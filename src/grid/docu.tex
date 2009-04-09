@@ -1,0 +1,276 @@
+%%This is a very basic article template.
+%%There is just one section and two subsections.
+\documentclass{article}
+
+\title{Documentation 2DGridder}
+\author{Uwe Hebbelmann, Sebastian Stock, Andre Schemschat}
+\date{28.02.2008}
+
+\begin{document}
+\maketitle{}
+
+\section{}
+\subsection{About}
+The program was written to convert three dimensional scans to two dimensional
+maps. The scanparser processes the scan in five steps. First, the scans are read
+using the scanparser based on the $scan_ io$ libraries. \newline
+Afterwards the scans are transformated using the transformationmatrix out of
+the frame-files. Within this step the y-correction and the min/max-Distance	
+filter are applied.\newline
+The next step convertes each scan to a scanGrid. The scanGrid ist divided into
+cells, which are resolution cm in size. Each cell contains the probability of
+it beeing free. During the process more filters (like taking the spotradius of 
+the laser into consideration) are applied.\newline
+If the grids are converted,
+each grid can be written to disk using a gridWriter (by default its the ppmWriter. 
+If you want to change that, just change the 2DGridder.cc) and then added to
+the parcelmanager.\newline
+The parcelmanager takes care of dividing the grid
+into the corresponding parcels, creating new parcels if neccessary and saving/loading
+them. If all scans are converted and added, the parcelmanager can write the
+entire world (based on all created parcels) into a single 2dm file (see
+formats), which can be viewed with the MapViewer. Furthermore it can export the
+map as a huge grid (which takes a lot of memory!). This is especially needed
+for the hough-method, but it also comes in handy for writing the map as a pgm
+file.
+The last step is to create polygon-maps out of the 2D-Map. The algorithm is
+based on houghes.
+
+\subsection{Resume-function}
+The programm creates parcels during runtime. These parcels store the
+information at a given position of possibly several scans. These parcels
+are managed using parcelinfos and parcel-files. Each time the program quits,
+it saves the created parcelinfos to a file called parcelinfo.conf. 
+
+This file contains the name of the parcel and the offset. If the resume-flag
+is set, the program tries to load the old parcelinfo file and reads the
+information of already created parcels. New scans now access the same parcels
+as old scans, which means, that they are added to the same worldmap.
+
+This may be used, to iterativly call the 2DGridder with scans and add each
+scan to the same worldmap, which is usefull for speeding up the process
+( because the memory used by the scan is completly freed) or add new created
+scans to an already processed batch of scans.
+
+If the flag is set to true however and the parameters do not match (e.g.
+parcelsize, resolution etc), the behavior will most certainly result in
+an error.
+
+
+This feature isn't yet fully tested and my contain bugs.
+
+
+\section{Parameters}
+
+\subsection{Usage}
+The following text will give a short explanation the parameters used in the
+2DGridder. Nearly all parameters are optional, the only parameter that is
+required is scandir. \newline
+Below there are a few samples how to invoke the programm using different
+settings.
+\newline
+{\bf ./2DGridder ~/scans/terrainScan} \newline
+This would process all Scans in the given folder with the standard arguments 
+(so the scantype must be uos, otherwise it will fail). However this might not 
+bring the best results.
+\newline
+\newline
+{\bf ./2DGridder -fold -s1 -e3 -r1 -w dat/duj} \newline
+This would process the scans one to three in the old scan format in the folder
+./dat/duj with a resolution of one cell per cm without waypoints.
+
+\subsection{scandir}
+{\bf Default: \ None} \newline
+{\bf Flag: \ None} \newline
+The flag specifies the folder in which the programm searchs for the scans. The
+structur of the folder needs to be according to the scantype (see flag
+scantype), in order to successfully read the scandata and the frames
+information.
+
+\subsection{outputdir}
+{\bf Default: \ './parcels'} \newline
+{\bf Flag: \ -o Path} \newline
+The outputdirectory specifies the folder where the worldmap, the viewpoints
+and the polygon-file are saved to. The folder needs to exist, otherwise an
+error is printed.
+
+\subsection{start}
+{\bf Default: \ 0} \newline
+{\bf Flag: \ -s Nr} \newline
+Start specifies the first scan to be read. By setting start and end, the range
+of processed scan can be limited.
+If startscan is smaller than the first scan available (e.g. -s0 but the first
+scan starts with 1) an error will be printed
+
+\subsection{end}
+{\bf Default: \ -1} \newline
+{\bf Flag: \ -e Nr} \newline
+End specifies the last scan to be read. Similiar to start, it can reduce the
+range of scans to process.
+If the default value is used, all scans after start are processed, until no
+more scans are found
+
+\subsection{maxDistance}
+{\bf Default: \ 2500} \newline
+{\bf Flag: \ -m Nr} \newline
+The range of the laser is often limited, so all scans above a specified
+distance are insecure. To avoid this, all found points further than
+maxDistance are not processed.
+MaxDistance is given in cm, which means the default is 25 meters.
+
+\subsection{minDistance}
+{\bf Default: \ -1} \newline
+{\bf Flag: \ -M nr} \newline
+Similar to maxDistance, but ignoring Scans closer than the specified
+distance. Per default the minimal distance is ignored.
+
+
+\subsection{readInitial}
+{\bf Default: false} \newline
+{\bf Flag: \ -t} \newline
+Read a file containing a initial transformation matrix.
+
+
+\subsection{scantype}
+{\bf Default: \ uos} \newline
+{\bf Flag: \ -f {uos, uos_map, old, rts, rts_map, ifp, riegl, zahn, ply}} \newline
+The scantype specifies the format of the scan to read. If the format does not
+match the format of the scans to read, the process will fail (undetermined
+abort)
+
+\subsection{correctYAxis}
+{\bf Default: \ false} \newline
+{\bf Flag: \ -y} \newline
+If set to true, the origin of all scans will be transformed to start at a
+z-offset of 0. If you encounter problems with partial scans not getting into
+the worldmap, try settings this flag and adjust the min- and maxRelevantHeight
+a bit. (So no scans are left out, because they are ignored because of incorrect
+scanvalues)
+
+\subsection{maxRelevantHeigth}
+{\bf Default: \ 50} \newline
+{\bf Flag: \ -M Nr} \newline
+Specifies the maximum height which is relevant for the robotor. All found
+points with y-coordinates above this value are not processed.
+The unit is cm, so the default is 0.5 meters.
+
+
+\subsection{minRelevantHeight}
+{\bf Default: \ 2} \newline
+{\bf Flag: \ -m Nr} \newline
+Specifies the minimum height which is relevant for the map. All points with an y-coordinate below this value are not processed. 
+This parameter is useful for eliminating interferences from the floor in front of the roboter;
+
+\subsection{resolution}
+{\bf Default: \ 10} \newline
+{\bf Flag: -r} \newline
+The resolution specifies the scale of the grid. The minimum resolution is 1, which means, that each cm is represented by one cell. The default is 10, which means that 10 cm of scandata is aggregated to one cell.
+The lower the resolution the higher the size of each grid and the longer it takes to convert the scan and the more memory is needed
+
+\subsection{createWaypoints}
+{\bf Default: \ true} \newline
+{\bf Flag: \ -w} \newline
+If this flag is set, then waypoints will NOT be created. If the flag ist not set,
+then the process will create for each found and relevant
+(see minRelevant / maxRelevantHeight or maxDistance) point
+free points on the direct line from the viewpoint of the roboter and the point.
+
+
+\subsection{createNeighbours}
+{\bf Default: \ true} \newline
+{\bf Flag: \ -n} \newline
+If this flag is set, then neighbours will NOT be created. If the flag is not set,
+than the process will check how far away the found point is and create neighbours 
+based on the spotradius of the laser.
+
+
+\subsection{parcelWidth}
+{\bf Default: \ 100} \newline
+{\bf Flag: \ -p Nr} \newline
+The parcelwidth specifies the width of the parcels of the map. The finer the
+scale is, the more often the parcels are written and read from the disk, but 
+the worldmap will be smaller (since there are not as much useless information
+in the world-file).
+
+\subsection{parcelHeight}
+{\bf Default: \ 100} \newline
+{\bf Flag: -P Nr} \newline
+See parcelWidth. 
+
+\subsection{writeWorld}
+{\bf Default: \ true} \newline
+{\bf Flag: \ -d} \newline
+If this flag is set, the world-file will NOT be created. By default the value is true, so all parcels are merged to one world-file. The world-file is written in the worldformat, which can be read by the MapViewer.
+
+\subsection{writeGrids}
+{\bf Default: \ false} \newline
+{\bf Flag: \ -g} \newline
+By default the value is false, so the single grid files are not written. If set
+to true, each converted scan is written as a ppm-file to the disk.
+
+\subsection{writeLines}
+{\bf Default: \ false} \newline
+{\bf Flag: \ -l} \newline
+By default the value is false, so lines are not created. If the parameter is
+set to true, the programm tries to extrapolate polygonlines out of the
+worldmap using the hough-matrix.
+This may take, dependend on the size of the map, very long.
+
+\subsection{spotradius}
+{\bf Default: \ 15} \newline
+{\bf Flag: \ -a Nr} \newline
+The spotradius is the deflection-factor of the laser on longer ranges. The
+value given relates to the deflection at 30 meter (3000 cm), so the default
+results in a factor of 1/200. The method to calculate the probability of
+neighbours for each point is based on the deflection.
+
+\subsection{count}
+{\bf Default: \ 50} \newline
+{\bf Flag: \ -c Nr} \newline
+This flag specifies how many scans are loaded, process and added to the worldmap
+until they are freed. Since the loaded scans and grids are not needed after
+they are processed, they can be freed. This is achieved by processing count
+scans in a row, and then freeing the not needed data.
+
+\subsection{resume}
+{\bf Default: false} \newline
+{\bf Flag: \ -R} \newline
+If this flag is set, the programm will load the parcels it has created
+during the last run. See Resume-function for more information.
+
+\section{formats}
+This section is about the formats which can be written using the
+2DGridder. For most formats it is only a short description, because most of
+them are plain simple.
+
+\subsection{PPM}
+The ppm is a greyscale-picture format which is quite simple. It only needs the
+size of the image and a value for each pixel. For more information, try google.
+
+\subsection{gnuplot}
+The gnuplot files are used to visualize the data in gnuplot (and maybe other
+tools). The information is written as $x z value$ with value beeing -1 for no
+information or $\in[0,1]$, each point a line.
+
+\subsection{world (2dm)}
+The worldformat is used to transport data between the 2Dgridder and the
+MapViewer. The first line is the Version of the file. Mostly this is 1. The
+second line specifies the resolution used in the grid. The third line specifies
+the minimal and maximal found x and z values, in the order of $minX maxX minZ
+maxZ$. The next line contains the position of the roboter during the first
+scan (x and z coordinate). The rest of the file is similar to the gnuplot
+format, which means $x z value$.
+
+\subsection{Viewpoints}
+The viewpoint-file contains a list of coordinates at which the roboter has
+taken the scans. Each line contains a x and z value standing for the position.
+
+\subsection{parcel}
+The parcelformat is used to store the information of the parcels during
+runtime. The parcels are stored as binary, so they can be stored and loaded
+faster
+
+\subsection{bor}
+The bor-format is used to store the polygion-files created out of the map.
+
+\end{document}

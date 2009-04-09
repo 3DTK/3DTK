@@ -1,0 +1,12 @@
+For a detailed explanation about the programm, its usage, etc., please
+refer to the high level documentation doc/documentation_HL.pdf
+(esp. section 4-6, for starters).
+
+IMPORTANT:
+Take care to register scans first (bin/slam6D) before trying to
+display them (bin/show), and think about using the point reduction
+(see section 6) for a much faster scan matching result.
+
+A reference manual can be found in doc/refman.pdf resp.
+doc/html/index.html (type in 'make docu' to compile the doxygen
+documentation for the HTML files).

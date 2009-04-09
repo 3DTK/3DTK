@@ -1,0 +1,28 @@
+/**
+   @file
+   @brief Displaying of a matched 3D scene
+   @author Kai Lingemann. Institute of Computer Science, University of Osnabrueck, Germany.
+   @author Andreas Nuechter. Institute of Computer Science, University of Osnabrueck, Germany.
+*/
+
+/**
+   sets the OpenGL point,
+   (z axis is inverted in OpenGL)
+*/
+void setGLPoint(GLdouble pX, GLdouble pY, GLdouble pZ)
+{
+  //  pZ *= -1.0;
+  glVertex3d(pX, pY, pZ);
+}
+
+
+/**
+   sets the OpenGL point,
+   (z axis is inverted in OpenGL)
+*/
+void setGLPoint(GLdouble* p) 
+{
+  GLdouble pZ = 1.0 * p[2];
+
+  glVertex3d(p[0], p[1], pZ);
+}
