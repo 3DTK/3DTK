@@ -1,0 +1,19 @@
+MAKEFLAGS += -s #-j
+
+STATIC  = # -static -L/usr/local/src/Mesa-7.0.1/lib/
+
+# -------
+# GNU C++
+# -------
+#
+GPP    = g++
+#CFLAGS = -O3 -Wall -pipe -march=native -fopenmp -DWITH_OPENMP -Wno-deprecated #-Winline -DDEBUG $(STATIC)
+CFLAGS = -O3 -Wall -mfpmath=sse -msse2 -march=i686 -finline-functions #-Winline -DDEBUG $(STATIC)
+
+# ---------
+# Intel ICC
+# ---------
+#
+#GPP     = /opt/intel/compiler/bin/icc
+#CFLAGS  = -O2 -msse3 -mcpu=pentium4 -finline-functions -openmp -parallel -DWITH_OPENMP -openmp-report1 -par-report1 #-DDEBUG
+

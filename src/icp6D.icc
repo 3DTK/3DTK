@@ -1,0 +1,82 @@
+/**
+ * @file 
+ * @brief Implementation of 3D scan matching with ICP
+ * @author Kai Lingemann. Institute of Computer Science, University of Osnabrueck, Germany.
+ * @author Andreas Nuechter. Institute of Computer Science, University of Osnabrueck, Germany.
+ */
+
+
+/**
+ * Will return the maximal number of randomization
+ *
+ * @return the maximal number of iterations
+ */
+inline int icp6D::get_rnd()
+{
+  return rnd;
+}
+
+/**
+ * Will return weather to use the meta scan
+ *
+ * @return the maximal number of iterations
+ */
+inline bool icp6D::get_meta()
+{
+  return meta;
+}
+
+/**
+ * Will return the anim flag
+ *
+ * @return the anim flag
+ */
+inline int icp6D::get_anim() {
+  return anim;
+}
+
+/**
+ * Will return weather to use the cache
+ *
+ * @return the use_cache flag
+ */
+inline bool icp6D::get_use_cache()
+{
+  return use_cache;
+}
+
+/**
+ * Set the anim flag
+ *
+ * @param anim Animate which frames?
+ */
+inline void icp6D::set_anim(int anim) {
+  this->anim = anim;
+}
+
+/**
+ * Get the maximal distance for matching
+ *
+ * @return the maximal distance for matching
+ */
+inline double icp6D::get_max_dist_match2() {
+  return max_dist_match2;
+}
+
+/**
+ * Set the maximal distance for matching
+ *
+ * @param max_dist_match2 the maximal distance (^2 !!!) for matching
+ */
+inline void icp6D::set_max_dist_match2(double max_dist_match2) {
+  this->max_dist_match2 = max_dist_match2;
+}
+
+/**
+ * Set the Maximum number of iterations
+ *
+ * @param max_num_iterations Maximum number of iterations
+ */
+inline void icp6D::set_max_num_iterations(int max_num_iterations) {
+  this->max_num_iterations = max_num_iterations;
+}

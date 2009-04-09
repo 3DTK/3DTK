@@ -1,0 +1,42 @@
+
+inline void D2Tree::calcDivide(double x_size, double y_size, double z_size,
+				    double center[3],
+				    double &x_sizeNew, double &y_sizeNew, double &z_sizeNew,
+				    double newcenter[8][3])
+{
+  x_sizeNew = x_size * 0.5;
+  y_sizeNew = y_size * 0.5;
+  z_sizeNew = z_size * 0.5;
+
+  newcenter[0][0] = center[0] - x_sizeNew;
+  newcenter[0][1] = center[1] - y_sizeNew;
+  newcenter[0][2] = center[2] - z_sizeNew;
+
+  newcenter[1][0] = center[0] + x_sizeNew;
+  newcenter[1][1] = center[1] - y_sizeNew;
+  newcenter[1][2] = center[2] - z_sizeNew;
+
+  newcenter[2][0] = center[0] - x_sizeNew;
+  newcenter[2][1] = center[1] + y_sizeNew;
+  newcenter[2][2] = center[2] - z_sizeNew;
+  
+  newcenter[3][0] = center[0] - x_sizeNew;
+  newcenter[3][1] = center[1] - y_sizeNew;
+  newcenter[3][2] = center[2] + z_sizeNew;
+  
+  newcenter[4][0] = center[0] + x_sizeNew;
+  newcenter[4][1] = center[1] + y_sizeNew;
+  newcenter[4][2] = center[2] - z_sizeNew;
+
+  newcenter[5][0] = center[0] + x_sizeNew;
+  newcenter[5][1] = center[1] - y_sizeNew;
+  newcenter[5][2] = center[2] + z_sizeNew;
+
+  newcenter[6][0] = center[0] - x_sizeNew;
+  newcenter[6][1] = center[1] + y_sizeNew;
+  newcenter[6][2] = center[2] + z_sizeNew;
+
+  newcenter[7][0] = center[0] + x_sizeNew;
+  newcenter[7][1] = center[1] + y_sizeNew;
+  newcenter[7][2] = center[2] + z_sizeNew;
+}
