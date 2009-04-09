@@ -1,0 +1,22 @@
+\begin{thebibliography}{1}
+
+\bibitem{Arun_1987}
+K.~S. Arun, T.~S. Huang, and S.~D. Blostein.
+\newblock Least square fitting of two 3-d point sets.
+\newblock {\em IEEE Transactions on Pattern Analysis and Machine Intelligence},
+  9(5):698 -- 700, 1987.
+
+\bibitem{Besl_1992}
+P.~Besl and N.~McKay.
+\newblock A method for {R}egistration of 3--{D} {S}hapes.
+\newblock {\em IEEE Transactions on Pattern Analysis and Machine Intelligence},
+  14(2):239 -- 256, February 1992.
+
+\bibitem{Lorusso_1995}
+A.~Lorusso, D.~Eggert, and R.~Fisher.
+\newblock A {C}omparison of {F}our {A}lgorithms for {E}stimating 3-{D} {R}igid
+  {T}ransformations.
+\newblock In {\em Proceedings of the 4th British Machine Vision Conference
+  (BMVC '95)}, pages 237 -- 246, Birmingham, England, September 1995.
+
+\end{thebibliography}
