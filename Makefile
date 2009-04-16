@@ -101,7 +101,7 @@ $(OBJ)scan.o: $(OBJ)octtree.o $(OBJ)kd.o $(OBJ)kdc.o $(SRC)scan.h $(SRC)scan_io.
 	$(GPP) $(CFLAGS) -c -o $(OBJ)scan.o $(SRC)scan.cc 
 
 $(OBJ)scanlib.a: $(OBJ)octtree.o $(OBJ)kd.o $(OBJ)kdc.o $(OBJ)scan.o $(OBJ)d2tree.o $(OBJ)octtree.o
-	echo Compiling Scan ...
+	echo Linking Scanlib ...
 	$(AR) -cr $(OBJ)scanlib.a $(OBJ)scan.o $(OBJ)octtree.o $(OBJ)kd.o $(OBJ)kdc.o $(OBJ)d2tree.o
 	ranlib $(OBJ)scanlib.a
 

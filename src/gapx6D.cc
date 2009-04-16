@@ -447,7 +447,7 @@ double gapx6D::doGraphSlam6D(Graph gr, vector <Scan *> allScans, int nrIt)
     }
 
     ColumnVector t0(3), t(3), tlast(3);
-    int vectorOffset, beforeOffset;
+    int vectorOffset;
     int loop_end = gr.getNrScans();
     double alignxf[16];
 

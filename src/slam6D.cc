@@ -98,71 +98,111 @@ void usage(char* prog)
 	  << "   " << prog << " [options] directory" << endl << endl;
   cout << bold << "OPTIONS" << normal << endl
 
-	  << bold << "  -a" << normal << " NR, " << bold << "--algo=" << normal << "NR   [default: 0]" << endl
-	  << "         selects the rotation representation for the ICP matching algorithm" << endl
-	  << "         (0 = approx, 1 = quaterion, 2 = SVD)" << endl << endl
-	  << bold << "  -A" << normal << " NR, " << bold << "--anim=" << normal
-	                    << "NR   [default: first and last frame only]" << endl
-	  << "         if specified, use only every NR-th frame for animation" << endl << endl
-	  << bold << "  -c" << normal << " NR, " << bold << "--cldist=" << normal << "NR   [default: 500]"
-	                    << endl
-	  << "         specifies the maximal distance for closed loops" << endl << endl
-	  << bold << "  -C" << normal << " NR, " << bold << "--clpairs=" << normal << "NR   [default: 6]"
-	                    << endl
+	  << bold << "  -a" << normal << " NR, " << bold << "--algo=" << normal << "NR   [default: 2]" << endl
+	  << "         selects the minimizazion method for the ICP matching algorithm" << endl
+	  << "           1 = small angle approximation" << endl
+	  << "           2 = unit quaterion based method by Horn" << endl
+	  << "           3 = singular value decomposition by Arun et al. " << endl
+       << "           4 = orhtonormal matrices by Horn et al." << endl
+	  << "           5 = HELIX approximation by Hofer & Potmann" << endl
+	  << endl
+	  << bold << "  -A" << normal << " NR, " << bold << "--anim=" << normal << "NR   [default: first and last frame only]" << endl
+	  << "         if specified, use only every NR-th frame for animation" << endl
+	  << endl
+	  << bold << "  -c" << normal << " NR, " << bold << "--cldist=" << normal << "NR   [default: 500]" << endl
+	  << "         specifies the maximal distance for closed loops" << endl
+	  << endl
+	  << bold << "  -C" << normal << " NR, " << bold << "--clpairs=" << normal << "NR   [default: 6]" << endl
 	  << "         specifies the minimal number of points for an overlap. If not specified" << endl
-	  << "         cldist is used instead" << endl << endl
+	  << "         cldist is used instead" << endl
+	  << endl
 	  << bold << "  -d" << normal << " NR, " << bold << "--dist=" << normal << "NR   [default: 25]" << endl
-	  << "         sets the maximal point-to-point distance for matching to <NR> 'units'" << endl
-	  << "         (unit of scan data, e.g. cm)" << endl << endl
-	  << bold << "  -D" << normal << " NR, " << bold << "--distLUM="
+	  << "         sets the maximal point-to-point distance for matching with ICP to <NR> 'units'" << endl
+	  << "         (unit of scan data, e.g. cm)" << endl
+	  << endl
+	  << bold << "  -D" << normal << " NR, " << bold << "--distSLAM="
 	                    << normal << "NR   [default: same value as -d option]" << endl
-	  << "         sets the maximal point-to-point distance for matching with LUM to <NR> 'units'" << endl
-	  << "         (unit of scan data, e.g. cm)" << endl << endl
+	  << "         sets the maximal point-to-point distance for matching with SLAM to <NR> 'units'" << endl
+	  << "         (unit of scan data, e.g. cm)" << endl
+	  << endl
 	  << bold << "  --DlastLUM" << normal << " NR  [default not set]" << endl
 	  << "         sets the maximal point-to-point distance for the final LUM correction," << endl
-	  << "         if final LUM is not required dont set it." << endl 
+	  << "         if final LUM is not required don'tt set it." << endl
+	  << endl
 	  << bold << "  -e" << normal << " NR, " << bold << "--end=" << normal << "NR" << endl
-	  << "         end after scan NR" << endl << endl
+	  << "         end after scan NR" << endl
+	  << endl
 	  << bold << "  --epsICP=" << normal << "NR   [default: 0.00001]" << endl
-	  << "         stop ICP iteration if difference is smaller than NR" << endl << endl
-	  << bold << "  --epsLUM=" << normal << " NR   [default: 0.5]" << endl
-	  << "         stop LUM iteration if average difference is smaller than NR" << endl << endl
+	  << "         stop ICP iteration if difference is smaller than NR" << endl
+	  << endl
+	  << bold << "  --epsSLAM=" << normal << " NR   [default: 0.5]" << endl
+	  << "         stop SLAM iteration if average difference is smaller than NR" << endl
+	  << endl
 	  << bold << "  -f" << normal << " F, " << bold << "--format=" << normal << "F" << endl
 	  << "         using shared library F for input" << endl
-	  << "         (chose F from {uos, uos_map, old, rts, rts_map, ifp, riegl, zahn, ply})" << endl << endl
-	  << bold << "  -i" << normal << " NR, " << bold << "--iter=" << normal << "NR   [default: 50]" << endl
-	  << "         sets the maximal number of iterations to <NR>" << endl << endl
-	  << bold << "  -I" << normal << " NR, " << bold << "--iterLUM=" << normal << "NR" << endl
-	  << "         sets the maximal number of iterations for LUM to <NR>" << endl << endl
+	  << "         (chose F from {uos, uos_map, old, rts, rts_map, ifp, riegl, zahn, ply})" << endl
+	  << endl
+	  << bold << "  -G" << normal << " NR, " << bold << "--graphSlam6DAlgo=" << normal << "NR   [default: 0]" << endl
+	  << "         selects the minimizazion method for the SLAM matching algorithm" << endl
+	  << "           0 = no global relaxation technique" << endl
+	  << "           1 = Lu & Milios extention using euler angles due to Borrmann et al." << endl
+	  << "           2 = Lu & Milios extention using using unit quaternions" << endl
+       << "           3 = HELIX approximation by Hofer and Pottmann" << endl
+	  << "           4 = small angle approximation" << endl
+	  << endl
+	  << bold << "  -i" << normal << " NR, " << bold << "--iter=" << normal << "NR [default: 50]" << endl
+	  << "         sets the maximal number of ICP iterations to <NR>" << endl
+	  << endl
+	  << bold << "  -I" << normal << " NR, " << bold << "--iterSLAM=" << normal << "NR [default: 0]" << endl
+	  << "         sets the maximal number of iterations for SLAM to <NR>" << endl
+	  << "         (if not set, graphSLAM is not executed)" << endl 
+	  << endl
        << bold << "  -l" << normal << " NR, " << bold << "--loopsize=" << normal << "NR [default: 20]" << endl
-	  << "         sets the size of a loop, i.e., a loop must exceed <NR> of scans" << endl << endl 
+	  << "         sets the size of a loop, i.e., a loop must exceed <NR> of scans" << endl
+	  << endl
+	  << bold << "  -L" << normal << " NR, " << bold << "--loop6DAlgo=" << normal << "NR   [default: 0]" << endl
+	  << "         selects the method for closing the loop explicitly" << endl
+	  << "           0 = no loop closing technique" << endl
+	  << "           1 = euler angles" << endl
+	  << "           2 = quaternions " << endl
+       << "           3 = unit quaternions" << endl
+	  << "           4 = SLERP" << endl
+	  << endl
 	  << bold << "  --lastscan" << normal << endl
-	  << "         Match against the last scan only (default: match against a meta scan)" << endl << endl
+	  << "         Match against the last scan only (default: match current scan against a meta scan of all previous scans)" << endl
+	  << endl
 	  << bold << "  -m" << normal << " NR, " << bold << "--max=" << normal << "NR" << endl
-	  << "         neglegt all data points with a distance larger than NR 'units'" << endl << endl
+	  << "         neglegt all data points with a distance larger than NR 'units'" << endl
+	  << endl
 	  << bold << "  -M" << normal << " NR, " << bold << "--min=" << normal << "NR" << endl
-	  << "         neglegt all data points with a distance smaller than NR 'units'" << endl << endl
+	  << "         neglegt all data points with a distance smaller than NR 'units'" << endl
+	  << endl
 	  << bold << "  -n" << normal << " FILE, " << bold << "--net=" << normal << "FILE" << endl
-	  << "         specifies the file that includes the net structure for LUM" << endl << endl
+	  << "         specifies the file that includes the net structure for SLAM" << endl
+	  << endl
 	  << bold << "  -p, --trustpose" << normal << endl
 	  << "         Trust the pose file, do not extrapolate the last transformation." << endl
-	  << "         (Just for testing purposes.)" << endl << endl
+	  << "         (just for testing purposes, or gps input.)" << endl
+	  << endl
 	  << bold << "  -q, --quiet" << normal << endl
-	  << "         Quiet mode. Suppress (most) messages" << endl << endl
+	  << "         Quiet mode. Suppress (most) messages" << endl
+	  << endl
 	  << bold << "  -Q, --veryquiet" << normal << endl
-	  << "         Very quiet mode. Suppress all messages, except in case of error." << endl << endl
+	  << "         Very quiet mode. Suppress all messages, except in case of error." << endl
+	  << endl
 	  << bold << "  -r" << normal << " NR, " << bold << "--reduce=" << normal << "NR" << endl
-	  << "         turns on octree based point reduction (voxel size=<NR>)" << endl << endl
+	  << "         turns on octree based point reduction (voxel size=<NR>)" << endl
+	  << endl
 	  << bold << "  -R" << normal << " NR, " << bold << "--random=" << normal << "NR" << endl
-	  << "         turns on randomized reduction, using about every <NR>-th point only" << endl << endl
+	  << "         turns on randomized reduction, using about every <NR>-th point only" << endl
+	  << endl
 	  << bold << "  --cache" << normal << endl
-	  << "         turns on cached kd-tree search" << endl << endl
-	  << bold << "  --scale=NR" << normal << endl
-	  << "         specifies a scale. Scans are expected to be in [cm]." << endl
-	  << "         E.g., in case of [mm], try --scale=0.01" << endl
+	  << "         turns on cached kd-tree search" << endl
+	  << endl
 	  << bold << "  -s" << normal << " NR, " << bold << "--start=" << normal << "NR" << endl
 	  << "         start at scan NR (i.e., neglects the first NR scans)" << endl
-	  << "         [ATTENTION: counting naturally starts with 0]" << endl << endl
+	  << "         [ATTENTION: counting naturally starts with 0]" << endl
+	  << endl
     	  << endl << endl;
   
   cout << bold << "EXAMPLES " << normal << endl
@@ -180,7 +220,7 @@ void usage(char* prog)
  * @param red using point reduction?
  * @param rand use randomized point reduction?
  * @param mdm maximal distance match
- * @param mdml maximal distance match for LUM
+ * @param mdml maximal distance match for SLAM
  * @param mni maximal number of iterations
  * @param start starting at scan number 'start'
  * @param end stopping at scan number 'end'
@@ -191,24 +231,23 @@ void usage(char* prog)
  * @param extrapolate_pose - i.e., extrapolating the odometry by the last transformation
  *        (vs. taking the pose file as <b>exact</b>)
  * @param meta match against all scans (= meta scan), or against the last scan only???
- * @param scale Scaling the whole scene.
  * @param anim selects the rotation representation for the matching algorithm
- * @param mni_lum sets the maximal number of iterations for LUM
- * @param net specifies the file that includes the net structure for LUM
+ * @param mni_lum sets the maximal number of iterations for SLAM
+ * @param net specifies the file that includes the net structure for SLAM
  * @param cldist specifies the maximal distance for closed loops
  * @param epsilonICP stop ICP iteration if difference is smaller than this value
- * @param epsilonLUM stop LUM iteration if average difference is smaller than this value
+ * @param epsilonSLAM stop SLAM iteration if average difference is smaller than this value
  * @param algo specfies the used algorithm for rotation computation
- * @param lum6DAlgo specifies the used algorithm for global LUM correction
+ * @param lum6DAlgo specifies the used algorithm for global SLAM correction
  * @param loopsize defines the minimal loop size
  * @return 0, if the parsing was successful. 1 otherwise
  */
 int parseArgs(int argc, char **argv, string &dir, double &red, int &rand,
 		    double &mdm, double &mdml, double &mdmll,
 		    int &mni, int &start, int &end, int &maxDist, int &minDist, bool &quiet, bool &veryQuiet,
-		    bool &extrapolate_pose, bool &meta, double &scale, int &algo, int &loopSlam6DAlgo, int &lum6DAlgo, int &anim,
+		    bool &extrapolate_pose, bool &meta, int &algo, int &loopSlam6DAlgo, int &lum6DAlgo, int &anim,
 		    int &mni_lum, string &net, double &cldist, int &clpairs, int &loopsize,
-		    double &epsilonICP, double &epsilonLUM, bool &use_cache, bool &initial,
+		    double &epsilonICP, double &epsilonSLAM, bool &use_cache, bool &initial,
 		    reader_type &type)
 {
   int  c;
@@ -225,14 +264,14 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &rand,
     { "graphSlam6DAlgo", required_argument,   0,  'G' },
     { "net",       required_argument,   0,  'n' },
     { "iter",      required_argument,   0,  'i' },
-    { "iterLUM",   required_argument,   0,  'I' },
+    { "iterSLAM",   required_argument,   0,  'I' },
     { "max",       required_argument,   0,  'm' },
     { "loopsize",  required_argument,   0,  'l' },
     { "cldist",    required_argument,   0,  'c' },
     { "clpairs",   required_argument,   0,  'C' },
     { "min",       required_argument,   0,  'M' },
     { "dist",      required_argument,   0,  'd' },
-    { "distLUM",   required_argument,   0,  'D' },
+    { "distSLAM",   required_argument,   0,  'D' },
     { "start",     required_argument,   0,  's' },
     { "end",       required_argument,   0,  'e' },
     { "reduce",    required_argument,   0,  'r' },
@@ -242,10 +281,9 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &rand,
     { "trustpose", no_argument,         0,  'p' },
     { "anim",      required_argument,   0,  'A' },
     { "lastscan",  no_argument,         0,  '2' }, // use the long format only
-    { "DlastLUM",  required_argument,   0,  '4' }, // use the long format only
-    { "scale",     required_argument,   0,  '3' }, // use the long format only
+    { "DlastSLAM",  required_argument,   0,  '4' }, // use the long format only
     { "epsICP",    required_argument,   0,  '5' }, // use the long format only
-    { "epsLUM",    required_argument,   0,  '6' }, // use the long format only
+    { "epsSLAM",    required_argument,   0,  '6' }, // use the long format only
     { "cache",     no_argument,         0,  '7' },
     { "initial",   no_argument,         0,  '8' },
     { 0,           0,   0,   0}                    // needed, cf. getopt.h
@@ -336,18 +374,14 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &rand,
 	 case '2':  // = --lastscan
 	   meta = false;
 	   break;
-	 case '3':  // = --scale
-	   scale = atof(optarg);
-	   if (scale < 0) { cerr << "Error: <scale> cannot be negative.\n"; exit(1); }
-	   break;
-	 case '4':  // = --DlastLUM
+	 case '4':  // = --DlastSLAM
 	   mdmll = atof(optarg);
 	   break;
 	 case '5':  // = --epsICP
 	   epsilonICP = atof(optarg);
 	   break;
-	 case '6':  // = --epsLUM
-	   epsilonLUM = atof(optarg);
+	 case '6':  // = --epsSLAM
+	   epsilonSLAM = atof(optarg);
 	   break;
 	 case '7':  // = --cache
 	   use_cache = true;
@@ -381,9 +415,6 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &rand,
 	   abort ();
       }
 
-  // scaling the voxel size, too
-  if (red > 0.0 && scale > 0.0) red *= scale;
-
   if (optind != argc-1) {
     cerr << "\n*** Directory missing ***" << endl;
     usage(argv[0]);
@@ -401,14 +432,14 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &rand,
 
 /**
  * This function is used to match a set of laser scans with any minimally
- * connected Graph, using the globally consistent LUM-algorithm in 3D.
+ * connected Graph, using the globally consistent SLAM-algorithm in 3D.
  *
  * @param allScans Contains all laser scans
- * @param nrIt The number of iterations the LUM-algorithm will run
+ * @param nrIt The number of iterations the SLAM-algorithm will run
  * @param cldist maximal distance for closing loops
  * @param loopsize minimal loop size
  */
-void matchGraph6Dautomatic(double cldist, int loopsize, vector <Scan *> allScans, icp6D *my_icp6D, bool meta_icp, bool use_cache, loopSlam6D *my_loopSlam6D, graphSlam6D *my_graphSlam6D, int nrIt, double epsilonLUM, double mdml, double mdmll)
+void matchGraph6Dautomatic(double cldist, int loopsize, vector <Scan *> allScans, icp6D *my_icp6D, bool meta_icp, bool use_cache, loopSlam6D *my_loopSlam6D, graphSlam6D *my_graphSlam6D, int nrIt, double epsilonSLAM, double mdml, double mdmll)
 {
   double cldist2 = sqr(cldist);
 
@@ -498,7 +529,7 @@ void matchGraph6Dautomatic(double cldist, int loopsize, vector <Scan *> allScans
           ret = my_graphSlam6D->doGraphSlam6D(*gr, allScans, 1);
           delete gr;
           j++;
-        } while (j < nrIt && ret > epsilonLUM);
+        } while (j < nrIt && ret > epsilonSLAM);
       }
     }
   }
@@ -519,7 +550,7 @@ void matchGraph6Dautomatic(double cldist, int loopsize, vector <Scan *> allScans
       ret = my_graphSlam6D->doGraphSlam6D(*gr, allScans, 1);
       delete gr;
       j++;
-    } while (j < nrIt && ret > epsilonLUM);
+    } while (j < nrIt && ret > epsilonSLAM);
   }
 
   if(my_graphSlam6D != NULL && mdmll > 0.0) {
@@ -535,7 +566,7 @@ void matchGraph6Dautomatic(double cldist, int loopsize, vector <Scan *> allScans
       ret = my_graphSlam6D->doGraphSlam6D(*gr, allScans, 1);
       delete gr;
       j++;
-    } while (j < nrIt && ret > epsilonLUM);
+    } while (j < nrIt && ret > epsilonSLAM);
   }
 }
 
@@ -572,7 +603,6 @@ int main(int argc, char **argv)
   int    minDist    = -1;
   bool   eP         = true;  // should we extrapolate the pose??
   bool   meta       = true;  // match against meta scan, or against LAST scan only?
-  double scale      = -1.0;
   int    algo       = 2;
   int    mni_lum    = -1;
   double cldist     = 500;
@@ -581,17 +611,17 @@ int main(int argc, char **argv)
   string net        = "none";
   int    anim       = -1;
   double epsilonICP = 0.00001;
-  double epsilonLUM = 0.5;
+  double epsilonSLAM = 0.5;
   bool   use_cache  = false;
   bool   initial    = false;
   int    loopSlam6DAlgo  = 0;
   int    lum6DAlgo  = 0;
-  bool   exportPoints = false;
+  bool   exportPoints = true;
   reader_type type    = UOS;
   
   parseArgs(argc, argv, dir, red, rand, mdm, mdml, mdmll, mni, start, end,
-		  maxDist, minDist, quiet, veryQuiet, eP, meta, scale, algo, loopSlam6DAlgo, lum6DAlgo, anim,
-		  mni_lum, net, cldist, clpairs, loopsize, epsilonICP, epsilonLUM,
+		  maxDist, minDist, quiet, veryQuiet, eP, meta, algo, loopSlam6DAlgo, lum6DAlgo, anim,
+		  mni_lum, net, cldist, clpairs, loopsize, epsilonICP, epsilonSLAM,
 		  use_cache, initial, type);
 
   cout << "slam6D will proceed with the following parameters:" << endl;
@@ -716,7 +746,7 @@ int main(int argc, char **argv)
 						anim, epsilonICP, use_cache);
     my_icp->doICP(Scan::allScans);
     graphSlam6D *my_graphSlam6D = new lum6DEuler(my_icp6Dminimizer, mdm, mdml, mdmll, mni, quiet, meta,
-									    rand, eP, anim, epsilonICP, use_cache, epsilonLUM);
+									    rand, eP, anim, epsilonICP, use_cache, epsilonSLAM);
     my_graphSlam6D->matchGraph6Dautomatic(Scan::allScans, mni_lum, clpairs, loopsize);
     //!!!!!!!!!!!!!!!!!!!!!!!!		  
   } else {
@@ -724,19 +754,19 @@ int main(int argc, char **argv)
     switch (lum6DAlgo) {
     case 1 :
 	 my_graphSlam6D = new lum6DEuler(my_icp6Dminimizer, mdm, mdml, mdmll, mni, quiet, meta, rand, eP,
-						anim, epsilonICP, use_cache, epsilonLUM);
+						anim, epsilonICP, use_cache, epsilonSLAM);
 	 break;
     case 2 :
       my_graphSlam6D = new lum6DQuat(my_icp6Dminimizer, mdm, mdml, mdmll, mni, quiet, meta, rand, eP,
-					    anim, epsilonICP, use_cache, epsilonLUM);
+					    anim, epsilonICP, use_cache, epsilonSLAM);
       break;
     case 3 : 
       my_graphSlam6D = new ghelix6DQ2(my_icp6Dminimizer, mdm, mdml, mdmll, mni, quiet, meta, rand, eP,
-						anim, epsilonICP, use_cache, epsilonLUM);
+						anim, epsilonICP, use_cache, epsilonSLAM);
 	 break;
     case 4 :
       my_graphSlam6D = new gapx6D(my_icp6Dminimizer, mdm, mdml, mdmll, mni, quiet, meta, rand, eP,
-					anim, epsilonICP, use_cache, epsilonLUM);
+					anim, epsilonICP, use_cache, epsilonSLAM);
       break;
     }
     // Construct Network
@@ -772,7 +802,7 @@ int main(int argc, char **argv)
           break;
       }
 
-      matchGraph6Dautomatic(cldist, loopsize, Scan::allScans, my_icp, meta, use_cache, my_loopSlam6D, my_graphSlam6D, mni_lum, epsilonLUM, mdml, mdmll);
+      matchGraph6Dautomatic(cldist, loopsize, Scan::allScans, my_icp, meta, use_cache, my_loopSlam6D, my_graphSlam6D, mni_lum, epsilonSLAM, mdml, mdmll);
       delete my_icp;
       if(loopSlam6DAlgo > 0) {
         delete my_loopSlam6D;

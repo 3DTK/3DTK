@@ -54,10 +54,12 @@ public:
   virtual ~lum6DEuler();
   
   double doGraphSlam6D(Graph gr, vector <Scan*> MetaScan, int nrIt);
+
+  static void covarianceEuler(Scan *first, Scan *second, bool use_cache, int rnd, double max_dist_match2, Matrix *C, ColumnVector *CD=0);
   
 private:
-  void FillGB3D(Graph *gr, vector <ColumnVector >* CD, vector <Matrix>* C, Matrix* G, ColumnVector* B);
-  void CalculateLinks3D(int numLinks, vPtPair **ptpairs, vector <ColumnVector >* CD , vector <Matrix>* C);
+  void FillGB3D(Graph *gr, Matrix* G, ColumnVector* B, vector <Scan *> allScans);
+//  void CalculateLinks3D(int numLinks, vPtPair **ptpairs, vector <ColumnVector >* CD , vector <Matrix>* C);
     
 };
 
