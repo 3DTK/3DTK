@@ -65,7 +65,7 @@ int ScanIO_zuf::readScans(int start, int end, string &dir, int maxDist, int mind
 
   double rPos[3] = { 0.0, 0.0, 0.0 };
   double rPosTheta[16] = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
-  double inMatrix[16], tMatrix[16];
+  double inMatrix[16];
   char dummy[255];
   pose_in.getline(dummy, 255);
   pose_in.getline(dummy, 255);

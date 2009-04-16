@@ -25,11 +25,10 @@ int ScanIO_iais::readScans(int start, int end, string &dir,
   static int  fileCounter = start;
   static string poseFileName;
   string scanFileName;
-  double timestamp;
 
   double maxDist2 = sqr(maxDist);
 
-  double matrix[16], matrix_final[16];
+  double matrix[16];
   
   static ifstream pose_in;
   ifstream scan_in;

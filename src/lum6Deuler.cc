@@ -51,60 +51,20 @@ lum6DEuler::~lum6DEuler()
 
 
 /**
- * A function to fill the linear system G X = B.
- *
- * @param gr the Graph is used to map the given covariances C and CD matrices to the correct link
- * @param CD A vector containing all covariances C multiplied with their respective estimations D
- * @param C A vector containing all covariances C of the pose difference estimations D
- * @param G The matrix G specifying the linear equation
- * @param B The vector B 
- */
-void lum6DEuler::FillGB3D(Graph *gr, vector <ColumnVector >* CD, vector <Matrix>* C,
-					 Matrix* G, ColumnVector* B)
-{
-  int a, b;
-
-  cout << CD->size() << endl;
-  cout << C->size() << endl;
-  
-  Matrix Cab;
-  ColumnVector CDab;
-
-  for(int i = 0; i < gr->getNrLinks(); i++){
-    a = gr->getLink(i,0) - 1;
-    b = gr->getLink(i,1) - 1;
-  
-    //    cout << "i " << i << " a: " << a << " b: " << b << endl; 
-    Cab = (*C)[i];
-    CDab = (*CD)[i];
-
-    if(a >= 0){
-      B->Rows(a*6+1,a*6+6) += CDab;
-      G->SubMatrix(a*6+1,a*6+6,a*6+1,a*6+6) += Cab;
-    }
-    if(b >= 0){
-      B->Rows(b*6+1,b*6+6) -= CDab;
-      G->SubMatrix(b*6+1,b*6+6,b*6+1,b*6+6) += Cab;
-    }
-    if(a >= 0 && b >= 0) { 
-      G->SubMatrix(a*6+1,a*6+6,b*6+1,b*6+6) = -Cab;
-      G->SubMatrix(b*6+1,b*6+6,a*6+1,a*6+6) = -Cab;
-    }
-  }
-}
-
-/**
  * This function calculates the covariances Cij and the Vector Cij*Dij for
  * all links, using the given point pairs.
  * 
- * @param numLinks Number of links in the graph and thereore in the linear system
- * @param vptpairs A vector containing a set of all point pairs in the same order as specified by gr
- * @param CD After CalculateLins3D() returns, this will contain all
- *        Cij*Dij in the same order as specified by gr
- * @param C After CalculateLins3D() returns, this will contain all Cij in the same order as specified by gr
-*/
-void lum6DEuler::CalculateLinks3D(int numLinks, vPtPair **ptpairs,
-						    vector <ColumnVector >* CD , vector <Matrix>* C)
+ * @param first pointer to the first scan of the link
+ * @param second pointer to the second scan of the link
+ * @param use_cache shall we use the cache?
+ * @param rnd shall we use randomization for computing the point pairs?
+ * @param max_dist_match2 maximal distance allowed for point pairs
+ * @param C pointer to the covariance matrix Cij
+ * @param CD pointer to the vector Cij*Dij
+ */
+void lum6DEuler::covarianceEuler(Scan *first, Scan *second, 
+                                 bool use_cache, int rnd, double max_dist_match2, 
+                                 Matrix *C, ColumnVector *CD) 
 {
   // x,y,z       denote the coordinates of uk (Here averaged over ak and bk)
   // sx,sy,sz    are the sums of their respective coordinates of uk over each paint pair
@@ -121,26 +81,39 @@ void lum6DEuler::CalculateLinks3D(int numLinks, vPtPair **ptpairs,
   // Almost the covarianve
   Matrix MM(6,6);
   // A set of point pairs
-  vPtPair *uk;
+  vector <PtPair> uk;
   // A point pair
   Point ak, bk;
   // number of pairs in a set
   int m;
 
-  // for every link in the network
-  for(int i = 0; i < numLinks; i++){
-    uk = ptpairs[i];
-    m = uk->size();
+#ifdef WITH_OPENMP
+  int thread_num = omp_get_thread_num();
+#else
+  int thread_num = 0;
+#endif
 
-    MZ = 0.0;
-    MM = 0.0;
-    sx = sy = sz = xy = yz = xz = ypz = xpz = xpy = ss = 0.0;
-    
-    if (m > 0) {
-	 // for each point pair
+  double dummy_centroid_m[3];
+  double dummy_centroid_d[3];
+
+  if (use_cache) {
+    KDCacheItem *closest = Scan::initCache(first, second);
+    Scan::getPtPairsCache(&uk, closest, first, second, thread_num, rnd, max_dist_match2, dummy_centroid_m, dummy_centroid_d);
+  } else {
+    Scan::getPtPairs(&uk, first, second, thread_num, rnd, max_dist_match2, dummy_centroid_m, dummy_centroid_d);
+  }
+
+  m = uk.size();
+
+  MZ = 0.0;
+  MM = 0.0;
+  sx = sy = sz = xy = yz = xz = ypz = xpz = xpy = ss = 0.0;
+
+  if (m > 0) {
+    // for each point pair
 	 for(int j = 0; j < m; j++){
-        ak = (*uk)[j].p1;
-        bk = (*uk)[j].p2;
+        ak = uk[j].p1;
+        bk = uk[j].p2;
         
         // Some temporary values
         x = (ak.x + bk.x)/2.0;
@@ -194,8 +167,8 @@ void lum6DEuler::CalculateLinks3D(int numLinks, vPtPair **ptpairs,
 	 // Again going through all point pairs to faster calculate s.
 	 // This cannot be done earlier as we need D, and therefore MM and MZ to do this
 	 for(int j = 0; j < m; j++){
-	   ak = (*uk)[j].p1;
-	   bk = (*uk)[j].p2;
+	   ak = uk[j].p1;
+	   bk = uk[j].p2;
    
 	   x = (ak.x + bk.x) / 2.0;
 	   y = (ak.y + bk.y) / 2.0;
@@ -209,21 +182,66 @@ void lum6DEuler::CalculateLinks3D(int numLinks, vPtPair **ptpairs,
 	 ss =  ss / (2*m - 3);
 	 ss = 1.0 / ss;
 
-	 CD->push_back(MZ * ss);
-	 C->push_back(MM * ss);
-	 
-    } else {
-	 
-      // This case should not occur
-	 ss = 0.0;
-	 MM(1,1) = MM(1,2) = MM(1,3) = 0.0;
-	 MM(2,1) = MM(2,2) = MM(2,3) = 0.0;
-	 MM(3,1) = MM(3,2) = MM(3,3) = 0.0;
-	 MZ(6) = MZ(1) = MZ(2) = 0.0;
-	 MZ(3) = MZ(4) = MZ(5) = 0.0;
-	 CD->push_back(MZ);
-	 C->push_back(MM);
-	 
+	 if (CD) {
+	   *CD = MZ * ss;
+	 }
+	 *C = MM * ss;
+
+  } else {
+
+    // This case should not occur
+    ss = 0.0;
+    MM(1,1) = MM(1,2) = MM(1,3) = 0.0;
+    MM(2,1) = MM(2,2) = MM(2,3) = 0.0;
+    MM(3,1) = MM(3,2) = MM(3,3) = 0.0;
+    MZ(6) = MZ(1) = MZ(2) = 0.0;
+    MZ(3) = MZ(4) = MZ(5) = 0.0;
+    *C = 0;
+    if(CD)
+      *CD = 0;
+    cerr << "Error calculating covariance matrix" << endl;
+
+  }
+}
+
+/**
+ * A function to fill the linear system G X = B.
+ *
+ * @param gr the Graph is used to map the given covariances C and CD matrices to the correct link
+ * @param CD A vector containing all covariances C multiplied with their respective estimations D
+ * @param C A vector containing all covariances C of the pose difference estimations D
+ * @param G The matrix G specifying the linear equation
+ * @param B The vector B 
+ */
+void lum6DEuler::FillGB3D(Graph *gr, Matrix* G, ColumnVector* B,vector<Scan *> allScans )
+{
+  int a, b;
+
+  Matrix Cab;
+  ColumnVector CDab;
+
+  for(int i = 0; i < gr->getNrLinks(); i++){
+    a = gr->getLink(i,0) - 1;
+    b = gr->getLink(i,1) - 1;
+    Scan *FirstScan  = allScans[gr->getLink(i,0)];
+    Scan *SecondScan = allScans[gr->getLink(i,1)];
+  
+    //    cout << "i " << i << " a: " << a << " b: " << b << endl; 
+
+    covarianceEuler(FirstScan, SecondScan, use_cache, (int)my_icp->get_rnd(), 
+                    (int)max_dist_match2_LUM, &Cab, &CDab); 
+
+    if(a >= 0){
+      B->Rows(a*6+1,a*6+6) += CDab;
+      G->SubMatrix(a*6+1,a*6+6,a*6+1,a*6+6) += Cab;
+    }
+    if(b >= 0){
+      B->Rows(b*6+1,b*6+6) -= CDab;
+      G->SubMatrix(b*6+1,b*6+6,b*6+1,b*6+6) += Cab;
+    }
+    if(a >= 0 && b >= 0) { 
+      G->SubMatrix(a*6+1,a*6+6,b*6+1,b*6+6) = -Cab;
+      G->SubMatrix(b*6+1,b*6+6,a*6+1,a*6+6) = -Cab;
     }
   }
 }
@@ -267,10 +285,6 @@ double lum6DEuler::doGraphSlam6D(Graph gr, vector <Scan *> allScans, int nrIt)
   // the IdentityMatrix to transform some Scans with
   double id[16];
   M4identity(id);
-  
-  vPtPair **ptpairs = 0;                 // Contains sets of point pairs for all links
-  vector < Matrix > CD;                  // Contains covariance matrices
-  vector < ColumnVector > CDq;           // = (M^t*M)^-1*M^t*Z
 
   double sum_position_diff = DBL_MAX;
   double ret = DBL_MAX;
@@ -281,77 +295,6 @@ double lum6DEuler::doGraphSlam6D(Graph gr, vector <Scan *> allScans, int nrIt)
 
    if (nrIt > 1) cout << "Iteration " << iteration << endl;
     
-   // Transform first scan to zero, otherwise updating poses would yield incorrect values
-//     if (iteration == 0) {
-//       double* tin = allScans[0]->transMat;
-//       double tout[16];
-//       M4inv(tin, tout);
-
-//       for(unsigned int i = 0; i < allScans.size(); i++){
-//         allScans[i]->transform(tout, Scan::INVALID);
-//       }
-//     }
-
-    if (ptpairs != 0) delete [] ptpairs;
-    ptpairs = new vPtPair*[gr.getNrLinks()];
-
-    
-    for (int i = 0; i < gr.getNrLinks(); i++) {
-      ptpairs[i] = new vPtPair;
-    }
-
-    // Get all point pairs after ICP
-    int end_loop = gr.getNrLinks(); 
-#ifdef WITH_OPENMP
-    omp_set_num_threads(OPENMP_NUM_THREADS);
-#pragma omp parallel for schedule(dynamic)
-#endif
-    for(int i = 0; i < end_loop; i++) {
-      cout << "P" << i << flush; 
-      Scan * FirstScan  = allScans[gr.getLink(i,0)];
-      Scan * SecondScan = allScans[gr.getLink(i,1)];
-#ifdef WITH_OPENMP
-      int thread_num = omp_get_thread_num();
-#else
-      int thread_num = 0;
-#endif
-	 
-	 double dummy_centroid_m[3];
-	 double dummy_centroid_d[3];
-
-	 if (use_cache) {
-	   KDCacheItem *closest = Scan::initCache(FirstScan, SecondScan);
-	   Scan::getPtPairsCache(ptpairs[i], closest, FirstScan, SecondScan, thread_num,
-						(int)my_icp->get_rnd(), (int)max_dist_match2_LUM,
-						dummy_centroid_m, dummy_centroid_d);
-	 } else {
-	   Scan::getPtPairs(ptpairs[i], FirstScan, SecondScan, thread_num,
-					(int)my_icp->get_rnd(), (int)max_dist_match2_LUM,
-					dummy_centroid_m, dummy_centroid_d);
-	 }
-	 
-      // faulty network
-      if (ptpairs[i]->size() <= 1) {
-	   cout << "Error: Link (" << gr.getLink(i,0)
-		   << " - " << gr.getLink(i, 1) << " ) is empty with "
-		   << ptpairs[i]->size() << " Corr. points. iteration = "
-		   << iteration << endl;
-	   //	   exit(1);
-	 } 
-    }
-
-    CDq.clear();
-    CD.clear();
-    
-    // Get covariances and CD matrices for each square
-    CalculateLinks3D(gr.getNrLinks(), ptpairs, &CDq , &CD);
-    
-    // delete ptPairs
-    for (int i = 0; i < gr.getNrLinks(); i++) {
-	 ptpairs[i]->clear();
-	 delete (ptpairs[i]);
-    }
-    cout << "LINKS" << flush; 
 
     // * Calculate X and CX from all Dij and Cij
     int n = (gr.getNrScans() - 1);
@@ -362,7 +305,7 @@ double lum6DEuler::doGraphSlam6D(Graph gr, vector <Scan *> allScans, int nrIt)
     G = 0.0;
     B = 0.0;
     // ...fill G and B...
-    FillGB3D(&gr, &CDq , &CD, &G, &B);
+    FillGB3D(&gr, &G, &B, allScans);
     // ...and solve it
     ColumnVector X =  solveSparseCholesky(G, B);
     
@@ -458,14 +401,11 @@ double lum6DEuler::doGraphSlam6D(Graph gr, vector <Scan *> allScans, int nrIt)
       x[0] = result.element(0);
       x[1] = result.element(1);
       x[2] = result.element(2);
-      sum_position_diff += Len(x);	 
+      sum_position_diff += Len(x);	  
     }
     cout << "Sum of Position differenzes = " << sum_position_diff << endl << endl;
     ret = (sum_position_diff / (double)gr.getNrScans());
   }
-
-  delete [] ptpairs;
-  ptpairs = 0;
   
   return ret;
 }
