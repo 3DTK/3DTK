@@ -11,6 +11,7 @@
 #ifdef _MSC_VER
 #include <windows.h>
 #define  _USE_MATH_DEFINES
+#include <math.h>
 inline int gettimeofday (struct timeval* tp, void* tzp) 
 {
   unsigned long t;

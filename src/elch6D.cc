@@ -6,6 +6,9 @@ using std::string;
 
 #include <limits.h>
 
+#include <list>
+using namespace std;
+
 #include <boost/graph/graphviz.hpp>
 #include <boost/graph/dijkstra_shortest_paths.hpp>
 #include <boost/graph/graph_traits.hpp>

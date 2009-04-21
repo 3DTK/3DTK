@@ -29,8 +29,9 @@ void elch6DunitQuat::close_loop(const vector <Scan *> &allScans, int first, int 
     add_edge(from, to, C(4, 4) + C(5, 5) + C(6, 6) + C(7, 7), grb[3]);
   }
 
-  double weights[4][n];
+  double *weights[4];
   for(int i = 0; i < 4; i++) {
+    weights[i] = new double[n];
     graph_balancer(grb[i], first, last, weights[i]);
   }
 
@@ -139,4 +140,9 @@ void elch6DunitQuat::close_loop(const vector <Scan *> &allScans, int first, int 
     Normalize4(rPosQuat);
     allScans[i]->transformToQuat(rPos, rPosQuat, i == n-1 ? 2 : 1);
   }
+
+  for(int i = 0; i < 4; i++) {
+    delete [] weights[i];
+  }
+
 }
