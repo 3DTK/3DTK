@@ -9,6 +9,7 @@
 
 #include <cfloat>
 #include <fstream>
+using std::flush;
 #include <cstring>
 
 #include "globals.icc"

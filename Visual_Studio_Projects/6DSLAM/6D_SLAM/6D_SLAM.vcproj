@@ -42,6 +42,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/D _CRT_SECURE_NO_DEPRECATE /D USE_C_SPARSE"
 				Optimization="0"
+				AdditionalIncludeDirectories="C:\Programme\boost\boost_1_38"
 				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE"
 				MinimalRebuild="false"
 				BasicRuntimeChecks="3"
@@ -126,6 +127,7 @@
 				InlineFunctionExpansion="2"
 				EnableIntrinsicFunctions="true"
 				OmitFramePointers="true"
+				AdditionalIncludeDirectories="C:\Programme\boost\boost_1_38"
 				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
 				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="true"
@@ -195,6 +197,38 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\..\src\d2tree.cc"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\src\elch6D.cc"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\src\elch6Deuler.cc"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\src\elch6Dquat.cc"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\src\elch6Dslerp.cc"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\src\elch6DunitQuat.cc"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\src\gapx6D.cc"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\src\ghelix6DQ2.cc"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\src\globals.icc"
 				>
 				<FileConfiguration
@@ -208,6 +242,10 @@
 			</File>
 			<File
 				RelativePath="..\..\..\src\graph.cc"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\src\graphSlam6D.cc"
 				>
 			</File>
 			<File
@@ -228,6 +266,14 @@
 			</File>
 			<File
 				RelativePath="..\..\..\src\icp6Dapx.cc"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\src\icp6Dhelix.cc"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\src\icp6Dortho.cc"
 				>
 			</File>
 			<File
@@ -255,7 +301,11 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\src\lum6D.cc"
+				RelativePath="..\..\..\src\lum6Deuler.cc"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\src\lum6Dquat.cc"
 				>
 			</File>
 			<File
@@ -445,7 +495,43 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\..\src\d2tree.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\src\defs.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\src\elch6Deuler.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\src\elch6Dquat.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\src\elch6Dslerp.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\src\elch6DunitQuat.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\src\gapx6D.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\src\ghelix6DQ2.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\src\graph.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\src\graphSlam6D.h"
 				>
 			</File>
 			<File
@@ -457,7 +543,15 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\..\src\icp6Dhelix.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\src\icp6Dminimizer.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\src\icp6Dortho.h"
 				>
 			</File>
 			<File
@@ -477,7 +571,19 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\src\lum6D.h"
+				RelativePath="..\..\..\src\kdparams.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\src\loopSlam6D.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\src\lum6Deuler.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\src\lum6Dquat.h"
 				>
 			</File>
 			<File

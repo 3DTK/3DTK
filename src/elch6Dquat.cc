@@ -28,8 +28,9 @@ void elch6Dquat::close_loop(const vector <Scan *> &allScans, int first, int last
     }
   }
 
-  double weights[7][n];
+  double *weights[7];
   for(int i = 0; i < 7; i++) {
+    weights[i] = new double[n];
     graph_balancer(grb[i], first, last, weights[i]);
   }
 
@@ -95,4 +96,9 @@ void elch6Dquat::close_loop(const vector <Scan *> &allScans, int first, int last
     Normalize4(rPosQuat);
     allScans[i]->transformToQuat(rPos, rPosQuat, i == n-1 ? 2 : 1);
   }
+
+  for(int i = 0; i < 7; i++) {
+    delete [] weights[i];
+  }
+
 }

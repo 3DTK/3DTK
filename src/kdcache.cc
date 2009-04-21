@@ -3,11 +3,12 @@
  *  @author Andreas Nuechter. Institute of Computer Science, University of Osnabrueck, Germany.
  */
 
+#include <algorithm>
+using std::swap;
+
 #include "kdcache.h"
-
-// KDtree_cache class static variables
-KDCache KDtree_cache::cache[4];
-
+#include "kdc.h"
+#include "globals.icc"
 /**
  * Constructor
  *
@@ -114,7 +115,7 @@ KDtree_cache::KDtree_cache(double **pts, int n, KDtree_cache *_parent)
  * @param threadNum Thread number, for parallelization
  * @return Pointer to the closest point
  */
-KDCache KDtree_cache::FindClosestCache(double *_p, double maxdist2, int threadNum)
+KDCacheItem* KDtree_cache::FindClosestCache(double *_p, double maxdist2, int threadNum)
 {
   cache[threadNum].param.closest = 0;
   cache[threadNum].param.closest_d2 = HUGE_VAL;
