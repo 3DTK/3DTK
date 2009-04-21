@@ -28,8 +28,9 @@ void elch6Deuler::close_loop(const vector <Scan *> &allScans, int first, int las
     }
   }
 
-  double weights[6][n];
+  double *weights[6];
   for(int i = 0; i < 6; i++) {
+    weights[i] = new double[n];
     graph_balancer(grb[i], first, last, weights[i]);
   }
 
@@ -85,4 +86,9 @@ void elch6Deuler::close_loop(const vector <Scan *> &allScans, int first, int las
 
     allScans[i]->transformToEuler(rPos, rPosTheta, i == n-1 ? 2 : 1);
   }
+
+  for(int i = 0; i < 6; i++) {
+    delete [] weights[i];
+  }
+
 }

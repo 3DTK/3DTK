@@ -18,11 +18,8 @@
 
 #include "glui.h"
 #include "stdinc.h"
-#ifndef _MSC_VER
+
 #include <GL/glut.h>
-#else
-#include "..\..\..\Visual_Studio_Projects\6DSLAM\SHOW\glut\glut.h"    /* Header File For The glu toolkit */
-#endif
 
 
 /*********************************** GLUI:: add_checkbox() ************/

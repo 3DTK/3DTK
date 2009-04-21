@@ -19,12 +19,7 @@
 #include "glui.h"
 #include "stdinc.h"
 
-#ifdef _MSC_VER
-#include "..\..\..\Visual_Studio_Projects\6DSLAM\SHOW\glut\glut.h"    /* Header File For The glu toolkit */
-#else
-#include <GL/glut.h>
-#endif
-
+#include "GL/glut.h"    /* Header File For The glu toolkit */
 
 void (*show_glut_keyboard_CB)(unsigned char, int, int);
 void (*show_glut_special_CB)(int, int, int);

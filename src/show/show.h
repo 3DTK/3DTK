@@ -11,12 +11,12 @@
 #include <stdlib.h>
 #include "GL/glut.h"    /* Header File For The glu toolkit */
 
+#include "../scan.h"
+
 #ifdef _MSC_VER
-  #include "..\scan.h"
   #define  _USE_MATH_DEFINES
   #include <windows.h>
 #else
-  #include "../scan.h"
   #include <unistd.h>
 #endif
 
