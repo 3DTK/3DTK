@@ -23,7 +23,12 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+
+#ifdef COMPILE_MAC
+#include <GLUT/glut.h>
+#else
 #include <GL/glut.h>
+#endif
 
 #define GLUI_VERSION 2.01f    /********** Current version **********/
 
