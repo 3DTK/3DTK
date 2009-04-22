@@ -19,7 +19,6 @@
 #include "glui.h"
 #include "stdinc.h"
 
-#include "GL/glut.h"    /* Header File For The glu toolkit */
 
 void (*show_glut_keyboard_CB)(unsigned char, int, int);
 void (*show_glut_special_CB)(int, int, int);

@@ -19,7 +19,6 @@
 #include "glui.h"
 #include "stdinc.h"
 
-#include <GL/glut.h>
 
 
 /*********************************** GLUI:: add_checkbox() ************/

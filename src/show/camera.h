@@ -11,9 +11,12 @@
 #include <windows.h>
 #endif
 
+#ifdef COMPILE_MAC
+#include <OpenGL/gl.h>
+#else
 #include <GL/gl.h>
+#endif
 
-#include <GL/gl.h>
 #include "glui/glui.h"
 #include <iostream>
 
