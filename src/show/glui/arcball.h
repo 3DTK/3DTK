@@ -40,7 +40,11 @@
 #include "algebra3.h"
 #include "quaternion.h"
 
-#include "GL/glut.h"    /* Header File For The glu toolkit */
+#ifdef COMPILE_MAC
+#include <GLUT/glut.h>
+#else
+#include <GL/glut.h>
+#endif
 
 class Arcball {
 public:

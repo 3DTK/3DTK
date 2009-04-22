@@ -17,10 +17,10 @@ libglui.a: $(GLUI_OBJS)
 	@ar -cr libglui.a $(GLUI_OBJS)
 
 .cpp.o:
-	@$(GPP) -c $(CFLAGS) $(CPPFLAGS) $(INCS) $*.cpp
+	@$(GPP) -c $(CFLAGS) $(CPPFLAGS) -Wno-deprecated $(INCS) $*.cpp
 
 .c.o:
-	@$(GPP) -c $(CFLAGS) $(CPPFLAGS) $(INCS) $*.c
+	@$(GPP) -c $(CFLAGS) $(CPPFLAGS) -Wno-deprecated $(INCS) $*.c
 
 clean:
 	/bin/rm -f *.o

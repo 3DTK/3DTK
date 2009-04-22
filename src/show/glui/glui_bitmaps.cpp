@@ -19,8 +19,6 @@
 #include "glui.h"
 #include "stdinc.h"
 
-#include <GL/glut.h>
-
 int *bitmap_arrays[] = {
   glui_img_checkbox_0,
   glui_img_checkbox_1,

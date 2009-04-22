@@ -9,7 +9,13 @@
 #define __SHOW_H__
 
 #include <stdlib.h>
-#include "GL/glut.h"    /* Header File For The glu toolkit */
+
+#ifdef COMPILE_MAC
+#include <GLUT/glut.h>
+#else
+#include <GL/glut.h>
+#endif
+
 
 #include "../scan.h"
 
@@ -40,7 +46,12 @@ using std::ifstream;
 #include <vector>
 using std::vector;
 
-#include <GL/gl.h>	    /* Header File For The OpenGL32 Library */
+#ifdef COMPILE_MAC
+#include <GLUT/glut.h>
+#else
+#include <GL/glut.h>
+#endif
+
 #include "glui/glui.h"  /* Header File For The glui funktions */
 
 #ifndef _MSC_VER
