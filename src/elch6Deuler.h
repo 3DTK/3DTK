@@ -1,3 +1,8 @@
+/**
+ * @file ELCH implementation using Euler angles
+ * @author Jochen Sprickerhof
+ */
+
 #ifndef __ELCH6D_EULER_H__
 #define __ELCH6D_EULER_H__
 

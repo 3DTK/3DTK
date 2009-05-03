@@ -1,3 +1,7 @@
+/* @file extracts the final poses from the frame files
+ * @author Jochen Sprickerhof
+ */
+
 #ifndef _MSC_VER
 #include <getopt.h>
 #else

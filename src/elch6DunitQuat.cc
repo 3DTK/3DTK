@@ -1,3 +1,8 @@
+/**
+ * @file ELCH implementation using unit Quaternions
+ * @author Jochen Sprickerhof
+ */
+
 #include <iostream>
 using std::cout;
 using std::cerr;

@@ -1,3 +1,7 @@
+/** @file graph balancer implementation and utility functions
+ * @author Jochen Sprickerhof
+ */
+
 #include <fstream>
 using std::ofstream;
 
@@ -162,6 +166,7 @@ void elch6D::graph_balancer(graph_t &g, int f, int l, double *weights)
   double dist;
   list<int>::iterator si, ei, s_min, e_min;
 
+  // process all junctions
   while(!crossings.empty()) {
     dist = -1;
     for(si = crossings.begin(); si != crossings.end(); si++) {
@@ -187,7 +192,7 @@ void elch6D::graph_balancer(graph_t &g, int f, int l, double *weights)
     if(dist > -1) {
       remove_edge(*e_min, p_min[*e_min], g);
       for(int i = p_min[*e_min]; i != *s_min; i = p_min[i]) {
-        //Das geht sogar, wenn weights[*s_min] > weights[*e_min]!
+        //even right with weights[*s_min] > weights[*e_min]! (math works)
         weights[i] = weights[*s_min] + (weights[*e_min] - weights[*s_min]) * d_min[i] / d_min[*e_min];
         remove_edge(i, p_min[i], g);
         if(degree(i, g) > 0) {
@@ -208,6 +213,7 @@ void elch6D::graph_balancer(graph_t &g, int f, int l, double *weights)
   graph_traits <graph_t>::adjacency_iterator ai, ai_end;
   int s;
 
+  // error propagation
   while(!branches.empty()) {
     s = branches.front();
     branches.pop_front();

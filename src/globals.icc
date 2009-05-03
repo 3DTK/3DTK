@@ -851,6 +851,27 @@ static inline void slerp(const double *qa, const double *qb, const double t, dou
   Normalize4(qm);
 }
 
+/* taken from ROOT (CERN)
+ * as well in:
+ * Effective Sampling and Distance Metrics for 3D Rigid Body Path Planning
+ * James J. Kuffner
+ *
+ * Distance between two rotations in Quaternion form
+ * Note:  The rotation group is isomorphic to a 3-sphere
+ * with diametrically opposite points identified.
+ * The (rotation group-invariant) is the smaller
+ * of the two possible angles between the images of
+ * the two rotations on that sphere.  Thus the distance
+ * is never greater than pi/2.
+ */
+inline double quat_dist(double quat1[4], double quat2[4]) {
+  double chordLength = std::fabs(quat1[0]*quat2[0] + quat1[1]*quat2[1] + quat1[2]*quat2[2] + quat1[3]*quat2[3]);
+  if (chordLength > 1) chordLength = 1; // in case roundoff fouls us up
+  return acos(chordLength) / M_PI * 180.0;
+}
+
+
+
 /**
  *  Converts a Rotation given by Axis-Angle and a Translation into a
  *  4x4 Transformation matrix

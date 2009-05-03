@@ -21,6 +21,15 @@ class loopSlam6D {
 public:
   /** 
    * Constructor 
+   * @param _quiet suppress informative output
+   * @param my_icp6Dminimizer the used ICP algorithm
+   * @param mdm maximal distance match for ICP
+   * @param max_num_iterations Maximal number of iterations for ICP
+   * @param rnd randomized point selection for ICP
+   * @param eP Extrapolate odometry
+   * @param anim animate scan matching
+   * @param epsilonICP the ICP epsilon
+   * @param use_cache used cached k-d tree search
    */
   loopSlam6D(bool _quiet, icp6Dminimizer *my_icp6Dminimizer, double mdm, int max_num_iterations, int rnd, bool eP, int anim, double epsilonICP, bool use_cache)
   {
@@ -36,6 +45,13 @@ public:
     delete my_icp6D;
   };
 
+  /**
+   * virtual loop closing function
+   * @param allScans all laser scans
+   * @param first index of first laser scan in the loop
+   * @param last indes of last laser scan in the loop
+   * @param g graph for loop optimization
+   */
   virtual void close_loop(const vector <Scan *> &allScans, int first, int last, graph_t &g) = 0;
 
 protected:
