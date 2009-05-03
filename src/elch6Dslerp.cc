@@ -1,3 +1,8 @@
+/**
+ * @file ELCH implementation using SLERP
+ * @author Jochen Sprickerhof
+ */
+
 #include <iostream>
 using std::cout;
 using std::cerr;

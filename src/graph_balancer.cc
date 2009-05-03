@@ -1,3 +1,9 @@
+/**
+ * @file stand alone graph balancer implementation
+ * reads graph in graphviz format and optimizes it
+ * @author Jochen Sprickerhof
+ */
+
 #ifndef _MSC_VER
 #include <getopt.h>
 #else

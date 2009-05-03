@@ -431,13 +431,22 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &rand,
 }
 
 /**
- * This function is used to match a set of laser scans with any minimally
- * connected Graph, using the globally consistent SLAM-algorithm in 3D.
+ * This function is does all the matching stuff
+ * it iterates over all scans using the algorithm objects to calculate new poses
+ * objects could be NULL if algorithm should not be used
  *
- * @param allScans Contains all laser scans
- * @param nrIt The number of iterations the SLAM-algorithm will run
  * @param cldist maximal distance for closing loops
  * @param loopsize minimal loop size
+ * @param allScans Contains all laser scans
+ * @param my_icp6D the ICP implementation
+ * @param meta_icp math ICP against a metascan
+ * @param use_cache Indicates if cached versions of the search tree has to be build
+ * @param my_loopSlam6D used loopoptimizer
+ * @param my_graphSlam6D used global optimization
+ * @param nrIt The number of iterations the global SLAM-algorithm will run
+ * @param epsilonSLAM epsilon for global SLAM iteration
+ * @param mdml maximal distance match for global SLAM
+ * @param mdmll maximal distance match for global SLAM after all scans ar matched
  */
 void matchGraph6Dautomatic(double cldist, int loopsize, vector <Scan *> allScans, icp6D *my_icp6D, bool meta_icp, bool use_cache, loopSlam6D *my_loopSlam6D, graphSlam6D *my_graphSlam6D, int nrIt, double epsilonSLAM, double mdml, double mdmll)
 {
@@ -446,6 +455,7 @@ void matchGraph6Dautomatic(double cldist, int loopsize, vector <Scan *> allScans
   // list of scan for metascan
   vector < Scan* > metas;
 
+  // graph for loop optimization
   graph_t g;
 
   int n = allScans.size();

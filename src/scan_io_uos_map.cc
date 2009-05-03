@@ -3,6 +3,7 @@
  * @brief Implementation of reading 3D scans
  * @author Kai Lingemann. Institute of Computer Science, University of Osnabrueck, Germany.
  * @author Andreas Nuechter. Institute of Computer Science, University of Osnabrueck, Germany.
+ * @author Jochen Sprickerhof
  */
 
 #include "scan_io_uos_map.h"
