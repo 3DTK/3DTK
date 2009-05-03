@@ -1,3 +1,8 @@
+/**
+ * @file ELCH implementation using SLERP
+ * @author Jochen Sprickerhof
+ */
+
 #ifndef __ELCH6D_SLERP_H__
 #define __ELCH6D_SLERP_H__
 

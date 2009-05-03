@@ -1,3 +1,8 @@
+/**
+ * @file ELCH implementation using unit Quaternions
+ * @author Jochen Sprickerhof
+ */
+
 #ifndef __ELCH6D_UINTQUAT_H__
 #define __ELCH6D_UNITQUAT_H__
 

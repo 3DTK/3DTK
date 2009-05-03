@@ -22,6 +22,7 @@ using std::endl;
 
 #include <boost/graph/adjacency_list.hpp>
 
+/* Boost graph declaration */
 using boost::edge_weight_t;
 typedef boost::adjacency_list <
     boost::listS, boost::vecS, boost::undirectedS,
