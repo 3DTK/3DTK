@@ -1,6 +1,11 @@
-For a detailed explanation about the programm, its usage, etc., please
+Before compilation, make sure to uncomment the flags in the
+Makefile.master file that fit your system!
+
+-------------------------------------------------------------------
+
+For a detailed explanation of the programm, its usage, etc., please
 refer to the high level documentation doc/documentation_HL.pdf
-(esp. section 4-6, for starters).
+(esp. sections 4-6, for starters).
 
 IMPORTANT:
 Take care to register scans first (bin/slam6D) before trying to
