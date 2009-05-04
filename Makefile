@@ -201,61 +201,61 @@ docu_hl:	$(DOC)high_level_doc/documentation.tex
 
 $(BIN)scan_io_uos.so: $(SRC)scan_io.h $(SRC)scan_io_uos.h $(SRC)scan_io_uos.cc $(SRC)point.h $(SRC)point.icc $(SRC)globals.icc
 	echo Compiling shared library for reading UOS scans ...
-	$(GPP) $(CFLAGS) -fPIC $(SHAREDFLAGS) -o $(BIN)scan_io_uos.so $(SRC)scan_io_uos.cc 
+	$(GPP) $(CFLAGS) $(SHAREDFLAGS) -o $(BIN)scan_io_uos.so $(SRC)scan_io_uos.cc 
 
 $(BIN)scan_io_uos_map.so: $(SRC)scan_io.h $(SRC)scan_io_uos_map.h $(SRC)scan_io_uos_map.cc $(SRC)point.h $(SRC)point.icc $(SRC)globals.icc
 	echo Compiling shared library for reading UOS scans with given map ...
-	$(GPP) $(CFLAGS) -fPIC $(SHAREDFLAGS) -o $(BIN)scan_io_uos_map.so $(SRC)scan_io_uos_map.cc 
+	$(GPP) $(CFLAGS) $(SHAREDFLAGS) -o $(BIN)scan_io_uos_map.so $(SRC)scan_io_uos_map.cc 
 
 $(BIN)scan_io_old.so: $(SRC)scan_io.h $(SRC)scan_io_old.h $(SRC)scan_io_old.cc $(SRC)point.h $(SRC)point.icc $(SRC)globals.icc
 	echo Compiling shared library for reading old UOS scans ...
-	$(GPP) $(CFLAGS) -fPIC $(SHAREDFLAGS) -o $(BIN)scan_io_old.so $(SRC)scan_io_old.cc 
+	$(GPP) $(CFLAGS) $(SHAREDFLAGS) -o $(BIN)scan_io_old.so $(SRC)scan_io_old.cc 
 
 $(BIN)scan_io_rts.so: $(SRC)scan_io.h $(SRC)scan_io_rts.h $(SRC)scan_io_rts.cc $(SRC)point.h $(SRC)point.icc $(SRC)globals.icc
 	echo Compiling shared library for reading RTS scans ...
-	$(GPP) $(CFLAGS) -fPIC  $(SHAREDFLAGS) -o $(BIN)scan_io_rts.so $(SRC)scan_io_rts.cc 
+	$(GPP) $(CFLAGS)  $(SHAREDFLAGS) -o $(BIN)scan_io_rts.so $(SRC)scan_io_rts.cc 
 
 $(BIN)scan_io_iais.so: $(SRC)scan_io.h $(SRC)scan_io_iais.h $(SRC)scan_io_iais.cc $(SRC)point.h $(SRC)point.icc $(SRC)globals.icc
 	echo Compiling shared library for reading IAIS scans ...
-	$(GPP) $(CFLAGS) -fPIC $(SHAREDFLAGS) -o $(BIN)scan_io_iais.so $(SRC)scan_io_iais.cc 
+	$(GPP) $(CFLAGS) $(SHAREDFLAGS) -o $(BIN)scan_io_iais.so $(SRC)scan_io_iais.cc 
 
 $(BIN)scan_io_rts_map.so: $(SRC)scan_io.h $(SRC)scan_io_rts_map.h $(SRC)scan_io_rts_map.cc $(SRC)point.h $(SRC)point.icc $(SRC)globals.icc
 	echo Compiling shared library for reading RTS scans with given map ...
-	$(GPP) $(CFLAGS) -fPIC $(SHAREDFLAGS) -o $(BIN)scan_io_rts_map.so $(SRC)scan_io_rts_map.cc 
+	$(GPP) $(CFLAGS) $(SHAREDFLAGS) -o $(BIN)scan_io_rts_map.so $(SRC)scan_io_rts_map.cc 
 
 $(BIN)scan_io_riegl.so: $(SRC)scan_io.h $(SRC)scan_io_riegl.h $(SRC)scan_io_riegl.cc $(SRC)point.h $(SRC)point.icc $(SRC)globals.icc
 	echo Compiling shared library for reading Riegl scans ...
-	$(GPP) $(CFLAGS) -fPIC $(SHAREDFLAGS) -o $(BIN)scan_io_riegl.so $(SRC)scan_io_riegl.cc 
+	$(GPP) $(CFLAGS) $(SHAREDFLAGS) -o $(BIN)scan_io_riegl.so $(SRC)scan_io_riegl.cc 
 
 $(BIN)scan_io_zuf.so: $(SRC)scan_io.h $(SRC)scan_io_zuf.h $(SRC)scan_io_zuf.cc $(SRC)point.h $(SRC)point.icc $(SRC)globals.icc
 	echo Compiling shared library for reading Z+F scans ...
-	$(GPP) $(CFLAGS) -fPIC $(SHAREDFLAGS) -o $(BIN)scan_io_zuf.so $(SRC)scan_io_zuf.cc 
+	$(GPP) $(CFLAGS) $(SHAREDFLAGS) -o $(BIN)scan_io_zuf.so $(SRC)scan_io_zuf.cc 
 
 $(BIN)scan_io_ifp.so: $(SRC)scan_io.h $(SRC)scan_io_ifp.h $(SRC)scan_io_ifp.cc $(SRC)point.h $(SRC)point.icc $(SRC)globals.icc
 	echo Compiling shared library for reading IFP scans ...
-	$(GPP) $(CFLAGS) -fPIC $(SHAREDFLAGS) -o $(BIN)scan_io_ifp.so $(SRC)scan_io_ifp.cc 
+	$(GPP) $(CFLAGS) $(SHAREDFLAGS) -o $(BIN)scan_io_ifp.so $(SRC)scan_io_ifp.cc 
 
 $(BIN)scan_io_ply.so: $(SRC)scan_io.h $(SRC)scan_io_ply.h $(SRC)scan_io_ply.cc $(SRC)point.h $(SRC)point.icc $(SRC)globals.icc
 	echo Compiling shared library for reading PLY scans ...
-	$(GPP) $(CFLAGS) -fPIC $(SHAREDFLAGS) -o $(BIN)scan_io_ply.so $(SRC)scan_io_ply.cc 
+	$(GPP) $(CFLAGS) $(SHAREDFLAGS) -o $(BIN)scan_io_ply.so $(SRC)scan_io_ply.cc 
 
 $(BIN)scan_io_xyz.so: $(SRC)scan_io.h $(SRC)scan_io_xyz.h $(SRC)scan_io_xyz.cc $(SRC)point.h $(SRC)point.icc $(SRC)globals.icc
 	echo Compiling shared library for reading XYZ scans ...
-	$(GPP) $(CFLAGS) -fPIC $(SHAREDFLAGS) -o $(BIN)scan_io_xyz.so $(SRC)scan_io_xyz.cc 
+	$(GPP) $(CFLAGS) $(SHAREDFLAGS) -o $(BIN)scan_io_xyz.so $(SRC)scan_io_xyz.cc 
 
 $(BIN)scan_io_wrl.so: $(SRC)scan_io.h $(SRC)scan_io_wrl.h $(SRC)scan_io_wrl.cc $(SRC)point.h $(SRC)point.icc $(SRC)globals.icc
 	echo Compiling shared library for reading VRML v1.0 scans ...
-	$(GPP) $(CFLAGS) -fPIC $(SHAREDFLAGS) -o $(BIN)scan_io_wrl.so $(SRC)scan_io_wrl.cc 
+	$(GPP) $(CFLAGS) $(SHAREDFLAGS) -o $(BIN)scan_io_wrl.so $(SRC)scan_io_wrl.cc 
 
 $(BIN)scan_io_zahn.so: $(SRC)scan_io.h $(SRC)scan_io_zahn.h $(SRC)scan_io_zahn.cc $(SRC)point.h $(SRC)point.icc $(SRC)globals.icc
 	echo Compiling shared library for reading Zaehne scans ...
-	$(GPP) $(CFLAGS) -fPIC $(SHAREDFLAGS) -o $(BIN)scan_io_zahn.so $(SRC)scan_io_zahn.cc 
+	$(GPP) $(CFLAGS) $(SHAREDFLAGS) -o $(BIN)scan_io_zahn.so $(SRC)scan_io_zahn.cc 
 	echo DONE
 	echo
 
 $(BIN)scan_io_front.so: $(SRC)scan_io.h $(SRC)scan_io_front.h $(SRC)scan_io_front.cc $(SRC)point.h $(SRC)point.icc $(SRC)globals.icc
 	echo Compiling shared library for reading 2D Front scans ...
-	$(GPP) $(CFLAGS) -fPIC $(SHAREDFLAGS) -o $(BIN)scan_io_front.so $(SRC)scan_io_front.cc 
+	$(GPP) $(CFLAGS) $(SHAREDFLAGS) -o $(BIN)scan_io_front.so $(SRC)scan_io_front.cc 
 	echo DONE
 	echo
 
