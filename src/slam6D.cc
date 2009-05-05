@@ -7,6 +7,7 @@
  * 
  * @author Kai Lingemann. Institute of Computer Science, University of Osnabrueck, Germany.
  * @author Andreas Nuechter. Institute of Computer Science, University of Osnabrueck, Germany.
+ * @author Jochen Sprickerhof
  */
 
 #ifdef WITH_OPENMP

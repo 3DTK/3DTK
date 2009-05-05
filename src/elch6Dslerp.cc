@@ -19,6 +19,16 @@ using boost::graph_traits;
 #include "elch6Dslerp.h"
 #include "lum6Dquat.h"
 
+/**
+ * ELCH loop closing function using SLERP
+ * matches first and last scan of a loop with ICP
+ * distributes the error
+ *
+ * @param allScans all laser scans
+ * @param first index of first laser scan in the loop
+ * @param last indes of last laser scan in the loop
+ * @param g graph for loop optimization
+ */
 void elch6Dslerp::close_loop(const vector <Scan *> &allScans, int first, int last, graph_t &g)
 {
   int n = num_vertices(g);
