@@ -31,12 +31,27 @@ using boost::graph_traits;
   }
 }*/
 
+/**
+ * sets a filename for graph_weight_out and calls it
+ * @param g the graph to save
+ * @param first the first node
+ * @param last the last node
+ * @param weights the computed weights
+ */
 void elch6D::graph_weight_out(graph_t &g, int first, int last, double *weights)
 {
   string name("graph_weight_" + to_string(num_vertices(g), 3) + ".dot");
   graph_weight_out(g, first, last, weights, name);
 }
 
+/**
+ * writes a graphviz file with the graph labled with the computed weights
+ * @param g the graph to save
+ * @param first the first node
+ * @param last the last node
+ * @param weights the computed weights
+ * @param out_file the file to write to
+ */
 void elch6D::graph_weight_out(graph_t &g, int first, int last, double *weights, string &out_file)
 {
   ofstream dot_file(out_file.c_str());
@@ -56,12 +71,23 @@ void elch6D::graph_weight_out(graph_t &g, int first, int last, double *weights, 
   dot_file.close();
 }
 
+/**
+ * sets a filename and calls graph_pos_out
+ * @param g the graph to save
+ * @param allScans all laser scans
+ */
 void elch6D::graph_pos_out(graph_t &g, const vector <Scan *> &allScans)
 {
   string name("graph_pos_" + to_string(num_vertices(g), 3) + ".dot");
   graph_pos_out(g, allScans, name);
 }
 
+/**
+ * writes the graph using the computed scan poses
+ * @param g the graph to save
+ * @param allScans all laser scans
+ * @param out_file the file to write to
+ */
 void elch6D::graph_pos_out(graph_t &g, const vector <Scan *> &allScans, string &out_file)
 {
   ofstream graph_file(out_file.c_str());
@@ -80,6 +106,12 @@ void elch6D::graph_pos_out(graph_t &g, const vector <Scan *> &allScans, string &
   graph2_file.close();
 }
 
+/**
+ * write graphviz file with real poses
+ * @param g the graph
+ * @param allScans all laser scans
+ * @param out_file the file to write to
+ */
 void elch6D::dot_pos_out(graph_t &g, const vector <Scan *> &allScans, string &out_file)
 {
   ofstream dot_file(out_file.c_str());
@@ -104,12 +136,21 @@ void elch6D::dot_pos_out(graph_t &g, const vector <Scan *> &allScans, string &ou
   dot_file.close();
 }
 
+/**
+ * sets filename and calls graph_out
+ * @param g the graph
+ */
 void elch6D::graph_out(graph_t &g)
 {
   string name("graph_" + to_string(num_vertices(g), 3) + ".dot");
   graph_out(g, name);
 }
 
+/**
+ * uses boost write_graphviz to write the graph
+ * @param g the graph
+ * @param out_file the file to write to
+ */
 void elch6D::graph_out(graph_t &g, string &out_file)
 {
   ofstream dot_file(out_file.c_str());
@@ -117,12 +158,20 @@ void elch6D::graph_out(graph_t &g, string &out_file)
   dot_file.close();
 }
 
+/**
+ * sets filename and calls slim_graph_out
+ */
 void elch6D::slim_graph_out(graph_t g)
 {
   string name("slim_graph_" + to_string(num_vertices(g), 3) + ".dot");
   slim_graph_out(g, name);
 }
 
+/**
+ * writes slim graph (supressing unimportant nodes)
+ * @param g the graph
+ * @param out_file the file to write to
+ */
 void elch6D::slim_graph_out(graph_t g, string &out_file)
 {
   bool todo;
@@ -153,6 +202,13 @@ void elch6D::slim_graph_out(graph_t g, string &out_file)
   dot_file.close();
 }
 
+/**
+ * graph balancer algorithm computes the weights
+ * @param g the graph
+ * @param f index of the first node
+ * @param l index of the last node
+ * @param weights array for the weights
+ */
 void elch6D::graph_balancer(graph_t &g, int f, int l, double *weights)
 {
   list<int> crossings, branches;
