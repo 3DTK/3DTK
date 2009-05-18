@@ -10,7 +10,7 @@
  * @author Jochen Sprickerhof
  */
 
-#ifdef WITH_OPENMP
+#ifdef _OPENMP
 #include <omp.h>
 #endif
 
@@ -642,7 +642,7 @@ int main(int argc, char **argv)
   Scan::readScans(type, start, end, dir, maxDist, minDist, true);
   
   int end_reduction = (int)Scan::allScans.size();
-#ifdef WITH_OPENMP
+#ifdef _OPENMP
 #pragma omp parallel for schedule(dynamic)
 #endif
   for (int iterator = 0; iterator < end_reduction; iterator++) {

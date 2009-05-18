@@ -10,7 +10,7 @@
 
 #include <stdlib.h>
 
-#ifdef COMPILE_MAC
+#ifdef __APPLE__
 #include <GLUT/glut.h>
 #else
 #include <GL/glut.h>
@@ -46,7 +46,7 @@ using std::ifstream;
 #include <vector>
 using std::vector;
 
-#ifdef COMPILE_MAC
+#ifdef __APPLE__
 #include <GLUT/glut.h>
 #else
 #include <GL/glut.h>

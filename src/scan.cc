@@ -17,7 +17,7 @@ using std::stringstream;
 #include "scan_io.h"
 #include "d2tree.h"
 
-#ifdef WITH_OPENMP
+#ifdef _OPENMP
 #include <omp.h>
 #endif
 
@@ -376,7 +376,7 @@ void Scan::transformAll(const double alignxf[16])
 {
   int end_loop = (int)points.size();
   
-#ifdef WITH_OPENMP
+#ifdef _OPENMP
 #pragma omp parallel for
 #endif
   for (int i = 0; i < end_loop; ++i)
@@ -417,7 +417,7 @@ void Scan::transform(const double alignxf[16], const double colour[4], int islum
    * thats a moving point cloud. The get ptPairs methods do _not_ consider
    * transformation of target points
    */   
-#ifdef WITH_OPENMP
+#ifdef _OPENMP
 #pragma omp parallel for
 #endif
    for (int i = 0; i < end_loop; i++) {
@@ -431,7 +431,7 @@ void Scan::transform(const double alignxf[16], const double colour[4], int islum
 	  << rPosTheta[0] << ", " << rPosTheta[1] << ", " << rPosTheta[2] << ") ---> ";
 #endif
 
-#ifdef WITH_OPENMP
+#ifdef _OPENMP
 #pragma omp parallel for
 #endif
   for (int i = 0; i < points_red_size; i++) {
@@ -686,7 +686,7 @@ void Scan::createTrees(bool use_cache)
 {
   cerr << "create " << allScans.size() << " k-d trees " << flush;
   int i;
-#ifdef WITH_OPENMPx
+#ifdef _OPENMPx
 #pragma omp parallel for schedule(dynamic)
 #endif
     for (i = 0; i < (int)allScans.size(); i++) {
@@ -703,7 +703,7 @@ void Scan::createTrees(bool use_cache)
 void Scan::deleteTrees()
 {
   int i;
-#ifdef WITH_OPENMPx
+#ifdef _OPENMPx
 #pragma omp parallel for schedule(dynamic)
 #endif
   for (i = 0; i < (int)allScans.size(); i++) { 
