@@ -100,7 +100,7 @@ double gapx6D::genBAtransForLinkedPair( int firstScanNum, int secondScanNum,
   Ak1(2) = cm.y - cd.y;
   Ak1(3) = cm.z - cd.z;
 
-#ifdef WITH_OPENMP
+#ifdef _OPENMP
 #pragma omp critical (enterB)
 #endif
   {
@@ -257,7 +257,7 @@ double gapx6D::genBArotForLinkedPair( int firstScanNum, int secondScanNum, vPtPa
     Ak2(3) += (p1y - p2y) * p1x - (p1x - p2x) * p1y;
   }
   
-#ifdef WITH_OPENMP
+#ifdef _OPENMP
 #pragma omp critical (enterB)
 #endif
     {
@@ -375,7 +375,7 @@ double gapx6D::doGraphSlam6D(Graph gr, vector <Scan *> allScans, int nrIt)
 
     // Get all point pairs after ICP
     int end_loop = gr.getNrLinks(); 
-#ifdef WITH_OPENMP
+#ifdef _OPENMP
     omp_set_num_threads(OPENMP_NUM_THREADS);
 #pragma omp parallel for schedule(dynamic)
 #endif
@@ -384,7 +384,7 @@ double gapx6D::doGraphSlam6D(Graph gr, vector <Scan *> allScans, int nrIt)
       cout << "P" << i << flush; 
       Scan * FirstScan  = allScans[gr.getLink(i,0)];
       Scan * SecondScan = allScans[gr.getLink(i,1)];
-#ifdef WITH_OPENMP
+#ifdef _OPENMP
       int thread_num = omp_get_thread_num();
 #else
       int thread_num = 0;

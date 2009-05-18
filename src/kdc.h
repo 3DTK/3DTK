@@ -51,7 +51,7 @@ public:
   KDCacheItem* FindClosestCacheInit(double *_p, double maxdist2, int threadNum = 0);
 
 private:
-#ifdef WITH_OPENMP
+#ifdef _OPENMP
 #ifdef __INTEL_COMPILER
       __declspec (align(16)) static KDCacheItem cacheItem[MAX_OPENMP_NUM_THREADS];
 #else
