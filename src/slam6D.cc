@@ -126,9 +126,9 @@ void usage(char* prog)
 	  << "         sets the maximal point-to-point distance for matching with SLAM to <NR> 'units'" << endl
 	  << "         (unit of scan data, e.g. cm)" << endl
 	  << endl
-	  << bold << "  --DlastLUM" << normal << " NR  [default not set]" << endl
-	  << "         sets the maximal point-to-point distance for the final LUM correction," << endl
-	  << "         if final LUM is not required don'tt set it." << endl
+	  << bold << "  --DlastSLAM" << normal << " NR  [default not set]" << endl
+	  << "         sets the maximal point-to-point distance for the final SLAM correction," << endl
+	  << "         if final SLAM is not required don'tt set it." << endl
 	  << endl
 	  << bold << "  -e" << normal << " NR, " << bold << "--end=" << normal << "NR" << endl
 	  << "         end after scan NR" << endl
@@ -627,7 +627,7 @@ int main(int argc, char **argv)
   bool   initial    = false;
   int    loopSlam6DAlgo  = 0;
   int    lum6DAlgo  = 0;
-  bool   exportPoints = true;
+  bool   exportPoints = false;
   reader_type type    = UOS;
   
   parseArgs(argc, argv, dir, red, rand, mdm, mdml, mdmll, mni, start, end,
