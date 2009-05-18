@@ -87,7 +87,7 @@ void lum6DEuler::covarianceEuler(Scan *first, Scan *second,
   // number of pairs in a set
   int m;
 
-#ifdef WITH_OPENMP
+#ifdef _OPENMP
   int thread_num = omp_get_thread_num();
 #else
   int thread_num = 0;

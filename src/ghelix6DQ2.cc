@@ -134,7 +134,7 @@ double ghelix6DQ2::genBBdForLinkedPair( int firstScanNum, int secondScanNum, vPt
     sum += pDistX*pDistX + pDistY*pDistY + pDistZ*pDistZ;
   }
 
-#ifdef WITH_OPENMP
+#ifdef _OPENMP
   #pragma omp critical (enterB)
 #endif
   { 
@@ -340,7 +340,7 @@ double ghelix6DQ2::doGraphSlam6D(Graph gr, vector <Scan *> allScans, int nrIt)
 
     // Get all point pairs after ICP
     int end_loop = gr.getNrLinks(); 
-#ifdef WITH_OPENMP
+#ifdef _OPENMP
     omp_set_num_threads(OPENMP_NUM_THREADS);
 #pragma omp parallel for schedule(dynamic)
 #endif
@@ -349,7 +349,7 @@ double ghelix6DQ2::doGraphSlam6D(Graph gr, vector <Scan *> allScans, int nrIt)
       cout << "P" << i << flush; 
       Scan * FirstScan  = allScans[gr.getLink(i,0)];
       Scan * SecondScan = allScans[gr.getLink(i,1)];
-#ifdef WITH_OPENMP
+#ifdef _OPENMP
       int thread_num = omp_get_thread_num();
 #else
       int thread_num = 0;

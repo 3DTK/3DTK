@@ -12,7 +12,7 @@
 #include "kdparams.h"
 #include "searchTree.h"
 
-#ifdef WITH_OPENMP
+#ifdef _OPENMP
 #include <omp.h>
 #endif
 
@@ -57,7 +57,7 @@ private:
    *
    * Padded in the parallel case.
    */
-#ifdef WITH_OPENMP
+#ifdef _OPENMP
 #ifdef __INTEL_COMPILER
   __declspec (align(16)) static KDParams params[MAX_OPENMP_NUM_THREADS];
 #else

@@ -9,7 +9,7 @@
 
 #include "icp6D.h"
 
-#ifdef WITH_OPENMP
+#ifdef _OPENMP
 #include <omp.h>
 #endif
 
@@ -95,7 +95,7 @@ int icp6D::match(Scan* PreviousScan, Scan* CurrentScan)
     prev_prev_ret = prev_ret;
     prev_ret = ret;
 
-#ifdef WITH_OPENMP
+#ifdef _OPENMP
    // Implementation according to the paper 
    // "The Parallel Iterative Closest Point Algorithm"
    // by Langis / Greenspan / Godin, IEEE 3DIM 2001

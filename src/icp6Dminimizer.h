@@ -12,7 +12,7 @@ using std::vector;
 
 #include "defs.h"
 
-#ifdef WITH_OPENMP
+#ifdef _OPENMP
 #include <omp.h>
 #endif
 
