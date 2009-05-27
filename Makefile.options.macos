@@ -1,0 +1,18 @@
+# -------------
+# GNU C++ MACOS
+# -------------
+#
+GPP    = g++
+CFLAGS = -O3 -Wall -pipe -Wno-deprecated
+SHAREDFLAGS = -dynamiclib
+LIBRARIES = -framework OpenGL -framework GLUT
+
+
+# ---------------------
+# GNU C++ MACOS GCC 4.2
+# ---------------------
+#
+#GPP    = g++-4.2
+#CFLAGS = -O3 -Wall -pipe -Wno-deprecated -fopenmp 
+#LIBRARIES = -framework OpenGL -framework GLUT
+#SHAREDFLAGS = -shared

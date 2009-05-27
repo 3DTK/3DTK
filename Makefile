@@ -1,6 +1,7 @@
 # This Makefile is maintained manually
 
 include Makefile.master
+include Makefile.options
 
 BIN     = bin/
 OBJ     = obj/
@@ -256,9 +257,6 @@ $(BIN)scan_io_zahn.so: $(SRC)scan_io.h $(SRC)scan_io_zahn.h $(SRC)scan_io_zahn.c
 $(BIN)scan_io_front.so: $(SRC)scan_io.h $(SRC)scan_io_front.h $(SRC)scan_io_front.cc $(SRC)point.h $(SRC)point.icc $(SRC)globals.icc
 	echo Compiling shared library for reading 2D Front scans ...
 	$(GPP) $(CFLAGS) $(SHAREDFLAGS) -o $(BIN)scan_io_front.so $(SRC)scan_io_front.cc 
-	echo DONE
-	echo
-
 
 ######## GRID
 

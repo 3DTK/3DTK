@@ -1,5 +1,8 @@
-Before compilation, make sure to uncomment the flags in the
-Makefile.master file that fit your system!
+-------------------------------------------------------------------
+
+Before compilation, copy one of the Makefile.options.X files to
+generate the file "Makefile.options", with "X" depending on your
+system (linux, linux with the icc compiler, macOS, etc.)
 
 -------------------------------------------------------------------
 
@@ -15,3 +18,5 @@ display them (bin/show), and think about using the point reduction
 A reference manual can be found in doc/refman.pdf resp.
 doc/html/index.html (type in 'make docu' to compile the doxygen
 documentation for the HTML files).
+
+
