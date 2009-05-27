@@ -1,0 +1,7 @@
+# ---------
+# Intel ICC
+# ---------
+#
+GPP     = /opt/intel/compiler/icc
+CFLAGS  = -O2 -msse3 -mcpu=pentium4 -finline-functions -openmp -parallel -openmp-report1 -par-report1 #-DDEBUG
+LIBRARIES = -lglut -lGL -lGLU -L/usr/X11R6/lib -lXmu -lXt -lXi -lm -lXext -lX11 -lpthread -ldl -lstdc++ 
