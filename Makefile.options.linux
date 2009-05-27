@@ -1,0 +1,11 @@
+# -------
+# GNU C++
+# -------
+#
+GPP    = g++
+SHAREDFLAGS = -shared #-fPIC
+LIBRARIES = -lglut -lGL -lGLU -L/usr/X11R6/lib -lXmu -lXt -lXi -lm -lXext -lX11 -lpthread -ldl -lstdc++ 
+
+#CFLAGS = -O3 -Wall -mfpmath=sse -msse2 -march=i686 -finline-functions #-Winline -DDEBUG $(STATIC)
+#CFLAGS = -O3 -Wall -pipe -Wno-deprecated -fopenmp
+CFLAGS = -O3 -Wall -pipe -march=native -fopenmp -Wno-deprecated #-Winline -DDEBUG $(STATIC)

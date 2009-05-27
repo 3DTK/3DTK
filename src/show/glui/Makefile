@@ -1,4 +1,5 @@
 include ../../../Makefile.master
+include ../../../Makefile.options
 
 .SUFFIXES: .cpp
 
