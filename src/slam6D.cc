@@ -248,7 +248,7 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &rand,
 		    int &mni, int &start, int &end, int &maxDist, int &minDist, bool &quiet, bool &veryQuiet,
 		    bool &extrapolate_pose, bool &meta, int &algo, int &loopSlam6DAlgo, int &lum6DAlgo, int &anim,
 		    int &mni_lum, string &net, double &cldist, int &clpairs, int &loopsize,
-		    double &epsilonICP, double &epsilonSLAM, bool &use_cache, bool &initial,
+		    double &epsilonICP, double &epsilonSLAM, bool &use_cache, bool &initial, double &distLoop, int &iterLoop,
 		    reader_type &type)
 {
   int  c;
@@ -287,6 +287,8 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &rand,
     { "epsSLAM",    required_argument,   0,  '6' }, // use the long format only
     { "cache",     no_argument,         0,  '7' },
     { "initial",   no_argument,         0,  '8' },
+    { "distLoop",  required_argument,   0,  '9' }, // use the long format only
+    { "iterLoop",  required_argument,   0, '10' }, // use the long format only
     { 0,           0,   0,   0}                    // needed, cf. getopt.h
   };
 
@@ -389,6 +391,12 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &rand,
 	   break;
 	 case '8':  // = --initial
 	   initial = true;
+	   break;
+	 case '9':  // = --distLoop
+	   distLoop = atof(optarg);
+	   break;
+	 case '10':  // = --iterLoop
+	   iterLoop = atoi(optarg);
 	   break;
 	 case 'f': 
 	   if (strcasecmp(optarg, "uos") == 0) type = UOS;
@@ -628,12 +636,14 @@ int main(int argc, char **argv)
   int    loopSlam6DAlgo  = 0;
   int    lum6DAlgo  = 0;
   bool   exportPoints = false;
+  double distLoop = 700.0;
+  int iterLoop = 100;
   reader_type type    = UOS;
   
   parseArgs(argc, argv, dir, red, rand, mdm, mdml, mdmll, mni, start, end,
 		  maxDist, minDist, quiet, veryQuiet, eP, meta, algo, loopSlam6DAlgo, lum6DAlgo, anim,
 		  mni_lum, net, cldist, clpairs, loopsize, epsilonICP, epsilonSLAM,
-		  use_cache, initial, type);
+		  use_cache, initial, distLoop, iterLoop, type);
 
   cout << "slam6D will proceed with the following parameters:" << endl;
   //@@@ to do
@@ -800,16 +810,16 @@ int main(int argc, char **argv)
       loopSlam6D *my_loopSlam6D = 0;
       switch(loopSlam6DAlgo) {
         case 1:
-          my_loopSlam6D = new elch6Deuler(veryQuiet, my_icp6Dminimizer, cldist + 200.0, 100, rand, eP, 10, epsilonICP, use_cache);
+          my_loopSlam6D = new elch6Deuler(veryQuiet, my_icp6Dminimizer, distLoop, iterLoop, rand, eP, 10, epsilonICP, use_cache);
           break;
         case 2:
-          my_loopSlam6D = new elch6Dquat(veryQuiet, my_icp6Dminimizer, cldist + 200.0, 100, rand, eP, 10, epsilonICP, use_cache);
+          my_loopSlam6D = new elch6Dquat(veryQuiet, my_icp6Dminimizer, distLoop, iterLoop, rand, eP, 10, epsilonICP, use_cache);
           break;
         case 3:
-          my_loopSlam6D = new elch6DunitQuat(veryQuiet, my_icp6Dminimizer, cldist + 200.0, 100, rand, eP, 10, epsilonICP, use_cache);
+          my_loopSlam6D = new elch6DunitQuat(veryQuiet, my_icp6Dminimizer, distLoop, iterLoop, rand, eP, 10, epsilonICP, use_cache);
           break;
         case 4:
-          my_loopSlam6D = new elch6Dslerp(veryQuiet, my_icp6Dminimizer, cldist + 200.0, 100, rand, eP, 10, epsilonICP, use_cache);
+          my_loopSlam6D = new elch6Dslerp(veryQuiet, my_icp6Dminimizer, distLoop, iterLoop, rand, eP, 10, epsilonICP, use_cache);
           break;
       }
 
