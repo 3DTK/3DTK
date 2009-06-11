@@ -288,7 +288,7 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &rand,
     { "cache",     no_argument,         0,  '7' },
     { "initial",   no_argument,         0,  '8' },
     { "distLoop",  required_argument,   0,  '9' }, // use the long format only
-    { "iterLoop",  required_argument,   0, '10' }, // use the long format only
+    { "iterLoop",  required_argument,   0,  '1' }, // use the long format only
     { 0,           0,   0,   0}                    // needed, cf. getopt.h
   };
 
@@ -395,7 +395,7 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &rand,
 	 case '9':  // = --distLoop
 	   distLoop = atof(optarg);
 	   break;
-	 case '10':  // = --iterLoop
+	 case '1':  // = --iterLoop
 	   iterLoop = atoi(optarg);
 	   break;
 	 case 'f': 
