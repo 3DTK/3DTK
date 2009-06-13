@@ -34,11 +34,11 @@ $(BIN)frame_to_graph: $(SRC)frame_to_graph.cc $(SRC)globals.icc
 
 $(BIN)convergence: $(SRC)convergence.cc $(SRC)convergence.h $(SRC)globals.icc
 	echo Compiling and linking Convergence ...
-	$(GPP) $(CFLAGS) -o $(BIN)convergence $(SRC)convergence.cc $(SRC)convergence.h
+	$(GPP) $(CFLAGS) -o $(BIN)convergence $(SRC)convergence.cc
 	echo DONE
 	echo
 
-$(BIN)graph_balancer: $(OBJ)elch6D.o $(SRC)graph_balancer.cc 
+$(BIN)graph_balancer: $(OBJ)elch6D.o $(SRC)graph_balancer.cc $(SRC)graph.h
 	echo Compiling and linking Graph Balancer ...
 	$(GPP) $(CFLAGS) -lboost_graph-mt -o $(BIN)graph_balancer $(SRC)graph_balancer.cc $(OBJ)elch6D.o 
 	echo DONE
@@ -130,23 +130,23 @@ $(OBJ)lum6Dquat.o: $(OBJ)icp6D.o $(OBJ)graph.o $(SRC)globals.icc $(SRC)lum6Dquat
 	echo Compiling LUM 6D Quaternion ...
 	$(GPP) $(CFLAGS) -DUSE_C_SPARSE -c -o $(OBJ)lum6Dquat.o $(SRC)lum6Dquat.cc 
 
-$(OBJ)elch6D.o: $(SRC)icp6Dminimizer.h $(SRC)elch6D.h $(SRC)elch6D.cc $(SRC)loopSlam6D.h
+$(OBJ)elch6D.o: $(SRC)elch6D.cc $(SRC)elch6D.h $(SRC)loopSlam6D.h $(SRC)icp6D.h $(SRC)icp6Dminimizer.h $(SRC)scan.h $(SRC)graph.h
 	echo Compiling ELCH 6D ...
 	$(GPP) $(CFLAGS) -c -o $(OBJ)elch6D.o $(SRC)elch6D.cc 
 
-$(OBJ)elch6Deuler.o: $(SRC)icp6D.h $(SRC)icp6Dminimizer.h $(SRC)graph.h $(SRC)elch6Deuler.h $(SRC)elch6Deuler.cc $(SRC)elch6D.h
+$(OBJ)elch6Deuler.o: $(SRC)elch6Deuler.cc $(SRC)elch6Deuler.h $(SRC)elch6D.h $(SRC)loopSlam6D.h $(SRC)icp6D.h $(SRC)icp6Dminimizer.h $(SRC)scan.h $(SRC)graph.h $(SRC)lum6Deuler.h
 	echo Compiling ELCH 6D Euler ...
 	$(GPP) $(CFLAGS) -c -o $(OBJ)elch6Deuler.o $(SRC)elch6Deuler.cc 
 
-$(OBJ)elch6Dquat.o: $(SRC)icp6D.h $(SRC)icp6Dminimizer.h $(SRC)graph.h $(SRC)elch6Dquat.h $(SRC)elch6Dquat.cc $(SRC)elch6D.h
+$(OBJ)elch6Dquat.o: $(SRC)elch6Dquat.cc $(SRC)elch6Dquat.h $(SRC)elch6D.h $(SRC)loopSlam6D.h $(SRC)icp6D.h $(SRC)icp6Dminimizer.h $(SRC)scan.h $(SRC)graph.h $(SRC)lum6Dquat.h
 	echo Compiling ELCH 6D Quaternion ...
 	$(GPP) $(CFLAGS) -c -o $(OBJ)elch6Dquat.o $(SRC)elch6Dquat.cc 
 
-$(OBJ)elch6DunitQuat.o: $(SRC)icp6D.h $(SRC)icp6Dminimizer.h $(SRC)graph.h $(SRC)elch6DunitQuat.h $(SRC)elch6DunitQuat.cc $(SRC)elch6D.h
+$(OBJ)elch6DunitQuat.o: $(SRC)elch6DunitQuat.cc $(SRC)elch6DunitQuat.h $(SRC)elch6D.h $(SRC)loopSlam6D.h $(SRC)icp6D.h $(SRC)icp6Dminimizer.h $(SRC)scan.h $(SRC)graph.h $(SRC)lum6Dquat.h
 	echo Compiling ELCH 6D Unit Quaternion ...
 	$(GPP) $(CFLAGS) -c -o $(OBJ)elch6DunitQuat.o $(SRC)elch6DunitQuat.cc 
 
-$(OBJ)elch6Dslerp.o: $(SRC)icp6D.h $(SRC)icp6Dminimizer.h $(SRC)graph.h $(SRC)elch6Dslerp.h $(SRC)elch6Dslerp.cc $(SRC)elch6D.h
+$(OBJ)elch6Dslerp.o: $(SRC)elch6Dslerp.cc $(SRC)elch6Dslerp.h $(SRC)elch6D.h $(SRC)loopSlam6D.h $(SRC)icp6D.h $(SRC)icp6Dminimizer.h $(SRC)scan.h $(SRC)graph.h $(SRC)lum6Dquat.h
 	echo Compiling ELCH 6D SLERP Quaternion ...
 	$(GPP) $(CFLAGS) -c -o $(OBJ)elch6Dslerp.o $(SRC)elch6Dslerp.cc 
 
@@ -214,7 +214,7 @@ $(BIN)scan_io_old.so: $(SRC)scan_io.h $(SRC)scan_io_old.h $(SRC)scan_io_old.cc $
 
 $(BIN)scan_io_rts.so: $(SRC)scan_io.h $(SRC)scan_io_rts.h $(SRC)scan_io_rts.cc $(SRC)point.h $(SRC)point.icc $(SRC)globals.icc
 	echo Compiling shared library for reading RTS scans ...
-	$(GPP) $(CFLAGS)  $(SHAREDFLAGS) -o $(BIN)scan_io_rts.so $(SRC)scan_io_rts.cc 
+	$(GPP) $(CFLAGS) $(SHAREDFLAGS) -o $(BIN)scan_io_rts.so $(SRC)scan_io_rts.cc 
 
 $(BIN)scan_io_iais.so: $(SRC)scan_io.h $(SRC)scan_io_iais.h $(SRC)scan_io_iais.cc $(SRC)point.h $(SRC)point.icc $(SRC)globals.icc
 	echo Compiling shared library for reading IAIS scans ...
@@ -251,8 +251,6 @@ $(BIN)scan_io_wrl.so: $(SRC)scan_io.h $(SRC)scan_io_wrl.h $(SRC)scan_io_wrl.cc $
 $(BIN)scan_io_zahn.so: $(SRC)scan_io.h $(SRC)scan_io_zahn.h $(SRC)scan_io_zahn.cc $(SRC)point.h $(SRC)point.icc $(SRC)globals.icc
 	echo Compiling shared library for reading Zaehne scans ...
 	$(GPP) $(CFLAGS) $(SHAREDFLAGS) -o $(BIN)scan_io_zahn.so $(SRC)scan_io_zahn.cc 
-	echo DONE
-	echo
 
 $(BIN)scan_io_front.so: $(SRC)scan_io.h $(SRC)scan_io_front.h $(SRC)scan_io_front.cc $(SRC)point.h $(SRC)point.icc $(SRC)globals.icc
 	echo Compiling shared library for reading 2D Front scans ...
