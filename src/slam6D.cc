@@ -248,8 +248,8 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &rand,
 		    int &mni, int &start, int &end, int &maxDist, int &minDist, bool &quiet, bool &veryQuiet,
 		    bool &extrapolate_pose, bool &meta, int &algo, int &loopSlam6DAlgo, int &lum6DAlgo, int &anim,
 		    int &mni_lum, string &net, double &cldist, int &clpairs, int &loopsize,
-		    double &epsilonICP, double &epsilonSLAM, bool &use_cache, bool &initial, double &distLoop, int &iterLoop,
-		    reader_type &type)
+		    double &epsilonICP, double &epsilonSLAM, bool &use_cache, bool &initial, double &distLoop,
+        int &iterLoop, double &graphDist, reader_type &type)
 {
   int  c;
   // from unistd.h:
@@ -289,6 +289,7 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &rand,
     { "initial",   no_argument,         0,  '8' },
     { "distLoop",  required_argument,   0,  '9' }, // use the long format only
     { "iterLoop",  required_argument,   0,  '1' }, // use the long format only
+    { "graphDist", required_argument,   0,  '3' }, // use the long format only
     { 0,           0,   0,   0}                    // needed, cf. getopt.h
   };
 
@@ -398,6 +399,9 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &rand,
 	 case '1':  // = --iterLoop
 	   iterLoop = atoi(optarg);
 	   break;
+	 case '3':  // = --graphDist
+	   graphDist = atof(optarg);
+	   break;
 	 case 'f': 
 	   if (strcasecmp(optarg, "uos") == 0) type = UOS;
 	   else if (strcasecmp(optarg, "uos_map") == 0) type = UOS_MAP;
@@ -457,7 +461,7 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &rand,
  * @param mdml maximal distance match for global SLAM
  * @param mdmll maximal distance match for global SLAM after all scans ar matched
  */
-void matchGraph6Dautomatic(double cldist, int loopsize, vector <Scan *> allScans, icp6D *my_icp6D, bool meta_icp, bool use_cache, loopSlam6D *my_loopSlam6D, graphSlam6D *my_graphSlam6D, int nrIt, double epsilonSLAM, double mdml, double mdmll)
+void matchGraph6Dautomatic(double cldist, int loopsize, vector <Scan *> allScans, icp6D *my_icp6D, bool meta_icp, bool use_cache, loopSlam6D *my_loopSlam6D, graphSlam6D *my_graphSlam6D, int nrIt, double epsilonSLAM, double mdml, double mdmll, double graphDist)
 {
   double cldist2 = sqr(cldist);
 
@@ -578,9 +582,7 @@ void matchGraph6Dautomatic(double cldist, int loopsize, vector <Scan *> allScans
     double ret;
     do {
       // recalculate graph
-      //@@
-      //Graph *gr = new Graph(n, sqr(200), loopsize);
-      Graph *gr = new Graph(n, cldist2, loopsize);
+      Graph *gr = new Graph(n, sqr(graphDist), loopsize);
       cout << "Global: " << j << endl;
       ret = my_graphSlam6D->doGraphSlam6D(*gr, allScans, 1);
       delete gr;
@@ -636,14 +638,15 @@ int main(int argc, char **argv)
   int    loopSlam6DAlgo  = 0;
   int    lum6DAlgo  = 0;
   bool   exportPoints = false;
-  double distLoop = 700.0;
-  int iterLoop = 100;
+  double distLoop   = 700.0;
+  int iterLoop      = 100;
+  double graphDist  = cldist;
   reader_type type    = UOS;
   
   parseArgs(argc, argv, dir, red, rand, mdm, mdml, mdmll, mni, start, end,
 		  maxDist, minDist, quiet, veryQuiet, eP, meta, algo, loopSlam6DAlgo, lum6DAlgo, anim,
 		  mni_lum, net, cldist, clpairs, loopsize, epsilonICP, epsilonSLAM,
-		  use_cache, initial, distLoop, iterLoop, type);
+		  use_cache, initial, distLoop, iterLoop, graphDist, type);
 
   cout << "slam6D will proceed with the following parameters:" << endl;
   //@@@ to do
@@ -823,7 +826,7 @@ int main(int argc, char **argv)
           break;
       }
 
-      matchGraph6Dautomatic(cldist, loopsize, Scan::allScans, my_icp, meta, use_cache, my_loopSlam6D, my_graphSlam6D, mni_lum, epsilonSLAM, mdml, mdmll);
+      matchGraph6Dautomatic(cldist, loopsize, Scan::allScans, my_icp, meta, use_cache, my_loopSlam6D, my_graphSlam6D, mni_lum, epsilonSLAM, mdml, mdmll, graphDist);
       delete my_icp;
       if(loopSlam6DAlgo > 0) {
         delete my_loopSlam6D;
