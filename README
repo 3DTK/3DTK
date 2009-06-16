@@ -4,6 +4,10 @@ Before compilation, copy one of the Makefile.options.X files to
 generate the file "Makefile.options", with "X" depending on your
 system (linux, linux with the icc compiler, macOS, etc.)
 
+The Boost Graph Lib is needed to compile the slam6D program.
+If you are using Debian just do:
+aptitude install libboost-graph-dev
+
 -------------------------------------------------------------------
 
 For a detailed explanation of the programm, its usage, etc., please
