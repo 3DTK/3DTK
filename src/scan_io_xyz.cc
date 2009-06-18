@@ -1,6 +1,6 @@
 /**
  * @file
- * @brief Implementation of reading 3D scans
+ * @brief Implementation of reading 3D scans in XYZ format (i.e., pure 3D data points only)
  * @author Kai Lingemann. Institute of Computer Science, University of Osnabrueck, Germany.
  * @author Andreas Nuechter. Institute of Computer Science, University of Osnabrueck, Germany.
  */
@@ -17,7 +17,7 @@ using std::swap;
 
 /**
  * Reads specified scans from given directory in
- * the XYZ file format
+ * the XYZ file format (i.e., pure 3D data points only)
  * It will be compiled as shared lib.
  *
  * @param start Starts to read with this scan
