@@ -18,9 +18,10 @@ IMPORTANT:
 Take care to register scans first (bin/slam6D) before trying to
 display them (bin/show), and think about using the point reduction
 (see section 6) for a much faster scan matching result.
+Three example scans are included in the dat directory, several
+larger data sets can be downloaded from the data repository,
+http://kos.informatik.uni-osnabrueck.de/3Dscans/
 
 A reference manual can be found in doc/refman.pdf resp.
 doc/html/index.html (type in 'make docu' to compile the doxygen
 documentation for the HTML files).
-
-

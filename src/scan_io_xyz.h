@@ -1,6 +1,6 @@
 /**
  * @file
- * @brief IO of 3D scans in XYZ file format
+ * @brief IO of 3D scans in XYZ file format (i.e., pure 3D data points only)
  * @author Kai Lingemann. Institute of Computer Science, University of Osnabrueck, Germany.
  * @author Andreas Nuechter. Institute of Computer Science, University of Osnabrueck, Germany.
  */
@@ -26,7 +26,7 @@ using std::vector;
 #include "scan_io.h"
 
 /**
- * @brief 3D scan loader for XYZ scans
+ * @brief 3D scan loader for XYZ scans (i.e., pure 3D data points only)
  *
  * The compiled class is available as shared object file
  */
