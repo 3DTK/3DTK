@@ -475,19 +475,19 @@ void Scan::transform(const double alignxf[16], const double colour[4], int islum
     case 0:
 	 end_loop = (int)allScans.size();
 	 for (int iter = 0; iter < end_loop; iter++) {
-     in_meta = false;
-     for(int i = 0; i < end_meta; i++) {
-       if(meta_parts[i] == allScans[iter]) {
-         found = iter;
-         in_meta = true;
-       }
-     }
+	   in_meta = false;
+	   for(int i = 0; i < end_meta; i++) {
+		if(meta_parts[i] == allScans[iter]) {
+		  found = iter;
+		  in_meta = true;
+		}
+	   }
 	   if (allScans[iter]->sout.good()) {
 		allScans[iter]->sout << allScans[iter]->transMat << endl;    
 		if (allScans[iter] == this || in_meta) {
 		  found = iter;
 		  allScans[iter]->sout << colour[0] << " " << colour[1] << " " << colour[2] << " " << colour[3]
-		                       << endl;
+						   << endl;
 		} else {
 		  if (found == 0) {
 		    allScans[iter]->sout << "1 1 0 1" << endl;
