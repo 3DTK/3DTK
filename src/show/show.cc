@@ -28,7 +28,7 @@ int window_id;
  * Size of points
  */
 GLfloat pointsize          = 1.7;
-int     anim_delay         = 0;
+int     anim_delay         = 5;
 
 /**
  * Indicator whether and how the drawing window
@@ -90,12 +90,12 @@ GLfloat fogDensity       = 0.001;
 /**
  * Mode of the fog (exp, exp2, linear)
  */ 
-GLint fogMode;
+GLint fogMode            = GL_EXP;
 
 /**
  * Indicates if fog should be shown
  */
-int show_fog             = 0;
+int show_fog             = 1;
 
 /**
  * Indicates if the points should be shown
@@ -366,7 +366,7 @@ void readFrames(string dir, int start, int end, bool readInitial)
     MetaColour.push_back(ColMatrices);
     
     MetaMatrix.push_back(Matrices);
-    
+
     /////////////////!!!!!!!!!!!!!!!!!!!!!!!!
     //@@@
 //     if (fileCounter == start+1) {

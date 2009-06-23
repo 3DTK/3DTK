@@ -309,7 +309,7 @@ void DisplayItFunc(GLenum mode)
     glLineWidth(5);
     glBegin(GL_LINE_STRIP);
     for(unsigned int i = 0; i<Scan::allScans.size(); i++){
-      if(frameNr > -1 && frameNr < MetaMatrix[1].size()) {
+      if(frameNr > -1 && frameNr < (int)MetaMatrix[1].size()) {
         if(MetaColour[i][frameNr][0] < 0) {
           continue;
         }
@@ -503,7 +503,7 @@ void CallBackIdleFunc(void)
 	 
   // return is nothing has to be updated
   if (haveToUpdate == 0) return;
-  
+
   // case: display is invalid - update it
   if (haveToUpdate == 1) {
     glutPostRedisplay();
@@ -524,7 +524,7 @@ void CallBackIdleFunc(void)
   
   // case: animation
   static int anim_iterator = 0; // # scan
-  static int anim_jterator = 4800; // # frame in this scan
+  static int anim_jterator = 0; // # frame in this scan
   /* 
    */
   if(haveToUpdate == 3 ){
@@ -535,7 +535,7 @@ void CallBackIdleFunc(void)
       return;
     }
     scanNr = 1;
-    frameNr =  calcFrameNo()+ anim_jterator;
+    frameNr =  calcFrameNo() + anim_jterator;
     glutPostRedisplay();
 
     if(save_animation){
@@ -554,9 +554,9 @@ void CallBackIdleFunc(void)
 #endif
 
   if (haveToUpdate == 4) { // stop animation
-     anim_iterator = 0;  // so that the next click on the button restarts the animation.
-       anim_jterator = 0;  // delete these lines if you want a 'continue' functionality.
-                                        
+    anim_iterator = 0;  // so that the next click on the button restarts the animation.
+    anim_jterator = 0;  // delete these lines if you want a 'continue' functionality.
+    
     scanNr = frameNr = -1;
     haveToUpdate = 1;
   }
@@ -1294,22 +1294,18 @@ int calcFrameNo(){
   //this ensures that we avoid the invalid frames
 
   int counter = 0;             //to store the frame no
-  int i = 0;                   // our iterator
 
   //check until a valid frame is found
   //any frame with colour code starting with
   // -1 is invalid
   
-  while(MetaColour[1][i][0]<0){   
-    
-    i++;                       //increment the iterator
+  while(MetaColour[1][counter][0]<0){   
     counter++;                 //increment the frame counter
-   //  cout << "val is: " <<  MetaColour[2][i][0] << endl;
+   //  cout << "val is: " <<  MetaColour[1][counter][0] << endl;
 //     cout << "counter is: " << counter << endl;
   }
-  
+
   return counter;
-  
 }
 
 //----------------------------------------------------------------------------------------------
