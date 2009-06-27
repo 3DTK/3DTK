@@ -8,11 +8,13 @@ using std::ofstream;
 #include <string>
 using std::string;
 
-#include <limits.h>
-
 #include <list>
-using namespace std;
+using std::list;
 
+#include <algorithm>
+using std::swap;
+
+#include <limits.h> //for old boost and new gcc
 #include <boost/graph/graphviz.hpp>
 #include <boost/graph/dijkstra_shortest_paths.hpp>
 #include <boost/graph/graph_traits.hpp>
@@ -217,8 +219,10 @@ void elch6D::graph_balancer(graph_t &g, int f, int l, double *weights)
   weights[f] = 0;
   weights[l] = 1;
 
-  vector<int> p(num_vertices(g)), p_min;
-  vector<double> d(num_vertices(g)), d_min;
+  int *p = new int[num_vertices(g)];
+  int *p_min = new int[num_vertices(g)];
+  double *d = new double[num_vertices(g)];
+  double *d_min = new double[num_vertices(g)];
   double dist;
   list<int>::iterator si, ei, s_min, e_min;
 
@@ -226,14 +230,14 @@ void elch6D::graph_balancer(graph_t &g, int f, int l, double *weights)
   while(!crossings.empty()) {
     dist = -1;
     for(si = crossings.begin(); si != crossings.end(); si++) {
-      dijkstra_shortest_paths(g, *si, boost::predecessor_map(&p[0]).distance_map(&d[0]));
+      dijkstra_shortest_paths(g, *si, boost::predecessor_map(p).distance_map(d));
       ei = si;
       ei++;
       for(; ei != crossings.end(); ei++) {
         if(*ei != p[*ei] && (dist < 0 || d[*ei] < dist)) {
           dist = d[*ei];
-          p_min = p;
-          d_min = d;
+          swap(p, p_min);
+          swap(d, d_min);
           s_min = si;
           e_min = ei;
         }
@@ -265,6 +269,11 @@ void elch6D::graph_balancer(graph_t &g, int f, int l, double *weights)
       }
     }
   }
+
+  delete[] p;
+  delete[] p_min;
+  delete[] d;
+  delete[] d_min;
 
   graph_traits <graph_t>::adjacency_iterator ai, ai_end;
   int s;
