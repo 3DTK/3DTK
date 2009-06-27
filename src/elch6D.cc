@@ -224,6 +224,7 @@ void elch6D::graph_balancer(graph_t &g, int f, int l, double *weights)
   double *d = new double[num_vertices(g)];
   double *d_min = new double[num_vertices(g)];
   double dist;
+  bool do_swap = false;
   list<int>::iterator si, ei, s_min, e_min;
 
   // process all junctions
@@ -236,11 +237,15 @@ void elch6D::graph_balancer(graph_t &g, int f, int l, double *weights)
       for(; ei != crossings.end(); ei++) {
         if(*ei != p[*ei] && (dist < 0 || d[*ei] < dist)) {
           dist = d[*ei];
-          swap(p, p_min);
-          swap(d, d_min);
           s_min = si;
           e_min = ei;
+          do_swap = true;
         }
+      }
+      if(do_swap) {
+        swap(p, p_min);
+        swap(d, d_min);
+        do_swap = false;
       }
       if(dist < 0) {
         branches.push_back(*si);
