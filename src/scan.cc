@@ -504,8 +504,7 @@ void Scan::transform(const double alignxf[16], const double colour[4], int islum
     case 1:
 	 if (sout.good()) {
 	   sout << transMat << endl
-	        << colour[0] << " " << colour[1] << " " << colour[2] << " " << colour[3] << endl
-	        << endl;  
+	        << colour[0] << " " << colour[1] << " " << colour[2] << " " << colour[3] << endl;
 	 } else {
 	   cerr << "ERROR: Cannot store frames." << endl;
 	   exit(1);

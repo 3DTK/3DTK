@@ -102,7 +102,7 @@ void elch6Dslerp::close_loop(const vector <Scan *> &allScans, int first, int las
     axisangle[2] = deltaQ[2];
     axisangle[3] = deltaQ[3];
     QuatToAA(axisangle);
-    cout << deltaT[0] << " " << deltaT[1] << " " << deltaT[2] << " " << axisangle[0] << " " << axisangle[1] << " " << axisangle[2] << " " << axisangle[3] << endl;
+    cout << "Delta: " << deltaT[0] << " " << deltaT[1] << " " << deltaT[2] << " " << axisangle[0] << " " << axisangle[1] << " " << axisangle[2] << " " << axisangle[3] << endl;
   }
   
   //transform scans

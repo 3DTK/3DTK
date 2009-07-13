@@ -95,7 +95,7 @@ void elch6Dquat::close_loop(const vector <Scan *> &allScans, int first, int last
     axisangle[2] = delta[5];
     axisangle[3] = delta[6];
     QuatToAA(axisangle);
-    cout << delta[0] << " " << delta[1] << " " << delta[2] << " " << axisangle[0] << " " << axisangle[1] << " " << axisangle[2] << " " << axisangle[3] << endl;
+    cout << "Delta: " << delta[0] << " " << delta[1] << " " << delta[2] << " " << axisangle[0] << " " << axisangle[1] << " " << axisangle[2] << " " << axisangle[3] << endl;
   }
 
   double rPos[3], rPosQuat[4];

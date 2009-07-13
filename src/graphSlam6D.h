@@ -72,6 +72,11 @@ protected:
    * indicates using the cache
    */
   bool use_cache;
+
+  /**
+   * be quiet
+   */
+  bool quiet;
 };
 
 #endif 
