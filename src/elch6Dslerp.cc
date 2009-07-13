@@ -117,7 +117,7 @@ void elch6Dslerp::close_loop(const vector <Scan *> &allScans, int first, int las
   MMult(Pf0, tmp2, delta0);
 
 #ifdef _OPENMP
-#pragma omp for private(rPos, rPosQuat, tmp1, tmp2)
+#pragma omp parallel for private(rPos, rPosQuat, tmp1, tmp2)
 #endif
   for(int i = 1; i < n; i++) {
     if(i >= last - offset_last_start && i <= last + offset_last_end) {
