@@ -41,9 +41,9 @@ void elch6Dslerp::close_loop(const vector <Scan *> &allScans, int first, int las
     lum6DQuat::covarianceQuat(allScans[from], allScans[to], my_icp6D->get_use_cache(), my_icp6D->get_rnd(), my_icp6D->get_max_dist_match2(), &C);
     C = C.i();
     for(int j = 0; j < 3; j++) {
-      add_edge(from, to, C(j + 1, j + 1), grb[j]);
+      add_edge(from, to, fabs(C(j + 1, j + 1)), grb[j]);
     }
-    add_edge(from, to, C(4, 4) + C(5, 5) + C(6, 6) + C(7, 7), grb[3]);
+    add_edge(from, to, fabs(C(4, 4)) + fabs(C(5, 5)) + fabs(C(6, 6)) + fabs(C(7, 7)), grb[3]);
   }
 
   double *weights[4];
