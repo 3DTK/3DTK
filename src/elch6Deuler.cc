@@ -39,7 +39,7 @@ void elch6Deuler::close_loop(const vector <Scan *> &allScans, int first, int las
     lum6DEuler::covarianceEuler(allScans[from], allScans[to], my_icp6D->get_use_cache(), my_icp6D->get_rnd(), my_icp6D->get_max_dist_match2(), &C);
     C = C.i();
     for(int j = 0; j < 6; j++) {
-      add_edge(from, to, C(j + 1, j + 1), grb[j]);
+      add_edge(from, to, fabs(C(j + 1, j + 1)), grb[j]);
     }
   }
 
