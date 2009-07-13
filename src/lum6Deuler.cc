@@ -111,39 +111,39 @@ void lum6DEuler::covarianceEuler(Scan *first, Scan *second,
 
   if (m > 0) {
     // for each point pair
-	 for(int j = 0; j < m; j++){
-        ak = uk[j].p1;
-        bk = uk[j].p2;
-        
-        // Some temporary values
-        x = (ak.x + bk.x)/2.0;
-        y = (ak.y + bk.y)/2.0;
-        z = (ak.z + bk.z)/2.0;
-        dx = ak.x - bk.x;
-        dy = ak.y - bk.y;
-        dz = ak.z - bk.z;
+    for(int j = 0; j < m; j++){
+      ak = uk[j].p1;
+      bk = uk[j].p2;
 
-        // Sum up all necessary values to construct MM
-        sx += x;
-        sy += y;
-        sz += z;
+      // Some temporary values
+      x = (ak.x + bk.x)/2.0;
+      y = (ak.y + bk.y)/2.0;
+      z = (ak.z + bk.z)/2.0;
+      dx = ak.x - bk.x;
+      dy = ak.y - bk.y;
+      dz = ak.z - bk.z;
 
-        xpy += x*x + y*y;
-        xpz += x*x + z*z;
-        ypz += y*y + z*z;
+      // Sum up all necessary values to construct MM
+      sx += x;
+      sy += y;
+      sz += z;
 
-        xy += x*y;
-        xz += x*z;
-        yz += y*z;
+      xpy += x*x + y*y;
+      xpz += x*x + z*z;
+      ypz += y*y + z*z;
 
-        // Sum up each part of MZ
-        MZ(1) += dx;
-        MZ(2) += dy;
-        MZ(3) += dz;
-        MZ(4) += -z * dy + y * dz;
-        MZ(5) += -y * dx + x * dy;
-        MZ(6) += z * dx - x * dz;
-	 }
+      xy += x*y;
+      xz += x*z;
+      yz += y*z;
+
+      // Sum up each part of MZ
+      MZ(1) += dx;
+      MZ(2) += dy;
+      MZ(3) += dz;
+      MZ(4) += -z * dy + y * dz;
+      MZ(5) += -y * dx + x * dy;
+      MZ(6) += z * dx - x * dz;
+    }
 	 // Now construct the symmetrical matrix MM
 	 MM(1,1) = MM(2,2) = MM(3,3) = m;
 	 MM(4,4) = ypz;
@@ -215,19 +215,19 @@ void lum6DEuler::covarianceEuler(Scan *first, Scan *second,
  */
 void lum6DEuler::FillGB3D(Graph *gr, Matrix* G, ColumnVector* B,vector<Scan *> allScans )
 {
-  int a, b;
-
-  Matrix Cab;
-  ColumnVector CDab;
-
+#ifdef _OPENMP
+#pragma omp parallel for
+#endif
   for(int i = 0; i < gr->getNrLinks(); i++){
-    a = gr->getLink(i,0) - 1;
-    b = gr->getLink(i,1) - 1;
+    int a = gr->getLink(i,0) - 1;
+    int b = gr->getLink(i,1) - 1;
     Scan *FirstScan  = allScans[gr->getLink(i,0)];
     Scan *SecondScan = allScans[gr->getLink(i,1)];
   
     //    cout << "i " << i << " a: " << a << " b: " << b << endl; 
 
+    Matrix Cab;
+    ColumnVector CDab;
     covarianceEuler(FirstScan, SecondScan, use_cache, (int)my_icp->get_rnd(), 
                     (int)max_dist_match2_LUM, &Cab, &CDab); 
 
@@ -257,7 +257,6 @@ void lum6DEuler::FillGB3D(Graph *gr, Matrix* G, ColumnVector* B,vector<Scan *> a
  */
 double lum6DEuler::doGraphSlam6D(Graph gr, vector <Scan *> allScans, int nrIt)
 {
-
 #ifdef WRITE_GRAPH_NET
   // for debug only:
   static int d = 0;
@@ -286,7 +285,6 @@ double lum6DEuler::doGraphSlam6D(Graph gr, vector <Scan *> allScans, int nrIt)
   double id[16];
   M4identity(id);
 
-  double sum_position_diff = DBL_MAX;
   double ret = DBL_MAX;
 
   for(int iteration = 0;
@@ -308,36 +306,32 @@ double lum6DEuler::doGraphSlam6D(Graph gr, vector <Scan *> allScans, int nrIt)
     FillGB3D(&gr, &G, &B, allScans);
     // ...and solve it
     ColumnVector X =  solveSparseCholesky(G, B);
-    
+
     //cout << "X done!" << endl;
 
-    sum_position_diff = 0.0;
+    double sum_position_diff = 0.0;
     
-    Matrix Ha;
-    ColumnVector result;
-    
-    double rPos[3];
-    double rPosTheta[3];
-    double xa, ya, za, ctx, stx, cty, sty, tx, ty;
-
     // Start with second Scan
     int loop_end = gr.getNrScans();
+#ifdef _OPENMP
+#pragma omp parallel for reduction(+:sum_position_diff)
+#endif
     for(int i = 1; i < loop_end; i++){
 	 
       // Now update the Poses
-      Ha = IdentityMatrix(6);      
+      Matrix Ha = IdentityMatrix(6);
       
-      xa = allScans[i]->get_rPos()[0];
-      ya = allScans[i]->get_rPos()[1];
-      za = allScans[i]->get_rPos()[2];
+      double xa = allScans[i]->get_rPos()[0];
+      double ya = allScans[i]->get_rPos()[1];
+      double za = allScans[i]->get_rPos()[2];
 
-      tx = allScans[i]->get_rPosTheta()[0];
-      ty = allScans[i]->get_rPosTheta()[1];
+      double tx = allScans[i]->get_rPosTheta()[0];
+      double ty = allScans[i]->get_rPosTheta()[1];
 
-      ctx = cos(tx);
-      stx = sin(tx);
-      cty = cos(ty);
-      sty = sin(ty);
+      double ctx = cos(tx);
+      double stx = sin(tx);
+      double cty = cos(ty);
+      double sty = sin(ty);
 
       // Fill Ha
       Ha.element(0,4) = -za*ctx+ya*stx; 
@@ -366,7 +360,7 @@ double lum6DEuler::doGraphSlam6D(Graph gr, vector <Scan *> allScans, int nrIt)
       ColumnVector Xtmp = X.Rows((i-1)*6+1,(i-1)*6+6);
 
       // Correct pose estimate
-      result = Ha * Xtmp;
+      ColumnVector result = Ha * Xtmp;
 
       if(!quiet) {
         cout << "Old pose estimate, Scan " << i << endl;
@@ -378,6 +372,9 @@ double lum6DEuler::doGraphSlam6D(Graph gr, vector <Scan *> allScans, int nrIt)
        << " tz: " << allScans[i]->get_rPosTheta()[2]
        << endl;
       }
+
+      double rPos[3];
+      double rPosTheta[3];
 
       // calculate the updated Pose
       for (int k = 0; k < 3; k++) {
@@ -391,7 +388,7 @@ double lum6DEuler::doGraphSlam6D(Graph gr, vector <Scan *> allScans, int nrIt)
 	 } else {
 	   allScans[i]->transformToEuler(rPos, rPosTheta, 2);
 	 }
-	 
+
       if(!quiet) {
         cout <<  "x: " << allScans[i]->get_rPos()[0]
        << " y: " << allScans[i]->get_rPos()[1]
@@ -400,12 +397,12 @@ double lum6DEuler::doGraphSlam6D(Graph gr, vector <Scan *> allScans, int nrIt)
        << " ty: " << allScans[i]->get_rPosTheta()[1]
        << " tz: " << allScans[i]->get_rPosTheta()[2] << endl << endl;
       }
-	 
+
       double x[3];
       x[0] = result.element(0);
       x[1] = result.element(1);
       x[2] = result.element(2);
-      sum_position_diff += Len(x);	  
+      sum_position_diff += Len(x);
     }
     cout << "Sum of Position differenzes = " << sum_position_diff << endl;
     ret = (sum_position_diff / (double)gr.getNrScans());

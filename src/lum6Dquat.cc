@@ -191,9 +191,10 @@ void lum6DQuat::covarianceQuat(Scan *first, Scan *second,
 	 ss =  ss / (2*m - 3);
 	 ss = 1.0 / ss;
 
-   if(CD)
-      *CD = MZ * ss; 
-    *C = MM * ss;
+	 if (CD) {
+	   *CD = MZ * ss;
+	 }
+	 *C = MM * ss;
 
   } else {
 
@@ -211,6 +212,7 @@ void lum6DQuat::covarianceQuat(Scan *first, Scan *second,
 
   }
 }
+
 /**
  * A function to fill the linear system G X = B.
  *
@@ -222,19 +224,19 @@ void lum6DQuat::covarianceQuat(Scan *first, Scan *second,
  */
 void lum6DQuat::FillGB3D(Graph *gr,Matrix* G, ColumnVector* B, vector<Scan *> allScans)
 {
-  int a, b;
-
-  Matrix Cab;
-  ColumnVector CDab;
-
+#ifdef _OPENMP
+#pragma omp parallel for
+#endif
   for(int i = 0; i < gr->getNrLinks(); i++){
-    a = gr->getLink(i,0) - 1;
-    b = gr->getLink(i,1) - 1;
+    int a = gr->getLink(i,0) - 1;
+    int b = gr->getLink(i,1) - 1;
     Scan *FirstScan  = allScans[gr->getLink(i,0)];
     Scan *SecondScan = allScans[gr->getLink(i,1)];
   
     //    cout << "***i " << i << " a: " << a << " b: " << b << endl; 
-    
+
+    Matrix Cab;
+    ColumnVector CDab;
     covarianceQuat(FirstScan, SecondScan, use_cache, (int)my_icp->get_rnd(), 
                     (int)max_dist_match2_LUM, &Cab, &CDab); 
 
@@ -252,7 +254,6 @@ void lum6DQuat::FillGB3D(Graph *gr,Matrix* G, ColumnVector* B, vector<Scan *> al
     }
   }
 }
-
 
 /**
  * This function is used to match a set of laser scans with any minimally
@@ -292,8 +293,7 @@ double lum6DQuat::doGraphSlam6D(Graph gr, vector <Scan *> allScans, int nrIt)
   // the IdentityMatrix to transform some Scans with
   double id[16];
   M4identity(id);
-  
-  double sum_position_diff = DBL_MAX;
+
   double ret = DBL_MAX;
 
   for(int iteration = 0;
@@ -316,49 +316,44 @@ double lum6DQuat::doGraphSlam6D(Graph gr, vector <Scan *> allScans, int nrIt)
     // ...and solve it
     ColumnVector X =  solveSparseCholesky(G, B);
 
-    cout << "X done!" << endl;
+    //cout << "X done!" << endl;
 
-    sum_position_diff = 0.0;
+    double sum_position_diff = 0.0;
     
-    Matrix Ha;
-    ColumnVector result;
-    
-    double rPos[3];
-    double rPosQuat[4];
-    double xa, ya, za, p, q, r, s;
-    double px, py, pz,  qx, qy, qz,  rx, ry, rz,  sx, sy, sz;
-
     // Start with second Scan
     int loop_end = gr.getNrScans();
+#ifdef _OPENMP
+#pragma omp parallel for reduction(+:sum_position_diff)
+#endif
     for(int i = 1; i < loop_end; i++){
 	 
       // Now update the Poses
-      Ha = IdentityMatrix(7); 
+      Matrix Ha = IdentityMatrix(7);
       
-      xa = allScans[i]->get_rPos()[0];
-      ya = allScans[i]->get_rPos()[1];
-      za = allScans[i]->get_rPos()[2];
+      double xa = allScans[i]->get_rPos()[0];
+      double ya = allScans[i]->get_rPos()[1];
+      double za = allScans[i]->get_rPos()[2];
 
-      p = allScans[i]->get_rPosQuat()[0];
-      q = allScans[i]->get_rPosQuat()[1]; 
-      r = allScans[i]->get_rPosQuat()[2];
-      s = allScans[i]->get_rPosQuat()[3]; 
+      double p = allScans[i]->get_rPosQuat()[0];
+      double q = allScans[i]->get_rPosQuat()[1]; 
+      double r = allScans[i]->get_rPosQuat()[2];
+      double s = allScans[i]->get_rPosQuat()[3]; 
      
-      px = p * xa;
-      py = p * ya;
-      pz = p * za;
+      double px = p * xa;
+      double py = p * ya;
+      double pz = p * za;
       
-      qx = q * xa;
-      qy = q * ya;
-      qz = q * za;
+      double qx = q * xa;
+      double qy = q * ya;
+      double qz = q * za;
       
-      rx = r * xa;
-      ry = r * ya;
-      rz = r * za;
+      double rx = r * xa;
+      double ry = r * ya;
+      double rz = r * za;
       
-      sx = s * xa;
-      sy = s * ya;
-      sz = s * za;
+      double sx = s * xa;
+      double sy = s * ya;
+      double sz = s * za;
       
       // Fill Ha
       Ha.element(3,3) = 2 * p; 
@@ -399,37 +394,41 @@ double lum6DQuat::doGraphSlam6D(Graph gr, vector <Scan *> allScans, int nrIt)
 
       // Invert it
       Ha = Ha.i();
-	 
-	 
+
       // Get pose estimate
       ColumnVector Xtmp = X.Rows((i-1)*7+1,(i-1)*7+7);
 
       // Correct pose estimate
-      result = Ha * Xtmp;
- 
-      cout << "Old pose estimate , Scan " << i << endl;
-      cout <<  "x: " << allScans[i]->get_rPos()[0]
-		 << " y: " << allScans[i]->get_rPos()[1]
-		 << " z: " << allScans[i]->get_rPos()[2]
-		 << " p: " << allScans[i]->get_rPosQuat()[0]
-		 << " q: " << allScans[i]->get_rPosQuat()[1]
-		 << " r: " << allScans[i]->get_rPosQuat()[2]
-		 << " s: " << allScans[i]->get_rPosQuat()[3]
-		 << endl;
+      ColumnVector result = Ha * Xtmp;
+
+      if(!quiet) {
+        cout << "Old pose estimate, Scan " << i << endl;
+        cout <<  "x: " << allScans[i]->get_rPos()[0]
+       << " y: " << allScans[i]->get_rPos()[1]
+       << " z: " << allScans[i]->get_rPos()[2]
+       << " p: " << allScans[i]->get_rPosQuat()[0]
+       << " q: " << allScans[i]->get_rPosQuat()[1]
+       << " r: " << allScans[i]->get_rPosQuat()[2]
+       << " s: " << allScans[i]->get_rPosQuat()[3]
+       << endl;
+      }
+
+      double rPos[3];
+      double rPosQuat[4];
 
       // calculate the updated Pose
       for (int k = 0; k < 3; k++) {
         rPos[k]  = allScans[i]->get_rPos()[k] - result.element(k);
       }
 
-	 double q[4];
-	 q[0] = result.element(3);
-	 q[1] = result.element(4);
-	 q[2] = result.element(5);
-	 q[3] = result.element(6);
+	 double qtmp[4];
+	 qtmp[0] = result.element(3);
+	 qtmp[1] = result.element(4);
+	 qtmp[2] = result.element(5);
+	 qtmp[3] = result.element(6);
 
       for (int k = 0; k < 4; k++) {
-        rPosQuat[k] = allScans[i]->get_rPosQuat()[k] - q[k];
+        rPosQuat[k] = allScans[i]->get_rPosQuat()[k] - qtmp[k];
       }
 	 
 	 Normalize4(rPosQuat);
@@ -441,22 +440,24 @@ double lum6DQuat::doGraphSlam6D(Graph gr, vector <Scan *> allScans, int nrIt)
 	   allScans[i]->transformToQuat(rPos, rPosQuat, 2);
 	 }
 
-      cout <<  "x: " << allScans[i]->get_rPos()[0]
-	   << " y: " << allScans[i]->get_rPos()[1]
-	   << " z: " << allScans[i]->get_rPos()[2]
-	   << " p: " << allScans[i]->get_rPosQuat()[0]
-	   << " q: " << allScans[i]->get_rPosQuat()[1]
-	   << " r: " << allScans[i]->get_rPosQuat()[2]
-	   << " s: " << allScans[i]->get_rPosQuat()[3]
-	   << endl << endl;
+      if(!quiet) {
+        cout <<  "x: " << allScans[i]->get_rPos()[0]
+       << " y: " << allScans[i]->get_rPos()[1]
+       << " z: " << allScans[i]->get_rPos()[2]
+       << " p: " << allScans[i]->get_rPosQuat()[0]
+       << " q: " << allScans[i]->get_rPosQuat()[1]
+       << " r: " << allScans[i]->get_rPosQuat()[2]
+       << " s: " << allScans[i]->get_rPosQuat()[3]
+       << endl << endl;
+      }
 
       double x[3];
       x[0] = result.element(0);
       x[1] = result.element(1);
       x[2] = result.element(2);
-      sum_position_diff += Len(x);	 
+      sum_position_diff += Len(x);
     }
-    cout << "Sum of Position differenzes = " << sum_position_diff << endl << endl;
+    cout << "Sum of Position differenzes = " << sum_position_diff << endl;
     ret = (sum_position_diff / (double)gr.getNrScans());
   }
   
