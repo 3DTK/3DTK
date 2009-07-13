@@ -116,8 +116,11 @@ void elch6Dslerp::close_loop(const vector <Scan *> &allScans, int first, int las
   M4inv(tmp1, tmp2);
   MMult(Pf0, tmp2, delta0);
 
+#ifdef _OPENMP
+#pragma omp for private(rPos, rPosQuat, tmp1, tmp2)
+#endif
   for(int i = 1; i < n; i++) {
-    if( i >= last - offset_last_start && i <= last + offset_last_end) {
+    if(i >= last - offset_last_start && i <= last + offset_last_end) {
       MMult(delta0, Pf0_inv, tmp1);
     } else {
       rPos[0] = deltaT[0] * weights[0][i];
