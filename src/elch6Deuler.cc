@@ -87,7 +87,7 @@ void elch6Deuler::close_loop(const vector <Scan *> &allScans, int first, int las
   delta[5] = allScans[last]->get_rPosTheta()[2] - delta[5];
 
   if(!quiet) {
-    cout << delta[0] << " " << delta[1] << " " << delta[2] << " " << delta[3] << " " << delta[4] << " " << delta[5] << endl;
+    cout << "Delta: " << delta[0] << " " << delta[1] << " " << delta[2] << " " << delta[3] << " " << delta[4] << " " << delta[5] << endl;
   }
 
   double rPos[3], rPosTheta[3];

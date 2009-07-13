@@ -121,7 +121,7 @@ void elch6DunitQuat::close_loop(const vector <Scan *> &allScans, int first, int 
     axisangle[2] = deltaQ[2];
     axisangle[3] = deltaQ[3];
     QuatToAA(axisangle);
-    cout << delta[0] << " " << delta[1] << " " << delta[2] << " " << axisangle[0] << " " << axisangle[1] << " " << axisangle[2] << " " << axisangle[3] << endl;
+    cout << "Delta: " << delta[0] << " " << delta[1] << " " << delta[2] << " " << axisangle[0] << " " << axisangle[1] << " " << axisangle[2] << " " << axisangle[3] << endl;
   }
 
   // restore poses after ICP matching

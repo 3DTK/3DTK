@@ -309,7 +309,7 @@ double lum6DEuler::doGraphSlam6D(Graph gr, vector <Scan *> allScans, int nrIt)
     // ...and solve it
     ColumnVector X =  solveSparseCholesky(G, B);
     
-    cout << "X done!" << endl;
+    //cout << "X done!" << endl;
 
     sum_position_diff = 0.0;
     
@@ -368,14 +368,16 @@ double lum6DEuler::doGraphSlam6D(Graph gr, vector <Scan *> allScans, int nrIt)
       // Correct pose estimate
       result = Ha * Xtmp;
 
-      cout << "Old pose estimate, Scan " << i << endl;
-      cout <<  "x: " << allScans[i]->get_rPos()[0]
-		 << " y: " << allScans[i]->get_rPos()[1]
-		 << " z: " << allScans[i]->get_rPos()[2]
-		 << " tx: " << allScans[i]->get_rPosTheta()[0]
-		 << " ty: " << allScans[i]->get_rPosTheta()[1]
-		 << " tz: " << allScans[i]->get_rPosTheta()[2]
-		 << endl;
+      if(!quiet) {
+        cout << "Old pose estimate, Scan " << i << endl;
+        cout <<  "x: " << allScans[i]->get_rPos()[0]
+       << " y: " << allScans[i]->get_rPos()[1]
+       << " z: " << allScans[i]->get_rPos()[2]
+       << " tx: " << allScans[i]->get_rPosTheta()[0]
+       << " ty: " << allScans[i]->get_rPosTheta()[1]
+       << " tz: " << allScans[i]->get_rPosTheta()[2]
+       << endl;
+      }
 
       // calculate the updated Pose
       for (int k = 0; k < 3; k++) {
@@ -390,12 +392,14 @@ double lum6DEuler::doGraphSlam6D(Graph gr, vector <Scan *> allScans, int nrIt)
 	   allScans[i]->transformToEuler(rPos, rPosTheta, 2);
 	 }
 	 
-      cout <<  "x: " << allScans[i]->get_rPos()[0]
-		 << " y: " << allScans[i]->get_rPos()[1]
-		 << " z: " << allScans[i]->get_rPos()[2]
-		 << " tx: " << allScans[i]->get_rPosTheta()[0]
-		 << " ty: " << allScans[i]->get_rPosTheta()[1]
-		 << " tz: " << allScans[i]->get_rPosTheta()[2] << endl << endl;
+      if(!quiet) {
+        cout <<  "x: " << allScans[i]->get_rPos()[0]
+       << " y: " << allScans[i]->get_rPos()[1]
+       << " z: " << allScans[i]->get_rPos()[2]
+       << " tx: " << allScans[i]->get_rPosTheta()[0]
+       << " ty: " << allScans[i]->get_rPosTheta()[1]
+       << " tz: " << allScans[i]->get_rPosTheta()[2] << endl << endl;
+      }
 	 
       double x[3];
       x[0] = result.element(0);
@@ -403,7 +407,7 @@ double lum6DEuler::doGraphSlam6D(Graph gr, vector <Scan *> allScans, int nrIt)
       x[2] = result.element(2);
       sum_position_diff += Len(x);	  
     }
-    cout << "Sum of Position differenzes = " << sum_position_diff << endl << endl;
+    cout << "Sum of Position differenzes = " << sum_position_diff << endl;
     ret = (sum_position_diff / (double)gr.getNrScans());
   }
   
