@@ -15,6 +15,7 @@ using std::list;
 using std::swap;
 
 #include <limits.h> //for old boost and new gcc
+using std::numeric_limits;
 #include <boost/graph/graphviz.hpp>
 #include <boost/graph/dijkstra_shortest_paths.hpp>
 #include <boost/graph/graph_traits.hpp>
