@@ -38,6 +38,7 @@ graphSlam6D::graphSlam6D(icp6Dminimizer *my_icp6Dminimizer,
 					bool eP, int anim, double epsilonICP, bool use_cache, double epsilonLUM)
 {
   this->use_cache = use_cache;
+  this->quiet = quiet;
   this->epsilonLUM = epsilonLUM;
   this->max_dist_match2_LUM = sqr(max_dist_match);
   if (max_dist_match_last > 0) {
