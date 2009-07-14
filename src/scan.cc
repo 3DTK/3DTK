@@ -34,11 +34,6 @@ vector <Scan *>  Scan::allScans;
 unsigned int     Scan::numberOfScans = 0;
 bool             Scan::outputFrames = false;
 string           Scan::dir;
-double           Scan::VALID[4]   = { 0, 1, 0, 1}; // green
-double           Scan::ICP[4]     = { 0, 0, 1, 1}; // blue
-double           Scan::LUM[4]     = { 1, 0, 0, 1}; // red 
-double           Scan::INVALID[4] = {-1, 0, 0, 0}; 
-double           Scan::START[4]   = { 1, 1, 0, 1}; // yellow
 vector<KDCache*> Scan::closest_cache;
 
 /**
@@ -401,11 +396,11 @@ void Scan::transformAll(const double alignxf[16])
  *         1  LUM transformation, all scans except last scan
  *         2  LUM transformation, last scan only
  */
-void Scan::transform(const double alignxf[16], const double colour[4], int islum)
+void Scan::transform(const double alignxf[16], const AlgoType type, int islum)
 {
   int end_meta = (int)meta_parts.size();
   for(int i = 0; i < end_meta; i++) {
-    meta_parts[i]->transform(alignxf, colour, -1);
+    meta_parts[i]->transform(alignxf, type, -1);
   }
   int end_loop = (int)points.size();
 #ifdef TRANSFORM_ALL_POINTS
@@ -461,12 +456,9 @@ void Scan::transform(const double alignxf[16], const double colour[4], int islum
   memcpy(dalignxf, tempxf, sizeof(transMat));
 
   // store transformation
-  bool inspace = true, in_meta;
+  bool in_meta;
   int  found = 0;
-  inspace = inspace && colour[0] >= 0.0 && colour[0] <= 1.0;
-  inspace = inspace && colour[1] >= 0.0 && colour[1] <= 1.0;
-  inspace = inspace && colour[2] >= 0.0 && colour[2] <= 1.0;
-  if (inspace) {
+  if (type != INVALID) {
 
     switch (islum) {
     case -1:
@@ -483,16 +475,15 @@ void Scan::transform(const double alignxf[16], const double colour[4], int islum
 		}
 	   }
 	   if (allScans[iter]->sout.good()) {
-		allScans[iter]->sout << allScans[iter]->transMat << endl;    
+		allScans[iter]->sout << allScans[iter]->transMat;
 		if (allScans[iter] == this || in_meta) {
 		  found = iter;
-		  allScans[iter]->sout << colour[0] << " " << colour[1] << " " << colour[2] << " " << colour[3]
-						   << endl;
+		  allScans[iter]->sout << type << endl;
 		} else {
 		  if (found == 0) {
-		    allScans[iter]->sout << "1 1 0 1" << endl;
+		    allScans[iter]->sout << ICPINACTIVE << endl;
 		  } else {
-		    allScans[iter]->sout << "-1 0 0 1" << endl;
+		    allScans[iter]->sout << INVALID << endl;
 		  }
 		}
 	   } else {
@@ -503,8 +494,7 @@ void Scan::transform(const double alignxf[16], const double colour[4], int islum
 	 break;
     case 1:
 	 if (sout.good()) {
-	   sout << transMat << endl
-	        << colour[0] << " " << colour[1] << " " << colour[2] << " " << colour[3] << endl;
+	   sout << transMat << type << endl;
 	 } else {
 	   cerr << "ERROR: Cannot store frames." << endl;
 	   exit(1);
@@ -516,17 +506,14 @@ void Scan::transform(const double alignxf[16], const double colour[4], int islum
 	   if (allScans[iter] == this) {
 		found = iter;
 		if (sout.good()) {
-		  sout << transMat << endl
-		       << colour[0] << " " << colour[1] << " " << colour[2] << " " << colour[3] << endl;
+		  sout << transMat << type << endl;
 		} else {
 		  cerr << "ERROR: Cannot store frames." << endl;
 		  exit(1);
 		}
 		
 		if (allScans[0]->sout.good()) {
-		  allScans[0]->sout << allScans[0]->transMat << endl
-		                    << colour[0] << " " << colour[1] << " " << colour[2] << " " << colour[3]
-		                    << endl;  
+		  allScans[0]->sout << allScans[0]->transMat << type << endl;
 		} else {
 		  cerr << "ERROR: Cannot store frames." << endl;
 		  exit(1);
@@ -534,8 +521,7 @@ void Scan::transform(const double alignxf[16], const double colour[4], int islum
 		continue;
 	   }
 	   if (found != 0) {
-		allScans[iter]->sout << allScans[iter]->transMat << endl
-						 << "-1 0 0 1" << endl;
+		allScans[iter]->sout << allScans[iter]->transMat << INVALID << endl;
 	   }
 	 }
 	 break;
@@ -563,12 +549,12 @@ void Scan::transform(const double alignxf[16], const double colour[4], int islum
  *         2  LUM transformation, last scan only
  */
 void Scan::transform(const double alignQuat[4], const double alignt[3],
-				 const double colour[4], int islum)
+				 const AlgoType type, int islum)
 {
 
   double alignxf[16];
   QuatToMatrix4(alignQuat, alignt, alignxf);
-  transform(alignxf, colour, islum);
+  transform(alignxf, type, islum);
 }
 
 
@@ -580,14 +566,14 @@ void Scan::transform(const double alignQuat[4], const double alignt[3],
  * @param rPT Orientation as Euler angle to which this scan will be set
  * @param islum Is the transformation part of LUM?
  */
-void Scan::transformToEuler(double rP[3], double rPT[3], int islum)
+void Scan::transformToEuler(double rP[3], double rPT[3], const AlgoType type, int islum)
 {
   double tinv[16];
   double alignxf[16];
   M4inv(transMat, tinv);
   transform(tinv, INVALID);
   EulerToMatrix4(rP, rPT, alignxf);
-  transform(alignxf, LUM, islum);
+  transform(alignxf, type, islum);
 }
 
 /**
@@ -598,14 +584,14 @@ void Scan::transformToEuler(double rP[3], double rPT[3], int islum)
  * @param rPQ Orientation as Quaternion to which this scan will be set
  * @param islum Is the transformation part of LUM?
  */
-void Scan::transformToQuat(double rP[3], double rPQ[4], int islum)
+void Scan::transformToQuat(double rP[3], double rPQ[4], const AlgoType type, int islum)
 {
   double tinv[16];
   double alignxf[16];
   M4inv(transMat, tinv);
   transform(tinv, INVALID);
   QuatToMatrix4(rPQ, rP, alignxf);
-  transform(alignxf, LUM, islum);
+  transform(alignxf, type, islum);
 }
 
 

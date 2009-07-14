@@ -131,7 +131,7 @@ void elch6Dslerp::close_loop(const vector <Scan *> &allScans, int first, int las
       MMult(delta0, tmp1, tmp2);
       MMult(tmp2, Pf0_inv, tmp1);
     }
-    allScans[i]->transform(tmp1, Scan::LUM, i == n-1 ? 2 : 1);
+    allScans[i]->transform(tmp1, Scan::ELCH, i == n-1 ? 2 : 1);
   }
 
   for(int i = 0; i < 4; i++) {

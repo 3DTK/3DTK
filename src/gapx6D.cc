@@ -18,9 +18,6 @@ using std::flush;
 
 using std::ofstream;
 
-double gapx6D::LUM[4] = { 1, 0, 0, 1}; // red 
-
-
 /**
  * Constructor
  *
@@ -473,9 +470,9 @@ double gapx6D::doGraphSlam6D(Graph gr, vector <Scan *> allScans, int nrIt)
 		   << endl;
 	   
 	   if (i < loop_end - 1) {
-		allScans[i]->transform(alignxf, LUM, 1);
+		allScans[i]->transform(alignxf, Scan::LUM, 1);
 	   } else {
-		allScans[i]->transform(alignxf, LUM, 2);
+		allScans[i]->transform(alignxf, Scan::LUM, 2);
 	   }
 	   
 	   cout <<  "x: " << allScans[i]->get_rPos()[0]

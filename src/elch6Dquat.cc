@@ -109,7 +109,7 @@ void elch6Dquat::close_loop(const vector <Scan *> &allScans, int first, int last
     rPosQuat[3] = allScans[i]->get_rPosQuat()[3] + delta[6] * (weights[6][i] - weights[6][0]);
 
     Normalize4(rPosQuat);
-    allScans[i]->transformToQuat(rPos, rPosQuat, i == n-1 ? 2 : 1);
+    allScans[i]->transformToQuat(rPos, rPosQuat, Scan::ELCH, i == n-1 ? 2 : 1);
   }
 
   for(int i = 0; i < 7; i++) {
