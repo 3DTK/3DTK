@@ -99,7 +99,7 @@ void elch6Deuler::close_loop(const vector <Scan *> &allScans, int first, int las
     rPosTheta[1] = allScans[i]->get_rPosTheta()[1] + delta[4] * (weights[4][i] - weights[4][0]);
     rPosTheta[2] = allScans[i]->get_rPosTheta()[2] + delta[5] * (weights[5][i] - weights[5][0]);
 
-    allScans[i]->transformToEuler(rPos, rPosTheta, i == n-1 ? 2 : 1);
+    allScans[i]->transformToEuler(rPos, rPosTheta, Scan::ELCH, i == n-1 ? 2 : 1);
   }
 
   for(int i = 0; i < 6; i++) {

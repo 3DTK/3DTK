@@ -70,14 +70,18 @@ public:
   void transformAll(const double alignxf[16]);
   void transformAll(const double alignQuat[4], const double alignt[3]);
  
+  enum AlgoType {
+    INVALID, ICP, ICPINACTIVE, LUM, ELCH
+  };
+
   void transform(const double alignxf[16],
-			  const double colour[4], int islum = 0);
+			  const AlgoType type, int islum = 0);
   void transform(const double alignQuat[4], const double alignt[3],
-			  const double colour[4], int islum = 0);
+			  const AlgoType type, int islum = 0);
   void transformToEuler(double rP[3], double rPT[3],
-				    int islum = 0);
+				    const AlgoType type, int islum = 0);
   void transformToQuat(double rP[3], double rPQ[4],
-				   int islum = 0);
+				   const AlgoType type, int islum = 0);
   
   void calcReducedPoints(double voxelSize);
   
@@ -128,28 +132,6 @@ public:
   static void readScans(reader_type type,
 				    int start, int end, string &dir, int maxDist, int minDist,
 				    bool openFileForWriting = false);  
-
-  /** 
-   *  A valid colour to be displayed
-   */
-  static double VALID[4];// = {0,1,0,1};
-  /**
-   *	This is how LUM changes are to be shown
-   */
-  static double LUM[4];// = {1,0,0,1};
-  /**
-   * This is how ICP changes are to be shown
-   */
-  static double ICP[4];// = {0,0,1,1};
-  /**
-   * This colour will not be displayed
-   */
-  static double INVALID[4];// = {-1,0,0,0};
-  /**
-   * This is how the starting poses are to be shown
-   */
-  static double START[4];
-
   inline const vector <Point>* get_points() const;
   inline const double** get_points_red() const;
 

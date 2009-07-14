@@ -28,24 +28,18 @@ using std::exception;
 void read_Frame(string frameFile, ofstream &out_stream)
 {
   double transMat[16];
-  double colourMat[4];
+  int type;
   double rPos[3];
   double rPosTheta[3];
   ifstream frame(frameFile.c_str());
 
   while(frame) {
     try {
-      frame >> transMat;
-      for(int i = 0; i < 4; i++) {
-        frame >> colourMat[i];
-      }
-      //cout << "trans:" << transMat << endl << colourMat[0] << " " << colourMat[1] << " " << colourMat[2] << " " << colourMat[3] << endl;
+      frame >> transMat >> type;
     }
     catch(const exception &e) {
       break;
     }
-    //if(colourMat[0] == 0 && colourMat[1] == 0) {
-    //}
   }
   Matrix4ToEuler(transMat, rPosTheta, rPos);
   //out_stream << rPos[0] << " " << rPos[1] << " " << rPos[2] << " " << rPosTheta[0] << " " << rPosTheta[1] << " " << rPosTheta[2] << endl;
