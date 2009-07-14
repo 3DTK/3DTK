@@ -8,6 +8,7 @@
 #include <stdexcept>
 using std::exception;
 
+#include "scan.h"
 #include "convergence.h"
 
 /**
@@ -98,21 +99,14 @@ int parseArgs(int argc,char **argv, string &dir, int &frame, int &type)
 void getLocalConvergence(ifstream *inputFile, ofstream *outputFile)
 {
   double transMat[16];
-  double temp;
-  double first, second;
-  first = second = -2;
+  int type;
   double rPos[3];
   double rPosTheta[3];
   cout<<"starting local convergence"<<endl;
   while ((*inputFile).good()) {
     try {
-      (*inputFile) >> transMat;
-      (*inputFile) >> first;
-      (*inputFile) >> second;
-      for (int i = 0; i < 2 ; i++) {
-        (*inputFile) >> temp;
-      }
-      if(first == 0 && second == 0)
+      (*inputFile) >> transMat >> type;
+      if(type == Scan::ICP)
       {
         Matrix4ToEuler(transMat, rPosTheta, rPos);
         (*outputFile)<<rPos[0]<<" "<<rPos[1]<<" "<<rPos[2]<<endl;
@@ -127,6 +121,7 @@ void getLocalConvergence(ifstream *inputFile, ofstream *outputFile)
 void getGlobalConvergence(ifstream *inputFile, ofstream *outputFile)
 {
   double transMat[16];
+  int type;
   double rPosOrg[3], rPosThetaOrg[3];
   double quatOrg[4];
   //108
@@ -140,8 +135,6 @@ void getGlobalConvergence(ifstream *inputFile, ofstream *outputFile)
   Matrix4ToEuler(tmp, rPosThetaOrg, rPosOrg);
   Matrix4ToQuat(tmp, quatOrg);
   double quat[4];
-  double temp;
-  double first, second;
   double rPos[3];
   double rPosTheta[3];
   bool initial = true;
@@ -149,15 +142,10 @@ void getGlobalConvergence(ifstream *inputFile, ofstream *outputFile)
   cout<<"starting global convergence"<<endl;
   while ((*inputFile).good()) {
     try {
-      (*inputFile) >> transMat;
-      (*inputFile) >> first;
-      (*inputFile) >> second;
-      for (int i = 0; i < 2 ; i++) {
-        (*inputFile) >> temp;
-      }
+      (*inputFile) >> transMat >> type;
       Matrix4ToEuler(transMat, rPosTheta, rPos);
       Matrix4ToQuat(transMat, quat);
-      if((initial || first != -1) && second != 1)
+      if((initial || type != Scan::INVALID) && type != Scan::ICPINACTIVE)
       {
         initial = false;
         (*outputFile) << sqrt(Dist2(rPosOrg, rPos))/100.0 << " " << quat_dist(quatOrg, quat) << endl;
@@ -172,21 +160,15 @@ void getGlobalConvergence(ifstream *inputFile, ofstream *outputFile)
 void getGlobalConvergence_org(ifstream *inputFile, ofstream *outputFile)
 {
   double transMat[16];
-  double temp;
+  int type;
   bool lumYetFound = false;
-  double first, second;
   double rPos[3];
   double rPosTheta[3];
   cout<<"starting global convergence"<<endl;
   while ((*inputFile).good()) {
     try {
-      (*inputFile) >> transMat;
-      (*inputFile) >> first;
-      (*inputFile) >> second;
-      for (int i = 0; i < 2 ; i++) {
-        (*inputFile) >> temp;
-      }
-      if((int)first == 1 && (int)second == 0)
+      (*inputFile) >> transMat >> type;
+      if(type == Scan::LUM)
       {
         lumYetFound = true;
         Matrix4ToEuler(transMat, rPosTheta, rPos);

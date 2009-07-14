@@ -435,9 +435,9 @@ double lum6DQuat::doGraphSlam6D(Graph gr, vector <Scan *> allScans, int nrIt)
 	 
       // Update the Pose
       if (i != gr.getNrScans() - 1) {
-	   allScans[i]->transformToQuat(rPos, rPosQuat, 1);
+	   allScans[i]->transformToQuat(rPos, rPosQuat, Scan::LUM, 1);
 	 } else {
-	   allScans[i]->transformToQuat(rPos, rPosQuat, 2);
+	   allScans[i]->transformToQuat(rPos, rPosQuat, Scan::LUM, 2);
 	 }
 
       if(!quiet) {

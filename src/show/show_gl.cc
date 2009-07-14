@@ -1,4 +1,27 @@
 /**
+ * color selector for animation
+ */
+void selectColors(Scan::AlgoType type) {
+  switch(type) {
+    case Scan::ICP:
+      glColor4d(0.85, 0.30,0.023, 1.0);
+      break;
+    case Scan::ICPINACTIVE:
+      glColor4d(0.78, 0.63,0.57, 1.0);	
+      break;
+    case Scan::LUM:
+      glColor4d(1.0, 0.0,0.0, 1.0);
+      break;
+    case Scan::ELCH:
+      glColor4d(0.0, 1.0,0.0, 1.0);
+      break;
+    default:
+      glColor4d(0.30, 0.35,0.59, 1.0);
+      break;
+  }
+}
+
+/**
  * Displays all data (i.e., points) that are to be displayed
  * @param mode spezification for drawing to screen or in selection mode
  */
@@ -9,24 +32,8 @@ void DrawPoints(GLenum mode)
 
     for(int iterator = (int)vvertexArrayList.size()-1; iterator >= 0; iterator--) {
 
-	 if (MetaColour[iterator][frameNr][0] < 0) continue;
-
-	 // red
-	 int active = 0;
-	 // blue?
-	 if (MetaColour[iterator][frameNr][2] > 0.9) { 
-	   active = 1;
-	 }
-	 // yellow
-	 if ((MetaColour[iterator][frameNr][0] > 0.9) && ((MetaColour[iterator][frameNr][1] > 0.9))) { 
-	   active = 2;
-	 }
-	   
-	 glColor4d(MetaColour[iterator][frameNr][0],
-			 MetaColour[iterator][frameNr][1],
-			 MetaColour[iterator][frameNr][2],
-			 MetaColour[iterator][frameNr][3]);
-	 
+	 if (MetaAlgoType[iterator][frameNr] == Scan::INVALID) continue;
+   selectColors(MetaAlgoType[iterator][frameNr]);	 
 	 glPushMatrix();
 	 glMultMatrixd(MetaMatrix[iterator][frameNr]);
 
@@ -35,17 +42,7 @@ void DrawPoints(GLenum mode)
 	 for (unsigned int jterator = 0; jterator < vvertexArrayList[iterator].size(); jterator++) {
 
 	   if ((jterator == 0) && vvertexArrayList[iterator][jterator]->numPointsToRender > 0) {
-		switch (active) {
-		case 0:
-		  glColor4d(0.30, 0.35,0.59, 1.0);	
-		  break;
-		case 1:
-		  glColor4d(0.85, 0.30,0.023, 1.0);
-		  break;
-		case 2:
-		  glColor4d(0.78, 0.63,0.57, 1.0);	
-		  break;
-		}
+       selectColors(MetaAlgoType[iterator][frameNr]);
 	   }
 	   
 	   if (vvertexArrayList[iterator][jterator]->numPointsToRender > 0) {
@@ -310,9 +307,7 @@ void DisplayItFunc(GLenum mode)
     glBegin(GL_LINE_STRIP);
     for(unsigned int i = 0; i<Scan::allScans.size(); i++){
       if(frameNr > -1 && frameNr < (int)MetaMatrix[1].size()) {
-        if(MetaColour[i][frameNr][0] < 0) {
-          continue;
-        }
+	      if (MetaAlgoType[i][frameNr] == Scan::INVALID) continue;
         test = MetaMatrix[i][frameNr];
       } else {
         test = MetaMatrix[i].back();
@@ -1299,9 +1294,9 @@ int calcFrameNo(){
   //any frame with colour code starting with
   // -1 is invalid
   
-  while(MetaColour[1][counter][0]<0){   
+  while(MetaAlgoType[1][counter] == Scan::INVALID){   
     counter++;                 //increment the frame counter
-   //  cout << "val is: " <<  MetaColour[1][counter][0] << endl;
+   //  cout << "val is: " << MetaAlgoType[iterator][frameNr] << endl;
 //     cout << "counter is: " << counter << endl;
   }
 

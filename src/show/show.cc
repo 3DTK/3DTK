@@ -124,9 +124,9 @@ int scanNr;
 vector < vector <double*> > MetaMatrix;
 
 /**
- * Storing of colours for all frames
+ * Storing of AlgoType for all frames
  */
-vector < vector <double*> > MetaColour;
+vector < vector <Scan::AlgoType> > MetaAlgoType;
 
 /**
  * Window position
@@ -325,20 +325,18 @@ void readFrames(string dir, int start, int end, bool readInitial)
     
     cout << "Reading Frames for 3D Scan " << frameFileName << "...";
     vector <double*> Matrices;
-    vector <double*> ColMatrices;
+    vector <Scan::AlgoType> algoTypes;
     int frameCounter = 0;
     
     while (frame_in.good()) {
 	 frameCounter++;	 
 	 double *transMatOpenGL = new double[16];
-	 double *colourMat = new double[4];
+   int type;
+   Scan::AlgoType algoType;
 	 try {
 	   double transMat[16];
-	   frame_in >> transMat;
-
-	   for (int i = 0; i < 4 ; i++) {
-		frame_in >> colourMat[i];
-	   }
+	   frame_in >> transMat >> type;
+     algoType = (Scan::AlgoType)type;
 
 	   // convert to OpenGL coordinate system
 	   double mirror[16];
@@ -360,17 +358,17 @@ void readFrames(string dir, int start, int end, bool readInitial)
 	 if (frameCounter > 1)
 	 {
 	   Matrices.push_back(transMatOpenGL);
-	   ColMatrices.push_back(colourMat);
+	   algoTypes.push_back(algoType);
 	 }
     }
-    MetaColour.push_back(ColMatrices);
+    MetaAlgoType.push_back(algoTypes);
     
     MetaMatrix.push_back(Matrices);
 
     /////////////////!!!!!!!!!!!!!!!!!!!!!!!!
     //@@@
 //     if (fileCounter == start+1) {
-//   	 MetaColour.push_back(ColMatrices);
+//   	 MetaAlgoType.push_back(algoTypes);
 //   	 MetaMatrix.push_back(Matrices);
 //     }
     

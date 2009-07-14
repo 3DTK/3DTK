@@ -384,9 +384,9 @@ double lum6DEuler::doGraphSlam6D(Graph gr, vector <Scan *> allScans, int nrIt)
       
       // Update the Pose
       if (i != gr.getNrScans() - 1) {
-	   allScans[i]->transformToEuler(rPos, rPosTheta, 1);
+	   allScans[i]->transformToEuler(rPos, rPosTheta, Scan::LUM, 1);
 	 } else {
-	   allScans[i]->transformToEuler(rPos, rPosTheta, 2);
+	   allScans[i]->transformToEuler(rPos, rPosTheta, Scan::LUM, 2);
 	 }
 
       if(!quiet) {

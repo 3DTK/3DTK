@@ -85,17 +85,14 @@ void scanmanager::readFrames(string dir, int start, int end,
 	{
 	    frameCounter++;	 
 	    double *transMatOpenGL = new double[16];
+      int type;
 //	    double *colourMat = new double[4];
-	    double colourMat[4];
+	    //double colourMat[4];
 	    
 	    try
 	    {
 		double transMat[16];
-		frame_in >> transMat;
-		
-		for (int i = 0; i < 4 ; i++) {
-		    frame_in >> colourMat[i];
-		}
+		frame_in >> transMat >> type;
 		
 		// convert to OpenGL coordinate system
 		double mirror[16];
@@ -118,7 +115,7 @@ void scanmanager::readFrames(string dir, int start, int end,
 	    if (frameCounter > 1)
 	    {
 		Matrices.push_back(transMatOpenGL);
-		ColMatrices.push_back(colourMat);
+		//ColMatrices.push_back(colourMat);
 	    }
 	}
 	//MetaColour.push_back(ColMatrices);

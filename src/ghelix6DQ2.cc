@@ -16,9 +16,6 @@ using std::flush;
 
 using std::ofstream;
 
-double ghelix6DQ2::LUM[4] = { 1, 0, 0, 1}; // red 
-
-
 /**
  * Constructor
  *
@@ -412,9 +409,9 @@ double ghelix6DQ2::doGraphSlam6D(Graph gr, vector <Scan *> allScans, int nrIt)
 		 << endl;
 	 
       if (i < loop_end - 1) {
-        allScans[i]->transform(alignxfLum, LUM, 1);
+        allScans[i]->transform(alignxfLum, Scan::LUM, 1);
       } else {
-        allScans[i]->transform(alignxfLum, LUM, 2);
+        allScans[i]->transform(alignxfLum, Scan::LUM, 2);
       }
 
 	 cout <<  "x: " << allScans[i]->get_rPos()[0]

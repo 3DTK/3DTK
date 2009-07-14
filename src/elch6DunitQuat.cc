@@ -125,9 +125,9 @@ void elch6DunitQuat::close_loop(const vector <Scan *> &allScans, int first, int 
   }
 
   // restore poses after ICP matching
-  allScans[last]->transformToQuat(pOld1, &pOld1[3], -1);
-  allScans[last - 1]->transformToQuat(pOld2, &pOld2[3], -1);
-  allScans[last - 2]->transformToQuat(pOld3, &pOld3[3], -1);
+  allScans[last]->transformToQuat(pOld1, &pOld1[3], Scan::INVALID, -1);
+  allScans[last - 1]->transformToQuat(pOld2, &pOld2[3], Scan::INVALID, -1);
+  allScans[last - 2]->transformToQuat(pOld3, &pOld3[3], Scan::INVALID, -1);
 
   //compute inverse rotation of Scan 0
   double scan0Pdelta[4], scan0Q[4];
@@ -153,7 +153,7 @@ void elch6DunitQuat::close_loop(const vector <Scan *> &allScans, int first, int 
     QMult(scan0Pdelta, tmpquat, rPosQuat);
 
     Normalize4(rPosQuat);
-    allScans[i]->transformToQuat(rPos, rPosQuat, i == n-1 ? 2 : 1);
+    allScans[i]->transformToQuat(rPos, rPosQuat, Scan::ELCH, i == n-1 ? 2 : 1);
   }
 
   for(int i = 0; i < 4; i++) {

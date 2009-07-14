@@ -146,11 +146,10 @@ int main(int argc, char **argv)
 	 exit(-1);
     }
     double transMat[16];
-    double color[4];
+    int type;
     while (frame_in.good()) {
 	 try {
-	   frame_in >> transMat;
-	   frame_in >> color[0] >> color[1] >> color[2] >> color[3];
+	   frame_in >> transMat >> type;
 	 } catch (const exception &e) {   
 	   break;
 	 }
