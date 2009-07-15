@@ -72,7 +72,7 @@ int parseArgs(int argc,char **argv, string &dir, int &frame, int &type)
 	   break;
 	 case 'z':
 	   type = atoi(optarg);
-	   if (type > 1 || type < 0) { cerr << "Error: only global (0) or local (1) available.\n"; exit(1); }
+	   if (type > 2 || type < 0) { cerr << "Error: only global (0) or local (1) available.\n"; exit(1); }
 	   break;
 	 case '?':
 	   usage(argv[0]);
@@ -118,38 +118,38 @@ void getLocalConvergence(ifstream *inputFile, ofstream *outputFile)
   }
 }
 
-void getGlobalConvergence(ifstream *inputFile, ofstream *outputFile)
+void getAllConvergence(ifstream *inputFile, ofstream *outputFile, int FrameNr)
 {
   double transMat[16];
   int type;
   double rPosOrg[3], rPosThetaOrg[3];
   double quatOrg[4];
   //108
-  //double tmp[16] = {-0.125888, 0.0122898, -0.991968, 0, 0.00384827, 0.999922, 0.0118999, 0, 0.992037, -0.00231931, -0.125925, 0, -1702.16, 34.255, 285.929, 1};
+  //double truth[16] = {-0.125888, 0.0122898, -0.991968, 0, 0.00384827, 0.999922, 0.0118999, 0, 0.992037, -0.00231931, -0.125925, 0, -1702.16, 34.255, 285.929, 1};
   //344
-  //double tmp[16] = {-0.548304, -0.00375733, 0.83627, 0, 0.0294523, 0.999283, 0.0238003, 0, -0.83576, 0.0376799, -0.5478, 0, 691.717, 55.8939, 216.401, 1};
+  //double truth[16] = {-0.548304, -0.00375733, 0.83627, 0, 0.0294523, 0.999283, 0.0238003, 0, -0.83576, 0.0376799, -0.5478, 0, 691.717, 55.8939, 216.401, 1};
   //556
-  double tmp[16] = {0.996696, 0.0336843, -0.073908, 0, -0.0325397, 0.999332, 0.016638, 0, 0.0744191, -0.0141781, 0.997126, 0, 6211.62, 364.291, -3468.65, 1};
+  double truth[16] = {0.996696, 0.0336843, -0.073908, 0, -0.0325397, 0.999332, 0.016638, 0, 0.0744191, -0.0141781, 0.997126, 0, 6211.62, 364.291, -3468.65, 1};
   //708
-  //double tmp[16] = {0.000564156, -0.0283691, -0.999597, 0, 0.00348951, 0.999591, -0.0283669, 0, 0.999994, -0.0034721, 0.00066292, 0, 7591.08, -31.354, 6938.24, 1};
-  Matrix4ToEuler(tmp, rPosThetaOrg, rPosOrg);
-  Matrix4ToQuat(tmp, quatOrg);
+  //double truth[16] = {0.000564156, -0.0283691, -0.999597, 0, 0.00348951, 0.999591, -0.0283669, 0, 0.999994, -0.0034721, 0.00066292, 0, 7591.08, -31.354, 6938.24, 1};
+  Matrix4ToEuler(truth, rPosThetaOrg, rPosOrg);
+  Matrix4ToQuat(truth, quatOrg);
   double quat[4];
   double rPos[3];
   double rPosTheta[3];
   bool initial = true;
 
-  cout<<"starting global convergence"<<endl;
+  cout<<"starting all convergence"<<endl;
   while ((*inputFile).good()) {
     try {
       (*inputFile) >> transMat >> type;
       Matrix4ToEuler(transMat, rPosTheta, rPos);
       Matrix4ToQuat(transMat, quat);
-      if((initial || type != Scan::INVALID) && type != Scan::ICPINACTIVE)
-      {
+      if((initial || type != Scan::INVALID) && type != Scan::ICPINACTIVE) {
         initial = false;
-        (*outputFile) << sqrt(Dist2(rPosOrg, rPos))/100.0 << " " << quat_dist(quatOrg, quat) << endl;
+        (*outputFile) << sqrt(Dist2(rPosOrg, rPos))/100.0 << " " << quat_dist(quatOrg, quat) << " " << type << endl;
       }
+      //(*outputFile) << sqrt(Dist2(rPosOrg, rPos))/100.0 << " " << quat_dist(quatOrg, quat) << " " << type << endl;
     }
     catch (const exception &e) {   
       break;
@@ -157,7 +157,7 @@ void getGlobalConvergence(ifstream *inputFile, ofstream *outputFile)
   }
 }
 
-void getGlobalConvergence_org(ifstream *inputFile, ofstream *outputFile)
+void getGlobalConvergence(ifstream *inputFile, ofstream *outputFile)
 {
   double transMat[16];
   int type;
@@ -216,6 +216,9 @@ void readFrames(string dir, int frameNr, int convType)
       } else if (convType == CONV_GLOBAL)
       {
         getGlobalConvergence(&frame_in, &xyz_out);
+      } else if (convType == CONV_ALL)
+      {
+        getAllConvergence(&frame_in, &xyz_out, frameNr);
       }
     
     frame_in.close();
