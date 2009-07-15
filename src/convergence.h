@@ -42,6 +42,7 @@ using std::string;
 
 #define CONV_LOCAL 1
 #define CONV_GLOBAL 0
+#define CONV_ALL 2
 
 #define BUFSIZE 1048576 ///< defining the buffer size
 
@@ -53,6 +54,7 @@ void usage(char * prog);
 
 void getGlobalConvergence(ifstream *inputFile, ofstream *outputFile);
 void getLocalConvergence(ifstream *inputFile, ofstream *outputFile);
+void getAllConvergence(ifstream *inputFile, ofstream *outputFile, int FrameNr);
 
 
 
