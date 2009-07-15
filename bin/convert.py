@@ -16,6 +16,7 @@ def main():
       frame = file(fullpath).read()
       frame = frame.replace('\n\n', '\n')
       frame = frame.replace('\n-1 0 0 1\n', '0\n')
+      frame = frame.replace('\n-1 1 0 1\n', '0\n')
       frame = frame.replace('\n0 0 1 1\n', '1\n')
       frame = frame.replace('\n1 1 0 1\n', '2\n')
       frame = frame.replace('\n1 0 0 1\n', '3\n')
