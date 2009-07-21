@@ -763,7 +763,7 @@ static inline void Matrix4ToQuat(const double *mat, double *quat, double *t = 0)
   quat[2] = -Y;
   quat[3] = -Z;
   
-  //  Normalize4(quat);
+  Normalize4(quat);
   if (t != 0) {
     t[0] = mat[12];
     t[1] = mat[13];
