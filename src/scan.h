@@ -39,7 +39,7 @@ using std::vector;
 
 
 enum reader_type {
-  UOS, UOS_MAP, OLD, RTS, RTS_MAP, RIEGL, IFP, ZAHN, PLY, WRL, XYZ, ZUF, IAIS, FRONT
+  UOS, UOS_MAP, UOS_FRAMES, OLD, RTS, RTS_MAP, RIEGL, IFP, ZAHN, PLY, WRL, XYZ, ZUF, IAIS, FRONT
 };
 
 // just some prototypes
