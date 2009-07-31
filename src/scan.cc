@@ -1235,6 +1235,9 @@ void Scan::readScans(reader_type type,
   case UOS_MAP:
     lib_string = "./bin/scan_io_uos_map";
     break;
+  case UOS_FRAMES:
+    lib_string = "./bin/scan_io_uos_frames";
+    break;
   case OLD:
     lib_string = "./bin/scan_io_old";
     break;
