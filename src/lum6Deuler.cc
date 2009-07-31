@@ -51,15 +51,15 @@ lum6DEuler::~lum6DEuler()
 
 
 /**
- * This function calculates the covariances Cij and the Vector Cij*Dij for
- * all links, using the given point pairs.
+ * This function calculates the inverse covariances Cij and the Vector Cij*Dij for
+ * two scans by finding pointpairs.
  * 
  * @param first pointer to the first scan of the link
  * @param second pointer to the second scan of the link
  * @param use_cache shall we use the cache?
  * @param rnd shall we use randomization for computing the point pairs?
  * @param max_dist_match2 maximal distance allowed for point pairs
- * @param C pointer to the covariance matrix Cij
+ * @param C pointer to the inverse of the covariance matrix Cij
  * @param CD pointer to the vector Cij*Dij
  */
 void lum6DEuler::covarianceEuler(Scan *first, Scan *second, 
