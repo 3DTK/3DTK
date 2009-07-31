@@ -461,7 +461,7 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &rand,
  * @param mdml maximal distance match for global SLAM
  * @param mdmll maximal distance match for global SLAM after all scans ar matched
  */
-void matchGraph6Dautomatic(double cldist, int loopsize, vector <Scan *> allScans, icp6D *my_icp6D, bool meta_icp, bool use_cache, loopSlam6D *my_loopSlam6D, graphSlam6D *my_graphSlam6D, int nrIt, double epsilonSLAM, double mdml, double mdmll, double graphDist)
+void matchGraph6Dautomatic(double cldist, int loopsize, vector <Scan *> allScans, icp6D *my_icp6D, bool meta_icp, bool use_cache, loopSlam6D *my_loopSlam6D, graphSlam6D *my_graphSlam6D, int nrIt, double epsilonSLAM, double mdml, double mdmll, double graphDist, bool &eP, reader_type type)
 {
   double cldist2 = sqr(cldist);
 
@@ -484,7 +484,11 @@ void matchGraph6Dautomatic(double cldist, int loopsize, vector <Scan *> allScans
 
     add_edge(i-1, i, g);
 
-    allScans[i]->mergeCoordinatesWithRoboterPosition(allScans[i-1]);
+    if(eP) {
+      allScans[i]->mergeCoordinatesWithRoboterPosition(allScans[i-1]);
+    } else {
+      allScans[i]->mergeCoordinatesWithRoboterPosition();
+    }
 
     //Hack to get all icp transformations into the .frames Files
     if(i == n-1 && my_icp6D != NULL && my_icp6D->get_anim() == -2) {
@@ -504,8 +508,20 @@ void matchGraph6Dautomatic(double cldist, int loopsize, vector <Scan *> allScans
         my_icp6D->match(meta_scan, allScans[i]);
         delete meta_scan;
       } else {
-        my_icp6D->match(allScans[i - 1], allScans[i]);
-      }  
+        switch(type) {
+          case UOS_MAP:
+            my_icp6D->match(allScans[0], allScans[i]);
+            break;
+          case RTS_MAP:
+            //untested (and could not work)
+            //if(i < 220-22 && i > 250-22) match(allScans[0], CurrentScan);
+            my_icp6D->match(allScans[0], allScans[i]);
+            break;
+          default:
+            my_icp6D->match(allScans[i - 1], allScans[i]);
+            break;
+        }
+      }
     } else {
       double id[16];
       M4identity(id);
@@ -826,7 +842,7 @@ int main(int argc, char **argv)
           break;
       }
 
-      matchGraph6Dautomatic(cldist, loopsize, Scan::allScans, my_icp, meta, use_cache, my_loopSlam6D, my_graphSlam6D, mni_lum, epsilonSLAM, mdml, mdmll, graphDist);
+      matchGraph6Dautomatic(cldist, loopsize, Scan::allScans, my_icp, meta, use_cache, my_loopSlam6D, my_graphSlam6D, mni_lum, epsilonSLAM, mdml, mdmll, graphDist, eP, type);
       delete my_icp;
       if(loopSlam6DAlgo > 0) {
         delete my_loopSlam6D;
