@@ -6,7 +6,9 @@ system (linux, linux with the icc compiler, macOS, etc.)
 
 The Boost Graph Lib is needed to compile the slam6D program.
 If you are using Debian just do:
-aptitude install libboost-graph-dev
+aptitude install libboost-graph-dev freeglut3-dev libxmu-dev libxi-dev
+for Ubuntu this would be:
+sudo aptitude install libboost-graph1.37-dev freeglut3-dev libxmu-dev libxi-dev
 
 -------------------------------------------------------------------
 
