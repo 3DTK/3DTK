@@ -193,7 +193,7 @@ void usage(char* prog)
 	  << "  -m NR   set the maximal range distance to NR 'units' (unit of scan data, e.g. cm)" << endl
 	  << bold << "  -f" << normal << " F, " << bold << "--format=" << normal << "F" << endl
 	  << "         using shared library F for input" << endl
-	  << "         (chose F from {uos, uos_map, old, rts, rts_map, ifp, riegl, zahn, ply})" << endl << endl
+	  << "         (chose F from {uos, uos_map, uos_frames, old, rts, rts_map, ifp, riegl, zahn, ply})" << endl << endl
 	  << endl;
   exit(1);
 }
@@ -249,6 +249,7 @@ int parseArgs(int argc,char **argv, string &dir, int& start, int& end, int& maxD
 	 case 'f':
 	   if (strcasecmp(optarg, "uos") == 0) type = UOS;
 	   else if (strcasecmp(optarg, "uos_map") == 0) type = UOS_MAP;
+	   else if (strcasecmp(optarg, "uos_frames") == 0) type = UOS_FRAMES;
 	   else if (strcasecmp(optarg, "old") == 0) type = OLD;
 	   else if (strcasecmp(optarg, "rts") == 0) type = RTS;
 	   else if (strcasecmp(optarg, "rts_map") == 0) type = RTS_MAP;

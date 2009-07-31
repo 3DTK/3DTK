@@ -141,7 +141,7 @@ void usage(char* prog)
 	  << endl
 	  << bold << "  -f" << normal << " F, " << bold << "--format=" << normal << "F" << endl
 	  << "         using shared library F for input" << endl
-	  << "         (chose F from {uos, uos_map, old, rts, rts_map, ifp, riegl, zahn, ply})" << endl
+	  << "         (chose F from {uos, uos_map, uos_frames, old, rts, rts_map, ifp, riegl, zahn, ply})" << endl
 	  << endl
 	  << bold << "  -G" << normal << " NR, " << bold << "--graphSlam6DAlgo=" << normal << "NR   [default: 0]" << endl
 	  << "         selects the minimizazion method for the SLAM matching algorithm" << endl
@@ -405,6 +405,7 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &rand,
 	 case 'f': 
 	   if (strcasecmp(optarg, "uos") == 0) type = UOS;
 	   else if (strcasecmp(optarg, "uos_map") == 0) type = UOS_MAP;
+	   else if (strcasecmp(optarg, "uos_frames") == 0) type = UOS_FRAMES;
 	   else if (strcasecmp(optarg, "old") == 0) type = OLD;
 	   else if (strcasecmp(optarg, "rts") == 0) type = RTS;
 	   else if (strcasecmp(optarg, "rts_map") == 0) type = RTS_MAP;
