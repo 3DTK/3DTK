@@ -512,6 +512,7 @@ void matchGraph6Dautomatic(double cldist, int loopsize, vector <Scan *> allScans
       } else {
         switch(type) {
           case UOS_MAP:
+          case UOS_MAP_FRAMES:
             my_icp6D->match(allScans[0], allScans[i]);
             break;
           case RTS_MAP:
