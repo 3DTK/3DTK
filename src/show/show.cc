@@ -296,7 +296,7 @@ int parseArgs(int argc,char **argv, string &dir, int& start, int& end, int& maxD
  * @param end stopping at scan number 'end'
  * @param read a file containing a initial transformation matrix and apply it
  */
-void readFrames(string dir, int start, int end, bool readInitial)
+void readFrames(string dir, int start, int end, bool readInitial, reader_type &type)
 {
 
   double initialTransform[16];
@@ -363,16 +363,14 @@ void readFrames(string dir, int start, int end, bool readInitial)
 	 }
     }
     MetaAlgoType.push_back(algoTypes);
-    
+
     MetaMatrix.push_back(Matrices);
 
-    /////////////////!!!!!!!!!!!!!!!!!!!!!!!!
-    //@@@
-//     if (fileCounter == start+1) {
-//   	 MetaAlgoType.push_back(algoTypes);
-//   	 MetaMatrix.push_back(Matrices);
-//     }
-    
+    if((type == UOS_MAP || type == RTS_MAP) && fileCounter == start+1) {
+      MetaAlgoType.push_back(algoTypes);
+      MetaMatrix.push_back(Matrices);
+    }
+
     frame_in.close();
     frame_in.clear();
     cout << MetaMatrix.back().size() << " done." << endl;
@@ -550,7 +548,7 @@ int main(int argc, char **argv){
 
   // Get Scans
   Scan::readScans(type, start, end, dir, maxDist, minDist, 0);
-  readFrames(dir, start, end, readInitial);
+  readFrames(dir, start, end, readInitial, type);
   createDisplayLists();
   
   glutMainLoop();
