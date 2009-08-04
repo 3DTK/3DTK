@@ -86,10 +86,10 @@ int ScanIO_uos_map::readScans(int start, int end, string &dir, int maxDist, int 
 
 	 for (double t = 0.0; t < length; t += 25.0) {
 	   Point p;
-	   p.x = x1 + t * n_x - 710.0;
-	   p.z = z1 + t * n_z - 1240.0;
+	   p.x = x1 + t * n_x - 713.832183017;
+	   p.z = z1 + t * n_z - 1238.220671;
 	   for (double y = -15.0; y < 1000; y += 25) {
-		p.y = y;
+		p.y = y + 13.8808;
 		ptss.push_back(p);
 	   }
 	 }
@@ -126,9 +126,9 @@ int ScanIO_uos_map::readScans(int start, int end, string &dir, int maxDist, int 
 	 z1 = - x1_t * s + z1_t * c;
 	 
 	 Point p;
-	 p.x = x1 - 710.0;
-	 p.z = z1 - 1240.0;
-	 p.y = y1_t;
+	 p.x = x1 - 713.832183017;
+	 p.z = z1 - 1238.220671;
+	 p.y = y1_t + 13.8808;
 	 ptss.push_back(p);
 
     }
