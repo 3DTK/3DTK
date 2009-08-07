@@ -1,5 +1,6 @@
 /** @file 
- *  @brief Implementation of the ICP error function minimization via SVD
+ *  @brief Implementation of the ICP error function minimization via
+ *  orthonormal matrices (buggy!)
  *  @author Kai Lingemann. Institute of Computer Science, University of Osnabrueck, Germany.
  *  @author Andreas Nuechter. Institute of Computer Science, University of Osnabrueck, Germany.
  */
