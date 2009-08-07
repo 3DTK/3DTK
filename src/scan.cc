@@ -770,7 +770,7 @@ void Scan::getPtPairsSimple(vector <PtPair> *pairs,
     if (closest) {
 	 centroid_m[0] += p[0];
 	 centroid_m[1] += p[1];
-	 centroid_m[2] += p[1];
+	 centroid_m[2] += p[2];
 	 centroid_d[0] += closest[0];
 	 centroid_d[1] += closest[1];
 	 centroid_d[2] += closest[2];	 
