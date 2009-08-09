@@ -7,25 +7,6 @@
 #ifndef __CAMERA_H__
 #define __CAMERA_H__
 
-#ifdef _MSC_VER
-#include <windows.h>
-#endif
-
-#ifdef __APPLE__
-#include <OpenGL/gl.h>
-#else
-#include <GL/gl.h>
-#endif
-
-#include "glui/glui.h"
-#include <iostream>
-
-using std::cout;
-using std::cerr;
-using std::endl;
-
-
-
 typedef struct {
   float r;
   float g;

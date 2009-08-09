@@ -8,58 +8,22 @@
 #ifndef __SHOW_H__
 #define __SHOW_H__
 
-#include <stdlib.h>
-
 #ifdef __APPLE__
 #include <GLUT/glut.h>
 #else
 #include <GL/glut.h>
 #endif
-
-
-#include "../scan.h"
-
 #ifdef _MSC_VER
-  #define  _USE_MATH_DEFINES
-  #include <windows.h>
-#else
-  #include <unistd.h>
+#define  _USE_MATH_DEFINES
+#include <windows.h>
 #endif
 
-#include <math.h>
-#ifdef _MSC_VER
-#define strcasecmp _stricmp
-#define strncasecmp _strnicmp
-#else
-#include <strings.h>
-#endif
-#include <fstream>
-
-#include <iostream>
-using std::cout;
-using std::cerr;
-using std::endl;
-using std::ofstream;
-using std::ios;
-using std::ifstream;
-
+#include <string>
+using std::string;
 #include <vector>
 using std::vector;
 
-#ifdef __APPLE__
-#include <GLUT/glut.h>
-#else
-#include <GL/glut.h>
-#endif
-
-#include "glui/glui.h"  /* Header File For The glui funktions */
-
-#ifndef _MSC_VER
-#include <getopt.h>
-#else
-#include "..\..\Visual_Studio_Projects\6DSLAM\6D_SLAM\XGetopt.h"
-#endif
-
+#include "PathGraph.h"
 
 /** for Glut display mode */
 #define RGBA 4   ///< colors for GLUT display
@@ -72,12 +36,7 @@ using std::vector;
 
 #define BUFSIZE 1048576 ///< defining the buffer size
 
-#include "vertexarray.h"
 #include "show1.icc"
-#include "../globals.icc"
-#include "camera.h"
-#include "PathGraph.h"
-#include "NurbsPath.h"
 #include "show.icc"
 
 void lookAt(const double dir[3],
@@ -129,10 +88,6 @@ enum { ROTATION_X, ROTATION_RX, ROTATION_Y, ROTATION_RY, ROTATION_Z, ROTATION_RZ
 enum { TRANS_X, TRANS_RX, TRANS_Y, TRANS_RY, TRANS_Z, TRANS_RZ };
   /** enumeration for the menue */
 enum { MENU_SCREEN, MENU_LIST, MENU_QUIT };
-
-
-
-
 
 #endif
 

@@ -9,15 +9,11 @@
 
 #include <vector>
 using std::vector;
-#include <ctime>
 
 #include "newmat/newmat.h"
 
-#include "ptpair.h"
 #include "scan.h"
 #include "icp6Dminimizer.h"
-
-#include "globals.icc"
 
 /**
  * @brief Representation of 3D scan matching with ICP.

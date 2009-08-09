@@ -3,6 +3,7 @@
 
 #include "scanGrid.h"
 #include "../scan.h"
+#include "../globals.icc"
 
 #define WAYPOINTWEIGHT 10
 #define SOLIDWEIGHT 5000

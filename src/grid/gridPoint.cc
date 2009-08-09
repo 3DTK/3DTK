@@ -1,5 +1,6 @@
 #include "gridPoint.h"
 #include <cstdlib>
+#include <iostream>
 
 /**
  * CTor. Sets counter and occupied to 0 and the coordinates to x and z

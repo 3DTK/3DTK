@@ -5,8 +5,6 @@
  * @author Andreas Nuechter. Institute of Computer Science, University of Osnabrueck, Germany.
  */
 
-#include "defs.h"
-
 #include "icp6D.h"
 
 #ifdef _OPENMP
@@ -14,6 +12,7 @@
 #endif
 
 #include <iomanip>
+#include "globals.icc"
 
 /**
  * Constructor 

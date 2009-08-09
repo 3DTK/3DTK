@@ -7,6 +7,11 @@
 
 #include "scan_io_riegl.h"
 #include "globals.icc"
+#include <fstream>
+using std::ifstream;
+#include <iostream>
+using std::cerr;
+using std::endl;
 
 #include <algorithm>
 using std::swap;

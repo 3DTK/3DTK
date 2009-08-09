@@ -1,4 +1,3 @@
-include ../../Makefile.master
 include ../../Makefile.options
 
 DIFF = ./sdiff

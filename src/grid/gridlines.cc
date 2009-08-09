@@ -2,10 +2,11 @@
 #include "hough.h"
 
 #include <iostream>
-#include <math.h>
+using std::cout;
+using std::cerr;
+using std::endl;
 #include <fstream>
-
-using namespace std;
+using std::ofstream;
 
 #define MINIMALLINELENGTH 2
 

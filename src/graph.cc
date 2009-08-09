@@ -13,6 +13,10 @@
 
 #include <fstream>
 using std::ifstream;
+#include <iostream>
+using std::cout;
+using std::cerr;
+using std::endl;
 
 /**
  * Constructor to create an empty graph

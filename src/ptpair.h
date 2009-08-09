@@ -10,6 +10,10 @@
 #define __PTPAIR_H__
 
 #include "point.h"
+#include <iostream>
+using std::endl;
+#include <fstream>
+using std::ofstream;
 
 /**
  * @brief Representing point pairs

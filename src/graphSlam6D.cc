@@ -14,7 +14,7 @@
 #include <fstream>
 using std::ofstream;
 using std::flush;
-
+#include "globals.icc"
 
 /**
  * Constructor

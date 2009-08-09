@@ -13,30 +13,19 @@
 #undef _STDIO_DEFINED
 #define  _USE_MATH_DEFINES
 #endif
-#include <stdio.h>
 
-#include <fstream>
 #include <string>
 using std::string;
-#include <iostream>
-using std::ofstream;
-using std::istream;
-using std::cout;
-using std::cerr;
-using std::endl;
-
 #include <vector>
 using std::vector;
+#include <sstream>
+using std::stringstream;
  
 #include "ptpair.h"
 #include "point.h"
-#include "globals.icc"
-#include "kd.h"
+#include "searchTree.h"
 #include "kdcache.h"
-#include "kdc.h"
-
-#include "defs.h"
-
+#include "globals.icc"
 
 enum reader_type {
   UOS, UOS_MAP, UOS_FRAMES, UOS_MAP_FRAMES, OLD, RTS, RTS_MAP, RIEGL, IFP, ZAHN, PLY, WRL, XYZ, ZUF, IAIS, FRONT

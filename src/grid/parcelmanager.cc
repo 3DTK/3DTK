@@ -2,9 +2,12 @@
 #include "parcelmanager.h"
 #include "../globals.icc"
 #include "gridWriter.h"
-
-
-using namespace std;
+#include <fstream>
+using std::ifstream;
+using std::ofstream;
+#include <iostream>
+using std::cerr;
+using std::endl;
 
 /**
  * Ctor.
@@ -80,7 +83,7 @@ void parcelmanager::freeMemory(bool all)
 	{	    
 	    // saving the parcel using the parcel format
             // (Must use parcelFormat, otherwise parcel cant be loaded again!)
-	    std::string filename = cur->first->getFilename();
+	    string filename = cur->first->getFilename();
 	    parcelWriter writer(filename);
 
 	    writer.write(*cur->second);
@@ -157,7 +160,7 @@ void parcelmanager::createParcel(long x, long z)
 
 
     // create parcelinfo and parcel
-    std::string filename = this->path + "parcel" + to_string(offsetX) + to_string(offsetZ) + ".pcl";
+    string filename = this->path + "parcel" + to_string(offsetX) + to_string(offsetZ) + ".pcl";
     
     parcelinfo *p = new parcelinfo(offsetX, offsetZ, filename);
     

@@ -5,6 +5,7 @@
  */
 
 #include "ghelix6DQ2.h"
+#include "icp6Dhelix.h"
 #include "sparse/csparse.h"
 
 #include <cfloat>

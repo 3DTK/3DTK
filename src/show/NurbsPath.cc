@@ -1,5 +1,3 @@
-#include <cstdio>
-using namespace std;
 #include "NurbsPath.h"
 
 /**

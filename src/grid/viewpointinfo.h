@@ -1,10 +1,14 @@
 #ifndef __VIEWPOINT_H_
 #define __VIEWPOINT_H_
 
-#include <map>
 #include <vector>
+using std::vector;
+#include <utility>
+using std::pair;
 
 #include "scanGrid.h"
+#include <string>
+using std::string;
 
 /**
  * The class manages a list of viewpoints from which the 
@@ -19,23 +23,23 @@ class viewpointinfo
 {
  private:
     /** Typedef for a viewpoint */
-    typedef std::pair<long, long> viewpoint;
+    typedef pair<long, long> viewpoint;
     
     /** Internal vector for storing the viewpoints */
-    std::vector<viewpoint> viewpoints;
+    vector<viewpoint> viewpoints;
 
     /** The path where the file is created */
-    std::string path;
+    string path;
 
  public:
     /** @brief CTor */
-    viewpointinfo(std::string path);
+    viewpointinfo(string path);
 
     /** @brief Adds the viewpoint information of a scanGrid */
     void addGrid(const scanGrid *grid);
     
     /** @brief Writes the internal list to file */
-    void write(std::string filename);
+    void write(string filename);
 };
 
 #endif

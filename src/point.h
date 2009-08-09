@@ -11,13 +11,9 @@
 #include <iostream>
 using std::ostream;
 using std::istream;
-using std::cout;
-using std::cerr;
-using std::endl;
 
 #include <stdexcept>
 using std::runtime_error;
-using std::exception;
 
 /**
  * @brief Representation of a point in 3D space
