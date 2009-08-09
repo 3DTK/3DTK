@@ -7,8 +7,6 @@
 #ifndef __KD_H__
 #define __KD_H__
 
-#include "defs.h"
-
 #include "kdparams.h"
 #include "searchTree.h"
 

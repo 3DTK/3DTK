@@ -10,15 +10,12 @@
 #ifndef __GRAPH_H__
 #define __GRAPH_H__
 
-#include "globals.icc"
-
 #include <vector>
 using std::vector;
 #include <string>
 using std::string;
-#include <iostream>
-using std::cerr;
-using std::endl;
+#include <fstream>
+using std::ostream;
 
 #include <boost/graph/adjacency_list.hpp>
 

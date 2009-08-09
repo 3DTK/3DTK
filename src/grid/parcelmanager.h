@@ -3,9 +3,12 @@
 
 #include <string>
 #include <map>
+using std::map;
 
 #include "parcel.h"
 #include "parcelinfo.h"
+#include <string>
+using std::string;
 
 
 #define PARCELINFOFILE "parcelinfo.conf"
@@ -25,7 +28,7 @@ class parcelmanager
 {
  private:
     /** Typedef for the map */
-    typedef std::map<parcelinfo*, parcel*> parcelmap;
+    typedef map<parcelinfo*, parcel*> parcelmap;
     
     /** The map for all parcelinfos and parcels */
     parcelmap parcels;
@@ -55,7 +58,7 @@ class parcelmanager
 
     
     /** The path where all infos should be stored */
-    std::string path;
+    string path;
 
     /** @brief The method frees each (not used) parcel */ 
     void freeMemory(bool all);
@@ -74,7 +77,7 @@ class parcelmanager
 
  public:
     /** @brief CTor */
-    parcelmanager(long width, long height, std::string path, int resolution, bool resume);
+    parcelmanager(long width, long height, string path, int resolution, bool resume);
 
     /** @brief Dtor */
     ~parcelmanager();
@@ -83,13 +86,13 @@ class parcelmanager
     void addGrid(const grid* g, long vpX, long vpZ);
 
     /** @brief The method saves the infos created so far */
-    void saveParcelinfo(std::string filename);
+    void saveParcelinfo(string filename);
 
     /** @brief The method loads the parcelinfos from file */
-    void loadParcelinfo(std::string filename);
+    void loadParcelinfo(string filename);
 
     /** @brief The method combines all parcels to a worldmap and writes it */
-    void writeWorld(std::string filename);
+    void writeWorld(string filename);
 
     /** @brief Merges all parcels into one grid and returns it */
     grid* createWorldGrid();

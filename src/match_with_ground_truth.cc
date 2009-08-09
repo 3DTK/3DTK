@@ -18,6 +18,8 @@ using std::ifstream;
 using std::ofstream;
 #include <vector>
 using std::vector;
+#include <stdexcept>
+using std::exception;
 
 #include "globals.icc"
 #include "ptpair.h"

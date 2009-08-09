@@ -8,6 +8,15 @@
 
 #include "scan_io_uos_map_frames.h"
 #include "globals.icc"
+#include <fstream>
+using std::ifstream;
+#include <iostream>
+using std::cout;
+using std::cerr;
+using std::endl;
+#include <stdexcept>
+using std::exception;
+
 
 #ifdef _MSC_VER
 #include <windows.h>

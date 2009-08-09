@@ -3,9 +3,10 @@
 
 #include <fstream>
 #include <vector>
-#include "gridPoint.h"
 
 #include "grid.h"
+#include <string>
+using std::string;
 
 /**
  * The class represents the baseclass for all writers.

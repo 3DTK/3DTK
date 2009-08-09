@@ -1,6 +1,5 @@
 # This Makefile is maintained manually
 
-include Makefile.master
 include Makefile.options
 
 BIN     = bin/
@@ -58,7 +57,7 @@ $(OBJ)camera.o: $(SHOWSRC)camera.h $(SHOWSRC)camera.cc $(SRC)globals.icc
 	echo Compiling Camera ...
 	$(GPP) $(CFLAGS) -c -o $(OBJ)camera.o $(SHOWSRC)camera.cc
 
-$(OBJ)NurbsPath.o: $(SHOWSRC)NurbsPath.h $(SHOWSRC)NurbsPath.cc $(SRC)globals.icc $(OBJ)PathGraph.o
+$(OBJ)NurbsPath.o: $(SHOWSRC)NurbsPath.h $(SHOWSRC)NurbsPath.cc $(SRC)globals.icc $(SHOWSRC)PathGraph.h
 	echo Compiling NurbsPath ...
 	$(GPP) $(CFLAGS) -c -o $(OBJ)NurbsPath.o $(SHOWSRC)NurbsPath.cc
 
@@ -93,11 +92,11 @@ $(OBJ)octtree.o: $(SRC)octtree.h $(SRC)octtree.cc $(SRC)globals.icc
 	echo Compiling Octree ...
 	$(GPP) $(CFLAGS) -c -o $(OBJ)octtree.o $(SRC)octtree.cc 
 
-$(OBJ)d2tree.o: $(SRC)d2tree.h $(SRC)d2tree.cc $(SRC)searchTree.h $(OBJ)octtree.o $(SRC)globals.icc
+$(OBJ)d2tree.o: $(SRC)d2tree.h $(SRC)d2tree.cc $(SRC)searchTree.h $(SRC)globals.icc
 	echo Compiling D2tree ...
 	$(GPP) $(CFLAGS) -c -o $(OBJ)d2tree.o $(SRC)d2tree.cc 
 
-$(OBJ)scan.o: $(OBJ)octtree.o $(OBJ)kd.o $(OBJ)kdc.o $(SRC)scan.h $(SRC)scan_io.h $(SRC)scan.cc $(SRC)scan.icc $(SRC)globals.icc $(SRC)point.h $(SRC)ptpair.h $(SRC)point.icc $(OBJ)d2tree.o
+$(OBJ)scan.o: $(SRC)octtree.h $(SRC)kd.h $(SRC)kdc.h $(SRC)kdcache.h $(SRC)scan.h $(SRC)scan_io.h $(SRC)scan.cc $(SRC)scan.icc $(SRC)globals.icc $(SRC)point.h $(SRC)ptpair.h $(SRC)point.icc $(SRC)d2tree.h
 	echo Compiling Scan ...
 	$(GPP) $(CFLAGS) -c -o $(OBJ)scan.o $(SRC)scan.cc 
 
@@ -106,31 +105,31 @@ $(OBJ)scanlib.a: $(OBJ)octtree.o $(OBJ)kd.o $(OBJ)kdc.o $(OBJ)scan.o $(OBJ)d2tre
 	$(AR) -cr $(OBJ)scanlib.a $(OBJ)scan.o $(OBJ)octtree.o $(OBJ)kd.o $(OBJ)kdc.o $(OBJ)d2tree.o
 	ranlib $(OBJ)scanlib.a
 
-$(OBJ)icp6D.o: $(OBJ)kd.o $(OBJ)kdc.o $(OBJ)scan.o $(SRC)icp6D.h $(SRC)icp6D.cc $(SRC)ptpair.h $(SRC)globals.icc $(SRC)icp6Dminimizer.h $(SRC)newmat/libnewmat.a
+$(OBJ)icp6D.o: $(SRC)kd.h $(SRC)kdc.h $(SRC)scan.h $(SRC)icp6D.h $(SRC)icp6D.cc $(SRC)ptpair.h $(SRC)globals.icc $(SRC)icp6Dminimizer.h $(SRC)newmat/newmat.h
 	echo Compiling ICP 6D ...
 	$(GPP) $(CFLAGS) -c -o $(OBJ)icp6D.o $(SRC)icp6D.cc 
 
-$(OBJ)graphSlam6D.o: $(OBJ)icp6D.o $(OBJ)graph.o $(SRC)globals.icc $(SRC)graphSlam6D.h $(SRC)graphSlam6D.cc $(SRC)newmat/libnewmat.a $(OBJ)csparse.o
+$(OBJ)graphSlam6D.o: $(SRC)icp6D.h $(SRC)graph.h $(SRC)globals.icc $(SRC)graphSlam6D.h $(SRC)graphSlam6D.cc $(SRC)newmat/newmat.h $(SRC)sparse/csparse.h
 	echo Compiling GraphSlam6D ...
 	$(GPP) $(CFLAGS) -c -o $(OBJ)graphSlam6D.o $(SRC)graphSlam6D.cc
 
-$(OBJ)gapx6D.o: $(OBJ)icp6D.o $(OBJ)graph.o $(SRC)globals.icc $(SRC)gapx6D.cc $(SRC)gapx6D.h $(OBJ)graphSlam6D.o $(SRC)newmat/libnewmat.a $(OBJ)csparse.o
+$(OBJ)gapx6D.o: $(SRC)icp6D.h $(SRC)graph.h $(SRC)globals.icc $(SRC)gapx6D.cc $(SRC)gapx6D.h $(SRC)graphSlam6D.h $(SRC)newmat/newmat.h $(SRC)sparse/csparse.h
 	echo Compiling Global APX 6D ...
 	$(GPP) $(CFLAGS) -DUSE_C_SPARSE -c -o $(OBJ)gapx6D.o $(SRC)gapx6D.cc 
 
-$(OBJ)ghelix6DQ2.o: $(OBJ)icp6D.o $(OBJ)graph.o $(SRC)globals.icc $(SRC)ghelix6DQ2.cc $(SRC)ghelix6DQ2.h $(OBJ)graphSlam6D.o $(SRC)newmat/libnewmat.a $(OBJ)csparse.o
+$(OBJ)ghelix6DQ2.o: $(SRC)icp6D.h $(SRC)graph.h $(SRC)globals.icc $(SRC)ghelix6DQ2.cc $(SRC)ghelix6DQ2.h $(SRC)graphSlam6D.h $(SRC)newmat/newmat.h $(SRC)sparse/csparse.h
 	echo Compiling global HELIX 6D Q2 ...
 	$(GPP) $(CFLAGS) -DUSE_C_SPARSE -c -o $(OBJ)ghelix6DQ2.o $(SRC)ghelix6DQ2.cc 
 
-$(OBJ)lum6Deuler.o: $(OBJ)icp6D.o $(OBJ)graph.o $(SRC)globals.icc $(SRC)lum6Deuler.h $(SRC)lum6Deuler.cc $(OBJ)graphSlam6D.o $(SRC)newmat/libnewmat.a $(OBJ)csparse.o
+$(OBJ)lum6Deuler.o: $(SRC)icp6D.h $(SRC)graph.h $(SRC)globals.icc $(SRC)lum6Deuler.h $(SRC)lum6Deuler.cc $(SRC)graphSlam6D.h $(SRC)newmat/newmat.h $(SRC)sparse/csparse.h
 	echo Compiling LUM 6D Euler  ...
 	$(GPP) $(CFLAGS) -DUSE_C_SPARSE -c -o $(OBJ)lum6Deuler.o $(SRC)lum6Deuler.cc 
 
-$(OBJ)lum6Dquat.o: $(OBJ)icp6D.o $(OBJ)graph.o $(SRC)globals.icc $(SRC)lum6Dquat.h $(SRC)lum6Dquat.cc $(OBJ)graphSlam6D.o $(SRC)newmat/libnewmat.a $(OBJ)csparse.o
+$(OBJ)lum6Dquat.o: $(SRC)icp6D.h $(SRC)graph.h $(SRC)globals.icc $(SRC)lum6Dquat.h $(SRC)lum6Dquat.cc $(SRC)graphSlam6D.h $(SRC)newmat/newmat.h $(SRC)sparse/csparse.h
 	echo Compiling LUM 6D Quaternion ...
 	$(GPP) $(CFLAGS) -DUSE_C_SPARSE -c -o $(OBJ)lum6Dquat.o $(SRC)lum6Dquat.cc 
 
-$(OBJ)elch6D.o: $(SRC)elch6D.cc $(SRC)elch6D.h $(SRC)loopSlam6D.h $(SRC)icp6D.h $(SRC)icp6Dminimizer.h $(SRC)scan.h $(SRC)graph.h
+$(OBJ)elch6D.o: $(SRC)elch6D.cc $(SRC)elch6D.h $(SRC)loopSlam6D.h $(SRC)icp6D.h $(SRC)icp6Dminimizer.h $(SRC)scan.h $(SRC)graph.h $(SRC)globals.icc
 	echo Compiling ELCH 6D ...
 	$(GPP) $(CFLAGS) -c -o $(OBJ)elch6D.o $(SRC)elch6D.cc 
 
@@ -138,15 +137,15 @@ $(OBJ)elch6Deuler.o: $(SRC)elch6Deuler.cc $(SRC)elch6Deuler.h $(SRC)elch6D.h $(S
 	echo Compiling ELCH 6D Euler ...
 	$(GPP) $(CFLAGS) -c -o $(OBJ)elch6Deuler.o $(SRC)elch6Deuler.cc 
 
-$(OBJ)elch6Dquat.o: $(SRC)elch6Dquat.cc $(SRC)elch6Dquat.h $(SRC)elch6D.h $(SRC)loopSlam6D.h $(SRC)icp6D.h $(SRC)icp6Dminimizer.h $(SRC)scan.h $(SRC)graph.h $(SRC)lum6Dquat.h
+$(OBJ)elch6Dquat.o: $(SRC)elch6Dquat.cc $(SRC)elch6Dquat.h $(SRC)elch6D.h $(SRC)loopSlam6D.h $(SRC)icp6D.h $(SRC)icp6Dminimizer.h $(SRC)scan.h $(SRC)graph.h $(SRC)lum6Dquat.h $(SRC)globals.icc
 	echo Compiling ELCH 6D Quaternion ...
 	$(GPP) $(CFLAGS) -c -o $(OBJ)elch6Dquat.o $(SRC)elch6Dquat.cc 
 
-$(OBJ)elch6DunitQuat.o: $(SRC)elch6DunitQuat.cc $(SRC)elch6DunitQuat.h $(SRC)elch6D.h $(SRC)loopSlam6D.h $(SRC)icp6D.h $(SRC)icp6Dminimizer.h $(SRC)scan.h $(SRC)graph.h $(SRC)lum6Dquat.h
+$(OBJ)elch6DunitQuat.o: $(SRC)elch6DunitQuat.cc $(SRC)elch6DunitQuat.h $(SRC)elch6D.h $(SRC)loopSlam6D.h $(SRC)icp6D.h $(SRC)icp6Dminimizer.h $(SRC)scan.h $(SRC)graph.h $(SRC)lum6Dquat.h $(SRC)globals.icc
 	echo Compiling ELCH 6D Unit Quaternion ...
 	$(GPP) $(CFLAGS) -c -o $(OBJ)elch6DunitQuat.o $(SRC)elch6DunitQuat.cc 
 
-$(OBJ)elch6Dslerp.o: $(SRC)elch6Dslerp.cc $(SRC)elch6Dslerp.h $(SRC)elch6D.h $(SRC)loopSlam6D.h $(SRC)icp6D.h $(SRC)icp6Dminimizer.h $(SRC)scan.h $(SRC)graph.h $(SRC)lum6Dquat.h
+$(OBJ)elch6Dslerp.o: $(SRC)elch6Dslerp.cc $(SRC)elch6Dslerp.h $(SRC)elch6D.h $(SRC)loopSlam6D.h $(SRC)icp6D.h $(SRC)icp6Dminimizer.h $(SRC)scan.h $(SRC)graph.h $(SRC)lum6Dquat.h $(SRC)globals.icc
 	echo Compiling ELCH 6D SLERP Quaternion ...
 	$(GPP) $(CFLAGS) -c -o $(OBJ)elch6Dslerp.o $(SRC)elch6Dslerp.cc 
 
@@ -170,7 +169,7 @@ $(OBJ)icp6Dhelix.o: $(SRC)icp6Dhelix.h $(SRC)icp6Dhelix.cc $(SRC)ptpair.h $(SRC)
 	echo Compiling ICP 6D with Helix ...
 	$(GPP) $(CFLAGS) -c -o $(OBJ)icp6Dhelix.o $(SRC)icp6Dhelix.cc
 
-$(OBJ)graph.o: $(SRC)graph.h $(SRC)graph.cc $(SRC)globals.icc $(OBJ)scan.o
+$(OBJ)graph.o: $(SRC)graph.h $(SRC)graph.cc $(SRC)globals.icc $(SRC)scan.h
 	echo Compiling Graph ...
 	$(GPP) $(CFLAGS) -c -o $(OBJ)graph.o $(SRC)graph.cc
 
@@ -266,15 +265,15 @@ $(BIN)scan_io_front.so: $(SRC)scan_io.h $(SRC)scan_io_front.h $(SRC)scan_io_fron
 
 ######## GRID
 
-$(OBJ)gridder.o: $(GRIDSRC)2DGridder.cc $(OBJ)scanmanager.o $(OBJ)scanGrid.o $(OBJ)scanToGrid.o $(OBJ)parcelmanager.o $(OBJ)gridlines.o
+$(OBJ)gridder.o: $(GRIDSRC)2DGridder.cc $(GRIDSRC)scanmanager.h $(GRIDSRC)scanGrid.h $(GRIDSRC)scanToGrid.h $(GRIDSRC)parcelmanager.h $(GRIDSRC)gridlines.h
 	echo Compiling 2Dgridder ...
 	$(GPP) $(CFLAGS) -c $(GRIDSRC)2DGridder.cc -o $(OBJ)gridder.o
 
-$(OBJ)grid.o: $(GRIDSRC)grid.cc $(GRIDSRC)grid.h $(OBJ)gridPoint.o
+$(OBJ)grid.o: $(GRIDSRC)grid.cc $(GRIDSRC)grid.h $(GRIDSRC)gridPoint.h
 	echo Compiling Grid ...
 	$(GPP) $(CFLAGS) -c $(GRIDSRC)grid.cc -o $(OBJ)grid.o
 
-$(OBJ)scanGrid.o: $(GRIDSRC)scanGrid.cc $(GRIDSRC)scanGrid.h $(OBJ)grid.o
+$(OBJ)scanGrid.o: $(GRIDSRC)scanGrid.cc $(GRIDSRC)scanGrid.h $(GRIDSRC)grid.h
 	echo Compiling ScanGrid ...
 	$(GPP) $(CFLAGS) -c $(GRIDSRC)scanGrid.cc -o $(OBJ)scanGrid.o
 
@@ -306,15 +305,15 @@ $(OBJ)gridWriter.o: $(GRIDSRC)gridWriter.h $(GRIDSRC)gridWriter.cc
 	echo Compiling GridWriter ...
 	$(GPP) $(CFLAGS) -c $(GRIDSRC)gridWriter.cc -o $(OBJ)gridWriter.o
 
-$(OBJ)viewpointinfo.o: $(GRIDSRC)viewpointinfo.h $(GRIDSRC)viewpointinfo.cc $(OBJ)scanGrid.o
+$(OBJ)viewpointinfo.o: $(GRIDSRC)viewpointinfo.h $(GRIDSRC)viewpointinfo.cc $(GRIDSRC)scanGrid.h
 	echo Compiling Viewpointinfo ...
 	$(GPP) $(CFLAGS) -c $(GRIDSRC)viewpointinfo.cc -o $(OBJ)viewpointinfo.o
 
-$(OBJ)line.o: $(GRIDSRC)line.cc $(GRIDSRC)line.h $(OBJ)gridPoint.o
+$(OBJ)line.o: $(GRIDSRC)line.cc $(GRIDSRC)line.h $(GRIDSRC)gridPoint.h
 	echo Compiling Line ...
 	$(GPP) $(CFLAGS) -c $(GRIDSRC)line.cc -o $(OBJ)line.o
 
-$(OBJ)gridlines.o: $(GRIDSRC)gridlines.cc $(GRIDSRC)gridlines.h $(OBJ)hough.o $(OBJ)line.o $(OBJ)grid.o
+$(OBJ)gridlines.o: $(GRIDSRC)gridlines.cc $(GRIDSRC)gridlines.h $(GRIDSRC)hough.h $(GRIDSRC)line.h $(GRIDSRC)grid.h
 	echo Compiling Gridlines ...
 	$(GPP) $(CFLAGS) -c $(GRIDSRC)gridlines.cc -o $(OBJ)gridlines.o
 

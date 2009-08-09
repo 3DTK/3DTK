@@ -8,18 +8,8 @@
 #ifndef __SCAN_IO_UOS_FRAMES_H__
 #define __SCAN_IO_UOS_FRAMES_H__
 
-#include <stdexcept>
-using std::runtime_error;
-using std::exception;
-#include <fstream>
-using std::ofstream;
-using std::ifstream;
 #include <string>
 using std::string;
-#include <iostream>
-using std::cout;
-using std::cerr;
-using std::endl;
 #include <vector>
 using std::vector;
 

@@ -1,9 +1,10 @@
 #ifndef __PATHGRAPH_H__
 #define __PATHGRAPH_H__
 #include <map>
+using std::map;
 #include <list>
+using std::list;
 #include <climits>
-using namespace std;
 
 
 typedef struct {float x; float y; } PointXY;

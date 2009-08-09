@@ -12,11 +12,8 @@
 
 #include <vector>
 using std::vector;
-#include <ctime>
 
 #include "graphSlam6D.h"
-
-#include "globals.icc"
 
 #include "newmat/newmatio.h"
 

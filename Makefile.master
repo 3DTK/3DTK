@@ -1,5 +1,0 @@
-MAKEFLAGS += -s #-j
-
-STATIC  = # -static -L/usr/local/src/Mesa-7.0.1/lib/
-
-

@@ -8,16 +8,6 @@
 #ifndef __D2TREE_H__
 #define __D2TREE_H__
 
-#include <fstream>
-#include <iostream>
-using std::cout;
-using std::cerr;
-using std::endl;
-using std::ios;
-using std::ofstream;
-#include <vector>
-using std::vector;
-
 #include "searchTree.h"
 
 /**

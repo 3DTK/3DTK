@@ -2,6 +2,7 @@
 #include "globals.icc"
 
 #include <fstream>
+using std::ofstream;
 
 double D2Tree::voxelSize = 10.0;
 

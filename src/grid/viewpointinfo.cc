@@ -1,9 +1,12 @@
 #include <fstream>
+using std::ofstream;
 
 #include "viewpointinfo.h"
 #include <cstdlib>
-
-using namespace std;
+#include <iostream>
+using std::cerr;
+using std::endl;
+using std::make_pair;
 
 /**
  * CTor.

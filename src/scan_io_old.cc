@@ -7,6 +7,8 @@
 
 #include "scan_io_old.h"
 #include "globals.icc"
+#include <fstream>
+using std::ifstream;
 
 #ifdef _MSC_VER
 #include <windows.h>

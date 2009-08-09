@@ -3,10 +3,19 @@
  * @brief Implementation of reading 3D scans
  * @author Kai Lingemann. Institute of Computer Science, University of Osnabrueck, Germany.
  * @author Andreas Nuechter. Institute of Computer Science, University of Osnabrueck, Germany.
+ * @author Jochen Sprickerhof
  */
 
 #include "scan_io_uos_frames.h"
 #include "globals.icc"
+#include <fstream>
+using std::ifstream;
+#include <iostream>
+using std::cout;
+using std::cerr;
+using std::endl;
+#include <stdexcept>
+using std::exception;
 
 #ifdef _MSC_VER
 #include <windows.h>

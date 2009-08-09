@@ -1,18 +1,32 @@
+MAKEFLAGS += -s
+
+#
+# -------
+# OpenMP
+# -------
+#MAKEFLAGS += -j
+CFLAGS = -DMAX_OPENMP_NUM_THREADS=4 -DOPENMP_NUM_THREADS=4
+#CFLAGS += -fopenmp
+
 # -------------
 # GNU C++ MACOS
 # -------------
 #
 GPP    = g++
-CFLAGS = -O3 -Wall -pipe -Wno-deprecated
 SHAREDFLAGS = -dynamiclib
-LIBRARIES = -framework OpenGL -framework GLUT
-
 
 # ---------------------
 # GNU C++ MACOS GCC 4.2
 # ---------------------
 #
 #GPP    = g++-4.2
-#CFLAGS = -O3 -Wall -pipe -Wno-deprecated -fopenmp 
-#LIBRARIES = -framework OpenGL -framework GLUT
-#SHAREDFLAGS = -shared
+#SHAREDFLAGS = -shared #-fPIC
+
+LIBRARIES = -framework OpenGL -framework GLUT
+CFLAGS += -O3 -Wall -finline-functions
+#CFLAGS += -static -L/usr/local/src/Mesa-7.0.1/lib/
+#CFLAGS += -DDEBUG
+#CFLAGS += -Winline
+#CFLAGS += -Wno-deprecated -Wno-write-strings
+CFLAGS += -pipe -march=native
+

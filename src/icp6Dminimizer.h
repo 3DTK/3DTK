@@ -10,8 +10,6 @@
 #include <vector>
 using std::vector;
 
-#include "defs.h"
-
 #ifdef _OPENMP
 #include <omp.h>
 #endif

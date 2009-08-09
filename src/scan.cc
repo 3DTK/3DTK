@@ -9,6 +9,11 @@
 using std::ifstream;
 using std::ofstream;
 
+#include <iostream>
+using std::cout;
+using std::cerr;
+using std::endl;
+
 #include <sstream>
 using std::stringstream;
 
@@ -16,6 +21,8 @@ using std::stringstream;
 #include "octtree.h"
 #include "scan_io.h"
 #include "d2tree.h"
+#include "kd.h"
+#include "kdc.h"
 
 #ifdef _OPENMP
 #include <omp.h>

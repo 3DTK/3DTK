@@ -16,6 +16,7 @@ using boost::graph_traits;
 
 #include "elch6DunitQuat.h"
 #include "lum6Dquat.h"
+#include "globals.icc"
 
 /**
  * ELCH loop closing function using unit Quaternion
