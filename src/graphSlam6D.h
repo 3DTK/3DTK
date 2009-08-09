@@ -8,7 +8,6 @@
 
 #include <vector>
 using std::vector;
-#include <ctime>
 
 #include "icp6D.h"
 #include "graph.h"

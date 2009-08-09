@@ -7,6 +7,11 @@
 
 #include "scan_io_zahn.h"
 #include "globals.icc"
+#include <fstream>
+using std::ifstream;
+#include <iostream>
+using std::cerr;
+using std::endl;
 
 #ifdef _MSC_VER
 #include <windows.h>

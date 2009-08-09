@@ -9,7 +9,6 @@
 #define __KDC_H__
 
 #include "searchTree.h"
-#include "defs.h"
 #include "kdcache.h"
 
 /**

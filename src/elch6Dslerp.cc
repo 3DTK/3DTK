@@ -18,6 +18,7 @@ using boost::graph_traits;
 
 #include "elch6Dslerp.h"
 #include "lum6Dquat.h"
+#include "globals.icc"
 
 /**
  * ELCH loop closing function using SLERP

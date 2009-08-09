@@ -2,8 +2,9 @@
 #define __NURBSPATH_H__
 
 #include <list>
+using std::list;
 #include <vector>
-using namespace std;
+using std::vector;
 #include "PathGraph.h"
 //#include "../map_sim/EdgeList.h"
 

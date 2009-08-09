@@ -13,6 +13,7 @@
 #include <cfloat>
 #include <fstream>
 using std::ofstream;
+#include "globals.icc"
 
 /**
  * Constructor

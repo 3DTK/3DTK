@@ -14,8 +14,6 @@
 #include <omp.h>
 #endif
 
-#include "defs.h"
-
 #define WANT_STREAM ///< define the WANT stream :)
  
 #include <string>

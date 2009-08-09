@@ -10,13 +10,10 @@
 
 #include <vector>
 using std::vector;
-#include <ctime>
 
 #include "graphSlam6D.h"
 #include "icp6D.h"
 #include "graph.h"
-
-#include "globals.icc"
 
 #include "newmat/newmatio.h"
 

@@ -21,6 +21,7 @@ using std::numeric_limits;
 #include <boost/graph/graph_traits.hpp>
 using boost::graph_traits;
 
+#include "globals.icc"
 #include "elch6D.h"
 
 /*void printout(graph_t &g, vector<Vertex> &p, vector<int> &d, double *weights)

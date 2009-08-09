@@ -1,7 +1,13 @@
 #include "scanmanager.h"
 #include <cstring>
-
-using namespace std;
+#include "../globals.icc"
+#include <stdexcept>
+using std::exception;
+#include <fstream>
+using std::ifstream;
+#include <iostream>
+using std::cerr;
+using std::endl;
 
 /**
  * Ctor.

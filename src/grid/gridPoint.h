@@ -1,8 +1,6 @@
 #ifndef __GRIDPOINT_H_
 #define __GRIDPOINT_H_
 
-#include <iostream>
-
 /**
  * The class represents a point in the grid. It contains its
  * absolute coordinates (x, z), a counter how often the point

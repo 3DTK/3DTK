@@ -1,7 +1,6 @@
 #include <cmath>
 #include <iostream>
 #include <map>
-#include "../globals.icc"
 
 #include "scanToGrid.h"
 

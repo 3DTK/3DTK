@@ -1,8 +1,11 @@
 #include "gridWriter.h"
 #include <iterator>
 #include <cstdlib>
-
-using namespace std;
+#include <iostream>
+using std::cerr;
+using std::endl;
+#include <fstream>
+using std::ofstream;
 
 /**
  * CTor of gridWriter. Tries to the file

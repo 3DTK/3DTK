@@ -8,17 +8,8 @@
 #ifndef OCTTREE_H
 #define OCTTREE_H
 
-#include <fstream>
-#include <iostream>
-using std::cout;
-using std::cerr;
-using std::endl;
-using std::ios;
-using std::ofstream;
 #include <vector>
 using std::vector;
-
-#include "globals.icc"
 
 /**
  * @brief Octree

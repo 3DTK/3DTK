@@ -6,6 +6,7 @@
 */
 
 #include "octtree.h"
+#include "globals.icc"
 double OctTree::voxelSize;
 
 /**

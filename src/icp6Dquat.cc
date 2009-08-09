@@ -12,6 +12,10 @@ using std::resetiosflags;
 using std::setiosflags;
 #include <cfloat>
 #include <cmath>
+#include <iostream>
+using std::cout;
+using std::cerr;
+using std::endl;
 
 #ifdef _MSC_VER
 #define cbrt(x) pow(x,1/3)

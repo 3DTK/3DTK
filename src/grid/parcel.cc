@@ -1,6 +1,9 @@
 #include "parcel.h"
 #include <fstream>
 #include <cstdlib>
+#include <iostream>
+using std::cerr;
+using std::endl;
 
 /**
  * Ctor

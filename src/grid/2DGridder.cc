@@ -6,6 +6,7 @@
 #include "gridWriter.h"
 #include "viewpointinfo.h"
 #include "gridlines.h"
+#include "../globals.icc"
 
 #include "Debug.h"
 
@@ -17,7 +18,8 @@
 #include <dirent.h>
 #include <strings.h>
 
-using namespace std;
+using std::cerr;
+using std::flush;
 
 #ifdef _MSC_VER
   #define  _USE_MATH_DEFINES
