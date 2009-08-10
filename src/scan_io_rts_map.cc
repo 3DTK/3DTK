@@ -68,6 +68,17 @@ int ScanIO_rts_map::readScans(int start, int end, string &dir, int maxDist, int 
     double c, s;
     
     // read map as first 3D scan
+    //
+    // A given 2D ground truth map, is extrapolated to 3D.
+    // Details are given in (jfr2008.pdf):
+    //
+    // Oliver Wulf, Andreas Nüchter, Joachim Hertzberg,
+    // and Bernardo Wagner. Benchmarking Urban Six-Degree-
+    // of-Freedom Simultaneous Localization and Mapping.
+    // Journal of Field Robotics (JFR), Wiley & Son,
+    // ISSN 1556-4959, Volume 25, Issue 3, pages 148 - 163,
+    // March 2008
+    
 #define READ_MAP  
 #ifdef READ_MAP    
     scanFileName = dir + "Uni_Hannover.map";
@@ -117,6 +128,16 @@ int ScanIO_rts_map::readScans(int start, int end, string &dir, int maxDist, int 
     scan_in.clear();
 #endif
 
+    // read map as first 3D scan
+    // A aerial lidar scan is loaded
+    // Details are given in (ecmr2009.pdf):
+    //
+    // Jochen Sprickerhof, Andreas Nüchter, Kai Lingemann,
+    // Joachim Hertzberg. An Explicit Loop Closing Technique
+    // for 6D SLAM, In Proceedings of the 4th European
+    // Conference on Mobile Robots (ECMR '09), Mlini/Dubrovnic,
+    // Croatia, September 2009
+    
 #define READ_AERIAL
 #ifdef READ_AERIAL
     scanFileName = dir + "bereich_uni.txt";
