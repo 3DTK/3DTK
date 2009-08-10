@@ -171,6 +171,12 @@ double icp6D_SVD::Point_Point_Align_Parallel(const int openmp_num_threads,
    // "The Parallel Iterative Closest Point Algorithm"
    // by Langis / Greenspan / Godin, IEEE 3DIM 2001
    // formula (4)
+   //
+   // The same information are given in (ecrm2007.pdf)
+   // Andreas Nüchter. Parallelization of Scan Matching
+   // for Robotic 3D Mapping. In Proceedings of the 3rd
+   // European Conference on Mobile Robots (ECMR '07),
+   // Freiburg, Germany, September 2007
    for (int i = 0; i < openmp_num_threads; i++) {
 	 s += sum[i];
 	 pairs_size += n[i]; 

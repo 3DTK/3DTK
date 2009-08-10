@@ -98,6 +98,12 @@ int icp6D::match(Scan* PreviousScan, Scan* CurrentScan)
    // Implementation according to the paper 
    // "The Parallel Iterative Closest Point Algorithm"
    // by Langis / Greenspan / Godin, IEEE 3DIM 2001
+   //
+   // The same information are given in (ecrm2007.pdf)
+   // Andreas Nüchter. Parallelization of Scan Matching
+   // for Robotic 3D Mapping. In Proceedings of the 3rd
+   // European Conference on Mobile Robots (ECMR '07),
+   // Freiburg, Germany, September 2007
    omp_set_num_threads(OPENMP_NUM_THREADS);
 
    int max = (int)CurrentScan->get_points_red_size();

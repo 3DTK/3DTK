@@ -1,10 +1,19 @@
 /**
  * @file 
  * @brief The implementation of globally consistent scan matching algorithm
+ *
  * @author Dorit Borrman. Institute of Computer Science, University of Osnabrueck, Germany.
  * @author Jan Elseberg. Institute of Computer Science, University of Osnabrueck, Germany.
  * @author Kai Lingemann. Institute of Computer Science, University of Osnabrueck, Germany.
  * @author Andreas Nuechter. Institute of Computer Science, University of Osnabrueck, Germany.
+ *
+ * A description of the algorithms implemented here can be found in the following paper
+ * (ras2007.pdf):
+ *
+ * Dorit Borrmann, Jan Elseberg, Kai Lingemann, Andreas Nüchter, and Joachim Hertzberg.
+ * Globally consistent 3D mapping with scan matching. Journal of Robotics and Autonomous
+ * Systems (JRAS), Elsevier Science, Volume 56, Issue 2, ISSN 0921-8890, pages 130 - 142,
+ * February 2008
  */
 
 #include "lum6Deuler.h"

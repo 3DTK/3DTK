@@ -339,8 +339,14 @@ void Scan::mergeCoordinatesWithRoboterPosition(const double prev_transMat[16],
  * @param prevScan The scan that's transformation is extrapolated,
  * i.e., odometry extrapolation
  *
- * For additional information see the paper: "6D SLAM -- 3D Mapping..."
- * by Andreas Nuechter et al. Journal of Field Robotics, 2007
+ * For additional information see the follwoing paper (jfr2007.pdf):
+ *
+ * Andreas Nüchter, Kai Lingemann, Joachim Hertzberg, and Hartmut Surmann,
+ * 6D SLAM - 3D Mapping Outdoor Environments Journal of Field Robotics (JFR),
+ * Special Issue on Quantitative Performance Evaluation of Robotic and Intelligent
+ * Systems, Wiley & Son, ISSN 1556-4959, Volume 24, Issue 8-9, pages 699 - 722,
+ * August/September, 2007
+ *
  */
 void Scan::mergeCoordinatesWithRoboterPosition(const Scan* prevScan)
 {
