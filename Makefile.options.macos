@@ -28,5 +28,5 @@ CFLAGS += -O3 -Wall -finline-functions
 #CFLAGS += -DDEBUG
 #CFLAGS += -Winline
 #CFLAGS += -Wno-deprecated -Wno-write-strings
-CFLAGS += -pipe -march=native
+#CFLAGS += -pipe -march=native
 

@@ -39,9 +39,6 @@ using std::endl;
 #include <iomanip>
 #include <stdexcept>
 using std::runtime_error;
-#include <iostream>
-using std::endl;
-using std::cout;
 
 /**
  * Converts a class T to a string of width with padding 0
