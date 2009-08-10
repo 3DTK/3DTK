@@ -110,7 +110,7 @@
 			<Tool
 				Name="VCPostBuildEventTool"
 				Description="Copying libraries, headers &amp; dll&apos;s..."
-				CommandLine="copy $(TargetDir)glut32.dll %WINDIR%\SYSTEM32&#x0D;&#x0A;copy $(TargetDir)glut32.lib &quot;$(DevEnvDir)..\..\VC98\lib&quot;&#x0D;&#x0A;copy ..\..\include\GL\glut.h &quot;$(DevEnvDir)..\..\VC98\include\GL&quot;&#x0D;&#x0A;"
+				CommandLine=""
 			/>
 		</Configuration>
 		<Configuration
@@ -210,7 +210,7 @@
 			<Tool
 				Name="VCPostBuildEventTool"
 				Description="Copying libraries, headers &amp; dll&apos;s..."
-				CommandLine="copy $(TargetDir)glut32.dll %WINDIR%\SYSTEM&#x0D;&#x0A;copy $(TargetDir)glut32.lib &quot;$(DevEnvDir)..\..\VC98\lib&quot;&#x0D;&#x0A;copy ..\..\include\GL\glut.h &quot;$(DevEnvDir)..\..\VC98\include\GL&quot;&#x0D;&#x0A;"
+				CommandLine=""
 			/>
 		</Configuration>
 	</Configurations>
