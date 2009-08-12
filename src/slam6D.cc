@@ -10,14 +10,14 @@
  * @author Jochen Sprickerhof
  */
 
-#ifndef _MSC_VER
+#ifdef _MSC_VER
+#ifdef OPENMP
+#define _OPENMP
+#endif
+#endif
+
 #ifdef _OPENMP
 #include <omp.h>
-#endif
-#else
-#ifdef OPENMP
-#include <omp.h>
-#endif
 #endif
 
 #define WANT_STREAM ///< define the WANT stream :)
