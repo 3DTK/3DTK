@@ -13,6 +13,7 @@
 #include <cfloat>
 #include <fstream>
 using std::ofstream;
+using std::cerr;
 #include "globals.icc"
 
 /**

@@ -13,6 +13,7 @@
 
 #include <iomanip>
 #include "globals.icc"
+using std::cerr;
 
 /**
  * Constructor 
