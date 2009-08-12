@@ -120,7 +120,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalOptions="/D _CRT_SECURE_NO_DEPRECATE /D WITH_OPENMPXX"
+				AdditionalOptions="/D _CRT_SECURE_NO_DEPRECATE /D MAX_OPENMP_NUM_THREADS=4 /D OPENMP_NUM_THREADS=4"
 				Optimization="2"
 				InlineFunctionExpansion="2"
 				EnableIntrinsicFunctions="true"
