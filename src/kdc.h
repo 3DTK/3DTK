@@ -8,6 +8,16 @@
 #ifndef __KDC_H__
 #define __KDC_H__
 
+#ifdef _MSC_VER
+#ifdef OPENMP
+#define _OPENMP
+#endif
+#endif
+
+#ifdef _OPENMP
+#include <omp.h>
+#endif
+
 #include "searchTree.h"
 #include "kdcache.h"
 

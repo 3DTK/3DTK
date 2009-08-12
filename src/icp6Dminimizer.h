@@ -7,6 +7,16 @@
 #ifndef __ICP6DMINIMIZER__
 #define __ICP6DMINIMIZER__
 
+#ifdef _MSC_VER
+#ifdef OPENMP
+#define _OPENMP
+#endif
+#endif
+
+#ifdef _OPENMP
+#include <omp.h>
+#endif
+
 #include <vector>
 using std::vector;
 

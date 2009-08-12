@@ -5,6 +5,12 @@
  * @author Jan Elseberg. Institute of Computer Science, University of Osnabrueck, Germany.
  */
 
+#ifdef _MSC_VER
+#ifdef OPENMP
+#define _OPENMP
+#endif
+#endif
+
 #include "gapx6D.h"
 #include "icp6Dapx.h"
 #include "sparse/csparse.h"

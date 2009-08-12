@@ -1,8 +1,14 @@
 /**
  * @file 
  * @brief The implementation of globally consistent scan matching algorithm by using helix correction
- * @author Peter Schneider. Institute of Computer Science, University of Koblenz , Germany.
+ * @author Peter Schneider. Institute of Computer Science, University of Koblenz, Germany.
  */
+
+#ifdef _MSC_VER
+#ifdef OPENMP
+#define _OPENMP
+#endif
+#endif
 
 #include "ghelix6DQ2.h"
 #include "icp6Dhelix.h"

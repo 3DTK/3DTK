@@ -16,6 +16,12 @@
  * February 2008
  */
 
+#ifdef _MSC_VER
+#ifdef OPENMP
+#define _OPENMP
+#endif
+#endif
+
 #include "lum6Deuler.h"
 #include "sparse/csparse.h"
 

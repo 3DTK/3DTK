@@ -103,7 +103,7 @@ KDtree::KDtree(double **pts, int n)
   }
   // Build subtrees
   int i;
-#ifdef WITH_OPENMP_KD
+#ifdef WITH_OPENMP_KD                   // does anybody know the reason why this is slower ?? --Andreas
   omp_set_num_threads(OPENMP_NUM_THREADS);
 #pragma omp parallel for schedule(dynamic) 
 #endif
