@@ -18,7 +18,7 @@ using std::ifstream;
 using std::exception;
 
 #ifdef _MSC_VER
-#include "..\Visual_Studio_Projects\6DSLAM\6D_SLAM\XGetopt.h"
+#include "..\..\Visual_Studio_Projects\6DSLAM\6D_SLAM\XGetopt.h"
 #else
 #include <getopt.h>
 #endif

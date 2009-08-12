@@ -8,14 +8,14 @@
 #ifndef __SHOW_H__
 #define __SHOW_H__
 
+#ifdef _MSC_VER
+#define  _USE_MATH_DEFINES
+#include <windows.h>
+#endif
 #ifdef __APPLE__
 #include <GLUT/glut.h>
 #else
 #include <GL/glut.h>
-#endif
-#ifdef _MSC_VER
-#define  _USE_MATH_DEFINES
-#include <windows.h>
 #endif
 
 #include <string>
