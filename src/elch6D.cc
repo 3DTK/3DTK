@@ -1,5 +1,10 @@
 /** @file graph balancer implementation and utility functions
- * @author Jochen Sprickerhof
+ *  @author Jochen Sprickerhof
+ *
+ * This file implements the paper (ecmr2009.pdf):
+ * Jochen Sprickerhof, Andreas Nuechter, Kai Lingemann, Joachim Hertzberg. An Explicit
+ * Loop Closing Technique for 6D SLAM, In Proceedings of the 4th European Conference on
+ * Mobile Robots (ECMR '09), Mlini/Dubrovnic, Croatia, September 2009.
  */
 
 #include <fstream>

@@ -1,6 +1,11 @@
 /** @file 
  *  @brief An optimized cached k-d tree implementation
  *  @author Andreas Nuechter. Institute of Computer Science, University of Osnabrueck, Germany.
+ *
+ * This file implements the paper (3dim2007.pdf):
+ * Andreas Nuechter, Kai Lingemann, and Joachim Hertzberg. Cached k-d tree search for ICP
+ * algorithms. In Proceedings of the 6th IEEE International Conference on Recent Advances
+ * in 3D Digital Imaging and Modeling (3DIM '07), IEEE Computer Society Press, ISBN
  */
 
 #include "kdc.h"
@@ -103,7 +108,7 @@ KDtree_cache::KDtree_cache(double **pts, int n, KDtree_cache *_parent)
   }
 
   // Build subtrees
-#ifdef WITH_OPENMP_KD
+#ifdef WITH_OPENMP_KD                         // does anybody know the reason why this is slower ?? --Andreas
   omp_set_num_threads(OPENMP_NUM_THREADS);
 #pragma omp parallel for
 #endif

@@ -7,6 +7,12 @@
 
 #include "icp6D.h"
 
+#ifdef _MSC_VER
+#ifdef OPENMP
+#define _OPENMP
+#endif
+#endif
+
 #ifdef _OPENMP
 #include <omp.h>
 #endif
