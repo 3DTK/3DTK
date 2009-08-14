@@ -1,5 +1,5 @@
 /** @file graph balancer implementation and utility functions
- *  @author Jochen Sprickerhof
+ *  @author Jochen Sprickerhof. Institute of Computer Science, University of Osnabrueck, Germany.
  *
  * This file implements the paper (ecmr2009.pdf):
  * Jochen Sprickerhof, Andreas Nuechter, Kai Lingemann, Joachim Hertzberg. An Explicit

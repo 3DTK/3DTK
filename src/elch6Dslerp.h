@@ -1,6 +1,6 @@
 /**
  * @file ELCH implementation using SLERP
- * @author Jochen Sprickerhof
+ * @author Jochen Sprickerhof. Institute of Computer Science, University of Osnabrueck, Germany.
  */
 
 #ifndef __ELCH6D_SLERP_H__

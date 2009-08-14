@@ -1,8 +1,13 @@
 /** @file 
  *  @brief Implementation of the ICP error function minimization via
- *  orthonormal matrices (buggy!)
- *  @author Kai Lingemann. Institute of Computer Science, University of Osnabrueck, Germany.
+ *  orthonormal matrices
+ *
+ *  Note: This file is still buggy. The matlab file testICPortho.m
+ *  in the src directory represents the working code, but needs still
+ *  to be converted into this file.
+ *
  *  @author Andreas Nuechter. Institute of Computer Science, University of Osnabrueck, Germany.
+ *
  */
 
 #include "icp6Dortho.h"
