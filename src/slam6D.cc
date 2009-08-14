@@ -7,7 +7,7 @@
  * 
  * @author Kai Lingemann. Institute of Computer Science, University of Osnabrueck, Germany.
  * @author Andreas Nuechter. Institute of Computer Science, University of Osnabrueck, Germany.
- * @author Jochen Sprickerhof
+ * @author Jochen Sprickerhof. Institute of Computer Science, University of Osnabrueck, Germany.
  */
 
 #ifdef _MSC_VER
@@ -121,6 +121,9 @@ void usage(char* prog)
 	  << "         specifies the minimal number of points for an overlap. If not specified" << endl
 	  << "         cldist is used instead" << endl
 	  << endl
+	  << bold << "  --cache" << normal << endl
+	  << "         turns on cached k-d tree search" << endl
+	  << endl
 	  << bold << "  -d" << normal << " NR, " << bold << "--dist=" << normal << "NR   [default: 25]" << endl
 	  << "         sets the maximal point-to-point distance for matching with ICP to <NR> 'units'" << endl
 	  << "         (unit of scan data, e.g. cm)" << endl
@@ -136,6 +139,10 @@ void usage(char* prog)
 	  << endl
 	  << bold << "  -e" << normal << " NR, " << bold << "--end=" << normal << "NR" << endl
 	  << "         end after scan NR" << endl
+	  << endl
+	  << bold << "  --exportAllPoints" << normal << endl
+	  << "         writes all registered reduced points to the file points.pts before" << endl
+	  << "         slam6D terminated" << endl;
 	  << endl
 	  << bold << "  --epsICP=" << normal << "NR   [default: 0.00001]" << endl
 	  << "         stop ICP iteration if difference is smaller than NR" << endl
@@ -201,9 +208,6 @@ void usage(char* prog)
 	  << bold << "  -R" << normal << " NR, " << bold << "--random=" << normal << "NR" << endl
 	  << "         turns on randomized reduction, using about every <NR>-th point only" << endl
 	  << endl
-	  << bold << "  --cache" << normal << endl
-	  << "         turns on cached kd-tree search" << endl
-	  << endl
 	  << bold << "  -s" << normal << " NR, " << bold << "--start=" << normal << "NR" << endl
 	  << "         start at scan NR (i.e., neglects the first NR scans)" << endl
 	  << "         [ATTENTION: counting naturally starts with 0]" << endl
@@ -252,8 +256,8 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &rand,
 		    int &mni, int &start, int &end, int &maxDist, int &minDist, bool &quiet, bool &veryQuiet,
 		    bool &extrapolate_pose, bool &meta, int &algo, int &loopSlam6DAlgo, int &lum6DAlgo, int &anim,
 		    int &mni_lum, string &net, double &cldist, int &clpairs, int &loopsize,
-		    double &epsilonICP, double &epsilonSLAM, bool &use_cache, bool &initial, double &distLoop,
-        int &iterLoop, double &graphDist, reader_type &type)
+		    double &epsilonICP, double &epsilonSLAM, bool &use_cache, bool &exportPts, double &distLoop,
+		    int &iterLoop, double &graphDist, reader_type &type)
 {
   int  c;
   // from unistd.h:
@@ -263,37 +267,37 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &rand,
   /* options descriptor */
   // 0: no arguments, 1: required argument, 2: optional argument
   static struct option longopts[] = {
-    { "format",    required_argument,   0,  'f' },  
-    { "algo",      required_argument,   0,  'a' },
-    { "loop6DAlgo", required_argument,   0,  'L' },
+    { "format",          required_argument,   0,  'f' },  
+    { "algo",            required_argument,   0,  'a' },
+    { "loop6DAlgo",      required_argument,   0,  'L' },
     { "graphSlam6DAlgo", required_argument,   0,  'G' },
-    { "net",       required_argument,   0,  'n' },
-    { "iter",      required_argument,   0,  'i' },
-    { "iterSLAM",   required_argument,   0,  'I' },
-    { "max",       required_argument,   0,  'm' },
-    { "loopsize",  required_argument,   0,  'l' },
-    { "cldist",    required_argument,   0,  'c' },
-    { "clpairs",   required_argument,   0,  'C' },
-    { "min",       required_argument,   0,  'M' },
-    { "dist",      required_argument,   0,  'd' },
-    { "distSLAM",   required_argument,   0,  'D' },
-    { "start",     required_argument,   0,  's' },
-    { "end",       required_argument,   0,  'e' },
-    { "reduce",    required_argument,   0,  'r' },
-    { "random",    required_argument,   0,  'R' },
-    { "quiet",     no_argument,         0,  'q' },
-    { "veryquiet", no_argument,         0,  'Q' },
-    { "trustpose", no_argument,         0,  'p' },
-    { "anim",      required_argument,   0,  'A' },
-    { "lastscan",  no_argument,         0,  '2' }, // use the long format only
-    { "DlastSLAM",  required_argument,   0,  '4' }, // use the long format only
-    { "epsICP",    required_argument,   0,  '5' }, // use the long format only
-    { "epsSLAM",    required_argument,   0,  '6' }, // use the long format only
-    { "cache",     no_argument,         0,  '7' },
-    { "initial",   no_argument,         0,  '8' },
-    { "distLoop",  required_argument,   0,  '9' }, // use the long format only
-    { "iterLoop",  required_argument,   0,  '1' }, // use the long format only
-    { "graphDist", required_argument,   0,  '3' }, // use the long format only
+    { "net",             required_argument,   0,  'n' },
+    { "iter",            required_argument,   0,  'i' },
+    { "iterSLAM",        required_argument,   0,  'I' },
+    { "max",             required_argument,   0,  'm' },
+    { "loopsize",        required_argument,   0,  'l' },
+    { "cldist",          required_argument,   0,  'c' },
+    { "clpairs",         required_argument,   0,  'C' },
+    { "min",             required_argument,   0,  'M' },
+    { "dist",            required_argument,   0,  'd' },
+    { "distSLAM",        required_argument,   0,  'D' },
+    { "start",           required_argument,   0,  's' },
+    { "end",             required_argument,   0,  'e' },
+    { "reduce",          required_argument,   0,  'r' },
+    { "random",          required_argument,   0,  'R' },
+    { "quiet",           no_argument,         0,  'q' },
+    { "veryquiet",       no_argument,         0,  'Q' },
+    { "trustpose",       no_argument,         0,  'p' },
+    { "anim",            required_argument,   0,  'A' },
+    { "lastscan",        no_argument,         0,  '2' }, // use the long format only
+    { "DlastSLAM",       required_argument,   0,  '4' }, // use the long format only
+    { "epsICP",          required_argument,   0,  '5' }, // use the long format only
+    { "epsSLAM",         required_argument,   0,  '6' }, // use the long format only
+    { "cache",           no_argument,         0,  '7' },
+    { "exportAllPoints", no_argument,         0,  '8' },
+    { "distLoop",        required_argument,   0,  '9' }, // use the long format only
+    { "iterLoop",        required_argument,   0,  '1' }, // use the long format only
+    { "graphDist",       required_argument,   0,  '3' }, // use the long format only
     { 0,           0,   0,   0}                    // needed, cf. getopt.h
   };
 
@@ -657,7 +661,7 @@ int main(int argc, char **argv)
   double epsilonICP = 0.00001;
   double epsilonSLAM = 0.5;
   bool   use_cache  = false;
-  bool   initial    = false;
+  bool   exportPts  = false;
   int    loopSlam6DAlgo  = 0;
   int    lum6DAlgo  = 0;
   bool   exportPoints = false;
@@ -669,7 +673,7 @@ int main(int argc, char **argv)
   parseArgs(argc, argv, dir, red, rand, mdm, mdml, mdmll, mni, start, end,
 		  maxDist, minDist, quiet, veryQuiet, eP, meta, algo, loopSlam6DAlgo, lum6DAlgo, anim,
 		  mni_lum, net, cldist, clpairs, loopsize, epsilonICP, epsilonSLAM,
-		  use_cache, initial, distLoop, iterLoop, graphDist, type);
+		  use_cache, exportPts, distLoop, iterLoop, graphDist, type);
 
   cout << "slam6D will proceed with the following parameters:" << endl;
   //@@@ to do
@@ -863,7 +867,7 @@ int main(int argc, char **argv)
 
   if (exportPoints) {
     cout << "Export all 3D Points" << endl;
-    ofstream redptsout("points.dat");
+    ofstream redptsout("points.pts");
     for(unsigned int i = 0; i < Scan::allScans.size(); i++) {
 	 for (int j = 0; j < Scan::allScans[i]->get_points_red_size(); j++) {
 	   redptsout << Scan::allScans[i]->get_points_red()[j][0] << " "

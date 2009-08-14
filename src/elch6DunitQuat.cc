@@ -1,6 +1,6 @@
 /**
  * @file ELCH implementation using unit Quaternions
- * @author Jochen Sprickerhof
+ * @author Jochen Sprickerhof. Institute of Computer Science, University of Osnabrueck, Germany.
  */
 
 #include <iostream>

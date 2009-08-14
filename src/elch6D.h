@@ -1,6 +1,6 @@
 /** 
  * @file graph balancer implementation and utility functions
- * @author Jochen Sprickerhof
+ * @author Jochen Sprickerhof. Institute of Computer Science, University of Osnabrueck, Germany.
  */
 
 #ifndef __ELCH6D_H__
