@@ -1,6 +1,6 @@
 /**
  * @file ELCH implementation using Euler angles
- * @author Jochen Sprickerhof
+ * @author Jochen Sprickerhof. Institute of Computer Science, University of Osnabrueck, Germany.
  */
 
 #ifndef __ELCH6D_EULER_H__
