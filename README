@@ -5,11 +5,12 @@ generate the file "Makefile.options", with "X" depending on your
 system (linux, linux with the icc compiler, macOS, etc.)
 
 The Boost Graph Lib is needed to compile the slam6D program.
+
 If you are using Debian just do:
 aptitude install libboost-graph-dev freeglut3-dev libxmu-dev libxi-dev
 for Ubuntu this would be:
 sudo aptitude install libboost-graph1.37-dev freeglut3-dev libxmu-dev libxi-dev
-
+SuSE users please use yast2 for installing the missing packages
 -------------------------------------------------------------------
 
 For a detailed explanation of the programm, its usage, etc., please
@@ -20,9 +21,35 @@ IMPORTANT:
 Take care to register scans first (bin/slam6D) before trying to
 display them (bin/show), and think about using the point reduction
 (see section 6) for a much faster scan matching result.
+
 Three example scans are included in the dat directory, several
 larger data sets can be downloaded from the data repository,
 http://kos.informatik.uni-osnabrueck.de/3Dscans/
+
+EXAMPLES:
+(using the data set in the slam6d repository)
+bin/slam6D -m 500 -R 5 -d 25.0 dat
+bin/show dat
+
+(using the data set in the slam6d repository)
+bin/slam6D --max=500 -r 10.2 -i 20 dat
+bin/show dat
+
+(using hannover1.tgz from http://kos.informatik.uni-osnabrueck.de/3Dscans/)
+bin/slam6D -s 1 -e 65 -r 10 -i 100 -d 75 -D 250 --epsICP=0.00001 --lastscan
+           -I 50 --cldist=750 -L 0 -G 1 /home/nuechter/dat/dat_hannover1
+bin/show -s 1 -e 65 /home/nuechter/dat/dat_hannover1
+
+(using hannover2.tgz from http://kos.informatik.uni-osnabrueck.de/3Dscans/)
+bin/slam6D -q -s 23 -e 924 -r 10 --anim=-2 -a 2 -d 75 -L 4 --cldist=1500 -G 1
+           -D -1 --DlastSLAM 250 --graphDist 200 -I 50 --lastscan -f rts 
+		 /home/nuechter/dat/dat_hannover2
+bin/show -s 22 -e 924 -f rts /home/nuechter/dat/dat_hannover2
+
+(using kvarntorp_mine.tgz (dat_mine1) form http://kos.informatik.uni-osnabrueck.de/3Dscans/)
+bin/slam6D -s 1 -e 76 -r 10 -m 3000 -d 50 -i 1000 --epsICP=0.000001 --lastscan
+           -I 50 -D 75 --clpairs=5000 -f old /home/nuechter/dat/dat_mine1/
+bin/show -s 1 -e 76 -m 3000 -f old /home/nuechter/dat/dat_mine1/
 
 A reference manual can be found in doc/refman.pdf resp.
 doc/html/index.html (type in 'make docu' to compile the doxygen
