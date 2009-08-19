@@ -117,7 +117,7 @@ int ScanIO_riegl::readScans(int start, int end, string &dir, int maxDist, int mi
   pose_in.clear();
   fileCounter++;
   
-  return 1;
+  return fileCounter-1;
 }
 
 
