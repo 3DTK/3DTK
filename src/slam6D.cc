@@ -142,7 +142,7 @@ void usage(char* prog)
 	  << endl
 	  << bold << "  --exportAllPoints" << normal << endl
 	  << "         writes all registered reduced points to the file points.pts before" << endl
-	  << "         slam6D terminated" << endl;
+	  << "         slam6D terminated" << endl
 	  << endl
 	  << bold << "  --epsICP=" << normal << "NR   [default: 0.00001]" << endl
 	  << "         stop ICP iteration if difference is smaller than NR" << endl
@@ -397,9 +397,6 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &rand,
 	   break;
 	 case '7':  // = --cache
 	   use_cache = true;
-	   break;
-	 case '8':  // = --initial
-	   initial = true;
 	   break;
 	 case '9':  // = --distLoop
 	   distLoop = atof(optarg);
