@@ -56,14 +56,13 @@ Scan::Scan()
 {
   kd = 0;
   scanNr = fileNr = 0;
-  rPos[0] = 0;
-  rPos[1] = 0;
-  rPos[2] = 0;
-  rPosTheta[0] = 0;
-  rPosTheta[1] = 0;
-  rPosTheta[2] = 0;
+  rPosOrg[0] = rPos[0] = 0;
+  rPosOrg[1] = rPos[1] = 0;
+  rPosOrg[2] = rPos[2] = 0;
+  rPosThetaOrg[0] = rPosTheta[0] = 0;
+  rPosThetaOrg[1] = rPosTheta[1] = 0;
+  rPosThetaOrg[2] = rPosTheta[2] = 0;
   M4identity(transMat);
-  M4identity(transMatOrg);
   M4identity(dalignxf);
 
   points_red_size = 0;
@@ -88,23 +87,21 @@ Scan::Scan(const double* euler, int maxDist)
   }
 
   if (euler == 0) {
-    rPos[0] = 0;
-    rPos[1] = 0;
-    rPos[2] = 0;
-    rPosTheta[0] = 0;
-    rPosTheta[1] = 0;
-    rPosTheta[2] = 0;
+    rPosOrg[0] = rPos[0] = 0;
+    rPosOrg[1] = rPos[1] = 0;
+    rPosOrg[2] = rPos[2] = 0;
+    rPosThetaOrg[0] = rPosTheta[0] = 0;
+    rPosThetaOrg[1] = rPosTheta[1] = 0;
+    rPosThetaOrg[2] = rPosTheta[2] = 0;
     M4identity(transMat);
-    M4identity(transMatOrg);
   } else {
-    rPos[0] = euler[0];
-    rPos[1] = euler[1];
-    rPos[2] = euler[2];
-    rPosTheta[0] = euler[3];
-    rPosTheta[1] = euler[4];
-    rPosTheta[2] = euler[5];
+    rPosOrg[0] = rPos[0] = euler[0];
+    rPosOrg[1] = rPos[1] = euler[1];
+    rPosOrg[2] = rPos[2] = euler[2];
+    rPosThetaOrg[0] = rPosTheta[0] = euler[3];
+    rPosThetaOrg[1] = rPosTheta[1] = euler[4];
+    rPosThetaOrg[2] = rPosTheta[2] = euler[5];
     EulerToMatrix4(rPos, rPosTheta, transMat);
-    EulerToMatrix4(rPos, rPosTheta, transMatOrg);
   }
 
   fileNr = 0;
@@ -125,14 +122,13 @@ Scan::Scan(const double _rPos[3], const double _rPosTheta[3], const int maxDist)
 {
   kd = 0;
   maxDist2 = (maxDist != -1 ? sqr(maxDist) : maxDist);
-  rPos[0] = _rPos[0];
-  rPos[1] = _rPos[1];
-  rPos[2] = _rPos[2];
-  rPosTheta[0] = _rPosTheta[0];
-  rPosTheta[1] = _rPosTheta[1];
-  rPosTheta[2] = _rPosTheta[2];
+  rPosOrg[0] = rPos[0] = _rPos[0];
+  rPosOrg[1] = rPos[1] = _rPos[1];
+  rPosOrg[2] = rPos[2] = _rPos[2];
+  rPosThetaOrg[0] = rPosTheta[0] = _rPosTheta[0];
+  rPosThetaOrg[1] = rPosTheta[1] = _rPosTheta[1];
+  rPosThetaOrg[2] = rPosTheta[2] = _rPosTheta[2];
   EulerToMatrix4(rPos, rPosTheta, transMat);
-  EulerToMatrix4(rPos, rPosTheta, transMatOrg);
 
   fileNr = 0;
   scanNr = numberOfScans++;
@@ -153,14 +149,13 @@ Scan::Scan(const vector < Scan* >& MetaScan, bool use_cache)
 {
   kd = 0;
   scanNr = numberOfScans++;
-  rPos[0] = 0;
-  rPos[1] = 0;
-  rPos[2] = 0;
-  rPosTheta[0] = 0;
-  rPosTheta[1] = 0;
-  rPosTheta[2] = 0;
+  rPosOrg[0] = rPos[0] = 0;
+  rPosOrg[1] = rPos[1] = 0;
+  rPosOrg[2] = rPos[2] = 0;
+  rPosThetaOrg[0] = rPosTheta[0] = 0;
+  rPosThetaOrg[1] = rPosTheta[1] = 0;
+  rPosThetaOrg[2] = rPosTheta[2] = 0;
   M4identity(transMat);
-  M4identity(transMatOrg);
   M4identity(dalignxf);
 
   // copy points
@@ -261,9 +256,14 @@ Scan::Scan(const Scan& s)
   rPosTheta[0] = s.rPosTheta[0];
   rPosTheta[1] = s.rPosTheta[1];
   rPosTheta[2] = s.rPosTheta[2];
+  rPosOrg[0]   = s.rPosOrg[0];
+  rPosOrg[1]   = s.rPosOrg[1];
+  rPosOrg[2]   = s.rPosOrg[2];
+  rPosThetaOrg[0] = s.rPosThetaOrg[0];
+  rPosThetaOrg[1] = s.rPosThetaOrg[1];
+  rPosThetaOrg[2] = s.rPosThetaOrg[2];
 
   memcpy(transMat, s.transMat, sizeof(transMat));
-  memcpy(transMatOrg, s.transMatOrg, sizeof(transMatOrg));
 
   // copy data points
   for (unsigned int i = 0; i < s.points.size(); points.push_back(s.points[i++]));    
@@ -288,6 +288,60 @@ Scan::Scan(const Scan& s)
 
 /**
  * Merges the scan's intrinsic coordinates with the robot position.
+ * @param prev_transMat The previous transformation matrix
+ * @param prev_rPosOrg The previous position (x,y,z)
+ * @param prev_rPosThetaOrg The previous heading (theta_x, theta_y, theta_z)
+ */
+void Scan::mergeCoordinatesWithRoboterPosition(const double prev_transMat[16],
+									  const double prev_rPosOrg[3],
+									  const double prev_rPosThetaOrg[3])
+{
+  double drPos[3], drPosTheta[3];
+  // reset values  
+  rPos[0] = 0;
+  rPos[1] = 0;
+  rPos[2] = 0;
+  rPosTheta[0] = 0;
+  rPosTheta[1] = 0;
+  rPosTheta[2] = 0;
+  M4identity(transMat);
+
+  drPos[0] = rPosOrg[0] - prev_rPosOrg[0];
+  drPos[1] = rPosOrg[1] - prev_rPosOrg[1];
+  drPos[2] = rPosOrg[2] - prev_rPosOrg[2];
+  
+  drPosTheta[0] = rPosThetaOrg[0] - prev_rPosThetaOrg[0];
+  drPosTheta[1] = rPosThetaOrg[1] - prev_rPosThetaOrg[1];
+  drPosTheta[2] = rPosThetaOrg[2] - prev_rPosThetaOrg[2];
+
+  double tempR[9], Rinv[9];
+  EulerToMatrix3(prev_rPosThetaOrg, tempR); // convert previous rPosTheta
+                                            // to a rotation matrix tempR
+  M3inv(tempR, Rinv);                       // ... and invert it ...
+
+  // use old drPos and the inverted rotation matrix to get the new rPos
+  // that is the real delta
+  double drPosNeu[3];
+  drPosNeu[0] = drPos[0] * Rinv[0] + drPos[1] * Rinv[3] + drPos[2] * Rinv[6];
+  drPosNeu[1] = drPos[0] * Rinv[1] + drPos[1] * Rinv[4] + drPos[2] * Rinv[7];
+  drPosNeu[2] = drPos[0] * Rinv[2] + drPos[1] * Rinv[5] + drPos[2] * Rinv[8];
+  drPos[0] = drPosNeu[0];
+  drPos[1] = drPosNeu[1];
+  drPos[2] = drPosNeu[2];
+
+  // convert the deltas to a matrix
+  double alignxf[16];
+  EulerToMatrix4(drPos, drPosTheta, alignxf); 
+
+  // and transform the 3D scan  
+  transform(alignxf, INVALID);
+  
+  // and finally apply the transformation matrix of the last 3D scan
+  transform(prev_transMat, INVALID);
+}
+
+/**
+ * Merges the scan's intrinsic coordinates with the robot position.
  * @param prevScan The scan that's transformation is extrapolated,
  * i.e., odometry extrapolation
  *
@@ -302,20 +356,9 @@ Scan::Scan(const Scan& s)
  */
 void Scan::mergeCoordinatesWithRoboterPosition(const Scan* prevScan)
 {
-  // reset values
-  rPos[0] = 0;
-  rPos[1] = 0;
-  rPos[2] = 0;
-  rPosTheta[0] = 0;
-  rPosTheta[1] = 0;
-  rPosTheta[2] = 0;
-  M4identity(transMat); //needed because points are initial there
-  transform(transMatOrg, INVALID); //transform points to initial position
-
-  double tempMat[16], deltaMat[16];
-  M4inv(prevScan->transMatOrg, tempMat);
-  MMult(prevScan->transMat, tempMat, deltaMat);
-  transform(deltaMat, INVALID); //apply delta transformation of the previous scan
+  mergeCoordinatesWithRoboterPosition(prevScan->transMat, 
+				      prevScan->rPosOrg,
+				      prevScan->rPosThetaOrg);
 }
 
 
@@ -325,15 +368,15 @@ void Scan::mergeCoordinatesWithRoboterPosition(const Scan* prevScan)
  */
 void Scan::mergeCoordinatesWithRoboterPosition()
 {
-  // reset values
-  rPos[0] = 0;
-  rPos[1] = 0;
-  rPos[2] = 0;
-  rPosTheta[0] = 0;
-  rPosTheta[1] = 0;
-  rPosTheta[2] = 0;
-  M4identity(transMat);
-  transform(transMat, INVALID);
+  double last_transMat[16];
+  double last_rPosOrg[3];
+  double last_rPosThetaOrg[3];
+  M4identity(last_transMat);
+  last_rPosOrg[0] = last_rPosOrg[1] = last_rPosOrg[2] = 0.0; 
+  last_rPosThetaOrg[0] = last_rPosThetaOrg[1] = last_rPosThetaOrg[2] = 0.0;
+  mergeCoordinatesWithRoboterPosition(last_transMat,
+				      last_rPosOrg, 
+				      last_rPosThetaOrg);
 }
 
 /**
