@@ -85,7 +85,13 @@ inline void Scan::resetPose()
   M4inv(transMat, tinv);
   transform(tinv, INVALID);
 
-  Matrix4ToEuler(transMat, rPosTheta, rPos);
+  rPos[0] = rPosOrg[0];
+  rPos[1] = rPosOrg[1];
+  rPos[2] = rPosOrg[2];
+  rPosTheta[0] = rPosThetaOrg[0];
+  rPosTheta[1] = rPosThetaOrg[1];
+  rPosTheta[2] = rPosThetaOrg[2];
+  EulerToMatrix4(rPos, rPosTheta, transMat);
   
   M4identity(dalignxf);
 }
