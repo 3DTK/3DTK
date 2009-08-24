@@ -355,12 +355,12 @@ void readFrames(string dir, int start, int end, bool readInitial, reader_type &t
     while (frame_in.good()) {
 	 frameCounter++;	 
 	 double *transMatOpenGL = new double[16];
-   int type;
+   int algoTypeInt;
    Scan::AlgoType algoType;
 	 try {
 	   double transMat[16];
-	   frame_in >> transMat >> type;
-     algoType = (Scan::AlgoType)type;
+	   frame_in >> transMat >> algoTypeInt;
+     algoType = (Scan::AlgoType)algoTypeInt;
 
 	   // convert to OpenGL coordinate system
 	   double mirror[16];
