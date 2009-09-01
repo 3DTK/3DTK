@@ -398,6 +398,8 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &rand,
 	 case '7':  // = --cache
 	   use_cache = true;
 	   break;
+	 case '8':  // not used
+	   break;
 	 case '9':  // = --distLoop
 	   distLoop = atof(optarg);
 	   break;
