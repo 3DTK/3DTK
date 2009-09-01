@@ -197,7 +197,7 @@ Scan::~Scan()
 {
   if (outputFrames && fileNr != -1) {
     string filename = dir + "scan" + to_string(fileNr, 3) + ".frames";
-
+    
     ofstream fout(filename.c_str());
     if (!fout.good()) {
 	 cerr << "ERROR: Cannot open file " << filename << endl;
