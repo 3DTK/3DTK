@@ -1,0 +1,13 @@
+
+Always remember Arnold's Laws of Documentation:
+
+  (1) If it should exist, it doesn't.
+  (2) If it does exist, it's out of date.
+  (3) Only documentation for useless programs transcends the
+      first two laws.
+
+
+If you're still interested in the documentation, you can generate both
+a doxygen and some more information about the mathematical background
+an such, by typing "make docu" in the parent directory.
+

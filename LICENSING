@@ -1,12 +1,10 @@
-SLAM6D stands under the GPLv3 licence, which is included in this
+SLAM6D is released under the GPLv3 license, which is included in this
 document.
 
-In addition this source code contains the newmat library from Robert
-Davies, the csparse lib from Tim Davis. Please see their libraries
-before SLAM6D. Furthermore, the provided viewer application builds on
-glui by Paul Rademacher with its own licence. This libraries are only
-provided to simplify the installation of SLAM6D.
-
+In addition, the source code contains the 'newmat' library from Robert
+Davies and the 'csparse' library from Tim Davis; the viewer application
+uses the 'glui' extension by Paul Rademacher, all with their own license.
+These libraries are provided just to simplify the installation of SLAM6D.
 
 ----
 

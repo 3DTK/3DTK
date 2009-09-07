@@ -628,11 +628,9 @@ int main(int argc, char **argv)
   signal (SIGSEGV, sigSEGVhandler);
   signal (SIGINT,  sigSEGVhandler);
 
-  cout << "slam6D - A high efficient SLAM implementation based on scan matching" << endl
+  cout << "slam6D - A highly efficient SLAM implementation based on scan matching" << endl
        << "         with 6 degrees of freedom" << endl
-       << "(c) University of Osnabrueck, Germany, 2006 - 2007" << endl << endl
-       << "Restricted Usage" << endl
-       << "Don't use without permission" << endl << endl;
+       << "(c) University of Osnabrueck, Germany, 2006 - 2009" << endl << endl;
   
   if (argc <= 1) {
     usage(argv[0]);
@@ -675,7 +673,7 @@ int main(int argc, char **argv)
 		  use_cache, exportPts, distLoop, iterLoop, graphDist, type);
 
   cout << "slam6D will proceed with the following parameters:" << endl;
-  //@@@ to do
+  //@@@ to do :-)
 
   // Get Scans
   Scan::readScans(type, start, end, dir, maxDist, minDist, true);
@@ -891,6 +889,8 @@ int main(int argc, char **argv)
   delete my_icp6Dminimizer;
 
   cout << endl << endl;
-  cout << "Normal program end." << endl;
+  cout << "Normal program end." << endl
+	  << (red < 0 && rand < 0 ? "(-> HINT: For a significant speedup, please use the '-r' or '-R' parameter <-)\n"
+		 : "")
+	  << endl;
 }
-
