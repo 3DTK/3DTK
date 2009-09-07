@@ -25,6 +25,8 @@ display them (bin/show), and think about using the point reduction
 Three example scans are included in the dat directory, several
 larger data sets can be downloaded from the data repository,
 http://kos.informatik.uni-osnabrueck.de/3Dscans/
+(Alternatively, click on the "Data Repository" link on this project's
+web site on Sourceforge, http://slam6d.sourceforge.net/)
 
 EXAMPLES:
 (using the data set in the slam6d repository)

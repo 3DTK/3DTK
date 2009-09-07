@@ -1,0 +1,12 @@
+Please remember: The data here is just for "playing around" with the
+program.
+
+Real, larger and more useful data sets can be downloaded from the data
+repository, http://kos.informatik.uni-osnabrueck.de/3Dscans/
+(or click on the "Data Repository" link on this project's web site
+on Sourceforge, http://slam6d.sourceforge.net/)
+
+Or use your own data, and if it's stored in a different format then
+the onces that are already supported by our program, write your own
+scan_io function. It's easy!
+
