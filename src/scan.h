@@ -28,7 +28,7 @@ using std::stringstream;
 #include "globals.icc"
 
 enum reader_type {
-  UOS, UOS_MAP, UOS_FRAMES, UOS_MAP_FRAMES, OLD, RTS, RTS_MAP, RIEGL, IFP, ZAHN, PLY, WRL, XYZ, ZUF, IAIS, FRONT
+  UOS, UOS_MAP, UOS_FRAMES, UOS_MAP_FRAMES, OLD, RTS, RTS_MAP, RIEGL, IFP, ZAHN, PLY, WRL, XYZ, ZUF, IAIS, FRONT, X3D
 };
 
 // just some prototypes
