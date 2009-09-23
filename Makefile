@@ -9,7 +9,7 @@ SHOWSRC = src/show/
 GRIDSRC = src/grid/
 DOC     = doc/
 
-all: $(BIN)slam6D $(BIN)scan_io_uos.so $(BIN)scan_io_uos_map.so $(BIN)scan_io_uos_frames.so $(BIN)scan_io_uos_map_frames.so $(BIN)scan_io_old.so $(BIN)scan_io_rts.so $(BIN)scan_io_iais.so $(BIN)scan_io_rts_map.so $(BIN)scan_io_front.so $(BIN)scan_io_riegl.so $(BIN)scan_io_zuf.so $(BIN)scan_io_xyz.so $(BIN)scan_io_ifp.so $(BIN)scan_io_ply.so $(BIN)scan_io_wrl.so $(BIN)scan_io_zahn.so $(BIN)show $(BIN)2DGridder #$(BIN)convergence $(BIN)frame_to_graph $(BIN)graph_balancer
+all: $(BIN)slam6D $(BIN)scan_io_uos.so $(BIN)scan_io_uos_map.so $(BIN)scan_io_uos_frames.so $(BIN)scan_io_uos_map_frames.so $(BIN)scan_io_old.so $(BIN)scan_io_x3d.so $(BIN)scan_io_rts.so $(BIN)scan_io_iais.so $(BIN)scan_io_rts_map.so $(BIN)scan_io_front.so $(BIN)scan_io_riegl.so $(BIN)scan_io_zuf.so $(BIN)scan_io_xyz.so $(BIN)scan_io_ifp.so $(BIN)scan_io_ply.so $(BIN)scan_io_wrl.so $(BIN)scan_io_zahn.so $(BIN)show $(BIN)2DGridder #$(BIN)convergence $(BIN)frame_to_graph $(BIN)graph_balancer
 
 it:
 	@echo
@@ -218,6 +218,10 @@ $(BIN)scan_io_uos_map_frames.so: $(SRC)scan_io.h $(SRC)scan_io_uos_map_frames.h 
 $(BIN)scan_io_old.so: $(SRC)scan_io.h $(SRC)scan_io_old.h $(SRC)scan_io_old.cc $(SRC)point.h $(SRC)point.icc $(SRC)globals.icc
 	echo Compiling shared library for reading old UOS scans ...
 	$(GPP) $(CFLAGS) $(SHAREDFLAGS) -o $(BIN)scan_io_old.so $(SRC)scan_io_old.cc 
+
+$(BIN)scan_io_x3d.so: $(SRC)scan_io.h $(SRC)scan_io_x3d.h $(SRC)scan_io_x3d.cc $(SRC)point.h $(SRC)point.icc $(SRC)globals.icc
+	echo Compiling shared library for reading x3d scans ...
+	$(GPP) $(CFLAGS) $(SHAREDFLAGS) -o $(BIN)scan_io_x3d.so $(SRC)scan_io_x3d.cc 
 
 $(BIN)scan_io_rts.so: $(SRC)scan_io.h $(SRC)scan_io_rts.h $(SRC)scan_io_rts.cc $(SRC)point.h $(SRC)point.icc $(SRC)globals.icc
 	echo Compiling shared library for reading RTS scans ...
