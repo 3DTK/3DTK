@@ -1296,6 +1296,9 @@ void Scan::readScans(reader_type type,
   case FRONT:
     lib_string = "./bin/scan_io_front";
     break;
+  case X3D:
+    lib_string = "./bin/scan_io_x3d";
+    break;
   default:
     cerr << "Don't recognize format " << type << endl;
     exit(1);
