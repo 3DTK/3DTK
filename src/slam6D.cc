@@ -424,6 +424,7 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &rand,
 	   else if (strcasecmp(optarg, "wrl") == 0) type = WRL;
 	   else if (strcasecmp(optarg, "xyz") == 0) type = XYZ;
 	   else if (strcasecmp(optarg, "zuf") == 0) type = ZUF;
+	   else if (strcasecmp(optarg, "asc") == 0) type = ASC;
 	   else if (strcasecmp(optarg, "iais") == 0) type = IAIS;
 	   else if (strcasecmp(optarg, "front") == 0) type = FRONT;
 	   else if (strcasecmp(optarg, "x3d") == 0) type = X3D;
