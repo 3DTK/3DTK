@@ -64,14 +64,15 @@ int ScanIO_ifp::readScans(int start, int end, string &dir, int maxDist, int mind
   for (unsigned int i = 3; i <= 5; i++) euler[i] = rad(euler[i]);
  
   // some noise for the pose estimations
+  /*
   double t1 = (double)(rand() % 100);
   double t2 = (double)(rand() % 100);
   double t3 = (double)(rand() % 100);
   double t4 = (double)(rand() % 5) * 0.025;
-
   euler[4] = t4;
 
   cout << "dx " << t1 << " dy " << t2 << " dz " << t3 << " dtheta_y " << t4 << endl;
+  */
   
   int dummy;
   scan_in >> dummy;
@@ -79,19 +80,22 @@ int ScanIO_ifp::readScans(int start, int end, string &dir, int maxDist, int mind
     Point p;
     int intensity, red, green, blue;
     scan_in >> p.z >> p.x >> p.y >> intensity >> red >> green >> blue;
-    p.z -= 3515250;
-    p.x -= 5407000;
-    p.y -= 250;
-
+    
+    p.z -= 3515165;
+    p.x -= 5407003;
+    p.y -= 254;
+    
     p.x *= -100;
     p.y *= 100;
     p.z *= 100;
     p.type = 0;
 
+    /*
     p.z += t1;
     p.x += t2;
     p.y += t3;
-
+    */
+    //cout << p << endl;
     ptss.push_back(p);
   }
     
