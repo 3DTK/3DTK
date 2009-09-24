@@ -1290,6 +1290,9 @@ void Scan::readScans(reader_type type,
   case ZUF:
     lib_string = "./bin/scan_io_zuf";
     break;
+  case ASC:
+    lib_string = "./bin/scan_io_asc";
+    break;
   case IAIS:
     lib_string = "./bin/scan_io_iais";
     break;
