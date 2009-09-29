@@ -663,7 +663,6 @@ int main(int argc, char **argv)
   bool   exportPts  = false;
   int    loopSlam6DAlgo  = 0;
   int    lum6DAlgo  = 0;
-  bool   exportPoints = false;
   double distLoop   = 700.0;
   int iterLoop      = 100;
   double graphDist  = cldist;
@@ -864,7 +863,7 @@ int main(int argc, char **argv)
   long endtime = GetCurrentTimeInMilliSec() - starttime;
   cout << "Matching done in " << endtime << " milliseconds!!!" << endl;
 
-  if (exportPoints) {
+  if (exportPts) {
     cout << "Export all 3D Points" << endl;
     ofstream redptsout("points.pts");
     for(unsigned int i = 0; i < Scan::allScans.size(); i++) {
