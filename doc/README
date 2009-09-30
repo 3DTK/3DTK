@@ -8,6 +8,9 @@ Always remember Arnold's Laws of Documentation:
 
 
 If you're still interested in the documentation, you can generate both
-a doxygen and some more information about the mathematical background
-an such, by typing "make docu" in the parent directory.
+a doxygen version and some more information about the mathematical background
+by typing "make docu" in the parent directory.
+
+Furthermore, there are some relevant publications in the 'papers' directory,
+which are also cited in the source code.
 
