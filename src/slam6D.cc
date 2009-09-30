@@ -399,6 +399,7 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &rand,
 	   use_cache = true;
 	   break;
 	 case '8':  // not used
+	   exportPts = true;
 	   break;
 	 case '9':  // = --distLoop
 	   distLoop = atof(optarg);
@@ -864,7 +865,7 @@ int main(int argc, char **argv)
   cout << "Matching done in " << endtime << " milliseconds!!!" << endl;
 
   if (exportPts) {
-    cout << "Export all 3D Points" << endl;
+    cout << "Export all 3D Points to file \"points.pts\"" << endl;
     ofstream redptsout("points.pts");
     for(unsigned int i = 0; i < Scan::allScans.size(); i++) {
 	 for (int j = 0; j < Scan::allScans[i]->get_points_red_size(); j++) {
