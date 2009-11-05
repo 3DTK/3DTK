@@ -34,17 +34,32 @@ void elch6Dslerp::close_loop(const vector <Scan *> &allScans, int first, int las
 {
   int n = num_vertices(g);
   graph_t grb[4];
-  Matrix C(7, 7);
-  graph_traits <graph_t>::edge_iterator ei, ei_end;
-  for(tie(ei, ei_end) = edges(g); ei != ei_end; ei++) {
+  graph_traits <graph_t>::edge_iterator ei = edges(g).first;
+  int num_arcs = num_edges(g);
+  int li = 0;
+#ifdef _OPENMP
+#pragma omp parallel for firstprivate(li, ei)
+#endif
+  for(int i = 0; i < num_arcs; i++) {
+    for(;i > li; li++, ei++) ;
+    for(;i < li; li--, ei--) ;
+    Matrix C(7, 7);
     int from = source(*ei, g);
     int to = target(*ei, g);
     lum6DQuat::covarianceQuat(allScans[from], allScans[to], my_icp6D->get_use_cache(), my_icp6D->get_rnd(), my_icp6D->get_max_dist_match2(), &C);
     C = C.i();
     for(int j = 0; j < 3; j++) {
+#ifdef _OPENMP
+#pragma omp critical
+#endif
       add_edge(from, to, fabs(C(j + 1, j + 1)), grb[j]);
     }
+#ifdef _OPENMP
+#pragma omp critical
+#endif
     add_edge(from, to, fabs(C(4, 4)) + fabs(C(5, 5)) + fabs(C(6, 6)) + fabs(C(7, 7)), grb[3]);
+    li++;
+    ei++;
   }
 
   double *weights[4];
