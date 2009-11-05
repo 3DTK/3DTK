@@ -38,7 +38,7 @@ int ScanIO_rts::readScans(int start, int end, string &dir,
   static ifstream pose_in;
   ifstream scan_in;
 
-  if (fileCounter > end) return -1;
+  if (end > -1 && fileCounter > end) return -1;
   
   if (fileCounter == start) {
     poseFileName = dir + "odometry_0_sync_interpol.dat";
@@ -56,7 +56,7 @@ int ScanIO_rts::readScans(int start, int end, string &dir,
 		>> euler[3] >> euler[5] >> euler[4];                 // theta_x, theta_y, theta_z
   
   scanFileName = dir + "scan3d_0_" + to_string(fileCounter) + ".3d";
-    
+
   scan_in.open(scanFileName.c_str());
   // read 3D scan
 
