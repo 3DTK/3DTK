@@ -690,7 +690,7 @@ void Scan::createTrees(bool use_cache)
 {
   cerr << "create " << allScans.size() << " k-d trees " << flush;
   int i;
-#ifdef _OPENMPx
+#ifdef _OPENMP
 #pragma omp parallel for schedule(dynamic)
 #endif
     for (i = 0; i < (int)allScans.size(); i++) {
@@ -707,7 +707,7 @@ void Scan::createTrees(bool use_cache)
 void Scan::deleteTrees()
 {
   int i;
-#ifdef _OPENMPx
+#ifdef _OPENMP
 #pragma omp parallel for schedule(dynamic)
 #endif
   for (i = 0; i < (int)allScans.size(); i++) { 
