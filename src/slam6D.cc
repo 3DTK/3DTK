@@ -858,7 +858,9 @@ int main(int argc, char **argv)
         delete my_loopSlam6D;
       }
     }
-    delete my_graphSlam6D;
+    if(my_graphSlam6D > 0) {
+      delete my_graphSlam6D;
+    }
   }
 
   long endtime = GetCurrentTimeInMilliSec() - starttime;
