@@ -235,8 +235,8 @@ void usage(char* prog)
  * @param type parsing result - file format to be read
  * @return 0, if the parsing was successful, 1 otherwise 
  */
-int parseArgs(int argc,char **argv, string &dir, int& start, int& end, int& maxDist, int& minDist,
-		    bool &readInitial, reader_type &type)
+int parseArgs(int argc,char **argv, string &dir, int& start, int& end, int& maxDist, int& minDist, 
+              double &red, bool &readInitial, reader_type &type)
 {
   start   = 0;
   end     = -1; // -1 indicates no limitation
@@ -264,6 +264,9 @@ int parseArgs(int argc,char **argv, string &dir, int& start, int& end, int& maxD
 	   break;
 	 case 'M':
 	   minDist = atoi(optarg);
+	   break;
+	 case 'r':
+	   red = atof(optarg);
 	   break;
 	 case 't':
 	   readInitial = true;
@@ -540,7 +543,7 @@ int main(int argc, char **argv){
   if(argc <= 1){
     usage(argv[0]);
   }
-
+  double red   = -1.0;
   int start = 0, end = -1, maxDist = -1, minDist = -1;
   string dir;
   bool readInitial = false;
@@ -548,7 +551,7 @@ int main(int argc, char **argv){
 
   path_file_name = new char[255];
   
-  parseArgs(argc, argv, dir, start, end, maxDist, minDist, readInitial, type);
+  parseArgs(argc, argv, dir, start, end, maxDist, minDist, red, readInitial, type);
   scandir = dir;
 
   // init and create display
@@ -572,6 +575,20 @@ int main(int argc, char **argv){
 
   // Get Scans
   Scan::readScans(type, start, end, dir, maxDist, minDist, 0);
+  
+  int end_reduction = (int)Scan::allScans.size();
+  #ifdef _OPENMP
+  #pragma omp parallel for schedule(dynamic)
+  #endif
+  for (int iterator = 0; iterator < end_reduction; iterator++) {
+    if (red > 0) {
+	    cout << "Reducing Scan No. " << iterator << endl;
+    } else {
+	    cout << "Copying Scan No. " << iterator << endl;
+    }
+    // reduction filter for current scan!
+    Scan::allScans[iterator]->calcReducedPoints(red);
+  }
   readFrames(dir, start, end, readInitial, type);
   createDisplayLists();
   
