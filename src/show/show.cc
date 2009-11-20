@@ -247,7 +247,7 @@ int parseArgs(int argc,char **argv, string &dir, int& start, int& end, int& maxD
   extern int optind;
 
   cout << endl;
-  while ((c = getopt (argc, argv, "f:s:e:m:M:p:wt")) != -1)
+  while ((c = getopt (argc, argv, "f:s:e:r:m:M:p:wt")) != -1)
     switch (c)
 	 {
 	 case 's':
