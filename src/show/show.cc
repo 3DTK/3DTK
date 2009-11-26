@@ -364,7 +364,7 @@ void readFrames(string dir, int start, int end, bool readInitial, reader_type &t
 	 try {
 	   double transMat[16];
 	   frame_in >> transMat >> algoTypeInt;
-     algoType = (Scan::AlgoType)algoTypeInt;
+	   algoType = (Scan::AlgoType)algoTypeInt;
 
 	   // convert to OpenGL coordinate system
 	   double mirror[16];
@@ -590,11 +590,33 @@ int main(int argc, char **argv){
     Scan::allScans[iterator]->calcReducedPoints(red);
   }
   readFrames(dir, start, end, readInitial, type);
+
+
+  cout << "Exporting the trajectory to \"trajectory.dat\"." << endl;
+  ofstream traj("trajectory.dat");
+  double *test;
+  traj << "# corrected pose (x,y,z), original pose (x,y,z)" << endl;
+  for(unsigned int i = 0; i<Scan::allScans.size(); i++){
+    if(frameNr > -1 && frameNr < (int)MetaMatrix[1].size()) {
+	 if (MetaAlgoType[i][frameNr] == Scan::INVALID) continue;
+	 test = MetaMatrix[i][frameNr];
+    } else {
+	 test = MetaMatrix[i].back();
+    }
+    //glVertex3f(test[12], test[13] + 500, test[14]);
+    traj << test[12] << " " << test[13] << " " << (fabs(test[14]) < 0.0001 ? test[14]:-1.0*test[14])  << " "
+	    << Scan::allScans[i]->get_rPos()[0] << " "
+	    << Scan::allScans[i]->get_rPos()[1] << " "
+	    << Scan::allScans[i]->get_rPos()[2] 
+	    << endl;
+  }
+  traj.close();
+  traj.clear();
+  
+  
   createDisplayLists();
   
   glutMainLoop();
 
   delete [] path_file_name;
 }
-
-

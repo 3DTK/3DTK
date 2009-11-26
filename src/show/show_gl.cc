@@ -33,7 +33,7 @@ void DrawPoints(GLenum mode)
     for(int iterator = (int)vvertexArrayList.size()-1; iterator >= 0; iterator--) {
 
 	 if (MetaAlgoType[iterator][frameNr] == Scan::INVALID) continue;
-   selectColors(MetaAlgoType[iterator][frameNr]);	 
+	 selectColors(MetaAlgoType[iterator][frameNr]);	 
 	 glPushMatrix();
 	 glMultMatrixd(MetaMatrix[iterator][frameNr]);
 
