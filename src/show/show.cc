@@ -465,18 +465,22 @@ void readFrames(string dir, int start, int end, bool readInitial, reader_type &t
  * create display lists
  * @to do general framework for color & type definitions
  */
-void createDisplayLists()
+void createDisplayLists(bool reduced)
 {
   for(unsigned int i = 0; i < Scan::allScans.size() ; i++) {
- 
+
     // count points
     int color1 = 0, color2 = 0;
-    for (unsigned int jterator = 0; jterator < Scan::allScans[i]->get_points()->size(); jterator++) {
-	 if (Scan::allScans[i]->get_points()->at(jterator).type & TYPE_GROUND) {
-	   color1++;
-	 } else {
-		color2++;
-	 }
+    if (!reduced) {
+      for (unsigned int jterator = 0; jterator < Scan::allScans[i]->get_points()->size(); jterator++) {
+        if (Scan::allScans[i]->get_points()->at(jterator).type & TYPE_GROUND) {
+          color1++;
+        } else {
+          color2++;
+        }
+      }
+    } else {
+      color2 = 3* Scan::allScans[i]->get_points_red_size();
     }
     
     // allocate memory
@@ -485,18 +489,27 @@ void createDisplayLists()
 
     // fill points
     color1 = 0, color2 = 0;
-    for (unsigned int jterator = 0; jterator < Scan::allScans[i]->get_points()->size(); jterator++) {
-	 if (Scan::allScans[i]->get_points()->at(jterator).type & TYPE_GROUND) {
-	   myvertexArray1->array[color1] = Scan::allScans[i]->get_points()->at(jterator).x;
-	   myvertexArray1->array[color1+1] = Scan::allScans[i]->get_points()->at(jterator).y;
-	   myvertexArray1->array[color1+2] = Scan::allScans[i]->get_points()->at(jterator).z;
-	   color1 += 3;
-	 } else {
-	   myvertexArray2->array[color2] = Scan::allScans[i]->get_points()->at(jterator).x;
-	   myvertexArray2->array[color2+1] = Scan::allScans[i]->get_points()->at(jterator).y;
-	   myvertexArray2->array[color2+2] = Scan::allScans[i]->get_points()->at(jterator).z;
-	   color2 += 3;
-	 }
+    if (reduced) {
+      for (unsigned int jterator = 0; jterator < Scan::allScans[i]->get_points_red_size(); jterator++) {
+        myvertexArray2->array[color2] = Scan::allScans[i]->get_points_red()[jterator][0];
+        myvertexArray2->array[color2+1] = Scan::allScans[i]->get_points_red()[jterator][1];
+        myvertexArray2->array[color2+2] = Scan::allScans[i]->get_points_red()[jterator][2];
+          color2 += 3;
+      }
+    } else {
+      for (unsigned int jterator = 0; jterator < Scan::allScans[i]->get_points()->size(); jterator++) {
+        if (Scan::allScans[i]->get_points()->at(jterator).type & TYPE_GROUND) {
+          myvertexArray1->array[color1] = Scan::allScans[i]->get_points()->at(jterator).x;
+          myvertexArray1->array[color1+1] = Scan::allScans[i]->get_points()->at(jterator).y;
+          myvertexArray1->array[color1+2] = Scan::allScans[i]->get_points()->at(jterator).z;
+          color1 += 3;
+        } else {
+          myvertexArray2->array[color2] = Scan::allScans[i]->get_points()->at(jterator).x;
+          myvertexArray2->array[color2+1] = Scan::allScans[i]->get_points()->at(jterator).y;
+          myvertexArray2->array[color2+2] = Scan::allScans[i]->get_points()->at(jterator).z;
+          color2 += 3;
+        }
+      }
     }
 
     glNewList(myvertexArray1->name, GL_COMPILE);
@@ -613,8 +626,11 @@ int main(int argc, char **argv){
   traj.close();
   traj.clear();
   
-  
-  createDisplayLists();
+  if (red > 0) {
+    createDisplayLists(true);
+  } else {
+    createDisplayLists(false);
+  }
   
   glutMainLoop();
 
