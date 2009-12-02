@@ -82,6 +82,7 @@ void pathAnimate1(int i);
 int calcFrameNo();
 int calcNoOfPoints(vector<PointXY>);
 
+void createDisplayLists(bool reduced=false);
 
 enum { ROTATION_X, ROTATION_RX, ROTATION_Y, ROTATION_RY, ROTATION_Z, ROTATION_RZ };
   /** enumeration for translation */
