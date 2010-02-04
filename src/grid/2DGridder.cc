@@ -68,7 +68,7 @@ void usage(char* prog)
 	 << "  -M NR   set the minimal range distance to NR 'units' (unit of scan data, e.g. cm)" << endl
 	 << "  -f F    format = F" << endl
 	 << "          using shared library F for input" << endl
-	 << "          (chose F from {uos, uos_map, uos_frames, uos_map_frames, old, rts, rts_map, ifp, riegl, zahn, ply})" << endl
+	 << "          (chose F from {uos, uos_map, uos_frames, uos_map_frames, old, rts, rts_map, ifp, riegl_bin, riegl_txt, zahn, ply})" << endl
 	 << "  -o DIR  the output directory (if none is set use the input directory" << endl 
 	 << "  -t      read a file containing a initial transformation matrix" << endl
 	 << "  -H NR   set the maximal relevant height to NR 'units' (unit of scan data, e.g. cm)" << endl
@@ -217,7 +217,8 @@ int parseArgs(int argc, char **argv,
 		else if (strcasecmp(optarg, "rts") == 0) type = RTS;
 		else if (strcasecmp(optarg, "rts_map") == 0) type = RTS_MAP;
 		else if (strcasecmp(optarg, "ifp") == 0) type = IFP;
-		else if (strcasecmp(optarg, "riegl") == 0) type = RIEGL;
+		else if (strcasecmp(optarg, "riegl_txt") == 0) type = RIEGL_TXT;
+		else if (strcasecmp(optarg, "riegl_bin") == 0) type = RIEGL_BIN;
 		else if (strcasecmp(optarg, "zahn") == 0) type = ZAHN;
 		else if (strcasecmp(optarg, "ply") == 0) type = PLY;
 		else {

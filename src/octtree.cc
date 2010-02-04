@@ -177,7 +177,7 @@ void OctTree::countPointsAndQueue(const vector<double*> &i_points,
     for (int j = 0; j < 8; j++) {
 	 if (fabs(i_points[i][0] - center[j][0]) <= x_size) {
 	   if (fabs(i_points[i][1] - center[j][1]) <= y_size) {
-		if (fabs(i_points[i][2] - center[j][2]) <=  z_size) {
+		if (fabs(i_points[i][2] - center[j][2]) <= z_size) {
 		  count[j]++;
 		  points[j].push_back(i_points[i]);
 		  break;
@@ -218,7 +218,7 @@ void OctTree::countPointsAndQueue(double **pts, int n,
     for (int j = 0; j < 8; j++) {
 	 if (fabs(pts[i][0] - center[j][0]) <= x_size) {
 	   if (fabs(pts[i][1] - center[j][1]) <= y_size) {
-		if (fabs(pts[i][2] - center[j][2]) <=  z_size) {
+		if (fabs(pts[i][2] - center[j][2]) <= z_size) {
 		  count[j]++;
 		  points[j].push_back( pts[i] );
 		  break;
@@ -261,7 +261,7 @@ void OctTree::GetOctTreeCenter(vector<double*> &c)
  */
 OctTree::~OctTree() {
   for(int i = 0; i < 8; i++) {
-    if (child[i] !=0) {
+    if (child[i] != 0) {
       delete child[i];
       child[i] = 0;
     }

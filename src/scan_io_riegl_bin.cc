@@ -5,7 +5,7 @@
  * @author Andreas Nuechter. Institute of Computer Science, University of Osnabrueck, Germany.
  */
 
-#include "scan_io_riegl.h"
+#include "scan_io_riegl_bin.h"
 #include "globals.icc"
 #include <fstream>
 using std::ifstream;
@@ -28,9 +28,7 @@ using std::swap;
  * Scan poses will NOT be initialized after a call
  * to this function. Initial pose estimation works 
  * only with the -p switch, i.e., trusting the initial
- * estimations by Riegl. Actually, the Riegl poses
- * are high precise and this function puts noise
- * on it.
+ * estimations by Riegl. 
  * 
  * @param start Starts to read with this scan
  * @param end Stops with this scan
@@ -40,8 +38,8 @@ using std::swap;
  * @param euler Initital pose estimates (will not be applied to the points
  * @param ptss Vector containing the read points
  */
-int ScanIO_riegl::readScans(int start, int end, string &dir, int maxDist, int mindist,
-					   double *euler, vector<Point> &ptss)
+int ScanIO_riegl_bin::readScans(int start, int end, string &dir, int maxDist, int mindist,
+						  double *euler, vector<Point> &ptss)
 {
   static int fileCounter = start;
   string scanFileName;
@@ -132,7 +130,7 @@ extern "C" __declspec(dllexport) ScanIO* create()
 extern "C" ScanIO* create()
 #endif
 {
-  return new ScanIO_riegl;
+  return new ScanIO_riegl_bin;
 }
 
 
