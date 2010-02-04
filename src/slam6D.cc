@@ -152,7 +152,7 @@ void usage(char* prog)
 	  << endl
 	  << bold << "  -f" << normal << " F, " << bold << "--format=" << normal << "F" << endl
 	  << "         using shared library F for input" << endl
-	  << "         (chose F from {uos, uos_map, uos_frames, uos_map_frames, old, rts, rts_map, ifp, riegl, zahn, ply})" << endl
+	  << "         (chose F from {uos, uos_map, uos_frames, uos_map_frames, old, rts, rts_map, ifp, riegl_txt, riegl_bin, zahn, ply})" << endl
 	  << endl
 	  << bold << "  -G" << normal << " NR, " << bold << "--graphSlam6DAlgo=" << normal << "NR   [default: 0]" << endl
 	  << "         selects the minimizazion method for the SLAM matching algorithm" << endl
@@ -419,7 +419,8 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &rand,
 	   else if (strcasecmp(optarg, "rts") == 0) type = RTS;
 	   else if (strcasecmp(optarg, "rts_map") == 0) type = RTS_MAP;
 	   else if (strcasecmp(optarg, "ifp") == 0) type = IFP;
-	   else if (strcasecmp(optarg, "riegl") == 0) type = RIEGL;
+	   else if (strcasecmp(optarg, "riegl_txt") == 0) type = RIEGL_TXT;
+	   else if (strcasecmp(optarg, "riegl_bin") == 0) type = RIEGL_BIN;
 	   else if (strcasecmp(optarg, "zahn") == 0) type = ZAHN;
 	   else if (strcasecmp(optarg, "ply") == 0) type = PLY;
 	   else if (strcasecmp(optarg, "wrl") == 0) type = WRL;

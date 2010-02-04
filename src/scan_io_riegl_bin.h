@@ -20,7 +20,7 @@ using std::vector;
  *
  * The compiled class is available as shared object file
  */
-class ScanIO_riegl : public ScanIO {
+class ScanIO_riegl_bin : public ScanIO {
 public:
   virtual int readScans(int start, int end, string &dir, int maxDist, int mindist,
 				    double *euler, vector<Point> &ptss);
