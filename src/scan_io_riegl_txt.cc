@@ -51,7 +51,7 @@ int ScanIO_riegl_txt::readScans(int start, int end, string &dir, int maxDist, in
   if (end > -1 && fileCounter > end) return -1; // 'nuf read
 
   
-  poseFileName = dir + "scan" + to_string(fileCounter,3) + ".pose";
+  poseFileName = dir + "scan" + to_string(fileCounter,3) + ".dat";
   scanFileName = dir + "scan" + to_string(fileCounter,3) + ".txt";
     
   scan_in.open(scanFileName.c_str());
@@ -64,9 +64,6 @@ int ScanIO_riegl_txt::readScans(int start, int end, string &dir, int maxDist, in
   cout << "Processing Scan " << scanFileName;
   cout.flush();
   
-  char firstline[255];
-  scan_in.getline(firstline, 255);
-
   double rPos[3], rPosTheta[16];
   double inMatrix[16], tMatrix[16];
   for (unsigned int i = 0; i < 16; pose_in >> inMatrix[i++]);
@@ -83,10 +80,6 @@ int ScanIO_riegl_txt::readScans(int start, int end, string &dir, int maxDist, in
   euler[4] = rPosTheta[1];
   euler[5] = rPosTheta[2];
 
-  double test[16], test1[16];
-  EulerToMatrix4(rPos, rPosTheta, test);
-  M4inv(test, test1);
-
   long num_pts = 0;
   if (scan_in.good()) {
     scan_in >> num_pts;
@@ -97,14 +90,13 @@ int ScanIO_riegl_txt::readScans(int start, int end, string &dir, int maxDist, in
   
   while (scan_in.good()) {
     Point p;
-    double dummy;
-    scan_in >> p.x >> p.z >> p.y >> dummy >> dummy >> dummy >> dummy;
+    double range, theta, phi, reflectance;
+    scan_in >> p.x >> p.z >> p.y >> range >> theta >> phi >> reflectance;
     /*
     p.x *= 100;
     p.y *= 100;
     p.z *= 100;
     */
-    p.transform(test1);
 
     ptss.push_back(p);
   }
