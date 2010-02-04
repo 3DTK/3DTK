@@ -162,8 +162,9 @@ void newMenu()
   glui2->add_column_to_panel(nav_panel, false );
   glui2->add_translation_to_panel(nav_panel, "Move Z", GLUI_TRANSLATION_Z,
 						    &obj_pos_button[2], -1, update_view_translation);
-  
 
+  glui2->add_column_to_panel(nav_panel, false);
+  glui2->add_checkbox_to_panel(nav_panel, "MouseNav", &cameraNavMouseMode );
   
   /*** Create the right subwindow ***/
   glui1 = GLUI_Master.create_glui("3D_Viewer - Selection");
