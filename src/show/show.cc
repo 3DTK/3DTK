@@ -134,6 +134,17 @@ int show_cameras         = 1;             // Show the camera boxes in the viewer
  */
 int show_path            = 1;             // Show the camera movement path ?
 
+/**
+ * Camera navigation by mouse or by panel
+ */
+int cameraNavMouseMode  = 1;
+
+int mouseNavX, mouseNavY;
+int mouseNavButton;
+
+double mouseRotX = 0.0;
+double mouseRotY = 0.0;
+
 //@@@
 int animate_both         = 0;             // Animate both scan matchin and path?
 

@@ -254,8 +254,11 @@ void DisplayItFunc(GLenum mode)
   QuaternionToAxisAngle(quat, axis, angle);
 
   // do the model-transformation
-  glRotated(angle, axis[0], axis[1], axis[2]);   //rotate the camera
-
+  if (cameraNavMouseMode == 1) {
+    glRotated( mouseRotX, 1, 0, 0);
+    glRotated( mouseRotY, 0, 1, 0);
+  } else glRotated(angle, axis[0], axis[1], axis[2]);    // rotate the camera
+  
   glTranslated(X, Y, Z);       // move camera	
 
 //   cout << "Position  :" << X << " " << Y << " " << Z << endl;
@@ -356,6 +359,7 @@ void DisplayItFunc(GLenum mode)
 void topView()
 {
   static GLdouble save_qx, save_qy, save_qz, save_qangle, save_X, save_Y, save_Z;
+  static GLdouble saveMouseRotX, saveMouseRotY;
   
   if (!showTopView) // set to top view
     {
@@ -368,11 +372,15 @@ void topView()
 	 save_qy     = quat[1];
 	 save_qz     = quat[2];
 	 save_qangle = quat[3];
+	 saveMouseRotX = mouseRotX;
+	 saveMouseRotY = mouseRotY;
 	 
 	 Y = Y - 350.0;
 	 Z = Z + 500.0;
 	 quat[3] = quat[0] = sqrt(0.5);
 	 quat[1] = quat[2] = 0.0;
+	 mouseRotX = 90;
+	 mouseRotY = 0;
 	 
 	 haveToUpdate = 2;
     } else {
@@ -386,6 +394,8 @@ void topView()
 	 quat[1] = save_qy;
 	 quat[2] = save_qz;
 	 quat[3] = save_qangle;
+	 mouseRotX = saveMouseRotX;
+	 mouseRotY = saveMouseRotY;
 	 
 	 haveToUpdate = 2;	 
   }
@@ -860,7 +870,8 @@ void CallBackMouseFunc(int button, int state, int x, int y)
   GLint hits;
   GLint viewport[4];
 
-  if (state == GLUT_DOWN && (button == GLUT_LEFT_BUTTON || button == GLUT_RIGHT_BUTTON)) {
+  if(cameraNavMouseMode != 1) {
+   if (state == GLUT_DOWN && (button == GLUT_LEFT_BUTTON || button == GLUT_RIGHT_BUTTON)) {
 
     if (!showTopView) {
 		
@@ -912,7 +923,75 @@ void CallBackMouseFunc(int button, int state, int x, int y)
 
     }
   }
+  } else {
+   
+    if( state == GLUT_DOWN) {
+
+      mouseNavX = x;
+      mouseNavY = y;
+      mouseNavButton = button;
+    }
+  }
 }
+
+void CallBackMouseMotionFunc(int x, int y) {
+  if(cameraNavMouseMode == 1) {
+    double mat[9];
+    double mouseRotXRand = M_PI * mouseRotX / 180; 
+    double mouseRotYRand = M_PI * (360-mouseRotY) / 180;
+    mat[0] = cos(mouseRotYRand);
+    mat[1] = 0;
+    mat[2] = sin(mouseRotYRand);
+    mat[3] = sin(mouseRotXRand) * sin(mouseRotYRand);
+    mat[4] = cos(mouseRotXRand);
+    mat[5] = -cos(mouseRotYRand) * sin(mouseRotXRand);
+    mat[6] = -cos(mouseRotXRand) * sin(mouseRotYRand);
+    mat[7] = sin(mouseRotXRand);
+    mat[8] = cos(mouseRotXRand) * cos(mouseRotYRand);
+//  QuaternionToMatrix4(quat, mat);
+    int deltaMouseX = x - mouseNavX;
+    int deltaMouseY = mouseNavY - y;
+    int deltaMouseZ = y - mouseNavY;
+    mouseNavX = x;
+    mouseNavY = y;
+    if(!camMode) {
+      double transX, transY, transZ;
+      transX = transY = transZ = 0.0;
+      if( mouseNavButton == GLUT_RIGHT_BUTTON){
+        if ( showTopView ) {
+          deltaMouseX *= 5;
+          deltaMouseY *= 5;
+        }
+        transX = deltaMouseX * mat[0] + -deltaMouseY * mat[3];
+        transY = deltaMouseX * mat[1] + deltaMouseY * mat[4];
+        transZ = -deltaMouseX * mat[2] + deltaMouseY * mat[5]; 
+      } else if( mouseNavButton == GLUT_MIDDLE_BUTTON ){
+        if ( !showTopView ) {
+          deltaMouseY *= -5;
+          deltaMouseZ *= -5;
+        }
+        transX = deltaMouseX * mat[0] + deltaMouseZ * mat[6];
+        transY = deltaMouseX * mat[1] + deltaMouseY * mat[7];      
+        transZ = -deltaMouseX * mat[2] + -deltaMouseZ * mat[8];
+      } else if ( mouseNavButton == GLUT_LEFT_BUTTON ){
+        if ( !showTopView ){
+          mouseRotX += deltaMouseY;
+          mouseRotY -= deltaMouseX;
+          if (mouseRotX < -90) mouseRotX=90;
+          else if (mouseRotX > 90) mouseRotX=90;
+          if (mouseRotY > 360) mouseRotY=0;
+          else if (mouseRotY < 0) mouseRotY=360;
+        }
+      }
+      X += transX;
+      Y += transY;
+      Z += transZ;
+      haveToUpdate = 1;
+    }
+  }
+}
+
+
 
 //--------------------------------------------------------------------------------
 
@@ -932,6 +1011,7 @@ void initScreenWindow()
   glutReshapeFunc( CallBackReshapeFunc );
   glutMouseFunc  ( CallBackMouseFunc );
   glutKeyboardFunc ( CallBackKeyboardFunc);
+  glutMotionFunc ( CallBackMouseMotionFunc); 
   glutSpecialFunc ( CallBackSpecialFunc);
   GLUI_Master.set_glutReshapeFunc( CallBackReshapeFunc );
   GLUI_Master.set_glutIdleFunc( CallBackIdleFunc );
