@@ -1272,8 +1272,11 @@ void Scan::readScans(reader_type type,
   case IFP:
     lib_string = "./bin/scan_io_ifp";
     break;
-  case RIEGL:
-    lib_string = "./bin/scan_io_riegl";
+  case RIEGL_TXT:
+    lib_string = "./bin/scan_io_riegl_txt";
+    break;
+  case RIEGL_BIN:
+    lib_string = "./bin/scan_io_riegl_BIN";
     break;
   case ZAHN:
     lib_string = "./bin/scan_io_zahn";

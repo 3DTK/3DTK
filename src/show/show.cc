@@ -215,7 +215,7 @@ void usage(char* prog)
 	  << "  -m NR   set the maximal range distance to NR 'units' (unit of scan data, e.g. cm)" << endl
 	  << bold << "  -f" << normal << " F, " << bold << "--format=" << normal << "F" << endl
 	  << "         using shared library F for input" << endl
-	  << "         (chose F from {uos, uos_map, uos_frames, uos_map_frames, old, rts, rts_map, ifp, riegl, zahn, ply})" << endl << endl
+	  << "         (chose F from {uos, uos_map, uos_frames, uos_map_frames, old, rts, rts_map, ifp, riegl_bin, riegl_txt, zahn, ply})" << endl << endl
 	  << endl;
   exit(1);
 }
@@ -280,7 +280,8 @@ int parseArgs(int argc,char **argv, string &dir, int& start, int& end, int& maxD
 	   else if (strcasecmp(optarg, "rts") == 0) type = RTS;
 	   else if (strcasecmp(optarg, "rts_map") == 0) type = RTS_MAP;
 	   else if (strcasecmp(optarg, "ifp") == 0) type = IFP;
-	   else if (strcasecmp(optarg, "riegl") == 0) type = RIEGL;
+	   else if (strcasecmp(optarg, "riegl_txt") == 0) type = RIEGL_TXT;
+	   else if (strcasecmp(optarg, "riegl_bin") == 0) type = RIEGL_BIN;
 	   else if (strcasecmp(optarg, "zahn") == 0) type = ZAHN;
 	   else if (strcasecmp(optarg, "ply") == 0) type = PLY;
 	   else if (strcasecmp(optarg, "wrl") == 0) type = WRL;
@@ -440,12 +441,13 @@ void readFrames(string dir, int start, int end, bool readInitial, reader_type &t
 	 EulerToMatrix4(euler, euler+3, MetaMatrix[i].back());
 	 cout << MetaMatrix[i].back() << endl << endl;
     }
+    
     ofstream out("6Dreg.dat");
     for (unsigned int i = 0; i < MetaMatrix.size(); i++) {
       for (int j = 0; j < 16; j++) out << MetaMatrix[i].back()[j] << " ";
        out << endl;
     }
-  */
+  
   /*
    ofstream out1("trajectory.pose.dat");
    for (unsigned int i = 0; i < MetaMatrix.size(); i++) {
