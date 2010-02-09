@@ -27,9 +27,17 @@ using std::swap;
  * Scan poses will NOT be initialized after a call
  * to this function. Initial pose estimation works 
  * only with the -p switch, i.e., trusting the initial
- * estimations by Riegl. Actually, the Riegl poses
- * are high precise and this function puts noise
- * on it.
+ * estimations by Riegl.
+ *
+ * The scans have to be exported from the Riegl software
+ * as follows:
+ * 1. Export point cloud data to ASCII
+ *    Use Scanners own Coordinate System (SOCS)
+ *    X Y Z Range Theta Phi Reflectance
+ * 2. Export acqusition location (after you have registered
+ *    with the Riegl software)
+ *    Export SOP
+ *    Write out as .dat file 
  * 
  * @param start Starts to read with this scan
  * @param end Stops with this scan
