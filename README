@@ -23,6 +23,9 @@ IMPORTANT:
 Take care to register scans first (bin/slam6D) before trying to
 display them (bin/show), and think about using the point reduction
 (see section 6) for a much faster scan matching result.
+Extremely large scans might need to be reduced (using bin/scan_red) before
+registration. This will write reduced scans in the uos format into a directory
+"reduced" in the data directory.
 
 Three example scans are included in the dat directory, several
 larger data sets can be downloaded from the data repository,
@@ -54,6 +57,12 @@ bin/show -s 22 -e 924 -f rts /home/nuechter/dat/dat_hannover2
 bin/slam6D -s 1 -e 76 -r 10 -m 3000 -d 50 -i 1000 --epsICP=0.000001 --lastscan
            -I 50 -D 75 --clpairs=5000 -f old /home/nuechter/dat/dat_mine1/
 bin/show -s 1 -e 76 -m 3000 -f old /home/nuechter/dat/dat_mine1/
+
+(using bremen_city.zip from http://kos.informatik.uni-osnabrueck.de/3Dscans/)
+bin/scan_red -s 0 -e 12 -r 10 /home/nuechter/dat/bremen_city
+bin/slam6D -a 2 -q /home/nuechter/dat/bremen_city/reduced -f uos -d 150 --lastscan 
+            -s 0 -e 12 --anim=1 -n /home/nuechter/dat/bremen_city/bremen.net -G 1 -D 100 
+            -i 0 -I 50 -p --epsSLAM=0.0 bin/show -s 0 -e 12 /home/nuechter/dat/bremen_city/reduced
 
 A reference manual can be found in doc/refman.pdf resp.
 doc/html/index.html (type in 'make docu' to compile the doxygen

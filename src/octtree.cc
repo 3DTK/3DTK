@@ -255,6 +255,48 @@ void OctTree::GetOctTreeCenter(vector<double*> &c)
   }
 }
 
+/**
+ * Randomly selects a point from each bucket and returns them in the parameter.
+ */
+void OctTree::GetOctTreeRandom(vector<double*> &c)
+{
+  if(leaf == true) {
+    int tmp = rand(points.size());
+    c.push_back(points[tmp]);
+  }
+  for( int i = 0; i < 8; i++){ 
+    if (child[i] != 0) {
+      child[i]->GetOctTreeRandom(c);
+    }
+  }
+} 
+
+
+/**
+ * Randomly selects ptspervoxel points from each bucket and returns them in the parameter.
+ */
+void OctTree::GetOctTreeRandom(vector<double*>&c, unsigned int ptspervoxel)
+{   
+  if(leaf == true) {
+    set<int> indices;
+    for(unsigned int i=0; i<points.size();i++)indices.insert(i);
+    while(indices.size() > ptspervoxel) {
+      int tmp = rand(points.size());
+      indices.erase(tmp);
+   
+    }
+    for(set<int>::iterator it = indices.begin(); it != indices.end(); it++) {
+      c.push_back(points[*it]);
+    }
+  }
+  for( int i = 0; i < 8; i++){
+    if (child[i] != 0) {
+      child[i]->GetOctTreeRandom(c, ptspervoxel);
+    }
+  }
+
+}
+
 
 /**
  * Destructor

@@ -9,7 +9,7 @@ SHOWSRC = src/show/
 GRIDSRC = src/grid/
 DOC     = doc/
 
-all: $(BIN)slam6D $(BIN)scan_io_uos.so $(BIN)scan_io_uos_map.so $(BIN)scan_io_uos_frames.so $(BIN)scan_io_uos_map_frames.so $(BIN)scan_io_old.so $(BIN)scan_io_x3d.so $(BIN)scan_io_asc.so $(BIN)scan_io_rts.so $(BIN)scan_io_iais.so $(BIN)scan_io_rts_map.so $(BIN)scan_io_front.so $(BIN)scan_io_riegl_txt.so $(BIN)scan_io_riegl_bin.so $(BIN)scan_io_zuf.so $(BIN)scan_io_xyz.so $(BIN)scan_io_ifp.so $(BIN)scan_io_ply.so $(BIN)scan_io_wrl.so $(BIN)scan_io_zahn.so $(BIN)show $(BIN)2DGridder #$(BIN)convergence $(BIN)frame_to_graph $(BIN)graph_balancer
+all: $(BIN)slam6D $(BIN)scan_io_uos.so $(BIN)scan_io_uos_map.so $(BIN)scan_io_uos_frames.so $(BIN)scan_io_uos_map_frames.so $(BIN)scan_io_old.so $(BIN)scan_io_x3d.so $(BIN)scan_io_asc.so $(BIN)scan_io_rts.so $(BIN)scan_io_iais.so $(BIN)scan_io_rts_map.so $(BIN)scan_io_front.so $(BIN)scan_io_riegl_txt.so $(BIN)scan_io_riegl_bin.so $(BIN)scan_io_zuf.so $(BIN)scan_io_xyz.so $(BIN)scan_io_ifp.so $(BIN)scan_io_ply.so $(BIN)scan_io_wrl.so $(BIN)scan_io_zahn.so $(BIN)show $(BIN)2DGridder $(BIN)scan_red #$(BIN)convergence $(BIN)frame_to_graph $(BIN)graph_balancer 
 
 it:
 	@echo
@@ -339,6 +339,12 @@ $(BIN)2DGridder: $(OBJ)gridder.o $(OBJ)line.o $(OBJ)gridlines.o $(OBJ)hough.o $(
 	echo DONE
 	echo
 
+$(BIN)scan_red: $(OBJ)scanlib.a $(SRC)globals.icc $(SRC)scan_red.cc 
+	echo Compiling and Linking Riegl Scan Reduction ...
+	$(GPP) $(CFLAGS) -o $(BIN)scan_red $(SRC)scan_red.cc $(OBJ)scanlib.a -ldl 
+	echo DONE
+	echo
+ 
 ##################################################################################
 
 svn_clean: # "are you sure?"-version
