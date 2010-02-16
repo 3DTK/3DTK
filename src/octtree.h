@@ -10,6 +10,8 @@
 
 #include <vector>
 using std::vector;
+#include <set>
+using std::set;
 
 /**
  * @brief Octree
@@ -26,6 +28,8 @@ public:
   ~OctTree();
   
   void GetOctTreeCenter(vector<double*>&c);
+  void GetOctTreeRandom(vector<double*>&c);
+  void GetOctTreeRandom(vector<double*>&c, unsigned int ptspervoxel);
 
 protected:
   

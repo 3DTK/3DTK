@@ -660,7 +660,7 @@ void Scan::calcReducedPoints(double voxelSize)
   vector<double*> center;
   
   center.clear();
-  oct->GetOctTreeCenter(center);
+  oct->GetOctTreeRandom(center);
 
   // storing it as reduced scan
   points_red = new double*[center.size()];

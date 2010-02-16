@@ -118,12 +118,17 @@ public:
    * storing a list of (pointers to) all scans here 
    */
   static vector <Scan *> allScans;
+  /**
+   * The output directory
+   */  
+  static string dir;
+
   static void readScans(reader_type type,
 				    int start, int end, string &dir, int maxDist, int minDist,
 				    bool openFileForWriting = false);  
   inline const vector <Point>* get_points() const;
   inline const double** get_points_red() const;
-
+  inline void setPoints(vector <Point> *_points);
 private:
   
   /**
@@ -218,11 +223,6 @@ private:
    * need it.
    */
   static bool outputFrames;
-
-  /**
-   * The output directory
-   */  
-  static string dir;
 
   /**
    * counter for the number of 3D Scans (including the metascans)
