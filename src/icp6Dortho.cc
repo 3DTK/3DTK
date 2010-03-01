@@ -41,28 +41,6 @@ double icp6D_ORTHO::Point_Point_Align(const vector<PtPair>& pairs, double *align
   double** m = new double*[pairs.size()];
   double** d = new double*[pairs.size()];
 
-  double cm[3] = {0.0, 0.0, 0.0};
-  double cd[3] = {0.0, 0.0, 0.0};
-  for (unsigned int i = 0; i <  pairs.size(); i++){
-    cm[0] += pairs[i].p1.x;
-    cm[1] += pairs[i].p1.y;
-    cm[2] += pairs[i].p1.z;
-    cd[0] += pairs[i].p2.x;
-    cd[1] += pairs[i].p2.y;
-    cd[2] += pairs[i].p2.z;
-  }
-  cm[0] /= pairs.size();
-  cm[1] /= pairs.size();
-  cm[2] /= pairs.size();
-  cd[0] /= pairs.size();
-  cd[1] /= pairs.size();
-  cd[2] /= pairs.size();
-
-   cout << "centroid" << endl;
-   cout << cm[0] << " " << cm[1] << " " << cm[2] << endl;
-   cout << cd[0] << " " << cd[1] << " " << cd[2] << endl;
-
-  
   for(unsigned int i = 0; i <  pairs.size(); i++){
     m[i] = new double[3];
     d[i] = new double[3];
