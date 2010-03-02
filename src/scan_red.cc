@@ -117,7 +117,7 @@ void usage(char* prog)
  * @return 0, if the parsing was successful. 1 otherwise
  */
 int parseArgs(int argc, char **argv, string &dir, double &red, 
-		    int &start, int &end, int &maxDist, int &minDist, 
+		    int &start, int &end, int &maxDist, int &minDist, int &octree, 
 		    reader_type &type)
 {
   bool reduced = false;
@@ -135,6 +135,7 @@ int parseArgs(int argc, char **argv, string &dir, double &red,
     { "start",           required_argument,   0,  's' },
     { "end",             required_argument,   0,  'e' },
     { "reduce",          required_argument,   0,  'r' },
+    { "octree",          optional_argument,   0,  'O' },
     { 0,           0,   0,   0}                    // needed, cf. getopt.h
   };
 
@@ -181,6 +182,13 @@ int parseArgs(int argc, char **argv, string &dir, double &red,
 	   break;
 	 case 'm':
 	   maxDist = atoi(optarg);
+	   break;
+	 case 'O':
+     if (optarg) {
+       octree = atoi(optarg);
+     } else {
+       octree = 1;
+     }
 	   break;
 	 case 'M':
 	   minDist = atoi(optarg);
@@ -238,9 +246,10 @@ int main(int argc, char **argv)
   int    start = 0,   end = -1;
   int    maxDist    = -1;
   int    minDist    = -1;
+  int    octree     = 0;
   reader_type type    = RIEGL_TXT;
   
-  parseArgs(argc, argv, dir, red, start, end, maxDist, minDist, type);
+  parseArgs(argc, argv, dir, red, start, end, maxDist, minDist, octree, type);
 
   //@@@ to do :-)
 
@@ -262,7 +271,7 @@ int main(int argc, char **argv)
   while (fileNr <= end) {
     Scan::readScans(type, fileNr, fileNr, dir, maxDist, minDist, 0);
       // reduction filter for current scan!
-    Scan::allScans[0]->calcReducedPoints(red);
+    Scan::allScans[0]->calcReducedPoints(red, octree);
     
 	  cout << "Writing Scan No. " << fileNr ;
     cout << " with " << Scan::allScans[0]->get_points_red_size() << " points" << endl; 
