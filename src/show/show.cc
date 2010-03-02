@@ -247,7 +247,7 @@ void usage(char* prog)
  * @return 0, if the parsing was successful, 1 otherwise 
  */
 int parseArgs(int argc,char **argv, string &dir, int& start, int& end, int& maxDist, int& minDist, 
-              double &red, bool &readInitial, reader_type &type)
+              double &red, bool &readInitial, int &octree, reader_type &type)
 {
   start   = 0;
   end     = -1; // -1 indicates no limitation
@@ -258,7 +258,7 @@ int parseArgs(int argc,char **argv, string &dir, int& start, int& end, int& maxD
   extern int optind;
 
   cout << endl;
-  while ((c = getopt (argc, argv, "f:s:e:r:m:M:p:wt")) != -1)
+  while ((c = getopt (argc, argv, "f:s:e:r:m:M:p:O:wt")) != -1)
     switch (c)
 	 {
 	 case 's':
@@ -281,6 +281,9 @@ int parseArgs(int argc,char **argv, string &dir, int& start, int& end, int& maxD
 	   break;
 	 case 't':
 	   readInitial = true;
+	   break;
+	 case 'O':
+     octree = atoi(optarg);
 	   break;
 	 case 'f':
 	   if (strcasecmp(optarg, "uos") == 0) type = UOS;
@@ -574,10 +577,11 @@ int main(int argc, char **argv){
   string dir;
   bool readInitial = false;
   reader_type type  = UOS;
+  int octree = 0;
 
   path_file_name = new char[255];
   
-  parseArgs(argc, argv, dir, start, end, maxDist, minDist, red, readInitial, type);
+  parseArgs(argc, argv, dir, start, end, maxDist, minDist, red, readInitial, octree, type);
   scandir = dir;
 
   // init and create display
@@ -613,7 +617,7 @@ int main(int argc, char **argv){
 	    cout << "Copying Scan No. " << iterator << endl;
     }
     // reduction filter for current scan!
-    Scan::allScans[iterator]->calcReducedPoints(red);
+    Scan::allScans[iterator]->calcReducedPoints(red, octree);
   }
   readFrames(dir, start, end, readInitial, type);
 

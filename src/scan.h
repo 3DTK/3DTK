@@ -72,7 +72,7 @@ public:
   void transformToQuat(double rP[3], double rPQ[4],
 				   const AlgoType type, int islum = 0);
   
-  void calcReducedPoints(double voxelSize);
+  void calcReducedPoints(double voxelSize, int nrpts = 0);
   
   static void createTrees(bool use_cache);
   static void deleteTrees();
