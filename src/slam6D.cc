@@ -192,6 +192,10 @@ void usage(char* prog)
 	  << bold << "  -n" << normal << " FILE, " << bold << "--net=" << normal << "FILE" << endl
 	  << "         specifies the file that includes the net structure for SLAM" << endl
 	  << endl
+	  << bold << "  -O" << normal << " NR (optional), " << bold << "--octree=" << normal << "NR (optional)" << endl
+	  << "         use randomized octree based point reduction (pts per voxel=<NR>)" << endl
+	  << "         requires -r or -reduce" << endl
+	  << endl
 	  << bold << "  -p, --trustpose" << normal << endl
 	  << "         Trust the pose file, do not extrapolate the last transformation." << endl
 	  << "         (just for testing purposes, or gps input.)" << endl
@@ -257,7 +261,7 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &rand,
 		    bool &extrapolate_pose, bool &meta, int &algo, int &loopSlam6DAlgo, int &lum6DAlgo, int &anim,
 		    int &mni_lum, string &net, double &cldist, int &clpairs, int &loopsize,
 		    double &epsilonICP, double &epsilonSLAM, bool &use_cache, bool &exportPts, double &distLoop,
-		    int &iterLoop, double &graphDist, reader_type &type)
+		    int &iterLoop, double &graphDist, int &octree, reader_type &type)
 {
   int  c;
   // from unistd.h:
@@ -284,6 +288,7 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &rand,
     { "start",           required_argument,   0,  's' },
     { "end",             required_argument,   0,  'e' },
     { "reduce",          required_argument,   0,  'r' },
+    { "octree",          optional_argument,   0,  'O' },
     { "random",          required_argument,   0,  'R' },
     { "quiet",           no_argument,         0,  'q' },
     { "veryquiet",       no_argument,         0,  'Q' },
@@ -337,6 +342,13 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &rand,
 	   break;
 	 case 'r':
 	   red = atof(optarg);
+	   break;
+	 case 'O':
+     if (optarg) {
+       octree = atoi(optarg);
+     } else {
+       octree = 1;
+     }
 	   break;
 	 case 'R':
 	   rand = atoi(optarg);
@@ -668,12 +680,13 @@ int main(int argc, char **argv)
   double distLoop   = 700.0;
   int iterLoop      = 100;
   double graphDist  = cldist;
+  int octree       = 0;  // employ randomized octree reduction?
   reader_type type    = UOS;
   
   parseArgs(argc, argv, dir, red, rand, mdm, mdml, mdmll, mni, start, end,
 		  maxDist, minDist, quiet, veryQuiet, eP, meta, algo, loopSlam6DAlgo, lum6DAlgo, anim,
 		  mni_lum, net, cldist, clpairs, loopsize, epsilonICP, epsilonSLAM,
-		  use_cache, exportPts, distLoop, iterLoop, graphDist, type);
+		  use_cache, exportPts, distLoop, iterLoop, graphDist, octree, type);
 
   cout << "slam6D will proceed with the following parameters:" << endl;
   //@@@ to do :-)
@@ -692,7 +705,7 @@ int main(int argc, char **argv)
 	 cout << "Copying Scan No. " << iterator << endl;
     }
     // reduction filter for current scan!
-    Scan::allScans[iterator]->calcReducedPoints(red);
+    Scan::allScans[iterator]->calcReducedPoints(red, octree);
   }
 
   Scan::createTrees(use_cache);

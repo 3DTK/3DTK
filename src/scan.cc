@@ -619,7 +619,7 @@ void Scan::transformToQuat(double rP[3], double rPQ[4], const AlgoType type, int
  * reduced points as the centers of the octree voxels.
  * @param voxelSize The maximal size of each voxel
  */
-void Scan::calcReducedPoints(double voxelSize)
+void Scan::calcReducedPoints(double voxelSize, int nrpts)
 {
   // no reduction needed
   // copy vector of points to array of points to avoid
@@ -660,7 +660,12 @@ void Scan::calcReducedPoints(double voxelSize)
   vector<double*> center;
   
   center.clear();
-  oct->GetOctTreeRandom(center);
+
+  if (nrpts > 0) {
+    oct->GetOctTreeRandom(center, nrpts);
+  } else {
+    oct->GetOctTreeCenter(center);
+  }
 
   // storing it as reduced scan
   points_red = new double*[center.size()];
