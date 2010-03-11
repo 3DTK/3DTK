@@ -10,6 +10,8 @@
 
 #include <vector>
 using std::vector;
+#include <list>
+using std::list;
 #include <set>
 using std::set;
 
@@ -33,13 +35,13 @@ public:
 
 protected:
   
-  OctTree(vector<double*> &splitPoints, double center[3], 
+  OctTree(list<double*> &splitPoints, double center[3], 
 		double x_size, double y_size, double z_size);
   
   int countPoints(double **pts, int n, double center[3], 
 			   double x_size, double y_size, double z_size);
   
-  void countPointsAndQueue(const vector<double*> &i_points,
+  void countPointsAndQueue(list<double*> &i_points,
 					  double center[8][3], 
 					  double x_size, double y_size, double z_size,
 					  OctTree **child);
@@ -57,7 +59,7 @@ protected:
   /**
    * storing the points
    */
-  vector<double*> points;
+  list<double*> points;
   
   /**
    * storing the center

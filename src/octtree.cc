@@ -85,7 +85,7 @@ OctTree::OctTree(double **pts, int n, double voxelSize) {
 /**
  * Private constructor: Needed for recursive bulding of the octree
  */
-OctTree::OctTree(vector<double*> &splitPoints, double _center[3], 
+OctTree::OctTree(list<double*> &splitPoints, double _center[3], 
                  double _x_size, double _y_size, double _z_size)
 {
   // set up values
@@ -105,8 +105,9 @@ OctTree::OctTree(vector<double*> &splitPoints, double _center[3],
   // -----------------------------------------
   if ((z_size <= voxelSize)) {
     // copy points
-    for (unsigned int i = 0; i < splitPoints.size(); i++) {
-      points.push_back(splitPoints[i]);
+    for (list<double *>::iterator itr = splitPoints.begin(); 
+        itr != splitPoints.end(); itr++) {
+      points.push_back(*itr);
     }
     leaf = true;
     return; 
@@ -165,34 +166,40 @@ OctTree::OctTree(vector<double*> &splitPoints, double _center[3],
  * @param y_size maximal distance from the center (y direction)
  * @param z_size maximal distance from the center (z direction)
  */
-void OctTree::countPointsAndQueue(const vector<double*> &i_points,
+void OctTree::countPointsAndQueue(list<double*> &i_points,
                                  double center[8][3], 
                                  double x_size, double y_size, double z_size,
-						   OctTree **child)
+                                 OctTree **child)
 {
-  vector<double*> points[8];
-  int count[8] = {0, 0, 0, 0, 0, 0, 0, 0};
+  list<double*> points;
 
-  for (unsigned int i = 0; i < i_points.size(); i++) {
-    for (int j = 0; j < 8; j++) {
-	 if (fabs(i_points[i][0] - center[j][0]) <= x_size) {
-	   if (fabs(i_points[i][1] - center[j][1]) <= y_size) {
-		if (fabs(i_points[i][2] - center[j][2]) <= z_size) {
-		  count[j]++;
-		  points[j].push_back(i_points[i]);
-		  break;
-		}
-	   }
-	 }
+  for (int j = 0; j < 7; j++) {
+    for ( list<double *>::iterator itr = i_points.begin(); itr != i_points.end(); itr++) {
+      if (fabs((*itr)[0] - center[j][0]) <= x_size) {
+        if (fabs((*itr)[1] - center[j][1]) <= y_size) {
+          if (fabs((*itr)[2] - center[j][2]) <= z_size) {
+            points.push_back(*itr);
+            itr = i_points.erase(itr);
+            itr--;
+          }
+        }
+      }
     }
-  }
-  for (int j = 0; j < 8; j++) {
-    if (count[j] > 0) {
-	 child[j] = new OctTree(points[j], center[j], x_size, y_size, z_size); 
+    if (points.size() > 0) {
+      child[j] = new OctTree(points, center[j], x_size, y_size, z_size); 
+      points.clear();
     } else {
-	 child[j] = 0;
+      child[j] = 0;
     }
   }
+  // remaining child
+  if (i_points.size() > 0) {
+    child[7] = new OctTree(i_points,center[7], x_size, y_size, z_size); 
+    i_points.clear();
+  } else {
+    child[7] = 0;
+  }
+
 }
 
 /**
@@ -211,28 +218,23 @@ void OctTree::countPointsAndQueue(double **pts, int n,
                                  double x_size, double y_size, double z_size,
 						   OctTree **child)
 {
-  vector<double*> points[8];
-  int count[8] = {0, 0, 0, 0, 0, 0, 0, 0};
-  
-  for (int i = 0; i < n; i++) {
-    for (int j = 0; j < 8; j++) {
-	 if (fabs(pts[i][0] - center[j][0]) <= x_size) {
-	   if (fabs(pts[i][1] - center[j][1]) <= y_size) {
-		if (fabs(pts[i][2] - center[j][2]) <= z_size) {
-		  count[j]++;
-		  points[j].push_back( pts[i] );
-		  break;
-		}
-	   }
-	 } 
-    }
-  }
-  
+  list<double*> points;
+
   for (int j = 0; j < 8; j++) {
-    if (count[j] > 0) {
-	 child[j] = new OctTree(points[j], center[j], x_size, y_size, z_size); 
+    for (int i = 0; i < n; i++) {
+      if (fabs(pts[i][0] - center[j][0]) <= x_size) {
+        if (fabs(pts[i][1] - center[j][1]) <= y_size) {
+          if (fabs(pts[i][2] - center[j][2]) <= z_size) {
+            points.push_back( pts[i] );
+          }
+        }
+      } 
+    }
+    if (points.size() > 0) {
+      child[j] = new OctTree(points, center[j], x_size, y_size, z_size); 
+      points.clear();
     } else {
-	 child[j] = 0;
+      child[j] = 0;
     }
   }
 }
@@ -243,7 +245,7 @@ void OctTree::countPointsAndQueue(double **pts, int n,
  */
 void OctTree::GetOctTreeCenter(vector<double*> &c)
 {
-  if (leaf == true) {
+  if (leaf == true ) {
     c.push_back(center);
     return;
   }
@@ -262,7 +264,9 @@ void OctTree::GetOctTreeRandom(vector<double*> &c)
 {
   if(leaf == true) {
     int tmp = rand(points.size());
-    c.push_back(points[tmp]);
+    list<double *>::iterator it = points.begin();
+    for(int i = 0; i < tmp; i++, it++);
+    c.push_back(*it);
   }
   for( int i = 0; i < 8; i++){ 
     if (child[i] != 0) {
@@ -279,6 +283,8 @@ void OctTree::GetOctTreeRandom(vector<double*>&c, unsigned int ptspervoxel)
 {   
   if(leaf == true) {
     set<int> indices;
+    // TODO: fix this naive selection of points, its very inefficient for a 
+    // large number of points
     for(unsigned int i=0; i<points.size();i++)indices.insert(i);
     while(indices.size() > ptspervoxel) {
       int tmp = rand(points.size());
@@ -286,7 +292,9 @@ void OctTree::GetOctTreeRandom(vector<double*>&c, unsigned int ptspervoxel)
    
     }
     for(set<int>::iterator it = indices.begin(); it != indices.end(); it++) {
-      c.push_back(points[*it]);
+      list<double *>::iterator itl = points.begin();
+      for(int i = 0; i < *it; i++, itl++);
+      c.push_back(*itl);
     }
   }
   for( int i = 0; i < 8; i++){
