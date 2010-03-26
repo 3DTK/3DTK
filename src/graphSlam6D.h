@@ -31,7 +31,7 @@ public:
   /** 
    * Destructor 
    */
-  virtual ~graphSlam6D() {};
+  virtual ~graphSlam6D();
 
   virtual double doGraphSlam6D(Graph gr, vector <Scan*> MetaScan, int nrIt) = 0;
   
@@ -76,6 +76,9 @@ protected:
    * be quiet
    */
   bool quiet;
+
+
+  long ctime;
 };
 
 #endif 
