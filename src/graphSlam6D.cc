@@ -52,11 +52,17 @@ graphSlam6D::graphSlam6D(icp6Dminimizer *my_icp6Dminimizer,
   } else {
     this->max_dist_match2_last_LUM = -1;
   }
+
+  ctime = 0.0;
+  
   this->my_icp = new icp6D(my_icp6Dminimizer, mdm, max_num_iterations,
 					  quiet, meta, rnd, eP, anim, epsilonICP, use_cache);
 }
 
-
+graphSlam6D::~graphSlam6D()
+ {
+   cout << "Time spent in the SLAM backend:" << ctime << endl;
+ }
 /**
  * This function is used to match a set of laser scans with any minimally
  * connected Graph, using the globally consistent LUM-algorithm in 3D.
@@ -236,7 +242,9 @@ ColumnVector graphSlam6D::solveCholesky(const Matrix &G, const ColumnVector &B)
  */
 ColumnVector graphSlam6D::solveSparseCholesky(const Matrix &G, const ColumnVector &B)
 {
-  
+
+  long starttime = GetCurrentTimeInMilliSec();
+    
 #ifdef WRITE_MATRIX_PGM
   writeMatrixPGM(G);
 #endif
@@ -268,6 +276,8 @@ ColumnVector graphSlam6D::solveSparseCholesky(const Matrix &G, const ColumnVecto
   cs_spfree(A);
   cs_spfree(T);
   delete [] x;
+
+  ctime += GetCurrentTimeInMilliSec() - starttime;
 
   return X;
 }

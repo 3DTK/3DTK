@@ -48,19 +48,20 @@ int ScanIO_front::readScans(int start, int end, string &dir, int maxDist, int mi
   int my_fileNr = fileCounter;
   
   if (end > -1 && fileCounter > end) return -1; // 'nuf read
-  scanFileName = dir + "Front" + to_string(fileCounter,3) + ".dat";
-  poseFileName = dir + "scan" + to_string(fileCounter,3) + ".pose";
+  scanFileName = dir + "Front" + to_string(fileCounter,6) + ".dat";
+  //  poseFileName = dir + "scan" + to_string(fileCounter,3) + ".pose";
   
   scan_in.open(scanFileName.c_str());
-  pose_in.open(poseFileName.c_str());
+  //  pose_in.open(poseFileName.c_str());
 
   // read 3D scan
-  if (!pose_in.good() && !scan_in.good()) return -1; // no more files in the directory
-  if (!pose_in.good()) { cerr << "ERROR: Missing file " << poseFileName << endl; exit(1); }
+  if ( //!pose_in.good() &&
+	 !scan_in.good()) return -1; // no more files in the directory
+  //  if (!pose_in.good()) { cerr << "ERROR: Missing file " << poseFileName << endl; exit(1); }
   if (!scan_in.good()) { cerr << "ERROR: Missing file " << scanFileName << endl; exit(1); }
   cout << "Processing Scan " << scanFileName;
   
-  for (unsigned int i = 0; i < 6; pose_in >> euler[i++]);
+  for (unsigned int i = 0; i < 6; euler[i++] = 0.0);
 
   cout << " @ pose (" << euler[0] << "," << euler[1] << "," << euler[2]
 	  << "," << euler[3] << "," << euler[4] << ","  << euler[5] << ")" << endl;
@@ -78,8 +79,8 @@ int ScanIO_front::readScans(int start, int end, string &dir, int maxDist, int mi
     double pp[3];
     try {
 	 scan_in >> ddummy >> dummy >> pp[0] >> pp[2];
-	 pp[0] *= 0.1;
-	 pp[2] *= 0.1;
+	 //	 pp[0] *= 0.1;
+	 //	 pp[2] *= 0.1;
 	 pp[1] = 0.0;
     } catch (...) {
 	 break;
