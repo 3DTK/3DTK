@@ -2,8 +2,10 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="8,00"
-	Name="RIEGL_TXT_DLL"
-	ProjectGUID="{10E15DF4-58C4-4143-AD9E-B77666DFAAB5}"
+	Name="scan_red"
+	ProjectGUID="{85801526-22DA-421F-84EA-627663097510}"
+	RootNamespace="scan_red"
+	Keyword="Win32Proj"
 	>
 	<Platforms>
 		<Platform
@@ -17,7 +19,8 @@
 			Name="Debug|Win32"
 			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
-			ConfigurationType="2"
+			ConfigurationType="1"
+			CharacterSet="1"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -36,7 +39,15 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalOptions="/D _CRT_SECURE_NO_DEPRECATE"
+				Optimization="0"
+				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE"
+				MinimalRebuild="true"
+				BasicRuntimeChecks="3"
+				RuntimeLibrary="3"
+				UsePrecompiledHeader="0"
+				WarningLevel="3"
+				Detect64BitPortabilityProblems="true"
+				DebugInformationFormat="4"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -49,7 +60,10 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile="$(ProjectDir)\..\..\..\bin\scan_io_riegl.dll"
+				LinkIncremental="2"
+				GenerateDebugInformation="true"
+				SubSystem="1"
+				TargetMachine="1"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -80,7 +94,10 @@
 			Name="Release|Win32"
 			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
-			ConfigurationType="2"
+			ConfigurationType="1"
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
+			CharacterSet="2"
+			WholeProgramOptimization="1"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -99,7 +116,21 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalOptions="/D _CRT_SECURE_NO_DEPRECATE"
+				AdditionalOptions="/D _CRT_SECURE_NO_DEPRECATE /D USE_C_SPARSE /D MAX_OPENMP_NUM_THREADS=4 /D OPENMP_NUM_THREADS=4"
+				InlineFunctionExpansion="2"
+				EnableIntrinsicFunctions="true"
+				OmitFramePointers="true"
+				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
+				GeneratePreprocessedFile="0"
+				ExceptionHandling="1"
+				RuntimeLibrary="0"
+				EnableFunctionLevelLinking="true"
+				EnableEnhancedInstructionSet="2"
+				OpenMP="true"
+				UsePrecompiledHeader="0"
+				WarningLevel="3"
+				Detect64BitPortabilityProblems="true"
+				DebugInformationFormat="0"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -112,7 +143,13 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile="$(ProjectDir)\..\..\..\bin\scan_io_riegl.dll"
+				OutputFile="$(ProjectDir)\..\..\..\bin\scan_red.exe"
+				LinkIncremental="1"
+				GenerateDebugInformation="false"
+				SubSystem="1"
+				OptimizeReferences="2"
+				EnableCOMDATFolding="2"
+				TargetMachine="1"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -149,7 +186,51 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath="..\..\..\src\scan_io_riegl_txt.cc"
+				RelativePath="..\..\..\src\globals.icc"
+				>
+				<FileConfiguration
+					Name="Release|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\..\src\kd.cc"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\src\kdc.cc"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\src\octtree.cc"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\src\scan.cc"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\src\scan.icc"
+				>
+				<FileConfiguration
+					Name="Release|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\..\src\scan_red.cc"
+				>
+			</File>
+			<File
+				RelativePath="..\6D_SLAM\XGetopt.cpp"
 				>
 			</File>
 		</Filter>
@@ -159,7 +240,31 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
+				RelativePath="..\..\..\src\kd.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\src\kdc.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\src\kdcache.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\src\octtree.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\src\point.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\src\ptpair.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\src\scan.h"
 				>
 			</File>
 			<File
@@ -167,7 +272,11 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\src\scan_io_riegl_txt.h"
+				RelativePath="..\..\..\src\searchTree.h"
+				>
+			</File>
+			<File
+				RelativePath="..\6D_SLAM\XGetopt.h"
 				>
 			</File>
 		</Filter>

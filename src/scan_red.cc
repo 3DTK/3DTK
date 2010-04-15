@@ -8,7 +8,7 @@
  * and 'dir' the directory of a set of scans
  * Reduced scans will be written to 'dir/reduced'
  *
- * @author Dorit Borrmann. Smart Systems Group, Jacobs University Bremen gGmbH, Germany. 
+ * @author Dorit Borrmann. Automation Group, Jacobs University Bremen gGmbH, Germany. 
  */
 #ifdef _MSC_VER
 #ifdef OPENMP
@@ -29,7 +29,7 @@ using std::ofstream;
 
 #include "scan.h"
 
-#include "scan_io_riegl_txt.h"
+#include "scan_io.h"
 #include "globals.icc"
 
 #ifdef _OPENMP
@@ -201,7 +201,7 @@ int parseArgs(int argc, char **argv, string &dir, double &red,
       }
 
   if(!reduced) {
-    cerr << "\n*** Reduction method missind ***" << endl;
+    cerr << "\n*** Reduction method missed ***" << endl;
     usage(argv[0]);
   }
   if (optind != argc-1) {
@@ -231,9 +231,7 @@ int parseArgs(int argc, char **argv, string &dir, double &red,
 int main(int argc, char **argv)
 {
 
-  cout << "(c) University of Osnabrueck, 2006 - 2010" << endl << endl
-	  << "Restricted Usage" << endl
-	  << "Don't use without permission" << endl;
+  cout << "(c) UJacobs University Bremen, gGmbH, 2010" << endl << endl;
   
   if (argc <= 1) {
     usage(argv[0]);
@@ -258,7 +256,11 @@ int main(int argc, char **argv)
   int fileNr = start;
   string reddir = dir + "reduced"; 
  
+#ifdef _MSC_VER
+  int success = mkdir(reddir.c_str());
+#else
   int success = mkdir(reddir.c_str(), S_IRWXU|S_IRWXG|S_IRWXO);
+#endif
   if(success == 0) { 
     cout << "Writing scans to " << reddir << endl;
   } else if(errno == EEXIST) {
