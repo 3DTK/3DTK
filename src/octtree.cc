@@ -174,17 +174,18 @@ void OctTree::countPointsAndQueue(list<double*> &i_points,
   list<double*> points;
 
   for (int j = 0; j < 7; j++) {
-    for ( list<double *>::iterator itr = i_points.begin(); itr != i_points.end(); itr++) {
+    for ( list<double *>::iterator itr = i_points.begin(); itr != i_points.end();) {
       if (fabs((*itr)[0] - center[j][0]) <= x_size) {
         if (fabs((*itr)[1] - center[j][1]) <= y_size) {
           if (fabs((*itr)[2] - center[j][2]) <= z_size) {
-            points.push_back(*itr);
-            itr = i_points.erase(itr);
-            itr--;
+			 points.push_back(*itr);
+             itr = i_points.erase(itr);
+		     continue;
           }
         }
-      }
-    }
+	  }
+	  itr++;
+	}
     if (points.size() > 0) {
       child[j] = new OctTree(points, center[j], x_size, y_size, z_size); 
       points.clear();

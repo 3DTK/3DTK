@@ -16,7 +16,7 @@ void selectColors(Scan::AlgoType type) {
       glColor4d(0.0, 1.0,0.0, 1.0);
       break;
     default:
-      glColor4d(0.30, 0.35,0.59, 1.0);
+      glColor4d(1.0, 1.0, 1.0, 1.0);
       break;
   }
 }

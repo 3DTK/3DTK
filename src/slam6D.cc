@@ -194,7 +194,7 @@ void usage(char* prog)
 	  << endl
 	  << bold << "  -O" << normal << " NR (optional), " << bold << "--octree=" << normal << "NR (optional)" << endl
 	  << "         use randomized octree based point reduction (pts per voxel=<NR>)" << endl
-	  << "         requires -r or -reduce" << endl
+	  << "         requires -r or --reduce" << endl
 	  << endl
 	  << bold << "  -p, --trustpose" << normal << endl
 	  << "         Trust the pose file, do not extrapolate the last transformation." << endl
@@ -344,11 +344,11 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &rand,
 	   red = atof(optarg);
 	   break;
 	 case 'O':
-     if (optarg) {
-       octree = atoi(optarg);
-     } else {
-       octree = 1;
-     }
+       if (optarg) {
+         octree = atoi(optarg);
+       } else {
+         octree = 1;
+       }
 	   break;
 	 case 'R':
 	   rand = atoi(optarg);

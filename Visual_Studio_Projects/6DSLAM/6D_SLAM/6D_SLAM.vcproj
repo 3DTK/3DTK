@@ -40,7 +40,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalOptions="/D _CRT_SECURE_NO_DEPRECATE /D USE_C_SPARSE"
+				AdditionalOptions="/D _CRT_SECURE_NO_DEPRECATE /D USE_C_SPARSE /D MAX_OPENMP_NUM_THREADS=4 /D OPENMP_NUM_THREADS=4"
 				Optimization="0"
 				AdditionalIncludeDirectories="C:\Programme\boost\boost_1_38"
 				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE"
@@ -124,12 +124,14 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/D _CRT_SECURE_NO_DEPRECATE /D USE_C_SPARSE /D MAX_OPENMP_NUM_THREADS=4 /D OPENMP_NUM_THREADS=4"
+				Optimization="2"
 				InlineFunctionExpansion="2"
 				EnableIntrinsicFunctions="true"
 				OmitFramePointers="true"
 				AdditionalIncludeDirectories="C:\Programme\boost\boost_1_38"
 				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
 				RuntimeLibrary="0"
+				StructMemberAlignment="0"
 				EnableFunctionLevelLinking="true"
 				EnableEnhancedInstructionSet="2"
 				OpenMP="true"
