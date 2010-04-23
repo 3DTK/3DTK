@@ -30,3 +30,8 @@ CFLAGS += -O3 -Wall -finline-functions
 #CFLAGS += -Wno-deprecated -Wno-write-strings
 #CFLAGS += -pipe -march=native
 
+#
+# RIEGL options
+#
+#
+#WITH_RIVLIB = WITH_RIVLIB

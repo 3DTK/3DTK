@@ -9,7 +9,7 @@ SHOWSRC = src/show/
 GRIDSRC = src/grid/
 DOC     = doc/
 
-all: $(BIN)slam6D $(BIN)scan_io_uos.so $(BIN)scan_io_uos_map.so $(BIN)scan_io_uos_frames.so $(BIN)scan_io_uos_map_frames.so $(BIN)scan_io_old.so $(BIN)scan_io_x3d.so $(BIN)scan_io_asc.so $(BIN)scan_io_rts.so $(BIN)scan_io_iais.so $(BIN)scan_io_rts_map.so $(BIN)scan_io_front.so $(BIN)scan_io_riegl_txt.so $(BIN)scan_io_riegl_bin.so $(BIN)scan_io_zuf.so $(BIN)scan_io_xyz.so $(BIN)scan_io_ifp.so $(BIN)scan_io_ply.so $(BIN)scan_io_wrl.so $(BIN)scan_io_zahn.so $(BIN)show $(BIN)2DGridder $(BIN)scan_red #$(BIN)convergence $(BIN)frame_to_graph $(BIN)graph_balancer 
+all: $(BIN)slam6D $(BIN)scan_io_uos.so $(BIN)scan_io_rxp.so $(BIN)scan_io_uos_map.so $(BIN)scan_io_uos_frames.so $(BIN)scan_io_uos_map_frames.so $(BIN)scan_io_old.so $(BIN)scan_io_x3d.so $(BIN)scan_io_asc.so $(BIN)scan_io_rts.so $(BIN)scan_io_iais.so $(BIN)scan_io_rts_map.so $(BIN)scan_io_front.so $(BIN)scan_io_riegl_txt.so $(BIN)scan_io_riegl_bin.so $(BIN)scan_io_zuf.so $(BIN)scan_io_xyz.so $(BIN)scan_io_ifp.so $(BIN)scan_io_ply.so $(BIN)scan_io_wrl.so $(BIN)scan_io_zahn.so $(BIN)show $(BIN)2DGridder $(BIN)scan_red #$(BIN)convergence $(BIN)frame_to_graph $(BIN)graph_balancer 
 
 it:
 	@echo
@@ -201,7 +201,16 @@ docu_hl:	$(DOC)high_level_doc/documentation.tex
 
 $(BIN)scan_io_uos.so: $(SRC)scan_io.h $(SRC)scan_io_uos.h $(SRC)scan_io_uos.cc $(SRC)point.h $(SRC)point.icc $(SRC)globals.icc
 	echo Compiling shared library for reading UOS scans ...
-	$(GPP) $(CFLAGS) $(SHAREDFLAGS) -o $(BIN)scan_io_uos.so $(SRC)scan_io_uos.cc 
+	$(GPP) $(CFLAGS) $(SHAREDFLAGS) -o $(BIN)scan_io_uos.so $(SRC)scan_io_uos.cc
+
+ifdef WITH_RIVLIB
+$(BIN)scan_io_rxp.so: $(SRC)scan_io.h $(SRC)scan_io_rxp.h $(SRC)scan_io_rxp.cc $(SRC)point.h $(SRC)point.icc $(SRC)globals.icc
+	echo Compiling shared library for reading RIEGL rxp scans ...
+	$(GPP) $(CFLAGS) $(SHAREDFLAGS) -o $(BIN)scan_io_rxp.so $(SRC)scan_io_rxp.cc $(SRC)riegl/libscanlib-mt-s.a $(SRC)riegl/libctrllib-mt-s.a $(SRC)riegl/libboost_system-mt-s-1_35-vns.a -lpthread
+else
+$(BIN)scan_io_rxp.so: 
+
+endif
 
 $(BIN)scan_io_uos_map.so: $(SRC)scan_io.h $(SRC)scan_io_uos_map.h $(SRC)scan_io_uos_map.cc $(SRC)point.h $(SRC)point.icc $(SRC)globals.icc
 	echo Compiling shared library for reading UOS scans with given map ...

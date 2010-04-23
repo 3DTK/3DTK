@@ -21,3 +21,10 @@ CFLAGS += -O2 -Wall -finline-functions
 #CFLAGS += -static -L/usr/local/src/Mesa-7.0.1/lib/
 #CFLAGS += -DDEBUG
 CFLAGS += -msse3 -mcpu=pentium4
+
+
+#
+# RIEGL options
+#
+#
+#WITH_RIVLIB = WITH_RIVLIB

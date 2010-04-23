@@ -1310,6 +1310,9 @@ void Scan::readScans(reader_type type,
   case X3D:
     lib_string = "./bin/scan_io_x3d";
     break;
+  case RXP:
+    lib_string = "./bin/scan_io_rxp";
+    break;
   default:
     cerr << "Don't recognize format " << type << endl;
     exit(1);
