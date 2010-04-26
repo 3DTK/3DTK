@@ -110,7 +110,7 @@ int ScanIO_riegl_txt::readScans(int start, int end, string &dir, int maxDist, in
     scan_in >> num_pts;
     cout << " with " << num_pts << " Points";
     cout.flush();
-    ptss.resize(num_pts);
+    ptss.reserve(num_pts);
   }
   
   // read point data and transform into slam6D coordinate system 
