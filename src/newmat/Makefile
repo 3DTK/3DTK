@@ -1,20 +1,21 @@
 include ../../Makefile.options
 
+OBJ = ../../obj/
 DIFF = ./sdiff
 PRE = ./
 MAJOR = 1
 MINOR = 0
 
-%.o:           	%.cpp
-		$(GPP) $(CFLAGS) -c $*.cpp
+$(OBJ)%.o:      %.cpp
+		$(GPP) $(CFLAGS) -o $(OBJ)$*.o -c $*.cpp
 
 #everything:    	tmt example test_exc nl_ex sl_ex garch 
 
-newmat_lobj = newmat1.o newmat2.o newmat3.o newmat4.o newmat5.o newmat6.o newmat7.o newmat8.o newmatex.o bandmat.o submat.o myexcept.o cholesky.o evalue.o fft.o hholder.o jacobi.o newfft.o sort.o svd.o newmatrm.o newmat9.o
+newmat_lobj = $(OBJ)newmat1.o $(OBJ)newmat2.o $(OBJ)newmat3.o $(OBJ)newmat4.o $(OBJ)newmat5.o $(OBJ)newmat6.o $(OBJ)newmat7.o $(OBJ)newmat8.o $(OBJ)newmatex.o $(OBJ)bandmat.o $(OBJ)submat.o $(OBJ)myexcept.o $(OBJ)cholesky.o $(OBJ)evalue.o $(OBJ)fft.o $(OBJ)hholder.o $(OBJ)jacobi.o $(OBJ)newfft.o $(OBJ)sort.o $(OBJ)svd.o $(OBJ)newmatrm.o $(OBJ)newmat9.o
 
 libnewmat.a:   	$(newmat_lobj)
-		@$(AR) -cr $@ $(newmat_lobj)
-		@ranlib $@
+		$(AR) -cr $(OBJ)$@ $(newmat_lobj)
+		ranlib $(OBJ)$@
 
 clean:
 	/bin/rm -f *.o
@@ -49,49 +50,49 @@ garch_obj = garch.o newmatnl.o
 garch:         	$(garch_obj) libnewmat.a
 		$(GPP) -o $@ $(garch_obj) -L. -lnewmat -lm
 
-newmat1.o:     	newmat1.cpp newmat.h include.h boolean.h myexcept.h
+$(OBJ)newmat1.o:     	newmat1.cpp newmat.h include.h boolean.h myexcept.h
 
-newmat2.o:     	newmat2.cpp include.h newmat.h newmatrc.h boolean.h myexcept.h controlw.h
+$(OBJ)newmat2.o:     	newmat2.cpp include.h newmat.h newmatrc.h boolean.h myexcept.h controlw.h
 
-newmat3.o:     	newmat3.cpp include.h newmat.h newmatrc.h boolean.h myexcept.h controlw.h
+$(OBJ)newmat3.o:     	newmat3.cpp include.h newmat.h newmatrc.h boolean.h myexcept.h controlw.h
 
-newmat4.o:     	newmat4.cpp include.h newmat.h newmatrc.h boolean.h myexcept.h controlw.h
+$(OBJ)newmat4.o:     	newmat4.cpp include.h newmat.h newmatrc.h boolean.h myexcept.h controlw.h
 
-newmat5.o:     	newmat5.cpp include.h newmat.h newmatrc.h boolean.h myexcept.h controlw.h
+$(OBJ)newmat5.o:     	newmat5.cpp include.h newmat.h newmatrc.h boolean.h myexcept.h controlw.h
 
-newmat6.o:     	newmat6.cpp include.h newmat.h newmatrc.h boolean.h myexcept.h controlw.h
+$(OBJ)newmat6.o:     	newmat6.cpp include.h newmat.h newmatrc.h boolean.h myexcept.h controlw.h
 
-newmat7.o:     	newmat7.cpp include.h newmat.h newmatrc.h boolean.h myexcept.h controlw.h
+$(OBJ)newmat7.o:     	newmat7.cpp include.h newmat.h newmatrc.h boolean.h myexcept.h controlw.h
 
-newmat8.o:     	newmat8.cpp include.h newmat.h newmatrc.h precisio.h boolean.h myexcept.h controlw.h
+$(OBJ)newmat8.o:     	newmat8.cpp include.h newmat.h newmatrc.h precisio.h boolean.h myexcept.h controlw.h
 
-newmatex.o:    	newmatex.cpp include.h newmat.h boolean.h myexcept.h
+$(OBJ)newmatex.o:    	newmatex.cpp include.h newmat.h boolean.h myexcept.h
 
-bandmat.o:     	bandmat.cpp include.h newmat.h newmatrc.h boolean.h myexcept.h controlw.h
+$(OBJ)bandmat.o:     	bandmat.cpp include.h newmat.h newmatrc.h boolean.h myexcept.h controlw.h
 
-submat.o:      	submat.cpp include.h newmat.h newmatrc.h boolean.h myexcept.h controlw.h
+$(OBJ)submat.o:      	submat.cpp include.h newmat.h newmatrc.h boolean.h myexcept.h controlw.h
 
-myexcept.o:    	myexcept.cpp include.h boolean.h myexcept.h
+$(OBJ)myexcept.o:    	myexcept.cpp include.h boolean.h myexcept.h
 
-cholesky.o:    	cholesky.cpp include.h newmat.h boolean.h myexcept.h
+$(OBJ)cholesky.o:    	cholesky.cpp include.h newmat.h boolean.h myexcept.h
 
-evalue.o:      	evalue.cpp include.h newmatap.h newmatrm.h precisio.h newmat.h boolean.h myexcept.h
+$(OBJ)evalue.o:      	evalue.cpp include.h newmatap.h newmatrm.h precisio.h newmat.h boolean.h myexcept.h
 
-fft.o:         	fft.cpp include.h newmatap.h newmat.h boolean.h myexcept.h
+$(OBJ)fft.o:         	fft.cpp include.h newmatap.h newmat.h boolean.h myexcept.h
 
-hholder.o:     	hholder.cpp include.h newmatap.h newmat.h boolean.h myexcept.h
+$(OBJ)hholder.o:     	hholder.cpp include.h newmatap.h newmat.h boolean.h myexcept.h
 
-jacobi.o:      	jacobi.cpp include.h newmatap.h precisio.h newmatrm.h newmat.h boolean.h myexcept.h
+$(OBJ)jacobi.o:      	jacobi.cpp include.h newmatap.h precisio.h newmatrm.h newmat.h boolean.h myexcept.h
 
-newfft.o:      	newfft.cpp newmatap.h newmat.h include.h boolean.h myexcept.h
+$(OBJ)newfft.o:      	newfft.cpp newmatap.h newmat.h include.h boolean.h myexcept.h
 
-sort.o:        	sort.cpp include.h newmatap.h newmat.h boolean.h myexcept.h
+$(OBJ)sort.o:        	sort.cpp include.h newmatap.h newmat.h boolean.h myexcept.h
 
-svd.o:         	svd.cpp include.h newmatap.h newmatrm.h precisio.h newmat.h boolean.h myexcept.h
+$(OBJ)svd.o:         	svd.cpp include.h newmatap.h newmatrm.h precisio.h newmat.h boolean.h myexcept.h
 
-newmatrm.o:    	newmatrm.cpp newmat.h newmatrm.h include.h boolean.h myexcept.h
+$(OBJ)newmatrm.o:    	newmatrm.cpp newmat.h newmatrm.h include.h boolean.h myexcept.h
 
-newmat9.o:     	newmat9.cpp include.h newmat.h newmatio.h newmatrc.h boolean.h myexcept.h controlw.h
+$(OBJ)newmat9.o:     	newmat9.cpp include.h newmat.h newmatio.h newmatrc.h boolean.h myexcept.h controlw.h
 
 tmt.o:         	tmt.cpp include.h newmat.h tmt.h boolean.h myexcept.h
 

@@ -1,0 +1,5 @@
+#!/bin/sh
+for e in *.pose; do 
+    sed 's/,/\./g' "$e" > "$e.tmp"
+    mv "$e.tmp" "$e"
+done;    

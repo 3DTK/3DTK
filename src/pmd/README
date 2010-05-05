@@ -1,0 +1,19 @@
+Code for PMD camera.
+
+pmdaccess2/*    PMD-camera access lib
+cvpmd & pmdWrap libpmdaccess2 wrapper, PMD -> OpenCV marshalling and a bit of math.
+calibrate/*     PMD calibration tool
+pose/*          3D Tracking, pose estimation
+offline/*       Grab data for offline processing
+*xml            cameras matrices
+
+Depends on OpenCV (2.0), GLFW, FTGL, libconfig, xmlrpc-c
+
+installing opencv on ubuntu: http://ivkin.net/2009/11/installing-opencv-2-0-on-ubuntu-9-10-karmic-koala/
+
+to compile just run:
+    $ make
+
+Ubuntu issues: 
+    # fix GLFW /usr/lib/libglfw.so symlink
+    # obtain libconfig somewhere (i.e. from debian repos or install from source)
