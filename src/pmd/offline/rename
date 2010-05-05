@@ -1,0 +1,12 @@
+#! /bin/bash
+if [ $1 = "" ]; then 
+	echo "no new name given!"
+	exit
+fi
+mv s001.avi $1.avi
+#mv s001.arv $1.arv
+#mv s001.farv $1.farv
+mv s001.irv $1.irv
+mv s001.firv $1.firv
+mv s001.3dp $1.3dp
+mv s001.head $1.head
