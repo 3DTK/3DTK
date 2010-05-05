@@ -7,9 +7,33 @@ OBJ     = obj/
 SRC     = src/
 SHOWSRC = src/show/
 GRIDSRC = src/grid/
+PMDSRC  = src/pmd/
 DOC     = doc/
 
-all: $(BIN)slam6D $(BIN)scan_io_uos.so $(BIN)scan_io_rxp.so $(BIN)scan_io_uos_map.so $(BIN)scan_io_uos_frames.so $(BIN)scan_io_uos_map_frames.so $(BIN)scan_io_old.so $(BIN)scan_io_x3d.so $(BIN)scan_io_asc.so $(BIN)scan_io_rts.so $(BIN)scan_io_iais.so $(BIN)scan_io_rts_map.so $(BIN)scan_io_front.so $(BIN)scan_io_riegl_txt.so $(BIN)scan_io_riegl_bin.so $(BIN)scan_io_zuf.so $(BIN)scan_io_xyz.so $(BIN)scan_io_ifp.so $(BIN)scan_io_ply.so $(BIN)scan_io_wrl.so $(BIN)scan_io_zahn.so $(BIN)show $(BIN)2DGridder $(BIN)scan_red #$(BIN)convergence $(BIN)frame_to_graph $(BIN)graph_balancer 
+TARGETS = $(BIN)slam6D $(BIN)scan_io_uos.so $(BIN)scan_io_rxp.so $(BIN)scan_io_uos_map.so $(BIN)scan_io_uos_frames.so $(BIN)scan_io_uos_map_frames.so $(BIN)scan_io_old.so $(BIN)scan_io_x3d.so $(BIN)scan_io_asc.so $(BIN)scan_io_rts.so $(BIN)scan_io_iais.so $(BIN)scan_io_rts_map.so $(BIN)scan_io_front.so $(BIN)scan_io_riegl_txt.so $(BIN)scan_io_riegl_bin.so $(BIN)scan_io_zuf.so $(BIN)scan_io_xyz.so $(BIN)scan_io_ifp.so $(BIN)scan_io_ply.so $(BIN)scan_io_wrl.so $(BIN)scan_io_zahn.so
+
+ifdef WITH_SCANRED
+TARGETS += $(BIN)scan_red
+endif
+
+ifdef WITH_SHOW
+TARGETS += $(BIN)show
+endif
+
+ifdef WITH_GRIDDER
+TARGETS += $(BIN)2DGridder
+endif
+
+ifdef WITH_TOOLS
+TARGETS += $(BIN)convergence $(BIN)frame_to_graph $(BIN)graph_balancer 
+endif
+
+ifdef WITH_PMD
+TARGETS += $(BIN)grabVideoAnd3D $(BIN)grabFramesCam $(BIN)grabFramesPMD $(BIN)convertToSLAM6D $(BIN)calibrate $(BIN)extrinsic $(BIN)pose
+endif
+
+
+all: $(TARGETS)
 
 it:
 	@echo
@@ -25,58 +49,11 @@ docu: docu_html docu_latex docu_hl
 	echo + Highlevel documentation generated: $(DOC)documentation_HL.pdf
 	echo
 
-$(BIN)frame_to_graph: $(SRC)frame_to_graph.cc $(SRC)globals.icc
-	echo Compiling and linking Frame_to_graph ...
-	$(GPP) $(CFLAGS) -o $(BIN)frame_to_graph $(SRC)frame_to_graph.cc 
-	echo DONE
-	echo
+############# SLAM6D ##############
 
-$(BIN)convergence: $(SRC)convergence.cc $(SRC)convergence.h $(SRC)globals.icc
-	echo Compiling and linking Convergence ...
-	$(GPP) $(CFLAGS) -o $(BIN)convergence $(SRC)convergence.cc
-	echo DONE
-	echo
-
-$(BIN)graph_balancer: $(OBJ)elch6D.o $(SRC)graph_balancer.cc $(SRC)graph.h
-	echo Compiling and linking Graph Balancer ...
-	$(GPP) $(CFLAGS) -lboost_graph-mt -o $(BIN)graph_balancer $(SRC)graph_balancer.cc $(OBJ)elch6D.o 
-	echo DONE
-	echo
-
-$(BIN)show: $(SHOWSRC)glui/libglui.a $(SHOWSRC)show.cc $(SHOWSRC)show.h $(SHOWSRC)show.icc $(SHOWSRC)show1.icc $(SHOWSRC)show_menu.cc $(SHOWSRC)show_gl.cc $(SRC)point.h $(SRC)point.icc $(SRC)globals.icc $(OBJ)scan.o $(OBJ)vertexarray.o $(OBJ)camera.o $(OBJ)PathGraph.o $(OBJ)NurbsPath.o $(OBJ)scanlib.a
-	echo Compiling and Linking Show ...
-	$(GPP) $(CFLAGS) -o $(BIN)show -I$(SRC) $(SHOWSRC)show.cc $(OBJ)scanlib.a $(OBJ)vertexarray.o $(OBJ)camera.o $(OBJ)PathGraph.o $(OBJ)NurbsPath.o $(SHOWSRC)glui/libglui.a $(LIBRARIES)
-	echo DONE
-	echo
-
-$(OBJ)vertexarray.o: $(SHOWSRC)vertexarray.h $(SHOWSRC)vertexarray.cc
-	echo Compiling VertexArray ...
-	$(GPP) $(CFLAGS) -c -o $(OBJ)vertexarray.o $(SHOWSRC)vertexarray.cc
-
-$(OBJ)camera.o: $(SHOWSRC)camera.h $(SHOWSRC)camera.cc $(SRC)globals.icc
-	echo Compiling Camera ...
-	$(GPP) $(CFLAGS) -c -o $(OBJ)camera.o $(SHOWSRC)camera.cc
-
-$(OBJ)NurbsPath.o: $(SHOWSRC)NurbsPath.h $(SHOWSRC)NurbsPath.cc $(SRC)globals.icc $(SHOWSRC)PathGraph.h
-	echo Compiling NurbsPath ...
-	$(GPP) $(CFLAGS) -c -o $(OBJ)NurbsPath.o $(SHOWSRC)NurbsPath.cc
-
-$(OBJ)PathGraph.o: $(SHOWSRC)PathGraph.h $(SHOWSRC)PathGraph.cc $(SRC)globals.icc
-	echo Compiling PathGraph ...
-	$(GPP) $(CFLAGS) -c -o $(OBJ)PathGraph.o $(SHOWSRC)PathGraph.cc
-
-
-$(SHOWSRC)glui/libglui.a: $(SHOWSRC)glui/*.c $(SHOWSRC)glui/*.cpp $(SHOWSRC)glui/*.h
-	echo Compiling Glui ...
-	cd $(SHOWSRC)glui ; make
-
-$(SRC)newmat/libnewmat.a: $(SRC)newmat/*.cpp $(SRC)newmat/*.h
-	echo Compiling Newmat ...
-	cd $(SRC)newmat ; make
-
-$(BIN)slam6D: $(OBJ)scanlib.a $(OBJ)icp6D.o $(OBJ)graphSlam6D.o $(OBJ)icp6Dapx.o $(OBJ)icp6Dsvd.o $(OBJ)icp6Dortho.o $(OBJ)icp6Dquat.o $(OBJ)icp6Dhelix.o $(OBJ)gapx6D.o $(OBJ)ghelix6DQ2.o $(OBJ)lum6Deuler.o $(OBJ)lum6Dquat.o $(OBJ)graph.o $(SRC)slam6D.cc $(SRC)globals.icc $(OBJ)csparse.o $(SRC)newmat/libnewmat.a $(OBJ)elch6D.o $(OBJ)elch6Dquat.o $(OBJ)elch6DunitQuat.o $(OBJ)elch6Dslerp.o $(OBJ)elch6Deuler.o
+$(BIN)slam6D: $(OBJ)scanlib.a $(OBJ)icp6D.o $(OBJ)graphSlam6D.o $(OBJ)icp6Dapx.o $(OBJ)icp6Dsvd.o $(OBJ)icp6Dortho.o $(OBJ)icp6Dquat.o $(OBJ)icp6Dhelix.o $(OBJ)gapx6D.o $(OBJ)ghelix6DQ2.o $(OBJ)lum6Deuler.o $(OBJ)lum6Dquat.o $(OBJ)graph.o $(SRC)slam6D.cc $(SRC)globals.icc $(OBJ)csparse.o $(OBJ)libnewmat.a $(OBJ)elch6D.o $(OBJ)elch6Dquat.o $(OBJ)elch6DunitQuat.o $(OBJ)elch6Dslerp.o $(OBJ)elch6Deuler.o
 	echo Compiling and Linking SLAM 6D ...
-	$(GPP) $(CFLAGS) -o $(BIN)slam6D $(SRC)slam6D.cc $(OBJ)scanlib.a $(OBJ)icp6D.o $(OBJ)gapx6D.o $(OBJ)ghelix6DQ2.o $(OBJ)lum6Deuler.o $(OBJ)lum6Dquat.o $(OBJ)graphSlam6D.o $(OBJ)graph.o $(OBJ)icp6Dapx.o $(OBJ)icp6Dsvd.o $(OBJ)icp6Dortho.o $(OBJ)icp6Dquat.o $(OBJ)icp6Dhelix.o $(OBJ)csparse.o $(SRC)newmat/libnewmat.a $(OBJ)elch6D.o $(OBJ)elch6Dquat.o $(OBJ)elch6DunitQuat.o $(OBJ)elch6Dslerp.o $(OBJ)elch6Deuler.o -ldl 
+	$(GPP) $(CFLAGS) -o $(BIN)slam6D $(SRC)slam6D.cc $(OBJ)scanlib.a $(OBJ)icp6D.o $(OBJ)gapx6D.o $(OBJ)ghelix6DQ2.o $(OBJ)lum6Deuler.o $(OBJ)lum6Dquat.o $(OBJ)graphSlam6D.o $(OBJ)graph.o $(OBJ)icp6Dapx.o $(OBJ)icp6Dsvd.o $(OBJ)icp6Dortho.o $(OBJ)icp6Dquat.o $(OBJ)icp6Dhelix.o $(OBJ)csparse.o $(OBJ)libnewmat.a $(OBJ)elch6D.o $(OBJ)elch6Dquat.o $(OBJ)elch6DunitQuat.o $(OBJ)elch6Dslerp.o $(OBJ)elch6Deuler.o -ldl 
 	echo DONE
 	echo
 
@@ -197,7 +174,11 @@ docu_hl:	$(DOC)high_level_doc/documentation.tex
 	cd $(DOC)high_level_doc ; ps2pdf14 documentation.ps ../documentation_HL.pdf
 
 
-##################################################################################
+############# SLAM6D LIBS ##############
+
+$(OBJ)libnewmat.a: $(SRC)newmat/*.cpp $(SRC)newmat/*.h
+	echo Compiling Newmat ...
+	cd $(SRC)newmat ; make
 
 $(BIN)scan_io_uos.so: $(SRC)scan_io.h $(SRC)scan_io_uos.h $(SRC)scan_io_uos.cc $(SRC)point.h $(SRC)point.icc $(SRC)globals.icc
 	echo Compiling shared library for reading UOS scans ...
@@ -209,7 +190,6 @@ $(BIN)scan_io_rxp.so: $(SRC)scan_io.h $(SRC)scan_io_rxp.h $(SRC)scan_io_rxp.cc $
 	$(GPP) $(CFLAGS) $(SHAREDFLAGS) -o $(BIN)scan_io_rxp.so $(SRC)scan_io_rxp.cc $(SRC)riegl/libscanlib-mt-s.a $(SRC)riegl/libctrllib-mt-s.a $(SRC)riegl/libboost_system-mt-s-1_35-vns.a -lpthread
 else
 $(BIN)scan_io_rxp.so: 
-
 endif
 
 $(BIN)scan_io_uos_map.so: $(SRC)scan_io.h $(SRC)scan_io_uos_map.h $(SRC)scan_io_uos_map.cc $(SRC)point.h $(SRC)point.icc $(SRC)globals.icc
@@ -276,15 +256,55 @@ $(BIN)scan_io_wrl.so: $(SRC)scan_io.h $(SRC)scan_io_wrl.h $(SRC)scan_io_wrl.cc $
 	echo Compiling shared library for reading VRML v1.0 scans ...
 	$(GPP) $(CFLAGS) $(SHAREDFLAGS) -o $(BIN)scan_io_wrl.so $(SRC)scan_io_wrl.cc 
 
-$(BIN)scan_io_zahn.so: $(SRC)scan_io.h $(SRC)scan_io_zahn.h $(SRC)scan_io_zahn.cc $(SRC)point.h $(SRC)point.icc $(SRC)globals.icc
-	echo Compiling shared library for reading Zaehne scans ...
-	$(GPP) $(CFLAGS) $(SHAREDFLAGS) -o $(BIN)scan_io_zahn.so $(SRC)scan_io_zahn.cc 
-
 $(BIN)scan_io_front.so: $(SRC)scan_io.h $(SRC)scan_io_front.h $(SRC)scan_io_front.cc $(SRC)point.h $(SRC)point.icc $(SRC)globals.icc
 	echo Compiling shared library for reading 2D Front scans ...
 	$(GPP) $(CFLAGS) $(SHAREDFLAGS) -o $(BIN)scan_io_front.so $(SRC)scan_io_front.cc 
 
-######## GRID
+$(BIN)scan_io_zahn.so: $(SRC)scan_io.h $(SRC)scan_io_zahn.h $(SRC)scan_io_zahn.cc $(SRC)point.h $(SRC)point.icc $(SRC)globals.icc
+	echo Compiling shared library for reading Zaehne scans ...
+	$(GPP) $(CFLAGS) $(SHAREDFLAGS) -o $(BIN)scan_io_zahn.so $(SRC)scan_io_zahn.cc 
+	echo DONE
+	echo
+
+
+############# SCAN REDUCTION ##############
+
+$(BIN)scan_red: $(OBJ)scanlib.a $(SRC)globals.icc $(SRC)scan_red.cc 
+	echo Compiling and Linking Scan Reduction ...
+	$(GPP) $(CFLAGS) -o $(BIN)scan_red $(SRC)scan_red.cc $(OBJ)scanlib.a -ldl 
+	echo DONE
+	echo
+
+############# SHOW ##############
+
+$(BIN)show: $(OBJ)libglui.a $(SHOWSRC)show.cc $(SHOWSRC)show.h $(SHOWSRC)show.icc $(SHOWSRC)show1.icc $(SHOWSRC)show_menu.cc $(SHOWSRC)show_gl.cc $(SRC)point.h $(SRC)point.icc $(SRC)globals.icc $(OBJ)scan.o $(OBJ)vertexarray.o $(OBJ)camera.o $(OBJ)PathGraph.o $(OBJ)NurbsPath.o $(OBJ)scanlib.a
+	echo Compiling and Linking Show ...
+	$(GPP) $(CFLAGS) -o $(BIN)show -I$(SRC) $(SHOWSRC)show.cc $(OBJ)scanlib.a $(OBJ)vertexarray.o $(OBJ)camera.o $(OBJ)PathGraph.o $(OBJ)NurbsPath.o $(OBJ)libglui.a $(LIBRARIES)
+	echo DONE
+	echo
+
+$(OBJ)vertexarray.o: $(SHOWSRC)vertexarray.h $(SHOWSRC)vertexarray.cc
+	echo Compiling VertexArray ...
+	$(GPP) $(CFLAGS) -c -o $(OBJ)vertexarray.o $(SHOWSRC)vertexarray.cc
+
+$(OBJ)camera.o: $(SHOWSRC)camera.h $(SHOWSRC)camera.cc $(SRC)globals.icc
+	echo Compiling Camera ...
+	$(GPP) $(CFLAGS) -c -o $(OBJ)camera.o $(SHOWSRC)camera.cc
+
+$(OBJ)NurbsPath.o: $(SHOWSRC)NurbsPath.h $(SHOWSRC)NurbsPath.cc $(SRC)globals.icc $(SHOWSRC)PathGraph.h
+	echo Compiling NurbsPath ...
+	$(GPP) $(CFLAGS) -c -o $(OBJ)NurbsPath.o $(SHOWSRC)NurbsPath.cc
+
+$(OBJ)PathGraph.o: $(SHOWSRC)PathGraph.h $(SHOWSRC)PathGraph.cc $(SRC)globals.icc
+	echo Compiling PathGraph ...
+	$(GPP) $(CFLAGS) -c -o $(OBJ)PathGraph.o $(SHOWSRC)PathGraph.cc
+
+$(OBJ)libglui.a: $(SHOWSRC)glui/*.c $(SHOWSRC)glui/*.cpp $(SHOWSRC)glui/*.h
+	echo Compiling Glui ...
+	cd $(SHOWSRC)glui ; make
+
+
+############# GRIDDER ##############
 
 $(OBJ)gridder.o: $(GRIDSRC)2DGridder.cc $(GRIDSRC)scanmanager.h $(GRIDSRC)scanGrid.h $(GRIDSRC)scanToGrid.h $(GRIDSRC)parcelmanager.h $(GRIDSRC)gridlines.h
 	echo Compiling 2Dgridder ...
@@ -348,12 +368,72 @@ $(BIN)2DGridder: $(OBJ)gridder.o $(OBJ)line.o $(OBJ)gridlines.o $(OBJ)hough.o $(
 	echo DONE
 	echo
 
-$(BIN)scan_red: $(OBJ)scanlib.a $(SRC)globals.icc $(SRC)scan_red.cc 
-	echo Compiling and Linking Riegl Scan Reduction ...
-	$(GPP) $(CFLAGS) -o $(BIN)scan_red $(SRC)scan_red.cc $(OBJ)scanlib.a -ldl 
+
+############# TOOLS ##############
+
+$(BIN)frame_to_graph: $(SRC)frame_to_graph.cc $(SRC)globals.icc
+	echo Compiling and linking Frame_to_graph ...
+	$(GPP) $(CFLAGS) -o $(BIN)frame_to_graph $(SRC)frame_to_graph.cc 
 	echo DONE
 	echo
- 
+
+$(BIN)convergence: $(SRC)convergence.cc $(SRC)convergence.h $(SRC)globals.icc
+	echo Compiling and linking Convergence ...
+	$(GPP) $(CFLAGS) -o $(BIN)convergence $(SRC)convergence.cc
+	echo DONE
+	echo
+
+$(BIN)graph_balancer: $(OBJ)elch6D.o $(SRC)graph_balancer.cc $(SRC)graph.h
+	echo Compiling and linking Graph Balancer ...
+	$(GPP) $(CFLAGS) -lboost_graph-mt -o $(BIN)graph_balancer $(SRC)graph_balancer.cc $(OBJ)elch6D.o 
+	echo DONE
+	echo
+
+
+############# PMD camera ##############
+
+$(OBJ)libpmdaccess2.a: $(PMDSRC)/pmdaccess2/pmdaccess.cc
+	echo Compiling libpmdaccess ...
+	$(GPP) -c $(PMDSRC)/pmdaccess2/pmdaccess.cc -o $(OBJ)pmdaccess.o                                   
+	ar rs $(OBJ)libpmdaccess2.a $(OBJ)pmdaccess.o  
+
+$(OBJ)cvpmd.o: $(PMDSRC)cvpmd.cc
+	echo Compiling OpenCV PMD ...
+	$(GPP) $(CFLAGS) $(PMDPKG) -I$(PMDSRC)pmdaccess2 -I$(SRC) -c -o $(OBJ)cvpmd.o $(PMDSRC)cvpmd.cc
+
+$(OBJ)pmdWrap.o: $(PMDSRC)pmdWrap.cc
+	echo Compiling PMD wrapper ...
+	$(GPP) $(CFLAGS) $(PMDPKG) -I$(PMDSRC)pmdaccess2 -I$(SRC) -c -o $(OBJ)pmdWrap.o $(PMDSRC)pmdWrap.cc
+
+$(BIN)grabVideoAnd3D: $(OBJ)pmdWrap.o $(OBJ)cvpmd.o $(OBJ)icp6D.o $(OBJ)icp6Dapx.o $(OBJ)icp6Dhelix.o $(OBJ)icp6Dortho.o $(OBJ)icp6Dquat.o $(OBJ)icp6Dsvd.o $(OBJ)scanlib.a $(OBJ)libnewmat.a $(OBJ)libpmdaccess2.a $(PMDSRC)offline/grabVideoAnd3D.cc
+	echo Compiling and Linking video and pmd grabber ...
+	$(GPP) $(CFLAGS) $(PMDPKG) -I$(PMDSRC) -I$(PMDSRC)pmdaccess2 -I$(SRC) $(PMDLIBS) $(OBJ)pmdWrap.o $(OBJ)cvpmd.o $(OBJ)icp6D.o $(OBJ)icp6Dapx.o $(OBJ)icp6Dhelix.o $(OBJ)icp6Dortho.o $(OBJ)icp6Dquat.o $(OBJ)icp6Dsvd.o $(OBJ)scanlib.a $(OBJ)libnewmat.a $(OBJ)libpmdaccess2.a -o $(BIN)grabVideoAnd3D $(PMDSRC)offline/grabVideoAnd3D.cc
+
+$(BIN)convertToSLAM6D: $(OBJ)pmdWrap.o $(OBJ)cvpmd.o $(OBJ)icp6D.o $(OBJ)icp6Dapx.o $(OBJ)icp6Dhelix.o $(OBJ)icp6Dortho.o $(OBJ)icp6Dquat.o $(OBJ)icp6Dsvd.o $(OBJ)scanlib.a $(OBJ)libnewmat.a $(OBJ)libpmdaccess2.a $(PMDSRC)offline/convertToSLAM6D.cc
+	echo Compiling and Linking converting tool to slam6D ...
+	echo Linking converting tool to slam6D ...
+	$(GPP) $(CFLAGS) $(PMDPKG) -I$(PMDSRC) -I$(PMDSRC)pmdaccess2 -I$(SRC) $(PMDLIBS) $(OBJ)pmdWrap.o $(OBJ)cvpmd.o $(OBJ)icp6D.o $(OBJ)icp6Dapx.o $(OBJ)icp6Dhelix.o $(OBJ)icp6Dortho.o $(OBJ)icp6Dquat.o $(OBJ)icp6Dsvd.o $(OBJ)scanlib.a $(OBJ)libnewmat.a $(OBJ)libpmdaccess2.a -o $(BIN)convertToSLAM6D $(PMDSRC)offline/convertToSLAM6D.cc
+
+$(BIN)calibrate: $(PMDSRC)/calibrate/calibrate.cc
+	echo Compiling and Linking calibrate ...
+	$(GPP) $(CFLAGS) $(PMDPKG) -I$(PMDSRC) -I$(PMDSRC)pmdaccess2 -I$(SRC) $(PMDLIBS) -o $(BIN)calibrate $(PMDSRC)/calibrate/calibrate.cc
+
+$(BIN)grabFramesCam: $(PMDSRC)calibrate/grabFramesCam.cc
+	echo Compiling and Linking grab frames camera ...
+	$(GPP) $(CFLAGS) $(PMDPKG) -I$(PMDSRC) -I$(PMDSRC)pmdaccess2 -I$(SRC) $(PMDLIBS) -o $(BIN)grabFramesCam $(PMDSRC)calibrate/grabFramesCam.cc
+
+$(BIN)grabFramesPMD: $(PMDSRC)calibrate/grabFramesPMD.cc $(OBJ)libpmdaccess2.a
+	echo Compiling and Linking grab frames PMD ...
+	$(GPP) $(CFLAGS) $(PMDPKG) -I$(PMDSRC) -I$(PMDSRC)pmdaccess2 -I$(SRC) $(OBJ)cvpmd.o $(OBJ)pmdWrap.o $(OBJ)libpmdaccess2.a $(OBJ)icp6D.o $(OBJ)icp6Dapx.o $(OBJ)icp6Dhelix.o $(OBJ)icp6Dortho.o $(OBJ)icp6Dquat.o $(OBJ)icp6Dsvd.o $(OBJ)scanlib.a $(PMDLIBS) $(OBJ)libnewmat.a -o $(BIN)grabFramesPMD $(PMDSRC)calibrate/grabFramesPMD.cc
+
+$(BIN)extrinsic: $(PMDSRC)calibrate/extrinsic.cc
+	echo Compiling and Linking extrinsic camera calibration ...
+	$(GPP) $(CFLAGS) $(PMDPKG) -I$(PMDSRC) -I$(PMDSRC)pmdaccess2 -I$(SRC) $(PMDLIBS) -o $(BIN)extrinsic $(PMDSRC)calibrate/extrinsic.cc
+
+$(BIN)pose: $(PMDSRC)pose/pose.cc $(PMDSRC)pose/history.cc $(OBJ)libpmdaccess2.a
+	echo Compiling and Linking PMD pose ...
+	$(GPP) $(CFLAGS) $(PMDPKG) -I$(PMDSRC) -I$(PMDSRC)pmdaccess2 -I$(SRC) $(OBJ)cvpmd.o $(OBJ)pmdWrap.o $(OBJ)libpmdaccess2.a $(OBJ)icp6D.o $(OBJ)icp6Dapx.o $(OBJ)icp6Dhelix.o $(OBJ)icp6Dortho.o $(OBJ)icp6Dquat.o $(OBJ)icp6Dsvd.o $(OBJ)scanlib.a $(PMDLIBS) $(OBJ)libnewmat.a -o $(BIN)pose $(PMDSRC)pose/pose.cc $(PMDSRC)pose/history.cc
+
 ##################################################################################
 
 svn_clean: # "are you sure?"-version
@@ -366,8 +446,6 @@ clean:
 	/bin/rm -f $(OBJ)*
 	/bin/rm -f $(BIN)*.so
 	cd $(SRC)newmat ; make clean
-	rm -f $(SRC)newmat/libnewmat.a
 	cd $(SHOWSRC)glui ; make clean
-	rm -f $(SHOWSRC)glui/libglui.a
 	cd $(DOC)high_level_doc ; make clean
 #	cd $(DOC)latex ; make clean

@@ -30,8 +30,46 @@ CFLAGS += -O3 -Wall -finline-functions
 #CFLAGS += -Wno-deprecated -Wno-write-strings
 #CFLAGS += -pipe -march=native
 
+
 #
-# RIEGL options
+# RIEGL scanner options
+# ---------------------
 #
+#WITH_RIVLIB = WITH_RIVLIB     # compile with rxp file support
+
+
 #
-#WITH_RIVLIB = WITH_RIVLIB
+# SCAN REDCUTION options
+# ----------------------
+#
+WITH_SCANRED = WITH_SCANRED    # compile with scan_red program
+
+
+#
+# SHOW options
+# ------------
+#
+WITH_SHOW = WITH_SHOW         # compile with show program
+
+
+#
+# GRIDDER options
+# ---------------
+#
+WITH_GRIDDER = WITH_GRIDDER   # compile with gridder program
+
+
+#
+# TOOLS options
+# -------------
+#
+WITH_TOOLS = WITH_TOOLS       # compile with further tools
+
+#
+# PMD camera options
+# ------------------
+#
+WITH_PMD = WITH_PMD          # compile PMD camera tools
+
+PMDLIBS = -lglfw -lGLU -lftgl -lxmlrpc_util -lglfw -lGLU -lftgl  -lxmlrpc_client -lxmlrpc -lxmlrpc++ -lxmlrpc_client++ -lxmlrpc_xmltok -lxmlrpc_xmlparse
+PMDPKG = `pkg-config --cflags opencv` `pkg-config --cflags ftgl` `pkg-config --libs libconfig` `pkg-config --libs opencv`
