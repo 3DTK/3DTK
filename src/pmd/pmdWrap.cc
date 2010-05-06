@@ -38,7 +38,12 @@ PMDCam *initPMDCam(const char *confPath) {
         //FIXME: pmdc initialization assert
 
         int camID;
+#if (((LIBCONFIG_VER_MAJOR == 1) && (LIBCONFIG_VER_MINOR >= 4)) \
+    || (LIBCONFIG_VER_MAJOR > 1))
         config_lookup_int(conf, "cameraID", &camID);
+#else //libconfig API changed in version 1.4b
+        config_lookup_int(conf, "cameraID", (long *)&camID);
+#endif
         pmdc->_capture = cvCaptureFromCAM(camID);
         if(!pmdc->_capture) fprintf(stderr, "ERROR: Can't initialize capture, see camera id in pmdc.conf.\n"); 
     } else {      
@@ -71,8 +76,14 @@ PMDCam *initPMDCam(const char *confPath) {
         //TODO: read pmd header somewhere
     }
     CvSize pmdSz;
+#if (((LIBCONFIG_VER_MAJOR == 1) && (LIBCONFIG_VER_MINOR >= 4)) \
+    || (LIBCONFIG_VER_MAJOR > 1))
     config_lookup_int(conf, "pmdSize.width", &pmdSz.width);
     config_lookup_int(conf, "pmdSize.height", &pmdSz.height);
+#else //libconfig API changed in version 1.4b
+    config_lookup_int(conf, "pmdSize.width", (long *)&pmdSz.width);
+    config_lookup_int(conf, "pmdSize.height", (long *)&pmdSz.height);
+#endif
     printf("DEBUG: pmdSz: %i %i\n", pmdSz.width, pmdSz.height);
     pmdc->_iPMDIU = cvCreateImage(pmdSz, IPL_DEPTH_8U, 1);
     pmdc->iPMDI   = cvCreateImage(pmdSz, IPL_DEPTH_8U, 1);
@@ -123,14 +134,28 @@ PMDCam *initPMDCam(const char *confPath) {
 
    
     config_lookup_float(conf, "tracking.quality", &pmdc->_track.quality);
+#if (((LIBCONFIG_VER_MAJOR == 1) && (LIBCONFIG_VER_MINOR >= 4)) \
+    || (LIBCONFIG_VER_MAJOR > 1))
     config_lookup_int(conf, "tracking.min", &pmdc->_track.minFeatures);
     config_lookup_int(conf, "tracking.max", &pmdc->_track.maxFeatures);
-    config_lookup_int(conf, "tracking.minDist", &pmdc->_track.minDist);    
+    config_lookup_int(conf, "tracking.minDist", &pmdc->_track.minDist);
     config_lookup_int(conf, "tracking.winSize", &pmdc->_track.winSz);
     config_lookup_int(conf, "historyLen", &pmdc->historyLen);
+#else //libconfig API changed in version 1.4b
+    config_lookup_int(conf, "tracking.min", (long *)&pmdc->_track.minFeatures);
+    config_lookup_int(conf, "tracking.max", (long *)&pmdc->_track.maxFeatures);
+    config_lookup_int(conf, "tracking.minDist", (long *)&pmdc->_track.minDist);
+    config_lookup_int(conf, "tracking.winSize", (long *)&pmdc->_track.winSz);
+    config_lookup_int(conf, "historyLen", (long *)&pmdc->historyLen);
+#endif
     pmdc->_track.trackingFlags = 0; //FIXME, if you init pyrs here
 
+#if (((LIBCONFIG_VER_MAJOR == 1) && (LIBCONFIG_VER_MINOR >= 4)) \
+    || (LIBCONFIG_VER_MAJOR > 1))
     config_lookup_int(conf, "minPts", &pmdc->minPts4Pose);
+#else //libconfig API changed in version 1.4b
+    config_lookup_int(conf, "minPts", (long *)&pmdc->minPts4Pose);
+#endif
     config_lookup_float(conf, "maxError", &pmdc->maxError);
 
     config_lookup_float(conf, "outliersRemoval.sigmaDepth", &pmdc->sigmaDepth);
