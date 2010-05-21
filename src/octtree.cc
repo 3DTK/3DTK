@@ -283,14 +283,18 @@ void OctTree::GetOctTreeRandom(vector<double*> &c)
 void OctTree::GetOctTreeRandom(vector<double*>&c, unsigned int ptspervoxel)
 {   
   if(leaf == true) {
+    if (ptspervoxel >= points.size()) {
+      for(list<double *>::iterator itl = points.begin(); 
+          itl != points.end(); itl++) {
+        c.push_back(*itl);
+      }
+      return;
+    } 
+
     set<int> indices;
-    // TODO: fix this naive selection of points, its very inefficient for a 
-    // large number of points
-    for(unsigned int i=0; i<points.size();i++)indices.insert(i);
-    while(indices.size() > ptspervoxel) {
-      int tmp = rand(points.size());
-      indices.erase(tmp);
-   
+    while(indices.size() < ptspervoxel) {
+      int tmp = rand(points.size()-1);
+      indices.insert(tmp);
     }
     for(set<int>::iterator it = indices.begin(); it != indices.end(); it++) {
       list<double *>::iterator itl = points.begin();
