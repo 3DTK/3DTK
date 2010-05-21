@@ -1,0 +1,4 @@
+modified by Deyuan Qiu:
+.../include/ANN.h	line779
+.../src/kd_tree.h	line87	line155
+.../MAKEFILE 		line94
