@@ -1,0 +1,55 @@
+GENERATEKEYS(1)                   User Manual                  GENERATEKEYS(1)
+
+
+
+NAME
+       generatekeys - Generate SIFT keypoints from an image file
+
+SYNOPSIS
+       generatekeys.exe imagefile keyfile[.gz] [downscaleResolution]
+
+DESCRIPTION
+       Generate SIFT key descriptors for an image. It reads in the image file,
+       finds SIFT keypoints for descriptive image locations  and  outputs  the
+       SIFT  descriptors  to  the  keyfile. The image is internally doubled in
+       size, as this increases the number of keypoints found. If  you  do  not
+       want  this  behaviour  or  want to downscale the picture, see the down-
+       scaleResolution option. The resulting keyfiles can be processed by  the
+       other utilities in the autopano-sift package.
+
+OPTIONS
+       imagefile
+              The  image  file name that will be read in and processed. It can
+              be in any format readable by the  GDK  pixbuf  loaders.  Usually
+              that includes JPEG, PNG and TIFF.
+
+       keyfile
+              The  name  of  the  keypoint XML file to generate. When ".gz" is
+              used at the end of the filename, the file is transparently  com-
+              pressed using the gzip compression. See gzip(1)
+
+       downscaleResolution
+              An  optional  integer width and height limitation. If given, the
+              input image is downscaled so its larger  dimension  matches  the
+              given size in pixels.  The smaller the downscale resolution, the
+              smaller the memory requirements, but  also  less  keypoints  are
+              found.  In  case  no downscale resolution is given, the image is
+              doubled in size prior to processing, which leads  to  substantly
+              more  keypoints.  If  you  use  0 as downscaleResolution you can
+              switch this behaviour off and the original image is used without
+              applying any scaling.
+
+BUGS
+       The  memory  requirements  are quite big. If you have 256Mb of ram, you
+       should go with a 700 downscale resolution, if you have 512Mb 1300 is  a
+       good value.
+
+AUTHOR
+       Sebastian Nowozin <nowozin at cs dot tu dash berlin dot de>
+
+SEE ALSO
+       autopano-complete(1), autopano(1), autopanog(1), showone(1), showtwo(1)
+
+
+
+autopano-sift                      MAY 2004                    GENERATEKEYS(1)

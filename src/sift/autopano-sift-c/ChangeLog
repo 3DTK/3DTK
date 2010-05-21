@@ -1,0 +1,305 @@
+2009-10-06  brunopostle
+
+	* [r4584] AutoPanoSift.h, ChangeLog: Fix version, not quite sure why
+	  config.h is ignored
+
+2009-09-28  brunopostle
+
+	* [r4511] CMakeLists.txt: Minor cpack settings transferred from trunk
+	* [r4510] CMakeLists.txt: Unify line-endings
+	* [r4509] ChangeLog: Update ChangeLog for likely 2.5.1 beta1
+	* [r4508] CMakeLists.txt: New ChangeLog regime, update like so:
+	  cmake -DUPDATE_CHANGELOG=YES .
+
+2009-09-28  yuv
+
+	* [r4505] CMakeLists.txt: bumped up version number to 2.5.1
+	* [r4504] APSCpp/APSCpp.c: apply trunk/4213 (fix for 'filename with
+	  whitepsaces bug')
+	* [r4503] .: codeline for interimistic release (don't know when 2.5.2
+	  will be fixed)
+
+2009-05-29  brunopostle
+
+	* [r3895] Commented out unused gaussian blur (Scott Crosby)
+	* [r3894] Inline ImageMap_SetPixel() and ImageMap_GetPixel() patch
+	  #2798145 (Scott Crosby)
+
+2009-05-08  gkohlmeyer
+
+	* [r3841] Updated CMake file for wxWidgets 2.8.10
+
+2009-03-08  brunopostle
+
+	* [r3713] fix binary cpack generator (Kornel Benko)
+
+2009-03-04  brunopostle
+
+	* [r3703] cpack stuff required for RPM and DEB generators (Kornel
+	  Benko)
+
+2009-03-03  brunopostle
+
+	* [r3700] Eliminate a couple of rare cases in which autopano-sift-C
+	  chooses to print an
+	  error message and die, rather than doing anything sensible (Norman
+	  Yarvin)
+
+2009-02-27  gkohlmeyer
+
+	* [r3677] Small change in CMakeLists.txt to get rid of version warning
+	  in CMake
+
+2009-02-22  gkohlmeyer
+
+	* [r3664] Updated CMake files for libxml2 2.7.3, wxWidgets 2.8.9 and
+	  current libpano
+
+2008-07-23  brunopostle
+
+	* [r3223] Update ChangeLog for 2.5.0 release.
+	  Pablo seems to have a different svn2cl...
+
+2008-04-24  brunopostle
+
+	* [r3036] Don't try and install a file called /usr/README
+
+2008-03-09  tksharpless
+
+	* [r2941] APSCpp/APSCpp_main.c replace <ctime> with <time.h>; fix
+	  Time_t casting error.
+
+2008-03-08  tksharpless
+
+	* [r2939] ooops, forgot to add ANNkd_wrap.cpp. Here 'tis
+	* [r2938] Repackaged ANN kd-tree in a C - callable C++ wrapper.
+	  Replaced the .cpp versions of APSCpp and APSCpp_main witn .c
+	  versions.
+	  This lets Nowozin's code be compiled as C++ on Windows and as C
+	  elsewhere -- the only way that seems to work.
+	  Adjusted APSCpp/CMakeLists.txt accordingly.
+	* [r2937] fixes for C++ compile errors on Linux
+	* [r2936] Changed match acceptance policy to eliminate duplicate
+	  control points -- seems to give better alignments, and slighly
+	  faster too.
+
+2008-03-07  tksharpless
+
+	* [r2934] add ANN subdir
+	* [r2933] autopano-sift-c uses faster ANN kd-tree by default; also
+	  better defaults for maxdim and ransac.
+	  Added ANN source diredtory (NOTE: custom ANN.h)
+	  Cleaned up CMake scripts ==> Only tested in Windows <==
+	  Assigned package version number 2.5.0
+
+2008-03-04  tksharpless
+
+	* [r2927] Made command line error handling more reliable and
+	  informative
+
+2008-03-03  dangelo
+
+	* [r2925] Enable compilation with gcc
+	* [r2924] Added #define HAVE_MALLOC 1 on apple as this seems to fix
+	  some problem with realloc
+	* [r2923] removed obselete makefile
+
+2008-03-03  tksharpless
+
+	* [r2922] adding older version with Seb's fix
+	* [r2921] removing current head rev
+	* [r2920] correct a messsage about output file
+	* [r2919] Try again to add APSCpp/CMakeLists.txt
+	* [r2918] change name of APSCpp/CMakeLists.txt to correct case
+
+2008-03-01  tksharpless
+
+	* [r2914] Major extension of APSC, now renamed autopano-sift-c, adds
+	  stereographic projection and reduces memory demand.
+	  Source is in subdir APSCpp. Some bugfixes in libsift in addition to
+	  the change from double to float for image maps, which almost doubles
+	  useful image size for generatekeys as well as autopano-sift-c.
+	* [r2913] Rewrote Component_ToString to eliminate 2 bugs (one serious,
+	  leading to seg faults). This fix replaces Seb's recent fix of the
+	  same major bug, because I am too tired to merge them properly.
+
+2008-02-22  tksharpless
+
+	* [r2906] Undoing previous commit -- I just didn't understand how
+	  ArrayList was supposed to work -- Sorry, TKS
+
+2008-02-21  tksharpless
+
+	* [r2905] ArrayList_new() was initializing list full instead of empty,
+	  leaving (dim) null entries at start of list.
+
+2008-02-20  brunopostle
+
+	* [r2904] Don't put compiled binary in tarball
+
+2008-02-17  dangelo
+
+	* [r2881] #define HAVE_MALLOC on OSX, it seems to fix an out of memory
+	  situation due to the use of realloc.
+
+2008-02-15  dangelo
+
+	* [r2859] Renamed APSC to autopano-sift-c, to match the naming style
+	  of most other tools shipped with hugin.
+
+2008-02-08  sebpz
+
+	* [r2809] Default 800 for maxdim
+
+2008-02-07  sebpz
+
+	* [r2801] Fix for Seg Fault in Component_ToString
+
+2008-02-07  tksharpless
+
+	* [r2800] Made the "-" option work. Anyone who uses it must donate 1
+	  Euro to the hugin project :)
+	* [r2799] Add APSC, which combines generatekeys and autopano in one
+	  executable.
+	  
+	  fflush stdout writes in utils.c
+
+2008-02-05  brunopostle
+
+	* [r2793] Perl version of autopano-c-complete, should be 100%
+	  compatible
+
+2008-02-05  tksharpless
+
+	* [r2791] installs vbs script on Windows, else shell script.
+	* [r2790] Finds the autopano executables if they are in a reasonable
+	  place; if not, quits with explicit error.
+
+2008-02-03  yuv
+
+	* [r2780] INSTALL target for Windows in build directory instead of
+	  "C:\Program Files", for SDK integration
+	* [r2777] Pete Holzmann added wildcard functionality and improved
+	  output
+
+2008-02-02  sebpz
+
+	* [r2770] Adding gz output for keyfiles
+	* [r2769] Reverting previous change - gzip not supported by autopano
+	* [r2768] Create gzip compressed key files
+
+2008-02-01  dangelo
+
+	* [r2759] Corrected possible crash when many images are used.
+
+2008-02-01  yuv
+
+	* [r2756] added feedback-loop to avoid concurrent execution of
+	  multiple instances of generatekeys
+	* [r2755] corrected for space in path
+
+2008-01-31  yuv
+
+	* [r2744] Windows translation of autopano-c-complete.sh
+
+2008-01-29  brunopostle
+
+	* [r2732] Revert and fix previous commit
+	* [r2731] Don't install duplicate man pages
+	* [r2730] autopano-c-complete.sh needs to be installed executable
+	* [r2729] Fix line endings, no other changes
+	* [r2728] Don't put a generated Makefile in the tarball
+	* [r2727] Don't put the compiled binaries in the tarball
+
+2008-01-29  dangelo
+
+	* [r2725] unified libxml config on windows and unix
+	* [r2724] remove MY prefix leftover from some testing.
+
+2008-01-29  tksharpless
+
+	* [r2722] fixed bad Unix compiler flag from previous fix (my fault)
+
+2008-01-28  tksharpless
+
+	* [r2718] changed root cmakelists.txt so it works on Windows with the
+	  sdk; tried not to break Linux build but this is not verified.
+
+2008-01-28  btownshend
+
+	* [r2709] Removed unused variable declaration
+	* [r2708] Fixed handling of 16-bit files
+	  Fixed memory overrun during malloc of images
+
+2008-01-15  dangelo
+
+	* [r2638] Fixed compilation with gcc
+	* [r2637] Added CMake build system and fixed source, so that it
+	  compiles with MSVC.
+
+2008-01-02  brunopostle
+
+	* [r2597] Allow setting PREFIX and CFLAGS
+	* [r2596] man page cleanup and rename
+
+2008-01-02  dangelo
+
+	* [r2590]
+	* [r2589] build against pano13 by default
+
+2008-01-02  brunopostle
+
+	* [r2588] install target typo fix (Yuval Levy)
+
+2007-12-30  brunopostle
+
+	* [r2583] Apply fix from bug #1808333 seems to work for me.
+	  https://sourceforge.net/tracker/index.php?func=detail&aid=1808333&group_id=77506&atid=550441
+	* [r2582] Fix bug with directories containing spaces
+
+2007-07-20  brunopostle
+
+	* [r2295] Create man directories
+	* [r2294] Add man pages to install target
+
+2007-07-19  dangelo
+
+	* [r2292] added a simple install target
+
+2007-05-29  dangelo
+
+	* [r2029] moved files to trunk directory
+	* [r2028] moved to trunk directory
+
+2007-04-18  brunopostle
+
+	* [r2027] add autopano-c-complete.sh script
+
+2007-04-18  dangelo
+
+	* [r2026] applied patch by Alexandre Duret-Lutz
+
+2007-02-05  brunopostle
+
+	* [r2025] rewrite dist target
+
+2007-02-02  dangelo
+
+	* [r2024] applied patch
+	* [r2023] find include files in standart directories
+	* [r2022] added debug statement
+	* [r2021] ups
+	* [r2020] fixed minimum search
+
+2007-01-23  brunopostle
+
+	* [r2019] Minor tweak to build on a system with pano12 installed
+
+2006-08-21  dangelo
+
+	* [r2015] Initial revision
+
+2006-08-21  
+
+	* [r2014] New repository initialized by cvs2svn.
+

@@ -8,9 +8,10 @@ SRC     = src/
 SHOWSRC = src/show/
 GRIDSRC = src/grid/
 PMDSRC  = src/pmd/
+APSSRC  = src/sift/autopano-sift-c/
 DOC     = doc/
 
-TARGETS = $(BIN)slam6D $(BIN)scan_io_uos.so $(BIN)scan_io_rxp.so $(BIN)scan_io_uos_map.so $(BIN)scan_io_uos_frames.so $(BIN)scan_io_uos_map_frames.so $(BIN)scan_io_old.so $(BIN)scan_io_x3d.so $(BIN)scan_io_asc.so $(BIN)scan_io_rts.so $(BIN)scan_io_iais.so $(BIN)scan_io_rts_map.so $(BIN)scan_io_front.so $(BIN)scan_io_riegl_txt.so $(BIN)scan_io_riegl_bin.so $(BIN)scan_io_zuf.so $(BIN)scan_io_xyz.so $(BIN)scan_io_ifp.so $(BIN)scan_io_ply.so $(BIN)scan_io_wrl.so $(BIN)scan_io_zahn.so
+TARGETS = $(BIN)slam6D $(BIN)scan_io_uos.so $(BIN)scan_io_rxp.so $(BIN)scan_io_uos_map.so $(BIN)scan_io_uos_frames.so $(BIN)scan_io_uos_map_frames.so $(BIN)scan_io_old.so $(BIN)scan_io_x3d.so $(BIN)scan_io_asc.so $(BIN)scan_io_rts.so $(BIN)scan_io_iais.so $(BIN)scan_io_rts_map.so $(BIN)scan_io_front.so $(BIN)scan_io_riegl_txt.so $(BIN)scan_io_riegl_bin.so $(BIN)scan_io_zuf.so $(BIN)scan_io_xyz.so $(BIN)scan_io_ifp.so $(BIN)scan_io_ply.so $(BIN)scan_io_wrl.so $(BIN)scan_io_zahn.so 
 
 ifdef WITH_SCANRED
 TARGETS += $(BIN)scan_red
@@ -30,6 +31,10 @@ endif
 
 ifdef WITH_PMD
 TARGETS += $(BIN)grabVideoAnd3D $(BIN)grabFramesCam $(BIN)grabFramesPMD $(BIN)convertToSLAM6D $(BIN)calibrate $(BIN)extrinsic $(BIN)pose
+endif
+
+ifdef WITH_SIFT
+TARGETS += $(OBJ)libANN.a $(BIN)autopano $(BIN)autopano-sift-c 
 endif
 
 
@@ -175,6 +180,10 @@ docu_hl:	$(DOC)high_level_doc/documentation.tex
 
 
 ############# SLAM6D LIBS ##############
+
+$(OBJ)libANN.a: $(SRC)ann_1.1.1_modified/src/*.cpp $(SRC)ann_1.1.1_modified/src/*.h
+	echo Making modified ANN lib ...
+	cd $(SRC)ann_1.1.1_modified/src ; make
 
 $(OBJ)libnewmat.a: $(SRC)newmat/*.cpp $(SRC)newmat/*.h
 	echo Compiling Newmat ...
@@ -433,6 +442,140 @@ $(BIN)extrinsic: $(PMDSRC)calibrate/extrinsic.cc
 $(BIN)pose: $(PMDSRC)pose/pose.cc $(PMDSRC)pose/history.cc $(OBJ)libpmdaccess2.a
 	echo Compiling and Linking PMD pose ...
 	$(GPP) $(CFLAGS) $(PMDPKG) -I$(PMDSRC) -I$(PMDSRC)pmdaccess2 -I$(SRC) $(OBJ)cvpmd.o $(OBJ)pmdWrap.o $(OBJ)libpmdaccess2.a $(OBJ)icp6D.o $(OBJ)icp6Dapx.o $(OBJ)icp6Dhelix.o $(OBJ)icp6Dortho.o $(OBJ)icp6Dquat.o $(OBJ)icp6Dsvd.o $(OBJ)scanlib.a $(PMDLIBS) $(OBJ)libnewmat.a -o $(BIN)pose $(PMDSRC)pose/pose.cc $(PMDSRC)pose/history.cc
+	echo DONE
+	echo
+
+############# SIFT based registration ##############
+
+$(OBJ)LoweDetector.o: $(APSSRC)LoweDetector.c
+	echo Compiling LoweDetector ...
+	$(GCC) $(FLAGS) -DHAS_PANO13 -O2 -I$(APSSRC) -o $(OBJ)LoweDetector.o -c $(APSSRC)LoweDetector.c
+
+$(OBJ)RANSAC.o: $(APSSRC)RANSAC.c
+	echo Compiling RANSAC ...
+	$(GCC) $(FLAGS) -DHAS_PANO13 -O2 -I$(APSSRC) -o $(OBJ)RANSAC.o -c $(APSSRC)RANSAC.c
+
+$(OBJ)GaussianConvolution.o: $(APSSRC)GaussianConvolution.c
+	echo Compiling GaussianConvolution ...
+	$(GCC) $(FLAGS) -DHAS_PANO13 -O2 -I$(APSSRC) -o $(OBJ)GaussianConvolution.o -c $(APSSRC)GaussianConvolution.c
+
+$(OBJ)ScaleSpace.o: $(APSSRC)ScaleSpace.c
+	echo Compiling ScaleSpace ...
+	$(GCC) $(FLAGS) -DHAS_PANO13 -O2 -I$(APSSRC) -o $(OBJ)ScaleSpace.o -c $(APSSRC)ScaleSpace.c
+
+$(OBJ)KeypointXML.o: $(APSSRC)KeypointXML.c
+	echo Compiling KeypointXML ...
+	$(GCC) $(FLAGS) -DHAS_PANO13 -O2 -I$(APSSRC) -o $(OBJ)KeypointXML.o -c $(APSSRC)KeypointXML.c
+
+$(OBJ)MatchKeys.o: $(APSSRC)MatchKeys.c
+	echo Compiling MatchKeys ...
+	$(GCC) $(FLAGS) -DHAS_PANO13 -O2 -I$(APSSRC) -o $(OBJ)MatchKeys.o -c $(APSSRC)MatchKeys.c
+
+$(OBJ)KDTree.o: $(APSSRC)KDTree.c
+	echo Compiling KDTree for SIFT ...
+	$(GCC) $(FLAGS) -DHAS_PANO13 -O2 -I$(APSSRC) -o $(OBJ)KDTree.o -c $(APSSRC)KDTree.c
+
+$(OBJ)BondBall.o: $(APSSRC)BondBall.c
+	echo Compiling BondBall ...
+	$(GCC) $(FLAGS) -DHAS_PANO13 -O2 -I$(APSSRC) -o $(OBJ)BondBall.o -c $(APSSRC)BondBall.c
+
+$(OBJ)AreaFilter.o: $(APSSRC)AreaFilter.c
+	echo Compiling AreaFilter ...
+	$(GCC) $(FLAGS) -DHAS_PANO13 -O2 -I$(APSSRC) -o $(OBJ)AreaFilter.o -c $(APSSRC)AreaFilter.c
+
+$(OBJ)ImageMatchModel.o: $(APSSRC)ImageMatchModel.c
+	echo Compiling ImageMatchModel ...
+	$(GCC) $(FLAGS) -DHAS_PANO13 -O2 -I$(APSSRC) -o $(OBJ)ImageMatchModel.o -c $(APSSRC)ImageMatchModel.c
+
+$(OBJ)Transform.o: $(APSSRC)Transform.c
+	echo Compiling Transform ...
+	$(GCC) $(FLAGS) -DHAS_PANO13 -O2 -I$(APSSRC) -o $(OBJ)Transform.o -c $(APSSRC)Transform.c
+
+$(OBJ)DisplayImage.o: $(APSSRC)DisplayImage.c
+	echo Compiling DisplayImager ...
+	$(GCC) $(FLAGS) -DHAS_PANO13 -O2 -I$(APSSRC) -o $(OBJ)DisplayImage.o -c $(APSSRC)DisplayImage.c
+
+$(OBJ)ImageMap.o: $(APSSRC)ImageMap.c
+	echo Compiling ImageMap ...
+	$(GCC) $(FLAGS) -DHAS_PANO13 -O2 -I$(APSSRC) -o $(OBJ)ImageMap.o -c $(APSSRC)ImageMap.c
+
+$(OBJ)HashTable.o: $(APSSRC)HashTable.c
+	echo Compiling HashTable ...
+	$(GCC) $(FLAGS) -DHAS_PANO13 -O2 -I$(APSSRC) -o $(OBJ)HashTable.o -c $(APSSRC)HashTable.c
+
+$(OBJ)ArrayList.o: $(APSSRC)ArrayList.c
+	echo Compiling ArrayList ...
+	$(GCC) $(FLAGS) -DHAS_PANO13 -O2 -I$(APSSRC) -o $(OBJ)ArrayList.o -c $(APSSRC)ArrayList.c
+
+$(OBJ)SAreaFilter.o: $(APSSRC)SAreaFilter.c
+	echo Compiling HashTable ...
+	$(GCC) $(FLAGS) -DHAS_PANO13 -O2 -I$(APSSRC) -o $(OBJ)SAreaFilter.o -c $(APSSRC)ASAreaFilter.c
+
+$(OBJ)Random.o: $(APSSRC)Random.c
+	echo Compiling Random ...
+	$(GCC) $(FLAGS) -DHAS_PANO13 -O2 -I$(APSSRC) -o $(OBJ)Random.o -c $(APSSRC)Random.c
+
+$(OBJ)SimpleMatrix.o: $(APSSRC)SimpleMatrix.c
+	echo Compiling SimpleMatrix ...
+	$(GCC) $(FLAGS) -DHAS_PANO13 -O2 -I$(APSSRC) -o $(OBJ)SimpleMatrix.o -c $(APSSRC)SimpleMatrix.c
+
+$(OBJ)Utils.o: $(APSSRC)Utils.c
+	echo Compiling Utils ...
+	$(GCC) $(FLAGS) -DHAS_PANO13 -O2 -I$(APSSRC) -o $(OBJ)Utils.o -c $(APSSRC)Utils.c
+
+$(OBJ)liblibsift.a: $(OBJ)LoweDetector.o $(OBJ)RANSAC.o $(OBJ)GaussianConvolution.o $(OBJ)ScaleSpace.o $(OBJ)KeypointXML.o $(OBJ)MatchKeys.o $(OBJ)KDTree.o $(OBJ)BondBall.o $(OBJ)AreaFilter.o $(OBJ)ImageMatchModel.o $(OBJ)Transform.o $(OBJ)DisplayImage.o $(OBJ)ImageMap.o $(OBJ)HashTable.o $(OBJ)ArrayList.o $(OBJ)Random.o $(OBJ)SimpleMatrix.o $(OBJ)Utils.o
+	echo Linking LibLibSift ...
+	ar cr $(OBJ)liblibsift.a $(OBJ)LoweDetector.o $(OBJ)RANSAC.o $(OBJ)GaussianConvolution.o $(OBJ)ScaleSpace.o $(OBJ)KeypointXML.o $(OBJ)MatchKeys.o $(OBJ)KDTree.o $(OBJ)BondBall.o $(OBJ)AreaFilter.o $(OBJ)ImageMatchModel.o $(OBJ)Transform.o $(OBJ)DisplayImage.o $(OBJ)ImageMap.o $(OBJ)HashTable.o $(OBJ)ArrayList.o $(OBJ)Random.o $(OBJ)SimpleMatrix.o $(OBJ)Utils.o
+	ranlib $(OBJ)liblibsift.a
+
+$(OBJ)AutoPano.o: $(APSSRC)AutoPano.c
+	echo Compiling AutoPano ...
+	$(GCC) $(CFLAGS) -DHAS_PANO13 -O2 -I$(APSSRC) -o $(OBJ)AutoPano.o -c $(APSSRC)AutoPano.c
+
+$(BIN)autopano: $(OBJ)AutoPano.o $(OBJ)liblibsift.a
+	echo Linking AutoPano ...
+	$(GCC) $(CFLAGS) -o $(BIN)autopano $(OBJ)AutoPano.o -rdynamic $(OBJ)liblibsift.a -ljpeg -ltiff -lpng -lz -lpano13 -lxml2
+
+$(BIN)generatekeys: $(OBJ)GenerateKeys.o $(OBJ)liblibsift.a
+	echo Linking GenerateKeys ...
+	$(GCC) $(CFLAGS) -o $(BIN)generatekeys $(OBJ)GenerateKeys.o -rdynamic $(OBJ)liblibsift.a -ljpeg -ltiff -lpng -lz -lpano13 -lxml2
+
+$(OBJ)ANNkd_wrap.o: $(APSSRC)APSCpp/ANNkd_wrap.cpp
+	echo Compiling ANN kd wrap ...
+	$(GPP) $(CFLAGS) -DHAS_PANO13 -o $(OBJ)ANNkd_wrap.o -c -I$(SRC)ann_1.1.1_modified/include/ $(APSSRC)APSCpp/ANNkd_wrap.cpp
+
+$(OBJ)APSCpp_main.o: $(APSSRC)APSCpp/APSCpp_main.c
+	echo Compiling APSCpp_main ...
+	$(GCC) $(FLAGS) -DHAS_PANO13 -o $(OBJ)APSCpp_main.o -c -I$(APSSRC) $(APSSRC)APSCpp/APSCpp_main.c
+
+$(OBJ)APSCpp.o: $(APSSRC)APSCpp/APSCpp.c
+	echo Compiling APSCpp ...
+	$(GCC) $(FLAGS) -DHAS_PANO13 -o $(OBJ)APSCpp.o -c -I$(APSSRC) $(APSSRC)APSCpp/APSCpp.c
+
+$(OBJ)CamLens.o: $(APSSRC)APSCpp/CamLens.c 
+	echo Compiling CamLens ...
+	$(GCC) $(FLAGS) -DHAS_PANO13 -o $(OBJ)CamLens.o -c -I$(APSSRC) $(APSSRC)APSCpp/CamLens.c
+
+$(OBJ)HermiteSpline.o: $(APSSRC)APSCpp/HermiteSpline.c 
+	echo Compiling HermiteSpline ...
+	$(GCC) $(FLAGS) -DHAS_PANO13 -o $(OBJ)HermiteSpline.o -c -I$(APSSRC) $(APSSRC)APSCpp/HermiteSpline.c
+
+$(OBJ)saInterp.o: $(APSSRC)APSCpp/saInterp.c 
+	echo Compiling saInterp ...
+	$(GCC) $(FLAGS) -DHAS_PANO13 -o $(OBJ)saInterp.o -c -I$(APSSRC) $(APSSRC)APSCpp/saInterp.c
+
+$(OBJ)saRemap.o: $(APSSRC)APSCpp/saRemap.c
+	echo Compiling saRemap ...
+	$(GCC) $(FLAGS) -DHAS_PANO13 -o $(OBJ)saRemap.o -c -I$(APSSRC) $(APSSRC)APSCpp/saRemap.c
+
+$(BIN)autopano-sift-c: $(OBJ)ANNkd_wrap.o $(OBJ)APSCpp_main.o $(OBJ)APSCpp.o $(OBJ)CamLens.o $(OBJ)HermiteSpline.o $(OBJ)saInterp.o $(OBJ)saRemap.o $(OBJ)libANN.a $(OBJ)liblibsift.a
+	echo Linking autopano-sift-c
+	$(GPP) $(CFLAGS) -DHAS_PANO13 $(OBJ)ANNkd_wrap.o $(OBJ)APSCpp_main.o $(OBJ)APSCpp.o $(OBJ)CamLens.o $(OBJ)HermiteSpline.o $(OBJ)saInterp.o $(OBJ)saRemap.o -o $(BIN)autopano-sift-c -rdynamic $(OBJ)libANN.a $(OBJ)liblibsift.a -ljpeg -ltiff -lpng -lz -lz -lpano13 -lxml2 -lstdc++ 
+	echo DONE
+	echo 
+
+
+
 
 ##################################################################################
 

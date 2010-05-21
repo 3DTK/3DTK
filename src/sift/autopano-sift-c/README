@@ -1,0 +1,81 @@
+
+
+SIFT Feature Detection implementation
+
+Copyright (C) 2004-2005, Sebastian Nowozin (nowozin@cs.tu-berlin.de)
+
+
+
+Introduction
+============
+
+The SIFT feature detection algorithm has been invented and published by David
+Lowe at the University of British Columbia. A detailed account of the complete
+algorithm is available at http://www.cs.ubc.ca/~lowe/papers/ijcv03-abs.html
+
+  The algorithm provides the capability to identify key feature points within
+arbitrary images. It further extracts highly distinct information for each
+such point and allows to characterize the point invariant to a number of
+modifications to the image. It is invariant to contrast/brightness changes, to
+rotation, scaling and partially invariant to other kinds of transformations.
+The algorithm can be flexibly used to create input data for image matching,
+object identification and other computer vision related algorithms.
+
+  The use of the SIFT algorithm for automatic panorama creation has been
+developed by Matthew Brown and David Lowe in their paper "Recognising
+Panoramas" available at http://www.cs.ubc.ca/~mbrown/papers/iccv2003.pdf and
+examples of this application are available at
+http://www.cs.ubc.ca/~mbrown/panorama/panorama.html
+
+  This package provides an implementation of the SIFT algorithm and a set of
+utilities to utilize the algorithm to match two or more images. As output, a
+number of control points are created, which specify one and the same image
+location in two images. The output is created as project file for the Hugin
+panorama stitching software, which is available at http://hugin.sourceforge.net/
+
+
+License
+=======
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; version 2 of the License.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
+
+WARNING:
+
+	"The University of British Columbia has applied for a patent on the SIFT
+	 algorithm in the United States.  Applications of this software may
+	 require a license from the University of British Columbia."
+
+
+The detailed license for this package is available in the "LICENSE" file,
+please read and acknowledge it before using the software.  The SIFT algorithm
+is patented in the United States and as such restricted in use within the
+United States.  I believe it is safe to use the software for any purpose
+outside of the US, but I will not take any guarantee for doing so.  Inside the
+US, please consult the licensing office of the University of British Columbia.
+
+
+Installation
+============
+
+The only dependencies are:
+libpano13, libpng, libtiff, libjpeg, zlib and libxml2
+
+autopano-sift-C uses a standard cmake build system:
+
+  cmake .
+  make
+  make install
+
+
