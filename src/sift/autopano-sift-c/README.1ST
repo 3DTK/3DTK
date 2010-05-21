@@ -1,0 +1,44 @@
+
+This is autopano-sift-2.4 ported to plain "C"
+The source is kept as close as possible to the original version.
+
+It should have the same inputs and outputs as the original "C#" version
+which is available at http://www.cs.tu-berlin.de/~nowozin/autopano-sift
+
+
+The only dependencies are:
+libpano13, libpng, libtiff, libjpeg, zlib and libxml2
+
+The doc directory contains verbatim copies from the original
+
+-------------------------
+
+Note from Pablo d'Angelo (pablo.dangelo at web.de):
+
+These files have suddenly appeared on the hugin patches page. It has been
+uploaded by an anonymous person. Thank you!
+
+--------------------------
+
+Upgrade to v. 2.5 March 2008 by TKSharpless (tksharpless@gmail.com)
+
+Internal image data changed from double to float, cutting memory
+demand in the keypoint finder by almost half.
+
+New executable autopano-sift-c both finds and matches keypoints
+without generating XML files.  It can run under hugin 0.7 as an
+alternate control point finder.  When run from the command line it
+can read image information from any PanoTools compatible script. 
+ 
+If projection formats and angular sizes of the image are specified,
+it converts to stereographic projection, which gives better results 
+with wide-angle lenses.
+
+Autopano-sift-c uses the much faster ANN kd-tree for keypoint matching 
+(but retains the option to use Nowozin's KDTree code for comparison).
+
+See README-autopano-sift-c.txt for details.
+
+The manpages in share/man are now quite out of date, but are still
+installed in hopes someone will be moved to update them.
+

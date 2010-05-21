@@ -1,0 +1,66 @@
+AUTOPANO-SIFT(7)                   Overview                   AUTOPANO-SIFT(7)
+
+
+
+NAME
+       autopano-sift - Automatic panorama stitching package
+
+INTRODUCTION
+       The  autopano-sift  package contains a number programs to ease the cre-
+       ation of panoramic images. A tedious task in panoramic  image  creation
+       from  many  individual images is the aligning of the images so they fit
+       together. This is normally done by  using  control  points  which  give
+       information  about shared image features. For example, image two images
+       of a church. Lets assume both images overlap so that the rooftop of the
+       church is visible in both. By telling a panorama software that the roof
+       is in both images at a specific position the images can be aligned.  At
+       least  three  control point pairs between every two images are required
+       usually.
+
+       The manual work of creating this control points can be  immense.  Espe-
+       cially  for  panorama images holding more than one line of images there
+       is a huge number of possible overlaps.
+
+       The autopano-sift package can automatically create control point  pairs
+       by using a combination of sophisticated algorithms and models. For most
+       feature-rich images it works very well, often outperforming  humans  in
+       coverage, precision and speed.
+
+       In  the following, the individual utilities are introduced. If you want
+       a quick start, try the autopanog(1) GUI frontend.
+
+
+DESCRIPTION
+       autopanog The GTK# GUI frontend for generating and matching  SIFT  key-
+       points.  As  a  user wanting to stitch panorama images, this is all you
+       will ever need. See autopanog(1)
+
+       autopano The keypoint matching program. It can take SIFT keypoint files
+       as input and produce PTO output files. See autopano(1)
+
+       generatekeys  The SIFT keypoint extraction program. Takes an image from
+       you, and gives keypoints back. Optionally can downscale the image to  a
+       given resolution, so your memory size is cared for. See generatekeys(1)
+
+       showone Show the SIFT keypoints overlayed over the  source  image.  Use
+       includes  debugging and tuning of SIFT parameters and to get an impres-
+       sion how well spread the keypoints are. See showone(1)
+
+       showtwo Do simplistic matching of SIFT keypoints  between  two  images,
+       without  geometric  model.  Use  includes representing general matching
+       quality. Optionally filter only  a  given  number  of  "best"  keypoint
+       matches. See showtwo(1)
+
+
+BUGS
+       If you find any bugs in the programs, please mail the author.
+
+AUTHOR
+       Sebastian Nowozin <nowozin at cs dot tu dash berlin dot de>
+
+SEE ALSO
+       autopano(1), autopanog(1), generatekeys(1), showone(1), showtwo(1)
+
+
+
+autopano-sift                      MAY 2004                   AUTOPANO-SIFT(7)

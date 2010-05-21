@@ -1,0 +1,95 @@
+#!/usr/bin/perl
+
+use strict;
+use warnings;
+use File::Spec::Functions;
+use Getopt::Long;
+use Pod::Usage;
+
+my $path_output;
+my $pix_max = 800;
+my $points = 10;
+my $noransac = 0;
+my $refine = 0;
+my $clean = 0;
+my $help = 0;
+
+GetOptions ('o|output=s' => \$path_output,
+            's|size=i' => \$pix_max,
+            'p|points=i' => \$points,
+            'n|noransac' => \$noransac,
+            'r|refine' => \$refine,
+            'c|clean' => \$clean,
+            'h|help' => \$help);
+
+my @paths_input = @ARGV;
+
+my $ransac = 1; $ransac = 0 if $noransac;
+my @refine = (); @refine = ('--refine', '--keep-unrefinable', 0) if $refine;
+
+pod2usage (-verbose => 2) if $help;
+pod2usage (2) unless (defined $path_output and scalar @paths_input > 1);
+
+my @paths_key;
+
+for my $path_input (@paths_input)
+{
+    my $path_key = "$path_input.key";
+    push @paths_key, $path_key;
+    next if (-e $path_key and not $clean);
+    system ('generatekeys', $path_input, $path_key, $pix_max);
+}
+
+system ('autopano', @refine, '--ransac', $ransac,
+    '--maxmatches', $points, $path_output, @paths_key);
+
+for my $path_key (@paths_key)
+{
+    unlink $path_key if ($clean);
+}
+
+exit 0;
+
+__END__
+
+=head1 NAME
+
+autopano-c-complete - wrapper for generatekeys and autopano
+
+=head1 SYNOPSIS
+
+autopano-c-complete [options] --output project.pto image1 image2 [...]
+
+ Options:
+  -o | --output name    Filename of created panorama project
+  -s | --size number    Downsize images until width and height is
+                          smaller than number, default 800
+  -p | --points number  Number of generated control points between,
+                          each pair, default: 10
+  -n | --noransac       No ransac detection, useful for fisheye images
+  -r | --refine         Refine the found control points using the
+                          original images, delete unrefinable.
+  -c | --clean          Do not reuse keypoints detected in earlier runs,
+                          deletes old keypoint files.
+  -h | --help           Outputs help documentation.
+
+=head1 DESCRIPTION
+
+B<autopano-c-complete> takes a list of image files and creates a hugin
+compatible project file containing control points linking the images together.
+
+=head1 LICENSE
+
+This file is licensed under the same terms as autopano-sift-C itself
+
+=head1 SEE ALSO
+
+L<http://hugin.sourceforge.net/>
+L<http://cs.tu-berlin.de/~nowozin/autopano-sift/>
+
+=head1 AUTHOR
+
+Bruno Postle - February 2008.  Based on autopano-c-complete by Pablo d'Angelo
+
+=cut
+
