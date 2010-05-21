@@ -64,6 +64,13 @@ bin/slam6D -a 2 -q /home/nuechter/dat/bremen_city/reduced -f uos -d 150 --lastsc
             -s 0 -e 12 --anim=1 -n /home/nuechter/dat/bremen_city/bremen.net -G 1 -D 100 
             -i 0 -I 50 -p --epsSLAM=0.0 bin/show -s 0 -e 12 /home/nuechter/dat/bremen_city/reduced
 
+(using UniKoblenz_CampusTour3_OsnabrueckFormat.tar.gz from
+http://kos.informatik.uni-osnabrueck.de/3Dscans/)
+bin/slam6D -s 1 -e 320 -r 20 -i 300 --epsICP=0.000001 -d 45 -D 45
+           --lastscan -f uos --algo=3 -l 10 -L 4 -I 100 -G 1
+            /home/nuechter/dat/UniKoblenz_CampusTour3_OsnabrueckFormat/
+bin/show -s 1 -e 320 -f uos /home/nuechter/dat/UniKoblenz_CampusTour3_OsnabrueckFormat/		  
+		  
 A reference manual can be found in doc/refman.pdf resp.
 doc/html/index.html (type in 'make docu' to compile the doxygen
 documentation for the HTML files).

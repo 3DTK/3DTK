@@ -1,26 +1,34 @@
 MAKEFLAGS += -s
 
-#
 # -------
 # OpenMP
 # -------
 #MAKEFLAGS += -j
 CFLAGS = -DMAX_OPENMP_NUM_THREADS=4 -DOPENMP_NUM_THREADS=4
-#CFLAGS += -openmp -parallel
+CFLAGS += -openmp -parallel
 #CFLAGS += -openmp-report1 -par-report1
 
 # ---------
 # Intel ICC
 # ---------
 #
+GCC     = /opt/intel/compiler/bin/icc
 GPP     = /opt/intel/compiler/bin/icc
 SHAREDFLAGS = -shared -fPIC
 LIBRARIES = -lglut -lGL -lGLU -L/usr/X11R6/lib -lXmu -lXt -lXi -lm -lXext -lX11 -lpthread -ldl -lstdc++ 
 
-CFLAGS += -O2 -Wall -finline-functions
+CFLAGS += -O2 -w1 -finline-functions
+FLAGS  += -O2 -w1 -finline-functions
+
 #CFLAGS += -static -L/usr/local/src/Mesa-7.0.1/lib/
 #CFLAGS += -DDEBUG
 CFLAGS += -msse3 -mcpu=pentium4
+
+###################################################################
+#
+# Next, you can decide if you want to compile additional components 
+#
+###################################################################
 
 #
 # RIEGL scanner options
@@ -64,3 +72,9 @@ WITH_PMD = WITH_PMD          # compile PMD camera tools
 
 PMDLIBS = -lglfw -lGLU -lftgl -lxmlrpc_util -lglfw -lGLU -lftgl  -lxmlrpc_client -lxmlrpc -lxmlrpc++ -lxmlrpc_client++ -lxmlrpc_xmltok -lxmlrpc_xmlparse
 PMDPKG = `pkg-config --cflags opencv` `pkg-config --cflags ftgl` `pkg-config --libs libconfig` `pkg-config --libs opencv`
+
+#
+# SIFT based registration
+# -----------------------
+#
+WITH_SIFT = WITH_SIFT         # compile SIFT tools

@@ -1,0 +1,58 @@
+.\" Process this file with
+.\" groff -man -Tascii foo.1
+.\"
+.TH AUTOPANO-COMPLETE 1 "MAY 2004" autopano-sift "User Manual"
+.SH NAME
+autopano-complete \- Generate panorama project file from images.
+.SH SYNOPSIS
+.B autopano-complete.sh
+.I [options]
+.I -o output.pto
+.I image1
+.I image2
+.I [image3 [..]]
+.SH DESCRIPTION
+Generate panorama project from image files. First, generate temporary keypoint
+files for each of the image files given on the command line. Then match the
+image files to identify the same features in two or more images. Generate a
+PTO panorama project file from the matching results. (Programs such as
+.BR hugin
+can read it.)
+.SH OPTIONS
+.IP image
+The image files to read in. They can be in any common format, including JPEG,
+PNG and TIFF.
+.IP "-o|--output <file>"
+Set PTO panorama output file (mandatory).
+.IP "-s|--size <pixelsize>"
+Set downscale resolution. If any of the image dimensions exceed this side, the
+image is resized so the longer side of the images will be this size. This is a
+preprocessing step and no file on disc will be changed. Use this when memory
+is rare.
+.IP "-p|--points <count>"
+The maximum number of control points to generate per image pair. When more
+than the given number of pairs are found, only the best are kept.
+.IP -n|--noransac
+Do not use the RANSAC algorithm (RANdom Sample Consensus), which does use
+geometric correllation to remove unwanted matches. Use this when uncommon lens
+geometries are used, such as fisheye lenses.
+.IP -c|--clean
+In any case, wipe the table - the previously generated keypoint files - and
+then generate the keypoint files from the images and match. If no clean is
+used, then previous image keypoint files are also used for matching.
+.IP -h|--help
+Output a concise usage help.
+.SH BUGS
+No bugs known, if you find any, please send a bug report to me. I will try to
+fix it. An old, obselete version of this script exists with similar
+functionality, see
+.BR autopano-complete.old
+.SH AUTHOR
+Pablo d'Angelo <pablo dot dangelo at web dot de>,
+Sebastian Nowozin <nowozin at cs dot tu dash berlin dot de>
+.SH "SEE ALSO"
+.BR autopano-sift (7),
+.BR generatekeys (1),
+.BR autopanog (1),
+.BR showone (1),
+.BR showtwo (1)

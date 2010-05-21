@@ -7,7 +7,6 @@
 
 #include "cvpmd.h"
 
-#define OPENMP_NUM_THREADS 1 //OMG :P
 #include "icp6Dminimizer.h"
 
 struct PMDFiles {
