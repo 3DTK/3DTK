@@ -24,6 +24,8 @@ FLAGS  += -O2 -w1 -finline-functions
 #CFLAGS += -DDEBUG
 CFLAGS += -msse3 -mcpu=pentium4
 
+#CFLAGS += -DUSE_GL_POINTS
+
 ###################################################################
 #
 # Next, you can decide if you want to compile additional components 

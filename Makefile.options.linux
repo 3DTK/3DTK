@@ -25,6 +25,7 @@ FLAGS    += -O3 -Wall -finline-functions
 CFLAGS += -Wno-deprecated -Wno-write-strings
 #CFLAGS += -mfpmath=sse -msse2 -march=i686
 CFLAGS += -pipe -march=native
+#CFLAGS += -DUSE_GL_POINTS
 
 ###################################################################
 #

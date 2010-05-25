@@ -33,8 +33,14 @@ public:
   void GetOctTreeRandom(vector<double*>&c);
   void GetOctTreeRandom(vector<double*>&c, unsigned int ptspervoxel);
 
+  void displayOctTree(long targetpts);
+  void displayOctTreeAll();
+  int cullOctTree();
 protected:
   
+  bool culled;
+  int nrpts;
+
   OctTree(list<double*> &splitPoints, double center[3], 
 		double x_size, double y_size, double z_size);
   
@@ -50,6 +56,8 @@ protected:
 					  double center[8][3], 
 					  double x_size, double y_size, double z_size,
 					  OctTree **child);
+  
+  void setVisible();
 
   /**
    * the (maximal 8) children of a box
