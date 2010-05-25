@@ -48,7 +48,7 @@ void DrawPoints(GLenum mode)
   // In case of animation
   if(scanNr != -1) {
 
-    for(int iterator = (int)vvertexArrayList.size()-1; iterator >= 0; iterator--) {
+    for(int iterator = (int)Scan::allScans.size()-1; iterator >= 0; iterator--) {
 
       if (MetaAlgoType[iterator][frameNr] == Scan::INVALID) continue;
       selectColors(MetaAlgoType[iterator][frameNr]);	 
@@ -56,7 +56,17 @@ void DrawPoints(GLenum mode)
       glMultMatrixd(MetaMatrix[iterator][frameNr]);
 
       glPointSize(pointsize);
-
+#ifdef USE_GL_POINTS
+        ExtractFrustum();
+        octpts[iterator]->cullOctTree();
+          
+        selectColors(MetaAlgoType[iterator][frameNr]);
+        if (displaymoving) {
+          octpts[iterator]->displayOctTree(ptstodisplay);
+        } else {
+          octpts[iterator]->displayOctTreeAll();
+        }
+#else
       for (unsigned int jterator = 0; jterator < vvertexArrayList[iterator].size(); jterator++) {
 
         if ((jterator == 0) && vvertexArrayList[iterator][jterator]->numPointsToRender > 0) {
@@ -67,6 +77,7 @@ void DrawPoints(GLenum mode)
           glCallList(vvertexArrayList[iterator][jterator]->name);
         }
       }
+#endif
       glPopMatrix();
     }
 
@@ -99,7 +110,7 @@ void DrawPoints(GLenum mode)
 
       glPointSize(pointsize);
 
-      for(int iterator = (int)vvertexArrayList.size()-1; iterator >= 0; iterator--) {
+      for(int iterator = (int)Scan::allScans.size()-1; iterator >= 0; iterator--) {
         glPushMatrix();
         if (invert)                               // default: white points on black background
           glColor4d(1.0, 1.0, 1.0, 1.0);
@@ -110,7 +121,6 @@ void DrawPoints(GLenum mode)
 
         glMultMatrixd(MetaMatrix[iterator].back());
 
-        //#define USE_GL_POINTS
 #ifdef USE_GL_POINTS
         ExtractFrustum();
         octpts[iterator]->cullOctTree();
@@ -119,7 +129,6 @@ void DrawPoints(GLenum mode)
         } else {
           octpts[iterator]->displayOctTreeAll();
         }
-
 #else
         for (unsigned int jterator = 0; jterator < vvertexArrayList[iterator].size(); jterator++) {
           if (vvertexArrayList[iterator][jterator]->numPointsToRender > 0) {
