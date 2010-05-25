@@ -6,6 +6,7 @@
  * @author Kai Lingemann. Institute of Computer Science, University of Osnabrueck, Germany.
  */
 
+#include "../octtree.h"
 #include "show.h"
 #include "camera.h"
 #include "NurbsPath.h"
@@ -36,6 +37,10 @@ using std::exception;
  */
 vector< vector<vertexArray*> > vvertexArrayList;
 
+/**
+ * the octrees that store the points for each scan
+ */
+OctTree **octpts;
 /**
  * Storing the base directory
  */
@@ -554,6 +559,34 @@ void createDisplayLists(bool reduced)
     vvertexArray.push_back(myvertexArray2);
     vvertexArrayList.push_back(vvertexArray);
   }
+
+#ifdef USE_GL_POINTS
+  cout << "Creating display octrees.." << endl;
+  octpts = new OctTree*[Scan::allScans.size()];
+  for(unsigned int i = 0; i < Scan::allScans.size() ; i++) {
+    if (reduced) {
+      double **pts = new double*[Scan::allScans[i]->get_points_red_size()];
+      for (unsigned int jterator = 0; jterator < Scan::allScans[i]->get_points_red_size(); jterator++) {
+        pts[jterator] = new double[3];
+        pts[jterator][0] = Scan::allScans[i]->get_points_red()[jterator][0];
+        pts[jterator][1] = Scan::allScans[i]->get_points_red()[jterator][1];
+        pts[jterator][2] = Scan::allScans[i]->get_points_red()[jterator][2];
+      }
+      octpts[i] = new OctTree(pts, Scan::allScans[i]->get_points_red_size(), 10.0);  // TODO remove magic number
+
+    } else {
+      double **pts = new double*[Scan::allScans[i]->get_points()->size()];
+      for (unsigned int jterator = 0; jterator < Scan::allScans[i]->get_points()->size(); jterator++) {
+        pts[jterator] = new double[3];
+        pts[jterator][0] = Scan::allScans[i]->get_points()->at(jterator).x;
+        pts[jterator][1] = Scan::allScans[i]->get_points()->at(jterator).y;
+        pts[jterator][2] = Scan::allScans[i]->get_points()->at(jterator).z;
+      }
+      octpts[i] = new OctTree(pts, Scan::allScans[i]->get_points_red_size(), 10.0);  //TODO remove magic number
+    }
+    cout << "Scan " << i << " octree finished." << endl;
+  }
+#endif
 }
 
 			    
