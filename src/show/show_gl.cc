@@ -1,3 +1,8 @@
+#include "viewcull.h"
+bool displaymoving = false;
+bool displaywasmoving = false;
+long ptstodisplay = 100000;
+double idealfps = 7.0; // program tries to have this framerate
 /**
  * color selector for animation
  */
@@ -27,89 +32,103 @@ void selectColors(Scan::AlgoType type) {
  */
 void DrawPoints(GLenum mode)
 {
+  static long time;
+  double fps =  1000.0/(GetCurrentTimeInMilliSec() - time);
+  time = GetCurrentTimeInMilliSec();
+  //cout << fps << " "  << ptstodisplay << endl;
+  if (displaywasmoving) {
+    long max = 10000000000;
+    long min = 10000;
+    ptstodisplay *= 1.0 + (fps - idealfps)/idealfps;
+    if (ptstodisplay < min) ptstodisplay = min;
+    else if (ptstodisplay > max) ptstodisplay = max;
+  }
+  displaywasmoving = displaymoving;
+
   // In case of animation
   if(scanNr != -1) {
 
     for(int iterator = (int)vvertexArrayList.size()-1; iterator >= 0; iterator--) {
 
-	 if (MetaAlgoType[iterator][frameNr] == Scan::INVALID) continue;
-	 selectColors(MetaAlgoType[iterator][frameNr]);	 
-	 glPushMatrix();
-	 glMultMatrixd(MetaMatrix[iterator][frameNr]);
+      if (MetaAlgoType[iterator][frameNr] == Scan::INVALID) continue;
+      selectColors(MetaAlgoType[iterator][frameNr]);	 
+      glPushMatrix();
+      glMultMatrixd(MetaMatrix[iterator][frameNr]);
 
-	 glPointSize(pointsize);
+      glPointSize(pointsize);
 
-	 for (unsigned int jterator = 0; jterator < vvertexArrayList[iterator].size(); jterator++) {
+      for (unsigned int jterator = 0; jterator < vvertexArrayList[iterator].size(); jterator++) {
 
-	   if ((jterator == 0) && vvertexArrayList[iterator][jterator]->numPointsToRender > 0) {
-       selectColors(MetaAlgoType[iterator][frameNr]);
-	   }
-	   
-	   if (vvertexArrayList[iterator][jterator]->numPointsToRender > 0) {
-		glCallList(vvertexArrayList[iterator][jterator]->name);
-	   }
-	 }
-	 glPopMatrix();
+        if ((jterator == 0) && vvertexArrayList[iterator][jterator]->numPointsToRender > 0) {
+          selectColors(MetaAlgoType[iterator][frameNr]);
+        }
+
+        if (vvertexArrayList[iterator][jterator]->numPointsToRender > 0) {
+          glCallList(vvertexArrayList[iterator][jterator]->name);
+        }
+      }
+      glPopMatrix();
     }
-    
+
   } else {
-    
-  if(mode == GL_SELECT){
-	 // select points mode
-	 // ------------------
-	 for(unsigned int iterator = 0; iterator < Scan::allScans.size(); iterator++) {
-	   glPushMatrix();
-	   glMultMatrixd(MetaMatrix[iterator].back());
-	   for (unsigned int jterator = 0;
-		   jterator < Scan::allScans[iterator]->get_points()->size();
-		   jterator++) {
-		GLuint name = iterator * 1000000 + jterator  ;
-		glLoadName(name);
+
+    if(mode == GL_SELECT){
+      // select points mode
+      // ------------------
+      for(unsigned int iterator = 0; iterator < Scan::allScans.size(); iterator++) {
+        glPushMatrix();
+        glMultMatrixd(MetaMatrix[iterator].back());
+        for (unsigned int jterator = 0;
+            jterator < Scan::allScans[iterator]->get_points()->size();
+            jterator++) {
+          GLuint name = iterator * 1000000 + jterator  ;
+          glLoadName(name);
           glBegin(GL_POINTS);
-		setGLPoint(Scan::allScans[iterator]->get_points()->at(jterator).x,
-				 Scan::allScans[iterator]->get_points()->at(jterator).y,
-				 Scan::allScans[iterator]->get_points()->at(jterator).z);
+          setGLPoint(Scan::allScans[iterator]->get_points()->at(jterator).x,
+              Scan::allScans[iterator]->get_points()->at(jterator).y,
+              Scan::allScans[iterator]->get_points()->at(jterator).z);
           glEnd();
-	   }
-	   glFlush();
-	   glPopMatrix();
-	 }
+        }
+        glFlush();
+        glPopMatrix();
+      }
     } else {
 
-	 // draw point is normal mode
-	 // -------------------------
+      // draw point is normal mode
+      // -------------------------
 
-	 glPointSize(pointsize);
+      glPointSize(pointsize);
 
-	 for(int iterator = (int)vvertexArrayList.size()-1; iterator >= 0; iterator--) {
-	   glPushMatrix();
-	   if (invert)                               // default: white points on black background
-		glColor4d(1.0, 1.0, 1.0, 1.0);
-	   else                                      // black points on white background
-		glColor4d(0.0, 0.0, 0.0, 1.0);
+      for(int iterator = (int)vvertexArrayList.size()-1; iterator >= 0; iterator--) {
+        glPushMatrix();
+        if (invert)                               // default: white points on black background
+          glColor4d(1.0, 1.0, 1.0, 1.0);
+        else                                      // black points on white background
+          glColor4d(0.0, 0.0, 0.0, 1.0);
 
-	   //	   if (iterator == 0) glColor4d(0.5, 1.0, 0.5, 1.0);
-	   
-	   glMultMatrixd(MetaMatrix[iterator].back());
+        //	   if (iterator == 0) glColor4d(0.5, 1.0, 0.5, 1.0);
 
- 	   for (unsigned int jterator = 0; jterator < vvertexArrayList[iterator].size(); jterator++) {
-		if (vvertexArrayList[iterator][jterator]->numPointsToRender > 0) {
-//#define USE_GL_POINTS
+        glMultMatrixd(MetaMatrix[iterator].back());
+
+        //#define USE_GL_POINTS
 #ifdef USE_GL_POINTS
-			glBegin(GL_POINTS);
-			for (int i = 0; i < vvertexArrayList[iterator][jterator]->numPointsToRender; i += 3) {
-				glVertex3f(vvertexArrayList[iterator][jterator]->array[i],
-					vvertexArrayList[iterator][jterator]->array[i+1],
-					vvertexArrayList[iterator][jterator]->array[i+2]);
-			}
-			glEnd();
+        ExtractFrustum();
+        octpts[iterator]->cullOctTree();
+        if (displaymoving) {
+          octpts[iterator]->displayOctTree(ptstodisplay);
+        } else {
+          octpts[iterator]->displayOctTreeAll();
+        }
+
 #else
-		  glCallList(vvertexArrayList[iterator][jterator]->name);
+        for (unsigned int jterator = 0; jterator < vvertexArrayList[iterator].size(); jterator++) {
+          if (vvertexArrayList[iterator][jterator]->numPointsToRender > 0) {
+            glCallList(vvertexArrayList[iterator][jterator]->name);
+          }
+        }
 #endif
-		}
- 	   }
-	   glPopMatrix();
-	 }
+        glPopMatrix();
+      }
     }
   }
 }
@@ -930,6 +949,10 @@ void CallBackMouseFunc(int button, int state, int x, int y)
       mouseNavX = x;
       mouseNavY = y;
       mouseNavButton = button;
+      displaymoving = true;
+    } else {
+      displaymoving = false;
+      haveToUpdate = 1;
     }
   }
 }
