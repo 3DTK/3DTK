@@ -9,6 +9,7 @@ SHOWSRC = src/show/
 GRIDSRC = src/grid/
 PMDSRC  = src/pmd/
 APSSRC  = src/sift/autopano-sift-c/
+SIFTSRC = src/sift/
 DOC     = doc/
 
 TARGETS = $(BIN)slam6D $(BIN)scan_io_uos.so $(BIN)scan_io_rxp.so $(BIN)scan_io_uos_map.so $(BIN)scan_io_uos_frames.so $(BIN)scan_io_uos_map_frames.so $(BIN)scan_io_old.so $(BIN)scan_io_x3d.so $(BIN)scan_io_asc.so $(BIN)scan_io_rts.so $(BIN)scan_io_iais.so $(BIN)scan_io_rts_map.so $(BIN)scan_io_front.so $(BIN)scan_io_riegl_txt.so $(BIN)scan_io_riegl_bin.so $(BIN)scan_io_zuf.so $(BIN)scan_io_xyz.so $(BIN)scan_io_ifp.so $(BIN)scan_io_ply.so $(BIN)scan_io_wrl.so $(BIN)scan_io_zahn.so 
@@ -34,7 +35,7 @@ TARGETS += $(BIN)grabVideoAnd3D $(BIN)grabFramesCam $(BIN)grabFramesPMD $(BIN)co
 endif
 
 ifdef WITH_SIFT
-TARGETS += $(OBJ)libANN.a $(BIN)autopano $(BIN)autopano-sift-c 
+TARGETS += $(OBJ)libANN.a $(BIN)autopano $(BIN)autopano-sift-c $(BIN)generatesiftfeatures $(BIN)mergehistograms $(BIN)panoramacreator $(BIN)visualizemap $(BIN)visualizescan $(BIN)reduceppc $(BIN)matchsiftfeatures $(BIN)registerscans $(BIN)readscan #$(BIN)visualizematches $(BIN)visualizeregistrations
 endif
 
 
@@ -145,7 +146,7 @@ $(OBJ)icp6Dortho.o: $(SRC)icp6Dortho.h $(SRC)icp6Dortho.cc $(SRC)ptpair.h $(SRC)
 
 $(OBJ)icp6Dquat.o: $(SRC)icp6Dquat.h $(SRC)icp6Dquat.cc $(SRC)ptpair.h $(SRC)icp6Dminimizer.h
 	echo Compiling ICP 6D with Quaternion ...
-	$(GPP) $(CFLAGS) -c -o $(OBJ)icp6Dquat.o $(SRC)icp6Dquat.cc 
+	$(GPP) $(CFLAGS) $(SHAREDFLAGS) -c -o $(OBJ)icp6Dquat.o $(SRC)icp6Dquat.cc 
 
 $(OBJ)icp6Dhelix.o: $(SRC)icp6Dhelix.h $(SRC)icp6Dhelix.cc $(SRC)ptpair.h $(SRC)icp6Dminimizer.h
 	echo Compiling ICP 6D with Helix ...
@@ -447,81 +448,81 @@ $(BIN)pose: $(PMDSRC)pose/pose.cc $(PMDSRC)pose/history.cc $(OBJ)libpmdaccess2.a
 
 ############# SIFT based registration ##############
 
-$(OBJ)LoweDetector.o: $(APSSRC)LoweDetector.c
+$(OBJ)LoweDetector.o: $(APSSRC)LoweDetector.*
 	echo Compiling LoweDetector ...
-	$(GCC) $(FLAGS) -DHAS_PANO13 -O2 -I$(APSSRC) -o $(OBJ)LoweDetector.o -c $(APSSRC)LoweDetector.c
+	$(GCC) $(FLAGS) -DHAS_PANO13 -I$(APSSRC) -o $(OBJ)LoweDetector.o -c $(APSSRC)LoweDetector.c
 
-$(OBJ)RANSAC.o: $(APSSRC)RANSAC.c
+$(OBJ)RANSAC.o: $(APSSRC)RANSAC.*
 	echo Compiling RANSAC ...
-	$(GCC) $(FLAGS) -DHAS_PANO13 -O2 -I$(APSSRC) -o $(OBJ)RANSAC.o -c $(APSSRC)RANSAC.c
+	$(GCC) $(FLAGS) -DHAS_PANO13 -I$(APSSRC) -o $(OBJ)RANSAC.o -c $(APSSRC)RANSAC.c
 
-$(OBJ)GaussianConvolution.o: $(APSSRC)GaussianConvolution.c
+$(OBJ)GaussianConvolution.o: $(APSSRC)GaussianConvolution.*
 	echo Compiling GaussianConvolution ...
-	$(GCC) $(FLAGS) -DHAS_PANO13 -O2 -I$(APSSRC) -o $(OBJ)GaussianConvolution.o -c $(APSSRC)GaussianConvolution.c
+	$(GCC) $(FLAGS) -DHAS_PANO13 -I$(APSSRC) -o $(OBJ)GaussianConvolution.o -c $(APSSRC)GaussianConvolution.c
 
-$(OBJ)ScaleSpace.o: $(APSSRC)ScaleSpace.c
+$(OBJ)ScaleSpace.o: $(APSSRC)ScaleSpace.*
 	echo Compiling ScaleSpace ...
-	$(GCC) $(FLAGS) -DHAS_PANO13 -O2 -I$(APSSRC) -o $(OBJ)ScaleSpace.o -c $(APSSRC)ScaleSpace.c
+	$(GCC) $(FLAGS) -DHAS_PANO13 -I$(APSSRC) -o $(OBJ)ScaleSpace.o -c $(APSSRC)ScaleSpace.c
 
-$(OBJ)KeypointXML.o: $(APSSRC)KeypointXML.c
+$(OBJ)KeypointXML.o: $(APSSRC)KeypointXML.*
 	echo Compiling KeypointXML ...
-	$(GCC) $(FLAGS) -DHAS_PANO13 -O2 -I$(APSSRC) -o $(OBJ)KeypointXML.o -c $(APSSRC)KeypointXML.c
+	$(GCC) $(FLAGS) -DHAS_PANO13 -I$(APSSRC) -o $(OBJ)KeypointXML.o -c $(APSSRC)KeypointXML.c
 
-$(OBJ)MatchKeys.o: $(APSSRC)MatchKeys.c
+$(OBJ)MatchKeys.o: $(APSSRC)MatchKeys.*
 	echo Compiling MatchKeys ...
-	$(GCC) $(FLAGS) -DHAS_PANO13 -O2 -I$(APSSRC) -o $(OBJ)MatchKeys.o -c $(APSSRC)MatchKeys.c
+	$(GCC) $(FLAGS) -DHAS_PANO13 -I$(APSSRC) -o $(OBJ)MatchKeys.o -c $(APSSRC)MatchKeys.c
 
-$(OBJ)KDTree.o: $(APSSRC)KDTree.c
+$(OBJ)KDTree.o: $(APSSRC)KDTree.*
 	echo Compiling KDTree for SIFT ...
-	$(GCC) $(FLAGS) -DHAS_PANO13 -O2 -I$(APSSRC) -o $(OBJ)KDTree.o -c $(APSSRC)KDTree.c
+	$(GCC) $(FLAGS) -DHAS_PANO13 -I$(APSSRC) -o $(OBJ)KDTree.o -c $(APSSRC)KDTree.c
 
-$(OBJ)BondBall.o: $(APSSRC)BondBall.c
+$(OBJ)BondBall.o: $(APSSRC)BondBall.*
 	echo Compiling BondBall ...
-	$(GCC) $(FLAGS) -DHAS_PANO13 -O2 -I$(APSSRC) -o $(OBJ)BondBall.o -c $(APSSRC)BondBall.c
+	$(GCC) $(FLAGS) -DHAS_PANO13 -I$(APSSRC) -o $(OBJ)BondBall.o -c $(APSSRC)BondBall.c
 
-$(OBJ)AreaFilter.o: $(APSSRC)AreaFilter.c
+$(OBJ)AreaFilter.o: $(APSSRC)AreaFilter.*
 	echo Compiling AreaFilter ...
-	$(GCC) $(FLAGS) -DHAS_PANO13 -O2 -I$(APSSRC) -o $(OBJ)AreaFilter.o -c $(APSSRC)AreaFilter.c
+	$(GCC) $(FLAGS) -DHAS_PANO13 -I$(APSSRC) -o $(OBJ)AreaFilter.o -c $(APSSRC)AreaFilter.c
 
-$(OBJ)ImageMatchModel.o: $(APSSRC)ImageMatchModel.c
+$(OBJ)ImageMatchModel.o: $(APSSRC)ImageMatchModel.*
 	echo Compiling ImageMatchModel ...
-	$(GCC) $(FLAGS) -DHAS_PANO13 -O2 -I$(APSSRC) -o $(OBJ)ImageMatchModel.o -c $(APSSRC)ImageMatchModel.c
+	$(GCC) $(FLAGS) -DHAS_PANO13 -I$(APSSRC) -o $(OBJ)ImageMatchModel.o -c $(APSSRC)ImageMatchModel.c
 
-$(OBJ)Transform.o: $(APSSRC)Transform.c
+$(OBJ)Transform.o: $(APSSRC)Transform.*
 	echo Compiling Transform ...
-	$(GCC) $(FLAGS) -DHAS_PANO13 -O2 -I$(APSSRC) -o $(OBJ)Transform.o -c $(APSSRC)Transform.c
+	$(GCC) $(FLAGS) -DHAS_PANO13 -I$(APSSRC) -o $(OBJ)Transform.o -c $(APSSRC)Transform.c
 
-$(OBJ)DisplayImage.o: $(APSSRC)DisplayImage.c
+$(OBJ)DisplayImage.o: $(APSSRC)DisplayImage.*
 	echo Compiling DisplayImager ...
-	$(GCC) $(FLAGS) -DHAS_PANO13 -O2 -I$(APSSRC) -o $(OBJ)DisplayImage.o -c $(APSSRC)DisplayImage.c
+	$(GCC) $(FLAGS) -DHAS_PANO13 -I$(APSSRC) -o $(OBJ)DisplayImage.o -c $(APSSRC)DisplayImage.c
 
-$(OBJ)ImageMap.o: $(APSSRC)ImageMap.c
+$(OBJ)ImageMap.o: $(APSSRC)ImageMap.*
 	echo Compiling ImageMap ...
-	$(GCC) $(FLAGS) -DHAS_PANO13 -O2 -I$(APSSRC) -o $(OBJ)ImageMap.o -c $(APSSRC)ImageMap.c
+	$(GCC) $(FLAGS) -DHAS_PANO13 -I$(APSSRC) -o $(OBJ)ImageMap.o -c $(APSSRC)ImageMap.c
 
-$(OBJ)HashTable.o: $(APSSRC)HashTable.c
+$(OBJ)HashTable.o: $(APSSRC)HashTable.*
 	echo Compiling HashTable ...
-	$(GCC) $(FLAGS) -DHAS_PANO13 -O2 -I$(APSSRC) -o $(OBJ)HashTable.o -c $(APSSRC)HashTable.c
+	$(GCC) $(FLAGS) -DHAS_PANO13 -I$(APSSRC) -o $(OBJ)HashTable.o -c $(APSSRC)HashTable.c
 
-$(OBJ)ArrayList.o: $(APSSRC)ArrayList.c
+$(OBJ)ArrayList.o: $(APSSRC)ArrayList.*
 	echo Compiling ArrayList ...
-	$(GCC) $(FLAGS) -DHAS_PANO13 -O2 -I$(APSSRC) -o $(OBJ)ArrayList.o -c $(APSSRC)ArrayList.c
+	$(GCC) $(FLAGS) -DHAS_PANO13 -I$(APSSRC) -o $(OBJ)ArrayList.o -c $(APSSRC)ArrayList.c
 
-$(OBJ)SAreaFilter.o: $(APSSRC)SAreaFilter.c
+$(OBJ)SAreaFilter.o: $(APSSRC)SAreaFilter.*
 	echo Compiling HashTable ...
-	$(GCC) $(FLAGS) -DHAS_PANO13 -O2 -I$(APSSRC) -o $(OBJ)SAreaFilter.o -c $(APSSRC)ASAreaFilter.c
+	$(GCC) $(FLAGS) -DHAS_PANO13 -I$(APSSRC) -o $(OBJ)SAreaFilter.o -c $(APSSRC)ASAreaFilter.c
 
-$(OBJ)Random.o: $(APSSRC)Random.c
+$(OBJ)Random.o: $(APSSRC)Random.*
 	echo Compiling Random ...
-	$(GCC) $(FLAGS) -DHAS_PANO13 -O2 -I$(APSSRC) -o $(OBJ)Random.o -c $(APSSRC)Random.c
+	$(GCC) $(FLAGS) -DHAS_PANO13 -I$(APSSRC) -o $(OBJ)Random.o -c $(APSSRC)Random.c
 
-$(OBJ)SimpleMatrix.o: $(APSSRC)SimpleMatrix.c
+$(OBJ)SimpleMatrix.o: $(APSSRC)SimpleMatrix.*
 	echo Compiling SimpleMatrix ...
-	$(GCC) $(FLAGS) -DHAS_PANO13 -O2 -I$(APSSRC) -o $(OBJ)SimpleMatrix.o -c $(APSSRC)SimpleMatrix.c
+	$(GCC) $(FLAGS) -DHAS_PANO13 -I$(APSSRC) -o $(OBJ)SimpleMatrix.o -c $(APSSRC)SimpleMatrix.c
 
-$(OBJ)Utils.o: $(APSSRC)Utils.c
+$(OBJ)Utils.o: $(APSSRC)Utils.*
 	echo Compiling Utils ...
-	$(GCC) $(FLAGS) -DHAS_PANO13 -O2 -I$(APSSRC) -o $(OBJ)Utils.o -c $(APSSRC)Utils.c
+	$(GCC) $(FLAGS) -DHAS_PANO13 -I$(APSSRC) -o $(OBJ)Utils.o -c $(APSSRC)Utils.c
 
 $(OBJ)liblibsift.a: $(OBJ)LoweDetector.o $(OBJ)RANSAC.o $(OBJ)GaussianConvolution.o $(OBJ)ScaleSpace.o $(OBJ)KeypointXML.o $(OBJ)MatchKeys.o $(OBJ)KDTree.o $(OBJ)BondBall.o $(OBJ)AreaFilter.o $(OBJ)ImageMatchModel.o $(OBJ)Transform.o $(OBJ)DisplayImage.o $(OBJ)ImageMap.o $(OBJ)HashTable.o $(OBJ)ArrayList.o $(OBJ)Random.o $(OBJ)SimpleMatrix.o $(OBJ)Utils.o
 	echo Linking LibLibSift ...
@@ -574,8 +575,158 @@ $(BIN)autopano-sift-c: $(OBJ)ANNkd_wrap.o $(OBJ)APSCpp_main.o $(OBJ)APSCpp.o $(O
 	echo DONE
 	echo 
 
+$(OBJ)Coord.o: $(SIFTSRC)library/Coord.*
+	echo Compiling Coord ...
+	$(GPP) $(CFLAGS) $(SHAREDFLAGS) -Dterscanreg_EXPORTS -o $(OBJ)Coord.o -c $(SIFTSRC)library/Coord.cpp
+
+$(OBJ)PanoramaMap.o: $(SIFTSRC)library/PanoramaMap.*
+	echo Compiling PanoramaMap ...
+	$(GPP) $(CFLAGS) $(SHAREDFLAGS) -Dterscanreg_EXPORTS -o $(OBJ)PanoramaMap.o -c $(SIFTSRC)library/PanoramaMap.cpp
+
+$(OBJ)PointC.o: $(SIFTSRC)library/PointC.*
+	echo Compiling PointC ...
+	$(GPP) $(CFLAGS) $(SHAREDFLAGS) -Dterscanreg_EXPORTS -o $(OBJ)PointC.o -c $(SIFTSRC)library/PointC.cpp
+
+$(OBJ)PointCloud.o: $(SIFTSRC)library/PointCloud.*
+	echo Compiling PointCloud ...
+	$(GPP) $(CFLAGS) $(SHAREDFLAGS) -Dterscanreg_EXPORTS -o $(OBJ)PointCloud.o -c $(SIFTSRC)library/PointCloud.cpp
+
+$(OBJ)PolarPoint.o: $(SIFTSRC)library/PolarPoint.*
+	echo Compiling PolarPoint ...
+	$(GPP) $(CFLAGS) $(SHAREDFLAGS) -Dterscanreg_EXPORTS -o $(OBJ)PolarPoint.o -c $(SIFTSRC)library/PolarPoint.cpp
+
+$(OBJ)PolarPointCloud.o: $(SIFTSRC)library/PolarPointCloud.*
+	echo Compiling PolarPointCloud ...
+	$(GPP) $(CFLAGS) $(SHAREDFLAGS) -Dterscanreg_EXPORTS -o $(OBJ)PolarPointCloud.o -c $(SIFTSRC)library/PolarPointCloud.cpp
+
+$(OBJ)Reader.o: $(SIFTSRC)library/Reader.cpp
+	echo Compiling Coord.cpp ...
+	$(GPP) $(CFLAGS) $(SHAREDFLAGS) -Dterscanreg_EXPORTS -o $(OBJ)Reader.o -c $(SIFTSRC)library/Reader.cpp
+
+$(OBJ)Reader_RIEGL.o: $(SIFTSRC)library/Reader_RIEGL.*
+	echo Compiling Reader_RIEGL ...
+	$(GPP) $(CFLAGS) $(SHAREDFLAGS) -Dterscanreg_EXPORTS -o $(OBJ)Reader_RIEGL.o -c $(SIFTSRC)library/Reader_RIEGL.cpp
+
+$(OBJ)SuperPixel.o: $(SIFTSRC)library/SuperPixel.*
+	echo Compiling SuperPixel ...
+	$(GPP) $(CFLAGS) $(SHAREDFLAGS) -Dterscanreg_EXPORTS -o $(OBJ)SuperPixel.o -c $(SIFTSRC)library/SuperPixel.cpp
+
+$(OBJ)Feature.o: $(SIFTSRC)library/Feature.*
+	echo Compiling Feature ...
+	$(GPP) $(CFLAGS) $(SHAREDFLAGS) -Dterscanreg_EXPORTS -o $(OBJ)Feature.o -c $(SIFTSRC)library/Feature.cpp
+
+$(OBJ)FeatureBase.o: $(SIFTSRC)library/FeatureBase.*
+	echo Compiling FeatureBase ...
+	$(GPP) $(CFLAGS) $(SHAREDFLAGS) -Dterscanreg_EXPORTS -o $(OBJ)FeatureBase.o -c $(SIFTSRC)library/FeatureBase.cpp
+
+$(OBJ)FeatureSet.o: $(SIFTSRC)library/FeatureSet.*
+	echo Compiling FeatureSet ...
+	$(GPP) $(CFLAGS) $(SHAREDFLAGS) -Dterscanreg_EXPORTS -o $(OBJ)FeatureSet.o -c $(SIFTSRC)library/FeatureSet.cpp
+
+$(OBJ)FeatureMatch.o: $(SIFTSRC)library/FeatureMatch.*
+	echo Compiling FeatureMatch ...
+	$(GPP) $(CFLAGS) $(SHAREDFLAGS) -Dterscanreg_EXPORTS -o $(OBJ)FeatureMatch.o -c $(SIFTSRC)library/FeatureMatch.cpp
+
+$(OBJ)FeatureMatchSet.o: $(SIFTSRC)library/FeatureMatchSet.*
+	echo Compiling FeatureMatchSet ...
+	$(GPP) $(CFLAGS) $(SHAREDFLAGS) -Dterscanreg_EXPORTS -o $(OBJ)FeatureMatchSet.o -c $(SIFTSRC)library/FeatureMatchSet.cpp
+
+$(OBJ)FeatureMatchSetGroup.o: $(SIFTSRC)library/FeatureMatchSetGroup.*
+	echo Compiling FeatureMatchSetGroup.cpp ...
+	$(GPP) $(CFLAGS) $(SHAREDFLAGS) -Dterscanreg_EXPORTS -o $(OBJ)FeatureMatchSetGroup.o -c $(SIFTSRC)library/FeatureMatchSetGroup.cpp
+
+$(OBJ)Register.o: $(SIFTSRC)library/Register.*
+	echo Compiling Register ...
+	$(GPP) $(CFLAGS) $(SHAREDFLAGS) -I/usr/include/FTGL -I/usr/include/freetype2 -Dterscanreg_EXPORTS -o $(OBJ)Register.o -I$(SRC) -c $(SIFTSRC)library/Register.cpp
+
+$(OBJ)ScanTransform.o: $(SIFTSRC)library/ScanTransform.*
+	echo Compiling ScanTransform ...
+	$(GPP) $(CFLAGS) $(SHAREDFLAGS) -Dterscanreg_EXPORTS -o $(OBJ)ScanTransform.o -I$(SIFTSRC)library/ -c $(SIFTSRC)library/ScanTransform.cpp
+
+$(OBJ)PanoramaMap_gl.o: $(SIFTSRC)library/opengl_objects/PanoramaMap_gl.*
+	echo Compiling PanoramaMap_gl ...
+	$(GPP) $(CFLAGS) $(SHAREDFLAGS) -Dterscanreg_EXPORTS -o $(OBJ)PanoramaMap_gl.o -I$(SIFTSRC)library/ -c $(SIFTSRC)library/opengl_objects/PanoramaMap_gl.cpp
+
+$(OBJ)FeatureMatchSet_gl.o: $(SIFTSRC)library/opengl_objects/FeatureMatchSet_gl.*
+	echo Compiling FeatureMatchSet_gl ...
+	$(GPP) $(CFLAGS) $(SHAREDFLAGS) -Dterscanreg_EXPORTS -o $(OBJ)FeatureMatchSet_gl.o -I$(SIFTSRC)library/ -c $(SIFTSRC)library/opengl_objects/FeatureMatchSet_gl.cpp
+
+$(OBJ)PointCloud_gl.o: $(SIFTSRC)library/opengl_objects/PointCloud_gl.*
+	echo Compiling PointCloud_gl ...
+	$(GPP) $(CFLAGS) $(SHAREDFLAGS) -Dterscanreg_EXPORTS -o $(OBJ)PointCloud_gl.o -I$(SIFTSRC)library/ -c $(SIFTSRC)library/opengl_objects/PointCloud_gl.cpp
+
+$(OBJ)PolarPointCloud_gl.o: $(SIFTSRC)library/opengl_objects/PolarPointCloud_gl.*
+	echo Compiling PolarPointCloud_gl ...
+	$(GPP) $(CFLAGS) $(SHAREDFLAGS) -Dterscanreg_EXPORTS -o $(OBJ)PolarPointCloud_gl.o -I$(SIFTSRC)library/ -c $(SIFTSRC)library/opengl_objects/PolarPointCloud_gl.cpp
+
+$(BIN)libterscanreg.so: $(OBJ)Coord.o $(OBJ)PanoramaMap.o $(OBJ)PointC.o $(OBJ)PointCloud.o $(OBJ)PolarPoint.o $(OBJ)PolarPointCloud.o $(OBJ)Reader.o $(OBJ)Reader_RIEGL.o $(OBJ)SuperPixel.o $(OBJ)Feature.o $(OBJ)FeatureBase.o $(OBJ)FeatureSet.o $(OBJ)FeatureMatch.o $(OBJ)FeatureMatchSet.o $(OBJ)FeatureMatchSetGroup.o $(OBJ)Register.o $(OBJ)ScanTransform.o $(OBJ)PanoramaMap_gl.o $(OBJ)FeatureMatchSet_gl.o $(OBJ)PointCloud_gl.o $(OBJ)PolarPointCloud_gl.o $(OBJ)icp6Dquat.o $(BIN)libopengl-framework.so
+	echo Linking libterscanreg shared lib ...
+	$(GPP) $(CFLAGS) $(SHAREDFLAGS) -o $(BIN)libterscanreg.so $(OBJ)Coord.o $(OBJ)PanoramaMap.o $(OBJ)PointC.o $(OBJ)PointCloud.o $(OBJ)PolarPoint.o $(OBJ)PolarPointCloud.o $(OBJ)Reader.o $(OBJ)Reader_RIEGL.o $(OBJ)SuperPixel.o $(OBJ)Feature.o $(OBJ)FeatureBase.o $(OBJ)FeatureSet.o $(OBJ)FeatureMatch.o $(OBJ)FeatureMatchSet.o $(OBJ)FeatureMatchSetGroup.o $(OBJ)Register.o $(OBJ)ScanTransform.o $(OBJ)PanoramaMap_gl.o $(OBJ)FeatureMatchSet_gl.o $(OBJ)PointCloud_gl.o $(OBJ)PolarPointCloud_gl.o $(OBJ)icp6Dquat.o $(BIN)libopengl-framework.so -lfreetype -lftgl -lglut
+
+$(OBJ)CoordGL.o: $(SIFTSRC)opengl_framework/CoordGL.*
+	echo Compiling CoordGL ...
+	$(GPP) $(CFLAGS) $(SHAREDFLAGS) -Dopengl_framework_EXPORTS -o $(OBJ)CoordGL.o -c $(SIFTSRC)opengl_framework/CoordGL.cpp
+
+$(OBJ)GL.o: $(SIFTSRC)opengl_framework/GL.*
+	echo Compiling GL ...
+	$(GPP) $(CFLAGS) $(SHAREDFLAGS) -Dopengl_framework_EXPORTS  -I/usr/include/FTGL -I/usr/include/freetype2 -o $(OBJ)GL.o -c $(SIFTSRC)opengl_framework/GL.cpp
+
+$(OBJ)Object_gl.o: $(SIFTSRC)opengl_framework/Object_gl.*
+	echo Compiling CoordGL ...
+	$(GPP) $(CFLAGS) $(SHAREDFLAGS) -Dopengl_framework_EXPORTS -o $(OBJ)Object_gl.o -c $(SIFTSRC)opengl_framework/Object_gl.cpp
+
+$(OBJ)X.o: $(SIFTSRC)opengl_framework/X.*
+	echo Compiling X ...
+	$(GPP) $(CFLAGS) $(SHAREDFLAGS) -Dopengl_framework_EXPORTS -o $(OBJ)X.o -c $(SIFTSRC)opengl_framework/X.cpp
+
+$(BIN)libopengl-framework.so: $(OBJ)CoordGL.o $(OBJ)GL.o $(OBJ)Object_gl.o $(OBJ)X.o 
+	echo Linking libopengl-framework shared lib ...
+	$(GPP) $(CFLAGS) $(SHAREDFLAGS) -Dopengl_framework_EXPORTS -o $(BIN)libopengl-framework.so $(OBJ)CoordGL.o $(OBJ)GL.o $(OBJ)Object_gl.o $(OBJ)X.o -lfreetype -lftgl -lglut
 
 
+$(BIN)generatesiftfeatures: $(SIFTSRC)programs/generatesiftfeatures.cpp $(BIN)libterscanreg.so $(BIN)libopengl-framework.so
+	echo Compiling and Linking Generatesiftfeatures ...
+	$(GPP) $(CFLAGS) -o $(BIN)generatesiftfeatures -I$(SIFTSRC)opengl_framework/ -I$(SIFTSRC)library/ -DHAS_PANO13 -I$(APSSRC) $(SIFTSRC)programs/generatesiftfeatures.cpp $(OBJ)liblibsift.a $(BIN)libterscanreg.so $(BIN)libopengl-framework.so -lvigraimpex -lfreetype -lftgl -lglut -lxml2
+
+$(BIN)mergehistograms: $(SIFTSRC)programs/mergehistograms.cpp $(BIN)libterscanreg.so $(BIN)libopengl-framework.so
+	echo Compiling and Linking Mergehistograms ...
+	$(GPP) $(CFLAGS) -o $(BIN)mergehistograms -I$(SIFTSRC)opengl_framework/ -I$(SIFTSRC)library/ -DHAS_PANO13 -I$(APSSRC) $(SIFTSRC)programs/mergehistograms.cpp $(OBJ)liblibsift.a $(BIN)libterscanreg.so $(BIN)libopengl-framework.so -lvigraimpex -lfreetype -lftgl -lglut -lxml2
+
+$(BIN)panoramacreator: $(SIFTSRC)programs/panoramacreator.cpp $(BIN)libterscanreg.so $(BIN)libopengl-framework.so
+	echo Compiling and Linking Panoramacreator ...
+	$(GPP) $(CFLAGS) -o $(BIN)panoramacreator -I$(SIFTSRC)opengl_framework/ -I$(SIFTSRC)library/ -DHAS_PANO13 -I$(APSSRC) $(SIFTSRC)programs/panoramacreator.cpp $(OBJ)liblibsift.a $(BIN)libterscanreg.so $(BIN)libopengl-framework.so -lvigraimpex -lfreetype -lftgl -lglut -lxml2
+
+$(BIN)visualizemap: $(SIFTSRC)programs/visualizemap.cpp $(BIN)libterscanreg.so $(BIN)libopengl-framework.so
+	echo Compiling and Linking Visualizemap ...
+	$(GPP) $(CFLAGS) -o $(BIN)visualizemap -I$(SIFTSRC)opengl_framework/ -I$(SIFTSRC)library/ -I/usr/include/FTGL -I/usr/include/freetype2 -DHAS_PANO13 -I$(APSSRC) $(SIFTSRC)programs/visualizemap.cpp $(OBJ)liblibsift.a $(BIN)libterscanreg.so $(BIN)libopengl-framework.so -lvigraimpex -lfreetype -lftgl -lglut -lxml2
+
+$(BIN)visualizescan: $(SIFTSRC)programs/visualizescan.cpp $(BIN)libterscanreg.so $(BIN)libopengl-framework.so
+	echo Compiling and Linking Visualizescan ...
+	$(GPP) $(CFLAGS) -o $(BIN)visualizescan -I$(SIFTSRC)opengl_framework/ -I$(SIFTSRC)library/ -I/usr/include/FTGL -I/usr/include/freetype2 -DHAS_PANO13 -I$(APSSRC) $(SIFTSRC)programs/visualizescan.cpp $(OBJ)liblibsift.a $(BIN)libterscanreg.so $(BIN)libopengl-framework.so -lvigraimpex -lfreetype -lftgl -lglut -lxml2
+
+$(BIN)visualizematches: $(SIFTSRC)programs/visualizematches.cpp $(BIN)libterscanreg.so $(BIN)libopengl-framework.so
+	echo Compiling and Linking Visualizematches ...
+	$(GPP) $(CFLAGS) -o $(BIN)visualizematches -I$(SIFTSRC)opengl_framework/ -I$(SIFTSRC)library/ -I/usr/include/FTGL -I/usr/include/freetype2 -DHAS_PANO13 -I$(APSSRC) $(SIFTSRC)programs/visualizematches.cpp $(OBJ)liblibsift.a $(BIN)libterscanreg.so $(BIN)libopengl-framework.so -lvigraimpex -lfreetype -lftgl -lglut -lxml2
+
+$(BIN)visualizeregistrations: $(SIFTSRC)programs/visualizeregistrations.cpp $(BIN)libterscanreg.so $(BIN)libopengl-framework.so
+	echo Compiling and Linking Visualizeregistrations ...
+	$(GPP) $(CFLAGS) -o $(BIN)visualizeregistrations -I$(SIFTSRC)opengl_framework/ -I$(SIFTSRC)library/ -I/usr/include/FTGL -I/usr/include/freetype2 -DHAS_PANO13 -I$(APSSRC) $(SIFTSRC)programs/visualizeregistrations.cpp $(OBJ)liblibsift.a $(BIN)libterscanreg.so $(BIN)libopengl-framework.so -lvigraimpex -lfreetype -lftgl -lglut -lxml2
+
+$(BIN)reduceppc: $(SIFTSRC)programs/reduceppc.cpp $(BIN)libterscanreg.so $(BIN)libopengl-framework.so
+	echo Compiling and Linking Reduceppc ...
+	$(GPP) $(CFLAGS) -o $(BIN)reduceppc -I$(SIFTSRC)opengl_framework/ -I$(SIFTSRC)library/ -DHAS_PANO13 -I$(APSSRC) $(SIFTSRC)programs/reduceppc.cpp $(OBJ)liblibsift.a $(BIN)libterscanreg.so $(BIN)libopengl-framework.so -lvigraimpex -lfreetype -lxml2
+
+$(BIN)matchsiftfeatures: $(SIFTSRC)programs/matchsiftfeatures.cpp $(BIN)libterscanreg.so $(BIN)libopengl-framework.so
+	echo Compiling and Linking Matchsiftfeatures ...
+	$(GPP) $(CFLAGS) -o $(BIN)matchsiftfeatures -I$(SIFTSRC)opengl_framework/ -I$(SIFTSRC)library/ -DHAS_PANO13 -I$(APSSRC) $(SIFTSRC)programs/matchsiftfeatures.cpp $(OBJ)liblibsift.a $(BIN)libterscanreg.so $(BIN)libopengl-framework.so -lvigraimpex -lglut -lxml2
+
+$(BIN)registerscans: $(SIFTSRC)programs/registerscans.cpp $(BIN)libterscanreg.so $(BIN)libopengl-framework.so
+	echo Compiling and Linking Registerscans ...
+	$(GPP) $(CFLAGS) -o $(BIN)registerscans -I$(SIFTSRC)opengl_framework/ -I$(SIFTSRC)library/ -I/usr/include/FTGL -I/usr/include/freetype2 -DHAS_PANO13 -I$(APSSRC) $(SIFTSRC)programs/registerscans.cpp $(OBJ)liblibsift.a $(BIN)libterscanreg.so $(BIN)libopengl-framework.so -lvigraimpex -lglut -lxml2
+
+$(BIN)readscan: $(SIFTSRC)programs/readscan.cpp $(BIN)libterscanreg.so $(BIN)libopengl-framework.so
+	echo Compiling and Linking readscan ...
+	$(GPP) $(CFLAGS) -o $(BIN)readscan -I$(SIFTSRC)opengl_framework/ -I$(SIFTSRC)library/ -DHAS_PANO13 -I$(APSSRC) $(SIFTSRC)programs/readscan.cpp $(OBJ)liblibsift.a $(BIN)libterscanreg.so $(BIN)libopengl-framework.so -lvigraimpex -lglut -lxml2
 
 ##################################################################################
 
