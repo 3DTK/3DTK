@@ -12,7 +12,7 @@
 #include "opengl_objects/PanoramaMap_gl.h"
 #include "opengl_objects/FeatureMatchSet_gl.h"
 
-#include <opengl-framework/GL.h>
+#include "opengl_framework/GL.h"
 
 using namespace std;
 

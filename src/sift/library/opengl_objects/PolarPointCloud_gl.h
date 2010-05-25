@@ -11,10 +11,10 @@
 #ifndef POLARPOINTCLOUD_GL_H_
 #define POLARPOINTCLOUD_GL_H_
 
-#include "../PolarPointCloud.h"
-#include <opengl-framework/Object_gl.h>
+#include "PolarPointCloud.h"
+#include "opengl_framework/Object_gl.h"
 #include <GL/glut.h>
-#include "../Coord.h"
+#include "Coord.h"
 
 class PolarPointCloud_gl : public Object_gl {
 public:

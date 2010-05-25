@@ -35,7 +35,7 @@ TARGETS += $(BIN)grabVideoAnd3D $(BIN)grabFramesCam $(BIN)grabFramesPMD $(BIN)co
 endif
 
 ifdef WITH_SIFT
-TARGETS += $(OBJ)libANN.a $(BIN)autopano $(BIN)autopano-sift-c $(BIN)generatesiftfeatures $(BIN)mergehistograms $(BIN)panoramacreator $(BIN)visualizemap $(BIN)visualizescan $(BIN)reduceppc $(BIN)matchsiftfeatures $(BIN)registerscans $(BIN)readscan #$(BIN)visualizematches $(BIN)visualizeregistrations
+TARGETS += $(OBJ)libANN.a $(BIN)autopano $(BIN)autopano-sift-c $(BIN)generatesiftfeatures $(BIN)mergehistograms $(BIN)panoramacreator $(BIN)visualizemap $(BIN)visualizescan $(BIN)reduceppc $(BIN)matchsiftfeatures $(BIN)registerscans $(BIN)readscan $(BIN)visualizematches $(BIN)visualizeregistrations
 endif
 
 
@@ -637,7 +637,7 @@ $(OBJ)FeatureMatchSetGroup.o: $(SIFTSRC)library/FeatureMatchSetGroup.*
 
 $(OBJ)Register.o: $(SIFTSRC)library/Register.*
 	echo Compiling Register ...
-	$(GPP) $(CFLAGS) $(SHAREDFLAGS) -I/usr/include/FTGL -I/usr/include/freetype2 -Dterscanreg_EXPORTS -o $(OBJ)Register.o -I$(SRC) -c $(SIFTSRC)library/Register.cpp
+	$(GPP) $(CFLAGS) $(SHAREDFLAGS) -I/usr/include/FTGL -I/usr/include/freetype2 -Dterscanreg_EXPORTS -I$(SRC) -I$(SIFTSRC) -I$(SIFTSRC)opengl_framework/ -I$(SIFTSRC)library/ -o $(OBJ)Register.o -c $(SIFTSRC)library/Register.cpp
 
 $(OBJ)ScanTransform.o: $(SIFTSRC)library/ScanTransform.*
 	echo Compiling ScanTransform ...
@@ -645,19 +645,19 @@ $(OBJ)ScanTransform.o: $(SIFTSRC)library/ScanTransform.*
 
 $(OBJ)PanoramaMap_gl.o: $(SIFTSRC)library/opengl_objects/PanoramaMap_gl.*
 	echo Compiling PanoramaMap_gl ...
-	$(GPP) $(CFLAGS) $(SHAREDFLAGS) -Dterscanreg_EXPORTS -o $(OBJ)PanoramaMap_gl.o -I$(SIFTSRC)library/ -c $(SIFTSRC)library/opengl_objects/PanoramaMap_gl.cpp
+	$(GPP) $(CFLAGS) $(SHAREDFLAGS) -Dterscanreg_EXPORTS -o $(OBJ)PanoramaMap_gl.o -I$(SIFTSRC)library/ -I$(SIFTSRC) -c $(SIFTSRC)library/opengl_objects/PanoramaMap_gl.cpp
 
 $(OBJ)FeatureMatchSet_gl.o: $(SIFTSRC)library/opengl_objects/FeatureMatchSet_gl.*
 	echo Compiling FeatureMatchSet_gl ...
-	$(GPP) $(CFLAGS) $(SHAREDFLAGS) -Dterscanreg_EXPORTS -o $(OBJ)FeatureMatchSet_gl.o -I$(SIFTSRC)library/ -c $(SIFTSRC)library/opengl_objects/FeatureMatchSet_gl.cpp
+	$(GPP) $(CFLAGS) $(SHAREDFLAGS) -Dterscanreg_EXPORTS -o $(OBJ)FeatureMatchSet_gl.o -I$(SIFTSRC)library/ -I$(SIFTSRC) -c $(SIFTSRC)library/opengl_objects/FeatureMatchSet_gl.cpp
 
 $(OBJ)PointCloud_gl.o: $(SIFTSRC)library/opengl_objects/PointCloud_gl.*
 	echo Compiling PointCloud_gl ...
-	$(GPP) $(CFLAGS) $(SHAREDFLAGS) -Dterscanreg_EXPORTS -o $(OBJ)PointCloud_gl.o -I$(SIFTSRC)library/ -c $(SIFTSRC)library/opengl_objects/PointCloud_gl.cpp
+	$(GPP) $(CFLAGS) $(SHAREDFLAGS) -Dterscanreg_EXPORTS -o $(OBJ)PointCloud_gl.o -I$(SIFTSRC)library/ -I$(SIFTSRC) -c $(SIFTSRC)library/opengl_objects/PointCloud_gl.cpp
 
 $(OBJ)PolarPointCloud_gl.o: $(SIFTSRC)library/opengl_objects/PolarPointCloud_gl.*
 	echo Compiling PolarPointCloud_gl ...
-	$(GPP) $(CFLAGS) $(SHAREDFLAGS) -Dterscanreg_EXPORTS -o $(OBJ)PolarPointCloud_gl.o -I$(SIFTSRC)library/ -c $(SIFTSRC)library/opengl_objects/PolarPointCloud_gl.cpp
+	$(GPP) $(CFLAGS) $(SHAREDFLAGS) -Dterscanreg_EXPORTS -o $(OBJ)PolarPointCloud_gl.o -I$(SIFTSRC)library/ -I$(SIFTSRC) -c $(SIFTSRC)library/opengl_objects/PolarPointCloud_gl.cpp
 
 $(BIN)libterscanreg.so: $(OBJ)Coord.o $(OBJ)PanoramaMap.o $(OBJ)PointC.o $(OBJ)PointCloud.o $(OBJ)PolarPoint.o $(OBJ)PolarPointCloud.o $(OBJ)Reader.o $(OBJ)Reader_RIEGL.o $(OBJ)SuperPixel.o $(OBJ)Feature.o $(OBJ)FeatureBase.o $(OBJ)FeatureSet.o $(OBJ)FeatureMatch.o $(OBJ)FeatureMatchSet.o $(OBJ)FeatureMatchSetGroup.o $(OBJ)Register.o $(OBJ)ScanTransform.o $(OBJ)PanoramaMap_gl.o $(OBJ)FeatureMatchSet_gl.o $(OBJ)PointCloud_gl.o $(OBJ)PolarPointCloud_gl.o $(OBJ)icp6Dquat.o $(BIN)libopengl-framework.so
 	echo Linking libterscanreg shared lib ...
@@ -698,19 +698,19 @@ $(BIN)panoramacreator: $(SIFTSRC)programs/panoramacreator.cpp $(BIN)libterscanre
 
 $(BIN)visualizemap: $(SIFTSRC)programs/visualizemap.cpp $(BIN)libterscanreg.so $(BIN)libopengl-framework.so
 	echo Compiling and Linking Visualizemap ...
-	$(GPP) $(CFLAGS) -o $(BIN)visualizemap -I$(SIFTSRC)opengl_framework/ -I$(SIFTSRC)library/ -I/usr/include/FTGL -I/usr/include/freetype2 -DHAS_PANO13 -I$(APSSRC) $(SIFTSRC)programs/visualizemap.cpp $(OBJ)liblibsift.a $(BIN)libterscanreg.so $(BIN)libopengl-framework.so -lvigraimpex -lfreetype -lftgl -lglut -lxml2
+	$(GPP) $(CFLAGS) -o $(BIN)visualizemap -I$(SIFTSRC)opengl_framework/ -I$(SIFTSRC)library/ -I/usr/include/FTGL -I/usr/include/freetype2 -DHAS_PANO13 -I$(APSSRC) -I$(SIFTSRC) $(SIFTSRC)programs/visualizemap.cpp $(OBJ)liblibsift.a $(BIN)libterscanreg.so $(BIN)libopengl-framework.so -lvigraimpex -lfreetype -lftgl -lglut -lxml2
 
 $(BIN)visualizescan: $(SIFTSRC)programs/visualizescan.cpp $(BIN)libterscanreg.so $(BIN)libopengl-framework.so
 	echo Compiling and Linking Visualizescan ...
-	$(GPP) $(CFLAGS) -o $(BIN)visualizescan -I$(SIFTSRC)opengl_framework/ -I$(SIFTSRC)library/ -I/usr/include/FTGL -I/usr/include/freetype2 -DHAS_PANO13 -I$(APSSRC) $(SIFTSRC)programs/visualizescan.cpp $(OBJ)liblibsift.a $(BIN)libterscanreg.so $(BIN)libopengl-framework.so -lvigraimpex -lfreetype -lftgl -lglut -lxml2
+	$(GPP) $(CFLAGS) -o $(BIN)visualizescan -I$(SIFTSRC)opengl_framework/ -I$(SIFTSRC)library/ -I/usr/include/FTGL -I/usr/include/freetype2 -DHAS_PANO13 -I$(APSSRC) -I$(SIFTSRC) $(SIFTSRC)programs/visualizescan.cpp $(OBJ)liblibsift.a $(BIN)libterscanreg.so $(BIN)libopengl-framework.so -lvigraimpex -lfreetype -lftgl -lglut -lxml2
 
 $(BIN)visualizematches: $(SIFTSRC)programs/visualizematches.cpp $(BIN)libterscanreg.so $(BIN)libopengl-framework.so
 	echo Compiling and Linking Visualizematches ...
-	$(GPP) $(CFLAGS) -o $(BIN)visualizematches -I$(SIFTSRC)opengl_framework/ -I$(SIFTSRC)library/ -I/usr/include/FTGL -I/usr/include/freetype2 -DHAS_PANO13 -I$(APSSRC) $(SIFTSRC)programs/visualizematches.cpp $(OBJ)liblibsift.a $(BIN)libterscanreg.so $(BIN)libopengl-framework.so -lvigraimpex -lfreetype -lftgl -lglut -lxml2
+	$(GPP) $(CFLAGS) -o $(BIN)visualizematches -I$(SIFTSRC)opengl_framework/ -I$(SIFTSRC)library/ -I/usr/include/FTGL -I/usr/include/freetype2 -DHAS_PANO13 -I$(APSSRC) -I$(SIFTSRC) $(SIFTSRC)programs/visualizematches.cpp $(OBJ)liblibsift.a $(BIN)libterscanreg.so $(BIN)libopengl-framework.so -lvigraimpex -lfreetype -lftgl -lglut -lxml2
 
 $(BIN)visualizeregistrations: $(SIFTSRC)programs/visualizeregistrations.cpp $(BIN)libterscanreg.so $(BIN)libopengl-framework.so
 	echo Compiling and Linking Visualizeregistrations ...
-	$(GPP) $(CFLAGS) -o $(BIN)visualizeregistrations -I$(SIFTSRC)opengl_framework/ -I$(SIFTSRC)library/ -I/usr/include/FTGL -I/usr/include/freetype2 -DHAS_PANO13 -I$(APSSRC) $(SIFTSRC)programs/visualizeregistrations.cpp $(OBJ)liblibsift.a $(BIN)libterscanreg.so $(BIN)libopengl-framework.so -lvigraimpex -lfreetype -lftgl -lglut -lxml2
+	$(GPP) $(CFLAGS) -o $(BIN)visualizeregistrations -I$(SIFTSRC)opengl_framework/ -I$(SIFTSRC)library/ -I/usr/include/FTGL -I/usr/include/freetype2 -DHAS_PANO13 -I$(APSSRC) -I$(SIFTSRC) -I$(SIFTSRC) $(SIFTSRC)programs/visualizeregistrations.cpp $(OBJ)liblibsift.a $(BIN)libterscanreg.so $(BIN)libopengl-framework.so -lvigraimpex -lfreetype -lftgl -lglut -lxml2
 
 $(BIN)reduceppc: $(SIFTSRC)programs/reduceppc.cpp $(BIN)libterscanreg.so $(BIN)libopengl-framework.so
 	echo Compiling and Linking Reduceppc ...
@@ -722,7 +722,7 @@ $(BIN)matchsiftfeatures: $(SIFTSRC)programs/matchsiftfeatures.cpp $(BIN)libtersc
 
 $(BIN)registerscans: $(SIFTSRC)programs/registerscans.cpp $(BIN)libterscanreg.so $(BIN)libopengl-framework.so
 	echo Compiling and Linking Registerscans ...
-	$(GPP) $(CFLAGS) -o $(BIN)registerscans -I$(SIFTSRC)opengl_framework/ -I$(SIFTSRC)library/ -I/usr/include/FTGL -I/usr/include/freetype2 -DHAS_PANO13 -I$(APSSRC) $(SIFTSRC)programs/registerscans.cpp $(OBJ)liblibsift.a $(BIN)libterscanreg.so $(BIN)libopengl-framework.so -lvigraimpex -lglut -lxml2
+	$(GPP) $(CFLAGS) -o $(BIN)registerscans -I$(SIFTSRC)opengl_framework/ -I$(SIFTSRC)library/ -I/usr/include/FTGL -I/usr/include/freetype2 -DHAS_PANO13 -I$(APSSRC) -I$(SIFTSRC) $(SIFTSRC)programs/registerscans.cpp $(OBJ)liblibsift.a $(BIN)libterscanreg.so $(BIN)libopengl-framework.so -lvigraimpex -lglut -lxml2
 
 $(BIN)readscan: $(SIFTSRC)programs/readscan.cpp $(BIN)libterscanreg.so $(BIN)libopengl-framework.so
 	echo Compiling and Linking readscan ...

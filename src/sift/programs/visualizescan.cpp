@@ -11,7 +11,7 @@
 #include "PointCloud.h"
 #include "opengl_objects/PolarPointCloud_gl.h"
 #include "opengl_objects/PointCloud_gl.h"
-#include "opengl-framework/GL.h"
+#include "opengl_framework/GL.h"
 
 using namespace std;
 
