@@ -489,6 +489,7 @@ void readFrames(string dir, int start, int end, bool readInitial, reader_type &t
  */
 void createDisplayLists(bool reduced)
 {
+#ifndef USE_GL_POINTS
   for(unsigned int i = 0; i < Scan::allScans.size() ; i++) {
 
     // count points
@@ -560,7 +561,8 @@ void createDisplayLists(bool reduced)
     vvertexArrayList.push_back(vvertexArray);
   }
 
-#ifdef USE_GL_POINTS
+#else
+//#ifdef USE_GL_POINTS
   cout << "Creating display octrees.." << endl;
   octpts = new OctTree*[Scan::allScans.size()];
   for(unsigned int i = 0; i < Scan::allScans.size() ; i++) {
