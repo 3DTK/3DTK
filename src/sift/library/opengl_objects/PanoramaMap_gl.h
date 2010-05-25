@@ -8,8 +8,8 @@
 #ifndef PANORAMAMAP_GL_H_
 #define PANORAMAMAP_GL_H_
 
-#include "../PanoramaMap.h"
-#include <opengl-framework/Object_gl.h>
+#include "PanoramaMap.h"
+#include "opengl_framework/Object_gl.h"
 #include <GL/glut.h>
 #include <stdio.h>
 

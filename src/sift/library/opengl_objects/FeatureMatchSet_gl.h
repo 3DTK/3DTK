@@ -1,9 +1,9 @@
 #ifndef __FEATURE_MATCH_SET_GL_H__
 #define __FEATURE_MATCH_SET_GL_H__
 
-#include <FeatureMatchSet.h>
-#include <PanoramaMap.h>
-#include <opengl-framework/Object_gl.h>
+#include "FeatureMatchSet.h"
+#include "PanoramaMap.h"
+#include "opengl_framework/Object_gl.h"
 #include <assert.h>
 #include <iostream>
 #include <math.h>

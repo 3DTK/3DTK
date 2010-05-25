@@ -12,7 +12,7 @@
 #include "PanoramaMap.h"
 #include "Register.h"
 
-#include "opengl-framework/GL.h"
+#include "opengl_framework/GL.h"
  
 using namespace std;
 

@@ -8,9 +8,9 @@
 #ifndef POINTCLOUD_GL_H_
 #define POINTCLOUD_GL_H_
 
-#include "../PointCloud.h"
-#include <opengl-framework/Object_gl.h>
-#include "../Coord.h"
+#include "PointCloud.h"
+#include "opengl_framework/Object_gl.h"
+#include "Coord.h"
 #include <GL/glut.h>
 
 class PointCloud_gl: public Object_gl {
