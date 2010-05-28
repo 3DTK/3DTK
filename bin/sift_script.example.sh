@@ -50,11 +50,11 @@ bin/generatesiftfeatures -x /home/nuechter/dat/bremen_city/scan010.txt.ppc_2880x
 bin/generatesiftfeatures -x /home/nuechter/dat/bremen_city/scan011.txt.ppc_2880x800.map.xml -i /home/nuechter/dat/bremen_city/scan011.txt.ppc_2880x800.map &
 bin/generatesiftfeatures -x /home/nuechter/dat/bremen_city/scan012.txt.ppc_2880x800.map.xml -i /home/nuechter/dat/bremen_city/scan012.txt.ppc_2880x800.map &
 wait
+
 # you can match all at once but I don't recommend this
-# matchsiftfeatures -o all.matches *.map
+# bin/matchsiftfeatures -o /home/nuechter/dat/bremen_city/all.matches /home/nuechter/dat/bremen_city/*.xml
 
 # match pairwise only 
-bin/matchsiftfeatures -o /home/nuechter/dat/bremen_city/1.2.matches /home/nuechter/dat/bremen_city/scan001.txt.ppc_2880x800.map.xml /home/nuechter/dat/bremen_city/scan002.txt.ppc_2880x800.map.xml &
 bin/matchsiftfeatures -o /home/nuechter/dat/bremen_city/1.2.matches /home/nuechter/dat/bremen_city/scan001.txt.ppc_2880x800.map.xml /home/nuechter/dat/bremen_city/scan002.txt.ppc_2880x800.map.xml &
 bin/matchsiftfeatures -o /home/nuechter/dat/bremen_city/2.3.matches /home/nuechter/dat/bremen_city/scan002.txt.ppc_2880x800.map.xml /home/nuechter/dat/bremen_city/scan003.txt.ppc_2880x800.map.xml &
 bin/matchsiftfeatures -o /home/nuechter/dat/bremen_city/3.4.matches /home/nuechter/dat/bremen_city/scan003.txt.ppc_2880x800.map.xml /home/nuechter/dat/bremen_city/scan004.txt.ppc_2880x800.map.xml &
@@ -80,7 +80,7 @@ bin/registerscans -m /home/nuechter/dat/bremen_city/1.2.matches -m /home/nuechte
 # you can visualize result with:
 # (-m 20 to include only every 20th point, -c random color for each scan
 #  -r would be rainbow map for the height of the points)
-bin/visualizeregistrations -m 20 -c -p /home/nuechter/dat/bremen_city/scan001.txt.ppc -p /home/nuechter/dat/bremen_city/scan002.txt.ppc -p /home/nuechter/dat/bremen_city/scan003.txt.ppc -p /home/nuechter/dat/bremen_city/scan004.txt.ppc -p /home/nuechter/dat/bremen_city/scan005.txt.ppc -p /home/nuechter/dat/bremen_city/scan006.txt.ppc -p /home/nuechter/dat/bremen_city/scan007.txt.ppc -p /home/nuechter/dat/bremen_city/scan008.txt.ppc -p /home/nuechter/dat/bremen_city/scan009.txt.ppc -p s/home/nuechter/dat/bremen_city/can010.txt.ppc -p /home/nuechter/dat/bremen_city/scan011.txt.ppc -p /home/nuechter/dat/bremen_city/scan012.txt.ppc -p /home/nuechter/dat/bremen_city/scan000.txt.ppc
+bin/visualizeregistrations -m 20 -c -p /home/nuechter/dat/bremen_city/scan001.txt.ppc -p /home/nuechter/dat/bremen_city/scan002.txt.ppc -p /home/nuechter/dat/bremen_city/scan003.txt.ppc -p /home/nuechter/dat/bremen_city/scan004.txt.ppc -p /home/nuechter/dat/bremen_city/scan005.txt.ppc -p /home/nuechter/dat/bremen_city/scan006.txt.ppc -p /home/nuechter/dat/bremen_city/scan007.txt.ppc -p /home/nuechter/dat/bremen_city/scan008.txt.ppc -p /home/nuechter/dat/bremen_city/scan009.txt.ppc -p /home/nuechter/dat/bremen_city/scan010.txt.ppc -p /home/nuechter/dat/bremen_city/scan011.txt.ppc -p /home/nuechter/dat/bremen_city/scan012.txt.ppc -p /home/nuechter/dat/bremen_city/scan000.txt.ppc
 
 # if you want to visualize registrations more often and don't want to
 # wait so much to read each object, you can reduce the polar point
