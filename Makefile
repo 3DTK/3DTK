@@ -38,6 +38,13 @@ ifdef WITH_SIFT
 TARGETS += $(OBJ)libANN.a $(BIN)autopano $(BIN)autopano-sift-c $(BIN)generatesiftfeatures $(BIN)mergehistograms $(BIN)panoramacreator $(BIN)visualizemap $(BIN)visualizescan $(BIN)reduceppc $(BIN)matchsiftfeatures $(BIN)registerscans $(BIN)readscan $(BIN)visualizematches $(BIN)visualizeregistrations
 endif
 
+ifdef WITH_TORO
+TARGETS += src/toro
+endif
+
+ifdef WITH_HOGMAN
+TARGETS += src/hogman
+endif
 
 all: $(TARGETS)
 
@@ -57,9 +64,9 @@ docu: docu_html docu_latex docu_hl
 
 ############# SLAM6D ##############
 
-$(BIN)slam6D: $(OBJ)libglui.a $(OBJ)scanlib.a $(OBJ)icp6D.o $(OBJ)graphSlam6D.o $(OBJ)icp6Dapx.o $(OBJ)icp6Dsvd.o $(OBJ)icp6Dortho.o $(OBJ)icp6Dquat.o $(OBJ)icp6Dhelix.o $(OBJ)gapx6D.o $(OBJ)ghelix6DQ2.o $(OBJ)lum6Deuler.o $(OBJ)lum6Dquat.o $(OBJ)graph.o $(SRC)slam6D.cc $(SRC)globals.icc $(OBJ)csparse.o $(OBJ)libnewmat.a $(OBJ)elch6D.o $(OBJ)elch6Dquat.o $(OBJ)elch6DunitQuat.o $(OBJ)elch6Dslerp.o $(OBJ)elch6Deuler.o
+$(BIN)slam6D: $(OBJ)libglui.a $(OBJ)scanlib.a $(OBJ)icp6D.o $(OBJ)graphSlam6D.o $(OBJ)icp6Dapx.o $(OBJ)icp6Dsvd.o $(OBJ)icp6Dortho.o $(OBJ)icp6Dquat.o $(OBJ)icp6Dhelix.o $(OBJ)gapx6D.o $(OBJ)ghelix6DQ2.o $(OBJ)lum6Deuler.o $(OBJ)lum6Dquat.o $(OBJ)graph.o $(SRC)slam6D.cc $(SRC)globals.icc $(OBJ)csparse.o $(OBJ)libnewmat.a $(OBJ)elch6D.o $(OBJ)elch6Dquat.o $(OBJ)elch6DunitQuat.o $(OBJ)elch6Dslerp.o $(OBJ)elch6Deuler.o $(OBJ)loopToro.o $(OBJ)loopHOG-Man.o $(OBJ)graphToro.o $(OBJ)graphHOG-Man.o
 	echo Compiling and Linking SLAM 6D ...
-	$(GPP) $(CFLAGS) -o $(BIN)slam6D $(SRC)slam6D.cc $(OBJ)scanlib.a $(OBJ)icp6D.o $(OBJ)gapx6D.o $(OBJ)ghelix6DQ2.o $(OBJ)lum6Deuler.o $(OBJ)lum6Dquat.o $(OBJ)graphSlam6D.o $(OBJ)graph.o $(OBJ)icp6Dapx.o $(OBJ)icp6Dsvd.o $(OBJ)icp6Dortho.o $(OBJ)icp6Dquat.o $(OBJ)icp6Dhelix.o $(OBJ)csparse.o $(OBJ)libnewmat.a $(OBJ)elch6D.o $(OBJ)elch6Dquat.o $(OBJ)elch6DunitQuat.o $(OBJ)elch6Dslerp.o $(OBJ)elch6Deuler.o -ldl $(OBJ)libglui.a $(LIBRARIES)
+	$(GPP) $(CFLAGS) -o $(BIN)slam6D $(SRC)slam6D.cc $(OBJ)scanlib.a $(OBJ)icp6D.o $(OBJ)gapx6D.o $(OBJ)ghelix6DQ2.o $(OBJ)lum6Deuler.o $(OBJ)lum6Dquat.o $(OBJ)graphSlam6D.o $(OBJ)graph.o $(OBJ)icp6Dapx.o $(OBJ)icp6Dsvd.o $(OBJ)icp6Dortho.o $(OBJ)icp6Dquat.o $(OBJ)icp6Dhelix.o $(OBJ)csparse.o $(OBJ)libnewmat.a $(OBJ)elch6D.o $(OBJ)elch6Dquat.o $(OBJ)elch6DunitQuat.o $(OBJ)elch6Dslerp.o $(OBJ)elch6Deuler.o -ldl $(OBJ)libglui.a $(OBJ)loopToro.o $(OBJ)loopHOG-Man.o $(OBJ)graphToro.o $(OBJ)graphHOG-Man.o $(LIBRARIES)
 	echo DONE
 	echo
 
@@ -116,6 +123,14 @@ $(OBJ)lum6Dquat.o: $(SRC)icp6D.h $(SRC)graph.h $(SRC)globals.icc $(SRC)lum6Dquat
 	echo Compiling LUM 6D Quaternion ...
 	$(GPP) $(CFLAGS) -DUSE_C_SPARSE -c -o $(OBJ)lum6Dquat.o $(SRC)lum6Dquat.cc 
 
+$(OBJ)graphToro.o: $(SRC)graphToro.cc $(SRC)graphToro.h $(SRC)graphSlam6D.h $(SRC)icp6D.h $(SRC)graph.h $(SRC)globals.icc $(SRC)lum6Deuler.h
+	echo Compiling Graph TORO  ...
+	$(GPP) $(CFLAGS) -c -o $(OBJ)graphToro.o $(SRC)graphToro.cc
+
+$(OBJ)graphHOG-Man.o: $(SRC)graphHOG-Man.cc $(SRC)graphHOG-Man.h $(SRC)graphSlam6D.h $(SRC)icp6D.h $(SRC)graph.h $(SRC)globals.icc $(SRC)lum6Deuler.h
+	echo Compiling Graph HOG-Man  ...
+	$(GPP) $(CFLAGS) -c -o $(OBJ)graphHOG-Man.o $(SRC)graphHOG-Man.cc
+
 $(OBJ)elch6D.o: $(SRC)elch6D.cc $(SRC)elch6D.h $(SRC)loopSlam6D.h $(SRC)icp6D.h $(SRC)icp6Dminimizer.h $(SRC)scan.h $(SRC)graph.h $(SRC)globals.icc
 	echo Compiling ELCH 6D ...
 	$(GPP) $(CFLAGS) -c -o $(OBJ)elch6D.o $(SRC)elch6D.cc 
@@ -135,6 +150,14 @@ $(OBJ)elch6DunitQuat.o: $(SRC)elch6DunitQuat.cc $(SRC)elch6DunitQuat.h $(SRC)elc
 $(OBJ)elch6Dslerp.o: $(SRC)elch6Dslerp.cc $(SRC)elch6Dslerp.h $(SRC)elch6D.h $(SRC)loopSlam6D.h $(SRC)icp6D.h $(SRC)icp6Dminimizer.h $(SRC)scan.h $(SRC)graph.h $(SRC)lum6Dquat.h $(SRC)globals.icc
 	echo Compiling ELCH 6D SLERP Quaternion ...
 	$(GPP) $(CFLAGS) -c -o $(OBJ)elch6Dslerp.o $(SRC)elch6Dslerp.cc 
+
+$(OBJ)loopToro.o: $(SRC)loopToro.cc $(SRC)loopToro.h $(SRC)loopSlam6D.h $(SRC)icp6D.h $(SRC)icp6Dminimizer.h $(SRC)scan.h $(SRC)graph.h $(SRC)lum6Dquat.h $(SRC)globals.icc
+	echo Compiling Loop TORO ...
+	$(GPP) $(CFLAGS) -c -o $(OBJ)loopToro.o $(SRC)loopToro.cc
+
+$(OBJ)loopHOG-Man.o: $(SRC)loopHOG-Man.cc $(SRC)loopHOG-Man.h $(SRC)loopSlam6D.h $(SRC)icp6D.h $(SRC)icp6Dminimizer.h $(SRC)scan.h $(SRC)graph.h $(SRC)lum6Dquat.h $(SRC)globals.icc
+	echo Compiling Loop HOG-Man ...
+	$(GPP) $(CFLAGS) -c -o $(OBJ)loopHOG-Man.o $(SRC)loopHOG-Man.cc
 
 $(OBJ)icp6Dapx.o: $(SRC)icp6Dapx.h $(SRC)icp6Dapx.cc $(SRC)ptpair.h $(SRC)icp6Dminimizer.h
 	echo Compiling ICP 6D with Approximation ...
@@ -731,6 +754,20 @@ $(BIN)registerscans: $(SIFTSRC)programs/registerscans.cpp $(BIN)libterscanreg.so
 $(BIN)readscan: $(SIFTSRC)programs/readscan.cpp $(BIN)libterscanreg.so $(BIN)libopengl-framework.so
 	echo Compiling and Linking readscan ...
 	$(GPP) $(CFLAGS) -o $(BIN)readscan -I$(SIFTSRC)opengl_framework/ -I$(SIFTSRC)library/ -DHAS_PANO13 -I$(APSSRC) $(SIFTSRC)programs/readscan.cpp $(OBJ)liblibsift.a $(BIN)libterscanreg.so $(BIN)libopengl-framework.so -lvigraimpex -lglut -lxml2
+
+############# TORO ##############
+src/toro/:
+	svn co https://svn.openslam.org/data/svn/toro/trunk src/toro
+	cd src/toro && make
+	cp src/toro/toro3d $(BIN)
+
+############# HOG-Man ##############
+src/hogman/:
+	svn co https://svn.openslam.org/data/svn/hog-man/trunk src/hogman
+	cd src/hogman && ./configure
+	cd src/hogman && LD_LIBRARY_PATH=`pwd`/lib make
+	cp src/hogman/bin/hogman3d $(BIN)
+	cp src/hogman/lib/*.so $(BIN)
 
 ##################################################################################
 

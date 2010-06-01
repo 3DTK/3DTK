@@ -1,0 +1,62 @@
+/**
+ * @file TORO wrapper
+ * @author Jochen Sprickerhof. Institute of Computer Science, University of Osnabrueck, Germany.
+ */
+
+#ifndef __GRAPH_TORO_H__
+#define __GRAPH_TORO_H__
+
+#include "graphSlam6D.h"
+
+class graphToro : public graphSlam6D {
+
+public:
+  /**
+   * Constructor (default)
+   */
+  graphToro() {};
+  /**
+   * Constructor
+   *
+   * @param my_icp6Dminimizer Pointer to ICP minimization functor
+   * @param mdm Maximum PtoP distance to which point pairs are collected for ICP
+   * @param max_dist_match Maximum PtoP distance to which point pairs are collected for LUM
+   * @param max_num_iterations Maximal number of iterations for ICP
+   * @param quiet Suspesses all output to std out
+   * @param meta Indicates if metascan matching has to be used
+   * @param rnd Indicates if randomization has to be used
+   * @param eP Extrapolate odometry?
+   * @param anim Animate which frames?
+   * @param epsilonICP Termination criterion for ICP
+   * @param use_cache Shall we used cached k-d tree search
+   * @param epsilonLUM Termination criterion for LUM
+   */
+  graphToro(icp6Dminimizer *my_icp6Dminimizer,
+      double mdm = 25.0,
+      double max_dist_match = 25.0,
+      double max_dist_match_last = -1.0,
+      int max_num_iterations = 50,
+      bool quiet = false,
+      bool meta = false,
+      int rnd = 1,
+      bool eP = true,
+      int anim = -1,
+      double epsilonICP = 0.0000001,
+      bool use_cache = false,
+      double epsilonLUM = 0.5)
+    : graphSlam6D(my_icp6Dminimizer,
+        mdm, max_dist_match, max_dist_match_last,
+        max_num_iterations, quiet, meta, rnd,
+        eP, anim, epsilonICP, use_cache, epsilonLUM)
+    { }
+
+  virtual ~graphToro()
+  {
+    delete my_icp;
+  }
+
+  double doGraphSlam6D(Graph gr, vector <Scan*> MetaScan, int nrIt);
+
+};
+
+#endif

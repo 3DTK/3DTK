@@ -1046,4 +1046,79 @@ static inline void Cross(const T *x, const T *y, T *result)
   return;
 }
 
+/**
+ * converts a quaternion to Euler angels in the roll pitch yaw system
+ */
+static inline void QuatRPYEuler(const double *quat, double *euler)
+{
+	double n = sqrt(quat[0]*quat[0] + quat[1]*quat[1] + quat[2]*quat[2] + quat[3]*quat[3]);
+	double s = n > 0?2./(n*n):0.;
+
+	double m00, m01, m02, m10, m11, m12, m20, m21, m22;
+
+
+	double xs = quat[1]*s;
+	double ys = quat[2]*s;
+	double zs = quat[3]*s;
+
+	double wx = quat[0]*xs;
+	double wy = quat[0]*ys;
+	double wz = quat[0]*zs;
+
+	double xx = quat[1]*xs;
+	double xy = quat[1]*ys;
+	double xz = quat[1]*zs;
+
+	double yy = quat[2]*ys;
+	double yz = quat[2]*zs;
+
+	double zz = quat[3]*zs;
+
+	m00 = 1.0 - (yy + zz);
+	m11 = 1.0 - (xx + zz);
+	m22 = 1.0 - (xx + yy);
+
+
+	m10 = xy + wz;
+	m01 = xy - wz;
+
+	m20 = xz - wy;
+	m02 = xz + wy;
+	m21 = yz + wx;
+	m12 = yz - wx;
+
+	euler[0] = atan2(m21,m22);
+	euler[1] = atan2(-m20,sqrt(m21*m21 + m22*m22));
+	euler[2] = atan2(m10,m00);
+}
+
+/**
+ * converts from Euler angels in the roll pitch yaw system to a quaternion
+ */
+static inline void RPYEulerQuat(const double *euler, double *quat)
+{
+	double sphi   = sin(euler[0]);
+	double stheta = sin(euler[1]);
+	double spsi   = sin(euler[2]);
+	double cphi   = cos(euler[0]);
+	double ctheta = cos(euler[1]);
+	double cpsi   = cos(euler[2]);
+
+	double _r[3][3] = { //create rotational Matrix
+		{cpsi*ctheta, cpsi*stheta*sphi - spsi*cphi, cpsi*stheta*cphi + spsi*sphi},
+		{spsi*ctheta, spsi*stheta*sphi + cpsi*cphi, spsi*stheta*cphi - cpsi*sphi},
+		{    -stheta,                  ctheta*sphi,                  ctheta*cphi}
+	};
+
+#define MY_MAX(a,b) (((a)>(b))?(a):(b))
+	double _w = sqrt(MY_MAX(0, 1 + _r[0][0] + _r[1][1] + _r[2][2]))/2.0;
+	double _x = sqrt(MY_MAX(0, 1 + _r[0][0] - _r[1][1] - _r[2][2]))/2.0;
+	double _y = sqrt(MY_MAX(0, 1 - _r[0][0] + _r[1][1] - _r[2][2]))/2.0;
+	double _z = sqrt(MY_MAX(0, 1 - _r[0][0] - _r[1][1] + _r[2][2]))/2.0;
+	quat[0] = _w;
+	quat[1] = (_r[2][1] - _r[1][2])>=0?fabs(_x):-fabs(_x);
+	quat[2] = (_r[0][2] - _r[2][0])>=0?fabs(_y):-fabs(_y);
+	quat[3] = (_r[1][0] - _r[0][1])>=0?fabs(_z):-fabs(_z);
+}
+
 #endif

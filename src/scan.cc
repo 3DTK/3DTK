@@ -578,6 +578,21 @@ void Scan::transform(const double alignQuat[4], const double alignt[3],
 
 
 /**
+ * Transforms the scan, so that the given Matrix
+ * prepresent the next pose.
+ *
+ * @param alignxf Transformation matrix to which this scan will be set to
+ * @param islum Is the transformation part of LUM?
+ */
+void Scan::transformToMatrix(double alignxf[16], const AlgoType type, int islum)
+{
+  double tinv[16];
+  M4inv(transMat, tinv);
+  transform(tinv, INVALID);
+  transform(alignxf, type, islum);
+}
+
+/**
  * Transforms the scan, so that the given Euler angles
  * prepresent the next pose.
  *
