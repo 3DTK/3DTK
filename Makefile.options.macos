@@ -86,3 +86,15 @@ PMDPKG = `pkg-config --cflags opencv` `pkg-config --cflags ftgl` `pkg-config --l
 # -----------------------
 #
 WITH_SIFT = WITH_SIFT         # compile SIFT tools
+
+#
+# TORO options
+# ------------------
+#
+#WITH_TORO = True          # compile TORO
+
+#
+# HOGMAN options
+# ------------------
+#
+#WITH_HOGMAN = True          # compile HOG-Man

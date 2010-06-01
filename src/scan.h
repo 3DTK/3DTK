@@ -60,13 +60,15 @@ public:
   void transformAll(const double alignQuat[4], const double alignt[3]);
  
   enum AlgoType {
-    INVALID, ICP, ICPINACTIVE, LUM, ELCH
+    INVALID, ICP, ICPINACTIVE, LUM, ELCH, LOOPTORO, LOOPHOGMAN, GRAPHTORO, GRAPHHOGMAN
   };
 
   void transform(const double alignxf[16],
 			  const AlgoType type, int islum = 0);
   void transform(const double alignQuat[4], const double alignt[3],
 			  const AlgoType type, int islum = 0);
+  void transformToMatrix(double alignxf[16],
+            const AlgoType type, int islum = 0);
   void transformToEuler(double rP[3], double rPT[3],
 				    const AlgoType type, int islum = 0);
   void transformToQuat(double rP[3], double rPQ[4],

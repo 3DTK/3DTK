@@ -42,10 +42,14 @@ using std::ifstream;
 #include "lum6Deuler.h"
 #include "lum6Dquat.h"
 #include "ghelix6DQ2.h"
+#include "graphToro.h"
+#include "graphHOG-Man.h"
 #include "elch6Deuler.h"
 #include "elch6Dquat.h"
 #include "elch6DunitQuat.h"
 #include "elch6Dslerp.h"
+#include "loopToro.h"
+#include "loopHOG-Man.h"
 #include "graphSlam6D.h"
 #include "gapx6D.h"
 #include "graph.h"
@@ -161,6 +165,8 @@ void usage(char* prog)
 	  << "           2 = Lu & Milios extention using using unit quaternions" << endl
        << "           3 = HELIX approximation by Hofer and Pottmann" << endl
 	  << "           4 = small angle approximation" << endl
+	  << "           5 = TORO" << endl
+	  << "           5 = HOG-Man" << endl
 	  << endl
 	  << bold << "  -i" << normal << " NR, " << bold << "--iter=" << normal << "NR [default: 50]" << endl
 	  << "         sets the maximal number of ICP iterations to <NR>" << endl
@@ -179,6 +185,8 @@ void usage(char* prog)
 	  << "           2 = quaternions " << endl
        << "           3 = unit quaternions" << endl
 	  << "           4 = SLERP" << endl
+	  << "           5 = TORO" << endl
+	  << "           6 = HOG-Man" << endl
 	  << endl
 	  << bold << "  --lastscan" << normal << endl
 	  << "         Match against the last scan only (default: match current scan against a meta scan of all previous scans)" << endl
@@ -319,14 +327,14 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &rand,
 	   break;
 	 case 'L':
 	   loopSlam6DAlgo = atoi(optarg);
-	   if (loopSlam6DAlgo < 0 || loopSlam6DAlgo > 4) {
+	   if (loopSlam6DAlgo < 0 || loopSlam6DAlgo > 6) {
 		cerr << "Error: global loop closing algorithm not available." << endl;
 		exit(1);
 	   }
      break;
 	 case 'G':
 	   lum6DAlgo = atoi(optarg);
-	   if ((lum6DAlgo < 0) || (lum6DAlgo > 4)) {
+	   if ((lum6DAlgo < 0) || (lum6DAlgo > 6)) {
 		cerr << "Error: global relaxation algorithm not available." << endl;
 		exit(1);
 	   }
@@ -832,6 +840,14 @@ int main(int argc, char **argv)
       my_graphSlam6D = new gapx6D(my_icp6Dminimizer, mdm, mdml, mdmll, mni, quiet, meta, rand, eP,
 					anim, epsilonICP, use_cache, epsilonSLAM);
       break;
+    case 5 :
+      my_graphSlam6D = new graphToro(my_icp6Dminimizer, mdm, mdml, mdmll, mni, quiet, meta, rand, eP,
+					-1, epsilonICP, use_cache, epsilonSLAM);
+      break;
+    case 6 :
+      my_graphSlam6D = new graphHOGMan(my_icp6Dminimizer, mdm, mdml, mdmll, mni, quiet, meta, rand, eP,
+					-1, epsilonICP, use_cache, epsilonSLAM);
+      break;
     }
     // Construct Network
     if (net != "none") {
@@ -863,6 +879,12 @@ int main(int argc, char **argv)
           break;
         case 4:
           my_loopSlam6D = new elch6Dslerp(veryQuiet, my_icp6Dminimizer, distLoop, iterLoop, rand, eP, 10, epsilonICP, use_cache);
+          break;
+        case 5:
+          my_loopSlam6D = new loopToro(veryQuiet, my_icp6Dminimizer, distLoop, iterLoop, rand, eP, 10, epsilonICP, use_cache);
+          break;
+        case 6:
+          my_loopSlam6D = new loopHOGMan(veryQuiet, my_icp6Dminimizer, distLoop, iterLoop, rand, eP, 10, epsilonICP, use_cache);
           break;
       }
 
