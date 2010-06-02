@@ -5,8 +5,10 @@
  * @author Andreas Nuechter. Institute of Computer Science, University of Osnabrueck, Germany.
 */
 
+#ifdef USE_GL_POINTS
 #include "show/viewcull.h"
 #include "show/glui/glui.h"  /* Header File For The glui funktions */
+#endif
 
 #include "octtree.h"
 #include "globals.icc"
@@ -313,6 +315,8 @@ void OctTree::GetOctTreeRandom(vector<double*>&c, unsigned int ptspervoxel)
 
 }
 
+#ifdef USE_GL_POINTS
+
 /**
  * sets the culled flag to false in this and all child nodes. Needed for cullOctTree()
  */
@@ -351,22 +355,6 @@ int OctTree::cullOctTree() {
     nrpts = points.size(); 
   }
   return nrpts;
-  /*
-  culled = !QuadInFrustrum(center[0], center[1], center[2], x_size, y_size, z_size);
-  if (!culled && !leaf) {
-    for( int i = 0; i < 8; i++){
-      if (child[i] != 0) {
-        child[i]->cullOctTree();
-        if (!child[i]->culled) {
-          nrpts += child[i]->nrpts;
-        }
-      }
-    }
-  } else if (leaf) {
-    nrpts = points.size(); 
-  }
-  return nrpts;
-  */
   
 }
 
@@ -437,6 +425,7 @@ void OctTree::displayOctTree(long targetpts) {
     }
   }
 }
+#endif
 
 
 /**

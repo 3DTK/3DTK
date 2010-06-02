@@ -78,7 +78,7 @@ $(OBJ)kd.o: $(SRC)searchTree.h $(SRC)kd.h $(SRC)kd.cc $(SRC)globals.icc
 	echo Compiling KD tree ...
 	$(GPP) $(CFLAGS) -c -o $(OBJ)kd.o $(SRC)kd.cc 
 
-$(OBJ)octtree.o: $(SRC)octtree.h $(SRC)octtree.cc $(SRC)globals.icc
+$(OBJ)octtree.o: $(SRC)octtree.h $(SRC)octtree.cc $(SRC)globals.icc $(OBJ)viewcull.o
 	echo Compiling Octree ...
 	$(GPP) $(CFLAGS) -c -o $(OBJ)octtree.o $(SRC)octtree.cc 
 
@@ -308,7 +308,7 @@ $(BIN)scan_io_zahn.so: $(SRC)scan_io.h $(SRC)scan_io_zahn.h $(SRC)scan_io_zahn.c
 
 $(BIN)scan_red: $(OBJ)scanlib.a $(SRC)globals.icc $(SRC)scan_red.cc 
 	echo Compiling and Linking Scan Reduction ...
-	$(GPP) $(CFLAGS) -o $(BIN)scan_red $(SRC)scan_red.cc $(OBJ)scanlib.a -ldl 
+	$(GPP) $(CFLAGS) -o $(BIN)scan_red $(SRC)scan_red.cc $(OBJ)scanlib.a -ldl $(LIBRARIES) 
 	echo DONE
 	echo
 
@@ -401,7 +401,7 @@ $(OBJ)hough.o: $(GRIDSRC)hough.cc $(GRIDSRC)hough.h
 
 $(BIN)2DGridder: $(OBJ)gridder.o $(OBJ)line.o $(OBJ)gridlines.o $(OBJ)hough.o $(OBJ)viewpointinfo.o $(OBJ)gridWriter.o $(OBJ)parcelmanager.o $(OBJ)parcel.o $(OBJ)parcelinfo.o $(OBJ)scanGrid.o $(OBJ)grid.o $(OBJ)scanToGrid.o $(OBJ)gridPoint.o $(OBJ)scan.o $(OBJ)scanmanager.o $(OBJ)kd.o $(OBJ)kdc.o
 	echo Compiling and Linking Grid ...
-	$(GPP) $(CFLAGS) -o $(BIN)2DGridder $(OBJ)viewpointinfo.o $(OBJ)line.o $(OBJ)gridlines.o $(OBJ)hough.o $(OBJ)gridder.o $(OBJ)gridWriter.o $(OBJ)parcelmanager.o $(OBJ)parcelinfo.o $(OBJ)scanmanager.o $(OBJ)grid.o $(OBJ)scanGrid.o $(OBJ)parcel.o $(OBJ)gridPoint.o $(OBJ)scanToGrid.o $(OBJ)scan.o $(OBJ)octtree.o $(OBJ)kd.o $(OBJ)kdc.o -ldl  -lstdc++
+	$(GPP) $(CFLAGS) -o $(BIN)2DGridder $(OBJ)viewpointinfo.o $(OBJ)line.o $(OBJ)gridlines.o $(OBJ)hough.o $(OBJ)gridder.o $(OBJ)gridWriter.o $(OBJ)parcelmanager.o $(OBJ)parcelinfo.o $(OBJ)scanmanager.o $(OBJ)grid.o $(OBJ)scanGrid.o $(OBJ)parcel.o $(OBJ)gridPoint.o $(OBJ)scanToGrid.o $(OBJ)scan.o $(OBJ)octtree.o $(OBJ)kd.o $(OBJ)kdc.o -ldl  -lstdc++ $(LIBRARIES) 
 	echo DONE
 	echo
 
