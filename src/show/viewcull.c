@@ -155,16 +155,13 @@ float planeEqs[6][4];
 /* Test a sphere's bounding box against the six clip planes */
  int culled (float *p) 
 {
-    int i, j;
+    int i;
     int culled;
 
     for (i=0; i<6; i++) {
         culled = 0;
-        ///for (j=0; j<3; j++) {   // point must be inside of all planes to be visible, so if one test failes we can return culled
-            if (!(distanceFromPlane(planeEqs[i],p) < 0.))
-              return 1;
-                //culled |= 1<<j;
-        //}
+        if (!(distanceFromPlane(planeEqs[i],p) < 0.))
+          return 1;
     }
     /* Not trivially culled. visible. */
     return 0;
