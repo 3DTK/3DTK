@@ -27,7 +27,7 @@ TARGETS += $(BIN)2DGridder
 endif
 
 ifdef WITH_TOOLS
-TARGETS += $(BIN)convergence $(BIN)frame_to_graph $(BIN)graph_balancer 
+TARGETS += $(BIN)convergence $(BIN)frame_to_graph $(BIN)graph_balancer
 endif
 
 ifdef WITH_PMD
@@ -78,7 +78,7 @@ $(OBJ)kd.o: $(SRC)searchTree.h $(SRC)kd.h $(SRC)kd.cc $(SRC)globals.icc
 	echo Compiling KD tree ...
 	$(GPP) $(CFLAGS) -c -o $(OBJ)kd.o $(SRC)kd.cc 
 
-$(OBJ)octtree.o: $(SRC)octtree.h $(SRC)octtree.cc $(SRC)globals.icc $(OBJ)viewcull.o
+$(OBJ)octtree.o: $(SRC)octtree.h $(SRC)octtree.cc $(SRC)globals.icc $(SRC)show/viewcull.h
 	echo Compiling Octree ...
 	$(GPP) $(CFLAGS) -c -o $(OBJ)octtree.o $(SRC)octtree.cc 
 
@@ -399,9 +399,9 @@ $(OBJ)hough.o: $(GRIDSRC)hough.cc $(GRIDSRC)hough.h
 	echo Compiling Hough ...
 	$(GPP) $(CFLAGS) -c $(GRIDSRC)hough.cc -o $(OBJ)hough.o
 
-$(BIN)2DGridder: $(OBJ)gridder.o $(OBJ)line.o $(OBJ)gridlines.o $(OBJ)hough.o $(OBJ)viewpointinfo.o $(OBJ)gridWriter.o $(OBJ)parcelmanager.o $(OBJ)parcel.o $(OBJ)parcelinfo.o $(OBJ)scanGrid.o $(OBJ)grid.o $(OBJ)scanToGrid.o $(OBJ)gridPoint.o $(OBJ)scan.o $(OBJ)scanmanager.o $(OBJ)kd.o $(OBJ)kdc.o
+$(BIN)2DGridder: $(OBJ)gridder.o $(OBJ)line.o $(OBJ)gridlines.o $(OBJ)hough.o $(OBJ)viewpointinfo.o $(OBJ)gridWriter.o $(OBJ)parcelmanager.o $(OBJ)parcel.o $(OBJ)parcelinfo.o $(OBJ)scanGrid.o $(OBJ)grid.o $(OBJ)scanToGrid.o $(OBJ)gridPoint.o $(OBJ)scanlib.a $(OBJ)scanmanager.o
 	echo Compiling and Linking Grid ...
-	$(GPP) $(CFLAGS) -o $(BIN)2DGridder $(OBJ)viewpointinfo.o $(OBJ)line.o $(OBJ)gridlines.o $(OBJ)hough.o $(OBJ)gridder.o $(OBJ)gridWriter.o $(OBJ)parcelmanager.o $(OBJ)parcelinfo.o $(OBJ)scanmanager.o $(OBJ)grid.o $(OBJ)scanGrid.o $(OBJ)parcel.o $(OBJ)gridPoint.o $(OBJ)scanToGrid.o $(OBJ)scan.o $(OBJ)octtree.o $(OBJ)kd.o $(OBJ)kdc.o -ldl  -lstdc++ $(LIBRARIES) 
+	$(GPP) $(CFLAGS) -o $(BIN)2DGridder $(OBJ)viewpointinfo.o $(OBJ)line.o $(OBJ)gridlines.o $(OBJ)hough.o $(OBJ)gridder.o $(OBJ)gridWriter.o $(OBJ)parcelmanager.o $(OBJ)parcelinfo.o $(OBJ)scanmanager.o $(OBJ)grid.o $(OBJ)scanGrid.o $(OBJ)parcel.o $(OBJ)gridPoint.o $(OBJ)scanToGrid.o $(OBJ)scanlib.a -ldl  -lstdc++ $(LIBRARIES)
 	echo DONE
 	echo
 
@@ -459,7 +459,7 @@ $(BIN)grabFramesCam: $(PMDSRC)calibrate/grabFramesCam.cc
 	echo Compiling and Linking grab frames camera ...
 	$(GPP) $(CFLAGS) $(PMDPKG) -I$(PMDSRC) -I$(PMDSRC)pmdaccess2 -I$(SRC) $(PMDLIBS) -o $(BIN)grabFramesCam $(PMDSRC)calibrate/grabFramesCam.cc
 
-$(BIN)grabFramesPMD: $(PMDSRC)calibrate/grabFramesPMD.cc $(OBJ)libpmdaccess2.a
+$(BIN)grabFramesPMD: $(PMDSRC)calibrate/grabFramesPMD.cc $(OBJ)libpmdaccess2.a $(OBJ)scanlib.a
 	echo Compiling and Linking grab frames PMD ...
 	$(GPP) $(CFLAGS) $(PMDPKG) -I$(PMDSRC) -I$(PMDSRC)pmdaccess2 -I$(SRC) $(OBJ)cvpmd.o $(OBJ)pmdWrap.o $(OBJ)libpmdaccess2.a $(OBJ)icp6D.o $(OBJ)icp6Dapx.o $(OBJ)icp6Dhelix.o $(OBJ)icp6Dortho.o $(OBJ)icp6Dquat.o $(OBJ)icp6Dsvd.o $(OBJ)scanlib.a $(PMDLIBS) $(OBJ)libnewmat.a -o $(BIN)grabFramesPMD $(PMDSRC)calibrate/grabFramesPMD.cc
 
@@ -467,7 +467,7 @@ $(BIN)extrinsic: $(PMDSRC)calibrate/extrinsic.cc
 	echo Compiling and Linking extrinsic camera calibration ...
 	$(GPP) $(CFLAGS) $(PMDPKG) -I$(PMDSRC) -I$(PMDSRC)pmdaccess2 -I$(SRC) $(PMDLIBS) -o $(BIN)extrinsic $(PMDSRC)calibrate/extrinsic.cc
 
-$(BIN)pose: $(PMDSRC)pose/pose.cc $(PMDSRC)pose/history.cc $(OBJ)libpmdaccess2.a
+$(BIN)pose: $(PMDSRC)pose/pose.cc $(PMDSRC)pose/history.cc $(OBJ)libpmdaccess2.a $(OBJ)scanlib.a $(OBJ)libnewmat.a
 	echo Compiling and Linking PMD pose ...
 	$(GPP) $(CFLAGS) $(PMDPKG) -I$(PMDSRC) -I$(PMDSRC)pmdaccess2 -I$(SRC) $(OBJ)cvpmd.o $(OBJ)pmdWrap.o $(OBJ)libpmdaccess2.a $(OBJ)icp6D.o $(OBJ)icp6Dapx.o $(OBJ)icp6Dhelix.o $(OBJ)icp6Dortho.o $(OBJ)icp6Dquat.o $(OBJ)icp6Dsvd.o $(OBJ)scanlib.a $(PMDLIBS) $(OBJ)libnewmat.a -o $(BIN)pose $(PMDSRC)pose/pose.cc $(PMDSRC)pose/history.cc
 	echo DONE
@@ -493,7 +493,7 @@ $(OBJ)ScaleSpace.o: $(APSSRC)ScaleSpace.*
 
 $(OBJ)KeypointXML.o: $(APSSRC)KeypointXML.*
 	echo Compiling KeypointXML ...
-	$(GCC) $(FLAGS) -DHAS_PANO13 -I$(APSSRC) -o $(OBJ)KeypointXML.o -c $(APSSRC)KeypointXML.c
+	$(GCC) $(FLAGS) -DHAS_PANO13 -I$(APSSRC) -o $(OBJ)KeypointXML.o -c $(APSSRC)KeypointXML.c `pkg-config --cflags libxml-2.0`
 
 $(OBJ)MatchKeys.o: $(APSSRC)MatchKeys.*
 	echo Compiling MatchKeys ...
@@ -627,7 +627,7 @@ $(OBJ)PolarPointCloud.o: $(SIFTSRC)library/PolarPointCloud.*
 	$(GPP) $(CFLAGS) $(SHAREDFLAGS) -Dterscanreg_EXPORTS -o $(OBJ)PolarPointCloud.o -c $(SIFTSRC)library/PolarPointCloud.cpp
 
 $(OBJ)Reader.o: $(SIFTSRC)library/Reader.cpp
-	echo Compiling Coord.cpp ...
+	echo Compiling Reader.cpp ...
 	$(GPP) $(CFLAGS) $(SHAREDFLAGS) -Dterscanreg_EXPORTS -o $(OBJ)Reader.o -c $(SIFTSRC)library/Reader.cpp
 
 $(OBJ)Reader_RIEGL.o: $(SIFTSRC)library/Reader_RIEGL.*

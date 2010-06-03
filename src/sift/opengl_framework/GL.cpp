@@ -66,7 +66,7 @@ Window* GL::wnd = NULL;
 
 clock_t GL::lastMove = 0;
 
-FTGLPixmapFont GL::font("/usr/share/fonts/tahoma.ttf");
+FTGLPixmapFont GL::font("src/sift/opengl_framework/tahoma.ttf");
 
 GL::GL() {
 	// TODO Auto-generated constructor stub
