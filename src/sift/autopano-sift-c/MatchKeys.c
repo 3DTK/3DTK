@@ -825,7 +825,7 @@ void MultiMatch_BuildGlobalMatchList (MultiMatch* self)
 		//FatalError ("BUG: wrong keypoints caught");
 
 
-		if ((be1->distance / be2->distance) > 0.6) {
+		if ((be1->distance / be2->distance) > 0.8) {
 			ArrayList_delete(kpNNList);
 			continue;
 		}
