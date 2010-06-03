@@ -55,6 +55,7 @@ bin/generatesiftfeatures -x /home/nuechter/dat/bremen_city/scan012.txt.ppc_2880x
 # bin/matchsiftfeatures -o /home/nuechter/dat/bremen_city/all.matches /home/nuechter/dat/bremen_city/*.xml
 
 # match pairwise only 
+bin/matchsiftfeatures -o /home/nuechter/dat/bremen_city/0.1.matches /home/nuechter/dat/bremen_city/scan000.txt.ppc_2880x800.map.xml /home/nuechter/dat/bremen_city/scan001.txt.ppc_2880x800.map.xml 
 bin/matchsiftfeatures -o /home/nuechter/dat/bremen_city/1.2.matches /home/nuechter/dat/bremen_city/scan001.txt.ppc_2880x800.map.xml /home/nuechter/dat/bremen_city/scan002.txt.ppc_2880x800.map.xml 
 bin/matchsiftfeatures -o /home/nuechter/dat/bremen_city/2.3.matches /home/nuechter/dat/bremen_city/scan002.txt.ppc_2880x800.map.xml /home/nuechter/dat/bremen_city/scan003.txt.ppc_2880x800.map.xml 
 bin/matchsiftfeatures -o /home/nuechter/dat/bremen_city/3.4.matches /home/nuechter/dat/bremen_city/scan003.txt.ppc_2880x800.map.xml /home/nuechter/dat/bremen_city/scan004.txt.ppc_2880x800.map.xml 
@@ -66,14 +67,13 @@ bin/matchsiftfeatures -o /home/nuechter/dat/bremen_city/8.9.matches /home/nuecht
 bin/matchsiftfeatures -o /home/nuechter/dat/bremen_city/9.10.matches /home/nuechter/dat/bremen_city/scan009.txt.ppc_2880x800.map.xml /home/nuechter/dat/bremen_city/scan010.txt.ppc_2880x800.map.xml 
 bin/matchsiftfeatures -o /home/nuechter/dat/bremen_city/10.11.matches /home/nuechter/dat/bremen_city/scan010.txt.ppc_2880x800.map.xml /home/nuechter/dat/bremen_city/scan011.txt.ppc_2880x800.map.xml 
 bin/matchsiftfeatures -o /home/nuechter/dat/bremen_city/11.12.matches /home/nuechter/dat/bremen_city/scan011.txt.ppc_2880x800.map.xml /home/nuechter/dat/bremen_city/scan012.txt.ppc_2880x800.map.xml 
-bin/matchsiftfeatures -o /home/nuechter/dat/bremen_city/12.0.matches /home/nuechter/dat/bremen_city/scan012.txt.ppc_2880x800.map.xml /home/nuechter/dat/bremen_city/scan000.txt.ppc_2880x800.map.xml 
 
 
 # register scans. input matches maps, and then -d for minimum amount
 # of inliers, -t for inlier error threshold and -x for amount of
 # iterations per pairwise registration
 #bin/registerscans -m /home/nuechter/dat/bremen_city/1.2.matches -m /home/nuechter/dat/bremen_city/2.3.matches -m/home/nuechter/dat/bremen_city/3.4.matches -m /home/nuechter/dat/bremen_city/4.5.matches -m /home/nuechter/dat/bremen_city/5.6.matches -m /home/nuechter/dat/bremen_city/6.7.matches -m /home/nuechter/dat/bremen_city/7.8.matches -m /home/nuechter/dat/bremen_city/8.9.matches -m /home/nuechter/dat/bremen_city/9.10.matches -m /home/nuechter/dat/bremen_city/10.11.matches -m /home/nuechter/dat/bremen_city/11.12.matches -m /home/nuechter/dat/bremen_city/12.0.matches /home/nuechter/dat/bremen_city/*800.map -d 10 -t 0.5 -x 200000
-bin/registerscans -m /home/nuechter/dat/bremen_city/1.2.matches -m /home/nuechter/dat/bremen_city/2.3.matches -m/home/nuechter/dat/bremen_city/3.4.matches -m /home/nuechter/dat/bremen_city/4.5.matches -m /home/nuechter/dat/bremen_city/5.6.matches -m /home/nuechter/dat/bremen_city/6.7.matches -m /home/nuechter/dat/bremen_city/7.8.matches -m /home/nuechter/dat/bremen_city/8.9.matches -m /home/nuechter/dat/bremen_city/9.10.matches -m /home/nuechter/dat/bremen_city/10.11.matches -m /home/nuechter/dat/bremen_city/11.12.matches -m /home/nuechter/dat/bremen_city/12.0.matches /home/nuechter/dat/bremen_city/*800.map -d 10 -t 0.5 -x 5000000
+bin/registerscans -m /home/nuechter/dat/bremen_city/0.1.matches -m /home/nuechter/dat/bremen_city/1.2.matches -m /home/nuechter/dat/bremen_city/2.3.matches -m/home/nuechter/dat/bremen_city/3.4.matches -m /home/nuechter/dat/bremen_city/4.5.matches -m /home/nuechter/dat/bremen_city/5.6.matches -m /home/nuechter/dat/bremen_city/6.7.matches -m /home/nuechter/dat/bremen_city/7.8.matches -m /home/nuechter/dat/bremen_city/8.9.matches -m /home/nuechter/dat/bremen_city/9.10.matches -m /home/nuechter/dat/bremen_city/10.11.matches -m /home/nuechter/dat/bremen_city/11.12.matches /home/nuechter/dat/bremen_city/*800.map -d 10 -t 0.5 -x 500000
 
 
 # end of registration
