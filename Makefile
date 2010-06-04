@@ -39,11 +39,11 @@ TARGETS += $(OBJ)libANN.a $(BIN)autopano $(BIN)autopano-sift-c $(BIN)generatesif
 endif
 
 ifdef WITH_TORO
-TARGETS += src/toro
+TARGETS += $(BIN)toro3d
 endif
 
 ifdef WITH_HOGMAN
-TARGETS += src/hogman
+TARGETS += $(BIN)hogman3d
 endif
 
 all: $(TARGETS)
@@ -756,14 +756,12 @@ $(BIN)readscan: $(SIFTSRC)programs/readscan.cpp $(BIN)libterscanreg.so $(BIN)lib
 	$(GPP) $(CFLAGS) -o $(BIN)readscan -I$(SIFTSRC)opengl_framework/ -I$(SIFTSRC)library/ -DHAS_PANO13 -I$(APSSRC) $(SIFTSRC)programs/readscan.cpp $(OBJ)liblibsift.a $(BIN)libterscanreg.so $(BIN)libopengl-framework.so -lvigraimpex -lglut -lxml2
 
 ############# TORO ##############
-src/toro/:
-	svn co https://svn.openslam.org/data/svn/toro/trunk src/toro
+$(BIN)toro3d: $(SRC)/toro/*
 	cd src/toro && make
 	cp src/toro/toro3d $(BIN)
 
 ############# HOG-Man ##############
-src/hogman/:
-	svn co https://svn.openslam.org/data/svn/hog-man/trunk src/hogman
+$(BIN)hogman3d: $(SRC)hogman/aislib/graph_optimizer_hogman/*
 	cd src/hogman && ./configure
 	cd src/hogman && LD_LIBRARY_PATH=`pwd`/lib make
 	cp src/hogman/bin/hogman3d $(BIN)
