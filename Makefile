@@ -78,25 +78,21 @@ $(OBJ)kd.o: $(SRC)searchTree.h $(SRC)kd.h $(SRC)kd.cc $(SRC)globals.icc
 	echo Compiling KD tree ...
 	$(GPP) $(CFLAGS) -c -o $(OBJ)kd.o $(SRC)kd.cc 
 
-$(OBJ)octtree.o: $(SRC)octtree.h $(SRC)octtree.cc $(SRC)globals.icc $(SRC)show/viewcull.h
+$(OBJ)octree.o: $(SRC)octree.h $(SRC)octree.cc $(SRC)globals.icc 
 	echo Compiling Octree ...
-	$(GPP) $(CFLAGS) -c -o $(OBJ)octtree.o $(SRC)octtree.cc 
-
-$(OBJ)viewcull.o: $(SHOWSRC)viewcull.h $(SHOWSRC)viewcull.c
-	echo Compiling Software Culling ...
-	$(GPP) $(CFLAGS) -c -o $(OBJ)viewcull.o $(SHOWSRC)viewcull.c 
+	$(GPP) $(CFLAGS) -c -o $(OBJ)octree.o $(SRC)octree.cc
 
 $(OBJ)d2tree.o: $(SRC)d2tree.h $(SRC)d2tree.cc $(SRC)searchTree.h $(SRC)globals.icc
 	echo Compiling D2tree ...
 	$(GPP) $(CFLAGS) -c -o $(OBJ)d2tree.o $(SRC)d2tree.cc 
 
-$(OBJ)scan.o: $(SRC)octtree.h $(SRC)kd.h $(SRC)kdc.h $(SRC)kdcache.h $(SRC)scan.h $(SRC)scan_io.h $(SRC)scan.cc $(SRC)scan.icc $(SRC)globals.icc $(SRC)point.h $(SRC)ptpair.h $(SRC)point.icc $(SRC)d2tree.h
+$(OBJ)scan.o: $(SRC)octree.h $(SRC)kd.h $(SRC)kdc.h $(SRC)kdcache.h $(SRC)scan.h $(SRC)scan_io.h $(SRC)scan.cc $(SRC)scan.icc $(SRC)globals.icc $(SRC)point.h $(SRC)ptpair.h $(SRC)point.icc $(SRC)d2tree.h
 	echo Compiling Scan ...
 	$(GPP) $(CFLAGS) -c -o $(OBJ)scan.o $(SRC)scan.cc 
 
-$(OBJ)scanlib.a: $(OBJ)octtree.o $(OBJ)kd.o $(OBJ)kdc.o $(OBJ)scan.o $(OBJ)d2tree.o $(OBJ)octtree.o $(OBJ)viewcull.o
+$(OBJ)scanlib.a: $(OBJ)octree.o $(OBJ)kd.o $(OBJ)kdc.o $(OBJ)scan.o $(OBJ)d2tree.o $(OBJ)octree.o
 	echo Linking Scanlib ...
-	$(AR) -cr $(OBJ)scanlib.a $(OBJ)scan.o $(OBJ)octtree.o $(OBJ)kd.o $(OBJ)kdc.o $(OBJ)d2tree.o $(OBJ)viewcull.o 
+	$(AR) -cr $(OBJ)scanlib.a $(OBJ)scan.o $(OBJ)kd.o $(OBJ)kdc.o $(OBJ)d2tree.o $(OBJ)octree.o 
 	ranlib $(OBJ)scanlib.a
 
 $(OBJ)icp6D.o: $(SRC)kd.h $(SRC)kdc.h $(SRC)scan.h $(SRC)icp6D.h $(SRC)icp6D.cc $(SRC)ptpair.h $(SRC)globals.icc $(SRC)icp6Dminimizer.h $(SRC)newmat/newmat.h
@@ -224,7 +220,7 @@ $(BIN)scan_io_uos.so: $(SRC)scan_io.h $(SRC)scan_io_uos.h $(SRC)scan_io_uos.cc $
 ifdef WITH_RIVLIB
 $(BIN)scan_io_rxp.so: $(SRC)scan_io.h $(SRC)scan_io_rxp.h $(SRC)scan_io_rxp.cc $(SRC)point.h $(SRC)point.icc $(SRC)globals.icc
 	echo Compiling shared library for reading RIEGL rxp scans ...
-	$(GPP) $(CFLAGS) $(SHAREDFLAGS) -o $(BIN)scan_io_rxp.so $(SRC)scan_io_rxp.cc $(SRC)riegl/libscanlib-mt-s.a $(SRC)riegl/libctrllib-mt-s.a $(SRC)riegl/libboost_system-mt-s-1_35-vns.a -lpthread
+	$(GPP) $(CFLAGS) $(SHAREDFLAGS) -o $(BIN)scan_io_rxp.so -I$(SRC) $(SRC)scan_io_rxp.cc $(SRC)riegl/libscanlib-mt-s.a $(SRC)riegl/libctrllib-mt-s.a $(SRC)riegl/libboost_system-mt-s-1_35-vns.a -lpthread
 else
 $(BIN)scan_io_rxp.so: 
 endif
@@ -314,11 +310,19 @@ $(BIN)scan_red: $(OBJ)scanlib.a $(SRC)globals.icc $(SRC)scan_red.cc
 
 ############# SHOW ##############
 
-$(BIN)show: $(OBJ)libglui.a $(SHOWSRC)show.cc $(SHOWSRC)show.h $(SHOWSRC)show.icc $(SHOWSRC)show1.icc $(SHOWSRC)show_menu.cc $(SHOWSRC)show_gl.cc $(SRC)point.h $(SRC)point.icc $(SRC)globals.icc $(OBJ)scan.o $(OBJ)vertexarray.o $(OBJ)camera.o $(OBJ)PathGraph.o $(OBJ)NurbsPath.o $(OBJ)scanlib.a
+$(BIN)show: $(OBJ)libglui.a $(SHOWSRC)show.cc $(SHOWSRC)show.h $(SHOWSRC)show.icc $(SHOWSRC)show1.icc $(SHOWSRC)show_menu.cc $(SHOWSRC)show_gl.cc $(SRC)point.h $(SRC)point.icc $(SRC)globals.icc $(OBJ)scan.o $(OBJ)vertexarray.o $(OBJ)camera.o $(OBJ)PathGraph.o $(OBJ)NurbsPath.o $(OBJ)viewcull.o $(OBJ)show_octree.o $(OBJ)scanlib.a
 	echo Compiling and Linking Show ...
-	$(GPP) $(CFLAGS) -o $(BIN)show -I$(SRC) $(SHOWSRC)show.cc $(OBJ)scanlib.a $(OBJ)vertexarray.o $(OBJ)camera.o $(OBJ)PathGraph.o $(OBJ)NurbsPath.o $(OBJ)libglui.a $(LIBRARIES)
+	$(GPP) $(CFLAGS) -o $(BIN)show -I$(SRC) $(SHOWSRC)show.cc $(OBJ)scanlib.a $(OBJ)vertexarray.o $(OBJ)camera.o $(OBJ)PathGraph.o $(OBJ)NurbsPath.o $(OBJ)viewcull.o $(OBJ)show_octree.o $(OBJ)libglui.a $(LIBRARIES)
 	echo DONE
 	echo
+
+$(OBJ)show_octree.o: $(SRC)octree.h $(SHOWSRC)show_octree.h $(SHOWSRC)show_octree.cc $(SRC)globals.icc 
+	echo Compiling Octree for Show ...
+	$(GPP) $(CFLAGS) -c -o $(OBJ)show_octree.o -I$(SRC) $(SHOWSRC)show_octree.cc
+
+$(OBJ)viewcull.o: $(SHOWSRC)viewcull.h $(SHOWSRC)viewcull.cc
+	echo Compiling Software View Culling ...
+	$(GPP) $(CFLAGS) -c -o $(OBJ)viewcull.o $(SHOWSRC)viewcull.cc 
 
 $(OBJ)vertexarray.o: $(SHOWSRC)vertexarray.h $(SHOWSRC)vertexarray.cc
 	echo Compiling VertexArray ...
