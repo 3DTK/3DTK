@@ -24,7 +24,7 @@ using std::endl;
 using std::stringstream;
 
 #include "scan.h"
-#include "octtree.h"
+#include "octree.h"
 #include "scan_io.h"
 #include "d2tree.h"
 #include "kd.h"

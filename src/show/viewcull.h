@@ -3,12 +3,10 @@
 #include <math.h>
 #include <GL/glut.h>
 #include <GL/glu.h>
+#include <stdbool.h>
 
 #ifndef __VIEWCULL_H__
 #define __VIEWCULL_H__
-
-
-
 
 /*
  * matrix and math utility routines and macros
@@ -20,8 +18,6 @@ void matrixConcatenate (float *result, float *ma, float *mbu);
     sqrt((nin)[0]*(nin)[0] + (nin)[1]*(nin)[1] + (nin)[2]*(nin)[2])
 #define distanceFromPlane(peq,p) \
     ((peq)[0]*(p)[0] + (peq)[1]*(p)[1] + (peq)[2]*(p)[2] + (peq)[3])
-
-
 
 
 /* Calculates the six view volume planes in object coordinate (OC) space.
@@ -67,8 +63,6 @@ void matrixConcatenate (float *result, float *ma, float *mbu);
      */
 void calcViewVolumePlanes ();
 
-
-
 /* Test a sphere's bounding box against the six clip planes */
 int culled (float *p); 
 
@@ -77,7 +71,7 @@ void ExtractFrustum();
 
 bool PointInFrustum( float x, float y, float z );
 bool QuadInFrustrum( float x, float y, float z, float xsize, float ysize, float zsize );
-int QuadInFrustrum2( float x, float y, float z, float xsize, float ysize, float zsize );
+int  QuadInFrustrum2( float x, float y, float z, float xsize, float ysize, float zsize );
 
 bool CubeInFrustum( float x, float y, float z, float size );
 
