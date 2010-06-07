@@ -2,7 +2,7 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="8,00"
-	Name="scan_red"
+	Name="SCAN_RED"
 	ProjectGUID="{85801526-22DA-421F-84EA-627663097510}"
 	RootNamespace="scan_red"
 	Keyword="Win32Proj"
@@ -206,7 +206,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\src\octtree.cc"
+				RelativePath="..\..\..\src\octree.cc"
 				>
 			</File>
 			<File
@@ -252,7 +252,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\src\octtree.h"
+				RelativePath="..\..\..\src\octree.h"
 				>
 			</File>
 			<File

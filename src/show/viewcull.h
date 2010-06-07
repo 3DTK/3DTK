@@ -3,7 +3,10 @@
 #include <math.h>
 #include <GL/glut.h>
 #include <GL/glu.h>
+
+#ifndef _MSC_VER
 #include <stdbool.h>
+#endif
 
 #ifndef __VIEWCULL_H__
 #define __VIEWCULL_H__

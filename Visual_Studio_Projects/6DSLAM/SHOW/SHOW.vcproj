@@ -235,7 +235,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\src\octtree.cc"
+				RelativePath="..\..\..\src\octree.cc"
 				>
 			</File>
 			<File
@@ -327,7 +327,15 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath="..\..\..\src\show\show_octree.cc"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\src\show\vertexarray.cc"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\src\show\viewcull.cc"
 				>
 			</File>
 			<File
@@ -357,7 +365,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\src\octtree.h"
+				RelativePath="..\..\..\src\octree.h"
 				>
 			</File>
 			<File
@@ -389,7 +397,15 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\..\src\show\show_octree.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\src\show\vertexarray.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\src\show\viewcull.h"
 				>
 			</File>
 			<File
