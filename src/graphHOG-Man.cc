@@ -3,6 +3,9 @@
  * @author Jochen Sprickerhof. Institute of Computer Science, University of Osnabrueck, Germany.
  */
 
+#include <fstream>
+using std::ofstream;
+using std::ifstream;
 #include <cfloat>
 #include <cstring>
 #include "graphHOG-Man.h"

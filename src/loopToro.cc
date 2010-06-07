@@ -5,6 +5,7 @@
 
 #include <fstream>
 using std::ofstream;
+using std::ifstream;
 
 #include <boost/graph/graph_traits.hpp>
 using boost::graph_traits;
