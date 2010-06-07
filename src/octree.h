@@ -5,8 +5,8 @@
  * @author Andreas Nuechter. Institute of Computer Science, University of Osnabrueck, Germany.
  */
 
-#ifndef OCTTREE_H
-#define OCTTREE_H
+#ifndef OCTREE_H
+#define OCTREE_H
 
 #include <vector>
 using std::vector;
@@ -24,44 +24,34 @@ using std::set;
  * subboxes
  */
 class OctTree {
+
 public:
   
   OctTree(double **pts, int n, double _voxelSize);
-  ~OctTree();
+  OctTree(list<double*> &splitPoints, double center[3], 
+		double x_size, double y_size, double z_size);
+  virtual ~OctTree();
   
   void GetOctTreeCenter(vector<double*>&c);
   void GetOctTreeRandom(vector<double*>&c);
   void GetOctTreeRandom(vector<double*>&c, unsigned int ptspervoxel);
-
-#ifdef USE_GL_POINTS
-  void displayOctTree(long targetpts);
-  void displayOctTreeAll();
-  int cullOctTree();
-#endif
+ 
 protected:
   
-#ifdef USE_GL_POINTS
-  bool culled;
-  int nrpts;
-  
-  void setVisible();
-#endif
-
-  OctTree(list<double*> &splitPoints, double center[3], 
-		double x_size, double y_size, double z_size);
-  
+  /*
   int countPoints(double **pts, int n, double center[3], 
 			   double x_size, double y_size, double z_size);
+  */
   
-  void countPointsAndQueue(list<double*> &i_points,
-					  double center[8][3], 
-					  double x_size, double y_size, double z_size,
-					  OctTree **child);
+  virtual void countPointsAndQueue(list<double*> &i_points,
+							double center[8][3], 
+							double x_size, double y_size, double z_size,
+							OctTree **child);
   
-  void countPointsAndQueue(double **pts, int n,
-					  double center[8][3], 
-					  double x_size, double y_size, double z_size,
-					  OctTree **child);
+  virtual void countPointsAndQueue(double **pts, int n,
+							double center[8][3], 
+							double x_size, double y_size, double z_size,
+							OctTree **child);
   
 
   /**

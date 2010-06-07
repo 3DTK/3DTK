@@ -5,12 +5,7 @@
  * @author Andreas Nuechter. Institute of Computer Science, University of Osnabrueck, Germany.
 */
 
-#ifdef USE_GL_POINTS
-#include "show/viewcull.h"
-#include "show/glui/glui.h"  /* Header File For The glui funktions */
-#endif
-
-#include "octtree.h"
+#include "octree.h"
 #include "globals.icc"
 double OctTree::voxelSize;
 
@@ -314,119 +309,6 @@ void OctTree::GetOctTreeRandom(vector<double*>&c, unsigned int ptspervoxel)
   }
 
 }
-
-#ifdef USE_GL_POINTS
-
-/**
- * sets the culled flag to false in this and all child nodes. Needed for cullOctTree()
- */
-void OctTree::setVisible() {
-  culled = false;
-  for( int i = 0; i < 8; i++){
-    if (child[i] ) {
-      child[i]->setVisible();
-    }
-  }
-}
-/**
- * calculate which buckets are visible and count visible points.
- */
-int OctTree::cullOctTree() {
-  nrpts = 0;
-  int res = QuadInFrustrum2(center[0], center[1], center[2], x_size, y_size, z_size);
-  culled = (res == 0);
-
-  if (!culled && !leaf) {
-    for( int i = 0; i < 8; i++){
-      if (child[i] != 0 ) {
-        if (res == 1) { // only recurse if partially overlapping the frustrum
-          child[i]->cullOctTree();
-          if (!child[i]->culled) {
-            nrpts += child[i]->nrpts;
-          }
-        } else {
-          // TODO compute number of points correctly
-          nrpts += child[i]->nrpts;
-          setVisible();
-        }        
-      }
-    }
-  } else if (leaf) {
-    nrpts = points.size(); 
-  }
-  return nrpts;
-  
-}
-
-/**
- * Displays all non culled points
- */
-void OctTree::displayOctTreeAll() {
-  if(leaf == true) {
-    glBegin(GL_POINTS);
-    for(list<double *>::iterator itl = points.begin(); itl != points.end(); itl++) {
-      glVertex3f((*itl)[0],(*itl)[1],(*itl)[2]);
-    }
-    glEnd();
-  } else {
-    for( int i = 0; i < 8; i++){
-      if (child[i] != 0 && !child[i]->culled) {
-        child[i]->displayOctTreeAll();
-      }
-    }
-  }
-}
-
-/**
- * Displays non culled points. Tries to display only targetpts points, but will usually display four times as much
- *
- */
-void OctTree::displayOctTree(long targetpts) {
-  if (culled) return;
-  if(leaf == true && targetpts > 0) {
-    glBegin(GL_POINTS);
-    if (points.size() <= targetpts) {
-      for(list<double *>::iterator itl = points.begin(); itl != points.end(); itl++) {
-        glVertex3f((*itl)[0],(*itl)[1],(*itl)[2]);
-      }
-    } else {
-      // some optimization, since this case occurs quite often
-      if (targetpts == 1) {
-        double *p = *(points.begin());
-        glVertex3f(p[0],p[1],p[2]);
-      } else {
-        // TODO smarter subselection of points here
-        int each = points.size()/targetpts;
-        int i = 0;
-        for(list<double *>::iterator itl = points.begin(); itl != points.end(); itl++) {
-          i++;
-          if ( i%each == 0 ) {
-            glVertex3f((*itl)[0],(*itl)[1],(*itl)[2]);
-          }
-        }
-      }
-    }
-    glEnd();
-  } else {
-    int count = 0;
-    for( int i = 0; i < 8; i++){
-      if (child[i] != 0 && !child[i]->culled) { // check wether child exists and if its displayed
-        count++;
-        //count += child[i]->nrpts;
-      }
-    }
-    if (count == 0) return;
-    for( int i = 0; i < 8; i++){
-      if (child[i] != 0 && !child[i]->culled) {
-        double percentage = ((double)child[i]->nrpts)/((double)count);
-        //child[i]->displayOctTree(percentage*targetpts +1);  // plus 1 results in many many more extra points
-        child[i]->displayOctTree(targetpts/count);  
-      }
-    }
-  }
-}
-#endif
-
 
 /**
  * Destructor

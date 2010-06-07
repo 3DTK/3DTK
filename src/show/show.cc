@@ -6,7 +6,7 @@
  * @author Kai Lingemann. Institute of Computer Science, University of Osnabrueck, Germany.
  */
 
-#include "../octtree.h"
+#include "show_octree.h"
 #include "show.h"
 #include "camera.h"
 #include "NurbsPath.h"
@@ -40,7 +40,7 @@ vector< vector<vertexArray*> > vvertexArrayList;
 /**
  * the octrees that store the points for each scan
  */
-OctTree **octpts;
+Show_OctTree **octpts;
 /**
  * Storing the base directory
  */
@@ -288,7 +288,7 @@ int parseArgs(int argc,char **argv, string &dir, int& start, int& end, int& maxD
 	   readInitial = true;
 	   break;
 	 case 'O':
-     octree = atoi(optarg);
+	   octree = atoi(optarg);
 	   break;
 	 case 'f':
 	   if (strcasecmp(optarg, "uos") == 0) type = UOS;
@@ -564,7 +564,7 @@ void createDisplayLists(bool reduced)
 #else
 //#ifdef USE_GL_POINTS
   cout << "Creating display octrees.." << endl;
-  octpts = new OctTree*[Scan::allScans.size()];
+  octpts = new Show_OctTree*[Scan::allScans.size()];
   for(unsigned int i = 0; i < Scan::allScans.size() ; i++) {
     if (reduced) {
       double **pts = new double*[Scan::allScans[i]->get_points_red_size()];
@@ -574,7 +574,7 @@ void createDisplayLists(bool reduced)
         pts[jterator][1] = Scan::allScans[i]->get_points_red()[jterator][1];
         pts[jterator][2] = Scan::allScans[i]->get_points_red()[jterator][2];
       }
-      octpts[i] = new OctTree(pts, Scan::allScans[i]->get_points_red_size(), 10.0);  // TODO remove magic number
+      octpts[i] = new Show_OctTree(pts, Scan::allScans[i]->get_points_red_size(), 10.0);  // TODO remove magic number
 
     } else {
       double **pts = new double*[Scan::allScans[i]->get_points()->size()];
@@ -584,7 +584,7 @@ void createDisplayLists(bool reduced)
         pts[jterator][1] = Scan::allScans[i]->get_points()->at(jterator).y;
         pts[jterator][2] = Scan::allScans[i]->get_points()->at(jterator).z;
       }
-      octpts[i] = new OctTree(pts, Scan::allScans[i]->get_points_red_size(), 10.0);  //TODO remove magic number
+      octpts[i] = new Show_OctTree(pts, Scan::allScans[i]->get_points_red_size(), 10.0);  //TODO remove magic number
     }
     cout << "Scan " << i << " octree finished." << endl;
   }

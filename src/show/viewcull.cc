@@ -16,7 +16,6 @@ GLUquadric *quadSphere;
 int swCull = 1; /* toggles software culling, control with the <space> key */
 
 
-
 /*
  * matrix and math utility routines and macros
  */
