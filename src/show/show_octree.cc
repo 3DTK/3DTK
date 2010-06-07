@@ -6,7 +6,7 @@
 */
 
 #include "show_octree.h"
-#include "globals.icc"
+#include "../globals.icc"
 
 #include "viewcull.h"
 //#include "show/glui/glui.h"  /* Header File For The glui functions */

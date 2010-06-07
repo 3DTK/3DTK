@@ -8,9 +8,11 @@
 #ifndef SHOWOCTREE_H
 #define SHOWOCTREE_H
 
+#ifndef _MSC_VER
 #include <stdbool.h>
+#endif
 
-#include "octree.h"
+#include "../octree.h"
 
 /**
  * @brief Octree for show
