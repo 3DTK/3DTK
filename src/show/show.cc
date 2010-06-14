@@ -648,13 +648,11 @@ int main(int argc, char **argv){
   #pragma omp parallel for schedule(dynamic)
   #endif
   for (int iterator = 0; iterator < end_reduction; iterator++) {
+    // reduction filter for current scan!
     if (red > 0) {
 	    cout << "Reducing Scan No. " << iterator << endl;
-    } else {
-	    cout << "Copying Scan No. " << iterator << endl;
-    }
-    // reduction filter for current scan!
-    Scan::allScans[iterator]->calcReducedPoints(red, octree);
+      Scan::allScans[iterator]->calcReducedPoints(red, octree);
+    } // no copying necessary for show!
   }
   readFrames(dir, start, end, readInitial, type);
 
