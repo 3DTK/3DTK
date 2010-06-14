@@ -586,7 +586,8 @@ void createDisplayLists(bool reduced)
       }
       octpts[i] = new Show_OctTree(pts, Scan::allScans[i]->get_points_red_size(), 10.0);  //TODO remove magic number
     }
-    cout << "Scan " << i << " octree finished." << endl;
+    cout << "Scan " << i << " octree finished. Deleting original points.." << endl;
+    Scan::allScans[i]->clearPoints();
   }
 #endif
 }
