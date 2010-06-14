@@ -589,13 +589,13 @@ void createDisplayLists(bool reduced)
         pts[jterator][1] = Scan::allScans[i]->get_points()->at(jterator).y;
         pts[jterator][2] = Scan::allScans[i]->get_points()->at(jterator).z;
       }
-      octpts[i] = new Show_BOctTree(pts, Scan::allScans[i]->get_points_red_size(), 50.0);  //TODO remove magic number
+      octpts[i] = new Show_BOctTree(pts, Scan::allScans[i]->get_points()->size(), 50.0);  //TODO remove magic number
       for (unsigned int jterator = 0; jterator < Scan::allScans[i]->get_points()->size(); jterator++) {
         delete[] pts[jterator];
       }
       delete[] pts;
     }
-    cout << "Scan " << i << " octree finished. Deleting original points.." << endl;
+    cout << "Scan " << i << " octree finished. Deleting original points.." << octpts[i]->countNodes() << endl;
     Scan::allScans[i]->clearPoints();
   }
 #endif
