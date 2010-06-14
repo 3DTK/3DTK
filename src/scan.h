@@ -131,6 +131,7 @@ public:
   inline const vector <Point>* get_points() const;
   inline const double** get_points_red() const;
   inline void setPoints(vector <Point> *_points);
+  inline void clearPoints();
 private:
   
   /**

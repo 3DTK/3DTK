@@ -21,6 +21,10 @@ inline int Scan::get_points_red_size() const
   return points_red_size;
 }
 
+inline void Scan::clearPoints() {
+  points.clear();
+}
+
 inline void Scan::setPoints(vector <Point>* _points) {
   points = *_points;
 }
