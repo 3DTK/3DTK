@@ -595,7 +595,7 @@ void createDisplayLists(bool reduced)
       }
       delete[] pts;
     }
-    cout << "Scan " << i << " octree finished. Deleting original points.." << octpts[i]->countNodes() << endl;
+    cout << "Scan " << i << " octree finished. Deleting original points.." << endl;
     Scan::allScans[i]->clearPoints();
   }
 #endif
