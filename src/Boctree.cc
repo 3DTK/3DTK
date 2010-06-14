@@ -17,7 +17,6 @@ double BOctTree::voxelSize;
  */
 BOctTree::BOctTree(double **pts, int n, double voxelSize) {
   this->voxelSize = voxelSize;
-  cout << "base constructor " << this->voxelSize <<  "  " << voxelSize << endl;
 
   double xmin = pts[0][0], xmax = pts[0][0];
   double ymin = pts[0][1], ymax = pts[0][1];
@@ -45,7 +44,6 @@ BOctTree::BOctTree(double **pts, int n, double voxelSize) {
   }
   // set up values
   root = new bitoct();
-  printf("Created root node at %p.  %d\n", root, sizeof(root));
  
   countPointsAndQueue(pts, n, newcenter, sizeNew, *root);
 }
@@ -57,7 +55,6 @@ BOctTree::BOctTree(double **pts, int n, double voxelSize) {
 pointrep* BOctTree::branch(bitoct &node, list<double*> &splitPoints, 
               double _center[3], double _size)
 {
-  //printf("Branch %p\n", &node);
 
   // if bucket is too small stop building tree
   // -----------------------------------------
@@ -70,7 +67,6 @@ pointrep* BOctTree::branch(bitoct &node, list<double*> &splitPoints,
       points->push_back(*itr);
     }*/
     pointrep *points = new pointrep[3*splitPoints.size() + 1];
-//  printf("Branch points %p\n", points);
     points[0].length = splitPoints.size();
     int i = 1;
     for (list<double *>::iterator itr = splitPoints.begin(); 
@@ -219,7 +215,7 @@ void BOctTree::countPointsAndQueue(list<double*> &i_points,
 void BOctTree::countPointsAndQueue(double **pts, int n, 
                                  double center[8][3], 
                                  double size,
-						   bitoct &parent)
+				 bitoct &parent)
 {
   list<double*> points[8];
   int n_children = 0;
@@ -244,7 +240,6 @@ void BOctTree::countPointsAndQueue(double **pts, int n,
   // create children
   bitunion *children = new bitunion[n_children];
   bitoct::link(parent, children);
-
   int count = 0;
   for (int j = 0; j < 8; j++) {
     if (!points[j].empty()) {
