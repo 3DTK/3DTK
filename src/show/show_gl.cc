@@ -70,13 +70,12 @@ void DrawPoints(GLenum mode)
       glPointSize(pointsize);
 #ifdef USE_GL_POINTS
         ExtractFrustum();
-        octpts[iterator]->cullOctTree();
           
         selectColors(MetaAlgoType[iterator][frameNr]);
         if (displaymoving) {
-          octpts[iterator]->displayOctTree(ptstodisplay);
+          octpts[iterator]->displayOctTreeCulled(ptstodisplay);
         } else {
-          octpts[iterator]->displayOctTreeAll();
+          octpts[iterator]->displayOctTreeAllCulled();
         }
 #else
       for (unsigned int jterator = 0; jterator < vvertexArrayList[iterator].size(); jterator++) {
@@ -135,11 +134,10 @@ void DrawPoints(GLenum mode)
 
 #ifdef USE_GL_POINTS
         ExtractFrustum();
-        octpts[iterator]->cullOctTree();
         if (displaymoving) {
-          octpts[iterator]->displayOctTree(ptstodisplay);
+          octpts[iterator]->displayOctTreeCulled(ptstodisplay);
         } else {
-          octpts[iterator]->displayOctTreeAll();
+          octpts[iterator]->displayOctTreeAllCulled();
         }
 #else
         for (unsigned int jterator = 0; jterator < vvertexArrayList[iterator].size(); jterator++) {
