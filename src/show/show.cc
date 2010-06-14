@@ -354,62 +354,62 @@ void readFrames(string dir, int start, int end, bool readInitial, reader_type &t
     string initialTransformFileName = dir + "initital.frame";
     ifstream initial_in(initialTransformFileName.c_str());
     if (!initial_in.good()) {
-	 cout << "Error opening " << initialTransformFileName << endl;
-	 exit(-1);
+      cout << "Error opening " << initialTransformFileName << endl;
+      exit(-1);
     }
     initial_in >> initialTransform;
     cout << initialTransform << endl;
   }
-  
+
   ifstream frame_in;
   int  fileCounter = start;
   string frameFileName;
   for (;;) {
     if (end > -1 && fileCounter > end) break; // 'nuf read
     frameFileName = dir + "scan" + to_string(fileCounter++,3) + ".frames";
-    
+
     frame_in.open(frameFileName.c_str());
 
     // read 3D scan
     if (!frame_in.good()) break; // no more files in the directory
-    
+
     cout << "Reading Frames for 3D Scan " << frameFileName << "...";
     vector <double*> Matrices;
     vector <Scan::AlgoType> algoTypes;
     int frameCounter = 0;
-    
-    while (frame_in.good()) {
-	 frameCounter++;	 
-	 double *transMatOpenGL = new double[16];
-   int algoTypeInt;
-   Scan::AlgoType algoType;
-	 try {
-	   double transMat[16];
-	   frame_in >> transMat >> algoTypeInt;
-	   algoType = (Scan::AlgoType)algoTypeInt;
 
-	   // convert to OpenGL coordinate system
-	   double mirror[16];
-	   M4identity(mirror);
-	   mirror[10] = -1.0;
-	   if (readInitial) {
-		double tempxf[16];
-		MMult(mirror, initialTransform, tempxf);
-		memcpy(mirror, tempxf, sizeof(tempxf));
-	   }
-	   //@@@
-	   //	   memcpy(transMatOpenGL, transMat, 16*sizeof(double));
-	   MMult(mirror, transMat, transMatOpenGL);
-	 }
-	 catch (const exception &e) {   
-	   break;
-	 }
-	 // don't store the very first entry, since it's the identity matrix.	 
-	 if (frameCounter > 1)
-	 {
-	   Matrices.push_back(transMatOpenGL);
-	   algoTypes.push_back(algoType);
-	 }
+    while (frame_in.good()) {
+      frameCounter++;	 
+      double *transMatOpenGL = new double[16];
+      int algoTypeInt;
+      Scan::AlgoType algoType;
+      try {
+        double transMat[16];
+        frame_in >> transMat >> algoTypeInt;
+        algoType = (Scan::AlgoType)algoTypeInt;
+
+        // convert to OpenGL coordinate system
+        double mirror[16];
+        M4identity(mirror);
+        mirror[10] = -1.0;
+        if (readInitial) {
+          double tempxf[16];
+          MMult(mirror, initialTransform, tempxf);
+          memcpy(mirror, tempxf, sizeof(tempxf));
+        }
+        //@@@
+        //	   memcpy(transMatOpenGL, transMat, 16*sizeof(double));
+        MMult(mirror, transMat, transMatOpenGL);
+      }
+      catch (const exception &e) {   
+        break;
+      }
+      // don't store the very first entry, since it's the identity matrix.	 
+      if (frameCounter > 1)
+      {
+        Matrices.push_back(transMatOpenGL);
+        algoTypes.push_back(algoType);
+      }
     }
     MetaAlgoType.push_back(algoTypes);
 
@@ -424,7 +424,11 @@ void readFrames(string dir, int start, int end, bool readInitial, reader_type &t
     frame_in.clear();
     cout << MetaMatrix.back().size() << " done." << endl;
   }
-  if (MetaMatrix.size() == 0) cerr << "ERROR: Missing or empty directory: " << dir << endl << endl;
+  if (MetaMatrix.size() == 0) {
+    cerr << "ERROR: Missing or empty directory: " << dir << endl << endl;
+    cerr << "aborting..." << endl;
+    exit(1);
+  }
   /////////////////!!!!!!!!!!!!!!!!!!!!!!!!
   //@@@
   /*
@@ -649,6 +653,9 @@ int main(int argc, char **argv){
 
   scanNr = frameNr = -1;
 
+  // read frames first, to get notifyied of missing frames before all scans are read in
+  readFrames(dir, start, end, readInitial, type);
+
   // Get Scans
   Scan::readScans(type, start, end, dir, maxDist, minDist, 0);
   
@@ -663,7 +670,6 @@ int main(int argc, char **argv){
       Scan::allScans[iterator]->calcReducedPoints(red, octree);
     } // no copying necessary for show!
   }
-  readFrames(dir, start, end, readInitial, type);
 
 
   cout << "Exporting the trajectory to \"trajectory.dat\"." << endl;
