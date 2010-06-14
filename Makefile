@@ -82,17 +82,21 @@ $(OBJ)octree.o: $(SRC)octree.h $(SRC)octree.cc $(SRC)globals.icc
 	echo Compiling Octree ...
 	$(GPP) $(CFLAGS) -c -o $(OBJ)octree.o $(SRC)octree.cc
 
+$(OBJ)Boctree.o: $(SRC)Boctree.h $(SRC)Boctree.cc $(SRC)globals.icc 
+	echo Compiling BOctree ...
+	$(GPP) $(CFLAGS) -c -o $(OBJ)Boctree.o $(SRC)Boctree.cc
+
 $(OBJ)d2tree.o: $(SRC)d2tree.h $(SRC)d2tree.cc $(SRC)searchTree.h $(SRC)globals.icc
 	echo Compiling D2tree ...
 	$(GPP) $(CFLAGS) -c -o $(OBJ)d2tree.o $(SRC)d2tree.cc 
 
-$(OBJ)scan.o: $(SRC)octree.h $(SRC)kd.h $(SRC)kdc.h $(SRC)kdcache.h $(SRC)scan.h $(SRC)scan_io.h $(SRC)scan.cc $(SRC)scan.icc $(SRC)globals.icc $(SRC)point.h $(SRC)ptpair.h $(SRC)point.icc $(SRC)d2tree.h
+$(OBJ)scan.o: $(SRC)Boctree.h $(SRC)kd.h $(SRC)kdc.h $(SRC)kdcache.h $(SRC)scan.h $(SRC)scan_io.h $(SRC)scan.cc $(SRC)scan.icc $(SRC)globals.icc $(SRC)point.h $(SRC)ptpair.h $(SRC)point.icc $(SRC)d2tree.h
 	echo Compiling Scan ...
 	$(GPP) $(CFLAGS) -c -o $(OBJ)scan.o $(SRC)scan.cc 
 
-$(OBJ)scanlib.a: $(OBJ)octree.o $(OBJ)kd.o $(OBJ)kdc.o $(OBJ)scan.o $(OBJ)d2tree.o $(OBJ)octree.o
+$(OBJ)scanlib.a: $(OBJ)octree.o $(OBJ)kd.o $(OBJ)kdc.o $(OBJ)scan.o $(OBJ)d2tree.o $(OBJ)Boctree.o
 	echo Linking Scanlib ...
-	$(AR) -cr $(OBJ)scanlib.a $(OBJ)scan.o $(OBJ)kd.o $(OBJ)kdc.o $(OBJ)d2tree.o $(OBJ)octree.o 
+	$(AR) -cr $(OBJ)scanlib.a $(OBJ)scan.o $(OBJ)kd.o $(OBJ)kdc.o $(OBJ)d2tree.o $(OBJ)octree.o $(OBJ)Boctree.o 
 	ranlib $(OBJ)scanlib.a
 
 $(OBJ)icp6D.o: $(SRC)kd.h $(SRC)kdc.h $(SRC)scan.h $(SRC)icp6D.h $(SRC)icp6D.cc $(SRC)ptpair.h $(SRC)globals.icc $(SRC)icp6Dminimizer.h $(SRC)newmat/newmat.h
@@ -310,15 +314,19 @@ $(BIN)scan_red: $(OBJ)scanlib.a $(SRC)globals.icc $(SRC)scan_red.cc
 
 ############# SHOW ##############
 
-$(BIN)show: $(OBJ)libglui.a $(SHOWSRC)show.cc $(SHOWSRC)show.h $(SHOWSRC)show.icc $(SHOWSRC)show1.icc $(SHOWSRC)show_menu.cc $(SHOWSRC)show_gl.cc $(SRC)point.h $(SRC)point.icc $(SRC)globals.icc $(OBJ)scan.o $(OBJ)vertexarray.o $(OBJ)camera.o $(OBJ)PathGraph.o $(OBJ)NurbsPath.o $(OBJ)viewcull.o $(OBJ)show_octree.o $(OBJ)scanlib.a
+$(BIN)show: $(OBJ)libglui.a $(SHOWSRC)show.cc $(SHOWSRC)show.h $(SHOWSRC)show.icc $(SHOWSRC)show1.icc $(SHOWSRC)show_menu.cc $(SHOWSRC)show_gl.cc $(SRC)point.h $(SRC)point.icc $(SRC)globals.icc $(OBJ)scan.o $(OBJ)vertexarray.o $(OBJ)camera.o $(OBJ)PathGraph.o $(OBJ)NurbsPath.o $(OBJ)viewcull.o $(OBJ)show_octree.o $(OBJ)show_Boctree.o $(OBJ)scanlib.a
 	echo Compiling and Linking Show ...
-	$(GPP) $(CFLAGS) -o $(BIN)show -I$(SRC) $(SHOWSRC)show.cc $(OBJ)scanlib.a $(OBJ)vertexarray.o $(OBJ)camera.o $(OBJ)PathGraph.o $(OBJ)NurbsPath.o $(OBJ)viewcull.o $(OBJ)show_octree.o $(OBJ)libglui.a $(LIBRARIES)
+	$(GPP) $(CFLAGS) -o $(BIN)show -I$(SRC) $(SHOWSRC)show.cc $(OBJ)show_Boctree.o $(OBJ)scanlib.a $(OBJ)vertexarray.o $(OBJ)camera.o $(OBJ)PathGraph.o $(OBJ)NurbsPath.o $(OBJ)viewcull.o $(OBJ)show_octree.o $(OBJ)libglui.a $(LIBRARIES)
 	echo DONE
 	echo
 
 $(OBJ)show_octree.o: $(SRC)octree.h $(SHOWSRC)show_octree.h $(SHOWSRC)show_octree.cc $(SRC)globals.icc 
 	echo Compiling Octree for Show ...
 	$(GPP) $(CFLAGS) -c -o $(OBJ)show_octree.o -I$(SRC) $(SHOWSRC)show_octree.cc
+
+$(OBJ)show_Boctree.o: $(SRC)Boctree.h $(SHOWSRC)show_Boctree.h $(SHOWSRC)show_Boctree.cc $(SRC)globals.icc 
+	echo Compiling Octree for Show ...
+	$(GPP) $(CFLAGS) -c -o $(OBJ)show_Boctree.o -I$(SRC) $(SHOWSRC)show_Boctree.cc
 
 $(OBJ)viewcull.o: $(SHOWSRC)viewcull.h $(SHOWSRC)viewcull.cc
 	echo Compiling Software View Culling ...

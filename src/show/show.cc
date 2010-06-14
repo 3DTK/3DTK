@@ -7,6 +7,7 @@
  */
 
 #include "show_octree.h"
+#include "show_Boctree.h"
 #include "show.h"
 #include "camera.h"
 #include "NurbsPath.h"
@@ -40,7 +41,7 @@ vector< vector<vertexArray*> > vvertexArrayList;
 /**
  * the octrees that store the points for each scan
  */
-Show_OctTree **octpts;
+Show_BOctTree **octpts;
 /**
  * Storing the base directory
  */
@@ -564,7 +565,7 @@ void createDisplayLists(bool reduced)
 #else
 //#ifdef USE_GL_POINTS
   cout << "Creating display octrees.." << endl;
-  octpts = new Show_OctTree*[Scan::allScans.size()];
+  octpts = new Show_BOctTree*[Scan::allScans.size()];
   for(unsigned int i = 0; i < Scan::allScans.size() ; i++) {
     if (reduced) {
       double **pts = new double*[Scan::allScans[i]->get_points_red_size()];
@@ -574,7 +575,11 @@ void createDisplayLists(bool reduced)
         pts[jterator][1] = Scan::allScans[i]->get_points_red()[jterator][1];
         pts[jterator][2] = Scan::allScans[i]->get_points_red()[jterator][2];
       }
-      octpts[i] = new Show_OctTree(pts, Scan::allScans[i]->get_points_red_size(), 10.0);  // TODO remove magic number
+      octpts[i] = new Show_BOctTree(pts, Scan::allScans[i]->get_points_red_size(), 50.0);  // TODO remove magic number
+      for (unsigned int jterator = 0; jterator < Scan::allScans[i]->get_points_red_size(); jterator++) {
+        delete[] pts[jterator];
+      }
+      delete[] pts;
 
     } else {
       double **pts = new double*[Scan::allScans[i]->get_points()->size()];
@@ -584,7 +589,11 @@ void createDisplayLists(bool reduced)
         pts[jterator][1] = Scan::allScans[i]->get_points()->at(jterator).y;
         pts[jterator][2] = Scan::allScans[i]->get_points()->at(jterator).z;
       }
-      octpts[i] = new Show_OctTree(pts, Scan::allScans[i]->get_points_red_size(), 10.0);  //TODO remove magic number
+      octpts[i] = new Show_BOctTree(pts, Scan::allScans[i]->get_points_red_size(), 50.0);  //TODO remove magic number
+      for (unsigned int jterator = 0; jterator < Scan::allScans[i]->get_points()->size(); jterator++) {
+        delete[] pts[jterator];
+      }
+      delete[] pts;
     }
     cout << "Scan " << i << " octree finished. Deleting original points.." << endl;
     Scan::allScans[i]->clearPoints();
