@@ -76,7 +76,10 @@ class bitoct{
     children = (bitunion*)((char*)&parent + parent.child_pointer);
     // n = __builtin_popcount(parent.valid); // number of children
   }
+ 
+
 };
+  
 
 /**
  * This union combines an octree node with a pointer to a set of points. This allows
@@ -155,155 +158,5 @@ protected:
   static double voxelSize;
 
 };
-
-#include <stack>
-using std::stack;
-
-
-struct wrapper {
-  void *node;      // current node
-  unsigned int index;  // index of the child (or point) that comes after this node in the stack
-  unsigned int length;  // number of childs 
-/*  bool leaf;               // wether this is a leaf, and should be interpreted as a set of points
-  
-  wrapper(bitunion *_node) : node(_node), index(0), length( __builtin_popcount(_node->node.valid) ), leaf(false) {};
-  wrapper(bitoct *_node) : node(_node), index(0), length( __builtin_popcount(_node->valid) ), leaf(false) {};
-  wrapper(double *_node, unsigned int nrc) : node(_node), index(0), length(nrc), leaf(true) {};
-  */
-  wrapper(bitunion *_node) : node(_node), index(0), length( __builtin_popcount(_node->node.valid) )  {};
-  wrapper(bitoct *_node) : node(_node), index(0), length( __builtin_popcount(_node->valid) ) {};
-  wrapper(double *_node, unsigned int nrc) : node(_node), index(0), length(nrc) {};
-};
-
-class Iterater_BOctTree : public BOctTree {
-  stack<wrapper*> rec_stack;
-  double *current;
-  bool valid;
-
-  public:
-    Iterater_BOctTree(double **pts, int n, double _voxelSize) : BOctTree(pts, n, _voxelSize), current(0), valid(false) {}
-
-    void first() {
-      // reset stack
-//      rec_stack.clear();
-      rec_stack.push( new wrapper(root) );
-      printf("calling first: %p\n",root);
-      current = first(*root);
-      valid = true;
-    }
-
-    bool is_valid() { return valid;}
-
-    double *get() {
-      return current;
-    }
-
-    void next() {
-      wrapper *c_w = rec_stack.top();  // current iterator position in the octree
-
-      // top of stack MUST be a leaf node, i.e. pointing to set of points
-      pointrep *points = ((pointrep *)c_w->node);
-      c_w->index++;               // notify wrapper
-
-
-      // check if index is too large now, this means the current leaf has run out of
-      // points, we must backtrack to the previos node in the stack and get the next point
-      if (c_w->index == c_w->length) {
-        printf("N index > \n");
-        delete c_w;
-        rec_stack.pop();   // remove leaf
-        // now backtrack till we find a node that has unexplored children, or until the 
-        // stack has been popped completely
-        while (!rec_stack.empty()) {
-          c_w = rec_stack.top();
-        printf("N prev element %p \n", c_w->node);
-          if (c_w->index == c_w->length) { // this node is fully explored
-        printf("N prev element %p has been fully explored delete\n", c_w->node);
-            delete c_w;
-            rec_stack.pop();   // remove leaf
-          } else {
-        printf("N prev element %p has childs not yet explored \n", c_w->node);
-            break;
-          }
-        }
-        if (rec_stack.empty()) {
-          valid = false;
-          return;
-        }
-
-        // c_w has unexplored children, get the first point of the first unexplored child
-        bitoct &node = *(bitoct*)c_w->node;
-        bitunion *children;
-        bitoct::getChildren(node, children);
-        unsigned int count = 0;
-        
-        for (short i = 0; i < 8; i++) {
-          if (  ( 1 << i ) & node.valid ) {   // if ith node exists
-            if (count <= c_w->index) {   // not yet at the first unexplored child  // TODO FIXME can be improved by comparing to the deleted node above
-              printf("N child %p is not next child\n", children);
-              ++children; // next child
-              ++count;
-              continue;
-            }
-              c_w->index++;               // notify wrapper
-              printf("N child %p _is_ next child\n", children);
-
-
-            // otherwise we must check if child is leaf or not and proceed with getting the first point
-            if (  ( 1 << i ) & node.leaf ) {   // if ith node is leaf
-              pointrep *points = children->points;
-              unsigned int length = points[0].length;
-              rec_stack.push( new wrapper(&(points[1].v), length) );
-              current = &(points[1].v);
-            } else { // recurse
-              rec_stack.push( new wrapper(children) );  // push this node on stack
-              current = first(children->node);
-            }
-            break;
-          }
-        }
-      } else {
-        current = &(points[c_w->index*3 ].v);  // set current point to the next point in the list
-
-      }
-
-
-    }
-
-
-  private:
-
-    /**
-     * Finds the first point that is a child of the given node.
-     * Assumes rec_stack is filled up to node. Will continue filling rec_stack with 
-     * children of the node in order.
-     *
-     */
-    double *first(bitoct &node) {
-      printf("first %p\n", &node);
-      bitunion *children;
-      bitoct::getChildren(node, children);
-
-      for (short i = 0; i < 8; i++) {
-        if (  ( 1 << i ) & node.valid ) {   // if ith node exists
-          if (  ( 1 << i ) & node.leaf ) {   // if ith node is leaf
-            pointrep *points = children->points;
-            unsigned int length = points[0].length;
-            rec_stack.push( new wrapper(&(points[1].v), length) );
-            return &(points[1].v);
-          } else { // recurse
-            rec_stack.push( new wrapper(children) );  // push this node on stack
-            return first(children->node);
-          }
-          ++children; // next child
-        }
-      }
-    }
-
-
-
-
-};
-
 
 #endif
