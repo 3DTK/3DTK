@@ -53,10 +53,15 @@ typedef dunion pointrep;
  */
 class bitoct{
   public:
+#ifdef _MSC_VER
+  __int64 child_pointer        : 48;
+  unsigned valid              :  8;
+  unsigned leaf               :  8;
+#else
   signed long child_pointer   : 48;
   unsigned valid              :  8;
   unsigned leaf               :  8;
-
+#endif
   /**
    * sets the child pointer of parent so it points to child 
    */

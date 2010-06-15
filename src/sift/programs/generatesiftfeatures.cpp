@@ -1,4 +1,3 @@
-
 /**
  *
  *	@author Darko Makreshanski
@@ -26,8 +25,8 @@
  * For more information, see the LICENSE file supplied with the distribution.
  */
 
-#include <PanoramaMap.h>
-#include <FeatureSet.h>
+#include "PanoramaMap.h"
+#include "FeatureSet.h"
 #include <stdio.h>
 #include <unistd.h>
 #include <stdlib.h>
