@@ -114,23 +114,31 @@ class BOctTree {
 public:
   
   BOctTree(double **pts, int n, double _voxelSize);
-//  BOctTree(deque<double*> &pts, double _voxelSize);
+  BOctTree(deque<double*> pts, double _voxelSize);
+  BOctTree(vector<double*> pts, double _voxelSize);
   virtual ~BOctTree();
   
   void GetOctTreeCenter(vector<double*>&c);
   void GetOctTreeRandom(vector<double*>&c);
   
   long countNodes();
+  long countLeaves();
  
 protected:
   void GetOctTreeCenter(vector<double*>&c, bitoct &node, double *center, double size);
   void GetOctTreeRandom(vector<double*>&c, bitoct &node);
   long countNodes(bitoct &node);
+  long countLeaves(bitoct &node);
   void deletetNodes(bitoct &node);
 
   pointrep *branch( bitoct &node, deque<double*> &points, double center[3], double size);
 
+  pointrep *branch( bitoct &node, vector<double*> &points, double center[3], double size);
+
   void countPointsAndQueue(deque<double*> &i_points,
+ 		double center[8][3], double size, bitoct &parent); 
+  
+  void countPointsAndQueue(vector<double*> &i_points,
  		double center[8][3], double size, bitoct &parent); 
 
   void countPointsAndQueue(double **pts, int n,

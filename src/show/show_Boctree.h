@@ -26,6 +26,8 @@ class Show_BOctTree : public BOctTree  {
 public:
 
   Show_BOctTree(double **pts, int n, double voxelSize);
+  Show_BOctTree(deque<double*> pts, double voxelSize);
+  Show_BOctTree(vector<double*> pts, double voxelSize);
   
   void displayOctTreeCulled(long targetpts);
   void displayOctTreeAllCulled();
