@@ -1,13 +1,17 @@
-
-
 #include <stdlib.h>
 #include <stdio.h>
-#include <unistd.h>
+//#include <unistd.h>
 #include <string.h>
 #include <string>
 #include <vector>
 #include <iostream>
 #include <ctime>
+
+#ifndef _MSC_VER
+#include <getopt.h>
+#else
+#include "..\..\..\Visual_Studio_Projects\6DSLAM\6D_SLAM\XGetopt.h"
+#endif
 
 #include "Reader_RIEGL.h"
 #include "PanoramaMap.h"
