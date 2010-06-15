@@ -54,28 +54,25 @@ BOctTree::BOctTree(double **pts, int n, double voxelSize) {
  * @param n number of points
  * @param voxelSize the size of the voxels
  */
-/*
-BOctTree::BOctTree(deque<double*> &pts, double voxelSize) {
+
+BOctTree::BOctTree(deque<double*> pts, double voxelSize) {
   this->voxelSize = voxelSize;
     
   deque<double *>::iterator itr = pts.begin();  
-  double xmin = pts[0][0], xmax = pts[0][0];
-  double ymin = pts[0][1], ymax = pts[0][1];
-  double zmin = pts[0][2], zmax = pts[0][2];
+  double xmin = (*itr)[0], xmax = (*itr)[0];
+  double ymin = (*itr)[1], ymax = (*itr)[1];
+  double zmin = (*itr)[2], zmax = (*itr)[2];
   
-  while(itr != points.end()) {
-
+  while(itr != pts.end()) {
+    xmin = min(xmin, (*itr)[0]);
+    xmax = max(xmax, (*itr)[0]);
+    ymin = min(ymin, (*itr)[1]);
+    ymax = max(ymax, (*itr)[1]);
+    zmin = min(zmin, (*itr)[2]);
+    zmax = max(zmax, (*itr)[2]); 
     itr++;
   }
 
-  for (int i = 1; i < n; i++) {
-    xmin = min(xmin, pts[i][0]);
-    xmax = max(xmax, pts[i][0]);
-    ymin = min(ymin, pts[i][1]);
-    ymax = max(ymax, pts[i][1]);
-    zmin = min(zmin, pts[i][2]);
-    zmax = max(zmax, pts[i][2]); 
-  }
   center[0] = 0.5 * (xmin+xmax);
   center[1] = 0.5 * (ymin+ymax);
   center[2] = 0.5 * (zmin+zmax);
@@ -92,9 +89,47 @@ BOctTree::BOctTree(deque<double*> &pts, double voxelSize) {
   // set up values
   root = new bitoct();
  
-  countPointsAndQueue(pts, n, newcenter, sizeNew, *root);
+  countPointsAndQueue(pts, newcenter, sizeNew, *root);
 }
-*/
+
+
+BOctTree::BOctTree(vector<double*> pts, double voxelSize) {
+  this->voxelSize = voxelSize;
+    
+  vector<double *>::iterator itr = pts.begin();  
+  double xmin = (*itr)[0], xmax = (*itr)[0];
+  double ymin = (*itr)[1], ymax = (*itr)[1];
+  double zmin = (*itr)[2], zmax = (*itr)[2];
+  
+  while(itr != pts.end()) {
+    xmin = min(xmin, (*itr)[0]);
+    xmax = max(xmax, (*itr)[0]);
+    ymin = min(ymin, (*itr)[1]);
+    ymax = max(ymax, (*itr)[1]);
+    zmin = min(zmin, (*itr)[2]);
+    zmax = max(zmax, (*itr)[2]); 
+    itr++;
+  }
+
+  center[0] = 0.5 * (xmin+xmax);
+  center[1] = 0.5 * (ymin+ymax);
+  center[2] = 0.5 * (zmin+zmax);
+  size = max(max(0.5 * (xmax-xmin), 0.5 * (ymax-ymin)), 0.5 * (zmax-zmin));
+
+
+  // calculate new buckets
+  double newcenter[8][3];
+  double sizeNew = size / 2.0;
+
+  for (int i = 0; i < 8; i++) {
+    childcenter(center, newcenter[i], size, i);
+  }
+  // set up values
+  root = new bitoct();
+ 
+  countPointsAndQueue(pts, newcenter, sizeNew, *root);
+}
+
 
 /**
  * Needed for recursive bulding of the octree
@@ -118,6 +153,46 @@ pointrep* BOctTree::branch(bitoct &node, deque<double*> &splitPoints,
     points[0].length = splitPoints.size();
     int i = 1;
     for (deque<double *>::iterator itr = splitPoints.begin(); 
+        itr != splitPoints.end(); itr++) {
+      points[i++].v = (*itr)[0];
+      points[i++].v = (*itr)[1];
+      points[i++].v = (*itr)[2];
+    }
+    return points; 
+  }  
+
+  // calculate new buckets
+  double newcenter[8][3];
+  double sizeNew;
+
+  sizeNew = _size / 2.0;
+
+  for (int i = 0; i < 8; i++) {
+    childcenter(_center, newcenter[i], _size, i);
+  }
+
+  countPointsAndQueue(splitPoints, newcenter, sizeNew, node);
+  return 0;
+}
+
+pointrep* BOctTree::branch(bitoct &node, vector<double*> &splitPoints, 
+              double _center[3], double _size)
+{
+
+  // if bucket is too small stop building tree
+  // -----------------------------------------
+  if ((_size <= voxelSize)) {
+    // copy points
+    /*
+    list<double*> *points = new list<double*>();
+    for (list<double *>::iterator itr = splitPoints.begin(); 
+        itr != splitPoints.end(); itr++) {
+      points->push_back(*itr);
+    }*/
+    pointrep *points = new pointrep[3*splitPoints.size() + 1];
+    points[0].length = splitPoints.size();
+    int i = 1;
+    for (vector<double *>::iterator itr = splitPoints.begin(); 
         itr != splitPoints.end(); itr++) {
       points[i++].v = (*itr)[0];
       points[i++].v = (*itr)[1];
@@ -208,21 +283,19 @@ void BOctTree::countPointsAndQueue(deque<double*> &i_points,
   int n_children = 0;
   
 
-  for (int j = 0; j < 7; j++) {
-    for ( deque<double *>::iterator itr = i_points.begin(); itr != i_points.end();) {
+  for (int j = 0; j < 8; j++) {
+    for ( deque<double *>::iterator itr = i_points.begin(); itr != i_points.end(); itr++) {
       if (fabs((*itr)[0] - center[j][0]) <= size) {
         if (fabs((*itr)[1] - center[j][1]) <= size) {
           if (fabs((*itr)[2] - center[j][2]) <= size) {
             points[j].push_back(*itr);
-            itr = i_points.erase(itr);
             continue;
           }
         }
       }
-      itr++;
     }
   }
-  points[7] = i_points;
+  i_points.clear();
   for (int j = 0; j < 8; j++) {
     if (!points[j].empty()) {
       parent.valid = ( 1 << j ) | parent.valid;
@@ -252,6 +325,65 @@ void BOctTree::countPointsAndQueue(deque<double*> &i_points,
 /**
  * Returns the number of represented points in the octree
  * (and stores them in the vector points, after checking the size constraints)
+ * @param i_points the source vector
+ * @param points the target vector
+ * @param center the center
+ * @param x_size maximal distance from the center (x direction)
+ * @param y_size maximal distance from the center (y direction)
+ * @param z_size maximal distance from the center (z direction)
+ */
+void BOctTree::countPointsAndQueue(vector<double*> &i_points,
+                                 double center[8][3], 
+                                 double size,
+                                 bitoct &parent)
+{
+  vector<double*> points[8];
+  int n_children = 0;
+
+  for (int j = 0; j < 8; j++) {
+    for ( vector<double *>::iterator itr = i_points.begin(); itr != i_points.end(); itr++) {
+      if (fabs((*itr)[0] - center[j][0]) <= size) {
+        if (fabs((*itr)[1] - center[j][1]) <= size) {
+          if (fabs((*itr)[2] - center[j][2]) <= size) {
+            points[j].push_back(*itr);
+            continue;
+          }
+        }
+      }
+    }
+  }
+  
+  i_points.clear();
+  vector<double*>().swap(i_points);
+  for (int j = 0; j < 8; j++) {
+    if (!points[j].empty()) {
+      parent.valid = ( 1 << j ) | parent.valid;
+      ++n_children;
+    }
+  }
+
+  // create children
+  bitunion *children = new bitunion[n_children];
+  bitoct::link(parent, children);
+
+  int count = 0;
+  for (int j = 0; j < 8; j++) {
+    if (!points[j].empty()) {
+      pointrep *c = branch(children[count].node, points[j], center[j], size);  // leaf node
+      if (c) { 
+        children[count].points = c; // set this child to deque of points
+        parent.leaf = ( 1 << j ) | parent.leaf;  // remember this is a leaf
+      }
+      points[j].clear();
+      vector<double*>().swap(points[j]);
+      ++count;
+    }
+  }
+
+}
+/**
+ * Returns the number of represented points in the octree
+ * (and stores them in the vector points, after checking the size constraints)
  * @param pts the source points (2-dim array)
  * @param n number of points in the source array
  * @param points the target vector
@@ -265,7 +397,7 @@ void BOctTree::countPointsAndQueue(double **pts, int n,
                                  double size,
 				 bitoct &parent)
 {
-  deque<double*> points[8];
+  vector<double*> points[8];
   int n_children = 0;
   for (int j = 0; j < 8; j++) {
     for (int i = 0; i < n; i++) {
@@ -291,14 +423,12 @@ void BOctTree::countPointsAndQueue(double **pts, int n,
   for (int j = 0; j < 8; j++) {
     if (!points[j].empty()) {
       pointrep *c = branch(children[count].node, points[j], center[j], size);  // leaf node
-     // pointrep *c = 0;
       if (c) { 
-        children[count].points = c; // set this child to deque of points
+        children[count].points = c; // set this child to vector of points
         parent.leaf = ( 1 << j ) | parent.leaf;  // remember this is a leaf
       }
       points[j].clear();
-//      deque<double*>().swap(points[j]);
-//      points[j] = deque<double*>();
+      vector<double*>().swap(points[j]);
       ++count;
     }
   }
@@ -318,7 +448,32 @@ long BOctTree::countNodes(bitoct &node) {
       if (  ( 1 << i ) & node.leaf ) {   // if ith node is leaf
         ++result;
       } else { // recurse
-        result += countNodes(children->node);
+        result += countNodes(children->node) + 1;
+      }
+      ++children; // next child
+    }
+  }
+
+  return result;
+}
+
+long BOctTree::countLeaves() {
+  return 1 + countLeaves(*root);
+}
+
+long BOctTree::countLeaves(bitoct &node) {
+  long result = 0;
+  bitunion *children;
+  bitoct::getChildren(node, children);
+
+  for (short i = 0; i < 8; i++) {
+    if (  ( 1 << i ) & node.valid ) {   // if ith node exists
+      if (  ( 1 << i ) & node.leaf ) {   // if ith node is leaf
+        pointrep *points = children->points;
+        long nrpts = points[0].length;
+        result += 3*nrpts + 1;
+      } else { // recurse
+        result += countLeaves(children->node);
       }
       ++children; // next child
     }
