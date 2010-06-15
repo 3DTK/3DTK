@@ -6,7 +6,6 @@
  * @author Kai Lingemann. Institute of Computer Science, University of Osnabrueck, Germany.
  */
 
-#include "show_octree.h"
 #include "show_Boctree.h"
 #include "show.h"
 #include "camera.h"
