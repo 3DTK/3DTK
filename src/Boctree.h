@@ -14,8 +14,8 @@
 
 #include <vector>
 using std::vector;
-#include <list>
-using std::list;
+#include <deque>
+using std::deque;
 #include <set>
 using std::set;
 
@@ -28,7 +28,9 @@ union bitunion;
  */
 union dunion {
   double v;
-  int    length;
+  unsigned int    length;
+  dunion() : length(0) {};
+
 };
 
 // TODO create a wrapper class to implement different point representations
@@ -112,6 +114,7 @@ class BOctTree {
 public:
   
   BOctTree(double **pts, int n, double _voxelSize);
+//  BOctTree(deque<double*> &pts, double _voxelSize);
   virtual ~BOctTree();
   
   void GetOctTreeCenter(vector<double*>&c);
@@ -125,9 +128,9 @@ protected:
   long countNodes(bitoct &node);
   void deletetNodes(bitoct &node);
 
-  pointrep *branch( bitoct &node, list<double*> &points, double center[3], double size);
+  pointrep *branch( bitoct &node, deque<double*> &points, double center[3], double size);
 
-  void countPointsAndQueue(list<double*> &i_points,
+  void countPointsAndQueue(deque<double*> &i_points,
  		double center[8][3], double size, bitoct &parent); 
 
   void countPointsAndQueue(double **pts, int n,
