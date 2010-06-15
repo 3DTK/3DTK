@@ -30,11 +30,16 @@
 #include "FeatureSet.h"
 #include "FeatureMatchSetGroup.h"
 #include <stdio.h>
-#include <unistd.h>
 #include <stdlib.h>
 #include <assert.h>
 #include <ctime>
 #include "AutoPanoSift.h"
+
+#ifndef _MSC_VER
+#include <getopt.h>
+#else
+#include "..\..\..\Visual_Studio_Projects\6DSLAM\6D_SLAM\XGetopt.h"
+#endif
 
 void usage(int argc, char** argv)
 {

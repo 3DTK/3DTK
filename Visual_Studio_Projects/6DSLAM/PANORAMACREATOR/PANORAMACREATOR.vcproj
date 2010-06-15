@@ -40,7 +40,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\..\src\sift\library"
+				AdditionalIncludeDirectories="..\..\..\src\sift\library;&quot;C:\Programme\vigra-1.7.0-src\include&quot;"
 				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -62,6 +62,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				LinkIncremental="2"
+				AdditionalLibraryDirectories="&quot;C:\Programme\vigra-1.7.0-src\src\impex\release&quot;"
 				GenerateDebugInformation="true"
 				SubSystem="1"
 				TargetMachine="1"
@@ -117,13 +118,13 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/D _CRT_SECURE_NO_DEPRECATE"
-				AdditionalIncludeDirectories="..\..\..\src\sift\library;C:\Programme\vigra\include"
+				AdditionalIncludeDirectories="..\..\..\src\sift\library;&quot;C:\Programme\vigra-1.7.0-src\include&quot;"
 				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
 				RuntimeLibrary="2"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
 				Detect64BitPortabilityProblems="true"
-				DebugInformationFormat="3"
+				DebugInformationFormat="0"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -136,6 +137,9 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
+				RegisterOutput="true"
+				LinkLibraryDependencies="true"
+				AdditionalDependencies="&quot;C:\Programme\vigra-1.7.0-src\src\impex\debug\vigraimpex.lib"
 				OutputFile="$(ProjectDir)\..\..\..\bin\panoramacreator.exe"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories=""
