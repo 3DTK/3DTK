@@ -24,7 +24,7 @@ using std::endl;
 using std::stringstream;
 
 #include "scan.h"
-#include "octree.h"
+#include "Boctree.h"
 #include "scan_io.h"
 #include "d2tree.h"
 #include "kd.h"
@@ -668,7 +668,7 @@ void Scan::calcReducedPoints(double voxelSize, int nrpts)
     num_pts++;
   }
 
-  OctTree *oct = new OctTree(ptsOct, num_pts, voxelSize);
+  BOctTree *oct = new BOctTree(ptsOct, num_pts, voxelSize);
 
   //  OctTree *oct   // get points from the scan's octree
   // & store them in the points_red vector as the reduced version of the scan
@@ -680,7 +680,7 @@ void Scan::calcReducedPoints(double voxelSize, int nrpts)
     if (nrpts == 1) {
       oct->GetOctTreeRandom(center);
     }else {
-      oct->GetOctTreeRandom(center, nrpts);
+//      oct->GetOctTreeRandom(center, nrpts);
     }
   } else {
     oct->GetOctTreeCenter(center);
