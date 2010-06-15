@@ -115,12 +115,13 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
+				AdditionalIncludeDirectories="..\..\..\src\sift\library;&quot;C:\Programme\vigra-1.7.0-src\include&quot;;&quot;..\..\..\src\sift\autopano-sift-c&quot;"
 				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
 				RuntimeLibrary="2"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
 				Detect64BitPortabilityProblems="true"
-				DebugInformationFormat="3"
+				DebugInformationFormat="0"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -133,6 +134,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
+				AdditionalDependencies="&quot;C:\Programme\vigra-1.7.0-src\src\impex\debug\vigraimpex.lib"
 				LinkIncremental="1"
 				GenerateDebugInformation="true"
 				SubSystem="1"
@@ -174,12 +176,36 @@
 			Filter="cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx"
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
+			<File
+				RelativePath="..\..\..\src\sift\library\FeatureSet.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\src\sift\programs\matchsiftfeatures.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\src\sift\library\PanoramaMap.cpp"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Headerdateien"
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
+			<File
+				RelativePath="..\..\..\src\sift\autopano-sift-c\AutoPanoSift.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\src\sift\library\FeatureSet.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\src\sift\library\PanoramaMap.h"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Ressourcendateien"
