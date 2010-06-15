@@ -23,6 +23,7 @@ inline int Scan::get_points_red_size() const
 
 inline void Scan::clearPoints() {
   points.clear();
+  vector<Point>().swap(points);  //  swap trick, forces STL to free the memory
 }
 
 inline void Scan::setPoints(vector <Point>* _points) {
