@@ -10,6 +10,21 @@
 
 #include "viewcull.h"
 
+#if __GNUC__ > 3 || (__GNUC__ == 3 && __GNUC_MINOR__ >= 4)
+  #define POPCOUNT(mask) __builtin_popcount(mask)
+#else
+//#define POPCOUNT(mask) 8
+
+unsigned char _my_popcount_3(unsigned char x) {
+  x -= (x >> 1) & 0x55;             //put count of each 2 bits into those 2 bits
+  x = (x & 0x33) + ((x >> 2) & 0x33); //put count of each 4 bits into those 4 bits 
+  x = (x + (x >> 4)) & 0x0f;        //put count of each 8 bits into those 8 bits 
+  return x;
+}
+#define POPCOUNT(mask) _my_popcount_3(mask)
+
+#endif
+
 
 Show_BOctTree::Show_BOctTree(double **pts, int n, double voxelSize)
   : BOctTree(pts, n, voxelSize)
@@ -140,7 +155,7 @@ void Show_BOctTree::displayOctTree(long targetpts, bitoct &node, double *center,
 
       } else { // recurse
         childcenter(center, ccenter, size, i);  // childrens center
-        displayOctTree(targetpts/__builtin_popcount(node.valid), children->node, ccenter, size/2.0);
+        displayOctTree(targetpts/POPCOUNT(node.valid), children->node, ccenter, size/2.0);
       }
       ++children; // next child
     }
@@ -186,7 +201,7 @@ void Show_BOctTree::displayOctTreeCulled(long targetpts, bitoct &node, double *c
         glEnd();
 
       } else { // recurse
-        displayOctTreeCulled(targetpts/__builtin_popcount(node.valid), children->node, ccenter, size/2.0);
+        displayOctTreeCulled(targetpts/POPCOUNT(node.valid), children->node, ccenter, size/2.0);
       }
       ++children; // next child
     }
