@@ -680,7 +680,7 @@ void Scan::calcReducedPoints(double voxelSize, int nrpts)
     if (nrpts == 1) {
       oct->GetOctTreeRandom(center);
     }else {
-//      oct->GetOctTreeRandom(center, nrpts);
+      oct->GetOctTreeRandom(center, nrpts);
     }
   } else {
     oct->GetOctTreeCenter(center);
