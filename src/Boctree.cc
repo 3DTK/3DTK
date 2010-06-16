@@ -352,6 +352,10 @@ void BOctTree::countPointsAndQueue(vector<double*> &i_points,
   vector<double*> points[8];
   int n_children = 0;
 
+
+#ifdef _OPENMP 
+#pragma omp parallel for schedule(dynamic) 
+#endif
   for (int j = 0; j < 8; j++) {
     for ( vector<double *>::iterator itr = i_points.begin(); itr != i_points.end(); itr++) {
       if (fabs((*itr)[0] - center[j][0]) <= size) {
@@ -373,7 +377,6 @@ void BOctTree::countPointsAndQueue(vector<double*> &i_points,
       ++n_children;
     }
   }
-
   // create children
   bitunion *children = new bitunion[n_children];
   bitoct::link(parent, children);
@@ -391,7 +394,6 @@ void BOctTree::countPointsAndQueue(vector<double*> &i_points,
       ++count;
     }
   }
-
 }
 /**
  * Returns the number of represented points in the octree
@@ -411,6 +413,9 @@ void BOctTree::countPointsAndQueue(double **pts, int n,
 {
   vector<double*> points[8];
   int n_children = 0;
+#ifdef _OPENMP 
+#pragma omp parallel for schedule(dynamic) 
+#endif
   for (int j = 0; j < 8; j++) {
     for (int i = 0; i < n; i++) {
       if (fabs(pts[i][0] - center[j][0]) <= size) {
