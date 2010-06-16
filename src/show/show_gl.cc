@@ -897,6 +897,17 @@ void callCameraView(int dummy)
 }
 
 //--------------------------------------------------------------------------------------
+void CallBackMouseFuncMoving(int button, int state, int x, int y)
+{
+
+    if( state == GLUT_DOWN) {
+      displaymoving = true;
+    } else {
+      displaymoving = false;
+      if (displaywasmoving)      
+        haveToUpdate = 1;
+    }
+}
 
 /**
  * This function is called after a mousebutton has been pressed.
@@ -1051,6 +1062,7 @@ void initScreenWindow()
 
   glutDisplayFunc( CallBackDisplayFunc );
   glutReshapeFunc( CallBackReshapeFunc );
+  
   glutMouseFunc  ( CallBackMouseFunc );
   glutKeyboardFunc ( CallBackKeyboardFunc);
   glutMotionFunc ( CallBackMouseMotionFunc); 

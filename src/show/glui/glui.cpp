@@ -659,6 +659,15 @@ void    GLUI_Main::special(int key, int x, int y)
 }
 
 
+/*********************** GLUI_Master_Object::set_glutMouseFunc() **********/
+
+void GLUI_Main::set_glutMouseFunc(void (*f)(int button, int state,
+                             int x, int y))
+{
+  glut_mouse_CB = f;
+//  glutMouseFunc( glui_mouse_func );
+//  add_cb_to_glut_window( glutGetWindow(), GLUI_GLUT_MOUSE, (void*) f);
+}
 
 /****************************** GLUI_Main::mouse() **************/
 
@@ -726,6 +735,8 @@ void    GLUI_Main::mouse(int button, int state, int x, int y)
     if ( callthrough AND glut_mouse_CB )
     glut_mouse_CB( button, state, x, y );
     **/
+    if ( glut_mouse_CB )
+      glut_mouse_CB( button, state, x, y );
 
   callthrough=callthrough; /* To get rid of compiler warnings */
 }
@@ -1026,6 +1037,7 @@ GLUI_Main::GLUI_Main( void )
   main_panel->set_int_val( GLUI_PANEL_NONE );
   main_panel->glui        = (GLUI*) this;
   main_panel->name        = "\0";
+    glut_mouse_CB           = NULL;
 }
 
 /************************************ GLUI_Main::draw_raised_box() **********/
