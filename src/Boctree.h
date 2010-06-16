@@ -120,6 +120,7 @@ public:
   
   void GetOctTreeCenter(vector<double*>&c);
   void GetOctTreeRandom(vector<double*>&c);
+  void GetOctTreeRandom(vector<double*>&c, unsigned int ptspervoxel);
   
   long countNodes();
   long countLeaves();
@@ -127,6 +128,7 @@ public:
 protected:
   void GetOctTreeCenter(vector<double*>&c, bitoct &node, double *center, double size);
   void GetOctTreeRandom(vector<double*>&c, bitoct &node);
+  void GetOctTreeRandom(vector<double*>&c, unsigned int ptspervoxel, bitoct &node);
   long countNodes(bitoct &node);
   long countLeaves(bitoct &node);
   void deletetNodes(bitoct &node);
