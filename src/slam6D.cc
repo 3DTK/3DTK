@@ -200,7 +200,7 @@ void usage(char* prog)
 	  << bold << "  -n" << normal << " FILE, " << bold << "--net=" << normal << "FILE" << endl
 	  << "         specifies the file that includes the net structure for SLAM" << endl
 	  << endl
-	  << bold << "  -O" << normal << " NR (optional), " << bold << "--octree=" << normal << "NR (optional)" << endl
+	  << bold << "  -O" << normal << "NR (optional), " << bold << "--octree=" << normal << "NR (optional)" << endl
 	  << "         use randomized octree based point reduction (pts per voxel=<NR>)" << endl
 	  << "         requires -r or --reduce" << endl
 	  << endl
@@ -315,7 +315,7 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &rand,
   };
 
   cout << endl;
-  while ((c = getopt_long(argc, argv, "f:A:G:L:a:r:R:d:D:i:l:I:c:C:n:s:e:m:M:qQp", longopts, NULL)) != -1)
+  while ((c = getopt_long(argc, argv, "O::f:A:G:L:a:r:R:d:D:i:l:I:c:C:n:s:e:m:M:qQp", longopts, NULL)) != -1)
     switch (c)
 	 {
 	 case 'a':
