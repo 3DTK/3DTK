@@ -91,6 +91,7 @@ void newMenu()
   glui2 = GLUI_Master.create_glui("3D_Viewer - Controls");
   window_id_menu2 = glui2->get_glut_window_id();
   glutSetWindow(window_id_menu2);
+
   glutPositionWindow(START_X, START_Y + START_HEIGHT + 65);
   glutSetWindow(window_id);
   glui2->set_main_gfx_window( window_id );
@@ -165,6 +166,7 @@ void newMenu()
 
   glui2->add_column_to_panel(nav_panel, false);
   glui2->add_checkbox_to_panel(nav_panel, "MouseNav", &cameraNavMouseMode );
+  glui2->set_glutMouseFunc(CallBackMouseFuncMoving);
   
   /*** Create the right subwindow ***/
   glui1 = GLUI_Master.create_glui("3D_Viewer - Selection");

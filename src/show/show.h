@@ -74,6 +74,7 @@ void savePath(int dummy);
 void loadPath(int dummy);
 void CallBackKeyboardFunc(unsigned char key, int x, int y);
 void CallBackMouseFunc(int button, int state, int x, int y);
+void CallBackMouseFuncMoving(int button, int state, int x, int y);
 void CallBackMouseMotionFunc(int x, int y);
 void CallBackSpecialFunc(int key, int x, int y);
 void InterfaceFunc(unsigned char key);

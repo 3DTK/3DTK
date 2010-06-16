@@ -658,6 +658,7 @@ public:
   void         set_ortho_projection( void );
   void         set_viewport( void );
   void         refresh( void );
+  void set_glutMouseFunc(void (*f)(int button, int state, int x, int y));
 };
 
 
