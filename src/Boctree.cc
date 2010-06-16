@@ -481,6 +481,43 @@ long BOctTree::countLeaves(bitoct &node) {
 
   return result;
 }
+void BOctTree::GetOctTreeRandom(vector<double*> &c, unsigned int ptspervoxel)
+{
+  GetOctTreeRandom(c, ptspervoxel, *root);
+}
+
+void BOctTree::GetOctTreeRandom(vector<double*>&c, unsigned int ptspervoxel, bitoct &node) {
+  
+  bitunion *children;
+  bitoct::getChildren(node, children);
+
+  for (short i = 0; i < 8; i++) {
+    if (  ( 1 << i ) & node.valid ) {   // if ith node exists
+      if (  ( 1 << i ) & node.leaf ) {   // if ith node is leaf
+        pointrep *points = children->points;
+        unsigned int length = points[0].length;
+        if (ptspervoxel >= length) {
+          for (unsigned int j = 0; j < length; j++) 
+            c.push_back(&(points[3*j+1].v));
+
+          ++children; // next child
+          continue;
+        }
+        set<int> indices;
+        while(indices.size() < ptspervoxel) {
+          int tmp = rand(length-1);
+          indices.insert(tmp);
+        }
+        for(set<int>::iterator it = indices.begin(); it != indices.end(); it++) 
+          c.push_back(&(points[3*(*it)+1].v));
+
+      } else { // recurse
+        GetOctTreeRandom(c, ptspervoxel, children->node);
+      }
+      ++children; // next child
+    }
+  }
+} 
 
 void BOctTree::GetOctTreeRandom(vector<double*> &c)
 {
