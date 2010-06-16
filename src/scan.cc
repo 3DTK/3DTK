@@ -644,10 +644,10 @@ void Scan::calcReducedPoints(double voxelSize, int nrpts)
 
     int end_loop = points_red_size = (int)points.size();
     for (int i = 0; i < end_loop; i++) {
-	  points_red[i] = new double[3];
-	  points_red[i][0] = points[i].x;
-	  points_red[i][1] = points[i].y;
-	  points_red[i][2] = points[i].z;
+      points_red[i] = new double[3];
+      points_red[i][0] = points[i].x;
+      points_red[i][1] = points[i].y;
+      points_red[i][2] = points[i].z;
     }
     return;
   }
