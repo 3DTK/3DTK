@@ -585,21 +585,22 @@ void createDisplayLists(bool reduced)
       delete[] pts;
 
     } else {
-      double **pts = new double*[Scan::allScans[i]->get_points()->size()];
-      for (unsigned int jterator = 0; jterator < Scan::allScans[i]->get_points()->size(); jterator++) {
+      unsigned int nrpts = Scan::allScans[i]->get_points()->size();
+      double **pts = new double*[nrpts];
+      for (unsigned int jterator = 0; jterator < nrpts; jterator++) {
         pts[jterator] = new double[3];
         pts[jterator][0] = Scan::allScans[i]->get_points()->at(jterator).x;
         pts[jterator][1] = Scan::allScans[i]->get_points()->at(jterator).y;
         pts[jterator][2] = Scan::allScans[i]->get_points()->at(jterator).z;
       }
-      octpts[i] = new Show_BOctTree(pts, Scan::allScans[i]->get_points()->size(), 50.0);  //TODO remove magic number
-      for (unsigned int jterator = 0; jterator < Scan::allScans[i]->get_points()->size(); jterator++) {
+      Scan::allScans[i]->clearPoints();
+      octpts[i] = new Show_BOctTree(pts, nrpts , 50.0);  //TODO remove magic number
+      for (unsigned int jterator = 0; jterator < nrpts; jterator++) {
         delete[] pts[jterator];
       }
       delete[] pts;
     }
-    cout << "Scan " << i << " octree finished. Deleting original points.." << endl;
-    Scan::allScans[i]->clearPoints();
+    cout << "Scan " << i << " octree finished." << endl;
   }
 #endif
 }

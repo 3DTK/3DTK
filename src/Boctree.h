@@ -18,6 +18,8 @@ using std::vector;
 using std::deque;
 #include <set>
 using std::set;
+#include <list>
+using std::list;
 
 union bitunion;
 
@@ -114,8 +116,6 @@ class BOctTree {
 public:
   
   BOctTree(double **pts, int n, double _voxelSize);
-  BOctTree(deque<double*> pts, double _voxelSize);
-  BOctTree(vector<double*> pts, double _voxelSize);
   virtual ~BOctTree();
   
   void GetOctTreeCenter(vector<double*>&c);
@@ -136,6 +136,10 @@ protected:
   pointrep *branch( bitoct &node, deque<double*> &points, double center[3], double size);
 
   pointrep *branch( bitoct &node, vector<double*> &points, double center[3], double size);
+  pointrep *branch( bitoct &node, list<double*> &points, double center[3], double size);
+  
+  void countPointsAndQueue(list<double*> &i_points,
+ 		double center[8][3], double size, bitoct &parent); 
 
   void countPointsAndQueue(deque<double*> &i_points,
  		double center[8][3], double size, bitoct &parent); 

@@ -30,23 +30,6 @@ Show_BOctTree::Show_BOctTree(double **pts, int n, double voxelSize)
   : BOctTree(pts, n, voxelSize)
 { }
 
-Show_BOctTree::Show_BOctTree(deque<double*> pts, double voxelSize)
-  : BOctTree(pts, voxelSize)
-{ }
-
-Show_BOctTree::Show_BOctTree(vector<double*> pts, double voxelSize)
-  : BOctTree(pts, voxelSize)
-{ }
-
-/*  
-void Show_BOctTree::displayOctTreeAll() {
-  displayOctTreeAll(*root, center, size);
-}
-
-void Show_BOctTree::displayOctTree(int targetpts) {
-  displayOctTree(targetpts, *root, center, size);
-}*/
-
 void Show_BOctTree::displayOctTreeAllCulled() {
   displayOctTreeAll(*root, center, size);
 }
