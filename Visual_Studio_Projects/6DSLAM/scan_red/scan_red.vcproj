@@ -186,6 +186,10 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
+				RelativePath="..\..\..\src\Boctree.cc"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\src\globals.icc"
 				>
 				<FileConfiguration
@@ -203,10 +207,6 @@
 			</File>
 			<File
 				RelativePath="..\..\..\src\kdc.cc"
-				>
-			</File>
-			<File
-				RelativePath="..\..\..\src\octree.cc"
 				>
 			</File>
 			<File
@@ -240,6 +240,10 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
+				RelativePath="..\..\..\src\Boctree.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\src\kd.h"
 				>
 			</File>
@@ -249,10 +253,6 @@
 			</File>
 			<File
 				RelativePath="..\..\..\src\kdcache.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\..\src\octree.h"
 				>
 			</File>
 			<File
