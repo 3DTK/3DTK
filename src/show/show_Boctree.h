@@ -32,11 +32,11 @@ public:
 
 protected:
   
-  void displayOctTree(long targetpts, bitoct &node, double *center, double size );
+  void displayOctTree(long targetpts, bitoct &node);
   void displayOctTreeAll( bitoct &node, double *center, double size );
   void displayOctTreeCulled(long targetpts, bitoct &node, double *center, double size );
   void displayOctTreeAllCulled( bitoct &node, double *center, double size );
-
+  
 };
 
 #endif
