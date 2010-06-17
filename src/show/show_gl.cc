@@ -296,7 +296,11 @@ void DisplayItFunc(GLenum mode)
     glRotated( mouseRotX, 1, 0, 0);
     glRotated( mouseRotY, 0, 1, 0);
   } else glRotated(angle, axis[0], axis[1], axis[2]);    // rotate the camera
-  
+
+  glGetFloatv(GL_MODELVIEW_MATRIX, view_rotate_button);
+  glui2->sync_live();
+  glui2->show();
+ 
   glTranslated(X, Y, Z);       // move camera	
 
 //   cout << "Position  :" << X << " " << Y << " " << Z << endl;
