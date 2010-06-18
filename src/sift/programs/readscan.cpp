@@ -6,6 +6,8 @@
 #include <vector>
 #include <iostream>
 #include <fstream>
+#define _USE_MATH_DEFINES
+#include <cmath>
 
 #ifndef _MSC_VER
 #include <getopt.h>

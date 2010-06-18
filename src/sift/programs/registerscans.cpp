@@ -1,18 +1,23 @@
-
-
 #include <stdlib.h>
 #include <stdio.h>
-#include <unistd.h>
 #include <string.h>
 #include <string>
 #include <vector>
 #include <ctime>
+#define _USE_MATH_DEFINES
+#include <cmath> 
+
+#ifndef _MSC_VER
+#include <getopt.h>
+#else
+#include "..\..\..\Visual_Studio_Projects\6DSLAM\6D_SLAM\XGetopt.h"
+#endif
 
 #include "FeatureMatchSetGroup.h"
 #include "PanoramaMap.h"
 #include "Register.h"
 
-#include "opengl_framework/GL.h"
+//#include "opengl_framework/GL.h"
  
 using namespace std;
 

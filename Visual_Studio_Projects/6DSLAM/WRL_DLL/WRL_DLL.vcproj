@@ -4,6 +4,7 @@
 	Version="8,00"
 	Name="WRL_DLL"
 	ProjectGUID="{D72FB4B8-54BF-4DFA-92C0-43DE7534F2D2}"
+	RootNamespace="WRL_DLL"
 	>
 	<Platforms>
 		<Platform
@@ -170,12 +171,6 @@
 				RelativePath="..\..\..\src\scan_io_wrl.h"
 				>
 			</File>
-		</Filter>
-		<Filter
-			Name="Ressourcendateien"
-			Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav"
-			UniqueIdentifier="{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}"
-			>
 		</Filter>
 	</Files>
 	<Globals>

@@ -2,9 +2,9 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="8,00"
-	Name="SCAN_RED"
-	ProjectGUID="{85801526-22DA-421F-84EA-627663097510}"
-	RootNamespace="scan_red"
+	Name="REGISTERSCANS"
+	ProjectGUID="{35760145-7CB4-4D51-8788-C7178A24EB94}"
+	RootNamespace="REGISTERSCANS"
 	Keyword="Win32Proj"
 	>
 	<Platforms>
@@ -95,8 +95,7 @@
 			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="1"
-			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
-			CharacterSet="2"
+			CharacterSet="1"
 			WholeProgramOptimization="1"
 			>
 			<Tool
@@ -116,21 +115,14 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalOptions="/D _CRT_SECURE_NO_DEPRECATE /D USE_C_SPARSE /D MAX_OPENMP_NUM_THREADS=4 /D OPENMP_NUM_THREADS=4"
-				InlineFunctionExpansion="2"
-				EnableIntrinsicFunctions="true"
-				OmitFramePointers="true"
+				AdditionalOptions="/D MAX_OPENMP_NUM_THREADS=8 /D OPENMP_NUM_THREADS=8"
+				AdditionalIncludeDirectories="&quot;C:\Programme\vigra-1.7.0-src\include&quot;;..\..\..\src\sift\library;..\..\..\src\sift;&quot;..\..\..\Visual_Studio_Projects\6DSLAM\glut-3.7.6\include&quot;;C:\Programme\ftgl\src;&quot;C:\Programme\freetype-2.1.10\include&quot;"
 				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
-				GeneratePreprocessedFile="0"
-				ExceptionHandling="1"
-				RuntimeLibrary="0"
-				EnableFunctionLevelLinking="true"
-				EnableEnhancedInstructionSet="2"
-				OpenMP="true"
+				RuntimeLibrary="2"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
 				Detect64BitPortabilityProblems="true"
-				DebugInformationFormat="0"
+				DebugInformationFormat="3"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -143,9 +135,12 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile="$(ProjectDir)\..\..\..\bin\scan_red.exe"
+				LinkLibraryDependencies="false"
+				AdditionalDependencies="C:\Programme\vigra-1.7.0-src\src\impex\release\vigraimpex.lib"
+				OutputFile="$(ProjectDir)\..\..\..\bin\registerscans.exe"
 				LinkIncremental="1"
-				GenerateDebugInformation="false"
+				AdditionalLibraryDirectories="&quot;..\..\..\Visual_Studio_Projects\6DSLAM\glut-3.7.6\lib\glut\Release&quot;;&quot;C:\Programme\vigra-1.7.0-src\src\impex\release\&quot;"
+				GenerateDebugInformation="true"
 				SubSystem="1"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
@@ -186,47 +181,59 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath="..\..\..\src\Boctree.cc"
+				RelativePath="..\..\..\src\sift\library\Coord.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\src\globals.icc"
+				RelativePath="..\..\..\src\sift\library\FeatureBase.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\src\sift\library\FeatureMatch.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\src\sift\library\FeatureMatchSet.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\src\sift\library\FeatureMatchSetGroup.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\src\icp6Dquat.cc"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\src\sift\library\PanoramaMap.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\src\sift\library\PolarPoint.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\src\sift\library\PolarPointCloud.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\src\sift\library\Register.cpp"
 				>
 				<FileConfiguration
 					Name="Release|Win32"
-					ExcludedFromBuild="true"
 					>
 					<Tool
-						Name="VCCustomBuildTool"
+						Name="VCCLCompilerTool"
+						AdditionalIncludeDirectories="$(ProjectDir)\..\..\..\src"
 					/>
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\..\..\src\kd.cc"
+				RelativePath="..\..\..\src\sift\programs\registerscans.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\src\kdc.cc"
-				>
-			</File>
-			<File
-				RelativePath="..\..\..\src\scan.cc"
-				>
-			</File>
-			<File
-				RelativePath="..\..\..\src\scan.icc"
-				>
-				<FileConfiguration
-					Name="Release|Win32"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCustomBuildTool"
-					/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="..\..\..\src\scan_red.cc"
+				RelativePath="..\..\..\src\sift\library\ScanTransform.cpp"
 				>
 			</File>
 			<File
@@ -240,39 +247,55 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath="..\..\..\src\Boctree.h"
+				RelativePath="..\..\..\src\sift\library\Coord.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\src\kd.h"
+				RelativePath="..\..\..\src\sift\library\FeatureBase.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\src\kdc.h"
+				RelativePath="..\..\..\src\sift\library\FeatureMatch.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\src\kdcache.h"
+				RelativePath="..\..\..\src\sift\library\FeatureMatchSet.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\src\point.h"
+				RelativePath="..\..\..\src\sift\library\FeatureMatchSetGroup.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\src\ptpair.h"
+				RelativePath="..\..\..\src\icp6Dminimizer.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\src\scan.h"
+				RelativePath="..\..\..\src\icp6Dquat.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\src\scan_io.h"
+				RelativePath="..\..\..\src\sift\library\PanoramaMap.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\src\searchTree.h"
+				RelativePath="..\..\..\src\sift\library\opengl_objects\PointCloud_gl.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\src\sift\library\PolarPoint.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\src\sift\library\PolarPointCloud.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\src\sift\library\Register.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\src\sift\library\ScanTransform.h"
 				>
 			</File>
 			<File
