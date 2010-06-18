@@ -115,7 +115,8 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="&quot;..\..\..\src\sift\autopano-sift-c&quot;;..\..\..\src\sift\library;&quot;C:\Programme\vigra-1.7.0-src\include&quot;"
+				AdditionalOptions="/D HAS_PANO13"
+				AdditionalIncludeDirectories="&quot;..\..\..\src\sift\autopano-sift-c&quot;;..\..\..\src\sift\library;&quot;C:\Programme\vigra-1.7.0-src\include&quot;;C:\Programme;C:\Programme\libxml\include"
 				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
 				RuntimeLibrary="2"
 				UsePrecompiledHeader="0"
@@ -134,7 +135,10 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
+				AdditionalDependencies="C:\Programme\lzlib\lib\zlib.lib C:\Programme\vigra-1.7.0-src\src\impex\release\vigraimpex.lib C:\Programme\pano13\Release\libpano.lib C:\Programme\jpeg-8b\libjpeg.lib C:\Programme\lpng142\projects\visualc6\Win32_LIB_Release\libpng.lib C:\Programme\tiff-3.9.4\libtiff\libtiff.lib C:\Programme\libxml\lib\libxml2.lib"
+				OutputFile="$(ProjectDir)\..\..\..\bin\generatesiftfeatures.exe"
 				LinkIncremental="1"
+				IgnoreDefaultLibraryNames="libcmt.lib"
 				GenerateDebugInformation="true"
 				SubSystem="1"
 				OptimizeReferences="2"
@@ -176,16 +180,132 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
+				RelativePath="..\..\..\src\sift\autopano-sift-c\ArrayList.c"
+				>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						CompileAs="2"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\..\src\sift\autopano-sift-c\DisplayImage.c"
+				>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						CompileAs="2"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\..\src\sift\library\Feature.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\src\sift\library\FeatureSet.cpp"
 				>
+			</File>
+			<File
+				RelativePath="..\..\..\src\sift\autopano-sift-c\GaussianConvolution.c"
+				>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						CompileAs="2"
+					/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="..\..\..\src\sift\programs\generatesiftfeatures.cpp"
 				>
 			</File>
 			<File
+				RelativePath="..\..\..\src\sift\autopano-sift-c\ImageMap.c"
+				>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						CompileAs="2"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\..\src\sift\autopano-sift-c\KeypointXML.c"
+				>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						CompileAs="2"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\..\src\sift\autopano-sift-c\LoweDetector.c"
+				>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						CompileAs="2"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
 				RelativePath="..\..\..\src\sift\library\PanoramaMap.cpp"
 				>
+			</File>
+			<File
+				RelativePath="..\..\..\src\sift\library\PolarPointCloud.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\src\sift\autopano-sift-c\ScaleSpace.c"
+				>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						CompileAs="2"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\..\src\sift\autopano-sift-c\SimpleMatrix.c"
+				>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						CompileAs="2"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\..\src\sift\autopano-sift-c\Utils.c"
+				>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						CompileAs="2"
+					/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="..\6D_SLAM\XGetopt.cpp"
@@ -202,11 +322,19 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\..\src\sift\library\Feature.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\src\sift\library\FeatureSet.h"
 				>
 			</File>
 			<File
 				RelativePath="..\..\..\src\sift\library\PanoramaMap.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\src\sift\library\PolarPointCloud.h"
 				>
 			</File>
 			<File

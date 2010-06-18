@@ -4,20 +4,22 @@
 #include "Register.h"
 #include "Coord.h"
 
-#include <unistd.h>
 #include <stdlib.h>
 #include <iostream>
 #include <cassert>
-#include <math.h>
-#include <icp6Dquat.h>
 #include <limits>
 #include <list>
 #include <sstream>
+#define _USE_MATH_DEFINES
+#include <cmath> 
+#define M_PI 3.1415
 
+#include "icp6Dquat.h"
 #include "PolarPointCloud.h"
 #include "PointCloud.h"
 #include "opengl_objects/PointCloud_gl.h"
-#include "opengl_framework/GL.h"
+
+//#include "opengl_framework/GL.h"
 
 using namespace std;
 
@@ -685,15 +687,9 @@ bool Register::registerSet(FeatureMatchSet *set, PanoramaMap *map1, PanoramaMap 
 //	roll = atan2(trans[2][1], trans[2][2]);
 //	cout << "Yaw: " << yaw * 180.0 / M_PI << ", Pitch: " << pitch * 180.0 / M_PI << ", Roll: " << roll * 180.0 / M_PI << endl;
 	
-
-
-
-
-
-	double histtmax = 20;
-	double histtstep = 0.5;
-	
-	int histcount = histtmax / histtstep;
+#define histtmax 20
+#define histtstep 0.5
+#define histcount 40   // int histcount = histtmax / histtstep;
 
 	ostringstream stroutt;
 	stroutt << "histogram_t-" << map1->scanid << "-" << map2->scanid << "_" << map1->width << "x" << map1->height;
@@ -718,12 +714,9 @@ bool Register::registerSet(FeatureMatchSet *set, PanoramaMap *map1, PanoramaMap 
 	}
 	outt.close();
 
-
-
-	double histrmax = 180;
-	double histrstep = 2;
-	
-	int histrcount = histrmax / histrstep;
+#define histrmax 180
+#define histrstep 2
+#define histrcount 90   // int histrcount = histrmax / histrstep;
 
 	ostringstream stroutr;
 	stroutr << "histogram_r-" << map1->scanid << "-" << map2->scanid << "_" << map1->width << "x" << map1->height;

@@ -4,6 +4,7 @@
 	Version="8,00"
 	Name="UOS_MAP_DLL"
 	ProjectGUID="{418B32F8-C7BD-4A20-8114-C9FC6C50FC69}"
+	RootNamespace="UOS_MAP_DLL"
 	>
 	<Platforms>
 		<Platform
@@ -170,12 +171,6 @@
 				RelativePath="..\..\..\src\scan_io_uos_map.h"
 				>
 			</File>
-		</Filter>
-		<Filter
-			Name="Ressourcendateien"
-			Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav"
-			UniqueIdentifier="{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}"
-			>
 		</Filter>
 	</Files>
 	<Globals>

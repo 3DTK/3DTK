@@ -4,6 +4,7 @@
 	Version="8,00"
 	Name="UOS_OLD_DLL"
 	ProjectGUID="{ACABEA79-CAFA-43D7-B92A-2B4545C923F7}"
+	RootNamespace="UOS_OLD_DLL"
 	>
 	<Platforms>
 		<Platform
@@ -170,12 +171,6 @@
 				RelativePath="..\..\..\src\scan_io_old.h"
 				>
 			</File>
-		</Filter>
-		<Filter
-			Name="Ressourcendateien"
-			Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav"
-			UniqueIdentifier="{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}"
-			>
 		</Filter>
 	</Files>
 	<Globals>
