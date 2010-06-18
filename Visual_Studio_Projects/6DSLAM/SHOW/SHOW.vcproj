@@ -239,10 +239,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\src\octree.cc"
-				>
-			</File>
-			<File
 				RelativePath="..\..\..\src\show\PathGraph.cc"
 				>
 			</File>
@@ -291,6 +287,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath="..\..\..\src\show\show_Boctree.cc"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\src\show\show_gl.cc"
 				>
 				<FileConfiguration
@@ -329,10 +329,6 @@
 						Name="VCCLCompilerTool"
 					/>
 				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="..\..\..\src\show\show_octree.cc"
-				>
 			</File>
 			<File
 				RelativePath="..\..\..\src\show\vertexarray.cc"
@@ -405,7 +401,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\src\show\show_octree.h"
+				RelativePath="..\..\..\src\show\show_Boctree.h"
 				>
 			</File>
 			<File
@@ -421,16 +417,6 @@
 				>
 			</File>
 		</Filter>
-		<Filter
-			Name="Resource Files"
-			Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx"
-			UniqueIdentifier="{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}"
-			>
-		</Filter>
-		<File
-			RelativePath=".\ReadMe.txt"
-			>
-		</File>
 	</Files>
 	<Globals>
 	</Globals>

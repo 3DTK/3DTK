@@ -4,6 +4,7 @@
 	Version="8,00"
 	Name="RTS_MAP_DLL"
 	ProjectGUID="{C477F662-A764-4F15-B824-0F4D24E36FE2}"
+	RootNamespace="RTS_MAP_DLL"
 	>
 	<Platforms>
 		<Platform
@@ -170,12 +171,6 @@
 				RelativePath="..\..\..\src\scan_io_rts_map.h"
 				>
 			</File>
-		</Filter>
-		<Filter
-			Name="Ressourcendateien"
-			Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav"
-			UniqueIdentifier="{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}"
-			>
 		</Filter>
 	</Files>
 	<Globals>

@@ -4,6 +4,7 @@
 	Version="8,00"
 	Name="ZAHN_DLL"
 	ProjectGUID="{957AF8F1-15D6-439F-96AB-2B84CAFAE8B6}"
+	RootNamespace="ZAHN_DLL"
 	>
 	<Platforms>
 		<Platform
@@ -170,12 +171,6 @@
 				RelativePath="..\..\..\src\scan_io_zahn.h"
 				>
 			</File>
-		</Filter>
-		<Filter
-			Name="Ressourcendateien"
-			Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav"
-			UniqueIdentifier="{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}"
-			>
 		</Filter>
 	</Files>
 	<Globals>
