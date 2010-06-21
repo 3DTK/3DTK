@@ -4,10 +4,12 @@ MAKEFLAGS += -s
 # -------
 # OpenMP
 # -------
-#MAKEFLAGS += -j
+#
+#MAKEFLAGS += -j 4
 CFLAGS = -DMAX_OPENMP_NUM_THREADS=4 -DOPENMP_NUM_THREADS=4
-#CFLAGS += -fopenmp
+CFLAGS += -fopenmp
 
+#
 # -------
 # GNU C++
 # -------
@@ -25,7 +27,7 @@ FLAGS    += -O3 -Wall -finline-functions
 CFLAGS += -Wno-deprecated -Wno-write-strings
 #CFLAGS += -mfpmath=sse -msse2 -march=i686
 CFLAGS += -pipe -march=native
-#CFLAGS += -DUSE_GL_POINTS
+
 
 ###################################################################
 #
@@ -33,63 +35,88 @@ CFLAGS += -pipe -march=native
 #
 ###################################################################
 
+
+#
+# CUDA code for NVIDIA cards
+# --------------------------
+#
+#WITH_CUDA = True              # compile with cuda support
+
+CUDA = /usr/local/cuda/bin/nvcc
+CUDALIBS = -lcuda -lcudpp64 -lcublas -lcudart -lcutil
+CUDALIBDIRS = -L /usr/local/cuda/lib64/ \
+              -L /usr/local/src/NVIDIA_GPU_Computing_SDK/C/lib \
+		    -L /usr/local/src/NVIDIA_GPU_Computing_SDK/shared/lib/linux
+CUDAINCDIRS = -I/usr/local/src/NVIDIA_GPU_Computing_SDK/C/common/inc/\
+              -I /usr/local/src/NVIDIA_GPU_Computing_SDK/C/common/inc/cudpp/\
+              -I /usr/local/cuda/include/
+
+		    
 #
 # RIEGL scanner options
 # ---------------------
 #
-#WITH_RIVLIB = WITH_RIVLIB     # compile with rxp file support
+WITH_RIVLIB = True            # compile with rxp file support
 
 
 #
 # SCAN REDCUTION options
 # ----------------------
 #
-WITH_SCANRED = WITH_SCANRED    # compile with scan_red program
+WITH_SCANRED = True           # compile with scan_red program
 
 
 #
 # SHOW options
 # ------------
 #
-WITH_SHOW = WITH_SHOW         # compile with show program
+WITH_SHOW = True              # compile with show program
+
+CFLAGS += -DUSE_GL_POINTS     # use high speed rendering with octrees
 
 
 #
 # GRIDDER options
 # ---------------
 #
-WITH_GRIDDER = WITH_GRIDDER   # compile with gridder program
+WITH_GRIDDER = True           # compile with gridder program
 
 
 #
 # TOOLS options
 # -------------
 #
-WITH_TOOLS = WITH_TOOLS       # compile with further tools
+WITH_TOOLS = True             # compile with further tools
 
 #
 # PMD camera options
 # ------------------
 #
-WITH_PMD = WITH_PMD          # compile PMD camera tools
+WITH_PMD = True              # compile PMD camera tools
 
-PMDLIBS = -lglfw -lGLU -lftgl -lxmlrpc_util -lglfw -lGLU -lftgl  -lxmlrpc_client -lxmlrpc -lxmlrpc++ -lxmlrpc_client++ -lxmlrpc_xmltok -lxmlrpc_xmlparse
-PMDPKG = `pkg-config --cflags opencv` `pkg-config --cflags ftgl` `pkg-config --libs libconfig` `pkg-config --libs opencv`
+PMDLIBS = -lglfw -lGLU -lftgl -lxmlrpc_util -lglfw -lGLU -lftgl \
+           -lxmlrpc_client -lxmlrpc -lxmlrpc++ -lxmlrpc_client++ -lxmlrpc_xmltok -lxmlrpc_xmlparse
+PMDPKG = `pkg-config --cflags opencv` `pkg-config --cflags ftgl` \
+         `pkg-config --libs libconfig` `pkg-config --libs opencv`
 
+	    
 #
 # SIFT based registration
 # -----------------------
 #
-WITH_SIFT = WITH_SIFT         # compile SIFT tools
+WITH_SIFT = True              # compile SIFT tools
+
+SIFTFLAGS = -DHAS_PANO13 
 
 #
-# TORO options
-# ------------------
+# TORO graph optimization 
+# -----------------------
 #
-#WITH_TORO = True          # compile TORO
+WITH_TORO = True              # compile TORO
+
 
 #
-# HOGMAN options
-# ------------------
+# HOG-Man graph optimization
+# --------------------------
 #
-#WITH_HOGMAN = True          # compile HOG-Man
+WITH_HOGMAN = True            # compile HOG-Man

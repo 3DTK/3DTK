@@ -8,8 +8,6 @@
 #ifndef GL_H_
 #define GL_H_
 
-#define M_PI 3.141592653589
-
 #include <list>
 #include "Object_gl.h"
 #include "CoordGL.h"

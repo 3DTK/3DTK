@@ -56,7 +56,7 @@ public:
   inline void set_max_dist_match2(double max_dist_match2);
   inline void set_max_num_iterations(int max_num_iterations);
   
-private:
+protected:
 
   /**
    * suppress output to cout
