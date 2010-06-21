@@ -49,12 +49,25 @@ bool             Scan::outputFrames = false;
 string           Scan::dir;
 vector<KDCache*> Scan::closest_cache;
 
+// FIXME
+void Scan::backup_points_red(){
+    org_points_red = new double*[points_red_size];
+    for(int i = 0 ; i < points_red_size ; ++i){
+        org_points_red[i] = new double[3];
+        org_points_red[i][0] = points_red[i][0];
+        org_points_red[i][1] = points_red[i][1];
+        org_points_red[i][2] = points_red[i][2];
+    }
+}
+
+
 /**
  * default Constructor
  */
 Scan::Scan()
 {
   kd = 0;
+  ann_kd_tree = 0;
   scanNr = fileNr = 0;
   rPosOrg[0] = rPos[0] = 0;
   rPosOrg[1] = rPos[1] = 0;
@@ -79,6 +92,7 @@ Scan::Scan()
 Scan::Scan(const double* euler, int maxDist)
 {
   kd = 0;
+  ann_kd_tree = 0;
   maxDist2 = (maxDist != -1 ? sqr(maxDist) : maxDist);
   
   if (dir == "") {
@@ -121,6 +135,7 @@ Scan::Scan(const double* euler, int maxDist)
 Scan::Scan(const double _rPos[3], const double _rPosTheta[3], const int maxDist)
 {
   kd = 0;
+  ann_kd_tree = 0;
   maxDist2 = (maxDist != -1 ? sqr(maxDist) : maxDist);
   rPosOrg[0] = rPos[0] = _rPos[0];
   rPosOrg[1] = rPos[1] = _rPos[1];
@@ -148,6 +163,7 @@ Scan::Scan(const double _rPos[3], const double _rPosTheta[3], const int maxDist)
 Scan::Scan(const vector < Scan* >& MetaScan, bool use_cache)
 {
   kd = 0;
+  ann_kd_tree = 0;
   scanNr = numberOfScans++;
   rPosOrg[0] = rPos[0] = 0;
   rPosOrg[1] = rPos[1] = 0;
@@ -279,6 +295,9 @@ Scan::Scan(const Scan& s)
   memcpy(dalignxf, s.dalignxf, sizeof(dalignxf));
   if (s.kd != 0) {
     createTree(false);
+  }
+  if (s.ann_kd_tree != 0) {
+    createANNTree();
   }
 
   scanNr = s.scanNr;
@@ -1202,6 +1221,8 @@ void Scan::getPtPairsCacheParallel(vector <PtPair> *pairs, KDCacheItem *closest,
  */
 void Scan::createTree(bool use_cache)
 {
+  createANNTree();
+  
   M4identity(dalignxf);
   double temp[16];
   memcpy(temp, transMat, sizeof(transMat));
@@ -1228,6 +1249,41 @@ void Scan::createTree(bool use_cache)
   
   return;
 }
+
+void Scan::createANNTree()
+{
+#ifdef WITH_CUDA  
+  backup_points_red();
+  double** temp = new double*[points_red_size];
+  for(int i = 0 ; i < points_red_size ; ++i){
+    temp[i] = new double[3];
+    temp[i][0] = (float)get_points_red()[i][0];
+    temp[i][1] = (float)get_points_red()[i][1];
+    temp[i][2] = (float)get_points_red()[i][2];
+  }
+  if(!ann_kd_tree){
+    ann_kd_tree = new ANNkd_tree(temp, points_red_size, 3, 1, ANN_KD_STD);
+    cout << "Cuda tree was generated with " << points_red_size << " points" << endl;
+  } else {
+    cout << "Cuda tree exists. No need for another creation" << endl;
+  }
+#endif
+}
+
+ANNkd_tree* Scan::getANNTree(){
+  return ann_kd_tree;
+}
+
+double* Scan::getDAlign(){
+    return dalignxf;
+}
+
+double** Scan::get_org_points_red(){
+    return org_points_red;
+}
+
+
+
 
 /**
  * Delete the search tree

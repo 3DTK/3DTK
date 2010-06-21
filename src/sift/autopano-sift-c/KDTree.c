@@ -1,4 +1,3 @@
-
 /* autopano-sift, Automatic panorama image creation
  * Copyright (C) 2004 -- Sebastian Nowozin
  *

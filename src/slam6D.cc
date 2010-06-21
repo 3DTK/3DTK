@@ -39,6 +39,9 @@ using std::ifstream;
 #include "icp6Dortho.h"
 #include "icp6Dhelix.h"
 #include "icp6D.h"
+#ifdef WITH_CUDA
+#include "cuda/icp6Dcuda.h"
+#endif
 #include "lum6Deuler.h"
 #include "lum6Dquat.h"
 #include "ghelix6DQ2.h"
@@ -127,6 +130,9 @@ void usage(char* prog)
 	  << endl
 	  << bold << "  --cache" << normal << endl
 	  << "         turns on cached k-d tree search" << endl
+	  << endl
+	  << bold << "  --cuda" << normal << endl
+	  << "         turns on cuda processing" << endl
 	  << endl
 	  << bold << "  -d" << normal << " NR, " << bold << "--dist=" << normal << "NR   [default: 25]" << endl
 	  << "         sets the maximal point-to-point distance for matching with ICP to <NR> 'units'" << endl
@@ -224,6 +230,8 @@ void usage(char* prog)
 	  << "         start at scan NR (i.e., neglects the first NR scans)" << endl
 	  << "         [ATTENTION: counting naturally starts with 0]" << endl
 	  << endl
+	  << bold << "-u" << normal <<", "<< bold<<"--cuda" << endl
+	  << "         this option activates icp running on GPU instead of CPU"<<endl
     	  << endl << endl;
   
   cout << bold << "EXAMPLES " << normal << endl
@@ -269,7 +277,7 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &rand,
 		    bool &extrapolate_pose, bool &meta, int &algo, int &loopSlam6DAlgo, int &lum6DAlgo, int &anim,
 		    int &mni_lum, string &net, double &cldist, int &clpairs, int &loopsize,
 		    double &epsilonICP, double &epsilonSLAM, bool &use_cache, bool &exportPts, double &distLoop,
-		    int &iterLoop, double &graphDist, int &octree, reader_type &type)
+		    int &iterLoop, double &graphDist, int &octree, bool &cuda_enabled, reader_type &type)
 {
   int  c;
   // from unistd.h:
@@ -311,11 +319,12 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &rand,
     { "distLoop",        required_argument,   0,  '9' }, // use the long format only
     { "iterLoop",        required_argument,   0,  '1' }, // use the long format only
     { "graphDist",       required_argument,   0,  '3' }, // use the long format only
+    { "cuda",            no_argument,         0,  'u' }, // cuda will be enabled
     { 0,           0,   0,   0}                    // needed, cf. getopt.h
   };
 
   cout << endl;
-  while ((c = getopt_long(argc, argv, "O::f:A:G:L:a:r:R:d:D:i:l:I:c:C:n:s:e:m:M:qQp", longopts, NULL)) != -1)
+  while ((c = getopt_long(argc, argv, "O::f:A:G:L:a:r:R:d:D:i:l:I:c:C:n:s:e:m:M:u:qQp", longopts, NULL)) != -1)
     switch (c)
 	 {
 	 case 'a':
@@ -455,7 +464,10 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &rand,
 		abort ();
 	   }
 	   break;
-      case '?':
+	 case 'u':
+	   cuda_enabled = true;
+	   break;
+       case '?':
 	   usage(argv[0]);
 	   return 1;
       default:
@@ -690,12 +702,13 @@ int main(int argc, char **argv)
   int iterLoop      = 100;
   double graphDist  = cldist;
   int octree       = 0;  // employ randomized octree reduction?
+  bool cuda_enabled    = false;
   reader_type type    = UOS;
   
   parseArgs(argc, argv, dir, red, rand, mdm, mdml, mdmll, mni, start, end,
 		  maxDist, minDist, quiet, veryQuiet, eP, meta, algo, loopSlam6DAlgo, lum6DAlgo, anim,
 		  mni_lum, net, cldist, clpairs, loopsize, epsilonICP, epsilonSLAM,
-		  use_cache, exportPts, distLoop, iterLoop, graphDist, octree, type);
+		  use_cache, exportPts, distLoop, iterLoop, graphDist, octree, cuda_enabled, type);
 
   cout << "slam6D will proceed with the following parameters:" << endl;
   //@@@ to do :-)
@@ -738,85 +751,37 @@ int main(int argc, char **argv)
     break;
   }
 
-  // evaluate scan matching
-  //#define EVALUATION 
-#ifdef EVALUATION  
-  if (initial) {
-    if (Scan::allScans.size() != 2) {
-	 cout << "Evaluation expects 2 scans" << endl;
-	 exit(-1);
-    }
-
-    // read matrix
-    ifstream in("initial.mat");
-    double initalignxf[16];
-    in >> initalignxf;
-
-    double d2[3], dtheta2[3];
-    Matrix4ToEuler(initalignxf, dtheta2, d2);
-    
-    cout << "transform 2nd scan by " << d2[0] << " " << d2[1] << " " << d2[2] << " "
-	    << dtheta2[0] << " " << dtheta2[1] << " " << dtheta2[2] << endl;
-
-    // transform the odometry guess
-    Scan::allScans[1]->rPosOrg[0] += d2[0];
-    Scan::allScans[1]->rPosOrg[1] += d2[1];
-    Scan::allScans[1]->rPosOrg[2] += d2[2];
-    Scan::allScans[1]->rPosThetaOrg[0] += dtheta2[0];
-    Scan::allScans[1]->rPosThetaOrg[1] += dtheta2[1];
-    Scan::allScans[1]->rPosThetaOrg[2] += dtheta2[2];    
- 
-    // do ICP
-    // ------
-    icp6D *my_icp = 0;
-    my_icp = new icp6D(my_icp6Dminimizer, mdm, mni, quiet, meta, rand, eP,
-				   anim, epsilonICP, use_cache);
-    
-    long starttime = GetCurrentTimeInMilliSec();
-
-    if (my_icp) my_icp->doICP(Scan::allScans);
-
-    long endtime = GetCurrentTimeInMilliSec() - starttime;
-    cout << "Matching done in a time of [ms]: " << endtime << endl;
-    delete my_icp;
-    
-    // convert to OpenGL coordinate system
-    ofstream out("final.trans");
-    out << Scan::allScans[1]->rPos[0] << " "
-	   << Scan::allScans[1]->rPos[1] << " "
-	   << Scan::allScans[1]->rPos[2] << endl;
-    out << Scan::allScans[1]->rPosTheta[0] << " "
-	   << Scan::allScans[1]->rPosTheta[1] << " "
-	   << Scan::allScans[1]->rPosTheta[2] << endl;
-    out.close();
-    out.clear();
-
-    cout << "Saving registration information in .frames files" << endl;
-    vector <Scan*>::iterator Iter = Scan::allScans.begin();
-    for( ; Iter != Scan::allScans.end(); ) {
-	 Iter = Scan::allScans.begin();
-	 delete (*Iter);
-	 cout << ".";
-	 cout.flush(); 
-    }
-    Scan::allScans.clear();
-      
-    exit(1);
-  }
-#endif
-  
   // match the scans and print the time used
   long starttime = GetCurrentTimeInMilliSec();
   if (mni_lum == -1 && loopSlam6DAlgo == 0) {
     icp6D *my_icp = 0;
-    my_icp = new icp6D(my_icp6Dminimizer, mdm, mni, quiet, meta, rand, eP,
+    if (cuda_enabled) {
+#ifdef WITH_CUDA	 
+	 my_icp = new icp6Dcuda(my_icp6Dminimizer, mdm, mni, quiet, meta, rand, eP,
 					    anim, epsilonICP, use_cache);
+#else
+	 cout << "slam6d was not compiled for excuting CUDA code" << endl;
+#endif	 
+    } else {
+	 my_icp = new icp6D(my_icp6Dminimizer, mdm, mni, quiet, meta, rand, eP,
+					anim, epsilonICP, use_cache);
+    }
     if (my_icp) my_icp->doICP(Scan::allScans);
     delete my_icp;
   } else if (clpairs > -1) {
     //!!!!!!!!!!!!!!!!!!!!!!!!
-    icp6D *my_icp = new icp6D(my_icp6Dminimizer, mdm, mni, quiet, meta, rand, eP,
-						anim, epsilonICP, use_cache);
+    icp6D *my_icp = 0;
+    if (cuda_enabled) {
+#ifdef WITH_CUDA	 
+	 my_icp = new icp6Dcuda(my_icp6Dminimizer, mdm, mni, quiet, meta, rand, eP,
+					    anim, epsilonICP, use_cache);
+#else
+	 cout << "slam6d was not compiled for excuting CUDA code" << endl;
+#endif	 
+    } else {
+	 my_icp = new icp6D(my_icp6Dminimizer, mdm, mni, quiet, meta, rand, eP,
+					anim, epsilonICP, use_cache);
+    }
     my_icp->doICP(Scan::allScans);
     graphSlam6D *my_graphSlam6D = new lum6DEuler(my_icp6Dminimizer, mdm, mdml, mdmll, mni, quiet, meta,
 									    rand, eP, anim, epsilonICP, use_cache, epsilonSLAM);
@@ -827,33 +792,43 @@ int main(int argc, char **argv)
     switch (lum6DAlgo) {
     case 1 :
 	 my_graphSlam6D = new lum6DEuler(my_icp6Dminimizer, mdm, mdml, mdmll, mni, quiet, meta, rand, eP,
-						anim, epsilonICP, use_cache, epsilonSLAM);
+							   anim, epsilonICP, use_cache, epsilonSLAM);
 	 break;
     case 2 :
       my_graphSlam6D = new lum6DQuat(my_icp6Dminimizer, mdm, mdml, mdmll, mni, quiet, meta, rand, eP,
-					    anim, epsilonICP, use_cache, epsilonSLAM);
+							  anim, epsilonICP, use_cache, epsilonSLAM);
       break;
     case 3 : 
       my_graphSlam6D = new ghelix6DQ2(my_icp6Dminimizer, mdm, mdml, mdmll, mni, quiet, meta, rand, eP,
-						anim, epsilonICP, use_cache, epsilonSLAM);
+							   anim, epsilonICP, use_cache, epsilonSLAM);
 	 break;
     case 4 :
       my_graphSlam6D = new gapx6D(my_icp6Dminimizer, mdm, mdml, mdmll, mni, quiet, meta, rand, eP,
-					anim, epsilonICP, use_cache, epsilonSLAM);
+						    anim, epsilonICP, use_cache, epsilonSLAM);
       break;
     case 5 :
       my_graphSlam6D = new graphToro(my_icp6Dminimizer, mdm, mdml, mdmll, mni, quiet, meta, rand, eP,
-					-1, epsilonICP, use_cache, epsilonSLAM);
+							  -1, epsilonICP, use_cache, epsilonSLAM);
       break;
     case 6 :
       my_graphSlam6D = new graphHOGMan(my_icp6Dminimizer, mdm, mdml, mdmll, mni, quiet, meta, rand, eP,
-					-1, epsilonICP, use_cache, epsilonSLAM);
+							    -1, epsilonICP, use_cache, epsilonSLAM);
       break;
     }
     // Construct Network
     if (net != "none") {
-	 icp6D *my_icp = new icp6D(my_icp6Dminimizer, mdm, mni, quiet, meta, rand, eP,
-						  anim, epsilonICP, use_cache);
+	 icp6D *my_icp = 0;
+	 if (cuda_enabled) {
+#ifdef WITH_CUDA	 
+	   my_icp = new icp6Dcuda(my_icp6Dminimizer, mdm, mni, quiet, meta, rand, eP,
+						 anim, epsilonICP, use_cache);
+#else
+	   cout << "slam6d was not compiled for excuting CUDA code" << endl;
+#endif	 
+	 } else {
+	   my_icp = new icp6D(my_icp6Dminimizer, mdm, mni, quiet, meta, rand, eP,
+					  anim, epsilonICP, use_cache);
+	 }
 	 my_icp->doICP(Scan::allScans);
 
 	 Graph* structure;
@@ -864,11 +839,20 @@ int main(int argc, char **argv)
     } else {
       icp6D *my_icp = 0;
       if(algo > 0) {
-        my_icp = new icp6D(my_icp6Dminimizer, mdm, mni, quiet, meta, rand, eP, anim, epsilonICP, use_cache);
-      }
-
-      loopSlam6D *my_loopSlam6D = 0;
-      switch(loopSlam6DAlgo) {
+	   if (cuda_enabled) {
+#ifdef WITH_CUDA	 
+	   my_icp = new icp6Dcuda(my_icp6Dminimizer, mdm, mni, quiet, meta, rand, eP,
+						 anim, epsilonICP, use_cache);
+#else
+	   cout << "slam6d was not compiled for excuting CUDA code" << endl;
+#endif	 
+	   } else {
+		my_icp = new icp6D(my_icp6Dminimizer, mdm, mni, quiet, meta, rand, eP,
+					    anim, epsilonICP, use_cache);
+	   }
+	   
+	   loopSlam6D *my_loopSlam6D = 0;
+	   switch(loopSlam6DAlgo) {
         case 1:
           my_loopSlam6D = new elch6Deuler(veryQuiet, my_icp6Dminimizer, distLoop, iterLoop, rand, eP, 10, epsilonICP, use_cache);
           break;
@@ -887,16 +871,17 @@ int main(int argc, char **argv)
         case 6:
           my_loopSlam6D = new loopHOGMan(veryQuiet, my_icp6Dminimizer, distLoop, iterLoop, rand, eP, 10, epsilonICP, use_cache);
           break;
-      }
+	   }
 
-      matchGraph6Dautomatic(cldist, loopsize, Scan::allScans, my_icp, meta, use_cache, my_loopSlam6D, my_graphSlam6D, mni_lum, epsilonSLAM, mdml, mdmll, graphDist, eP, type);
-      delete my_icp;
-      if(loopSlam6DAlgo > 0) {
-        delete my_loopSlam6D;
-      }
-    }
-    if(my_graphSlam6D > 0) {
-      delete my_graphSlam6D;
+	   matchGraph6Dautomatic(cldist, loopsize, Scan::allScans, my_icp, meta, use_cache, my_loopSlam6D, my_graphSlam6D, mni_lum, epsilonSLAM, mdml, mdmll, graphDist, eP, type);
+	   delete my_icp;
+	   if(loopSlam6DAlgo > 0) {
+		delete my_loopSlam6D;
+	   }
+	 }
+	 if(my_graphSlam6D > 0) {
+	   delete my_graphSlam6D;
+	 }
     }
   }
 
