@@ -20,7 +20,13 @@ using std::string;
 using std::vector;
 #include <sstream>
 using std::stringstream;
- 
+
+// ANN k-d tree library
+#include "ANN/ANN.h"				// ANN declarations
+#include "ANN/ANNperf.h"				// k-d tree printing
+//#include "kd_tree.h"		  		// ANN node declaration
+
+
 #include "ptpair.h"
 #include "point.h"
 #include "searchTree.h"
@@ -132,6 +138,12 @@ public:
   inline const double** get_points_red() const;
   inline void setPoints(vector <Point> *_points);
   inline void clearPoints();
+
+  //FIXME
+  double** get_org_points_red();
+  double* getDAlign();
+  ANNkd_tree* getANNTree();
+
 private:
   
   /**
@@ -188,12 +200,29 @@ private:
    */
   static vector<KDCache*> closest_cache;
 
+  //FIXME: use union  
   /**
    * The search tree
    *
    * It can be a k-d tree of cached k-d tree.
    */
   Tree *kd;
+
+  /**
+   * This KD tree is created only for the CUDA usages
+   */
+
+  ANNkd_tree *ann_kd_tree;
+
+  //FIXME: Do we need it?
+  /**
+   * We store orginial values of reduced points in the following array
+   * Since points_red are subject to change, we have to store it somewhere
+   * only for cuda reasons
+   */
+  double **org_points_red;
+  void backup_points_red();
+  void createANNTree();
   
   /**
    * Array for storing reduced points. The reduced points are copied and k-d trees 
