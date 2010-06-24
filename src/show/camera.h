@@ -28,13 +28,11 @@ private:
   float r_x, r_y, r_z;
   float angle;
   float cam_size;
-  int numOfCameras;
   float focal_length;
   float focal_x;
   float focal_y;
   float focal_z;
   float view_width;
-  float lookat_point;
   float fx, fy, fz;
   Color camcolor;
 
@@ -65,7 +63,6 @@ public:
   void setRY(float);
   void setRZ(float);
   void setAngle(float);
-  int howManyCams();
   Color getColor();
   void setColor(Color);
   void setRotate(float,float,float,float);

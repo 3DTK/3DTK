@@ -151,7 +151,7 @@ double mouseRotX = 0.0;
 double mouseRotY = 0.0;
 
 //@@@
-int animate_both         = 0;             // Animate both scan matchin and path?
+//int animate_both         = 0;             // Animate both scan matchin and path?
 
 int frameNr;
 int scanNr;
@@ -188,13 +188,14 @@ GLdouble quat1[4] = {0.0, 0.0, 0.0, 1.0};
 GLdouble angle1  = 0.0f;
 double axis1[3];
 float x_c, y_c, z_c;
+  
+static unsigned int path_iterator = 0;
+static int oldcamNavMode = 0;
 
 /**
  * Animation sould be saved to file
  */
 int save_animation         = 0;
-
-int enable_camera_angle    = 0;
 
 /**some variables for the camera path**/
 
@@ -428,60 +429,6 @@ void readFrames(string dir, int start, int end, bool readInitial, reader_type &t
     cerr << "aborting..." << endl;
     exit(1);
   }
-  /////////////////!!!!!!!!!!!!!!!!!!!!!!!!
-  //@@@
-  /*
-  string filename;
-  for (unsigned int i = 0; i < MetaMatrix.size(); i++) {
-    filename = "6Dreg" + to_string(i,2) + ".dat";
-    ofstream out(filename.c_str());
-    out << MetaMatrix[i].back()[0] << " ";
-    out << MetaMatrix[i].back()[1] << " ";
-    out << MetaMatrix[i].back()[2] << " ";
-    out << MetaMatrix[i].back()[3] << " " << endl;
-    out << MetaMatrix[i].back()[4] << " ";
-    out << MetaMatrix[i].back()[5] << " ";
-    out << MetaMatrix[i].back()[6] << " ";
-    out << MetaMatrix[i].back()[7] << " " << endl;
-    out << MetaMatrix[i].back()[8] << " ";
-    out << MetaMatrix[i].back()[9] << " ";
-    out << MetaMatrix[i].back()[10] << " ";
-    out << MetaMatrix[i].back()[11] << " " << endl;
-    out << MetaMatrix[i].back()[12]*0.01 << " ";
-    out << MetaMatrix[i].back()[13]*0.01 << " ";
-    out << MetaMatrix[i].back()[14]*0.01 << " ";
-    out << MetaMatrix[i].back()[15] << " ";
-    out << endl;
-  }
-  */
-  /*
-  
-    for (unsigned int i = 0; i < MetaMatrix.size(); i++) {
-	 double euler[6];
-	 cout << MetaMatrix[i].back() << endl;
-	 Matrix4ToEuler(MetaMatrix[i].back(), euler+3, euler);
-	 euler[3] *= -1.0;
-	 euler[5] *= -1.0;
-	 EulerToMatrix4(euler, euler+3, MetaMatrix[i].back());
-	 cout << MetaMatrix[i].back() << endl << endl;
-    }
-    
-    ofstream out("6Dreg.dat");
-    for (unsigned int i = 0; i < MetaMatrix.size(); i++) {
-      for (int j = 0; j < 16; j++) out << MetaMatrix[i].back()[j] << " ";
-       out << endl;
-    }
-  
-  /*
-   ofstream out1("trajectory.pose.dat");
-   for (unsigned int i = 0; i < MetaMatrix.size(); i++) {
-	double rPos[3], rPosTheta[3];
-	Matrix4ToEuler(MetaMatrix[i].back(), rPosTheta, rPos);
-	out1 << rPos[0] << " " << rPos[1] << " " << rPos[2] << " "
-		<< rPosTheta[0] << " " << rPosTheta[1] << " " << rPosTheta[2] << endl;
-	out1 << endl;
-   }
-  */
 }
 
 //-----------------------------------------------------------------------------------
@@ -698,7 +645,7 @@ int main(int argc, char **argv){
   } else {
     createDisplayLists(false);
   }
-  
+
   glutMainLoop();
 
   delete [] path_file_name;

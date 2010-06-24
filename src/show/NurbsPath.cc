@@ -11,18 +11,24 @@ vector<PointXY>
 NurbsPath::getNurbsPath(vector<PointXY>& origP,  
                         unsigned int nump){
   list<PGNode*> pgnl;
+  list<PGNode*> freepgnl;
   for(unsigned int i=0; i<origP.size();i++){
     PGNode* p = new PGNode();
     p->point.x = origP[i].x;
     p->point.y = origP[i].y;
     pgnl.push_back(p);
+    freepgnl.push_back(p);
   }
+
   vector<PointXY> vec = getNurbsPath(pgnl,nump);
 
+  for(list<PGNode*>::iterator it = freepgnl.begin();it!=freepgnl.end();it++) {
+    PGNode *p = *it;
+    delete p;
+  }
   pgnl.clear();
-  //for(list<PGNode*>::iterator it = pgnl.begin();it!=pgnl.end();it++)
-  //  delete *it;
-  //  std::cout << " i am in the header 3" << endl;
+  freepgnl.clear();
+  
   return vec;
 }
 /**
@@ -58,8 +64,8 @@ NurbsPath::getNurbsPath(list<PGNode*>& origP,
   }
   //end short path hack
 
-  float *origPX = new float(ivN);
-  float *origPY = new float(ivN);
+  float *origPX = new float[ivN];
+  float *origPY = new float[ivN];
   list<PGNode*>::iterator it;
   unsigned int i=0;
   for(it=origP.begin();it!=origP.end();it++,i++){
@@ -72,12 +78,16 @@ NurbsPath::getNurbsPath(list<PGNode*>& origP,
   ivNumKnots = ivN + ivDegree;
   ivNumP   = nump;
   
-  float *ivpKnots = new float(ivNumKnots);
+  float *ivpKnots = new float[ivNumKnots+1];
+
   for(i=0;i<=ivDegree;i++)
     ivpKnots[i] = 0.0f;
+
   int numIntKnots = ((ivNumKnots-ivDegree)-(ivOrder));
+
   for(i=ivOrder; i < ivNumKnots - ivDegree ; i++)
     ivpKnots[i] = ((float)(i-ivDegree))/(numIntKnots+1);
+
   for(i=ivNumKnots-ivDegree;i<=ivNumKnots;i++)
     ivpKnots[i] = 1.f;
 
@@ -85,6 +95,7 @@ NurbsPath::getNurbsPath(list<PGNode*>& origP,
   nurbsPath.reserve(ivNumP);
   PointXY outPoint;
   float out[2]={0,0};
+
   for(i=0;i<=ivNumP; i++){
     out[0] = 0;
     out[1] = 0; 
@@ -93,9 +104,8 @@ NurbsPath::getNurbsPath(list<PGNode*>& origP,
     else
       getOutpoint(.999999,out,origPX,origPY,ivpKnots);
 
-    // printf("%f %f\n",out[0],out[1]);
-    outPoint.x = (long)out[0];
-    outPoint.y = (long)out[1];
+    outPoint.x = out[0];
+    outPoint.y = out[1];
     nurbsPath.push_back(outPoint);
   }
 
