@@ -82,7 +82,7 @@ void calcLookAtPath();
 void drawRobotPath(int dummy);
 void pathAnimate1(int i);
 int calcFrameNo();
-int calcNoOfPoints(vector<PointXY>);
+int calcNoOfPoints(vector<PointXY>, vector<PointXY>);
 
 void createDisplayLists(bool reduced=false);
 

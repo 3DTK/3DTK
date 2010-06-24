@@ -77,12 +77,6 @@ inline void Camera::setAngle(float newangle)
 {
   angle = newangle;
 } 
-
-inline int Camera::howManyCams()
-{
-  return numOfCameras;
-}
-  
 inline Color Camera::getColor()
 {
   return camcolor;

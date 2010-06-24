@@ -159,6 +159,9 @@ void DrawPoints(GLenum mode)
 void DrawPath()
 {
   calcPath();
+  calcLookAtPath();
+
+  // draw path
   glBegin(GL_LINE_STRIP);
     for(unsigned int j = 0; j < path_vectorX.size(); j++){
 	 // set the color 
@@ -166,6 +169,16 @@ void DrawPath()
 	 // set the points
 	 glVertex3f(path_vectorX.at(j).x,path_vectorX.at(j).y,path_vectorZ.at(j).y);
     }
+  glEnd();
+  
+  // draw lookat path
+  glBegin(GL_LINE_STRIP);
+  for(unsigned int j = 0; j < lookat_vectorX.size(); j++){
+    //set the color 
+    glColor4d(1.0, 0.0, 0.0, 1.0);
+    //set the points
+    glVertex3f(lookat_vectorX.at(j).x,lookat_vectorX.at(j).y,lookat_vectorZ.at(j).y);
+  }
   glEnd();
 }
 
@@ -222,34 +235,9 @@ void DrawCameras(void)
     }
     // draw the camera
     temp->drawCamera(showBeam);
+    //temp->drawCamera(true);
   }
 }
-
-/**
- * Draw a smooth path passing from all the camera points.
- *
- */
-void DrawLookAtPath()
-{
-  calcLookAtPath();
-  
- //  //Now combining the two path vectors to draw the path.
-   
-  glBegin(GL_LINE_STRIP);
-    for(unsigned int j = 0; j < lookat_vectorX.size(); j++){
-	 //set the color 
-	 glColor4d(1.0, 0.0, 0.0, 1.0);
-	 //set the points
-	 glVertex3f(lookat_vectorX.at(j).x,lookat_vectorX.at(j).y,lookat_vectorZ.at(j).y);
-    }
-  glEnd();
-
-  //repaint the screen and swap the buffers
-  glutSwapBuffers();
- 
- 
-}
-
 
 //-----------------------------------------------------------------------------------
 
@@ -363,7 +351,7 @@ void DisplayItFunc(GLenum mode)
     glEnd();
   }
 
-/*
+
   // if show camera is true then draw cameras.
   if (show_cameras == 1) {
     DrawCameras();
@@ -372,12 +360,12 @@ void DisplayItFunc(GLenum mode)
   // if show path is true the draw path.
   if(show_path == 1) {
     DrawPath();
-    DrawLookAtPath();
   }
   
+
   // for debug purposes only
   // to see the lookat path of our animation
-  calcLookAtPath();
+  //calcLookAtPath();
 
   // enable/disable the camera panel according to the camera Mode
   if (camMode) {
@@ -387,7 +375,7 @@ void DisplayItFunc(GLenum mode)
     camera_panel->disable();
     path_panel->enable();
   }
-*/
+
 
   glPopMatrix();
   // force draw the scene
@@ -609,62 +597,46 @@ void CallBackIdleFunc(void)
   }
 
   // case: path animation
-  static unsigned int itera = 1;
   if(haveToUpdate == 6){
-   
-    //save the animation
-    if(save_animation){
-	 string filename = scandir + "animframe" + to_string(frameNr,4) + ".ppm";
-	 cout << filename << endl;
-	 glDumpWindowPPM(filename.c_str(),0);
-	
+
+    if (path_iterator == 0) {
+      oldcamNavMode = cameraNavMouseMode;  // remember state of old mousenav
+      cameraNavMouseMode = 0;
     }
-    
+
+
+
     //check if the user wants to animate both
     //scan matching and the path at the same
     //time
-  
-    if(animate_both){
-	  anim_jterator += 1;
 
-	 if(!(anim_jterator < (int) MetaMatrix[1].size())){
-	   anim_iterator = 0;
-	   haveToUpdate = 4;
-	   return;
-	 }else
-	   haveToUpdate = 6;
-	 
-	 scanNr = 1;
-	 frameNr = anim_jterator + calcFrameNo();
-	 glutPostRedisplay();
-    }
-    //cout << "itera: " << itera << endl;
-    
-    if(itera < path_vectorX.size()-4){
-	 //call the path animation function
-	 pathAnimate1(itera);
-	 //hide both the cameras and the path
-	 show_cameras = 0;
-	 show_path = 0;
-	 //increase the iteration count
-	 
-	 //itera += div_no -6;
-	 itera += 1;
-	 //cout << "i am here" << endl;
-	  //repaint the screen
-	 glutPostRedisplay();
-    }else{
-	  anim_jterator += 1;
-	  // cout << "i am here instead" << endl;
-	 if(!(anim_jterator < (int) MetaMatrix[1].size())){
-	   anim_iterator = 0;
-	   haveToUpdate = 4;
-	   itera = 1;
-	   return;
-	 }else
-	    haveToUpdate = 6;
-	
-	 
+    //cout << "path_iterator: " << path_iterator << endl;
+    if(path_iterator < path_vectorX.size()){   // standard animation case
+      //call the path animation function
+      pathAnimate1(path_iterator);
+      //hide both the cameras and the path
+      show_cameras = 0;
+      show_path = 0;
+      //increase the iteration count
+
+      path_iterator += 1;
+      //cout << "i am here" << endl;
+      //repaint the screen
+      glutPostRedisplay();
+
+      //save the animation
+      if(save_animation){
+        string filename = scandir + "animframe" + to_string(path_iterator,4) + ".ppm";
+        cout << filename << endl;
+        glDumpWindowPPM(filename.c_str(),0);
+
+      }
+    }else{                             // animation has just ended
+      cameraNavMouseMode = oldcamNavMode;
+      show_cameras = 1;
+      show_path = 1;
+      //cout << "i am here instead" << endl;
+      haveToUpdate = 0;
     }
   }
   
@@ -854,33 +826,35 @@ void callCameraView(int dummy)
 
   // if the camera list is empty then add
   // new cameras at the origin
-  
   if (cam_list.size() == 0) {
-    
+
     Camera *cam1 = new Camera;
     cam1->setRotate(angle1, x_c, y_c, z_c);
-    cam1->addCamera(0,0,0,0,0,0,0,0,0,0);
+    cam1->addCamera(0,0,200,0,0,0,0,0,0,0);
     cam_list.push_back(cam1);
-    
+
   } else {
 
     // else add camera at the same position as
     // the last camera in the list
     Camera *cam2 = new Camera;
     cam2->addCamera(cam_list.at(cam_list.size()-1)->getFX(),
-				cam_list.at(cam_list.size()-1)->getFY(),
-				cam_list.at(cam_list.size()-1)->getFZ(),
-				angle1,
-				x_c,
-				y_c,
-				z_c,
-				cam_list.at(cam_list.size()-1)->getX(),
-				cam_list.at(cam_list.size()-1)->getY(),
-				cam_list.at(cam_list.size()-1)->getZ());
+        cam_list.at(cam_list.size()-1)->getFY(),
+        cam_list.at(cam_list.size()-1)->getFZ(),
+        angle1,
+        x_c,
+        y_c,
+        z_c,
+        cam_list.at(cam_list.size()-1)->getX(),
+        cam_list.at(cam_list.size()-1)->getY(),
+        cam_list.at(cam_list.size()-1)->getZ());
     cam_list.push_back(cam2);
-    
+    printf("AC  %f %f %f \n", cam_list.at(cam_list.size()-1)->getFX(),
+        cam_list.at(cam_list.size()-1)->getFY(),
+        cam_list.at(cam_list.size()-1)->getFZ());
+
   }
-  
+
   // now reset the value of the cam_choice spinner
   cam_spinner->set_int_limits( 1, cam_list.size() );
   cam_spinner->set_int_val(cam_list.size());
@@ -1369,7 +1343,7 @@ void drawRobotPath(int dummy){
 
   //lets loop through the entire frame files to extract the
   //total number of places where the robot has taken the scans from
-  for(unsigned int i = 0; i<Scan::allScans.size(); i++){
+  for(unsigned int i = 0; i<Scan::allScans.size(); i++) {
 
     //temp variable
     double *test, test1[9];
@@ -1405,7 +1379,6 @@ void drawRobotPath(int dummy){
 				  test[12],
 				  test[13] + 150,   // Just raise the eyelevel a bit to see as the robot  
 				  test[14]);       // had seen
-    
     
     //now store it in the cam list vector
     cam_list.push_back(newcam);
@@ -1443,21 +1416,21 @@ int calcFrameNo(){
 
 //----------------------------------------------------------------------------------------------
 
-int calcNoOfPoints(vector<PointXY> vec)
+int calcNoOfPoints(vector<PointXY> vec1, vector<PointXY> vec2)
 {
-  static int noOfPoints = 0; 
-  int distance;
-  
-  for(unsigned int i=0;i<vec.size()-1;i++){
-    
-    if((vec.at(i+1).x - vec.at(i).x)>(vec.at(i+1).y - vec.at(i).y)){
-	 distance = (int)(vec.at(i+1).x - vec.at(i).x);
-    }else{
-	 distance = (int)(vec.at(i+1).y - vec.at(i).y);
-    }
-    noOfPoints += (distance/10);
+  int noOfPoints = 0; 
+
+  double distance = 0.0;
+  double dx, dy, dz;
+  for(unsigned int i=0;i<vec1.size()-1;i++){
+    dx = vec1.at(i+1).x - vec1.at(i).x;
+    dy = vec1.at(i+1).y - vec1.at(i).y;
+    dz = vec2.at(i+1).y - vec2.at(i).y;
+
+    distance += sqrt(dx*dx + dy*dy + dz*dz );
   }
-  return noOfPoints;
+
+  return distance/10;
 }
 
 //-----------------------------------------------------------------

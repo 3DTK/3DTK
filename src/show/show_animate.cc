@@ -7,6 +7,8 @@ using std::cout;
 using std::cerr;
 using std::endl;
 
+static int nr_interpolations = 0;
+
 void calcLookAtPath()
 {
   PointXY temp ;
@@ -16,88 +18,73 @@ void calcLookAtPath()
     	return;
   }
 
-  // note: remember that the focal point we are trying to interpolate
-  // here has the following coordinates in the camera
-  // (x,y,z+focal_length) where
-  //  x = cameras x position
-  //  y = cameras y position
-  //  z = cameras z position
-  //  focal_length = camera's focal length
-  
   // to interpolate with the xy coordinate.
   for (unsigned int i = 0; i < cam_list.size(); i++) {
     temp.x = cam_list.at(i)->getFX();
     temp.y = cam_list.at(i)->getFY();
     if(i < lookat_listXY.size()){
-	 lookat_listXY.at(i).x = temp.x;
-	 lookat_listXY.at(i).y = temp.y;
+      lookat_listXY.at(i).x = temp.x;
+      lookat_listXY.at(i).y = temp.y;
     } else {
-	 lookat_listXY.push_back(temp);
+      lookat_listXY.push_back(temp);
     }
   }
 
-  
+
   // to interpolate with the xz coordinate.
   for (unsigned int i = 0; i < cam_list.size(); i++) {
     temp.x = cam_list.at(i)->getFX();
     temp.y = cam_list.at(i)->getFZ();
-    
+
     if(i < lookat_listXZ.size()) {
-	 lookat_listXZ.at(i).x = temp.x;
-	 lookat_listXZ.at(i).y = temp.y;
+      lookat_listXZ.at(i).x = temp.x;
+      lookat_listXZ.at(i).y = temp.y;
     } else {
-	 lookat_listXZ.push_back(temp);
+      lookat_listXZ.push_back(temp);
     }
   }
 
   // now get the nurbs path for the individual xy and xz plane
-  lookat_vectorX = cam_nurbs_path.getNurbsPath(lookat_listXY, 500);
-  lookat_vectorZ = cam_nurbs_path.getNurbsPath(lookat_listXZ, 500);
+  lookat_vectorX = cam_nurbs_path.getNurbsPath(lookat_listXY, nr_interpolations);
+  lookat_vectorZ = cam_nurbs_path.getNurbsPath(lookat_listXZ, nr_interpolations);
 }
 
 void calcPath()
 {
-  int points1 = 0, points2 = 0;
-  int point;
   PointXY temp ;
  
   // if camera list is empty then return
   if (cam_list.size() == 0) {
     return;
   }
-
-  // to interpolate with the xy coordinate.
-  for(unsigned int i = 0;i < cam_list.size(); i++){
-    temp.x = cam_list.at(i)->getX();
-    temp.y = cam_list.at(i)->getY();
-    if(i<path_listXY.size()){
-	 path_listXY.at(i).x = temp.x;
-	 path_listXY.at(i).y = temp.y;
-    }else{
-	 path_listXY.push_back(temp);
-    }
+// to interpolate with the xy coordinate.
+for(unsigned int i = 0;i < cam_list.size(); i++){
+  temp.x = cam_list.at(i)->getX();
+  temp.y = cam_list.at(i)->getY();
+  if(i<path_listXY.size()){
+    path_listXY.at(i).x = temp.x;
+    path_listXY.at(i).y = temp.y;
+  }else{
+    path_listXY.push_back(temp);
   }
+}
 
   // to interpolate with the xz coordinate.
-  for(unsigned int i=0;i<cam_list.size();i++){
-    temp.x = cam_list.at(i)->getX();
-    temp.y = cam_list.at(i)->getZ();
-    if(i<path_listXZ.size()){
-	 path_listXZ.at(i).x = temp.x;
-	 path_listXZ.at(i).y = temp.y;
-    }else{
-	 path_listXZ.push_back(temp);
-    }
+for(unsigned int i=0;i<cam_list.size();i++){
+  temp.x = cam_list.at(i)->getX();
+  temp.y = cam_list.at(i)->getZ();
+  if(i<path_listXZ.size()){
+    path_listXZ.at(i).x = temp.x;
+    path_listXZ.at(i).y = temp.y;
+  }else{
+    path_listXZ.push_back(temp);
   }
-
-  points1 = calcNoOfPoints(path_listXY);
-  points2 = calcNoOfPoints(path_listXZ);
- 
-  (points1 > points2) ? point = points1 : point = points2;
+}
+  nr_interpolations = calcNoOfPoints(path_listXY, path_listXZ);
  
   // now get the nurbs path for the individual xy and xz plane
-  path_vectorX = cam_nurbs_path.getNurbsPath(path_listXY,point);
-  path_vectorZ = cam_nurbs_path.getNurbsPath(path_listXZ,point);
+  path_vectorX = cam_nurbs_path.getNurbsPath(path_listXY, nr_interpolations);
+  path_vectorZ = cam_nurbs_path.getNurbsPath(path_listXZ, nr_interpolations);
 }
 
 /**
@@ -115,36 +102,20 @@ void pathAnimate1(int i)
     double matrix_quat[4];
     double direction[3];
 
-    //if both path and scan matching needs to be animated then
-    if(animate_both || (!enable_camera_angle)){
+    //another nurbs path for the direction of the camera to lookat is created
+    //using the calckLookAtPath
+    //calcLookAtPath();
 
-	 //the lookat direction matrix would be
-	 direction[0] = path_vectorX.at(i).x - path_vectorX.at(i+3).x;
-	 direction[1] = path_vectorX.at(i).y - path_vectorX.at(i+3).y;
-	 direction[2] = path_vectorZ.at(i).y - path_vectorZ.at(i+3).y;
-	 
-    }else{
-	 
-	 
-	 //another nurbs path for the direction of the camera to lookat is created
-	 //using the calckLookAtPath
-	 calcLookAtPath();
+    //now we have the nurbs path for the lookat points thus
 
-	 //now we have the nurbs path for the lookat points thus
+    //our lookat direction matrix would be
+    direction[0] = path_vectorX.at(i).x - lookat_vectorX.at(i).x;
+    direction[1] = path_vectorX.at(i).y - lookat_vectorX.at(i).y;
+    direction[2] = path_vectorZ.at(i).y - lookat_vectorZ.at(i).y;
 
-	 //our lookat direction matrix would be
-	 direction[0] = path_vectorX.at(i).x - lookat_vectorX.at(i).x;
-	 direction[1] = path_vectorX.at(i).y - lookat_vectorX.at(i).y;
-	 direction[2] = path_vectorZ.at(i).y - lookat_vectorZ.at(i).y;
-	 
-	 
-    }
-    
-   
-    
-    //now call lookAt function to calculate our lookat matrix
-    lookAt(direction, 0,0,0,matrix, up);
-    // lookAt(direction, lookat_vectorX.at(i).x , lookat_vectorX.at(i).y, lookat_vectorZ.at(i).y,matrix,up);
+      //now call lookAt function to calculate our lookat matrix
+    //lookAt(direction, 0,0,0,matrix, up);
+     lookAt(direction, lookat_vectorX.at(i).x , lookat_vectorX.at(i).y, lookat_vectorZ.at(i).y,matrix,up);
     //convert the matrix to quaternion
     Matrix4ToQuaternion(matrix, matrix_quat);
 
@@ -165,10 +136,9 @@ void pathAnimate1(int i)
     X = -path_vectorX.at(i).x;
     Z = -path_vectorZ.at(i).y;
     Y = -path_vectorX.at(i).y;
-    
+
     //signal about repainting the animation scene
     haveToUpdate = 6;
-
   }
 }
 

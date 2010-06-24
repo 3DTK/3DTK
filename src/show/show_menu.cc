@@ -139,7 +139,6 @@ void newMenu()
   cam_spinner->set_alignment( GLUI_ALIGN_LEFT );
   
   glui2->add_button_to_panel(camera_panel, "Add Camera", 0, callCameraView )->set_alignment( GLUI_ALIGN_CENTER );
-  //  glui2->add_button_to_panel(camera_panel, "Edit Camera", 0, callEditCamera )->set_alignment( GLUI_ALIGN_CENTER );
   glui2->add_button_to_panel(camera_panel, "Delete Camera", 0, callDeleteCamera )->set_alignment( GLUI_ALIGN_CENTER );
   
   /******* Other navigation controls**********/
@@ -221,9 +220,6 @@ void newMenu()
   glui1->add_button_to_panel(path_panel, "Load Path   ", 0, loadPath)->set_alignment( GLUI_ALIGN_CENTER);
   glui1->add_button_to_panel(path_panel, "Load Robot P.", 0, drawRobotPath )->set_alignment( GLUI_ALIGN_CENTER );
   glui1->add_separator_to_panel(path_panel);
-  glui1->add_checkbox_to_panel(path_panel, "Animate Scan", &animate_both);
-  glui1->add_statictext_to_panel(path_panel, "     Matching as well");
-  glui1->add_checkbox_to_panel(path_panel, "Enable Camera Angle",&enable_camera_angle);
   glui1->add_checkbox_to_panel(path_panel, "Save Animation", &save_animation);
   glui1->add_button_to_panel(path_panel, "Animate Path", 0, pathAnimate)->set_alignment( GLUI_ALIGN_CENTER);
  
@@ -265,9 +261,8 @@ void newMenu()
  */
 void pathAnimate(int dummy) {
   
-  //  cout << "Called: pathAnimate() .... " << endl;
   //signal that the screen needs to be repainted for animation
   haveToUpdate = 6;
- 
+  path_iterator = 0;
  
 }
