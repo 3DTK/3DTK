@@ -442,13 +442,13 @@ $(BIN)frame_to_graph: $(SRC)frame_to_graph.cc $(SRC)globals.icc
 
 $(BIN)convergence: $(SRC)convergence.cc $(SRC)convergence.h $(SRC)globals.icc
 	echo Compiling and linking Convergence ...
-	$(GPP) $(CFLAGS) -o $(BIN)convergence $(SRC)convergence.cc
+	$(GPP) $(CFLAGS) -I$(SRC)ann_1.1.1_modified/include/ -o $(BIN)convergence $(SRC)convergence.cc
 	echo DONE
 	echo
 
 $(BIN)graph_balancer: $(OBJ)elch6D.o $(SRC)graph_balancer.cc $(SRC)graph.h
 	echo Compiling and linking Graph Balancer ...
-	$(GPP) $(CFLAGS)  -I$(SRC)ann_1.1.1_modified/include/ -lboost_graph-mt -o $(BIN)graph_balancer $(SRC)graph_balancer.cc $(OBJ)elch6D.o 
+	$(GPP) $(CFLAGS) -I$(SRC)ann_1.1.1_modified/include/ -lboost_graph-mt -o $(BIN)graph_balancer $(SRC)graph_balancer.cc $(OBJ)elch6D.o 
 	echo DONE
 	echo
 
