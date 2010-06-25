@@ -31,6 +31,17 @@ using std::exception;
 #include <strings.h>
 #endif
 
+
+#ifdef _MSC_VER
+#ifdef OPENMP
+#define _OPENMP
+#endif
+#endif
+
+#ifdef _OPENMP
+#include <omp.h>
+#endif
+
 /**
  * This vector contains the pointer to a vertex array for
  * all colors (inner vector) and all scans (outer vector)
@@ -173,6 +184,7 @@ int START_X              = 0;
 int START_Y              = 0;
 int START_WIDTH          = 720;
 int START_HEIGHT         = 576;
+GLdouble aspect          = (double)START_WIDTH/(double)START_HEIGHT;          // Current aspect ratio
 
 // Defines for Point Semantic
 #define TYPE_UNKNOWN         0x0000
@@ -516,6 +528,12 @@ void createDisplayLists(bool reduced)
 //#ifdef USE_GL_POINTS
   cout << "Creating display octrees.." << endl;
   octpts = new Show_BOctTree*[Scan::allScans.size()];
+
+#ifdef _OPENMP
+  omp_set_num_threads(OPENMP_NUM_THREADS);
+  omp_set_nested(1);
+#pragma omp parallel for schedule(dynamic)
+#endif
   for(unsigned int i = 0; i < Scan::allScans.size() ; i++) {
     if (reduced) {
       double **pts = new double*[Scan::allScans[i]->get_points_red_size()];
