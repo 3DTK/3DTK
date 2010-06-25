@@ -59,7 +59,6 @@ void DrawPoints(GLenum mode)
 
   // In case of animation
   if(scanNr != -1) {
- cout << "anim start..." << endl;
   unsigned long st = GetCurrentTimeInMilliSec();
 
     for(int iterator = (int)Scan::allScans.size()-1; iterator >= 0; iterator--) {
@@ -93,7 +92,6 @@ void DrawPoints(GLenum mode)
 #endif
       glPopMatrix();
     }
-  cout << "done in " << GetCurrentTimeInMilliSec() - st << endl;
 
   } else {
 
@@ -161,17 +159,21 @@ void DrawPoints(GLenum mode)
  */
 void DrawPath()
 {
+  if(cam_list.size() == 0){
+    	return;
+  }
+
   calcPath();
   calcLookAtPath();
 
   // draw path
   glBegin(GL_LINE_STRIP);
-    for(unsigned int j = 0; j < path_vectorX.size(); j++){
-	 // set the color 
-	 glColor4d(1.0, 1.0, 0.0, 1.0);
-	 // set the points
-	 glVertex3f(path_vectorX.at(j).x,path_vectorX.at(j).y,path_vectorZ.at(j).y);
-    }
+  for(unsigned int j = 0; j < path_vectorX.size(); j++){
+    // set the color 
+    glColor4d(1.0, 1.0, 0.0, 1.0);
+    // set the points
+    glVertex3f(path_vectorX.at(j).x,path_vectorX.at(j).y,path_vectorZ.at(j).y);
+  }
   glEnd();
   
   // draw lookat path
