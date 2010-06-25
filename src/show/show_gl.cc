@@ -59,6 +59,8 @@ void DrawPoints(GLenum mode)
 
   // In case of animation
   if(scanNr != -1) {
+ cout << "anim start..." << endl;
+  unsigned long st = GetCurrentTimeInMilliSec();
 
     for(int iterator = (int)Scan::allScans.size()-1; iterator >= 0; iterator--) {
 
@@ -91,6 +93,7 @@ void DrawPoints(GLenum mode)
 #endif
       glPopMatrix();
     }
+  cout << "done in " << GetCurrentTimeInMilliSec() - st << endl;
 
   } else {
 
@@ -504,6 +507,7 @@ void CallBackDisplayFunc()
   }
 
   glDrawBuffer(GL_BACK);
+  //glDrawBuffer(GL_FRONT);
   // delete framebuffer and z-buffer
 
   //Call the display function
@@ -826,6 +830,21 @@ void callCameraView(int dummy)
 
   // if the camera list is empty then add
   // new cameras at the origin
+  if (dummy == 1) {
+    Camera *cam2 = new Camera;
+    cam2->addCamera(0,0,0,
+        angle1,
+        x_c,
+        y_c,
+        z_c,
+        X,
+        Y,
+        Z);
+    cam_list.push_back(cam2);
+    printf("AC  %f %f %f \n", cam_list.at(cam_list.size()-1)->getFX(),
+        cam_list.at(cam_list.size()-1)->getFY(),
+        cam_list.at(cam_list.size()-1)->getFZ());
+  }else {
   if (cam_list.size() == 0) {
 
     Camera *cam1 = new Camera;
@@ -853,6 +872,7 @@ void callCameraView(int dummy)
         cam_list.at(cam_list.size()-1)->getFY(),
         cam_list.at(cam_list.size()-1)->getFZ());
 
+  }
   }
 
   // now reset the value of the cam_choice spinner
@@ -898,58 +918,58 @@ void CallBackMouseFunc(int button, int state, int x, int y)
   GLint viewport[4];
 
   if(cameraNavMouseMode != 1) {
-   if (state == GLUT_DOWN && (button == GLUT_LEFT_BUTTON || button == GLUT_RIGHT_BUTTON)) {
+    if (state == GLUT_DOWN && (button == GLUT_LEFT_BUTTON || button == GLUT_RIGHT_BUTTON)) {
 
-    if (!showTopView) {
-		
-	 // set up a special picking matrix, drwa to an virt. screen
-	 glGetIntegerv(GL_VIEWPORT, viewport);
-     
-	 glSelectBuffer(BUFSIZE, selectBuf);
-	 (void) glRenderMode(GL_SELECT);
-     
-	 glInitNames();
-	 glPushName(0);
-     
-	 glMatrixMode(GL_PROJECTION);
-	 glPushMatrix();
-	 glLoadIdentity();
-     
-	 gluPickMatrix((GLdouble)x, (GLdouble)(viewport[3]-y), 2.0, 2.0, viewport);
-   gluPerspective(cangle, 1.13, 1.0, 40000.0);
-	 glMatrixMode(GL_MODELVIEW);
-	 DisplayItFunc(GL_SELECT);
-     
-	 glMatrixMode(GL_PROJECTION);
-	 glPopMatrix();
-	 glMatrixMode(GL_MODELVIEW);
+      if (!showTopView) {
 
-	 hits = glRenderMode(GL_RENDER);                       // get hits
-	 ProcessHitsFunc(hits, selectBuf,button);
-	 //	 glutPostRedisplay();
-	
-    } else {
+        // set up a special picking matrix, drwa to an virt. screen
+        glGetIntegerv(GL_VIEWPORT, viewport);
 
-	 glMatrixMode ( GL_PROJECTION );
-	 glPushMatrix();
-	 glLoadIdentity ();
-	 gluPickMatrix((GLdouble)x, (GLdouble)(viewport[3]-y), 3.0, 3.0, viewport);
-	 glOrtho ( -1.13 * pzoom, 1.13 * pzoom,
-			 -1 * pzoom, pzoom,
-			 1.0, 32000.0 );
-	 glMatrixMode ( GL_MODELVIEW );
-	 DisplayItFunc(GL_SELECT);
-	 glMatrixMode(GL_PROJECTION);
-	 glPopMatrix();
-	 glMatrixMode(GL_MODELVIEW);
+        glSelectBuffer(BUFSIZE, selectBuf);
+        (void) glRenderMode(GL_SELECT);
 
-	 hits = glRenderMode(GL_RENDER);                       // get hits
-	 ProcessHitsFunc(hits, selectBuf,button);
-	 
-	 //	 glutPostRedisplay(); 
+        glInitNames();
+        glPushName(0);
 
+        glMatrixMode(GL_PROJECTION);
+        glPushMatrix();
+        glLoadIdentity();
+
+        gluPickMatrix((GLdouble)x, (GLdouble)(viewport[3]-y), 2.0, 2.0, viewport);
+        gluPerspective(cangle, aspect, 1.0, 40000.0);
+        glMatrixMode(GL_MODELVIEW);
+        DisplayItFunc(GL_SELECT);
+
+        glMatrixMode(GL_PROJECTION);
+        glPopMatrix();
+        glMatrixMode(GL_MODELVIEW);
+
+        hits = glRenderMode(GL_RENDER);                       // get hits
+        ProcessHitsFunc(hits, selectBuf,button);
+        //	 glutPostRedisplay();
+
+      } else {
+
+        glMatrixMode ( GL_PROJECTION );
+        glPushMatrix();
+        glLoadIdentity ();
+        gluPickMatrix((GLdouble)x, (GLdouble)(viewport[3]-y), 3.0, 3.0, viewport);
+        glOrtho ( -aspect * pzoom, aspect * pzoom,
+            -1 * pzoom, pzoom,
+            1.0, 32000.0 );
+        glMatrixMode ( GL_MODELVIEW );
+        DisplayItFunc(GL_SELECT);
+        glMatrixMode(GL_PROJECTION);
+        glPopMatrix();
+        glMatrixMode(GL_MODELVIEW);
+
+        hits = glRenderMode(GL_RENDER);                       // get hits
+        ProcessHitsFunc(hits, selectBuf,button);
+
+        //	 glutPostRedisplay(); 
+
+      }
     }
-  }
   } else {
    
     if( state == GLUT_DOWN) {
@@ -1172,6 +1192,7 @@ void glDumpWindowPPM(const char *filename, GLenum mode)
  */
 void CallBackReshapeFunc(int width, int height)
 {
+    aspect = (double)width/(double)height;
   if (!showTopView) {
     // usage of the vsize of a structiewport
     glViewport(0, 0, (GLint)width, (GLint)height);
@@ -1181,7 +1202,7 @@ void CallBackReshapeFunc(int width, int height)
 
     // angle, aspect, near clip, far clip
     // get matrix
-    gluPerspective(cangle, 1.13, 1.0, 40000.0);
+    gluPerspective(cangle, aspect, 1.0, 40000.0);
 
     // now use modelview-matrix as current matrix
     glMatrixMode(GL_MODELVIEW);
@@ -1197,9 +1218,9 @@ void CallBackReshapeFunc(int width, int height)
     glLoadIdentity ();
 
     // get matrix
-    glOrtho ( -1.13 * pzoom, 1.13 * pzoom,
-		    -1 * pzoom, 1 * pzoom,
-		    1.0, 32000.0 );
+	 glOrtho ( -aspect * pzoom, aspect * pzoom,
+			 -1 * pzoom, pzoom,
+			 1.0, 32000.0 );
 
     // now use modelview-matrix as current matrix
     glMatrixMode(GL_MODELVIEW);

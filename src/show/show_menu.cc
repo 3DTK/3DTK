@@ -171,7 +171,7 @@ void newMenu()
   glui1 = GLUI_Master.create_glui("3D_Viewer - Selection");
   window_id_menu1 = glui1->get_glut_window_id();
   glutSetWindow(window_id_menu1);
-  glutPositionWindow(START_X + START_WIDTH + 10, START_Y + 30);
+  glutPositionWindow(START_X + START_WIDTH + 50, START_Y + 30);
   glutSetWindow(window_id);
   glui1->set_main_gfx_window( window_id );
 
