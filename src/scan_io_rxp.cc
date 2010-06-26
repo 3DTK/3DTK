@@ -68,7 +68,11 @@ protected:
             p.x = t.vertex[0]*100.0;
             p.y = t.vertex[2]*100.0;
             p.z = t.vertex[1]*100.0;
-            p.type = 0; // = t.reflectance;
+
+            p.reflectance = t.reflectance;
+            p.amplitude   = t.amplitude;
+            p.deviation   = t.deviation;
+
             o->push_back(p);
         }
     }

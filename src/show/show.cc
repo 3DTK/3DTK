@@ -182,6 +182,8 @@ vector < vector <Scan::AlgoType> > MetaAlgoType;
  */
 int START_X              = 0;
 int START_Y              = 0;
+//int START_WIDTH          = 1475;
+//int START_HEIGHT         = 860;
 int START_WIDTH          = 720;
 int START_HEIGHT         = 576;
 GLdouble aspect          = (double)START_WIDTH/(double)START_HEIGHT;          // Current aspect ratio
@@ -217,6 +219,17 @@ NurbsPath cam_nurbs_path;
 char *path_file_name;
 float flength;
 
+/**
+ * value of the listBox fo Color Value and Colormap
+ */
+int listboxColorVal = 0;
+int listboxColorMapVal = 0;
+ColorManager *cm;
+float mincolor_value = 0.0;
+float maxcolor_value = 0.0;
+unsigned int  types = ColorManager::USE_NONE;
+
+
 #include "show_menu.cc"
 #include "show_animate.cc"
 #include "show_gl.cc"
@@ -236,16 +249,52 @@ void usage(char* prog)
 #endif
   
   cout << endl
-	  << "Usage: " << prog << "  [-s NR] [-e NR] [-m NR] directory" << endl << endl;
+	  << bold << "USAGE " << normal << endl
+	  << "   " << prog << " [options] directory" << endl << endl;
+  cout << bold << "OPTIONS" << normal << endl
 
-  cout << "  -s NR   start at scan NR (i.e., neglects the first NR scans)" << endl
-       << "          [ATTENTION: counting starts with 0]" << endl
-	  << "  -e NR   end after scan NR" << "" << endl
-	  << "  -m NR   set the maximal range distance to NR 'units' (unit of scan data, e.g. cm)" << endl
+	  << bold << "  -e" << normal << " NR, " << bold << "--end=" << normal << "NR" << endl
+	  << "         end after scan NR" << endl
+	  << endl
 	  << bold << "  -f" << normal << " F, " << bold << "--format=" << normal << "F" << endl
 	  << "         using shared library F for input" << endl
-	  << "         (chose F from {uos, uos_map, uos_frames, uos_map_frames, old, rts, rts_map, ifp, riegl_bin, riegl_txt, zahn, ply})" << endl << endl
-	  << endl;
+	  << "         (chose F from {uos, uos_map, uos_frames, uos_map_frames, old, rts, rts_map, ifp, riegl_txt, riegl_bin, zahn, ply, wrl, xyz, zuf, iais, front, x3d, rxp })" << endl
+	  << endl
+	  << bold << "  -m" << normal << " NR, " << bold << "--max=" << normal << "NR" << endl
+	  << "         neglegt all data points with a distance larger than NR 'units'" << endl
+	  << endl
+	  << bold << "  -M" << normal << " NR, " << bold << "--min=" << normal << "NR" << endl
+	  << "         neglegt all data points with a distance smaller than NR 'units'" << endl
+	  << endl
+	  << bold << "  -O" << normal << "NR (optional), " << bold << "--octree=" << normal << "NR (optional)" << endl
+	  << "         use randomized octree based point reduction (pts per voxel=<NR>)" << endl
+	  << "         requires " << bold << "-r" << normal <<" or " << bold << "--reduce" << endl
+	  << endl
+	  << bold << "  -r" << normal << " NR, " << bold << "--reduce=" << normal << "NR" << endl
+	  << "         turns on octree based point reduction (voxel size=<NR>)" << endl
+	  << endl
+	  << bold << "  -s" << normal << " NR, " << bold << "--start=" << normal << "NR" << endl
+	  << "         start at scan NR (i.e., neglects the first NR scans)" << endl
+	  << "         [ATTENTION: counting naturally starts with 0]" << endl
+	  << endl
+	  
+    << bold << "  -R, --reflectance, --reflectivity" << normal << endl
+	  << "         use reflectivity values for coloring point clouds" << endl
+	  << "         only works when using octree display" << endl
+	  << endl
+    << bold << "  -a, --amplitude" << endl << normal
+	  << "         use amplitude values for coloring point clouds" << endl
+	  << "         only works when using octree display" << endl
+	  << endl
+    << bold << "  -d, --deviation" << endl << normal
+	  << "         use amplitude values for coloring point clouds" << endl
+	  << "         only works when using octree display" << endl
+	  << endl
+    << bold << "  -h, --height" << endl << normal
+	  << "         use y-values for coloring point clouds" << endl
+	  << "         only works when using octree display" << endl
+    << endl << endl;
+  
   exit(1);
 }
 
@@ -265,7 +314,7 @@ void usage(char* prog)
  * @return 0, if the parsing was successful, 1 otherwise 
  */
 int parseArgs(int argc,char **argv, string &dir, int& start, int& end, int& maxDist, int& minDist, 
-              double &red, bool &readInitial, int &octree, reader_type &type)
+              double &red, bool &readInitial, int &octree, unsigned int &types , reader_type &type)
 {
   start   = 0;
   end     = -1; // -1 indicates no limitation
@@ -276,7 +325,23 @@ int parseArgs(int argc,char **argv, string &dir, int& start, int& end, int& maxD
   extern int optind;
 
   cout << endl;
-  while ((c = getopt (argc, argv, "f:s:e:r:m:M:p:O:wt")) != -1)
+  static struct option longopts[] = {
+    { "format",          required_argument,   0,  'f' },  
+    { "start",           required_argument,   0,  's' },
+    { "end",             required_argument,   0,  'e' },
+    { "reduce",          required_argument,   0,  'r' },
+    { "max",             required_argument,   0,  'm' },
+    { "min",             required_argument,   0,  'M' },
+    { "octree",          optional_argument,   0,  'O' },
+    { "reflectance",     no_argument,         0,  'R' },
+    { "reflectivity",    no_argument,         0,  'R' },
+    { "amplitude",       no_argument,         0,  'a' },
+    { "deviation",       no_argument,         0,  'd' },
+    { "height",          no_argument,         0,  'h' },
+    { 0,           0,   0,   0}                    // needed, cf. getopt.h
+  };
+
+  while ((c = getopt_long(argc, argv,"f:s:e:r:m:M:O:wtRadh", longopts, NULL)) != -1)
     switch (c)
 	 {
 	 case 's':
@@ -328,11 +393,23 @@ int parseArgs(int argc,char **argv, string &dir, int& start, int& end, int& maxD
 	   }
 	   break;
 	 case '?':
-	   usage(argv[0]);
-	   return 1;
-      default:
-	   abort ();
-      }
+     usage(argv[0]);
+     return 1;
+   case 'R':
+     types |= ColorManager::USE_REFLECTANCE;
+     break;
+   case 'a':
+     types |= ColorManager::USE_AMPLITUDE;
+     break;
+   case 'd':
+     types |= ColorManager::USE_DEVIATION;
+     break;
+   case 'h':
+     types |= ColorManager::USE_HEIGHT;
+     break;
+   default:
+     abort ();
+   }
 
   if (optind != argc-1) {
     cerr << "\n*** Directory missing ***" << endl;
@@ -450,7 +527,7 @@ void readFrames(string dir, int start, int end, bool readInitial, reader_type &t
  * create display lists
  * @to do general framework for color & type definitions
  */
-void createDisplayLists(bool reduced)
+void createDisplayLists(bool reduced, unsigned int types)
 {
 #ifndef USE_GL_POINTS
   for(unsigned int i = 0; i < Scan::allScans.size() ; i++) {
@@ -550,20 +627,50 @@ void createDisplayLists(bool reduced)
       delete[] pts;
 
     } else {
-      unsigned int nrpts = Scan::allScans[i]->get_points()->size();
-      double **pts = new double*[nrpts];
-      for (unsigned int jterator = 0; jterator < nrpts; jterator++) {
-        pts[jterator] = new double[3];
-        pts[jterator][0] = Scan::allScans[i]->get_points()->at(jterator).x;
-        pts[jterator][1] = Scan::allScans[i]->get_points()->at(jterator).y;
-        pts[jterator][2] = Scan::allScans[i]->get_points()->at(jterator).z;
+      if (types != ColorManager::USE_NONE) {
+        unsigned int pointdim = cm->getPointDim();
+        unsigned int nrpts = Scan::allScans[i]->get_points()->size();
+        double **pts = new double*[nrpts];
+        unsigned int counter;
+        for (unsigned int jterator = 0; jterator < nrpts; jterator++) {
+          counter = 0;
+          pts[jterator] = new double[pointdim];
+          pts[jterator][counter++] = Scan::allScans[i]->get_points()->at(jterator).x;
+          pts[jterator][counter++] = Scan::allScans[i]->get_points()->at(jterator).y;
+          pts[jterator][counter++] = Scan::allScans[i]->get_points()->at(jterator).z;
+          if (types & ColorManager::USE_REFLECTANCE) {
+            pts[jterator][counter++] = Scan::allScans[i]->get_points()->at(jterator).reflectance;
+          }
+          if (types & ColorManager::USE_AMPLITUDE) {
+            pts[jterator][counter++] = Scan::allScans[i]->get_points()->at(jterator).amplitude;
+          }
+          if (types & ColorManager::USE_DEVIATION) {  
+            pts[jterator][counter++] = Scan::allScans[i]->get_points()->at(jterator).deviation;
+          }
+
+        }
+        Scan::allScans[i]->clearPoints();
+        octpts[i] = new Show_BOctTree(pts, nrpts , 50.0, pointdim, cm);  //TODO remove magic number
+        for (unsigned int jterator = 0; jterator < nrpts; jterator++) {
+          delete[] pts[jterator];
+        }
+        delete[] pts;
+      } else {
+        unsigned int nrpts = Scan::allScans[i]->get_points()->size();
+        double **pts = new double*[nrpts];
+        for (unsigned int jterator = 0; jterator < nrpts; jterator++) {
+          pts[jterator] = new double[3];
+          pts[jterator][0] = Scan::allScans[i]->get_points()->at(jterator).x;
+          pts[jterator][1] = Scan::allScans[i]->get_points()->at(jterator).y;
+          pts[jterator][2] = Scan::allScans[i]->get_points()->at(jterator).z;
+        }
+        Scan::allScans[i]->clearPoints();
+        octpts[i] = new Show_BOctTree(pts, nrpts , 50.0);  //TODO remove magic number
+        for (unsigned int jterator = 0; jterator < nrpts; jterator++) {
+          delete[] pts[jterator];
+        }
+        delete[] pts;
       }
-      Scan::allScans[i]->clearPoints();
-      octpts[i] = new Show_BOctTree(pts, nrpts , 50.0);  //TODO remove magic number
-      for (unsigned int jterator = 0; jterator < nrpts; jterator++) {
-        delete[] pts[jterator];
-      }
-      delete[] pts;
     }
     cout << "Scan " << i << " octree finished." << endl;
   }
@@ -596,7 +703,7 @@ int main(int argc, char **argv){
 
   path_file_name = new char[255];
   
-  parseArgs(argc, argv, dir, start, end, maxDist, minDist, red, readInitial, octree, type);
+  parseArgs(argc, argv, dir, start, end, maxDist, minDist, red, readInitial, octree, types, type);
   scandir = dir;
 
   // init and create display
@@ -632,6 +739,7 @@ int main(int argc, char **argv){
     // reduction filter for current scan!
     if (red > 0) {
 	    cout << "Reducing Scan No. " << iterator << endl;
+      // TODO do another reduction so reflectance values etc are carried over
       Scan::allScans[iterator]->calcReducedPoints(red, octree);
     } // no copying necessary for show!
   }
@@ -657,12 +765,17 @@ int main(int argc, char **argv){
   }
   traj.close();
   traj.clear();
-  
+ 
+  cm = new ColorManager(4096, types);
   if (red > 0) {
-    createDisplayLists(true);
+    createDisplayLists(true, types);
   } else {
-    createDisplayLists(false);
+    createDisplayLists(false, types);
   }
+  cm->setCurrentType(ColorManager::USE_HEIGHT);
+  ColorMap cmap;
+  cm->setColorMap(cmap);
+  resetMinMax(0);
 
   glutMainLoop();
 

@@ -688,11 +688,8 @@ void Scan::calcReducedPoints(double voxelSize, int nrpts)
   }
 
   BOctTree *oct = new BOctTree(ptsOct, num_pts, voxelSize);
-
-  //  OctTree *oct   // get points from the scan's octree
-  // & store them in the points_red vector as the reduced version of the scan
-  vector<double*> center;
   
+  vector<double*> center;
   center.clear();
 
   if (nrpts > 0) {

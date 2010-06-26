@@ -9,6 +9,7 @@
 #include "../globals.icc"
 #include <omp.h>
 #include "viewcull.h"
+#include "colormanager.h"
 
 #if __GNUC__ > 3 || (__GNUC__ == 3 && __GNUC_MINOR__ >= 4)
   #define POPCOUNT(mask) __builtin_popcount(mask)
@@ -26,9 +27,16 @@ unsigned char _my_popcount_3(unsigned char x) {
 #endif
 
 
-Show_BOctTree::Show_BOctTree(double **pts, int n, double voxelSize)
-  : BOctTree(pts, n, voxelSize)
-{ }
+Show_BOctTree::Show_BOctTree(double **pts, int n, double voxelSize, unsigned int pointdim, ColorManager *_cm)
+  : BOctTree(pts, n, voxelSize, pointdim)
+{
+  cm = _cm;
+  if (cm) {
+    for (int i = 1; i < n; i++) {
+      cm->updateRanges(pts[i]);
+    }
+  }
+}
 
 void Show_BOctTree::displayOctTreeAllCulled() {
   displayOctTreeAll(*root, center, size);
@@ -54,8 +62,9 @@ void Show_BOctTree::displayOctTreeAll(bitoct &node, double *center, double size)
         double *point = &(points[1].v);  // first point
         glBegin(GL_POINTS);
         for(unsigned int iterator = 0; iterator < length; iterator++ ) {
+          if(cm) cm->setColor(point);
           glVertex3f( point[0], point[1], point[2]);
-          point+=3;
+          point+=POINTDIM;
         }
         glEnd();
       } else { // recurse
@@ -94,8 +103,9 @@ void Show_BOctTree::displayOctTreeAllCulled(bitoct &node, double *center, double
           double *point = &(points[1].v);  // first point
           glBegin(GL_POINTS);
           for(unsigned int iterator = 0; iterator < length; iterator++ ) {
+          if(cm) cm->setColor(point);
             glVertex3f( point[0], point[1], point[2]);
-            point+=3;
+            point+=POINTDIM;
           }
           glEnd();
         }
@@ -126,13 +136,15 @@ void Show_BOctTree::displayOctTree(long targetpts, bitoct &node) {
         glBegin(GL_POINTS);
         if (length <= targetpts) {        // more points requested than possible, plot all
           for(unsigned int iterator = 0; iterator < length; iterator++ ) {
+          if(cm) cm->setColor(point);
             glVertex3f( point[0], point[1], point[2]);
-            point+=3;
+            point+=POINTDIM;
           }
         } else {                         // select points to show
           // TODO smarter subselection of points here
-          int each = 3 * (length/targetpts);
+          int each = POINTDIM * (length/targetpts);
           for(unsigned int iterator = 0; iterator < targetpts; iterator++ ) {
+          if(cm) cm->setColor(point);
             glVertex3f( point[0], point[1], point[2]);
             point += each;
           }
@@ -174,13 +186,15 @@ void Show_BOctTree::displayOctTreeCulled(long targetpts, bitoct &node, double *c
           glBegin(GL_POINTS);
           if (length <= targetpts) {        // more points requested than possible, plot all
             for(unsigned int iterator = 0; iterator < length; iterator++ ) {
+          if(cm) cm->setColor(point);
               glVertex3f( point[0], point[1], point[2]);
-              point+=3;
+              point+=POINTDIM;
             }
           } else {                         // select points to show
             // TODO smarter subselection of points here
-            int each = 3 * (length/targetpts);
+            int each = POINTDIM * (length/targetpts);
             for(unsigned int iterator = 0; iterator < targetpts; iterator++ ) {
+          if(cm) cm->setColor(point);
               glVertex3f( point[0], point[1], point[2]);
               point += each;
             }

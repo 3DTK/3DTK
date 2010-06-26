@@ -4,6 +4,7 @@
  * @author Kai Lingemann. Institute of Computer Science, University of Osnabrueck, Germany.
  * @author Andreas Nuechter. Institute of Computer Science, University of Osnabrueck, Germany.
  */
+#include "colormanager.h"
 
 // GUI variables
 
@@ -80,6 +81,12 @@ GLUI_Spinner    *cam_spinner;
 GLUI_Spinner    *anim_spinner;
 /** Panel for the camera controls **/
 GLUI_Panel *cam_panel;
+/** ListBox for choosing which value to map to a color  */
+GLUI_Listbox    *value_listbox;
+/** ListBox for choosing which color map to use  */
+GLUI_Listbox    *colormap_listbox;
+GLUI_Spinner    *mincol_spinner;
+GLUI_Spinner    *maxcol_spinner;
 
 /**
  * Generate the menu for the application.
@@ -236,6 +243,35 @@ void newMenu()
   
  
   glui1->add_separator();
+  
+  /****** Color Controls *****/
+  if (types) {
+    value_listbox = glui1->add_listbox( "Color values:", &listboxColorVal, 0, &mapColorToValue);
+    value_listbox->set_alignment(GLUI_ALIGN_RIGHT);
+    value_listbox->add_item(ColorManager::USE_HEIGHT, "height");
+    if (types & ColorManager::USE_REFLECTANCE) 
+      value_listbox->add_item(ColorManager::USE_REFLECTANCE, "reflectance");
+    if (types & ColorManager::USE_AMPLITUDE) 
+      value_listbox->add_item(ColorManager::USE_AMPLITUDE, "amplitude");
+    if (types & ColorManager::USE_DEVIATION) 
+      value_listbox->add_item(ColorManager::USE_DEVIATION, "deviation");
+
+    colormap_listbox = glui1->add_listbox( "Colormap:   ", &listboxColorMapVal, 1, &changeColorMap);
+    colormap_listbox->set_alignment(GLUI_ALIGN_RIGHT);
+    colormap_listbox->add_item(0, "None");
+    colormap_listbox->add_item(1, "Grey");
+    colormap_listbox->add_item(2, "HSV");
+    colormap_listbox->add_item(3, "Jet");
+    colormap_listbox->add_item(4, "Hot");
+
+    glui1->add_button( "Reset Min/Max", 0, &resetMinMax )->set_alignment( GLUI_ALIGN_CENTER );
+    mincol_spinner = glui1->add_spinner( "Min Val:", GLUI_SPINNER_FLOAT, &mincolor_value, 0, &minmaxChanged);
+    mincol_spinner->set_alignment(GLUI_ALIGN_RIGHT);
+    maxcol_spinner = glui1->add_spinner( "Max Val:", GLUI_SPINNER_FLOAT, &maxcolor_value, 0, &minmaxChanged);
+    maxcol_spinner->set_alignment(GLUI_ALIGN_RIGHT); 
+
+    glui1->add_separator();
+  }
 
   /****** A 'quit' button *****/
   glui1->add_button( "Quit", 0,(GLUI_Update_CB)exit )->set_alignment( GLUI_ALIGN_CENTER );
