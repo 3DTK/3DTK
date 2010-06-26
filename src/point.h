@@ -24,11 +24,11 @@ public:
   /**
    *	Default constructor
    */
-  inline Point() { x = y = z = 0.0; type = 0; };
+  inline Point() { x = y = z = 0.0; type = 0; reflectance = 0.0; amplitude = 0.0; deviation = 0.0; };
   /**
    *	Copy constructor
    */
-  inline Point(const Point& p) { x = p.x; y = p.y; z = p.z; type = p.type; };
+  inline Point(const Point& p) { x = p.x; y = p.y; z = p.z; type = p.type; reflectance = p.reflectance; amplitude = p.amplitude; deviation = p.deviation; };
   /**
    *	Constructor with an array, i.e., vecctor of coordinates
    */
@@ -47,7 +47,11 @@ public:
   double z;
   /// additional information about the point, e.g., semantic 
   int type;
-  
+
+  float reflectance;
+  float amplitude;
+  float deviation;
+
 };
 
 #include "point.icc"

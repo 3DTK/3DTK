@@ -88,7 +88,6 @@ int ScanIO_ifp::readScans(int start, int end, string &dir, int maxDist, int mind
     p.x *= -100;
     p.y *= 100;
     p.z *= 100;
-    p.type = 0;
 
     /*
     p.z += t1;

@@ -114,7 +114,7 @@ class BOctTree {
 
 public:
   
-  BOctTree(double **pts, int n, double _voxelSize);
+  BOctTree(double **pts, int n, double _voxelSize, unsigned int pointdim = 3);
   virtual ~BOctTree();
   
   void GetOctTreeCenter(vector<double*>&c);
@@ -172,6 +172,8 @@ protected:
    * storing the voxel size
    */
   static double voxelSize;
+
+  unsigned int POINTDIM;
 
 };
 

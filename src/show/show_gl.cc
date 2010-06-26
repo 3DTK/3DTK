@@ -59,7 +59,6 @@ void DrawPoints(GLenum mode)
 
   // In case of animation
   if(scanNr != -1) {
-  unsigned long st = GetCurrentTimeInMilliSec();
 
     for(int iterator = (int)Scan::allScans.size()-1; iterator >= 0; iterator--) {
 
@@ -1441,8 +1440,6 @@ int calcFrameNo(){
 
 int calcNoOfPoints(vector<PointXY> vec1, vector<PointXY> vec2)
 {
-  int noOfPoints = 0; 
-
   double distance = 0.0;
   double dx, dy, dz;
   for(unsigned int i=0;i<vec1.size()-1;i++){
@@ -1468,3 +1465,46 @@ void CallBackKeyboardFunc(unsigned char key, int x, int y) {
   InterfaceFunc(key);
 }
 
+void mapColorToValue(int dummy) {
+  cm->setCurrentType(listboxColorVal);
+  resetMinMax(0);
+}
+
+void changeColorMap(int dummy) {
+  ColorMap c;
+  GreyMap gm;
+  HSVMap hsv;
+  JetMap jm;
+  HotMap hot;
+
+  switch (listboxColorMapVal) {
+    case 0:
+      // TODO implement no color map
+      cm->setColorMap(c);
+      break;
+    case 1:
+      cm->setColorMap(gm);
+      break;
+    case 2:
+      cm->setColorMap(hsv);
+      break;
+    case 3:
+      cm->setColorMap(jm);
+      break;
+    case 4:
+      cm->setColorMap(hot);
+      break;
+    default:
+      break;
+  }
+}
+
+void minmaxChanged(int dummy) {
+  cm->setMinMax(mincolor_value, maxcolor_value);
+}
+
+void resetMinMax(int dummy) {
+  mincolor_value = cm->getMin();
+  maxcolor_value = cm->getMax();
+  minmaxChanged(0);
+}

@@ -15,8 +15,10 @@ double BOctTree::voxelSize;
  * @param n number of points
  * @param voxelSize the size of the voxels
  */
-BOctTree::BOctTree(double **pts, int n, double voxelSize) {
+BOctTree::BOctTree(double **pts, int n, double voxelSize, unsigned int pointdim) {
   this->voxelSize = voxelSize;
+
+  this->POINTDIM = pointdim;
 
   double xmin = pts[0][0], xmax = pts[0][0];
   double ymin = pts[0][1], ymax = pts[0][1];
@@ -68,14 +70,14 @@ pointrep* BOctTree::branch(bitoct &node, deque<double*> &splitPoints,
         itr != splitPoints.end(); itr++) {
       points->push_back(*itr);
     }*/
-    pointrep *points = new pointrep[3*splitPoints.size() + 1];
+    pointrep *points = new pointrep[POINTDIM*splitPoints.size() + 1];
     points[0].length = splitPoints.size();
     int i = 1;
     for (deque<double *>::iterator itr = splitPoints.begin(); 
         itr != splitPoints.end(); itr++) {
-      points[i++].v = (*itr)[0];
-      points[i++].v = (*itr)[1];
-      points[i++].v = (*itr)[2];
+      for (unsigned int iterator = 0; iterator < POINTDIM; iterator++) {
+        points[i++].v = (*itr)[iterator];
+      }
     }
     return points; 
   }  
@@ -108,14 +110,14 @@ pointrep* BOctTree::branch(bitoct &node, list<double*> &splitPoints,
         itr != splitPoints.end(); itr++) {
       points->push_back(*itr);
     }*/
-    pointrep *points = new pointrep[3*splitPoints.size() + 1];
+    pointrep *points = new pointrep[POINTDIM*splitPoints.size() + 1];
     points[0].length = splitPoints.size();
     int i = 1;
     for (list<double *>::iterator itr = splitPoints.begin(); 
         itr != splitPoints.end(); itr++) {
-      points[i++].v = (*itr)[0];
-      points[i++].v = (*itr)[1];
-      points[i++].v = (*itr)[2];
+      for (unsigned int iterator = 0; iterator < POINTDIM; iterator++) {
+        points[i++].v = (*itr)[iterator];
+      }
     }
     return points; 
   }  
@@ -148,14 +150,14 @@ pointrep* BOctTree::branch(bitoct &node, vector<double*> &splitPoints,
         itr != splitPoints.end(); itr++) {
       points->push_back(*itr);
     }*/
-    pointrep *points = new pointrep[3*splitPoints.size() + 1];
+    pointrep *points = new pointrep[POINTDIM*splitPoints.size() + 1];
     points[0].length = splitPoints.size();
     int i = 1;
     for (vector<double *>::iterator itr = splitPoints.begin(); 
         itr != splitPoints.end(); itr++) {
-      points[i++].v = (*itr)[0];
-      points[i++].v = (*itr)[1];
-      points[i++].v = (*itr)[2];
+      for (unsigned int iterator = 0; iterator < POINTDIM; iterator++) {
+        points[i++].v = (*itr)[iterator];
+      }
     }
     return points; 
   }  
@@ -488,7 +490,7 @@ long BOctTree::countLeaves(bitoct &node) {
       if (  ( 1 << i ) & node.leaf ) {   // if ith node is leaf
         pointrep *points = children->points;
         long nrpts = points[0].length;
-        result += 3*nrpts + 1;
+        result += POINTDIM*nrpts + 1;
       } else { // recurse
         result += countLeaves(children->node);
       }
@@ -515,7 +517,7 @@ void BOctTree::GetOctTreeRandom(vector<double*>&c, unsigned int ptspervoxel, bit
         unsigned int length = points[0].length;
         if (ptspervoxel >= length) {
           for (unsigned int j = 0; j < length; j++) 
-            c.push_back(&(points[3*j+1].v));
+            c.push_back(&(points[POINTDIM*j+1].v));
 
           ++children; // next child
           continue;
@@ -526,7 +528,7 @@ void BOctTree::GetOctTreeRandom(vector<double*>&c, unsigned int ptspervoxel, bit
           indices.insert(tmp);
         }
         for(set<int>::iterator it = indices.begin(); it != indices.end(); it++) 
-          c.push_back(&(points[3*(*it)+1].v));
+          c.push_back(&(points[POINTDIM*(*it)+1].v));
 
       } else { // recurse
         GetOctTreeRandom(c, ptspervoxel, children->node);
@@ -551,7 +553,7 @@ void BOctTree::GetOctTreeRandom(vector<double*>&c, bitoct &node) {
       if (  ( 1 << i ) & node.leaf ) {   // if ith node is leaf
         pointrep *points = children->points;
         int tmp = rand(points[0].length);
-        double *point = &(points[3*tmp+1].v);
+        double *point = &(points[POINTDIM*tmp+1].v);
         c.push_back(point);
 
       } else { // recurse
@@ -579,10 +581,10 @@ void BOctTree::GetOctTreeCenter(vector<double*>&c, bitoct &node, double *center,
     if (  ( 1 << i ) & node.valid ) {   // if ith node exists
       childcenter(center, ccenter, size, i);  // childrens center
       if (  ( 1 << i ) & node.leaf ) {   // if ith node is leaf get center
-        double * cp = new double[3];
-        cp[0] = ccenter[0];
-        cp[1] = ccenter[1];
-        cp[2] = ccenter[2];
+        double * cp = new double[POINTDIM];
+        for (unsigned int iterator = 0; iterator < POINTDIM; iterator++) {
+          cp[iterator] = ccenter[iterator];
+        }
         c.push_back(cp);
       } else { // recurse
         GetOctTreeCenter(c, children->node, ccenter, size/2.0);

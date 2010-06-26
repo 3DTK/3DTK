@@ -162,7 +162,7 @@ void usage(char* prog)
 	  << endl
 	  << bold << "  -f" << normal << " F, " << bold << "--format=" << normal << "F" << endl
 	  << "         using shared library F for input" << endl
-	  << "         (chose F from {uos, uos_map, uos_frames, uos_map_frames, old, rts, rts_map, ifp, riegl_txt, riegl_bin, zahn, ply})" << endl
+	  << "         (chose F from {uos, uos_map, uos_frames, uos_map_frames, old, rts, rts_map, ifp, riegl_txt, riegl_bin, zahn, ply, wrl, xyz, zuf, iais, front, x3d, rxp })" << endl
 	  << endl
 	  << bold << "  -G" << normal << " NR, " << bold << "--graphSlam6DAlgo=" << normal << "NR   [default: 0]" << endl
 	  << "         selects the minimizazion method for the SLAM matching algorithm" << endl
@@ -208,7 +208,7 @@ void usage(char* prog)
 	  << endl
 	  << bold << "  -O" << normal << "NR (optional), " << bold << "--octree=" << normal << "NR (optional)" << endl
 	  << "         use randomized octree based point reduction (pts per voxel=<NR>)" << endl
-	  << "         requires -r or --reduce" << endl
+	  << "         requires " << bold << "-r" << normal <<" or " << bold << "--reduce" << endl
 	  << endl
 	  << bold << "  -p, --trustpose" << normal << endl
 	  << "         Trust the pose file, do not extrapolate the last transformation." << endl
@@ -731,6 +731,11 @@ int main(int argc, char **argv)
   }
 
   Scan::createTrees(use_cache);
+ 
+  // at this point the points vector can not be used anymore!!!
+  for (int iterator = 0; iterator < end_reduction; iterator++) {
+      Scan::allScans[iterator]->clearPoints();
+  }
 
   icp6Dminimizer *my_icp6Dminimizer = 0;
   switch (algo) {
