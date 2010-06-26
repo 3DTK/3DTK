@@ -10,6 +10,7 @@
 
 
 #include "../Boctree.h"
+#include "colormanager.h"
 
 /**
  * @brief Octree for show
@@ -25,8 +26,8 @@ class Show_BOctTree : public BOctTree  {
 
 public:
 
-  Show_BOctTree(double **pts, int n, double voxelSize);
-  
+  Show_BOctTree(double **pts, int n, double voxelSize, unsigned int pointdim = 3, ColorManager *_cm = 0);
+
   void displayOctTreeCulled(long targetpts);
   void displayOctTreeAllCulled();
 
@@ -36,7 +37,8 @@ protected:
   void displayOctTreeAll( bitoct &node, double *center, double size );
   void displayOctTreeCulled(long targetpts, bitoct &node, double *center, double size );
   void displayOctTreeAllCulled( bitoct &node, double *center, double size );
-  
+
+  ColorManager *cm;
 };
 
 #endif
