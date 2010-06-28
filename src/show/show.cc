@@ -217,7 +217,11 @@ vector<PointXY> path_listXY, path_listXZ, path_vectorX, path_vectorZ;
 vector<PointXY> lookat_listXY, lookat_listXZ, lookat_vectorX, lookat_vectorZ;
 NurbsPath cam_nurbs_path;
 char *path_file_name;
+char *pose_file_name;
 float flength;
+
+/** Factor for saved image size */
+int factor = 1;
 
 /**
  * value of the listBox fo Color Value and Colormap
@@ -672,7 +676,7 @@ void createDisplayLists(bool reduced, unsigned int types)
         delete[] pts;
       }
     }
-    cout << "Scan " << i << " octree finished." << endl;
+    cout << "Scan " << i << " octree finished. Deleting original points.." << endl;
   }
 #endif
 }
@@ -701,7 +705,11 @@ int main(int argc, char **argv){
   reader_type type  = UOS;
   int octree = 0;
 
-  path_file_name = new char[255];
+  pose_file_name = new char[sizeof(GLUI_String)];
+  path_file_name = new char[sizeof(GLUI_String)];
+   
+  strncpy(pose_file_name, "pose.dat", sizeof(GLUI_String));  
+  strncpy(path_file_name, "file.path", sizeof(GLUI_String));  
   
   parseArgs(argc, argv, dir, start, end, maxDist, minDist, red, readInitial, octree, types, type);
   scandir = dir;
@@ -780,4 +788,5 @@ int main(int argc, char **argv){
   glutMainLoop();
 
   delete [] path_file_name;
+  delete [] pose_file_name;
 }

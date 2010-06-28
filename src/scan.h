@@ -92,6 +92,10 @@ public:
 					int thread_num,
 					int rnd, double max_dist_match2,
 					double *centroid_m, double *centroid_d);
+  static void getNoPairsSimple(vector <double*> &diff, 
+					   Scan* Source, Scan* Target, 
+					   int thread_num,
+					   double max_dist_match2);
   static void getPtPairsSimple(vector <PtPair> *pairs, 
 						 Scan* Source, Scan* Target, 
 						 int thread_num,
