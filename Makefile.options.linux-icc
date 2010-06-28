@@ -45,6 +45,11 @@ CFLAGS += -msse3 -mcpu=pentium4
 #
 WITH_SCANRED = WITH_SCANRED    # compile with scan_red program
 
+#
+# SCAN DIFFERENCE options
+# ----------------------
+#
+WITH_SCANDIFF = WITH_SCANDIFF    # compile with scan_red program
 
 #
 # SHOW options
