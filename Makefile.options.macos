@@ -51,6 +51,11 @@ CFLAGS += -O3 -Wall -finline-functions
 #
 WITH_SCANRED = WITH_SCANRED    # compile with scan_red program
 
+#
+# SCAN DIFFERENCE options
+# ----------------------
+#
+WITH_SCANDIFF = WITH_SCANDIFF    # compile with scan_red program
 
 #
 # SHOW options
