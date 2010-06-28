@@ -18,6 +18,10 @@ ifdef WITH_SCANRED
 TARGETS += $(BIN)scan_red
 endif
 
+ifdef WITH_SCANDIFF
+TARGETS += $(BIN)scan_diff
+endif
+
 ifdef WITH_SHOW
 TARGETS += $(BIN)show
 endif
@@ -329,9 +333,17 @@ $(BIN)scan_red: $(OBJ)scanlib.a $(SRC)globals.icc $(SRC)scan_red.cc
 	echo DONE
 	echo
 
+############# SCAN DIFFERENCE ##############
+
+$(BIN)scan_diff: $(OBJ)scanlib.a $(SRC)globals.icc $(SRC)scan_diff.cc 
+	echo Compiling and Linking Scan Difference ...
+	$(GPP) $(CFLAGS) -I$(SRC)ann_1.1.1_modified/include/ -o $(BIN)scan_diff $(SRC)scan_diff.cc $(OBJ)scanlib.a $(OBJ)libANN.a -ldl $(LIBRARIES) 
+	echo DONE
+	echo
+
 ############# SHOW ##############
 
-$(BIN)show: $(OBJ)libglui.a $(SHOWSRC)show.cc $(SHOWSRC)show.h $(SHOWSRC)show.icc $(SHOWSRC)show1.icc $(SHOWSRC)show_menu.cc $(SHOWSRC)show_gl.cc $(SRC)point.h $(SRC)point.icc $(SRC)globals.icc $(OBJ)scan.o $(OBJ)vertexarray.o $(OBJ)camera.o $(OBJ)PathGraph.o $(OBJ)NurbsPath.o $(OBJ)viewcull.o $(OBJ)show_Boctree.o $(OBJ)scanlib.a $(SHOWSRC)show_animate.cc $(OBJ)colormanager.o
+$(BIN)show: $(OBJ)libglui.a $(SHOWSRC)show.cc $(SHOWSRC)show.h $(SHOWSRC)show.icc $(SHOWSRC)show1.icc $(SHOWSRC)show_menu.cc $(SHOWSRC)show_gl.cc $(SHOWSRC)show_animate.cc $(SRC)point.h $(SRC)point.icc $(SRC)globals.icc $(OBJ)scan.o $(OBJ)vertexarray.o $(OBJ)camera.o $(OBJ)PathGraph.o $(OBJ)NurbsPath.o $(OBJ)viewcull.o $(OBJ)show_Boctree.o $(OBJ)scanlib.a $(OBJ)colormanager.o
 	echo Compiling and Linking Show ...
 	$(GPP) $(CFLAGS)  -I$(SRC)ann_1.1.1_modified/include/ -o $(BIN)show -I$(SRC) $(SHOWSRC)show.cc $(OBJ)show_Boctree.o $(OBJ)scanlib.a $(OBJ)vertexarray.o $(OBJ)camera.o $(OBJ)PathGraph.o $(OBJ)NurbsPath.o $(OBJ)viewcull.o $(OBJ)colormanager.o $(OBJ)libglui.a $(OBJ)libANN.a $(LIBRARIES)
 	echo DONE

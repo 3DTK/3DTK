@@ -663,10 +663,10 @@ void Scan::calcReducedPoints(double voxelSize, int nrpts)
 
     int end_loop = points_red_size = (int)points.size();
     for (int i = 0; i < end_loop; i++) {
-      points_red[i] = new double[3];
-      points_red[i][0] = points[i].x;
-      points_red[i][1] = points[i].y;
-      points_red[i][2] = points[i].z;
+	  points_red[i] = new double[3];
+	  points_red[i][0] = points[i].x;
+	  points_red[i][1] = points[i].y;
+	  points_red[i][2] = points[i].z;
     }
     return;
   }
@@ -792,6 +792,50 @@ KDCacheItem* Scan::initCache(const Scan* Source, const Scan* Target)
   return closest;
 }
 
+/**
+ * Calculates Source\Target 
+ * Calculates a set of corresponding point pairs and returns them. It
+ * computes the k-d trees and deletes them after the pairs have been
+ * found. This slow function should be used only for testing
+ * 
+ * @param pairs The resulting point pairs (vector will be filled)
+ * @param Source The scan whose points are matched to Targets' points
+ * @param Target The scan to whiche the opints are matched
+ * @param thread_num number of the thread (for parallelization)
+ * @param rnd randomized point selection
+ * @param max_dist_match2 maximal allowed distance for matching
+ */
+
+void Scan::getNoPairsSimple(vector <double*> &diff, 
+					   Scan* Source, Scan* Target, 
+					   int thread_num,
+					   double max_dist_match2)
+{
+  unsigned int numpts_target;
+  KDtree *kd = 0;
+
+  kd = new KDtree(Target->points_red, Target->points_red_size);
+  numpts_target = Source->points_red_size;
+  
+    cout << "Max: " << max_dist_match2 << endl;
+  for (unsigned int i = 0; i < numpts_target; i++) {
+
+    double p[3];
+    p[0] = Source->points_red[i][0];
+    p[1] = Source->points_red[i][1];
+    p[2] = Source->points_red[i][2];
+
+
+    double *closest = kd->FindClosest(p, max_dist_match2, thread_num);
+    if (!closest) {
+	    diff.push_back(Source->points_red[i]);
+	    //diff.push_back(closest);
+    } 
+  }
+  
+  delete kd;
+  return;
+}
 
 /**
  * Calculates a set of corresponding point pairs and returns them. It

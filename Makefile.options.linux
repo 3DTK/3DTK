@@ -65,6 +65,12 @@ WITH_RIVLIB = True            # compile with rxp file support
 #
 WITH_SCANRED = True           # compile with scan_red program
 
+#
+# SCAN DIFFERENCE options
+# ----------------------
+#
+WITH_SCANDIFF = True    # compile with scan_diff program
+
 
 #
 # SHOW options

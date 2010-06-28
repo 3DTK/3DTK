@@ -21,6 +21,8 @@ GLUI_Spinner    *ps_spinner;
 GLUI_Spinner    *cangle_spinner;
 /** GLUI spinner for the current angle */
 GLUI_Spinner    *pzoom_spinner;
+/** GLUI spinner for the factor for the image size */
+GLUI_Spinner    *image_spinner;
 
 int window_id_menu1, ///< menue window ids
     window_id_menu2; ///< menue window ids
@@ -45,6 +47,10 @@ GLUI_Panel      *wireframe_panel;
 /** Pointer to the panels */
 GLUI_Panel      *path_panel;
 /** Pointer to the panels */
+GLUI_Panel      *pose_panel;
+/** Pointer to the panels */
+GLUI_Panel      *color_panel;
+/** Pointer to the panels */
 GLUI_Panel      *camera_panel;
 /** Pointer to the panels */
 GLUI_Panel      *nav_panel;
@@ -56,6 +62,8 @@ GLUI_Panel      *settings_panel;
 GLUI_Button     *button1;
 /** Pointer to the edit text box*/
 GLUI_EditText *path_filename_edit;
+/** Pointer to the edit text box*/
+GLUI_EditText *pose_filename_edit;
 /** Pointer to the edit text box*/
 GLUI_EditText *flength_edit;
 
@@ -172,7 +180,7 @@ void newMenu()
 
   glui2->add_column_to_panel(nav_panel, false);
   glui2->add_checkbox_to_panel(nav_panel, "MouseNav", &cameraNavMouseMode );
-  glui2->set_glutMouseFunc(CallBackMouseFuncMoving);
+  //glui2->set_glutMouseFunc(CallBackMouseFuncMoving);
   
   /*** Create the right subwindow ***/
   glui1 = GLUI_Master.create_glui("3D_Viewer - Selection");
@@ -191,7 +199,6 @@ void newMenu()
   ps_spinner->set_float_val(pointsize);
   ps_spinner->set_alignment( GLUI_ALIGN_LEFT );  
 
-  glui1->add_separator();
 
   /**** Fog Panel *****/
   
@@ -216,37 +223,11 @@ void newMenu()
   fog_spinner->set_alignment( GLUI_ALIGN_LEFT );  
 
 
-  glui1->add_separator();
-
-  /**** Path panel *******/
-
-  path_panel = glui1->add_panel("Path:");
-  path_filename_edit = glui1->add_edittext_to_panel(path_panel,"File: ",GLUI_EDITTEXT_TEXT, path_file_name);
-  path_filename_edit->set_alignment( GLUI_ALIGN_LEFT );
-  glui1->add_button_to_panel(path_panel, "Save Path   ", 0, savePath)->set_alignment( GLUI_ALIGN_CENTER);
-  glui1->add_button_to_panel(path_panel, "Load Path   ", 0, loadPath)->set_alignment( GLUI_ALIGN_CENTER);
-  glui1->add_button_to_panel(path_panel, "Load Robot P.", 0, drawRobotPath )->set_alignment( GLUI_ALIGN_CENTER );
-  glui1->add_separator_to_panel(path_panel);
-  glui1->add_checkbox_to_panel(path_panel, "Save Animation", &save_animation);
-  glui1->add_button_to_panel(path_panel, "Animate Path", 0, pathAnimate)->set_alignment( GLUI_ALIGN_CENTER);
- 
-  
-  glui1->add_separator();
-
-  /****** Invert button *****/
-  glui1->add_button( "Invert", 0, invertView )->set_alignment( GLUI_ALIGN_CENTER );
-  /****** Animate button *****/
-  anim_spinner = glui1->add_spinner( "Anim delay:", GLUI_SPINNER_INT, &anim_delay);
-  anim_spinner->set_int_limits( 0, 100 );
-  anim_spinner->set_speed( 1 );
-  glui1->add_button( "Animate", 0, startAnimation )->set_alignment( GLUI_ALIGN_CENTER );
-  
- 
-  glui1->add_separator();
-  
   /****** Color Controls *****/
   if (types) {
-    value_listbox = glui1->add_listbox( "Color values:", &listboxColorVal, 0, &mapColorToValue);
+    color_panel = glui1->add_rollout("Color :", false );
+    color_panel ->set_alignment( GLUI_ALIGN_LEFT );
+    value_listbox = glui1->add_listbox_to_panel(color_panel, "Color values:", &listboxColorVal, 0, &mapColorToValue);
     value_listbox->set_alignment(GLUI_ALIGN_RIGHT);
     value_listbox->add_item(ColorManager::USE_HEIGHT, "height");
     if (types & ColorManager::USE_REFLECTANCE) 
@@ -256,7 +237,7 @@ void newMenu()
     if (types & ColorManager::USE_DEVIATION) 
       value_listbox->add_item(ColorManager::USE_DEVIATION, "deviation");
 
-    colormap_listbox = glui1->add_listbox( "Colormap:   ", &listboxColorMapVal, 1, &changeColorMap);
+    colormap_listbox = glui1->add_listbox_to_panel(color_panel, "Colormap:   ", &listboxColorMapVal, 1, &changeColorMap);
     colormap_listbox->set_alignment(GLUI_ALIGN_RIGHT);
     colormap_listbox->add_item(0, "None");
     colormap_listbox->add_item(1, "Grey");
@@ -264,14 +245,58 @@ void newMenu()
     colormap_listbox->add_item(3, "Jet");
     colormap_listbox->add_item(4, "Hot");
 
-    glui1->add_button( "Reset Min/Max", 0, &resetMinMax )->set_alignment( GLUI_ALIGN_CENTER );
-    mincol_spinner = glui1->add_spinner( "Min Val:", GLUI_SPINNER_FLOAT, &mincolor_value, 0, &minmaxChanged);
+    glui1->add_button_to_panel(color_panel, "Reset Min/Max", 0, &resetMinMax )->set_alignment( GLUI_ALIGN_CENTER );
+    mincol_spinner = glui1->add_spinner_to_panel(color_panel, "Min Val:", GLUI_SPINNER_FLOAT, &mincolor_value, 0, &minmaxChanged);
     mincol_spinner->set_alignment(GLUI_ALIGN_RIGHT);
-    maxcol_spinner = glui1->add_spinner( "Max Val:", GLUI_SPINNER_FLOAT, &maxcolor_value, 0, &minmaxChanged);
+    maxcol_spinner = glui1->add_spinner_to_panel(color_panel, "Max Val:", GLUI_SPINNER_FLOAT, &maxcolor_value, 0, &minmaxChanged);
     maxcol_spinner->set_alignment(GLUI_ALIGN_RIGHT); 
 
-    glui1->add_separator();
   }
+  glui1->add_separator();
+ 
+  /****** Invert button *****/
+  glui1->add_button( "Invert", 0, invertView )->set_alignment( GLUI_ALIGN_CENTER );
+  /****** Animate button *****/
+  anim_spinner = glui1->add_spinner( "Anim delay:", GLUI_SPINNER_INT, &anim_delay);
+  anim_spinner->set_int_limits( 0, 100 );
+  anim_spinner->set_speed( 1 );
+  glui1->add_button( "Animate", 0, startAnimation )->set_alignment( GLUI_ALIGN_CENTER );
+  
+  glui1->add_separator();
+
+  
+/**** Path panel *******/
+
+  path_panel = glui1->add_rollout("Camera Path :", false );
+  path_panel ->set_alignment( GLUI_ALIGN_LEFT );
+  path_filename_edit = glui1->add_edittext_to_panel(path_panel,"File: ",GLUI_EDITTEXT_TEXT, path_file_name);
+  path_filename_edit->set_alignment( GLUI_ALIGN_LEFT );
+  glui1->add_button_to_panel(path_panel, "Save Path   ", 0, savePath)->set_alignment( GLUI_ALIGN_CENTER);
+  glui1->add_button_to_panel(path_panel, "Load Path   ", 0, loadPath)->set_alignment( GLUI_ALIGN_CENTER);
+  glui1->add_button_to_panel(path_panel, "Load Robot P.", 0, drawRobotPath )->set_alignment( GLUI_ALIGN_CENTER );
+  glui1->add_separator_to_panel(path_panel);
+  glui1->add_checkbox_to_panel(path_panel, "Save Animation", &save_animation);
+  glui1->add_button_to_panel(path_panel, "Animate Path", 0, pathAnimate)->set_alignment( GLUI_ALIGN_CENTER);
+
+  /**** Position panel *******/
+  
+  pose_panel = glui1->add_rollout("Position :", false );
+  pose_panel ->set_alignment( GLUI_ALIGN_LEFT );
+  pose_filename_edit = glui1->add_edittext_to_panel(pose_panel,"File: ",GLUI_EDITTEXT_TEXT, pose_file_name);
+  pose_filename_edit->set_alignment( GLUI_ALIGN_LEFT );
+  glui1->add_button_to_panel(pose_panel, "Save Pose   ", 0, savePose)->set_alignment( GLUI_ALIGN_CENTER);
+  glui1->add_button_to_panel(pose_panel, "Load Pose   ", 0, loadPose)->set_alignment( GLUI_ALIGN_CENTER);
+  static int dummy3;
+  image_spinner = glui1->add_spinner_to_panel(pose_panel, "Factor :   ",
+GLUI_SPINNER_INT, &factor);
+  image_spinner->set_int_limits( 1, 10 );
+  image_spinner->set_speed( 1 );
+  image_spinner->set_alignment(GLUI_ALIGN_RIGHT);
+  glui1->add_button_to_panel(pose_panel, "Save Image   ", 0, saveImage)->set_alignment( GLUI_ALIGN_CENTER);
+  
+ 
+  glui1->add_separator();
+  
 
   /****** A 'quit' button *****/
   glui1->add_button( "Quit", 0,(GLUI_Update_CB)exit )->set_alignment( GLUI_ALIGN_CENTER );
