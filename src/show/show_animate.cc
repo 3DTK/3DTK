@@ -292,3 +292,94 @@ void loadPath(int dummy) {
 
 }
 
+/**
+ * This function loads the camera pose from the given
+ * pose file.
+ */
+
+void loadPose(int dummy) {
+  //buffer variable
+  char buffer[127];
+  double euler[3];
+  double quat[4];
+  double mouseRotX;
+  double mouseRotY;
+  double cangle;
+
+  //file stream
+  fstream poseFile;
+
+
+  //check if other files are open or not
+  if(poseFile.is_open()){
+
+    //if open then close the file
+    poseFile.clear();
+    poseFile.close();
+       
+  }
+
+  //open the path file
+  poseFile.open(pose_file_name, ios::in);
+  if(!poseFile.good()) {
+    cerr << "Error loading file " << pose_file_name << endl;
+    return;
+  }
+ 
+  // Position 
+  for (unsigned int i = 0; i < 3; poseFile >> euler[i++]);
+  // Orientation
+  for (unsigned int i = 0; i < 4; poseFile >> quat[i++]);
+  poseFile >> mouseRotX >> mouseRotY >> cangle;
+  
+  setView(euler, quat, mouseRotX, mouseRotY, cangle);
+  
+  poseFile.clear();
+  poseFile.close();
+
+} 
+
+/**
+ * This function saves the current camera pose to a file.
+ */
+
+void savePose(int dummy) {
+  cout << "Save" << endl;
+  //output file stream
+  ofstream posefile;
+
+  //open the output file
+  posefile.open(pose_file_name, ios::out);
+   
+  //if file not found then show error
+  if(!posefile){
+    cerr << "Error creating the pose file." << endl;
+    return;
+  }
+
+  //store all the relevant information about the
+  //individual camera position in this file. 
+   
+  posefile << X << " " << Y << " " << Z << endl;
+  for(int i = 0; i < 4; i++) {
+    posefile << quat[i] << " ";
+  }
+	posefile << mouseRotX << " " <<  mouseRotY << " " << cangle << endl;
+  
+  //close the file after writing
+  posefile.clear();
+  posefile.close();
+  
+}
+
+/**
+  * This function saves the current view into a ppm-file with variable scale
+  * factor.
+  */
+void saveImage(int dummy) {
+  static int imageNr = 0;
+  string imageFileName;
+  imageFileName = "image" + to_string(imageNr,3) + ".ppm";
+  glWriteImagePPM(imageFileName.c_str(),factor,0);
+  imageNr++; 
+}

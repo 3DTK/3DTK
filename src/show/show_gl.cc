@@ -1,4 +1,6 @@
 #include "viewcull.h"
+#include <string.h>
+
 bool displaymoving = false;
 bool displaywasmoving = false;
 long ptstodisplay = 100000;
@@ -125,10 +127,13 @@ void DrawPoints(GLenum mode)
         glPushMatrix();
         if (invert)                               // default: white points on black background
           glColor4d(1.0, 1.0, 1.0, 1.0);
+        	   //if (iterator == 0) glColor4d(139.0/255, 69.0/255, 19.0/255, 1.0);
+        	   //if (iterator == 0) glColor4d(0.5, 1.0, 0.5, 1.0);
         else                                      // black points on white background
           glColor4d(0.0, 0.0, 0.0, 1.0);
 
-        //	   if (iterator == 0) glColor4d(0.5, 1.0, 0.5, 1.0);
+        	   //if (iterator == 0) glColor4d(0.5, 1.0, 0.5, 1.0);
+        	   //if (iterator == 0) glColor4d(139.0/255, 69.0/255, 19.0/255, 1.0);
 
         glMultMatrixd(MetaMatrix[iterator].back());
 
@@ -483,6 +488,26 @@ void resetView(int dummy)
   rotButton->reset();
   haveToUpdate = 2;
 }
+
+void setView(double pos[3], double new_quat[4], 
+             double newMouseRotX, double newMouseRotY, double newCangle)
+{
+  X = pos[0];
+  Y = pos[1];
+  Z = pos[2];
+  for(int i = 0; i < 4; i++) {
+    quat[i] = new_quat[i];
+  }
+  cangle = newCangle;
+  mouseRotX = newMouseRotX;
+  mouseRotY = newMouseRotY;
+  //pzoom = pzoom_new;
+  //pzoom_spinner->set_float_val(pzoom);  
+  //rotButton->reset();
+  
+  haveToUpdate = 2;
+}
+  
 
 //---------------------------------------------------------------------------
 /**
@@ -1173,6 +1198,7 @@ void glDumpWindowPPM(const char *filename, GLenum mode)
   for (i = 0; i < win_height; i++) {     // For each row
     for (j = 0; j < win_width; j++) {    // For each column
       for (k = 0; k < RGB; k++) {        // For each RGB component
+        //cout << (RGBA*((win_height-1-i)*win_width+j)+k) << endl;
         ibuffer[l++] = (unsigned char)
           *(buffer + (RGBA*((win_height-1-i)*win_width+j)+k));
       }                                  // end RGB
@@ -1181,6 +1207,109 @@ void glDumpWindowPPM(const char *filename, GLenum mode)
 
   // Write output buffer to the file */
   fp.write((const char*)ibuffer, sizeof(unsigned char) * (RGB * win_width * win_height));
+  fp.close();
+  fp.clear();
+  delete [] buffer;
+  delete [] ibuffer;
+}
+
+/* +++++++++-------------++++++++++++
+ * NAME
+ *   glDumpWindowPPM
+ * DESCRIPTION
+ *   writes an ppm file of the window
+ *   content
+ *   size is scale times the window size
+ * PARAMETERS
+ *   filename
+ * RESULT
+ *  writes the framebuffer content
+ *  to a ppm file
++++++++++-------------++++++++++++ */
+void glWriteImagePPM(const char *filename, int scale, GLenum mode)
+{
+  int m,o,k,l;                  // Counter variables
+  // Get viewport parameters
+  double left, right, top, bottom;
+  double tmp = 1.0/tan(rad(cangle)/2.0);
+ 
+  // Get camera parameters
+  GLdouble savedMatrix[16];
+  glGetDoublev(GL_PROJECTION_MATRIX,savedMatrix);
+   
+  top = 1.0/tmp;
+  bottom = -top;
+  right = 1.25/tmp;
+  left = -right;
+
+  double part_height, part_width;
+  part_width = (right - left)/(double)scale;
+  part_height = (top - bottom)/(double)scale;
+  
+  // Calculate part parameters
+  GLint viewport[4];
+  glGetIntegerv(GL_VIEWPORT, viewport);
+  int win_width = viewport[2];
+  int win_height = viewport[3];
+  int image_width = scale * win_width;
+  int image_height = scale * win_height;
+
+  // Allocate memory for the the frame buffer and output buffer
+  GLubyte *buffer;              // The GL Frame Buffer
+  unsigned char *ibuffer;       // The PPM Output Buffer
+  buffer = new GLubyte[win_width * win_height * RGBA];
+  ibuffer = new unsigned char[image_width * image_height * RGB];
+
+  double height = bottom;
+  for(int i = 0; i < scale; i++) {
+    double width = left;
+    for(int j = 0; j < scale; j++) {
+      glMatrixMode(GL_PROJECTION);
+      glLoadIdentity();
+      string imageFileName;
+      glFrustum(width, width + part_width, height, height + part_height, 1.0, 40000.0); 
+      DisplayItFunc(mode); 
+      //imageFileName = "image" + to_string(i,3) + "_" + to_string(j,3) + ".ppm";
+      //glDumpWindowPPM(imageFileName.c_str(),mode);
+  
+      // Read window contents from GL frame buffer with glReadPixels
+      glFinish();
+      glReadBuffer(mode);
+      glReadPixels(0, 0, win_width, win_height, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
+     
+      // Loop through the frame buffer data, writing to the PPM file.  Be careful
+      //   to account for the frame buffer having 4 bytes per pixel while the
+      //   output file has 3 bytes per pixel
+                                        // end row
+      for (m = 0; m < win_height; m++) {     // For each row
+        for (o = 0; o < win_width; o++) {    // For each column
+          for (k = 0; k < RGB; k++) {        // For each RGB component
+            int l = (k+RGB*(image_width*((scale - 1 - i)*win_height + m) + j*win_width + o));
+            ibuffer[l]   = (unsigned char) *(buffer + (RGBA*((win_height-1-m)*win_width+o)+k));
+          }                                  // end RGB
+        }                                    // end column
+      }
+      width += part_width;
+    }
+    height += part_height;
+  }
+ 
+  glLoadMatrixd(savedMatrix);
+  DisplayItFunc(mode); 
+  // show the rednered scene
+  haveToUpdate=1;
+
+  ofstream fp;                  // The PPM File
+
+  // Open the output file
+  fp.open(filename, ios::out);
+
+  // Write a proper P6 PPM header
+  fp << "P6" << endl << "# CREATOR: 3D_Viewer by Dorit Borrmann, Jacobs University Bremen gGmbH"
+	<< endl << image_width  << " " << image_height << " " << UCHAR_MAX << endl;
+
+  // Write output buffer to the file 
+  fp.write((const char*)ibuffer, sizeof(unsigned char) * (RGB * image_width * image_height));
   fp.close();
   fp.clear();
   delete [] buffer;
@@ -1275,13 +1404,14 @@ void ProcessHitsFunc(GLint hits, GLuint buffer[],int button)
  */
 
 void InterfaceFunc(unsigned char key){
-  
-  path_file_name = path_filename_edit->get_text();
+ 
+  strncpy(path_file_name, path_filename_edit->get_text(), sizeof(GLUI_String));  
+  strncpy(pose_file_name, pose_filename_edit->get_text(), sizeof(GLUI_String));  
   // flength = cam_list.at(cam_choice-1)->getFocalLength();
   if(flength !=0 ){
     cam_list.at(cam_choice-1)->setFocalLength(flength);
   }
- 
+  
   return;
 }
 
