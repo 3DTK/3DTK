@@ -180,7 +180,7 @@ void newMenu()
 
   glui2->add_column_to_panel(nav_panel, false);
   glui2->add_checkbox_to_panel(nav_panel, "MouseNav", &cameraNavMouseMode );
-  //glui2->set_glutMouseFunc(CallBackMouseFuncMoving);
+  glui2->set_glutMouseFunc(CallBackMouseFuncMoving);
   
   /*** Create the right subwindow ***/
   glui1 = GLUI_Master.create_glui("3D_Viewer - Selection");

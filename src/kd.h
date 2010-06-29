@@ -68,7 +68,7 @@ private:
   static KDParams params[MAX_OPENMP_NUM_THREADS];
 #endif //__INTEL_COMPILER
 #else
-  static KDParams params[4];
+  static KDParams params[MAX_OPENMP_NUM_THREADS];
 #endif	
 
   /**

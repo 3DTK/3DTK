@@ -171,6 +171,87 @@
 				Name="VCPostBuildEventTool"
 			/>
 		</Configuration>
+		<Configuration
+			Name="MyDebug|Win32"
+			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
+			IntermediateDirectory="$(ConfigurationName)"
+			ConfigurationType="1"
+			CharacterSet="1"
+			WholeProgramOptimization="1"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				AdditionalOptions="/D MAX_OPENMP_NUM_THREADS=8 /D OPENMP_NUM_THREADS=8"
+				AdditionalIncludeDirectories="&quot;C:\Programme\vigra-1.7.0-src\include&quot;;..\..\..\src\sift\library;..\..\..\src\sift;&quot;..\..\..\Visual_Studio_Projects\6DSLAM\glut-3.7.6\include&quot;;C:\Programme\ftgl\src;&quot;C:\Programme\freetype-2.1.10\include&quot;"
+				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
+				RuntimeLibrary="2"
+				UsePrecompiledHeader="0"
+				WarningLevel="3"
+				Detect64BitPortabilityProblems="true"
+				DebugInformationFormat="3"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLinkerTool"
+				LinkLibraryDependencies="false"
+				AdditionalDependencies="C:\Programme\vigra-1.7.0-src\src\impex\release\vigraimpex.lib"
+				OutputFile="$(ProjectDir)\..\..\..\bin\registerscans.exe"
+				LinkIncremental="1"
+				AdditionalLibraryDirectories="&quot;..\..\..\Visual_Studio_Projects\6DSLAM\glut-3.7.6\lib\glut\Release&quot;;&quot;C:\Programme\vigra-1.7.0-src\src\impex\release\&quot;"
+				GenerateDebugInformation="true"
+				SubSystem="1"
+				OptimizeReferences="2"
+				EnableCOMDATFolding="2"
+				TargetMachine="1"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCWebDeploymentTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
+		</Configuration>
 	</Configurations>
 	<References>
 	</References>
@@ -221,6 +302,14 @@
 				>
 				<FileConfiguration
 					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						AdditionalIncludeDirectories="$(ProjectDir)\..\..\..\src"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="MyDebug|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
