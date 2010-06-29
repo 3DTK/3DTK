@@ -797,9 +797,9 @@ $(BIN)readscan: $(SIFTSRC)programs/readscan.cpp $(BIN)libterscanreg.so $(BIN)lib
 	$(GPP) $(CFLAGS) -o $(BIN)readscan -I$(SIFTSRC)opengl_framework/ -I$(SIFTSRC)library/ -DHAS_PANO13 -I$(APSSRC) $(SIFTSRC)programs/readscan.cpp $(OBJ)liblibsift.a $(BIN)libterscanreg.so $(BIN)libopengl-framework.so -lvigraimpex -lglut -lxml2
 
 ############# TORO ##############
-$(BIN)toro3d: $(SRC)/toro/*
-	cd src/toro && make
-	cp src/toro/toro3d $(BIN)
+$(BIN)toro3d: $(SRC)toro/*
+	cd $(SRC)toro && make
+	cp $(SRC)toro/toro3d $(BIN)
 
 ############# HOG-Man ##############
 $(BIN)hogman3d: $(SRC)hogman/aislib/graph_optimizer_hogman/*
