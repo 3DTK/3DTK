@@ -1,11 +1,18 @@
-#include "colormanager.h"
+#ifdef _MSC_VER
+#define  _USE_MATH_DEFINES
+#include <windows.h>
+#endif
+#ifdef __APPLE__
+#include <GLUT/glut.h>
+#else
 #include <GL/glut.h>
-#include <GL/glu.h>
+#endif
+#include "colormanager.h"
 #include "stdio.h"
 #include "../globals.icc"
 #include "float.h"
 
-#include "math.h"
+//#include "math.h"
 
 ColorManager::ColorManager(unsigned int _buckets, unsigned int types)
   : buckets(_buckets) {

@@ -59,6 +59,8 @@ void DrawPoints(GLenum mode)
   }
   displaywasmoving = displaymoving;
 
+  cout << displaymoving << "   " << fps << endl;
+
   // In case of animation
   if(scanNr != -1) {
 

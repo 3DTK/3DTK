@@ -615,7 +615,7 @@ void createDisplayLists(bool reduced, unsigned int types)
   omp_set_nested(1);
 #pragma omp parallel for schedule(dynamic)
 #endif
-  for(unsigned int i = 0; i < Scan::allScans.size() ; i++) {
+  for(int i = 0; i < (int)Scan::allScans.size() ; i++) {
     if (reduced) {
       double **pts = new double*[Scan::allScans[i]->get_points_red_size()];
       for (unsigned int jterator = 0; jterator < Scan::allScans[i]->get_points_red_size(); jterator++) {

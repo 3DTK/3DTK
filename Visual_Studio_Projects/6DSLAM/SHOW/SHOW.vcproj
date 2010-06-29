@@ -120,13 +120,106 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalOptions="/D _CRT_SECURE_NO_DEPRECATE /D MAX_OPENMP_NUM_THREADS=4 /D OPENMP_NUM_THREADS=4"
+				AdditionalOptions="/D _CRT_SECURE_NO_DEPRECATE /D MAX_OPENMP_NUM_THREADS=4 /D OPENMP_NUM_THREADS=4 /DUSE_GL_POINTS"
 				Optimization="2"
 				InlineFunctionExpansion="2"
 				EnableIntrinsicFunctions="true"
 				OmitFramePointers="true"
 				WholeProgramOptimization="true"
-				AdditionalIncludeDirectories="&quot;..\..\..\Visual_Studio_Projects\6DSLAM\glut-3.7.6\include&quot;"
+				AdditionalIncludeDirectories="..\..\..\src\ann_1.1.1_modified\include;..\..\..\..\src\ann_1.1.1_modified\include;&quot;..\..\..\Visual_Studio_Projects\6DSLAM\glut-3.7.6\include&quot;"
+				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
+				StringPooling="false"
+				MinimalRebuild="false"
+				RuntimeLibrary="0"
+				EnableFunctionLevelLinking="true"
+				EnableEnhancedInstructionSet="2"
+				OpenMP="true"
+				Detect64BitPortabilityProblems="true"
+				DebugInformationFormat="0"
+				OmitDefaultLibName="false"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLinkerTool"
+				RegisterOutput="true"
+				LinkLibraryDependencies="true"
+				OutputFile="$(ProjectDir)\..\..\..\bin\show.exe"
+				LinkIncremental="1"
+				AdditionalLibraryDirectories="..\..\..\Visual_Studio_Projects\6DSLAM\SHOW\glui\Release;&quot;..\..\..\Visual_Studio_Projects\6DSLAM\glut-3.7.6\lib\glut\Release&quot;"
+				IgnoreAllDefaultLibraries="false"
+				GenerateDebugInformation="false"
+				GenerateMapFile="false"
+				SubSystem="1"
+				OptimizeReferences="2"
+				EnableCOMDATFolding="2"
+				OptimizeForWindows98="1"
+				LinkTimeCodeGeneration="1"
+				TargetMachine="1"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCWebDeploymentTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
+		</Configuration>
+		<Configuration
+			Name="MyDebug|Win32"
+			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
+			IntermediateDirectory="$(ConfigurationName)"
+			ConfigurationType="1"
+			UseOfMFC="1"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				AdditionalOptions="/D _CRT_SECURE_NO_DEPRECATE /D MAX_OPENMP_NUM_THREADS=4 /D OPENMP_NUM_THREADS=4 /DUSE_GL_POINTS"
+				Optimization="2"
+				InlineFunctionExpansion="2"
+				EnableIntrinsicFunctions="true"
+				OmitFramePointers="true"
+				WholeProgramOptimization="true"
+				AdditionalIncludeDirectories="..\..\..\src\ann_1.1.1_modified\include;..\..\..\..\src\ann_1.1.1_modified\include;&quot;..\..\..\Visual_Studio_Projects\6DSLAM\glut-3.7.6\include&quot;"
 				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
 				StringPooling="false"
 				MinimalRebuild="false"
@@ -207,6 +300,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\..\src\show\colormanager.cc"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\src\globals.icc"
 				>
 				<FileConfiguration
@@ -219,6 +316,14 @@
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Release|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="MyDebug|Win32"
 					ExcludedFromBuild="true"
 					>
 					<Tool
@@ -285,6 +390,14 @@
 						Name="VCCLCompilerTool"
 					/>
 				</FileConfiguration>
+				<FileConfiguration
+					Name="MyDebug|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+					/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="..\..\..\src\show\show_Boctree.cc"
@@ -309,6 +422,14 @@
 						Name="VCCLCompilerTool"
 					/>
 				</FileConfiguration>
+				<FileConfiguration
+					Name="MyDebug|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+					/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="..\..\..\src\show\show_menu.cc"
@@ -323,6 +444,14 @@
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Release|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="MyDebug|Win32"
 					ExcludedFromBuild="true"
 					>
 					<Tool
@@ -354,6 +483,10 @@
 			</File>
 			<File
 				RelativePath="..\..\..\src\show\camera.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\src\show\colormanager.h"
 				>
 			</File>
 			<File
