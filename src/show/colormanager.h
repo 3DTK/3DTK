@@ -4,10 +4,20 @@
 
 class ColorMap {
   public:
+    enum CM {
+      SOLID = 0,
+      GREY = 1,
+      HSV = 2,
+      JET = 3,
+      HOT = 4,
+    };
+
   virtual void calcColor(float *d, unsigned int i, unsigned int buckets) {
     d[0] = d[1] = d[2] = 1.0;
   }
 
+  static ColorMap getColorMap(CM map);
+  
   /**
    * hue is in [0,360], all others in [0,1]
    */
@@ -68,27 +78,17 @@ class ColorManager {
 
   public: 
   
-    static const unsigned int USE_NONE = 0;
-    static const unsigned int USE_REFLECTANCE = 1;
-    static const unsigned int USE_AMPLITUDE = 2;
-    static const unsigned int USE_DEVIATION = 4;
-    static const unsigned int USE_HEIGHT = 8;
-//  static const unsigned int USE_TYPE = 16
-
-    ColorManager(unsigned int buckets, unsigned int types);
+    ColorManager(unsigned int buckets, unsigned int types, unsigned int pointdim, float *mins, float *maxs);
+    ~ColorManager();
 
     void setColor(double *val);
 
-    void setColorMap(ColorMap &cm);
-    void setCurrentType(unsigned int type);
+    virtual void setColorMap(ColorMap &cm);
+    void setCurrentDim(unsigned int cdim);
 
-    void updateRanges(double *);
 
     void setMinMax(float min, float max);
 
-    inline float getMin() { return min;};
-    inline float getMax() { return max;};
-    inline unsigned int getPointDim() { return pointdim; };
   protected:
 
     unsigned int toIndex(double *val);
@@ -97,7 +97,6 @@ class ColorManager {
     
     unsigned int buckets;
     
-    unsigned int pointdim;
     unsigned int currentdim;
   
     /** stores minima and maxima for each point dimension */ 
@@ -105,16 +104,40 @@ class ColorManager {
     float *maxs;
     /** maps color to value */ 
     float **colormap;
-    /** maps valuetypes to point dimension for easier access */ 
-    int dimensionmap[4];
 
     float min;
     float max;
 
     float extentbuckets;    
 
-   // ColorMap current_cm;
+};
 
+#include "stdio.h"
+class ColorManagerC : public ColorManager {
+  public:
+    ColorManagerC(unsigned int buckets, unsigned int types, unsigned int pointdim, float *mins, float *maxs, float _color[3]) : ColorManager(buckets, types, pointdim, mins, maxs) {
+      color[0] = _color[0];
+      color[1] = _color[1];
+      color[2] = _color[2];
+    }
+
+    virtual void setColorMap(ColorMap &cm) {
+      for (unsigned int i = 0; i < buckets; i++) {
+        cm.calcColor(colormap[i], i, buckets);
+        for (unsigned int j = 0; j < 3; j++) {
+          colormap[i][j] -= color[j];
+          if (colormap[i][j] < 0.0) colormap[i][j] = 0.0;
+        }
+      }
+      cm.calcColor(colormap[buckets], buckets-1, buckets);
+      for (unsigned int j = 0; j < 3; j++) {
+        colormap[buckets][j] -= color[j];
+        if (colormap[buckets][j] < 0.0) colormap[buckets][j] = 0.0;
+      }
+    }
+
+  private:
+    float color[3];
 };
 
 

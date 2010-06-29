@@ -228,10 +228,11 @@ int factor = 1;
  */
 int listboxColorVal = 0;
 int listboxColorMapVal = 0;
-ColorManager *cm;
+ScanColorManager *cm;
 float mincolor_value = 0.0;
 float maxcolor_value = 0.0;
-unsigned int  types = ColorManager::USE_NONE;
+unsigned int  types = ScanColorManager::USE_HEIGHT;
+int scans_colored = 0;
 
 
 #include "show_menu.cc"
@@ -400,16 +401,16 @@ int parseArgs(int argc,char **argv, string &dir, int& start, int& end, int& maxD
      usage(argv[0]);
      return 1;
    case 'R':
-     types |= ColorManager::USE_REFLECTANCE;
+     types |= ScanColorManager::USE_REFLECTANCE;
      break;
    case 'a':
-     types |= ColorManager::USE_AMPLITUDE;
+     types |= ScanColorManager::USE_AMPLITUDE;
      break;
    case 'd':
-     types |= ColorManager::USE_DEVIATION;
+     types |= ScanColorManager::USE_DEVIATION;
      break;
    case 'h':
-     types |= ColorManager::USE_HEIGHT;
+     types |= ScanColorManager::USE_HEIGHT;
      break;
    default:
      abort ();
@@ -631,7 +632,7 @@ void createDisplayLists(bool reduced, unsigned int types)
       delete[] pts;
 
     } else {
-      if (types != ColorManager::USE_NONE) {
+      if (types != ScanColorManager::USE_NONE) {
         unsigned int pointdim = cm->getPointDim();
         unsigned int nrpts = Scan::allScans[i]->get_points()->size();
         double **pts = new double*[nrpts];
@@ -642,13 +643,13 @@ void createDisplayLists(bool reduced, unsigned int types)
           pts[jterator][counter++] = Scan::allScans[i]->get_points()->at(jterator).x;
           pts[jterator][counter++] = Scan::allScans[i]->get_points()->at(jterator).y;
           pts[jterator][counter++] = Scan::allScans[i]->get_points()->at(jterator).z;
-          if (types & ColorManager::USE_REFLECTANCE) {
+          if (types & ScanColorManager::USE_REFLECTANCE) {
             pts[jterator][counter++] = Scan::allScans[i]->get_points()->at(jterator).reflectance;
           }
-          if (types & ColorManager::USE_AMPLITUDE) {
+          if (types & ScanColorManager::USE_AMPLITUDE) {
             pts[jterator][counter++] = Scan::allScans[i]->get_points()->at(jterator).amplitude;
           }
-          if (types & ColorManager::USE_DEVIATION) {  
+          if (types & ScanColorManager::USE_DEVIATION) {  
             pts[jterator][counter++] = Scan::allScans[i]->get_points()->at(jterator).deviation;
           }
 
@@ -774,13 +775,13 @@ int main(int argc, char **argv){
   traj.close();
   traj.clear();
  
-  cm = new ColorManager(4096, types);
+  cm = new ScanColorManager(4096, types);
   if (red > 0) {
     createDisplayLists(true, types);
   } else {
     createDisplayLists(false, types);
   }
-  cm->setCurrentType(ColorManager::USE_HEIGHT);
+  cm->setCurrentType(ScanColorManager::USE_HEIGHT);
   ColorMap cmap;
   cm->setColorMap(cmap);
   resetMinMax(0);
