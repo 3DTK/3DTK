@@ -171,6 +171,87 @@
 				Name="VCPostBuildEventTool"
 			/>
 		</Configuration>
+		<Configuration
+			Name="MyDebug|Win32"
+			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
+			IntermediateDirectory="$(ConfigurationName)"
+			ConfigurationType="1"
+			CharacterSet="1"
+			WholeProgramOptimization="1"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				AdditionalOptions="/D HAS_PANO13"
+				AdditionalIncludeDirectories="C:\Programme\libxml\include;C:\Programme;..\..\..\src\sift\library;&quot;C:\Programme\vigra-1.7.0-src\include&quot;;&quot;..\..\..\src\sift\autopano-sift-c&quot;"
+				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
+				RuntimeLibrary="0"
+				UsePrecompiledHeader="0"
+				WarningLevel="3"
+				Detect64BitPortabilityProblems="true"
+				DebugInformationFormat="0"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLinkerTool"
+				AdditionalDependencies="C:\Programme\lzlib\lib\zlib.lib C:\Programme\vigra-1.7.0-src\src\impex\release\vigraimpex.lib C:\Programme\pano13\Release\libpano.lib C:\Programme\jpeg-8b\libjpeg.lib C:\Programme\lpng142\projects\visualc6\Win32_LIB_Release\libpng.lib C:\Programme\tiff-3.9.4\libtiff\libtiff.lib C:\Programme\libxml\lib\libxml2.lib"
+				OutputFile="$(ProjectDir)\..\..\..\bin\matchsiftfeatures.exe"
+				LinkIncremental="1"
+				AdditionalLibraryDirectories="&quot;C:\Programme\jpeg-8b&quot;;C:\Programme\lpng142\projects\visualc6\Win32_LIB_Release;C:\Programme\pano13\Release;&quot;C:\Programme\tiff-3.9.4\libtiff&quot;;C:\Programme\libxml\lib;C:\Programme\lzlib\lib"
+				IgnoreDefaultLibraryNames="libcmt.lib"
+				GenerateDebugInformation="true"
+				SubSystem="1"
+				OptimizeReferences="2"
+				EnableCOMDATFolding="2"
+				TargetMachine="1"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCWebDeploymentTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
+		</Configuration>
 	</Configurations>
 	<References>
 	</References>
@@ -191,12 +272,28 @@
 						CompileAs="2"
 					/>
 				</FileConfiguration>
+				<FileConfiguration
+					Name="MyDebug|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						CompileAs="2"
+					/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="..\..\..\src\sift\autopano-sift-c\ArrayList.c"
 				>
 				<FileConfiguration
 					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						CompileAs="2"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="MyDebug|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -215,12 +312,28 @@
 						CompileAs="2"
 					/>
 				</FileConfiguration>
+				<FileConfiguration
+					Name="MyDebug|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						CompileAs="2"
+					/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="..\..\..\src\sift\autopano-sift-c\DisplayImage.c"
 				>
 				<FileConfiguration
 					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						CompileAs="2"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="MyDebug|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -263,12 +376,28 @@
 						CompileAs="2"
 					/>
 				</FileConfiguration>
+				<FileConfiguration
+					Name="MyDebug|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						CompileAs="2"
+					/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="..\..\..\src\sift\autopano-sift-c\HashTable.c"
 				>
 				<FileConfiguration
 					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						CompileAs="2"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="MyDebug|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -287,12 +416,28 @@
 						CompileAs="2"
 					/>
 				</FileConfiguration>
+				<FileConfiguration
+					Name="MyDebug|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						CompileAs="2"
+					/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="..\..\..\src\sift\autopano-sift-c\ImageMatchModel.c"
 				>
 				<FileConfiguration
 					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						CompileAs="2"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="MyDebug|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -311,12 +456,28 @@
 						CompileAs="2"
 					/>
 				</FileConfiguration>
+				<FileConfiguration
+					Name="MyDebug|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						CompileAs="2"
+					/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="..\..\..\src\sift\autopano-sift-c\KeypointXML.c"
 				>
 				<FileConfiguration
 					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						CompileAs="2"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="MyDebug|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -335,12 +496,29 @@
 						CompileAs="2"
 					/>
 				</FileConfiguration>
+				<FileConfiguration
+					Name="MyDebug|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						CompileAs="2"
+					/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="..\..\..\src\sift\autopano-sift-c\MatchKeys.c"
 				>
 				<FileConfiguration
 					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						DisableLanguageExtensions="false"
+						CompileAs="2"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="MyDebug|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -376,12 +554,28 @@
 						CompileAs="2"
 					/>
 				</FileConfiguration>
+				<FileConfiguration
+					Name="MyDebug|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						CompileAs="2"
+					/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="..\..\..\src\sift\autopano-sift-c\RANSAC.c"
 				>
 				<FileConfiguration
 					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						CompileAs="2"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="MyDebug|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -400,12 +594,28 @@
 						CompileAs="2"
 					/>
 				</FileConfiguration>
+				<FileConfiguration
+					Name="MyDebug|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						CompileAs="2"
+					/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="..\..\..\src\sift\autopano-sift-c\SimpleMatrix.c"
 				>
 				<FileConfiguration
 					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						CompileAs="2"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="MyDebug|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -424,12 +634,28 @@
 						CompileAs="2"
 					/>
 				</FileConfiguration>
+				<FileConfiguration
+					Name="MyDebug|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						CompileAs="2"
+					/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="..\..\..\src\sift\autopano-sift-c\Utils.c"
 				>
 				<FileConfiguration
 					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						CompileAs="2"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="MyDebug|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"

@@ -56,6 +56,13 @@ typedef dunion pointrep;
  */
 class bitoct{
   public:
+	/*  bitoct() {
+		  child_pointer = 0;
+		  valid = 0;
+		  leaf  = 0;
+	  }
+	  */
+
 #ifdef _MSC_VER
   __int64 child_pointer        : 48;
   unsigned valid              :  8;
@@ -99,7 +106,11 @@ union bitunion {
 
   bitunion(pointrep *p) : points(p) {};
   bitunion(bitoct b) : node(b) {};
-  bitunion() : points(0) {};           // needed for new []
+  bitunion() : points(0) {
+	node.child_pointer = 0;
+	node.leaf = 0;
+	node.valid = 0;
+  };           // needed for new []
 };
 
 /**
