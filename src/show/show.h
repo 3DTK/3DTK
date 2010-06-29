@@ -25,6 +25,7 @@ using std::vector;
 
 #include "PathGraph.h"
 #include "colormanager.h"
+#include "scancolormanager.h"
 
 /** for Glut display mode */
 #define RGBA 4   ///< colors for GLUT display
@@ -90,13 +91,14 @@ void pathAnimate1(int i);
 int calcFrameNo();
 int calcNoOfPoints(vector<PointXY>, vector<PointXY>);
 
-void createDisplayLists(bool reduced=false, unsigned int types = ColorManager::USE_NONE);
+void createDisplayLists(bool reduced=false, unsigned int types = ScanColorManager::USE_NONE);
 
 
 void mapColorToValue(int dummy);
 void changeColorMap(int dummy);
 void minmaxChanged(int dummy);
 void resetMinMax(int dummy);
+void setScansColored(int dummy);
 
 enum { ROTATION_X, ROTATION_RX, ROTATION_Y, ROTATION_RY, ROTATION_Z, ROTATION_RZ };
   /** enumeration for translation */

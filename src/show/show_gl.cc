@@ -362,7 +362,6 @@ void DisplayItFunc(GLenum mode)
     glEnd();
   }
 
-
   // if show camera is true then draw cameras.
   if (show_cameras == 1) {
     DrawCameras();
@@ -374,6 +373,7 @@ void DisplayItFunc(GLenum mode)
   }
   
 
+/*
   // for debug purposes only
   // to see the lookat path of our animation
   //calcLookAtPath();
@@ -386,7 +386,7 @@ void DisplayItFunc(GLenum mode)
     camera_panel->disable();
     path_panel->enable();
   }
-
+*/
 
   glPopMatrix();
   // force draw the scene
@@ -1639,4 +1639,12 @@ void resetMinMax(int dummy) {
   mincolor_value = cm->getMin();
   maxcolor_value = cm->getMax();
   minmaxChanged(0);
+}
+
+void setScansColored(int dummy) {
+  if (scans_colored) {
+    cm->setColorScans(true);
+  } else {
+    cm->setColorScans(false);
+  }
 }
