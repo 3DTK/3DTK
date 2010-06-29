@@ -343,11 +343,15 @@ $(BIN)scan_diff: $(OBJ)scanlib.a $(SRC)globals.icc $(SRC)scan_diff.cc
 
 ############# SHOW ##############
 
-$(BIN)show: $(OBJ)libglui.a $(SHOWSRC)show.cc $(SHOWSRC)show.h $(SHOWSRC)show.icc $(SHOWSRC)show1.icc $(SHOWSRC)show_menu.cc $(SHOWSRC)show_gl.cc $(SHOWSRC)show_animate.cc $(SRC)point.h $(SRC)point.icc $(SRC)globals.icc $(OBJ)scan.o $(OBJ)vertexarray.o $(OBJ)camera.o $(OBJ)PathGraph.o $(OBJ)NurbsPath.o $(OBJ)viewcull.o $(OBJ)show_Boctree.o $(OBJ)scanlib.a $(OBJ)colormanager.o
+$(BIN)show: $(OBJ)libglui.a $(SHOWSRC)show.cc $(SHOWSRC)show.h $(SHOWSRC)show.icc $(SHOWSRC)show1.icc $(SHOWSRC)show_menu.cc $(SHOWSRC)show_gl.cc $(SHOWSRC)show_animate.cc $(SRC)point.h $(SRC)point.icc $(SRC)globals.icc $(OBJ)scan.o $(OBJ)vertexarray.o $(OBJ)camera.o $(OBJ)PathGraph.o $(OBJ)NurbsPath.o $(OBJ)viewcull.o $(OBJ)show_Boctree.o $(OBJ)scanlib.a $(OBJ)colormanager.o $(OBJ)scancolormanager.o
 	echo Compiling and Linking Show ...
-	$(GPP) $(CFLAGS)  -I$(SRC)ann_1.1.1_modified/include/ -o $(BIN)show -I$(SRC) $(SHOWSRC)show.cc $(OBJ)show_Boctree.o $(OBJ)scanlib.a $(OBJ)vertexarray.o $(OBJ)camera.o $(OBJ)PathGraph.o $(OBJ)NurbsPath.o $(OBJ)viewcull.o $(OBJ)colormanager.o $(OBJ)libglui.a $(OBJ)libANN.a $(LIBRARIES)
+	$(GPP) $(CFLAGS)  -I$(SRC)ann_1.1.1_modified/include/ -o $(BIN)show -I$(SRC) $(SHOWSRC)show.cc $(OBJ)show_Boctree.o $(OBJ)scanlib.a $(OBJ)vertexarray.o $(OBJ)camera.o $(OBJ)PathGraph.o $(OBJ)NurbsPath.o $(OBJ)viewcull.o $(OBJ)colormanager.o $(OBJ)scancolormanager.o $(OBJ)libglui.a $(OBJ)libANN.a $(LIBRARIES)
 	echo DONE
 	echo
+
+$(OBJ)scancolormanager.o: $(SHOWSRC)scancolormanager.h $(SHOWSRC)scancolormanager.cc $(SHOWSRC)colormanager.h $(SHOWSRC)colormanager.cc
+	echo Compiling ScanColorManager for Show ...
+	$(GPP) $(CFLAGS) -c -o $(OBJ)scancolormanager.o -I$(SRC) $(SHOWSRC)scancolormanager.cc
 
 $(OBJ)colormanager.o: $(SHOWSRC)colormanager.h $(SHOWSRC)colormanager.cc
 	echo Compiling ColorManager for Show ...

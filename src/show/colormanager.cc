@@ -14,7 +14,7 @@
 
 //#include "math.h"
 
-ColorManager::ColorManager(unsigned int _buckets, unsigned int types)
+ColorManager::ColorManager(unsigned int _buckets, unsigned int types, unsigned int pointdim, float *_mins, float *_maxs)
   : buckets(_buckets) {
   
   colormap = new float*[buckets + 1];  // allow a color more for values equal to max
@@ -23,29 +23,28 @@ ColorManager::ColorManager(unsigned int _buckets, unsigned int types)
   }
   colormap[buckets] = new float[3];
 
-  pointdim = 3; // at least 3 dimensions
-  if (types & USE_REFLECTANCE) pointdim++;
-  if (types & USE_AMPLITUDE)   pointdim++;
-  if (types & USE_DEVIATION)   pointdim++;
 
  
   mins = new float[pointdim];
   maxs = new float[pointdim];
   for (unsigned int i = 0; i < pointdim; i++) { 
-    mins[i] = FLT_MAX;
-    maxs[i] = FLT_MIN;
+    mins[i] = _mins[i];
+    maxs[i] = _maxs[i];
   }
-  dimensionmap[1] = dimensionmap[2] = dimensionmap[3] = 1; // choose height per default  
-  
-  dimensionmap[0] = 1;  // height 
-  
-  int counter = 3;
-  if (types & USE_REFLECTANCE) dimensionmap[1] = counter++;  
-  if (types & USE_AMPLITUDE) dimensionmap[2] = counter++;  
-  if (types & USE_DEVIATION) dimensionmap[3] = counter++;  
 
+  setCurrentDim(0);
 
-  setCurrentType(ColorManager::USE_HEIGHT);
+}
+
+ColorManager::~ColorManager() {
+  for (unsigned int i = 0; i < buckets; i++) {
+    delete[] colormap[i];
+  }
+  delete[] colormap[buckets];
+  delete[] colormap;
+  
+  delete[] mins;
+  delete[] maxs;
 }
 
 void ColorManager::setColorMap(ColorMap &cm) {
@@ -55,28 +54,8 @@ void ColorManager::setColorMap(ColorMap &cm) {
   cm.calcColor(colormap[buckets], buckets-1, buckets);
 }
 
-void ColorManager::setCurrentType(unsigned int type) {
-  switch (type) {
-    case USE_NONE: 
-      // TODO  implement no color map
-      // setColorMap(0);
-     currentdim = dimensionmap[0];
-     break;
-    case USE_HEIGHT: 
-     currentdim = dimensionmap[0];
-     break;
-    case USE_REFLECTANCE: 
-     currentdim = dimensionmap[1];
-     break;
-    case USE_AMPLITUDE: 
-     currentdim = dimensionmap[2];
-     break;
-    case USE_DEVIATION: 
-     currentdim = dimensionmap[3];
-     break;
-   default:
-     break;
-  }
+void ColorManager::setCurrentDim(unsigned int cdim) {
+  currentdim = cdim;
   makeValid();
 }
 
@@ -111,14 +90,6 @@ void ColorManager::makeValid() {
   extentbuckets = extent/(float)buckets;
 }
     
-void ColorManager::updateRanges(double *point) {
-  for (unsigned int i = 0; i < pointdim; i++) {
-    if (point[i] < mins[i]) mins[i] = point[i];
-    if (point[i] > maxs[i]) maxs[i] = point[i];
-  }
-}
-  
-
 
 
 
@@ -171,4 +142,27 @@ void ColorMap::convert_hsv_to_rgb(float hue, float s, float v,
       break;
   }
 
+}
+
+ColorMap ColorMap::getColorMap(CM map) {
+  switch(map) {
+    case SOLID:
+      return ColorMap();
+      break;
+    case GREY:
+      return GreyMap();
+      break;
+    case HSV:
+      return HSVMap();
+      break;
+    case JET:
+      return JetMap();
+      break;
+    case HOT:
+      return HotMap();
+      break;
+    default:
+      return ColorMap();
+      break;
+  }
 }

@@ -229,27 +229,28 @@ void newMenu()
     color_panel ->set_alignment( GLUI_ALIGN_LEFT );
     value_listbox = glui1->add_listbox_to_panel(color_panel, "Color values:", &listboxColorVal, 0, &mapColorToValue);
     value_listbox->set_alignment(GLUI_ALIGN_RIGHT);
-    value_listbox->add_item(ColorManager::USE_HEIGHT, "height");
-    if (types & ColorManager::USE_REFLECTANCE) 
-      value_listbox->add_item(ColorManager::USE_REFLECTANCE, "reflectance");
-    if (types & ColorManager::USE_AMPLITUDE) 
-      value_listbox->add_item(ColorManager::USE_AMPLITUDE, "amplitude");
-    if (types & ColorManager::USE_DEVIATION) 
-      value_listbox->add_item(ColorManager::USE_DEVIATION, "deviation");
+    value_listbox->add_item(ScanColorManager::USE_HEIGHT, "height");
+    if (types & ScanColorManager::USE_REFLECTANCE) 
+      value_listbox->add_item(ScanColorManager::USE_REFLECTANCE, "reflectance");
+    if (types & ScanColorManager::USE_AMPLITUDE) 
+      value_listbox->add_item(ScanColorManager::USE_AMPLITUDE, "amplitude");
+    if (types & ScanColorManager::USE_DEVIATION) 
+      value_listbox->add_item(ScanColorManager::USE_DEVIATION, "deviation");
 
     colormap_listbox = glui1->add_listbox_to_panel(color_panel, "Colormap:   ", &listboxColorMapVal, 1, &changeColorMap);
     colormap_listbox->set_alignment(GLUI_ALIGN_RIGHT);
-    colormap_listbox->add_item(0, "None");
+    colormap_listbox->add_item(0, "Solid");
     colormap_listbox->add_item(1, "Grey");
     colormap_listbox->add_item(2, "HSV");
     colormap_listbox->add_item(3, "Jet");
     colormap_listbox->add_item(4, "Hot");
 
-    glui1->add_button_to_panel(color_panel, "Reset Min/Max", 0, &resetMinMax )->set_alignment( GLUI_ALIGN_CENTER );
+    glui1->add_checkbox_to_panel(color_panel, "Id Scans by Color", &scans_colored, 0,  &setScansColored);
     mincol_spinner = glui1->add_spinner_to_panel(color_panel, "Min Val:", GLUI_SPINNER_FLOAT, &mincolor_value, 0, &minmaxChanged);
     mincol_spinner->set_alignment(GLUI_ALIGN_RIGHT);
     maxcol_spinner = glui1->add_spinner_to_panel(color_panel, "Max Val:", GLUI_SPINNER_FLOAT, &maxcolor_value, 0, &minmaxChanged);
     maxcol_spinner->set_alignment(GLUI_ALIGN_RIGHT); 
+    glui1->add_button_to_panel(color_panel, "Reset Min/Max", 0, &resetMinMax )->set_alignment( GLUI_ALIGN_CENTER );
 
   }
   glui1->add_separator();
