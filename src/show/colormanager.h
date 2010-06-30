@@ -112,7 +112,6 @@ class ColorManager {
 
 };
 
-#include "stdio.h"
 class ColorManagerC : public ColorManager {
   public:
     ColorManagerC(unsigned int buckets, unsigned int types, unsigned int pointdim, float *mins, float *maxs, float _color[3]) : ColorManager(buckets, types, pointdim, mins, maxs) {
