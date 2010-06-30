@@ -16,16 +16,16 @@ class Show_BOctTree;
  */
 class ScanColorManager {
   public:
-    static const unsigned int USE_NONE = 0;
-    static const unsigned int USE_REFLECTANCE = 1;
-    static const unsigned int USE_AMPLITUDE = 2;
-    static const unsigned int USE_DEVIATION = 4;
-    static const unsigned int USE_HEIGHT = 8;
+    static const unsigned int USE_NONE;
+    static const unsigned int USE_REFLECTANCE;
+    static const unsigned int USE_AMPLITUDE;
+    static const unsigned int USE_DEVIATION;
+    static const unsigned int USE_HEIGHT;
 //  static const unsigned int USE_TYPE = 16
 
-    static const unsigned int MODE_STATIC = 0;
-    static const unsigned int MODE_COLOR_SCAN = 1;
-    static const unsigned int MODE_ANIMATION = 2;
+    static const unsigned int MODE_STATIC;
+    static const unsigned int MODE_COLOR_SCAN;
+    static const unsigned int MODE_ANIMATION;
 
     ScanColorManager(unsigned int buckets, unsigned int types);
 

@@ -11,6 +11,17 @@
 #include "show_Boctree.h"
 #include "float.h"
 
+const unsigned int ScanColorManager::USE_NONE = 0;
+const unsigned int ScanColorManager::USE_REFLECTANCE = 1;
+const unsigned int ScanColorManager::USE_AMPLITUDE = 2;
+const unsigned int ScanColorManager::USE_DEVIATION = 4;
+const unsigned int ScanColorManager::USE_HEIGHT = 8;
+
+const unsigned int ScanColorManager::MODE_STATIC = 0;
+const unsigned int ScanColorManager::MODE_COLOR_SCAN = 1;
+const unsigned int ScanColorManager::MODE_ANIMATION = 2;
+
+
 
 float ScanColorManager::colormap[6][3] = {
   {0.3,0,0},
