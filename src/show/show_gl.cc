@@ -324,8 +324,11 @@ void DisplayItFunc(GLenum mode)
       } else {
         test = MetaMatrix[i].back();
       }
-      //glVertex3f(test[12], test[13] + 500, test[14]);
-      glVertex3f(test[12], 2000, test[14]);
+      if(showTopView) {
+        glVertex3f(test[12], 2000, test[14]);
+      } else {
+        glVertex3f(test[12], test[13], test[14]);
+      }
     }
     glEnd();
   }
