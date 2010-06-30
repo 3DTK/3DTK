@@ -60,7 +60,7 @@ int ScanIO_riegl_txt::readScans(int start, int end, string &dir, int maxDist, in
   if (end > -1 && fileCounter > end) return -1; // 'nuf read
 
   
-  poseFileName = dir + "scan" + to_string(fileCounter,3) + ".txt.dat";
+  poseFileName = dir + "scan" + to_string(fileCounter,3) + ".dat";
   scanFileName = dir + "scan" + to_string(fileCounter,3) + ".txt";
     
   scan_in.open(scanFileName.c_str());
@@ -75,10 +75,6 @@ int ScanIO_riegl_txt::readScans(int start, int end, string &dir, int maxDist, in
   
   double rPos[3], rPosTheta[16];
   double inMatrix[16], tMatrix[16];
-  //@@@
-  char dummy[255];
-  pose_in.getline(dummy, 255);
-   
   for (unsigned int i = 0; i < 16; pose_in >> inMatrix[i++]);
   
   // transform input pose
