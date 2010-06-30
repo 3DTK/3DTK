@@ -143,7 +143,6 @@ void ColorMap::convert_hsv_to_rgb(float hue, float s, float v,
   }
 
 }
-
 ColorMap ColorMap::getColorMap(CM map) {
   switch(map) {
     case SOLID:

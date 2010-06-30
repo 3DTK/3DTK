@@ -216,7 +216,6 @@ void Show_BOctTree::displayOctTreeCulled(long targetpts, bitoct &node, double *c
             }
           } else {                         // select points to show
             // TODO smarter subselection of points here
-
             double each = (double)POINTDIM * (double)((double)length/(double)newtargetpts);
             double *p;
             int index;
