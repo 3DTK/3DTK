@@ -77,6 +77,7 @@ int     anim_delay         = 5;
  * haveToUpdate == 3 animation scan matching
  * haveToUpdate == 4 stop animation scan matching
  * haveToUpdate == 6 path animation
+ * haveToUpdate == 7 force redisplay with all points
  */
 int haveToUpdate         = 0;
 

@@ -2,10 +2,13 @@
 #include <string.h>
 #include "scancolormanager.h"
 
-bool displaymoving = false;
-bool displaywasmoving = false;
-long ptstodisplay = 100000;
-double idealfps = 7.0; // program tries to have this framerate
+bool fullydisplayed = true;   // true if all points have been drawn to the screen
+bool showall = false;         // true iff next DrawPoints should redraw scene with all points
+bool mousemoving = false;     // true iff a mouse button has been pressed inside a window, but hs not been released
+bool delayeddisplay = false;  // true iff mouse button callbacks should redraw the scene after button release
+long ptstodisplay = 100000;  
+double idealfps = 10.0;       // program tries to have this framerate
+double lastfps = idealfps;    // last frame rate    
   
 
 /**
@@ -14,18 +17,13 @@ double idealfps = 7.0; // program tries to have this framerate
  */
 void DrawPoints(GLenum mode)
 {
-  static long time;
-  double fps =  1000.0/(GetCurrentTimeInMilliSec() - time);
-  time = GetCurrentTimeInMilliSec();
-  //cout << fps << " "  << ptstodisplay << endl;
-  if (displaywasmoving) {
-    long max = 10000000000;
-    long min = 10000;
-    ptstodisplay *= 1.0 + (fps - idealfps)/idealfps;
-    if (ptstodisplay < min) ptstodisplay = min;
-    else if (ptstodisplay > max) ptstodisplay = max;
-  }
-  displaywasmoving = displaymoving;
+  long time = GetCurrentTimeInMilliSec();
+  long max = 10000000000;
+  long min = 10000;
+  ptstodisplay *= 1.0 + (lastfps - idealfps)/idealfps;
+  if (ptstodisplay < min) ptstodisplay = min;
+  else if (ptstodisplay > max) ptstodisplay = max;
+
 
   // In case of animation
   if(scanNr != -1) {
@@ -43,7 +41,7 @@ void DrawPoints(GLenum mode)
         ExtractFrustum();
           
         cm->selectColors(MetaAlgoType[iterator][frameNr]);
-        if (displaymoving) {
+        if (!showall) {
           octpts[iterator]->displayOctTreeCulled(ptstodisplay);
         } else {
           octpts[iterator]->displayOctTreeAllCulled();
@@ -109,7 +107,7 @@ void DrawPoints(GLenum mode)
 
 #ifdef USE_GL_POINTS
         ExtractFrustum();
-        if (displaymoving) {
+        if (!showall) {
           octpts[iterator]->displayOctTreeCulled(ptstodisplay);
         } else {
           octpts[iterator]->displayOctTreeAllCulled();
@@ -125,6 +123,14 @@ void DrawPoints(GLenum mode)
       }
     }
   }
+
+  if (!showall) {
+    lastfps =  1000.0/(GetCurrentTimeInMilliSec() - time);
+    fullydisplayed = false;
+  } else {
+    fullydisplayed = true;
+  }
+  showall = false;         
 }
 
 /**
@@ -548,6 +554,13 @@ void CallBackIdleFunc(void)
     haveToUpdate = 0;
     return;
   }
+  // case: display is invalid - update it with all points
+  if (haveToUpdate == 7) {
+    showall = true;
+    glutPostRedisplay();
+    haveToUpdate = 0;
+    return;
+  }
 
   // case: camera angle is changed - instead of repeating code call Reshape,
   // since these OpenGL commands are the same
@@ -897,13 +910,32 @@ void callCameraView(int dummy)
 void CallBackMouseFuncMoving(int button, int state, int x, int y)
 {
 
-    if( state == GLUT_DOWN) {
-      displaymoving = true;
-    } else {
-      displaymoving = false;
-      if (displaywasmoving)      
-        haveToUpdate = 1;
+  if( state == GLUT_DOWN) {
+    mousemoving = true;
+  } else {
+    mousemoving = false;
+    if (delayeddisplay) {
+      delayeddisplay = false;
+      if (fullydisplayed) return;
+      haveToUpdate = 7;
     }
+  }
+}
+
+
+void CallBackEntryFunc(int state) {
+  if (state == GLUT_LEFT) {
+      if (mousemoving) {  // mouse button was pressed, delay redisplay
+        delayeddisplay = true;
+      } 
+      else {
+        if (fullydisplayed ) return;
+        haveToUpdate = 7;
+      }
+  } else if (state == GLUT_ENTERED) {
+      showall = false;
+  }
+  
 }
 
 /**
@@ -937,6 +969,7 @@ void CallBackMouseFunc(int button, int state, int x, int y)
         gluPickMatrix((GLdouble)x, (GLdouble)(viewport[3]-y), 2.0, 2.0, viewport);
         gluPerspective(cangle, aspect, 1.0, 40000.0);
         glMatrixMode(GL_MODELVIEW);
+        showall = true;
         DisplayItFunc(GL_SELECT);
 
         glMatrixMode(GL_PROJECTION);
@@ -976,10 +1009,15 @@ void CallBackMouseFunc(int button, int state, int x, int y)
       mouseNavX = x;
       mouseNavY = y;
       mouseNavButton = button;
-      displaymoving = true;
+      
+      mousemoving = true;
     } else {
-      displaymoving = false;
-      haveToUpdate = 1;
+      mousemoving = false;
+      if (delayeddisplay) {
+        delayeddisplay = false;
+        if (fullydisplayed) return;
+        haveToUpdate = 7;
+      }
     }
   }
 }
@@ -1064,6 +1102,7 @@ void initScreenWindow()
   glutKeyboardFunc ( CallBackKeyboardFunc);
   glutMotionFunc ( CallBackMouseMotionFunc); 
   glutSpecialFunc ( CallBackSpecialFunc);
+  glutEntryFunc ( CallBackEntryFunc);
   GLUI_Master.set_glutReshapeFunc( CallBackReshapeFunc );
   GLUI_Master.set_glutIdleFunc( CallBackIdleFunc );
 
@@ -1240,7 +1279,8 @@ void glWriteImagePPM(const char *filename, int scale, GLenum mode)
       glMatrixMode(GL_PROJECTION);
       glLoadIdentity();
       string imageFileName;
-      glFrustum(width, width + part_width, height, height + part_height, 1.0, 40000.0); 
+      glFrustum(width, width + part_width, height, height + part_height, 1.0, 40000.0);
+      showall = true;
       DisplayItFunc(mode); 
       //imageFileName = "image" + to_string(i,3) + "_" + to_string(j,3) + ".ppm";
       //glDumpWindowPPM(imageFileName.c_str(),mode);
@@ -1268,9 +1308,10 @@ void glWriteImagePPM(const char *filename, int scale, GLenum mode)
   }
  
   glLoadMatrixd(savedMatrix);
+  showall = true;
   DisplayItFunc(mode); 
   // show the rednered scene
-  haveToUpdate=1;
+  haveToUpdate=7;
 
   ofstream fp;                  // The PPM File
 
@@ -1394,6 +1435,7 @@ void CallBackSpecialFunc(int key , int x, int y) {
   cout << "Called: CallBackSpecialFunc() ... " << endl;
   // return;
 }
+
 
 
 //--------------------------------------------------------------

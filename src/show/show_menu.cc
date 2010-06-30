@@ -108,6 +108,7 @@ void newMenu()
   glutSetWindow(window_id_menu2);
 
   glutPositionWindow(START_X, START_Y + START_HEIGHT + 65);
+  glutEntryFunc ( CallBackEntryFunc);
   glutSetWindow(window_id);
   glui2->set_main_gfx_window( window_id );
 
@@ -187,6 +188,7 @@ void newMenu()
   window_id_menu1 = glui1->get_glut_window_id();
   glutSetWindow(window_id_menu1);
   glutPositionWindow(START_X + START_WIDTH + 50, START_Y + 30);
+  glutEntryFunc ( CallBackEntryFunc);
   glutSetWindow(window_id);
   glui1->set_main_gfx_window( window_id );
 
@@ -227,24 +229,29 @@ void newMenu()
   if (types) {
     color_panel = glui1->add_rollout("Color :", false );
     color_panel ->set_alignment( GLUI_ALIGN_LEFT );
-    value_listbox = glui1->add_listbox_to_panel(color_panel, "Color values:", &listboxColorVal, 0, &mapColorToValue);
-    value_listbox->set_alignment(GLUI_ALIGN_RIGHT);
-    value_listbox->add_item(ScanColorManager::USE_HEIGHT, "height");
-    if (types & ScanColorManager::USE_REFLECTANCE) 
-      value_listbox->add_item(ScanColorManager::USE_REFLECTANCE, "reflectance");
-    if (types & ScanColorManager::USE_AMPLITUDE) 
-      value_listbox->add_item(ScanColorManager::USE_AMPLITUDE, "amplitude");
-    if (types & ScanColorManager::USE_DEVIATION) 
-      value_listbox->add_item(ScanColorManager::USE_DEVIATION, "deviation");
 
-    colormap_listbox = glui1->add_listbox_to_panel(color_panel, "Colormap:   ", &listboxColorMapVal, 1, &changeColorMap);
-    colormap_listbox->set_alignment(GLUI_ALIGN_RIGHT);
-    colormap_listbox->add_item(0, "Solid");
-    colormap_listbox->add_item(1, "Grey");
-    colormap_listbox->add_item(2, "HSV");
-    colormap_listbox->add_item(3, "Jet");
-    colormap_listbox->add_item(4, "Hot");
+    GLUI_Panel *color_ro = glui1->add_rollout_to_panel(color_panel, "Color values:");
+    color_ro->set_alignment(GLUI_ALIGN_LEFT);
 
+    GLUI_RadioGroup *color_rog = glui1->add_radiogroup_to_panel( color_ro, &listboxColorVal, 0, &mapColorToValue );
+    glui1->add_radiobutton_to_group( color_rog, "height");
+    GLUI_RadioButton *rbrefl =  glui1->add_radiobutton_to_group( color_rog, "reflectance");
+    GLUI_RadioButton *rbampl = glui1->add_radiobutton_to_group( color_rog, "amplitude");
+    GLUI_RadioButton *rbdevi = glui1->add_radiobutton_to_group( color_rog, "deviation");
+    if (!(types & ScanColorManager::USE_REFLECTANCE)) rbrefl->disable(); 
+    if (!(types & ScanColorManager::USE_AMPLITUDE)) rbampl->disable();
+    if (!(types & ScanColorManager::USE_DEVIATION)) rbdevi->disable(); 
+    
+    GLUI_Panel *colorm_ro = glui1->add_rollout_to_panel(color_panel, "Colormap:");
+    colorm_ro->set_alignment(GLUI_ALIGN_LEFT);
+
+    GLUI_RadioGroup *colorm_rog = glui1->add_radiogroup_to_panel(colorm_ro, &listboxColorMapVal, 0, &changeColorMap);
+    glui1->add_radiobutton_to_group(colorm_rog, "Solid");
+    glui1->add_radiobutton_to_group(colorm_rog, "Grey");
+    glui1->add_radiobutton_to_group(colorm_rog, "HSV");
+    glui1->add_radiobutton_to_group(colorm_rog, "Jet");
+    glui1->add_radiobutton_to_group(colorm_rog, "Hot");
+    
     glui1->add_checkbox_to_panel(color_panel, "Id Scans by Color", &scans_colored, 0,  &setScansColored);
     mincol_spinner = glui1->add_spinner_to_panel(color_panel, "Min Val:", GLUI_SPINNER_FLOAT, &mincolor_value, 0, &minmaxChanged);
     mincol_spinner->set_alignment(GLUI_ALIGN_RIGHT);
@@ -302,6 +309,7 @@ GLUI_SPINNER_INT, &factor);
   /****** A 'quit' button *****/
   glui1->add_button( "Quit", 0,(GLUI_Update_CB)exit )->set_alignment( GLUI_ALIGN_CENTER );
 
+  glui1->set_glutMouseFunc(CallBackMouseFuncMoving);
   /**** Link windows to GLUI, and register idle callback ******/  
   glutSetWindow(window_id);
   glui1->set_main_gfx_window( window_id );  // right

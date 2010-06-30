@@ -84,6 +84,7 @@ void CallBackMouseFunc(int button, int state, int x, int y);
 void CallBackMouseFuncMoving(int button, int state, int x, int y);
 void CallBackMouseMotionFunc(int x, int y);
 void CallBackSpecialFunc(int key, int x, int y);
+void CallBackEntryFunc(int state);
 void InterfaceFunc(unsigned char key);
 void calcLookAtPath();
 void drawRobotPath(int dummy);
