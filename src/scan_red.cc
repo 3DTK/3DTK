@@ -232,7 +232,7 @@ int parseArgs(int argc, char **argv, string &dir, double &red,
 int main(int argc, char **argv)
 {
 
-  cout << "(c) UJacobs University Bremen, gGmbH, 2010" << endl << endl;
+  cout << "(c) Jacobs University Bremen, gGmbH, 2010" << endl << endl;
   
   if (argc <= 1) {
     usage(argv[0]);
@@ -276,7 +276,7 @@ int main(int argc, char **argv)
       // reduction filter for current scan!
     Scan::allScans[0]->calcReducedPoints(red, octree);
     
-	  cout << "Writing Scan No. " << fileNr ;
+    cout << "Writing Scan No. " << fileNr ;
     cout << " with " << Scan::allScans[0]->get_points_red_size() << " points" << endl; 
     string scanFileName;
     string poseFileName;

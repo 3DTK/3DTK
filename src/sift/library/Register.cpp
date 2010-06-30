@@ -517,12 +517,13 @@ bool Register::registerSet(FeatureMatchSet *set, PanoramaMap *map1, PanoramaMap 
 
 	
 	if (
-			mode == ALL 
-				|| 
-			(mode == MAXIMUM && mode_maximum > (countm * (countm - 1) * (countm - 2)) / 6)
+			mode == ALL
+			//@@@
+			//				|| 
+			//			(mode == MAXIMUM && mode_maximum > (countm * (countm - 1) * (countm - 2)) / 6)
 		) {
 
-//			cout << "Going through all points...\n";
+			cout << "Going through all points...\n";
 			for (int p1 = 0 ; p1 < countm - 2 ; p1++) {
 				for(int p2 = p1 + 1 ; p2 < countm - 1 ; p2++) {
 					for (int p3 = p2 + 1 ; p3 < countm ; p3++) {
