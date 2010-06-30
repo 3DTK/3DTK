@@ -345,13 +345,13 @@ $(BIN)scan_diff: $(OBJ)scanlib.a $(SRC)globals.icc $(SRC)scan_diff.cc
 
 $(BIN)show: $(OBJ)libglui.a $(SHOWSRC)show.cc $(SHOWSRC)show.h $(SHOWSRC)show.icc $(SHOWSRC)show1.icc $(SHOWSRC)show_menu.cc $(SHOWSRC)show_gl.cc $(SHOWSRC)show_animate.cc $(SRC)point.h $(SRC)point.icc $(SRC)globals.icc $(OBJ)scan.o $(OBJ)vertexarray.o $(OBJ)camera.o $(OBJ)PathGraph.o $(OBJ)NurbsPath.o $(OBJ)viewcull.o $(OBJ)show_Boctree.o $(OBJ)scanlib.a $(OBJ)colormanager.o $(OBJ)scancolormanager.o
 	echo Compiling and Linking Show ...
-	$(GPP) $(CFLAGS)  -I$(SRC)ann_1.1.1_modified/include/ -o $(BIN)show -I$(SRC) $(SHOWSRC)show.cc $(OBJ)show_Boctree.o $(OBJ)scanlib.a $(OBJ)vertexarray.o $(OBJ)camera.o $(OBJ)PathGraph.o $(OBJ)NurbsPath.o $(OBJ)viewcull.o $(OBJ)colormanager.o $(OBJ)scancolormanager.o $(OBJ)libglui.a $(OBJ)libANN.a $(LIBRARIES)
+	echo $(GPP) $(CFLAGS)  -I$(SRC)ann_1.1.1_modified/include/ -o $(BIN)show -I$(SRC) $(SHOWSRC)show.cc $(OBJ)scancolormanager.o $(OBJ)show_Boctree.o $(OBJ)scanlib.a $(OBJ)vertexarray.o $(OBJ)camera.o $(OBJ)PathGraph.o $(OBJ)NurbsPath.o $(OBJ)viewcull.o $(OBJ)colormanager.o $(OBJ)libglui.a $(OBJ)libANN.a $(LIBRARIES)
 	echo DONE
 	echo
 
 $(OBJ)scancolormanager.o: $(SHOWSRC)scancolormanager.h $(SHOWSRC)scancolormanager.cc $(SHOWSRC)colormanager.h $(SHOWSRC)colormanager.cc
 	echo Compiling ScanColorManager for Show ...
-	$(GPP) $(CFLAGS) -c -o $(OBJ)scancolormanager.o -I$(SRC) $(SHOWSRC)scancolormanager.cc
+	$(GPP) $(CFLAGS) -c -o $(OBJ)scancolormanager.o -I$(SRC) $(SHOWSRC)scancolormanager.cc -I$(SRC)ann_1.1.1_modified/include/
 
 $(OBJ)colormanager.o: $(SHOWSRC)colormanager.h $(SHOWSRC)colormanager.cc
 	echo Compiling ColorManager for Show ...
@@ -359,7 +359,7 @@ $(OBJ)colormanager.o: $(SHOWSRC)colormanager.h $(SHOWSRC)colormanager.cc
 
 $(OBJ)show_Boctree.o: $(SRC)Boctree.h $(SHOWSRC)show_Boctree.h $(SHOWSRC)show_Boctree.cc $(SRC)globals.icc 
 	echo Compiling Octree for Show ...
-	$(GPP) $(CFLAGS) -c -o $(OBJ)show_Boctree.o -I$(SRC) $(SHOWSRC)show_Boctree.cc
+	$(GPP) $(CFLAGS) -c -o $(OBJ)show_Boctree.o -I$(SRC) $(SHOWSRC)show_Boctree.cc -I$(SRC)ann_1.1.1_modified/include/
 
 $(OBJ)viewcull.o: $(SHOWSRC)viewcull.h $(SHOWSRC)viewcull.cc
 	echo Compiling Software View Culling ...
