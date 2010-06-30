@@ -45,8 +45,6 @@ protected:
     // overridden from pointcloud class
     void on_echo_transformed(echo_type echo)
     {
-	 static ofstream out ("scan.txt");
-
         // here we select which target types we are interested in
         for (unsigned int i = 0; i < target_count; i++) {
             // targets is a member std::vector that contains all
@@ -64,23 +62,7 @@ protected:
             // target.time
             // target.vertex  point coordinates
             //
-
-		  out << t.vertex[0] << " " << t.vertex[1] << " " << t.vertex[2] << " ";
-		  
-		  double range = std::sqrt(t.vertex[0]*t.vertex[0]
-							  + t.vertex[1]*t.vertex[1]
-							  + t.vertex[2]*t.vertex[2]);
-            if (range > numeric_limits<double>::epsilon()) {
-                double phi = atan2(t.vertex[1],t.vertex[0]);
-                phi = ((phi<0.0)?(phi+2.0*pi):phi);
-                double theta = std::acos(t.vertex[2]/range);
-                t.vertex[0] = static_cast<float>(range);
-                t.vertex[1] = static_cast<float>((360.0/(2.0*pi))*theta);
-                t.vertex[2] = static_cast<float>((360.0/(2.0*pi))*phi);
-            }
-		  out << t.vertex[0] << " " << t.vertex[1] << " " << t.vertex[2] << " " << t.reflectance << endl; 
-
-		    
+            
             Point p;
 
             p.x = t.vertex[0]*100.0;
