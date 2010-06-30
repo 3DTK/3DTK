@@ -1,44 +1,12 @@
 #include "viewcull.h"
 #include <string.h>
+#include "scancolormanager.h"
 
 bool displaymoving = false;
 bool displaywasmoving = false;
 long ptstodisplay = 100000;
 double idealfps = 7.0; // program tries to have this framerate
-/**
- * color selector for animation
- */
-void selectColors(Scan::AlgoType type) {
-  switch(type) {
-    case Scan::ICP:
-      glColor4d(0.85, 0.30,0.023, 1.0);
-      break;
-    case Scan::ICPINACTIVE:
-      glColor4d(0.78, 0.63,0.57, 1.0);	
-      break;
-    case Scan::LUM:
-      glColor4d(1.0, 0.0,0.0, 1.0);
-      break;
-    case Scan::ELCH:
-      glColor4d(0.0, 1.0,0.0, 1.0);
-      break;
-    case Scan::LOOPTORO:
-      glColor4d(0.0, 0.0, 1.0, 1.0);
-      break;
-    case Scan::LOOPHOGMAN:
-      glColor4d(0.0, 1.0, 1.0, 1.0);
-      break;
-    case Scan::GRAPHTORO:
-      glColor4d(1.0, 0.0, 1.0, 1.0);
-      break;
-    case Scan::GRAPHHOGMAN:
-      glColor4d(1.0, 1.0, 0.0, 1.0);
-      break;
-    default:
-      glColor4d(1.0, 1.0, 1.0, 1.0);
-      break;
-  }
-}
+  
 
 /**
  * Displays all data (i.e., points) that are to be displayed
@@ -59,15 +27,14 @@ void DrawPoints(GLenum mode)
   }
   displaywasmoving = displaymoving;
 
-  cout << displaymoving << "   " << fps << endl;
-
   // In case of animation
   if(scanNr != -1) {
+    cm->setMode(ScanColorManager::MODE_ANIMATION);
 
     for(int iterator = (int)Scan::allScans.size()-1; iterator >= 0; iterator--) {
 
       if (MetaAlgoType[iterator][frameNr] == Scan::INVALID) continue;
-      selectColors(MetaAlgoType[iterator][frameNr]);	 
+      cm->selectColors(MetaAlgoType[iterator][frameNr]);	 
       glPushMatrix();
       glMultMatrixd(MetaMatrix[iterator][frameNr]);
 
@@ -75,7 +42,7 @@ void DrawPoints(GLenum mode)
 #ifdef USE_GL_POINTS
         ExtractFrustum();
           
-        selectColors(MetaAlgoType[iterator][frameNr]);
+        cm->selectColors(MetaAlgoType[iterator][frameNr]);
         if (displaymoving) {
           octpts[iterator]->displayOctTreeCulled(ptstodisplay);
         } else {
@@ -85,7 +52,7 @@ void DrawPoints(GLenum mode)
       for (unsigned int jterator = 0; jterator < vvertexArrayList[iterator].size(); jterator++) {
 
         if ((jterator == 0) && vvertexArrayList[iterator][jterator]->numPointsToRender > 0) {
-          selectColors(MetaAlgoType[iterator][frameNr]);
+          cm->selectColors(MetaAlgoType[iterator][frameNr]);
         }
 
         if (vvertexArrayList[iterator][jterator]->numPointsToRender > 0) {
@@ -96,6 +63,7 @@ void DrawPoints(GLenum mode)
       glPopMatrix();
     }
 
+    setScansColored(0);
   } else {
 
     if(mode == GL_SELECT){
@@ -1643,8 +1611,8 @@ void resetMinMax(int dummy) {
 
 void setScansColored(int dummy) {
   if (scans_colored) {
-    cm->setColorScans(true);
+    cm->setMode(ScanColorManager::MODE_COLOR_SCAN);
   } else {
-    cm->setColorScans(false);
+    cm->setMode(ScanColorManager::MODE_STATIC);
   }
 }
