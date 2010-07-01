@@ -101,7 +101,7 @@ void DrawPoints(GLenum mode)
           glColor4d(0.0, 0.0, 0.0, 1.0);
 
         	   //if (iterator == 0) glColor4d(0.5, 1.0, 0.5, 1.0);
-        	   //if (iterator == 0) glColor4d(139.0/255, 69.0/255, 19.0/255, 1.0);
+        	   if (iterator == 0) glColor4d(139.0/255, 69.0/255, 19.0/255, 1.0);
 
         glMultMatrixd(MetaMatrix[iterator].back());
 
@@ -1307,11 +1307,10 @@ void glWriteImagePPM(const char *filename, int scale, GLenum mode)
     height += part_height;
   }
  
+  // show the starting scene 
   glLoadMatrixd(savedMatrix);
-  showall = true;
-  DisplayItFunc(mode); 
   // show the rednered scene
-  haveToUpdate=7;
+  haveToUpdate=2;
 
   ofstream fp;                  // The PPM File
 
