@@ -72,6 +72,16 @@ protected:
             p.reflectance = t.reflectance;
             p.amplitude   = t.amplitude;
             p.deviation   = t.deviation;
+            
+            if (target_count > 1) {         // multiple echos
+              if (i + 1 == target_count) {  // last echo
+                p.type = 10;
+              } else {                      // inner and first echos
+                p.type = i;
+              }
+            } else {                        // single echo
+              p.type = 9;
+            }
 
             o->push_back(p);
         }
