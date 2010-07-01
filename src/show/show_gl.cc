@@ -1610,7 +1610,26 @@ void CallBackKeyboardFunc(unsigned char key, int x, int y) {
 }
 
 void mapColorToValue(int dummy) {
-  cm->setCurrentType(listboxColorVal);
+  printf("Map color to val %d  \n", listboxColorVal);
+  switch (listboxColorVal) {
+    case 0:
+      cm->setCurrentType(ScanColorManager::USE_HEIGHT);
+      break;
+    case 1:
+      cm->setCurrentType(ScanColorManager::USE_REFLECTANCE);
+      break;
+    case 2:
+      cm->setCurrentType(ScanColorManager::USE_AMPLITUDE);
+      break;
+    case 3:
+      cm->setCurrentType(ScanColorManager::USE_DEVIATION);
+      break;
+    case 4:
+      cm->setCurrentType(ScanColorManager::USE_TYPE);
+      break;
+    default:
+      break;
+  };
   resetMinMax(0);
 }
 

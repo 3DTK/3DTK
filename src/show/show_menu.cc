@@ -238,9 +238,11 @@ void newMenu()
     GLUI_RadioButton *rbrefl =  glui1->add_radiobutton_to_group( color_rog, "reflectance");
     GLUI_RadioButton *rbampl = glui1->add_radiobutton_to_group( color_rog, "amplitude");
     GLUI_RadioButton *rbdevi = glui1->add_radiobutton_to_group( color_rog, "deviation");
+    GLUI_RadioButton *rbtype = glui1->add_radiobutton_to_group( color_rog, "type");
     if (!(types & ScanColorManager::USE_REFLECTANCE)) rbrefl->disable(); 
     if (!(types & ScanColorManager::USE_AMPLITUDE)) rbampl->disable();
     if (!(types & ScanColorManager::USE_DEVIATION)) rbdevi->disable(); 
+    if (!(types & ScanColorManager::USE_TYPE)) rbtype->disable(); 
     
     GLUI_Panel *colorm_ro = glui1->add_rollout_to_panel(color_panel, "Colormap:");
     colorm_ro->set_alignment(GLUI_ALIGN_LEFT);

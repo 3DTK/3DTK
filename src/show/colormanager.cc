@@ -14,7 +14,7 @@
 
 //#include "math.h"
 
-ColorManager::ColorManager(unsigned int _buckets, unsigned int types, unsigned int pointdim, float *_mins, float *_maxs)
+ColorManager::ColorManager(unsigned int _buckets, unsigned int pointdim, float *_mins, float *_maxs)
   : buckets(_buckets) {
   
   colormap = new float*[buckets + 1];  // allow a color more for values equal to max
