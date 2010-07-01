@@ -299,6 +299,10 @@ void usage(char* prog)
     << bold << "  -h, --height" << endl << normal
 	  << "         use y-values for coloring point clouds" << endl
 	  << "         only works when using octree display" << endl
+	  << endl
+    << bold << "  -T, --type" << endl << normal
+	  << "         use type values for coloring point clouds" << endl
+	  << "         only works when using octree display" << endl
     << endl << endl;
   
   exit(1);
@@ -344,6 +348,7 @@ int parseArgs(int argc,char **argv, string &dir, int& start, int& end, int& maxD
     { "amplitude",       no_argument,         0,  'a' },
     { "deviation",       no_argument,         0,  'd' },
     { "height",          no_argument,         0,  'h' },
+    { "type",            no_argument,         0,  'T' },
     { 0,           0,   0,   0}                    // needed, cf. getopt.h
   };
 
@@ -412,6 +417,9 @@ int parseArgs(int argc,char **argv, string &dir, int& start, int& end, int& maxD
      break;
    case 'h':
      types |= ScanColorManager::USE_HEIGHT;
+     break;
+   case 'T':
+     types |= ScanColorManager::USE_TYPE;
      break;
    default:
      abort ();
@@ -633,27 +641,12 @@ void createDisplayLists(bool reduced, unsigned int types)
       delete[] pts;
 
     } else {
-      if (types != ScanColorManager::USE_NONE) {
+      if (types != ScanColorManager::USE_NONE && cm) {
         unsigned int pointdim = cm->getPointDim();
         unsigned int nrpts = Scan::allScans[i]->get_points()->size();
         double **pts = new double*[nrpts];
-        unsigned int counter;
         for (unsigned int jterator = 0; jterator < nrpts; jterator++) {
-          counter = 0;
-          pts[jterator] = new double[pointdim];
-          pts[jterator][counter++] = Scan::allScans[i]->get_points()->at(jterator).x;
-          pts[jterator][counter++] = Scan::allScans[i]->get_points()->at(jterator).y;
-          pts[jterator][counter++] = Scan::allScans[i]->get_points()->at(jterator).z;
-          if (types & ScanColorManager::USE_REFLECTANCE) {
-            pts[jterator][counter++] = Scan::allScans[i]->get_points()->at(jterator).reflectance;
-          }
-          if (types & ScanColorManager::USE_AMPLITUDE) {
-            pts[jterator][counter++] = Scan::allScans[i]->get_points()->at(jterator).amplitude;
-          }
-          if (types & ScanColorManager::USE_DEVIATION) {  
-            pts[jterator][counter++] = Scan::allScans[i]->get_points()->at(jterator).deviation;
-          }
-
+          pts[jterator] = cm->createPoint(Scan::allScans[i]->get_points()->at(jterator), types);
         }
         Scan::allScans[i]->clearPoints();
         octpts[i] = new Show_BOctTree(pts, nrpts , 50.0, pointdim, cm);  //TODO remove magic number

@@ -21,7 +21,7 @@ class ScanColorManager {
     static const unsigned int USE_AMPLITUDE;
     static const unsigned int USE_DEVIATION;
     static const unsigned int USE_HEIGHT;
-//  static const unsigned int USE_TYPE = 16
+    static const unsigned int USE_TYPE;
 
     static const unsigned int MODE_STATIC;
     static const unsigned int MODE_COLOR_SCAN;
@@ -45,10 +45,9 @@ class ScanColorManager {
     inline unsigned int getPointDim() { return pointdim; };
     void makeValid();
 
-    /**
-       * color selector for animation
-       */
     void selectColors(Scan::AlgoType type);
+
+    double *createPoint(const Point &p, const unsigned int types);
 
   protected:
 
@@ -65,7 +64,7 @@ class ScanColorManager {
 
     unsigned int currenttype;
     
-    static float colormap[6][3];
+    static const float colormap[6][3];
 
     unsigned int buckets;
     unsigned int types;
@@ -74,7 +73,7 @@ class ScanColorManager {
     float *mins;
     float *maxs;
     /** maps valuetypes to point dimension for easier access */ 
-    int dimensionmap[4];
+    int dimensionmap[5];
     
     bool valid;
     bool colorScans;

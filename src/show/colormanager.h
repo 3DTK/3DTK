@@ -78,7 +78,7 @@ class ColorManager {
 
   public: 
   
-    ColorManager(unsigned int buckets, unsigned int types, unsigned int pointdim, float *mins, float *maxs);
+    ColorManager(unsigned int buckets, unsigned int pointdim, float *mins, float *maxs);
     ~ColorManager();
 
     void setColor(double *val);
@@ -114,7 +114,7 @@ class ColorManager {
 
 class ColorManagerC : public ColorManager {
   public:
-    ColorManagerC(unsigned int buckets, unsigned int types, unsigned int pointdim, float *mins, float *maxs, float _color[3]) : ColorManager(buckets, types, pointdim, mins, maxs) {
+    ColorManagerC(unsigned int buckets, unsigned int pointdim, float *mins, float *maxs, const float _color[3]) : ColorManager(buckets, pointdim, mins, maxs) {
       color[0] = _color[0];
       color[1] = _color[1];
       color[2] = _color[2];
