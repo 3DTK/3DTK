@@ -165,6 +165,9 @@ void loadPath(int dummy) {
     cams.push_back(p);
     lookats.push_back(l);
   }
+  calcPath();
+  calcLookAtPath();
+
 
   //reset the cam_choice spinner
   cam_spinner->set_int_limits( 1, cams.size() );
