@@ -140,9 +140,6 @@ void DrawPoints(GLenum mode)
 void DrawPath()
 {
   
-  calcPath();
-  calcLookAtPath();
-
   // draw path
   glBegin(GL_LINE_STRIP);
   for(unsigned int j = 0; j < path_vectorX.size(); j++){
@@ -426,6 +423,9 @@ void callDeleteCamera(int dummy){
     cam_spinner->set_int_limits( 1, cams.size());
     cam_spinner->set_int_val(cam_choice);
   }
+  calcPath();
+  calcLookAtPath();
+
 }
 
 
@@ -760,6 +760,10 @@ void callCameraView(int dummy)
   cams.push_back(campos);
   lookats.push_back(lookat);
   
+  calcPath();
+  calcLookAtPath();
+
+  
   // now reset the value of the cam_choice spinner
   cam_spinner->set_int_limits( 1, cams.size() );
   cam_spinner->set_int_val(cams.size());
@@ -779,6 +783,7 @@ void CallBackMouseFuncMoving(int button, int state, int x, int y)
     if (delayeddisplay) {
       delayeddisplay = false;
       if (fullydisplayed) return;
+      if (haveToUpdate == 6) return;
       haveToUpdate = 7;
     }
   }
@@ -792,6 +797,7 @@ void CallBackEntryFunc(int state) {
       } 
       else {
         if (fullydisplayed ) return;
+        if (haveToUpdate == 6) return;
         haveToUpdate = 7;
       }
   } else if (state == GLUT_ENTERED) {
@@ -878,6 +884,7 @@ void CallBackMouseFunc(int button, int state, int x, int y)
       if (delayeddisplay) {
         delayeddisplay = false;
         if (fullydisplayed) return;
+        if (haveToUpdate == 6) return;
         haveToUpdate = 7;
       }
     }
@@ -1287,6 +1294,9 @@ void drawRobotPath(int dummy){
     cams.push_back(campos);
     lookats.push_back(lookat);
   }
+  calcPath();
+  calcLookAtPath();
+
    
   //reset the cam_choice spinner
   cam_spinner->set_int_limits( 1, cams.size() ); 
