@@ -41,11 +41,6 @@ using std::vector;
 #include "show1.icc"
 #include "show.icc"
 
-void lookAt(const double dir[3],
- 		  const double X, const double Y, const double Z,
- 		  double *mat, const double *up);
-
-
 void CallBackReshapeFunc(int width, int height);
 void CallBackIdleFunc(void);
 void DisplayItFunc(GLenum mode);
@@ -55,7 +50,6 @@ void glWriteImagePPM(const char *filename, int scale, GLenum mode);
 void ProcessHitsFunc(GLint hits, GLuint buffer[],int button);
 int parseArgs(int argc, char **argv, string &dir, int& start, int& end, int& maxDist, bool& wanim, bool &readInitial);
 void usage(char * prog);
-int query_extension(char* extName);
 void myNewMenu();
 void topView();
 void resetView(int dummy);
@@ -67,10 +61,8 @@ void invertView(int dummy);
 void callTopView(int dummy);
 void drawCameras(void);
 void callCameraView(int dummy);
-void cameraView();
 void callDeleteCamera(int dummy);
 
-void drawPath();
 void pathAnimate(int dummy);
 void savePath(int dummy);
 void loadPath(int dummy);
