@@ -225,6 +225,10 @@ float flength;
 int factor = 1;
 
 /**
+ * program tries to have this framerate
+ */
+double idealfps = 20.0;       
+/**
  * value of the listBox fo Color Value and Colormap
  */
 int listboxColorVal = 0;
@@ -265,6 +269,9 @@ void usage(char* prog)
 	  << bold << "  -f" << normal << " F, " << bold << "--format=" << normal << "F" << endl
 	  << "         using shared library F for input" << endl
 	  << "         (chose F from {uos, uos_map, uos_frames, uos_map_frames, old, rts, rts_map, ifp, riegl_txt, riegl_bin, zahn, ply, wrl, xyz, zuf, iais, front, x3d, rxp })" << endl
+	  << endl
+	  << bold << "  -F" << normal << " NR, " << bold << "--fps=" << normal << "NR [default: 20]" << endl
+	  << "         will attempt to display points with a framerate of NR" << endl
 	  << endl
 	  << bold << "  -m" << normal << " NR, " << bold << "--max=" << normal << "NR" << endl
 	  << "         neglegt all data points with a distance larger than NR 'units'" << endl
@@ -324,7 +331,7 @@ void usage(char* prog)
  * @return 0, if the parsing was successful, 1 otherwise 
  */
 int parseArgs(int argc,char **argv, string &dir, int& start, int& end, int& maxDist, int& minDist, 
-              double &red, bool &readInitial, int &octree, unsigned int &types , reader_type &type)
+              double &red, bool &readInitial, int &octree, unsigned int &types, double &fps, reader_type &type)
 {
   start   = 0;
   end     = -1; // -1 indicates no limitation
@@ -337,6 +344,7 @@ int parseArgs(int argc,char **argv, string &dir, int& start, int& end, int& maxD
   cout << endl;
   static struct option longopts[] = {
     { "format",          required_argument,   0,  'f' },  
+    { "fps",             required_argument,   0,  'F' },  
     { "start",           required_argument,   0,  's' },
     { "end",             required_argument,   0,  'e' },
     { "reduce",          required_argument,   0,  'r' },
@@ -352,7 +360,7 @@ int parseArgs(int argc,char **argv, string &dir, int& start, int& end, int& maxD
     { 0,           0,   0,   0}                    // needed, cf. getopt.h
   };
 
-  while ((c = getopt_long(argc, argv,"f:s:e:r:m:M:O:wtRadh", longopts, NULL)) != -1)
+  while ((c = getopt_long(argc, argv,"F:f:s:e:r:m:M:O:wtRadh", longopts, NULL)) != -1)
     switch (c)
 	 {
 	 case 's':
@@ -420,6 +428,9 @@ int parseArgs(int argc,char **argv, string &dir, int& start, int& end, int& maxD
      break;
    case 'T':
      types |= ScanColorManager::USE_TYPE;
+     break;
+   case 'F':
+     fps = atof(optarg);
      break;
    default:
      abort ();
@@ -706,7 +717,7 @@ int main(int argc, char **argv){
   strncpy(pose_file_name, "pose.dat", sizeof(GLUI_String));  
   strncpy(path_file_name, "file.path", sizeof(GLUI_String));  
   
-  parseArgs(argc, argv, dir, start, end, maxDist, minDist, red, readInitial, octree, types, type);
+  parseArgs(argc, argv, dir, start, end, maxDist, minDist, red, readInitial, octree, types, idealfps, type);
   scandir = dir;
 
   // init and create display
