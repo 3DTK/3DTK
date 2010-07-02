@@ -124,11 +124,11 @@ void DrawPoints(GLenum mode)
     }
   }
 
-  if (!showall) {
+  if (pointmode == 1 || (showall && pointmode == 0) ) {
+    fullydisplayed = true;
+  } else {
     lastfps =  1000.0/(GetCurrentTimeInMilliSec() - time);
     fullydisplayed = false;
-  } else {
-    fullydisplayed = true;
   }
   showall = false;         
 }
@@ -144,7 +144,7 @@ void DrawPath()
   glBegin(GL_LINE_STRIP);
   for(unsigned int j = 0; j < path_vectorX.size(); j++){
     // set the color 
-    glColor4d(1.0, 1.0, 0.0, 1.0);
+    glColor4d(0.0, 0.0, 1.0, 0.7);
     // set the points
     glVertex3f(path_vectorX.at(j).x,path_vectorX.at(j).y,path_vectorZ.at(j).y);
   }
@@ -154,9 +154,19 @@ void DrawPath()
   glBegin(GL_LINE_STRIP);
   for(unsigned int j = 0; j < lookat_vectorX.size(); j++){
     //set the color 
-    glColor4d(1.0, 0.0, 0.0, 1.0);
+    glColor4d(1.0, 0.0, 0.0, 0.7);
     //set the points
     glVertex3f(lookat_vectorX.at(j).x,lookat_vectorX.at(j).y,lookat_vectorZ.at(j).y);
+  }
+  glEnd();
+  
+  // draw up path
+  glBegin(GL_LINE_STRIP);
+  for(unsigned int j = 0; j < ups_vectorX.size(); j++){
+    //set the color 
+    glColor4d(0.0, 1.0, 0.0, 0.7);
+    //set the points
+    glVertex3f(ups_vectorX.at(j).x,ups_vectorX.at(j).y,ups_vectorZ.at(j).y);
   }
   glEnd();
 }
@@ -173,6 +183,7 @@ void DrawCameras(void)
  // TODO improve upon this primitive camera   
     Point p = cams[i];
     Point l = lookats[i];
+    Point u = ups[i];
 
     
     if (i+1 == cam_choice) {
@@ -197,6 +208,16 @@ void DrawCameras(void)
     glVertex3d( l.x,  l.y,  l.z);
     glEnd();
 
+    if (i+1 == cam_choice) {
+      glColor3f(1, 0, 1);
+      glPointSize(20);
+    } else {
+      glColor3f(0, 1, 0);
+      glPointSize(10);
+    }
+    glBegin(GL_POINTS);
+    glVertex3d( u.x,  u.y,  u.z);
+    glEnd();
 
     glPopMatrix();
   }
@@ -246,7 +267,10 @@ void DisplayItFunc(GLenum mode)
   if (haveToUpdate == 6 && path_iterator < path_vectorX.size() ) {
     gluLookAt(path_vectorX.at(path_iterator).x, path_vectorX.at(path_iterator).y, path_vectorZ.at(path_iterator).y,
               lookat_vectorX.at(path_iterator).x, lookat_vectorX.at(path_iterator).y, lookat_vectorZ.at(path_iterator).y,
-              0, 1, 0  );
+              ups_vectorX.at(path_iterator).x - path_vectorX.at(path_iterator).x,
+              ups_vectorX.at(path_iterator).y - path_vectorX.at(path_iterator).y, 
+              ups_vectorZ.at(path_iterator).y - path_vectorZ.at(path_iterator).y);
+//            0, 1, 0  );
     /*
     gluLookAt(camposition.x, camposition.y, camposition.z,
               lookatposition.x, lookatposition.y, lookatposition.z,
@@ -404,11 +428,13 @@ void callDeleteCamera(int dummy){
   //in the camera list
   vector<Point>::iterator position;
   vector<Point>::iterator positionL;
+  vector<Point>::iterator positionU;
 
   //calculate the position of the camera. we are referring
   //to the selected camera
   position = cams.begin()+ (cam_choice-1);
   positionL = lookats.begin()+ (cam_choice-1);
+  positionU = ups.begin()+ (cam_choice-1);
 
   //if no camera present then return
   if(cam_choice == 0)
@@ -419,13 +445,13 @@ void callDeleteCamera(int dummy){
     //delete the camera from the position
     cams.erase(position);
     lookats.erase(positionL);
+    ups.erase(positionU);
     //reset the cam_choice spinner values
     cam_spinner->set_int_limits( 1, cams.size());
     cam_spinner->set_int_val(cam_choice);
   }
-  calcPath();
-  calcLookAtPath();
-
+  
+  calcCameraPaths();
 }
 
 
@@ -756,20 +782,24 @@ void callCameraView(int dummy)
   Point campos(-X, -Y, -Z);
 
   // calculate lookat point
-  Point lookat(0, 0, -200);
+  Point lookat;
+  Point up(0, 0, 0);
   double tmat[16];
   for (int i =0;i<16;i++) tmat[i] = view_rotate_button[i];
-  lookat.transform(tmat);
-  lookat.x = -lookat.x -X; 
-  lookat.y = -lookat.y -Y; 
-  lookat.z = lookat.z  -Z; 
+  
+  lookat.x = -100*tmat[2] -X;
+  lookat.y = -100*tmat[6] -Y;
+  lookat.z = -100*tmat[10] -Z;
+
+  up.x = 100*tmat[1] -X; 
+  up.y = 100*tmat[5] -Y; 
+  up.z = 100*tmat[9] -Z; 
 
   cams.push_back(campos);
   lookats.push_back(lookat);
+  ups.push_back(up);
   
-  calcPath();
-  calcLookAtPath();
-
+  calcCameraPaths();
   
   // now reset the value of the cam_choice spinner
   cam_spinner->set_int_limits( 1, cams.size() );
@@ -1042,6 +1072,10 @@ void glDumpWindowPPM(const char *filename, GLenum mode)
     }                                    // end column
   }                                      // end row
 
+  // to make a video do:
+  // for f in *ppm ; do convert -quality 100 $f `basename $f ppm`jpg; done 
+  // mencoder "mf://*.jpg" -mf fps=10 -o test.avi -ovc lavc -lavcopts vcodec=msmpeg4v2:vbitrate=800 
+
   // Write output buffer to the file */
   fp.write((const char*)ibuffer, sizeof(unsigned char) * (RGB * win_width * win_height));
   fp.close();
@@ -1301,8 +1335,7 @@ void drawRobotPath(int dummy){
     cams.push_back(campos);
     lookats.push_back(lookat);
   }
-  calcPath();
-  calcLookAtPath();
+  calcCameraPaths();
 
    
   //reset the cam_choice spinner

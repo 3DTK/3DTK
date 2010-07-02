@@ -76,7 +76,7 @@ void CallBackMouseMotionFunc(int x, int y);
 void CallBackSpecialFunc(int key, int x, int y);
 void CallBackEntryFunc(int state);
 void InterfaceFunc(unsigned char key);
-void calcLookAtPath();
+void calcCameraPaths();
 void drawRobotPath(int dummy);
 int calcFrameNo();
 int calcNoOfPoints(vector<PointXY>, vector<PointXY>);

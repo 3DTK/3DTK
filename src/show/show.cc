@@ -211,10 +211,10 @@ static int oldcamNavMode = 0;
 int save_animation         = 0;
 
 /**some variables for the camera path**/
-vector<PointXY> path_vectorX, path_vectorZ;
-vector<PointXY> lookat_vectorX, lookat_vectorZ;
+vector<PointXY> path_vectorX, path_vectorZ,  lookat_vectorX, lookat_vectorZ, ups_vectorX, ups_vectorZ;
 vector<Point> cams;
 vector<Point> lookats;
+vector<Point> ups;
 
 NurbsPath cam_nurbs_path;
 char *path_file_name;
