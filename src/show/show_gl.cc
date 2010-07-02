@@ -1262,7 +1262,7 @@ void drawRobotPath(int dummy){
   for(unsigned int i = 0; i<Scan::allScans.size(); i++) {
 
     //temp variable
-    double *test, test1[9];
+    double *temp;
    
     
     //Now, lets go to the last of each frame file to
@@ -1270,34 +1270,22 @@ void drawRobotPath(int dummy){
     //after scan matching has been done.
     glMultMatrixd(MetaMatrix[i].back());
 
-    //test is final transformation matrix
-    test = MetaMatrix[i].back();
+    //temp is final transformation matrix
+    temp = MetaMatrix[i].back();
 
-    //extracting the rotational matrix to a separate rotational
-    //matrix 
-    test1[0] = test[0];
-    test1[1] = test[1];
-    test1[2] = test[2];
-    test1[3] = test[4];
-    test1[4] = test[5];
-    test1[5] = test[6];
-    test1[6] = test[8];
-    test1[7] = test[9];
-    test1[8] = test[10];
-   
-      
-    //now for each place the robot took the scans from add camera
-    //there.                          
-    /*newcam = new Camera;
-    
-    
-    newcam->addCamera(0,0,0,0, 0, 0, 0,
-				  test[12],
-				  test[13] + 150,   // Just raise the eyelevel a bit to see as the robot  
-				  test[14]);       // had seen
-    */
-    //now store it in the cam list vector
-    //cam_list.push_back(newcam);
+    Point campos(temp[12], temp[13] + 100, temp[14]);
+
+    // calculate lookat point
+    Point lookat(0, 0, 200);
+    double tmat[16];
+    for (int i =0;i<16;i++) tmat[i] = temp[i]; 
+    lookat.transform(tmat);
+    lookat.x = lookat.x ; 
+    lookat.y = lookat.y + 100; 
+    lookat.z = lookat.z  ; 
+
+    cams.push_back(campos);
+    lookats.push_back(lookat);
   }
    
   //reset the cam_choice spinner
