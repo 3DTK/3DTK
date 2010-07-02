@@ -8,7 +8,7 @@
 
 #include "show_Boctree.h"
 #include "show.h"
-#include "camera.h"
+//#include "camera.h"
 #include "NurbsPath.h"
 #include "vertexarray.h"
 #include "../scan.h"
@@ -195,9 +195,7 @@ GLdouble aspect          = (double)START_WIDTH/(double)START_HEIGHT;          //
 #define TYPE_GROUND          0x0002 
 #define TYPE_CEILING         0x0003 
 
-vector <Camera*> cam_list;
 int cam_choice             = 0;
-bool camMode               = false;
 /**camera rotation variables**/
 GLdouble quat1[4] = {0.0, 0.0, 0.0, 1.0};
 GLdouble angle1  = 0.0f;
@@ -213,9 +211,11 @@ static int oldcamNavMode = 0;
 int save_animation         = 0;
 
 /**some variables for the camera path**/
+vector<PointXY> path_vectorX, path_vectorZ;
+vector<PointXY> lookat_vectorX, lookat_vectorZ;
+vector<Point> cams;
+vector<Point> lookats;
 
-vector<PointXY> path_listXY, path_listXZ, path_vectorX, path_vectorZ;
-vector<PointXY> lookat_listXY, lookat_listXZ, lookat_vectorX, lookat_vectorZ;
 NurbsPath cam_nurbs_path;
 char *path_file_name;
 char *pose_file_name;

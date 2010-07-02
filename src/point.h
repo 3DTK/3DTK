@@ -34,6 +34,11 @@ public:
    */
   inline Point(const double *p) { x = p[0]; y = p[1]; z = p[2]; };
 
+  /**
+   *	Constructor with three double values 
+   */
+  inline Point(const double _x, const double _y, const double _z) { x = _x; y = _y; z = _z; };
+
   inline void transform(const double alignxf[16]);
   inline friend ostream& operator<<(ostream& os, const Point& p);
   inline friend istream& operator>>(istream& is, Point& p);

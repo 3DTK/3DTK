@@ -180,30 +180,24 @@ void ScanColorManager::setCurrentType(unsigned int type) {
   makeValid();
   switch (type) {
     case USE_NONE:
-      printf("type none\n");
       for (unsigned int i = 0; i < allScans.size(); i++) {
         allScans[i]->setColorManager(0); 
       }
       currentdim = dimensionmap[0];
       break;
     case USE_HEIGHT: 
-      printf("type height\n");
       currentdim = dimensionmap[0];
       break;
     case USE_REFLECTANCE: 
-      printf("type reflec\n");
       currentdim = dimensionmap[1];
       break;
     case USE_AMPLITUDE: 
-      printf("type amplitude\n");
       currentdim = dimensionmap[2];
       break;
     case USE_DEVIATION: 
-      printf("type dev\n");
       currentdim = dimensionmap[3];
       break;
     case USE_TYPE: 
-      printf("type type\n");
       currentdim = dimensionmap[4];
       break;
     default:
