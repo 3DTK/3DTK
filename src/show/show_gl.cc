@@ -655,6 +655,9 @@ void update_view_rotate(int t)
 
   // normalize the quartenion
   QuatNormalize(view_rotate_button_quat);
+    
+  // copy it to the global quartenion quat
+  memcpy(quat, view_rotate_button_quat, sizeof(quat));
 }
 
 /**
@@ -667,21 +670,25 @@ void update_view_translation(int t)
 
   for (int i = 0; i < 3; i++) {
     if (fabs(obj_pos_button_old[i] - obj_pos_button[i]) > COMPARE_EPSILON) {
-	 obj_pos_button1[i] = obj_pos_button[i] - obj_pos_button_old[i];
-	 obj_pos_button_old[i] = obj_pos_button[i];
+      obj_pos_button1[i] = obj_pos_button[i] - obj_pos_button_old[i];
+      obj_pos_button_old[i] = obj_pos_button[i];
     } else obj_pos_button1[i] = 0.0;
   }
 
   QuaternionToMatrix4(quat, mat);
   obj_pos_button_new[0] =   obj_pos_button1[0] * mat[0]
-                          + obj_pos_button1[1] * mat[4]
-                          + obj_pos_button1[2] * mat[8];
+    + obj_pos_button1[1] * mat[4]
+    + obj_pos_button1[2] * mat[8];
   obj_pos_button_new[1] =   obj_pos_button1[0] * mat[1]
-                          + obj_pos_button1[1] * mat[5]
-                          + obj_pos_button1[2] * mat[9];
+    + obj_pos_button1[1] * mat[5]
+    + obj_pos_button1[2] * mat[9];
   obj_pos_button_new[2] =   obj_pos_button1[0] * mat[2]
-                          + obj_pos_button1[1] * mat[6]
-                          + obj_pos_button1[2] * mat[10];
+    + obj_pos_button1[1] * mat[6]
+    + obj_pos_button1[2] * mat[10];
+    
+  X = X + obj_pos_button_new[0];
+  Y = Y + obj_pos_button_new[1];
+  Z = Z + obj_pos_button_new[2];
 
 }
 
