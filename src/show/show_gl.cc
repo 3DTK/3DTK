@@ -7,8 +7,8 @@ bool showall = false;         // true iff next DrawPoints should redraw scene wi
 bool mousemoving = false;     // true iff a mouse button has been pressed inside a window, but hs not been released
 bool delayeddisplay = false;  // true iff mouse button callbacks should redraw the scene after button release
 long ptstodisplay = 100000;  
-double idealfps = 10.0;       // program tries to have this framerate
 double lastfps = idealfps;    // last frame rate    
+int pointmode = -1;
 
 
 /**
@@ -41,10 +41,10 @@ void DrawPoints(GLenum mode)
         ExtractFrustum();
           
         cm->selectColors(MetaAlgoType[iterator][frameNr]);
-        if (!showall) {
-          octpts[iterator]->displayOctTreeCulled(ptstodisplay);
-        } else {
+        if (pointmode == 1 || (showall && pointmode == 0) ) {
           octpts[iterator]->displayOctTreeAllCulled();
+        } else {
+          octpts[iterator]->displayOctTreeCulled(ptstodisplay/(int)Scan::allScans.size());
         }
 #else
       for (unsigned int jterator = 0; jterator < vvertexArrayList[iterator].size(); jterator++) {
@@ -107,10 +107,10 @@ void DrawPoints(GLenum mode)
 
 #ifdef USE_GL_POINTS
         ExtractFrustum();
-        if (!showall) {
-          octpts[iterator]->displayOctTreeCulled(ptstodisplay);
-        } else {
+        if (pointmode == 1 || (showall && pointmode == 0) ) {
           octpts[iterator]->displayOctTreeAllCulled();
+        } else {
+          octpts[iterator]->displayOctTreeCulled(ptstodisplay/(int)Scan::allScans.size());
         }
 #else
         for (unsigned int jterator = 0; jterator < vvertexArrayList[iterator].size(); jterator++) {
@@ -1415,5 +1415,24 @@ void setScansColored(int dummy) {
     cm->setMode(ScanColorManager::MODE_COLOR_SCAN);
   } else {
     cm->setMode(ScanColorManager::MODE_STATIC);
+  }
+}
+
+
+void changePointMode(int dummy) {
+  if (dummy == 0) {           // always display
+    if (pointmode != 1) {  // standard mode
+      pointmode = 1;
+      never_box->set_int_val(0);
+    } else {
+      pointmode = 0;
+    }
+  } else if (dummy == 1) {    // never display
+    if (pointmode != -1) {  // standard mode
+      pointmode = -1;
+      always_box->set_int_val(0);
+    } else {
+      pointmode = 0;
+    }
   }
 }

@@ -96,6 +96,10 @@ GLUI_Listbox    *colormap_listbox;
 GLUI_Spinner    *mincol_spinner;
 GLUI_Spinner    *maxcol_spinner;
 
+/** Checkboxes for changing point display mode **/
+GLUI_Checkbox *always_box;
+GLUI_Checkbox *never_box;
+
 /**
  * Generate the menu for the application.
  * It consists of control and selection menus.
@@ -180,6 +184,12 @@ void newMenu()
 
   glui2->add_column_to_panel(nav_panel, false);
   glui2->add_checkbox_to_panel(nav_panel, "MouseNav", &cameraNavMouseMode );
+  
+  static int dummy4;
+  always_box = glui2->add_checkbox_to_panel(nav_panel, "Always all Points", &dummy4, 0, &changePointMode);
+  static int dummy5 = 1;
+  never_box =  glui2->add_checkbox_to_panel(nav_panel, "Always reduced Points", &dummy5, 1, &changePointMode );
+  
   glui2->set_glutMouseFunc(CallBackMouseFuncMoving);
   
   /*** Create the right subwindow ***/

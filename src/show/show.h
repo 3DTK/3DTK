@@ -83,7 +83,7 @@ int calcNoOfPoints(vector<PointXY>, vector<PointXY>);
 
 void createDisplayLists(bool reduced=false, unsigned int types = ScanColorManager::USE_NONE);
 
-
+void changePointMode(int dummy);
 void mapColorToValue(int dummy);
 void changeColorMap(int dummy);
 void minmaxChanged(int dummy);
