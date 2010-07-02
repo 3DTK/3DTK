@@ -165,3 +165,18 @@ ColorMap ColorMap::getColorMap(CM map) {
       break;
   }
 }
+
+const float DiffMap::cmap[7][3] = {
+  {         0,         0,    1.0000},
+  {         0,    0.5000,         0},
+  {    1.0000,         0,         0},
+  {         0,    0.7500,    0.7500},
+  {    0.7500,         0,    0.7500},
+  {    0.7500,    0.7500,         0},
+  {    0.2500,    0.2500,    0.2500} };
+
+void DiffMap::calcColor(float *d, unsigned int i, unsigned int buckets) {
+  d[0] = cmap[i%7][0];
+  d[1] = cmap[i%7][1];
+  d[2] = cmap[i%7][2];
+}

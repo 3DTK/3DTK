@@ -74,6 +74,13 @@ class HotMap : public ColorMap {
   }
 };
 
+class DiffMap : public ColorMap {
+  public:
+  virtual void calcColor(float *d, unsigned int i, unsigned int buckets);
+  private:
+  static const float cmap[7][3];
+};
+
 class ColorManager {
 
   public: 

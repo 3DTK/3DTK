@@ -142,7 +142,6 @@ void newMenu()
   
   /****** Reset button *****/
   glui2->add_button_to_panel(mode_panel, "Reset position", 0, resetView )->set_alignment( GLUI_ALIGN_CENTER );
-  glui2->add_button_to_panel(mode_panel, "Camera Mode", 0, callCameraMode )->set_alignment( GLUI_ALIGN_CENTER );
   glui2->add_column( true );
 
   /****** Add Camera View *****/
@@ -154,7 +153,7 @@ void newMenu()
   cam_spinner->set_speed( 1 );
   cam_spinner->set_alignment( GLUI_ALIGN_LEFT );
   
-  glui2->add_button_to_panel(camera_panel, "Add Camera", 0, callCameraView )->set_alignment( GLUI_ALIGN_CENTER );
+  glui2->add_button_to_panel(camera_panel, "Add Camera", 1, callCameraView )->set_alignment( GLUI_ALIGN_CENTER );
   glui2->add_button_to_panel(camera_panel, "Delete Camera", 0, callDeleteCamera )->set_alignment( GLUI_ALIGN_CENTER );
   
   /******* Other navigation controls**********/
@@ -253,6 +252,7 @@ void newMenu()
     glui1->add_radiobutton_to_group(colorm_rog, "HSV");
     glui1->add_radiobutton_to_group(colorm_rog, "Jet");
     glui1->add_radiobutton_to_group(colorm_rog, "Hot");
+    glui1->add_radiobutton_to_group(colorm_rog, "Rand");
     
     glui1->add_checkbox_to_panel(color_panel, "Id Scans by Color", &scans_colored, 0,  &setScansColored);
     mincol_spinner = glui1->add_spinner_to_panel(color_panel, "Min Val:", GLUI_SPINNER_FLOAT, &mincolor_value, 0, &minmaxChanged);
