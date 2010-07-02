@@ -9,6 +9,34 @@ using std::endl;
 
 static int nr_interpolations = 0;
 
+void calcUpPath()
+{
+
+  // if camera list is empty then return
+  if(cams.empty())	return;
+  PointXY temp ;
+  vector<PointXY> ups_listXY, ups_listXZ;
+
+  // to interpolate with the xy coordinate.
+  for (unsigned int i = 0; i < ups.size(); i++) {
+    temp.x = ups[i].x;
+    temp.y = ups[i].y;
+    ups_listXY.push_back(temp);
+  }
+
+
+  // to interpolate with the xz coordinate.
+  for (unsigned int i = 0; i < ups.size(); i++) {
+    temp.x = ups[i].x;
+    temp.y = ups[i].z;
+    ups_listXZ.push_back(temp);
+  }
+
+  // now get the nurbs path for the individual xy and xz plane
+  ups_vectorX = cam_nurbs_path.getNurbsPath(ups_listXY, nr_interpolations);
+  ups_vectorZ = cam_nurbs_path.getNurbsPath(ups_listXZ, nr_interpolations);
+}
+
 void calcLookAtPath()
 {
 
@@ -65,6 +93,13 @@ void calcPath()
   path_vectorZ = cam_nurbs_path.getNurbsPath(path_listXZ, nr_interpolations);
 }
 
+void calcCameraPaths() {
+  calcPath();
+  calcLookAtPath();
+  calcUpPath();
+}
+
+
 //------------------------------------------------------------------------------------------
 
 /**
@@ -95,6 +130,9 @@ void savePath(int dummy) {
     pathfile << lookats[i].x << endl;
     pathfile << lookats[i].y << endl;
     pathfile << lookats[i].z << endl;
+    pathfile << ups[i].x << endl;
+    pathfile << ups[i].y << endl;
+    pathfile << ups[i].z << endl;
   }
 
   //close the file after writing
@@ -115,6 +153,7 @@ void loadPath(int dummy) {
   unsigned int length;
   float x, y, z;
   float lx, ly, lz;
+  float ux, uy, uz;
 
   //buffer variable
   char buffer[2048];
@@ -132,6 +171,7 @@ void loadPath(int dummy) {
   //clear the camlist first
   cams.clear();
   lookats.clear();
+  ups.clear();
 
   //open the path file
   pathFile.open(path_file_name, ios::in);
@@ -158,16 +198,24 @@ void loadPath(int dummy) {
     pathFile.getline(buffer,2048);
     lz = atof(buffer);
     
+    pathFile.getline(buffer,2048);
+    ux = atof(buffer);
+    pathFile.getline(buffer,2048);
+    uy = atof(buffer);
+    pathFile.getline(buffer,2048);
+    uz = atof(buffer);
+    
     //feed the information to create a new
     //camera with those values
     Point p(x,y,z);
     Point l(lx,ly,lz);
+    Point u(ux,uy,uz);
+
     cams.push_back(p);
     lookats.push_back(l);
+    ups.push_back(u);
   }
-  calcPath();
-  calcLookAtPath();
-
+  calcCameraPaths();
 
   //reset the cam_choice spinner
   cam_spinner->set_int_limits( 1, cams.size() );
