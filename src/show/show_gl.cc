@@ -9,7 +9,7 @@ bool delayeddisplay = false;  // true iff mouse button callbacks should redraw t
 long ptstodisplay = 100000;  
 double idealfps = 10.0;       // program tries to have this framerate
 double lastfps = idealfps;    // last frame rate    
-  
+
 
 /**
  * Displays all data (i.e., points) that are to be displayed
@@ -139,10 +139,7 @@ void DrawPoints(GLenum mode)
  */
 void DrawPath()
 {
-  if(cam_list.size() == 0){
-    	return;
-  }
-
+  
   calcPath();
   calcLookAtPath();
 
@@ -173,54 +170,38 @@ void DrawPath()
  */
 void DrawCameras(void)
 {
-  // temp camera variable
-  Camera *temp;
+  for (int i = 0; i < cams.size(); i++) {
+    glPushMatrix();
+    
+ // TODO improve upon this primitive camera   
+    Point p = cams[i];
+    Point l = lookats[i];
 
-  // show the bean pointing to the angle where the camera
-  // is looking at or not.
-  bool showBeam = false;
-
-  // variable for active and normal camera colors
-  Color activecolor, normalcolor;
-
-  // set the value for active camera color
-  activecolor.r = 0.0;
-  activecolor.g = 1.0;
-  activecolor.b = 0.0;
-
-  // set the value for normal camera color
-  normalcolor.r = 0.0;
-  normalcolor.g = 0.0;
-  normalcolor.b = 1.0;
-
-  // for all the cameras in our camera list
-  for(unsigned int i=0;i<cam_list.size(); i++) {
-    temp = cam_list.at(i);
-    // if the camera is the selected camera then
-    if (i == (unsigned int) cam_choice-1) {
-
-	 // if it is in the cameramode
-	 if (camMode) {
-	   // set the color to activecamera color
-	   temp->setColor(activecolor);
-	   // show the pointing beam
-	   showBeam = true;
-	   flength = temp->getFocalLength();
-	 } else {
-	   // set the camera to normal color
-	   temp->setColor(normalcolor);
-	   // hide the beam
-	   showBeam = false;
-	 }
+    
+    if (i+1 == cam_choice) {
+      glColor3f(1, 1, 0);
+      glPointSize(20);
     } else {
-	 // else set it to normal camera color
-	 temp->setColor(normalcolor);
-	 // hide the beam
-	 showBeam = false;
+      glColor3f(0, 0, 1);
+      glPointSize(10);
     }
-    // draw the camera
-    temp->drawCamera(showBeam);
-    //temp->drawCamera(true);
+    glBegin(GL_POINTS);
+    glVertex3d(p.x, p.y, p.z);
+    glEnd();
+
+    if (i+1 == cam_choice) {
+      glColor3f(0, 1, 1);
+      glPointSize(20);
+    } else {
+      glColor3f(1, 0, 0);
+      glPointSize(10);
+    }
+    glBegin(GL_POINTS);
+    glVertex3d( l.x,  l.y,  l.z);
+    glEnd();
+
+
+    glPopMatrix();
   }
 }
 
@@ -265,16 +246,27 @@ void DisplayItFunc(GLenum mode)
   QuaternionToAxisAngle(quat, axis, angle);
 
   // do the model-transformation
-  if (cameraNavMouseMode == 1) {
-    glRotated( mouseRotX, 1, 0, 0);
-    glRotated( mouseRotY, 0, 1, 0);
-  } else glRotated(angle, axis[0], axis[1], axis[2]);    // rotate the camera
+  if (haveToUpdate == 6 && path_iterator < path_vectorX.size() ) {
+    gluLookAt(path_vectorX.at(path_iterator).x, path_vectorX.at(path_iterator).y, path_vectorZ.at(path_iterator).y,
+              lookat_vectorX.at(path_iterator).x, lookat_vectorX.at(path_iterator).y, lookat_vectorZ.at(path_iterator).y,
+              0, 1, 0  );
+    /*
+    gluLookAt(camposition.x, camposition.y, camposition.z,
+              lookatposition.x, lookatposition.y, lookatposition.z,
+              0, 1, 0  );*/
+  }else {
+    if (cameraNavMouseMode == 1) {
+      glRotated( mouseRotX, 1, 0, 0);
+      glRotated( mouseRotY, 0, 1, 0);
+    } else glRotated(angle, axis[0], axis[1], axis[2]);    // rotate the camera
+    glGetFloatv(GL_MODELVIEW_MATRIX, view_rotate_button);
 
-  glGetFloatv(GL_MODELVIEW_MATRIX, view_rotate_button);
-  glui2->sync_live();
-  glui2->show();
- 
-  glTranslated(X, Y, Z);       // move camera	
+    glui2->sync_live();
+    glui2->show();
+
+    glTranslated(X, Y, Z);       // move camera	
+  }
+
 
 //   cout << "Position  :" << X << " " << Y << " " << Z << endl;
 //   cout << "Quaternion:" << quat[0] << " " << quat[1] << " " << quat[2] << " " << quat[3] << endl;
@@ -349,22 +341,6 @@ void DisplayItFunc(GLenum mode)
     DrawPath();
   }
   
-
-/*
-  // for debug purposes only
-  // to see the lookat path of our animation
-  //calcLookAtPath();
-
-  // enable/disable the camera panel according to the camera Mode
-  if (camMode) {
-    camera_panel->enable();
-    path_panel->disable();
-  } else {
-    camera_panel->disable();
-    path_panel->enable();
-  }
-*/
-
   glPopMatrix();
   // force draw the scene
   glFlush();
@@ -429,22 +405,25 @@ void callDeleteCamera(int dummy){
  
   //iterator for the position of camera
   //in the camera list
-  vector<Camera*>::iterator position;
+  vector<Point>::iterator position;
+  vector<Point>::iterator positionL;
 
   //calculate the position of the camera. we are referring
   //to the selected camera
-  position = cam_list.begin()+ (cam_choice-1);
+  position = cams.begin()+ (cam_choice-1);
+  positionL = lookats.begin()+ (cam_choice-1);
 
   //if no camera present then return
   if(cam_choice == 0)
     return;
 
   //if the list is not empty then
-  if(!cam_list.empty()){
+  if(!cams.empty()){
     //delete the camera from the position
-    cam_list.erase(position);
+    cams.erase(position);
+    lookats.erase(positionL);
     //reset the cam_choice spinner values
-    cam_spinner->set_int_limits( 1, cam_list.size());
+    cam_spinner->set_int_limits( 1, cams.size());
     cam_spinner->set_int_val(cam_choice);
   }
 }
@@ -466,6 +445,8 @@ void resetView(int dummy)
   quat[0] = quat[1] = quat[2] = X = Z = 0.0;
   rotButton->reset();
   haveToUpdate = 2;
+  mouseRotX = 0;
+  mouseRotY = 0;
 }
 
 void setView(double pos[3], double new_quat[4], 
@@ -629,7 +610,7 @@ void CallBackIdleFunc(void)
     //cout << "path_iterator: " << path_iterator << endl;
     if(path_iterator < path_vectorX.size()){   // standard animation case
       //call the path animation function
-      pathAnimate1(path_iterator);
+      //pathAnimate1(path_iterator);
       //hide both the cameras and the path
       show_cameras = 0;
       show_path = 0;
@@ -674,37 +655,6 @@ void update_view_rotate(int t)
 
   // normalize the quartenion
   QuatNormalize(view_rotate_button_quat);
-
-  // if not in cam mode
-  if (!camMode) {
-    // copy it to the global quartenion quat
-    memcpy(quat, view_rotate_button_quat, sizeof(quat));
-  } else {
-   
-    // else copy it to another gloabl quartenion quat1
-    // which just rotates the camera.
-    memcpy(quat1, view_rotate_button_quat, sizeof(quat1));
-
-    // now convert to axis and angle for this camera rotational
-    // quaternion matrix
-    QuaternionToAxisAngle(quat1, axis1, angle1);
-
-    // extract the value of the axis.
-    x_c = axis1[0];
-    y_c = axis1[1];
-    z_c = axis1[2];
-
-    // now set the extracted angle and axis value to the selected
-    // camera
-    cam_list.at(cam_choice-1)->setRotate(angle1, x_c, y_c, z_c);
-
-    // now also make sure that the focal point changes when the
-    // camera is rotated
-
-    // redisplay the screen 
-    glutPostRedisplay();
-   
-  }
 }
 
 /**
@@ -733,35 +683,6 @@ void update_view_translation(int t)
                           + obj_pos_button1[1] * mat[6]
                           + obj_pos_button1[2] * mat[10];
 
-  // if not in the camera mode then just
-  // translate the whole scene
-  if(!camMode){
-    
-    X = X + obj_pos_button_new[0];
-    Y = Y + obj_pos_button_new[1];
-    Z = Z + obj_pos_button_new[2];
-
-  }else{
-    
-    //else if in the camera mode then
-    //check whether top view is active or not
-     if(showTopView){
-	  //in the top view the selected camera is moved however the
-	  //z axis is not moved.
-	
-	  cam_list.at(cam_choice-1)->setX( cam_list.at(cam_choice-1)->getX() + obj_pos_button_new[0]);
-	  cam_list.at(cam_choice-1)->setZ( cam_list.at(cam_choice-1)->getZ() + obj_pos_button_new[2]);
-	  cam_list.at(cam_choice-1)->drawCamera(false);
-	}else{
-	  //if in normal view then the selected camera is freely moved in the
-	  //3d world.
-	
-	  cam_list.at(cam_choice-1)->setX( cam_list.at(cam_choice-1)->getX() + obj_pos_button_new[0]);
-	  cam_list.at(cam_choice-1)->setY( cam_list.at(cam_choice-1)->getY() + obj_pos_button_new[1]);
-	  cam_list.at(cam_choice-1)->setZ( cam_list.at(cam_choice-1)->getZ() + obj_pos_button_new[2]);
-	  cam_list.at(cam_choice-1)->drawCamera(false);
-	}
-  }
 }
 
 
@@ -806,28 +727,14 @@ void invertView(int dummy)
 void callTopView(int dummy)
 { 
   topView();
-  if(!camMode){
-    if (showTopView) {
-	 rotButton->disable();
-	 cangle_spinner->disable();
-	 pzoom_spinner->enable();
-    } else {
-	 rotButton->enable();
-	 cangle_spinner->enable();
-	 pzoom_spinner->disable();
-    }
-  }else{
-    // as the view is in the add camera mode
-    // certain buttons have to be disabled
-    if(showTopView){
-	 rotButton->enable();
-	 cangle_spinner->disable();
-	 pzoom_spinner->enable();
-    }else{
-	 rotButton->enable();
-	 cangle_spinner->enable();
-	 pzoom_spinner->disable();
-    }
+  if (showTopView) {
+    rotButton->disable();
+    cangle_spinner->disable();
+    pzoom_spinner->enable();
+  } else {
+    rotButton->enable();
+    cangle_spinner->enable();
+    pzoom_spinner->disable();
   }
 }
 
@@ -839,69 +746,24 @@ void callTopView(int dummy)
  */
 void callCameraView(int dummy)
 {
+  Point campos(-X, -Y, -Z);
 
-  // if the camera list is empty then add
-  // new cameras at the origin
-  if (dummy == 1) {
-    Camera *cam2 = new Camera;
-    cam2->addCamera(0,0,0,
-        angle1,
-        x_c,
-        y_c,
-        z_c,
-        X,
-        Y,
-        Z);
-    cam_list.push_back(cam2);
-    printf("AC  %f %f %f \n", cam_list.at(cam_list.size()-1)->getFX(),
-        cam_list.at(cam_list.size()-1)->getFY(),
-        cam_list.at(cam_list.size()-1)->getFZ());
-  }else {
-  if (cam_list.size() == 0) {
+  // calculate lookat point
+  Point lookat(0, 0, -200);
+  double tmat[16];
+  for (int i =0;i<16;i++) tmat[i] = view_rotate_button[i];
+  lookat.transform(tmat);
+  lookat.x = -lookat.x -X; 
+  lookat.y = -lookat.y -Y; 
+  lookat.z = lookat.z  -Z; 
 
-    Camera *cam1 = new Camera;
-    cam1->setRotate(angle1, x_c, y_c, z_c);
-    cam1->addCamera(0,0,200,0,0,0,0,0,0,0);
-    cam_list.push_back(cam1);
-
-  } else {
-
-    // else add camera at the same position as
-    // the last camera in the list
-    Camera *cam2 = new Camera;
-    cam2->addCamera(cam_list.at(cam_list.size()-1)->getFX(),
-        cam_list.at(cam_list.size()-1)->getFY(),
-        cam_list.at(cam_list.size()-1)->getFZ(),
-        angle1,
-        x_c,
-        y_c,
-        z_c,
-        cam_list.at(cam_list.size()-1)->getX(),
-        cam_list.at(cam_list.size()-1)->getY(),
-        cam_list.at(cam_list.size()-1)->getZ());
-    cam_list.push_back(cam2);
-    printf("AC  %f %f %f \n", cam_list.at(cam_list.size()-1)->getFX(),
-        cam_list.at(cam_list.size()-1)->getFY(),
-        cam_list.at(cam_list.size()-1)->getFZ());
-
-  }
-  }
-
-  // now reset the value of the cam_choice spinner
-  cam_spinner->set_int_limits( 1, cam_list.size() );
-  cam_spinner->set_int_val(cam_list.size());
+  cams.push_back(campos);
+  lookats.push_back(lookat);
   
-  //enable/disable the appropriate buttons in the control panel  
-  if(showTopView){
-    rotButton->disable();
-    cangle_spinner->disable();
-    pzoom_spinner->enable();
-  }else{
-    rotButton->enable();
-    cangle_spinner->disable();
-    pzoom_spinner->disable();
-  }
-
+  // now reset the value of the cam_choice spinner
+  cam_spinner->set_int_limits( 1, cams.size() );
+  cam_spinner->set_int_val(cams.size());
+  
   //signal to repaint screen
   haveToUpdate  = 1;
 }
@@ -1036,46 +898,45 @@ void CallBackMouseMotionFunc(int x, int y) {
     mat[6] = -cos(mouseRotXRand) * sin(mouseRotYRand);
     mat[7] = sin(mouseRotXRand);
     mat[8] = cos(mouseRotXRand) * cos(mouseRotYRand);
-//  QuaternionToMatrix4(quat, mat);
+    
     int deltaMouseX = x - mouseNavX;
     int deltaMouseY = mouseNavY - y;
     int deltaMouseZ = y - mouseNavY;
     mouseNavX = x;
     mouseNavY = y;
-    if(!camMode) {
-      double transX, transY, transZ;
-      transX = transY = transZ = 0.0;
-      if( mouseNavButton == GLUT_RIGHT_BUTTON){
-        if ( showTopView ) {
-          deltaMouseX *= 5;
-          deltaMouseY *= 5;
-        }
-        transX = deltaMouseX * mat[0] + -deltaMouseY * mat[3];
-        transY = deltaMouseX * mat[1] + deltaMouseY * mat[4];
-        transZ = -deltaMouseX * mat[2] + deltaMouseY * mat[5]; 
-      } else if( mouseNavButton == GLUT_MIDDLE_BUTTON ){
-        if ( !showTopView ) {
-          deltaMouseY *= -5;
-          deltaMouseZ *= -5;
-        }
-        transX = deltaMouseX * mat[0] + deltaMouseZ * mat[6];
-        transY = deltaMouseX * mat[1] + deltaMouseY * mat[7];      
-        transZ = -deltaMouseX * mat[2] + -deltaMouseZ * mat[8];
-      } else if ( mouseNavButton == GLUT_LEFT_BUTTON ){
-        if ( !showTopView ){
-          mouseRotX += deltaMouseY;
-          mouseRotY -= deltaMouseX;
-          if (mouseRotX < -90) mouseRotX=90;
-          else if (mouseRotX > 90) mouseRotX=90;
-          if (mouseRotY > 360) mouseRotY=0;
-          else if (mouseRotY < 0) mouseRotY=360;
-        }
+      
+    double transX, transY, transZ;
+    transX = transY = transZ = 0.0;
+    if( mouseNavButton == GLUT_RIGHT_BUTTON){
+      if ( showTopView ) {
+        deltaMouseX *= 5;
+        deltaMouseY *= 5;
       }
-      X += transX;
-      Y += transY;
-      Z += transZ;
-      haveToUpdate = 1;
+      transX = deltaMouseX * mat[0] + -deltaMouseY * mat[3];
+      transY = deltaMouseX * mat[1] + deltaMouseY * mat[4];
+      transZ = -deltaMouseX * mat[2] + deltaMouseY * mat[5]; 
+    } else if( mouseNavButton == GLUT_MIDDLE_BUTTON ){
+      if ( !showTopView ) {
+        deltaMouseY *= -5;
+        deltaMouseZ *= -5;
+      }
+      transX = deltaMouseX * mat[0] + deltaMouseZ * mat[6];
+      transY = deltaMouseX * mat[1] + deltaMouseY * mat[7];      
+      transZ = -deltaMouseX * mat[2] + -deltaMouseZ * mat[8];
+    } else if ( mouseNavButton == GLUT_LEFT_BUTTON ){
+      if ( !showTopView ){
+        mouseRotX += deltaMouseY;
+        mouseRotY -= deltaMouseX;
+        if (mouseRotX < -90) mouseRotX=90;
+        else if (mouseRotX > 90) mouseRotX=90;
+        if (mouseRotY > 360) mouseRotY=0;
+        else if (mouseRotY < 0) mouseRotY=360;
+      }
     }
+    X += transX;
+    Y += transY;
+    Z += transZ;
+    haveToUpdate = 1;
   }
 }
 
@@ -1420,11 +1281,6 @@ void InterfaceFunc(unsigned char key){
  
   strncpy(path_file_name, path_filename_edit->get_text(), sizeof(GLUI_String));  
   strncpy(pose_file_name, pose_filename_edit->get_text(), sizeof(GLUI_String));  
-  // flength = cam_list.at(cam_choice-1)->getFocalLength();
-  if(flength !=0 ){
-    cam_list.at(cam_choice-1)->setFocalLength(flength);
-  }
-  
   return;
 }
 
@@ -1437,54 +1293,6 @@ void CallBackSpecialFunc(int key , int x, int y) {
 
 
 
-//--------------------------------------------------------------
-/**
- * This function is called when the user enters the
- * camera mode.
- */
-
-void callCameraMode(int dummy){
-
-  static GLdouble save_qx, save_qy, save_qz, save_qangle, save_X, save_Y, save_Z;
-
-  //if not camera mode then save all the variables
-  if(!camMode){
-    camMode = true;
-    save_X        = X;
-    save_Y        = Y;
-    save_Z        = Z;
-    save_qx       = quat[0];
-    save_qy       = quat[1];
-    save_qz       = quat[2];
-    save_qangle   = quat[3];
-    rotButton->enable();
-    cangle_spinner->enable();
-    pzoom_spinner->disable();
-    
-  }else{
-    
-    camMode = false;
-    // restore old settings
-    X = save_X;
-    Y = save_Y;
-    Z = save_Z;
-    quat[0] = save_qx;
-    quat[1] = save_qy;
-    quat[2] = save_qz;
-    quat[3] = save_qangle;
-	 
-    
-    rotButton->enable();
-    rotButton->reset();
-    cangle_spinner->enable();
-    pzoom_spinner->disable();
-    haveToUpdate = 1;      
-  }
-  
-}
-//--------------------------------------------------------------------------------
-
-
 //---------------------------------------------------------------------------------------
 
 /**
@@ -1494,18 +1302,10 @@ void callCameraMode(int dummy){
  */
 
 void drawRobotPath(int dummy){
-   
-  //cout<<"Called: drawRobotPath()..... " << endl;
-
-  //temporary camera
-  Camera *newcam;
-
+  // TODO FIXME change to work with new camera path
   
   //clear the camera list as we are going to add the cameras
   //in the path where the robot travelled.
-  cam_list.clear();
-
-  
 
   //lets loop through the entire frame files to extract the
   //total number of places where the robot has taken the scans from
@@ -1538,23 +1338,20 @@ void drawRobotPath(int dummy){
       
     //now for each place the robot took the scans from add camera
     //there.                          
-    newcam = new Camera;
+    /*newcam = new Camera;
     
     
     newcam->addCamera(0,0,0,0, 0, 0, 0,
 				  test[12],
 				  test[13] + 150,   // Just raise the eyelevel a bit to see as the robot  
 				  test[14]);       // had seen
-    
+    */
     //now store it in the cam list vector
-    cam_list.push_back(newcam);
-    
-    
-    
+    //cam_list.push_back(newcam);
   }
    
   //reset the cam_choice spinner
-  cam_spinner->set_int_limits( 1, cam_list.size() ); 
+  cam_spinner->set_int_limits( 1, cams.size() ); 
   
   //signal for the update of scene
   haveToUpdate = 1;
@@ -1610,7 +1407,6 @@ void CallBackKeyboardFunc(unsigned char key, int x, int y) {
 }
 
 void mapColorToValue(int dummy) {
-  printf("Map color to val %d  \n", listboxColorVal);
   switch (listboxColorVal) {
     case 0:
       cm->setCurrentType(ScanColorManager::USE_HEIGHT);
@@ -1639,6 +1435,7 @@ void changeColorMap(int dummy) {
   HSVMap hsv;
   JetMap jm;
   HotMap hot;
+  DiffMap diff;
 
   switch (listboxColorMapVal) {
     case 0:
@@ -1656,6 +1453,9 @@ void changeColorMap(int dummy) {
       break;
     case 4:
       cm->setColorMap(hot);
+      break;
+    case 5:
+      cm->setColorMap(diff);
       break;
     default:
       break;
