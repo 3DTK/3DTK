@@ -971,56 +971,6 @@ void initScreenWindow()
 
 }
 
-//--------------------------------------------------------------------------------
-
-
-/* +++++++++-------------++++++++++++
- * NAME
- *   lookAt
- * DESCRIPTION
- *   calculates a lookAT matrix from a
- *   given point X,Y,Z, to dir using the
- *   up vector upconverts
- *   mat is 4x4
- * +++++++++-------------++++++++++++ */   
-void lookAt(const double dir[3],
-		  const double X, const double Y, const double Z,
-		  double *mat, const double *up)
-{
-  double forward[3], local_up[3], side[3];
-  if (up == 0) {
-    local_up[0] = 0.0;
-    local_up[1] = 1.0;
-    local_up[2] = 0.0;
-  } else {
-    local_up[0] = up[0];
-    local_up[1] = up[1];
-    local_up[2] = up[2];
-  }
-  
-  forward[0] = dir[0] - X;
-  forward[1] = dir[1] - Y;
-  forward[2] = dir[2] - Z;
-  Normalize3(forward);
-  Cross(local_up, forward, side);
-  Normalize3(side);
-  Cross(side, forward, local_up);
-  M4identity(mat);
-  mat[0] = side[0];
-  mat[4] = side[1];
-  mat[8] = side[2];
-  mat[1] = -1.0 * local_up[0];
-  mat[5] = -1.0 * local_up[1];
-  mat[9] = -1.0 * local_up[2];
-  mat[2]  = forward[0];
-  mat[6]  = forward[1];
-  mat[10] = forward[2];                 // now mat contains the look@ matrix
-  mat[12] = X;
-  mat[13] = Y;
-  mat[14] = Z;
-}
-
-
 
 /* +++++++++-------------++++++++++++
  * NAME
