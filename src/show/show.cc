@@ -219,7 +219,6 @@ vector<Point> ups;
 NurbsPath cam_nurbs_path;
 char *path_file_name;
 char *pose_file_name;
-float flength;
 
 /** Factor for saved image size */
 int factor = 1;
