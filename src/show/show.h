@@ -60,7 +60,7 @@ void startAnimation(int dummy);
 void invertView(int dummy);
 void callTopView(int dummy);
 void drawCameras(void);
-void callCameraView(int dummy);
+void callAddCamera(int dummy);
 void callDeleteCamera(int dummy);
 
 void pathAnimate(int dummy);
@@ -76,7 +76,7 @@ void CallBackMouseMotionFunc(int x, int y);
 void CallBackSpecialFunc(int key, int x, int y);
 void CallBackEntryFunc(int state);
 void InterfaceFunc(unsigned char key);
-void calcCameraPaths();
+void updateCamera();
 void drawRobotPath(int dummy);
 int calcFrameNo();
 int calcNoOfPoints(vector<PointXY>, vector<PointXY>);

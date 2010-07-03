@@ -140,11 +140,12 @@ void DrawPoints(GLenum mode)
 void DrawPath()
 {
   
+  glLineWidth(10.0);
   // draw path
   glBegin(GL_LINE_STRIP);
   for(unsigned int j = 0; j < path_vectorX.size(); j++){
     // set the color 
-    glColor4d(0.0, 0.0, 1.0, 0.7);
+    glColor3f(0.0, 1.0, 0.0);
     // set the points
     glVertex3f(path_vectorX.at(j).x,path_vectorX.at(j).y,path_vectorZ.at(j).y);
   }
@@ -154,13 +155,14 @@ void DrawPath()
   glBegin(GL_LINE_STRIP);
   for(unsigned int j = 0; j < lookat_vectorX.size(); j++){
     //set the color 
-    glColor4d(1.0, 0.0, 0.0, 0.7);
+    glColor3d(1.0, 1.0, 0.0);
     //set the points
     glVertex3f(lookat_vectorX.at(j).x,lookat_vectorX.at(j).y,lookat_vectorZ.at(j).y);
   }
   glEnd();
   
   // draw up path
+  /*
   glBegin(GL_LINE_STRIP);
   for(unsigned int j = 0; j < ups_vectorX.size(); j++){
     //set the color 
@@ -169,6 +171,7 @@ void DrawPath()
     glVertex3f(ups_vectorX.at(j).x,ups_vectorX.at(j).y,ups_vectorZ.at(j).y);
   }
   glEnd();
+  */
 }
 
 /**
@@ -182,10 +185,83 @@ void DrawCameras(void)
     
  // TODO improve upon this primitive camera   
     Point p = cams[i];
-    Point l = lookats[i];
-    Point u = ups[i];
+    Point l = Point::norm( lookats[i] - p );  // forward vector
+    Point u = Point::norm( ups[i] - p );      // up vector
+    Point r = Point::cross(l,u);        // right vector
+    l = 5 * l;
+    r = 5 * r;
+    u = 5 * u;
 
+    Point cube[8];
+    cube[0] = p + l - r - u; 
+    cube[1] = p + l + r - u; 
+    cube[2] = p - l + r - u; 
+    cube[3] = p - l - r - u; 
+    cube[4] = p + l - r + u;  
+    cube[5] = p + l + r + u;  
+    cube[6] = p - l + r + u;  
+    cube[7] = p - l - r + u;
     
+    int sides[6][4] = {{0,1,2,3}, {4,5,6,7}, {0,1,5,4},
+                       {3,2,6,7}, {1,2,6,5}, {0,3,7,4}};
+
+    if (i+1 == cam_choice) {
+      glColor3f(1, 0, 1);
+    } else {
+      glColor3f(0, 1, 0);
+    }
+    // camera cube
+    glPolygonMode (GL_FRONT_AND_BACK, GL_FILL); 
+    glBegin(GL_QUADS);
+      for (int j = 0; j < 6; j++) {
+        if (j == 2) continue;
+        for (int k = 0; k < 4; k++) {
+          int index = sides[j][k];
+          glVertex3d(cube[index].x, cube[index].y, cube[index].z);
+        }
+      }
+    glEnd();
+   
+    r = 5 * r;
+    u = 5 * u;
+    
+    glColor3f(1, 1, 0);
+    if (i+1 == cam_choice) {
+      glPointSize(10);
+    } else {
+      glPointSize(5);
+    }
+    glBegin(GL_POINTS);
+    glVertex3d( lookats[i].x,  lookats[i].y,  lookats[i].z);
+    glEnd();
+
+    Point fcube[8];
+    fcube[0] = cube[4]; 
+    fcube[1] = cube[5];
+    fcube[2] = cube[1];
+    fcube[3] = cube[0];
+    fcube[4] = lookats[i] - r + u;  
+    fcube[5] = lookats[i] + r + u;  
+    fcube[6] = lookats[i] + r - u;  
+    fcube[7] = lookats[i] - r - u;  
+    
+    glLineWidth(2.0);
+    glLineStipple(1, 0x0C0F);
+    glEnable(GL_LINE_STIPPLE);
+    glPolygonMode (GL_FRONT_AND_BACK, GL_LINE); 
+    // camera FOV
+    glBegin(GL_QUADS);
+      for (int j = 0; j < 6; j++) {
+        for (int k = 0; k < 4; k++) {
+          int index = sides[j][k];
+          glVertex3d(fcube[index].x, fcube[index].y, fcube[index].z);
+        }
+      }
+    glEnd();
+    glDisable(GL_LINE_STIPPLE);
+
+
+   /*
     if (i+1 == cam_choice) {
       glColor3f(1, 1, 0);
       glPointSize(20);
@@ -218,6 +294,7 @@ void DrawCameras(void)
     glBegin(GL_POINTS);
     glVertex3d( u.x,  u.y,  u.z);
     glEnd();
+*/ 
 
     glPopMatrix();
   }
@@ -270,11 +347,6 @@ void DisplayItFunc(GLenum mode)
               ups_vectorX.at(path_iterator).x - path_vectorX.at(path_iterator).x,
               ups_vectorX.at(path_iterator).y - path_vectorX.at(path_iterator).y, 
               ups_vectorZ.at(path_iterator).y - path_vectorZ.at(path_iterator).y);
-//            0, 1, 0  );
-    /*
-    gluLookAt(camposition.x, camposition.y, camposition.z,
-              lookatposition.x, lookatposition.y, lookatposition.z,
-              0, 1, 0  );*/
   }else {
     if (cameraNavMouseMode == 1) {
       glRotated( mouseRotX, 1, 0, 0);
@@ -447,11 +519,9 @@ void callDeleteCamera(int dummy){
     lookats.erase(positionL);
     ups.erase(positionU);
     //reset the cam_choice spinner values
-    cam_spinner->set_int_limits( 1, cams.size());
-    cam_spinner->set_int_val(cam_choice);
   }
   
-  calcCameraPaths();
+  updateCamera();
 }
 
 
@@ -636,7 +706,6 @@ void CallBackIdleFunc(void)
     //cout << "path_iterator: " << path_iterator << endl;
     if(path_iterator < path_vectorX.size()){   // standard animation case
       //call the path animation function
-      //pathAnimate1(path_iterator);
       //hide both the cameras and the path
       show_cameras = 0;
       show_path = 0;
@@ -777,7 +846,7 @@ void callTopView(int dummy)
  * calls the cameraView function 
  * @param dummy not needed necessary for glui 
  */
-void callCameraView(int dummy)
+void callAddCamera(int dummy)
 {
   Point campos(-X, -Y, -Z);
 
@@ -787,23 +856,19 @@ void callCameraView(int dummy)
   double tmat[16];
   for (int i =0;i<16;i++) tmat[i] = view_rotate_button[i];
   
-  lookat.x = -100*tmat[2] -X;
-  lookat.y = -100*tmat[6] -Y;
-  lookat.z = -100*tmat[10] -Z;
+  lookat.x = -50*tmat[2] -X;
+  lookat.y = -50*tmat[6] -Y;
+  lookat.z = -50*tmat[10] -Z;
 
-  up.x = 100*tmat[1] -X; 
-  up.y = 100*tmat[5] -Y; 
-  up.z = 100*tmat[9] -Z; 
+  up.x = 50*tmat[1] -X; 
+  up.y = 50*tmat[5] -Y; 
+  up.z = 50*tmat[9] -Z; 
 
   cams.push_back(campos);
   lookats.push_back(lookat);
   ups.push_back(up);
   
-  calcCameraPaths();
-  
-  // now reset the value of the cam_choice spinner
-  cam_spinner->set_int_limits( 1, cams.size() );
-  cam_spinner->set_int_val(cams.size());
+  updateCamera();
   
   //signal to repaint screen
   haveToUpdate  = 1;
@@ -1324,8 +1389,8 @@ void drawRobotPath(int dummy){
     Point campos(temp[12], temp[13] + 100, temp[14]);
 
     // calculate lookat point
-    Point lookat(0, 0, 100);
-    Point up(0, 100, 0);
+    Point lookat(0, 0, 50);
+    Point up(0, 50, 0);
     double tmat[16];
     for (int i =0;i<16;i++) tmat[i] = temp[i]; 
     lookat.transform(tmat);
@@ -1342,12 +1407,8 @@ void drawRobotPath(int dummy){
     lookats.push_back(lookat);
     ups.push_back(up);
   }
-  calcCameraPaths();
-
+  updateCamera();
    
-  //reset the cam_choice spinner
-  cam_spinner->set_int_limits( 1, cams.size() ); 
-  
   //signal for the update of scene
   haveToUpdate = 1;
 }

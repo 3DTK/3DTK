@@ -8,6 +8,7 @@
 #ifndef __POINT_H__
 #define __POINT_H__
 
+#include <cmath>
 #include <iostream>
 using std::ostream;
 using std::istream;
@@ -38,6 +39,38 @@ public:
    *	Constructor with three double values 
    */
   inline Point(const double _x, const double _y, const double _z) { x = _x; y = _y; z = _z; };
+  
+  static inline Point cross(const Point &X, const Point &Y) {
+    Point res;
+    res.x = X.y * Y.z - X.z * Y.y;
+    res.y = X.z * Y.x - X.x * Y.z;
+    res.z = X.x * Y.y - X.y * Y.x;
+    return res;
+  };
+  
+  static inline Point norm(const Point &p) {
+    double l = sqrt(p.x*p.x + p.y*p.y + p.z*p.z);
+    Point res(p.x/l, p.y/l, p.z/l);
+    return res;
+  };
+
+  inline Point operator+(const Point &p) const {
+    Point res;
+    res.x = x + p.x;
+    res.y = y + p.y;
+    res.z = z + p.z;
+    return res; 
+  };
+  
+  inline Point operator-(const Point &p) const {
+    Point res;
+    res.x = x - p.x;
+    res.y = y - p.y;
+    res.z = z - p.z;
+    return res; 
+  };
+  
+
 
   inline void transform(const double alignxf[16]);
   inline friend ostream& operator<<(ostream& os, const Point& p);
@@ -58,6 +91,14 @@ public:
   float deviation;
 
 };
+  
+inline Point operator*(const double &v, const Point &p) {
+  Point res;
+  res.x = v * p.x;
+  res.y = v * p.y;
+  res.z = v * p.z;
+  return res;
+}
 
 #include "point.icc"
 

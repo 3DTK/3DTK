@@ -64,8 +64,6 @@ GLUI_Button     *button1;
 GLUI_EditText *path_filename_edit;
 /** Pointer to the edit text box*/
 GLUI_EditText *pose_filename_edit;
-/** Pointer to the edit text box*/
-GLUI_EditText *flength_edit;
 
 /** Pointer to the rotation button */
 GLUI_Rotation  *rotButton;
@@ -133,9 +131,6 @@ void newMenu()
   pzoom_spinner->set_alignment( GLUI_ALIGN_RIGHT );
   pzoom_spinner->disable();
 
-  flength_edit = glui2->add_edittext_to_panel(settings_panel,"  Focal Length :",GLUI_EDITTEXT_FLOAT,&flength);
-  flength_edit->set_alignment( GLUI_ALIGN_LEFT );
- 
   glui2->add_column( true );
 
   mode_panel = glui2->add_panel("Mode: ");
@@ -157,7 +152,7 @@ void newMenu()
   cam_spinner->set_speed( 1 );
   cam_spinner->set_alignment( GLUI_ALIGN_LEFT );
   
-  glui2->add_button_to_panel(camera_panel, "Add Camera", 1, callCameraView )->set_alignment( GLUI_ALIGN_CENTER );
+  glui2->add_button_to_panel(camera_panel, "Add Camera", 1, callAddCamera )->set_alignment( GLUI_ALIGN_CENTER );
   glui2->add_button_to_panel(camera_panel, "Delete Camera", 0, callDeleteCamera )->set_alignment( GLUI_ALIGN_CENTER );
   
   /******* Other navigation controls**********/
@@ -188,7 +183,7 @@ void newMenu()
   static int dummy4;
   always_box = glui2->add_checkbox_to_panel(nav_panel, "Always all Points", &dummy4, 0, &changePointMode);
   static int dummy5 = 1;
-  never_box =  glui2->add_checkbox_to_panel(nav_panel, "Always reduced Points", &dummy5, 1, &changePointMode );
+  never_box =  glui2->add_checkbox_to_panel(nav_panel, "Always reduce Points", &dummy5, 1, &changePointMode );
   
   glui2->set_glutMouseFunc(CallBackMouseFuncMoving);
   
