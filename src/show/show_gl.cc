@@ -1324,16 +1324,23 @@ void drawRobotPath(int dummy){
     Point campos(temp[12], temp[13] + 100, temp[14]);
 
     // calculate lookat point
-    Point lookat(0, 0, 200);
+    Point lookat(0, 0, 100);
+    Point up(0, 100, 0);
     double tmat[16];
     for (int i =0;i<16;i++) tmat[i] = temp[i]; 
     lookat.transform(tmat);
     lookat.x = lookat.x ; 
     lookat.y = lookat.y + 100; 
     lookat.z = lookat.z  ; 
+    
+    up.transform(tmat);
+    up.x = up.x ; 
+    up.y = up.y + 100; 
+    up.z = up.z  ; 
 
     cams.push_back(campos);
     lookats.push_back(lookat);
+    ups.push_back(up);
   }
   calcCameraPaths();
 
