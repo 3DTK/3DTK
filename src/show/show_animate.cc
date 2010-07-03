@@ -93,7 +93,10 @@ void calcPath()
   path_vectorZ = cam_nurbs_path.getNurbsPath(path_listXZ, nr_interpolations);
 }
 
-void calcCameraPaths() {
+void updateCamera() {
+  cam_spinner->set_int_limits( 1, cams.size());
+  cam_spinner->set_int_val(cam_choice);
+  
   calcPath();
   calcLookAtPath();
   calcUpPath();
@@ -215,11 +218,8 @@ void loadPath(int dummy) {
     lookats.push_back(l);
     ups.push_back(u);
   }
-  calcCameraPaths();
+  updateCamera();
 
-  //reset the cam_choice spinner
-  cam_spinner->set_int_limits( 1, cams.size() );
-  
   //now close the file
   pathFile.clear();
   pathFile.close();
