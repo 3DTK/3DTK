@@ -81,7 +81,7 @@ WITH_TOOLS = WITH_TOOLS       # compile with further tools
 # PMD camera options
 # ------------------
 #
-WITH_PMD = WITH_PMD          # compile PMD camera tools
+#WITH_PMD = WITH_PMD          # compile PMD camera tools
 
 PMDLIBS = -lglfw -lGLU -lftgl -lxmlrpc_util -lglfw -lGLU -lftgl  -lxmlrpc_client -lxmlrpc -lxmlrpc++ -lxmlrpc_client++ -lxmlrpc_xmltok -lxmlrpc_xmlparse
 PMDPKG = `pkg-config --cflags opencv` `pkg-config --cflags ftgl` `pkg-config --libs libconfig` `pkg-config --libs opencv`
@@ -90,7 +90,7 @@ PMDPKG = `pkg-config --cflags opencv` `pkg-config --cflags ftgl` `pkg-config --l
 # SIFT based registration
 # -----------------------
 #
-WITH_SIFT = WITH_SIFT         # compile SIFT tools
+#WITH_SIFT = WITH_SIFT         # compile SIFT tools
 
 #
 # TORO options
