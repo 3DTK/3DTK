@@ -24,7 +24,6 @@ void DrawPoints(GLenum mode)
   if (ptstodisplay < min) ptstodisplay = min;
   else if (ptstodisplay > max) ptstodisplay = max;
 
-
   // In case of animation
   if(scanNr != -1) {
     cm->setMode(ScanColorManager::MODE_ANIMATION);
@@ -38,7 +37,7 @@ void DrawPoints(GLenum mode)
 
       glPointSize(pointsize);
 #ifdef USE_GL_POINTS
-        ExtractFrustum();
+        ExtractFrustum(pointsize);
           
         cm->selectColors(MetaAlgoType[iterator][frameNr]);
         if (pointmode == 1 || (showall && pointmode == 0) ) {
@@ -106,7 +105,7 @@ void DrawPoints(GLenum mode)
         glMultMatrixd(MetaMatrix[iterator].back());
 
 #ifdef USE_GL_POINTS
-        ExtractFrustum();
+        ExtractFrustum(pointsize);
         if (pointmode == 1 || (showall && pointmode == 0) ) {
           octpts[iterator]->displayOctTreeAllCulled();
         } else {
