@@ -56,7 +56,7 @@ CUDAINCDIRS = -I/usr/local/src/NVIDIA_GPU_Computing_SDK/C/common/inc/\
 # RIEGL scanner options
 # ---------------------
 #
-WITH_RIVLIB = True            # compile with rxp file support
+#WITH_RIVLIB = True            # compile with rxp file support
 
 
 #
@@ -98,7 +98,7 @@ WITH_TOOLS = True             # compile with further tools
 # PMD camera options
 # ------------------
 #
-WITH_PMD = True              # compile PMD camera tools
+#WITH_PMD = True              # compile PMD camera tools
 
 PMDLIBS = -lglfw -lGLU -lftgl -lxmlrpc_util -lglfw -lGLU -lftgl \
            -lxmlrpc_client -lxmlrpc -lxmlrpc++ -lxmlrpc_client++ -lxmlrpc_xmltok -lxmlrpc_xmlparse
@@ -110,7 +110,7 @@ PMDPKG = `pkg-config --cflags opencv` `pkg-config --cflags ftgl` \
 # SIFT based registration
 # -----------------------
 #
-WITH_SIFT = True              # compile SIFT tools
+#WITH_SIFT = True              # compile SIFT tools
 
 SIFTFLAGS = -DHAS_PANO13 
 
@@ -118,11 +118,11 @@ SIFTFLAGS = -DHAS_PANO13
 # TORO graph optimization 
 # -----------------------
 #
-WITH_TORO = True              # compile TORO
+#WITH_TORO = True              # compile TORO
 
 
 #
 # HOG-Man graph optimization
 # --------------------------
 #
-WITH_HOGMAN = True            # compile HOG-Man
+#WITH_HOGMAN = True            # compile HOG-Man
