@@ -11,186 +11,45 @@
 #include <GL/glut.h>
 #include <GL/glu.h>
 
+#include "../globals.icc"
 
-GLUquadric *quadSphere;
-int swCull = 1; /* toggles software culling, control with the <space> key */
-
-
-/*
- * matrix and math utility routines and macros
- */
-
- void matrixConcatenate (float *result, float *ma, float *mb)
-{
-    int i;
-    double mb00, mb01, mb02, mb03,
-           mb10, mb11, mb12, mb13,
-           mb20, mb21, mb22, mb23,
-           mb30, mb31, mb32, mb33;
-    double mai0, mai1, mai2, mai3;
-
-    mb00 = mb[0];  mb01 = mb[1];
-    mb02 = mb[2];  mb03 = mb[3];
-    mb10 = mb[4];  mb11 = mb[5];
-    mb12 = mb[6];  mb13 = mb[7];
-    mb20 = mb[8];  mb21 = mb[9];
-    mb22 = mb[10];  mb23 = mb[11];
-    mb30 = mb[12];  mb31 = mb[13];
-    mb32 = mb[14];  mb33 = mb[15];
-
-    for (i = 0; i < 4; i++) {
-        mai0 = ma[i*4+0];  mai1 = ma[i*4+1];
-	    mai2 = ma[i*4+2];  mai3 = ma[i*4+3];
-
-        result[i*4+0] = mai0 * mb00 + mai1 * mb10 + mai2 * mb20 + mai3 * mb30;
-        result[i*4+1] = mai0 * mb01 + mai1 * mb11 + mai2 * mb21 + mai3 * mb31;
-        result[i*4+2] = mai0 * mb02 + mai1 * mb12 + mai2 * mb22 + mai3 * mb32;
-        result[i*4+3] = mai0 * mb03 + mai1 * mb13 + mai2 * mb23 + mai3 * mb33;
-    }
-}
-
-#define vectorLength(nin) \
-    sqrt((nin)[0]*(nin)[0] + (nin)[1]*(nin)[1] + (nin)[2]*(nin)[2])
-#define distanceFromPlane(peq,p) \
-    ((peq)[0]*(p)[0] + (peq)[1]*(p)[1] + (peq)[2]*(p)[2] + (peq)[3])
-
-
-
-
-/*
- * Wiew volume plane storage and calculation
- */
-
-/* Storage for the six planes, left right top bottom near far */
-float planeEqs[6][4];
-
-/* Calculates the six view volume planes in object coordinate (OC) space.
-       
-       Algorithm:
-       
-       A view volume plane in OC is transformed into CC by multiplying it by
-       the inverse of the combined ModelView and Projection matrix (M).
-       Algebraically, this is written:
-              -1
-         P   M   = P
-          oc        cc
-       
-       The resulting six view volume planes in CC are:
-         [ -1  0  0  1 ]
-         [  1  0  0  1 ]
-         [  0 -1  0  1 ]
-         [  0  1  0  1 ]
-         [  0  0 -1  1 ]
-         [  0  0  1  1 ]
-       
-       To transform the CC view volume planes into OC, we simply multiply
-       the CC plane equations by the combined ModelView and Projection matrices
-       using standard vector-matrix multiplication. Algebraically, this is written:  
-         P   M = P
-          cc      oc
-       
-       Since all of the CC plane equation components are 0, 1, or -1, full vector-
-       matrix multiplication is overkill. For example, the first element of the
-       first OC plane equation is computed as:
-         A = -1 * m0 + 0 * m1 + 0 * m2 + 1 * m3
-       This simplifies to:
-         A = m3 - m0
-       
-       Other terms simpliofy similarly. In fact, all six plane equations can be
-       computed as follows:
-         [ m3-m0  m7-m4  m11-m8  m15-m12 ]
-         [ m3+m0  m7+m4  m11+m8  m15+m12 ]
-         [ m3-m1  m7-m5  m11-m9  m15-m13 ]
-         [ m3+m1  m7+m5  m11+m9  m15+m13 ]
-         [ m3-m2  m7-m6  m11-m10 m15-m14 ]
-         [ m3+m2  m7+m6  m11+m10 m15+m14 ]
-     */
- void calcViewVolumePlanes ()
-{
-    GLfloat ocEcMat[16], ecCcMat[16], ocCcMat[16];
-
-
-    /* Get the modelview and projection matrices */
-    glGetFloatv (GL_MODELVIEW_MATRIX, ocEcMat);
-    glGetFloatv (GL_PROJECTION_MATRIX, ecCcMat);
-
-    /* ocCcMat transforms from OC (object coordinates) to CC (clip coordinates) */
-    matrixConcatenate (ocCcMat, ocEcMat, ecCcMat);
-
-    /* Calculate the six OC plane equations. */
-    planeEqs[0][0] = ocCcMat[3] - ocCcMat[0]; 
-    planeEqs[0][1] = ocCcMat[7] - ocCcMat[4]; 
-    planeEqs[0][2] = ocCcMat[11] - ocCcMat[8]; 
-    planeEqs[0][3] = ocCcMat[15] - ocCcMat[12]; 
-
-    planeEqs[1][0] = ocCcMat[3] + ocCcMat[0]; 
-    planeEqs[1][1] = ocCcMat[7] + ocCcMat[4]; 
-    planeEqs[1][2] = ocCcMat[11] + ocCcMat[8]; 
-    planeEqs[1][3] = ocCcMat[15] + ocCcMat[12]; 
-
-    planeEqs[2][0] = ocCcMat[3] + ocCcMat[1]; 
-    planeEqs[2][1] = ocCcMat[7] + ocCcMat[5]; 
-    planeEqs[2][2] = ocCcMat[11] + ocCcMat[9]; 
-    planeEqs[2][3] = ocCcMat[15] + ocCcMat[13]; 
-
-    planeEqs[3][0] = ocCcMat[3] - ocCcMat[1]; 
-    planeEqs[3][1] = ocCcMat[7] - ocCcMat[5]; 
-    planeEqs[3][2] = ocCcMat[11] - ocCcMat[9]; 
-    planeEqs[3][3] = ocCcMat[15] - ocCcMat[13]; 
-
-    planeEqs[4][0] = ocCcMat[3] + ocCcMat[2]; 
-    planeEqs[4][1] = ocCcMat[7] + ocCcMat[6]; 
-    planeEqs[4][2] = ocCcMat[11] + ocCcMat[10]; 
-    planeEqs[4][3] = ocCcMat[15] + ocCcMat[14]; 
-
-    planeEqs[5][0] = ocCcMat[3] - ocCcMat[2]; 
-    planeEqs[5][1] = ocCcMat[7] - ocCcMat[6]; 
-    planeEqs[5][2] = ocCcMat[11] - ocCcMat[10]; 
-    planeEqs[5][3] = ocCcMat[15] - ocCcMat[14]; 
-}
-
-
-
-/* Test a sphere's bounding box against the six clip planes */
- int culled (float *p) 
-{
-    int i;
-    int culled;
-
-    for (i=0; i<6; i++) {
-        culled = 0;
-        if (!(distanceFromPlane(planeEqs[i],p) < 0.))
-          return 1;
-    }
-    /* Not trivially culled. visible. */
-    return 0;
-}
-/* 
-static int culled (double p[3])
-{
-    int i, j;
-    int culled;
-
-    for (i=0; i<3; i++) {
-        culled = 0;
-        for (j=0; j<8; j++) {   // point must be inside of all planes
-            if (distanceFromPlane(planeEqs[i], p[j]) < 0.)
-                culled |= 1<<j;
-        }
-        if (culled==0xff)
-            // All eight vertices of bounding box are trivially culled
-            return 1;
-    }
-    // Not trivially culled. Probably visible.
-    return 0;
-}
-*/
-
-
+/** The 6 planes of the viewing frustum */
 float frustum[6][4];
 
- void ExtractFrustum()
+/** the modelview * projection matrix to map a model point to an onscreen coordinate */
+float matrix[16];
+/** some useful variables for faster calculation of the pixel coordinates */
+short VP[4];
+/** a unit vector pointing to the right of the screen */
+float right[3];
+/** how much detail is shown, 0 means everything is plotted */
+short DETAIL;
+
+void remViewport() {
+  GLdouble modelMatrix[16];
+  GLdouble projMatrix[16];
+  int viewport[4];
+  glGetDoublev(GL_MODELVIEW_MATRIX,modelMatrix);
+  glGetDoublev(GL_PROJECTION_MATRIX,projMatrix);
+  glGetIntegerv(GL_VIEWPORT,viewport);
+
+  MMult( projMatrix, modelMatrix, matrix );
+  VP[0] = 0.5*viewport[2];
+  VP[1] = 0.5*viewport[2] + viewport[0];
+
+  VP[2] = 0.5*viewport[3];
+  VP[3] = 0.5*viewport[3] + viewport[1];
+
+  right[0] = modelMatrix[0];
+  right[1] = modelMatrix[4];
+  right[2] = modelMatrix[8];
+}
+
+void ExtractFrustum(short detail)
 {
+   DETAIL = detail + 1;
+   remViewport();
+
    float   proj[16];
    float   modl[16];
    float   clip[16];
@@ -304,52 +163,85 @@ float frustum[6][4];
 }
 
 
-bool PointInFrustum( float x, float y, float z )
-{
-   int p;
 
-   for( p = 0; p < 6; p++ )
-      if( frustum[p][0] * x + frustum[p][1] * y + frustum[p][2] * z + frustum[p][3] <= 0 )
-         return false;
-   return true;
+void myProject(float x, float y, float z, short &Xi ) {
+  float pn[2];
+  // x coordinate on screen, not normalized
+  pn[0] = x * matrix[0] + y * matrix[4] + z * matrix[8]  + matrix[12];
+  // normalization
+  pn[1] = x * matrix[3] + y * matrix[7] + z * matrix[11] + matrix[15];
+
+  // normalized x coordinate on screen
+  pn[0] /= pn[1];
+
+  // true x coordinate in viewport coordinate system
+  Xi = pn[0]*VP[0] + VP[1];
 }
 
-bool SphereInFrustum( float x, float y, float z, float radius )
+bool LOD(float x, float y, float z, float size)
 {
-  int p;
+  short X1;
+  short X2;
+ 
+  // onscreen position of the leftmost point
+  myProject(x - size*right[0], y - size*right[1], z - size*right[2], X1);
+  // onscreen position of the rightmost point
+  myProject(x + size*right[0], y + size*right[1], z + size*right[2], X2);
 
-  for( p = 0; p < 6; p++ )
-    if( frustum[p][0] * x + frustum[p][1] * y + frustum[p][2] * z + frustum[p][3] <= -radius )
-      return false;
-  return true;
+  if (X1 > X2) {
+    return (X1-X2) > DETAIL;
+  } else {
+    return (X2-X1) > DETAIL;
+  }
 }
+
 
 /**
  * 0 if not in frustrum
  * 1 if partial overlap
  * 2 if entirely within frustrum
  */
-int QuadInFrustrum2( float x, float y, float z, float xsize, float ysize, float zsize )
+int CubeInFrustum2( float x, float y, float z, float size )
 {
    int p;
 
+   float xm, xp, ym, yp, zm, zp;
+   float Fxm, Fxp, Fym, Fyp, Fzm, Fzp;
+   xm = x - size;
+   xp = x + size;
+   ym = y - size;
+   yp = y + size;
+   zm = z - size;
+   zp = z + size;
+
    for( p = 0; p < 6; p++ )
    {
-      if( frustum[p][0] * (x - xsize) + frustum[p][1] * (y - ysize) + frustum[p][2] * (z - zsize) + frustum[p][3] > 0 )
+      Fxm = frustum[p][0] * xm;
+      Fym = frustum[p][1] * ym;
+      Fzm = frustum[p][2] * zm;
+      if( Fxm + Fym + Fzm + frustum[p][3] > 0 )
          continue;
-      if( frustum[p][0] * (x + xsize) + frustum[p][1] * (y - ysize) + frustum[p][2] * (z - zsize) + frustum[p][3] > 0 )
+
+      Fxp = frustum[p][0] * xp;
+      if( Fxp + Fym + Fzm + frustum[p][3] > 0 )
          continue;
-      if( frustum[p][0] * (x - xsize) + frustum[p][1] * (y + ysize) + frustum[p][2] * (z - zsize) + frustum[p][3] > 0 )
+
+      Fyp = frustum[p][1] * yp;
+      if( Fxm + Fyp + Fzm + frustum[p][3] > 0 )
          continue;
-      if( frustum[p][0] * (x + xsize) + frustum[p][1] * (y + ysize) + frustum[p][2] * (z - zsize) + frustum[p][3] > 0 )
+
+      if( Fxp + Fyp + Fzm + frustum[p][3] > 0 )
          continue;
-      if( frustum[p][0] * (x - xsize) + frustum[p][1] * (y - ysize) + frustum[p][2] * (z + zsize) + frustum[p][3] > 0 )
+      
+      Fzp = frustum[p][2] * zp;
+      if( Fxm + Fym + Fzp + frustum[p][3] > 0 )
          continue;
-      if( frustum[p][0] * (x + xsize) + frustum[p][1] * (y - ysize) + frustum[p][2] * (z + zsize) + frustum[p][3] > 0 )
+
+      if( Fxp + Fym + Fzp + frustum[p][3] > 0 )
          continue;
-      if( frustum[p][0] * (x - xsize) + frustum[p][1] * (y + ysize) + frustum[p][2] * (z + zsize) + frustum[p][3] > 0 )
+      if( Fxm + Fyp + Fzp + frustum[p][3] > 0 )
          continue;
-      if( frustum[p][0] * (x + xsize) + frustum[p][1] * (y + ysize) + frustum[p][2] * (z + zsize) + frustum[p][3] > 0 )
+      if( Fxp + Fyp + Fzp + frustum[p][3] > 0 )
          continue;
       return 0;
    }
@@ -357,55 +249,39 @@ int QuadInFrustrum2( float x, float y, float z, float xsize, float ysize, float 
    // box is in frustrum, now check wether all corners are within. If one is outside return 1 otherwise 2
    for( p = 0; p < 6; p++ )
    {
-      if( frustum[p][0] * (x - xsize) + frustum[p][1] * (y - ysize) + frustum[p][2] * (z - zsize) + frustum[p][3] < 0 )
+      Fxm = frustum[p][0] * xm;
+      Fym = frustum[p][1] * ym;
+      Fzm = frustum[p][2] * zm;
+      if( Fxm + Fym + Fzm + frustum[p][3] < 0 )
          return 1;
-      if( frustum[p][0] * (x + xsize) + frustum[p][1] * (y - ysize) + frustum[p][2] * (z - zsize) + frustum[p][3] < 0 )
+      
+      Fxp = frustum[p][0] * xp;
+      if( Fxp + Fym + Fzm + frustum[p][3] < 0 )
          return 1;
-      if( frustum[p][0] * (x - xsize) + frustum[p][1] * (y + ysize) + frustum[p][2] * (z - zsize) + frustum[p][3] < 0 )
+      
+      Fyp = frustum[p][1] * yp;
+      if( Fxm + Fyp + Fzm + frustum[p][3] < 0 )
          return 1;
-      if( frustum[p][0] * (x + xsize) + frustum[p][1] * (y + ysize) + frustum[p][2] * (z - zsize) + frustum[p][3] < 0 )
+
+      if( Fxp + Fyp + Fzm + frustum[p][3] < 0 )
          return 1;
-      if( frustum[p][0] * (x - xsize) + frustum[p][1] * (y - ysize) + frustum[p][2] * (z + zsize) + frustum[p][3] < 0 )
+
+      Fzp = frustum[p][2] * zp;
+      if( Fxm + Fym + Fzp + frustum[p][3] < 0 )
          return 1;
-      if( frustum[p][0] * (x + xsize) + frustum[p][1] * (y - ysize) + frustum[p][2] * (z + zsize) + frustum[p][3] < 0 )
+      
+      if( Fxp + Fym + Fzp + frustum[p][3] < 0 )
          return 1;
-      if( frustum[p][0] * (x - xsize) + frustum[p][1] * (y + ysize) + frustum[p][2] * (z + zsize) + frustum[p][3] < 0 )
+      if( Fxm + Fyp + Fzp + frustum[p][3] < 0 )
          return 1;
-      if( frustum[p][0] * (x + xsize) + frustum[p][1] * (y + ysize) + frustum[p][2] * (z + zsize) + frustum[p][3] < 0 )
+      if( Fxp + Fyp + Fzp + frustum[p][3] < 0 )
          return 1;
    }
    return 2;
 
 }
 
-bool QuadInFrustrum( float x, float y, float z, float xsize, float ysize, float zsize )
-{
-   int p;
-
-   for( p = 0; p < 6; p++ )
-   {
-      if( frustum[p][0] * (x - xsize) + frustum[p][1] * (y - ysize) + frustum[p][2] * (z - zsize) + frustum[p][3] > 0 )
-         continue;
-      if( frustum[p][0] * (x + xsize) + frustum[p][1] * (y - ysize) + frustum[p][2] * (z - zsize) + frustum[p][3] > 0 )
-         continue;
-      if( frustum[p][0] * (x - xsize) + frustum[p][1] * (y + ysize) + frustum[p][2] * (z - zsize) + frustum[p][3] > 0 )
-         continue;
-      if( frustum[p][0] * (x + xsize) + frustum[p][1] * (y + ysize) + frustum[p][2] * (z - zsize) + frustum[p][3] > 0 )
-         continue;
-      if( frustum[p][0] * (x - xsize) + frustum[p][1] * (y - ysize) + frustum[p][2] * (z + zsize) + frustum[p][3] > 0 )
-         continue;
-      if( frustum[p][0] * (x + xsize) + frustum[p][1] * (y - ysize) + frustum[p][2] * (z + zsize) + frustum[p][3] > 0 )
-         continue;
-      if( frustum[p][0] * (x - xsize) + frustum[p][1] * (y + ysize) + frustum[p][2] * (z + zsize) + frustum[p][3] > 0 )
-         continue;
-      if( frustum[p][0] * (x + xsize) + frustum[p][1] * (y + ysize) + frustum[p][2] * (z + zsize) + frustum[p][3] > 0 )
-         continue;
-      return false;
-   }
-   return true;
-}
-
-bool CubeInFrustum( float x, float y, float z, float size )
+int QuadInFrustrum2old( float x, float y, float z, float size )
 {
    int p;
 
@@ -427,8 +303,76 @@ bool CubeInFrustum( float x, float y, float z, float size )
          continue;
       if( frustum[p][0] * (x + size) + frustum[p][1] * (y + size) + frustum[p][2] * (z + size) + frustum[p][3] > 0 )
          continue;
+      return 0;
+   }
+
+   // box is in frustrum, now check wether all corners are within. If one is outside return 1 otherwise 2
+   for( p = 0; p < 6; p++ )
+   {
+      if( frustum[p][0] * (x - size) + frustum[p][1] * (y - size) + frustum[p][2] * (z - size) + frustum[p][3] < 0 )
+         return 1;
+      if( frustum[p][0] * (x + size) + frustum[p][1] * (y - size) + frustum[p][2] * (z - size) + frustum[p][3] < 0 )
+         return 1;
+      if( frustum[p][0] * (x - size) + frustum[p][1] * (y + size) + frustum[p][2] * (z - size) + frustum[p][3] < 0 )
+         return 1;
+      if( frustum[p][0] * (x + size) + frustum[p][1] * (y + size) + frustum[p][2] * (z - size) + frustum[p][3] < 0 )
+         return 1;
+      if( frustum[p][0] * (x - size) + frustum[p][1] * (y - size) + frustum[p][2] * (z + size) + frustum[p][3] < 0 )
+         return 1;
+      if( frustum[p][0] * (x + size) + frustum[p][1] * (y - size) + frustum[p][2] * (z + size) + frustum[p][3] < 0 )
+         return 1;
+      if( frustum[p][0] * (x - size) + frustum[p][1] * (y + size) + frustum[p][2] * (z + size) + frustum[p][3] < 0 )
+         return 1;
+      if( frustum[p][0] * (x + size) + frustum[p][1] * (y + size) + frustum[p][2] * (z + size) + frustum[p][3] < 0 )
+         return 1;
+   }
+   return 2;
+
+}
+
+bool CubeInFrustum( float x, float y, float z, float size )
+{
+   int p;
+
+   float xm, xp, ym, yp, zm, zp;
+   float Fxm, Fxp, Fym, Fyp, Fzm, Fzp;
+   xm = x - size;
+   xp = x + size;
+   ym = y - size;
+   yp = y + size;
+   zm = z - size;
+   zp = z + size;
+
+   for( p = 0; p < 6; p++ )
+   {
+      Fxm = frustum[p][0] * xm;
+      Fym = frustum[p][1] * ym;
+      Fzm = frustum[p][2] * zm;
+      if( Fxm + Fym + Fzm + frustum[p][3] > 0 )
+         continue;
+
+      Fxp = frustum[p][0] * xp;
+      if( Fxp + Fym + Fzm + frustum[p][3] > 0 )
+         continue;
+
+      Fyp = frustum[p][1] * yp;
+      if( Fxm + Fyp + Fzm + frustum[p][3] > 0 )
+         continue;
+
+      if( Fxp + Fyp + Fzm + frustum[p][3] > 0 )
+         continue;
+      
+      Fzp = frustum[p][2] * zp;
+      if( Fxm + Fym + Fzp + frustum[p][3] > 0 )
+         continue;
+
+      if( Fxp + Fym + Fzp + frustum[p][3] > 0 )
+         continue;
+      if( Fxm + Fyp + Fzp + frustum[p][3] > 0 )
+         continue;
+      if( Fxp + Fyp + Fzp + frustum[p][3] > 0 )
+         continue;
       return false;
    }
    return true;
 }
-

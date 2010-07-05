@@ -48,9 +48,9 @@ void Show_BOctTree::displayOctTreeAllCulled() {
   displayOctTreeAll(*root, center, size);
 }
 
+
 void Show_BOctTree::displayOctTreeCulled(long targetpts) {
-  displayOctTreeCulled(targetpts, *root, center, size);
-  //displayOctTree(targetpts, *root);
+  displayOctTreeCulledLOD(targetpts, *root, center, size);
 }
 
 /**
@@ -87,7 +87,7 @@ void Show_BOctTree::displayOctTreeAll(bitoct &node, double *center, double size)
  * Displays all non culled points
  */
 void Show_BOctTree::displayOctTreeAllCulled(bitoct &node, double *center, double size) {
-  int res = QuadInFrustrum2(center[0], center[1], center[2], size, size, size);
+  int res = CubeInFrustum2(center[0], center[1], center[2], size);
   if (res==0) return;  // culled do not continue with this branch of the tree
   
   if (res == 2) { // if entirely within frustrum discontinue culling
@@ -104,7 +104,7 @@ void Show_BOctTree::displayOctTreeAllCulled(bitoct &node, double *center, double
       childcenter(center, ccenter, size, i);  // childrens center
       if (  ( 1 << i ) & node.leaf ) {   // if ith node is leaf get center
         // check if leaf is visible
-        if ( QuadInFrustrum(ccenter[0], ccenter[1], ccenter[2], size, size, size) ) {
+        if ( CubeInFrustum(ccenter[0], ccenter[1], ccenter[2], size) ) {
           pointrep *points = children->points;
           unsigned int length = points[0].length;
           double *point = &(points[1].v);  // first point
@@ -124,69 +124,19 @@ void Show_BOctTree::displayOctTreeAllCulled(bitoct &node, double *center, double
   }
 
 }
-/**
- * Displays octree. Tries to display only targetpts points, but will usually display four times as much
- *
- */
-void Show_BOctTree::displayOctTree(long targetpts, bitoct &node) {
-  if (targetpts <= 0) return; // no need to display anything
 
-  bitunion *children;
-  bitoct::getChildren(node, children);
-  
-  unsigned short nc = POPCOUNT(node.valid);
-  long newtargetpts = targetpts;
-  if (nc > 0) {
-    newtargetpts = newtargetpts/nc;
-    if (newtargetpts <= 0 ) return;
-  }
-
-  for (short i = 0; i < 8; i++) {
-    if (  ( 1 << i ) & node.valid ) {   // if ith node exists
-      if (  ( 1 << i ) & node.leaf ) {   // if ith node is leaf get center
-        pointrep *points = children->points;
-        unsigned int length = points[0].length;
-        double *point = &(points[1].v);  // first point
-        glBegin(GL_POINTS);
-        if (length <= newtargetpts) {        // more points requested than possible, plot all
-          for(unsigned int iterator = 0; iterator < length; iterator++ ) {
-          if(cm) cm->setColor(point);
-            glVertex3f( point[0], point[1], point[2]);
-            point+=POINTDIM;
-          }
-        } else {                         // select points to show
-          // TODO smarter subselection of points here
-          double each = (double)POINTDIM * (double)((double)length/(double)newtargetpts);
-          double *p;
-          int index;
-          for(unsigned int iterator = 0; iterator < newtargetpts; iterator++ ) {
-            index = (double)iterator * each;
-            p = point + index - index%POINTDIM;
-            if(cm) cm->setColor(p);
-            glVertex3f( p[0], p[1], p[2]);
-          }
-        }
-        glEnd();
-      } else { // recurse
-        displayOctTree(newtargetpts, children->node);
-      }
-      ++children; // next child
-    }
-  }
-}
-
-
-void Show_BOctTree::displayOctTreeCulled(long targetpts, bitoct &node, double *center, double size) {
+void Show_BOctTree::displayOctTreeCulledLOD(long targetpts, bitoct &node, double *center, double size) {
   if (targetpts <= 0) return; // no need to display anything
   
-  int res = QuadInFrustrum2(center[0], center[1], center[2], size, size, size);
+  int res = CubeInFrustum2(center[0], center[1], center[2], size);
   if (res==0) return;  // culled do not continue with this branch of the tree
   
   if (res == 2) { // if entirely within frustrum discontinue culling
-    displayOctTree(targetpts, node);
+    displayOctTreeLOD(targetpts, node, center, size);
     return;
   }
 
+  
   double ccenter[3];
   bitunion *children;
   bitoct::getChildren(node, children);
@@ -203,12 +153,16 @@ void Show_BOctTree::displayOctTreeCulled(long targetpts, bitoct &node, double *c
       childcenter(center, ccenter, size, i);  // childrens center
       if (  ( 1 << i ) & node.leaf ) {   // if ith node is leaf get center
         // check if leaf is visible
-        if ( QuadInFrustrum(ccenter[0], ccenter[1], ccenter[2], size, size, size) ) {
+        if ( CubeInFrustum(ccenter[0], ccenter[1], ccenter[2], size) ) {
           pointrep *points = children->points;
           unsigned int length = points[0].length;
           double *point = &(points[1].v);  // first point
           glBegin(GL_POINTS);
-          if (length <= newtargetpts) {        // more points requested than possible, plot all
+           
+          if (length > 10 && !LOD(ccenter[0], ccenter[1], ccenter[2], size/2.0) ) {  // only a single pixel on screen only paint one point
+            if(cm) cm->setColor(point);
+            glVertex3f( point[0], point[1], point[2]);
+          } else if (length <= newtargetpts) {        // more points requested than possible, plot all
             for(unsigned int iterator = 0; iterator < length; iterator++ ) {
               if(cm) cm->setColor(point);
               glVertex3f( point[0], point[1], point[2]);
@@ -231,10 +185,67 @@ void Show_BOctTree::displayOctTreeCulled(long targetpts, bitoct &node, double *c
         }
 
       } else { // recurse
-        displayOctTreeCulled(newtargetpts, children->node, ccenter, size/2.0);
+        displayOctTreeCulledLOD(newtargetpts, children->node, ccenter, size/2.0);
       }
       ++children; // next child
     }
   }
 }
 
+/**
+ * Displays octree. Tries to display only targetpts points, but will usually display four times as much
+ *
+ */
+void Show_BOctTree::displayOctTreeLOD(long targetpts, bitoct &node, double *center, double size) {
+  if (targetpts <= 0) return; // no need to display anything
+  
+  double ccenter[3];
+  bitunion *children;
+  bitoct::getChildren(node, children);
+  
+  unsigned short nc = POPCOUNT(node.valid);
+  long newtargetpts = targetpts;
+  if (nc > 0) {
+    newtargetpts = newtargetpts/nc;
+    if (newtargetpts <= 0 ) return;
+  }
+
+
+  for (short i = 0; i < 8; i++) {
+    if (  ( 1 << i ) & node.valid ) {   // if ith node exists
+      childcenter(center, ccenter, size, i);  // childrens center
+      if (  ( 1 << i ) & node.leaf ) {   // if ith node is leaf get center
+        pointrep *points = children->points;
+        unsigned int length = points[0].length;
+        double *point = &(points[1].v);  // first point
+        glBegin(GL_POINTS);
+        if (length > 10 && !LOD(ccenter[0], ccenter[1], ccenter[2], size/2.0) ) {  // only a single pixel on screen only paint one point
+          if(cm) cm->setColor(point);
+          glVertex3f( point[0], point[1], point[2]);
+        } else if (length <= newtargetpts) {        // more points requested than possible, plot all
+          for(unsigned int iterator = 0; iterator < length; iterator++ ) {
+            if(cm) cm->setColor(point);
+            glVertex3f( point[0], point[1], point[2]);
+            point+=POINTDIM;
+          }
+        } else {                         // select points to show
+          // TODO smarter subselection of points here
+          double each = (double)POINTDIM * (double)((double)length/(double)newtargetpts);
+          double *p;
+          int index;
+          for(unsigned int iterator = 0; iterator < newtargetpts; iterator++ ) {
+            index = (double)iterator * each;
+            p = point + index - index%POINTDIM;
+            if(cm) cm->setColor(p);
+            glVertex3f( p[0], p[1], p[2]);
+            //point += each;
+          }
+        }
+        glEnd();
+      } else { // recurse
+        displayOctTreeLOD(newtargetpts, children->node, ccenter, size/2.0);
+      }
+      ++children; // next child
+    }
+  }
+}
