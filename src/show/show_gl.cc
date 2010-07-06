@@ -884,7 +884,7 @@ void CallBackMouseFuncMoving(int button, int state, int x, int y)
     if (delayeddisplay) {
       delayeddisplay = false;
       if (fullydisplayed) return;
-      if (haveToUpdate == 6) return;
+      if (haveToUpdate == 6 || haveToUpdate == 3 || haveToUpdate == 4) return;
       haveToUpdate = 7;
     }
   }
@@ -898,7 +898,7 @@ void CallBackEntryFunc(int state) {
       } 
       else {
         if (fullydisplayed ) return;
-        if (haveToUpdate == 6) return;
+        if (haveToUpdate == 6 || haveToUpdate == 3 || haveToUpdate == 4) return;
         haveToUpdate = 7;
       }
   } else if (state == GLUT_ENTERED) {
@@ -985,7 +985,7 @@ void CallBackMouseFunc(int button, int state, int x, int y)
       if (delayeddisplay) {
         delayeddisplay = false;
         if (fullydisplayed) return;
-        if (haveToUpdate == 6) return;
+        if (haveToUpdate == 6 || haveToUpdate == 3 || haveToUpdate == 4) return;
         haveToUpdate = 7;
       }
     }
