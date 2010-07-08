@@ -406,6 +406,7 @@ int parseArgs(int argc,char **argv, string &dir, int& start, int& end, int& maxD
 	   else if (strcasecmp(optarg, "front") == 0) type = FRONT;
 	   else if (strcasecmp(optarg, "x3d") == 0) type = X3D;
 	   else if (strcasecmp(optarg, "rxp") == 0) type = RXP;
+	   else if (strcasecmp(optarg, "kit") == 0) type = KIT;
 	   else {
 		abort ();
 	   }
@@ -630,11 +631,6 @@ void createDisplayLists(bool reduced, unsigned int types)
   cout << "Creating display octrees.." << endl;
   octpts = new Show_BOctTree*[Scan::allScans.size()];
 
-#ifdef _OPENMP
-  omp_set_num_threads(OPENMP_NUM_THREADS);
-  omp_set_nested(1);
-#pragma omp parallel for schedule(dynamic)
-#endif
   for(int i = 0; i < (int)Scan::allScans.size() ; i++) {
     if (reduced) {
       double **pts = new double*[Scan::allScans[i]->get_points_red_size()];
