@@ -352,7 +352,7 @@ void DisplayItFunc(GLenum mode)
       glRotated( mouseRotY, 0, 1, 0);
     } else glRotated(angle, axis[0], axis[1], axis[2]);    // rotate the camera
     glGetFloatv(GL_MODELVIEW_MATRIX, view_rotate_button);
-
+    
     glui2->sync_live();
     glui2->show();
 
@@ -704,6 +704,7 @@ void CallBackIdleFunc(void)
 
     //cout << "path_iterator: " << path_iterator << endl;
     if(path_iterator < path_vectorX.size()){   // standard animation case
+
       //call the path animation function
       //hide both the cameras and the path
       show_cameras = 0;
@@ -718,7 +719,7 @@ void CallBackIdleFunc(void)
       //save the animation
       if(save_animation){
         string filename = scandir + "animframe" + to_string(path_iterator,4) + ".ppm";
-        cout << filename << endl;
+        cout << "written " << filename << " of " << path_vectorX.size() << " files" << endl;
         glDumpWindowPPM(filename.c_str(),0);
 
       }
@@ -760,7 +761,7 @@ void update_view_rotate(int t)
 
 void update_view_translation(int t)
 {
-  double mat[16], obj_pos_button_new[3], obj_pos_button1[3];
+  double obj_pos_button_new[3], obj_pos_button1[3];
 
   for (int i = 0; i < 3; i++) {
     if (fabs(obj_pos_button_old[i] - obj_pos_button[i]) > COMPARE_EPSILON) {
@@ -769,20 +770,9 @@ void update_view_translation(int t)
     } else obj_pos_button1[i] = 0.0;
   }
 
-  QuaternionToMatrix4(quat, mat);
-  obj_pos_button_new[0] =   obj_pos_button1[0] * mat[0]
-    + obj_pos_button1[1] * mat[4]
-    + obj_pos_button1[2] * mat[8];
-  obj_pos_button_new[1] =   obj_pos_button1[0] * mat[1]
-    + obj_pos_button1[1] * mat[5]
-    + obj_pos_button1[2] * mat[9];
-  obj_pos_button_new[2] =   obj_pos_button1[0] * mat[2]
-    + obj_pos_button1[1] * mat[6]
-    + obj_pos_button1[2] * mat[10];
-    
-  X = X + obj_pos_button_new[0];
-  Y = Y + obj_pos_button_new[1];
-  Z = Z + obj_pos_button_new[2];
+  X = X + obj_pos_button1[0] * view_rotate_button[0] + obj_pos_button1[1] * view_rotate_button[1] + obj_pos_button1[2] * view_rotate_button[2]; 
+  Y = Y + obj_pos_button1[0] * view_rotate_button[4] + obj_pos_button1[1] * view_rotate_button[5] + obj_pos_button1[2] * view_rotate_button[6]; 
+  Z = Z + obj_pos_button1[0] * view_rotate_button[8] + obj_pos_button1[1] * view_rotate_button[9] + obj_pos_button1[2] * view_rotate_button[10]; 
 
 }
 
@@ -1006,7 +996,7 @@ void CallBackMouseMotionFunc(int x, int y) {
     mat[6] = -cos(mouseRotXRand) * sin(mouseRotYRand);
     mat[7] = sin(mouseRotXRand);
     mat[8] = cos(mouseRotXRand) * cos(mouseRotYRand);
-    
+
     int deltaMouseX = x - mouseNavX;
     int deltaMouseY = mouseNavY - y;
     int deltaMouseZ = y - mouseNavY;
