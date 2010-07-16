@@ -720,7 +720,8 @@ void CallBackIdleFunc(void)
       if(save_animation){
         string filename = scandir + "animframe" + to_string(path_iterator,4) + ".ppm";
         cout << "written " << filename << " of " << path_vectorX.size() << " files" << endl;
-        glDumpWindowPPM(filename.c_str(),0);
+        glWriteImagePPM(filename.c_str(), factor, 0);
+        haveToUpdate = 6;
 
       }
     }else{                             // animation has just ended
