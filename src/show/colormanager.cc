@@ -54,6 +54,16 @@ void ColorManager::setColorMap(ColorMap &cm) {
   cm.calcColor(colormap[buckets], buckets-1, buckets);
 }
 
+void ColorManager::invert() {
+  for (unsigned int i = 0; i < buckets+1; i++) {
+    for (unsigned int j = 0; j < 3; j++) {
+      colormap[i][j] = 1.0 - colormap[i][j];
+    }
+  }
+
+}
+
+
 void ColorManager::setCurrentDim(unsigned int cdim) {
   currentdim = cdim;
   makeValid();
@@ -159,6 +169,9 @@ ColorMap ColorMap::getColorMap(CM map) {
       break;
     case HOT:
       return HotMap();
+      break;
+    case SHSV:
+      return SHSVMap();
       break;
     default:
       return ColorMap();

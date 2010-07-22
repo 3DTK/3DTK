@@ -258,6 +258,7 @@ void newMenu()
     glui1->add_radiobutton_to_group(colorm_rog, "Jet");
     glui1->add_radiobutton_to_group(colorm_rog, "Hot");
     glui1->add_radiobutton_to_group(colorm_rog, "Rand");
+    glui1->add_radiobutton_to_group(colorm_rog, "SHSV");
     
     glui1->add_checkbox_to_panel(color_panel, "Id Scans by Color", &scans_colored, 0,  &setScansColored);
     mincol_spinner = glui1->add_spinner_to_panel(color_panel, "Min Val:", GLUI_SPINNER_FLOAT, &mincolor_value, 0, &minmaxChanged);
