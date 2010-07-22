@@ -10,6 +10,7 @@ class ColorMap {
       HSV = 2,
       JET = 3,
       HOT = 4,
+      SHSV = 5,
     };
 
   virtual void calcColor(float *d, unsigned int i, unsigned int buckets) {
@@ -39,6 +40,14 @@ class HSVMap : public ColorMap {
   virtual void calcColor(float *d, unsigned int i, unsigned int buckets) {
     float t = (float)i/(float)buckets;
     convert_hsv_to_rgb(360.0*t, 1.0, 1.0,  d[0], d[1], d[2]);
+  }
+};
+
+class SHSVMap : public ColorMap {
+  public:
+  virtual void calcColor(float *d, unsigned int i, unsigned int buckets) {
+    float t = (float)i/(float)buckets;
+    convert_hsv_to_rgb(240.0*(1.0-t), 1.0, 1.0,  d[0], d[1], d[2]);
   }
 };
 
@@ -91,6 +100,8 @@ class ColorManager {
     void setColor(double *val);
 
     virtual void setColorMap(ColorMap &cm);
+
+    void invert();
     void setCurrentDim(unsigned int cdim);
 
 

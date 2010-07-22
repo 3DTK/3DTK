@@ -39,6 +39,7 @@ class ScanColorManager {
 
     void setMinMax(float min, float max);
     void setMode(const unsigned int &mode);
+    void setInvert(bool invert);
 
     inline float getMin() { return mins[currentdim];};
     inline float getMax() { return maxs[currentdim];};
@@ -77,6 +78,7 @@ class ScanColorManager {
     
     bool valid;
     bool colorScans;
+    bool inverted;
 };
 
 #endif

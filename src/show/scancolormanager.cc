@@ -41,6 +41,7 @@ const float ScanColorManager::colormap[6][3] = {
  */
 ScanColorManager::ScanColorManager(unsigned int _buckets, unsigned int _types) {
   valid = false;
+  inverted = false;
   buckets = _buckets;
   types = _types;
 
@@ -68,6 +69,7 @@ ScanColorManager::ScanColorManager(unsigned int _buckets, unsigned int _types) {
  
   currenttype = USE_HEIGHT;
   currentdim = 0;
+ 
     
 }
 
@@ -161,6 +163,7 @@ void ScanColorManager::setColorMap(ColorMap &cm) {
   makeValid();
   for (unsigned int i = 0; i < allManager.size(); i++) {
     allManager[i]->setColorMap(cm);
+    if (inverted) allManager[i]->invert();
   }
 }
 
@@ -275,4 +278,14 @@ double * ScanColorManager::createPoint(const Point &P, const unsigned int types)
 
   return p;
 
+}
+    
+
+void ScanColorManager::setInvert(bool invert) {
+  if (invert != inverted) {
+    for (unsigned int i = 0; i < allManager.size(); i++) {
+      allManager[i]->invert();
+    }
+  }
+  inverted = invert;
 }

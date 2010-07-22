@@ -810,6 +810,7 @@ void callResetView(int dummy)
 void invertView(int dummy)
 {
   invert = !invert;
+  cm->setInvert(!invert);
 }
 
 /**
@@ -1479,6 +1480,7 @@ void changeColorMap(int dummy) {
   ColorMap c;
   GreyMap gm;
   HSVMap hsv;
+  SHSVMap shsv;
   JetMap jm;
   HotMap hot;
   DiffMap diff;
@@ -1502,6 +1504,9 @@ void changeColorMap(int dummy) {
       break;
     case 5:
       cm->setColorMap(diff);
+      break;
+    case 6:
+      cm->setColorMap(shsv);
       break;
     default:
       break;
