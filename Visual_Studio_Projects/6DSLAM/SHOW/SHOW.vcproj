@@ -296,10 +296,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\src\show\camera.cc"
-				>
-			</File>
-			<File
 				RelativePath="..\..\..\src\show\colormanager.cc"
 				>
 			</File>
@@ -358,6 +354,10 @@
 						UsePrecompiledHeader="0"
 					/>
 				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\..\src\show\scancolormanager.cc"
+				>
 			</File>
 			<File
 				RelativePath="..\..\..\src\show\show.cc"
@@ -482,10 +482,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\src\show\camera.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\..\src\show\colormanager.h"
 				>
 			</File>
@@ -519,6 +515,10 @@
 			</File>
 			<File
 				RelativePath="..\..\..\src\scan_io.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\src\show\scancolormanager.h"
 				>
 			</File>
 			<File
