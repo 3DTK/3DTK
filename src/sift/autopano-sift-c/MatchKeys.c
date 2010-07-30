@@ -236,6 +236,7 @@ void MultiMatch_LoadKeysets(MultiMatch* self, ArrayList* filenames)
 	int n;
 	for ( n = 0 ; n < self->imageCount ; ++n) {
 	        char* fn = (char *) ArrayList_GetItem(filenames, n);
+
 		KeypointXMLList* keys = KeypointXMLReader_ReadComplete (fn);
 		if (!keys)
 			FatalError("Failed to load keypoints from %s", fn);

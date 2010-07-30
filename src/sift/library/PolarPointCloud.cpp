@@ -12,10 +12,10 @@
 
 using namespace std;
 
-PolarPointCloud::PolarPointCloud(string scanid, vector<PolarPoint> *data, long length, double mina, double maxa, double minb, double maxb)
+PolarPointCloud::PolarPointCloud(string scanid, vector<PolarPoint> *_data, long length, double mina, double maxa, double minb, double maxb)
 {
 	this->scanid = scanid;
-	this->data = data;
+	this->data = _data;;
 	this->length = length;
 	this->mina = mina;
 	this->maxa = maxa;
@@ -74,7 +74,7 @@ const vector<PolarPoint> *PolarPointCloud::getData()
 PolarPointCloud::~PolarPointCloud() {
 //	std::cout << "Freeing PPC data\n";
 //	delete [] this->data;
-	delete data;
+//	delete data;
 }
 
 
@@ -102,12 +102,11 @@ void PolarPointCloud::serialize(const char* filename)
 		out.write((char*) &r, sizeof(r));
 		out.write((char*) &d, sizeof(d));
 	}	
-	
 	out.write((char*) &mina, sizeof(mina));
 	out.write((char*) &maxa, sizeof(maxa));
 	out.write((char*) &minb, sizeof(minb));
 	out.write((char*) &maxb, sizeof(maxb));
-	
+
 	out.close();
 }
 

@@ -134,7 +134,7 @@ PolarPointCloud Reader_RIEGL::readPolarPointCloud(string scanid, string filename
 			}
 
 		}
-
+		cout << data->size() << endl;
 		cout << minr << " refl " << maxr << endl;
 		cout << mind << " dist " << maxd << endl;
 		cout << minb / 2 / M_PI * 360 << " b " << maxb / 2 / M_PI * 360 << endl;

@@ -151,7 +151,6 @@ void PanoramaMap::toJpeg(std::string filename)
 	}
 
 	vigra::exportImage(vigra::srcImageRange(img), info);
-
 }
 
 void PanoramaMap::serialize(const char* filename)
