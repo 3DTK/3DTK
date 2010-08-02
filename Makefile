@@ -802,7 +802,7 @@ $(BIN)toro3d: $(SRC)toro/*
 	cp $(SRC)toro/toro3d $(BIN)
 
 ############# HOG-Man ##############
-$(BIN)hogman3d: $(SRC)hogman/aislib/graph_optimizer_hogman/*
+$(BIN)hogman3d: $(SRC)hogman/aislib/graph_optimizer_hogman/*.cpp
 	cd src/hogman && ./configure
 	cd src/hogman && LD_LIBRARY_PATH=`pwd`/lib make
 	cp src/hogman/bin/hogman3d $(BIN)
