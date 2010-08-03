@@ -144,10 +144,14 @@ public:
   inline void clearPoints();
 
   //FIXME
-  double** get_org_points_red();
-  double* getDAlign();
-  ANNkd_tree* getANNTree();
+  inline const ANNkd_tree* getANNTree() const;
+  inline const double* getDAlign() const;
+  inline const double* getDAlign_inv() const;
+  inline double** get_org_points_red() const;
 
+  double** org_points_red;
+  void backup_points_red();
+  
 private:
   
   /**
@@ -217,15 +221,6 @@ private:
    */
 
   ANNkd_tree *ann_kd_tree;
-
-  //FIXME: Do we need it?
-  /**
-   * We store orginial values of reduced points in the following array
-   * Since points_red are subject to change, we have to store it somewhere
-   * only for cuda reasons
-   */
-  double **org_points_red;
-  void backup_points_red();
   void createANNTree();
   
   /**

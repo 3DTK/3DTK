@@ -50,17 +50,8 @@ public:
   int match(Scan* PreviousScan, Scan* CurrentScan);
 
   void initGPUicp(int width, int height, float max_rad, float min_rad, int iter, int max_iter, 
-			   int max_proctime, float max_dev, double trans[], double trans_inv[]);
+			   int max_proctime, float max_dev, const double trans[], const double trans_inv[]);
   void cleanup();
-
-  int doICP(float [4][4]);
-  void getModelPointer(double** &);
-  void getScenePointer(float** &);
-  //SetTreePointer MUST be called before doICP
-  void setTreePointer(ANNkd_tree *&);
-  void getTreePointer(ANNkd_tree *&);
-  void setMinimums(float x, float y, float z);
-  Matrix** getMatrices();
 
 };
 
