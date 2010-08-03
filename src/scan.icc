@@ -16,6 +16,21 @@ inline ostream& operator<<(ostream& os, const Scan& s)
   return os;
 }
 
+inline const ANNkd_tree* Scan::getANNTree() const
+{
+  return ann_kd_tree;
+}
+
+inline const double* Scan::getDAlign() const
+{
+    return dalignxf;
+}
+
+inline double** Scan::get_org_points_red() const
+{
+  return points_red_lum;
+}
+
 inline int Scan::get_points_red_size() const
 {
   return points_red_size;

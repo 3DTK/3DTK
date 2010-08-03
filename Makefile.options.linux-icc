@@ -57,6 +57,7 @@ WITH_SCANDIFF = WITH_SCANDIFF    # compile with scan_red program
 #
 WITH_SHOW = WITH_SHOW         # compile with show program
 
+CFLAGS += -DUSE_GL_POINTS     # use high speed rendering with octrees
 
 #
 # GRIDDER options
@@ -85,6 +86,8 @@ PMDPKG = `pkg-config --cflags opencv` `pkg-config --cflags ftgl` `pkg-config --l
 # -----------------------
 #
 #WITH_SIFT = WITH_SIFT         # compile SIFT tools
+
+SIFTFLAGS = -DHAS_PANO13 
 
 #
 # TORO options

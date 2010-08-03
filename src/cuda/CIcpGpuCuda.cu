@@ -147,7 +147,6 @@ void CIcpGpuCuda::init(unsigned unWidth, unsigned unHeight, unsigned max_iter){
 	CUDA_SAFE_CALL(cudaMalloc((void**)&fDevLoBound, _unSizeTree*sizeof(float)));
 	CUDA_SAFE_CALL(cudaMalloc((void**)&fDevHiBound, _unSizeTree*sizeof(float)));
 
-
 	CUDA_SAFE_CALL(cudaMallocArray(&cuArray, &cuDesc, _unWidth, _unHeight));		//to be bound to texture
 
 	// Initialize states
@@ -407,7 +406,7 @@ unsigned CIcpGpuCuda::getSize(void){
 	return unSizeData;
 }
 
-void CIcpGpuCuda::setTreePointer(ANNkd_tree *&tree){
+void CIcpGpuCuda::setTreePointer(ANNkd_tree *tree){
     kdTree = tree;
 }
 void CIcpGpuCuda::getTreePointer(ANNkd_tree *&tree ){
@@ -430,7 +429,7 @@ void CIcpGpuCuda::setTree(){
 	unSizeTree = depth2size(nDepth);	//cout<<"unSizeTree: "<<unSizeTree<<endl;	  //decide size of array to be uploaded to GPU
 
 	if(unSizeTree>_unSizeTree){
-		cout<<"Not enough memory for tree construction. Tree size must be larger than "<<unSizeTree<<endl;
+		cout<<"Not enough memory for tree construction. Tree size must be smaller than "<<unSizeTree<<endl;
 		exit(1);
 	}
 
@@ -667,6 +666,12 @@ void CIcpGpuCuda::iteration(){
                         break;
 		case	ICP_NOTMATCHABLE:	
                         cout<<"terminated: point clounds not matchable."<<endl;
+				    /*
+    	(*final_matrix)(1,1) = 1.0;(*final_matrix)(1,2) = 0.0;(*final_matrix)(1,3) = 0.0;(*final_matrix)(1,4) = 0.0;
+	(*final_matrix)(2,1) = 0.0;(*final_matrix)(2,2) = 1.0;(*final_matrix)(2,3) = 0.0;(*final_matrix)(2,4) = 0.0;
+	(*final_matrix)(3,1) = 0.0;(*final_matrix)(3,2) = 0.0;(*final_matrix)(3,3) = 1.0;(*final_matrix)(3,4) = 0.0;
+	(*final_matrix)(4,1) = 0.0;(*final_matrix)(4,2) = 0.0;(*final_matrix)(4,3) = 0.0;(*final_matrix)(4,4) = 1.0;
+*/
                         break;
 		case	ICP_MAXITERATIONS:	
                         cout<<"terminated: maximum iteration exceeds."<<endl;
@@ -800,7 +805,7 @@ Matrix** CIcpGpuCuda::getMatrices(){
     return matrices;
 }
 
-void CIcpGpuCuda::setTrans_Trans_inv(double tr[], double tr_inv[]){
+void CIcpGpuCuda::setTrans_Trans_inv(const double tr[], const double tr_inv[]){
     trans = new Matrix(4,4);
     trans_inv = new Matrix(4,4);
     (*trans)(1,1) = tr[0]; (*trans)(2,1)=tr[1];(*trans)(3,1)=tr[2];(*trans)(4,1)=tr[3];
