@@ -149,9 +149,6 @@ public:
   inline const double* getDAlign_inv() const;
   inline double** get_org_points_red() const;
 
-  double** org_points_red;
-  void backup_points_red();
-  
 private:
   
   /**
