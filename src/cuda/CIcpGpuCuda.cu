@@ -9,12 +9,12 @@
 #include "CIcpGpuCuda.cuh"
 #include "CSystem.h"
 
-void CIcpGpuCuda::init(unsigned unWidth, unsigned unHeight, unsigned max_iter){
-
+void CIcpGpuCuda::init(unsigned unWidth, unsigned unHeight, unsigned max_iter)
+{
 	// Initialize CUTIL
 	int d;
-//	CUT_DEVICE_INIT(_argc, _argv);
 	cudaSetDevice(0); // Since we have only one GPU I didn't initialize anything
+	
 	// It may cause problems if more GPUs take into account
 	// The reason of doing that was initialization of it several times
 	// Now it is not initialized several times and just once.
@@ -30,34 +30,11 @@ void CIcpGpuCuda::init(unsigned unWidth, unsigned unHeight, unsigned max_iter){
             (*m)(4,1) = 0;(*m)(4,2) = 0;(*m)(4,3) = 0;(*m)(4,4) = 1;
         }
 
-	// init by myself for dubugging
-//    cudaDeviceProp deviceProp;
-//    deviceProp.major = 1;
-//    deviceProp.minor = 0;
-//    int desiredMinorRevision = 0;
-//    int dev;
-//
-//    CUDA_SAFE_CALL(cudaChooseDevice(&dev, &deviceProp));
-//    CUDA_SAFE_CALL(cudaGetDeviceProperties(&deviceProp, dev));
-//
-//    if(deviceProp.major > 1 || deviceProp.minor >= desiredMinorRevision)
-//    {
-//        printf("Using Device %d: \"%s\"\n", dev, deviceProp.name);
-//        CUDA_SAFE_CALL(cudaSetDevice(dev));
-//    }
-//    else if (desiredMinorRevision == 3)
-//    {
-//        printf("There is no device supporting compute capability %d.%d.\n\n",
-//            1, desiredMinorRevision);
-//        printf("TEST PASSED");
-//        CUT_EXIT(_argc, _argv);
-//    }
-
-
-    //set data size
+    // set data size
     setResolution(unWidth, unHeight);
-//    cout<<"unSizeData: "<<unSizeData<<endl;
-//    cout<<"Tree Size :"	<<TREESIZE<<endl;
+
+    //    cout<<"unSizeData: "<<unSizeData<<endl;
+    //    cout<<"Tree Size :"	<<TREESIZE<<endl;
 
     // Initialize CUBLAS
     cublasStatus statusCUBLAS = cublasInit();
@@ -76,40 +53,32 @@ void CIcpGpuCuda::init(unsigned unWidth, unsigned unHeight, unsigned max_iter){
     result = cudppPlan(&compactplan, config, unSizeData, 1, 0);
     if (CUDPP_SUCCESS != result)	printf("Error creating CUDPPPlan\n");
 
-	_unSizeTree = (unsigned)TREESIZE;
-	CUDA_SAFE_CALL(cudaMallocHost((void**)&fSplit, _unSizeTree*sizeof(float)));
-	CUDA_SAFE_CALL(cudaMallocHost((void**)&unIdx, _unSizeTree*sizeof(unsigned)));
-	CUDA_SAFE_CALL(cudaMallocHost((void**)&unAxis, _unSizeTree*sizeof(unsigned)));
-	CUDA_SAFE_CALL(cudaMallocHost((void**)&bIsLeaf, _unSizeTree*sizeof(bool)));
-	CUDA_SAFE_CALL(cudaMallocHost((void**)&fLoBound, _unSizeTree*sizeof(float)));
-	CUDA_SAFE_CALL(cudaMallocHost((void**)&fHiBound, _unSizeTree*sizeof(float)));
+    _unSizeTree = (unsigned)TREESIZE;
+    CUDA_SAFE_CALL(cudaMallocHost((void**)&fSplit, _unSizeTree*sizeof(float)));
+    CUDA_SAFE_CALL(cudaMallocHost((void**)&unIdx, _unSizeTree*sizeof(unsigned)));
+    CUDA_SAFE_CALL(cudaMallocHost((void**)&unAxis, _unSizeTree*sizeof(unsigned)));
+    CUDA_SAFE_CALL(cudaMallocHost((void**)&bIsLeaf, _unSizeTree*sizeof(bool)));
+    CUDA_SAFE_CALL(cudaMallocHost((void**)&fLoBound, _unSizeTree*sizeof(float)));
+    CUDA_SAFE_CALL(cudaMallocHost((void**)&fHiBound, _unSizeTree*sizeof(float)));
 
-	CUDA_SAFE_CALL(cudaMallocHost((void**)&f4Mdl, unSizeData*sizeof(float4)));		//to be downloaded to texture
+    CUDA_SAFE_CALL(cudaMallocHost((void**)&f4Mdl, unSizeData*sizeof(float4)));  // to be downloaded to texture
 
-	// Host memory allocation
-	CUDA_SAFE_CALL(cudaMallocHost((void**)&fHstScnX, unSizeData*sizeof(float)));
-	CUDA_SAFE_CALL(cudaMallocHost((void**)&fHstScnY, unSizeData *sizeof(float)));
-	CUDA_SAFE_CALL(cudaMallocHost((void**)&fHstScnZ, unSizeData*sizeof(float)));	//scene
+    // Host memory allocation
+    CUDA_SAFE_CALL(cudaMallocHost((void**)&fHstScnX, unSizeData*sizeof(float)));
+    CUDA_SAFE_CALL(cudaMallocHost((void**)&fHstScnY, unSizeData *sizeof(float)));
+    CUDA_SAFE_CALL(cudaMallocHost((void**)&fHstScnZ, unSizeData*sizeof(float)));	//scene
 
-	fHstScn[0]=fHstScnX;
-	fHstScn[1]=fHstScnY;
-	fHstScn[2]=fHstScnZ;
+    fHstScn[0]=fHstScnX;
+    fHstScn[1]=fHstScnY;
+    fHstScn[2]=fHstScnZ;
 
-	CUDA_SAFE_CALL(cudaMallocHost((void**)&pNoPairs, sizeof(unsigned)));
+    CUDA_SAFE_CALL(cudaMallocHost((void**)&pNoPairs, sizeof(unsigned)));
 
-	CSystem<double>::allocate(unSizeData,3,h_idata);							//model
+    CSystem<double>::allocate(unSizeData, 3, h_idata);							//model
 
-
-/*
-	h_idata = (double**)malloc(unSizeData*sizeof(double*));
-	for (int unRow = 1 ; unRow < unSizeData ; unRow++)
-	{
-		h_idata[unRow] = (double*)malloc(3*sizeof(double));
-	}
-*/
-	// Device memory allocation
-	CUDA_SAFE_CALL(cudaMalloc((void**)&fDist, unSizeData*sizeof(float)));
-	CUDA_SAFE_CALL(cudaMalloc((void**)&fDistCpt, unSizeData*sizeof(float)));
+    // Device memory allocation
+    CUDA_SAFE_CALL(cudaMalloc((void**)&fDist, unSizeData*sizeof(float)));
+    CUDA_SAFE_CALL(cudaMalloc((void**)&fDistCpt, unSizeData*sizeof(float)));
 	CUDA_SAFE_CALL(cudaMalloc((void**)&unMask, unSizeData*sizeof(unsigned)));
 	CUDA_SAFE_CALL(cudaMalloc((void**)&fDevMdlPairX, unSizeData*sizeof(float)));	//pairs after shrinking
 	CUDA_SAFE_CALL(cudaMalloc((void**)&fDevMdlPairY, unSizeData*sizeof(float)));
@@ -118,9 +87,9 @@ void CIcpGpuCuda::init(unsigned unWidth, unsigned unHeight, unsigned max_iter){
 	CUDA_SAFE_CALL(cudaMalloc((void**)&fDevScnPairY, unSizeData*sizeof(float)));
 	CUDA_SAFE_CALL(cudaMalloc((void**)&fDevScnPairZ, unSizeData*sizeof(float)));
         /////////////// Added by Shams
-        CUDA_SAFE_CALL(cudaMalloc((void**)&cngfDevScnX,unSizeData*sizeof(float)));
-        CUDA_SAFE_CALL(cudaMalloc((void**)&cngfDevScnY,unSizeData*sizeof(float)));
-        CUDA_SAFE_CALL(cudaMalloc((void**)&cngfDevScnZ,unSizeData*sizeof(float)));
+     CUDA_SAFE_CALL(cudaMalloc((void**)&cngfDevScnX,unSizeData*sizeof(float)));
+     CUDA_SAFE_CALL(cudaMalloc((void**)&cngfDevScnY,unSizeData*sizeof(float)));
+     CUDA_SAFE_CALL(cudaMalloc((void**)&cngfDevScnZ,unSizeData*sizeof(float)));
 	CUDA_SAFE_CALL(cudaMalloc((void**)&cngfDevMdlPairX, unSizeData*sizeof(float)));	//pairs after shrinking
 	CUDA_SAFE_CALL(cudaMalloc((void**)&cngfDevMdlPairY, unSizeData*sizeof(float)));
 	CUDA_SAFE_CALL(cudaMalloc((void**)&cngfDevMdlPairZ, unSizeData*sizeof(float)));
@@ -150,7 +119,6 @@ void CIcpGpuCuda::init(unsigned unWidth, unsigned unHeight, unsigned max_iter){
 	CUDA_SAFE_CALL(cudaMallocArray(&cuArray, &cuDesc, _unWidth, _unHeight));		//to be bound to texture
 
 	// Initialize states
-//	unMaxIteration		=	0;
 	fMaxProcTime		=	0.0f;
 	fMaxDeviation		=	0.0f;
 	_fSearchRadiusMax	=	0.0f;
@@ -160,33 +128,11 @@ void CIcpGpuCuda::init(unsigned unWidth, unsigned unHeight, unsigned max_iter){
 	_dElapsedTime		=	0.0;
 
         /*
-            Array of ones to be used instead of abs sum
+	    * Array of ones to be used instead of abs sum
         */
-/*
-///////// From Teo Test
- float * d_a,*h_a,*h_b;
- int N = 10000;
-  h_a=(float *)malloc(N*sizeof(float));
-  h_b=(float *)malloc(N*sizeof(float));
-  for (int i=0;i<N;i++)
-    h_a[i]=1.0;
-
-  cudaMalloc((void**)&d_a,N*sizeof(float));
-  cudaMemcpy(d_a,h_a,N*sizeof(float),cudaMemcpyHostToDevice);
-  cudaMemcpy(h_b,d_a,N*sizeof(float),cudaMemcpyDeviceToHost);
-  printf(" dummy value %f = %f \n ",h_a[0],h_b[0]);
-  cudaFree(d_a);
-  free(h_a);
-  free(h_b);
-
-////////
-*/
-
 	cudaMallocHost((void**)&temp_ones, unSizeData*sizeof(float));
-	cudaMalloc((void**)&ones, unSizeData*sizeof(float));	//Array of ones
-
-        for(int i = 0; i < unSizeData ; ++i)
-            temp_ones[i] = 1.0f;
+	cudaMalloc((void**)&ones, unSizeData*sizeof(float));	// Array of ones
+     for(int i = 0; i < unSizeData ; ++i)temp_ones[i] = 1.0f;
 	cudaMemcpy(ones, temp_ones, unSizeData*sizeof(float), cudaMemcpyHostToDevice);
 }
 
@@ -194,9 +140,6 @@ CIcpGpuCuda::~CIcpGpuCuda(){
     /////////////
 	// tidy up
     /////////////
-//	CUDA_SAFE_CALL(cudaFree(fDevMdlX));
-//	CUDA_SAFE_CALL(cudaFree(fDevMdlY));
-//	CUDA_SAFE_CALL(cudaFree(fDevMdlZ));
 	CUDA_SAFE_CALL(cudaUnbindTexture(refTex));
 	CUDA_SAFE_CALL(cudaFreeArray(cuArray));
 	CUDA_SAFE_CALL(cudaFree(fDevSplit));
@@ -205,8 +148,6 @@ CIcpGpuCuda::~CIcpGpuCuda(){
 	CUDA_SAFE_CALL(cudaFree(bDevIsLeaf));
 	CUDA_SAFE_CALL(cudaFree(fDevLoBound));
 	CUDA_SAFE_CALL(cudaFree(fDevHiBound));
-//	CUDA_SAFE_CALL(cudaFree(unDevResult));
-//	CUDA_SAFE_CALL(cudaFree(temp));
 	CUDA_SAFE_CALL(cudaFree(fDevScnX));
 	CUDA_SAFE_CALL(cudaFree(fDevScnY));
 	CUDA_SAFE_CALL(cudaFree(fDevScnZ));
@@ -225,25 +166,20 @@ CIcpGpuCuda::~CIcpGpuCuda(){
 	CUDA_SAFE_CALL(cudaFree(fDevScnPairX));
 	CUDA_SAFE_CALL(cudaFree(fDevScnPairY));
 	CUDA_SAFE_CALL(cudaFree(fDevScnPairZ));
-        ///// Added By Shams
-        CUDA_SAFE_CALL(cudaFree(cngfDevScnX));
-        CUDA_SAFE_CALL(cudaFree(cngfDevScnY));
-        CUDA_SAFE_CALL(cudaFree(cngfDevScnZ));
+     CUDA_SAFE_CALL(cudaFree(cngfDevScnX));
+     CUDA_SAFE_CALL(cudaFree(cngfDevScnY));
+     CUDA_SAFE_CALL(cudaFree(cngfDevScnZ));
 	CUDA_SAFE_CALL(cudaFree(cngfDevMdlPairX));
 	CUDA_SAFE_CALL(cudaFree(cngfDevMdlPairY));
 	CUDA_SAFE_CALL(cudaFree(cngfDevMdlPairZ));
 	CUDA_SAFE_CALL(cudaFree(cngfDevScnPairX));
 	CUDA_SAFE_CALL(cudaFree(cngfDevScnPairY));
 	CUDA_SAFE_CALL(cudaFree(cngfDevScnPairZ));
-        /////
 
 	CUDA_SAFE_CALL(cudaFree(unNoPairs));
 	CUDA_SAFE_CALL(cudaFree(ones));
 
 
-//	CUDA_SAFE_CALL(cudaFreeHost(fX));
-//	CUDA_SAFE_CALL(cudaFreeHost(fY));
-//	CUDA_SAFE_CALL(cudaFreeHost(fZ));
 	CUDA_SAFE_CALL(cudaFreeHost(fSplit));
 	CUDA_SAFE_CALL(cudaFreeHost(unIdx));
 	CUDA_SAFE_CALL(cudaFreeHost(unAxis));
@@ -257,25 +193,6 @@ CIcpGpuCuda::~CIcpGpuCuda(){
 	CUDA_SAFE_CALL(cudaFreeHost(f4Mdl));
 	CUDA_SAFE_CALL(cudaFreeHost(temp_ones));
 
-//	delete[] fX;
-//	delete[] fY;
-//	delete[] fZ;
-//	delete[] fSplit;
-//	delete[] unIdx;
-//	delete[] unAxis;
-//	delete[] bIsLeaf;
-//	delete[] fLoBound;
-//	delete[] fHiBound;
-//	delete pNoPairs;
-
-//	delete[] fHstScnX;
-//	delete[] fHstScnY;
-//	delete[] fHstScnZ;
-
-//    delete kdTree;
-//    delete st;
-
-
 	free(h_idata);
 
 
@@ -284,37 +201,23 @@ CIcpGpuCuda::~CIcpGpuCuda(){
     /////////
     bool bShutDownSuccess = true;
 
-    //Done with CUDPP
+    // Done with CUDPP
     result = cudppDestroyPlan(compactplan);
     if (CUDPP_SUCCESS != result){
     	printf("Error destroying CUDPPPlan\n");
     	bShutDownSuccess = false;
     }
-//    else	printf("\nExit CUDPP.\n");
 
-    //Done with CUBLAS
+    // Done with CUBLAS
     cublasStatus statusCUBLAS = cublasShutdown();
     if (statusCUBLAS != CUBLAS_STATUS_SUCCESS) {
         fprintf (stderr, "!!!! shutdown error (A)\n");
         bShutDownSuccess = false;
     }
-//    else	printf("\nExit CUBLAS.\n");
 
-    //Done with ANN
-	annClose();
-	printf("\nExit ANN.\n");
+    // Done with ANN
+    annClose();
 
-	//Done with CUTIL
-//	CUT_EXIT(_argc, _argv);
-//	CUT_EXIT();
-//	printf("\nExit CUTIL.\n");
-
-/*
-	if(bShutDownSuccess){
-		printf("\nICP done successfully.\n");
-	}
-	cout<< "Last line of destructor\n";
-*/
 }
 
 void CIcpGpuCuda::setResolution(unsigned unWidth, unsigned unHeight){
@@ -414,34 +317,34 @@ void CIcpGpuCuda::getTreePointer(ANNkd_tree *&tree ){
 }
 
 
-void CIcpGpuCuda::setTree(){
-	//build tree
-//	fair::CTimer treetimer;
-//	treetimer.reset();
-//	kdTree = new ANNkd_tree(h_idata,(int)unSizeData, 3, 1, ANN_KD_STD); //commented by shams
-//	cout<<"tree built in: "<<treetimer.getTime()<<endl;
+void CIcpGpuCuda::setTree()
+{
 
-	//preparation
+	// preparation
 	st = new ANNkdStats();
 	kdTree->getStats(*st);
 	int nDepth = st->depth;
-//	cout<<"level of the tree: "<<st->depth<<" (counted from 0)"<<endl;
-	unSizeTree = depth2size(nDepth);	//cout<<"unSizeTree: "<<unSizeTree<<endl;	  //decide size of array to be uploaded to GPU
+     // cout<<"level of the tree: "<<st->depth<<" (counted from 0)"<<endl;
+	// decide size of array to be uploaded to GPU
+	unSizeTree = depth2size(nDepth);
+	// cout<<"unSizeTree: "<<unSizeTree<<endl;
 
-	if(unSizeTree>_unSizeTree){
-		cout<<"Not enough memory for tree construction. Tree size must be smaller than "<<unSizeTree<<endl;
+	if (unSizeTree>_unSizeTree) {
+		cout << "Not enough memory for tree construction. Tree size must be smaller than "
+		     << unSizeTree <<endl;
 		exit(1);
 	}
 
-	//rearrange
+	// rearrange
 	ANNkd_split* pRoot = (ANNkd_split*)kdTree->getRoot();
-	if(unSizeData>1)	rearrange(pRoot, 1);
-	else{
-		cout<<"Not enough points in the tree."<<endl;
-		exit(1);
+	if (unSizeData>1) {
+	  rearrange(pRoot, 1);
+	} else {
+	  cout<<"Not enough points in the tree."<<endl;
+	  exit(1);
 	}
 
-	//download the tree
+	// download the tree
 	CUDA_SAFE_CALL(cudaMemcpy(fDevSplit, fSplit, unSizeTree*sizeof(float), cudaMemcpyHostToDevice));
 	CUDA_SAFE_CALL(cudaMemcpy(unDevIdx, unIdx, unSizeTree*sizeof(unsigned), cudaMemcpyHostToDevice));
 	CUDA_SAFE_CALL(cudaMemcpy(unDevAxis, unAxis, unSizeTree*sizeof(unsigned), cudaMemcpyHostToDevice));
@@ -449,40 +352,25 @@ void CIcpGpuCuda::setTree(){
 	CUDA_SAFE_CALL(cudaMemcpy(fDevLoBound, fLoBound, unSizeTree*sizeof(float), cudaMemcpyHostToDevice));
 	CUDA_SAFE_CALL(cudaMemcpy(fDevHiBound, fHiBound, unSizeTree*sizeof(float), cudaMemcpyHostToDevice));
 
-	//clean up
-	delete kdTree;
+	// clean up
+//	delete kdTree;
 	delete st;
 }
 
-void CIcpGpuCuda::setModel(){
-
-	//using linear memory
-//	CUDA_SAFE_CALL(cudaMallocHost((void**)&fX, unSizeData*sizeof(float)));			//structure of array (SoA), page-locked memory
-//	CUDA_SAFE_CALL(cudaMallocHost((void**)&fY, unSizeData*sizeof(float)));
-//	CUDA_SAFE_CALL(cudaMallocHost((void**)&fZ, unSizeData*sizeof(float)));
-//	CUDA_SAFE_CALL(cudaMalloc((void**)&fDevMdlX, unSizeData*sizeof(float)));
-//	CUDA_SAFE_CALL(cudaMalloc((void**)&fDevMdlY, unSizeData*sizeof(float)));
-//	CUDA_SAFE_CALL(cudaMalloc((void**)&fDevMdlZ, unSizeData*sizeof(float)));
-//	for(unsigned i=0;i<unSizeData;i++){
-//		fX[i]=(float)h_idata[i][0];//	fHstScnX[i]=fX[i] + 0.1;
-//		fY[i]=(float)h_idata[i][0];//	fHstScnY[i]=fY[i] + 0.08;
-//		fZ[i]=(float)h_idata[i][0];//	fHstScnZ[i]=fZ[i] + 0.12;
-//	}
-//	CUDA_SAFE_CALL(cudaMemcpy(fDevMdlX, fX, unSizeData*sizeof(float), cudaMemcpyHostToDevice));
-//	CUDA_SAFE_CALL(cudaMemcpy(fDevMdlY, fY, unSizeData*sizeof(float), cudaMemcpyHostToDevice));
-//	CUDA_SAFE_CALL(cudaMemcpy(fDevMdlZ, fZ, unSizeData*sizeof(float), cudaMemcpyHostToDevice));
-
-	//using texture memory
-	for(unsigned i=0;i<unSizeData;i++){	//type cast
-		f4Mdl[i].x=(float)h_idata[i][0];//cout<<f4Mdl[i].x<<'\t';
-		f4Mdl[i].y=(float)h_idata[i][1];//cout<<f4Mdl[i].y<<'\t';
-		f4Mdl[i].z=(float)h_idata[i][2];//cout<<f4Mdl[i].z<<endl;
+void CIcpGpuCuda::setModel()
+{
+	// using texture memory
+	for(unsigned i = 0; i < unSizeData; i++) {	// type cast
+	  f4Mdl[i].x=(float)h_idata[i][0];
+	  f4Mdl[i].y=(float)h_idata[i][1];
+	  f4Mdl[i].z=(float)h_idata[i][2];
 	}
 	cudaMemcpyToArray(cuArray,0,0,f4Mdl,unSizeData*sizeof(float4),cudaMemcpyHostToDevice);
 	cudaBindTextureToArray(refTex,cuArray);
 }
 
-void CIcpGpuCuda::setScene(){
+void CIcpGpuCuda::setScene()
+{
 	CUDA_SAFE_CALL(cudaMemcpy(fDevScnX, fHstScnX, unSizeData*sizeof(float), cudaMemcpyHostToDevice));
 	CUDA_SAFE_CALL(cudaMemcpy(fDevScnY, fHstScnY, unSizeData*sizeof(float), cudaMemcpyHostToDevice));
 	CUDA_SAFE_CALL(cudaMemcpy(fDevScnZ, fHstScnZ, unSizeData*sizeof(float), cudaMemcpyHostToDevice));
@@ -491,7 +379,7 @@ void CIcpGpuCuda::setScene(){
 inline int CIcpGpuCuda::depth2size(int nDepth)
 {
 	double nSize = 0;
-	for(int i=0;i<=nDepth;i++)
+	for(int i = 0;i <= nDepth; i++)
 	{
 		nSize += pow(2.0,(double)i);
 	}
@@ -549,10 +437,9 @@ void CIcpGpuCuda::iteration(){
 	
 	init_time = clock();
 
-
-        //The main loop of ICP
+     // The main loop of ICP
 	while(icpStat == ICP_PROCESSING){
-            if(unNoIter<=_unIterations)
+       if (unNoIter <= _unIterations)
 		unQStep = unNoIter/_unNoQSizeStep;
 
             findNearestNeighbors(fSearchRadius, unQStep);
@@ -570,16 +457,13 @@ void CIcpGpuCuda::iteration(){
 		// transform estimation
 		//////////////////////
 
-        	//Compute centroids (assume all data are non-negative)
+        	// Compute centroids (assume all data are non-negative)
 		float *fCm = new float(3);
 		float *fCs = new float(3);
 
 
                 computeCentroid(fDevMdlPairX,fDevMdlPairY,fDevMdlPairZ, fCm);
                 computeCentroid(fDevScnPairX,fDevScnPairY,fDevScnPairZ, fCs);
-
-//                cout<<"Model Centroid "<<fCm[0]<<" "<<fCm[1]<<" "<<fCm[2]<<endl;
-//                cout<<"Scene Centroid "<<fCs[0]<<" "<<fCs[1]<<" "<<fCs[3]<<endl;
 
                 fDeviation = cublasSdot(unSizeData,fDistCpt,1,ones,1);
                 fDeviation /= unPairs;
@@ -629,7 +513,7 @@ void CIcpGpuCuda::iteration(){
 			dTranslation[1] = fCm[1] - r_time_colVec(2);
 			dTranslation[2] = fCm[2] - r_time_colVec(3);
 
-                        matrix = fillHomoMatrix(&R,dTranslation);
+               matrix = fillHomoMatrix(&R,dTranslation);
 
 			*final_matrix = matrix * (*final_matrix);
 
@@ -733,7 +617,6 @@ void CIcpGpuCuda::class_nns_priority(
 		bool* bDevIsLeaf, 						//kd-tree: node type (both nodes)
 		float* fDevLoBound,						//kd-tree: lower bounding box (inner node)
 		float* fDevHiBound,						//kd-tree: higher bounding box (inner node)
-//		unsigned* unDevResult,					//result, an array of scene point cloud indeces.
 		unsigned* unMask,						//a 0-1 mask of pair and non-pairs.
 		float* fDevMdlPairX,
 		float* fDevMdlPairY,
@@ -741,16 +624,19 @@ void CIcpGpuCuda::class_nns_priority(
 		float* fDevScnPairX,
 		float* fDevScnPairY,
 		float* fDevScnPairZ,
-//		unsigned* temp,
 		float fSearchRadius,
 		unsigned unSize,
 		unsigned unWidth,
-		unsigned unQStep){						//for dubugging thread
-	wrapper_nns_priority(/*fDevMdlX, fDevMdlY, fDevMdlZ,*/ fDevScnX, fDevScnY, fDevScnZ,
-			fDist, fDevSplit, unDevIdx, unDevAxis, bDevIsLeaf, fDevLoBound, fDevHiBound,
-			/*unDevResult,*/ unMask, fDevMdlPairX, fDevMdlPairY, fDevMdlPairZ, fDevScnPairX, fDevScnPairY, fDevScnPairZ,
-			/*temp,*/ dimGrid, dimBlock, fSearchRadius, unSize, unWidth, unQStep);
-                                }
+		unsigned unQStep)
+{
+   wrapper_nns_priority( fDevScnX, fDevScnY, fDevScnZ,
+		             	fDist, fDevSplit, unDevIdx, unDevAxis, bDevIsLeaf, fDevLoBound, fDevHiBound,
+			          unMask,
+					fDevMdlPairX, fDevMdlPairY, fDevMdlPairZ, fDevScnPairX, fDevScnPairY, fDevScnPairZ,
+			          dimGrid, dimBlock, fSearchRadius,
+					unSize, unWidth,
+					unQStep );
+}
 
 
 //centralize a pointcloud
@@ -780,22 +666,24 @@ void CIcpGpuCuda::class_centralize(unsigned* unMask,
 			dimGrid, dimBlock);
 }
 
-//transform point cloud
-void CIcpGpuCuda::class_transformation(float* fDevScnX,					//piont cloud to be transformed
-		float* fDevScnY,
-		float* fDevScnZ,
-		float m00,	float m01,	float m02,	float m03,
-		float m10,	float m11,	float m12,	float m13,
-		float m20,	float m21,	float m22,	float m23){
-	wrapper_transformation(fDevScnX, fDevScnY, fDevScnZ,
-			m00,	m01,	m02,	m03,
-			m10,	m11,	m12,	m13,
-			m20,	m21,	m22,	m23,
-			dimGrid, dimBlock);
+// transform point cloud
+void CIcpGpuCuda::class_transformation(float* fDevScnX,	// point cloud to be transformed
+		                             float* fDevScnY,
+		                             float* fDevScnZ,
+		                             float m00, float m01, float m02, float m03,
+		                             float m10, float m11, float m12, float m13,
+		                             float m20, float m21, float m22, float m23)
+{
+   wrapper_transformation(fDevScnX, fDevScnY, fDevScnZ,
+			           m00, m01, m02, m03,
+			           m10, m11, m12, m13,
+                          m20, m21, m22, m23,
+                          dimGrid, dimBlock);
 }
 
 
-void CIcpGpuCuda::setMinimums(float x, float y, float z){
+void CIcpGpuCuda::setMinimums(float x, float y, float z)
+{
     min_x = x;
     min_y = y;
     min_z = z;
@@ -821,7 +709,8 @@ void CIcpGpuCuda::setTrans_Trans_inv(const double tr[], const double tr_inv[]){
 }
 
 
-void CIcpGpuCuda::findNearestNeighbors(float fSearchRadius, unsigned unQStep){
+void CIcpGpuCuda::findNearestNeighbors(float fSearchRadius, unsigned unQStep)
+{
                 // We make a copy of the existing scene point cloud in order to transform it
                 cudaMemcpy(cngfDevScnX, fDevScnX, unSizeData*sizeof(float), cudaMemcpyDeviceToDevice);
                 cudaMemcpy(cngfDevScnY, fDevScnY, unSizeData*sizeof(float), cudaMemcpyDeviceToDevice);
@@ -870,12 +759,6 @@ void CIcpGpuCuda::findNearestNeighbors(float fSearchRadius, unsigned unQStep){
                 cudaMemcpy(tmpmdl_x, fDevMdlPairX, 10*sizeof(float), cudaMemcpyDeviceToHost);
                 cudaMemcpy(tmpmdl_y, fDevMdlPairY, 10*sizeof(float), cudaMemcpyDeviceToHost);
                 cudaMemcpy(tmpmdl_z, fDevMdlPairZ, 10*sizeof(float), cudaMemcpyDeviceToHost);
-/*                cout<<"------------------Point Pairs"<<endl;
-                for(int i = 0 ; i < 10 ; ++i){
-                    cout<<"Model "<<tmpmdl_x[i]<<" " << tmpmdl_y[i]<<" "<<tmpmdl_z[i];
-                    cout<<" Scene "<<tmpscn_x[i]<<" " << tmpscn_y[i]<<" "<<tmpscn_z[i]<<endl;
-                }
-  */
 }
 
 Matrix CIcpGpuCuda::fillHomoMatrix(Matrix* R, double* dTranslation){
@@ -924,7 +807,7 @@ Matrix CIcpGpuCuda::computeHMatrix(){
 			Matrix H(3,3);
 			H = 0.0;
 
-			unsigned unSizeOfSec = 200000;//need to be tuned for best performance!				//+++ Fill by gpu +++
+			unsigned unSizeOfSec = 200000; // need to be tuned for best performance!// +++ Fill by gpu +++
 			if(unSizeData<=unSizeOfSec){
 				H(1,1) = (double)cublasSdot(unSizeData,fCenScnX,1,fCenModX,1);
 				H(1,2) = (double)cublasSdot(unSizeData,fCenScnX,1,fCenModY,1);

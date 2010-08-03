@@ -28,7 +28,8 @@
  */
 //#define	BLOCKSIZE	512
 //#define	BLOCKSIZE	256
-#define	BLOCKSIZE	64
+//#define	BLOCKSIZE	64
+#define	BLOCKSIZE	12
 
 
 /*
@@ -63,10 +64,9 @@ public:
 	* @param	unWidth		the width of point cloud image.
 	* @param	unHeight	the height of pint cloud image.
 	*/
-	CIcpGpuCuda(int argc, char **argv, unsigned unWidth, unsigned unHeight, unsigned max_iter){
-		_argc = argc;
-		_argv = argv;
-		init(unWidth, unHeight,max_iter);}
+	CIcpGpuCuda(unsigned unWidth, unsigned unHeight, unsigned max_iter){
+		init(unWidth, unHeight,max_iter);
+	}
 
 	/*
 	*	standard destructor
@@ -139,16 +139,15 @@ public:
 	*	Get the transformation matrix.
 	* @return	The transformation matrix.
 	*/
-//	fair::CMatrix44* getMatrix(void);
 	Matrix* getMatrix(void);
 
-/**
-        These two functions are to set and get the tree pointer
-        It is supposed to be created in scan file and passed to this class
+	/**
+     * These two functions are to set and get the tree pointer
+     *  It is supposed to be created in scan file and passed to this class
+	**/
 
-**/
-        void setTreePointer(ANNkd_tree *);
-        void getTreePointer(ANNkd_tree *&);
+	void setTreePointer(ANNkd_tree *);
+     void getTreePointer(ANNkd_tree *&);
 
 	double getTime(void);
 
@@ -298,13 +297,9 @@ private:
 
 	unsigned unPairs;
 	unsigned* pNoPairs;
-//	fair::CMatrix44 final_matrix;
 	Matrix* final_matrix;
 	double _dElapsedTime;
         Matrix** matrices;
-
-    int _argc;
-    char** _argv;
 
     /*
         Minimums of all values
@@ -325,7 +320,6 @@ private:
 	bool* bDevIsLeaf;
 	float* fDevLoBound;
 	float* fDevHiBound;
-//	unsigned* unDevResult;		//indices of scene point cloud
 	float* fDevScnX;
 	float* fDevScnY;
 	float* fDevScnZ;
@@ -357,7 +351,6 @@ private:
 	float* fCenScnY;
 	float* fCenScnZ;
 	unsigned* unNoPairs;
-//	unsigned* temp;
 
 	//kd-tree based nearest neighbor search, using a priority queue.
 	void class_nns_priority(
@@ -371,7 +364,6 @@ private:
 			bool* bDevIsLeaf, 						//kd-tree: node type (both nodes)
 			float* fDevLoBound,						//kd-tree: lower bounding box (inner node)
 			float* fDevHiBound,						//kd-tree: higher bounding box (inner node)
-	//		unsigned* unDevResult,					//result, an array of scene point cloud indeces.
 			unsigned* unMask,						//a 0-1 mask of pair and non-pairs.
 			float* fDevMdlPairX,
 			float* fDevMdlPairY,
@@ -379,7 +371,6 @@ private:
 			float* fDevScnPairX,
 			float* fDevScnPairY,
 			float* fDevScnPairZ,
-//			unsigned* temp,
 			float fSearchRadius,
 			unsigned unSize,
 			unsigned unWidth,

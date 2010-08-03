@@ -10,7 +10,7 @@ using namespace std;
 void icp6Dcuda::initGPUicp(int width, int height, float max_rad, float min_rad, int iter, int max_iter, 
 					  int max_proctime, float max_dev, const double trans[], const double trans_inv[])
 {
-    icp = new CIcpGpuCuda(1, NULL, (unsigned) width, (unsigned) height, (unsigned) max_iter);
+    icp = new CIcpGpuCuda((unsigned) width, (unsigned)height, (unsigned)max_iter);
     icp->setMaxIteration((unsigned) max_iter);
     icp->setMaxProcTime((double) max_proctime);
     icp->setMaxDeviation((double) max_dev);
