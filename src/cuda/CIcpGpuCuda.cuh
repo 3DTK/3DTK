@@ -23,18 +23,19 @@
 
 #include "CSystem.h"
 
-
 /*
  * The maximum block size. For nVidia G80 architecture, 192 is suggested.
  */
 //#define	BLOCKSIZE	512
-#define	BLOCKSIZE	256
-//#define	BLOCKSIZE	12
+//#define	BLOCKSIZE	256
+#define	BLOCKSIZE	64
+
 
 /*
  * The big enough size of the AoS that is going to allocate for the kd-tree.
  */
-#define	TREESIZE	262143
+//#define	TREESIZE	262143
+#define	TREESIZE  524288
 
 #ifdef use_namespace
 using namespace std;
@@ -62,7 +63,7 @@ public:
 	* @param	unWidth		the width of point cloud image.
 	* @param	unHeight	the height of pint cloud image.
 	*/
-	CIcpGpuCuda(int argc, char **argv, unsigned unWidth, unsigned unHeight,unsigned max_iter){
+	CIcpGpuCuda(int argc, char **argv, unsigned unWidth, unsigned unHeight, unsigned max_iter){
 		_argc = argc;
 		_argv = argv;
 		init(unWidth, unHeight,max_iter);}
@@ -146,7 +147,7 @@ public:
         It is supposed to be created in scan file and passed to this class
 
 **/
-        void setTreePointer(ANNkd_tree *&);
+        void setTreePointer(ANNkd_tree *);
         void getTreePointer(ANNkd_tree *&);
 
 	double getTime(void);
@@ -154,7 +155,7 @@ public:
         void setMinimums(float x, float y, float z);
         Matrix** getMatrices();
 
-        void setTrans_Trans_inv(double[], double[]);
+        void setTrans_Trans_inv(const double[], const double[]);
 
         void findNearestNeighbors(float, unsigned);
 

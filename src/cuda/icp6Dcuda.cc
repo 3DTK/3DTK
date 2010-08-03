@@ -8,7 +8,7 @@ using namespace std;
 
 
 void icp6Dcuda::initGPUicp(int width, int height, float max_rad, float min_rad, int iter, int max_iter, 
-					  int max_proctime, float max_dev, double trans[], double trans_inv[])
+					  int max_proctime, float max_dev, const double trans[], const double trans_inv[])
 {
     icp = new CIcpGpuCuda(1, NULL, (unsigned) width, (unsigned) height, (unsigned) max_iter);
     icp->setMaxIteration((unsigned) max_iter);
@@ -44,19 +44,19 @@ int icp6Dcuda::match(Scan* PreviousScan, Scan* CurrentScan)
   int mdlSize = PreviousScan->get_points_red_size(), scnSize = CurrentScan->get_points_red_size();
   double** mdl;
   float** scn;
-  double *trans;
+  const double *trans;
   double trans_inv[16];
   trans = PreviousScan->getDAlign();
-  M4inv(trans,trans_inv);
+  M4inv(trans, trans_inv);
 
-  initGPUicp(1, max(mdlSize, scnSize),
+  initGPUicp(10, ceil((float)max(mdlSize, scnSize)/10.0f), //@@@ 1, max(mdlSize, scnSize)/10,
 		   sqrt(max_dist_match2), sqrt(max_dist_match2), max_num_iterations,
 		   max_num_iterations, INT_MAX, epsilonICP, trans, trans_inv);
   
   double **mod_dat = PreviousScan->get_org_points_red();
   const double **scn_dat = CurrentScan->get_points_red();
-  getModelPointer(mdl);
-  getScenePointer(scn);
+  mdl = h_idata;
+  scn = fHstScn;
   //  cout << "model point cloud size is " << mdlSize << "\n";
   for (unsigned int i = 0; i < mdlSize; ++i) {
     mdl[i][0] = (float) mod_dat[i][0];
@@ -70,70 +70,42 @@ int icp6Dcuda::match(Scan* PreviousScan, Scan* CurrentScan)
     scn[2][i] = (float) scn_dat[i][2];
   }
 
-  ANNkd_tree *mdltree = PreviousScan->getANNTree();
-  setTreePointer(mdltree);
+  icp->setTreePointer(const_cast<ANNkd_tree *>(PreviousScan->getANNTree()));
   float result[4][4];
-  doICP(result);
-  Matrix** mats = getMatrices();
+
+  // doICP
+  icp->setPointClouds();
+  icp->iteration();
+  Matrix* M = icp->getMatrix();
+
+  for (int i = 0 ; i < 4 ; ++i){
+    for(int j = 0 ; j < 4 ; ++j) {
+	 result[i][j] = (*M)(i+1,j+1);
+    }	
+  }
+  
   if(anim > 0){
+    Matrix** mats = icp->getMatrices();
     for(int ci = 0 ; ci < max_num_iterations ; ci += anim){
 	 Matrix* cur_mat = mats[ci];
 	 double xf[16];
 	 for(int i = 1; i < 5 ; ++i)
 	   for(int j = 1; j < 5; ++j)
 		xf[(i-1)+(j-1)*4] = (*cur_mat)(i,j);
-	 CurrentScan->transform(xf,Scan::ICP, 0);
+	 CurrentScan->transform(xf, Scan::ICP, 0);
     }
   }
-  else{
+  else {
     double alignxf[16];
     for (int i = 0; i < 4; ++i)
 	 for (int j = 0; j < 4; ++j){
 	   alignxf[i + j * 4] = result[i][j];
 	 }
-    CurrentScan->transform(alignxf, Scan::ICP, 0); // write end pose
+     CurrentScan->transform(alignxf, Scan::ICP, 0); // write end pose
   }
 
-  cleanup();
-  
-  return EXIT_SUCCESS;
-
-}
-
-int icp6Dcuda::doICP(float mat[4][4])
-{
-  icp->setPointClouds();
-  
-  icp->iteration();
-  
-  Matrix* M = icp->getMatrix();
-  for (int i = 0 ; i < 4 ; ++i){
-    for(int j = 0 ; j < 4 ; ++j) {
-	 mat[i][j] = (*M)(i+1,j+1);
-    }	
-  }
+  delete icp;
   
   return EXIT_SUCCESS;
 }
 
-void icp6Dcuda::getModelPointer(double** &mdl){
-	mdl = h_idata;
-}
-
-void icp6Dcuda::getScenePointer(float** &scn){
-	scn = fHstScn;
-}
-
-void icp6Dcuda::setTreePointer(ANNkd_tree *&tree){
-    icp->setTreePointer(tree);
-}
-void icp6Dcuda::getTreePointer(ANNkd_tree *&tree){
-    icp->getTreePointer(tree);
-}
-void icp6Dcuda::setMinimums(float x, float y, float z){
-    icp->setMinimums(x,y,z);
-}
-
-Matrix** icp6Dcuda::getMatrices(){
-    return icp->getMatrices();
-}

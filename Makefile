@@ -203,7 +203,7 @@ $(OBJ)CIcpGpuCuda.o: $(SRC)cuda/CIcpGpuCuda.cu $(SRC)cuda/CIcpGpuCuda.cuh $(SRC)
 	echo Compiling CUDA ICP ... 
 	$(CUDA) -c $(SRC)cuda/CIcpGpuCuda.cu -o $(OBJ)CIcpGpuCuda.o -I$(SRC) -I$(SRC)ann_1.1.1_modified/include/ -I$(SRC)ann_1.1.1_modified/src/ $(CUDAINCDIRS)
 
-$(OBJ)icp6Dcuda.o: $(SRC)cuda/icp6Dcuda.cc $(SRC)cuda/icp6Dcuda.h
+$(OBJ)icp6Dcuda.o: $(SRC)cuda/icp6Dcuda.cc $(SRC)cuda/icp6Dcuda.h $(SRC)scan.h
 	echo Compiling CUDA wrapper ... 
 	$(GPP) ${CFLAGSCUDA} ${LIBDIRS} $(CFLAGS) -c $(SRC)cuda/icp6Dcuda.cc -I$(SRC) -I$(SRC)ann_1.1.1_modified/include/ -I$(SRC)ann_1.1.1_modified/src/ $(CUDAINCDIRS) -o $(OBJ)icp6Dcuda.o 
 
