@@ -2,7 +2,7 @@
  * @file
  * @brief Implementation of reading 3D scans
  * @author Andreas Nuechter. Jacobs University Bremen gGmbH
- * @author Dorit Borrmann. Smart Systems Group, Jacobs University Bremen gGmbH, Germany. 
+ * @author Jan Elseberg. Smart Systems Group, Jacobs University Bremen gGmbH, Germany. 
  */
 
 #include "scan_io_rxp.h"
@@ -45,17 +45,11 @@ protected:
     // overridden from pointcloud class
     void on_echo_transformed(echo_type echo)
     {
-        // here we select which target types we are interested in
-        for (unsigned int i = 0; i < target_count; i++) {
             // targets is a member std::vector that contains all
             // echoes seen so far, i.e. the current echo is always
             // indexed by target_count-1.
-            target& t(targets[i]);
+            target& t(targets[target_count - 1]);
 
-            // target_count > 1      =>  multiple echos
-            //  target_count == i+1  =>  i is last echo
-            //  target_count != i+1  =>  i is first echo
-            // target_count == 1     =>  single echo
             // target.reflectance
             // target.amplitude
             // target.deviation
@@ -73,18 +67,17 @@ protected:
             p.amplitude   = t.amplitude;
             p.deviation   = t.deviation;
             
-            if (target_count > 1) {         // multiple echos
-              if (i + 1 == target_count) {  // last echo
-                p.type = 10;
-              } else {                      // inner and first echos
-                p.type = i;
-              }
-            } else {                        // single echo
+
+            if ( pointcloud::first == echo ) {
+              p.type = 0;
+            } else if ( pointcloud::interior == echo ) {
+              p.type = 1;              
+            } else if ( pointcloud::last == echo ) {
+              p.type = 10;
+            } else if ( pointcloud::single == echo ){
               p.type = 9;
             }
-
             o->push_back(p);
-        }
     }
 
     // overridden from basic_packets
@@ -170,7 +163,6 @@ int ScanIO_rxp::readScans(int start, int end, string &dir, int maxDist, int mind
 
   //done
   rc->close();
-
 
 
   fileCounter++;
