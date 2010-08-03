@@ -76,19 +76,22 @@ using std::ifstream;
 //  Handling Segmentation faults and CTRL-C
 void sigSEGVhandler (int v)
 {
-  cout << endl
-	  << "# **************************** #" << endl
-	  << "  Segmentation fault or Crtl-C" << endl
-       << "# **************************** #" << endl
-	  << endl
-	  << "Saving registration information in .frames files" << endl; 
-  for (unsigned int i = 0; i < Scan::allScans.size(); i++) {
-    if (i % 2) cout << ".";
-    cout.flush();
-    delete Scan::allScans[i];
+  static bool segfault = false;
+  if(!segfault) {
+    segfault = true;
+    cout << endl
+      << "# **************************** #" << endl
+      << "  Segmentation fault or Crtl-C" << endl
+      << "# **************************** #" << endl
+      << endl
+      << "Saving registration information in .frames files" << endl;
+    for (unsigned int i = 0; i < Scan::allScans.size(); i++) {
+      if (i % 2) cout << ".";
+      cout.flush();
+      delete Scan::allScans[i];
+    }
+    cout << endl;
   }
-  cout << endl;
-
   exit(-1);
 }
 
