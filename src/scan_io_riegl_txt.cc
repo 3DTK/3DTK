@@ -123,6 +123,7 @@ int ScanIO_riegl_txt::readScans(int start, int end, string &dir, int maxDist, in
     p.y *= 100;
     p.z *= 100;
     
+    p.reflectance = reflectance;
 
     ptss.push_back(p);
   }

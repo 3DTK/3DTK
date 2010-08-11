@@ -6,7 +6,6 @@ using std::endl;
 using std::ifstream;
 using std::ofstream;
 
-#include "scan.h"
 #include "globals.icc"
 #include <string.h>
 

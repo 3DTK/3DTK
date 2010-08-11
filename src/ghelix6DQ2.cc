@@ -431,7 +431,7 @@ double ghelix6DQ2::doGraphSlam6D(Graph gr, vector <Scan *> allScans, int nrIt)
 	 sum_position_diff += sqrt( sqr(alignxfLum[12]) + sqr(alignxfLum[13]) +  sqr(alignxfLum[14]));
 
     }
-    cout << "Sum of Position differenzes = " << sum_position_diff << endl << endl;
+    cout << "Sum of Position differences = " << sum_position_diff << endl << endl;
     ret = (sum_position_diff / (double)gr.getNrScans());
   }
   delete [] ptpairs;
