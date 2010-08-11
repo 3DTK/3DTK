@@ -1167,7 +1167,7 @@ void glWriteImagePPM(const char *filename, int scale, GLenum mode)
    
   top = 1.0/tmp;
   bottom = -top;
-  right = 1.25/tmp;
+  right = (aspect)/tmp;
   left = -right;
 
   double part_height, part_width;
