@@ -449,42 +449,42 @@ void topView()
   static GLdouble saveMouseRotX, saveMouseRotY;
   
   if (!showTopView) // set to top view
-    {
-	 showTopView = true;
-	 // save current pose
-	 save_X      = X;
-	 save_Y      = Y;
-	 save_Z      = Z;
-	 save_qx     = quat[0];
-	 save_qy     = quat[1];
-	 save_qz     = quat[2];
-	 save_qangle = quat[3];
-	 saveMouseRotX = mouseRotX;
-	 saveMouseRotY = mouseRotY;
+  {
+	  showTopView = true;
+	  // save current pose
+	  save_X      = X;
+	  save_Y      = Y;
+	  save_Z      = Z;
+	  save_qx     = quat[0];
+	  save_qy     = quat[1];
+	  save_qz     = quat[2];
+	  save_qangle = quat[3];
+	  saveMouseRotX = mouseRotX;
+	  saveMouseRotY = mouseRotY;
 	 
-	 Y = Y - 350.0;
-	 Z = Z + 500.0;
-	 quat[3] = quat[0] = sqrt(0.5);
-	 quat[1] = quat[2] = 0.0;
-	 mouseRotX = 90;
-	 mouseRotY = 0;
+	  Y = Y - 350.0;
+	  Z = Z + 500.0;
+	  quat[3] = quat[0] = sqrt(0.5);
+	  quat[1] = quat[2] = 0.0;
+	  mouseRotX = 90;
+	  mouseRotY = 0;
 	 
-	 haveToUpdate = 2;
-    } else {
-	 showTopView = false;
+	  haveToUpdate = 2;
+  } else {
+	  showTopView = false;
 
-	 // restore old settings
-	 X = save_X;
-	 Y = save_Y;
-	 Z = save_Z;
-	 quat[0] = save_qx;
-	 quat[1] = save_qy;
-	 quat[2] = save_qz;
-	 quat[3] = save_qangle;
-	 mouseRotX = saveMouseRotX;
-	 mouseRotY = saveMouseRotY;
+	  // restore old settings
+	  X = save_X;
+	  Y = save_Y;
+	  Z = save_Z;
+	  quat[0] = save_qx;
+	  quat[1] = save_qy;
+	  quat[2] = save_qz;
+	  quat[3] = save_qangle;
+	  mouseRotX = saveMouseRotX;
+	  mouseRotY = saveMouseRotY;
 	 
-	 haveToUpdate = 2;	 
+	  haveToUpdate = 2;	 
   }
 }
 
@@ -545,8 +545,15 @@ void resetView(int dummy)
   mouseRotY = 0;
 }
 
+/**
+ * Function to set the viewer window back to a previously saved state.
+ */
+
 void setView(double pos[3], double new_quat[4], 
-             double newMouseRotX, double newMouseRotY, double newCangle)
+             double newMouseRotX, double newMouseRotY, double newCangle,
+             bool sTV, bool cNMM, double pzoom_new, 
+             bool s_points, bool s_path, bool s_cameras, double ps, int
+             sf, double fD, bool inv)
 {
   X = pos[0];
   Y = pos[1];
@@ -557,9 +564,24 @@ void setView(double pos[3], double new_quat[4],
   cangle = newCangle;
   mouseRotX = newMouseRotX;
   mouseRotY = newMouseRotY;
-  //pzoom = pzoom_new;
-  //pzoom_spinner->set_float_val(pzoom);  
-  //rotButton->reset();
+  showTopView = sTV,
+  cameraNavMouseMode = cNMM;
+  pzoom = pzoom_new;
+  pzoom_spinner->set_float_val(pzoom);  
+  if(showTopView) {
+    pzoom_spinner->enable();
+    cangle_spinner->disable();
+  } else {
+    pzoom_spinner->disable();
+    cangle_spinner->enable();
+  }
+  show_points = s_points;
+  show_path = s_path;
+  show_cameras = s_cameras;
+  pointsize = ps;
+  show_fog = sf;
+  fogDensity = fD;
+  invert = inv;
   
   haveToUpdate = 2;
 }
@@ -1156,93 +1178,116 @@ void glDumpWindowPPM(const char *filename, GLenum mode)
 +++++++++-------------++++++++++++ */
 void glWriteImagePPM(const char *filename, int scale, GLenum mode)
 {
-  int m,o,k,l;                  // Counter variables
-  // Get viewport parameters
-  double left, right, top, bottom;
-  double tmp = 1.0/tan(rad(cangle)/2.0);
- 
-  // Get camera parameters
-  GLdouble savedMatrix[16];
-  glGetDoublev(GL_PROJECTION_MATRIX,savedMatrix);
+  //if(!showTopView) {
+    int m,o,k,l;                  // Counter variables
+    // Get viewport parameters
+    double left, right, top, bottom;
+    double tmp = 1.0/tan(rad(cangle)/2.0);
    
-  top = 1.0/tmp;
-  bottom = -top;
-  right = (aspect)/tmp;
-  left = -right;
-
-  double part_height, part_width;
-  part_width = (right - left)/(double)scale;
-  part_height = (top - bottom)/(double)scale;
-  
-  // Calculate part parameters
-  GLint viewport[4];
-  glGetIntegerv(GL_VIEWPORT, viewport);
-  int win_width = viewport[2];
-  int win_height = viewport[3];
-  int image_width = scale * win_width;
-  int image_height = scale * win_height;
-
-  // Allocate memory for the the frame buffer and output buffer
-  GLubyte *buffer;              // The GL Frame Buffer
-  unsigned char *ibuffer;       // The PPM Output Buffer
-  buffer = new GLubyte[win_width * win_height * RGBA];
-  ibuffer = new unsigned char[image_width * image_height * RGB];
-
-  double height = bottom;
-  for(int i = 0; i < scale; i++) {
-    double width = left;
-    for(int j = 0; j < scale; j++) {
-      glMatrixMode(GL_PROJECTION);
-      glLoadIdentity();
-      string imageFileName;
-      glFrustum(width, width + part_width, height, height + part_height, 1.0, 40000.0);
-      showall = true;
-      DisplayItFunc(mode); 
-      //imageFileName = "image" + to_string(i,3) + "_" + to_string(j,3) + ".ppm";
-      //glDumpWindowPPM(imageFileName.c_str(),mode);
-  
-      // Read window contents from GL frame buffer with glReadPixels
-      glFinish();
-      glReadBuffer(mode);
-      glReadPixels(0, 0, win_width, win_height, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
+    // Save camera parameters
+    GLdouble savedMatrix[16];
+    glGetDoublev(GL_PROJECTION_MATRIX,savedMatrix);
      
-      // Loop through the frame buffer data, writing to the PPM file.  Be careful
-      //   to account for the frame buffer having 4 bytes per pixel while the
-      //   output file has 3 bytes per pixel
-                                        // end row
-      for (m = 0; m < win_height; m++) {     // For each row
-        for (o = 0; o < win_width; o++) {    // For each column
-          for (k = 0; k < RGB; k++) {        // For each RGB component
-            int l = (k+RGB*(image_width*((scale - 1 - i)*win_height + m) + j*win_width + o));
-            ibuffer[l]   = (unsigned char) *(buffer + (RGBA*((win_height-1-m)*win_width+o)+k));
-          }                                  // end RGB
-        }                                    // end column
-      }
-      width += part_width;
+    top = 1.0/tmp;
+    bottom = -top;
+    right = (aspect)/tmp;
+    left = -right;
+
+    double part_height, part_width;
+    if(!showTopView) {
+      part_width = (right - left)/(double)scale;
+      part_height = (top - bottom)/(double)scale;
+    } else {
+      part_height = (2*pzoom)/scale;
+      part_width = (2*pzoom*aspect)/scale;
+      cout << part_width << " " << part_height << endl;
     }
-    height += part_height;
-  }
- 
-  // show the starting scene 
-  glLoadMatrixd(savedMatrix);
-  // show the rednered scene
-  haveToUpdate=2;
+    // Calculate part parameters
+    GLint viewport[4];
+    glGetIntegerv(GL_VIEWPORT, viewport);
+    int win_width = viewport[2];
+    int win_height = viewport[3];
+    int image_width = scale * win_width;
+    int image_height = scale * win_height;
 
-  ofstream fp;                  // The PPM File
+    // Allocate memory for the the frame buffer and output buffer
+    GLubyte *buffer;              // The GL Frame Buffer
+    unsigned char *ibuffer;       // The PPM Output Buffer
+    buffer = new GLubyte[win_width * win_height * RGBA];
+    ibuffer = new unsigned char[image_width * image_height * RGB];
 
-  // Open the output file
-  fp.open(filename, ios::out);
+    double height;
+    if(!showTopView) {
+      height = bottom;
+    } else {
+      height = -pzoom;
+    }
+    for(int i = 0; i < scale; i++) {
+      double width;
+      if(!showTopView) {
+        width = left;
+      } else {
+        width = -pzoom*aspect;
+      }
+      for(int j = 0; j < scale; j++) {
+        glMatrixMode(GL_PROJECTION);
+        glLoadIdentity();
+        if(!showTopView) {
+          glFrustum(width, width + part_width, height, height + part_height, 1.0, 40000.0);
+          showall = true;
+          DisplayItFunc(mode); 
+        } else {
+          cout << width << " " << width + part_width << " " << height << " "
+          << height + part_height << endl;
+          glOrtho( width, width + part_width, 
+                   height, height + part_height, 
+                   1.0, 32000.0 );
+          glMatrixMode(GL_MODELVIEW);
+          DisplayItFunc(mode);
+        }
+    
+        // Read window contents from GL frame buffer with glReadPixels
+        glFinish();
+        glReadBuffer(mode);
+        glReadPixels(0, 0, win_width, win_height, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
+       
+        // Loop through the frame buffer data, writing to the PPM file.  Be careful
+        //   to account for the frame buffer having 4 bytes per pixel while the
+        //   output file has 3 bytes per pixel
+                                          // end row
+        for (m = 0; m < win_height; m++) {     // For each row
+          for (o = 0; o < win_width; o++) {    // For each column
+            for (k = 0; k < RGB; k++) {        // For each RGB component
+              int l = (k+RGB*(image_width*((scale - 1 - i)*win_height + m) + j*win_width + o));
+              ibuffer[l]   = (unsigned char) *(buffer + (RGBA*((win_height-1-m)*win_width+o)+k));
+            }                                  // end RGB
+          }                                    // end column
+        }
+        width += part_width;
+      }
+      height += part_height;
+    }
+   
+    // show the starting scene 
+    glLoadMatrixd(savedMatrix);
+    // show the rednered scene
+    haveToUpdate=2;
 
-  // Write a proper P6 PPM header
-  fp << "P6" << endl << "# CREATOR: 3D_Viewer by Dorit Borrmann, Jacobs University Bremen gGmbH"
-	<< endl << image_width  << " " << image_height << " " << UCHAR_MAX << endl;
+    ofstream fp;                  // The PPM File
 
-  // Write output buffer to the file 
-  fp.write((const char*)ibuffer, sizeof(unsigned char) * (RGB * image_width * image_height));
-  fp.close();
-  fp.clear();
-  delete [] buffer;
-  delete [] ibuffer;
+    // Open the output file
+    fp.open(filename, ios::out);
+
+    // Write a proper P6 PPM header
+    fp << "P6" << endl << "# CREATOR: 3D_Viewer by Dorit Borrmann, Jacobs University Bremen gGmbH"
+    << endl << image_width  << " " << image_height << " " << UCHAR_MAX << endl;
+
+    // Write output buffer to the file 
+    fp.write((const char*)ibuffer, sizeof(unsigned char) * (RGB * image_width * image_height));
+    fp.close();
+    fp.clear();
+    delete [] buffer;
+    delete [] ibuffer;
 }
 
 /** Reshape Function
