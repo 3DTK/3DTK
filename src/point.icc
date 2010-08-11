@@ -1,3 +1,4 @@
+#include <cmath>
 /**
  *  @file
  *  @brief Implementation of a 3D point.      
@@ -46,3 +47,16 @@ inline void Point::transform(const double *alignxf)
   y = y_neu + alignxf[13];
   z = z_neu + alignxf[14];
 }
+
+/**
+  * Calculates the difference between two points.
+  * @param p The second point
+  */
+
+inline double Point::distance(const Point &p)
+{
+  double distance;
+  distance = (p.x - x)*(p.x - x) + (p.y - y)*(p.y - y) + (p.z - z)*(p.z - z);
+  return sqrt(distance);
+}
+

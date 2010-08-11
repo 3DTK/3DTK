@@ -7,7 +7,7 @@
  * Use -s for the first scan, -e for the second scan
  *  'dir' the directory of a set of scans
  * The result is a scan in the UOS format (.3d) that contains all points from
- * the first scan that do NOT have a corresponding point in the second scan with
+ * the first scan that do NOT have a corresponding point in the second scan 
  * within a distance of less than NR units.
  * Difference scans will be written to 'dir/diff'
  * ATTENTION: All scans between START and END will be loaded!
@@ -109,14 +109,13 @@ void usage(char* prog)
  * @param argc the number of arguments
  * @param argv the arguments
  * @param dir the directory
- * @param red using point reduction?
- * @param rand use randomized point reduction?
- * @param start starting at scan number 'start'
- * @param end stopping at scan number 'end'
+ * @param start first scan number 'start'
+ * @param end last scan number 'end'
  * @param maxDist - maximal distance of points being loaded
  * @param minDist - minimal distance of points being loaded
- * @param quiet switches on/off the quiet mode
- * @param veryQuiet switches on/off the 'very quiet' mode
+ * @param dist the maximal distance for a point pair
+ * @param type the scan format
+ * @param desc true if start is greater than end
  * @return 0, if the parsing was successful. 1 otherwise
  */
 int parseArgs(int argc, char **argv, string &dir, 
@@ -220,11 +219,12 @@ int parseArgs(int argc, char **argv, string &dir,
 
 
 /**
- * Main program for reducing scans.
- * Usage: bin/scan_red -r <NR> 'dir',
- * Use -r for octree based reduction  (voxel size=<NR>)
+ * Main program for calculating the difference of two scans.
+ * Usage: bin/scan_diff -d <NR> -s <NR> -e <NR> 'dir',
+ * Use -s and -e for the two scans, 
+ * -d 
  * and 'dir' the directory of a set of scans
- * Reduced scans will be written to 'dir/reduced'
+ * Difference scans will be written to 'dir/diff/scan[00]s.3d'
  * 
  */
 int main(int argc, char **argv)
@@ -248,7 +248,7 @@ int main(int argc, char **argv)
 
   parseArgs(argc, argv, dir, start, end, maxDist, minDist, dist, type, desc);
 
-  // Get Scans
+  // Get Scans (all scans between start and end)
   Scan::dir = dir;
   string diffdir = dir + "diff"; 
  
