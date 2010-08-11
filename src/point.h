@@ -73,6 +73,7 @@ public:
 
 
   inline void transform(const double alignxf[16]);
+  inline double distance(const Point& p);
   inline friend ostream& operator<<(ostream& os, const Point& p);
   inline friend istream& operator>>(istream& is, Point& p);
 

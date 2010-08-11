@@ -465,7 +465,7 @@ double lum6DQuat::doGraphSlam6D(Graph gr, vector <Scan *> allScans, int nrIt)
       x[2] = result.element(2);
       sum_position_diff += Len(x);
     }
-    cout << "Sum of Position differenzes = " << sum_position_diff << endl;
+    cout << "Sum of Position differences = " << sum_position_diff << endl;
     ret = (sum_position_diff / (double)gr.getNrScans());
   }
   
