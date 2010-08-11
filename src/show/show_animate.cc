@@ -238,6 +238,16 @@ void loadPose(int dummy) {
   double mouseRotX;
   double mouseRotY;
   double cangle;
+  bool showTopView;
+  bool cameraNavMouseMode;
+  double pzoom;
+  bool show_path;
+  bool show_points;
+  bool show_cameras;
+  double pointsize;
+  int show_fog;
+  double fogDensity;
+  bool invert;
 
   //file stream
   fstream poseFile;
@@ -264,8 +274,13 @@ void loadPose(int dummy) {
   // Orientation
   for (unsigned int i = 0; i < 4; poseFile >> quat[i++]);
   poseFile >> mouseRotX >> mouseRotY >> cangle;
+  poseFile >> showTopView >> cameraNavMouseMode >> pzoom;
+  poseFile >> show_points >> show_path >> show_cameras >> pointsize;
+  poseFile >> show_fog >> fogDensity >> invert;
   
-  setView(euler, quat, mouseRotX, mouseRotY, cangle);
+  setView(euler, quat, mouseRotX, mouseRotY, cangle, showTopView,
+          cameraNavMouseMode, pzoom, show_points, show_path, show_cameras,
+          pointsize, show_fog, fogDensity, invert);
   
   poseFile.clear();
   poseFile.close();
@@ -298,7 +313,10 @@ void savePose(int dummy) {
     posefile << quat[i] << " ";
   }
 	posefile << mouseRotX << " " <<  mouseRotY << " " << cangle << endl;
-  
+  posefile << showTopView << " " << cameraNavMouseMode << " " << pzoom << endl;
+  posefile << show_points << " " << show_path << " " << show_cameras << " " << pointsize << endl;
+  posefile << show_fog << " " << fogDensity << " " << invert << endl;
+
   //close the file after writing
   posefile.clear();
   posefile.close();
