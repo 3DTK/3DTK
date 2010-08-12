@@ -34,7 +34,6 @@ public:
   graphHOGMan(icp6Dminimizer *my_icp6Dminimizer,
       double mdm = 25.0,
       double max_dist_match = 25.0,
-      double max_dist_match_last = -1.0,
       int max_num_iterations = 50,
       bool quiet = false,
       bool meta = false,
@@ -45,7 +44,7 @@ public:
       bool use_cache = false,
       double epsilonLUM = 0.5)
     : graphSlam6D(my_icp6Dminimizer,
-        mdm, max_dist_match, max_dist_match_last,
+        mdm, max_dist_match,
         max_num_iterations, quiet, meta, rnd,
         eP, anim, epsilonICP, use_cache, epsilonLUM)
     { }
