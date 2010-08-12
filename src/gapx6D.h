@@ -34,7 +34,6 @@ public:
   gapx6D(icp6Dminimizer *my_icp6Dminimizer,
 	    double mdm = 25.0,
 	    double max_dist_match = 25.0,
-	    double max_dist_match_last = -1.0,
 	    int max_num_iterations = 50,
 	    bool quiet = false,
 	    bool meta = false,

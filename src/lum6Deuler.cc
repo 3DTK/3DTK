@@ -48,11 +48,11 @@ using std::cerr;
  * @param epsilonLUM Termination criterion for LUM
  */
 lum6DEuler::lum6DEuler(icp6Dminimizer *my_icp6Dminimizer,
-				   double mdm, double max_dist_match, double max_dist_match_last,
+				   double mdm, double max_dist_match, 
 				   int max_num_iterations, bool quiet, bool meta, int rnd,
 				   bool eP, int anim, double epsilonICP, bool use_cache, double epsilonLUM)
   : graphSlam6D(my_icp6Dminimizer,
-			 mdm, max_dist_match, max_dist_match_last,
+			 mdm, max_dist_match,
 			 max_num_iterations, quiet, meta, rnd,
 			 eP, anim, epsilonICP, use_cache, epsilonLUM)
 { }
