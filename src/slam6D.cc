@@ -21,7 +21,7 @@
 #endif
 
 #define WANT_STREAM ///< define the WANT stream :)
- 
+
 #include <string>
 using std::string;
 #include <iostream>
@@ -109,138 +109,138 @@ void usage(char* prog)
   const string normal("");
 #endif
   cout << endl
-	  << bold << "USAGE " << normal << endl
-	  << "   " << prog << " [options] directory" << endl << endl;
+    << bold << "USAGE " << normal << endl
+    << "   " << prog << " [options] directory" << endl << endl;
   cout << bold << "OPTIONS" << normal << endl
 
-	  << bold << "  -a" << normal << " NR, " << bold << "--algo=" << normal << "NR   [default: 2]" << endl
-	  << "         selects the minimizazion method for the ICP matching algorithm" << endl
-	  << "           1 = small angle approximation" << endl
-	  << "           2 = unit quaterion based method by Horn" << endl
-	  << "           3 = singular value decomposition by Arun et al. " << endl
-       << "           4 = orhtonormal matrices by Horn et al." << endl
-	  << "           5 = HELIX approximation by Hofer & Potmann" << endl
-	  << endl
-	  << bold << "  -A" << normal << " NR, " << bold << "--anim=" << normal << "NR   [default: first and last frame only]" << endl
-	  << "         if specified, use only every NR-th frame for animation" << endl
-	  << endl
-	  << bold << "  -c" << normal << " NR, " << bold << "--cldist=" << normal << "NR   [default: 500]" << endl
-	  << "         specifies the maximal distance for closed loops" << endl
-	  << endl
-	  << bold << "  -C" << normal << " NR, " << bold << "--clpairs=" << normal << "NR   [default: 6]" << endl
-	  << "         specifies the minimal number of points for an overlap. If not specified" << endl
-	  << "         cldist is used instead" << endl
-	  << endl
-	  << bold << "  --cache" << normal << endl
-	  << "         turns on cached k-d tree search" << endl
-	  << endl
-	  << bold << "  --cuda" << normal << endl
-	  << "         turns on cuda processing" << endl
-	  << endl
-	  << bold << "  -d" << normal << " NR, " << bold << "--dist=" << normal << "NR   [default: 25]" << endl
-	  << "         sets the maximal point-to-point distance for matching with ICP to <NR> 'units'" << endl
-	  << "         (unit of scan data, e.g. cm)" << endl
-	  << endl
-	  << bold << "  -D" << normal << " NR, " << bold << "--distSLAM="
-	                    << normal << "NR   [default: same value as -d option]" << endl
-	  << "         sets the maximal point-to-point distance for matching with SLAM to <NR> 'units'" << endl
-	  << "         (unit of scan data, e.g. cm)" << endl
-	  << endl
-	  << bold << "  --DlastSLAM" << normal << " NR  [default not set]" << endl
-	  << "         sets the maximal point-to-point distance for the final SLAM correction," << endl
-	  << "         if final SLAM is not required don'tt set it." << endl
-	  << endl
-	  << bold << "  -e" << normal << " NR, " << bold << "--end=" << normal << "NR" << endl
-	  << "         end after scan NR" << endl
-	  << endl
-	  << bold << "  --exportAllPoints" << normal << endl
-	  << "         writes all registered reduced points to the file points.pts before" << endl
-	  << "         slam6D terminated" << endl
-	  << endl
-	  << bold << "  --epsICP=" << normal << "NR   [default: 0.00001]" << endl
-	  << "         stop ICP iteration if difference is smaller than NR" << endl
-	  << endl
-	  << bold << "  --epsSLAM=" << normal << " NR   [default: 0.5]" << endl
-	  << "         stop SLAM iteration if average difference is smaller than NR" << endl
-	  << endl
-	  << bold << "  -f" << normal << " F, " << bold << "--format=" << normal << "F" << endl
-	  << "         using shared library F for input" << endl
-	  << "         (chose F from {uos, uos_map, uos_frames, uos_map_frames, old, rts, rts_map, ifp, riegl_txt, riegl_bin, zahn, ply, wrl, xyz, zuf, iais, front, x3d, rxp })" << endl
-	  << endl
-	  << bold << "  -G" << normal << " NR, " << bold << "--graphSlam6DAlgo=" << normal << "NR   [default: 0]" << endl
-	  << "         selects the minimizazion method for the SLAM matching algorithm" << endl
-	  << "           0 = no global relaxation technique" << endl
-	  << "           1 = Lu & Milios extention using euler angles due to Borrmann et al." << endl
-	  << "           2 = Lu & Milios extention using using unit quaternions" << endl
-       << "           3 = HELIX approximation by Hofer and Pottmann" << endl
-	  << "           4 = small angle approximation" << endl
-	  << "           5 = TORO" << endl
-	  << "           5 = HOG-Man" << endl
-	  << endl
-	  << bold << "  -i" << normal << " NR, " << bold << "--iter=" << normal << "NR [default: 50]" << endl
-	  << "         sets the maximal number of ICP iterations to <NR>" << endl
-	  << endl
-	  << bold << "  -I" << normal << " NR, " << bold << "--iterSLAM=" << normal << "NR [default: 0]" << endl
-	  << "         sets the maximal number of iterations for SLAM to <NR>" << endl
-	  << "         (if not set, graphSLAM is not executed)" << endl 
-	  << endl
-       << bold << "  -l" << normal << " NR, " << bold << "--loopsize=" << normal << "NR [default: 20]" << endl
-	  << "         sets the size of a loop, i.e., a loop must exceed <NR> of scans" << endl
-	  << endl
-	  << bold << "  -L" << normal << " NR, " << bold << "--loop6DAlgo=" << normal << "NR   [default: 0]" << endl
-	  << "         selects the method for closing the loop explicitly" << endl
-	  << "           0 = no loop closing technique" << endl
-	  << "           1 = euler angles" << endl
-	  << "           2 = quaternions " << endl
-       << "           3 = unit quaternions" << endl
-	  << "           4 = SLERP" << endl
-	  << "           5 = TORO" << endl
-	  << "           6 = HOG-Man" << endl
-	  << endl
-	  << bold << "  --lastscan" << normal << endl
-	  << "         Match against the last scan only (default: match current scan against a meta scan of all previous scans)" << endl
-	  << endl
-	  << bold << "  -m" << normal << " NR, " << bold << "--max=" << normal << "NR" << endl
-	  << "         neglegt all data points with a distance larger than NR 'units'" << endl
-	  << endl
-	  << bold << "  -M" << normal << " NR, " << bold << "--min=" << normal << "NR" << endl
-	  << "         neglegt all data points with a distance smaller than NR 'units'" << endl
-	  << endl
-	  << bold << "  -n" << normal << " FILE, " << bold << "--net=" << normal << "FILE" << endl
-	  << "         specifies the file that includes the net structure for SLAM" << endl
-	  << endl
-	  << bold << "  -O" << normal << "NR (optional), " << bold << "--octree=" << normal << "NR (optional)" << endl
-	  << "         use randomized octree based point reduction (pts per voxel=<NR>)" << endl
-	  << "         requires " << bold << "-r" << normal <<" or " << bold << "--reduce" << endl
-	  << endl
-	  << bold << "  -p, --trustpose" << normal << endl
-	  << "         Trust the pose file, do not extrapolate the last transformation." << endl
-	  << "         (just for testing purposes, or gps input.)" << endl
-	  << endl
-	  << bold << "  -q, --quiet" << normal << endl
-	  << "         Quiet mode. Suppress (most) messages" << endl
-	  << endl
-	  << bold << "  -Q, --veryquiet" << normal << endl
-	  << "         Very quiet mode. Suppress all messages, except in case of error." << endl
-	  << endl
-	  << bold << "  -r" << normal << " NR, " << bold << "--reduce=" << normal << "NR" << endl
-	  << "         turns on octree based point reduction (voxel size=<NR>)" << endl
-	  << endl
-	  << bold << "  -R" << normal << " NR, " << bold << "--random=" << normal << "NR" << endl
-	  << "         turns on randomized reduction, using about every <NR>-th point only" << endl
-	  << endl
-	  << bold << "  -s" << normal << " NR, " << bold << "--start=" << normal << "NR" << endl
-	  << "         start at scan NR (i.e., neglects the first NR scans)" << endl
-	  << "         [ATTENTION: counting naturally starts with 0]" << endl
-	  << endl
-	  << bold << "-u" << normal <<", "<< bold<<"--cuda" << endl
-	  << "         this option activates icp running on GPU instead of CPU"<<endl
-    	  << endl << endl;
-  
+    << bold << "  -a" << normal << " NR, " << bold << "--algo=" << normal << "NR   [default: 2]" << endl
+    << "         selects the minimizazion method for the ICP matching algorithm" << endl
+    << "           1 = small angle approximation" << endl
+    << "           2 = unit quaterion based method by Horn" << endl
+    << "           3 = singular value decomposition by Arun et al. " << endl
+    << "           4 = orhtonormal matrices by Horn et al." << endl
+    << "           5 = HELIX approximation by Hofer & Potmann" << endl
+    << endl
+    << bold << "  -A" << normal << " NR, " << bold << "--anim=" << normal << "NR   [default: first and last frame only]" << endl
+    << "         if specified, use only every NR-th frame for animation" << endl
+    << endl
+    << bold << "  -c" << normal << " NR, " << bold << "--cldist=" << normal << "NR   [default: 500]" << endl
+    << "         specifies the maximal distance for closed loops" << endl
+    << endl
+    << bold << "  -C" << normal << " NR, " << bold << "--clpairs=" << normal << "NR   [default: 6]" << endl
+    << "         specifies the minimal number of points for an overlap. If not specified" << endl
+    << "         cldist is used instead" << endl
+    << endl
+    << bold << "  --cache" << normal << endl
+    << "         turns on cached k-d tree search" << endl
+    << endl
+    << bold << "  --cuda" << normal << endl
+    << "         turns on cuda processing" << endl
+    << endl
+    << bold << "  -d" << normal << " NR, " << bold << "--dist=" << normal << "NR   [default: 25]" << endl
+    << "         sets the maximal point-to-point distance for matching with ICP to <NR> 'units'" << endl
+    << "         (unit of scan data, e.g. cm)" << endl
+    << endl
+    << bold << "  -D" << normal << " NR, " << bold << "--distSLAM="
+    << normal << "NR   [default: same value as -d option]" << endl
+    << "         sets the maximal point-to-point distance for matching with SLAM to <NR> 'units'" << endl
+    << "         (unit of scan data, e.g. cm)" << endl
+    << endl
+    << bold << "  --DlastSLAM" << normal << " NR  [default not set]" << endl
+    << "         sets the maximal point-to-point distance for the final SLAM correction," << endl
+    << "         if final SLAM is not required don't set it." << endl
+    << endl
+    << bold << "  -e" << normal << " NR, " << bold << "--end=" << normal << "NR" << endl
+    << "         end after scan NR" << endl
+    << endl
+    << bold << "  --exportAllPoints" << normal << endl
+    << "         writes all registered reduced points to the file points.pts before" << endl
+    << "         slam6D terminated" << endl
+    << endl
+    << bold << "  --epsICP=" << normal << "NR   [default: 0.00001]" << endl
+    << "         stop ICP iteration if difference is smaller than NR" << endl
+    << endl
+    << bold << "  --epsSLAM=" << normal << " NR   [default: 0.5]" << endl
+    << "         stop SLAM iteration if average difference is smaller than NR" << endl
+    << endl
+    << bold << "  -f" << normal << " F, " << bold << "--format=" << normal << "F" << endl
+    << "         using shared library F for input" << endl
+    << "         (chose F from {uos, uos_map, uos_frames, uos_map_frames, old, rts, rts_map, ifp, riegl_txt, riegl_bin, zahn, ply, wrl, xyz, zuf, iais, front, x3d, rxp })" << endl
+    << endl
+    << bold << "  -G" << normal << " NR, " << bold << "--graphSlam6DAlgo=" << normal << "NR   [default: 0]" << endl
+    << "         selects the minimizazion method for the SLAM matching algorithm" << endl
+    << "           0 = no global relaxation technique" << endl
+    << "           1 = Lu & Milios extention using euler angles due to Borrmann et al." << endl
+    << "           2 = Lu & Milios extention using using unit quaternions" << endl
+    << "           3 = HELIX approximation by Hofer and Pottmann" << endl
+    << "           4 = small angle approximation" << endl
+    << "           5 = TORO" << endl
+    << "           5 = HOG-Man" << endl
+    << endl
+    << bold << "  -i" << normal << " NR, " << bold << "--iter=" << normal << "NR [default: 50]" << endl
+    << "         sets the maximal number of ICP iterations to <NR>" << endl
+    << endl
+    << bold << "  -I" << normal << " NR, " << bold << "--iterSLAM=" << normal << "NR [default: 0]" << endl
+    << "         sets the maximal number of iterations for SLAM to <NR>" << endl
+    << "         (if not set, graphSLAM is not executed)" << endl 
+    << endl
+    << bold << "  -l" << normal << " NR, " << bold << "--loopsize=" << normal << "NR [default: 20]" << endl
+    << "         sets the size of a loop, i.e., a loop must exceed <NR> of scans" << endl
+    << endl
+    << bold << "  -L" << normal << " NR, " << bold << "--loop6DAlgo=" << normal << "NR   [default: 0]" << endl
+    << "         selects the method for closing the loop explicitly" << endl
+    << "           0 = no loop closing technique" << endl
+    << "           1 = euler angles" << endl
+    << "           2 = quaternions " << endl
+    << "           3 = unit quaternions" << endl
+    << "           4 = SLERP" << endl
+    << "           5 = TORO" << endl
+    << "           6 = HOG-Man" << endl
+    << endl
+    << bold << "  --metascan" << normal << endl
+    << "         Match current scan against a meta scan of all previous scans (default match against the last scan only)" << endl
+    << endl
+    << bold << "  -m" << normal << " NR, " << bold << "--max=" << normal << "NR" << endl
+    << "         neglegt all data points with a distance larger than NR 'units'" << endl
+    << endl
+    << bold << "  -M" << normal << " NR, " << bold << "--min=" << normal << "NR" << endl
+    << "         neglegt all data points with a distance smaller than NR 'units'" << endl
+    << endl
+    << bold << "  -n" << normal << " FILE, " << bold << "--net=" << normal << "FILE" << endl
+    << "         specifies the file that includes the net structure for SLAM" << endl
+    << endl
+    << bold << "  -O" << normal << "NR (optional), " << bold << "--octree=" << normal << "NR (optional)" << endl
+    << "         use randomized octree based point reduction (pts per voxel=<NR>)" << endl
+    << "         requires " << bold << "-r" << normal <<" or " << bold << "--reduce" << endl
+    << endl
+    << bold << "  -p, --trustpose" << normal << endl
+    << "         Trust the pose file, do not extrapolate the last transformation." << endl
+    << "         (just for testing purposes, or gps input.)" << endl
+    << endl
+    << bold << "  -q, --quiet" << normal << endl
+    << "         Quiet mode. Suppress (most) messages" << endl
+    << endl
+    << bold << "  -Q, --veryquiet" << normal << endl
+    << "         Very quiet mode. Suppress all messages, except in case of error." << endl
+    << endl
+    << bold << "  -r" << normal << " NR, " << bold << "--reduce=" << normal << "NR" << endl
+    << "         turns on octree based point reduction (voxel size=<NR>)" << endl
+    << endl
+    << bold << "  -R" << normal << " NR, " << bold << "--random=" << normal << "NR" << endl
+    << "         turns on randomized reduction, using about every <NR>-th point only" << endl
+    << endl
+    << bold << "  -s" << normal << " NR, " << bold << "--start=" << normal << "NR" << endl
+    << "         start at scan NR (i.e., neglects the first NR scans)" << endl
+    << "         [ATTENTION: counting naturally starts with 0]" << endl
+    << endl
+    << bold << "-u" << normal <<", "<< bold<<"--cuda" << endl
+    << "         this option activates icp running on GPU instead of CPU"<<endl
+    << endl << endl;
+
   cout << bold << "EXAMPLES " << normal << endl
-	  << "   " << prog << " -m 500 -R 5 -d 25.0 dat" << endl
-	  << "   " << prog << " --max=500 -r 10.2 -i 20 dat" << endl
-	  << "   " << prog << " -s 2 -e 10 dat" << endl << endl;
+    << "   " << prog << " dat" << endl
+    << "   " << prog << " --max=500 -r 10.2 -i 20 dat" << endl
+    << "   " << prog << " -s 2 -e 10 dat" << endl << endl;
   exit(1);
 }
 
@@ -275,12 +275,12 @@ void usage(char* prog)
  * @return 0, if the parsing was successful. 1 otherwise
  */
 int parseArgs(int argc, char **argv, string &dir, double &red, int &rand,
-		    double &mdm, double &mdml, double &mdmll,
-		    int &mni, int &start, int &end, int &maxDist, int &minDist, bool &quiet, bool &veryQuiet,
-		    bool &extrapolate_pose, bool &meta, int &algo, int &loopSlam6DAlgo, int &lum6DAlgo, int &anim,
-		    int &mni_lum, string &net, double &cldist, int &clpairs, int &loopsize,
-		    double &epsilonICP, double &epsilonSLAM, bool &use_cache, bool &exportPts, double &distLoop,
-		    int &iterLoop, double &graphDist, int &octree, bool &cuda_enabled, reader_type &type)
+    double &mdm, double &mdml, double &mdmll,
+    int &mni, int &start, int &end, int &maxDist, int &minDist, bool &quiet, bool &veryQuiet,
+    bool &extrapolate_pose, bool &meta, int &algo, int &loopSlam6DAlgo, int &lum6DAlgo, int &anim,
+    int &mni_lum, string &net, double &cldist, int &clpairs, int &loopsize,
+    double &epsilonICP, double &epsilonSLAM, bool &use_cache, bool &exportPts, double &distLoop,
+    int &iterLoop, double &graphDist, int &octree, bool &cuda_enabled, reader_type &type)
 {
   int  c;
   // from unistd.h:
@@ -313,7 +313,7 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &rand,
     { "veryquiet",       no_argument,         0,  'Q' },
     { "trustpose",       no_argument,         0,  'p' },
     { "anim",            required_argument,   0,  'A' },
-    { "lastscan",        no_argument,         0,  '2' }, // use the long format only
+    { "metascan",        no_argument,         0,  '2' }, // use the long format only
     { "DlastSLAM",       required_argument,   0,  '4' }, // use the long format only
     { "epsICP",          required_argument,   0,  '5' }, // use the long format only
     { "epsSLAM",         required_argument,   0,  '6' }, // use the long format only
@@ -329,153 +329,153 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &rand,
   cout << endl;
   while ((c = getopt_long(argc, argv, "O::f:A:G:L:a:r:R:d:D:i:l:I:c:C:n:s:e:m:M:u:qQp", longopts, NULL)) != -1)
     switch (c)
-	 {
-	 case 'a':
-	   algo = atoi(optarg);
-	   if ((algo < 0) || (algo > 6)) {
-		cerr << "Error: ICP Algorithm not available." << endl;
-		exit(1);
-	   }	   
-	   break;
-	 case 'L':
-	   loopSlam6DAlgo = atoi(optarg);
-	   if (loopSlam6DAlgo < 0 || loopSlam6DAlgo > 6) {
-		cerr << "Error: global loop closing algorithm not available." << endl;
-		exit(1);
-	   }
-     break;
-	 case 'G':
-	   lum6DAlgo = atoi(optarg);
-	   if ((lum6DAlgo < 0) || (lum6DAlgo > 6)) {
-		cerr << "Error: global relaxation algorithm not available." << endl;
-		exit(1);
-	   }
-     break;
-	 case 'c':
-	   cldist = atof(optarg);
-	   break;
-	 case 'C':
-	   clpairs = atoi(optarg);
-	   break;
-	 case 'l':
-	   loopsize = atoi(optarg);
-	   break;
-	 case 'r':
-	   red = atof(optarg);
-	   break;
-	 case 'O':
-       if (optarg) {
-         octree = atoi(optarg);
-       } else {
-         octree = 1;
-       }
-	   break;
-	 case 'R':
-	   rand = atoi(optarg);
-	   break;
-	 case 'd':
-	   mdm = atof(optarg);
-	   break;
-	 case 'D':
-	   mdml = atof(optarg);
-	   break;
-	 case 'i':
-	   mni = atoi(optarg);
-	   break;
-	 case 'I':
-	   mni_lum = atoi(optarg);
-	   break;
-	 case 'n':
-	   net = optarg;
-	   break;
-	 case 's':
-	   start = atoi(optarg);
-	   if (start < 0) { cerr << "Error: Cannot start at a negative scan number.\n"; exit(1); }
-	   break;
-	 case 'e':
-	   end = atoi(optarg);
-	   if (end < 0)     { cerr << "Error: Cannot end at a negative scan number.\n"; exit(1); }
-	   if (end < start) { cerr << "Error: <end> cannot be smaller than <start>.\n"; exit(1); }
-	   break;
-	 case 'm':
-	   maxDist = atoi(optarg);
-	   break;
-	 case 'M':
-	   minDist = atoi(optarg);
-	   break;
-	 case 'q':
-	   quiet = true;
-	   break;
-	 case 'Q':
-	   quiet = veryQuiet = true;
-	   break;
-	 case 'p':
-	   extrapolate_pose = false;
-	   break;
-	 case 'A':
-	   anim = atoi(optarg);
-	   break;
-	 case '2':  // = --lastscan
-	   meta = false;
-	   break;
-	 case '4':  // = --DlastSLAM
-	   mdmll = atof(optarg);
-	   break;
-	 case '5':  // = --epsICP
-	   epsilonICP = atof(optarg);
-	   break;
-	 case '6':  // = --epsSLAM
-	   epsilonSLAM = atof(optarg);
-	   break;
-	 case '7':  // = --cache
-	   use_cache = true;
-	   break;
-	 case '8':  // not used
-	   exportPts = true;
-	   break;
-	 case '9':  // = --distLoop
-	   distLoop = atof(optarg);
-	   break;
-	 case '1':  // = --iterLoop
-	   iterLoop = atoi(optarg);
-	   break;
-	 case '3':  // = --graphDist
-	   graphDist = atof(optarg);
-	   break;
-	 case 'f': 
-	   if (strcasecmp(optarg, "uos") == 0) type = UOS;
-	   else if (strcasecmp(optarg, "uos_map") == 0) type = UOS_MAP;
-	   else if (strcasecmp(optarg, "uos_frames") == 0) type = UOS_FRAMES;
-	   else if (strcasecmp(optarg, "uos_map_frames") == 0) type = UOS_MAP_FRAMES;
-	   else if (strcasecmp(optarg, "old") == 0) type = OLD;
-	   else if (strcasecmp(optarg, "rts") == 0) type = RTS;
-	   else if (strcasecmp(optarg, "rts_map") == 0) type = RTS_MAP;
-	   else if (strcasecmp(optarg, "ifp") == 0) type = IFP;
-	   else if (strcasecmp(optarg, "riegl_txt") == 0) type = RIEGL_TXT;
-	   else if (strcasecmp(optarg, "riegl_bin") == 0) type = RIEGL_BIN;
-	   else if (strcasecmp(optarg, "zahn") == 0) type = ZAHN;
-	   else if (strcasecmp(optarg, "ply") == 0) type = PLY;
-	   else if (strcasecmp(optarg, "wrl") == 0) type = WRL;
-	   else if (strcasecmp(optarg, "xyz") == 0) type = XYZ;
-	   else if (strcasecmp(optarg, "zuf") == 0) type = ZUF;
-	   else if (strcasecmp(optarg, "asc") == 0) type = ASC;
-	   else if (strcasecmp(optarg, "iais") == 0) type = IAIS;
-	   else if (strcasecmp(optarg, "front") == 0) type = FRONT;
-	   else if (strcasecmp(optarg, "x3d") == 0) type = X3D;
-	   else if (strcasecmp(optarg, "rxp") == 0) type = RXP;
-	   else {
-		abort ();
-	   }
-	   break;
-	 case 'u':
-	   cuda_enabled = true;
-	   break;
-       case '?':
-	   usage(argv[0]);
-	   return 1;
+    {
+      case 'a':
+        algo = atoi(optarg);
+        if ((algo < 0) || (algo > 6)) {
+          cerr << "Error: ICP Algorithm not available." << endl;
+          exit(1);
+        }	   
+        break;
+      case 'L':
+        loopSlam6DAlgo = atoi(optarg);
+        if (loopSlam6DAlgo < 0 || loopSlam6DAlgo > 6) {
+          cerr << "Error: global loop closing algorithm not available." << endl;
+          exit(1);
+        }
+        break;
+      case 'G':
+        lum6DAlgo = atoi(optarg);
+        if ((lum6DAlgo < 0) || (lum6DAlgo > 6)) {
+          cerr << "Error: global relaxation algorithm not available." << endl;
+          exit(1);
+        }
+        break;
+      case 'c':
+        cldist = atof(optarg);
+        break;
+      case 'C':
+        clpairs = atoi(optarg);
+        break;
+      case 'l':
+        loopsize = atoi(optarg);
+        break;
+      case 'r':
+        red = atof(optarg);
+        break;
+      case 'O':
+        if (optarg) {
+          octree = atoi(optarg);
+        } else {
+          octree = 1;
+        }
+        break;
+      case 'R':
+        rand = atoi(optarg);
+        break;
+      case 'd':
+        mdm = atof(optarg);
+        break;
+      case 'D':
+        mdml = atof(optarg);
+        break;
+      case 'i':
+        mni = atoi(optarg);
+        break;
+      case 'I':
+        mni_lum = atoi(optarg);
+        break;
+      case 'n':
+        net = optarg;
+        break;
+      case 's':
+        start = atoi(optarg);
+        if (start < 0) { cerr << "Error: Cannot start at a negative scan number.\n"; exit(1); }
+        break;
+      case 'e':
+        end = atoi(optarg);
+        if (end < 0)     { cerr << "Error: Cannot end at a negative scan number.\n"; exit(1); }
+        if (end < start) { cerr << "Error: <end> cannot be smaller than <start>.\n"; exit(1); }
+        break;
+      case 'm':
+        maxDist = atoi(optarg);
+        break;
+      case 'M':
+        minDist = atoi(optarg);
+        break;
+      case 'q':
+        quiet = true;
+        break;
+      case 'Q':
+        quiet = veryQuiet = true;
+        break;
+      case 'p':
+        extrapolate_pose = false;
+        break;
+      case 'A':
+        anim = atoi(optarg);
+        break;
+      case '2':  // = --metascan
+        meta = true;
+        break;
+      case '4':  // = --DlastSLAM
+        mdmll = atof(optarg);
+        break;
+      case '5':  // = --epsICP
+        epsilonICP = atof(optarg);
+        break;
+      case '6':  // = --epsSLAM
+        epsilonSLAM = atof(optarg);
+        break;
+      case '7':  // = --cache
+        use_cache = true;
+        break;
+      case '8':  // not used
+        exportPts = true;
+        break;
+      case '9':  // = --distLoop
+        distLoop = atof(optarg);
+        break;
+      case '1':  // = --iterLoop
+        iterLoop = atoi(optarg);
+        break;
+      case '3':  // = --graphDist
+        graphDist = atof(optarg);
+        break;
+      case 'f': 
+        if (strcasecmp(optarg, "uos") == 0) type = UOS;
+        else if (strcasecmp(optarg, "uos_map") == 0) type = UOS_MAP;
+        else if (strcasecmp(optarg, "uos_frames") == 0) type = UOS_FRAMES;
+        else if (strcasecmp(optarg, "uos_map_frames") == 0) type = UOS_MAP_FRAMES;
+        else if (strcasecmp(optarg, "old") == 0) type = OLD;
+        else if (strcasecmp(optarg, "rts") == 0) type = RTS;
+        else if (strcasecmp(optarg, "rts_map") == 0) type = RTS_MAP;
+        else if (strcasecmp(optarg, "ifp") == 0) type = IFP;
+        else if (strcasecmp(optarg, "riegl_txt") == 0) type = RIEGL_TXT;
+        else if (strcasecmp(optarg, "riegl_bin") == 0) type = RIEGL_BIN;
+        else if (strcasecmp(optarg, "zahn") == 0) type = ZAHN;
+        else if (strcasecmp(optarg, "ply") == 0) type = PLY;
+        else if (strcasecmp(optarg, "wrl") == 0) type = WRL;
+        else if (strcasecmp(optarg, "xyz") == 0) type = XYZ;
+        else if (strcasecmp(optarg, "zuf") == 0) type = ZUF;
+        else if (strcasecmp(optarg, "asc") == 0) type = ASC;
+        else if (strcasecmp(optarg, "iais") == 0) type = IAIS;
+        else if (strcasecmp(optarg, "front") == 0) type = FRONT;
+        else if (strcasecmp(optarg, "x3d") == 0) type = X3D;
+        else if (strcasecmp(optarg, "rxp") == 0) type = RXP;
+        else {
+          abort ();
+        }
+        break;
+      case 'u':
+        cuda_enabled = true;
+        break;
+      case '?':
+        usage(argv[0]);
+        return 1;
       default:
-	   abort ();
-      }
+        abort ();
+    }
 
   if (optind != argc-1) {
     cerr << "\n*** Directory missing ***" << endl;
@@ -546,7 +546,7 @@ void matchGraph6Dautomatic(double cldist, int loopsize, vector <Scan *> allScans
 
     /*if(i == 85 || i == 321 || i == 533) {
       my_icp6D->set_anim(1);
-    }*/
+      }*/
 
     if(my_icp6D != NULL){
       cout << "ICP" << endl;
@@ -580,7 +580,7 @@ void matchGraph6Dautomatic(double cldist, int loopsize, vector <Scan *> allScans
 
     /*if(i == 85 || i == 321 || i == 533) {
       my_icp6D->set_anim(-2);
-    }*/
+      }*/
 
     if(loop_detection == 1) {
       loop_detection = 2;
@@ -669,9 +669,9 @@ int main(int argc, char **argv)
   signal (SIGINT,  sigSEGVhandler);
 
   cout << "slam6D - A highly efficient SLAM implementation based on scan matching" << endl
-       << "         with 6 degrees of freedom" << endl
-       << "(c) University of Osnabrueck, Germany, 2006 - 2009" << endl << endl;
-  
+    << "         with 6 degrees of freedom" << endl
+    << "(c) University of Osnabrueck, Germany, 2006 - 2009" << endl << endl;
+
   if (argc <= 1) {
     usage(argv[0]);
   }
@@ -687,7 +687,7 @@ int main(int argc, char **argv)
   int    maxDist    = -1;
   int    minDist    = -1;
   bool   eP         = true;  // should we extrapolate the pose??
-  bool   meta       = true;  // match against meta scan, or against LAST scan only?
+  bool   meta       = false;  // match against meta scan, or against LAST scan only?
   int    algo       = 2;
   int    mni_lum    = -1;
   double cldist     = 500;
@@ -707,56 +707,56 @@ int main(int argc, char **argv)
   int octree       = 0;  // employ randomized octree reduction?
   bool cuda_enabled    = false;
   reader_type type    = UOS;
-  
+
   parseArgs(argc, argv, dir, red, rand, mdm, mdml, mdmll, mni, start, end,
-		  maxDist, minDist, quiet, veryQuiet, eP, meta, algo, loopSlam6DAlgo, lum6DAlgo, anim,
-		  mni_lum, net, cldist, clpairs, loopsize, epsilonICP, epsilonSLAM,
-		  use_cache, exportPts, distLoop, iterLoop, graphDist, octree, cuda_enabled, type);
+      maxDist, minDist, quiet, veryQuiet, eP, meta, algo, loopSlam6DAlgo, lum6DAlgo, anim,
+      mni_lum, net, cldist, clpairs, loopsize, epsilonICP, epsilonSLAM,
+      use_cache, exportPts, distLoop, iterLoop, graphDist, octree, cuda_enabled, type);
 
   cout << "slam6D will proceed with the following parameters:" << endl;
   //@@@ to do :-)
 
   // Get Scans
   Scan::readScans(type, start, end, dir, maxDist, minDist, true);
-  
+
   int end_reduction = (int)Scan::allScans.size();
 #ifdef _OPENMP
 #pragma omp parallel for schedule(dynamic)
 #endif
   for (int iterator = 0; iterator < end_reduction; iterator++) {
     if (red > 0) {
-	 cout << "Reducing Scan No. " << iterator << endl;
+      cout << "Reducing Scan No. " << iterator << endl;
     } else {
-	 cout << "Copying Scan No. " << iterator << endl;
+      cout << "Copying Scan No. " << iterator << endl;
     }
     // reduction filter for current scan!
     Scan::allScans[iterator]->calcReducedPoints(red, octree);
   }
 
   Scan::createTrees(use_cache);
- 
+
   // at this point the points vector can not be used anymore!!!
   for (int iterator = 0; iterator < end_reduction; iterator++) {
-      Scan::allScans[iterator]->clearPoints();
+    Scan::allScans[iterator]->clearPoints();
   }
 
   icp6Dminimizer *my_icp6Dminimizer = 0;
   switch (algo) {
-  case 1 :
-    my_icp6Dminimizer = new icp6D_APX(quiet);
-    break;
-  case 2 :
-    my_icp6Dminimizer = new icp6D_QUAT(quiet);
-    break;
-  case 3 :
-    my_icp6Dminimizer = new icp6D_SVD(quiet);
-    break;
-  case 4 :
-    my_icp6Dminimizer = new icp6D_ORTHO(quiet);
-    break;
-  case 5 :
-    my_icp6Dminimizer = new icp6D_HELIX(quiet);
-    break;
+    case 1 :
+      my_icp6Dminimizer = new icp6D_APX(quiet);
+      break;
+    case 2 :
+      my_icp6Dminimizer = new icp6D_QUAT(quiet);
+      break;
+    case 3 :
+      my_icp6Dminimizer = new icp6D_SVD(quiet);
+      break;
+    case 4 :
+      my_icp6Dminimizer = new icp6D_ORTHO(quiet);
+      break;
+    case 5 :
+      my_icp6Dminimizer = new icp6D_HELIX(quiet);
+      break;
   }
 
   // match the scans and print the time used
@@ -765,14 +765,14 @@ int main(int argc, char **argv)
     icp6D *my_icp = 0;
     if (cuda_enabled) {
 #ifdef WITH_CUDA	 
-	 my_icp = new icp6Dcuda(my_icp6Dminimizer, mdm, mni, quiet, meta, rand, eP,
-					    anim, epsilonICP, use_cache);
+      my_icp = new icp6Dcuda(my_icp6Dminimizer, mdm, mni, quiet, meta, rand, eP,
+          anim, epsilonICP, use_cache);
 #else
-	 cout << "slam6d was not compiled for excuting CUDA code" << endl;
+      cout << "slam6d was not compiled for excuting CUDA code" << endl;
 #endif	 
     } else {
-	 my_icp = new icp6D(my_icp6Dminimizer, mdm, mni, quiet, meta, rand, eP,
-					anim, epsilonICP, use_cache);
+      my_icp = new icp6D(my_icp6Dminimizer, mdm, mni, quiet, meta, rand, eP,
+          anim, epsilonICP, use_cache);
     }
     if (my_icp) my_icp->doICP(Scan::allScans);
     delete my_icp;
@@ -781,115 +781,118 @@ int main(int argc, char **argv)
     icp6D *my_icp = 0;
     if (cuda_enabled) {
 #ifdef WITH_CUDA	 
-	 my_icp = new icp6Dcuda(my_icp6Dminimizer, mdm, mni, quiet, meta, rand, eP,
-					    anim, epsilonICP, use_cache);
+      my_icp = new icp6Dcuda(my_icp6Dminimizer, mdm, mni, quiet, meta, rand, eP,
+          anim, epsilonICP, use_cache);
 #else
-	 cout << "slam6d was not compiled for excuting CUDA code" << endl;
+      cout << "slam6d was not compiled for excuting CUDA code" << endl;
 #endif	 
     } else {
-	 my_icp = new icp6D(my_icp6Dminimizer, mdm, mni, quiet, meta, rand, eP,
-					anim, epsilonICP, use_cache);
+      my_icp = new icp6D(my_icp6Dminimizer, mdm, mni, quiet, meta, rand, eP,
+          anim, epsilonICP, use_cache);
     }
     my_icp->doICP(Scan::allScans);
-    graphSlam6D *my_graphSlam6D = new lum6DEuler(my_icp6Dminimizer, mdm, mdml, mdmll, mni, quiet, meta,
-									    rand, eP, anim, epsilonICP, use_cache, epsilonSLAM);
+    graphSlam6D *my_graphSlam6D = new lum6DEuler(my_icp6Dminimizer, mdm, mdml, mni, quiet, meta,
+        rand, eP, anim, epsilonICP, use_cache, epsilonSLAM);
     my_graphSlam6D->matchGraph6Dautomatic(Scan::allScans, mni_lum, clpairs, loopsize);
     //!!!!!!!!!!!!!!!!!!!!!!!!		  
   } else {
     graphSlam6D *my_graphSlam6D = 0;
     switch (lum6DAlgo) {
-    case 1 :
-	 my_graphSlam6D = new lum6DEuler(my_icp6Dminimizer, mdm, mdml, mdmll, mni, quiet, meta, rand, eP,
-							   anim, epsilonICP, use_cache, epsilonSLAM);
-	 break;
-    case 2 :
-      my_graphSlam6D = new lum6DQuat(my_icp6Dminimizer, mdm, mdml, mdmll, mni, quiet, meta, rand, eP,
-							  anim, epsilonICP, use_cache, epsilonSLAM);
-      break;
-    case 3 : 
-      my_graphSlam6D = new ghelix6DQ2(my_icp6Dminimizer, mdm, mdml, mdmll, mni, quiet, meta, rand, eP,
-							   anim, epsilonICP, use_cache, epsilonSLAM);
-	 break;
-    case 4 :
-      my_graphSlam6D = new gapx6D(my_icp6Dminimizer, mdm, mdml, mdmll, mni, quiet, meta, rand, eP,
-						    anim, epsilonICP, use_cache, epsilonSLAM);
-      break;
-    case 5 :
-      my_graphSlam6D = new graphToro(my_icp6Dminimizer, mdm, mdml, mdmll, mni, quiet, meta, rand, eP,
-							  -1, epsilonICP, use_cache, epsilonSLAM);
-      break;
-    case 6 :
-      my_graphSlam6D = new graphHOGMan(my_icp6Dminimizer, mdm, mdml, mdmll, mni, quiet, meta, rand, eP,
-							    -1, epsilonICP, use_cache, epsilonSLAM);
-      break;
+      case 1 :
+        my_graphSlam6D = new lum6DEuler(my_icp6Dminimizer, mdm, mdml, mni, quiet, meta, rand, eP,
+            anim, epsilonICP, use_cache, epsilonSLAM);
+        break;
+      case 2 :
+        my_graphSlam6D = new lum6DQuat(my_icp6Dminimizer, mdm, mdml, mni, quiet, meta, rand, eP,
+            anim, epsilonICP, use_cache, epsilonSLAM);
+        break;
+      case 3 : 
+        my_graphSlam6D = new ghelix6DQ2(my_icp6Dminimizer, mdm, mdml, mni, quiet, meta, rand, eP,
+            anim, epsilonICP, use_cache, epsilonSLAM);
+        break;
+      case 4 :
+        my_graphSlam6D = new gapx6D(my_icp6Dminimizer, mdm, mdml, mni, quiet, meta, rand, eP,
+            anim, epsilonICP, use_cache, epsilonSLAM);
+        break;
+      case 5 :
+        my_graphSlam6D = new graphToro(my_icp6Dminimizer, mdm, mdml, mni, quiet, meta, rand, eP,
+            -1, epsilonICP, use_cache, epsilonSLAM);
+        break;
+      case 6 :
+        my_graphSlam6D = new graphHOGMan(my_icp6Dminimizer, mdm, mdml, mni, quiet, meta, rand, eP,
+            -1, epsilonICP, use_cache, epsilonSLAM);
+        break;
     }
     // Construct Network
     if (net != "none") {
-	 icp6D *my_icp = 0;
-	 if (cuda_enabled) {
+      icp6D *my_icp = 0;
+      if (cuda_enabled) {
 #ifdef WITH_CUDA	 
-	   my_icp = new icp6Dcuda(my_icp6Dminimizer, mdm, mni, quiet, meta, rand, eP,
-						 anim, epsilonICP, use_cache);
+        my_icp = new icp6Dcuda(my_icp6Dminimizer, mdm, mni, quiet, meta, rand, eP,
+            anim, epsilonICP, use_cache);
 #else
-	   cout << "slam6d was not compiled for excuting CUDA code" << endl;
+        cout << "slam6d was not compiled for excuting CUDA code" << endl;
 #endif	 
-	 } else {
-	   my_icp = new icp6D(my_icp6Dminimizer, mdm, mni, quiet, meta, rand, eP,
-					  anim, epsilonICP, use_cache);
-	 }
-	 my_icp->doICP(Scan::allScans);
+      } else {
+        my_icp = new icp6D(my_icp6Dminimizer, mdm, mni, quiet, meta, rand, eP,
+            anim, epsilonICP, use_cache);
+      }
+      my_icp->doICP(Scan::allScans);
 
-	 Graph* structure;
-	 structure = new Graph(net);
-	 my_graphSlam6D->doGraphSlam6D(*structure, Scan::allScans, mni_lum);
-	 mdml = mdmll;
-	 my_graphSlam6D->doGraphSlam6D(*structure, Scan::allScans, mni_lum);
+      Graph* structure;
+      structure = new Graph(net);
+      my_graphSlam6D->doGraphSlam6D(*structure, Scan::allScans, mni_lum);
+      if(mdmll > 0.0) {
+        my_graphSlam6D->set_mdmll(mdmll);
+        my_graphSlam6D->doGraphSlam6D(*structure, Scan::allScans, mni_lum);
+      }
+
     } else {
       icp6D *my_icp = 0;
       if(algo > 0) {
-	   if (cuda_enabled) {
+        if (cuda_enabled) {
 #ifdef WITH_CUDA	 
-	   my_icp = new icp6Dcuda(my_icp6Dminimizer, mdm, mni, quiet, meta, rand, eP,
-						 anim, epsilonICP, use_cache);
+          my_icp = new icp6Dcuda(my_icp6Dminimizer, mdm, mni, quiet, meta, rand, eP,
+              anim, epsilonICP, use_cache);
 #else
-	   cout << "slam6d was not compiled for excuting CUDA code" << endl;
+          cout << "slam6d was not compiled for excuting CUDA code" << endl;
 #endif	 
-	   } else {
-		my_icp = new icp6D(my_icp6Dminimizer, mdm, mni, quiet, meta, rand, eP,
-					    anim, epsilonICP, use_cache);
-	   }
-	   
-	   loopSlam6D *my_loopSlam6D = 0;
-	   switch(loopSlam6DAlgo) {
-        case 1:
-          my_loopSlam6D = new elch6Deuler(veryQuiet, my_icp6Dminimizer, distLoop, iterLoop, rand, eP, 10, epsilonICP, use_cache);
-          break;
-        case 2:
-          my_loopSlam6D = new elch6Dquat(veryQuiet, my_icp6Dminimizer, distLoop, iterLoop, rand, eP, 10, epsilonICP, use_cache);
-          break;
-        case 3:
-          my_loopSlam6D = new elch6DunitQuat(veryQuiet, my_icp6Dminimizer, distLoop, iterLoop, rand, eP, 10, epsilonICP, use_cache);
-          break;
-        case 4:
-          my_loopSlam6D = new elch6Dslerp(veryQuiet, my_icp6Dminimizer, distLoop, iterLoop, rand, eP, 10, epsilonICP, use_cache);
-          break;
-        case 5:
-          my_loopSlam6D = new loopToro(veryQuiet, my_icp6Dminimizer, distLoop, iterLoop, rand, eP, 10, epsilonICP, use_cache);
-          break;
-        case 6:
-          my_loopSlam6D = new loopHOGMan(veryQuiet, my_icp6Dminimizer, distLoop, iterLoop, rand, eP, 10, epsilonICP, use_cache);
-          break;
-	   }
+        } else {
+          my_icp = new icp6D(my_icp6Dminimizer, mdm, mni, quiet, meta, rand, eP,
+              anim, epsilonICP, use_cache);
+        }
 
-	   matchGraph6Dautomatic(cldist, loopsize, Scan::allScans, my_icp, meta, use_cache, my_loopSlam6D, my_graphSlam6D, mni_lum, epsilonSLAM, mdml, mdmll, graphDist, eP, type);
-	   delete my_icp;
-	   if(loopSlam6DAlgo > 0) {
-		delete my_loopSlam6D;
-	   }
-	 }
-	 if(my_graphSlam6D > 0) {
-	   delete my_graphSlam6D;
-	 }
+        loopSlam6D *my_loopSlam6D = 0;
+        switch(loopSlam6DAlgo) {
+          case 1:
+            my_loopSlam6D = new elch6Deuler(veryQuiet, my_icp6Dminimizer, distLoop, iterLoop, rand, eP, 10, epsilonICP, use_cache);
+            break;
+          case 2:
+            my_loopSlam6D = new elch6Dquat(veryQuiet, my_icp6Dminimizer, distLoop, iterLoop, rand, eP, 10, epsilonICP, use_cache);
+            break;
+          case 3:
+            my_loopSlam6D = new elch6DunitQuat(veryQuiet, my_icp6Dminimizer, distLoop, iterLoop, rand, eP, 10, epsilonICP, use_cache);
+            break;
+          case 4:
+            my_loopSlam6D = new elch6Dslerp(veryQuiet, my_icp6Dminimizer, distLoop, iterLoop, rand, eP, 10, epsilonICP, use_cache);
+            break;
+          case 5:
+            my_loopSlam6D = new loopToro(veryQuiet, my_icp6Dminimizer, distLoop, iterLoop, rand, eP, 10, epsilonICP, use_cache);
+            break;
+          case 6:
+            my_loopSlam6D = new loopHOGMan(veryQuiet, my_icp6Dminimizer, distLoop, iterLoop, rand, eP, 10, epsilonICP, use_cache);
+            break;
+        }
+
+        matchGraph6Dautomatic(cldist, loopsize, Scan::allScans, my_icp, meta, use_cache, my_loopSlam6D, my_graphSlam6D, mni_lum, epsilonSLAM, mdml, mdmll, graphDist, eP, type);
+        delete my_icp;
+        if(loopSlam6DAlgo > 0) {
+          delete my_loopSlam6D;
+        }
+      }
+      if(my_graphSlam6D > 0) {
+        delete my_graphSlam6D;
+      }
     }
   }
 
@@ -900,16 +903,16 @@ int main(int argc, char **argv)
     cout << "Export all 3D Points to file \"points.pts\"" << endl;
     ofstream redptsout("points.pts");
     for(unsigned int i = 0; i < Scan::allScans.size(); i++) {
-	 for (int j = 0; j < Scan::allScans[i]->get_points_red_size(); j++) {
-	   redptsout << Scan::allScans[i]->get_points_red()[j][0] << " "
-			   << Scan::allScans[i]->get_points_red()[j][1] << " "
-			   << Scan::allScans[i]->get_points_red()[j][2] << endl;
-	 }
+      for (int j = 0; j < Scan::allScans[i]->get_points_red_size(); j++) {
+        redptsout << Scan::allScans[i]->get_points_red()[j][0] << " "
+          << Scan::allScans[i]->get_points_red()[j][1] << " "
+          << Scan::allScans[i]->get_points_red()[j][2] << endl;
+      }
     }
     redptsout.close();
     redptsout.clear();
   }
-  
+
   cout << "Saving registration information in .frames files" << endl;
   vector <Scan*>::iterator Iter = Scan::allScans.begin();
   for( ; Iter != Scan::allScans.end(); ) {
@@ -924,7 +927,7 @@ int main(int argc, char **argv)
 
   cout << endl << endl;
   cout << "Normal program end." << endl
-	  << (red < 0 && rand < 0 ? "(-> HINT: For a significant speedup, please use the '-r' or '-R' parameter <-)\n"
-		 : "")
-	  << endl;
+    << (red < 0 && rand < 0 ? "(-> HINT: For a significant speedup, please use the '-r' or '-R' parameter <-)\n"
+        : "")
+    << endl;
 }

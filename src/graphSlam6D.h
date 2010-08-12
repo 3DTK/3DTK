@@ -24,7 +24,7 @@ public:
   graphSlam6D() { };
 
   graphSlam6D(icp6Dminimizer *my_icp6Dminimizer,
-		    double mdm, double max_dist_match, double max_dist_match_last,
+		    double mdm, double max_dist_match, 
 		    int max_num_iterations, bool quiet, bool meta, int rnd,
 		    bool eP, int anim, double epsilonICP, bool use_cache, double epsilonLUM);
 
@@ -61,11 +61,6 @@ protected:
    * the maximal distance (^2 !!!) for matching in LUM
    */
   double max_dist_match2_LUM;
-
-  /**
-   * the maximal distance (^2 !!!) for matching in LUM
-   */
-  double max_dist_match2_last_LUM;
 
   /**
    * indicates using the cache

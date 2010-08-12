@@ -39,7 +39,7 @@ using std::flush;
  * @param epsilonLUM Termination criterion for LUM
  */
 graphSlam6D::graphSlam6D(icp6Dminimizer *my_icp6Dminimizer,
-					double mdm, double max_dist_match, double max_dist_match_last,
+					double mdm, double max_dist_match, 
 					int max_num_iterations, bool quiet, bool meta, int rnd,
 					bool eP, int anim, double epsilonICP, bool use_cache, double epsilonLUM)
 {
@@ -47,11 +47,6 @@ graphSlam6D::graphSlam6D(icp6Dminimizer *my_icp6Dminimizer,
   this->quiet = quiet;
   this->epsilonLUM = epsilonLUM;
   this->max_dist_match2_LUM = sqr(max_dist_match);
-  if (max_dist_match_last > 0) {
-    this->max_dist_match2_last_LUM = sqr(max_dist_match_last);
-  } else {
-    this->max_dist_match2_last_LUM = -1;
-  }
 
   ctime = 0.0;
   
