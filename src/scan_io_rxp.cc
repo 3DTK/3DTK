@@ -58,10 +58,14 @@ protected:
             //
             
             Point p;
-
+/*
             p.x = t.vertex[0]*100.0;
             p.y = t.vertex[2]*100.0;
-            p.z = t.vertex[1]*100.0;
+            p.z = t.vertex[1]*100.0;*/
+            p.x = t.vertex[1]*-100.0;
+            p.y = t.vertex[2]*100.0;
+            p.z = t.vertex[0]*100.0;
+
 
             p.reflectance = t.reflectance;
             p.amplitude   = t.amplitude;
