@@ -5,8 +5,8 @@
  * Main programm to match 3D scans with ICP and the globally consistent LUM approach.
  * Use -i from the command line to match with ICP, and -I to match 3D Scans using the LUM algorithm.
  * 
+ * @author Andreas Nuechter. Jacobs University Bremen gGmbH, Germany
  * @author Kai Lingemann. Institute of Computer Science, University of Osnabrueck, Germany.
- * @author Andreas Nuechter. Institute of Computer Science, University of Osnabrueck, Germany.
  * @author Jochen Sprickerhof. Institute of Computer Science, University of Osnabrueck, Germany.
  */
 
@@ -38,6 +38,9 @@ using std::ifstream;
 #include "icp6Dquat.h"
 #include "icp6Dortho.h"
 #include "icp6Dhelix.h"
+#include "icp6Ddual.h"
+#include "icp6Dlumeuler.h"
+#include "icp6Dlumquat.h"
 #include "icp6D.h"
 #ifdef WITH_CUDA
 #include "cuda/icp6Dcuda.h"
@@ -113,13 +116,16 @@ void usage(char* prog)
     << "   " << prog << " [options] directory" << endl << endl;
   cout << bold << "OPTIONS" << normal << endl
 
-    << bold << "  -a" << normal << " NR, " << bold << "--algo=" << normal << "NR   [default: 2]" << endl
+    << bold << "  -a" << normal << " NR, " << bold << "--algo=" << normal << "NR   [default: 1]" << endl
     << "         selects the minimizazion method for the ICP matching algorithm" << endl
-    << "           1 = small angle approximation" << endl
-    << "           2 = unit quaterion based method by Horn" << endl
-    << "           3 = singular value decomposition by Arun et al. " << endl
-    << "           4 = orhtonormal matrices by Horn et al." << endl
-    << "           5 = HELIX approximation by Hofer & Potmann" << endl
+    << "           1 = unit quaterion based method by Horn" << endl
+    << "           2 = singular value decomposition by Arun et al. " << endl
+    << "           3 = orhtonormal matrices by Horn et al." << endl
+    << "           4 = dual quaternion method by Walker et al." << endl
+    << "           5 = helix approximation by Hofer & Potmann" << endl
+    << "           6 = small angle approximation" << endl
+    << "           7 = Lu & Milios style, i.e., uncertainty based, with Euler angles" << endl
+    << "           8 = Lu & Milios style, i.e., uncertainty based, with Quaternion" << endl
     << endl
     << bold << "  -A" << normal << " NR, " << bold << "--anim=" << normal << "NR   [default: first and last frame only]" << endl
     << "         if specified, use only every NR-th frame for animation" << endl
@@ -193,7 +199,7 @@ void usage(char* prog)
     << "           1 = euler angles" << endl
     << "           2 = quaternions " << endl
     << "           3 = unit quaternions" << endl
-    << "           4 = SLERP" << endl
+    << "           4 = SLERP (recommended)" << endl
     << "           5 = TORO" << endl
     << "           6 = HOG-Man" << endl
     << endl
@@ -332,7 +338,7 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &rand,
     {
       case 'a':
         algo = atoi(optarg);
-        if ((algo < 0) || (algo > 6)) {
+        if ((algo < 1) || (algo > 8)) {
           cerr << "Error: ICP Algorithm not available." << endl;
           exit(1);
         }	   
@@ -510,7 +516,11 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &rand,
  * @param mdml maximal distance match for global SLAM
  * @param mdmll maximal distance match for global SLAM after all scans ar matched
  */
-void matchGraph6Dautomatic(double cldist, int loopsize, vector <Scan *> allScans, icp6D *my_icp6D, bool meta_icp, bool use_cache, loopSlam6D *my_loopSlam6D, graphSlam6D *my_graphSlam6D, int nrIt, double epsilonSLAM, double mdml, double mdmll, double graphDist, bool &eP, reader_type type)
+void matchGraph6Dautomatic(double cldist, int loopsize, vector <Scan *> allScans, icp6D *my_icp6D,
+					  bool meta_icp, bool use_cache, bool cuda_enabled,
+					  loopSlam6D *my_loopSlam6D, graphSlam6D *my_graphSlam6D, int nrIt,
+					  double epsilonSLAM, double mdml, double mdmll, double graphDist,
+					  bool &eP, reader_type type)
 {
   double cldist2 = sqr(cldist);
 
@@ -553,7 +563,7 @@ void matchGraph6Dautomatic(double cldist, int loopsize, vector <Scan *> allScans
       // Matching strongly linked scans with ICPs
       if(meta_icp) {
         metas.push_back(allScans[i - 1]);
-        Scan *meta_scan = new Scan(metas, use_cache);
+        Scan *meta_scan = new Scan(metas, use_cache, cuda_enabled);
         my_icp6D->match(meta_scan, allScans[i]);
         delete meta_scan;
       } else {
@@ -688,7 +698,7 @@ int main(int argc, char **argv)
   int    minDist    = -1;
   bool   eP         = true;  // should we extrapolate the pose??
   bool   meta       = false;  // match against meta scan, or against LAST scan only?
-  int    algo       = 2;
+  int    algo       = 1;
   int    mni_lum    = -1;
   double cldist     = 500;
   int    clpairs    = -1;
@@ -733,7 +743,7 @@ int main(int argc, char **argv)
     Scan::allScans[iterator]->calcReducedPoints(red, octree);
   }
 
-  Scan::createTrees(use_cache);
+  Scan::createTrees(use_cache, cuda_enabled);
 
   // at this point the points vector can not be used anymore!!!
   for (int iterator = 0; iterator < end_reduction; iterator++) {
@@ -743,19 +753,28 @@ int main(int argc, char **argv)
   icp6Dminimizer *my_icp6Dminimizer = 0;
   switch (algo) {
     case 1 :
-      my_icp6Dminimizer = new icp6D_APX(quiet);
-      break;
-    case 2 :
       my_icp6Dminimizer = new icp6D_QUAT(quiet);
       break;
-    case 3 :
+    case 2 :
       my_icp6Dminimizer = new icp6D_SVD(quiet);
       break;
-    case 4 :
+    case 3 :
       my_icp6Dminimizer = new icp6D_ORTHO(quiet);
+      break;
+    case 4 :
+      my_icp6Dminimizer = new icp6D_DUAL(quiet);
       break;
     case 5 :
       my_icp6Dminimizer = new icp6D_HELIX(quiet);
+      break;
+    case 6 :
+      my_icp6Dminimizer = new icp6D_APX(quiet);
+      break;
+    case 7 :
+      my_icp6Dminimizer = new icp6D_LUMEULER(quiet);
+      break;
+    case 8 :
+      my_icp6Dminimizer = new icp6D_LUMQUAT(quiet);
       break;
   }
 
@@ -766,13 +785,13 @@ int main(int argc, char **argv)
     if (cuda_enabled) {
 #ifdef WITH_CUDA	 
       my_icp = new icp6Dcuda(my_icp6Dminimizer, mdm, mni, quiet, meta, rand, eP,
-          anim, epsilonICP, use_cache);
+					    anim, epsilonICP, use_cache, cuda_enabled);
 #else
       cout << "slam6d was not compiled for excuting CUDA code" << endl;
 #endif	 
     } else {
       my_icp = new icp6D(my_icp6Dminimizer, mdm, mni, quiet, meta, rand, eP,
-          anim, epsilonICP, use_cache);
+					anim, epsilonICP, use_cache, cuda_enabled);
     }
     if (my_icp) my_icp->doICP(Scan::allScans);
     delete my_icp;
@@ -782,13 +801,13 @@ int main(int argc, char **argv)
     if (cuda_enabled) {
 #ifdef WITH_CUDA	 
       my_icp = new icp6Dcuda(my_icp6Dminimizer, mdm, mni, quiet, meta, rand, eP,
-          anim, epsilonICP, use_cache);
+					    anim, epsilonICP, use_cache, cuda_enabled);
 #else
       cout << "slam6d was not compiled for excuting CUDA code" << endl;
 #endif	 
     } else {
       my_icp = new icp6D(my_icp6Dminimizer, mdm, mni, quiet, meta, rand, eP,
-          anim, epsilonICP, use_cache);
+					anim, epsilonICP, use_cache, cuda_enabled);
     }
     my_icp->doICP(Scan::allScans);
     graphSlam6D *my_graphSlam6D = new lum6DEuler(my_icp6Dminimizer, mdm, mdml, mni, quiet, meta,
@@ -884,7 +903,9 @@ int main(int argc, char **argv)
             break;
         }
 
-        matchGraph6Dautomatic(cldist, loopsize, Scan::allScans, my_icp, meta, use_cache, my_loopSlam6D, my_graphSlam6D, mni_lum, epsilonSLAM, mdml, mdmll, graphDist, eP, type);
+        matchGraph6Dautomatic(cldist, loopsize, Scan::allScans, my_icp, meta,
+						use_cache, cuda_enabled, my_loopSlam6D, my_graphSlam6D,
+						mni_lum, epsilonSLAM, mdml, mdmll, graphDist, eP, type);
         delete my_icp;
         if(loopSlam6DAlgo > 0) {
           delete my_loopSlam6D;

@@ -69,13 +69,13 @@ docu: docu_html docu_latex docu_hl
 ############# SLAM6D ##############
 
 ifdef WITH_CUDA
-$(BIN)slam6D: $(OBJ)libglui.a $(OBJ)scanlib.a $(OBJ)icp6D.o $(OBJ)graphSlam6D.o $(OBJ)icp6Dapx.o $(OBJ)icp6Dsvd.o $(OBJ)icp6Dortho.o $(OBJ)icp6Dquat.o $(OBJ)icp6Dhelix.o $(OBJ)gapx6D.o $(OBJ)ghelix6DQ2.o $(OBJ)lum6Deuler.o $(OBJ)lum6Dquat.o $(OBJ)graph.o $(SRC)slam6D.cc $(SRC)globals.icc $(OBJ)csparse.o $(OBJ)libnewmat.a $(OBJ)elch6D.o $(OBJ)elch6Dquat.o $(OBJ)elch6DunitQuat.o $(OBJ)elch6Dslerp.o $(OBJ)elch6Deuler.o $(OBJ)loopToro.o $(OBJ)loopHOG-Man.o $(OBJ)graphToro.o $(OBJ)graphHOG-Man.o $(OBJ)CIcpGpuCuda.o $(OBJ)icp6Dcuda.o $(OBJ)libANN.a
+$(BIN)slam6D: $(OBJ)libglui.a $(OBJ)scanlib.a $(OBJ)icp6D.o $(OBJ)graphSlam6D.o $(OBJ)icp6Dapx.o $(OBJ)icp6Dsvd.o $(OBJ)icp6Dortho.o $(OBJ)icp6Dquat.o $(OBJ)icp6Dhelix.o $(OBJ)icp6Ddual.o $(OBJ)icp6Dlumeuler.o $(OBJ)icp6Dlumquat.o $(OBJ)gapx6D.o $(OBJ)ghelix6DQ2.o $(OBJ)lum6Deuler.o $(OBJ)lum6Dquat.o $(OBJ)graph.o $(SRC)slam6D.cc $(SRC)globals.icc $(OBJ)csparse.o $(OBJ)libnewmat.a $(OBJ)elch6D.o $(OBJ)elch6Dquat.o $(OBJ)elch6DunitQuat.o $(OBJ)elch6Dslerp.o $(OBJ)elch6Deuler.o $(OBJ)loopToro.o $(OBJ)loopHOG-Man.o $(OBJ)graphToro.o $(OBJ)graphHOG-Man.o $(OBJ)CIcpGpuCuda.o $(OBJ)icp6Dcuda.o $(OBJ)libANN.a
 	echo Compiling and Linking SLAM 6D with CUDA ...
-	$(GPP) $(CFLAGS) -DWITH_CUDA  -I$(SRC)ann_1.1.1_modified/include/ -I$(SRC)ann_1.1.1_modified/src/ -I$(SRC) -o $(BIN)slam6D $(SRC)slam6D.cc $(OBJ)scanlib.a $(OBJ)icp6D.o $(OBJ)gapx6D.o $(OBJ)ghelix6DQ2.o $(OBJ)lum6Deuler.o $(OBJ)lum6Dquat.o $(OBJ)graphSlam6D.o $(OBJ)graph.o $(OBJ)icp6Dapx.o $(OBJ)icp6Dsvd.o $(OBJ)icp6Dortho.o $(OBJ)icp6Dquat.o $(OBJ)icp6Dhelix.o $(OBJ)csparse.o $(OBJ)libnewmat.a $(OBJ)elch6D.o $(OBJ)elch6Dquat.o $(OBJ)elch6DunitQuat.o $(OBJ)elch6Dslerp.o $(OBJ)elch6Deuler.o -ldl $(OBJ)libglui.a $(OBJ)loopToro.o $(OBJ)loopHOG-Man.o $(OBJ)graphToro.o $(OBJ)graphHOG-Man.o $(OBJ)CIcpGpuCuda.o $(OBJ)icp6Dcuda.o $(OBJ)libANN.a $(LIBRARIES) $(CUDALIBDIRS) $(CUDALIBS)
+	$(GPP) $(CFLAGS) -DWITH_CUDA  -I$(SRC)ann_1.1.1_modified/include/ -I$(SRC)ann_1.1.1_modified/src/ -I$(SRC) -o $(BIN)slam6D $(SRC)slam6D.cc $(OBJ)scanlib.a $(OBJ)icp6D.o $(OBJ)gapx6D.o $(OBJ)ghelix6DQ2.o $(OBJ)lum6Deuler.o $(OBJ)lum6Dquat.o $(OBJ)graphSlam6D.o $(OBJ)graph.o $(OBJ)icp6Dapx.o $(OBJ)icp6Dsvd.o $(OBJ)icp6Dortho.o $(OBJ)icp6Dquat.o $(OBJ)icp6Dhelix.o $(OBJ)icp6Ddual.o $(OBJ)icp6Dlumeuler.o $(OBJ)icp6Dlumquat.o $(OBJ)csparse.o $(OBJ)libnewmat.a $(OBJ)elch6D.o $(OBJ)elch6Dquat.o $(OBJ)elch6DunitQuat.o $(OBJ)elch6Dslerp.o $(OBJ)elch6Deuler.o -ldl $(OBJ)libglui.a $(OBJ)loopToro.o $(OBJ)loopHOG-Man.o $(OBJ)graphToro.o $(OBJ)graphHOG-Man.o $(OBJ)CIcpGpuCuda.o $(OBJ)icp6Dcuda.o $(OBJ)libANN.a $(LIBRARIES) $(CUDALIBDIRS) $(CUDALIBS)
 else
-$(BIN)slam6D: $(OBJ)libglui.a $(OBJ)scanlib.a $(OBJ)icp6D.o $(OBJ)graphSlam6D.o $(OBJ)icp6Dapx.o $(OBJ)icp6Dsvd.o $(OBJ)icp6Dortho.o $(OBJ)icp6Dquat.o $(OBJ)icp6Dhelix.o $(OBJ)gapx6D.o $(OBJ)ghelix6DQ2.o $(OBJ)lum6Deuler.o $(OBJ)lum6Dquat.o $(OBJ)graph.o $(SRC)slam6D.cc $(SRC)globals.icc $(OBJ)csparse.o $(OBJ)libnewmat.a $(OBJ)elch6D.o $(OBJ)elch6Dquat.o $(OBJ)elch6DunitQuat.o $(OBJ)elch6Dslerp.o $(OBJ)elch6Deuler.o $(OBJ)loopToro.o $(OBJ)loopHOG-Man.o $(OBJ)graphToro.o $(OBJ)graphHOG-Man.o $(OBJ)libANN.a
+$(BIN)slam6D: $(OBJ)libglui.a $(OBJ)scanlib.a $(OBJ)icp6D.o $(OBJ)graphSlam6D.o $(OBJ)icp6Dapx.o $(OBJ)icp6Dsvd.o $(OBJ)icp6Dortho.o $(OBJ)icp6Dquat.o $(OBJ)icp6Dhelix.o $(OBJ)icp6Ddual.o $(OBJ)icp6Dlumeuler.o $(OBJ)icp6Dlumquat.o $(OBJ)gapx6D.o $(OBJ)ghelix6DQ2.o $(OBJ)lum6Deuler.o $(OBJ)lum6Dquat.o $(OBJ)graph.o $(SRC)slam6D.cc $(SRC)globals.icc $(OBJ)csparse.o $(OBJ)libnewmat.a $(OBJ)elch6D.o $(OBJ)elch6Dquat.o $(OBJ)elch6DunitQuat.o $(OBJ)elch6Dslerp.o $(OBJ)elch6Deuler.o $(OBJ)loopToro.o $(OBJ)loopHOG-Man.o $(OBJ)graphToro.o $(OBJ)graphHOG-Man.o $(OBJ)libANN.a
 	echo Compiling and Linking SLAM 6D ...
-	$(GPP) $(CFLAGS) -I$(SRC)ann_1.1.1_modified/include/ -o $(BIN)slam6D $(SRC)slam6D.cc $(OBJ)scanlib.a $(OBJ)icp6D.o $(OBJ)gapx6D.o $(OBJ)ghelix6DQ2.o $(OBJ)lum6Deuler.o $(OBJ)lum6Dquat.o $(OBJ)graphSlam6D.o $(OBJ)graph.o $(OBJ)icp6Dapx.o $(OBJ)icp6Dsvd.o $(OBJ)icp6Dortho.o $(OBJ)icp6Dquat.o $(OBJ)icp6Dhelix.o $(OBJ)csparse.o $(OBJ)libnewmat.a $(OBJ)elch6D.o $(OBJ)elch6Dquat.o $(OBJ)elch6DunitQuat.o $(OBJ)elch6Dslerp.o $(OBJ)elch6Deuler.o -ldl $(OBJ)libglui.a $(OBJ)loopToro.o $(OBJ)loopHOG-Man.o $(OBJ)graphToro.o $(OBJ)graphHOG-Man.o $(OBJ)libANN.a $(LIBRARIES)
+	$(GPP) $(CFLAGS) -I$(SRC)ann_1.1.1_modified/include/ -o $(BIN)slam6D $(SRC)slam6D.cc $(OBJ)scanlib.a $(OBJ)icp6D.o $(OBJ)gapx6D.o $(OBJ)ghelix6DQ2.o $(OBJ)lum6Deuler.o $(OBJ)lum6Dquat.o $(OBJ)graphSlam6D.o $(OBJ)graph.o $(OBJ)icp6Dapx.o $(OBJ)icp6Dsvd.o $(OBJ)icp6Dortho.o $(OBJ)icp6Dquat.o $(OBJ)icp6Dhelix.o $(OBJ)icp6Ddual.o $(OBJ)icp6Dlumeuler.o $(OBJ)icp6Dlumquat.o $(OBJ)csparse.o $(OBJ)libnewmat.a $(OBJ)elch6D.o $(OBJ)elch6Dquat.o $(OBJ)elch6DunitQuat.o $(OBJ)elch6Dslerp.o $(OBJ)elch6Deuler.o -ldl $(OBJ)libglui.a $(OBJ)loopToro.o $(OBJ)loopHOG-Man.o $(OBJ)graphToro.o $(OBJ)graphHOG-Man.o $(OBJ)libANN.a $(LIBRARIES)
 endif
 	echo DONE
 	echo
@@ -190,6 +190,18 @@ $(OBJ)icp6Dquat.o: $(SRC)icp6Dquat.h $(SRC)icp6Dquat.cc $(SRC)ptpair.h $(SRC)icp
 $(OBJ)icp6Dhelix.o: $(SRC)icp6Dhelix.h $(SRC)icp6Dhelix.cc $(SRC)ptpair.h $(SRC)icp6Dminimizer.h
 	echo Compiling ICP 6D with Helix ...
 	$(GPP) $(CFLAGS) -c -o $(OBJ)icp6Dhelix.o $(SRC)icp6Dhelix.cc
+
+$(OBJ)icp6Ddual.o: $(SRC)icp6Ddual.h $(SRC)icp6Ddual.cc $(SRC)ptpair.h $(SRC)icp6Dminimizer.h
+	echo Compiling ICP 6D with Dual Quaternions ...
+	$(GPP) $(CFLAGS) -c -o $(OBJ)icp6Ddual.o $(SRC)icp6Ddual.cc
+
+$(OBJ)icp6Dlumeuler.o: $(SRC)icp6Dlumeuler.h $(SRC)icp6Dlumeuler.cc $(SRC)ptpair.h $(SRC)icp6Dminimizer.h
+	echo Compiling ICP 6D with uncertainty-based using Euler angles ...
+	$(GPP) $(CFLAGS) -c -o $(OBJ)icp6Dlumeuler.o $(SRC)icp6Dlumeuler.cc
+
+$(OBJ)icp6Dlumquat.o: $(SRC)icp6Dlumquat.h $(SRC)icp6Dlumquat.cc $(SRC)ptpair.h $(SRC)icp6Dminimizer.h
+	echo Compiling ICP 6D with uncertainty-based using quaternions ...
+	$(GPP) $(CFLAGS) -c -o $(OBJ)icp6Dlumquat.o $(SRC)icp6Dlumquat.cc
 
 $(OBJ)graph.o: $(SRC)graph.h $(SRC)graph.cc $(SRC)globals.icc $(SRC)scan.h
 	echo Compiling Graph ...
