@@ -50,7 +50,7 @@ ifdef WITH_HOGMAN
 TARGETS += $(BIN)hogman3d
 endif
 
-all: $(TARGETS)
+all: $(OBJ) $(TARGETS)
 
 it:
 	@echo
@@ -65,6 +65,9 @@ docu: docu_html docu_latex docu_hl
 	echo + Reference documentation generated: $(DOC)refman.pdf
 	echo + Highlevel documentation generated: $(DOC)documentation_HL.pdf
 	echo
+
+$(OBJ):
+	@mkdir $@
 
 ############# SLAM6D ##############
 
