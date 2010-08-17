@@ -1,6 +1,7 @@
 /** @file 
  *  @brief Implementation of the ICP error function minimization via helix-translation
  *  @author Peter Schneider. Institute of Computer Science, University of Koblenz and Landau, Germany.
+ *  @author Andreas Nuechter. Jacobs University Bremen gGmbH, Germany
  */
 
 #include "icp6Dhelix.h"
@@ -123,19 +124,6 @@ double icp6D_HELIX::Point_Point_Align(const vector<PtPair>& Pairs, double *align
   computeRt( &ccs, vectorOffset, alignxf);    
 
   return error;
-}
-
-
-double icp6D_HELIX::Point_Point_Align_Parallel(const int openmp_num_threads, 
-					     const unsigned int n[OPENMP_NUM_THREADS],
-					     const double sum[OPENMP_NUM_THREADS], 
-					     const double centroid_m[OPENMP_NUM_THREADS][3],
-					     const double centroid_d[OPENMP_NUM_THREADS][3], 
-					     const double Si[OPENMP_NUM_THREADS][9], 
-					     double *alignxf)
-{
-  cout << "parallel HELIX not impelented yet" << endl;
-  exit(-1);
 }
 
 

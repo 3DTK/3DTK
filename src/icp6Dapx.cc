@@ -1,7 +1,7 @@
 /** @file 
  *  @brief Implementation of the ICP error function minimization via approximation
+ *  @author Andreas Nuechter. Jacobs University Bremen gGmbH, Germany
  *  @author Kai Lingemann. Institute of Computer Science, University of Osnabrueck, Germany.
- *  @author Andreas Nuechter. Institute of Computer Science, University of Osnabrueck, Germany.
  */
 
 #include "icp6Dapx.h"
@@ -119,16 +119,154 @@ double icp6D_APX::Point_Point_Align(const vector<PtPair>& Pairs, double *alignxf
 
 
 double icp6D_APX::Point_Point_Align_Parallel(const int openmp_num_threads, 
-					     const unsigned int n[OPENMP_NUM_THREADS],
-					     const double sum[OPENMP_NUM_THREADS], 
-					     const double centroid_m[OPENMP_NUM_THREADS][3],
-					     const double centroid_d[OPENMP_NUM_THREADS][3], 
-					     const double Si[OPENMP_NUM_THREADS][9], 
-					     double *alignxf)
+									const unsigned int n[OPENMP_NUM_THREADS],
+									const double sum[OPENMP_NUM_THREADS], 
+									const double centroid_m[OPENMP_NUM_THREADS][3],
+									const double centroid_d[OPENMP_NUM_THREADS][3], 
+									const vector<PtPair> pairs[OPENMP_NUM_THREADS],
+									double *alignxf)
+                         
 {
-  cout << "parallel APX not impelented yet" << endl;
+#ifdef _OPENMP
+
+  double At[OPENMP_NUM_THREADS][3][3];
+  double Bt[OPENMP_NUM_THREADS][3];
+
+  for (int j=0;j < OPENMP_NUM_THREADS; j++)
+    for (int k = 0;k < 3; k++) {
+	 for (int l = 0; l < 3; l++)
+	   At[j][k][l] = 0.0;
+	 Bt[j][k] = 0.0;
+    }
+  double A[3][3];
+  double B[3];
+  memset(&A[0][0], 0, 9 * sizeof(double));
+  memset(&B[0], 0, 3 * sizeof(double));
+                     
+  double s = 0.0;
+  double error;
+  unsigned int pairs_size = 0;
+  double cm[3] = {0.0, 0.0, 0.0};  // centroid m
+  double cd[3] = {0.0, 0.0, 0.0};  // centroid d
+
+  double cms[3], cds[3];
+  for (int i = 0; i < 3; i++) cms[i] = cds[i] = 0.0;
+
+  for (int i = 0; i < openmp_num_threads; i++) {
+    s += sum[i];
+    pairs_size += n[i];
+	 
+    // compute centroids for all the pairs
+    cm[0] += n[i] * centroid_m[i][0];
+    cm[1] += n[i] * centroid_m[i][1];
+    cm[2] += n[i] * centroid_m[i][2];
+    cd[0] += n[i] * centroid_d[i][0];
+    cd[1] += n[i] * centroid_d[i][1];
+    cd[2] += n[i] * centroid_d[i][2];
+    
+    cms[0] += centroid_m[i][0];
+    cms[1] += centroid_m[i][1];
+    cms[2] += centroid_m[i][2];
+    cds[0] += centroid_d[i][0];
+    cds[1] += centroid_d[i][1];
+    cds[2] += centroid_d[i][2];
+  }
+  
+  cm[0] /= pairs_size;
+  cm[1] /= pairs_size;
+  cm[2] /= pairs_size;
+  cd[0] /= pairs_size;
+  cd[1] /= pairs_size;
+  cd[2] /= pairs_size;
+  
+  error = sqrt(s / (double)pairs_size);
+
+#pragma omp parallel
+  {
+    int thread_num = omp_get_thread_num();
+    for (unsigned int i = 0 ; i < (unsigned int)pairs[thread_num].size() ; i++)
+	 {
+	   At[thread_num][0][0] += (pairs[thread_num][i].p2.y - cd[1])*(pairs[thread_num][i].p2.y - cd[1]) +
+		(pairs[thread_num][i].p2.z - cd[2])*(pairs[thread_num][i].p2.z - cd[2]);
+	   At[thread_num][0][1] -= (pairs[thread_num][i].p2.x - cd[0])*(pairs[thread_num][i].p2.y - cd[1]);
+	   At[thread_num][0][2] -= (pairs[thread_num][i].p2.x - cd[0])*(pairs[thread_num][i].p2.z - cd[2]);
+	   At[thread_num][1][1] += (pairs[thread_num][i].p2.x - cd[0])*(pairs[thread_num][i].p2.x - cd[0]) +
+		(pairs[thread_num][i].p2.z - cd[2])*(pairs[thread_num][i].p2.z - cd[2]);
+	   At[thread_num][1][2] -= (pairs[thread_num][i].p2.y - cd[1])*(pairs[thread_num][i].p2.z - cd[2]);
+	   At[thread_num][2][2] += (pairs[thread_num][i].p2.x - cd[0])*(pairs[thread_num][i].p2.x - cd[0]) +
+		(pairs[thread_num][i].p2.y - cd[1])*(pairs[thread_num][i].p2.y - cd[1]);
+	 
+	   Bt[thread_num][0] += (pairs[thread_num][i].p1.z - pairs[thread_num][i].p2.z)
+		* (pairs[thread_num][i].p2.y - cd[1]) - (pairs[thread_num][i].p1.y - pairs[thread_num][i].p2.y)
+		* (pairs[thread_num][i].p2.z - cd[2]);	 
+	   Bt[thread_num][1] += (pairs[thread_num][i].p1.x - pairs[thread_num][i].p2.x)
+		* (pairs[thread_num][i].p2.z - cd[2]) - (pairs[thread_num][i].p1.z - pairs[thread_num][i].p2.z)
+		* (pairs[thread_num][i].p2.x - cd[0]);
+	   Bt[thread_num][2] += (pairs[thread_num][i].p1.y - pairs[thread_num][i].p2.y) *
+		(pairs[thread_num][i].p2.x - cd[0]) - (pairs[thread_num][i].p1.x - pairs[thread_num][i].p2.x)
+		* (pairs[thread_num][i].p2.y - cd[1]);
+	 }
+  }
+
+  for (int j = 0;j < OPENMP_NUM_THREADS; j++)
+    for (int k = 0; k < 3; k++) {
+	 for (int l = 0; l < 3; l++)
+	   A[k][l] += At[j][k][l] ;
+	 B[k] += Bt[j][k];
+    }
+
+  // continue with linear solution
+  
+  if (!quiet) {
+    cout.setf(ios::basefield);
+    cout << "PAPX RMS point-to-point error = "
+	    << resetiosflags(ios::adjustfield) << setiosflags(ios::internal)
+	    << resetiosflags(ios::floatfield) << setiosflags(ios::fixed)
+	    << std::setw(10) << std::setprecision(7)
+	    << error
+	    << "  using " << std::setw(6) << pairs_size << " points" << endl;
+  }
+   
+  // Solve eqns
+  double diag[3];
+  if (!choldc(A, diag)) {
+    printf("Couldn't find transform.\n");
+    return -1.0;
+  }
+  double x[3];
+  cholsl(A, diag, B, x);
+
+  // Interpret results
+  double sx = x[0];
+  double cx = sqrt(1.0 - sx*sx);
+  double sy = x[1];
+  double cy = sqrt(1.0 - sy*sy);
+  double sz = x[2];
+  double cz = sqrt(1.0 - sz*sz);
+
+  alignxf[0]  = cy*cz;
+  alignxf[1]  = sx*sy*cz + cx*sz;
+  alignxf[2]  = -cx*sy*cz + sx*sz;
+  alignxf[3]  = 0;
+  alignxf[4]  = -cy*sz;
+  alignxf[5]  = -sx*sy*sz + cx*cz;
+  alignxf[6]  = cx*sy*sz + sx*cz;
+  alignxf[7]  = 0;
+  alignxf[8]  = sy;
+  alignxf[9]  = -sx*cy;
+  alignxf[10] = cx*cy;
+  alignxf[11] = 0;
+  alignxf[12] = cm[0] - alignxf[0]*cd[0] - alignxf[4]*cd[1] - alignxf[8]*cd[2];
+  alignxf[13] = cm[1] - alignxf[1]*cd[0] - alignxf[5]*cd[1] - alignxf[9]*cd[2];
+  alignxf[14] = cm[2] - alignxf[2]*cd[0] - alignxf[6]*cd[1] - alignxf[10]*cd[2];
+  alignxf[15] = 1;
+  return error;
+#else
+  cout << "Point_Point_Align_Parallel:"<< endl
+	  << "Please compile with OpenMP support to use this function" << endl;
   exit(-1);
-}
+#endif  
+} 
 
 
 void icp6D_APX::computeRt(const double *x, const double *dx, double *alignxf)

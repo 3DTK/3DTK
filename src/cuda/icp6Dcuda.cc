@@ -22,10 +22,10 @@ void icp6Dcuda::initGPUicp(int width, int height, float max_rad, float min_rad, 
 
 icp6Dcuda::icp6Dcuda(icp6Dminimizer *my_icp6Dminimizer, double max_dist_match, 
 				 int max_num_iterations, bool quiet, bool meta, int rnd, bool eP,
-				 int anim, double epsilonICP, bool use_cache)
+				 int anim, double epsilonICP, bool use_cache, bool cuda_enabled)
 : icp6D(my_icp6Dminimizer, max_dist_match, 
 	   max_num_iterations, quiet, meta, rnd, eP,
-	   anim, epsilonICP, use_cache)
+	   anim, epsilonICP, use_cache, cuda_enabled)
 { }
 
 void icp6Dcuda::cleanup()

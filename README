@@ -67,7 +67,7 @@ bin/slam6D -a 2 -q /home/nuechter/dat/bremen_city/reduced -f uos -d 150
 (using UniKoblenz_CampusTour3_OsnabrueckFormat.tar.gz from
 http://kos.informatik.uni-osnabrueck.de/3Dscans/)
 bin/slam6D -s 1 -e 320 -r 20 -i 300 --epsICP=0.000001 -d 45 -D 45
-           -f uos --algo=3 -l 10 -L 4 -I 100 -G 1
+           -f uos --algo=2 -l 10 -L 4 -I 100 -G 1
             /home/nuechter/dat/UniKoblenz_CampusTour3_OsnabrueckFormat/
 bin/show -s 1 -e 320 -f uos /home/nuechter/dat/UniKoblenz_CampusTour3_OsnabrueckFormat/		  
 		  

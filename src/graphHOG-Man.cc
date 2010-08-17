@@ -51,7 +51,7 @@ double graphHOGMan::doGraphSlam6D(Graph gr, vector <Scan *> allScans, int nrIt)
           meta_start.push_back(allScans[i]);
         }
       }
-      Scan *start = new Scan(meta_start, false);
+      Scan *start = new Scan(meta_start, false, false);
 
       //static size of metascan
       int offset_last_start = 2;
@@ -63,7 +63,7 @@ double graphHOGMan::doGraphSlam6D(Graph gr, vector <Scan *> allScans, int nrIt)
           meta_end.push_back(allScans[i]);
         }
       }
-      Scan *end = new Scan(meta_end, false);
+      Scan *end = new Scan(meta_end, false, false);
 
       memcpy(Pl0, allScans[last]->get_transMat(), 16 * sizeof(double));
       my_icp->match(start, end);

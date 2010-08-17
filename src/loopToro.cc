@@ -83,7 +83,7 @@ void loopToro::close_loop(const vector <Scan *> &allScans, int first, int last, 
       meta_start.push_back(allScans[i]);
     }
   }
-  Scan *start = new Scan(meta_start, false);
+  Scan *start = new Scan(meta_start, false, false);
 
   //static size of metascan
   int offset_last_start = 2;
@@ -93,7 +93,7 @@ void loopToro::close_loop(const vector <Scan *> &allScans, int first, int last, 
   for(int i = last - offset_last_start; i <= last + offset_last_end && i < n; i++) {
     meta_end.push_back(allScans[i]);
   }
-  Scan *end = new Scan(meta_end, false);
+  Scan *end = new Scan(meta_end, false, false);
 
   my_icp6D->match(start, end);
 

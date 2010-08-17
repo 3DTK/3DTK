@@ -40,7 +40,8 @@ public:
 		  bool eP = true,
 		  int anim = -1,
 		  double epsilonICP = 0.0000001,
-		  bool use_cache = false);
+		  bool use_cache = false,
+		  bool cuda_enabled = false);
   
   /**
    * Destructor (empty, but needed, because virtual)
