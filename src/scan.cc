@@ -1315,7 +1315,7 @@ void Scan::readScans(reader_type type,
     lib_string = "./bin/scan_io_riegl_txt";
     break;
   case RIEGL_BIN:
-    lib_string = "./bin/scan_io_riegl_BIN";
+    lib_string = "./bin/scan_io_riegl_bin";
     break;
   case ZAHN:
     lib_string = "./bin/scan_io_zahn";
