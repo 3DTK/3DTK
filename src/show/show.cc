@@ -195,7 +195,7 @@ GLdouble aspect          = (double)START_WIDTH/(double)START_HEIGHT;          //
 #define TYPE_GROUND          0x0002 
 #define TYPE_CEILING         0x0003 
 
-int cam_choice             = 0;
+unsigned int cam_choice             = 0;
 /**camera rotation variables**/
 GLdouble quat1[4] = {0.0, 0.0, 0.0, 1.0};
 GLdouble angle1  = 0.0f;
@@ -634,14 +634,14 @@ void createDisplayLists(bool reduced, unsigned int types)
   for(int i = 0; i < (int)Scan::allScans.size() ; i++) {
     if (reduced) {
       double **pts = new double*[Scan::allScans[i]->get_points_red_size()];
-      for (unsigned int jterator = 0; jterator < Scan::allScans[i]->get_points_red_size(); jterator++) {
+      for (int jterator = 0; jterator < Scan::allScans[i]->get_points_red_size(); jterator++) {
         pts[jterator] = new double[3];
         pts[jterator][0] = Scan::allScans[i]->get_points_red()[jterator][0];
         pts[jterator][1] = Scan::allScans[i]->get_points_red()[jterator][1];
         pts[jterator][2] = Scan::allScans[i]->get_points_red()[jterator][2];
       }
       octpts[i] = new Show_BOctTree(pts, Scan::allScans[i]->get_points_red_size(), 50.0);  // TODO remove magic number
-      for (unsigned int jterator = 0; jterator < Scan::allScans[i]->get_points_red_size(); jterator++) {
+      for (int jterator = 0; jterator < Scan::allScans[i]->get_points_red_size(); jterator++) {
         delete[] pts[jterator];
       }
       delete[] pts;

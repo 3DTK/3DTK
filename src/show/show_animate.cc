@@ -231,8 +231,6 @@ void loadPath(int dummy) {
  */
 
 void loadPose(int dummy) {
-  //buffer variable
-  char buffer[127];
   double euler[3];
   double quat[4];
   double mouseRotX;

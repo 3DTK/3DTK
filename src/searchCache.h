@@ -14,7 +14,8 @@
  */
 class SearchTreeCacheItem
 {
-  // contains nothing
+  public:
+    virtual ~SearchTreeCacheItem() {};
 };
 
 
