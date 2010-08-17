@@ -134,7 +134,7 @@ KDtree_cache::KDtree_cache(double **pts, int n, KDtree_cache *_parent)
 KDCacheItem* KDtree_cache::FindClosestCache(double *_p, double maxdist2, int threadNum)
 {
   cacheItem[threadNum].param.closest = 0;
-  cacheItem[threadNum].param.closest_d2 = HUGE_VAL;
+  cacheItem[threadNum].param.closest_d2 = maxdist2;
   cacheItem[threadNum].param.p = _p;
   _FindClosestCache((KDtree_cache*)0, threadNum);
   return &cacheItem[threadNum];
