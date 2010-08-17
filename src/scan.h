@@ -164,9 +164,7 @@ private:
   /**
    * The original pose of the scan, e.g., from odometry
    */
-  double rPosOrg[3],         ///< translation
-         rPosThetaOrg[3],    ///< rotation
-         transMatOrg[16];
+  double transMatOrg[16];
 
   /**
    * Vector for storing the scan data
