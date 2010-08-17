@@ -327,7 +327,7 @@ $(BIN)scan_io_zahn.so: $(SRC)scan_io.h $(SRC)scan_io_zahn.h $(SRC)scan_io_zahn.c
 
 ############# SCAN REDUCTION ##############
 
-$(BIN)scan_red: $(OBJ)scanlib.a $(SRC)globals.icc $(SRC)scan_red.cc 
+$(BIN)scan_red: $(OBJ)scanlib.a $(SRC)globals.icc $(SRC)scan_red.cc $(OBJ)libANN.a
 	echo Compiling and Linking Scan Reduction ...
 	$(GPP) $(CFLAGS)  -I$(SRC)ann_1.1.1_modified/include/ -o $(BIN)scan_red $(SRC)scan_red.cc $(OBJ)scanlib.a $(OBJ)libANN.a -ldl $(LIBRARIES) 
 	echo DONE
@@ -335,7 +335,7 @@ $(BIN)scan_red: $(OBJ)scanlib.a $(SRC)globals.icc $(SRC)scan_red.cc
 
 ############# SCAN DIFFERENCE ##############
 
-$(BIN)scan_diff: $(OBJ)scanlib.a $(SRC)globals.icc $(SRC)scan_diff.cc 
+$(BIN)scan_diff: $(OBJ)scanlib.a $(SRC)globals.icc $(SRC)scan_diff.cc $(OBJ)libANN.a
 	echo Compiling and Linking Scan Difference ...
 	$(GPP) $(CFLAGS) -I$(SRC)ann_1.1.1_modified/include/ -o $(BIN)scan_diff $(SRC)scan_diff.cc $(OBJ)scanlib.a $(OBJ)libANN.a -ldl $(LIBRARIES) 
 	echo DONE
@@ -343,7 +343,7 @@ $(BIN)scan_diff: $(OBJ)scanlib.a $(SRC)globals.icc $(SRC)scan_diff.cc
 
 ############# SHOW ##############
 
-$(BIN)show: $(OBJ)libglui.a $(SHOWSRC)show.cc $(SHOWSRC)show.h $(SHOWSRC)show.icc $(SHOWSRC)show1.icc $(SHOWSRC)show_menu.cc $(SHOWSRC)show_gl.cc $(SHOWSRC)show_animate.cc $(SRC)point.h $(SRC)point.icc $(SRC)globals.icc $(OBJ)scan.o $(OBJ)vertexarray.o $(OBJ)PathGraph.o $(OBJ)NurbsPath.o $(OBJ)viewcull.o $(OBJ)show_Boctree.o $(OBJ)scanlib.a $(OBJ)colormanager.o $(OBJ)scancolormanager.o
+$(BIN)show: $(OBJ)libglui.a $(SHOWSRC)show.cc $(SHOWSRC)show.h $(SHOWSRC)show.icc $(SHOWSRC)show1.icc $(SHOWSRC)show_menu.cc $(SHOWSRC)show_gl.cc $(SHOWSRC)show_animate.cc $(SRC)point.h $(SRC)point.icc $(SRC)globals.icc $(OBJ)scan.o $(OBJ)vertexarray.o $(OBJ)PathGraph.o $(OBJ)NurbsPath.o $(OBJ)viewcull.o $(OBJ)show_Boctree.o $(OBJ)scanlib.a $(OBJ)colormanager.o $(OBJ)scancolormanager.o $(OBJ)libANN.a
 	echo Compiling and Linking Show ...
 	$(GPP) $(CFLAGS)  -I$(SRC)ann_1.1.1_modified/include/ -o $(BIN)show -I$(SRC) $(SHOWSRC)show.cc $(OBJ)scancolormanager.o $(OBJ)show_Boctree.o $(OBJ)scanlib.a $(OBJ)vertexarray.o $(OBJ)PathGraph.o $(OBJ)NurbsPath.o $(OBJ)viewcull.o $(OBJ)colormanager.o $(OBJ)libglui.a $(OBJ)libANN.a $(LIBRARIES)
 	echo DONE
@@ -440,7 +440,7 @@ $(OBJ)hough.o: $(GRIDSRC)hough.cc $(GRIDSRC)hough.h
 	echo Compiling Hough ...
 	$(GPP) $(CFLAGS) -c $(GRIDSRC)hough.cc -o $(OBJ)hough.o
 
-$(BIN)2DGridder: $(OBJ)gridder.o $(OBJ)line.o $(OBJ)gridlines.o $(OBJ)hough.o $(OBJ)viewpointinfo.o $(OBJ)gridWriter.o $(OBJ)parcelmanager.o $(OBJ)parcel.o $(OBJ)parcelinfo.o $(OBJ)scanGrid.o $(OBJ)grid.o $(OBJ)scanToGrid.o $(OBJ)gridPoint.o $(OBJ)scanlib.a $(OBJ)scanmanager.o
+$(BIN)2DGridder: $(OBJ)gridder.o $(OBJ)line.o $(OBJ)gridlines.o $(OBJ)hough.o $(OBJ)viewpointinfo.o $(OBJ)gridWriter.o $(OBJ)parcelmanager.o $(OBJ)parcel.o $(OBJ)parcelinfo.o $(OBJ)scanGrid.o $(OBJ)grid.o $(OBJ)scanToGrid.o $(OBJ)gridPoint.o $(OBJ)scanlib.a $(OBJ)scanmanager.o $(OBJ)libANN.a
 	echo Compiling and Linking Grid ...
 	$(GPP) $(CFLAGS) -I$(SRC)ann_1.1.1_modified/include/ -o $(BIN)2DGridder $(OBJ)viewpointinfo.o $(OBJ)line.o $(OBJ)gridlines.o $(OBJ)hough.o $(OBJ)gridder.o $(OBJ)gridWriter.o $(OBJ)parcelmanager.o $(OBJ)parcelinfo.o $(OBJ)scanmanager.o $(OBJ)grid.o $(OBJ)scanGrid.o $(OBJ)parcel.o $(OBJ)gridPoint.o $(OBJ)scanToGrid.o $(OBJ)scanlib.a $(OBJ)libANN.a -ldl  -lstdc++ $(LIBRARIES)
 	echo DONE
@@ -483,7 +483,7 @@ $(OBJ)pmdWrap.o: $(PMDSRC)pmdWrap.cc
 	echo Compiling PMD wrapper ...
 	$(GPP) $(CFLAGS) $(PMDPKG) -I$(PMDSRC)pmdaccess2 -I$(SRC) -c -o $(OBJ)pmdWrap.o $(PMDSRC)pmdWrap.cc
 
-$(BIN)grabVideoAnd3D: $(OBJ)pmdWrap.o $(OBJ)cvpmd.o $(OBJ)icp6D.o $(OBJ)icp6Dapx.o $(OBJ)icp6Dhelix.o $(OBJ)icp6Dortho.o $(OBJ)icp6Dquat.o $(OBJ)icp6Dsvd.o $(OBJ)scanlib.a $(OBJ)libnewmat.a $(OBJ)libpmdaccess2.a $(PMDSRC)offline/grabVideoAnd3D.cc
+$(BIN)grabVideoAnd3D: $(OBJ)pmdWrap.o $(OBJ)cvpmd.o $(OBJ)icp6D.o $(OBJ)icp6Dapx.o $(OBJ)icp6Dhelix.o $(OBJ)icp6Dortho.o $(OBJ)icp6Dquat.o $(OBJ)icp6Dsvd.o $(OBJ)scanlib.a $(OBJ)libnewmat.a $(OBJ)libpmdaccess2.a $(PMDSRC)offline/grabVideoAnd3D.cc $(OBJ)libANN.a
 	echo Compiling and Linking video and pmd grabber ...
 	$(GPP) $(CFLAGS) $(PMDPKG) -I$(PMDSRC)  -I$(SRC)ann_1.1.1_modified/include/ -I$(PMDSRC)pmdaccess2 -I$(SRC) $(PMDLIBS) $(OBJ)pmdWrap.o $(OBJ)cvpmd.o $(OBJ)icp6D.o $(OBJ)icp6Dapx.o $(OBJ)icp6Dhelix.o $(OBJ)icp6Dortho.o $(OBJ)icp6Dquat.o $(OBJ)icp6Dsvd.o $(OBJ)scanlib.a $(OBJ)libnewmat.a $(OBJ)libpmdaccess2.a $(OBJ)libANN.a -o $(BIN)grabVideoAnd3D $(PMDSRC)offline/grabVideoAnd3D.cc
 
@@ -500,7 +500,7 @@ $(BIN)grabFramesCam: $(PMDSRC)calibrate/grabFramesCam.cc
 	echo Compiling and Linking grab frames camera ...
 	$(GPP) $(CFLAGS) $(PMDPKG) -I$(PMDSRC) -I$(PMDSRC)pmdaccess2 -I$(SRC) $(PMDLIBS) -o $(BIN)grabFramesCam $(PMDSRC)calibrate/grabFramesCam.cc
 
-$(BIN)grabFramesPMD: $(PMDSRC)calibrate/grabFramesPMD.cc $(OBJ)libpmdaccess2.a $(OBJ)scanlib.a
+$(BIN)grabFramesPMD: $(PMDSRC)calibrate/grabFramesPMD.cc $(OBJ)libpmdaccess2.a $(OBJ)scanlib.a $(OBJ)libANN.a
 	echo Compiling and Linking grab frames PMD ...
 	$(GPP) $(CFLAGS) $(PMDPKG) -I$(PMDSRC)  -I$(SRC)ann_1.1.1_modified/include/ -I$(PMDSRC)pmdaccess2 -I$(SRC) $(OBJ)cvpmd.o $(OBJ)pmdWrap.o $(OBJ)libpmdaccess2.a $(OBJ)icp6D.o $(OBJ)icp6Dapx.o $(OBJ)icp6Dhelix.o $(OBJ)icp6Dortho.o $(OBJ)icp6Dquat.o $(OBJ)icp6Dsvd.o $(OBJ)scanlib.a $(PMDLIBS) $(OBJ)libnewmat.a $(OBJ)libANN.a -o $(BIN)grabFramesPMD $(PMDSRC)calibrate/grabFramesPMD.cc
 
@@ -508,7 +508,7 @@ $(BIN)extrinsic: $(PMDSRC)calibrate/extrinsic.cc
 	echo Compiling and Linking extrinsic camera calibration ...
 	$(GPP) $(CFLAGS) $(PMDPKG) -I$(PMDSRC) -I$(PMDSRC)pmdaccess2 -I$(SRC) $(PMDLIBS) -o $(BIN)extrinsic $(PMDSRC)calibrate/extrinsic.cc
 
-$(BIN)pose: $(PMDSRC)pose/pose.cc $(PMDSRC)pose/history.cc $(OBJ)libpmdaccess2.a $(OBJ)scanlib.a $(OBJ)libnewmat.a
+$(BIN)pose: $(PMDSRC)pose/pose.cc $(PMDSRC)pose/history.cc $(OBJ)libpmdaccess2.a $(OBJ)scanlib.a $(OBJ)libnewmat.a $(OBJ)libANN.a
 	echo Compiling and Linking PMD pose ...
 	$(GPP) $(CFLAGS) $(PMDPKG) -I$(PMDSRC)  -I$(SRC)ann_1.1.1_modified/include/ -I$(PMDSRC)pmdaccess2 -I$(SRC) $(OBJ)cvpmd.o $(OBJ)pmdWrap.o $(OBJ)libpmdaccess2.a $(OBJ)icp6D.o $(OBJ)icp6Dapx.o $(OBJ)icp6Dhelix.o $(OBJ)icp6Dortho.o $(OBJ)icp6Dquat.o $(OBJ)icp6Dsvd.o $(OBJ)scanlib.a $(PMDLIBS) $(OBJ)libnewmat.a $(OBJ)libANN.a -o $(BIN)pose $(PMDSRC)pose/pose.cc $(PMDSRC)pose/history.cc
 	echo DONE
