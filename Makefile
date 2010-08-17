@@ -56,7 +56,7 @@ it:
 	@echo
 	@echo "Tag 'it:' shouldn't be needed if the Makefile were correct... :-)"
 	@echo
-	make clean && make
+	$(MAKE) clean && $(MAKE)
 
 docu: docu_html docu_latex docu_hl
 	echo
@@ -215,7 +215,7 @@ docu_html:
 	echo
 
 docu_latex:
-	cd $(DOC)latex ; make
+	$(MAKE) -C $(DOC)latex
 	cd $(DOC)latex ; dvips refman
 	cd $(DOC)latex ; ps2pdf14 refman.ps refman.pdf
 	cp $(DOC)latex/refman.pdf $(DOC)
@@ -232,11 +232,11 @@ docu_hl:	$(DOC)high_level_doc/documentation.tex
 
 $(OBJ)libANN.a: $(SRC)ann_1.1.1_modified/src/*.cpp $(SRC)ann_1.1.1_modified/src/*.h
 	echo Making modified ANN lib ...
-	cd $(SRC)ann_1.1.1_modified/src ; make
+	$(MAKE) -C $(SRC)ann_1.1.1_modified/src
 
 $(OBJ)libnewmat.a: $(SRC)newmat/*.cpp $(SRC)newmat/*.h
 	echo Compiling Newmat ...
-	cd $(SRC)newmat ; make
+	$(MAKE) -C $(SRC)newmat
 
 $(BIN)scan_io_uos.so: $(SRC)scan_io.h $(SRC)scan_io_uos.h $(SRC)scan_io_uos.cc $(SRC)point.h $(SRC)point.icc $(SRC)globals.icc
 	echo Compiling shared library for reading UOS scans ...
@@ -379,7 +379,7 @@ $(OBJ)PathGraph.o: $(SHOWSRC)PathGraph.h $(SHOWSRC)PathGraph.cc $(SRC)globals.ic
 
 $(OBJ)libglui.a: $(SHOWSRC)glui/*.c $(SHOWSRC)glui/*.cpp $(SHOWSRC)glui/*.h
 	echo Compiling Glui ...
-	cd $(SHOWSRC)glui ; make
+	$(MAKE) -C $(SHOWSRC)glui
 
 
 ############# GRIDDER ##############
@@ -798,13 +798,13 @@ $(BIN)readscan: $(SIFTSRC)programs/readscan.cpp $(BIN)libterscanreg.so $(BIN)lib
 
 ############# TORO ##############
 $(BIN)toro3d: $(SRC)toro/*
-	cd $(SRC)toro && make
+	$(MAKE) -C $(SRC)toro
 	cp $(SRC)toro/toro3d $(BIN)
 
 ############# HOG-Man ##############
 $(BIN)hogman3d: $(SRC)hogman/aislib/graph_optimizer_hogman/*.cpp
 	cd src/hogman && ./configure
-	cd src/hogman && LD_LIBRARY_PATH=`pwd`/lib make
+	LD_LIBRARY_PATH=`pwd`/lib $(MAKE) -C src/hogman
 	cp src/hogman/bin/hogman3d $(BIN)
 	cp src/hogman/lib/*.so $(BIN)
 
@@ -819,7 +819,7 @@ svn_clean_del:
 clean:	
 	/bin/rm -f $(OBJ)*
 	/bin/rm -f $(BIN)*.so
-	cd $(SRC)newmat ; make clean
-	cd $(SHOWSRC)glui ; make clean
-	cd $(DOC)high_level_doc ; make clean
-#	cd $(DOC)latex ; make clean
+	$(MAKE) -C $(SRC)newmat clean
+	$(MAKE) -C $(SHOWSRC)glui clean
+	$(MAKE) -C $(DOC)high_level_doc clean
+#	$(MAKE) -C $(DOC)latex clean
