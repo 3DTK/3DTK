@@ -302,7 +302,6 @@ void newMenu()
   pose_filename_edit->set_alignment( GLUI_ALIGN_LEFT );
   glui1->add_button_to_panel(pose_panel, "Save Pose   ", 0, savePose)->set_alignment( GLUI_ALIGN_CENTER);
   glui1->add_button_to_panel(pose_panel, "Load Pose   ", 0, loadPose)->set_alignment( GLUI_ALIGN_CENTER);
-  static int dummy3;
   image_spinner = glui1->add_spinner_to_panel(pose_panel, "Factor :   ",
 GLUI_SPINNER_INT, &factor);
   image_spinner->set_int_limits( 1, 10 );

@@ -127,7 +127,7 @@ void PathGraph::savePath(const char* fn){
   fprintf(file,"x\n");
   i=0;
   for(it=ivNodeList.begin();it!=ivNodeList.end();it++,i++){
-    fprintf(file,"%i %i ",names[*it], (*it)->neighbours.size());
+    fprintf(file,"%i %zu ",names[*it], (*it)->neighbours.size());
     for(it2=(*it)->neighbours.begin();it2!=(*it)->neighbours.end();it2++){
       fprintf(file,"%i ",names[*it2]);
     }
@@ -158,7 +158,7 @@ void PathGraph::saveGraph(const char* fn){
   fprintf(file,"x\n");
   i=0;
   for(it=ivNodeList.begin();it!=ivNodeList.end();it++,i++){
-    fprintf(file,"%i %i ",names[*it], (*it)->neighbours.size());
+    fprintf(file,"%i %zu ",names[*it], (*it)->neighbours.size());
     for(it2=(*it)->neighbours.begin();it2!=(*it)->neighbours.end();it2++){
       fprintf(file,"%i ",names[*it2]);
     }
