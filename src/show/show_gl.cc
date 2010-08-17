@@ -180,7 +180,7 @@ void DrawPath()
  */
 void DrawCameras(void)
 {
-  for (int i = 0; i < cams.size(); i++) {
+  for (unsigned int i = 0; i < cams.size(); i++) {
     glPushMatrix();
     
  // TODO improve upon this primitive camera   
@@ -785,7 +785,7 @@ void update_view_rotate(int t)
 
 void update_view_translation(int t)
 {
-  double obj_pos_button_new[3], obj_pos_button1[3];
+  double obj_pos_button1[3];
 
   for (int i = 0; i < 3; i++) {
     if (fabs(obj_pos_button_old[i] - obj_pos_button[i]) > COMPARE_EPSILON) {
@@ -1179,7 +1179,7 @@ void glDumpWindowPPM(const char *filename, GLenum mode)
 void glWriteImagePPM(const char *filename, int scale, GLenum mode)
 {
   //if(!showTopView) {
-    int m,o,k,l;                  // Counter variables
+    int m,o,k;                  // Counter variables
     // Get viewport parameters
     double left, right, top, bottom;
     double tmp = 1.0/tan(rad(cangle)/2.0);

@@ -10,8 +10,10 @@ class ColorMap {
       HSV = 2,
       JET = 3,
       HOT = 4,
-      SHSV = 5,
+      SHSV = 5
     };
+
+    virtual ~ColorMap() {};
 
   virtual void calcColor(float *d, unsigned int i, unsigned int buckets) {
     d[0] = d[1] = d[2] = 1.0;
@@ -95,7 +97,7 @@ class ColorManager {
   public: 
   
     ColorManager(unsigned int buckets, unsigned int pointdim, float *mins, float *maxs);
-    ~ColorManager();
+    virtual ~ColorManager();
 
     void setColor(double *val);
 
