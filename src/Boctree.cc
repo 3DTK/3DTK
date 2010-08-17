@@ -428,6 +428,8 @@ void BOctTree::countPointsAndQueue(double **pts, int n,
         }
       } 
     }
+  }
+  for (int j = 0; j < 8; j++) {
     // if non-empty set valid flag for this child
     if (!points[j].empty()) {
       parent.valid = ( 1 << j ) | parent.valid;
