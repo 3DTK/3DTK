@@ -152,7 +152,7 @@ Scan::Scan(const double _rPos[3], const double _rPosTheta[3], const int maxDist)
  * @param MetaScan Vector that contains the 3D scans
  * @param use_cache Indicates if cached versions of the search tree has to be build
  */
-Scan::Scan(const vector < Scan* >& MetaScan, bool use_cache)
+Scan::Scan(const vector < Scan* >& MetaScan, bool use_cache, bool cuda_enabled)
 {
   kd = 0;
   ann_kd_tree = 0;
@@ -190,7 +190,7 @@ Scan::Scan(const vector < Scan* >& MetaScan, bool use_cache)
   scanNr = numberOfScans++;
 
   // build new search tree
-  createTree(use_cache);
+  createTree(use_cache, cuda_enabled);
 
   // add Scan to ScanList
   allScans.push_back(this);
@@ -282,7 +282,7 @@ Scan::Scan(const Scan& s)
   }
   memcpy(dalignxf, s.dalignxf, sizeof(dalignxf));
   if (s.kd != 0) {
-    createTree(false);
+    createTree(false, false);
   }
 
   scanNr = s.scanNr;
@@ -667,7 +667,7 @@ void Scan::calcReducedPoints(double voxelSize, int nrpts)
 /**
  * Calculates the search trees for all scans
  */
-void Scan::createTrees(bool use_cache)
+void Scan::createTrees(bool use_cache, bool cuda_enabled)
 {
   cerr << "create " << allScans.size() << " k-d trees " << flush;
   int i;
@@ -675,7 +675,7 @@ void Scan::createTrees(bool use_cache)
 #pragma omp parallel for schedule(dynamic)
 #endif
     for (i = 0; i < (int)allScans.size(); i++) {
-	 allScans[i]->createTree(use_cache); 
+	 allScans[i]->createTree(use_cache, cuda_enabled); 
   }
   cerr << "... done." << endl;
   return;
@@ -1201,7 +1201,7 @@ void Scan::getPtPairsCacheParallel(vector <PtPair> *pairs, KDCacheItem *closest,
  * Computes a search tree depending on the type this can be 
  * a k-d tree od a cached k-d tree
  */
-void Scan::createTree(bool use_cache)
+void Scan::createTree(bool use_cache, bool cuda_enabled)
 {
   M4identity(dalignxf);
   double temp[16];
@@ -1226,7 +1226,7 @@ void Scan::createTree(bool use_cache)
     kd = new KDtree(points_red_lum, points_red_size);
   }
    
-  createANNTree();
+  if (cuda_enabled) createANNTree();
 
   return;
 }

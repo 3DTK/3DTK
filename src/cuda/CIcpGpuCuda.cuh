@@ -28,8 +28,8 @@
  */
 //#define	BLOCKSIZE	512
 //#define	BLOCKSIZE	256
-//#define	BLOCKSIZE	64
-#define	BLOCKSIZE	12
+#define	BLOCKSIZE	64
+//#define	BLOCKSIZE	1
 
 
 /*

@@ -54,12 +54,12 @@ void elch6Dquat::close_loop(const vector <Scan *> &allScans, int first, int last
   meta_start.push_back(allScans[first]);
   meta_start.push_back(allScans[first + 1]);
   meta_start.push_back(allScans[first + 2]);
-  Scan *start = new Scan(meta_start, false);
+  Scan *start = new Scan(meta_start, false, false);
   vector <Scan *> meta_end;
   meta_end.push_back(allScans[last - 2]);
   meta_end.push_back(allScans[last - 1]);
   meta_end.push_back(allScans[last]);
-  Scan *end = new Scan(meta_end, false);
+  Scan *end = new Scan(meta_end, false, false);
 
   for(int i = last - 2; i <= last; i++) {
     for(int j = 0; j < 7; j++) {

@@ -28,6 +28,7 @@ public:
 							 const double centroid_m[OPENMP_NUM_THREADS][3],
 							 const double centroid_d[OPENMP_NUM_THREADS][3], 
 							 const double Si[OPENMP_NUM_THREADS][9], double *alignxf);
+  inline int getAlgorithmID() { return 1; }; 
 
 private:
   void   quaternion2matrix(double *q, double m[3][3]);

@@ -49,7 +49,7 @@ public:
   Scan();
   Scan(const double *euler, int maxDist = -1);
   Scan(const double rPos[3], const double rPosTheta[3], int maxDist = -1);
-  Scan(const vector < Scan* >& MetaScan, bool use_cache);
+  Scan(const vector < Scan* >& MetaScan, bool use_cache, bool cuda_enabled);
   Scan(const Scan& s);
 
   ~Scan();
@@ -82,7 +82,7 @@ public:
   
   void calcReducedPoints(double voxelSize, int nrpts = 0);
   
-  static void createTrees(bool use_cache);
+  static void createTrees(bool use_cache, bool cuda_enabled);
   static void deleteTrees();
 
   static KDCacheItem* initCache(const Scan* Source, const Scan* Target);
@@ -278,7 +278,7 @@ private:
    */
   int maxDist2;
 
-  void createTree(bool use_cache);
+  void createTree(bool use_cache, bool cuda_enabled);
   void deleteTree();
 
   void mergeCoordinatesWithRoboterPosition(const double prev_transMat[16],
