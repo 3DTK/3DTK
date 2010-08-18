@@ -140,9 +140,6 @@ void usage(char* prog)
     << bold << "  --cache" << normal << endl
     << "         turns on cached k-d tree search" << endl
     << endl
-    << bold << "  --cuda" << normal << endl
-    << "         turns on cuda processing" << endl
-    << endl
     << bold << "  -d" << normal << " NR, " << bold << "--dist=" << normal << "NR   [default: 25]" << endl
     << "         sets the maximal point-to-point distance for matching with ICP to <NR> 'units'" << endl
     << "         (unit of scan data, e.g. cm)" << endl
@@ -239,7 +236,7 @@ void usage(char* prog)
     << "         start at scan NR (i.e., neglects the first NR scans)" << endl
     << "         [ATTENTION: counting naturally starts with 0]" << endl
     << endl
-    << bold << "-u" << normal <<", "<< bold<<"--cuda" << endl
+    << bold << "  -u" << normal <<", "<< bold<<"--cuda" << normal << endl
     << "         this option activates icp running on GPU instead of CPU"<<endl
     << endl << endl;
 
@@ -333,7 +330,7 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &rand,
   };
 
   cout << endl;
-  while ((c = getopt_long(argc, argv, "O::f:A:G:L:a:r:R:d:D:i:l:I:c:C:n:s:e:m:M:u:qQp", longopts, NULL)) != -1)
+  while ((c = getopt_long(argc, argv, "O::f:A:G:L:a:r:R:d:D:i:l:I:c:C:n:s:e:m:M:uqQp", longopts, NULL)) != -1)
     switch (c)
     {
       case 'a':
