@@ -610,8 +610,7 @@ void CallBackDisplayFunc()
 #endif
   }
 
-  glDrawBuffer(GL_BACK);
-  //glDrawBuffer(GL_FRONT);
+  glDrawBuffer(buffermode);
   // delete framebuffer and z-buffer
 
   //Call the display function
@@ -1126,7 +1125,7 @@ void glDumpWindowPPM(const char *filename, GLenum mode)
 
   // Read window contents from GL frame buffer with glReadPixels
   glFinish();
-  glReadBuffer(mode);
+  glReadBuffer(buffermode);
   glReadPixels(0, 0, win_width, win_height,
                         GL_RGBA, GL_UNSIGNED_BYTE, buffer);
 
@@ -1248,7 +1247,7 @@ void glWriteImagePPM(const char *filename, int scale, GLenum mode)
     
         // Read window contents from GL frame buffer with glReadPixels
         glFinish();
-        glReadBuffer(mode);
+        glReadBuffer(buffermode);
         glReadPixels(0, 0, win_width, win_height, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
        
         // Loop through the frame buffer data, writing to the PPM file.  Be careful
