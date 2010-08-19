@@ -69,6 +69,11 @@ GLfloat pointsize          = 1.7;
 int     anim_delay         = 5;
 
 /**
+ * Select Color Buffer
+ */
+GLenum buffermode = GL_BACK;
+
+/**
  * Indicator whether and how the drawing window
  * has to be updated.
  *
