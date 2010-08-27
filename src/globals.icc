@@ -516,8 +516,8 @@ static inline void	M4_submat(const T *Min, T *Mout, int i, int j ) {
 template <class T>
 static inline double M4det(const T *M )
 {
-  double det, result = 0, i = 1.0;
-  double Msub3[9];
+  T det, result = 0, i = 1.0;
+  T Msub3[9];
   int    n;
   for ( n = 0; n < 4; n++, i *= -1.0 ) {
     M4_submat( M, Msub3, 0, n );
@@ -538,13 +538,13 @@ static inline double M4det(const T *M )
 template <class T>
 static inline int M4inv(const T *Min, T *Mout )
 {
-  double  mdet = M4det( Min );
+  T  mdet = M4det( Min );
   if ( fabs( mdet ) < 0.0005 ) {
     cout << "Error matrix inverting!" << endl;
     M4identity( Mout );
     return( 0 );
   }
-  double  mtemp[9];
+  T  mtemp[9];
   int     i, j, sign;
   for ( i = 0; i < 4; i++ ) {
     for ( j = 0; j < 4; j++ ) {
