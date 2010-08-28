@@ -43,6 +43,8 @@ class ScanColorManager {
 
     inline float getMin() { return mins[currentdim];};
     inline float getMax() { return maxs[currentdim];};
+    inline float getMin(unsigned int dim) { return mins[dim];};
+    inline float getMax(unsigned int dim) { return maxs[dim];};
     inline unsigned int getPointDim() { return pointdim; };
     void makeValid();
 

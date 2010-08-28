@@ -7,7 +7,7 @@
 
 #include "Boctree.h"
 #include "globals.icc"
-double BOctTree::voxelSize;
+//double BOctTree::voxelSize;
 
 /**
  * Constructor
@@ -631,4 +631,141 @@ void BOctTree::deletetNodes(bitoct &node) {
     delete[] children;
   }
   
+}
+  
+
+void BOctTree::serialize(std::string filename, double *minmax) {
+  char buffer[sizeof(double) * 20];
+  double *p = reinterpret_cast<double*>(buffer);
+
+  std::ofstream file;
+  file.open (filename.c_str(), std::ios::out | std::ios::binary);
+
+  // write magic bits
+  buffer[0] = 'X';
+  buffer[1] = 'T';
+  file.write(buffer, 2);
+
+  // write header
+  p[0] = voxelSize;
+  p[1] = center[0]; 
+  p[2] = center[1]; 
+  p[3] = center[2];
+  p[4] = size;
+
+  int *ip = reinterpret_cast<int*>(&(buffer[5 * sizeof(double)]));
+  *ip = POINTDIM;
+
+  file.write(buffer, 5 * sizeof(double) + sizeof(int));
+
+  if (minmax) {
+    for (unsigned int i = 0; i < 2*POINTDIM; i++) {
+      p[i] = minmax[i];
+    }
+  } else {
+    for (unsigned int i = 0; i < 2*POINTDIM; i++) {
+      p[i] = 0.0; 
+    }
+  }
+  file.write(buffer, 2*POINTDIM * sizeof(double));
+
+  // write root node
+  serialize(file, *root);
+
+  file.close();
+}
+
+void BOctTree::deserialize(std::string filename, double *minmax) {
+  char buffer[sizeof(double) * 20];
+  double *p = reinterpret_cast<double*>(buffer);
+
+  std::ifstream file;
+  file.open (filename.c_str(), std::ios::in | std::ios::binary);
+
+  // read magic bits
+  file.read(buffer, 2);
+  if ( buffer[0] != 'X' || buffer[1] != 'T') {
+    std::cerr << "Not an octree file!!" << endl;
+    file.close();
+  }
+
+  // read header
+  file.read(buffer, 5 * sizeof(double));
+  voxelSize = p[0];
+  center[0] = p[1];
+  center[1] = p[2];
+  center[2] = p[3];
+  size = p[4];
+
+  file.read(buffer, sizeof(int));
+  int *ip = reinterpret_cast<int*>(buffer);
+  POINTDIM = *ip;
+
+
+  if (minmax) {
+    file.read(reinterpret_cast<char*>(minmax), 2*POINTDIM * sizeof(double));
+  } else {  // skip
+    file.read(buffer, 2*POINTDIM * sizeof(double));
+  }
+
+  // read root node
+  root = new bitoct();
+  deserialize(file, *root);
+  file.close();
+}
+
+void BOctTree::serialize(std::ofstream &of, bitoct &node) {
+  char buffer[2];
+  buffer[0] = node.valid;
+  buffer[1] = node.leaf;
+  of.write(buffer, 2);
+
+
+  // write children
+  bitunion *children;
+  bitoct::getChildren(node, children);
+  for (short i = 0; i < 8; i++) {
+    if (  ( 1 << i ) & node.valid ) {   // if ith node exists
+      if (  ( 1 << i ) & node.leaf ) {   // if ith node is leaf write points 
+        pointrep *points = children->points;
+        unsigned int length = points[0].length;
+        of.write(reinterpret_cast<char*>(points), sizeof(pointrep) * (length * POINTDIM  +1));
+      } else {  // write child 
+        serialize(of, children->node);
+      }
+      ++children; // next child
+    }
+  }
+}
+
+void BOctTree::deserialize(std::ifstream &f, bitoct &node) {
+  char buffer[2];
+  f.read(buffer, 2);
+  node.valid = buffer[0];
+  node.leaf = buffer[1];
+
+  unsigned short n_children = POPCOUNT(node.valid);
+
+  // create children
+  bitunion *children = new bitunion[n_children];
+  bitoct::link(node, children);
+
+  for (short i = 0; i < 8; i++) {
+    if (  ( 1 << i ) & node.valid ) {   // if ith node exists
+      if (  ( 1 << i ) & node.leaf ) {   // if ith node is leaf read points 
+        pointrep first;
+        f.read(reinterpret_cast<char*>(&first), sizeof(pointrep));
+        unsigned int length = first.length;  // read first element, which is the length
+        pointrep *points = new pointrep[POINTDIM * length + 1];   // make room for points 
+        children->points = points;
+        points[0] = first;
+        points++;
+        f.read(reinterpret_cast<char*>(points), sizeof(pointrep) * length * POINTDIM); // read the points
+      } else {  // write child 
+        deserialize(f, children->node);
+      }
+      ++children; // next child
+    }
+  }
+
 }

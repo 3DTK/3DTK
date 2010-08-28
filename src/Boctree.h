@@ -19,6 +19,9 @@ using std::deque;
 using std::set;
 #include <list>
 using std::list;
+#include <iostream>
+#include <fstream>
+#include <string>
 
 union bitunion;
 
@@ -113,6 +116,22 @@ union bitunion {
   };           // needed for new []
 };
 
+
+#if __GNUC__ > 3 || (__GNUC__ == 3 && __GNUC_MINOR__ >= 4)
+  #define POPCOUNT(mask) __builtin_popcount(mask)
+#else
+//#define POPCOUNT(mask) 8
+
+unsigned char _my_popcount_3(unsigned char x) {
+  x -= (x >> 1) & 0x55;             //put count of each 2 bits into those 2 bits
+  x = (x & 0x33) + ((x >> 2) & 0x33); //put count of each 4 bits into those 4 bits 
+  x = (x + (x >> 4)) & 0x0f;        //put count of each 8 bits into those 8 bits 
+  return x;
+}
+#define POPCOUNT(mask) _my_popcount_3(mask)
+
+#endif
+
 /**
  * @brief Octree
  * 
@@ -126,6 +145,8 @@ class BOctTree {
 public:
   
   BOctTree(double **pts, int n, double _voxelSize, unsigned int pointdim = 3);
+  BOctTree(std::string filename, double *minmax = 0) {deserialize(filename, minmax); }
+
   virtual ~BOctTree();
   
   void GetOctTreeCenter(vector<double*>&c);
@@ -134,8 +155,15 @@ public:
   
   long countNodes();
   long countLeaves();
+
+  void serialize(std::string filename, double *mimax = 0);
+  void deserialize(std::string filename, double *minmax = 0);
  
 protected:
+
+  void serialize(std::ofstream &of, bitoct &node);
+  void deserialize(std::ifstream &of, bitoct &node);
+
   void GetOctTreeCenter(vector<double*>&c, bitoct &node, double *center, double size);
   void GetOctTreeRandom(vector<double*>&c, bitoct &node);
   void GetOctTreeRandom(vector<double*>&c, unsigned int ptspervoxel, bitoct &node);
@@ -182,7 +210,7 @@ protected:
   /**
    * storing the voxel size
    */
-  static double voxelSize;
+  double voxelSize;
 
   unsigned int POINTDIM;
 
