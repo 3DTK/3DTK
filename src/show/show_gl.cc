@@ -29,7 +29,11 @@ void DrawPoints(GLenum mode)
   if(scanNr != -1) {
     cm->setMode(ScanColorManager::MODE_ANIMATION);
 
+#ifdef USE_GL_POINTS
+    for(int iterator = (int)octpts.size()-1; iterator >= 0; iterator--) {
+#else
     for(int iterator = (int)Scan::allScans.size()-1; iterator >= 0; iterator--) {
+#endif
 
       if (MetaAlgoType[iterator][frameNr] == Scan::INVALID) continue;
       cm->selectColors(MetaAlgoType[iterator][frameNr]);	 
@@ -44,7 +48,7 @@ void DrawPoints(GLenum mode)
         if (pointmode == 1 || (showall && pointmode == 0) ) {
           octpts[iterator]->displayOctTreeAllCulled();
         } else {
-          octpts[iterator]->displayOctTreeCulled(ptstodisplay/(int)Scan::allScans.size());
+          octpts[iterator]->displayOctTreeCulled(ptstodisplay/(int)octpts.size());
         }
 #else
       for (unsigned int jterator = 0; jterator < vvertexArrayList[iterator].size(); jterator++) {
@@ -91,7 +95,11 @@ void DrawPoints(GLenum mode)
 
       glPointSize(pointsize);
 
+#ifdef USE_GL_POINTS
+      for(int iterator = (int)octpts.size()-1; iterator >= 0; iterator--) {
+#else
       for(int iterator = (int)Scan::allScans.size()-1; iterator >= 0; iterator--) {
+#endif
         glPushMatrix();
         if (invert)                               // default: white points on black background
           glColor4d(1.0, 1.0, 1.0, 1.0);
@@ -110,7 +118,7 @@ void DrawPoints(GLenum mode)
         if (pointmode == 1 || (showall && pointmode == 0) ) {
           octpts[iterator]->displayOctTreeAllCulled();
         } else {
-          octpts[iterator]->displayOctTreeCulled(ptstodisplay/(int)Scan::allScans.size());
+          octpts[iterator]->displayOctTreeCulled(ptstodisplay/(int)octpts.size());
         }
 #else
         for (unsigned int jterator = 0; jterator < vvertexArrayList[iterator].size(); jterator++) {

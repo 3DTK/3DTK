@@ -12,30 +12,28 @@
 #include "colormanager.h"
 #include "scancolormanager.h"
 
-#if __GNUC__ > 3 || (__GNUC__ == 3 && __GNUC_MINOR__ >= 4)
-  #define POPCOUNT(mask) __builtin_popcount(mask)
-#else
-//#define POPCOUNT(mask) 8
-
-unsigned char _my_popcount_3(unsigned char x) {
-  x -= (x >> 1) & 0x55;             //put count of each 2 bits into those 2 bits
-  x = (x & 0x33) + ((x >> 2) & 0x33); //put count of each 4 bits into those 4 bits 
-  x = (x + (x >> 4)) & 0x0f;        //put count of each 8 bits into those 8 bits 
-  return x;
-}
-#define POPCOUNT(mask) _my_popcount_3(mask)
-
-#endif
 
 
 Show_BOctTree::Show_BOctTree(double **pts, int n, double voxelSize, unsigned int pointdim, ScanColorManager *scm)
   : BOctTree(pts, n, voxelSize, pointdim)
 {
+  cm = 0;
   if (scm) {
     scm->registerTree(this);
     for (int i = 1; i < n; i++) {
       scm->updateRanges(pts[i]);
     }
+  }
+}
+
+Show_BOctTree::Show_BOctTree(std::string filename, ScanColorManager *scm )
+  : BOctTree(filename)
+{
+  if (scm) {
+    scm->registerTree(this);
+/*      for (int i = 1; i < n; i++) {
+      scm->updateRanges(pts[i]);
+    }*/
   }
   cm = 0;
 }
@@ -136,7 +134,6 @@ void Show_BOctTree::displayOctTreeCulledLOD(long targetpts, bitoct &node, double
     return;
   }
 
-  
   double ccenter[3];
   bitunion *children;
   bitoct::getChildren(node, children);
