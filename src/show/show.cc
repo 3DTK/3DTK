@@ -51,7 +51,8 @@ vector< vector<vertexArray*> > vvertexArrayList;
 /**
  * the octrees that store the points for each scan
  */
-Show_BOctTree **octpts;
+//Show_BOctTree **octpts;
+vector<Show_BOctTree*> octpts;
 /**
  * Storing the base directory
  */
@@ -314,6 +315,17 @@ void usage(char* prog)
     << bold << "  -T, --type" << endl << normal
 	  << "         use type values for coloring point clouds" << endl
 	  << "         only works when using octree display" << endl
+    
+    << bold << "  --saveOct" << endl << normal
+	  << "         stores all used scans as octrees in the given directory" << endl
+	  << "         All reflectivity/amplitude/deviation/type settings are stored as well." << endl
+	  << "         only works when using octree display" << endl
+    << bold << "  --loadOct" << endl << normal
+	  << "         only reads octrees from the given directory" << endl
+	  << "         All reflectivity/amplitude/deviation/type settings are read from file." << endl
+	  << "         Unless these are also specified correctly on the command line, they will." << endl
+	  << "         not be displayed correctly (Work in progress)." << endl
+	  << "         only works when using octree display" << endl
     << endl << endl;
   
   exit(1);
@@ -335,7 +347,7 @@ void usage(char* prog)
  * @return 0, if the parsing was successful, 1 otherwise 
  */
 int parseArgs(int argc,char **argv, string &dir, int& start, int& end, int& maxDist, int& minDist, 
-              double &red, bool &readInitial, int &octree, unsigned int &types, double &fps, reader_type &type)
+              double &red, bool &readInitial, int &octree, unsigned int &types, double &fps, bool &loadOct, bool &saveOct, reader_type &type)
 {
   start   = 0;
   end     = -1; // -1 indicates no limitation
@@ -361,6 +373,8 @@ int parseArgs(int argc,char **argv, string &dir, int& start, int& end, int& maxD
     { "deviation",       no_argument,         0,  'd' },
     { "height",          no_argument,         0,  'h' },
     { "type",            no_argument,         0,  'T' },
+    { "saveOct",         no_argument,         0,  '0' },
+    { "loadOct",         no_argument,         0,  '1' },
     { 0,           0,   0,   0}                    // needed, cf. getopt.h
   };
 
@@ -436,6 +450,12 @@ int parseArgs(int argc,char **argv, string &dir, int& start, int& end, int& maxD
      break;
    case 'F':
      fps = atof(optarg);
+     break;
+   case '0':
+     saveOct = true;
+     break;
+   case '1':
+     loadOct = true;
      break;
    default:
      abort ();
@@ -634,7 +654,7 @@ void createDisplayLists(bool reduced, unsigned int types)
 #else
 //#ifdef USE_GL_POINTS
   cout << "Creating display octrees.." << endl;
-  octpts = new Show_BOctTree*[Scan::allScans.size()];
+  //octpts = new Show_BOctTree*[Scan::allScans.size()];
 
   for(int i = 0; i < (int)Scan::allScans.size() ; i++) {
     if (reduced) {
@@ -645,7 +665,8 @@ void createDisplayLists(bool reduced, unsigned int types)
         pts[jterator][1] = Scan::allScans[i]->get_points_red()[jterator][1];
         pts[jterator][2] = Scan::allScans[i]->get_points_red()[jterator][2];
       }
-      octpts[i] = new Show_BOctTree(pts, Scan::allScans[i]->get_points_red_size(), 50.0);  // TODO remove magic number
+      //octpts[i] = new Show_BOctTree(pts, Scan::allScans[i]->get_points_red_size(), 50.0);  // TODO remove magic number
+      octpts.push_back( new Show_BOctTree(pts, Scan::allScans[i]->get_points_red_size(), 50.0));  // TODO remove magic number
       for (int jterator = 0; jterator < Scan::allScans[i]->get_points_red_size(); jterator++) {
         delete[] pts[jterator];
       }
@@ -660,7 +681,7 @@ void createDisplayLists(bool reduced, unsigned int types)
           pts[jterator] = cm->createPoint(Scan::allScans[i]->get_points()->at(jterator), types);
         }
         Scan::allScans[i]->clearPoints();
-        octpts[i] = new Show_BOctTree(pts, nrpts , 50.0, pointdim, cm);  //TODO remove magic number
+        octpts.push_back( new Show_BOctTree(pts, nrpts , 50.0, pointdim, cm) );  //TODO remove magic number
         for (unsigned int jterator = 0; jterator < nrpts; jterator++) {
           delete[] pts[jterator];
         }
@@ -675,7 +696,7 @@ void createDisplayLists(bool reduced, unsigned int types)
           pts[jterator][2] = Scan::allScans[i]->get_points()->at(jterator).z;
         }
         Scan::allScans[i]->clearPoints();
-        octpts[i] = new Show_BOctTree(pts, nrpts , 50.0);  //TODO remove magic number
+        octpts.push_back( new Show_BOctTree(pts, nrpts , 50.0) );  //TODO remove magic number
         for (unsigned int jterator = 0; jterator < nrpts; jterator++) {
           delete[] pts[jterator];
         }
@@ -710,6 +731,8 @@ int main(int argc, char **argv){
   bool readInitial = false;
   reader_type type  = UOS;
   int octree = 0;
+  bool loadOct = false;
+  bool saveOct = false;
 
   pose_file_name = new char[sizeof(GLUI_String)];
   path_file_name = new char[sizeof(GLUI_String)];
@@ -717,7 +740,7 @@ int main(int argc, char **argv){
   strncpy(pose_file_name, "pose.dat", sizeof(GLUI_String));  
   strncpy(path_file_name, "file.path", sizeof(GLUI_String));  
   
-  parseArgs(argc, argv, dir, start, end, maxDist, minDist, red, readInitial, octree, types, idealfps, type);
+  parseArgs(argc, argv, dir, start, end, maxDist, minDist, red, readInitial, octree, types, idealfps, loadOct, saveOct, type);
   scandir = dir;
 
   // init and create display
@@ -743,7 +766,11 @@ int main(int argc, char **argv){
   readFrames(dir, start, end, readInitial, type);
 
   // Get Scans
-  Scan::readScans(type, start, end, dir, maxDist, minDist, 0);
+  if (!loadOct) {
+    Scan::readScans(type, start, end, dir, maxDist, minDist, 0);
+  } else {
+    cout << "Skipping files.." << endl;
+  }
   
   int end_reduction = (int)Scan::allScans.size();
   #ifdef _OPENMP
@@ -781,10 +808,27 @@ int main(int argc, char **argv){
   traj.clear();
  
   cm = new ScanColorManager(4096, types);
-  if (red > 0) {
-    createDisplayLists(true, types);
+  
+  if (loadOct) {
+    for (int i = start; i <= end; i++) {
+      string scanFileName = dir + "scan" + to_string(i,3) + ".oct";
+      cout << "Reading octree " << scanFileName << endl;
+      octpts.push_back(new Show_BOctTree(scanFileName, cm)); 
+    }
   } else {
-    createDisplayLists(false, types);
+    if (red > 0) {
+      createDisplayLists(true, types);
+    } else {
+      createDisplayLists(false, types);
+    }
+
+    if (saveOct) {
+      for (int i = 0; i < Scan::allScans.size(); i++) {
+        string scanFileName = dir + "scan" + to_string(i+start,3) + ".oct";
+        cout << "Saving octree " << scanFileName << endl;
+        octpts[i]->serialize(scanFileName);
+      }
+    }
   }
   cm->setCurrentType(ScanColorManager::USE_HEIGHT);
   ColorMap cmap;

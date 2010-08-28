@@ -31,6 +31,7 @@ class Show_BOctTree : public BOctTree  {
 public:
 
   Show_BOctTree(double **pts, int n, double voxelSize, unsigned int pointdim = 3, ScanColorManager *_cm = 0);
+  Show_BOctTree(std::string filename, ScanColorManager *_cm = 0);
 
   void setColorManager(ColorManager *_cm);
 
