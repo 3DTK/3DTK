@@ -382,7 +382,19 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\..\src\icp6Ddual.cc"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\src\icp6Dhelix.cc"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\src\icp6Dlumeuler.cc"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\src\icp6Dlumquat.cc"
 				>
 			</File>
 			<File
@@ -696,7 +708,19 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\..\src\icp6Ddual.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\src\icp6Dhelix.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\src\icp6Dlumeuler.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\src\icp6Dlumquat.h"
 				>
 			</File>
 			<File
