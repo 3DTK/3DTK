@@ -12,6 +12,7 @@
 #include <windows.h>
 #define  _USE_MATH_DEFINES
 #include <math.h>
+
 inline int gettimeofday (struct timeval* tp, void* tzp) 
 {
   unsigned long t;
@@ -39,6 +40,21 @@ using std::endl;
 #include <iomanip>
 #include <stdexcept>
 using std::runtime_error;
+
+/**
+ * Set bits count
+ *
+ * @param unsigned char x 
+ *
+ * @return char 
+ *
+ */
+inline unsigned char _my_popcount_3(unsigned char x) {
+  x -= (x >> 1) & 0x55;                //put count of each 2 bits into those 2 bits
+  x = (x & 0x33) + ((x >> 2) & 0x33);  //put count of each 4 bits into those 4 bits 
+  x = (x + (x >> 4)) & 0x0f;           //put count of each 8 bits into those 8 bits 
+  return x;
+}
 
 /**
  * Converts a class T to a string of width with padding 0

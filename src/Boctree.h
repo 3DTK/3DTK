@@ -23,6 +23,16 @@ using std::list;
 #include <fstream>
 #include <string>
 
+#include "globals.icc"
+
+#if __GNUC__ > 3 || (__GNUC__ == 3 && __GNUC_MINOR__ >= 4)
+  #define POPCOUNT(mask) __builtin_popcount(mask)
+#else
+  #define POPCOUNT(mask) _my_popcount_3(mask)
+#endif
+
+
+// forward declaration
 union bitunion;
 
 /**
@@ -59,12 +69,6 @@ typedef dunion pointrep;
  */
 class bitoct{
   public:
-	/*  bitoct() {
-		  child_pointer = 0;
-		  valid = 0;
-		  leaf  = 0;
-	  }
-	  */
 
 #ifdef _MSC_VER
   __int64 child_pointer        : 48;
@@ -87,7 +91,6 @@ class bitoct{
    */
   static inline void getChildren(bitoct &parent, bitunion* &children) {
     children = (bitunion*)((char*)&parent + parent.child_pointer);
-    // n = __builtin_popcount(parent.valid); // number of children
   }
  
 
@@ -116,21 +119,6 @@ union bitunion {
   };           // needed for new []
 };
 
-
-#if __GNUC__ > 3 || (__GNUC__ == 3 && __GNUC_MINOR__ >= 4)
-  #define POPCOUNT(mask) __builtin_popcount(mask)
-#else
-//#define POPCOUNT(mask) 8
-
-unsigned char _my_popcount_3(unsigned char x) {
-  x -= (x >> 1) & 0x55;             //put count of each 2 bits into those 2 bits
-  x = (x & 0x33) + ((x >> 2) & 0x33); //put count of each 4 bits into those 4 bits 
-  x = (x + (x >> 4)) & 0x0f;        //put count of each 8 bits into those 8 bits 
-  return x;
-}
-#define POPCOUNT(mask) _my_popcount_3(mask)
-
-#endif
 
 /**
  * @brief Octree
