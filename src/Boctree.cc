@@ -7,7 +7,6 @@
 
 #include "Boctree.h"
 #include "globals.icc"
-//double BOctTree::voxelSize;
 
 /**
  * Constructor
