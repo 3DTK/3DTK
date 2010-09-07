@@ -11,6 +11,10 @@
 #ifndef __VIEWCULL_H__
 #define __VIEWCULL_H__
 
+bool HitBoundingBox(double center[3], double size );
+void calcRay(int x, int y, double znear, double zfar);  
+float RayDist(double *point); 
+short ScreenDist(double *point);
 void ExtractFrustum(short detail);
 
 

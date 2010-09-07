@@ -11,6 +11,7 @@ long ptstodisplay = 100000;
 double lastfps = idealfps;    // last frame rate    
 int pointmode = -1;
 
+vector<double *> selected_points;
 
 /**
  * Displays all data (i.e., points) that are to be displayed
@@ -43,7 +44,6 @@ void DrawPoints(GLenum mode)
       glPointSize(pointsize);
 #ifdef USE_GL_POINTS
         ExtractFrustum(pointsize);
-          
         cm->selectColors(MetaAlgoType[iterator][frameNr]);
         if (pointmode == 1 || (showall && pointmode == 0) ) {
           octpts[iterator]->displayOctTreeAllCulled();
@@ -114,12 +114,23 @@ void DrawPoints(GLenum mode)
         glMultMatrixd(MetaMatrix[iterator].back());
 
 #ifdef USE_GL_POINTS
+       //  cout << endl << endl;  calcRay(0,0, 1.0, 40000.0);
+        
         ExtractFrustum(pointsize);
         if (pointmode == 1 || (showall && pointmode == 0) ) {
           octpts[iterator]->displayOctTreeAllCulled();
         } else {
           octpts[iterator]->displayOctTreeCulled(ptstodisplay/(int)octpts.size());
         }
+        glColor3f(1.0, 0.0, 0.0);
+        glPointSize(pointsize + 10.0);
+          glBegin(GL_POINTS);
+          for (unsigned int i = 0; i < selected_points.size(); i++) {
+            glVertex3d(selected_points[i][0], selected_points[i][1], selected_points[i][2]);
+          //  cout << selected_points[i][0] << " " <<  selected_points[i][1] << " " <<  selected_points[i][2] << endl;
+          }
+          glEnd();
+        
 #else
         for (unsigned int jterator = 0; jterator < vvertexArrayList[iterator].size(); jterator++) {
           if (vvertexArrayList[iterator][jterator]->numPointsToRender > 0) {
@@ -941,7 +952,51 @@ void CallBackMouseFunc(int button, int state, int x, int y)
 
   if(cameraNavMouseMode != 1) {
     if (state == GLUT_DOWN && (button == GLUT_LEFT_BUTTON || button == GLUT_RIGHT_BUTTON)) {
+      ///////////////////////////////////////
 
+#ifdef USE_GL_POINTS
+//        glMatrixMode(GL_PROJECTION);
+//        glPushMatrix();
+//        glLoadIdentity();
+
+//        gluPickMatrix((GLdouble)x, (GLdouble)(viewport[3]-y), 2.0, 2.0, viewport);
+//        gluPerspective(cangle, aspect, 1.0, 40000.0);
+      // set the matrix mode
+      glMatrixMode(GL_MODELVIEW);
+      // init modelview matrix
+      glLoadIdentity();
+      // variable to store the axis values
+      double axis[3];
+      // convert from quaternion to axis angle
+      QuaternionToAxisAngle(quat, axis, angle);
+
+      // do the model-transformation
+      if (cameraNavMouseMode == 1) {
+        glRotated( mouseRotX, 1, 0, 0);
+        glRotated( mouseRotY, 0, 1, 0);
+      } else glRotated(angle, axis[0], axis[1], axis[2]);    // rotate the camera
+      glGetFloatv(GL_MODELVIEW_MATRIX, view_rotate_button);
+      glui2->sync_live();
+      glui2->show();
+      glTranslated(X, Y, Z);       // move camera	
+
+      selected_points.clear();
+      double *sp = 0;
+      for(int iterator = (int)octpts.size()-1; iterator >= 0; iterator--) {
+        glPushMatrix();
+        glMultMatrixd(MetaMatrix[iterator].back());
+        calcRay(x, y, 1.0, 40000.0);
+//        octpts[iterator]->selectRay(selected_points);
+        octpts[iterator]->selectRay(sp);
+        if (sp != 0) {
+          selected_points.push_back(sp);
+        }
+        glPopMatrix();
+      }
+      glPopMatrix();
+      glutPostRedisplay();
+      /////////////////////////////////////
+#else
       if (!showTopView) {
 
         // set up a special picking matrix, drwa to an virt. screen
@@ -992,6 +1047,7 @@ void CallBackMouseFunc(int button, int state, int x, int y)
         //	 glutPostRedisplay(); 
 
       }
+#endif
     }
   } else {
    
