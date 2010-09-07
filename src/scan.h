@@ -55,7 +55,6 @@ public:
   ~Scan();
 
   void mergeCoordinatesWithRoboterPosition(const Scan *prevScan);
-  void mergeCoordinatesWithRoboterPosition();
 
   inline const double* get_transMat() const;
   inline const double* get_rPos() const;
@@ -280,10 +279,6 @@ private:
 
   void createTree(bool use_cache, bool cuda_enabled);
   void deleteTree();
-
-  void mergeCoordinatesWithRoboterPosition(const double prev_transMat[16],
-					   const double prev_rPosOrg[3], 
-					   const double prev_rPosThetaOrg[3]);
 };
 
 #include "scan.icc"

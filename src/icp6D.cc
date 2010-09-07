@@ -260,11 +260,9 @@ void icp6D::doICP(vector <Scan *> allScans)
     
     if (i > 0) {
       PreviousScan = allScans[i-1];
-    }
-    if (!eP || i == 0) {                             // extrapolate odometry
-      CurrentScan->mergeCoordinatesWithRoboterPosition();
-    } else {
-      CurrentScan->mergeCoordinatesWithRoboterPosition(PreviousScan);
+      if (eP) {                             // extrapolate odometry
+        CurrentScan->mergeCoordinatesWithRoboterPosition(PreviousScan);
+      }
     }
 
     if (i > 0) {

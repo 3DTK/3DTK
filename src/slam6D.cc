@@ -533,8 +533,6 @@ void matchGraph6Dautomatic(double cldist, int loopsize, vector <Scan *> allScans
   double dist, min_dist = -1;
   int first = 0, last = 0;
 
-  allScans[0]->mergeCoordinatesWithRoboterPosition();
-
   for(int i = 1; i < n; i++) {
     cout << i << "/" << n << endl;
 
@@ -542,8 +540,6 @@ void matchGraph6Dautomatic(double cldist, int loopsize, vector <Scan *> allScans
 
     if(eP) {
       allScans[i]->mergeCoordinatesWithRoboterPosition(allScans[i-1]);
-    } else {
-      allScans[i]->mergeCoordinatesWithRoboterPosition();
     }
 
     //Hack to get all icp transformations into the .frames Files
