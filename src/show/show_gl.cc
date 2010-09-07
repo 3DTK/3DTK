@@ -11,7 +11,6 @@ long ptstodisplay = 100000;
 double lastfps = idealfps;    // last frame rate    
 int pointmode = -1;
 
-vector<double *> selected_points;
 
 /**
  * Displays all data (i.e., points) that are to be displayed
@@ -125,9 +124,8 @@ void DrawPoints(GLenum mode)
         glColor3f(1.0, 0.0, 0.0);
         glPointSize(pointsize + 10.0);
           glBegin(GL_POINTS);
-          for (unsigned int i = 0; i < selected_points.size(); i++) {
-            glVertex3d(selected_points[i][0], selected_points[i][1], selected_points[i][2]);
-          //  cout << selected_points[i][0] << " " <<  selected_points[i][1] << " " <<  selected_points[i][2] << endl;
+          for (unsigned int i = 0; i < selected_points[iterator].size(); i++) {
+            glVertex3d(selected_points[iterator][i][0], selected_points[iterator][i][1], selected_points[iterator][i][2]);
           }
           glEnd();
         glPointSize(pointsize);
@@ -956,12 +954,6 @@ void CallBackMouseFunc(int button, int state, int x, int y)
       ///////////////////////////////////////
 
 #ifdef USE_GL_POINTS
-//        glMatrixMode(GL_PROJECTION);
-//        glPushMatrix();
-//        glLoadIdentity();
-
-//        gluPickMatrix((GLdouble)x, (GLdouble)(viewport[3]-y), 2.0, 2.0, viewport);
-//        gluPerspective(cangle, aspect, 1.0, 40000.0);
       // set the matrix mode
       glMatrixMode(GL_MODELVIEW);
       // init modelview matrix
@@ -976,12 +968,15 @@ void CallBackMouseFunc(int button, int state, int x, int y)
         glRotated( mouseRotX, 1, 0, 0);
         glRotated( mouseRotY, 0, 1, 0);
       } else glRotated(angle, axis[0], axis[1], axis[2]);    // rotate the camera
+      
       glGetFloatv(GL_MODELVIEW_MATRIX, view_rotate_button);
       glui2->sync_live();
       glui2->show();
       glTranslated(X, Y, Z);       // move camera	
 
-      selected_points.clear();
+      for(int iterator = (int)octpts.size()-1; iterator >= 0; iterator--) {
+        selected_points[iterator].clear();
+      }
       double *sp = 0;
       for(int iterator = (int)octpts.size()-1; iterator >= 0; iterator--) {
         glPushMatrix();
@@ -990,7 +985,7 @@ void CallBackMouseFunc(int button, int state, int x, int y)
 //        octpts[iterator]->selectRay(selected_points);
         octpts[iterator]->selectRay(sp);
         if (sp != 0) {
-          selected_points.push_back(sp);
+          selected_points[iterator].push_back(sp);
         }
         glPopMatrix();
       }

@@ -244,6 +244,10 @@ float maxcolor_value = 0.0;
 unsigned int  types = ScanColorManager::USE_HEIGHT;
 int scans_colored = 0;
 
+/**
+ * Contains the selected points for each scan
+ */
+vector<double *> *selected_points;
 
 #include "show_menu.cc"
 #include "show_animate.cc"
@@ -835,8 +839,11 @@ int main(int argc, char **argv){
   cm->setColorMap(cmap);
   resetMinMax(0);
 
+  selected_points = new vector<double*>[octpts.size()];
+
   glutMainLoop();
 
   delete [] path_file_name;
   delete [] pose_file_name;
+  delete [] selected_points;
 }
