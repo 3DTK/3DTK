@@ -89,24 +89,17 @@ Scan::Scan(const double* euler, int maxDist)
     exit(1);
   }
 
+  rPos[0] = 0;
+  rPos[1] = 0;
+  rPos[2] = 0;
+  rPosTheta[0] = 0;
+  rPosTheta[1] = 0;
+  rPosTheta[2] = 0;
+  M4identity(transMat);
   if (euler == 0) {
-    rPos[0] = 0;
-    rPos[1] = 0;
-    rPos[2] = 0;
-    rPosTheta[0] = 0;
-    rPosTheta[1] = 0;
-    rPosTheta[2] = 0;
-    M4identity(transMat);
     M4identity(transMatOrg);
   } else {
-    rPos[0] = euler[0];
-    rPos[1] = euler[1];
-    rPos[2] = euler[2];
-    rPosTheta[0] = euler[3];
-    rPosTheta[1] = euler[4];
-    rPosTheta[2] = euler[5];
-    EulerToMatrix4(rPos, rPosTheta, transMat);
-    EulerToMatrix4(rPos, rPosTheta, transMatOrg);
+    EulerToMatrix4(euler, &euler[3], transMatOrg);
   }
 
   fileNr = 0;
@@ -128,14 +121,14 @@ Scan::Scan(const double _rPos[3], const double _rPosTheta[3], const int maxDist)
   kd = 0;
   ann_kd_tree = 0;
   maxDist2 = (maxDist != -1 ? sqr(maxDist) : maxDist);
-  rPos[0] = _rPos[0];
-  rPos[1] = _rPos[1];
-  rPos[2] = _rPos[2];
-  rPosTheta[0] = _rPosTheta[0];
-  rPosTheta[1] = _rPosTheta[1];
-  rPosTheta[2] = _rPosTheta[2];
-  EulerToMatrix4(rPos, rPosTheta, transMat);
-  EulerToMatrix4(rPos, rPosTheta, transMatOrg);
+  rPos[0] = 0;
+  rPos[1] = 0;
+  rPos[2] = 0;
+  rPosTheta[0] = 0;
+  rPosTheta[1] = 0;
+  rPosTheta[2] = 0;
+  M4identity(transMat);
+  EulerToMatrix4(_rPos, _rPosTheta, transMatOrg);
 
   fileNr = 0;
   scanNr = numberOfScans++;
@@ -306,38 +299,10 @@ Scan::Scan(const Scan& s)
  */
 void Scan::mergeCoordinatesWithRoboterPosition(const Scan* prevScan)
 {
-  // reset values
-  rPos[0] = 0;
-  rPos[1] = 0;
-  rPos[2] = 0;
-  rPosTheta[0] = 0;
-  rPosTheta[1] = 0;
-  rPosTheta[2] = 0;
-  M4identity(transMat); //needed because points are initial there
-  transform(transMatOrg, INVALID); //transform points to initial position
-
   double tempMat[16], deltaMat[16];
   M4inv(prevScan->transMatOrg, tempMat);
   MMult(prevScan->transMat, tempMat, deltaMat);
   transform(deltaMat, INVALID); //apply delta transformation of the previous scan
-}
-
-
-/**
- * Wrapper function, setting the vectors to (0, 0, 0)
- * applicable to first scan!!!
- */
-void Scan::mergeCoordinatesWithRoboterPosition()
-{
-  // reset values
-  rPos[0] = 0;
-  rPos[1] = 0;
-  rPos[2] = 0;
-  rPosTheta[0] = 0;
-  rPosTheta[1] = 0;
-  rPosTheta[2] = 0;
-  M4identity(transMat);
-  transform(transMat, INVALID);
 }
 
 /**
@@ -662,6 +627,8 @@ void Scan::calcReducedPoints(double voxelSize, int nrpts)
     delete [] ptsOct[i];
   }
   delete [] ptsOct;
+
+  transform(transMatOrg, INVALID); //transform points to initial position
 }
 
 /**
