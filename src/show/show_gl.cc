@@ -130,6 +130,7 @@ void DrawPoints(GLenum mode)
           //  cout << selected_points[i][0] << " " <<  selected_points[i][1] << " " <<  selected_points[i][2] << endl;
           }
           glEnd();
+        glPointSize(pointsize);
         
 #else
         for (unsigned int jterator = 0; jterator < vvertexArrayList[iterator].size(); jterator++) {
