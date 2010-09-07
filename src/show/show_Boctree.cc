@@ -246,3 +246,80 @@ void Show_BOctTree::displayOctTreeLOD(long targetpts, bitoct &node, double *cent
     }
   }
 }
+  
+
+void Show_BOctTree::selectRay(vector<double *> &points) {
+  selectRay(points, *root, center, size);
+
+}
+
+void Show_BOctTree::selectRay(double* &point) {
+  selectRay(point, *root, center, size, FLT_MAX);
+}
+  
+
+void Show_BOctTree::selectRay(vector<double *> &selpoints, bitoct &node, double *center, double size) {
+  
+  if (!HitBoundingBox(center, size ))return;
+
+  double ccenter[3];
+  bitunion *children;
+  bitoct::getChildren(node, children);
+
+  for (short i = 0; i < 8; i++) {
+    if (  ( 1 << i ) & node.valid ) {   // if ith node exists
+      childcenter(center, ccenter, size, i);  // childrens center
+      if (  ( 1 << i ) & node.leaf ) {   // if ith node is leaf get center
+        // check if leaf is visible
+        if ( HitBoundingBox(ccenter, size) ) {
+          pointrep *points = children->points;
+          unsigned int length = points[0].length;
+          double *point = &(points[1].v);  // first point
+          for(unsigned int iterator = 0; iterator < length; iterator++ ) {
+            selpoints.push_back(point);
+            point+=POINTDIM;
+          }
+        }
+      } else { // recurse
+        selectRay( selpoints, children->node, ccenter, size/2.0);
+      }
+      ++children; // next child
+    }
+  }
+
+}
+
+
+void Show_BOctTree::selectRay(double * &selpoint, bitoct &node, double *center, double size, float min) {
+  
+  if (!HitBoundingBox(center, size ))return;
+
+  double ccenter[3];
+  bitunion *children;
+  bitoct::getChildren(node, children);
+
+  for (short i = 0; i < 8; i++) {
+    if (  ( 1 << i ) & node.valid ) {   // if ith node exists
+      childcenter(center, ccenter, size, i);  // childrens center
+      if (  ( 1 << i ) & node.leaf ) {   // if ith node is leaf get center
+        // check if leaf is visible
+        if ( HitBoundingBox(ccenter, size) ) {
+          pointrep *points = children->points;
+          unsigned int length = points[0].length;
+          double *point = &(points[1].v);  // first point
+          for(unsigned int iterator = 0; iterator < length; iterator++ ) {
+            if (min > RayDist(point) && ScreenDist(point) < 5) {
+              selpoint = point;
+              min = RayDist(point);
+            }
+            point+=POINTDIM;
+          }
+        }
+      } else { // recurse
+        selectRay( selpoint, children->node, ccenter, size/2.0, min);
+      }
+      ++children; // next child
+    }
+  }
+
+}

@@ -37,6 +37,8 @@ public:
 
   void displayOctTreeCulled(long targetpts);
   void displayOctTreeAllCulled();
+  void selectRay(vector<double *> &points);
+  void selectRay(double * &point);
 
 protected:
   
@@ -44,6 +46,8 @@ protected:
   void displayOctTreeAllCulled( bitoct &node, double *center, double size );
   void displayOctTreeCulledLOD(long targetpts, bitoct &node, double *center, double size );
   void displayOctTreeLOD(long targetpts, bitoct &node, double *center, double size );
+  void selectRay(vector<double *> &points, bitoct &node, double *center, double size);
+  void selectRay(double * &point, bitoct &node, double *center, double size, float min);
 
   ColorManager *cm;
 };
