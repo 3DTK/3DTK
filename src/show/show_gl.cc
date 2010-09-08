@@ -422,21 +422,23 @@ void DisplayItFunc(GLenum mode)
   if (show_points == 1) DrawPoints(mode);
 
   if(show_path == 1) {
-    double *test;
+    double *pose;
     glColor4d(1.0, 0.0, 0.0, 1.0);
     glLineWidth(5);
     glBegin(GL_LINE_STRIP);
-    for(unsigned int i = 0; i<Scan::allScans.size(); i++){
-      if(frameNr > -1 && frameNr < (int)MetaMatrix[1].size()) {
-	      if (MetaAlgoType[i][frameNr] == Scan::INVALID) continue;
-        test = MetaMatrix[i][frameNr];
+    for(unsigned int i = 0; i < MetaMatrix.size(); i++){
+      if(frameNr > -1 && frameNr < (int)MetaMatrix[i].size()) {
+	      if(MetaAlgoType[i][frameNr] == Scan::INVALID) {
+          continue;
+        }
+        pose = MetaMatrix[i][frameNr];
       } else {
-        test = MetaMatrix[i].back();
+        pose = MetaMatrix[i].back();
       }
       if(showTopView) {
-        glVertex3f(test[12], 2000, test[14]);
+        glVertex3f(pose[12], 2000, pose[14]);
       } else {
-        glVertex3f(test[12], test[13], test[14]);
+        glVertex3f(pose[12], pose[13], pose[14]);
       }
     }
     glEnd();
