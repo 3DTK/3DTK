@@ -1470,7 +1470,7 @@ void drawRobotPath(int dummy){
 
   //lets loop through the entire frame files to extract the
   //total number of places where the robot has taken the scans from
-  for(unsigned int i = 0; i<Scan::allScans.size(); i++) {
+  for(unsigned int i = 0; i < MetaMatrix.size(); i++){
 
     //temp variable
     double *temp;
