@@ -31,7 +31,7 @@ TARGETS += $(BIN)2DGridder
 endif
 
 ifdef WITH_TOOLS
-TARGETS += $(BIN)convergence $(BIN)frame_to_graph $(BIN)graph_balancer
+TARGETS += $(BIN)convergence $(BIN)frame_to_graph $(BIN)graph_balancer $(BIN)exportPoints
 endif
 
 ifdef WITH_PMD
@@ -479,6 +479,13 @@ $(BIN)convergence: $(SRC)convergence.cc $(SRC)convergence.h $(SRC)globals.icc
 $(BIN)graph_balancer: $(OBJ)elch6D.o $(SRC)graph_balancer.cc $(SRC)graph.h
 	echo Compiling and linking Graph Balancer ...
 	$(GPP) $(CFLAGS) -I$(SRC)ann_1.1.1_modified/include/ -lboost_graph-mt -o $(BIN)graph_balancer $(SRC)graph_balancer.cc $(OBJ)elch6D.o 
+	echo DONE
+	echo
+
+$(BIN)exportPoints: $(SRC)exportPoints.cc $(OBJ)scanlib.a $(SRC)globals.icc $(OBJ)libANN.a
+
+	echo Compiling and linking exportPoints ...
+	$(GPP) $(CFLAGS) -I$(SRC)ann_1.1.1_modified/include/ -o $(BIN)exportPoints $(SRC)exportPoints.cc $(OBJ)scanlib.a -ldl
 	echo DONE
 	echo
 
