@@ -575,6 +575,7 @@ void Scan::calcReducedPoints(double voxelSize, int nrpts)
 	  points_red[i][1] = points[i].y;
 	  points_red[i][2] = points[i].z;
     }
+    transform(transMatOrg, INVALID); //transform points to initial position
     return;
   }
 
