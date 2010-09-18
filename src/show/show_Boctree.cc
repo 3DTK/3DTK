@@ -102,7 +102,7 @@ void Show_BOctTree::displayOctTreeAllCulled(bitoct &node, double *center, double
       childcenter(center, ccenter, size, i);  // childrens center
       if (  ( 1 << i ) & node.leaf ) {   // if ith node is leaf get center
         // check if leaf is visible
-        if ( CubeInFrustum(ccenter[0], ccenter[1], ccenter[2], size) ) {
+        if ( CubeInFrustum(ccenter[0], ccenter[1], ccenter[2], size/2.0) ) {
           pointrep *points = children->points;
           unsigned int length = points[0].length;
           double *point = &(points[1].v);  // first point
@@ -150,7 +150,7 @@ void Show_BOctTree::displayOctTreeCulledLOD(long targetpts, bitoct &node, double
       childcenter(center, ccenter, size, i);  // childrens center
       if (  ( 1 << i ) & node.leaf ) {   // if ith node is leaf get center
         // check if leaf is visible
-        if ( CubeInFrustum(ccenter[0], ccenter[1], ccenter[2], size) ) {
+        if ( CubeInFrustum(ccenter[0], ccenter[1], ccenter[2], size/2.0) ) {
           pointrep *points = children->points;
           unsigned int length = points[0].length;
           double *point = &(points[1].v);  // first point
