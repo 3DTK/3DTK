@@ -251,7 +251,7 @@ void icp6D::doICP(vector <Scan *> allScans)
   
   vector < Scan* > MetaScan;
   Scan* my_MetaScan = 0;
- 
+
   for(unsigned int i = 0; i < allScans.size(); i++) {
     cout << i << "*" << endl;
 
@@ -267,14 +267,8 @@ void icp6D::doICP(vector <Scan *> allScans)
 
     if (i > 0) {
       if (meta) {
-	   // if ((i < 220-22) && (i > 250-22)) match(allScans[0], CurrentScan);
-	   // else
-     //match(allScans[0], CurrentScan);
 	   match(my_MetaScan, CurrentScan);
       } else {
-	   // if ((i < 220-22) && (i > 250-22)) match(allScans[0], CurrentScan);
-	   // else
-     //match(allScans[0], CurrentScan);
 	   match(PreviousScan, CurrentScan);
       }
     }

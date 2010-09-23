@@ -7,17 +7,23 @@ using namespace std;
 #include "newmat/newmat.h"
 
 
-void icp6Dcuda::initGPUicp(int width, int height, float max_rad, float min_rad, int iter, int max_iter, 
+void icp6Dcuda::initGPUicp(float max_rad, float min_rad, int iter, int max_iter, 
 					  int max_proctime, float max_dev, const double trans[], const double trans_inv[])
 {
-    icp = new CIcpGpuCuda((unsigned) width, (unsigned)height, (unsigned)max_iter);
-    icp->setMaxIteration((unsigned) max_iter);
+  if (max_scnSize < Scan::max_points_red_size) {
+    if (icp != 0) {
+	 delete icp;
+	 icp = 0;
+    }
+  }
+  if (icp == 0) {
+    max_scnSize = Scan::max_points_red_size;
+    icp = new CIcpGpuCuda((unsigned)10, ceil((float)Scan::max_points_red_size/10.f) ,
+					 (unsigned)max_num_iterations);
     icp->setMaxProcTime((double) max_proctime);
     icp->setMaxDeviation((double) max_dev);
-    icp->setSearchRadius((float) max_rad, (float) min_rad, (unsigned) iter);
-    h_idata = icp->getModelPointer();
-    fHstScn = icp->getScenePointer();
-    icp->setTrans_Trans_inv(trans, trans_inv);
+    icp->setSearchRadius((float) max_rad, (float) min_rad, (unsigned)max_num_iterations);
+  }
 }
 
 icp6Dcuda::icp6Dcuda(icp6Dminimizer *my_icp6Dminimizer, double max_dist_match, 
@@ -26,11 +32,9 @@ icp6Dcuda::icp6Dcuda(icp6Dminimizer *my_icp6Dminimizer, double max_dist_match,
 : icp6D(my_icp6Dminimizer, max_dist_match, 
 	   max_num_iterations, quiet, meta, rnd, eP,
 	   anim, epsilonICP, use_cache, cuda_enabled)
-{ }
-
-void icp6Dcuda::cleanup()
 {
-  delete icp;
+  icp = 0;
+  max_scnSize = 0;
 }
 
 /**
@@ -49,25 +53,29 @@ int icp6Dcuda::match(Scan* PreviousScan, Scan* CurrentScan)
   trans = PreviousScan->getDAlign();
   M4inv(trans, trans_inv);
 
-  initGPUicp(10, ceil((float)max(mdlSize, scnSize)/10.0f), //@@@ 1, max(mdlSize, scnSize)/10,
-		   sqrt(max_dist_match2), sqrt(max_dist_match2), max_num_iterations,
+  initGPUicp(sqrt(max_dist_match2), sqrt(max_dist_match2), max_num_iterations,
 		   max_num_iterations, INT_MAX, epsilonICP, trans, trans_inv);
   
+  h_idata = icp->getModelPointer();
+  fHstScn = icp->getScenePointer();
+  icp->setTrans_Trans_inv(trans, trans_inv);
+  icp->setSize(10, ceil((float)max(mdlSize, scnSize)/10.0f));
+
   double **mod_dat = PreviousScan->get_org_points_red();
   const double **scn_dat = CurrentScan->get_points_red();
   mdl = h_idata;
   scn = fHstScn;
-  //  cout << "model point cloud size is " << mdlSize << "\n";
+  cout << "model point cloud size is " << mdlSize << "\n";
   for (unsigned int i = 0; i < mdlSize; ++i) {
-    mdl[i][0] = (float) mod_dat[i][0];
-    mdl[i][1] = (float) mod_dat[i][1];
-    mdl[i][2] = (float) mod_dat[i][2];
+    mdl[i][0] = (float)mod_dat[i][0];
+    mdl[i][1] = (float)mod_dat[i][1];
+    mdl[i][2] = (float)mod_dat[i][2];
   }
-  //  cout << "scene point cloud size is " << scnSize << "\n";
+  cout << "scene point cloud size is " << scnSize << "\n";
   for (unsigned int i = 0; i < scnSize; ++i) {
-    scn[0][i] = (float) scn_dat[i][0];
-    scn[1][i] = (float) scn_dat[i][1];
-    scn[2][i] = (float) scn_dat[i][2];
+    scn[0][i] = (float)scn_dat[i][0];
+    scn[1][i] = (float)scn_dat[i][1];
+    scn[2][i] = (float)scn_dat[i][2];
   }
 
   icp->setTreePointer(const_cast<ANNkd_tree *>(PreviousScan->getANNTree()));
@@ -104,8 +112,6 @@ int icp6Dcuda::match(Scan* PreviousScan, Scan* CurrentScan)
      CurrentScan->transform(alignxf, Scan::ICP, 0); // write end pose
   }
 
-  delete icp;
-  
   return EXIT_SUCCESS;
 }
 

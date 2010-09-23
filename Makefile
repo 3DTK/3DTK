@@ -485,7 +485,7 @@ $(BIN)graph_balancer: $(OBJ)elch6D.o $(SRC)graph_balancer.cc $(SRC)graph.h
 $(BIN)exportPoints: $(SRC)exportPoints.cc $(OBJ)scanlib.a $(SRC)globals.icc $(OBJ)libANN.a
 
 	echo Compiling and linking exportPoints ...
-	$(GPP) $(CFLAGS) -I$(SRC)ann_1.1.1_modified/include/ -o $(BIN)exportPoints $(SRC)exportPoints.cc $(OBJ)scanlib.a -ldl
+	$(GPP) $(CFLAGS) -I$(SRC)ann_1.1.1_modified/include/ -o $(BIN)exportPoints $(SRC)exportPoints.cc $(OBJ)scanlib.a $(OBJ)libANN.a -ldl 
 	echo DONE
 	echo
 
