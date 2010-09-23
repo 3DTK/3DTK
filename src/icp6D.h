@@ -113,6 +113,11 @@ protected:
    * ptr to ICP error function minimizer functor
    */
   icp6Dminimizer *my_icp6Dminimizer;
+
+  /**
+   * Maximum number of points in all scans
+   */
+  unsigned int max_scn_size; //FIXME -> update with metascan
 };
 
 #include "icp6D.icc"

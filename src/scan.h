@@ -24,8 +24,6 @@ using std::stringstream;
 // ANN k-d tree library
 #include "ANN/ANN.h"				// ANN declarations
 #include "ANN/ANNperf.h"				// k-d tree printing
-//#include "kd_tree.h"		  		// ANN node declaration
-
 
 #include "ptpair.h"
 #include "point.h"
@@ -129,6 +127,12 @@ public:
    * storing a list of (pointers to) all scans here 
    */
   static vector <Scan *> allScans;
+
+  /**
+   * max number of (reduced) points in the scans
+   */
+  static unsigned int max_points_red_size;
+  
   /**
    * The output directory
    */  

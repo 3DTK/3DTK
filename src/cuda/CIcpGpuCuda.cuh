@@ -166,6 +166,8 @@ public:
 
         void printMatrix(Matrix *);
 
+     void setSize(unsigned int width, unsigned int height);	
+	   
 private:
 	
 	////////////////
