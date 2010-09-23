@@ -137,6 +137,7 @@ void CIcpGpuCuda::init(unsigned unWidth, unsigned unHeight, unsigned max_iter)
 }
 
 CIcpGpuCuda::~CIcpGpuCuda(){
+
     /////////////
 	// tidy up
     /////////////
@@ -281,6 +282,16 @@ void CIcpGpuCuda::setMaxDeviation(double fDeviation){
 		cout<<"Error setting maximum deviation."<<endl;
 		exit(1);
 	}
+}
+
+void CIcpGpuCuda::setSize(unsigned int width, unsigned int height){
+    //The memory allocation is once done for all scans
+    //we require to update the sizes for each scan matching process
+    //The size which is set in constructor is the maximum possible,
+    //and this size is associated to each pair.
+    setResolution(width, height);
+    cout<<"unSizeData: "<<unSizeData<<endl;
+
 }
 
 void CIcpGpuCuda::setSearchRadius(float fRadiusMax, float fRadiusMin, unsigned unIterations){
@@ -453,6 +464,7 @@ void CIcpGpuCuda::iteration(){
             unPairs = *pNoPairs;
 
             if (unPairs) {
+
 		//////////////////////
 		// transform estimation
 		//////////////////////

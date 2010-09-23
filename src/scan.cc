@@ -45,6 +45,7 @@ using std::flush;
 
 vector <Scan *>  Scan::allScans;
 unsigned int     Scan::numberOfScans = 0;
+unsigned int     Scan::max_points_red_size = 0;
 bool             Scan::outputFrames = false;
 string           Scan::dir;
 vector<KDCache*> Scan::closest_cache;
@@ -184,6 +185,8 @@ Scan::Scan(const vector < Scan* >& MetaScan, bool use_cache, bool cuda_enabled)
 
   // build new search tree
   createTree(use_cache, cuda_enabled);
+  // update max num point in scan iff you have to do so
+  if (points_red_size > max_points_red_size) max_points_red_size = points_red_size;
 
   // add Scan to ScanList
   allScans.push_back(this);
@@ -276,6 +279,8 @@ Scan::Scan(const Scan& s)
   memcpy(dalignxf, s.dalignxf, sizeof(dalignxf));
   if (s.kd != 0) {
     createTree(false, false);
+    // update max num point in scan iff you have to do so
+    if (points_red_size > max_points_red_size) max_points_red_size = points_red_size;
   }
 
   scanNr = s.scanNr;
@@ -576,6 +581,8 @@ void Scan::calcReducedPoints(double voxelSize, int nrpts)
 	  points_red[i][2] = points[i].z;
     }
     transform(transMatOrg, INVALID); //transform points to initial position
+    // update max num point in scan iff you have to do so
+    if (points_red_size > max_points_red_size) max_points_red_size = points_red_size;
     return;
   }
 
@@ -630,6 +637,9 @@ void Scan::calcReducedPoints(double voxelSize, int nrpts)
   delete [] ptsOct;
 
   transform(transMatOrg, INVALID); //transform points to initial position
+
+  // update max num point in scan iff you have to do so
+  if (points_red_size > max_points_red_size) max_points_red_size = points_red_size;
 }
 
 /**
@@ -643,7 +653,7 @@ void Scan::createTrees(bool use_cache, bool cuda_enabled)
 #pragma omp parallel for schedule(dynamic)
 #endif
     for (i = 0; i < (int)allScans.size(); i++) {
-	 allScans[i]->createTree(use_cache, cuda_enabled); 
+	 allScans[i]->createTree(use_cache, cuda_enabled);
   }
   cerr << "... done." << endl;
   return;

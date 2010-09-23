@@ -28,6 +28,8 @@ private:
 	int width;
 	int height;
 
+  unsigned int max_scnSize;
+  
 // Default resolution for Slam6D software
 
 public:
@@ -50,10 +52,8 @@ public:
 
   int match(Scan* PreviousScan, Scan* CurrentScan);
 
-  void initGPUicp(int width, int height, float max_rad, float min_rad, int iter, int max_iter, 
+  void initGPUicp(float max_rad, float min_rad, int iter, int max_iter, 
 			   int max_proctime, float max_dev, const double trans[], const double trans_inv[]);
-  void cleanup();
-
 };
 
 
