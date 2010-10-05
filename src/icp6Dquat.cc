@@ -58,15 +58,15 @@ double icp6D_QUAT::Point_Point_Align(const vector<PtPair>& pairs, double *alignf
     sum += sqr(pairs[i].p1.x - pairs[i].p2.x)
 	 + sqr(pairs[i].p1.y - pairs[i].p2.y)
 	 + sqr(pairs[i].p1.z - pairs[i].p2.z) ;
-    S[0][0] += pairs[i].p1.x * pairs[i].p2.x;
-    S[0][1] += pairs[i].p1.x * pairs[i].p2.y;
-    S[0][2] += pairs[i].p1.x * pairs[i].p2.z;
-    S[1][0] += pairs[i].p1.y * pairs[i].p2.x;
-    S[1][1] += pairs[i].p1.y * pairs[i].p2.y;
-    S[1][2] += pairs[i].p1.y * pairs[i].p2.z;
-    S[2][0] += pairs[i].p1.z * pairs[i].p2.x;
-    S[2][1] += pairs[i].p1.z * pairs[i].p2.y;
-    S[2][2] += pairs[i].p1.z * pairs[i].p2.z;
+    S[0][0] += pairs[i].p2.x * pairs[i].p1.x;
+    S[0][1] += pairs[i].p2.x * pairs[i].p1.y;
+    S[0][2] += pairs[i].p2.x * pairs[i].p1.z;
+    S[1][0] += pairs[i].p2.y * pairs[i].p1.x;
+    S[1][1] += pairs[i].p2.y * pairs[i].p1.y;
+    S[1][2] += pairs[i].p2.y * pairs[i].p1.z;
+    S[2][0] += pairs[i].p2.z * pairs[i].p1.x;
+    S[2][1] += pairs[i].p2.z * pairs[i].p1.y;
+    S[2][2] += pairs[i].p2.z * pairs[i].p1.z;
   }
 
   double error = sqrt(sum / n);
@@ -84,15 +84,15 @@ double icp6D_QUAT::Point_Point_Align(const vector<PtPair>& pairs, double *alignf
   for (i = 0; i < 3; i++)
     for (j = 0; j < 3; j++)
       S[i][j] *= fact;
-  S[0][0] -= centroid_m[0] * centroid_d[0];
-  S[0][1] -= centroid_m[0] * centroid_d[1];
-  S[0][2] -= centroid_m[0] * centroid_d[2];
-  S[1][0] -= centroid_m[1] * centroid_d[0];
-  S[1][1] -= centroid_m[1] * centroid_d[1];
-  S[1][2] -= centroid_m[1] * centroid_d[2];
-  S[2][0] -= centroid_m[2] * centroid_d[0];
-  S[2][1] -= centroid_m[2] * centroid_d[1];
-  S[2][2] -= centroid_m[2] * centroid_d[2];
+  S[0][0] -= centroid_d[0] * centroid_m[0];
+  S[0][1] -= centroid_d[0] * centroid_m[1];
+  S[0][2] -= centroid_d[0] * centroid_m[2];
+  S[1][0] -= centroid_d[1] * centroid_m[0];
+  S[1][1] -= centroid_d[1] * centroid_m[1];
+  S[1][2] -= centroid_d[1] * centroid_m[2];
+  S[2][0] -= centroid_d[2] * centroid_m[0];
+  S[2][1] -= centroid_d[2] * centroid_m[1];
+  S[2][2] -= centroid_d[2] * centroid_m[2];
   // calculate the 4x4 symmetric matrix Q
   double trace = S[0][0] + S[1][1] + S[2][2];
   double A23 = S[1][2] - S[2][1];
@@ -116,26 +116,26 @@ double icp6D_QUAT::Point_Point_Align(const vector<PtPair>& pairs, double *alignf
   M4identity(alignfx);
   
   alignfx[0] = m[0][0];
-  alignfx[1] = m[0][1];
-  alignfx[2] = m[0][2];
+  alignfx[1] = m[1][0];
+  alignfx[2] = m[2][0];
   alignfx[3] = 0.0;
-  alignfx[4] = m[1][0];
+  alignfx[4] = m[0][1];
   alignfx[5] = m[1][1];
-  alignfx[6] = m[1][2];
+  alignfx[6] = m[2][1];
   alignfx[7] = 0.0;
-  alignfx[8] = m[2][0];
-  alignfx[9] = m[2][1];
+  alignfx[8] = m[0][2];
+  alignfx[9] = m[1][2];
   alignfx[10] = m[2][2];
   alignfx[11] = 0.0;
   
   // calculate the translation vector, 
-  alignfx[12] = centroid_d[0] - m[0][0]*centroid_m[0] - m[0][1]*centroid_m[1] - m[0][2]*centroid_m[2];
-  alignfx[13] = centroid_d[1] - m[1][0]*centroid_m[0] - m[1][1]*centroid_m[1] - m[1][2]*centroid_m[2];
-  alignfx[14] = centroid_d[2] - m[2][0]*centroid_m[0] - m[2][1]*centroid_m[1] - m[2][2]*centroid_m[2];
-  alignfx[12] *= -1;
+  alignfx[12] = centroid_m[0] - m[0][0]*centroid_d[0] - m[0][1]*centroid_d[1] - m[0][2]*centroid_d[2];
+  alignfx[13] = centroid_m[1] - m[1][0]*centroid_d[0] - m[1][1]*centroid_d[1] - m[1][2]*centroid_d[2];
+  alignfx[14] = centroid_m[2] - m[2][0]*centroid_d[0] - m[2][1]*centroid_d[1] - m[2][2]*centroid_d[2];
+/*  alignfx[12] *= -1;
   alignfx[13] *= -1;
-  alignfx[14] *= -1;
-  
+  alignfx[14] *= -1;*/
+
   return error;
 }
 
@@ -517,43 +517,43 @@ double icp6D_QUAT::Point_Point_Align_Parallel(const int openmp_num_threads,
 					      const double Si[OPENMP_NUM_THREADS][9], 
 					      double *alignfx)
 {
-   double s = 0.0;
-   double ret;
-   unsigned int pairs_size = 0;
-   double cm[3] = {0.0, 0.0, 0.0};  // centroid m
-   double cd[3] = {0.0, 0.0, 0.0};  // centroid d
+  double s = 0.0;
+  double ret;
+  unsigned int pairs_size = 0;
+  double cm[3] = {0.0, 0.0, 0.0};  // centroid m
+  double cd[3] = {0.0, 0.0, 0.0};  // centroid d
 
-   // Implementation according to the paper 
-   // "The Parallel Iterative Closest Point Algorithm"
-   // by Langis / Greenspan / Godin, IEEE 3DIM 2001
-   // formula (4)
-   for (int i = 0; i < openmp_num_threads; i++) {
-	s += sum[i];
-	pairs_size += n[i]; 
-	cm[0] += n[i] * centroid_m[i][0];
-	cm[1] += n[i] * centroid_m[i][1];
-	cm[2] += n[i] * centroid_m[i][2];
-	cd[0] += n[i] * centroid_d[i][0];
-	cd[1] += n[i] * centroid_d[i][1];
-	cd[2] += n[i] * centroid_d[i][2];
-   }
-   cm[0] /= pairs_size;
-   cm[1] /= pairs_size;
-   cm[2] /= pairs_size;
-   cd[0] /= pairs_size;
-   cd[1] /= pairs_size;
-   cd[2] /= pairs_size;
+  // Implementation according to the paper 
+  // "The Parallel Iterative Closest Point Algorithm"
+  // by Langis / Greenspan / Godin, IEEE 3DIM 2001
+  // formula (4)
+  for (int i = 0; i < openmp_num_threads; i++) {
+    s += sum[i];
+    pairs_size += n[i]; 
+    cm[0] += n[i] * centroid_m[i][0];
+    cm[1] += n[i] * centroid_m[i][1];
+    cm[2] += n[i] * centroid_m[i][2];
+    cd[0] += n[i] * centroid_d[i][0];
+    cd[1] += n[i] * centroid_d[i][1];
+    cd[2] += n[i] * centroid_d[i][2];
+  }
+  cm[0] /= pairs_size;
+  cm[1] /= pairs_size;
+  cm[2] /= pairs_size;
+  cd[0] /= pairs_size;
+  cd[1] /= pairs_size;
+  cd[2] /= pairs_size;
 
-   ret = sqrt(s / (double)pairs_size);
-   if (!quiet) {
-     cout.setf(ios::basefield);
-     cout << "PQUAT RMS point-to-point error = "
- 	     << resetiosflags(ios::adjustfield) << setiosflags(ios::internal)
- 	     << resetiosflags(ios::floatfield) << setiosflags(ios::fixed)
- 	     << std::setw(10) << std::setprecision(7)
- 	     << ret
- 	     << "  using " << std::setw(6) << pairs_size << " points" << endl;
-   }
+  ret = sqrt(s / (double)pairs_size);
+  if (!quiet) {
+    cout.setf(ios::basefield);
+    cout << "PQUAT RMS point-to-point error = "
+      << resetiosflags(ios::adjustfield) << setiosflags(ios::internal)
+      << resetiosflags(ios::floatfield) << setiosflags(ios::fixed)
+      << std::setw(10) << std::setprecision(7)
+      << ret
+      << "  using " << std::setw(6) << pairs_size << " points" << endl;
+  }
 
   double S[3][3];
   double Q[4][4];
@@ -562,27 +562,27 @@ double icp6D_QUAT::Point_Point_Align_Parallel(const int openmp_num_threads,
   for (i = 0; i < 3; i++)
     for (j = 0; j < 3; j++)
       S[i][j] = 0;
-  
+
   // calculate the cross covariance matrix
   // formula (5)
   for (int i = 0; i < openmp_num_threads; i++) {
     for(int j = 0; j < 3; j++){
-	 for(int k = 0; k < 3; k++){
-	   S[j][k] += Si[i][j*3+k] + n[i] * ((centroid_m[i][j] - cm[j]) * (centroid_d[i][k] - cd[k])) ;
-	 }
+      for(int k = 0; k < 3; k++){
+        S[j][k] += Si[i][k*3+j] + n[i] * ((centroid_d[i][j] - cd[j]) * (centroid_m[i][k] - cm[k])) ;
+      }
     }
   }
 
-  S[0][0] -= cm[0] * cd[0];
-  S[0][1] -= cm[0] * cd[1];
-  S[0][2] -= cm[0] * cd[2];
-  S[1][0] -= cm[1] * cd[0];
-  S[1][1] -= cm[1] * cd[1];
-  S[1][2] -= cm[1] * cd[2];
-  S[2][0] -= cm[2] * cd[0];
-  S[2][1] -= cm[2] * cd[1];
-  S[2][2] -= cm[2] * cd[2];
-  
+  S[0][0] -= cd[0] * cm[0];
+  S[0][1] -= cd[0] * cm[1];
+  S[0][2] -= cd[0] * cm[2];
+  S[1][0] -= cd[1] * cm[0];
+  S[1][1] -= cd[1] * cm[1];
+  S[1][2] -= cd[1] * cm[2];
+  S[2][0] -= cd[2] * cm[0];
+  S[2][1] -= cd[2] * cm[1];
+  S[2][2] -= cd[2] * cm[2];
+
   // calculate the 4x4 symmetric matrix Q
   double trace = S[0][0] + S[1][1] + S[2][2];
   double A23 = S[1][2] - S[2][1];
@@ -596,7 +596,7 @@ double icp6D_QUAT::Point_Point_Align_Parallel(const int openmp_num_threads,
   for (i = 0; i < 3; i++)
     for (j = 0; j < 3; j++)
       Q[i+1][j+1] = S[i][j]+S[j][i]-(i==j ? trace : 0);
-   
+
   // the quaternion
   double q[7];
 
@@ -607,27 +607,24 @@ double icp6D_QUAT::Point_Point_Align_Parallel(const int openmp_num_threads,
   quaternion2matrix(q, m);
 
   M4identity(alignfx);
-  
+
   alignfx[0] = m[0][0];
-  alignfx[1] = m[0][1];
-  alignfx[2] = m[0][2];
+  alignfx[1] = m[1][0];
+  alignfx[2] = m[2][0];
   alignfx[3] = 0.0;
-  alignfx[4] = m[1][0];
+  alignfx[4] = m[0][1];
   alignfx[5] = m[1][1];
-  alignfx[6] = m[1][2];
+  alignfx[6] = m[2][1];
   alignfx[7] = 0.0;
-  alignfx[8] = m[2][0];
-  alignfx[9] = m[2][1];
+  alignfx[8] = m[0][2];
+  alignfx[9] = m[1][2];
   alignfx[10] = m[2][2];
   alignfx[11] = 0.0;
-  
+
   // calculate the translation vector, 
-  alignfx[12] = cd[0] - m[0][0]*cm[0] - m[0][1]*cm[1] - m[0][2]*cm[2];
-  alignfx[13] = cd[1] - m[1][0]*cm[0] - m[1][1]*cm[1] - m[1][2]*cm[2];
-  alignfx[14] = cd[2] - m[2][0]*cm[0] - m[2][1]*cm[1] - m[2][2]*cm[2];
-  alignfx[12] *= -1.0;
-  alignfx[13] *= -1.0;
-  alignfx[14] *= -1.0;
+  alignfx[12] = cm[0] - m[0][0]*cd[0] - m[0][1]*cd[1] - m[0][2]*cd[2];
+  alignfx[13] = cm[1] - m[1][0]*cd[0] - m[1][1]*cd[1] - m[1][2]*cd[2];
+  alignfx[14] = cm[2] - m[2][0]*cd[0] - m[2][1]*cd[1] - m[2][2]*cd[2];
 
   return ret;
 }
