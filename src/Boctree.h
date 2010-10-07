@@ -134,6 +134,7 @@ public:
   
   BOctTree(double **pts, int n, double _voxelSize, unsigned int pointdim = 3);
   BOctTree(std::string filename, double *minmax = 0) {deserialize(filename, minmax); }
+  BOctTree(vector<double *> &pts, double voxelSize, unsigned int pointdim = 3);
 
   virtual ~BOctTree();
   
