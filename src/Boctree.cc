@@ -49,6 +49,41 @@ BOctTree::BOctTree(double **pts, int n, double voxelSize, unsigned int pointdim)
   countPointsAndQueue(pts, n, newcenter, sizeNew, *root);
 }
 
+BOctTree::BOctTree(vector<double *> &pts, double voxelSize, unsigned int pointdim) {
+  this->voxelSize = voxelSize;
+
+  this->POINTDIM = pointdim;
+
+  double xmin = pts[0][0], xmax = pts[0][0];
+  double ymin = pts[0][1], ymax = pts[0][1];
+  double zmin = pts[0][2], zmax = pts[0][2];
+  for (int i = 1; i < pts.size(); i++) {
+    xmin = min(xmin, pts[i][0]);
+    xmax = max(xmax, pts[i][0]);
+    ymin = min(ymin, pts[i][1]);
+    ymax = max(ymax, pts[i][1]);
+    zmin = min(zmin, pts[i][2]);
+    zmax = max(zmax, pts[i][2]); 
+  }
+  center[0] = 0.5 * (xmin+xmax);
+  center[1] = 0.5 * (ymin+ymax);
+  center[2] = 0.5 * (zmin+zmax);
+  size = max(max(0.5 * (xmax-xmin), 0.5 * (ymax-ymin)), 0.5 * (zmax-zmin));
+
+
+  // calculate new buckets
+  double newcenter[8][3];
+  double sizeNew = size / 2.0;
+
+  for (int i = 0; i < 8; i++) {
+    childcenter(center, newcenter[i], size, i);
+  }
+  // set up values
+  root = new bitoct();
+ 
+  countPointsAndQueue(pts, newcenter, sizeNew, *root);
+}
+
 
 
 /**
