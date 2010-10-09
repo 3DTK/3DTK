@@ -354,7 +354,7 @@ $(BIN)scan_diff: $(OBJ)scanlib.a $(SRC)globals.icc $(SRC)scan_diff.cc $(OBJ)libA
 
 ############# SHOW ##############
 
-$(BIN)show: $(OBJ)libglui.a $(SHOWSRC)show.cc $(SHOWSRC)show.h $(SHOWSRC)show.icc $(SHOWSRC)show1.icc $(SHOWSRC)show_menu.cc $(SHOWSRC)show_gl.cc $(SHOWSRC)show_animate.cc $(SRC)point.h $(SRC)point.icc $(SRC)globals.icc $(OBJ)scan.o $(OBJ)vertexarray.o $(OBJ)PathGraph.o $(OBJ)NurbsPath.o $(OBJ)viewcull.o $(OBJ)scanlib.a $(OBJ)colormanager.o  $(OBJ)libANN.a
+$(BIN)show: $(OBJ)libglui.a $(SHOWSRC)show.cc $(SHOWSRC)show.h $(SHOWSRC)show.icc $(SHOWSRC)show1.icc $(SHOWSRC)show_menu.cc $(SHOWSRC)show_gl.cc $(SHOWSRC)show_animate.cc $(SRC)point.h $(SRC)point.icc $(SRC)globals.icc $(OBJ)scan.o $(OBJ)vertexarray.o $(OBJ)PathGraph.o $(OBJ)NurbsPath.o $(OBJ)viewcull.o $(OBJ)scanlib.a $(OBJ)colormanager.o  $(OBJ)libANN.a $(SRC)Boctree.h $(SHOWSRC)show_Boctree.h
 	echo Compiling and Linking Show ...
 	$(GPP) $(CFLAGS)  -I$(SRC)ann_1.1.1_modified/include/ -o $(BIN)show -I$(SRC) $(SHOWSRC)show.cc $(OBJ)scanlib.a $(OBJ)vertexarray.o $(OBJ)PathGraph.o $(OBJ)NurbsPath.o $(OBJ)viewcull.o $(OBJ)colormanager.o $(OBJ)libglui.a $(OBJ)libANN.a $(LIBRARIES)
 	echo DONE
