@@ -45,6 +45,8 @@ public:
   {
     if (scm) {
       scm->registerTree(this);
+      scm->updateRanges(BOctTree<T>::mins);
+      scm->updateRanges(BOctTree<T>::maxs);
     }
     cm = 0;
   }
