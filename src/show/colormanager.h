@@ -1,6 +1,15 @@
 #ifndef __COLORMANAGER_H__
 #define __COLORMANAGER_H__
 
+#ifdef _MSC_VER
+#define  _USE_MATH_DEFINES
+#include <windows.h>
+#endif
+#ifdef __APPLE__
+#include <GLUT/glut.h>
+#else
+#include <GL/glut.h>
+#endif
 
 class ColorMap {
   public:
@@ -92,33 +101,95 @@ class DiffMap : public ColorMap {
   static const float cmap[7][3];
 };
 
-class ColorManager {
+template <class T=float> class ColorManager {
 
   public: 
   
-    ColorManager(unsigned int buckets, unsigned int pointdim, float *mins, float *maxs);
-    virtual ~ColorManager();
+    ColorManager(unsigned int _buckets, unsigned int pointdim, float *_mins, float *_maxs) : buckets(_buckets) {
+      colormap = new float*[buckets + 1];  // allow a color more for values equal to max
+      for (unsigned int i = 0; i < buckets; i++) {
+        colormap[i] = new float[3];
+      }
+      colormap[buckets] = new float[3];
+      
+      mins = new float[pointdim];
+      maxs = new float[pointdim];
+      for (unsigned int i = 0; i < pointdim; i++) { 
+        mins[i] = _mins[i];
+        maxs[i] = _maxs[i];
+      }
 
-    void setColor(double *val);
+      setCurrentDim(0);
+    }
 
-    virtual void setColorMap(ColorMap &cm);
+    virtual ~ColorManager() {
+      for (unsigned int i = 0; i < buckets; i++) {
+        delete[] colormap[i];
+      }
+      delete[] colormap[buckets];
+      delete[] colormap;
 
-    void invert();
-    void setCurrentDim(unsigned int cdim);
+      delete[] mins;
+      delete[] maxs;
+    }
+
+    void setColor(T *val) {
+      int index = toIndex(val);
+      glColor3f( colormap[index][0], colormap[index][1], colormap[index][2] );
+    }
+
+    virtual void setColorMap(ColorMap &cm) {
+      for (unsigned int i = 0; i < buckets; i++) {
+        cm.calcColor(colormap[i], i, buckets);
+      }
+      cm.calcColor(colormap[buckets], buckets-1, buckets);
+    }
+
+    void invert() {
+      for (unsigned int i = 0; i < buckets+1; i++) {
+        for (unsigned int j = 0; j < 3; j++) {
+          colormap[i][j] = 1.0 - colormap[i][j];
+        }
+      }
+    }
 
 
-    void setMinMax(float min, float max);
+    void setCurrentDim(unsigned int cdim) {
+      currentdim = cdim;
+      makeValid();
+    }
+
+
+    void setMinMax(float _min, float _max) {
+      if (_min < _max) {
+        min = _min;
+        max = _max;
+      }
+      float extent = max - min;
+      extentbuckets = extent/(float)buckets;
+    }
 
   protected:
 
-    unsigned int toIndex(double *val);
-  
-    void makeValid();
-    
+    unsigned int toIndex(T *val) {
+      T value = val[currentdim];
+      if (value < min) return 0;
+      if (value > max) return buckets;
+      return (unsigned int)((value-min)/extentbuckets);
+    }
+
+    void makeValid() {
+      min = mins[currentdim];
+      max = maxs[currentdim];
+
+      float extent = max - min;
+      extentbuckets = extent/(float)buckets;
+    }
+
     unsigned int buckets;
-    
+
     unsigned int currentdim;
-  
+
     /** stores minima and maxima for each point dimension */ 
     float *mins;
     float *maxs;
@@ -132,26 +203,26 @@ class ColorManager {
 
 };
 
-class ColorManagerC : public ColorManager {
+template <class T = float> class ColorManagerC : public ColorManager<T> {
   public:
-    ColorManagerC(unsigned int buckets, unsigned int pointdim, float *mins, float *maxs, const float _color[3]) : ColorManager(buckets, pointdim, mins, maxs) {
+    ColorManagerC(unsigned int buckets, unsigned int pointdim, float *mins, float *maxs, const float _color[3]) : ColorManager<T>(buckets, pointdim, mins, maxs) {
       color[0] = _color[0];
       color[1] = _color[1];
       color[2] = _color[2];
     }
 
     virtual void setColorMap(ColorMap &cm) {
-      for (unsigned int i = 0; i < buckets; i++) {
-        cm.calcColor(colormap[i], i, buckets);
+      for (unsigned int i = 0; i < ColorManager<T>::buckets; i++) {
+        cm.calcColor(ColorManager<T>::colormap[i], i, ColorManager<T>::buckets);
         for (unsigned int j = 0; j < 3; j++) {
-          colormap[i][j] -= color[j];
-          if (colormap[i][j] < 0.0) colormap[i][j] = 0.0;
+          ColorManager<T>::colormap[i][j] -= color[j];
+          if (ColorManager<T>::colormap[i][j] < 0.0) ColorManager<T>::colormap[i][j] = 0.0;
         }
       }
-      cm.calcColor(colormap[buckets], buckets-1, buckets);
+      cm.calcColor(ColorManager<T>::colormap[ColorManager<T>::buckets], ColorManager<T>::buckets-1, ColorManager<T>::buckets);
       for (unsigned int j = 0; j < 3; j++) {
-        colormap[buckets][j] -= color[j];
-        if (colormap[buckets][j] < 0.0) colormap[buckets][j] = 0.0;
+        ColorManager<T>::colormap[ColorManager<T>::buckets][j] -= color[j];
+        if (ColorManager<T>::colormap[ColorManager<T>::buckets][j] < 0.0) ColorManager<T>::colormap[ColorManager<T>::buckets][j] = 0.0;
       }
     }
 

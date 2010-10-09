@@ -90,8 +90,8 @@ public:
   float reflectance;
   float amplitude;
   float deviation;
-
 };
+
   
 inline Point operator*(const double &v, const Point &p) {
   Point res;

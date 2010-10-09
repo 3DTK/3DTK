@@ -42,6 +42,8 @@ using std::exception;
 #include <omp.h>
 #endif
 
+#include "../point_type.h"
+
 /**
  * This vector contains the pointer to a vertex array for
  * all colors (inner vector) and all scans (outer vector)
@@ -52,7 +54,7 @@ vector< vector<vertexArray*> > vvertexArrayList;
  * the octrees that store the points for each scan
  */
 //Show_BOctTree **octpts;
-vector<Show_BOctTree*> octpts;
+vector<Show_BOctTree<sfloat>*> octpts;
 /**
  * Storing the base directory
  */
@@ -238,16 +240,17 @@ double idealfps = 20.0;
  */
 int listboxColorVal = 0;
 int listboxColorMapVal = 0;
-ScanColorManager *cm;
+ScanColorManager<sfloat> *cm;
 float mincolor_value = 0.0;
 float maxcolor_value = 0.0;
-unsigned int  types = ScanColorManager::USE_HEIGHT;
+//unsigned int  types = Point::USE_HEIGHT;
+PointType<sfloat> pointtype;
 int scans_colored = 0;
 
 /**
  * Contains the selected points for each scan
  */
-vector<double *> *selected_points;
+vector<sfloat *> *selected_points;
 
 #include "show_menu.cc"
 #include "show_animate.cc"
@@ -351,8 +354,9 @@ void usage(char* prog)
  * @return 0, if the parsing was successful, 1 otherwise 
  */
 int parseArgs(int argc,char **argv, string &dir, int& start, int& end, int& maxDist, int& minDist, 
-              double &red, bool &readInitial, int &octree, unsigned int &types, double &fps, bool &loadOct, bool &saveOct, reader_type &type)
+              double &red, bool &readInitial, int &octree, PointType<sfloat> &ptype, double &fps, bool &loadOct, bool &saveOct, reader_type &type)
 {
+  unsigned int types = PointType<sfloat>::USE_NONE;
   start   = 0;
   end     = -1; // -1 indicates no limitation
   maxDist = -1; // -1 indicates no limitation
@@ -438,19 +442,19 @@ int parseArgs(int argc,char **argv, string &dir, int& start, int& end, int& maxD
      usage(argv[0]);
      return 1;
    case 'R':
-     types |= ScanColorManager::USE_REFLECTANCE;
+     types |= PointType<sfloat>::USE_REFLECTANCE;
      break;
    case 'a':
-     types |= ScanColorManager::USE_AMPLITUDE;
+     types |= PointType<sfloat>::USE_AMPLITUDE;
      break;
    case 'd':
-     types |= ScanColorManager::USE_DEVIATION;
+     types |= PointType<sfloat>::USE_DEVIATION;
      break;
    case 'h':
-     types |= ScanColorManager::USE_HEIGHT;
+     types |= PointType<sfloat>::USE_HEIGHT;
      break;
    case 'T':
-     types |= ScanColorManager::USE_TYPE;
+     types |= PointType<sfloat>::USE_TYPE;
      break;
    case 'F':
      fps = atof(optarg);
@@ -476,6 +480,8 @@ int parseArgs(int argc,char **argv, string &dir, int& start, int& end, int& maxD
 #else
   if (dir[dir.length()-1] != '\\') dir = dir + "\\";
 #endif
+
+  ptype = PointType<sfloat>(types);
   return 0;
 }
 
@@ -581,7 +587,7 @@ void readFrames(string dir, int start, int end, bool readInitial, reader_type &t
  * create display lists
  * @to do general framework for color & type definitions
  */
-void createDisplayLists(bool reduced, unsigned int types)
+void createDisplayLists(bool reduced)
 {
 #ifndef USE_GL_POINTS
   for(unsigned int i = 0; i < Scan::allScans.size() ; i++) {
@@ -662,35 +668,35 @@ void createDisplayLists(bool reduced, unsigned int types)
 
   for(int i = 0; i < (int)Scan::allScans.size() ; i++) {
     if (reduced) {
-      double **pts = new double*[Scan::allScans[i]->get_points_red_size()];
+      sfloat **pts = new sfloat*[Scan::allScans[i]->get_points_red_size()];
       for (int jterator = 0; jterator < Scan::allScans[i]->get_points_red_size(); jterator++) {
-        pts[jterator] = new double[3];
+        pts[jterator] = new sfloat[3];
         pts[jterator][0] = Scan::allScans[i]->get_points_red()[jterator][0];
         pts[jterator][1] = Scan::allScans[i]->get_points_red()[jterator][1];
         pts[jterator][2] = Scan::allScans[i]->get_points_red()[jterator][2];
       }
       //octpts[i] = new Show_BOctTree(pts, Scan::allScans[i]->get_points_red_size(), 50.0);  // TODO remove magic number
-      octpts.push_back( new Show_BOctTree(pts, Scan::allScans[i]->get_points_red_size(), 50.0));  // TODO remove magic number
+      octpts.push_back( new Show_BOctTree<sfloat>(pts, Scan::allScans[i]->get_points_red_size(), 50.0));  // TODO remove magic number
       for (int jterator = 0; jterator < Scan::allScans[i]->get_points_red_size(); jterator++) {
         delete[] pts[jterator];
       }
       delete[] pts;
 
     } else {
-      if (types != ScanColorManager::USE_NONE && cm) {
+//     if (types != PointType::USE_NONE && cm) {
         unsigned int pointdim = cm->getPointDim();
         unsigned int nrpts = Scan::allScans[i]->get_points()->size();
-        double **pts = new double*[nrpts];
+        sfloat **pts = new sfloat*[nrpts];
         for (unsigned int jterator = 0; jterator < nrpts; jterator++) {
-          pts[jterator] = cm->createPoint(Scan::allScans[i]->get_points()->at(jterator), types);
+          pts[jterator] = pointtype.createPoint(Scan::allScans[i]->get_points()->at(jterator));
         }
         Scan::allScans[i]->clearPoints();
-        octpts.push_back( new Show_BOctTree(pts, nrpts , 50.0, pointdim, cm) );  //TODO remove magic number
+        octpts.push_back( new Show_BOctTree<sfloat>(pts, nrpts , 50.0, pointdim, cm) );  //TODO remove magic number
         for (unsigned int jterator = 0; jterator < nrpts; jterator++) {
           delete[] pts[jterator];
         }
         delete[] pts;
-      } else {
+/*      } else {
         unsigned int nrpts = Scan::allScans[i]->get_points()->size();
         double **pts = new double*[nrpts];
         for (unsigned int jterator = 0; jterator < nrpts; jterator++) {
@@ -700,12 +706,12 @@ void createDisplayLists(bool reduced, unsigned int types)
           pts[jterator][2] = Scan::allScans[i]->get_points()->at(jterator).z;
         }
         Scan::allScans[i]->clearPoints();
-        octpts.push_back( new Show_BOctTree(pts, nrpts , 50.0) );  //TODO remove magic number
+        octpts.push_back( new Show_BOctTree<double>(pts, nrpts , 50.0) );  //TODO remove magic number
         for (unsigned int jterator = 0; jterator < nrpts; jterator++) {
           delete[] pts[jterator];
         }
         delete[] pts;
-      }
+      }*/
     }
     cout << "Scan " << i << " octree finished. Deleting original points.." << endl;
   }
@@ -744,7 +750,7 @@ int main(int argc, char **argv){
   strncpy(pose_file_name, "pose.dat", sizeof(GLUI_String));  
   strncpy(path_file_name, "file.path", sizeof(GLUI_String));  
   
-  parseArgs(argc, argv, dir, start, end, maxDist, minDist, red, readInitial, octree, types, idealfps, loadOct, saveOct, type);
+  parseArgs(argc, argv, dir, start, end, maxDist, minDist, red, readInitial, octree, pointtype, idealfps, loadOct, saveOct, type);
   scandir = dir;
 
   // init and create display
@@ -810,20 +816,19 @@ int main(int argc, char **argv){
   }
   traj.close();
   traj.clear();
- 
-  cm = new ScanColorManager(4096, types);
+  cm = new ScanColorManager<sfloat>(4096, pointtype);
   
   if (loadOct) {
     for (int i = start; i <= end; i++) {
       string scanFileName = dir + "scan" + to_string(i,3) + ".oct";
       cout << "Reading octree " << scanFileName << endl;
-      octpts.push_back(new Show_BOctTree(scanFileName, cm)); 
+      octpts.push_back(new Show_BOctTree<sfloat>(scanFileName, cm)); 
     }
   } else {
     if (red > 0) {
-      createDisplayLists(true, types);
+      createDisplayLists(true);
     } else {
-      createDisplayLists(false, types);
+      createDisplayLists(false);
     }
 
     if (saveOct) {
@@ -834,12 +839,12 @@ int main(int argc, char **argv){
       }
     }
   }
-  cm->setCurrentType(ScanColorManager::USE_HEIGHT);
+  cm->setCurrentType(PointType<sfloat>::USE_HEIGHT);
   ColorMap cmap;
   cm->setColorMap(cmap);
   resetMinMax(0);
 
-  selected_points = new vector<double*>[octpts.size()];
+  selected_points = new vector<sfloat*>[octpts.size()];
 
   glutMainLoop();
 

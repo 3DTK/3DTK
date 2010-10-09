@@ -230,44 +230,46 @@ void newMenu()
 
 
   /****** Color Controls *****/
-  if (types) {
-    color_panel = glui1->add_rollout("Color :", false );
-    color_panel ->set_alignment( GLUI_ALIGN_LEFT );
+  color_panel = glui1->add_rollout("Color :", false );
+  color_panel ->set_alignment( GLUI_ALIGN_LEFT );
 
-    GLUI_Panel *color_ro = glui1->add_rollout_to_panel(color_panel, "Color values:");
-    color_ro->set_alignment(GLUI_ALIGN_LEFT);
+  GLUI_Panel *color_ro = glui1->add_rollout_to_panel(color_panel, "Color values:");
+  color_ro->set_alignment(GLUI_ALIGN_LEFT);
 
-    GLUI_RadioGroup *color_rog = glui1->add_radiogroup_to_panel( color_ro, &listboxColorVal, 0, &mapColorToValue );
-    glui1->add_radiobutton_to_group( color_rog, "height");
-    GLUI_RadioButton *rbrefl =  glui1->add_radiobutton_to_group( color_rog, "reflectance");
-    GLUI_RadioButton *rbampl = glui1->add_radiobutton_to_group( color_rog, "amplitude");
-    GLUI_RadioButton *rbdevi = glui1->add_radiobutton_to_group( color_rog, "deviation");
-    GLUI_RadioButton *rbtype = glui1->add_radiobutton_to_group( color_rog, "type");
-    if (!(types & ScanColorManager::USE_REFLECTANCE)) rbrefl->disable(); 
-    if (!(types & ScanColorManager::USE_AMPLITUDE)) rbampl->disable();
-    if (!(types & ScanColorManager::USE_DEVIATION)) rbdevi->disable(); 
-    if (!(types & ScanColorManager::USE_TYPE)) rbtype->disable(); 
-    
-    GLUI_Panel *colorm_ro = glui1->add_rollout_to_panel(color_panel, "Colormap:");
-    colorm_ro->set_alignment(GLUI_ALIGN_LEFT);
+  GLUI_RadioGroup *color_rog = glui1->add_radiogroup_to_panel( color_ro, &listboxColorVal, 0, &mapColorToValue );
+  glui1->add_radiobutton_to_group( color_rog, "height");
+  GLUI_RadioButton *rbrefl =  glui1->add_radiobutton_to_group( color_rog, "reflectance");
+  GLUI_RadioButton *rbampl = glui1->add_radiobutton_to_group( color_rog, "amplitude");
+  GLUI_RadioButton *rbdevi = glui1->add_radiobutton_to_group( color_rog, "deviation");
+  GLUI_RadioButton *rbtype = glui1->add_radiobutton_to_group( color_rog, "type");
+  //if (!(types & PointType::USE_REFLECTANCE)) rbrefl->disable(); 
+  //if (!(types & PointType::USE_AMPLITUDE)) rbampl->disable();
+  //if (!(types & PointType::USE_DEVIATION)) rbdevi->disable(); 
+  //if (!(types & PointType::USE_TYPE)) rbtype->disable(); 
+  if (!(pointtype.hasReflectance())) rbrefl->disable(); 
+  if (!(pointtype.hasAmplitude())) rbampl->disable();
+  if (!(pointtype.hasDeviation())) rbdevi->disable(); 
+  if (!(pointtype.hasType())) rbtype->disable(); 
 
-    GLUI_RadioGroup *colorm_rog = glui1->add_radiogroup_to_panel(colorm_ro, &listboxColorMapVal, 0, &changeColorMap);
-    glui1->add_radiobutton_to_group(colorm_rog, "Solid");
-    glui1->add_radiobutton_to_group(colorm_rog, "Grey");
-    glui1->add_radiobutton_to_group(colorm_rog, "HSV");
-    glui1->add_radiobutton_to_group(colorm_rog, "Jet");
-    glui1->add_radiobutton_to_group(colorm_rog, "Hot");
-    glui1->add_radiobutton_to_group(colorm_rog, "Rand");
-    glui1->add_radiobutton_to_group(colorm_rog, "SHSV");
-    
-    glui1->add_checkbox_to_panel(color_panel, "Id Scans by Color", &scans_colored, 0,  &setScansColored);
-    mincol_spinner = glui1->add_spinner_to_panel(color_panel, "Min Val:", GLUI_SPINNER_FLOAT, &mincolor_value, 0, &minmaxChanged);
-    mincol_spinner->set_alignment(GLUI_ALIGN_RIGHT);
-    maxcol_spinner = glui1->add_spinner_to_panel(color_panel, "Max Val:", GLUI_SPINNER_FLOAT, &maxcolor_value, 0, &minmaxChanged);
-    maxcol_spinner->set_alignment(GLUI_ALIGN_RIGHT); 
-    glui1->add_button_to_panel(color_panel, "Reset Min/Max", 0, &resetMinMax )->set_alignment( GLUI_ALIGN_CENTER );
+  GLUI_Panel *colorm_ro = glui1->add_rollout_to_panel(color_panel, "Colormap:");
+  colorm_ro->set_alignment(GLUI_ALIGN_LEFT);
 
-  }
+  GLUI_RadioGroup *colorm_rog = glui1->add_radiogroup_to_panel(colorm_ro, &listboxColorMapVal, 0, &changeColorMap);
+  glui1->add_radiobutton_to_group(colorm_rog, "Solid");
+  glui1->add_radiobutton_to_group(colorm_rog, "Grey");
+  glui1->add_radiobutton_to_group(colorm_rog, "HSV");
+  glui1->add_radiobutton_to_group(colorm_rog, "Jet");
+  glui1->add_radiobutton_to_group(colorm_rog, "Hot");
+  glui1->add_radiobutton_to_group(colorm_rog, "Rand");
+  glui1->add_radiobutton_to_group(colorm_rog, "SHSV");
+
+  glui1->add_checkbox_to_panel(color_panel, "Id Scans by Color", &scans_colored, 0,  &setScansColored);
+  mincol_spinner = glui1->add_spinner_to_panel(color_panel, "Min Val:", GLUI_SPINNER_FLOAT, &mincolor_value, 0, &minmaxChanged);
+  mincol_spinner->set_alignment(GLUI_ALIGN_RIGHT);
+  maxcol_spinner = glui1->add_spinner_to_panel(color_panel, "Max Val:", GLUI_SPINNER_FLOAT, &maxcolor_value, 0, &minmaxChanged);
+  maxcol_spinner->set_alignment(GLUI_ALIGN_RIGHT); 
+  glui1->add_button_to_panel(color_panel, "Reset Min/Max", 0, &resetMinMax )->set_alignment( GLUI_ALIGN_CENTER );
+
   glui1->add_separator();
  
   /****** Invert button *****/

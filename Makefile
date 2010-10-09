@@ -93,10 +93,6 @@ $(OBJ)kd.o: $(SRC)searchTree.h $(SRC)kd.h $(SRC)kd.cc $(SRC)globals.icc
 	$(GPP) $(CFLAGS) -c -o $(OBJ)kd.o $(SRC)kd.cc 
 
 
-$(OBJ)Boctree.o: $(SRC)Boctree.h $(SRC)Boctree.cc $(SRC)globals.icc 
-	echo Compiling BOctree ...
-	$(GPP) $(CFLAGS) -c -o $(OBJ)Boctree.o $(SRC)Boctree.cc
-
 $(OBJ)d2tree.o: $(SRC)d2tree.h $(SRC)d2tree.cc $(SRC)searchTree.h $(SRC)globals.icc
 	echo Compiling D2tree ...
 	$(GPP) $(CFLAGS) -c -o $(OBJ)d2tree.o $(SRC)d2tree.cc 
@@ -109,9 +105,9 @@ else
 	$(GPP) $(CFLAGS) -I$(SRC)ann_1.1.1_modified/include/ -c -o $(OBJ)scan.o $(SRC)scan.cc
 endif
 
-$(OBJ)scanlib.a: $(OBJ)kd.o $(OBJ)kdc.o $(OBJ)scan.o $(OBJ)d2tree.o $(OBJ)Boctree.o
+$(OBJ)scanlib.a: $(OBJ)kd.o $(OBJ)kdc.o $(OBJ)scan.o $(OBJ)d2tree.o
 	echo Linking Scanlib ...
-	$(AR) -cr $(OBJ)scanlib.a $(OBJ)scan.o $(OBJ)kd.o $(OBJ)kdc.o $(OBJ)d2tree.o $(OBJ)Boctree.o 
+	$(AR) -cr $(OBJ)scanlib.a $(OBJ)scan.o $(OBJ)kd.o $(OBJ)kdc.o $(OBJ)d2tree.o
 	ranlib $(OBJ)scanlib.a
 
 $(OBJ)icp6D.o: $(SRC)kd.h $(SRC)kdc.h $(SRC)scan.h $(SRC)icp6D.h $(SRC)icp6D.cc $(SRC)ptpair.h $(SRC)globals.icc $(SRC)icp6Dminimizer.h $(SRC)newmat/newmat.h
@@ -358,23 +354,15 @@ $(BIN)scan_diff: $(OBJ)scanlib.a $(SRC)globals.icc $(SRC)scan_diff.cc $(OBJ)libA
 
 ############# SHOW ##############
 
-$(BIN)show: $(OBJ)libglui.a $(SHOWSRC)show.cc $(SHOWSRC)show.h $(SHOWSRC)show.icc $(SHOWSRC)show1.icc $(SHOWSRC)show_menu.cc $(SHOWSRC)show_gl.cc $(SHOWSRC)show_animate.cc $(SRC)point.h $(SRC)point.icc $(SRC)globals.icc $(OBJ)scan.o $(OBJ)vertexarray.o $(OBJ)PathGraph.o $(OBJ)NurbsPath.o $(OBJ)viewcull.o $(OBJ)show_Boctree.o $(OBJ)scanlib.a $(OBJ)colormanager.o $(OBJ)scancolormanager.o $(OBJ)libANN.a
+$(BIN)show: $(OBJ)libglui.a $(SHOWSRC)show.cc $(SHOWSRC)show.h $(SHOWSRC)show.icc $(SHOWSRC)show1.icc $(SHOWSRC)show_menu.cc $(SHOWSRC)show_gl.cc $(SHOWSRC)show_animate.cc $(SRC)point.h $(SRC)point.icc $(SRC)globals.icc $(OBJ)scan.o $(OBJ)vertexarray.o $(OBJ)PathGraph.o $(OBJ)NurbsPath.o $(OBJ)viewcull.o $(OBJ)scanlib.a $(OBJ)colormanager.o  $(OBJ)libANN.a
 	echo Compiling and Linking Show ...
-	$(GPP) $(CFLAGS)  -I$(SRC)ann_1.1.1_modified/include/ -o $(BIN)show -I$(SRC) $(SHOWSRC)show.cc $(OBJ)scancolormanager.o $(OBJ)show_Boctree.o $(OBJ)scanlib.a $(OBJ)vertexarray.o $(OBJ)PathGraph.o $(OBJ)NurbsPath.o $(OBJ)viewcull.o $(OBJ)colormanager.o $(OBJ)libglui.a $(OBJ)libANN.a $(LIBRARIES)
+	$(GPP) $(CFLAGS)  -I$(SRC)ann_1.1.1_modified/include/ -o $(BIN)show -I$(SRC) $(SHOWSRC)show.cc $(OBJ)scanlib.a $(OBJ)vertexarray.o $(OBJ)PathGraph.o $(OBJ)NurbsPath.o $(OBJ)viewcull.o $(OBJ)colormanager.o $(OBJ)libglui.a $(OBJ)libANN.a $(LIBRARIES)
 	echo DONE
 	echo
-
-$(OBJ)scancolormanager.o: $(SHOWSRC)scancolormanager.h $(SHOWSRC)scancolormanager.cc $(SHOWSRC)colormanager.h $(SHOWSRC)colormanager.cc
-	echo Compiling ScanColorManager for Show ...
-	$(GPP) $(CFLAGS) -c -o $(OBJ)scancolormanager.o -I$(SRC) $(SHOWSRC)scancolormanager.cc -I$(SRC)ann_1.1.1_modified/include/
 
 $(OBJ)colormanager.o: $(SHOWSRC)colormanager.h $(SHOWSRC)colormanager.cc
 	echo Compiling ColorManager for Show ...
 	$(GPP) $(CFLAGS) -c -o $(OBJ)colormanager.o -I$(SRC) $(SHOWSRC)colormanager.cc
-
-$(OBJ)show_Boctree.o: $(SRC)Boctree.h $(SHOWSRC)show_Boctree.h $(SHOWSRC)show_Boctree.cc $(SRC)globals.icc 
-	echo Compiling Octree for Show ...
-	$(GPP) $(CFLAGS) -c -o $(OBJ)show_Boctree.o -I$(SRC) $(SHOWSRC)show_Boctree.cc -I$(SRC)ann_1.1.1_modified/include/
 
 $(OBJ)viewcull.o: $(SHOWSRC)viewcull.h $(SHOWSRC)viewcull.cc
 	echo Compiling Software View Culling ...
