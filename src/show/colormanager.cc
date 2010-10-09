@@ -7,99 +7,11 @@
 #else
 #include <GL/glut.h>
 #endif
-#include "colormanager.h"
 #include "stdio.h"
 #include "../globals.icc"
 #include "float.h"
+#include "colormanager.h"
 
-//#include "math.h"
-
-ColorManager::ColorManager(unsigned int _buckets, unsigned int pointdim, float *_mins, float *_maxs)
-  : buckets(_buckets) {
-  
-  colormap = new float*[buckets + 1];  // allow a color more for values equal to max
-  for (unsigned int i = 0; i < buckets; i++) {
-    colormap[i] = new float[3];
-  }
-  colormap[buckets] = new float[3];
-
-
- 
-  mins = new float[pointdim];
-  maxs = new float[pointdim];
-  for (unsigned int i = 0; i < pointdim; i++) { 
-    mins[i] = _mins[i];
-    maxs[i] = _maxs[i];
-  }
-
-  setCurrentDim(0);
-
-}
-
-ColorManager::~ColorManager() {
-  for (unsigned int i = 0; i < buckets; i++) {
-    delete[] colormap[i];
-  }
-  delete[] colormap[buckets];
-  delete[] colormap;
-  
-  delete[] mins;
-  delete[] maxs;
-}
-
-void ColorManager::setColorMap(ColorMap &cm) {
-  for (unsigned int i = 0; i < buckets; i++) {
-    cm.calcColor(colormap[i], i, buckets);
-  }
-  cm.calcColor(colormap[buckets], buckets-1, buckets);
-}
-
-void ColorManager::invert() {
-  for (unsigned int i = 0; i < buckets+1; i++) {
-    for (unsigned int j = 0; j < 3; j++) {
-      colormap[i][j] = 1.0 - colormap[i][j];
-    }
-  }
-
-}
-
-
-void ColorManager::setCurrentDim(unsigned int cdim) {
-  currentdim = cdim;
-  makeValid();
-}
-
-void ColorManager::setColor(double *val) {
-  int index = toIndex(val);
-  glColor3f( colormap[index][0], colormap[index][1], colormap[index][2] );
-}
-    
-unsigned int ColorManager::toIndex(double *val) {
-  double value = val[currentdim];
-  if (value < min) return 0;
-  if (value > max) return buckets;
-  return (unsigned int)((value-min)/extentbuckets);
-  //return (int)((val[currentdim]-min)/extentbuckets);
-}
-    
-void ColorManager::setMinMax(float _min, float _max) {
-  if (_min < _max) {
-    min = _min;
-    max = _max;
-  }
-  float extent = max - min;
-  extentbuckets = extent/(float)buckets;
-  //setColorMap(current_cm);
-}
-    
-void ColorManager::makeValid() {
-  min = mins[currentdim];
-  max = maxs[currentdim];
-  
-  float extent = max - min;
-  extentbuckets = extent/(float)buckets;
-}
-    
 
 
 
