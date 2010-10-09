@@ -27,7 +27,7 @@ void DrawPoints(GLenum mode)
 
   // In case of animation
   if(scanNr != -1) {
-    cm->setMode(ScanColorManager::MODE_ANIMATION);
+    cm->setMode(ScanColorManager<double>::MODE_ANIMATION);
 
 #ifdef USE_GL_POINTS
     for(int iterator = (int)octpts.size()-1; iterator >= 0; iterator--) {
@@ -979,7 +979,7 @@ void CallBackMouseFunc(int button, int state, int x, int y)
       for(int iterator = (int)octpts.size()-1; iterator >= 0; iterator--) {
         selected_points[iterator].clear();
       }
-      double *sp = 0;
+      float *sp = 0;
       for(int iterator = (int)octpts.size()-1; iterator >= 0; iterator--) {
         glPushMatrix();
         glMultMatrixd(MetaMatrix[iterator].back());
@@ -1563,19 +1563,19 @@ void CallBackKeyboardFunc(unsigned char key, int x, int y) {
 void mapColorToValue(int dummy) {
   switch (listboxColorVal) {
     case 0:
-      cm->setCurrentType(ScanColorManager::USE_HEIGHT);
+      cm->setCurrentType(PointType<sfloat>::USE_HEIGHT);
       break;
     case 1:
-      cm->setCurrentType(ScanColorManager::USE_REFLECTANCE);
+      cm->setCurrentType(PointType<sfloat>::USE_REFLECTANCE);
       break;
     case 2:
-      cm->setCurrentType(ScanColorManager::USE_AMPLITUDE);
+      cm->setCurrentType(PointType<sfloat>::USE_AMPLITUDE);
       break;
     case 3:
-      cm->setCurrentType(ScanColorManager::USE_DEVIATION);
+      cm->setCurrentType(PointType<sfloat>::USE_DEVIATION);
       break;
     case 4:
-      cm->setCurrentType(ScanColorManager::USE_TYPE);
+      cm->setCurrentType(PointType<sfloat>::USE_TYPE);
       break;
     default:
       break;
@@ -1632,9 +1632,9 @@ void resetMinMax(int dummy) {
 
 void setScansColored(int dummy) {
   if (scans_colored) {
-    cm->setMode(ScanColorManager::MODE_COLOR_SCAN);
+    cm->setMode(ScanColorManager<double>::MODE_COLOR_SCAN);
   } else {
-    cm->setMode(ScanColorManager::MODE_STATIC);
+    cm->setMode(ScanColorManager<double>::MODE_STATIC);
   }
 }
 

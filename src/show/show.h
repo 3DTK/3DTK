@@ -38,6 +38,9 @@ using std::vector;
 
 #define BUFSIZE 1048576 ///< defining the buffer size
 
+// This defines the floating point precision of the show program
+typedef float sfloat;
+
 #include "show1.icc"
 #include "show.icc"
 
@@ -85,7 +88,7 @@ void drawRobotPath(int dummy);
 int calcFrameNo();
 int calcNoOfPoints(vector<PointXY>, vector<PointXY>);
 
-void createDisplayLists(bool reduced=false, unsigned int types = ScanColorManager::USE_NONE);
+void createDisplayLists(bool reduced=false);
 
 void changePointMode(int dummy);
 void mapColorToValue(int dummy);

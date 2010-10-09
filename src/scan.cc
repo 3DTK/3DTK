@@ -601,7 +601,7 @@ void Scan::calcReducedPoints(double voxelSize, int nrpts)
     ptsOct[num_pts][2] = points[i].z;
     num_pts++;
   }
-  BOctTree *oct = new BOctTree(ptsOct, num_pts, voxelSize);
+  BOctTree<double> *oct = new BOctTree<double>(ptsOct, num_pts, voxelSize);
 
   vector<double*> center;
   center.clear();

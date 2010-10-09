@@ -1,86 +1,232 @@
 #ifndef __SCANCOLORMANAGER_H__
 #define __SCANCOLORMANAGER_H__
 
+#ifdef _MSC_VER
+#define  _USE_MATH_DEFINES
+#include <windows.h>
+#endif
+#ifdef __APPLE__
+#include <GLUT/glut.h>
+#else
+#include <GL/glut.h>
+#endif
+
+#include "../point.h"
 #include "../scan.h"
 #include "show_Boctree.h"
 #include "colormanager.h"
 #include <vector>
+#include <float.h>
+#include "../point_type.h"
 using std::vector;
 
-class Show_BOctTree;
+template <class T> class Show_BOctTree;
 
 /**
  * This class is a special ColorManager that handles a set of Colormanagers.
  * This manager is capable of mapping managers to scans in dependence of the state of the 
  * show program. 
  */
-class ScanColorManager {
+template <class T = float> class ScanColorManager {
   public:
-    static const unsigned int USE_NONE;
-    static const unsigned int USE_REFLECTANCE;
-    static const unsigned int USE_AMPLITUDE;
-    static const unsigned int USE_DEVIATION;
-    static const unsigned int USE_HEIGHT;
-    static const unsigned int USE_TYPE;
 
-    static const unsigned int MODE_STATIC;
-    static const unsigned int MODE_COLOR_SCAN;
-    static const unsigned int MODE_ANIMATION;
+  static const unsigned int MODE_STATIC;
+  static const unsigned int MODE_COLOR_SCAN;
+  static const unsigned int MODE_ANIMATION;
 
-    ScanColorManager(unsigned int buckets, unsigned int types);
-
-    void registerTree(Show_BOctTree *b);
+    ScanColorManager(unsigned int _buckets, PointType<T> type) : pointtype(type) {
+      valid = false;
+      inverted = false;
+      buckets = _buckets;
+//      types = _types;
     
-    void setColorMap(ColorMap &cm);
-    void setColorMap(ColorMap::CM &cm);
-    void setCurrentType(unsigned int type);
+      pointtype = type;
+      //pointdim = PointType::PointDim(types);
+      //
 
-    void updateRanges(double *);
+      
+      mins = new float[pointtype.getPointDim()];
+      maxs = new float[pointtype.getPointDim()];
+      for (unsigned int i = 0; i < pointtype.getPointDim(); i++) { 
+        mins[i] = FLT_MAX;
+        maxs[i] = FLT_MIN;
+      }
 
-    void setMinMax(float min, float max);
-    void setMode(const unsigned int &mode);
-    void setInvert(bool invert);
+      currenttype = PointType<T>::USE_HEIGHT;
+      currentdim = 0;
+    }
+
+    void registerTree(Show_BOctTree<T> *b) { allScans.push_back(b); }
+    
+    void setColorMap(ColorMap &cm) {
+      makeValid();
+      for (unsigned int i = 0; i < allManager.size(); i++) {
+        allManager[i]->setColorMap(cm);
+        if (inverted) allManager[i]->invert();
+      }
+    }
+
+    void setColorMap(ColorMap::CM &cm) {
+      ColorMap cmap = ColorMap::getColorMap(cm); 
+      setColorMap(cmap);
+    }
+
+    void setCurrentType(unsigned int type) {
+      makeValid();
+      if (type == PointType<T>::USE_NONE) {
+        for (unsigned int i = 0; i < allScans.size(); i++) {
+          allScans[i]->setColorManager(0); 
+        }
+      }
+      currentdim = pointtype.getType(type);
+
+      if(type != PointType<T>::USE_NONE) {
+        for (unsigned int i = 0; i < allManager.size(); i++) {
+          allManager[i]->setCurrentDim(currentdim);
+        }
+        currenttype = type;
+      }
+    }
+
+    void updateRanges(T *point) {
+      for (unsigned int i = 0; i < pointtype.getPointDim(); i++) {
+        if (point[i] < mins[i]) mins[i] = point[i];
+        if (point[i] > maxs[i]) maxs[i] = point[i];
+      }
+    }
+
+    void setMinMax(float min, float max) {
+      makeValid();
+      for (unsigned int i = 0; i < allManager.size(); i++) {
+        allManager[i]->setMinMax(min, max);
+      }
+    }
+    void setMode(const unsigned int &mode) {
+      if (mode == ScanColorManager<T>::MODE_STATIC) {
+        for (unsigned int i = 0; i < allScans.size(); i++) {
+          allScans[i]->setColorManager(staticManager[i]);
+        }
+      } else if (mode == ScanColorManager<T>::MODE_COLOR_SCAN) {
+        for (unsigned int i = 0; i < allScans.size(); i++) {
+          allScans[i]->setColorManager(scanManager[i]);
+        }
+      } else if (mode == ScanColorManager<T>::MODE_ANIMATION) {
+        for (unsigned int i = 0; i < allScans.size(); i++) {
+          allScans[i]->setColorManager(0);
+        }
+      }
+    }
+    void setInvert(bool invert) {
+      if (invert != inverted) {
+        for (unsigned int i = 0; i < allManager.size(); i++) {
+          allManager[i]->invert();
+        }
+      }
+      inverted = invert;
+    }
 
     inline float getMin() { return mins[currentdim];};
     inline float getMax() { return maxs[currentdim];};
     inline float getMin(unsigned int dim) { return mins[dim];};
     inline float getMax(unsigned int dim) { return maxs[dim];};
-    inline unsigned int getPointDim() { return pointdim; };
-    void makeValid();
+    inline unsigned int getPointDim() { return pointtype.getPointDim(); };
+    void makeValid() {
+      if (!valid) {
+        for (unsigned int i = 0; i < allScans.size(); i++) {
+          Show_BOctTree<T> *scan = allScans[i];
+          ColorManager<T> *cm = new ColorManager<T>(buckets, pointtype.getPointDim(), mins, maxs);
+          cm->setCurrentDim(currentdim);
+          scan->setColorManager(cm);
+          staticManager.push_back(cm);
 
-    void selectColors(Scan::AlgoType type);
+          // new colormanager for scan index influenced colorscheme
+          ColorManagerC<T> *cmc = new ColorManagerC<T>(buckets, pointtype.getPointDim(), mins, maxs, colormap[i%6]);
+          scanManager.push_back(cmc);
 
-    double *createPoint(const Point &p, const unsigned int types);
+          allManager.push_back(cm);
+          allManager.push_back(cmc);
+        }
+        valid = true;
+      }
+    }
+
+    void selectColors(Scan::AlgoType type) {
+      switch(type) {
+        case Scan::ICP:
+          glColor4d(0.85, 0.30,0.023, 1.0);
+          break;
+        case Scan::ICPINACTIVE:
+          glColor4d(0.78, 0.63,0.57, 1.0);	
+          break;
+        case Scan::LUM:
+          glColor4d(1.0, 0.0,0.0, 1.0);
+          break;
+        case Scan::ELCH:
+          glColor4d(0.0, 1.0,0.0, 1.0);
+          break;
+        case Scan::LOOPTORO:
+          glColor4d(0.0, 0.0, 1.0, 1.0);
+          break;
+        case Scan::LOOPHOGMAN:
+          glColor4d(0.0, 1.0, 1.0, 1.0);
+          break;
+        case Scan::GRAPHTORO:
+          glColor4d(1.0, 0.0, 1.0, 1.0);
+          break;
+        case Scan::GRAPHHOGMAN:
+          glColor4d(1.0, 1.0, 0.0, 1.0);
+          break;
+        default:
+          glColor4d(1.0, 1.0, 1.0, 1.0);
+          break;
+      }
+    }
+
 
   protected:
 
-    unsigned int pointdim;
     unsigned int currentdim;
 
-    vector<Show_BOctTree *> allScans;
-    vector<ColorManager *> allManager;
+    vector<Show_BOctTree<T> *> allScans;
+    vector<ColorManager<T> *> allManager;
 
-    vector<ColorManager *> staticManager;
-    vector<ColorManagerC *> scanManager;
+    vector<ColorManager<T> *> staticManager;
+    vector<ColorManagerC<T> *> scanManager;
 //    vector<ColorManager *> scanAnimManager;  // Implement later
-
 
     unsigned int currenttype;
     
     static const float colormap[6][3];
 
     unsigned int buckets;
-    unsigned int types;
 
     /** stores minima and maxima for each point dimension */ 
     float *mins;
     float *maxs;
     /** maps valuetypes to point dimension for easier access */ 
-    int dimensionmap[5];
+    PointType<T> pointtype;
     
     bool valid;
     bool colorScans;
     bool inverted;
 };
+
+ 
+template <class T> const unsigned int ScanColorManager<T>::MODE_STATIC = 0;
+template <class T> const unsigned int ScanColorManager<T>::MODE_COLOR_SCAN = 1;
+template <class T> const unsigned int ScanColorManager<T>::MODE_ANIMATION = 2;
+  
+
+/**
+ * a const colormap for when scans are supposed to be colored differently
+ *
+ */
+template <class T> const float ScanColorManager<T>::colormap[6][3] = {
+  {0.3,0,0},
+  {0,0.3,0},
+  {0,0,0.3},
+  {0,0.3,0.3},
+  {0.3,0,0.3},
+  {0.3,0.3,0}};
 
 #endif
