@@ -30,8 +30,8 @@ template <class T> class Show_BOctTree : public BOctTree<T>  {
 
 public:
 
-  Show_BOctTree(T **pts, int n, T voxelSize, unsigned int pointdim = 3, ScanColorManager<T> *scm = 0)
-    : BOctTree<T>(pts, n, voxelSize, pointdim) {
+  Show_BOctTree(T **pts, int n, T voxelSize, PointType<T> _pointtype = PointType<T>(), ScanColorManager<T> *scm = 0)
+    : BOctTree<T>(pts, n, voxelSize, _pointtype) {
     cm = 0;
     if (scm) {
       scm->registerTree(this);
@@ -70,10 +70,10 @@ public:
 
 protected:
   
-  void displayOctTreeAll( bitoct<T> &node, T *center, T size ) {
+  void displayOctTreeAll( bitoct &node, T *center, T size ) {
     T ccenter[3];
     bitunion<T> *children;
-    bitoct<T>::getChildren(node, children);
+    bitoct::getChildren(node, children);
 
     for (short i = 0; i < 8; i++) {
       if (  ( 1 << i ) & node.valid ) {   // if ith node exists
@@ -97,7 +97,7 @@ protected:
     }
   }
 
-  void displayOctTreeAllCulled( bitoct<T> &node, T *center, T size ) {
+  void displayOctTreeAllCulled( bitoct &node, T *center, T size ) {
     int res = CubeInFrustum2(center[0], center[1], center[2], size);
     if (res==0) return;  // culled do not continue with this branch of the tree
 
@@ -108,7 +108,7 @@ protected:
 
     T ccenter[3];
     bitunion<T> *children;
-    bitoct<T>::getChildren(node, children);
+    bitoct::getChildren(node, children);
 
     for (short i = 0; i < 8; i++) {
       if (  ( 1 << i ) & node.valid ) {   // if ith node exists
@@ -135,7 +135,7 @@ protected:
     }
   }
 
-  void displayOctTreeCulledLOD(long targetpts, bitoct<T> &node, T *center, T size ) {
+  void displayOctTreeCulledLOD(long targetpts, bitoct &node, T *center, T size ) {
     if (targetpts <= 0) return; // no need to display anything
 
     int res = CubeInFrustum2(center[0], center[1], center[2], size);
@@ -148,7 +148,7 @@ protected:
 
     T ccenter[3];
     bitunion<T> *children;
-    bitoct<T>::getChildren(node, children);
+    bitoct::getChildren(node, children);
 
     unsigned short nc = POPCOUNT(node.valid);
     long newtargetpts = targetpts;
@@ -201,12 +201,12 @@ protected:
     }
   }
 
-  void displayOctTreeLOD(long targetpts, bitoct<T> &node, T *center, T size ) {
+  void displayOctTreeLOD(long targetpts, bitoct &node, T *center, T size ) {
     if (targetpts <= 0) return; // no need to display anything
 
     T ccenter[3];
     bitunion<T> *children;
-    bitoct<T>::getChildren(node, children);
+    bitoct::getChildren(node, children);
 
     unsigned short nc = POPCOUNT(node.valid);
     long newtargetpts = targetpts;
@@ -255,12 +255,12 @@ protected:
     }
   }
 
-  void selectRay(vector<T *> &selpoints, bitoct<T> &node, T *center, T size) {
+  void selectRay(vector<T *> &selpoints, bitoct &node, T *center, T size) {
     if (!HitBoundingBox(center, size ))return;
 
     T ccenter[3];
     bitunion<T> *children;
-    bitoct<T>::getChildren(node, children);
+    bitoct::getChildren(node, children);
 
     for (short i = 0; i < 8; i++) {
       if (  ( 1 << i ) & node.valid ) {   // if ith node exists
@@ -284,12 +284,12 @@ protected:
     }
   }
 
-  void selectRay(T * &selpoint, bitoct<T> &node, T *center, T size, float min) {
+  void selectRay(T * &selpoint, bitoct &node, T *center, T size, float min) {
     if (!HitBoundingBox(center, size ))return;
 
     T ccenter[3];
     bitunion<T> *children;
-    bitoct<T>::getChildren(node, children);
+    bitoct::getChildren(node, children);
 
     for (short i = 0; i < 8; i++) {
       if (  ( 1 << i ) & node.valid ) {   // if ith node exists
