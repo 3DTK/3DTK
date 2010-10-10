@@ -24,13 +24,13 @@ using std::list;
 #include <string>
 
 #include "globals.icc"
+#include "point_type.h"
 
 #if __GNUC__ > 3 || (__GNUC__ == 3 && __GNUC_MINOR__ >= 4)
   #define POPCOUNT(mask) __builtin_popcount(mask)
 #else
   #define POPCOUNT(mask) _my_popcount_3(mask)
 #endif
-
 
 // forward declaration
 template <class T> union bitunion;
@@ -50,6 +50,9 @@ template <class T> union dunion {
 //typedef dunion<T> pointrep<T>;
 #define pointrep union dunion<T>
 
+
+
+
 /**
  * This struct represents the nodes of the octree
  *
@@ -66,7 +69,7 @@ template <class T> union dunion {
  * 3^8 possible states, so in essence we could save 3 bits by compression.
  *
  */
-template <class T> class bitoct{
+class bitoct{
   public:
 
 #ifdef _MSC_VER
@@ -81,14 +84,16 @@ template <class T> class bitoct{
   /**
    * sets the child pointer of parent so it points to child 
    */
-  static inline void link(bitoct<T> &parent, bitunion<T> *child) {
+  template <class T>
+  static inline void link(bitoct &parent, bitunion<T> *child) {
     parent.child_pointer = (long)((char*)child - (char*)&parent);
   }
 
   /**
    * Returns the children of this node (given as parent).
    */
-  static inline void getChildren(bitoct<T> &parent, bitunion<T>* &children) {
+  template <class T>
+  static inline void getChildren(bitoct &parent, bitunion<T>* &children) {
     children = (bitunion<T>*)((char*)&parent + parent.child_pointer);
   }
  
@@ -108,10 +113,10 @@ template <class T> class bitoct{
 template <class T> union bitunion {
   pointrep *points;
   //union dunion<T> *points;
-  bitoct<T> node;
+  bitoct node;
 
   bitunion(pointrep *p) : points(p) {};
-  bitunion(bitoct<T> b) : node(b) {};
+  bitunion(bitoct b) : node(b) {};
   bitunion() : points(0) {
     node.child_pointer = 0;
     node.valid = 0;
@@ -131,10 +136,10 @@ template <class T> class BOctTree {
 
 public:
   
-  BOctTree(T **pts, int n, T voxelSize, unsigned int pointdim = 3) {
+  BOctTree(T **pts, int n, T voxelSize, PointType<T> _pointtype = PointType<T>() ) : pointtype(_pointtype) {
     this->voxelSize = voxelSize;
 
-    this->POINTDIM = pointdim;
+    this->POINTDIM = pointtype.getPointDim();
 
     mins = new T[POINTDIM];
     maxs = new T[POINTDIM];
@@ -166,68 +171,68 @@ public:
       childcenter(center, newcenter[i], size, i);
     }
     // set up values
-    root = new bitoct<T>();
+    root = new bitoct();
 
     countPointsAndQueue(pts, n, newcenter, sizeNew, *root);
   }
 
-BOctTree(std::string filename) {deserialize(filename); }
-BOctTree(vector<T *> &pts, T voxelSize, unsigned int pointdim = 3) {
-  this->voxelSize = voxelSize;
+  BOctTree(std::string filename) {deserialize(filename); }
+  BOctTree(vector<T *> &pts, T voxelSize, unsigned int pointdim = 3) {
+    this->voxelSize = voxelSize;
 
-  this->POINTDIM = pointdim;
+    this->POINTDIM = pointdim;
 
-  mins = new T[POINTDIM];
-  maxs = new T[POINTDIM];
+    mins = new T[POINTDIM];
+    maxs = new T[POINTDIM];
 
-  // initialising
-  for (unsigned int i = 0; i < POINTDIM; i++) { 
-    mins[i] = pts[0][i]; 
-    maxs[i] = pts[0][i];
-  }
-
-  for (unsigned int i = 0; i < POINTDIM; i++) { 
-    for (int j = 1; j < pts.size(); j++) {
-      mins[i] = min(mins[i], pts[j][i]);
-      maxs[i] = max(maxs[i], pts[j][i]);
+    // initialising
+    for (unsigned int i = 0; i < POINTDIM; i++) { 
+      mins[i] = pts[0][i]; 
+      maxs[i] = pts[0][i];
     }
+
+    for (unsigned int i = 0; i < POINTDIM; i++) { 
+      for (int j = 1; j < pts.size(); j++) {
+        mins[i] = min(mins[i], pts[j][i]);
+        maxs[i] = max(maxs[i], pts[j][i]);
+      }
+    }
+
+    center[0] = 0.5 * (mins[0] + maxs[0]);
+    center[1] = 0.5 * (mins[1] + maxs[1]);
+    center[2] = 0.5 * (mins[2] + maxs[2]);
+    size = max(max(0.5 * (maxs[0] - mins[0]), 0.5 * (maxs[1] - mins[1])), 0.5 * (maxs[2] - mins[2]));
+
+    // calculate new buckets
+    T newcenter[8][3];
+    T sizeNew = size / 2.0;
+
+    for (int i = 0; i < 8; i++) {
+      childcenter(center, newcenter[i], size, i);
+    }
+    // set up values
+    root = new bitoct();
+
+    countPointsAndQueue(pts, newcenter, sizeNew, *root);
   }
 
-  center[0] = 0.5 * (mins[0] + maxs[0]);
-  center[1] = 0.5 * (mins[1] + maxs[1]);
-  center[2] = 0.5 * (mins[2] + maxs[2]);
-  size = max(max(0.5 * (maxs[0] - mins[0]), 0.5 * (maxs[1] - mins[1])), 0.5 * (maxs[2] - mins[2]));
+  virtual ~BOctTree(){
+    deletetNodes(*root);
+    delete root;
 
-  // calculate new buckets
-  T newcenter[8][3];
-  T sizeNew = size / 2.0;
+    delete[] mins;
+    delete[] maxs;
+  } 
 
-  for (int i = 0; i < 8; i++) {
-    childcenter(center, newcenter[i], size, i);
-  }
-  // set up values
-  root = new bitoct<T>();
+  void GetOctTreeCenter(vector<T*>&c) { GetOctTreeCenter(c, *root, center, size); }
+  void GetOctTreeRandom(vector<T*>&c) { GetOctTreeRandom(c, *root); }
+  void GetOctTreeRandom(vector<T*>&c, unsigned int ptspervoxel) { GetOctTreeRandom(c, ptspervoxel, *root); }
 
-  countPointsAndQueue(pts, newcenter, sizeNew, *root);
-}
-
-virtual ~BOctTree(){
-  deletetNodes(*root);
-  delete root;
-
-  delete[] mins;
-  delete[] maxs;
-} 
-
-void GetOctTreeCenter(vector<T*>&c) { GetOctTreeCenter(c, *root, center, size); }
-void GetOctTreeRandom(vector<T*>&c) { GetOctTreeRandom(c, *root); }
-void GetOctTreeRandom(vector<T*>&c, unsigned int ptspervoxel) { GetOctTreeRandom(c, ptspervoxel, *root); }
-
-long countNodes() { return 1 + countNodes(*root); }
-long countLeaves() { return 1 + countLeaves(*root); }
+  long countNodes() { return 1 + countNodes(*root); }
+  long countLeaves() { return 1 + countLeaves(*root); }
 
 
-void deserialize(std::string filename ) {
+  void deserialize(std::string filename ) {
     char buffer[sizeof(T) * 20];
     T *p = reinterpret_cast<T*>(buffer);
 
@@ -243,6 +248,8 @@ void deserialize(std::string filename ) {
     }
 
     // read header
+    pointtype = PointType<T>::deserialize(file);
+
     file.read(buffer, 5 * sizeof(T));
     voxelSize = p[0];
     center[0] = p[1];
@@ -261,11 +268,11 @@ void deserialize(std::string filename ) {
     file.read(reinterpret_cast<char*>(maxs), POINTDIM * sizeof(T));
 
     // read root node
-    root = new bitoct<T>();
+    root = new bitoct();
     deserialize(file, *root);
     file.close();
   }
-  
+
   void serialize(std::string filename) {
     char buffer[sizeof(T) * 20];
     T *p = reinterpret_cast<T*>(buffer);
@@ -279,6 +286,8 @@ void deserialize(std::string filename ) {
     file.write(buffer, 2);
 
     // write header
+    pointtype.serialize(file);
+
     p[0] = voxelSize;
     p[1] = center[0]; 
     p[2] = center[1]; 
@@ -305,10 +314,32 @@ void deserialize(std::string filename ) {
 
     file.close();
   }
- 
+
+  static PointType<T> readType(std::string filename ) {
+    char buffer[sizeof(T) * 20];
+
+    std::ifstream file;
+    file.open (filename.c_str(), std::ios::in | std::ios::binary);
+
+    // read magic bits
+    file.read(buffer, 2);
+    if ( buffer[0] != 'X' || buffer[1] != 'T') {
+      std::cerr << "Not an octree file!!" << endl;
+      file.close();
+      return PointType<T>();
+    }
+
+    // read header
+    PointType<T> pointtype = PointType<T>::deserialize(file);
+
+    file.close();
+
+    return pointtype;
+  }
+
 protected:
-  
-  void deserialize(std::ifstream &f, bitoct<T> &node) {
+
+  void deserialize(std::ifstream &f, bitoct &node) {
     char buffer[2];
     f.read(buffer, 2);
     node.valid = buffer[0];
@@ -318,7 +349,7 @@ protected:
 
     // create children
     bitunion<T> *children = new bitunion<T>[n_children];
-    bitoct<T>::link(node, children);
+    bitoct::link(node, children);
 
     for (short i = 0; i < 8; i++) {
       if (  ( 1 << i ) & node.valid ) {   // if ith node exists
@@ -339,7 +370,7 @@ protected:
     }
   }
 
-  void serialize(std::ofstream &of, bitoct<T> &node) {
+  void serialize(std::ofstream &of, bitoct &node) {
     char buffer[2];
     buffer[0] = node.valid;
     buffer[1] = node.leaf;
@@ -348,7 +379,7 @@ protected:
 
     // write children
     bitunion<T> *children;
-    bitoct<T>::getChildren(node, children);
+    bitoct::getChildren(node, children);
     for (short i = 0; i < 8; i++) {
       if (  ( 1 << i ) & node.valid ) {   // if ith node exists
         if (  ( 1 << i ) & node.leaf ) {   // if ith node is leaf write points 
@@ -364,10 +395,10 @@ protected:
   }
 
 
-  void GetOctTreeCenter(vector<T*>&c, bitoct<T> &node, T *center, T size) {
+  void GetOctTreeCenter(vector<T*>&c, bitoct &node, T *center, T size) {
     T ccenter[3];
     bitunion<T> *children;
-    bitoct<T>::getChildren(node, children);
+    bitoct::getChildren(node, children);
 
     for (short i = 0; i < 8; i++) {
       if (  ( 1 << i ) & node.valid ) {   // if ith node exists
@@ -386,9 +417,9 @@ protected:
     }
   }
 
-  void GetOctTreeRandom(vector<T*>&c, bitoct<T> &node) {
+  void GetOctTreeRandom(vector<T*>&c, bitoct &node) {
     bitunion<T> *children;
-    bitoct<T>::getChildren(node, children);
+    bitoct::getChildren(node, children);
 
     for (short i = 0; i < 8; i++) {
       if (  ( 1 << i ) & node.valid ) {   // if ith node exists
@@ -405,10 +436,10 @@ protected:
       }
     }
   } 
-  
-  void GetOctTreeRandom(vector<T*>&c, unsigned int ptspervoxel, bitoct<T> &node) {
+
+  void GetOctTreeRandom(vector<T*>&c, unsigned int ptspervoxel, bitoct &node) {
     bitunion<T> *children;
-    bitoct<T>::getChildren(node, children);
+    bitoct::getChildren(node, children);
 
     for (short i = 0; i < 8; i++) {
       if (  ( 1 << i ) & node.valid ) {   // if ith node exists
@@ -438,15 +469,15 @@ protected:
     }
   }
 
-  long countNodes(bitoct<T> &node) {
+  long countNodes(bitoct &node) {
     long result = 0;
     bitunion<T> *children;
-    bitoct<T>::getChildren(node, children);
+    bitoct::getChildren(node, children);
 
     for (short i = 0; i < 8; i++) {
       if (  ( 1 << i ) & node.valid ) {   // if ith node exists
         if (  ( 1 << i ) & node.leaf ) {   // if ith node is leaf
-          ++result;
+       //   ++result;
         } else { // recurse
           result += countNodes(children->node) + 1;
         }
@@ -456,10 +487,10 @@ protected:
     return result;
   }
 
-  long countLeaves(bitoct<T> &node) {
+  long countLeaves(bitoct &node) {
     long result = 0;
     bitunion<T> *children;
-    bitoct<T>::getChildren(node, children);
+    bitoct::getChildren(node, children);
 
     for (short i = 0; i < 8; i++) {
       if (  ( 1 << i ) & node.valid ) {   // if ith node exists
@@ -477,9 +508,9 @@ protected:
   }
 
 
-  void deletetNodes(bitoct<T> &node) {
+  void deletetNodes(bitoct &node) {
     bitunion<T> *children;
-    bitoct<T>::getChildren(node, children);
+    bitoct::getChildren(node, children);
     bool haschildren = false;
 
     for (short i = 0; i < 8; i++) {
@@ -495,12 +526,12 @@ protected:
     }
     // delete children
     if (haschildren) {
-      bitoct<T>::getChildren(node, children);
+      bitoct::getChildren(node, children);
       delete[] children;
     }
   }
 
-  pointrep *branch( bitoct<T> &node, vector<T*> &splitPoints, T _center[3], T _size) {
+  pointrep *branch( bitoct &node, vector<T*> &splitPoints, T _center[3], T _size) {
     // if bucket is too small stop building tree
     // -----------------------------------------
     if ((_size <= voxelSize)) {
@@ -531,7 +562,7 @@ protected:
     return 0;
   }
 
-  void countPointsAndQueue(vector<T*> &i_points, T center[8][3], T size, bitoct<T> &parent) {
+  void countPointsAndQueue(vector<T*> &i_points, T center[8][3], T size, bitoct &parent) {
     vector<T*> points[8];
     int n_children = 0;
 
@@ -561,7 +592,7 @@ protected:
     }
     // create children
     bitunion<T> *children = new bitunion<T>[n_children];
-    bitoct<T>::link(parent, children);
+    bitoct::link(parent, children);
 
     int count = 0;
     for (int j = 0; j < 8; j++) {
@@ -578,7 +609,7 @@ protected:
     }
   }
 
-  void countPointsAndQueue(T **pts, int n,  T center[8][3], T size, bitoct<T> &parent) {
+  void countPointsAndQueue(T **pts, int n,  T center[8][3], T size, bitoct &parent) {
     vector<T*> points[8];
     int n_children = 0;
 #ifdef _OPENMP 
@@ -605,7 +636,7 @@ protected:
 
     // create children
     bitunion<T> *children = new bitunion<T>[n_children];
-    bitoct<T>::link(parent, children);
+    bitoct::link(parent, children);
     int count = 0;
     for (int j = 0; j < 8; j++) {
       if (!points[j].empty()) {
@@ -673,14 +704,14 @@ protected:
   /**
    * the root of the octree 
    */
-  bitoct<T>* root;
+  bitoct* root;
 
-  
+
   /**
    * storing the center
    */
   T center[3];
-  
+
   /**
    * storing the dimension
    */
@@ -698,6 +729,8 @@ protected:
   T *maxs;
 
   unsigned int POINTDIM;
+
+  PointType<T> pointtype;
 
 };
 

@@ -330,8 +330,7 @@ void usage(char* prog)
     << bold << "  --loadOct" << endl << normal
 	  << "         only reads octrees from the given directory" << endl
 	  << "         All reflectivity/amplitude/deviation/type settings are read from file." << endl
-	  << "         Unless these are also specified correctly on the command line, they will." << endl
-	  << "         not be displayed correctly (Work in progress)." << endl
+	  << "         --reflectance/--amplitude and similar parameters are therefore ignored." << endl
 	  << "         only works when using octree display" << endl
     << endl << endl;
   
@@ -684,14 +683,13 @@ void createDisplayLists(bool reduced)
 
     } else {
 //     if (types != PointType::USE_NONE && cm) {
-        unsigned int pointdim = cm->getPointDim();
         unsigned int nrpts = Scan::allScans[i]->get_points()->size();
         sfloat **pts = new sfloat*[nrpts];
         for (unsigned int jterator = 0; jterator < nrpts; jterator++) {
           pts[jterator] = pointtype.createPoint(Scan::allScans[i]->get_points()->at(jterator));
         }
         Scan::allScans[i]->clearPoints();
-        octpts.push_back( new Show_BOctTree<sfloat>(pts, nrpts , 50.0, pointdim, cm) );  //TODO remove magic number
+        octpts.push_back( new Show_BOctTree<sfloat>(pts, nrpts , 50.0, pointtype, cm) );  //TODO remove magic number
         for (unsigned int jterator = 0; jterator < nrpts; jterator++) {
           delete[] pts[jterator];
         }
@@ -751,6 +749,15 @@ int main(int argc, char **argv){
   strncpy(path_file_name, "file.path", sizeof(GLUI_String));  
   
   parseArgs(argc, argv, dir, start, end, maxDist, minDist, red, readInitial, octree, pointtype, idealfps, loadOct, saveOct, type);
+
+  // if we want to load display file get pointtypes from the files first
+  if (loadOct) {
+    string scanFileName = dir + "scan" + to_string(start,3) + ".oct";
+    cout << "Getting point information from " << scanFileName << endl;
+    cout << "Attention! All subsequent oct-files must be of the same type!" << endl;
+
+    pointtype = BOctTree<sfloat>::readType(scanFileName);
+  }
   scandir = dir;
 
   // init and create display
@@ -822,7 +829,7 @@ int main(int argc, char **argv){
     for (int i = start; i <= end; i++) {
       string scanFileName = dir + "scan" + to_string(i,3) + ".oct";
       cout << "Reading octree " << scanFileName << endl;
-      octpts.push_back(new Show_BOctTree<sfloat>(scanFileName, cm)); 
+      octpts.push_back(new Show_BOctTree<sfloat>(scanFileName, cm));
     }
   } else {
     if (red > 0) {
