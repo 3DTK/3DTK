@@ -10,6 +10,11 @@ using std::cout;
 using std::cerr;
 using std::endl;
 
+#include <iostream>
+#include <fstream>
+
+#include "point.h"
+
 #ifndef __POINT_TYPE_H__
 #define __POINT_TYPE_H__
 
@@ -31,7 +36,6 @@ public:
   }
 
   PointType(unsigned int _types) : types(_types) {
-
     dimensionmap[1] = dimensionmap[2] = dimensionmap[3] = dimensionmap[4] = 1; // choose height per default  
     dimensionmap[0] = 1;  // height 
 
@@ -98,10 +102,29 @@ public:
 
   unsigned int getPointDim() { return pointdim; }
 
+  static PointType<T> deserialize(std::ifstream &f) {
+    unsigned int types;
+    f.read(reinterpret_cast<char*>(&types), sizeof(unsigned int));
+    return PointType<T>(types);
+  }
+  
+  void serialize(std::ofstream &f) {
+    f.write(reinterpret_cast<char*>(&types), sizeof(unsigned int));
+  }
 
 private:
+  /**
+   * collection of flags 
+   */
   unsigned int types;
+  /**
+   * Derived from types: 3 spatial dimensions + 1 for each flag set
+   **/
   unsigned int pointdim;
+
+  /**
+   * Derived from types, to map type to the array index for each point
+   **/
   int dimensionmap[5];
 
   bool hasType(unsigned int type) {
