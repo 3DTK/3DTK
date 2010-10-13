@@ -1325,6 +1325,9 @@ void Scan::readScans(reader_type type,
   case RXP:
     lib_string = "./bin/scan_io_rxp";
     break;
+  case AIS:
+    lib_string = "./bin/scan_io_ais";
+    break;
   default:
     cerr << "Don't recognize format " << type << endl;
     exit(1);
