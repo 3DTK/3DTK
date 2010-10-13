@@ -99,7 +99,7 @@ double graphHOGMan::doGraphSlam6D(Graph gr, vector <Scan *> allScans, int nrIt)
   }
   outFile.close();
 
-  system("LD_LIBRARY_PATH=./bin/ ./bin/hogman3d -batch -oc -o hogman-final.graph hogman.graph");
+  system("LD_LIBRARY_PATH=./bin/ ./bin/hogman3d -update 1 -oc -o hogman-final.graph hogman.graph");
 
   ifstream inFile("hogman-final.graph");
   string tag;
@@ -122,7 +122,7 @@ double graphHOGMan::doGraphSlam6D(Graph gr, vector <Scan *> allScans, int nrIt)
         rPos[2] *= 100;
         RPYEulerQuat(rPosTheta, rPosQuat);
         if(id != 0) {
-          allScans[id]->transformToQuat(rPos, rPosQuat, Scan::LOOPHOGMAN, 1);
+          allScans[id]->transformToQuat(rPos, rPosQuat, Scan::GRAPHHOGMAN, 1);
         }
       }
     }
@@ -134,7 +134,7 @@ double graphHOGMan::doGraphSlam6D(Graph gr, vector <Scan *> allScans, int nrIt)
     }
   }
   RPYEulerQuat(rPosThetaN, rPosQuat);
-  allScans[n-1]->transformToQuat(rPosN, rPosQuat, Scan::LOOPHOGMAN, 2);
+  allScans[n-1]->transformToQuat(rPosN, rPosQuat, Scan::GRAPHHOGMAN, 2);
   inFile.close();
 
   return DBL_MAX;

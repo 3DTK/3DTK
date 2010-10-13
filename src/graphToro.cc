@@ -99,7 +99,7 @@ double graphToro::doGraphSlam6D(Graph gr, vector <Scan *> allScans, int nrIt)
   }
   outFile.close();
 
-  system("./bin/toro3d toro.graph");
+  system("sort toro.graph > toro2.graph && mv toro2.graph toro.graph && ./bin/toro3d toro.graph");
 
   ifstream inFile("toro-treeopt-final.graph");
   string tag;
@@ -122,7 +122,7 @@ double graphToro::doGraphSlam6D(Graph gr, vector <Scan *> allScans, int nrIt)
         rPos[2] *= 100;
         RPYEulerQuat(rPosTheta, rPosQuat);
         if(id != 0) {
-          allScans[id]->transformToQuat(rPos, rPosQuat, Scan::LOOPTORO, 1);
+          allScans[id]->transformToQuat(rPos, rPosQuat, Scan::GRAPHTORO, 1);
         }
       }
     }
@@ -134,7 +134,7 @@ double graphToro::doGraphSlam6D(Graph gr, vector <Scan *> allScans, int nrIt)
     }
   }
   RPYEulerQuat(rPosThetaN, rPosQuat);
-  allScans[n-1]->transformToQuat(rPosN, rPosQuat, Scan::LOOPTORO, 2);
+  allScans[n-1]->transformToQuat(rPosN, rPosQuat, Scan::GRAPHTORO, 2);
   inFile.close();
 
   return DBL_MAX;

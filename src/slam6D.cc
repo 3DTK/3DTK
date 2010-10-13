@@ -178,7 +178,7 @@ void usage(char* prog)
     << "           3 = HELIX approximation by Hofer and Pottmann" << endl
     << "           4 = small angle approximation" << endl
     << "           5 = TORO" << endl
-    << "           5 = HOG-Man" << endl
+    << "           6 = HOG-Man" << endl
     << endl
     << bold << "  -i" << normal << " NR, " << bold << "--iter=" << normal << "NR [default: 50]" << endl
     << "         sets the maximal number of ICP iterations to <NR>" << endl
@@ -335,7 +335,7 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &rand,
     {
       case 'a':
         algo = atoi(optarg);
-        if ((algo < 1) || (algo > 8)) {
+        if ((algo < 0) || (algo > 8)) {
           cerr << "Error: ICP Algorithm not available." << endl;
           exit(1);
         }	   
@@ -828,11 +828,11 @@ int main(int argc, char **argv)
         break;
       case 5 :
         my_graphSlam6D = new graphToro(my_icp6Dminimizer, mdm, mdml, mni, quiet, meta, rand, eP,
-            -1, epsilonICP, use_cache, epsilonSLAM);
+            -2, epsilonICP, use_cache, epsilonSLAM);
         break;
       case 6 :
         my_graphSlam6D = new graphHOGMan(my_icp6Dminimizer, mdm, mdml, mni, quiet, meta, rand, eP,
-            -1, epsilonICP, use_cache, epsilonSLAM);
+            -2, epsilonICP, use_cache, epsilonSLAM);
         break;
     }
     // Construct Network
