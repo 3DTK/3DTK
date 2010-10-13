@@ -12,7 +12,7 @@ APSSRC  = src/sift/autopano-sift-c/
 SIFTSRC = src/sift/
 DOC     = doc/
 
-TARGETS = $(BIN)slam6D $(BIN)scan_io_uos.so $(BIN)scan_io_rxp.so $(BIN)scan_io_uos_map.so $(BIN)scan_io_uos_frames.so $(BIN)scan_io_uos_map_frames.so $(BIN)scan_io_old.so $(BIN)scan_io_x3d.so $(BIN)scan_io_asc.so $(BIN)scan_io_rts.so $(BIN)scan_io_iais.so $(BIN)scan_io_rts_map.so $(BIN)scan_io_front.so $(BIN)scan_io_riegl_txt.so $(BIN)scan_io_riegl_bin.so $(BIN)scan_io_zuf.so $(BIN)scan_io_xyz.so $(BIN)scan_io_ifp.so $(BIN)scan_io_ply.so $(BIN)scan_io_wrl.so $(BIN)scan_io_zahn.so 
+TARGETS = $(BIN)slam6D $(BIN)scan_io_uos.so $(BIN)scan_io_rxp.so $(BIN)scan_io_uos_map.so $(BIN)scan_io_uos_frames.so $(BIN)scan_io_uos_map_frames.so $(BIN)scan_io_old.so $(BIN)scan_io_x3d.so $(BIN)scan_io_asc.so $(BIN)scan_io_rts.so $(BIN)scan_io_iais.so $(BIN)scan_io_rts_map.so $(BIN)scan_io_front.so $(BIN)scan_io_riegl_txt.so $(BIN)scan_io_riegl_bin.so $(BIN)scan_io_zuf.so $(BIN)scan_io_xyz.so $(BIN)scan_io_ifp.so $(BIN)scan_io_ply.so $(BIN)scan_io_wrl.so $(BIN)scan_io_zahn.so $(BIN)scan_io_ais.so
 
 ifdef WITH_SCANRED
 TARGETS += $(BIN)scan_red
@@ -332,9 +332,10 @@ $(BIN)scan_io_front.so: $(SRC)scan_io.h $(SRC)scan_io_front.h $(SRC)scan_io_fron
 $(BIN)scan_io_zahn.so: $(SRC)scan_io.h $(SRC)scan_io_zahn.h $(SRC)scan_io_zahn.cc $(SRC)point.h $(SRC)point.icc $(SRC)globals.icc
 	echo Compiling shared library for reading Zaehne scans ...
 	$(GPP) $(CFLAGS) $(SHAREDFLAGS) -o $(BIN)scan_io_zahn.so $(SRC)scan_io_zahn.cc 
-	echo DONE
-	echo
 
+$(BIN)scan_io_ais.so: $(SRC)scan_io.h $(SRC)scan_io_ais.h $(SRC)scan_io_ais.cc $(SRC)point.h $(SRC)point.icc $(SRC)globals.icc
+	echo Compiling shared library for reading AIS scans ...
+	$(GPP) $(CFLAGS) $(SHAREDFLAGS) -o $(BIN)scan_io_ais.so $(SRC)scan_io_ais.cc
 
 ############# SCAN REDUCTION ##############
 

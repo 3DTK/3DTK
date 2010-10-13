@@ -175,6 +175,7 @@ int parseArgs(int argc, char **argv, string &dir,
 	   else if (strcasecmp(optarg, "front") == 0) type = FRONT;
 	   else if (strcasecmp(optarg, "x3d") == 0) type = X3D;
 	   else if (strcasecmp(optarg, "rxp") == 0) type = RXP;
+	   else if (strcasecmp(optarg, "ais") == 0) type = AIS;
 	   else {
 		 abort ();
 	   }
