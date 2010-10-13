@@ -122,7 +122,7 @@ void loopToro::close_loop(const vector <Scan *> &allScans, int first, int last, 
     C(1, 1) << " " << "\n";
   outFile.close();
 
-  system("./bin/toro3d toro.graph");
+  system("sort toro.graph > toro2.graph && mv toro2.graph toro.graph && ./bin/toro3d -i 300 toro.graph");
 
   ifstream inFile("toro-treeopt-final.graph");
   string tag;
