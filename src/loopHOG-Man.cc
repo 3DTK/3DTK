@@ -122,7 +122,7 @@ void loopHOGMan::close_loop(const vector <Scan *> &allScans, int first, int last
     C(1, 1) << " " << "\n";
   outFile.close();
 
-  system("LD_LIBRARY_PATH=./bin/ ./bin/hogman3d -batch -oc -o hogman-final.graph hogman.graph");
+  system("LD_LIBRARY_PATH=./bin/ ./bin/hogman3d -update 1 -oc -o hogman-final.graph hogman.graph");
 
   ifstream inFile("hogman-final.graph");
   string tag;
