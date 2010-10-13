@@ -553,12 +553,8 @@ void readFrames(string dir, int start, int end, bool readInitial, reader_type &t
       catch (const exception &e) {   
         break;
       }
-      // don't store the very first entry, since it's the identity matrix.	 
-      if (frameCounter > 1)
-      {
-        Matrices.push_back(transMatOpenGL);
-        algoTypes.push_back(algoType);
-      }
+      Matrices.push_back(transMatOpenGL);
+      algoTypes.push_back(algoType);
     }
     MetaAlgoType.push_back(algoTypes);
 
