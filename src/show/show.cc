@@ -280,7 +280,7 @@ void usage(char* prog)
 	  << endl
 	  << bold << "  -f" << normal << " F, " << bold << "--format=" << normal << "F" << endl
 	  << "         using shared library F for input" << endl
-	  << "         (chose F from {uos, uos_map, uos_frames, uos_map_frames, old, rts, rts_map, ifp, riegl_txt, riegl_bin, zahn, ply, wrl, xyz, zuf, iais, front, x3d, rxp })" << endl
+	  << "         (chose F from {uos, uos_map, uos_frames, uos_map_frames, old, rts, rts_map, ifp, riegl_txt, riegl_bin, zahn, ply, wrl, xyz, zuf, iais, front, x3d, rxp, ais })" << endl
 	  << endl
 	  << bold << "  -F" << normal << " NR, " << bold << "--fps=" << normal << "NR [default: 20]" << endl
 	  << "         will attempt to display points with a framerate of NR" << endl
@@ -433,6 +433,7 @@ int parseArgs(int argc,char **argv, string &dir, int& start, int& end, int& maxD
 	   else if (strcasecmp(optarg, "x3d") == 0) type = X3D;
 	   else if (strcasecmp(optarg, "rxp") == 0) type = RXP;
 	   else if (strcasecmp(optarg, "kit") == 0) type = KIT;
+	   else if (strcasecmp(optarg, "ais") == 0) type = AIS;
 	   else {
 		abort ();
 	   }
