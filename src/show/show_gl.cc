@@ -979,7 +979,7 @@ void CallBackMouseFunc(int button, int state, int x, int y)
       for(int iterator = (int)octpts.size()-1; iterator >= 0; iterator--) {
         selected_points[iterator].clear();
       }
-      float *sp = 0;
+      sfloat *sp = 0;
       for(int iterator = (int)octpts.size()-1; iterator >= 0; iterator--) {
         glPushMatrix();
         glMultMatrixd(MetaMatrix[iterator].back());
