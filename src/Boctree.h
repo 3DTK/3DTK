@@ -120,6 +120,7 @@ template <class T> union bitunion {
   bitunion() : points(0) {
     node.child_pointer = 0;
     node.valid = 0;
+    node.leaf = 0;
   };           // needed for new []
 };
 
