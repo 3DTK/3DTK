@@ -21,6 +21,7 @@
 #include "globals.icc"
 using std::cerr;
 
+#include <string.h>
 /**
  * Constructor 
  *
@@ -211,6 +212,9 @@ int icp6D::match(Scan* PreviousScan, Scan* CurrentScan)
     }
     // do we have enough point pairs?
     if (pairs.size() > 3) {
+      if (my_icp6Dminimizer->getAlgorithmID() == 3 || my_icp6Dminimizer->getAlgorithmID() == 8 ) {
+        memcpy(alignxf, CurrentScan->get_transMat(), 16);
+      }
 	 ret = my_icp6Dminimizer->Point_Point_Align(pairs, alignxf, centroid_m, centroid_d);
     } else {
 	 break;
