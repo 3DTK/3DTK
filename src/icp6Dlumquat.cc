@@ -31,6 +31,11 @@ using std::setiosflags;
 double icp6D_LUMQUAT::Point_Point_Align(const vector<PtPair>& pairs, double *alignfx,
 								const double centroid_m[3], const double centroid_d[3])
 {
+  // alignxf is filled with the current pose, t is the translation, quat is the quaternion
+  double t[3], quat[4];
+  Matrix4ToQuat(alignfx, quat, t);
+
+
   double error = 0;
   double sum = 0.0;
 	
@@ -68,6 +73,7 @@ double icp6D_LUMQUAT::Point_Point_Align(const vector<PtPair>& pairs, double *ali
   
   cout << "LUMQUAT is not implemented yet!!!" << endl;
   exit(-1);
+  // NOTE: remember to return an incremental matrix instead of the global matrix as computed in the paper
    
   for(unsigned int i = 0; i < pairs.size(); i++){
 	delete [] m[i];
