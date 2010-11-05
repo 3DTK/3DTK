@@ -33,7 +33,7 @@ double icp6D_LUMEULER::Point_Point_Align(const vector<PtPair>& pairs, double *al
 {
   // alignxf is filled with the current pose, rPos is the translation, rPosTheta are the 3 euler angles theta_x, theta_y, theta_z
   double rPos[3], rPosTheta[3];
-  Matrix4ToEuler(alignfx, rPos, rPosTheta);
+  Matrix4ToEuler(alignfx, rPosTheta, rPos);
 
   double error = 0;
   double sum = 0.0;
