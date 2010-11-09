@@ -11,6 +11,7 @@ using std::ifstream;
 #include <iostream>
 using std::cerr;
 using std::endl;
+#include <string.h>
 
 #ifdef _MSC_VER
 #include <windows.h>
@@ -48,57 +49,77 @@ int ScanIO_ply::readScans(int start, int end, string &dir, int maxDist, int mind
   for (int i=0; i < 6; i++) euler[i] = 0;
   
  if (end > -1 && fileCounter > end) return -1; // 'nuf read
-  scanFileName = dir + "mesh_cps_pos" + to_string(fileCounter,0) + ".ply";   
+  scanFileName = dir + "scan" + to_string(fileCounter,3) + ".ply";   
   scan_in.open(scanFileName.c_str());
   
   // read 3D scan
-  if (!scan_in.good()) return -1;  // no more scans to read
-  
-  cout << "Processing Scan " << scanFileName;
-  cout << " @ pose (" << euler[0] << "," << euler[1] << "," << euler[2]
-	  << "," << euler[3] << "," << euler[4] << ","  << euler[5] << ")" << endl;
+  if (!scan_in.good()) return -1;  // no more scans to read  
   
   bool binary = false;
   char dummy[256];
-  for (int i=0; i < 9; i++) {
+  char str[20]; // whatever size
+  double matrix[16];
+  int matrixPos = 0;
+  int nr;
+  float d1,d2,d3,d4;
+  sscanf(dummy,"%s %*s %d",str,&nr);
+
+  // header
+  do {
     scan_in.getline(dummy, 255);
-    if (i == 1) { // check for format
+    if (strncmp(dummy, "format", 6) == 0) {
 	 if (dummy[7] == 'a') binary = false;
 	 else if (dummy[7] == 'b') binary = true;
 	 else { cerr << "Don't recognize the format!" << endl; exit(1); }
     }
+    else if (strncmp(dummy, "element vertex", 14) == 0) {
+	 sscanf(dummy,"%s %*s %d",str,&nr);
+    }
+    else if (strncmp(dummy, "matrix", 6) == 0) {
+	 sscanf(dummy,"%s %f %f %f %f", str, &d1, &d2, &d3, &d4);
+	 matrix[matrixPos++] = d1;
+	 matrix[matrixPos++] = d2;
+	 matrix[matrixPos++] = d3;
+	 matrix[matrixPos++] = d4;
+    }    
+  } while (!(strncmp(dummy, "end_header",10) == 0 || !scan_in.good()));
+
+  if (matrixPos > 0) {
+    double rPosTheta[3];
+    double rPos[3];
+    Matrix4ToEuler(matrix, rPosTheta, rPos);
+
+
   }
-  char str[20]; // whatever size
-  int nr;
-  sscanf(dummy,"%s %*s %d",str,&nr);
-  
-  for (int i=0; i < 8; i++) {
-    scan_in.getline(dummy, 255);
-  }
-  
+
   for (int i=0; i < nr; i++) {	 
     Point p;
-    float dummyF;
+    float data, confidence, intensity;
     if (!binary) {
-	 scan_in >> p.z >> p.x >> p.y >> dummyF >> dummyF;
+	 scan_in >> p.z >> p.x >> p.y >> confidence >> intensity;
     } else {
-	 scan_in.read((char*)&dummyF, sizeof(float));
-	 p.z = (double)dummyF;
-	 scan_in.read((char*)&dummyF, sizeof(float));
-	 p.x = (double)dummyF;
-	 scan_in.read((char*)&dummyF, sizeof(float));
-	 p.y = (double)dummyF;
-	 scan_in.read((char*)&dummyF, sizeof(float));
-	 scan_in.read((char*)&dummyF, sizeof(float));
+	 scan_in.read((char*)&data, sizeof(float));
+	 p.z = (double)data;
+	 scan_in.read((char*)&data, sizeof(float));
+	 p.x = (double)data;
+	 scan_in.read((char*)&data, sizeof(float));
+	 p.y = (double)data;
+	 scan_in.read((char*)&confidence, sizeof(float));
+	 scan_in.read((char*)&intensity, sizeof(float));
     }
-    
-    p.x *= -100.0;
-    p.y *= 100.0;
-    p.z *= 100.0;
-    
+
+    p.x *= 10.0;
+    p.y *= 10.0;
+    p.z *= 10.0;
+
     if (maxDist2 == -1 || (int)(sqr(p.x) + sqr(p.y) + sqr(p.z)) < maxDist2)
 	 ptss.push_back(p);
   }
+
+  cout << "Processing Scan " << scanFileName;
+  cout << " @ pose (" << euler[0] << "," << euler[1] << "," << euler[2]
+	  << "," << euler[3] << "," << euler[4] << ","  << euler[5] << ")" << endl;
+
 
   scan_in.close();
   scan_in.clear();
