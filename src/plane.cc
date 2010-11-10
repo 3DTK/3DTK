@@ -1,47 +1,26 @@
 /**
- * @file
- * @brief Main program for reducing 3D scans.
- * 
- * Program to reduce scans for use with slam6d 
- * Usage: bin/scan_red -r <NR> 'dir',
- * Use -r for octree based reduction  (voxel size=<NR>)
- * and 'dir' the directory of a set of scans
- * Reduced scans will be written to 'dir/reduced'
- *
- * @author Dorit Borrmann. Automation Group, Jacobs University Bremen gGmbH, Germany. 
- */
-#ifdef _MSC_VER
-#ifdef OPENMP
-#define _OPENMP
-#endif
-#endif
+ * @file 
+ * @author Dorit Borrmann. Institute of Computer Science, University of Osnabrueck, Germany.
+*/
 
-#define WANT_STREAM ///< define the WANT stream :)
-#include <string>
-using std::string;
-#include <iostream>
-using std::cout;
-using std::cerr;
-using std::endl;
+//#include "sparse/csparse.h"
+
+#include <cfloat>
 #include <fstream>
-using std::ofstream;
-#include <errno.h>
-
-#include "scan.h"
-
-#include "scan_io.h"
-#include "globals.icc"
-
-#ifdef _OPENMP
-#include <omp.h>
-#endif
-
-
 #ifndef _MSC_VER
 #include <getopt.h>
 #else
 #include "..\Visual_Studio_Projects\6DSLAM\6D_SLAM\XGetopt.h"
 #endif
+
+#include <iostream>
+using std::ofstream;
+using std::flush;
+using std::cout;
+using std::string;
+using std::cerr;
+using std::endl;
+#include <errno.h>
 
 #ifdef _MSC_VER
 #define strcasecmp _stricmp
@@ -55,12 +34,9 @@ using std::ofstream;
 #include <dlfcn.h>
 #endif
 
+#include "hough.h"
 
-/**
- * Explains the usage of this program's command line parameters
- */
-void usage(char* prog)
-{
+void usage(char* prog) {
 #ifndef _MSC_VER
   const string bold("\033[1m");
   const string normal("\033[m");
@@ -70,12 +46,9 @@ void usage(char* prog)
 #endif
   cout << endl
 	  << bold << "USAGE " << normal << endl
-	  << "   " << prog << " [options] -r <NR> directory" << endl << endl;
+	  << "   " << prog << " [options] directory" << endl << endl;
   cout << bold << "OPTIONS" << normal << endl
 
-	  << bold << "  -e" << normal << " NR, " << bold << "--end=" << normal << "NR" << endl
-	  << "         end after scan NR" << endl
-	  << endl
 	  << bold << "  -f" << normal << " F, " << bold << "--format=" << normal << "F" << endl
 	  << "         using shared library F for input" << endl
 	  << "         (chose F from {uos, uos_map, uos_frames, uos_map_frames, old, rts, rts_map, ifp, riegl_txt, riegl_bin, zahn, ply})" << endl
@@ -85,6 +58,10 @@ void usage(char* prog)
 	  << endl
 	  << bold << "  -M" << normal << " NR, " << bold << "--min=" << normal << "NR" << endl
 	  << "         neglegt all data points with a distance smaller than NR 'units'" << endl
+	  << endl
+	  << bold << "  -p" << normal << " P, " << bold << "--plane=" << normal << "P" << endl
+	  << "         using algorithm P for plane detection" << endl
+	  << "         (chose P from {rht, sht, pht, ppht, apht})" << endl
 	  << endl
 	  << bold << "  -r" << normal << " NR, " << bold << "--reduce=" << normal << "NR" << endl
 	  << "         turns on octree based point reduction (voxel size=<NR>)" << endl
@@ -100,26 +77,12 @@ void usage(char* prog)
 	  << "   " << prog << " --max=5000 -r 10.2 dat" << endl
 	  << "   " << prog << " -s 2 -e 10 -r dat" << endl << endl;
   exit(1);
-}
 
-/** A function that parses the command-line arguments and sets the respective flags.
- * @param argc the number of arguments
- * @param argv the arguments
- * @param dir the directory
- * @param red using point reduction?
- * @param rand use randomized point reduction?
- * @param start starting at scan number 'start'
- * @param end stopping at scan number 'end'
- * @param maxDist - maximal distance of points being loaded
- * @param minDist - minimal distance of points being loaded
- * @param quiet switches on/off the quiet mode
- * @param veryQuiet switches on/off the 'very quiet' mode
- * @return 0, if the parsing was successful. 1 otherwise
- */
-int parseArgs(int argc, char **argv, string &dir, double &red, 
-		    int &start, int &end, int &maxDist, int &minDist, int &octree, 
-		    reader_type &type)
-{
+}
+int parseArgs(int argc, char **argv, string &dir, double &red, int &start, int
+  &maxDist, int&minDist, int &octree, reader_type &type, plane_alg &alg, bool
+  &quiet) {
+
   bool reduced = false;
   int  c;
   // from unistd.h:
@@ -133,15 +96,16 @@ int parseArgs(int argc, char **argv, string &dir, double &red,
     { "max",             required_argument,   0,  'm' },
     { "min",             required_argument,   0,  'M' },
     { "start",           required_argument,   0,  's' },
-    { "end",             required_argument,   0,  'e' },
     { "reduce",          required_argument,   0,  'r' },
+    { "plane",           required_argument,   0,  'p' },
+    { "quit",            no_argument,         0,  'q' },
     { "octree",          optional_argument,   0,  'O' },
     { 0,           0,   0,   0}                    // needed, cf. getopt.h
   };
 
   cout << endl;
-  while ((c = getopt_long(argc, argv, "f:r:s:e:m:M:O:", longopts, NULL)) != -1)
-    switch (c)
+  while ((c = getopt_long(argc, argv, "f:r:s:e:m:M:p:Oq", longopts, NULL)) != -1) 
+  switch (c)
 	 {
 	 case 'r':
 	   red = atof(optarg);
@@ -150,11 +114,6 @@ int parseArgs(int argc, char **argv, string &dir, double &red,
 	 case 's':
 	   start = atoi(optarg);
 	   if (start < 0) { cerr << "Error: Cannot start at a negative scan number.\n"; exit(1); }
-	   break;
-	 case 'e':
-	   end = atoi(optarg);
-	   if (end < 0)     { cerr << "Error: Cannot end at a negative scan number.\n"; exit(1); }
-	   if (end < start) { cerr << "Error: <end> cannot be smaller than <start>.\n"; exit(1); }
 	   break;
 	 case 'f': 
 	   if (strcasecmp(optarg, "uos") == 0) type = UOS;
@@ -177,12 +136,22 @@ int parseArgs(int argc, char **argv, string &dir, double &red,
 	   else if (strcasecmp(optarg, "front") == 0) type = FRONT;
 	   else if (strcasecmp(optarg, "x3d") == 0) type = X3D;
 	   else if (strcasecmp(optarg, "rxp") == 0) type = RXP;
-	   else if (strcasecmp(optarg, "ais") == 0) type = AIS;
 	   else {
 		 abort ();
 	   }
 	   break;
-	 case 'm':
+   case 'p': 
+      if(strcasecmp(optarg, "sht") == 0) alg = RHT;
+      else if(strcasecmp(optarg, "rht") == 0) alg = SHT;
+      else if(strcasecmp(optarg, "pht") == 0) alg = PHT;
+      else if(strcasecmp(optarg, "ppht") == 0) alg = PPHT;
+      else if(strcasecmp(optarg, "apht") == 0) alg = APHT;
+      else abort();
+      break;
+	 case 'q':
+     quiet = true;
+     break;
+   case 'm':
 	   maxDist = atoi(optarg);
 	   break;
 	 case 'O':
@@ -202,10 +171,6 @@ int parseArgs(int argc, char **argv, string &dir, double &red,
 	   abort ();
       }
 
-  if(!reduced) {
-    cerr << "\n*** Reduction method missed ***" << endl;
-    usage(argv[0]);
-  }
   if (optind != argc-1) {
     cerr << "\n*** Directory missing ***" << endl;
     usage(argv[0]);
@@ -221,16 +186,12 @@ int parseArgs(int argc, char **argv, string &dir, double &red,
   return 0;
 }
 
-
 /**
- * Main program for reducing scans.
- * Usage: bin/scan_red -r <NR> 'dir',
- * Use -r for octree based reduction  (voxel size=<NR>)
- * and 'dir' the directory of a set of scans
- * Reduced scans will be written to 'dir/reduced'
- * 
+ * Main function. The Hough Transform is called for the scan indicated as
+ * argument.
+ *
  */
-int main(int argc, char **argv)
+int main(int argc, char **argv) 
 {
 
   cout << "(c) Jacobs University Bremen, gGmbH, 2010" << endl << endl;
@@ -238,84 +199,75 @@ int main(int argc, char **argv)
   if (argc <= 1) {
     usage(argv[0]);
   }
-
   // parsing the command line parameters
   // init, default values if not specified
   string dir;
   double red   = -1.0;
-  int    start = 0,   end = -1;
+  int    start = 0;
   int    maxDist    = -1;
   int    minDist    = -1;
   int    octree     = 0;
-  reader_type type    = RIEGL_TXT;
+  bool   quiet = false;
+  reader_type type    = UOS;
+  plane_alg alg    = RHT;
   
-  parseArgs(argc, argv, dir, red, start, end, maxDist, minDist, octree, type);
-
-  //@@@ to do :-)
-
-  // Get Scans
+  parseArgs(argc, argv, dir, red, start, maxDist, minDist, octree, type, alg, quiet);
   Scan::dir = dir;
   int fileNr = start;
-  string reddir = dir + "reduced"; 
- 
+  string planedir = dir + "planes"; 
+
 #ifdef _MSC_VER
-  int success = mkdir(reddir.c_str());
+  int success = mkdir(planedir.c_str());
 #else
-  int success = mkdir(reddir.c_str(), S_IRWXU|S_IRWXG|S_IRWXO);
+  int success = mkdir(planedir.c_str(), S_IRWXU|S_IRWXG|S_IRWXO);
 #endif
   if(success == 0) { 
-    cout << "Writing scans to " << reddir << endl;
+    if(!quiet) {
+      cout << "Writing planes to " << planedir << endl;
+    }
   } else if(errno == EEXIST) {
-    cout << "Directory " << reddir << " exists already.  CONTINUE" << endl; 
+    cout << "Directory " << planedir << " exists already.  CONTINUE" << endl; 
   } else {
-    cerr << "Creating directory " << reddir << " failed" << endl;
+    cerr << "Creating directory " << planedir << " failed" << endl;
     exit(1);
   }
-
-  while (fileNr <= end) {
-    Scan::readScans(type, fileNr, fileNr, dir, maxDist, minDist, 0);
-      // reduction filter for current scan!
-    Scan::allScans[0]->calcReducedPoints(red, octree);
-    
-    cout << "Writing Scan No. " << fileNr ;
-    cout << " with " << Scan::allScans[0]->get_points_red_size() << " points" << endl; 
-    string scanFileName;
-    string poseFileName;
+  Scan::readScans(type, fileNr, fileNr, dir, maxDist, minDist, 0);
+  // reduction filter for current scan!
+  Scan::allScans[0]->calcReducedPoints(red, octree);
   
-    poseFileName = dir  + "reduced/scan" + to_string(fileNr,3) + ".pose";
-    scanFileName = dir + "reduced/scan" + to_string(fileNr,3) + ".3d";
-   
-     
-    ofstream redptsout(scanFileName.c_str());
-	  for (int j = 0; j < Scan::allScans[0]->get_points_red_size(); j++) {
-	       redptsout << Scan::allScans[0]->get_points_red()[j][0] << " "
-			   << Scan::allScans[0]->get_points_red()[j][1] << " "
-			   << Scan::allScans[0]->get_points_red()[j][2] << endl;
-	  }
-    redptsout.close();
-    redptsout.clear();
-      
+  long starttime = GetCurrentTimeInMilliSec(); 
+  double id[16];
+  M4identity(id);
+  for(int i = 0; i < 10; i++) {
+    Scan::allScans[0]->transform(id, Scan::ICP, 0);  // write end pose
+  }
+  Hough hough(Scan::allScans[0], quiet);
 
-    ofstream posout(poseFileName.c_str());
-    const double* rPos = Scan::allScans[0]->get_rPos();
-    const double* rPosTheta = Scan::allScans[0]->get_rPosTheta();
-    
-    posout << rPos[0] << " " 
-           << rPos[1] << " " 
-           << rPos[2] << endl   
-           << deg(rPosTheta[0]) << " " 
-           << deg(rPosTheta[1]) << " " 
-           << deg(rPosTheta[2]) << endl;  
-    
-    posout.close();
-    posout.clear();
+  starttime = (GetCurrentTimeInMilliSec() - starttime);
+  cout << "Time for Constructor call: " << starttime << endl;
 
-    delete Scan::allScans[0];
-    Scan::allScans.clear();
-    
-    fileNr++;
-  }   
+  starttime = GetCurrentTimeInMilliSec(); 
+  // choose Hough method here
+  switch(alg) {
+    case RHT: hough.RHT();
+              break;
+    case SHT: hough.SHT();
+              break;
+    case PHT: hough.PHT();
+              break;
+    case PPHT:  hough.PPHT();
+                break;
+    case APHT:  hough.APHT();
+                break;
+    default:  usage(argv[0]);
+              exit(1);
+              break;
+  }
 
-  cout << endl << endl;
-  cout << "Normal program end." << endl << endl;
+  hough.writePlanes();
+  starttime = (GetCurrentTimeInMilliSec() - starttime);
+  cout << "Time for Hough Transform: " << starttime << endl;
+  delete Scan::allScans[0];
+  Scan::allScans.clear();
 }
+

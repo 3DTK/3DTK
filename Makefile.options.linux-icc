@@ -90,6 +90,12 @@ PMDPKG = `pkg-config --cflags opencv` `pkg-config --cflags ftgl` `pkg-config --l
 SIFTFLAGS = -DHAS_PANO13 
 
 #
+# Plane detection
+# -----------------------
+#
+#WITH_PLANE = True              # compile Plane extraction
+
+#
 # TORO options
 # ------------------
 #

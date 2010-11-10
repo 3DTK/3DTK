@@ -1,0 +1,22 @@
+inline char *ConfigFileHough::Get_CfgFileName(){return CfgFileName;}
+inline double ConfigFileHough::Get_MaxDist(){return MaxDist;}
+inline double ConfigFileHough::Get_MinDist(){return MinDist;}
+
+inline int ConfigFileHough::Get_AccumulatorMax(){return AccumulatorMax;}
+inline int ConfigFileHough::Get_MinSizeAllPoints(){return MinSizeAllPoints;}
+inline int ConfigFileHough::Get_RhoNum(){return RhoNum;}
+inline int ConfigFileHough::Get_ThetaNum(){return ThetaNum;}
+inline int ConfigFileHough::Get_PhiNum(){return PhiNum;}
+inline int ConfigFileHough::Get_RhoMax(){return RhoMax;}
+inline double ConfigFileHough::Get_MaxPointPlaneDist(){return MaxPointPlaneDist;}
+inline int ConfigFileHough::Get_MaxPlanes(){return MaxPlanes;}
+
+inline int ConfigFileHough::Get_MinPlaneSize(){return MinPlaneSize;}
+inline double ConfigFileHough::Get_MinPlanarity(){return MinPlanarity;}
+inline double ConfigFileHough::Get_PlaneRatio(){return PlaneRatio;}
+inline double ConfigFileHough::Get_PointDist(){return PointDist;}
+inline bool ConfigFileHough::Get_PeakWindow(){return PeakWindow;}
+inline int ConfigFileHough::Get_WindowSize(){return WindowSize;}
+inline int ConfigFileHough::Get_TrashMax(){return TrashMax;}
+inline int ConfigFileHough::Get_AccumulatorType(){return AccumulatorType;}
+inline char* ConfigFileHough::Get_PlaneDir(){return PlaneDir;}

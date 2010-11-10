@@ -147,6 +147,7 @@ inline T deg(const T rad)
   return ( (rad * 360) / (2 * M_PI) ); 
 }
 
+
 /**
  * Computes the <i>squared</i> length of a 3-vector
  *
@@ -498,6 +499,65 @@ inline int rand(int rnd)
   return (int) ((float)rnd * std::rand() / (RAND_MAX + 1.0));
 }
 
+/**
+  * Transforms a point in cartesian coordinates into polar 
+  * coordinates 
+  */
+
+inline void toPolar(double *n, double *polar) {
+  double phi, theta, rho;
+  rho = Len(n);
+  Normalize3(n);
+
+ // if(fabs(1 - fabs(n[1])) < 0.001)  {
+ // cout << "Y " << n[0] << " " << n[1] << " " << n[2] << endl;
+
+  phi = acos(n[2]);
+  //if ( fabs(phi) < 0.0001) phi = 0.0001;
+  //if ( fabs(M_PI - phi) < 0.0001) phi = 0.0001;
+
+  double theta0;
+
+  if(fabs(phi) < 0.0001) {
+    theta = 0.0;
+  } else if(fabs(M_PI - phi) < 0.0001) {
+    theta = 0.0;
+  } else {
+    if(fabs(n[0]/sin(phi)) > 1.0) {
+      if(n[0]/sin(phi) < 0) {
+        theta0 = M_PI;
+      } else {
+        theta0 = 0.0;
+      }
+    } else {
+      theta0 = acos(n[0]/sin(phi));
+    
+    }
+  
+    
+    double sintheta = n[1]/sin(phi);
+
+    double EPS = 0.0001;
+
+    if(fabs(sin(theta0) - sintheta) < EPS) {
+      theta = theta0;
+    } else if(fabs( sin( 2*M_PI - theta0 ) - sintheta ) < EPS) {
+      theta = 2*M_PI - theta0;
+    } else {
+      theta = 0;
+      cout << "Fehler" << endl;
+    }
+
+  }
+ /* } else {
+    theta = 0.0;
+    phi = 0.0;
+  }*/
+  polar[0] = phi;
+  polar[1] = theta;
+  polar[2] = rho;
+
+}
 
 /*
  *   Computes the submatrix without

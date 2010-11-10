@@ -93,6 +93,12 @@ PMDPKG = `pkg-config --cflags opencv` `pkg-config --cflags ftgl` `pkg-config --l
 #WITH_SIFT = WITH_SIFT         # compile SIFT tools
 
 #
+# Plane detection
+# -----------------------
+#
+#WITH_PLANE = True              # compile Plane extraction
+
+#
 # TORO options
 # ------------------
 #
