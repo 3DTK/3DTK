@@ -25,6 +25,8 @@ public:
    */
   inline PtPair(double *_p1, double *_p2);
   
+  inline PtPair(Point &p1, Point &p2);
+  
   inline PtPair();
 
   inline friend ostream& operator<<(ostream& os, const PtPair& pair);
