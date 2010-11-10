@@ -42,6 +42,10 @@ ifdef WITH_SIFT
 TARGETS += $(OBJ)libANN.a $(BIN)autopano $(BIN)autopano-sift-c $(BIN)generatesiftfeatures $(BIN)mergehistograms $(BIN)panoramacreator $(BIN)visualizemap $(BIN)visualizescan $(BIN)reduceppc $(BIN)matchsiftfeatures $(BIN)registerscans $(BIN)readscan $(BIN)visualizematches $(BIN)visualizeregistrations
 endif
 
+ifdef WITH_PLANE
+TARGETS += $(BIN)planes
+endif
+
 ifdef WITH_TORO
 TARGETS += $(BIN)toro3d
 endif
@@ -349,10 +353,43 @@ $(BIN)scan_red: $(OBJ)scanlib.a $(SRC)globals.icc $(SRC)scan_red.cc $(OBJ)libANN
 
 $(BIN)scan_diff: $(OBJ)scanlib.a $(SRC)globals.icc $(SRC)scan_diff.cc $(OBJ)libANN.a
 	echo Compiling and Linking Scan Difference ...
-	$(GPP) $(CFLAGS) -I$(SRC)ann_1.1.1_modified/include/ -o $(BIN)scan_diff $(SRC)scan_diff.cc $(OBJ)scanlib.a $(OBJ)libANN.a -ldl $(LIBRARIES) 
+	$(GPP) $(CFLAGS) -I$(SRC)ann_1.1.1_modified/include/ -o $(BIN)scan_diff -I$(SRC) $(SRC)scan_diff.cc $(OBJ)scanlib.a $(OBJ)libANN.a -ldl $(LIBRARIES) 
 	echo DONE
 	echo
 
+############# PLANE EXTRACTION #############
+
+$(BIN)planes: $(OBJ)convexplane.o $(OBJ)accumulator.o $(OBJ)hsm3d.o $(OBJ)hough3D.o $(OBJ)ConfigFileHough.o $(OBJ)parascan.o $(OBJ)quadtree.o $(SRC)plane.cc $(OBJ)scanlib.a $(OBJ)csparse.o $(OBJ)libANN.a $(OBJ)libnewmat.a
+	echo Compiling and Linking Plane Extraction ...
+	$(GPP) $(CFLAGS) -I$(SRC)ann_1.1.1_modified/include/ -o $(BIN)planes $(SRC)plane.cc $(OBJ)hough3D.o $(OBJ)convexplane.o $(OBJ)hsm3d.o $(OBJ)accumulator.o $(OBJ)ConfigFileHough.o $(OBJ)parascan.o $(OBJ)quadtree.o $(OBJ)scanlib.a $(OBJ)libANN.a $(OBJ)libnewmat.a -ldl $(LIBRARIES)
+
+$(OBJ)hough3D.o: $(SRC)hough.h $(SRC)hough.cc $(SRC)globals.icc $(OBJ)hsm3d.o $(OBJ)convexplane.o $(OBJ)accumulator.o $(OBJ)ConfigFileHough.o $(OBJ)quadtree.o $(OBJ)libnewmat.a
+	echo Compiling Hough Transform ...
+	$(GPP) $(CFLAGS) -I$(SRC)ann_1.1.1_modified/include/ -c -o $(OBJ)hough3D.o $(SRC)hough.cc  
+
+$(OBJ)convexplane.o: $(SRC)convexplane.h $(SRC)convexplane.cc 
+	echo Compiling Convex Plane Representation ...
+	$(GPP) $(CFLAGS) -c -o $(OBJ)convexplane.o $(SRC)convexplane.cc
+
+$(OBJ)accumulator.o: $(SRC)accumulator.h $(SRC)accumulator.cc $(SRC)hsm3d.h $(OBJ)ConfigFileHough.o
+	echo Compiling Accumulator Classes ...
+	$(GPP) $(CFLAGS) -c -o $(OBJ)accumulator.o $(SRC)accumulator.cc 
+
+$(OBJ)hsm3d.o: $(SRC)accumulator.h $(SRC)hsm3d.cc $(SRC)hsm3d.h 
+	echo Compiling Accumulator Cube Classes ...
+	$(GPP) $(CFLAGS) -c -o $(OBJ)hsm3d.o $(SRC)hsm3d.cc 
+
+$(OBJ)ConfigFileHough.o: $(SRC)ConfigFileHough.cc $(SRC)ConfigFileHough.icc $(SRC)ConfigFileHough.h $(SRC)parascan.o
+	echo Compiling Configfile for Hough Transform ...
+	$(GPP) $(CFLAGS) -c -o $(OBJ)ConfigFileHough.o $(SRC)ConfigFileHough.cc 
+
+$(OBJ)parascan.o: $(SRC)parascan.cc $(SRC)parascan.h
+	echo Compiling Parameter Scanning ...
+	$(GPP) $(CFLAGS) -c -o $(OBJ)parascan.o $(SRC)parascan.cc
+
+$(OBJ)quadtree.o: $(SRC)quadtree.h $(SRC)quadtree.cc $(SRC)globals.icc
+	echo Compiling quadtree ...
+	$(GPP) $(CFLAGS) -c -o $(OBJ)quadtree.o $(SRC)quadtree.cc 
 ############# SHOW ##############
 
 $(BIN)show: $(OBJ)libglui.a $(SHOWSRC)show.cc $(SHOWSRC)show.h $(SHOWSRC)show.icc $(SHOWSRC)show1.icc $(SHOWSRC)show_menu.cc $(SHOWSRC)show_gl.cc $(SHOWSRC)show_animate.cc $(SRC)point.h $(SRC)point.icc $(SRC)globals.icc $(OBJ)scan.o $(OBJ)vertexarray.o $(OBJ)PathGraph.o $(OBJ)NurbsPath.o $(OBJ)viewcull.o $(OBJ)scanlib.a $(OBJ)colormanager.o  $(OBJ)libANN.a $(SRC)Boctree.h $(SHOWSRC)show_Boctree.h $(SRC)point_type.h

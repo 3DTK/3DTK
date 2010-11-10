@@ -36,6 +36,11 @@ inline int Scan::get_points_red_size() const
   return points_red_size;
 }
 
+inline const double** Scan::get_points_reduced() const
+{
+  return (const double**)points_red;
+}
+
 inline void Scan::clearPoints() {
   points.clear();
   vector<Point>().swap(points);  //  swap trick, forces STL to free the memory

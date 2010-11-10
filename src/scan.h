@@ -144,6 +144,8 @@ public:
   inline const vector <Point>* get_points() const;
   inline const double** get_points_red() const;
   inline void setPoints(vector <Point> *_points);
+  inline const double** get_points_reduced() const;
+
   inline void clearPoints();
 
   //FIXME
@@ -190,7 +192,7 @@ private:
    * here would mean too many conversions, therefore loss of speed for LUM.
    */
   double **points_red;
-
+  
   /** 
    * number elements of the array 
    */
