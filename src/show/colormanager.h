@@ -203,6 +203,7 @@ template <class T=float> class ColorManager {
 
 };
 
+
 template <class T = float> class ColorManagerC : public ColorManager<T> {
   public:
     ColorManagerC(unsigned int buckets, unsigned int pointdim, float *mins, float *maxs, const float _color[3]) : ColorManager<T>(buckets, pointdim, mins, maxs) {
@@ -228,6 +229,22 @@ template <class T = float> class ColorManagerC : public ColorManager<T> {
 
   private:
     float color[3];
+};
+
+template <class T = float> class CColorManager : public ColorManager<T> {
+  public:
+    CColorManager(unsigned int buckets, unsigned int pointdim, float *mins, float *maxs, unsigned int _colordim) : ColorManager<T>(buckets, pointdim, mins, maxs) {
+      colordim = _colordim;
+    }
+
+    void setColor(T *val) {
+      // TODO implement conversion from T to color
+      //T color = val(colordim)
+      //glColor3f(???) 
+    }
+
+  private:
+    unsigned int colordim;
 };
 
 

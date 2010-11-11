@@ -27,16 +27,17 @@ public:
   static const unsigned int USE_DEVIATION;
   static const unsigned int USE_HEIGHT;
   static const unsigned int USE_TYPE;
+  static const unsigned int USE_COLOR;
 
   PointType() {
     types = USE_NONE;
     pointdim = 3;
-    dimensionmap[1] = dimensionmap[2] = dimensionmap[3] = dimensionmap[4] = 1; // choose height per default  
+    dimensionmap[1] = dimensionmap[2] = dimensionmap[3] = dimensionmap[4] = dimensionmap[5] = 1; // choose height per default  
     dimensionmap[0] = 1;  // height 
   }
 
   PointType(unsigned int _types) : types(_types) {
-    dimensionmap[1] = dimensionmap[2] = dimensionmap[3] = dimensionmap[4] = 1; // choose height per default  
+    dimensionmap[1] = dimensionmap[2] = dimensionmap[3] = dimensionmap[4] = dimensionmap[5] = 1; // choose height per default  
     dimensionmap[0] = 1;  // height 
 
     pointdim = 3;
@@ -44,6 +45,7 @@ public:
     if (types & PointType::USE_AMPLITUDE) dimensionmap[2] = pointdim++;  
     if (types & PointType::USE_DEVIATION) dimensionmap[3] = pointdim++;  
     if (types & PointType::USE_TYPE) dimensionmap[4] = pointdim++; 
+    if (types & PointType::USE_COLOR) dimensionmap[5] = pointdim++; 
   }
 
   bool hasReflectance() {
@@ -57,6 +59,9 @@ public:
   }
   bool hasType() {
     return hasType(USE_TYPE); 
+  }
+  bool hasColor() {
+    return hasType(USE_COLOR); 
   }
 
   unsigned int getType(unsigned int type) {
@@ -72,6 +77,8 @@ public:
       return dimensionmap[3];
     } else if (type == USE_TYPE) {
       return dimensionmap[4];
+    } else if (type == USE_COLOR) {
+      return dimensionmap[5];
     } else {
       return 0;
     }
@@ -95,6 +102,10 @@ public:
     }
     if (types & USE_TYPE) {  
       p[counter++] = P.type;
+    }
+    if (types & USE_COLOR) {  
+      // TODO insert conversion from point color representation to T
+//      p[counter++] = P.red; ??
     }
 
     return p;
@@ -125,7 +136,7 @@ private:
   /**
    * Derived from types, to map type to the array index for each point
    **/
-  int dimensionmap[5];
+  int dimensionmap[6];
 
   bool hasType(unsigned int type) {
     return types & type;
@@ -140,5 +151,6 @@ template <class T> const unsigned int PointType<T>::USE_AMPLITUDE = 2;
 template <class T> const unsigned int PointType<T>::USE_DEVIATION = 4;
 template <class T> const unsigned int PointType<T>::USE_HEIGHT = 8;
 template <class T> const unsigned int PointType<T>::USE_TYPE = 16;
+template <class T> const unsigned int PointType<T>::USE_COLOR = 32;
 
 #endif
