@@ -33,6 +33,7 @@ template <class T = float> class ScanColorManager {
   static const unsigned int MODE_STATIC;
   static const unsigned int MODE_COLOR_SCAN;
   static const unsigned int MODE_ANIMATION;
+  static const unsigned int MODE_POINT_COLOR;
 
     ScanColorManager(unsigned int _buckets, PointType<T> type) : pointtype(type) {
       valid = false;
@@ -114,6 +115,10 @@ template <class T = float> class ScanColorManager {
         for (unsigned int i = 0; i < allScans.size(); i++) {
           allScans[i]->setColorManager(0);
         }
+      } else if (mode == ScanColorManager<T>::MODE_POINT_COLOR) {
+        for (unsigned int i = 0; i < allScans.size(); i++) {
+          allScans[i]->setColorManager(colorsManager[i]);
+        }
       }
     }
     void setInvert(bool invert) {
@@ -143,8 +148,14 @@ template <class T = float> class ScanColorManager {
           ColorManagerC<T> *cmc = new ColorManagerC<T>(buckets, pointtype.getPointDim(), mins, maxs, colormap[i%6]);
           scanManager.push_back(cmc);
 
+          // new colormanager for scan index influenced colorscheme
+          CColorManager<T> *ccm = new CColorManager<T>(buckets, pointtype.getPointDim(), mins, maxs, pointtype.getType(PointType<T>::USE_COLOR));
+          colorsManager.push_back(ccm);
+
           allManager.push_back(cm);
           allManager.push_back(cmc);
+          allManager.push_back(ccm);
+
         }
         valid = true;
       }
@@ -192,6 +203,7 @@ template <class T = float> class ScanColorManager {
 
     vector<ColorManager<T> *> staticManager;
     vector<ColorManagerC<T> *> scanManager;
+    vector<CColorManager<T> *> colorsManager;
 //    vector<ColorManager *> scanAnimManager;  // Implement later
 
     unsigned int currenttype;
@@ -215,6 +227,7 @@ template <class T = float> class ScanColorManager {
 template <class T> const unsigned int ScanColorManager<T>::MODE_STATIC = 0;
 template <class T> const unsigned int ScanColorManager<T>::MODE_COLOR_SCAN = 1;
 template <class T> const unsigned int ScanColorManager<T>::MODE_ANIMATION = 2;
+template <class T> const unsigned int ScanColorManager<T>::MODE_POINT_COLOR = 3;
   
 
 /**
