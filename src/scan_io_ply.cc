@@ -51,7 +51,7 @@ int ScanIO_ply::readScans(int start, int end, string &dir, int maxDist, int mind
  if (end > -1 && fileCounter > end) return -1; // 'nuf read
   scanFileName = dir + "scan" + to_string(fileCounter,3) + ".ply";   
   scan_in.open(scanFileName.c_str());
-  
+ 
   // read 3D scan
   if (!scan_in.good()) return -1;  // no more scans to read  
   
@@ -88,15 +88,18 @@ int ScanIO_ply::readScans(int start, int end, string &dir, int maxDist, int mind
     double rPosTheta[3];
     double rPos[3];
     Matrix4ToEuler(matrix, rPosTheta, rPos);
-
-
   }
 
   for (int i=0; i < nr; i++) {	 
     Point p;
     float data, confidence, intensity;
+    int r, g, b;
     if (!binary) {
-	 scan_in >> p.z >> p.x >> p.y >> confidence >> intensity;
+	 //scan_in >> p.z >> p.x >> p.y >> confidence >> intensity;
+	    scan_in >> p.z >> p.x >> p.y >> r >> g >> b;
+      p.rgb[0] = (char)r;
+      p.rgb[1] = (char)g;
+      p.rgb[2] = (char)b;
     } else {
 	 scan_in.read((char*)&data, sizeof(float));
 	 p.z = (double)data;
