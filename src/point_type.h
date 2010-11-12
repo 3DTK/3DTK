@@ -12,6 +12,7 @@ using std::endl;
 
 #include <iostream>
 #include <fstream>
+#include <string.h>
 
 #include "point.h"
 
@@ -104,8 +105,8 @@ public:
       p[counter++] = P.type;
     }
     if (types & USE_COLOR) {  
-      // TODO insert conversion from point color representation to T
-//      p[counter++] = P.red; ??
+      memcpy(&p[counter], P.rgb, 3);
+      counter++;
     }
 
     return p;

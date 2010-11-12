@@ -148,7 +148,7 @@ template <class T = float> class ScanColorManager {
           ColorManagerC<T> *cmc = new ColorManagerC<T>(buckets, pointtype.getPointDim(), mins, maxs, colormap[i%6]);
           scanManager.push_back(cmc);
 
-          // new colormanager for scan index influenced colorscheme
+          // new colormanager for the color based on the color of the points
           CColorManager<T> *ccm = new CColorManager<T>(buckets, pointtype.getPointDim(), mins, maxs, pointtype.getType(PointType<T>::USE_COLOR));
           colorsManager.push_back(ccm);
 

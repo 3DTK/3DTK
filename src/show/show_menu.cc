@@ -263,7 +263,14 @@ void newMenu()
   glui1->add_radiobutton_to_group(colorm_rog, "Rand");
   glui1->add_radiobutton_to_group(colorm_rog, "SHSV");
 
-  glui1->add_checkbox_to_panel(color_panel, "Id Scans by Color", &scans_colored, 0,  &setScansColored);
+  GLUI_Panel *scans_color = glui1->add_rollout_to_panel(color_panel, "Color type:");
+  scans_color->set_alignment(GLUI_ALIGN_LEFT);
+  GLUI_RadioGroup *scans_colored = glui1->add_radiogroup_to_panel(scans_color, &colorScanVal, 0, &setScansColored);
+  glui1->add_radiobutton_to_group(scans_colored, "None");
+  glui1->add_radiobutton_to_group(scans_colored, "Id Scans by Color");
+  GLUI_RadioButton *colorb = glui1->add_radiobutton_to_group( scans_colored, "Color by Points");
+  if (!(pointtype.hasColor())) colorb->disable(); 
+
   mincol_spinner = glui1->add_spinner_to_panel(color_panel, "Min Val:", GLUI_SPINNER_FLOAT, &mincolor_value, 0, &minmaxChanged);
   mincol_spinner->set_alignment(GLUI_ALIGN_RIGHT);
   maxcol_spinner = glui1->add_spinner_to_panel(color_panel, "Max Val:", GLUI_SPINNER_FLOAT, &maxcolor_value, 0, &minmaxChanged);

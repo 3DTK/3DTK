@@ -240,12 +240,12 @@ double idealfps = 20.0;
  */
 int listboxColorVal = 0;
 int listboxColorMapVal = 0;
+int colorScanVal = 0;
 ScanColorManager<sfloat> *cm;
 float mincolor_value = 0.0;
 float maxcolor_value = 0.0;
 //unsigned int  types = Point::USE_HEIGHT;
 PointType<sfloat> pointtype;
-int scans_colored = 0;
 
 /**
  * Contains the selected points for each scan
@@ -380,12 +380,13 @@ int parseArgs(int argc,char **argv, string &dir, int& start, int& end, int& maxD
     { "deviation",       no_argument,         0,  'd' },
     { "height",          no_argument,         0,  'h' },
     { "type",            no_argument,         0,  'T' },
+    { "color",           no_argument,         0,  'c' },
     { "saveOct",         no_argument,         0,  '0' },
     { "loadOct",         no_argument,         0,  '1' },
     { 0,           0,   0,   0}                    // needed, cf. getopt.h
   };
 
-  while ((c = getopt_long(argc, argv,"F:f:s:e:r:m:M:O:wtRadh", longopts, NULL)) != -1)
+  while ((c = getopt_long(argc, argv,"F:f:s:e:r:m:M:O:wtRadhTc", longopts, NULL)) != -1)
     switch (c)
 	 {
 	 case 's':
@@ -455,6 +456,9 @@ int parseArgs(int argc,char **argv, string &dir, int& start, int& end, int& maxD
      break;
    case 'T':
      types |= PointType<sfloat>::USE_TYPE;
+     break;
+   case 'c':
+     types |= PointType<sfloat>::USE_COLOR;
      break;
    case 'F':
      fps = atof(optarg);

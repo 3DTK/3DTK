@@ -10,6 +10,7 @@
 #else
 #include <GL/glut.h>
 #endif
+#include <string.h>
 
 class ColorMap {
   public:
@@ -133,9 +134,9 @@ template <class T=float> class ColorManager {
       delete[] maxs;
     }
 
-    void setColor(T *val) {
+    virtual void setColor(T *val) {
       int index = toIndex(val);
-      glColor3f( colormap[index][0], colormap[index][1], colormap[index][2] );
+      glColor3f( colormap[index][0], colormap[index][1], colormap[index][2] ); 
     }
 
     virtual void setColorMap(ColorMap &cm) {
@@ -238,9 +239,11 @@ template <class T = float> class CColorManager : public ColorManager<T> {
     }
 
     void setColor(T *val) {
-      // TODO implement conversion from T to color
-      //T color = val(colordim)
-      //glColor3f(???) 
+      
+      GLubyte color[3];
+      memcpy(color, &val[colordim], 3);
+      
+      glColor3ubv(color); 
     }
 
   private:
