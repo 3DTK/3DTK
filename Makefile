@@ -12,7 +12,7 @@ APSSRC  = src/sift/autopano-sift-c/
 SIFTSRC = src/sift/
 DOC     = doc/
 
-TARGETS = $(BIN)slam6D $(BIN)scan_io_uos.so $(BIN)scan_io_rxp.so $(BIN)scan_io_uos_map.so $(BIN)scan_io_uos_frames.so $(BIN)scan_io_uos_map_frames.so $(BIN)scan_io_old.so $(BIN)scan_io_x3d.so $(BIN)scan_io_asc.so $(BIN)scan_io_rts.so $(BIN)scan_io_iais.so $(BIN)scan_io_rts_map.so $(BIN)scan_io_front.so $(BIN)scan_io_riegl_txt.so $(BIN)scan_io_riegl_bin.so $(BIN)scan_io_zuf.so $(BIN)scan_io_xyz.so $(BIN)scan_io_ifp.so $(BIN)scan_io_ply.so $(BIN)scan_io_wrl.so $(BIN)scan_io_zahn.so $(BIN)scan_io_ais.so
+TARGETS = $(BIN)slam6D $(BIN)scan_io_uos.so $(BIN)scan_io_uos_rgb.so $(BIN)scan_io_rxp.so $(BIN)scan_io_uos_map.so $(BIN)scan_io_uos_frames.so $(BIN)scan_io_uos_map_frames.so $(BIN)scan_io_old.so $(BIN)scan_io_x3d.so $(BIN)scan_io_asc.so $(BIN)scan_io_rts.so $(BIN)scan_io_iais.so $(BIN)scan_io_rts_map.so $(BIN)scan_io_front.so $(BIN)scan_io_riegl_txt.so $(BIN)scan_io_riegl_bin.so $(BIN)scan_io_zuf.so $(BIN)scan_io_xyz.so $(BIN)scan_io_ifp.so $(BIN)scan_io_ply.so $(BIN)scan_io_wrl.so $(BIN)scan_io_zahn.so $(BIN)scan_io_ais.so
 
 ifdef WITH_SCANRED
 TARGETS += $(BIN)scan_red
@@ -268,6 +268,10 @@ endif
 $(BIN)scan_io_uos_map.so: $(SRC)scan_io.h $(SRC)scan_io_uos_map.h $(SRC)scan_io_uos_map.cc $(SRC)point.h $(SRC)point.icc $(SRC)globals.icc
 	echo Compiling shared library for reading UOS scans with given map ...
 	$(GPP) $(CFLAGS) $(SHAREDFLAGS) -o $(BIN)scan_io_uos_map.so $(SRC)scan_io_uos_map.cc 
+
+$(BIN)scan_io_uos_rgb.so: $(SRC)scan_io.h $(SRC)scan_io_uos_rgb.h $(SRC)scan_io_uos_rgb.cc $(SRC)point.h $(SRC)point.icc $(SRC)globals.icc
+	echo Compiling shared library for reading UOS scans with color data ...
+	$(GPP) $(CFLAGS) $(SHAREDFLAGS) -o $(BIN)scan_io_uos_rgb.so $(SRC)scan_io_uos_rgb.cc 
 
 $(BIN)scan_io_uos_frames.so: $(SRC)scan_io.h $(SRC)scan_io_uos_frames.h $(SRC)scan_io_uos_frames.cc $(SRC)point.h $(SRC)point.icc $(SRC)globals.icc
 	echo Compiling shared library for reading UOS scans with frames as poses...
