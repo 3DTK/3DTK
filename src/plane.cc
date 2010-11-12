@@ -120,6 +120,7 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &start, int
 	   else if (strcasecmp(optarg, "uos_map") == 0) type = UOS_MAP;
 	   else if (strcasecmp(optarg, "uos_frames") == 0) type = UOS_FRAMES;
 	   else if (strcasecmp(optarg, "uos_map_frames") == 0) type = UOS_MAP_FRAMES;
+	   else if (strcasecmp(optarg, "uos_rgb") == 0) type = UOS_RGB;
 	   else if (strcasecmp(optarg, "old") == 0) type = OLD;
 	   else if (strcasecmp(optarg, "rts") == 0) type = RTS;
 	   else if (strcasecmp(optarg, "rts_map") == 0) type = RTS_MAP;
