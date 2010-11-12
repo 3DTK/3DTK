@@ -32,7 +32,7 @@ using std::stringstream;
 #include "globals.icc"
 
 enum reader_type {
-  UOS, UOS_MAP, UOS_FRAMES, UOS_MAP_FRAMES, OLD, RTS, RTS_MAP, RIEGL_TXT, RIEGL_BIN, IFP, ZAHN, PLY, WRL, XYZ, ZUF, ASC, IAIS, FRONT, X3D, RXP, KIT, AIS
+  UOS, UOS_MAP, UOS_FRAMES, UOS_MAP_FRAMES, UOS_RGB, OLD, RTS, RTS_MAP, RIEGL_TXT, RIEGL_BIN, IFP, ZAHN, PLY, WRL, XYZ, ZUF, ASC, IAIS, FRONT, X3D, RXP, KIT, AIS
 };
 
 // just some prototypes
