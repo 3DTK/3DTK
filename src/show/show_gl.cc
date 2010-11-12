@@ -1577,6 +1577,9 @@ void mapColorToValue(int dummy) {
     case 4:
       cm->setCurrentType(PointType<sfloat>::USE_TYPE);
       break;
+    case 5:
+      cm->setCurrentType(PointType<sfloat>::USE_COLOR);
+      break;
     default:
       break;
   };
@@ -1631,10 +1634,18 @@ void resetMinMax(int dummy) {
 }
 
 void setScansColored(int dummy) {
-  if (scans_colored) {
-    cm->setMode(ScanColorManager<double>::MODE_COLOR_SCAN);
-  } else {
-    cm->setMode(ScanColorManager<double>::MODE_STATIC);
+  switch(colorScanVal) {
+    case 0: 
+      cm->setMode(ScanColorManager<double>::MODE_STATIC);
+      break;
+    case 1: 
+      cm->setMode(ScanColorManager<double>::MODE_COLOR_SCAN);
+      break;
+    case 2:
+      cm->setMode(ScanColorManager<double>::MODE_POINT_COLOR);
+      break;
+    default:
+      break;
   }
 }
 

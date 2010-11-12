@@ -392,13 +392,13 @@ $(OBJ)quadtree.o: $(SRC)quadtree.h $(SRC)quadtree.cc $(SRC)globals.icc
 	$(GPP) $(CFLAGS) -c -o $(OBJ)quadtree.o $(SRC)quadtree.cc 
 ############# SHOW ##############
 
-$(BIN)show: $(OBJ)libglui.a $(SHOWSRC)show.cc $(SHOWSRC)show.h $(SHOWSRC)show.icc $(SHOWSRC)show1.icc $(SHOWSRC)show_menu.cc $(SHOWSRC)show_gl.cc $(SHOWSRC)show_animate.cc $(SRC)point.h $(SRC)point.icc $(SRC)globals.icc $(OBJ)scan.o $(OBJ)vertexarray.o $(OBJ)PathGraph.o $(OBJ)NurbsPath.o $(OBJ)viewcull.o $(OBJ)scanlib.a $(OBJ)colormanager.o  $(OBJ)libANN.a $(SRC)Boctree.h $(SHOWSRC)show_Boctree.h $(SRC)point_type.h
+$(BIN)show: $(OBJ)libglui.a $(SHOWSRC)show.cc $(SHOWSRC)show.h $(SHOWSRC)show.icc $(SHOWSRC)show1.icc $(SHOWSRC)show_menu.cc $(SHOWSRC)show_gl.cc $(SHOWSRC)show_animate.cc $(SRC)point.h $(SRC)point.icc $(SRC)globals.icc $(OBJ)scan.o $(OBJ)vertexarray.o $(OBJ)PathGraph.o $(OBJ)NurbsPath.o $(OBJ)viewcull.o $(OBJ)scanlib.a $(OBJ)colormanager.o $(OBJ)libANN.a $(SRC)Boctree.h $(SHOWSRC)show_Boctree.h $(SRC)point_type.h $(SHOWSRC)scancolormanager.h
 	echo Compiling and Linking Show ...
 	$(GPP) $(CFLAGS)  -I$(SRC)ann_1.1.1_modified/include/ -o $(BIN)show -I$(SRC) $(SHOWSRC)show.cc $(OBJ)scanlib.a $(OBJ)vertexarray.o $(OBJ)PathGraph.o $(OBJ)NurbsPath.o $(OBJ)viewcull.o $(OBJ)colormanager.o $(OBJ)libglui.a $(OBJ)libANN.a $(LIBRARIES)
 	echo DONE
 	echo
 
-$(OBJ)colormanager.o: $(SHOWSRC)colormanager.h $(SHOWSRC)colormanager.cc
+$(OBJ)colormanager.o: $(SHOWSRC)colormanager.h $(SHOWSRC)colormanager.cc 
 	echo Compiling ColorManager for Show ...
 	$(GPP) $(CFLAGS) -c -o $(OBJ)colormanager.o -I$(SRC) $(SHOWSRC)colormanager.cc
 

@@ -25,20 +25,23 @@ public:
   /**
    *	Default constructor
    */
-  inline Point() { x = y = z = 0.0; type = 0; reflectance = 0.0; amplitude = 0.0; deviation = 0.0; };
+  inline Point() { x = y = z = 0.0; type = 0; reflectance = 0.0; amplitude = 0.0; deviation = 0.0; rgb[0] = 255; rgb[1] = 255; rgb[2] = 255;};
   /**
    *	Copy constructor
    */
-  inline Point(const Point& p) { x = p.x; y = p.y; z = p.z; type = p.type; reflectance = p.reflectance; amplitude = p.amplitude; deviation = p.deviation; };
+  inline Point(const Point& p) { x = p.x; y = p.y; z = p.z; type = p.type;
+  reflectance = p.reflectance; amplitude = p.amplitude; deviation = p.deviation; rgb[0] = p.rgb[0]; rgb[1] = p.rgb[1]; rgb[2] = p.rgb[2];};
   /**
    *	Constructor with an array, i.e., vecctor of coordinates
    */
   inline Point(const double *p) { x = p[0]; y = p[1]; z = p[2]; };
+  inline Point(const double *p, const char *c) { x = p[0]; y = p[1]; z = p[2]; rgb[0] = c[0]; rgb[1] = c[1]; rgb[2] = c[2];};
 
   /**
    *	Constructor with three double values 
    */
   inline Point(const double _x, const double _y, const double _z) { x = _x; y = _y; z = _z; };
+  inline Point(const double _x, const double _y, const double _z, const char _r, const char _g, const char _b) { x = _x; y = _y; z = _z; rgb[0] = _r; rgb[1] = _g; rgb[2] = _b;};
   
   static inline Point cross(const Point &X, const Point &Y) {
     Point res;
@@ -86,6 +89,10 @@ public:
   double z;
   /// additional information about the point, e.g., semantic 
   int type;
+
+  // color information of the point between 0 and 255
+  // rgb
+  unsigned char rgb[3];
 
   float reflectance;
   float amplitude;
