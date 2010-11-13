@@ -2,7 +2,7 @@
 #include <iostream>
 #include <map>
 
-#include "scanToGrid.h"
+#include "grid/scanToGrid.h"
 
 using std::vector;
 using std::map;

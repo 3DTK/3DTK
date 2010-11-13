@@ -1,4 +1,4 @@
-#include "line.h"
+#include "grid/line.h"
 #include <cmath>
 
 /**
@@ -20,6 +20,6 @@ line::line(gridPoint* start, gridPoint* end)
  */
 double line::getLength()
 {
-    return sqrt(pow(start->getX() - end->getX(), 2) +
-		pow(start->getZ() - end->getZ(), 2));
+    return sqrt(pow((double)start->getX() - end->getX(), 2) +
+ 		pow((double)start->getZ() - end->getZ(), 2));
 }

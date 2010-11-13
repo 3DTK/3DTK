@@ -1,7 +1,7 @@
 #include <string.h>
 
-#include "viewcull.h"
-#include "scancolormanager.h"
+#include "show/viewcull.h"
+#include "show/scancolormanager.h"
 
 bool fullydisplayed = true;   // true if all points have been drawn to the screen
 bool showall = false;         // true iff next DrawPoints should redraw scene with all points

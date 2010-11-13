@@ -1,5 +1,5 @@
-#include "gridlines.h"
-#include "hough.h"
+#include "grid/gridlines.h"
+#include "grid/hough.h"
 
 #include <iostream>
 using std::cout;

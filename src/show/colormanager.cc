@@ -8,9 +8,9 @@
 #include <GL/glut.h>
 #endif
 #include "stdio.h"
-#include "../globals.icc"
+#include "slam6d/globals.icc"
 #include "float.h"
-#include "colormanager.h"
+#include "show/colormanager.h"
 
 
 

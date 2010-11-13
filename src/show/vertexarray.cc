@@ -1,4 +1,4 @@
-#include "vertexarray.h"
+#include "show/vertexarray.h"
 
 GLuint vertexArray::nameCounter = 0;
 

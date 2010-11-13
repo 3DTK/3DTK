@@ -1,4 +1,4 @@
-#include "scanGrid.h"
+#include "grid/scanGrid.h"
 
 /**
  * CTor.
