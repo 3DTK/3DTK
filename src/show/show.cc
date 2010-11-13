@@ -6,20 +6,19 @@
  * @author Kai Lingemann. Institute of Computer Science, University of Osnabrueck, Germany.
  */
 
-#include "show_Boctree.h"
-#include "show.h"
-//#include "camera.h"
-#include "NurbsPath.h"
-#include "vertexarray.h"
-#include "../scan.h"
-#include "glui/glui.h"  /* Header File For The glui funktions */
+#include "show/show_Boctree.h"
+#include "show/show.h"
+#include "show/NurbsPath.h"
+#include "show/vertexarray.h"
+#include "slam6d/scan.h"
+#include "glui/glui.h"  /* Header File For The glui functions */
 #include <fstream>
 using std::ifstream;
 #include <stdexcept>
 using std::exception;
 
 #ifdef _MSC_VER
-#include "..\..\Visual_Studio_Projects\6DSLAM\6D_SLAM\XGetopt.h"
+#include "XGetopt.h"
 #else
 #include <getopt.h>
 #endif
@@ -42,7 +41,7 @@ using std::exception;
 #include <omp.h>
 #endif
 
-#include "../point_type.h"
+#include "slam6d/point_type.h"
 
 /**
  * This vector contains the pointer to a vertex array for

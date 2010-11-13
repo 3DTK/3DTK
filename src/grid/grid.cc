@@ -1,6 +1,6 @@
 #include <iostream>
 
-#include "grid.h"
+#include "grid/grid.h"
 #include <cstdlib>
 
 /**

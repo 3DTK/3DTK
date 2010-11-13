@@ -1,4 +1,4 @@
-#include "parcelinfo.h"
+#include "grid/parcelinfo.h"
 
 long parcelinfo::parcelwidth;
 long parcelinfo::parcelheight;

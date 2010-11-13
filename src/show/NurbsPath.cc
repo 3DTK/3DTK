@@ -1,4 +1,4 @@
-#include "NurbsPath.h"
+#include "show/NurbsPath.h"
 
 /**
  * Smoothes a given path, using the Cox-De-Boor algorithm to compute

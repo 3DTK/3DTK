@@ -4,14 +4,14 @@
  * 
  * @author Jan Elseberg. Automation Group, Jacobs University Bremen gGmbH, Germany. 
  */
-#include "viewcull.h"
+#include "show/viewcull.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
 #include <GL/glut.h>
 #include <GL/glu.h>
 
-#include "../globals.icc"
+#include "slam6d/globals.icc"
 
 /** The 6 planes of the viewing frustum */
 float frustum[6][4];

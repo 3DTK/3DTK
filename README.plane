@@ -1,4 +1,4 @@
-For detection planes compile with the WITH_PLANE option.
+For detecting planes compile with the WITH_PLANE option.
 Adapt the settings in bin/hough.cfg for your data set.
 
 This is still work in progress. A more detailed description of how to use the

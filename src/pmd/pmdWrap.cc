@@ -9,11 +9,11 @@
 #include "cvpmd.h"
 #include "pmdWrap.h"
 
-#include "icp6Dhelix.h"
-#include "icp6Dortho.h"
-#include "icp6Dquat.h"
-#include "icp6Dsvd.h"
-#include "icp6Dapx.h"
+#include "slam6d/icp6Dhelix.h"
+#include "slam6d/icp6Dortho.h"
+#include "slam6d/icp6Dquat.h"
+#include "slam6d/icp6Dsvd.h"
+#include "slam6d/icp6Dapx.h"
 
 
 //TODO: releasePMDCam()

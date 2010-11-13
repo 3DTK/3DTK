@@ -1,14 +1,14 @@
-#include "scanGrid.h"
-#include "scanToGrid.h"
-#include "../scan.h"
-#include "scanmanager.h"
-#include "parcelmanager.h"
-#include "gridWriter.h"
-#include "viewpointinfo.h"
-#include "gridlines.h"
-#include "../globals.icc"
+#include "grid/scanGrid.h"
+#include "grid/scanToGrid.h"
+#include "slam6d/scan.h"
+#include "grid/scanmanager.h"
+#include "grid/parcelmanager.h"
+#include "grid/gridWriter.h"
+#include "grid/viewpointinfo.h"
+#include "grid/gridlines.h"
+#include "slam6d/globals.icc"
 
-#include "Debug.h"
+#include "grid/Debug.h"
 
 #include <math.h>
 #include <fstream>

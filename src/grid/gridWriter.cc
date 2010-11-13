@@ -1,4 +1,4 @@
-#include "gridWriter.h"
+#include "grid/gridWriter.h"
 #include <iterator>
 #include <cstdlib>
 #include <iostream>

@@ -4,7 +4,7 @@
  * @author Kai Lingemann. Institute of Computer Science, University of Osnabrueck, Germany.
  * @author Andreas Nuechter. Institute of Computer Science, University of Osnabrueck, Germany.
  */
-#include "colormanager.h"
+#include "show/colormanager.h"
 
 // GUI variables
 
