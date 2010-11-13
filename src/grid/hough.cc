@@ -20,7 +20,7 @@
   gcc -o hough -pg -a -O2 -m486 -Wall hough.c -lm -DSTANDALONE
 */
 
-#include "hough.h"
+#include "grid/hough.h"
 #include <iostream>
 /***************************************************************************
  * CONSTANTS & MACROS

@@ -1,0 +1,121 @@
+/**
+ * @file
+ * @brief Inline helper functions for show program
+ * @author Kai Lingemann. Institute of Computer Science, University of Osnabrueck, Germany.
+ * @author Andreas Nuechter. Institute of Computer Science, University of Osnabrueck, Germany.
+ */
+
+#include "slam6d/globals.icc"
+
+/**
+ * converts a quaterion to a 4x4 matrix
+ * in OpenGL style
+ */
+template <class T>
+inline void QuaternionToMatrix4(const double *quat, T *mat)
+{
+  double xy = quat[0] * quat[1] * -1.0;
+  double xz = quat[0] * quat[2];
+  double yz = quat[1] * quat[2] * -1.0;
+  double wx = quat[3] * quat[0];
+  double wy = quat[3] * quat[1] * -1.0;
+  double wz = quat[3] * quat[2];
+  double x2 = sqr(quat[0]);
+  double y2 = sqr(quat[1]);
+  double z2 = sqr(quat[2]);
+
+  mat[0]  = 1.0 - 2.0 * (y2 + z2);
+  mat[4]  =       2.0 * (xy - wz);
+  mat[8]  =       2.0 * (xz + wy);
+
+  mat[1]  =       2.0 * (xy + wz);
+  mat[5]  = 1.0 - 2.0 * (x2 + z2);
+  mat[9]  =       2.0 * (yz - wx);
+
+  mat[2]  =       2.0 * (xz - wy);
+  mat[6]  =       2.0 * (yz + wx);
+  mat[10] = 1.0 - 2.0 * (x2 + y2);
+
+  mat[11] = mat[7] = mat[3] = mat[12] = mat[13] = mat[14] = 0.0;
+  mat[15] = 1.0;
+}
+
+/**
+ * converts a 4x4 matrix to a quaternion
+ */
+template <class T>
+inline void Matrix4ToQuaternion(const T *mat, double *quat)
+{
+  double S;
+  double Trace = 1 + mat[0] + mat[5] + mat[10];
+  if ( Trace > COMPARE_EPSILON ) {
+    S = sqrt(Trace) * 2;
+    quat[0] = -1.0 * ( mat[9] - mat[6] ) / S;       // q_x
+    quat[1] = -1.0 * ( mat[2] - mat[8] ) / S;       // q_y
+    quat[2] = -1.0 * ( mat[4] - mat[1] ) / S;       // q_z
+    quat[3] = 0.25 * S;                             // q_0
+  } else if ( mat[0] > mat[5] && mat[0] > mat[10] )  {	// Column 0: 
+    S  = sqrt( 1.0 + mat[0] - mat[5] - mat[10] ) * 2;
+    quat[0] = -1.0 * 0.25 * S;
+    quat[1] = -1.0 * (mat[4] + mat[1] ) / S;
+    quat[2] = -1.0 * (mat[2] + mat[8] ) / S;
+    quat[3] = (mat[9] - mat[6] ) / S; 
+  } else if ( mat[5] > mat[10] ) {		          	// Column 1: 
+    S  = sqrt( 1.0 + mat[5] - mat[0] - mat[10] ) * 2;
+    quat[0] = -1.0 * (mat[4] + mat[1] ) / S;
+    quat[1] = -1.0 * 0.25 * S;
+    quat[2] = -1.0 * (mat[9] + mat[6] ) / S;
+    quat[3] = (mat[2] - mat[8] ) / S;
+  } else {					               	// Column 2:
+    S  = sqrt( 1.0 + mat[10] - mat[0] - mat[5] ) * 2;
+    quat[0] = -1.0 * (mat[2] + mat[8] ) / S;
+    quat[1] = -1.0 * (mat[9] + mat[6] ) / S;
+    quat[2] = -1.0 * 0.25 * S;
+    quat[3] = (mat[4] - mat[1] ) / S;
+  }
+}
+
+/**
+ * normalizes a quaternion to gain a unit quaternion
+ */
+template <class T>
+inline void QuatNormalize(T *q)
+{
+  T norm = sqrt(sqr(q[0]) + sqr(q[1]) + sqr(q[2]) + sqr(q[3]));
+  q[3] = q[3] / norm;
+  q[2] = q[2] / norm;
+  q[1] = q[1] / norm;
+  q[0] = q[0] / norm;
+}
+
+/**
+ * multiplication of quaternions
+ */
+template <class T>
+inline void QuatMult(const T *q, const T *q_new, T *qtemp)
+{
+  qtemp[3] = q_new[3] * q[3]  - q_new[0] * q[0]   - q_new[1] * q[1]   - q_new[2] * q[2];
+  qtemp[0] = q_new[3] * q[0]  + q_new[0] * q[3]   + q_new[1] * q[2]   - q_new[2] * q[1];
+  qtemp[1] = q_new[3] * q[1]  + q_new[1] * q[3]   + q_new[2] * q[0]   - q_new[0] * q[2];
+  qtemp[2] = q_new[3] * q[2]  + q_new[2] * q[3]   + q_new[0] * q[1]   - q_new[1] * q[0];
+}
+
+/**
+ * converts a quaternion to an axis angle
+ */
+inline void QuaternionToAxisAngle(const double *quat, double *axis, double &angle)
+{
+  double quaternion_norm = sqrt( sqr(quat[0]) + sqr(quat[1]) + sqr(quat[2]) + sqr(quat[3]) );
+  double normalized_quat[4];
+  normalized_quat[0] = quat[0] / quaternion_norm;
+  normalized_quat[1] = quat[1] / quaternion_norm;
+  normalized_quat[2] = quat[2] / quaternion_norm;
+  normalized_quat[3] = quat[3] / quaternion_norm;
+  double cos_a = normalized_quat[3];
+  angle = deg(acos( cos_a )) * 2.0;
+  double sin_a = sqrt( 1.0 - cos_a * cos_a );
+  if ( fabs( sin_a ) < DIV_EPSILON ) sin_a = 1;
+  axis[0] =  normalized_quat[0] / sin_a;
+  axis[1] =  normalized_quat[1] / sin_a;
+  axis[2] = -1.0 * normalized_quat[2] / sin_a;
+}

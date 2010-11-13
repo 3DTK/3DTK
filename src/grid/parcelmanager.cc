@@ -1,7 +1,7 @@
 
-#include "parcelmanager.h"
-#include "../globals.icc"
-#include "gridWriter.h"
+#include "grid/parcelmanager.h"
+#include "slam6d/globals.icc"
+#include "grid/gridWriter.h"
 #include <fstream>
 using std::ifstream;
 using std::ofstream;

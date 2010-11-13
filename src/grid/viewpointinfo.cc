@@ -1,7 +1,7 @@
 #include <fstream>
 using std::ofstream;
 
-#include "viewpointinfo.h"
+#include "grid/viewpointinfo.h"
 #include <cstdlib>
 #include <iostream>
 using std::cerr;

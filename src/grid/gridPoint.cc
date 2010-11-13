@@ -1,4 +1,4 @@
-#include "gridPoint.h"
+#include "grid/gridPoint.h"
 #include <cstdlib>
 #include <iostream>
 

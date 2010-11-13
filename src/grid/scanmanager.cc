@@ -1,6 +1,6 @@
-#include "scanmanager.h"
+#include "grid/scanmanager.h"
 #include <cstring>
-#include "../globals.icc"
+#include "slam6d/globals.icc"
 #include <stdexcept>
 using std::exception;
 #include <fstream>

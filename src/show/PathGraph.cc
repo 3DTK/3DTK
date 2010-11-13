@@ -1,4 +1,4 @@
-#include "PathGraph.h"
+#include "show/PathGraph.h"
 #include <cstdio>
 
 PGNode* PathGraph::insertNode(PointXY p){
