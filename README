@@ -1,7 +1,13 @@
 -------------------------------------------------------------------
 
-The Boost Graph Lib is needed to compile the slam6D program.
+To compile the project simply call "make". This will configure slam6d using the
+default settings. If you wish to configure the project using custom settings do:
+"make config". This command requires ccmake be installed on your system.
+Alternatively you may change into the build directory ".build" and configure the
+project with your preferred cmake configurator, i.e.:
+cd .build && cmake -i ../
 
+The Boost Graph Lib is needed to compile the slam6D program.
 If you are using Debian just do:
 aptitude install libboost-graph-dev freeglut3-dev libxmu-dev libxi-dev
 or, if you are still using Debian stable (lenny):
