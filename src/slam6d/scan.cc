@@ -1329,6 +1329,9 @@ void Scan::readScans(reader_type type,
   case RIEGL_TXT:
     lib_string = "scan_io_riegl_txt";
     break;
+  case RIEGL_RGB:
+    lib_string = "scan_io_riegl_rgb";
+    break;
   case RIEGL_BIN:
     lib_string = "scan_io_riegl_bin";
     break;
