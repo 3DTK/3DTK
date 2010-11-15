@@ -20,6 +20,7 @@
 
 #include "newmat/newmat.h"
 #include "newmat/newmatap.h"
+using namespace NEWMAT;
 
 #include "slam6d/cuda/CSystem.h"
 
