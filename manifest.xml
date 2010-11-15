@@ -1,0 +1,30 @@
+<package>
+  <description brief="slam6d">
+
+     Slam6D
+
+  </description>
+  <author>Jan Elseberg</author>
+  <license>GPL</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/slam6d</url>
+  <export>
+    <cpp cflags="-I${prefix}/include -I${prefix}/3rdparty/ann_1.1.1_modified/include/ -DMAX_OPENMP_NUM_THREADS=8 -DOPENMP_NUM_THREADS=8 -DOPENMP  "
+      lflags="-Wl,-rpath,${prefix}/lib -lslam -L${prefix}/lib/ -lnewmat -fopenmp"/>
+  </export>
+    <!-- 
+    <cpp cflags="-I${prefix}/include -I${prefix}/3rdparty/ann_1.1.1_modified/include/ -I${prefix}/3rdparty/ -DMAX_OPENMP_NUM_THREADS=8 -DOPENMP_NUM_THREADS=8 -DOPENMP  "
+      lflags="-lslam -L${prefix}/lib/ -lnewmat -fopenmp"/>
+    <cpp cflags="-I${prefix}/include -I${prefix}/3rdparty/ann_1.1.1_modified/include/ -I${prefix}/3rdparty/ -DMAX_OPENMP_NUM_THREADS=8 -DOPENMP_NUM_THREADS=8 -DOPENMP  "
+      lflags="${prefix}/obj/libscanlib.a ${prefix}/obj/libANN.a ${prefix}/obj/libnewmat.a -L${prefix}/lib/ -lsparse -fopenmp"/>
+    <cpp cflags="-I${prefix}/include -I${prefix}/3rdparty/ann_1.1.1_modified/include/ -I${prefix}/3rdparty/ -DMAX_OPENMP_NUM_THREADS=8 -DOPENMP_NUM_THREADS=8 -DOPENMP -fopenmp "
+      lflags="${prefix}/obj/libscanlib.a ${prefix}/obj/libANN.a ${prefix}/obj/libnewmat.a -L${prefix}/lib/ -lsparse -fopenmp -lpthread"/>
+    <cpp lflags="-Wl,-rpath,${prefix}/bin,-rpath,${prefix}/obj -L${prefix}/bin -L${prefix}/obj ${prefix}/obj/scanlib.a ${prefix}/obj/icp6Dquat.o ${prefix}/obj/libnewmat.a -fopenmp -lpthread" cflags="-I${prefix}/src -I${prefix}/src/ann_1.1.1_modified/include/ -DMAX_OPENMP_NUM_THREADS=8 -DOPENMP_NUM_THREADS=8 -DOPENMP -fopenmp "/>
+         
+    <cpp lflags="-Wl,-rpath,${prefix}/bin,-rpath,${prefix}/obj -L${prefix}/bin -L${prefix}/obj ${prefix}/obj/scanlib.a ${prefix}/obj/icp6Dquat.o ${prefix}/obj/icp6D.o ${prefix}/obj/libANN.a ${prefix}/obj/libnewmat.a -fopenmp -lpthread" cflags="-I${prefix}/src -I${prefix}/src/ann_1.1.1_modified/include/ -DMAX_OPENMP_NUM_THREADS=8 -DOPENMP_NUM_THREADS=8 -DOPENMP -fopenmp"/> -->
+
+
+
+</package>
+
+

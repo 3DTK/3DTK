@@ -47,6 +47,7 @@ public:
   Scan();
   Scan(const double *euler, int maxDist = -1);
   Scan(const double rPos[3], const double rPosTheta[3], int maxDist = -1);
+  Scan(const double _rPos[3], const double _rPosTheta[3], vector<double *> &pts);
   Scan(const vector < Scan* >& MetaScan, bool use_cache, bool cuda_enabled);
   Scan(const Scan& s);
 
@@ -79,6 +80,7 @@ public:
   
   void calcReducedPoints(double voxelSize, int nrpts = 0);
   
+  void createTree(bool use_cache, bool cuda_enabled);
   static void createTrees(bool use_cache, bool cuda_enabled);
   static void deleteTrees();
 
@@ -192,7 +194,7 @@ private:
    * here would mean too many conversions, therefore loss of speed for LUM.
    */
   double **points_red;
-  
+
   /** 
    * number elements of the array 
    */
@@ -283,7 +285,6 @@ private:
    */
   int maxDist2;
 
-  void createTree(bool use_cache, bool cuda_enabled);
   void deleteTree();
 };
 

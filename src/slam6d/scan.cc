@@ -111,6 +111,40 @@ Scan::Scan(const double* euler, int maxDist)
   M4identity(dalignxf);
 }
 
+Scan::Scan(const double _rPos[3], const double _rPosTheta[3], vector<double *> &pts)
+{
+  kd = 0;
+  ann_kd_tree = 0;
+  maxDist2 = -1;
+  rPos[0] = 0;
+  rPos[1] = 0;
+  rPos[2] = 0;
+  rPosTheta[0] = 0;
+  rPosTheta[1] = 0;
+  rPosTheta[2] = 0;
+  M4identity(transMat);
+  EulerToMatrix4(_rPos, _rPosTheta, transMatOrg);
+
+  fileNr = 0;
+  scanNr = numberOfScans++;
+
+  points_red_size = 0;
+  M4identity(dalignxf);
+
+  points_red = new double*[pts.size()];
+
+  points_red_size = (int)pts.size();
+  for (int i = 0; i < points_red_size; i++) {
+    points_red[i] = pts[i];
+  }
+  transform(transMatOrg, INVALID); //transform points to initial position
+  // update max num point in scan iff you have to do so
+  if (points_red_size > max_points_red_size) max_points_red_size = points_red_size;
+
+  pts.clear();
+}
+
+
 /**
  * Constructor
  * @param _rPos[3] 3D position: estimation of the scan location, e.g. based on odometry
