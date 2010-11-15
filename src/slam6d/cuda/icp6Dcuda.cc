@@ -2,8 +2,8 @@
 
 using namespace std;
 
-#include "icp6Dcuda.h"
-#include "CIcpGpuCuda.cuh"
+#include "slam6d/cuda/icp6Dcuda.h"
+#include "slam6d/cuda/CIcpGpuCuda.cuh"
 #include "newmat/newmat.h"
 
 

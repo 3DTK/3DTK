@@ -5,9 +5,9 @@
  */
 
 
-#include "CIcpGpuCuda_kernel.cuh"
-#include "CIcpGpuCuda.cuh"
-#include "CSystem.h"
+#include "slam6d/cuda/CIcpGpuCuda_kernel.cuh"
+#include "slam6d/cuda/CIcpGpuCuda.cuh"
+#include "slam6d/cuda/CSystem.h"
 
 void CIcpGpuCuda::init(unsigned unWidth, unsigned unHeight, unsigned max_iter)
 {
