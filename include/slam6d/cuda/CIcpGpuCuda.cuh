@@ -21,7 +21,7 @@
 #include "newmat/newmat.h"
 #include "newmat/newmatap.h"
 
-#include "CSystem.h"
+#include "slam6d/cuda/CSystem.h"
 
 /*
  * The maximum block size. For nVidia G80 architecture, 192 is suggested.
