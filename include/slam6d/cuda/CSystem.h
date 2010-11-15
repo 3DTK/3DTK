@@ -41,6 +41,6 @@ class CSystem
     static void deallocate (T*** &aaatArray);
 };
 
-#include "CSystem.icc"
+#include "slam6d/cuda/CSystem.icc"
 
 #endif /*CSYSTEM_H_*/

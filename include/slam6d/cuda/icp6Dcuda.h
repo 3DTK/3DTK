@@ -10,8 +10,8 @@
 
 #include <dlfcn.h>
 
-#include "CIcpGpuCuda.cuh"
-#include "icp6D.h"
+#include "slam6d/cuda/CIcpGpuCuda.cuh"
+#include "slam6d/icp6D.h"
 
 class icp6Dcuda : public icp6D {
 private:

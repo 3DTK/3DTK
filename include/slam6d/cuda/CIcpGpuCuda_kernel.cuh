@@ -263,6 +263,6 @@ private:
 
 };
 
-#include "CIcpGpuCuda_kernel.cu"
+#include "slam6d/cuda/CIcpGpuCuda_kernel.cu"
 
 #endif
