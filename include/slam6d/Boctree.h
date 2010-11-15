@@ -168,7 +168,7 @@ public:
     T newcenter[8][3];
     T sizeNew = size / 2.0;
 
-    for (int i = 0; i < 8; i++) {
+    for (unsigned char i = 0; i < 8; i++) {
       childcenter(center, newcenter[i], size, i);
     }
     // set up values
@@ -178,10 +178,10 @@ public:
   }
 
   BOctTree(std::string filename) {deserialize(filename); }
-  BOctTree(vector<T *> &pts, T voxelSize, unsigned int pointdim = 3) {
+  BOctTree(vector<T *> &pts, T voxelSize, PointType<T> _pointtype = PointType<T>()) {
     this->voxelSize = voxelSize;
 
-    this->POINTDIM = pointdim;
+    this->POINTDIM = pointtype.getPointDim();
 
     mins = new T[POINTDIM];
     maxs = new T[POINTDIM];
@@ -208,7 +208,7 @@ public:
     T newcenter[8][3];
     T sizeNew = size / 2.0;
 
-    for (int i = 0; i < 8; i++) {
+    for (unsigned char i = 0; i < 8; i++) {
       childcenter(center, newcenter[i], size, i);
     }
     // set up values
@@ -401,7 +401,7 @@ protected:
     bitunion<T> *children;
     bitoct::getChildren(node, children);
 
-    for (short i = 0; i < 8; i++) {
+    for (unsigned char i = 0; i < 8; i++) {
       if (  ( 1 << i ) & node.valid ) {   // if ith node exists
         childcenter(center, ccenter, size, i);  // childrens center
         if (  ( 1 << i ) & node.leaf ) {   // if ith node is leaf get center
@@ -555,7 +555,7 @@ protected:
 
     sizeNew = _size / 2.0;
 
-    for (int i = 0; i < 8; i++) {
+    for (unsigned char i = 0; i < 8; i++) {
       childcenter(_center, newcenter[i], _size, i);
     }
 
@@ -654,7 +654,7 @@ protected:
   }
 
 
-  void childcenter(T *pcenter, T *ccenter, T size, int i) {
+  void childcenter(T *pcenter, T *ccenter, T size, unsigned char i) {
     switch (i) {
       case 0:
         ccenter[0] = pcenter[0] - size / 2.0;

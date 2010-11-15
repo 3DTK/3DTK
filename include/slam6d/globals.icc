@@ -500,6 +500,18 @@ inline int rand(int rnd)
 }
 
 /**
+ * generates unsigned character random numbers in [0..rnd]
+ *
+ * @param rnd  maximum number
+ * @return random number between 0 and rnd
+ */
+inline unsigned char randUC(unsigned char rnd)
+{
+  return (unsigned char) ((float)rnd * std::rand() / (RAND_MAX + 1.0));
+}
+
+
+/**
   * Transforms a point in cartesian coordinates into polar 
   * coordinates 
   */
