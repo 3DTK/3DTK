@@ -10,7 +10,7 @@
 #include <cuda.h>		//cuda
 #include <cutil.h>		//cuda utility
 #include "cublas.h"		//cublas
-#include "cudpp.h"	//cudpp
+#include "cudpp/cudpp.h"	//cudpp
 
 #define NO_QSIZE	6	//number of different queue size
 #define QSIZE1		1
