@@ -243,6 +243,71 @@ int icp6D::match(Scan* PreviousScan, Scan* CurrentScan)
   return iter;
 }
 
+
+/**
+ * Computes the point to point error between two scans 
+ * 
+ *
+ */
+double icp6D::Point_Point_Error(Scan* PreviousScan, Scan* CurrentScan, double max_dist_match, unsigned int *np) {
+  double error = 0;
+  unsigned int nr_ppairs = 0;
+
+#ifdef _OPENMP
+    omp_set_num_threads(OPENMP_NUM_THREADS);
+
+    int max = (int)CurrentScan->get_points_red_size();
+    int step = max / OPENMP_NUM_THREADS;
+
+    vector<PtPair> pairs[OPENMP_NUM_THREADS];
+    double sum[OPENMP_NUM_THREADS];
+    double centroid_m[OPENMP_NUM_THREADS][3];
+    double centroid_d[OPENMP_NUM_THREADS][3];
+
+    for (int i = 0; i < OPENMP_NUM_THREADS; i++) {
+      sum[i] = centroid_m[i][0] = centroid_m[i][1] = centroid_m[i][2] = 0.0;
+      centroid_d[i][0] = centroid_d[i][1] = centroid_d[i][2] = 0.0;
+    }
+
+#pragma omp parallel 
+    {
+      int thread_num = omp_get_thread_num();
+      Scan::getPtPairsParallel(pairs, PreviousScan, CurrentScan,
+          thread_num, step,
+          rnd, sqr(max_dist_match),
+          sum, centroid_m, centroid_d);
+
+    } 
+
+    for (unsigned int thread_num = 0; thread_num < OPENMP_NUM_THREADS; thread_num++) {
+      for (unsigned int i = 0; i < (unsigned int)pairs[thread_num].size(); i++) {
+        error += sqr(pairs[thread_num][i].p1.x - pairs[thread_num][i].p2.x)
+          + sqr(pairs[thread_num][i].p1.y - pairs[thread_num][i].p2.y)
+          + sqr(pairs[thread_num][i].p1.z - pairs[thread_num][i].p2.z);
+      }
+      nr_ppairs += (unsigned int)pairs[thread_num].size();
+    }
+#else
+
+    double centroid_m[3] = {0.0, 0.0, 0.0};
+    double centroid_d[3] = {0.0, 0.0, 0.0};
+    vector<PtPair> pairs;
+
+    Scan::getPtPairs(&pairs, PreviousScan, CurrentScan, 0, rnd, sqr(max_dist_match), centroid_m, centroid_d);
+
+    for (unsigned int i = 0; i < pairs.size(); i++) {
+      error += sqrt(
+          sqr(pairs[i].p1.x - pairs[i].p2.x)
+        + sqr(pairs[i].p1.y - pairs[i].p2.y)
+        + sqr(pairs[i].p1.z - pairs[i].p2.z) );
+    }
+    nr_ppairs = pairs.size();
+#endif
+
+    if (np) *np = nr_ppairs;
+//    return sqrt(error/nr_ppairs);
+    return error/nr_ppairs;
+}
 /**
  * This function matches the scans only with ICP
  * 
