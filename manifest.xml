@@ -1,29 +1,20 @@
 <package>
   <description brief="slam6d">
-
-     Slam6D
-
+     Slam6D - This project consists of a software to register 3D point clouds
+     into a common coordinate system, as well as a viewer to display the szene.
+     For the registration, different ICP minimizing algorithms can be chosen,
+     as well as global relaxation methods, aiming at generating an overall
+     globally consistent szene. Several formats for the point clouds are
+     supported, new formats can be implemented easily.
   </description>
-  <author>Jan Elseberg</author>
+  <author>Andreas Nuechter, Kai Lingemann, Jochen Sprickerhof, Dorit Borrmann, Jan Elseberg</author>
   <license>GPL</license>
-  <review status="unreviewed" notes=""/>
-  <url>http://ros.org/wiki/slam6d</url>
+  <review status="unreviewed" notes="Still under development."/>
+  <url>https://slam6d.svn.sourceforge.net/svnroot/slam6d</url>
   <export>
     <cpp cflags="-I${prefix}/include -I${prefix}/3rdparty/ann_1.1.1_modified/include/ -DMAX_OPENMP_NUM_THREADS=8 -DOPENMP_NUM_THREADS=8 -DOPENMP  "
       lflags="-Wl,-rpath,${prefix}/lib -lslam -L${prefix}/lib/ -lnewmat -fopenmp"/>
   </export>
-    <!-- 
-    <cpp cflags="-I${prefix}/include -I${prefix}/3rdparty/ann_1.1.1_modified/include/ -I${prefix}/3rdparty/ -DMAX_OPENMP_NUM_THREADS=8 -DOPENMP_NUM_THREADS=8 -DOPENMP  "
-      lflags="-lslam -L${prefix}/lib/ -lnewmat -fopenmp"/>
-    <cpp cflags="-I${prefix}/include -I${prefix}/3rdparty/ann_1.1.1_modified/include/ -I${prefix}/3rdparty/ -DMAX_OPENMP_NUM_THREADS=8 -DOPENMP_NUM_THREADS=8 -DOPENMP  "
-      lflags="${prefix}/obj/libscanlib.a ${prefix}/obj/libANN.a ${prefix}/obj/libnewmat.a -L${prefix}/lib/ -lsparse -fopenmp"/>
-    <cpp cflags="-I${prefix}/include -I${prefix}/3rdparty/ann_1.1.1_modified/include/ -I${prefix}/3rdparty/ -DMAX_OPENMP_NUM_THREADS=8 -DOPENMP_NUM_THREADS=8 -DOPENMP -fopenmp "
-      lflags="${prefix}/obj/libscanlib.a ${prefix}/obj/libANN.a ${prefix}/obj/libnewmat.a -L${prefix}/lib/ -lsparse -fopenmp -lpthread"/>
-    <cpp lflags="-Wl,-rpath,${prefix}/bin,-rpath,${prefix}/obj -L${prefix}/bin -L${prefix}/obj ${prefix}/obj/scanlib.a ${prefix}/obj/icp6Dquat.o ${prefix}/obj/libnewmat.a -fopenmp -lpthread" cflags="-I${prefix}/src -I${prefix}/src/ann_1.1.1_modified/include/ -DMAX_OPENMP_NUM_THREADS=8 -DOPENMP_NUM_THREADS=8 -DOPENMP -fopenmp "/>
-         
-    <cpp lflags="-Wl,-rpath,${prefix}/bin,-rpath,${prefix}/obj -L${prefix}/bin -L${prefix}/obj ${prefix}/obj/scanlib.a ${prefix}/obj/icp6Dquat.o ${prefix}/obj/icp6D.o ${prefix}/obj/libANN.a ${prefix}/obj/libnewmat.a -fopenmp -lpthread" cflags="-I${prefix}/src -I${prefix}/src/ann_1.1.1_modified/include/ -DMAX_OPENMP_NUM_THREADS=8 -DOPENMP_NUM_THREADS=8 -DOPENMP -fopenmp"/> -->
-
-
 
 </package>
 
