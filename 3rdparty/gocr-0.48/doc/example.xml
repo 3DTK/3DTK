@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<!DOCTYPE gocr SYSTEM "example.dtd">
+<!-- example file for example.dtd -->
+<page>
+ <block x="123" y="11" dx="500" dy="800">
+  <line x="130" y="11" dx="480" dy="30">
+    <word x="130" y="11" dx="80" dy="30"> 
+      <character x="130" y="11" dx="80" dy="30" value="A"/>
+      <character ... />
+      ...
+    </word>
+    <punctuation-mark .. />
+    <space .. />
+    <word ..>
+    ...
+    </word>
+  </line>
+  <box ... />
+  ...
+ </block>
+</page>

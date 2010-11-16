@@ -1,0 +1,6 @@
+.cvsignore
+.version
+Makefile
+autom4te.cache
+config.status
+config.log

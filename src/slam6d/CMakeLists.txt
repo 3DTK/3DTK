@@ -103,17 +103,3 @@ ENDIF(UNIX)
 IF(WIN32)
 	target_link_libraries(slam6D scanlib newmat sparse XGetopt ${Boost_LIBRARIES})
 ENDIF(WIN32)
-
-
-
-IF(WITH_PLANE)
-  add_executable(planes plane.cc hough.cc convexplane.cc accumulator.cc hsm3d.cc ConfigFileHough.cc parascan.cc quadtree.cc)
-  
-  IF(UNIX)
-    target_link_libraries(planes scanlib newmat sparse dl ANN newmat)
-  ENDIF(UNIX)
-
-  IF (WIN32)
-    target_link_libraries(planes scanlib newmat sparse ANN XGetopt)
-  ENDIF(WIN32)
-ENDIF(WITH_PLANE)

@@ -1,0 +1,65 @@
+TODO LIST
+
+Please send any ideas.
+
+Next release (0.4x)
+- quality test script for groups of samples (to ensure improvement in recognition)
+  single chars or single chars in words, clean and difficult sets,
+  formatted texts
+  false negative + false positive
+  start with numbers? option numbers only?
+  output: find fname.{jpg,png} + fname.txt + compare output gocr against txt
+  options: [testpath] [testchars]
+  bin/gocr_chk.sh testbase/free/{clean,glued,dusty}/{numbers,text}/
+  bin/gocr_chk.sh jocr/examples tmp09
+- fix problem with cutting melted chars (using vector frames)
+- better detection of agglutinated serifs (Gutenberg scans 086.png+171.png)
+- vectorize recognition (big step!, relation to other OSS?)
+  (find min distance to ideal vector patterns, start with <>())
+- frame_nn is marking only the borders like frame_vector and removed later
+- handle broken and glueed chars by the database algorithm (-m 256 -m 130) 
+- improve get_line2(), implement distance_to_point and distance_to_line
+- dot-matrix printouts (examples/matrix.jpg) (german: Nadeldrucker)
+- examples/inverse.pcx + examples/rotate45.pcx by nearest-box-to-line alg.
+  or mean nearest box (or its 4 edges) directions,
+  rotate only boxes (by creating new greater boxes and tread as new image)
+- proof replacement of getTextLine by getXMLline via pipe(?) or stdout
+  is pipe available on all platforms?
+- docu about ispell using via XML (what needed, test in gocr.tcl)
+- replace rest of UNDEFINED in unicode.c by its correct strings
+- add probability for box->m1..m4 (to reduce errors caused by bad line-scan)
+  call line detection function second time to improve unsure line data
+
+Next release (0.5x)
+- reduce pixel data by vectorization (big change, faster)
+- writing images through pipes (like reading)
+- using dictionary (optional) for replacing not recognized chars
+- Karsten.Hilbert@gmx.net: use ORChie WordBox-format
+  see http://http.cs.berkeley.edu/~fateman/kathey/ocrchie.html
+  aspell instead of ispell
+
+Near future: (planned version)
+- rewrite install-routine
+- perspective distortion (for cameras)
+- genetic algorithms engine (already in development, 0.8?). It includes
+  feature extraction and classification
+- support for other languages (may affect context_correction(), etc) (0.6?)
+- support for diagramation. Can be done using the Unicode+new stuff. I (bbg)
+  have some ideas.
+
+Far future:
+- gimp plugin
+- color support
+- Braille detection (usefull for blinds?)
+  see: American Journal of Physics Vol. 70, No. 7, p 684-688 (2002)
+  or use special foils
+- read image in smaller parts, to reduce memory usage.
+- frames should be recognized
+- better distance function (comparision of characters)
+- detection of orientation (i.a. 90,180,270deg rotation)
+- picture extraction
+- math formula detection, font type detection
+- handwritten texts (blockletters)
+   --- uff, really a lot of work ---
+- Feel free and add your suggestions and wishes,
+  or tell me, what is the most important point for you.

@@ -1,0 +1,17 @@
+Thanks:
+  ...to everyone who contributed to gocr. If you feel that your
+  name should be in this list, write mail to the author. These
+  are in no particular order:
+
+    G.Kugler for sending me first example files and testing. (MayMM)
+    Klaas Freitag for the libPgm2asc-patch <freitag@suse.de>
+    Ryan Dibble for the otsu.c file <dibbler@umich.edu>
+    Tim Waugh for the man page <twaugh@redhat.com>
+    David Pinson for the tkispell-patch <dpinson@materials.unsw.EDU.AU>
+    Martin Goldhahn for some patches <Martin.Goldhahn@Webcenter.no> 
+    Eberhard Burkard for the gocr.tcl patch <E.Burkard@web.de>
+    James R. Van Zandt for lot of tips <jrv@vanzandt.mv.com>
+    ...
+ 
+  ... and everyone else who submitted bug-reports,
+  feature-requests, patches and lots of example files.
