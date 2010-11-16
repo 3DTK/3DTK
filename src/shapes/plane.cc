@@ -152,6 +152,7 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &start, int
       else if(strcasecmp(optarg, "pht") == 0) alg = PHT;
       else if(strcasecmp(optarg, "ppht") == 0) alg = PPHT;
       else if(strcasecmp(optarg, "apht") == 0) alg = APHT;
+      else if(strcasecmp(optarg, "ran") == 0) alg = RANSAC;
       else abort();
       break;
 	 case 'q':
@@ -255,6 +256,7 @@ int main(int argc, char **argv)
   cout << "Time for Constructor call: " << starttime << endl;
 
   starttime = GetCurrentTimeInMilliSec(); 
+  
   // choose Hough method here
   switch(alg) {
     case RHT: hough.RHT();
@@ -267,12 +269,19 @@ int main(int argc, char **argv)
                 break;
     case APHT:  hough.APHT();
                 break;
+    case RANSAC: {
+                CollisionPlane<double> plane(1.0); // 1.0 cm maxdist
+                Ransac(plane, Scan::allScans[0]);
+              }
     default:  usage(argv[0]);
               exit(1);
               break;
   }
 
   hough.writePlanes();
+  
+  
+
   starttime = (GetCurrentTimeInMilliSec() - starttime);
   cout << "Time for Hough Transform: " << starttime << endl;
   delete Scan::allScans[0];
