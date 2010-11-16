@@ -30,7 +30,7 @@ ELSE(WITH_SHOW)
 ENDIF(WITH_SHOW)
 
 ## Shapes
-OPTION(WITH_SHAPE_DETECTION "Whether to build shapes and planes executable for detecting planes. ON/OFF" ON)
+OPTION(WITH_SHAPE_DETECTION "Whether to build shapes and planes executable for detecting planes. ON/OFF" OFF)
 IF(WITH_SHAPE_DETECTION)
   MESSAGE(STATUS "With shape detection")
 ELSE(WITH_SHAPE_DETECTION)
