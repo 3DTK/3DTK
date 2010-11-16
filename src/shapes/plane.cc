@@ -40,6 +40,10 @@ using std::endl;
 #include "shapes/NumberRecOctree.h"
 #include "shapes/ransac.h"
 
+enum plane_alg { 
+  RHT, SHT, PHT, PPHT, APHT, RANSAC
+};
+
 void usage(char* prog) {
 #ifndef _MSC_VER
   const string bold("\033[1m");
@@ -242,48 +246,48 @@ int main(int argc, char **argv)
   // reduction filter for current scan!
   Scan::allScans[0]->calcReducedPoints(red, octree);
   
-  long starttime = GetCurrentTimeInMilliSec(); 
   double id[16];
   M4identity(id);
   for(int i = 0; i < 10; i++) {
     Scan::allScans[0]->transform(id, Scan::ICP, 0);  // write end pose
   }
 
+  long starttime = GetCurrentTimeInMilliSec(); 
+  if(alg == RANSAC) {
+    CollisionPlane<double> plane(1.0); // 1.0 cm maxdist
+    Ransac(plane, Scan::allScans[0]);
 
-  Hough hough(Scan::allScans[0], quiet);
+  } else {
+    Hough hough(Scan::allScans[0], quiet);
+    starttime = (GetCurrentTimeInMilliSec() - starttime);
+    cout << "Time for Constructor call: " << starttime << endl;
 
-  starttime = (GetCurrentTimeInMilliSec() - starttime);
-  cout << "Time for Constructor call: " << starttime << endl;
+    starttime = GetCurrentTimeInMilliSec(); 
 
-  starttime = GetCurrentTimeInMilliSec(); 
-  
-  // choose Hough method here
-  switch(alg) {
-    case RHT: hough.RHT();
-              break;
-    case SHT: hough.SHT();
-              break;
-    case PHT: hough.PHT();
-              break;
-    case PPHT:  hough.PPHT();
+
+    // choose Hough method here
+    switch(alg) {
+      case RHT: hough.RHT();
                 break;
-    case APHT:  hough.APHT();
+      case SHT: hough.SHT();
                 break;
-    case RANSAC: {
-                CollisionPlane<double> plane(1.0); // 1.0 cm maxdist
-                Ransac(plane, Scan::allScans[0]);
-              }
-    default:  usage(argv[0]);
-              exit(1);
-              break;
+      case PHT: hough.PHT();
+                break;
+      case PPHT:  hough.PPHT();
+                  break;
+      case APHT:  hough.APHT();
+                  break;
+      default:  usage(argv[0]);
+                exit(1);
+                break;
+    }
+
+    hough.writePlanes();
   }
-
-  hough.writePlanes();
-  
   
 
   starttime = (GetCurrentTimeInMilliSec() - starttime);
-  cout << "Time for Hough Transform: " << starttime << endl;
+  cout << "Time for Plane Detection " << starttime << endl;
   delete Scan::allScans[0];
   Scan::allScans.clear();
 }

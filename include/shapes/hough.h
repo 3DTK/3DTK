@@ -12,10 +12,6 @@
 using std::ofstream;
 typedef vector <PtPair> vPtPair;  ///< just a typedef: vPtPair = vector of type PtPair
 
-enum plane_alg { 
-  RHT, SHT, PHT, PPHT, APHT, RANSAC
-};
-
 struct valuecompare {
   bool operator()(int* ip1, int* ip2) const {
     if(ip1[0] > ip2[0]) {
