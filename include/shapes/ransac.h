@@ -14,7 +14,7 @@ void Ransac(CollisionShape<T> &shape, Scan *scan, vector<T*> *best_points = 0) {
   // stores 3 sample points    
   vector<T *> ps;
   // create octree from the points
-  RansacOctTree<T> *oct = new RansacOctTree<T>(scan->get_points_red() , 50.0, PointType<T>::USE_REFLECTANCE );
+  RansacOctTree<T> *oct = new RansacOctTree<T>(scan->get_points_red(), scan->get_points_red_size(), 50.0 );
  
   for(int i = 0; i < 10000; i++) {
     ps.clear();
