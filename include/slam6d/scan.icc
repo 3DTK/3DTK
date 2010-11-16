@@ -36,9 +36,9 @@ inline int Scan::get_points_red_size() const
   return points_red_size;
 }
 
-inline const double** Scan::get_points_reduced() const
+inline double* const* Scan::get_points_reduced() const
 {
-  return (const double**)points_red;
+  return (double* const*)points_red;
 }
 
 inline void Scan::clearPoints() {
@@ -99,9 +99,9 @@ inline const vector <Point>* Scan::get_points() const
  * Accessor for 3D points
  * @return Vector of all reduced (or copied) points 
  */
-inline const double** Scan::get_points_red() const
+inline double* const* Scan::get_points_red() const
 {
-  return (const double**)points_red;
+  return (double* const*)points_red;
 }
 
 /**

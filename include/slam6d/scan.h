@@ -144,9 +144,9 @@ public:
 				    int start, int end, string &dir, int maxDist, int minDist,
 				    bool openFileForWriting = false);  
   inline const vector <Point>* get_points() const;
-  inline const double** get_points_red() const;
+  inline double* const* get_points_red() const;
   inline void setPoints(vector <Point> *_points);
-  inline const double** get_points_reduced() const;
+  inline double* const* get_points_reduced() const;
 
   inline void clearPoints();
 
