@@ -24,11 +24,11 @@ class CollisionShape {
 
   virtual bool containsPoint(T* p) = 0;
 
-  virtual void hypothesize(vector<T *> &points) = 0;
+  virtual bool hypothesize(vector<T *> &points) = 0;
 
   virtual unsigned char getNrPoints() = 0;
 
-  virtual bool valid() = 0;
+//  virtual bool valid() = 0;
 };
 
 
