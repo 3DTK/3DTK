@@ -11,6 +11,7 @@ template <class T=double>
 class CollisionShape {
   public:
 
+
   /**
    * This is the main function for speeding up the search for points on the shape.
    *
@@ -27,6 +28,8 @@ class CollisionShape {
   virtual bool hypothesize(vector<T *> &points) = 0;
 
   virtual unsigned char getNrPoints() = 0;
+
+  virtual CollisionShape<T> *copy() = 0;
 
 //  virtual bool valid() = 0;
 };
@@ -116,12 +119,29 @@ class CollisionPlane : public CollisionShape<T> {
         plane[j] = -plane[j];
       }
     }
+
+    nx = plane[0];
+    ny = plane[1];
+    nz = plane[2];
+    d = plane[3];
     return true;
   }
 
   virtual unsigned char getNrPoints() {
     return 3;
   }
+  
+  virtual CollisionShape<T> * copy() {
+    return new CollisionPlane<T>(maxDist);
+  }
+
+  void getPlane(double &x, double &y, double &z, double &_d) {
+    x = nx;
+    y = ny;
+    z = nz;
+    _d = d;
+  }
+
 
   protected:
     T maxDist;
