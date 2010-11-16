@@ -137,7 +137,7 @@ template <class T> class BOctTree {
 
 public:
   
-  BOctTree(T **pts, int n, T voxelSize, PointType<T> _pointtype = PointType<T>() ) : pointtype(_pointtype) {
+  BOctTree(T * const* pts, int n, T voxelSize, PointType<T> _pointtype = PointType<T>() ) : pointtype(_pointtype) {
     this->voxelSize = voxelSize;
 
     this->POINTDIM = pointtype.getPointDim();
@@ -178,7 +178,8 @@ public:
   }
 
   BOctTree(std::string filename) {deserialize(filename); }
-  BOctTree(vector<T *> &pts, T voxelSize, PointType<T> _pointtype = PointType<T>()) {
+
+  BOctTree(vector<const T *> &pts, T voxelSize, PointType<T> _pointtype = PointType<T>()) {
     this->voxelSize = voxelSize;
 
     this->POINTDIM = pointtype.getPointDim();
@@ -193,7 +194,7 @@ public:
     }
 
     for (unsigned int i = 0; i < POINTDIM; i++) { 
-      for (int j = 1; j < pts.size(); j++) {
+      for (unsigned int j = 1; j < pts.size(); j++) {
         mins[i] = min(mins[i], pts[j][i]);
         maxs[i] = max(maxs[i], pts[j][i]);
       }
@@ -532,7 +533,7 @@ protected:
     }
   }
 
-  pointrep *branch( bitoct &node, vector<T*> &splitPoints, T _center[3], T _size) {
+  pointrep *branch( bitoct &node, vector<const T*> &splitPoints, T _center[3], T _size) {
     // if bucket is too small stop building tree
     // -----------------------------------------
     if ((_size <= voxelSize)) {
@@ -540,7 +541,7 @@ protected:
       pointrep *points = new pointrep[POINTDIM*splitPoints.size() + 1];
       points[0].length = splitPoints.size();
       int i = 1;
-      for (typename vector<T *>::iterator itr = splitPoints.begin(); 
+      for (typename vector<const T *>::iterator itr = splitPoints.begin(); 
           itr != splitPoints.end(); itr++) {
         for (unsigned int iterator = 0; iterator < POINTDIM; iterator++) {
           points[i++].v = (*itr)[iterator];
@@ -563,15 +564,15 @@ protected:
     return 0;
   }
 
-  void countPointsAndQueue(vector<T*> &i_points, T center[8][3], T size, bitoct &parent) {
-    vector<T*> points[8];
+  void countPointsAndQueue(vector<const T*> &i_points, T center[8][3], T size, bitoct &parent) {
+    vector<const T*> points[8];
     int n_children = 0;
 
 #ifdef _OPENMP 
 #pragma omp parallel for schedule(dynamic) 
 #endif
     for (int j = 0; j < 8; j++) {
-      for (typename vector<T *>::iterator itr = i_points.begin(); itr != i_points.end(); itr++) {
+      for (typename vector<const T *>::iterator itr = i_points.begin(); itr != i_points.end(); itr++) {
         if (fabs((*itr)[0] - center[j][0]) <= size) {
           if (fabs((*itr)[1] - center[j][1]) <= size) {
             if (fabs((*itr)[2] - center[j][2]) <= size) {
@@ -584,7 +585,7 @@ protected:
     }
 
     i_points.clear();
-    vector<T*>().swap(i_points);
+    vector<const T*>().swap(i_points);
     for (int j = 0; j < 8; j++) {
       if (!points[j].empty()) {
         parent.valid = ( 1 << j ) | parent.valid;
@@ -604,14 +605,14 @@ protected:
           parent.leaf = ( 1 << j ) | parent.leaf;  // remember this is a leaf
         }
         points[j].clear();
-        vector<T*>().swap(points[j]);
+        vector<const T*>().swap(points[j]);
         ++count;
       }
     }
   }
 
-  void countPointsAndQueue(T **pts, int n,  T center[8][3], T size, bitoct &parent) {
-    vector<T*> points[8];
+  void countPointsAndQueue(T * const* pts, int n,  T center[8][3], T size, bitoct &parent) {
+    vector<const T*> points[8];
     int n_children = 0;
 #ifdef _OPENMP 
 #pragma omp parallel for schedule(dynamic) 
@@ -647,7 +648,7 @@ protected:
           parent.leaf = ( 1 << j ) | parent.leaf;  // remember this is a leaf
         }
         points[j].clear();
-        vector<T*>().swap(points[j]);
+        vector<const T*>().swap(points[j]);
         ++count;
       }
     }

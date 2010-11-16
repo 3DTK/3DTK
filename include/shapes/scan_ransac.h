@@ -25,9 +25,9 @@ void *dummy(void *);
 
 class NumberDetector {
   public:
-    vector<double *> *scan_points;
+    vector<const double *> *scan_points;
 
-  NumberDetector(vector<double *> *points, const char *number_topic, bool _visualize) : visualize(_visualize) {
+  NumberDetector(vector<const double *> *points, const char *number_topic, bool _visualize) : visualize(_visualize) {
     //number_publisher = n.advertise<sickday::StampedNumbers>(number_topic,  10);
     //marker_publisher = n.advertise<visualization_msgs::MarkerArray>("Marker_array", 10);
 
@@ -59,7 +59,7 @@ class NumberDetector {
 
   }
 
-  void RANSAC(vector<double *> &scan_points);
+  void RANSAC(vector<const double *> &scan_points);
   private:
   bool FindNumber(vector<double *> &points, double plane[4]); 
   void printNumbers(); 

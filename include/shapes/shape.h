@@ -9,7 +9,7 @@ using std::vector;
  */
 template <class T=double>
 class CollisionShape {
-
+  public:
 
   /**
    * This is the main function for speeding up the search for points on the shape.
