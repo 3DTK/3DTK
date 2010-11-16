@@ -13,7 +13,7 @@ void Ransac(CollisionShape<T> &shape, Scan *scan) {
   // create octree from the points
   RansacOctTree<T> *oct = new RansacOctTree<T>(scan->get_points_red() , 50.0, PointType<T>::USE_REFLECTANCE );
  
-  while(true) {
+  for(int i = 0; i < 10000; i++) {
     ps.clear();
     oct->DrawPoints(ps, shape.getNrPoints());
 
