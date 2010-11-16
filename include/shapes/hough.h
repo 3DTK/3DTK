@@ -13,7 +13,7 @@ using std::ofstream;
 typedef vector <PtPair> vPtPair;  ///< just a typedef: vPtPair = vector of type PtPair
 
 enum plane_alg { 
-  RHT, SHT, PHT, PPHT, APHT 
+  RHT, SHT, PHT, PPHT, APHT, RANSAC
 };
 
 struct valuecompare {
