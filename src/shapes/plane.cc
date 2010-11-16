@@ -36,6 +36,10 @@ using std::endl;
 
 #include "shapes/hough.h"
 
+#include "shapes/ransac_Boctree.h"
+#include "shapes/NumberRecOctree.h"
+#include "shapes/ransac.h"
+
 void usage(char* prog) {
 #ifndef _MSC_VER
   const string bold("\033[1m");
@@ -243,6 +247,11 @@ int main(int argc, char **argv)
   for(int i = 0; i < 10; i++) {
     Scan::allScans[0]->transform(id, Scan::ICP, 0);  // write end pose
   }
+
+
+
+
+  /*
   Hough hough(Scan::allScans[0], quiet);
 
   starttime = (GetCurrentTimeInMilliSec() - starttime);
@@ -264,9 +273,14 @@ int main(int argc, char **argv)
     default:  usage(argv[0]);
               exit(1);
               break;
-  }
+  }*/
+/*
+  CollisionPlane<double> plane(1.0); // 1.0 cm maxdist
 
-  hough.writePlanes();
+  Ransac(plane, Scan::allScans[0]);
+*/
+
+  //hough.writePlanes();
   starttime = (GetCurrentTimeInMilliSec() - starttime);
   cout << "Time for Hough Transform: " << starttime << endl;
   delete Scan::allScans[0];

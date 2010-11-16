@@ -40,9 +40,10 @@ class RansacOctTree : public BOctTree<T> {
 
 public:
   
-  RansacOctTree(const T **pts, int n, T _voxelSize, PointType<T> _pointtype = PointType<T>() ) : BOctTree<T>(pts, n, _voxelSize, _pointtype) {}
+  RansacOctTree(T* const* pts, int n, T _voxelSize, PointType<T> _pointtype = PointType<T>() ) : BOctTree<T>(pts, n, _voxelSize, _pointtype) {}
 
-  RansacOctTree(vector<T *> &pts, T voxelSize, PointType<T> _pointtype = PointType<T>() ) : BOctTree<T>(pts, voxelSize, _pointtype) {}
+  RansacOctTree(vector<const T *> &pts, T voxelSize, PointType<T> _pointtype = PointType<T>() ) : BOctTree<T>(pts, voxelSize, _pointtype) {}
+  //RansacOctTree(vector<T *> &pts, T voxelSize, PointType<T> _pointtype = PointType<T>() ) : BOctTree<T>(pts, voxelSize, _pointtype) {}
 
   RansacOctTree(std::string filename) : BOctTree<T> (filename) {}
 
@@ -60,9 +61,12 @@ public:
     return PointsOnShape(*BOctTree<T>::root, BOctTree<T>::center, BOctTree<T>::size, shape);
   }
 
+  unsigned long PointsOnShape(CollisionShape<T> &shape, vector<T *> &points) {
+    return PointsOnShape(*BOctTree<T>::root, BOctTree<T>::center, BOctTree<T>::size, shape);
+  }
 
 protected:
-  long PointsOnPlane(bitoct &node, T *center, T size, CollisionShape<T> &shape ) {
+  long PointsOnShape(bitoct &node, T *center, T size, CollisionShape<T> &shape ) {
     if (! shape.isInCube(center[0], center[1], center[2], size)) {
       return 0;
     }

@@ -344,7 +344,7 @@ bool NumberDetector::FindNumber(vector<double *> &points, double plane[4]) {
 }
 
 
-void NumberDetector::RANSAC(vector<double *> &scan_points) {
+void NumberDetector::RANSAC(vector<const double *> &scan_points) {
   // stores 3 sample points    
   vector<double *> ps;
   double a[3], b[3], c[3], plane[4];

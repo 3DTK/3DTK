@@ -27,7 +27,7 @@ Hough::Hough(Scan * GlobalScan, bool q) {
   
   allPoints = new vector<Point>();
 
-  const double** points_red = GlobalScan->get_points_reduced();
+  double* const* points_red = GlobalScan->get_points_reduced();
   for(int i = 0; i < GlobalScan->get_points_red_size(); i++) {
     Point p(points_red[i]);
     allPoints->push_back(p);
