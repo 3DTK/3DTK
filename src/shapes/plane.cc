@@ -249,9 +249,6 @@ int main(int argc, char **argv)
   }
 
 
-
-
-  /*
   Hough hough(Scan::allScans[0], quiet);
 
   starttime = (GetCurrentTimeInMilliSec() - starttime);
@@ -273,14 +270,9 @@ int main(int argc, char **argv)
     default:  usage(argv[0]);
               exit(1);
               break;
-  }*/
-/*
-  CollisionPlane<double> plane(1.0); // 1.0 cm maxdist
+  }
 
-  Ransac(plane, Scan::allScans[0]);
-*/
-
-  //hough.writePlanes();
+  hough.writePlanes();
   starttime = (GetCurrentTimeInMilliSec() - starttime);
   cout << "Time for Hough Transform: " << starttime << endl;
   delete Scan::allScans[0];
