@@ -1,0 +1,57 @@
+This file is intended to clarify why and how we are using Unicode in gocr. It's
+probably only interesting if you intend to do something similar in a project of
+yours or to develop gocr.
+
+History
+0.1	initial version
+
+---
+Why to use Unicode? While in this early development stage gocr doesn't
+recognize much more than the ASCII characters, we hope that someday it will
+support many different languages with different character sets; that it will
+recognize mathematical expressions, and so on. Even in this early stage, we are
+trying to support other Latin languages --- accented characters. Since once we
+aren't using ASCII characters anymore we are subject to the character set
+loaded in the machine if we use the 0x80-0xFF characters, we had to solve the
+problem.
+
+Against what Andrew Tanenbaum once said, "The good thing about standards is
+that there are so many to choose from", we decided to not invent a new one and
+stick to one of the current; Unicode is the most famous, so we chose it.
+
+To my dismay, Unicode's support, at this time, sucks. There are few libraries
+around to deal with it, contrary to what one would expect. The libraries I
+found, though very good, did not provide the kind of support we needed in gocr:
+to work internally with hundreds of different characters. They were all focused
+in handling external files, user interface --- i18n, in short --- something that
+I'm sure is much more needed and used than what gocr needs.
+
+That's why we wrote our own Unicode code. We implemented only what we needed,
+and in a practical way to the developer --- composing characters, etc. Since no
+one I know will want the output of their scanned and OCR document in Unicode or
+UTF-8 format (though I hope that one format will eventually be used in every OS
+and computer around, and ASCII will go to a museum, and though gocr can output
+in one of these formats too), we had to output in some format more friendly;
+the choices are existing character maps, TeX, SGML and HTML initially, and who
+knows what else later. Once we can recognize the text and keep the formatting,
+these formats will be desired even more.
+
+How to implement it (careful: developer's view)? Fortunatedly, there is partial
+support for it now. The wchar_t type defined in <stddef.h> is a standard (only
+sometimes 16, sometimes 32, perhaps even 64 somewhere). Do we need the libc's
+string functions? If we do, they also exist for wchar_t. Some conversion
+functions were needed: ASCII -> Unicode, Unicode -> everything else. 
+
+The ASCII -> Unicode conversion (done by the compose() function) is written to
+be called by the ocr engine, when it recognizes a character. You can also use
+the Unicode codes #defined in unicode.h, but the compose function allows a 
+simpler use. It's recommended to use the symbols itself for ASCII codes (don't
+need to LATIN_CAPITAL_LETTER_A, use 'A').
+
+The Unicode -> etc conversion (done by decode()) is a bit more difficult
+sometimes, since previous symbols may interact with the current one. For
+example, if you're converting to TeX, two characters that are in math mode will
+call two times math mode; for example, "\( \pi \) \( \iota \)", instead of 
+"\( \pi \iota \)". Possibly a wider conversion function, decode_text(), which
+deals with the entire text at once should be provided; this function will also
+create headers, etc.

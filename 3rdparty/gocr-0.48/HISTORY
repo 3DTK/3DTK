@@ -1,0 +1,243 @@
+History: (Changes,ChangeLog)
+ 0.48 Jul09
+       fix buffer overflow introduced in 0.46 for filenames
+       add codabar barcode
+       fix bug, removing melted serifs
+       add patch by Chris Lee, i25 barcode recognition + modifications
+       fix some false positive numbers "34" (video, gas meter)
+       fix problems with 2zZ4 for 10x10 screen font
+       better debug output for :;,.
+       remove examples, doc and libs part from configure (see below)
+       remove doc and examples from the (make install) part to reduce
+         dependencies (gs and transfig is not needed for rpm/ebuild)
+         gocr only may depend from netpbm, but can live without too
+         this will help to install gocr on "exotic" (nonlinux) platforms
+       fix gentoo app-text/gocr Bug 243250 src/Makefile: $(CC) $(LDFLAGS) ...
+
+ 0.47  fix database recognition for certainty 100 (-a 100)
+       insert spaces with certainty 100 (old: 99) to let -a 100 work
+       new option -u string for unrecognized chars
+       fix: No contrast in image causes division by zero
+       reduced false positive recognition of scanned "a496" (Gutenberg Project)
+       "d as a" patch ID: 1556112
+       add "Windows Pipe Fix", but I hate extra code for bad environments
+       improve 7x10, sample 0811qemu1.png (ToDo: not finished)
+       change black:white from &gt;4:1 to &gt;3.5:1 as criteria of inversion
+       reintroduce static library libPgm2asc.a (make libs) for OSRA project
+       add dynamic library (make libs), unused but may help other projects
+      
+ 0.46  improved context correction (especially helvetica "Il")
+       improved recognition of tiny chars "$1", fat "s", "rw" ","
+       fix blank spaces problem in filenames
+         (http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=316511)
+         !!! please check on other platforms and report to me !!!
+         there are still problems with special chars (double quodes, backslash)
+         better use this way: djpeg -gray -pnm strangefilename.jpg | gocr -
+       fix possible problem with database and UTF8 input 
+       fix hidden bug in pitch/spacing initialization
+       reactivate code for output of glued chars and strings 
+       fix wrong close() call
+       remove creation of pgm2asc.a for simplicity (see SF-patch 1827477)
+       
+ 0.45  minor corrections for c and k
+       minus sign is filtered by option -C "--" now, ("\-" was parsed badly)
+       clean up old unused code for simplicity (api, frontend)
+       fix problem with low height barcodes and barcode removing
+       fix problem with readpgm (for multiple images) and database
+       PACKAGE_VERSION defined by configure.in AC_INIT + gocr.spec
+
+ 0.44  add volume to boxes (negative means white areas inside black areas)
+       Fix overflow in despeckling routine (verbose mode, dust removing)
+       reactivate composed chars, fix merge_boxes
+       fix problems with uncertain line detection and not recognized "7"
+       option -a has an effect now for the output
+       adaptions to MICR E13-B font (see GnuMICR), ToDo: 4 extra-chars
+       fix num_boxes in merge_boxes (affects line detection)
+       reduce 2 prompts to one per char in database mode, ^A for skip all
+       fix problem with smaller headlines
+       fix problems with tall font (4)
+       fix includes for non-linux-platforms
+
+ 0.43  fix problem with dark frame around image
+       support multiple images, ex: giftopnm -image=all a.gif | gocr -
+       invert if obviously white on black (black_mass>=4*white_mass)
+       improve thresholding for discrete histograms
+         (note: this can particularly lead to bad results, will be fixed later)
+       speedup for big boxes (especially dark background)
+       fix memory leak (setas(same string) + detect_barcode)
+       fix uninitialized variables after insert spaces (num_frames)
+       fix frame_vector for single pixels (twice + ERROR idx out of range)
+
+ 0.42  further parts of recognition engine relaced by vector version
+       changed colored debug output for out??.png
+       division of glued chars replaced (slower but more accurate)
+       fix framing of small font
+       fix problem with uninitialized pnm_readpaminit call (CPS 21Nov06)
+       better progress output (see progress.[ch]), new image debug output
+       switch to the new improved rotation detection
+
+ 0.41  (buggy if --with-netpbm=no, apply the pgm-patch!)
+       otsu.c concentrates now only on high contrast regions
+       fix pnm reads for 2 byte pixels (--with-libpbm=no) 
+       update man-page (mail me your suggestions)
+       fix g++ warnings, float-OPs replaced by int-OPs
+       spacing reviewed; make distance() more sensitive
+       xml-objects (barcode, melted chars) now also handled with weights
+       fix division by zero bug for vertical positioned characters
+       default output is UTF8 now, UTF-encoding bug fixed
+       added certainty option 
+       added uninstall to Makefile
+       debug image format changed to png (using pipe) or ppm (fall-back)
+       much better word spacing (line-by-line based)
+       better DOT_ABOVE recognition
+       fix output of char groups or strings stored in database, utf8 input
+       fix buffer overflow in barcode decode39
+       fix lost comma on end of line
+       internal vector format added for future use (faster, scalable, rotable)
+       line detection extended
+       internal list management rewritten to fix memory leaks and segfaults
+
+ 0.40  update PNM file reader to maxval > 255
+       (make rpm) updated
+       barcode-patch UPC_addon by Michael van Rooyen
+       CAPITAL_LETTER_A_WITH_OGONEK added
+       no "(PICTURE)" output for UTF8+ASCII (better for Mobile OCR project)
+       smooth_borders() bug fixed and reworked
+       5x7 and prop10 font adaptions
+       objects now detected by flood-fill algorithm (better?)
+       XML-output changed
+       changed auto dust detection (not final)
+
+ 0.39  XML output added (subject of change, suggestions are welcome)
+       netpbm-link-error fixed in gocr.c and configure.in:
+         gocr.c: <config.h> changed to "config.h"
+       configure-option --with-netpbm=PATH and --without-netpbm added
+       update configure.in according to autoconf 2.57  
+       wchar_h miss-configuration fixed in pgm2asc.c
+       fix compiler warnings
+       char filter accepts abbreviations now, like "0-9A-F" (but slow)
+       update READMEde.txt
+       output barcode tags (also improved recognition)
+       fix pnm.c for files like example.eps.pbm
+       fix detect.c for barcodes
+       fix ocr0n.c 0<->8g
+
+ 0.38  move UTF/HTML/TeX decoding to getTextLine, return (char *) now
+       out_format HTML step towards detailed XML output
+       correct line detection for footnotes (detect.c)
+       "y" now seen as vowel (pgm2asc.c), I<vowel> susbtituted by l<vowel>
+       &eacute;-detection, &aacute;-output fixed
+       default dust_size is -1 now (auto detection = mean_size/10)
+       char filter added
+        ex: -C 0123456789ABCDEF    - recognize only hexcodes
+       man page updated (hopefully correct syntax)
+       database bug fixed (small fonts, example by Chris)
+       several bugs fixed by W. Webber (thanks)
+       speed improved by 3rd-pass matrix filter in pixel() (pixel.c) (code from W. Webber)
+       bug in remove_dust (remove.c) fixed
+       for fonts bigger than 20x40 smooth_borders() changed (b/w-scans)
+       bug in O0-detection fixed
+
+ 0.37   best-fit generates probability, not perfect but better results
+        bug in line detection removed (happens for lot of small boxes)
+        progress output (option -x <fileID|fname>)
+        counting versions number as floating point now
+        MACRON and DOT_ABOVE (not complete) defined (latin2)
+        adaptions for 5x7 and 6x12 screen font
+	doc/ocr.tex changed to doc/gocr.html (now independent of LaTeX)
+        symbols {} added
+        OCR-B font tested succesfull
+        better headline/picture distinction
+        bug removed (struct box.modifier is wchar_t now)
+
+        known bugs: to much newlines
+
+ 0.3.6
+        CARON and Omega defined,
+        output of not defined chars (HTML="&#xxx;", TeX="\symbol{xxx}")
+        system dependend bug: isupper(>255) SIGSEGV fixed
+        better line detection for lines with lowercase chars only
+        lot of possible SIGSEGV in list_del() fixed
+        barcode recognition (UPC,code128)
+        .ps .eps via pstopnm supported
+        -m 256 switches off the main ocr engine (usefull together with -m 2 for identical chars)
+        strings added to database ("ff","ft","special-symbol")
+        gocr.tcl adapted to gocr v0.3
+        internal detection probability introduced
+
+ 0.3.5
+        minor and major fixes (string\0 bugs)
+        memory leak fixes by Duncan Edwards
+        layout analysis or zoning (-m 4) improved, 
+        now it detects pictures and columns much better
+        the behavior of setting threshold (-l) is slightly changed
+        wcsdup defined for non-gnu-systems (BSD), further Problems?
+        better context correction for 10 (IO,lO)
+        Fixes for S.Koledin examples "GlS"
+        Euro-currency-sign detection added
+        better pitch estimation for proportional font (needs to be improved)
+        make install DESTDIR= instead configure --prefix= (better?)
+        use wchar_t by default, more simple code and -f works with nonLinuxOS
+        line detection more robust against vertical glued chars (js)
+        -f UTF8 added (usefull for xterm -u8), should be default?
+        handle vertical glued boxes (ex: g over T)
+ 0.3.4
+        some BSD adaptions (no WCHAR?), tell me if there are still problems
+        use unicode in database (4-8 hex digits)
+        new option: -p database_path/
+        TILDE fixed, #, &AElig;, &Aring;, etc. added (swedish,norwegian)
+        layout analysis improved
+ 0.3.3
+        database (-m 2) bug fixed and interactive mode (-m 130) added
+          its not finished, but you can test it
+          result should be ok for machine generated images (no scans)           
+        engine improved a bit
+ 0.3.2
+        ocr-engine improved for screen fonts (thanks for examples)
+        option -f [HTML,TeX,...] added
+ 0.3.1
+        make install updated
+ 0.3.0  some parts of the code reviewed (most work done by Bruno Barberi Gnecco)
+        tkispell patch from David Pinson (exec bug fixed)
+	gnome frontend added (Dany De Bontrider)
+        acute, grave, circumflex ... detection
+        C++ parts rewritten into C, and much more (see REVIEW)
+ 0.2.7  lib-patch from Klaas Freitag inserted, engine improved
+        option -n 1 detect only numbers, get threshold value by otsu.cc
+        xxx.pnm.bz2 can be used on linux systems bzip2 installed
+ 0.2.6  pipes used on POSIX2-systems for easier use of jpg,gif,tiff,pnm.gz-files
+        example: gocr text.jpg; gocr text.pnm.gz
+        verbose output on stderr, text output on stdout,
+        redirection of output possible (-e, -o, example: -e /dev/stdout)
+        engine upgraded a bit  (thx for the new sample files)
+        gocr.tcl upgraded (save options, save text)
+        DOS/WIN95-EXE created, download GOCREXE.ZIP (v0.2.5)
+ 0.2.5  program convert renamed to jconv
+        you can choose stdin as input now, for using conversion tools
+	example: djpeg -pnm -gray text.jpg | gocr -i -
+        option "--help" added, some bugs removed
+	amiga.h added for SAS/C under AmigaOS (suggested by Uffe Holst)
+	line detection changed (faster?)
+	importing gocr in your C++ application is easier now (see fkt pgm2asc)
+	argument can be given instead of option -i (this is more natural)
+	some reorganization of code (not finished)
+	2000 downloads counted !!! Jun2000
+        SourceForge.net used for gocr (project: jocr, other gocr exist there)
+        bugs in dust removing, line detection and zoning fixed (rewritten)
+        first version of tcl/tk-GUI, test it!
+        rekursive function frame_nn() replaced by labyrint-algorithm (no extensiv stack used)
+        gluing of broken chars added, removing glued serifs (on small fonts)
+        new bugs added :;
+ 0.2.4a2 some details are added (better dust removing and char division)
+ 0.2.4  three char division (connected chars), dust removing
+ 0.2.3	add layout analysis (very slowly, try -m 4), engine modified
+        better distance function, engine updated, database added for testing
+	1000 downloads counted !!! May2000
+ 0.2.2	gocr_0_2.tgz expands into gocr_0_2 directory (thanks to zz99zz)
+	engine upgraded a bit, some bugs fixed (umlaut, thin lines)
+	short documentation added (ocr.tex)
+	colored output (out30.bmp) for test/development-mode
+	bug: read ASC-PBM and PCX (1 bit) fixed
+ 0.2.1	first official release on freshmeat.net March 2000
+ 0.2	line scanning added
+ 0.1	project started (not documented), autumn 1998 - summer 1999

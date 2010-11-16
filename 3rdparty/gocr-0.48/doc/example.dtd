@@ -1,0 +1,53 @@
+<?xml version="1.0"?>
+<!--
+    first draft by Volker Simonis, reviewed by Joerg Schulenburg
+                 Its not ready for use!
+     ToDo:
+       - lynx/links/w3c should show xml like a html file 
+           value as <character ...>CharText</character>
+           or  <word><character ...></character><...>WordText</word>
+           or as line or as block? whats more useful?
+       - how to code table of alternative chars/words and its probability?
+       - how to handle images (as image tags?)
+       - xmllint -\-htmlout -\-loaddtd jocr/doc/example.dtd o.xml
+  -->
+<!ENTITY % default.attributes "x  CDATA #REQUIRED
+                               y  CDATA #REQUIRED
+                               dx CDATA #REQUIRED
+                               dy CDATA #REQUIRED">
+
+<!ELEMENT box EMPTY>
+<!ATTLIST box %default.attributes;
+              value CDATA #REQUIRED;>
+
+<!ELEMENT barcode EMPTY>
+<!ATTLIST barcode %default.attributes;
+                value CDATA #REQUIRED;>
+
+<!ELEMENT img EMPTY>
+<!ATTLIST img %default.attributes;>
+
+<!ELEMENT page (block*)>
+<!ATTLIST page %default.attributes;>
+
+<!ELEMENT block (line*)>
+<!ATTLIST block %default.attributes;>
+
+<!ELEMENT line ((word | space | punctuation-mark)*)>
+<!ATTLIST line %default.attributes;>
+
+<!ELEMENT word (character*)>
+<!ATTLIST word %default.attributes;>
+
+<!ELEMENT char EMPTY>
+<!ATTLIST char %default.attributes;
+               value CDATA #REQUIRED;
+               (#CDATA)>   <!-- is that correct? -->
+
+<!ELEMENT space EMPTY>
+<!ATTLIST space %default.attributes;
+                value CDATA #REQUIRED;>
+
+<!ELEMENT punctuation-mark EMPTY>
+<!ATTLIST punctuation-mark %default.attributes;
+                           value CDATA #REQUIRED;>

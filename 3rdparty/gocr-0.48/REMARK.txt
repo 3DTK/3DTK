@@ -1,0 +1,18 @@
+                                     
+testfile      size   num_c quality  time num_errors
+--------      x    y       -------  p1   p1 p2 p3
+g300a1.pbm  703  580   469 +        2s    4 -   0
+g300a2.pbm  724 1252  1021 +        5s    2 0   0
+g300b1.pbm 1564  277    55 +        4s    0 1   1
+g300b2.pbm  599 1319   860 snowy    9s   76 -  40
+g300b3.pbm  592 1324   934 snowy    7s   36 2  15
+g300c1.pbm  750 2771  2182 +       15s   35 1  14
+liebfrau1  2289 3200  1927 +       19s   13 0   8
+meraji1    1912 1355  1246 thinn   15s   65 4  40
+paraguay1  2617 1375  3280 frame   78s 1000 1  55
+
+p1=gocr0.2.4a3 on P400
+p2=recognita+4.0
+p3=gocr0.2.5
+
+most errors: connected chars, like fi,ff, italic font
