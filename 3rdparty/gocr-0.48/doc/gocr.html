@@ -1,0 +1,578 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+
+<HTML>
+<HEAD>
+<TITLE>GOCR-documentation</TITLE>
+<META NAME="description" CONTENT="GOCR-documentation">
+<META NAME="keywords" CONTENT="ocr">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-1">
+<META NAME="Generator" CONTENT="Joerg">
+</HEAD>
+
+<BODY >
+<H1 ALIGN="CENTER">GOCR-documentation</H1>
+<P ALIGN="CENTER"><STRONG>J&ouml;rg Schulenburg</STRONG></P>
+<P ALIGN="CENTER"><STRONG>Magdeburg, June 3, 2002</STRONG></P>
+
+<H3>Abstract:</H3>
+<DIV>
+In this documentation I describe some ideas for my OCR-program.
+It contains algorithms and examples and gives you
+ an impression of what the program can (or could) do.
+</DIV>
+<P>
+
+
+<P>
+<BR><HR>
+<!--Table of Child-Links-->
+<A NAME="CHILD_LINKS"></A>
+
+<UL>
+<LI><A HREF="#SEC1">Introduction</A>
+<LI><A HREF="#SEC2">Segmentation of textual regions / Layout analysis</A>
+<LI><A HREF="#SEC3">Line detection</A>
+<LI><A HREF="#SEC4">Cluster detection</A>
+<LI><A HREF="#SEC5">Engines</A>
+<LI><A HREF="#SEC6">Remove pixels</A>
+<LI><A HREF="#SEC7">Add pixels</A>
+<LI><A HREF="#SEC8">Similarity analyzer</A>
+<LI><A HREF="#SEC9">Overlapping characters</A>
+<LI><A HREF="#SEC10">Black/White, Gray and Colors</A>
+<LI><A HREF="#SEC11">Pictures on scanned pages</A>
+<LI><A HREF="#SEC12">Tools</A>
+<LI><A HREF="#SEC13">glossary</A>
+<LI><A HREF="#SEC14">More information?</A>
+<LI><A HREF="#SEC15">About this document</A>
+</UL>
+<!--End of Table of Child-Links-->
+
+<H1><A NAME="SEC1"> Introduction</A>
+</H1>
+First I have to say that I am not a expert in pattern recognition 
+or similar things. My knowledge is based mostly on experiments with my
+program.
+Therefore do not worry about stupid algorithms I put in this document. 
+In this documentation I describe some ideas for my OCR-program.
+The examples give you an impression of how the program handles 
+your images. 
+If you have comments regarding contents or spelling please
+write to the author.
+
+<H1><A NAME="SEC2">Segmentation of textual regions / Layout analysis</A></H1>
+
+This is implemented as a recursive division in two parts.
+
+<UL>
+ <LI>look for the thickest horizontal or vertical gap through the box</LI>
+ <LI>if the gap is less than five times longer than thick do not divide  </LI>
+ <LI>do the same with the two new parts</LI>
+</UL>
+I know that this algorithm is not as good as you wish,
+but I do not know a better one.
+
+<P>
+It would be very helpful to know about a function which is able to
+ decide whether the box represents a single text line or a more complex object. 
+
+<H1><A NAME="SEC3">Line detection</A></H1> 
+<P>
+Line detection is very importand for good recognition.
+ For example it is difficult to distinguish between lowercase letter <B>p</B>
+ and uppercase letter <B>P</B> without having a baseline (same total height).
+ The lowercase version of <B>p</B> has a depht (the lower end is below the
+ baseline) and therefore its easy to distinguish from the uppercase version
+ if the baseline is known. The line detection is responsible for finding the
+ baseline of every text line.
+
+<P>
+Lines of characters are detected by looking for interline spaces.
+ These are characterized by a large number of non-black pixels in a
+ row.  Image rotation (skewing) presents a problem, therefore the program
+ first looks only at the left half of the image.  When a line is
+ found, the left half of the right side is scanned, because lines
+ are often short.  The variation in height gives an indication of
+ the rotation angle.  Using this angle, a second run detects lines
+ more accurately.  Line detection may fail if there is dust on the
+ image. 
+
+<P>
+In version v0.2.3 this behaviour is slightly changed.
+ To detect the rotation angle, the line through the most
+ characters is detected.
+
+<H1><A NAME="SEC4">Cluster detection</A></H1>
+
+A cluster is a group of pixels which are connected with each other.
+The simplest way to detect a cluster is to look for a pixel.
+If you find one, look to the neighbouring pixels. This can be done recursively.
+
+<P>
+This method needs a lot of stack space if a cluster is very large,
+and can cause problems with the memory.
+
+<P>
+Do you remember the algorithm for leaving a maze?
+Go along the right (or left) wall. This seems to be a good approach
+for detecting clusters without recursion.
+The following picture shows a trace of the maze algorithm.
+
+<P>
+<TABLE  WIDTH="680">
+<TR><TD>
+<PRE>
+first 35 steps     next 36 steps     
+..@@@@@..@@@@&lt;..   ..v&lt;&lt;&lt;&lt;..v&lt;&lt;&lt;@..   * = starting point
+..@@@@@@@@@.@^&lt;.   ..&gt;&gt;v@^&lt;&lt;&lt;@.@@@.   &gt;^&lt;v = go right,up,left,down
+....@@@@@...@@^.   ....v@@@@...@@@.   @ = black pixel
+....@@@@....@@^.   ....v@@@....@@@.
+....@@@.....@@^.   ....v@@.....@@@.
+....@@@.....@@^.   ....v@@.....@@@.
+...@@@@.....@@^.   ...v&lt;@@.....@@@.
+...@@@......@@^.   ...v@@......@@@.
+...@@@......@@^.   ...v@@......@@@.
+...@@@.....@@@^.   ...v@@.....@@@@.
+...@@@.....@@&gt;^.   ...v@@.....@@@@.
+...@@@.....@@^..   ...v@@.....@@@..
+..@@@@.....@@^..   ..v&lt;@@.....@@@..
+..@@@@....@@@^..   ..v@@@....@@@@..
+*&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;^&lt;&lt;   @@@@@@@@@@@@@@@@
+</PRE></TD></TR>
+</TABLE>
+
+<P>
+The minimum and maximum coordinates can be used to create a box around the
+cluster. But does this algorithm work with diagonally connected pixels?
+
+<H1><A NAME="SEC5">Engines</A></H1>
+
+GOCR is able to work with different recognition engines.
+Since version 0.37 engines have to return a probability value together
+with the recognized character or a table of values to a table of characters.
+If the probability value is 100, the engine is 100% sure to have found the
+right character otherwise the value is less. This gives GOCR the possibility
+to compare results of different engines or in case of a not recognized character
+to inform the user or another
+application (spell checker) which characters probably could be there.
+
+<H2>Base-Engine</H2>
+The base engine (src/ocrX.c) is the original engine used in the first implementation
+of GOCR by J&ouml;rg. The idea was to get a fast and acceptable result
+without learning theoretical background. Later it should be replaced or completed
+by a better engine.
+The base engine is a rule based engine. 
+The engine was written without theoretical
+background and is improved by try and error method but is is still far from
+perfect. The algorithm is very tolerant to size and form af characters
+(omnifont).
+How does the engine identify a character? For the explanation look at the
+following pattern.
+
+<P>
+<TABLE  WIDTH="680">
+<TR><TD>
+<PRE>
+vvvv         vv- white regions
+......@@......  &lt;- crossing one line
+......@@......  
+.....@@@@.....
+.....@@@@.....
+.....@@@@.....
+....@..@@@....  &lt;- white hole / crossing two lines
+....@..@@@....  &lt;- crossing two lines
+....@..@@@....
+...@....@@@...
+...@....@@@...
+...@....@@@...
+..@@@@@@@@@@..  &lt;- horizontal line near center
+..@......@@@..
+..@......@@@..  
+.@........@@@.  v- increasing width of pattern
+.@........@@@.  v
+.@........@@@.  v
+@@@......@@@@@
+    ^^^-- gap
+</PRE></TD></TR>
+</TABLE>
+
+<P>
+In the future the program
+should detect edges, vertices, gaps, angles and so on.
+This is called feature extraction (as far as I know).
+With such data the engine could make a cluster analysis.
+But this is a difficult task, if the scanned image is noisy.
+
+<H2>Database-Engine</H2>
+The database  engine (src/database.c) was the second engine added to GOCR.
+It was primary written to give users a simple tool to recognize
+special language-specific characters. The program generates a list
+(text file db.lst of image filenames and character codes)
+and image samples (pnm-files) in a database path (./db/).
+The database can be created by hand or extern programs or by GOCR itself
+using option (-m 130). In the last case GOCR prompts the user 
+for not recognized characters. If he enters the character the pattern
+is saved in the database path as pnm-file and its file name is added 
+to the database list (db.lst) together with the text string the pattern
+should be replaced by.
+For recognition GOCR first loads the database into memory (option -m 2).
+The main algorithm compares not recognized characters with stored images
+and calculates a distance value. If the distance value is small enough,
+the character is treated as recognized.
+
+<H1><A NAME="SEC6">Remove pixels</A></H1>
+
+The following picture shows an <I>n</I> which has additional pixels at the
+bottom. Therefore it can not be detected as <I>n</I>. What can be done?
+
+<UL>
+<LI>classify horizontal (<TT>=</TT>) and vertical (<TT>I</TT>) pixels by
+ comparing the distance between the next vertical and next horizontal white
+ pixels (.)
+</LI>
+<LI>measure mean thickness of vertical and horizontal clusters
+</LI>
+<LI>erase unusually thin horizontal pixels at the bottom line
+</LI>
+</UL>
+
+<P>
+<TABLE  WIDTH="680">
+<TR><TD>
+<PRE>
+..@@@@@..@@@@@..     ..==III..===II.. dx=16 dy=15
+..@@@@@@@@@.@@@.     ..==III====.III. thickness 2 to 3
+....@@@@@...@@@.     ....III==...III.
+....@@@@....@@@.     ....III=....III.
+....@@@.....@@@.     ....III.....III.
+....@@@.....@@@.     ....III.....III.
+...@@@@.....@@@.     ...IIII.....III.
+...@@@......@@@.     ...III......III.
+...@@@......@@@.     ...III......III.
+...@@@.....@@@@.     ...III.....IIII.
+...@@@.....@@@@.     ...III.....IIII.
+...@@@.....@@@..     ...III.....III..
+..@@@@.....@@@..     ..IIII.....III..
+..@@@@....@@@@..     ..IIII....IIII..
+@@@@@@@@@@@@@@@@     ================
+      ^^^ 
+      this causes the problem
+</PRE></TD></TR>
+</TABLE>
+
+<P>
+A better way is to find serifs (horizontal lines glued on the lower end 
+of vertical lines) which touch together (v0.2.5).
+
+<P>
+The next picture shows blind pixels which are caused by dust on the paper.
+The upper right dots are not connected with the rest of the character.
+This can be detected via fill-algorithms. Currently the program
+assumes that dots near the upper end of a character are ``i''-dots
+or diaereses (umlaut dots).
+
+<P>
+<TABLE  WIDTH="680">
+<TR><TD>
+<PRE>
+..........................O...     ..........................O...
+..........................O...     ..........................O...
+..............................     ..............................
+..............................     ..............................
+..........@@@.......@@@@......     ..........@@@.......@@@@......
+..@@@@..@@@@@@@...@@@@@@@.....     ..@@@@..@@@@@@@...@@@@@@@.....
+@@@@@@@@@@@@@@@@.@@@@@@@@@....     @@@@@@@@@@@@@@@@.@@@@@@@@@....
+..@@@@@@....@@@@@@.....@@@@...     ..@@@@@@....@@@@@@.....@@@@...
+..@@@@.......@@@@......@@@@...     ..@@@@.......@@@@......@@@@...
+..@@@@.......@@@.......@@@@...     ..@@@@.......@@@.......@@@@...
+..@@@@.......@@@.......@@@@...     ..@@@@.......@@@.......@@@@...
+..@@@@.......@@@.......@@@@...     ..@@@@.......@@@.......@@@@...
+..@@@@.......@@@@......@@@@...     ..@@@@.......@@@@......@@@@...
+..@@@@.......@@@.......@@@@...     ..@@@@.......@@@.......@@@@...
+..@@@@.......@@@@......@@@@...     ..@@@@.......@@@@......@@@@...
+..@@@@.......@@@.......@@@@...     ..@@@@.......@@@.......@@@@...
+..@@@@.......@@@.......@@@@...     ..@@@@.......@@@.......@@@@...
+..@@@@.......@@@.......@@@@...     ..@@@@.......@@@.......@@@@...
+..@@@@.......@@@.......@@@@...     ..@@@@.......@@@.......@@@@...
+..@@@@.......@@@.......@@@@...     ..@@@@.......@@@.......@@@@...
+..@@@@.......@@@@......@@@@...     ..@@@@.......@@@@......@@@@...
+..@@@@......@@@@@......@@@@@..     ..@@@@......@@@@@......@@@@@..
+@@@@@@@@..@@@@@@@@@..@@@@@@@@@     @@@@@@@@..@@@@@@@@@..@@@@@@@@@
+</PRE></TD></TR>
+</TABLE>
+
+<H1><A NAME="SEC7">
+Add pixels</A>
+</H1>
+The following picture shows an <I>m</I>. The legs are only barely connected.
+How do we handle this?
+
+<UL>
+<LI>if the engine has failed, a filter is switched on and the engine
+ starts over
+</LI>
+<LI>the 2x2 filter sets pixels to (<I>O</I>) near barely connected pixels
+</LI>
+</UL>
+
+<P>
+<TABLE  WIDTH="680">
+<TR><TD>
+<PRE>
+   vv   vv
+@@@.@@@..@@@...     @@@.@@@..@@@...
+.@@.@@@@.@@@@..&lt;    .@@O@@@@O@@@@..  filter: .@ =&gt; O@     @. =&gt; @O
+.@@@..@@@..@@..&lt;    .@@@..@@@..@@..          @. =&gt; @.     .@ =&gt; .@
+.@@@..@@@..@@@.     .@@@..@@@..@@@.
+.@@@..@@@..@@@.     .@@@..@@@..@@@.     
+.@@@..@@@..@@@.     .@@@..@@@..@@@.     
+.@@@..@@@..@@@.     .@@@..@@@..@@@.
+.@@@..@@@..@@@.     .@@@..@@@..@@@.
+.@@@..@@@..@@@.     .@@@..@@@..@@@.
+.@@@..@@@..@@@.     .@@@..@@@..@@@.
+.@@@..@@@..@@@.     .@@@..@@@..@@@.
+.@@@..@@@..@@@.     .@@@..@@@..@@@.
+.@@@..@@@..@@@.     .@@@..@@@..@@@.
+@@@@@.@@@@.@@@@     @@@@@.@@@@.@@@@
+</PRE></TD></TR>
+</TABLE>
+
+<H1><A NAME="SEC8">
+Similarity analyzer</A>
+</H1>
+Some characters are a little bit noisy. These characters can be identified by
+comparison with other, already recognized characters. This can be done
+via a good distance function. May be 
+the distance function in the actual version of GOCR is not very good.
+Feel free to send me your ideas, but be sure it does not waste my time. 
+
+<H1><A NAME="SEC9">
+Overlapping characters</A>
+</H1>
+The following picture shows an overlapping <I>ru</I>.
+How do we handle this?
+
+<UL>
+<LI>look for 3 weak connections (sum over y is small, start in the middle)
+</LI>
+<LI>test if the right and left part can be detected by the engine
+</LI>
+<LI>correction of surrounding box
+</LI>
+</UL>
+
+<P>
+<TABLE  WIDTH="680">
+<TR><TD>
+<PRE>
+....@@...@@@@@@@@@@....@@@@@@@..     ....@@...@@@@@@@@@@....@@@@@@@..
+..@@@@..@@@@@..@@@@......@@@@@..     ..@@@@..@@@@@..@@@@......@@@@@..
+@@@@@@@@@@@@@.,.@@@.......@@@@..     @@@@@@@@@@@@@...@@@.......@@@@..
+..@@@@@@..@@@...@@@.......@@@@..     ..@@@@@@..@@@...@@@.......@@@@..
+...@@@@.......,.@@@@......@@@@..     ...@@@@.........@@@@......@@@@..
+...@@@@.........@@@@......@@@@..     ...@@@@.........@@@@......@@@@..
+...@@@@.......,.@@@.......@@@@..     ...@@@@.........@@@.......@@@@..
+...@@@@.........@@@.......@@@@..     ...@@@@.........@@@.......@@@@..
+...@@@........,.@@@@......@@@@..     ...@@@..........@@@@......@@@@..
+...@@@..........@@@@......@@@@..     ...@@@..........@@@@......@@@@..
+...@@@........,.@@@@......@@@@..     ...@@@..........@@@@......@@@@..
+...@@@..........@@@.......@@@@..     ...@@@..........@@@.......@@@@..
+...@@@........,.@@@@......@@@@..     ...@@@..........@@@@......@@@@..
+...@@@..........@@@@......@@@@..     ...@@@..........@@@@......@@@@..
+...@@@........,.@@@@......@@@@..     ...@@@..........@@@@......@@@@..
+...@@@..........@@@@@...@@@@@@@.     ...@@@..........@@@@@...@@@@@@@.
+..@@@@@.......,..@@@@@@@@@.@@@@@     ..@@@@@..........@@@@@@@@@.@@@@@
+@@@@@@@@@.........@@@@@@@..@@@..     @@@@@@@@@.........@@@@@@@..@@@..
+..............,....@@@..........     ...................@@@..........
+             ^^^
+             213 weak vertical lines
+</PRE></TD></TR>
+</TABLE>
+
+<P>
+Of course the situation is more difficult with slanted characters.
+
+<P>
+The following example shows, how to deal with larger clusters.
+To get a fast program a first test should select the possible positions of
+division. That can be done by following upper and lower bows to a crease or a break. Than try to break on all detected creases, start at most
+important one (not implemented yet v0.2.4).
+
+<P>
+<TABLE  WIDTH="766">
+<TR><TD>
+<PRE>
+             &gt;&gt;&gt;&gt;vvv&lt;&lt;&lt;&lt;&lt;       &gt;&gt;vv&lt;&lt;&lt;&lt;         &gt;&gt;&gt;vvv&lt;&lt;&lt;&lt;
+......@@@@@@@..................@@.........@@@@@@@..........@@@@@@@.....
+....@@@@@@@@@@@...............@@@.......@@@@@@@@@@@......@@@@@@@@@@@...
+...@@@@@@@@@@@@@.............@@@@......@@@@@@@@@@@@@....@@@@@@@@@@@@@..
+..@@@@.......@@@@...........@@@@@.....@@@@.......@@@@..@@@@.......@@@@.
+..@@@........@@@@..........@@@@@@@....@@@........@@@@@@@@@........@@@@.
+.@@@@..........@@.........@@@@@@@@...@@@@..........@@@@@@@.........@@@@
+.@@@.....................@@@@.@@@@...@@@..............@@...........@@@@
+.@@@....................@@@@@.@@@@...@@@...........................@@@@
+@@@...@@@@@@@...........@@@@..@@@...@@@...@@@@@@...................@@@.
+@@@@.@@@@@@@@@@........@@@@...@@@@..@@@@.@@@@@@@@@@...............@@@@.
+@@@@@@@@@@@@@@@.......@@@@....@@@@..@@@@@@@@@@@@@@@...............@@@..
+@@@@@@@.....@@@@@.....@@@.....@@@@..@@@@@@......@@@@@............@@@@..
+@@@@.........@@@@...@@@@......@@@@..@@@@@........@@@@...........@@@....
+@@@@..........@@@@.@@@@.......@@@@..@@@@..........@@@..........@@@@....
+@@@@..........@@@@@@@@@.......@@@@.@@@@@..........@@@.........@@@@.....
+@@@@..........@@@@@@@@@@@@@@@@@@@@@@@@@@..........@@@@.......@@@@......
+@@@@..........@@@@@@@@@@@@@@@@@@@@@@@@@@..........@@@@......@@@........
+.@@@..........@@@@@@@@@@@@@@@@@@@@@@.@@@..........@@@@....@@@@@........
+.@@@@........@@@@.............@@@@...@@@@........@@@@....@@@@..........
+..@@@@.......@@@@.............@@@@....@@@@.......@@@@...@@@@...........
+..@@@@@....@@@@@..............@@@@.....@@@@....@@@@@...@@@@@@..........
+....@@@@@@@@@@@...............@@@@......@@@@@@@@@@@...@@@@@@@@@@@@@@@@@
+.....@@@@@@@@@................@@@@........@@@@@@@@....@@@@@@@@@@@@@@@@@
+........@@@@...................@@..........@@@@@........@@@@@@@..@.@@@.
+            &gt;&gt;&gt;&gt;^            ^&lt;&lt;&gt;&gt;^ ^&lt;&lt;&lt;&lt;&lt;        &gt;&gt;&gt;^&lt;&lt;&lt;      ^^ ^
+
+&gt;,&lt; show the path of the detection algorithm
+</PRE></TD></TR>
+</TABLE>
+
+<P>
+The latest version of GOCR may use different algorithms.
+You have to look at the sources learn more.
+
+<H1><A NAME="SEC10">
+Black/White, Gray and Colors</A>
+</H1>
+For simplicity colored images are converted to gray internally.
+That means a red text on green background will not be detected.
+You should use your own filter for this purpose.
+
+<P>
+If the original image is gray, a critical value is calculated to
+extract characters from the background. This can fail, if images are
+on the scanned page or tha scan is bad (dark edges or borders).
+It is difficult to overcome this problem because graylevels are mostly
+restricted to the 8 bit limit (16 bit would help to overcome this problem).  
+
+<P>
+Black/White images are internally converted to gray with two levels (0 and
+255).
+
+<P>
+The lowest 4 bits are not used, because they are used by internal functions
+(this can be changed in future).
+
+<P>
+After calculation of the threshold value (otsu.c) the brightness of
+every pixel is recalculated to a new internal threshold value
+of 160 (128+32).
+This is a bit above the middle of the 8 bit range. The idea is to
+make the live easier for the other routines. Pixels which does not sure 
+belong to the white or black ones get a value near the threshold value.
+Some routines can use this bit of more information to ignore outriders.
+Second point is, that this is necessary for using lowest for bits
+without destroying image informations.
+
+<H1><A NAME="SEC11">Pictures on scanned pages</A>
+</H1>
+At first all objects on the scanned page are detected.
+Objects are clusters of black pixels.
+Pictures are detected if they are larger than 4 times the mean size of
+all objects. This rule is very simple and can fail some times.
+But it works fast and mostly the result is ok.
+
+<H1><A NAME="SEC12">Tools</A></H1>
+
+<P>
+<DL COMPACT>
+<DT>pbmclean:</DT>
+<DD>This program is written by Angus Duggan and Jef Poskanzer.
+ It cleans up ``snow'' on bitmap images.
+</DD>
+<DT>pnmtools:</DT>
+<DD>This tools are used to convert different image-formats to
+ easy readable PNM (PBM,PGM,PPM) format.
+ GOCR uses the popen-routine to call this programs if the
+ suffix of the filename matches to a list in pnm.c.
+ This will fail if pnmtools are missing.
+</DD>
+</DL>
+
+<H1><A NAME="SEC12b">related projects (to learn from)</A></H1>
+
+<P>
+<DL COMPACT>
+ <DT>unpaper:</DT> <!-- Dec05 JS -->
+ <DD> <a href="http://unpaper.berlios.de/">unpaper</a> -
+      post-processing scanned and photocopied book pages, 
+      written by Jens Gulden 2005, GPL 
+ </DD>
+</DL>
+
+<H1><A NAME="SEC13">glossary</A> </H1> <DL COMPACT>
+<DT>font series:</DT> <DD>bold, condensed</DD>
+<DT>font shape: </DT> <DD>normal, italic, slanted, sc... </DD>
+<DT>points:</DT>
+ <DD>length unit used for font size, 1/72 inch,
+    but I do not know its exact relation to the font size (height?
+    totalheight? width? 10pt and 300dpi results in 40 pixel heigh font?)
+ </DD>
+<DT>sans serif:</DT>
+ <DD>font without the (often thin) lines on the ends
+   of the character
+ </DD>
+<DT>descewing:</DT>
+ <DD>compensation of (slightly) rotated text
+ </DD>
+</DL>
+
+<H1><A NAME="SEC14"> More information?</A> </H1>
+<DL COMPACT>
+<DT>&middot;</DT>
+   <DD>see "/usr/share/doc/package/tetex/texmf/.../fntguide.dvi"
+       in the documentation of the tetex package 
+ 
+   </DD>
+<DT>&middot;</DT>
+   <DD>the fonts-HOWTO file is helpfully too
+                  ("www.faqs.org/faqs/fonts-faq/")
+ 
+  </DD>
+<DT>RTF:</DT>
+   <DD> RichTextFormat - does someone have a good documontation?
+  </DD>
+</DL>
+
+<H1><A NAME="SEC15"> About this document</A> </H1>
+This Document was originaly written in LaTeX.
+In May 2002 Joerg has convertet it to HTML. The reason is, that
+you can read it now directly and you does not need to have LaTeX and
+Ghostscript installed on your computer to read it.
+As a side effect you do not need tetex package to build the gocr.rpm-package.
+A good viewer to read this document is lynx, links or w3m.
+
+<BR>
+<HR>
+<ADDRESS> jNOschulen-at-gSmPAMx.de (remove NO+S+PAM) </ADDRESS>
+</BODY>
+</HTML>
+<!---
+%
+% -----------------------------------------------------------------
+%       #   v
+%       #   v     mark connected points via fifo-stack
+%       ### *<<   and 3bit direction code per pixel,
+%       # # ^ ^   should be better for overlapping letters
+%       ### ^<<
+% --------------------- point connections ----------------------
+% searching next nearest point  
+%     /----\
+%     |    |
+%   ^ | ## |
+%   | | ## |
+%   | |  | |
+%   | \--/ |
+%   \------/
+%-------------------------------------------------------------
+%
+
+--->

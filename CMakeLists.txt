@@ -29,6 +29,15 @@ ELSE(WITH_SHOW)
   MESSAGE(STATUS "Without show")
 ENDIF(WITH_SHOW)
 
+## Shapes
+OPTION(WITH_SHAPE_DETECTION "Whether to build shapes and planes executable for detecting planes. ON/OFF" ON)
+IF(WITH_SHAPE_DETECTION)
+  MESSAGE(STATUS "With shape detection")
+ELSE(WITH_SHAPE_DETECTION)
+  MESSAGE(STATUS "Without shape detection")
+ENDIF(WITH_SHAPE_DETECTION)
+
+
 ## Octree
 OPTION(WITH_OCTREE_DISPLAY "Whether to use octree display for efficiently culling scans ON/OFF" ON)
 
@@ -60,14 +69,6 @@ ELSE(WITH_TOOLS)
   MESSAGE(STATUS "Without Tools")
 ENDIF(WITH_TOOLS)
 
-## Plane
-OPTION(WITH_PLANE "Whether to build the planes executable for detecting planes. ON/OFF" OFF)
-
-IF(WITH_PLANE)
-  MESSAGE(STATUS "With Plane")
-ELSE(WITH_PLANE)
-  MESSAGE(STATUS "Without Plane")
-ENDIF(WITH_PLANE)
 
 
 ## Scan reduction
@@ -224,28 +225,17 @@ include_directories(${CMAKE_SOURCE_DIR}/3rdparty/)
 include_directories(${CMAKE_SOURCE_DIR}/3rdparty/glui)
 include_directories(${CMAKE_SOURCE_DIR}/3rdparty/ann_1.1.1_modified/include)
 include_directories(${CMAKE_SOURCE_DIR}/3rdparty/ann_1.1.1_modified/src)
-#include_directories(${CMAKE_SOURCE_DIR}/3rdparty/sparse)
 link_directories(${CMAKE_SOURCE_DIR}/obj)
 link_directories(${CMAKE_SOURCE_DIR}/lib)
-
-#set(newmat_LIBRARIES obj/libnewmat.a)
-#set(newmat_PROCESS_LIBS obj/libnewmat.a)
-
-
-
-
 
 add_subdirectory(3rdparty)
 add_subdirectory(src/slam6d)
 add_subdirectory(src/show)
 add_subdirectory(src/grid)
 add_subdirectory(src/pmd)
+add_subdirectory(src/shapes)
 add_subdirectory(src/slam6d/sift)
 
-# Alternative to subdirectory
-#set( SHOW_SRC src/show/)
-#add_executable(show ${SHOW_SRC}show.cc  ${SHOW_SRC}NurbsPath.cc ${SHOW_SRC}PathGraph.cc ${SHOW_SRC}vertexarray.cc  ${SHOW_SRC}viewcull.cc ${SHOW_SRC}colormanager.cc )
-#target_link_libraries(show scanlib dl newmat glut GL GLU glui )
 
 ## Compiling a shared library containing all of the project
 add_library(slam SHARED src/slam6d/icp6D.cc) 

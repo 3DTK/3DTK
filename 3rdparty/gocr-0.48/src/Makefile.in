@@ -1,0 +1,132 @@
+#
+# Makefile for ./src path, used by configure
+#
+
+EXEEXT = @EXEEXT@
+PROGRAM = gocr$(EXEEXT)
+# lib removed for simplification (v0.46)
+# but Igor from OSRA an optical chemical structure recognition software 
+#  wants it (v0.47 Mar09)
+PGMASCLIB = Pgm2asc
+#LIBPGMASCLIB = lib$(PGMASCLIB).a
+# ToDo: need a better pgm2asc.h for lib users 
+#INCLUDEFILES = gocr.h
+# avoid german compiler messages
+LANG=C
+
+LIBOBJS=pgm2asc.o \
+	box.o \
+	database.o \
+	detect.o \
+	barcode.o \
+	lines.o \
+	list.o \
+	ocr0.o \
+	ocr0n.o \
+	ocr1.o \
+	otsu.o \
+	output.o \
+	pixel.o \
+	unicode.o \
+	remove.o \
+	pnm.o \
+	pcx.o \
+	progress.o \
+	job.o
+
+# these two lines are for cross-compiling, not tested
+#srcdir = @srcdir@
+#VPATH = @srcdir@
+bindir = @bindir@
+#  lib removed for simplification
+#libdir = @libdir@
+#includedir = @includedir@
+
+CC=@CC@
+# lib removed for simplification
+# ar,ranlib detection removed from configure (simplicity)
+#  but needed by some developpers (linux only) for for (make libs)
+# RANLIB = @RANLIB@
+# AR = @AR@
+RANLIB = ranlib
+AR = ar
+INSTALL=@INSTALL@
+# shell is needed for OS/2 to let if test -r $(PROGRAM) ... work
+SHELL=@SHELL@
+
+DEFS=@DEFS@
+CPPFLAGS=@CPPFLAGS@
+# to see the config.h
+CFLAGS=@CFLAGS@ $(CPPFLAGS) -I../include $(DEFS)
+LDFLAGS=@LDFLAGS@
+LIBS=@LIBS@
+DESTDIR=@prefix@
+
+.SUFFIXES: .s .o .c .h
+# do not look for files if help (etc) is given
+.PHONY : doc clean install libs default
+
+.c.o: gocr.h pgm2asc.h ../include/config.h
+	$(CC) $(CFLAGS) -c -o $*.o $<
+
+default: all
+
+# all: $(PROGRAM) lib$(PGMASCLIB).a
+all: $(PROGRAM)
+
+gocr.o: gocr.h Makefile ../include/version.h
+
+.c.h:
+
+#$(PROGRAM): lib$(PGMASCLIB).a gocr.o
+$(PROGRAM): $(LIBOBJS) gocr.o
+	# make it conform to ld --as-needed
+	#$(CC) -o $@ $(LDFLAGS) gocr.o ./lib$(PGMASCLIB).a $(LIBS)
+	$(CC) -o $@ $(LDFLAGS) gocr.o $(LIBOBJS) $(LIBS)
+	if test -r $(PROGRAM); then cp $@ ../bin; fi
+
+libs: lib$(PGMASCLIB).a lib$(PGMASCLIB).@PACKAGE_VERSION@.so
+
+lib$(PGMASCLIB).@PACKAGE_VERSION@.so: $(LIBOBJS)
+	$(CC) -fPIC -shared -Wl,-h$@ -o $@ $(LIBOBJS)
+	-ln -s $@ lib$(PGMASCLIB).so
+
+lib$(PGMASCLIB).a: $(LIBOBJS)
+	#	-rm -f $@
+	$(AR) cru $@ $(LIBOBJS)
+	$(RANLIB) $@
+
+$(LIBOBJS): Makefile
+
+# PHONY = don't look at file clean, -rm = start rm and ignore errors
+.PHONY : clean proper install uninstall
+install: all
+	#$(INSTALL) -d $(DESTDIR)$(bindir) $(DESTDIR)$(libdir) $(DESTDIR)$(includedir)
+	$(INSTALL) -d $(DESTDIR)$(bindir)
+	$(INSTALL) ../bin/$(PROGRAM) $(DESTDIR)$(bindir)
+	$(INSTALL) ../bin/gocr.tcl   $(DESTDIR)$(bindir)  # better X11/bin?
+	if test -f lib$(PGMASCLIB).a; then\
+	 $(INSTALL) lib$(PGMASCLIB).a $(DESTDIR)$(libdir);\
+	 $(INSTALL) lib$(PGMASCLIB).@PACKAGE_VERSION@.so $(DESTDIR)$(libdir);\
+	 $(INSTALL) lib$(PGMASCLIB).so $(DESTDIR)$(libdir);\
+	fi
+	# ToDo: not sure that the link will be installed correctly
+	#$(INSTALL) $(INCLUDEFILES) $(DESTDIR)$(includedir)
+
+# directories are not removed
+uninstall:
+	-rm -f $(DESTDIR)$(bindir)/$(PROGRAM)
+	-rm -f $(DESTDIR)$(bindir)/gocr.tcl
+	-rm -f $(DESTDIR)$(libdir)/lib$(PGMASCLIB).a
+	-rm -f $(DESTDIR)$(libdir)/lib$(PGMASCLIB).@PACKAGE_VERSION@.so
+	-rm -f $(DESTDIR)$(libdir)/lib$(PGMASCLIB).so
+	# ToDo: set to old version.so ?
+	#for X in $(INCLUDEFILES); do rm -f $(DESTDIR)$(includedir)/$$X; done
+
+clean:
+	-rm -f *.o *~
+
+proper: clean
+	-rm -f gocr libPgm2asc.*
+	-rm -f gocr
+	

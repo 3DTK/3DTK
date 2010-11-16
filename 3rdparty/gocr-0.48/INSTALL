@@ -1,0 +1,83 @@
+			  INSTALLING gOCR
+
+
+INSTALLING BINARIES
+-------------------
+Be sure that you have all the libraries needed. To install a binary package,
+do the following:
+
+1. Unpack the archive if you have not done so already:
+
+	tar -xzf gocr[version].tar.gz
+
+on older tar versions, the above line might not work. If so, try the following:
+
+	gzip -cd gocr[version].tgz | tar -xf -
+
+This creates the directory ./gocr[version] containing the source from
+the main archive.
+
+2. Change to gocr directory and run make (use GNU Make).
+
+	cd gocr[version]; make install
+
+That's it.
+
+INSTALLING FROM SOURCE 
+----------------------
+
+Requirements
+------------
+You'll need a compiler; we recommend gcc, but the code should compile in any
+good one. gcc is available at http://gcc.gnu.org. I had some problems with gcc
+2.95.1 (it consumed a LOT of memory while compiling ocr0.c). 2.95.2 seems to
+be better.
+
+gOCR provides some simple functions to read/write pnm archives. Though not 
+needed, we strongly suggest, however, that you install the NetPBM package. Its
+official URL is: http://download.sourceforge.net/netpbm/.
+
+Installing this package will add support to many different image formats. 
+If you have a NetPBM version older than August 2000, we suggest that you
+download a more recent one, to take advantage of the new PAM functions.
+
+To create some of the examples provided, you'll need transfig.
+This is completely optional.
+
+Procedure
+---------
+1. Unpack the archive if you have not done so already:
+
+	tar -xzf gocr[version].tar.gz
+
+on older tar versions, the above line might not work. If so, try the following:
+
+	gzip -cd gocr[version].tgz | tar -xf -
+
+This creates the directory ./gocr[version] containing the source from
+the main archive.
+
+2. Change to gocr directory and run configure.
+
+	cd gocr[version]; ./configure
+
+For a list of options, try ./configure --help.
+If something goes wrong, try to run autoconf.
+
+3. Run make (GNU Make). This can take a while.
+
+	make
+
+4. gOCR comes with some examples, which are generated from xfig-files.
+   If you have transfig installed, you can make them:
+
+	make examples
+
+5. Install the binaries. You may need to do this as root.
+
+	make install
+
+6. Run gocr, or the frontend you chose.
+
+	gocr -h			Shows help
+	gocr.tcl		Runs Tcl GUI

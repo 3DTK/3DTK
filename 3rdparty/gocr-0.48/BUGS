@@ -1,0 +1,55 @@
+BUGS
+
+Reporting
+---------
+Please do not hesitate to report bugs, and if possible their fixes! If you 
+send an example file, please make sure it's small. To report bugs, do one 
+of the following:
+
+* go to http://sourceforge.net/bugs/?func=addbug&group_id=7147.
+ This is the preferred way to report bugs.
+
+* send it to one of the authors. Note that sometimes we may be busy, and
+we won't reply it for days. If you post using the previous method, surely
+one of the authors will read it.
+
+* use
+       diff -ru gocr_origin/ gocr_changed/ >patch
+  to create patches
+
+* if you have compiling problems, do not forget to send your configure-output
+  and the config.log file
+
+
+Known bugs (see jocr.SF.net page too)
+----------
+
+v0.48 cutting of double melted chars will fail (example: serif MN)
+v0.43 on dithered images gocr runs extremely long (seems to hang)
+v0.41 linker error using g++ and netpbm under SuSE-9.3
+v0.3.5
+  - segfault on some systems which do not support ifalpha(256+x)
+  - hexcode not read from database
+v0.2.5 german umlauts and i-dots are not handled correctly
+    problems high resolution fonts
+v0.2.4 I guess, there are still bugs.
+    Some systems do not handle stack in good manner (AmigaOS?).
+    gocr does extensively consume stack for recursive functions.
+    Therefore you can get memory protection failures or strange results.
+    The worst case is a huge black area. If that is a problem for you
+    request for changing it.
+    --- --- --- --- only for linux freaks --- --- --- 
+    By mistake I programmed an endless rekursiv function and ...
+    SuSE6.4+linux2.2.12/13 got several "out of mem" and system CRASHED!!!
+    ulimit: stack=unlimited
+    - if text is framed, frame should be ignored, but it is not
+v0.2.3 still problems with segmentation
+  - gcc 2.95.2 (SuSE6.4) error in load_db(), => fixed (thx to jasper)
+v0.2.1
+  - some people have problems running gocr on DOS/Win95
+    I guess: stack overflow. Is someone able to analyze or fix this?
+  - large black areas on pbm-files cause a segfault on
+    Ultra/Sparc (64bit) machines running Linux (2.1.126).
+    There is a recursive function in the program which causes a
+    stack overflow, which is not detected by the linux-kernel (BUG?).
+    I look for a better solution.

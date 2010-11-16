@@ -1,0 +1,165 @@
+			 GOCR (JOCR at SF.net)
+
+GOCR is an optical character recognition program, released under the
+GNU General Public License. It reads images in many formats  and outputs
+a text file. Possible image formats are pnm, pbm, pgm, ppm, some pcx and
+tga image files. Other formats like pnm.gz, pnm.bz2, png, jpg, tiff, gif,
+bmp will be automatically converted using the netpbm-progs, gzip and bzip2
+via unix pipe.
+A simple graphical frontend written in tcl/tk and some
+sample files are included.
+Gocr is also able to recognize and translate barcodes.
+You do not have to train the program or store large font bases.
+Simply call gocr from the command line and get your results.
+
+To see installation instructions, see the INSTALL file.
+
+How to start? (QUICK START)
+---------------------------
+Some examples of how you can use gocr:
+
+  gocr -h       			# help
+  gocr file.pbm				# minimum options
+  gocr -v 1 file.pbm >out.txt 2>out.log # generate text- and log file
+  djpeg -pnm -gray text.jpg | gocr -	# using JPEG-files
+  gzip -cd text.pbm.gz | gocr -		# using gzipped PBM-files
+  giftopnm text.gif | gocr -		# using GIF-files
+  gocr -v 1 -v 32 -m 4 file.pbm   	# zoning and out30.bmp output
+  xli -geometry 400x400 out30.bmp # see details using xli (recommanded viewer)
+  wish gocr.tcl			  # X11-tcl/tk-frontend (development version)
+  # see manual pages for more details
+
+
+How to get image files?
+-----------------------
+Scan text pages and save it as PGM/PBM/PNM file. Use a program such as
+The GIMP or Sane. You can also use netpbm-progs to convert several image 
+formats into PGM/PBM/PNM. The tool djpeg can be used to convert jpeg into pgm.
+If you have a POSIX compatible system like linux and PNM-tools, gzip and bzip2
+are installed, you are lucky and gocr will do conversion 
+from [.pnm.gz, .pnm.bz2, .jpg, .jpeg, .bmp, .tiff, .png, .ps, .eps]
+to [.pgm] for you. This list can easily be extended editing src/pnm.c.
+
+Gocr also comes with some examples, try: make examples.
+
+Memory limitations
+------------------
+WARNING!!!
+
+If you use a 300dpi scan of A4 letter, the image is about 2500x3500 pixels and
+gocr requires 8.75MB for storing the picture into the memory. Not only that,
+but gocr may create a 2nd copy, using a total of 17MB. This is independent
+of using b/w or gray-scale images. Be sure that you have enough RAM installed
+in your machine! Alternatively you can cut the picture into small pieces.
+You can use the pnmcut, from the netpbm package to cut the file. Example:
+
+pnmcut -left 0 -right 2500 -top 0 -height 1000 bigfile.pnm > smallfile.pnm
+
+And then use gocr in the cropped image as usual. Take care: if you chopp the
+characters, gocr won't be able to understand that line.
+
+Future versions will take care of this issue automatically.
+
+Limitations
+-----------
+gocr is still in its early stages. Your images should fit in these requirements
+if you want a good output:
+
+- good scans (all chars well seperated, one column, no tables etc, 12pt 300dpi)
+  should work well
+- fonts 20-60 pixels ( 5pt * 1in/72pt * 300 dpi = 20 dots )
+- output of image file for controlling detection
+
+And note that speed is very slow (this will be changed when recognition works 
+well)
+  12pt 300dpi 1700x950 16lines 700chars 22x28 P90=40s..90s v0.2.3 (gcc -O0)
+
+You can try to optimize the results:
+- make good scans/treat image
+- try to change the critical gray level (option -l <n>)
+- control the result on out10.png, out30.png (option -v 32)
+  example: ./gocr -v 32 -m 4 -m 256 -m 56 ~/aac.jpg # only check layout
+- enlarge option -d <n> for high resolution images which are noisy
+- try different combinations for option -m <n>
+- for thousends of documents with same font
+  you can use/create a database (-m 2/-m 130)
+- use options -d 0 -m 8 on screen shots (font8x12)
+- use filter option -C to through out wrong recognized chars (ex: gothic)
+
+What does >> NOT << work at the moment:
+- complex layouts (try option -m 4)
+- bad scans, noisy/snowy images, FAX-quality images
+- serif fonts, italic fonts, slanted fonts
+- handwritten texts (this is valid for the next ten years I guess)
+   the exisctence of autotrace can shorten this 
+- rotated images (but slightly rotated images should be no problem)
+- small fonts (fax like) or mix of different font size
+- colored images (use gray or black/white)
+- Chinese, Arabian, Egyptian, Cyrillic or Klingon fonts
+
+How it works or how it should work?
+- put the entire file into RAM (300dpi grayscale recommended)
+- remove dust and snow
+- detect small angle (lines which are not horizontal)
+- detect text boxes (option -m 4)
+- detect text-lines
+- detect characters
+- first step recognition (every character has its own empirical procedure)
+  - no neural network or similar general algorithms
+- analyze not detected chars by comparison with detected ones
+- try to divide overlapping chars
+- testwise: compare all letters (like compression of pictures)
+- for more details look to the gocr.html documentation
+
+Why the result of the new version are worse compared to the old version?
+- the algorithms of gocr are sometimes evolutionary, a fine tuned old
+  algorithm will be replased by a completly new algorithm which is more
+  general but a bit worse for your problem.
+  Please send your sample and give the new algo the chance to become
+  better as the old one.
+
+Security
+--------
+Because gocr only reads and writes files it is quite sure, except the
+popen-function which allows you to call gocr with non-pnm-image formats
+directly. The popen function can be misused to start other probably 
+dangerous programs.
+If you care about conversion to pnm format, you can safely disable
+popen-function by removing "#define HAVE_POPEN 1" from config.h before
+compiling the gocr package.
+
+
+How can you help gocr?
+----------------------
+- Send comments, ideas and patches (diff -ru gocr_original/ gocr_changed/).
+- If you have a lot of money, spend a bit (paypal). Ok, paypal has changed,
+  so please forget about it. Also the importand problem is now the missing
+  spare time for coding.
+- I always need example files (.pbm.gz or jpeg <100kB) for testing
+  the behavior of the ocr engine under different conditions, 
+  because scanning does take a lot of time which I do not have.
+  But do not send files which are not convertable by commercial ocr programs
+  or which are protected from copying and electronic processing by copyright.
+  That will help, to get the world's best OCR open source program. :) Thanks!
+- Please dont send captchas.
+- Send me your results (errors,num_chars,dpi) and if possible results
+  and name of professional OCR programs for statistics.
+- Read OCR literature, extract the essentials and send a short report
+  to me ;).
+- If you have a good idea, how to manage some OCR-tasks, tell me!
+- Tell your friends about gocr. Tell me about your success. Be happy.
+
+
+After all, is it gocr or jocr?
+------------------------------
+The original name of this project is gocr, from GNU Optical Character
+Recognition. Another project is using the same name, however; so the
+name was changed to jocr. If you have a good idea for a name, please
+send it.
+
+
+Latest news
+------------
+  http://jocr.sourceforge.net
+
+Authors: (see AUTHORS)

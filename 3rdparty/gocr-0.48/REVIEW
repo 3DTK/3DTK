@@ -1,0 +1,538 @@
+This is a list of reviews, so that developers don't get confused with the new
+changes. Please document what you do here. 
+
+() done
+[] done, but should be reviewed
+|| to be done, do if you can
+?? question: if you know, solve it
+Writer: put your initials inside.
+
+5/8
+(bbg) changed box1 to head_data.
+(bbg) changed boxd to head_db.
+|bbg| box2 static variables do not exist anymore. They were confusing,
+     since these names were used as arguments to functions too. From what I've
+     seen, this will not affect the program.
+     (js) agree
+(bbg) added new file: box.c, with all the functions that deal with boxes.
+(bbg) added new file: database.c, with all the functions that deal with db.
+[bbg] ocr_db()
+|bbg| split pgm2asc(): the function would still exist, but call other 
+     subfunctions which are part of it now. I suggest:
+     - find_letters()
+     - remove_dust()
+     - remove_pictures()
+     - remove_melted_serifs()
+     - find_longest_line()
+     - detect_lines()
+     etc: they are practically already defined between {}.
+?bbg? pgm2asc: it has 2 frame letter codes, 2 find pictures, 2 remove
+     dust
+     |js| It is result of last (not finished) big rewriting of code
+          will be changed later
+|bbg| vvv (or equivalent) should be global.
+
+6/8
+(bbg) general linked lists done (list.*).
+|bbg| Functions in box.c should be changed by the new general ones. 
+     linearr should too.
+(bbg) strc() and in_str() changed by strchr.
+?bbg? shouldn't test_umlaut() belong to another file, like ocr0.cc?
+      js: good idea
+      (bbg) moved to ocr0.cc
+?bbg? there are several functions with 2 or 3 versions (detect_lines,
+     detect_lines2, for example). Do they do the same thing (and one
+     is older) or different things?
+     js: different, they are different childs from same mother
+         they are going more different in future
+?bbg? What do ini_list(), excude() and getresult() do? They don't seem
+     to be used. If they are useless, please delete them.
+     js: read the new comments in the file (should be in seperate file?)
+|bbg| document pixel().
+     :done.
+|bbg| Many, many commented lines all over the file; should be cleaned.
+     :done.
+|bbg| Change new->malloc, delete->free.
+     :done
+
+7/8
+(js) some comments added in pgm2asc.cc
+|bbg| instead of p.p[x+y*p.x], use the new macro pixel_at(p, x, y).
+     Not all substitutions done yet.
+     :done.
+(bbg) excude() renamed to exclude().
+?bbg? what are the pixel bits meaning? A table would be useful.
+     (js) not stable: lowest (3-4?) bits are for temporary use
+              highest (4?) bits are for intensity
+|bbg| must change all "type &p" arguments.
+     :done
+|bbg| should make argument order standard: at the present, sometimes the
+     order is x0,x1,y0,y1, sometimes x0,y0,x1,y1, pix is not always the
+     first, etc.
+(bbg) turmite(): changed for+if -> while. Is is correct? I think so, but
+     a test wouldn't hurt. Also optimized the function.
+   (js) I test it after complete review.
+
+8/8
+(js) pgm2asc.cc: generally pix *p used, pgm2asc() partly rewritten 
+|js| ocr0.cc: pix *p must be used everywhere
+    :done
+(bbg) pixel(): first part (c33 filling) optimized.
+(bbg) minor optimizations, cut superflous counters.
+?bbg? copybox: shouldn't b->p be free()d, or realloc()ed? There's also a new
+     faster version (using memcpy), but there's no unmarking of pixels; I'm
+     also not sure if they are equivalent, since I'm not calling pixel. It's
+     between #ifs.
+
+9/8
+(bbg) Started to change linearr to linked lists; linearr is obsolete now,
+     and textlines too.
+(bbg) free_textlines() and getTextLine() use linked lists (instead of linearr)
+     now. The first may be deleted in the future.
+[bbg] store_boxtree_textlines use linked lists (instead of linearr) now, but
+     should be tested and reviewed; specially if (box2->c == ' ') since it 
+     doesn't check for an \n anymore (why should it?). Also the extra list_app
+     should be checked. Check too if "if (!(mo & 8))" shouldn't come before
+     "if (box2->c != '_')".
+     :done
+(bbg) Moved copybox() to box.c
+?bbg? put(): What are ia and io?
+      js: ia int_and, io int_or  new_pixel=(old_pixel & ia) | io
+          for more praktical use
+|bbg| What about putting remove_dust, remove_picture, remove_etc in another
+     file, such as clean.c or remove.c?
+      js: should be made
+      bbg: done
+|bbg| several #ifdef's pending approval or review. Get rid of them.
+      :done
+[bbg] Added code to open pgm files using libpgm. Not tested, but should be OK. 
+[bbg] started to write writepbm, writeppm.
+
+10/8
+[js] pgm2asc() new functions created
+(bbg) moved remove_* functions to remove.c
+(bbg) added doc/ directory; moved ocr.tex to doc/; created examples.txt.
+(bbg) added UNICODE support: unicode.h contains all symbols we will ever need,
+     unicode.c contains two conversion functions.
+(bbg) most of Unicode->TeX convert() (0x7F-0xFF) codes are done.
+[bbg] several compose() codes done.
+
+11/8
+(bbg) new pnm IO functions, much better now.
+[bbg] fixed part of ocr0.cc: since arguments changed from pix &p to pix *p, it 
+     wasn't compiling. Must fix the pix b; should it be changed to pix *b?
+     :done
+|bbg| Use new Unicode code; change all old code using unsigned char to wchar_t.
+     Work started. Take care: old libc functions won't work anymore. Use those 
+     defined in <wchar.h>. Perhaps we should wait until the review is done and 
+     gocr is working again.
+     :do it in 0.3.1 only.
+?bbg? should we move wert code to a new file?
+     (js) we should
+?bbg? should we move all code a /src sudirectory?
+     (js) we should, same step should rename .cc to .c
+|bbg| fix Makefile (or better, configure.in) to reflect new files.
+     :done
+[bbg] started to change all the for(box=head_data) to for_each_data. CAREFUL:
+     you cannot use for_each_data recursively. On the next layer, you must use
+     something like for(box=list_get_header; box; box=list_next(box));
+     :done
+
+13/8
+(bbg) finished changing for(box=head_data). Old box_* functions still used,
+     must fix.
+(bbg) cleaned 99% of the warning/errors when compiling pgm2asc.cc
+[bbg] fix: warning: control reaches end of non-void function 
+     `compare_unknown_with_known_chars(pix *, int)'
+     :done
+[bbg] check if pgm2asc.cc:474:i = ((pixel(p, x, y) < cs) ? 0 : 1); is useless
+     or not.
+     (js) useless, relict from older review-changes
+(bbg) vvv is now part of struct environment.
+(bbg) removed Uchar, may conflict with other libs. Use unsigned char.
+
+15/8
+(bbg) Tim Waugh sent man page; added him in the thanks of README.txt
+[bbg] should break README.txt in: INSTALL, CREDITS, TODO, HISTORY.
+     :done
+(bbg) more changes from box_* to list_*
+
+16/8
+(bbg) added greek letters to the unicode.c functions. Not complete.
+(bbg) added punctuation symbols to the unicode.c functions. Not complete.
+(bbg) added ISO8859-1 support to the unicode.c functions. 0x20-0xFF supported,
+     ligatures supported.
+
+18/8
+[bbg] fix try_to_divide_boxes to the new general linked list.
+[bbg] most for_each_data have a line like box2 = list_get_current, which is
+     unnecessary. Change box2 by list_get_current. To avoid clumsiness, it
+     maybe a good idea to create a new #define lgc(a) list_get_current(a).
+
+25/8
+(js) ./src created, .cc,.h,.c moved to src, .cc renamed to .c
+[js] try to get make working (make jconv) see config.h: USE_LIBPNM => HAVE_PNM_H
+|js| list.c L66 data_before ??? what does that mean?
+     (bbg) mistyped, fixed.
+     list_del should be tested
+     :done
+?js? unicode.c there are undefined DEFS L89++ (i have put it in /* */)
+     L150++,L185++,L633++
+     (bbg) fixed
+[js] make works again (now you can make compilation tests on changes)
+     ... but SEGFAULT
+
+26/8
+(bbg) fixed casting warnings in unicode.c; fixed undefined DEFS.
+|bbg| fix the missing LaTeX codes in unicode.c.
+
+28/8
+?js? configure does not find /usr/X11R6/include/pnm.h, why?
+[js] fixed some bugs to get gocr working, but there are still big bugs
+
+30/8
+(bbg) fixed all gcc warnings. Some bugs killed in the process.
+(bbg) fixed pnm.c compilation problem
+|bbg| have to fix database.c:102
+|bbg| MANDATORY: change all old linked list code to the new one. This means:
+     get rid of box_* functions, the header->data stuff, etc. The new linked
+     list code is probably working 100%.
+(bbg) changed $(CXX) to $(CC). C conversion completed!
+(bbg) added jconv and gocr sections to src/Makefile.
+(bbg) new ISO8859-1 codes in unicode.c:convert.
+(bbg) fixed several bugs in list.c, and patched list_del() to return 2 if 
+     deleted data was list->current.
+     
+1/9
+(bbg) added new list_init(). Use it.
+(bbg) wrote a fix to the list_del()+for_each_data bug. It's not very good, but
+     works. Fixes the nested loops too. Now you can use for_each_data
+     recursively.
+
+8/9
+(bbg) more fixes from the old LL system to the new one.
+(js) added list_higher_level(), fix list_lower_level()
+     bug fixed free_textlines(),store_boxtree_lines(),store_boxtree_lines()
+(js) review of pgm2asc() finished
+
+9/9
+(bbg) more fixes from the old LL system to the new one.
+(bbg) fixed the realloc fixes of 8/9 in fix list_lower_level(),
+     free_textlines(),store_boxtree_lines(), and fixed list_higher_level(), 
+     to avoid a blow if realloc fails. Now things continue working.
+(js) compilation bug removed
+(bbg) reviewed context_correction().
+(bbg) moved output_list() and write_img() to output.c. Added output.h.
+?bbg? Since output.c functions are only for debugging, what do you think about
+     adding some #ifdef DEBUGs to make a smaller, faster code? It doesn't have
+     to be done now, but it's an idea.
+   (js) its general good idea, but I would use a DEBUG level
+           DEBUG > 2 (or similar)
+          during development (until version 1.0) DEBUG should be activated
+          by default,
+          people could experiment with it and experts could deactivate DEBUG
+(bbg) cleaned old textline functions.
+
+11/9
+(js) have fixed two major bugs, gocr now works again (but only -m 56 works)
+
+18/9
+(js) pedantic compiler warnings removed 
+    bbg: compiling using pam (netpbm, see 22/9) functions generate some warnings,
+     which are caused by pam.h and do not affect gocr.
+(js) list_del() does not work proper in context_correction(), fixed
+    bbg: list_del return value should be checked always. I'm not sure what
+     behaviour you want, so I didn't add the checks.
+(js) malloc_box() bug fixed (memcpy src-dest mismatch)
+
+21/9
+(js) pgm2asc.c L1954, 2nd scan removed, now much faster, but
+     handling of umlaut etc. is missing (similar to gluing function)
+     bbg: umlaut is detected. Are you sure it's missing?
+(js) I am away until Sept 30th 2000
+
+22/9
+|bbg| pnm_readpnmrow() SIGSEGV's. Don't know why.
+     ?js? (when does it happens? example file?)
+     bbg: any file, here. Does it work for you? Are you sure isn't the pam 
+      functions?
+(bbg) added new code to read pnm's using netpbm package (pam* functions). It
+     works, but the drawback is that only recent (August 2000) libraries have
+     these functions. Added test for pam.h in configure. 
+[bbg] moved example files to ~/tests/. Updated Makefile.in to reflect changes
+     and moved the pertinent stuff to tests/Makefile. I don't have experience
+     with autoconf, but I think I did it right. :)
+(bbg) fixed tests for unistd.h, which were missing.
+|bbg| How to change gocr.tcl splitted windows proportion? It'd be nice to be
+     able to have a larger output area.
+|bbg| gotta fix make.bat. There's a make for DOS, however; should we delete
+     make.bat?
+(bbg) wrote INSTALL. Moved (no changes) history from README.txt to HISTORY.
+|bbg| review README.txt. Create a TODO file, BUGS, etc.
+     :done
+
+23/9
+?bbg? database.c::ocr_db(), is any use for box3?
+(bbg) added "Elapsed time".
+(bbg) minor fixes.
+
+24/9
+|bbg| remove_dust() broken? It's not being used currently, since it's the last
+     piece of code using old list functions, and if it's updated, ocr1.c returns
+     a bunch of "#hmm, something was going wrong". So, the problem may be in
+     ocr1.c. I wrote the patch for remove_dust(), it's in #ifdefs.
+     :done
+(bbg) patched rest of remove.c to with new list functions.
+[bbg] remove_pictures() loop is weird. I followed what was there, but it should
+     be checked.
+
+1/10
+(bbg) for_each_data now checks the return value of list_higher_level().
+(bbg) moved some functions to pixel.c
+(bbg) some cleanup
+
+3/10
+(js)  minor changes in Makefiles, add_line_infos() improved
+
+6/10
+(bbg) fixed bug when inserting a node before header, in list_ins().
+(bbg) fixed bug that made for_each_data use list->header twice: l->fix wasn't
+     properly initialized.
+(bbg) added list_sort(). Runned some tests, seems to be OK.
+
+7/10
+(bbg) updated list_sort() to a faster version. Runned tests.
+(bbg) some minor cosmetic fixes
+|bbg| amiga.h: is it really needed, can someone test it?
+|bbg| As soon as remove_dust is fixed, the old list code can be deleted, which
+     would be nice. So, Joerg, can you please fix it? Thanks.
+     [js] Have I fixed it?
+     :done
+
+9/10
+(mg)  moved gocr.tcl and create_db to new bin folder
+(mg)  cleaned up Makefile.in (some subdirs not included yet)
+(mg)  created new sub-folder lib
+(mg)  created new sub-folder include
+[mg]  installation for src is done very rudimentary
+
+13/10
+(bbg) split README.txt in BUGS, TODO and CREDITS. Joerg: Please write an AUTHORS
+     file.
+(bbg) renamed README.txt to README.
+(bbg) added list_empty(). Fixed list_higher_level to avoid empty lists. BTW: I
+    think that passing an empty list (l->header==NULL) may blow some of the 
+    list functions. 
+
+16/10
+(bbg) added AUTHORS.
+
+22/10
+(js) minor changes, glue_broken_chars() improved, ocr0 updated
+?js? list_del() seems not to work in nested for_each_element()-loops
+[js] remove_dust fixed?
+     :done
+
+23/10
+(bbg) rewrote list_del, using a new kind of fix. It will work as long as the
+     data is not freed by the user. A solution to fix this is to pass a pointer
+     to a function that will free the data.
+
+25/10
+(js) glue_broken_chars() recognition of "=" fixed, some other bugs fixed
+(js) some improvements for recognition (ocr0n.c,ocr0.c)
+
+27/10
+(js) further improvements for better recognition results, polish.tex added
+
+28/10
+(bbg) changed free_boxtree() to new code
+|bbg| have to fix the reast of the old box code
+     :done
+
+4/11
+[bbg] one of the frees of the new free_boxtree code sigsevs. I dunno why.
+     (js) boxlist->element->p is a pointer to existing whole pixmap, do not free this!
+[bbg] I commented the following lines of pgmasc.c: 1430,43,55,67,81,95, since
+     they seem to be unnecessary.
+       (js) hmm: they are not needed for list_ins, but could be usefull for 
+       a engine which looks for surrounding boxes. Do you know what I mean? 
+     It was the last step of the conversion to the
+     new list routines. *uf*.
+(bbg) ALL OLD CODE ROUTINES ARE DEPRECATED NOW. Mission successful, waiting for
+     permission to delete. :)
+       (js) permission granted
+(bbg) Just to reassure, I tested gocr today and it's 100%
+[bbg] change sort_boxes to a call to list_sort. sort_box_func should be 
+     reviewed
+      (js) looks ok to me.
+     or tini_list(){  
+      (js) ???
+?bbg? ini_list(), exclude() & getresult(): should they be deleted?
+       (js) not found :(
+     I'm working
+     on a probability based engine, using neural networks. 
+
+6/11
+(js) get Segmentation fault, => fixed
+
+14/11
+(bbg) deleted old list code.
+(bbg) moved all detect* functions to detect.c
+(bbg) movde lines functions to lines.c
+
+22/11
+(bbg) reviewed frame_nn(), mark_nn(), num_hole(), num_obj(). Some other minor
+    revisions.
+(bbg) added outbounds() macro in gocr.h. It should be used from now on.
+
+24/11
+(js) some patches by J.R.V. Zandt added
+?js? have still problems detecting pnm-libs via autoconf/configure
+
+25/11
+(bbg) added HTML support for all ISO8859-1 characters in unicode.
+
+27/11
+(bbg) some fixes in unicode.*
+|bbg| whatletter needs a serious revision.
+
+30/11
+[js] split ocr0.c (compiles faster now), gcc 2.95.1 "bug" removed?
+
+10/12
+[bbg] Unicode is now supported. Some tests should be made, specially testing
+    UNKNOWN/PICTURE and >0xFF characters.
+
+17/12
+[js] pamlib,netlib,pnmlib detection (configure.in) changed
+
+21/12
+[jrv] pgm2asc changes:
+  context_correction() BUGFIX: test whether
+previous(previous(current)) exists, before trying to dereferencing the pointer.
+  follow_path() introduced: follow a path, recording transitions
+between dark and light. 
+  xrealloc() introduced: safe memory allocation
+  loop() optimization: move direction test outside loop, simplify loop test
+  measure_pitch() introduced: detect monospaced font and measure the pitch
+  pgm2asc(): if font is monospaced, set spc per measured character spacing.
+  A few wording fixes.
+
+05/01
+(js) some fixes in glue_broken_chars results in good ";" and "!" detection
+     engine updated (examples/font1.pbm should work perfect)
+
+19/02
+(js) "make dist" now automaticly makes packaging (gocr-x.y.z.tgz)
+    does the Makefile in api working (especially make clean/proper)?
+   "make install" should work too
+   bbg: API makefiles work, but there's no make proper (use distclean instead)
+    I'd appreciate if someone could test the configure and libpnm. install is
+    not tested yet. 
+
+19/04
+[js] USE_UNICODE defined as default in gocr.h (test it), some fixes to get
+   -f TeX, -f HTML running, fixed bug in lines.c (unterminated string)
+  measure_pitch extended to 12<width<150 (see example)
+
+15/05
+[js] list.c line 225+226 realloc( .., (l->level+2)..) correct? (S.Niemz bug)
+
+30/07
+?js? readpnm if USE_libpnm does not the job of old readpgm (for pbm-files)
+
+22/08
+(js) gcc -Wall -pedantic warnings fixed, ocr0.c wchar_t used by default
+    we should switch to wchar_t, its more flexible and ANSI (?)
+    and the huge number of "#ifdef USE_UNICODE" statements are looking bad
+?js? can someone compile test on a machine without wchar.h? (FREEBSD?)
+
+25/08
+?js? I got following warning by gcc 2.95.3 20010315 (-Wall -pedantic):
+  lines.c: In function 'store_boxtree_lines':
+  lines.c:136: warning: implicit declaration of function 'wcsdup'
+  but I included <wchar.h>. Does anybody understand this???
+  hmmm ... Is it because of not ANSI (but GNU) extension?
+  What should we do with non-standart C-functions?
+  May be therefore I got the complains from FREEBSD users?
+
+30/08
+(js) pgm2asc.c, output.c simplified, improvement of char-devision
+
+08/02/2002
+?js? all possible SIGSEGVs in list.c fixed
+
+15/02/2002
+[js] ocr0.c will use setac() in future manipulating struct box - tac,wac
+  and c, if chars are very similar this will make context correction more
+  easyly, filtering will be more easily too (not fully implemented)
+
+25/02/2002
+[js] box->obj added for storing more than one char
+
+02/06/2002
+(jb) added special encodings for '&', '<', '>' to HTML decoder
+
+05/06/2002
+[jb] job_t introduced (same patch as sent to the mailing list)
+     Only local variables (configuration and pixmap) of main() are
+     moved inside job_t yet.
+[jb] boxlist and linelist converted to job_t
+[jb] Temorary introduction of global variable JOB (of type job_t)
+     This variable will be removed, while all functions are converted to
+     receive either an job_t pointer or the needed values.
+[jb] n_run, env, db_path and ppo converted to job_t
+[jb] converted dblist
+[jb] renamed init_job and free_job to job_free and job_init
+[jb] converted nearly all global variables (except warn and debug) to
+     job_t. Used JOB as new temporaryr global variable.
+     Overview of the renaming (some old variables are combined to a new one):
+     
+       OLD VAR NAMES      NEW VAR NAME
+     * main():inam        JOB->src.fname 
+     * main():p           JOB->src.p
+       env.p
+     * main():init        JOB->tmp.init_time
+     * ppo                JOB->tmp.ppo
+     * n_run              JOB->tmp.n_run
+     * dblist             JOB->tmp.dblist
+     * boxlist            JOB->res.boxlist
+     * linelist           JOB->res.linelist
+     * lines              JOB->res.lines
+     * env.avX            JOB->res.avX
+     * env.avY            JOB->res.avY
+     * env.sumX           JOB->res.sumX
+     * env.sumY           JOB->res.sumY
+     * env.numC           JOB->res.numC
+     * main():cs          JOB->cfg.cs
+       env.cs
+     * main():spc         JOB->cfg.spc
+     * main():mo          JOB->cfg.mode
+       env.mode
+     * main():dust_size   JOB->cfg.dust_size
+     * main():numo        JOB->cfg.only_numbers
+       only_numbers
+     * main():verbose     JOB->cfg.verbose
+       env.vvv
+     * main():out_format  JOB->cfg.out_format
+     * main():lc          JOB->cfg.lc
+     * env.db_path        JOB->cfg.db_path
+
+[jb] introduced list_and_data_free
+
+|jb| get rid of JOB.
+|jb| decide on last global variables "warn" and "debug"
+  js: its thought for debugging, we should use MACROS WARN or DEBUG
+|jb| eliminate static buffers inside fucntions.
+
+30/06/2002
+(js) gocr.h: struct box: modifier now wchar_t
+     mark things, which need changes with "ToDo:" directly in the sources,
+      so that we can grep for it and see that there are planed changes
+
+05/01/2003
+(js) ocr0.c: engine splitted in groups of characters (mostly pairs)
+     num_hole called once for every char, result is stored in a table
+?js? cvs ci jocr   does not work since 2003? (it tries to update jocr/CVS)
+   have cvs-1.11.1p1

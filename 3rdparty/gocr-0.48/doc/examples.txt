@@ -1,0 +1,67 @@
+Note: this info is related to example files, used to test gOCR. As of this 
+writing, these files are not available to non-developers. So, if you aren't
+a developer, forget about this file.
+
+				EXAMPLE FILES
+
+1. Scanning
+The examples can be scanned from anything; when looking for something, try to
+have in mind the kind of tests you are expecting to do: if you're testing
+accents recognition, look for texts in portuguese, french, etc. (pretty obvious,
+but keeping this in mind will help to have a large gamma of files covering
+different kinds of tests).
+
+If you're not interested in testing DPIs, scan at 150 or 300dpi.
+
+If you're not interested in testing the dust removal, cleaning, etc, functions,
+do the best scan you can. Usually increasing brightness and contrast will
+provide a sharper, cleaner image.
+
+Save the image in a supported format: for example, pgm or jpg. If a compression
+will result in a significant reduction of size, compress the image. BZIP2
+usually is the best compressor around, but gzip is more popular in the unix
+world. In the wintel world, people use ZIP, and usually will have to search for
+an application capable of opening .gz or .bz2 (though WinZIP opens at least the
+former).
+
+2. Sorting
+To help others to find the files they are looking for, the examples/ directory
+is divided in several other directories, which may be subdivided. When
+uploading a new example, look for the most suitable location. Depending of the
+directory, you probably will name your file with interesting info: for example,
+when uploading a image with all the characters of the foo font, the best thing
+to do is to place it at examples/fonts/foo.jpg.
+
+3. "Translation"
+Along with the image file, upload a text file with the expected output. Be
+careful with this file: it must resemble the original text as much as possible.
+Don't add extra new lines (\n), keep hyphenized words, etc. Name this file with
+the same name of the image file.
+
+In the beginning of the text file, you should provide comments, to help
+searches. Use the following sample:
+
+# Comments
+# DPI: 
+# Colors: 
+# Image size (colsXrows): 
+# Fonts: 
+# Font sizes: 
+# Layout form: 
+# Number of pictures: 
+# Language: 
+# Quality of scan: 
+# Non-ASCII characters: 
+# Extra: 
+
+Check existing examples to see what people have been doing. 
+
+Any lines that begin with # will be considered comments, so you may use several
+lines for comments or add new fields. Though gOCR itself doesn't depend on, and
+won't use, this file, it will be used by scripts.
+
+4. Other sources (WEB)
+ 
+  - http://www.clerkweb.house.gov/elections/elections.htm  (Nov2002)
+      PDF-files with lot of tables
+
