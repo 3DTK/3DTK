@@ -1,8 +1,8 @@
 #MAKEFLAGS += -j
 
-all: builddir
+all: builddir .configured
 	@mkdir -p .build
-	cd .build && cmake ..
+#	cd .build && cmake ..
 ifneq ($(MAKE),)
 	cd .build && $(MAKE) --no-print-directory
 else
@@ -12,11 +12,17 @@ endif
 builddir:
 	@mkdir -p .build
 
+.configured:
+	touch .configured
+	cd .build && cmake ..
+
 clean:
 	-cd .build && make clean --no-print-directory
 	rm -rf .build
+	rm .configured
 
 config: builddir
+	touch .configured
 	cd .build && ccmake ../
 
 
