@@ -25,7 +25,7 @@
 #define HAVE_WCSDUP 1
 
 /* Define if you have the <pam.h> header file.  */
-#define HAVE_PAM_H 1
+//#define HAVE_PAM_H 1
 
 /* Define if you have the <pnm.h> header file.  */
 #define HAVE_PNM_H 1
