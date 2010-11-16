@@ -19,8 +19,8 @@
 #include "history.h"
 
 // SLAM6D
-#include "point.h"
-#include "ptpair.h"
+#include "slam6d/point.h"
+#include "slam6d/ptpair.h"
 #include <vector>
 
 
