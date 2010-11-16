@@ -7,7 +7,10 @@
 
 // TODO implement some parameters to modify ransac (maybe in CollisionShape?)
 template <class T>
-void Ransac(CollisionShape<T> &shape, Scan *scan) {
+void Ransac(CollisionShape<T> &shape, Scan *scan, vector<T*> *best_points = 0) {
+  int best_score = 0;
+  CollisionShape<T> *best = 0;
+
   // stores 3 sample points    
   vector<T *> ps;
   // create octree from the points
@@ -19,12 +22,15 @@ void Ransac(CollisionShape<T> &shape, Scan *scan) {
 
     if ( shape.hypothesize(ps) ) {
       
-      // count number of points on the plane
+      // count number of points on the shape
       int r =  oct->PointsOnShape(shape);
       
-      if (r > 10) {
-        vector<T *> points;
-        oct->PointsOnShape(shape, points);
+      if (r > best_score) {
+        if (best) delete best;
+        // remember this best fitted shape
+        best_score = r;
+        best = shape.copy();
+        oct->PointsOnShape(shape, *best_points);
       }
     }
   }

@@ -10,16 +10,16 @@ IF (WITH_SHAPE_DETECTION)
                               ${GOCR_DIR}output.c ${GOCR_DIR}pixel.c ${GOCR_DIR}unicode.c ${GOCR_DIR}remove.c 
                               ${GOCR_DIR}pnm.c ${GOCR_DIR}pcx.c ${GOCR_DIR}progress.c ${GOCR_DIR}job.c)
 
-  add_executable(shapes shapes.cc  geom_math.cc numberrec.cc  scan_ransac.cc )
-
-  IF(WIN32)
-    target_link_libraries(shapes scanlib XGetopt netpbm Pgm2asc)
-  ENDIF(WIN32)
-
-  IF (UNIX)
-    target_link_libraries(shapes scanlib newmat dl netpbm Pgm2asc )
-  ENDIF(UNIX)
-  
+#  add_executable(shapes shapes.cc  geom_math.cc numberrec.cc  scan_ransac.cc )
+#
+#  IF(WIN32)
+#    target_link_libraries(shapes scanlib XGetopt netpbm Pgm2asc)
+#  ENDIF(WIN32)
+#
+#  IF (UNIX)
+#    target_link_libraries(shapes scanlib newmat dl netpbm Pgm2asc )
+#  ENDIF(UNIX)
+#  
   
   add_executable(planes plane.cc hough.cc convexplane.cc accumulator.cc hsm3d.cc ConfigFileHough.cc parascan.cc quadtree.cc geom_math.cc  )
   
