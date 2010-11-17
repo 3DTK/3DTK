@@ -49,6 +49,13 @@ class CollisionPlane : public CollisionShape<T> {
     d = _plane[3];*/
   }
 
+  CollisionPlane(T _maxDist, T x, T y, T z, T _d) {
+    maxDist = _maxDist;
+    nx = x;
+    ny = y;
+    nz = z;
+    d = _d;
+  }
 
   virtual bool isInCube(T x, T y, T z, T size) {
     T xm, xp, ym, yp, zm, zp;
@@ -132,7 +139,7 @@ class CollisionPlane : public CollisionShape<T> {
   }
   
   virtual CollisionShape<T> * copy() {
-    return new CollisionPlane<T>(maxDist);
+    return new CollisionPlane<T>(maxDist, nx, ny, nz, d);
   }
 
   void getPlane(double &x, double &y, double &z, double &_d) {
