@@ -60,7 +60,6 @@ class CollisionPlane : public CollisionShape<T> {
   }
 
   virtual bool isInCube(T x, T y, T z, T size) {
-    return true;
     T xm, xp, ym, yp, zm, zp;
     T Fxm, Fxp, Fym, Fyp, Fzm, Fzp;
     xm = x - size;
@@ -104,8 +103,7 @@ class CollisionPlane : public CollisionShape<T> {
 
 
   virtual bool containsPoint(T* p) {
-    return fabs(p[0]*nx + p[1]*ny + p[2]*nz + d) < maxDist;
-//    return fabs(planeDist(p, nx, ny, nz, d)) < maxDist;
+    return fabs(planeDist(p, nx, ny, nz, d)) < maxDist;
   }
 
   virtual bool hypothesize(vector<T *> &points) {
