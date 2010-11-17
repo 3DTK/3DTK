@@ -51,41 +51,66 @@ public:
     DrawPoints(p, *BOctTree<T>::root, nrp);
   }
  
-  /*
-  long PointsOnPlane(double plane[4], double maxdist) {
-    return PointsOnPlane(*BOctTree<T>::root, BOctTree<T>::center, BOctTree<T>::size, plane[0], plane[1], plane[2], plane[3], maxdist);
-  }*/
-
 
   unsigned long PointsOnShape(CollisionShape<T> &shape) {
     return PointsOnShape(*BOctTree<T>::root, BOctTree<T>::center, BOctTree<T>::size, shape);
   }
 
-  unsigned long PointsOnShape(CollisionShape<T> &shape, vector<T *> &points) {
-    return PointsOnShape(*BOctTree<T>::root, BOctTree<T>::center, BOctTree<T>::size, shape);
+  void PointsOnShape(CollisionShape<T> &shape, vector<T *> &points) {
+    PointsOnShape(*BOctTree<T>::root, BOctTree<T>::center, BOctTree<T>::size, shape, points);
+//    exit(0);
   }
 
 protected:
+void showbits(char a)
+{
+  int i  , k , mask;
+
+  for( i =7 ; i >= 0 ; i--)
+  {
+     mask = 1 << i;
+     k = a & mask;
+     if( k == 0)
+        cout<<"0 ";
+     else
+        cout<<"1 ";
+  }
+}
+
   long PointsOnShape(bitoct &node, T *center, T size, CollisionShape<T> &shape ) {
     if (! shape.isInCube(center[0], center[1], center[2], size)) {
       return 0;
     }
 
-    double ccenter[3];
+    T ccenter[3];
     bitunion<T> *children;
     bitoct::getChildren(node, children);
-
+    
+  /*  
+    printf("parent %p   children: %p \n", &node, children);
+    cout << "  ";
+    showbits(node.valid);
+    cout << endl;
+    cout << "  ";
+    showbits(node.leaf);
+    cout << endl;
+*/
     long result = 0;
+
+//    int r = 0;
 
     for (unsigned char i = 0; i < 8; i++) {
       if (  ( 1 << i ) & node.valid ) {   // if ith node exists
+//    printf("i: %u r: %d  parent %p   child[r]: %p \n", i, r, &node, children);
+//    r++;
+
         childcenter(center, ccenter, size, i);  // childrens center
         if (  ( 1 << i ) & node.leaf ) {   // if ith node is leaf get center
           // check if leaf contains shape
           if ( shape.isInCube(ccenter[0], ccenter[1], ccenter[2], size/2.0) ) {
             pointrep *points = children->points;
             unsigned int length = points[0].length;
-            double *point = &(points[1].v);  // first point
+            T *point = &(points[1].v);  // first point
             for(unsigned int iterator = 0; iterator < length; iterator++ ) {
               if ( shape.containsPoint(point) )
                 result++;
@@ -102,54 +127,79 @@ protected:
     return result;
   }
   
-/*
-  long PointsOnPlane(bitoct &node, double *center, double size, float nx, float ny, float nz, float d, float maxdist) { 
-    if (!PlaneInCube(center[0], center[1], center[2], size, nx, ny, nz, d)) {
-      return 0;
+  void PointsOnShape(bitoct &node, T *center, T size, CollisionShape<T> &shape, vector<T*> &vpoints) {
+    if (! shape.isInCube(center[0], center[1], center[2], size)) {
+      return;
     }
 
-    double ccenter[3];
-    bitunion *children;
+    T ccenter[3];
+    bitunion<T> *children;
     bitoct::getChildren(node, children);
 
-    long result = 0;
-
-    for (short i = 0; i < 8; i++) {
+    for (unsigned char i = 0; i < 8; i++) {
       if (  ( 1 << i ) & node.valid ) {   // if ith node exists
         childcenter(center, ccenter, size, i);  // childrens center
         if (  ( 1 << i ) & node.leaf ) {   // if ith node is leaf get center
-          // check if leaf contains plane
-          if ( PlaneInCube(ccenter[0], ccenter[1], ccenter[2], size/2.0, nx, ny, nz, d) ) {
+          // check if leaf contains shape
+          if ( shape.isInCube(ccenter[0], ccenter[1], ccenter[2], size/2.0) ) {
             pointrep *points = children->points;
             unsigned int length = points[0].length;
-            double *point = &(points[1].v);  // first point
+            T *point = &(points[1].v);  // first point
             for(unsigned int iterator = 0; iterator < length; iterator++ ) {
-              if( fabs(planeDist(point, nx, ny, nz, d)) < maxdist ) 
-                result++;
-              point+=POINTDIM;
+//              cerr << point[0] << " " << point[1] << " " << point[2] << endl;
+              if ( shape.containsPoint(point) ) {
+                T * p = new T[BOctTree<T>::POINTDIM];
+                for (unsigned int iterator = 0; iterator < BOctTree<T>::POINTDIM; iterator++) {
+                  p[iterator] = point[iterator];
+                }
+                vpoints.push_back(p);
+              }
+              point+= BOctTree<T>::POINTDIM;
             }
           }
         } else { // recurse
-          result += PointsOnPlane( children->node, ccenter, size/2.0, nx, ny, nz, d, maxdist);
+          PointsOnShape( children->node, ccenter, size/2.0, shape, vpoints);
         }
         ++children; // next child
       }
     }
-
-    return result;
   }
-  */
+
 
   void DrawPoints(vector<T *> &p, bitoct &node, unsigned char nrp) {
     bitunion<T> *children;
     bitoct::getChildren(node, children);
 
-    unsigned short n_children = POPCOUNT(node.valid);
-    unsigned short r = randUC(n_children);
+    unsigned char n_children = POPCOUNT(node.valid);
+    unsigned char r = randUC(n_children);
     if (r == n_children) r--;
 
+/*    cout << (unsigned int)r << " nc " << (unsigned int)n_children << endl;
+    showbits(node.valid);
+    cout << endl;
+    showbits(node.leaf);
+    cout << endl;
+*/
     bool leaf = false;
     unsigned char child_index = 0;
+/*    if (r == 2) {
+    for (unsigned char i = 0; i < 8; i++) {
+      cout << "i " << (unsigned int)i << endl;
+      if (  ( 1 << i ) & node.valid ) {   // if ith node exists
+        cout << "valid " << endl;
+        if (child_index == r) {
+          cout << "ci == r" << endl;
+          if (  ( 1 << i ) & node.leaf ) {   // if ith node exists
+            cout << "leaf" << endl;
+            leaf = true; 
+          }
+          cout << "no leaf" << endl;
+          break;
+        }
+        child_index++;
+      }
+    }
+    } else {*/
     for (unsigned char i = 0; i < 8; i++) {
       if (  ( 1 << i ) & node.valid ) {   // if ith node exists
         if (child_index == r) {
@@ -161,13 +211,18 @@ protected:
         child_index++;
       }
     }
+//    }
+//    cout << (unsigned int)r << " nc " << (unsigned int)n_children <<  " " << (unsigned int)child_index << endl;
+    if (child_index != r) return;   // bitmask valid might be all zero
 
     if (leaf) {
+/*      cout << "STOPPED" << endl;
+      return;*/
       pointrep *points = children[r].points;
       unsigned int length = points[0].length;
       if (length < nrp) return;
       if (length == nrp) {
-        for (char c = 0; c < 3; c++) {
+        for (char c = 0; c < nrp; c++) {
           p.push_back(&(points[BOctTree<T>::POINTDIM*c+1].v));
         }
         return;
@@ -179,6 +234,12 @@ protected:
         p.push_back(&(points[BOctTree<T>::POINTDIM*tmp+1].v));
       }
     } else {
+/*      printf("r: %d   parent %p  children %p   child[r]: %p \n", r, &node, children, &(children[r].node));
+    showbits(node.valid);
+    cout << endl;
+    showbits(node.leaf);
+    cout << endl;
+      cout << "RECURSED" << endl;*/
       DrawPoints(p, children[r].node, nrp);
     }
   }
