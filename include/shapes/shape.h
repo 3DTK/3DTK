@@ -31,6 +31,8 @@ class CollisionShape {
 
   virtual CollisionShape<T> *copy() = 0;
 
+  virtual CollisionShape<T>& operator=(const CollisionShape<T> &other) {return *this;};
+
 //  virtual bool valid() = 0;
 };
 
@@ -58,6 +60,7 @@ class CollisionPlane : public CollisionShape<T> {
   }
 
   virtual bool isInCube(T x, T y, T z, T size) {
+    return true;
     T xm, xp, ym, yp, zm, zp;
     T Fxm, Fxp, Fym, Fyp, Fzm, Fzp;
     xm = x - size;
@@ -102,6 +105,7 @@ class CollisionPlane : public CollisionShape<T> {
 
   virtual bool containsPoint(T* p) {
     return fabs(p[0]*nx + p[1]*ny + p[2]*nz + d) < maxDist;
+//    return fabs(planeDist(p, nx, ny, nz, d)) < maxDist;
   }
 
   virtual bool hypothesize(vector<T *> &points) {
@@ -138,8 +142,22 @@ class CollisionPlane : public CollisionShape<T> {
     return 3;
   }
   
-  virtual CollisionShape<T> * copy() {
-    return new CollisionPlane<T>(maxDist, nx, ny, nz, d);
+  virtual CollisionShape<T>* copy() {
+    return new CollisionPlane<T>(maxDist, nx, ny, nz, d); 
+  }
+  
+  
+  virtual CollisionPlane<T>& operator=(const CollisionShape<T> &_other) {
+    CollisionPlane<T> &other = (CollisionPlane<T> &)_other;
+    if (this != &other) {
+       this->maxDist =  other.maxDist;
+       this->nx      =  other.nx     ;
+       this->ny      =  other.ny     ;
+       this->nz      =  other.nz     ;
+       this->d       =  other.d      ;
+    }
+
+    return *this;
   }
 
   void getPlane(double &x, double &y, double &z, double &_d) {
