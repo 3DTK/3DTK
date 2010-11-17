@@ -255,13 +255,20 @@ int main(int argc, char **argv)
   long starttime = GetCurrentTimeInMilliSec(); 
   if(alg == RANSAC) {
     vector<double *> points;
-    CollisionPlane<double> plane(10.0); // 1.0 cm maxdist
+    CollisionPlane<double> plane(1.0); // 1.0 cm maxdist
     Ransac(plane, Scan::allScans[0], &points);
     
     double nx,ny,nz,d;
     plane.getPlane(nx,ny,nz,d);
+    cout << "DONE " << endl;
 
     cout << nx << " " << ny << " " << nz << " " << d << endl;
+
+    for (int i = 0; i < points.size(); i++) {
+      cerr << points[i][0] << " " << points[i][1] << " " << points[i][2] << endl;
+    }
+
+    cout << "nr points " << points.size() << endl;
 
   } else {
     Hough hough(Scan::allScans[0], quiet);
