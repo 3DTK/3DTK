@@ -5,6 +5,8 @@ IF(WITH_SIFT)
   SET(AUTOPANO_DIR autopano-sift-c/)
   include_directories(${AUTOPANO_DIR})
   
+  # dependant on libpano13-dev
+  FIND_PATH(LIBPANO13_INCLUDE_DIR pano13/filter.h)
   
   FIND_PATH(XML20_INCLUDE_DIR
     NAMES libxml/xmlreader.h libxml/xmlwriter.h  
