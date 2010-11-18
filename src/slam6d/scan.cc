@@ -1368,6 +1368,9 @@ void Scan::readScans(reader_type type,
   case AIS:
     lib_string = "scan_io_ais";
     break;
+  case OCT:
+    lib_string = "scan_io_oct";
+    break;
   default:
     cerr << "Don't recognize format " << type << endl;
     exit(1);

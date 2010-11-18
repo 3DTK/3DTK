@@ -436,6 +436,7 @@ int parseArgs(int argc,char **argv, string &dir, int& start, int& end, int& maxD
 	   else if (strcasecmp(optarg, "rxp") == 0) type = RXP;
 	   else if (strcasecmp(optarg, "kit") == 0) type = KIT;
 	   else if (strcasecmp(optarg, "ais") == 0) type = AIS;
+	   else if (strcasecmp(optarg, "oct") == 0) type = OCT;
 	   else {
 		abort ();
 	   }
