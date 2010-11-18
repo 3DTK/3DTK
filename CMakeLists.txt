@@ -172,6 +172,8 @@ ENDIF(WITH_TORO)
 OPTION(WITH_HOGMAN "Whether to use HOGMAN. ON/OFF" OFF)
 
 IF(WITH_HOGMAN)
+  # dependant on libqt4-devi
+  find_package( Qt4 REQUIRED)
   # CMake of earlier versions do not have external project capabilities
   cmake_minimum_required (VERSION 2.8)
   include(ExternalProject)
