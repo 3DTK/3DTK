@@ -112,6 +112,33 @@ public:
     return p;
   }
 
+  Point createPoint(T *p) {
+    Point P;
+    unsigned int counter = 0;
+
+    P.x = p[counter++];
+    P.y = p[counter++];
+    P.z = p[counter++];
+    if (types & USE_REFLECTANCE) {
+      P.reflectance = p[counter++];
+    }
+    if (types & USE_AMPLITUDE) {
+      P.amplitude = p[counter++];
+    }
+    if (types & USE_DEVIATION) {  
+      P.deviation = p[counter++];
+    }
+    if (types & USE_TYPE) {  
+      P.type = p[counter++];
+    }
+    if (types & USE_COLOR) {  
+      memcpy(P.rgb, &p[counter], 3);
+      counter++;
+    }
+
+    return P;
+  }
+
   unsigned int getPointDim() { return pointdim; }
 
   static PointType<T> deserialize(std::ifstream &f) {

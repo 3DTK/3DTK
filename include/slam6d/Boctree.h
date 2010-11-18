@@ -229,6 +229,7 @@ public:
   void GetOctTreeCenter(vector<T*>&c) { GetOctTreeCenter(c, *root, center, size); }
   void GetOctTreeRandom(vector<T*>&c) { GetOctTreeRandom(c, *root); }
   void GetOctTreeRandom(vector<T*>&c, unsigned int ptspervoxel) { GetOctTreeRandom(c, ptspervoxel, *root); }
+  void AllPoints(vector<T *> &vp) { AllPoints(*BOctTree<T>::root, vp); }
 
   long countNodes() { return 1 + countNodes(*root); }
   long countLeaves() { return 1 + countLeaves(*root); }
@@ -272,6 +273,39 @@ public:
     // read root node
     root = new bitoct();
     deserialize(file, *root);
+    file.close();
+  }
+  
+  
+  static void deserialize(std::string filename, vector<Point> &points ) {
+    char buffer[sizeof(T) * 20];
+    T *p = reinterpret_cast<T*>(buffer);
+
+    std::ifstream file;
+    file.open (filename.c_str(), std::ios::in | std::ios::binary);
+
+    // read magic bits
+    file.read(buffer, 2);
+    if ( buffer[0] != 'X' || buffer[1] != 'T') {
+      std::cerr << "Not an octree file!!" << endl;
+      file.close();
+      return;
+    }
+
+    // read header
+    PointType<T> pointtype = PointType<T>::deserialize(file);
+
+    file.read(buffer, 5 * sizeof(T)); // read over voxelsize, center and size
+    file.read(buffer, sizeof(int));
+
+    int *ip = reinterpret_cast<int*>(buffer);
+    unsigned int POINTDIM = *ip;
+
+    file.read(buffer, POINTDIM * sizeof(T));
+    file.read(buffer, POINTDIM * sizeof(T));
+
+    // read root node
+    deserialize(file, points, pointtype);
     file.close();
   }
 
@@ -340,6 +374,66 @@ public:
   }
 
 protected:
+  
+  
+  void AllPoints( bitoct &node, vector<T*> &vp) {
+    bitunion<T> *children;
+    bitoct::getChildren(node, children);
+
+    for (short i = 0; i < 8; i++) {
+      if (  ( 1 << i ) & node.valid ) {   // if ith node exists
+        if (  ( 1 << i ) & node.leaf ) {   // if ith node is leaf get center
+          pointrep *points = children->points;
+          unsigned int length = points[0].length;
+          T *point = &(points[1].v);  // first point
+          for(unsigned int iterator = 0; iterator < length; iterator++ ) {
+            //T *p = new T[BOctTree<T>::POINTDIM];
+//            T *p = new T[3];
+//            p[0] = point[0]; p[1] = point[1]; p[2] = point[2];
+            T *p = new T[BOctTree<T>::POINTDIM];
+            for (unsigned int k = 0; k < BOctTree<T>::POINTDIM; k++)
+              p[k] = point[k];
+
+            vp.push_back(p);
+
+            //glVertex3f( point[0], point[1], point[2]);
+            point+=BOctTree<T>::POINTDIM;
+          }
+        } else { // recurse
+          AllPoints( children->node, vp);
+        }
+        ++children; // next child
+      }
+    }
+  }
+  
+  
+  static void deserialize(std::ifstream &f, vector<Point> &vpoints, PointType<T> &pointtype) {
+    char buffer[2];
+    pointrep point[pointtype.getPointDim()];
+    f.read(buffer, 2);
+    bitoct node;
+    node.valid = buffer[0];
+    node.leaf = buffer[1];
+
+    unsigned short n_children = POPCOUNT(node.valid);
+
+    for (short i = 0; i < 8; i++) {
+      if (  ( 1 << i ) & node.valid ) {   // if ith node exists
+        if (  ( 1 << i ) & node.leaf ) {   // if ith node is leaf read points 
+          pointrep first;
+          f.read(reinterpret_cast<char*>(&first), sizeof(pointrep));
+          unsigned int length = first.length;  // read first element, which is the length
+          for (unsigned int k = 0; k < length; k++) {
+            f.read(reinterpret_cast<char*>(point), sizeof(pointrep) * pointtype.getPointDim()); // read the points
+            vpoints.push_back( pointtype.createPoint( &(point->v ) ) );
+          }
+        } else {  // write child 
+          deserialize(f, vpoints, pointtype);
+        }
+      }
+    }
+  }
 
   void deserialize(std::ifstream &f, bitoct &node) {
     char buffer[2];
@@ -438,6 +532,8 @@ protected:
       }
     }
   } 
+  
+  
 
   void GetOctTreeRandom(vector<T*>&c, unsigned int ptspervoxel, bitoct &node) {
     bitunion<T> *children;

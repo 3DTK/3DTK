@@ -469,6 +469,7 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &rand,
         else if (strcasecmp(optarg, "x3d") == 0) type = X3D;
         else if (strcasecmp(optarg, "rxp") == 0) type = RXP;
         else if (strcasecmp(optarg, "ais") == 0) type = AIS;
+        else if (strcasecmp(optarg, "oct") == 0) type = OCT;
         else {
           abort ();
         }
