@@ -670,20 +670,7 @@ void createDisplayLists(bool reduced)
 
   for(int i = 0; i < (int)Scan::allScans.size() ; i++) {
     if (reduced) {
-      sfloat **pts = new sfloat*[Scan::allScans[i]->get_points_red_size()];
-      for (int jterator = 0; jterator < Scan::allScans[i]->get_points_red_size(); jterator++) {
-        pts[jterator] = new sfloat[3];
-        pts[jterator][0] = Scan::allScans[i]->get_points_red()[jterator][0];
-        pts[jterator][1] = Scan::allScans[i]->get_points_red()[jterator][1];
-        pts[jterator][2] = Scan::allScans[i]->get_points_red()[jterator][2];
-      }
-      //octpts[i] = new Show_BOctTree(pts, Scan::allScans[i]->get_points_red_size(), 50.0);  // TODO remove magic number
-      octpts.push_back( new Show_BOctTree<sfloat>(pts, Scan::allScans[i]->get_points_red_size(), 50.0));  // TODO remove magic number
-      for (int jterator = 0; jterator < Scan::allScans[i]->get_points_red_size(); jterator++) {
-        delete[] pts[jterator];
-      }
-      delete[] pts;
-
+      octpts.push_back( new Show_BOctTree<sfloat>(Scan::allScans[i]->get_points_red(), Scan::allScans[i]->get_points_red_size(), 50.0, pointtype, cm));  // TODO remove magic number
     } else {
 //     if (types != PointType::USE_NONE && cm) {
         unsigned int nrpts = Scan::allScans[i]->get_points()->size();
@@ -842,7 +829,7 @@ int main(int argc, char **argv){
     }
 
     if (saveOct) {
-      for (int i = 0; i < Scan::allScans.size(); i++) {
+      for (unsigned int i = 0; i < Scan::allScans.size(); i++) {
         string scanFileName = dir + "scan" + to_string(i+start,3) + ".oct";
         cout << "Saving octree " << scanFileName << endl;
         octpts[i]->serialize(scanFileName);

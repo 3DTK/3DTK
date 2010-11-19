@@ -30,7 +30,8 @@ template <class T> class Show_BOctTree : public BOctTree<T>  {
 
 public:
 
-  Show_BOctTree(T **pts, int n, T voxelSize, PointType<T> _pointtype = PointType<T>(), ScanColorManager<T> *scm = 0)
+  template <class P>
+  Show_BOctTree(P * const* pts, int n, T voxelSize, PointType<T> _pointtype = PointType<T>(), ScanColorManager<T> *scm = 0)
     : BOctTree<T>(pts, n, voxelSize, _pointtype) {
     cm = 0;
     if (scm) {

@@ -43,7 +43,7 @@ int ScanIO_oct::readScans(int start, int end, string &dir, int maxDist, int mind
 
   ifstream pose_in;
 
-  double maxDist2 = sqr(maxDist);
+  //double maxDist2 = sqr(maxDist);
 
   int my_fileNr = fileCounter;
   

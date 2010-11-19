@@ -68,6 +68,7 @@ template <class T> bool HitBoundingBox(T center[3], T size )
       candidatePlane[i] = maxB[i];
       inside = false;
     }else {
+      candidatePlane[i] = 0.0;
       quadrant[i] = MIDDLE;
     }
 

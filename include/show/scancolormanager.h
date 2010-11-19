@@ -89,7 +89,8 @@ template <class T = float> class ScanColorManager {
       }
     }
 
-    void updateRanges(T *point) {
+    template<class P>
+    void updateRanges(P *point) {
       for (unsigned int i = 0; i < pointtype.getPointDim(); i++) {
         if (point[i] < mins[i]) mins[i] = point[i];
         if (point[i] > maxs[i]) maxs[i] = point[i];
