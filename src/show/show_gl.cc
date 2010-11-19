@@ -947,9 +947,9 @@ void CallBackEntryFunc(int state) {
 void CallBackMouseFunc(int button, int state, int x, int y)
 {
 
-  GLuint selectBuf[BUFSIZE];
-  GLint hits;
-  GLint viewport[4];
+  //GLuint selectBuf[BUFSIZE];
+  //GLint hits;
+  //GLint viewport[4];
 
   if(cameraNavMouseMode != 1) {
     if (state == GLUT_DOWN && (button == GLUT_LEFT_BUTTON || button == GLUT_RIGHT_BUTTON)) {

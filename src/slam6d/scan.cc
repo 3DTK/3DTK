@@ -139,7 +139,7 @@ Scan::Scan(const double _rPos[3], const double _rPosTheta[3], vector<double *> &
   }
   transform(transMatOrg, INVALID); //transform points to initial position
   // update max num point in scan iff you have to do so
-  if (points_red_size > max_points_red_size) max_points_red_size = points_red_size;
+  if (points_red_size > (int)max_points_red_size) max_points_red_size = points_red_size;
 
   pts.clear();
 }
@@ -220,7 +220,7 @@ Scan::Scan(const vector < Scan* >& MetaScan, bool use_cache, bool cuda_enabled)
   // build new search tree
   createTree(use_cache, cuda_enabled);
   // update max num point in scan iff you have to do so
-  if (points_red_size > max_points_red_size) max_points_red_size = points_red_size;
+  if (points_red_size > (int)max_points_red_size) max_points_red_size = points_red_size;
 
   // add Scan to ScanList
   allScans.push_back(this);
@@ -314,7 +314,7 @@ Scan::Scan(const Scan& s)
   if (s.kd != 0) {
     createTree(false, false);
     // update max num point in scan iff you have to do so
-    if (points_red_size > max_points_red_size) max_points_red_size = points_red_size;
+    if (points_red_size > (int)max_points_red_size) max_points_red_size = points_red_size;
   }
 
   scanNr = s.scanNr;
@@ -616,7 +616,7 @@ void Scan::calcReducedPoints(double voxelSize, int nrpts)
     }
     transform(transMatOrg, INVALID); //transform points to initial position
     // update max num point in scan iff you have to do so
-    if (points_red_size > max_points_red_size) max_points_red_size = points_red_size;
+    if (points_red_size > (int)max_points_red_size) max_points_red_size = points_red_size;
     return;
   }
 
@@ -673,7 +673,7 @@ void Scan::calcReducedPoints(double voxelSize, int nrpts)
   transform(transMatOrg, INVALID); //transform points to initial position
 
   // update max num point in scan iff you have to do so
-  if (points_red_size > max_points_red_size) max_points_red_size = points_red_size;
+  if (points_red_size > (int)max_points_red_size) max_points_red_size = points_red_size;
 }
 
 /**
