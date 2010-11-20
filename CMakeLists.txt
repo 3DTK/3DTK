@@ -241,7 +241,7 @@ add_subdirectory(src/slam6d/sift)
 
 ## Compiling a shared library containing all of the project
 add_library(slam SHARED src/slam6d/icp6D.cc) 
-target_link_libraries(slam scanlib_s ANN_s sparse_s ) 
+target_link_libraries(slam scanlib_s ANN_s sparse_s newmat_s) 
 
 MESSAGE (STATUS "Build environment is set up use \"make\" to compile")
 
