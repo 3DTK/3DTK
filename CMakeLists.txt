@@ -3,8 +3,6 @@ SET(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/3rdparty/CMakeModules" ${CMAKE_MODULE
 project (Slam6D)
 
 
-FIND_PACKAGE(OpenGL)
-
 #include_directories(OPENGL_INCLUDE_DIR)
 set(Boost_USE_STATIC_LIBS TRUE)
 SET(Boost_ADDITIONAL_VERSIONS "1.42" "1.42.0" "1.44" "1.44.0")
@@ -23,6 +21,7 @@ endif()
 OPTION(WITH_SHOW "Whether to build Show. This is the Visualization program of slam6d. ON/OFF" ON)
 
 IF(WITH_SHOW)
+  FIND_PACKAGE(OpenGL REQUIRED)
   MESSAGE(STATUS "With show")
 ELSE(WITH_SHOW)
   #  SET (WITH_OCTREE_DISPLAY "ON" CACHE INTERNAL "" FORCE)
@@ -117,6 +116,7 @@ ENDIF(WITH_CUDA)
 OPTION(WITH_PMD "Whether to build the PMD tools like grabVideoAnd3D calibrate etc. ON/OFF" OFF)
 
 IF(WITH_PMD)
+  FIND_PACKAGE(OpenGL REQUIRED)
   MESSAGE(STATUS "With Tools")
 ELSE(WITH_PMD)
   MESSAGE(STATUS "Without Tools")
