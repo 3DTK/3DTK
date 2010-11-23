@@ -59,7 +59,7 @@ IF(WITH_TOOLS)
   add_executable(exportPoints exportPoints.cc)
   
   IF(UNIX)
-    target_link_libraries(graph_balancer boost_graph-mt scanlib)
+    target_link_libraries(graph_balancer scanlib ${Boost_LIBRARIES})
     target_link_libraries(exportPoints scanlib dl ANN)
   ENDIF(UNIX)
 
