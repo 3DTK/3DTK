@@ -417,8 +417,6 @@ protected:
     node.valid = buffer[0];
     node.leaf = buffer[1];
 
-    unsigned short n_children = POPCOUNT(node.valid);
-
     for (short i = 0; i < 8; i++) {
       if (  ( 1 << i ) & node.valid ) {   // if ith node exists
         if (  ( 1 << i ) & node.leaf ) {   // if ith node is leaf read points 
