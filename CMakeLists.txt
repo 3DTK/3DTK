@@ -198,6 +198,15 @@ ELSE(WITH_HOGMAN)
   MESSAGE(STATUS "Without HOGMAN")
 ENDIF(WITH_HOGMAN)
 
+
+OPTION(EXPORT_SHARED_LIBS "Whether to build additional shared libraries for use in other projects. ON/OFF" OFF)
+
+IF(EXPORT_SHARED_LIBS)
+  MESSAGE(STATUS "exporting additional libraries")
+ELSE(EXPORT_SHARED_LIBS)
+  MESSAGE(STATUS "not exporting libraries")
+ENDIF(EXPORT_SHARED_LIBS)
+
 IF(WIN32)
   SET(ADDITIONAL_CFLAGS "-O3 -Wall -finline-functions" CACHE STRING"Additional flags given to the compiler (-O3 -Wall -finline-functions)" )
   include_directories(${CMAKE_SOURCE_DIR}/windows/)
@@ -238,10 +247,11 @@ add_subdirectory(src/pmd)
 add_subdirectory(src/shapes)
 add_subdirectory(src/slam6d/sift)
 
-
+IF(EXPORT_SHARED_LIBS)
 ## Compiling a shared library containing all of the project
 add_library(slam SHARED src/slam6d/icp6D.cc) 
 target_link_libraries(slam scanlib_s ANN_s sparse_s newmat_s) 
+ENDIF(EXPORT_SHARED_LIBS)
 
 MESSAGE (STATUS "Build environment is set up use \"make\" to compile")
 
