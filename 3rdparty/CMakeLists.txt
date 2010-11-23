@@ -16,7 +16,10 @@ SET(ANN_SRCS
   ${ANN_DIR}bd_fix_rad_search.cpp 
   ${ANN_DIR}perf.cpp)
 add_library(ANN STATIC ${ANN_SRCS})
+IF(EXPORT_SHARED_LIBS)
 add_library(ANN_s SHARED ${ANN_SRCS})
+ENDIF(EXPORT_SHARED_LIBS)
+
 # on windows systems the DLL_EXPORTS is required
 if (WIN32)
   SET_TARGET_PROPERTIES(ANN PROPERTIES COMPILE_FLAGS -DDLL_EXPORTS)
@@ -53,13 +56,16 @@ add_library(glui STATIC
 # Compile sparse library 
 SET(SPARSE_DIR ${CMAKE_SOURCE_DIR}/3rdparty/sparse/)
 add_library(sparse STATIC ${SPARSE_DIR}csparse.cc)
+IF(EXPORT_SHARED_LIBS)
 add_library(sparse_s SHARED ${SPARSE_DIR}csparse.cc)
+ENDIF(EXPORT_SHARED_LIBS)
 
 
 # Compile newmat library
 SET(NEWMAT_DIR ${CMAKE_SOURCE_DIR}/3rdparty/newmat/)
 SET(NEWMAT_SOURCES ${NEWMAT_DIR}newmat1.cpp ${NEWMAT_DIR}newmat2.cpp ${NEWMAT_DIR}newmat3.cpp ${NEWMAT_DIR}newmat4.cpp ${NEWMAT_DIR}newmat5.cpp ${NEWMAT_DIR}newmat6.cpp ${NEWMAT_DIR}newmat7.cpp ${NEWMAT_DIR}newmat8.cpp ${NEWMAT_DIR}newmatex.cpp ${NEWMAT_DIR}bandmat.cpp ${NEWMAT_DIR}submat.cpp ${NEWMAT_DIR}myexcept.cpp ${NEWMAT_DIR}cholesky.cpp ${NEWMAT_DIR}evalue.cpp ${NEWMAT_DIR}fft.cpp ${NEWMAT_DIR}hholder.cpp ${NEWMAT_DIR}jacobi.cpp ${NEWMAT_DIR}newfft.cpp ${NEWMAT_DIR}sort.cpp ${NEWMAT_DIR}svd.cpp ${NEWMAT_DIR}newmatrm.cpp ${NEWMAT_DIR}newmat9.cpp)
 add_library(newmat STATIC ${NEWMAT_SOURCES})
+IF(EXPORT_SHARED_LIBS)
 add_library(newmat_s SHARED ${NEWMAT_SOURCES})
-#add_library(newmat STATIC ${NEWMAT_DIR}newmat1.cpp ${NEWMAT_DIR}newmat2.cpp ${NEWMAT_DIR}newmat3.cpp ${NEWMAT_DIR}newmat4.cpp ${NEWMAT_DIR}newmat5.cpp ${NEWMAT_DIR}newmat6.cpp ${NEWMAT_DIR}newmat7.cpp ${NEWMAT_DIR}newmat8.cpp ${NEWMAT_DIR}newmatex.cpp ${NEWMAT_DIR}bandmat.cpp ${NEWMAT_DIR}submat.cpp ${NEWMAT_DIR}myexcept.cpp ${NEWMAT_DIR}cholesky.cpp ${NEWMAT_DIR}evalue.cpp ${NEWMAT_DIR}fft.cpp ${NEWMAT_DIR}hholder.cpp ${NEWMAT_DIR}jacobi.cpp ${NEWMAT_DIR}newfft.cpp ${NEWMAT_DIR}sort.cpp ${NEWMAT_DIR}svd.cpp ${NEWMAT_DIR}newmatrm.cpp ${NEWMAT_DIR}newmat9.cpp)
+ENDIF(EXPORT_SHARED_LIBS)
 
