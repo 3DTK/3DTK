@@ -35,13 +35,17 @@ class importer
     vector<Point> *o;
 
 public:
-    importer(vector<Point> *o_)
+    importer(vector<Point> *o_, int maxDist, int minDist)
         : pointcloud(false) // set this to true if you need gps aligned timing
         , o(o_)
-    {}
+    {
+      maxD = maxDist;
+      minD = minDist;
+    }
 
 protected:
-
+    int maxD;
+    int minD;
     // overridden from pointcloud class
     void on_echo_transformed(echo_type echo)
     {
@@ -81,7 +85,13 @@ protected:
             } else if ( pointcloud::single == echo ){
               p.type = 9;
             }
-            o->push_back(p);
+            if(maxD == -1 || sqr(p.x) + sqr(p.y) + sqr(p.z) < maxD*maxD) {
+              if(minD == -1 || sqr(p.x) + sqr(p.y) + sqr(p.z) > minD*minD) {
+                if(p.y > -20 && p.y < 200) {
+                  o->push_back(p);
+                }
+              }
+            }
     }
 
     // overridden from basic_packets
@@ -115,7 +125,7 @@ protected:
  * @param euler Initital pose estimates (will not be applied to the points
  * @param ptss Vector containing the read points
  */
-int ScanIO_rxp::readScans(int start, int end, string &dir, int maxDist, int mindist,
+int ScanIO_rxp::readScans(int start, int end, string &dir, int maxDist, int minDist,
 						  double *euler, vector<Point> &ptss)
 {
   static int fileCounter = start;
@@ -157,7 +167,7 @@ int ScanIO_rxp::readScans(int start, int end, string &dir, int maxDist, int mind
   // decoder splits the binary file into readable chunks
   decoder_rxpmarker dec(rc);
   // importer interprets the chunks
-  importer imp(&ptss);
+  importer imp(&ptss, maxDist, minDist);
 
   // iterate over chunks
   buffer  buf;
