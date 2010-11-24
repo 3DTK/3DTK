@@ -17,9 +17,9 @@ builddir:
 	cd .build && cmake ..
 
 clean:
-	cd .build && make clean --no-print-directory
-	rm -rf .build
-	rm .configured
+	cd .build && make clean --no-print-directory & \
+	rm -rf .build & \
+	rm .configured  
 
 
 config: builddir
