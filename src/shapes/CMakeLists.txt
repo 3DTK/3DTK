@@ -1,6 +1,7 @@
 IF (WITH_SHAPE_DETECTION)
   include_directories(${CMAKE_SOURCE_DIR}/3rdparty/gocr-0.48/src)
   include_directories(${CMAKE_SOURCE_DIR}/3rdparty/gocr-0.48/include)
+  include_directories(${CMAKE_SOURCE_DIR}/include/shapes/)
   
   # Compile gocr library
   SET(GOCR_DIR ${CMAKE_SOURCE_DIR}/3rdparty/gocr-0.48/src/)
@@ -21,7 +22,7 @@ IF (WITH_SHAPE_DETECTION)
 #  ENDIF(UNIX)
 #  
   
-  add_executable(planes plane.cc hough.cc convexplane.cc accumulator.cc hsm3d.cc ConfigFileHough.cc parascan.cc quadtree.cc geom_math.cc  )
+  add_executable(planes plane.cc hough.cc convexplane.cc accumulator.cc hsm3d.cc ConfigFileHough.cc parascan.cc quadtree.cc geom_math.cc )
   
   IF(UNIX)
     target_link_libraries(planes scanlib newmat sparse dl ANN )

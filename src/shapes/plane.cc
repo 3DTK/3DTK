@@ -36,12 +36,16 @@ using std::endl;
 
 #include "shapes/hough.h"
 
-#include "shapes/ransac_Boctree.h"
-#include "shapes/NumberRecOctree.h"
+//#include "shapes/ransac_Boctree.h"
+//#include "shapes/NumberRecOctree.h"
+#include "shapes/shape.h"
 #include "shapes/ransac.h"
+#include "slam6d/icp6D.h"
+#include "slam6d/icp6Dsvd.h"
+#include "slam6d/icp6Dquat.h"
 
 enum plane_alg { 
-  RHT, SHT, PHT, PPHT, APHT, RANSAC
+  RHT, SHT, PHT, PPHT, APHT, RANSAC, CALI
 };
 
 void usage(char* prog) {
@@ -87,6 +91,63 @@ void usage(char* prog) {
   exit(1);
 
 }
+
+void matchPlaneToBoard(vector<double *> &points) {
+  double rPos[3] = {0.0,0.0,0.0};
+  double rPosTheta[3] = {0.0,0.0,0.0};
+
+  vector<double *> boardpoints;
+  double halfwidth = 25.0;
+  double halfheight = 28.5;
+  double step = 0.5;
+
+  for(double i = -halfwidth; i <= halfwidth; i+=step) {
+    for(double j = -halfheight; j <= halfheight; j+=step) {
+      double * p = new double[3];
+      p[0] = i;
+      p[1] = j;
+      p[2] = 0.0;
+      boardpoints.push_back(p);
+    }
+  }
+
+  Scan * plane = new Scan(rPos, rPosTheta, points);
+  Scan * board = new Scan(rPos, rPosTheta, boardpoints);
+
+  bool quiet = true;
+  icp6Dminimizer *my_icp6Dminimizer = 0;
+  my_icp6Dminimizer = new icp6D_SVD(quiet);
+
+  icp6D *my_icp = 0;
+  double mdm = 550;
+  int mni = 500;
+  my_icp = new icp6D(my_icp6Dminimizer, mdm, mni, quiet, false, -1, false, 1, 0.00, false, false);
+
+  plane->createTree(false,false);
+  board->createTree(false,false);
+
+  my_icp->match(plane, board);
+
+  const double * pos = board->get_rPos();
+  const double * postheta = board->get_rPosTheta();
+  const double * transMat = board->get_transMat();
+  for(int i = 0; i < 16; i++) {
+    cout << transMat[i] << " ";
+  }
+
+  cout << endl << endl;
+  
+  for(int i = 0; i < 3; i++) {
+    cout << pos[i] << " ";
+  }
+  cout << endl;
+  for(int i = 0; i < 3; i++) {
+    cout << deg(postheta[i]) << " ";
+  }
+  cout << endl;
+
+}
+
 int parseArgs(int argc, char **argv, string &dir, double &red, int &start, int
   &maxDist, int&minDist, int &octree, reader_type &type, plane_alg &alg, bool
   &quiet) {
@@ -157,6 +218,7 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &start, int
       else if(strcasecmp(optarg, "ppht") == 0) alg = PPHT;
       else if(strcasecmp(optarg, "apht") == 0) alg = APHT;
       else if(strcasecmp(optarg, "ran") == 0) alg = RANSAC;
+      else if(strcasecmp(optarg, "cali") == 0) alg = CALI;
       else abort();
       break;
 	 case 'q':
@@ -253,13 +315,20 @@ int main(int argc, char **argv)
   }
 
   long starttime = GetCurrentTimeInMilliSec(); 
-  if(alg == RANSAC) {
+  if(alg >= RANSAC) {
     vector<double *> points;
-    CollisionPlane<double> plane(1.0); // 1.0 cm maxdist
-    Ransac(plane, Scan::allScans[0], &points);
-    
+    CollisionPlane<double> * plane;
+    if(alg == CALI) {
+      plane = new LightBulbPlane<double>(1.0,60);
+    } else {
+      plane = new CollisionPlane<double>(1.0); // 1.0 cm maxdist
+    }
+    Ransac(*plane, Scan::allScans[0], &points);
+    starttime = (GetCurrentTimeInMilliSec() - starttime);
+
+    cout << "nr points " << points.size() << endl;
     double nx,ny,nz,d;
-    plane.getPlane(nx,ny,nz,d);
+    plane->getPlane(nx,ny,nz,d);
     cout << "DONE " << endl;
 
     cout << nx << " " << ny << " " << nz << " " << d << endl;
@@ -267,16 +336,20 @@ int main(int argc, char **argv)
     for (int i = 0; i < points.size(); i++) {
       cerr << points[i][0] << " " << points[i][1] << " " << points[i][2] << endl;
     }
-
-    cout << "nr points " << points.size() << endl;
-
+    if(alg == CALI) {
+      matchPlaneToBoard(points);
+    } else {
+      for(int i = points.size() - 1; i > -1; i++) {
+        delete[] points[i];
+      }
+    }
+    delete plane;
   } else {
     Hough hough(Scan::allScans[0], quiet);
     starttime = (GetCurrentTimeInMilliSec() - starttime);
     cout << "Time for Constructor call: " << starttime << endl;
 
     starttime = GetCurrentTimeInMilliSec(); 
-
 
     // choose Hough method here
     switch(alg) {
@@ -296,10 +369,10 @@ int main(int argc, char **argv)
     }
 
     hough.writePlanes();
+    starttime = (GetCurrentTimeInMilliSec() - starttime);
   }
   
 
-  starttime = (GetCurrentTimeInMilliSec() - starttime);
   cout << "Time for Plane Detection " << starttime << endl;
   delete Scan::allScans[0];
   Scan::allScans.clear();
