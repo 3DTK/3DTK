@@ -3,6 +3,8 @@
 
 #include <vector>
 using std::vector;
+#include "slam6d/globals.icc"
+#include "wykobi/wykobi_algorithm.hpp"
 
 /**
  * The Shape class is for efficient collision detection in the Octree.
@@ -108,13 +110,13 @@ class CollisionPlane : public CollisionShape<T> {
 
   virtual bool hypothesize(vector<T *> &points) {
     if (points.size() < getNrPoints()) return false;
-    T a[3], b[3], c[3], plane[4];
-    
+    T a[3], b[3], f[3], plane[4];
+
     for (int j = 0; j < 3;j++) {                     // compute plane
       a[j] = points[0][j] - points[1][j];
       b[j] = points[0][j] - points[2][j];
-      c[j] = points[0][j] + points[1][j] + points[2][j];
-      c[j] /= 3.0;
+      f[j] = points[0][j] + points[1][j] + points[2][j];
+      f[j] /= 3.0;
     }
     Cross(a,b, plane);
     if (fabs(Len2(plane)) < 0.0001 ) {
@@ -122,7 +124,7 @@ class CollisionPlane : public CollisionShape<T> {
       return false;
     }
     Normalize3(plane);
-    plane[3] = -1.0 * planeDist(c, plane[0], plane[1], plane[2], 0);    // compute distance from origin
+    plane[3] = -1.0 * planeDist(f, plane[0], plane[1], plane[2], 0);    // compute distance from origin
     if (plane[3] < 0.0) {                            // flip normal if necessary
       for (int j = 0; j < 4;j++) {
         plane[j] = -plane[j];
@@ -172,5 +174,131 @@ class CollisionPlane : public CollisionShape<T> {
 
 };
 
+template <class T=double>
+class LightBulbPlane : public CollisionPlane<T> {
+  public:
+
+  LightBulbPlane (T _maxDist, T _maxSize) : CollisionPlane<T>(_maxDist) {
+    maxSize = _maxSize;
+    c[0] = 0;
+    c[1] = 0;
+    c[2] = 0;
+  }
+  
+  LightBulbPlane (T _maxDist, T _maxSize, T x, T y, T z, T _d, T* center) : CollisionPlane<T>(_maxDist) {
+    maxSize = _maxSize;
+    CollisionPlane<T>::nx = x;
+    CollisionPlane<T>::ny = y;
+    CollisionPlane<T>::nz = z;
+    CollisionPlane<T>::d = _d;
+    for(int i = 0; i < 3; i++) {
+      c[i] = center[i];
+    }
+
+  }
+ 
+  bool isInCube(T cx, T cy, T cz, T size) {
+    double radius = sqrt(3*size*size);
+    T c_dist = (cx - c[0])*(cx - c[0]) + (cy - c[1])*(cy - c[1]) + (cz - c[2])*(cz - c[2]);
+    return c_dist <= ((radius + maxSize)*(radius + maxSize)); 
+  }
+
+  virtual bool containsPoint(T* p) {
+    if(fabs(p[0]*CollisionPlane<T>::nx + p[1]*CollisionPlane<T>::ny + p[2]*CollisionPlane<T>::nz + CollisionPlane<T>::d) < CollisionPlane<T>::maxDist) {
+      return (Dist2(p, c) < (maxSize*maxSize));  
+    }
+    return false;
+  }
+  
+  virtual bool hypothesize(vector<T *> &points) {
+    if(!CollisionPlane<T>::hypothesize(points)) return false;
+    double maxSize2 = maxSize*maxSize;
+    for(int i = 0; i < 3; i++) {
+      for(int j = 0; j < 3; j++) {
+        if(Dist2(points[i], points[j]) > maxSize2) return false;
+      }
+    }
+    for (int j = 0; j < 3;j++) {                     // compute plane
+      c[j] = points[0][j] + points[1][j] + points[2][j];
+      
+      c[j] /= 3.0;
+    }
+    return true;
+  }
+  
+  virtual CollisionShape<T> * copy() {
+    return new LightBulbPlane<T>(CollisionPlane<T>::maxDist, maxSize, CollisionPlane<T>::nx, CollisionPlane<T>::ny, CollisionPlane<T>::nz, CollisionPlane<T>::d, c);
+  }
+  
+  virtual LightBulbPlane<T>& operator=(const CollisionShape<T> &_other) {
+    LightBulbPlane<T> &other = (LightBulbPlane<T> &)_other;
+    if (this != &other) {
+      this->maxDist =  other.maxDist;
+      this->nx      =  other.nx     ;
+      this->ny      =  other.ny     ;
+      this->nz      =  other.nz     ;
+      this->d       =  other.d      ;
+      this->maxSize =  other.maxSize;
+      for(int i = 0; i < 3; i++) {
+        this->c[i] = other.c[i];
+      }
+    }
+
+    return *this;
+  }
+
+  /*
+  bool validate(vector<T *> pts) {
+    // create array which will not be used
+    bool plane[125][125];
+    for(int i = 0; i < 125; i++) {
+      for(int j = 0; j < 125; j++) {
+        plane[j][i] = false;
+      }
+    }
+    double t[3];
+    double alignxf[16]; 
+    double aa[4]; 
+    aa[0] = -1.0 * acos(this.ny); 
+    aa[1] = this.nz / sqrt( this.nz*this.nz + this.nx*this.nx ); 
+    aa[2] = 0; 
+    aa[3] = -this.nx / sqrt( this.nx*this.nz + this.nx*this.nx );
+
+    AAToMatrix(aa, t, alignxf);
+
+    // compute 2d projection of the points, and scale reflectivity
+    for (unsigned int i = 0; i < points.size(); i++) {
+      double *p = points[i];                                                                                  
+      
+      npoints[i] = new double[4];
+      wykobi::point2d<double> point; 
+      
+      double x, y;
+
+      x = -(p[0] * alignxf[0] + p[1] * alignxf[4] + p[2] * alignxf[8]);
+      y = p[0] * alignxf[2] + p[1] * alignxf[6] + p[2] * alignxf[10];
+
+      if (x > maxx) maxx = x;
+      if (x < minx) minx = y;
+      if (y > maxz) maxz = y;
+      if (y < minz) minz = y; 
+      point = wykobi::make_point(x, y);
+      point_list.push_back(point);
+    }
+   
+    vector< wykobi::point2d<double> > point_list;
+    
+    wykobi::polygon<double,2> convex_hull;
+    wykobi::algorithm::convex_hull_jarvis_march< wykobi::point2d<double> >(point_list.begin(),point_list.end(),std::back_inserter(convex_hull));
+
+    
+
+    return true;
+  }
+  */
+  protected:
+    T maxSize;
+    T c[3];
+};
 
 #endif

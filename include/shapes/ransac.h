@@ -15,31 +15,27 @@ void Ransac(CollisionShape<T> &shape, Scan *scan, vector<T*> *best_points = 0) {
   vector<T *> ps;
   // create octree from the points
   RansacOctTree<T> *oct = new RansacOctTree<T>(scan->get_points_red(), scan->get_points_red_size(), 50.0 );
-
-  for(int i = 0; i < 10000; i++) {
+  
+  for(int i = 0; i < 5000; i++) {
     ps.clear();
     // randomly select points from the octree
     oct->DrawPoints(ps, shape.getNrPoints());
-
     // compute shape parameters from points
     if ( shape.hypothesize(ps) ) {
-      
       // count number of points on the shape
-      int r =  oct->PointsOnShape(shape);
-      
+      int r = oct->PointsOnShape(shape);
       if (r > best_score) {
         if (best) delete best;
         // remember this best fitted shape
-        if (best_points) {
-          best_points->clear();
-          oct->PointsOnShape(shape, *best_points);
-        }
         best_score = r;
         best = shape.copy();
       }
     }
   }
-
+  if (best_points) {
+    best_points->clear();
+    oct->PointsOnShape(*best, *best_points);
+  }
   shape = *best;
   delete best;
 
