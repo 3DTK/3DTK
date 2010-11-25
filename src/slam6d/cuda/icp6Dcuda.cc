@@ -62,7 +62,7 @@ int icp6Dcuda::match(Scan* PreviousScan, Scan* CurrentScan)
   icp->setSize(10, ceil((float)max(mdlSize, scnSize)/10.0f));
 
   double **mod_dat = PreviousScan->get_org_points_red();
-  const double **scn_dat = CurrentScan->get_points_red();
+  double *const*scn_dat = CurrentScan->get_points_red();
   mdl = h_idata;
   scn = fHstScn;
   cout << "model point cloud size is " << mdlSize << "\n";
