@@ -87,9 +87,7 @@ protected:
             }
             if(maxD == -1 || sqr(p.x) + sqr(p.y) + sqr(p.z) < maxD*maxD) {
               if(minD == -1 || sqr(p.x) + sqr(p.y) + sqr(p.z) > minD*minD) {
-                if(p.y > -20 && p.y < 200) {
-                  o->push_back(p);
-                }
+                o->push_back(p);
               }
             }
     }
