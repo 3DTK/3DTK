@@ -8,8 +8,8 @@ IF (WITH_SHOW)
   ENDIF(WIN32)
 
   IF (UNIX)
-    target_link_libraries(show scanlib newmat GL GLU glui)
-    target_link_libraries(show dl glut)
+    target_link_libraries(show scanlib newmat ${OPENGL_LIBRARIES} glui)
+    target_link_libraries(show dl ${GLUT_LIBRARIES} )
   ENDIF(UNIX)
 
   IF(WITH_CUDA)

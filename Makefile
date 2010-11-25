@@ -13,8 +13,8 @@ builddir:
 	@mkdir -p .build
 
 .configured:
-	touch .configured
 	cd .build && cmake ..
+	touch .configured
 
 clean:
 	cd .build && make clean --no-print-directory & \
