@@ -1378,6 +1378,8 @@ void Scan::readScans(reader_type type,
 
 #ifdef WIN32
   lib_string += ".dll";	
+#elif __APPLE__
+  lib_string = "lib" + lib_string + ".dylib";	
 #else
   lib_string = "lib" + lib_string + ".so";	
 #endif
