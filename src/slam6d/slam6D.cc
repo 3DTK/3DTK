@@ -330,7 +330,7 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &rand,
   };
 
   cout << endl;
-  while ((c = getopt_long(argc, argv, "O::f:A:G:L:a:r:R:d:D:i:l:I:c:C:n:s:e:m:M:uqQp", longopts, NULL)) != -1)
+  while ((c = getopt_long(argc, argv, "O:f:A:G:L:a:r:R:d:D:i:l:I:c:C:n:s:e:m:M:uqQp", longopts, NULL)) != -1)
     switch (c)
     {
       case 'a':
