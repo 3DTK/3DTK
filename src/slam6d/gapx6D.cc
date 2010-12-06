@@ -23,7 +23,7 @@ using std::flush;
 #include "slam6d/globals.icc"
 
 using std::ofstream;
-
+using namespace NEWMAT;
 /**
  * Constructor
  *

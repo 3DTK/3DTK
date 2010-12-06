@@ -13,7 +13,7 @@ using boost::graph_traits;
 #include "slam6d/loopToro.h"
 #include "slam6d/lum6Deuler.h"
 #include "slam6d/globals.icc"
-
+using namespace NEWMAT;
 /**
  * @param allScans all laser scans
  * @param first index of first laser scan in the loop
