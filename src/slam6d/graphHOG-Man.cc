@@ -11,7 +11,7 @@ using std::ifstream;
 #include "slam6d/graphHOG-Man.h"
 #include "slam6d/lum6Deuler.h"
 #include "slam6d/globals.icc"
-
+using namespace NEWMAT;
 /**
  * This function is used to match a set of laser scans with any minimally
  * connected Graph.

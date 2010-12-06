@@ -54,7 +54,7 @@ public:
 private:
 
   double genBBdForLinkedPair( int firstScanNum, int secondScanNum, vPtPair *ptpairs,
-						Matrix *B, ColumnVector *Bd);
+						NEWMAT::Matrix *B, NEWMAT::ColumnVector *Bd);
 };
 
 #endif

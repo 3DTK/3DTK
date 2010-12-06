@@ -11,7 +11,7 @@
 using std::vector;
 
 #include "newmat/newmat.h"
-using namespace NEWMAT;
+//using namespace NEWMAT;
 
 #include "slam6d/scan.h"
 #include "slam6d/icp6Dminimizer.h"
@@ -46,8 +46,8 @@ public:
   
   void doICP(vector <Scan *> allScans);
   virtual int match(Scan* PreviousScan, Scan* CurrentScan);
-  void covarianceEuler(Scan *scan1, Scan *scan2, Matrix *C);
-  void covarianceQuat(Scan *scan1, Scan *scan2, Matrix *C);
+  void covarianceEuler(Scan *scan1, Scan *scan2, NEWMAT::Matrix *C);
+  void covarianceQuat(Scan *scan1, Scan *scan2, NEWMAT::Matrix *C);
   double Point_Point_Error(Scan* PreviousScan, Scan* CurrentScan, double max_dist_match, unsigned int *nrp=0);
 
   inline int  get_rnd();

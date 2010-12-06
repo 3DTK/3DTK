@@ -52,10 +52,10 @@ public:
   
 private:
   double genBArotForLinkedPair(int firstScanNum, int secondScanNum, vPtPair *ptpairs,
-						 double *centroids_m, double *centroids_d, Matrix *B, ColumnVector *A);
+						 double *centroids_m, double *centroids_d, NEWMAT::Matrix *B, NEWMAT::ColumnVector *A);
   double genBAtransForLinkedPair(int firstScanNum, int secondScanNum,
 						   double *centroids_m, double *centroids_d,
-						   SymmetricMatrix *B, ColumnVector *A, ColumnVector &X);
+						   NEWMAT::SymmetricMatrix *B, NEWMAT::ColumnVector *A, NEWMAT::ColumnVector &X);
     
 };
 

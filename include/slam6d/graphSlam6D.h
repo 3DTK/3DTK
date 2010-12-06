@@ -38,12 +38,12 @@ public:
   void matchGraph6Dautomatic(vector <Scan*> MetaScan, int nrIt, double cldist, int loopsize);
   void matchGraph6Dautomatic(vector <Scan*> MetaScan, int nrIt, int clpairs, int loopsize);
 
-  ColumnVector solveSparseCholesky(const Matrix &G, const ColumnVector &B);
-  ColumnVector solveSparseQR(const Matrix &G, const ColumnVector &B);
-  ColumnVector solveCholesky(const Matrix &G, const ColumnVector &B);
-  ColumnVector solve(const Matrix &G, const ColumnVector &B);
+  NEWMAT::ColumnVector solveSparseCholesky(const NEWMAT::Matrix &G, const NEWMAT::ColumnVector &B);
+  NEWMAT::ColumnVector solveSparseQR(const NEWMAT::Matrix &G, const NEWMAT::ColumnVector &B);
+  NEWMAT::ColumnVector solveCholesky(const NEWMAT::Matrix &G, const NEWMAT::ColumnVector &B);
+  NEWMAT::ColumnVector solve(const NEWMAT::Matrix &G, const NEWMAT::ColumnVector &B);
 
-  void writeMatrixPGM(const Matrix &G);
+  void writeMatrixPGM(const NEWMAT::Matrix &G);
   void set_mdmll(double mdmll);
   
 protected:

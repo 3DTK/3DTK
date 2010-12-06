@@ -31,6 +31,7 @@ using std::ofstream;
 using std::cerr;
 #include "slam6d/globals.icc"
 
+using namespace NEWMAT;
 /**
  * Constructor
  *

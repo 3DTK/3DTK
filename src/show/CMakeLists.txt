@@ -1,5 +1,6 @@
 IF (WITH_SHOW)
 
+  include_directories(${OPENGL_INCLUDE_DIR})
   add_executable(show show.cc  NurbsPath.cc  PathGraph.cc vertexarray.cc  viewcull.cc colormanager.cc )
 
   IF(WIN32)
