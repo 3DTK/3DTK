@@ -50,10 +50,10 @@ public:
   virtual ~lum6DQuat();
   
   double doGraphSlam6D(Graph gr, vector <Scan*> MetaScan, int nrIt);
-  static void covarianceQuat(Scan *first, Scan *second, bool use_cache, int rnd, double max_dist_match2, Matrix *C, ColumnVector *CD=0);
+  static void covarianceQuat(Scan *first, Scan *second, bool use_cache, int rnd, double max_dist_match2, NEWMAT::Matrix *C, NEWMAT::ColumnVector *CD=0);
   
 private:
-  void FillGB3D(Graph *gr, Matrix* G, ColumnVector* B, vector<Scan*> allScans);
+  void FillGB3D(Graph *gr, NEWMAT::Matrix* G, NEWMAT::ColumnVector* B, vector<Scan*> allScans);
     
 };
 

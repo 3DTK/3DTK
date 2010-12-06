@@ -17,7 +17,7 @@ using boost::graph_traits;
 #include "slam6d/elch6Dquat.h"
 #include "slam6d/lum6Dquat.h"
 #include "slam6d/globals.icc"
-
+using namespace NEWMAT;
 /**
  * ELCH loop closing function using Quaternions
  * matches first and last scan of a loop with ICP

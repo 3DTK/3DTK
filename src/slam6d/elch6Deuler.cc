@@ -16,7 +16,7 @@ using boost::graph_traits;
 
 #include "slam6d/elch6Deuler.h"
 #include "slam6d/lum6Deuler.h"
-
+using namespace NEWMAT;
 /**
  * ELCH loop closing function using Euler angles
  * matches first and last scan of a loop with ICP
