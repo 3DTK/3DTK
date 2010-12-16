@@ -29,16 +29,17 @@ public:
   static const unsigned int USE_HEIGHT;
   static const unsigned int USE_TYPE;
   static const unsigned int USE_COLOR;
+  static const unsigned int USE_TIME;
 
   PointType() {
     types = USE_NONE;
     pointdim = 3;
-    dimensionmap[1] = dimensionmap[2] = dimensionmap[3] = dimensionmap[4] = dimensionmap[5] = 1; // choose height per default  
+    dimensionmap[1] = dimensionmap[2] = dimensionmap[3] = dimensionmap[4] = dimensionmap[5] = dimensionmap[6] = 1; // choose height per default  
     dimensionmap[0] = 1;  // height 
   }
 
   PointType(unsigned int _types) : types(_types) {
-    dimensionmap[1] = dimensionmap[2] = dimensionmap[3] = dimensionmap[4] = dimensionmap[5] = 1; // choose height per default  
+    dimensionmap[1] = dimensionmap[2] = dimensionmap[3] = dimensionmap[4] = dimensionmap[5] = dimensionmap[6] = 1; // choose height per default  
     dimensionmap[0] = 1;  // height 
 
     pointdim = 3;
@@ -47,6 +48,7 @@ public:
     if (types & PointType::USE_DEVIATION) dimensionmap[3] = pointdim++;  
     if (types & PointType::USE_TYPE) dimensionmap[4] = pointdim++; 
     if (types & PointType::USE_COLOR) dimensionmap[5] = pointdim++; 
+    if (types & PointType::USE_TIME) dimensionmap[6] = pointdim++; 
   }
 
   bool hasReflectance() {
@@ -64,6 +66,25 @@ public:
   bool hasColor() {
     return hasType(USE_COLOR); 
   }
+  bool hasTime() {
+    return hasType(USE_TIME); 
+  }
+
+  unsigned int getReflectance() {
+    return dimensionmap[1];
+  }
+  
+  unsigned int getAmplitude() {
+    return dimensionmap[2];
+  }
+  
+  unsigned int getDeviation() {
+    return dimensionmap[3];
+  }
+  
+  unsigned int getTime() {
+    return dimensionmap[6];
+  }
 
   unsigned int getType(unsigned int type) {
     if (type == USE_NONE ) {
@@ -80,6 +101,8 @@ public:
       return dimensionmap[4];
     } else if (type == USE_COLOR) {
       return dimensionmap[5];
+    } else if (type == USE_TIME) {
+      return dimensionmap[6];
     } else {
       return 0;
     }
@@ -108,6 +131,9 @@ public:
       memcpy(&p[counter], P.rgb, 3);
       counter++;
     }
+    if (types & USE_TIME) {  
+//      p[counter++] = P.timestamp;
+    }
 
     return p;
   }
@@ -135,6 +161,9 @@ public:
       memcpy(P.rgb, &p[counter], 3);
       counter++;
     }
+    if (types & USE_TIME) {  
+//      P.timestamp = p[counter++];
+    }
 
     return P;
   }
@@ -151,6 +180,8 @@ public:
     f.write(reinterpret_cast<char*>(&types), sizeof(unsigned int));
   }
 
+  unsigned int toFlags() const { return types; } 
+
 private:
   /**
    * collection of flags 
@@ -164,7 +195,7 @@ private:
   /**
    * Derived from types, to map type to the array index for each point
    **/
-  int dimensionmap[6];
+  int dimensionmap[7];
 
   bool hasType(unsigned int type) {
     return types & type;
@@ -180,5 +211,6 @@ template <class T> const unsigned int PointType<T>::USE_DEVIATION = 4;
 template <class T> const unsigned int PointType<T>::USE_HEIGHT = 8;
 template <class T> const unsigned int PointType<T>::USE_TYPE = 16;
 template <class T> const unsigned int PointType<T>::USE_COLOR = 32;
+template <class T> const unsigned int PointType<T>::USE_TIME = 64;
 
 #endif
