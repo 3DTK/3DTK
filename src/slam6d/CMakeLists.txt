@@ -46,6 +46,7 @@ add_library(scan_io_zahn            SHARED scan_io_zahn.cc           )
 add_library(scan_io_ais             SHARED scan_io_ais.cc            )
 add_library(scan_io_uos_rgb         SHARED scan_io_uos_rgb.cc        )
 add_library(scan_io_oct             SHARED scan_io_oct.cc            )
+add_library(scan_io_xyzr            SHARED scan_io_xyzr.cc           )
 
 IF (WITH_RIVLIB)
   add_library(scan_io_rxp           SHARED scan_io_rxp.cc            )

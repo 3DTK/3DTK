@@ -162,131 +162,117 @@ int parseArgs(int argc, char **argv,
     cout << endl;
     while ((c = getopt (argc, argv, "o:s:a:e:m:ncwgidlRM:h:H:f:r:p:P:yt")) != -1)
     {
-   	switch (c)
-	{
-	    case 'o':
-		outputdir = optarg;
-		if (!directoryExists(outputdir)) {
-		    cerr << "Error: Directory doesn't exist.\n";
-		    exit(1);
-		}
-		break;
-	    case 's':
-		start = atoi(optarg);
-		if (start < 0) { 
-		    cerr << "Error: Cannot start at a negative scan number.\n"; 
-		    exit(1); 
-		}
-		break;
-	    case 'e':
-		end = atoi(optarg);
-		if (end < 0) { 
-		    cerr << "Error: Cannot end at a negative scan number.\n"; 
-		    exit(1); 
-		}
-		if (end < start) { 
-		    cerr << "Error: <end> cannot be smaller than <start>.\n"; 
-		    exit(1); 
-		}
-		break;
-	    case 'c':
-	        count = atoi(optarg);
-	        if( count < 1){
-		  cerr << "Error: <count> must be greater than 1.\n";
-		  exit(1);
-		}
-	        break;
-            case 'R':
-	        resume = true;
-		break;
-	    case 'm':
-		maxDist = atoi(optarg);
-		break;
-	    case 'M':           
-		minDist = atoi(optarg);
-		break;
-	    case 't':
-		readInitial = true;
-		break;
-	    case 'f':
-		if (strcasecmp(optarg, "uos") == 0) type = UOS;
-		else if (strcasecmp(optarg, "uos_map") == 0) type = UOS_MAP;
-		else if (strcasecmp(optarg, "uos_frames") == 0) type = UOS_FRAMES;
-		else if (strcasecmp(optarg, "uos_map_frames") == 0) type = UOS_MAP_FRAMES;
-		else if (strcasecmp(optarg, "uos_rgb") == 0) type = UOS_RGB;
-		else if (strcasecmp(optarg, "old") == 0) type = OLD;
-		else if (strcasecmp(optarg, "rts") == 0) type = RTS;
-		else if (strcasecmp(optarg, "rts_map") == 0) type = RTS_MAP;
-		else if (strcasecmp(optarg, "ifp") == 0) type = IFP;
-		else if (strcasecmp(optarg, "riegl_txt") == 0) type = RIEGL_TXT;
-		else if (strcasecmp(optarg, "riegl_bin") == 0) type = RIEGL_BIN;
-		else if (strcasecmp(optarg, "zahn") == 0) type = ZAHN;
-		else if (strcasecmp(optarg, "ply") == 0) type = PLY;
-		else {
-		    abort();
-		}
-		break;
-	    case 'H':
-		maxHeight = atoi(optarg);
-		break;
-	    case 'h':
-		minHeight = atoi(optarg);
-		break;
-	    case 'g':
-	        writeGrids = true;
-	        break;	  
-	    case 'r':
-		resolution = atol(optarg);
-		if (resolution < 1) { 
-		    cerr << "Error: <resolution> cannot be smaller than 1.\n"; 
-		    exit(1); 
-		}
-		break;	
-	    case 'w':
-		waypoints = false;
-		break;
-	    case 'n':
-		neighbours = false;
-		break;
-	    case 'p':
-		parcelWidth = atol(optarg);
-		if (parcelWidth < 1) { 
-		    cerr << "Error: <parcel_width> cannot be smaller than 1.\n"; 
-		    exit(1); 
-		}
-		break;
-	    case 'P':
-		parcelHeight = atol(optarg);
-		if (parcelHeight < 1) { 
-		    cerr << "Error: <parcel_height> cannot be smaller than 1.\n"; 
-		    exit(1); 
-		}
-		break;
-	    case 'y':
-		correctY = true;
-		break;
-	    case 'a':
-		spotradius = atoi(optarg);
-		if (spotradius < 0) { 
-		    cerr << "Error: <spotradius> cannot be smaller than 0.\n"; 
-		    exit(1); 
-		}
-		break;
-	    case 'd':
-		writeWorld = false;
-		break;
-	    case 'l':
-		writeLines = true;
-		break;
-	    case 'i':
-		writeWorldppm = true;
-		break;
-	    case '?':
-		usage(argv[0]);
-		return 1;
-	    default:
-		abort();
-	}}
+      switch (c)
+      {
+        case 'o':
+          outputdir = optarg;
+          if (!directoryExists(outputdir)) {
+            cerr << "Error: Directory doesn't exist.\n";
+            exit(1);
+          }
+          break;
+        case 's':
+          start = atoi(optarg);
+          if (start < 0) { 
+            cerr << "Error: Cannot start at a negative scan number.\n"; 
+            exit(1); 
+          }
+          break;
+        case 'e':
+          end = atoi(optarg);
+          if (end < 0) { 
+            cerr << "Error: Cannot end at a negative scan number.\n"; 
+            exit(1); 
+          }
+          if (end < start) { 
+            cerr << "Error: <end> cannot be smaller than <start>.\n"; 
+            exit(1); 
+          }
+          break;
+        case 'c':
+          count = atoi(optarg);
+          if( count < 1){
+            cerr << "Error: <count> must be greater than 1.\n";
+            exit(1);
+          }
+          break;
+        case 'R':
+          resume = true;
+          break;
+        case 'm':
+          maxDist = atoi(optarg);
+          break;
+        case 'M':           
+          minDist = atoi(optarg);
+          break;
+        case 't':
+          readInitial = true;
+          break;
+        case 'f':
+          if (!Scan::toType(optarg, type))
+            abort ();
+          break;
+        case 'H':
+          maxHeight = atoi(optarg);
+          break;
+        case 'h':
+          minHeight = atoi(optarg);
+          break;
+        case 'g':
+          writeGrids = true;
+          break;	  
+        case 'r':
+          resolution = atol(optarg);
+          if (resolution < 1) { 
+            cerr << "Error: <resolution> cannot be smaller than 1.\n"; 
+            exit(1); 
+          }
+          break;	
+        case 'w':
+          waypoints = false;
+          break;
+        case 'n':
+          neighbours = false;
+          break;
+        case 'p':
+          parcelWidth = atol(optarg);
+          if (parcelWidth < 1) { 
+            cerr << "Error: <parcel_width> cannot be smaller than 1.\n"; 
+            exit(1); 
+          }
+          break;
+        case 'P':
+          parcelHeight = atol(optarg);
+          if (parcelHeight < 1) { 
+            cerr << "Error: <parcel_height> cannot be smaller than 1.\n"; 
+            exit(1); 
+          }
+          break;
+        case 'y':
+          correctY = true;
+          break;
+        case 'a':
+          spotradius = atoi(optarg);
+          if (spotradius < 0) { 
+            cerr << "Error: <spotradius> cannot be smaller than 0.\n"; 
+            exit(1); 
+          }
+          break;
+        case 'd':
+          writeWorld = false;
+          break;
+        case 'l':
+          writeLines = true;
+          break;
+        case 'i':
+          writeWorldppm = true;
+          break;
+        case '?':
+          usage(argv[0]);
+          return 1;
+        default:
+          abort();
+      }}
     
     if (optind != argc-1) {
 	cerr << "\n*** Input directory missing ***" << endl;

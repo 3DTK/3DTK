@@ -32,7 +32,7 @@ using std::stringstream;
 #include "slam6d/globals.icc"
 
 enum reader_type {
-  UOS, UOS_MAP, UOS_FRAMES, UOS_MAP_FRAMES, UOS_RGB, OLD, RTS, RTS_MAP, RIEGL_TXT, RIEGL_RGB, RIEGL_BIN, IFP, ZAHN, PLY, WRL, XYZ, ZUF, ASC, IAIS, FRONT, X3D, RXP, KIT, AIS, OCT
+  UOS, UOS_MAP, UOS_FRAMES, UOS_MAP_FRAMES, UOS_RGB, OLD, RTS, RTS_MAP, RIEGL_TXT, RIEGL_RGB, RIEGL_BIN, IFP, ZAHN, PLY, WRL, XYZ, ZUF, ASC, IAIS, FRONT, X3D, RXP, KIT, AIS, OCT, XYZR
 };
 
 // just some prototypes
@@ -139,6 +139,8 @@ public:
    * The output directory
    */  
   static string dir;
+
+  static bool toType(const char* string, reader_type &type);
 
   static void readScans(reader_type type,
 				    int start, int end, string &dir, int maxDist, int minDist,
