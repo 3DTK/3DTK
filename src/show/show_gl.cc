@@ -7,7 +7,7 @@ bool fullydisplayed = true;   // true if all points have been drawn to the scree
 bool showall = false;         // true iff next DrawPoints should redraw scene with all points
 bool mousemoving = false;     // true iff a mouse button has been pressed inside a window, but hs not been released
 bool delayeddisplay = false;  // true iff mouse button callbacks should redraw the scene after button release
-long ptstodisplay = 100000;  
+double ptstodisplay = 100000;  
 double lastfps = idealfps;    // last frame rate    
 int pointmode = -1;
 
