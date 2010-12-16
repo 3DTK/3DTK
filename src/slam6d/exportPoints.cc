@@ -175,31 +175,8 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &rand,
 	   extrapolate_pose = false;
 	   break;
 	 case 'f': 
-	   if (strcasecmp(optarg, "uos") == 0) type = UOS;
-	   else if (strcasecmp(optarg, "uos_map") == 0) type = UOS_MAP;
-	   else if (strcasecmp(optarg, "uos_frames") == 0) type = UOS_FRAMES;
-	   else if (strcasecmp(optarg, "uos_map_frames") == 0) type = UOS_MAP_FRAMES;
-	   else if (strcasecmp(optarg, "uos_rgb") == 0) type = UOS_RGB;
-	   else if (strcasecmp(optarg, "old") == 0) type = OLD;
-	   else if (strcasecmp(optarg, "rts") == 0) type = RTS;
-	   else if (strcasecmp(optarg, "rts_map") == 0) type = RTS_MAP;
-	   else if (strcasecmp(optarg, "ifp") == 0) type = IFP;
-	   else if (strcasecmp(optarg, "riegl_txt") == 0) type = RIEGL_TXT;
-	   else if (strcasecmp(optarg, "riegl_rgb") == 0) type = RIEGL_RGB;
-	   else if (strcasecmp(optarg, "riegl_bin") == 0) type = RIEGL_BIN;
-	   else if (strcasecmp(optarg, "zahn") == 0) type = ZAHN;
-	   else if (strcasecmp(optarg, "ply") == 0) type = PLY;
-	   else if (strcasecmp(optarg, "wrl") == 0) type = WRL;
-	   else if (strcasecmp(optarg, "xyz") == 0) type = XYZ;
-	   else if (strcasecmp(optarg, "zuf") == 0) type = ZUF;
-	   else if (strcasecmp(optarg, "asc") == 0) type = ASC;
-	   else if (strcasecmp(optarg, "iais") == 0) type = IAIS;
-	   else if (strcasecmp(optarg, "front") == 0) type = FRONT;
-	   else if (strcasecmp(optarg, "x3d") == 0) type = X3D;
-	   else if (strcasecmp(optarg, "ais") == 0) type = AIS;
-	   else {
-		abort ();
-	   }
+     if (!Scan::toType(optarg, type))
+       abort ();
 	   break;
       case '?':
 	   usage(argv[0]);

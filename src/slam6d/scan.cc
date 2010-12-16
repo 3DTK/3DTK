@@ -1273,6 +1273,37 @@ void Scan::deleteTree()
 
 
 
+bool Scan::toType(const char* string, reader_type &type) {
+  if (strcasecmp(string, "uos") == 0) type = UOS;
+  else if (strcasecmp(string, "uos_map") == 0) type = UOS_MAP;
+  else if (strcasecmp(string, "uos_frames") == 0) type = UOS_FRAMES;
+  else if (strcasecmp(string, "uos_map_frames") == 0) type = UOS_MAP_FRAMES;
+  else if (strcasecmp(string, "uos_rgb") == 0) type = UOS_RGB;
+  else if (strcasecmp(string, "old") == 0) type = OLD;
+  else if (strcasecmp(string, "rts") == 0) type = RTS;
+  else if (strcasecmp(string, "rts_map") == 0) type = RTS_MAP;
+  else if (strcasecmp(string, "ifp") == 0) type = IFP;
+  else if (strcasecmp(string, "riegl_txt") == 0) type = RIEGL_TXT;
+  else if (strcasecmp(string, "riegl_rgb") == 0) type = RIEGL_RGB;
+  else if (strcasecmp(string, "riegl_bin") == 0) type = RIEGL_BIN;
+  else if (strcasecmp(string, "zahn") == 0) type = ZAHN;
+  else if (strcasecmp(string, "ply") == 0) type = PLY;
+  else if (strcasecmp(string, "wrl") == 0) type = WRL;
+  else if (strcasecmp(string, "xyz") == 0) type = XYZ;
+  else if (strcasecmp(string, "zuf") == 0) type = ZUF;
+  else if (strcasecmp(string, "asc") == 0) type = ASC;
+  else if (strcasecmp(string, "iais") == 0) type = IAIS;
+  else if (strcasecmp(string, "front") == 0) type = FRONT;
+  else if (strcasecmp(string, "x3d") == 0) type = X3D;
+  else if (strcasecmp(string, "rxp") == 0) type = RXP;
+  else if (strcasecmp(string, "ais") == 0) type = AIS;
+  else if (strcasecmp(string, "oct") == 0) type = OCT;
+  else if (strcasecmp(string, "xyzr") == 0) type = XYZR;
+  else return false;
+
+  return true;
+}
+
 
 /**
  * Reads specified scans from given directory. 
@@ -1370,6 +1401,9 @@ void Scan::readScans(reader_type type,
     break;
   case OCT:
     lib_string = "scan_io_oct";
+    break;
+  case XYZR:
+    lib_string = "scan_io_xyzr";
     break;
   default:
     cerr << "Don't recognize format " << type << endl;
