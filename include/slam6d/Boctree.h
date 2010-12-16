@@ -181,7 +181,7 @@ public:
   BOctTree(std::string filename) {deserialize(filename); }
 
   template <class P>
-  BOctTree(vector<const P *> &pts, T voxelSize, PointType<T> _pointtype = PointType<T>()) {
+  BOctTree(vector<P *> &pts, T voxelSize, PointType<T> _pointtype = PointType<T>()) {
     this->voxelSize = voxelSize;
 
     this->POINTDIM = pointtype.getPointDim();
@@ -629,7 +629,7 @@ protected:
   }
 
   template <class P>
-  pointrep *branch( bitoct &node, vector<const P*> &splitPoints, T _center[3], T _size) {
+  pointrep *branch( bitoct &node, vector<P*> &splitPoints, T _center[3], T _size) {
     // if bucket is too small stop building tree
     // -----------------------------------------
     if ((_size <= voxelSize)) {
@@ -637,7 +637,7 @@ protected:
       pointrep *points = new pointrep[POINTDIM*splitPoints.size() + 1];
       points[0].length = splitPoints.size();
       int i = 1;
-      for (typename vector<const P *>::iterator itr = splitPoints.begin(); 
+      for (typename vector<P *>::iterator itr = splitPoints.begin(); 
           itr != splitPoints.end(); itr++) {
         for (unsigned int iterator = 0; iterator < POINTDIM; iterator++) {
           points[i++].v = (*itr)[iterator];
@@ -661,15 +661,15 @@ protected:
   }
 
   template <class P>
-  void countPointsAndQueue(vector<const P*> &i_points, T center[8][3], T size, bitoct &parent) {
-    vector<const P*> points[8];
+  void countPointsAndQueue(vector<P*> &i_points, T center[8][3], T size, bitoct &parent) {
+    vector<P*> points[8];
     int n_children = 0;
 
 #ifdef _OPENMP 
 #pragma omp parallel for schedule(dynamic) 
 #endif
     for (int j = 0; j < 8; j++) {
-      for (typename vector<const P *>::iterator itr = i_points.begin(); itr != i_points.end(); itr++) {
+      for (typename vector<P *>::iterator itr = i_points.begin(); itr != i_points.end(); itr++) {
         if (fabs((*itr)[0] - center[j][0]) <= size) {
           if (fabs((*itr)[1] - center[j][1]) <= size) {
             if (fabs((*itr)[2] - center[j][2]) <= size) {
@@ -682,7 +682,7 @@ protected:
     }
 
     i_points.clear();
-    vector<const P*>().swap(i_points);
+    vector<P*>().swap(i_points);
     for (int j = 0; j < 8; j++) {
       if (!points[j].empty()) {
         parent.valid = ( 1 << j ) | parent.valid;
@@ -702,7 +702,7 @@ protected:
           parent.leaf = ( 1 << j ) | parent.leaf;  // remember this is a leaf
         }
         points[j].clear();
-        vector<const P*>().swap(points[j]);
+        vector<P*>().swap(points[j]);
         ++count;
       }
     }
