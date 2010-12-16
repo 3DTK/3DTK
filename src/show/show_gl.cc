@@ -19,8 +19,8 @@ int pointmode = -1;
 void DrawPoints(GLenum mode)
 {
   long time = GetCurrentTimeInMilliSec();
-  long max = 10000000000;
-  long min = 10000;
+  double  max = 100000000000;
+  double min = 10000;
   ptstodisplay *= 1.0 + (lastfps - idealfps)/idealfps;
   if (ptstodisplay < min) ptstodisplay = min;
   else if (ptstodisplay > max) ptstodisplay = max;
