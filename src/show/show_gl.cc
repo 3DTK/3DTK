@@ -19,11 +19,12 @@ int pointmode = -1;
 void DrawPoints(GLenum mode)
 {
   long time = GetCurrentTimeInMilliSec();
-  double  max = 10000000000;
   double min = 10000;
-  ptstodisplay *= 1.0 + (lastfps - idealfps)/idealfps;
+  ptstodisplay *= 1.0 + 1.2*(lastfps - idealfps)/idealfps;
   if (ptstodisplay < min) ptstodisplay = min;
-  else if (ptstodisplay > max) ptstodisplay = max;
+  else if (ptstodisplay > maximum_target_points) ptstodisplay = maximum_target_points;
+
+  cout << ptstodisplay << endl;
 
   // In case of animation
   if(scanNr != -1) {

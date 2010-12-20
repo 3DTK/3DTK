@@ -69,7 +69,35 @@ public:
     selectRay(point, *BOctTree<T>::root, BOctTree<T>::center, BOctTree<T>::size, FLT_MAX); 
   }
 
+  unsigned long maxTargetPoints() {
+    return maxTargetPoints(*BOctTree<T>::root);
+  }
+
+
+
 protected:
+  unsigned long maxTargetPoints( bitoct &node ) {
+    bitunion<T> *children;
+    bitoct::getChildren(node, children);
+
+    unsigned long max = 0;
+
+    for (short i = 0; i < 8; i++) {
+      if (  ( 1 << i ) & node.valid ) {   // if ith node exists
+        if (  ( 1 << i ) & node.leaf ) {   // if ith node is leaf get center
+          pointrep *points = children->points;
+          unsigned long length = points[0].length;
+          if (length > max) max = length;
+        } else { // recurse
+          unsigned long tp = maxTargetPoints( children->node);
+          if (tp > max) max = tp;
+        }
+        ++children; // next child
+      }
+    }
+
+    return max*POPCOUNT(node.valid);
+  }
   
   void displayOctTreeAll( bitoct &node, T *center, T size ) {
     T ccenter[3];

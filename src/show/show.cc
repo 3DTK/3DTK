@@ -54,6 +54,7 @@ vector< vector<vertexArray*> > vvertexArrayList;
  */
 //Show_BOctTree **octpts;
 vector<Show_BOctTree<sfloat>*> octpts;
+unsigned long maximum_target_points = 0;
 /**
  * Storing the base directory
  */
@@ -803,6 +804,7 @@ int main(int argc, char **argv){
       createDisplayLists(false);
     }
 
+
     if (saveOct) {
       for (unsigned int i = 0; i < Scan::allScans.size(); i++) {
         string scanFileName = dir + "scan" + to_string(i+start,3) + ".oct";
@@ -811,6 +813,11 @@ int main(int argc, char **argv){
       }
     }
   }
+  for (unsigned int i = 0; i < octpts.size(); i++) { 
+    unsigned long tp = octpts[i]->maxTargetPoints();
+    if (tp > maximum_target_points) maximum_target_points = tp;
+  }
+
   cm->setCurrentType(PointType<sfloat>::USE_HEIGHT);
   ColorMap cmap;
   cm->setColorMap(cmap);
