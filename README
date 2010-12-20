@@ -7,13 +7,13 @@ Alternatively you may change into the build directory ".build" and configure the
 project with your preferred cmake configurator, i.e.:
 cd .build && cmake -i ../
 
-The Boost Graph Lib is needed to compile the slam6D program.
+Some Boost libraries (graph, regex, serialization) are needed to compile the slam6D program.
 If you are using Debian just do:
-aptitude install libboost-graph-dev freeglut3-dev libxmu-dev libxi-dev
+aptitude install libboost-graph-dev libboost-regex-dev libbost-serialization-dev freeglut3-dev libxmu-dev libxi-dev
 or, if you are still using Debian stable (lenny):
-aptitude install libboost-graph1.35-dev freeglut3-dev libxmu-dev libxi-dev
+aptitude install libboost-graph1.35-dev libboost-regex1.35-dev libboost-serialization1.35-dev freeglut3-dev libxmu-dev libxi-dev 
 for Ubuntu this would be:
-sudo aptitude install libboost-graph1.37-dev freeglut3-dev libxmu-dev libxi-dev
+sudo aptitude install libboost-graph-dev libboost-regex-dev libbost-serialization-dev freeglut3-dev libxmu-dev libxi-dev
 SuSE users please use yast2 for installing the missing packages
 -------------------------------------------------------------------
 
