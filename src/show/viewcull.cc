@@ -62,6 +62,8 @@ void calcRay(int x, int y, double znear, double zfar)  {
   rayVP[3] = 0.5*viewport[3] + viewport[1];
   rayX = x;
   rayY = viewport[3]-y;
+
+  remViewport();
 }
 
 void remViewport() {
