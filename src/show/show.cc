@@ -716,6 +716,10 @@ int main(int argc, char **argv){
   
   parseArgs(argc, argv, dir, start, end, maxDist, minDist, red, readInitial, octree, pointtype, idealfps, loadOct, saveOct, type);
 
+  if (type == OCT) {
+    loadOct = true;
+  }
+
   // if we want to load display file get pointtypes from the files first
   if (loadOct) {
     string scanFileName = dir + "scan" + to_string(start,3) + ".oct";
