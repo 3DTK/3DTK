@@ -640,15 +640,12 @@ void createDisplayLists(bool reduced)
   }
 
 #else
-//#ifdef USE_GL_POINTS
   cout << "Creating display octrees.." << endl;
-  //octpts = new Show_BOctTree*[Scan::allScans.size()];
 
   for(int i = 0; i < (int)Scan::allScans.size() ; i++) {
     if (reduced) {
       octpts.push_back( new Show_BOctTree<sfloat>(Scan::allScans[i]->get_points_red(), Scan::allScans[i]->get_points_red_size(), 50.0, pointtype, cm));  // TODO remove magic number
     } else {
-//     if (types != PointType::USE_NONE && cm) {
         unsigned int nrpts = Scan::allScans[i]->get_points()->size();
         sfloat **pts = new sfloat*[nrpts];
         for (unsigned int jterator = 0; jterator < nrpts; jterator++) {
@@ -660,22 +657,6 @@ void createDisplayLists(bool reduced)
           delete[] pts[jterator];
         }
         delete[] pts;
-/*      } else {
-        unsigned int nrpts = Scan::allScans[i]->get_points()->size();
-        double **pts = new double*[nrpts];
-        for (unsigned int jterator = 0; jterator < nrpts; jterator++) {
-          pts[jterator] = new double[3];
-          pts[jterator][0] = Scan::allScans[i]->get_points()->at(jterator).x;
-          pts[jterator][1] = Scan::allScans[i]->get_points()->at(jterator).y;
-          pts[jterator][2] = Scan::allScans[i]->get_points()->at(jterator).z;
-        }
-        Scan::allScans[i]->clearPoints();
-        octpts.push_back( new Show_BOctTree<double>(pts, nrpts , 50.0) );  //TODO remove magic number
-        for (unsigned int jterator = 0; jterator < nrpts; jterator++) {
-          delete[] pts[jterator];
-        }
-        delete[] pts;
-      }*/
     }
     cout << "Scan " << i << " octree finished. Deleting original points.." << endl;
   }
