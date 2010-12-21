@@ -24,8 +24,6 @@ void DrawPoints(GLenum mode)
   if (ptstodisplay < min) ptstodisplay = min;
   else if (ptstodisplay > maximum_target_points) ptstodisplay = maximum_target_points;
 
-  cout << ptstodisplay << endl;
-
   // In case of animation
   if(scanNr != -1) {
     cm->setMode(ScanColorManager<double>::MODE_ANIMATION);
