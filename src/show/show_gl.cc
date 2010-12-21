@@ -112,7 +112,7 @@ void DrawPoints(GLenum mode)
         glMultMatrixd(MetaMatrix[iterator].back());
 
 #ifdef USE_GL_POINTS
-       //  cout << endl << endl;  calcRay(0,0, 1.0, 40000.0);
+         //cout << endl << endl;  calcRay(570, 266, 1.0, 40000.0);
         
         ExtractFrustum(pointsize);
         if (pointmode == 1 || (showall && pointmode == 0) ) {
@@ -978,12 +978,12 @@ void CallBackMouseFunc(int button, int state, int x, int y)
       for(int iterator = (int)octpts.size()-1; iterator >= 0; iterator--) {
         selected_points[iterator].clear();
       }
-      sfloat *sp = 0;
       for(int iterator = (int)octpts.size()-1; iterator >= 0; iterator--) {
         glPushMatrix();
         glMultMatrixd(MetaMatrix[iterator].back());
         calcRay(x, y, 1.0, 40000.0);
 //        octpts[iterator]->selectRay(selected_points);
+        sfloat *sp = 0;
         octpts[iterator]->selectRay(sp);
         if (sp != 0) {
           selected_points[iterator].push_back(sp);
