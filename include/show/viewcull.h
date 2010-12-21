@@ -106,6 +106,7 @@ template <class T> bool HitBoundingBox(T center[3], T size )
 
 void calcRay(int x, int y, double znear, double zfar);  
 
+#include <float.h>
 template <class T> 
 float RayDist(T *point)
 {
