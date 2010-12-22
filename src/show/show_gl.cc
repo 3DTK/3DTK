@@ -351,12 +351,6 @@ void DisplayItFunc(GLenum mode)
   // set the polygon mode
   glPolygonMode(GL_FRONT/*_AND_BACK*/, GL_LINE); 
 
-  // variable to store the axis values
-  double axis[3];
-
-  // convert from quaternion to axis angle
-  QuaternionToAxisAngle(quat, axis, angle);
-
   // do the model-transformation
   if (haveToUpdate == 6 && path_iterator < path_vectorX.size() ) {
     gluLookAt(path_vectorX.at(path_iterator).x, path_vectorX.at(path_iterator).y, path_vectorZ.at(path_iterator).y,
@@ -368,9 +362,22 @@ void DisplayItFunc(GLenum mode)
     if (cameraNavMouseMode == 1) {
       glRotated( mouseRotX, 1, 0, 0);
       glRotated( mouseRotY, 0, 1, 0);
-    } else glRotated(angle, axis[0], axis[1], axis[2]);    // rotate the camera
-    glGetFloatv(GL_MODELVIEW_MATRIX, view_rotate_button);
+      glGetFloatv(GL_MODELVIEW_MATRIX, view_rotate_button);
+      update_view_rotate(0);
+    } else {
+      double t[3] = {0,0,0};
+      double mat[16];
+      QuatToMatrix4(quat, t, mat);
+      glMultMatrixd(mat);
+
+      glGetFloatv(GL_MODELVIEW_MATRIX, view_rotate_button);
+      //glRotated(angle, axis[0], axis[1], axis[2]);    // rotate the camera
+      double rPT[3];
+      Matrix4ToEuler(mat, rPT);
+      mouseRotX = deg(rPT[0]);
+      mouseRotY = deg(rPT[1]);
     
+    }
     glui2->sync_live();
     glui2->show();
 
@@ -483,8 +490,8 @@ void topView()
 	 
 	  Y = Y - 350.0;
 	  Z = Z + 500.0;
-	  quat[3] = quat[0] = sqrt(0.5);
-	  quat[1] = quat[2] = 0.0;
+    quat[0] = quat[1] = sqrt(0.5);
+	  quat[2] = quat[3] = 0.0;
 	  mouseRotX = 90;
 	  mouseRotY = 0;
 	 
@@ -552,12 +559,12 @@ void callDeleteCamera(int dummy){
 void resetView(int dummy)
 {
   Y = START_Y;
-  quat[3] = 1.0;
+  quat[0] = 1.0;
   cangle = 60.0;
   cangle_spinner->set_float_val(cangle);  
   pzoom = 2000.0;
   pzoom_spinner->set_float_val(pzoom);  
-  quat[0] = quat[1] = quat[2] = X = Z = 0.0;
+  quat[1] = quat[2] = quat[3] = X = Z = 0.0;
   rotButton->reset();
   haveToUpdate = 2;
   mouseRotX = 0;
@@ -788,7 +795,11 @@ void update_view_rotate(int t)
   double view_rotate_button_quat[4];
 
   // convert the rotate button matrix to quaternion 
-  Matrix4ToQuaternion(view_rotate_button, view_rotate_button_quat);
+  //Matrix4ToQuaternion(view_rotate_button, view_rotate_button_quat);
+  double mat[16];
+  for (int i = 0; i < 16; i++)
+    mat[i] = view_rotate_button[i];
+  Matrix4ToQuat(mat, view_rotate_button_quat);
 
   // normalize the quartenion
   QuatNormalize(view_rotate_button_quat);
@@ -959,18 +970,23 @@ void CallBackMouseFunc(int button, int state, int x, int y)
       glMatrixMode(GL_MODELVIEW);
       // init modelview matrix
       glLoadIdentity();
-      // variable to store the axis values
-      double axis[3];
-      // convert from quaternion to axis angle
-      QuaternionToAxisAngle(quat, axis, angle);
 
       // do the model-transformation
       if (cameraNavMouseMode == 1) {
         glRotated( mouseRotX, 1, 0, 0);
         glRotated( mouseRotY, 0, 1, 0);
-      } else glRotated(angle, axis[0], axis[1], axis[2]);    // rotate the camera
-      
-      glGetFloatv(GL_MODELVIEW_MATRIX, view_rotate_button);
+      } else {
+        double t[3] = {0,0,0};
+        double mat[16];
+        QuatToMatrix4(quat, t, mat);
+        glMultMatrixd(mat);
+
+        glGetFloatv(GL_MODELVIEW_MATRIX, view_rotate_button);
+        double rPT[3];
+        Matrix4ToEuler(mat, rPT);
+        mouseRotX = deg(rPT[0]);
+        mouseRotY = deg(rPT[1]);
+      }
       glui2->sync_live();
       glui2->show();
       glTranslated(X, Y, Z);       // move camera	
@@ -1112,8 +1128,8 @@ void CallBackMouseMotionFunc(int x, int y) {
         mouseRotY -= deltaMouseX;
         if (mouseRotX < -90) mouseRotX=90;
         else if (mouseRotX > 90) mouseRotX=90;
-        if (mouseRotY > 360) mouseRotY=0;
-        else if (mouseRotY < 0) mouseRotY=360;
+        if (mouseRotY > 360) mouseRotY-=360;
+        else if (mouseRotY < 0) mouseRotY+=360;
       }
     }
     X += transX;
