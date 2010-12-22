@@ -99,7 +99,7 @@ protected:
     return max*POPCOUNT(node.valid);
   }
   
-  void displayOctTreeAll( bitoct &node, T *center, T size ) {
+  void displayOctTreeAll( bitoct &node) {
     T ccenter[3];
     bitunion<T> *children;
     bitoct::getChildren(node, children);
@@ -118,8 +118,7 @@ protected:
           }
           glEnd();
         } else { // recurse
-          childcenter(center, ccenter, size, i);  // childrens center
-          displayOctTreeAll( children->node, ccenter, size/2.0);
+          displayOctTreeAll( children->node);
         }
         ++children; // next child
       }
@@ -131,7 +130,7 @@ protected:
     if (res==0) return;  // culled do not continue with this branch of the tree
 
     if (res == 2) { // if entirely within frustrum discontinue culling
-      displayOctTreeAll(node, center, size);
+      displayOctTreeAll(node);
       return;
     }
 
