@@ -59,7 +59,7 @@ public:
   }
   
   void displayOctTreeAllCulled() { 
-    displayOctTreeAll(*BOctTree<T>::root, BOctTree<T>::center, BOctTree<T>::size); 
+    displayOctTreeAllCulled(*BOctTree<T>::root, BOctTree<T>::center, BOctTree<T>::size); 
   }
 
   void selectRay(vector<T *> &points) { 
@@ -131,7 +131,7 @@ protected:
     if (res==0) return;  // culled do not continue with this branch of the tree
 
     if (res == 2) { // if entirely within frustrum discontinue culling
-      displayOctTreeAllCulled(node, center, size);
+      displayOctTreeAll(node, center, size);
       return;
     }
 
