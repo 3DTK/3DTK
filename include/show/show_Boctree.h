@@ -61,6 +61,10 @@ public:
   void displayOctTreeAllCulled() { 
     displayOctTreeAllCulled(*BOctTree<T>::root, BOctTree<T>::center, BOctTree<T>::size); 
   }
+  
+  void displayOctTree(T minsize = FLT_MAX) { 
+    displayOctTreeCAllCulled(*BOctTree<T>::root, BOctTree<T>::center, BOctTree<T>::size, minsize); 
+  }
 
   void selectRay(vector<T *> &points) { 
     selectRay(points, *BOctTree<T>::root, BOctTree<T>::center, BOctTree<T>::size); 
@@ -342,6 +346,99 @@ protected:
         ++children; // next child
       }
     }
+  }
+  
+  
+  
+  void displayOctTreeCAllCulled( bitoct &node, T *center, T size, T minsize ) {
+    int res = CubeInFrustum2(center[0], center[1], center[2], size);
+    if (res==0) return;  // culled do not continue with this branch of the tree
+
+    if (res == 2) { // if entirely within frustrum discontinue culling
+      displayOctTreeCAll(node, center, size, minsize);
+      return;
+    }
+
+    T ccenter[3];
+    bitunion<T> *children;
+    bitoct::getChildren(node, children);
+
+    for (short i = 0; i < 8; i++) {
+      if (  ( 1 << i ) & node.valid ) {   // if ith node exists
+        childcenter(center, ccenter, size, i);  // childrens center
+        if (  ( 1 << i ) & node.leaf || minsize > size ) {   // if ith node is leaf get center
+          // check if leaf is visible
+          if ( CubeInFrustum(ccenter[0], ccenter[1], ccenter[2], size/2.0) ) {
+            showCube(ccenter, size/2.0);
+          }
+        } else { // recurse
+          displayOctTreeCAllCulled( children->node, ccenter, size/2.0, minsize);
+        }
+        ++children; // next child
+      }
+    }
+  }
+  
+  void displayOctTreeCAll( bitoct &node, T *center, T size, T minsize ) {
+    T ccenter[3];
+    bitunion<T> *children;
+    bitoct::getChildren(node, children);
+
+    for (short i = 0; i < 8; i++) {
+      if (  ( 1 << i ) & node.valid ) {   // if ith node exists
+        childcenter(center, ccenter, size, i);  // childrens center
+        if (  ( 1 << i ) & node.leaf || minsize > size ) {   // if ith node is leaf get center
+          showCube(ccenter, size/2.0);
+        } else { // recurse
+          displayOctTreeCAll( children->node, ccenter, size/2.0, minsize);
+        }
+        ++children; // next child
+      }
+    }
+  }
+
+  void showCube(T *center, T size) {
+  glLineWidth(1.0);
+    glBegin(GL_QUADS);      // draw a cube with 6 quads
+glColor3f(0.0f,1.0f,0.0f);      // Set The Color To Green
+    glVertex3f(center[0] + size, center[1] + size, center[2] - size);
+    glVertex3f(center[0] - size, center[1] + size, center[2] - size);
+    glVertex3f(center[0] - size, center[1] + size, center[2] + size);
+    glVertex3f(center[0] + size, center[1] + size, center[2] + size);
+  glColor3f(1.0f,0.5f,0.0f);      // Set The Color To Orange
+
+    glVertex3f(center[0] + size, center[1] - size, center[2] + size); 
+    glVertex3f(center[0] - size, center[1] - size, center[2] + size);
+    glVertex3f(center[0] - size, center[1] - size, center[2] - size);
+    glVertex3f(center[0] + size, center[1] - size, center[2] - size);
+
+      glColor3f(1.0f,0.0f,0.0f);      // Set The Color To Red
+    glVertex3f(center[0] + size, center[1] + size, center[2] + size); 
+    glVertex3f(center[0] - size, center[1] + size, center[2] + size);
+    glVertex3f(center[0] - size, center[1] - size, center[2] + size);
+    glVertex3f(center[0] + size, center[1] - size, center[2] + size);
+
+      glColor3f(1.0f,1.0f,0.0f);      // Set The Color To Yellow
+    glVertex3f(center[0] + size, center[1] - size, center[2] - size); 
+    glVertex3f(center[0] - size, center[1] - size, center[2] - size);
+    glVertex3f(center[0] - size, center[1] + size, center[2] - size);
+    glVertex3f(center[0] + size, center[1] + size, center[2] - size);
+
+    glColor3f(0.0f,0.0f,1.0f);      // Set The Color To Blue
+    glVertex3f(center[0] - size, center[1] + size, center[2] + size); 
+    glVertex3f(center[0] - size, center[1] + size, center[2] - size);
+    glVertex3f(center[0] - size, center[1] - size, center[2] - size);
+    glVertex3f(center[0] - size, center[1] - size, center[2] + size);
+
+    glColor3f(1.0f,0.0f,1.0f);      // Set The Color To Violet
+    glVertex3f(center[0] + size, center[1] + size, center[2] - size); 
+    glVertex3f(center[0] + size, center[1] + size, center[2] + size);
+    glVertex3f(center[0] + size, center[1] - size, center[2] + size);
+    glVertex3f(center[0] + size, center[1] - size, center[2] - size);
+
+
+    glEnd();
+
   }
 
   ColorManager<T> *cm;
