@@ -21,12 +21,14 @@ void DrawPoints(GLenum mode)
   long time = GetCurrentTimeInMilliSec();
   double min = 10000;
   ptstodisplay *= 1.0 + 1.2*(lastfps - idealfps)/idealfps;
-  if (ptstodisplay < min) ptstodisplay = min;
-  else if (ptstodisplay > maximum_target_points) ptstodisplay = maximum_target_points;
+   if (ptstodisplay > maximum_target_points) ptstodisplay = maximum_target_points;
+  else if (ptstodisplay < min) ptstodisplay = min;
+
+  cout << ptstodisplay << " " << lastfps << endl;
 
   // In case of animation
   if(scanNr != -1) {
-    cm->setMode(ScanColorManager<double>::MODE_ANIMATION);
+    cm->setMode(ScanColorManager::MODE_ANIMATION);
 
 #ifdef USE_GL_POINTS
     for(int iterator = (int)octpts.size()-1; iterator >= 0; iterator--) {
@@ -119,6 +121,7 @@ void DrawPoints(GLenum mode)
           octpts[iterator]->displayOctTreeAllCulled();
         } else {
           octpts[iterator]->displayOctTreeCulled(ptstodisplay/(int)octpts.size());
+          //octpts[iterator]->displayOctTree(pointsize*pointsize*pointsize*10);
         }
         glColor3f(1.0, 0.0, 0.0);
         glPointSize(pointsize + 10.0);
@@ -143,6 +146,7 @@ void DrawPoints(GLenum mode)
 
   if (pointmode == 1 || (showall && pointmode == 0) ) {
     fullydisplayed = true;
+    lastfps =  1000.0/(GetCurrentTimeInMilliSec() - time);
   } else {
     lastfps =  1000.0/(GetCurrentTimeInMilliSec() - time);
     fullydisplayed = false;
@@ -1578,22 +1582,22 @@ void CallBackKeyboardFunc(unsigned char key, int x, int y) {
 void mapColorToValue(int dummy) {
   switch (listboxColorVal) {
     case 0:
-      cm->setCurrentType(PointType<sfloat>::USE_HEIGHT);
+      cm->setCurrentType(PointType::USE_HEIGHT);
       break;
     case 1:
-      cm->setCurrentType(PointType<sfloat>::USE_REFLECTANCE);
+      cm->setCurrentType(PointType::USE_REFLECTANCE);
       break;
     case 2:
-      cm->setCurrentType(PointType<sfloat>::USE_AMPLITUDE);
+      cm->setCurrentType(PointType::USE_AMPLITUDE);
       break;
     case 3:
-      cm->setCurrentType(PointType<sfloat>::USE_DEVIATION);
+      cm->setCurrentType(PointType::USE_DEVIATION);
       break;
     case 4:
-      cm->setCurrentType(PointType<sfloat>::USE_TYPE);
+      cm->setCurrentType(PointType::USE_TYPE);
       break;
     case 5:
-      cm->setCurrentType(PointType<sfloat>::USE_COLOR);
+      cm->setCurrentType(PointType::USE_COLOR);
       break;
     default:
       break;
@@ -1651,13 +1655,13 @@ void resetMinMax(int dummy) {
 void setScansColored(int dummy) {
   switch(colorScanVal) {
     case 0: 
-      cm->setMode(ScanColorManager<double>::MODE_STATIC);
+      cm->setMode(ScanColorManager::MODE_STATIC);
       break;
     case 1: 
-      cm->setMode(ScanColorManager<double>::MODE_COLOR_SCAN);
+      cm->setMode(ScanColorManager::MODE_COLOR_SCAN);
       break;
     case 2:
-      cm->setMode(ScanColorManager<double>::MODE_POINT_COLOR);
+      cm->setMode(ScanColorManager::MODE_POINT_COLOR);
       break;
     default:
       break;

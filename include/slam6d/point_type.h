@@ -19,7 +19,8 @@ using std::endl;
 #ifndef __POINT_TYPE_H__
 #define __POINT_TYPE_H__
 
-template <class T=double> class PointType {
+
+class PointType {
 public:
 
   static const unsigned int USE_NONE;
@@ -31,84 +32,64 @@ public:
   static const unsigned int USE_COLOR;
   static const unsigned int USE_TIME;
 
-  PointType() {
-    types = USE_NONE;
-    pointdim = 3;
-    dimensionmap[1] = dimensionmap[2] = dimensionmap[3] = dimensionmap[4] = dimensionmap[5] = dimensionmap[6] = 1; // choose height per default  
-    dimensionmap[0] = 1;  // height 
-  }
+  PointType();
 
-  PointType(unsigned int _types) : types(_types) {
-    dimensionmap[1] = dimensionmap[2] = dimensionmap[3] = dimensionmap[4] = dimensionmap[5] = dimensionmap[6] = 1; // choose height per default  
-    dimensionmap[0] = 1;  // height 
+  PointType(unsigned int _types);
 
-    pointdim = 3;
-    if (types & PointType::USE_REFLECTANCE) dimensionmap[1] = pointdim++;  
-    if (types & PointType::USE_AMPLITUDE) dimensionmap[2] = pointdim++;  
-    if (types & PointType::USE_DEVIATION) dimensionmap[3] = pointdim++;  
-    if (types & PointType::USE_TYPE) dimensionmap[4] = pointdim++; 
-    if (types & PointType::USE_COLOR) dimensionmap[5] = pointdim++; 
-    if (types & PointType::USE_TIME) dimensionmap[6] = pointdim++; 
-  }
+  bool hasReflectance();
+  bool hasAmplitude();
+  bool hasDeviation();
+  bool hasType();
+  bool hasColor();
+  bool hasTime();
 
-  bool hasReflectance() {
-    return hasType(USE_REFLECTANCE); 
-  }
-  bool hasAmplitude() {
-    return hasType(USE_AMPLITUDE); 
-  }
-  bool hasDeviation() {
-    return hasType(USE_DEVIATION); 
-  }
-  bool hasType() {
-    return hasType(USE_TYPE); 
-  }
-  bool hasColor() {
-    return hasType(USE_COLOR); 
-  }
-  bool hasTime() {
-    return hasType(USE_TIME); 
-  }
+  unsigned int getReflectance();
+  unsigned int getAmplitude();
+  unsigned int getDeviation(); 
+  unsigned int getTime();
+  unsigned int getType(unsigned int type);
+   
 
-  unsigned int getReflectance() {
-    return dimensionmap[1];
-  }
+  unsigned int getPointDim();
+
+  static PointType deserialize(std::ifstream &f);
   
-  unsigned int getAmplitude() {
-    return dimensionmap[2];
-  }
+  void serialize(std::ofstream &f);
+  unsigned int toFlags() const;
   
-  unsigned int getDeviation() {
-    return dimensionmap[3];
-  }
-  
-  unsigned int getTime() {
-    return dimensionmap[6];
-  }
+  template <class T>
+  T *createPoint(const Point &P);
 
-  unsigned int getType(unsigned int type) {
-    if (type == USE_NONE ) {
-      return dimensionmap[0];
-    } else if (type == USE_HEIGHT) {
-      return dimensionmap[0];
-    } else if (type == USE_REFLECTANCE) {
-      return dimensionmap[1];
-    } else if (type == USE_AMPLITUDE) {
-      return dimensionmap[2];
-    } else if (type == USE_DEVIATION) {
-      return dimensionmap[3];
-    } else if (type == USE_TYPE) {
-      return dimensionmap[4];
-    } else if (type == USE_COLOR) {
-      return dimensionmap[5];
-    } else if (type == USE_TIME) {
-      return dimensionmap[6];
-    } else {
-      return 0;
-    }
-  }
-    
-  T *createPoint(const Point &P) {
+  template <class T>
+  Point createPoint(T *p);
+
+private:
+  /**
+   * collection of flags 
+   */
+  unsigned int types;
+  /**
+   * Derived from types: 3 spatial dimensions + 1 for each flag set
+   **/
+  unsigned int pointdim;
+  
+  /** 
+   * Stores the size of each point in bytes
+   **/
+  unsigned int pointbytes;
+
+  /**
+   * Derived from types, to map type to the array index for each point
+   **/
+  int dimensionmap[7];
+
+  bool hasType(unsigned int type);
+
+};
+
+
+  template <class T>
+  T *PointType::createPoint(const Point &P) {
     unsigned int counter = 0;
 
     T *p = new T[pointdim];
@@ -138,7 +119,8 @@ public:
     return p;
   }
 
-  Point createPoint(T *p) {
+  template <class T>
+  Point PointType::createPoint(T *p) {
     Point P;
     unsigned int counter = 0;
 
@@ -167,50 +149,4 @@ public:
 
     return P;
   }
-
-  unsigned int getPointDim() { return pointdim; }
-
-  static PointType<T> deserialize(std::ifstream &f) {
-    unsigned int types;
-    f.read(reinterpret_cast<char*>(&types), sizeof(unsigned int));
-    return PointType<T>(types);
-  }
-  
-  void serialize(std::ofstream &f) {
-    f.write(reinterpret_cast<char*>(&types), sizeof(unsigned int));
-  }
-
-  unsigned int toFlags() const { return types; } 
-
-private:
-  /**
-   * collection of flags 
-   */
-  unsigned int types;
-  /**
-   * Derived from types: 3 spatial dimensions + 1 for each flag set
-   **/
-  unsigned int pointdim;
-
-  /**
-   * Derived from types, to map type to the array index for each point
-   **/
-  int dimensionmap[7];
-
-  bool hasType(unsigned int type) {
-    return types & type;
-  }
-
-};
-
-
-template <class T> const unsigned int PointType<T>::USE_NONE = 0;
-template <class T> const unsigned int PointType<T>::USE_REFLECTANCE = 1;
-template <class T> const unsigned int PointType<T>::USE_AMPLITUDE = 2;
-template <class T> const unsigned int PointType<T>::USE_DEVIATION = 4;
-template <class T> const unsigned int PointType<T>::USE_HEIGHT = 8;
-template <class T> const unsigned int PointType<T>::USE_TYPE = 16;
-template <class T> const unsigned int PointType<T>::USE_COLOR = 32;
-template <class T> const unsigned int PointType<T>::USE_TIME = 64;
-
 #endif
