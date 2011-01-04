@@ -145,10 +145,12 @@ short ScreenDist(T *point) {
 }
 
 void ExtractFrustum(short detail);
+void ExtractFrustum(float *frust[6]);
 
 
 bool CubeInFrustum( float x, float y, float z, float size );
 int  CubeInFrustum2( float x, float y, float z, float size );
+char PlaneAABB( float x, float y, float z, float size, float *plane );
 
 void remViewport();
 bool LOD(float x, float y, float z, float size);
