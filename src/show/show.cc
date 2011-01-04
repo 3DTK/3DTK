@@ -7,6 +7,7 @@
  */
 
 #include "show/show_Boctree.h"
+#include "show/compacttree.h"
 #include "show/show.h"
 #include "show/NurbsPath.h"
 #include "show/vertexarray.h"
@@ -53,7 +54,7 @@ vector< vector<vertexArray*> > vvertexArrayList;
  * the octrees that store the points for each scan
  */
 //Show_BOctTree **octpts;
-vector<Show_BOctTree<sfloat>*> octpts;
+vector<colordisplay*> octpts;
 unsigned long maximum_target_points = 0;
 /**
  * Storing the base directory
@@ -241,11 +242,11 @@ double idealfps = 20.0;
 int listboxColorVal = 0;
 int listboxColorMapVal = 0;
 int colorScanVal = 0;
-ScanColorManager<sfloat> *cm;
+ScanColorManager *cm;
 float mincolor_value = 0.0;
 float maxcolor_value = 0.0;
 //unsigned int  types = Point::USE_HEIGHT;
-PointType<sfloat> pointtype;
+PointType pointtype;
 
 /**
  * Contains the selected points for each scan
@@ -353,9 +354,9 @@ void usage(char* prog)
  * @return 0, if the parsing was successful, 1 otherwise 
  */
 int parseArgs(int argc,char **argv, string &dir, int& start, int& end, int& maxDist, int& minDist, 
-              double &red, bool &readInitial, int &octree, PointType<sfloat> &ptype, double &fps, bool &loadOct, bool &saveOct, reader_type &type)
+              double &red, bool &readInitial, int &octree, PointType &ptype, double &fps, bool &loadOct, bool &saveOct, reader_type &type)
 {
-  unsigned int types = PointType<sfloat>::USE_NONE;
+  unsigned int types = PointType::USE_NONE;
   start   = 0;
   end     = -1; // -1 indicates no limitation
   maxDist = -1; // -1 indicates no limitation
@@ -421,22 +422,22 @@ int parseArgs(int argc,char **argv, string &dir, int& start, int& end, int& maxD
      usage(argv[0]);
      return 1;
    case 'R':
-     types |= PointType<sfloat>::USE_REFLECTANCE;
+     types |= PointType::USE_REFLECTANCE;
      break;
    case 'a':
-     types |= PointType<sfloat>::USE_AMPLITUDE;
+     types |= PointType::USE_AMPLITUDE;
      break;
    case 'd':
-     types |= PointType<sfloat>::USE_DEVIATION;
+     types |= PointType::USE_DEVIATION;
      break;
    case 'h':
-     types |= PointType<sfloat>::USE_HEIGHT;
+     types |= PointType::USE_HEIGHT;
      break;
    case 'T':
-     types |= PointType<sfloat>::USE_TYPE;
+     types |= PointType::USE_TYPE;
      break;
    case 'c':
-     types |= PointType<sfloat>::USE_COLOR;
+     types |= PointType::USE_COLOR;
      break;
    case 'F':
      fps = atof(optarg);
@@ -463,7 +464,7 @@ int parseArgs(int argc,char **argv, string &dir, int& start, int& end, int& maxD
   if (dir[dir.length()-1] != '\\') dir = dir + "\\";
 #endif
 
-  ptype = PointType<sfloat>(types);
+  ptype = PointType(types);
   return 0;
 }
 
@@ -567,7 +568,6 @@ void readFrames(string dir, int start, int end, bool readInitial, reader_type &t
  */
 void createDisplayLists(bool reduced)
 {
-#ifndef USE_GL_POINTS
   for(unsigned int i = 0; i < Scan::allScans.size() ; i++) {
 
     // count points
@@ -591,7 +591,7 @@ void createDisplayLists(bool reduced)
     // fill points
     color1 = 0, color2 = 0;
     if (reduced) {
-      for (unsigned int jterator = 0; jterator < Scan::allScans[i]->get_points_red_size(); jterator++) {
+      for (int jterator = 0; jterator < Scan::allScans[i]->get_points_red_size(); jterator++) {
         myvertexArray2->array[color2] = Scan::allScans[i]->get_points_red()[jterator][0];
         myvertexArray2->array[color2+1] = Scan::allScans[i]->get_points_red()[jterator][1];
         myvertexArray2->array[color2+2] = Scan::allScans[i]->get_points_red()[jterator][2];
@@ -639,28 +639,6 @@ void createDisplayLists(bool reduced)
     vvertexArrayList.push_back(vvertexArray);
   }
 
-#else
-  cout << "Creating display octrees.." << endl;
-
-  for(int i = 0; i < (int)Scan::allScans.size() ; i++) {
-    if (reduced) {
-      octpts.push_back( new Show_BOctTree<sfloat>(Scan::allScans[i]->get_points_red(), Scan::allScans[i]->get_points_red_size(), 50.0, pointtype, cm));  // TODO remove magic number
-    } else {
-        unsigned int nrpts = Scan::allScans[i]->get_points()->size();
-        sfloat **pts = new sfloat*[nrpts];
-        for (unsigned int jterator = 0; jterator < nrpts; jterator++) {
-          pts[jterator] = pointtype.createPoint(Scan::allScans[i]->get_points()->at(jterator));
-        }
-        Scan::allScans[i]->clearPoints();
-        octpts.push_back( new Show_BOctTree<sfloat>(pts, nrpts , 50.0, pointtype, cm) );  //TODO remove magic number
-        for (unsigned int jterator = 0; jterator < nrpts; jterator++) {
-          delete[] pts[jterator];
-        }
-        delete[] pts;
-    }
-    cout << "Scan " << i << " octree finished. Deleting original points.." << endl;
-  }
-#endif
 }
 
 			    
@@ -760,21 +738,21 @@ int main(int argc, char **argv){
   traj << "# corrected pose (x,y,z), original pose (x,y,z)" << endl;
   for(unsigned int i = 0; i<Scan::allScans.size(); i++){
     if(frameNr > -1 && frameNr < (int)MetaMatrix[1].size()) {
-	 if (MetaAlgoType[i][frameNr] == Scan::INVALID) continue;
-	 test = MetaMatrix[i][frameNr];
+      if (MetaAlgoType[i][frameNr] == Scan::INVALID) continue;
+      test = MetaMatrix[i][frameNr];
     } else {
-	 test = MetaMatrix[i].back();
+      test = MetaMatrix[i].back();
     }
     //glVertex3f(test[12], test[13] + 500, test[14]);
     traj << test[12] << " " << test[13] << " " << (fabs(test[14]) < 0.0001 ? test[14]:-1.0*test[14])  << " "
-	    << Scan::allScans[i]->get_rPos()[0] << " "
-	    << Scan::allScans[i]->get_rPos()[1] << " "
-	    << Scan::allScans[i]->get_rPos()[2] 
-	    << endl;
+      << Scan::allScans[i]->get_rPos()[0] << " "
+      << Scan::allScans[i]->get_rPos()[1] << " "
+      << Scan::allScans[i]->get_rPos()[2] 
+      << endl;
   }
   traj.close();
   traj.clear();
-  cm = new ScanColorManager<sfloat>(4096, pointtype);
+  cm = new ScanColorManager(4096, pointtype);
   
   if (loadOct) {
     for (int i = start; i <= end; i++) {
@@ -783,27 +761,66 @@ int main(int argc, char **argv){
       octpts.push_back(new Show_BOctTree<sfloat>(scanFileName, cm));
     }
   } else {
-    if (red > 0) {
-      createDisplayLists(true);
-    } else {
-      createDisplayLists(false);
+//#define USE_COMPACT_TREE 1
+#ifndef USE_GL_POINTS
+    createDisplayLists(red > 0);
+#elif USE_COMPACT_TREE
+    cout << "Creating display octrees.." << endl;
+    for(int i = 0; i < (int)Scan::allScans.size() ; i++) {
+      compactTree *tree;
+      if (red > 0) {
+        tree = new compactTree(Scan::allScans[i]->get_points_red(), Scan::allScans[i]->get_points_red_size(), 50.0, pointtype, cm);  // TODO remove magic number
+      } else {
+        unsigned int nrpts = Scan::allScans[i]->get_points()->size();
+        sfloat **pts = new sfloat*[nrpts];
+        for (unsigned int jterator = 0; jterator < nrpts; jterator++) {
+          pts[jterator] = pointtype.createPoint<sfloat>(Scan::allScans[i]->get_points()->at(jterator));
+        }
+        Scan::allScans[i]->clearPoints();
+        tree = new compactTree(pts, nrpts , 50.0, pointtype, cm);  //TODO remove magic number
+        for (unsigned int jterator = 0; jterator < nrpts; jterator++) {
+          delete[] pts[jterator];
+        }
+        delete[] pts;
+      }
+      octpts.push_back(tree);
+      cout << "Scan " << i << " octree finished. Deleting original points.." << endl;
     }
-
-
-    if (saveOct) {
-      for (unsigned int i = 0; i < Scan::allScans.size(); i++) {
+#else
+    cout << "Creating display octrees.." << endl;
+    for(int i = 0; i < (int)Scan::allScans.size() ; i++) {
+      Show_BOctTree<sfloat> *tree;
+      if (red > 0) {
+        tree = new Show_BOctTree<sfloat>(Scan::allScans[i]->get_points_red(), Scan::allScans[i]->get_points_red_size(), 50.0, pointtype, cm);  // TODO remove magic number
+      } else {
+        unsigned int nrpts = Scan::allScans[i]->get_points()->size();
+        sfloat **pts = new sfloat*[nrpts];
+        for (unsigned int jterator = 0; jterator < nrpts; jterator++) {
+          pts[jterator] = pointtype.createPoint<sfloat>(Scan::allScans[i]->get_points()->at(jterator));
+        }
+        Scan::allScans[i]->clearPoints();
+        tree = new Show_BOctTree<sfloat>(pts, nrpts , 50.0, pointtype, cm);  //TODO remove magic number
+        for (unsigned int jterator = 0; jterator < nrpts; jterator++) {
+          delete[] pts[jterator];
+        }
+        delete[] pts;
+      }
+      octpts.push_back(tree);
+      if (saveOct) {
         string scanFileName = dir + "scan" + to_string(i+start,3) + ".oct";
         cout << "Saving octree " << scanFileName << endl;
-        octpts[i]->serialize(scanFileName);
+        tree->serialize(scanFileName);
       }
+      cout << "Scan " << i << " octree finished. Deleting original points.." << endl;
     }
+#endif
   }
   for (unsigned int i = 0; i < octpts.size(); i++) { 
     unsigned long tp = octpts[i]->maxTargetPoints();
     if (tp > maximum_target_points) maximum_target_points = tp;
   }
 
-  cm->setCurrentType(PointType<sfloat>::USE_HEIGHT);
+  cm->setCurrentType(PointType::USE_HEIGHT);
   ColorMap cmap;
   cm->setColorMap(cmap);
   resetMinMax(0);

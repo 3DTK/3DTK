@@ -204,6 +204,123 @@ void ExtractFrustum(short detail)
 }
 
 
+void ExtractFrustum(float *frust[6])
+{
+   remViewport();
+
+   float   proj[16];
+   float   modl[16];
+   float   clip[16];
+   float   t;
+
+   /* Get the current PROJECTION matrix from OpenGL */
+   glGetFloatv( GL_PROJECTION_MATRIX, proj );
+
+   /* Get the current MODELVIEW matrix from OpenGL */
+   glGetFloatv( GL_MODELVIEW_MATRIX, modl );
+
+   /* Combine the two matrices (multiply projection by modelview) */
+   clip[ 0] = modl[ 0] * proj[ 0] + modl[ 1] * proj[ 4] + modl[ 2] * proj[ 8] + modl[ 3] * proj[12];
+   clip[ 1] = modl[ 0] * proj[ 1] + modl[ 1] * proj[ 5] + modl[ 2] * proj[ 9] + modl[ 3] * proj[13];
+   clip[ 2] = modl[ 0] * proj[ 2] + modl[ 1] * proj[ 6] + modl[ 2] * proj[10] + modl[ 3] * proj[14];
+   clip[ 3] = modl[ 0] * proj[ 3] + modl[ 1] * proj[ 7] + modl[ 2] * proj[11] + modl[ 3] * proj[15];
+
+   clip[ 4] = modl[ 4] * proj[ 0] + modl[ 5] * proj[ 4] + modl[ 6] * proj[ 8] + modl[ 7] * proj[12];
+   clip[ 5] = modl[ 4] * proj[ 1] + modl[ 5] * proj[ 5] + modl[ 6] * proj[ 9] + modl[ 7] * proj[13];
+   clip[ 6] = modl[ 4] * proj[ 2] + modl[ 5] * proj[ 6] + modl[ 6] * proj[10] + modl[ 7] * proj[14];
+   clip[ 7] = modl[ 4] * proj[ 3] + modl[ 5] * proj[ 7] + modl[ 6] * proj[11] + modl[ 7] * proj[15];
+
+   clip[ 8] = modl[ 8] * proj[ 0] + modl[ 9] * proj[ 4] + modl[10] * proj[ 8] + modl[11] * proj[12];
+   clip[ 9] = modl[ 8] * proj[ 1] + modl[ 9] * proj[ 5] + modl[10] * proj[ 9] + modl[11] * proj[13];
+   clip[10] = modl[ 8] * proj[ 2] + modl[ 9] * proj[ 6] + modl[10] * proj[10] + modl[11] * proj[14];
+   clip[11] = modl[ 8] * proj[ 3] + modl[ 9] * proj[ 7] + modl[10] * proj[11] + modl[11] * proj[15];
+
+   clip[12] = modl[12] * proj[ 0] + modl[13] * proj[ 4] + modl[14] * proj[ 8] + modl[15] * proj[12];
+   clip[13] = modl[12] * proj[ 1] + modl[13] * proj[ 5] + modl[14] * proj[ 9] + modl[15] * proj[13];
+   clip[14] = modl[12] * proj[ 2] + modl[13] * proj[ 6] + modl[14] * proj[10] + modl[15] * proj[14];
+   clip[15] = modl[12] * proj[ 3] + modl[13] * proj[ 7] + modl[14] * proj[11] + modl[15] * proj[15];
+
+   /* Extract the numbers for the RIGHT plane */
+   frust[0][0] = clip[ 3] - clip[ 0];
+   frust[0][1] = clip[ 7] - clip[ 4];
+   frust[0][2] = clip[11] - clip[ 8];
+   frust[0][3] = clip[15] - clip[12];
+
+   /* Normalize the result */
+   t = sqrt( frust[0][0] * frust[0][0] + frust[0][1] * frust[0][1] + frust[0][2] * frust[0][2] );
+   frust[0][0] /= t;
+   frust[0][1] /= t;
+   frust[0][2] /= t;
+   frust[0][3] /= t;
+
+   /* Extract the numbers for the LEFT plane */
+   frust[1][0] = clip[ 3] + clip[ 0];
+   frust[1][1] = clip[ 7] + clip[ 4];
+   frust[1][2] = clip[11] + clip[ 8];
+   frust[1][3] = clip[15] + clip[12];
+
+   /* Normalize the result */
+   t = sqrt( frust[1][0] * frust[1][0] + frust[1][1] * frust[1][1] + frust[1][2] * frust[1][2] );
+   frust[1][0] /= t;
+   frust[1][1] /= t;
+   frust[1][2] /= t;
+   frust[1][3] /= t;
+
+   /* Extract the BOTTOM plane */
+   frust[2][0] = clip[ 3] + clip[ 1];
+   frust[2][1] = clip[ 7] + clip[ 5];
+   frust[2][2] = clip[11] + clip[ 9];
+   frust[2][3] = clip[15] + clip[13];
+
+   /* Normalize the result */
+   t = sqrt( frust[2][0] * frust[2][0] + frust[2][1] * frust[2][1] + frust[2][2] * frust[2][2] );
+   frust[2][0] /= t;
+   frust[2][1] /= t;
+   frust[2][2] /= t;
+   frust[2][3] /= t;
+
+   /* Extract the TOP plane */
+   frust[3][0] = clip[ 3] - clip[ 1];
+   frust[3][1] = clip[ 7] - clip[ 5];
+   frust[3][2] = clip[11] - clip[ 9];
+   frust[3][3] = clip[15] - clip[13];
+
+   /* Normalize the result */
+   t = sqrt( frust[3][0] * frust[3][0] + frust[3][1] * frust[3][1] + frust[3][2] * frust[3][2] );
+   frust[3][0] /= t;
+   frust[3][1] /= t;
+   frust[3][2] /= t;
+   frust[3][3] /= t;
+
+   /* Extract the FAR plane */
+   frust[4][0] = clip[ 3] - clip[ 2];
+   frust[4][1] = clip[ 7] - clip[ 6];
+   frust[4][2] = clip[11] - clip[10];
+   frust[4][3] = clip[15] - clip[14];
+
+   /* Normalize the result */
+   t = sqrt( frust[4][0] * frust[4][0] + frust[4][1] * frust[4][1] + frust[4][2] * frust[4][2] );
+   frust[4][0] /= t;
+   frust[4][1] /= t;
+   frust[4][2] /= t;
+   frust[4][3] /= t;
+
+   /* Extract the NEAR plane */
+   frust[5][0] = clip[ 3] + clip[ 2];
+   frust[5][1] = clip[ 7] + clip[ 6];
+   frust[5][2] = clip[11] + clip[10];
+   frust[5][3] = clip[15] + clip[14];
+
+   /* Normalize the result */
+   t = sqrt( frust[5][0] * frust[5][0] + frust[5][1] * frust[5][1] + frust[5][2] * frust[5][2] );
+   frust[5][0] /= t;
+   frust[5][1] /= t;
+   frust[5][2] /= t;
+   frust[5][3] /= t;
+
+}
+
+
 
 void myProject(float x, float y, float z, short &Xi ) {
   float pn[2];
@@ -321,6 +438,272 @@ int CubeInFrustum2( float x, float y, float z, float size )
    }
    return 2;
 
+}
+
+/*
+char PlaneAABB( float x, float y, float z, float size, float *plane )
+{
+   float dist = plane[3];
+
+   float xm, xp, ym, yp, zm, zp;
+   float Fxm, Fxp, Fym, Fyp, Fzm, Fzp;
+
+   float dmmm, dpmm, dmpm, dppm, dmmp, dpmp, dmpp, dppp;
+   xm = x - size;
+   xp = x + size;
+   ym = y - size;
+   yp = y + size;
+   zm = z - size;
+   zp = z + size;
+
+   {
+      Fxm = plane[0] * xm;
+      Fym = plane[1] * ym;
+      Fzm = plane[2] * zm;
+      dmmm = Fxm + Fym + Fzm + dist;
+      if( dmmm > 0 )
+         goto intersects;
+
+      Fxp = plane[0] * xp;
+      dpmm = Fxp + Fym + Fzm + dist;
+      if( dpmm > 0 )
+         goto intersects;
+
+      Fyp = plane[1] * yp;
+      dmpm = Fxm + Fyp + Fzm + dist;
+      if( dmpm > 0 )
+         goto intersects;
+
+      dppm = Fxp + Fyp + Fzm + dist;
+      if( dppm > 0 )
+         goto intersects;
+      
+      Fzp = plane[2] * zp;
+      dmmp = Fxm + Fym + Fzp + dist;
+      if( dmmp > 0 )
+         goto intersects;
+
+      dpmp = Fxp + Fym + Fzp + dist;
+      if( dpmp > 0 )
+         goto intersects;
+      dmpp = Fxm + Fyp + Fzp + dist;
+      if( dmpp > 0 )
+         goto intersects;
+      dppp = Fxp + Fyp + Fzp + dist;
+      if( dppp > 0 )
+         goto intersects;
+      return 0; // outside
+   }
+
+   intersects:
+
+   // cube is inside, determine if plane intersects the cube
+   {
+      if( dmmm < 0 )
+         return 1;
+      Fxp = plane[0] * xp;
+      dpmm = Fxp + Fym + Fzm + dist;
+      if( dpmm < 0 )
+         return 1;
+      Fyp = plane[1] * yp;
+      dmpm = Fxm + Fyp + Fzm + dist;
+      if( dmpm < 0 )
+         return 1;
+      dppm = Fxp + Fyp + Fzm + dist;
+      if( dppm < 0 )
+         return 1;
+      Fzp = plane[2] * zp;
+      dmmp = Fxm + Fym + Fzp + dist;
+      if( dmmp < 0 )
+         return 1;
+      dpmp = Fxp + Fym + Fzp + dist;
+      if( dpmp < 0 )
+         return 1;
+      dmpp = Fxm + Fyp + Fzp + dist;
+      if( dmpp < 0 )
+         return 1;
+      dppp = Fxp + Fyp + Fzp + dist;
+      if( dppp < 0 )
+         return 1;
+   }
+
+   // plane is outside
+   return 2;
+
+}
+*/
+char PlaneAABB( float x, float y, float z, float size, float *plane )
+{
+   float dist = plane[3];
+
+   float xm, xp, ym, yp, zm, zp;
+   float Fxm, Fxp, Fym, Fyp, Fzm, Fzp;
+
+   float dmmm, dpmm, dmpm, dppm, dmmp, dpmp, dmpp, dppp;
+   xm = x - size;
+   xp = x + size;
+   ym = y - size;
+   yp = y + size;
+   zm = z - size;
+   zp = z + size;
+
+   Fxm = plane[0] * xm;
+   Fym = plane[1] * ym;
+   Fzm = plane[2] * zm;
+   dmmm = Fxm + Fym + Fzm + dist;
+   if( dmmm > 0 )
+   {
+     Fxp = plane[0] * xp;
+     dpmm = Fxp + Fym + Fzm + dist;
+     if( dpmm < 0 )
+       return 1;
+     Fyp = plane[1] * yp;
+     dmpm = Fxm + Fyp + Fzm + dist;
+     if( dmpm < 0 )
+       return 1;
+     dppm = Fxp + Fyp + Fzm + dist;
+     if( dppm < 0 )
+       return 1;
+     Fzp = plane[2] * zp;
+     dmmp = Fxm + Fym + Fzp + dist;
+     if( dmmp < 0 )
+       return 1;
+     dpmp = Fxp + Fym + Fzp + dist;
+     if( dpmp < 0 )
+       return 1;
+     dmpp = Fxm + Fyp + Fzp + dist;
+     if( dmpp < 0 )
+       return 1;
+     dppp = Fxp + Fyp + Fzp + dist;
+     if( dppp < 0 )
+       return 1;
+     return 2;
+   }
+
+   Fxp = plane[0] * xp;
+   dpmm = Fxp + Fym + Fzm + dist;
+   if( dpmm > 0 )
+   {
+     if( dmmm < 0 )
+       return 1;
+     Fyp = plane[1] * yp;
+     dmpm = Fxm + Fyp + Fzm + dist;
+     if( dmpm < 0 )
+       return 1;
+     dppm = Fxp + Fyp + Fzm + dist;
+     if( dppm < 0 )
+       return 1;
+     Fzp = plane[2] * zp;
+     dmmp = Fxm + Fym + Fzp + dist;
+     if( dmmp < 0 )
+       return 1;
+     dpmp = Fxp + Fym + Fzp + dist;
+     if( dpmp < 0 )
+       return 1;
+     dmpp = Fxm + Fyp + Fzp + dist;
+     if( dmpp < 0 )
+       return 1;
+     dppp = Fxp + Fyp + Fzp + dist;
+     if( dppp < 0 )
+       return 1;
+     return 2;
+   }
+
+   Fyp = plane[1] * yp;
+   dmpm = Fxm + Fyp + Fzm + dist;
+   if( dmpm > 0 )
+   {
+     if( dmmm < 0 ||  dpmm < 0 )
+       return 1;
+     dppm = Fxp + Fyp + Fzm + dist;
+     if( dppm < 0 )
+       return 1;
+     Fzp = plane[2] * zp;
+     dmmp = Fxm + Fym + Fzp + dist;
+     if( dmmp < 0 )
+       return 1;
+     dpmp = Fxp + Fym + Fzp + dist;
+     if( dpmp < 0 )
+       return 1;
+     dmpp = Fxm + Fyp + Fzp + dist;
+     if( dmpp < 0 )
+       return 1;
+     dppp = Fxp + Fyp + Fzp + dist;
+     if( dppp < 0 )
+       return 1;
+     return 2;
+   }
+
+   dppm = Fxp + Fyp + Fzm + dist;
+   if( dppm > 0 )
+   {
+     if( dmmm < 0 ||  dpmm < 0 || dmpm < 0 )
+       return 1;
+     Fzp = plane[2] * zp;
+     dmmp = Fxm + Fym + Fzp + dist;
+     if( dmmp < 0 )
+       return 1;
+     dpmp = Fxp + Fym + Fzp + dist;
+     if( dpmp < 0 )
+       return 1;
+     dmpp = Fxm + Fyp + Fzp + dist;
+     if( dmpp < 0 )
+       return 1;
+     dppp = Fxp + Fyp + Fzp + dist;
+     if( dppp < 0 )
+       return 1;
+     return 2;
+   }
+
+   Fzp = plane[2] * zp;
+   dmmp = Fxm + Fym + Fzp + dist;
+   if( dmmp > 0 )
+   {
+     if( dmmm < 0 ||  dpmm < 0 || dmpm < 0 || dppm < 0 )
+       return 1;
+     dpmp = Fxp + Fym + Fzp + dist;
+     if( dpmp < 0 )
+       return 1;
+     dmpp = Fxm + Fyp + Fzp + dist;
+     if( dmpp < 0 )
+       return 1;
+     dppp = Fxp + Fyp + Fzp + dist;
+     if( dppp < 0 )
+       return 1;
+     return 2;
+   }
+
+   dpmp = Fxp + Fym + Fzp + dist;
+   if( dpmp > 0 )
+   {
+     if( dmmm < 0 ||  dpmm < 0 || dmpm < 0 || dppm < 0 || dmmp < 0 )
+       return 1;
+     dmpp = Fxm + Fyp + Fzp + dist;
+     if( dmpp < 0 )
+       return 1;
+     dppp = Fxp + Fyp + Fzp + dist;
+     if( dppp < 0 )
+       return 1;
+     return 2;
+   }
+   dmpp = Fxm + Fyp + Fzp + dist;
+   if( dmpp > 0 )
+   {
+     if( dmmm < 0 ||  dpmm < 0 || dmpm < 0 || dppm < 0 || dmmp < 0 || dpmp < 0 )
+       return 1;
+     dppp = Fxp + Fyp + Fzp + dist;
+     if( dppp < 0 )
+       return 1;
+     return 2;
+   }
+   dppp = Fxp + Fyp + Fzp + dist;
+   if( dppp > 0 )
+   {
+     if( dmmm < 0 ||  dpmm < 0 || dmpm < 0 || dppm < 0 || dmmp < 0 || dpmp < 0 || dmpp < 0)
+       return 1;
+     return 2;
+   }
+   return 0; // outside
 }
 
 int QuadInFrustrum2old( float x, float y, float z, float size )

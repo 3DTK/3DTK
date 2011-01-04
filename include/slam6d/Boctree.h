@@ -138,7 +138,7 @@ template <class T> class BOctTree {
 public:
 
   template <class P>
-  BOctTree(P * const* pts, int n, T voxelSize, PointType<T> _pointtype = PointType<T>() ) : pointtype(_pointtype) {
+  BOctTree(P * const* pts, int n, T voxelSize, PointType _pointtype = PointType() ) : pointtype(_pointtype) {
     this->voxelSize = voxelSize;
 
     this->POINTDIM = pointtype.getPointDim();
@@ -181,7 +181,7 @@ public:
   BOctTree(std::string filename) {deserialize(filename); }
 
   template <class P>
-  BOctTree(vector<P *> &pts, T voxelSize, PointType<T> _pointtype = PointType<T>()) {
+  BOctTree(vector<P *> &pts, T voxelSize, PointType _pointtype = PointType()) {
     this->voxelSize = voxelSize;
 
     this->POINTDIM = pointtype.getPointDim();
@@ -253,7 +253,7 @@ public:
     }
 
     // read header
-    pointtype = PointType<T>::deserialize(file);
+    pointtype = PointType::deserialize(file);
 
     file.read(buffer, 5 * sizeof(T));
     voxelSize = p[0];
@@ -294,7 +294,7 @@ public:
     }
 
     // read header
-    PointType<T> pointtype = PointType<T>::deserialize(file);
+    PointType pointtype = PointType::deserialize(file);
 
     file.read(buffer, 5 * sizeof(T)); // read over voxelsize, center and size
     file.read(buffer, sizeof(int));
@@ -352,7 +352,7 @@ public:
     file.close();
   }
 
-  static PointType<T> readType(std::string filename ) {
+  static PointType readType(std::string filename ) {
     char buffer[sizeof(T) * 20];
 
     std::ifstream file;
@@ -363,11 +363,11 @@ public:
     if ( buffer[0] != 'X' || buffer[1] != 'T') {
       std::cerr << "Not an octree file!!" << endl;
       file.close();
-      return PointType<T>();
+      return PointType();
     }
 
     // read header
-    PointType<T> pointtype = PointType<T>::deserialize(file);
+    PointType pointtype = PointType::deserialize(file);
 
     file.close();
 
@@ -409,7 +409,7 @@ protected:
   }
   
   
-  static void deserialize(std::ifstream &f, vector<Point> &vpoints, PointType<T> &pointtype) {
+  static void deserialize(std::ifstream &f, vector<Point> &vpoints, PointType &pointtype) {
     char buffer[2];
     pointrep point[pointtype.getPointDim()];
     f.read(buffer, 2);
@@ -830,7 +830,7 @@ protected:
 
   unsigned int POINTDIM;
 
-  PointType<T> pointtype;
+  PointType pointtype;
 
 };
 

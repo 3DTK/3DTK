@@ -102,7 +102,7 @@ class DiffMap : public ColorMap {
   static const float cmap[7][3];
 };
 
-template <class T=float> class ColorManager {
+class ColorManager {
 
   public: 
   
@@ -134,8 +134,17 @@ template <class T=float> class ColorManager {
       delete[] maxs;
     }
 
-    virtual void setColor(T *val) {
+    virtual void setColor(float *val) {
       int index = toIndex(val);
+      glColor3f( colormap[index][0], colormap[index][1], colormap[index][2] ); 
+    }
+    virtual void setColor(double *val) {
+      int index = toIndex(val);
+      glColor3f( colormap[index][0], colormap[index][1], colormap[index][2] ); 
+    }
+    virtual void setColor(short int *val) {
+      int index = toIndex(val);
+      //cout << "I " << index << " " << val[currentdim] << " " << currentdim << endl; 
       glColor3f( colormap[index][0], colormap[index][1], colormap[index][2] ); 
     }
 
@@ -172,6 +181,7 @@ template <class T=float> class ColorManager {
 
   protected:
 
+    template <class T>
     unsigned int toIndex(T *val) {
       T value = val[currentdim];
       if (value < min) return 0;
@@ -205,26 +215,26 @@ template <class T=float> class ColorManager {
 };
 
 
-template <class T = float> class ColorManagerC : public ColorManager<T> {
+class ColorManagerC : public ColorManager {
   public:
-    ColorManagerC(unsigned int buckets, unsigned int pointdim, float *mins, float *maxs, const float _color[3]) : ColorManager<T>(buckets, pointdim, mins, maxs) {
+    ColorManagerC(unsigned int buckets, unsigned int pointdim, float *mins, float *maxs, const float _color[3]) : ColorManager(buckets, pointdim, mins, maxs) {
       color[0] = _color[0];
       color[1] = _color[1];
       color[2] = _color[2];
     }
 
     virtual void setColorMap(ColorMap &cm) {
-      for (unsigned int i = 0; i < ColorManager<T>::buckets; i++) {
-        cm.calcColor(ColorManager<T>::colormap[i], i, ColorManager<T>::buckets);
+      for (unsigned int i = 0; i < ColorManager::buckets; i++) {
+        cm.calcColor(ColorManager::colormap[i], i, ColorManager::buckets);
         for (unsigned int j = 0; j < 3; j++) {
-          ColorManager<T>::colormap[i][j] -= color[j];
-          if (ColorManager<T>::colormap[i][j] < 0.0) ColorManager<T>::colormap[i][j] = 0.0;
+          ColorManager::colormap[i][j] -= color[j];
+          if (ColorManager::colormap[i][j] < 0.0) ColorManager::colormap[i][j] = 0.0;
         }
       }
-      cm.calcColor(ColorManager<T>::colormap[ColorManager<T>::buckets], ColorManager<T>::buckets-1, ColorManager<T>::buckets);
+      cm.calcColor(ColorManager::colormap[ColorManager::buckets], ColorManager::buckets-1, ColorManager::buckets);
       for (unsigned int j = 0; j < 3; j++) {
-        ColorManager<T>::colormap[ColorManager<T>::buckets][j] -= color[j];
-        if (ColorManager<T>::colormap[ColorManager<T>::buckets][j] < 0.0) ColorManager<T>::colormap[ColorManager<T>::buckets][j] = 0.0;
+        ColorManager::colormap[ColorManager::buckets][j] -= color[j];
+        if (ColorManager::colormap[ColorManager::buckets][j] < 0.0) ColorManager::colormap[ColorManager::buckets][j] = 0.0;
       }
     }
 
@@ -232,17 +242,25 @@ template <class T = float> class ColorManagerC : public ColorManager<T> {
     float color[3];
 };
 
-template <class T = float> class CColorManager : public ColorManager<T> {
+class CColorManager : public ColorManager {
   public:
-    CColorManager(unsigned int buckets, unsigned int pointdim, float *mins, float *maxs, unsigned int _colordim) : ColorManager<T>(buckets, pointdim, mins, maxs) {
+    CColorManager(unsigned int buckets, unsigned int pointdim, float *mins, float *maxs, unsigned int _colordim) : ColorManager(buckets, pointdim, mins, maxs) {
       colordim = _colordim;
     }
 
-    void setColor(T *val) {
-      
+    void setColor(double *val) {  
       GLubyte color[3];
-      memcpy(color, &val[colordim], 3);
-      
+      memcpy(color, &val[colordim], 3);      
+      glColor3ubv(color); 
+    }
+    void setColor(float *val) {  
+      GLubyte color[3];
+      memcpy(color, &val[colordim], 3);      
+      glColor3ubv(color); 
+    }
+    void setColor(short *val) {  
+      GLubyte color[3];
+      memcpy(color, &val[colordim], 3);      
       glColor3ubv(color); 
     }
 

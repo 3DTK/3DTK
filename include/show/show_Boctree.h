@@ -13,8 +13,9 @@
 #include "show/colormanager.h"
 #include "show/scancolormanager.h"
 #include "show/viewcull.h"
+#include "show/colordisplay.h"
 
-template <class T> class ScanColorManager;
+class ScanColorManager;
 
 /**
  * @brief Octree for show
@@ -26,14 +27,14 @@ template <class T> class ScanColorManager;
  *
  * It contains software culling functionalities
  */
-template <class T> class Show_BOctTree : public BOctTree<T>  {
+template <class T> class Show_BOctTree : public BOctTree<T>, public colordisplay  {
 
 public:
 
   template <class P>
-  Show_BOctTree(P * const* pts, int n, T voxelSize, PointType<T> _pointtype = PointType<T>(), ScanColorManager<T> *scm = 0)
+  Show_BOctTree(P * const* pts, int n, T voxelSize, PointType _pointtype = PointType(), ScanColorManager *scm = 0)
     : BOctTree<T>(pts, n, voxelSize, _pointtype) {
-    cm = 0;
+    setColorManager(0);
     if (scm) {
       scm->registerTree(this);
       for (int i = 1; i < n; i++) {
@@ -42,17 +43,15 @@ public:
     }
   }
 
-  Show_BOctTree(std::string filename, ScanColorManager<T> *scm = 0) : BOctTree<T>(filename)
+  Show_BOctTree(std::string filename, ScanColorManager *scm = 0) : BOctTree<T>(filename)
   {
     if (scm) {
       scm->registerTree(this);
       scm->updateRanges(BOctTree<T>::mins);
       scm->updateRanges(BOctTree<T>::maxs);
     }
-    cm = 0;
+    setColorManager(0);
   }
-
-  void setColorManager(ColorManager<T> *_cm) { cm = _cm; }
 
   void displayOctTreeCulled(long targetpts) { 
     displayOctTreeCulledLOD(targetpts, *BOctTree<T>::root, BOctTree<T>::center, BOctTree<T>::size); 
@@ -60,6 +59,15 @@ public:
   
   void displayOctTreeAllCulled() { 
     displayOctTreeAllCulled(*BOctTree<T>::root, BOctTree<T>::center, BOctTree<T>::size); 
+       return; 
+    float *curr_frustum[6];
+    for (int i = 0; i < 6; i++) 
+      curr_frustum[i] = new float[4];
+
+    ExtractFrustum(curr_frustum);
+    displayOctTreeAllCulled(*BOctTree<T>::root, BOctTree<T>::center, BOctTree<T>::size, curr_frustum, 6); 
+    for (int i = 0; i < 6; i++) 
+      delete[] curr_frustum[i];
   }
   
   void displayOctTree(T minsize = FLT_MAX) { 
@@ -104,7 +112,7 @@ protected:
   }
   
   void displayOctTreeAll( bitoct &node) {
-    T ccenter[3];
+//    T ccenter[3];
     bitunion<T> *children;
     bitoct::getChildren(node, children);
 
@@ -440,8 +448,52 @@ glColor3f(0.0f,1.0f,0.0f);      // Set The Color To Green
     glEnd();
 
   }
+  
+  
+  void displayOctTreeAllCulled( bitoct &node, T *center, T size, float *frustum[6], unsigned char frustsize ) {
+    float *new_frustum[6]; unsigned char counter = 0;
+    for (unsigned char p = 0; p < frustsize; p++ ) {
+      char res = PlaneAABB(center[0], center[1], center[2], size, frustum[p]);
+      if (res == 0) { // cube is on the wrong side of the plane (not visible)
+        return;
+      } else if ( res == 1 ) {  // plane intersects this volume continue culling with this plane
+        new_frustum[counter++] = frustum[p];
+      } // other case is simply not to continue culling with the respective plane
+    }
+    if (counter == 0) { // if entirely within frustrum discontinue culling
+      displayOctTreeAll(node);
+      return;
+    }
+    
+    T ccenter[3];
+    bitunion<T> *children;
+    bitoct::getChildren(node, children);
 
-  ColorManager<T> *cm;
+    for (short i = 0; i < 8; i++) {
+      if (  ( 1 << i ) & node.valid ) {   // if ith node exists
+        childcenter(center, ccenter, size, i);  // childrens center
+        if (  ( 1 << i ) & node.leaf ) {   // if ith node is leaf get center
+          // check if leaf is visible
+          //if ( CubeInFrustum(ccenter[0], ccenter[1], ccenter[2], size/2.0) ) {
+            pointrep *points = children->points;
+            unsigned int length = points[0].length;
+            T *point = &(points[1].v);  // first point
+            glBegin(GL_POINTS);
+            for(unsigned int iterator = 0; iterator < length; iterator++ ) {
+              if(cm) cm->setColor(point);
+              glVertex3f( point[0], point[1], point[2]);
+              point+=BOctTree<T>::POINTDIM;
+            }
+            glEnd();
+         // }
+        } else { // recurse
+          displayOctTreeAllCulled( children->node, ccenter, size/2.0, new_frustum, counter);
+        }
+        ++children; // next child
+      }
+    }
+  }
+
 };
 
 #endif
