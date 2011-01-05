@@ -24,7 +24,7 @@ void DrawPoints(GLenum mode)
    if (ptstodisplay > maximum_target_points) ptstodisplay = maximum_target_points;
   else if (ptstodisplay < min) ptstodisplay = min;
 
-  cout << ptstodisplay << " " << lastfps << endl;
+//  cout << ptstodisplay << " " << lastfps << endl;
 
   // In case of animation
   if(scanNr != -1) {
@@ -146,7 +146,7 @@ void DrawPoints(GLenum mode)
 
   if (pointmode == 1 || (showall && pointmode == 0) ) {
     fullydisplayed = true;
-    lastfps =  1000.0/(GetCurrentTimeInMilliSec() - time);
+    //lastfps =  1000.0/(GetCurrentTimeInMilliSec() - time);
   } else {
     lastfps =  1000.0/(GetCurrentTimeInMilliSec() - time);
     fullydisplayed = false;
