@@ -44,6 +44,7 @@ using std::exception;
 
 #include "slam6d/point_type.h"
 
+//#define USE_COMPACT_TREE 1
 /**
  * This vector contains the pointer to a vertex array for
  * all colors (inner vector) and all scans (outer vector)
@@ -758,10 +759,13 @@ int main(int argc, char **argv){
     for (int i = start; i <= end; i++) {
       string scanFileName = dir + "scan" + to_string(i,3) + ".oct";
       cout << "Reading octree " << scanFileName << endl;
+#ifdef USE_COMPACT_TREE
+      octpts.push_back(new compactTree(scanFileName, cm));
+#else
       octpts.push_back(new Show_BOctTree<sfloat>(scanFileName, cm));
+#endif
     }
   } else {
-//#define USE_COMPACT_TREE 1
 #ifndef USE_GL_POINTS
     createDisplayLists(red > 0);
 #elif USE_COMPACT_TREE
@@ -782,6 +786,11 @@ int main(int argc, char **argv){
           delete[] pts[jterator];
         }
         delete[] pts;
+      }
+      if (saveOct) {
+        string scanFileName = dir + "scan" + to_string(i+start,3) + ".oct";
+        cout << "Saving octree " << scanFileName << endl;
+        tree->serialize(scanFileName);
       }
       octpts.push_back(tree);
       cout << "Scan " << i << " octree finished. Deleting original points.." << endl;

@@ -92,10 +92,10 @@ class cbitp{
   public:
 
 #ifdef _MSC_VER
-  unsigned shortpointrep pointer        : 40;
+  unsigned shortpointrep pointer        : 48;
   unsigned int length                   : 24;
 #else
-  signed long pointer                   : 40;
+  signed long pointer                   : 48;
   unsigned int length                   : 24;
 #endif
 };
@@ -157,6 +157,16 @@ public:
 
   template <class P>
   compactTree(vector<P *> &pts, double voxelSize, PointType _pointtype = PointType());
+  
+  compactTree(std::string filename, ScanColorManager *scm = 0) {
+    deserialize(filename); 
+    if (scm) {
+      scm->registerTree(this);
+      scm->updateRanges(mins);
+      scm->updateRanges(maxs);
+    }
+    setColorManager(0);
+  }
 
   virtual ~compactTree();
 
@@ -177,6 +187,7 @@ public:
   unsigned long maxTargetPoints();
 
 
+  void serialize(std::string filename);
 protected:
   
   
@@ -255,6 +266,9 @@ protected:
 
   shortpointrep* createPoints(lint length);
 
+  void deserialize(std::string filename );
+  void deserialize(std::ifstream &f, cbitoct &node);
+  void serialize(std::ofstream &of, cbitoct &node);
 };
   
 template <class P>
