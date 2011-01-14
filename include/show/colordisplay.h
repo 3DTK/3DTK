@@ -11,6 +11,8 @@ class colordisplay {
   virtual unsigned long maxTargetPoints() = 0;
   virtual void selectRay(float * &point) {};
   virtual void selectRay(double * &point) {};
+  virtual void selectRay(vector<float*> &points) {};
+  virtual void selectRay(vector<double*> &points) {};
 
   virtual void displayOctTree(double minsize) {} ;
   virtual void displayOctTree(float minsize) {} ;
