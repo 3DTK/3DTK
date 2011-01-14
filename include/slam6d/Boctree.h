@@ -138,7 +138,7 @@ template <class T> class BOctTree {
 public:
 
   template <class P>
-  BOctTree(P * const* pts, int n, T voxelSize, PointType _pointtype = PointType() ) : pointtype(_pointtype) {
+  BOctTree(P * const* pts, int n, T voxelSize, PointType _pointtype = PointType(), bool _earlystop = false ) : pointtype(_pointtype), earlystop(_earlystop) {
     this->voxelSize = voxelSize;
 
     this->POINTDIM = pointtype.getPointDim();
@@ -163,6 +163,7 @@ public:
     center[1] = 0.5 * (mins[1] + maxs[1]);
     center[2] = 0.5 * (mins[2] + maxs[2]);
     size = max(max(0.5 * (maxs[0] - mins[0]), 0.5 * (maxs[1] - mins[1])), 0.5 * (maxs[2] - mins[2]));
+    size += 1.0; // for numerical reasons we increase size 
 
 
     // calculate new buckets
@@ -181,7 +182,7 @@ public:
   BOctTree(std::string filename) {deserialize(filename); }
 
   template <class P>
-  BOctTree(vector<P *> &pts, T voxelSize, PointType _pointtype = PointType()) {
+  BOctTree(vector<P *> &pts, T voxelSize, PointType _pointtype = PointType(), bool _earlystop = false) : earlystop(_earlystop) {
     this->voxelSize = voxelSize;
 
     this->POINTDIM = pointtype.getPointDim();
@@ -206,6 +207,7 @@ public:
     center[1] = 0.5 * (mins[1] + maxs[1]);
     center[2] = 0.5 * (mins[2] + maxs[2]);
     size = max(max(0.5 * (maxs[0] - mins[0]), 0.5 * (maxs[1] - mins[1])), 0.5 * (maxs[2] - mins[2]));
+    size += 1.0; // for numerical reasons we increase size 
 
     // calculate new buckets
     T newcenter[8][3];
@@ -233,9 +235,17 @@ public:
   void GetOctTreeRandom(vector<T*>&c, unsigned int ptspervoxel) { GetOctTreeRandom(c, ptspervoxel, *root); }
   void AllPoints(vector<T *> &vp) { AllPoints(*BOctTree<T>::root, vp); }
 
-  long countNodes() { return 1 + countNodes(*root); }
-  long countLeaves() { return 1 + countLeaves(*root); }
+  long countNodes() { return 1 + countNodes(*root); } // computes number of inner nodes
+  long countLeaves() { return countLeaves(*root); }   // computes number of leaves + points
+  long countOctLeaves() { return countOctLeaves(*root); } // computes number of leaves
 
+  double calcVoxelSize() {
+    double s = size;
+    while (s > voxelSize) {
+      s = s/2.0;
+    }
+    return s;
+  }
 
   void deserialize(std::string filename ) {
     char buffer[sizeof(T) * 20];
@@ -574,7 +584,7 @@ protected:
     for (short i = 0; i < 8; i++) {
       if (  ( 1 << i ) & node.valid ) {   // if ith node exists
         if (  ( 1 << i ) & node.leaf ) {   // if ith node is leaf
-       //   ++result;
+          //++result;
         } else { // recurse
           result += countNodes(children->node) + 1;
         }
@@ -594,9 +604,26 @@ protected:
         if (  ( 1 << i ) & node.leaf ) {   // if ith node is leaf
           pointrep *points = children->points;
           long nrpts = points[0].length;
-          result += POINTDIM*nrpts + 1;
+          result += POINTDIM*nrpts ;
         } else { // recurse
           result += countLeaves(children->node);
+        }
+        ++children; // next child
+      }
+    }
+    return result;
+  }
+  long countOctLeaves(bitoct &node) {
+    long result = 0;
+    bitunion<T> *children;
+    bitoct::getChildren(node, children);
+
+    for (short i = 0; i < 8; i++) {
+      if (  ( 1 << i ) & node.valid ) {   // if ith node exists
+        if (  ( 1 << i ) & node.leaf ) {   // if ith node is leaf
+          result ++;
+        } else { // recurse
+          result += countTrueLeaves(children->node);
         }
         ++children; // next child
       }
@@ -632,7 +659,7 @@ protected:
   pointrep *branch( bitoct &node, vector<P*> &splitPoints, T _center[3], T _size) {
     // if bucket is too small stop building tree
     // -----------------------------------------
-    if ((_size <= voxelSize)) {
+    if ((_size <= voxelSize) || (earlystop && splitPoints.size() <= 1) ) {
       // copy points
       pointrep *points = new pointrep[POINTDIM*splitPoints.size() + 1];
       points[0].length = splitPoints.size();
@@ -831,6 +858,8 @@ protected:
   unsigned int POINTDIM;
 
   PointType pointtype;
+
+  bool earlystop;
 
 };
 
