@@ -11,6 +11,8 @@ double ptstodisplay = 100000;
 double lastfps = idealfps;    // last frame rate    
 int pointmode = -1;
 
+float fardistance = 40000.0;
+float oldfardistance = 40000.0;
 
 /**
  * Displays all data (i.e., points) that are to be displayed
@@ -20,7 +22,7 @@ void DrawPoints(GLenum mode)
 {
   long time = GetCurrentTimeInMilliSec();
   double min = 10000;
-  ptstodisplay *= 1.0 + 1.2*(lastfps - idealfps)/idealfps;
+  ptstodisplay *= 1.0 + 1.0*(lastfps - idealfps)/idealfps;
    if (ptstodisplay > maximum_target_points) ptstodisplay = maximum_target_points;
   else if (ptstodisplay < min) ptstodisplay = min;
 
@@ -119,6 +121,7 @@ void DrawPoints(GLenum mode)
         ExtractFrustum(pointsize);
         if (pointmode == 1 || (showall && pointmode == 0) ) {
           octpts[iterator]->displayOctTreeAllCulled();
+          //octpts[iterator]->displayOctTree(pointsize * pointsize * 5);
         } else {
           octpts[iterator]->displayOctTreeCulled(ptstodisplay/(int)octpts.size());
           //octpts[iterator]->displayOctTree(pointsize*pointsize*pointsize*10);
@@ -146,9 +149,12 @@ void DrawPoints(GLenum mode)
 
   if (pointmode == 1 || (showall && pointmode == 0) ) {
     fullydisplayed = true;
-    //lastfps =  1000.0/(GetCurrentTimeInMilliSec() - time);
   } else {
-    lastfps =  1000.0/(GetCurrentTimeInMilliSec() - time);
+    unsigned long td = (GetCurrentTimeInMilliSec() - time);
+    if (td > 0)
+      lastfps =  1000.0/td;
+    else
+      lastfps = 1000.0;
     fullydisplayed = false;
   }
   showall = false;         
@@ -403,21 +409,30 @@ void DisplayItFunc(GLenum mode)
       fogColor[0] = fogColor[1] = fogColor[2] = fogColor[3] = 0.0;
     glEnable(GL_FOG);
     {
-	 if (show_fog==1) fogMode = GL_EXP;
-	 else if (show_fog==2) fogMode = GL_EXP2;
-	 else if (show_fog==3) fogMode = GL_LINEAR;
-	 else if (show_fog==4) fogMode = GL_EXP;
-	 else if (show_fog==5) fogMode = GL_EXP2;
-	 else if (show_fog==6) fogMode = GL_LINEAR;
+      // ln(1/2^8) = -5.54517744 -> threshold at which the last color bit is gone due to fog
+      if (show_fog==1) {fogMode = GL_EXP; fardistance = min(5.54517744 / fogDensity, 40000.0);}
+      else if (show_fog==2) {fogMode = GL_EXP2; fardistance = min(sqrt(5.54517744) / fogDensity, 40000.0);}
+      else if (show_fog==3) {fogMode = GL_LINEAR; fardistance = 32000.0;}
+      else if (show_fog==4) {fogMode = GL_EXP; fardistance = min(5.54517744 / fogDensity, 40000.0);}
+      else if (show_fog==5) {fogMode = GL_EXP2; fardistance = min(sqrt(5.54517744) / fogDensity, 40000.0);}
+      else if (show_fog==6) {fogMode = GL_LINEAR; fardistance = 32000.0;}
       glFogi(GL_FOG_MODE, fogMode);
       glFogfv(GL_FOG_COLOR, fogColor);
       glFogf(GL_FOG_DENSITY, fogDensity);
-      glHint(GL_FOG_HINT, GL_NICEST);
+      glHint(GL_FOG_HINT, GL_FASTEST);
       glFogf(GL_FOG_START, 100.0);
       glFogf(GL_FOG_END, 32000.0);
     }
   } else {
     glDisable(GL_FOG);
+    fardistance = 40000.0;
+  }
+  if ( fabs(oldfardistance - fardistance) > 0.00001 ) {
+//    cout << "Far plane set to " << fardistance << endl;
+    oldfardistance = fardistance;
+    int viewport[4];
+    glGetIntegerv(GL_VIEWPORT, viewport);
+    CallBackReshapeFunc(viewport[2],viewport[3]);
   }
  
   // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -628,9 +643,9 @@ void CallBackDisplayFunc()
   if ((cangle_spinner != 0 && (fabs(cangle_spinner->get_float_val() - cangle) > 0.5)) || 
 	 (pzoom_spinner != 0 && (fabs(pzoom_spinner->get_float_val() - pzoom) > 0.5))) {
 
-    int viewport[4];
     cangle = cangle_spinner->get_float_val();
     pzoom  = pzoom_spinner->get_float_val();
+    int viewport[4];
     glGetIntegerv(GL_VIEWPORT, viewport);
     CallBackReshapeFunc(viewport[2],viewport[3]);
 #ifdef _MSC_VER
@@ -995,19 +1010,29 @@ void CallBackMouseFunc(int button, int state, int x, int y)
       glui2->show();
       glTranslated(X, Y, Z);       // move camera	
 
+      sfloat *sp2 = 0;
       for(int iterator = (int)octpts.size()-1; iterator >= 0; iterator--) {
+        if (!selected_points[iterator].empty()) sp2 = selected_points[iterator][0];
+
         selected_points[iterator].clear();
       }
       for(int iterator = (int)octpts.size()-1; iterator >= 0; iterator--) {
         glPushMatrix();
         glMultMatrixd(MetaMatrix[iterator].back());
         calcRay(x, y, 1.0, 40000.0);
-//        octpts[iterator]->selectRay(selected_points);
+        //octpts[iterator]->selectRay(selected_points[iterator]);
+        
         sfloat *sp = 0;
         octpts[iterator]->selectRay(sp);
         if (sp != 0) {
+          cout << "Selected point: " << sp[0] << " " << sp[1] << " " << sp[2] << endl;
+
+          if (sp2 != 0)
+          cout << "Distance to last point: " << sqrt( sqr(sp2[0] - sp[0]) + sqr(sp2[1] - sp[1]) +sqr(sp2[2] - sp[2])  ) << endl; 
+
           selected_points[iterator].push_back(sp);
         }
+        
         glPopMatrix();
       }
       glPopMatrix();
@@ -1386,7 +1411,8 @@ void CallBackReshapeFunc(int width, int height)
 
     // angle, aspect, near clip, far clip
     // get matrix
-    gluPerspective(cangle, aspect, 1.0, 40000.0);
+//    gluPerspective(cangle, aspect, 1.0, 40000.0);
+    gluPerspective(cangle, aspect, 1.0, fardistance); 
 
     // now use modelview-matrix as current matrix
     glMatrixMode(GL_MODELVIEW);
