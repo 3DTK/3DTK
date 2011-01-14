@@ -33,7 +33,7 @@ public:
 
   template <class P>
   Show_BOctTree(P * const* pts, int n, T voxelSize, PointType _pointtype = PointType(), ScanColorManager *scm = 0)
-    : BOctTree<T>(pts, n, voxelSize, _pointtype) {
+    : BOctTree<T>(pts, n, voxelSize, _pointtype, true) {
     setColorManager(0);
     if (scm) {
       scm->registerTree(this);
@@ -54,24 +54,51 @@ public:
   }
 
   void displayOctTreeCulled(long targetpts) { 
+ //   glPointParameterf(GL_POINT_SIZE_MIN, 1.0);
+//    glPointParameterf(GL_POINT_SIZE_MAX, 100.0);
+/*    GLfloat p[3] = {1.0, 1.0, 0.0};
+    glPointParameterfv(GL_POINT_DISTANCE_ATTENUATION, p);
+*/
+
+    glBegin(GL_POINTS);
     displayOctTreeCulledLOD(targetpts, *BOctTree<T>::root, BOctTree<T>::center, BOctTree<T>::size); 
+    glEnd();
   }
   
   void displayOctTreeAllCulled() { 
+    glBegin(GL_POINTS);
     displayOctTreeAllCulled(*BOctTree<T>::root, BOctTree<T>::center, BOctTree<T>::size); 
-       return; 
+    //  displayOctTreeAll(*BOctTree<T>::root);
+    glEnd();
+//    cout << " " << countVisiblePoints(*BOctTree<T>::root, BOctTree<T>::center, BOctTree<T>::size) << " "; 
+
+    /*
+    
     float *curr_frustum[6];
     for (int i = 0; i < 6; i++) 
       curr_frustum[i] = new float[4];
 
     ExtractFrustum(curr_frustum);
+    glBegin(GL_POINTS);
     displayOctTreeAllCulled(*BOctTree<T>::root, BOctTree<T>::center, BOctTree<T>::size, curr_frustum, 6); 
+    glEnd();
     for (int i = 0; i < 6; i++) 
       delete[] curr_frustum[i];
+    */
   }
   
-  void displayOctTree(T minsize = FLT_MAX) { 
+  void displayOctTree(T minsize = FLT_MAX) {
     displayOctTreeCAllCulled(*BOctTree<T>::root, BOctTree<T>::center, BOctTree<T>::size, minsize); 
+    /*double s = BOctTree<T>::size;
+    while (s > minsize) {
+      s = s/2.0;
+    }
+    s = sqrt(s*s);
+    glPointSize(s);
+    glBegin(GL_POINTS);
+    displayOctTreeCAllCulled(*BOctTree<T>::root, BOctTree<T>::center, BOctTree<T>::size, minsize); 
+    glEnd();
+    */
   }
 
   void selectRay(vector<T *> &points) { 
@@ -122,13 +149,11 @@ protected:
           pointrep *points = children->points;
           unsigned int length = points[0].length;
           T *point = &(points[1].v);  // first point
-          glBegin(GL_POINTS);
           for(unsigned int iterator = 0; iterator < length; iterator++ ) {
             if(cm) cm->setColor(point);
             glVertex3f( point[0], point[1], point[2]);
             point+=BOctTree<T>::POINTDIM;
           }
-          glEnd();
         } else { // recurse
           displayOctTreeAll( children->node);
         }
@@ -155,18 +180,16 @@ protected:
         childcenter(center, ccenter, size, i);  // childrens center
         if (  ( 1 << i ) & node.leaf ) {   // if ith node is leaf get center
           // check if leaf is visible
-          if ( CubeInFrustum(ccenter[0], ccenter[1], ccenter[2], size/2.0) ) {
+       //   if ( CubeInFrustum(ccenter[0], ccenter[1], ccenter[2], size/2.0) ) {
             pointrep *points = children->points;
             unsigned int length = points[0].length;
             T *point = &(points[1].v);  // first point
-            glBegin(GL_POINTS);
             for(unsigned int iterator = 0; iterator < length; iterator++ ) {
               if(cm) cm->setColor(point);
               glVertex3f( point[0], point[1], point[2]);
               point+=BOctTree<T>::POINTDIM;
             }
-            glEnd();
-          }
+          //}
         } else { // recurse
           displayOctTreeAllCulled( children->node, ccenter, size/2.0);
         }
@@ -206,7 +229,6 @@ protected:
             pointrep *points = children->points;
             unsigned int length = points[0].length;
             T *point = &(points[1].v);  // first point
-            glBegin(GL_POINTS);
 
             if (length > 10 && !LOD(ccenter[0], ccenter[1], ccenter[2], size/2.0) ) {  // only a single pixel on screen only paint one point
               if(cm) cm->setColor(point);
@@ -230,7 +252,6 @@ protected:
                 //point += each;
               }
             }
-            glEnd();
           }
 
         } else { // recurse
@@ -263,7 +284,6 @@ protected:
           pointrep *points = children->points;
           unsigned int length = points[0].length;
           T *point = &(points[1].v);  // first point
-          glBegin(GL_POINTS);
           if (length > 10 && !LOD(ccenter[0], ccenter[1], ccenter[2], size/2.0) ) {  // only a single pixel on screen only paint one point
             if(cm) cm->setColor(point);
             glVertex3f( point[0], point[1], point[2]);
@@ -286,7 +306,6 @@ protected:
               //point += each;
             }
           }
-          glEnd();
         } else { // recurse
           displayOctTreeLOD(newtargetpts, children->node, ccenter, size/2.0);
         }
@@ -406,27 +425,27 @@ protected:
   }
 
   void showCube(T *center, T size) {
-  glLineWidth(1.0);
+    glLineWidth(1.0);
     glBegin(GL_QUADS);      // draw a cube with 6 quads
-glColor3f(0.0f,1.0f,0.0f);      // Set The Color To Green
+    glColor3f(0.0f,1.0f,0.0f);      // Set The Color To Green
     glVertex3f(center[0] + size, center[1] + size, center[2] - size);
     glVertex3f(center[0] - size, center[1] + size, center[2] - size);
     glVertex3f(center[0] - size, center[1] + size, center[2] + size);
     glVertex3f(center[0] + size, center[1] + size, center[2] + size);
-  glColor3f(1.0f,0.5f,0.0f);      // Set The Color To Orange
+    glColor3f(1.0f,0.5f,0.0f);      // Set The Color To Orange
 
     glVertex3f(center[0] + size, center[1] - size, center[2] + size); 
     glVertex3f(center[0] - size, center[1] - size, center[2] + size);
     glVertex3f(center[0] - size, center[1] - size, center[2] - size);
     glVertex3f(center[0] + size, center[1] - size, center[2] - size);
 
-      glColor3f(1.0f,0.0f,0.0f);      // Set The Color To Red
+    glColor3f(1.0f,0.0f,0.0f);      // Set The Color To Red
     glVertex3f(center[0] + size, center[1] + size, center[2] + size); 
     glVertex3f(center[0] - size, center[1] + size, center[2] + size);
     glVertex3f(center[0] - size, center[1] - size, center[2] + size);
     glVertex3f(center[0] + size, center[1] - size, center[2] + size);
 
-      glColor3f(1.0f,1.0f,0.0f);      // Set The Color To Yellow
+    glColor3f(1.0f,1.0f,0.0f);      // Set The Color To Yellow
     glVertex3f(center[0] + size, center[1] - size, center[2] - size); 
     glVertex3f(center[0] - size, center[1] - size, center[2] - size);
     glVertex3f(center[0] - size, center[1] + size, center[2] - size);
@@ -444,9 +463,7 @@ glColor3f(0.0f,1.0f,0.0f);      // Set The Color To Green
     glVertex3f(center[0] + size, center[1] - size, center[2] + size);
     glVertex3f(center[0] + size, center[1] - size, center[2] - size);
 
-
     glEnd();
-
   }
   
   
@@ -473,19 +490,14 @@ glColor3f(0.0f,1.0f,0.0f);      // Set The Color To Green
       if (  ( 1 << i ) & node.valid ) {   // if ith node exists
         childcenter(center, ccenter, size, i);  // childrens center
         if (  ( 1 << i ) & node.leaf ) {   // if ith node is leaf get center
-          // check if leaf is visible
-          //if ( CubeInFrustum(ccenter[0], ccenter[1], ccenter[2], size/2.0) ) {
-            pointrep *points = children->points;
-            unsigned int length = points[0].length;
-            T *point = &(points[1].v);  // first point
-            glBegin(GL_POINTS);
-            for(unsigned int iterator = 0; iterator < length; iterator++ ) {
-              if(cm) cm->setColor(point);
-              glVertex3f( point[0], point[1], point[2]);
-              point+=BOctTree<T>::POINTDIM;
-            }
-            glEnd();
-         // }
+          pointrep *points = children->points;
+          unsigned int length = points[0].length;
+          T *point = &(points[1].v);  // first point
+          for(unsigned int iterator = 0; iterator < length; iterator++ ) {
+            if(cm) cm->setColor(point);
+            glVertex3f( point[0], point[1], point[2]);
+            point+=BOctTree<T>::POINTDIM;
+          }
         } else { // recurse
           displayOctTreeAllCulled( children->node, ccenter, size/2.0, new_frustum, counter);
         }
@@ -493,6 +505,35 @@ glColor3f(0.0f,1.0f,0.0f);      // Set The Color To Green
       }
     }
   }
+
+  unsigned long int countVisiblePoints( bitoct &node, T *center, T size ) {
+    unsigned long int result = 0;
+    int res = CubeInFrustum2(center[0], center[1], center[2], size);
+    if (res==0) return 0;  // culled do not continue with this branch of the tree
+
+    T ccenter[3];
+    bitunion<T> *children;
+    bitoct::getChildren(node, children);
+
+    for (short i = 0; i < 8; i++) {
+      if (  ( 1 << i ) & node.valid ) {   // if ith node exists
+        childcenter(center, ccenter, size, i);  // childrens center
+        if (  ( 1 << i ) & node.leaf ) {   // if ith node is leaf get center
+          // check if leaf is visible
+          if ( CubeInFrustum(ccenter[0], ccenter[1], ccenter[2], size/2.0) ) {
+            pointrep *points = children->points;
+            unsigned int length = points[0].length;
+            result += length;
+          }
+        } else { // recurse
+          result += countVisiblePoints( children->node, ccenter, size/2.0);
+        }   
+        ++children; // next child
+      }
+    }         
+    return result;
+  }           
+
 
 };
 
