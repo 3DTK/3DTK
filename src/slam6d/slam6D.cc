@@ -118,9 +118,9 @@ void usage(char* prog)
 
     << bold << "  -a" << normal << " NR, " << bold << "--algo=" << normal << "NR   [default: 1]" << endl
     << "         selects the minimizazion method for the ICP matching algorithm" << endl
-    << "           1 = unit quaterion based method by Horn" << endl
+    << "           1 = unit quaternion based method by Horn" << endl
     << "           2 = singular value decomposition by Arun et al. " << endl
-    << "           3 = orhtonormal matrices by Horn et al." << endl
+    << "           3 = orthonormal matrices by Horn et al." << endl
     << "           4 = dual quaternion method by Walker et al." << endl
     << "           5 = helix approximation by Hofer & Potmann" << endl
     << "           6 = small angle approximation" << endl
@@ -173,8 +173,8 @@ void usage(char* prog)
     << bold << "  -G" << normal << " NR, " << bold << "--graphSlam6DAlgo=" << normal << "NR   [default: 0]" << endl
     << "         selects the minimizazion method for the SLAM matching algorithm" << endl
     << "           0 = no global relaxation technique" << endl
-    << "           1 = Lu & Milios extention using euler angles due to Borrmann et al." << endl
-    << "           2 = Lu & Milios extention using using unit quaternions" << endl
+    << "           1 = Lu & Milios extension using euler angles due to Borrmann et al." << endl
+    << "           2 = Lu & Milios extension using using unit quaternions" << endl
     << "           3 = HELIX approximation by Hofer and Pottmann" << endl
     << "           4 = small angle approximation" << endl
     << "           5 = TORO" << endl
