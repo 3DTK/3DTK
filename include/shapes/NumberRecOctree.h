@@ -12,7 +12,7 @@ class NumberRecOctTree : public RansacOctTree<T> {
 
   public: 
 //  NumberRecOctTree(vector<T *> &pts, T voxelSize, PointType<T> _pointtype = PointType<T>() ) : RansacOctTree<T>(pts, voxelSize, _pointtype) {}
-  NumberRecOctTree(vector<const T *> &pts, T voxelSize, PointType<T> _pointtype = PointType<T>() ) : RansacOctTree<T>(pts, voxelSize, _pointtype) {}
+  NumberRecOctTree(vector<const T *> &pts, T voxelSize, PointType _pointtype = PointType() ) : RansacOctTree<T>(pts, voxelSize, _pointtype) {}
 
   long PointsOnNumber(double plane[4], double maxdist, double _center[3], double radius) { 
     setNumber(plane, _center, radius, maxdist);
