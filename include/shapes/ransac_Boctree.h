@@ -40,9 +40,9 @@ class RansacOctTree : public BOctTree<T> {
 
 public:
   
-  RansacOctTree(T* const* pts, int n, T _voxelSize, PointType<T> _pointtype = PointType<T>() ) : BOctTree<T>(pts, n, _voxelSize, _pointtype) {}
+  RansacOctTree(T* const* pts, int n, T _voxelSize, PointType _pointtype = PointType() ) : BOctTree<T>(pts, n, _voxelSize, _pointtype) {}
 
-  RansacOctTree(vector<const T *> &pts, T voxelSize, PointType<T> _pointtype = PointType<T>() ) : BOctTree<T>(pts, voxelSize, _pointtype) {}
+  RansacOctTree(vector<const T *> &pts, T voxelSize, PointType _pointtype = PointType() ) : BOctTree<T>(pts, voxelSize, _pointtype) {}
   //RansacOctTree(vector<T *> &pts, T voxelSize, PointType<T> _pointtype = PointType<T>() ) : BOctTree<T>(pts, voxelSize, _pointtype) {}
 
   RansacOctTree(std::string filename) : BOctTree<T> (filename) {}
