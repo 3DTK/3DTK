@@ -1,5 +1,5 @@
 /*
- * detector.cc
+ * david_scanner.cc
  * Program takes as an input path to the config file which needs to have all the necessary information for the program.
  * Config file has to have (each on a new line, 9 lines in total):
  *
@@ -36,7 +36,7 @@ using namespace std;
 int main(int argc, char** argv){
 
 	if (argc!=2){
-		cout<<"USAGE: detector config_file\nConfig file should contain path_to_frames first_valid_frame last_valid_frame empty_frame path_to_intrinsics"
+		cout<<"USAGE: david_scanner config_file\nConfig file should contain path_to_frames first_valid_frame last_valid_frame empty_frame path_to_intrinsics"
 				"path_to_rotation_left path_to_rotation_right path_to_translation_left and path_to_translation_right each on a new line!"<<endl;
 		return -1;
 	}
