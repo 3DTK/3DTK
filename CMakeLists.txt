@@ -60,7 +60,7 @@ ELSE(WITH_GRIDDER)
 ENDIF(WITH_GRIDDER)
 
 ## Home-made Laserscanner 
-OPTION(WITH_DETECTOR "Whether to build the Detector app for homemade laser scanners binary ON/OFF" ON)
+OPTION(WITH_DETECTOR "Whether to build the Detector app for homemade laser scanners binary ON/OFF" OFF)
 
 IF(WITH_DETECTOR)
   MESSAGE(STATUS "With Detector")
