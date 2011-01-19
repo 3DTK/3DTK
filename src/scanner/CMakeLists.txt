@@ -1,8 +1,8 @@
-IF (WITH_DETECTOR)
+IF (WITH_DAVID_3D_SCANNER)
 
   FIND_PACKAGE(OpenCV REQUIRED )
-  add_executable(detector detector.cc )
-  target_link_libraries(detector cv highgui)
+  add_executable(david_scanner david_scanner.cc )
+  target_link_libraries(david_scanner cv highgui)
 
 
-ENDIF(WITH_DETECTOR)
+ENDIF(WITH_DAVID_3D_SCANNER)
