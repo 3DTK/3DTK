@@ -92,7 +92,7 @@ void usage(char* prog) {
 
 }
 
-void matchPlaneToBoard(vector<double *> &points) {
+vector<double *> * matchPlaneToBoard(vector<double *> &points, double *alignxf) {
   double rPos[3] = {0.0,0.0,0.0};
   double rPosTheta[3] = {0.0,0.0,0.0};
 
@@ -107,12 +107,14 @@ void matchPlaneToBoard(vector<double *> &points) {
       p[0] = i;
       p[1] = j;
       p[2] = 0.0;
+  //    cout << p[0] << " " << p[1] << " " << p[2] << endl;
       boardpoints.push_back(p);
     }
   }
 
   Scan * plane = new Scan(rPos, rPosTheta, points);
   Scan * board = new Scan(rPos, rPosTheta, boardpoints);
+  board->transform(alignxf, Scan::INVALID, 0);
 
   bool quiet = true;
   icp6Dminimizer *my_icp6Dminimizer = 0;
@@ -120,7 +122,7 @@ void matchPlaneToBoard(vector<double *> &points) {
 
   icp6D *my_icp = 0;
   double mdm = 550;
-  int mni = 500;
+  int mni = 1000;
   my_icp = new icp6D(my_icp6Dminimizer, mdm, mni, quiet, false, -1, false, 1, 0.00, false, false);
 
   plane->createTree(false,false);
@@ -145,7 +147,21 @@ void matchPlaneToBoard(vector<double *> &points) {
     cout << deg(postheta[i]) << " ";
   }
   cout << endl;
-
+  vector<double *> * result = new vector<double *>();
+  cout << "Calipoints Start" << endl;
+  for(double x = -20; x < 25; x+=10.0) {
+    for(double y = -25; y < 30; y+=10.0) {
+      double * p = new double[3];
+      p[0] = x;
+      p[1] = y;
+      p[2] = 0.0;
+      transform3(transMat, p);
+      result->push_back(p);
+      cout << p[0] << " " << p[1] << " " << p[2] << endl;
+    }
+  }
+  cout << "Calipoints End" << endl;
+  return result;
 }
 
 int parseArgs(int argc, char **argv, string &dir, double &red, int &start, int
@@ -261,6 +277,7 @@ int main(int argc, char **argv)
   reader_type type    = UOS;
   plane_alg alg    = RHT;
   
+  cout << "Parse args" << endl;
   parseArgs(argc, argv, dir, red, start, maxDist, minDist, octree, type, alg, quiet);
   Scan::dir = dir;
   int fileNr = start;
@@ -290,13 +307,13 @@ int main(int argc, char **argv)
   for(int i = 0; i < 10; i++) {
     Scan::allScans[0]->transform(id, Scan::ICP, 0);  // write end pose
   }
-
+  cout << "start plane detection" << endl;
   long starttime = GetCurrentTimeInMilliSec(); 
   if(alg >= RANSAC) {
     vector<double *> points;
     CollisionPlane<double> * plane;
     if(alg == CALI) {
-      plane = new LightBulbPlane<double>(1.0,60);
+      plane = new LightBulbPlane<double>(5.0,120);
     } else {
       plane = new CollisionPlane<double>(1.0); // 1.0 cm maxdist
     }
@@ -314,7 +331,15 @@ int main(int argc, char **argv)
       cerr << points[i][0] << " " << points[i][1] << " " << points[i][2] << endl;
     }
     if(alg == CALI) {
-      matchPlaneToBoard(points);
+      double rPos[3];
+      double rPosTheta[3];
+      for(int i = 0; i < 3; i++) {
+        rPosTheta[i] = 0.0;
+      }
+      ((LightBulbPlane<double> *)plane)->getCenter(rPos[0], rPos[1], rPos[2]);
+      double alignxf[16];
+      EulerToMatrix4(rPos, rPosTheta, alignxf);
+      matchPlaneToBoard(points, alignxf);
     } else {
       for(int i = points.size() - 1; i > -1; i++) {
         delete[] points[i];

@@ -5,7 +5,6 @@
 using std::string;
 using std::ofstream;
 
-
 ConvexPlane::ConvexPlane(double _n[3], double _rho, char _direction, wykobi::polygon<double,2> _convex_hull) {
 
   for(int i = 0; i < 3; i++) {
@@ -16,6 +15,38 @@ ConvexPlane::ConvexPlane(double _n[3], double _rho, char _direction, wykobi::pol
   convex_hull = _convex_hull;
   direction = _direction;
   rho = _rho;
+}
+
+ConvexPlane::ConvexPlane(double plane[4]) {
+  for(int i = 0; i < 3; i++) {
+    n[i] = plane[i];
+    rho = n[3];
+    if(fabs(n[0]) < fabs(n[1])) {
+      if(fabs(n[1]) < fabs(n[2])) {
+        direction = 'z';
+      } else {
+        direction = 'y';
+      } 
+    } else if (fabs(n[2]) < fabs(n[0])){
+      direction = 'x';
+    } else {
+      direction = 'z';
+    }
+
+  }
+}
+ConvexPlane::ConvexPlane(vector<ConvexPlane*> &partialplanes) {
+  int size = partialplanes.size();
+  for(int i = 0; i < size; i++) {
+    for(int j = 0; j < 3; j++) {
+      n[j] += partialplanes[i]->n[j];
+      rho += partialplanes[i]->rho;
+    }
+  }
+  for(int j = 0; j < 3; j++) {
+    n[j] /= size;
+  }
+  rho /= size;
 }
 
 ConvexPlane::ConvexPlane(double plane[4], vector<Point> &points ) {
@@ -93,6 +124,14 @@ void ConvexPlane::writePlane(string path, int counter) {
   }
   out.close();
 
+}
+
+void ConvexPlane::project(const double *p, double *p1) {
+  double dist = n[0] * p[0] + n[1] * p[1] + n[2] * p[2] - rho;
+  
+  p1[0] = p[0] - n[0] * dist;
+  p1[1] = p[1] - n[1] * dist;
+  p1[2] = p[2] - n[2] * dist;
 }
 
 bool ConvexPlane::isWall() {
