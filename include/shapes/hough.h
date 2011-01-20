@@ -37,7 +37,8 @@ public:
   Scan *PlaneScan2;
   int planeCounter;
   int scanCounter;
-  vector<ConvexPlane> planes;
+  // TODO delete planes in Constructor
+  vector<ConvexPlane*> planes;
 
   Hough(Scan * GlobalScan, bool quiet = true );
   ~Hough();
@@ -47,9 +48,12 @@ public:
   void PPHT();
   void APHT();
 
+  //vector<ConvexPlane>& getPlanes();
   bool distanceOK(Point p1, Point p2, Point p3);
   bool calculatePlane(Point p1, Point p2, Point p3, double &theta, double &phi, double &rho); 
 
+  double * const* deletePoints(vector<ConvexPlane*> &model, int &size); 
+  double * const* getPoints(int &size);
   int deletePoints(double * n, double rho);
   int deletePointsQuad(double * n, double rho);
 

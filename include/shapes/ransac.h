@@ -16,6 +16,7 @@ void Ransac(CollisionShape<T> &shape, Scan *scan, vector<T*> *best_points = 0) {
   // create octree from the points
   RansacOctTree<T> *oct = new RansacOctTree<T>(scan->get_points_red(), scan->get_points_red_size(), 50.0 );
   
+  cout << "start 5000 iterations" << endl;
   for(int i = 0; i < 5000; i++) {
     ps.clear();
     // randomly select points from the octree
@@ -32,9 +33,15 @@ void Ransac(CollisionShape<T> &shape, Scan *scan, vector<T*> *best_points = 0) {
       }
     }
   }
+  cout << "5000 iterations done" << endl;
   if (best_points) {
     best_points->clear();
     oct->PointsOnShape(*best, *best_points);
+    cout << "Nr points before refinement " << best_points->size() << endl;
+    best->refine(best_points);
+    best_points->clear();
+    oct->PointsOnShape(*best, *best_points);
+    cout << "Nr points after refinement " << best_points->size() << endl;
   }
   shape = *best;
   delete best;
