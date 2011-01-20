@@ -50,7 +50,7 @@ void DisplayItFunc(GLenum mode);
 void DrawPoints(GLenum mode);
 void glDumpWindowPPM(const char *filename, GLenum mode);
 void glWriteImagePPM(const char *filename, int scale, GLenum mode);
-void ProcessHitsFunc(GLint hits, GLuint buffer[],int button);
+void ProcessHitsFunc(GLint hits, GLuint buffer[]);
 int parseArgs(int argc, char **argv, string &dir, int& start, int& end, int& maxDist, bool& wanim, bool &readInitial);
 void usage(char * prog);
 void myNewMenu();
@@ -96,6 +96,9 @@ void changeColorMap(int dummy);
 void minmaxChanged(int dummy);
 void resetMinMax(int dummy);
 void setScansColored(int dummy);
+
+void saveSelection(int dummy);
+void clearSelection(int dummy);
 
 enum { ROTATION_X, ROTATION_RX, ROTATION_Y, ROTATION_RY, ROTATION_Z, ROTATION_RZ };
   /** enumeration for translation */

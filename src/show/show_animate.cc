@@ -332,3 +332,39 @@ void saveImage(int dummy) {
   glWriteImagePPM(imageFileName.c_str(),factor,0);
   imageNr++; 
 }
+
+/**
+ * Saves the currently selected points
+ *
+ */
+void saveSelection(int dummy) {
+  //output file stream
+  ofstream selectionfile;
+
+  //open the output file
+  selectionfile.open(selection_file_name, ios::out);
+   
+  //if file not found then show error
+  if(!selectionfile){
+    cerr << "Error creating the seelction file." << endl;
+    return;
+  }
+
+  for(unsigned int i = 0; i < octpts.size(); i++) {
+    selectionfile << "# points from scan nr " << i << endl; 
+    //for(int j = 0; j < selected_points[i].size(); j++) {
+    for ( set<sfloat*>::iterator it = selected_points[i].begin();
+        it != selected_points[i].end(); it++) {
+      for (unsigned int k = 0; k < pointtype.getPointDim(); k++) {
+//        selectionfile << selected_points[i][j][k] << " ";
+        selectionfile << (*it)[k] << " ";
+      }
+      selectionfile << endl;
+    }
+  }
+
+  //close the file after writing
+  selectionfile.clear();
+  selectionfile.close();
+}
+

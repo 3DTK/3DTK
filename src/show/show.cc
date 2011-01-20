@@ -6,9 +6,9 @@
  * @author Kai Lingemann. Institute of Computer Science, University of Osnabrueck, Germany.
  */
 
+#include "show/show.h"
 #include "show/show_Boctree.h"
 #include "show/compacttree.h"
-#include "show/show.h"
 #include "show/NurbsPath.h"
 #include "show/vertexarray.h"
 #include "slam6d/scan.h"
@@ -252,7 +252,19 @@ PointType pointtype;
 /**
  * Contains the selected points for each scan
  */
-vector<sfloat *> *selected_points;
+set<sfloat *> *selected_points;
+/**
+ * Select single points?  
+ */
+int select_voxels         = 1;
+/**
+ * Select or unselect points ? 
+ */
+int selectOrunselect         = 1;
+/** octree depth for selecting groups of points */
+int selection_depth = 1;
+int brush_size = 0;
+char *selection_file_name;
 
 #include "show_menu.cc"
 #include "show_animate.cc"
@@ -670,9 +682,11 @@ int main(int argc, char **argv){
 
   pose_file_name = new char[sizeof(GLUI_String)];
   path_file_name = new char[sizeof(GLUI_String)];
+  selection_file_name = new char[sizeof(GLUI_String)];
    
   strncpy(pose_file_name, "pose.dat", sizeof(GLUI_String));  
   strncpy(path_file_name, "file.path", sizeof(GLUI_String));  
+  strncpy(selection_file_name, "selected.3d", sizeof(GLUI_String));  
   
   parseArgs(argc, argv, dir, start, end, maxDist, minDist, red, readInitial, octree, pointtype, idealfps, loadOct, saveOct, type);
 
@@ -834,7 +848,7 @@ int main(int argc, char **argv){
   cm->setColorMap(cmap);
   resetMinMax(0);
 
-  selected_points = new vector<sfloat*>[octpts.size()];
+  selected_points = new set<sfloat*>[octpts.size()];
 
   glutMainLoop();
 
