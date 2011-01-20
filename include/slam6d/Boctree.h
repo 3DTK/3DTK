@@ -206,12 +206,9 @@ public:
     center[1] = 0.5 * (mins[1] + maxs[1]);
     center[2] = 0.5 * (mins[2] + maxs[2]);
     size = max(max(0.5 * (maxs[0] - mins[0]), 0.5 * (maxs[1] - mins[1])), 0.5 * (maxs[2] - mins[2]));
-<<<<<<< .mine
-    size += 1.0;
-=======
+    
     size += 1.0; // for numerical reasons we increase size 
 
->>>>>>> .r350
     // calculate new buckets
     T newcenter[8][3];
     T sizeNew = size / 2.0;
