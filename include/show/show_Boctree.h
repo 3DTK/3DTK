@@ -101,8 +101,11 @@ public:
     */
   }
 
-  void selectRay(vector<T *> &points) { 
-    selectRay(points, *BOctTree<T>::root, BOctTree<T>::center, BOctTree<T>::size); 
+  void selectRayBrushSize(set<T *> &points, int brushsize) { 
+    selectRayBS(points, *BOctTree<T>::root, BOctTree<T>::center, BOctTree<T>::size, brushsize); 
+  }
+  void selectRay(set<T *> &points, int depth = INT_MAX) { 
+    selectRay(points, *BOctTree<T>::root, BOctTree<T>::center, BOctTree<T>::size, depth); 
   }
   void selectRay(T * &point) { 
     selectRay(point, *BOctTree<T>::root, BOctTree<T>::center, BOctTree<T>::size, FLT_MAX); 
@@ -313,10 +316,36 @@ protected:
       }
     }
   }
+  void selectRay(set<T *> &selpoints, bitoct &node, T *center, T size, int max_depth, int depth = 0) {
+    if (depth < max_depth &&  !HitBoundingBox(center, size ))return;
 
-  void selectRay(vector<T *> &selpoints, bitoct &node, T *center, T size) {
-    if (!HitBoundingBox(center, size ))return;
+    T ccenter[3];
+    bitunion<T> *children;
+    bitoct::getChildren(node, children);
 
+    for (short i = 0; i < 8; i++) {
+      if (  ( 1 << i ) & node.valid ) {   // if ith node exists
+        childcenter(center, ccenter, size, i);  // childrens center
+        if (  ( 1 << i ) & node.leaf ) {   // if ith node is leaf get center
+          // check if leaf is visible
+          if ( !(depth+1  < max_depth) || HitBoundingBox(ccenter, size) ) {
+            pointrep *points = children->points;
+            unsigned int length = points[0].length;
+            T *point = &(points[1].v);  // first point
+            for(unsigned int iterator = 0; iterator < length; iterator++ ) {
+                selpoints.insert(point);
+              point+=BOctTree<T>::POINTDIM;
+            }
+          }
+        } else { // recurse
+          selectRay( selpoints, children->node, ccenter, size/2.0, max_depth, depth+1);
+        }
+        ++children; // next child
+      }
+    }
+  }
+
+  void selectRayBS(set<T *> &selpoints, bitoct &node, T *center, T size, int brushsize) {
     T ccenter[3];
     bitunion<T> *children;
     bitoct::getChildren(node, children);
@@ -331,12 +360,13 @@ protected:
             unsigned int length = points[0].length;
             T *point = &(points[1].v);  // first point
             for(unsigned int iterator = 0; iterator < length; iterator++ ) {
-              selpoints.push_back(point);
+              if (ScreenDist(point) < brushsize && RayDist(point) > 100.0) 
+                selpoints.insert(point);
               point+=BOctTree<T>::POINTDIM;
             }
           }
         } else { // recurse
-          selectRay( selpoints, children->node, ccenter, size/2.0);
+          selectRayBS( selpoints, children->node, ccenter, size/2.0, brushsize);
         }
         ++children; // next child
       }
@@ -360,9 +390,10 @@ protected:
             unsigned int length = points[0].length;
             T *point = &(points[1].v);  // first point
             for(unsigned int iterator = 0; iterator < length; iterator++ ) {
-              if (min > RayDist(point) && ScreenDist(point) < 5) {
+              T dist = RayDist(point);
+              if (min > dist && ScreenDist(point) < 5 && dist > 100.0) {
                 selpoint = point;
-                min = RayDist(point);
+                min = dist;
               }
               point+=BOctTree<T>::POINTDIM;
             }
