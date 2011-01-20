@@ -6,7 +6,7 @@ float maxDist = 1.0;     // cm
 float maxRadius = 105.0; // cm
 float CxM, CxP, CyM, CyP, CzM, CzP;
 
-double planeDist(double *p, float nx, float ny, float nz, float d) {
+double planeDist(const double *p, float nx, float ny, float nz, float d) {
     return p[0]*nx + p[1]*ny + p[2]*nz + d;
 }
   
