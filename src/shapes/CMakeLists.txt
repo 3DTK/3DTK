@@ -23,16 +23,16 @@ IF (WITH_SHAPE_DETECTION)
 #  
   
   add_executable(planes plane.cc hough.cc convexplane.cc accumulator.cc hsm3d.cc ConfigFileHough.cc parascan.cc quadtree.cc geom_math.cc )
-  add_executable(image toImage.cc image.cc hough.cc convexplane.cc accumulator.cc hsm3d.cc ConfigFileHough.cc parascan.cc quadtree.cc geom_math.cc )
+#  add_executable(image toImage.cc image.cc hough.cc convexplane.cc accumulator.cc hsm3d.cc ConfigFileHough.cc parascan.cc quadtree.cc geom_math.cc )
   
   IF(UNIX)
     target_link_libraries(planes scanlib newmat sparse dl ANN )
-    target_link_libraries(image scanlib newmat sparse dl ANN )
+#    target_link_libraries(image scanlib newmat sparse dl ANN )
   ENDIF(UNIX)
 
   IF (WIN32)
     target_link_libraries(planes scanlib newmat sparse ANN XGetopt)
-    target_link_libraries(image scanlib newmat sparse ANN XGetopt)
+#    target_link_libraries(image scanlib newmat sparse ANN XGetopt)
   ENDIF(WIN32)
   
 
