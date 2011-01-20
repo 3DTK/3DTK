@@ -310,7 +310,7 @@ int main(int argc, char **argv)
 
     cout << nx << " " << ny << " " << nz << " " << d << endl;
 
-    for (int i = 0; i < points.size(); i++) {
+    for (unsigned int i = 0; i < points.size(); i++) {
       cerr << points[i][0] << " " << points[i][1] << " " << points[i][2] << endl;
     }
     if(alg == CALI) {
