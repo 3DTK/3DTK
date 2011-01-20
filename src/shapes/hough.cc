@@ -155,7 +155,40 @@ void Hough::SHT() {
   } 
   
   delete maxlist; 
-   
+}
+
+double * const* Hough::getPoints(int &size) {
+  size = allPoints->size();
+  cout << 2 << endl;
+  double ** returnPoints = new double*[allPoints->size()];
+  for(int i = 0; i < allPoints->size(); i++) {
+    Point p = (*allPoints)[i];
+    returnPoints[i] = new double[3];
+    returnPoints[i][0] = p.x;
+    returnPoints[i][1] = p.y;
+    returnPoints[i][2] = p.z;
+  }
+  cout << 3 << endl;
+  return returnPoints;
+}
+
+double * const* Hough::deletePoints(vector<ConvexPlane*> &model, int &size) {
+  cout << 1 << endl;
+  for(int i = 0; i < model.size(); i++) {
+    deletePoints(model[i]->n, model[i]->rho); 
+  }
+  cout << 2 << endl;
+  double ** returnPoints = new double*[allPoints->size()];
+  for(int i = 0; i < allPoints->size(); i++) {
+    Point p = (*allPoints)[i];
+    returnPoints[i] = new double[3];
+    returnPoints[i][0] = p.x;
+    returnPoints[i][1] = p.y;
+    returnPoints[i][2] = p.z;
+  }
+  cout << 3 << endl;
+  size = allPoints->size();
+  return returnPoints;
 }
 
 /**
@@ -574,7 +607,7 @@ int Hough::deletePointsQuad(double * n, double rho) {
   double n4[4];
   calcPlane(planePoints, n4);
 
-  ConvexPlane plane1(n4, planePoints);
+  ConvexPlane * plane1 = new ConvexPlane(n4, planePoints);
   planes.push_back(plane1);
 	
 
@@ -711,7 +744,8 @@ int Hough::deletePoints(double * n, double rho) {
   
   if(nocluster) return maxPlane; 
 
-  ConvexPlane plane1(n, n2[3], direction, convex_hull);
+  ConvexPlane * plane1 = new ConvexPlane(n, n2[3], direction, convex_hull);
+  plane1->pointsize = maxPlane;
   planes.push_back(plane1);
 
   cout << " " << allPoints->size() << "\n";
@@ -864,9 +898,9 @@ void Hough::writePlanes() {
   
   if(!quiet) cout << "Writing " << planes.size() << " Planes to " << blub << endl;
   
-  for(vector<ConvexPlane>::iterator it = planes.begin(); it != planes.end(); it++) {
+  for(vector<ConvexPlane*>::iterator it = planes.begin(); it != planes.end(); it++) {
     string blub2 = blub + "/plane"+ to_string(counter,3) + ".3d";
-    (*it).writePlane(blub2, counter);
+    (*it)->writePlane(blub2, counter);
     counter++;
   }
 }
