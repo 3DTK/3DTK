@@ -57,6 +57,7 @@ public:
   }
 
   void PointsOnShape(CollisionShape<T> &shape, vector<T *> &points) {
+    cout << "Blub" << endl;
     PointsOnShape(*BOctTree<T>::root, BOctTree<T>::center, BOctTree<T>::size, shape, points);
 //    exit(0);
   }

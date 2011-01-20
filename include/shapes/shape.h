@@ -5,6 +5,11 @@
 using std::vector;
 #include "slam6d/globals.icc"
 #include "wykobi/wykobi_algorithm.hpp"
+#include "newmat/newmatio.h"
+#include "newmat/newmatap.h"
+using namespace NEWMAT;
+
+
 
 /**
  * The Shape class is for efficient collision detection in the Octree.
@@ -23,7 +28,8 @@ class CollisionShape {
    *         if unsure err on the side of caution, i.e. return true
    */
   virtual bool isInCube(T cx, T cy, T cz, T size) = 0;
-
+  
+  virtual void refine(vector<T *> *points) = 0;
 
   virtual bool containsPoint(T* p) = 0;
 
@@ -35,6 +41,71 @@ class CollisionShape {
 
   virtual CollisionShape<T>& operator=(const CollisionShape<T> &other) {return *this;};
 
+// given a set of points this will calculate the best fit plane
+  T fitPlane(vector<T *> &ppoints, T plane[4], T centroid[3]) {
+  SymmetricMatrix A(3);
+	A = 0;
+  int n;
+  n = ppoints.size();
+  double cx, cy, cz;
+  cx = 0.0;
+  cy = 0.0;
+  cz = 0.0;
+
+  for (int i = 0; i < n; i++) {
+    T* p = ppoints[i];
+    cx += p[0];
+    cy += p[1];
+    cz += p[2];
+  }
+  cx /= n;
+  cy /= n;
+  cz /= n;
+        
+  centroid[0] = cx;
+  centroid[1] = cy;
+  centroid[2] = cz;
+
+  for (int i = 0; i < n; i++) {
+    T* p = ppoints[i];
+    A(1, 1) += (p[0] - cx)*(p[0] - cx);
+    A(2, 2) += (p[1] - cy)*(p[1] - cy);
+    A(3, 3) += (p[2] - cz)*(p[2] - cz);
+    A(1, 2) += (p[0] - cx)*(p[1] - cy);
+    A(1, 3) += (p[0] - cx)*(p[2] - cz);
+    A(2, 3) += (p[1] - cy)*(p[2] - cz);
+  }
+
+  DiagonalMatrix D;
+  Matrix V;
+  try {
+    Jacobi(A,D,V);
+  } catch (ConvergenceException) {
+    cout << "couldn't find plane..." << endl;
+    return 0;
+  }
+  /*
+     cout << "A: "<< endl << A << endl;
+     cout << "D: "<< endl << D << endl;
+     cout << "V: "<< endl << V << endl;
+     */
+  int index;
+  D.MinimumAbsoluteValue1(index);
+     
+  plane[0] = V(1,index);
+  plane[1] = V(2,index);
+  plane[2] = V(3,index);
+  plane[3] = -planeDist(plane, cx, cy, cz, 0);
+  //plane[3] = -(plane[0]*cx + plane[1]*cy + plane[2]*cz);
+  
+  double sum = 0.0;
+  for(int i = 1; i < 4; i++) {
+    sum += D(i);
+  }
+  sum = D(index)/sum;
+
+  return D(index)/n;
+}
 //  virtual bool valid() = 0;
 };
 
@@ -108,6 +179,18 @@ class CollisionPlane : public CollisionShape<T> {
     return fabs(planeDist(p, nx, ny, nz, d)) < maxDist;
   }
 
+  virtual void refine(vector<T *> *points) {
+    cout << nx << " " << ny << " " << nz << " " << d << endl; 
+    T plane[4];
+    T centroid[3];
+    fitPlane((*points), plane, centroid);
+    nx = plane[0];
+    ny = plane[1];
+    nz = plane[2];
+    d = plane[3];
+    cout << nx << " " << ny << " " << nz << " " << d << endl; 
+  }
+  
   virtual bool hypothesize(vector<T *> &points) {
     if (points.size() < getNrPoints()) return false;
     T a[3], b[3], f[3], plane[4];
@@ -196,6 +279,18 @@ class LightBulbPlane : public CollisionPlane<T> {
     }
 
   }
+  
+  void refine(vector<T *> *points) {
+    cout << "LightBulbPlane" << endl; 
+    cout << this->nx << " " << this->ny << " " << this->nz << " " << this->d << endl; 
+    T plane[4];
+    fitPlane((*points), plane, c);
+    this->nx = plane[0];
+    this->ny = plane[1];
+    this->nz = plane[2];
+    this->d = plane[3];
+    cout << this->nx << " " << this->ny << " " << this->nz << " " << this->d << endl; 
+  }
  
   bool isInCube(T cx, T cy, T cz, T size) {
     double radius = sqrt(3*size*size);
@@ -247,6 +342,11 @@ class LightBulbPlane : public CollisionPlane<T> {
     return *this;
   }
 
+  void getCenter(T &x, T &y, T &z) {
+    x = this->c[0];
+    y = this->c[1];
+    z = this->c[2];
+  }
   /*
   bool validate(vector<T *> pts) {
     // create array which will not be used
