@@ -23,6 +23,9 @@ GLUI_Spinner    *cangle_spinner;
 GLUI_Spinner    *pzoom_spinner;
 /** GLUI spinner for the factor for the image size */
 GLUI_Spinner    *image_spinner;
+/** GLUI_Spinner for the depth to select groups of points */
+GLUI_Spinner    *depth_spinner;
+GLUI_Spinner    *brushsize_spinner;
 
 int window_id_menu1, ///< menue window ids
     window_id_menu2; ///< menue window ids
@@ -49,6 +52,8 @@ GLUI_Panel      *path_panel;
 /** Pointer to the panels */
 GLUI_Panel      *pose_panel;
 /** Pointer to the panels */
+GLUI_Panel      *selection_panel;
+/** Pointer to the panels */
 GLUI_Panel      *color_panel;
 /** Pointer to the panels */
 GLUI_Panel      *camera_panel;
@@ -64,6 +69,8 @@ GLUI_Button     *button1;
 GLUI_EditText *path_filename_edit;
 /** Pointer to the edit text box*/
 GLUI_EditText *pose_filename_edit;
+/** Pointer to the edit text box*/
+GLUI_EditText *selection_filename_edit;
 
 /** Pointer to the rotation button */
 GLUI_Rotation  *rotButton;
@@ -200,7 +207,7 @@ void newMenu()
   glui1->add_checkbox( "Draw Camera", &show_cameras);
   glui1->add_checkbox( "Draw Path", &show_path);
   ps_spinner = glui1->add_spinner( "Point Size:", GLUI_SPINNER_FLOAT, &pointsize);
-  ps_spinner->set_float_limits( 1.0, 5.0 );
+  ps_spinner->set_float_limits( 0.0000001, 5.0 );
   ps_spinner->set_speed( 25.0 );
   ps_spinner->set_float_val(pointsize);
   ps_spinner->set_alignment( GLUI_ALIGN_LEFT );  
@@ -321,6 +328,31 @@ GLUI_SPINNER_INT, &factor);
  
   glui1->add_separator();
   
+  /**** Selection panel ******/
+  selection_panel = glui1->add_rollout("Selection :", false );
+  selection_panel ->set_alignment( GLUI_ALIGN_LEFT );
+  
+  selection_filename_edit = glui1->add_edittext_to_panel(selection_panel,"File: ",GLUI_EDITTEXT_TEXT, selection_file_name);
+  selection_filename_edit->set_alignment( GLUI_ALIGN_LEFT );
+  glui1->add_button_to_panel(selection_panel, "Save selected points   ", 0, saveSelection)->set_alignment( GLUI_ALIGN_CENTER);
+
+  glui1->add_button_to_panel(selection_panel, "Clear selected points   ", 0, clearSelection)->set_alignment( GLUI_ALIGN_CENTER);
+  glui1->add_checkbox_to_panel(selection_panel, "Select/Unselect", &selectOrunselect);
+  glui1->add_checkbox_to_panel(selection_panel, "Select Voxels", &select_voxels);
+  depth_spinner = glui1->add_spinner_to_panel(selection_panel, "Depth :   ",
+      GLUI_SPINNER_INT, &selection_depth);
+  depth_spinner->set_int_limits( 1, 100 );
+  depth_spinner->set_speed( 1 );
+  depth_spinner->set_alignment(GLUI_ALIGN_RIGHT);
+  brushsize_spinner = glui1->add_spinner_to_panel(selection_panel, "Brushsize :   ",
+      GLUI_SPINNER_INT, &brush_size);
+  brushsize_spinner->set_int_limits( 0, 100 );
+  brushsize_spinner->set_speed( 1 );
+  brushsize_spinner->set_alignment(GLUI_ALIGN_RIGHT);
+  
+ 
+  glui1->add_separator();
+  
 
   /****** A 'quit' button *****/
   glui1->add_button( "Quit", 0,(GLUI_Update_CB)exit )->set_alignment( GLUI_ALIGN_CENTER );
@@ -352,3 +384,13 @@ void pathAnimate(int dummy) {
   path_iterator = 0;
  
 }
+
+
+/**
+ * This function clears the selected points  
+ */
+void clearSelection(int dummy) {
+  for(int iterator = (int)octpts.size()-1; iterator >= 0; iterator--) 
+    selected_points[iterator].clear();
+}
+
