@@ -1,7 +1,17 @@
 #ifndef __GEOM_MATH_H__
 #define __GEOM_MATH_H__
 
-double planeDist(const double *p, float nx, float ny, float nz, float d); 
+#include "newmat/newmatio.h"
+#include "newmat/newmatap.h"
+//using namespace NEWMAT;
+
+#include <vector>
+using std::vector;
+
+template <class T, class F>
+T planeDist(const T *p, F nx, F ny, F nz, F d) { 
+    return p[0]*nx + p[1]*ny + p[2]*nz + d;
+}
 bool SphereInAABB( float x, float y, float z, float size ) ;
 void setNumber(double *plane, double *center, double _radius, double _maxDist) ;
 bool PlaneInCube( float x, float y, float z, float size, float nx, float ny, float nz, float d);
@@ -11,7 +21,7 @@ bool closeToPlane(double *p);
 // given a set of points this will calculate the best fit plane
 template <class T>
 static T fitPlane(vector<T *> &ppoints, T plane[4], T centroid[3]) {
-  SymmetricMatrix A(3);
+  NEWMAT::SymmetricMatrix A(3);
 	A = 0;
   int n;
   n = ppoints.size();
@@ -44,11 +54,11 @@ static T fitPlane(vector<T *> &ppoints, T plane[4], T centroid[3]) {
     A(2, 3) += (p[1] - cy)*(p[2] - cz);
   }
 
-  DiagonalMatrix D;
-  Matrix V;
+  NEWMAT::DiagonalMatrix D;
+  NEWMAT::Matrix V;
   try {
-    Jacobi(A,D,V);
-  } catch (ConvergenceException) {
+    NEWMAT::Jacobi(A,D,V);
+  } catch (NEWMAT::ConvergenceException) {
     cout << "couldn't find plane..." << endl;
     return 0;
   }
@@ -63,7 +73,7 @@ static T fitPlane(vector<T *> &ppoints, T plane[4], T centroid[3]) {
   plane[0] = V(1,index);
   plane[1] = V(2,index);
   plane[2] = V(3,index);
-  plane[3] = -planeDist(plane, cx, cy, cz, 0);
+  plane[3] = -planeDist(plane, cx, cy, cz, 0.0);
   //plane[3] = -(plane[0]*cx + plane[1]*cy + plane[2]*cz);
   
   double sum = 0.0;

@@ -1,4 +1,5 @@
 #include "math.h"
+#include "shapes/geom_math.h"
 
 float Nx,Ny,Nz,Nd;
 float Cx, Cy, Cz;
@@ -6,10 +7,6 @@ float maxDist = 1.0;     // cm
 float maxRadius = 105.0; // cm
 float CxM, CxP, CyM, CyP, CzM, CzP;
 
-double planeDist(const double *p, float nx, float ny, float nz, float d) {
-    return p[0]*nx + p[1]*ny + p[2]*nz + d;
-}
-  
 bool SphereInAABB( float x, float y, float z, float size ) {
   if ( x + size < CxM ||
        x - size > CxP ||
