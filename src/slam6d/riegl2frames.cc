@@ -16,6 +16,10 @@ using std::ofstream;
 #include "XGetopt.h"
 #endif
 
+#if WIN32
+#define snprintf sprintf_s
+#endif 
+
 int parseArgs(int argc,char **argv, char dir[255], int& start, int& end){
   start   = 0;
   end     = -1; // -1 indicates no limitation

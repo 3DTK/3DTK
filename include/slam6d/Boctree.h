@@ -421,7 +421,7 @@ protected:
   
   static void deserialize(std::ifstream &f, vector<Point> &vpoints, PointType &pointtype) {
     char buffer[2];
-    pointrep point[pointtype.getPointDim()];
+    pointrep *point = new pointrep[pointtype.getPointDim()];
     f.read(buffer, 2);
     bitoct node;
     node.valid = buffer[0];
@@ -442,6 +442,7 @@ protected:
         }
       }
     }
+	delete [] point;
   }
 
   void deserialize(std::ifstream &f, bitoct &node) {
@@ -656,7 +657,7 @@ protected:
   }
 
   template <class P>
-  pointrep *branch( bitoct &node, vector<P*> &splitPoints, T _center[3], T _size) {
+  void* branch( bitoct &node, vector<P*> &splitPoints, T _center[3], T _size) {
     // if bucket is too small stop building tree
     // -----------------------------------------
     if ((_size <= voxelSize) || (earlystop && splitPoints.size() <= 1) ) {
@@ -723,7 +724,7 @@ protected:
     int count = 0;
     for (int j = 0; j < 8; j++) {
       if (!points[j].empty()) {
-        pointrep *c = branch(children[count].node, points[j], center[j], size);  // leaf node
+        pointrep *c = (pointrep*)branch(children[count].node, points[j], center[j], size);  // leaf node
         if (c) { 
           children[count].points = c; // set this child to deque of points
           parent.leaf = ( 1 << j ) | parent.leaf;  // remember this is a leaf
@@ -767,7 +768,7 @@ protected:
     int count = 0;
     for (int j = 0; j < 8; j++) {
       if (!points[j].empty()) {
-        pointrep *c = branch(children[count].node, points[j], center[j], size);  // leaf node
+        pointrep *c = (pointrep*)branch(children[count].node, points[j], center[j], size);  // leaf node
         if (c) { 
           children[count].points = c; // set this child to vector of points
           parent.leaf = ( 1 << j ) | parent.leaf;  // remember this is a leaf

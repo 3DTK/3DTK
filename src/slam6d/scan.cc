@@ -40,6 +40,13 @@ using std::stringstream;
 #include <dlfcn.h>
 #endif
 
+#ifdef _MSC_VER
+#define strcasecmp _stricmp
+#define strncasecmp _strnicmp
+#else
+#include <strings.h>
+#endif
+
 #include <cstring>
 using std::flush;
 
@@ -1270,7 +1277,6 @@ void Scan::deleteTree()
   
   return;
 }
-
 
 
 bool Scan::toType(const char* string, reader_type &type) {
