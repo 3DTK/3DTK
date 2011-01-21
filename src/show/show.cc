@@ -746,7 +746,7 @@ int main(int argc, char **argv){
     } // no copying necessary for show!
   }
 
-
+/*
   cout << "Exporting the trajectory to \"trajectory.dat\"." << endl;
   ofstream traj("trajectory.dat");
   double *test;
@@ -767,6 +767,8 @@ int main(int argc, char **argv){
   }
   traj.close();
   traj.clear();
+*/
+
   cm = new ScanColorManager(4096, pointtype);
   
   if (loadOct) {

@@ -587,9 +587,9 @@ void compactTree::deserialize(std::string filename ) {
 
   double vs = size;
   while (vs > voxelSize) {
-    vs = vs/2.0;
+    vs = vs * 0.5;
   }
-  precision = vs/ pow(2, 15);
+  precision = vs / 32768;  // 2^15
 
 
   // read root node

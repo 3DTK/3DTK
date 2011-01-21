@@ -248,7 +248,7 @@ void scanToGrid::createNeighbours(scanGrid *grid, long x, long z, float weightin
     calculateNormvector(dx, dz, xnorm, znorm);
 
     // calculating number of neighbours to weight    
-    int r = (int) (sqrt(pow(dx, 2) + pow(dz, 2)) * this->spot);
+    int r = (int) (sqrt(dx*dx + dz*dz) * this->spot);
 
     for(int i = -r; i <= r; ++i)
     { 

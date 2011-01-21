@@ -59,14 +59,6 @@ ELSE(WITH_GRIDDER)
   MESSAGE(STATUS "Without 2DGridder")
 ENDIF(WITH_GRIDDER)
 
-## Home-made Laserscanner 
-OPTION(WITH_DETECTOR "Whether to build the Detector app for homemade laser scanners binary ON/OFF" OFF)
-
-IF(WITH_DETECTOR)
-  MESSAGE(STATUS "With Detector")
-ELSE(WITH_DETECTOR)
-  MESSAGE(STATUS "Without Detector")
-ENDIF(WITH_DETECTOR)
 
 ## Tools 
 OPTION(WITH_TOOLS "Whether to build additional tools like convergence frame_to_graph etc. ON/OFF" ON)
@@ -257,7 +249,6 @@ add_subdirectory(src/grid)
 add_subdirectory(src/pmd)
 add_subdirectory(src/shapes)
 add_subdirectory(src/slam6d/sift)
-add_subdirectory(src/scanner)
 
 IF(EXPORT_SHARED_LIBS)
 ## Compiling a shared library containing all of the project
