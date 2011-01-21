@@ -31,6 +31,7 @@ public:
   static const unsigned int USE_TYPE;
   static const unsigned int USE_COLOR;
   static const unsigned int USE_TIME;
+  static const unsigned int USE_INDEX;
 
   PointType();
 
@@ -42,11 +43,14 @@ public:
   bool hasType();
   bool hasColor();
   bool hasTime();
+  bool hasIndex();
 
   unsigned int getReflectance();
   unsigned int getAmplitude();
   unsigned int getDeviation(); 
   unsigned int getTime();
+  unsigned int getIndex();
+  unsigned int getType();
   unsigned int getType(unsigned int type);
    
 
@@ -58,7 +62,7 @@ public:
   unsigned int toFlags() const;
   
   template <class T>
-  T *createPoint(const Point &P);
+  T *createPoint(const Point &P, unsigned int index=0);
 
   template <class T>
   Point createPoint(T *p);
@@ -81,7 +85,7 @@ private:
   /**
    * Derived from types, to map type to the array index for each point
    **/
-  int dimensionmap[7];
+  int dimensionmap[8];
 
   bool hasType(unsigned int type);
 
@@ -89,7 +93,7 @@ private:
 
 
   template <class T>
-  T *PointType::createPoint(const Point &P) {
+  T *PointType::createPoint(const Point &P, unsigned int index ) {
     unsigned int counter = 0;
 
     T *p = new T[pointdim];
@@ -114,6 +118,9 @@ private:
     }
     if (types & USE_TIME) {  
 //      p[counter++] = P.timestamp;
+    }
+    if (types & USE_INDEX) {  
+      p[counter++] = index; 
     }
 
     return p;
@@ -146,6 +153,7 @@ private:
     if (types & USE_TIME) {  
 //      P.timestamp = p[counter++];
     }
+
 
     return P;
   }
