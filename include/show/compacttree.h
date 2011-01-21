@@ -92,8 +92,8 @@ class cbitp{
   public:
 
 #ifdef _MSC_VER
-  unsigned shortpointrep pointer        : 48;
-  unsigned int length                   : 24;
+  __int64 pointer        : 48;
+  unsigned int length    : 24;
 #else
   signed long pointer                   : 48;
   unsigned int length                   : 24;
