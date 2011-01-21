@@ -142,7 +142,7 @@ class CollisionPlane : public CollisionShape<T> {
       return false;
     }
     Normalize3(plane);
-    plane[3] = -1.0 * planeDist(f, plane[0], plane[1], plane[2], 0);    // compute distance from origin
+    plane[3] = -1.0 * planeDist(f, plane[0], plane[1], plane[2], 0.0);    // compute distance from origin
     if (plane[3] < 0.0) {                            // flip normal if necessary
       for (int j = 0; j < 4;j++) {
         plane[j] = -plane[j];
@@ -316,7 +316,7 @@ class LightBulbPlane : public CollisionPlane<T> {
       if (x > maxx) maxx = x;
       if (x < minx) minx = y;
       if (y > maxz) maxz = y;
-      if (y < minz) minz = y; 
+      
       point = wykobi::make_point(x, y);
       point_list.push_back(point);
     }
