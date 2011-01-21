@@ -22,12 +22,12 @@ using std::endl;
 PointType::PointType() {
   types = USE_NONE;
   pointdim = 3;
-  dimensionmap[1] = dimensionmap[2] = dimensionmap[3] = dimensionmap[4] = dimensionmap[5] = dimensionmap[6] = 1; // choose height per default  
+  dimensionmap[1] = dimensionmap[2] = dimensionmap[3] = dimensionmap[4] = dimensionmap[5] = dimensionmap[6] = dimensionmap[7] = 1; // choose height per default  
   dimensionmap[0] = 1;  // height 
 }
 
 PointType::PointType(unsigned int _types) : types(_types) {
-  dimensionmap[1] = dimensionmap[2] = dimensionmap[3] = dimensionmap[4] = dimensionmap[5] = dimensionmap[6] = 1; // choose height per default  
+  dimensionmap[1] = dimensionmap[2] = dimensionmap[3] = dimensionmap[4] = dimensionmap[5] = dimensionmap[6] = dimensionmap[7] = 1; // choose height per default  
   dimensionmap[0] = 1;  // height 
 
   pointdim = 3;
@@ -37,6 +37,7 @@ PointType::PointType(unsigned int _types) : types(_types) {
   if (types & PointType::USE_TYPE) dimensionmap[4] = pointdim++; 
   if (types & PointType::USE_COLOR) dimensionmap[5] = pointdim++; 
   if (types & PointType::USE_TIME) dimensionmap[6] = pointdim++; 
+  if (types & PointType::USE_INDEX) dimensionmap[7] = pointdim++; 
 }
 
 bool PointType::hasReflectance() {
@@ -58,6 +59,10 @@ bool PointType::hasTime() {
   return hasType(USE_TIME); 
 }
 
+bool PointType::hasIndex() {
+  return hasType(USE_INDEX); 
+}
+
 unsigned int PointType::getReflectance() {
   return dimensionmap[1];
 }
@@ -72,6 +77,14 @@ unsigned int PointType::getDeviation() {
 
 unsigned int PointType::getTime() {
   return dimensionmap[6];
+}
+
+unsigned int PointType::getIndex() {
+  return dimensionmap[7];
+}
+
+unsigned int PointType::getType() {
+  return dimensionmap[4];
 }
 
 unsigned int PointType::getType(unsigned int type) {
@@ -124,4 +137,5 @@ const unsigned int PointType::USE_HEIGHT = 8;
 const unsigned int PointType::USE_TYPE = 16;
 const unsigned int PointType::USE_COLOR = 32;
 const unsigned int PointType::USE_TIME = 64;
+const unsigned int PointType::USE_INDEX = 128;
 
