@@ -46,8 +46,9 @@ add_library(scan_io_zahn            SHARED scan_io_zahn.cc           )
 add_library(scan_io_ais             SHARED scan_io_ais.cc            )
 add_library(scan_io_uos_rgb         SHARED scan_io_uos_rgb.cc        )
 add_library(scan_io_oct             SHARED scan_io_oct.cc            )
- target_link_libraries(scan_io_oct scanlib)
 add_library(scan_io_xyzr            SHARED scan_io_xyzr.cc           )
+
+ target_link_libraries(scan_io_oct scanlib_s)
 
 IF (WITH_RIVLIB)
   add_library(scan_io_rxp           SHARED scan_io_rxp.cc            )
@@ -90,9 +91,9 @@ SET(SCANLIB_SRCS
   )
 
 add_library(scanlib STATIC ${SCANLIB_SRCS})
-IF(EXPORT_SHARED_LIBS)
+#IF(EXPORT_SHARED_LIBS)
 add_library(scanlib_s SHARED ${SCANLIB_SRCS})
-ENDIF(EXPORT_SHARED_LIBS)
+#ENDIF(EXPORT_SHARED_LIBS)
 
 
 IF(WITH_CUDA)
