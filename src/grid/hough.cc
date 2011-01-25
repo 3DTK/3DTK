@@ -26,6 +26,11 @@
  * CONSTANTS & MACROS
  ***************************************************************************/
 
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
+
+
 /***********************FOR HOUGH TRANSFORMATION***************************/
 int DATA_RANGE = 725;
 int ScanAZ     = 721;
@@ -405,9 +410,12 @@ double SHT_find_line(int nr_pts, double *x, double *y,
   double m, b;
   int    count = 0;
   double x0,y0,xa,xe,ya,ye;
-  double lx[DATA_RANGE],ly[DATA_RANGE];
-  int index[DATA_RANGE],lastindex = 0;
-  double dist[DATA_RANGE], maxlinedist = 0.0, linedist = 0.0;
+  double *lx = new double[DATA_RANGE];
+  double *ly = new double[DATA_RANGE];
+  int *index = new int[DATA_RANGE];
+  int lastindex = 0;
+  double *dist = new double[DATA_RANGE];
+  double maxlinedist = 0.0, linedist = 0.0;
   int    go_over_x = 0;
   int    i, j;
   
@@ -476,6 +484,12 @@ double SHT_find_line(int nr_pts, double *x, double *y,
       marker[index[count-1]] = 3;
     }
   }
+
+  delete[] lx;
+  delete[] ly;
+  delete[] index;
+  delete[] dist;  
+
   return maxlinedist;
 }
 
@@ -684,7 +698,7 @@ int SHT_get_hough_lines(int nr_pts, double *x, double *y,
   unsigned long sht_average;
   unsigned long sht_maximum;
   int           sht_imax, sht_jmax;
-  int           sht_marker[ScanAZ];
+  int           *sht_marker = new int[ScanAZ];
   double        sht_length_of_a_line, sht_maxlinedist=100.0;
   int           i = 0;
   double        m,b;
@@ -733,6 +747,7 @@ int SHT_get_hough_lines(int nr_pts, double *x, double *y,
 						                     &sht_imax, &sht_jmax);
     i++;
   }
+  delete[] sht_marker;
   return i;
 }
 /**
