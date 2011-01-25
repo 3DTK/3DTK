@@ -71,7 +71,7 @@ public:
  * A search tree holds the pointer to the data.
  * Furthermore, search functionality must be privided
  **/
-class CachedSearchTree : public Tree {
+class CachedSearchTree : public SearchTree {
 public:  
   /**
    * Constructor (default)
@@ -115,6 +115,9 @@ public:
    * @return A new cach Item
    */
   virtual SearchTreeCacheItem* FindClosestCache(double *_p, double maxdist2, int threadNum = 0) = 0;
+  double *FindClosest(double *_p, double maxdist2, int threadNum = 0) {
+    return 0; 
+  }
 };
 
 
