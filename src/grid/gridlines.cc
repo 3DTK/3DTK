@@ -65,7 +65,9 @@ void gridlines::createLines(grid* g, int max_distance)
     if (ymin < -max_distance) ymin = -max_distance;
  
     // create arrays for the "hough" class and norm values 
-    double array_x[vx.size()], array_z[vz.size()];
+//    double array_x[vx.size()], array_z[vz.size()];
+    double *array_x = new double[vx.size()];
+	double *array_z = new double[vz.size()];
     for (size_t t = 0; t < vx.size(); t++) {
 	array_x[t] = vx.at(t) - xmin; 
 	array_z[t] = vz.at(t) - ymin;
@@ -80,7 +82,8 @@ void gridlines::createLines(grid* g, int max_distance)
 
     // result variables
     int sht_nr_line_pts;
-    double sht_x_line_pts[vx.size()], sht_y_line_pts[vx.size()];
+    double *sht_x_line_pts = new double[vx.size()];
+	double *sht_y_line_pts = new double[vx.size()];
     
     // get sht_resolutuion
     int sht_resolution = max_distance;
@@ -129,6 +132,11 @@ void gridlines::createLines(grid* g, int max_distance)
     }
 
     SHT_free_histogram(sht_histogram, sht_resolution);
+
+	delete[] array_x;
+	delete[] array_z;
+	delete[] sht_x_line_pts;
+	delete[] sht_y_line_pts;
 }
 
 /**

@@ -16,7 +16,6 @@
 #include <sstream>
 #include <vector>
 #include <dirent.h>
-#include <strings.h>
 
 using std::cerr;
 using std::flush;
@@ -24,10 +23,11 @@ using std::flush;
 #ifdef _MSC_VER
   #define  _USE_MATH_DEFINES
   #include <windows.h>
-  #include "..\Visual_Studio_Projects\SHOW\glut\glut.h"    /* Header File For The glu toolkit */
-  #include "..\Visual_Studio_Projects\6D_SLAM\XGetopt.h"
+  #include "GL/glut.h"    /* Header File For The glu toolkit */
+  #include "XGetopt.h"
 #else
   #include <getopt.h>
+  #include <strings.h>
 #endif
 
 /**

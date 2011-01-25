@@ -248,7 +248,7 @@ void scanToGrid::createNeighbours(scanGrid *grid, long x, long z, float weightin
     calculateNormvector(dx, dz, xnorm, znorm);
 
     // calculating number of neighbours to weight    
-    int r = (int) (sqrt(dx*dx + dz*dz) * this->spot);
+    int r = (int) (sqrt((double)(dx*dx + dz*dz)) * this->spot);
 
     for(int i = -r; i <= r; ++i)
     { 
@@ -263,7 +263,7 @@ void scanToGrid::createNeighbours(scanGrid *grid, long x, long z, float weightin
 	if( !grid->contains(px, pz))
 	    continue;
 
-	float weight = weighting / pow(2, abs(i*r));
+	float weight = weighting / pow(2.0, abs(i*r));
 
 	//	grid->addPoint(px, pz,
 	//       SOLIDWEIGHT * weight, SOLIDWEIGHT * weight);
@@ -298,7 +298,7 @@ void scanToGrid::createWaypoints(scanGrid *grid, long x, long z, float weighting
     double xnorm, znorm;
     calculateNormvector(dx, dz, xnorm, znorm);
 
-    int distance = (int)floor(sqrt(pow(dx, 2) + pow(dz, 2)) /
+    int distance = (int)floor(sqrt(pow((double)dx, 2) + pow((double)dz, 2)) /
 			      sqrt(pow(xnorm, 2) + pow(znorm, 2)));
 
 
