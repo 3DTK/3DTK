@@ -212,13 +212,12 @@ private:
    */
   static vector<KDCache*> closest_cache;
 
-  //FIXME: use union  
   /**
    * The search tree
    *
    * It can be a k-d tree of cached k-d tree.
    */
-  Tree *kd;
+  SearchTree *kd;
 
   /**
    * This KD tree is created only for the CUDA usages
