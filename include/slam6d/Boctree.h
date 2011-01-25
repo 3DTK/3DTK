@@ -23,6 +23,7 @@ using std::list;
 #include <fstream>
 #include <string>
 
+#include "limits.h"
 #include "globals.icc"
 #include "point_type.h"
 
@@ -32,6 +33,8 @@ using std::list;
   #define POPCOUNT(mask) _my_popcount_3(mask)
 #endif
 
+#include "slam6d/nnparams.h"
+#include "slam6d/searchTree.h"
 // forward declaration
 template <class T> union bitunion;
 
@@ -96,6 +99,17 @@ class bitoct{
   static inline void getChildren(bitoct &parent, bitunion<T>* &children) {
     children = (bitunion<T>*)((char*)&parent + parent.child_pointer);
   }
+
+  template <class T>
+  inline bitunion<T>* getChild(unsigned char index) {
+    bitunion<T> *children = (bitunion<T>*)((char*)this + this->child_pointer);
+    for (unsigned char i = 0; i < index; i++) {
+      if (  ( 1 << i ) & valid ) {   // if ith node exists
+        children++;
+      }
+    }
+    return children;
+  }
  
 
 };
@@ -122,6 +136,39 @@ template <class T> union bitunion {
     node.valid = 0;
     node.leaf = 0;
   };           // needed for new []
+  
+  inline T* getPoints() {
+    //return (T*)&(this->points[1].v);
+    return &(this->points[1].v);
+  }
+  inline unsigned int getLength() {
+    return this->points[0].length;
+  }
+  
+  inline bitunion<T>* getChild(unsigned char index) {
+    bitunion<T> *children = (bitunion<T>*)((char*)this + this->node.child_pointer);
+    for (unsigned char i = 0; i < index; i++) {
+      if (  ( 1 << i ) & node.valid ) {   // if ith node exists
+        children++;
+      }
+    }
+    return children;
+  }
+  
+  inline bool isValid(unsigned char index) {
+    return  (  ( 1 << index ) & node.valid );
+  }
+ /*
+  inline pointrep* getChild(unsigned char index) {
+    bitunion<T> *children = (bitunion<T>*)((char*)this + this->node.child_pointer);
+    return children[index].points; 
+  }*/
+  
+  inline bool childIsLeaf(unsigned char index) {
+    return (  ( 1 << index ) & node.leaf ); // if ith node is leaf get center
+  }
+
+  
 };
 
 
@@ -133,7 +180,7 @@ template <class T> union bitunion {
  * is recusivly subdivided into smaller
  * subboxes
  */
-template <class T> class BOctTree {
+template <class T> class BOctTree : public SearchTree {
 
 public:
 
@@ -173,12 +220,17 @@ public:
       childcenter(center, newcenter[i], size, i);
     }
     // set up values
-    root = new bitoct();
+    uroot = new bitunion<T>();
+    root = &uroot->node;
 
     countPointsAndQueue(pts, n, newcenter, sizeNew, *root);
+    init();
   }
 
-  BOctTree(std::string filename) {deserialize(filename); }
+  BOctTree(std::string filename) {
+    deserialize(filename); 
+    init();
+  }
 
   template <class P>
   BOctTree(vector<P *> &pts, T voxelSize, PointType _pointtype = PointType(), bool _earlystop = false) : earlystop(_earlystop) {
@@ -217,7 +269,8 @@ public:
       childcenter(center, newcenter[i], size, i);
     }
     // set up values
-    root = new bitoct();
+    uroot = new bitunion<T>();
+    root = &uroot->node;
 
     countPointsAndQueue(pts, newcenter, sizeNew, *root);
   }
@@ -239,12 +292,42 @@ public:
   long countLeaves() { return countLeaves(*root); }   // computes number of leaves + points
   long countOctLeaves() { return countOctLeaves(*root); } // computes number of leaves
 
-  double calcVoxelSize() {
-    double s = size;
-    while (s > voxelSize) {
-      s = s/2.0;
+  void  init() {
+    // compute maximal depth as well as the size of the smalles leaf
+    real_voxelSize = size;
+    max_depth = 1;
+    while (real_voxelSize > voxelSize) {
+      real_voxelSize = real_voxelSize/2.0;
+      max_depth++;
     }
-    return s;
+    
+    child_bit_depth = new unsigned int[max_depth];
+    child_bit_depth_inv = new unsigned int[max_depth];
+
+    for(int d=0; d < max_depth; d++) {
+      child_bit_depth[d] = 1 << (max_depth - d - 1);
+      child_bit_depth_inv[d] = ~child_bit_depth[d];
+    }
+    
+    mult = 1.0/real_voxelSize;
+    add[0] = -center[0] + size;
+    add[1] = -center[1] + size;
+    add[2] = -center[2] + size;
+
+    for (unsigned char mask = 0; mask < 256; mask++) {
+      for (unsigned char index = 0; index < 8; index++) {
+        char c = 0;
+        char *mimap = this->imap[index];  // maps area index to preference
+        for (unsigned char i = 0; i < 8; i++) {
+          if (  ( 1 << i ) & mask ) {   // if ith node exists
+            sequence2ci[index][mask][ mimap[i] ] = c++;
+          } else {
+            sequence2ci[index][mask][ mimap[i] ] = -1;
+          }
+        }
+      }
+      if (mask == UCHAR_MAX) break;
+    }
   }
 
   void deserialize(std::string filename ) {
@@ -284,6 +367,7 @@ public:
 
     // read root node
     root = new bitoct();
+    uroot = new bitunion<T>();
     deserialize(file, *root);
     file.close();
   }
@@ -781,44 +865,71 @@ protected:
   }
 
 
+  void getByIndex(T *point, T *&points, unsigned int &length) {
+    unsigned int x,y,z;
+    x = (point[0] + add[0]) * mult;
+    y = (point[1] + add[1]) * mult;
+    z = (point[2] + add[2]) * mult;
+    
+    bitunion<T> *node = uroot; 
+    unsigned char child_index;
+    unsigned int child_bit;
+    unsigned int depth = 0;
+
+    while (true) {
+      child_bit = child_bit_depth[depth];
+      child_index = ((x & child_bit )!=0)  | (((y & child_bit )!=0 )<< 1) | (((z & child_bit )!=0) << 2);
+      if (node->childIsLeaf(child_index) ) {
+        node = node->getChild(child_index);
+        points = node->getPoints();
+        length = node->getLength();
+        return;
+      } else {
+        node = node->getChild(child_index);
+      }
+      depth++;
+    }
+  }
+  NNParams params[100];
+
   void childcenter(T *pcenter, T *ccenter, T size, unsigned char i) {
     switch (i) {
-      case 0:
+      case 0:  // 000
         ccenter[0] = pcenter[0] - size / 2.0;
         ccenter[1] = pcenter[1] - size / 2.0;
         ccenter[2] = pcenter[2] - size / 2.0;
         break;
-      case 1:
+      case 1:  // 001
         ccenter[0] = pcenter[0] + size / 2.0;
         ccenter[1] = pcenter[1] - size / 2.0;
         ccenter[2] = pcenter[2] - size / 2.0;
         break;
-      case 2:
+      case 2:  // 010
         ccenter[0] = pcenter[0] - size / 2.0;
         ccenter[1] = pcenter[1] + size / 2.0;
         ccenter[2] = pcenter[2] - size / 2.0;
         break;
-      case 3:
-        ccenter[0] = pcenter[0] - size / 2.0;
-        ccenter[1] = pcenter[1] - size / 2.0;
-        ccenter[2] = pcenter[2] + size / 2.0;
-        break;
-      case 4:
+      case 3:  // 011
         ccenter[0] = pcenter[0] + size / 2.0;
         ccenter[1] = pcenter[1] + size / 2.0;
         ccenter[2] = pcenter[2] - size / 2.0;
         break;
-      case 5:
+      case 4:  // 100
+        ccenter[0] = pcenter[0] - size / 2.0;
+        ccenter[1] = pcenter[1] - size / 2.0;
+        ccenter[2] = pcenter[2] + size / 2.0;
+        break;
+      case 5:  // 101
         ccenter[0] = pcenter[0] + size / 2.0;
         ccenter[1] = pcenter[1] - size / 2.0;
         ccenter[2] = pcenter[2] + size / 2.0;
         break;
-      case 6:
+      case 6:  // 110
         ccenter[0] = pcenter[0] - size / 2.0;
         ccenter[1] = pcenter[1] + size / 2.0;
         ccenter[2] = pcenter[2] + size / 2.0;
         break;
-      case 7:
+      case 7:  // 111
         ccenter[0] = pcenter[0] + size / 2.0;
         ccenter[1] = pcenter[1] + size / 2.0;
         ccenter[2] = pcenter[2] + size / 2.0;
@@ -827,12 +938,59 @@ protected:
         break;
     }
   }
+void childcenter(int x, int y, int z, int &cx, int &cy, int &cz, char i, int size) {
+  switch (i) {
+    case 0:  // 000
+      cx = x - size ;
+      cy = y - size ;
+      cz = z - size ;
+      break;
+    case 1:  // 001
+      cx = x + size ;
+      cy = y - size ;
+      cz = z - size ;
+      break;
+    case 2:  // 010
+      cx = x - size ;
+      cy = y + size ;
+      cz = z - size ;
+      break;
+    case 3:  // 011
+      cx = x + size ;
+      cy = y + size ;
+      cz = z - size ;
+      break;
+    case 4:  // 100
+      cx = x - size ;
+      cy = y - size ;
+      cz = z + size ;
+      break;
+    case 5:  // 101
+      cx = x + size ;
+      cy = y - size ;
+      cz = z + size ;
+      break;
+    case 6:  // 110
+      cx = x - size ;
+      cy = y + size ;
+      cz = z + size ;
+      break;
+    case 7:  // 111
+      cx = x + size ;
+      cy = y + size ;
+      cz = z + size ;
+      break;
+    default:
+      break;
+  }
+}
 
 
   /**
    * the root of the octree 
    */
   bitoct* root;
+  bitunion<T>* uroot;
 
 
   /**
@@ -849,6 +1007,10 @@ protected:
    * storing the voxel size
    */
   T voxelSize;
+  /**
+   * The real voxelsize of the leaves
+   **/
+  T real_voxelSize;
 
   /**
    * storing minimal and maximal values for all dimensions
@@ -856,12 +1018,242 @@ protected:
   T *mins;
   T *maxs;
 
+  T add[3];
+  T mult;
+
+  unsigned char max_depth;
+  unsigned int *child_bit_depth; // octree only works to depth 32 with ints, should be plenty
+  unsigned int *child_bit_depth_inv; // octree only works to depth 32 with ints, should be plenty
+
   unsigned int POINTDIM;
 
   PointType pointtype;
 
   bool earlystop;
 
+  /**
+   * Given a leaf node, this function looks for the closest point to params[threadNum].closest
+   * in the list of points.
+   */
+  inline void findClosestInLeaf(bitunion<T> *node, int threadNum) {
+    if (params[threadNum].count >= params[threadNum].max_count) return;
+    params[threadNum].count++;
+    T* points = node->getPoints();
+    unsigned int length = node->getLength();
+    for(unsigned int iterator = 0; iterator < length; iterator++ ) {
+      double myd2 = Dist2(params[threadNum].p, points); 
+      if (myd2 < params[threadNum].closest_d2) {
+        params[threadNum].closest_d2 = myd2;
+        params[threadNum].closest = points;
+        if (myd2 <= 0.0001) {
+          params[threadNum].closest_v = 0; // the search radius in units of voxelSize
+        } else {
+          params[threadNum].closest_v = sqrt(myd2) * mult; // the search radius in units of voxelSize
+        }
+      }
+      points+=BOctTree<T>::POINTDIM;
+    }
+  }
+  
+
+
+/** 
+ * This function finds the closest point in the octree given a specified
+ * radius. This implementation is quit complex, although it is already
+ * simplified. The simplification incurs a significant loss in speed, as
+ * several calculations have to be performed repeatedly and a high number of
+ * unnecessary jumps are executed.
+ */
+  double *FindClosest(double *point, double maxdist2, int threadNum)
+  {
+    params[threadNum].closest = 0; // no point found currently
+    params[threadNum].closest_d2 = maxdist2;
+    params[threadNum].p = point;
+    params[threadNum].x = (point[0] + add[0]) * mult;
+    params[threadNum].y = (point[1] + add[1]) * mult;
+    params[threadNum].z = (point[2] + add[2]) * mult;
+    params[threadNum].closest_v = sqrt(maxdist2) * mult; // the search radius in units of voxelSize
+    params[threadNum].count = 0;
+    params[threadNum].max_count = 10000; // stop looking after this many buckets
+
+   
+    // box within bounds in voxel coordinates
+    int xmin, ymin, zmin, xmax, ymax, zmax;
+    xmin = max(params[threadNum].x-params[threadNum].closest_v, 0); 
+    ymin = max(params[threadNum].y-params[threadNum].closest_v, 0); 
+    zmin = max(params[threadNum].z-params[threadNum].closest_v, 0);
+
+    int li = child_bit_depth[0] * 2 -1;
+    
+    xmax = min(params[threadNum].x+params[threadNum].closest_v, li);
+    ymax = min(params[threadNum].y+params[threadNum].closest_v, li);
+    zmax = min(params[threadNum].z+params[threadNum].closest_v, li);
+    
+    unsigned char depth = 0;
+    unsigned int child_bit;
+    unsigned int child_index_min;
+    unsigned int child_index_max;
+
+    bitunion<T> *node = uroot;
+
+    int cx, cy, cz;
+    
+    child_bit = child_bit_depth[depth];
+    cx = child_bit_depth[depth];
+    cy = child_bit_depth[depth];
+    cz = child_bit_depth[depth];
+
+    while (true) { // find the first node where branching is required
+      child_index_min = ((xmin & child_bit )!=0)  | (((ymin & child_bit )!=0 )<< 1) | (((zmin & child_bit )!=0) << 2);
+      child_index_max = ((xmax & child_bit )!=0)  | (((ymax & child_bit )!=0 )<< 1) | (((zmax & child_bit )!=0) << 2);
+
+      // if these are the same, go there
+      // TODO: optimization: also traverse if only single child...
+      if (child_index_min == child_index_max) {
+        if (node->childIsLeaf(child_index_min) ) {  // luckily, no branching is required
+          findClosestInLeaf(node->getChild(child_index_min), threadNum);
+          return static_cast<double*>(params[threadNum].closest);
+        } else {
+          if (node->isValid(child_index_min) ) { // only descend when there is a child
+            childcenter(cx,cy,cz, cx,cy,cz, child_index_min, child_bit/2 ); 
+            node = node->getChild(child_index_min);
+            child_bit /= 2;
+          } else {  // there is no child containing the bounding box => no point is close enough
+            return 0;
+          }
+        }
+      } else {
+        // if min and max are not in the same child we must branch
+        break;
+      }
+    }
+    
+    // node contains all box-within-bounds cells, now begin best bin first search
+    _FindClosest(threadNum, node->node, child_bit/2, cx, cy, cz);
+    return static_cast<double*>(params[threadNum].closest);
+  }
+  
+  /**
+   * This is the heavy duty search function doing most of the (theoretically unneccesary) work. The tree is recursively searched.
+   * Depending on which of the 8 child-voxels is closer to the query point, the children are examined in a special order.
+   * This order is defined in map, imap is its inverse and sequence2ci is a speedup structure for faster access to the child indices. 
+   */
+  void _FindClosest(int threadNum, bitoct &node, int size, int x, int y, int z)
+  {
+    // Recursive case
+   
+    // compute which child is closest to the query point
+    unsigned char child_index =  ((params[threadNum].x - x) >= 0) | 
+                                (((params[threadNum].y - y) >= 0) << 1) | 
+                                (((params[threadNum].z - z) >= 0) << 2);
+    
+    char *seq2ci = sequence2ci[child_index][node.valid];  // maps preference to index in children array
+    char *mmap = this->map[child_index];  // maps preference to area index 
+
+    bitunion<T> *children;
+    bitoct::getChildren(node, children);
+    int cx, cy, cz;
+    cx = cy = cz = 0; // just to shut up the compiler warnings
+    for (unsigned char i = 0; i < 8; i++) { // in order of preference
+      child_index = mmap[i]; // the area index of the node 
+      if (  ( 1 << child_index ) & node.valid ) {   // if ith node exists
+        childcenter(x,y,z, cx,cy,cz, child_index, size); 
+        if ( params[threadNum].closest_v == 0 ||  max(max(abs( cx - params[threadNum].x ), 
+                 abs( cy - params[threadNum].y )),
+                 abs( cz - params[threadNum].z )) - size
+        >= params[threadNum].closest_v ) { 
+          break;
+        }
+        // find the closest point in leaf seq2ci[i] 
+        if (  ( 1 << child_index ) & node.leaf ) {   // if ith node is leaf
+          findClosestInLeaf( &children[seq2ci[i]], threadNum);
+        } else { // recurse
+          _FindClosest(threadNum, children[seq2ci[i]].node, size/2, cx, cy, cz);
+        }
+      }
+    }
+  }
+
+
+  /** 
+   * This function shows the possible speedup that can be gained by using the
+   * octree for nearest neighbour search, if a more sophisticated
+   * implementation were given. Here, only the bucket in which the query point
+   * falls is looked up. If doing the same thing in the kd-tree search, this
+   * function is about 3-5 times as fast
+   */
+  double *FindClosestInBucket(double *point, double maxdist2, int threadNum) {
+    params[threadNum].closest = 0;
+    params[threadNum].closest_d2 = maxdist2;
+    params[threadNum].p = point;
+    unsigned int x,y,z;
+    x = (point[0] + add[0]) * mult;
+    y = (point[1] + add[1]) * mult;
+    z = (point[2] + add[2]) * mult;
+    T * points;
+    unsigned int length;
+
+    bitunion<T> *node = uroot; 
+    unsigned char child_index;
+
+    unsigned int  child_bit = child_bit_depth[0];
+
+    while (true) {
+      child_index = ((x & child_bit )!=0)  | (((y & child_bit )!=0 )<< 1) | (((z & child_bit )!=0) << 2);
+      if (node->childIsLeaf(child_index) ) {
+        node = node->getChild(child_index);
+        points = node->getPoints();
+        length = node->getLength();
+        
+        for(unsigned int iterator = 0; iterator < length; iterator++ ) {
+          double myd2 = Dist2(params[threadNum].p, points); 
+          if (myd2 < params[threadNum].closest_d2) {
+            params[threadNum].closest_d2 = myd2;
+            params[threadNum].closest = points;
+          }
+          points+=BOctTree<T>::POINTDIM;
+        }
+        return static_cast<double*>(params[threadNum].closest);
+      } else {
+        if (node->isValid(child_index) ) {
+          node = node->getChild(child_index);
+        } else {
+          return 0;
+        }
+      }
+      child_bit >>= 1;
+    }
+    return static_cast<double*>(params[threadNum].closest);
+  }
+
+static char map[8][8]; 
+static char imap[8][8]; 
+static char sequence2ci[8][256][8];  // maps preference to index in children array for every valid_mask and every case
+
 };
 
+
+template <class T>
+char BOctTree<T>::sequence2ci[8][256][8] = {};
+
+template <class T>
+char BOctTree<T>::map[8][8] = { 
+        {0, 1, 2, 4, 3, 5, 6, 7 },
+        {1, 0, 3, 5, 2, 4, 6, 7 },
+        {2, 0, 3, 6, 1, 4, 5, 7 },
+        {3, 1, 2, 7, 0, 5, 4, 6 },
+        {4, 5, 6, 0, 7, 1, 2, 3 },
+        {5, 4, 7, 1, 6, 0, 3, 2 },
+        {6, 4, 7, 2, 5, 0, 3, 1 },
+        {7, 5, 6, 3, 4, 1, 2, 0 } };
+template <class T>
+char BOctTree<T>::imap[8][8] = {
+        {0, 1, 2, 4, 3, 5, 6, 7 },
+        {1, 0, 4, 2, 5, 3, 6, 7 },
+        {1, 4, 0, 2, 5, 6, 3, 7 },
+        {4, 1, 2, 0, 6, 5, 7, 3 },
+        {3, 5, 6, 7, 0, 1, 2, 4 },
+        {5, 3, 7, 6, 1, 0, 4, 2 },
+        {5, 7, 3, 6, 1, 4, 0, 2 },
+        {7, 5, 6, 3, 4, 1, 2, 0 } };
 #endif

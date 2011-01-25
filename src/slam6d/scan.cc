@@ -904,7 +904,7 @@ void Scan::getPtPairs(vector <PtPair> *pairs,
 
     //    cout << endl << "query Point " << p[0] << " " << p[1] << " " << p[2];
     
-    double *closest = ((KDtree*)Source->kd)->FindClosest(p, max_dist_match2, thread_num);
+    double *closest = Source->kd->FindClosest(p, max_dist_match2, thread_num);
     if (closest) {
 
 	 x_neu = closest[0] * Source->dalignxf[0] + closest[1] * Source->dalignxf[4] + closest[2] * Source->dalignxf[8];
@@ -1072,7 +1072,7 @@ void Scan::getPtPairsParallel(vector <PtPair> *pairs, Scan* Source, Scan* Target
     p[1] = y_neu + local_alignxf_inv[13];
     p[2] = z_neu + local_alignxf_inv[14];
 	  
-    double *closest = ((KDtree*)Source->kd)->FindClosest( p,
+    double *closest = Source->kd->FindClosest( p,
 											   max_dist_match2,
 											   thread_num );
     if (closest) {
