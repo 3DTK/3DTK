@@ -5,7 +5,7 @@
 #ifndef _MSC_VER
 #include <getopt.h>
 #else
-#include "..\Visual_Studio_Projects\6DSLAM\6D_SLAM\XGetopt.h"
+#include "XGetopt.h"
 #endif
 
 #include <iostream>
