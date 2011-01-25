@@ -7,7 +7,9 @@ project (Slam6D)
 set(Boost_USE_STATIC_LIBS TRUE)
 SET(Boost_ADDITIONAL_VERSIONS "1.42" "1.42.0" "1.44" "1.44.0" "1.45.0" "1.45")
 IF(WIN32)
+  # for some unknown reason no one variant works on all windows platforms
   find_package( Boost REQUIRED)
+  #find_package( Boost COMPONENTS serialization graph regex REQUIRED)
 ELSE(WIN32)
   find_package( Boost COMPONENTS serialization graph regex REQUIRED)
 ENDIF(WIN32)
@@ -223,7 +225,7 @@ ELSE(EXPORT_SHARED_LIBS)
 ENDIF(EXPORT_SHARED_LIBS)
 
 IF(WIN32)
-  SET(ADDITIONAL_CFLAGS "" CACHE STRING"Additional flags given to the compiler ()" )
+  SET(ADDITIONAL_CFLAGS "-O2" CACHE STRING"Additional flags given to the compiler ()" )
   include_directories(${CMAKE_SOURCE_DIR}/windows/)
   link_directories(${CMAKE_SOURCE_DIR}/windows)
   add_library(XGetopt STATIC ${CMAKE_SOURCE_DIR}/windows/XGetopt.cpp)
@@ -269,5 +271,13 @@ add_library(slam SHARED src/slam6d/icp6D.cc)
 target_link_libraries(slam scanlib_s ANN_s sparse_s newmat_s) 
 ENDIF(EXPORT_SHARED_LIBS)
 
-MESSAGE (STATUS "Build environment is set up use \"make\" to compile")
+MESSAGE (STATUS "Build environment is set up!")
 
+
+# hack to "circumvent" Debug and Release folders that are created under visual studio
+# this is why the INSTALL target has to be used in visual studio
+IF(MSVC)
+  INSTALL(DIRECTORY ${CMAKE_SOURCE_DIR}/bin/Release/ CONFIGURATIONS Release DESTINATION ${CMAKE_SOURCE_DIR}/windows FILES_MATCHING PATTERN "*.dll" PATTERN "*.exe")
+
+  INSTALL(DIRECTORY ${CMAKE_SOURCE_DIR}/bin/Debug/ CONFIGURATIONS rebug DESTINATION ${CMAKE_SOURCE_DIR}/windows FILES_MATCHING PATTERN "*.dll" PATTERN "*.exe")
+ENDIF(MSVC)

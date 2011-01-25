@@ -89,11 +89,12 @@ int main(int argc, char *argv[])
   read_graphviz(gf, g, dp);
 
   graph_t g_org(g);
-  double w[num_vertices(g)];
+  double *w = new double[num_vertices(g)];
 
   elch6D::graph_balancer(g, start, end, w);
   elch6D::graph_weight_out(g_org, start, end, w, out_file);
 
+  delete[] w;
   exit(0);
 }
 
