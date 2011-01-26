@@ -43,6 +43,7 @@ void DrawPoints(GLenum mode)
       glPushMatrix();
       glMultMatrixd(MetaMatrix[iterator][frameNr]);
 
+
       glPointSize(pointsize);
 #ifdef USE_GL_POINTS
         ExtractFrustum(pointsize);
@@ -122,7 +123,12 @@ void DrawPoints(GLenum mode)
 
 #ifdef USE_GL_POINTS
          //cout << endl << endl;  calcRay(570, 266, 1.0, 40000.0);
-        
+         /* // for height mapped color in the vertex shader
+      GLfloat v[16];
+      for (unsigned int l = 0; l < 16; l++)
+        v[l] = MetaMatrix[iterator].back()[l];
+      glUniformMatrix4fvARB(glGetUniformLocationARB(p, "MYMAT"), 1, 0, v);
+      */
         ExtractFrustum(pointsize);
         if (pointmode == 1 || (showall && pointmode == 0) ) {
           octpts[iterator]->displayOctTreeAllCulled();
@@ -943,55 +949,11 @@ void callAddCamera(int dummy)
   haveToUpdate  = 1;
 }
 
-//--------------------------------------------------------------------------------------
-void CallBackMouseFuncMoving(int button, int state, int x, int y)
-{
-
-  if( state == GLUT_DOWN) {
-    mousemoving = true;
-  } else {
-    mousemoving = false;
-    if (delayeddisplay) {
-      delayeddisplay = false;
-      if (fullydisplayed) return;
-      if (haveToUpdate == 6 || haveToUpdate == 3 || haveToUpdate == 4) return;
-      haveToUpdate = 7;
-    }
-  }
-}
-
-
-void CallBackEntryFunc(int state) {
-  if (state == GLUT_LEFT) {
-      if (mousemoving) {  // mouse button was pressed, delay redisplay
-        delayeddisplay = true;
-      } 
-      else {
-        if (fullydisplayed ) return;
-        if (haveToUpdate == 6 || haveToUpdate == 3 || haveToUpdate == 4) return;
-        haveToUpdate = 7;
-      }
-  } else if (state == GLUT_ENTERED) {
-      showall = false;
-  }
-  
-}
-
-/**
- * This function is called after a mousebutton has been pressed.
- */
-void CallBackMouseFunc(int button, int state, int x, int y)
-{
+void selectPoints(int x, int y) {
 
   GLuint selectBuf[BUFSIZE];
   GLint hits;
   GLint viewport[4];
-
-  // Are we selecting points or moving the camera?
-  if(cameraNavMouseMode != 1) { // selecting points
-    if (state == GLUT_DOWN && (button == GLUT_LEFT_BUTTON || button == GLUT_RIGHT_BUTTON)) {
-      ///////////////////////////////////////
-
       if (selectOrunselect) {
         // set the matrix mode
         glMatrixMode(GL_MODELVIEW);
@@ -1077,6 +1039,52 @@ void CallBackMouseFunc(int button, int state, int x, int y)
       glPopMatrix();
       glutPostRedisplay();
       /////////////////////////////////////
+}
+//--------------------------------------------------------------------------------------
+void CallBackMouseFuncMoving(int button, int state, int x, int y)
+{
+
+  if( state == GLUT_DOWN) {
+    mousemoving = true;
+  } else {
+    mousemoving = false;
+    if (delayeddisplay) {
+      delayeddisplay = false;
+      if (fullydisplayed) return;
+      if (haveToUpdate == 6 || haveToUpdate == 3 || haveToUpdate == 4) return;
+      haveToUpdate = 7;
+    }
+  }
+}
+
+
+void CallBackEntryFunc(int state) {
+  if (state == GLUT_LEFT) {
+      if (mousemoving) {  // mouse button was pressed, delay redisplay
+        delayeddisplay = true;
+      } 
+      else {
+        if (fullydisplayed ) return;
+        if (haveToUpdate == 6 || haveToUpdate == 3 || haveToUpdate == 4) return;
+        haveToUpdate = 7;
+      }
+  } else if (state == GLUT_ENTERED) {
+      showall = false;
+  }
+  
+}
+
+
+/**
+ * This function is called after a mousebutton has been pressed.
+ */
+void CallBackMouseFunc(int button, int state, int x, int y)
+{
+
+  // Are we selecting points or moving the camera?
+  if(cameraNavMouseMode != 1) { // selecting points
+    if (state == GLUT_DOWN && (button == GLUT_LEFT_BUTTON || button == GLUT_RIGHT_BUTTON)) {
+      selectPoints(x,y);
     }
   } else {
     if( state == GLUT_DOWN) {
@@ -1151,6 +1159,8 @@ void CallBackMouseMotionFunc(int x, int y) {
     Y += transY;
     Z += transZ;
     haveToUpdate = 1;
+  } else {
+    selectPoints(x,y);
   }
 }
 
