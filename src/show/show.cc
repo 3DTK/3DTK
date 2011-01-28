@@ -844,6 +844,7 @@ int main(int argc, char **argv){
     unsigned long tp = octpts[i]->maxTargetPoints();
     if (tp > maximum_target_points) maximum_target_points = tp;
   }
+  if (maximum_target_points > LONG_MAX) maximum_target_points = LONG_MAX;
 
   cm->setCurrentType(PointType::USE_HEIGHT);
   ColorMap cmap;
