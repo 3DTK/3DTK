@@ -215,6 +215,18 @@ ELSE(WITH_HOGMAN)
   MESSAGE(STATUS "Without HOGMAN")
 ENDIF(WITH_HOGMAN)
 
+## LSSR
+OPTION(WITH_LSSR "Import LSSR. ON/OFF" ON)
+
+IF(WITH_LSSR)
+  include(ExternalProject)
+  ExternalProject_Add(lssr
+     SVN_REPOSITORY https://lssrtoolkit.svn.sourceforge.net/svnroot/lssrtoolkit/ 
+     SOURCE_DIR "${CMAKE_SOURCE_DIR}/3rdparty/lssr"
+     INSTALL_COMMAND mv ${CMAKE_SOURCE_DIR}/3rdparty/lssr/bin/mcubes ${CMAKE_SOURCE_DIR}/bin
+     && cp ${CMAKE_SOURCE_DIR}/3rdparty/lssr/bin/viewer ${CMAKE_SOURCE_DIR}/bin
+  )
+ENDIF(WITH_LSSR)
 
 OPTION(EXPORT_SHARED_LIBS "Whether to build additional shared libraries for use in other projects. ON/OFF" OFF)
 
