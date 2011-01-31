@@ -1,8 +1,11 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
-#include <GL/glut.h>
-#include <GL/glu.h>
+//#include <GL/glut.h>
+//#include <GL/glu.h>
+
+#include <glu.h>
+#include <glut.h>
 
 #ifndef _MSC_VER
 #include <stdbool.h>
