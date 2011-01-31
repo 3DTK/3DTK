@@ -151,7 +151,7 @@ ENDIF(WITH_SIFT)
 INCLUDE(CountProcessors)
 SET(NUMBER_OF_CPUS "${PROCESSOR_COUNT}" CACHE STRING "The number of processors to use (default: ${PROCESSOR_COUNT})" )
 
-# OPENMP 
+# OPEN
 FIND_PACKAGE(OpenMP)
 IF(OPENMP_FOUND)
   OPTION(WITH_OPENMP "Whether to use parallel processing capabilities of OPENMP. ON/OFF" ON)
@@ -232,8 +232,18 @@ IF(WIN32)
   SET(CMAKE_STATIC_LIBRARY_SUFFIX "32.lib")
 ELSE(WIN32)
   SET(ADDITIONAL_CFLAGS "-O3 -Wall -finline-functions -Wno-write-strings -Wno-char-subscripts" CACHE STRING"Additional flags given to the compiler (-O3 -Wall -finline-functions -Wno-write-strings)" )
+  # Add include path for OpenGL without GL/-prefix 
+  # to avoid the include incompatibility between MACOS 
+  # and linux
+    FIND_PATH(OPENGL_INC gl.h /usr/include/GL)
+    include_directories(${OPENGL_INC})
 ENDIF(WIN32)
 
+# Add OpenGL includes for MACOS if needed
+IF(APPLE)
+  include_directories(/System/Library/Frameworks/GLUT.framework/Headers)
+  include_directories(/System/Library/Frameworks/OpenGL.framework/Headers)
+ENDIF(APPLE)
 
 SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${ADDITIONAL_CFLAGS}")
 
