@@ -1,33 +1,29 @@
 #MAKEFLAGS += -j
 
-all: builddir .configured
-	@mkdir -p .build
-#	cd .build && cmake ..
-ifneq ($(MAKE),)
-	cd .build && $(MAKE) --no-print-directory
-else
-	cd .build && make --no-print-directory
+ifeq ($(MAKE),)
+	MAKE=make
 endif
 
-builddir:
-	@mkdir -p .build
+all: .configured
+	cd .build && $(MAKE) --no-print-directory
 
-.configured:
+config: .build
+	cd .build && ccmake ..
+	touch .configured
+
+.configured: .build
 	cd .build && cmake ..
 	touch .configured
 
-clean:
-	cd .build && make clean --no-print-directory & \
-	rm -rf .build & \
-	rm .configured  
+.build:
+	mkdir -p .build
 
+clean: .build
+	cd .build && $(MAKE) clean --no-print-directory
+	rm -rf .build
+	rm -f .configured
 
-config: builddir
-	touch .configured
-	cd .build && ccmake ../
-
-
-DOC     = doc/
+DOC = doc/
 docu: docu_html docu_latex docu_hl
 	echo
 	echo
@@ -48,7 +44,7 @@ docu_latex:
 	cd $(DOC)latex ; ps2pdf14 refman.ps refman.pdf
 	cp $(DOC)latex/refman.pdf $(DOC)
 
-docu_hl:	$(DOC)high_level_doc/documentation.tex
+docu_hl: $(DOC)high_level_doc/documentation.tex
 	cd $(DOC)high_level_doc ; latex documentation.tex
 	cd $(DOC)high_level_doc ; bibtex documentation
 	cd $(DOC)high_level_doc ; latex documentation.tex
