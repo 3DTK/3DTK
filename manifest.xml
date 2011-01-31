@@ -12,8 +12,8 @@
   <review status="unreviewed" notes="Still under development."/>
   <url>https://slam6d.svn.sourceforge.net/svnroot/slam6d</url>
   <export>
-    <cpp cflags="-I${prefix}/include -I${prefix}/3rdparty/ann_1.1.1_modified/include/ -DMAX_OPENMP_NUM_THREADS=8 -DOPENMP_NUM_THREADS=8 -DOPENMP  "
-      lflags="-Wl,-rpath,${prefix}/lib -lslam -L${prefix}/lib/ -lnewmat -fopenmp"/>
+    <cpp cflags="-I${prefix}/3rdparty/ -I${prefix}/include -I${prefix}/3rdparty/ann_1.1.1_modified/include/ -DMAX_OPENMP_NUM_THREADS=8 -DOPENMP_NUM_THREADS=8 -DOPENMP  "
+      lflags="-Wl,-rpath,${prefix}/lib -lslam -L${prefix}/lib/ -lnewmat_s -fopenmp"/>
   </export>
 
 </package>
