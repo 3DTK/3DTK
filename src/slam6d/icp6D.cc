@@ -182,7 +182,7 @@ int icp6D::match(Scan* PreviousScan, Scan* CurrentScan)
     }
     if (pairssize > 3) {
 	 if ((my_icp6Dminimizer->getAlgorithmID() == 1) ||
-		  (my_icp6Dminimizer->getAlgorithmID() == 2)) {
+		  (my_icp6Dminimizer->getAlgorithmID() == 2) || (my_icp6Dminimizer->getAlgorithmID() == 9)) {
 	   ret = my_icp6Dminimizer->Point_Point_Align_Parallel(OPENMP_NUM_THREADS,
 												n, sum, centroid_d, centroid_m, Si, 
 												alignxf);
