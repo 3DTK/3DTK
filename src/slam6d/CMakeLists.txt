@@ -88,7 +88,7 @@ SET(SCANLIB_SRCS
   graph.cc          icp6Dapx.cc     icp6D.cc          icp6Dsvd.cc 
   icp6Dortho.cc     icp6Dquat.cc    icp6Dhelix.cc     icp6Dlumeuler.cc 
   icp6Dlumquat.cc   icp6Ddual.cc    lum6Deuler.cc     lum6Dquat.cc
-  icp6DsvdEigen.cc  ghelix6DQ2.cc   gapx6D.cc         graphToro.cc      
+  ghelix6DQ2.cc   gapx6D.cc         graphToro.cc      
   graphHOG-Man.cc   elch6D.cc       elch6Dquat.cc     elch6DunitQuat.cc 
   elch6Dslerp.cc    elch6Deuler.cc  loopToro.cc       loopHOG-Man.cc    
   point_type.cc 
