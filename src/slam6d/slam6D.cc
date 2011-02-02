@@ -127,7 +127,6 @@ void usage(char* prog)
     << "           6 = small angle approximation" << endl
     << "           7 = Lu & Milios style, i.e., uncertainty based, with Euler angles" << endl
     << "           8 = Lu & Milios style, i.e., uncertainty based, with Quaternion" << endl
-    << "           9 = singular value decomposition using Eigen libraray" << endl
     << endl
     << bold << "  -A" << normal << " NR, " << bold << "--anim=" << normal << "NR   [default: first and last frame only]" << endl
     << "         if specified, use only every NR-th frame for animation" << endl
@@ -337,7 +336,7 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &rand,
     {
       case 'a':
         algo = atoi(optarg);
-        if ((algo < 0) || (algo > 9)) {
+        if ((algo < 0) || (algo > 8)) {
           cerr << "Error: ICP Algorithm not available." << endl;
           exit(1);
         }	   
@@ -749,9 +748,6 @@ int main(int argc, char **argv)
       break;
     case 8 :
       my_icp6Dminimizer = new icp6D_LUMQUAT(quiet);
-      break;
-    case 9 : 
-      my_icp6Dminimizer = new icp6D_SVD_Eigen(quiet);
       break;
   }
 
