@@ -42,7 +42,6 @@ using std::ifstream;
 #include "slam6d/icp6Dlumeuler.h"
 #include "slam6d/icp6Dlumquat.h"
 #include "slam6d/icp6D.h"
-#include "slam6d/icp6DsvdEigen.h"
 #ifdef WITH_CUDA
 #include "slam6d/cuda/icp6Dcuda.h"
 #endif
