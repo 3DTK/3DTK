@@ -11,6 +11,7 @@ double ptstodisplay = 100000;
 double lastfps = idealfps;    // last frame rate    
 int pointmode = -1;
 
+float neardistance = 10.0;
 float fardistance = 40000.0;
 float oldfardistance = 40000.0;
 
@@ -51,7 +52,7 @@ void DrawPoints(GLenum mode)
         if (pointmode == 1 || (showall && pointmode == 0) ) {
           octpts[iterator]->displayOctTreeAllCulled();
         } else {
-          octpts[iterator]->displayOctTreeCulled(ptstodisplay/(int)octpts.size());
+          octpts[iterator]->displayOctTreeCulled(ptstodisplay);
         }
 #else
       for (unsigned int jterator = 0; jterator < vvertexArrayList[iterator].size(); jterator++) {
@@ -75,13 +76,13 @@ void DrawPoints(GLenum mode)
   cout << "SELECT MODEe " << selected_points[0].size() << endl;
       // select points mode
       // ------------------
+  GLuint name = 0;
       for(int iterator = (int)octpts.size()-1; iterator >= 0; iterator--) {
         glPushMatrix();
         glMultMatrixd(MetaMatrix[iterator].back());
 
         glColor3f(1.0, 0.0, 0.0);
         glPointSize(pointsize + 2.0);
-        GLuint name = 0;
         for ( set<sfloat*>::iterator it = selected_points[iterator].begin();
             it != selected_points[iterator].end(); it++) {
           glLoadName(name++);
@@ -134,7 +135,7 @@ void DrawPoints(GLenum mode)
           octpts[iterator]->displayOctTreeAllCulled();
           //octpts[iterator]->displayOctTree(pointsize * pointsize * 5);
         } else {
-          octpts[iterator]->displayOctTreeCulled(ptstodisplay/(int)octpts.size());
+          octpts[iterator]->displayOctTreeCulled(ptstodisplay);
           //octpts[iterator]->displayOctTree(pointsize*pointsize*pointsize*10);
         }
         glColor3f(1.0, 0.0, 0.0);
@@ -954,91 +955,92 @@ void selectPoints(int x, int y) {
   GLuint selectBuf[BUFSIZE];
   GLint hits;
   GLint viewport[4];
-      if (selectOrunselect) {
-        // set the matrix mode
-        glMatrixMode(GL_MODELVIEW);
-        // init modelview matrix
-        glLoadIdentity();
+  if (selectOrunselect) {
+    // set the matrix mode
+    glMatrixMode(GL_MODELVIEW);
+    // init modelview matrix
+    glLoadIdentity();
 
-        // do the model-transformation
-        if (cameraNavMouseMode == 1) {
-          glRotated( mouseRotX, 1, 0, 0);
-          glRotated( mouseRotY, 0, 1, 0);
-        } else {
-          double t[3] = {0,0,0};
-          double mat[16];
-          QuatToMatrix4(quat, t, mat);
-          glMultMatrixd(mat);
+    // do the model-transformation
+    if (cameraNavMouseMode == 1) {
+      glRotated( mouseRotX, 1, 0, 0);
+      glRotated( mouseRotY, 0, 1, 0);
+    } else {
+      double t[3] = {0,0,0};
+      double mat[16];
+      QuatToMatrix4(quat, t, mat);
+      glMultMatrixd(mat);
 
-          glGetFloatv(GL_MODELVIEW_MATRIX, view_rotate_button);
-          double rPT[3];
-          Matrix4ToEuler(mat, rPT);
-          mouseRotX = deg(rPT[0]);
-          mouseRotY = deg(rPT[1]);
+      glGetFloatv(GL_MODELVIEW_MATRIX, view_rotate_button);
+      double rPT[3];
+      Matrix4ToEuler(mat, rPT);
+      mouseRotX = deg(rPT[0]);
+      mouseRotY = deg(rPT[1]);
+    }
+    glui2->sync_live();
+    glui2->show();
+    glTranslated(X, Y, Z);       // move camera	
+
+    sfloat *sp2 = 0;
+    for(int iterator = (int)octpts.size()-1; iterator >= 0; iterator--) {
+      if (!selected_points[iterator].empty()) sp2 = *selected_points[iterator].begin();
+
+      //        selected_points[iterator].clear();
+    }
+    for(int iterator = (int)octpts.size()-1; iterator >= 0; iterator--) {
+      glPushMatrix();
+      glMultMatrixd(MetaMatrix[iterator].back());
+      calcRay(x, y, 1.0, 40000.0);
+      if (select_voxels) {
+        octpts[iterator]->selectRay(selected_points[iterator], selection_depth);
+      } else if (brush_size == 0) {
+        sfloat *sp = 0;
+        octpts[iterator]->selectRay(sp);
+        if (sp != 0) {
+          cout << "Selected point: " << sp[0] << " " << sp[1] << " " << sp[2] << endl;
+
+          if (sp2 != 0)
+            cout << "Distance to last point: " << sqrt( sqr(sp2[0] - sp[0]) + sqr(sp2[1] - sp[1]) +sqr(sp2[2] - sp[2])  ) << endl; 
+
+          selected_points[iterator].insert(sp);
         }
-        glui2->sync_live();
-        glui2->show();
-        glTranslated(X, Y, Z);       // move camera	
-
-        sfloat *sp2 = 0;
-        for(int iterator = (int)octpts.size()-1; iterator >= 0; iterator--) {
-          if (!selected_points[iterator].empty()) sp2 = *selected_points[iterator].begin();
-
-          //        selected_points[iterator].clear();
-        }
-        for(int iterator = (int)octpts.size()-1; iterator >= 0; iterator--) {
-          glPushMatrix();
-          glMultMatrixd(MetaMatrix[iterator].back());
-          calcRay(x, y, 1.0, 40000.0);
-          if (select_voxels) {
-            octpts[iterator]->selectRay(selected_points[iterator], selection_depth);
-          } else if (brush_size == 0) {
-            sfloat *sp = 0;
-            octpts[iterator]->selectRay(sp);
-            if (sp != 0) {
-              cout << "Selected point: " << sp[0] << " " << sp[1] << " " << sp[2] << endl;
-
-              if (sp2 != 0)
-                cout << "Distance to last point: " << sqrt( sqr(sp2[0] - sp[0]) + sqr(sp2[1] - sp[1]) +sqr(sp2[2] - sp[2])  ) << endl; 
-
-              selected_points[iterator].insert(sp);
-            }
-          } else { // select multiple points with a given brushsize
-            octpts[iterator]->selectRayBrushSize(selected_points[iterator], brush_size);
-          }
-
-          glPopMatrix();
-        }
-
-      } else {
-        // unselect points
-        glGetIntegerv(GL_VIEWPORT, viewport);
-
-        glSelectBuffer(BUFSIZE, selectBuf);
-        (void) glRenderMode(GL_SELECT);
-
-        glInitNames();
-        glPushName(0);
-
-        glMatrixMode(GL_PROJECTION);
-        glPushMatrix();
-        glLoadIdentity();
-
-        gluPickMatrix((GLdouble)x, (GLdouble)(viewport[3]-y), 10.0, 10.0, viewport);
-        gluPerspective(cangle, aspect, 50.0, fardistance); 
-        glMatrixMode(GL_MODELVIEW);
-        DisplayItFunc(GL_SELECT);
-
-        glMatrixMode(GL_PROJECTION);
-        glPopMatrix();
-        glMatrixMode(GL_MODELVIEW);
-
-        hits = glRenderMode(GL_RENDER);                       // get hits
-        ProcessHitsFunc(hits, selectBuf);
+      } else { // select multiple points with a given brushsize
+        octpts[iterator]->selectRayBrushSize(selected_points[iterator], brush_size);
       }
+
       glPopMatrix();
-      glutPostRedisplay();
-      /////////////////////////////////////
+    }
+
+  } else {
+    // unselect points
+    glGetIntegerv(GL_VIEWPORT, viewport);
+
+    glSelectBuffer(BUFSIZE, selectBuf);
+    (void) glRenderMode(GL_SELECT);
+
+    glInitNames();
+    glPushName(0);
+
+    glMatrixMode(GL_PROJECTION);
+    glPushMatrix();
+    glLoadIdentity();
+
+//    gluPickMatrix((GLdouble)x, (GLdouble)(viewport[3]-y), 10.0, 10.0, viewport);
+    gluPickMatrix((GLdouble)x, (GLdouble)(viewport[3]-y), brush_size*2, brush_size*2, viewport);
+    gluPerspective(cangle, aspect, neardistance, fardistance); 
+    glMatrixMode(GL_MODELVIEW);
+    DisplayItFunc(GL_SELECT);
+
+    glMatrixMode(GL_PROJECTION);
+    glPopMatrix();
+    glMatrixMode(GL_MODELVIEW);
+
+    hits = glRenderMode(GL_RENDER);                       // get hits
+    ProcessHitsFunc(hits, selectBuf);
+  }
+  glPopMatrix();
+  glutPostRedisplay();
+  /////////////////////////////////////
 }
 //--------------------------------------------------------------------------------------
 void CallBackMouseFuncMoving(int button, int state, int x, int y)
@@ -1408,7 +1410,7 @@ void CallBackReshapeFunc(int width, int height)
     // angle, aspect, near clip, far clip
     // get matrix
 //    gluPerspective(cangle, aspect, 1.0, 40000.0);
-    gluPerspective(cangle, aspect, 50.0, fardistance); 
+    gluPerspective(cangle, aspect, neardistance, fardistance); 
 
     // now use modelview-matrix as current matrix
     glMatrixMode(GL_MODELVIEW);
