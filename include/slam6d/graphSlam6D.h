@@ -45,6 +45,7 @@ public:
 
   void writeMatrixPGM(const NEWMAT::Matrix &G);
   void set_mdmll(double mdmll);
+  inline void set_quiet(bool _quiet) { quiet = _quiet;};
   
 protected:
   /**
