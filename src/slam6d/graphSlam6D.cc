@@ -117,6 +117,52 @@ void graphSlam6D::matchGraph6Dautomatic(vector <Scan *> allScans, int nrIt, int 
   return;
 }
 
+
+Graph *graphSlam6D::computeGraph6Dautomatic(vector <Scan *> allScans, int clpairs) 
+{
+  // the IdentityMatrix to transform some Scans with
+  double id[16];
+  M4identity(id);
+
+  int i = 0;
+
+  cout << "Generate graph ... " << flush;
+  i++;
+  Graph *gr = new Graph(0, false);
+  int j, maxj = (int)allScans.size();
+#ifdef _OPENMP
+  omp_set_num_threads(OPENMP_NUM_THREADS);
+#pragma omp parallel for schedule(dynamic)
+#endif
+  for (j = 0; j <  maxj; j++) {
+#ifdef _OPENMP
+    int thread_num = omp_get_thread_num();
+#else
+    int thread_num = 0;
+#endif
+    for (int k = 0; k < (int)allScans.size(); k++) {
+      if (j == k) continue;
+      Scan * FirstScan  = allScans[j];
+      Scan * SecondScan = allScans[k];
+      double centroid_d[3] = {0.0, 0.0, 0.0};
+      double centroid_m[3] = {0.0, 0.0, 0.0};
+      vPtPair temp;
+      Scan::getPtPairs(&temp, FirstScan, SecondScan, thread_num,
+          my_icp->get_rnd(), (int)max_dist_match2_LUM,
+          centroid_m, centroid_d);
+      if ((int)temp.size() > clpairs) {
+#ifdef _OPENMP
+#pragma omp critical
+#endif
+        gr->addLink(j, k);  
+      } 
+    }
+  }
+  cout << "done" << endl;
+
+  return gr;
+}
+
 /**
  * This function is used to solve the system of linear eq.
  *
