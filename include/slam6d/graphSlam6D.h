@@ -37,6 +37,7 @@ public:
   
   void matchGraph6Dautomatic(vector <Scan*> MetaScan, int nrIt, double cldist, int loopsize);
   void matchGraph6Dautomatic(vector <Scan*> MetaScan, int nrIt, int clpairs, int loopsize);
+  Graph *computeGraph6Dautomatic(vector <Scan *> allScans, int clpairs); 
 
   NEWMAT::ColumnVector solveSparseCholesky(const NEWMAT::Matrix &G, const NEWMAT::ColumnVector &B);
   NEWMAT::ColumnVector solveSparseQR(const NEWMAT::Matrix &G, const NEWMAT::ColumnVector &B);
