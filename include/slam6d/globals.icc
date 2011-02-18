@@ -1232,4 +1232,17 @@ static inline void RPYEulerQuat(const double *euler, double *quat)
 	quat[3] = (_r[1][0] - _r[0][1])>=0?fabs(_z):-fabs(_z);
 }
 
+
+inline void transform3(const double *alignxf, double *point)
+{
+  double x_neu, y_neu, z_neu;
+  x_neu = point[0] * alignxf[0] + point[1] * alignxf[4] + point[2] * alignxf[8];
+  y_neu = point[0] * alignxf[1] + point[1] * alignxf[5] + point[2] * alignxf[9];
+  z_neu = point[0] * alignxf[2] + point[1] * alignxf[6] + point[2] * alignxf[10];
+  point[0] = x_neu + alignxf[12];
+  point[1] = y_neu + alignxf[13];
+  point[2] = z_neu + alignxf[14];
+}
+
+
 #endif
