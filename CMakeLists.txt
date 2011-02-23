@@ -66,13 +66,13 @@ ELSE(WITH_GRIDDER)
 ENDIF(WITH_GRIDDER)
 
 ## Home-made Laserscanner 
-OPTION(WITH_DETECTOR "Whether to build the Detector app for homemade laser scanners binary ON/OFF" OFF)
+OPTION(WITH_DAVID_3D_SCANNER "Whether to build the David scanner app for homemade laser scanners binary ON/OFF" OFF)
 
-IF(WITH_DETECTOR)
-  MESSAGE(STATUS "With Detector")
-ELSE(WITH_DETECTOR)
-  MESSAGE(STATUS "Without Detector")
-ENDIF(WITH_DETECTOR)
+IF(WITH_DAVID_3D_SCANNER)
+  MESSAGE(STATUS "With David scanner")
+ELSE(WITH_DAVID_3D_SCANNER)
+  MESSAGE(STATUS "Without David scanner")
+ENDIF(WITH_DAVID_3D_SCANNER)
 
 ## Tools 
 OPTION(WITH_TOOLS "Whether to build additional tools like convergence frame_to_graph etc. ON/OFF" ON)
