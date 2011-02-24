@@ -19,8 +19,8 @@ config: .build
 	mkdir -p .build
 
 clean: .build
-	cd .build && $(MAKE) clean --no-print-directory
-	rm -rf .build
+	-cd .build && $(MAKE) clean --no-print-directory
+	-rm -rf .build
 	rm -f .configured
 
 DOC = doc/
