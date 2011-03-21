@@ -256,7 +256,7 @@ set<sfloat *> *selected_points;
 /**
  * Select single points?  
  */
-int select_voxels         = 1;
+int select_voxels         = 0;
 /**
  * Select or unselect points ? 
  */
