@@ -79,7 +79,7 @@ void loopToro::close_loop(const vector <Scan *> &allScans, int first, int last, 
 
   vector <Scan *> meta_start;
   for(int i = first - 2; i <= first + 2; i++) {
-    if(i > 0) {
+    if(i >= 0) {
       meta_start.push_back(allScans[i]);
     }
   }

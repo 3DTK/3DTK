@@ -47,7 +47,7 @@ double graphToro::doGraphSlam6D(Graph gr, vector <Scan *> allScans, int nrIt)
     if(first != last-1) {
       vector <Scan *> meta_start;
       for(int i = first - 2; i <= first + 2; i++) {
-        if(i > 0) {
+        if(i >= 0) {
           meta_start.push_back(allScans[i]);
         }
       }
@@ -59,7 +59,7 @@ double graphToro::doGraphSlam6D(Graph gr, vector <Scan *> allScans, int nrIt)
 
       vector <Scan *> meta_end;
       for(int i = last - offset_last_start; i <= last + offset_last_end && i < n; i++) {
-        if(i > 0) {
+        if(i >= 0) {
           meta_end.push_back(allScans[i]);
         }
       }
