@@ -31,7 +31,7 @@ using std::endl;
  * @param end Stops with this scan
  * @param dir The directory from which to read
  * @param maxDist Reads only Points up to this Distance
- * @param minDist Reads only Points from this Distance
+ * @param mindist Reads only Points from this Distance
  * @param euler Initital pose estimates (will not be applied to the points
  * @param ptss Vector containing the read points
  */
@@ -45,7 +45,7 @@ int ScanIO_uos::readScans(int start, int end, string &dir, int maxDist, int mind
   ifstream scan_in, pose_in;
 
   double maxDist2 = sqr(maxDist);
-  double minDist2 = sqr(minDist);
+  double minDist2 = sqr(mindist);
 
   int my_fileNr = fileCounter;
   
@@ -84,7 +84,7 @@ int ScanIO_uos::readScans(int start, int end, string &dir, int maxDist, int mind
     // load points up to a certain distance only
     // maxDist2 = -1 indicates no limitation
     if (maxDist == -1 || sqr(p.x) + sqr(p.y) + sqr(p.z) < maxDist2)
-    if (minDist == -1 || sqr(p.x) + sqr(p.y) + sqr(p.z) > minDist2)
+    if (mindist == -1 || sqr(p.x) + sqr(p.y) + sqr(p.z) > minDist2)
 	 ptss.push_back(p);
   }
   scan_in.close();
