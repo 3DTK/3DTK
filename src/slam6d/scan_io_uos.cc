@@ -45,6 +45,7 @@ int ScanIO_uos::readScans(int start, int end, string &dir, int maxDist, int mind
   ifstream scan_in, pose_in;
 
   double maxDist2 = sqr(maxDist);
+  double minDist2 = sqr(minDist);
 
   int my_fileNr = fileCounter;
   
@@ -83,6 +84,7 @@ int ScanIO_uos::readScans(int start, int end, string &dir, int maxDist, int mind
     // load points up to a certain distance only
     // maxDist2 = -1 indicates no limitation
     if (maxDist == -1 || sqr(p.x) + sqr(p.y) + sqr(p.z) < maxDist2)
+    if (minDist == -1 || sqr(p.x) + sqr(p.y) + sqr(p.z) > minDist2)
 	 ptss.push_back(p);
   }
   scan_in.close();
