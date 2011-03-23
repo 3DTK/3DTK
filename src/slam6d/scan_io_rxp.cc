@@ -24,86 +24,6 @@ using std::swap;
 using namespace scanlib;
 using namespace std;
 using namespace std::tr1;
-/**
- * The importer class is the interface to riegl's pointcloud class, and will convert their point struct to slam6d's point class.
- *
- * Code adapted from rivlib/example/pointcloudcpp.cpp available from http://www.riegl.com .
- */
-class importer
-    : public pointcloud
-{
-    vector<Point> *o;
-
-public:
-    importer(vector<Point> *o_, int maxDist, int minDist)
-        : pointcloud(false) // set this to true if you need gps aligned timing
-        , o(o_)
-    {
-      maxD = maxDist;
-      minD = minDist;
-    }
-
-protected:
-    int maxD;
-    int minD;
-    // overridden from pointcloud class
-    void on_echo_transformed(echo_type echo)
-    {
-            // targets is a member std::vector that contains all
-            // echoes seen so far, i.e. the current echo is always
-            // indexed by target_count-1.
-            target& t(targets[target_count - 1]);
-
-            // target.reflectance
-            // target.amplitude
-            // target.deviation
-            // target.time
-            // target.vertex  point coordinates
-            //
-            
-            Point p;
-/*
-            p.x = t.vertex[0]*100.0;
-            p.y = t.vertex[2]*100.0;
-            p.z = t.vertex[1]*100.0;*/
-            p.x = t.vertex[1]*-100.0;
-            p.y = t.vertex[2]*100.0;
-            p.z = t.vertex[0]*100.0;
-
-
-            p.reflectance = t.reflectance;
-            p.amplitude   = t.amplitude;
-            p.deviation   = t.deviation;
-            
-
-            if ( pointcloud::first == echo ) {
-              p.type = 0;
-            } else if ( pointcloud::interior == echo ) {
-              p.type = 1;              
-            } else if ( pointcloud::last == echo ) {
-              p.type = 10;
-            } else if ( pointcloud::single == echo ){
-              p.type = 9;
-            }
-            if(maxD == -1 || sqr(p.x) + sqr(p.y) + sqr(p.z) < maxD*maxD) {
-              if(minD == -1 || sqr(p.x) + sqr(p.y) + sqr(p.z) > minD*minD) {
-                o->push_back(p);
-              }
-            }
-    }
-
-    // overridden from basic_packets
-    // this function gets called when a the scanner emits a notification
-    // about an exceptional state.
-    void on_unsolicited_message(const unsolicited_message<iterator_type>& arg) {
-        basic_packets::on_unsolicited_message(arg);
-        // in this example we just print a warning to stderr
-        cerr << "WARNING: " << arg.message << endl;
-        // the following line would put out the entire content of the packet
-        // converted to ASCII format:
-        // cerr << arg << endl;
-    }
-};
 
 /**
  * Reads specified scans from given directory in
@@ -180,6 +100,51 @@ int ScanIO_rxp::readScans(int start, int end, string &dir, int maxDist, int minD
   fileCounter++;
   
   return fileCounter-1;
+}
+    
+void importer::on_echo_transformed(echo_type echo)
+{
+  // targets is a member std::vector that contains all
+  // echoes seen so far, i.e. the current echo is always
+  // indexed by target_count-1.
+  target& t(targets[target_count - 1]);
+
+  // target.reflectance
+  // target.amplitude
+  // target.deviation
+  // target.time
+  // target.vertex  point coordinates
+  //
+
+  Point p;
+  /*
+     p.x = t.vertex[0]*100.0;
+     p.y = t.vertex[2]*100.0;
+     p.z = t.vertex[1]*100.0;*/
+  p.x = t.vertex[1]*-100.0;
+  p.y = t.vertex[2]*100.0;
+  p.z = t.vertex[0]*100.0;
+
+
+  p.reflectance = t.reflectance;
+  p.amplitude   = t.amplitude;
+  p.deviation   = t.deviation;
+
+
+  if ( pointcloud::first == echo ) {
+    p.type = 0;
+  } else if ( pointcloud::interior == echo ) {
+    p.type = 1;              
+  } else if ( pointcloud::last == echo ) {
+    p.type = 10;
+  } else if ( pointcloud::single == echo ){
+    p.type = 9;
+  }
+  if(maxD == -1 || sqr(p.x) + sqr(p.y) + sqr(p.z) < maxD*maxD) {
+    if(minD == -1 || sqr(p.x) + sqr(p.y) + sqr(p.z) > minD*minD) {
+      o->push_back(p);
+    }
+  }
 }
 
 
