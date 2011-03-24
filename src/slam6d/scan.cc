@@ -1290,6 +1290,7 @@ bool Scan::toType(const char* string, reader_type &type) {
   else if (strcasecmp(string, "rts_map") == 0) type = RTS_MAP;
   else if (strcasecmp(string, "ifp") == 0) type = IFP;
   else if (strcasecmp(string, "riegl_txt") == 0) type = RIEGL_TXT;
+  else if (strcasecmp(string, "riegl_project") == 0) type = RIEGL_PROJECT;
   else if (strcasecmp(string, "riegl_rgb") == 0) type = RIEGL_RGB;
   else if (strcasecmp(string, "riegl_bin") == 0) type = RIEGL_BIN;
   else if (strcasecmp(string, "zahn") == 0) type = ZAHN;
@@ -1365,6 +1366,9 @@ void Scan::readScans(reader_type type,
     break;
   case RIEGL_TXT:
     lib_string = "scan_io_riegl_txt";
+    break;
+  case RIEGL_PROJECT:
+    lib_string = "scan_io_riegl_project";
     break;
   case RIEGL_RGB:
     lib_string = "scan_io_riegl_rgb";
