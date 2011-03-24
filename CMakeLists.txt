@@ -113,6 +113,8 @@ IF(WITH_RIVLIB)
   link_directories(${CMAKE_SOURCE_DIR}/3rdparty)
   SET(RIEGL_DIR ${CMAKE_SOURCE_DIR}/3rdparty/riegl/)
   SET(RIVLIB ${RIEGL_DIR}libscanlib-mt-s.a ${RIEGL_DIR}libctrllib-mt-s.a ${RIEGL_DIR}libboost_system-mt-s-1_43_0-vns.a pthread)
+  FIND_PACKAGE(LibXml2 )
+
 ELSE(WITH_RIVLIB)
   MESSAGE(STATUS "Do NOT compile a scan IO for RXP")
 ENDIF(WITH_RIVLIB)
