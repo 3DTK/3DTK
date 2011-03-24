@@ -56,6 +56,13 @@ ENDIF(WIN32)
 IF (WITH_RIVLIB)
   add_library(scan_io_rxp           SHARED scan_io_rxp.cc            )
   target_link_libraries(scan_io_rxp ${RIVLIB})
+
+  IF (WITH_RIEGL_PROJECT)
+    FIND_PACKAGE(LibXml2 REQUIRED)
+    include_directories(${LIBXML2_INCLUDE_DIR})
+    add_library(scan_io_riegl_project           SHARED scan_io_riegl_project.cc            )
+    target_link_libraries(scan_io_riegl_project ${RIVLIB} scan_io_rxp ${LIBXML2_LIBRARIES})
+  ENDIF(WITH_RIEGL_PROJECT)
 ENDIF(WITH_RIVLIB) 
 
 IF(WITH_TOOLS)
