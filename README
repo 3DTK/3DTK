@@ -50,15 +50,14 @@ bin/slam6D --max=500 -r 10.2 -i 20 --metascan dat
 bin/show dat
 
 (using hannover1.tgz from http://kos.informatik.uni-osnabrueck.de/3Dscans/)
-bin/slam6D -s 1 -e 65 -r 10 -i 100 -d 75 -D 250 --epsICP=0.00001 
-           -I 50 --cldist=750 -L 0 -G 1 /home/nuechter/dat/dat_hannover1
-bin/show -s 1 -e 65 /home/nuechter/dat/dat_hannover1
+bin/slam6D -q -r 10 -s 1 -d 150 -L 4 --cldist=950 --distLoop 150 --iterLoop 500
+           -G 1 -D -1 --DlastSLAM 250 --graphDist 200 -I 50 hannover1
+bin/show -s 1 hannover1
 
 (using hannover2.tgz from http://kos.informatik.uni-osnabrueck.de/3Dscans/)
-bin/slam6D -q -s 23 -e 924 -r 10 --anim=-2 -a 2 -d 75 -L 4 --cldist=1500 -G 1
-           -D -1 --DlastSLAM 250 --graphDist 200 -I 50 -f rts 
-		 /home/nuechter/dat/dat_hannover2
-bin/show -s 22 -e 924 -f rts /home/nuechter/dat/dat_hannover2
+bin/slam6D -q -r 10 -f rts -s 23 -d 75 -L 4 --cldist=1500 -G 1 -D -1
+           --DlastSLAM 250 --graphDist 200 -I 50 hannover2
+bin/show -f rts -s 23 hannover2
 
 (using kvarntorp_mine.tgz (dat_mine1) form http://kos.informatik.uni-osnabrueck.de/3Dscans/)
 bin/slam6D -s 1 -e 76 -r 10 -m 3000 -d 50 -i 1000 --epsICP=0.000001 
