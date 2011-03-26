@@ -97,7 +97,7 @@ SET(SCANLIB_SRCS
   ghelix6DQ2.cc   gapx6D.cc         graphToro.cc      
   graphHOG-Man.cc   elch6D.cc       elch6Dquat.cc     elch6DunitQuat.cc 
   elch6Dslerp.cc    elch6Deuler.cc  loopToro.cc       loopHOG-Man.cc    
-  point_type.cc 
+  point_type.cc	icp6Dquatscale.cc
   )
 
 add_library(scanlib STATIC ${SCANLIB_SRCS})
