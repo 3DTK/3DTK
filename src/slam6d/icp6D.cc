@@ -98,6 +98,9 @@ int icp6D::match(Scan* PreviousScan, Scan* CurrentScan)
   double ret = 0.0, prev_ret = 0.0, prev_prev_ret = 0.0;
   int iter = 0;
   double alignxf[16];
+	if(my_icp6Dminimizer->getAlgorithmID() == 9) {
+		#undef _OPENMP
+	}
   for (iter = 0; iter < max_num_iterations; iter++) {
 
     prev_prev_ret = prev_ret;
@@ -192,7 +195,7 @@ int icp6D::match(Scan* PreviousScan, Scan* CurrentScan)
 												pairs,
 												alignxf);
 	 } else {
-	   cout << "This parallel minimization algorithm is not not implemented !!!" << endl;
+	   cout << "This parallel minimization algorithm is not implemented !!!" << endl;
 	   exit(-1);
 	 }
     } else {
