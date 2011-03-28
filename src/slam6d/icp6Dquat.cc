@@ -1,6 +1,6 @@
 /** @file 
  *  @brief Implementation of the ICP error function minimization via quaternions
- *  @author Andreas Nuechter. Institute of Computer Science, University of Osnabrueck, Germany.
+ *  @author Andreas Nuechter. Jacobs University Bremen gGmbH, Germany.
  */
 
 #include "slam6d/icp6Dquat.h"
@@ -132,9 +132,6 @@ double icp6D_QUAT::Point_Point_Align(const vector<PtPair>& pairs, double *alignf
   alignfx[12] = centroid_m[0] - m[0][0]*centroid_d[0] - m[0][1]*centroid_d[1] - m[0][2]*centroid_d[2];
   alignfx[13] = centroid_m[1] - m[1][0]*centroid_d[0] - m[1][1]*centroid_d[1] - m[1][2]*centroid_d[2];
   alignfx[14] = centroid_m[2] - m[2][0]*centroid_d[0] - m[2][1]*centroid_d[1] - m[2][2]*centroid_d[2];
-/*  alignfx[12] *= -1;
-  alignfx[13] *= -1;
-  alignfx[14] *= -1;*/
 
   return error;
 }
