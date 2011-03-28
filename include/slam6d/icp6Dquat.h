@@ -1,7 +1,7 @@
 /** @file 
  *  @brief Definition of the ICP error function minimization
  *  @author Kai Lingemann. Institute of Computer Science, University of Osnabrueck, Germany.
- *  @author Andreas Nuechter. Institute of Computer Science, University of Osnabrueck, Germany.
+ *  @author Andreas Nuechter. Jacobs University Bremen gGmbH, Germany.
  */
 
 #ifndef __ICP6DQUAT_H__
@@ -30,7 +30,7 @@ public:
 							 const double Si[OPENMP_NUM_THREADS][9], double *alignxf);
   inline int getAlgorithmID() { return 1; }; 
 
-private:
+protected:
   void   quaternion2matrix(double *q, double m[3][3]);
   int    ferrari(double a, double b, double c, double d, double rts[4]);
   int    qudrtc(double b, double c, double rts[4]);
