@@ -265,10 +265,21 @@ int main(int argc, char **argv)
    
      
     ofstream redptsout(scanFileName.c_str());
-	  for (int j = 0; j < Scan::allScans[0]->get_points_red_size(); j++) {
-	       redptsout << Scan::allScans[0]->get_points_red()[j][0] << " "
+    for (int j = 0; j < Scan::allScans[0]->get_points_red_size(); j++) {
+	       // Transform points back into local coordinate system
+         double invMat[16];
+         M4inv(Scan::allScans[0]->get_transMat(), invMat);
+         
+         Point p(Scan::allScans[0]->get_points_red()[j]);
+         p.transform(invMat);
+         redptsout << p.x << " " << p.y << " " << p.z << endl;
+         
+         /*
+         //Points in global coordinate system
+         redptsout << Scan::allScans[0]->get_points_red()[j][0] << " "
 			   << Scan::allScans[0]->get_points_red()[j][1] << " "
 			   << Scan::allScans[0]->get_points_red()[j][2] << endl;
+         */
 	  }
     redptsout.close();
     redptsout.clear();
