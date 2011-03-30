@@ -701,29 +701,8 @@ int main(int argc, char **argv)
   //@@@ to do :-)
 
   // Get Scans
-  Scan::readScans(type, start, end, dir, maxDist, minDist, true);
-
-  int end_reduction = (int)Scan::allScans.size();
-#ifdef _OPENMP
-#pragma omp parallel for schedule(dynamic)
-#endif
-  for (int iterator = 0; iterator < end_reduction; iterator++) {
-    if (red > 0) {
-      cout << "Reducing Scan No. " << iterator << endl;
-    } else {
-      cout << "Copying Scan No. " << iterator << endl;
-    }
-    // reduction filter for current scan!
-    Scan::allScans[iterator]->calcReducedPoints(red, octree);
-  }
-
-  Scan::createTrees(use_cache, cuda_enabled);
-
-  // at this point the points vector can not be used anymore!!!
-  for (int iterator = 0; iterator < end_reduction; iterator++) {
-    Scan::allScans[iterator]->clearPoints();
-  }
-
+  Scan::readScansRedSearch(type, start, end, dir, maxDist, minDist, red, octree, use_cache, cuda_enabled, true);
+  
   icp6Dminimizer *my_icp6Dminimizer = 0;
   switch (algo) {
     case 1 :

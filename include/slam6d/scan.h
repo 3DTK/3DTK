@@ -145,6 +145,13 @@ public:
   static void readScans(reader_type type,
 				    int start, int end, string &dir, int maxDist, int minDist,
 				    bool openFileForWriting = false);  
+  static void readScansRedSearch(reader_type type,
+				    int start, int end, string &dir, int maxDist, int minDist,
+            double voxelSize, int nrpts, // reduction parameters
+            bool use_cache, bool cuda_enabled, 
+            bool openFileForWriting = false
+
+            );  
   inline const vector <Point>* get_points() const;
   inline double* const* get_points_red() const;
   inline void setPoints(vector <Point> *_points);
