@@ -234,7 +234,7 @@ void lum6DEuler::covarianceEuler(Scan *first, Scan *second,
 void lum6DEuler::FillGB3D(Graph *gr, Matrix* G, ColumnVector* B,vector<Scan *> allScans )
 {
 #ifdef _OPENMP
-#pragma omp parallel for
+#pragma omp parallel for schedule(dynamic)
 #endif
   for(int i = 0; i < gr->getNrLinks(); i++){
     int a = gr->getLink(i,0) - 1;
