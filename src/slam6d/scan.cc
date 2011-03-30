@@ -1506,3 +1506,200 @@ void Scan::readScans(reader_type type,
   return;
 }
 
+
+void Scan::readScansRedSearch(reader_type type,
+		     int start, int end, string &_dir, int maxDist, int minDist, 
+         double voxelSize, int nrpts, // reduction parameters
+         bool use_cache, bool cuda_enabled, 
+		     bool openFileForWriting)
+{
+  outputFrames = openFileForWriting;
+  dir = _dir;
+
+  // load the lib
+  string lib_string;
+  switch (type) {
+  case UOS:
+    lib_string = "scan_io_uos";
+    break;
+  case UOS_MAP:
+    lib_string = "scan_io_uos_map";
+    break;
+  case UOS_FRAMES:
+    lib_string = "scan_io_uos_frames";
+    break;
+  case UOS_MAP_FRAMES:
+    lib_string = "scan_io_uos_map_frames";
+    break;
+  case UOS_RGB:
+    lib_string = "scan_io_uos_rgb";
+    break;
+  case OLD:
+    lib_string = "scan_io_old";
+    break;
+  case RTS:
+    lib_string = "scan_io_rts";
+    break;
+  case RTS_MAP:
+    lib_string = "scan_io_rts_map";
+    break;
+  case IFP:
+    lib_string = "scan_io_ifp";
+    break;
+  case RIEGL_TXT:
+    lib_string = "scan_io_riegl_txt";
+    break;
+  case RIEGL_PROJECT:
+    lib_string = "scan_io_riegl_project";
+    break;
+  case RIEGL_RGB:
+    lib_string = "scan_io_riegl_rgb";
+    break;
+  case RIEGL_BIN:
+    lib_string = "scan_io_riegl_bin";
+    break;
+  case ZAHN:
+    lib_string = "scan_io_zahn";
+    break;
+  case PLY:
+    lib_string = "scan_io_ply";
+    break;
+  case WRL:
+    lib_string = "scan_io_wrl";
+    break;
+  case XYZ:
+    lib_string = "scan_io_xyz";
+    break;
+  case ZUF:
+    lib_string = "scan_io_zuf";
+    break;
+  case ASC:
+    lib_string = "scan_io_asc";
+    break;
+  case IAIS:
+    lib_string = "scan_io_iais";
+    break;
+  case FRONT:
+    lib_string = "scan_io_front";
+    break;
+  case X3D:
+    lib_string = "scan_io_x3d";
+    break;
+  case RXP:
+    lib_string = "scan_io_rxp";
+    break;
+  case AIS:
+    lib_string = "scan_io_ais";
+    break;
+  case OCT:
+    lib_string = "scan_io_oct";
+    break;
+  case XYZR:
+    lib_string = "scan_io_xyzr";
+    break;
+  default:
+    cerr << "Don't recognize format " << type << endl;
+    exit(1);
+  }
+
+#ifdef WIN32
+  lib_string += ".dll";	
+#elif __APPLE__
+  lib_string = "lib/lib" + lib_string + ".dylib";	
+#else
+  lib_string = "lib" + lib_string + ".so";	
+#endif
+  cerr << "Loading shared lib " << lib_string;
+  
+#ifdef _MSC_VER
+  HINSTANCE hinstLib = LoadLibrary(lib_string.c_str());
+  if (!hinstLib) {
+    cerr << "Cannot load library: " << lib_string.c_str() << endl;
+    exit(-1);
+  }
+
+  cerr << " ... done." << endl << endl;
+
+  create_sio* create_ScanIO = (create_sio*)GetProcAddress(hinstLib, "create");
+
+  if (!create_ScanIO) {
+    cerr << "Cannot load symbol create " << endl;
+	FreeLibrary(hinstLib);
+    exit(-1);
+  }
+ 
+#else
+  void *ptrScanIO = dlopen(lib_string.c_str(), RTLD_LAZY);
+
+  if (!ptrScanIO) {
+    cerr << "Cannot load library: " << dlerror() << endl;
+    exit(-1);
+  }
+
+  cerr << " ... done." << endl << endl;
+  
+  // reset the errors
+  dlerror();
+
+  // load the symbols
+  create_sio* create_ScanIO = (create_sio*)dlsym(ptrScanIO, "create");
+  const char* dlsym_error = dlerror();
+  if (dlsym_error) {
+    cerr << "Cannot load symbol create: " << dlsym_error << endl;
+    exit(-1);
+  }
+#endif
+
+  // create an instance of ScanIO
+  ScanIO *my_ScanIO = create_ScanIO();
+
+  double eu[6] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+  vector <Point> ptss;
+  int _fileNr;
+
+#pragma omp parallel
+  {
+#pragma omp single nowait
+    {
+      // read Scan-by-scan until no scan is available anymore
+      while ((_fileNr = my_ScanIO->readScans(start, end, dir, maxDist, minDist, eu, ptss)) != -1) {
+        Scan *currentScan = new Scan(eu, maxDist);
+        currentScan->fileNr = _fileNr;
+
+        currentScan->points = ptss;    // copy points
+        ptss.clear();                  // clear points
+        allScans.push_back(currentScan);
+
+#pragma omp task
+        {
+          cout << "reducing scan " << currentScan->fileNr << " and creating searchTree" << endl;
+          currentScan->calcReducedPoints(voxelSize, nrpts);
+          currentScan->clearPoints();
+          currentScan->createTree(use_cache, cuda_enabled);
+        }
+      }
+    }
+  }
+#pragma omp taskwait
+
+#ifdef _MSC_VER
+  destroy_sio* destroy_ScanIO = (destroy_sio*)GetProcAddress(hinstLib, "destroy");
+
+  if (!destroy_ScanIO) {
+    cerr << "Cannot load symbol destroy " << endl;
+    FreeLibrary(hinstLib);
+    exit(-1);
+  }
+  destroy_ScanIO(my_ScanIO);
+#else
+  destroy_sio* destroy_ScanIO = (destroy_sio*)dlsym(ptrScanIO, "destroy");
+  dlsym_error = dlerror();
+  if (dlsym_error) {
+    cerr << "Cannot load symbol create: " << dlsym_error << endl;
+    exit(-1);
+  }
+  destroy_ScanIO(my_ScanIO);
+#endif
+  return;
+}
+
