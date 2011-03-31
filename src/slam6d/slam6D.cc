@@ -891,13 +891,12 @@ int main(int argc, char **argv)
   }
 
   cout << "Saving registration information in .frames files" << endl;
-  vector <Scan*>::iterator Iter = Scan::allScans.begin();
-  for( ; Iter != Scan::allScans.end(); ) {
-    Iter = Scan::allScans.begin();
-    delete (*Iter);
+  for (unsigned int i = 0; i < Scan::allScans.size(); i++) {
+    delete Scan::allScans[i];
     cout << ".";
     cout.flush(); 
   }
+
   Scan::allScans.clear();
 
   delete my_icp6Dminimizer;
