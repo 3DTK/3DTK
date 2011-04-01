@@ -183,6 +183,8 @@ template <class T> union bitunion {
 template <class T> class BOctTree : public SearchTree {
 
 public:
+  BOctTree() {
+  }
 
   template <class P>
   BOctTree(P * const* pts, int n, T voxelSize, PointType _pointtype = PointType(), bool _earlystop = false ) : pointtype(_pointtype), earlystop(_earlystop) {
@@ -328,6 +330,7 @@ public:
       }
       if (mask == UCHAR_MAX) break;
     }
+    largest_index = child_bit_depth[0] * 2 -1;
   }
 
   void deserialize(std::string filename ) {
@@ -1083,11 +1086,11 @@ void childcenter(int x, int y, int z, int &cx, int &cy, int &cz, char i, int siz
     ymin = max(params[threadNum].y-params[threadNum].closest_v, 0); 
     zmin = max(params[threadNum].z-params[threadNum].closest_v, 0);
 
-    int li = child_bit_depth[0] * 2 -1;
+//    int largest_index = child_bit_depth[0] * 2 -1;
     
-    xmax = min(params[threadNum].x+params[threadNum].closest_v, li);
-    ymax = min(params[threadNum].y+params[threadNum].closest_v, li);
-    zmax = min(params[threadNum].z+params[threadNum].closest_v, li);
+    xmax = min(params[threadNum].x+params[threadNum].closest_v, largest_index);
+    ymax = min(params[threadNum].y+params[threadNum].closest_v, largest_index);
+    zmax = min(params[threadNum].z+params[threadNum].closest_v, largest_index);
     
     unsigned char depth = 0;
     unsigned int child_bit;
@@ -1230,6 +1233,8 @@ static char map[8][8];
 static char imap[8][8]; 
 static char sequence2ci[8][256][8];  // maps preference to index in children array for every valid_mask and every case
 
+
+int largest_index;
 };
 
 
