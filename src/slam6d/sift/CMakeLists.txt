@@ -58,7 +58,9 @@ IF(WITH_SIFT)
     ${AUTOPANOCPP_DIR}saRemap.c ) 
   target_link_libraries(autopano-sift-c libsift jpeg tiff png z pano13 xml2 ANN stdc++)
 
-  FIND_PACKAGE(LibXml2 REQUIRED)
+  IF(NOT WIN32)
+    FIND_PACKAGE(LibXml2 REQUIRED)
+  ENDIF(NOT WIN32)
 
   SET(TERSCANREG_DIR library/)
   SET(TERSCANREGGL_DIR ${TERSCANREG_DIR}opengl_objects/)
