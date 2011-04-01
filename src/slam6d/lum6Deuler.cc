@@ -198,7 +198,7 @@ void lum6DEuler::covarianceEuler(Scan *first, Scan *second,
 	 }
 
 	 ss =  ss / (2*m - 3);
-	 ss = 1.0 / ss;
+   ss = 1.0 / ss;
 
 	 if (CD) {
 	   *CD = MZ * ss;
@@ -217,7 +217,7 @@ void lum6DEuler::covarianceEuler(Scan *first, Scan *second,
     *C = 0;
     if(CD)
       *CD = 0;
-    cerr << "Error calculating covariance matrix" << endl;
+    cerr << "Error calculating covariance matrix" << endl; 
 
   }
 }
@@ -244,8 +244,8 @@ void lum6DEuler::FillGB3D(Graph *gr, Matrix* G, ColumnVector* B,vector<Scan *> a
   
     //    cout << "i " << i << " a: " << a << " b: " << b << endl; 
 
-    Matrix Cab;
-    ColumnVector CDab;
+    Matrix Cab(6,6);
+    ColumnVector CDab(6);
     covarianceEuler(FirstScan, SecondScan, use_cache, (int)my_icp->get_rnd(), 
                     (int)max_dist_match2_LUM, &Cab, &CDab); 
 
