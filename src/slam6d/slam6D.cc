@@ -891,8 +891,10 @@ int main(int argc, char **argv)
   }
 
   cout << "Saving registration information in .frames files" << endl;
-  for (unsigned int i = 0; i < Scan::allScans.size(); i++) {
-    delete Scan::allScans[i];
+  vector <Scan*>::iterator Iter = Scan::allScans.begin();
+  for( ; Iter != Scan::allScans.end(); ) {
+    Iter = Scan::allScans.begin();
+    delete (*Iter);
     cout << ".";
     cout.flush(); 
   }
