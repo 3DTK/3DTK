@@ -1,13 +1,15 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
-//#include <GL/glut.h>
-//#include <GL/glu.h>
 
-#include <glu.h>
+
+#ifdef _MSC_VER
+#include <windows.h>
+#include <GL/glu.h>
+#include <GL/glut.h>
+#else
 #include <glut.h>
-
-#ifndef _MSC_VER
+#include <glu.h>
 #include <stdbool.h>
 #endif
 
