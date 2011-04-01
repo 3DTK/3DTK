@@ -5,7 +5,7 @@
  * @author Andreas Nuechter. Institute of Computer Science, University of Osnabrueck, Germany.
  */
 
-#ifdef _MSC_VER
+#ifdef _MSC_VER 
 #ifdef OPENMP
 #define _OPENMP
 #endif
