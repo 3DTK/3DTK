@@ -62,28 +62,27 @@ static void matrixToPos(const char* matrix, double *rPos, double *rPosTheta) {
     {
       ss >> inMatrix[n];
     }
-    inMatrix[3] *=100.0;
-    inMatrix[7] *=100.0;
-    inMatrix[11] *=100.0;
-    
-    tMatrix[0] =  inMatrix[0];
-    tMatrix[1] =  inMatrix[8];
-    tMatrix[2] =  inMatrix[4];
-    tMatrix[3] =  inMatrix[12];
-    tMatrix[4] =  inMatrix[2];
-    tMatrix[5] =  inMatrix[10];
-    tMatrix[6] =  inMatrix[6];
-    tMatrix[7] =  inMatrix[14];
-    tMatrix[8] =  inMatrix[1];
-    tMatrix[9] =  inMatrix[9];
-    tMatrix[10] = inMatrix[5];
-    tMatrix[11] = inMatrix[13];
-    tMatrix[12] = inMatrix[3];
-    tMatrix[13] = inMatrix[11]; 
-    tMatrix[14] = inMatrix[7]; 
+    tMatrix[0] = inMatrix[5];
+    tMatrix[1] = -inMatrix[9];
+    tMatrix[2] = -inMatrix[1];
+    tMatrix[3] = -inMatrix[13];
+    tMatrix[4] = -inMatrix[6];
+    tMatrix[5] = inMatrix[10];
+    tMatrix[6] = inMatrix[2];
+    tMatrix[7] = inMatrix[14];
+    tMatrix[8] = -inMatrix[4];
+    tMatrix[9] = inMatrix[8];
+    tMatrix[10] = inMatrix[0];
+    tMatrix[11] = inMatrix[12];
+    tMatrix[12] = -inMatrix[7];
+    tMatrix[13] = inMatrix[11];
+    tMatrix[14] = inMatrix[3];
     tMatrix[15] = inMatrix[15];
 
     Matrix4ToEuler(tMatrix, rPosTheta, rPos);
+    rPos[0] *= 100;
+    rPos[1] *= 100;
+    rPos[2] *= 100;
 }
 
 static int getPaths(const char* filename) {
@@ -92,7 +91,6 @@ static int getPaths(const char* filename) {
   xmlDocPtr doc;
   xmlXPathContextPtr xpathCtx;
   xmlXPathObjectPtr xpathObj;
-  //const xmlChar* xpathExpr = BAD_CAST "/project/scanpositions/scanposition/sop/matrix";
   const xmlChar* names = BAD_CAST "/project/scanpositions/scanposition";
 
   /* Load XML document */
@@ -150,7 +148,8 @@ static int getPaths(const char* filename) {
       // put together filename
       string filename = "";
       filename = "SCANS/" + (string)POSITIONN + "/SINGLESCANS/" + (string)FILEN + ""; 
-      printf("%s\n", filename.c_str());
+      //cout << rPos[0] << " " << rPos[1] << " " << rPos[2] << " " << filename << endl;
+      cout << "Project Scan " << filename << " is mapped to index " << i << endl;
       filenames.push_back(filename);
     }
 
@@ -221,7 +220,7 @@ int ScanIO_riegl_project::readScans(int start, int end, string &dir, int maxDist
   for (unsigned int i = 0; i <= 5; i++) euler[i] = eulers[fileCounter][i]; 
 
   cout << " @ pose (" << euler[0] << "," << euler[1] << "," << euler[2]
-	  << "," << euler[3] << "," << euler[4] << ","  << euler[5] << ")" << endl;
+	  << "," << deg(euler[3]) << "," << deg(euler[4]) << ","  << deg(euler[5]) << ")" << endl;
 
   // open scanfile
   shared_ptr<basic_rconnection> rc;
