@@ -621,7 +621,7 @@ void Scan::calcReducedPoints(double voxelSize, int nrpts)
 	  points_red[i][1] = points[i].y;
 	  points_red[i][2] = points[i].z;
     }
-    transform(transMatOrg, INVALID); //transform points to initial position
+//    transform(transMatOrg, INVALID); //transform points to initial position
     // update max num point in scan iff you have to do so
     if (points_red_size > (int)max_points_red_size) max_points_red_size = points_red_size;
     return;
@@ -677,7 +677,7 @@ void Scan::calcReducedPoints(double voxelSize, int nrpts)
   }
   delete [] ptsOct;
 
-  transform(transMatOrg, INVALID); //transform points to initial position
+//  transform(transMatOrg, INVALID); //transform points to initial position
 
   // update max num point in scan iff you have to do so
   if (points_red_size > (int)max_points_red_size) max_points_red_size = points_red_size;
@@ -1674,6 +1674,7 @@ void Scan::readScansRedSearch(reader_type type,
         {
           cout << "reducing scan " << currentScan->fileNr << " and creating searchTree" << endl;
           currentScan->calcReducedPoints(voxelSize, nrpts);
+          currentScan->transform(currentScan->transMatOrg, INVALID); //transform points to initial position
           currentScan->clearPoints();
           currentScan->createTree(use_cache, cuda_enabled);
         }
