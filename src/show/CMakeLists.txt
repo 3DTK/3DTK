@@ -1,7 +1,7 @@
 IF (WITH_SHOW)
 
   include_directories(${OPENGL_INCLUDE_DIR})
-  add_executable(show show.cc  NurbsPath.cc  PathGraph.cc vertexarray.cc  viewcull.cc colormanager.cc compacttree.cc scancolormanager.cc)
+  add_executable(show show.cc  NurbsPath.cc  PathGraph.cc vertexarray.cc  viewcull.cc colormanager.cc compacttree.cc scancolormanager.cc display.cc)
 
   IF(WIN32)
     target_link_libraries(show glui ${CMAKE_SOURCE_DIR}/windows/glut32.lib)

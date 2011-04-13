@@ -43,6 +43,7 @@ using std::exception;
 #endif
 
 #include "slam6d/point_type.h"
+#include "show/display.h"
 
 //#define USE_COMPACT_TREE 1
 /**
@@ -51,6 +52,7 @@ using std::exception;
  */
 vector< vector<vertexArray*> > vvertexArrayList;
 
+vector<Display*> displays;
 /**
  * the octrees that store the points for each scan
  */
@@ -689,6 +691,11 @@ int main(int argc, char **argv){
   strncpy(selection_file_name, "selected.3d", sizeof(GLUI_String));  
   
   parseArgs(argc, argv, dir, start, end, maxDist, minDist, red, readInitial, octree, pointtype, idealfps, loadOct, saveOct, type);
+
+  ////////////////////////
+  string dummy = "dummy.file";
+  Display::readDisplays(dummy, displays);
+  ////////////////////
 
   if (type == OCT) {
     loadOct = true;

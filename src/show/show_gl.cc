@@ -173,6 +173,13 @@ void DrawPoints(GLenum mode)
   showall = false;         
 }
 
+
+void DrawObjects(GLenum mode) {
+  for (unsigned int i = 0; i < displays.size(); i++)
+    displays[i]->displayAll();
+
+}
+
 /**
  * Draw a smooth path passing from all the camera points.
  *
@@ -460,6 +467,7 @@ void DisplayItFunc(GLenum mode)
   // if show points is true the draw points
   if (show_points == 1) DrawPoints(mode);
 
+
   if(show_path == 1) {
     double *pose;
     glColor4d(1.0, 0.0, 0.0, 1.0);
@@ -492,6 +500,7 @@ void DisplayItFunc(GLenum mode)
   if(show_path == 1) {
     DrawPath();
   }
+  DrawObjects(mode);
   
   glPopMatrix();
   // force draw the scene
