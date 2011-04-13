@@ -29,12 +29,8 @@ LineDisplay::LineDisplay(vector<float*> &l) {
 }
 
 Display * LineDisplay::readFromFile(string &filename) {
-//  string Filename = "/home/jelseber/software/ros/mystacks/irma3d/bag2scans/lines.pts"; 
-  string Filename = "/home/jelseber/software/ros/mystacks/irma3d/bag2scans/corrs.3d"; 
-  //string Filename = "/home/jelseber/software/ros/mystacks/irma3d/bag2scans/corr_000_002.pts"; 
-//  string Filename = "/home/jelseber/software/ros/mystacks/irma3d/bag2scans/scan000.3d"; 
   ifstream input;
-  input.open(Filename.c_str());
+  input.open(filename.c_str());
 
   vector<float*> lines;
   while (input.good()) {
