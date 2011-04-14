@@ -301,6 +301,11 @@ void usage(char* prog)
 	  << bold << "  -F" << normal << " NR, " << bold << "--fps=" << normal << "NR [default: 20]" << endl
 	  << "         will attempt to display points with a framerate of NR" << endl
 	  << endl
+	  << bold << "  -l" << normal << " FILE, " << bold << "--loadObj=" << normal <<
+    "FILE" << endl
+	  << "         load objects specified in <FILE>" << endl
+	  << endl
+	  << endl
 	  << bold << "  -m" << normal << " NR, " << bold << "--max=" << normal << "NR" << endl
 	  << "         neglegt all data points with a distance larger than NR 'units'" << endl
 	  << endl
@@ -369,7 +374,7 @@ void usage(char* prog)
  * @return 0, if the parsing was successful, 1 otherwise 
  */
 int parseArgs(int argc,char **argv, string &dir, int& start, int& end, int& maxDist, int& minDist, 
-              double &red, bool &readInitial, int &octree, PointType &ptype, double &fps, bool &loadOct, bool &saveOct, reader_type &type)
+              double &red, bool &readInitial, int &octree, PointType &ptype, double &fps, string &loadObj, bool &loadOct, bool &saveOct, reader_type &type)
 {
   unsigned int types = PointType::USE_NONE;
   start   = 0;
@@ -397,12 +402,13 @@ int parseArgs(int argc,char **argv, string &dir, int& start, int& end, int& maxD
     { "height",          no_argument,         0,  'h' },
     { "type",            no_argument,         0,  'T' },
     { "color",           no_argument,         0,  'c' },
+    { "loadObj",         required_argument,   0,  'l' },
     { "saveOct",         no_argument,         0,  '0' },
     { "loadOct",         no_argument,         0,  '1' },
     { 0,           0,   0,   0}                    // needed, cf. getopt.h
   };
 
-  while ((c = getopt_long(argc, argv,"F:f:s:e:r:m:M:O:wtRadhTc", longopts, NULL)) != -1)
+  while ((c = getopt_long(argc, argv,"F:f:s:e:r:m:M:O:l:wtRadhTc", longopts, NULL)) != -1)
     switch (c)
 	 {
 	 case 's':
@@ -462,6 +468,9 @@ int parseArgs(int argc,char **argv, string &dir, int& start, int& end, int& maxD
      break;
    case '1':
      loadOct = true;
+     break;
+   case 'l':
+     loadObj = optarg;
      break;
    default:
      abort ();
@@ -681,6 +690,7 @@ int main(int argc, char **argv){
   int octree = 0;
   bool loadOct = false;
   bool saveOct = false;
+  string loadObj;
 
   pose_file_name = new char[sizeof(GLUI_String)];
   path_file_name = new char[sizeof(GLUI_String)];
@@ -690,11 +700,11 @@ int main(int argc, char **argv){
   strncpy(path_file_name, "file.path", sizeof(GLUI_String));  
   strncpy(selection_file_name, "selected.3d", sizeof(GLUI_String));  
   
-  parseArgs(argc, argv, dir, start, end, maxDist, minDist, red, readInitial, octree, pointtype, idealfps, loadOct, saveOct, type);
+  parseArgs(argc, argv, dir, start, end, maxDist, minDist, red, readInitial,
+  octree, pointtype, idealfps, loadObj, loadOct, saveOct, type);
 
   ////////////////////////
-  string dummy = "dummy.file";
-  Display::readDisplays(dummy, displays);
+  Display::readDisplays(loadObj, displays);
   ////////////////////
 
   if (type == OCT) {

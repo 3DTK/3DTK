@@ -136,16 +136,16 @@ class ColorManager {
 
     virtual void setColor(float *val) {
       int index = toIndex(val);
-      glColor3f( colormap[index][0], colormap[index][1], colormap[index][2] ); 
+      glColor4f( colormap[index][0], colormap[index][1], colormap[index][2], 1.0 ); 
     }
     virtual void setColor(double *val) {
       int index = toIndex(val);
-      glColor3f( colormap[index][0], colormap[index][1], colormap[index][2] ); 
+      glColor4f( colormap[index][0], colormap[index][1], colormap[index][2], 1.0 ); 
     }
     virtual void setColor(short int *val) {
       int index = toIndex(val);
       //cout << "I " << index << " " << val[currentdim] << " " << currentdim << endl; 
-      glColor3f( colormap[index][0], colormap[index][1], colormap[index][2] ); 
+      glColor4f( colormap[index][0], colormap[index][1], colormap[index][2], 1.0 ); 
     }
 
     virtual void setColorMap(ColorMap &cm) {
