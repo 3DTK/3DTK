@@ -1,5 +1,5 @@
 #include <string.h>
-
+#include <stdlib.h>
 #include "show/viewcull.h"
 #include "show/scancolormanager.h"
 
@@ -81,7 +81,7 @@ void DrawPoints(GLenum mode)
         glPushMatrix();
         glMultMatrixd(MetaMatrix[iterator].back());
 
-        glColor3f(1.0, 0.0, 0.0);
+        glColor4f(1.0, 0.0, 0.0,1.0);
         glPointSize(pointsize + 2.0);
         for ( set<sfloat*>::iterator it = selected_points[iterator].begin();
             it != selected_points[iterator].end(); it++) {
@@ -111,11 +111,11 @@ void DrawPoints(GLenum mode)
 #endif
         glPushMatrix();
         if (invert)                               // default: white points on black background
-          glColor4d(1.0, 1.0, 1.0, 1.0);
+          glColor4d(1.0, 1.0, 1.0, 0.0);
         	   //if (iterator == 0) glColor4d(139.0/255, 69.0/255, 19.0/255, 1.0);
         	   //if (iterator == 0) glColor4d(0.5, 1.0, 0.5, 1.0);
         else                                      // black points on white background
-          glColor4d(0.0, 0.0, 0.0, 1.0);
+          glColor4d(0.0, 0.0, 0.0, 0.0);
 
         	   //if (iterator == 0) glColor4d(0.5, 1.0, 0.5, 1.0);
         	   if (iterator == 0) glColor4d(139.0/255, 69.0/255, 19.0/255, 1.0);
@@ -138,7 +138,7 @@ void DrawPoints(GLenum mode)
           octpts[iterator]->displayOctTreeCulled(ptstodisplay);
           //octpts[iterator]->displayOctTree(pointsize*pointsize*pointsize*10);
         }
-        glColor3f(1.0, 0.0, 0.0);
+        glColor4f(1.0, 0.0, 0.0, 1.0);
         glPointSize(pointsize + 2.0);
         glBegin(GL_POINTS);
         for ( set<sfloat*>::iterator it = selected_points[iterator].begin();
@@ -192,7 +192,7 @@ void DrawPath()
   glBegin(GL_LINE_STRIP);
   for(unsigned int j = 0; j < path_vectorX.size(); j++){
     // set the color 
-    glColor3f(0.0, 1.0, 0.0);
+    glColor4f(0.0, 1.0, 0.0, 1.0);
     // set the points
     glVertex3f(path_vectorX.at(j).x,path_vectorX.at(j).y,path_vectorZ.at(j).y);
   }
@@ -202,7 +202,7 @@ void DrawPath()
   glBegin(GL_LINE_STRIP);
   for(unsigned int j = 0; j < lookat_vectorX.size(); j++){
     //set the color 
-    glColor3d(1.0, 1.0, 0.0);
+    glColor4d(1.0, 1.0, 0.0, 1.0);
     //set the points
     glVertex3f(lookat_vectorX.at(j).x,lookat_vectorX.at(j).y,lookat_vectorZ.at(j).y);
   }
@@ -253,9 +253,9 @@ void DrawCameras(void)
                        {3,2,6,7}, {1,2,6,5}, {0,3,7,4}};
 
     if (i+1 == cam_choice) {
-      glColor3f(1, 0, 1);
+      glColor4f(1, 0, 1, 1);
     } else {
-      glColor3f(0, 1, 0);
+      glColor4f(0, 1, 0, 1);
     }
     // camera cube
     glPolygonMode (GL_FRONT_AND_BACK, GL_FILL); 
@@ -272,7 +272,7 @@ void DrawCameras(void)
     r = 5 * r;
     u = 5 * u;
     
-    glColor3f(1, 1, 0);
+    glColor4f(1, 1, 0, 1);
     if (i+1 == cam_choice) {
       glPointSize(10);
     } else {
@@ -757,10 +757,19 @@ void CallBackIdleFunc(void)
 
     if(save_animation){
 	 string filename = scandir + "animframe" + to_string(frameNr,4) + ".ppm";
+	 /*
+   string jpgname = scandir + "animframe" + to_string(frameNr,4) + ".jpg";
 	 cout << filename << endl;
 	 glDumpWindowPPM(filename.c_str(),0);
-	
-    }
+   string systemcall = "convert -quality 100 " + filename + " " + jpgname;	
+   cout << systemcall << endl;
+   system(systemcall.c_str());
+   systemcall = "rm " + filename + " " + jpgname;	
+   system(systemcall.c_str());
+   cout << systemcall << endl;
+  // for f in *ppm ; do convert -quality 100 $f `basename $f ppm`jpg; done 
+   */
+   }
     
   }
 #ifdef _MSC_VER
@@ -809,8 +818,13 @@ void CallBackIdleFunc(void)
       //save the animation
       if(save_animation){
         string filename = scandir + "animframe" + to_string(path_iterator,4) + ".ppm";
+	      string jpgname = scandir + "animframe" + to_string(path_iterator,4) + ".jpg";
         cout << "written " << filename << " of " << path_vectorX.size() << " files" << endl;
         glWriteImagePPM(filename.c_str(), factor, 0);
+        string systemcall = "convert -quality 100 " + filename + " " + jpgname;	
+        system(systemcall.c_str());
+        systemcall = "rm " + filename;	
+        system(systemcall.c_str());
         haveToUpdate = 6;
 
       }
@@ -1266,7 +1280,6 @@ void glDumpWindowPPM(const char *filename, GLenum mode)
   // to make a video do:
   // for f in *ppm ; do convert -quality 100 $f `basename $f ppm`jpg; done 
   // mencoder "mf://*.jpg" -mf fps=10 -o test.avi -ovc lavc -lavcopts vcodec=msmpeg4v2:vbitrate=800 
-
   // Write output buffer to the file */
   fp.write((const char*)ibuffer, sizeof(unsigned char) * (RGB * win_width * win_height));
   fp.close();
@@ -1446,11 +1459,14 @@ void CallBackReshapeFunc(int width, int height)
  
   }
 //  glDepthMask(false);
-  //glEnable(GL_BLEND);
-  //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+  glEnable(GL_BLEND); // TODO
+  glBlendFunc(GL_ONE, GL_ZERO); // TODO
+  //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); // TODO
+  //glBlendFunc(GL_ONE, GL_ONE); // TODO
   //glBlendFunc(GL_SRC_COLOR, GL_DST_COLOR);
-  //  glHint(GL_POINT_SMOOTH_HINT, GL_NICEST);
-  glDepthFunc(GL_LEQUAL);
+  glHint(GL_POINT_SMOOTH_HINT, GL_NICEST);
+ // TODO glDepthFunc(GL_LEQUAL);
+  glDepthFunc(GL_LESS); //TODO
   glEnable(GL_DEPTH_TEST);  
   glEnable (GL_POINT_SMOOTH);
 }
@@ -1625,7 +1641,7 @@ int calcNoOfPoints(vector<PointXY> vec1, vector<PointXY> vec2)
     distance += sqrt(dx*dx + dy*dy + dz*dz );
   }
 
-  return distance/10;
+  return distance/2;
 }
 
 //-----------------------------------------------------------------
