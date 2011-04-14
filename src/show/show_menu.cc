@@ -240,7 +240,7 @@ void newMenu()
   color_panel = glui1->add_rollout("Color :", false );
   color_panel ->set_alignment( GLUI_ALIGN_LEFT );
 
-  GLUI_Panel *color_ro = glui1->add_rollout_to_panel(color_panel, "Color values:");
+  GLUI_Panel *color_ro = glui1->add_rollout_to_panel(color_panel, "Color values:", false);
   color_ro->set_alignment(GLUI_ALIGN_LEFT);
 
   GLUI_RadioGroup *color_rog = glui1->add_radiogroup_to_panel( color_ro, &listboxColorVal, 0, &mapColorToValue );
@@ -258,7 +258,7 @@ void newMenu()
   if (!(pointtype.hasDeviation())) rbdevi->disable(); 
   if (!(pointtype.hasType())) rbtype->disable(); 
 
-  GLUI_Panel *colorm_ro = glui1->add_rollout_to_panel(color_panel, "Colormap:");
+  GLUI_Panel *colorm_ro = glui1->add_rollout_to_panel(color_panel, "Colormap:", false);
   colorm_ro->set_alignment(GLUI_ALIGN_LEFT);
 
   GLUI_RadioGroup *colorm_rog = glui1->add_radiogroup_to_panel(colorm_ro, &listboxColorMapVal, 0, &changeColorMap);
@@ -270,7 +270,7 @@ void newMenu()
   glui1->add_radiobutton_to_group(colorm_rog, "Rand");
   glui1->add_radiobutton_to_group(colorm_rog, "SHSV");
 
-  GLUI_Panel *scans_color = glui1->add_rollout_to_panel(color_panel, "Color type:");
+  GLUI_Panel *scans_color = glui1->add_rollout_to_panel(color_panel, "Color type:", false);
   scans_color->set_alignment(GLUI_ALIGN_LEFT);
   GLUI_RadioGroup *scans_colored = glui1->add_radiogroup_to_panel(scans_color, &colorScanVal, 0, &setScansColored);
   glui1->add_radiobutton_to_group(scans_colored, "None");
