@@ -198,6 +198,19 @@ void lum6DEuler::covarianceEuler(Scan *first, Scan *second,
 	 }
 
 	 ss =  ss / (2*m - 3);
+   // for dealing with numerical instabilities when identical point clouds are used in matching
+   if (ss  < 0.0000000000001) {
+     ss = 0.0;
+     MM(1,1) = MM(1,2) = MM(1,3) = 0.0;
+     MM(2,1) = MM(2,2) = MM(2,3) = 0.0;
+     MM(3,1) = MM(3,2) = MM(3,3) = 0.0;
+     MZ(6) = MZ(1) = MZ(2) = 0.0;
+     MZ(3) = MZ(4) = MZ(5) = 0.0;
+     *C = 0;
+     if(CD)
+       *CD = 0;
+     return;
+   }
    ss = 1.0 / ss;
 
 	 if (CD) {
