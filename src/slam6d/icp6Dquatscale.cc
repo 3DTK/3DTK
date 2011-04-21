@@ -3,7 +3,6 @@
  *  @author Flavia Grosan, Alex Tandrau. Jacobs University Bremen gGmbH, Germany.
  *  @author Andreas Nuechter. Jacobs University Bremen gGmbH, Germany.
  */
-
 #include "slam6d/icp6Dquatscale.h"
 
 #include "slam6d/globals.icc"
@@ -56,13 +55,13 @@ double icp6D_QUAT_SCALE::Point_Point_Align(const vector<PtPair>& pairs, double *
 					 sqr(pairs[i].p1.y - pairs[i].p2.y) +
 					 sqr(pairs[i].p1.z - pairs[i].p2.z);
 
-		sums[0] += sqr(pairs[i].p1.x - centroid_d[0]) +
-							 sqr(pairs[i].p1.y - centroid_d[1]) +
-							 sqr(pairs[i].p1.z - centroid_d[2]);
+		sums[0] += sqr(pairs[i].p1.x - centroid_m[0]) +
+							 sqr(pairs[i].p1.y - centroid_m[1]) +
+							 sqr(pairs[i].p1.z - centroid_m[2]);
 		
-		sums[1] += sqr(pairs[i].p2.x - centroid_m[0]) +
-							 sqr(pairs[i].p2.y - centroid_m[1]) +
-							 sqr(pairs[i].p2.z - centroid_m[2]);
+		sums[1] += sqr(pairs[i].p2.x - centroid_d[0]) +
+							 sqr(pairs[i].p2.y - centroid_d[1]) +
+							 sqr(pairs[i].p2.z - centroid_d[2]);
 							
     S[0][0] += pairs[i].p2.x * pairs[i].p1.x;
     S[0][1] += pairs[i].p2.x * pairs[i].p1.y;
@@ -127,22 +126,21 @@ double icp6D_QUAT_SCALE::Point_Point_Align(const vector<PtPair>& pairs, double *
   double scale_s = sqrt(sums[0] / sums[1]);
 
   alignfx[0] = m[0][0] * scale_s;
-  alignfx[1] = m[1][0];
-  alignfx[2] = m[2][0];
+  alignfx[1] = m[1][0] * scale_s;
+  alignfx[2] = m[2][0] * scale_s;
   alignfx[3] = 0.0;
-  alignfx[4] = m[0][1];
+  alignfx[4] = m[0][1] * scale_s;
   alignfx[5] = m[1][1] * scale_s;
-  alignfx[6] = m[2][1];
+  alignfx[6] = m[2][1] * scale_s;
   alignfx[7] = 0.0;
-  alignfx[8] = m[0][2];
-  alignfx[9] = m[1][2];
+  alignfx[8] = m[0][2] * scale_s;
+  alignfx[9] = m[1][2] * scale_s;
   alignfx[10] = m[2][2] * scale_s;
   alignfx[11] = 0.0;
-  
   // calculate the translation vector, 
-  alignfx[12] = centroid_m[0] - m[0][0]*scale_s*centroid_d[0] - m[0][1]*centroid_d[1] - m[0][2]*centroid_d[2];
-  alignfx[13] = centroid_m[1] - m[1][0]*centroid_d[0] - m[1][1]*scale_s*centroid_d[1] - m[1][2]*centroid_d[2];
-  alignfx[14] = centroid_m[2] - m[2][0]*centroid_d[0] - m[2][1]*centroid_d[1] - m[2][2]*scale_s*centroid_d[2];
+  alignfx[12] = centroid_m[0] - m[0][0]*centroid_d[0]*scale_s - m[0][1]*scale_s*centroid_d[1] - m[0][2]*centroid_d[2]*scale_s; 
+  alignfx[13] = centroid_m[1] - m[1][0]*centroid_d[0]*scale_s - m[1][1]*scale_s*centroid_d[1] - m[1][2]*centroid_d[2]*scale_s;
+  alignfx[14] = centroid_m[2] - m[2][0]*centroid_d[0]*scale_s - m[2][1]*scale_s*centroid_d[1] - m[2][2]*centroid_d[2]*scale_s;
 
   return error;
 }
