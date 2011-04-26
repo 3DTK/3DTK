@@ -78,6 +78,7 @@ public:
   void transformToQuat(double rP[3], double rPQ[4],
 				   const AlgoType type, int islum = 0);
   
+  void toGlobal(double voxelSize, int nrpts);
   void calcReducedPoints(double voxelSize, int nrpts = 0);
   
   void createTree(bool use_cache, bool cuda_enabled);
