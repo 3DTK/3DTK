@@ -33,12 +33,12 @@ using std::endl;
 #endif
 
 #include "shapes/hough.h"
+
 #include "shapes/shape.h"
 #include "shapes/ransac.h"
-
-enum plane_alg { 
-  RHT, SHT, PHT, PPHT, APHT, RANSAC
-};
+#include "slam6d/icp6D.h"
+#include "slam6d/icp6Dsvd.h"
+#include "slam6d/icp6Dquat.h"
 
 void usage(char* prog) {
 #ifndef _MSC_VER
@@ -88,13 +88,81 @@ void usage(char* prog) {
 
 }
 
-/**
-  * Parses command line arguments needed for plane detection. For details about
-  * the argument see usage().
-  */
+vector<double *> * matchPlaneToBoard(vector<double *> &points, double *alignxf) {
+  double rPos[3] = {0.0,0.0,0.0};
+  double rPosTheta[3] = {0.0,0.0,0.0};
+
+  vector<double *> boardpoints;
+  double halfwidth = 25.0;
+  double halfheight = 28.5;
+  double step = 0.5;
+
+  for(double i = -halfwidth; i <= halfwidth; i+=step) {
+    for(double j = -halfheight; j <= halfheight; j+=step) {
+      double * p = new double[3];
+      p[0] = i;
+      p[1] = j;
+      p[2] = 0.0;
+      //cout << p[0] << " " << p[1] << " " << p[2] << endl;
+      cout << p[0] << " " << p[1] << " " << rand(5.0)-2.5 << endl;
+      boardpoints.push_back(p);
+    }
+  }
+
+  Scan * plane = new Scan(rPos, rPosTheta, points);
+  Scan * board = new Scan(rPos, rPosTheta, boardpoints);
+  board->transform(alignxf, Scan::INVALID, 0);
+
+  bool quiet = true;
+  icp6Dminimizer *my_icp6Dminimizer = 0;
+  my_icp6Dminimizer = new icp6D_SVD(quiet);
+
+  icp6D *my_icp = 0;
+  double mdm = 550;
+  int mni = 1000;
+  my_icp = new icp6D(my_icp6Dminimizer, mdm, mni, quiet, false, -1, false, 1, 0.00, false, false);
+
+  plane->createTree(false,false);
+  board->createTree(false,false);
+
+  my_icp->match(plane, board);
+
+  const double * pos = board->get_rPos();
+  const double * postheta = board->get_rPosTheta();
+  const double * transMat = board->get_transMat();
+  for(int i = 0; i < 16; i++) {
+    cout << transMat[i] << " ";
+  }
+
+  cout << endl << endl;
+  
+  for(int i = 0; i < 3; i++) {
+    cout << pos[i] << " ";
+  }
+  cout << endl;
+  for(int i = 0; i < 3; i++) {
+    cout << deg(postheta[i]) << " ";
+  }
+  cout << endl;
+  vector<double *> * result = new vector<double *>();
+  cout << "Calipoints Start" << endl;
+  for(double x = -20; x < 25; x+=10.0) {
+    for(double y = -25; y < 30; y+=10.0) {
+      double * p = new double[3];
+      p[0] = x;
+      p[1] = y;
+      p[2] = 0.0;
+      transform3(transMat, p);
+      result->push_back(p);
+      cerr << p[0] << " " << p[1] << " " << p[2] << endl;
+    }
+  }
+  cout << "Calipoints End" << endl;
+  return result;
+}
 
 int parseArgs(int argc, char **argv, string &dir, double &red, int &start, int
-  &maxDist, int&minDist, int &octree, reader_type &type, plane_alg &alg, bool
+  &maxDist, int&minDist, int &octree, reader_type &type, bool
   &quiet) {
 
   bool reduced = false;
@@ -111,14 +179,13 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &start, int
     { "min",             required_argument,   0,  'M' },
     { "start",           required_argument,   0,  's' },
     { "reduce",          required_argument,   0,  'r' },
-    { "plane",           required_argument,   0,  'p' },
-    { "quiet",            no_argument,         0,  'q' },
+    { "quit",            no_argument,         0,  'q' },
     { "octree",          optional_argument,   0,  'O' },
     { 0,           0,   0,   0}                    // needed, cf. getopt.h
   };
 
   cout << endl;
-  while ((c = getopt_long(argc, argv, "f:r:s:e:m:M:p:O:q", longopts, NULL)) != -1) 
+  while ((c = getopt_long(argc, argv, "f:r:s:e:m:M:O:q", longopts, NULL)) != -1) 
   switch (c)
 	 {
 	 case 'r':
@@ -133,15 +200,14 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &start, int
      if (!Scan::toType(optarg, type))
        abort ();
      break;
+   /*
    case 'p': 
-      if(strcasecmp(optarg, "rht") == 0) alg = RHT;
-      else if(strcasecmp(optarg, "sht") == 0) alg = SHT;
-      else if(strcasecmp(optarg, "pht") == 0) alg = PHT;
-      else if(strcasecmp(optarg, "ppht") == 0) alg = PPHT;
-      else if(strcasecmp(optarg, "apht") == 0) alg = APHT;
-      else if(strcasecmp(optarg, "ran") == 0) alg = RANSAC;
-      else abort();
       break;
+      
+      if(strcasecmp(optarg, "bulbs") == 0) alg = 0;
+      else if(strcasecmp(optarg, "chess") == 0) alg = 1;
+      break;
+      */
 	 case 'q':
      quiet = true;
      break;
@@ -181,7 +247,7 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &start, int
 }
 
 /**
- * Main function. The Hough Transform or RANSAC are called for the scan indicated as
+ * Main function. The Hough Transform is called for the scan indicated as
  * argument.
  *
  */
@@ -203,10 +269,9 @@ int main(int argc, char **argv)
   int    octree     = 0;
   bool   quiet = false;
   reader_type type    = UOS;
-  plane_alg alg    = RHT;
   
   cout << "Parse args" << endl;
-  parseArgs(argc, argv, dir, red, start, maxDist, minDist, octree, type, alg, quiet);
+  parseArgs(argc, argv, dir, red, start, maxDist, minDist, octree, type, quiet);
   Scan::dir = dir;
   int fileNr = start;
   string planedir = dir + "planes"; 
@@ -227,69 +292,46 @@ int main(int argc, char **argv)
     exit(1);
   }
   Scan::readScans(type, fileNr, fileNr, dir, maxDist, minDist, 0);
-  // reduction filter for current scan and transformation into global coordinate
-  // system
+  // reduction filter for current scan!
   Scan::allScans[0]->toGlobal(red, octree);
   double id[16];
   M4identity(id);
   for(int i = 0; i < 10; i++) {
     Scan::allScans[0]->transform(id, Scan::ICP, 0);  // write end pose
   }
-
-  if(!quiet) cout << "start plane detection" << endl;
+  cout << "start plane detection" << endl;
   long starttime = GetCurrentTimeInMilliSec(); 
-  if(alg >= RANSAC) {
-    vector<double *> points;
-    CollisionPlane<double> * plane;
-    plane = new CollisionPlane<double>(1.0); // 1.0 cm maxdist
-    Ransac(*plane, Scan::allScans[0], &points);
-    starttime = (GetCurrentTimeInMilliSec() - starttime);
+  vector<double *> points;
+  CollisionPlane<double> * plane;
+  plane = new LightBulbPlane<double>(5.0,120);
+  Ransac(*plane, Scan::allScans[0], &points);
+  starttime = (GetCurrentTimeInMilliSec() - starttime);
 
-    cout << "nr points " << points.size() << endl;
-    double nx,ny,nz,d;
-    plane->getPlane(nx,ny,nz,d);
-    if(!quiet) cout << "DONE " << endl;
+  cout << "nr points " << points.size() << endl;
+  double nx,ny,nz,d;
+  plane->getPlane(nx,ny,nz,d);
+  cout << "DONE " << endl;
 
-    if(!quiet) cout << nx << " " << ny << " " << nz << " " << d << endl;
-
-    /**
-    for (unsigned int i = 0; i < points.size(); i++) {
-      cerr << points[i][0] << " " << points[i][1] << " " << points[i][2] << endl;
-    }
-    */
-    for(int i = points.size() - 1; i > -1; i++) {
-      delete[] points[i];
-    }
-    
-    delete plane;
-  } else {
-    Hough hough(Scan::allScans[0], quiet);
-    starttime = (GetCurrentTimeInMilliSec() - starttime);
-    cout << "Time for Constructor call: " << starttime << endl;
-
-    starttime = GetCurrentTimeInMilliSec(); 
-    if (!quiet) cout << "algorithm: " << alg << endl;
-    // choose Hough method here
-    switch(alg) {
-      case RHT: hough.RHT();
-                break;
-      case SHT: hough.SHT();
-                break;
-      case PHT: hough.PHT();
-                break;
-      case PPHT:  hough.PPHT();
-                  break;
-      case APHT:  hough.APHT();
-                  break;
-      default:  usage(argv[0]);
-                exit(1);
-                break;
-    }
-
-    hough.writePlanes();
-    starttime = (GetCurrentTimeInMilliSec() - starttime);
+  cout << nx << " " << ny << " " << nz << " " << d << endl;
+  /*
+  for (unsigned int i = 0; i < points.size(); i++) {
+    cerr << points[i][0] << " " << points[i][1] << " " << points[i][2] << endl;
+  }
+  */
+  double rPos[3];
+  double rPosTheta[3];
+  for(int i = 0; i < 3; i++) {
+    rPosTheta[i] = 0.0;
+  }
+  ((LightBulbPlane<double> *)plane)->getCenter(rPos[0], rPos[1], rPos[2]);
+  double alignxf[16];
+  EulerToMatrix4(rPos, rPosTheta, alignxf);
+  matchPlaneToBoard(points, alignxf);
+  for(int i = points.size() - 1; i > -1; i++) {
+    delete[] points[i];
   }
   
+  delete plane;
 
   cout << "Time for Plane Detection " << starttime << endl;
   delete Scan::allScans[0];
