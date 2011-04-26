@@ -10,6 +10,17 @@ using namespace NEWMAT;
 #include <dlfcn.h>
 #include <sys/stat.h>
 
+/**
+  * Hough Constructor.
+  * Loads the Configfile, located in "bin/hough.cfg" and initializes the
+  * accumulator. For details about the implemented Hough methods please read:
+  *
+  * Dorit Borrmann, Jan Elseberg, Kai Lingemann, and Andreas Nüchter. The 3D
+  * Hough Transform for Plane Detection in Point Clouds - A Review and A new
+  * Accumulator Design, Journal 3D Research, Springer, Volume 2, Number 2, 
+  * March 2011.
+  */
+
 Hough::Hough(Scan * GlobalScan, bool q) {
  
   quiet = q;
@@ -51,8 +62,13 @@ Hough::Hough(Scan * GlobalScan, bool q) {
   
 }
 
+/**
+  * Desctructor.
+  */
+
 Hough::~Hough() {
   if(out.is_open()) out.close();
+
   delete acc;
   delete allPoints;
   
@@ -65,6 +81,7 @@ Hough::~Hough() {
 
 void Hough::RHT() {
 
+  cout << "RHT" << endl;
   Point p1, p2, p3;
   double theta, phi, rho;
   int planeSize = 2000;
@@ -87,6 +104,7 @@ void Hough::RHT() {
 
     // check distance
     if(!distanceOK(p1, p2, p3)) continue;
+    //cout << "Distance OK" << endl;
     // calculate Plane
     if(calculatePlane(p1, p2, p3, theta, phi, rho)) {
       // increment accumulator cell
@@ -94,7 +112,10 @@ void Hough::RHT() {
         end = GetCurrentTimeInMilliSec() - start;
         start = GetCurrentTimeInMilliSec();
         if(!quiet) cout << "Time for RHT " << plane << ": " << end << endl; 
+        cout << "A" << endl;
+        cout << rho << " " << theta << " " << phi << endl;
         double * n = acc->getMax(rho, theta, phi);
+        cout << "B" << endl;
         planeSize = deletePoints(n, rho);
         if(planeSize < myConfigFileHough.Get_MinPlaneSize()) counter++;
         end = GetCurrentTimeInMilliSec() - start;
@@ -102,11 +123,23 @@ void Hough::RHT() {
         if(!quiet) cout << "Time for Polygonization " << plane << ": " << end << endl; 
         acc->resetAccumulator();
         plane++;
+        if(!quiet) cout << "Planes " << planes.size() << endl;
       }
 
     }
   
   }
+  /*
+  vector<Point>::iterator itr = allPoints->begin();
+ 
+  Point p;
+  start = GetCurrentTimeInMilliSec(); 
+  while(itr != allPoints->end()) {
+    p = *(itr);
+    cout << p.x << " " << p.y << " " << p.z << endl;
+    itr++;
+  } 
+  */
 }
 
 /**
@@ -157,9 +190,12 @@ void Hough::SHT() {
   delete maxlist; 
 }
 
+/**
+  * Function that returns all the remaining points in the allPoints vector.
+  * @return points that do not lie on an already detected plane
+  */
 double * const* Hough::getPoints(int &size) {
   size = allPoints->size();
-  cout << 2 << endl;
   double ** returnPoints = new double*[allPoints->size()];
   for(int i = 0; i < allPoints->size(); i++) {
     Point p = (*allPoints)[i];
@@ -168,16 +204,19 @@ double * const* Hough::getPoints(int &size) {
     returnPoints[i][1] = p.y;
     returnPoints[i][2] = p.z;
   }
-  cout << 3 << endl;
   return returnPoints;
 }
 
+/**
+  * Deletes all points that lie on a list of planes. 
+  * @param model the list of planes
+  * @param size the number of remaining points after delete operation
+  * @return the remaining points
+  */
 double * const* Hough::deletePoints(vector<ConvexPlane*> &model, int &size) {
-  cout << 1 << endl;
   for(int i = 0; i < model.size(); i++) {
     deletePoints(model[i]->n, model[i]->rho); 
   }
-  cout << 2 << endl;
   double ** returnPoints = new double*[allPoints->size()];
   for(int i = 0; i < allPoints->size(); i++) {
     Point p = (*allPoints)[i];
@@ -186,7 +225,6 @@ double * const* Hough::deletePoints(vector<ConvexPlane*> &model, int &size) {
     returnPoints[i][1] = p.y;
     returnPoints[i][2] = p.z;
   }
-  cout << 3 << endl;
   size = allPoints->size();
   return returnPoints;
 }
@@ -428,7 +466,13 @@ void Hough::APHT() {
       
 }
 
+/**
+  * Verifies the distance criterion needed for the RHT. The distance between the
+  * three selected points may not exceed a maximal or fall below a minimal
+  * distance. 
+  */
 bool Hough::distanceOK(Point p1, Point p2, Point p3) {
+  return true;
   // p1 - p2
   double distance = (p1.x - p2.x) * (p1.x - p2.x) + (p1.y - p2.y) * (p1.y - p2.y) + (p1.z - p2.z) * (p1.z - p2.z); 
   if(sqrt(distance) < myConfigFileHough.Get_MinDist()) return false;
@@ -448,6 +492,10 @@ bool Hough::distanceOK(Point p1, Point p2, Point p3) {
   
 }
 
+/**
+  * Calculates the polar coordinates (rho, theta, phi) of the plane spanned by
+  * three points p1, p2, and p3.
+  */
 bool Hough::calculatePlane(Point p1, Point p2, Point p3, double &theta, double &phi, double &rho) {
 
   double v1[3];
@@ -486,7 +534,7 @@ bool Hough::calculatePlane(Point p1, Point p2, Point p3, double &theta, double &
 }
 
 /**
-  * Verbesserte Funktion zum loeschen der Punkte
+  * Improved function for point deletion.
   */
 int Hough::deletePointsQuad(double * n, double rho) {
 
@@ -511,7 +559,6 @@ int Hough::deletePointsQuad(double * n, double rho) {
     } 
    itr++;
   }
-  cout << "A" << endl;
   double n2[4];
 
   // calculating the best fit plane
@@ -534,7 +581,6 @@ int Hough::deletePointsQuad(double * n, double rho) {
     }
    itr++;
   }
-  cout << "B" << endl;
   delete allPoints;
   allPoints = nallPoints;
   
@@ -567,7 +613,7 @@ int Hough::deletePointsQuad(double * n, double rho) {
       _theta = 2*M_PI - costheta;
     } else {
       _theta = 0;
-      cout << "Fehler JP" << endl;
+      cout << "Error JP" << endl;
     }
 
     pppoints[i][0] = _phi;
@@ -575,7 +621,6 @@ int Hough::deletePointsQuad(double * n, double rho) {
     pppoints[i][2] = sqrt(p.x*p.x + p.y*p.y + p.z*p.z);
   }
   planePoints.clear();
-  cout << "C" << endl;
 
   QuadTree tree(pppoints, nr_points , 0.3, min_angle);
 	vector<set<double *> > cps;
@@ -622,10 +667,15 @@ int Hough::deletePointsQuad(double * n, double rho) {
 }
 
 /**
-  * Clustern using Two-Pass algorithm
+  * Deletes points from allPoints that lie on the given plane. All points from
+  * the biggest cluster on that plane are deleted. If the cluster is
+  * sufficiently planar, the convex hull is added to the result list.
+  *
+  * @param n normal vector of the plane
+  * @param rho distance between plane and origin
+  * @return the number of points in the deleted cluster plane
   */
 int Hough::deletePoints(double * n, double rho) {
-
   char direction = ' ';
   Normalize3(n);
   vector<Point> *nallPoints = new vector<Point>();
@@ -652,9 +702,10 @@ int Hough::deletePoints(double * n, double rho) {
   double D = calcPlane(planePoints, n2);
   
   bool nocluster = false;
+  
   if(D > myConfigFileHough.Get_MinPlanarity()) {
     nocluster = true;
-  }
+  } 
   
   if(fabs(n2[0]) < fabs(n2[1])) {
     if(fabs(n2[1]) < fabs(n2[2])) {
@@ -719,7 +770,8 @@ int Hough::deletePoints(double * n, double rho) {
 
   
   int region = cluster(planePairs, minx, maxx, miny, maxy);
-  vector< wykobi::point2d<double> > point_list;
+  // delete points from this list
+  list< double*> point_list;
   
   vPtPair::iterator vitr;
   for(vitr = planePairs.begin(); vitr != planePairs.end(); vitr++) {
@@ -728,8 +780,9 @@ int Hough::deletePoints(double * n, double rho) {
     p = (*vitr).p1;
     Point p2 = (*vitr).p2;
     if(fabs(p2.z - region) < 0.1) {
-      wykobi::point2d<double> point; 
-      point = wykobi::make_point(p2.x, p2.y);
+      double * point = new double[2];
+      point[0] = p2.x;
+      point[1] = p2.y;
       point_list.push_back(point);
     } else {
       allPoints->push_back(p);
@@ -737,14 +790,12 @@ int Hough::deletePoints(double * n, double rho) {
   }
   int maxPlane = point_list.size();
   if(maxPlane < myConfigFileHough.Get_MinPlaneSize()) return maxPlane;
-  wykobi::polygon<double,2> convex_hull;
-  wykobi::polygon<double,2> convex_hull2;
-  wykobi::algorithm::convex_hull_jarvis_march< wykobi::point2d<double> >(point_list.begin(),point_list.end(),std::back_inserter(convex_hull));
+  vector<double *> convex_hull;
+  ConvexPlane::JarvisMarchConvexHull(point_list,convex_hull);
 
-  
   if(nocluster) return maxPlane; 
 
-  ConvexPlane * plane1 = new ConvexPlane(n, n2[3], direction, convex_hull);
+  ConvexPlane * plane1 = new ConvexPlane(n2, n2[3], direction, convex_hull);
   plane1->pointsize = maxPlane;
   planes.push_back(plane1);
 
@@ -754,6 +805,9 @@ int Hough::deletePoints(double * n, double rho) {
   // ENDE
 }
 
+/**
+  * Clustering using Two-Pass algorithm
+  */
 int Hough::cluster(vPtPair &pairs, double minx, double maxx, double miny, double maxy) {
   vPtPair::iterator vitr;
   vector<set<int> > linked;
@@ -881,6 +935,10 @@ int Hough::cluster(vPtPair &pairs, double minx, double maxx, double miny, double
   return maxindex;
 }
 
+/**
+  * Writes the convex hull of each detected plane to the directory given in the
+  * config file. Also writes a list of detected planes to the directory.
+  */
 void Hough::writePlanes() {
   int counter = 0;
   string blub = "";
@@ -898,13 +956,24 @@ void Hough::writePlanes() {
   
   if(!quiet) cout << "Writing " << planes.size() << " Planes to " << blub << endl;
   
+  ofstream out;
+  string blub3 = blub + "/planes.list";
+  out.open(blub3.c_str());
   for(vector<ConvexPlane*>::iterator it = planes.begin(); it != planes.end(); it++) {
     string blub2 = blub + "/plane"+ to_string(counter,3) + ".3d";
+    out << "Plane " << blub2 << endl;
     (*it)->writePlane(blub2, counter);
     counter++;
   }
+
+  out.close();
+  out.flush();
 }
 
+/**
+  * Writes the remaining points from allPoints to the plane directory given in
+  * the config file.
+  */
 void Hough::writeAllPoints(int index, vector<Point> points) {
 
   string blub = "";
@@ -937,7 +1006,11 @@ void Hough::writeAllPoints(int index, vector<Point> points) {
 }
 
 
-// given a set of points this will calculate the best fit plane
+/**
+  * Given a set of points this function will calculate the best fit plane
+  * @param the set of points
+  * @param the plane description as normal vector and distance to origin
+  */
 double calcPlane(vector<Point> &ppoints, double plane[4]) {
   SymmetricMatrix A(3);
 	A = 0;

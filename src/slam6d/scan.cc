@@ -1506,6 +1506,10 @@ void Scan::readScans(reader_type type,
   return;
 }
 
+void Scan::toGlobal(double voxelSize, int nrpts) {
+  this->calcReducedPoints(voxelSize, nrpts);
+  this->transform(this->transMatOrg, INVALID);
+}
 
 void Scan::readScansRedSearch(reader_type type,
 		     int start, int end, string &_dir, int maxDist, int minDist, 

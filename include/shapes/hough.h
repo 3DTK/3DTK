@@ -3,7 +3,7 @@
 
 #include "shapes/convexplane.h"
 #include "shapes/ConfigFileHough.h"
-#include "wykobi/wykobi_algorithm.hpp"
+//#include "wykobi/wykobi_algorithm.hpp"
 #include "slam6d/point.h"
 #include "slam6d/scan.h"
 #include "shapes/accumulator.h"

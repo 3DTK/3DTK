@@ -1654,14 +1654,17 @@ int* AccumulatorBallI::accumulateAPHT(Point p) {
 }
 
 double* AccumulatorBallI::getMax(double &rho, double &theta, double &phi) {
-//TODO
+//TODO was??
+  
   int rhoindex = myConfigFileHough.Get_RhoNum() - 1;
   
   if(rho < myConfigFileHough.Get_RhoMax()) {
-    rhoindex = (int)(rho*((double)myConfigFileHough.Get_RhoNum()/(double)myConfigFileHough.Get_RhoMax()));   
+    rhoindex =
+    (int)(rho*((double)myConfigFileHough.Get_RhoNum()/(double)myConfigFileHough.Get_RhoMax()));   
   }
   
   int phiindex = (int)(phi*(((double)myConfigFileHough.Get_PhiNum())/(M_PI)));
+  if(phiindex == myConfigFileHough.Get_PhiNum()) phiindex--;
   int bNr = ballNr[phiindex];
   int thetaindex = (int)(theta*((bNr + 1)/(2*M_PI)));
   thetaindex = thetaindex % bNr;
