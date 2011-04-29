@@ -93,7 +93,7 @@ void Hough::RHT() {
   int counter = 0;
   while( allPoints->size() > stop && 
           planes.size() < (unsigned int)myConfigFileHough.Get_MaxPlanes() &&
-          counter < myConfigFileHough.Get_TrashMax()) { 
+          counter < (int)myConfigFileHough.Get_TrashMax()) { 
     unsigned int pint = (int) (((*allPoints).size())*(rand()/(RAND_MAX+1.0)));
 
     p1 = (*allPoints)[pint];
@@ -112,12 +112,10 @@ void Hough::RHT() {
         end = GetCurrentTimeInMilliSec() - start;
         start = GetCurrentTimeInMilliSec();
         if(!quiet) cout << "Time for RHT " << plane << ": " << end << endl; 
-        cout << "A" << endl;
-        cout << rho << " " << theta << " " << phi << endl;
+        //cout << rho << " " << theta << " " << phi << endl;
         double * n = acc->getMax(rho, theta, phi);
-        cout << "B" << endl;
         planeSize = deletePoints(n, rho);
-        if(planeSize < myConfigFileHough.Get_MinPlaneSize()) counter++;
+        if(planeSize < (int)myConfigFileHough.Get_MinPlaneSize()) counter++;
         end = GetCurrentTimeInMilliSec() - start;
         start = GetCurrentTimeInMilliSec();
         if(!quiet) cout << "Time for Polygonization " << plane << ": " << end << endl; 
@@ -197,7 +195,7 @@ void Hough::SHT() {
 double * const* Hough::getPoints(int &size) {
   size = allPoints->size();
   double ** returnPoints = new double*[allPoints->size()];
-  for(int i = 0; i < allPoints->size(); i++) {
+  for(unsigned int i = 0; i < allPoints->size(); i++) {
     Point p = (*allPoints)[i];
     returnPoints[i] = new double[3];
     returnPoints[i][0] = p.x;
@@ -214,11 +212,11 @@ double * const* Hough::getPoints(int &size) {
   * @return the remaining points
   */
 double * const* Hough::deletePoints(vector<ConvexPlane*> &model, int &size) {
-  for(int i = 0; i < model.size(); i++) {
+  for(unsigned int i = 0; i < model.size(); i++) {
     deletePoints(model[i]->n, model[i]->rho); 
   }
   double ** returnPoints = new double*[allPoints->size()];
-  for(int i = 0; i < allPoints->size(); i++) {
+  for(unsigned int i = 0; i < allPoints->size(); i++) {
     Point p = (*allPoints)[i];
     returnPoints[i] = new double[3];
     returnPoints[i][0] = p.x;
@@ -455,7 +453,7 @@ void Hough::APHT() {
       }
     }
     // repeat until maximum stability count exceeds a threshold
-  } while(max < myConfigFileHough.Get_AccumulatorMax());
+  } while(max < (int)myConfigFileHough.Get_AccumulatorMax());
 
   for(int i = 0; i <= maxpos; i++) {
     double * n = acc->getMax(mergelist[i]); 
@@ -788,7 +786,7 @@ int Hough::deletePoints(double * n, double rho) {
       allPoints->push_back(p);
     }
   }
-  int maxPlane = point_list.size();
+  unsigned int maxPlane = point_list.size();
   if(maxPlane < myConfigFileHough.Get_MinPlaneSize()) return maxPlane;
   vector<double *> convex_hull;
   ConvexPlane::JarvisMarchConvexHull(point_list,convex_hull);
