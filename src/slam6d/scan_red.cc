@@ -252,16 +252,22 @@ int main(int argc, char **argv)
 
   while (fileNr <= end) {
     Scan::readScans(type, fileNr, fileNr, dir, maxDist, minDist, 0);
-      // reduction filter for current scan!
+    const double* rPos = Scan::allScans[0]->get_rPos();
+    const double* rPosTheta = Scan::allScans[0]->get_rPosTheta();
+    
+    // reduction filter for current scan!
+    
+    cout << "Reducing Scan No. " << fileNr << endl;
     Scan::allScans[0]->calcReducedPoints(red, octree);
+    
     
     cout << "Writing Scan No. " << fileNr ;
     cout << " with " << Scan::allScans[0]->get_points_red_size() << " points" << endl; 
     string scanFileName;
     string poseFileName;
   
-    poseFileName = dir  + "reduced/scan" + to_string(fileNr,3) + ".pose";
     scanFileName = dir + "reduced/scan" + to_string(fileNr,3) + ".3d";
+    poseFileName = dir  + "reduced/scan" + to_string(fileNr,3) + ".pose";
    
      
     ofstream redptsout(scanFileName.c_str());
@@ -269,20 +275,18 @@ int main(int argc, char **argv)
          Point p(Scan::allScans[0]->get_points_red()[j]);
          redptsout << p.x << " " << p.y << " " << p.z << endl;
          
-         /*
+         
          //Points in global coordinate system
          redptsout << Scan::allScans[0]->get_points_red()[j][0] << " "
 			   << Scan::allScans[0]->get_points_red()[j][1] << " "
 			   << Scan::allScans[0]->get_points_red()[j][2] << endl;
-         */
+         
 	  }
     redptsout.close();
     redptsout.clear();
       
 
     ofstream posout(poseFileName.c_str());
-    const double* rPos = Scan::allScans[0]->get_rPos();
-    const double* rPosTheta = Scan::allScans[0]->get_rPosTheta();
     
     posout << rPos[0] << " " 
            << rPos[1] << " " 
