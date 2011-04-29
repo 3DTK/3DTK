@@ -97,12 +97,12 @@ Scan::Scan(const double* euler, int maxDist)
     exit(1);
   }
 
-  rPos[0] = 0;
-  rPos[1] = 0;
-  rPos[2] = 0;
-  rPosTheta[0] = 0;
-  rPosTheta[1] = 0;
-  rPosTheta[2] = 0;
+  rPos[0] = euler[0];
+  rPos[1] = euler[1];
+  rPos[2] = euler[2];
+  rPosTheta[0] = euler[3];
+  rPosTheta[1] = euler[4];
+  rPosTheta[2] = euler[5];
   M4identity(transMat);
   if (euler == 0) {
     M4identity(transMatOrg);
@@ -123,12 +123,12 @@ Scan::Scan(const double _rPos[3], const double _rPosTheta[3], vector<double *> &
   kd = 0;
   ann_kd_tree = 0;
   maxDist2 = -1;
-  rPos[0] = 0;
-  rPos[1] = 0;
-  rPos[2] = 0;
-  rPosTheta[0] = 0;
-  rPosTheta[1] = 0;
-  rPosTheta[2] = 0;
+  rPos[0] = _rPos[0];
+  rPos[1] = _rPos[1];
+  rPos[2] = _rPos[2];
+  rPosTheta[0] = _rPosTheta[0];
+  rPosTheta[1] = _rPosTheta[1];
+  rPosTheta[2] = _rPosTheta[2];
   M4identity(transMat);
   EulerToMatrix4(_rPos, _rPosTheta, transMatOrg);
 
@@ -163,12 +163,12 @@ Scan::Scan(const double _rPos[3], const double _rPosTheta[3], const int maxDist)
   kd = 0;
   ann_kd_tree = 0;
   maxDist2 = (maxDist != -1 ? sqr(maxDist) : maxDist);
-  rPos[0] = 0;
-  rPos[1] = 0;
-  rPos[2] = 0;
-  rPosTheta[0] = 0;
-  rPosTheta[1] = 0;
-  rPosTheta[2] = 0;
+  rPos[0] = _rPos[0];
+  rPos[1] = _rPos[1];
+  rPos[2] = _rPos[2];
+  rPosTheta[0] = _rPosTheta[0];
+  rPosTheta[1] = _rPosTheta[1];
+  rPosTheta[2] = _rPosTheta[2];
   M4identity(transMat);
   EulerToMatrix4(_rPos, _rPosTheta, transMatOrg);
 
@@ -1478,6 +1478,7 @@ void Scan::readScans(reader_type type,
   // read Scan-by-scan until no scan is available anymore
   while ((_fileNr = my_ScanIO->readScans(start, end, dir, maxDist, minDist, eu, ptss)) != -1) {
     Scan *currentScan = new Scan(eu, maxDist);
+    
     currentScan->fileNr = _fileNr;
 
     currentScan->points = ptss;    // copy points
