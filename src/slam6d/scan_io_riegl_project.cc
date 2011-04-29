@@ -221,7 +221,7 @@ int ScanIO_riegl_project::readScans(int start, int end, string &dir, int maxDist
 
   cout << " @ pose (" << euler[0] << "," << euler[1] << "," << euler[2]
 	  << "," << deg(euler[3]) << "," << deg(euler[4]) << ","  << deg(euler[5]) << ")" << endl;
-
+  
   // open scanfile
   shared_ptr<basic_rconnection> rc;
   rc = basic_rconnection::create(scanFileName);
@@ -240,7 +240,7 @@ int ScanIO_riegl_project::readScans(int start, int end, string &dir, int maxDist
 
   //done
   rc->close();
-
+  
 
   fileCounter++;
   
