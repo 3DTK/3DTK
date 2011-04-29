@@ -103,7 +103,7 @@ vector<double*> _convex_hull) {
 ConvexPlane::ConvexPlane(double plane[4]) {
   for(int i = 0; i < 3; i++) {
     n[i] = plane[i];
-    rho = n[3];
+    rho = plane[3];
     if(fabs(n[0]) < fabs(n[1])) {
       if(fabs(n[1]) < fabs(n[2])) {
         direction = 'z';

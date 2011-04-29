@@ -31,7 +31,7 @@ ConfigFileHough::ConfigFileHough() {
 
 }
 
-int ConfigFileHough::ShowConfiguration() {
+void ConfigFileHough::ShowConfiguration() {
   cout << "MaxDist " << Get_MaxDist() << endl;
   cout << "MinDist " << Get_MinDist() << endl;
   cout << "AccumulatorMax " << Get_AccumulatorMax() << endl;
@@ -53,7 +53,7 @@ int ConfigFileHough::ShowConfiguration() {
   cout << "PlaneDir " << Get_PlaneDir() << endl;
 }
 
-int ConfigFileHough::LoadCfg(char* CfgFile) {
+unsigned int ConfigFileHough::LoadCfg(char* CfgFile) {
 
   FILE *Cfg;
 

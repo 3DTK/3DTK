@@ -36,30 +36,30 @@ public:
   
   ConfigFileHough();
 
-  int LoadCfg(char *CfgFile);
-  int ShowConfiguration();
+  unsigned int LoadCfg(char *CfgFile);
+  void ShowConfiguration();
 
   inline char* Get_CfgFileName();
 
   inline double Get_MaxDist();
   inline double Get_MinDist();             
-  inline int Get_AccumulatorMax();   
-  inline int Get_MinSizeAllPoints();    
-  inline int Get_RhoNum();              
-  inline int Get_ThetaNum();           
-  inline int Get_PhiNum();         
-  inline int Get_RhoMax();           
+  inline unsigned int Get_AccumulatorMax();   
+  inline unsigned int Get_MinSizeAllPoints();    
+  inline unsigned int Get_RhoNum();              
+  inline unsigned int Get_ThetaNum();           
+  inline unsigned int Get_PhiNum();         
+  inline unsigned int Get_RhoMax();           
   inline double Get_MaxPointPlaneDist();   
-  inline int Get_MaxPlanes();           
-  inline int Get_MinPlaneSize(); 
+  inline unsigned int Get_MaxPlanes();           
+  inline unsigned int Get_MinPlaneSize(); 
   inline double Get_MinPlanarity();
   inline double Get_PlaneRatio();
   inline double Get_PointDist();           
   inline bool Get_PeakWindow(); 
-  inline int Get_WindowSize();
-  inline int Get_TrashMax();
+  inline unsigned int Get_WindowSize();
+  inline unsigned int Get_TrashMax();
                     
-  inline int Get_AccumulatorType();     
+  inline unsigned int Get_AccumulatorType();     
   inline char* Get_PlaneDir();  
 
 private:
@@ -67,22 +67,22 @@ private:
   char CfgFileName[FNAME_LENGTH];
   double MaxDist;
   double MinDist;
-  int AccumulatorMax;
-  int MinSizeAllPoints;
-  int RhoNum;
-  int ThetaNum;
-  int PhiNum;
-  int RhoMax;
+  unsigned int AccumulatorMax;
+  unsigned int MinSizeAllPoints;
+  unsigned int RhoNum;
+  unsigned int ThetaNum;
+  unsigned int PhiNum;
+  unsigned int RhoMax;
   double MaxPointPlaneDist;
-  int MaxPlanes;
-  int MinPlaneSize;
+  unsigned int MaxPlanes;
+  unsigned int MinPlaneSize;
   double MinPlanarity;
   double PlaneRatio;
   double PointDist;
   bool PeakWindow;
-  int WindowSize;
-  int TrashMax;
-  int AccumulatorType;
+  unsigned int WindowSize;
+  unsigned int TrashMax;
+  unsigned int AccumulatorType;
   char PlaneDir[FNAME_LENGTH];
 
 };
