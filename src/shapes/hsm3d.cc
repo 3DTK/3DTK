@@ -92,6 +92,10 @@ bool real_compare(double x, double y) {
       cubi.face = s[2] > 0 ? 3 : 6;
       cubi.u = s[0] / s[2];
       cubi.v = s[1] / s[2];
+    } else {
+      cubi.face = 0;
+      cubi.u = 0;
+      cubi.v = 0;
     }
 
     buffer_point retval;

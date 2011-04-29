@@ -4,7 +4,6 @@
 #include <vector>
 using std::vector;
 #include "slam6d/globals.icc"
-#include "wykobi/wykobi_algorithm.hpp"
 #include "newmat/newmatio.h"
 #include "newmat/newmatap.h"
 using namespace NEWMAT;
@@ -116,7 +115,7 @@ class CollisionPlane : public CollisionShape<T> {
 
   virtual void refine(vector<T *> *points) {
     cout << nx << " " << ny << " " << nz << " " << d << endl; 
-    T plane[4];
+    T plane[4] = {0,0,0,0};
     T centroid[3];
     fitPlane((*points), plane, centroid);
     nx = plane[0];
