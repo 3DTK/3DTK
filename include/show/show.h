@@ -48,6 +48,7 @@ void CallBackReshapeFunc(int width, int height);
 void CallBackIdleFunc(void);
 void DisplayItFunc(GLenum mode);
 void DrawPoints(GLenum mode);
+void DrawUrl();
 void glDumpWindowPPM(const char *filename, GLenum mode);
 void glWriteImagePPM(const char *filename, int scale, GLenum mode);
 void ProcessHitsFunc(GLint hits, GLuint buffer[]);
