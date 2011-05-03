@@ -15,6 +15,8 @@ float neardistance = 10.0;
 float fardistance = 40000.0;
 float oldfardistance = 40000.0;
 
+bool smallfont = true;
+bool label = true;
 /**
  * Displays all data (i.e., points) that are to be displayed
  * @param mode spezification for drawing to screen or in selection mode
@@ -358,6 +360,7 @@ void DisplayItFunc(GLenum mode)
   /**
    * Color of the fog 
    */
+  
   GLfloat fogColor[4];
   
   // set the clear color buffer in case of
@@ -503,11 +506,63 @@ void DisplayItFunc(GLenum mode)
   DrawObjects(mode);
   
   glPopMatrix();
+  if(label) DrawUrl();
+  
   // force draw the scene
   glFlush();
   glFinish();
 }
 
+void DrawUrl() {
+  glMatrixMode(GL_MODELVIEW);
+  glPushMatrix();
+  glLoadIdentity();
+  glMatrixMode(GL_PROJECTION);
+
+  // Save the current projection matrix
+  glPushMatrix();
+  // Make the current matrix the identity matrix
+  glLoadIdentity();
+
+  // Set the projection (to 2D orthographic)
+  glOrtho(0.0,100.0,0.0,100.0,-1.5,1.5);
+  
+  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); // TODO
+  
+  glColor4d(0.0,0.0,0.0,0.7);
+  
+  glBegin(GL_QUADS);
+  glVertex3f(0,0,-0.1);
+  glVertex3f(0,6,-0.1);
+  if(smallfont) {
+    glVertex3f(22,6,-0.1);
+    glVertex3f(22,0,-0.1);
+  } else {
+    glVertex3f(25,6,-0.1);
+    glVertex3f(25,0,-0.1);
+  }
+  glEnd();
+  
+  glBlendFunc(GL_ONE, GL_ZERO);
+  glColor3f(1,1,1);
+  if(smallfont) {
+    glRasterPos3f(1,3.5,0.0);
+    _glutBitmapString(GLUT_BITMAP_8_BY_13, "created by 3DTK");
+    glRasterPos3f(1,1,0.0);
+    _glutBitmapString(GLUT_BITMAP_8_BY_13, "http://threedtk.de");
+  } else {
+    glRasterPos3f(1,3.5,0.0);
+    _glutBitmapString(GLUT_BITMAP_9_BY_15, "created by 3DTK");
+    glRasterPos3f(1,1,0.0);
+    _glutBitmapString(GLUT_BITMAP_9_BY_15, "http://threedtk.de");
+  }
+  
+  // Restore the original projection matrix
+  glPopMatrix();
+  glMatrixMode(GL_MODELVIEW);
+  glPopMatrix();
+
+}
 /**
  * Function topview. Set the screen for top view.
  */
@@ -1312,7 +1367,12 @@ void glWriteImagePPM(const char *filename, int scale, GLenum mode)
     // Save camera parameters
     GLdouble savedMatrix[16];
     glGetDoublev(GL_PROJECTION_MATRIX,savedMatrix);
-     
+    GLdouble savedModel[16];
+    glGetDoublev(GL_MODELVIEW_MATRIX,savedModel);
+    //glMatrixMode(GL_PROJECTION);
+    //glPushMatrix();
+    //glMatrixMode(GL_MODELVIEW);
+    //glPushMatrix();
     top = 1.0/tmp;
     bottom = -top;
     right = (aspect)/tmp;
@@ -1340,7 +1400,8 @@ void glWriteImagePPM(const char *filename, int scale, GLenum mode)
     unsigned char *ibuffer;       // The PPM Output Buffer
     buffer = new GLubyte[win_width * win_height * RGBA];
     ibuffer = new unsigned char[image_width * image_height * RGB];
-
+    
+    smallfont = (scale==1);
     double height;
     if(!showTopView) {
       height = bottom;
@@ -1354,20 +1415,27 @@ void glWriteImagePPM(const char *filename, int scale, GLenum mode)
       } else {
         width = -pzoom*aspect;
       }
-      for(int j = 0; j < scale; j++) {
+      for(int j = 0; j < scale; j++) { 
         glMatrixMode(GL_PROJECTION);
         glLoadIdentity();
+        label = false;
         if(!showTopView) {
-          glFrustum(width, width + part_width, height, height + part_height, 1.0, 40000.0);
+          glFrustum(width, width + part_width, height, height + part_height,
+          1.0, 40000.0);
           showall = true;
+          glMatrixMode(GL_MODELVIEW);
+          if(i==0 && j==0) {
+            label = true; 
+          }
           DisplayItFunc(mode); 
         } else {
-          cout << width << " " << width + part_width << " " << height << " "
-          << height + part_height << endl;
           glOrtho( width, width + part_width, 
                    height, height + part_height, 
                    1.0, 32000.0 );
           glMatrixMode(GL_MODELVIEW);
+          if(i==0 && j==0) {
+            label = true;
+          }
           DisplayItFunc(mode);
         }
     
@@ -1394,9 +1462,17 @@ void glWriteImagePPM(const char *filename, int scale, GLenum mode)
     }
    
     // show the starting scene 
+    
+  // Restore the original projection matrix
+    glMatrixMode(GL_PROJECTION);
     glLoadMatrixd(savedMatrix);
+    glMatrixMode(GL_MODELVIEW);
+    glLoadMatrixd(savedModel);
     // show the rednered scene
+    label = true;
+    smallfont = true;
     haveToUpdate=2;
+    DisplayItFunc(mode);
 
     ofstream fp;                  // The PPM File
 
