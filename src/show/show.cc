@@ -122,11 +122,13 @@ GLdouble angle           = 0.0;
  * Current rotation axis of the scene as quaternion
  */
 GLdouble quat[4]         ={0.0, 0.0, 0.0, 1.0};
+GLdouble Rquat[4]         ={0.0, 0.0, 0.0, 1.0};
 
 /**
  * Current translation of the scene 
  */
 GLdouble X               = 0.0, Y               = 0.0, Z               = 0.0;
+GLdouble RVX = 0.0, RVY = 0.0, RVZ = 0.0;
 
 /**
  * parallel zoom (similar to apex angle) for parallel projection
@@ -316,6 +318,9 @@ void usage(char* prog)
 	  << "         use randomized octree based point reduction (pts per voxel=<NR>)" << endl
 	  << "         requires " << bold << "-r" << normal <<" or " << bold << "--reduce" << endl
 	  << endl
+	  << bold << "  -0" << normal << " , " << bold << "--origin" << normal << "" << endl
+	  << "         sets the starting and reset position to the position of the first scan" << endl
+	  << endl
 	  << bold << "  -r" << normal << " NR, " << bold << "--reduce=" << normal << "NR" << endl
 	  << "         turns on octree based point reduction (voxel size=<NR>)" << endl
 	  << endl
@@ -374,7 +379,7 @@ void usage(char* prog)
  * @return 0, if the parsing was successful, 1 otherwise 
  */
 int parseArgs(int argc,char **argv, string &dir, int& start, int& end, int& maxDist, int& minDist, 
-              double &red, bool &readInitial, int &octree, PointType &ptype, double &fps, string &loadObj, bool &loadOct, bool &saveOct, reader_type &type)
+              double &red, bool &readInitial, int &octree, PointType &ptype, double &fps, string &loadObj, bool &loadOct, bool &saveOct, bool &origin, reader_type &type)
 {
   unsigned int types = PointType::USE_NONE;
   start   = 0;
@@ -387,6 +392,7 @@ int parseArgs(int argc,char **argv, string &dir, int& start, int& end, int& maxD
 
   cout << endl;
   static struct option longopts[] = {
+    { "origin",          no_argument,         0,  'o' },
     { "format",          required_argument,   0,  'f' },  
     { "fps",             required_argument,   0,  'F' },  
     { "start",           required_argument,   0,  's' },
@@ -408,7 +414,7 @@ int parseArgs(int argc,char **argv, string &dir, int& start, int& end, int& maxD
     { 0,           0,   0,   0}                    // needed, cf. getopt.h
   };
 
-  while ((c = getopt_long(argc, argv,"F:f:s:e:r:m:M:O:l:wtRadhTc", longopts, NULL)) != -1)
+  while ((c = getopt_long(argc, argv,"F:f:s:e:r:m:M:O:l:wtRadhToc", longopts, NULL)) != -1)
     switch (c)
 	 {
 	 case 's':
@@ -463,6 +469,9 @@ int parseArgs(int argc,char **argv, string &dir, int& start, int& end, int& maxD
    case 'F':
      fps = atof(optarg);
      break;
+   case 'o':
+     origin = false;
+     break;
    case '0':
      saveOct = true;
      break;
@@ -492,6 +501,24 @@ int parseArgs(int argc,char **argv, string &dir, int& start, int& end, int& maxD
   return 0;
 }
 
+void setResetView(bool origin) {
+  if (!origin) {
+    double *transmat = MetaMatrix[0].back();
+    cout << transmat << endl;
+
+    RVX = -transmat[12];
+    RVY = -transmat[13];
+    RVZ = -transmat[14];
+    Matrix4ToQuat(transmat, Rquat);
+  X = RVX;
+  Y = RVY;
+  Z = RVZ;
+  quat[0] = Rquat[0];
+  quat[1] = Rquat[1];
+  quat[2] = Rquat[2];
+  quat[3] = Rquat[3];
+  }
+}
 
 /*
  * A function that read the .frame files created by slam6D
@@ -691,6 +718,7 @@ int main(int argc, char **argv){
   bool loadOct = false;
   bool saveOct = false;
   string loadObj;
+  bool origin = true;
 
   pose_file_name = new char[sizeof(GLUI_String)];
   path_file_name = new char[sizeof(GLUI_String)];
@@ -701,7 +729,7 @@ int main(int argc, char **argv){
   strncpy(selection_file_name, "selected.3d", sizeof(GLUI_String));  
   
   parseArgs(argc, argv, dir, start, end, maxDist, minDist, red, readInitial,
-  octree, pointtype, idealfps, loadObj, loadOct, saveOct, type);
+  octree, pointtype, idealfps, loadObj, loadOct, saveOct, origin, type);
 
   ////////////////////////
   Display::readDisplays(loadObj, displays);
@@ -742,6 +770,8 @@ int main(int argc, char **argv){
 
   // read frames first, to get notifyied of missing frames before all scans are read in
   readFrames(dir, start, end, readInitial, type);
+
+  setResetView(origin);
 
   // Get Scans
   if (!loadOct) {
