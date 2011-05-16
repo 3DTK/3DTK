@@ -1,6 +1,9 @@
-#ifndef __DISPLAY_H__
-#define __DISPLAY_H__
+#include <string.h>
+#include <stdlib.h>
+#include "show/viewcull.h"
+#include "show/scancolormanager.h"
 //#include "show/colormanager.h"
+/*
 #include "limits.h"
 #include <vector>
 using std::vector;
@@ -8,8 +11,16 @@ using std::vector;
 #include <string.h>
 using std::string;
 
-#include <glu.h>
+#include <stdlib.h>
+#include <stdio.h>
 #include <glut.h>
+#include <GL/glut.h>
+#include <glu.h>
+*/
+#ifndef __DISPLAY_H__
+#define __DISPLAY_H__
+
+using namespace std;
 
 class Display {
   public:
@@ -29,6 +40,20 @@ class Display {
   protected:
   static double mirror[16];
   //ColorManager *cm;
+};
+
+class PointDisplay : public Display { 
+ 
+  public:
+  static Display* readFromFile(string &filename);
+  virtual void displayObject();
+
+  private:
+
+  PointDisplay(vector<float*> &p, vector<string> &l);
+
+  vector<float *> points;
+  vector<string> labels;
 };
 
 class LineDisplay : public Display { 
