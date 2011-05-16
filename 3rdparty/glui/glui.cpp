@@ -550,9 +550,9 @@ int _glutBitmapWidthString( void *font, char *s )
 /* Displays the contents of a string using GLUT's bitmap character function */
 /* Does not handle newlines                                             */
 
-void _glutBitmapString( void *font, char *s )
+void _glutBitmapString( void *font, const char *s )
 {
-  char *p = s;
+  const char *p = s;
 
   while( *p != '\0' )  {
     glutBitmapCharacter( font, *p );

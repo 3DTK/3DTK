@@ -1670,7 +1670,7 @@ public:
 
 /********** Misc functions *********************/
 int _glutBitmapWidthString( void *font, char *s );
-void _glutBitmapString( void *font, char *s );
+void _glutBitmapString( void *font, const char *s );
 
 
 
