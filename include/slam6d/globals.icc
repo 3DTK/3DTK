@@ -510,6 +510,25 @@ inline unsigned char randUC(unsigned char rnd)
   return (unsigned char) ((float)rnd * std::rand() / (RAND_MAX + 1.0));
 }
 
+/**
+ * Computes the angle between 2 points in polar coordinates
+ */
+inline double polardist(double* p, double *p2) {
+  double stheta = sin(p[0]) * sin(p2[0]);
+  double myd2 = acos( stheta * cos(p[1]) * cos(p2[1]) 
+                    + stheta * sin(p[1]) * sin(p2[1]) 
+                    + cos(p[0]) * cos(p2[0])); 
+  return myd2;
+}
+
+                        
+
+inline void toKartesian(double *polar, double *kart) {
+  kart[0] = polar[2] * cos( polar[1] ) * sin( polar[0] );
+  kart[1] = polar[2] * sin( polar[1] ) * sin( polar[0] );
+  kart[2] = polar[2] * cos( polar[0] );
+
+}
 
 /**
   * Transforms a point in cartesian coordinates into polar 

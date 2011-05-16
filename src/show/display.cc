@@ -1,3 +1,10 @@
+//#include <string.h>
+//#include "show/viewcull.h"
+//#include "show/scancolormanager.h"
+
+#include <glut.h>
+#include <glu.h>
+#include <glui.h>
 #include "show/display.h"
 #include "slam6d/globals.icc"
 #include <fstream>
@@ -6,9 +13,6 @@ using std::ifstream;
 using std::cout;
 using std::cerr;
 using std::endl;
-
-#include <glu.h>
-#include <glut.h>
 
 double Display::mirror[16] = {1,0,0,0,
   0,1,0,0,
@@ -40,6 +44,8 @@ void Display::readDisplays(string &filename, vector<Display*> &displays) {
           color[i] = rand()/((double)RAND_MAX);
         }
         displays.push_back(PlaneDisplay::readFromFile(objectfile, color));
+      } else if(strcmp(type.c_str(), "Point") == 0) {
+        displays.push_back(PointDisplay::readFromFile(objectfile));
       } else if(strcmp(type.c_str(), "Line") == 0) {
         displays.push_back(LineDisplay::readFromFile(objectfile));
       } else if(strcmp(type.c_str(), "GroupPlane") == 0) {
@@ -53,6 +59,62 @@ void Display::readDisplays(string &filename, vector<Display*> &displays) {
   }
   input.close();
   input.clear();
+}
+
+PointDisplay::PointDisplay(vector<float*> &p, vector<string> &l) {
+  points = p;
+  labels = l;
+}
+
+Display * PointDisplay::readFromFile(string &filename) {
+  ifstream input;
+  input.open(filename.c_str());
+
+  vector<float*> points;
+  vector<string> labels;
+  while (input.good()) {
+    try {
+      float *p = new float[3];
+      input >> p[0] >> p[1] >> p[2];
+      points.push_back(p);
+      string l;
+      input >> l;
+      labels.push_back(l);
+    } catch (...) {
+      break;
+    }
+  }
+ 
+  points.pop_back();
+  labels.pop_back();
+  input.close();
+  input.clear();
+
+  return new PointDisplay(points, labels);
+    
+}
+
+void PointDisplay::displayObject() {
+
+  glColor3f(1.0, 0.3, 0.3);
+  
+  glPointSize(5);
+  glBegin(GL_POINTS);
+  for (unsigned int i = 0; i < points.size(); i++) {
+    glVertex3f(points[i][0], points[i][1], points[i][2]);
+  }
+  glEnd();
+  
+  glPushMatrix();
+  for(unsigned int i = 0; i < points.size(); i++) {
+    
+    glRasterPos3f(points[i][0], points[i][1], points[i][2]);
+    _glutBitmapString(GLUT_BITMAP_HELVETICA_10, labels[i].c_str());
+    //_glutBitmapString(GLUT_BITMAP_9_BY_15, "http://threedtk.de");
+   
+  }
+  glPopMatrix();
+  
 }
 
 LineDisplay::LineDisplay(vector<float*> &l) {
