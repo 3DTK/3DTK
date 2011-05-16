@@ -418,7 +418,6 @@ void DisplayItFunc(GLenum mode)
   }
 
 
-
 //   cout << "Position  :" << X << " " << Y << " " << Z << endl;
 //   cout << "Quaternion:" << quat[0] << " " << quat[1] << " " << quat[2] << " " << quat[3] << endl;
 //   cout << "Axis/Angle:" << axis[0] << " " << axis[1] << " " << axis[2] << " " << angle << endl;
@@ -655,13 +654,20 @@ void callDeleteCamera(int dummy){
 
 void resetView(int dummy)
 {
-  Y = START_Y;
-  quat[0] = 1.0;
+//  quat[0] = 1.0;
   cangle = 60.0;
   cangle_spinner->set_float_val(cangle);  
   pzoom = 2000.0;
   pzoom_spinner->set_float_val(pzoom);  
-  quat[1] = quat[2] = quat[3] = X = Z = 0.0;
+//  quat[1] = quat[2] = quat[3] = X = Y = Z = 0.0;
+//  quat[1] = quat[2] = quat[3] = 0.0;
+  X = RVX;
+  Y = RVY;
+  Z = RVZ;
+  quat[0] = Rquat[0];
+  quat[1] = Rquat[1];
+  quat[2] = Rquat[2];
+  quat[3] = Rquat[3];
   rotButton->reset();
   haveToUpdate = 2;
   mouseRotX = 0;
