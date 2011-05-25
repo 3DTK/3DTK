@@ -28,10 +28,10 @@ void icp6Dcuda::initGPUicp(float max_rad, float min_rad, int iter, int max_iter,
 
 icp6Dcuda::icp6Dcuda(icp6Dminimizer *my_icp6Dminimizer, double max_dist_match, 
 				 int max_num_iterations, bool quiet, bool meta, int rnd, bool eP,
-				 int anim, double epsilonICP, bool use_cache, bool cuda_enabled)
+				 int anim, double epsilonICP, int nns_method, bool cuda_enabled)
 : icp6D(my_icp6Dminimizer, max_dist_match, 
 	   max_num_iterations, quiet, meta, rnd, eP,
-	   anim, epsilonICP, use_cache, cuda_enabled)
+	   anim, epsilonICP, nns_method, cuda_enabled)
 {
   icp = 0;
   max_scnSize = 0;

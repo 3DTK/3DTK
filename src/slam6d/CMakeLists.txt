@@ -94,7 +94,7 @@ SET(SCANLIB_SRCS
   graph.cc          icp6Dapx.cc     icp6D.cc          icp6Dsvd.cc 
   icp6Dortho.cc     icp6Dquat.cc    icp6Dhelix.cc     icp6Dlumeuler.cc 
   icp6Dlumquat.cc   icp6Ddual.cc    lum6Deuler.cc     lum6Dquat.cc
-  ghelix6DQ2.cc   gapx6D.cc         graphToro.cc      
+  ghelix6DQ2.cc     gapx6D.cc       graphToro.cc      ann_kd.cc
   graphHOG-Man.cc   elch6D.cc       elch6Dquat.cc     elch6DunitQuat.cc 
   elch6Dslerp.cc    elch6Deuler.cc  loopToro.cc       loopHOG-Man.cc    
   point_type.cc	icp6Dquatscale.cc
@@ -118,11 +118,11 @@ ELSE(WITH_CUDA)
 ENDIF(WITH_CUDA)
 
 IF(UNIX)
-  target_link_libraries(slam6D dl scanlib newmat sparse)
+  target_link_libraries(slam6D dl scanlib newmat sparse ANN)
 ENDIF(UNIX)
 
 IF(WIN32)
-  target_link_libraries(slam6D scanlib newmat sparse XGetopt ${Boost_LIBRARIES})
+  target_link_libraries(slam6D scanlib newmat sparse ANN XGetopt ${Boost_LIBRARIES})
 ENDIF(WIN32)
 
 

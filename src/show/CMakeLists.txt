@@ -5,11 +5,11 @@ IF (WITH_SHOW)
 
   IF(WIN32)
     target_link_libraries(show glui ${CMAKE_SOURCE_DIR}/windows/glut32.lib)
-    target_link_libraries(show scanlib ${OPENGL_LIBRARIES} XGetopt)
+    target_link_libraries(show scanlib ANN ${OPENGL_LIBRARIES} XGetopt)
   ENDIF(WIN32)
 
   IF (UNIX)
-    target_link_libraries(show scanlib newmat ${OPENGL_LIBRARIES} glui)
+    target_link_libraries(show scanlib newmat ANN ${OPENGL_LIBRARIES} glui)
     target_link_libraries(show dl ${GLUT_LIBRARIES} )
   ENDIF(UNIX)
 

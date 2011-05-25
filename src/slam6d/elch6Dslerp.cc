@@ -46,7 +46,7 @@ void elch6Dslerp::close_loop(const vector <Scan *> &allScans, int first, int las
     Matrix C(7, 7);
     int from = source(*ei, g);
     int to = target(*ei, g);
-    lum6DQuat::covarianceQuat(allScans[from], allScans[to], my_icp6D->get_use_cache(), my_icp6D->get_rnd(), my_icp6D->get_max_dist_match2(), &C);
+    lum6DQuat::covarianceQuat(allScans[from], allScans[to], my_icp6D->get_nns_method(), my_icp6D->get_rnd(), my_icp6D->get_max_dist_match2(), &C);
     C = C.i();
     for(int j = 0; j < 3; j++) {
 #ifdef _OPENMP

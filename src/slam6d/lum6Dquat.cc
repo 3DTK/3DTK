@@ -36,17 +36,17 @@ using namespace NEWMAT;
  * @param eP Extrapolate odometry?
  * @param anim Animate which frames?
  * @param epsilonICP Termination criterion for ICP
- * @param use_cache Shall we used cached k-d tree search
+ * @param nns_method Specifies which NNS method is used
  * @param epsilonLUM Termination criterion for LUM
  */
 lum6DQuat::lum6DQuat(icp6Dminimizer *my_icp6Dminimizer,
 				   double mdm, double max_dist_match, 
 				   int max_num_iterations, bool quiet, bool meta, int rnd,
-				   bool eP, int anim, double epsilonICP, bool use_cache, double epsilonLUM)
+				   bool eP, int anim, double epsilonICP, int nns_method, double epsilonLUM)
   : graphSlam6D(my_icp6Dminimizer,
 			 mdm, max_dist_match, 
 			 max_num_iterations, quiet, meta, rnd,
-			 eP, anim, epsilonICP, use_cache, epsilonLUM)
+			 eP, anim, epsilonICP, nns_method, epsilonLUM)
 { }
 
 
@@ -65,15 +65,15 @@ lum6DQuat::~lum6DQuat()
  * 
  * @param first pointer to the first scan of the link
  * @param second pointer to the second scan of the link
- * @param use_cache shall we use the cache?
+ * @param nns_method Specifies which NNS method is used
  * @param rnd shall we use randomization for computing the point pairs?
  * @param max_dist_match2 maximal distance allowed for point pairs
  * @param C pointer to the inverse of the covariance matrix Cij
  * @param CD pointer to the vector Cij*Dij
  */
 void lum6DQuat::covarianceQuat(Scan *first, Scan *second, 
-                                 bool use_cache, int rnd, double max_dist_match2, 
-                                 Matrix *C, ColumnVector *CD) 
+                               int nns_method, int rnd, double max_dist_match2, 
+						 Matrix *C, ColumnVector *CD) 
 {
   // x,y,z       denote the coordinates of uk (Here averaged over ak and bk)
   // sx,sy,sz    are the sums of their respective coordinates of uk over each paint pair
@@ -105,13 +105,23 @@ void lum6DQuat::covarianceQuat(Scan *first, Scan *second,
   double dummy_centroid_m[3];
   double dummy_centroid_d[3];
 
-  if (use_cache) {
-    KDCacheItem *closest = Scan::initCache(first, second);
-    Scan::getPtPairsCache(&uk, closest, first, second, thread_num, rnd, max_dist_match2, dummy_centroid_m, dummy_centroid_d);
-  } else {
-    Scan::getPtPairs(&uk, first, second, thread_num, rnd, max_dist_match2, dummy_centroid_m, dummy_centroid_d);
+  switch (nns_method) {
+    case cachedKD:
+	 {
+	 KDCacheItem *closest = Scan::initCache(first, second);
+	 Scan::getPtPairsCache(&uk, closest, first, second, thread_num,
+					   rnd, max_dist_match2, dummy_centroid_m, dummy_centroid_d);
+	 break;
+	 }
+    case simpleKD:
+    case ANNTree:
+    case BOCTree:
+//  case NaboKD:
+	 Scan::getPtPairs(&uk, first, second, thread_num,
+				   rnd, max_dist_match2, dummy_centroid_m, dummy_centroid_d);  
+      break;
   }
-
+  
   m = uk.size();
 
   MZ = 0.0;
@@ -246,7 +256,7 @@ void lum6DQuat::FillGB3D(Graph *gr,Matrix* G, ColumnVector* B, vector<Scan *> al
 
     Matrix Cab;
     ColumnVector CDab;
-    covarianceQuat(FirstScan, SecondScan, use_cache, (int)my_icp->get_rnd(), 
+    covarianceQuat(FirstScan, SecondScan, nns_method, (int)my_icp->get_rnd(), 
                     (int)max_dist_match2_LUM, &Cab, &CDab); 
 
     if(a >= 0){
