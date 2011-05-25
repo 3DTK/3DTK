@@ -29,13 +29,13 @@ public:
    * @param eP Extrapolate odometry
    * @param anim animate scan matching
    * @param epsilonICP the ICP epsilon
-   * @param use_cache used cached k-d tree search
+   * @param nns_method the k-d tree search
    */
-  loopSlam6D(bool _quiet, icp6Dminimizer *my_icp6Dminimizer, double mdm, int max_num_iterations, int rnd, bool eP, int anim, double epsilonICP, bool use_cache)
+  loopSlam6D(bool _quiet, icp6Dminimizer *my_icp6Dminimizer, double mdm, int max_num_iterations, int rnd, bool eP, int anim, double epsilonICP,  int nns_method)
   {
     this->quiet = _quiet;
     this->my_icp6D = new icp6D(my_icp6Dminimizer, mdm, max_num_iterations,
-                    quiet, false, rnd, eP, anim, epsilonICP, use_cache);
+                    quiet, false, rnd, eP, anim, epsilonICP, nns_method);
   };
 
   /** 

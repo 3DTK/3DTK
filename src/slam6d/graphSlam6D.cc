@@ -36,15 +36,15 @@ using namespace NEWMAT;
  * @param eP Extrapolate odometry?
  * @param anim Animate which frames?
  * @param epsilonICP Termination criterion for ICP
- * @param use_cache Shall we used cached k-d tree search
+ * @param nns_method Specifies which NNS method to use
  * @param epsilonLUM Termination criterion for LUM
  */
 graphSlam6D::graphSlam6D(icp6Dminimizer *my_icp6Dminimizer,
 					double mdm, double max_dist_match, 
 					int max_num_iterations, bool quiet, bool meta, int rnd,
-					bool eP, int anim, double epsilonICP, bool use_cache, double epsilonLUM)
+					bool eP, int anim, double epsilonICP, int nns_method, double epsilonLUM)
 {
-  this->use_cache = use_cache;
+  this->nns_method = nns_method;
   this->quiet = quiet;
   this->epsilonLUM = epsilonLUM;
   this->max_dist_match2_LUM = sqr(max_dist_match);
@@ -52,7 +52,7 @@ graphSlam6D::graphSlam6D(icp6Dminimizer *my_icp6Dminimizer,
   ctime = 0.0;
   
   this->my_icp = new icp6D(my_icp6Dminimizer, mdm, max_num_iterations,
-					  quiet, meta, rnd, eP, anim, epsilonICP, use_cache);
+					  quiet, meta, rnd, eP, anim, epsilonICP, nns_method);
 }
 
 graphSlam6D::~graphSlam6D()

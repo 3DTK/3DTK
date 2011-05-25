@@ -28,7 +28,7 @@ public:
    * @param eP Extrapolate odometry?
    * @param anim Animate which frames?
    * @param epsilonICP Termination criterion for ICP
-   * @param use_cache Shall we used cached k-d tree search
+   * @param nns_method Which nearest neigbor search method shall we use
    * @param epsilonLUM Termination criterion for LUM
    */
   graphHOGMan(icp6Dminimizer *my_icp6Dminimizer,
@@ -41,12 +41,12 @@ public:
       bool eP = true,
       int anim = -1,
       double epsilonICP = 0.0000001,
-      bool use_cache = false,
+      int nns_method = simpleKD,
       double epsilonLUM = 0.5)
     : graphSlam6D(my_icp6Dminimizer,
         mdm, max_dist_match,
         max_num_iterations, quiet, meta, rnd,
-        eP, anim, epsilonICP, use_cache, epsilonLUM)
+        eP, anim, epsilonICP, nns_method, epsilonLUM)
     { }
 
   virtual ~graphHOGMan()

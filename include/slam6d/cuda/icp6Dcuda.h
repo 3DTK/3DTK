@@ -42,7 +42,7 @@ public:
 		  bool eP = true,
 		  int anim = -1,
 		  double epsilonICP = 0.0000001,
-		  bool use_cache = false,
+		  int nns_method = simpleKD,
 		  bool cuda_enabled = false);
   
   /**

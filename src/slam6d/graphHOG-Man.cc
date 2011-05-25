@@ -77,7 +77,7 @@ double graphHOGMan::doGraphSlam6D(Graph gr, vector <Scan *> allScans, int nrIt)
     Matrix4ToQuat(rela, rPosQuat, rPos);
     QuatRPYEuler(rPosQuat, rPosTheta);
 
-    lum6DEuler::covarianceEuler(allScans[first], allScans[last], my_icp->get_use_cache(), my_icp->get_rnd(), my_icp->get_max_dist_match2(), &C);
+    lum6DEuler::covarianceEuler(allScans[first], allScans[last], my_icp->get_nns_method(), my_icp->get_rnd(), my_icp->get_max_dist_match2(), &C);
 
     outFile << "EDGE3" << " " << last << " " << first << " " <<
       (rPos[0]/100) << " " <<

@@ -36,17 +36,17 @@ using std::ofstream;
  * @param eP Extrapolate odometry?
  * @param anim Animate which frames?
  * @param epsilonICP Termination criterion for ICP
- * @param use_cache Shall we used cached k-d tree search
+ * @param nns_method Specifies which NNS method to use
  * @param epsilonLUM Termination criterion for LUM
  */
 ghelix6DQ2::ghelix6DQ2(icp6Dminimizer *my_icp6Dminimizer,
 		   double mdm, double max_dist_match, 
 		   int max_num_iterations, bool quiet, bool meta, int rnd,
-		   bool eP, int anim, double epsilonICP, bool use_cache, double epsilonLUM)
+		   bool eP, int anim, double epsilonICP, int nns_method, double epsilonLUM)
   : graphSlam6D(my_icp6Dminimizer,
 			 mdm, max_dist_match,
 			 max_num_iterations, quiet, meta, rnd,
-			 eP, anim, epsilonICP, use_cache, epsilonLUM)
+			 eP, anim, epsilonICP, nns_method, epsilonLUM)
 { }
 
 
@@ -361,17 +361,25 @@ double ghelix6DQ2::doGraphSlam6D(Graph gr, vector <Scan *> allScans, int nrIt)
 	 double dummy_centroid_m[3];
 	 double dummy_centroid_d[3];
 
-	 if (use_cache) {
-	   KDCacheItem *closest = Scan::initCache(FirstScan, SecondScan);
-	   Scan::getPtPairsCache(ptpairs[i], closest, FirstScan, SecondScan, thread_num,
-						(int)my_icp->get_rnd(), (int)max_dist_match2_LUM,
-						dummy_centroid_m, dummy_centroid_d);
-	 } else {
-	   Scan::getPtPairs(ptpairs[i], FirstScan, SecondScan, thread_num,
-					(int)my_icp->get_rnd(), (int)max_dist_match2_LUM,
-					dummy_centroid_m, dummy_centroid_d);
+	 switch (nns_method) {
+	   case cachedKD:
+		{
+		KDCacheItem *closest = Scan::initCache(FirstScan, SecondScan);
+	     Scan::getPtPairsCache(ptpairs[i], closest, FirstScan, SecondScan, thread_num,
+						  (int)my_icp->get_rnd(), (int)max_dist_match2_LUM,
+						  dummy_centroid_m, dummy_centroid_d);
+		break;
+		}
+	   case simpleKD:
+        case ANNTree:
+        case BOCTree:
+//      case NaboKD:         
+		Scan::getPtPairs(ptpairs[i], FirstScan, SecondScan, thread_num,
+					  (int)my_icp->get_rnd(), (int)max_dist_match2_LUM,
+					  dummy_centroid_m, dummy_centroid_d);
+		break;
 	 }
-	 
+
       // faulty network
       if (ptpairs[i]->size() <= 1) {
 	   cout << "Error: Link (" << gr.getLink(i,0)

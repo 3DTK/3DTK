@@ -26,7 +26,7 @@ public:
   graphSlam6D(icp6Dminimizer *my_icp6Dminimizer,
 		    double mdm, double max_dist_match, 
 		    int max_num_iterations, bool quiet, bool meta, int rnd,
-		    bool eP, int anim, double epsilonICP, bool use_cache, double epsilonLUM);
+		    bool eP, int anim, double epsilonICP, int nns_method, double epsilonLUM);
 
   /** 
    * Destructor 
@@ -65,9 +65,9 @@ protected:
   double max_dist_match2_LUM;
 
   /**
-   * indicates using the cache
+   * indicates the NNS method being used
    */
-  bool use_cache;
+  int nns_method;
 
   /**
    * be quiet
