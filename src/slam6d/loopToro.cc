@@ -55,7 +55,7 @@ void loopToro::close_loop(const vector <Scan *> &allScans, int first, int last, 
     Matrix4ToQuat(rela, rPosQuat, rPos);
     QuatRPYEuler(rPosQuat, rPosTheta);
 
-    lum6DEuler::covarianceEuler(allScans[from], allScans[to], my_icp6D->get_use_cache(), my_icp6D->get_rnd(), my_icp6D->get_max_dist_match2(), &C);
+    lum6DEuler::covarianceEuler(allScans[from], allScans[to], my_icp6D->get_nns_method(), my_icp6D->get_rnd(), my_icp6D->get_max_dist_match2(), &C);
 
 #ifdef _OPENMP
 #pragma omp critical
@@ -105,7 +105,7 @@ void loopToro::close_loop(const vector <Scan *> &allScans, int first, int last, 
   Matrix4ToQuat(rela, rPosQuat, rPos);
   QuatRPYEuler(rPosQuat, rPosTheta);
 
-  lum6DEuler::covarianceEuler(allScans[first], allScans[last], my_icp6D->get_use_cache(), my_icp6D->get_rnd(), my_icp6D->get_max_dist_match2(), &C);
+  lum6DEuler::covarianceEuler(allScans[first], allScans[last], my_icp6D->get_nns_method(), my_icp6D->get_rnd(), my_icp6D->get_max_dist_match2(), &C);
 
   outFile << "EDGE3" << " " << last << " " << first << " " <<
     (rPos[0]/100) << " " <<

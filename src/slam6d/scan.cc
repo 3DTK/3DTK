@@ -29,6 +29,7 @@ using std::stringstream;
 #include "slam6d/d2tree.h"
 #include "slam6d/kd.h"
 #include "slam6d/kdc.h"
+#include "slam6d/ann_kd.h"
 
 #ifdef _OPENMP
 #include <omp.h>
@@ -185,9 +186,10 @@ Scan::Scan(const double _rPos[3], const double _rPosTheta[3], const int maxDist)
  * and reinitializes the cache, iff needed
  *
  * @param MetaScan Vector that contains the 3D scans
- * @param use_cache Indicates if cached versions of the search tree has to be build
+ * @param nns_method Indicates the version of the tree to be built
+ * @param cuda_enabled indicated, if cuda should be used for NNS
  */
-Scan::Scan(const vector < Scan* >& MetaScan, bool use_cache, bool cuda_enabled)
+Scan::Scan(const vector < Scan* >& MetaScan, int nns_method, bool cuda_enabled)
 {
   kd = 0;
   ann_kd_tree = 0;
@@ -225,7 +227,8 @@ Scan::Scan(const vector < Scan* >& MetaScan, bool use_cache, bool cuda_enabled)
   scanNr = numberOfScans++;
 
   // build new search tree
-  createTree(use_cache, cuda_enabled);
+  createTree(nns_method, cuda_enabled);
+  
   // update max num point in scan iff you have to do so
   if (points_red_size > (int)max_points_red_size) max_points_red_size = points_red_size;
 
@@ -686,7 +689,7 @@ void Scan::calcReducedPoints(double voxelSize, int nrpts)
 /**
  * Calculates the search trees for all scans
  */
-void Scan::createTrees(bool use_cache, bool cuda_enabled)
+void Scan::createTrees(int nns_method, bool cuda_enabled)
 {
   cerr << "create " << allScans.size() << " k-d trees " << flush;
   int i;
@@ -694,7 +697,7 @@ void Scan::createTrees(bool use_cache, bool cuda_enabled)
 #pragma omp parallel for schedule(dynamic)
 #endif
     for (i = 0; i < (int)allScans.size(); i++) {
-	 allScans[i]->createTree(use_cache, cuda_enabled);
+	 allScans[i]->createTree(nns_method, cuda_enabled);
   }
   cerr << "... done." << endl;
   return;
@@ -1220,7 +1223,7 @@ void Scan::getPtPairsCacheParallel(vector <PtPair> *pairs, KDCacheItem *closest,
  * Computes a search tree depending on the type this can be 
  * a k-d tree od a cached k-d tree
  */
-void Scan::createTree(bool use_cache, bool cuda_enabled)
+void Scan::createTree(int nns_method, bool cuda_enabled)
 {
   M4identity(dalignxf);
   double temp[16];
@@ -1239,12 +1242,30 @@ void Scan::createTree(bool use_cache, bool cuda_enabled)
   //  kd = new D2Tree(points_red_lum, points_red_size, 105);
   //  cout << "successfull" << endl;
 
-  if (use_cache) {
-    kd = new KDtree_cache(points_red_lum, points_red_size);
-  } else {
-    kd = new KDtree(points_red_lum, points_red_size);
+  switch(nns_method)
+  { 
+    case cachedKD:
+        kd = new KDtree_cache(points_red_lum, points_red_size);
+    break;
+    
+    case simpleKD:
+        kd = new KDtree(points_red_lum, points_red_size);
+    break;
+    
+    case ANNTree:
+        kd = new ANNtree(points_red_lum, points_red_size);  //ANNKD
+    break;
+    /*
+    case NaboKD:
+        kd = new NaboSearch(points_red_lum, points_red_size);
+    break;
+    */
+    case BOCTree:
+        PointType pointtype;
+        kd = new BOctTree<double>(points_red_lum, points_red_size, 10.0, pointtype, true);
+    break;
   }
-   
+  
   if (cuda_enabled) createANNTree();
 
   return;
@@ -1514,9 +1535,9 @@ void Scan::toGlobal(double voxelSize, int nrpts) {
 
 void Scan::readScansRedSearch(reader_type type,
 		     int start, int end, string &_dir, int maxDist, int minDist, 
-         double voxelSize, int nrpts, // reduction parameters
-         bool use_cache, bool cuda_enabled, 
-		     bool openFileForWriting)
+						double voxelSize, int nrpts, // reduction parameters
+						int nns_method, bool cuda_enabled, 
+						bool openFileForWriting)
 {
   outputFrames = openFileForWriting;
   dir = _dir;
@@ -1681,7 +1702,7 @@ void Scan::readScansRedSearch(reader_type type,
           currentScan->calcReducedPoints(voxelSize, nrpts);
           currentScan->transform(currentScan->transMatOrg, INVALID); //transform points to initial position
           currentScan->clearPoints();
-          currentScan->createTree(use_cache, cuda_enabled);
+          currentScan->createTree(nns_method, cuda_enabled);
         }
       }
     }

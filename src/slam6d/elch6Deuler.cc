@@ -36,7 +36,7 @@ void elch6Deuler::close_loop(const vector <Scan *> &allScans, int first, int las
   for(tie(ei, ei_end) = edges(g); ei != ei_end; ei++) {
     int from = source(*ei, g);
     int to = target(*ei, g);
-    lum6DEuler::covarianceEuler(allScans[from], allScans[to], my_icp6D->get_use_cache(), my_icp6D->get_rnd(), my_icp6D->get_max_dist_match2(), &C);
+    lum6DEuler::covarianceEuler(allScans[from], allScans[to], my_icp6D->get_nns_method(), my_icp6D->get_rnd(), my_icp6D->get_max_dist_match2(), &C);
     C = C.i();
     for(int j = 0; j < 6; j++) {
       add_edge(from, to, fabs(C(j + 1, j + 1)), grb[j]);

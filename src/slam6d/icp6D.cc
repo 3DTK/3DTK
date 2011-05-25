@@ -34,17 +34,17 @@ using std::cerr;
  * @param eP Extrapolate odometry?
  * @param anim Animate which frames?
  * @param epsilonICP Termination criterion
- * @param use_cache Shall we used cached kd tree search
+ * @param nns_method Selects NNS method to be used  
  */
 icp6D::icp6D(icp6Dminimizer *my_icp6Dminimizer, double max_dist_match,
 		   int max_num_iterations, bool quiet, bool meta, int rnd, bool eP,
-		   int anim, double epsilonICP, bool use_cache, bool cuda_enabled)
+		   int anim, double epsilonICP, int nns_method, bool cuda_enabled)
 {
   this->my_icp6Dminimizer = my_icp6Dminimizer;
   this->anim              = anim;
-  this->use_cache         = use_cache;
   this->cuda_enabled      = cuda_enabled;
-  
+  this->nns_method        = nns_method;
+   
   if (!quiet) {
     cout << "Maximal distance match      : " << max_dist_match << endl
 	 << "Maximal number of iterations: " << max_num_iterations << endl << endl;
@@ -90,7 +90,7 @@ int icp6D::match(Scan* PreviousScan, Scan* CurrentScan)
   }
 
   KDCacheItem *closest = 0;
-  if (use_cache) {
+  if (nns_method == cachedKD) {
     closest = Scan::initCache(PreviousScan, CurrentScan);
   }
   
@@ -137,16 +137,23 @@ int icp6D::match(Scan* PreviousScan, Scan* CurrentScan)
     {
 	 int thread_num = omp_get_thread_num();
 
-	 if (use_cache) {
-	   Scan::getPtPairsCacheParallel(pairs, closest, PreviousScan, CurrentScan,
-							   thread_num, step,
-							   rnd, max_dist_match2,
-							   sum, centroid_m, centroid_d);
-	 } else {
-	   Scan::getPtPairsParallel(pairs, PreviousScan, CurrentScan,
-						   thread_num, step,
-						   rnd, max_dist_match2,
-						   sum, centroid_m, centroid_d);
+	 switch (nns_method) {
+	   case cachedKD:
+	     Scan::getPtPairsCacheParallel(pairs, closest, PreviousScan, CurrentScan,
+		  					     thread_num, step,
+								rnd, max_dist_match2,
+								sum, centroid_m, centroid_d);
+		break;
+
+	   case simpleKD:
+	   case ANNTree:
+	   case BOCTree:
+//	   case NaboKD:         
+		Scan::getPtPairsParallel(pairs, PreviousScan, CurrentScan,
+							thread_num, step,
+							rnd, max_dist_match2,
+							sum, centroid_m, centroid_d);
+		break;
 	 }
 
 	 n[thread_num] = (unsigned int)pairs[thread_num].size();
@@ -205,11 +212,22 @@ int icp6D::match(Scan* PreviousScan, Scan* CurrentScan)
     vector<PtPair> pairs;
    
     //   Scan::getPtPairsSimple(&pairs, PreviousScan, CurrentScan, 0, rnd, max_dist_match2);
-    if (use_cache) {
-	 Scan::getPtPairsCache(&pairs, closest, PreviousScan, CurrentScan, 0, rnd, max_dist_match2, centroid_m, centroid_d);
-    } else {
-	 Scan::getPtPairs(&pairs, PreviousScan, CurrentScan, 0, rnd, max_dist_match2, centroid_m, centroid_d);
+    switch (nns_method) {
+        
+      case cachedKD:
+        Scan::getPtPairsCache(&pairs, closest, PreviousScan, CurrentScan, 0,
+						rnd, max_dist_match2, centroid_m, centroid_d);
+	   break;
+
+      case simpleKD:
+      case ANNTree:
+      case BOCTree: 
+//    case NaboKD:        
+        Scan::getPtPairs(&pairs, PreviousScan, CurrentScan, 0, rnd,
+					max_dist_match2, centroid_m, centroid_d);
+	   break;
     }
+
     // do we have enough point pairs?
     if (pairs.size() > 3) {
       if (my_icp6Dminimizer->getAlgorithmID() == 3 || my_icp6Dminimizer->getAlgorithmID() == 8 ) {
@@ -348,7 +366,7 @@ void icp6D::doICP(vector <Scan *> allScans)
       if (my_MetaScan) {
 	   delete my_MetaScan;
       }
-      my_MetaScan = new Scan(MetaScan, use_cache, cuda_enabled);
+      my_MetaScan = new Scan(MetaScan, nns_method, cuda_enabled);
     }
   }
 }

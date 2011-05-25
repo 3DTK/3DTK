@@ -44,13 +44,14 @@ public:
 		  bool eP = true,
 		  int anim = -1,
 		  double epsilonICP = 0.0000001,
-		  bool use_cache = false,
+		  int nns_method = simpleKD,
 		  double epsilonLUM = 0.5);
 
   virtual ~lum6DQuat();
   
   double doGraphSlam6D(Graph gr, vector <Scan*> MetaScan, int nrIt);
-  static void covarianceQuat(Scan *first, Scan *second, bool use_cache, int rnd, double max_dist_match2, NEWMAT::Matrix *C, NEWMAT::ColumnVector *CD=0);
+  static void covarianceQuat(Scan *first, Scan *second,  int nns_method,
+					    int rnd, double max_dist_match2, NEWMAT::Matrix *C, NEWMAT::ColumnVector *CD=0);
   
 private:
   void FillGB3D(Graph *gr, NEWMAT::Matrix* G, NEWMAT::ColumnVector* B, vector<Scan*> allScans);

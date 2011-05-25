@@ -36,7 +36,7 @@ public:
 	   bool eP = true,
 	   int anim = -1,
 	   double epsilonICP = 0.0000001,
-	   bool use_cache = false,
+	   int nns_method = simpleKD,
 	   bool cuda_enabled = false);
   
   /**
@@ -53,7 +53,7 @@ public:
   inline int  get_rnd();
   inline bool get_meta();
   inline int  get_anim();
-  inline bool get_use_cache();
+  inline int get_nns_method();
   inline void set_anim(int anim);
   inline double get_max_dist_match2();
   inline void set_max_dist_match2(double max_dist_match2);
@@ -82,9 +82,9 @@ protected:
   bool   meta;
 
   /**
-   * specifies if cached kd-tree search shall be used
+   * specifies which NNS method should be used 
    */
-  bool use_cache;
+  int nns_method;
 
   /**
    * specifies if the ANN trees have to be built

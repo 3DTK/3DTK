@@ -11,8 +11,9 @@
 class elch6D : public loopSlam6D {
 
   public:
-    elch6D(bool _quiet, icp6Dminimizer *my_icp6Dminimizer, double mdm, int max_num_iterations, int rnd, bool eP, int anim, double epsilonICP, bool use_cache)
-      : loopSlam6D(_quiet, my_icp6Dminimizer, mdm, max_num_iterations, rnd, eP, anim, epsilonICP, use_cache) {}
+    elch6D(bool _quiet, icp6Dminimizer *my_icp6Dminimizer, double mdm, int max_num_iterations,
+		 int rnd, bool eP, int anim, double epsilonICP,  int nns_method)
+      : loopSlam6D(_quiet, my_icp6Dminimizer, mdm, max_num_iterations, rnd, eP, anim, epsilonICP, nns_method) {}
 
     static void graph_balancer(graph_t &g, int f, int l, double *weights);
 

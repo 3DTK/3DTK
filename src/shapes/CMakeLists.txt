@@ -28,7 +28,7 @@ IF (WITH_SHAPE_DETECTION)
 #  add_executable(matchMarker matchMarker.cc)
   
   IF(UNIX)
-    target_link_libraries(planes scanlib newmat dl)
+    target_link_libraries(planes scanlib newmat dl ANN)
 #    target_link_libraries(caliboard scanlib newmat dl)
 #    target_link_libraries(image scanlib newmat sparse dl ANN )
 #    target_link_libraries(matchMarker scanlib newmat sparse dl ANN )

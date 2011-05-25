@@ -36,13 +36,13 @@ inline int icp6D::get_anim() {
 }
 
 /**
- * Will return weather to use the cache
+ * Will return the used nearest neigbor search method
  *
- * @return the use_cache flag
+ * @return the nns_method number
  */
-inline bool icp6D::get_use_cache()
+inline int icp6D::get_nns_method()
 {
-  return use_cache;
+  return nns_method;
 }
 
 /**
