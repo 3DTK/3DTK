@@ -1327,8 +1327,8 @@ bool Scan::toType(const char* string, reader_type &type) {
   else if (strcasecmp(string, "ais") == 0) type = AIS;
   else if (strcasecmp(string, "oct") == 0) type = OCT;
   else if (strcasecmp(string, "xyzr") == 0) type = XYZR;
+  else if (strcasecmp(string, "ks") == 0) type = KS;
   else return false;
-
   return true;
 }
 
@@ -1435,6 +1435,9 @@ void Scan::readScans(reader_type type,
     break;
   case XYZR:
     lib_string = "scan_io_xyzr";
+    break;
+  case KS:
+    lib_string = "scan_io_ks";
     break;
   default:
     cerr << "Don't recognize format " << type << endl;
@@ -1622,6 +1625,9 @@ void Scan::readScansRedSearch(reader_type type,
     break;
   case XYZR:
     lib_string = "scan_io_xyzr";
+    break;
+  case KS:
+    lib_string = "scan_io_ks";
     break;
   default:
     cerr << "Don't recognize format " << type << endl;
