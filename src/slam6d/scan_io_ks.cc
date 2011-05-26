@@ -50,19 +50,21 @@ int ScanIO_ks::readScans(int start, int end, string &dir, int maxDist, int mindi
   int my_fileNr = fileCounter;
   
   if (end > -1 && fileCounter > end) return -1; // 'nuf read
-  scanFileName = dir + "ks" + to_string(fileCounter,3) + ".txt";
+  scanFileName = dir + "Color_ScanPos" + to_string(fileCounter,3) + " - Scan001.txt";
   poseFileName = dir + "ks" + to_string(fileCounter,3) + ".pose";
 
   scan_in.open(scanFileName.c_str());
-  pose_in.open(poseFileName.c_str());
+  //-pose_in.open(poseFileName.c_str());
 
   // read 3D scan
-  if (!pose_in.good() && !scan_in.good()) return -1; // no more files in the directory
-  if (!pose_in.good()) { cerr << "ERROR: Missing file " << poseFileName << endl; exit(1); }
+  //-if (!pose_in.good() && !scan_in.good()) return -1; // no more files in the directory
+  if (!scan_in.good()) return -1; // no more files in the directory
+  //-if (!pose_in.good()) { cerr << "ERROR: Missing file " << poseFileName << endl; exit(1); }
   if (!scan_in.good()) { cerr << "ERROR: Missing file " << scanFileName << endl; exit(1); }
   cout << "Processing Scan " << scanFileName;
   
-  for (unsigned int i = 0; i < 6; pose_in >> euler[i++]);
+  //for (unsigned int i = 0; i < 6; pose_in >> euler[i++]);
+  for (unsigned int i = 0; i < 6; euler[i++] = 0.0);
 
   cout << " @ pose (" << euler[0] << "," << euler[1] << "," << euler[2]
 	  << "," << euler[3] << "," << euler[4] << ","  << euler[5] << ")" << endl;
