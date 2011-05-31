@@ -31,7 +31,7 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <ctime>
-#include "AutoPanoSift.h"
+#include "autopano-sift-c_modified/AutoPanoSift.h"
 
 #ifndef _MSC_VER
 #include <getopt.h>
