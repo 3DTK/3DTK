@@ -10,19 +10,18 @@
 
 class FeatureMatchSet
 {
-	public:
-		FeatureMatchSet();
-		FeatureMatchSet (std::string scanone, std::string scantwo, std::vector<FeatureMatch> matches);
-		virtual ~FeatureMatchSet ();
-	
-		void serialize(std::ofstream &out);
-		FeatureMatchSet(std::ifstream &in);
-
-		bool operator<(FeatureMatchSet &c) {return false;}
-	
-		std::string firstscan;
-		std::string secondscan;
-		std::vector<FeatureMatch> matches;	
+ public:
+  FeatureMatchSet();
+  virtual ~FeatureMatchSet ();
+  
+  void serialize(std::ofstream &out);
+  FeatureMatchSet(std::ifstream &in);
+  
+  bool operator<(FeatureMatchSet &c) {return false;}
+  
+  std::string firstscan;
+  std::string secondscan;
+  std::vector<FeatureMatch> matches;	
 };
 
 #endif /* __FEATURE_MATCH_SET_H__ */

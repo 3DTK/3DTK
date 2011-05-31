@@ -11,8 +11,6 @@ IF(WITH_SIFT)
 
   FIND_PATH(LIBVIGRA_INCLUDE_DIR vigra/impex.hxx)
 
-  include_directories(/usr/include/freetype2/)
-
   FIND_PATH(XML20_INCLUDE_DIR
     NAMES libxml/xmlreader.h libxml/xmlwriter.h  
     PATHS 
@@ -63,13 +61,9 @@ IF(WITH_SIFT)
   ENDIF(NOT WIN32)
 
   SET(TERSCANREG_DIR library/)
-  SET(TERSCANREGGL_DIR ${TERSCANREG_DIR}opengl_objects/)
-  SET(OPENGLFRAMEWORK_DIR opengl_framework/)
   SET(SIFTPROGRAMS_DIR programs/)
 
   include_directories(${TERSCANREG_DIR})
-  include_directories(${TERSCANREGGL_DIR})
-  include_directories(${OPENGLFRAMEWORK_DIR})
   include_directories(${CMAKE_SOURCE_DIR}/include/slam6d)	
   include_directories(.)	
 
@@ -91,52 +85,25 @@ IF(WITH_SIFT)
     ${TERSCANREG_DIR}FeatureMatchSetGroup.cpp
     ${TERSCANREG_DIR}Register.cpp
     ${TERSCANREG_DIR}ScanTransform.cpp
-    ${TERSCANREGGL_DIR}PanoramaMap_gl.cpp
-    ${TERSCANREGGL_DIR}FeatureMatchSet_gl.cpp
-    ${TERSCANREGGL_DIR}PointCloud_gl.cpp
-    ${TERSCANREGGL_DIR}FeatureMatchSet_gl.cpp
-    ${TERSCANREGGL_DIR}PolarPointCloud_gl.cpp
-    ${TERSCANREGGL_DIR}FeatureMatchSet_gl.cpp
     ../icp6Dquat.cc
   )
 
   add_library(terscanreg STATIC ${TERSCANREG_SRCS})
 
-  SET(OPENGLFRAMEWORK_SRCS
-   ${OPENGLFRAMEWORK_DIR}CoordGL.cpp 
-   ${OPENGLFRAMEWORK_DIR}GL.cpp 
-   ${OPENGLFRAMEWORK_DIR}Object_gl.cpp 
-   ${OPENGLFRAMEWORK_DIR}X.cpp
-  )
-
-  add_library(opengl-framework STATIC ${OPENGLFRAMEWORK_SRCS})
- 
   add_executable(generatesiftfeatures ${SIFTPROGRAMS_DIR}generatesiftfeatures.cpp)
-  add_executable(mergehistograms ${SIFTPROGRAMS_DIR}mergehistograms.cpp)
   add_executable(panoramacreator ${SIFTPROGRAMS_DIR}panoramacreator.cpp)
-  add_executable(visualizemap ${SIFTPROGRAMS_DIR}visualizemap.cpp)
-  add_executable(visualizescan ${SIFTPROGRAMS_DIR}visualizescan.cpp)
-  add_executable(reduceppc ${SIFTPROGRAMS_DIR}reduceppc.cpp)
   add_executable(matchsiftfeatures ${SIFTPROGRAMS_DIR}matchsiftfeatures.cpp)
   add_executable(registerscans ${SIFTPROGRAMS_DIR}registerscans.cpp)
   add_executable(readscan ${SIFTPROGRAMS_DIR}readscan.cpp)
-  add_executable(visualizematches ${SIFTPROGRAMS_DIR}visualizematches.cpp)
-  add_executable(visualizeregistrations ${SIFTPROGRAMS_DIR}visualizeregistrations.cpp)
 
-  SET(ADDSIFT_LIBS ${GLUT_LIBRARIES} vigraimpex freetype ftgl xml2 )
+  SET(ADDSIFT_LIBS vigraimpex freetype xml2 )
 
   IF(UNIX)
-    target_link_libraries(generatesiftfeatures terscanreg opengl-framework libsift ${ADDSIFT_LIBS})
-    target_link_libraries(mergehistograms terscanreg opengl-framework libsift ${ADDSIFT_LIBS})
-    target_link_libraries(panoramacreator terscanreg opengl-framework libsift ${ADDSIFT_LIBS})
-    target_link_libraries(visualizemap terscanreg opengl-framework libsift ${ADDSIFT_LIBS})
-    target_link_libraries(visualizescan terscanreg opengl-framework libsift ${ADDSIFT_LIBS})
-    target_link_libraries(reduceppc terscanreg opengl-framework libsift ${ADDSIFT_LIBS})
-    target_link_libraries(matchsiftfeatures terscanreg opengl-framework libsift ${ADDSIFT_LIBS})
-    target_link_libraries(registerscans terscanreg opengl-framework libsift ${ADDSIFT_LIBS})
-    target_link_libraries(readscan terscanreg opengl-framework libsift ${ADDSIFT_LIBS})
-    target_link_libraries(visualizematches terscanreg opengl-framework libsift ${ADDSIFT_LIBS})
-    target_link_libraries(visualizeregistrations terscanreg opengl-framework libsift ${ADDSIFT_LIBS})
+    target_link_libraries(generatesiftfeatures terscanreg libsift ${ADDSIFT_LIBS})
+    target_link_libraries(panoramacreator terscanreg libsift ${ADDSIFT_LIBS})
+    target_link_libraries(matchsiftfeatures terscanreg libsift ${ADDSIFT_LIBS})
+    target_link_libraries(registerscans terscanreg libsift ${ADDSIFT_LIBS})
+    target_link_libraries(readscan terscanreg libsift ${ADDSIFT_LIBS})
   ENDIF(UNIX)
 
 ENDIF(WITH_SIFT)
