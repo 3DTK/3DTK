@@ -13,9 +13,9 @@
 #include "..\..\..\Visual_Studio_Projects\6DSLAM\6D_SLAM\XGetopt.h"
 #endif
 
-#include "FeatureMatchSetGroup.h"
-#include "PanoramaMap.h"
-#include "Register.h"
+#include "slam6d/sift/library/FeatureMatchSetGroup.h"
+#include "slam6d/sift/library/PanoramaMap.h"
+#include "slam6d/sift/library/Register.h"
 
 using namespace std;
 

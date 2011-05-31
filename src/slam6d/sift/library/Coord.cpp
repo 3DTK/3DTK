@@ -4,7 +4,7 @@
  *  Created on: Feb 14, 2010
  *      Author: darko
  */
-#include "Coord.h"
+#include "slam6d/sift/library/Coord.h"
 #include <iostream>
 #include <math.h>
 

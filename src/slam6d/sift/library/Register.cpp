@@ -1,5 +1,5 @@
-#include "Register.h"
-#include "Coord.h"
+#include "slam6d/sift/library/Register.h"
+#include "slam6d/sift/library/Coord.h"
 #include <stdlib.h>
 #include <iostream>
 #include <cassert>
@@ -9,9 +9,10 @@
 #define _USE_MATH_DEFINES
 #include <cmath>
 #define M_PI 3.1415
-#include "icp6Dquat.h"
-#include "PolarPointCloud.h"
-#include "PointCloud.h"
+
+#include "slam6d/icp6Dquat.h"
+#include "slam6d/sift/library/PolarPointCloud.h"
+#include "slam6d/sift/library/PointCloud.h"
 
 using namespace std;
 

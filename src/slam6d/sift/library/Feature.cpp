@@ -1,5 +1,5 @@
 #include <fstream>
-#include "Feature.h"
+#include "slam6d/sift/library/Feature.h"
 
 using namespace std;
 

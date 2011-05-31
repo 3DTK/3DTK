@@ -5,7 +5,7 @@
  *      Author: darko
  */
 
-#include "PolarPoint.h"
+#include "slam6d/sift/library/PolarPoint.h"
 
 
 
