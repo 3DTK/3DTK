@@ -65,7 +65,9 @@ Scan::Scan()
 {
   kd = 0;
   ann_kd_tree = 0;
+  nns_method = 1;
   scanNr = fileNr = 0;
+  cuda_enabled = false;
   rPos[0] = 0;
   rPos[1] = 0;
   rPos[2] = 0;
@@ -91,6 +93,8 @@ Scan::Scan(const double* euler, int maxDist)
 {
   kd = 0;
   ann_kd_tree = 0;
+  nns_method = 1;
+  cuda_enabled = false;
   maxDist2 = (maxDist != -1 ? sqr(maxDist) : maxDist);
   
   if (dir == "") {
@@ -123,6 +127,8 @@ Scan::Scan(const double _rPos[3], const double _rPosTheta[3], vector<double *> &
 {
   kd = 0;
   ann_kd_tree = 0;
+  nns_method = 1;
+  cuda_enabled = false;
   maxDist2 = -1;
   rPos[0] = _rPos[0];
   rPos[1] = _rPos[1];
@@ -163,6 +169,8 @@ Scan::Scan(const double _rPos[3], const double _rPosTheta[3], const int maxDist)
 {
   kd = 0;
   ann_kd_tree = 0;
+  nns_method = 1;
+  cuda_enabled = false;
   maxDist2 = (maxDist != -1 ? sqr(maxDist) : maxDist);
   rPos[0] = _rPos[0];
   rPos[1] = _rPos[1];
@@ -193,6 +201,8 @@ Scan::Scan(const vector < Scan* >& MetaScan, int nns_method, bool cuda_enabled)
 {
   kd = 0;
   ann_kd_tree = 0;
+  this->cuda_enabled = cuda_enabled;
+  this->nns_method = nns_method;
   scanNr = numberOfScans++;
   rPos[0] = 0;
   rPos[1] = 0;
@@ -321,8 +331,10 @@ Scan::Scan(const Scan& s)
     points_red[i][2] = s.points_red[i][2];
   }
   memcpy(dalignxf, s.dalignxf, sizeof(dalignxf));
+  nns_method = s.nns_method;
+  cuda_enabled = s.cuda_enabled;
   if (s.kd != 0) {
-    createTree(false, false);
+    createTree(nns_method, cuda_enabled);
     // update max num point in scan iff you have to do so
     if (points_red_size > (int)max_points_red_size) max_points_red_size = points_red_size;
   }
@@ -1225,6 +1237,8 @@ void Scan::getPtPairsCacheParallel(vector <PtPair> *pairs, KDCacheItem *closest,
  */
 void Scan::createTree(int nns_method, bool cuda_enabled)
 {
+  this->nns_method = nns_method;
+  this->cuda_enabled = cuda_enabled;
   M4identity(dalignxf);
   double temp[16];
   memcpy(temp, transMat, sizeof(transMat));
