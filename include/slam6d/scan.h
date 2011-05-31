@@ -180,6 +180,18 @@ private:
          rQuat[4],      ///< 3D rotation in Quaternion representation
          transMat[16];  ///< (4x4) transformation matrix
 
+  
+  /**
+    * run ICP on GPU instead of CPU
+    */
+
+  bool cuda_enabled;
+  /**
+    * Defines the method used for nearest neighbor search
+    */
+
+  int nns_method;
+
   /**
    * The original pose of the scan, e.g., from odometry
    */
