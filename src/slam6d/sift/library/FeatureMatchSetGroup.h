@@ -6,15 +6,14 @@
 
 class FeatureMatchSetGroup
 {
-	public:
-		FeatureMatchSetGroup();
-		FeatureMatchSetGroup (std::list<FeatureMatchSet>);
-		virtual ~FeatureMatchSetGroup ();
-		
-		void serialize(const char * filename);
-		FeatureMatchSetGroup(const char * filename);
-		
-		std::list<FeatureMatchSet> matchsets;
+ public:
+  FeatureMatchSetGroup();
+  virtual ~FeatureMatchSetGroup ();
+  
+  void serialize(const char * filename);
+  FeatureMatchSetGroup(const char * filename);
+  
+  std::list<FeatureMatchSet> matchsets;
 };
 
 #endif /* __FEATURE_MATCH_SET_GROUP_H__ */

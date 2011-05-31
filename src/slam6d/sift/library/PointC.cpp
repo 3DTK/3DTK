@@ -7,7 +7,7 @@
 
 #include "PointC.h"
 
-
-PointC::~PointC() {
+PointC::~PointC() 
+{
 	// TODO Auto-generated destructor stub
 }
