@@ -6,7 +6,7 @@
  *      Maintained : HamidReza Mey 04, 2011
  */
 
-#include "PanoramaMap.h"
+#include "slam6d/sift/library/PanoramaMap.h"
 #include <iostream>
 #include <fstream>
 #include <new>

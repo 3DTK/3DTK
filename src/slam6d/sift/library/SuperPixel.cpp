@@ -5,7 +5,7 @@
  *      Author: darko
  */
 
-#include "SuperPixel.h"
+#include "slam6d/sift/library/SuperPixel.h"
 
 //SuperPixel::SuperPixel() {
 //	// TODO Auto-generated constructor stub

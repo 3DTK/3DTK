@@ -25,9 +25,9 @@
  * For more information, see the LICENSE file supplied with the distribution.
  */
 
-#include "PanoramaMap.h"
-#include "FeatureSet.h"
-#include "FeatureMatchSetGroup.h"
+#include "slam6d/sift/library/PanoramaMap.h"
+#include "slam6d/sift/library/FeatureSet.h"
+#include "slam6d/sift/library/FeatureMatchSetGroup.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>

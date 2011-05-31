@@ -1,4 +1,4 @@
-#include "FeatureSet.h"
+#include "slam6d/sift/library/FeatureSet.h"
 #include <iostream>
 
 using namespace std;

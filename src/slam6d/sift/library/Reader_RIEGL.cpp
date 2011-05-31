@@ -6,7 +6,7 @@
  *      Maintained : HamidReza Mey 04, 2011
  */
 
-#include "Reader_RIEGL.h"
+#include "slam6d/sift/library/Reader_RIEGL.h"
 #include <fstream>
 #include <iostream>
 #include <stdlib.h>

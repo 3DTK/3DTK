@@ -1,4 +1,4 @@
-#include "ScanTransform.h"
+#include "slam6d/sift/library/ScanTransform.h"
 
 using namespace std;
 

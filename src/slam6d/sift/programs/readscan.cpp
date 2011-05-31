@@ -20,7 +20,7 @@
 #include "..\..\..\Visual_Studio_Projects\6DSLAM\6D_SLAM\XGetopt.h"
 #endif
 
-#include "Reader_RIEGL.h"
+#include "slam6d/sift/library/Reader_RIEGL.h"
 
 using namespace std;
 
