@@ -8,15 +8,14 @@
 #ifndef READER_H_
 #define READER_H_
 
-enum ReaderException {
-	FILE_NOT_FOUND,
-	INVALID_DATA
-};
+enum ReaderException 
+  {
+    FILE_NOT_FOUND,
+    INVALID_DATA
+  };
 
-class Reader {
-public:
-//	Reader();
-//	virtual ~Reader();
+class Reader 
+{
+ public:
 };
-
 #endif /* READER_H_ */

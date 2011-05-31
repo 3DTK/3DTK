@@ -4,6 +4,5 @@
 #include <string>
 
 using namespace std;
-
 #endif /* __UTILS_H__ */
 

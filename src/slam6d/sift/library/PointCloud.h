@@ -11,20 +11,19 @@
 #include "PolarPointCloud.h"
 #include "PointC.h"
 
-
-class PointCloud {
-public:
-	PointCloud(PointC* data, long length);
-	PointCloud(PolarPointCloud *ppc);
-	virtual ~PointCloud();
-
-	PointC *getData() const;
-    long getLength() const;
-    void setData(PointC *data, long length);
-
-private:
-	PointC* data;
-	long length;
+class PointCloud 
+{
+ public:
+  PointCloud(PointC* data, long length);
+  PointCloud(PolarPointCloud *ppc);
+  virtual ~PointCloud();
+  
+  PointC *getData() const;
+  long getLength() const;
+  void setData(PointC *data, long length);
+  
+ private:
+  PointC* data;
+  long length;
 };
-
 #endif /* POINTCLOUD_H_ */

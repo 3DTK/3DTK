@@ -6,18 +6,16 @@
 #include <fstream>
 #include "Feature.h"
 
-
 class FeatureSet
 {
-	public:
-		FeatureSet () {}
-		FeatureSet (std::string scanid, std::vector<Feature> features);
-		virtual ~FeatureSet () {}
-		void serialize(const char* filename);
-		FeatureSet(const char* filename);
-		std::string scanid;
-		std::vector<Feature> features;	
+ public:
+  FeatureSet () {}
+  virtual ~FeatureSet () {}
+
+  void serialize(const char* filename);
+  FeatureSet(const char* filename);
+  std::string scanid;
+  std::vector<Feature> features;	
 };
 
 #endif /* __FEATURE_SET_H__ */
-
