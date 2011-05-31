@@ -5,7 +5,7 @@
  *      Author: darko
  */
 
-#include "PointC.h"
+#include "slam6d/sift/library/PointC.h"
 
 PointC::~PointC() 
 {

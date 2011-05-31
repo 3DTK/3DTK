@@ -6,7 +6,7 @@
  *      Maintained : HamidReza Mey 04, 2011
  */
 
-#include "PolarPointCloud.h"
+#include "slam6d/sift/library/PolarPointCloud.h"
 #include <iostream>
 #include <math.h>
 #include <fstream>

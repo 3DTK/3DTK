@@ -5,8 +5,8 @@
  *      Author: darko
  */
 
-#include "PointCloud.h"
-#include "PointC.h"
+#include "slam6d/sift/library/PointCloud.h"
+#include "slam6d/sift/library/PointC.h"
 #include <vector>
 
 using namespace std;
