@@ -1065,12 +1065,12 @@ void selectPoints(int x, int y) {
     glui2->show();
     glTranslated(X, Y, Z);       // move camera	
 
-    sfloat *sp2 = 0;
-    for(int iterator = (int)octpts.size()-1; iterator >= 0; iterator--) {
+    static sfloat *sp2 = 0;
+/*    for(int iterator = (int)octpts.size()-1; iterator >= 0; iterator--) {
       if (!selected_points[iterator].empty()) sp2 = *selected_points[iterator].begin();
 
       //        selected_points[iterator].clear();
-    }
+    }*/
     for(int iterator = (int)octpts.size()-1; iterator >= 0; iterator--) {
       glPushMatrix();
       glMultMatrixd(MetaMatrix[iterator].back());
@@ -1083,8 +1083,10 @@ void selectPoints(int x, int y) {
         if (sp != 0) {
           cout << "Selected point: " << sp[0] << " " << sp[1] << " " << sp[2] << endl;
 
-          if (sp2 != 0)
+          if (sp2 != 0) {
             cout << "Distance to last point: " << sqrt( sqr(sp2[0] - sp[0]) + sqr(sp2[1] - sp[1]) +sqr(sp2[2] - sp[2])  ) << endl; 
+          }
+          sp2 = sp;
 
           selected_points[iterator].insert(sp);
         }
