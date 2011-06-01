@@ -353,21 +353,21 @@ void Register::processTrianglePair(FeatureMatchSet *set, PanoramaMap *map1, Pano
       if (!hasCoordsB[itm]) continue;
       tca = coordsA[itm];
       tcb = coordsB[itm];
-      
+
       Coord tcb_trans = centera + transformCoord(tcb - centerb, align);
       double errori = (tcb_trans - tca).abs();
       if (errori < t)
         {
-	  cout<< "errori= " << errori << endl;
+	  cout<< "errori=            " << errori << endl;
 	  inlier_error += errori;
 	  inlier_error_ind++;
-	  cout<<inlier_error_ind<<endl;
+	  //cout<<inlier_error_ind<<endl;
 	}
     }
   maxd[inlier_error_ind]++;
   if (inlier_error_ind >= d)
     {
-      cout<<inlier_error_ind<<endl;
+      cout<<"inlier=                       "<<inlier_error_ind<<endl;
       double avg_error = inlier_error / inlier_error_ind;
       if (avg_error - dinfluence*inlier_error_ind < best_error - dinfluence*best_ind)
 	{
