@@ -24,12 +24,13 @@
 #define MERCATOR 6
 #define RECTILINEAR 7
 #define PANNINI 8
+#define STEREOGRAPHIC 9
 
 class PanoramaMap 
 {
  public:
-  //panninid is the d variable in pannini projection equations and panninin is the number of images per scan for pannini projection
-  PanoramaMap(PolarPointCloud* cloud, int width, int height, int method, double panninid, int panninin);
+  //panninid is the d variable in pannini projection equations and n is the number of images per scan for pannini projection and stereor is the r parameter of stereographic
+  PanoramaMap(PolarPointCloud* cloud, int width, int height, int method, double panninid, int imagen, double stereor);
   //used in generatesiftfeaturs.cpp
   PanoramaMap(const char* filename); //deserialize
   PanoramaMap();
@@ -56,7 +57,8 @@ class PanoramaMap
   int height;
   int projection;
   double d;//the Pannini projection parameter
-  int n;//number of images per scan for pannini
+  int n;//number of images per scan 
+  double r;//stereoghraphic projection parameter
 };
 
 #endif /* PANORAMAMAP_H_ */
