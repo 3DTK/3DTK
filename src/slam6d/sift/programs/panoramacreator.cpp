@@ -36,7 +36,7 @@ struct size
 void usage(int argc, char** argv)
 {
   printf("\n");
-  printf("USAGE: %s [-m] [-j] [-d] [-v] [-n] [-p] -s <WIDTHxHEIGHT> [-s <WIDTHxHEIGHT> ...] FILE1.ppc [FILE2.ppc] ...\n",argv[0]);
+  printf("USAGE: %s [-m] [-j] [-d] [-v] [-n] [-R] [-p] -s <WIDTHxHEIGHT> [-s <WIDTHxHEIGHT> ...] FILE1.ppc [FILE2.ppc] ...\n",argv[0]);
   printf("\n");
   printf("\n");
   printf("\tOptions:\n");
@@ -45,12 +45,13 @@ void usage(int argc, char** argv)
   printf("\t\t-j \t\t\twrite an Refelectance image to Refelectance.jpg file:\n");
   printf("\t\t-p \t\t\tselect the projection for create the map:\n");
   printf("\t\t-v \t\t\tthe d parameter for pannini projection,default is 1:\n");
+  printf("\t\t-R \t\t\tthe R parameter for stereographic projection,default is 1:\n");
   printf("\t\t-n \t\t\tthe number of images per scan ,default is 4:\n"); 
   printf("\t\t-s <WxH>\t\tsize of output in widthxheight\n");
   printf("\t\t\t\t\tinput files should be serialization of PolarPointCloud class returned by readscan\n");
   printf("\n");
   printf("\tExample:\n");
-  printf("\t\t%s -j -s 1000x300 -s 500x150 example.file\n");
+  printf("\t\t%s -m -j -d -v -p PANNINI -s 500x150 example.file\n");
   printf("\n");
   exit(1);
 }
@@ -71,12 +72,13 @@ int main(int argc, char** argv)
   int c; 
   int width;
   int height;
-  float d = 1;
+  double d = 1;
   int n = 4;
+  double r = 1;
   
   opterr = 0;
   //reade the command line and get the options
-  while ((c = getopt (argc, argv, "r:mjdv:n:s:p:")) != -1)
+  while ((c = getopt (argc, argv, "r:mjdR:v:n:s:p:")) != -1)
     switch (c)
       {
       case 'p':
@@ -84,6 +86,9 @@ int main(int argc, char** argv)
 	break;
       case 'v':
 	d = atof(optarg);
+	break;
+      case 'R':
+	r = atof(optarg);
 	break;
       case 'n':
 	n = atoi(optarg);
@@ -135,14 +140,9 @@ int main(int argc, char** argv)
     {
       reader = "RIEGL";
     }
-  //check the D for Pannini
-  //if(d == NULL && (strcmp(projection, "PANNINI") == 0))
-  // {
-  //   d = 1;
-  // }
-
+ 
   //check for projection
-  if (projection == NULL || (!(strcmp(projection, "STANDARD") == 0) && !(strcmp(projection, "CYLINDRICAL") == 0) && !(strcmp(projection, "NEW") == 0) && !(strcmp(projection, "MERCATOR") == 0) && !(strcmp(projection, "RECTILINEAR") == 0) && !(strcmp(projection, "PANNINI") == 0)))
+  if (projection == NULL || (!(strcmp(projection, "STANDARD") == 0) && !(strcmp(projection, "CYLINDRICAL") == 0) && !(strcmp(projection, "NEW") == 0) && !(strcmp(projection, "MERCATOR") == 0) && !(strcmp(projection, "RECTILINEAR") == 0) && !(strcmp(projection, "PANNINI") == 0) && !(strcmp(projection, "STEREOGRAPHIC") == 0)))
     {
       projection = "STANDARD";
     }
@@ -158,6 +158,8 @@ int main(int argc, char** argv)
     method = RECTILINEAR;
   if((strcmp(projection, "PANNINI") == 0))
     method = PANNINI;
+  if((strcmp(projection, "STEREOGRAPHIC") == 0))
+    method = STEREOGRAPHIC;
   //check for image or map option
   if (!writeMaps && !writeRefelectanceJpeg && !writeRangeImage)
     {
@@ -179,7 +181,7 @@ int main(int argc, char** argv)
 	{
 	  cout << "Creating Map " << it->width << " " << it->height << endl;
 	  start = clock();
-	  PanoramaMap map(&polarcloud, it->width, it->height, method, d, n);
+	  PanoramaMap map(&polarcloud, it->width, it->height, method, d, n, r);
 	  end = clock();
 	  double time = ((double)((int) end - (int) start)) / CLOCKS_PER_SEC;
 	  cout << "Finished creating map with time: " << time << endl;
