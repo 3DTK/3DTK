@@ -26,7 +26,7 @@ PanoramaMap::PanoramaMap()
 }
 
 //Implementation of projections
-PanoramaMap::PanoramaMap(PolarPointCloud* cloud, int nwidth, int nheight, int method, double panninid, int panninin)
+PanoramaMap::PanoramaMap(PolarPointCloud* cloud, int nwidth, int nheight, int method, double panninid, int imagen, double stereor)
 {
   scanid = cloud->scanid;
 
@@ -129,16 +129,21 @@ PanoramaMap::PanoramaMap(PolarPointCloud* cloud, int nwidth, int nheight, int me
       //find the x and y range and add longitude to x and z to y
       double xmaxt = (double) nwidth / 2 / M_PI;
       int xmax = nwidth - 1;
-      double ymaxt = (double) nheight / ((3200));
+      double ymaxt = (double) nheight / (cloud->maxz - cloud->minz);
+      // double ymaxt = (double) nheight / ((3200));
       //double ymaxt = (double) nheight / ((20m) / maxmetr);
       int ymax = nheight - 1;
-      double ylow = (200);
+      double ylow = cloud->minz;
+      //double ylow = (200);
       for (int i = 0 ; i < length ; i++)
         {
 	  int x = (int) ( xmaxt * (*pdata)[i].a);
 	  if (x < 0) x = 0;
 	  if (x > xmax) x = xmax;
-	  //int y = (int) ( ymaxt * tan((*pdata)[i].b + ylow) );
+	  int y = (int) ( ymaxt * ((*pdata)[i].y - ylow) );
+	  if (y < 0) y = 0;
+	  if (y > ymax) y = ymax;
+	  /*
 	  int y;
 	  if((*pdata)[i].y < 3000)
             {
@@ -152,6 +157,7 @@ PanoramaMap::PanoramaMap(PolarPointCloud* cloud, int nwidth, int nheight, int me
 	      if (y < 0) y = 0;
 	      if (y > ymax) y = ymax;
             }
+	  */
 	  //add the point with max distance
 	  if( data[x][y].meta < (*pdata)[i].d )
             {
@@ -172,8 +178,8 @@ PanoramaMap::PanoramaMap(PolarPointCloud* cloud, int nwidth, int nheight, int me
       //find the x and y range
       double xmaxt = (double) nwidth / 2 / M_PI;
       int xmax = nwidth - 1;
-      double ymaxt = (double) nheight / (log(tan(MAX_ANGLE / 360 * 2 * M_PI)+(1/cos(MAX_ANGLE / 360 * 2 * M_PI))) - log(tan(MIN_ANGLE / 360 * 2 * M_PI)+(1/cos(MIN_ANGLE / 360 * 2 * M_PI))));
-      double ylow = log(tan(MIN_ANGLE / 360 * 2 * M_PI)+(1/cos(MIN_ANGLE / 360 * 2 * M_PI)));
+      double ymaxt = (double) nheight / ( log( tan( MAX_ANGLE / 360 * 2 * M_PI ) + ( 1 / cos( MAX_ANGLE / 360 * 2 * M_PI ) ) ) - log ( tan( MIN_ANGLE / 360 * 2 * M_PI) + (1/cos(MIN_ANGLE / 360 * 2 * M_PI) ) ) );
+      double ylow = log(tan(MIN_ANGLE / 360 * 2 * M_PI) + (1/cos(MIN_ANGLE / 360 * 2 * M_PI)));
       int ymax = nheight - 1;
       //go through all points and find the x and y
       for (int i = 0 ; i < length ; i++)
@@ -181,7 +187,7 @@ PanoramaMap::PanoramaMap(PolarPointCloud* cloud, int nwidth, int nheight, int me
 	  int x = (int) ( xmaxt * (*pdata)[i].a);
 	  if (x < 0) x = 0;
 	  if (x > xmax) x = xmax;
-	  int y = (int) ( ymaxt * (log(tan((*pdata)[i].b) + (1/cos((*pdata)[i].b))) - ylow));
+	  int y = (int) ( ymaxt * (log(tan((*pdata)[i].b) + (1/cos((*pdata)[i].b))) - ylow) );
 	  if (y < 0) y = 0;
 	  if (y > ymax) y = ymax;
 	  //add the point with max distance
@@ -374,13 +380,15 @@ PanoramaMap::PanoramaMap(PolarPointCloud* cloud, int nwidth, int nheight, int me
       long length = cloud->getLength();
       //double d = 0;
       d = panninid;
-      n = panninin;
+      n = imagen;
       cout << "Parameter d is:" << d <<", Number of images per scan is:" << n << endl;
       const vector<PolarPoint> *pdata = cloud->getData(); 
       double l0, p1, iminx, imaxx, iminy, imaxy, interval;
       interval = 2 * M_PI / n;
-      iminy = -M_PI/3;
+      //iminy = -M_PI/3;
+      iminy = -2*M_PI/9;
       imaxy = M_PI/3;
+      //latitude of projection center
       p1 = 0;
       //go through all points 
       for (int i = 0 ; i < length ; i++)
@@ -389,11 +397,11 @@ PanoramaMap::PanoramaMap(PolarPointCloud* cloud, int nwidth, int nheight, int me
 	    {
 	      iminx = j * interval;
 	      imaxx = (j +1) * interval;
-	      //check for point in the first 90 degree
+	      //check for point in interval
 	      if((*pdata)[i].a < (imaxx) && (*pdata)[i].a > (iminx))
 		{
 		  double max, min, s;
-		  //the longitude and latitude of projection center
+		  //the longitude of projection center
 		  l0 = iminx + interval / 2;
 		  // p1 = 0;
 		  //finding the min and max of the x direction
@@ -415,11 +423,11 @@ PanoramaMap::PanoramaMap(PolarPointCloud* cloud, int nwidth, int nheight, int me
 		  int ymax = nheight - 1;
 		  //project the points and add them to image
 		  s = (d + 1) / (d + sin(p1) * tan((*pdata)[i].b) + cos(p1) * cos((*pdata)[i].a - l0));
-		  int x = (int)(xmaxt) * (s * (sin((*pdata)[i].a - l0)) - xlow);
+		  int x = (int)(xmaxt) * (s * sin((*pdata)[i].a - l0) - xlow);
 		  if (x < 0) x = 0;
 		  if (x > xmax) x = xmax;
 		  x = x + (j * nwidth / n);
-		  int y = (int) (ymaxt) * (s * (tan((*pdata)[i].b) * (cos(p1) - sin(p1) * 1/tan((*pdata)[i].b * cos((*pdata)[i].a - l0)))) - ylow);
+		  int y = (int) (ymaxt) * ( (s * tan((*pdata)[i].b) * (cos(p1) - sin(p1) * (1/tan((*pdata)[i].b)) * cos((*pdata)[i].a - l0) ) ) - ylow );
 		  if (y < 0) y = 0;
 		  if (y > ymax) y = ymax;
 		  //add the point with max distance
@@ -433,125 +441,77 @@ PanoramaMap::PanoramaMap(PolarPointCloud* cloud, int nwidth, int nheight, int me
 		    }
 		}
 	    }
-	  /*
-	  //same as first interval
-	  if((*pdata)[i].a < (M_PI) && (*pdata)[i].a > (M_PI/2))
-	    {
-	      double max, min, s;
-	      double l0 = M_PI/2 + M_PI/4;
-	      double p1 = 0;
-	      s = (d + 1) / (d + sin(p1) * tan(M_PI/3) + cos(p1) * cos(M_PI - l0));
-	      max = s * (sin(M_PI - l0));
-	      s = (d + 1) / (d + sin(p1) * tan(-M_PI/3) + cos(p1) * cos(M_PI/2 - l0));
-	      min = s * (sin(M_PI/2 - l0));
-	      double xmaxt = (double) (nwidth / 4) / (max -min);
-	      double xlow = min;
-	      int xmax = (nwidth/4) - 1;
-	      s = (d + 1) / (d + sin(p1) * tan(M_PI/3) + cos(p1) * cos(M_PI - l0));
-	      max = s * (tan(M_PI/3) * (cos(p1) - sin(p1) * 1/tan(M_PI/3) * cos(M_PI - l0)));
-	      s = (d + 1) / (d + sin(p1) * tan(-M_PI/3) + cos(p1) * cos(M_PI/2 - l0));
-	      min = s * (tan(-M_PI/3) * (cos(p1) - sin(p1) * 1/tan(-M_PI/3) * cos(M_PI/2 - l0)));
-	      double ymaxt = (double) nheight / (max - min);
-	      double ylow = min;
-	      int ymax = nheight - 1;
-	      
-	      s = (d + 1) / (d + sin(p1) * tan((*pdata)[i].b) + cos(p1) * cos((*pdata)[i].a - l0));
-	      int x = (int)(xmaxt) * (s * (sin((*pdata)[i].a - l0)) - xlow);
-	      if (x < 0) x = 0;
-	      if (x > xmax) x = xmax;
-	      x = x + (nwidth/4);
-	      int y = (int) (ymaxt) * (s * (tan((*pdata)[i].b) * (cos(p1) - sin(p1) * 1/tan((*pdata)[i].b * cos((*pdata)[i].a - l0)))) - ylow);	      
-	      if (y < 0) y = 0;
-	      if (y > ymax) y = ymax;
-	      if( data[x][y].meta < (*pdata)[i].d )
-		{
-		  data[x][y].value = (*pdata)[i].r;
-		  data[x][y].meta = (*pdata)[i].d;
-		  data[x][y].x = (*pdata)[i].x;
-		  data[x][y].y = (*pdata)[i].y;
-		  data[x][y].z = (*pdata)[i].z;
-		}
-	    }
-	  //same as fisrt interval
-	  if((*pdata)[i].a < (3*M_PI/2) && (*pdata)[i].a > (M_PI))
-	    {
-	      double max, min, s;
-	      double l0 = M_PI + M_PI/4;
-	      double p1 = 0;
-	      s = (d + 1) / (d + sin(p1) * tan(M_PI/3) + cos(p1) * cos(3*M_PI/2 - l0));
-	      max = s * (sin(3*M_PI/2 - l0));
-	      s = (d + 1) / (d + sin(p1) * tan(-M_PI/3) + cos(p1) * cos(M_PI - l0));
-	      min = s * (sin(M_PI - l0));
-	      double xmaxt = (double) (nwidth / 4) / (max -min);
-	      double xlow = min;
-	      int xmax = (nwidth/4) - 1;
-	      s = (d + 1) / (d + sin(p1) * tan(M_PI/3) + cos(p1) * cos(3*M_PI/2 - l0));
-	      max = s * (tan(M_PI/3) * (cos(p1) - sin(p1) * 1/tan(M_PI/3) * cos(3*M_PI/2 - l0)));
-	      s = (d + 1) / (d + sin(p1) * tan(-M_PI/3) + cos(p1) * cos(M_PI - l0));
-	      min = s * (tan(-M_PI/3) * (cos(p1) - sin(p1) * 1/tan(-M_PI/3) * cos(M_PI - l0)));
-	      double ymaxt = (double) nheight / (max - min);
-	      double ylow = min;
-	      int ymax = nheight - 1;
-	      
-	      s = (d + 1) / (d + sin(p1) * tan((*pdata)[i].b) + cos(p1) * cos((*pdata)[i].a - l0));
-	      int x = (int)(xmaxt) * (s * (sin((*pdata)[i].a - l0)) - xlow);	      
-	      if (x < 0) x = 0;
-	      if (x > xmax) x = xmax;
-	      x = x + 2*(nwidth/4);
-	      int y = (int) (ymaxt) * (s * (tan((*pdata)[i].b) * (cos(p1) - sin(p1) * 1/tan((*pdata)[i].b * cos((*pdata)[i].a - l0)))) - ylow);	
- 	      if (y < 0) y = 0;
-	      if (y > ymax) y = ymax;
-	      if( data[x][y].meta < (*pdata)[i].d )
-		{
-		  data[x][y].value = (*pdata)[i].r;
-		  data[x][y].meta = (*pdata)[i].d;
-		  data[x][y].x = (*pdata)[i].x;
-		  data[x][y].y = (*pdata)[i].y;
-		  data[x][y].z = (*pdata)[i].z;
-		}
-	    }
-	  //same as first interval
-	  if((*pdata)[i].a < (2*M_PI) && (*pdata)[i].a > (3*M_PI/2))
-	    {
-	      double max, min, s;
-	      double l0 = 3*M_PI/2 + M_PI/4;
-	      double p1 = 0;
-	      s = (d + 1) / (d + sin(p1) * tan(M_PI/3) + cos(p1) * cos(2*M_PI - l0));
-	      max = s * (sin(2*M_PI - l0));
-	      s = (d + 1) / (d + sin(p1) * tan(-M_PI/3) + cos(p1) * cos(3*M_PI/2 - l0));
-	      min = s * (sin(3*M_PI/2 - l0));
-	      double xmaxt = (double) (nwidth / 4) / (max -min);
-	      double xlow = min;
-	      int xmax = (nwidth/4) - 1;
-	      s = (d + 1) / (d + sin(p1) * tan(M_PI/3) + cos(p1) * cos(2*M_PI - l0));
-	      max = s * (tan(M_PI/3) * (cos(p1) - sin(p1) * 1/tan(M_PI/3) * cos(2*M_PI - l0)));
-	      s = (d + 1) / (d + sin(p1) * tan(-M_PI/3) + cos(p1) * cos(3*M_PI/2 - l0));
-	      min = s * (tan(-M_PI/3) * (cos(p1) - sin(p1) * 1/tan(-M_PI/3) * cos(3*M_PI/2 - l0))); 
-	      double ymaxt = (double) nheight / (max - min);
-	      double ylow = min;
-	      int ymax = nheight - 1;
-	      
-	      s = (d + 1) / (d + sin(p1) * tan((*pdata)[i].b) + cos(p1) * cos((*pdata)[i].a - l0));
-	      int x = (int)(xmaxt) * (s * (sin((*pdata)[i].a - l0)) - xlow);	      
-	      if (x < 0) x = 0;
-	      if (x > xmax) x = xmax;
-	      x = x + 3*(nwidth/4);
-	      int y = (int) (ymaxt) * (s * (tan((*pdata)[i].b) * (cos(p1) - sin(p1) * 1/tan((*pdata)[i].b * cos((*pdata)[i].a - l0)))) - ylow);
-	      if (y < 0) y = 0;
-	      if (y > ymax) y = ymax;
-	      if( data[x][y].meta < (*pdata)[i].d )
-		{
-		  data[x][y].value = (*pdata)[i].r;
-		  data[x][y].meta = (*pdata)[i].d;
-		  data[x][y].x = (*pdata)[i].x;
-		  data[x][y].y = (*pdata)[i].y;
-		  data[x][y].z = (*pdata)[i].z;
-		}
-	    
-	    }
-	  */
 	}
       projection = PANNINI;
+    }
+  //Stereographic Projection
+  if(method == STEREOGRAPHIC)
+    {
+      long length = cloud->getLength();
+      r = stereor;
+      n = imagen;
+      cout << "Paremeter r is:" << r << ", Number of images per scan is:" << n << endl;
+      const vector<PolarPoint> *pdata = cloud->getData();
+      // l0 and p1 are the center of projection iminx, imaxx, iminy, imaxy are the bounderis of intervals
+      double l0, p1, iminx, imaxx, iminy, imaxy, interval;
+      interval = 2 * M_PI / n;
+      //iminy = -M_PI/3;
+      iminy = -2*M_PI/9;
+      imaxy = M_PI/3;
+      //latitude of projection center
+      p1 = 0;
+      //go through ll points
+      for ( int i = 0 ; i < length ; i++)
+	{
+	  for ( int j = 0 ; j < n ; j++)
+	    {
+	      iminx = j * interval;
+	      imaxx = (j+1) * interval;
+	      //check for point in intervals
+	      if((*pdata)[i].a < (imaxx) && (*pdata)[i].a > (iminx))
+		{
+		  double max, min, k;
+		  //longitude of projection center
+		  l0 = iminx + interval / 2;
+		  //finding the min and max of x direction
+		  //use the k variable of stereographic projection mentioned in the thesis
+		  k = (2 * r) / (1 + sin(p1) * sin(p1) + cos(p1) * cos(p1) * cos(imaxx - l0));
+		  max = k * cos(p1) * sin (imaxx - l0);
+		  k = (2 * r) / (1 + sin (p1) * sin(p1) + cos(p1) * cos(p1) * cos(iminx -l0));
+		  min = k * cos(p1) * sin (iminx -l0);
+		  double xmaxt = (double) (nwidth / n) / (max - min);
+		  double xlow = min;
+		  int xmax = (nwidth / n) - 1;
+		  //finding the min and max of y direction
+		  k = (2 * r) / (1 + sin(p1) * sin(imaxy) + cos(p1) * cos(imaxy) * cos(imaxx - l0));
+		  max = k * (cos(p1) * sin(imaxy) - sin(p1) * cos(imaxy) * cos(imaxx - l0));
+		  k = (2 * r) / (1 + sin(p1) * sin(iminy) + cos(p1) * cos(iminy) * cos(iminx - l0));
+		  min = k * (cos(p1) * sin(iminy) - sin(p1) * cos(iminy) * cos(iminx - l0));
+		  double ymaxt = (double) nheight / (max - min);
+		  double ylow = min;
+		  int ymax = nheight - 1;
+		  //project the points and add them to image
+		  k = (2 * r) / (1 + sin(p1) * sin((*pdata)[i].b) + cos(p1) * cos((*pdata)[i].b) * cos((*pdata)[i].a - l0));
+		  int x = (int) (xmaxt) * (k * cos((*pdata)[i].b) * sin((*pdata)[i].a - l0) - xlow);
+		  if (x < 0) x = 0;
+		  if (x > xmax) x = xmax;
+		  x = x + (j * nwidth / n);
+		  int y = (int) (ymaxt) * (k * ( cos(p1) * sin((*pdata)[i].b) - sin(p1) * cos((*pdata)[i].b) * cos((*pdata)[i].a - l0) ) - ylow);
+		  if (y < 0) y = 0;
+		  if (y > ymax) y = ymax;
+		  //add the point with max distance
+		  if (data[x][y].meta < (*pdata)[i].d)
+		    {
+		      data[x][y].value = (*pdata)[i].r;
+		      data[x][y].meta = (*pdata)[i].d;
+		      data[x][y].x = (*pdata)[i].x;
+		      data[x][y].y = (*pdata)[i].y;
+		      data[x][y].z = (*pdata)[i].z;
+		    }
+		}
+	    }
+	}
+      projection = STEREOGRAPHIC;
     }
   //use the added values and index to find the mean 
   /*
