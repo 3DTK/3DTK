@@ -1,4 +1,4 @@
-
+# couple of specific examples
 # first convert to binary polar point cloud object
 
 bin/readscan -o /home/nuechter/dat/bremen_city/scan000.txt.ppc /home/nuechter/dat/bremen_city/scan000.txt 
