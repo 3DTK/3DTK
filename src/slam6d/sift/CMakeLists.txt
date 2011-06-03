@@ -21,11 +21,8 @@ IF(WITH_SIFT)
     ${TERSCANREG_DIR}PanoramaMap.cpp
     ${TERSCANREG_DIR}PointC.cpp
     ${TERSCANREG_DIR}PointCloud.cpp
-    ${TERSCANREG_DIR}PolarPoint.cpp
     ${TERSCANREG_DIR}PolarPointCloud.cpp
-    ${TERSCANREG_DIR}Reader.cpp
     ${TERSCANREG_DIR}Reader_RIEGL.cpp
-    ${TERSCANREG_DIR}SuperPixel.cpp
     ${TERSCANREG_DIR}Feature.cpp
     ${TERSCANREG_DIR}FeatureBase.cpp
     ${TERSCANREG_DIR}FeatureSet.cpp
