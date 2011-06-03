@@ -7,10 +7,12 @@ Alternatively you may change into the build directory ".build" and configure the
 project with your preferred cmake configurator, i.e.:
 cd .build && cmake -i ../
 
-For Microsoft Windows, use the cmake-gui application provided by cmake to
-configure and generate project files for the appropriate version of visual
-studio of your system. Use the INSTALL target to built the entire project.
-Executables (and .dll's) will then reside in the "windows" folder.
+For Microsoft Windows, use the cmake-gui application provided by cmake
+to configure and generate project files for the appropriate version of
+Microsoft Visual Studio C++ of your system. Use the INSTALL target to
+built the entire project.  Executables (and .dll's) will then reside
+in the "windows" folder. For running the binaries you need to install
+the proper redistributable package.
 
 Some Boost libraries (graph, regex, serialization) are needed to compile the slam6D program.
 If you are using Debian just do:
