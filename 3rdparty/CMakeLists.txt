@@ -1,4 +1,5 @@
 # Compile autopano-sift-c
+IF(WITH_SIFT)
   ADD_DEFINITIONS("-DHAS_PANO13")
 
   SET(AUTOPANOCPP_DIR ${CMAKE_SOURCE_DIR}/3rdparty/autopano-sift-c_modified/APSCpp/)
@@ -55,7 +56,7 @@
     ${AUTOPANOCPP_DIR}saInterp.c
     ${AUTOPANOCPP_DIR}saRemap.c ) 
   target_link_libraries(autopano-sift-c libsift jpeg tiff png z pano13 xml2 ANN stdc++)
-
+ENDIF(WITH_SIFT)
 
 # Compile ANN library
 SET(ANN_DIR ${CMAKE_SOURCE_DIR}/3rdparty/ann_1.1.1_modified/src/)
