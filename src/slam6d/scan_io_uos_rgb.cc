@@ -36,7 +36,7 @@ using std::endl;
  * @param euler Initital pose estimates (will not be applied to the points
  * @param ptss Vector containing the read points
  */
-int ScanIO_uos_rgb::readScans(int start, int end, string &dir, int maxDist, int minDist,
+int ScanIO_uos_rgb::readScans(int start, int end, string &dir, int maxDist, int mindist,
 			  double *euler, vector<Point> &ptss)
 {
   static int fileCounter = start;
@@ -46,29 +46,26 @@ int ScanIO_uos_rgb::readScans(int start, int end, string &dir, int maxDist, int 
   ifstream scan_in, pose_in;
 
   double maxDist2 = sqr(maxDist);
-  double minDist2 = sqr(minDist);
 
   int my_fileNr = fileCounter;
   
   if (end > -1 && fileCounter > end) return -1; // 'nuf read
-  stringstream fc;
-  fc << fileCounter;
-  scanFileName = dir + "Output_1m_" + fc.str() +".txt"; //to_string(fileCounter,3) + ".3d";
-  //  poseFileName = dir + "scan" + to_string(fileCounter,3) + ".pose";
+  scanFileName = dir + "scan" + to_string(fileCounter,3) + ".3d";
+  poseFileName = dir + "scan" + to_string(fileCounter,3) + ".pose";
   
   scan_in.open(scanFileName.c_str());
-  //  pose_in.open(poseFileName.c_str());
+  pose_in.open(poseFileName.c_str());
 
   // read 3D scan
-  //  if (!pose_in.good() && !scan_in.good()) return -1; // no more files in the directory
-  //  if (!pose_in.good()) { cerr << "ERROR: Missing file " << poseFileName << endl; exit(1); }
+  if (!pose_in.good() && !scan_in.good()) return -1; // no more files in the directory
+  if (!pose_in.good()) { cerr << "ERROR: Missing file " << poseFileName << endl; exit(1); }
   if (!scan_in.good()) { cerr << "ERROR: Missing file " << scanFileName << endl; exit(1); }
   cout << "Processing Scan " << scanFileName;
   
   for (unsigned int i = 0; i < 6; pose_in >> euler[i++]);
 
   cout << " @ pose (" << euler[0] << "," << euler[1] << "," << euler[2]
-	  << "," << euler[3] << "," << euler[4] << ","  << euler[5] << ")";
+	  << "," << euler[3] << "," << euler[4] << ","  << euler[5] << ")" << endl;
   
   // convert angles from deg to rad
   for (unsigned int i = 3; i <= 5; i++) euler[i] = rad(euler[i]);
@@ -76,13 +73,12 @@ int ScanIO_uos_rgb::readScans(int start, int end, string &dir, int maxDist, int 
   // overread the first line
   char dummy[255];
   scan_in.getline(dummy, 255);
-  scan_in.getline(dummy, 255);
   
   int r, g, b;
   while (scan_in.good()) {
     Point p;
     try {
-	 scan_in >> p;
+	    scan_in >> p;
       scan_in >> r >> g >> b;
       p.rgb[0] = (char)r;
       p.rgb[1] = (char)g;
@@ -94,19 +90,14 @@ int ScanIO_uos_rgb::readScans(int start, int end, string &dir, int maxDist, int 
     // load points up to a certain distance only
     // maxDist2 = -1 indicates no limitation
     if (maxDist == -1 || sqr(p.x) + sqr(p.y) + sqr(p.z) < maxDist2)
-	 if (minDist == -1 || sqr(p.x) + sqr(p.y) + sqr(p.z) > minDist2)
-	   if (r > 0) 
-		ptss.push_back(p);
+	 ptss.push_back(p);
   }
-
-  cout << " with " << ptss.size() << " points." << endl;
-  
   scan_in.close();
   scan_in.clear();
   pose_in.close();
   pose_in.clear();
   fileCounter++;
-
+  
   return  my_fileNr;
 }
 
