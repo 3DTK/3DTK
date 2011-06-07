@@ -4,7 +4,7 @@
  * @author Andreas Nuechter. Jacobs University Bremen gGmbH, Grmany.
  * @author Darko Makreshanski. Jacobs University Bremen gGmbH, Germany.
  */
-#include "PointC.h"
+#include "slam6d/sift/library/PointC.h"
 
 PointC::~PointC() 
 {
