@@ -1,10 +1,10 @@
-/*
- * FeatureBase.h
- *
- *  Created on: April, 15, 2010
- *      Author: darko makreshanski
+/**
+ * @file FeatureBase.h
+ * @brief FeatureBase is an entity with x, y, scale, orientation
+ * @author Andreas Nuechter. Jacobs University Bremen gGmbH, Grmany.
+ * @author HamidReza Houshiar. Jacobs University Bremen gGmbH, Germany.
+ * @author Darko Makreshanski. Jacobs University Bremen gGmbH, Germany.
  */
-
 #ifndef FEATURE_BASE_H_
 #define FEATURE_BASE_H_
 

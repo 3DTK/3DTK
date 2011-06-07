@@ -1,3 +1,10 @@
+/**
+ * @file ScanTransform.cc
+ * @brief Implementation of ScanTransform class
+ * @author Andreas Nuechter. Jacobs University Bremen gGmbH, Grmany.
+ * @author HamidReza Houshiar. Jacobs University Bremen gGmbH, Germany.
+ * @author Darko Makreshanski. Jacobs University Bremen gGmbH, Germany.
+ */
 #include "slam6d/sift/library/ScanTransform.h"
 
 using namespace std;

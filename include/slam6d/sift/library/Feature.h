@@ -1,10 +1,10 @@
-/*
- * Feature.h
- *
- *  Created on: April, 15, 2010
- *      Author: darko makreshanski
+/**
+ * @file Feature.h
+ * @brief Feature is a FeatureBase with descriptor
+ * @author Andreas Nuechter. Jacobs University Bremen gGmbH, Grmany.
+ * @author HamidReza Houshiar. Jacobs University Bremen gGmbH, Germany.
+ * @author Darko Makreshanski. Jacobs University Bremen gGmbH, Germany.
  */
-
 #ifndef CONTROL_POINT_H_
 #define CONTROL_POINT_H_
 

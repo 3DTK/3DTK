@@ -1,3 +1,10 @@
+/**
+ * @file ScanTransform.h
+ * @brief transform the coordinates
+ * @author Andreas Nuechter. Jacobs University Bremen gGmbH, Grmany.
+ * @author HamidReza Houshiar. Jacobs University Bremen gGmbH, Germany.
+ * @author Darko Makreshanski. Jacobs University Bremen gGmbH, Germany.
+ */
 #ifndef __SCAN_TRANSFORM_H__
 #define __SCAN_TRANSFORM_H__
 

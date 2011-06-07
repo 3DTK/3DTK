@@ -1,3 +1,10 @@
+/**
+ * @file FeatureSet.h
+ * @brief A vector of Features
+ * @author Andreas Nuechter. Jacobs University Bremen gGmbH, Grmany.
+ * @author HamidReza Houshiar. Jacobs University Bremen gGmbH, Germany.
+ * @author Darko Makreshanski. Jacobs University Bremen gGmbH, Germany.
+ */
 #ifndef __FEATURE_SET_H__
 #define __FEATURE_SET_H__
 

@@ -1,3 +1,10 @@
+/**
+ * @file FeatureSet.cc
+ * @brief Implementation of Class FeatureSet
+ * @author Andreas Nuechter. Jacobs University Bremen gGmbH, Grmany.
+ * @author HamidReza Houshiar. Jacobs University Bremen gGmbH, Germany.
+ * @author Darko Makreshanski. Jacobs University Bremen gGmbH, Germany.
+ */
 #include "slam6d/sift/library/FeatureSet.h"
 #include <iostream>
 
