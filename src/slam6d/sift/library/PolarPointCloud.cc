@@ -1,11 +1,10 @@
 /**
- * PolarPointCloud.cpp
- *
- *  Created on: Feb 20, 2010
- *      Author: darko
- *      Maintained : HamidReza Mey 04, 2011
+ * @file PolarPointCloud.cc
+ * @brief Implementation of PolarPoint class
+ * @author Andreas Nuechter. Jacobs University Bremen gGmbH, Grmany.
+ * @author HamidReza Houshiar. Jacobs University Bremen gGmbH, Germany.
+ * @author Darko Makreshanski. Jacobs University Bremen gGmbH, Germany.
  */
-
 #include "slam6d/sift/library/PolarPointCloud.h"
 #include <iostream>
 #include <math.h>

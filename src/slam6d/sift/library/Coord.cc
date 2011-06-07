@@ -1,8 +1,9 @@
-/*
- * DataMap.cpp
- *
- *  Created on: Feb 14, 2010
- *      Author: darko
+/**
+ * @file Coords.cc
+ * @brief Implementation of Class Coord
+ * @author Andreas Nuechter. Jacobs University Bremen gGmbH, Grmany.
+ * @author HamidReza Houshiar. Jacobs University Bremen gGmbH, Germany.
+ * @author Darko Makreshanski. Jacobs University Bremen gGmbH, Germany.
  */
 #include "slam6d/sift/library/Coord.h"
 #include <iostream>

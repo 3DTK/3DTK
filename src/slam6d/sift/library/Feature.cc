@@ -1,3 +1,10 @@
+/**
+ * @file Feature.cc
+ * @brief Implementation of Class Feature
+ * @author Andreas Nuechter. Jacobs University Bremen gGmbH, Grmany.
+ * @author HamidReza Houshiar. Jacobs University Bremen gGmbH, Germany.
+ * @author Darko Makreshanski. Jacobs University Bremen gGmbH, Germany.
+ */
 #include <fstream>
 #include "slam6d/sift/library/Feature.h"
 

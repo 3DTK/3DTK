@@ -1,11 +1,10 @@
 /**
- * SuperPixel.h
- *
- *  Created on: Mar 14, 2010
- *      Author: darko
- *      Maintained : HamidReza May 10, 2011
+ * @file SuperPixel.h
+ * @brief is a structure containing the refelectance,range,x,y,z
+ * @author Andreas Nuechter. Jacobs University Bremen gGmbH, Grmany.
+ * @author HamidReza Houshiar. Jacobs University Bremen gGmbH, Germany.
+ * @author Darko Makreshanski. Jacobs University Bremen gGmbH, Germany.
  */
-
 #ifndef SUPERPIXEL_H_
 #define SUPERPIXEL_H_
 

@@ -1,11 +1,10 @@
 /**
- * Reader_RIEGL.cpp
- *
- *  Created on: Feb 20, 2010
- *      Author: darko
- *      Maintained : HamidReza Mey 04, 2011
+ * @file Reader_RIEGL.cc
+ * @brief Implementation of Reader_RIEGL class
+ * @author Andreas Nuechter. Jacobs University Bremen gGmbH, Grmany.
+ * @author HamidReza Houshiar. Jacobs University Bremen gGmbH, Germany.
+ * @author Darko Makreshanski. Jacobs University Bremen gGmbH, Germany.
  */
-
 #include "slam6d/sift/library/Reader_RIEGL.h"
 #include <fstream>
 #include <iostream>

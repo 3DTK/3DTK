@@ -1,3 +1,11 @@
+/**
+ * @file registerscans.cc
+ * @brief Rgister two or more scans with specific parameters like:
+ *        minimum distance between each two ransac points, minimun number of inliers, minimum error,...
+ * @author Andreas Nuechter. Jacobs University Bremen gGmbH, Grmany.
+ * @author HamidReza Houshiar. Jacobs University Bremen gGmbH, Germany.
+ * @author Darko Makreshanski. Jacobs University Bremen gGmbH, Germany.
+ */
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>

@@ -1,11 +1,10 @@
 /**
- * PolarPoint.h
- *
- *  Created on: Feb 20, 2010
- *      Author: darko
- *      Maintained : HamidReza May 04, 2011
+ * @file PolarPoint.h
+ * @brief is a structure containing the theta,phi,refelectance,range,x,y,z
+ * @author Andreas Nuechter. Jacobs University Bremen gGmbH, Grmany.
+ * @author HamidReza Houshiar. Jacobs University Bremen gGmbH, Germany.
+ * @author Darko Makreshanski. Jacobs University Bremen gGmbH, Germany.
  */
-
 #ifndef POLARPOINT_H_
 #define POLARPOINT_H_
 

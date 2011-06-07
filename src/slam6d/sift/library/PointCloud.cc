@@ -1,10 +1,10 @@
-/*
- * PointCloud.cpp
- *
- *  Created on: Mar 14, 2010
- *      Author: darko
+/**
+ * @file PointCloud.cc
+ * @brief Implementation of class PointCloud
+ * @author Andreas Nuechter. Jacobs University Bremen gGmbH, Grmany.
+ * @author HamidReza Houshiar. Jacobs University Bremen gGmbH, Germany.
+ * @author Darko Makreshanski. Jacobs University Bremen gGmbH, Germany.
  */
-
 #include "slam6d/sift/library/PointCloud.h"
 #include "slam6d/sift/library/PointC.h"
 #include <vector>

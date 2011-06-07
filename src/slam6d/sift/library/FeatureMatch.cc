@@ -1,3 +1,10 @@
+/**
+ * @file FeatureMatch.cc
+ * @brief Implementation of Class FeatureMatch
+ * @author Andreas Nuechter. Jacobs University Bremen gGmbH, Grmany.
+ * @author HamidReza Houshiar. Jacobs University Bremen gGmbH, Germany.
+ * @author Darko Makreshanski. Jacobs University Bremen gGmbH, Germany.
+ */
 #include <fstream>
 #include "slam6d/sift/library/FeatureMatch.h"
 

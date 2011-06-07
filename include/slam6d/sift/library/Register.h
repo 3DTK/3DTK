@@ -1,3 +1,10 @@
+/**
+ * @file Register.h
+ * @brief Register two and more scans
+ * @author Andreas Nuechter. Jacobs University Bremen gGmbH, Grmany.
+ * @author HamidReza Houshiar. Jacobs University Bremen gGmbH, Germany.
+ * @author Darko Makreshanski. Jacobs University Bremen gGmbH, Germany.
+ */
 #ifndef __REGISTER_H__
 #define __REGISTER_H__
 
