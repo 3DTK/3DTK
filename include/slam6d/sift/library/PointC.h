@@ -1,10 +1,9 @@
-/*
- * Point.h
- *
- *  Created on: Mar 14, 2010
- *      Author: darko
+/**
+ * @file PoinC.h
+ * @brief 
+ * @author Andreas Nuechter. Jacobs University Bremen gGmbH, Grmany.
+ * @author Darko Makreshanski. Jacobs University Bremen gGmbH, Germany.
  */
-
 #ifndef POINTC_H_
 #define POINTC_H_
 

@@ -17,30 +17,30 @@ IF(WITH_SIFT)
   FIND_PATH(LIBPANO13_INCLUDE_DIR pano13/filter.h)
 
   SET(TERSCANREG_SRCS
-    ${TERSCANREG_DIR}Coord.cpp
-    ${TERSCANREG_DIR}PanoramaMap.cpp
-    ${TERSCANREG_DIR}PointC.cpp
-    ${TERSCANREG_DIR}PointCloud.cpp
-    ${TERSCANREG_DIR}PolarPointCloud.cpp
-    ${TERSCANREG_DIR}Reader_RIEGL.cpp
-    ${TERSCANREG_DIR}Feature.cpp
-    ${TERSCANREG_DIR}FeatureBase.cpp
-    ${TERSCANREG_DIR}FeatureSet.cpp
-    ${TERSCANREG_DIR}FeatureMatch.cpp
-    ${TERSCANREG_DIR}FeatureMatchSet.cpp
-    ${TERSCANREG_DIR}FeatureMatchSetGroup.cpp
-    ${TERSCANREG_DIR}Register.cpp
-    ${TERSCANREG_DIR}ScanTransform.cpp
+    ${TERSCANREG_DIR}Coord.cc
+    ${TERSCANREG_DIR}PanoramaMap.cc
+    ${TERSCANREG_DIR}PointC.cc
+    ${TERSCANREG_DIR}PointCloud.cc
+    ${TERSCANREG_DIR}PolarPointCloud.cc
+    ${TERSCANREG_DIR}Reader_RIEGL.cc
+    ${TERSCANREG_DIR}Feature.cc
+    ${TERSCANREG_DIR}FeatureBase.cc
+    ${TERSCANREG_DIR}FeatureSet.cc
+    ${TERSCANREG_DIR}FeatureMatch.cc
+    ${TERSCANREG_DIR}FeatureMatchSet.cc
+    ${TERSCANREG_DIR}FeatureMatchSetGroup.cc
+    ${TERSCANREG_DIR}Register.cc
+    ${TERSCANREG_DIR}ScanTransform.cc
     ../icp6Dquat.cc
   )
 
   add_library(terscanreg STATIC ${TERSCANREG_SRCS})
 
-  add_executable(generatesiftfeatures ${SIFTPROGRAMS_DIR}generatesiftfeatures.cpp)
-  add_executable(panoramacreator ${SIFTPROGRAMS_DIR}panoramacreator.cpp)
-  add_executable(matchsiftfeatures ${SIFTPROGRAMS_DIR}matchsiftfeatures.cpp)
-  add_executable(registerscans ${SIFTPROGRAMS_DIR}registerscans.cpp)
-  add_executable(readscan ${SIFTPROGRAMS_DIR}readscan.cpp)
+  add_executable(generatesiftfeatures ${SIFTPROGRAMS_DIR}generatesiftfeatures.cc)
+  add_executable(panoramacreator ${SIFTPROGRAMS_DIR}panoramacreator.cc)
+  add_executable(matchsiftfeatures ${SIFTPROGRAMS_DIR}matchsiftfeatures.cc)
+  add_executable(registerscans ${SIFTPROGRAMS_DIR}registerscans.cc)
+  add_executable(readscan ${SIFTPROGRAMS_DIR}readscan.cc)
 
   SET(ADDSIFT_LIBS vigraimpex xml2 )
 

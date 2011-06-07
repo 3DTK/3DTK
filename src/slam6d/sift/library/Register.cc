@@ -1,3 +1,10 @@
+/**
+ * @file Register.cc
+ * @brief Implementation of Register class
+ * @author Andreas Nuechter. Jacobs University Bremen gGmbH, Grmany.
+ * @author HamidReza Houshiar. Jacobs University Bremen gGmbH, Germany.
+ * @author Darko Makreshanski. Jacobs University Bremen gGmbH, Germany.
+ */
 #include "slam6d/sift/library/Register.h"
 #include "slam6d/sift/library/Coord.h"
 #include <stdlib.h>

@@ -1,3 +1,10 @@
+/**
+ * @file FeatureMatchSetGroup.h
+ * @brief A list of FeatureMatchSets
+ * @author Andreas Nuechter. Jacobs University Bremen gGmbH, Grmany.
+ * @author HamidReza Houshiar. Jacobs University Bremen gGmbH, Germany.
+ * @author Darko Makreshanski. Jacobs University Bremen gGmbH, Germany.
+ */
 #ifndef __FEATURE_MATCH_SET_GROUP_H__
 #define __FEATURE_MATCH_SET_GROUP_H__
 

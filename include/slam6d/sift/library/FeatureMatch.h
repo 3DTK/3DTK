@@ -1,3 +1,10 @@
+/**
+ * @file FeatureMatch.h
+ * @brief A match of FeaturBase from two scans
+ * @author Andreas Nuechter. Jacobs University Bremen gGmbH, Grmany.
+ * @author HamidReza Houshiar. Jacobs University Bremen gGmbH, Germany.
+ * @author Darko Makreshanski. Jacobs University Bremen gGmbH, Germany.
+ */
 #ifndef __FEATURE_MATCH_H__
 #define __FEATURE_MATCH_H__
 

@@ -1,11 +1,10 @@
 /**
- * Reader_RIEGL.h
- *
- *  Created on: Feb 20, 2010
- *      Author: darko
- *      Maintained : HamidReza May 04, 2011
+ * @file Reader_RIEGL.h
+ * @brief read the txt files and creat the polarpointcloud
+ * @author Andreas Nuechter. Jacobs University Bremen gGmbH, Grmany.
+ * @author HamidReza Houshiar. Jacobs University Bremen gGmbH, Germany.
+ * @author Darko Makreshanski. Jacobs University Bremen gGmbH, Germany.
  */
-
 #ifndef READER_RIEGL_H_
 #define READER_RIEGL_H_
 

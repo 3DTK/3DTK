@@ -1,9 +1,10 @@
 /**
-* readerscan.cpp
-*
-* Created by: Darko
-*      Maintained : HamidReza May 10, 2011
-*/
+ * @file readscan.cc
+ * @brief read scans and create polarpointcloud
+ * @author Andreas Nuechter. Jacobs University Bremen gGmbH, Grmany.
+ * @author HamidReza Houshiar. Jacobs University Bremen gGmbH, Germany.
+ * @author Darko Makreshanski. Jacobs University Bremen gGmbH, Germany.
+ */
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>

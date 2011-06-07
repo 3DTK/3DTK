@@ -1,11 +1,11 @@
 /**
- * PanoramaMap.cpp
- *
- *  Created on: Feb 20, 2010
- *      Author: darko
- *      Maintained : HamidReza Mey 04, 2011
+ * @file PanoramaMap.cc
+ * @brief Implementation of Class PanoramaMap, Implementation of Equirectangular,Cylindrical,zaxis,Mercator,
+ *        Rectilinear, Pannini projections
+ * @author Andreas Nuechter. Jacobs University Bremen gGmbH, Grmany.
+ * @author HamidReza Houshiar. Jacobs University Bremen gGmbH, Germany.
+ * @author Darko Makreshanski. Jacobs University Bremen gGmbH, Germany.
  */
-
 #include "slam6d/sift/library/PanoramaMap.h"
 #include <iostream>
 #include <fstream>

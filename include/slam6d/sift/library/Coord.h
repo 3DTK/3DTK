@@ -1,10 +1,10 @@
-/*
- * DataMap.h
- *
- *  Created on: Feb 14, 2010
- *      Author: darko
+/**
+ * @file Coords.h
+ * @brief 
+ * @author Andreas Nuechter. Jacobs University Bremen gGmbH, Grmany.
+ * @author HamidReza Houshiar. Jacobs University Bremen gGmbH, Germany.
+ * @author Darko Makreshanski. Jacobs University Bremen gGmbH, Germany.
  */
-
 #ifndef COORD_H
 #define COORD_H
 #include <iostream>

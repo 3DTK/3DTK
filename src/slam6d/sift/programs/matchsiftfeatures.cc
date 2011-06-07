@@ -1,10 +1,10 @@
 /**
- *
- *	Author : Darko Makreshanski
- *  Maintained : HamidReza Mar 13, 2011
- *	this file is a modified version of AutoPano.c from the autopano-sift-C library
+ * @file matchsiftfeatures.cc
+ * @brief this file is a modified version of AutoPano.C from the autopano-sift-C library
+ * @author Andreas Nuechter. Jacobs University Bremen gGmbH, Grmany.
+ * @author HamidReza Houshiar. Jacobs University Bremen gGmbH, Germany.
+ * @author Darko Makreshanski. Jacobs University Bremen gGmbH, Germany.
  */
-
 /* autopano-sift, Automatic panorama image creation
  * Copyright (C) 2004 -- Sebastian Nowozin
  *

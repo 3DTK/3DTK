@@ -1,11 +1,10 @@
 /**
- * PolarPointCloud.h
- *
- *  Created on: Feb 20, 2010
- *      Author: darko
- *      Maintained : HamidReza Mey 04, 2011
+ * @file PolarPointCloud.h
+ * @brief Create the vector PolarPoint and get the min and max of horizantal and vertical angles
+ * @author Andreas Nuechter. Jacobs University Bremen gGmbH, Grmany.
+ * @author HamidReza Houshiar. Jacobs University Bremen gGmbH, Germany.
+ * @author Darko Makreshanski. Jacobs University Bremen gGmbH, Germany.
  */
-
 #ifndef POLARPOINTCLOUD_H_
 #define POLARPOINTCLOUD_H_
 

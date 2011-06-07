@@ -1,11 +1,10 @@
 /**
- * PanoramaMap.h
- *
- *  Created on: Feb 20, 2010
- *      Author: darko
- *      Maintained : HamidReza Mey 04, 2011
+ * @file PanoramaMap.h
+ * @brief Create map files with different projections and also create panorama images
+ * @author Andreas Nuechter. Jacobs University Bremen gGmbH, Grmany.
+ * @author HamidReza Houshiar. Jacobs University Bremen gGmbH, Germany.
+ * @author Darko Makreshanski. Jacobs University Bremen gGmbH, Germany.
  */
-
 #ifndef PANORAMAMAP_H_
 #define PANORAMAMAP_H_
 
