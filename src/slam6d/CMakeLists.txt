@@ -8,6 +8,7 @@ IF(WITH_SCAN_REDUCTION)
   IF (WIN32)
     target_link_libraries(scan_red scanlib ANN XGetopt)
   ENDIF(WIN32)
+  
 ENDIF(WITH_SCAN_REDUCTION)
 
 IF(WITH_SCAN_DIFF) 
@@ -46,6 +47,7 @@ add_library(scan_io_zahn            SHARED scan_io_zahn.cc           )
 add_library(scan_io_ais             SHARED scan_io_ais.cc            )
 add_library(scan_io_uos_rgb         SHARED scan_io_uos_rgb.cc        )
 add_library(scan_io_xyzr            SHARED scan_io_xyzr.cc           )
+add_library(scan_io_xyz_rgb         SHARED scan_io_xyz_rgb.cc        )
 add_library(scan_io_ks              SHARED scan_io_ks.cc             )
 
 add_library(scan_io_oct             SHARED scan_io_oct.cc point_type.cc)
