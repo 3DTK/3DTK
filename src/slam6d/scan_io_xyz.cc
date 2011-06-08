@@ -1,6 +1,6 @@
 /**
  * @file
- * @brief Implementation of reading 3D scans in XYZ format (i.e., pure 3D data points only)
+ * @brief Implementation of reading 3D scans in XYZ format (i.e., pure 3D data * points in a right handed coordinate system only)
  * @author Kai Lingemann. Institute of Computer Science, University of Osnabrueck, Germany.
  * @author Andreas Nuechter. Institute of Computer Science, University of Osnabrueck, Germany.
  */
@@ -23,7 +23,7 @@ using std::swap;
 
 /**
  * Reads specified scans from given directory in
- * the XYZ file format (i.e., pure 3D data points only)
+ * the XYZ file format (i.e., pure 3D data points only in a right handed * coordinate system)
  * It will be compiled as shared lib.
  *
  * @param start Starts to read with this scan
@@ -34,17 +34,19 @@ using std::swap;
  * @param euler Initital pose estimates (will not be applied to the points
  * @param ptss Vector containing the read points
  */
-int ScanIO_xyz::readScans(int start, int end, string &dir, int maxDist, int mindist,
+int ScanIO_xyz::readScans(int start, int end, string &dir, int maxDist, int minDist,
 					 double *euler, vector<Point> &ptss)
 {
   static int fileCounter = start;
   string scanFileName;
 
   ifstream scan_in, pose_in;
+  double maxDist2 = sqr(maxDist);
+  double minDist2 = sqr(minDist);
 
   if (end > -1 && fileCounter > end) return -1; // 'nuf read
 
-  scanFileName = dir + "Challenger.xyz"; // " + to_string(fileCounter,2) + ".xyz";
+  scanFileName = dir + to_string(fileCounter,3) + ".xyz";
   scan_in.open(scanFileName.c_str());
   // read 3D scan
   if (!scan_in.good()) { cerr << "ERROR: Missing file " << scanFileName << endl; exit(1); }
@@ -53,25 +55,24 @@ int ScanIO_xyz::readScans(int start, int end, string &dir, int maxDist, int mind
   char firstline[255];
   scan_in.getline(firstline, 255);
 
-  double rPos[3] = { 0.0, 0.0, 0.0 };
-  double rPosTheta[16]  = { 0.0, 0.0, 0.0 };
-
-  euler[0] = rPos[0];
-  euler[1] = rPos[1];
-  euler[2] = rPos[2];
-  euler[3] = rPosTheta[0];
-  euler[4] = rPosTheta[1];
-  euler[5] = rPosTheta[2];
+  euler[0] = 0.0;
+  euler[1] = 0.0;
+  euler[2] = 0.0;
+  euler[3] = 0.0;
+  euler[4] = 0.0;
+  euler[5] = 0.0;
 
   while (scan_in.good()) {
     Point p;
     int dummy;
-    scan_in >> p.x >> p.y >> p.z >> dummy >> dummy >> dummy;
+    scan_in >> p.x >> p.z >> p.y;
     p.x *= 100;
     p.y *= 100;
     p.z *= 100;
 	 
-    ptss.push_back(p);
+    if (maxDist == -1 || sqr(p.x) + sqr(p.y) + sqr(p.z) < maxDist2)
+      if (minDist == -1 || sqr(p.x) + sqr(p.y) + sqr(p.z) > minDist2)
+        ptss.push_back(p);
   }
 
   cout << " done" << endl;
