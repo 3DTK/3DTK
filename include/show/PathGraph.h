@@ -5,6 +5,7 @@ using std::map;
 #include <list>
 using std::list;
 #include <climits>
+#include <cstddef>
 
 
 typedef struct {float x; float y; } PointXY;
