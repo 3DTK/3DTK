@@ -40,6 +40,9 @@
 #include "..\..\..\Visual_Studio_Projects\6DSLAM\6D_SLAM\XGetopt.h"
 #endif
 
+/**
+ *   usage - explains how to use the program CMD
+ */
 void usage(int argc, char** argv)
 {
   printf("\n");
@@ -50,11 +53,7 @@ void usage(int argc, char** argv)
   printf("\t\t-o FILE.matches\t\tserialize the FeatureMatchSetGroup class\n");
   printf("\t\t-m <maxmatches>\t\tfilter and return the best <maxmatches> matches\n");
   printf("\t\tfile.keyxml\t\tinput file. The xml file output returned by generatesiftfeatures -x\n");
-  //	printf("\t\t-m MIN_DIM\t\tminDim: (optional) Downscale resolution. The image is repeatedly halfed in size until both width and height are below 'minDim'.\n");
   printf("\n");
-  //	printf("\tExample:\n");
-  //	printf("\t\t%s -j -s 1000x300 -s 500x150 example.file\n");
-  //	printf("\n");
   exit(1);
 }
 
@@ -97,17 +96,14 @@ FeatureMatchSetGroup *getFeatureMatchSetGroup(ArrayList* matchsets)
   return res;
 }
 
-int main (int argc, char* argv[])
+/**
+ *   parseArgs - reade the comand line options
+ */
+int parseArgs(int argc, char **argv, string &output, int &maxmatches, vector<string> &inputfiles)
 {
-  vector<char*> inputfiles;
-  char *output = NULL;
-  
-  int maxmatches = 0;
-  
   int c;
-  
   opterr = 0;
-  
+  //read the command line and get the options
   while ((c = getopt (argc, argv, "o:m:")) != -1)
     switch (c)
       {
@@ -132,7 +128,7 @@ int main (int argc, char* argv[])
 	usage(argc, argv);
       }
   
-  if (output == NULL) 
+  if (output.empty())  
     {
       printf("You must provide an output file\n");
       usage(argc, argv);
@@ -144,12 +140,43 @@ int main (int argc, char* argv[])
       printf("Too few input files. At least two are required.\n");
       usage(argc, argv);
     }
-  
-  ArrayList* keyfiles = ArrayList_new0(NULL);
-  
+
   for (int index = optind; index < argc; index++) 
     {
-      ArrayList_AddItem(keyfiles, argv[index]);
+      inputfiles.push_back(argv[index]);
+    }
+  
+  return 1;
+}
+
+
+/**
+ *   main - reads the xml files and match sift featurs and create the .matches files 
+ */
+int main (int argc, char* argv[])
+{
+  vector<string> inputfiles;
+  string output;
+  int maxmatches = 0;
+  vector<string>::iterator it;
+  
+  parseArgs(argc, argv, output, maxmatches, inputfiles);
+  cout<<endl;
+  cout<<"matchsiftfeatures will procees with the following parameters: "<<endl;
+  cout<<"Output: "<<output<<endl;
+  cout<<"Maxmatches: "<<maxmatches<<endl;
+  cout<<"Inputfiles :"<<endl;
+  for (it = inputfiles.begin() ; it != inputfiles.end() ; it++) 
+    {
+      cout<<"    "<<*it<<endl;
+    }
+  cout<<endl;
+
+  ArrayList* keyfiles = ArrayList_new0(NULL);
+  for (it = inputfiles.begin() ; it != inputfiles.end() ; it++) 
+    {
+      string temp = *it;
+      ArrayList_AddItem(keyfiles, (void*) temp.c_str());
     }
   
   MultiMatch* mm = MultiMatch_new0 ();
@@ -167,7 +194,7 @@ int main (int argc, char* argv[])
   
   FeatureMatchSetGroup *msg = getFeatureMatchSetGroup(msList);
   
-  msg->serialize(output);
+  msg->serialize(output.c_str());
   
   delete msg;
   ArrayList_delete(keyfiles);

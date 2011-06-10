@@ -33,6 +33,9 @@ struct size
   int height;
 };
 
+/**
+ *   usage - explains how to use the program CMD
+ */
 void usage(int argc, char** argv)
 {
   printf("\n");
@@ -45,27 +48,16 @@ void usage(int argc, char** argv)
   printf("\t\t-t <float>\t\t minimum threshold distance that determines if it is a fit or not (default: 1.0)\n");
   printf("\t\t-i <float>\t\t influence of the numbers of inliers to the error term (default: 0.05)\n");
   printf("\t\t-r <float>\t\t minimum distance between any two points in a triangle (default: 5)\n");
-  //	printf("\t\t-a <float>\t\t minimum angle in a triangle\n");
   printf("\t\tFILE.map\t\tinput .map file (serialization of a PanoramaMap class object)\n");
   printf("\n");
-  //	printf("\tExample:\n");
-  //	printf("\t\t%s -i example.map\n", argv[0]);
-  //	printf("\n");
    exit(1);
 }
 
-int main(int argc, char** argv)
+/** 
+ *   parseArgs - reade the comand line options
+ */
+int parseArgs(int argc, char **argv, vector<char*> &input, int &d, double &t, double &i, double &r, double &a, int &modemax, vector<string> &smap)
 {
-  vector<char*> input;
-  
-  int d = 0;
-  double t = 0;
-  double i = 0;
-  double r = 0;
-  double a = 0;
-  
-  int modemax = 0;
-  
   opterr = 0;
   int c;
   
@@ -133,7 +125,47 @@ int main(int argc, char** argv)
     {
       usage(argc, argv);
     }
-  
+   for (int index = optind; index < argc ; index++) 
+    {
+      smap.push_back(argv[index]);
+    }
+  return 1;
+}
+
+/**
+ *  main - use match features to register scans
+ */
+int main(int argc, char** argv)
+{
+  vector<char*> input;  
+  int d = 0;
+  double t = 0;
+  double i = 0;
+  double r = 0;
+  double a = 0;
+  int modemax = 0;
+  vector<string> smap;
+
+  parseArgs(argc, argv, input, d, t, i, r, a, modemax, smap);
+  cout<<endl;
+  cout<<"registerscans will proceed with the following parameters: "<<endl;
+  cout<<"input: "<<endl;
+  for(int i = 0 ; i< (int) input.size() ; i++)
+    {
+      cout<<"   "<<input[i]<<endl;
+    }
+  cout<<"Minimum number of inliers 'd': "<<d<<endl;
+  cout<<"Minimum threshold 't': "<<t<<endl;
+  cout<<"Influence of the inliers to error 'i': "<<i<<endl;
+  cout<<"Minimum distance for two point in RANSAC 'r': "<<r<<endl;
+  cout<<"Modemax for RANSAC: "<<modemax<<endl;
+  cout<<"Maps: "<<endl;
+  for(int i = 0 ; i < (int) smap.size() ; i++)
+    {
+      cout<<"   "<<smap[i]<<endl;
+    }
+  cout<<endl;
+    
   FeatureMatchSetGroup group;
   for (int i = 0 ; i < (int) input.size() ; i++) 
     {
@@ -144,10 +176,10 @@ int main(int argc, char** argv)
   cout << group.matchsets.size() << endl;
 
   vector<PanoramaMap*> maps;
-  for (int index = optind; index < argc ; index++) 
+  for (int index = 0 ; index < (int) smap.size() ; index++)
     {
-      cout << "Reading map: " << argv[index] << endl;
-      PanoramaMap *map = new PanoramaMap(argv[index]);
+      cout << "Reading map: " << smap[index] << endl;
+      PanoramaMap *map = new PanoramaMap(smap[index].c_str());
       maps.push_back(map);
     }
   

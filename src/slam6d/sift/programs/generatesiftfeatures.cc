@@ -39,6 +39,9 @@
 #include "..\..\..\Visual_Studio_Projects\6DSLAM\6D_SLAM\XGetopt.h"
 #endif
 
+/**
+ *   usage - explains how to use the program CMD
+ */
 void usage(int argc, char** argv)
 {
   printf("\n");
@@ -86,19 +89,13 @@ FeatureSet* getFeatureSet(ArrayList* featlist, std::string scanid)
   return set;
 }
 
-int main (int argc, char* argv[])
+/** 
+ *   parseArgs - reade the comand line options
+ */
+int parseArgs(int argc, char **argv, string &outputxml, string &output, string &input, int &downRes)
 {
-  int downRes = 0;
-  char *input = NULL;
-  char *outputxml = NULL;
-  char *output = NULL;
-  
-  WriteLine("SIFT Keypoint Generation\n"); //, version %s\n", PACKAGE_VERSION);
-  
   int c;
-  
-  opterr = 0;
-  
+  opterr = 0;  
   while ((c = getopt (argc, argv, ":x:o:i:m:")) != -1)
     switch (c)
       {
@@ -125,48 +122,48 @@ int main (int argc, char* argv[])
       usage(argc, argv);
       }
   
-  if (input == NULL) 
+  if (input.empty())
     {
       printf("You must provide an input file\n");
       usage(argc, argv);
     }
   
-  if (outputxml == NULL && output == NULL) 
+  if (outputxml.empty() && output.empty())
     {
       printf("You must provide either xml (-x) or serialization output (-o)\n");
       usage(argc, argv);
     }
-  
-  //	 1. load the image file
-  //	WriteLine ("opening %s", argv[1]);
-  
-  //	DisplayImage* pic = DisplayImage_new(input);
-  //	int pW = pic->width;
-  //	int pH = pic->height;
-  //
-  //	double startScale = 1.0;
-  //	if (downRes > 0) {
-  //			startScale = DisplayImage_ScaleWithin(pic, downRes);
-  //			WriteLine ("Scaled picture, starting with scale %0.04f",
-  //				    startScale);
-  //	}
-  //
-  //	ImageMap* picMap = DisplayImage_ConvertToImageMap(pic);
-  //	DisplayImage_delete(pic);
-  
-  //changed from converting from map to converting to image because the output was inconsistent
+  return 1;
+}
 
-  PanoramaMap map(input);
+/**
+ *  main - get the images and generate sift featurs and create .xml files
+ */
+int main (int argc, char* argv[])
+{
+  int downRes = 0;
+  string input;
+  string outputxml;
+  string output;
+
+  parseArgs(argc, argv, outputxml, output, input, downRes);
+  cout<<endl;
+  cout<<"generatesiftfeatures will proceed with the following parameters: "<<endl;
+  cout<<"outputxml: "<<outputxml<<endl;
+  cout<<"output: "<<output<<endl;
+  cout<<"input: "<<input<<endl;
+  cout<<"downRes: "<<downRes<<endl;
+  cout<<endl;
+
+  WriteLine("SIFT Keypoint Generation\n");
+  PanoramaMap map(input.c_str());
   ImageMap* picMap = getImageMapFromPanoramaMap(&map);
   int pW = map.width;
   int pH = map.height;
   
   // 2. find the features
   LoweFeatureDetector* lf = LoweFeatureDetector_new0();
-  //	if (argc > 3) {
-  //		LoweFeatureDetector_DetectFeaturesDownscaled (lf, picMap, 0, 1.0 / startScale);
-  //	} else
-  
+   
   cout << "Detecting Features...\n";
   clock_t start = clock();
   LoweFeatureDetector_DetectFeatures (lf, picMap);
@@ -175,22 +172,21 @@ int main (int argc, char* argv[])
   WriteLine ("found %d global keypoints with time: %f\n",
 	     ArrayList_Count(LoweFeatureDetector_GlobalNaturalKeypoints(lf)), time);
   
-  if (outputxml != NULL) 
+   if (!outputxml.empty())
     {
-      KeypointXMLWriter_WriteComplete ((char*) map.scanid.c_str(), pW, pH, outputxml,
+      KeypointXMLWriter_WriteComplete ((char*) map.scanid.c_str(), pW, pH, (char*) outputxml.c_str(),
 				       LoweFeatureDetector_GlobalNaturalKeypoints(lf));
-      WriteLine("Wrote XML file to %s\n", outputxml);
+      cout<<"Wrote XML file to "<<outputxml<<endl;
     }
   
-  if (output != NULL) 
+   if (!output.empty())
     {
       FeatureSet *set = getFeatureSet(LoweFeatureDetector_GlobalNaturalKeypoints(lf), map.scanid);
-      set->serialize(output);
-      WriteLine("Wrote FeatureSet file to %s\n", output);
+      set->serialize(output.c_str());
+      cout<<"Wrote FeatureSet file to "<<output<<endl;
       delete set;
     }
   
-  //	ImageMap_delete(picMap);
-  LoweFeatureDetector_delete(lf);
+   LoweFeatureDetector_delete(lf);
   return 0;
 }
