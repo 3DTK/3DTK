@@ -44,18 +44,12 @@ void usage(int argc, char** argv)
   exit(1);
 }
 
-/**
- *   main - reads the input and create polarpointcloud and write it to output
+/** 
+ *   parseArgs - reade the comand line options
  */
-int main(int argc, char** argv)
+int parseArgs(int argc, char **argv, string &reader, string &input, string &output, string &scanid)
 {
-  char *reader = NULL;
-  char *input = NULL;
-  char *output = NULL;
-  char *scanid = NULL;
-  
   int c;
-  
   //reade the comand line and get the options
   while ((c = getopt (argc, argv, "o:d:")) != -1)
     switch (c)
@@ -78,7 +72,7 @@ int main(int argc, char** argv)
       }
   
   //check the input data of comand line
-  if (output == NULL)
+  if(output.empty())  
     {
       usage(argc, argv);
     }
@@ -88,20 +82,39 @@ int main(int argc, char** argv)
     }
   
   //put the non option parameter to input
-  if (reader == NULL || !(strcmp(reader, "RIEGL") == 0))
+  if (reader.empty() || reader.compare("RIEGL") != 0 )
     {
       reader = "RIEGL";
     }
   input = argv[optind];
-  if (scanid == NULL)
+  if (scanid.empty())
     {
       scanid = input;
     }
-  cout<<scanid<<endl;
+  return 1;
+}
+
+/**
+ *   main - reads the input and create polarpointcloud and write it to output
+ */
+int main(int argc, char** argv)
+{
+  string reader;
+  string input;
+  string output;
+  string scanid;
+
+  parseArgs(argc, argv, reader, input, output, scanid); 
+  cout<<endl;
+  cout<<"readerscan will proceed with the following parameters:"<<endl;
+  cout<<"reader: "<<reader<<endl;
+  cout<<"input: "<<scanid<<endl;
+  cout<<"output: "<<output<<endl;
+  cout<<"scanid: "<<scanid<<endl<<endl;
   
   //create the polarpoin cloud from input flie and write it to .ppc file
   PolarPointCloud polarcloud = Reader_RIEGL::readPolarPointCloud(scanid, input, 1);
-  polarcloud.serialize(output);
+  polarcloud.serialize(output.c_str());
   
   //experimental------
   int ind[100];
