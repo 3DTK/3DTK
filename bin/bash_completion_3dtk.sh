@@ -1,4 +1,4 @@
-#bash completion for cowsay
+#bash completion for show and slam6d
 
 #have show &&
 _show()
