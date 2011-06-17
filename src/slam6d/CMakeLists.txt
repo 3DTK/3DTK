@@ -73,8 +73,10 @@ IF(WITH_TOOLS)
   add_executable(graph_balancer graph_balancer.cc)
   add_executable(exportPoints exportPoints.cc)
   add_executable(frames2riegl frames2riegl.cc)
+  add_executable(frames2pose frames2pose.cc)
+  add_executable(pose2frames pose2frames.cc)
   add_executable(riegl2frames riegl2frames.cc)
-  
+
   IF(UNIX)
     target_link_libraries(graph_balancer scanlib ${Boost_LIBRARIES})
     target_link_libraries(exportPoints scanlib dl ANN)
