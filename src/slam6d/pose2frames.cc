@@ -41,7 +41,8 @@ int parseArgs(int argc,char **argv, char dir[255], int& start, int& end){
    }
 
   if (optind != argc-1) {
-    cerr << "\n*** Directory missing ***" << endl;
+    cerr << "\n*** Directory missing ***\n" << endl; 
+    cout << endl
 	  << "Usage: " << argv[0] << "  [-s NR] [-e NR] directory" << endl << endl;
 
     cout << "  -s NR   start at scan NR (i.e., neglects the first NR scans)" << endl
