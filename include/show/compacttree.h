@@ -323,10 +323,17 @@ template <class P>
       shortpointrep *points = createPoints(splitPoints.size()); 
       node.linkPoints(points, splitPoints.size());
       int i = 0;
+      double distance;
       for (typename vector<P *>::iterator itr = splitPoints.begin(); 
           itr != splitPoints.end(); itr++) {
         for (unsigned int iterator = 0; iterator < 3; iterator++) {
-          points[i++] = (((*itr)[iterator] - _center[iterator])/_size ) * (1 << 15);//* pow(2,15) ;
+          distance = (*itr)[iterator] - _center[iterator];
+          
+          if (distance >= _size) {
+            points[i++] = (1 << 15) -1;
+          } else {
+            points[i++] = (distance/_size ) * (1 << 15);//* pow(2,15) ;
+          }
         }
         for (unsigned int iterator = 3; iterator < POINTDIM; iterator++) {
           points[i++] = (*itr)[iterator];
@@ -483,5 +490,6 @@ template <class P>
 template <class P>
 inline unsigned char compactTree::childIndex(const double *center, const P *point) {
   return  (point[0] >= center[0] ) | ((point[1] >= center[1] ) << 1) | ((point[2] >= center[2] ) << 2) ;
+//  return  (point[0] > center[0] ) | ((point[1] > center[1] ) << 1) | ((point[2] > center[2] ) << 2) ;
 }
 #endif
