@@ -482,6 +482,6 @@ template <class P>
 
 template <class P>
 inline unsigned char compactTree::childIndex(const double *center, const P *point) {
-  return  (point[0] > center[0] ) | ((point[1] > center[1] ) << 1) | ((point[2] > center[2] ) << 2) ;
+  return  (point[0] >= center[0] ) | ((point[1] >= center[1] ) << 1) | ((point[2] >= center[2] ) << 2) ;
 }
 #endif
