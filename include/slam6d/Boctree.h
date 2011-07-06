@@ -779,22 +779,6 @@ protected:
   void countPointsAndQueue(vector<P*> &i_points, T center[8][3], T size, bitoct &parent, T *pcenter) {
     vector<P*> points[8];
     int n_children = 0;
-/*
-#ifdef _OPENMP 
-#pragma omp parallel for schedule(dynamic) 
-#endif
-    for (int j = 0; j < 8; j++) {
-      for (typename vector<P *>::iterator itr = i_points.begin(); itr != i_points.end(); itr++) {
-        if (fabs((*itr)[0] - center[j][0]) <= size) {
-          if (fabs((*itr)[1] - center[j][1]) <= size) {
-            if (fabs((*itr)[2] - center[j][2]) <= size) {
-              points[j].push_back(*itr);
-              continue;
-            }
-          }
-        }
-      }
-    }*/
     for (typename vector<P *>::iterator itr = i_points.begin(); itr != i_points.end(); itr++) {
       points[childIndex<P>(pcenter, *itr)].push_back( *itr );
     }
@@ -830,32 +814,10 @@ protected:
   void countPointsAndQueue(P * const* pts, int n,  T center[8][3], T size, bitoct &parent, T pcenter[3]) {
     vector<const P*> points[8];
     int n_children = 0;
-/*#ifdef _OPENMP 
-#pragma omp parallel for schedule(dynamic) 
-#endif
-    for (int j = 0; j < 8; j++) {
-      for (int i = 0; i < n; i++) {
-        if (fabs(pts[i][0] - center[j][0]) <= size) {
-          if (fabs(pts[i][1] - center[j][1]) <= size) {
-            if (fabs(pts[i][2] - center[j][2]) <= size) {
-              points[j].push_back( pts[i] );
-//              cout << "p2 " << j << "  " << ((pts[i][0] > pcenter[0] ) | ((pts[i][1] > pcenter[1] ) << 1) | ((pts[i][2] > pcenter[2] ) << 2))  << endl;
-              childIndex<P>( pcenter, pts[i] );
-            }
-          }
-        } 
-      }
-    }
-    */
       for (int i = 0; i < n; i++) {
               points[childIndex<P>(pcenter, pts[i])].push_back( pts[i] );
-//              cout << "p2 " << j << "  " << ((pts[i][0] > pcenter[0] ) | ((pts[i][1] > pcenter[1] ) << 1) | ((pts[i][2] > pcenter[2] ) << 2))  << endl;
-//              childIndex<P>( pcenter, pts[i] );
     }
     
-    for (int j = 0; j < 8; j++) {
-      cout << "SIZE " << points[j].size() << endl;
-    }
     for (int j = 0; j < 8; j++) {
       // if non-empty set valid flag for this child
       if (!points[j].empty()) {
