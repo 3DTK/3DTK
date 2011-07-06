@@ -225,7 +225,7 @@ public:
     uroot = new bitunion<T>();
     root = &uroot->node;
 
-    countPointsAndQueue(pts, n, newcenter, sizeNew, *root);
+    countPointsAndQueue(pts, n, newcenter, sizeNew, *root, center);
     init();
   }
 
@@ -274,7 +274,7 @@ public:
     uroot = new bitunion<T>();
     root = &uroot->node;
 
-    countPointsAndQueue(pts, newcenter, sizeNew, *root);
+    countPointsAndQueue(pts, newcenter, sizeNew, *root, center);
   }
 
   virtual ~BOctTree(){
@@ -747,7 +747,7 @@ protected:
   void* branch( bitoct &node, vector<P*> &splitPoints, T _center[3], T _size) {
     // if bucket is too small stop building tree
     // -----------------------------------------
-    if ((_size <= voxelSize) || (earlystop && splitPoints.size() <= 1) ) {
+    if ((_size <= voxelSize) || (earlystop && splitPoints.size() <= 10) ) {
       // copy points
       pointrep *points = new pointrep[POINTDIM*splitPoints.size() + 1];
       points[0].length = splitPoints.size();
@@ -771,15 +771,15 @@ protected:
       childcenter(_center, newcenter[i], _size, i);
     }
 
-    countPointsAndQueue(splitPoints, newcenter, sizeNew, node);
+    countPointsAndQueue(splitPoints, newcenter, sizeNew, node, _center);
     return 0;
   }
 
   template <class P>
-  void countPointsAndQueue(vector<P*> &i_points, T center[8][3], T size, bitoct &parent) {
+  void countPointsAndQueue(vector<P*> &i_points, T center[8][3], T size, bitoct &parent, T *pcenter) {
     vector<P*> points[8];
     int n_children = 0;
-
+/*
 #ifdef _OPENMP 
 #pragma omp parallel for schedule(dynamic) 
 #endif
@@ -794,6 +794,9 @@ protected:
           }
         }
       }
+    }*/
+    for (typename vector<P *>::iterator itr = i_points.begin(); itr != i_points.end(); itr++) {
+      points[childIndex<P>(pcenter, *itr)].push_back( *itr );
     }
 
     i_points.clear();
@@ -824,10 +827,10 @@ protected:
   }
 
   template <class P>
-  void countPointsAndQueue(P * const* pts, int n,  T center[8][3], T size, bitoct &parent) {
+  void countPointsAndQueue(P * const* pts, int n,  T center[8][3], T size, bitoct &parent, T pcenter[3]) {
     vector<const P*> points[8];
     int n_children = 0;
-#ifdef _OPENMP 
+/*#ifdef _OPENMP 
 #pragma omp parallel for schedule(dynamic) 
 #endif
     for (int j = 0; j < 8; j++) {
@@ -836,10 +839,22 @@ protected:
           if (fabs(pts[i][1] - center[j][1]) <= size) {
             if (fabs(pts[i][2] - center[j][2]) <= size) {
               points[j].push_back( pts[i] );
+//              cout << "p2 " << j << "  " << ((pts[i][0] > pcenter[0] ) | ((pts[i][1] > pcenter[1] ) << 1) | ((pts[i][2] > pcenter[2] ) << 2))  << endl;
+              childIndex<P>( pcenter, pts[i] );
             }
           }
         } 
       }
+    }
+    */
+      for (int i = 0; i < n; i++) {
+              points[childIndex<P>(pcenter, pts[i])].push_back( pts[i] );
+//              cout << "p2 " << j << "  " << ((pts[i][0] > pcenter[0] ) | ((pts[i][1] > pcenter[1] ) << 1) | ((pts[i][2] > pcenter[2] ) << 2))  << endl;
+//              childIndex<P>( pcenter, pts[i] );
+    }
+    
+    for (int j = 0; j < 8; j++) {
+      cout << "SIZE " << points[j].size() << endl;
     }
     for (int j = 0; j < 8; j++) {
       // if non-empty set valid flag for this child
@@ -987,6 +1002,10 @@ void childcenter(int x, int y, int z, int &cx, int &cy, int &cz, char i, int siz
       break;
   }
 }
+template <class P>
+inline unsigned char childIndex(const T *center, const P *point) {
+  return  (point[0] > center[0] ) | ((point[1] > center[1] ) << 1) | ((point[2] > center[2] ) << 2) ;
+}
 
 
   /**
@@ -1051,7 +1070,7 @@ void childcenter(int x, int y, int z, int &cx, int &cy, int &cz, char i, int siz
         if (myd2 <= 0.0001) {
           params[threadNum].closest_v = 0; // the search radius in units of voxelSize
         } else {
-          params[threadNum].closest_v = sqrt(myd2) * mult; // the search radius in units of voxelSize
+          params[threadNum].closest_v = sqrt(myd2) * mult + 1; // the search radius in units of voxelSize
         }
       }
       points+=BOctTree<T>::POINTDIM;
@@ -1075,7 +1094,7 @@ void childcenter(int x, int y, int z, int &cx, int &cy, int &cz, char i, int siz
     params[threadNum].x = (point[0] + add[0]) * mult;
     params[threadNum].y = (point[1] + add[1]) * mult;
     params[threadNum].z = (point[2] + add[2]) * mult;
-    params[threadNum].closest_v = sqrt(maxdist2) * mult; // the search radius in units of voxelSize
+    params[threadNum].closest_v = sqrt(maxdist2) * mult + 1; // the search radius in units of voxelSize
     params[threadNum].count = 0;
     params[threadNum].max_count = 10000; // stop looking after this many buckets
 
