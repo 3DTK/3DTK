@@ -205,13 +205,16 @@ protected:
   bool branch(union cbitunion<tshort> &node, vector<P*> &splitPoints, double _center[3], double _size);
 
   template <class P>
-  inline void countPointsAndQueue(vector<P*> &i_points, double center[8][3], double size, cbitoct &parent);
+  inline void countPointsAndQueue(vector<P*> &i_points, double center[8][3], double size, cbitoct &parent, double *pcenter);
 
   template <class P>
-  inline void countPointsAndQueue(P * const* pts, int n,  double center[8][3], double size, cbitoct &parent);
+  inline void countPointsAndQueue(P * const* pts, int n,  double center[8][3], double size, cbitoct &parent, double *pcenter);
 
 
   void childcenter(double *pcenter, double *ccenter, double size, unsigned char i); 
+
+  template <class P>
+inline unsigned char childIndex(const double *center, const P *point);
   
   
   unsigned long maxTargetPoints( cbitoct &node );
@@ -308,7 +311,7 @@ template <class P>
     // set up values
     root = new cbitoct();
 
-    countPointsAndQueue(pts, newcenter, sizeNew, *root);
+    countPointsAndQueue(pts, newcenter, sizeNew, *root, center);
   }
 
 template <class P>
@@ -322,32 +325,12 @@ template <class P>
       int i = 0;
       for (typename vector<P *>::iterator itr = splitPoints.begin(); 
           itr != splitPoints.end(); itr++) {
-        //tshort r[3];
         for (unsigned int iterator = 0; iterator < 3; iterator++) {
-//          points[i++].v = (*itr)[iterator];
-          points[i++] = (((*itr)[iterator] - _center[iterator])/_size ) * pow(2,15) ;
-        //  r[iterator] = (((*itr)[iterator] - _center[iterator])/_size ) * pow(2,15) ; 
-//         cout << (*itr)[iterator] << " at c " << _center[iterator] << " converted to " << (((*itr)[iterator] - _center[iterator])/_size ) * pow(2, 15) ;
+          points[i++] = (((*itr)[iterator] - _center[iterator])/_size ) * (1 << 15);//* pow(2,15) ;
         }
         for (unsigned int iterator = 3; iterator < POINTDIM; iterator++) {
           points[i++] = (*itr)[iterator];
-//          cout << "R " << (*itr)[iterator] << " " << (tshort)(*itr)[iterator]<< endl;
         }
-//      cout << "SPLIT " << i 
-/*        for (unsigned int iterator = 0; iterator < 3; iterator++) 
-          cout << _center[iterator] << " ";
-        cout << endl;
-        for (unsigned int iterator = 0; iterator < 3; iterator++) 
-          cout << (*itr)[iterator] << " ";
-        cout << endl;
-        for (unsigned int iterator = 0; iterator < 3; iterator++) 
-          cout <<  r[iterator] << " "; 
-        cout << endl;
-        for (unsigned int iterator = 0; iterator < 3; iterator++) 
-          cout << ((double)r[iterator]) * precision + _center[iterator] << " ";
-        cout << endl;
-        cout << endl;
-        */
       }
       return true;
     }  
@@ -362,29 +345,17 @@ template <class P>
       childcenter(_center, newcenter[i], _size, i);
     }
 
-    countPointsAndQueue(splitPoints, newcenter, sizeNew, node.node);
+    countPointsAndQueue(splitPoints, newcenter, sizeNew, node.node, _center);
     return false;
   }
   
 template <class P>
-  void compactTree::countPointsAndQueue(vector<P*> &i_points, double center[8][3], double size, cbitoct &parent) {
+  void compactTree::countPointsAndQueue(vector<P*> &i_points, double center[8][3], double size, cbitoct &parent, double *pcenter) {
     vector<P*> points[8];
     int n_children = 0;
-
-#ifdef _OPENMP 
-#pragma omp parallel for schedule(dynamic) 
-#endif
-    for (int j = 0; j < 8; j++) {
-      for (typename vector<P *>::iterator itr = i_points.begin(); itr != i_points.end(); itr++) {
-        if (fabs((*itr)[0] - center[j][0]) <= size) {
-          if (fabs((*itr)[1] - center[j][1]) <= size) {
-            if (fabs((*itr)[2] - center[j][2]) <= size) {
-              points[j].push_back(*itr);
-              continue;
-            }
-          }
-        }
-      }
+    
+    for (typename vector<P *>::iterator itr = i_points.begin(); itr != i_points.end(); itr++) {
+      points[childIndex<P>(pcenter, *itr)].push_back( *itr );
     }
 
     i_points.clear();
@@ -413,22 +384,12 @@ template <class P>
   }
 
   template <class P>
-  void compactTree::countPointsAndQueue(P * const* pts, int n,  double center[8][3], double size, cbitoct &parent) {
+  void compactTree::countPointsAndQueue(P * const* pts, int n,  double center[8][3], double size, cbitoct &parent, double *pcenter) {
     vector<const P*> points[8];
     int n_children = 0;
-#ifdef _OPENMP 
-#pragma omp parallel for schedule(dynamic) 
-#endif
-    for (int j = 0; j < 8; j++) {
-      for (int i = 0; i < n; i++) {
-        if (fabs(pts[i][0] - center[j][0]) <= size) {
-          if (fabs(pts[i][1] - center[j][1]) <= size) {
-            if (fabs(pts[i][2] - center[j][2]) <= size) {
-              points[j].push_back( pts[i] );
-            }
-          }
-        } 
-      }
+    
+    for (int i = 0; i < n; i++) {
+      points[childIndex<P>(pcenter, pts[i])].push_back( pts[i] );
     }
     for (int j = 0; j < 8; j++) {
       // if non-empty set valid flag for this child
@@ -501,7 +462,7 @@ template <class P>
     }
 //    vs = vs/2.0;
 //    double precision = vs/ pow(2, sizeof(tshort)*8-1);
-    precision = vs/ pow(2, 15);
+    precision = vs/ (1 << 15); //pow(2, 15);
     // vs is the real voxelsize
     cout << "real voxelsize is " << vs << endl;
     cout << "precision is now " << precision << endl;
@@ -516,6 +477,11 @@ template <class P>
     // set up values
     root = new cbitoct();
 
-    countPointsAndQueue(pts, n, newcenter, sizeNew, *root);
+    countPointsAndQueue(pts, n, newcenter, sizeNew, *root, center);
   } 
+
+template <class P>
+inline unsigned char compactTree::childIndex(const double *center, const P *point) {
+  return  (point[0] > center[0] ) | ((point[1] > center[1] ) << 1) | ((point[2] > center[2] ) << 2) ;
+}
 #endif

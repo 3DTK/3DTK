@@ -58,11 +58,17 @@ int ScanIO_uos::readScans(int start, int end, string &dir, int maxDist, int mind
 
   // read 3D scan
   if (!pose_in.good() && !scan_in.good()) return -1; // no more files in the directory
-  if (!pose_in.good()) { cerr << "ERROR: Missing file " << poseFileName << endl; exit(1); }
+  if (!pose_in.good()) { 
+    cerr << "ERROR: Missing file " << poseFileName << endl; //exit(1); 
+    cerr << "using default pose 0,0,0 !!!" << endl;
+    for (unsigned int i = 0; i < 6; euler[i++] = 0.0);
+  } else {
+    for (unsigned int i = 0; i < 6; pose_in >> euler[i++]);
+  }
+
   if (!scan_in.good()) { cerr << "ERROR: Missing file " << scanFileName << endl; exit(1); }
   cout << "Processing Scan " << scanFileName;
   
-  for (unsigned int i = 0; i < 6; pose_in >> euler[i++]);
 
   cout << " @ pose (" << euler[0] << "," << euler[1] << "," << euler[2]
 	  << "," << euler[3] << "," << euler[4] << ","  << euler[5] << ")" << endl;

@@ -485,14 +485,14 @@ void compactTree::childcenter(double *pcenter, double *ccenter, double size, uns
       ccenter[2] = pcenter[2] - size / 2.0;
       break;
     case 3:
-      ccenter[0] = pcenter[0] - size / 2.0;
-      ccenter[1] = pcenter[1] - size / 2.0;
-      ccenter[2] = pcenter[2] + size / 2.0;
-      break;
-    case 4:
       ccenter[0] = pcenter[0] + size / 2.0;
       ccenter[1] = pcenter[1] + size / 2.0;
       ccenter[2] = pcenter[2] - size / 2.0;
+      break;
+    case 4:
+      ccenter[0] = pcenter[0] - size / 2.0;
+      ccenter[1] = pcenter[1] - size / 2.0;
+      ccenter[2] = pcenter[2] + size / 2.0;
       break;
     case 5:
       ccenter[0] = pcenter[0] + size / 2.0;
