@@ -828,7 +828,7 @@ void CallBackIdleFunc(void)
    systemcall = "rm " + filename + " " + jpgname;	
    system(systemcall.c_str());
    cout << systemcall << endl;
-  // for f in *ppm ; do convert -quality 100 $f `basename $f ppm`jpg; done 
+  // for f in *ppm ; do convert -quality 100 -type TrueColor $f `basename $f ppm`jpg; done 
    */
    }
     
