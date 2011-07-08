@@ -349,7 +349,8 @@ void usage(char* prog)
     << bold << "  -T, --type" << endl << normal
 	  << "         use type values for coloring point clouds" << endl
 	  << "         only works when using octree display" << endl
-    
+    << bold << "  -c, --color" << endl << normal
+	  << "         use color RGB values for coloring point clouds" << endl
     << bold << "  --saveOct" << endl << normal
 	  << "         stores all used scans as octrees in the given directory" << endl
 	  << "         All reflectivity/amplitude/deviation/type settings are stored as well." << endl
