@@ -496,7 +496,7 @@ static inline unsigned long GetCurrentTimeInMilliSec()
  */
 inline int rand(int rnd)
 {
-  return (int) ((float)rnd * std::rand() / (RAND_MAX + 1.0));
+  return (int) ((double)rnd * (double)std::rand() / (RAND_MAX + 1.0));
 }
 
 /**
