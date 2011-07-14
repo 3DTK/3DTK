@@ -817,19 +817,18 @@ void CallBackIdleFunc(void)
     glutPostRedisplay();
 
     if(save_animation){
-	 string filename = scandir + "animframe" + to_string(frameNr,4) + ".ppm";
-	 /*
-   string jpgname = scandir + "animframe" + to_string(frameNr,4) + ".jpg";
-	 cout << filename << endl;
+	 string filename = scandir + "animframe" + to_string(frameNr,5) + ".ppm";
+	 cout << "write " << filename << endl;
 	 glDumpWindowPPM(filename.c_str(),0);
-   string systemcall = "convert -quality 100 " + filename + " " + jpgname;	
-   cout << systemcall << endl;
-   system(systemcall.c_str());
-   systemcall = "rm " + filename + " " + jpgname;	
-   system(systemcall.c_str());
-   cout << systemcall << endl;
+
+	 string jpgname = scandir + "animframe" + to_string(frameNr,5) + ".jpg";
+	 string systemcall = "convert -quality 100 -type TrueColor " + filename + " " + jpgname;	
+	 //	 cout << systemcall << endl;
+	 system(systemcall.c_str());
+	 systemcall = "rm " + filename;
+	 system(systemcall.c_str());
+	 //	 cout << systemcall << endl;
   // for f in *ppm ; do convert -quality 100 -type TrueColor $f `basename $f ppm`jpg; done 
-   */
    }
     
   }
@@ -878,8 +877,8 @@ void CallBackIdleFunc(void)
 
       //save the animation
       if(save_animation){
-        string filename = scandir + "animframe" + to_string(path_iterator,4) + ".ppm";
-	      string jpgname = scandir + "animframe" + to_string(path_iterator,4) + ".jpg";
+        string filename = scandir + "animframe" + to_string(path_iterator,5) + ".ppm";
+	   string jpgname = scandir + "animframe" + to_string(path_iterator,5) + ".jpg";
         cout << "written " << filename << " of " << path_vectorX.size() << " files" << endl;
         glWriteImagePPM(filename.c_str(), factor, 0);
         string systemcall = "convert -quality 100 " + filename + " " + jpgname;	
