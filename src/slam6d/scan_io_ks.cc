@@ -50,7 +50,7 @@ int ScanIO_ks::readScans(int start, int end, string &dir, int maxDist, int mindi
   int my_fileNr = fileCounter;
   
   if (end > -1 && fileCounter > end) return -1; // 'nuf read
-  scanFileName = dir + "Color_ScanPos" + to_string(fileCounter,3) + " - Scan001.txt";
+  scanFileName = dir + "ScanPos" + to_string(fileCounter,3) + " - Scan001.txt";
   poseFileName = dir + "scan" + to_string(fileCounter,3) + ".pose";
 
   scan_in.open(scanFileName.c_str());
@@ -62,12 +62,24 @@ int ScanIO_ks::readScans(int start, int end, string &dir, int maxDist, int mindi
   if (!pose_in.good()) { cerr << "ERROR: Missing file " << poseFileName << endl; exit(1); }
   if (!scan_in.good()) { cerr << "ERROR: Missing file " << scanFileName << endl; exit(1); }
   cout << "Processing Scan " << scanFileName;
-  
+
   for (unsigned int i = 0; i < 6; pose_in >> euler[i++]);
+
+  // CAD map -> pose correction:
+
+  double tmp;
+  tmp = euler[0];
+  euler[0] = -euler[2];
+  euler[2] = tmp;
+  
+  euler[0] *= 100;
+  euler[1] *= 100;
+  euler[2] *= 100;
+
 
   cout << " @ pose (" << euler[0] << "," << euler[1] << "," << euler[2]
 	  << "," << euler[3] << "," << euler[4] << ","  << euler[5] << ")" << endl;
-
+                                                            
   // convert angles from deg to rad
   for (unsigned int i = 3; i <= 5; i++) euler[i] = rad(euler[i]);
   
@@ -76,32 +88,29 @@ int ScanIO_ks::readScans(int start, int end, string &dir, int maxDist, int mindi
   scan_in.getline(dummy, 255);
 
   // format: X[m] Y[m] Z[m] R[0..1] G[0..1] B[0..1] Amplitude[0..1] Reflectance[]
-  float r, g, b;
   while (scan_in.good()) {
     Point p;
     try {
 	 scan_in >> p.x;
 	 scan_in >> p.z;
 	 scan_in >> p.y;
-	 
+	 /*	 
 	 scan_in >> r;
 	 scan_in >> g;
 	 scan_in >> b;
 	 scan_in >> p.amplitude;
 	 scan_in >> p.reflectance;
+	 */
 
-	 // that's REALLY not the best way to deal with a fixed offset... well, quick hack! ;-)
-	 // seems to hold for all of their scans
+	 // const offset (heaven only knows why)
 	 p.x -= 70000.0;
 	 p.z -= 20000.0;
-	 
+
+	 // m -> cm
 	 p.x *= 100.0;
 	 p.y *= 100.0;
 	 p.z *= 100.0;
 
-	 p.rgb[0] = (char)(r * 255.0);
-	 p.rgb[1] = (char)(g * 255.0);
-	 p.rgb[2] = (char)(b * 255.0);
     } catch (...) {
 	 break;
     }
