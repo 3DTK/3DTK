@@ -26,6 +26,7 @@ GLUI_Spinner    *image_spinner;
 /** GLUI_Spinner for the depth to select groups of points */
 GLUI_Spinner    *depth_spinner;
 GLUI_Spinner    *brushsize_spinner;
+GLUI_Spinner    *frame_spinner;
 
 int window_id_menu1, ///< menue window ids
     window_id_menu2; ///< menue window ids
@@ -63,6 +64,8 @@ GLUI_Panel      *nav_panel;
 GLUI_Panel      *mode_panel;
 /** Pointer to the panels */
 GLUI_Panel      *settings_panel;
+/** Pointer to the panels */
+GLUI_Panel      *advanced_panel;
 /** Pointer to the button */
 GLUI_Button     *button1;
 /** Pointer to the edit text box*/
@@ -352,7 +355,26 @@ GLUI_SPINNER_INT, &factor);
   
  
   glui1->add_separator();
-  
+  /**** Advanced panel ******/
+  if (advanced_controls) {
+    advanced_panel = glui1->add_rollout("Advanced :", false );
+    advanced_panel->set_alignment( GLUI_ALIGN_LEFT );
+
+    //  glui1->add_edittext_to_panel(advanced_panel,"Frame #: ",GLUI_EDITTEXT_TEXT, current_frame)->set_alignment( GLUI_ALIGN_LEFT );
+    frame_spinner = glui1->add_spinner_to_panel(advanced_panel, "Frame #:   ",
+        GLUI_SPINNER_INT, &current_frame);
+    frame_spinner->set_int_limits( 0, MetaMatrix[0].size()-1 );
+    frame_spinner->set_speed( 10 );
+    frame_spinner->set_alignment(GLUI_ALIGN_RIGHT);
+
+    frame_spinner = glui1->add_spinner_to_panel(advanced_panel, "FPS :   ",
+        GLUI_SPINNER_FLOAT, &idealfps);
+    frame_spinner->set_int_limits( 0, 100 );
+    frame_spinner->set_speed( 1 );
+    frame_spinner->set_alignment(GLUI_ALIGN_RIGHT);
+
+    glui1->add_separator();
+  }
 
   /****** A 'quit' button *****/
   glui1->add_button( "Quit", 0,(GLUI_Update_CB)exit )->set_alignment( GLUI_ALIGN_CENTER );

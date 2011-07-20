@@ -75,10 +75,9 @@ void DrawPoints(GLenum mode)
   } else {
 
     if(mode == GL_SELECT){
-  cout << "SELECT MODEe " << selected_points[0].size() << endl;
       // select points mode
       // ------------------
-  GLuint name = 0;
+      GLuint name = 0;
       for(int iterator = (int)octpts.size()-1; iterator >= 0; iterator--) {
         glPushMatrix();
         glMultMatrixd(MetaMatrix[iterator].back());
@@ -98,7 +97,6 @@ void DrawPoints(GLenum mode)
         glPopMatrix();
       }
 
-  cout << "SELECT MODEe done" << endl;
     } else {
 
       // draw point is normal mode
@@ -122,7 +120,8 @@ void DrawPoints(GLenum mode)
         	   //if (iterator == 0) glColor4d(0.5, 1.0, 0.5, 1.0);
         	   if (iterator == 0) glColor4d(139.0/255, 69.0/255, 19.0/255, 1.0);
 
-        glMultMatrixd(MetaMatrix[iterator].back());
+      //  glMultMatrixd(MetaMatrix[iterator].back());
+        glMultMatrixd(MetaMatrix[iterator][current_frame]);
 
 #ifdef USE_GL_POINTS
          //cout << endl << endl;  calcRay(570, 266, 1.0, 40000.0);
@@ -482,7 +481,8 @@ void DisplayItFunc(GLenum mode)
         }
         pose = MetaMatrix[i][frameNr];
       } else {
-        pose = MetaMatrix[i].back();
+        //pose = MetaMatrix[i].back();
+        pose = MetaMatrix[i][current_frame];
       }
       if(showTopView) {
         glVertex3f(pose[12], 2000, pose[14]);

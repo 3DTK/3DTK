@@ -13,7 +13,7 @@ _show()
     _split_longopt
 
     # options list
-    opts="-e -s -f --format -F --fps -m --max -M --min -O --octree -r --reduce -R --reflectance --reflectivity -a --amplitude -d --deviation -h --height -T --type --saveOct --loadOct"
+    opts="-e -s -f --format -F --fps -m --max -M --min -O --octree -r --reduce -R --reflectance --reflectivity -a --amplitude -d --deviation -h --height -T --type --saveOct --loadOct --advanced"
     filetype="uos uos_map uos_rgb uos_frames uos_map_frames old rts rts_map ifp riegl_txt riegl_rgb riegl_bin zahn ply wrl xyz zuf iais front x3d rxp ais"
 
     case $prev in
