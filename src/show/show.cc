@@ -45,7 +45,7 @@ using std::exception;
 #include "slam6d/point_type.h"
 #include "show/display.h"
 
-// #define USE_COMPACT_TREE 1 // attention: makes bad things if defined! ;-)
+//#define USE_COMPACT_TREE 1 // attention: makes bad things if defined! ;-)
 
 /**
  * This vector contains the pointer to a vertex array for
@@ -203,6 +203,7 @@ int START_Y              = 0;
 int START_WIDTH          = 720;
 int START_HEIGHT         = 576;
 GLdouble aspect          = (double)START_WIDTH/(double)START_HEIGHT;          // Current aspect ratio
+bool advanced_controls = false;
 
 // Defines for Point Semantic
 #define TYPE_UNKNOWN         0x0000
@@ -241,7 +242,7 @@ int factor = 1;
 /**
  * program tries to have this framerate
  */
-double idealfps = 20.0;       
+float idealfps = 20.0;       
 /**
  * value of the listBox fo Color Value and Colormap
  */
@@ -271,6 +272,7 @@ int selection_depth = 1;
 int brush_size = 0;
 char *selection_file_name;
 
+int current_frame = 0;
 #include "show_menu.cc"
 #include "show_animate.cc"
 #include "show_gl.cc"
@@ -381,7 +383,7 @@ void usage(char* prog)
  * @return 0, if the parsing was successful, 1 otherwise 
  */
 int parseArgs(int argc,char **argv, string &dir, int& start, int& end, int& maxDist, int& minDist, 
-              double &red, bool &readInitial, int &octree, PointType &ptype, double &fps, string &loadObj, bool &loadOct, bool &saveOct, bool &origin, reader_type &type)
+              double &red, bool &readInitial, int &octree, PointType &ptype, float &fps, string &loadObj, bool &loadOct, bool &saveOct, bool &origin, reader_type &type)
 {
   unsigned int types = PointType::USE_NONE;
   start   = 0;
@@ -413,6 +415,7 @@ int parseArgs(int argc,char **argv, string &dir, int& start, int& end, int& maxD
     { "loadObj",         required_argument,   0,  'l' },
     { "saveOct",         no_argument,         0,  '0' },
     { "loadOct",         no_argument,         0,  '1' },
+    { "advanced",        no_argument,         0,  '2' },
     { 0,           0,   0,   0}                    // needed, cf. getopt.h
   };
 
@@ -482,6 +485,9 @@ int parseArgs(int argc,char **argv, string &dir, int& start, int& end, int& maxD
      break;
    case 'l':
      loadObj = optarg;
+     break;
+   case '2':
+     advanced_controls = true; 
      break;
    default:
      abort ();
@@ -604,6 +610,7 @@ void readFrames(string dir, int start, int end, bool readInitial, reader_type &t
     frame_in.close();
     frame_in.clear();
     cout << MetaMatrix.back().size() << " done." << endl;
+    current_frame = MetaMatrix.back().size() - 1;
   }
   if (MetaMatrix.size() == 0) {
     cerr << "ERROR: Missing or empty directory: " << dir << endl << endl;
@@ -760,8 +767,6 @@ int main(int argc, char **argv){
   /***************/
   glutInit(&argc,argv);
   
-  initScreenWindow();
-  newMenu();
 
   if (invert)
     glClearColor(0.0, 0.0, 0.0, 0.0);
@@ -902,6 +907,8 @@ int main(int argc, char **argv){
 
   selected_points = new set<sfloat*>[octpts.size()];
 
+  initScreenWindow();
+  newMenu();
   glutMainLoop();
 
   delete [] path_file_name;
