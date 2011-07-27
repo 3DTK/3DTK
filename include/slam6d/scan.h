@@ -30,6 +30,8 @@ using std::stringstream;
 #include "slam6d/searchTree.h"
 #include "slam6d/kdcache.h"
 #include "slam6d/globals.icc"
+#include "slam6d/scan_io.h"
+
 
 enum reader_type {
   UOS, UOS_MAP, UOS_FRAMES, UOS_MAP_FRAMES, UOS_RGB, OLD, RTS, RTS_MAP, RIEGL_TXT, RIEGL_PROJECT, RIEGL_RGB, RIEGL_BIN, IFP, ZAHN, PLY, WRL, XYZ, ZUF, ASC, IAIS, FRONT, X3D, RXP, KIT, AIS, OCT, TXYZR, XYZR, XYZ_RGB, KS, KS_RGB };
@@ -38,9 +40,6 @@ enum nns_type {
   simpleKD, cachedKD, ANNTree, BOCTree //, NaboKD
 };
 
-
-// just some prototypes
-class ScanIO;
 
 /**
  * @brief 3D scan representation and implementation of scan matching
@@ -169,6 +168,26 @@ public:
   inline double** get_org_points_red() const;
 
 private:
+
+
+  class scanIOwrapper : public ScanIO {
+    public:
+
+    scanIOwrapper(reader_type type );
+    ~scanIOwrapper();
+
+    virtual int readScans(int start, int end, string &dir, int maxDist, int mindist,
+				    double *euler, vector<Point> &ptss); 
+    private:
+    ScanIO *my_ScanIO;
+
+#ifdef _MSC_VER
+    HINSTANCE hinstLib;
+#else
+    void *ptrScanIO;
+#endif
+
+  };
   
   /**
    * The pose of the scan
