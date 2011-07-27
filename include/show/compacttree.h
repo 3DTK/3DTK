@@ -186,6 +186,7 @@ public:
 
   unsigned long maxTargetPoints();
 
+  inline void getCenter(double center[3]) const;
 
   void serialize(std::string filename);
 protected:
@@ -492,4 +493,10 @@ inline unsigned char compactTree::childIndex(const double *center, const P *poin
   return  (point[0] >= center[0] ) | ((point[1] >= center[1] ) << 1) | ((point[2] >= center[2] ) << 2) ;
 //  return  (point[0] > center[0] ) | ((point[1] > center[1] ) << 1) | ((point[2] > center[2] ) << 2) ;
 }
+  
+  void compactTree::getCenter(double _center[3]) const {
+    _center[0] = center[0];
+    _center[1] = center[1];
+    _center[2] = center[2];
+  }
 #endif
