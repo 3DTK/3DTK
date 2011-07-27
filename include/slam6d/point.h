@@ -73,6 +73,19 @@ public:
     return res; 
   };
   
+  inline Point& operator-=(const Point &p) {
+    x -= p.x;
+    y -= p.y;
+    z -= p.z;
+    return *this; 
+  };
+  inline Point& operator+=(const Point &p) {
+    x += p.x;
+    y += p.y;
+    z += p.z;
+    return *this; 
+  };
+  
 
 
   inline void transform(const double alignxf[16]);

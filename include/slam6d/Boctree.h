@@ -470,6 +470,12 @@ public:
 
     return pointtype;
   }
+  
+  void getCenter(double _center[3]) const {
+    _center[0] = center[0];
+    _center[1] = center[1];
+    _center[2] = center[2];
+  }
 
 protected:
   
