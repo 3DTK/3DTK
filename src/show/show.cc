@@ -321,8 +321,11 @@ void usage(char* prog)
 	  << "         use randomized octree based point reduction (pts per voxel=<NR>)" << endl
 	  << "         requires " << bold << "-r" << normal <<" or " << bold << "--reduce" << endl
 	  << endl
-	  << bold << "  -0" << normal << " , " << bold << "--origin" << normal << "" << endl
-	  << "         sets the starting and reset position to the position of the first scan" << endl
+	  << bold << "  -o" << normal << " NR, " << bold << "--origin=" << normal << "NR (optional)" << endl
+	  << "         sets the starting and reset position to: " << endl
+	  << "           0 = the origin of the coordinate system (default)" << endl
+	  << "           1 = the position of the first scan (default if --origin is in argument list)" << endl
+	  << "           2 = the center of the first scan" << endl
 	  << endl
 	  << bold << "  -r" << normal << " NR, " << bold << "--reduce=" << normal << "NR" << endl
 	  << "         turns on octree based point reduction (voxel size=<NR>)" << endl
@@ -383,7 +386,7 @@ void usage(char* prog)
  * @return 0, if the parsing was successful, 1 otherwise 
  */
 int parseArgs(int argc,char **argv, string &dir, int& start, int& end, int& maxDist, int& minDist, 
-              double &red, bool &readInitial, int &octree, PointType &ptype, float &fps, string &loadObj, bool &loadOct, bool &saveOct, bool &origin, reader_type &type)
+              double &red, bool &readInitial, int &octree, PointType &ptype, float &fps, string &loadObj, bool &loadOct, bool &saveOct, int &origin, reader_type &type)
 {
   unsigned int types = PointType::USE_NONE;
   start   = 0;
@@ -396,7 +399,7 @@ int parseArgs(int argc,char **argv, string &dir, int& start, int& end, int& maxD
 
   cout << endl;
   static struct option longopts[] = {
-    { "origin",          no_argument,         0,  'o' },
+    { "origin",          optional_argument,   0,  'o' },
     { "format",          required_argument,   0,  'f' },  
     { "fps",             required_argument,   0,  'F' },  
     { "start",           required_argument,   0,  's' },
@@ -419,7 +422,7 @@ int parseArgs(int argc,char **argv, string &dir, int& start, int& end, int& maxD
     { 0,           0,   0,   0}                    // needed, cf. getopt.h
   };
 
-  while ((c = getopt_long(argc, argv,"F:f:s:e:r:m:M:O:l:wtRadhToc", longopts, NULL)) != -1)
+  while ((c = getopt_long(argc, argv,"F:f:s:e:r:m:M:O:o:l:wtRadhTc", longopts, NULL)) != -1)
     switch (c)
 	 {
 	 case 's':
@@ -443,9 +446,13 @@ int parseArgs(int argc,char **argv, string &dir, int& start, int& end, int& maxD
 	 case 't':
 	   readInitial = true;
 	   break;
-	 case 'O':
-	   octree = atoi(optarg);
-	   break;
+   case 'O':
+     if (optarg) {
+       octree = atoi(optarg);
+     } else {
+       octree = 1;
+     }
+     break;
 	 case 'f':
      if (!Scan::toType(optarg, type))
        abort ();
@@ -475,7 +482,11 @@ int parseArgs(int argc,char **argv, string &dir, int& start, int& end, int& maxD
      fps = atof(optarg);
      break;
    case 'o':
-     origin = false;
+     if (optarg) {
+       origin = atoi(optarg);
+     } else {
+       origin = 1;
+     }
      break;
    case '0':
      saveOct = true;
@@ -509,8 +520,8 @@ int parseArgs(int argc,char **argv, string &dir, int& start, int& end, int& maxD
   return 0;
 }
 
-void setResetView(bool origin) {
-  if (!origin) {
+void setResetView(int origin) {
+  if (origin == 1) {
     double *transmat = MetaMatrix[0].back();
     cout << transmat << endl;
 
@@ -518,13 +529,26 @@ void setResetView(bool origin) {
     RVY = -transmat[13];
     RVZ = -transmat[14];
     Matrix4ToQuat(transmat, Rquat);
-  X = RVX;
-  Y = RVY;
-  Z = RVZ;
-  quat[0] = Rquat[0];
-  quat[1] = Rquat[1];
-  quat[2] = Rquat[2];
-  quat[3] = Rquat[3];
+    X = RVX;
+    Y = RVY;
+    Z = RVZ;
+    quat[0] = Rquat[0];
+    quat[1] = Rquat[1];
+    quat[2] = Rquat[2];
+    quat[3] = Rquat[3];
+  } else if (origin == 2) {
+    double center[3];
+#ifdef USE_COMPACT_TREE
+    ((compactTree*)octpts[0])->getCenter(center);
+#else
+    ((Show_BOctTree<sfloat>*)octpts[0])->getCenter(center);
+#endif
+    RVX = -center[0];
+    RVY = -center[1];
+    RVZ = -center[2];
+    X = RVX;
+    Y = RVY;
+    Z = RVZ;
   }
 }
 
@@ -727,7 +751,7 @@ int main(int argc, char **argv){
   bool loadOct = false;
   bool saveOct = false;
   string loadObj;
-  bool origin = true;
+  int origin = 0;
 
   pose_file_name = new char[sizeof(GLUI_String)];
   path_file_name = new char[sizeof(GLUI_String)];
@@ -778,7 +802,6 @@ int main(int argc, char **argv){
   // read frames first, to get notifyied of missing frames before all scans are read in
   readFrames(dir, start, end, readInitial, type);
 
-  setResetView(origin);
 
   // Get Scans
   if (!loadOct) {
@@ -786,6 +809,7 @@ int main(int argc, char **argv){
   } else {
     cout << "Skipping files.." << endl;
   }
+ 
   
   int end_reduction = (int)Scan::allScans.size();
   #ifdef _OPENMP
@@ -799,29 +823,6 @@ int main(int argc, char **argv){
       Scan::allScans[iterator]->calcReducedPoints(red, octree);
     } // no copying necessary for show!
   }
-
-/*
-  cout << "Exporting the trajectory to \"trajectory.dat\"." << endl;
-  ofstream traj("trajectory.dat");
-  double *test;
-  traj << "# corrected pose (x,y,z), original pose (x,y,z)" << endl;
-  for(unsigned int i = 0; i<Scan::allScans.size(); i++){
-    if(frameNr > -1 && frameNr < (int)MetaMatrix[1].size()) {
-      if (MetaAlgoType[i][frameNr] == Scan::INVALID) continue;
-      test = MetaMatrix[i][frameNr];
-    } else {
-      test = MetaMatrix[i].back();
-    }
-    //glVertex3f(test[12], test[13] + 500, test[14]);
-    traj << test[12] << " " << test[13] << " " << (fabs(test[14]) < 0.0001 ? test[14]:-1.0*test[14])  << " "
-      << Scan::allScans[i]->get_rPos()[0] << " "
-      << Scan::allScans[i]->get_rPos()[1] << " "
-      << Scan::allScans[i]->get_rPos()[2] 
-      << endl;
-  }
-  traj.close();
-  traj.clear();
-*/
 
   cm = new ScanColorManager(4096, pointtype);
   
@@ -906,6 +907,9 @@ int main(int argc, char **argv){
   resetMinMax(0);
 
   selected_points = new set<sfloat*>[octpts.size()];
+  
+  // sets (and computes if necessary) the pose that is used for the reset button
+  setResetView(origin);
 
   initScreenWindow();
   newMenu();
