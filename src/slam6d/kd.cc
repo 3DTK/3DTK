@@ -21,7 +21,7 @@ using std::swap;
 #include <cstring>
 
 // KDtree class static variables
-KDParams KDtree::params[4];
+KDParams KDtree::params[MAX_OPENMP_NUM_THREADS];
 
 /**
  * Constructor

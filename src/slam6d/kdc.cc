@@ -23,7 +23,7 @@ using std::swap;
 #define CENTROID
 
 // KDtree_cache class static variables
-KDCacheItem KDtree_cache::cacheItem[4];
+KDCacheItem KDtree_cache::cacheItem[MAX_OPENMP_NUM_THREADS];
 
 /**
  * Constructor
