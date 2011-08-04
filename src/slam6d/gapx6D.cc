@@ -379,7 +379,7 @@ double gapx6D::doGraphSlam6D(Graph gr, vector <Scan *> allScans, int nrIt)
     // Get all point pairs after ICP
     int end_loop = gr.getNrLinks(); 
 #ifdef _OPENMP
-    omp_set_num_threads(OPENMP_NUM_THREADS);
+    omp_set_num_threads(4);
 #pragma omp parallel for schedule(dynamic)
 #endif
 
