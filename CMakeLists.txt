@@ -153,9 +153,14 @@ ELSE(WITH_SIFT)
 ENDIF(WITH_SIFT)
 
 
+
 ## Multiple Cores 
-#INCLUDE(CountProcessors)
-#SET(NUMBER_OF_CPUS "${PROCESSOR_COUNT}" CACHE STRING "The number of processors to use (default: ${PROCESSOR_COUNT})" )
+IF(APPLE)
+  SET(PROCESSOR_COUNT 2)
+ELSE(APPLE)
+  INCLUDE(CountProcessors)
+  SET(NUMBER_OF_CPUS "${PROCESSOR_COUNT}" CACHE STRING "The number of processors to use (default: ${PROCESSOR_COUNT})" )
+ENDIF(APPLE)
 
 # OPEN
 FIND_PACKAGE(OpenMP)
