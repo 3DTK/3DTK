@@ -154,8 +154,8 @@ ENDIF(WITH_SIFT)
 
 
 ## Multiple Cores 
-INCLUDE(CountProcessors)
-SET(NUMBER_OF_CPUS "${PROCESSOR_COUNT}" CACHE STRING "The number of processors to use (default: ${PROCESSOR_COUNT})" )
+#INCLUDE(CountProcessors)
+#SET(NUMBER_OF_CPUS "${PROCESSOR_COUNT}" CACHE STRING "The number of processors to use (default: ${PROCESSOR_COUNT})" )
 
 # OPEN
 FIND_PACKAGE(OpenMP)

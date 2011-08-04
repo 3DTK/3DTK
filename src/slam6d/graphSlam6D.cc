@@ -84,7 +84,7 @@ void graphSlam6D::matchGraph6Dautomatic(vector <Scan *> allScans, int nrIt, int 
     gr = new Graph(0, false);
     int j, maxj = (int)allScans.size();
 #ifdef _OPENMP
-    omp_set_num_threads(OPENMP_NUM_THREADS);
+    omp_set_num_threads(4);
 #pragma omp parallel for schedule(dynamic)
 #endif
     for (j = 0; j <  maxj; j++) {
@@ -131,7 +131,7 @@ Graph *graphSlam6D::computeGraph6Dautomatic(vector <Scan *> allScans, int clpair
   Graph *gr = new Graph(0, false);
   int j, maxj = (int)allScans.size();
 #ifdef _OPENMP
-  omp_set_num_threads(OPENMP_NUM_THREADS);
+  omp_set_num_threads(4);
 #pragma omp parallel for schedule(dynamic)
 #endif
   for (j = 0; j <  maxj; j++) {

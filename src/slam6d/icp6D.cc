@@ -113,26 +113,26 @@ int icp6D::match(Scan* PreviousScan, Scan* CurrentScan)
     // for Robotic 3D Mapping. In Proceedings of the 3rd
     // European Conference on Mobile Robots (ECMR '07),
     // Freiburg, Germany, September 2007
-    omp_set_num_threads(OPENMP_NUM_THREADS);
+    omp_set_num_threads(4);
 
     int max = (int)CurrentScan->get_points_red_size();
-    int step = max / OPENMP_NUM_THREADS;
+    int step = max / 4;
 
-    vector<PtPair> pairs[OPENMP_NUM_THREADS];
-    double sum[OPENMP_NUM_THREADS];
-    double centroid_m[OPENMP_NUM_THREADS][3];
-    double centroid_d[OPENMP_NUM_THREADS][3];
-    double Si[OPENMP_NUM_THREADS][9];
-    unsigned int n[OPENMP_NUM_THREADS];
+    vector<PtPair> pairs[4];
+    double sum[4];
+    double centroid_m[4][3];
+    double centroid_d[4][3];
+    double Si[4][9];
+    unsigned int n[4];
 
-    for (int i = 0; i < OPENMP_NUM_THREADS; i++) {
+    for (int i = 0; i < 4; i++) {
 	 sum[i] = centroid_m[i][0] = centroid_m[i][1] = centroid_m[i][2] = 0.0;
 	 centroid_d[i][0] = centroid_d[i][1] = centroid_d[i][2] = 0.0;
 	 Si[i][0] = Si[i][1] = Si[i][2] = Si[i][3] = Si[i][4] = Si[i][5] = Si[i][6] = Si[i][7] = Si[i][8] = 0.0;
 	 n[i] = 0;
     }
 
-    //   for (int thread_num = 0; thread_num < OPENMP_NUM_THREADS; thread_num++) {
+    //   for (int thread_num = 0; thread_num < 4; thread_num++) {
 #pragma omp parallel 
     {
 	 int thread_num = omp_get_thread_num();
@@ -184,17 +184,17 @@ int icp6D::match(Scan* PreviousScan, Scan* CurrentScan)
   
     // do we have enough point pairs?
     unsigned int pairssize = 0;
-    for (int i = 0; i < OPENMP_NUM_THREADS; i++) {
+    for (int i = 0; i < 4; i++) {
 	 pairssize += n[i];
     }
     if (pairssize > 3) {
 	 if ((my_icp6Dminimizer->getAlgorithmID() == 1) ||
 		  (my_icp6Dminimizer->getAlgorithmID() == 2) ) {
-	   ret = my_icp6Dminimizer->Point_Point_Align_Parallel(OPENMP_NUM_THREADS,
+	   ret = my_icp6Dminimizer->Point_Point_Align_Parallel(4,
 												n, sum, centroid_d, centroid_m, Si, 
 												alignxf);
 	 } else if (my_icp6Dminimizer->getAlgorithmID() == 6) {
-	   ret = my_icp6Dminimizer->Point_Point_Align_Parallel(OPENMP_NUM_THREADS,
+	   ret = my_icp6Dminimizer->Point_Point_Align_Parallel(4,
 												n, sum, centroid_d, centroid_m, 
 												pairs,
 												alignxf);
@@ -272,17 +272,17 @@ double icp6D::Point_Point_Error(Scan* PreviousScan, Scan* CurrentScan, double ma
   unsigned int nr_ppairs = 0;
 
 #ifdef _OPENMP
-    omp_set_num_threads(OPENMP_NUM_THREADS);
+  omp_set_num_threads(4);
 
     int max = (int)CurrentScan->get_points_red_size();
-    int step = max / OPENMP_NUM_THREADS;
+    int step = max / 4;
 
-    vector<PtPair> pairs[OPENMP_NUM_THREADS];
-    double sum[OPENMP_NUM_THREADS];
-    double centroid_m[OPENMP_NUM_THREADS][3];
-    double centroid_d[OPENMP_NUM_THREADS][3];
+    vector<PtPair> pairs[4];
+    double sum[4];
+    double centroid_m[4][3];
+    double centroid_d[4][3];
 
-    for (int i = 0; i < OPENMP_NUM_THREADS; i++) {
+    for (int i = 0; i < 4; i++) {
       sum[i] = centroid_m[i][0] = centroid_m[i][1] = centroid_m[i][2] = 0.0;
       centroid_d[i][0] = centroid_d[i][1] = centroid_d[i][2] = 0.0;
     }
@@ -297,7 +297,7 @@ double icp6D::Point_Point_Error(Scan* PreviousScan, Scan* CurrentScan, double ma
 
     } 
 
-    for (unsigned int thread_num = 0; thread_num < OPENMP_NUM_THREADS; thread_num++) {
+    for (unsigned int thread_num = 0; thread_num < 4; thread_num++) {
       for (unsigned int i = 0; i < (unsigned int)pairs[thread_num].size(); i++) {
         error += sqr(pairs[thread_num][i].p1.x - pairs[thread_num][i].p2.x)
           + sqr(pairs[thread_num][i].p1.y - pairs[thread_num][i].p2.y)
