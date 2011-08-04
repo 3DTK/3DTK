@@ -119,20 +119,20 @@ double icp6D_APX::Point_Point_Align(const vector<PtPair>& Pairs, double *alignxf
 
 
 double icp6D_APX::Point_Point_Align_Parallel(const int openmp_num_threads, 
-									const unsigned int n[4],
-									const double sum[4], 
-									const double centroid_m[4][3],
-									const double centroid_d[4][3], 
-									const vector<PtPair> pairs[4],
+									const unsigned int n[OPENMP_NUM_THREADS],
+									const double sum[OPENMP_NUM_THREADS], 
+									const double centroid_m[OPENMP_NUM_THREADS][3],
+									const double centroid_d[OPENMP_NUM_THREADS][3], 
+									const vector<PtPair> pairs[OPENMP_NUM_THREADS],
 									double *alignxf)
                          
 {
 #ifdef _OPENMP
 
-  double At[4][3][3];
-  double Bt[4][3];
+  double At[OPENMP_NUM_THREADS][3][3];
+  double Bt[OPENMP_NUM_THREADS][3];
 
-  for (int j=0;j < 4; j++)
+  for (int j=0;j < OPENMP_NUM_THREADS; j++)
     for (int k = 0;k < 3; k++) {
 	 for (int l = 0; l < 3; l++)
 	   At[j][k][l] = 0.0;
@@ -208,7 +208,7 @@ double icp6D_APX::Point_Point_Align_Parallel(const int openmp_num_threads,
 	 }
   }
 
-  for (int j = 0;j < 4; j++)
+  for (int j = 0;j < OPENMP_NUM_THREADS; j++)
     for (int k = 0; k < 3; k++) {
 	 for (int l = 0; l < 3; l++)
 	   A[k][l] += At[j][k][l] ;
