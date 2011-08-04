@@ -734,7 +734,26 @@ void createDisplayLists(bool reduced)
  */
 
 int main(int argc, char **argv){
+
+  /***************/
+  /* init OpenGL */
+  /***************/
+  glutInit(&argc,argv);
   
+
+  //if (invert)
+  //glutInitWindowPosition(0,0);
+  //glutInitWindowSize(800, 600);
+  //glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH);
+  //glutCreateWindow("Show");
+
+  initScreenWindow();
+
+  glClearColor(0.0, 0.0, 0.0, 0.0);
+  //else
+    //    glClearColor(1.0, 1.0, 1.0, 1.0);
+ 
+
   cout << "(c) University of Osnabrueck, 2006 - 2007" << endl << endl
 	  << "Restricted Usage" << endl
 	  << "Don't use without permission" << endl;
@@ -742,6 +761,9 @@ int main(int argc, char **argv){
   if(argc <= 1){
     usage(argv[0]);
   }
+
+
+
   double red   = -1.0;
   int start = 0, end = -1, maxDist = -1, minDist = -1;
   string dir;
@@ -786,16 +808,7 @@ int main(int argc, char **argv){
   M4identity(view_rotate_button);
   obj_pos_button[0] = obj_pos_button[1] = obj_pos_button[2] = 0.0;
 
-  /***************/
-  /* init OpenGL */
-  /***************/
-  glutInit(&argc,argv);
-  
 
-  if (invert)
-    glClearColor(0.0, 0.0, 0.0, 0.0);
-  else
-    glClearColor(1.0, 1.0, 1.0, 1.0);
 
   scanNr = frameNr = -1;
 
@@ -911,7 +924,7 @@ int main(int argc, char **argv){
   // sets (and computes if necessary) the pose that is used for the reset button
   setResetView(origin);
 
-  initScreenWindow();
+  //initScreenWindow();
   newMenu();
   glutMainLoop();
 

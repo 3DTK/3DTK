@@ -80,6 +80,8 @@ int ScanIO_ks::readScans(int start, int end, string &dir, int maxDist, int mindi
   cout << " @ pose (" << euler[0] << "," << euler[1] << "," << euler[2]
 	  << "," << euler[3] << "," << euler[4] << ","  << euler[5] << ")" << endl;
                                                             
+
+                                                            
   // convert angles from deg to rad
   for (unsigned int i = 3; i <= 5; i++) euler[i] = rad(euler[i]);
   
@@ -120,6 +122,7 @@ int ScanIO_ks::readScans(int start, int end, string &dir, int maxDist, int mindi
     if (mindist == -1 || sqr(p.x) + sqr(p.y) + sqr(p.z) > minDist2)
 	 ptss.push_back(p);
   }
+  cout << "READ " << ptss.size() << " points." << endl;
   scan_in.close();
   scan_in.clear();
   pose_in.close();
