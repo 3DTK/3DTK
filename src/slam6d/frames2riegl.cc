@@ -79,9 +79,6 @@ int main(int argc, char **argv)
   ifstream pose_in;
   ofstream pose_out;
 
-  double rPos[3],rPosTheta[3];
-  double refPos[3],refPosTheta[3];
-  
   double inMatrix[16];
   double tMatrix[17];
 

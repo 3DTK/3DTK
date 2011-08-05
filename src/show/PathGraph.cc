@@ -189,7 +189,7 @@ void PathGraph::loadGraph(const char* fn){
     i++;
     names[name] = this->insertNode(p);
   }
-  fscanf(file,"%c",&c);
+  res = fscanf(file,"%c",&c);
   int numNeighbours, neighbourName;
   i= 0;
   while(1){
