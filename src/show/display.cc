@@ -177,7 +177,7 @@ GroupPlaneDisplay::GroupPlaneDisplay(vector<PlaneDisplay*> &p) {
 }
 
 void GroupPlaneDisplay::displayObject() {
-  for(int i = 0; i < planes.size(); i++) {
+  for(unsigned int i = 0; i < planes.size(); i++) {
     planes[i]->displayObject();
   }
 }

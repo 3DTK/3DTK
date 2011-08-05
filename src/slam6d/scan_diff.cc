@@ -323,7 +323,7 @@ int main(int argc, char **argv)
  
   ofstream ptsout(scanFileName.c_str());
 
-  for(int i = 0; i < diff.size(); i++) {
+  for(unsigned int i = 0; i < diff.size(); i++) {
     Point p(diff[i]);
     p.transform(transMat); 
     ptsout << p.x << " " << p.y << " " << p.z << " " << endl;    

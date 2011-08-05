@@ -72,7 +72,7 @@ double icp6D_SVD::Point_Point_Align(const vector<PtPair>& pairs, double *alignfx
     }
   }
   
-  for(int i = 0; i < pairs.size(); i++){
+  for(unsigned int i = 0; i < pairs.size(); i++){
     for(int j = 0; j < 3; j++){
       for(int k = 0; k < 3; k++){
         H(j+1, k+1) += d[i][j]*m[i][k];
