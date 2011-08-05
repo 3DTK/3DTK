@@ -10,30 +10,49 @@
 
   Copyright (c) 1998 Paul Rademacher
 
-  This program is freely distributable without licensing fees and is
-  provided without guarantee or warrantee expressed or implied. This
-  program is -not- in the public domain.
+  WWW:    http://sourceforge.net/projects/glui/
+  Forums: http://sourceforge.net/forum/?group_id=92496
+
+  This software is provided 'as-is', without any express or implied 
+  warranty. In no event will the authors be held liable for any damages 
+  arising from the use of this software. 
+
+  Permission is granted to anyone to use this software for any purpose, 
+  including commercial applications, and to alter it and redistribute it 
+  freely, subject to the following restrictions: 
+
+  1. The origin of this software must not be misrepresented; you must not 
+  claim that you wrote the original software. If you use this software 
+  in a product, an acknowledgment in the product documentation would be 
+  appreciated but is not required. 
+  2. Altered source versions must be plainly marked as such, and must not be 
+  misrepresented as being the original software. 
+  3. This notice may not be removed or altered from any source distribution. 
 
 *****************************************************************************/
 
-#include "glui.h"
-#include "stdinc.h"
+#include "glui_internal_control.h"
+
+/****************************** GLUI_Separator::GLUI_Separator() **********/
+
+GLUI_Separator::GLUI_Separator( GLUI_Node *parent )
+{
+  common_init();
+  parent->add_control( this );
+}
 
 /****************************** GLUI_Separator::draw() **********/
 
 void    GLUI_Separator::draw( int x, int y )
 {
-  int width, indent, orig;
+  GLUI_DRAWINGSENTINAL_IDIOM
+  
+  int width, indent;
   int           cont_x, cont_y, cont_w, cont_h, cont_x_off, cont_y_off;
-
-  if ( NOT can_draw() )
-    return;
-
-  orig = set_to_glut_window();
 
   if ( parent() != NULL ) {
     get_this_column_dims(&cont_x, &cont_y, &cont_w, &cont_h, 
-             &cont_x_off, &cont_y_off);
+			 &cont_x_off, &cont_y_off);
 
     width = cont_w - cont_x_off*2;
   }
@@ -53,8 +72,6 @@ void    GLUI_Separator::draw( int x, int y )
   glVertex2i( indent,       GLUI_SEPARATOR_HEIGHT/2 );    
   glVertex2i( width-indent, GLUI_SEPARATOR_HEIGHT/2 );    
   glEnd();
-
-  restore_window(orig);
 }
 
 

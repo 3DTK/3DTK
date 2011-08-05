@@ -1,116 +1,66 @@
 /****************************************************************************
-  
-  GLUI User Interface Toolkit
+
+  GLUI User Interface Toolkit 
   ---------------------------
 
      glui_add_controls.cpp - Routines for adding controls to a GLUI window
 
+Note: these routines are all deprecated.  Keeping them all here
+prevents the linker from dragging in all the .o files, even for controls
+that aren't used.
 
           --------------------------------------------------
 
   Copyright (c) 1998 Paul Rademacher
 
-  This program is freely distributable without licensing fees and is
-  provided without guarantee or warrantee expressed or implied. This
-  program is -not- in the public domain.
+  WWW:    http://sourceforge.net/projects/glui/
+  Forums: http://sourceforge.net/forum/?group_id=92496
+
+  This software is provided 'as-is', without any express or implied 
+  warranty. In no event will the authors be held liable for any damages 
+  arising from the use of this software. 
+
+  Permission is granted to anyone to use this software for any purpose, 
+  including commercial applications, and to alter it and redistribute it 
+  freely, subject to the following restrictions: 
+
+  1. The origin of this software must not be misrepresented; you must not 
+  claim that you wrote the original software. If you use this software 
+  in a product, an acknowledgment in the product documentation would be 
+  appreciated but is not required. 
+  2. Altered source versions must be plainly marked as such, and must not be 
+  misrepresented as being the original software. 
+  3. This notice may not be removed or altered from any source distribution. 
 
 *****************************************************************************/
 
 #include "glui.h"
-#include "stdinc.h"
-
+#include "glui_internal.h"
 
 
 /*********************************** GLUI:: add_checkbox() ************/
 
-GLUI_Checkbox   *GLUI:: add_checkbox( char *name, int *value_ptr,
-                      int id, GLUI_Update_CB callback )
+GLUI_Checkbox   *GLUI:: add_checkbox( const char *name, int *value_ptr,
+                                      int id, GLUI_CB callback )
 {
   return add_checkbox_to_panel( main_panel,
-                name, value_ptr, id, callback );
+				name, value_ptr, id, callback );
 }
 
 
 /*********************************** GLUI:: add_checkbox_to_panel() **********/
 
 GLUI_Checkbox   *GLUI::add_checkbox_to_panel( GLUI_Panel *panel,
-                          char *name, int *value_ptr,
-                          int id, 
-                          GLUI_Update_CB callback )
+					      const char *name, int *value_ptr,
+					      int id, 
+					      GLUI_CB callback )
 {
-  GLUI_Checkbox *control;
-
-  control = new GLUI_Checkbox;
-
-  if ( control ) {
-    control->set_ptr_val( value_ptr );
-    control->user_id    = id;
-    control->set_name( name );
-    control->callback    = callback;
-
-    add_control( panel, control );
-
-    control->init_live();
-
-    return control;
-  }
-  else {
-    return NULL;
-  }
+  return new GLUI_Checkbox( panel, name, value_ptr, id, callback );
 }
-
-
-
-/************************************ GLUI_Main::add_control() **************/
- 
-int    GLUI_Main::add_control( GLUI_Node *parent, GLUI_Control *control )
-{
-  GLUI_Control *parent_control;
-
-  /*** Collapsible nodes have to be handled differently, b/c the first and 
-    last children are swapped in and out  ***/
-  parent_control = ((GLUI_Control*)parent);
-  if ( parent_control->collapsible == true ) {
-    if ( NOT parent_control->is_open ) {
-      /** Swap in the original first and last children **/
-      parent_control->child_head  = parent_control->collapsed_node.child_head;
-      parent_control->child_tail  = parent_control->collapsed_node.child_tail;
-
-      /*** Link this control ***/
-      control->link_this_to_parent_last( parent );
-
-      /** Swap the children back out ***/
-      parent_control->collapsed_node.child_head = parent_control->child_head;
-      parent_control->collapsed_node.child_tail = parent_control->child_tail;
-      parent_control->child_head = NULL;
-      parent_control->child_tail = NULL;
-    }
-    else {
-      control->link_this_to_parent_last( parent );
-    }
-  }
-  else {
-    control->link_this_to_parent_last( parent );
-  }
-  control->glui = (GLUI*) this;
-  control->update_size();
-  control->enabled = ((GLUI_Control*) parent)->enabled;
-  control->glui->refresh();
-
-  /** Now set the 'hidden' var based on the parent **/
-  if ( parent_control->hidden OR 
-       (parent_control->collapsible AND NOT parent_control->is_open ) )
-  {
-    control->hidden = true;
-  }
-
-  return true;
-}
-
 
 /********************************************* GLUI::add_panel() *************/
 
-GLUI_Panel     *GLUI::add_panel( char *name, int type )
+GLUI_Panel     *GLUI::add_panel( const char *name, int type )
 {
   return add_panel_to_panel( main_panel, name, type );
 }
@@ -118,123 +68,46 @@ GLUI_Panel     *GLUI::add_panel( char *name, int type )
 
 /**************************************** GLUI::add_panel_to_panel() *********/
 
-GLUI_Panel     *GLUI::add_panel_to_panel( GLUI_Panel *parent_panel,
-                      char *name, int type )
+GLUI_Panel *GLUI::add_panel_to_panel( GLUI_Panel *parent_panel,
+                                          const char *name, int type )
 {
-  GLUI_Panel *panel;
-  
-  panel = new GLUI_Panel;
-
-  if ( panel ) {
-    panel->set_name( name );
-    panel->user_id    = -1;
-    panel->int_val    = type;
-
-    add_control( parent_panel, panel );
-
-    return panel;
-  }
-  else {
-    return NULL;
-  }  
+  return new GLUI_Panel( parent_panel, name, type );
 }
 
 
 /***************************** GLUI::add_radiogroup() ***************/
 
 GLUI_RadioGroup *GLUI::add_radiogroup( int *value_ptr,
-                       int user_id, GLUI_Update_CB callback)
+				       int user_id, GLUI_CB callback)
 {
   return add_radiogroup_to_panel( main_panel, value_ptr,
-                  user_id, callback );
+				  user_id, callback );
 }
 
 
 /***************************** GLUI::add_radiogroup_to_panel() ***************/
 
-GLUI_RadioGroup *GLUI::add_radiogroup_to_panel(  GLUI_Panel *panel,
-                         int *value_ptr,
-                         int user_id, GLUI_Update_CB callback)
+GLUI_RadioGroup *GLUI::add_radiogroup_to_panel(  
+  GLUI_Panel *panel, int *value_ptr,
+  int user_id, GLUI_CB callback
+  )
 {
-  GLUI_RadioGroup *control;
-  GLUI_String      buf;
-
-  control = new GLUI_RadioGroup;
-
-  if ( control ) {
-    control->set_ptr_val( value_ptr );
-    if ( value_ptr ) {
-      control->int_val = *value_ptr;  /** Can't call set_int_val(), b/c that 
-                    function will try to call the 
-                    callback, etc */
-      /** Actually, maybe not **/
-      control->last_live_int = *value_ptr;
-    }
-
-    control->user_id    = user_id;
-    sprintf( buf, "RadioGroup: %p", control );
-    control->set_name( buf );
-    control->callback   = callback;
-
-    add_control( panel, control );
-
-    control->init_live();
-
-    return control;
-  }
-  else {
-    return NULL;
-  }
-
+  return new GLUI_RadioGroup( panel, value_ptr, user_id, callback );
 }
 
 
 /***************************** GLUI::add_radiobutton_to_group() *************/
 
 GLUI_RadioButton *GLUI::add_radiobutton_to_group(  GLUI_RadioGroup *group,
-                           char *name )
+                                                   const char *name )
 {
-  GLUI_RadioButton *control;
-
-  if ( group->type != GLUI_CONTROL_RADIOGROUP ) {
-    /*fprintf( stderr, "ERROR: Trying to add radiobutton to non-radiogroup\n" );              */
-    /*fflush( stderr );              */
-    return NULL;
-  }
-
-  control = new GLUI_RadioButton;
-
-  if ( control ) {
-    control->set_int_val( 0 );
-    /*int_val = 0;              */
-
-    /** A radio button's user id is always its ordinal number (zero-indexed)
-      within the group */
-    control->user_id    = group->num_buttons;
-    group->num_buttons++;   /* Increments radiogroup's button count */
-    control->set_name( name );
-    control->group = group;
-
-    add_control( group, control );
-
-    /*** Now update button states ***/
-    group->set_int_val( group->int_val ); /* This tells the group to
-                         reset itself to its
-                         current value, thereby
-                         updating all its buttons */
-
-    return control;
-  }
-  else {
-    return NULL;
-  }
-
+  return new GLUI_RadioButton( group, name );
 }
 
 
 /********************************** GLUI::add_statictext() ************/
 
-GLUI_StaticText  *GLUI::add_statictext( char *name )
+GLUI_StaticText  *GLUI::add_statictext( const char *name )
 {
   return add_statictext_to_panel( main_panel, name );
 }
@@ -242,67 +115,31 @@ GLUI_StaticText  *GLUI::add_statictext( char *name )
 
 /******************************* GLUI::add_statictext_to_panel() **********/
 
-GLUI_StaticText  *GLUI::
-add_statictext_to_panel( GLUI_Panel *panel, char *name )
+GLUI_StaticText *GLUI::add_statictext_to_panel( GLUI_Panel *panel, 
+                                                const char *name )
 {
-  GLUI_StaticText *control;
-
-  control = new GLUI_StaticText;
-
-  if ( control ) {
-    control->set_name( name );
-    add_control( panel, control );
-
-    return control;
-  }
-  else {
-    return NULL;
-  }
-
+  return new GLUI_StaticText( panel, name );
 }
 
 
 /***************************************** GLUI:: add_button() ************/
 
-GLUI_Button   *GLUI:: add_button( char *name, 
-                  int id, GLUI_Update_CB callback )
+GLUI_Button   *GLUI:: add_button( const char *name, 
+				  int id, GLUI_CB callback )
 {
   return add_button_to_panel( main_panel,
-                  name, id, callback );
+                              name, id, callback );
 }
-
 
 /*********************************** GLUI:: add_button_to_panel() **********/
 
 GLUI_Button   *GLUI::add_button_to_panel( GLUI_Panel *panel,
-                      char *name, 
-                      int id, 
-                      GLUI_Update_CB callback )
+					  const char *name, 
+					  int id, 
+					  GLUI_CB callback )
 {
-  GLUI_Button *control;
-  
-  control = new GLUI_Button;
-  
-  if ( control ) {
-    /*    control->set_ptr_val( value_ptr );
-      if ( value_ptr ) {
-      control->set_int_val( *value_ptr );
-      }*/
-
-    control->user_id     = id;
-    control->callback    = callback;
-    control->set_name( name );
-    
-    add_control( panel, control );
-    
-    return control;
-  }
-  else {
-    return NULL;
-  }
+  return new GLUI_Button( panel, name, id, callback );
 }
-
-
 
 /********************************** GLUI::add_separator() ************/
 
@@ -316,141 +153,71 @@ void  GLUI::add_separator( void )
 
 void      GLUI::add_separator_to_panel( GLUI_Panel *panel )
 {
-  GLUI_Separator *control = new GLUI_Separator;
-
-  if ( control ) {
-    add_control( panel, control );
-  }
+  new GLUI_Separator( panel );
 }
 
 
 /********************************** GLUI::add_edittext() ************/
 
-GLUI_EditText  *GLUI::add_edittext( char *name, 
-                    int data_type, void *data,
-                    int id, GLUI_Update_CB callback)
+GLUI_EditText  *GLUI::add_edittext( const char *name, 
+				    int data_type, void *data,
+				    int id, GLUI_CB callback)
 {
   return add_edittext_to_panel( main_panel, name, data_type, data,
-                id, callback );
+                                id, callback );
 }
 
 
 /******************************* GLUI::add_edittext_to_panel() **********/
 
-GLUI_EditText  *GLUI::
-add_edittext_to_panel( GLUI_Panel *panel, char *name, 
-               int data_type, void *data,
-               int id, GLUI_Update_CB callback)
+GLUI_EditText  *GLUI::add_edittext_to_panel( GLUI_Panel *panel, 
+                                             const char *name, 
+                                             int data_type, void *data,
+                                             int id, GLUI_CB callback)
 {
-  GLUI_EditText *control;
+  return new GLUI_EditText( panel, name, data_type, data, id, callback );
+}
 
-  control = new GLUI_EditText;
+/********************************** GLUI::add_edittext() ************/
 
-  if ( control ) {
-    control->set_name( name );
-    
-    control->data_type   = data_type;
-    control->ptr_val     = data;
-    control->user_id     = id;
-    control->callback    = callback;
-    
-    if ( data_type == GLUI_EDITTEXT_TEXT ) {
-      control->live_type = GLUI_LIVE_TEXT;
-    }
-    else if ( data_type == GLUI_EDITTEXT_INT ) {
-      control->live_type = GLUI_LIVE_INT;
-      if ( data == NULL )
-    control->set_int_val(control->int_val);   /** Set to some default, in case of no live var **/
-    }
-    else if ( data_type == GLUI_EDITTEXT_FLOAT ) {
-      control->live_type = GLUI_LIVE_FLOAT;
-      control->num_periods = 1;
-      if ( data == NULL )
-    control->set_float_val(control->float_val);   /** Set to some default, in case of no live var **/
-    }
-    else {
-      return NULL;   /* Did not pass in a valid data type */
-    }
-
-    add_control( panel, control );
-
-    control->init_live();
-
-    return control;
-  }
-  else {
-    return NULL;
-  }
-
+GLUI_EditText  *GLUI::add_edittext( const char *name, 
+                                    GLUI_String & data,
+                                    int id, GLUI_CB callback)
+{
+  return add_edittext_to_panel( main_panel, name, data, id, callback );
 }
 
 
+/******************************* GLUI::add_edittext_to_panel() **********/
+
+GLUI_EditText*
+GLUI::add_edittext_to_panel( GLUI_Panel *panel, const char *name, 
+                             GLUI_String& data,
+                             int id, GLUI_CB callback)
+{
+  return new GLUI_EditText( panel, name, GLUI_EDITTEXT_STRING, &data, id, callback );
+}
+
 /********************************** GLUI::add_spinner() ************/
 
-GLUI_Spinner  *GLUI::add_spinner( char *name, 
-                  int data_type, void *data,
-                  int id, GLUI_Update_CB callback)
+GLUI_Spinner  *GLUI::add_spinner( const char *name, 
+				  int data_type, void *data,
+				  int id, GLUI_CB callback)
 {
   return add_spinner_to_panel( main_panel, name, data_type, data,
-                   id, callback );
+			       id, callback );
 }
 
 
 /******************************* GLUI::add_spinner_to_panel() **********/
 
-GLUI_Spinner  *GLUI::
-add_spinner_to_panel( GLUI_Panel *panel, char *name, 
-              int data_type, void *data,
-              int id, GLUI_Update_CB callback)
+GLUI_Spinner  *GLUI::add_spinner_to_panel( 
+  GLUI_Panel *panel, const char *name, 
+  int data_type, void *data,
+  int id, GLUI_CB callback
+)
 {
-  GLUI_Spinner *control;
-  int           text_type;
-
-  control = new GLUI_Spinner;
- 
-  if ( NOT strcmp( name, "Spinner Test" ))
-    id=id;
-
-
-  if ( control ) {
-    if ( data_type == GLUI_SPINNER_INT ) {
-      text_type = GLUI_EDITTEXT_INT;
-      /*      control->live_type = GLUI_LIVE_INT;              */
-    }
-    else if ( data_type == GLUI_SPINNER_FLOAT ) {
-      text_type = GLUI_EDITTEXT_FLOAT;
-      /*      control->live_type = GLUI_LIVE_FLOAT;              */
-    }
-    else {
-      return NULL;   /* Did not pass in a valid data type */
-    }
-
-    GLUI_EditText *edittext = 
-      add_edittext_to_panel( (GLUI_Panel*) control, name, text_type, data,
-                 id, callback );
-
-    if ( edittext ) {
-      control->set_name( name );
-      control->edittext    = edittext;  /* Link the edittext to the spinner */
-      /*      control->ptr_val     = data;               */
-      control->user_id     = id;
-      control->data_type   = data_type;
-      control->callback    = callback;
-    
-      edittext->spinner    = control; /* Link the spinner to the edittext */
-            
-      add_control( panel, control );
-      
-      return control;
-    }
-    else {
-      return NULL;
-    }
-  }
-  else {
-    return NULL;
-  }
-
+  return new GLUI_Spinner( panel, name, data_type, data, id, callback );
 }
 
 
@@ -466,197 +233,89 @@ void   GLUI::add_column( int draw_bar )
 
 void   GLUI::add_column_to_panel( GLUI_Panel *panel, int draw_bar )
 {
-  GLUI_Column *control = new GLUI_Column;
-
-  if ( control ) {
-    control->int_val = draw_bar; /* Whether to draw vertical bar or not */
-
-    add_control( panel, control );
-  }
-  else {
-  }
+  new GLUI_Column( panel, draw_bar );
 }
 
 
 /*********************************** GLUI:: add_listbox() ************/
 
-GLUI_Listbox   *GLUI:: add_listbox( char *name, int *value_ptr,
-                    int id, GLUI_Update_CB callback )
+GLUI_Listbox   *GLUI:: add_listbox( const char *name, int *value_ptr,
+				    int id, GLUI_CB callback )
 {
   return add_listbox_to_panel( main_panel,
-                   name, value_ptr, id, callback );
+                               name, value_ptr, id, callback );
 }
 
 
 /*********************************** GLUI:: add_listbox_to_panel() **********/
 
 GLUI_Listbox   *GLUI::add_listbox_to_panel( GLUI_Panel *panel,
-                        char *name, int *value_ptr,
-                        int id, 
-                        GLUI_Update_CB callback )
+                                            const char *name, int *value_ptr,
+                                            int id, 
+                                            GLUI_CB callback )
 {
-  GLUI_Listbox *control;
-
-  control = new GLUI_Listbox;
-
-  if ( control ) {
-    control->set_ptr_val( value_ptr );
-    control->user_id    = id;
-    control->set_name( name );
-    control->callback    = callback;
-
-    add_control( panel, control );
-
-    control->init_live();
-
-    return control;
-  }
-  else {
-    return NULL;
-  }
+  return new GLUI_Listbox( panel, name, value_ptr, id, callback );
 }
 
 
 /*********************************** GLUI:: add_rotation() ************/
 
-GLUI_Rotation   *GLUI:: add_rotation( char *name, float *value_ptr,
-                      int id, GLUI_Update_CB callback )
+GLUI_Rotation   *GLUI:: add_rotation( const char *name, float *value_ptr,
+                                      int id, GLUI_CB callback )
 {
-  return add_rotation_to_panel( main_panel,
-                name, value_ptr, id, callback );
+  return add_rotation_to_panel( main_panel, name, value_ptr, id, callback );
 }
 
 
 /*********************************** GLUI:: add_rotation_to_panel() **********/
 
-GLUI_Rotation   *GLUI::add_rotation_to_panel( GLUI_Panel *panel,
-                          char *name, float *value_ptr,
-                          int id, 
-                          GLUI_Update_CB callback )
+GLUI_Rotation *GLUI::add_rotation_to_panel( GLUI_Panel *panel,
+                                            const char *name, float *value_ptr,
+                                            int id, 
+                                            GLUI_CB callback )
 {
-  GLUI_Rotation *control;
-
-  control = new GLUI_Rotation;
-
-  if ( control ) {
-    control->set_ptr_val( value_ptr );
-    control->user_id    = id;
-    control->set_name( name );
-    control->callback    = callback;
-    add_control( panel, control );
-    control->init_live();
-
-    /*** Init the live 4x4 matrix.  This is different than the standard
-      live variable behavior, since the original value of the 4x4 matrix
-      is ignored and reset to Identity  ***/
-    if ( value_ptr != NULL ) {
-      int i, j, index;
-      for( i=0; i<4; i++ ) {
-    for( j=0; j<4; j++ ) {
-      index = i*4+j;
-      if ( i==j )
-        value_ptr[index] = 1.0;
-      else
-        value_ptr[index] = 0.0;
-    }
-      }
-    }
-
-    /*init_ball();              */
-        
-    return control;
-  }
-  else {
-    return NULL;
-  }
+  return new GLUI_Rotation( panel, name, value_ptr, id, callback );
 }
 
 
 /*********************************** GLUI:: add_translation() ************/
 
-GLUI_Translation   
-  *GLUI:: add_translation( char *name, int trans_type,
-               float *value_ptr, int id, GLUI_Update_CB callback )
+GLUI_Translation *GLUI:: add_translation( const char *name, int trans_type,
+                                          float *value_ptr, int id, 
+                                          GLUI_CB callback )
 {
   return add_translation_to_panel( main_panel,name,trans_type, 
-                   value_ptr, id, callback );
+                                   value_ptr, id, callback );
 }
 
 
 /*********************************** GLUI:: add_translation_to_panel() **********/
 
-GLUI_Translation   
-   *GLUI::add_translation_to_panel( 
-                   GLUI_Panel *panel, char *name, 
-                   int trans_type, float *value_ptr,
-                   int id, GLUI_Update_CB callback )
+GLUI_Translation *GLUI::add_translation_to_panel( 
+  GLUI_Panel *panel, const char *name, 
+  int trans_type, float *value_ptr,
+  int id, GLUI_CB callback 
+  )
 {
-  GLUI_Translation *control;
-
-  control = new GLUI_Translation;
-
-  if ( control ) {
-    control->set_ptr_val( value_ptr );
-    control->user_id    = id;
-    control->set_name( name );
-    control->callback    = callback;
-    add_control( panel, control );
-    control->init_live();
-
-    control->trans_type = trans_type;
-
-    if ( trans_type == GLUI_TRANSLATION_XY ) {
-      control->float_array_size = 2;
-    }
-    else if ( trans_type == GLUI_TRANSLATION_X ) {
-      control->float_array_size = 1;
-    }
-    else if ( trans_type == GLUI_TRANSLATION_Y ) {
-      control->float_array_size = 1;
-    }
-    else if ( trans_type == GLUI_TRANSLATION_Z ) {
-      control->float_array_size = 1;
-    }
-
-    return control;
-  }
-  else {
-    return NULL;
-  }
+  return new GLUI_Translation(panel, name, trans_type, value_ptr, id, callback);
 }
 
 
 /********************************** GLUI::add_rollout() **************/
 
-GLUI_Rollout   *GLUI::add_rollout( char *name, int open )
+GLUI_Rollout   *GLUI::add_rollout( const char *name, int open, int type)
 {
-  return add_rollout_to_panel( main_panel, name, open );
+  return add_rollout_to_panel( main_panel, name, open, type);
 }
 
 
 /****************************** GLUI::add_rollout_to_panel() *********/
 
-GLUI_Rollout *GLUI::add_rollout_to_panel(GLUI_Panel *panel,char *name,int open)
+GLUI_Rollout *GLUI::add_rollout_to_panel(GLUI_Panel *panel, const char *name,
+                                         int open, int type)
 {
-  GLUI_Rollout     *rollout;
-  
-  rollout = new GLUI_Rollout;
-
-  if ( rollout ) {
-    rollout->set_name( name );
-    rollout->user_id    = -1;
-    rollout->int_val    = GLUI_PANEL_EMBOSSED;
-        
-    if ( NOT open ) {
-      rollout->is_open = false;
-      rollout->h = GLUI_DEFAULT_CONTROL_HEIGHT + 7;
-    }
-
-    add_control( panel, rollout );
-
-    return rollout;
-  }
-  else {
-    return NULL;
-  }  
+  return new GLUI_Rollout( panel, name, open, type );
 }
+
+
+
