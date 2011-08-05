@@ -10,25 +10,45 @@
 
   Copyright (c) 1998 Paul Rademacher
 
-  This program is freely distributable without licensing fees and is
-  provided without guarantee or warrantee expressed or implied. This
-  program is -not- in the public domain.
+  WWW:    http://sourceforge.net/projects/glui/
+  Forums: http://sourceforge.net/forum/?group_id=92496
+
+  This software is provided 'as-is', without any express or implied 
+  warranty. In no event will the authors be held liable for any damages 
+  arising from the use of this software. 
+
+  Permission is granted to anyone to use this software for any purpose, 
+  including commercial applications, and to alter it and redistribute it 
+  freely, subject to the following restrictions: 
+
+  1. The origin of this software must not be misrepresented; you must not 
+  claim that you wrote the original software. If you use this software 
+  in a product, an acknowledgment in the product documentation would be 
+  appreciated but is not required. 
+  2. Altered source versions must be plainly marked as such, and must not be 
+  misrepresented as being the original software. 
+  3. This notice may not be removed or altered from any source distribution. 
 
 *****************************************************************************/
 
-#include "glui.h"
-#include "stdinc.h"
+#include "glui_internal_control.h"
+
+GLUI_Panel::GLUI_Panel( GLUI_Node *parent, const char *name, int type )
+{
+  common_init();
+  set_name( name );
+  user_id    = -1;
+  int_val    = type;
+
+  parent->add_control( this );
+}
 
 /****************************** GLUI_Panel::draw() **********/
 
 void    GLUI_Panel::draw( int x, int y )
 {
-  int top, orig;
-
-  if ( NOT can_draw() )
-    return;
-
-  orig = set_to_glut_window();
+  int top;
+  GLUI_DRAWINGSENTINAL_IDIOM
 
   if ( int_val == GLUI_PANEL_RAISED ) {
     top = 0;
@@ -73,7 +93,7 @@ void    GLUI_Panel::draw( int x, int y )
     **/    
       }
   else if ( int_val == GLUI_PANEL_EMBOSSED ) {
-    if ( name[0] == '\0' ) {
+    if ( parent_node == NULL || name == "" ) {
       top = 0;
     }
     else {
@@ -99,14 +119,14 @@ void    GLUI_Panel::draw( int x, int y )
     glEnd();
 
     /**** Only display text in embossed panel ****/
-    if ( name[0] != '\0' ) { /* Only  draw non-null strings */
+    if ( parent_node != NULL && name != "" ) { /* Only  draw non-null strings */
       int left = 7, height=GLUI_PANEL_NAME_DROP+1;
       int str_width;
 
       str_width = string_width(name);
 
       if ( glui )
-    glColor3ub(glui->bkgd_color.r,glui->bkgd_color.g,glui->bkgd_color.b);
+	glColor3ubv(glui->bkgd_color);
       glDisable( GL_CULL_FACE );
       glBegin( GL_QUADS );
       glVertex2i( left-3, 0 );               glVertex2i( left+str_width+3, 0 );
@@ -118,16 +138,13 @@ void    GLUI_Panel::draw( int x, int y )
   }
 
   glLineWidth( 1.0 );
-
-  restore_window(orig);
 }
-
 
 /****************************** GLUI_Panel::set_name() **********/
 
-void    GLUI_Panel::set_name( char *new_name )
+void    GLUI_Panel::set_name( const char *new_name )
 {
-  strncpy(name,new_name,sizeof(GLUI_String));
+  name = new_name ? new_name : "";
 
   update_size();
 
@@ -140,17 +157,10 @@ void    GLUI_Panel::set_name( char *new_name )
 
 void    GLUI_Panel::set_type( int new_type )
 {
-  int old_window;
-
   if ( new_type != int_val ) {
     int_val = new_type;
-
-    /*    translate_and_draw_front();             */
     update_size();
-
-    old_window = set_to_glut_window();
-    glutPostRedisplay( );
-    restore_window( old_window );
+    redraw();
   }
 }
 
@@ -169,7 +179,7 @@ void   GLUI_Panel::update_size( void )
   if ( w < text_size + 16 )
     w = text_size + 16 ;
 
-  if ( name[0] != '\0' AND int_val == GLUI_PANEL_EMBOSSED ) {
+  if ( name != "" AND int_val == GLUI_PANEL_EMBOSSED ) {
     this->y_off_top = GLUI_YOFF + 8;
   }
   else {

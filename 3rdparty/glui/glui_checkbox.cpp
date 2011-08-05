@@ -1,6 +1,7 @@
+
 /****************************************************************************
   
-  GLUI User Interface Toolkit
+  GLUI User Interface Toolkit 
   ---------------------------
 
      glui_checkbox - GLUI_Checkbox control class
@@ -10,29 +11,57 @@
 
   Copyright (c) 1998 Paul Rademacher
 
-  This program is freely distributable without licensing fees and is
-  provided without guarantee or warrantee expressed or implied. This
-  program is -not- in the public domain.
+  WWW:    http://sourceforge.net/projects/glui/
+  Forums: http://sourceforge.net/forum/?group_id=92496
+
+  This software is provided 'as-is', without any express or implied 
+  warranty. In no event will the authors be held liable for any damages 
+  arising from the use of this software. 
+
+  Permission is granted to anyone to use this software for any purpose, 
+  including commercial applications, and to alter it and redistribute it 
+  freely, subject to the following restrictions: 
+
+  1. The origin of this software must not be misrepresented; you must not 
+  claim that you wrote the original software. If you use this software 
+  in a product, an acknowledgment in the product documentation would be 
+  appreciated but is not required. 
+  2. Altered source versions must be plainly marked as such, and must not be 
+  misrepresented as being the original software. 
+  3. This notice may not be removed or altered from any source distribution. 
 
 *****************************************************************************/
 
-#include "glui.h"
-#include "stdinc.h"
+#include "glui_internal_control.h"
+
+/****************************** GLUI_Checkbox::GLUI_Checkbox() **********/
+
+GLUI_Checkbox::GLUI_Checkbox( GLUI_Node *parent,
+                              const char *name, int *value_ptr,
+                              int id, 
+                              GLUI_CB cb )
+{
+  common_init();
+
+  set_ptr_val( value_ptr );
+  set_name( name );
+  user_id    = id;
+  callback   = cb;
+
+  parent->add_control( this );
+
+  init_live();
+}
 
 /****************************** GLUI_Checkbox::mouse_down_handler() **********/
 
 int    GLUI_Checkbox::mouse_down_handler( int local_x, int local_y )
 {
   orig_value = int_val;
-  
-  TOGGLE_BOOL( int_val );
+  int_val = !int_val;
 
   currently_inside = true;
-
-  if ( int_val )
-    draw_checked();
-  else
-    draw_unchecked();
+  redraw();
 
   return false;
 }
@@ -40,9 +69,9 @@ int    GLUI_Checkbox::mouse_down_handler( int local_x, int local_y )
 
 /****************************** GLUI_Checkbox::mouse_up_handler() **********/
 
-int    GLUI_Checkbox::mouse_up_handler( int local_x, int local_y, int inside )
+int    GLUI_Checkbox::mouse_up_handler( int local_x, int local_y, bool inside )
 {
-  if ( NOT inside ) {
+  if ( NOT inside ) { /* undo effect on value */
     int_val = orig_value;    
   }
   else {
@@ -52,11 +81,6 @@ int    GLUI_Checkbox::mouse_up_handler( int local_x, int local_y, int inside )
     execute_callback();
   }
 
-  if ( int_val )
-    draw_checked();
-  else
-    draw_unchecked();
-
   return false;
 }
 
@@ -64,26 +88,15 @@ int    GLUI_Checkbox::mouse_up_handler( int local_x, int local_y, int inside )
 /****************************** GLUI_Checkbox::mouse_held_down_handler() ******/
 
 int    GLUI_Checkbox::mouse_held_down_handler( int local_x, int local_y,
-                           int inside)
+					       bool inside)
 {
   /********** Toggle checked and unchecked bitmap if we're entering or
     leaving the checkbox area **********/
-
-  /** oops, this was wrong!
-    if ( NOT inside AND currently_inside == true )
-    draw_unchecked();
-  else if ( inside AND currently_inside == false ) 
-    draw_checked();*/
-
-  if ( inside != currently_inside )
-    TOGGLE_BOOL( int_val );
-
-  currently_inside = inside;
-
-  if ( int_val )
-    draw_checked();
-  else
-    draw_unchecked();
+  if ( inside != currently_inside ) {
+     int_val = !int_val;
+     currently_inside = inside;
+     redraw();
+  }
   
   return false;
 }
@@ -101,12 +114,7 @@ int    GLUI_Checkbox::key_handler( unsigned char key,int modifiers )
 
 void    GLUI_Checkbox::draw( int x, int y )
 {
-  int orig;
-
-  if ( NOT can_draw() )
-    return;
-
-  orig = set_to_glut_window();
+  GLUI_DRAWINGSENTINAL_IDIOM
 
   if ( int_val != 0 ) {
     if ( enabled ) 
@@ -124,124 +132,33 @@ void    GLUI_Checkbox::draw( int x, int y )
   draw_active_area();
 
   draw_name( text_x_offset, 10);
-
-  restore_window(orig);
 }
 
+/**************************** GLUI_Checkbox::draw_active_area() **************/
 
-/************************************** GLUI_Checkbox::draw_checked() ******/
-
-void   GLUI_Checkbox::draw_checked( void )
+void    GLUI_Checkbox::draw_active_area( void )
 {
-  int state, orig;
+  GLUI_DRAWINGSENTINAL_IDIOM
+  int text_width, left, right;
 
-  if ( NOT can_draw() )
-    return;
+  text_width = _glutBitmapWidthString( glui->font, name.c_str() );
+  left       = text_x_offset-3;
+  right      = left + 7 + text_width;
 
-  orig = set_to_glut_window();
-  state = glui->set_front_draw_buffer();
-  
-  glColor3f( 0.0, 0.0, 0.0 );
-  glPushMatrix();
-  translate_to_origin();
-  if ( enabled )
-    glui->std_bitmaps.draw( GLUI_STDBITMAP_CHECKBOX_ON, 0, 0 );
-  else
-    glui->std_bitmaps.draw( GLUI_STDBITMAP_CHECKBOX_ON_DIS, 0, 0 );
-  draw_active_area();
-  glPopMatrix();
+  if ( active ) {
+    glEnable( GL_LINE_STIPPLE );
+    glLineStipple( 1, 0x5555 );
+    glColor3f( 0., 0., 0. );
+  } else {
+    glColor3ubv( glui->bkgd_color );
+  }
 
-  glui->restore_draw_buffer(state);
-  restore_window(orig);
-}
-
-
-/************************************** GLUI_Checkbox::draw_unchecked() ******/
-
-void   GLUI_Checkbox::draw_unchecked( void )
-{
-  int state, orig;
-
-  if ( NOT can_draw() )
-    return;
-
-  orig = set_to_glut_window();
-  state = glui->set_front_draw_buffer();
-
-  glColor3f( 1.0, 1.0, 1.0 );
-  glPushMatrix();
-  translate_to_origin();
-  if ( enabled )
-    glui->std_bitmaps.draw( GLUI_STDBITMAP_CHECKBOX_OFF, 0, 0 );
-  else
-    glui->std_bitmaps.draw( GLUI_STDBITMAP_CHECKBOX_OFF_DIS, 0, 0 );
-  draw_active_area();
-  glPopMatrix();
-
-  glui->restore_draw_buffer(state);
-  restore_window(orig);  
-}
-
-
-/**************************************** GLUI_Checkbox::draw_X() ************/
-
-void   GLUI_Checkbox::draw_X( void )
-{
-  int orig;
-
-  orig = set_to_glut_window();
-
-  /*  glPointSize( 1.0 );
-      glBegin( GL_POINTS );
-      for( i=2; i<=GLUI_CHECKBOX_SIZE-2; i++ ) {
-      glVertex2i( i,i );
-      glVertex2i( i,GLUI_CHECKBOX_SIZE-i );
-      }
-      glEnd();
-      */
-
-  /*  glColor3f( 0.0, 0.0, 0.0 );              */
-
-  /*
-    glBegin( GL_LINES );
-    glVertex2i( 0,                    0 );
-    glVertex2i( GLUI_CHECKBOX_SIZE-0, GLUI_CHECKBOX_SIZE-0 );
-    glVertex2i( GLUI_CHECKBOX_SIZE-0, 0  );
-    glVertex2i( 0,                    GLUI_CHECKBOX_SIZE-0 );
-    glEnd();*/
-
-  restore_window(orig);
-}
-
-
-/********************************** GLUI_Checkbox::draw_empty_box() **********/
-
-void     GLUI_Checkbox::draw_empty_box( void )
-{
-  int orig;
-
-  if ( NOT can_draw())
-    return;
-  
-  orig = set_to_glut_window();
-
-  glColor3f( 1.0, 1.0, 1.0 );
-  glBegin( GL_QUADS );
-  glVertex2i( 0, 0 );
-  glVertex2i( GLUI_CHECKBOX_SIZE, 0 );
-  glVertex2i( GLUI_CHECKBOX_SIZE, GLUI_CHECKBOX_SIZE );
-  glVertex2i( 0,                  GLUI_CHECKBOX_SIZE );
-  glEnd();
-
-  glColor3f( 0.0, 0.0, 0.0 );
   glBegin( GL_LINE_LOOP );
-  glVertex2i( 0, 0 );
-  glVertex2i( GLUI_CHECKBOX_SIZE, 0 );
-  glVertex2i( GLUI_CHECKBOX_SIZE, GLUI_CHECKBOX_SIZE );
-  glVertex2i( 0,                  GLUI_CHECKBOX_SIZE );
+  glVertex2i(left,0);     glVertex2i( right,0);
+  glVertex2i(right,h+1);   glVertex2i( left,h+1);
   glEnd();
-
-  restore_window(orig);
+  
+  glDisable( GL_LINE_STIPPLE );
 }
 
 
@@ -254,44 +171,10 @@ void   GLUI_Checkbox::update_size( void )
   if ( NOT glui )
     return;
 
-  text_size = _glutBitmapWidthString( glui->font, name );
+  text_size = _glutBitmapWidthString( glui->font, name.c_str() );
 
   /*  if ( w < text_x_offset + text_size + 6 )              */
   w = text_x_offset + text_size + 6 ;
-}
-
-
-/**************************** GLUI_Checkbox::draw_active_area() **************/
-
-void    GLUI_Checkbox::draw_active_area( void )
-{
-  int text_width, left, right, orig;
-
-  if ( NOT can_draw())
-    return;
-
-  orig = set_to_glut_window();
-
-  text_width = _glutBitmapWidthString( glui->font, name );
-  left       = text_x_offset-3;
-  right      = left + 7 + text_width;
-
-  if ( active ) {
-    glEnable( GL_LINE_STIPPLE );
-    glLineStipple( 1, 0x5555 );
-    glColor3f( 0., 0., 0. );
-  } else {
-    glColor3ub( glui->bkgd_color.r, glui->bkgd_color.g, glui->bkgd_color.b );
-  }
-
-  glBegin( GL_LINE_LOOP );
-  glVertex2i(left,0);     glVertex2i( right,0);
-  glVertex2i(right,h+1);   glVertex2i( left,h+1);
-  glEnd();
-  
-  glDisable( GL_LINE_STIPPLE );
-
-  restore_window(orig);
 }
 
 
@@ -303,11 +186,5 @@ void    GLUI_Checkbox::set_int_val( int new_val )
 
   /*** Update the variable we're (possibly) pointing to ***/
   output_live(true);
-
-  if ( can_draw() ) {
-    if ( int_val )
-      draw_checked();
-    else
-      draw_unchecked();
-  }
+  redraw();
 }
