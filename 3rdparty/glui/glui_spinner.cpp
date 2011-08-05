@@ -10,24 +10,42 @@
      spinner does not explicitly keep track of the current value - this is all
         handled by the underlying edittext control
         -> thus, spinner->sync_live() has no meaning, nor spinner->output_live
-    -> BUT, edittext will alter this spinner's float_val and int_val,
-       so that spinner->get/set will work
+	-> BUT, edittext will alter this spinner's float_val and int_val,
+	   so that spinner->get/set will work
+
+
+FIXME: there's a heck of a lot of duplication between this and glui_scrollbar.cpp. 
+  (OSL, 2006/06)
 
 
           --------------------------------------------------
 
   Copyright (c) 1998 Paul Rademacher
 
-  This program is freely distributable without licensing fees and is
-  provided without guarantee or warrantee expressed or implied. This
-  program is -not- in the public domain.
+  WWW:    http://sourceforge.net/projects/glui/
+  Forums: http://sourceforge.net/forum/?group_id=92496
+
+  This software is provided 'as-is', without any express or implied 
+  warranty. In no event will the authors be held liable for any damages 
+  arising from the use of this software. 
+
+  Permission is granted to anyone to use this software for any purpose, 
+  including commercial applications, and to alter it and redistribute it 
+  freely, subject to the following restrictions: 
+
+  1. The origin of this software must not be misrepresented; you must not 
+  claim that you wrote the original software. If you use this software 
+  in a product, an acknowledgment in the product documentation would be 
+  appreciated but is not required. 
+  2. Altered source versions must be plainly marked as such, and must not be 
+  misrepresented as being the original software. 
+  3. This notice may not be removed or altered from any source distribution. 
 
 *****************************************************************************/
 
-  
-#include "glui.h"
-#include "stdinc.h"
-#include <math.h>
+#include "glui_internal_control.h"
+#include <cmath>
+#include <cassert>
 
 /*static int __debug=0;              */
 
@@ -36,30 +54,85 @@
 #define  GLUI_SPINNER_CALLBACK_INTERVAL    1
 
  
-/****************************** spinner_edittext_callback() ******************/
-/*   This function is not used anymore.  It has been replaced by directly    */
-/*   Including an optional pointer to a spinner from an edittext box         */
+/****************************** GLUI_Spinner::GLUI_Spinner() ****************/
 
-void  spinner_edittext_callback( int id )
+GLUI_Spinner::GLUI_Spinner( GLUI_Node* parent, const char *name, 
+                            int data_type, int id, GLUI_CB callback )
 {
-  GLUI_Spinner *spinner;
-
-  putchar( '.' ); flushout;
-  
-  spinner = (GLUI_Spinner*) id;
-
-  if ( NOT spinner )
-    return;
-
-  spinner->do_callbacks();
+  common_construct(parent, name, data_type, NULL, id, callback);
 }
 
+/****************************** GLUI_Spinner::GLUI_Spinner() ****************/
 
+GLUI_Spinner::GLUI_Spinner( GLUI_Node* parent, const char *name, 
+                            int *live_var, int id, GLUI_CB callback )
+{
+  common_construct(parent, name, GLUI_SPINNER_INT, live_var, id, callback);
+}
+
+/****************************** GLUI_Spinner::GLUI_Spinner() ****************/
+
+GLUI_Spinner::GLUI_Spinner( GLUI_Node* parent, const char *name, 
+             float *live_var, int id, GLUI_CB callback )
+{
+  common_construct(parent, name, GLUI_SPINNER_FLOAT, live_var, id, callback);
+}
+
+/****************************** GLUI_Spinner::GLUI_Spinner() ****************/
+
+GLUI_Spinner::GLUI_Spinner( GLUI_Node *parent, const char *name, 
+                            int data_t, void *live_var,
+                            int id, GLUI_CB callback )
+{
+  common_construct(parent, name, data_t, live_var, id, callback);
+}
+
+/****************************** GLUI_Spinner::common_construct() ************/
+
+void GLUI_Spinner::common_construct( GLUI_Node* parent, const char *name, 
+                                     int data_t, void *data, 
+                                     int id, GLUI_CB cb )
+{
+  common_init();
+
+  if ( NOT strcmp( name, "Spinner Test" ))
+    id=id;
+
+  int text_type;
+  if ( data_t == GLUI_SPINNER_INT ) {
+    text_type = GLUI_EDITTEXT_INT;
+  }
+  else if ( data_t == GLUI_SPINNER_FLOAT ) {
+    text_type = GLUI_EDITTEXT_FLOAT;
+  }
+  else {
+    assert(0); /* Did not pass in a valid data type */
+  }
+
+  user_id     = id;
+  data_type   = data_t;
+  callback    = cb;
+  set_name( name );
+  //glui        = parent->get_glui();
+
+  parent->add_control( this );
+
+  GLUI_EditText *txt = 
+    new GLUI_EditText( this, name, text_type, data, id, cb);
+
+  edittext    = txt;  /* Link the edittext to the spinner */
+  /*      control->ptr_val     = data;               */
+    
+  edittext->spinner    = this; /* Link the spinner to the edittext */
+            
+}
+ 
 /****************************** GLUI_Spinner::mouse_down_handler() **********/
 
 int    GLUI_Spinner::mouse_down_handler( int local_x, int local_y )
 {
   this->state = find_arrow( local_x, local_y );
+  GLUI_Master.glui_setIdleFuncIfNecessary();
 
   /*  printf( "spinner: mouse down  : %d/%d   arrow:%d\n", local_x, local_y,
       find_arrow( local_x, local_y ));
@@ -69,8 +142,7 @@ int    GLUI_Spinner::mouse_down_handler( int local_x, int local_y )
     return true;
 
   reset_growth();
-  if ( can_draw() )
-    draw_arrows();  
+  redraw();  
 
   /*** ints and floats behave a bit differently.  When you click on
     an int spinner, you expect the value to immediately go up by 1, whereas
@@ -91,16 +163,16 @@ int    GLUI_Spinner::mouse_down_handler( int local_x, int local_y )
 
 /******************************** GLUI_Spinner::mouse_up_handler() **********/
 
-int    GLUI_Spinner::mouse_up_handler( int local_x, int local_y, int inside )
+int    GLUI_Spinner::mouse_up_handler( int local_x, int local_y, bool inside )
 {
   state = GLUI_SPINNER_STATE_NONE;
+  GLUI_Master.glui_setIdleFuncIfNecessary();
 
   /*  printf("spinner: mouse up  : %d/%d    inside: %d\n",local_x,local_y,inside);              */
 
   /*glutSetCursor( GLUT_CURSOR_INHERIT );              */
   glutSetCursor( GLUT_CURSOR_LEFT_ARROW );
-
-  draw_arrows();
+  redraw();
 
   /*  do_callbacks(); --- stub               */
   /*  if ( callback )               */
@@ -113,7 +185,7 @@ int    GLUI_Spinner::mouse_up_handler( int local_x, int local_y, int inside )
 /***************************** GLUI_Spinner::mouse_held_down_handler() ******/
 
 int    GLUI_Spinner::mouse_held_down_handler( int local_x, int local_y,
-                          int new_inside)
+					      bool new_inside)
 {
   int new_state;
 
@@ -136,15 +208,15 @@ int    GLUI_Spinner::mouse_held_down_handler( int local_x, int local_y,
     }
     else {
       if ( new_inside OR 1) {
-    /** The state changed, but we're still inside - that
-      means we moved off the arrow: begin dragging **/
-    state = GLUI_SPINNER_STATE_BOTH;
+	/** The state changed, but we're still inside - that
+	  means we moved off the arrow: begin dragging **/
+	state = GLUI_SPINNER_STATE_BOTH;
       }
       else {
-    /*** Here check y of mouse position to determine whether to 
-      drag ***/
+	/*** Here check y of mouse position to determine whether to 
+	  drag ***/
 
-    /* ... */
+	/* ... */
       }
     }
 
@@ -155,15 +227,14 @@ int    GLUI_Spinner::mouse_held_down_handler( int local_x, int local_y,
       last_y = local_y;
 
       /** If the spinner has limits, we reset the growth value, since
-    reset_growth() will compute a new growth value for dragging
-    vs. clicking.  If the spinner has no limits, then we just let the
-    growth remain at whatever the user has incremented it up to **/
+	reset_growth() will compute a new growth value for dragging
+	vs. clicking.  If the spinner has no limits, then we just let the
+	growth remain at whatever the user has incremented it up to **/
       if ( edittext->has_limits != GLUI_LIMIT_NONE )
-    reset_growth();
+	reset_growth();
     }
 
-    if ( can_draw() )
-      draw_arrows();
+    redraw();
   }
 
   return false;
@@ -184,41 +255,36 @@ int    GLUI_Spinner::key_handler( unsigned char key,int modifiers )
 
 void    GLUI_Spinner::draw( int x, int y )
 {
-  int orig;
-
-  if ( NOT can_draw() )
-    return;
-
-  orig = set_to_glut_window();
+  GLUI_DRAWINGSENTINAL_IDIOM
 
   if ( enabled ) {
     /*** Draw the up arrow either pressed or unrpessed ***/
     if ( state == GLUI_SPINNER_STATE_UP OR state == GLUI_SPINNER_STATE_BOTH )
       glui->std_bitmaps.draw( GLUI_STDBITMAP_SPINNER_UP_ON, 
-                  w-GLUI_SPINNER_ARROW_WIDTH-1, 
-                  GLUI_SPINNER_ARROW_Y);
+			      w-GLUI_SPINNER_ARROW_WIDTH-1, 
+			      GLUI_SPINNER_ARROW_Y);
     else
       glui->std_bitmaps.draw( GLUI_STDBITMAP_SPINNER_UP_OFF, 
-                  w-GLUI_SPINNER_ARROW_WIDTH-1,
-                  GLUI_SPINNER_ARROW_Y);
+			      w-GLUI_SPINNER_ARROW_WIDTH-1,
+			      GLUI_SPINNER_ARROW_Y);
 
     /*** Draw the down arrow either pressed or unrpessed ***/
     if (state == GLUI_SPINNER_STATE_DOWN OR state == GLUI_SPINNER_STATE_BOTH)
       glui->std_bitmaps.draw( GLUI_STDBITMAP_SPINNER_DOWN_ON, 
-                  w-GLUI_SPINNER_ARROW_WIDTH-1, 
-                  GLUI_SPINNER_ARROW_HEIGHT+GLUI_SPINNER_ARROW_Y);
+			      w-GLUI_SPINNER_ARROW_WIDTH-1, 
+			      GLUI_SPINNER_ARROW_HEIGHT+GLUI_SPINNER_ARROW_Y);
     else
       glui->std_bitmaps.draw( GLUI_STDBITMAP_SPINNER_DOWN_OFF, 
-                  w-GLUI_SPINNER_ARROW_WIDTH-1,
-                  GLUI_SPINNER_ARROW_HEIGHT+GLUI_SPINNER_ARROW_Y);
+			      w-GLUI_SPINNER_ARROW_WIDTH-1,
+			      GLUI_SPINNER_ARROW_HEIGHT+GLUI_SPINNER_ARROW_Y);
   }
   else {  /**** The spinner is disabled ****/
     glui->std_bitmaps.draw( GLUI_STDBITMAP_SPINNER_UP_DIS, 
-                w-GLUI_SPINNER_ARROW_WIDTH-1, 
-                GLUI_SPINNER_ARROW_Y);
+			    w-GLUI_SPINNER_ARROW_WIDTH-1, 
+			    GLUI_SPINNER_ARROW_Y);
     glui->std_bitmaps.draw( GLUI_STDBITMAP_SPINNER_DOWN_DIS, 
-                w-GLUI_SPINNER_ARROW_WIDTH-1, 
-                GLUI_SPINNER_ARROW_HEIGHT+GLUI_SPINNER_ARROW_Y);
+			    w-GLUI_SPINNER_ARROW_WIDTH-1, 
+			    GLUI_SPINNER_ARROW_HEIGHT+GLUI_SPINNER_ARROW_Y);
   }
 
   if ( active ) {
@@ -227,7 +293,7 @@ void    GLUI_Spinner::draw( int x, int y )
     glLineStipple( 1, 0x5555 );
   }
   else {
-    glColor3ub( glui->bkgd_color.r,glui->bkgd_color.g,glui->bkgd_color.b );
+    glColor3ubv( glui->bkgd_color );
   } 
 
   glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
@@ -240,12 +306,7 @@ void    GLUI_Spinner::draw( int x, int y )
   glEnd();
   glDisable( GL_LINE_STIPPLE );  
   glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
-
-  restore_window( orig );
 }
-
-
-
 
 
 /********************************* GLUI_Spinner::special_handler() **********/
@@ -254,19 +315,19 @@ int    GLUI_Spinner::special_handler( int key,int modifiers )
 {
   if ( key == GLUT_KEY_UP ) {    /** Simulate a click in the up arrow **/
     mouse_down_handler( x_abs + w - GLUI_SPINNER_ARROW_WIDTH + 1,
-            y_abs + GLUI_SPINNER_ARROW_Y+1 );
+			y_abs + GLUI_SPINNER_ARROW_Y+1 );
     mouse_up_handler( x_abs + w - GLUI_SPINNER_ARROW_WIDTH + 1,
-              y_abs + GLUI_SPINNER_ARROW_Y+1, true );
+		      y_abs + GLUI_SPINNER_ARROW_Y+1, true );
   }
   else if ( key == GLUT_KEY_DOWN ) {  /** Simulate a click in the up arrow **/
     mouse_down_handler(x_abs + w - GLUI_SPINNER_ARROW_WIDTH + 1,
-               y_abs+GLUI_SPINNER_ARROW_Y+1+GLUI_SPINNER_ARROW_HEIGHT);
+		       y_abs+GLUI_SPINNER_ARROW_Y+1+GLUI_SPINNER_ARROW_HEIGHT);
     mouse_up_handler( x_abs + w - GLUI_SPINNER_ARROW_WIDTH + 1,
-              y_abs+GLUI_SPINNER_ARROW_Y+1 +GLUI_SPINNER_ARROW_HEIGHT,
-              true );
+		      y_abs+GLUI_SPINNER_ARROW_Y+1 +GLUI_SPINNER_ARROW_HEIGHT,
+		      true );
   }
   else if ( key == GLUT_KEY_HOME ) {  /** Set value to limit top - 
-                    or increment by 10 **/
+					or increment by 10 **/
   }
   else if ( key == GLUT_KEY_END ) {  
   }
@@ -301,6 +362,7 @@ void   GLUI_Spinner::set_int_val( int new_val )
 
 void   GLUI_Spinner::update_size( void )
 {
+  if (!edittext) return;
   /*edittext->w = this->w - GLUI_SPINNER_ARROW_WIDTH-3;              */
   this->w = edittext->w + GLUI_SPINNER_ARROW_WIDTH + 3;
 }
@@ -317,27 +379,16 @@ int    GLUI_Spinner::find_arrow( int local_x, int local_y )
        local_x <= w ) {
 
     if ( local_y >= GLUI_SPINNER_ARROW_Y AND 
-     local_y <= (GLUI_SPINNER_ARROW_Y+GLUI_SPINNER_ARROW_HEIGHT) )
+	 local_y <= (GLUI_SPINNER_ARROW_Y+GLUI_SPINNER_ARROW_HEIGHT) )
       return GLUI_SPINNER_STATE_UP;
 
     if ( local_y >= GLUI_SPINNER_ARROW_Y+GLUI_SPINNER_ARROW_HEIGHT AND 
-     local_y <= (GLUI_SPINNER_ARROW_Y+GLUI_SPINNER_ARROW_HEIGHT*2) )
+	 local_y <= (GLUI_SPINNER_ARROW_Y+GLUI_SPINNER_ARROW_HEIGHT*2) )
       return GLUI_SPINNER_STATE_DOWN;
 
   }
 
   return GLUI_SPINNER_STATE_NONE;
-}
-
-
-/****************************** GLUI_Spinner::draw_arrows() **********/
-
-void    GLUI_Spinner::draw_arrows( void )
-{
-  if ( NOT can_draw() )
-    return;
-
-  translate_and_draw_front();
 }
 
 
@@ -374,7 +425,7 @@ void    GLUI_Spinner::do_click( void )
     to do the callback on each iteration of this function, just on every 
     i^th iteration, where i is given by GLUI_SPINNER_CALLBACK_INTERVAL ****/
   callback_count++;
-  //  if ( (callback_count % GLUI_SPINNER_CALLBACK_INTERVAL ) == 0 )
+  if ( (callback_count % GLUI_SPINNER_CALLBACK_INTERVAL ) == 0 )
     do_callbacks();
 }
 
@@ -419,7 +470,7 @@ void    GLUI_Spinner::do_drag( int x, int y )
 
 /***************************************** GLUI_Spinner::needs_idle() ******/
 
-int     GLUI_Spinner::needs_idle( void )
+bool GLUI_Spinner::needs_idle( void ) const
 {
   if  (state == GLUI_SPINNER_STATE_UP OR state == GLUI_SPINNER_STATE_DOWN ) {
     return true;
@@ -546,10 +597,10 @@ void    GLUI_Spinner::increase_growth( void )
 
 /*************************************** GLUI_Spinner:get_text() *************/
 
-char    *GLUI_Spinner::get_text( void )
+const char    *GLUI_Spinner::get_text( void )
 { 
   if (edittext) 
-    return edittext->text; 
+    return edittext->text.c_str(); 
   else 
     return ""; 
 }

@@ -108,6 +108,10 @@ add_library(glui STATIC
  ${GLUI_DIR}glui_mouse_iaction.cpp 
  ${GLUI_DIR}glui_listbox.cpp 
  ${GLUI_DIR}glui_rollout.cpp 
+ ${GLUI_DIR}glui_string.cpp 
+ ${GLUI_DIR}glui_window.cpp 
+ ${GLUI_DIR}glui_treepanel.cpp 
+ ${GLUI_DIR}glui_tree.cpp 
  ${GLUI_DIR}arcball.cpp 
  ${GLUI_DIR}algebra3.cpp
  ${GLUI_DIR}quaternion.cpp )

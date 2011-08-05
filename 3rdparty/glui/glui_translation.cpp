@@ -10,21 +10,69 @@
 
   Copyright (c) 1998 Paul Rademacher
 
-  This program is freely distributable without licensing fees and is
-  provided without guarantee or warrantee expressed or implied. This
-  program is -not- in the public domain.
+  WWW:    http://sourceforge.net/projects/glui/
+  Forums: http://sourceforge.net/forum/?group_id=92496
+
+  This software is provided 'as-is', without any express or implied 
+  warranty. In no event will the authors be held liable for any damages 
+  arising from the use of this software. 
+
+  Permission is granted to anyone to use this software for any purpose, 
+  including commercial applications, and to alter it and redistribute it 
+  freely, subject to the following restrictions: 
+
+  1. The origin of this software must not be misrepresented; you must not 
+  claim that you wrote the original software. If you use this software 
+  in a product, an acknowledgment in the product documentation would be 
+  appreciated but is not required. 
+  2. Altered source versions must be plainly marked as such, and must not be 
+  misrepresented as being the original software. 
+  3. This notice may not be removed or altered from any source distribution. 
 
 *****************************************************************************/
 
 #include "glui.h"
-#include "stdinc.h"
+#include "glui_internal.h"
 #include "algebra3.h"
+
+/********************** GLUI_Translation::GLUI_Translation() ***/
+
+GLUI_Translation::GLUI_Translation(
+  GLUI_Node *parent, const char *name, 
+  int trans_t, float *value_ptr,
+  int id, GLUI_CB cb )
+{
+  common_init();
+
+  set_ptr_val( value_ptr );
+  user_id    = id;
+  set_name( name );
+  callback    = cb;
+  parent->add_control( this );
+  //init_live();
+
+  trans_type = trans_t;
+
+  if ( trans_type == GLUI_TRANSLATION_XY ) {
+    float_array_size = 2;
+  }
+  else if ( trans_type == GLUI_TRANSLATION_X ) {
+    float_array_size = 1;
+  }
+  else if ( trans_type == GLUI_TRANSLATION_Y ) {
+    float_array_size = 1;
+  }
+  else if ( trans_type == GLUI_TRANSLATION_Z ) {
+    float_array_size = 1;
+  }
+  init_live();
+}
 
 /********************** GLUI_Translation::iaction_mouse_down_handler() ***/
 /*  These are really in local coords (5/10/99)                            */
 
 int    GLUI_Translation::iaction_mouse_down_handler( int local_x, 
-                             int local_y )
+						     int local_y )
 {
   int center_x, center_y;
 
@@ -42,12 +90,12 @@ int    GLUI_Translation::iaction_mouse_down_handler( int local_x,
 
     if ( glui->curr_modifiers & GLUT_ACTIVE_ALT ) {
       if ( ABS(local_y-center_y) > ABS(local_x-center_x) ) {
-    locked = GLUI_TRANSLATION_LOCK_Y;
-    glutSetCursor( GLUT_CURSOR_UP_DOWN );
+        locked = GLUI_TRANSLATION_LOCK_Y;
+        glutSetCursor( GLUT_CURSOR_UP_DOWN );
       }
       else {
-    locked = GLUI_TRANSLATION_LOCK_X;
-    glutSetCursor( GLUT_CURSOR_LEFT_RIGHT );
+        locked = GLUI_TRANSLATION_LOCK_X;
+        glutSetCursor( GLUT_CURSOR_LEFT_RIGHT );
       }
     }
     else {
@@ -69,7 +117,7 @@ int    GLUI_Translation::iaction_mouse_down_handler( int local_x,
   }
 
   trans_mouse_code = 1;
-  translate_and_draw_front();
+  redraw();
 
   return false;
 }
@@ -78,12 +126,12 @@ int    GLUI_Translation::iaction_mouse_down_handler( int local_x,
 /*********************** GLUI_Translation::iaction_mouse_up_handler() **********/
 
 int    GLUI_Translation::iaction_mouse_up_handler( int local_x, int local_y, 
-                           int inside )
+						   bool inside )
 {
   trans_mouse_code = GLUI_TRANSLATION_MOUSE_NONE;
   locked = GLUI_TRANSLATION_LOCK_NONE;
 
-  translate_and_draw_front();
+  redraw();
 
   return false;
 }
@@ -92,7 +140,7 @@ int    GLUI_Translation::iaction_mouse_up_handler( int local_x, int local_y,
 /******************* GLUI_Translation::iaction_mouse_held_down_handler() ******/
 
 int    GLUI_Translation::iaction_mouse_held_down_handler( int local_x, int local_y,
-                              int inside)
+							  bool inside)
 {  
   float x_off, y_off;
   float off_array[2];
@@ -108,7 +156,7 @@ int    GLUI_Translation::iaction_mouse_held_down_handler( int local_x, int local
     x_off *= .01f;
     y_off *= .01f;
   }
-        
+		
 
   if ( trans_type == GLUI_TRANSLATION_XY ) {
 
@@ -140,8 +188,6 @@ int    GLUI_Translation::iaction_mouse_held_down_handler( int local_x, int local
 
 void    GLUI_Translation::iaction_draw_active_area_persp( void )
 {
-  if ( NOT can_draw() )
-    return;
 }
 
 
@@ -149,16 +195,13 @@ void    GLUI_Translation::iaction_draw_active_area_persp( void )
 
 void    GLUI_Translation::iaction_draw_active_area_ortho( void )
 {
-  if ( NOT can_draw() )
-    return;
-
   /********* Draw emboss circles around arcball control *********/
   float radius;
   radius = (float)(h-22)/2.0;  /*  MIN((float)w/2.0, (float)h/2.0); */
   glLineWidth( 1.0 );
 
   draw_emboss_box( (int) -radius-2, (int)radius+2, 
-           (int)-radius-2, (int)radius+2 );
+		   (int)-radius-2, (int)radius+2 );
 
   glMatrixMode( GL_MODELVIEW );
   glPushMatrix();
@@ -312,10 +355,10 @@ void    GLUI_Translation::draw_2d_arrow( int radius, int filled, int orientation
 
   if ( glui )
     bkgd.set(glui->bkgd_color_f[0],
-         glui->bkgd_color_f[1],
-         glui->bkgd_color_f[2]);
+	     glui->bkgd_color_f[1],
+	     glui->bkgd_color_f[2]);
 
-  /*    bkgd[0] = 255.0; bkgd[1] = 0;              */
+  /*	bkgd[0] = 255.0; bkgd[1] = 0;              */
 
   /** The following 8 colors define the shading of an octagon, in
     clockwise order, starting from the upstroke on the left  **/
@@ -339,7 +382,7 @@ void    GLUI_Translation::draw_2d_arrow( int radius, int filled, int orientation
 #define DRAW_SEG( xa,ya,xb,yb ) glVertex2f(xa,ya); glVertex2f(xb,yb);
 
   glScalef( -1.0, 1.0, 1.0 );
-    
+	
   if ( orientation == 2 ) {
     c_off = 4;
   }
@@ -363,7 +406,7 @@ void    GLUI_Translation::draw_2d_arrow( int radius, int filled, int orientation
   else
     y0 = 0.0;
 
-    
+	
   if ( trans_type == GLUI_TRANSLATION_Z ) {
     if ( orientation == 0 ) {
       y1 += 2.0;
@@ -400,7 +443,7 @@ void    GLUI_Translation::draw_2d_arrow( int radius, int filled, int orientation
     colors_out[3] = colors_out[4] = colors_out[5] = colors_out[6] = white;
     colors_in[0] = colors_in[1] = colors_in[2] = colors_in[7] = white;
     colors_in[3] = colors_in[4] = colors_in[5] = colors_in[6] = gray;
-    
+	
   }
 
   glBegin( GL_POLYGON );
@@ -418,11 +461,11 @@ void    GLUI_Translation::draw_2d_arrow( int radius, int filled, int orientation
   glBegin( GL_LINES );
 
   SET_COL_IN(1+c_off);  DRAW_SEG( 0.0, y2-1.0, -x2, y1-1.0 );
-  SET_COL_IN(6+c_off);  DRAW_SEG( -x2+2.0, y1+1.0, -x1b+1.0, y1+1.0 );
-  SET_COL_IN(0+c_off);  DRAW_SEG( -x1b+1.0, y1+1.0, -x1a+1.0, y0 );
-  SET_COL_IN(3+c_off);  DRAW_SEG( 0.0, y2-1.0, x2, y1-1.0 );
-  SET_COL_IN(6+c_off);  DRAW_SEG( x2-1.0, y1+1.0, x1b-1.0, y1+1.0 );
-  SET_COL_IN(4+c_off);  DRAW_SEG( x1b-1.0, y1+1.0, x1a-1.0, y0 );
+  SET_COL_IN(6+c_off);	DRAW_SEG( -x2+2.0, y1+1.0, -x1b+1.0, y1+1.0 );
+  SET_COL_IN(0+c_off);	DRAW_SEG( -x1b+1.0, y1+1.0, -x1a+1.0, y0 );
+  SET_COL_IN(3+c_off);	DRAW_SEG( 0.0, y2-1.0, x2, y1-1.0 );
+  SET_COL_IN(6+c_off);	DRAW_SEG( x2-1.0, y1+1.0, x1b-1.0, y1+1.0 );
+  SET_COL_IN(4+c_off);	DRAW_SEG( x1b-1.0, y1+1.0, x1a-1.0, y0 );
 
   SET_COL_OUT(0+c_off);  DRAW_SEG( -x1a, y0, -x1b, y1  );
   SET_COL_OUT(6+c_off);  DRAW_SEG( -x1b, y1,  -x2, y1  );
@@ -446,19 +489,19 @@ int    GLUI_Translation::get_mouse_code( int x, int y )
   if ( x == 0 AND y < 0 )
     return GLUI_TRANSLATION_MOUSE_DOWN;
   else if ( x == 0 AND y > 0 )
-    return GLUI_TRANSLATION_MOUSE_UP;       
+    return GLUI_TRANSLATION_MOUSE_UP;		
   else if ( x > 0 AND y == 0 )
-    return GLUI_TRANSLATION_MOUSE_LEFT;     
+    return GLUI_TRANSLATION_MOUSE_LEFT;		
   else if ( x < 0 AND y == 0 )
-    return GLUI_TRANSLATION_MOUSE_RIGHT;        
+    return GLUI_TRANSLATION_MOUSE_RIGHT;		
   else if ( x < 0 AND y < 0 )
-    return GLUI_TRANSLATION_MOUSE_DOWN_LEFT;        
+    return GLUI_TRANSLATION_MOUSE_DOWN_LEFT;		
   else if ( x < 0 AND y > 0 )
     return GLUI_TRANSLATION_MOUSE_DOWN_RIGHT;
   else if ( x > 0 AND y < 0 )
     return GLUI_TRANSLATION_MOUSE_UP_LEFT;
   else if ( x > 0 AND y > 0 )
-    return GLUI_TRANSLATION_MOUSE_UP_RIGHT; 
+    return GLUI_TRANSLATION_MOUSE_UP_RIGHT;	
 
 
   return GLUI_TRANSLATION_MOUSE_NONE;
@@ -477,7 +520,7 @@ void  GLUI_Translation::set_x( float val )
 
 void  GLUI_Translation::set_y( float val )
 {
-  if ( trans_type == GLUI_TRANSLATION_XY )          
+  if ( trans_type == GLUI_TRANSLATION_XY )			
     set_one_val( val, 1 );
   else
     set_one_val( val, 0 );
@@ -498,12 +541,12 @@ void  GLUI_Translation::set_one_val( float val, int index )
 {
   float *fp;
 
-  float_array_val[index] = val;   /* set value in array              */
+  float_array_val[index] = val;	  /* set value in array              */
 
   /*** The code below is like output_live, except it only operates on
     a single member of the float array (given by 'index') instead of
     outputting the entire array   ****/
-    
+	
   if ( ptr_val == NULL OR NOT live_inited )
     return;
  
