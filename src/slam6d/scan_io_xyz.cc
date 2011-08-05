@@ -64,7 +64,6 @@ int ScanIO_xyz::readScans(int start, int end, string &dir, int maxDist, int minD
 
   while (scan_in.good()) {
     Point p;
-    int dummy;
     scan_in >> p.x >> p.z >> p.y;
     p.x *= 100;
     p.y *= 100;
