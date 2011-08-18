@@ -101,6 +101,8 @@ void setScansColored(int dummy);
 void saveSelection(int dummy);
 void clearSelection(int dummy);
 
+void updateControls();
+
 enum { ROTATION_X, ROTATION_RX, ROTATION_Y, ROTATION_RY, ROTATION_Z, ROTATION_RZ };
   /** enumeration for translation */
 enum { TRANS_X, TRANS_RX, TRANS_Y, TRANS_RY, TRANS_Z, TRANS_RZ };

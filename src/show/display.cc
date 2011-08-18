@@ -14,12 +14,12 @@ using std::cout;
 using std::cerr;
 using std::endl;
 
-double Display::mirror[16] = {1,0,0,0,
+double SDisplay::mirror[16] = {1,0,0,0,
   0,1,0,0,
   0,0,-1,0,
   0,0,0,1};
   
-void Display::displayAll() {
+void SDisplay::displayAll() {
   // TODO ensure all settings are set to default
   //
   glPushMatrix();
@@ -28,7 +28,7 @@ void Display::displayAll() {
   glPopMatrix();
 }
 
-void Display::readDisplays(string &filename, vector<Display*> &displays) {
+void SDisplay::readDisplays(string &filename, vector<SDisplay*> &displays) {
   ifstream input;
   input.open(filename.c_str());
 
@@ -51,7 +51,7 @@ void Display::readDisplays(string &filename, vector<Display*> &displays) {
       } else if(strcmp(type.c_str(), "GroupPlane") == 0) {
         displays.push_back(GroupPlaneDisplay::readFromFile(objectfile));
       } else {
-        cerr << "Unknown Display Object" << endl;
+        cerr << "Unknown SDisplay Object" << endl;
       }
     } catch(...) {
       cerr << "Wrong display type" << endl;
@@ -66,7 +66,7 @@ PointDisplay::PointDisplay(vector<float*> &p, vector<string> &l) {
   labels = l;
 }
 
-Display * PointDisplay::readFromFile(string &filename) {
+SDisplay * PointDisplay::readFromFile(string &filename) {
   ifstream input;
   input.open(filename.c_str());
 
@@ -121,7 +121,7 @@ LineDisplay::LineDisplay(vector<float*> &l) {
   lines = l;
 }
 
-Display * LineDisplay::readFromFile(string &filename) {
+SDisplay * LineDisplay::readFromFile(string &filename) {
   ifstream input;
   input.open(filename.c_str());
 
@@ -182,7 +182,7 @@ void GroupPlaneDisplay::displayObject() {
   }
 }
 
-Display* GroupPlaneDisplay::readFromFile(string &filename) {
+SDisplay* GroupPlaneDisplay::readFromFile(string &filename) {
   ifstream input;
   input.open(filename.c_str());
   vector<PlaneDisplay*> planes;
@@ -229,7 +229,7 @@ PlaneDisplay::PlaneDisplay(vector<float*> &p, float* c) {
   color = c;
 }
 
-Display * PlaneDisplay::readFromFile(string &filename, float* color) {
+SDisplay * PlaneDisplay::readFromFile(string &filename, float* color) {
   ifstream input;
   input.open(filename.c_str());
 
