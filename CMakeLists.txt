@@ -23,8 +23,33 @@ endif()
 # Declare Options and modify build accordingly ##
 #################################################
 
-## Show difference
+## Show 
 OPTION(WITH_SHOW "Whether to build Show. This is the Visualization program of slam6d. ON/OFF" ON)
+
+IF(WITH_SHOW)
+  FIND_PACKAGE(OpenGL REQUIRED)
+  FIND_PACKAGE(GLUT REQUIRED)
+  MESSAGE(STATUS "With show")
+ELSE(WITH_SHOW)
+  #  SET (WITH_OCTREE_DISPLAY "ON" CACHE INTERNAL "" FORCE)
+  MESSAGE(STATUS "Without show")
+ENDIF(WITH_SHOW)
+
+## WXShow 
+OPTION(WITH_WXSHOW "Whether to build WXShow. This is the wxwidgets variant of Show. ON/OFF" OFF)
+
+IF(WITH_WXSHOW)
+  FIND_PACKAGE(OpenGL REQUIRED)
+  FIND_PACKAGE(GLUT REQUIRED)
+  find_package(wxWidgets COMPONENTS core base gl REQUIRED)
+  # set wxWidgets_wxrc_EXECUTABLE to be ignored in the configuration
+  SET (wxWidgets_wxrc_EXECUTABLE " " CACHE INTERNAL "" FORCE) 
+  # wxWidgets include (this will do all the magic to configure everything)
+  include( ${wxWidgets_USE_FILE})
+  MESSAGE(STATUS "With wxshow")
+ELSE(WITH_XWSHOW)
+  MESSAGE(STATUS "Without wxshow")
+ENDIF(WITH_WXSHOW)
 
 IF(WITH_SHOW)
   FIND_PACKAGE(OpenGL REQUIRED)
@@ -274,6 +299,7 @@ SET( CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin )
 include_directories(${CMAKE_SOURCE_DIR}/include)
 include_directories(${CMAKE_SOURCE_DIR}/3rdparty/)
 include_directories(${CMAKE_SOURCE_DIR}/3rdparty/glui)
+include_directories(${CMAKE_SOURCE_DIR}/3rdparty/wxthings/include/)
 include_directories(${CMAKE_SOURCE_DIR}/3rdparty/ann_1.1.1_modified/include)
 include_directories(${CMAKE_SOURCE_DIR}/3rdparty/ann_1.1.1_modified/src)
 link_directories(${CMAKE_SOURCE_DIR}/obj)
@@ -282,6 +308,7 @@ link_directories(${CMAKE_SOURCE_DIR}/lib)
 add_subdirectory(3rdparty)
 add_subdirectory(src/slam6d)
 add_subdirectory(src/show)
+#add_subdirectory(src/wxshow)
 add_subdirectory(src/grid)
 add_subdirectory(src/pmd)
 add_subdirectory(src/shapes)

@@ -117,6 +117,26 @@ add_library(glui STATIC
  ${GLUI_DIR}quaternion.cpp )
  
 
+
+IF(WITH_WXSHOW)
+
+# Compile wxthings library
+SET(WXTHINGS_DIR ${CMAKE_SOURCE_DIR}/3rdparty/wxthings/src/)
+add_library(wxthings STATIC 
+  ${WXTHINGS_DIR}block.cpp
+  ${WXTHINGS_DIR}bmpcombo.cpp
+  ${WXTHINGS_DIR}dropdown.cpp
+  # ${WXTHINGS_DIR}filebrws.cpp  # these two are not needed and would create unnecessary dependencies
+  #${WXTHINGS_DIR}genergdi.cpp
+  ${WXTHINGS_DIR}geometry.cpp
+  ${WXTHINGS_DIR}menubtn.cpp
+  ${WXTHINGS_DIR}optvalue.cpp
+  ${WXTHINGS_DIR}range.cpp
+  ${WXTHINGS_DIR}spinctld.cpp
+  ${WXTHINGS_DIR}toggle.cpp
+)
+ENDIF(WITH_WXSHOW)
+
 # Compile sparse library 
 SET(SPARSE_DIR ${CMAKE_SOURCE_DIR}/3rdparty/sparse/)
 add_library(sparse STATIC ${SPARSE_DIR}csparse.cc)

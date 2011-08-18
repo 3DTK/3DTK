@@ -22,19 +22,19 @@ using std::string;
 
 using namespace std;
 
-class Display {
+class SDisplay {
   public:
   //inline void setColorManager(ColorManager *_cm) { cm = _cm; }
   
  
-  //virtual Display* readFromFile(string &filename) = 0;
+  //virtual SDisplay* readFromFile(string &filename) = 0;
   virtual const char *getName() { return "Unnamed display"; }
   virtual void display(double detail) { displayAll(); } 
   virtual void displayAll();
   
   virtual void displayObject() = 0;
 
-  static void readDisplays(string &filename, vector<Display*> &displays); 
+  static void readDisplays(string &filename, vector<SDisplay*> &displays); 
   
 
   protected:
@@ -42,10 +42,10 @@ class Display {
   //ColorManager *cm;
 };
 
-class PointDisplay : public Display { 
+class PointDisplay : public SDisplay { 
  
   public:
-  static Display* readFromFile(string &filename);
+  static SDisplay* readFromFile(string &filename);
   virtual void displayObject();
 
   private:
@@ -56,10 +56,10 @@ class PointDisplay : public Display {
   vector<string> labels;
 };
 
-class LineDisplay : public Display { 
+class LineDisplay : public SDisplay { 
  
   public:
-  static Display* readFromFile(string &filename);
+  static SDisplay* readFromFile(string &filename);
   virtual void displayObject();
 
   private:
@@ -69,9 +69,9 @@ class LineDisplay : public Display {
   vector<float *> lines;
 };
 
-class PlaneDisplay : public Display {
+class PlaneDisplay : public SDisplay {
   public: 
-  static Display* readFromFile(string &filename, float* color);
+  static SDisplay* readFromFile(string &filename, float* color);
   virtual void displayObject();
 
   private:
@@ -82,9 +82,9 @@ class PlaneDisplay : public Display {
 
 };
 
-class GroupPlaneDisplay : public Display {
+class GroupPlaneDisplay : public SDisplay {
   public:
-  static Display* readFromFile(string &filename);
+  static SDisplay* readFromFile(string &filename);
   virtual void displayObject();
 
   private:
