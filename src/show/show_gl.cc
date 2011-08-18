@@ -139,15 +139,17 @@ void DrawPoints(GLenum mode)
           octpts[iterator]->displayOctTreeCulled(ptstodisplay);
           //octpts[iterator]->displayOctTree(pointsize*pointsize*pointsize*10);
         }
-        glColor4f(1.0, 0.0, 0.0, 1.0);
-        glPointSize(pointsize + 2.0);
-        glBegin(GL_POINTS);
-        for ( set<sfloat*>::iterator it = selected_points[iterator].begin();
-            it != selected_points[iterator].end(); it++) {
-          glVertex3d((*it)[0], (*it)[1], (*it)[2]);
+        if (!selected_points[iterator].empty()) {
+          glColor4f(1.0, 0.0, 0.0, 1.0);
+          glPointSize(pointsize + 2.0);
+          glBegin(GL_POINTS);
+          for ( set<sfloat*>::iterator it = selected_points[iterator].begin();
+              it != selected_points[iterator].end(); it++) {
+            glVertex3d((*it)[0], (*it)[1], (*it)[2]);
+          }
+          glEnd();
+          glPointSize(pointsize);
         }
-        glEnd();
-        glPointSize(pointsize);
         
 #else
         for (unsigned int jterator = 0; jterator < vvertexArrayList[iterator].size(); jterator++) {
@@ -410,8 +412,7 @@ void DisplayItFunc(GLenum mode)
       mouseRotY = deg(rPT[1]);
     
     }
-    glui2->sync_live();
-    glui2->show();
+    updateControls();
 
     glTranslated(X, Y, Z);       // move camera	
   }
@@ -526,6 +527,7 @@ void DrawUrl() {
   // Set the projection (to 2D orthographic)
   glOrtho(0.0,100.0,0.0,100.0,-1.5,1.5);
   
+    glPolygonMode (GL_FRONT_AND_BACK, GL_FILL); 
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); // TODO
   
   glColor4d(0.0,0.0,0.0,0.7);
@@ -656,9 +658,7 @@ void resetView(int dummy)
 {
 //  quat[0] = 1.0;
   cangle = 60.0;
-  cangle_spinner->set_float_val(cangle);  
   pzoom = 2000.0;
-  pzoom_spinner->set_float_val(pzoom);  
 //  quat[1] = quat[2] = quat[3] = X = Y = Z = 0.0;
 //  quat[1] = quat[2] = quat[3] = 0.0;
   X = RVX;
@@ -668,10 +668,11 @@ void resetView(int dummy)
   quat[1] = Rquat[1];
   quat[2] = Rquat[2];
   quat[3] = Rquat[3];
-  rotButton->reset();
   haveToUpdate = 2;
   mouseRotX = 0;
   mouseRotY = 0;
+
+  updateControls();
 }
 
 /**
@@ -696,14 +697,8 @@ void setView(double pos[3], double new_quat[4],
   showTopView = sTV,
   cameraNavMouseMode = cNMM;
   pzoom = pzoom_new;
-  pzoom_spinner->set_float_val(pzoom);  
-  if(showTopView) {
-    pzoom_spinner->enable();
-    cangle_spinner->disable();
-  } else {
-    pzoom_spinner->disable();
-    cangle_spinner->enable();
-  }
+  updateControls();
+
   show_points = s_points;
   show_path = s_path;
   show_cameras = s_cameras;
@@ -749,8 +744,8 @@ void CallBackDisplayFunc()
   glutSwapBuffers(); 
 
   // live sync the glui variables with the controls
-  glui1->sync_live();
-  glui2->sync_live();
+  // TODO check if this one is necessary
+//  updateControls();
 
 }
 //--------------------------------------------------------------------------------
@@ -817,11 +812,11 @@ void CallBackIdleFunc(void)
     glutPostRedisplay();
 
     if(save_animation){
-	 string filename = scandir + "animframe" + to_string(frameNr,5) + ".ppm";
+	 string filename = scandirectory + "animframe" + to_string(frameNr,5) + ".ppm";
 	 cout << "write " << filename << endl;
 	 glDumpWindowPPM(filename.c_str(),0);
 
-	 string jpgname = scandir + "animframe" + to_string(frameNr,5) + ".jpg";
+	 string jpgname = scandirectory + "animframe" + to_string(frameNr,5) + ".jpg";
 	 string systemcall = "convert -quality 100 -type TrueColor " + filename + " " + jpgname;	
 	 //	 cout << systemcall << endl;
 	 system(systemcall.c_str());
@@ -831,7 +826,7 @@ void CallBackIdleFunc(void)
   // for f in *ppm ; do convert -quality 100 -type TrueColor $f `basename $f ppm`jpg; done 
    }
     
-  }
+}
 #ifdef _MSC_VER
   Sleep(300);
   Sleep(anim_delay);
@@ -877,8 +872,8 @@ void CallBackIdleFunc(void)
 
       //save the animation
       if(save_animation){
-        string filename = scandir + "animframe" + to_string(path_iterator,5) + ".ppm";
-	   string jpgname = scandir + "animframe" + to_string(path_iterator,5) + ".jpg";
+        string filename = scandirectory + "animframe" + to_string(path_iterator,5) + ".ppm";
+        string jpgname = scandirectory + "animframe" + to_string(path_iterator,5) + ".jpg";
         cout << "written " << filename << " of " << path_vectorX.size() << " files" << endl;
         glWriteImagePPM(filename.c_str(), factor, 0);
         string systemcall = "convert -quality 100 " + filename + " " + jpgname;	
@@ -1060,8 +1055,7 @@ void selectPoints(int x, int y) {
       mouseRotX = deg(rPT[0]);
       mouseRotY = deg(rPT[1]);
     }
-    glui2->sync_live();
-    glui2->show();
+    updateControls();
     glTranslated(X, Y, Z);       // move camera	
 
     static sfloat *sp2 = 0;
@@ -1182,6 +1176,7 @@ void CallBackMouseFunc(int button, int state, int x, int y)
       
       mousemoving = true;
     } else {
+      mouseNavButton = -1;
       mousemoving = false;
       if (delayeddisplay) {
         delayeddisplay = false;
@@ -1241,6 +1236,8 @@ void CallBackMouseMotionFunc(int x, int y) {
         if (mouseRotY > 360) mouseRotY-=360;
         else if (mouseRotY < 0) mouseRotY+=360;
       }
+    } else {
+      return;
     }
     X += transX;
     Y += transY;
@@ -1642,19 +1639,14 @@ void CallBackSpecialFunc(int key , int x, int y) {
  */
 
 void drawRobotPath(int dummy){
-  // TODO FIXME change to work with new camera path
-  
   //clear the camera list as we are going to add the cameras
   //in the path where the robot travelled.
 
   //lets loop through the entire frame files to extract the
   //total number of places where the robot has taken the scans from
   for(unsigned int i = 0; i < MetaMatrix.size(); i++){
-
     //temp variable
     double *temp;
-   
-    
     //Now, lets go to the last of each frame file to
     //extract the transformation matrix obtained
     //after scan matching has been done.
@@ -1833,16 +1825,17 @@ void changePointMode(int dummy) {
   if (dummy == 0) {           // always display
     if (pointmode != 1) {  // standard mode
       pointmode = 1;
-      never_box->set_int_val(0);
+      //never_box->set_int_val(0);
     } else {
       pointmode = 0;
     }
   } else if (dummy == 1) {    // never display
     if (pointmode != -1) {  // standard mode
       pointmode = -1;
-      always_box->set_int_val(0);
+      //always_box->set_int_val(0);
     } else {
       pointmode = 0;
     }
   }
+  updateControls();
 }

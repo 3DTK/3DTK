@@ -94,8 +94,7 @@ void calcPath()
 }
 
 void updateCamera() {
-  cam_spinner->set_int_limits( 1, cams.size());
-  cam_spinner->set_int_val(cam_choice);
+  updateControls();
   
   calcPath();
   calcLookAtPath();
