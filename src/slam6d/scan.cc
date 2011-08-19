@@ -1345,6 +1345,7 @@ bool Scan::toType(const char* string, reader_type &type) {
   else if (strcasecmp(string, "xyz_rgb") == 0) type = XYZ_RGB;
   else if (strcasecmp(string, "ks") == 0) type = KS;
   else if (strcasecmp(string, "ks_rgb") == 0) type = KS_RGB;
+  else if (strcasecmp(string, "stl") == 0) type = STL;
   else return false;
   return true;
 }
@@ -1530,6 +1531,9 @@ Scan::scanIOwrapper::scanIOwrapper(reader_type type){
     break;
   case KS_RGB:
     lib_string = "scan_io_ks_rgb";
+    break;
+  case STL:
+    lib_string = "scan_io_stl";
     break;
   default:
     cerr << "Don't recognize format " << type << endl;

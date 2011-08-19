@@ -400,7 +400,8 @@ bool wxShow::OnInit()
     new_argv[i] = new char[ strlen(cc) +1 ];
     strcpy(new_argv[i], cc);
   }
-  initShow(argc, new_argv); 
+  initShow(argc, new_argv);
+  //glClearColor(0.0, 0.0, 0.0, 0.0);
 
   wxBoxSizer* sizer = new wxBoxSizer(wxHORIZONTAL);
   frame = new wxFrame((wxFrame *)NULL, -1,  wxT("Viewer"), wxPoint(START_X, START_Y), wxSize(START_WIDTH, START_HEIGHT));
