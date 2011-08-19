@@ -719,8 +719,7 @@ void initShow(int argc, char **argv){
   /* init OpenGL */
   /***************/
   glutInit(&argc,argv);
-  glClearColor(0.0, 0.0, 0.0, 0.0);
-
+  
   cout << "(c) University of Osnabrueck, 2006 - 2007" << endl << endl
 	  << "Restricted Usage" << endl
 	  << "Don't use without permission" << endl;
