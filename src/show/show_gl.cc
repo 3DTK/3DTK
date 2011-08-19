@@ -1276,7 +1276,7 @@ void initScreenWindow()
   GLUI_Master.set_glutIdleFunc( CallBackIdleFunc );
 
   update_view_rotate(0);
-
+  glClearColor(0.0, 0.0, 0.0, 0.0);
 }
 
 

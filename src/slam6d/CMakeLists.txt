@@ -51,6 +51,7 @@ add_library(scan_io_xyzr            SHARED scan_io_xyzr.cc           )
 add_library(scan_io_xyz_rgb         SHARED scan_io_xyz_rgb.cc        )
 add_library(scan_io_ks              SHARED scan_io_ks.cc             )
 add_library(scan_io_ks_rgb          SHARED scan_io_ks_rgb.cc         )
+add_library(scan_io_stl              SHARED scan_io_stl.cc           )
 
 add_library(scan_io_oct             SHARED scan_io_oct.cc point_type.cc)
 IF(WIN32)
