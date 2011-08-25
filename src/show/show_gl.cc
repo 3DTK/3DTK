@@ -533,28 +533,28 @@ void DrawUrl() {
   glColor4d(0.0,0.0,0.0,0.7);
   
   glBegin(GL_QUADS);
-  glVertex3f(0,0,-0.1);
-  glVertex3f(0,6,-0.1);
+  glVertex3f(0,0,1.49);
+  glVertex3f(0,6,1.49);
   if(smallfont) {
-    glVertex3f(22,6,-0.1);
-    glVertex3f(22,0,-0.1);
+    glVertex3f(22,6,1.49);
+    glVertex3f(22,0,1.49);
   } else {
-    glVertex3f(25,6,-0.1);
-    glVertex3f(25,0,-0.1);
+    glVertex3f(25,6,1.49);
+    glVertex3f(25,0,1.49);
   }
   glEnd();
   
   glBlendFunc(GL_ONE, GL_ZERO);
   glColor3f(1,1,1);
   if(smallfont) {
-    glRasterPos3f(1,3.5,0.0);
+    glRasterPos3f(1,3.5,1.5);
     _glutBitmapString(GLUT_BITMAP_8_BY_13, "created by 3DTK");
-    glRasterPos3f(1,1,0.0);
+    glRasterPos3f(1,1,1.5);
     _glutBitmapString(GLUT_BITMAP_8_BY_13, "http://threedtk.de");
   } else {
-    glRasterPos3f(1,3.5,0.0);
+    glRasterPos3f(1,3.5,1.5);
     _glutBitmapString(GLUT_BITMAP_9_BY_15, "created by 3DTK");
-    glRasterPos3f(1,1,0.0);
+    glRasterPos3f(1,1,1.5);
     _glutBitmapString(GLUT_BITMAP_9_BY_15, "http://threedtk.de");
   }
   
