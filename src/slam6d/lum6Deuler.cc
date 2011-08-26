@@ -137,7 +137,7 @@ void lum6DEuler::covarianceEuler(Scan *first, Scan *second,
   MM = 0.0;
   sx = sy = sz = xy = yz = xz = ypz = xpz = xpy = ss = 0.0;
 
-  if (m > 0) {
+  if (m > 2) {
     // for each point pair
     for(int j = 0; j < m; j++){
       ak = uk[j].p1;
@@ -254,7 +254,7 @@ void lum6DEuler::covarianceEuler(Scan *first, Scan *second,
  * @param G The matrix G specifying the linear equation
  * @param B The vector B 
  */
-void lum6DEuler::FillGB3D(Graph *gr, Matrix* G, ColumnVector* B,vector<Scan *> allScans )
+void lum6DEuler::FillGB3D(Graph *gr, GraphMatrix* G, ColumnVector* B,vector<Scan *> allScans )
 {
 #ifdef _OPENMP
 #pragma omp parallel for schedule(dynamic)
@@ -272,19 +272,25 @@ void lum6DEuler::FillGB3D(Graph *gr, Matrix* G, ColumnVector* B,vector<Scan *> a
     covarianceEuler(FirstScan, SecondScan, nns_method, (int)my_icp->get_rnd(), 
                     (int)max_dist_match2_LUM, &Cab, &CDab); 
 
-    if(a >= 0){
-      B->Rows(a*6+1,a*6+6) += CDab;
-      G->SubMatrix(a*6+1,a*6+6,a*6+1,a*6+6) += Cab;
-    }
-    if(b >= 0){
-      B->Rows(b*6+1,b*6+6) -= CDab;
-      G->SubMatrix(b*6+1,b*6+6,b*6+1,b*6+6) += Cab;
-    }
-    if(a >= 0 && b >= 0) { 
-      G->SubMatrix(a*6+1,a*6+6,b*6+1,b*6+6) = -Cab;
-      G->SubMatrix(b*6+1,b*6+6,a*6+1,a*6+6) = -Cab;
+#pragma omp critical
+    {
+      if(a >= 0){
+        B->Rows(a*6+1,a*6+6) += CDab;
+        G->add(a, a, Cab);
+      }
+      if(b >= 0){
+        B->Rows(b*6+1,b*6+6) -= CDab;
+        G->add(b, b, Cab);
+      }
+      if(a >= 0 && b >= 0) { 
+        G->subtract(a, b, Cab);
+        G->subtract(b, a, Cab);
+      }
+
     }
   }
+
+//  G->print();
 }
 
 /**
@@ -339,14 +345,15 @@ double lum6DEuler::doGraphSlam6D(Graph gr, vector <Scan *> allScans, int nrIt)
     int n = (gr.getNrScans() - 1);
     
     // Construct the linear equation system..
-    Matrix G(6*n,6*n);
+    GraphMatrix *G = new GraphMatrix();
     ColumnVector B(6*n);
-    G = 0.0;
     B = 0.0;
     // ...fill G and B...
-    FillGB3D(&gr, &G, &B, allScans);
+    FillGB3D(&gr, G, &B, allScans);
     // ...and solve it
     ColumnVector X =  solveSparseCholesky(G, B);
+
+  //  delete G;
 
     //cout << "X done!" << endl;
 
