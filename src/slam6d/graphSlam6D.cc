@@ -50,7 +50,7 @@ graphSlam6D::graphSlam6D(icp6Dminimizer *my_icp6Dminimizer,
   this->max_dist_match2_LUM = sqr(max_dist_match);
 
   ctime = 0.0;
-  
+
   this->my_icp = new icp6D(my_icp6Dminimizer, mdm, max_num_iterations,
 					  quiet, meta, rnd, eP, anim, epsilonICP, nns_method);
 }
@@ -324,6 +324,41 @@ ColumnVector graphSlam6D::solveSparseCholesky(const Matrix &G, const ColumnVecto
   return X;
 }
 
+ColumnVector graphSlam6D::solveSparseCholesky(GraphMatrix *G, const ColumnVector &B)
+{
+
+  long starttime = GetCurrentTimeInMilliSec();
+
+  int n = B.Nrows();
+  ColumnVector X(n);
+  
+  // ------------------------------
+  // Sparse Cholsekey decomposition
+  // ------------------------------
+  cs *A, *T = cs_spalloc (0, 0, 1, 1, 1) ;
+  double *x = new double[n];
+  for (int i = 0; i < n; i++) {
+    x[i] = B.element(i);
+  }
+  G->convertToCS(T);
+  A = cs_triplet (T);
+  cs_dropzeros (A) ;			// drop zero entries
+//  cs_print(T, 0);
+  cs_cholsol (A, x, 1) ;
+  // copy values back  
+  for (int i = 0; i < n; i++) {
+    X.element(i) = x[i];
+  }
+
+  cs_spfree(A);
+  cs_spfree(T);
+  delete [] x;
+
+  ctime += GetCurrentTimeInMilliSec() - starttime;
+
+  return X;
+}
+
 
 /**
  * This function is used to solve the system of linear eq.
@@ -371,3 +406,73 @@ void graphSlam6D::set_mdmll(double mdmll) {
   max_dist_match2_LUM = sqr(mdmll);
 }
 
+
+void GraphMatrix::add(const unsigned int i, const unsigned int j, Matrix &Cij) {
+  uipair ui(i,j);
+  it = matrix.find( ui );
+  if (it != matrix.end()) {
+    (*(it->second)) += Cij;
+  } else {
+    Matrix *C = new Matrix(6,6);
+    *C = Cij;
+    matrix.insert( uimpair( ui, C));
+  }
+}
+
+void GraphMatrix::subtract(const unsigned int i, const  unsigned int j,Matrix &Cij) {
+  uipair ui(i,j);
+  it = matrix.find( ui );
+  if (it != matrix.end()) {
+    (*it->second) -= Cij;
+  } else {
+    Matrix *C = new Matrix(6,6);
+    *C = Cij;
+    *C *= -1.0;
+    matrix.insert( uimpair( ui, C));
+  }
+}
+
+void GraphMatrix::print() {
+  for ( it = matrix.begin() ; it != matrix.end(); it++ ) {
+    uimpair uim = *it;
+    uipair ui = uim.first;
+    cout << ui.first << " " << ui.second << " :" << endl << *uim.second << endl;
+  }
+}
+
+GraphMatrix::~GraphMatrix() {
+  for ( it = matrix.begin() ; it != matrix.end(); it++ ) {
+    uimpair uim = *it;
+    delete uim.second;
+  }
+
+}
+
+void GraphMatrix::convertToCS(cs *T) {
+  unsigned int a,b;
+  int imin,imax,jmin,jmax;
+
+  for ( it = matrix.begin() ; it != matrix.end(); it++ ) {
+    Matrix *C = it->second;
+    a = it->first.first;
+    b = it->first.second;
+//    cout << a << " " << b << " " << C << endl;
+    imin = a*6;
+    jmin = b*6;
+
+    imax = a*6 + 6;
+    jmax = b*6 + 6;
+    a = b = 0;
+
+    for (int i = imin; i < imax; i++, a++) {
+      b = 0;
+      for (int j = jmin; j < jmax; j++, b++) {
+        if (fabs(C->element(a, b)) > 0.00001) {
+          cs_entry (T, i, j, C->element(a, b));
+        }
+      }
+    }
+  }
+//  print();
+//  cs_print(T, 0);
+}
