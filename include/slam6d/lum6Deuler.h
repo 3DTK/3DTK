@@ -55,7 +55,7 @@ public:
 						int rnd, double max_dist_match2, NEWMAT::Matrix *C, NEWMAT::ColumnVector *CD=0);
   
 private:
-  void FillGB3D(Graph *gr, NEWMAT::Matrix* G, NEWMAT::ColumnVector* B, vector <Scan *> allScans);
+  void FillGB3D(Graph *gr, GraphMatrix *G, NEWMAT::ColumnVector* B, vector <Scan *> allScans);
 //  void CalculateLinks3D(int numLinks, vPtPair **ptpairs, vector <ColumnVector >* CD , vector <NEWMAT::Matrix>* C);
     
 };
