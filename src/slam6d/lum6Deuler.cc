@@ -353,7 +353,7 @@ double lum6DEuler::doGraphSlam6D(Graph gr, vector <Scan *> allScans, int nrIt)
     // ...and solve it
     ColumnVector X =  solveSparseCholesky(G, B);
 
-  //  delete G;
+    delete G;
 
     //cout << "X done!" << endl;
 
