@@ -10,7 +10,14 @@
 class SelectionImpl : public Selection {
   public:
 
-		SelectionImpl( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Selection"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( -1,-1 ), long style = wxDEFAULT_FRAME_STYLE|wxTAB_TRAVERSAL ) : Selection(parent, id, title, pos, size, style) {};
+		SelectionImpl( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Selection"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( -1,-1 ), long style = wxDEFAULT_FRAME_STYLE|wxTAB_TRAVERSAL ) : Selection(parent, id, title, pos, size, style) {
+  
+      if (pointtype.hasReflectance()) m_choice11->Append(wxT("reflectance"));
+      if (pointtype.hasAmplitude()) m_choice11->Append(wxT("amplitude"));
+      if (pointtype.hasDeviation()) m_choice11->Append(wxT("deviation"));
+      if (pointtype.hasType()) m_choice11->Append(wxT("type"));
+
+    };
 		// Virtual event handlers, overide them in your derived class
     //
 		virtual void OnDrawPoints( wxCommandEvent& event ) { 
@@ -63,9 +70,36 @@ class SelectionImpl : public Selection {
     }
 		virtual void OnColorValue( wxCommandEvent& event )
     {
-      listboxColorVal = event.GetSelection();
-      mapColorToValue(0);
+      // we can't use the glui-show function for changing the color as a listbox is used here instead
+      switch (event.GetSelection()) {
+        case 0:
+          cm->setCurrentType(PointType::USE_HEIGHT);
+          break;
+        case 1:
+          if (pointtype.hasReflectance()) {
+            cm->setCurrentType(PointType::USE_REFLECTANCE);
+            break;
+          }
+        case 2:
+          if (pointtype.hasAmplitude()) {
+            cm->setCurrentType(PointType::USE_AMPLITUDE);
+            break;
+          }
+        case 3:
+          if (pointtype.hasDeviation()) {
+            cm->setCurrentType(PointType::USE_DEVIATION);
+            break;
+          }
+        case 4:
+          if (pointtype.hasType()) {
+            cm->setCurrentType(PointType::USE_TYPE);
+            break;
+          }
+        default:
+          break;
+      };
       haveToUpdate = 1;
+      resetMinMax(0);
       event.Skip(); 
     }
 		virtual void OnColorMap( wxCommandEvent& event ) 
@@ -99,8 +133,6 @@ class SelectionImpl : public Selection {
     }
 		virtual void OnColorResetMinMax( wxCommandEvent& event ) { 
       resetMinMax(0);
-      m_spinCtrl6->SetValue(maxcolor_value);
-      m_spinCtrl61->SetValue(mincolor_value);
       haveToUpdate = 1;
       event.Skip(); 
     }
@@ -165,7 +197,6 @@ class SelectionImpl : public Selection {
         lookats.push_back(lookat);
         ups.push_back(up);
       }
-      // TODO update the controls
       //signal for the update of scene
       haveToUpdate = 1;
       event.Skip(); 
@@ -259,9 +290,8 @@ class SelectionImpl : public Selection {
         frame_spin->SetRange(0, MetaMatrix[0].size()-1);
         frame_spin->SetValue(current_frame);
       }
-      pointsize_spinner->SetValue(pointsize);
-      fogdens_spinner->SetValue(fogDensity);
-
+      m_spinCtrl61->SetValue(mincolor_value);
+      m_spinCtrl6->SetValue(maxcolor_value);
     }
 
 };
@@ -418,7 +448,7 @@ bool wxShow::OnInit()
   selection = new SelectionImpl( (wxWindow*)NULL, wxID_ANY, wxT("Selection"), wxPoint(START_X + START_WIDTH + 50, START_Y + 30) );
   controls = new ControlImpl( (wxWindow*)NULL, wxID_ANY, wxT("Controls"), wxPoint(START_X, START_Y + START_HEIGHT + 20 ) );
  
-  selection->SetSize(wxSize(200,373) );
+  selection->SetSize(wxSize(200,393) );
   selection->SetAutoLayout(true);
   selection ->Show();
   selection ->Layout();
@@ -476,8 +506,7 @@ void BasicGLPane::mouseEvent(wxMouseEvent& event)
   }
 }
 
-void BasicGLPane::idle(wxIdleEvent& event)
-{
+void BasicGLPane::idle() {
   if(glutGetWindow() != window_id)
     glutSetWindow(window_id);
 	 
@@ -516,13 +545,13 @@ void BasicGLPane::idle(wxIdleEvent& event)
    */
   if(haveToUpdate == 3 ){
     anim_jterator += 1;
-    if(!(anim_jterator < (int) MetaMatrix[1].size())){
+    if(!(MetaMatrix.size() > 1 &&  anim_jterator < (int) MetaMatrix[1].size())){
       anim_iterator = 0;
       haveToUpdate = 4;
       return;
     }
     scanNr = 1;
-    frameNr =  calcFrameNo() + anim_jterator;
+    frameNr =  anim_jterator;
     paint();
 
     if(save_animation){
@@ -593,6 +622,11 @@ void BasicGLPane::idle(wxIdleEvent& event)
       haveToUpdate = 0;
     }
   }
+}
+
+void BasicGLPane::idle(wxIdleEvent& event)
+{
+  idle();
   event.RequestMore();
 }
 
@@ -602,10 +636,7 @@ void BasicGLPane::mouseMoved(wxMouseEvent& event)
   int y = event.GetY();
 
   CallBackMouseMotionFunc(x, y);
-
-  if (haveToUpdate != 0) {
-    paint();
-  }
+  idle();
 }
 void BasicGLPane::mouseDown(wxMouseEvent& event) {}
 void BasicGLPane::mouseWheelMoved(wxMouseEvent& event) {}

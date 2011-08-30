@@ -746,7 +746,7 @@ void initShow(int argc, char **argv){
   selection_file_name = new char[sizeof(GLUI_String)];
    
   strncpy(pose_file_name, "pose.dat", sizeof(GLUI_String));  
-  strncpy(path_file_name, "file.path", sizeof(GLUI_String));  
+  strncpy(path_file_name, "path.dat", sizeof(GLUI_String));  
   strncpy(selection_file_name, "selected.3d", sizeof(GLUI_String));  
   
   parseArgs(argc, argv, dir, start, end, maxDist, minDist, red, readInitial,
