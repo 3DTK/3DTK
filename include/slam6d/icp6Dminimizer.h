@@ -82,7 +82,7 @@ public:
     exit(-1);
   }
 
-  virtual inline int getAlgorithmID() = 0; 
+  virtual int getAlgorithmID() = 0; 
 
 protected:
   bool quiet; ///< determines the verbosity
