@@ -6,6 +6,7 @@
 ///////////////////////////////////////////////////////////////////////////
 
 #include "show/selectionframe.h"
+#include "float.h"
 
 ///////////////////////////////////////////////////////////////////////////
 
@@ -80,7 +81,7 @@ Selection::Selection( wxWindow* parent, wxWindowID id, const wxString& title, co
 	bSizer6->Add( 0, 0, 1, wxEXPAND, 5 );
 	
 	fogdens_spinner = new wxSpinCtrlDbl( *m_panel3, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 
-      0, 1.0, 0.0001, 0.0001 );
+      0, 1.0, 0.001, 0.001 );
 	bSizer6->Add( fogdens_spinner, 0, wxRIGHT|wxLEFT, 5 );
 	
 	m_panel3->SetSizer( bSizer6 );
@@ -108,8 +109,9 @@ Selection::Selection( wxWindow* parent, wxWindowID id, const wxString& title, co
 	
 	bSizer311->Add( 0, 0, 1, wxEXPAND, 5 );
 	
-	wxString m_choice11Choices[] = { wxT("height"), wxT("reflectance"), wxT("amplitude"), wxT("deviation"), wxT("type") };
-	int m_choice11NChoices = sizeof( m_choice11Choices ) / sizeof( wxString );
+	wxString m_choice11Choices[] = { wxT("height") };
+
+  int m_choice11NChoices = sizeof( m_choice11Choices ) / sizeof( wxString );
 	m_choice11 = new wxChoice( m_panel211, wxID_ANY, wxDefaultPosition, wxDefaultSize, m_choice11NChoices, m_choice11Choices, 0 );
 	m_choice11->SetSelection( 4 );
 	bSizer311->Add( m_choice11, 0, wxRIGHT|wxLEFT, 5 );
@@ -174,7 +176,7 @@ Selection::Selection( wxWindow* parent, wxWindowID id, const wxString& title, co
 	
 	bSizer51->Add( 0, 0, 1, wxEXPAND, 5 );
 	
-	m_spinCtrl61 = new wxSpinCtrlDbl( *m_panel411, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, -1000, 1000, 0 );
+	m_spinCtrl61 = new wxSpinCtrlDbl( *m_panel411, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, -DBL_MAX, DBL_MAX, 0 );
 	bSizer51->Add( m_spinCtrl61, 0, wxRIGHT|wxLEFT, 5 );
 	
 	m_panel411->SetSizer( bSizer51 );
@@ -193,7 +195,7 @@ Selection::Selection( wxWindow* parent, wxWindowID id, const wxString& title, co
 	
 	bSizer5->Add( 0, 0, 1, wxEXPAND, 5 );
 	
-	m_spinCtrl6 = new wxSpinCtrlDbl( *m_panel41, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, -1000, 1000, 6 );
+	m_spinCtrl6 = new wxSpinCtrlDbl( *m_panel41, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, -DBL_MAX, DBL_MAX, 6 );
 	bSizer5->Add( m_spinCtrl6, 0, wxRIGHT|wxLEFT, 5 );
 	
 	m_panel41->SetSizer( bSizer5 );
@@ -250,7 +252,7 @@ Selection::Selection( wxWindow* parent, wxWindowID id, const wxString& title, co
 	m_staticText412->Wrap( -1 );
 	bSizer52->Add( m_staticText412, 0, wxALL, 5 );
 	
-	m_textCtrl1 = new wxTextCtrl( m_panel412, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
+	m_textCtrl1 = new wxTextCtrl( m_panel412, wxID_ANY, wxT("path.dat"), wxDefaultPosition, wxDefaultSize, 0 );
 	bSizer52->Add( m_textCtrl1, 0, wxRIGHT|wxLEFT, 5 );
 	
 	m_panel412->SetSizer( bSizer52 );
@@ -294,7 +296,7 @@ Selection::Selection( wxWindow* parent, wxWindowID id, const wxString& title, co
 	m_staticText4121->Wrap( -1 );
 	bSizer521->Add( m_staticText4121, 0, wxALL, 5 );
 	
-	m_textCtrl11 = new wxTextCtrl( m_panel4121, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
+	m_textCtrl11 = new wxTextCtrl( m_panel4121, wxID_ANY, wxT("pose.dat"), wxDefaultPosition, wxDefaultSize, 0 );
 	bSizer521->Add( m_textCtrl11, 0, wxRIGHT|wxLEFT, 5 );
 	
 	m_panel4121->SetSizer( bSizer521 );
@@ -351,7 +353,7 @@ Selection::Selection( wxWindow* parent, wxWindowID id, const wxString& title, co
 	m_staticText41211->Wrap( -1 );
 	bSizer5211->Add( m_staticText41211, 0, wxALL, 5 );
 	
-	m_textCtrl111 = new wxTextCtrl( m_panel41211, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
+	m_textCtrl111 = new wxTextCtrl( m_panel41211, wxID_ANY, wxT("selected.3d"), wxDefaultPosition, wxDefaultSize, 0 );
 	bSizer5211->Add( m_textCtrl111, 0, wxRIGHT|wxLEFT, 5 );
 	
 	m_panel41211->SetSizer( bSizer5211 );

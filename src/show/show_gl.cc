@@ -40,7 +40,6 @@ void DrawPoints(GLenum mode)
 #else
     for(int iterator = (int)Scan::allScans.size()-1; iterator >= 0; iterator--) {
 #endif
-
       if (MetaAlgoType[iterator][frameNr] == Scan::INVALID) continue;
       cm->selectColors(MetaAlgoType[iterator][frameNr]);	 
       glPushMatrix();
@@ -808,7 +807,7 @@ void CallBackIdleFunc(void)
       return;
     }
     scanNr = 1;
-    frameNr =  calcFrameNo() + anim_jterator;
+    frameNr =  anim_jterator;
     glutPostRedisplay();
 
     if(save_animation){
@@ -1681,28 +1680,6 @@ void drawRobotPath(int dummy){
   //signal for the update of scene
   haveToUpdate = 1;
 }
-//----------------------------------------------------------------------------------------------
-
-int calcFrameNo(){
-  //calculate the frame number
-  //this ensures that we avoid the invalid frames
-
-  int counter = 0;             //to store the frame no
-
-  //check until a valid frame is found
-  //any frame with colour code starting with
-  // -1 is invalid
-  
-  while(MetaAlgoType[1][counter] == Scan::INVALID){   
-    counter++;                 //increment the frame counter
-   //  cout << "val is: " << MetaAlgoType[iterator][frameNr] << endl;
-//     cout << "counter is: " << counter << endl;
-  }
-
-  return counter;
-}
-
-//----------------------------------------------------------------------------------------------
 
 int calcNoOfPoints(vector<PointXY> vec1, vector<PointXY> vec2)
 {
