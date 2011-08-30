@@ -539,19 +539,14 @@ void BasicGLPane::idle() {
   }
   
   // case: animation
-  static int anim_iterator = 0; // # scan
-  static int anim_jterator = 0; // # frame in this scan
-  /* 
-   */
   if(haveToUpdate == 3 ){
-    anim_jterator += 1;
-    if(!(MetaMatrix.size() > 1 &&  anim_jterator < (int) MetaMatrix[1].size())){
-      anim_iterator = 0;
+    frameNr += 1;
+    if(!(MetaMatrix.size() > 1 &&  frameNr < (int) MetaMatrix[1].size())){
+      frameNr = 0;
       haveToUpdate = 4;
       return;
     }
     scanNr = 1;
-    frameNr =  anim_jterator;
     paint();
 
     if(save_animation){
@@ -570,10 +565,8 @@ void BasicGLPane::idle() {
 #endif
 
   if (haveToUpdate == 4) { // stop animation
-    anim_iterator = 0;  // so that the next click on the button restarts the animation.
-    anim_jterator = 0;  // delete these lines if you want a 'continue' functionality.
-    
-    scanNr = frameNr = -1;
+    frameNr = 0;  // delete these lines if you want a 'continue' functionality.
+    scanNr = -1;
     haveToUpdate = 1;
   }
 
