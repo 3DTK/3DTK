@@ -32,7 +32,7 @@ void DrawPoints(GLenum mode)
 //  cout << ptstodisplay << " " << lastfps << endl;
 
   // In case of animation
-  if(scanNr != -1) {
+  if(frameNr != 0) {
     cm->setMode(ScanColorManager::MODE_ANIMATION);
 
 #ifdef USE_GL_POINTS
@@ -802,7 +802,6 @@ void CallBackIdleFunc(void)
       haveToUpdate = 4;
       return;
     }
-    scanNr = 1;
     glutPostRedisplay();
 
     if(save_animation){
@@ -830,7 +829,6 @@ void CallBackIdleFunc(void)
 
   if (haveToUpdate == 4) { // stop animation
     frameNr = 0;  // delete these lines if you want a 'continue' functionality.
-    scanNr = -1;
     haveToUpdate = 1;
   }
 
