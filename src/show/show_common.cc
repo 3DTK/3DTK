@@ -171,8 +171,7 @@ double mouseRotY = 0.0;
 //@@@
 //int animate_both         = 0;             // Animate both scan matchin and path?
 
-int frameNr;
-int scanNr;
+int frameNr = 0;
 
 /**
  * Storing of all transformation (frames for animation) of all scans
@@ -773,10 +772,6 @@ void initShow(int argc, char **argv){
   // init and create display
   M4identity(view_rotate_button);
   obj_pos_button[0] = obj_pos_button[1] = obj_pos_button[2] = 0.0;
-
-
-
-  scanNr = frameNr = -1;
 
   // read frames first, to get notifyied of missing frames before all scans are read in
   readFrames(dir, start, end, readInitial, type);
