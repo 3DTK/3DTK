@@ -801,7 +801,7 @@ void CallBackIdleFunc(void)
    */
   if(haveToUpdate == 3 ){
     anim_jterator += 1;
-    if(!(anim_jterator < (int) MetaMatrix[1].size())){
+    if(!(MetaMatrix.size() > 1 &&  anim_jterator < (int) MetaMatrix[1].size())){
       anim_iterator = 0;
       haveToUpdate = 4;
       return;
