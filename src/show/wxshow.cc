@@ -546,7 +546,6 @@ void BasicGLPane::idle() {
       haveToUpdate = 4;
       return;
     }
-    scanNr = 1;
     paint();
 
     if(save_animation){
@@ -566,7 +565,6 @@ void BasicGLPane::idle() {
 
   if (haveToUpdate == 4) { // stop animation
     frameNr = 0;  // delete these lines if you want a 'continue' functionality.
-    scanNr = -1;
     haveToUpdate = 1;
   }
 
