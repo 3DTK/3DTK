@@ -24,7 +24,7 @@ public:
     
   // events
   void idle();
-  void idle(wxIdleEvent& event);
+  void idle_event(wxIdleEvent& event);
   void mouseMoved(wxMouseEvent& event);
   void mouseEvent(wxMouseEvent& event);
   void mouseDown(wxMouseEvent& event);

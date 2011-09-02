@@ -463,7 +463,7 @@ bool wxShow::OnInit()
 } 
  
 BEGIN_EVENT_TABLE(BasicGLPane, wxGLCanvas)
-EVT_IDLE(BasicGLPane::idle)
+EVT_IDLE(BasicGLPane::idle_event)
 EVT_MOTION(BasicGLPane::mouseMoved)
 EVT_MOUSE_EVENTS(BasicGLPane::mouseEvent)
   //EVT_LEFT_DOWN(BasicGLPane::mouseDown)
@@ -615,7 +615,7 @@ void BasicGLPane::idle() {
   }
 }
 
-void BasicGLPane::idle(wxIdleEvent& event)
+void BasicGLPane::idle_event(wxIdleEvent& event)
 {
   idle();
   event.RequestMore();
