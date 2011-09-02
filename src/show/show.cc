@@ -29,8 +29,6 @@ void updateControls() {
   glui2->sync_live();
   glui2->show();
 
-  cangle_spinner->set_float_val(cangle);
-  pzoom_spinner->set_float_val(pzoom);
   rotButton->reset();
 
   if(showTopView) {
@@ -42,24 +40,21 @@ void updateControls() {
   }
 
 
-  pzoom_spinner->set_float_val(pzoom);
-  cangle_spinner->set_float_val(cangle);
+  switch(pointmode) {
+    case -1:
+      always_box->set_int_val(0);
+      never_box->set_int_val(1);
+      break;
+    case 0:
+      always_box->set_int_val(0);
+      never_box->set_int_val(0);
+      break;
+    case 1:
+      always_box->set_int_val(1);
+      never_box->set_int_val(0);
+      break;
+  }
 
-      switch(pointmode) {
-        case -1:
-          always_box->set_int_val(0);
-          never_box->set_int_val(1);
-          break;
-        case 0:
-          always_box->set_int_val(0);
-          never_box->set_int_val(0);
-          break;
-        case 1:
-          always_box->set_int_val(1);
-          never_box->set_int_val(0);
-          break;
-      }
-
-      cam_spinner->set_int_limits( 1, cams.size());
-      cam_spinner->set_int_val(cam_choice);
+  cam_spinner->set_int_limits( 1, cams.size());
+  cam_spinner->set_int_val(cam_choice);
 }
