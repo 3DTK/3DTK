@@ -126,17 +126,15 @@ void newMenu()
 
   settings_panel = glui2->add_panel("Settings: ");
   
-  static float dummy1;
-  cangle_spinner = glui2->add_spinner_to_panel(settings_panel, "Apex Angle :   ", GLUI_SPINNER_FLOAT, &dummy1);
+  cangle_spinner = glui2->add_spinner_to_panel(settings_panel, "Apex Angle :   ", GLUI_SPINNER_FLOAT, &cangle);
   cangle_spinner->set_float_limits( 1.0, 180.0 );
   cangle_spinner->set_speed( 20.0 );
   cangle_spinner->set_float_val(60.0);
   cangle_spinner->set_alignment( GLUI_ALIGN_RIGHT );
 
-  static float dummy2;
-  pzoom_spinner = glui2->add_spinner_to_panel(settings_panel, "Parallel Zoom :", GLUI_SPINNER_FLOAT, &dummy2);
+  pzoom_spinner = glui2->add_spinner_to_panel(settings_panel, "Parallel Zoom :", GLUI_SPINNER_FLOAT, &pzoom);
   pzoom_spinner->set_float_limits( 10.0, 50000.0 );
-  pzoom_spinner->set_speed( 50.0 );
+  pzoom_spinner->set_speed( 5.0 );
   pzoom_spinner->set_float_val(2000.0);
   pzoom_spinner->set_alignment( GLUI_ALIGN_RIGHT );
   pzoom_spinner->disable();

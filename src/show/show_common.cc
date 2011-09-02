@@ -103,7 +103,8 @@ bool addCameraView       = false;         //Is the view in add box mode?
 /**
  * Storing the apex angle of the camera
  */ 
-GLdouble cangle          = 60.0;          // Current camera opening mode
+GLfloat cangle          = 60.0;          // Current camera opening mode
+GLfloat cangle_old      = cangle; 
 
 /**
  * Current rotation angle of the scene 
@@ -125,7 +126,8 @@ GLdouble RVX = 0.0, RVY = 0.0, RVZ = 0.0;
 /**
  * parallel zoom (similar to apex angle) for parallel projection
  */
-GLdouble pzoom = 2000.0;
+GLfloat pzoom = 2000.0;
+GLfloat pzoom_old = pzoom; 
 
 /**
  * Density of the fog
