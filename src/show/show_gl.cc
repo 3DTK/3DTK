@@ -718,11 +718,11 @@ void setView(double pos[3], double new_quat[4],
 
 void CallBackDisplayFunc()
 {
-  if ((cangle_spinner != 0 && (fabs(cangle_spinner->get_float_val() - cangle) > 0.5)) || 
-	 (pzoom_spinner != 0 && (fabs(pzoom_spinner->get_float_val() - pzoom) > 0.5))) {
+  if ((cangle_spinner != 0 && (fabs(cangle_old - cangle) > 0.5)) || 
+	 (pzoom_spinner != 0 && (fabs(pzoom_old - pzoom) > 0.5))) {
 
-    cangle = cangle_spinner->get_float_val();
-    pzoom  = pzoom_spinner->get_float_val();
+    cangle_old = cangle;
+    pzoom_old = pzoom;
     int viewport[4];
     glGetIntegerv(GL_VIEWPORT, viewport);
     CallBackReshapeFunc(viewport[2],viewport[3]);
@@ -741,10 +741,6 @@ void CallBackDisplayFunc()
   
   // show the rednered scene
   glutSwapBuffers(); 
-
-  // live sync the glui variables with the controls
-  // TODO check if this one is necessary
-//  updateControls();
 
 }
 //--------------------------------------------------------------------------------
