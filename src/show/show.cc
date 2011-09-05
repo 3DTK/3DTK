@@ -29,7 +29,7 @@ void updateControls() {
   glui2->sync_live();
   glui2->show();
 
-  rotButton->reset();
+//  rotButton->reset();
 
   if(showTopView) {
     pzoom_spinner->enable();
