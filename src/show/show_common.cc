@@ -550,7 +550,7 @@ void setResetView(int origin) {
  * @param end stopping at scan number 'end'
  * @param read a file containing a initial transformation matrix and apply it
  */
-void readFrames(string dir, int start, int end, bool readInitial, reader_type &type)
+int readFrames(string dir, int start, int end, bool readInitial, reader_type &type)
 {
 
   double initialTransform[16];
@@ -627,9 +627,35 @@ void readFrames(string dir, int start, int end, bool readInitial, reader_type &t
     current_frame = MetaMatrix.back().size() - 1;
   }
   if (MetaMatrix.size() == 0) {
-    cerr << "ERROR: Missing or empty directory: " << dir << endl << endl;
-    cerr << "aborting..." << endl;
-    exit(1);
+    cerr << "*****************************************" << endl;
+    cerr << "** ERROR: No .frames could be found!   **" << endl; 
+    cerr << "*****************************************" << endl;
+    cerr << " ERROR: Missing or empty directory: " << dir << endl << endl;
+    return -1;
+  }
+  return 0;
+}
+
+void generateFrames(int start, int end) {
+  cout << "using Identity for frames " << endl;
+  int  fileCounter = start;
+  for (;;) {
+    if (fileCounter > end) break; // 'nuf read
+    fileCounter++;
+
+    vector <double*> Matrices;
+    vector <Scan::AlgoType> algoTypes;
+
+    for (int i = 0; i < 3; i++) {
+      double *transMat = new double[16];
+      M4identity(transMat);
+      transMat[10] = -1.0;
+      Matrices.push_back(transMat);
+      algoTypes.push_back(Scan::ICP);
+
+    }
+    MetaAlgoType.push_back(algoTypes);
+    MetaMatrix.push_back(Matrices);
   }
 }
 
@@ -742,13 +768,13 @@ void initShow(int argc, char **argv){
   string loadObj;
   int origin = 0;
 
-  pose_file_name = new char[sizeof(GLUI_String)];
-  path_file_name = new char[sizeof(GLUI_String)];
-  selection_file_name = new char[sizeof(GLUI_String)];
+  pose_file_name = new char[1024];
+  path_file_name = new char[1024];
+  selection_file_name = new char[1024];
    
-  strncpy(pose_file_name, "pose.dat", sizeof(GLUI_String));  
-  strncpy(path_file_name, "path.dat", sizeof(GLUI_String));  
-  strncpy(selection_file_name, "selected.3d", sizeof(GLUI_String));  
+  strncpy(pose_file_name, "pose.dat", 1024);  
+  strncpy(path_file_name, "path.dat", 1024);  
+  strncpy(selection_file_name, "selected.3d", 1024);  
   
   parseArgs(argc, argv, dir, start, end, maxDist, minDist, red, readInitial,
   octree, pointtype, idealfps, loadObj, loadOct, saveOct, origin, type);
@@ -776,7 +802,7 @@ void initShow(int argc, char **argv){
   obj_pos_button[0] = obj_pos_button[1] = obj_pos_button[2] = 0.0;
 
   // read frames first, to get notifyied of missing frames before all scans are read in
-  readFrames(dir, start, end, readInitial, type);
+  int r = readFrames(dir, start, end, readInitial, type);
 
 
   // Get Scans
@@ -785,6 +811,13 @@ void initShow(int argc, char **argv){
   } else {
     cout << "Skipping files.." << endl;
   }
+
+  if (!loadOct) {
+    if (r) generateFrames(start, start + Scan::allScans.size() - 1); 
+  } else {
+    if (r) generateFrames(start, start + octpts.size() - 1); 
+  }
+
  
   
   int end_reduction = (int)Scan::allScans.size();
