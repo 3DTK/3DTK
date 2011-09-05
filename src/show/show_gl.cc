@@ -1602,8 +1602,8 @@ void ProcessHitsFunc(GLint hits, GLuint buffer[])
 
 void InterfaceFunc(unsigned char key){
  
-  strncpy(path_file_name, path_filename_edit->get_text(), sizeof(GLUI_String));  
-  strncpy(pose_file_name, pose_filename_edit->get_text(), sizeof(GLUI_String));  
+  strncpy(path_file_name, path_filename_edit->get_text(), 1024);  
+  strncpy(pose_file_name, pose_filename_edit->get_text(), 1024);  
   return;
 }
 
