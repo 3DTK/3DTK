@@ -269,7 +269,7 @@ IF(WIN32)
   add_library(XGetopt STATIC ${CMAKE_SOURCE_DIR}/windows/XGetopt.cpp)
   SET(CMAKE_STATIC_LIBRARY_SUFFIX "32.lib")
 ELSE(WIN32)
-  SET(ADDITIONAL_CFLAGS "-O3 -msse3 -Wall -finline-functions -Wno-write-strings -Wno-char-subscripts" CACHE STRING"Additional flags given to the compiler (-O3 -Wall -finline-functions -Wno-write-strings)" )
+  SET(ADDITIONAL_CFLAGS "-O3 -msse3 -Wall -finline-functions -Wno-write-strings -Wno-char-subscripts -Wno-unused-result" CACHE STRING"Additional flags given to the compiler (-O3 -Wall -finline-functions -Wno-write-strings -Wno-unused-result)" )
   # Add include path for OpenGL without GL/-prefix 
   # to avoid the include incompatibility between MACOS 
   # and linux

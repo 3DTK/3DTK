@@ -86,7 +86,7 @@ int ScanIO_stl::readScans(int start, int end, string &dir, int maxDist, int mind
   real32_t v1[3], v2[3], v3[3];
   uint16_t attrib;
 
-  for (int i=0; i < number; i++) {
+  for (unsigned int i=0; i < number; i++) {
     Point p;
     scan_in.read((char*)normal, sizeof(normal));
     scan_in.read((char*)v1, sizeof(v1));
