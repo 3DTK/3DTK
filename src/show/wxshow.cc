@@ -408,7 +408,9 @@ public:
       controls->updateControls();
       selection->updateControls();
     }
+
 };
+    
 
 static wxShow *globalGUI = 0;
     
@@ -421,6 +423,7 @@ IMPLEMENT_APP(wxShow)
  
 bool wxShow::OnInit()
 {
+
   globalGUI = this;
   // wxwidgets saves the argv as wxchar, which is 2-byte unicode, so we must convert it back
   char **new_argv = new char*[argc];
@@ -471,7 +474,7 @@ EVT_MOUSE_EVENTS(BasicGLPane::mouseEvent)
 //EVT_RIGHT_DOWN(BasicGLPane::rightClick)
 //EVT_LEAVE_WINDOW(BasicGLPane::mouseLeftWindow)
 EVT_SIZE(BasicGLPane::resized)
-//EVT_KEY_DOWN(BasicGLPane::keyPressed)
+EVT_KEY_DOWN(BasicGLPane::keyPressed)
 //EVT_KEY_UP(BasicGLPane::keyReleased)
 //EVT_MOUSEWHEEL(BasicGLPane::mouseWheelMoved)
 EVT_PAINT(BasicGLPane::render)
@@ -481,6 +484,7 @@ END_EVENT_TABLE()
 // some useful events to use
 void BasicGLPane::mouseEvent(wxMouseEvent& event) 
 {
+  SetFocus();
   int x = event.GetX();
   int y = event.GetY();
  
@@ -634,7 +638,14 @@ void BasicGLPane::mouseWheelMoved(wxMouseEvent& event) {}
 void BasicGLPane::mouseReleased(wxMouseEvent& event) {}
 void BasicGLPane::rightClick(wxMouseEvent& event) {}
 void BasicGLPane::mouseLeftWindow(wxMouseEvent& event) {}
-void BasicGLPane::keyPressed(wxKeyEvent& event) {}
+
+
+void BasicGLPane::keyPressed(wxKeyEvent& event) {
+  KeyboardFunc(event.GetKeyCode(), event.CmdDown(), event.AltDown(), event.ShiftDown());
+}
+
+
+
 void BasicGLPane::keyReleased(wxKeyEvent& event) {}
  
 // Vertices and faces of a simple cube to demonstrate 3D render
@@ -647,7 +658,7 @@ GLint faces[6][4] = {  /* Vertex indices for the 6 faces of a cube. */
  
  
 BasicGLPane::BasicGLPane(wxFrame* parent, int* args) :
-    wxGLCanvas(parent, wxID_ANY, args, wxDefaultPosition, wxDefaultSize, wxFULL_REPAINT_ON_RESIZE)
+    wxGLCanvas(parent, wxID_ANY, args, wxDefaultPosition, wxDefaultSize, wxFULL_REPAINT_ON_RESIZE||wxWANTS_CHARS)
 {
 
   m_context = new wxGLContext(this);
