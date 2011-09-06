@@ -169,6 +169,7 @@ int mouseNavButton = -1;
 
 double mouseRotX = 0.0;
 double mouseRotY = 0.0;
+double mouseRotZ = 0.0;
 
 //@@@
 //int animate_both         = 0;             // Animate both scan matchin and path?

@@ -395,6 +395,7 @@ void DisplayItFunc(GLenum mode)
     if (cameraNavMouseMode == 1) {
       glRotated( mouseRotX, 1, 0, 0);
       glRotated( mouseRotY, 0, 1, 0);
+      glRotated( mouseRotZ, 0, 0, 1);
       glGetFloatv(GL_MODELVIEW_MATRIX, view_rotate_button);
       update_view_rotate(0);
     } else {
@@ -409,6 +410,7 @@ void DisplayItFunc(GLenum mode)
       Matrix4ToEuler(mat, rPT);
       mouseRotX = deg(rPT[0]);
       mouseRotY = deg(rPT[1]);
+      mouseRotZ = deg(rPT[2]);
     
     }
     updateControls();
@@ -569,7 +571,7 @@ void DrawUrl() {
 void topView()
 {
   static GLdouble save_qx, save_qy, save_qz, save_qangle, save_X, save_Y, save_Z;
-  static GLdouble saveMouseRotX, saveMouseRotY;
+  static GLdouble saveMouseRotX, saveMouseRotY, saveMouseRotZ;
   
   if (!showTopView) // set to top view
   {
@@ -584,6 +586,7 @@ void topView()
 	  save_qangle = quat[3];
 	  saveMouseRotX = mouseRotX;
 	  saveMouseRotY = mouseRotY;
+	  saveMouseRotZ = mouseRotZ;
 	 
 	  Y = Y - 350.0;
 	  Z = Z + 500.0;
@@ -591,6 +594,7 @@ void topView()
 	  quat[2] = quat[3] = 0.0;
 	  mouseRotX = 90;
 	  mouseRotY = 0;
+	  mouseRotZ = 0;
 	 
 	  haveToUpdate = 2;
   } else {
@@ -606,6 +610,7 @@ void topView()
 	  quat[3] = save_qangle;
 	  mouseRotX = saveMouseRotX;
 	  mouseRotY = saveMouseRotY;
+	  mouseRotZ = saveMouseRotZ;
 	 
 	  haveToUpdate = 2;	 
   }
@@ -670,6 +675,7 @@ void resetView(int dummy)
   haveToUpdate = 2;
   mouseRotX = 0;
   mouseRotY = 0;
+  mouseRotZ = 0;
 
   updateControls();
 }
@@ -679,7 +685,8 @@ void resetView(int dummy)
  */
 
 void setView(double pos[3], double new_quat[4], 
-             double newMouseRotX, double newMouseRotY, double newCangle,
+             double newMouseRotX, double newMouseRotY, double newMouseRotZ, 
+             double newCangle,
              bool sTV, bool cNMM, double pzoom_new, 
              bool s_points, bool s_path, bool s_cameras, double ps, int
              sf, double fD, bool inv)
@@ -693,6 +700,7 @@ void setView(double pos[3], double new_quat[4],
   cangle = newCangle;
   mouseRotX = newMouseRotX;
   mouseRotY = newMouseRotY;
+  mouseRotZ = newMouseRotZ;
   showTopView = sTV,
   cameraNavMouseMode = cNMM;
   pzoom = pzoom_new;
@@ -1029,6 +1037,7 @@ void selectPoints(int x, int y) {
     if (cameraNavMouseMode == 1) {
       glRotated( mouseRotX, 1, 0, 0);
       glRotated( mouseRotY, 0, 1, 0);
+      glRotated( mouseRotZ, 0, 0, 1);
     } else {
       double t[3] = {0,0,0};
       double mat[16];
@@ -1040,6 +1049,7 @@ void selectPoints(int x, int y) {
       Matrix4ToEuler(mat, rPT);
       mouseRotX = deg(rPT[0]);
       mouseRotY = deg(rPT[1]);
+      mouseRotZ = deg(rPT[2]);
     }
     updateControls();
     glTranslated(X, Y, Z);       // move camera	
@@ -1174,61 +1184,134 @@ void CallBackMouseFunc(int button, int state, int x, int y)
   }
 }
 
-void CallBackMouseMotionFunc(int x, int y) {
-  if(cameraNavMouseMode == 1) {
-    double mat[9];
-    double mouseRotXRand = M_PI * mouseRotX / 180; 
-    double mouseRotYRand = M_PI * (360-mouseRotY) / 180;
-    mat[0] = cos(mouseRotYRand);
-    mat[1] = 0;
-    mat[2] = sin(mouseRotYRand);
-    mat[3] = sin(mouseRotXRand) * sin(mouseRotYRand);
-    mat[4] = cos(mouseRotXRand);
-    mat[5] = -cos(mouseRotYRand) * sin(mouseRotXRand);
-    mat[6] = -cos(mouseRotXRand) * sin(mouseRotYRand);
-    mat[7] = sin(mouseRotXRand);
-    mat[8] = cos(mouseRotXRand) * cos(mouseRotYRand);
 
-    int deltaMouseX = x - mouseNavX;
-    int deltaMouseY = mouseNavY - y;
-    int deltaMouseZ = y - mouseNavY;
-    mouseNavX = x;
-    mouseNavY = y;
-      
-    double transX, transY, transZ;
-    transX = transY = transZ = 0.0;
+void moveCamera(double x, double y, double z, double rotx, double roty, double rotz) {
+  double mat[9];
+  
+  double xr = M_PI * mouseRotX / 180; 
+  double yr = M_PI * mouseRotY / 180;
+  double zr = M_PI * mouseRotZ / 180;
+  double c1,c2,c3,s1,s2,s3;
+  s1 = sin(xr);  c1 = cos(xr);
+  s2 = sin(yr);  c2 = cos(yr);
+  s3 = sin(zr);  c3 = cos(zr);
+  mat[0] = c2*c3;
+  mat[1] = -c2*s3;
+  mat[2] = s2;
+  mat[3] = c1*s3+c3*s1*s2;
+  mat[4] = c1*c3-s1*s2*s3;
+  mat[5] = -c2*s1;
+  mat[6] = s1*s3-c1*c3*s2;
+  mat[7] = c1*s2*s3+c3*s1;
+  mat[8] = c1*c2;
+
+  double transX, transY, transZ;
+  transX = transY = transZ = 0.0;
+
+  mouseRotX += rotx;
+  mouseRotY -= roty;
+  mouseRotZ -= rotz;
+  
+  if (mouseRotX < -90) mouseRotX=-90;
+  else if (mouseRotX > 90) mouseRotX=90;
+  if (mouseRotY > 360) mouseRotY-=360;
+  else if (mouseRotY < 0) mouseRotY+=360;
+  if (mouseRotZ > 360) mouseRotZ-=360;
+  else if (mouseRotZ < 0) mouseRotZ+=360;
+
+  transX += x * mat[0] + y * mat[3] + z * mat[6];
+  transY += x * mat[1] + y * mat[4] + z * mat[7];      
+  transZ += x * mat[2] + y * mat[5] + z * mat[8];
+
+
+  X += transX;
+  Y += transY;
+  Z += transZ;
+  haveToUpdate = 1;
+
+}
+
+void KeyboardFunc(int key, bool control, bool alt, bool shift) {
+  double stepsize = 10.0;
+  if (shift) stepsize *= 10.0;
+  if (control) stepsize *= 0.1;
+
+  double rotsize = 0.2 * stepsize;
+
+  switch (key) {
+    case 'w':
+    case 'W':
+      moveCamera(0,0,stepsize,0,0,0);
+      break;
+    case 'a':
+    case 'A':
+      moveCamera(stepsize,0,0,0,0,0);
+      break;
+    case 's':
+    case 'S':
+      moveCamera(0,0,-stepsize,0,0,0);
+      break;
+    case 'd':
+    case 'D':
+      moveCamera(-stepsize,0,0,0,0,0);
+      break;
+    case 'c':
+    case 'C':
+      moveCamera(0,stepsize,0,0,0,0);
+      break;
+    case 32:  // WXK_SPACE
+      moveCamera(0,-stepsize,0,0,0,0);
+      break;
+    case 314: // WXK_LEFT
+      moveCamera(0,0,0,0,rotsize,0);
+      break;
+    case 315: // WXK_UP
+      moveCamera(0,0,0,rotsize,0,0);
+      break;
+    case 316: // WXK_RIGHT
+      moveCamera(0,0,0,0,-rotsize,0);
+      break;
+    case 317: // WXK_DOWN
+      moveCamera(0,0,0,-rotsize,0,0);
+      break;
+    case 'q':
+    case 'Q':
+    case 366: // WXK_PAGEUP
+      moveCamera(0,0,0,0,0,rotsize);
+      break;
+    case 'e':
+    case 'E':
+    case 367: // WXK_PAGEDOWN
+      moveCamera(0,0,0,0,0,-rotsize);
+      break;
+    default:
+      break;
+  }
+}
+
+void CallBackMouseMotionFunc(int x, int y) {
+  int deltaMouseX = x - mouseNavX;
+  int deltaMouseY = mouseNavY - y;
+  mouseNavX = x;
+  mouseNavY = y;
+
+  if(cameraNavMouseMode == 1) {
     if( mouseNavButton == GLUT_RIGHT_BUTTON){
       if ( showTopView ) {
         deltaMouseX *= 5;
         deltaMouseY *= 5;
       }
-      transX = deltaMouseX * mat[0] + -deltaMouseY * mat[3];
-      transY = deltaMouseX * mat[1] + deltaMouseY * mat[4];
-      transZ = -deltaMouseX * mat[2] + deltaMouseY * mat[5]; 
+      moveCamera(deltaMouseX, deltaMouseY, 0, 0,0,0);
     } else if( mouseNavButton == GLUT_MIDDLE_BUTTON ){
       if ( !showTopView ) {
         deltaMouseY *= -5;
-        deltaMouseZ *= -5;
       }
-      transX = deltaMouseX * mat[0] + deltaMouseZ * mat[6];
-      transY = deltaMouseX * mat[1] + deltaMouseY * mat[7];      
-      transZ = -deltaMouseX * mat[2] + -deltaMouseZ * mat[8];
+      moveCamera(deltaMouseX, 0, deltaMouseY, 0,0,0);
     } else if ( mouseNavButton == GLUT_LEFT_BUTTON ){
-      if ( !showTopView ){
-        mouseRotX += deltaMouseY;
-        mouseRotY -= deltaMouseX;
-        if (mouseRotX < -90) mouseRotX=90;
-        else if (mouseRotX > 90) mouseRotX=90;
-        if (mouseRotY > 360) mouseRotY-=360;
-        else if (mouseRotY < 0) mouseRotY+=360;
-      }
+      moveCamera(0, 0, 0, deltaMouseY,deltaMouseX,0);
     } else {
       return;
     }
-    X += transX;
-    Y += transY;
-    Z += transZ;
-    haveToUpdate = 1;
   } else {
     selectPoints(x,y);
   }
@@ -1610,7 +1693,7 @@ void InterfaceFunc(unsigned char key){
 //-----------------------------------------------------------------
 
 void CallBackSpecialFunc(int key , int x, int y) {
-  cout << "Called: CallBackSpecialFunc() ... " << endl;
+  KeyboardFunc(key + 214, false, false, false);
   // return;
 }
 
@@ -1693,6 +1776,7 @@ void CallBackKeyboardFunc(unsigned char key, int x, int y) {
   //call the interfacefunc. it deals with all our
   //keyboard activities
   InterfaceFunc(key);
+  KeyboardFunc(key, false, false, false);
 }
 
 void mapColorToValue(int dummy) {

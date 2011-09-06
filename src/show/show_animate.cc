@@ -234,6 +234,7 @@ void loadPose(int dummy) {
   double quat[4];
   double mouseRotX;
   double mouseRotY;
+  double mouseRotZ;
   double cangle;
   bool showTopView;
   bool cameraNavMouseMode;
@@ -270,12 +271,12 @@ void loadPose(int dummy) {
   for (unsigned int i = 0; i < 3; poseFile >> euler[i++]);
   // Orientation
   for (unsigned int i = 0; i < 4; poseFile >> quat[i++]);
-  poseFile >> mouseRotX >> mouseRotY >> cangle;
+  poseFile >> mouseRotX >> mouseRotY >> mouseRotZ >> cangle;
   poseFile >> showTopView >> cameraNavMouseMode >> pzoom;
   poseFile >> show_points >> show_path >> show_cameras >> pointsize;
   poseFile >> show_fog >> fogDensity >> invert;
   
-  setView(euler, quat, mouseRotX, mouseRotY, cangle, showTopView,
+  setView(euler, quat, mouseRotX, mouseRotY, mouseRotZ, cangle, showTopView,
           cameraNavMouseMode, pzoom, show_points, show_path, show_cameras,
           pointsize, show_fog, fogDensity, invert);
   
@@ -309,7 +310,7 @@ void savePose(int dummy) {
   for(int i = 0; i < 4; i++) {
     posefile << quat[i] << " ";
   }
-	posefile << mouseRotX << " " <<  mouseRotY << " " << cangle << endl;
+	posefile << mouseRotX << " " <<  mouseRotY << " " << mouseRotZ << " " <<cangle << endl;
   posefile << showTopView << " " << cameraNavMouseMode << " " << pzoom << endl;
   posefile << show_points << " " << show_path << " " << show_cameras << " " << pointsize << endl;
   posefile << show_fog << " " << fogDensity << " " << invert << endl;
