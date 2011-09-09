@@ -477,7 +477,7 @@ void DisplayItFunc(GLenum mode)
     glLineWidth(5);
     glBegin(GL_LINE_STRIP);
     for(unsigned int i = 0; i < MetaMatrix.size(); i++){
-      if(frameNr > -1 && frameNr < (int)MetaMatrix[i].size()) {
+      if(frameNr >= 1 && frameNr < (int)MetaMatrix[i].size()) {
 	      if(MetaAlgoType[i][frameNr] == Scan::INVALID) {
           continue;
         }
