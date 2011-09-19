@@ -141,9 +141,12 @@ ScanColorManager::ScanColorManager(unsigned int _buckets, PointType type) : poin
       switch(type) {
         case Scan::ICP:
           glColor4d(0.85, 0.30,0.023, 1.0);
+          //glColor4d(1.0, 0.30,0.30, 1.0);
+          //glColor4d(1.0, 0.00,0.00, 1.0);
           break;
         case Scan::ICPINACTIVE:
           glColor4d(0.78, 0.63,0.57, 1.0);	
+          //glColor4d(1.00, 1.00,1.00, 1.0);	
           break;
         case Scan::LUM:
           glColor4d(1.0, 0.0,0.0, 1.0);

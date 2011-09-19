@@ -70,6 +70,7 @@ void invertView(int dummy);
 void callTopView(int dummy);
 void drawCameras(void);
 void callAddCamera(int dummy);
+void callCameraUpdate(int dummy);
 void callDeleteCamera(int dummy);
 
 void pathAnimate(int dummy);
@@ -89,6 +90,7 @@ void updateCamera();
 void drawRobotPath(int dummy);
 int calcFrameNo();
 int calcNoOfPoints(vector<PointXY>, vector<PointXY>);
+void calcInterpolatedCameras(vector<PointXY>, vector<PointXY>);
 
 void createDisplayLists(bool reduced=false);
 
