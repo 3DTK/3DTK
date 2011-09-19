@@ -677,7 +677,7 @@ void resetView(int dummy)
   mouseRotY = 0;
   mouseRotZ = 0;
 
-  updateControls();
+  resetRotationButton();
 }
 
 /**
@@ -704,7 +704,7 @@ void setView(double pos[3], double new_quat[4],
   showTopView = sTV,
   cameraNavMouseMode = cNMM;
   pzoom = pzoom_new;
-  updateControls();
+  updateTopViewControls();
 
   show_points = s_points;
   show_path = s_path;
@@ -1924,7 +1924,7 @@ void changePointMode(int dummy) {
       pointmode = 0;
     }
   }
-  updateControls();
+  updatePointModeControls();
 }
 
 void callCameraUpdate(int dummy) {
