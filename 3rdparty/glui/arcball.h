@@ -1,33 +1,6 @@
 /**********************************************************************
 
-  arcball.h
-
-  GLUI User Interface Toolkit 
-  Copyright (c) 1998 Paul Rademacher
-     Feb 1998, Paul Rademacher (rademach@cs.unc.edu)
-     Oct 2003, Nigel Stewart - GLUI Code Cleaning
-
-
-  WWW:    http://sourceforge.net/projects/glui/
-  Forums: http://sourceforge.net/forum/?group_id=92496
-
-  This software is provided 'as-is', without any express or implied 
-  warranty. In no event will the authors be held liable for any damages 
-  arising from the use of this software. 
-
-  Permission is granted to anyone to use this software for any purpose, 
-  including commercial applications, and to alter it and redistribute it 
-  freely, subject to the following restrictions: 
-
-  1. The origin of this software must not be misrepresented; you must not 
-  claim that you wrote the original software. If you use this software 
-  in a product, an acknowledgment in the product documentation would be 
-  appreciated but is not required. 
-  2. Altered source versions must be plainly marked as such, and must not be 
-  misrepresented as being the original software. 
-  3. This notice may not be removed or altered from any source distribution. 
-
- ---------------------------------------------------------------------
+  Arcball.h
 
   A C++ class that implements the Arcball, as described by Ken
   Shoemake in Graphics Gems IV.  
@@ -52,35 +25,36 @@
   The current rotation is stored in the 4x4 float matrix 'rot'.
   It is also stored in the quaternion 'q_now'.  
 
+  ------------------------------------------------------------------
+
+  Feb 25, 1998 - Paul Rademacher (rademach@cs.unc.edu)
+
 **********************************************************************/
 
-#ifndef GLUI_ARCBALL_H
-#define GLUI_ARCBALL_H
 
-#include "glui_internal.h"
+#ifndef _ARCBALL_H_
+#define _ARCBALL_H_
+
+
+#include "stdinc.h"
 #include "algebra3.h"
 #include "quaternion.h"
 
-class Arcball 
-{
+#ifdef __APPLE__
+#include <GLUT/glut.h>
+#else
+#include <GL/glut.h>
+#endif
+
+class Arcball {
 public:
-    Arcball();
-    Arcball(mat4 *mtx);
-    Arcball(const vec2 &center, float radius);
+  Bool  constraint_x, constraint_y;
+  vec2  center;
+  float radius, damp_factor;
+  int   zero_increment;
 
-    void  set_damping(float d);
-    void  idle();
-    void  mouse_down(int x, int y);
-    void  mouse_up();
-    void  mouse_motion(int x, int y, int shift, int ctrl, int alt);
-    void  mouse_motion(int x, int y);
-    void  set_constraints(bool constrain_x, bool constrain_y);
-    void  set_params(const vec2 &center, float radius);  
-    void  reset_mouse();
-    void  init();
-
-    vec3  constrain_vector(const vec3 &vector, const vec3 &axis);
-    vec3  mouse_to_sphere(const vec2 &p);
+  vec3  constrain_vector( vec3 vector, vec3 axis );
+  vec3  mouse_to_sphere( vec2 p );
  
   //public:
     int   is_mouse_down;  /* true for down, false for up */
@@ -90,10 +64,22 @@ public:
     mat4  rot, rot_increment;
     mat4  *rot_ptr;
 
-    bool  constraint_x, constraint_y;
-    vec2  center;
-    float radius, damp_factor;
-    int   zero_increment;
+    void  set_damping( float d );
+    void  idle( void );
+    void  mouse_down( int x, int y );
+    void  mouse_up( void );
+    void  mouse_motion( int x, int y, int shift, int ctrl, int alt );
+    void  mouse_motion( int x, int y );
+    void  set_constraints( Bool constrain_x, Bool constrain_y );
+    void  set_params( vec2 center, float radius );  
+    void  reset_mouse( void );
+    void  init( void );
+
+    Arcball( void );
+    Arcball( mat4 *mtx );
+    Arcball( vec2 center, float radius );
 };
 
+
 #endif
+

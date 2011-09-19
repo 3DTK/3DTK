@@ -10,41 +10,15 @@
 
   Copyright (c) 1998 Paul Rademacher
 
-  WWW:    http://sourceforge.net/projects/glui/
-  Forums: http://sourceforge.net/forum/?group_id=92496
-
-  This software is provided 'as-is', without any express or implied 
-  warranty. In no event will the authors be held liable for any damages 
-  arising from the use of this software. 
-
-  Permission is granted to anyone to use this software for any purpose, 
-  including commercial applications, and to alter it and redistribute it 
-  freely, subject to the following restrictions: 
-
-  1. The origin of this software must not be misrepresented; you must not 
-  claim that you wrote the original software. If you use this software 
-  in a product, an acknowledgment in the product documentation would be 
-  appreciated but is not required. 
-  2. Altered source versions must be plainly marked as such, and must not be 
-  misrepresented as being the original software. 
-  3. This notice may not be removed or altered from any source distribution. 
+  This program is freely distributable without licensing fees and is
+  provided without guarantee or warrantee expressed or implied. This
+  program is -not- in the public domain.
 
 *****************************************************************************/
 
+
 #include "glui.h"
-#include "glui_internal.h"
-
-/********************************************* GLUI_Node::GLUI_Node() *******/
-
-GLUI_Node::GLUI_Node()
-: 
-    parent_node(NULL),
-    child_head(NULL),
-    child_tail(NULL),
-    next_sibling(NULL),
-    prev_sibling(NULL)
-{
-}
+#include "stdinc.h"
 
 /********************************************* GLUI_Node::first() *******/
 /* Returns first sibling in 'this' node's sibling list                  */
@@ -96,6 +70,7 @@ void   GLUI_Node::link_this_to_parent_last( GLUI_Node *new_parent )
   if ( new_parent->child_tail == NULL ) {   /* parent has no children */
     new_parent->child_head = this;
     new_parent->child_tail = this;
+    this->parent_node      = new_parent;
     this->parent_node      = new_parent;
   }
   else {                                 /* parent has children */
@@ -197,18 +172,4 @@ void   GLUI_Node::unlink( void )
   this->prev_sibling = NULL;
   this->child_head   = NULL;
   this->child_tail   = NULL;
-}
-
-/**************************************** GLUI_Node::dump() **************/
-
-void GLUI_Node::dump( FILE *out, const char *name )
-{
-    fprintf( out, "GLUI_node: %s\n", name );
-    fprintf( out, "   parent: %p     child_head: %p    child_tail: %p\n",
-        (void *) parent_node,
-        (void *) child_head,
-        (void *) child_tail );
-    fprintf( out, "   next: %p       prev: %p\n",
-        (void *) next_sibling,
-        (void *) prev_sibling );
 }
