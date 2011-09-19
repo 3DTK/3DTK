@@ -513,7 +513,6 @@ int parseArgs(int argc,char **argv, string &dir, int& start, int& end, int& maxD
 #endif
 
   ptype = PointType(types);
-  cout << "Hallo" << endl;
   return 0;
 }
 
