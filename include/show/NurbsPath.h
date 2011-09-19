@@ -15,11 +15,13 @@ using std::vector;
  *  @author Anton Fl&uuml;gge
  *  @author Hannes Schulz
  */
+
 class NurbsPath{
   public:
+    static vector<double> camRatio;
     NurbsPath(){}
-    vector<PointXY> getNurbsPath(list<PGNode*>&, unsigned int);
-    vector<PointXY> getNurbsPath(vector<PointXY>&, unsigned int);
+    vector<PointXY> getNurbsPath(list<PGNode*>&, unsigned int, int);
+    vector<PointXY> getNurbsPath(vector<PointXY>&, unsigned int, int);
   private:
     float coxDeBoor(float u,int i,int k,const float* Knots);
     void getOutpoint(float t,float OutPoint[],float*opx,float*opy,const float*knots);

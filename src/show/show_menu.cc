@@ -107,6 +107,8 @@ GLUI_Spinner    *maxcol_spinner;
 /** Checkboxes for changing point display mode **/
 GLUI_Checkbox *always_box;
 GLUI_Checkbox *never_box;
+/** Checkbox for changing interpolation mode **/
+GLUI_Checkbox *interpol_box;
 
 /**
  * Generate the menu for the application.
@@ -309,6 +311,9 @@ void newMenu()
   glui1->add_button_to_panel(path_panel, "Load Robot P.", 0, drawRobotPath )->set_alignment( GLUI_ALIGN_CENTER );
   glui1->add_separator_to_panel(path_panel);
   glui1->add_checkbox_to_panel(path_panel, "Save Animation", &save_animation);
+  interpol_box = glui1->add_checkbox_to_panel(path_panel, "Interpolate by Distance", &inter_by_dist, -1, &callCameraUpdate);
+  //always_box = glui2->add_checkbox_to_panel(nav_panel, "Always all Points", &dummy4, 0, &changePointMode);
+  //glui1->add_checkbox_to_panel(path_panel, "Interpolate by Distance", &inter_by_dist);
   glui1->add_button_to_panel(path_panel, "Animate Path", 0, pathAnimate)->set_alignment( GLUI_ALIGN_CENTER);
 
   /**** Position panel *******/

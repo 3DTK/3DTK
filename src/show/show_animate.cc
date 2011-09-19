@@ -33,8 +33,8 @@ void calcUpPath()
   }
 
   // now get the nurbs path for the individual xy and xz plane
-  ups_vectorX = cam_nurbs_path.getNurbsPath(ups_listXY, nr_interpolations);
-  ups_vectorZ = cam_nurbs_path.getNurbsPath(ups_listXZ, nr_interpolations);
+  ups_vectorX = cam_nurbs_path.getNurbsPath(ups_listXY, nr_interpolations, inter_by_dist);
+  ups_vectorZ = cam_nurbs_path.getNurbsPath(ups_listXZ, nr_interpolations, inter_by_dist);
 }
 
 void calcLookAtPath()
@@ -61,8 +61,8 @@ void calcLookAtPath()
   }
 
   // now get the nurbs path for the individual xy and xz plane
-  lookat_vectorX = cam_nurbs_path.getNurbsPath(lookat_listXY, nr_interpolations);
-  lookat_vectorZ = cam_nurbs_path.getNurbsPath(lookat_listXZ, nr_interpolations);
+  lookat_vectorX = cam_nurbs_path.getNurbsPath(lookat_listXY, nr_interpolations, inter_by_dist);
+  lookat_vectorZ = cam_nurbs_path.getNurbsPath(lookat_listXZ, nr_interpolations, inter_by_dist);
 }
 
 void calcPath()
@@ -87,10 +87,10 @@ void calcPath()
   }
 
   nr_interpolations = calcNoOfPoints(path_listXY, path_listXZ);
-
+  calcInterpolatedCameras(path_listXY, path_listXZ);
   // now get the nurbs path for the individual xy and xz plane
-  path_vectorX = cam_nurbs_path.getNurbsPath(path_listXY, nr_interpolations);
-  path_vectorZ = cam_nurbs_path.getNurbsPath(path_listXZ, nr_interpolations);
+  path_vectorX = cam_nurbs_path.getNurbsPath(path_listXY, nr_interpolations, inter_by_dist);
+  path_vectorZ = cam_nurbs_path.getNurbsPath(path_listXZ, nr_interpolations, inter_by_dist);
 }
 
 void updateCamera() {

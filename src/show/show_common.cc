@@ -216,6 +216,11 @@ static int oldcamNavMode = 0;
  * Animation sould be saved to file
  */
 int save_animation         = 0;
+/**
+ * If true, interpolation for camera path is based on distance, else always
+ * the same number of images between two cameras.
+ */
+int inter_by_dist          = 1;
 
 /**some variables for the camera path**/
 vector<PointXY> path_vectorX, path_vectorZ,  lookat_vectorX, lookat_vectorZ, ups_vectorX, ups_vectorZ;
@@ -508,6 +513,7 @@ int parseArgs(int argc,char **argv, string &dir, int& start, int& end, int& maxD
 #endif
 
   ptype = PointType(types);
+  cout << "Hallo" << endl;
   return 0;
 }
 
