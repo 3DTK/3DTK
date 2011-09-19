@@ -809,21 +809,23 @@ void CallBackIdleFunc(void)
     glutPostRedisplay();
 
     if(save_animation){
-	 string filename = scandirectory + "animframe" + to_string(frameNr,5) + ".ppm";
-	 cout << "write " << filename << endl;
-	 glDumpWindowPPM(filename.c_str(),0);
+	    string filename = scandirectory + "animframe" + to_string(frameNr,5) + ".ppm";
+	    cout << "write " << filename << endl;
+      int tmpUpdate = haveToUpdate;
+      glWriteImagePPM(filename.c_str(), factor, 0);
+      haveToUpdate = tmpUpdate;
 
-	 string jpgname = scandirectory + "animframe" + to_string(frameNr,5) + ".jpg";
-	 string systemcall = "convert -quality 100 -type TrueColor " + filename + " " + jpgname;	
-	 //	 cout << systemcall << endl;
-	 system(systemcall.c_str());
-	 systemcall = "rm " + filename;
-	 system(systemcall.c_str());
-	 //	 cout << systemcall << endl;
-  // for f in *ppm ; do convert -quality 100 -type TrueColor $f `basename $f ppm`jpg; done 
+	    string jpgname = scandirectory + "animframe" + to_string(frameNr,5) + ".jpg";
+	    string systemcall = "convert -quality 100 -type TrueColor " + filename + " " + jpgname;	
+	    //	 cout << systemcall << endl;
+	    system(systemcall.c_str());
+	    systemcall = "rm " + filename;
+	    system(systemcall.c_str());
+	    //	 cout << systemcall << endl;
+      // for f in *ppm ; do convert -quality 100 -type TrueColor $f `basename $f ppm`jpg; done 
    }
     
-}
+  }
 #ifdef _MSC_VER
   Sleep(300);
   Sleep(anim_delay);
@@ -1751,6 +1753,43 @@ void drawRobotPath(int dummy){
   haveToUpdate = 1;
 }
 
+/**
+  * Calculates the positions of the interpolated camera path positions on the
+  * Nurbs path. There will be an equal number of intermediate positions between
+  * neighboring cameras.
+  */
+void calcInterpolatedCameras(vector<PointXY> vec1, vector<PointXY> vec2) {
+  NurbsPath::camRatio.clear();
+  double distance = 0.0;
+  double dx, dy, dz;
+  for(unsigned int i=0;i<vec1.size()-1;i++){
+    dx = vec1.at(i+1).x - vec1.at(i).x;
+    dy = vec1.at(i+1).y - vec1.at(i).y;
+    dz = vec2.at(i+1).y - vec2.at(i).y;
+
+    distance += sqrt(dx*dx + dy*dy + dz*dz );
+  }
+  double distance2 = 0.0; 
+  int im_per_cam = (distance/2.0)/(vec1.size() - 1);
+  int count = 0;
+  for(unsigned int i = 0; i < vec1.size()-1; i++) {
+    dx = vec1.at(i+1).x - vec1.at(i).x;
+    dy = vec1.at(i+1).y - vec1.at(i).y;
+    dz = vec2.at(i+1).y - vec2.at(i).y;
+    double curr_dist = sqrt(dx*dx + dy*dy + dz*dz);
+    for(int j = 0; j < im_per_cam; j++) {
+      count++;
+      NurbsPath::camRatio.push_back((distance2 + ((double)j * (curr_dist/(double)im_per_cam)))/(distance + 0.1));
+    }
+    
+    distance2 += sqrt(dx*dx + dy*dy + dz*dz);
+  }
+}
+
+/**
+  * Calculates the number of interpolation points for the camera path based on
+  * the length of the path
+  */
 int calcNoOfPoints(vector<PointXY> vec1, vector<PointXY> vec2)
 {
   double distance = 0.0;
@@ -1886,4 +1925,8 @@ void changePointMode(int dummy) {
     }
   }
   updateControls();
+}
+
+void callCameraUpdate(int dummy) {
+  updateCamera();
 }

@@ -1,5 +1,6 @@
 #include "show/NurbsPath.h"
-
+#include <stdio.h>
+#include <iostream>
 /**
  * Smoothes a given path, using the Cox-De-Boor algorithm to compute
  * new nodes on the B-Spline.
@@ -7,9 +8,11 @@
  * @param nump  number of points, which should be computed for the smoothed path
  * @return vector of PointXYs representing the smoothed path
  */
+vector<double> NurbsPath::camRatio = vector<double>();
+
 vector<PointXY> 
 NurbsPath::getNurbsPath(vector<PointXY>& origP,  
-                        unsigned int nump){
+                        unsigned int nump, int inter_by_dist){
   list<PGNode*> pgnl;
   list<PGNode*> freepgnl;
   for(unsigned int i=0; i<origP.size();i++){
@@ -20,7 +23,7 @@ NurbsPath::getNurbsPath(vector<PointXY>& origP,
     freepgnl.push_back(p);
   }
 
-  vector<PointXY> vec = getNurbsPath(pgnl,nump);
+  vector<PointXY> vec = getNurbsPath(pgnl,nump,inter_by_dist);
 
   for(list<PGNode*>::iterator it = freepgnl.begin();it!=freepgnl.end();it++) {
     PGNode *p = *it;
@@ -31,6 +34,7 @@ NurbsPath::getNurbsPath(vector<PointXY>& origP,
   
   return vec;
 }
+
 /**
  * Smoothes a given path, using the Cox-De-Boor algorithm to compute
  * new nodes on the B-Spline.
@@ -40,7 +44,7 @@ NurbsPath::getNurbsPath(vector<PointXY>& origP,
  */
 vector<PointXY> 
 NurbsPath::getNurbsPath(list<PGNode*>& origP,  
-                        unsigned int nump){
+                        unsigned int nump, int inter_by_dist){
   ivN = origP.size();
   if(ivN<=1){
     vector<PointXY> pv;
@@ -76,8 +80,11 @@ NurbsPath::getNurbsPath(list<PGNode*>& origP,
   ivDegree = 3;
   ivOrder  = ivDegree+1;
   ivNumKnots = ivN + ivDegree;
-  ivNumP   = nump;
-  
+  if(inter_by_dist) {
+    ivNumP   = nump;
+  } else {
+    ivNumP   = camRatio.size();
+  }
   float *ivpKnots = new float[ivNumKnots+1];
 
   for(i=0;i<=ivDegree;i++)
@@ -100,7 +107,11 @@ NurbsPath::getNurbsPath(list<PGNode*>& origP,
     out[0] = 0;
     out[1] = 0; 
     if(i!=ivNumP)
-      getOutpoint((float)i/ivNumP,out,origPX,origPY,ivpKnots);
+      if(inter_by_dist) {
+        getOutpoint((float)i/ivNumP,out,origPX,origPY,ivpKnots);
+      } else {
+        getOutpoint(camRatio[i],out,origPX,origPY,ivpKnots);
+      }
     else
       getOutpoint(.999999,out,origPX,origPY,ivpKnots);
 
@@ -115,6 +126,7 @@ NurbsPath::getNurbsPath(list<PGNode*>& origP,
 
   return nurbsPath;
 }
+
 
 /**
  * Implementation of the Cox-De-Boor algorithm.
