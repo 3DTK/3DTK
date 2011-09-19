@@ -94,7 +94,7 @@ void calcPath()
 }
 
 void updateCamera() {
-  updateControls();
+  updateCamControls();
   
   calcPath();
   calcLookAtPath();

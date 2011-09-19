@@ -749,3 +749,8 @@ void BasicGLPane::paint( )
 void updateControls() {
   globalGUI->updateControls();
 }
+
+void updatePointModeControls() {}
+void updateTopViewControls() {}
+void resetRotationButton() {}
+void updateCamControls() {}
