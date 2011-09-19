@@ -624,9 +624,21 @@ protected:
       if (  ( 1 << i ) & node.valid ) {   // if ith node exists
         if (  ( 1 << i ) & node.leaf ) {   // if ith node is leaf
           pointrep *points = children->points;
+          // new version to ignore leaves with less than 3 points
+          /* 
+          if(points[0].length > 2) { 
+            for(int tmp = 0; tmp < points[0].length; tmp++) {
+              T *point = &(points[POINTDIM*tmp+1].v);
+              c.push_back(point);
+            }
+          }
+          */  
+          //old version
+          
           int tmp = rand(points[0].length);
           T *point = &(points[POINTDIM*tmp+1].v);
           c.push_back(point);
+          
 
         } else { // recurse
           GetOctTreeRandom(c, children->node);
