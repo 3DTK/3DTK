@@ -107,11 +107,6 @@ GLfloat cangle          = 60.0;          // Current camera opening mode
 GLfloat cangle_old      = cangle; 
 
 /**
- * Current rotation angle of the scene 
- */
-GLdouble angle           = 0.0;
-
-/**
  * Current rotation axis of the scene as quaternion
  */
 GLdouble quat[4]         ={0.0, 0.0, 0.0, 1.0};
@@ -203,11 +198,6 @@ bool advanced_controls = false;
 #define TYPE_CEILING         0x0003 
 
 unsigned int cam_choice             = 0;
-/**camera rotation variables**/
-GLdouble quat1[4] = {0.0, 0.0, 0.0, 1.0};
-GLdouble angle1  = 0.0f;
-double axis1[3];
-float x_c, y_c, z_c;
   
 static unsigned int path_iterator = 0;
 static int oldcamNavMode = 0;
