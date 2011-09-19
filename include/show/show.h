@@ -105,6 +105,10 @@ void saveSelection(int dummy);
 void clearSelection(int dummy);
 
 void updateControls();
+void updatePointModeControls();
+void updateTopViewControls();
+void resetRotationButton();
+void updateCamControls();
 
 enum { ROTATION_X, ROTATION_RX, ROTATION_Y, ROTATION_RY, ROTATION_Z, ROTATION_RZ };
   /** enumeration for translation */

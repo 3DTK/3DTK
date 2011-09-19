@@ -23,14 +23,16 @@ int main(int argc, char **argv){
 }
 
 
-void updateControls() {
-  glui1->sync_live();
-  glui1->show();
-  glui2->sync_live();
-  glui2->show();
+void updateCamControls() {
+  cam_spinner->set_int_limits( 1, cams.size());
+  cam_spinner->set_int_val(cam_choice);
+}
 
-//  rotButton->reset();
+void resetRotationButton() {
+  rotButton->reset();
+}
 
+void updateTopViewControls() {
   if(showTopView) {
     pzoom_spinner->enable();
     cangle_spinner->disable();
@@ -38,8 +40,9 @@ void updateControls() {
     pzoom_spinner->disable();
     cangle_spinner->enable();
   }
+}
 
-
+void updatePointModeControls() {
   switch(pointmode) {
     case -1:
       always_box->set_int_val(0);
@@ -54,7 +57,12 @@ void updateControls() {
       never_box->set_int_val(0);
       break;
   }
+}
 
-  cam_spinner->set_int_limits( 1, cams.size());
-  cam_spinner->set_int_val(cam_choice);
+
+void updateControls() {
+  glui1->sync_live();
+  glui1->show();
+  glui2->sync_live();
+  glui2->show();
 }
