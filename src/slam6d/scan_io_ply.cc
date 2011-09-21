@@ -65,25 +65,28 @@ int ScanIO_ply::readScans(int start, int end, string &dir, int maxDist, int mind
   sscanf(dummy,"%s %*s %d",str,&nr);
 
   // header
+  int counter = -2;
   do {
+    if(counter > -2) counter++;
     scan_in.getline(dummy, 255);
-    if (strncmp(dummy, "format", 6) == 0) {
+   if (strncmp(dummy, "format", 6) == 0) {
 	 if (dummy[7] == 'a') binary = false;
 	 else if (dummy[7] == 'b') binary = true;
 	 else { cerr << "Don't recognize the format!" << endl; exit(1); }
     }
     else if (strncmp(dummy, "element vertex", 14) == 0) {
-	 sscanf(dummy,"%s %*s %d",str,&nr);
+	    sscanf(dummy,"%s %*s %d",str,&nr);
+      counter++;
     }
     else if (strncmp(dummy, "matrix", 6) == 0) {
-	 sscanf(dummy,"%s %f %f %f %f", str, &d1, &d2, &d3, &d4);
-	 matrix[matrixPos++] = d1;
-	 matrix[matrixPos++] = d2;
-	 matrix[matrixPos++] = d3;
-	 matrix[matrixPos++] = d4;
+	    sscanf(dummy,"%s %f %f %f %f", str, &d1, &d2, &d3, &d4);
+	    matrix[matrixPos++] = d1;
+	    matrix[matrixPos++] = d2;
+	    matrix[matrixPos++] = d3;
+	    matrix[matrixPos++] = d4;
     }    
   } while (!(strncmp(dummy, "end_header",10) == 0 || !scan_in.good()));
-
+  
   if (matrixPos > 0) {
     double rPosTheta[3];
     double rPos[3];
@@ -93,13 +96,27 @@ int ScanIO_ply::readScans(int start, int end, string &dir, int maxDist, int mind
   for (int i=0; i < nr; i++) {	 
     Point p;
     float data, confidence, intensity;
+    float dummy;
     int r, g, b;
     if (!binary) {
-	 //scan_in >> p.z >> p.x >> p.y >> confidence >> intensity;
-	    scan_in >> p.z >> p.x >> p.y >> r >> g >> b;
-      p.rgb[0] = (char)r;
-      p.rgb[1] = (char)g;
-      p.rgb[2] = (char)b;
+	    //scan_in >> p.z >> p.x >> p.y >> r >> g >> b;
+	    switch(counter) {
+        case 6:
+          scan_in >> p.z >> p.y >> p.x >> r >> g >> b;
+          break;
+        case 9:
+	    //scan_in >> p.z >> p.x >> p.y >> dummy >> dummy >> dummy >> r >> g >> b;
+	        scan_in >> p.z >> p.y >> p.x >> dummy >> dummy >> dummy >> r >> g >> b;
+          break;
+        default: 
+	        scan_in >> p.z >> p.x >> p.y >> confidence >> intensity;
+          break;
+      }
+      if(counter == 6 || counter == 9) {
+        p.rgb[0] = (char)r;
+        p.rgb[1] = (char)g;
+        p.rgb[2] = (char)b;
+      }
     } else {
 	 scan_in.read((char*)&data, sizeof(float));
 	 p.z = (double)data;

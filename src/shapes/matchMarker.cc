@@ -8,6 +8,7 @@ using std::endl;
 using std::ofstream;
 using std::ifstream;
 #include <errno.h>
+#include <time.h>
 
 #include "slam6d/scan.h"
 
@@ -37,11 +38,10 @@ struct match {
 
 void refine(int source, int target, match &tmp) {
   // transform scan according to matching triple
-  tmp.alignxf[14]+=10;
   Scan::allScans[target]->transformToMatrix(tmp.alignxf,Scan::INVALID);
   // search for point pairs
   //TODO
-  bool quiet = false;
+  bool quiet = true;
   icp6Dminimizer *my_icp6Dminimizer = 0;
   my_icp6Dminimizer = new icp6D_SVD(quiet);
 
@@ -52,22 +52,22 @@ void refine(int source, int target, match &tmp) {
 
   my_icp->match(Scan::allScans[source], Scan::allScans[target]);
  
-  //cout << "Point pairs: "<< tmp.n_o_m << endl;
+  ////cout << "Point pairs: "<< tmp.n_o_m << endl;
   const double * transMat = Scan::allScans[target]->get_transMat();
   for(int i = 0; i < 16; i++) {
-    cout << tmp.alignxf[i] << " " ;
+    //cout << tmp.alignxf[i] << " " ;
     tmp.alignxf[i] = transMat[i];
   }
-  cout << endl;
+  //cout << endl;
 }
 
 void evaluate(int source, int target, match &tmp) {
-  cout << "S1 " << tmp.s_a[0] << " " << tmp.s_a[1] << " " << tmp.s_a[2] << endl;
-  cout << "T1 " << tmp.t_a[0] << " " << tmp.t_a[1] << " " << tmp.t_a[2] << endl;
-  cout << "S2 " << tmp.s_b[0] << " " << tmp.s_b[1] << " " << tmp.s_b[2] << endl;
-  cout << "T2 " << tmp.t_b[0] << " " << tmp.t_b[1] << " " << tmp.t_b[2] << endl;
-  cout << "S3 " << tmp.s_c[0] << " " << tmp.s_c[1] << " " << tmp.s_c[2] << endl;
-  cout << "T3 " << tmp.t_c[0] << " " << tmp.t_c[1] << " " << tmp.t_c[2] << endl;
+  //cout << "S1 " << tmp.s_a[0] << " " << tmp.s_a[1] << " " << tmp.s_a[2] << endl;
+  //cout << "T1 " << tmp.t_a[0] << " " << tmp.t_a[1] << " " << tmp.t_a[2] << endl;
+  //cout << "S2 " << tmp.s_b[0] << " " << tmp.s_b[1] << " " << tmp.s_b[2] << endl;
+  //cout << "T2 " << tmp.t_b[0] << " " << tmp.t_b[1] << " " << tmp.t_b[2] << endl;
+  //cout << "S3 " << tmp.s_c[0] << " " << tmp.s_c[1] << " " << tmp.s_c[2] << endl;
+  //cout << "T3 " << tmp.t_c[0] << " " << tmp.t_c[1] << " " << tmp.t_c[2] << endl;
   
   // Point pairs
   vector<PtPair> pairs_in;
@@ -87,32 +87,44 @@ void evaluate(int source, int target, match &tmp) {
   
   // transform scan according to matching triple
   icp6Dminimizer *my_icp6Dminimizer = 0;
-  my_icp6Dminimizer = new icp6D_SVD(false);
+  my_icp6Dminimizer = new icp6D_SVD(true);
   my_icp6Dminimizer->Point_Point_Align(pairs_in, tmp.alignxf, centroid_s, centroid_t);
   Scan::allScans[target]->transformToMatrix(tmp.alignxf,Scan::INVALID);
 
   vector<PtPair> pairs_out;
   // search for point pairs
-  Scan::getPtPairs(&pairs_out, Scan::allScans[source], Scan::allScans[target], 1, 0, 625.0, centroid_s, centroid_t);  
+  Scan::getPtPairs(&pairs_out, Scan::allScans[source], Scan::allScans[target], 1, 0, 25.0, centroid_s, centroid_t);  
  
   tmp.n_o_m = pairs_out.size();
-  cout << "Point pairs: "<< tmp.n_o_m << endl;
-  for(int i = 0; i < 16; i++) {
-    cout << tmp.alignxf[i] << " ";
+  //cout << tmp.n_o_m << endl;
+  
+  if(tmp.n_o_m > Scan::allScans[target]->get_points_red_size()) {
+    //cout << "Point pairs: "<< tmp.n_o_m << endl;
+    
+    /*
+    for(int i = 0; i < 16; i++) {
+      cout << tmp.alignxf[i] << " ";
+    }
+    for(int i = 0; i < pairs_out.size(); i++) {
+      cout << pairs_out[i].p1.x << " " << pairs_out[i].p1.y << " " << pairs_out[i].p1.z <<
+      " " << pairs_out[i].p2.x << " " << pairs_out[i].p2.y << " " << pairs_out[i].p2.z << endl; 
+    }
+    */
   }
-  cout << "S1 " << tmp.s_a[0] << " " << tmp.s_a[1] << " " << tmp.s_a[2] << endl;
-  cout << "T1 " << tmp.t_a[0] << " " << tmp.t_a[1] << " " << tmp.t_a[2] << endl;
-  cout << "S2 " << tmp.s_b[0] << " " << tmp.s_b[1] << " " << tmp.s_b[2] << endl;
-  cout << "T2 " << tmp.t_b[0] << " " << tmp.t_b[1] << " " << tmp.t_b[2] << endl;
-  cout << "S3 " << tmp.s_c[0] << " " << tmp.s_c[1] << " " << tmp.s_c[2] << endl;
-  cout << "T3 " << tmp.t_c[0] << " " << tmp.t_c[1] << " " << tmp.t_c[2] << endl;
-  cout << endl;
+  
+  //cout << "S1 " << tmp.s_a[0] << " " << tmp.s_a[1] << " " << tmp.s_a[2] << endl;
+  //cout << "T1 " << tmp.t_a[0] << " " << tmp.t_a[1] << " " << tmp.t_a[2] << endl;
+  //cout << "S2 " << tmp.s_b[0] << " " << tmp.s_b[1] << " " << tmp.s_b[2] << endl;
+  //cout << "T2 " << tmp.t_b[0] << " " << tmp.t_b[1] << " " << tmp.t_b[2] << endl;
+  //cout << "S3 " << tmp.s_c[0] << " " << tmp.s_c[1] << " " << tmp.s_c[2] << endl;
+  //cout << "T3 " << tmp.t_c[0] << " " << tmp.t_c[1] << " " << tmp.t_c[2] << endl;
+  //cout << endl;
   Scan::allScans[target]->resetPose();
 
   delete my_icp6Dminimizer;
 }
 
-void matchMarker(int start, int end) { // BOF
+void matchBruteForce(int start, int end) { // BOF
   double* const* source = Scan::allScans[start]->get_points_red();
   double* const* target = Scan::allScans[end]->get_points_red();
   int nr_m_s = Scan::allScans[start]->get_points_red_size();
@@ -128,22 +140,22 @@ void matchMarker(int start, int end) { // BOF
       double dist = sqrt(Dist2(source[i], source[j]));
       dist_s[i][j] = dist;
       dist_s[j][i] = dist;
-      cout << dist << " "; 
+      //cout << dist << " "; 
     }
-    cout << endl;
+    //cout << endl;
   }
-  cout << endl;
+  //cout << endl;
   for(int i = 0; i < nr_m_t; i++) {
     for(int j = i; j < nr_m_t; j++) {
       double dist = sqrt(Dist2(target[i], target[j]));
       dist_t[i][j] = dist;
       dist_t[j][i] = dist;
-      cout << dist << " "; 
+      //cout << dist << " "; 
     }
-    cout << endl;
+    //cout << endl;
   }
-  cout << endl;
-  cout << "Done calculating distances" << endl;
+  //cout << endl;
+  //cout << "Done calculating distances" << endl;
 
   // do matching
   for(int i = 0; i < nr_m_s; i++) {               // 1
@@ -184,22 +196,118 @@ void matchMarker(int start, int end) { // BOF
       max_i = i;
       max = matching_results[i].n_o_m;
     }
-    cout << i << ": " << matching_results[i].n_o_m << ", " << matching_results[i].variance << endl;
+    //cout << i << ": " << matching_results[i].n_o_m << ", " << matching_results[i].variance << endl;
     for(int j = 0; j < 16; j++) {
-      cout << matching_results[i].alignxf[j] << " ";
+      //cout << matching_results[i].alignxf[j] << " ";
     }
   }
-  cout << "Max index: " << max_i << ", points: " << max << endl;
+  //cout << "Max index: " << max_i << ", points: " << max << endl;
   for(int i = 0; i < 16; i++) {
-    cout << matching_results[max_i].alignxf[i] << " ";
+    //cout << matching_results[max_i].alignxf[i] << " ";
   }
   refine(start, end, matching_results[max_i]);
-  cout << endl << "Refined: " << endl;
+  //cout << endl << "Refined: " << endl;
   for(int i = 0; i < 16; i++) {
     cout << matching_results[max_i].alignxf[i] << " ";
   }
 
-  cout << endl;
+  cout << " 2" << endl;
+} // EOF
+
+void matchMarker(int start, int end) { // BOF
+  cout << start << " " << end << endl;
+  double* const* source = Scan::allScans[start]->get_points_red();
+  double* const* target = Scan::allScans[end]->get_points_red();
+  int nr_m_s = Scan::allScans[start]->get_points_red_size();
+  int nr_m_t = Scan::allScans[end]->get_points_red_size();
+  cout << "Points: " << nr_m_s << " " << nr_m_t << endl;
+  double dist_s[nr_m_s][nr_m_s];
+  double dist_t[nr_m_t][nr_m_t];
+  double eps = 5.0;
+  vector<match> matching_results;
+
+  // calculate distance graphs
+  for(int i = 0; i < nr_m_s; i++) {
+    for(int j = i; j < nr_m_s; j++) {
+      double dist = sqrt(Dist2(source[i], source[j]));
+      dist_s[i][j] = dist;
+      dist_s[j][i] = dist;
+      //cout << dist << " "; 
+    }
+    //cout << endl;
+  }
+  //cout << endl;
+  for(int i = 0; i < nr_m_t; i++) {
+    for(int j = i; j < nr_m_t; j++) {
+      double dist = sqrt(Dist2(target[i], target[j]));
+      dist_t[i][j] = dist;
+      dist_t[j][i] = dist;
+      //cout << dist << " "; 
+    }
+    //cout << endl;
+  }
+  //cout << endl;
+  //cout << "Done calculating distances" << endl;
+  for(int runs = 0; runs < 100; runs++) {
+    int i = (int) (nr_m_s*(rand()/(RAND_MAX+1.0)));
+    int j = (int) (nr_m_s*(rand()/(RAND_MAX+1.0)));
+    int m = (int) (nr_m_s*(rand()/(RAND_MAX+1.0)));
+    double dist_a = dist_s[i][j];
+    double dist_3_i = dist_s[i][m];
+    double dist_3_j = dist_s[j][m];
+  
+  
+  // do matching
+    for(int k = 0; k < nr_m_t; k++) {           // 3
+      for(int l = 0; l < nr_m_t; l++) {         // 4
+        if(fabs(dist_t[k][l] - dist_a) < eps) { // 5
+       
+          for(int n = 0; n < nr_m_t; n++) {   // 7
+            if(fabs(dist_t[k][n] - dist_3_i) < eps) { // 8
+              if(fabs(dist_t[l][n] - dist_3_j) < eps) { // 9 
+                //match found calculate error function
+                match tmp;
+                tmp.s_a = source[i];
+                tmp.s_b = source[j];
+                tmp.s_c = source[m];
+                tmp.t_a = target[k];
+                tmp.t_b = target[l];
+                tmp.t_c = target[n];
+                evaluate(start, end, tmp);
+                matching_results.push_back(tmp);
+              }                                         // 9
+            }                                         // 8
+          }                                   // 7
+        }                                     // 6
+                                              // 5
+      }                                         // 4
+    }                                           // 3
+  }                                               // 1
+  int max = 0;
+  int max_i = 0;
+  for(int i = 0; i < matching_results.size(); i++) {
+    if(matching_results[i].n_o_m > max) {
+      max_i = i;
+      max = matching_results[i].n_o_m;
+      //cout << i << " " << max << endl;
+    }
+    //cout << i << ": " << matching_results[i].n_o_m << ", " << matching_results[i].variance << endl;
+    for(int j = 0; j < 16; j++) {
+      //cout << matching_results[i].alignxf[j] << " ";
+    }
+  }
+  cout << "Really?" << endl;
+  //cout << "Max index: " << max_i << ", points: " << max << endl;
+  for(int i = 0; i < 16; i++) {
+    //cout << matching_results[max_i].alignxf[i] << " ";
+  }
+  refine(start, end, matching_results[max_i]);
+  //cout << endl << "Refined: " << endl;
+  for(int i = 0; i < 16; i++) {
+    cout << matching_results[max_i].alignxf[i] << " ";
+  }
+
+  cout << " 2" << endl;
 } // EOF
 
 /**
@@ -271,7 +379,7 @@ int parseArgs(int argc, char **argv, string &dir,
     { 0,           0,   0,   0}                    // needed, cf. getopt.h
   };
 
-  cout << endl;
+  //cout << endl;
   while ((c = getopt_long(argc, argv, "f:d:s:e:", longopts, NULL)) != -1)
     switch (c)
 	 {
@@ -348,15 +456,20 @@ int main(int argc, char **argv)
   int    start = -1,   end = -1;
   int    maxDist    = -1;
   int    minDist    = -1;
-  reader_type type    = RIEGL_TXT;
+  reader_type type    = UOS;
   bool desc = false;  
 
   parseArgs(argc, argv, dir, start, end, dist, type, desc);
   
   Scan::readScansRedSearch(type, start, end, dir, maxDist, minDist, -1, 1, false, false, false);
-  cout << "Start match marker" << endl; 
-  matchMarker(start, end - start);
-  cout << "End match marker" << endl; 
+  cout << "Start match marker ..." << endl; 
+  srand(time(0));
+  srand(0);
+  long starttime = GetCurrentTimeInMilliSec(); 
+ // matchBruteForce(start, end-start);
+  matchMarker(0, end - start);
+  starttime = (GetCurrentTimeInMilliSec() - starttime);
+  cout << " done in " << starttime << " ms" << endl; 
   
   vector <Scan*>::iterator Iter = Scan::allScans.begin();
   for( ; Iter != Scan::allScans.end(); ) {

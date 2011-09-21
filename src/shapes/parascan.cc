@@ -7,7 +7,7 @@
 
 /* -------------------------------------------------------------------------- */
 
-int  paramtr_scan_int(FILE *stream, char *search,int defaultval)
+int  paramtr_scan_int(FILE *stream, const char *search,int defaultval)
 {
   char target[256];
 
@@ -19,7 +19,7 @@ int  paramtr_scan_int(FILE *stream, char *search,int defaultval)
 
 /* -------------------------------------------------------------------------- */
 
-double  paramtr_scan_double(FILE *stream, char *search,double defaultval)
+double  paramtr_scan_double(FILE *stream, const char *search,double defaultval)
 {
   char target[256];
    
@@ -31,9 +31,9 @@ double  paramtr_scan_double(FILE *stream, char *search,double defaultval)
 
 /* -------------------------------------------------------------------------- */
 
-bool paramtr_scan_str(FILE *stream, char *search, char *target)
+bool paramtr_scan_str(FILE *stream, const char *search, char *target)
 {
-  char  *ptr = search;
+  const char  *ptr = search;
   int   c, mem;
 
     /* erster durchlauf */
@@ -59,7 +59,11 @@ bool paramtr_scan_str(FILE *stream, char *search, char *target)
 	  } /* if */
 	}
 	else {
-	  fscanf(stream, "%s", target);
+	  int numberOfItemsRead = fscanf(stream, "%s", target);
+          if(!numberOfItemsRead)
+            {
+              return false;
+            }
 	  return true;
 	} /* if */
       } /* if */
@@ -70,9 +74,11 @@ bool paramtr_scan_str(FILE *stream, char *search, char *target)
 
 /* -------------------------------------------------------------------------- */
 
-int  paramtr_scan_echo(char *filename, char *search)
+int  paramtr_scan_echo(const char *filename, const char *search)
 {
-  char  *ptr = search, str[256], *target;
+  const char  *ptr = search;
+  char str[256];
+  char* target;
   int   c, no;
   FILE  *stream;
 

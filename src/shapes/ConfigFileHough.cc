@@ -53,7 +53,7 @@ void ConfigFileHough::ShowConfiguration() {
   cout << "PlaneDir " << Get_PlaneDir() << endl;
 }
 
-unsigned int ConfigFileHough::LoadCfg(char* CfgFile) {
+unsigned int ConfigFileHough::LoadCfg(const char* CfgFile) {
 
   FILE *Cfg;
 
