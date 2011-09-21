@@ -63,11 +63,16 @@ void usage(char* prog) {
 	  << bold << "  -M" << normal << " NR, " << bold << "--min=" << normal << "NR" << endl
 	  << "         neglegt all data points with a distance smaller than NR 'units'" << endl
 	  << endl
-	  << bold << "  -p" << normal << " P, " << bold << "--plane=" << normal << "P" << endl
-	  << "         using algorithm P for plane detection" << endl
-	  << "         (chose P from {rht, sht, pht, ppht, apht})" << endl
+	  << bold << "  -p" << normal << " NR, " << bold << "--pattern=" << normal << "NR" << endl
+	  << "         use pattern NR for plane detection" << endl
+	  << "         0: lightbulb pattern" << endl
+	  << "         1: chess pattern on cardboard" << endl
+	  << "         0: chess pattern on wooden board" << endl
 	  << endl
-	  << bold << "  -r" << normal << " NR, " << bold << "--reduce=" << normal << "NR" << endl
+	  << bold << "  -c" << normal << " P, " << bold << "--output=" << normal << "P" << endl
+	  << "         write the output data to file P" << endl
+    << endl
+    << bold << "  -r" << normal << " NR, " << bold << "--reduce=" << normal << "NR" << endl
 	  << "         turns on octree based point reduction (voxel size=<NR>)" << endl
 	  << endl
 	  << bold << "  -O" << normal << "NR (optional), " << bold << "--octree=" << normal << "NR (optional)" << endl
@@ -88,9 +93,7 @@ void usage(char* prog) {
 
 }
 
-vector<double *> * matchPlaneToBoard(vector<double *> &points, double *alignxf) {
-  bool thermocam = true;
-  bool chessboard = false;
+vector<double *> * matchPlaneToBoard(vector<double *> &points, double *alignxf, int pattern, string output) {
   double rPos[3] = {0.0,0.0,0.0};
   double rPosTheta[3] = {0.0,0.0,0.0};
 
@@ -98,16 +101,19 @@ vector<double *> * matchPlaneToBoard(vector<double *> &points, double *alignxf) 
   double halfwidth; 
   double halfheight; 
   
-  if(thermocam) {
-    cout << "Hallo" << endl;
-    halfheight = 28.5;
-    halfwidth = 25.0;
-  } else if(chessboard){
-    halfwidth = 18.3;
-    halfheight = 18.5;
-  } else {
-    halfwidth = 19.0;
-    halfheight = 38.0;
+  switch(pattern) {
+    case 0: 
+      halfheight = 28.5;
+      halfwidth = 25.0;
+      break;
+    case 1:
+      halfwidth = 18.3;
+      halfheight = 18.5;
+      break;
+    case 2:
+      halfwidth = 19.0;
+      halfheight = 38.0;
+      break;
   }
   double step = 0.5;
 
@@ -117,16 +123,11 @@ vector<double *> * matchPlaneToBoard(vector<double *> &points, double *alignxf) 
       p[0] = i;
       p[1] = j;
       p[2] = 0.0;
-      cout << p[0] << " " << p[1] << " " << p[2] << endl;
-      //cout << p[0] << " " << p[1] << " " << rand(5.0)-2.5 << endl;
+      //cout << p[0] << " " << p[1] << " " << p[2] << endl;
       boardpoints.push_back(p);
     }
   }
-  for(int i = 0; i < 16; i++) {
-    cout << alignxf[i] << " ";
-  }
-  cout << "2" << endl;
-  return 0;
+  
   Scan * plane = new Scan(rPos, rPosTheta, points);
   Scan * board = new Scan(rPos, rPosTheta, boardpoints);
   board->transform(alignxf, Scan::INVALID, 0);
@@ -164,7 +165,10 @@ vector<double *> * matchPlaneToBoard(vector<double *> &points, double *alignxf) 
   cout << endl;
   vector<double *> * result = new vector<double *>();
   cout << "Calipoints Start" << endl;
-  if(thermocam) {
+  
+  ofstream caliout(output.c_str());
+  switch(pattern) {
+  case 0:
     for(double x = -20; x < 25; x+=10.0) {
       for(double y = -25; y < 30; y+=10.0) {
         double * p = new double[3];
@@ -173,10 +177,24 @@ vector<double *> * matchPlaneToBoard(vector<double *> &points, double *alignxf) 
         p[2] = 0.0;
         transform3(transMat, p);
         result->push_back(p);
-        cerr << p[0] << " " << p[1] << " " << p[2] << endl;
+        caliout << p[0] << " " << p[1] << " " << p[2] << endl;
       }
     }
-  } else if(chessboard){
+    break;
+  case 1:
+    for(double x = -7.8; x < 10; x+=5.2) {
+      for(double y = 4.1; y < 33.0; y+=5.2) {
+        double * p = new double[3];
+        p[0] = x;
+        p[1] = y;
+        p[2] = 0.0;
+        transform3(transMat, p);
+        result->push_back(p);
+        caliout << p[0] << " " << p[1] << " " << p[2] << endl;
+      }
+    }
+    break;
+  case 2:
     for(double x = -12; x < 16; x+=4.0) {
       for(double y = -12; y < 16; y+=4.0) {
         double * p = new double[3];
@@ -185,46 +203,20 @@ vector<double *> * matchPlaneToBoard(vector<double *> &points, double *alignxf) 
         p[2] = 0.0;
         transform3(transMat, p);
         result->push_back(p);
-        cerr << p[0] << " " << p[1] << " " << p[2] << endl;
+        caliout << p[0] << " " << p[1] << " " << p[2] << endl;
       }
     }
-  } else {
-    /*
-    for(double x = -7.8; x < 10; x+=5.2) {
-    //  for(double y = -13; y i< 15; y+=5.2) {
-    //                 17.1
-      for(double y = 4.1; y < 33.0; y+=5.2) {
-        double * p = new double[3];
-        p[0] = x;
-        p[1] = y;
-        p[2] = 0.0;
-        transform3(transMat, p);
-        result->push_back(p);
-        cerr << p[0] << " " << p[1] << " " << p[2] << endl;
-      }
-    }
-    */
-    for(double x = -7.8; x < 10; x+=5.2) {
-    //  for(double y = -13; y i< 15; y+=5.2) {
-    //                 17.1
-      for(double y = -30.1; y < -3.0; y+=5.2) {
-        double * p = new double[3];
-        p[0] = x;
-        p[1] = y;
-        p[2] = 0.0;
-        transform3(transMat, p);
-        result->push_back(p);
-        cerr << p[0] << " " << p[1] << " " << p[2] << endl;
-      }
-    }
-  }
+    break;
+  } 
+  caliout.close();
+  caliout.clear();
+
   cout << "Calipoints End" << endl;
   return result;
 }
 
-int parseArgs(int argc, char **argv, string &dir, double &red, int &start, int
-  &maxDist, int&minDist, int &octree, reader_type &type, bool
-  &quiet) {
+int parseArgs(int argc, char **argv, string &dir, double &red, int &start, int pattern, 
+string &output, int &maxDist, int&minDist, int &octree, reader_type &type, bool &quiet) {
 
   bool reduced = false;
   int  c;
@@ -240,13 +232,15 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &start, int
     { "min",             required_argument,   0,  'M' },
     { "start",           required_argument,   0,  's' },
     { "reduce",          required_argument,   0,  'r' },
-    { "quit",            no_argument,         0,  'q' },
+    { "pattern",         required_argument,   0,  'p' },
+    { "quiet",           no_argument,         0,  'q' },
     { "octree",          optional_argument,   0,  'O' },
+    { "output",          required_argument,   0,  'c' },
     { 0,           0,   0,   0}                    // needed, cf. getopt.h
   };
 
   cout << endl;
-  while ((c = getopt_long(argc, argv, "f:r:s:e:m:M:O:q", longopts, NULL)) != -1) 
+  while ((c = getopt_long(argc, argv, "f:r:s:e:m:M:O:qp:c:", longopts, NULL)) != -1) 
   switch (c)
 	 {
 	 case 'r':
@@ -261,14 +255,13 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &start, int
      if (!Scan::toType(optarg, type))
        abort ();
      break;
-   /*
    case 'p': 
+      pattern = atoi(optarg);
+      if(pattern < 0 || pattern > 2) { cerr << "Error: choose pattern between 0 and 2!\n"; exit(1); }
       break;
-      
-      if(strcasecmp(optarg, "bulbs") == 0) alg = 0;
-      else if(strcasecmp(optarg, "chess") == 0) alg = 1;
-      break;
-      */
+   case 'c':
+     output = optarg;
+     break;
 	 case 'q':
      quiet = true;
      break;
@@ -329,10 +322,12 @@ int main(int argc, char **argv)
   int    minDist    = -1;
   int    octree     = 0;
   bool   quiet = false;
+  int    pattern = 0;
+  string output = "cali.3d";
   reader_type type    = UOS;
   
   cout << "Parse args" << endl;
-  parseArgs(argc, argv, dir, red, start, maxDist, minDist, octree, type, quiet);
+  parseArgs(argc, argv, dir, red, start, pattern, output, maxDist, minDist, octree, type, quiet);
   Scan::dir = dir;
   int fileNr = start;
   string planedir = dir + "planes"; 
@@ -374,11 +369,6 @@ int main(int argc, char **argv)
   cout << "DONE " << endl;
 
   cout << nx << " " << ny << " " << nz << " " << d << endl;
-  /*
-  for (unsigned int i = 0; i < points.size(); i++) {
-    cerr << points[i][0] << " " << points[i][1] << " " << points[i][2] << endl;
-  }
-  */
   double rPos[3];
   double rPosTheta[3];
   for(int i = 0; i < 3; i++) {
@@ -387,7 +377,7 @@ int main(int argc, char **argv)
   ((LightBulbPlane<double> *)plane)->getCenter(rPos[0], rPos[1], rPos[2]);
   double alignxf[16];
   EulerToMatrix4(rPos, rPosTheta, alignxf);
-  matchPlaneToBoard(points, alignxf);
+  matchPlaneToBoard(points, alignxf, pattern, output);
   for(int i = points.size() - 1; i > -1; i++) {
     delete[] points[i];
   }
