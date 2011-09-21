@@ -1342,6 +1342,7 @@ bool Scan::toType(const char* string, reader_type &type) {
   else if (strcasecmp(string, "oct") == 0) type = OCT;
   else if (strcasecmp(string, "txyzr") == 0) type = TXYZR;
   else if (strcasecmp(string, "xyzr") == 0) type = XYZR;
+  else if (strcasecmp(string, "leica") == 0) type = LEICA;
   else if (strcasecmp(string, "xyz_rgb") == 0) type = XYZ_RGB;
   else if (strcasecmp(string, "ks") == 0) type = KS;
   else if (strcasecmp(string, "ks_rgb") == 0) type = KS_RGB;
@@ -1522,6 +1523,9 @@ Scan::scanIOwrapper::scanIOwrapper(reader_type type){
     break;
   case XYZR:
     lib_string = "scan_io_xyzr";
+    break;
+  case LEICA:
+    lib_string = "scan_io_leica_txt";
     break;
   case XYZ_RGB:
     lib_string = "scan_io_xyz_rgb";
