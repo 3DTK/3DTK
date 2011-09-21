@@ -4,8 +4,8 @@
  * @author Sven Albrecht. Institute of Computer Science, University of Osnabrueck, Germany.
  */
 
-#ifndef __SCAN_IO_XYZR_H__
-#define __SCAN_IO_XYZR_H__
+#ifndef __SCAN_IO_LEICA_H__
+#define __SCAN_IO_LEICA_H__
 
 #include <string>
 using std::string;

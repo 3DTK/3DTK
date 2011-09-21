@@ -80,10 +80,12 @@ IF(WITH_TOOLS)
   add_executable(frames2pose frames2pose.cc)
   add_executable(pose2frames pose2frames.cc)
   add_executable(riegl2frames riegl2frames.cc)
+  add_executable(toGlobal toGlobal.cc)
 
   IF(UNIX)
     target_link_libraries(graph_balancer scanlib ${Boost_LIBRARIES})
     target_link_libraries(exportPoints scanlib dl ANN)
+    target_link_libraries(toGlobal scanlib)
   ENDIF(UNIX)
 
   
