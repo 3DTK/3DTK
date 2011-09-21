@@ -23,10 +23,10 @@
 /* prototyps */
 /* -------------------------------------------------------------------------- */
 
-extern int  paramtr_scan_int(FILE *stream, char *search,int defaultval);
-extern double  paramtr_scan_double(FILE *stream, char *search,double defaultval);
-extern bool  paramtr_scan_str(FILE *stream, char *search, char *target);
-extern int  paramtr_scan_echo(char *filename, char *search);
+extern int  paramtr_scan_int(FILE *stream, const char *search,int defaultval);
+extern double  paramtr_scan_double(FILE *stream, const char *search,double defaultval);
+extern bool  paramtr_scan_str(FILE *stream, const char *search, char *target);
+extern int  paramtr_scan_echo(const char *filename, const char *search);
 /* descriptions */
 /* -------------------------------------------------------------------------- */
 

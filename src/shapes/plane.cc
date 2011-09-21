@@ -257,7 +257,7 @@ int main(int argc, char **argv)
       cerr << points[i][0] << " " << points[i][1] << " " << points[i][2] << endl;
     }
     */
-    for(int i = points.size() - 1; i > -1; i++) {
+    for(int i = points.size() - 1; i > -1; i--) {
       delete[] points[i];
     }
     
@@ -289,7 +289,6 @@ int main(int argc, char **argv)
     hough.writePlanes();
     starttime = (GetCurrentTimeInMilliSec() - starttime);
   }
-  
 
   cout << "Time for Plane Detection " << starttime << endl;
   delete Scan::allScans[0];

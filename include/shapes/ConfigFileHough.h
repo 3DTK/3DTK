@@ -2,26 +2,26 @@
 #define _ConfigFileHough_
 
 #define DEF_CfgFileName         "bin/hough.cfg"
-#define DEF_MaxDist             200
-#define DEF_MinDist             25
+#define DEF_MaxDist             500
+#define DEF_MinDist             50
 #define DEF_AccumulatorMax      100
-#define DEF_MinSizeAllPoints    2000
-#define DEF_RhoNum              100
-#define DEF_ThetaNum            120
-#define DEF_PhiNum              60
-#define DEF_RhoMax              30
-#define DEF_MaxPointPlaneDist   2000
+#define DEF_MinSizeAllPoints    20
+#define DEF_RhoNum              500
+#define DEF_ThetaNum            360
+#define DEF_PhiNum              176
+#define DEF_RhoMax              1500
+#define DEF_MaxPointPlaneDist   1.5
 #define DEF_MaxPlanes           20
-#define DEF_MinPlaneSize        1
+#define DEF_MinPlaneSize        100
 #define DEF_MinPlanarity        30.0
-#define DEF_PlaneRatio          0.9
-#define DEF_PointDist           30.0
+#define DEF_PlaneRatio          0.5
+#define DEF_PointDist           5.0
 #define DEF_PeakWindow          false
 #define DEF_WindowSize          8
 #define DEF_TrashMax            20
 
-#define DEF_AccumulatorType     1
-#define DEF_PlaneDir            "/tmp/planes/"
+#define DEF_AccumulatorType     3
+#define DEF_PlaneDir            "dat/planes/"
 #define FNAME_LENGTH            100
 
 struct maxcompare {
@@ -36,7 +36,7 @@ public:
   
   ConfigFileHough();
 
-  unsigned int LoadCfg(char *CfgFile);
+  unsigned int LoadCfg(const char *CfgFile);
   void ShowConfiguration();
 
   inline char* Get_CfgFileName();
@@ -62,7 +62,7 @@ public:
   inline unsigned int Get_AccumulatorType();     
   inline char* Get_PlaneDir();  
 
-private:
+//private: // Parameters are public to avoid having to create mutator functions
 
   char CfgFileName[FNAME_LENGTH];
   double MaxDist;
@@ -86,6 +86,6 @@ private:
   char PlaneDir[FNAME_LENGTH];
 
 };
-#include "shapes/ConfigFileHough.icc"
+#include "ConfigFileHough.icc"
 
 #endif

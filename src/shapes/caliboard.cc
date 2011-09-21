@@ -89,12 +89,26 @@ void usage(char* prog) {
 }
 
 vector<double *> * matchPlaneToBoard(vector<double *> &points, double *alignxf) {
+  bool thermocam = true;
+  bool chessboard = false;
   double rPos[3] = {0.0,0.0,0.0};
   double rPosTheta[3] = {0.0,0.0,0.0};
 
   vector<double *> boardpoints;
-  double halfwidth = 25.0;
-  double halfheight = 28.5;
+  double halfwidth; 
+  double halfheight; 
+  
+  if(thermocam) {
+    cout << "Hallo" << endl;
+    halfheight = 28.5;
+    halfwidth = 25.0;
+  } else if(chessboard){
+    halfwidth = 18.3;
+    halfheight = 18.5;
+  } else {
+    halfwidth = 19.0;
+    halfheight = 38.0;
+  }
   double step = 0.5;
 
   for(double i = -halfwidth; i <= halfwidth; i+=step) {
@@ -103,23 +117,27 @@ vector<double *> * matchPlaneToBoard(vector<double *> &points, double *alignxf) 
       p[0] = i;
       p[1] = j;
       p[2] = 0.0;
-      //cout << p[0] << " " << p[1] << " " << p[2] << endl;
-      cout << p[0] << " " << p[1] << " " << rand(5.0)-2.5 << endl;
+      cout << p[0] << " " << p[1] << " " << p[2] << endl;
+      //cout << p[0] << " " << p[1] << " " << rand(5.0)-2.5 << endl;
       boardpoints.push_back(p);
     }
   }
-
+  for(int i = 0; i < 16; i++) {
+    cout << alignxf[i] << " ";
+  }
+  cout << "2" << endl;
+  return 0;
   Scan * plane = new Scan(rPos, rPosTheta, points);
   Scan * board = new Scan(rPos, rPosTheta, boardpoints);
   board->transform(alignxf, Scan::INVALID, 0);
-
+  
   bool quiet = true;
   icp6Dminimizer *my_icp6Dminimizer = 0;
   my_icp6Dminimizer = new icp6D_SVD(quiet);
 
   icp6D *my_icp = 0;
-  double mdm = 550;
-  int mni = 1000;
+  double mdm = 50;
+  int mni = 1500;
   my_icp = new icp6D(my_icp6Dminimizer, mdm, mni, quiet, false, -1, false, 1, 0.00, false, false);
 
   plane->createTree(false,false);
@@ -146,15 +164,58 @@ vector<double *> * matchPlaneToBoard(vector<double *> &points, double *alignxf) 
   cout << endl;
   vector<double *> * result = new vector<double *>();
   cout << "Calipoints Start" << endl;
-  for(double x = -20; x < 25; x+=10.0) {
-    for(double y = -25; y < 30; y+=10.0) {
-      double * p = new double[3];
-      p[0] = x;
-      p[1] = y;
-      p[2] = 0.0;
-      transform3(transMat, p);
-      result->push_back(p);
-      cerr << p[0] << " " << p[1] << " " << p[2] << endl;
+  if(thermocam) {
+    for(double x = -20; x < 25; x+=10.0) {
+      for(double y = -25; y < 30; y+=10.0) {
+        double * p = new double[3];
+        p[0] = x;
+        p[1] = y;
+        p[2] = 0.0;
+        transform3(transMat, p);
+        result->push_back(p);
+        cerr << p[0] << " " << p[1] << " " << p[2] << endl;
+      }
+    }
+  } else if(chessboard){
+    for(double x = -12; x < 16; x+=4.0) {
+      for(double y = -12; y < 16; y+=4.0) {
+        double * p = new double[3];
+        p[0] = x;
+        p[1] = y;
+        p[2] = 0.0;
+        transform3(transMat, p);
+        result->push_back(p);
+        cerr << p[0] << " " << p[1] << " " << p[2] << endl;
+      }
+    }
+  } else {
+    /*
+    for(double x = -7.8; x < 10; x+=5.2) {
+    //  for(double y = -13; y i< 15; y+=5.2) {
+    //                 17.1
+      for(double y = 4.1; y < 33.0; y+=5.2) {
+        double * p = new double[3];
+        p[0] = x;
+        p[1] = y;
+        p[2] = 0.0;
+        transform3(transMat, p);
+        result->push_back(p);
+        cerr << p[0] << " " << p[1] << " " << p[2] << endl;
+      }
+    }
+    */
+    for(double x = -7.8; x < 10; x+=5.2) {
+    //  for(double y = -13; y i< 15; y+=5.2) {
+    //                 17.1
+      for(double y = -30.1; y < -3.0; y+=5.2) {
+        double * p = new double[3];
+        p[0] = x;
+        p[1] = y;
+        p[2] = 0.0;
+        transform3(transMat, p);
+        result->push_back(p);
+        cerr << p[0] << " " << p[1] << " " << p[2] << endl;
+      }
     }
   }
   cout << "Calipoints End" << endl;
