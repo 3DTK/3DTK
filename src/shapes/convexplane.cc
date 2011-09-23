@@ -55,20 +55,24 @@ void ConvexPlane::JarvisMarchConvexHull(list<double*> &points, vector<double*> &
   itr = points.begin();
   double * start = convex_hull[0]; 
   double * current = (*points.begin());
+  bool closed = true;
   do {
+    closed = true;
     itr = points.begin();
+    end = points.begin();
     while(itr != points.end()) {
       if(furtherleft(start, (*itr), current)) {
         end = itr;
         current = (*end);
+        closed = false;
       }
       itr++;
     }
     start = current;
-    convex_hull.push_back(current);
-    if(end != points.end()) {
+    if(!closed) {
+      convex_hull.push_back(current);
       end = points.erase(end);
-    }
+    } 
     current = anchor;
   } while(start != anchor);
   
@@ -81,7 +85,6 @@ void ConvexPlane::JarvisMarchConvexHull(list<double*> &points, vector<double*> &
       itr++;
     }
   }
-  convex_hull.pop_back();
   cout << "End of Convex " << convex_hull.size() << endl;
 }
 

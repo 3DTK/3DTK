@@ -231,7 +231,6 @@ PlaneDisplay::PlaneDisplay(vector<float*> &p, float* c) {
 
 SDisplay * PlaneDisplay::readFromFile(string &filename, float* color) {
   ifstream input;
-  cout << filename << endl;
   input.open(filename.c_str());
 
   vector<float*> points;

@@ -89,6 +89,16 @@ EXAMPLE:
 bin/planes -s 0 dat
 bin/show -s 0 -e 0 dat -l dat/planes/planes.list
 
+(using bremen_city.zip from http://kos.informatik.uni-osnabrueck.de/3Dscans/)
+adapt these settings in bin/hough.cfg:
+RhoNum              500          
+RhoMax              5000  
+MaxPointPlaneDist   50.0 
+MinPlaneSize        50
+PointDist           100.0  
+/bin/planes -f riegl_txt -s 0 /home/nuechter/dat/bremen_city/ -r 50 -O 1 -m 5000
+/bin/show -s 0 -e 0 /home/dborrman/Jacobs/dat/bremen_city/ -f riegl_txt -l dat/planes/planes.list -r 10 -O 1 -m 5000
+
 ------------------------------------------------
 A reference manual can be found in doc/refman.pdf resp.
 doc/html/index.html (type in 'make docu' to compile the doxygen

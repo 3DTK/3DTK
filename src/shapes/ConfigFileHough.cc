@@ -74,9 +74,9 @@ unsigned int ConfigFileHough::LoadCfg(const char* CfgFile) {
   RhoMax            = paramtr_scan_int(Cfg, "RhoMax", DEF_RhoMax);
   MaxPlanes         = paramtr_scan_int(Cfg, "MaxPlanes", DEF_MaxPlanes);
   MinPlaneSize      = paramtr_scan_int(Cfg, "MinPlaneSize", DEF_MinPlaneSize);
-  MinPlanarity      = paramtr_scan_int(Cfg, "MinPlanarity", DEF_MinPlanarity);
-  PlaneRatio        = paramtr_scan_int(Cfg, "PlaneRatio", DEF_PlaneRatio);
-  MaxPointPlaneDist = paramtr_scan_int(Cfg, "MaxPointPlaneDist", DEF_MaxPointPlaneDist);
+  MinPlanarity      = paramtr_scan_double(Cfg, "MinPlanarity", DEF_MinPlanarity);
+  PlaneRatio        = paramtr_scan_double(Cfg, "PlaneRatio", DEF_PlaneRatio);
+  MaxPointPlaneDist = paramtr_scan_double(Cfg, "MaxPointPlaneDist", DEF_MaxPointPlaneDist);
   PeakWindow        = paramtr_scan_int(Cfg, "PeakWindow", DEF_PeakWindow);
   WindowSize        = paramtr_scan_int(Cfg, "WindowSize", DEF_WindowSize);
   TrashMax          = paramtr_scan_int(Cfg, "TrashMax", DEF_TrashMax);

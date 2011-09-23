@@ -65,12 +65,12 @@ void usage(char* prog) {
 	  << endl
 	  << bold << "  -p" << normal << " P, " << bold << "--plane=" << normal << "P" << endl
 	  << "         using algorithm P for plane detection" << endl
-	  << "         (chose P from {rht, sht, pht, ppht, apht})" << endl
+	  << "         (chose P from {rht, sht, pht, ppht, apht, ran})" << endl
 	  << endl
 	  << bold << "  -r" << normal << " NR, " << bold << "--reduce=" << normal << "NR" << endl
 	  << "         turns on octree based point reduction (voxel size=<NR>)" << endl
 	  << endl
-	  << bold << "  -O" << normal << "NR (optional), " << bold << "--octree=" << normal << "NR (optional)" << endl
+	  << bold << "  -O" << normal << " NR (optional), " << bold << "--octree=" << normal << "NR (optional)" << endl
 	  << "         use randomized octree based point reduction (pts per voxel=<NR>)" << endl
 	  << "         requires " << bold << "-r" << normal <<" or " << bold << "--reduce" << endl
 	  << endl
@@ -287,6 +287,7 @@ int main(int argc, char **argv)
     }
 
     hough.writePlanes();
+    cout << "Write Planes done" << endl;
     starttime = (GetCurrentTimeInMilliSec() - starttime);
   }
 
