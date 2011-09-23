@@ -48,13 +48,14 @@ using std::swap;
  * @param euler Initital pose estimates (will not be applied to the points
  * @param ptss Vector containing the read points
  */
-int ScanIO_riegl_txt::readScans(int start, int end, string &dir, int maxDist, int mindist,
+int ScanIO_riegl_txt::readScans(int start, int end, string &dir, int maxDist, int minDist,
 						  double *euler, vector<Point> &ptss)
 {
   static int fileCounter = start;
   string scanFileName;
   string poseFileName;
-
+  double maxDist2 = sqr(maxDist);
+  double minDist2 = sqr(minDist);
   ifstream scan_in, pose_in;
 
   if (end > -1 && fileCounter > end) return -1; // 'nuf read
@@ -125,7 +126,9 @@ int ScanIO_riegl_txt::readScans(int start, int end, string &dir, int maxDist, in
     
     p.reflectance = reflectance;
 
-    ptss.push_back(p);
+    if (maxDist == -1 || sqr(p.x) + sqr(p.y) + sqr(p.z) < maxDist2)
+      if (minDist == -1 || sqr(p.x) + sqr(p.y) + sqr(p.z) > minDist2)
+        ptss.push_back(p);
   }
   
   cout << " done" << endl;

@@ -91,7 +91,10 @@ void Hough::SetScan(Scan* scan)
   */
 
 Hough::~Hough() {
-  if(out.is_open()) out.close();
+  if(out.is_open()) {
+    out.flush();
+    out.close();
+  }
 
   for(vector<ConvexPlane*>::iterator it = planes.begin(); 
       it != planes.end(); it++) {
@@ -141,8 +144,8 @@ void Hough::RHT() {
         end = GetCurrentTimeInMilliSec() - start;
         start = GetCurrentTimeInMilliSec();
         if(!quiet) cout << "Time for RHT " << plane << ": " << end << endl; 
-        //cout << rho << " " << theta << " " << phi << endl;
         double * n = acc->getMax(rho, theta, phi);
+        cout << rho << " " << theta << " " << phi << endl;
         planeSize = deletePoints(n, rho);
         delete[] n;
         cout << "Delete Points done " << plane << endl;
@@ -507,7 +510,6 @@ void Hough::APHT() {
   * distance. 
   */
 bool Hough::distanceOK(Point p1, Point p2, Point p3) {
-  return true;
   // p1 - p2
   double distance = (p1.x - p2.x) * (p1.x - p2.x) + (p1.y - p2.y) * (p1.y - p2.y) + (p1.z - p2.z) * (p1.z - p2.z); 
   if(sqrt(distance) < myConfigFileHough.Get_MinDist()) return false;
@@ -813,6 +815,7 @@ int Hough::deletePoints(double * n, double rho) {
   for(int x = 0; x < 3; x++) {
     rgb[x] = (unsigned char)((255)*(rand()/(RAND_MAX+1.0)));
   }
+  vector<Point> tmp_points;
   for(vitr = planePairs.begin(); vitr != planePairs.end(); vitr++) {
     
   // Case distinction x-z or x-y or y-z
@@ -823,7 +826,24 @@ int Hough::deletePoints(double * n, double rho) {
       point[0] = p2.x;
       point[1] = p2.y;
       point_list.push_back(point);
-      if(nocluster) {
+      tmp_points.push_back(p);
+    } else {
+      allPoints->push_back(p);
+    }
+  }
+  D = calcPlane(tmp_points, n2);
+  
+  nocluster = false;
+  
+  if(D > myConfigFileHough.Get_MinPlanarity()) {
+    nocluster = true;
+  }
+  unsigned int maxPlane = point_list.size();
+  
+  // color points
+  for(itr = tmp_points.begin(); itr != tmp_points.end(); itr++) {
+      p = (*itr);
+      if(nocluster || maxPlane >= myConfigFileHough.Get_MinPlaneSize()) {
         p.rgb[0] = 0;
         p.rgb[1] = 0;
         p.rgb[2] = 0;
@@ -833,14 +853,24 @@ int Hough::deletePoints(double * n, double rho) {
         p.rgb[2] = rgb[2];
       }
       coloredPoints.push_back(p);
-    } else {
-      allPoints->push_back(p);
-    }
   }
-  unsigned int maxPlane = point_list.size();
-  if(maxPlane < myConfigFileHough.Get_MinPlaneSize()) return maxPlane;
+  tmp_points.clear();
+
+  if(nocluster || maxPlane < myConfigFileHough.Get_MinPlaneSize()) {
+    for(list<double* >::iterator it = point_list.begin();
+      it != point_list.end(); ) {
+      double* tmp = (*it);
+      it = point_list.erase(it);
+      delete[] tmp;
+    }
+    point_list.clear();
+    return maxPlane;
+  }
+
+  // If plane ok, calculate convex hull
   vector<double *> convex_hull;
   ConvexPlane::JarvisMarchConvexHull(point_list,convex_hull);
+  
   for(list<double* >::iterator it = point_list.begin();
       it != point_list.end(); ) {
       double* tmp = (*it);
@@ -888,16 +918,19 @@ int Hough::cluster(vPtPair &pairs, double minx, double maxx, double miny, double
     }
     delete tmp;
   }
-  
+ 
   //int colors[ylength][xlength];
-  bool points[ylength][xlength];
-  int region = 0;
-  for(int x = 0; x < xlength; x++) {
-    for(int y = 0; y < ylength; y++) {
-      points[y][x] = false;
-      colors[y][x] = region;
+  vector< vector<bool> > points;
+  for(int i = 0; i < ylength; i++) {
+    vector<bool> *tmp = new vector<bool>;
+    points.push_back(*tmp);
+    for(int j = 0; j < xlength; j++) {
+      points[i].push_back(false);
     }
+    delete tmp;
   }
+
+  int region = 0;
   
   for(vitr = pairs.begin(); vitr != pairs.end(); vitr++) {
     int x = (int)(((*vitr).p2.x - minx)  / (maxx - minx) * xlength - 0.5);   
@@ -1004,11 +1037,7 @@ int Hough::cluster(vPtPair &pairs, double minx, double maxx, double miny, double
     } 
   }
   
-  /* 
-  for(int i = 0; i < ylength; i++) {
-    delete colors[i];
-  }
-  */        
+   
   /*            
   for(vector<set<int> >::iterator itr = linked.begin(); itr != linked.end(); ) {
     set<>current = (*itr);
@@ -1197,7 +1226,6 @@ double calcPlane(vector<Point> &ppoints, double plane[4]) {
     sum += D(i);
   }
   sum = D(index)/sum;
-  //cout << sum << " " << n << " " << D(index) << endl;
-  return D(index)/n;
+  return sum;
 }
 
