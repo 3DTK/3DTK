@@ -13,7 +13,7 @@
 #define DEF_MaxPointPlaneDist   1.5
 #define DEF_MaxPlanes           20
 #define DEF_MinPlaneSize        100
-#define DEF_MinPlanarity        30.0
+#define DEF_MinPlanarity        0.3
 #define DEF_PlaneRatio          0.5
 #define DEF_PointDist           5.0
 #define DEF_PeakWindow          false
