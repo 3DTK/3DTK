@@ -80,7 +80,7 @@ int ScanIO_leica_txt::readScans(int start, int end, string &dir, int maxDist, in
     try {
       scan_in >> x >> z >> y;
       x *= 100.0;
-      y *= -100.0;
+      y *= 100.0;
       z *= 100.0;
       p = Point (x, y, z);
       scan_in >> p.reflectance;
