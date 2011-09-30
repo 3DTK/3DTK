@@ -102,6 +102,7 @@ int ScanIO_ply::readScans(int start, int end, string &dir, int maxDist, int mind
 	    //scan_in >> p.z >> p.x >> p.y >> r >> g >> b;
 	    switch(counter) {
         case 6:
+        case 12:
           scan_in >> p.z >> p.y >> p.x >> r >> g >> b;
           break;
         case 9:
@@ -112,10 +113,12 @@ int ScanIO_ply::readScans(int start, int end, string &dir, int maxDist, int mind
 	        scan_in >> p.z >> p.x >> p.y >> confidence >> intensity;
           break;
       }
-      if(counter == 6 || counter == 9) {
+      if(counter == 6 || counter == 9 || counter == 12) {
         p.rgb[0] = (char)r;
         p.rgb[1] = (char)g;
         p.rgb[2] = (char)b;
+      } else {
+        p.reflectance = intensity;
       }
     } else {
 	 scan_in.read((char*)&data, sizeof(float));
@@ -127,10 +130,6 @@ int ScanIO_ply::readScans(int start, int end, string &dir, int maxDist, int mind
 	 scan_in.read((char*)&confidence, sizeof(float));
 	 scan_in.read((char*)&intensity, sizeof(float));
     }
-
-    p.x *= 10.0;
-    p.y *= 10.0;
-    p.z *= 10.0;
 
     if (maxDist2 == -1 || (int)(sqr(p.x) + sqr(p.y) + sqr(p.z)) < maxDist2)
 	 ptss.push_back(p);
