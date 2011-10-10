@@ -240,8 +240,8 @@ void usage(char* prog)
     << endl
     << bold << "  -t" << normal << " NR, " << bold << "--nns_method=" << normal << "NR   [default: 1]" << endl
     << "         selects the Nearest Neighbor Search Algorithm" << endl
-    << "           0 = cached k-d tree " << endl
-    << "           1 = simple k-d tree " << endl
+    << "           0 = simple k-d tree " << endl
+    << "           1 = cached k-d tree " << endl
     << "           2 = ANNTree " << endl
     << "           3 = BOCTree " << endl
     << endl
