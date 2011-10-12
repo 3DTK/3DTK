@@ -112,7 +112,14 @@ SET(SCANLIB_SRCS
   )
 
 add_library(scanlib STATIC ${SCANLIB_SRCS})
-target_link_libraries(scanlib dl)
+IF(UNIX)
+  target_link_libraries(scanlib dl)
+ENDIF(UNIX)
+
+IF(WIN32)
+  target_link_libraries(scanlib)
+ENDIF(WIN32)
+
 IF(EXPORT_SHARED_LIBS)
 add_library(scanlib_s SHARED ${SCANLIB_SRCS})
 #target_link_libraries(scanlib_s ${Boost_LIBRARIES} newmat)
