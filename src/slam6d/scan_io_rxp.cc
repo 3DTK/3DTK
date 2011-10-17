@@ -53,48 +53,83 @@ int ScanIO_rxp::readScans(int start, int end, string &dir, int maxDist, int minD
   ifstream pose_in;
 
   if (end > -1 && fileCounter > end) return -1; // 'nuf read
-
   
-  poseFileName = dir + "scan" + to_string(fileCounter,3) + ".pose";
-  scanFileName = "file://" + dir + "scan" + to_string(fileCounter,3) + ".rxp";
+  string rxp = ".rxp";
+  if (dir.rfind(rxp) == dir.length() - rxp.length() - 1) { // dir is a .rxp file
+    string shortdir = dir;
+    shortdir.erase(shortdir.length() -1); // erase last character
+    if (!dec) {
+      rc = basic_rconnection::create(shortdir);
+      rc->open();
+      
+      // decoder splits the binary file into readable chunks
+      dec = new decoder_rxpmarker(rc);
+      // importer interprets the chunks
+      imp = new importer(&ptss, maxDist, minDist, start);
+    } 
+
+    buffer  buf;
+
+    // skip the first scans
+    if (imp->getCurrentScan() < start ) {
+      for ( dec->get(buf); !dec->eoi(); dec->get(buf) ) {
+        imp->dispatch(buf.begin(), buf.end());
+        if (imp->getCurrentScan() >= start) break;
+      }
+    }
+    if (dec->eoi()) return -1;
+    int cscan = imp->getCurrentScan();
+    // iterate over chunks, until the next scan is reached
+    for ( dec->get(buf); !dec->eoi() ; dec->get(buf) ) {
+      imp->dispatch(buf.begin(), buf.end());
+      if (imp->getCurrentScan() != cscan) break;
+    }
     
-  pose_in.open(poseFileName.c_str());
-  // read 3D scan
+    for (unsigned int i = 0; i < 6; euler[i++] = 0.0);
+    //done
+  } else {
 
-  if (!pose_in.good()) return -1; // no more files in the directory
-  if (!pose_in.good()) { cerr << "ERROR: Missing file " << poseFileName << endl; exit(1); }
-  cout << "Processing Scan " << scanFileName;
-  cout.flush();
-  
-  for (unsigned int i = 0; i < 6; pose_in >> euler[i++]);
+    poseFileName = dir + "scan" + to_string(fileCounter,3) + ".pose";
+    scanFileName = "file://" + dir + "scan" + to_string(fileCounter,3) + ".rxp";
 
-  cout << " @ pose (" << euler[0] << "," << euler[1] << "," << euler[2]
-	  << "," << euler[3] << "," << euler[4] << ","  << euler[5] << ")" << endl;
-  
-  // convert angles from deg to rad
-  for (unsigned int i = 3; i <= 5; i++) euler[i] = rad(euler[i]);
-  pose_in.close();
-  pose_in.clear();
+    pose_in.open(poseFileName.c_str());
+    // read 3D scan
+
+    if (!pose_in.good()) return -1; // no more files in the directory
+    if (!pose_in.good()) { cerr << "ERROR: Missing file " << poseFileName << endl; exit(1); }
+    cout << "Processing Scan " << scanFileName;
+    cout.flush();
+
+    for (unsigned int i = 0; i < 6; pose_in >> euler[i++]);
+
+    cout << " @ pose (" << euler[0] << "," << euler[1] << "," << euler[2]
+      << "," << euler[3] << "," << euler[4] << ","  << euler[5] << ")" << endl;
+
+    // convert angles from deg to rad
+    for (unsigned int i = 3; i <= 5; i++) euler[i] = rad(euler[i]);
+    pose_in.close();
+    pose_in.clear();
 
 
-  // open scanfile
-  shared_ptr<basic_rconnection> rc;
-  rc = basic_rconnection::create(scanFileName);
-  rc->open();
+    // open scanfile
+    rc = basic_rconnection::create(scanFileName);
+    rc->open();
 
-  // decoder splits the binary file into readable chunks
-  decoder_rxpmarker dec(rc);
-  // importer interprets the chunks
-  importer imp(&ptss, maxDist, minDist);
+    // decoder splits the binary file into readable chunks
+    dec = new decoder_rxpmarker(rc);
+    // importer interprets the chunks
+    imp = new importer(&ptss, maxDist, minDist);
 
-  // iterate over chunks
-  buffer  buf;
-  for ( dec.get(buf); !dec.eoi(); dec.get(buf) ) {
-    imp.dispatch(buf.begin(), buf.end());
+    // iterate over chunks
+    buffer  buf;
+    for ( dec->get(buf); !dec->eoi(); dec->get(buf) ) {
+      imp->dispatch(buf.begin(), buf.end());
+    }
+
+    //done
+    rc->close();
+
   }
-
-  //done
-  rc->close();
 
 
   fileCounter++;
@@ -104,6 +139,7 @@ int ScanIO_rxp::readScans(int start, int end, string &dir, int maxDist, int minD
     
 void importer::on_echo_transformed(echo_type echo)
 {
+  if (currentscan < start) return;
   // targets is a member std::vector that contains all
   // echoes seen so far, i.e. the current echo is always
   // indexed by target_count-1.
@@ -117,14 +153,10 @@ void importer::on_echo_transformed(echo_type echo)
   //
 
   Point p;
-  /*
-     p.x = t.vertex[0]*100.0;
-     p.y = t.vertex[2]*100.0;
-     p.z = t.vertex[1]*100.0;*/
+  
   p.x = t.vertex[1]*-100.0;
   p.y = t.vertex[2]*100.0;
   p.z = t.vertex[0]*100.0;
-
 
   p.reflectance = t.reflectance;
   p.amplitude   = t.amplitude;
