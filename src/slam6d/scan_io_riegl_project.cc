@@ -114,12 +114,12 @@ static int getPaths(const char* filename) {
   // parse the scanpositions
   xmlNodeSetPtr nodes = xpathObj->nodesetval;
   int size;
-  int i;
+  int iter;
 
   size = (nodes) ? nodes->nodeNr : 0;
 
-  for(i = 0; i < size; i++) {
-    xmlNodePtr position = nodes->nodeTab[i];
+  for(iter = 0; iter < size; iter++) {
+    xmlNodePtr position = nodes->nodeTab[iter];
     xmlNodePtr name = srSeekChildNodeNamed(position, "name");
     xmlNodePtr singlescans = srSeekChildNodeNamed(position, "singlescans");
     xmlNodePtr scan = srSeekChildNodeNamed(singlescans, "scan");
@@ -149,7 +149,7 @@ static int getPaths(const char* filename) {
       string filename = "";
       filename = "SCANS/" + (string)POSITIONN + "/SINGLESCANS/" + (string)FILEN + ""; 
       //cout << rPos[0] << " " << rPos[1] << " " << rPos[2] << " " << filename << endl;
-      cout << "Project Scan " << filename << " is mapped to index " << i << endl;
+      cout << "Project Scan " << filename << " is mapped to index " << iter << endl;
       filenames.push_back(filename);
     }
 
