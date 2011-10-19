@@ -48,12 +48,21 @@ public:
 #pragma omp parallel for
 #endif
       for (int i = 0; i < 2; i++) {
-	   if (i == 0 && node.child1) delete node.child1; 
+        if (i == 0 && node.child1) delete node.child1; 
         if (i == 1 && node.child2) delete node.child2; 
-	 }
+      }
     } else {
       if (leaf.p) delete [] leaf.p;
     }
+
+    // delete entries in cache
+    vector <KDCache*>::iterator Iter1;
+    for(Iter1 = closest_cache.begin(); Iter1 != closest_cache.end(); Iter1++) {
+      delete [] (*Iter1)->item;
+      delete *Iter1;
+    }
+    closest_cache.clear();
+    
   }
 
   KDCacheItem* FindClosestCache(double *_p, double maxdist2, int threadNum = 0);
@@ -105,6 +114,16 @@ private:
   void _FindClosestCacheInit(int threadNum = 0);
   void _FindClosestCache(KDtree_cache *prev = 0, int threadNum = 0);
 
+  KDCacheItem* initCache(const Scan* Target);
+  vector<KDCache*> closest_cache;
+public:
+  virtual void getPtPairs(vector <PtPair> *pairs, 
+				  double *source_alignxf, 
+          double * const *q_points, unsigned int startindex, unsigned int nr_qpts,
+				  int thread_num,
+				  int rnd, double max_dist_match2, double &sum,
+				  double *centroid_m, double *centroid_d,
+          Scan *Target = 0);
 };
 
 #endif

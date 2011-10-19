@@ -56,7 +56,6 @@ unsigned int     Scan::numberOfScans = 0;
 unsigned int     Scan::max_points_red_size = 0;
 bool             Scan::outputFrames = false;
 string           Scan::dir;
-vector<KDCache*> Scan::closest_cache;
 
 /**
  * default Constructor
@@ -271,19 +270,6 @@ Scan::~Scan()
   }
 
   if (this->kd != 0) deleteTree();
-
-  // delete entries in cache
-  vector <KDCache*>::iterator Iter1;
-  for(Iter1 = closest_cache.begin(); Iter1 != closest_cache.end();) {
-    if (((*Iter1)->SourceScanNr == scanNr) ||
-	   ((*Iter1)->TargetScanNr == scanNr)) {
-	 delete [] (*Iter1)->item;
-	 delete *Iter1;
-	 closest_cache.erase(Iter1);
-    } else {
-	 Iter1++;
-    }
-  }
 
   // delete Scan from ScanList
   vector <Scan*>::iterator Iter;
@@ -742,6 +728,7 @@ void Scan::deleteTrees()
  * @param Target Pointer to second scan
  * @return Pointer to cache memory
  */ 
+/*
 KDCacheItem* Scan::initCache(const Scan* Source, const Scan* Target)
 {
   KDCacheItem *closest = 0;
@@ -749,9 +736,9 @@ KDCacheItem* Scan::initCache(const Scan* Source, const Scan* Target)
   // determine cache
   for(unsigned int i = 0; i < closest_cache.size(); i++) {
     if ((closest_cache[i]->SourceScanNr == Source->scanNr) &&
-	   (closest_cache[i]->TargetScanNr == Target->scanNr)) {
-	 closest = closest_cache[i]->item; 	                 // cache found
-	 break;
+        (closest_cache[i]->TargetScanNr == Target->scanNr)) {
+      closest = closest_cache[i]->item; 	                 // cache found
+      break;
     }
   }
   // cache for this source/target pair not initialized
@@ -765,7 +752,9 @@ KDCacheItem* Scan::initCache(const Scan* Source, const Scan* Target)
   }
 
   return closest;
+  return 0;
 }
+  */
 
 /**
  * Calculates Source\Target 
@@ -835,7 +824,7 @@ void Scan::getPtPairsSimple(vector <PtPair> *pairs,
 
   kd = new KDtree(Source->points_red, Source->points_red_size);
   numpts_target = Target->points_red_size;
-  
+
   for (unsigned int i = 0; i < numpts_target; i++) {
     if (rnd > 1 && rand(rnd) != 0) continue;  // take about 1/rnd-th of the numbers only
 
@@ -846,14 +835,14 @@ void Scan::getPtPairsSimple(vector <PtPair> *pairs,
 
     double *closest = kd->FindClosest(p, max_dist_match2, thread_num);
     if (closest) {
-	 centroid_m[0] += p[0];
-	 centroid_m[1] += p[1];
-	 centroid_m[2] += p[2];
-	 centroid_d[0] += closest[0];
-	 centroid_d[1] += closest[1];
-	 centroid_d[2] += closest[2];	 
-	 PtPair myPair(closest, p);
-	 pairs->push_back(myPair);
+      centroid_m[0] += p[0];
+      centroid_m[1] += p[1];
+      centroid_m[2] += p[2];
+      centroid_d[0] += closest[0];
+      centroid_d[1] += closest[1];
+      centroid_d[2] += closest[2];	 
+      PtPair myPair(closest, p);
+      pairs->push_back(myPair);
     }
   }
   centroid_m[0] /= pairs[thread_num].size();
@@ -862,7 +851,7 @@ void Scan::getPtPairsSimple(vector <PtPair> *pairs,
   centroid_d[0] /= pairs[thread_num].size();
   centroid_d[1] /= pairs[thread_num].size();
   centroid_d[2] /= pairs[thread_num].size();
-  
+
   delete kd;
   return;
 }
@@ -888,156 +877,13 @@ void Scan::getPtPairsSimple(vector <PtPair> *pairs,
 void Scan::getPtPairs(vector <PtPair> *pairs, 
 				  Scan* Source, Scan* Target, 
 				  int thread_num,
-				  int rnd, double max_dist_match2,
+				  int rnd, double max_dist_match2, double &sum,
 				  double *centroid_m, double *centroid_d)
 {
-  centroid_m[0] = 0.0;
-  centroid_m[1] = 0.0;
-  centroid_m[2] = 0.0;
-  centroid_d[0] = 0.0;
-  centroid_d[1] = 0.0;
-  centroid_d[2] = 0.0;
-  
-  double local_alignxf_inv[16];
-  M4inv(Source->dalignxf, local_alignxf_inv);
-
-  for (unsigned int i = 0; i < (unsigned int)Target->points_red_size; i++) {
-    if (rnd > 1 && rand(rnd) != 0) continue;  // take about 1/rnd-th of the numbers only
-
-    double p[3];
-    p[0] = Target->points_red[i][0];
-    p[1] = Target->points_red[i][1];
-    p[2] = Target->points_red[i][2];
-    
-    double x_neu, y_neu, z_neu;
-    x_neu = p[0] * local_alignxf_inv[0] + p[1] * local_alignxf_inv[4] + p[2] * local_alignxf_inv[8];
-    y_neu = p[0] * local_alignxf_inv[1] + p[1] * local_alignxf_inv[5] + p[2] * local_alignxf_inv[9];
-    z_neu = p[0] * local_alignxf_inv[2] + p[1] * local_alignxf_inv[6] + p[2] * local_alignxf_inv[10];
-    p[0] = x_neu + local_alignxf_inv[12];
-    p[1] = y_neu + local_alignxf_inv[13];
-    p[2] = z_neu + local_alignxf_inv[14];
-
-    //    cout << endl << "query Point " << p[0] << " " << p[1] << " " << p[2];
-    
-    double *closest = Source->kd->FindClosest(p, max_dist_match2, thread_num);
-    if (closest) {
-
-	 x_neu = closest[0] * Source->dalignxf[0] + closest[1] * Source->dalignxf[4] + closest[2] * Source->dalignxf[8];
-	 y_neu = closest[0] * Source->dalignxf[1] + closest[1] * Source->dalignxf[5] + closest[2] * Source->dalignxf[9];
-	 z_neu = closest[0] * Source->dalignxf[2] + closest[1] * Source->dalignxf[6] + closest[2] * Source->dalignxf[10];
-	 p[0] = x_neu + Source->dalignxf[12];
-	 p[1] = y_neu + Source->dalignxf[13];
-	 p[2] = z_neu + Source->dalignxf[14];
-
-	 //	 cout << endl << "closest point " << p[0] << " " << p[1] << " " << p[2] << endl;
-
-	 centroid_d[0] += Target->points_red[i][0];
-	 centroid_d[1] += Target->points_red[i][1];
-	 centroid_d[2] += Target->points_red[i][2];
-	 centroid_m[0] += p[0];
-	 centroid_m[1] += p[1];
-	 centroid_m[2] += p[2];	 
-	 
-	 PtPair myPair(p, Target->points_red[i]);
-
-	 pairs->push_back(myPair);
-    }
-  }
-
-  centroid_m[0] /= pairs->size();
-  centroid_m[1] /= pairs->size();
-  centroid_m[2] /= pairs->size();
-  centroid_d[0] /= pairs->size();
-  centroid_d[1] /= pairs->size();
-  centroid_d[2] /= pairs->size();
-
-  return;
-}
-
-
-/**
- * Calculates a set of corresponding point pairs and returns them.
- * The function uses also the fast corresponding points method (see 
- * getPtPairs) and uses the cached version of the search.
- *
- * Reference: "Cached k-d tree search for ICP algorithms" by A. Nuechter
- *            et al., Proceedings IEEE 3DIM, Montreal, Canada, 2007.
- * 
- * @param Source The scan whose points are matched to Targets' points
- * @param Target The scan to whiche the opints are matched
- * @param pairs the resulting point pairs
- * @param thread_num number of the thread (for parallelization)
- * @param rnd randomized point selection
- * @param max_dist_match2 maximal allowed distance for matching
- * @return a set of corresponding point pairs
- */
-void Scan::getPtPairsCache(vector <PtPair> *pairs, KDCacheItem *closest, 
-					  Scan* Source, Scan* Target, 
-					  int thread_num,
-					  int rnd, double max_dist_match2,
-					  double *centroid_m, double *centroid_d)
-{
-  double local_alignxf_inv[16];
-  M4inv(Source->dalignxf, local_alignxf_inv);
-
-  for (unsigned int i = 0; i < (unsigned int)Target->points_red_size; i++) {
-    if (rnd > 1 && rand(rnd) != 0) continue;  // take about 1/rnd-th of the numbers only
-
-    double p[3];
-    p[0] = Target->points_red[i][0];
-    p[1] = Target->points_red[i][1];
-    p[2] = Target->points_red[i][2];
-    
-    double x_neu, y_neu, z_neu;
-    x_neu = p[0] * local_alignxf_inv[0] + p[1] * local_alignxf_inv[4] + p[2] * local_alignxf_inv[8];
-    y_neu = p[0] * local_alignxf_inv[1] + p[1] * local_alignxf_inv[5] + p[2] * local_alignxf_inv[9];
-    z_neu = p[0] * local_alignxf_inv[2] + p[1] * local_alignxf_inv[6] + p[2] * local_alignxf_inv[10];
-    p[0] = x_neu + local_alignxf_inv[12];
-    p[1] = y_neu + local_alignxf_inv[13];
-    p[2] = z_neu + local_alignxf_inv[14];
-
-    if (closest[i].node) {
-	 closest[i] = *(closest[i].node->FindClosestCache(p, max_dist_match2, thread_num));
-    } else {
-	 closest[i] = *(((KDtree_cache*)Source->kd)->FindClosestCacheInit(p, max_dist_match2, thread_num));
-    }
-
-    if (closest[i].param.closest_d2 < max_dist_match2) {
-	 
-	 x_neu = closest[i].param.closest[0] * Source->dalignxf[0]
-	   + closest[i].param.closest[1] * Source->dalignxf[4]
-	   + closest[i].param.closest[2] * Source->dalignxf[8];
-	 y_neu = closest[i].param.closest[0] * Source->dalignxf[1]
-	   + closest[i].param.closest[1] * Source->dalignxf[5]
-	   + closest[i].param.closest[2] * Source->dalignxf[9];
-	 z_neu = closest[i].param.closest[0] * Source->dalignxf[2]
-	   + closest[i].param.closest[1] * Source->dalignxf[6]
-	   + closest[i].param.closest[2] * Source->dalignxf[10];
-	 
-	 p[0] = x_neu + Source->dalignxf[12];
-	 p[1] = y_neu + Source->dalignxf[13];
-	 p[2] = z_neu + Source->dalignxf[14];
-
-	 centroid_m[0] += Target->points_red[i][0];
-	 centroid_m[1] += Target->points_red[i][1];
-	 centroid_m[2] += Target->points_red[i][2];
-	 centroid_d[0] += p[0];
-	 centroid_d[1] += p[1];
-	 centroid_d[2] += p[2];	 
-	 
-	 PtPair myPair(p, Target->points_red[i]);
-	 pairs->push_back(myPair);
-    }
-  }
-
-  centroid_m[0] /= pairs[thread_num].size();
-  centroid_m[1] /= pairs[thread_num].size();
-  centroid_m[2] /= pairs[thread_num].size();
-  centroid_d[0] /= pairs[thread_num].size();
-  centroid_d[1] /= pairs[thread_num].size();
-  centroid_d[2] /= pairs[thread_num].size();
-  
-  return;
+  Source->kd->getPtPairs(pairs, Source->dalignxf,
+      Target->points_red, 0, Target->points_red_size, 
+      thread_num, 
+      rnd, max_dist_match2, sum, centroid_m, centroid_d, Target);
 }
 
 
@@ -1068,168 +914,13 @@ void Scan::getPtPairsParallel(vector <PtPair> *pairs, Scan* Source, Scan* Target
 						double *sum,
 						double centroid_m[OPENMP_NUM_THREADS][3], double centroid_d[OPENMP_NUM_THREADS][3])
 {
-  double local_alignxf_inv[16];
-  M4inv(Source->dalignxf, local_alignxf_inv);
-
-  for (int i = thread_num * step; i < thread_num * step + step; i++) {
-    if (rnd > 1 && rand(rnd) != 0) continue;  // take about 1/rnd-th of the numbers only
-
-    double p[3];
-    p[0] = Target->points_red[i][0];
-    p[1] = Target->points_red[i][1];
-    p[2] = Target->points_red[i][2];
-
-    double x_neu, y_neu, z_neu;
-    x_neu = p[0] * local_alignxf_inv[0] + p[1] * local_alignxf_inv[4] + p[2] * local_alignxf_inv[8];
-    y_neu = p[0] * local_alignxf_inv[1] + p[1] * local_alignxf_inv[5] + p[2] * local_alignxf_inv[9];
-    z_neu = p[0] * local_alignxf_inv[2] + p[1] * local_alignxf_inv[6] + p[2] * local_alignxf_inv[10];
-    p[0] = x_neu + local_alignxf_inv[12];
-    p[1] = y_neu + local_alignxf_inv[13];
-    p[2] = z_neu + local_alignxf_inv[14];
-	  
-    double *closest = Source->kd->FindClosest( p,
-											   max_dist_match2,
-											   thread_num );
-    if (closest) {
-
-	 x_neu = closest[0] * Source->dalignxf[0] + closest[1] * Source->dalignxf[4] + closest[2] * Source->dalignxf[8];
-	 y_neu = closest[0] * Source->dalignxf[1] + closest[1] * Source->dalignxf[5] + closest[2] * Source->dalignxf[9];
-	 z_neu = closest[0] * Source->dalignxf[2] + closest[1] * Source->dalignxf[6] + closest[2] * Source->dalignxf[10];
-	 p[0] = x_neu + Source->dalignxf[12];
-	 p[1] = y_neu + Source->dalignxf[13];
-	 p[2] = z_neu + Source->dalignxf[14];
-
-	 centroid_m[thread_num][0] += Target->points_red[i][0];
-	 centroid_m[thread_num][1] += Target->points_red[i][1];
-	 centroid_m[thread_num][2] += Target->points_red[i][2];
-	 centroid_d[thread_num][0] += p[0];
-	 centroid_d[thread_num][1] += p[1];
-	 centroid_d[thread_num][2] += p[2];	 
-	 
-	 PtPair myPair(p, Target->points_red[i]);
-	 pairs[thread_num].push_back(myPair);
-	 
-	 double p12[3] = { myPair.p1.x - myPair.p2.x, 
-				    myPair.p1.y - myPair.p2.y,
-				    myPair.p1.z - myPair.p2.z };
-	 sum[thread_num] += Len2(p12);
-    }
-  }
-
-  if(pairs[thread_num].size() == 0) // do not divide by zero
-    return;
-
-  centroid_m[thread_num][0] /= pairs[thread_num].size();
-  centroid_m[thread_num][1] /= pairs[thread_num].size();
-  centroid_m[thread_num][2] /= pairs[thread_num].size();
-  centroid_d[thread_num][0] /= pairs[thread_num].size();
-  centroid_d[thread_num][1] /= pairs[thread_num].size();
-  centroid_d[thread_num][2] /= pairs[thread_num].size();
-  
-  return;
+  Source->kd->getPtPairs(&pairs[thread_num], Source->dalignxf, 
+      Target->points_red, thread_num * step, thread_num * step + step, 
+      thread_num, 
+      rnd, max_dist_match2, sum[thread_num],
+      centroid_m[thread_num], centroid_d[thread_num], Target);
 }
 
-
-/**
- * Calculates a set of corresponding point pairs and returns them.
- * The function uses the k-d trees stored the the scan class, thus
- * the function createTrees and delteTrees have to be called before
- * resp. afterwards.
- * 
- * @param pairs The resulting point pairs (vector will be filled)
- * @param Source The scan whose points are matched to Targets' points
- * @param Target The scan to whiche the opints are matched
- * @param thread_num The number of the thread that is computing ptPairs in parallel 
- * @param step The number of steps for parallelization
- * @param rnd randomized point selection
- * @param max_dist_match2 maximal allowed distance for matching
- * @param sum The sum of distances of the points
- *
- * These intermediate values are for the parallel ICP algorithm 
- * introduced in the paper  
- * "The Parallel Iterative Closest Point Algorithm"
- *  by Langis / Greenspan / Godin, IEEE 3DIM 2001
- * see also : "Cached k-d tree search for ICP algorithms" by A. Nuechter
- *             et al., Proceedings IEEE 3DIM, Montreal, Canada, 2007.
- *
- */
-void Scan::getPtPairsCacheParallel(vector <PtPair> *pairs, KDCacheItem *closest,
-							Scan* Source, Scan* Target,
-							int thread_num, int step,
-							int rnd, double max_dist_match2,
-							double *sum,
-							double centroid_m[OPENMP_NUM_THREADS][3], double centroid_d[OPENMP_NUM_THREADS][3])
-{
-  double local_alignxf_inv[16];
-  M4inv(Source->dalignxf, local_alignxf_inv);
-
-  for (int i = thread_num * step; i < thread_num * step + step; i++) {
-
-    if (rnd > 1 && rand(rnd) != 0) continue;  // take about 1/rnd-th of the numbers only
-
-    double p[3];
-    p[0] = Target->points_red[i][0];
-    p[1] = Target->points_red[i][1];
-    p[2] = Target->points_red[i][2];
-
-    double x_neu, y_neu, z_neu;
-    x_neu = p[0] * local_alignxf_inv[0] + p[1] * local_alignxf_inv[4] + p[2] * local_alignxf_inv[8];
-    y_neu = p[0] * local_alignxf_inv[1] + p[1] * local_alignxf_inv[5] + p[2] * local_alignxf_inv[9];
-    z_neu = p[0] * local_alignxf_inv[2] + p[1] * local_alignxf_inv[6] + p[2] * local_alignxf_inv[10];
-    p[0] = x_neu + local_alignxf_inv[12];
-    p[1] = y_neu + local_alignxf_inv[13];
-    p[2] = z_neu + local_alignxf_inv[14];
-	  
-    if (closest[i].node) {
-	 closest[i] = *(closest[i].node->FindClosestCache(p, max_dist_match2, thread_num));
-    } else {
-	 closest[i] = *(((KDtree_cache*)Source->kd)->FindClosestCacheInit(p, max_dist_match2, thread_num));
-    }
-
-    if (closest[i].param.closest_d2 < max_dist_match2) {
-	 
-	 x_neu = closest[i].param.closest[0] * Source->dalignxf[0]
-	   + closest[i].param.closest[1] * Source->dalignxf[4]
-	   + closest[i].param.closest[2] * Source->dalignxf[8];
-	 y_neu = closest[i].param.closest[0] * Source->dalignxf[1]
-	   + closest[i].param.closest[1] * Source->dalignxf[5]
-	   + closest[i].param.closest[2] * Source->dalignxf[9];
-	 z_neu = closest[i].param.closest[0] * Source->dalignxf[2]
-	   + closest[i].param.closest[1] * Source->dalignxf[6]
-	   + closest[i].param.closest[2] * Source->dalignxf[10];
-	 
-	 p[0] = x_neu + Source->dalignxf[12];
-	 p[1] = y_neu + Source->dalignxf[13];
-	 p[2] = z_neu + Source->dalignxf[14];
-
-	 centroid_m[thread_num][0] += Target->points_red[i][0];
-	 centroid_m[thread_num][1] += Target->points_red[i][1];
-	 centroid_m[thread_num][2] += Target->points_red[i][2];
-	 centroid_d[thread_num][0] += p[0];
-	 centroid_d[thread_num][1] += p[1];
-	 centroid_d[thread_num][2] += p[2];	 
-	 
-	 PtPair myPair(p, Target->points_red[i]);
-	 pairs[thread_num].push_back(myPair);
-	 double p12[3] = { myPair.p1.x - myPair.p2.x, 
-			   myPair.p1.y - myPair.p2.y,
-			   myPair.p1.z - myPair.p2.z };
-	 sum[thread_num] += Len2(p12);
-    }
-  }
-
-  if(pairs[thread_num].size() == 0) // do not divide by zero
-    return;
-
-  centroid_m[thread_num][0] /= pairs[thread_num].size();
-  centroid_m[thread_num][1] /= pairs[thread_num].size();
-  centroid_m[thread_num][2] /= pairs[thread_num].size();
-  centroid_d[thread_num][0] /= pairs[thread_num].size();
-  centroid_d[thread_num][1] /= pairs[thread_num].size();
-  centroid_d[thread_num][2] /= pairs[thread_num].size();
-  
-  return;
-}
 
 /**
  * Computes a search tree depending on the type this can be 
@@ -1409,10 +1100,12 @@ void Scan::readScansRedSearch(reader_type type,
   int _fileNr;
   scanIOwrapper my_ScanIO(type);
 
+#ifdef _OPENMP
 #pragma omp parallel
   {
 #pragma omp single nowait
     {
+#endif
       // read Scan-by-scan until no scan is available anymore
       while ((_fileNr = my_ScanIO.readScans(start, end, dir, maxDist, minDist, eu, ptss)) != -1) {
         Scan *currentScan = new Scan(eu, maxDist);
@@ -1422,7 +1115,9 @@ void Scan::readScansRedSearch(reader_type type,
         ptss.clear();                  // clear points
         allScans.push_back(currentScan);
 
+#ifdef _OPENMP
 #pragma omp task
+#endif
         {
           cout << "reducing scan " << currentScan->fileNr << " and creating searchTree" << endl;
           currentScan->calcReducedPoints(voxelSize, nrpts);
@@ -1431,9 +1126,11 @@ void Scan::readScansRedSearch(reader_type type,
           currentScan->createTree(nns_method, cuda_enabled);
         }
       }
+#ifdef _OPENMP
     }
   }
 #pragma omp taskwait
+#endif
 
   return;
 }

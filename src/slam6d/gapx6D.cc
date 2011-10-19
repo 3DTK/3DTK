@@ -393,24 +393,10 @@ double gapx6D::doGraphSlam6D(Graph gr, vector <Scan *> allScans, int nrIt)
       int thread_num = 0;
 #endif
 
-	 switch (nns_method) {
-	   case cachedKD:
-		{
-		KDCacheItem *closest = Scan::initCache(FirstScan, SecondScan);
-		Scan::getPtPairsCache(ptpairs[i], closest, FirstScan, SecondScan, thread_num,
-						  (int)my_icp->get_rnd(), (int)max_dist_match2_LUM,
-						  centroids_m[i], centroids_d[i]);
-		break;
-		}
-	   case simpleKD:
-        case ANNTree:
-        case BOCTree:
-//      case NaboKD:
+      double dummy_sum;
 		Scan::getPtPairs(ptpairs[i], FirstScan, SecondScan, thread_num,
-					  (int)my_icp->get_rnd(), (int)max_dist_match2_LUM,
+					  (int)my_icp->get_rnd(), (int)max_dist_match2_LUM, dummy_sum,
 					  centroids_m[i], centroids_d[i]);
-		break;
-	 }
 
 	 // faulty network
 	 if (ptpairs[i]->size() <= 1) {
