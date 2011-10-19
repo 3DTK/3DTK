@@ -282,7 +282,11 @@ class SelectionImpl : public Selection {
       haveToUpdate = 1;
       event.Skip(); 
     }
-		virtual void OnFramerateSpinner( wxSpinEvent& event ) { event.Skip(); }
+		virtual void OnFramerateSpinner( wxSpinEvent& event ) { 
+      idealfps = event.GetPosition();
+      haveToUpdate = 1;
+      event.Skip(); 
+    }
 
   public:
     void updateControls() {
