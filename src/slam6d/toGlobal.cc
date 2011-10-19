@@ -86,7 +86,6 @@ int main(int argc, char **argv)
     int frameCounter = 0;
     double transMat[16];
     //double transMatOpenGL[16];
-    double *colourMat = new double[4];
 
     while (frame_in.good()) {
      frameCounter++;
@@ -100,7 +99,7 @@ int main(int argc, char **argv)
     }
 
     Point p;
-    double range, theta, phi, reflectance;
+//    double range, theta, phi, reflectance;
     cout.precision(10);
     while(scan_in.good()) {
   /*    scan_in >> p.z >> p.x >> p.y >> range >> theta >> phi >> reflectance;

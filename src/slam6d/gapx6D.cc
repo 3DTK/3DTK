@@ -146,8 +146,6 @@ double gapx6D::genBArotForLinkedPair( int firstScanNum, int secondScanNum, vPtPa
   double p1xp1y, p1xp1z, p1yp1z, p1y2p1z2, p1x2p1z2, p1x2p1y2;
   double p2xp2y, p2xp2z, p2yp2z, p2y2p2z2, p2x2p2z2, p2x2p2y2;
 
-  double p1xp2y, p1xp2z, p1yp2z;
-  double p2xp1y, p2xp1z, p2yp1z;
   double p2zp1x, p2zp1y, p2yp1x, p1yp2x, p1zp2x, p1zp2y;
 
   double p1xp2xp1yp2y, p1xp2xp1zp2z, p1yp2yp1zp2z;
@@ -193,16 +191,18 @@ double gapx6D::genBArotForLinkedPair( int firstScanNum, int secondScanNum, vPtPa
     p1xp1z = p1x * p1z;
     p1yp1z = p1y * p1z;
 
-    p2xp1y = p2x * p1y;
-    p2xp1z = p2x * p1z;
+    //p2xp1y = p2x * p1y;
+    //p2xp1z = p2x * p1z;
     p2yp1x = p2y * p1x;
-    p2yp1z = p2y * p1z;
+    //p2yp1z = p2y * p1z;
     p2zp1x = p2z * p1x;
     p2zp1y = p2z * p1y;
 
+    /*
     p1xp2y = p1x * p2y;
     p1xp2z = p1x * p2z;
     p1yp2z = p1y * p2z;
+    */
     p1yp2x = p1y * p2x;
     p1zp2x = p1z * p2x;
     p1zp2y = p1z * p2y;

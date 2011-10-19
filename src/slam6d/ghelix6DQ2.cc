@@ -82,7 +82,7 @@ double ghelix6DQ2::genBBdForLinkedPair( int firstScanNum, int secondScanNum, vPt
   memset(&bd1[0], 0, 6 * sizeof(double));
   memset(&bd2[0], 0, 6 * sizeof(double));
 
-  double p1x, p1y, p1z, p2x, p2y, p2z, pDistX, pDistY, pDistZ, px1Sq, py1Sq, pz1Sq, px2Sq, py2Sq, pz2Sq;
+  double p1x, p1y, p1z, p2x, p2y, p2z, pDistX, pDistY, pDistZ, px2Sq, py2Sq, pz2Sq;
 
   int n = (*ptpairs).size();
   double sum = 0;
@@ -96,9 +96,9 @@ double ghelix6DQ2::genBBdForLinkedPair( int firstScanNum, int secondScanNum, vPt
     p2y = (*ptpairs)[i].p2.y;
     p2z = (*ptpairs)[i].p2.z;
 
-    px1Sq = p1x * p1x;
-    py1Sq = p1y * p1y;
-    pz1Sq = p1z * p1z;
+    //px1Sq = p1x * p1x;
+    //py1Sq = p1y * p1y;
+    //pz1Sq = p1z * p1z;
 
     px2Sq = p2x * p2x;
     py2Sq = p2y * p2y;
