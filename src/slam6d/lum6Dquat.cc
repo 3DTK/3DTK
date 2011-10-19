@@ -104,23 +104,10 @@ void lum6DQuat::covarianceQuat(Scan *first, Scan *second,
 
   double dummy_centroid_m[3];
   double dummy_centroid_d[3];
+  double dummy_sum;
 
-  switch (nns_method) {
-    case cachedKD:
-	 {
-	 KDCacheItem *closest = Scan::initCache(first, second);
-	 Scan::getPtPairsCache(&uk, closest, first, second, thread_num,
-					   rnd, max_dist_match2, dummy_centroid_m, dummy_centroid_d);
-	 break;
-	 }
-    case simpleKD:
-    case ANNTree:
-    case BOCTree:
-//  case NaboKD:
-	 Scan::getPtPairs(&uk, first, second, thread_num,
-				   rnd, max_dist_match2, dummy_centroid_m, dummy_centroid_d);  
-      break;
-  }
+  Scan::getPtPairs(&uk, first, second, thread_num,
+      rnd, max_dist_match2, dummy_sum, dummy_centroid_m, dummy_centroid_d);  
   
   m = uk.size();
 

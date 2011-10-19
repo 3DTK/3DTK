@@ -41,10 +41,14 @@ enum nns_type {
 };
 
 
+class SearchTree;
+
 /**
  * @brief 3D scan representation and implementation of scan matching
  */
 class Scan {
+
+  friend class SearchTree;
 
 public:
   Scan();
@@ -88,12 +92,12 @@ public:
   static void createTrees(int nns_method, bool cuda_enabled);
   static void deleteTrees();
 
-  static KDCacheItem* initCache(const Scan* Source, const Scan* Target);
+//  static KDCacheItem* initCache(const Scan* Source, const Scan* Target);
   
   static void getPtPairs(vector <PtPair> *pairs, 
 					Scan* Source, Scan* Target, 
 					int thread_num,
-					int rnd, double max_dist_match2,
+					int rnd, double max_dist_match2, double &sum,
 					double *centroid_m, double *centroid_d);
   static void getNoPairsSimple(vector <double*> &diff, 
 					   Scan* Source, Scan* Target, 
@@ -104,23 +108,12 @@ public:
 						 int thread_num,
 						 int rnd, double max_dist_match2,
 						 double *centroid_m, double *centroid_d);
-  static void getPtPairsCache(vector <PtPair> *pairs, KDCacheItem *closest,
-						Scan* Source, Scan* Target, 
-						int thread_num,
-						int rnd, double max_dist_match2,
-						double *centroid_m, double *centroid_d);  
   static void getPtPairsParallel(vector <PtPair> *pairs, 
 						   Scan* Source, Scan* Target,
 						   int thread_num, int step,
 						   int rnd, double max_dist_match2,
 						   double *sum,
 						   double centroid_m[OPENMP_NUM_THREADS][3], double centroid_d[OPENMP_NUM_THREADS][3]);
-  static void getPtPairsCacheParallel(vector <PtPair> *pairs, KDCacheItem *closest,
-							   Scan* Source, Scan* Target,
-							   int thread_num, int step,
-							   int rnd, double max_dist_match2,
-							   double *sum,
-							   double centroid_m[OPENMP_NUM_THREADS][3], double centroid_d[OPENMP_NUM_THREADS][3]);
    
   inline friend ostream& operator<<(ostream& os, const Scan& s); 
   inline friend ostream& operator<<(ostream& os, const double matrix[16]);
@@ -242,16 +235,6 @@ private:
    * number elements of the array 
    */
   int points_red_size;
-
-  /** 
-   * This vector holds the cache, i.e., the pointers to the leafs.
-   * It is build during the first ICP iteration and used in the 
-   * following ones.
-   *
-   * Reference: "Cached k-d tree search for ICP algorithms" by A. Nuechter
-   *            et al., Proceedings IEEE 3DIM, Montreal, Canada, 2007.
-   */
-  static vector<KDCache*> closest_cache;
 
   /**
    * The search tree

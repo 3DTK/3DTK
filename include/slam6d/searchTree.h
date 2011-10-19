@@ -8,6 +8,7 @@
 #define __SEARCHTREE_H__
 
 #include "searchCache.h"
+#include "scan.h"
 
 /**
  * @brief The tree structure 
@@ -24,6 +25,7 @@ public:
 };
 
 
+class Scan;
 /**
  * @brief The search tree structure 
  * 
@@ -31,6 +33,7 @@ public:
  * Furthermore, search functionality must be privided
  **/
 class SearchTree : public Tree {
+  friend class Scan;
 public:
   /**
    * Constructor (default)
@@ -62,6 +65,16 @@ public:
    * @return Pointer to closest point 
    */
   virtual double *FindClosest(double *_p, double maxdist2, int threadNum = 0) = 0;
+
+  
+  virtual void getPtPairs(vector <PtPair> *pairs, 
+				  double *source_alignxf, 
+          double * const *q_points, unsigned int startindex, unsigned int nr_qpts,
+				  int thread_num,
+				  int rnd, double max_dist_match2, double &sum,
+				  double *centroid_m, double *centroid_d,
+          Scan *Target);
+
 };
 
 
