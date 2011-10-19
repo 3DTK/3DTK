@@ -231,8 +231,94 @@ void KDtree_cache::_FindClosestCacheInit(int threadNum)
   }
 }
 
+KDCacheItem* KDtree_cache::initCache(const Scan* Target)
+{
+  KDCacheItem *closest = 0;
+  
+  // determine cache
+  for(unsigned int i = 0; i < closest_cache.size(); i++) {
+    if (closest_cache[i]->target == Target) {
+      closest = closest_cache[i]->item; 	                 // cache found
+      break;
+    }
+  }
+  // cache for this target is not initialized
+  if (closest == 0) {
+    closest = new KDCacheItem[Target->get_points_red_size()];
+    KDCache *nc = new KDCache;
+    nc->item = closest;
+    nc->target = Target;
+    closest_cache.push_back(nc);                              // append cache
+  }
+
+  return closest;
+}
 
 
+void KDtree_cache::getPtPairs(vector <PtPair> *pairs, 
+    double *source_alignxf,                          // source
+    double * const *q_points, unsigned int startindex, unsigned int nr_qpts,  // target
+    int thread_num,
+    int rnd, double max_dist_match2, double &sum,
+    double *centroid_m, double *centroid_d, Scan *Target)
+{
+  KDCacheItem *closest;
+  #pragma omp critical
+  {
+  closest = initCache(Target);
+  }
+
+  centroid_m[0] = 0.0;
+  centroid_m[1] = 0.0;
+  centroid_m[2] = 0.0;
+  centroid_d[0] = 0.0;
+  centroid_d[1] = 0.0;
+  centroid_d[2] = 0.0;
+
+  double local_alignxf_inv[16];
+  M4inv(source_alignxf, local_alignxf_inv);
+
+  for (unsigned int i = startindex; i < (unsigned int)nr_qpts; i++) {
+    if (rnd > 1 && rand(rnd) != 0) continue;  // take about 1/rnd-th of the numbers only
+
+    double p[3];
+    transform3(local_alignxf_inv, q_points[i], p);
+
+    if (closest[i].node) {
+      closest[i] = *(closest[i].node->FindClosestCache(p, max_dist_match2, thread_num));
+    } else {
+      closest[i] = *(this->FindClosestCacheInit(p, max_dist_match2, thread_num));
+    }
+    if (closest[i].param.closest_d2 < max_dist_match2 ) {
+      transform3(source_alignxf, closest[i].param.closest, p);
+
+      centroid_d[0] += q_points[i][0];
+      centroid_d[1] += q_points[i][1];
+      centroid_d[2] += q_points[i][2];
+      centroid_m[0] += p[0];
+      centroid_m[1] += p[1];
+      centroid_m[2] += p[2];	 
+
+      PtPair myPair(p, q_points[i]);
+      double p12[3] = { 
+        myPair.p1.x - myPair.p2.x, 
+        myPair.p1.y - myPair.p2.y,
+        myPair.p1.z - myPair.p2.z };
+      sum += Len2(p12);
+
+      pairs->push_back(myPair);
+    }
+  }
+
+  centroid_m[0] /= pairs->size();
+  centroid_m[1] /= pairs->size();
+  centroid_m[2] /= pairs->size();
+  centroid_d[0] /= pairs->size();
+  centroid_d[1] /= pairs->size();
+  centroid_d[2] /= pairs->size();
+
+  return;
+}
 
 
 

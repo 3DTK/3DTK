@@ -101,14 +101,14 @@ IF(WITH_TOOLS)
 ENDIF(WITH_TOOLS)
 
 SET(SCANLIB_SRCS
-  kd.cc kdc.cc      scan.cc         d2tree.cc         graphSlam6D.cc 
-  graph.cc          icp6Dapx.cc     icp6D.cc          icp6Dsvd.cc 
-  icp6Dortho.cc     icp6Dquat.cc    icp6Dhelix.cc     icp6Dlumeuler.cc 
-  icp6Dlumquat.cc   icp6Ddual.cc    lum6Deuler.cc     lum6Dquat.cc
-  ghelix6DQ2.cc     gapx6D.cc       graphToro.cc      ann_kd.cc
-  graphHOG-Man.cc   elch6D.cc       elch6Dquat.cc     elch6DunitQuat.cc 
-  elch6Dslerp.cc    elch6Deuler.cc  loopToro.cc       loopHOG-Man.cc    
-  point_type.cc	icp6Dquatscale.cc
+  kd.cc kdc.cc      scan.cc           d2tree.cc         graphSlam6D.cc 
+  graph.cc          icp6Dapx.cc       icp6D.cc          icp6Dsvd.cc 
+  icp6Dortho.cc     icp6Dquat.cc      icp6Dhelix.cc     icp6Dlumeuler.cc 
+  icp6Dlumquat.cc   icp6Ddual.cc      lum6Deuler.cc     lum6Dquat.cc
+  ghelix6DQ2.cc     gapx6D.cc         graphToro.cc      ann_kd.cc
+  graphHOG-Man.cc   elch6D.cc         elch6Dquat.cc     elch6DunitQuat.cc 
+  elch6Dslerp.cc    elch6Deuler.cc    loopToro.cc       loopHOG-Man.cc    
+  point_type.cc	    icp6Dquatscale.cc searchTree.cc
   )
 
 add_library(scanlib STATIC ${SCANLIB_SRCS})

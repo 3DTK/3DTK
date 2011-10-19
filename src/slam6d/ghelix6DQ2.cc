@@ -360,25 +360,11 @@ double ghelix6DQ2::doGraphSlam6D(Graph gr, vector <Scan *> allScans, int nrIt)
 #endif
 	 double dummy_centroid_m[3];
 	 double dummy_centroid_d[3];
+	 double dummy_sum;
 
-	 switch (nns_method) {
-	   case cachedKD:
-		{
-		KDCacheItem *closest = Scan::initCache(FirstScan, SecondScan);
-	     Scan::getPtPairsCache(ptpairs[i], closest, FirstScan, SecondScan, thread_num,
-						  (int)my_icp->get_rnd(), (int)max_dist_match2_LUM,
-						  dummy_centroid_m, dummy_centroid_d);
-		break;
-		}
-	   case simpleKD:
-        case ANNTree:
-        case BOCTree:
-//      case NaboKD:         
-		Scan::getPtPairs(ptpairs[i], FirstScan, SecondScan, thread_num,
-					  (int)my_icp->get_rnd(), (int)max_dist_match2_LUM,
-					  dummy_centroid_m, dummy_centroid_d);
-		break;
-	 }
+   Scan::getPtPairs(ptpairs[i], FirstScan, SecondScan, thread_num,
+       (int)my_icp->get_rnd(), (int)max_dist_match2_LUM, dummy_sum,
+       dummy_centroid_m, dummy_centroid_d);
 
       // faulty network
       if (ptpairs[i]->size() <= 1) {

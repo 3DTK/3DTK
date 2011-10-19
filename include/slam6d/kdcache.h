@@ -13,6 +13,7 @@
 
 // just a prototype
 class KDtree_cache;
+class Scan;
 
 /**
  * @brief cache item
@@ -36,10 +37,12 @@ public:
  **/
 class KDCache {
 public:
-  KDCache() { SourceScanNr = TargetScanNr = 0; item = 0; };
+//  KDCache() { SourceScanNr = TargetScanNr = 0; item = 0; };
+  KDCache() { target = 0; item = 0; };
   KDCacheItem *item;  // array of items
-  unsigned int SourceScanNr;
-  unsigned int TargetScanNr;
+//  unsigned int SourceScanNr;
+//  unsigned int TargetScanNr;
+  Scan const * target; 
 };
 
 #endif

@@ -127,6 +127,7 @@ double icp6D_APX::Point_Point_Align_Parallel(const int openmp_num_threads,
 									double *alignxf)
                          
 {
+
 #ifdef _OPENMP
 
   double At[OPENMP_NUM_THREADS][3][3];
@@ -260,6 +261,7 @@ double icp6D_APX::Point_Point_Align_Parallel(const int openmp_num_threads,
   alignxf[13] = cm[1] - alignxf[1]*cd[0] - alignxf[5]*cd[1] - alignxf[9]*cd[2];
   alignxf[14] = cm[2] - alignxf[2]*cd[0] - alignxf[6]*cd[1] - alignxf[10]*cd[2];
   alignxf[15] = 1;
+
   return error;
 #else
   cout << "Point_Point_Align_Parallel:"<< endl

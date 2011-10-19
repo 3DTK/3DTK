@@ -89,27 +89,28 @@ void graphSlam6D::matchGraph6Dautomatic(vector <Scan *> allScans, int nrIt, int 
 #endif
     for (j = 0; j <  maxj; j++) {
 #ifdef _OPENMP
-	 int thread_num = omp_get_thread_num();
+      int thread_num = omp_get_thread_num();
 #else
-	 int thread_num = 0;
+      int thread_num = 0;
 #endif
-	 for (int k = 0; k < (int)allScans.size(); k++) {
-	   if (j == k) continue;
-	   Scan * FirstScan  = allScans[j];
-	   Scan * SecondScan = allScans[k];
-	   double centroid_d[3] = {0.0, 0.0, 0.0};
-	   double centroid_m[3] = {0.0, 0.0, 0.0};
-	   vPtPair temp;
-	   Scan::getPtPairs(&temp, FirstScan, SecondScan, thread_num,
-					my_icp->get_rnd(), (int)max_dist_match2_LUM,
-					centroid_m, centroid_d);
-	   if ((int)temp.size() > clpairs) {
+      for (int k = 0; k < (int)allScans.size(); k++) {
+        if (j == k) continue;
+        Scan * FirstScan  = allScans[j];
+        Scan * SecondScan = allScans[k];
+        double centroid_d[3] = {0.0, 0.0, 0.0};
+        double centroid_m[3] = {0.0, 0.0, 0.0};
+        vPtPair temp;
+        double sum_dummy;
+        Scan::getPtPairs(&temp, FirstScan, SecondScan, thread_num,
+            my_icp->get_rnd(), (int)max_dist_match2_LUM, sum_dummy,
+            centroid_m, centroid_d);
+        if ((int)temp.size() > clpairs) {
 #ifdef _OPENMP
 #pragma omp critical
 #endif
-		gr->addLink(j, k);  
-	   } 
-	 }
+          gr->addLink(j, k);  
+        } 
+      }
     }
     cout << "done" << endl;
   } while ((doGraphSlam6D(*gr, allScans, 1) > 0.001) && (i < nrIt));
@@ -147,8 +148,9 @@ Graph *graphSlam6D::computeGraph6Dautomatic(vector <Scan *> allScans, int clpair
       double centroid_d[3] = {0.0, 0.0, 0.0};
       double centroid_m[3] = {0.0, 0.0, 0.0};
       vPtPair temp;
+      double sum_dummy;
       Scan::getPtPairs(&temp, FirstScan, SecondScan, thread_num,
-          my_icp->get_rnd(), (int)max_dist_match2_LUM,
+          my_icp->get_rnd(), (int)max_dist_match2_LUM, sum_dummy,
           centroid_m, centroid_d);
       if ((int)temp.size() > clpairs) {
 #ifdef _OPENMP
