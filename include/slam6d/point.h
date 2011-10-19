@@ -34,7 +34,7 @@ public:
   /**
    *	Constructor with an array, i.e., vecctor of coordinates
    */
-  inline Point(const double *p) { x = p[0]; y = p[1]; z = p[2]; };
+  inline Point(const double *p) { x = p[0]; y = p[1]; z = p[2]; type = 0; reflectance = 0.0; amplitude = 0.0; deviation = 0.0; rgb[0] = 255; rgb[1] = 255; rgb[2] = 255;};
   inline Point(const double *p, const char *c) { x = p[0]; y = p[1]; z = p[2]; rgb[0] = c[0]; rgb[1] = c[1]; rgb[2] = c[2];};
 
   /**

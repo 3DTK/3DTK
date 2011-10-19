@@ -692,18 +692,17 @@ int SHT_get_hough_lines(int nr_pts, double *x, double *y,
   
   strcpy(filename,"plane.dat");
   //prev_clock = GetCurrentTimeInMilliSec();
+  unsigned long sht_average;
+  sht_average = SHT_Find_average_value_of_historgram(sht_resolution, sht_histogram);
 #endif
   
   // sht
-  unsigned long sht_average;
   unsigned long sht_maximum;
   int           sht_imax, sht_jmax;
   int           *sht_marker = new int[ScanAZ];
-  double        sht_length_of_a_line, sht_maxlinedist=100.0;
+  double        sht_length_of_a_line;
   int           i = 0;
   double        m,b;
-  int           go_over_x = 0;
-  int           nr_removed_points;
   
   // init marker
   for (i = 0; i < nr_pts; i++) sht_marker[i] = 0;
@@ -711,7 +710,6 @@ int SHT_get_hough_lines(int nr_pts, double *x, double *y,
   
   // hough
   SHT_hough_transform(nr_pts, x, y, sht_resolution, max_rho_d, sht_histogram,xmin,ymin);
-  sht_average = SHT_Find_average_value_of_historgram(sht_resolution, sht_histogram);
   sht_maximum = SHT_Find_max_value_of_historgram(sht_resolution, sht_histogram,
 						 &sht_imax, &sht_jmax);
   i = 0;
@@ -730,18 +728,18 @@ int SHT_get_hough_lines(int nr_pts, double *x, double *y,
     SHT_Print_histogram(sht_fpr_histogramm, sht_resolution, sht_histogram, sht_average);
     fclose(sht_fpr_histogramm);
 #endif
-    go_over_x  = SHT_calc_line(sht_resolution, max_rho_d, sht_histogram, sht_imax, sht_jmax, &m, &b);
+    SHT_calc_line(sht_resolution, max_rho_d, sht_histogram, sht_imax, sht_jmax, &m, &b);
     if (unsorted) {
-	 sht_maxlinedist = SHT_find_unsorted_line(nr_pts, x, y, sht_resolution, max_rho_d, sht_histogram,
+	 SHT_find_unsorted_line(nr_pts, x, y, sht_resolution, max_rho_d, sht_histogram,
 									  sht_imax, sht_jmax, sht_marker, sht_length_of_a_line,
 									  nr_line_pts, x_line_pts, y_line_pts, xmin,ymin);
     }
     else {
-	 sht_maxlinedist = SHT_find_line(nr_pts, x, y, sht_resolution, max_rho_d, sht_histogram,
+	 SHT_find_line(nr_pts, x, y, sht_resolution, max_rho_d, sht_histogram,
 								 sht_imax, sht_jmax, sht_marker, sht_length_of_a_line,
 								 nr_line_pts, x_line_pts, y_line_pts, xmin,ymin);
     }
-    nr_removed_points = SHT_remove_line(nr_pts, x, y, sht_resolution, max_rho_d,
+    SHT_remove_line(nr_pts, x, y, sht_resolution, max_rho_d,
 								sht_histogram, sht_marker,xmin,ymin);
     sht_maximum = SHT_Find_max_value_of_historgram(sht_resolution, sht_histogram,
 						                     &sht_imax, &sht_jmax);

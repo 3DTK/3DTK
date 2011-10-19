@@ -205,7 +205,7 @@ void    GLUI_Rotation::setup_texture( void )
     light = glui->bkgd_color.r;
       }
 
-      c = ((((i&0x8)==0) ^ ((j&0x8))==0)) * light;
+      c = ((  (((i&0x8)==0) ^ ((j&0x8)))  == 0 )) * light;
       if ( c == 0 )
     c = dark;
       texture_image[i][j][0] = c;
