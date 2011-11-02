@@ -1,0 +1,90 @@
+README for 0.10.3 cvBlob.
+
+
+1. DOWNLOAD LATEST SOURCE
+
+You need Subversion ( http://subversion.tigris.org ).
+
+Read only checkout:
+
+	svn checkout http://cvblob.googlecode.com/svn/trunk/ cvblob-read-only
+
+
+2. DEPENDENCIES
+
+In order to compile cvBlob you need the following:
+
+	* CMAKE ( http://www.cmake.org )
+	* OpenCV ( http://opencvlibrary.sourceforge.net )
+
+2.1 Instalation of dependencies in Debian type SO (Ubuntu,...) using apt:
+
+If you are in a Debian style distribution (Ubuntu, for example) you can do something
+like this:
+
+	sudo aptitude install cmake libcv4 libcv-dev libcvaux4
+
+2.2 Instalation of dependencies in SuSE using Yast
+
+Type this:
+
+	su -c "yast -i libopencv1 opencv opencv-debuginfo opencv-debugsource opencv-devel opencv-python cmake cmake-gui"
+
+
+3. COMPILING AND INSTALLING
+
+In Linux, if you have unpacked the source in $CVBLOB, enter in a console:
+
+	cd $CVBLOB
+	cmake .
+	make
+	sudo make install
+
+In Windows it must be as easy as in Linux (changing "make" for the equivalent in your compiler).
+If problems, please read:
+	http://www.cmake.org/HTML/RunningCMake.html
+
+3.1 OpenCV path
+
+You can tell CMake where OpenCV is installed, in case it can't find it, using the "OpenCV_DIR" variable:
+
+	cmake . -DOpenCV_DIR=<path_to_OpenCV>
+
+3.2 Installation path
+
+To change the destination path for the installation, set "CMAKE_INSTALL_PREFIX" variable:
+
+	cmake . -DCMAKE_INSTALL_PREFIX=<installation_path>
+
+3.3 Problems
+
+Latest information about compiling:
+	http://code.google.com/p/cvblob/wiki/HowToCompile
+
+
+4. INFORMATION
+
+The official home page of cvBlob is:
+	http://cvblob.googlecode.com
+
+Downloads:
+	http://code.google.com/p/cvblob/downloads/list 
+
+Documentation:
+	http://code.google.com/p/cvblob/wiki/WikiIndex?tm=6
+
+Bug reports:
+	http://code.google.com/p/cvblob/issues/list
+
+
+5. MAIN AUTHOR
+
+Comments, suggestions and, why not, donations (PayPal) to:
+
+	Cristóbal Carnero Liñán		E-mail: grendel.ccl@gmail.com
+
+
+6. CONTRIBUTORS
+
+	Stefan Gachter			Web page: http://gachter.name
+	Kouichi Nishino
