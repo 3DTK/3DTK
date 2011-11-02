@@ -1,7 +1,13 @@
-IF (WITH_SHAPE_DETECTION)
+IF (WITH_THERMO)
+  find_package(OpenCV REQUIRED)
+
+  include_directories(${CMAKE_SOURCE_DIR}/3rdparty/cvblob)
   include_directories(${CMAKE_SOURCE_DIR}/3rdparty/gocr-0.48/src)
   include_directories(${CMAKE_SOURCE_DIR}/3rdparty/gocr-0.48/include)
   include_directories(${CMAKE_SOURCE_DIR}/include/shapes/)
+  include_directories(${CMAKE_SOURCE_DIR}/include/thermo/)
+  include_directories(/usr/include/)
+  include_directories(/usr/include/opencv)
   
 #  # Compile gocr library
 #  SET(GOCR_DIR ${CMAKE_SOURCE_DIR}/3rdparty/gocr-0.48/src/)
@@ -22,29 +28,23 @@ IF (WITH_SHAPE_DETECTION)
 #  ENDIF(UNIX)
 #  
   
-  add_executable(planes plane.cc)
-#  add_executable(image toImage.cc image.cc hough.cc convexplane.cc accumulator.cc hsm3d.cc ConfigFileHough.cc parascan.cc quadtree.cc geom_math.cc )
-#  add_executable(matchMarker matchMarker.cc)
+  add_executable(caliboard caliboard.cc) 
+#  add_executable(thermo thermo.cc) 
+#  add_executable(thermo thermo.cc src/cvaux.cpp  src/cvblob.cpp  src/cvcolor.cpp src/cvcontour.cpp  src/cvlabel.cpp  src/cvtrack.cpp)
+  add_executable(thermo thermo.cc)
   
   IF(UNIX)
-    target_link_libraries(planes scanlib shapelib newmat dl ANN)
-#    target_link_libraries(image scanlib newmat sparse dl ANN )
-#    target_link_libraries(matchMarker scanlib newmat sparse dl ANN )
+    target_link_libraries(caliboard scanlib shapelib newmat dl ANN)
+    target_link_libraries(thermo scanlib shapelib newmat dl ANN)
+#    target_link_libraries(thermo scanlib shapelib newmat dl ANN)
+    target_link_libraries(thermo cv cvaux cxcore GL GLU highgui cvblob scanlib ANN)
   ENDIF(UNIX)
 
   IF (WIN32)
-    target_link_libraries(planes scanlib newmat XGetopt)
-#    target_link_libraries(image scanlib newmat sparse ANN XGetopt)
+    target_link_libraries(caliboard scanlib shapelib newmat XGetopt ANN)
+#    target_link_libraries(thermo scanlib shapelib newmat XGetopt ANN)
+    target_link_libraries(thermo cv cvaux cxcore GL GLU highgui cvblob scanlib ANN)
   ENDIF(WIN32)
+  
 
-SET(SHAPELIB_SRCS
-  hough.cc convexplane.cc accumulator.cc hsm3d.cc ConfigFileHough.cc parascan.cc quadtree.cc geom_math.cc )
-
-add_library(shapelib STATIC ${SHAPELIB_SRCS})
-#target_link_libraries(shapelib)
-IF(EXPORT_SHARED_LIBS)
-add_library(shapelib_s SHARED ${SHAPELIB_SRCS})
-#target_link_libraries(scanlib_s ${Boost_LIBRARIES} newmat)
-ENDIF(EXPORT_SHARED_LIBS)
-
-ENDIF(WITH_SHAPE_DETECTION)
+ENDIF(WITH_THERMO)

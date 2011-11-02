@@ -68,6 +68,17 @@ ELSE(WITH_SHAPE_DETECTION)
   MESSAGE(STATUS "Without shape detection")
 ENDIF(WITH_SHAPE_DETECTION)
 
+## Thermo 
+OPTION(WITH_THERMO "Whether to build executables for mutual calibration of laser scanner and camera. ON/OFF" OFF)
+IF(WITH_THERMO)
+  FIND_PACKAGE(OpenCV REQUIRED)
+  add_subdirectory(3rdparty/cvblob)
+  include_directories(${CMAKE_SOURCE_DIR}/3rdparty/cvblob)
+  link_directories(${CMAKE_SOURCE_DIR}/3rdparty/cvblob)
+  MESSAGE(STATUS "With thermo")
+ELSE(WITH_THERMO)
+  MESSAGE(STATUS "Without thermo")
+ENDIF(WITH_THERMO)
 
 ## Octree
 OPTION(WITH_OCTREE_DISPLAY "Whether to use octree display for efficiently culling scans ON/OFF" ON)
@@ -312,6 +323,7 @@ add_subdirectory(src/show)
 add_subdirectory(src/grid)
 add_subdirectory(src/pmd)
 add_subdirectory(src/shapes)
+add_subdirectory(src/thermo)
 add_subdirectory(src/slam6d/sift)
 add_subdirectory(src/scanner)
 
