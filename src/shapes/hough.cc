@@ -33,10 +33,9 @@ Hough::Hough(bool q, std::string configFile)
       myConfigFileHough.ShowConfiguration();
     }
   }
-
 }
 
-Hough::Hough(Scan * GlobalScan, bool q, std::string configFile) 
+Hough::Hough(Scan * GlobalScan, bool q, std::string configFile)
 {
  
   quiet = q;
@@ -811,10 +810,6 @@ int Hough::deletePoints(double * n, double rho) {
   list< double*> point_list;
   
   vPtPair::iterator vitr;
-  unsigned char rgb[3];
-  for(int x = 0; x < 3; x++) {
-    rgb[x] = (unsigned char)((255)*(rand()/(RAND_MAX+1.0)));
-  }
   vector<Point> tmp_points;
   for(vitr = planePairs.begin(); vitr != planePairs.end(); vitr++) {
     
@@ -841,9 +836,13 @@ int Hough::deletePoints(double * n, double rho) {
   unsigned int maxPlane = point_list.size();
   
   // color points
+  unsigned char rgb[3];
+  for(int x = 0; x < 3; x++) {
+    rgb[x] = (unsigned char)((255)*(rand()/(RAND_MAX+1.0)));
+  }
   for(itr = tmp_points.begin(); itr != tmp_points.end(); itr++) {
       p = (*itr);
-      if(nocluster || maxPlane >= myConfigFileHough.Get_MinPlaneSize()) {
+      if(nocluster || maxPlane < myConfigFileHough.Get_MinPlaneSize()) {
         p.rgb[0] = 0;
         p.rgb[1] = 0;
         p.rgb[2] = 0;

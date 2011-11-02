@@ -72,9 +72,10 @@ void ConvexPlane::JarvisMarchConvexHull(list<double*> &points, vector<double*> &
     if(!closed) {
       convex_hull.push_back(current);
       end = points.erase(end);
-    } 
+    }
     current = anchor;
   } while(start != anchor);
+  convex_hull.pop_back();
   
   itr = points.begin();
   while(itr != points.end()) {
