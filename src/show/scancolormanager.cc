@@ -121,7 +121,11 @@ ScanColorManager::ScanColorManager(unsigned int _buckets, PointType type) : poin
           staticManager.push_back(cm);
 
           // new colormanager for scan index influenced colorscheme
-          ColorManagerC *cmc = new ColorManagerC(buckets, pointtype.getPointDim(), mins, maxs, colormap[i%6]);
+          DiffMap m;
+//          JetMap m;
+          float c[3] = {0,0,0};
+          m.calcColor(c, i, allScans.size() );
+          ColorManagerC *cmc = new ColorManagerC(buckets, pointtype.getPointDim(), mins, maxs, c);
           scanManager.push_back(cmc);
 
           // new colormanager for the color based on the color of the points
@@ -179,16 +183,4 @@ const unsigned int ScanColorManager::MODE_COLOR_SCAN = 1;
 const unsigned int ScanColorManager::MODE_ANIMATION = 2;
 const unsigned int ScanColorManager::MODE_POINT_COLOR = 3;
   
-
-/**
- * a const colormap for when scans are supposed to be colored differently
- *
- */
-const float ScanColorManager::colormap[6][3] = {
-  {0.3,0,0},
-  {0,0.3,0},
-  {0,0,0.3},
-  {0,0.3,0.3},
-  {0.3,0,0.3},
-  {0.3,0.3,0}};
 

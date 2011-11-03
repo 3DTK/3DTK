@@ -72,8 +72,6 @@ class ScanColorManager {
 
     unsigned int currenttype;
     
-    static const float colormap[6][3];
-
     unsigned int buckets;
 
     /** stores minima and maxima for each point dimension */ 
