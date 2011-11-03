@@ -36,7 +36,6 @@ using std::exception;
 
 #include "slam6d/point_type.h"
 #include "show/display.h"
-//#define USE_COMPACT_TREE 1 // attention: makes bad things if defined! ;-)
 
 /**
  * This vector contains the pointer to a vertex array for
