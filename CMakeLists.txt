@@ -92,6 +92,17 @@ ENDIF(WITH_OCTREE_DISPLAY)
 #SET (WITH_OCTREE_DISPLAY ${WITH_OCTREE_DISPLAY} CACHE BOOL 
 #"Whether to use octree display for efficiently culling scans ON/OFF" FORCE)
 
+
+## Octree
+OPTION(WITH_COMPACT_OCTREE "Whether to use the compact octree display ON/OFF" OFF)
+
+IF(WITH_COMPACT_OCTREE)
+  MESSAGE(STATUS "Using compact octrees")
+  SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DUSE_COMPACT_TREE")
+ELSE(WITH_COMPACT_OCTREE)
+  MESSAGE(STATUS "Not using compact octreees: Warning uses more memory")
+ENDIF(WITH_COMPACT_OCTREE)
+
 ## Gridder 
 OPTION(WITH_GRIDDER "Whether to build the 2DGridder binary ON/OFF" ON)
 
