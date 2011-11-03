@@ -225,7 +225,7 @@ public:
     uroot = new bitunion<T>();
     root = &uroot->node;
 
-    countPointsAndQueue(pts, n, newcenter, sizeNew, *root, center);
+    countPointsAndQueueFast(pts, n, newcenter, sizeNew, *root, center);
     init();
   }
 
@@ -760,6 +760,37 @@ protected:
       delete[] children;
     }
   }
+  
+  template <class P>
+  void* branch( bitoct &node, P * const * splitPoints, int n,  T _center[3], T _size) {
+    // if bucket is too small stop building tree
+    // -----------------------------------------
+    if ((_size <= voxelSize) || (earlystop && n <= 10) ) {
+      // copy points
+      pointrep *points = new pointrep[POINTDIM*n + 1];
+      points[0].length = n;
+      int i = 1;
+      for (int j = 0; j < n; j++) {
+        for (unsigned int iterator = 0; iterator < POINTDIM; iterator++) {
+          points[i++].v = splitPoints[j][iterator];
+        }
+      }
+      return points; 
+    }  
+
+    // calculate new buckets
+    T newcenter[8][3];
+    T sizeNew;
+
+    sizeNew = _size / 2.0;
+
+    for (unsigned char i = 0; i < 8; i++) {
+      childcenter(_center, newcenter[i], _size, i);
+    }
+
+    countPointsAndQueueFast(splitPoints, n, newcenter, sizeNew, node, _center);
+    return 0;
+  }
 
   template <class P>
   void* branch( bitoct &node, vector<P*> &splitPoints, T _center[3], T _size) {
@@ -827,18 +858,19 @@ protected:
       }
     }
   }
-
+  
   template <class P>
-  void countPointsAndQueue(P * const* pts, int n,  T center[8][3], T size, bitoct &parent, T pcenter[3]) {
-    vector<const P*> points[8];
+  void countPointsAndQueueFast(P * const* points, int n,  T center[8][3], T size, bitoct &parent, T pcenter[3]) {
+    P * const *blocks[9];
+    blocks[0] = points;
+    blocks[8] = points + n;
+    fullsort(points, n, pcenter, blocks+1);
+
     int n_children = 0;
-      for (int i = 0; i < n; i++) {
-              points[childIndex<P>(pcenter, pts[i])].push_back( pts[i] );
-    }
     
     for (int j = 0; j < 8; j++) {
       // if non-empty set valid flag for this child
-      if (!points[j].empty()) {
+      if (blocks[j+1] - blocks[j] > 0) {
         parent.valid = ( 1 << j ) | parent.valid;
         ++n_children;
       }
@@ -849,14 +881,12 @@ protected:
     bitoct::link(parent, children);
     int count = 0;
     for (int j = 0; j < 8; j++) {
-      if (!points[j].empty()) {
-        pointrep *c = (pointrep*)branch(children[count].node, points[j], center[j], size);  // leaf node
+      if (blocks[j+1] - blocks[j] > 0) {
+        pointrep *c = (pointrep*)branch(children[count].node, blocks[j], blocks[j+1] - blocks[j], center[j], size);  // leaf node
         if (c) { 
           children[count].points = c; // set this child to vector of points
           parent.leaf = ( 1 << j ) | parent.leaf;  // remember this is a leaf
         }
-        points[j].clear();
-        vector<const P*>().swap(points[j]);
         ++count;
       }
     }
@@ -1226,6 +1256,90 @@ inline unsigned char childIndex(const T *center, const P *point) {
       child_bit >>= 1;
     }
     return static_cast<double*>(params[threadNum].closest);
+  }
+  
+
+template <class P>
+  void fullsort(P * const * points, int n, T splitval[3], P * const * blocks[9]) {
+    P* const * L0;
+    P* const * L1;
+    P* const * L2;
+    unsigned int n0L, n0R, n1L, n1R ;
+
+    // sort along Z
+    L0 = sort(points, n, splitval[2], 2);
+      
+      n0L = L0 - points;
+      // sort along Y (left of Z)   points -- L0
+      L1 = sort(points, n0L, splitval[1], 1);
+
+        n1L = L1 - points; 
+        // sort along X (left of Y)  points -- L1
+        L2 = sort(points, n1L, splitval[0], 0);
+        
+          blocks[0] = L2;
+        
+        n1R = n0L - n1L;
+        // sort along X (right of Y) // L1 -- L0
+        L2 = sort(L1, n1R, splitval[0], 0);
+        
+          blocks[1] = L1;
+          blocks[2] = L2;
+
+      n0R = n - n0L;
+      // sort along Y (right of Z)  L0 -- end
+      L1 = sort(L0, n0R, splitval[1], 1);
+      
+        n1L = L1 - L0; 
+        // sort along X (left of Y)  points -- L1
+        L2 = sort(L0, n1L, splitval[0], 0);
+        
+          blocks[3] = L0;
+          blocks[4] = L2;
+        
+        n1R = n0R - n1L;
+        // sort along X (right of Y) // L1 -- L0
+        L2 = sort(L1, n1R, splitval[0], 0);
+        
+          blocks[5] = L1;
+          blocks[6] = L2;
+  }
+
+
+  template <class P>
+  P* const * sort(P* const * points, unsigned int n, T splitval, unsigned char index) {
+    if (n==0) return points;
+    
+    if (n==1) {
+      if (points[0][index] < splitval)
+        return points+1;
+      else
+        return points;
+    }
+
+    P **left = const_cast<P**>(points);
+    P **right = const_cast<P**>(points + n - 1);
+    
+    
+      while (1) {
+      while ((*left)[index] < splitval) 
+      {
+        left++;
+        if (right < left)
+          break;
+      }
+      while ((*right)[index] >= splitval)
+      {
+        right--;
+        if (right < left)
+          break;
+      }
+      if (right < left)
+        break;
+
+      std::swap(*left, *right);
+    }
+    return left;
   }
 
 static char map[8][8]; 
