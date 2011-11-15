@@ -196,7 +196,7 @@ void sortCluster(double point_array[][2], int board_n, int board_h, int board_w,
   
 }
 
-IplImage* detectBlobs(IplImage *org_image, int corner_exp, int board_h, int board_w, bool quiet, double point_array2[][2]) {
+IplImage* detectBlobs(IplImage *org_image, int &corner_exp, int board_h, int board_w, bool quiet, double point_array2[][2]) {
 
   IplImage *gray_image = cvCloneImage(org_image); 
   cvThreshold(gray_image, gray_image, 140, 255, CV_THRESH_BINARY);
@@ -227,10 +227,54 @@ IplImage* detectBlobs(IplImage *org_image, int corner_exp, int board_h, int boar
         it2->second->area <= average_size_max && 
         blob_count < corner_exp) {
         
-      if(!quiet) {
-      }
+     // CvScalar cvBlobMeanColor(it, labelImg, org_image);
       point_array2[blob_count][0] = it2->second->centroid.x;
       point_array2[blob_count][1] = it2->second->centroid.y;
+      //cout << "c: " << it2->second->centroid.x << " " << it2->second->centroid.y << " ";
+      double sumx = 0.0;
+      double sumy = 0.0;
+      double sum = 0.0;
+      
+      /*
+      cout << "Area" << it2->second->area << endl;
+      cout << it2-> second->minx << " " << it2->second->maxx;
+      cout << " " << it2-> second->miny << " " << it2->second->maxy << endl;
+      cout << "W/H " << gray_image->width << " " << gray_image->height << endl;
+      */
+      /*
+      int step = 5;
+      int minx = ((int)it2->second->minx - step) > -1 ? (it2->second->minx - step) : 0;
+      int maxx = ((it2->second->maxx + step) < gray_image->width) ? (it2->second->maxx + step) : (gray_image->width - 1);
+      int miny = ((int)it2->second->miny - step) > -1 ? (it2->second->miny - step) : 0;
+      int maxy = ((it2->second->maxy + step) < gray_image->height) ? (it2->second->maxy + step) : (gray_image->height - 1);
+      
+      */
+      
+      int minx = it2->second->minx;
+      int miny = it2->second->miny;
+      int maxx = it2->second->maxx;
+      int maxy = it2->second->maxy;
+      
+      for(int x = minx; x <= maxx; x++) {
+        for(int y = miny; y <= maxy; y++) {
+          if(cvGet2D(gray_image, y, x).val[0] > 0) {
+            CvScalar c;
+            c = cvGet2D(org_image, y, x);
+       //     cout << "X " << x << " " << y << " " << c.val[0] << " " <<
+         //     c.val[1] << " " << c.val[2] << " " << c.val[3] << endl;
+            sum += c.val[0];
+            sumx += c.val[0]*x;
+            sumy += c.val[0]*y;
+          }
+        }
+      }
+      
+      sumx /= sum;
+      sumy /= sum;
+      point_array2[blob_count][0] = sumx;
+      point_array2[blob_count][1] = sumy;
+      
+      //cout << sumx << " " << sumy << endl;
       blob_count++;
     }
   }
@@ -239,8 +283,7 @@ IplImage* detectBlobs(IplImage *org_image, int corner_exp, int board_h, int boar
   // sorting the points
   sortCluster(point_array2, corner_exp, board_h, board_w, true); 
   cvReleaseImage(&labelImg);
-  cout << "return" << endl;
-  cout << "returned" << endl;
+  corner_exp = blob_count;
   return gray_image;
 }
 
@@ -459,11 +502,15 @@ chess, bool quiet, string dir, int scale) {
     string t1;
 
     if(optical) {
-      t = dir + to_string(count, 3) + "/photo" + to_string(count, 3) + ".ppm";
-		  t1 = dir + to_string(count, 3) + "/cimage" + to_string(count, 3) + ".ppm";
+      t = dir + "/photo" + to_string(count, 3) + ".ppm";
+		  t1 = dir + "/cimage" + to_string(count, 3) + ".ppm";
+      //t = dir + to_string(count, 3) + "/photo" + to_string(count, 3) + ".ppm";
+		  //t1 = dir + to_string(count, 3) + "/cimage" + to_string(count, 3) + ".ppm";
     } else {
-      t = dir + to_string(count, 3) + "/image" + to_string(count, 3) + ".ppm";
-		  t1 = dir + to_string(count, 3) + "/timage" + to_string(count, 3) + ".ppm";
+      //t = dir + to_string(count, 3) + "/image" + to_string(count, 3) + ".ppm";
+		  //t1 = dir + to_string(count, 3) + "/timage" + to_string(count, 3) + ".ppm";
+      t = dir + "/image" + to_string(count, 3) + ".ppm";
+		  t1 = dir + "/timage" + to_string(count, 3) + ".ppm";
     }
     cout << t << endl;
 		//loading images and finding corners
@@ -484,9 +531,14 @@ chess, bool quiet, string dir, int scale) {
       image = detectCorners(image1, corner_exp, board_h, board_w, quiet, point_array2, scale);
     } else {
       cout << "detect blob" << endl;
-      image = detectBlobs(image1, corner_exp, board_h, board_w, quiet, point_array2);
+      int tmp_corners = corner_exp;
+      image = detectBlobs(image1, tmp_corners, board_h, board_w, quiet, point_array2);
     }
 
+    for(int i = 0; i < corner_exp; i++) {
+      cout << (float) point_array2[i][0] << " " << (float) point_array2[i][1] <<
+      endl;
+    }
 		//drawing the lines on the image now
 		drawLines(point_array2, corner_exp, image);
 
@@ -529,18 +581,121 @@ chess, bool quiet, string dir, int scale) {
 //END
 }
 
-void readPoints(string filename, CvPoint3D32f *corners, int size) {
+bool readPoints(string filename, CvPoint3D32f *corners, int size) {
   ifstream infile(filename.c_str(), ios::in);
   if (!infile) {
     cout << "3Ddata file cannot be loaded" << endl;
-    return;
+    return false;
   }
-  
+ 
+  string verify;
+  infile >> verify;
+  if(strcmp(verify.c_str(), "failed") == 0) return false;
   for(int l = 0; l < size; l++) {
       infile >> corners[l].y;
       infile >> corners[l].z;
       infile >> corners[l].x;
       corners[l].y = -corners[l].y;
+  }
+  return true;
+}
+
+int realMedian(CvMat * vectors, int nr_vectors) {
+  bool swapped;
+  double distances[nr_vectors];
+
+  for(int i = 0; i < nr_vectors; i++) {
+    double sum = 0;
+    double x1 = (CV_MAT_ELEM(*vectors,float,i,0));
+    double y1 = (CV_MAT_ELEM(*vectors,float,i,1));
+    double z1 = (CV_MAT_ELEM(*vectors,float,i,2));
+    for(int j = 0; j < nr_vectors; j++) {
+      double x2 = (CV_MAT_ELEM(*vectors,float,j,0));
+      double y2 = (CV_MAT_ELEM(*vectors,float,j,1));
+      double z2 = (CV_MAT_ELEM(*vectors,float,j,2));
+      double tmp = (x2-x1)*(x2-x1)+(y2-y1)*(y2-y1)+(z2-z1)*(z2-z1);
+      sum += sqrt(tmp);
+    }
+    distances[i] = sum;
+  }
+  int min_pos = -1;
+  double min_dist = DBL_MAX;
+  for(int i = 0; i < nr_vectors; i++) {
+    if(distances[i] < min_dist) {
+      min_pos = i;
+      min_dist = distances[i];
+    }
+  }
+  
+  return min_pos;
+}
+
+void filterMedian(CvMat * vectors, int nr_vectors, int threshold, CvMat * mean) {
+  
+  // calculate Median
+  int min_pos = realMedian(vectors, nr_vectors);
+  
+  // crop outliers
+  double x1 = (CV_MAT_ELEM(*vectors,float,min_pos,0));
+  double y1 = (CV_MAT_ELEM(*vectors,float,min_pos,1));
+  double z1 = (CV_MAT_ELEM(*vectors,float,min_pos,2));
+
+  cout  << "MEDIAN: " << x1 << " " <<  y1 << " " <<  z1 << endl;
+  int count = 0;
+  for(int i = 0; i < nr_vectors; i++) {
+    double x2 = (CV_MAT_ELEM(*vectors,float,i,0));
+    double y2 = (CV_MAT_ELEM(*vectors,float,i,1));
+    double z2 = (CV_MAT_ELEM(*vectors,float,i,2));
+    double tmp = (x2-x1)*(x2-x1)+(y2-y1)*(y2-y1)+(z2-z1)*(z2-z1);
+    if(sqrt(tmp) < 1.0/threshold) count++;
+  }
+
+  cout << "START" << endl;
+  CvMat* some_vectors = cvCreateMat(count, 6, CV_32FC1);
+  count = 0;
+  for(int i = 0; i < nr_vectors; i++) {
+    double x2 = (CV_MAT_ELEM(*vectors,float,i,0));
+    double y2 = (CV_MAT_ELEM(*vectors,float,i,1));
+    double z2 = (CV_MAT_ELEM(*vectors,float,i,2));
+    double tmp = (x2-x1)*(x2-x1)+(y2-y1)*(y2-y1)+(z2-z1)*(z2-z1);
+    if(sqrt(tmp) < 1.0/threshold) {
+      for(int j = 0; j < 6; j++) {
+        (CV_MAT_ELEM(*some_vectors,float,count,j)) = (CV_MAT_ELEM(*vectors,float,i,j));
+        cout << (CV_MAT_ELEM(*some_vectors,float,count,j)) << " "; 
+      }
+      cout << endl;
+      count++;
+    }
+  }
+  
+  if(threshold < 3) {
+    filterMedian(some_vectors, count, ++threshold, mean);
+    cvReleaseMat(&some_vectors);
+  } else {
+    x1 = (CV_MAT_ELEM(*some_vectors,float,min_pos,0));
+    y1 = (CV_MAT_ELEM(*some_vectors,float,min_pos,1));
+    z1 = (CV_MAT_ELEM(*some_vectors,float,min_pos,2));
+    cout  << "MEDIAN: " << x1 << " " <<  y1 << " " <<  z1 << endl;
+    double x2 = 0;
+    double y2 = 0;
+    double z2 = 0;
+    double r1 = 0;
+    double r2 = 0;
+    double r3 = 0;
+    for(int i = 0; i < count; i++) {
+      x2 += (CV_MAT_ELEM(*some_vectors,float,i,0));
+      y2 += (CV_MAT_ELEM(*some_vectors,float,i,1));
+      z2 += (CV_MAT_ELEM(*some_vectors,float,i,2));
+      r1 += (CV_MAT_ELEM(*some_vectors,float,i,3));
+      r2 += (CV_MAT_ELEM(*some_vectors,float,i,4));
+      r3 += (CV_MAT_ELEM(*some_vectors,float,i,5));
+    }
+    (CV_MAT_ELEM(*mean,float,0,0)) = x2/count; 
+    (CV_MAT_ELEM(*mean,float,0,1)) = y2/count; 
+    (CV_MAT_ELEM(*mean,float,0,2)) = z2/count; 
+    (CV_MAT_ELEM(*mean,float,0,3)) = r1/count; 
+    (CV_MAT_ELEM(*mean,float,0,4)) = r2/count; 
+    (CV_MAT_ELEM(*mean,float,0,5)) = r3/count; 
   }
 }
 
@@ -549,7 +704,7 @@ void sortElementByElement(CvMat * vectors, int nr_elems, int nr_vectors) {
   for (int i = 0; i < nr_elems; i++) {
 		do {
 			swapped = false;
-			for (int j = 1; j <= successes - 1; j++) {
+			for (int j = 1; j <= nr_vectors - 1; j++) {
 				if (CV_MAT_ELEM(*vectors,float,j,i) < CV_MAT_ELEM(*vectors,float,j-1,i)) {
 					float temp = CV_MAT_ELEM(*vectors,float,j,i);
 					CV_MAT_ELEM(*vectors,float,j,i) = CV_MAT_ELEM(*vectors,float,j-1,i);
@@ -560,22 +715,132 @@ void sortElementByElement(CvMat * vectors, int nr_elems, int nr_vectors) {
 		} while (swapped);
 	}
 }
+void calculateExtrinsicsWithReprojectionCheck(CvMat * points2D, CvMat *
+    points3D, CvMat * rotation_vectors_temp, CvMat * translation_vectors_temp, CvMat
+    * distortion, CvMat * intrinsics, int corners, int successes, string dir, bool quiet, string substring) {
+  double reprojectionError[successes];
+  for(int i = 0; i < successes; i++) {
+    reprojectionError[i] = 0.0;
+  }
+
+  for(int i = 0; i < successes; i++) {
+    reprojectionError[i] = 0.0;
+    CvMat * rotation = cvCreateMat(1, 3, CV_32FC1);
+    CvMat * translation = cvCreateMat(1, 3, CV_32FC1);
+    
+    for(int k = 0; k < 3; k++) {
+      CV_MAT_ELEM(*rotation, float, 0, k) = CV_MAT_ELEM(*rotation_vectors_temp, float, i, k);
+      CV_MAT_ELEM(*translation, float, 0, k) = CV_MAT_ELEM(*translation_vectors_temp, float, i, k);
+    }
+    /*
+    for(int k = 0; k < 3; k++) {
+      cout << CV_MAT_ELEM(*rotation, float, 0, k) << " ";
+      CV_MAT_ELEM(*translation, float, 0, k) = CV_MAT_ELEM(*translation_vectors_temp, float, i, k);
+    }
+    for(int k = 0; k < 3; k++) {
+      cout << CV_MAT_ELEM(*translation, float, 0, k) << " ";
+    }
+    cout << endl;
+    for(int k = 0; k < 3; k++) {
+      for(int l = 0; l < 3; l++) {
+        cout << CV_MAT_ELEM(*intrinsics, float, k, l) << " ";
+      }
+    }
+    
+    for(int k = 0; k < 5; k++) {
+      CV_MAT_ELEM(*distortion, float, k, 0) = 0;
+    }
+    cout << endl;
+    cout << endl;
+    */
+    for(int j = 0; j < successes; j++) {
+      double tmp = 0;
+      //calculate reprojection error
+      CvMat * point_3Dcloud = cvCreateMat(corners, 3, CV_32FC1);
+      CvMat * point_2Dcloud = cvCreateMat(corners, 2, CV_32FC1);
+      for(int l = 0; l < corners; l++) {
+        CV_MAT_ELEM(*point_2Dcloud,float,l,0) = 0.0; 
+        CV_MAT_ELEM(*point_2Dcloud,float,l,1) = 1.0; 
+        CV_MAT_ELEM(*point_3Dcloud,float,l,0) = CV_MAT_ELEM(*points3D,CvPoint3D32f,j,l).x;
+        CV_MAT_ELEM(*point_3Dcloud,float,l,1) = CV_MAT_ELEM(*points3D,CvPoint3D32f,j,l).y;
+        CV_MAT_ELEM(*point_3Dcloud,float,l,2) = CV_MAT_ELEM(*points3D,CvPoint3D32f,j,l).z;
+        /* 
+        cout << CV_MAT_ELEM(*points3D,CvPoint3D32f,j,l).x << " ";
+        cout << CV_MAT_ELEM(*points3D,CvPoint3D32f,j,l).y << " ";
+        cout << CV_MAT_ELEM(*points3D,CvPoint3D32f,j,l).z << endl;
+        */
+      }
+      cvProjectPoints2(point_3Dcloud, rotation, translation, intrinsics, 
+          distortion, point_2Dcloud, NULL, NULL, NULL, NULL, NULL, 0);
+      for(int l = 0; l < corners; l++) {
+        double x = CV_MAT_ELEM(*point_2Dcloud,float,l,0) - CV_MAT_ELEM(*points2D,CvPoint2D32f,j,l).x;
+        //cout << l << " " << CV_MAT_ELEM(*point_2Dcloud,float,l,0) << " ";
+        //cout << CV_MAT_ELEM(*points2D,CvPoint2D32f,j,l).x << endl;
+        double y = CV_MAT_ELEM(*point_2Dcloud,float,l,1) - CV_MAT_ELEM(*points2D,CvPoint2D32f,j,l).y;
+        //cout << CV_MAT_ELEM(*point_2Dcloud,float,l,1) << " " << CV_MAT_ELEM(*points2D,CvPoint2D32f,j,l).y << endl;
+        //cout << i << " " << j << " " << x << " " << y << endl;
+        tmp += sqrt(x*x + y*y);
+      }
+      cvReleaseMat(&point_2Dcloud);
+      reprojectionError[i] += tmp;
+      cvReleaseMat(&point_3Dcloud);
+    }
+    cvReleaseMat(&rotation);
+    cvReleaseMat(&translation);
+  }
+
+  int maxindex = -1;
+  double max = DBL_MAX;
+  for(int i = 0; i < successes; i++) {
+    if(reprojectionError[i] < max) {
+      maxindex = i;
+      max = reprojectionError[i];
+      cout << reprojectionError[i] << endl;
+    } else { 
+      cout << reprojectionError[i] << endl;
+    }
+  }
+
+  CvMat * rotation = cvCreateMat(1, 3, CV_32FC1);
+  CvMat * translation = cvCreateMat(1, 3, CV_32FC1);
+  
+  cout << "Maxindex " << maxindex << endl;
+  for(int i = 0; i < 3; i++) {
+    CV_MAT_ELEM(*rotation, float, 0, i) = CV_MAT_ELEM(*rotation_vectors_temp, float, maxindex, i);
+    CV_MAT_ELEM(*translation, float, 0, i) = CV_MAT_ELEM(*translation_vectors_temp, float, maxindex, i);
+  }
+  for(int i = 0; i < 3; i++) {
+    cout << CV_MAT_ELEM(*rotation, float, 0, i) << " ";
+  }
+  for(int i = 0; i < 3; i++) {
+    cout << CV_MAT_ELEM(*translation, float, 0, i) << " ";
+  }
+  cout << endl; 
+  string file = dir + "Rotation" + substring + ".xml";
+  cvSave(file.c_str(), rotation);
+  file = dir + "Translation" + substring + ".xml";
+  cvSave(file.c_str(), translation);
+
+}
 
 void calculateExtrinsics(CvMat * rotation_vectors_temp, CvMat * translation_vectors_temp, int successes, string dir, bool quiet, string substring) {
   
   cout << "Start calculateExtrinsics" << endl;
   CvMat* rotation_vectors = cvCreateMat(successes, 3, CV_32FC1);
 	CvMat* translation_vectors = cvCreateMat(successes, 3, CV_32FC1);
+	CvMat* vectors = cvCreateMat(successes, 6, CV_32FC1);
 	CvMat* rotation_vector_mean = cvCreateMat(1, 3, CV_32FC1);
 	CvMat* translation_vector_mean = cvCreateMat(1, 3, CV_32FC1);
 	CvMat* rotation_vector_median = cvCreateMat(1, 3, CV_32FC1);
 	CvMat* translation_vector_median = cvCreateMat(1, 3, CV_32FC1);
-
+  CvMat* median = cvCreateMat(1, 6, CV_32FC1);
 	for (int t = 0; t < 3; t++) {
     CV_MAT_ELEM(*rotation_vector_mean,float,0,t) = 0;
 		CV_MAT_ELEM(*translation_vector_mean,float,0,t) = 0;
 		CV_MAT_ELEM(*rotation_vector_median,float,0,t) = 0;
 		CV_MAT_ELEM(*translation_vector_median,float,0,t) = 0;
+		CV_MAT_ELEM(*median,float,0,t) = 0;
+		CV_MAT_ELEM(*median,float,0,t + 3) = 0;
 	}
 
 	for (int h = 0; h < successes; h++) {
@@ -585,7 +850,10 @@ void calculateExtrinsics(CvMat * rotation_vectors_temp, CvMat * translation_vect
 
 		  CV_MAT_ELEM(*translation_vectors,float,h,t) =CV_MAT_ELEM(*translation_vectors_temp,float,h,t);
 		  CV_MAT_ELEM(*translation_vector_mean,float,0,t) +=CV_MAT_ELEM(*translation_vectors,float,h,t);
-	  }
+	    
+		  CV_MAT_ELEM(*vectors,float,h,t) =CV_MAT_ELEM(*translation_vectors_temp,float,h,t);
+		  CV_MAT_ELEM(*vectors,float,h,t + 3) =CV_MAT_ELEM(*rotation_vectors_temp,float,h,t);
+    }
   }
 	
   for(int t = 0; t < 3; t++) {
@@ -595,7 +863,23 @@ void calculateExtrinsics(CvMat * rotation_vectors_temp, CvMat * translation_vect
 
 	// finding the median of rotation and translation
 	// sorting the rotation vectors element by element
-	sortElementByElement(rotation_vectors, 3, successes);
+	if(!quiet) {
+    cout << "number of successes : " << successes << endl;
+	  cout << "rotation vectors are" << endl;
+	  for (int i = 0; i < successes; i++) {
+		  cout << CV_MAT_ELEM(*rotation_vectors,float,i,0) << " "
+				<<CV_MAT_ELEM(*rotation_vectors,float,i,1) << " "
+				<<CV_MAT_ELEM(*rotation_vectors,float,i,2) << endl;
+	  }
+	  cout << "translation vectors are" << endl;
+	  for (int i = 0; i < successes; i++) {
+		  cout << CV_MAT_ELEM(*translation_vectors,float,i,0) << " "
+				<<CV_MAT_ELEM(*translation_vectors,float,i,1) << " "
+				<<CV_MAT_ELEM(*translation_vectors,float,i,2) << endl;
+	  }
+  }
+	/*
+  sortElementByElement(rotation_vectors, 3, successes);
 	sortElementByElement(translation_vectors, 3, successes);
 	
 	if(!quiet) {
@@ -613,11 +897,17 @@ void calculateExtrinsics(CvMat * rotation_vectors_temp, CvMat * translation_vect
 				<<CV_MAT_ELEM(*translation_vectors,float,i,2) << endl;
 	  }
   }
+  */
 	// getting the median vectors
-	int index = successes / 2;
+	//int index = successes / 2;
+	//int index = realMedian(translation_vectors, 3, successes);
+  filterMedian(vectors, successes, 1, median);
+  
   for(int t = 0; t < 3; t++) {
-    CV_MAT_ELEM(*translation_vector_median,float,0,t) = CV_MAT_ELEM(*translation_vectors,float,index,t);
-	  CV_MAT_ELEM(*rotation_vector_median,float,0,t) = CV_MAT_ELEM(*rotation_vectors,float,index,t);
+    //CV_MAT_ELEM(*translation_vector_median,float,0,t) = CV_MAT_ELEM(*translation_vectors,float,index,t);
+	  //CV_MAT_ELEM(*rotation_vector_median,float,0,t) = CV_MAT_ELEM(*rotation_vectors,float,index,t);
+    CV_MAT_ELEM(*translation_vector_median,float,0,t) = CV_MAT_ELEM(*median,float,0,t);
+	  CV_MAT_ELEM(*rotation_vector_median,float,0,t) = CV_MAT_ELEM(*median,float,0,t+3);
 	}
 	
   cout << "mean rotation vector is :" << endl;
@@ -687,122 +977,155 @@ void ExtrCalibFunc(int board_w, int board_h, int start, int end, bool optical, b
   CvMat *intrinsic = (CvMat*) cvLoad(file.c_str());
 	file = dir + "Distortion" + substring + ".xml";
 	CvMat *distortion = (CvMat*) cvLoad(file.c_str());
-	file = dir + "mapx" + substring + ".xml";
-	IplImage *mapx = (IplImage*) cvLoad(file.c_str());
-	file = dir + "mapy" + substring + ".xml";
-	IplImage *mapy = (IplImage*) cvLoad(file.c_str());
 	////////////for storing the rotations and translation vectors
-	CvMat* rotation_vectors_temp = cvCreateMat(corner_exp, 3, CV_32FC1);
-	CvMat* translation_vectors_temp = cvCreateMat(corner_exp, 3, CV_32FC1);
-	int successes = 0;
+	CvMat* rotation_vectors_temp = cvCreateMat(nr_img, 3, CV_32FC1);
+	CvMat* translation_vectors_temp = cvCreateMat(nr_img, 3, CV_32FC1);
+  CvMat* points3D = cvCreateMat(nr_img, corner_exp, CV_32FC3);
+  CvMat* points2D = cvCreateMat(nr_img, corner_exp, CV_32FC2);
+  //CvMat* points3D = cvCreateMat(nr_img, corner_exp, CvPoint3D32f);
+  //CvMat* points2D = cvCreateMat(nr_img, corner_exp, CvPoint2D32f);
+  int successes = 0;
 
   cout << "xml files read" << endl;
   //////////////////////////////////////////////////////
-	for (int count = start; count <= end; count++) {
-		string i;
+  for (int count = start; count <= end; count++) {
+    string i;
     string p;
-    
+
     cout << "Reading data " << to_string(count, 3) << endl;
     if(optical) {
-      i = dir + to_string(count, 3) + "/photo" + to_string(count, 3) + ".ppm";
+      //i = dir + (count, 3) + "/photo" + to_string(count, 3) + ".ppm";
+      i = dir + "/photo" + to_string(count, 3) + ".ppm";
     } else {
-      i = dir + to_string(count, 3) + "/image" + to_string(count, 3) + ".ppm";
+      //i = dir + to_string(count, 3) + "/image" + to_string(count, 3) + ".ppm";
+      i = dir + "/image" + to_string(count, 3) + ".ppm";
     }
-    p = dir + to_string(count, 3) + "/scan" + to_string(count + 1,3) + ".3d";
-
+    p = dir + "cali/scan" + to_string(count,3) + ".3d";
+    cout << p << endl;
     // Load points from scan
-    readPoints(p, corners, corner_exp);
-		
+    bool scan_cali = readPoints(p, corners, corner_exp);
+    cout << "Scan calibration was done !";	
+    if(scan_cali) cout << "true" << endl;
+    else cout << "false" << endl;
+    if(!scan_cali) continue;
     // Load image and detect corners
     IplImage* image1 = cvLoadImage(i.c_str(), -1);
-		if (!image1) {
-			cout << "image cannot be loaded" << endl;
-			return;
-		}
+    if (!image1) {
+      cout << "image cannot be loaded" << endl;
+      return;
+    }
     cvShowImage("Original Image", image1);
-    
+
     double point_array2[corner_exp][2];
     IplImage *image;
-    
+
+    int tmp_corners = corner_exp;
     if(chess) {
       cout << "detect corners" << endl;
       image = detectCorners(image1, corner_exp, board_h, board_w, quiet, point_array2, scale);
     } else {
       cout << "detect blob" << endl;
-      image = detectBlobs(image1, corner_exp, board_h, board_w, quiet, point_array2);
+      image = detectBlobs(image1, tmp_corners, board_h, board_w, quiet, point_array2);
     }
     cout << "corners detected" <<  endl;
-		
+    if(!image) cout << "there is something wrong with feature detection" << endl;
     //drawing the lines on the image now
-		drawLines(point_array2, corner_exp, image);
+    drawLines(point_array2, corner_exp, image);
     CvMat* image_points = cvCreateMat(corner_exp, 2, CV_32FC1);
-		CvMat* object_points = cvCreateMat(corner_exp, 3, CV_32FC1);
-		CvMat* point_counts = cvCreateMat(1, 1, CV_32SC1);
-		CvMat* Rotation = cvCreateMat(1, 3, CV_32FC1);
-		CvMat* Translation = cvCreateMat(1, 3, CV_32FC1);
+    CvMat* object_points = cvCreateMat(corner_exp, 3, CV_32FC1);
+    CvMat* Rotation = cvCreateMat(1, 3, CV_32FC1);
+    CvMat* Translation = cvCreateMat(1, 3, CV_32FC1);
 
-		cout << "\nDo you want to use the data from this image ('y' or 'n'). 'x' aborts the calibration? : ";
-		int c = cvWaitKey(100);
-		if (c == 27) {
-			break;
-		}
-		char in;
-		cin >> in;
-    if (in == 'y') {
-      size = cvGetSize(image);
-      //appending corner data to a generic data structure for all images
-      for (int j = 0; j < corner_exp; ++j) {
-        //doExtrinsicCalibration();
-        CV_MAT_ELEM(*image_points, float,j,0) = (float) point_array2[j][0];
-        CV_MAT_ELEM(*image_points, float,j,1) = (float) point_array2[j][1];
-        CV_MAT_ELEM(*object_points,float,j,0) = corners[j].x;
-        CV_MAT_ELEM(*object_points,float,j,1) = corners[j].y;
-        CV_MAT_ELEM(*object_points,float,j,2) = corners[j].z;
-      }
-      CV_MAT_ELEM(*point_counts, int,0,0) = corner_exp;
-      
-      cvFindExtrinsicCameraParams2(object_points, image_points, intrinsic, distortion, Rotation, Translation);
-     
-      // append data to vectors
-      if(!quiet) cout << "Rotation is:" << endl;
-      for (int row = 0; row < 1; row++) {
-        for (int col = 0; col < 3; col++) {
-          if(!quiet) cout << CV_MAT_ELEM( *Rotation, float, row, col ) << "  ";
-          CV_MAT_ELEM( *rotation_vectors_temp, float, successes, col ) = CV_MAT_ELEM( *Rotation, float, row, col );
-        }
-        if(!quiet) cout << endl;
-      }
-      if(!quiet) cout << "Translation is:" << endl;
-      for (int row = 0; row < 1; row++) {
-        for (int col = 0; col < 3; col++) {
-          if(!quiet) cout << CV_MAT_ELEM( *Translation, float, row, col ) << "  ";
-          CV_MAT_ELEM( *translation_vectors_temp, float, successes, col ) = CV_MAT_ELEM( *Translation, float, row, col );
-        }
-        if(!quiet) cout << endl;
-      }
-      successes++;
-      
-    } else if(in == 'x') {
+    cout << "\nDo you want to use the data from this image ('y' or 'n'). 'x' aborts the calibration? : ";
+    int c = cvWaitKey(100);
+    if (c == 27) {
       break;
     }
+    char in;
+    cin >> in;
+    if(tmp_corners == corner_exp) {
+      if (in == 'y') {
+        size = cvGetSize(image);
+        //appending corner data to a generic data structure for all images
+        for (int j = 0; j < corner_exp; ++j) {
+          //doExtrinsicCalibration();
+          CV_MAT_ELEM(*image_points, float,j,0) = (float) point_array2[j][0];
+          CV_MAT_ELEM(*image_points, float,j,1) = (float) point_array2[j][1];
+          CV_MAT_ELEM(*object_points,float,j,0) = corners[j].x;
+          CV_MAT_ELEM(*object_points,float,j,1) = corners[j].y;
+          CV_MAT_ELEM(*object_points,float,j,2) = corners[j].z;
+
+          //CV_MAT_ELEM(*points2D, float*, j, successes)[0] = (float)point_array2[j][0];
+          CV_MAT_ELEM(*points2D, CvPoint2D32f, successes, j).x = (float)point_array2[j][0];
+          CV_MAT_ELEM(*points2D, CvPoint2D32f, successes, j).y = (float)point_array2[j][1];
+          CV_MAT_ELEM(*points3D, CvPoint3D32f, successes, j).x = corners[j].x; 
+          CV_MAT_ELEM(*points3D, CvPoint3D32f, successes, j).y = corners[j].y;
+          CV_MAT_ELEM(*points3D, CvPoint3D32f, successes, j).z = corners[j].z; 
+        }
+        /*
+        for(int j = 0; j < corner_exp; j++) {
+          for(int k = 0; k < 2; k++) {
+            cout << CV_MAT_ELEM(*image_points, float,j,k) << " ";
+          }
+          for(int k = 0; k < 3; k++) {
+            cout << CV_MAT_ELEM(*object_points, float,j,k) << " ";
+          }
+          cout << endl;
+          cout << CV_MAT_ELEM(*points2D, CvPoint2D32f, successes, j).x
+          << " " << CV_MAT_ELEM(*points2D, CvPoint2D32f, successes, j).y
+          << " " << CV_MAT_ELEM(*points3D, CvPoint3D32f, successes, j).x
+          << " " << CV_MAT_ELEM(*points3D, CvPoint3D32f, successes, j).y
+          << " " << CV_MAT_ELEM(*points3D, CvPoint3D32f, successes, j).z <<
+          endl;
+        }
+        */
+        cvFindExtrinsicCameraParams2(object_points, image_points, intrinsic, distortion, Rotation, Translation);
+        // append data to vectors
+        if(!quiet) cout << "Rotation is:" << endl;
+        for (int row = 0; row < 1; row++) {
+          for (int col = 0; col < 3; col++) {
+            if(!quiet) cout << CV_MAT_ELEM( *Rotation, float, row, col ) << "  ";
+            CV_MAT_ELEM( *rotation_vectors_temp, float, successes, col ) = CV_MAT_ELEM( *Rotation, float, row, col );
+          }
+          if(!quiet) cout << endl;
+        }
+        if(!quiet) cout << "Translation is:" << endl;
+        for (int row = 0; row < 1; row++) {
+          for (int col = 0; col < 3; col++) {
+            if(!quiet) cout << CV_MAT_ELEM( *Translation, float, row, col ) << "  ";
+            CV_MAT_ELEM( *translation_vectors_temp, float, successes, col ) = CV_MAT_ELEM( *Translation, float, row, col );
+          }
+          if(!quiet) cout << endl;
+        }
+        successes++;
+
+      } else if(in == 'x') {
+        break;
+      }
+    } 
     cvReleaseImage(&image);
     cvReleaseImage(&image1);
 		cvReleaseMat(&image_points);
 		cvReleaseMat(&object_points);
-		cvReleaseMat(&point_counts);
-		cvReleaseMat(&Rotation);
+    cvReleaseMat(&Rotation);
 		cvReleaseMat(&Translation);
-
 	}//for loop for imagecount
-	cvReleaseImage(&mapx);
-	cvReleaseImage(&mapy);
+  cvDestroyWindow("Original Image");
+  cvDestroyWindow("Final Result");
+
+  cout << "Number of successes: " << successes << endl;
+  // Now calculating mean and median rotation and trans
+  //calculateExtrinsics(rotation_vectors_temp, translation_vectors_temp, successes, dir, quiet, substring);
+	calculateExtrinsicsWithReprojectionCheck(points2D, points3D,
+  rotation_vectors_temp, translation_vectors_temp, distortion, intrinsic,
+  corner_exp, successes, dir, quiet, substring);
   cvReleaseMat(&intrinsic);
   cvReleaseMat(&distortion);
-	
-  // Now calculating mean and median rotation and trans
-  calculateExtrinsics(rotation_vectors_temp, translation_vectors_temp, successes, dir, quiet, substring);
-	cvReleaseMat(&translation_vectors_temp);
+  cvReleaseMat(&translation_vectors_temp);
 	cvReleaseMat(&rotation_vectors_temp);
+  cvReleaseMat(&points2D);
+  cvReleaseMat(&points3D);
+  cout << "DONE" << endl;
 }
 
 void ProjectAndMap(int start, int end, bool optical, bool quiet, string dir,
@@ -819,9 +1142,13 @@ bool correction, int neighborhood) {
   CvMat *intrinsic = (CvMat*) cvLoad(file.c_str());
   file = dir + "Distortion" + substring + ".xml";
   CvMat *distortion = (CvMat*) cvLoad(file.c_str());
-  file = dir + "RotationMedian" + substring + ".xml";
+  //file = dir + "RotationMedian" + substring + ".xml";
+  file = dir + "Rotation" + substring + ".xml";
+  //file = dir + "RotationMean" + substring + ".xml";
   CvMat *Rotation = (CvMat*) cvLoad(file.c_str());
-  file = dir + "TranslationMedian" + substring + ".xml";
+  file = dir + "Translation" + substring + ".xml";
+  //file = dir + "TranslationMedian" + substring + ".xml";
+  //file = dir + "TranslationMean" + substring + ".xml";
   CvMat *Translation = (CvMat*) cvLoad(file.c_str());
   CvMat* undistort = cvCreateMat(5,1,CV_32FC1);
 	for (int hh = 0; hh < 5; hh++) {
@@ -854,6 +1181,7 @@ bool correction, int neighborhood) {
     CvMat* point_3Dcloud; 
     CvMat* point_2Dcloud; 
     CvMat* undistort_2Dcloud; 
+    
     CvMat* point_3Dcloud_2;
     CvMat* point_2Dcloud_2;
     CvMat* undistort_2Dcloud_2; 
@@ -881,14 +1209,17 @@ bool correction, int neighborhood) {
     }
     CvSize size = cvGetSize(image); 
 
-    IplImage* image0 = cvLoadImage(t0.c_str(), -1);
+    IplImage* image0;
+    if(fabs(rot_angle) > 1) {
+      image0 = cvLoadImage(t0.c_str(), -1);
 
-    if (!image0) {
-      cout << "second image " << t0 << " cannot be loaded" << endl;
-      return;
+      if (!image0) {
+        cout << "second image " << t0 << " cannot be loaded" << endl;
+        return;
+      }
+      image0 = resizeImage(image0, scale);
     }
 
-    image0 = resizeImage(image0, scale);
     image = resizeImage(image, scale);
     // reading the 3D points and projecting them back to 2d
     Scan::readScans(type, count, count, dir, maxDist, minDist, 0);
@@ -933,10 +1264,10 @@ bool correction, int neighborhood) {
     fstream outfile;
     outfile.open(outname.c_str(), ios::out);
 
-    //for couting how many points get mapped to first and second image file
+    //for counting how many points get mapped to first and second image file
     int point_map1 = 0;  // #points mapped to first image
     int point_map2 = 0;  //    "      "    "  second image
-    
+   
     for (int k = 0; k < Scan::allScans[0]->get_points_red_size(); k++) {
       float px = CV_MAT_ELEM(*undistort_2Dcloud,float,k,0);
       float py = CV_MAT_ELEM(*undistort_2Dcloud,float,k,1);
@@ -971,8 +1302,7 @@ bool correction, int neighborhood) {
             temp_vec.push_back(c.val[0]);
             temp_vec.push_back(p_id);
             if(neighborhood > 1) {
-              int neighbors = 3;
-              int limit = neighbors / 2;
+              int limit = neighborhood / 2;
 
               int lower_y = ppy - limit > 0 ? ppy - limit : 0;
               int upper_y = ppy + limit < size.height ? ppy + limit : size.height - 1;
@@ -1002,8 +1332,8 @@ bool correction, int neighborhood) {
             outfile << c.val[2] <<" "<< c.val[1]<<" "<<c.val[0]<<endl;
 
           }
-        }
-      } else if(fabs(rot_angle > 1)){
+        } 
+      } else if(fabs(rot_angle) > 1) {
         px = CV_MAT_ELEM(*undistort_2Dcloud_2,float,k,0);
         py = CV_MAT_ELEM(*undistort_2Dcloud_2,float,k,1);
         if (px < image0->width - .5 && px >= 0 && py >= 0 && py < image0->height - .5) {
@@ -1027,17 +1357,12 @@ bool correction, int neighborhood) {
             CvScalar c;
 
             c = cvGet2D(image0, ppy, ppx);
-            CvMat* temp_vec_in2 = cvCreateMat(3, 1, CV_32FC1);
-            CvMat* temp_vec_out2 = cvCreateMat(3, 1, CV_32FC1);
-            CV_MAT_ELEM(*temp_vec_in2, float,0,0) = -(CV_MAT_ELEM(*point_3Dcloud_2,float,k,1));
-            CV_MAT_ELEM(*temp_vec_in2, float,1,0) = CV_MAT_ELEM(*point_3Dcloud_2,float,k,2);
-            CV_MAT_ELEM(*temp_vec_in2, float,2,0) = CV_MAT_ELEM(*point_3Dcloud_2,float,k,0);
             if(correction) {
               vector<float> temp_vec;
               float p2_id = 1;
-              temp_vec.push_back((CV_MAT_ELEM(*temp_vec_out2,float,0,0)));
-              temp_vec.push_back((CV_MAT_ELEM(*temp_vec_out2,float,1,0)));
-              temp_vec.push_back((CV_MAT_ELEM(*temp_vec_out2,float,2,0)));
+              temp_vec.push_back(-(CV_MAT_ELEM(*point_3Dcloud,float,k,1)));
+              temp_vec.push_back((CV_MAT_ELEM(*point_3Dcloud,float,k,2)));
+              temp_vec.push_back((CV_MAT_ELEM(*point_3Dcloud,float,k,0)));
               temp_vec.push_back(c.val[2]);
               temp_vec.push_back(c.val[1]);
               temp_vec.push_back(c.val[0]);
@@ -1066,12 +1391,10 @@ bool correction, int neighborhood) {
                 data2[ppy][ppx].push_back(temp_vec);
               }
               temp_vec.clear();
-              cvReleaseMat(&temp_vec_in2);
-              cvReleaseMat(&temp_vec_out2);
             } else {
-              outfile << -(CV_MAT_ELEM(*point_3Dcloud_2,float,k,1))<<" ";
-              outfile << CV_MAT_ELEM(*point_3Dcloud_2,float,k,2)<<" ";
-              outfile << CV_MAT_ELEM(*point_3Dcloud_2,float,k,0)<<" ";
+              outfile << -(CV_MAT_ELEM(*point_3Dcloud,float,k,1))<<" ";
+              outfile << CV_MAT_ELEM(*point_3Dcloud,float,k,2)<<" ";
+              outfile << CV_MAT_ELEM(*point_3Dcloud,float,k,0)<<" ";
               outfile << c.val[2] <<" "<< c.val[1]<<" "<<c.val[0]<<endl;
             }
           }
@@ -1079,9 +1402,13 @@ bool correction, int neighborhood) {
       }
 
     }
-    CorrectErrorAndWrite(data1, outfile, size);
-    if(fabs(rot_angle) > 1) {
-      CorrectErrorAndWrite(data2, outfile, size);
+    if(correction) {
+      CorrectErrorAndWrite(data1, outfile, size);
+      if(fabs(rot_angle) > 1) {
+        if(size.width > 0 && size.height > 0) {
+          CorrectErrorAndWrite(data2, outfile, size);
+        }
+      }
     }
 
     outfile.flush();
@@ -1096,17 +1423,19 @@ bool correction, int neighborhood) {
     cout<<"runtime for scan " << count << " in seconds is: " << time << endl;
 
     cvReleaseImage(&image);
-    cvReleaseImage(&image0);
     cvReleaseMat(&point_2Dcloud);
     cvReleaseMat(&point_3Dcloud);
+    cvReleaseMat(&undistort_2Dcloud);
     if(fabs(rot_angle) > 1) {
+      cvReleaseImage(&image0);
       cvReleaseMat(&point_2Dcloud_2);
       cvReleaseMat(&point_3Dcloud_2);
+      cvReleaseMat(&undistort_2Dcloud_2);
     }
-    for (int f = 0; f < size.height; f++) {
-      for (int g = 0; g < size.width; g++) {
-        data1[f][g].clear();
-        data2[f][g].clear();
+    for (int i = 0; i < size.height; i++) {
+      for (int j = 0; j < size.width; j++) {
+        data1[i][j].clear();
+        data2[i][j].clear();
       }
     }
 
@@ -1116,6 +1445,7 @@ bool correction, int neighborhood) {
   cvReleaseMat(&distortion);
   cvReleaseMat(&Rotation);
   cvReleaseMat(&Translation);
+  cvReleaseMat(&undistort);
 
 }
 
@@ -1153,7 +1483,7 @@ bool clusterSearch(float ** points, int size, double thresh1, double thres2, fst
     tmp[0] = position;
     tmp[1] = j - 1;
     tmp[2] = sum / (j - position);
-    tmp[3] = (j - position) / (clusters.size() + 1);
+    tmp[3] = (double)(j - position) / (clusters.size() + 1.0);
     if(tmp[3] > max_cluster) {
       max_position = clusters.size();
       max_cluster = tmp[3];
@@ -1169,25 +1499,33 @@ bool clusterSearch(float ** points, int size, double thresh1, double thres2, fst
    */
 
   //if(clusters[max_position][3] > thres2) {
-    /*
+   
+   /*
     for (int p = 0; p < clusters[max_position][0]; p++)//points before the cluster
     {
-      points[p][3] = 0;
+      points[p][3] = 255;
       points[p][4] = 0;
-      points[p][5] = 255;
-    }
-    */
-    for(int p = clusters[max_position][0]; p < clusters[max_position][1]; p++) {    
-      if(points[p][6] == 1) {
+      points[p][5] = 0;
 			  outfile << points[p][0] << " " << points[p][1] << " " << points[p][2] << " ";
+				outfile << points[p][3] << " " << points[p][4] << " " << points[p][5] << endl;
+    }*/
+    
+    for(int p = clusters[max_position][0]; p <= clusters[max_position][1]; p++) {    
+      if(points[p][6] == 1) {
+        outfile << points[p][0] << " " << points[p][1] << " " << points[p][2] << " ";
 				outfile << points[p][3] << " " << points[p][4] << " " << points[p][5] << endl;
       }
     }
-    /*
+    
+  /* 
     for(int p = clusters[max_position][1] + 1; p < size; p++) {
+      if(points[p][6] == 1) {
       points[p][3] = 0;
       points[p][4] = 255;
-      points[p][5] = 255;
+      points[p][5] = 0;
+			  outfile << points[p][0] << " " << points[p][1] << " " << points[p][2] << " ";
+				outfile << points[p][3] << " " << points[p][4] << " " << points[p][5] << endl;
+      }
     }
     */
   //} 
@@ -1208,32 +1546,27 @@ void CorrectErrorAndWrite(Float2D &data, fstream &outfile, CvSize size) {
   // getting points mapping to one pixel
   for (int i = 0; i < size.height; i++) {
     for (int j = 0; j < size.width; j++) {
-      int size = data[i][j].size();
-      if (size > 0) {
+      int tmp_size = data[i][j].size();
+      if (tmp_size > 0) {
+      /*
         max_cluster = size > max_cluster ? size : max_cluster;
         min_cluster = size < min_cluster ? size : min_cluster;
-
-        float ** points = new float*[size];
-        for (int k = 0; k < size; k++) {
+      */
+        float ** points = new float*[tmp_size];
+        for (int k = 0; k < tmp_size; k++) {
           points[k] = new float[7];
           for(int l = 0; l < 7; l++) {
             points[k][l] = data[i][j][k][l];
           }
         }
+        
         //////////sorting the points now in ascending order wrt distance
-        sortDistances(points, size); 
+        sortDistances(points, tmp_size); 
+        
         ///////////////once we have the sorted points looking for clusters
-        clusterSearch(points, size, thresh1, thresh2, outfile);
-        //////////////write the points to the file
-        /*
-        for(int k = 0; k < size; k++) {
-          if(points[k][6] == 1) {
-						outfile << points[k][0] << " " << points[k][1] << " " << points[k][2] << " ";
-						outfile << points[k][3] << " " << points[k][4] << " " << points[k][5] << endl;
-          }
-        }
-        */
-        for (int k = 0; k < size; k++) {
+        clusterSearch(points, tmp_size, thresh1, thresh2, outfile);
+        
+        for (int k = 0; k < tmp_size; k++) {
           delete[] points[k];
         }
         delete[] points;
@@ -1440,7 +1773,8 @@ int main(int argc, char** argv) {
   bool mapping = false;
   bool quiet = false;
   int scale = 1;
-  double rot_angle = 40;
+  //double rot_angle = 40;
+  double rot_angle = 0;
   bool correction = false;
   int neighborhood = 1;
 
