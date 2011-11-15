@@ -52,6 +52,12 @@ void usage(char* prog) {
 	  << bold << "USAGE " << normal << endl
 	  << "   " << prog << " [options] directory" << endl << endl;
   cout << bold << "OPTIONS" << normal << endl
+	  << bold << "  -b" << normal << " NR, " << bold << "--bottom=" << normal << "NR" << endl
+	  << "         trim the scan with lower boundary NR" << endl
+	  << endl
+	  << bold << "  -e" << normal << " NR, " << bold << "--end=" << normal << "NR" << endl
+	  << "         end after scan NR" << endl
+	  << endl
 
 	  << bold << "  -f" << normal << " F, " << bold << "--format=" << normal << "F" << endl
 	  << "         using shared library F for input" << endl
@@ -67,11 +73,8 @@ void usage(char* prog) {
 	  << "         use pattern NR for plane detection" << endl
 	  << "         0: lightbulb pattern" << endl
 	  << "         1: chess pattern on cardboard" << endl
-	  << "         0: chess pattern on wooden board" << endl
+	  << "         2: chess pattern on wooden board" << endl
 	  << endl
-	  << bold << "  -c" << normal << " P, " << bold << "--output=" << normal << "P" << endl
-	  << "         write the output data to file P" << endl
-    << endl
     << bold << "  -r" << normal << " NR, " << bold << "--reduce=" << normal << "NR" << endl
 	  << "         turns on octree based point reduction (voxel size=<NR>)" << endl
 	  << endl
@@ -83,6 +86,9 @@ void usage(char* prog) {
 	  << "         start at scan NR (i.e., neglects the first NR scans)" << endl
 	  << "         [ATTENTION: counting naturally starts with 0]" << endl
 	  << endl
+	  << bold << "  -t" << normal << " NR, " << bold << "--top=" << normal << "NR" << endl
+	  << "         trim the scan with upper boundary NR" << endl
+	  << endl
     	  << endl << endl;
   
   cout << bold << "EXAMPLES " << normal << endl
@@ -93,14 +99,16 @@ void usage(char* prog) {
 
 }
 
-vector<double *> * matchPlaneToBoard(vector<double *> &points, double *alignxf, int pattern, string output) {
+bool matchPlaneToBoard(vector<double *> &points, double *alignxf, int pattern, string output) {
   double rPos[3] = {0.0,0.0,0.0};
   double rPosTheta[3] = {0.0,0.0,0.0};
 
   vector<double *> boardpoints;
   double halfwidth; 
   double halfheight; 
-  
+  double w_step = 0.5;
+  double h_step = 0.5;
+
   switch(pattern) {
     case 0: 
       halfheight = 28.5;
@@ -109,16 +117,17 @@ vector<double *> * matchPlaneToBoard(vector<double *> &points, double *alignxf, 
     case 1:
       halfwidth = 18.3;
       halfheight = 18.5;
+      w_step = 0.6;
       break;
     case 2:
+    case 3:
       halfwidth = 19.0;
       halfheight = 38.0;
       break;
   }
-  double step = 0.5;
 
-  for(double i = -halfwidth; i <= halfwidth; i+=step) {
-    for(double j = -halfheight; j <= halfheight; j+=step) {
+  for(double i = -halfwidth; i <= halfwidth; i+=w_step) {
+    for(double j = -halfheight; j <= halfheight; j+=h_step) {
       double * p = new double[3];
       p[0] = i;
       p[1] = j;
@@ -127,7 +136,9 @@ vector<double *> * matchPlaneToBoard(vector<double *> &points, double *alignxf, 
       boardpoints.push_back(p);
     }
   }
-  
+ 
+  int nr_points = boardpoints.size();
+  int nr_points2 = points.size();
   Scan * plane = new Scan(rPos, rPosTheta, points);
   Scan * board = new Scan(rPos, rPosTheta, boardpoints);
   board->transform(alignxf, Scan::INVALID, 0);
@@ -138,14 +149,29 @@ vector<double *> * matchPlaneToBoard(vector<double *> &points, double *alignxf, 
 
   icp6D *my_icp = 0;
   double mdm = 50;
-  int mni = 1500;
+  int mni = 50;
   my_icp = new icp6D(my_icp6Dminimizer, mdm, mni, quiet, false, -1, false, 1, 0.00, false, false);
 
   plane->createTree(false,false);
   board->createTree(false,false);
 
   my_icp->match(plane, board);
+  
+  delete my_icp;
+  mdm = 2;
+  mni = 300;
+  my_icp = new icp6D(my_icp6Dminimizer, mdm, mni, quiet, false, -1, false, 1, 0.00, false, false);
+  my_icp->match(plane, board);
+  
 
+  double sum; 
+  double centroid_s[3] = {0.0, 0.0, 0.0};
+  double centroid_t[3] = {0.0, 0.0, 0.0};
+  vector<PtPair> pairs_out;
+  Scan::getPtPairs(&pairs_out, plane, board, 1, 0, 2.0, sum, centroid_s, centroid_t);  
+  int nr_matches = pairs_out.size();
+  
+  cout << "Result " << nr_matches << " " << nr_points << " " << nr_points2 << endl;
   const double * pos = board->get_rPos();
   const double * postheta = board->get_rPosTheta();
   const double * transMat = board->get_transMat();
@@ -167,10 +193,19 @@ vector<double *> * matchPlaneToBoard(vector<double *> &points, double *alignxf, 
   cout << "Calipoints Start" << endl;
   
   ofstream caliout(output.c_str());
+  
+  if(nr_matches < nr_points) {
+    caliout << "failed" << endl;
+  } else {
+    caliout << "Calibration" << endl; 
+  }
+  
   switch(pattern) {
+  // lightbulb
   case 0:
-    for(double x = -20; x < 25; x+=10.0) {
-      for(double y = -25; y < 30; y+=10.0) {
+    for(double y = -25; y < 30; y+=10.0) {
+      //for(double x = -20; x < 25; x+=10.0) {
+      for(double x = 20; x > -25; x-=10.0) {
         double * p = new double[3];
         p[0] = x;
         p[1] = y;
@@ -181,7 +216,8 @@ vector<double *> * matchPlaneToBoard(vector<double *> &points, double *alignxf, 
       }
     }
     break;
-  case 1:
+  // chessboard on wooden board pattern top
+  case 2:
     for(double x = -7.8; x < 10; x+=5.2) {
       for(double y = 4.1; y < 33.0; y+=5.2) {
         double * p = new double[3];
@@ -194,7 +230,23 @@ vector<double *> * matchPlaneToBoard(vector<double *> &points, double *alignxf, 
       }
     }
     break;
-  case 2:
+  case 3:
+    for(double y = -4.1; y > -33.0; y-=5.2) {
+    //for(double y = -30.1; y < -0.0; y+=5.2) {
+   //   for(double x = 7.8; x > -10; x-=5.2) {
+    for(double x = -8.1; x < 10; x+=5.2) {
+        double * p = new double[3];
+        p[0] = x;
+        p[1] = y;
+        p[2] = 0.0;
+        transform3(transMat, p);
+        result->push_back(p);
+        caliout << p[0] << " " << p[1] << " " << p[2] << endl;
+      }
+    }
+    break;
+  // chessboard on cardboard
+  case 1:
     for(double x = -12; x < 16; x+=4.0) {
       for(double y = -12; y < 16; y+=4.0) {
         double * p = new double[3];
@@ -212,11 +264,11 @@ vector<double *> * matchPlaneToBoard(vector<double *> &points, double *alignxf, 
   caliout.clear();
 
   cout << "Calipoints End" << endl;
-  return result;
+  return !(nr_matches < nr_points);
 }
 
-int parseArgs(int argc, char **argv, string &dir, double &red, int &start, int pattern, 
-string &output, int &maxDist, int&minDist, int &octree, reader_type &type, bool &quiet) {
+int parseArgs(int argc, char **argv, string &dir, double &red, int &start, int &end, int &pattern, int &maxDist, int &minDist, double &top, double &bottom, int &octree, reader_type &type, bool
+&quiet) {
 
   bool reduced = false;
   int  c;
@@ -235,21 +287,28 @@ string &output, int &maxDist, int&minDist, int &octree, reader_type &type, bool 
     { "pattern",         required_argument,   0,  'p' },
     { "quiet",           no_argument,         0,  'q' },
     { "octree",          optional_argument,   0,  'O' },
-    { "output",          required_argument,   0,  'c' },
+    { "end",             required_argument,   0,  'e' },
+    { "top",             required_argument,   0,  't' },
+    { "bottom",          required_argument,   0,  'b' },
     { 0,           0,   0,   0}                    // needed, cf. getopt.h
   };
 
   cout << endl;
-  while ((c = getopt_long(argc, argv, "f:r:s:e:m:M:O:qp:c:", longopts, NULL)) != -1) 
+  while ((c = getopt_long(argc, argv, "f:r:s:e:m:M:O:qp:e:t:b:", longopts, NULL)) != -1) 
   switch (c)
 	 {
 	 case 'r':
-	   red = atof(optarg);
+     red = atof(optarg);
      reduced = true;
 	   break;
 	 case 's':
 	   start = atoi(optarg);
 	   if (start < 0) { cerr << "Error: Cannot start at a negative scan number.\n"; exit(1); }
+	   break;
+	 case 'e':
+	   end = atoi(optarg);
+	   if (end < 0) { cerr << "Error: Cannot end at a negative scan number.\n"; exit(1); }
+	   if (end < start) { cerr << "Error: <end> cannot be smaller than <start>.\n"; exit(1); }
 	   break;
 	 case 'f': 
      if (!Scan::toType(optarg, type))
@@ -257,11 +316,8 @@ string &output, int &maxDist, int&minDist, int &octree, reader_type &type, bool 
      break;
    case 'p': 
       pattern = atoi(optarg);
-      if(pattern < 0 || pattern > 2) { cerr << "Error: choose pattern between 0 and 2!\n"; exit(1); }
+      if(pattern < 0 || pattern > 3) { cerr << "Error: choose pattern between 0 and 3!\n"; exit(1); }
       break;
-   case 'c':
-     output = optarg;
-     break;
 	 case 'q':
      quiet = true;
      break;
@@ -275,15 +331,22 @@ string &output, int &maxDist, int&minDist, int &octree, reader_type &type, bool 
        octree = 1;
      }
 	   break;
+	 case 't':
+     top = atof(optarg);
+	   break;
+	 case 'b':
+	   bottom = atof(optarg);
+     break;
 	 case 'M':
 	   minDist = atoi(optarg);
 	   break;
    case '?':
 	   usage(argv[0]);
 	   return 1;
-      default:
-	   abort ();
-      }
+   default:
+	    abort ();
+      break;
+   }
 
   if (optind != argc-1) {
     cerr << "\n*** Directory missing ***" << endl;
@@ -309,7 +372,7 @@ int main(int argc, char **argv)
 {
 
   cout << "(c) Jacobs University Bremen, gGmbH, 2010" << endl << endl;
-  
+
   if (argc <= 1) {
     usage(argv[0]);
   }
@@ -318,74 +381,98 @@ int main(int argc, char **argv)
   string dir;
   double red   = -1.0;
   int    start = 0;
+  int    end = -1;
   int    maxDist    = -1;
   int    minDist    = -1;
   int    octree     = 0;
   bool   quiet = false;
   int    pattern = 0;
-  string output = "cali.3d";
+  double bottom = -5;
+  double top = 170;
   reader_type type    = UOS;
-  
+
   cout << "Parse args" << endl;
-  parseArgs(argc, argv, dir, red, start, pattern, output, maxDist, minDist, octree, type, quiet);
+  parseArgs(argc, argv, dir, red, start, end, pattern, maxDist, minDist, top, bottom, octree, type, quiet);
   Scan::dir = dir;
   int fileNr = start;
-  string planedir = dir + "planes"; 
+  string calidir = dir + "/cali"; 
 
 #ifdef _MSC_VER
-  int success = mkdir(planedir.c_str());
+  int success = mkdir(calidir.c_str());
 #else
-  int success = mkdir(planedir.c_str(), S_IRWXU|S_IRWXG|S_IRWXO);
+  int success = mkdir(calidir.c_str(), S_IRWXU|S_IRWXG|S_IRWXO);
 #endif
   if(success == 0) { 
     if(!quiet) {
-      cout << "Writing planes to " << planedir << endl;
+      cout << "Writing calibration results to " << calidir << endl;
     }
   } else if(errno == EEXIST) {
-    cout << "Directory " << planedir << " exists already.  CONTINUE" << endl; 
+    cout << "Directory " << calidir << " exists already.  CONTINUE" << endl; 
   } else {
-    cerr << "Creating directory " << planedir << " failed" << endl;
+    cerr << "Creating directory " << calidir << " failed" << endl;
     exit(1);
   }
-  Scan::readScans(type, fileNr, fileNr, dir, maxDist, minDist, 0);
-  // reduction filter for current scan!
-  Scan::allScans[0]->toGlobal(red, octree);
-  double id[16];
-  M4identity(id);
-  for(int i = 0; i < 10; i++) {
-    Scan::allScans[0]->transform(id, Scan::ICP, 0);  // write end pose
-  }
-  cout << "start plane detection" << endl;
-  long starttime = GetCurrentTimeInMilliSec(); 
-  vector<double *> points;
-  CollisionPlane<double> * plane;
-  plane = new LightBulbPlane<double>(5.0,120);
-  Ransac(*plane, Scan::allScans[0], &points);
-  starttime = (GetCurrentTimeInMilliSec() - starttime);
 
-  cout << "nr points " << points.size() << endl;
-  double nx,ny,nz,d;
-  plane->getPlane(nx,ny,nz,d);
-  cout << "DONE " << endl;
-
-  cout << nx << " " << ny << " " << nz << " " << d << endl;
-  double rPos[3];
-  double rPosTheta[3];
-  for(int i = 0; i < 3; i++) {
-    rPosTheta[i] = 0.0;
-  }
-  ((LightBulbPlane<double> *)plane)->getCenter(rPos[0], rPos[1], rPos[2]);
-  double alignxf[16];
-  EulerToMatrix4(rPos, rPosTheta, alignxf);
-  matchPlaneToBoard(points, alignxf, pattern, output);
-  for(int i = points.size() - 1; i > -1; i++) {
-    delete[] points[i];
-  }
+  cout << start << " " << end << endl;
+  int successes = 0;
+  int failures = 0;
   
-  delete plane;
+  long calitime = GetCurrentTimeInMilliSec(); 
+  while (fileNr <= end) {
+    Scan::readScans(type, fileNr, fileNr, dir, maxDist, minDist, 0);
 
-  cout << "Time for Plane Detection " << starttime << endl;
-  delete Scan::allScans[0];
-  Scan::allScans.clear();
+    string output = calidir + "/scan" + to_string(fileNr,3) + ".3d";
+    cout << "Top: " << top << " Bottom: " << bottom << endl;
+    Scan::allScans[0]->trim(top, bottom);
+
+    Scan::allScans[0]->toGlobal(red, octree);
+    double id[16];
+    M4identity(id);
+    for(int i = 0; i < 10; i++) {
+      Scan::allScans[0]->transform(id, Scan::ICP, 0);  // write end pose
+    }
+    cout << "start plane detection" << endl;
+    long starttime = GetCurrentTimeInMilliSec(); 
+    vector<double *> points;
+    CollisionPlane<double> * plane;
+    plane = new LightBulbPlane<double>(50,120);
+    Ransac(*plane, Scan::allScans[0], &points);
+    starttime = (GetCurrentTimeInMilliSec() - starttime);
+
+    cout << "nr points " << points.size() << endl;
+    double nx,ny,nz,d;
+    plane->getPlane(nx,ny,nz,d);
+    cout << "DONE " << endl;
+
+    cout << nx << " " << ny << " " << nz << " " << d << endl;
+    double rPos[3];
+    double rPosTheta[3];
+    for(int i = 0; i < 3; i++) {
+      rPosTheta[i] = 0.0;
+    }
+    ((LightBulbPlane<double> *)plane)->getCenter(rPos[0], rPos[1], rPos[2]);
+    double alignxf[16];
+    EulerToMatrix4(rPos, rPosTheta, alignxf);
+    if(matchPlaneToBoard(points, alignxf, pattern, output)) {
+      successes++;
+    } else {
+      failures++;
+    }
+    for(int i = points.size() - 1; i > -1; i++) {
+      delete[] points[i];
+    }
+
+    delete plane;
+
+    cout << "Time for Plane Detection " << starttime << endl;
+    delete Scan::allScans[0];
+    Scan::allScans.clear();
+    fileNr++;
+  }
+  calitime = (GetCurrentTimeInMilliSec() - calitime);
+
+  cout << "Calibration done with " << successes << " successes and " << failures
+  << " failures!" << endl;
+  cout << "Time for Calibration " << calitime << endl;
 }
 

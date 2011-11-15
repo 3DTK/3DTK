@@ -91,7 +91,8 @@ int ScanIO_uos::readScans(int start, int end, string &dir, int maxDist, int mind
     // maxDist2 = -1 indicates no limitation
     if (maxDist == -1 || sqr(p.x) + sqr(p.y) + sqr(p.z) < maxDist2)
     if (mindist == -1 || sqr(p.x) + sqr(p.y) + sqr(p.z) > minDist2)
-	 ptss.push_back(p);
+	  //if (p.y > -10 && p.y < 100)
+   ptss.push_back(p);
   }
   scan_in.close();
   scan_in.clear();

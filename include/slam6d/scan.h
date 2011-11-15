@@ -87,6 +87,7 @@ public:
   
   void toGlobal(double voxelSize, int nrpts);
   void calcReducedPoints(double voxelSize, int nrpts = 0);
+  void trim(double top, double bottom);
   
   void createTree(int nns_method, bool cuda_enabled);
   static void createTrees(int nns_method, bool cuda_enabled);

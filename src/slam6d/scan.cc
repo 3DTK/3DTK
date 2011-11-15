@@ -601,6 +601,22 @@ void Scan::transformToQuat(double rP[3], double rPQ[4], const AlgoType type, int
   transform(alignxf, type, islum);
 }
 
+/**
+ * Removes all points from the vector that are above or below a threshold
+ * @param top upper threshold
+ * @param bottom lower threshold
+ */
+void Scan::trim(double top, double bottom)
+{
+  vector <Point> ptss;
+  for(vector<Point>::iterator it = this->points.begin(); it != this->points.end(); it++) {
+  //  cout << (*it).y << endl;
+    if((*it).y > bottom && (*it).y < top) {
+      ptss.push_back(*it);
+    }
+  }
+  points = ptss;
+}
 
 /**
  * Computes an octtree of the current scan, then getting the
