@@ -742,9 +742,9 @@ void initShow(int argc, char **argv){
   /***************/
   glutInit(&argc,argv);
   
-  cout << "(c) University of Osnabrueck, 2006 - 2007" << endl << endl
-	  << "Restricted Usage" << endl
-	  << "Don't use without permission" << endl;
+  cout << "(wx)show - A highly efficient 3D point cloud viewer" << endl
+       << "(c) Jacobs University Bremen gGmbH, Germany, since 2009" << endl
+	  << "    University of Osnabrueck, Germany, 2006 - 2009" << endl << endl;
 
   if(argc <= 1){
     usage(argv[0]);
