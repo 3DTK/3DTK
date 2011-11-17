@@ -631,9 +631,14 @@ int readFrames(string dir, int start, int end, bool readInitial, reader_type &ty
   return 0;
 }
 
-void generateFrames(int start, int end) {
-  cout << "using Identity for frames " << endl;
+void generateFrames(int start, int end, bool identity) {
+  if (identity) {
+    cout << "using Identity for frames " << endl;
+  } else {
+    cout << "using pose information for frames " << endl;
+  }
   int  fileCounter = start;
+  int index = 0;
   for (;;) {
     if (fileCounter > end) break; // 'nuf read
     fileCounter++;
@@ -643,12 +648,20 @@ void generateFrames(int start, int end) {
 
     for (int i = 0; i < 3; i++) {
       double *transMat = new double[16];
-      M4identity(transMat);
-      transMat[10] = -1.0;
+      
+      if (identity) {
+        M4identity(transMat);
+        transMat[10] = -1.0;
+      } else {
+        double rPos[3], rPosTheta[3];
+        EulerToMatrix4(Scan::allScans[index]->get_rPos(), Scan::allScans[index]->get_rPosTheta(), transMat ); 
+      }
+
       Matrices.push_back(transMat);
       algoTypes.push_back(Scan::ICP);
 
     }
+    index++;
     MetaAlgoType.push_back(algoTypes);
     MetaMatrix.push_back(Matrices);
   }
@@ -808,9 +821,9 @@ void initShow(int argc, char **argv){
   }
 
   if (!loadOct) {
-    if (r) generateFrames(start, start + Scan::allScans.size() - 1); 
+    if (r) generateFrames(start, start + Scan::allScans.size() - 1, false); 
   } else {
-    if (r) generateFrames(start, start + octpts.size() - 1); 
+    if (r) generateFrames(start, start + octpts.size() - 1, true); 
   }
 
  
