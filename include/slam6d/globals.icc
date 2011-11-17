@@ -193,17 +193,6 @@ inline T Dist2(const T *x1, const F *x2)
 }
 
 /*
- * Calculates the squared norm of the input 3-vector
- *
- * @param x input 3-vector
- */
-template <class T>
-static inline T Norm3(T *x)
-{
-  return sqrt(x[0]*x[0] + x[1]*x[1] + x[2]*x[2]);
-}
-
-/*
  * Normalization of the input 3-vector
  *
  * @param x  input/output 3-vector
