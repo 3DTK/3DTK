@@ -665,8 +665,9 @@ int main(int argc, char **argv)
   signal (SIGINT,  sigSEGVhandler);
 
   cout << "slam6D - A highly efficient SLAM implementation based on scan matching" << endl
-    << "         with 6 degrees of freedom" << endl
-    << "(c) University of Osnabrueck, Germany, 2006 - 2009" << endl << endl;
+       << "         with 6 degrees of freedom" << endl
+       << "(c) Jacobs University Bremen gGmbH, Germany, since 2009" << endl
+	  << "    University of Osnabrueck, Germany, 2006 - 2009" << endl << endl;
 
   if (argc <= 1) {
     usage(argv[0]);
