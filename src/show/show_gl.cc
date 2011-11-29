@@ -108,6 +108,7 @@ void DrawPoints(GLenum mode)
 #else
       for(int iterator = (int)Scan::allScans.size()-1; iterator >= 0; iterator--) {
 #endif
+        if (MetaAlgoType[iterator][current_frame] == Scan::INVALID) continue;
         glPushMatrix();
         if (invert)                               // default: white points on black background
           glColor4d(1.0, 1.0, 1.0, 0.0);
