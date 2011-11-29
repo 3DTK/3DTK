@@ -115,7 +115,7 @@ void lum6DQuat::covarianceQuat(Scan *first, Scan *second,
   MM = 0.0;
   sx = sy = sz = xy = yz = xz = ypz = xpz = xpy = xpypz = ss = 0.0;
 
-  if (m > 0) {
+  if (m > 2) {
     // for each point pair
     for(int j = 0; j < m; j++){
       ak = uk[j].p1;
