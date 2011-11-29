@@ -86,12 +86,10 @@ double graphHOGMan::doGraphSlam6D(Graph gr, vector <Scan *> allScans, int nrIt)
       rPosTheta[0] << " " <<
       rPosTheta[1] << " " <<
       rPosTheta[2] << " " <<
-      C(1, 1) << " " << C(1, 2) << " " << C(1, 3) << " " << C(1, 4) << " " << C(1, 5) << " " << C(1, 6) << " " <<
-      C(1, 1) << " " << C(1, 2) << " " << C(1, 3) << " " << C(1, 4) << " " << C(1, 5) << " " <<
-      C(1, 1) << " " << C(1, 2) << " " << C(1, 3) << " " << C(1, 4) << " " <<
-      C(1, 1) << " " << C(1, 2) << " " << C(1, 3) << " " <<
-      C(1, 1) << " " << C(1, 2) << " " <<
-      C(1, 1) << " " << endl;
+    for(int i = 0; i < 7; i++)
+      for(int j = i; j < 7; j++)
+        outFile << C(i, j) << " ";
+    outFile << endl;
 
     if(first != last-1) {
       allScans[last]->transformToMatrix(Pl0,Scan::INVALID);
