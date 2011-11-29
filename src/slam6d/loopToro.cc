@@ -67,7 +67,7 @@ void loopToro::close_loop(const vector <Scan *> &allScans, int first, int last, 
       (rPos[2]/100) << " " <<
       rPosTheta[0] << " " <<
       rPosTheta[1] << " " <<
-      rPosTheta[2] << " " <<
+      rPosTheta[2] << " ";
     for(int i = 0; i < 7; i++)
       for(int j = i; j < 7; j++)
         outFile << C(i, j) << " ";
