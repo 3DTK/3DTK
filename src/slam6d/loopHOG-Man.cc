@@ -68,7 +68,7 @@ void loopHOGMan::close_loop(const vector <Scan *> &allScans, int first, int last
       rPosTheta[0] << " " <<
       rPosTheta[1] << " " <<
       rPosTheta[2] << " ";
-    for(int i = 0; i < 7; i++)
+    for(int i = 1; i < 7; i++)
       for(int j = i; j < 7; j++)
         outFile << C(i, j) << " ";
     outFile << endl;
