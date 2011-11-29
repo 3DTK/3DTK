@@ -85,7 +85,7 @@ double graphHOGMan::doGraphSlam6D(Graph gr, vector <Scan *> allScans, int nrIt)
       (rPos[2]/100) << " " <<
       rPosTheta[0] << " " <<
       rPosTheta[1] << " " <<
-      rPosTheta[2] << " " <<
+      rPosTheta[2] << " ";
     for(int i = 0; i < 7; i++)
       for(int j = i; j < 7; j++)
         outFile << C(i, j) << " ";
