@@ -118,9 +118,13 @@ void DrawPoints(GLenum mode)
           glColor4d(0.0, 0.0, 0.0, 0.0);
 
         	   //if (iterator == 0) glColor4d(0.5, 1.0, 0.5, 1.0);
-        	   if (iterator == 0) glColor4d(139.0/255, 69.0/255, 19.0/255, 1.0);
+        	   //if (iterator == 0) glColor4d(139.0/255, 69.0/255, 19.0/255, 1.0);
 
       //  glMultMatrixd(MetaMatrix[iterator].back());
+             if (current_frame != MetaMatrix.back().size() - 1) {
+               cm->setMode(ScanColorManager::MODE_ANIMATION);
+               cm->selectColors(MetaAlgoType[iterator][current_frame]);
+             }
         glMultMatrixd(MetaMatrix[iterator][current_frame]);
 
 #ifdef USE_GL_POINTS
