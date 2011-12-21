@@ -10,8 +10,9 @@
 
 ///////////////////////////////////////////////////////////////////////////
 
-Selection::Selection( wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, long style ) : wxFrame( parent, id, title, pos, size, style )
-{
+Selection::Selection( wxWindow* parent, wxWindowID id, const wxString& title,
+    const wxPoint& pos, const wxSize& size, long style, bool advanced_controls ) : wxFrame( parent, id,
+      title, pos, size, style ) {
 	//this->SetSizeHints( wxDefaultSize, wxDefaultSize );
 	
 	bSizer1 = new wxBoxSizer( wxVERTICAL );
@@ -413,47 +414,124 @@ Selection::Selection( wxWindow* parent, wxWindowID id, const wxString& title, co
 	sbSizer211->Add( m_panel413111, 1, wxEXPAND|wxRIGHT|wxLEFT, 5 );
 	
 	bSizer1->Add( selectionpane, 0, wxALIGN_CENTER_HORIZONTAL, 5 );
+
+  if (advanced_controls) {
+    wxCollapsiblePane *advancedpane = new wxCollapsiblePane(this, wxID_ANY, wxT("Advanced:"));
+    wxWindow *advancedwin = advancedpane->GetPane();
+    wxBoxSizer* sbSizer2111 = new wxBoxSizer( wxVERTICAL );
+    advancedwin->SetSizer(sbSizer2111); 
+
+    //  ------------------------
+    m_panel413112 = new wxPanel( advancedwin, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
+    wxBoxSizer* bSizer53112;
+    bSizer53112 = new wxBoxSizer( wxHORIZONTAL );
+
+    m_staticText413112 = new wxStaticText( m_panel413112, wxID_ANY, wxT("Frame #:"), wxDefaultPosition, wxDefaultSize, 0 );
+    m_staticText413112->Wrap( -1 );
+    bSizer53112->Add( m_staticText413112, 0, wxALL, 5 );
+
+
+    bSizer53112->Add( 0, 0, 1, wxEXPAND, 5 );
+
+    frame_spin = new wxSpinCtrl( m_panel413112, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 10, 0 );
+    bSizer53112->Add( frame_spin, 0, wxRIGHT|wxLEFT, 5 );
+
+    m_panel413112->SetSizer( bSizer53112 );
+    m_panel413112->Layout();
+    bSizer53112->Fit( m_panel413112 );
+    sbSizer2111->Add( m_panel413112, 0, wxEXPAND|wxRIGHT|wxLEFT, 5 );
+
+    //  -----------------------
+    m_panel4131111 = new wxPanel( advancedwin, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
+    wxBoxSizer* bSizer531111;
+    bSizer531111 = new wxBoxSizer( wxHORIZONTAL );
+
+    m_staticText4131111 = new wxStaticText( m_panel4131111, wxID_ANY, wxT("FPS:"), wxDefaultPosition, wxDefaultSize, 0 );
+    m_staticText4131111->Wrap( -1 );
+    bSizer531111->Add( m_staticText4131111, 0, wxALL, 5 );
+
+
+    bSizer531111->Add( 0, 0, 1, wxEXPAND, 5 );
+
+    m_spinCtrl621111 = new wxSpinCtrl( m_panel4131111, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 1, 100, 20 );
+    bSizer531111->Add( m_spinCtrl621111, 0, wxRIGHT|wxLEFT, 5 );
+
+    m_panel4131111->SetSizer( bSizer531111 );
+    m_panel4131111->Layout();
+    bSizer531111->Fit( m_panel4131111 );
+    sbSizer2111->Add( m_panel4131111, 0, wxEXPAND|wxRIGHT|wxLEFT, 5 );
+    //////////////////
+    farplane_panel = new wxPanel( advancedwin, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
+    wxBoxSizer* farplane_sizer;
+    farplane_sizer = new wxBoxSizer( wxHORIZONTAL );
+
+    farplane_text = new wxStaticText( farplane_panel, wxID_ANY, wxT("farplane:"), wxDefaultPosition, wxDefaultSize, 0 );
+    farplane_text->Wrap( -1 );
+    farplane_sizer->Add( farplane_text, 0, wxALL, 5 );
+
+
+    farplane_sizer->Add( 0, 0, 1, wxEXPAND, 5 );
+
+    farplane_spinner = new wxSpinCtrl( farplane_panel, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 1, 100000, 40000 );
+    farplane_sizer->Add( farplane_spinner, 0, wxRIGHT|wxLEFT, 5 );
+
+    farplane_panel->SetSizer( farplane_sizer );
+    farplane_panel->Layout();
+    farplane_sizer->Fit( farplane_panel );
+    sbSizer2111->Add( farplane_panel, 0, wxEXPAND |wxRIGHT|wxLEFT, 5 );
+    ////////////////////////////////
+    nearplane_panel = new wxPanel( advancedwin, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
+    wxBoxSizer* nearplane_sizer;
+    nearplane_sizer = new wxBoxSizer( wxHORIZONTAL );
+
+    nearplane_text = new wxStaticText( nearplane_panel, wxID_ANY, wxT("nearplane:"), wxDefaultPosition, wxDefaultSize, 0 );
+    nearplane_text->Wrap( -1 );
+    nearplane_sizer->Add( nearplane_text, 0, wxALL, 5 );
+
+
+    nearplane_sizer->Add( 0, 0, 1, wxEXPAND, 5 );
+
+    nearplane_spinner = new wxSpinCtrl( nearplane_panel, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 1, 100000, 10 );
+    nearplane_sizer->Add( nearplane_spinner, 0, wxRIGHT|wxLEFT, 5 );
+
+    nearplane_panel->SetSizer( nearplane_sizer );
+    nearplane_panel->Layout();
+    nearplane_sizer->Fit( nearplane_panel );
+
+    sbSizer2111->Add( nearplane_panel, 0, wxEXPAND | wxRIGHT|wxLEFT, 5 );
+    //	bSizer1->Add( sbSizer2111, 0, wxALIGN_CENTER_HORIZONTAL, 5 );
+    ///////////////////
+    cycleLOD = new wxButton( advancedwin, wxID_ANY, wxT("Cycle LOD"), wxDefaultPosition, wxDefaultSize, 0 );
+    sbSizer2111->Add( cycleLOD, 0, wxALIGN_CENTER_HORIZONTAL|wxRIGHT|wxLEFT, 5 );
+
+    //////////
+    lod_panel = new wxPanel( advancedwin, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
+    wxBoxSizer* lod_sizer;
+    lod_sizer = new wxBoxSizer( wxHORIZONTAL );
 	
-  wxCollapsiblePane *advancedpane = new wxCollapsiblePane(this, wxID_ANY, wxT("Advanced:"));
-  wxWindow *advancedwin = advancedpane->GetPane();
-	wxBoxSizer* sbSizer2111 = new wxBoxSizer( wxVERTICAL );
-  advancedwin->SetSizer(sbSizer2111); 
-	
-	m_panel413112 = new wxPanel( advancedwin, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
-	wxBoxSizer* bSizer53112;
-	bSizer53112 = new wxBoxSizer( wxHORIZONTAL );
-	
-	m_staticText413112 = new wxStaticText( m_panel413112, wxID_ANY, wxT("Frame #:"), wxDefaultPosition, wxDefaultSize, 0 );
-	m_staticText413112->Wrap( -1 );
-	bSizer53112->Add( m_staticText413112, 0, wxALL, 5 );
+    lod_text = new wxStaticText( lod_panel, wxID_ANY, wxT("lod speed:"), wxDefaultPosition, wxDefaultSize, 0 );
+    lod_text->Wrap( -1 );
+    lod_sizer->Add( lod_text, 0, wxALL, 5 );
 	
 	
-	bSizer53112->Add( 0, 0, 1, wxEXPAND, 5 );
+    lod_sizer->Add( 0, 0, 1, wxEXPAND, 5 );
 	
-	frame_spin = new wxSpinCtrl( m_panel413112, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 10, 0 );
-	bSizer53112->Add( frame_spin, 0, wxRIGHT|wxLEFT, 5 );
-	sbSizer2111->Add( m_panel413112, 0, wxEXPAND|wxRIGHT|wxLEFT, 5 );
+    //lod_spinner = new wxSpinCtrl( lod_panel, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 2, 1 );
+    lod_spinner = new wxSpinCtrlDbl( *lod_panel, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0.0, 2.0, 1.0, 0.01 );
+    lod_sizer->Add( lod_spinner, 0, wxRIGHT|wxLEFT, 5 );
 	
-	m_panel4131111 = new wxPanel( advancedwin, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
-	wxBoxSizer* bSizer531111;
-	bSizer531111 = new wxBoxSizer( wxHORIZONTAL );
-	
-	m_staticText4131111 = new wxStaticText( m_panel4131111, wxID_ANY, wxT("FPS:"), wxDefaultPosition, wxDefaultSize, 0 );
-	m_staticText4131111->Wrap( -1 );
-	bSizer531111->Add( m_staticText4131111, 0, wxALL, 5 );
-	
-	
-	bSizer531111->Add( 0, 0, 1, wxEXPAND, 5 );
-	
-	m_spinCtrl621111 = new wxSpinCtrl( m_panel4131111, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 1, 100, 20 );
-	bSizer531111->Add( m_spinCtrl621111, 0, wxRIGHT|wxLEFT, 5 );
-	
-	m_panel4131111->SetSizer( bSizer531111 );
-	m_panel4131111->Layout();
-	bSizer531111->Fit( m_panel4131111 );
-	sbSizer2111->Add( m_panel4131111, 1, wxEXPAND|wxRIGHT|wxLEFT, 5 );
-	
-	bSizer1->Add( advancedpane, 0, wxALIGN_CENTER_HORIZONTAL, 5 );
+    lod_panel->SetSizer( lod_sizer );
+    lod_panel->Layout();
+    lod_sizer->Fit( lod_panel );
+    sbSizer2111->Add( lod_panel, 0, wxEXPAND | wxRIGHT| wxLEFT, 5 );
+
+
+
+
+    bSizer1->Add( advancedpane, 0, wxALIGN_CENTER_HORIZONTAL, 5 );
+  } else {
+    frame_spin = new wxSpinCtrl( 0, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 10, 0 );
+  }
 	
 	m_button31 = new wxButton( this, wxID_ANY, wxT("Quit"), wxDefaultPosition, wxDefaultSize, 0 );
 	bSizer1->Add( m_button31, 0, wxALIGN_CENTER_HORIZONTAL|wxRIGHT|wxLEFT, 5 );
@@ -496,9 +574,14 @@ Selection::Selection( wxWindow* parent, wxWindowID id, const wxString& title, co
 	m_checkBox6->Connect( wxEVT_COMMAND_CHECKBOX_CLICKED, wxCommandEventHandler( Selection::OnSelectionSV ), NULL, this );
 	m_spinCtrl6211->Connect( wxEVT_COMMAND_SPINCTRL_UPDATED, wxSpinEventHandler( Selection::OnSelectionDepth ), NULL, this );
 	m_spinCtrl62111->Connect( wxEVT_COMMAND_SPINCTRL_UPDATED, wxSpinEventHandler( Selection::OnSelectionBrushsize ), NULL, this );
-	frame_spin->Connect( wxEVT_COMMAND_SPINCTRL_UPDATED, wxSpinEventHandler( Selection::OnFrameSpinner ), NULL, this );
-	m_spinCtrl621111->Connect( wxEVT_COMMAND_SPINCTRL_UPDATED, wxSpinEventHandler( Selection::OnFramerateSpinner ), NULL, this );
-//	this->SetSizeHints( wxDefaultSize, wxDefaultSize );
+  if (advanced_controls) {
+    frame_spin->Connect( wxEVT_COMMAND_SPINCTRL_UPDATED, wxSpinEventHandler( Selection::OnFrameSpinner ), NULL, this );
+    m_spinCtrl621111->Connect( wxEVT_COMMAND_SPINCTRL_UPDATED, wxSpinEventHandler( Selection::OnFramerateSpinner ), NULL, this );
+    farplane_spinner->Connect( wxEVT_COMMAND_SPINCTRL_UPDATED, wxSpinEventHandler( Selection::OnFarplaneSpinner ), NULL, this );
+    nearplane_spinner->Connect( wxEVT_COMMAND_SPINCTRL_UPDATED, wxSpinEventHandler( Selection::OnNearplaneSpinner ), NULL, this );
+    lod_spinner->Connect( wxEVT_COMMAND_SPINCTRL_UPDATED, wxSpinEventHandler( Selection::OnLODAdaption ), NULL, this );
+    cycleLOD->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( Selection::OnCycleLOD ), NULL, this );
+  }
 }
 
 Selection::~Selection()
@@ -540,6 +623,10 @@ Selection::~Selection()
 	m_spinCtrl62111->Disconnect( wxEVT_COMMAND_SPINCTRL_UPDATED, wxSpinEventHandler( Selection::OnSelectionBrushsize ), NULL, this );
 	frame_spin->Disconnect( wxEVT_COMMAND_SPINCTRL_UPDATED, wxSpinEventHandler( Selection::OnFrameSpinner ), NULL, this );
 	m_spinCtrl621111->Disconnect( wxEVT_COMMAND_SPINCTRL_UPDATED, wxSpinEventHandler( Selection::OnFramerateSpinner ), NULL, this );
+	farplane_spinner->Disconnect( wxEVT_COMMAND_SPINCTRL_UPDATED, wxSpinEventHandler( Selection::OnFarplaneSpinner ), NULL, this );
+	nearplane_spinner->Disconnect( wxEVT_COMMAND_SPINCTRL_UPDATED, wxSpinEventHandler( Selection::OnNearplaneSpinner ), NULL, this );
+	lod_spinner->Disconnect( wxEVT_COMMAND_SPINCTRL_UPDATED, wxSpinEventHandler( Selection::OnLODAdaption ), NULL, this );
+	cycleLOD->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( Selection::OnCycleLOD ), NULL, this );
 }
 
 Controls::Controls( wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, long style ) : wxFrame( parent, id, title, pos, size, style )

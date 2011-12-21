@@ -8,12 +8,10 @@ bool showall = false;         // true iff next DrawPoints should redraw scene wi
 bool mousemoving = false;     // true iff a mouse button has been pressed inside a window, but hs not been released
 bool delayeddisplay = false;  // true iff mouse button callbacks should redraw the scene after button release
 double ptstodisplay = 100000;  
+float ratio = 0.0001;
 double lastfps = idealfps;    // last frame rate    
 int pointmode = -1;
 
-float neardistance = 10.0;
-float fardistance = 40000.0;
-float oldfardistance = 40000.0;
 
 bool smallfont = true;
 bool label = true;
@@ -24,13 +22,22 @@ bool label = true;
 void DrawPoints(GLenum mode)
 {
   long time = GetCurrentTimeInMilliSec();
-  double min = 10000;
-  ptstodisplay *= 1.0 + 1.0*(lastfps - idealfps)/idealfps;
-   if (ptstodisplay > maximum_target_points) ptstodisplay = maximum_target_points;
+  double min = 0.000000001;
+  double max = 1.0;
+  ratio *= 1.0 + adaption_rate*(lastfps - idealfps)/idealfps;
+  if (ratio > max) ratio = max;
+  else if (ratio < min) ratio = min;
+
+
+/*
+  min = 1;
+  double max = 100.0;
+  if (lastfps > idealfps) ptstodisplay--;
+  if (lastfps < idealfps) ptstodisplay+=2;
+  if (ptstodisplay > max) ptstodisplay = max;
   else if (ptstodisplay < min) ptstodisplay = min;
-
 //  cout << ptstodisplay << " " << lastfps << endl;
-
+*/
   // In case of animation
   if(frameNr != 0) {
     cm->setMode(ScanColorManager::MODE_ANIMATION);
@@ -51,9 +58,9 @@ void DrawPoints(GLenum mode)
         ExtractFrustum(pointsize);
         cm->selectColors(MetaAlgoType[iterator][frameNr]);
         if (pointmode == 1 || (showall && pointmode == 0) ) {
-          octpts[iterator]->displayOctTreeAllCulled();
+          octpts[iterator]->display();
         } else {
-          octpts[iterator]->displayOctTreeCulled(ptstodisplay);
+          octpts[iterator]->displayLOD(ratio);
         }
 #else
       for (unsigned int jterator = 0; jterator < vvertexArrayList[iterator].size(); jterator++) {
@@ -121,10 +128,10 @@ void DrawPoints(GLenum mode)
         	   //if (iterator == 0) glColor4d(139.0/255, 69.0/255, 19.0/255, 1.0);
 
       //  glMultMatrixd(MetaMatrix[iterator].back());
-             if (current_frame != MetaMatrix.back().size() - 1) {
-               cm->setMode(ScanColorManager::MODE_ANIMATION);
-               cm->selectColors(MetaAlgoType[iterator][current_frame]);
-             }
+        if (current_frame != (int)MetaMatrix.back().size() - 1) {
+          cm->setMode(ScanColorManager::MODE_ANIMATION);
+          cm->selectColors(MetaAlgoType[iterator][current_frame]);
+        }
         glMultMatrixd(MetaMatrix[iterator][current_frame]);
 
 #ifdef USE_GL_POINTS
@@ -137,11 +144,10 @@ void DrawPoints(GLenum mode)
       */
         ExtractFrustum(pointsize);
         if (pointmode == 1 || (showall && pointmode == 0) ) {
-          octpts[iterator]->displayOctTreeAllCulled();
+          octpts[iterator]->display();
           //octpts[iterator]->displayOctTree(pointsize * pointsize * 5);
         } else {
-          octpts[iterator]->displayOctTreeCulled(ptstodisplay);
-          //octpts[iterator]->displayOctTree(pointsize*pointsize*pointsize*10);
+          octpts[iterator]->displayLOD(ratio);
         }
         if (!selected_points[iterator].empty()) {
           glColor4f(1.0, 0.0, 0.0, 1.0);
@@ -454,11 +460,12 @@ void DisplayItFunc(GLenum mode)
     }
   } else {
     glDisable(GL_FOG);
-    fardistance = 40000.0;
+    fardistance = 100000.0;
   }
-  if ( fabs(oldfardistance - fardistance) > 0.00001 ) {
-//    cout << "Far plane set to " << fardistance << endl;
+  if (fardistance > maxfardistance) fardistance = maxfardistance;
+  if ( fabs(oldfardistance - fardistance) > 0.00001 || fabs(oldneardistance - neardistance) > 0.00001 ) {
     oldfardistance = fardistance;
+    oldneardistance = neardistance;
     int viewport[4];
     glGetIntegerv(GL_VIEWPORT, viewport);
     CallBackReshapeFunc(viewport[2],viewport[3]);
@@ -1700,7 +1707,7 @@ void InterfaceFunc(unsigned char key){
 //-----------------------------------------------------------------
 
 void CallBackSpecialFunc(int key , int x, int y) {
-  KeyboardFunc(key + 214, false, false, false);
+  //KeyboardFunc(key + 214, false, false, false);
   // return;
 }
 
@@ -1815,12 +1822,21 @@ int calcNoOfPoints(vector<PointXY> vec1, vector<PointXY> vec2)
 /**
  * This function handles the the keyboard input
  */
-
-void CallBackKeyboardFunc(unsigned char key, int x, int y) {
+void CallBackInterfaceFunc(unsigned char key, int x, int y) {
   //call the interfacefunc. it deals with all our
   //keyboard activities
   InterfaceFunc(key);
-  KeyboardFunc(key, false, false, false);
+}
+
+void CallBackKeyboardFunc(unsigned char key, int x, int y) {
+  bool cmd,alt,shift;
+  cmd = glutGetModifiers() & GLUT_ACTIVE_CTRL;
+  alt = glutGetModifiers() & GLUT_ACTIVE_ALT;
+  shift = glutGetModifiers() & GLUT_ACTIVE_SHIFT;
+  if (cmd) {
+    key += 96;
+  }
+  KeyboardFunc(key, cmd, alt, shift);
 }
 
 void mapColorToValue(int dummy) {

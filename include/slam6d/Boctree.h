@@ -476,6 +476,27 @@ public:
     _center[1] = center[1];
     _center[2] = center[2];
   }
+ 
+  /**
+   * Picks the first point in depth first order starting from the given node
+   *
+   */
+  T* pickPoint(bitoct &node) {
+    bitunion<T> *children;
+    bitoct::getChildren(node, children);
+
+    for (short i = 0; i < 8; i++) {
+      if (  ( 1 << i ) & node.valid ) {   // if ith node exists
+        if (  ( 1 << i ) & node.leaf ) {   // if ith node is leaf
+          return &(children->points[1].v);
+        } else { // recurse
+          return pickPoint(children->node);
+        }
+        ++children; // next child
+      }
+    }
+    return 0;
+  } 
 
 protected:
   

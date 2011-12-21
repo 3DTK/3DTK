@@ -103,6 +103,16 @@ ELSE(WITH_COMPACT_OCTREE)
   MESSAGE(STATUS "Not using compact octreees: Warning uses more memory")
 ENDIF(WITH_COMPACT_OCTREE)
 
+## Glee?
+OPTION(WITH_GLEE "Whether to use OpenGL extensions, requires glee. ON/OFF" OFF)
+
+IF(WITH_GLEE)
+  MESSAGE(STATUS "Using opengl extensions")
+  SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DWITH_GLEE")
+ELSE(WITH_GLEE)
+  MESSAGE(STATUS "Not using opengl extensions")
+ENDIF(WITH_GLEE)
+
 ## Gridder 
 OPTION(WITH_GRIDDER "Whether to build the 2DGridder binary ON/OFF" ON)
 

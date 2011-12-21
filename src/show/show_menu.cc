@@ -393,7 +393,7 @@ GLUI_SPINNER_INT, &factor);
   // cout << "Called : myNewMenu()...."<<endl;
   // cout << "show_points: " << show_points << endl;
   GLUI_Master.set_glutMouseFunc( CallBackMouseFunc );
-  GLUI_Master.set_glutKeyboardFunc( CallBackKeyboardFunc );
+  GLUI_Master.set_glutKeyboardFunc( CallBackInterfaceFunc );
   GLUI_Master.set_glutIdleFunc( CallBackIdleFunc );
   GLUI_Master.set_glutSpecialFunc( CallBackSpecialFunc );
 }
