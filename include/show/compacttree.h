@@ -33,10 +33,22 @@ using std::list;
 #include "show/viewcull.h"
 #include "show/scancolormanager.h"
 
+
+#ifdef WITH_8BIT_POINTS
+typedef signed char tshort;
+#define TSHORT_MAXP1 (1 << 7); 
+#define TSHORT_MAX ((1 << 7) - 1); 
+typedef signed char shortpointrep; 
+#else
 typedef short int tshort;
-typedef unsigned int lint;
-//typedef unsigned char shortpointrep; 
+#define TSHORT_MAXP1 (1 << 15); 
+#define TSHORT_MAX ((1 << 15) - 1); 
 typedef short int shortpointrep; 
+#endif
+
+
+
+typedef unsigned int lint;
 
 class ScanColorManager;
 // forward declaration
@@ -343,9 +355,11 @@ template <class P>
           distance = (*itr)[iterator] - _center[iterator];
           
           if (distance >= _size) {
-            points[i++] = (1 << 15) -1;
+//            points[i++] = (1 << 15) -1;
+            points[i++] = TSHORT_MAX; 
           } else {
-            points[i++] = (distance/_size ) * (1 << 15);//* pow(2,15) ;
+//            points[i++] = (distance/_size ) * (1 << 15);//* pow(2,15) ;
+            points[i++] = (distance/_size ) * TSHORT_MAXP1;
           }
         }
         for (unsigned int iterator = 3; iterator < POINTDIM; iterator++) {
@@ -482,7 +496,8 @@ template <class P>
     }
 //    vs = vs/2.0;
 //    double precision = vs/ pow(2, sizeof(tshort)*8-1);
-    precision = vs/ (1 << 15); //pow(2, 15);
+    //precision = vs/ (1 << 15); //pow(2, 15);
+    precision = vs / TSHORT_MAXP1;
     // vs is the real voxelsize
     cout << "real voxelsize is " << vs << endl;
     cout << "precision is now " << precision << endl;
