@@ -147,6 +147,10 @@ class ColorManager {
       //cout << "I " << index << " " << val[currentdim] << " " << currentdim << endl; 
       glColor4f( colormap[index][0], colormap[index][1], colormap[index][2], 1.0 ); 
     }
+    virtual void setColor(signed char *val) {
+      int index = toIndex(val);
+      glColor4f( colormap[index][0], colormap[index][1], colormap[index][2], 1.0 ); 
+    }
 
     virtual void setColorMap(ColorMap &cm) {
       for (unsigned int i = 0; i < buckets; i++) {
@@ -259,6 +263,11 @@ class CColorManager : public ColorManager {
       glColor3ubv(color); 
     }
     void setColor(short *val) {  
+      GLubyte color[3];
+      memcpy(color, &val[colordim], 3);      
+      glColor3ubv(color); 
+    }
+    virtual void setColor(signed char *val) {
       GLubyte color[3];
       memcpy(color, &val[colordim], 3);      
       glColor3ubv(color); 
