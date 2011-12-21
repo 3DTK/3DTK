@@ -166,6 +166,8 @@ public:
       scm->updateRanges(maxs);
     }
     setColorManager(0);
+    maxtargetpoints =  maxTargetPoints(*root);
+    current_lod_mode = 0;
   }
 
   virtual ~compactTree();
@@ -176,15 +178,13 @@ public:
   inline long countNodes();
   inline long countLeaves(); 
   void setColorManager(ColorManager *_cm);
-  void displayOctTreeCulled(long targetpts);
-  void displayOctTreeAllCulled();
+  void displayLOD(float lod);
+  void display();
   void displayOctTree(double minsize = FLT_MAX);
   template <class T>
   void selectRay(vector<T *> &points);
   template <class T>
   void selectRay(T * &point);
-
-  unsigned long maxTargetPoints();
 
   inline void getCenter(double center[3]) const;
 
@@ -225,8 +225,10 @@ inline unsigned char childIndex(const double *center, const P *point);
   void displayOctTreeAllCulled( cbitoct &node, double *center, double size );
 
   void displayOctTreeCulledLOD(long targetpts, cbitoct &node, double *center, double size ); 
-
   void displayOctTreeLOD(long targetpts, cbitoct &node, double *center, double size ); 
+
+  void displayOctTreeCulledLOD2(float lod, cbitoct &node, double *center, double size ); 
+  void displayOctTreeLOD2(float lod, cbitoct &node, double *center, double size ); 
   
   
   void displayOctTreeCAllCulled( cbitoct &node, double *center, double size, double minsize ); 
@@ -273,6 +275,14 @@ inline unsigned char childIndex(const double *center, const P *point);
   void deserialize(std::string filename );
   void deserialize(std::ifstream &f, cbitoct &node);
   void serialize(std::ofstream &of, cbitoct &node);
+  
+  
+  unsigned long maxtargetpoints;
+  unsigned int current_lod_mode;
+  
+  void cycleLOD() {
+    current_lod_mode = (current_lod_mode+1)%3;
+  }
 };
   
 template <class P>
@@ -313,6 +323,8 @@ template <class P>
     root = new cbitoct();
 
     countPointsAndQueue(pts, newcenter, sizeNew, *root, center);
+    maxtargetpoints =  maxTargetPoints(*root);
+    current_lod_mode = 0;
   }
 
 template <class P>
@@ -486,6 +498,8 @@ template <class P>
     root = new cbitoct();
 
     countPointsAndQueue(pts, n, newcenter, sizeNew, *root, center);
+    maxtargetpoints =  maxTargetPoints(*root);
+    current_lod_mode = 0;
   } 
 
 template <class P>

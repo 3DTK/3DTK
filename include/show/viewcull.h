@@ -159,6 +159,7 @@ char PlaneAABB( float x, float y, float z, float size, float *plane );
 
 void remViewport();
 bool LOD(float x, float y, float z, float size);
+int LOD2(float x, float y, float z, float size);
 
 
 #endif

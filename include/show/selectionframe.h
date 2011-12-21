@@ -119,6 +119,19 @@ class Selection : public wxFrame
 		wxStaticText* m_staticText4131111;
 		
 		wxSpinCtrl* m_spinCtrl621111;
+		wxPanel* farplane_panel;
+		wxStaticText* farplane_text;
+		
+		wxSpinCtrl* farplane_spinner;
+		wxPanel* nearplane_panel;
+		wxStaticText* nearplane_text;
+		
+		wxSpinCtrl* nearplane_spinner;
+		wxPanel* lod_panel;
+		wxStaticText* lod_text;
+		
+		wxSpinCtrlDbl* lod_spinner;
+		wxButton* cycleLOD;
 		wxButton* m_button31;
 		
 		// Virtual event handlers, overide them in your derived class
@@ -158,12 +171,16 @@ class Selection : public wxFrame
 		virtual void OnSelectionBrushsize( wxSpinEvent& event ) { event.Skip(); }
 		virtual void OnFrameSpinner( wxSpinEvent& event ) { event.Skip(); }
 		virtual void OnFramerateSpinner( wxSpinEvent& event ) { event.Skip(); }
+		virtual void OnFarplaneSpinner( wxSpinEvent& event ) { event.Skip(); }
+		virtual void OnNearplaneSpinner( wxSpinEvent& event ) { event.Skip(); }
+		virtual void OnLODAdaption( wxSpinEvent& event ) { event.Skip(); }
+		virtual void OnCycleLOD( wxCommandEvent& event ) { event.Skip(); }
 		
 	
 	public:
 		wxBoxSizer* bSizer1;
 		
-		Selection( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Selection"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( -1,-1 ), long style = wxDEFAULT_FRAME_STYLE|wxTAB_TRAVERSAL );
+		Selection( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Selection"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( -1,-1 ), long style = wxDEFAULT_FRAME_STYLE|wxTAB_TRAVERSAL, bool advanced_controls = false );
 		~Selection();
 	
 };

@@ -356,7 +356,7 @@ int read_one_packet ( FILE *fp, vector<Point> &ptss, int maxDist, int minDist )
     double sin_phi, cos_phi;
 
     unsigned short physicalNO;
-    unsigned short logicalNO;
+    //unsigned short logicalNO;
 
     double rotational;
     double distance;
@@ -367,16 +367,17 @@ int read_one_packet ( FILE *fp, vector<Point> &ptss, int maxDist, int minDist )
 
 
     
-    unsigned short rot;
+//    unsigned short rot;
   
 
     double x, y, z;
 
+    /*
     int circle_col = 0;
     int circle_row = 0;
     int circle_col_other = 0; 
     int circle_row_other = 0;
-   
+   */
 
 
     for ( c = 0 ; c < CIRCLELENGTH; c++ )
@@ -404,10 +405,10 @@ int read_one_packet ( FILE *fp, vector<Point> &ptss, int maxDist, int minDist )
 
 
             pshort = ( unsigned short * ) ( p + 2 );
-            rot = ( ( unsigned short ) ( *pshort ) / 100.0 );
+            //rot = ( ( unsigned short ) ( *pshort ) / 100.0 );
 
 
-            circle_col =  c * 6 + i / 2;
+            //circle_col =  c * 6 + i / 2;
             rotational = ( ( double ) ( *pshort ) ) / 100.0;
 
     
@@ -417,14 +418,14 @@ int read_one_packet ( FILE *fp, vector<Point> &ptss, int maxDist, int minDist )
             {
                
                 physicalNO  = j + Head;
-                logicalNO = velodyne_physical_to_logical ( physicalNO );
+                //logicalNO = velodyne_physical_to_logical ( physicalNO );
 
-                circle_col =  c * 6 + i / 2;
-                circle_row =  logicalNO;
+                //circle_col =  c * 6 + i / 2;
+                //circle_row =  logicalNO;
 
 
-                circle_col_other =  c * 6 + i / 2;  /////????
-                circle_row_other =  logicalNO / 2;
+                //circle_col_other =  c * 6 + i / 2;  /////????
+                //circle_row_other =  logicalNO / 2;
 
              
                 
