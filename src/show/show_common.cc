@@ -1,3 +1,7 @@
+#ifdef WITH_GLEE
+#include <GLee.h>
+#endif
+
 #include "show/show.h"
 #include "show/show_Boctree.h"
 #include "show/compacttree.h"
@@ -49,7 +53,6 @@ vector< ::SDisplay*> displays;
  */
 //Show_BOctTree **octpts;
 vector<colordisplay*> octpts;
-unsigned long maximum_target_points = 0;
 /**
  * Storing the base directory
  */
@@ -63,7 +66,7 @@ int window_id;
 /**
  * Size of points
  */
-GLfloat pointsize          = 1.7;
+GLfloat pointsize          = 1.0;
 int     anim_delay         = 5;
 
 /**
@@ -189,6 +192,15 @@ int START_WIDTH          = 720;
 int START_HEIGHT         = 576;
 GLdouble aspect          = (double)START_WIDTH/(double)START_HEIGHT;          // Current aspect ratio
 bool advanced_controls = false;
+
+float neardistance = 10.0;
+float oldneardistance = 10.0;
+float maxfardistance = 40000.0;; 
+float fardistance = 40000.0;
+float oldfardistance = 40000.0;
+
+float adaption_rate = 1.0;
+
 
 // Defines for Point Semantic
 #define TYPE_UNKNOWN         0x0000
@@ -653,7 +665,6 @@ void generateFrames(int start, int end, bool identity) {
         M4identity(transMat);
         transMat[10] = -1.0;
       } else {
-        double rPos[3], rPosTheta[3];
         EulerToMatrix4(Scan::allScans[index]->get_rPos(), Scan::allScans[index]->get_rPosTheta(), transMat ); 
       }
 
@@ -747,6 +758,12 @@ void createDisplayLists(bool reduced)
   }
 
 }
+
+void cycleLOD() {
+  for (unsigned int i = 0; i < octpts.size(); i++)
+    octpts[i]->cycleLOD();
+}
+
 
 void initShow(int argc, char **argv){
 
@@ -857,7 +874,7 @@ void initShow(int argc, char **argv){
 #ifndef USE_GL_POINTS
     createDisplayLists(red > 0);
 #elif USE_COMPACT_TREE
-    cout << "Creating display octrees.." << endl;
+    cout << "Creating compact display octrees.." << endl;
     for(int i = 0; i < (int)Scan::allScans.size() ; i++) {
       compactTree *tree;
       if (red > 0) {
@@ -869,7 +886,7 @@ void initShow(int argc, char **argv){
           pts[jterator] = pointtype.createPoint<sfloat>(Scan::allScans[i]->get_points()->at(jterator));
         }
         Scan::allScans[i]->clearPoints();
-        tree = new compactTree(pts, nrpts , 50.0, pointtype, cm);  //TODO remove magic number
+        tree = new compactTree(pts, nrpts , 20.0, pointtype, cm);  //TODO remove magic number
         for (unsigned int jterator = 0; jterator < nrpts; jterator++) {
           delete[] pts[jterator];
         }
@@ -896,7 +913,7 @@ void initShow(int argc, char **argv){
           pts[jterator] = pointtype.createPoint<sfloat>(Scan::allScans[i]->get_points()->at(jterator));
         }
         Scan::allScans[i]->clearPoints();
-        tree = new Show_BOctTree<sfloat>(pts, nrpts , 50.0, pointtype, cm);  //TODO remove magic number
+        tree = new Show_BOctTree<sfloat>(pts, nrpts , 20.0, pointtype, cm);  //TODO remove magic number
         for (unsigned int jterator = 0; jterator < nrpts; jterator++) {
           delete[] pts[jterator];
         }
@@ -912,11 +929,6 @@ void initShow(int argc, char **argv){
     }
 #endif
   }
-  for (unsigned int i = 0; i < octpts.size(); i++) { 
-    unsigned long tp = octpts[i]->maxTargetPoints();
-    if (tp > maximum_target_points) maximum_target_points = tp;
-  }
-  if (maximum_target_points > LONG_MAX) maximum_target_points = LONG_MAX;
 
   cm->setCurrentType(PointType::USE_HEIGHT);
   ColorMap cmap;

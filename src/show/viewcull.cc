@@ -340,9 +340,29 @@ void myProject(float x, float y, float z, short &Xi ) {
   Xi = pn[0]*VP[0] + VP[1];
 }
 
+int LOD2(float x, float y, float z, float size)
+{
+  size = sqrt(3*size*size);
+
+  short X1;
+  short X2;
+ 
+  // onscreen position of the leftmost point
+  myProject(x - size*right[0], y - size*right[1], z - size*right[2], X1);
+  // onscreen position of the rightmost point
+  myProject(x + size*right[0], y + size*right[1], z + size*right[2], X2);
+
+  if (X1 > X2) {
+    return (X1-X2);
+  } else {
+    return (X2-X1);
+  }
+}
 
 bool LOD(float x, float y, float z, float size)
 {
+  size = sqrt(3*size*size);
+
   short X1;
   short X2;
  

@@ -366,6 +366,110 @@ void compactTree::displayOctTreeLOD(long targetpts, cbitoct &node, double *cente
   }
 }
 
+void compactTree::displayOctTreeCulledLOD2(float ratio, cbitoct &node, double *center, double size ) {
+  int res = CubeInFrustum2(center[0], center[1], center[2], size);
+  if (res==0) return;  // culled do not continue with this branch of the tree
+
+  if (res == 2) { // if entirely within frustrum discontinue culling
+    displayOctTreeLOD2(ratio, node, center, size);
+    return;
+  }
+
+  double ccenter[3];
+  cbitunion<tshort> *children;
+  cbitoct::getChildren(node, children);
+
+  for (short i = 0; i < 8; i++) {
+    if (  ( 1 << i ) & node.valid ) {   // if ith node exists
+      childcenter(center, ccenter, size, i);  // childrens center
+      if (  ( 1 << i ) & node.leaf ) {   // if ith node is leaf get center
+        // check if leaf is visible
+        if ( CubeInFrustum(ccenter[0], ccenter[1], ccenter[2], size/2.0) ) {
+          tshort *point = children->getPoints();
+          lint length = children->getLength();
+            
+          int l = LOD2(ccenter[0], ccenter[1], ccenter[2], size/2.0);  // only a single pixel on screen only paint one point
+          l = max((int)(l*l*ratio), 0);
+          if (l != 0) {
+            if ((int)length > l ) {
+              double each = (double)POINTDIM * (double)((double)length/(double)l);
+              tshort *p;
+              int index;
+              for(int iterator = 0; iterator < l; iterator++ ) {
+                index = (double)iterator * each;
+                p = point + index - index%POINTDIM;
+                if(cm) cm->setColor(p);
+                glVertex3f( p[0] * precision + ccenter[0], p[1] * precision + ccenter[1], p[2] * precision + ccenter[2]);
+              }
+            } else if ((int)length <= l) { 
+              for(unsigned int iterator = 0; iterator < length; iterator++ ) {
+                if(cm) cm->setColor(point);
+                glVertex3f( point[0] * precision + ccenter[0], point[1] * precision + ccenter[1], point[2] * precision + ccenter[2]);
+                point+=POINTDIM;
+              }
+            } else if (l == 1) {
+                if(cm) cm->setColor(point);
+                glVertex3f( point[0] * precision + ccenter[0], point[1] * precision + ccenter[1], point[2] * precision + ccenter[2]);
+            }
+          }
+        }
+      } else { // recurse
+        displayOctTreeCulledLOD2(ratio, children->node, ccenter, size/2.0);
+      }
+      ++children; // next child
+    }
+  }
+}
+
+void compactTree::displayOctTreeLOD2(float ratio, cbitoct &node, double *center, double size ) {
+  double ccenter[3];
+  cbitunion<tshort> *children;
+  cbitoct::getChildren(node, children);
+
+
+  for (short i = 0; i < 8; i++) {
+    if (  ( 1 << i ) & node.valid ) {   // if ith node exists
+      childcenter(center, ccenter, size, i);  // childrens center
+      if (  ( 1 << i ) & node.leaf ) {   // if ith node is leaf get center
+        tshort *point = children->getPoints();
+        lint length = children->getLength();
+            
+        int l = LOD2(ccenter[0], ccenter[1], ccenter[2], size/2.0);  // only a single pixel on screen only paint one point
+        l = max((int)(l*l*ratio), 0);
+        if (l > 1) {
+          if ((int)length > l ) {
+            double each = (double)POINTDIM * (double)((double)length/(double)l);
+            tshort *p;
+            int index;
+            for(int iterator = 0; iterator < l; iterator++ ) {
+              index = (double)iterator * each;
+              p = point + index - index%POINTDIM;
+              if(cm) cm->setColor(p);
+              glVertex3f( p[0] * precision + ccenter[0], p[1] * precision + ccenter[1], p[2] * precision + ccenter[2]);
+            }
+          } else if ((int)length <= l) { 
+            for(unsigned int iterator = 0; iterator < length; iterator++ ) {
+              if(cm) cm->setColor(point);
+              glVertex3f( point[0] * precision + ccenter[0], point[1] * precision + ccenter[1], point[2] * precision + ccenter[2]);
+              point+=POINTDIM;
+            }
+          }
+        } else {
+          if(cm) cm->setColor(point);
+          glVertex3f( point[0] * precision + ccenter[0], point[1] * precision + ccenter[1], point[2] * precision + ccenter[2]);
+        }
+      } else { // recurse
+        int l = LOD2(ccenter[0], ccenter[1], ccenter[2], size/2.0);  // only a single pixel on screen only paint one point
+        l = max((int)(l*l*ratio), 0);
+        if (l > 0) {
+          displayOctTreeLOD2(ratio, children->node, ccenter, size/2.0);
+        }
+      }
+      ++children; // next child
+    }
+  }
+}
+
 
 void compactTree::displayOctTreeCAllCulled( cbitoct &node, double *center, double size, double minsize ) {
   int res = CubeInFrustum2(center[0], center[1], center[2], size);
@@ -523,20 +627,47 @@ long compactTree::countLeaves() { return 1 + countLeaves(*root); }
 
 void compactTree::setColorManager(ColorManager *_cm) { cm = _cm; }
 
-void compactTree::displayOctTreeCulled(long targetpts) { 
-  displayOctTreeCulledLOD(targetpts, *root, center, size); 
+void compactTree::displayLOD(float ratio) { 
+//  displayOctTreeCulledLOD(targetpts, *root, center, size); 
+    switch (current_lod_mode) {
+      case 0:
+        glBegin(GL_POINTS);
+        displayOctTreeCulledLOD(maxtargetpoints * ratio, *root, center, size); 
+        glEnd();
+        break;
+      case 1:
+        glBegin(GL_POINTS);
+        displayOctTreeCulledLOD2(ratio , *root, center, size);
+        glEnd();
+        break;
+      case 2:
+        /*
+#ifdef WITH_GLEE
+        if (GLEE_ARB_point_parameters) {
+          glPointParameterfARB(GL_POINT_SIZE_MIN_ARB, 1.0);
+          glPointParameterfARB(GL_POINT_SIZE_MAX_ARB, 100000.0);
+          GLfloat p[3] = {0.0, 0.0000, 0.0000005};
+          glPointParameterfvARB(GL_POINT_DISTANCE_ATTENUATION_ARB, p);
+          displayOctTreeCPAllCulled(*BOctTree<T>::root, BOctTree<T>::center, BOctTree<T>::size,  BOctTree<T>::size/  pow(2, min( (int)(ratio * BOctTree<T>::max_depth ), BOctTree<T>::max_depth - 3) ) ); 
+          p[0] = 1.0;
+          p[2] = 0.0;
+          glPointParameterfvARB(GL_POINT_DISTANCE_ATTENUATION_ARB, p);
+        }
+#endif
+*/
+      break;
+      default:
+      break;
+    }
 }
 
-void compactTree::displayOctTreeAllCulled() { 
+void compactTree::display() { 
   displayOctTreeAllCulled(*root, center, size); 
   //displayOctTreeAll(*root, center, size); 
 }
 
 void compactTree::displayOctTree(double minsize ) { 
   displayOctTreeCAllCulled(*root, center, size, minsize); 
-}
-unsigned long compactTree::maxTargetPoints() {
-  return maxTargetPoints(*root);
 }
 
 shortpointrep* compactTree::createPoints(lint length) {

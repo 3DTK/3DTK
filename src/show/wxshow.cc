@@ -1,16 +1,16 @@
+#include "show_common.cc"
 #include "wx/wx.h"
 #include "wx/sizer.h"
 #include "wx/glcanvas.h"
 #include "show/wxshow.h"
 #include "show/selectionframe.h"
 
-#include "show_common.cc"
 
 
 class SelectionImpl : public Selection {
   public:
 
-		SelectionImpl( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Selection"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( -1,-1 ), long style = wxDEFAULT_FRAME_STYLE|wxTAB_TRAVERSAL ) : Selection(parent, id, title, pos, size, style) {
+		SelectionImpl( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Selection"), bool advanced_controls = false, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( -1,-1 ), long style = wxDEFAULT_FRAME_STYLE|wxTAB_TRAVERSAL ) : Selection(parent, id, title, pos, size, style, advanced_controls) {
   
       if (pointtype.hasReflectance()) m_choice11->Append(wxT("reflectance"));
       if (pointtype.hasAmplitude()) m_choice11->Append(wxT("amplitude"));
@@ -287,6 +287,27 @@ class SelectionImpl : public Selection {
       haveToUpdate = 1;
       event.Skip(); 
     }
+		virtual void OnFarplaneSpinner( wxSpinEvent& event ) { 
+      maxfardistance = event.GetPosition();
+      haveToUpdate = 1;
+      event.Skip(); 
+    }
+		virtual void OnNearplaneSpinner( wxSpinEvent& event ) { 
+      neardistance = event.GetPosition();
+      haveToUpdate = 1;
+      event.Skip(); 
+    }
+		virtual void OnCycleLOD( wxCommandEvent& event ) { 
+      ::cycleLOD();
+      haveToUpdate = 1;
+      event.Skip(); 
+    }
+		
+    virtual void OnLODAdaption( wxSpinEvent& event ) { 
+      adaption_rate = ((wxSpinCtrlDbl*)event.GetEventObject())->GetValue();
+      haveToUpdate = 1;
+      event.Skip(); 
+    }
 
   public:
     void updateControls() {
@@ -452,7 +473,7 @@ bool wxShow::OnInit()
   frame->SetAutoLayout(true);
 
 
-  selection = new SelectionImpl( (wxWindow*)NULL, wxID_ANY, wxT("Selection"), wxPoint(START_X + START_WIDTH + 50, START_Y + 30) );
+  selection = new SelectionImpl( (wxWindow*)NULL, wxID_ANY, wxT("Selection"), advanced_controls, wxPoint(START_X + START_WIDTH + 50, START_Y + 30) );
   controls = new ControlImpl( (wxWindow*)NULL, wxID_ANY, wxT("Controls"), wxPoint(START_X, START_Y + START_HEIGHT + 20 ) );
  
   selection->SetSize(wxSize(200,393) );

@@ -79,6 +79,7 @@ void loadPath(int dummy);
 void savePose(int dummy);
 void loadPose(int dummy);
 void saveImage(int dummy);
+void CallBackInterfaceFunc(unsigned char key, int x, int y);
 void CallBackKeyboardFunc(unsigned char key, int x, int y);
 void CallBackMouseFunc(int button, int state, int x, int y);
 void CallBackMouseFuncMoving(int button, int state, int x, int y);
