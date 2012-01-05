@@ -28,16 +28,6 @@ void DrawPoints(GLenum mode)
   if (ratio > max) ratio = max;
   else if (ratio < min) ratio = min;
 
-
-/*
-  min = 1;
-  double max = 100.0;
-  if (lastfps > idealfps) ptstodisplay--;
-  if (lastfps < idealfps) ptstodisplay+=2;
-  if (ptstodisplay > max) ptstodisplay = max;
-  else if (ptstodisplay < min) ptstodisplay = min;
-//  cout << ptstodisplay << " " << lastfps << endl;
-*/
   // In case of animation
   if(frameNr != 0) {
     cm->setMode(ScanColorManager::MODE_ANIMATION);
@@ -445,18 +435,18 @@ void DisplayItFunc(GLenum mode)
     glEnable(GL_FOG);
     {
       // ln(1/2^8) = -5.54517744 -> threshold at which the last color bit is gone due to fog
-      if (show_fog==1) {fogMode = GL_EXP; fardistance = min(5.54517744 / fogDensity, 40000.0);}
-      else if (show_fog==2) {fogMode = GL_EXP2; fardistance = min(sqrt(5.54517744) / fogDensity, 40000.0);}
+      if (show_fog==1) {fogMode = GL_EXP; fardistance = min(5.54517744 / fogDensity, maxfardistance);}
+      else if (show_fog==2) {fogMode = GL_EXP2; fardistance = min(sqrt(5.54517744) / fogDensity, maxfardistance);}
       else if (show_fog==3) {fogMode = GL_LINEAR; fardistance = 32000.0;}
-      else if (show_fog==4) {fogMode = GL_EXP; fardistance = min(5.54517744 / fogDensity, 40000.0);}
-      else if (show_fog==5) {fogMode = GL_EXP2; fardistance = min(sqrt(5.54517744) / fogDensity, 40000.0);}
-      else if (show_fog==6) {fogMode = GL_LINEAR; fardistance = 32000.0;}
+      else if (show_fog==4) {fogMode = GL_EXP; fardistance = min(5.54517744 / fogDensity, maxfardistance);}
+      else if (show_fog==5) {fogMode = GL_EXP2; fardistance = min(sqrt(5.54517744) / fogDensity, maxfardistance);}
+      else if (show_fog==6) {fogMode = GL_LINEAR; fardistance = maxfardistance;}
       glFogi(GL_FOG_MODE, fogMode);
       glFogfv(GL_FOG_COLOR, fogColor);
       glFogf(GL_FOG_DENSITY, fogDensity);
       glHint(GL_FOG_HINT, GL_FASTEST);
-      glFogf(GL_FOG_START, 100.0);
-      glFogf(GL_FOG_END, 32000.0);
+      glFogf(GL_FOG_START, neardistance);
+      glFogf(GL_FOG_END, maxfardistance);
     }
   } else {
     glDisable(GL_FOG);
@@ -674,7 +664,7 @@ void resetView(int dummy)
 {
 //  quat[0] = 1.0;
   cangle = 60.0;
-  pzoom = 2000.0;
+  pzoom = defaultZoom; 
 //  quat[1] = quat[2] = quat[3] = X = Y = Z = 0.0;
 //  quat[1] = quat[2] = quat[3] = 0.0;
   X = RVX;
@@ -1246,7 +1236,7 @@ void moveCamera(double x, double y, double z, double rotx, double roty, double r
 }
 
 void KeyboardFunc(int key, bool control, bool alt, bool shift) {
-  double stepsize = 10.0;
+  double stepsize = movementSpeed; 
   if (shift) stepsize *= 10.0;
   if (control) stepsize *= 0.1;
 
@@ -1304,8 +1294,8 @@ void KeyboardFunc(int key, bool control, bool alt, bool shift) {
 }
 
 void CallBackMouseMotionFunc(int x, int y) {
-  int deltaMouseX = x - mouseNavX;
-  int deltaMouseY = mouseNavY - y;
+  double deltaMouseX = x - mouseNavX;
+  double deltaMouseY = mouseNavY - y;
   mouseNavX = x;
   mouseNavY = y;
 
@@ -1315,11 +1305,15 @@ void CallBackMouseMotionFunc(int x, int y) {
         deltaMouseX *= 5;
         deltaMouseY *= 5;
       }
+      deltaMouseX *= movementSpeed/10.0;  // moving 10 pixels is equivalent to one key stroke
+      deltaMouseY *= movementSpeed/10.0;
       moveCamera(deltaMouseX, deltaMouseY, 0, 0,0,0);
     } else if( mouseNavButton == GLUT_MIDDLE_BUTTON ){
       if ( !showTopView ) {
         deltaMouseY *= -5;
       }
+      deltaMouseX *= movementSpeed/10.0;  // moving 10 pixels is equivalent to one key stroke
+      deltaMouseY *= movementSpeed/10.0;
       moveCamera(deltaMouseX, 0, deltaMouseY, 0,0,0);
     } else if ( mouseNavButton == GLUT_LEFT_BUTTON ){
       moveCamera(0, 0, 0, deltaMouseY,deltaMouseX,0);
@@ -1639,8 +1633,8 @@ void CallBackReshapeFunc(int width, int height)
  */
 void ProcessHitsFunc(GLint hits, GLuint buffer[])
 {
-  cout << "SIZE " << selected_points[0].size() << endl;
-  cout << "processing " << endl;
+  //cout << "SIZE " << selected_points[0].size() << endl;
+  //cout << "processing " << endl;
   set<int> names;
   set<sfloat *> unsel_points;
 
@@ -1657,7 +1651,7 @@ void ProcessHitsFunc(GLint hits, GLuint buffer[])
       ptr++;
     }
   }
-  cout << "number of names " << names.size() << endl;
+  //cout << "number of names " << names.size() << endl;
   if (names.empty()) return;
 
   int index = 0;

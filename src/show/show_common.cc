@@ -126,10 +126,6 @@ GLdouble RVX = 0.0, RVY = 0.0, RVZ = 0.0;
 GLfloat pzoom = 2000.0;
 GLfloat pzoom_old = pzoom; 
 
-/**
- * Density of the fog
- */ 
-GLfloat fogDensity       = 0.001;
 
 /**
  * Mode of the fog (exp, exp2, linear)
@@ -193,11 +189,17 @@ int START_HEIGHT         = 576;
 GLdouble aspect          = (double)START_WIDTH/(double)START_HEIGHT;          // Current aspect ratio
 bool advanced_controls = false;
 
-float neardistance = 10.0;
-float oldneardistance = 10.0;
-float maxfardistance = 40000.0;; 
-float fardistance = 40000.0;
-float oldfardistance = 40000.0;
+// the following values are scale dependant, i.e. all values are in m
+double neardistance = 0.10;
+double oldneardistance = 0.10;
+double maxfardistance = 400.0;; 
+double fardistance = 400.0;
+double oldfardistance = 40000.0;
+double movementSpeed = 0.1;
+double defaultZoom = 20.0;
+GLfloat fogDensity       = 0.1;
+double voxelSize = 0.20;
+
 
 float adaption_rate = 1.0;
 
@@ -331,6 +333,11 @@ void usage(char* prog)
 	  << "         start at scan NR (i.e., neglects the first NR scans)" << endl
 	  << "         [ATTENTION: counting naturally starts with 0]" << endl
 	  << endl
+	  << bold << "  -S" << normal << " NR, " << bold << "--scale=" << normal << "NR" << endl
+	  << "         scale factor to use (default: 0.01), modifies movement speed etc. " << endl
+	  << "         use 1 when point coordinates are in m, 0.01 when in cm and so forth. " << endl
+	  << "         " << endl
+	  << endl
 	  
     << bold << "  -R, --reflectance, --reflectivity" << normal << endl
 	  << "         use reflectivity values for coloring point clouds" << endl
@@ -383,7 +390,7 @@ void usage(char* prog)
  * @return 0, if the parsing was successful, 1 otherwise 
  */
 int parseArgs(int argc,char **argv, string &dir, int& start, int& end, int& maxDist, int& minDist, 
-              double &red, bool &readInitial, int &octree, PointType &ptype, float &fps, string &loadObj, bool &loadOct, bool &saveOct, int &origin, reader_type &type)
+              double &red, bool &readInitial, int &octree, PointType &ptype, float &fps, string &loadObj, bool &loadOct, bool &saveOct, int &origin, double &scale, reader_type &type)
 {
   unsigned int types = PointType::USE_NONE;
   start   = 0;
@@ -399,6 +406,7 @@ int parseArgs(int argc,char **argv, string &dir, int& start, int& end, int& maxD
     { "origin",          optional_argument,   0,  'o' },
     { "format",          required_argument,   0,  'f' },  
     { "fps",             required_argument,   0,  'F' },  
+    { "scale",           required_argument,   0,  'S' },
     { "start",           required_argument,   0,  's' },
     { "end",             required_argument,   0,  'e' },
     { "reduce",          required_argument,   0,  'r' },
@@ -477,6 +485,9 @@ int parseArgs(int argc,char **argv, string &dir, int& start, int& end, int& maxD
      break;
    case 'F':
      fps = atof(optarg);
+     break;
+   case 'S':
+     scale = atof(optarg);
      break;
    case 'o':
      if (optarg) {
@@ -792,6 +803,7 @@ void initShow(int argc, char **argv){
   bool saveOct = false;
   string loadObj;
   int origin = 0;
+  double scale = 0.01; // in m
 
   pose_file_name = new char[1024];
   path_file_name = new char[1024];
@@ -802,7 +814,19 @@ void initShow(int argc, char **argv){
   strncpy(selection_file_name, "selected.3d", 1024);  
   
   parseArgs(argc, argv, dir, start, end, maxDist, minDist, red, readInitial,
-  octree, pointtype, idealfps, loadObj, loadOct, saveOct, origin, type);
+  octree, pointtype, idealfps, loadObj, loadOct, saveOct, origin, scale, type);
+
+  // modify all scale dependant variables
+  scale = 1.0 / scale; 
+  movementSpeed *= scale;
+  neardistance *= scale;
+  oldneardistance *= scale;
+  maxfardistance *= scale;
+  fardistance *= scale;
+  fogDensity /= scale;
+  defaultZoom *= scale;
+  voxelSize *= scale;
+//  oldfardistance *= scale;
 
   ////////////////////////
   SDisplay::readDisplays(loadObj, displays);
@@ -878,7 +902,7 @@ void initShow(int argc, char **argv){
     for(int i = 0; i < (int)Scan::allScans.size() ; i++) {
       compactTree *tree;
       if (red > 0) {
-        tree = new compactTree(Scan::allScans[i]->get_points_red(), Scan::allScans[i]->get_points_red_size(), 50.0, pointtype, cm);  // TODO remove magic number
+        tree = new compactTree(Scan::allScans[i]->get_points_red(), Scan::allScans[i]->get_points_red_size(), voxelSize, pointtype, cm);  // TODO remove magic number
       } else {
         unsigned int nrpts = Scan::allScans[i]->get_points()->size();
         sfloat **pts = new sfloat*[nrpts];
@@ -886,7 +910,7 @@ void initShow(int argc, char **argv){
           pts[jterator] = pointtype.createPoint<sfloat>(Scan::allScans[i]->get_points()->at(jterator));
         }
         Scan::allScans[i]->clearPoints();
-        tree = new compactTree(pts, nrpts , 20.0, pointtype, cm);  //TODO remove magic number
+        tree = new compactTree(pts, nrpts , voxelSize, pointtype, cm);  //TODO remove magic number
         for (unsigned int jterator = 0; jterator < nrpts; jterator++) {
           delete[] pts[jterator];
         }
@@ -905,7 +929,7 @@ void initShow(int argc, char **argv){
     for(int i = 0; i < (int)Scan::allScans.size() ; i++) {
       Show_BOctTree<sfloat> *tree;
       if (red > 0) {
-        tree = new Show_BOctTree<sfloat>(Scan::allScans[i]->get_points_red(), Scan::allScans[i]->get_points_red_size(), 50.0, pointtype, cm);  // TODO remove magic number
+        tree = new Show_BOctTree<sfloat>(Scan::allScans[i]->get_points_red(), Scan::allScans[i]->get_points_red_size(), voxelSize, pointtype, cm);  // TODO remove magic number
       } else {
         unsigned int nrpts = Scan::allScans[i]->get_points()->size();
         sfloat **pts = new sfloat*[nrpts];
@@ -913,7 +937,7 @@ void initShow(int argc, char **argv){
           pts[jterator] = pointtype.createPoint<sfloat>(Scan::allScans[i]->get_points()->at(jterator));
         }
         Scan::allScans[i]->clearPoints();
-        tree = new Show_BOctTree<sfloat>(pts, nrpts , 20.0, pointtype, cm);  //TODO remove magic number
+        tree = new Show_BOctTree<sfloat>(pts, nrpts , voxelSize, pointtype, cm);  //TODO remove magic number
         for (unsigned int jterator = 0; jterator < nrpts; jterator++) {
           delete[] pts[jterator];
         }
