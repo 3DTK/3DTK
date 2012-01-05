@@ -41,7 +41,7 @@ IF(WITH_PMD)
 
   add_library(pmdaccess2 STATIC ${PMDACCESS_DIR}pmdaccess.cc)
   
-  SET(PMD_LIBS pmdaccess2 config glfw GLU ftgl xmlrpc_util glfw xmlrpc_client xmlrpc xmlrpc++ xmlrpc_client++ xmlrpc_xmltok xmlrpc_xmlparse ${OpenCV_LIBS} )
+  SET(PMD_LIBS pmdaccess2 config glfw GL GLU ftgl xmlrpc_util glfw xmlrpc_client xmlrpc xmlrpc++ xmlrpc_client++ xmlrpc_xmltok xmlrpc_xmlparse ${OpenCV_LIBS} )
 
 
   add_executable(grabVideoAnd3D  ${OFFLINE_DIR}grabVideoAnd3D.cc cvpmd.cc pmdWrap.cc ) 
