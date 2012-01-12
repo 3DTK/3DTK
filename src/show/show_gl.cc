@@ -1161,7 +1161,6 @@ void CallBackEntryFunc(int state) {
  */
 void CallBackMouseFunc(int button, int state, int x, int y)
 {
-
   // Are we selecting points or moving the camera?
   if(cameraNavMouseMode != 1) { // selecting points
     if (state == GLUT_DOWN && (button == GLUT_LEFT_BUTTON || button == GLUT_RIGHT_BUTTON)) {
@@ -1287,6 +1286,15 @@ void KeyboardFunc(int key, bool control, bool alt, bool shift) {
     case 'E':
     case 367: // WXK_PAGEDOWN
       moveCamera(0,0,0,0,0,-rotsize);
+      break;
+    case 'f':
+      if (!fullscreen) {     
+        fullscreen = true;
+        glutFullScreen();
+      } else {
+        fullscreen = false;
+        glutReshapeWindow(current_width, current_height);
+      }
       break;
     default:
       break;
@@ -1578,7 +1586,11 @@ void glWriteImagePPM(const char *filename, int scale, GLenum mode)
  */
 void CallBackReshapeFunc(int width, int height)
 {
-    aspect = (double)width/(double)height;
+  if (!fullscreen) {
+    current_height = height;
+    current_width = width;
+  }
+  aspect = (double)width/(double)height;
   if (!showTopView) {
     // usage of the vsize of a structiewport
     glViewport(0, 0, (GLint)width, (GLint)height);
