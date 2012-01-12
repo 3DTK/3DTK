@@ -46,7 +46,6 @@ ScanColorManager::ScanColorManager(unsigned int _buckets, PointType type) : poin
       makeValid();
       for (unsigned int i = 0; i < allManager.size(); i++) {
         allManager[i]->setColorMap(cm);
-        if (inverted) allManager[i]->invert();
       }
     }
 
@@ -97,14 +96,6 @@ ScanColorManager::ScanColorManager(unsigned int _buckets, PointType type) : poin
         }
       }
     }
-    void ScanColorManager::setInvert(bool invert) {
-      if (invert != inverted) {
-        for (unsigned int i = 0; i < allManager.size(); i++) {
-          allManager[i]->invert();
-        }
-      }
-      inverted = invert;
-    }
 
     float ScanColorManager::getMin() { return mins[currentdim];};
     float ScanColorManager::getMax() { return maxs[currentdim];};
@@ -125,7 +116,7 @@ ScanColorManager::ScanColorManager(unsigned int _buckets, PointType type) : poin
 //          JetMap m;
           float c[3] = {0,0,0};
           m.calcColor(c, i, allScans.size() );
-          ColorManagerC *cmc = new ColorManagerC(buckets, pointtype.getPointDim(), mins, maxs, c);
+          ColorManager *cmc = new ColorManager(buckets, pointtype.getPointDim(), mins, maxs, c);
           scanManager.push_back(cmc);
 
           // new colormanager for the color based on the color of the points
