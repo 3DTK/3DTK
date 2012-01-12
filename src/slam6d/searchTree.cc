@@ -50,7 +50,15 @@ void SearchTree::getPtPairs(vector <PtPair> *pairs,
       sum += Len2(p12);
 
       pairs->push_back(myPair);
+    /*cout << "PTPAIR" << i << " " 
+      << p[0] << " "
+      << p[1] << " "
+      << p[2] << " - " 
+      << q_points[i][0] << " "
+      << q_points[i][1] << " "
+      << q_points[i][2] << "          " << Len2(p12) << endl; */
     }
+
   }
 
   if (pairs->size() == 0) return;

@@ -222,12 +222,12 @@ void newMenu()
   fogt_panel ->set_alignment( GLUI_ALIGN_LEFT );
   GLUI_RadioGroup *fogt = glui1-> add_radiogroup_to_panel( fogt_panel, &show_fog );
   glui1->add_radiobutton_to_group( fogt, "No Fog" );
-  glui1->add_radiobutton_to_group( fogt, "Fog Black Exp" );
-  glui1->add_radiobutton_to_group( fogt, "Fog Black Exp2" );
-  glui1->add_radiobutton_to_group( fogt, "Fog Black Linear" );
-  glui1->add_radiobutton_to_group( fogt, "Fog White Exp" );
-  glui1->add_radiobutton_to_group( fogt, "Fog White Exp2" );
-  glui1->add_radiobutton_to_group( fogt, "Fog White Linear" );
+  glui1->add_radiobutton_to_group( fogt, "Fog Exp" );
+  glui1->add_radiobutton_to_group( fogt, "Fog Exp2" );
+  glui1->add_radiobutton_to_group( fogt, "Fog Linear" );
+  glui1->add_radiobutton_to_group( fogt, "inverted Fog Exp" );
+  glui1->add_radiobutton_to_group( fogt, "inverted Fog Exp2" );
+  glui1->add_radiobutton_to_group( fogt, "inverted Fog Linear" );
 
   
   

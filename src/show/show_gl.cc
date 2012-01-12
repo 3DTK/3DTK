@@ -109,13 +109,8 @@ void DrawPoints(GLenum mode)
         glPushMatrix();
         if (invert)                               // default: white points on black background
           glColor4d(1.0, 1.0, 1.0, 0.0);
-        	   //if (iterator == 0) glColor4d(139.0/255, 69.0/255, 19.0/255, 1.0);
-        	   //if (iterator == 0) glColor4d(0.5, 1.0, 0.5, 1.0);
         else                                      // black points on white background
           glColor4d(0.0, 0.0, 0.0, 0.0);
-
-        	   //if (iterator == 0) glColor4d(0.5, 1.0, 0.5, 1.0);
-        	   //if (iterator == 0) glColor4d(139.0/255, 69.0/255, 19.0/255, 1.0);
 
       //  glMultMatrixd(MetaMatrix[iterator].back());
         if (current_frame != (int)MetaMatrix.back().size() - 1) {
@@ -363,6 +358,11 @@ void DisplayItFunc(GLenum mode)
    */
   
   GLfloat fogColor[4];
+
+  if(!invert) {
+    glEnable(GL_COLOR_LOGIC_OP);
+    glLogicOp(GL_COPY_INVERTED);
+  }
   
   // set the clear color buffer in case of
   // both invert and non invert mode
@@ -438,8 +438,8 @@ void DisplayItFunc(GLenum mode)
       if (show_fog==1) {fogMode = GL_EXP; fardistance = min(5.54517744 / fogDensity, maxfardistance);}
       else if (show_fog==2) {fogMode = GL_EXP2; fardistance = min(sqrt(5.54517744) / fogDensity, maxfardistance);}
       else if (show_fog==3) {fogMode = GL_LINEAR; fardistance = 32000.0;}
-      else if (show_fog==4) {fogMode = GL_EXP; fardistance = min(5.54517744 / fogDensity, maxfardistance);}
-      else if (show_fog==5) {fogMode = GL_EXP2; fardistance = min(sqrt(5.54517744) / fogDensity, maxfardistance);}
+      else if (show_fog==4) {fogMode = GL_EXP; fardistance =    maxfardistance; }
+      else if (show_fog==5) {fogMode = GL_EXP2; fardistance =   maxfardistance; }
       else if (show_fog==6) {fogMode = GL_LINEAR; fardistance = maxfardistance;}
       glFogi(GL_FOG_MODE, fogMode);
       glFogfv(GL_FOG_COLOR, fogColor);
@@ -450,7 +450,7 @@ void DisplayItFunc(GLenum mode)
     }
   } else {
     glDisable(GL_FOG);
-    fardistance = 100000.0;
+    fardistance = maxfardistance;
   }
   if (fardistance > maxfardistance) fardistance = maxfardistance;
   if ( fabs(oldfardistance - fardistance) > 0.00001 || fabs(oldneardistance - neardistance) > 0.00001 ) {
@@ -510,7 +510,10 @@ void DisplayItFunc(GLenum mode)
   
   glPopMatrix();
   if(label) DrawUrl();
-  
+
+  if (!invert) {
+    glDisable(GL_COLOR_LOGIC_OP);
+  }
   // force draw the scene
   glFlush();
   glFinish();
@@ -971,7 +974,6 @@ void callResetView(int dummy)
 void invertView(int dummy)
 {
   invert = !invert;
-  cm->setInvert(!invert);
 }
 
 /**

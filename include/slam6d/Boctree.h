@@ -33,6 +33,8 @@ using std::list;
   #define POPCOUNT(mask) _my_popcount_3(mask)
 #endif
 
+#include "slam6d/allocator.h"
+
 #include "slam6d/nnparams.h"
 #include "slam6d/searchTree.h"
 // forward declaration
@@ -222,7 +224,7 @@ public:
       childcenter(center, newcenter[i], size, i);
     }
     // set up values
-    uroot = new bitunion<T>();
+    uroot = alloc.allocate<bitunion<T> >();    
     root = &uroot->node;
 
     countPointsAndQueueFast(pts, n, newcenter, sizeNew, *root, center);
@@ -271,16 +273,13 @@ public:
       childcenter(center, newcenter[i], size, i);
     }
     // set up values
-    uroot = new bitunion<T>();
+    uroot = alloc.allocate<bitunion<T> >();    
     root = &uroot->node;
 
     countPointsAndQueue(pts, newcenter, sizeNew, *root, center);
   }
 
   virtual ~BOctTree(){
-    deletetNodes(*root);
-    delete root;
-
     delete[] mins;
     delete[] maxs;
   } 
@@ -369,8 +368,9 @@ public:
     file.read(reinterpret_cast<char*>(maxs), POINTDIM * sizeof(T));
 
     // read root node
-    root = new bitoct();
-    uroot = new bitunion<T>();
+    uroot = alloc.allocate<bitunion<T> >();    
+    root = &uroot->node;
+    
     deserialize(file, *root);
     file.close();
   }
@@ -556,7 +556,7 @@ protected:
         }
       }
     }
-	delete [] point;
+    delete [] point;
   }
 
   void deserialize(std::ifstream &f, bitoct &node) {
@@ -568,7 +568,7 @@ protected:
     unsigned short n_children = POPCOUNT(node.valid);
 
     // create children
-    bitunion<T> *children = new bitunion<T>[n_children];
+    bitunion<T> *children = alloc.allocate<bitunion<T> >(n_children);    
     bitoct::link(node, children);
 
     for (short i = 0; i < 8; i++) {
@@ -577,7 +577,7 @@ protected:
           pointrep first;
           f.read(reinterpret_cast<char*>(&first), sizeof(pointrep));
           unsigned int length = first.length;  // read first element, which is the length
-          pointrep *points = new pointrep[POINTDIM * length + 1];   // make room for points 
+          pointrep *points = alloc.allocate<pointrep> (POINTDIM*length + 1);
           children->points = points;
           points[0] = first;
           points++;
@@ -778,7 +778,6 @@ protected:
     // delete children
     if (haschildren) {
       bitoct::getChildren(node, children);
-      delete[] children;
     }
   }
   
@@ -787,8 +786,10 @@ protected:
     // if bucket is too small stop building tree
     // -----------------------------------------
     if ((_size <= voxelSize) || (earlystop && n <= 10) ) {
+
       // copy points
-      pointrep *points = new pointrep[POINTDIM*n + 1];
+      pointrep *points = alloc.allocate<pointrep> (POINTDIM*n + 1);
+
       points[0].length = n;
       int i = 1;
       for (int j = 0; j < n; j++) {
@@ -819,7 +820,7 @@ protected:
     // -----------------------------------------
     if ((_size <= voxelSize) || (earlystop && splitPoints.size() <= 10) ) {
       // copy points
-      pointrep *points = new pointrep[POINTDIM*splitPoints.size() + 1];
+      pointrep *points = alloc.allocate<pointrep> (POINTDIM*splitPoints.size() + 1);
       points[0].length = splitPoints.size();
       int i = 1;
       for (typename vector<P *>::iterator itr = splitPoints.begin(); 
@@ -862,7 +863,7 @@ protected:
       }
     }
     // create children
-    bitunion<T> *children = new bitunion<T>[n_children];
+    bitunion<T> *children = alloc.allocate<bitunion<T> >(n_children);
     bitoct::link(parent, children);
 
     int count = 0;
@@ -898,7 +899,7 @@ protected:
     }
 
     // create children
-    bitunion<T> *children = new bitunion<T>[n_children];
+    bitunion<T> *children = alloc.allocate<bitunion<T> >(n_children);
     bitoct::link(parent, children);
     int count = 0;
     for (int j = 0; j < 8; j++) {
@@ -1074,6 +1075,8 @@ inline unsigned char childIndex(const T *center, const P *point) {
   T add[3];
   T mult;
 
+  PackedAllocator alloc;
+
   unsigned char max_depth;
   unsigned int *child_bit_depth; // octree only works to depth 32 with ints, should be plenty
   unsigned int *child_bit_depth_inv; // octree only works to depth 32 with ints, should be plenty
@@ -1214,8 +1217,8 @@ inline unsigned char childIndex(const T *center, const P *point) {
         if ( params[threadNum].closest_v == 0 ||  max(max(abs( cx - params[threadNum].x ), 
                  abs( cy - params[threadNum].y )),
                  abs( cz - params[threadNum].z )) - size
-        >= params[threadNum].closest_v ) { 
-          break;
+        > params[threadNum].closest_v ) { 
+          continue;
         }
         // find the closest point in leaf seq2ci[i] 
         if (  ( 1 << child_index ) & node.leaf ) {   // if ith node is leaf

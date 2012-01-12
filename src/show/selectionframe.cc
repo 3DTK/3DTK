@@ -59,7 +59,7 @@ Selection::Selection( wxWindow* parent, wxWindowID id, const wxString& title,
 	
 	bSizer31->Add( 0, 0, 1, wxEXPAND, 5 );
 	
-	wxString m_choice1Choices[] = { wxT("None"), wxT("Black Exp"), wxT("Black Exp2"), wxT("Black Linear"), wxT("White Exp"), wxT("White Exp2"), wxT("White Linear") };
+	wxString m_choice1Choices[] = { wxT("None"), wxT("Exp"), wxT("Exp2"), wxT("Linear"), wxT("inverted, Exp"), wxT("inverted, Exp2"), wxT("inverted, Linear") };
 	int m_choice1NChoices = sizeof( m_choice1Choices ) / sizeof( wxString );
 	m_choice1 = new wxChoice( m_panel21, wxID_ANY, wxDefaultPosition, wxDefaultSize, m_choice1NChoices, m_choice1Choices, 0 );
 	m_choice1->SetSelection( 1 );
