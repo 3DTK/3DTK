@@ -9,8 +9,17 @@ class colordisplay {
   public:
   inline void setColorManager(ColorManager *_cm) { cm = _cm; }
   
-  virtual void displayLOD(float lod) { display(); };
-  virtual void display() = 0; 
+  void displayLOD(float lod) { 
+    if (cm) cm->load();
+    drawLOD(lod); 
+    if (cm) cm->unload();
+  };
+
+  void display() {
+    if (cm) cm->load();
+    draw();
+    if (cm) cm->unload();
+  }
 
   virtual void selectRay(float * &point) {};
   virtual void selectRay(double * &point) {};
@@ -22,6 +31,10 @@ class colordisplay {
   virtual void cycleLOD() {};
 
   protected:
+  
+  virtual void drawLOD(float lod) = 0; 
+  virtual void draw() = 0; 
+  
   ColorManager *cm;
 };
 

@@ -67,7 +67,7 @@ class ScanColorManager {
     vector<ColorManager *> allManager;
 
     vector<ColorManager *> staticManager;
-    vector<ColorManagerC *> scanManager;
+    vector<ColorManager *> scanManager;
     vector<CColorManager *> colorsManager;
 
     unsigned int currenttype;

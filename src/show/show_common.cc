@@ -960,8 +960,8 @@ void initShow(int argc, char **argv){
   }
 
   cm->setCurrentType(PointType::USE_HEIGHT);
-  ColorMap cmap;
-  cm->setColorMap(cmap);
+  //ColorMap cmap;
+  //cm->setColorMap(cmap);
   resetMinMax(0);
 
   selected_points = new set<sfloat*>[octpts.size()];

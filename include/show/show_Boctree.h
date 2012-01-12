@@ -62,7 +62,8 @@ public:
     displayOctTreeCulledLOD(targetpts, *BOctTree<T>::root, BOctTree<T>::center, BOctTree<T>::size); 
     glEnd();
   }
-  void displayLOD(float ratio) { 
+
+  void drawLOD(float ratio) { 
     switch (current_lod_mode) {
       case 0:
         glBegin(GL_POINTS);
@@ -91,13 +92,9 @@ public:
       default:
       break;
     }
-
- //   cout << ratio << " " << (int)((1.0 - ratio)*500)+1 << endl;
-//    displayOctTreeCulledLOD3( targetpts, *BOctTree<T>::root, BOctTree<T>::center, BOctTree<T>::size);
-//
   }
   
-  void display() { 
+  void draw() { 
     glBegin(GL_POINTS);
     displayOctTreeAllCulled(*BOctTree<T>::root, BOctTree<T>::center, BOctTree<T>::size); 
     glEnd();

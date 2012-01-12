@@ -11,6 +11,7 @@
 #include <GL/glut.h>
 #endif
 #include <string.h>
+#include <stdio.h>
 
 class ColorMap {
   public:
@@ -106,7 +107,17 @@ class ColorManager {
 
   public: 
   
-    ColorManager(unsigned int _buckets, unsigned int pointdim, float *_mins, float *_maxs) : buckets(_buckets) {
+    ColorManager(unsigned int _buckets, unsigned int pointdim, float *_mins, float *_maxs, const float *_color = 0) : buckets(_buckets) {
+      if (_color) {
+        color[0] = _color[0];
+        color[1] = _color[1];
+        color[2] = _color[2];
+      } else {
+        color[0] = 1;
+        color[1] = 1;
+        color[2] = 1;
+      }
+
       colormap = new float*[buckets + 1];  // allow a color more for values equal to max
       for (unsigned int i = 0; i < buckets; i++) {
         colormap[i] = new float[3];
@@ -134,22 +145,27 @@ class ColorManager {
       delete[] maxs;
     }
 
+    virtual void load() {
+      glColor3f(color[0], color[1], color[2] );
+      glEnable (GL_TEXTURE_1D); 
+      glBindTexture (GL_TEXTURE_1D, 0); 
+    }
+    
+    virtual void unload() {
+      glDisable (GL_TEXTURE_1D); 
+    }
+
     virtual void setColor(float *val) {
-      int index = toIndex(val);
-      glColor4f( colormap[index][0], colormap[index][1], colormap[index][2], 1.0 ); 
+      glTexCoord1f( (float)((val[currentdim]-min)/extent) );
     }
     virtual void setColor(double *val) {
-      int index = toIndex(val);
-      glColor4f( colormap[index][0], colormap[index][1], colormap[index][2], 1.0 ); 
+      glTexCoord1f( (float)((val[currentdim]-min)/extent) );
     }
     virtual void setColor(short int *val) {
-      int index = toIndex(val);
-      //cout << "I " << index << " " << val[currentdim] << " " << currentdim << endl; 
-      glColor4f( colormap[index][0], colormap[index][1], colormap[index][2], 1.0 ); 
+      glTexCoord1f( (float)((val[currentdim]-min)/extent) );
     }
     virtual void setColor(signed char *val) {
-      int index = toIndex(val);
-      glColor4f( colormap[index][0], colormap[index][1], colormap[index][2], 1.0 ); 
+      glTexCoord1f( (float)((val[currentdim]-min)/extent) );
     }
 
     virtual void setColorMap(ColorMap &cm) {
@@ -157,14 +173,7 @@ class ColorManager {
         cm.calcColor(colormap[i], i, buckets);
       }
       cm.calcColor(colormap[buckets], buckets-1, buckets);
-    }
-
-    void invert() {
-      for (unsigned int i = 0; i < buckets+1; i++) {
-        for (unsigned int j = 0; j < 3; j++) {
-          colormap[i][j] = 1.0 - colormap[i][j];
-        }
-      }
+      convertToTexture1D();
     }
 
 
@@ -179,26 +188,38 @@ class ColorManager {
         min = _min;
         max = _max;
       }
-      float extent = max - min;
-      extentbuckets = extent/(float)buckets;
+      extent = max - min;
     }
 
   protected:
+    
+    
+    void convertToTexture1D() {
+      unsigned char imageData[(buckets+1) * 3];
+      for (unsigned int i = 0; i < buckets; i++) {
+        imageData[3*i+0] = colormap[i][0]*255;
+        imageData[3*i+1] = colormap[i][1]*255;
+        imageData[3*i+2] = colormap[i][2]*255;
+      }
 
-    template <class T>
-    unsigned int toIndex(T *val) {
-      T value = val[currentdim];
-      if (value < min) return 0;
-      if (value > max) return buckets;
-      return (unsigned int)((value-min)/extentbuckets);
+      imageData[3*buckets+0] = colormap[buckets][0]*255;
+      imageData[3*buckets+1] = colormap[buckets][1]*255;
+      imageData[3*buckets+2] = colormap[buckets][2]*255;
+
+      glBindTexture (GL_TEXTURE_1D, 0);
+      glPixelStorei (GL_UNPACK_ALIGNMENT, 1);
+      glTexParameteri (GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+      glTexParameteri (GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+      glTexParameteri (GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+      glTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+      glTexImage1D (GL_TEXTURE_1D, 0, GL_RGB, buckets+1, 0, GL_RGB, GL_UNSIGNED_BYTE, imageData);
     }
 
     void makeValid() {
       min = mins[currentdim];
       max = maxs[currentdim];
 
-      float extent = max - min;
-      extentbuckets = extent/(float)buckets;
+      extent = max - min;
     }
 
     unsigned int buckets;
@@ -214,42 +235,31 @@ class ColorManager {
     float min;
     float max;
 
-    float extentbuckets;    
+    float extent;    
 
-};
-
-
-class ColorManagerC : public ColorManager {
-  public:
-    ColorManagerC(unsigned int buckets, unsigned int pointdim, float *mins, float *maxs, const float _color[3]) : ColorManager(buckets, pointdim, mins, maxs) {
-      color[0] = _color[0];
-      color[1] = _color[1];
-      color[2] = _color[2];
-    }
-
-    virtual void setColorMap(ColorMap &cm) {
-      for (unsigned int i = 0; i < ColorManager::buckets; i++) {
-        cm.calcColor(ColorManager::colormap[i], i, ColorManager::buckets);
-        for (unsigned int j = 0; j < 3; j++) {
-          ColorManager::colormap[i][j] -= color[j];
-          if (ColorManager::colormap[i][j] < 0.0) ColorManager::colormap[i][j] = 0.0;
-        }
-      }
-      cm.calcColor(ColorManager::colormap[ColorManager::buckets], ColorManager::buckets-1, ColorManager::buckets);
-      for (unsigned int j = 0; j < 3; j++) {
-        ColorManager::colormap[ColorManager::buckets][j] -= color[j];
-        if (ColorManager::colormap[ColorManager::buckets][j] < 0.0) ColorManager::colormap[ColorManager::buckets][j] = 0.0;
-      }
-    }
-
-  private:
     float color[3];
+
 };
 
 class CColorManager : public ColorManager {
   public:
     CColorManager(unsigned int buckets, unsigned int pointdim, float *mins, float *maxs, unsigned int _colordim) : ColorManager(buckets, pointdim, mins, maxs) {
       colordim = _colordim;
+    }
+    
+    virtual void load() {
+      glGetBooleanv(GL_COLOR_LOGIC_OP, &color_state);
+      glDisable(GL_COLOR_LOGIC_OP); // this disables inversion of color, but also messes with fog behaviour
+      glColor3f(color[0], color[1], color[2] );
+      glEnable (GL_TEXTURE_1D); 
+      glBindTexture (GL_TEXTURE_1D, 0); 
+    }
+    
+    virtual void unload() {
+      glDisable (GL_TEXTURE_1D); 
+      if (color_state) {
+        glEnable(GL_COLOR_LOGIC_OP);
+      }
     }
 
     void setColor(double *val) {  
@@ -275,6 +285,7 @@ class CColorManager : public ColorManager {
 
   private:
     unsigned int colordim;
+    GLboolean color_state;
 };
 
 

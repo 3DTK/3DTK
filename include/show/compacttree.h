@@ -32,8 +32,11 @@ using std::list;
 #include "show/colordisplay.h"
 #include "show/viewcull.h"
 #include "show/scancolormanager.h"
+#include "slam6d/allocator.h"
 
 
+#define POINTERBITS 32
+#define WITH_8BIT_POINTS
 #ifdef WITH_8BIT_POINTS
 typedef signed char tshort;
 #define TSHORT_MAXP1 (1 << 7); 
@@ -73,11 +76,11 @@ class cbitoct{
   public:
 
 #ifdef _MSC_VER
-  __int64 child_pointer        : 48;
+  __int64 child_pointer        : POINTERBITS;
   unsigned valid              :  8;
   unsigned leaf               :  8;
 #else
-  signed long child_pointer   : 48;
+  signed long child_pointer   : POINTERBITS;
   unsigned valid              :  8;
   unsigned leaf               :  8;
 #endif
@@ -104,10 +107,10 @@ class cbitp{
   public:
 
 #ifdef _MSC_VER
-  __int64 pointer        : 48;
+  __int64 pointer        : POINTERBITS;
   unsigned int length    : 24;
 #else
-  signed long pointer                   : 48;
+  signed long pointer                   : POINTERBITS;
   unsigned int length                   : 24;
 #endif
 };
@@ -190,8 +193,8 @@ public:
   inline long countNodes();
   inline long countLeaves(); 
   void setColorManager(ColorManager *_cm);
-  void displayLOD(float lod);
-  void display();
+  void drawLOD(float lod);
+  void draw();
   void displayOctTree(double minsize = FLT_MAX);
   template <class T>
   void selectRay(vector<T *> &points);
@@ -203,6 +206,7 @@ public:
   void serialize(std::string filename);
 protected:
   
+  PackedAllocator alloc;
   
   void AllPoints( cbitoct &node, vector<double*> &vp, double center[3], double size);
 
@@ -332,7 +336,7 @@ template <class P>
       childcenter(center, newcenter[i], size, i);
     }
     // set up values
-    root = new cbitoct();
+    root = alloc.allocate<cbitoct>();    
 
     countPointsAndQueue(pts, newcenter, sizeNew, *root, center);
     maxtargetpoints =  maxTargetPoints(*root);
@@ -401,7 +405,7 @@ template <class P>
       }
     }
     // create children
-    cbitunion<tshort> *children = new cbitunion<tshort>[n_children];
+    cbitunion<tshort> *children = alloc.allocate<cbitunion<tshort> >(n_children);    
     cbitoct::link(parent, children);
 
     int count = 0;
@@ -434,7 +438,7 @@ template <class P>
     }
 
     // create children
-    cbitunion<tshort> *children = new cbitunion<tshort>[n_children];
+    cbitunion<tshort> *children = alloc.allocate<cbitunion<tshort> >(n_children);    
     cbitoct::link(parent, children);
     int count = 0;
     for (int j = 0; j < 8; j++) {
@@ -510,7 +514,7 @@ template <class P>
       childcenter(center, newcenter[i], size, i);
     }
     // set up values
-    root = new cbitoct();
+    root = alloc.allocate<cbitoct>();    
 
     countPointsAndQueue(pts, n, newcenter, sizeNew, *root, center);
     maxtargetpoints =  maxTargetPoints(*root);
@@ -520,7 +524,6 @@ template <class P>
 template <class P>
 inline unsigned char compactTree::childIndex(const double *center, const P *point) {
   return  (point[0] >= center[0] ) | ((point[1] >= center[1] ) << 1) | ((point[2] >= center[2] ) << 2) ;
-//  return  (point[0] > center[0] ) | ((point[1] > center[1] ) << 1) | ((point[2] > center[2] ) << 2) ;
 }
   
   void compactTree::getCenter(double _center[3]) const {

@@ -30,8 +30,8 @@ using std::list;
 #include "show/viewcull.h"
 
 compactTree::~compactTree(){
-  deletetNodes(*root);
-  delete root;
+  //deletetNodes(*root);
+  //delete root;
 
   delete[] mins;
   delete[] maxs;
@@ -414,7 +414,11 @@ void compactTree::displayOctTreeCulledLOD2(float ratio, cbitoct &node, double *c
           }
         }
       } else { // recurse
-        displayOctTreeCulledLOD2(ratio, children->node, ccenter, size/2.0);
+        int l = LOD2(ccenter[0], ccenter[1], ccenter[2], size/2.0);  // only a single pixel on screen only paint one point
+        l = max((int)(l*l*ratio), 0);
+        if (l > 0) {
+          displayOctTreeCulledLOD2(ratio, children->node, ccenter, size/2.0);
+        }
       }
       ++children; // next child
     }
@@ -627,8 +631,7 @@ long compactTree::countLeaves() { return 1 + countLeaves(*root); }
 
 void compactTree::setColorManager(ColorManager *_cm) { cm = _cm; }
 
-void compactTree::displayLOD(float ratio) { 
-//  displayOctTreeCulledLOD(targetpts, *root, center, size); 
+void compactTree::drawLOD(float ratio) { 
     switch (current_lod_mode) {
       case 0:
         glBegin(GL_POINTS);
@@ -661,9 +664,8 @@ void compactTree::displayLOD(float ratio) {
     }
 }
 
-void compactTree::display() { 
+void compactTree::draw() { 
   displayOctTreeAllCulled(*root, center, size); 
-  //displayOctTreeAll(*root, center, size); 
 }
 
 void compactTree::displayOctTree(double minsize ) { 
@@ -671,7 +673,8 @@ void compactTree::displayOctTree(double minsize ) {
 }
 
 shortpointrep* compactTree::createPoints(lint length) {
-  shortpointrep *points = new shortpointrep[POINTDIM*length];
+  //shortpointrep *points = new shortpointrep[POINTDIM*length];
+  shortpointrep *points = alloc.allocate<shortpointrep> (POINTDIM*length);
   return points;
 }
 void compactTree::deserialize(std::string filename ) {
@@ -725,7 +728,8 @@ void compactTree::deserialize(std::string filename ) {
 
 
   // read root node
-  root = new cbitoct();
+  //root = new cbitoct();
+  root = alloc.allocate<cbitoct>();    
   deserialize(file, *root );
   file.close();
 }
@@ -742,7 +746,8 @@ void compactTree::deserialize(std::ifstream &f, cbitoct &node) {
   unsigned short n_children = POPCOUNT(node.valid);
 
   // create children
-  cbitunion<tshort> *children = new cbitunion<tshort>[n_children];
+  //cbitunion<tshort> *children = new cbitunion<tshort>[n_children];
+  cbitunion<tshort> *children = alloc.allocate<cbitunion<tshort> >(n_children);    
   cbitoct::link(node, children);
 
   for (short i = 0; i < 8; i++) {
