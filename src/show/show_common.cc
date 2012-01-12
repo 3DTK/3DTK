@@ -189,6 +189,11 @@ int START_HEIGHT         = 576;
 GLdouble aspect          = (double)START_WIDTH/(double)START_HEIGHT;          // Current aspect ratio
 bool advanced_controls = false;
 
+bool fullscreen = false;
+int current_width = START_WIDTH;
+int current_height = START_HEIGHT;
+
+
 // the following values are scale dependant, i.e. all values are in m
 double neardistance = 0.10;
 double oldneardistance = 0.10;
