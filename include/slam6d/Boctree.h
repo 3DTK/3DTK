@@ -227,7 +227,8 @@ public:
     uroot = alloc.allocate<bitunion<T> >();    
     root = &uroot->node;
 
-    countPointsAndQueueFast(pts, n, newcenter, sizeNew, *root, center);
+    //countPointsAndQueueFast(pts, n, newcenter, sizeNew, *root, center);
+    countPointsAndQueue(pts, n, newcenter, sizeNew, *root, center);
     init();
   }
 
@@ -880,6 +881,43 @@ protected:
       }
     }
   }
+
+
+  template <class P>
+  void countPointsAndQueue(P * const* pts, int n,  T center[8][3], T size, bitoct &parent, T pcenter[3]) {
+    vector<const P*> points[8];
+    int n_children = 0;
+      for (int i = 0; i < n; i++) {
+              points[childIndex<P>(pcenter, pts[i])].push_back( pts[i] );
+    }
+
+    for (int j = 0; j < 8; j++) {
+      // if non-empty set valid flag for this child
+      if (!points[j].empty()) {
+        parent.valid = ( 1 << j ) | parent.valid;
+        ++n_children;
+      }
+    }
+
+    // create children
+    bitunion<T> *children = new bitunion<T>[n_children];
+    bitoct::link(parent, children);
+    int count = 0;
+    for (int j = 0; j < 8; j++) {
+      if (!points[j].empty()) {
+        pointrep *c = (pointrep*)branch(children[count].node, points[j], center[j], size);  // leaf node
+        if (c) {
+          children[count].points = c; // set this child to vector of points
+          parent.leaf = ( 1 << j ) | parent.leaf;  // remember this is a leaf
+        }
+        points[j].clear();
+        vector<const P*>().swap(points[j]);
+        ++count;
+      }
+    }
+  }
+
+
   
   template <class P>
   void countPointsAndQueueFast(P * const* points, int n,  T center[8][3], T size, bitoct &parent, T pcenter[3]) {
