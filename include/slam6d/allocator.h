@@ -40,25 +40,26 @@ public:
   
   template<class T> 
     T *allocate(unsigned int nr) {
-      //cout << "alloc arr with " << nr << " elements" << endl;
       unsigned int size = sizeof(T) * nr;
       unsigned char *chunk;
       if (size + index > chunksize) {
         wastedspace += (chunksize-index);
         if (chunksize > size) {
           chunk = new unsigned char[chunksize];
+          bzero(chunk, chunksize);
           memsize+=chunksize;
         } else {
           chunk = new unsigned char[size];
+          bzero(chunk, size);
           memsize+=size;
         }
         mem.push_back(chunk);
         index = 0;
       } else {
         chunk = mem.back();
+        chunk = chunk + index;
       }
 
-      chunk = chunk + index;          // pointer to free byte
       index += size;                  // increment index
       return (T*)chunk;                 
     }
@@ -117,9 +118,11 @@ public:
       // no chunk is large enough... make new one
       if (chunksize > size) {
         chunk = new unsigned char[chunksize];
+        bzero(chunk, chunksize);
         memsize += chunksize;
       } else {   // in case the requested memory is larger than our chunks, make a single chunk thats large enough
         chunk = new unsigned char[size];
+        bzero(chunk, size);
         memsize += size;
       }
       mem.push_back(chunk);
