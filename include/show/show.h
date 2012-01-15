@@ -14,6 +14,8 @@
 #endif
 #ifdef __APPLE__
 #include <GLUT/glut.h>
+#elif WITH_FREEGLUT
+#include <GL/freeglut.h>
 #else
 #include <GL/glut.h>
 #endif
@@ -46,8 +48,8 @@ typedef float sfloat;
 
 void CallBackReshapeFunc(int width, int height);
 void CallBackIdleFunc(void);
-void DisplayItFunc(GLenum mode);
-void DrawPoints(GLenum mode);
+void DisplayItFunc(GLenum mode, bool interruptable = false);
+void DrawPoints(GLenum mode, bool interruptable = false);
 void DrawUrl();
 void glDumpWindowPPM(const char *filename, GLenum mode);
 void glWriteImagePPM(const char *filename, int scale, GLenum mode);
@@ -81,20 +83,22 @@ void loadPose(int dummy);
 void saveImage(int dummy);
 void CallBackInterfaceFunc(unsigned char key, int x, int y);
 void CallBackKeyboardFunc(unsigned char key, int x, int y);
+void CallBackKeyboardUpFunc(unsigned char key, int x, int y);
 void CallBackMouseFunc(int button, int state, int x, int y);
 void CallBackMouseFuncMoving(int button, int state, int x, int y);
 void CallBackMouseMotionFunc(int x, int y);
 void CallBackSpecialFunc(int key, int x, int y);
-void CallBackEntryFunc(int state);
 void InterfaceFunc(unsigned char key);
 void updateCamera();
 void drawRobotPath(int dummy);
 int calcFrameNo();
 int calcNoOfPoints(vector<PointXY>, vector<PointXY>);
 void calcInterpolatedCameras(vector<PointXY>, vector<PointXY>);
+void calcPointSequence(vector<int> &sequence, int frameNr);
 
 void createDisplayLists(bool reduced=false);
 
+void updatePointModeControls();
 void changePointMode(int dummy);
 void mapColorToValue(int dummy);
 void changeColorMap(int dummy);
@@ -106,10 +110,13 @@ void saveSelection(int dummy);
 void clearSelection(int dummy);
 
 void updateControls();
-void updatePointModeControls();
 void updateTopViewControls();
 void resetRotationButton();
 void updateCamControls();
+bool isInterrupted();
+void checkForInterrupt();
+void interruptDrawing();
+void cycleLOD();
 
 enum { ROTATION_X, ROTATION_RX, ROTATION_Y, ROTATION_RY, ROTATION_Z, ROTATION_RZ };
   /** enumeration for translation */

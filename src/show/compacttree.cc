@@ -633,11 +633,6 @@ void compactTree::setColorManager(ColorManager *_cm) { cm = _cm; }
 
 void compactTree::drawLOD(float ratio) { 
     switch (current_lod_mode) {
-      case 0:
-        glBegin(GL_POINTS);
-        displayOctTreeCulledLOD(maxtargetpoints * ratio, *root, center, size); 
-        glEnd();
-        break;
       case 1:
         glBegin(GL_POINTS);
         displayOctTreeCulledLOD2(ratio , *root, center, size);
@@ -658,7 +653,12 @@ void compactTree::drawLOD(float ratio) {
         }
 #endif
 */
-      break;
+      //break;
+      case 0:
+        glBegin(GL_POINTS);
+        displayOctTreeCulledLOD(maxtargetpoints * ratio, *root, center, size); 
+        glEnd();
+        break;
       default:
       break;
     }

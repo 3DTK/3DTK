@@ -19,7 +19,7 @@ public:
   int getHeight();
     
   void render(wxPaintEvent& evt);
-  void paint(); 
+  void paint(bool interruptable=false); 
   void prepare3DViewport(int topleft_x, int topleft_y, int bottomrigth_x, int bottomrigth_y);
     
   // events

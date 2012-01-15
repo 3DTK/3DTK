@@ -23,6 +23,20 @@ endif()
 # Declare Options and modify build accordingly ##
 #################################################
 
+## FreeGLUT 
+IF(UNIX)
+  OPTION(WITH_FREEGLUT "Whether freeglut is available. This enables iterative drawing in show. ON/OFF" ON)
+ELSE(UNIX)
+  OPTION(WITH_FREEGLUT "Whether freeglut is available. This enables iterative drawing in show. ON/OFF" OFF)
+ENDIF(UNIX)
+
+IF(WITH_FREEGLUT)
+  MESSAGE(STATUS "With freeglut")
+  SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DWITH_FREEGLUT")
+ELSE(WITH_FREEGLUT)
+  MESSAGE(STATUS "Without freeglut")
+ENDIF(WITH_FREEGLUT)
+
 ## Show 
 OPTION(WITH_SHOW "Whether to build Show. This is the Visualization program of slam6d. ON/OFF" ON)
 

@@ -42,6 +42,29 @@ void updateTopViewControls() {
   }
 }
 
+
+void updateControls() {
+  glui1->sync_live();
+  glui1->show();
+  glui2->sync_live();
+  glui2->show();
+}
+
+static bool interrupted = false;
+void interruptDrawing() {
+  interrupted = true;
+}
+void checkForInterrupt() {
+  interrupted = false;
+}
+bool isInterrupted() {
+#ifdef WITH_FREEGLUT
+  glutMainLoopEvent(); 
+#endif
+  glutSetWindow(window_id);
+  return interrupted;
+}
+
 void updatePointModeControls() {
   switch(pointmode) {
     case -1:
@@ -57,12 +80,4 @@ void updatePointModeControls() {
       never_box->set_int_val(0);
       break;
   }
-}
-
-
-void updateControls() {
-  glui1->sync_live();
-  glui1->show();
-  glui2->sync_live();
-  glui2->show();
 }
