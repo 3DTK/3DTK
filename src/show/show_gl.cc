@@ -4,11 +4,9 @@
 #include "show/scancolormanager.h"
 
 bool fullydisplayed = true;   // true if all points have been drawn to the screen
-bool showall = false;         // true iff next DrawPoints should redraw scene with all points
 bool mousemoving = false;     // true iff a mouse button has been pressed inside a window, but hs not been released
-bool delayeddisplay = false;  // true iff mouse button callbacks should redraw the scene after button release
+bool keypressed = false;     // true iff a key button has been pressed inside a window, but hs not been released
 double ptstodisplay = 100000;  
-float ratio = 0.0001;
 double lastfps = idealfps;    // last frame rate    
 int pointmode = -1;
 
@@ -19,14 +17,14 @@ bool label = true;
  * Displays all data (i.e., points) that are to be displayed
  * @param mode spezification for drawing to screen or in selection mode
  */
-void DrawPoints(GLenum mode)
+void DrawPoints(GLenum mode, bool interruptable)
 {
   long time = GetCurrentTimeInMilliSec();
   double min = 0.000000001;
   double max = 1.0;
-  ratio *= 1.0 + adaption_rate*(lastfps - idealfps)/idealfps;
-  if (ratio > max) ratio = max;
-  else if (ratio < min) ratio = min;
+  LevelOfDetail *= 1.0 + adaption_rate*(lastfps - idealfps)/idealfps;
+  if (LevelOfDetail > max) LevelOfDetail = max;
+  else if (LevelOfDetail < min) LevelOfDetail = min;
 
   // In case of animation
   if(frameNr != 0) {
@@ -47,10 +45,10 @@ void DrawPoints(GLenum mode)
 #ifdef USE_GL_POINTS
         ExtractFrustum(pointsize);
         cm->selectColors(MetaAlgoType[iterator][frameNr]);
-        if (pointmode == 1 || (showall && pointmode == 0) ) {
+        if (pointmode == 1 ) {
           octpts[iterator]->display();
         } else {
-          octpts[iterator]->displayLOD(ratio);
+          octpts[iterator]->displayLOD(LevelOfDetail);
         }
 #else
       for (unsigned int jterator = 0; jterator < vvertexArrayList[iterator].size(); jterator++) {
@@ -98,10 +96,17 @@ void DrawPoints(GLenum mode)
       // draw point is normal mode
       // -------------------------
 
+      if (interruptable) {
+        glDrawBuffer (GL_FRONT);
+      }
       glPointSize(pointsize);
 
+      vector<int> sequence;
+      calcPointSequence(sequence, current_frame);
 #ifdef USE_GL_POINTS
-      for(int iterator = (int)octpts.size()-1; iterator >= 0; iterator--) {
+      //for(int iterator = (int)octpts.size()-1; iterator >= 0; iterator--) {
+      for(unsigned int i = 0; i < sequence.size(); i++) {
+        int iterator = sequence[i];
 #else
       for(int iterator = (int)Scan::allScans.size()-1; iterator >= 0; iterator--) {
 #endif
@@ -128,11 +133,20 @@ void DrawPoints(GLenum mode)
       glUniformMatrix4fvARB(glGetUniformLocationARB(p, "MYMAT"), 1, 0, v);
       */
         ExtractFrustum(pointsize);
-        if (pointmode == 1 || (showall && pointmode == 0) ) {
+        if (pointmode == 1 ) {
           octpts[iterator]->display();
           //octpts[iterator]->displayOctTree(pointsize * pointsize * 5);
+        } else if (interruptable) {
+          checkForInterrupt();
+          glFlush();
+          glFinish();
+          if (isInterrupted()) {
+            glPopMatrix();
+            return;
+          }
+          octpts[iterator]->display();
         } else {
-          octpts[iterator]->displayLOD(ratio);
+          octpts[iterator]->displayLOD(LevelOfDetail);
         }
         if (!selected_points[iterator].empty()) {
           glColor4f(1.0, 0.0, 0.0, 1.0);
@@ -158,7 +172,8 @@ void DrawPoints(GLenum mode)
     }
   }
 
-  if (pointmode == 1 || (showall && pointmode == 0) ) {
+
+  if (pointmode == 1 ) {
     fullydisplayed = true;
   } else {
     unsigned long td = (GetCurrentTimeInMilliSec() - time);
@@ -168,7 +183,8 @@ void DrawPoints(GLenum mode)
       lastfps = 1000.0;
     fullydisplayed = false;
   }
-  showall = false;         
+  if (interruptable)
+    fullydisplayed = true;
 }
 
 
@@ -351,7 +367,7 @@ void DrawCameras(void)
 /**
  * Dispaly function
  */
-void DisplayItFunc(GLenum mode)
+void DisplayItFunc(GLenum mode, bool interruptable)
 {
   /**
    * Color of the fog 
@@ -372,7 +388,9 @@ void DisplayItFunc(GLenum mode)
     glClearColor(1.0, 1.0, 1.0, 1.0);
 
   // clear the color and depth buffer bit
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  if (!interruptable) { // single buffer mode, we need the depth buffer
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  }
 
   glPushMatrix();
 
@@ -435,12 +453,12 @@ void DisplayItFunc(GLenum mode)
     glEnable(GL_FOG);
     {
       // ln(1/2^8) = -5.54517744 -> threshold at which the last color bit is gone due to fog
-      if (show_fog==1) {fogMode = GL_EXP; fardistance = min(5.54517744 / fogDensity, maxfardistance);}
-      else if (show_fog==2) {fogMode = GL_EXP2; fardistance = min(sqrt(5.54517744) / fogDensity, maxfardistance);}
+      if (show_fog==1) {fogMode = GL_EXP; fardistance = min(5.54517744 / fogDensity, (double)maxfardistance);}
+      else if (show_fog==2) {fogMode = GL_EXP2; fardistance = min(sqrt(5.54517744) / fogDensity, (double)maxfardistance);}
       else if (show_fog==3) {fogMode = GL_LINEAR; fardistance = 32000.0;}
-      else if (show_fog==4) {fogMode = GL_EXP; fardistance =    maxfardistance; }
-      else if (show_fog==5) {fogMode = GL_EXP2; fardistance =   maxfardistance; }
-      else if (show_fog==6) {fogMode = GL_LINEAR; fardistance = maxfardistance;}
+      else if (show_fog==4) {fogMode = GL_EXP; fardistance =    (double)maxfardistance; }
+      else if (show_fog==5) {fogMode = GL_EXP2; fardistance =   (double)maxfardistance; }
+      else if (show_fog==6) {fogMode = GL_LINEAR; fardistance = (double)maxfardistance;}
       glFogi(GL_FOG_MODE, fogMode);
       glFogfv(GL_FOG_COLOR, fogColor);
       glFogf(GL_FOG_DENSITY, fogDensity);
@@ -468,10 +486,6 @@ void DisplayItFunc(GLenum mode)
   // using the drawing functions
   //
   // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-  // if show points is true the draw points
-  if (show_points == 1) DrawPoints(mode);
-
 
   if(show_path == 1) {
     double *pose;
@@ -508,8 +522,15 @@ void DisplayItFunc(GLenum mode)
   }
   DrawObjects(mode);
   
-  glPopMatrix();
+  //glPopMatrix();
   if(label) DrawUrl();
+  
+  
+  // if show points is true the draw points
+  if (show_points == 1) DrawPoints(mode, interruptable);
+  
+  
+  glPopMatrix();
 
   if (!invert) {
     glDisable(GL_COLOR_LOGIC_OP);
@@ -750,7 +771,7 @@ void CallBackDisplayFunc()
   // delete framebuffer and z-buffer
 
   //Call the display function
-  DisplayItFunc(GL_RENDER);
+  DisplayItFunc(GL_RENDER );
   
   // show the rednered scene
   glutSwapBuffers(); 
@@ -775,8 +796,16 @@ void CallBackIdleFunc(void)
   if(glutGetWindow() != window_id)
     glutSetWindow(window_id);
 	 
-  // return is nothing has to be updated
-  if (haveToUpdate == 0) return;
+  // return as nothing has to be updated
+  if (haveToUpdate == 0) {
+    if (!fullydisplayed && !mousemoving && !keypressed && pointmode == 0
+        ) {
+      glDrawBuffer(buffermode);
+      //Call the display function
+      DisplayItFunc(GL_RENDER, true);
+    }
+    return;
+  }
 
   // case: display is invalid - update it
   if (haveToUpdate == 1) {
@@ -785,12 +814,12 @@ void CallBackIdleFunc(void)
     return;
   }
   // case: display is invalid - update it with all points
-  if (haveToUpdate == 7) {
+/*  if (haveToUpdate == 7) {
     showall = true;
     glutPostRedisplay();
     haveToUpdate = 0;
     return;
-  }
+  }*/
 
   // case: camera angle is changed - instead of repeating code call Reshape,
   // since these OpenGL commands are the same
@@ -1040,24 +1069,24 @@ void selectPoints(int x, int y) {
     glLoadIdentity();
 
     // do the model-transformation
-    if (cameraNavMouseMode == 1) {
-      glRotated( mouseRotX, 1, 0, 0);
-      glRotated( mouseRotY, 0, 1, 0);
-      glRotated( mouseRotZ, 0, 0, 1);
-    } else {
-      double t[3] = {0,0,0};
-      double mat[16];
-      QuatToMatrix4(quat, t, mat);
-      glMultMatrixd(mat);
+  if (cameraNavMouseMode == 1) {
+    glRotated( mouseRotX, 1, 0, 0);
+    glRotated( mouseRotY, 0, 1, 0);
+    glRotated( mouseRotZ, 0, 0, 1);
+  } else {
+    double t[3] = {0,0,0};
+    double mat[16];
+    QuatToMatrix4(quat, t, mat);
+    glMultMatrixd(mat);
 
-      glGetFloatv(GL_MODELVIEW_MATRIX, view_rotate_button);
-      double rPT[3];
-      Matrix4ToEuler(mat, rPT);
-      mouseRotX = deg(rPT[0]);
-      mouseRotY = deg(rPT[1]);
-      mouseRotZ = deg(rPT[2]);
-    }
-    updateControls();
+    glGetFloatv(GL_MODELVIEW_MATRIX, view_rotate_button);
+    double rPT[3];
+    Matrix4ToEuler(mat, rPT);
+    mouseRotX = deg(rPT[0]);
+    mouseRotY = deg(rPT[1]);
+    mouseRotZ = deg(rPT[2]);
+  }
+  updateControls();
     glTranslated(X, Y, Z);       // move camera	
 
     static sfloat *sp2 = 0;
@@ -1131,30 +1160,7 @@ void CallBackMouseFuncMoving(int button, int state, int x, int y)
     mousemoving = true;
   } else {
     mousemoving = false;
-    if (delayeddisplay) {
-      delayeddisplay = false;
-      if (fullydisplayed) return;
-      if (haveToUpdate == 6 || haveToUpdate == 3 || haveToUpdate == 4) return;
-      haveToUpdate = 7;
-    }
   }
-}
-
-
-void CallBackEntryFunc(int state) {
-  if (state == GLUT_LEFT) {
-      if (mousemoving) {  // mouse button was pressed, delay redisplay
-        delayeddisplay = true;
-      } 
-      else {
-        if (fullydisplayed ) return;
-        if (haveToUpdate == 6 || haveToUpdate == 3 || haveToUpdate == 4) return;
-        haveToUpdate = 7;
-      }
-  } else if (state == GLUT_ENTERED) {
-      showall = false;
-  }
-  
 }
 
 
@@ -1179,18 +1185,13 @@ void CallBackMouseFunc(int button, int state, int x, int y)
     } else {
       mouseNavButton = -1;
       mousemoving = false;
-      if (delayeddisplay) {
-        delayeddisplay = false;
-        if (fullydisplayed) return;
-        if (haveToUpdate == 6 || haveToUpdate == 3 || haveToUpdate == 4) return;
-        haveToUpdate = 7;
-      }
     }
   }
 }
 
 
 void moveCamera(double x, double y, double z, double rotx, double roty, double rotz) {
+  interruptDrawing();
   double mat[9];
   
   double xr = M_PI * mouseRotX / 180; 
@@ -1356,9 +1357,10 @@ void initScreenWindow()
   
   glutMouseFunc  ( CallBackMouseFunc );
   glutKeyboardFunc ( CallBackKeyboardFunc);
+  glutKeyboardUpFunc ( CallBackKeyboardUpFunc);
   glutMotionFunc ( CallBackMouseMotionFunc); 
   glutSpecialFunc ( CallBackSpecialFunc);
-  glutEntryFunc ( CallBackEntryFunc);
+//  glutEntryFunc ( CallBackEntryFunc);
   GLUI_Master.set_glutReshapeFunc( CallBackReshapeFunc );
   GLUI_Master.set_glutIdleFunc( CallBackIdleFunc );
 
@@ -1513,7 +1515,6 @@ void glWriteImagePPM(const char *filename, int scale, GLenum mode)
         if(!showTopView) {
           glFrustum(width, width + part_width, height, height + part_height,
           1.0, 40000.0);
-          showall = true;
           glMatrixMode(GL_MODELVIEW);
           if(i==0 && j==0) {
             label = true; 
@@ -1836,7 +1837,27 @@ void CallBackInterfaceFunc(unsigned char key, int x, int y) {
   InterfaceFunc(key);
 }
 
+void CallBackKeyboardUpFunc(unsigned char key, int x, int y) {
+  keymap[key] = false;
+  if (key >= 'A' && key <= 'Z') {
+    keymap[key+ ('a'-'A')] = false;
+  }
+  if (key >= 'a' && key <= 'z') {
+    keymap[key+ ('A'-'a')] = false;
+  }
+
+  for (unsigned int i = 0; i < 256; i++) {
+    if (keymap[i]) {
+      keypressed = true;
+      return;
+    }
+  }
+  keypressed = false;
+}
+
 void CallBackKeyboardFunc(unsigned char key, int x, int y) {
+  keymap[key] = true;
+  keypressed = true;
   bool cmd,alt,shift;
   cmd = glutGetModifiers() & GLUT_ACTIVE_CTRL;
   alt = glutGetModifiers() & GLUT_ACTIVE_ALT;
@@ -1953,9 +1974,29 @@ void changePointMode(int dummy) {
       pointmode = 0;
     }
   }
-  updatePointModeControls();
+    updatePointModeControls();
 }
+
 
 void callCameraUpdate(int dummy) {
   updateCamera();
+}
+
+void calcPointSequence(vector<int> &sequence, int frameNr) {
+  sequence.clear();
+  vector<pair<double, int> > dists;
+  double x,y,z;
+ 
+  for (unsigned int i = 0; i < octpts.size(); i++) {
+    x = MetaMatrix[i][frameNr][12];
+    y = MetaMatrix[i][frameNr][13];
+    z = MetaMatrix[i][frameNr][14];
+    dists.push_back( pair<double, int>(sqr(X + x) + sqr(Y + y) + sqr(Z + z), i) );
+  }
+
+  sort( dists.begin(), dists.end());
+
+  for (unsigned int i = 0; i < dists.size(); i++) {
+    sequence.push_back( dists[i].second);
+  }
 }

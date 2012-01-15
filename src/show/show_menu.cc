@@ -27,6 +27,10 @@ GLUI_Spinner    *image_spinner;
 GLUI_Spinner    *depth_spinner;
 GLUI_Spinner    *brushsize_spinner;
 GLUI_Spinner    *frame_spinner;
+GLUI_Spinner    *fps_spinner;
+GLUI_Spinner    *farplane_spinner;
+GLUI_Spinner    *nearplane_spinner;
+GLUI_Spinner    *lod_spinner;
 
 int window_id_menu1, ///< menue window ids
     window_id_menu2; ///< menue window ids
@@ -122,7 +126,6 @@ void newMenu()
   glutSetWindow(window_id_menu2);
 
   glutPositionWindow(START_X, START_Y + START_HEIGHT + 65);
-  glutEntryFunc ( CallBackEntryFunc);
   glutSetWindow(window_id);
   glui2->set_main_gfx_window( window_id );
 
@@ -192,17 +195,15 @@ void newMenu()
   
   static int dummy4;
   always_box = glui2->add_checkbox_to_panel(nav_panel, "Always all Points", &dummy4, 0, &changePointMode);
+  glui2->set_glutMouseFunc(CallBackMouseFuncMoving);
   static int dummy5 = 1;
   never_box =  glui2->add_checkbox_to_panel(nav_panel, "Always reduce Points", &dummy5, 1, &changePointMode );
-  
-  glui2->set_glutMouseFunc(CallBackMouseFuncMoving);
   
   /*** Create the right subwindow ***/
   glui1 = GLUI_Master.create_glui("3D_Viewer - Selection");
   window_id_menu1 = glui1->get_glut_window_id();
   glutSetWindow(window_id_menu1);
   glutPositionWindow(START_X + START_WIDTH + 50, START_Y + 30);
-  glutEntryFunc ( CallBackEntryFunc);
   glutSetWindow(window_id);
   glui1->set_main_gfx_window( window_id );
 
@@ -370,12 +371,32 @@ GLUI_SPINNER_INT, &factor);
     frame_spinner->set_speed( 10 );
     frame_spinner->set_alignment(GLUI_ALIGN_RIGHT);
 
-    frame_spinner = glui1->add_spinner_to_panel(advanced_panel, "FPS :   ",
+    fps_spinner = glui1->add_spinner_to_panel(advanced_panel, "FPS :   ",
         GLUI_SPINNER_FLOAT, &idealfps);
-    frame_spinner->set_int_limits( 0, 100 );
-    frame_spinner->set_speed( 1 );
-    frame_spinner->set_alignment(GLUI_ALIGN_RIGHT);
+    fps_spinner->set_int_limits( 0, 100 );
+    fps_spinner->set_speed( 1 );
+    fps_spinner->set_alignment(GLUI_ALIGN_RIGHT);
 
+    farplane_spinner = glui1->add_spinner_to_panel(advanced_panel, "farplane :   ",
+        GLUI_SPINNER_FLOAT, &maxfardistance);
+    farplane_spinner->set_float_limits( 1, 100000 );
+    farplane_spinner->set_speed( 1 );
+    farplane_spinner->set_alignment(GLUI_ALIGN_RIGHT);
+    
+    nearplane_spinner = glui1->add_spinner_to_panel(advanced_panel, "nearplane :   ",
+        GLUI_SPINNER_FLOAT, &neardistance);
+    nearplane_spinner->set_int_limits( 1, 100000 );
+    nearplane_spinner->set_speed( 1 );
+    nearplane_spinner->set_alignment(GLUI_ALIGN_RIGHT);
+
+    glui1->add_button_to_panel(advanced_panel, "Cycle LOD", 0,(GLUI_Update_CB)cycleLOD )->set_alignment( GLUI_ALIGN_CENTER );
+
+    lod_spinner = glui1->add_spinner_to_panel(advanced_panel, "lod speed :   ",
+        GLUI_SPINNER_FLOAT, &adaption_rate);
+    lod_spinner->set_float_limits( 0, 3.0 );
+    lod_spinner->set_speed( 0.1 );
+    lod_spinner->set_alignment(GLUI_ALIGN_RIGHT);
+    
     glui1->add_separator();
   }
 

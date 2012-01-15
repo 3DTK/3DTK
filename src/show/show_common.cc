@@ -164,6 +164,8 @@ double mouseRotX = 0.0;
 double mouseRotY = 0.0;
 double mouseRotZ = 0.0;
 
+bool keymap[256];
+
 //@@@
 //int animate_both         = 0;             // Animate both scan matchin and path?
 
@@ -195,9 +197,9 @@ int current_height = START_HEIGHT;
 
 
 // the following values are scale dependant, i.e. all values are in m
-double neardistance = 0.10;
+float neardistance = 0.10;
 double oldneardistance = 0.10;
-double maxfardistance = 400.0;; 
+float maxfardistance = 400.0;; 
 double fardistance = 400.0;
 double oldfardistance = 40000.0;
 double movementSpeed = 0.1;
@@ -207,6 +209,7 @@ double voxelSize = 0.20;
 
 
 float adaption_rate = 1.0;
+float LevelOfDetail = 0.0001;
 
 
 // Defines for Point Semantic
@@ -776,6 +779,7 @@ void createDisplayLists(bool reduced)
 }
 
 void cycleLOD() {
+  LevelOfDetail = 0.00001;
   for (unsigned int i = 0; i < octpts.size(); i++)
     octpts[i]->cycleLOD();
 }
@@ -968,4 +972,8 @@ void initShow(int argc, char **argv){
   
   // sets (and computes if necessary) the pose that is used for the reset button
   setResetView(origin);
+
+  for (unsigned int i = 0; i < 256; i++) {
+    keymap[i] = false;
+  }
 }
