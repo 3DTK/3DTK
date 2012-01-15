@@ -539,8 +539,27 @@ void BasicGLPane::idle() {
   if(glutGetWindow() != window_id)
     glutSetWindow(window_id);
 	 
+  /*
+  static unsigned long start = GetCurrentTimeInMilliSec();
   // return as nothing has to be updated
-  if (haveToUpdate == 0) return;
+  if (haveToUpdate == 0) {
+    if ((GetCurrentTimeInMilliSec()-start) > 100) {
+      paint(true);
+      start = GetCurrentTimeInMilliSec();
+    }
+    return;
+  }
+  start = GetCurrentTimeInMilliSec();
+  */
+  if (haveToUpdate == 0) {
+    if (!fullydisplayed && !mousemoving && !keypressed) {
+      glDrawBuffer(buffermode);
+      //Call the display function
+      DisplayItFunc(GL_RENDER, true);
+    }
+    return;
+  }
+  
 
   // case: display is invalid - update it
   if (haveToUpdate == 1) {
@@ -549,12 +568,13 @@ void BasicGLPane::idle() {
     return;
   }
   // case: display is invalid - update it with all points
-  if (haveToUpdate == 7) {
+/*if (haveToUpdate == 7) {
     showall = true;
     paint();
     haveToUpdate = 0;
     return;
   }
+  */
 
   // case: camera angle is changed - instead of repeating code call Reshape,
   // since these OpenGL commands are the same
@@ -647,7 +667,7 @@ void BasicGLPane::idle() {
 void BasicGLPane::idle_event(wxIdleEvent& event)
 {
   idle();
-  event.RequestMore();
+  //event.RequestMore();
 }
 
 void BasicGLPane::mouseMoved(wxMouseEvent& event) 
@@ -656,7 +676,7 @@ void BasicGLPane::mouseMoved(wxMouseEvent& event)
   int y = event.GetY();
 
   CallBackMouseMotionFunc(x, y);
-  idle();
+  //idle();
 }
 void BasicGLPane::mouseDown(wxMouseEvent& event) {}
 void BasicGLPane::mouseWheelMoved(wxMouseEvent& event) {}
@@ -754,7 +774,7 @@ void BasicGLPane::render( wxPaintEvent& evt )
 }
 
 
-void BasicGLPane::paint( )
+void BasicGLPane::paint(bool interruptable)
 {
     if(!IsShown()) return;
     wxGLCanvas::SetCurrent(*m_context);
@@ -764,18 +784,34 @@ void BasicGLPane::paint( )
     // delete framebuffer and z-buffer
 
     //Call the display function
-    DisplayItFunc(GL_RENDER);
+    DisplayItFunc(GL_RENDER, interruptable);
 
     // show the rednered scene
-    SwapBuffers(); 
+    if (!interruptable) { // interruptible draw is single buffered
+      SwapBuffers();
+    }
+//    ProcessPendingEvents();
 }
 
 
 void updateControls() {
   globalGUI->updateControls();
 }
-
 void updatePointModeControls() {}
 void updateTopViewControls() {}
 void resetRotationButton() {}
 void updateCamControls() {}
+
+static bool interrupted;
+
+void interruptDrawing() {
+  interrupted = true;
+}
+void checkForInterrupt() {
+  interrupted = false;
+}
+bool isInterrupted() {
+  globalGUI->Dispatch();
+  globalGUI->ProcessPendingEvents();
+  return interrupted;
+}
