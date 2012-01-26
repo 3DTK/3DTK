@@ -1513,8 +1513,7 @@ void glWriteImagePPM(const char *filename, int scale, GLenum mode)
         glLoadIdentity();
         label = false;
         if(!showTopView) {
-          glFrustum(width, width + part_width, height, height + part_height,
-          1.0, 40000.0);
+          glFrustum(neardistance*width, neardistance*(width + part_width), neardistance*(height), neardistance*(height + part_height), neardistance, fardistance);
           glMatrixMode(GL_MODELVIEW);
           if(i==0 && j==0) {
             label = true; 
