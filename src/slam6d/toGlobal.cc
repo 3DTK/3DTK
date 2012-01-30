@@ -53,7 +53,7 @@ int parseArgs(int argc,char **argv, char dir[255], int& start, int& end){
 
   if (optind != argc-1) {
     cerr << "\n*** Directory missing ***" << endl;
-    abort();
+    exit(0);
   }
   strncpy(dir,argv[optind],255);
 
