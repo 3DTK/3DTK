@@ -195,7 +195,7 @@ class ColorManager {
     
     
     void convertToTexture1D() {
-      unsigned char imageData[(buckets+1) * 3];
+      unsigned char *imageData = new unsigned char[(buckets+1) * 3];
       for (unsigned int i = 0; i < buckets; i++) {
         imageData[3*i+0] = colormap[i][0]*255;
         imageData[3*i+1] = colormap[i][1]*255;
@@ -213,6 +213,7 @@ class ColorManager {
       glTexParameteri (GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
       glTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
       glTexImage1D (GL_TEXTURE_1D, 0, GL_RGB, buckets+1, 0, GL_RGB, GL_UNSIGNED_BYTE, imageData);
+	  delete[] imageData;
     }
 
     void makeValid() {

@@ -11,9 +11,10 @@ using std::ofstream;
 #include <string.h>
 
 #ifndef _MSC_VER
+#include <getopt.h>
 #include <unistd.h>
 #else
-#include "..\Visual_Studio_Projects\6D_SLAM\XGetopt.h"
+#include "XGetopt.h"
 #endif
 
 int parseArgs(int argc,char **argv, char dir[255], int& start, int& end){
