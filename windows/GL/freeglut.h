@@ -1,8 +1,8 @@
-#ifndef  __GLUT_H__
-#define  __GLUT_H__
+#ifndef  __FREEGLUT_H__
+#define  __FREEGLUT_H__
 
 /*
- * glut.h
+ * freeglut.h
  *
  * The freeglut library include file
  *
@@ -15,7 +15,8 @@
  */
 
 #include "freeglut_std.h"
+#include "freeglut_ext.h"
 
 /*** END OF FILE ***/
 
-#endif /* __GLUT_H__ */
+#endif /* __FREEGLUT_H__ */
