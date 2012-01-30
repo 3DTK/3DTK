@@ -1118,11 +1118,13 @@ void Scan::readScansRedSearch(reader_type type,
   int _fileNr;
   scanIOwrapper my_ScanIO(type);
 
+#ifndef _MSC_VER 
 #ifdef _OPENMP
 #pragma omp parallel
   {
 #pragma omp single nowait
     {
+#endif
 #endif
       // read Scan-by-scan until no scan is available anymore
       while ((_fileNr = my_ScanIO.readScans(start, end, dir, maxDist, minDist, eu, ptss)) != -1) {
@@ -1133,8 +1135,10 @@ void Scan::readScansRedSearch(reader_type type,
         ptss.clear();                  // clear points
         allScans.push_back(currentScan);
 
+#ifndef _MSC_VER 
 #ifdef _OPENMP
 #pragma omp task
+#endif
 #endif
         {
           cout << "reducing scan " << currentScan->fileNr << " and creating searchTree" << endl;
@@ -1144,10 +1148,12 @@ void Scan::readScansRedSearch(reader_type type,
           currentScan->createTree(nns_method, cuda_enabled);
         }
       }
+#ifndef _MSC_VER 
 #ifdef _OPENMP
     }
   }
 #pragma omp taskwait
+#endif
 #endif
 
   return;
