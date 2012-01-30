@@ -20,7 +20,6 @@ using std::swap;
 #include<cstdlib>
 #include<cmath>
 #include<cstring>
-#include <getopt.h>
 #include <errno.h>
 
 using namespace std;
@@ -29,6 +28,14 @@ using namespace std;
 #ifdef _MSC_VER
 #include <windows.h>
 #endif
+
+#ifndef _MSC_VER
+#include <getopt.h>
+#else
+#include "XGetopt.h"
+#endif
+
+
 #define BLOCK_OFFSET 42+16
 
 #define BLOCK_SIZE 1206

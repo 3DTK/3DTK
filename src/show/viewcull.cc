@@ -9,12 +9,12 @@
 #include <stdio.h>
 #include <math.h>
 
-//#include <GL/glut.h>
-//#include <GL/glu.h>
-
+#include <GL/glut.h>
+#include <GL/glu.h>
+/*
 #include <gl.h>
 #include <glut.h>
-
+*/
 #include "slam6d/globals.icc"
 
 /** The 6 planes of the viewing frustum */

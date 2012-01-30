@@ -14,9 +14,18 @@ using std::exception;
 
 #ifndef _MSC_VER
 #include <unistd.h>
-#else
-#include "..\Visual_Studio_Projects\6D_SLAM\XGetopt.h"
 #endif
+
+#ifdef _MSC_VER
+#include "XGetopt.h"
+#else
+#include <getopt.h>
+#endif
+
+#if WIN32
+#define snprintf sprintf_s
+#endif 
+
 
 int parseArgs(int argc,char **argv, char dir[255], int& start, int& end){
   start   = 0;
