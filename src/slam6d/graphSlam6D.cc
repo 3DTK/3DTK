@@ -49,7 +49,7 @@ graphSlam6D::graphSlam6D(icp6Dminimizer *my_icp6Dminimizer,
   this->epsilonLUM = epsilonLUM;
   this->max_dist_match2_LUM = sqr(max_dist_match);
 
-  ctime = 0.0;
+  ctime = 0;
 
   this->my_icp = new icp6D(my_icp6Dminimizer, mdm, max_num_iterations,
 					  quiet, meta, rnd, eP, anim, epsilonICP, nns_method);
