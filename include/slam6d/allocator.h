@@ -46,11 +46,11 @@ public:
         wastedspace += (chunksize-index);
         if (chunksize > size) {
           chunk = new unsigned char[chunksize];
-          bzero(chunk, chunksize);
+		  memset(chunk, 0, chunksize);
           memsize+=chunksize;
         } else {
           chunk = new unsigned char[size];
-          bzero(chunk, size);
+		  memset(chunk, 0, size);
           memsize+=size;
         }
         mem.push_back(chunk);
@@ -118,12 +118,12 @@ public:
       // no chunk is large enough... make new one
       if (chunksize > size) {
         chunk = new unsigned char[chunksize];
-        bzero(chunk, chunksize);
+        memset(chunk, 0, chunksize);
         memsize += chunksize;
       } else {   // in case the requested memory is larger than our chunks, make a single chunk thats large enough
         chunk = new unsigned char[size];
-        bzero(chunk, size);
-        memsize += size;
+        memset(chunk, 0, size);
+		memsize += size;
       }
       mem.push_back(chunk);
       index.push_back(size);

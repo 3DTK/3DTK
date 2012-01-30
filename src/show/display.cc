@@ -2,8 +2,7 @@
 //#include "show/viewcull.h"
 //#include "show/scancolormanager.h"
 
-#include <glut.h>
-#include <glu.h>
+//#include <glu.h>
 #include <glui.h>
 #include "show/display.h"
 #include "slam6d/globals.icc"
@@ -13,6 +12,15 @@ using std::ifstream;
 using std::cout;
 using std::cerr;
 using std::endl;
+
+#ifdef __APPLE__
+#include <GLUT/glut.h>
+#elif WITH_FREEGLUT
+#include <GL/freeglut.h>
+#else
+#include <GL/glut.h>
+#endif
+
 
 double SDisplay::mirror[16] = {1,0,0,0,
   0,1,0,0,
