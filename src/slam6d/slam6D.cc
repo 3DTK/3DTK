@@ -89,10 +89,12 @@ void sigSEGVhandler (int v)
       << "# **************************** #" << endl
       << endl
       << "Saving registration information in .frames files" << endl;
-    for (unsigned int i = 0; i < Scan::allScans.size(); i++) {
-      if (i % 2) cout << ".";
-      cout.flush();
-      delete Scan::allScans[i];
+    vector <Scan*>::iterator Iter = Scan::allScans.begin();
+    for( ; Iter != Scan::allScans.end(); ) {
+      Iter = Scan::allScans.begin();
+      delete (*Iter);
+      cout << ".";
+      cout.flush(); 
     }
     cout << endl;
   }
