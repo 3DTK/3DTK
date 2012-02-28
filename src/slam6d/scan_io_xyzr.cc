@@ -50,27 +50,36 @@ int ScanIO_xyzr::readScans(int start, int end, string &dir, int maxDist, int min
   int my_fileNr = fileCounter;
   
   if (end > -1 && fileCounter > end) return -1; // 'nuf read
+  /*
   scanFileName = dir + "scan" + to_string(fileCounter,3) + ".3d";
   poseFileName = dir + "scan" + to_string(fileCounter,3) + ".pose";
   
   scan_in.open(scanFileName.c_str());
   pose_in.open(poseFileName.c_str());
+  */
 
-  // read 3D scan
-  if (!pose_in.good() && !scan_in.good()) return -1; // no more files in the directory
-  if (!pose_in.good()) { 
-    cerr << "ERROR: Missing file " << poseFileName << endl; //exit(1); 
-    cerr << "using default pose 0,0,0 !!!" << endl;
-    for (unsigned int i = 0; i < 6; euler[i++] = 0.0);
-  } else {
-    for (unsigned int i = 0; i < 6; pose_in >> euler[i++]);
-  }
-  if (!scan_in.good()) { cerr << "ERROR: Missing file " << scanFileName << endl; exit(1); }
-  cout << "Processing Scan " << scanFileName;
+  scanFileName = dir + "konv_bremenc_" + to_string(fileCounter,3) + ".txt";
+  scan_in.open(scanFileName.c_str());
+  poseFileName = dir + "scan" + to_string(fileCounter,3) + ".pose";
+  pose_in.open(poseFileName.c_str());
   
+  // read 3D scan
+  //  if (!pose_in.good() && !scan_in.good()) return -1; // no more files in the directory
+ if (!scan_in.good()) return -1; // no more files in the directory
+ cout << "Processing Scan " << scanFileName;
+  
+ if (pose_in.good()) {
+     for (unsigned int i = 0; i < 6; pose_in >> euler[i++]);
 
-  cout << " @ pose (" << euler[0] << "," << euler[1] << "," << euler[2]
-	  << "," << euler[3] << "," << euler[4] << ","  << euler[5] << ")" << endl;
+	// convert angles from deg to rad
+	for (unsigned int i = 3; i <= 5; i++) euler[i] = rad(euler[i]);
+ } else {
+   cout << endl << "No pose estimate given." << endl;
+   for (unsigned int i = 0; i < 6; euler[i++] = 0.0);
+ }
+ 
+ cout << " @ pose (" << euler[0] << "," << euler[1] << "," << euler[2]
+	 << "," << deg(euler[3]) << "," << deg(euler[4]) << ","  << deg(euler[5]) << ")" << endl;
   
   // convert angles from deg to rad
   for (unsigned int i = 3; i <= 5; i++) euler[i] = rad(euler[i]);
@@ -78,12 +87,22 @@ int ScanIO_xyzr::readScans(int start, int end, string &dir, int maxDist, int min
   // overread the first line
   char dummy[255];
   scan_in.getline(dummy, 255);
-  
+
+  double tmp;
   while (scan_in.good()) {
     Point p;
     try {
 	 scan_in >> p;
-   scan_in >> p.reflectance;
+	 
+	 p.x -= 485531.0;
+	 p.y -= 5882078.400;
+	 p.z -= 52;
+
+	 tmp = p.z;
+	 p.z = p.y;
+	 p.y = tmp;
+	 
+	 scan_in >> p.reflectance;
     } catch (...) {
 	 break;
     }

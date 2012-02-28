@@ -765,6 +765,13 @@ int main(int argc, char **argv)
       my_icp = new icp6D(my_icp6Dminimizer, mdm, mni, quiet, meta, rand, eP,
 					anim, epsilonICP, nns_method, cuda_enabled);
     }
+
+    // check if CAD matching was selected as type
+    if (type == UOS_CAD)
+    {
+      my_icp->set_cad_matching (true);
+    }
+
     if (my_icp) my_icp->doICP(Scan::allScans);
     delete my_icp;
   } else if (clpairs > -1) {
