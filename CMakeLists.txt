@@ -4,7 +4,11 @@ project (Slam6D)
 
 
 #include_directories(OPENGL_INCLUDE_DIR)
-set(Boost_USE_STATIC_LIBS TRUE)
+IF(WIN32)
+  set(Boost_USE_STATIC_LIBS TRUE)
+ELSE(WIN32)
+  set(Boost_USE_STATIC_LIBS FALSE)
+ENDIF(WIN32)
 SET(Boost_ADDITIONAL_VERSIONS "1.42" "1.42.0" "1.44" "1.44.0" "1.45.0" "1.45" "1.47.0" "1.47")
 IF(WIN32)
   # for some unknown reason no one variant works on all windows platforms
@@ -170,6 +174,16 @@ ELSE(WITH_SCAN_DIFF)
   MESSAGE(STATUS "Without scan_diff")
 ENDIF(WITH_SCAN_DIFF)
 
+
+## CAD matching
+OPTION (WITH_CAD "Wether to build with CAD import lib ON/OFF" OFF)
+
+IF (WITH_CAD)
+  MESSAGE (STATUS "With CAD import")
+  find_package (Boost COMPONENTS program_options filesystem REQUIRED)
+ELSE (WITH_CAD)
+  MESSAGE (STATUS "Without CAD import")
+ENDIF (WITH_CAD)
 
 ## RivLib
 OPTION(WITH_RIVLIB "Whether the RIEGL rivlib is present ON/OFF" OFF)

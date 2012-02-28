@@ -1056,6 +1056,7 @@ bool Scan::toType(const char* string, reader_type &type) {
   else if (strcasecmp(string, "stl") == 0) type = STL;
   else if (strcasecmp(string, "pcl") == 0) type = PCL;
   else if (strcasecmp(string, "pci") == 0) type = PCI;
+  else if (strcasecmp(string, "cad") == 0) type = UOS_CAD;
   else return false;
   return true;
 }
@@ -1265,6 +1266,9 @@ Scan::scanIOwrapper::scanIOwrapper(reader_type type){
     break;
   case PCI:
     lib_string = "scan_io_pci";
+    break;
+  case UOS_CAD:
+    lib_string = "scan_io_cad";
     break;
   default:
     cerr << "Don't recognize format " << type << endl;
