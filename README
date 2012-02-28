@@ -56,8 +56,8 @@ bin/show dat
 
 (using hannover1.tgz from http://kos.informatik.uni-osnabrueck.de/3Dscans/)
 bin/slam6D -s 1 -e 65 -r 10 -i 100 -d 75 -D 250 --epsICP=0.00001 
-           -I 50 --cldist=750 -L 0 -G 1 dat_hannover1
-bin/show -s 1 -e 65 dat_hannover1
+           -I 50 --cldist=750 -L 0 -G 1 /home/nuechter/dat/dat_hannover1
+bin/show -s 1 -e 65 /home/nuechter/dat/dat_hannover1
 
 (using hannover2.tgz from http://kos.informatik.uni-osnabrueck.de/3Dscans/)
 bin/slam6D -q -r 10 -f rts -s 23 -d 75 -L 4 --cldist=1500 -G 1 -D -1
@@ -66,22 +66,22 @@ bin/show -f rts -s 23 hannover2
 
 (using kvarntorp_mine.tgz (dat_mine1) form http://kos.informatik.uni-osnabrueck.de/3Dscans/)
 bin/slam6D -s 1 -e 76 -r 10 -m 3000 -d 50 -i 1000 --epsICP=0.000001 
-           -I 50 -D 75 --clpairs=5000 -f old dat_mine1
-bin/show -s 1 -e 76 -m 3000 -f old dat_mine1
+           -I 50 -D 75 --clpairs=5000 -f old /home/nuechter/dat/dat_mine1/
+bin/show -s 1 -e 76 -m 3000 -f old /home/nuechter/dat/dat_mine1/
 
 (using bremen_city.zip from http://kos.informatik.uni-osnabrueck.de/3Dscans/)
-bin/scan_red -s 0 -e 12 -r 10 bremen_city
-bin/slam6D -a 2 -q bremen_city/reduced -f uos -d 150  
-            -s 0 -e 12 --anim=1 -n bremen_city/bremen.net -G 1 -D 100 
+bin/scan_red -s 0 -e 12 -r 10 /home/nuechter/dat/bremen_city
+bin/slam6D -a 2 -q /home/nuechter/dat/bremen_city/reduced -f uos -d 150  
+            -s 0 -e 12 --anim=1 -n /home/nuechter/dat/bremen_city/bremen.net -G 1 -D 100 
             -i 0 -I 50 -p --epsSLAM=0.0 
-bin/show -s 0 -e 12 bremen_city/reduced
+bin/show -s 0 -e 12 /home/nuechter/dat/bremen_city/reduced
 
 (using UniKoblenz_CampusTour3_OsnabrueckFormat.tar.gz from
 http://kos.informatik.uni-osnabrueck.de/3Dscans/)
 bin/slam6D -s 1 -e 320 -r 20 -i 300 --epsICP=0.000001 -d 45 -D 45
            -f uos --algo=2 -l 10 -L 4 -I 100 -G 1
-            UniKoblenz_CampusTour3_OsnabrueckFormat
-bin/show -s 1 -e 320 -f uos UniKoblenz_CampusTour3_OsnabrueckFormat
+            /home/nuechter/dat/UniKoblenz_CampusTour3_OsnabrueckFormat/
+bin/show -s 1 -e 320 -f uos /home/nuechter/dat/UniKoblenz_CampusTour3_OsnabrueckFormat/		  
 -------------------------------------------------------------------
 
 For detecting planes compile with the WITH_PLANE option.
@@ -99,8 +99,8 @@ RhoMax              5000
 MaxPointPlaneDist   50.0 
 MinPlaneSize        50
 PointDist           100.0  
-/bin/planes -f riegl_txt -s 0 dat/bremen_city/ -r 50 -O 1 -m 5000
-/bin/show -s 0 -e 0 dat/bremen_city/ -f riegl_txt -l dat/planes/planes.list -r 10 -O 1 -m 5000
+/bin/planes -f riegl_txt -s 0 /home/nuechter/dat/bremen_city/ -r 50 -O 1 -m 5000
+/bin/show -s 0 -e 0 /home/dborrman/Jacobs/dat/bremen_city/ -f riegl_txt -l dat/planes/planes.list -r 10 -O 1 -m 5000
 
 ------------------------------------------------
 A reference manual can be found in doc/refman.pdf resp.
