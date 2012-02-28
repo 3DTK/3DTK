@@ -38,7 +38,8 @@ using std::cerr;
  */
 icp6D::icp6D(icp6Dminimizer *my_icp6Dminimizer, double max_dist_match,
 		   int max_num_iterations, bool quiet, bool meta, int rnd, bool eP,
-		   int anim, double epsilonICP, int nns_method, bool cuda_enabled)
+		   int anim, double epsilonICP, int nns_method, bool cuda_enabled,
+       bool cad_matching)
 {
   this->my_icp6Dminimizer = my_icp6Dminimizer;
   this->anim              = anim;
@@ -70,6 +71,7 @@ icp6D::icp6D(icp6Dminimizer *my_icp6Dminimizer, double max_dist_match,
   
   // Set initial seed (for "real" random numbers)
   //  srand( (unsigned)time( NULL ) );
+  this->cad_matching = cad_matching;
 }
 
 /**
@@ -331,12 +333,16 @@ void icp6D::doICP(vector <Scan *> allScans)
 
     if (i > 0) {
       if (meta) {
-	   match(my_MetaScan, CurrentScan);
-      } else {
-	   match(PreviousScan, CurrentScan);
+        match(my_MetaScan, CurrentScan);
+      }
+      else if (cad_matching) {
+        match (allScans[0], CurrentScan);
+      }
+      else {
+        match(PreviousScan, CurrentScan);
       }
     }
-    
+
     // push processed scan
     if ( meta && i != allScans.size()-1 ) {
       MetaScan.push_back(CurrentScan);

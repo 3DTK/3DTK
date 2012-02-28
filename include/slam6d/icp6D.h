@@ -37,7 +37,8 @@ public:
 	   int anim = -1,
 	   double epsilonICP = 0.0000001,
 	   int nns_method = simpleKD,
-	   bool cuda_enabled = false);
+	   bool cuda_enabled = false,
+     bool cad_matching = false);
   
   /**
    * Destructor (empty, but needed, because virtual)
@@ -58,6 +59,8 @@ public:
   inline double get_max_dist_match2();
   inline void set_max_dist_match2(double max_dist_match2);
   inline void set_max_num_iterations(int max_num_iterations);
+  inline void set_cad_matching (bool cad_matching);
+  inline bool get_cad_matching (void);
   
 protected:
 
@@ -120,6 +123,11 @@ protected:
    * Maximum number of points in all scans
    */
   unsigned int max_scn_size; //FIXME -> update with metascan
+
+  /**
+   * determines if CAD models are matched against one scan
+   */
+  bool cad_matching;
 };
 
 #include "icp6D.icc"
