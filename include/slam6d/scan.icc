@@ -119,3 +119,26 @@ inline void Scan::resetPose()
   M4identity(dalignxf);
 }
 
+/**
+ * Sets the file Nr
+ */
+inline void Scan::setFileNr(int _fileNr)
+{
+  fileNr = _fileNr;
+}
+
+/**
+ * Gets the file Nr
+ */
+inline int Scan::getFileNr() const
+{
+  return fileNr;
+}
+
+/**
+ * Gets the inital odometry psoe
+ */
+inline const double * Scan::getTransMatOrg() const
+{
+  return transMatOrg;
+}

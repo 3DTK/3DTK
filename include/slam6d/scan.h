@@ -14,6 +14,7 @@
 #define  _USE_MATH_DEFINES
 #endif
 
+#include <cstring>
 #include <string>
 using std::string;
 #include <vector>
@@ -34,7 +35,7 @@ using std::stringstream;
 
 
 enum reader_type {
-  UOS, UOS_MAP, UOS_FRAMES, UOS_MAP_FRAMES, UOS_RGB, OLD, RTS, RTS_MAP, RIEGL_TXT, RIEGL_PROJECT, RIEGL_RGB, RIEGL_BIN, IFP, ZAHN, PLY, WRL, XYZ, ZUF, ASC, IAIS, FRONT, X3D, RXP, KIT, AIS, OCT, TXYZR, XYZR, XYZ_RGB, KS, KS_RGB, STL, LEICA, PCL, PCI, UOS_CAD };
+  UOS, UOS_MAP, UOS_FRAMES, UOS_MAP_FRAMES, UOS_RGB, OLD, RTS, RTS_MAP, RIEGL_TXT, RIEGL_PROJECT, RIEGL_RGB, RIEGL_BIN, IFP, ZAHN, PLY, WRL, XYZ, ZUF, ASC, IAIS, FRONT, X3D, RXP, KIT, AIS, OCT, TXYZR, XYZR, XYZ_RGB, KS, KS_RGB, STL, LEICA, PCL, PCI, UOS_CAD, VELODYNE, VELODYNE_FRAMES };
 
 enum nns_type {
   simpleKD, cachedKD, ANNTree, BOCTree //, NaboKD
@@ -148,11 +149,15 @@ public:
 						   double voxelSize, int nrpts, // reduction parameters
 						   int nns_method, bool cuda_enabled, 
 						   bool openFileForWriting = false);  
+
   inline const vector <Point>* get_points() const;
   inline double* const* get_points_red() const;
   inline void setPoints(vector <Point> *_points);
   inline double* const* get_points_reduced() const;
-
+  inline void setFileNr(int _fileNr);
+  inline int  getFileNr() const;
+  inline const double * getTransMatOrg() const;
+  
   inline void clearPoints();
 
   //FIXME
@@ -161,8 +166,7 @@ public:
   inline const double* getDAlign_inv() const;
   inline double** get_org_points_red() const;
 
-private:
-
+protected:
 
   class scanIOwrapper : public ScanIO {
     public:
@@ -292,11 +296,12 @@ private:
    * The actual scan number
    */
   unsigned int scanNr;
+  
   /**
    * The actual file number for the *.frames file
    */
   int fileNr;
-
+  
   /*
    * The stringstream sout buffers the frame file. It will be written to disk at
    * once at the end of the program. This reduces file operations and saves time.
