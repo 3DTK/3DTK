@@ -136,6 +136,15 @@ ELSE(WITH_GRIDDER)
   MESSAGE(STATUS "Without 2DGridder")
 ENDIF(WITH_GRIDDER)
 
+## Dynamic VELOSLAM
+OPTION(WITH_VELOSLAM "Whether to build the VeloSLAM binary ON/OFF" ON)
+
+IF(WITH_VELOSLAM)
+  MESSAGE(STATUS "With VELOSLAM")
+ELSE(WITH_VELOSLAM)
+  MESSAGE(STATUS "Without VELOSLAM")
+ENDIF(WITH_VELOSLAM)
+
 ## Home-made Laserscanner 
 OPTION(WITH_DAVID_3D_SCANNER "Whether to build the David scanner app for homemade laser scanners binary ON/OFF" OFF)
 
@@ -364,8 +373,8 @@ link_directories(${CMAKE_SOURCE_DIR}/lib)
 
 add_subdirectory(3rdparty)
 add_subdirectory(src/slam6d)
+add_subdirectory(src/veloslam)
 add_subdirectory(src/show)
-#add_subdirectory(src/wxshow)
 add_subdirectory(src/grid)
 add_subdirectory(src/pmd)
 add_subdirectory(src/shapes)
