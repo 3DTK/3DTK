@@ -713,8 +713,8 @@ int main(int argc, char **argv)
   //@@@ to do :-)
 
   // Get Scans
-  Scan::readScansRedSearch(type, start, end, dir,
-					  maxDist, minDist, red, octree, nns_method, cuda_enabled, true);
+  VeloScan::readScansRedSearch(type, start, end, dir,
+						 maxDist, minDist, red, octree, nns_method, cuda_enabled, true);
   
   icp6Dminimizer *my_icp6Dminimizer = 0;
   switch (algo) {
