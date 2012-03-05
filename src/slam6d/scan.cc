@@ -48,7 +48,6 @@ using std::stringstream;
 #include <strings.h>
 #endif
 
-#include <cstring>
 using std::flush;
 
 vector <Scan *>  Scan::allScans;
@@ -1057,6 +1056,8 @@ bool Scan::toType(const char* string, reader_type &type) {
   else if (strcasecmp(string, "pcl") == 0) type = PCL;
   else if (strcasecmp(string, "pci") == 0) type = PCI;
   else if (strcasecmp(string, "cad") == 0) type = UOS_CAD;
+  else if (strcasecmp(string, "velodyne") == 0) type = VELODYNE;
+  else if (strcasecmp(string, "velodyne_frames") == 0) type = VELODYNE_FRAMES;
   else return false;
   return true;
 }
@@ -1270,9 +1271,15 @@ Scan::scanIOwrapper::scanIOwrapper(reader_type type){
   case UOS_CAD:
     lib_string = "scan_io_cad";
     break;
+  case VELODYNE:
+    lib_string = "scan_io_velodyne";
+    break;
+  case VELODYNE_FRAMES:
+    lib_string = "scan_io_velodyne_frames";
+    break;
   default:
     cerr << "Don't recognize format " << type << endl;
-    exit(1);
+    return;
   }
 
 #ifdef WIN32
