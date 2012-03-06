@@ -37,8 +37,8 @@ public:
    * @param threadNum If parallel threads share the search tree the thread num must be given
    * @return Pointer to closest point 
    */
-  virtual double *FindClosest(double *_p, double maxdist2, int threadNum = 0);
-  double *_FindClosest(double *_p);
+  virtual double *FindClosest(double *_p, double maxdist2, int threadNum = 0) const;
+  double *_FindClosest(double *_p) const;
 
    void outputTree();
    int _outputTree();

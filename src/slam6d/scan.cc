@@ -622,7 +622,7 @@ void Scan::trim(double top, double bottom)
  * reduced points as the centers of the octree voxels.
  * @param voxelSize The maximal size of each voxel
  */
-void Scan::calcReducedPoints(double voxelSize, int nrpts)
+void Scan::calcReducedPoints(double voxelSize, int nrpts, PointType pointtype)
 {
   // no reduction needed
   // copy vector of points to array of points to avoid
@@ -658,7 +658,7 @@ void Scan::calcReducedPoints(double voxelSize, int nrpts)
     ptsOct[num_pts][2] = points[i].z;
     num_pts++;
   }
-  BOctTree<double> *oct = new BOctTree<double>(ptsOct, num_pts, voxelSize);
+  BOctTree<double> *oct = new BOctTree<double>(ptsOct, num_pts, voxelSize, pointtype);
 
   vector<double*> center;
   center.clear();

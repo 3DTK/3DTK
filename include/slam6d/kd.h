@@ -51,7 +51,7 @@ public:
     }
   }
 
-  double *FindClosest(double *_p, double maxdist2, int threadNum = 0);
+  double *FindClosest(double *_p, double maxdist2, int threadNum = 0) const;
 
 private:
   /**
@@ -105,7 +105,7 @@ private:
     } leaf;
   };
 
-  void _FindClosest(int threadNum);
+  void _FindClosest(int threadNum) const;
 };
 
 #endif

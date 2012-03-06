@@ -46,7 +46,7 @@ public:
   * @param threadNum Thread number, for parallelization
   * @return Pointer to the closest point
   */  
-  double *FindClosest(double *_p, double maxdist2, int threadNum = 0);
+  double *FindClosest(double *_p, double maxdist2, int threadNum = 0) const;
 
 private:
 

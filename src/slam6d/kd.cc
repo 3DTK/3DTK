@@ -121,7 +121,7 @@ KDtree::KDtree(double **pts, int n)
  * @param threadNum Thread number, for parallelization
  * @return Pointer to the closest point
  */
-double *KDtree::FindClosest(double *_p, double maxdist2, int threadNum)
+double *KDtree::FindClosest(double *_p, double maxdist2, int threadNum) const
 {
   params[threadNum].closest = 0;
   params[threadNum].closest_d2 = maxdist2;
@@ -133,7 +133,7 @@ double *KDtree::FindClosest(double *_p, double maxdist2, int threadNum)
 /**
  * Wrapped function 
  */
-void KDtree::_FindClosest(int threadNum)
+void KDtree::_FindClosest(int threadNum) const
 {
   // Leaf nodes
   if (npts) {

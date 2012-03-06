@@ -28,6 +28,7 @@ using std::stringstream;
 
 #include "slam6d/ptpair.h"
 #include "slam6d/point.h"
+#include "slam6d/point_type.h"
 #include "slam6d/searchTree.h"
 #include "slam6d/kdcache.h"
 #include "slam6d/globals.icc"
@@ -87,7 +88,7 @@ public:
 				   const AlgoType type, int islum = 0);
   
   void toGlobal(double voxelSize, int nrpts);
-  void calcReducedPoints(double voxelSize, int nrpts = 0);
+  void calcReducedPoints(double voxelSize, int nrpts = 0, PointType _pointtype = PointType());
   void trim(double top, double bottom);
   
   void createTree(int nns_method, bool cuda_enabled);
@@ -154,6 +155,7 @@ public:
   inline double* const* get_points_red() const;
   inline void setPoints(vector <Point> *_points);
   inline double* const* get_points_reduced() const;
+  inline const SearchTree *get_tree() const;
   inline void setFileNr(int _fileNr);
   inline int  getFileNr() const;
   inline const double * getTransMatOrg() const;
