@@ -944,9 +944,9 @@ protected:
       depth++;
     }
   }
-  NNParams params[100];
+  static NNParams params[100];
 
-  void childcenter(T *pcenter, T *ccenter, T size, unsigned char i) {
+  void childcenter(T *pcenter, T *ccenter, T size, unsigned char i) const {
     switch (i) {
       case 0:  // 000
         ccenter[0] = pcenter[0] - size / 2.0;
@@ -992,7 +992,7 @@ protected:
         break;
     }
   }
-void childcenter(int x, int y, int z, int &cx, int &cy, int &cz, char i, int size) {
+void childcenter(int x, int y, int z, int &cx, int &cy, int &cz, char i, int size) const {
   switch (i) {
     case 0:  // 000
       cx = x - size ;
@@ -1095,7 +1095,7 @@ inline unsigned char childIndex(const T *center, const P *point) {
    * Given a leaf node, this function looks for the closest point to params[threadNum].closest
    * in the list of points.
    */
-  inline void findClosestInLeaf(bitunion<T> *node, int threadNum) {
+  inline void findClosestInLeaf(bitunion<T> *node, int threadNum) const {
     if (params[threadNum].count >= params[threadNum].max_count) return;
     params[threadNum].count++;
     T* points = node->getPoints();
@@ -1124,7 +1124,7 @@ inline unsigned char childIndex(const T *center, const P *point) {
  * several calculations have to be performed repeatedly and a high number of
  * unnecessary jumps are executed.
  */
-  double *FindClosest(double *point, double maxdist2, int threadNum)
+  double *FindClosest(double *point, double maxdist2, int threadNum) const
   {
     params[threadNum].closest = 0; // no point found currently
     params[threadNum].closest_d2 = maxdist2;
@@ -1198,7 +1198,7 @@ inline unsigned char childIndex(const T *center, const P *point) {
    * Depending on which of the 8 child-voxels is closer to the query point, the children are examined in a special order.
    * This order is defined in map, imap is its inverse and sequence2ci is a speedup structure for faster access to the child indices. 
    */
-  void _FindClosest(int threadNum, bitoct &node, int size, int x, int y, int z)
+  void _FindClosest(int threadNum, bitoct &node, int size, int x, int y, int z) const
   {
     // Recursive case
    
@@ -1402,4 +1402,7 @@ char BOctTree<T>::imap[8][8] = {
         {5, 3, 7, 6, 1, 0, 4, 2 },
         {5, 7, 3, 6, 1, 4, 0, 2 },
         {7, 5, 6, 3, 4, 1, 2, 0 } };
+
+template <class T>
+NNParams BOctTree<T>::params[100];
 #endif

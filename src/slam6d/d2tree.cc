@@ -261,7 +261,7 @@ void D2Tree::updateChilds(double *pts, D2Tree **child,
 //  }    
 }
 
-double *D2Tree::_FindClosest(double *p)
+double *D2Tree::_FindClosest(double *p) const
 {
   if (isleaf) {
     return closest_point;
@@ -292,7 +292,7 @@ double *D2Tree::_FindClosest(double *p)
   return 0;
 }
 
-double *D2Tree::FindClosest(double *p, double maxdist2, int threadNum)
+double *D2Tree::FindClosest(double *p, double maxdist2, int threadNum) const
 {
   double *pp = 0;
   
