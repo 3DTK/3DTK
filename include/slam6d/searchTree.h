@@ -64,7 +64,7 @@ public:
    * @param threadNum If parallel threads share the search tree the thread num must be given
    * @return Pointer to closest point 
    */
-  virtual double *FindClosest(double *_p, double maxdist2, int threadNum = 0) = 0;
+  virtual double *FindClosest(double *_p, double maxdist2, int threadNum = 0) const = 0 ;
 
   
   virtual void getPtPairs(vector <PtPair> *pairs, 
@@ -128,7 +128,7 @@ public:
    * @return A new cach Item
    */
   virtual SearchTreeCacheItem* FindClosestCache(double *_p, double maxdist2, int threadNum = 0) = 0;
-  double *FindClosest(double *_p, double maxdist2, int threadNum = 0) {
+  double *FindClosest(double *_p, double maxdist2, int threadNum = 0) const {
     return 0; 
   }
 };

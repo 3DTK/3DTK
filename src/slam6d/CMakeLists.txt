@@ -13,13 +13,16 @@ ENDIF(WITH_SCAN_REDUCTION)
 
 IF(WITH_SCAN_DIFF) 
   add_executable(scan_diff scan_diff.cc)
+  add_executable(scan_diff2d scan_diff2d.cc ../show/colormanager.cc)
   
   IF(UNIX)
     target_link_libraries(scan_diff scanlib dl ANN)
+    target_link_libraries(scan_diff2d scanlib dl ANN)
   ENDIF(UNIX)
 
   IF (WIN32)
     target_link_libraries(scan_diff scanlib ANN XGetopt)
+    target_link_libraries(scan_diff2d scanlib ANN XGetopt)
   ENDIF(WIN32)
 ENDIF(WITH_SCAN_DIFF)
 

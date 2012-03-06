@@ -62,7 +62,7 @@ ANNtree::~ANNtree()
  * @param threadNum Thread number, for parallelization
  * @return Pointer to the closest point
  */  
-double *ANNtree::FindClosest(double *_p, double maxdist2, int threadNum)
+double *ANNtree::FindClosest(double *_p, double maxdist2, int threadNum) const
 {
 
 #pragma omp critical

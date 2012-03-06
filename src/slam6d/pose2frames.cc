@@ -97,6 +97,8 @@ int main(int argc, char **argv)
     // convert angles from deg to rad
     for (unsigned int i=0; i < 3; i++) rPosTheta[i] = rad(rPosTheta[i]);
 
+    cerr << rPos[0] << " " << rPos[1] << " " << rPos[2] << endl;
+
     pose_in.close();
     pose_in.clear();
 

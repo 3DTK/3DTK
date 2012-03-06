@@ -41,6 +41,10 @@ inline double* const* Scan::get_points_reduced() const
   return (double* const*)points_red;
 }
 
+inline const SearchTree* Scan::get_tree() const
+{
+  return kd;
+}
 inline void Scan::clearPoints() {
   points.clear();
   vector<Point>().swap(points);  //  swap trick, forces STL to free the memory
