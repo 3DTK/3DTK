@@ -181,6 +181,9 @@ void VeloScan::readScans(reader_type type,
     currentScan->setPoints(&ptss);    // copy points
     ptss.clear();                   // clear points
     allScans.push_back(currentScan);
+    cout << "removing dynamic objects ... ";
+    currentScan->GetAllofObject();
+    cout << "done" << endl;
   }
   return;
 }

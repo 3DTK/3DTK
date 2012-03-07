@@ -7,7 +7,11 @@
 #include "show/compacttree.h"
 #include "show/NurbsPath.h"
 #include "show/vertexarray.h"
+#ifndef DYNAMIC_OBJECT_REMOVAL
 #include "slam6d/scan.h"
+#else
+#include "veloslam/veloscan.h"
+#endif
 #include "glui/glui.h"  /* Header File For The glui functions */
 #include <fstream>
 using std::ifstream;
@@ -635,11 +639,11 @@ int readFrames(string dir, int start, int end, bool readInitial, reader_type &ty
       catch (const exception &e) {   
         break;
       }
-      Matrices.push_back(transMatOpenGL);
-      algoTypes.push_back(algoType);
+	 Matrices.push_back(transMatOpenGL);
+	 algoTypes.push_back(algoType);
     }
-    MetaAlgoType.push_back(algoTypes);
 
+    MetaAlgoType.push_back(algoTypes);
     MetaMatrix.push_back(Matrices);
 
     if((type == UOS_MAP || type == UOS_MAP_FRAMES || type == RTS_MAP) && fileCounter == start+1) {
@@ -865,7 +869,11 @@ void initShow(int argc, char **argv){
 
   // Get Scans
   if (!loadOct) {
+#ifndef DYNAMIC_OBJECT_REMOVAL
     Scan::readScans(type, start, end, dir, maxDist, minDist, 0);
+#else
+    VeloScan::readScans(type, start, end, dir, maxDist, minDist, 0);
+#endif
   } else {
     cout << "Skipping files.." << endl;
   }
@@ -875,8 +883,6 @@ void initShow(int argc, char **argv){
   } else {
     if (r) generateFrames(start, start + octpts.size() - 1, true); 
   }
-
- 
   
   int end_reduction = (int)Scan::allScans.size();
   #ifdef _OPENMP

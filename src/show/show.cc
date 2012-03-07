@@ -42,7 +42,7 @@ void updateTopViewControls() {
   }
 }
 
-
+  
 void updateControls() {
   glui1->sync_live();
   glui1->show();
