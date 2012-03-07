@@ -65,15 +65,6 @@ ELSE(WITH_XWSHOW)
   MESSAGE(STATUS "Without wxshow")
 ENDIF(WITH_WXSHOW)
 
-IF(WITH_SHOW)
-  FIND_PACKAGE(OpenGL REQUIRED)
-  FIND_PACKAGE(GLUT REQUIRED)
-  MESSAGE(STATUS "With show")
-ELSE(WITH_SHOW)
-  #  SET (WITH_OCTREE_DISPLAY "ON" CACHE INTERNAL "" FORCE)
-  MESSAGE(STATUS "Without show")
-ENDIF(WITH_SHOW)
-
 ## Shapes
 OPTION(WITH_SHAPE_DETECTION "Whether to build shapes and planes executable for detecting planes. ON/OFF" OFF)
 IF(WITH_SHAPE_DETECTION)
@@ -137,7 +128,7 @@ ELSE(WITH_GRIDDER)
 ENDIF(WITH_GRIDDER)
 
 ## Dynamic VELOSLAM
-OPTION(WITH_VELOSLAM "Whether to build the VeloSLAM binary ON/OFF" ON)
+OPTION(WITH_VELOSLAM "Whether to build the Velodyne data processing (veloslam/veloshow) ON/OFF" OFF)
 
 IF(WITH_VELOSLAM)
   MESSAGE(STATUS "With VELOSLAM")

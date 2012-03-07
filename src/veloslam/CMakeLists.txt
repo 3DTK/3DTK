@@ -1,6 +1,6 @@
 IF(WITH_VELOSLAM)
   add_executable(veloslam veloslam.cc veloscan.cc)
-
+  
 IF(UNIX)
   target_link_libraries(veloslam dl scanlib newmat sparse ANN)
 ENDIF(UNIX)
