@@ -6,7 +6,7 @@
  * @author Andreas Nuechter. Jacobs University Bremen, Germany
  */
 
-#ifdef _MSC_VER 
+#ifdef _MSC_VER
 #ifdef OPENMP
 #define _OPENMP
 #endif
@@ -50,7 +50,7 @@ using std::flush;
  * default Constructor
  */
 VeloScan::VeloScan()
-  : Scan()
+    : Scan()
 { }
 
 /**
@@ -60,11 +60,11 @@ VeloScan::VeloScan()
  * transformation matrices when match (default: false)
  */
 VeloScan::VeloScan(const double* euler, int maxDist)
-  : Scan(euler, maxDist)
+    : Scan(euler, maxDist)
 { }
 
 VeloScan::VeloScan(const double _rPos[3], const double _rPosTheta[3], vector<double *> &pts)
-  : Scan(_rPos, _rPosTheta, pts)
+    : Scan(_rPos, _rPosTheta, pts)
 { }
 
 /**
@@ -74,7 +74,7 @@ VeloScan::VeloScan(const double _rPos[3], const double _rPosTheta[3], vector<dou
  * @param maxDist Regard only points up to an (Euclidean) distance of maxDist
  */
 VeloScan::VeloScan(const double _rPos[3], const double _rPosTheta[3], const int maxDist)
-  : Scan(_rPos, _rPosTheta, maxDist) 
+    : Scan(_rPos, _rPosTheta, maxDist)
 { }
 
 /**
@@ -88,52 +88,55 @@ VeloScan::VeloScan(const double _rPos[3], const double _rPosTheta[3], const int 
  */
 VeloScan::VeloScan(const vector < VeloScan* >& MetaScan, int nns_method, bool cuda_enabled)
 {
-  kd = 0;
-  ann_kd_tree = 0;
-  scanNr = numberOfScans++;
-  rPos[0] = 0;
-  rPos[1] = 0;
-  rPos[2] = 0;
-  rPosTheta[0] = 0;
-  rPosTheta[1] = 0;
-  rPosTheta[2] = 0;
-  M4identity(transMat);
-  M4identity(transMatOrg);
-  M4identity(dalignxf);
+    kd = 0;
+    ann_kd_tree = 0;
+    scanNr = numberOfScans++;
+    rPos[0] = 0;
+    rPos[1] = 0;
+    rPos[2] = 0;
+    rPosTheta[0] = 0;
+    rPosTheta[1] = 0;
+    rPosTheta[2] = 0;
+    M4identity(transMat);
+    M4identity(transMatOrg);
+    M4identity(dalignxf);
 
-  // copy points
-  int numpts = 0;
-  int end_loop = (int)MetaScan.size();
-  for (int i = 0; i < end_loop; i++) {
-    numpts += MetaScan[i]->points_red_size;
-  }
-  points_red_size = numpts;
-  points_red = new double*[numpts];  
-  int k = 0;
-  for (int i = 0; i < end_loop; i++) {
-    for (int j = 0; j < MetaScan[i]->points_red_size; j++) {
-	 points_red[k] = new double[3];
-	 points_red[k][0] = MetaScan[i]->points_red[j][0];
-	 points_red[k][1] = MetaScan[i]->points_red[j][1];
-	 points_red[k][2] = MetaScan[i]->points_red[j][2];
-	 k++;
+    // copy points
+    int numpts = 0;
+    int end_loop = (int)MetaScan.size();
+    for (int i = 0; i < end_loop; i++)
+    {
+        numpts += MetaScan[i]->points_red_size;
     }
-  }
+    points_red_size = numpts;
+    points_red = new double*[numpts];
+    int k = 0;
+    for (int i = 0; i < end_loop; i++)
+    {
+        for (int j = 0; j < MetaScan[i]->points_red_size; j++)
+        {
+            points_red[k] = new double[3];
+            points_red[k][0] = MetaScan[i]->points_red[j][0];
+            points_red[k][1] = MetaScan[i]->points_red[j][1];
+            points_red[k][2] = MetaScan[i]->points_red[j][2];
+            k++;
+        }
+    }
 
-  fileNr = -1; // no need to store something from a meta scan!
-  scanNr = numberOfScans++;
+    fileNr = -1; // no need to store something from a meta scan!
+    scanNr = numberOfScans++;
 
-  // build new search tree
-  createTree(nns_method, cuda_enabled);
-  // update max num point in scan iff you have to do so
-  if (points_red_size > (int)max_points_red_size) max_points_red_size = points_red_size;
+    // build new search tree
+    createTree(nns_method, cuda_enabled);
+    // update max num point in scan iff you have to do so
+    if (points_red_size > (int)max_points_red_size) max_points_red_size = points_red_size;
 
-  // add Scan to ScanList
-  allScans.push_back(this);
+    // add Scan to ScanList
+    allScans.push_back(this);
 
-  meta_parts = MetaScan;
+    meta_parts = MetaScan;
 }
-  
+
 /**
  * Desctuctor
  */
@@ -144,104 +147,106 @@ VeloScan::~VeloScan()
  * Copy constructor
  */
 VeloScan::VeloScan(const VeloScan& s)
-  : Scan(s)
+    : Scan(s)
 { }
 
 /**
- * Reads specified scans from given directory. 
- * Scan poses will NOT be initialized after a call 
- * to this function. It loads a shared lib where the 
+ * Reads specified scans from given directory.
+ * Scan poses will NOT be initialized after a call
+ * to this function. It loads a shared lib where the
  * actual file processing takes place
- * 
+ *
  * @param type Specifies the type of the flies to be loaded
  * @param start Starts to read with this scan
  * @param end Stops with this scan
  * @param _dir The drectory containing the data
  * @param maxDist Reads only Points up to this distance
  * @param minDist Reads only Points from this distance
- * @param openFileForWriting Opens .frames files to store the 
+ * @param openFileForWriting Opens .frames files to store the
  *        scan matching results
  */
 void VeloScan::readScans(reader_type type,
-					int start, int end, string &_dir, int maxDist, int minDist, 
-					bool openFileForWriting)
+                         int start, int end, string &_dir, int maxDist, int minDist,
+                         bool openFileForWriting)
 {
-  outputFrames = openFileForWriting;
-  dir = _dir;
-  double eu[6] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
-  vector <Point> ptss;
-  int _fileNr;
-  scanIOwrapper my_ScanIO(type);
+    outputFrames = openFileForWriting;
+    dir = _dir;
+    double eu[6] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+    vector <Point> ptss;
+    int _fileNr;
+    scanIOwrapper my_ScanIO(type);
 
-  // read Scan-by-scan until no scan is available anymore
-  while ((_fileNr = my_ScanIO.readScans(start, end, dir, maxDist, minDist, eu, ptss)) != -1) {
-    VeloScan *currentScan = new VeloScan(eu, maxDist);
-    
-    currentScan->setFileNr(_fileNr);
-    currentScan->setPoints(&ptss);    // copy points
-    ptss.clear();                   // clear points
-    allScans.push_back(currentScan);
-    cout << "removing dynamic objects ... ";
-    currentScan->GetAllofObject();
-    cout << "done" << endl;
-  }
-  return;
+    // read Scan-by-scan until no scan is available anymore
+    while ((_fileNr = my_ScanIO.readScans(start, end, dir, maxDist, minDist, eu, ptss)) != -1)
+    {
+        VeloScan *currentScan = new VeloScan(eu, maxDist);
+
+        currentScan->setFileNr(_fileNr);
+        currentScan->setPoints(&ptss);    // copy points
+        ptss.clear();                   // clear points
+        allScans.push_back(currentScan);
+        cout << "removing dynamic objects ... ";
+        currentScan->GetAllofObject();
+        cout << "done" << endl;
+    }
+    return;
 }
 
 
 void VeloScan::readScansRedSearch(reader_type type,
-		     int start, int end, string &_dir, int maxDist, int minDist, 
-						double voxelSize, int nrpts, // reduction parameters
-						int nns_method, bool cuda_enabled, 
-						bool openFileForWriting)
+                                  int start, int end, string &_dir, int maxDist, int minDist,
+                                  double voxelSize, int nrpts, // reduction parameters
+                                  int nns_method, bool cuda_enabled,
+                                  bool openFileForWriting)
 {
-  outputFrames = openFileForWriting;
-  dir = _dir;
-  double eu[6] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
-  vector <Point> ptss;
-  int _fileNr;
-  scanIOwrapper my_ScanIO(type);
+    outputFrames = openFileForWriting;
+    dir = _dir;
+    double eu[6] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+    vector <Point> ptss;
+    int _fileNr;
+    scanIOwrapper my_ScanIO(type);
 
-#ifndef _MSC_VER 
+#ifndef _MSC_VER
 #ifdef _OPENMP
-#pragma omp parallel
-  {
-#pragma omp single nowait
+    #pragma omp parallel
     {
-#endif
-#endif
-      // read Scan-by-scan until no scan is available anymore
-      while ((_fileNr = my_ScanIO.readScans(start, end, dir, maxDist, minDist, eu, ptss)) != -1) {
-        VeloScan *currentScan = new VeloScan(eu, maxDist);
-	   currentScan->setFileNr(_fileNr);
-	   currentScan->setPoints(&ptss);    // copy points
-        ptss.clear();                  // clear points
-        allScans.push_back(currentScan);
-
-#ifndef _MSC_VER 
-#ifdef _OPENMP
-#pragma omp task
-#endif
-#endif
+        #pragma omp single nowait
         {
-          cout << "removing dynamic objects, reducing scan " << currentScan->getFileNr() << " and creating searchTree" << endl;
-		currentScan->GetAllofObject();
-		currentScan->calcReducedPoints(voxelSize, nrpts);
-          currentScan->transform(currentScan->getTransMatOrg(), INVALID); //transform points to initial position
-		currentScan->clearPoints();
-		currentScan->createTree(nns_method, cuda_enabled);
-		
-        }
-      }
-#ifndef _MSC_VER 
+#endif
+#endif
+            // read Scan-by-scan until no scan is available anymore
+            while ((_fileNr = my_ScanIO.readScans(start, end, dir, maxDist, minDist, eu, ptss)) != -1)
+            {
+                VeloScan *currentScan = new VeloScan(eu, maxDist);
+                currentScan->setFileNr(_fileNr);
+                currentScan->setPoints(&ptss);    // copy points
+                ptss.clear();                  // clear points
+                allScans.push_back(currentScan);
+
+#ifndef _MSC_VER
 #ifdef _OPENMP
+                #pragma omp task
+#endif
+#endif
+                {
+                    cout << "removing dynamic objects, reducing scan " << currentScan->getFileNr() << " and creating searchTree" << endl;
+                    currentScan->GetAllofObject();
+                    currentScan->calcReducedPoints(voxelSize, nrpts);
+                    currentScan->transform(currentScan->getTransMatOrg(), INVALID); //transform points to initial position
+                    currentScan->clearPoints();
+                    currentScan->createTree(nns_method, cuda_enabled);
+
+                }
+            }
+#ifndef _MSC_VER
+#ifdef _OPENMP
+        }
     }
-  }
-#pragma omp taskwait
+    #pragma omp taskwait
 #endif
 #endif
 
-  return;
+    return;
 }
 
 /*
@@ -259,96 +264,96 @@ int VeloScan::CalcRadAndTheta()
 }
 */
 
- /*
+/*
 void VeloScan::SaveAllofObject()
 {
-		for(unsigned int i=0; i<scanClusterArray.size();++i)
-		{
-			//è¿åŠ¨ç›®æ ‡çš„ç‰¹å¾ç»“æ„
-			clusterFeature &glu=scanClusterFeatureArray[i];
-			cluster &gluData=scanClusterArray[i];
-			if(glu.size_x>1500 || glu.size_y>1500 || glu.size_x*glu.size_y >600*600 )
-       			SaveObjectsInPCD(noofframe*1000 + i, gluData );
-		}
+	for(unsigned int i=0; i<scanClusterArray.size();++i)
+	{
+		//ÔË¶¯Ä¿±êµÄÌØÕ÷½á¹¹
+		clusterFeature &glu=scanClusterFeatureArray[i];
+		cluster &gluData=scanClusterArray[i];
+		if(glu.size_x>1500 || glu.size_y>1500 || glu.size_x*glu.size_y >600*600 )
+      			SaveObjectsInPCD(noofframe*1000 + i, gluData );
+	}
 }
- */
-  /*
+*/
+/*
 void VeloScan::SaveNoObjectPointCloud()
 {
-	//int i,j,k;
-	//char filename[256]; 
-	//pcl::PointCloud<pcl::PointXYZ> cloud;
-	//pcl::PointXYZ point;
-	//cloud.height   = 1;
-	//cloud.is_dense = false;
+//int i,j,k;
+//char filename[256];
+//pcl::PointCloud<pcl::PointXYZ> cloud;
+//pcl::PointXYZ point;
+//cloud.height   = 1;
+//cloud.is_dense = false;
 
-	////æ¯ä¸ªClusterä¸‹é¢æœ‰å‡ ä¸ªCellï¼Œæ¯ä¸ªCellæœ‰å¾ˆå¤šç‚¹
-	//int startofpoint  = 0;
-	//int colMax=  scanCellFeatureArray.size();
-	//for(i=0; i<colMax; ++i)
-	//{ 
-	//	cellFeatureColumn  &gFeatureCol =	scanCellFeatureArray[i];
-	//	int rowMax= gFeatureCol.size();
-	//	for(j=0;j< rowMax; ++j)
-	//	{
-	//	   cellFeature &gcellFreature =  gFeatureCol[j];
-	//	   if( !(gcellFreature.cellType & CELL_TYPE_FOR_SLAM6D))
-	//		   continue;
+////Ã¿¸öClusterÏÂÃæÓĞ¼¸¸öCell£¬Ã¿¸öCellÓĞºÜ¶àµã
+//int startofpoint  = 0;
+//int colMax=  scanCellFeatureArray.size();
+//for(i=0; i<colMax; ++i)
+//{
+//	cellFeatureColumn  &gFeatureCol =	scanCellFeatureArray[i];
+//	int rowMax= gFeatureCol.size();
+//	for(j=0;j< rowMax; ++j)
+//	{
+//	   cellFeature &gcellFreature =  gFeatureCol[j];
+//	   if( !(gcellFreature.cellType & CELL_TYPE_FOR_SLAM6D))
+//		   continue;
 
-	//	   startofpoint += gcellFreature.pCell->size();
-	//	   cell &gCell =*( gcellFreature.pCell);
-	//	   for( k=0; k< gcellFreature.pCell->size();++k)
-	//	   {
-	//			Point p = *(gCell[k]);
-	//			point.x = p.x/100.0;
-	//			point.y = p.y/100.0;
-	//			point.z = p.z/100.0;
-	//			cloud.points.push_back(point);
-	//	   }
-	//	
-	//	}
-	//}
+//	   startofpoint += gcellFreature.pCell->size();
+//	   cell &gCell =*( gcellFreature.pCell);
+//	   for( k=0; k< gcellFreature.pCell->size();++k)
+//	   {
+//			Point p = *(gCell[k]);
+//			point.x = p.x/100.0;
+//			point.y = p.y/100.0;
+//			point.z = p.z/100.0;
+//			cloud.points.push_back(point);
+//	   }
+//
+//	}
+//}
 
-	//cloud.width    =  startofpoint;
-	//cloud.height   = 1;
-	//cloud.is_dense = false;
-	//if(cloud.width   > 0)
-	//{
-	//	sprintf (filename, "C:\\test\\noobject\\noobject%08d.pcd", indexFrame); 
-	//	//pcl::io::savePCDFileASCII (filename, cloud);
-	//	pcl::io::savePCDFileBinary( filename, cloud);
-	//}
-	//
+//cloud.width    =  startofpoint;
+//cloud.height   = 1;
+//cloud.is_dense = false;
+//if(cloud.width   > 0)
+//{
+//	sprintf (filename, "C:\\test\\noobject\\noobject%08d.pcd", indexFrame);
+//	//pcl::io::savePCDFileASCII (filename, cloud);
+//	pcl::io::savePCDFileBinary( filename, cloud);
+//}
+//
 }
-  */
+*/
 void VeloScan::ExchangeNoObjectPointCloud()
 {
-  unsigned int i,j,k;
-	points.clear();
+    unsigned int i,j,k;
+    points.clear();
 
-	//æ¯ä¸ªClusterä¸‹é¢æœ‰å‡ ä¸ªCellï¼Œæ¯ä¸ªCellæœ‰å¾ˆå¤šç‚¹
-	int startofpoint  = 0;
-	unsigned int colMax=  scanCellFeatureArray.size();
-	for(i=0; i<colMax; ++i)
-	{ 
-		cellFeatureColumn  &gFeatureCol = scanCellFeatureArray[i];
-		unsigned int rowMax= gFeatureCol.size();
-		for(j=0;j< rowMax; ++j)
-		{
-		   cellFeature &gcellFreature =  gFeatureCol[j];
-		   if( !(gcellFreature.cellType & CELL_TYPE_FOR_SLAM6D))
-			   continue;
+    //Ã¿¸öClusterÏÂÃæÓĞ¼¸¸öCell£¬Ã¿¸öCellÓĞºÜ¶àµã
+    int startofpoint  = 0;
+    unsigned int colMax=  scanCellFeatureArray.size();
+    for(i=0; i<colMax; ++i)
+    {
+        cellFeatureColumn  &gFeatureCol = scanCellFeatureArray[i];
+        unsigned int rowMax= gFeatureCol.size();
+        for(j=0; j< rowMax; ++j)
+        {
+            cellFeature &gcellFreature =  gFeatureCol[j];
+            if( !(gcellFreature.cellType & CELL_TYPE_FOR_SLAM6D))
+                continue;
 
-		   startofpoint += gcellFreature.pCell->size();
-		   cell &gCell =*( gcellFreature.pCell);
-		   for( k=0; k< gcellFreature.pCell->size();++k)
-		   {
-			Point p = *(gCell[k]);
-			points.push_back(p);
-		   }
-		
-		}
-	}
+            startofpoint += gcellFreature.pCell->size();
+            cell &gCell =*( gcellFreature.pCell);
+            for( k=0; k< gcellFreature.pCell->size(); ++k)
+            {
+                Point p = *(gCell[k]);
+                points.push_back(p);
+            }
+
+        }
+    }
 
 
 }
@@ -356,130 +361,130 @@ void VeloScan::ExchangeNoObjectPointCloud()
 
 void VeloScan::FreeAllCellAndCluterMemory()
 {
-	scanCellArray.clear();
-	scanCellFeatureArray.clear();
+    scanCellArray.clear();
+    scanCellFeatureArray.clear();
 
-	scanClusterArray.clear();;
-	scanClusterFeatureArray.clear();
+    scanClusterArray.clear();;
+    scanClusterFeatureArray.clear();
 }
 
 
 bool VeloScan::FilterNOMovingObjcets(clusterFeature &glu)
 {
-	/**æ ‘ç”µæ†ä¹‹ç±»**/
-	if( glu.size_z > 200 && ((glu.size_x>glu.size_y?glu.size_x:glu.size_y))<360)
-	{
-		return false;
-	}
-	/**è‡³å°‘3.5ç±³é•¿ï¼Œä½†å®½å°äº1.4mï¼Œæ‰€ä»¥ä¸å¯èƒ½ä¸ºè½¦**/
-	else if((glu.size_y>350 && glu.size_x<140)|| (glu.size_x>350 && glu.size_y<140))
-	{
-		return false;
-	}
-	else if(glu.size_z > 250 )
-	{
-		return false;
-	}
-	else if((glu.size_x>glu.size_y?glu.size_x:glu.size_y)>420 && glu.size_z<130)
-	{
-		return false;
-	}
+    /**Ê÷µç¸ËÖ®Àà**/
+    if( glu.size_z > 200 && ((glu.size_x>glu.size_y?glu.size_x:glu.size_y))<360)
+    {
+        return false;
+    }
+    /**ÖÁÉÙ3.5Ã×³¤£¬µ«¿íĞ¡ÓÚ1.4m£¬ËùÒÔ²»¿ÉÄÜÎª³µ**/
+    else if((glu.size_y>350 && glu.size_x<140)|| (glu.size_x>350 && glu.size_y<140))
+    {
+        return false;
+    }
+    else if(glu.size_z > 250 )
+    {
+        return false;
+    }
+    else if((glu.size_x>glu.size_y?glu.size_x:glu.size_y)>420 && glu.size_z<130)
+    {
+        return false;
+    }
 
-	else if((glu.size_x>glu.size_y?glu.size_x:glu.size_y)>3.5 && ((glu.size_x>glu.size_y?glu.size_x:glu.size_y)/(glu.size_x<glu.size_y?glu.size_x:glu.size_y)>4))
-	{
-		return false;
-	}
+    else if((glu.size_x>glu.size_y?glu.size_x:glu.size_y)>3.5 && ((glu.size_x>glu.size_y?glu.size_x:glu.size_y)/(glu.size_x<glu.size_y?glu.size_x:glu.size_y)>4))
+    {
+        return false;
+    }
 
-	else if(glu.size_x<700 && glu.size_y<700 &&  glu.size_z > 100  )
-	{
-		return true;
-	}
+    else if(glu.size_x<700 && glu.size_y<700 &&  glu.size_z > 100  )
+    {
+        return true;
+    }
 
-	// è¿‡æ»¤æ‰è¶…è¿‡15ç±³çš„ è¶…çº§å¤§çš„ç‰©ä½“è‚¯å®šæ˜¯å»ºç­‘ç‰©
-	if(glu.size_x>1500 || glu.size_y>1500 || glu.size_x*glu.size_y >600*600 )
-	{
-		return false;
-	}
+    // ¹ıÂËµô³¬¹ı15Ã×µÄ ³¬¼¶´óµÄÎïÌå¿Ï¶¨ÊÇ½¨ÖşÎï
+    if(glu.size_x>1500 || glu.size_y>1500 || glu.size_x*glu.size_y >600*600 )
+    {
+        return false;
+    }
 
-	// è¿‡æ»¤è¿‡é¢ç§¯ç‰¹åˆ«å¤§çš„ ç‰¹åˆ«ç»†é•¿çš„å¤§ç‰©ä½“ï¼Œå¯èƒ½æ˜¯æ …æ 
-	if(glu.size_x*glu.size_y >500*500  &&  glu.size_x/glu.size_y < 1.5)
-	{
-		return false;
-	}
+    // ¹ıÂË¹ıÃæ»ıÌØ±ğ´óµÄ ÌØ±ğÏ¸³¤µÄ´óÎïÌå£¬¿ÉÄÜÊÇÕ¤À¸
+    if(glu.size_x*glu.size_y >500*500  &&  glu.size_x/glu.size_y < 1.5)
+    {
+        return false;
+    }
 
-	//è¿‡æ»¤æ‰1ç±³äºŒä¸€ä¸‹çš„ å°ç›®æ ‡	
-	if(glu.size_z < 100)
-	{
-		return false;
-	}
-	//è¿‡æ»¤æ‰é•¿å®½é«˜æ€»å’Œå°äº3ç±³çš„ //æœ‰å¯èƒ½æ˜¯è¡Œäºº
-	if((glu.size_x + glu.size_y + glu.size_z)<1.5)
-	{
-		return false;
-	}
+    //¹ıÂËµô1Ã×¶şÒ»ÏÂµÄ Ğ¡Ä¿±ê
+    if(glu.size_z < 100)
+    {
+        return false;
+    }
+    //¹ıÂËµô³¤¿í¸ß×ÜºÍĞ¡ÓÚ3Ã×µÄ //ÓĞ¿ÉÄÜÊÇĞĞÈË
+    if((glu.size_x + glu.size_y + glu.size_z)<1.5)
+    {
+        return false;
+    }
 
-	// è¿‡æ»¤æ‰è¶…è¿‡å®½åº¦è¶…è¿‡3ç±³çš„ 
-	if(glu.size_y>300)
-	{
-		return false;
-	}
+    // ¹ıÂËµô³¬¹ı¿í¶È³¬¹ı3Ã×µÄ
+    if(glu.size_y>300)
+    {
+        return false;
+    }
 
-	//if(glu.size_x<40||glu.size_y<40||glu.size_z<40)
-	//	continue;
+    //if(glu.size_x<40||glu.size_y<40||glu.size_z<40)
+    //	continue;
 
-	//æœ‰å¯èƒ½æ˜¯è¡Œäºº
-	if((glu.size_x + glu.size_y) <4)
-	{
-		return false;
-	}
+    //ÓĞ¿ÉÄÜÊÇĞĞÈË
+    if((glu.size_x + glu.size_y) <4)
+    {
+        return false;
+    }
 
-	//è¿‡æ»¤æ‰é•¿å®½æ¯”å¤§äº3çš„  //æœ‰å¾ˆå¤šå…¬æ±½ç¬¦åˆè¿™ä¸ªæ¡ä»¶
-	if(glu.size_x/glu.size_y>3.0)
-	{
-		return false;
-	}
+    //¹ıÂËµô³¤¿í±È´óÓÚ3µÄ  //ÓĞºÜ¶à¹«Æû·ûºÏÕâ¸öÌõ¼ş
+    if(glu.size_x/glu.size_y>3.0)
+    {
+        return false;
+    }
 
-	return true;
+    return true;
 }
 
 void VeloScan::GetAllofObject()
 {
-  //	int i,j;
-  //	int size;
+    //	int i,j;
+    //	int size;
 
-	if(points.size() > 0)
-	{
-	  //		noofframe +=1000;
-	    //  ä¿å­˜æ•´å¸§æ•°æ®åˆ°PCDæ–‡ä»¶
-	//	SaveFrameInPCD();
-		//  æ•£åˆ—åˆ°é¥¼å‹Cellä¸­
-		TransferToCellArray();
-		//  è®¡ç®—ç›¸åº”çš„ç‰¹å¾ å¹¶çš„åˆ°éšœç¢ç‰©çš„Cell
-		CalcScanCellFeature();
-		//  èšç±»ä¸ºClusterå¯¹è±¡
-    		FindAndCalcScanClusterFeature();
-		//ä¿å­˜åŠ¨æ€ç›®æ ‡çš„å¯¹è±¡åˆ°PCDæ–‡ä»¶
-	//	SaveAllofObject();
-	//	SaveNoObjectPointCloud();
-	        ExchangeNoObjectPointCloud();
-		// æ˜¾ç¤ºå¤„ç†çš„ç»“æœï¼Œç”¨äºè°ƒè¯•ã€‚
-	//        Show(0);
-		//å¯ä»¥ä¿å­˜éè¿åŠ¨ç›®æ ‡çš„ç‚¹åˆ°PCDæ–‡ä»¶ä¸­ï¼Œçœ‹ä¸€ä¸‹æ•ˆæœå•Šã€‚
+    if(points.size() > 0)
+    {
+        //		noofframe +=1000;
+        //  ±£´æÕûÖ¡Êı¾İµ½PCDÎÄ¼ş
+        //	SaveFrameInPCD();
+        //  É¢ÁĞµ½±ıĞÍCellÖĞ
+        TransferToCellArray();
+        //  ¼ÆËãÏàÓ¦µÄÌØÕ÷ ²¢µÄµ½ÕÏ°­ÎïµÄCell
+        CalcScanCellFeature();
+        //  ¾ÛÀàÎªCluster¶ÔÏó
+        FindAndCalcScanClusterFeature();
+        //±£´æ¶¯Ì¬Ä¿±êµÄ¶ÔÏóµ½PCDÎÄ¼ş
+        //	SaveAllofObject();
+        //	SaveNoObjectPointCloud();
+        ExchangeNoObjectPointCloud();
+        // ÏÔÊ¾´¦ÀíµÄ½á¹û£¬ÓÃÓÚµ÷ÊÔ¡£
+        //        Show(0);
+        //¿ÉÒÔ±£´æ·ÇÔË¶¯Ä¿±êµÄµãµ½PCDÎÄ¼şÖĞ£¬¿´Ò»ÏÂĞ§¹û°¡¡£
 
-		//éœ€è¦æ¸…ç†æ‰€æœ‰çš„å­˜å‚¨æ•°æ®ã€‚
-		FreeAllCellAndCluterMemory();
-	}
+        //ĞèÒªÇåÀíËùÓĞµÄ´æ´¢Êı¾İ¡£
+        FreeAllCellAndCluterMemory();
+    }
     return;
- }
- 
- 
+}
+
+
 int VeloScan::TransferToCellArray()
 {
 #define  DefaultColumnSize 360
 
     int columnSize= 360;	  //cfg.cfgPlaneDetect.ColumnSize;
-    int CellSize= 50;	 //cfg.cfgPlaneDetect.CellSize;	 
-    int MinRad=0;		//cfg.cfgPlaneDetect.MinRad;	
+    int CellSize= 50;	 //cfg.cfgPlaneDetect.CellSize;
+    int MinRad=0;		//cfg.cfgPlaneDetect.MinRad;
     int MaxRad=6000;		//cfg.cfgPlaneDetect.MaxRad
 
     if((MaxRad-MinRad)%CellSize!=0)
@@ -497,8 +502,8 @@ int VeloScan::TransferToCellArray()
         columnSize=DefaultColumnSize;
 
     int sectionSize=columnSize/8;
-    
-	// è®¡ç®—è·ç¦»å€¼å’Œæ¯ä¸ªç‚¹çš„æ—‹è§’
+
+    // ¼ÆËã¾àÀëÖµºÍÃ¿¸öµãµÄĞı½Ç
     //    CalcRadAndTheta();
 
     scanCellArray.resize(columnSize);
@@ -519,156 +524,155 @@ int VeloScan::TransferToCellArray()
 //     printf("scanCellArray.size= %d\n",scanCellArray.size());
     for(i=0; i< points.size(); ++i)
     {
-            count++;
-            Point  &pt= points[i]; 
+        count++;
+        Point  &pt= points[i];
 
-		  
-		  
-			// é€‰æ‹©åœ¨è·ç¦»é›·è¾¾çš„ä¸€å®šçš„èŒƒå›´å†…è¿›è¡Œæµ‹è¯•
-            if( sqrt( pt.x*pt.x + pt.y*pt.y ) <= MinRad ||
-			 sqrt( pt.x*pt.x + pt.y*pt.y ) >= MaxRad)
-                continue;
 
-		// å››ä¸ªè±¡é™çš„æ•£åˆ— ç¬¬ä¸€ä¸ªè±¡é™
-            if(pt.x >0 && pt.y>0 )
+
+        // Ñ¡ÔñÔÚ¾àÀëÀ×´ïµÄÒ»¶¨µÄ·¶Î§ÄÚ½øĞĞ²âÊÔ
+        if( sqrt( pt.x*pt.x + pt.y*pt.y ) <= MinRad ||sqrt( pt.x*pt.x + pt.y*pt.y ) >= MaxRad)
+            continue;
+
+        // ËÄ¸öÏóÏŞµÄÉ¢ÁĞ µÚÒ»¸öÏóÏŞ
+        if(pt.x >0 && pt.y>0 )
+        {
+            if(pt.x > pt.y)
             {
-                if(pt.x > pt.y)
+                flag=pt.y/pt.x;
+                result=upper_bound(tanv.begin(),tanv.end(),flag);
+                if(result==tanv.end())
                 {
-                    flag=pt.y/pt.x; 
-                    result=upper_bound(tanv.begin(),tanv.end(),flag);
-                    if(result==tanv.end())
-                    {
-                        offset=sectionSize-1;
-                    }
-                    else
-                    {
-                        offset=result-tanv.begin();
-                    }
+                    offset=sectionSize-1;
                 }
                 else
                 {
-			   flag=1 / (pt.y/pt.x); 
-                    result=upper_bound(tanv.begin(),tanv.end(),flag);
-                    if(result==tanv.end())
-                    {
-                        offset=sectionSize;
-                    }
-                    else
-                    {
-                        diff=result-tanv.begin();
-                        offset=sectionSize*2-1-(diff);
-                    }
-
+                    offset=result-tanv.begin();
                 }
             }
-
-			//ç¬¬äºŒè±¡é™
-            else if(pt.x<0 && pt.y>0)
-            {
-                if(-pt.x>pt.y)
-                {
-                    flag=-pt.y/pt.x; 
-                    result=upper_bound(tanv.begin(),tanv.end(),flag);
-                    if(result==tanv.end())
-                    {
-                        offset=sectionSize*3;
-                    }
-                    else
-                    {
-                        offset=sectionSize*4-1-(result-tanv.begin());
-                    }
-
-                }
-                else
-                {
-			   flag=1/(-pt.y/pt.x);
-                    result=upper_bound(tanv.begin(),tanv.end(),flag);
-                    if(result==tanv.end())
-                    {
-                        offset=sectionSize*3-1;
-                    }
-                    else
-                    {
-                        offset=sectionSize*2+(result-tanv.begin());
-                    }
-                }
-            }
-
-			//ç¬¬ä¸‰è±¡é™
-            else if(pt.x<0&&pt.y<0)
-            {
-                if(-pt.x>-pt.y)
-                {
-                    flag=pt.y/pt.x; 
-                    result=upper_bound(tanv.begin(),tanv.end(),flag);
-                    if(result==tanv.end())
-                    {
-                        offset=sectionSize*5-1;
-                    }
-                    else
-                    {
-                        offset=sectionSize*4+(result-tanv.begin());
-                    }
-                }
-                else
-                {
-			   flag=1/ (pt.y/pt.x); 
-                    result=upper_bound(tanv.begin(),tanv.end(),flag);
-                    if(result==tanv.end())
-                    {
-                        offset=sectionSize*5;
-                    }
-                    else
-                    {
-                        offset=sectionSize*6-1-(result-tanv.begin());
-                    }
-
-                }
-            }
-
-			//ç¬¬å››è±¡é™
-            else if(pt.x>0&&pt.y<0)
-            {
-                if(pt.x>-pt.y)
-                {
-                    flag=-pt.y/pt.x; 
-                    result=upper_bound(tanv.begin(),tanv.end(),flag);
-                    if(result==tanv.end())
-                    {
-                        offset=sectionSize*7;
-                    }
-                    else
-                    {
-                        offset=sectionSize*8-1-(result-tanv.begin());
-                    }
-                }
-                else
-                {
-			   flag=1 / (-pt.y/pt.x); 
-                    result=upper_bound(tanv.begin(),tanv.end(),flag);
-                    if(result==tanv.end())
-                    {
-                        offset=sectionSize*7-1;
-                    }
-                    else
-                    {
-                        offset=sectionSize*6+(result-tanv.begin());
-                    }
-                }
-            }
-
-			//éƒ½ä¸å±äº
             else
             {
-                continue;
-            }
+                flag=1/(pt.y/pt.x);
+                result=upper_bound(tanv.begin(),tanv.end(),flag);
+                if(result==tanv.end())
+                {
+                    offset=sectionSize;
+                }
+                else
+                {
+                    diff=result-tanv.begin();
+                    offset=sectionSize*2-1-(diff);
+                }
 
-         //æ•£åˆ—è¿‡ç¨‹   
-            int k= (int)((sqrt( pt.x*pt.x + pt.y*pt.y )-MinRad)/(CellSize*1.0));
-            scanCellArray[offset][k].push_back(&pt);
+            }
+        }
+
+        //µÚ¶şÏóÏŞ
+        else if(pt.x<0 && pt.y>0)
+        {
+            if(-pt.x>pt.y)
+            {
+                flag=-pt.y/pt.x;
+                result=upper_bound(tanv.begin(),tanv.end(),flag);
+                if(result==tanv.end())
+                {
+                    offset=sectionSize*3;
+                }
+                else
+                {
+                    offset=sectionSize*4-1-(result-tanv.begin());
+                }
+
+            }
+            else
+            {
+                flag=1/(-pt.y/pt.x);
+                result=upper_bound(tanv.begin(),tanv.end(),flag);
+                if(result==tanv.end())
+                {
+                    offset=sectionSize*3-1;
+                }
+                else
+                {
+                    offset=sectionSize*2+(result-tanv.begin());
+                }
+            }
+        }
+
+        //µÚÈıÏóÏŞ
+        else if(pt.x<0&&pt.y<0)
+        {
+            if(-pt.x>-pt.y)
+            {
+                flag=pt.y/pt.x;
+                result=upper_bound(tanv.begin(),tanv.end(),flag);
+                if(result==tanv.end())
+                {
+                    offset=sectionSize*5-1;
+                }
+                else
+                {
+                    offset=sectionSize*4+(result-tanv.begin());
+                }
+            }
+            else
+            {
+                flag=1/ (pt.y/pt.x);
+                result=upper_bound(tanv.begin(),tanv.end(),flag);
+                if(result==tanv.end())
+                {
+                    offset=sectionSize*5;
+                }
+                else
+                {
+                    offset=sectionSize*6-1-(result-tanv.begin());
+                }
+
+            }
+        }
+
+        //µÚËÄÏóÏŞ
+        else if(pt.x>0&&pt.y<0)
+        {
+            if(pt.x>-pt.y)
+            {
+                flag=-pt.y/pt.x;
+                result=upper_bound(tanv.begin(),tanv.end(),flag);
+                if(result==tanv.end())
+                {
+                    offset=sectionSize*7;
+                }
+                else
+                {
+                    offset=sectionSize*8-1-(result-tanv.begin());
+                }
+            }
+            else
+            {
+                flag=1 / (-pt.y/pt.x);
+                result=upper_bound(tanv.begin(),tanv.end(),flag);
+                if(result==tanv.end())
+                {
+                    offset=sectionSize*7-1;
+                }
+                else
+                {
+                    offset=sectionSize*6+(result-tanv.begin());
+                }
+            }
+        }
+
+        //¶¼²»ÊôÓÚ
+        else
+        {
+            continue;
+        }
+
+        //É¢ÁĞ¹ı³Ì
+        int k= (int)((sqrt( pt.x*pt.x + pt.y*pt.y )-MinRad)/(CellSize*1.0));
+        scanCellArray[offset][k].push_back(&pt);
     }
-	return 0;
-} 
+    return 0;
+}
 
 
 int VeloScan::CalcScanCellFeature()
@@ -681,15 +685,15 @@ int VeloScan::CalcScanCellFeature()
     int columnSize=scanCellArray.size();
     int cellNumber=scanCellArray[0].size();
 
-//åˆ†é…ç©ºé—´ã€‚æ€»å…±æœ‰columnSize(360)ä¸ªæ–¹å‘çš„column,æ¯ä¸€ä¸ªcolumnåˆ†é…cellNumberä¸ªç½‘æ ¼ç©ºé—´ã€‚
+//·ÖÅä¿Õ¼ä¡£×Ü¹²ÓĞcolumnSize(360)¸ö·½ÏòµÄcolumn,Ã¿Ò»¸öcolumn·ÖÅäcellNumber¸öÍø¸ñ¿Õ¼ä¡£
     if( scanCellFeatureArray.size()==0)
     {
         scanCellFeatureArray.resize(columnSize);
         for(i=0; i<columnSize; ++i)
-            scanCellFeatureArray[i].resize(cellNumber); 
+            scanCellFeatureArray[i].resize(cellNumber);
     }
 
-//è®¡ç®—æ¯ä¸ªCellçš„ç‰¹å¾ã€‚
+//¼ÆËãÃ¿¸öCellµÄÌØÕ÷¡£
     for(j=0; j <columnSize; j++)
     {
         cellColumn &column=scanCellArray[j];
@@ -701,9 +705,9 @@ int VeloScan::CalcScanCellFeature()
             feature.pCell=&cellObj;
             CalcCellFeature(cellObj,feature);
 
-			// å¾—åˆ°æ˜¯éšœç¢ç‰©çš„ç‚¹ç°‡
-	    if( feature.delta_z > 120)
-  		scanCellFeatureArray[j][i].cellType |= CELL_TYPE_ABOVE_DELTA_Z;
+            // µÃµ½ÊÇÕÏ°­ÎïµÄµã´Ø
+            if( feature.delta_z > 120)
+                scanCellFeatureArray[j][i].cellType |= CELL_TYPE_ABOVE_DELTA_Z;
 
         }
     }
@@ -715,7 +719,7 @@ int VeloScan::CalcScanCellFeature()
 int VeloScan::FindAndCalcScanClusterFeature()
 {
     int i,j;
-	
+
     if( scanCellArray.size()==0)
         return -1;
 
@@ -733,49 +737,49 @@ int VeloScan::FindAndCalcScanClusterFeature()
         {
             cluster clu;
             SearchNeigh(clu,searchedFlag,i,j);
-            if(clu.size())                                          //è¯¥é›†ç¾¤é‡Œæœ‰ç¬¦åˆè¦æ±‚çš„cellï¼Œåˆ™ä¿å­˜è¯¥é›†ç¾¤
+            if(clu.size())                                          //¸Ã¼¯ÈºÀïÓĞ·ûºÏÒªÇóµÄcell£¬Ôò±£´æ¸Ã¼¯Èº
                 scanClusterArray.push_back(clu);
         }
     }
 
-	int clustersize=scanClusterArray.size();                //æ€»å…±æœ‰clustersizeä¸ªé›†ç¾¤
-	if(scanClusterFeatureArray.size()==0)
-		scanClusterFeatureArray.resize(clustersize);
+    int clustersize=scanClusterArray.size();                //×Ü¹²ÓĞclustersize¸ö¼¯Èº
+    if(scanClusterFeatureArray.size()==0)
+        scanClusterFeatureArray.resize(clustersize);
 
-	//è®¡ç®—æ¯ä¸€ä¸ªç›®æ ‡çš„ç‰¹å¾ã€‚
-	for(i=0; i<clustersize; ++i)
-		CalcClusterFeature(scanClusterArray[i],scanClusterFeatureArray[i]);
+    //¼ÆËãÃ¿Ò»¸öÄ¿±êµÄÌØÕ÷¡£
+    for(i=0; i<clustersize; ++i)
+        CalcClusterFeature(scanClusterArray[i],scanClusterFeatureArray[i]);
 
-	//Find moving Ojbects
-	for(i=0; i<clustersize; ++i)
-	{
-     	clusterFeature &glu = scanClusterFeatureArray[i];
-		glu.clusterType != CLUSTER_TYPE_OBJECT;
-	    if( FilterNOMovingObjcets(glu))
-		{
-				clusterFeature &gclu = 	scanClusterFeatureArray[i];
-				gclu.clusterType  |=CLUSTER_TYPE_MOVING_OBJECT;
-		}
-	}
+    //Find moving Ojbects
+    for(i=0; i<clustersize; ++i)
+    {
+        clusterFeature &glu = scanClusterFeatureArray[i];
+        glu.clusterType != CLUSTER_TYPE_OBJECT;
+        if( FilterNOMovingObjcets(glu))
+        {
+            clusterFeature &gclu = 	scanClusterFeatureArray[i];
+            gclu.clusterType  |=CLUSTER_TYPE_MOVING_OBJECT;
+        }
+    }
 
-	//Mark No Moving Ojbects CELLS
-	int k;
-	for(i=0; i<clustersize; ++i)
-	{
-     	clusterFeature &glu = scanClusterFeatureArray[i];
-		if( !(glu.clusterType & CLUSTER_TYPE_MOVING_OBJECT))
-		{
-				cluster  &gclu = 	scanClusterArray[i];
-				for(j =0; j< gclu.size() ; ++j)
-				{
-					cellFeature &gcF = *(gclu[j]);
-					gcF.cellType |= CELL_TYPE_FOR_SLAM6D;
-				}
-		}
-	
-	}
+    //Mark No Moving Ojbects CELLS
+    int k;
+    for(i=0; i<clustersize; ++i)
+    {
+        clusterFeature &glu = scanClusterFeatureArray[i];
+        if( !(glu.clusterType & CLUSTER_TYPE_MOVING_OBJECT))
+        {
+            cluster  &gclu = 	scanClusterArray[i];
+            for(j =0; j< gclu.size() ; ++j)
+            {
+                cellFeature &gcF = *(gclu[j]);
+                gcF.cellType |= CELL_TYPE_FOR_SLAM6D;
+            }
+        }
 
-	return 0;
+    }
+
+    return 0;
 }
 
 
@@ -784,10 +788,10 @@ int VeloScan::SearchNeigh(cluster& clu,charvv& flagvv,int i,int j)
     int columnSize=scanCellArray.size();
     int cellNumber=scanCellArray[0].size();
 
-	//åˆ°äº†æ ¼ç½‘è¾¹ç¼˜ï¼Œåœæ­¢æœç´¢
+    //µ½ÁË¸ñÍø±ßÔµ£¬Í£Ö¹ËÑË÷
     if(i<0||i>=columnSize||j<0||j>=cellNumber)
         return 0;
-	//åˆ°äº†è·ŸèŠ‚ç‚¹
+    //µ½ÁË¸ú½Úµã
     if(flagvv[i][j]==1)
         return 0;
 
@@ -797,11 +801,11 @@ int VeloScan::SearchNeigh(cluster& clu,charvv& flagvv,int i,int j)
         return 0;
     }
 
-    if(scanCellFeatureArray[i][j].cellType & CELL_TYPE_ABOVE_DELTA_Z) //æœ‰ç¬¦åˆè¦æ±‚çš„cell
+    if(scanCellFeatureArray[i][j].cellType & CELL_TYPE_ABOVE_DELTA_Z) //ÓĞ·ûºÏÒªÇóµÄcell
     {
         flagvv[i][j]=1;
 
-	clu.push_back(&scanCellFeatureArray[i][j]); //å­˜è¿›é›†ç¾¤é‡Œ
+        clu.push_back(&scanCellFeatureArray[i][j]); //´æ½ø¼¯ÈºÀï
 
         SearchNeigh(clu,flagvv,i-1,j-1);
         SearchNeigh(clu,flagvv,i-1,j);
@@ -812,10 +816,10 @@ int VeloScan::SearchNeigh(cluster& clu,charvv& flagvv,int i,int j)
         SearchNeigh(clu,flagvv,i+1,j);
         SearchNeigh(clu,flagvv,i+1,j+1);
 
-	SearchNeigh(clu,flagvv,i,j+2);
-	SearchNeigh(clu,flagvv,i,j-2);
-	SearchNeigh(clu,flagvv,i+2,j);
-	SearchNeigh(clu,flagvv,i-2,j);
+        SearchNeigh(clu,flagvv,i,j+2);
+        SearchNeigh(clu,flagvv,i,j-2);
+        SearchNeigh(clu,flagvv,i+2,j);
+        SearchNeigh(clu,flagvv,i-2,j);
     }
 
     return 0;
@@ -825,12 +829,12 @@ int VeloScan::SearchNeigh(cluster& clu,charvv& flagvv,int i,int j)
 int VeloScan::CalcClusterFeature(cluster& clu,clusterFeature& f)
 {
     f.size=clu.size();
-	
+
     if(f.size==0)
     {
         return 0;
     }
-	
+
     f.clusterType=0;
 
     int i=0;
@@ -865,8 +869,8 @@ int VeloScan::CalcClusterFeature(cluster& clu,clusterFeature& f)
         }
     }
     f.size_x=f.max_x-f.min_x;
-	f.size_y=f.max_y-f.min_y;
-	f.size_z=f.max_z-f.min_z;
+    f.size_y=f.max_y-f.min_y;
+    f.size_z=f.max_z-f.min_z;
 
     return 0;
 }
@@ -874,107 +878,107 @@ int VeloScan::CalcClusterFeature(cluster& clu,clusterFeature& f)
 
 int VeloScan::CalcCellFeature(cell& cellobj, cellFeature& f)
 {
-	   int outlier;
-	   float lastMaxZ;
-	   f.size=cellobj.size();
-	   f.cellType=0;
-	   
-	   if(f.size==0)
-	   {
-		   f.cellType|=CELL_TYPE_INVALID;
-		   return 0;
-	   }
-	   
-	   f.ave_x=f.ave_y=f.ave_z=0.0;
-	   f.delta_z=0;
-	
-	   int i=0;
-	   for(i=0; i<f.size; ++i)
-	   {
-		   f.ave_x+=cellobj[i]->x;
-		   f.ave_y+=cellobj[i]->y;
-		   f.ave_z+=cellobj[i]->z;
-	
-		   if(cellobj[i]->type & POINT_TYPE_BELOW_R)
-			   f.cellType|=CELL_TYPE_BELOW_R;
+    int outlier;
+    float lastMaxZ;
+    f.size=cellobj.size();
+    f.cellType=0;
 
-		   if(i==0)
-		   {
-			   outlier=0;
-			   f.min_x=f.max_x=cellobj[i]->x;
-			   f.min_y=f.max_y=cellobj[i]->y;
-			   lastMaxZ=f.min_z=f.max_z=cellobj[i]->z;
-		   }
-		   else
-		   {
-			   if(f.max_x<cellobj[i]->x)
-				   f.max_x=cellobj[i]->x;
-	
-			   if(f.min_x>cellobj[i]->x)
-				   f.min_x=cellobj[i]->x;
-	
-			   if(f.max_y<cellobj[i]->y)
-				   f.max_y=cellobj[i]->y;
-	
-			   if(f.min_y>cellobj[i]->y)
-				   f.min_y=cellobj[i]->y;
-	
-			   if(f.max_z<cellobj[i]->z)
-			   {
-				   lastMaxZ=f.max_z;
-				   f.max_z=cellobj[i]->z;
-				   outlier=i;
-			   }
-	
-			   if(f.min_z>cellobj[i]->z)
-				   f.min_z=cellobj[i]->z;
-	
-		   }
-	   }
-	
-	   if(f.size>1)
-	   {
-		   int z=f.ave_z-cellobj[outlier]->z;
-		   z/=(f.size-1)*1.0;
-	
-		   if(cellobj[outlier]->z-z<50)
-		   {
-			   outlier=-1;
-			   f.ave_z/=f.size*1.0;
-		   }
-		   else
-		   {
-			   f.max_z=lastMaxZ;
-			   f.ave_z=z;
-		   }
-	   }
-	   else
-	   {
-		   outlier=-1;
-		   f.ave_z/=f.size*1.0;
-	   }
-	
-	   f.ave_x/=f.size*1.0;
-	   f.ave_y/=f.size*1.0;
+    if(f.size==0)
+    {
+        f.cellType|=CELL_TYPE_INVALID;
+        return 0;
+    }
 
-	   for(i=0; i<f.size; ++i)
-	   {
-		   if(i==outlier)
-			   continue;
-		   f.delta_z+= fabs(cellobj[i]->z-f.ave_z);
-	   }
+    f.ave_x=f.ave_y=f.ave_z=0.0;
+    f.delta_z=0;
+
+    int i=0;
+    for(i=0; i<f.size; ++i)
+    {
+        f.ave_x+=cellobj[i]->x;
+        f.ave_y+=cellobj[i]->y;
+        f.ave_z+=cellobj[i]->z;
+
+        if(cellobj[i]->type & POINT_TYPE_BELOW_R)
+            f.cellType|=CELL_TYPE_BELOW_R;
+
+        if(i==0)
+        {
+            outlier=0;
+            f.min_x=f.max_x=cellobj[i]->x;
+            f.min_y=f.max_y=cellobj[i]->y;
+            lastMaxZ=f.min_z=f.max_z=cellobj[i]->z;
+        }
+        else
+        {
+            if(f.max_x<cellobj[i]->x)
+                f.max_x=cellobj[i]->x;
+
+            if(f.min_x>cellobj[i]->x)
+                f.min_x=cellobj[i]->x;
+
+            if(f.max_y<cellobj[i]->y)
+                f.max_y=cellobj[i]->y;
+
+            if(f.min_y>cellobj[i]->y)
+                f.min_y=cellobj[i]->y;
+
+            if(f.max_z<cellobj[i]->z)
+            {
+                lastMaxZ=f.max_z;
+                f.max_z=cellobj[i]->z;
+                outlier=i;
+            }
+
+            if(f.min_z>cellobj[i]->z)
+                f.min_z=cellobj[i]->z;
+
+        }
+    }
+
+    if(f.size>1)
+    {
+        int z=f.ave_z-cellobj[outlier]->z;
+        z/=(f.size-1)*1.0;
+
+        if(cellobj[outlier]->z-z<50)
+        {
+            outlier=-1;
+            f.ave_z/=f.size*1.0;
+        }
+        else
+        {
+            f.max_z=lastMaxZ;
+            f.ave_z=z;
+        }
+    }
+    else
+    {
+        outlier=-1;
+        f.ave_z/=f.size*1.0;
+    }
+
+    f.ave_x/=f.size*1.0;
+    f.ave_y/=f.size*1.0;
+
+    for(i=0; i<f.size; ++i)
+    {
+        if(i==outlier)
+            continue;
+        f.delta_z+= fabs(cellobj[i]->z-f.ave_z);
+    }
 
 
-		//  è¿›è¡Œè·¯é¢å’Œéšœç¢ç‰©çš„åˆ†å‰²ï¼Œå…·ä½“å°±æ˜¯ä¿®æ”¹Cellçš„å±æ€§
-	   float threshold;
+    //  ½øĞĞÂ·ÃæºÍÕÏ°­ÎïµÄ·Ö¸î£¬¾ßÌå¾ÍÊÇĞŞ¸ÄCellµÄÊôĞÔ
+    float threshold;
 //	   threshold=f.delta_z/((f.size)*1.0);
-   	   threshold=f.delta_z;
+    threshold=f.delta_z;
 
-	   float GridThresholdGroundDetect =120;
-	   if(threshold >  GridThresholdGroundDetect)
-		   f.cellType|=CELL_TYPE_ABOVE_DELTA_Z;
-	   else
-		   f.cellType|=CELL_TYPE_BELOW_DELTA_Z;
-	
+    float GridThresholdGroundDetect =120;
+    if(threshold >  GridThresholdGroundDetect)
+        f.cellType|=CELL_TYPE_ABOVE_DELTA_Z;
+    else
+        f.cellType|=CELL_TYPE_BELOW_DELTA_Z;
+
     return 0;
 }
