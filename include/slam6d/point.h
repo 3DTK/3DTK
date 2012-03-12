@@ -1,4 +1,4 @@
-﻿/**
+/**
  *  @file
  *  @brief Representation of a 3D point
  *  @author Kai Lingemann. Institute of Computer Science, University of Osnabrueck, Germany.
