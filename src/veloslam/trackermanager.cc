@@ -591,7 +591,7 @@ int TrackerManager::DrawTrackersMovtion_Long(vector <VeloScan *> allScans)
 }
 
 
-int TrackerManager::DrawTrackersMovtion_Long_Number(vector <VeloScan *> allScans, int n)
+int TrackerManager::DrawTrackersMovtion_Long_Number(vector <Scan *> allScans, int n)
 {
 	 int i,j,k,colorIdx;
 

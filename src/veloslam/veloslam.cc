@@ -676,7 +676,9 @@ int main(int argc, char **argv)
 
 #ifndef _MSC_VER
   glutInit(&argc, argv);
-#endif
+#else
+  glutInit(&argc, argv);
+#endif   
 
   signal (SIGSEGV, sigSEGVhandler);
   signal (SIGINT,  sigSEGVhandler);

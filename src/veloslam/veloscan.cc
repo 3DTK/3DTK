@@ -77,8 +77,10 @@ using std::flush;
 #else
 #include <GL/freeglut.h>
 #endif
-
+#include "veloslam/velodefs.h"
 #include "veloslam/color_util.h"
+
+
 TrackerManager trackMgr;
 float absf(float a)
 {
@@ -275,7 +277,7 @@ void VeloScan::readScansRedSearch(reader_type type,
                     currentScan->GetAllofObject();
                     currentScan->calcReducedPoints(voxelSize, nrpts);
                     currentScan->transform(currentScan->getTransMatOrg(), INVALID); //transform points to initial position
-                    currentScan->clearPoints();
+       //             currentScan->clearPoints();
                     currentScan->createTree(nns_method, cuda_enabled);
 
                 }
