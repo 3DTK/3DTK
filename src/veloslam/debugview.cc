@@ -714,8 +714,10 @@ static void Draw(void)
 	glTranslatef(x_move,y_move,0);
 	glScalef(m_zoom, m_zoom, m_zoom);
 
-    DrawAll_ScanPoints_Number(Scan::allScans,  1,  0.8, 0.8, 0.8, 5);
+//    Draw_points_ZValue(Scan::allScans[0],  1,  0.8, 0.8, 0.8);
+//    DrawAll_ScanPoints_Number(Scan::allScans,  1,  0.8, 0.8, 0.8, 5);
 //	trackMgr.DrawTrackersMovtion_Long_Number((vector <VeloScan *> )(Scan::allScans), 5);
+
 
     glFlush();
  	glutSwapBuffers();
