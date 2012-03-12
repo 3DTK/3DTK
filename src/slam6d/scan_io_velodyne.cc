@@ -5,6 +5,7 @@
  * @author Dorit Borrmann. Smart Systems Group, Jacobs University Bremen gGmbH, Germany. 
  */
 
+#include "veloslam/velodefs.h"
 #include "slam6d/scan_io_velodyne.h"
 #include "slam6d/globals.icc"
 #include <fstream>
