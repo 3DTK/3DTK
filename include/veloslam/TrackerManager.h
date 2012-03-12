@@ -3,7 +3,7 @@
 #include <list>
 #include <vector>
 #include "slam6d/scan.h"
-#include "Veloslam/Tracker.h"
+#include "veloslam/tracker.h"
 
 using namespace std;
 

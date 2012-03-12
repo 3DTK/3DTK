@@ -5,7 +5,7 @@
  * @author Amuz T, Jacobs University Bremen, German
  * @author Kai Lingemann. Institute of Computer Science, University of Osnabrueck, Germany.
  */
-
+/*
 #include "show/show_common.cc"
 
 /**
@@ -13,16 +13,18 @@
  * Reads the scan (scan000.3d, ...) and frames files (scan000.frames, ...) from the data directory.
  * The frames are used for animation of the matching process.
  */
+
 int main(int argc, char **argv){
 
-  initShow(argc, argv);
-  initScreenWindow();
+ // initShow(argc, argv);
+ // initScreenWindow();
 
-  newMenu();
-  glutMainLoop();
+ // newMenu();
+ // glutMainLoop();
+  return 1;
 }
 
-
+/*
 void updateCamControls() {
   cam_spinner->set_int_limits( 1, cams.size());
   cam_spinner->set_int_val(cam_choice);
@@ -81,3 +83,4 @@ void updatePointModeControls() {
       break;
   }
 }
+*/
