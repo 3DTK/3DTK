@@ -253,8 +253,11 @@ int read_one_packet ( FILE *fp, vector<Point> &ptss, int maxDist, int minDist )
    
 	for ( c = 0 ; c < CIRCLELENGTH; c++ )
 	{
-
+#ifdef _MSC_VER
+		fseek(fp , BLOCK_OFFSET, SEEK_CUR);
+#else
 		fseeko(fp , BLOCK_OFFSET, SEEK_CUR);
+#endif
 		size=fread ( buf, 1, BLOCK_SIZE, fp );
 
 		if(size<BLOCK_SIZE)
@@ -379,15 +382,17 @@ int ScanIO_velodyne::readScans(int start, int end, string &dir, int maxDist, int
 {
   static int fileCounter = start;
   string scanFileName;
-
   FILE *scan_in;
-
 
   if (end > -1 && fileCounter > end) return -1; // 'nuf read
 
   scanFileName = dir + "scan" + ".bin";
- 
+#ifdef _MSC_VER
+  scan_in = fopen(scanFileName.c_str(),"rb");  
+#else
   scan_in = fopen64(scanFileName.c_str(),"rb");  
+#endif
+
   if(scan_in == NULL)
   {
     cerr<<scanFileName <<endl;
@@ -396,15 +401,20 @@ int ScanIO_velodyne::readScans(int start, int end, string &dir, int maxDist, int
 	return 0;
   }
 
- 
   velodyne_calib_precompute();
   cout << "Processing Scan " << scanFileName;
   cout.flush();
   
   ptss.reserve(12*32*CIRCLELENGTH);
+
+ #ifdef _MSC_VER
+  fseek(scan_in, 24, SEEK_SET);
+  fseek(scan_in, (BLOCK_SIZE+BLOCK_OFFSET)*CIRCLELENGTH*fileCounter, SEEK_CUR);
+#else
   fseeko(scan_in, 24, SEEK_SET);
   fseeko(scan_in, (BLOCK_SIZE+BLOCK_OFFSET)*CIRCLELENGTH*fileCounter, SEEK_CUR);
-  
+#endif
+
   read_one_packet(scan_in, ptss, maxDist, minDist);
   cout << " with " << ptss.size() << " Points";
   cout << " done " << fileCounter<<endl;
