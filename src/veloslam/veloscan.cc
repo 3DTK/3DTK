@@ -248,14 +248,14 @@ void VeloScan::readScansRedSearch(reader_type type,
     int _fileNr;
     scanIOwrapper my_ScanIO(type);
 
-//#ifndef _MSC_VER
-//#ifdef _OPENMP
-//    #pragma omp parallel
-//    {
-//        #pragma omp single nowait
-//        {
-//#endif
-//#endif
+#ifndef _MSC_VER
+#ifdef _OPENMP
+    #pragma omp parallel
+    {
+        #pragma omp single nowait
+        {
+#endif
+#endif
             // read Scan-by-scan until no scan is available anymore
             while ((_fileNr = my_ScanIO.readScans(start, end, dir, maxDist, minDist, eu, ptss)) != -1)
             {
@@ -265,11 +265,11 @@ void VeloScan::readScansRedSearch(reader_type type,
                 ptss.clear();                  // clear points
                 allScans.push_back(currentScan);
 
-//#ifndef _MSC_VER
-//#ifdef _OPENMP
-//                #pragma omp task
-//#endif
-//#endif
+#ifndef _MSC_VER
+#ifdef _OPENMP
+                #pragma omp task
+#endif
+#endif
                 {
                     cout << "removing dynamic objects, reducing scan " << currentScan->getFileNr() << " and creating searchTree" << endl;
                     currentScan->GetAllofObject();
@@ -280,13 +280,13 @@ void VeloScan::readScansRedSearch(reader_type type,
 
                 }
             }
-//#ifndef _MSC_VER
-//#ifdef _OPENMP
-//        }
-//    }
-//    #pragma omp taskwait
-//#endif
-//#endif
+#ifndef _MSC_VER
+#ifdef _OPENMP
+        }
+    }
+    #pragma omp taskwait
+#endif
+#endif
 
     return;
 }
