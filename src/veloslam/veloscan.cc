@@ -47,7 +47,7 @@ using std::stringstream;
 using std::flush;
 
 #include "veloslam/veloscan.h"
-#include "veloslam/trackerManager.h"
+#include "veloslam/trackermanager.h"
 
 #ifdef _OPENMP
 #include <omp.h>

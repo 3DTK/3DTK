@@ -22,7 +22,7 @@ void sincos(double ra, double * sinra, double* cosra);
 int isless(double x, double y);
 
 
-inline int isfinite(double x) { return _finite(x); }
+//inline int isfinite(double x) { return _finite(x); }
 
 static inline double sq(double v)
 {

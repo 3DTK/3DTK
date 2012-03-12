@@ -23,8 +23,8 @@ using std::stringstream;
 #include "slam6d/kd.h"
 #include "slam6d/kdc.h"
 #include "veloslam/veloscan.h"
-#include "veloslam/TrackerManager.h"
-#include "veloslam/debugView.h"
+#include "veloslam/trackermanager.h"
+#include "veloslam/debugview.h"
 
 extern TrackerManager trackMgr;
 
