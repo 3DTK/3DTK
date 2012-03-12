@@ -33,7 +33,7 @@ void elch6Deuler::close_loop(const vector <Scan *> &allScans, int first, int las
   graph_t grb[6];
   Matrix C(6, 6);
   graph_traits <graph_t>::edge_iterator ei, ei_end;
-  for(tie(ei, ei_end) = edges(g); ei != ei_end; ei++) {
+  for(tr1::tie(ei, ei_end) = edges(g); ei != ei_end; ei++) {
     int from = source(*ei, g);
     int to = target(*ei, g);
     lum6DEuler::covarianceEuler(allScans[from], allScans[to], my_icp6D->get_nns_method(), my_icp6D->get_rnd(), my_icp6D->get_max_dist_match2(), &C);

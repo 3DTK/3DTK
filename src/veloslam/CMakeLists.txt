@@ -1,5 +1,5 @@
 IF(WITH_VELOSLAM)
-  add_executable(veloslam veloslam.cc veloscan.cc)
+  add_executable(veloslam veloslam.cc veloscan.cc debugview.cc pcddump.cc tracker.cc trackermanager.cc)
   
 IF(UNIX)
   target_link_libraries(veloslam dl scanlib newmat sparse ANN)
