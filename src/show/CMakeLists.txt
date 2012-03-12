@@ -27,7 +27,7 @@ IF(WITH_WXSHOW)
 ENDIF(WITH_WXSHOW)
 
 IF(WITH_VELOSLAM)
-  add_executable(veloshow ../veloslam/veloshow.cc ../veloslam/veloscan.cc ${SHOW_SRCS})
+  add_executable(veloshow ../veloslam/veloshow.cc ../veloslam/veloscan.cc ../veloslam/debugview.cc ../veloslam/pcddump.cc ../veloslam/tracker.cc ../veloslam/trackermanager.cc ${SHOW_SRCS})
   target_link_libraries(veloshow ${SHOW_LIBS})
 ENDIF(WITH_VELOSLAM)  
   
