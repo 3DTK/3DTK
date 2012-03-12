@@ -77,6 +77,16 @@ using std::ifstream;
 #include <strings.h>
 #endif
 
+#include <GL/gl.h>			/* OpenGL header file */
+#include <GL/glu.h>			/* OpenGL utilities header file */
+
+#ifdef _MSC_VER
+#include <GL/glut.h>
+#else
+#include <GL/freeglut.h>
+#endif
+
+
 //  Handling Segmentation faults and CTRL-C
 void sigSEGVhandler (int v)
 {
@@ -663,6 +673,11 @@ void matchGraph6Dautomatic(double cldist, int loopsize, vector <Scan *> allScans
  */
 int main(int argc, char **argv)
 {
+
+#ifndef _MSC_VER
+  glutInit(&argc, argv);
+#endif
+
   signal (SIGSEGV, sigSEGVhandler);
   signal (SIGINT,  sigSEGVhandler);
 
@@ -905,7 +920,7 @@ int main(int argc, char **argv)
   long endtime = GetCurrentTimeInMilliSec() - starttime;
   cout << "Matching done in " << endtime << " milliseconds!!!" << endl;
 
-   Show(0);
+  Show(0);
 
   if (exportPts) {
     cout << "Export all 3D Points to file \"points.pts\"" << endl;

@@ -27,6 +27,7 @@ using namespace std;
 #ifdef _MSC_VER
 #include <windows.h>
 #endif
+
 #define BLOCK_OFFSET 42+16
 
 #define BLOCK_SIZE 1206
@@ -252,7 +253,7 @@ int read_one_packet ( FILE *fp, vector<Point> &ptss, int maxDist, int minDist )
 	for ( c = 0 ; c < CIRCLELENGTH; c++ )
 	{
 
-		fseek(fp , BLOCK_OFFSET, SEEK_CUR);
+		fseeko(fp , BLOCK_OFFSET, SEEK_CUR);
 		size=fread ( buf, 1, BLOCK_SIZE, fp );
 
 		if(size<BLOCK_SIZE)
@@ -377,26 +378,22 @@ int ScanIO_velodyne::readScans(int start, int end, string &dir, int maxDist, int
 {
   static int fileCounter = start;
   string scanFileName;
-  string poseFileName;
-  
 
   FILE *scan_in;
-  FILE *pose_in;
+
 
   if (end > -1 && fileCounter > end) return -1; // 'nuf read
 
   scanFileName = dir + "scan" + ".bin";
-  poseFileName = dir + "scan" + to_string(fileCounter,3) + ".pose";
-
-  scan_in = fopen(scanFileName.c_str(),"rb");  
-  if(scan_in==NULL)
+ 
+  scan_in = fopen64(scanFileName.c_str(),"rb");  
+  if(scan_in == NULL)
   {
     cerr<<scanFileName <<endl;
 	cerr << "ERROR: Missing file " << scanFileName <<" "<<strerror(errno)<< endl;
 	exit(1); 
 	return 0;
   }
-  pose_in=NULL;
 
  
   velodyne_calib_precompute();
@@ -404,8 +401,8 @@ int ScanIO_velodyne::readScans(int start, int end, string &dir, int maxDist, int
   cout.flush();
   
   ptss.reserve(12*32*CIRCLELENGTH);
-  fseek(scan_in, 24, SEEK_SET);
-  fseek(scan_in, (BLOCK_SIZE+BLOCK_OFFSET)*CIRCLELENGTH*fileCounter, SEEK_CUR);
+  fseeko(scan_in, 24, SEEK_SET);
+  fseeko(scan_in, (BLOCK_SIZE+BLOCK_OFFSET)*CIRCLELENGTH*fileCounter, SEEK_CUR);
   
   read_one_packet(scan_in, ptss, maxDist, minDist);
   cout << " with " << ptss.size() << " Points";
