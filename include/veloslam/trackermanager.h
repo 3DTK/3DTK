@@ -42,7 +42,7 @@ public:
 	int DrawTrackersMovtion_Long(vector <VeloScan *> allScans);
 
 	/** @brief 将所有的跟踪器运动情况画出来, 完整的连续轨迹*/
-	int DrawTrackersMovtion_Long_Number(vector <VeloScan *> allScans, int n);
+	int DrawTrackersMovtion_Long_Number(vector <Scan *> allScans, int n);
 
 	/** @brief 跟踪过滤器，把一些不符合跟踪的cluster去掉*/
 	static bool TrackerFilter(clusterFeature &glu);

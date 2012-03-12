@@ -716,7 +716,7 @@ static void Draw(void)
 
 //    Draw_points_ZValue(Scan::allScans[0],  1,  0.8, 0.8, 0.8);
     DrawAll_ScanPoints_Number(Scan::allScans,  1,  0.8, 0.8, 0.8, 5);
-//	trackMgr.DrawTrackersMovtion_Long_Number((vector <VeloScan *> )(Scan::allScans), 5);
+	trackMgr.DrawTrackersMovtion_Long_Number(Scan::allScans, 5);
 
 
     glFlush();
