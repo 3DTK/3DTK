@@ -5,22 +5,6 @@
  * @author Dorit Borrmann. Smart Systems Group, Jacobs University Bremen gGmbH, Germany. 
  */
 
-//FIXME
-/** 无效点，打到距离外，或者在我们定义的距离之外*/
-#define POINT_TYPE_INVALID       0x00000001
-/** 大于半径均值平均差阈值*/
-#define POINT_TYPE_ABOVE_DELTA_R 0x00000002
-/** 小于半径均值平均差阈值*/
-#define POINT_TYPE_BELOW_DELTA_R 0x00000004
-/** 大于高程均值平均差阈值*/
-#define POINT_TYPE_ABOVE_DELTA_Z 0x00000008
-/** 小于高程均值平均差阈值*/
-#define POINT_TYPE_BELOW_DELTA_Z 0x00000010
-/** 大于半径阈值*/
-#define POINT_TYPE_ABOVE_R       0x00000020
-/** 小于半径阈值*/
-#define POINT_TYPE_BELOW_R       0x00000040
-
 #include "slam6d/scan_io_velodyne.h"
 #include "slam6d/globals.icc"
 #include <fstream>
@@ -333,17 +317,18 @@ int read_one_packet ( FILE *fp, vector<Point> &ptss, int maxDist, int minDist )
 
 					x -= horizdffsetCorrection[physicalNO] * cos_ctheta;
 					y -= horizdffsetCorrection[physicalNO] * sin_ctheta;
-					/*
+
 					point.rad  = sqrt(  x*x 	+  y*y );
 					point.tan_theta  = y/x;
-					*/
-					point.type |= POINT_TYPE_INVALID;
 
+					point.point_type|=POINT_TYPE_INVALID;
+
+					//主要是为了保证左手系和屏幕显示的习惯相似
 					point.x=x*100;
-					point.y=y*100;
-					point.z=z*100;
+					point.y=z*100;
+					point.z=y*100;
 
-    					{
+   					{
 						ptss.push_back(point);
 					}
 				}

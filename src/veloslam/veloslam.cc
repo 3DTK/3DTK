@@ -28,7 +28,7 @@ using std::endl;
 #include <fstream>
 using std::ifstream;
 
-#include "veloslam/veloscan.h"
+
 
 #include "slam6d/icp6Dapx.h"
 #include "slam6d/icp6Dsvd.h"
@@ -66,6 +66,9 @@ using std::ifstream;
 #endif
 
 #include <csignal>
+
+#include "veloslam/veloscan.h"
+#include "veloslam/debugview.h"
 
 #ifdef _MSC_VER
 #define strcasecmp _stricmp
@@ -901,6 +904,8 @@ int main(int argc, char **argv)
 
   long endtime = GetCurrentTimeInMilliSec() - starttime;
   cout << "Matching done in " << endtime << " milliseconds!!!" << endl;
+
+   Show(0);
 
   if (exportPts) {
     cout << "Export all 3D Points to file \"points.pts\"" << endl;

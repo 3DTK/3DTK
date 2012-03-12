@@ -16,120 +16,8 @@
 #endif
 
 #include "slam6d/scan.h"
-
-/** ÎÞÐ§Cell£¬ÀïÃæÃ»ÓÐµã*/
-#define CELL_TYPE_INVALID                0x00000001
-/** ´óÓÚ°ë¾¶¾ùÖµÆ½¾ù²îãÐÖµ*/
-#define CELL_TYPE_ABOVE_DELTA_R  0x00000002
-/** Ð¡ÓÚ°ë¾¶¾ùÖµÆ½¾ù²îãÐÖµ*/
-#define CELL_TYPE_BELOW_DELTA_R  0x00000004
-/** ´óÓÚ¸ß³Ì¾ùÖµÆ½¾ù²îãÐÖµ*/
-#define CELL_TYPE_ABOVE_DELTA_Z  0x00000008
-/** Ð¡ÓÚ¸ß³Ì¾ùÖµÆ½¾ù²îãÐÖµ*/
-#define CELL_TYPE_BELOW_DELTA_Z  0x00000010
-/** ´óÓÚ°ë¾¶ãÐÖµ*/
-#define CELL_TYPE_ABOVE_R               0x00000020
-/** Ð¡ÓÚ°ë¾¶ãÐÖµ*/
-#define CELL_TYPE_BELOW_R              0x00000040
-/** ±ÈÀ×´ï¸ß*/
-#define CELL_TYPE_ABOVE_LIDAR       0x00000080
-/** ÔÚÕÏ°­Îï¸ú×Ù¼ì²â¾àÀë·¶Î§ÄÚ*/
-#define CELL_TYPE_IN_OBSTACLE_RANGE       0x00000100
-/** ¿ÉÒÔÓÃÓÚSlam6DÆ´½ÓµÄµãÔÆ*/
-#define CELL_TYPE_FOR_SLAM6D        0x00000200
-/** ·ÇÖÐ¿Õ£¬ÔÚÐ£Ô°ÀïÃæÈç¹ûÍ·¶¥ÓÐÊ÷£¬ÔòÎªÖÐ¿Õ*/
-#define CELL_TYPE_NOT_HOLLOW        0x00000400
-
-/** ±ÈÀ×´ï¸ß*/
-#define CUDE_TYPE_ABOVE_LIDAR       0x00000001
-/** ÔÚÕÏ°­Îï¸ú×Ù¼ì²â¾àÀë·¶Î§ÄÚ*/
-#define CUDE_TYPE_IN_OBSTACLE_RANGE       0x00000002
-/** ¸Ã¸ñ×ÓÀïÓÐË®Æ½ sick µÄÉ¨Ãèµã£¬ËµÃ÷¸Ã¸ñ×ÓÊÇÕÏ°­Îï¸ñ×Ó **/
-#define CUDE_TYPE_CONTAIN_SICK        0x00000400
-
-/** ±ÈÀ×´ï¸ß*/
-#define CLUSTER_TYPE_OBJECT       0x00000001
-/** ÔÚÕÏ°­Îï¸ú×Ù¼ì²â¾àÀë·¶Î§ÄÚ*/
-#define CLUSTER_TYPE_MOVING_OBJECT       0x00000002
-
-/** ¸ñÍøµ¥Ôª,±ýÐÍºÍ·½ÐÎÍø¸ñµ¥Ôª£¬ÀïÃæ°üº¬ÁË¸Ãµ¥ÔªËùº¬ËùÓÐµãµÄÖ¸Õë*/
-typedef vector<Point*> cell;
-/** °ë¾¶·½ÏòÉÏµÄ ÏàÍ¬Ðý½ÇµÄ Ò»ÁÐ¸ñÍøµ¥Ôª*/
-typedef vector<cell> cellColumn;
-/** Õû¸ö¸ñÍø£¬±ýÐÍºÍ·½¸ñÐÎ*/
-typedef vector<cellColumn> cellArray;  //±ý×´¸ñÍø·½Ê½
-
-//!!!!
-
-typedef vector<char> charv;
-typedef vector<charv> charvv;
-
-/** ÎÞÐ§µã£¬´òµ½¾àÀëÍâ£¬»òÕßÔÚÎÒÃÇ¶¨ÒåµÄ¾àÀëÖ®Íâ*/
-#define POINT_TYPE_INVALID       0x00000001
-/** ´óÓÚ°ë¾¶¾ùÖµÆ½¾ù²îãÐÖµ*/
-#define POINT_TYPE_ABOVE_DELTA_R 0x00000002
-/** Ð¡ÓÚ°ë¾¶¾ùÖµÆ½¾ù²îãÐÖµ*/
-#define POINT_TYPE_BELOW_DELTA_R 0x00000004
-/** ´óÓÚ¸ß³Ì¾ùÖµÆ½¾ù²îãÐÖµ*/
-#define POINT_TYPE_ABOVE_DELTA_Z 0x00000008
-/** Ð¡ÓÚ¸ß³Ì¾ùÖµÆ½¾ù²îãÐÖµ*/
-#define POINT_TYPE_BELOW_DELTA_Z 0x00000010
-/** ´óÓÚ°ë¾¶ãÐÖµ*/
-#define POINT_TYPE_ABOVE_R       0x00000020
-/** Ð¡ÓÚ°ë¾¶ãÐÖµ*/
-#define POINT_TYPE_BELOW_R       0x00000040
-
-//!!!!
-
-
-/** ¸ñÍøµ¥ÔªµÄÌØÕ÷  cellFeature¡¡Õâ¸öÊÇ±ýÐÍÍø¸ñÌØÕ÷*/
-class cellFeature
-{
-public:
-	/** x,y,zµÄ¾ùÖµ*/
-	float ave_x,ave_y,ave_z;
-	/** x,y,zµÄ×îÖµ*/
-	float min_x,min_y,min_z;
-	float max_x,max_y,max_z;
-	float delta_z;
-
-	/** ÓÐ¶àÉÙ¸öcircleµÄµã */
-	int circleNum;
-	int size; //µãµÄ¸öÊý
-	unsigned int cellType;
-	cell* pCell;
-};
-
-typedef vector<cellFeature> cellFeatureColumn; //ÏàÍ¬Ðý½Ç·½ÏòÉÏµÄÍø¸ñÌØÕ÷Êý×é
-typedef vector<cellFeatureColumn> cellFeatureArray;//Õû¸öÍø¸ñÌØÕ÷Êý×é
-
-/** ¼¯ÈºµÄÌØÕ÷ Õâ¸öÊÇ±ýÐÍÍø¸ñ¼¯ÈºµÄÌØÕ÷*/// ¶¯Ä¿±êµÄÌØÕ÷ 
-class clusterFeature
-{
-public:
-	/** x,y,zµÄ×îÖµ*/
-	float min_x,min_y,min_z;
-	float max_x,max_y,max_z;
-	float min_y_x,   max_y_x;           //×î´ó×îÐ¡Y ¶ÔÓ¦µÄx £¬ÖìÉñÌí Ìí¼Ó
-	float size_x,size_y,size_z;
-	float speed_x, speed_y, speed;   // ËÙ¶ÈÌØÕ÷
-
-	int size;
-	unsigned int clusterType;
-};
-typedef vector<clusterFeature> clusterFeatureArray;
-
-//Ò»Á¾³µÊÇÓÉºÜ¶àÍø¸ñ×é³ÉµÄ
-/** ¼¯Èº  */
-typedef vector<cellFeature*> cluster;//Ò»¸ö¼¯ÈºÀïÓÐºÃ¼¸¸öÍø¸ñ£¬Ã¿¸öÍø¸ñÌØÕ÷ÏàËÆ
-
-/** ¼¯ÈºÊý×é */
-typedef vector<cluster> clusterArray;
-typedef vector<clusterFeature> clusterFeatureArray;
-
-typedef vector<cellFeature> cellFeatureColumn; //ÏàÍ¬Ðý½Ç·½ÏòÉÏµÄÍø¸ñÌØÕ÷Êý×é
-typedef vector<cellFeatureColumn> cellFeatureArray;//Õû¸öÍø¸ñÌØÕ÷Êý×é
-
+#include "veloslam/gridcell.h"
+#include "veloslam/gridcluster.h"
 
 /**
  * @brief 3D scan representation and implementation of dynamic velodyne scan matching
@@ -155,7 +43,7 @@ public:
 						   int nns_method, bool cuda_enabled, 
 						   bool openFileForWriting = false);  
 
-private:
+public:
 
   /**
    * Vector storing single scans of a metascan
@@ -164,10 +52,9 @@ private:
   
   // FIXME
   void GetAllofObject();
-  //  void SaveAllofObject();
-  //  void SaveNoObjectPointCloud();
+  int  CalcRadAndTheta();
+
   int TransferToCellArray();
-  //  int CalcRadAndTheta();
   bool FilterNOMovingObjcets(clusterFeature &glu);
   void ExchangeNoObjectPointCloud();
   void FreeAllCellAndCluterMemory();
@@ -186,6 +73,19 @@ private:
   
   clusterArray scanClusterArray;
   clusterFeatureArray scanClusterFeatureArray;
+
+  	/**
+	* Vector for the scan data tracking object 
+	*/
+	vector <Point> points_tracking;
+  	/**
+	* for tracking  
+	*/
+    bool isTrackerHandled;
+  	/**
+	* count scan number 
+	*/
+	long scanid;
 
 };
 

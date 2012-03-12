@@ -1,4 +1,4 @@
-/**
+﻿/**
  *  @file
  *  @brief Representation of a 3D point
  *  @author Kai Lingemann. Institute of Computer Science, University of Osnabrueck, Germany.
@@ -15,6 +15,15 @@ using std::istream;
 
 #include <stdexcept>
 using std::runtime_error;
+
+/** ÎÞÐ§µã£¬´òµ½¾àÀëÍâ£¬»òÕßÔÚÎÒÃÇ¶¨ÒåµÄ¾àÀëÖ®Íâ*/
+#define POINT_TYPE_INVALID       0x00000001
+#define POINT_TYPE_ABOVE_DELTA_R 0x00000002
+#define POINT_TYPE_BELOW_DELTA_R 0x00000004
+#define POINT_TYPE_ABOVE_DELTA_Y 0x00000008
+#define POINT_TYPE_BELOW_DELTA_Y 0x00000010
+#define POINT_TYPE_ABOVE_R       0x00000020
+#define POINT_TYPE_BELOW_R       0x00000040
 
 /**
  * @brief Representation of a point in 3D space
@@ -102,6 +111,12 @@ public:
   double z;
   /// additional information about the point, e.g., semantic 
   int type;
+  ///  add type point  for veloscan
+  int point_type;
+  ///  range  in 3D space cylindrical coordinates
+  double rad;
+  ///    tang in  cylindrical coordinates
+  double tan_theta;
 
   // color information of the point between 0 and 255
   // rgb

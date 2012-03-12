@@ -46,6 +46,48 @@ using std::stringstream;
 #include <cstring>
 using std::flush;
 
+#include "veloslam/veloscan.h"
+#include "veloslam/trackerManager.h"
+
+#ifdef _OPENMP
+#include <omp.h>
+#endif
+
+#ifdef _MSC_VER
+#include <windows.h>
+#else
+#include <dlfcn.h>
+#endif
+
+#ifdef _MSC_VER
+#define strcasecmp _stricmp
+#define strncasecmp _strnicmp
+#else
+#include <strings.h>
+#endif
+
+#include <cstring>
+using std::flush;
+
+#include <GL/gl.h>			/* OpenGL header file */
+#include <GL/glu.h>			/* OpenGL utilities header file */
+
+#ifdef _MSC_VER
+#include <GL/glut.h>
+#else
+#include <GL/freeglut.h>
+#endif
+
+#include "veloslam/color_util.h"
+TrackerManager trackMgr;
+float absf(float a)
+{
+	return a>0?a:-a;
+}
+
+
+extern int Show(int frameno);
+
 /**
  * default Constructor
  */
@@ -249,242 +291,28 @@ void VeloScan::readScansRedSearch(reader_type type,
     return;
 }
 
-/*
+
 int VeloScan::CalcRadAndTheta()
 {
     int i,j;
     int size=  points.size();
 
+	// 重新旋转了坐标，所以y改为z，
     for(i=0; i< size; ++i)
     {
-	points[i].rad  = sqrt(  points[i].x*points[i].x   +   points[i].y*points[i].y );
-	points[i].tan_theta  = points[i].y/points[i].x;
+		points[i].rad  = sqrt(  points[i].x*points[i].x   +   points[i].z*points[i].z );
+		points[i].tan_theta  = points[i].z/points[i].x;
     }
     return 0;
 }
-*/
-
-/*
-void VeloScan::SaveAllofObject()
-{
-	for(unsigned int i=0; i<scanClusterArray.size();++i)
-	{
-		//运动目标的特征结构
-		clusterFeature &glu=scanClusterFeatureArray[i];
-		cluster &gluData=scanClusterArray[i];
-		if(glu.size_x>1500 || glu.size_y>1500 || glu.size_x*glu.size_y >600*600 )
-      			SaveObjectsInPCD(noofframe*1000 + i, gluData );
-	}
-}
-*/
-/*
-void VeloScan::SaveNoObjectPointCloud()
-{
-//int i,j,k;
-//char filename[256];
-//pcl::PointCloud<pcl::PointXYZ> cloud;
-//pcl::PointXYZ point;
-//cloud.height   = 1;
-//cloud.is_dense = false;
-
-////每个Cluster下面有几个Cell，每个Cell有很多点
-//int startofpoint  = 0;
-//int colMax=  scanCellFeatureArray.size();
-//for(i=0; i<colMax; ++i)
-//{
-//	cellFeatureColumn  &gFeatureCol =	scanCellFeatureArray[i];
-//	int rowMax= gFeatureCol.size();
-//	for(j=0;j< rowMax; ++j)
-//	{
-//	   cellFeature &gcellFreature =  gFeatureCol[j];
-//	   if( !(gcellFreature.cellType & CELL_TYPE_FOR_SLAM6D))
-//		   continue;
-
-//	   startofpoint += gcellFreature.pCell->size();
-//	   cell &gCell =*( gcellFreature.pCell);
-//	   for( k=0; k< gcellFreature.pCell->size();++k)
-//	   {
-//			Point p = *(gCell[k]);
-//			point.x = p.x/100.0;
-//			point.y = p.y/100.0;
-//			point.z = p.z/100.0;
-//			cloud.points.push_back(point);
-//	   }
-//
-//	}
-//}
-
-//cloud.width    =  startofpoint;
-//cloud.height   = 1;
-//cloud.is_dense = false;
-//if(cloud.width   > 0)
-//{
-//	sprintf (filename, "C:\\test\\noobject\\noobject%08d.pcd", indexFrame);
-//	//pcl::io::savePCDFileASCII (filename, cloud);
-//	pcl::io::savePCDFileBinary( filename, cloud);
-//}
-//
-}
-*/
-void VeloScan::ExchangeNoObjectPointCloud()
-{
-    unsigned int i,j,k;
-    points.clear();
-
-    //每个Cluster下面有几个Cell，每个Cell有很多点
-    int startofpoint  = 0;
-    unsigned int colMax=  scanCellFeatureArray.size();
-    for(i=0; i<colMax; ++i)
-    {
-        cellFeatureColumn  &gFeatureCol = scanCellFeatureArray[i];
-        unsigned int rowMax= gFeatureCol.size();
-        for(j=0; j< rowMax; ++j)
-        {
-            cellFeature &gcellFreature =  gFeatureCol[j];
-            if( !(gcellFreature.cellType & CELL_TYPE_FOR_SLAM6D))
-                continue;
-
-            startofpoint += gcellFreature.pCell->size();
-            cell &gCell =*( gcellFreature.pCell);
-            for( k=0; k< gcellFreature.pCell->size(); ++k)
-            {
-                Point p = *(gCell[k]);
-                points.push_back(p);
-            }
-
-        }
-    }
-
-
-}
-
-
-void VeloScan::FreeAllCellAndCluterMemory()
-{
-    scanCellArray.clear();
-    scanCellFeatureArray.clear();
-
-    scanClusterArray.clear();;
-    scanClusterFeatureArray.clear();
-}
-
-
-bool VeloScan::FilterNOMovingObjcets(clusterFeature &glu)
-{
-    /**树电杆之类**/
-    if( glu.size_z > 200 && ((glu.size_x>glu.size_y?glu.size_x:glu.size_y))<360)
-    {
-        return false;
-    }
-    /**至少3.5米长，但宽小于1.4m，所以不可能为车**/
-    else if((glu.size_y>350 && glu.size_x<140)|| (glu.size_x>350 && glu.size_y<140))
-    {
-        return false;
-    }
-    else if(glu.size_z > 250 )
-    {
-        return false;
-    }
-    else if((glu.size_x>glu.size_y?glu.size_x:glu.size_y)>420 && glu.size_z<130)
-    {
-        return false;
-    }
-
-    else if((glu.size_x>glu.size_y?glu.size_x:glu.size_y)>3.5 && ((glu.size_x>glu.size_y?glu.size_x:glu.size_y)/(glu.size_x<glu.size_y?glu.size_x:glu.size_y)>4))
-    {
-        return false;
-    }
-
-    else if(glu.size_x<700 && glu.size_y<700 &&  glu.size_z > 100  )
-    {
-        return true;
-    }
-
-    // 过滤掉超过15米的 超级大的物体肯定是建筑物
-    if(glu.size_x>1500 || glu.size_y>1500 || glu.size_x*glu.size_y >600*600 )
-    {
-        return false;
-    }
-
-    // 过滤过面积特别大的 特别细长的大物体，可能是栅栏
-    if(glu.size_x*glu.size_y >500*500  &&  glu.size_x/glu.size_y < 1.5)
-    {
-        return false;
-    }
-
-    //过滤掉1米二一下的 小目标
-    if(glu.size_z < 100)
-    {
-        return false;
-    }
-    //过滤掉长宽高总和小于3米的 //有可能是行人
-    if((glu.size_x + glu.size_y + glu.size_z)<1.5)
-    {
-        return false;
-    }
-
-    // 过滤掉超过宽度超过3米的
-    if(glu.size_y>300)
-    {
-        return false;
-    }
-
-    //if(glu.size_x<40||glu.size_y<40||glu.size_z<40)
-    //	continue;
-
-    //有可能是行人
-    if((glu.size_x + glu.size_y) <4)
-    {
-        return false;
-    }
-
-    //过滤掉长宽比大于3的  //有很多公汽符合这个条件
-    if(glu.size_x/glu.size_y>3.0)
-    {
-        return false;
-    }
-
-    return true;
-}
-
-void VeloScan::GetAllofObject()
-{
-    //	int i,j;
-    //	int size;
-
-    if(points.size() > 0)
-    {
-        //		noofframe +=1000;
-        //  保存整帧数据到PCD文件
-        //	SaveFrameInPCD();
-        //  散列到饼型Cell中
-        TransferToCellArray();
-        //  计算相应的特征 并的到障碍物的Cell
-        CalcScanCellFeature();
-        //  聚类为Cluster对象
-        FindAndCalcScanClusterFeature();
-        //保存动态目标的对象到PCD文件
-        //	SaveAllofObject();
-        //	SaveNoObjectPointCloud();
-        ExchangeNoObjectPointCloud();
-        // 显示处理的结果，用于调试。
-        //        Show(0);
-        //可以保存非运动目标的点到PCD文件中，看一下效果啊。
-
-        //需要清理所有的存储数据。
-        FreeAllCellAndCluterMemory();
-    }
-    return;
-}
-
 
 int VeloScan::TransferToCellArray()
 {
 #define  DefaultColumnSize 360
 
     int columnSize= 360;	  //cfg.cfgPlaneDetect.ColumnSize;
-    int CellSize= 50;	 //cfg.cfgPlaneDetect.CellSize;
-    int MinRad=0;		//cfg.cfgPlaneDetect.MinRad;
+    int CellSize= 50;	 //cfg.cfgPlaneDetect.CellSize;	 
+    int MinRad=0;		//cfg.cfgPlaneDetect.MinRad;	
     int MaxRad=6000;		//cfg.cfgPlaneDetect.MaxRad
 
     if((MaxRad-MinRad)%CellSize!=0)
@@ -502,9 +330,9 @@ int VeloScan::TransferToCellArray()
         columnSize=DefaultColumnSize;
 
     int sectionSize=columnSize/8;
-
-    // 计算距离值和每个点的旋角
-    //    CalcRadAndTheta();
+    
+	// 计算距离值和每个点的旋角
+    CalcRadAndTheta();
 
     scanCellArray.resize(columnSize);
     for(i=0; i<columnSize; ++i)
@@ -524,153 +352,256 @@ int VeloScan::TransferToCellArray()
 //     printf("scanCellArray.size= %d\n",scanCellArray.size());
     for(i=0; i< points.size(); ++i)
     {
-        count++;
-        Point  &pt= points[i];
+            count++;
+            Point  &pt= points[i]; 
 
+			// 选择在距离雷达的一定的范围内进行测试
+            if(pt.rad <=MinRad || pt.rad>=MaxRad)
+                continue;
 
+		// 四个象限的散列 第一个象限  旋转坐标系
 
-        // 选择在距离雷达的一定的范围内进行测试
-        if( sqrt( pt.x*pt.x + pt.y*pt.y ) <= MinRad ||sqrt( pt.x*pt.x + pt.y*pt.y ) >= MaxRad)
-            continue;
-
-        // 四个象限的散列 第一个象限
-        if(pt.x >0 && pt.y>0 )
-        {
-            if(pt.x > pt.y)
+            if(pt.x >0 && pt.z>0 )
             {
-                flag=pt.y/pt.x;
-                result=upper_bound(tanv.begin(),tanv.end(),flag);
-                if(result==tanv.end())
+                if(pt.x > pt.z)
                 {
-                    offset=sectionSize-1;
+                    flag=pt.tan_theta;
+                    result=upper_bound(tanv.begin(),tanv.end(),flag);
+                    if(result==tanv.end())
+                    {
+                        offset=sectionSize-1;
+                    }
+                    else
+                    {
+                        offset=result-tanv.begin();
+                    }
                 }
                 else
                 {
-                    offset=result-tanv.begin();
+                    flag=1/pt.tan_theta;
+                    result=upper_bound(tanv.begin(),tanv.end(),flag);
+                    if(result==tanv.end())
+                    {
+                        offset=sectionSize;
+                    }
+                    else
+                    {
+                        diff=result-tanv.begin();
+                        offset=sectionSize*2-1-(diff);
+                    }
+
                 }
             }
+
+			//第二象限
+            else if(pt.x<0 && pt.z>0)
+            {
+                if(-pt.x>pt.z)
+                {
+                    flag=-pt.tan_theta;
+                    result=upper_bound(tanv.begin(),tanv.end(),flag);
+                    if(result==tanv.end())
+                    {
+                        offset=sectionSize*3;
+                    }
+                    else
+                    {
+                        offset=sectionSize*4-1-(result-tanv.begin());
+                    }
+
+                }
+                else
+                {
+                    flag=1/-pt.tan_theta;
+                    result=upper_bound(tanv.begin(),tanv.end(),flag);
+                    if(result==tanv.end())
+                    {
+                        offset=sectionSize*3-1;
+                    }
+                    else
+                    {
+                        offset=sectionSize*2+(result-tanv.begin());
+                    }
+                }
+            }
+
+			//第三象限
+            else if(pt.x<0&&pt.z<0)
+            {
+                if(-pt.x>-pt.z)
+                {
+                    flag=pt.tan_theta;
+                    result=upper_bound(tanv.begin(),tanv.end(),flag);
+                    if(result==tanv.end())
+                    {
+                        offset=sectionSize*5-1;
+                    }
+                    else
+                    {
+                        offset=sectionSize*4+(result-tanv.begin());
+                    }
+                }
+                else
+                {
+                    flag=1/pt.tan_theta;
+                    result=upper_bound(tanv.begin(),tanv.end(),flag);
+                    if(result==tanv.end())
+                    {
+                        offset=sectionSize*5;
+                    }
+                    else
+                    {
+                        offset=sectionSize*6-1-(result-tanv.begin());
+                    }
+
+                }
+            }
+
+			//第四象限
+            else if(pt.x>0&&pt.z<0)
+            {
+                if(pt.x>-pt.z)
+                {
+                    flag=-pt.tan_theta;
+                    result=upper_bound(tanv.begin(),tanv.end(),flag);
+                    if(result==tanv.end())
+                    {
+                        offset=sectionSize*7;
+                    }
+                    else
+                    {
+                        offset=sectionSize*8-1-(result-tanv.begin());
+                    }
+                }
+                else
+                {
+                    flag=1/-pt.tan_theta;
+                    result=upper_bound(tanv.begin(),tanv.end(),flag);
+                    if(result==tanv.end())
+                    {
+                        offset=sectionSize*7-1;
+                    }
+                    else
+                    {
+                        offset=sectionSize*6+(result-tanv.begin());
+                    }
+                }
+            }
+
+			//都不属于
             else
             {
-                flag=1/(pt.y/pt.x);
-                result=upper_bound(tanv.begin(),tanv.end(),flag);
-                if(result==tanv.end())
-                {
-                    offset=sectionSize;
-                }
-                else
-                {
-                    diff=result-tanv.begin();
-                    offset=sectionSize*2-1-(diff);
-                }
-
+                continue;
             }
-        }
 
-        //第二象限
-        else if(pt.x<0 && pt.y>0)
-        {
-            if(-pt.x>pt.y)
-            {
-                flag=-pt.y/pt.x;
-                result=upper_bound(tanv.begin(),tanv.end(),flag);
-                if(result==tanv.end())
-                {
-                    offset=sectionSize*3;
-                }
-                else
-                {
-                    offset=sectionSize*4-1-(result-tanv.begin());
-                }
-
-            }
-            else
-            {
-                flag=1/(-pt.y/pt.x);
-                result=upper_bound(tanv.begin(),tanv.end(),flag);
-                if(result==tanv.end())
-                {
-                    offset=sectionSize*3-1;
-                }
-                else
-                {
-                    offset=sectionSize*2+(result-tanv.begin());
-                }
-            }
-        }
-
-        //第三象限
-        else if(pt.x<0&&pt.y<0)
-        {
-            if(-pt.x>-pt.y)
-            {
-                flag=pt.y/pt.x;
-                result=upper_bound(tanv.begin(),tanv.end(),flag);
-                if(result==tanv.end())
-                {
-                    offset=sectionSize*5-1;
-                }
-                else
-                {
-                    offset=sectionSize*4+(result-tanv.begin());
-                }
-            }
-            else
-            {
-                flag=1/ (pt.y/pt.x);
-                result=upper_bound(tanv.begin(),tanv.end(),flag);
-                if(result==tanv.end())
-                {
-                    offset=sectionSize*5;
-                }
-                else
-                {
-                    offset=sectionSize*6-1-(result-tanv.begin());
-                }
-
-            }
-        }
-
-        //第四象限
-        else if(pt.x>0&&pt.y<0)
-        {
-            if(pt.x>-pt.y)
-            {
-                flag=-pt.y/pt.x;
-                result=upper_bound(tanv.begin(),tanv.end(),flag);
-                if(result==tanv.end())
-                {
-                    offset=sectionSize*7;
-                }
-                else
-                {
-                    offset=sectionSize*8-1-(result-tanv.begin());
-                }
-            }
-            else
-            {
-                flag=1 / (-pt.y/pt.x);
-                result=upper_bound(tanv.begin(),tanv.end(),flag);
-                if(result==tanv.end())
-                {
-                    offset=sectionSize*7-1;
-                }
-                else
-                {
-                    offset=sectionSize*6+(result-tanv.begin());
-                }
-            }
-        }
-
-        //都不属于
-        else
-        {
-            continue;
-        }
-
-        //散列过程
-        int k= (int)((sqrt( pt.x*pt.x + pt.y*pt.y )-MinRad)/(CellSize*1.0));
-        scanCellArray[offset][k].push_back(&pt);
+         //散列过程   
+            int k= (int)((pt.rad-MinRad)/(CellSize*1.0));
+            scanCellArray[offset][k].push_back(&pt);
     }
+	return 0;
+} 
+
+
+
+int VeloScan::CalcCellFeature(cell& cellobj, cellFeature& f)
+{
+	   int outlier;
+	   float lastMaxY;
+	   f.size=cellobj.size();
+	   f.cellType=0;
+	   
+	   if(f.size==0)
+	   {
+		   f.cellType|=CELL_TYPE_INVALID;
+		   return 0;
+	   }
+	   
+	   f.ave_x= f.ave_y = f.ave_z=0.0;
+	   f.delta_y=0;
+	
+	   int i=0;
+	   for(i=0; i<f.size; ++i)
+	   {
+		   f.ave_x+=cellobj[i]->x;
+		   f.ave_z+=cellobj[i]->z;
+		   f.ave_y+=cellobj[i]->y;
+   
+
+		   if(cellobj[i]->point_type & POINT_TYPE_BELOW_R)
+			   f.cellType|=CELL_TYPE_BELOW_R;
+
+		   if(i==0)
+		   {
+			   outlier=0;
+			   f.min_x=f.max_x=cellobj[i]->x;
+			   f.min_z=f.max_z=cellobj[i]->z;
+			   lastMaxY=f.min_y=f.max_y=cellobj[i]->y;  // 修改坐标
+		   }
+		   else
+		   {
+			   if(f.max_x<cellobj[i]->x)		f.max_x=cellobj[i]->x;
+	
+			   if(f.min_x>cellobj[i]->x)	   f.min_x=cellobj[i]->x;
+	
+			   if(f.max_z<cellobj[i]->z)	   f.max_z=cellobj[i]->z;
+	
+			   if(f.min_z>cellobj[i]->z)    f.min_z=cellobj[i]->z;
+	
+			   if(f.max_y<cellobj[i]->y)
+			   {
+				   lastMaxY=f.max_y;
+				   f.max_y=cellobj[i]->y;
+				   outlier=i;
+			   }
+	
+			   if(f.min_y>cellobj[i]->y)
+				   f.min_y=cellobj[i]->y;
+	
+		   }
+	   }
+	
+	   if(f.size>1)
+	   {
+		   int y=f.ave_y-cellobj[outlier]->y;
+		   y/=(f.size-1)*1.0;
+	
+		   if(cellobj[outlier]->y-y<50)
+		   {
+			   outlier=-1;
+			   f.ave_y/=f.size*1.0;
+		   }
+		   else
+		   {
+			   f.max_y=lastMaxY;
+			   f.ave_y=y;
+		   }
+	   }
+	   else
+	   {
+		   outlier=-1;
+		   f.ave_y/=f.size*1.0;
+	   }
+	
+	   f.ave_x/=f.size*1.0;
+	   f.ave_z/=f.size*1.0;
+
+	   for(i=0; i<f.size; ++i)
+	   {
+		   if(i==outlier)
+			   continue;
+		   f.delta_y+= absf(cellobj[i]->y - f.ave_y);
+	   }
+
+		//  进行路面和障碍物的分割，具体就是修改Cell的属性
+	   float threshold;
+   	   threshold=f.delta_y;
+
+	   float GridThresholdGroundDetect =120;
+	   if(threshold >  GridThresholdGroundDetect)
+		   f.cellType|=CELL_TYPE_ABOVE_DELTA_Y;
+	   else
+		   f.cellType|=CELL_TYPE_BELOW_DELTA_Y;
+	
     return 0;
 }
 
@@ -690,7 +621,7 @@ int VeloScan::CalcScanCellFeature()
     {
         scanCellFeatureArray.resize(columnSize);
         for(i=0; i<columnSize; ++i)
-            scanCellFeatureArray[i].resize(cellNumber);
+            scanCellFeatureArray[i].resize(cellNumber); 
     }
 
 //计算每个Cell的特征。
@@ -702,12 +633,22 @@ int VeloScan::CalcScanCellFeature()
         {
             cell &cellObj=scanCellArray[j][i];
             cellFeature &feature=scanCellFeatureArray[j][i];
+			//记住特征的位置
+			feature.columnID=j;
+			feature.cellID=i;
+
+			//用于获得用于计算相关的点云
             feature.pCell=&cellObj;
             CalcCellFeature(cellObj,feature);
 
-            // 得到是障碍物的点簇
-            if( feature.delta_z > 120)
-                scanCellFeatureArray[j][i].cellType |= CELL_TYPE_ABOVE_DELTA_Z;
+			// 得到是障碍物的点簇
+	         if( feature.delta_y > 120)
+             {
+				 scanCellFeatureArray[j][i].cellType |= CELL_TYPE_ABOVE_DELTA_Y;
+				 for(int k=0;k <scanCellArray[j][i].size(); k++)
+					 scanCellArray[j][i][k]->point_type |= POINT_TYPE_ABOVE_DELTA_Y;
+
+			 }
 
         }
     }
@@ -715,11 +656,124 @@ int VeloScan::CalcScanCellFeature()
     return 0;
 }
 
+int VeloScan::SearchNeigh(cluster& clu,charvv& flagvv,int i,int j)
+{
+    int columnSize=scanCellArray.size();
+    int cellNumber=scanCellArray[0].size();
+
+	//到了格网边缘，停止搜索
+    if(i<0||i>=columnSize||j<0||j>=cellNumber)
+        return 0;
+	//到了跟节点
+    if(flagvv[i][j]==1)
+        return 0;
+
+    if(scanCellFeatureArray[i][j].size==0)
+    {
+        flagvv[i][j]=1;
+        return 0;
+    }
+
+    if(scanCellFeatureArray[i][j].cellType & CELL_TYPE_ABOVE_DELTA_Y) //有符合要求的cell
+    {
+        flagvv[i][j]=1;
+
+    	clu.push_back(&scanCellFeatureArray[i][j]); //存进集群里
+
+        SearchNeigh(clu,flagvv,i-1,j-1);
+        SearchNeigh(clu,flagvv,i-1,j);
+        SearchNeigh(clu,flagvv,i-1,j+1);
+        SearchNeigh(clu,flagvv,i,j-1);
+        SearchNeigh(clu,flagvv,i,j+1);
+        SearchNeigh(clu,flagvv,i+1,j-1);
+        SearchNeigh(clu,flagvv,i+1,j);
+        SearchNeigh(clu,flagvv,i+1,j+1);
+
+		SearchNeigh(clu,flagvv,i,j+2);
+		SearchNeigh(clu,flagvv,i,j-2);
+		SearchNeigh(clu,flagvv,i+2,j);
+		SearchNeigh(clu,flagvv,i-2,j);
+
+		//SearchNeigh(clu,flagvv,i,j+3);
+		//SearchNeigh(clu,flagvv,i,j-3);
+		//SearchNeigh(clu,flagvv,i+3,j);
+		//SearchNeigh(clu,flagvv,i-3,j);
+    }
+
+    return 0;
+}
+
+int VeloScan::CalcClusterFeature(cluster& clu,clusterFeature& f)
+{
+    f.size=clu.size();
+	
+    if(f.size==0)
+    {
+        return 0;
+    }
+	
+    f.clusterType=0;
+	f.pointNumber=0;
+
+	f.avg_x =0;  	f.avg_y=0;		f.avg_z=0;
+
+    int i=0;
+    for(i=0; i<f.size; ++i)
+    {
+		f.avg_x += clu[i]->ave_x;
+		f.avg_y += clu[i]->ave_y;
+		f.avg_z += clu[i]->ave_z;
+
+        if(i==0)
+        {
+            f.min_x=f.max_x=clu[i]->min_x;
+ 		    f.min_z=f.max_z=clu[i]->min_z;
+            f.min_y=f.max_y=clu[i]->min_y;
+        }
+        else
+        {
+            if(f.max_x<clu[i]->max_x)
+                f.max_x=clu[i]->max_x;
+
+            if(f.min_x>clu[i]->min_x)
+                f.min_x=clu[i]->min_x;
+
+            if(f.max_z<clu[i]->max_z)
+                f.max_z=clu[i]->max_z;
+
+            if(f.min_z>clu[i]->min_z)
+                f.min_z=clu[i]->min_z;
+
+            if(f.max_y<clu[i]->max_y)
+                f.max_y=clu[i]->max_y;
+
+            if(f.min_y>clu[i]->min_y)
+                f.min_y=clu[i]->min_y;
+
+        }
+		f.pointNumber+=clu[i]->size;
+		f.theta  += clu[i]->size*clu[i]->columnID;
+		f.radius  += clu[i]->size*clu[i]->cellID;
+    }
+
+    f.size_x=f.max_x-f.min_x;
+	f.size_z=f.max_z-f.min_z;
+	f.size_y=f.max_y-f.min_y;
+
+	f.avg_x /= f.size;
+	f.avg_y /= f.size;
+	f.avg_z /= f.size;
+
+	f.theta=f.theta / (f.pointNumber*1.0);
+	f.radius=f.radius / (f.pointNumber*1.0);
+
+    return 0;
+}
 
 int VeloScan::FindAndCalcScanClusterFeature()
 {
     int i,j;
-
+	
     if( scanCellArray.size()==0)
         return -1;
 
@@ -742,243 +796,218 @@ int VeloScan::FindAndCalcScanClusterFeature()
         }
     }
 
-    int clustersize=scanClusterArray.size();                //总共有clustersize个集群
-    if(scanClusterFeatureArray.size()==0)
-        scanClusterFeatureArray.resize(clustersize);
+	int clustersize=scanClusterArray.size();                //总共有clustersize个集群
+	if(scanClusterFeatureArray.size()==0)
+		scanClusterFeatureArray.resize(clustersize);
 
-    //计算每一个目标的特征。
-    for(i=0; i<clustersize; ++i)
-        CalcClusterFeature(scanClusterArray[i],scanClusterFeatureArray[i]);
+	//计算每一个目标的特征。
+	for(i=0; i<clustersize; ++i)
+		CalcClusterFeature(scanClusterArray[i],scanClusterFeatureArray[i]);
 
-    //Find moving Ojbects
-    for(i=0; i<clustersize; ++i)
-    {
-        clusterFeature &glu = scanClusterFeatureArray[i];
-        glu.clusterType != CLUSTER_TYPE_OBJECT;
-        if( FilterNOMovingObjcets(glu))
-        {
-            clusterFeature &gclu = 	scanClusterFeatureArray[i];
-            gclu.clusterType  |=CLUSTER_TYPE_MOVING_OBJECT;
-        }
-    }
+	//Find moving Ojbects
+	for(i=0; i<clustersize; ++i)
+	{
+     	clusterFeature &glu = scanClusterFeatureArray[i];
+		glu.clusterType != CLUSTER_TYPE_OBJECT;
+	    if( FilterNOMovingObjcets(glu))
+		{
+				clusterFeature &gclu = 	scanClusterFeatureArray[i];
+				gclu.clusterType  |=CLUSTER_TYPE_MOVING_OBJECT;
+		}
+	}
 
-    //Mark No Moving Ojbects CELLS
-    int k;
-    for(i=0; i<clustersize; ++i)
-    {
-        clusterFeature &glu = scanClusterFeatureArray[i];
-        if( !(glu.clusterType & CLUSTER_TYPE_MOVING_OBJECT))
-        {
-            cluster  &gclu = 	scanClusterArray[i];
-            for(j =0; j< gclu.size() ; ++j)
-            {
-                cellFeature &gcF = *(gclu[j]);
-                gcF.cellType |= CELL_TYPE_FOR_SLAM6D;
-            }
-        }
+	//Mark No Moving Ojbects CELLS
+	int k;
+	for(i=0; i<clustersize; ++i)
+	{
+     	clusterFeature &glu = scanClusterFeatureArray[i];
+		if( !(glu.clusterType & CLUSTER_TYPE_MOVING_OBJECT))
+		{
+				cluster  &gclu = 	scanClusterArray[i];
+				for(j =0; j< gclu.size() ; ++j)
+				{
+					cellFeature &gcF = *(gclu[j]);
+					gcF.cellType |= CELL_TYPE_FOR_SLAM6D;
+				}
+		}
+	
+	}
 
-    }
-
-    return 0;
+	return 0;
 }
 
-
-int VeloScan::SearchNeigh(cluster& clu,charvv& flagvv,int i,int j)
+void VeloScan::ExchangeNoObjectPointCloud()
 {
-    int columnSize=scanCellArray.size();
-    int cellNumber=scanCellArray[0].size();
+	int i,j,k;
 
-    //到了格网边缘，停止搜索
-    if(i<0||i>=columnSize||j<0||j>=cellNumber)
-        return 0;
-    //到了跟节点
-    if(flagvv[i][j]==1)
-        return 0;
+	// 存在跟踪的数组中
+	points_tracking= points;
+	points.clear();
 
-    if(scanCellFeatureArray[i][j].size==0)
-    {
-        flagvv[i][j]=1;
-        return 0;
-    }
+	//每个Cluster下面有几个Cell，每个Cell有很多点
+	int startofpoint  = 0;
+	int colMax=  scanCellFeatureArray.size();
+	for(i=0; i<colMax; ++i)
+	{ 
+		cellFeatureColumn  &gFeatureCol = scanCellFeatureArray[i];
+		int rowMax= gFeatureCol.size();
+		for(j=0;j< rowMax; ++j)
+		{
+		   cellFeature &gcellFreature =  gFeatureCol[j];
+		   // 所有的Object全部参加运算
+		//   if( !(gcellFreature.cellType & CELL_TYPE_FOR_SLAM6D))
+		//	   continue;
 
-    if(scanCellFeatureArray[i][j].cellType & CELL_TYPE_ABOVE_DELTA_Z) //有符合要求的cell
-    {
-        flagvv[i][j]=1;
+		   startofpoint += gcellFreature.pCell->size();
+		   cell &gCell =*( gcellFreature.pCell);
+		   for( k=0; k< gcellFreature.pCell->size();++k)
+		   {
+			Point p = *(gCell[k]);
+			points.push_back(p);
+		   }
+		
+		}
+	}
 
-        clu.push_back(&scanCellFeatureArray[i][j]); //存进集群里
-
-        SearchNeigh(clu,flagvv,i-1,j-1);
-        SearchNeigh(clu,flagvv,i-1,j);
-        SearchNeigh(clu,flagvv,i-1,j+1);
-        SearchNeigh(clu,flagvv,i,j-1);
-        SearchNeigh(clu,flagvv,i,j+1);
-        SearchNeigh(clu,flagvv,i+1,j-1);
-        SearchNeigh(clu,flagvv,i+1,j);
-        SearchNeigh(clu,flagvv,i+1,j+1);
-
-        SearchNeigh(clu,flagvv,i,j+2);
-        SearchNeigh(clu,flagvv,i,j-2);
-        SearchNeigh(clu,flagvv,i+2,j);
-        SearchNeigh(clu,flagvv,i-2,j);
-    }
-
-    return 0;
 }
 
-
-int VeloScan::CalcClusterFeature(cluster& clu,clusterFeature& f)
+void VeloScan::FreeAllCellAndCluterMemory()
 {
-    f.size=clu.size();
+	scanCellArray.clear();
+	scanCellFeatureArray.clear();
 
-    if(f.size==0)
-    {
-        return 0;
-    }
-
-    f.clusterType=0;
-
-    int i=0;
-    for(i=0; i<f.size; ++i)
-    {
-        if(i==0)
-        {
-            f.min_x=f.max_x=clu[i]->min_x;
-            f.min_y=f.max_y=clu[i]->min_y;
-            f.min_z=f.max_z=clu[i]->min_z;
-        }
-        else
-        {
-            if(f.max_x<clu[i]->max_x)
-                f.max_x=clu[i]->max_x;
-
-            if(f.min_x>clu[i]->min_x)
-                f.min_x=clu[i]->min_x;
-
-            if(f.max_y<clu[i]->max_y)
-                f.max_y=clu[i]->max_y;
-
-            if(f.min_y>clu[i]->min_y)
-                f.min_y=clu[i]->min_y;
-
-            if(f.max_z<clu[i]->max_z)
-                f.max_z=clu[i]->max_z;
-
-            if(f.min_z>clu[i]->min_z)
-                f.min_z=clu[i]->min_z;
-
-        }
-    }
-    f.size_x=f.max_x-f.min_x;
-    f.size_y=f.max_y-f.min_y;
-    f.size_z=f.max_z-f.min_z;
-
-    return 0;
+	scanClusterArray.clear();;
+	scanClusterFeatureArray.clear();
 }
 
-
-int VeloScan::CalcCellFeature(cell& cellobj, cellFeature& f)
+bool VeloScan::FilterNOMovingObjcets(clusterFeature &glu)
 {
-    int outlier;
-    float lastMaxZ;
-    f.size=cellobj.size();
-    f.cellType=0;
+	if(glu.size < 8)
+		return false; // small object do not use it!
 
-    if(f.size==0)
-    {
-        f.cellType|=CELL_TYPE_INVALID;
-        return 0;
-    }
+	return true; // no filter
 
-    f.ave_x=f.ave_y=f.ave_z=0.0;
-    f.delta_z=0;
+	/**树电杆之类**/
+	//if( glu.size_z > 200 && ((glu.size_x>glu.size_y?glu.size_x:glu.size_y))<360)
+	//{
+	//	return false;
+	//}
+	///**至少3.5米长，但宽小于1.4m，所以不可能为车**/
+	//else if((glu.size_z>350 && glu.size_x<140)|| (glu.size_x>350 && glu.size_z<140))
+	//{
+	//	return false;
+	//}
+	//else if(glu.size_z > 250 )
+	//{
+	//	return false;
+	//}
+	//else if((glu.size_x>glu.size_y?glu.size_x:glu.size_y)>420 && glu.size_z<130)
+	//{
+	//	return false;
+	//}
 
-    int i=0;
-    for(i=0; i<f.size; ++i)
-    {
-        f.ave_x+=cellobj[i]->x;
-        f.ave_y+=cellobj[i]->y;
-        f.ave_z+=cellobj[i]->z;
+	//else if((glu.size_x>glu.size_y?glu.size_x:glu.size_y)>3.5
+	//	&& ((glu.size_x>glu.size_y?glu.size_x:glu.size_y)/(glu.size_x<glu.size_y?glu.size_x:glu.size_y)>4))
+	//{
+	//	return false;
+	//}
 
-        if(cellobj[i]->type & POINT_TYPE_BELOW_R)
-            f.cellType|=CELL_TYPE_BELOW_R;
+	//else if(glu.size_x<700 && glu.size_z<700 &&  glu.size_y > 100  )
+	//{
+	//	return true;
+	//}
 
-        if(i==0)
-        {
-            outlier=0;
-            f.min_x=f.max_x=cellobj[i]->x;
-            f.min_y=f.max_y=cellobj[i]->y;
-            lastMaxZ=f.min_z=f.max_z=cellobj[i]->z;
-        }
-        else
-        {
-            if(f.max_x<cellobj[i]->x)
-                f.max_x=cellobj[i]->x;
+	//// 过滤掉超过15米的 超级大的物体肯定是建筑物
+	//if(glu.size_x>1500 || glu.size_z>1500 || glu.size_x*glu.size_z >600*600 )
+	//{
+	//	return false;
+	//}
 
-            if(f.min_x>cellobj[i]->x)
-                f.min_x=cellobj[i]->x;
+	//// 过滤过面积特别大的 特别细长的大物体，可能是栅栏
+	//if(glu.size_x*glu.size_z >500*500  &&  glu.size_x/glu.size_z < 1.5)
+	//{
+	//	return false;
+	//}
 
-            if(f.max_y<cellobj[i]->y)
-                f.max_y=cellobj[i]->y;
+	////过滤掉1米二一下的 小目标	
+	//if(glu.size_y < 100)
+	//{
+	//	return false;
+	//}
+	////过滤掉长宽高总和小于3米的 //有可能是行人
+	//if((glu.size_x + glu.size_y + glu.size_z)<1.5)
+	//{
+	//	return false;
+	//}
 
-            if(f.min_y>cellobj[i]->y)
-                f.min_y=cellobj[i]->y;
+	// 过滤掉超过宽度超过3米的 
+	//if(glu.size_z>700)
+	//{
+	//	return false;
+	//}
 
-            if(f.max_z<cellobj[i]->z)
-            {
-                lastMaxZ=f.max_z;
-                f.max_z=cellobj[i]->z;
-                outlier=i;
-            }
+	//if(glu.size_x>700)
+	//{
+	//	return false;
+	//}
 
-            if(f.min_z>cellobj[i]->z)
-                f.min_z=cellobj[i]->z;
+	////有可能是行人
+	//if((glu.size_x + glu.size_z) <4)
+	//{
+	//	return false;
+	//}
 
-        }
-    }
+	//过滤掉长宽比大于3的  //有很多公汽符合这个条件
+	//if(glu.size_x/glu.size_z>3.0)
+	//{
+	//	return false;
+	//}
 
-    if(f.size>1)
-    {
-        int z=f.ave_z-cellobj[outlier]->z;
-        z/=(f.size-1)*1.0;
-
-        if(cellobj[outlier]->z-z<50)
-        {
-            outlier=-1;
-            f.ave_z/=f.size*1.0;
-        }
-        else
-        {
-            f.max_z=lastMaxZ;
-            f.ave_z=z;
-        }
-    }
-    else
-    {
-        outlier=-1;
-        f.ave_z/=f.size*1.0;
-    }
-
-    f.ave_x/=f.size*1.0;
-    f.ave_y/=f.size*1.0;
-
-    for(i=0; i<f.size; ++i)
-    {
-        if(i==outlier)
-            continue;
-        f.delta_z+= fabs(cellobj[i]->z-f.ave_z);
-    }
-
-
-    //  进行路面和障碍物的分割，具体就是修改Cell的属性
-    float threshold;
-//	   threshold=f.delta_z/((f.size)*1.0);
-    threshold=f.delta_z;
-
-    float GridThresholdGroundDetect =120;
-    if(threshold >  GridThresholdGroundDetect)
-        f.cellType|=CELL_TYPE_ABOVE_DELTA_Z;
-    else
-        f.cellType|=CELL_TYPE_BELOW_DELTA_Z;
-
-    return 0;
+//	return true;
 }
+
+static int scancont =0;
+
+void VeloScan::GetAllofObject()
+{
+	int i,j;
+	int size;
+
+	if(points.size() > 0)
+	{
+			//	noofframe +=1000;
+			//  保存整帧数据到PCD文件
+			//	SaveFrameInPCD();
+       
+			//  散列到饼型Cell中
+			TransferToCellArray();
+			//  计算相应的特征 并的到障碍物的Cell
+			CalcScanCellFeature();
+			//  聚类为Cluster对象
+			FindAndCalcScanClusterFeature();
+			//  开始跟踪，每帧进行一次
+			/////////////////////////////////////////////
+			trackMgr.HandleScan(*this);
+
+			//TRACE("DrawTrackers\n");
+	        
+//			if(scancont ==3)
+//    	     	Show(0);
+
+			scancont ++;
+			/////////////////////////////////////////////////
+
+			//保存动态目标的对象到PCD文件
+			//	SaveAllofObject();
+			//	SaveNoObjectPointCloud();
+		//	ExchangeNoObjectPointCloud();
+
+			// 显示处理的结果，用于调试。
+			//       Show(0);
+			//可以保存非运动目标的点到PCD文件中，看一下效果啊。
+
+			//需要清理所有的存储数据。
+		//   FreeAllCellAndCluterMemory();
+	}
+    return;
+ }
