@@ -316,7 +316,7 @@ int read_one_packet ( FILE *fp, vector<Point> &ptss, int maxDist, int minDist )
     for ( c = 0 ; c < CIRCLELENGTH; c++ )
     {
 
-		fseeko(fp , BLOCK_OFFSET, SEEK_CUR);
+		fseek(fp , BLOCK_OFFSET, SEEK_CUR);
         size=fread ( buf, 1, BLOCK_SIZE, fp );
 		
 		if(size<BLOCK_SIZE)
@@ -545,8 +545,8 @@ int ScanIO_velodyne_frame::readScans(int start, int end, string &dir, int maxDis
   fseeko(scan_in, 0, SEEK_SET);
   fseeko(scan_in, BLOCK_SIZE*CIRCLELENGTH*fileCounter, SEEK_CUR);
  #else
-  fseeko(scan_in, 24, SEEK_SET);
-  fseeko(scan_in, (BLOCK_SIZE+BLOCK_OFFSET)*CIRCLELENGTH*fileCounter, SEEK_CUR);
+  fseek(scan_in, 24, SEEK_SET);
+  fseek(scan_in, (BLOCK_SIZE+BLOCK_OFFSET)*CIRCLELENGTH*fileCounter, SEEK_CUR);
  #endif
   
 #endif
@@ -558,8 +558,8 @@ int ScanIO_velodyne_frame::readScans(int start, int end, string &dir, int maxDis
   if(pose_in)
   {
       double poseinfo[6];
-      fseeko(pose_in, 0, SEEK_SET);
-      fseeko(pose_in, sizeof(double)*6*fileCounter, SEEK_CUR);
+      fseek(pose_in, 0, SEEK_SET);
+      fseek(pose_in, sizeof(double)*6*fileCounter, SEEK_CUR);
 	  fread(poseinfo,sizeof(double)*6,1,pose_in);
 	  euler[0] = poseinfo[0]*100 - 135701 ;
       euler[1] = poseinfo[1]*100- 842.154;
