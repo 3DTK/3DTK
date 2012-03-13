@@ -44,6 +44,9 @@ public:
 	/** @brief 将所有的跟踪器运动情况画出来, 完整的连续轨迹*/
 	int DrawTrackersMovtion_Long_Number(vector <Scan *> allScans, int n);
 
+	/** @brief 将所有的跟踪器运动情况画出来, what every size or lenght, 完整的连续轨迹*/
+	int TrackerManager::DrawTrackersMovtion_Long_Number_All(vector <Scan *> allScans, int n);
+
 	/** @brief 跟踪过滤器，把一些不符合跟踪的cluster去掉*/
 	static bool TrackerFilter(clusterFeature &glu);
 

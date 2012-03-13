@@ -715,8 +715,8 @@ static void Draw(void)
 	glScalef(m_zoom, m_zoom, m_zoom);
 
 //    Draw_points_ZValue(Scan::allScans[0],  1,  0.8, 0.8, 0.8);
-    DrawAll_ScanPoints_Number(Scan::allScans,  1,  0.8, 0.8, 0.8, 5);
-	trackMgr.DrawTrackersMovtion_Long_Number(Scan::allScans, 5);
+    DrawAll_ScanPoints_Number(Scan::allScans,  1,  0.8, 0.8, 0.8, 100);
+	trackMgr.DrawTrackersMovtion_Long_Number_All(Scan::allScans, 100);
 
 
     glFlush();
