@@ -9,6 +9,7 @@
  */
 
 #include "slam6d/kdc.h"
+#include "slam6d/scan.h"
 #include "slam6d/globals.icc"
 
 #include <iostream>
@@ -244,7 +245,11 @@ KDCacheItem* KDtree_cache::initCache(const Scan* Target)
   }
   // cache for this target is not initialized
   if (closest == 0) {
+#ifndef WITH_SCANSERVER
     closest = new KDCacheItem[Target->get_points_red_size()];
+#else //WITH_SCANSERVER
+    closest = new KDCacheItem[const_cast<Scan*>(Target)->getCountReduced()];
+#endif //WITH_SCANSERVER
     KDCache *nc = new KDCache;
     nc->item = closest;
     nc->target = Target;

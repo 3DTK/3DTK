@@ -31,7 +31,7 @@ class scanmanager {
     ~scanmanager();
 
     /** @brief Reads scans, frames and the transformationmatrix */
-    void startscan(string inputdir, string outputdir, reader_type scantype,
+    void startscan(string inputdir, string outputdir, IOType scantype,
 		   int start, int end, bool readInitial, 
 		   int max_distance, int min_distance,
 		   bool correctYAxis);

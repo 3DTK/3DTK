@@ -119,7 +119,7 @@ void usage(char* prog)
  */
 int parseArgs(int argc, char **argv, string &dir, double &red, int &rand,
 		    int &start, int &end, int &maxDist, int &minDist, bool &extrapolate_pose,
-		    int &octree, reader_type &type)
+		    int &octree, IOType &type)
 {
   int  c;
   // from unistd.h:
@@ -174,10 +174,14 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &rand,
 	 case 'p':
 	   extrapolate_pose = false;
 	   break;
-	 case 'f': 
-     if (!Scan::toType(optarg, type))
-       abort ();
-	   break;
+	 case 'f':
+    try {
+      type = formatname_to_io_type(optarg);
+    } catch (...) { // runtime_error
+      cerr << "Format " << optarg << " unknown." << endl;
+      abort();
+    }
+    break;
       case '?':
 	   usage(argv[0]);
 	   return 1;
@@ -200,7 +204,7 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &rand,
   return 0;
 }
 
-void readFrames(string dir, int start, int end, reader_type &type)
+void readFrames(string dir, int start, int end, IOType &type)
 {
   ifstream frame_in;
   int  fileCounter = start;
@@ -266,7 +270,7 @@ int main(int argc, char **argv)
   int    minDist    = -1;
   bool   eP         = true;  // should we extrapolate the pose??
   int octree       = 0;  // employ randomized octree reduction?
-  reader_type type    = UOS;
+  IOType type    = UOS;
 
   parseArgs(argc, argv, dir, red, rand, start, end,
       maxDist, minDist, eP, octree, type);
