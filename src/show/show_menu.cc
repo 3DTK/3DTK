@@ -241,7 +241,7 @@ void newMenu()
 
 
   /****** Color Controls *****/
-  color_panel = glui1->add_rollout("Color :", false );
+  color_panel = glui1->add_rollout("Color :", true );
   color_panel ->set_alignment( GLUI_ALIGN_LEFT );
 
   GLUI_Panel *color_ro = glui1->add_rollout_to_panel(color_panel, "Color values:", false);
@@ -274,7 +274,7 @@ void newMenu()
   glui1->add_radiobutton_to_group(colorm_rog, "Rand");
   glui1->add_radiobutton_to_group(colorm_rog, "SHSV");
 
-  GLUI_Panel *scans_color = glui1->add_rollout_to_panel(color_panel, "Color type:", false);
+  GLUI_Panel *scans_color = glui1->add_rollout_to_panel(color_panel, "Color type:", true);
   scans_color->set_alignment(GLUI_ALIGN_LEFT);
   GLUI_RadioGroup *scans_colored = glui1->add_radiogroup_to_panel(scans_color, &colorScanVal, 0, &setScansColored);
   glui1->add_radiobutton_to_group(scans_colored, "None");

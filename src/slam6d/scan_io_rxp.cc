@@ -88,7 +88,6 @@ int ScanIO_rxp::readScans(int start, int end, string &dir, int maxDist, int minD
     for (unsigned int i = 0; i < 6; euler[i++] = 0.0);
     //done
   } else {
-
     poseFileName = dir + "scan" + to_string(fileCounter,3) + ".pose";
     scanFileName = "file://" + dir + "scan" + to_string(fileCounter,3) + ".rxp";
 
@@ -181,6 +180,46 @@ void importer::on_echo_transformed(echo_type echo)
   }
 }
 
+int ScanIO_rxp::readScan(int idx, string &dir, int maxDist, int minDist, double *euler, vector<Point> &ptss)
+{
+  string rxp = ".rxp";
+  if (dir.rfind(rxp) == dir.length() - rxp.length()) 
+    { // dir is a .rxp file
+      string shortdir = dir;
+      //shortdir.erase(shortdir.length() - 1); // erase last character
+      if (!dec) 
+	{
+	  rc = basic_rconnection::create(dir);
+	  rc->open();
+	  
+	  // decoder splits the binary file into readable chunks
+	  dec = new decoder_rxpmarker(rc);
+	  // importer interprets the chunks
+	  imp = new importer(&ptss, maxDist, minDist, idx);
+	} 
+      
+      buffer  buf;
+      // skip the first scans
+      if (imp->getCurrentScan() < idx ) {
+	for ( dec->get(buf); !dec->eoi(); dec->get(buf) ) {
+	  imp->dispatch(buf.begin(), buf.end());
+	  if (imp->getCurrentScan() >= idx) break;
+	}
+      }
+    
+      int cscan = imp->getCurrentScan();
+      // iterate over chunks, until the next scan is reached
+      for ( dec->get(buf); !dec->eoi() ; dec->get(buf) ) 
+	{
+	  imp->dispatch(buf.begin(), buf.end());
+	  if (imp->getCurrentScan() != cscan) break;
+	}
+      
+      for (unsigned int i = 0; i < 6; euler[i++] = 0.0);
+      //done
+    }
+  return ptss.size();
+}
 
 /**
  * class factory for object construction

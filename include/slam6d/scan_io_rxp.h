@@ -34,6 +34,7 @@ public:
   ScanIO_rxp() : dec(0), imp(0) {}
   virtual int readScans(int start, int end, string &dir, int maxDist, int mindist,
 				    double *euler, vector<Point> &ptss);
+  virtual int readScan(int idx, string &dir, int maxDist, int mindist, double *euler, vector<Point> &ptss);
 };
 
 
