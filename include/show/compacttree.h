@@ -36,7 +36,7 @@ using std::list;
 
 
 #define POINTERBITS 32
-//#define WITH_8BIT_POINTS
+#define WITH_8BIT_POINTS
 #ifdef WITH_8BIT_POINTS
 typedef signed char tshort;
 #define TSHORT_MAXP1 (1 << 7); 
