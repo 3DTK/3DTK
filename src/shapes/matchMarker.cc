@@ -362,7 +362,7 @@ void usage(char* prog)
  */
 int parseArgs(int argc, char **argv, string &dir, 
 		    int &start, int &end, double &dist, 
-		    reader_type &type, bool &desc)
+		    IOType &type, bool &desc)
 {
   int  c;
   // from unistd.h:
@@ -394,9 +394,13 @@ int parseArgs(int argc, char **argv, string &dir,
 	   end = atoi(optarg);
 	   if (end < 0)     { cerr << "Error: Cannot end at a negative scan number.\n"; exit(1); }
 	   break;
-	 case 'f': 
-     if (!Scan::toType(optarg, type))
-       abort ();
+	 case 'f':
+     try {
+       type = formatname_to_io_type(optarg);
+     } catch (...) { // runtime_error
+       cerr << "Format " << optarg << " unknown." << endl;
+       abort();
+     }
      break;
    case '?':
 	   usage(argv[0]);
@@ -456,7 +460,7 @@ int main(int argc, char **argv)
   int    start = -1,   end = -1;
   int    maxDist    = -1;
   int    minDist    = -1;
-  reader_type type    = UOS;
+  IOType type    = UOS;
   bool desc = false;  
 
   parseArgs(argc, argv, dir, start, end, dist, type, desc);

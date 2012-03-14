@@ -81,8 +81,13 @@ void elch6Deuler::close_loop(const vector <Scan *> &allScans, int first, int las
 
   my_icp6D->match(start, end);
 
+#ifndef WITH_SCANSERVER
   delete start;
   delete end;
+#else //WITH_SCANSERVER
+  Scan::remove(start);
+  Scan::remove(end);
+#endif //WITH_SCANSERVER
   
   delta[0] = allScans[last]->get_rPos()[0] - delta[0];
   delta[1] = allScans[last]->get_rPos()[1] - delta[1];

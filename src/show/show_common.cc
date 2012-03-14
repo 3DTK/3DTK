@@ -17,6 +17,11 @@
 using std::ifstream;
 #include <stdexcept>
 using std::exception;
+#include <algorithm>
+
+#ifdef WITH_METRICS
+#include "scanserver/metrics.h"
+#endif
 
 #ifdef _MSC_VER
 #include "XGetopt.h"
@@ -33,7 +38,7 @@ using std::exception;
 
 
 #ifdef _MSC_VER
-#ifdef OPENMP
+#if !defined _OPENMP && defined OPENMP 
 #define _OPENMP
 #endif
 #endif
@@ -41,6 +46,10 @@ using std::exception;
 #ifdef _OPENMP
 #include <omp.h>
 #endif
+
+#ifdef WITH_SCANSERVER
+#include "scanserver/clientInterface.h"
+#endif //WITH_SCANSERVER
 
 #include "slam6d/point_type.h"
 #include "show/display.h"
@@ -60,7 +69,7 @@ vector<colordisplay*> octpts;
 /**
  * Storing the base directory
  */
-string scandirectory;
+string scan_dir;
 
 /**
  * Storing the ID of the main windows
@@ -386,6 +395,66 @@ void usage(char* prog)
   exit(1);
 }
 
+/**
+ * Make type, start and end a write once only class for parseFormatFile because
+ * we know the directory only after the type, start and end parameters may have
+ * been written already, so encapsulate this write once behaviour in this class.
+ */
+template<typename T>
+class WriteOnce {
+public:
+  WriteOnce(T& value) : value(value), written(false) {}
+  WriteOnce& operator=(const T& other) { if(!written) { value = other; written = true; } return *this; }
+  operator T() const { return value; }
+private:
+  T& value;
+  bool written;
+};
+
+/**
+ * Parsing of a formats file in the scan directory for default type and scan
+ * index ranges without overwriting user set parameters. Does nothing if
+ * file doesn't exist.
+ * 
+ * @param dir directory the scans and format file are contained in
+ * @param type which ScanIO to use for the scans in that directory
+ * @param start index for the first valid scan
+ * @param end index for the last valid scan
+ */
+void parseFormatFile(string& dir, WriteOnce<IOType>& type, WriteOnce<int>& start, WriteOnce<int>& end)
+{
+  ifstream file((dir+"format").c_str());
+  if(!file.good()) return;
+  
+  string line, key, value, format;
+  while(getline(file, line)) {
+    size_t pos = line.find('=');
+    key = trim(line.substr(0, pos - 0));
+    value = trim(line.substr(pos+1));
+    if(key == "format") {
+      try {
+        format = value;
+        type = formatname_to_io_type(format.c_str());
+      } catch (...) { // runtime_error
+        cerr << "Error while parsing format file: Format '" << format << "' unknown." << endl;
+        break;
+      }
+    } else if(key == "start") {
+      stringstream str(value.c_str());
+      int s;
+      str >> s;
+      start = s;
+    } else if(key == "end") {
+      stringstream str(value.c_str());
+      int e;
+      str >> e;
+      end = e;
+    } else {
+      cerr << "Error while parsing format file: Unknown key '" << key << "'" << endl;
+      break;
+    }
+  }
+}
 
 /**
  * A function that parses the command-line arguments and sets the respective flags.
@@ -402,7 +471,7 @@ void usage(char* prog)
  * @return 0, if the parsing was successful, 1 otherwise 
  */
 int parseArgs(int argc,char **argv, string &dir, int& start, int& end, int& maxDist, int& minDist, 
-              double &red, bool &readInitial, int &octree, PointType &ptype, float &fps, string &loadObj, bool &loadOct, bool &saveOct, int &origin, double &scale, reader_type &type)
+              double &red, bool &readInitial, int &octree, PointType &ptype, float &fps, string &loadObj, bool &loadOct, bool &saveOct, int &origin, double &scale, IOType &type)
 {
   unsigned int types = PointType::USE_NONE;
   start   = 0;
@@ -412,6 +481,9 @@ int parseArgs(int argc,char **argv, string &dir, int& start, int& end, int& maxD
   // from unistd.h
   extern char *optarg;
   extern int optind;
+  
+  WriteOnce<IOType> w_type(type);
+  WriteOnce<int> w_start(start), w_end(end);
 
   cout << endl;
   static struct option longopts[] = {
@@ -439,90 +511,94 @@ int parseArgs(int argc,char **argv, string &dir, int& start, int& end, int& maxD
     { 0,           0,   0,   0}                    // needed, cf. getopt.h
   };
 
-  while ((c = getopt_long(argc, argv,"F:f:s:e:r:m:M:O:o:l:wtRadhTc", longopts, NULL)) != -1)
-    switch (c)
-	 {
-	 case 's':
-	   start = atoi(optarg);
-	   if (start < 0) { cerr << "Error: Cannot start at a negative scan number.\n"; exit(1); }
-	   break;
-	 case 'e':
-	   end = atoi(optarg);
-	   if (end < 0)     { cerr << "Error: Cannot end at a negative scan number.\n"; exit(1); }
-	   if (end < start) { cerr << "Error: <end> cannot be smaller than <start>.\n"; exit(1); }
-	   break;
-	 case 'm':
-	   maxDist = atoi(optarg);
-	   break;
-	 case 'M':
-	   minDist = atoi(optarg);
-	   break;
-	 case 'r':
-	   red = atof(optarg);
-	   break;
-	 case 't':
-	   readInitial = true;
-	   break;
-   case 'O':
-     if (optarg) {
-       octree = atoi(optarg);
-     } else {
-       octree = 1;
-     }
-     break;
-	 case 'f':
-     if (!Scan::toType(optarg, type))
-       abort ();
-	   break;
-	 case '?':
-     usage(argv[0]);
-     return 1;
-   case 'R':
-     types |= PointType::USE_REFLECTANCE;
-     break;
-   case 'a':
-     types |= PointType::USE_AMPLITUDE;
-     break;
-   case 'd':
-     types |= PointType::USE_DEVIATION;
-     break;
-   case 'h':
-     types |= PointType::USE_HEIGHT;
-     break;
-   case 'T':
-     types |= PointType::USE_TYPE;
-     break;
-   case 'c':
-     types |= PointType::USE_COLOR;
-     break;
-   case 'F':
-     fps = atof(optarg);
-     break;
-   case 'S':
-     scale = atof(optarg);
-     break;
-   case 'o':
-     if (optarg) {
-       origin = atoi(optarg);
-     } else {
-       origin = 1;
-     }
-     break;
-   case '0':
-     saveOct = true;
-     break;
-   case '1':
-     loadOct = true;
-     break;
-   case 'l':
-     loadObj = optarg;
-     break;
-   case '2':
-     advanced_controls = true; 
-     break;
-   default:
-     abort ();
-   }
+  while ((c = getopt_long(argc, argv,"F:f:s:e:r:m:M:O:o:l:wtRadhTc", longopts, NULL)) != -1) {
+    switch (c) {
+      case 's':
+        w_start = atoi(optarg);
+        if (start < 0) { cerr << "Error: Cannot start at a negative scan number.\n"; exit(1); }
+        break;
+      case 'e':
+        w_end = atoi(optarg);
+        if (end < 0)     { cerr << "Error: Cannot end at a negative scan number.\n"; exit(1); }
+        if (end < start) { cerr << "Error: <end> cannot be smaller than <start>.\n"; exit(1); }
+        break;
+      case 'm':
+        maxDist = atoi(optarg);
+        break;
+      case 'M':
+        minDist = atoi(optarg);
+        break;
+      case 'r':
+        red = atof(optarg);
+        break;
+      case 't':
+        readInitial = true;
+        break;
+      case 'O':
+        if (optarg) {
+          octree = atoi(optarg);
+        } else {
+          octree = 1;
+        }
+        break;
+      case 'f':
+        try {
+          w_type = formatname_to_io_type(optarg);
+        } catch (...) { // runtime_error
+          cerr << "Format " << optarg << " unknown." << endl;
+          abort();
+        }
+        break;
+      case '?':
+        usage(argv[0]);
+        return 1;
+      case 'R':
+        types |= PointType::USE_REFLECTANCE;
+        break;
+      case 'a':
+        types |= PointType::USE_AMPLITUDE;
+        break;
+      case 'd':
+        types |= PointType::USE_DEVIATION;
+        break;
+      case 'h':
+        types |= PointType::USE_HEIGHT;
+        break;
+      case 'T':
+        types |= PointType::USE_TYPE;
+        break;
+      case 'c':
+        types |= PointType::USE_COLOR;
+        break;
+      case 'F':
+        fps = atof(optarg);
+        break;
+      case 'S':
+        scale = atof(optarg);
+        break;
+      case 'o':
+        if (optarg) {
+          origin = atoi(optarg);
+        } else {
+          origin = 1;
+        }
+        break;
+      case '0':
+        saveOct = true;
+        break;
+      case '1':
+        loadOct = true;
+        break;
+      case 'l':
+        loadObj = optarg;
+        break;
+      case '2':
+        advanced_controls = true; 
+        break;
+      default:
+        abort ();
+    }
+  }
 
   if (optind != argc-1) {
     cerr << "\n*** Directory missing ***" << endl;
@@ -535,6 +611,8 @@ int parseArgs(int argc,char **argv, string &dir, int& start, int& end, int& maxD
 #else
   if (dir[dir.length()-1] != '\\') dir = dir + "\\";
 #endif
+  
+  parseFormatFile(dir, w_type, w_start, w_end);
 
   ptype = PointType(types);
   return 0;
@@ -580,9 +658,14 @@ void setResetView(int origin) {
  * @param end stopping at scan number 'end'
  * @param read a file containing a initial transformation matrix and apply it
  */
-int readFrames(string dir, int start, int end, bool readInitial, reader_type &type)
+int readFrames(string dir, int start, int end, bool readInitial, IOType &type)
 {
 
+  // convert to OpenGL coordinate system
+  double mirror[16];
+  M4identity(mirror);
+  mirror[10] = -1.0;
+  
   double initialTransform[16];
   if (readInitial) {
     cout << "Initial Transform:" << endl;
@@ -594,8 +677,14 @@ int readFrames(string dir, int start, int end, bool readInitial, reader_type &ty
     }
     initial_in >> initialTransform;
     cout << initialTransform << endl;
+    
+    // update the mirror to apply the initial frame for all frames
+    double tempxf[16];
+    MMult(mirror, initialTransform, tempxf);
+    memcpy(mirror, tempxf, sizeof(tempxf));
   }
 
+#ifndef WITH_SCANSERVER
   ifstream frame_in;
   int  fileCounter = start;
   string frameFileName;
@@ -611,10 +700,8 @@ int readFrames(string dir, int start, int end, bool readInitial, reader_type &ty
     cout << "Reading Frames for 3D Scan " << frameFileName << "...";
     vector <double*> Matrices;
     vector <Scan::AlgoType> algoTypes;
-    int frameCounter = 0;
 
     while (frame_in.good()) {
-      frameCounter++;	 
       double *transMatOpenGL = new double[16];
       int algoTypeInt;
       Scan::AlgoType algoType;
@@ -622,30 +709,37 @@ int readFrames(string dir, int start, int end, bool readInitial, reader_type &ty
         double transMat[16];
         frame_in >> transMat >> algoTypeInt;
         algoType = (Scan::AlgoType)algoTypeInt;
-
-        // convert to OpenGL coordinate system
-        double mirror[16];
-        M4identity(mirror);
-        mirror[10] = -1.0;
-        if (readInitial) {
-          double tempxf[16];
-          MMult(mirror, initialTransform, tempxf);
-          memcpy(mirror, tempxf, sizeof(tempxf));
-        }
-        //@@@
-        //	   memcpy(transMatOpenGL, transMat, 16*sizeof(double));
+        
+        //memcpy(transMatOpenGL, transMat, 16*sizeof(double));
+        // apply mirror to convert (and initial frame if requested) the frame and save in opengl
         MMult(mirror, transMat, transMatOpenGL);
       }
       catch (const exception &e) {   
         break;
       }
-	 Matrices.push_back(transMatOpenGL);
-	 algoTypes.push_back(algoType);
+#else //WITH_SCANSERVER
+  for(std::vector<Scan*>::iterator it = Scan::allScans.begin(); it != Scan::allScans.end(); ++it) {
+    vector<double*> Matrices;
+    vector<Scan::AlgoType> algoTypes;
+    
+    // iterate over frames (stop if none were created) and pull/convert the frames into local containers
+    const FrameVector& frames = (*it)->getFrames();
+    if(frames.size() == 0) break;
+    for(FrameVector::const_iterator jt = frames.begin(); jt != frames.end(); ++jt) {
+      double *transMatOpenGL = new double[16];
+      Scan::AlgoType algoType = (Scan::AlgoType)jt->type;
+      
+      // apply mirror to convert (and initial frame if requested) the frame and save in opengl
+      MMult(mirror, jt->transformation, transMatOpenGL);
+#endif //WITH_SCANSERVER
+      Matrices.push_back(transMatOpenGL);
+      algoTypes.push_back(algoType);
     }
-
+    
     MetaAlgoType.push_back(algoTypes);
     MetaMatrix.push_back(Matrices);
-
+    
+#ifndef WITH_SCANSERVER
     if((type == UOS_MAP || type == UOS_MAP_FRAMES || type == RTS_MAP) && fileCounter == start+1) {
       MetaAlgoType.push_back(algoTypes);
       MetaMatrix.push_back(Matrices);
@@ -654,8 +748,15 @@ int readFrames(string dir, int start, int end, bool readInitial, reader_type &ty
     frame_in.close();
     frame_in.clear();
     cout << MetaMatrix.back().size() << " done." << endl;
+#else //WITH_SCANSERVER
+    if((type == UOS_MAP || type == UOS_MAP_FRAMES || type == RTS_MAP) && it == Scan::allScans.begin()) {
+      MetaAlgoType.push_back(algoTypes);
+      MetaMatrix.push_back(Matrices);
+    }
+#endif //WITH_SCANSERVER
     current_frame = MetaMatrix.back().size() - 1;
   }
+  
   if (MetaMatrix.size() == 0) {
     cerr << "*****************************************" << endl;
     cerr << "** ERROR: No .frames could be found!   **" << endl; 
@@ -713,6 +814,7 @@ void createDisplayLists(bool reduced)
 
     // count points
     int color1 = 0, color2 = 0;
+#ifndef WITH_SCANSERVER
     if (!reduced) {
       for (unsigned int jterator = 0; jterator < Scan::allScans[i]->get_points()->size(); jterator++) {
         if (Scan::allScans[i]->get_points()->at(jterator).type & TYPE_GROUND) {
@@ -724,6 +826,10 @@ void createDisplayLists(bool reduced)
     } else {
       color2 = 3* Scan::allScans[i]->get_points_red_size();
     }
+#else
+    // TODO: points isn't used anymore, but it could be filled with empty points but types
+    color2 = 3* Scan::allScans[i]->getCountReduced();
+#endif
     
     // allocate memory
     vertexArray* myvertexArray1 = new vertexArray(color1);
@@ -732,13 +838,25 @@ void createDisplayLists(bool reduced)
     // fill points
     color1 = 0, color2 = 0;
     if (reduced) {
+#ifndef WITH_SCANSERVER
       for (int jterator = 0; jterator < Scan::allScans[i]->get_points_red_size(); jterator++) {
         myvertexArray2->array[color2] = Scan::allScans[i]->get_points_red()[jterator][0];
         myvertexArray2->array[color2+1] = Scan::allScans[i]->get_points_red()[jterator][1];
         myvertexArray2->array[color2+2] = Scan::allScans[i]->get_points_red()[jterator][2];
           color2 += 3;
       }
+#else //WITH_SCANSERVER
+      DataXYZ xyz_r(Scan::allScans[i]->getXYZReduced());
+      for(int k = 0, i = 0; i < color2; ++i) {
+        for(unsigned int j = 0; j < 3; ++j) {
+          myvertexArray2->array[k++] = xyz_r[i][j];
+        }
+      }
+#endif //WITH_SCANSERVER
+
     } else {
+#ifndef WITH_SCANSERVER
+      // TODO: still no colors, get_points is gone and types aren't supported at the moment
       for (unsigned int jterator = 0; jterator < Scan::allScans[i]->get_points()->size(); jterator++) {
         if (Scan::allScans[i]->get_points()->at(jterator).type & TYPE_GROUND) {
           myvertexArray1->array[color1] = Scan::allScans[i]->get_points()->at(jterator).x;
@@ -752,6 +870,7 @@ void createDisplayLists(bool reduced)
           color2 += 3;
         }
       }
+#endif //WITH_SCANSERVER
     }
 
     glNewList(myvertexArray1->name, GL_COMPILE);
@@ -779,13 +898,42 @@ void createDisplayLists(bool reduced)
     vvertexArray.push_back(myvertexArray2);
     vvertexArrayList.push_back(vvertexArray);
   }
-
 }
 
 void cycleLOD() {
   LevelOfDetail = 0.00001;
   for (unsigned int i = 0; i < octpts.size(); i++)
     octpts[i]->cycleLOD();
+}
+
+
+sfloat** createPointArray(Scan* scan, PointType& pointtype)
+{
+#ifdef WITH_SCANSERVER
+  // access data with prefetching
+  pointtype.useScan(scan);
+#endif //WITH_SCANSERVER
+  
+  // create a float array with requested attributes by pointtype via createPoint
+  unsigned int nrpts = scan->getCount();
+  sfloat** pts = new sfloat*[nrpts];
+  for(unsigned int i = 0; i < nrpts; i++) {
+#ifndef WITH_SCANSERVER
+    pts[i] = pointtype.createPoint<sfloat>(scan->get_points()->at(i));
+#else
+    pts[i] = pointtype.createPoint<sfloat>(i);
+#endif
+  }
+  
+#ifndef WITH_SCANSERVER
+  // unload full points which are not needed anymore
+  scan->clearPoints();
+#else //WITH_SCANSERVER
+  // unlock access to data
+  pointtype.clearScan();
+#endif
+  
+  return pts;
 }
 
 
@@ -804,13 +952,22 @@ void initShow(int argc, char **argv){
     usage(argv[0]);
   }
 
-
+#ifdef WITH_SCANSERVER
+  ClientInterface* client;
+  try {
+    client = ClientInterface::create();
+  } catch(std::runtime_error& e) {
+    cerr << "ClientInterface could not be created: " << e.what() << endl;
+    cerr << "Start the scanserver first." << endl;
+    exit(-1);
+  }
+#endif
 
   double red   = -1.0;
   int start = 0, end = -1, maxDist = -1, minDist = -1;
   string dir;
   bool readInitial = false;
-  reader_type type  = UOS;
+  IOType type  = UOS;
   int octree = 0;
   bool loadOct = false;
   bool saveOct = false;
@@ -850,38 +1007,49 @@ void initShow(int argc, char **argv){
   }
 
   // if we want to load display file get pointtypes from the files first
-  if (loadOct) {
+  if(loadOct) {
     string scanFileName = dir + "scan" + to_string(start,3) + ".oct";
     cout << "Getting point information from " << scanFileName << endl;
     cout << "Attention! All subsequent oct-files must be of the same type!" << endl;
 
     pointtype = BOctTree<sfloat>::readType(scanFileName);
   }
-  scandirectory = dir;
+  scan_dir = dir;
 
   // init and create display
   M4identity(view_rotate_button);
   obj_pos_button[0] = obj_pos_button[1] = obj_pos_button[2] = 0.0;
-
-  // read frames first, to get notifyied of missing frames before all scans are read in
+  
+  // Loading scans, reducing, loading frames and generation if neccessary
+#ifdef WITH_SCANSERVER
+  // load all available scans
+  Scan::readScans(type, start, end, dir, maxDist, minDist, 0);
+  
+  // apply (on-demand) reduction
+  if(red > 0) {
+    // create show-only reduced points
+    for(vector<Scan*>::iterator it = Scan::allScans.begin(); it != Scan::allScans.end(); ++it) {
+      Scan* scan = *it;
+      scan->calcReducedShow(red, octree);
+    }
+  }
+  
+  // generate frames later after on-cache-full event has been handled
+#else //WITH_SCANSERVER
+  // read frames first, to get notified of missing frames before all scans are read in
   int r = readFrames(dir, start, end, readInitial, type);
-
-
-  // Get Scans
+  
+  // Get Scans and create frames if needed
   if (!loadOct) {
 #ifndef DYNAMIC_OBJECT_REMOVAL
     Scan::readScans(type, start, end, dir, maxDist, minDist, 0);
 #else
     VeloScan::readScans(type, start, end, dir, maxDist, minDist, 0);
 #endif
+    if(r) generateFrames(start, start + Scan::allScans.size() - 1, false); 
   } else {
     cout << "Skipping files.." << endl;
-  }
-
-  if (!loadOct) {
-    if (r) generateFrames(start, start + Scan::allScans.size() - 1, false); 
-  } else {
-    if (r) generateFrames(start, start + octpts.size() - 1, true); 
+    if(r) generateFrames(start, start + octpts.size() - 1, true); 
   }
   
   int end_reduction = (int)Scan::allScans.size();
@@ -891,14 +1059,17 @@ void initShow(int argc, char **argv){
   for (int iterator = 0; iterator < end_reduction; iterator++) {
     // reduction filter for current scan!
     if (red > 0) {
-	    cout << "Reducing Scan No. " << iterator << endl;
+      cout << "Reducing Scan No. " << iterator << endl;
       // TODO do another reduction so reflectance values etc are carried over
       Scan::allScans[iterator]->calcReducedPoints(red, octree);
     } // no copying necessary for show!
   }
+#endif //WITH_SCANSERVER
 
   cm = new ScanColorManager(4096, pointtype);
   
+#ifndef WITH_SCANSERVER
+  // Generating octtrees
   if (loadOct) {
     for (int i = start; i <= end; i++) {
       string scanFileName = dir + "scan" + to_string(i,3) + ".oct";
@@ -909,66 +1080,214 @@ void initShow(int argc, char **argv){
       octpts.push_back(new Show_BOctTree<sfloat>(scanFileName, cm));
 #endif
     }
-  } else {
-#ifndef USE_GL_POINTS
-    createDisplayLists(red > 0);
-#elif USE_COMPACT_TREE
+  } else
+#endif //WITH_SCANSERVER
+  {
+#ifdef USE_GL_POINTS // use octtrees
+#ifdef USE_COMPACT_TREE
     cout << "Creating compact display octrees.." << endl;
-    for(int i = 0; i < (int)Scan::allScans.size() ; i++) {
-      compactTree *tree;
-      if (red > 0) {
-        tree = new compactTree(Scan::allScans[i]->get_points_red(), Scan::allScans[i]->get_points_red_size(), voxelSize, pointtype, cm);  // TODO remove magic number
-      } else {
-        unsigned int nrpts = Scan::allScans[i]->get_points()->size();
-        sfloat **pts = new sfloat*[nrpts];
-        for (unsigned int jterator = 0; jterator < nrpts; jterator++) {
-          pts[jterator] = pointtype.createPoint<sfloat>(Scan::allScans[i]->get_points()->at(jterator));
-        }
-        Scan::allScans[i]->clearPoints();
-        tree = new compactTree(pts, nrpts , voxelSize, pointtype, cm);  //TODO remove magic number
-        for (unsigned int jterator = 0; jterator < nrpts; jterator++) {
-          delete[] pts[jterator];
-        }
-        delete[] pts;
-      }
-      if (saveOct) {
-        string scanFileName = dir + "scan" + to_string(i+start,3) + ".oct";
-        cout << "Saving octree " << scanFileName << endl;
-        tree->serialize(scanFileName);
-      }
-      octpts.push_back(tree);
-      cout << "Scan " << i << " octree finished. Deleting original points.." << endl;
-    }
 #else
     cout << "Creating display octrees.." << endl;
-    for(int i = 0; i < (int)Scan::allScans.size() ; i++) {
-      Show_BOctTree<sfloat> *tree;
-      if (red > 0) {
-        tree = new Show_BOctTree<sfloat>(Scan::allScans[i]->get_points_red(), Scan::allScans[i]->get_points_red_size(), voxelSize, pointtype, cm);  // TODO remove magic number
-      } else {
-        unsigned int nrpts = Scan::allScans[i]->get_points()->size();
-        sfloat **pts = new sfloat*[nrpts];
-        for (unsigned int jterator = 0; jterator < nrpts; jterator++) {
-          pts[jterator] = pointtype.createPoint<sfloat>(Scan::allScans[i]->get_points()->at(jterator));
+#endif
+#ifdef WITH_SCANSERVER
+    if(loadOct) cout << "Loading octtrees from file where possible instead of creating them from scans." << endl;
+    std::size_t free_mem = client->getCacheSize();
+    for(unsigned int i = 0; i < Scan::allScans.size() ; i++) {
+      Scan* scan = Scan::allScans[i];
+    
+    // create data structures
+#ifdef USE_COMPACT_TREE // FIXME: change compact tree, then this case can be removed
+      compactTree* tree;
+      try {
+        if (red > 0) { // with reduction, only xyz points
+          tree = new compactTree(Array<float>(scan->getXYZReducedShow()).get(), scan->getXYZReducedShow().size(), voxelSize, pointtype, cm);
+        } else { // without reduction, xyz + attribute points
+          sfloat** pts = createPointArray(scan, pointtype);
+          unsigned int nrpts = scan->getCount();
+          tree = new compactTree(pts, nrpts, voxelSize, pointtype, cm);
+          for(unsigned int i = 0; i < nrpts; ++i) delete[] pts[i]; delete[] pts;
         }
-        Scan::allScans[i]->clearPoints();
-        tree = new Show_BOctTree<sfloat>(pts, nrpts , voxelSize, pointtype, cm);  //TODO remove magic number
-        for (unsigned int jterator = 0; jterator < nrpts; jterator++) {
-          delete[] pts[jterator];
-        }
-        delete[] pts;
+      } catch(runtime_error& e) {
+        // handle scanserver max cache lock by not loading any more scans, no data has to be cleand up
+        // Array<float> should never be created in thise case, PointType cleans the whole scan up on error by itself, before creating the float array
+        cout << "Scan " << i << " could not be loaded into memory, stopping here." << endl;
+        break;
       }
-      octpts.push_back(tree);
+#else // FIXME: remove the case above
+      BOctTree<float>* btree = 0;
+      // set octtree parameters to invalidate cached ones with other parameters (changing range/height is already handled)
+      stringstream s;
+      s << red << " " << voxelSize << " " << pointtype.toFlags();
+      scan->setOcttreeParameters(s.str().c_str());
+      // try to get cached boctrees first
+      DataOct* cached;
+      try {
+        cached = new DataOct(scan->getOcttree());
+        if(!(*cached)) {
+          // remove empty access object
+          delete cached; cached = 0;
+          // if loadOct is given, load the octtree under blind assumption that parameters match
+          if (loadOct) {
+            string scanFileName = dir + "scan" + to_string(start+i,3) + ".oct";
+            btree = new BOctTree<sfloat>(scanFileName);
+          } else {
+            // create a new octtree and cache it
+            if (red > 0) { // with reduction, only xyz points
+              btree = new BOctTree<sfloat>(Array<float>(scan->getXYZReducedShow()).get(), scan->getXYZReducedShow().size(), voxelSize, pointtype, true);
+            } else { // without reduction, xyz + attribute points
+              sfloat** pts = createPointArray(scan, pointtype);
+              unsigned int nrpts = scan->getCount();
+              btree = new BOctTree<sfloat>(pts, nrpts, voxelSize, pointtype, true);
+              for(unsigned int i = 0; i < nrpts; ++i) delete[] pts[i]; delete[] pts;
+            }
+          }
+          // copy tree into cache
+          cached = new DataOct(scan->copyOcttreeToCache(btree));
+          delete btree; btree = 0;
+        }
+      } catch(runtime_error& e) {
+        // handle scanserver max cache lock by not loading any more scans, no data has to be cleand up
+        // Array<float> should never be created in the case of reduction, for non reduced case the PointType cleans the whole scan up on error by itself, before creating the float array
+        // delete tree if copy to cache failed
+        if(btree != 0) { delete btree; btree = 0; }
+        cout << "Scan " << i << " could not be loaded into memory, stopping here." << endl;
+        break;
+      }
+      // check if the octtree would actually fit with all the others
+      unsigned int tree_size = cached->get().getMemorySize();
+      if(tree_size > free_mem) {
+        // delete dangling access object
+        delete cached;
+        cout << "Stopping at scan " << i << ", no more octtrees could fit in memory." << endl;
+        break;
+      } else {
+        // subtract available memory
+        free_mem -= tree_size;
+      }
+      // show structures
+#ifdef USE_COMPACT_TREE
+      compactTree* tree = new compactTree(cached, cm);
+#else
+      Show_BOctTree<sfloat>* tree = new Show_BOctTree<sfloat>(scan, cached, cm);
+#endif
+      // unlock cached octtree to enable creation of more octtres without blocking the space for full scan points
+      tree->unlockCachedTree();
+#endif //FIXME: remove this line
+
+#else //WITH_SCANSERVER
+
+    for(int i = 0; i < (int)Scan::allScans.size() ; i++) {
+      Scan* scan = Scan::allScans[i];
+      
+    // create data structures
+#ifdef USE_COMPACT_TREE
+      compactTree* tree;
+#else
+      Show_BOctTree<float>* tree;
+#endif
+      if (red > 0) { // with reduction, only xyz points
+#ifdef USE_COMPACT_TREE
+        tree = new compactTree(scan->get_points_red(), scan->get_points_red_size(), voxelSize, pointtype, cm);
+#else
+        tree = new Show_BOctTree<sfloat>(scan->get_points_red(), scan->get_points_red_size(), voxelSize, pointtype, cm);
+#endif
+      } else { // without reduction, xyz + attribute points
+        unsigned int nrpts = scan->getCount();
+        sfloat** pts = createPointArray(scan, pointtype);
+#ifdef USE_COMPACT_TREE
+        tree = new compactTree(pts, nrpts, voxelSize, pointtype, cm);
+#else
+        tree = new Show_BOctTree<sfloat>(pts, nrpts, voxelSize, pointtype, cm);
+#endif
+        for(unsigned int i = 0; i < nrpts; ++i) delete[] pts[i]; delete[] pts;
+      }
+#ifndef USE_COMPACT_TREE
+      unsigned int tree_size = tree->getMemorySize();
+#endif
+#endif //WITH_SCANSERVER
+
+      // octtrees have been created successfully, register (and save) them
       if (saveOct) {
         string scanFileName = dir + "scan" + to_string(i+start,3) + ".oct";
         cout << "Saving octree " << scanFileName << endl;
         tree->serialize(scanFileName);
       }
-      cout << "Scan " << i << " octree finished. Deleting original points.." << endl;
+      octpts.push_back(tree);
+      
+      // print something
+#ifdef USE_COMPACT_TREE // TODO: change compact tree for memory footprint output, remove this case
+      cout << "Scan " << i << " octree finished." << endl;
+#else
+      cout << "Scan " << i << " octree finished (";
+      bool space = false;
+      if(tree_size/1024/1024 > 0) {
+        cout << tree_size/1024/1024 << "M";
+        space = true;
+      }      
+      if((tree_size/1024)%1024 > 0) {
+        if(space) cout << " ";
+        cout << (tree_size/1024)%1024 << "K";
+        space = true;
+      }
+      if(tree_size%1024 > 0) {
+        if(space) cout << " ";
+        cout << tree_size%1024 << "B";
+      }
+      cout << ")." << endl;
+#endif
     }
+
+#if defined WITH_SCANSERVER && !defined USE_COMPACT_TREE
+/*
+TODO: to maximize space for octtrees, implement a heuristic to remove all
+CacheObjects sequentially from the start and pack octtrees one after another
+until it reaches the maximum size allowed, resetting the index, but causing the
+first to be locked again and stopping by catching the exception
+set heuristic, do locking, catch exception, reset heuristic to default or old
+*/
+    // activate all octtrees until they don't fit anymore
+    cout << "Locking octtrees in memory " << flush;
+    bool stop = false;
+    unsigned int loaded = 0;
+    unsigned int dots = (octpts.size() / 20);
+    if(dots == 0) dots = 1;
+    vector<colordisplay*>::iterator it_remove_first = octpts.end();
+    for(vector<colordisplay*>::iterator it = octpts.begin(); it != octpts.end(); ++it) {
+      if(!stop) {
+        // try to lock the octtree in cache
+        try {
+          Show_BOctTree<sfloat>* stree = dynamic_cast<Show_BOctTree<sfloat>*>(*it);
+          stree->lockCachedTree();
+          loaded++;
+          if(loaded % dots == 0) cout << '.' << flush;
+        } catch(runtime_error& e) {
+          stop = true;
+          it_remove_first = it;
+        }
+      }
+      if(stop) {
+        // delete the octtree, resize after iteration
+        delete *it;
+      }
+    }
+
+    // now remove iterators for deleted octtrees
+    if(stop) octpts.erase(it_remove_first, octpts.end());
+    cout << ' ' << loaded << " octtrees loaded." << endl;
+#endif //WITH_SCANSERVER & COMPACT_TREE
+
+#else // not using octtrees
+    createDisplayLists(red > 0);
 #endif
   }
-
+  
+#ifdef WITH_SCANSERVER
+  // load frames now that we know how many scans we actually loaded
+  unsigned int real_end = std::min((unsigned int)(end), (unsigned int)(start + octpts.size() - 1));
+  int r = readFrames(dir, start, real_end, readInitial, type);
+  if(r) generateFrames(start, real_end, true);
+#endif //WITH_SCANSERVER
+  
   cm->setCurrentType(PointType::USE_HEIGHT);
   //ColorMap cmap;
   //cm->setColorMap(cmap);
@@ -983,3 +1302,34 @@ void initShow(int argc, char **argv){
     keymap[i] = false;
   }
 }
+
+void deinitShow()
+{
+  static volatile bool done = false;
+  if(done) return;
+  done = true;
+  
+#ifdef WITH_SCANSERVER
+  if(octpts.size()) {
+#ifdef WITH_METRICS
+    // print metric information
+    ClientInterface::getInstance()->printMetrics();
+#endif //WITH_METRICS
+    cout << "Cleaning up scans and octtrees." << endl;
+    // delete octtrees to release the cache locks within
+    for(vector<colordisplay*>::iterator it = octpts.begin(); it!= octpts.end(); ++it) {
+      delete *it;
+    }
+    // clean up Scans
+    Scan::clearScans();
+  }
+  // close client interface
+  ClientInterface::destroy();
+#endif //WITH_SCANSERVER
+}
+
+/**
+ * Global program scope destructor workaround to clean up data regardless of
+ * the way of program exit.
+ */
+struct Deinit { ~Deinit() { deinitShow(); } } deinit;

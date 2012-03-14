@@ -9,7 +9,7 @@
 #define __KDC_H__
 
 #ifdef _MSC_VER
-#ifdef OPENMP
+#if !defined _OPENMP && defined OPENMP 
 #define _OPENMP
 #endif
 #endif

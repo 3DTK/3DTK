@@ -35,16 +35,29 @@ void DrawPoints(GLenum mode, bool interruptable)
 #else
     for(int iterator = (int)Scan::allScans.size()-1; iterator >= 0; iterator--) {
 #endif
-      if (MetaAlgoType[iterator][frameNr] == Scan::INVALID) continue;
-      cm->selectColors(MetaAlgoType[iterator][frameNr]);	 
+      // ignore scans that don't have any frames associated with them
+      if((unsigned int)iterator >= MetaMatrix.size()) continue;
+      // set usable frame
+      double* frame;
+      Scan::AlgoType type;
+      if((unsigned int)frameNr >= MetaMatrix[iterator].size()) {
+        // use last possible frame
+        frame = MetaMatrix[iterator].back();
+        type = MetaAlgoType[iterator].back();
+      } else {
+        frame = MetaMatrix[iterator][frameNr];
+        type = MetaAlgoType[iterator][frameNr];
+      }
+      if(type == Scan::INVALID) continue;
+      cm->selectColors(type);	 
       glPushMatrix();
-      glMultMatrixd(MetaMatrix[iterator][frameNr]);
+      glMultMatrixd(frame);
 
 
       glPointSize(pointsize);
 #ifdef USE_GL_POINTS
         ExtractFrustum(pointsize);
-        cm->selectColors(MetaAlgoType[iterator][frameNr]);
+        cm->selectColors(type);
         if (pointmode == 1 ) {
           octpts[iterator]->display();
         } else {
@@ -54,7 +67,7 @@ void DrawPoints(GLenum mode, bool interruptable)
       for (unsigned int jterator = 0; jterator < vvertexArrayList[iterator].size(); jterator++) {
 
         if ((jterator == 0) && vvertexArrayList[iterator][jterator]->numPointsToRender > 0) {
-          cm->selectColors(MetaAlgoType[iterator][frameNr]);
+          cm->selectColors(type);
         }
 
         if (vvertexArrayList[iterator][jterator]->numPointsToRender > 0) {
@@ -110,7 +123,20 @@ void DrawPoints(GLenum mode, bool interruptable)
 #else
       for(int iterator = (int)Scan::allScans.size()-1; iterator >= 0; iterator--) {
 #endif
-        if (MetaAlgoType[iterator][current_frame] == Scan::INVALID) continue;
+        // ignore scans that don't have any frames associated with them
+        if((unsigned int)iterator >= MetaMatrix.size()) continue;
+        // set usable frame
+        double* frame;
+        Scan::AlgoType type;
+        if((unsigned int)current_frame >= MetaMatrix[iterator].size()) {
+          // use last possible frame
+          frame = MetaMatrix[iterator].back();
+          type = MetaAlgoType[iterator].back();
+        } else {
+          frame = MetaMatrix[iterator][current_frame];
+          type = MetaAlgoType[iterator][current_frame];
+        }
+        if (type == Scan::INVALID) continue;
         glPushMatrix();
         if (invert)                               // default: white points on black background
           glColor4d(1.0, 1.0, 1.0, 0.0);
@@ -120,9 +146,9 @@ void DrawPoints(GLenum mode, bool interruptable)
       //  glMultMatrixd(MetaMatrix[iterator].back());
         if (current_frame != (int)MetaMatrix.back().size() - 1) {
           cm->setMode(ScanColorManager::MODE_ANIMATION);
-          cm->selectColors(MetaAlgoType[iterator][current_frame]);
+          cm->selectColors(type);
         }
-        glMultMatrixd(MetaMatrix[iterator][current_frame]);
+        glMultMatrixd(frame);
 
 #ifdef USE_GL_POINTS
          //cout << endl << endl;  calcRay(570, 266, 1.0, 40000.0);
@@ -135,7 +161,6 @@ void DrawPoints(GLenum mode, bool interruptable)
         ExtractFrustum(pointsize);
         if (pointmode == 1 ) {
           octpts[iterator]->display();
-          //octpts[iterator]->displayOctTree(pointsize * pointsize * 5);
         } else if (interruptable) {
           checkForInterrupt();
           glFlush();
@@ -365,7 +390,7 @@ void DrawCameras(void)
 
   
 /**
- * Dispaly function
+ * Display function
  */
 void DisplayItFunc(GLenum mode, bool interruptable)
 {
@@ -493,14 +518,27 @@ void DisplayItFunc(GLenum mode, bool interruptable)
     glLineWidth(5);
     glBegin(GL_LINE_STRIP);
     for(unsigned int i = 0; i < MetaMatrix.size(); i++){
+      // set usable type
+      Scan::AlgoType type;
+      if((unsigned int)frameNr >= MetaMatrix[i].size()) {
+        type = MetaAlgoType[i].back();
+      } else {
+        type = MetaAlgoType[i][frameNr];
+      }
       if(frameNr >= 1 && frameNr < (int)MetaMatrix[i].size()) {
-	      if(MetaAlgoType[i][frameNr] == Scan::INVALID) {
-          continue;
-        }
-        pose = MetaMatrix[i][frameNr];
+        if(type == Scan::INVALID) continue;
+        // avoid incomplete frames in a scan
+        if((unsigned int)frameNr >= MetaMatrix[i].size())
+          pose = MetaMatrix[i].back();
+        else
+          pose = MetaMatrix[i][frameNr];
       } else {
         //pose = MetaMatrix[i].back();
-        pose = MetaMatrix[i][current_frame];
+        // avoid incomplete frames in a scan
+        if((unsigned int)current_frame >= MetaMatrix[i].size())
+          pose = MetaMatrix[i].back();
+        else
+          pose = MetaMatrix[i][current_frame];
       }
       if(showTopView) {
         glVertex3f(pose[12], 2000, pose[14]);
@@ -843,13 +881,13 @@ void CallBackIdleFunc(void)
     glutPostRedisplay();
 
     if(save_animation){
-	    string filename = scandirectory + "animframe" + to_string(frameNr,5) + ".ppm";
+	    string filename = scan_dir + "animframe" + to_string(frameNr,5) + ".ppm";
 	    cout << "write " << filename << endl;
       int tmpUpdate = haveToUpdate;
       glWriteImagePPM(filename.c_str(), factor, 0);
       haveToUpdate = tmpUpdate;
 
-	    string jpgname = scandirectory + "animframe" + to_string(frameNr,5) + ".jpg";
+	    string jpgname = scan_dir + "animframe" + to_string(frameNr,5) + ".jpg";
 	    string systemcall = "convert -quality 100 -type TrueColor " + filename + " " + jpgname;	
 	    //	 cout << systemcall << endl;
 	    system(systemcall.c_str());
@@ -902,8 +940,8 @@ void CallBackIdleFunc(void)
 
       //save the animation
       if(save_animation){
-        string filename = scandirectory + "animframe" + to_string(path_iterator,5) + ".ppm";
-        string jpgname = scandirectory + "animframe" + to_string(path_iterator,5) + ".jpg";
+        string filename = scan_dir + "animframe" + to_string(path_iterator,5) + ".ppm";
+        string jpgname = scan_dir + "animframe" + to_string(path_iterator,5) + ".jpg";
         cout << "written " << filename << " of " << path_vectorX.size() << " files" << endl;
         glWriteImagePPM(filename.c_str(), factor, 0);
         string systemcall = "convert -quality 100 " + filename + " " + jpgname;	
@@ -1987,9 +2025,19 @@ void calcPointSequence(vector<int> &sequence, int frameNr) {
   double x,y,z;
  
   for (unsigned int i = 0; i < octpts.size(); i++) {
-    x = MetaMatrix[i][frameNr][12];
-    y = MetaMatrix[i][frameNr][13];
-    z = MetaMatrix[i][frameNr][14];
+    // stop at scans that don't have any frames associated with them
+    if(i >= MetaMatrix.size()) break;
+    // set usable frame
+    double* frame;
+    if((unsigned int)frameNr >= MetaMatrix[i].size()) {
+      // use last possible frame
+      frame = MetaMatrix[i].back();
+    } else {
+      frame = MetaMatrix[i][frameNr];
+    }
+    x = frame[12];
+    y = frame[13];
+    z = frame[14];
     dists.push_back( pair<double, int>(sqr(X + x) + sqr(Y + y) + sqr(Z + z), i) );
   }
 

@@ -3,6 +3,13 @@
  *  @brief Representation of a 3D point type
  *  @author Jan Elsberg. Automation Group, Jacobs University Bremen gGmbH, Germany. 
  */
+
+#include "slam6d/point_type.h"
+
+#ifdef WITH_SCANSERVER
+#include "slam6d/scan.h"
+#endif //WITH_SCANSERVER
+
 #include <string>
 using std::string;
 #include <iostream>
@@ -10,12 +17,11 @@ using std::cout;
 using std::cerr;
 using std::endl;
 
-#include <iostream>
 #include <fstream>
 #include <string.h>
 
-#include "slam6d/point.h"
-#include "slam6d/point_type.h"
+#include <stdexcept>
+using std::runtime_error;
 
 
 
@@ -139,3 +145,54 @@ const unsigned int PointType::USE_COLOR = 32;
 const unsigned int PointType::USE_TIME = 64;
 const unsigned int PointType::USE_INDEX = 128;
 
+#ifdef WITH_SCANSERVER
+void PointType::useScan(Scan* scan)
+{
+  // clear pointers first
+  m_xyz = 0; m_rgb = 0; m_reflectance = 0; m_amplitude = 0; m_type = 0; m_deviation = 0;
+  
+  // prefetch data to avoid unneccessary loading times due to split ScanHandlers
+  scan->prefetch(DATA_XYZ);
+  if(hasColor()) scan->prefetch(DATA_RGB);
+  if(hasReflectance()) scan->prefetch(DATA_REFLECTANCE);
+  if(hasAmplitude()) scan->prefetch(DATA_AMPLITUDE);
+  if(hasType()) scan->prefetch(DATA_TYPE);
+  if(hasDeviation()) scan->prefetch(DATA_DEVIATION);
+  
+  // access data
+  try {
+    m_xyz = new DataXYZ(scan->getXYZ());
+    if(hasColor()) m_rgb = new DataRGB(scan->getRGB());
+    if(hasReflectance()) m_reflectance = new DataReflectance(scan->getReflectance());
+    if(hasAmplitude()) m_amplitude = new DataAmplitude(scan->getAmplitude());
+    if(hasType()) m_type = new DataType(scan->getType());
+    if(hasDeviation()) m_deviation = new DataDeviation(scan->getDeviation());
+    
+    // check if data is available, otherwise reset pointer to indicate that the scan doesn't prove this value
+    if(m_rgb && !(*m_rgb)) { delete m_rgb; m_rgb = 0; }
+    if(m_reflectance && !(*m_reflectance)) { delete m_reflectance; m_reflectance = 0; }
+    if(m_amplitude && !(*m_amplitude)) { delete m_amplitude; m_amplitude = 0; }
+    if(m_type && !(*m_type)) { delete m_type; m_type = 0; }
+    if(m_deviation && !(*m_deviation)) { delete m_deviation; m_deviation = 0; }
+  } catch(runtime_error& e) {
+    scan->clearPrefetch();
+    // unlock everything again
+    clearScan();
+    throw e;
+  }
+  
+  // clear prefetch flags
+  scan->clearPrefetch();
+}
+
+void PointType::clearScan()
+{
+  // unlock data access
+  if(m_xyz) delete m_xyz;
+  if(hasColor() && m_rgb) delete m_rgb;
+  if(hasReflectance() && m_reflectance) delete m_reflectance;
+  if(hasAmplitude() && m_amplitude) delete m_amplitude;
+  if(hasType() && m_type) delete m_type;
+  if(hasDeviation() && m_deviation) delete m_deviation;
+}
+#endif //WITH_SCANSERVER

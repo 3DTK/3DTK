@@ -8,7 +8,7 @@
 #include "slam6d/icp6D.h"
 
 #ifdef _MSC_VER
-#ifdef OPENMP
+#if !defined _OPENMP && defined OPENMP 
 #define _OPENMP
 #endif
 #endif
@@ -112,7 +112,11 @@ int icp6D::match(Scan* PreviousScan, Scan* CurrentScan)
     // Freiburg, Germany, September 2007
     omp_set_num_threads(OPENMP_NUM_THREADS);
 
+#ifndef WITH_SCANSERVER
     int max = (int)CurrentScan->get_points_red_size();
+#else //WITH_SCANSERVER
+    int max = (int)CurrentScan->getCountReduced();
+#endif //WITH_SCANSERVER
     int step = max / OPENMP_NUM_THREADS;
 
     vector<PtPair> pairs[OPENMP_NUM_THREADS];
@@ -163,7 +167,7 @@ int icp6D::match(Scan* PreviousScan, Scan* CurrentScan)
           Si[thread_num][2] += pp[0] * qq[2];
           Si[thread_num][3] += pp[1] * qq[0];
           Si[thread_num][4] += pp[1] * qq[1];
-          Si[thread_num][5] += pp[1] * qq[2]; 
+          Si[thread_num][5] += pp[1] * qq[2];
           Si[thread_num][6] += pp[2] * qq[0];
           Si[thread_num][7] += pp[2] * qq[1];
           Si[thread_num][8] += pp[2] * qq[2];
@@ -209,28 +213,28 @@ int icp6D::match(Scan* PreviousScan, Scan* CurrentScan)
       if (my_icp6Dminimizer->getAlgorithmID() == 3 || my_icp6Dminimizer->getAlgorithmID() == 8 ) {
         memcpy(alignxf, CurrentScan->get_transMat(), sizeof(alignxf));
       }
-	 ret = my_icp6Dminimizer->Point_Point_Align(pairs, alignxf, centroid_m, centroid_d);
+      ret = my_icp6Dminimizer->Point_Point_Align(pairs, alignxf, centroid_m, centroid_d);
     } else {
-	 break;
+      break;
     }
    
 #endif
 
     if ((iter == 0 && anim != -2) || ((anim > 0) && (iter % anim == 0))) {
-	 CurrentScan->transform(alignxf, Scan::ICP, 0);   // transform the current scan
+      CurrentScan->transform(alignxf, Scan::ICP, 0);   // transform the current scan
     } else {
-	 CurrentScan->transform(alignxf, Scan::ICP, -1);  // transform the current scan
+      CurrentScan->transform(alignxf, Scan::ICP, -1);  // transform the current scan
     }
     
     if ((fabs(ret - prev_ret) < epsilonICP) && (fabs(ret - prev_prev_ret) < epsilonICP)) {
-	 double id[16];
-	 M4identity(id);
-	 if(anim == -2) {
-	   CurrentScan->transform(id, Scan::ICP, -1);  // write end pose
-	 } else {
-	   CurrentScan->transform(id, Scan::ICP, 0);  // write end pose
-	 }
-	 break;
+      double id[16];
+      M4identity(id);
+      if(anim == -2) {
+        CurrentScan->transform(id, Scan::ICP, -1);  // write end pose
+      } else {
+        CurrentScan->transform(id, Scan::ICP, 0);  // write end pose
+      }
+    break;
     }
   }
   
@@ -250,7 +254,11 @@ double icp6D::Point_Point_Error(Scan* PreviousScan, Scan* CurrentScan, double ma
 #ifdef _OPENMP
     omp_set_num_threads(OPENMP_NUM_THREADS);
 
+#ifndef WITH_SCANSERVER
     int max = (int)CurrentScan->get_points_red_size();
+#else //WITH_SCANSERVER
+    int max = (int)CurrentScan->getCountReduced();
+#endif //WITH_SCANSERVER
     int step = max / OPENMP_NUM_THREADS;
 
     vector<PtPair> pairs[OPENMP_NUM_THREADS];
@@ -334,11 +342,10 @@ void icp6D::doICP(vector <Scan *> allScans)
     if (i > 0) {
       if (meta) {
         match(my_MetaScan, CurrentScan);
-      }
-      else if (cad_matching) {
+      } else
+      if (cad_matching) {
         match (allScans[0], CurrentScan);
-      }
-      else {
+      } else {
         match(PreviousScan, CurrentScan);
       }
     }
@@ -347,7 +354,11 @@ void icp6D::doICP(vector <Scan *> allScans)
     if ( meta && i != allScans.size()-1 ) {
       MetaScan.push_back(CurrentScan);
       if (my_MetaScan) {
-	   delete my_MetaScan;
+#ifndef WITH_SCANSERVER
+        delete my_MetaScan;
+#else //WITH_SCANSERVER
+        Scan::remove(my_MetaScan);
+#endif //WITH_SCANSERVER
       }
       my_MetaScan = new Scan(MetaScan, nns_method, cuda_enabled);
     }

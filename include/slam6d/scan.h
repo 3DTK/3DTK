@@ -34,9 +34,14 @@ using std::stringstream;
 #include "slam6d/globals.icc"
 #include "slam6d/scan_io.h"
 
+#ifdef WITH_SCANSERVER
+#include "scanserver/sharedScan.h"
+#include <boost/thread/mutex.hpp>
+#include <boost/thread/locks.hpp>
+#endif
 
-enum reader_type {
-  UOS, UOS_MAP, UOS_FRAMES, UOS_MAP_FRAMES, UOS_RGB, OLD, RTS, RTS_MAP, RIEGL_TXT, RIEGL_PROJECT, RIEGL_RGB, RIEGL_BIN, IFP, ZAHN, PLY, WRL, XYZ, ZUF, ASC, IAIS, FRONT, X3D, RXP, KIT, AIS, OCT, TXYZR, XYZR, XYZ_RGB, KS, KS_RGB, STL, LEICA, PCL, PCI, UOS_CAD, VELODYNE, VELODYNE_FRAMES };
+
+#include "scanserver/io_types.h"
 
 enum nns_type {
   simpleKD, cachedKD, ANNTree, BOCTree //, NaboKD
@@ -44,6 +49,8 @@ enum nns_type {
 
 
 class SearchTree;
+template<typename T>
+class BOctTree;
 
 /**
  * @brief 3D scan representation and implementation of scan matching
@@ -62,7 +69,7 @@ public:
 
   ~Scan();
 
-  void mergeCoordinatesWithRoboterPosition(const Scan *prevScan);
+  void mergeCoordinatesWithRoboterPosition(Scan *prevScan);
 
   inline const double* get_transMat() const;
   inline const double* get_rPos() const;
@@ -118,10 +125,12 @@ public:
 						   double *sum,
 						   double centroid_m[OPENMP_NUM_THREADS][3], double centroid_d[OPENMP_NUM_THREADS][3]);
    
-  inline friend ostream& operator<<(ostream& os, const Scan& s); 
+  inline friend ostream& operator<<(ostream& os, Scan& s); 
   inline friend ostream& operator<<(ostream& os, const double matrix[16]);
 
+#ifndef WITH_SCANSERVER
   inline int get_points_red_size() const;
+#endif //WITH_SCANSERVER
 
   inline void resetPose();
   
@@ -130,6 +139,7 @@ public:
    */
   static vector <Scan *> allScans;
 
+#ifndef WITH_SCANSERVER
   /**
    * max number of (reduced) points in the scans
    */
@@ -139,41 +149,48 @@ public:
    * The output directory
    */  
   static string dir;
+#endif //WITH_SCANSERVER
 
-  static bool toType(const char* string, reader_type &type);
-
-  static void readScans(reader_type type,
+  static void readScans(IOType type,
 				    int start, int end, string &dir, int maxDist, int minDist,
-				    bool openFileForWriting = false);  
-  static void readScansRedSearch(reader_type type,
+				    bool openFileForWriting = false);
+  static void readScansRedSearch(IOType type,
 						   int start, int end, string &dir, int maxDist, int minDist,
 						   double voxelSize, int nrpts, // reduction parameters
-						   int nns_method, bool cuda_enabled, 
-						   bool openFileForWriting = false);  
-
+						   int nns_method = -1, bool cuda_enabled = false,
+						   bool openFileForWriting = false);
+#ifndef WITH_SCANSERVER
   inline const vector <Point>* get_points() const;
   inline double* const* get_points_red() const;
   inline void setPoints(vector <Point> *_points);
   inline double* const* get_points_reduced() const;
-  inline const SearchTree *get_tree() const;
   inline void setFileNr(int _fileNr);
   inline int  getFileNr() const;
+  
+  // stub for making it compatible with scanserver getCount
+  inline unsigned int getCount() const { return get_points()->size(); }
+
+  inline void clearPoints();
+#endif //WITH_SCANSERVER
+
+  inline const SearchTree *get_tree() const;
   inline const double * getTransMatOrg() const;
   
-  inline void clearPoints();
-
   //FIXME
   inline const ANNkd_tree* getANNTree() const;
   inline const double* getDAlign() const;
   inline const double* getDAlign_inv() const;
+#ifndef WITH_SCANSERVER
   inline double** get_org_points_red() const;
+#endif //WITH_SCANSERVER
 
 protected:
 
+#ifndef WITH_SCANSERVER
   class scanIOwrapper : public ScanIO {
     public:
 
-    scanIOwrapper(reader_type type );
+    scanIOwrapper(IOType type );
     ~scanIOwrapper();
 
     virtual int readScans(int start, int end, string &dir, int maxDist, int mindist,
@@ -188,6 +205,7 @@ protected:
 #endif
 
   };
+#endif //WITH_SCANSERVER
   
   /**
    * The pose of the scan
@@ -200,32 +218,36 @@ protected:
          transMat[16];  ///< (4x4) transformation matrix
 
   
-  /**
-    * run ICP on GPU instead of CPU
-    */
-
+  //! Run ICP on GPU instead of CPU
   bool cuda_enabled;
-  /**
-    * Defines the method used for nearest neighbor search
-    */
-
+  
+  //! Defines the method used for nearest neighbor search and which tree to use
   int nns_method;
 
   /**
    * The original pose of the scan, e.g., from odometry
    */
   double transMatOrg[16];
+  
+  //! Internal function of transform which alters the reduced points
+  void transformReduced(const double alignxf[16]);
+  
+  //! Internal function of transform which handles the matrices
+  void transformMatrix(const double alignxf[16]);
 
+#ifndef WITH_SCANSERVER
   /**
    * Vector for storing the scan data
    */
   vector <Point> points;
+#endif //WITH_SCANSERVER
 
   /**
    * Vector storing single scans of a metascan
    */
   vector <Scan *> meta_parts;
 
+#ifndef WITH_SCANSERVER
   /**
    * Array for storing reduced points. In case there is no reduction the points will
    * be copied. All transformations are applied only to this array, sving a lot of
@@ -242,6 +264,7 @@ protected:
    * number elements of the array 
    */
   int points_red_size;
+#endif //WITH_SCANSERVER
 
   /**
    * The search tree
@@ -253,10 +276,10 @@ protected:
   /**
    * This KD tree is created only for the CUDA usages
    */
-
   ANNkd_tree *ann_kd_tree;
   void createANNTree();
   
+#ifndef WITH_SCANSERVER
   /**
    * Array for storing reduced points. The reduced points are copied and k-d trees 
    * can be constructed with pointers to these trees. This allows the computation
@@ -269,12 +292,7 @@ protected:
    * here would mean too many conversions, therefore loss of speed for LUM.
    */
   double** points_red_lum;
-
-  /**
-   * The treeTransMat_inv holds the current transformation of a 3D scan that is stored 
-   * in a search tree. 
-   */
-  double treeTransMat_inv[16];
+#endif //WITH_SCANSERVER
 
   /**
    * The dalignxf transformation represents the delta transformation virtually applied
@@ -282,12 +300,14 @@ protected:
    */
   double dalignxf[16];
 
+#ifndef WITH_SCANSERVER
   /**
    * The flag outputFrames specifies if .frames files should be created and written.
    * In show or conversion tools this is usually unwanted, in slam6D we certainly 
    * need it.
    */
   static bool outputFrames;
+#endif //WITH_SCANSERVER
 
   /**
    * counter for the number of 3D Scans (including the metascans)
@@ -299,6 +319,7 @@ protected:
    */
   unsigned int scanNr;
   
+#ifndef WITH_SCANSERVER
   /**
    * The actual file number for the *.frames file
    */
@@ -309,6 +330,7 @@ protected:
    * once at the end of the program. This reduces file operations and saves time.
    */
   stringstream sout;
+#endif //WITH_SCANSERVER
 
   /** 
    * regard only points up to an (Euclidean) distance of maxDist
@@ -319,6 +341,140 @@ protected:
   int maxDist2;
 
   void deleteTree();
+  
+#ifdef WITH_SCANSERVER
+public:
+  //! Delete scans, shared scans, the directory and empty the vector
+  static void clearScans();
+
+  //! Delete a single scan and its entry from the vector
+  static void remove(Scan* scan);
+
+  //! Determine the maximum number of reduced points of all scans
+  static unsigned int getMaxCountReduced();
+private:
+  static ScanVector* shared_scans;
+public:
+  //! Create a scan with its internal data hold by a shared scan
+  Scan(SharedScan* shared_scan);
+
+  //! Identifier (counter variable in the ScanIO) from the shared scan
+  inline const char* getIdentifier() const { if(m_shared_scan != 0) return m_shared_scan->getIdentifier(); else return "none"; }
+
+  //! Expose raw contents
+  double* getPose() const;
+  DataXYZ getXYZ() const;
+  DataRGB getRGB() const;
+  DataReflectance getReflectance() const;
+  DataAmplitude getAmplitude() const;
+  DataType getType() const;
+  DataDeviation getDeviation() const;
+  
+  //! Set prefetch flags (routed to SharedScan)
+  void prefetch(IODataType type) { m_shared_scan->prefetch(type); }
+  
+  //! Return prefetch flags (routed to SharedScan)
+  unsigned int getPrefetch() const { return m_shared_scan->getPrefetch(); }
+  
+  //! Clear prefetch flags (routed to SharedScan)
+  void clearPrefetch() { m_shared_scan->clearPrefetch(); }
+  
+  
+  //! Count of (filtered) points
+  unsigned int getCount();
+
+  //! Expose reduced points
+  unsigned int getCountReduced();
+
+  //! Get reduced points which are affected by transform and used as target points in matching
+  DataXYZ getXYZReduced();
+
+  //! Get the tree and calculate it on demand if not available
+  SearchTree* getSearchTree();
+
+  /**
+   * Get reduced points which are only transformed to the initial transMatOrg pose and serve as a basis for SearchTree.
+   * In case of a meta-scan this doesn't use a SharedScan (cause none exists for a self-created Scan) and uses meta_points instead.
+   */
+  DataXYZ getXYZReducedOriginal();
+
+  //! Creates a reduced version of xyz in local coordinates for show to use
+  void calcReducedShow(double voxelSize, int nrpts = 0);
+
+  //! Individual reduced data for show
+  TripleArray<float> getXYZReducedShow();
+  
+  //! Identify an octtree how it was created and if it can be fetched from cache
+  void setOcttreeParameters(const char* params);
+  
+  //! Get saved octtree (for show)
+  CacheDataAccess getOcttree();
+  
+  //! Copy an octtree into cache and attach it to this scan
+  CacheDataAccess copyOcttreeToCache(BOctTree<float>* oct);
+
+  /**
+   * Copies reduced points to original points without any transformation.
+   * Is called in the on-demand reduction after the transMatOrg transformation of the reduced points. Otherwise, use at your own risk.
+   */
+  void copyReducedToOriginal();
+  
+  /**
+   * Inverse functionality of copyReducedToOriginal.
+   * Used in the on-demand reduction if originals fitting the reduction and filter parameters and same pose were found and can skip the reduction step.
+   */
+  void copyOriginalToReduced();
+  
+  //! Called from the metascan constructor this function handles matrices and the creation of the meta searchtree
+  void createMetaTree(const vector<Scan*>& scans);
+
+  //! Clear previous stored frames to start from anew
+  void clearFrames();
+  
+  //! Get contained frames
+  const FrameVector& getFrames();
+
+  //! Save frames into a file
+  void saveFrames();
+
+private:
+  //! Constructor initialization stub
+  void init();
+
+  //! Add a new frame with the current transformation and given type, only called from transform
+  void addFrame(AlgoType type);
+
+  //! Calculate reduced points and an untransformed copy of it plus the search trees on demand
+  void calcReducedOnDemand();
+  
+private:
+  //! Reference to the shared scan
+  SharedScan* m_shared_scan;
+
+  //! Array holding the meta points instead of having a SharedScan reference
+  unsigned int meta_count;
+
+  //! Buffered value of count and its reduced part
+  unsigned int m_count, m_count_reduced;
+  
+  //! Buffered size of reduced show data
+  unsigned int m_show_count;
+  
+  //! Reduction on-demand parameter for voxel size
+  double reduction_voxelSize;
+  
+  //! Reduction on-demand parameter for octree center
+  int reduction_nrpts;
+  
+  //! Reduction on-demand parameter for voxel size for show
+  double show_red_voxelSize;
+  
+  //! Reduction on-demand parameter for octree center for show
+  int show_red_nrpts;
+
+  //! Mutex for safely reducing points and creating the search tree just once in a multithreaded environment
+  boost::mutex m_mutex_reduction, m_mutex_create_tree;
+#endif //WITH_SCANSERVER
 };
 
 #include "scan.icc"
