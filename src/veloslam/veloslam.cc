@@ -304,7 +304,7 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &rand,
     bool &extrapolate_pose, bool &meta, int &algo, int &loopSlam6DAlgo, int &lum6DAlgo, int &anim,
     int &mni_lum, string &net, double &cldist, int &clpairs, int &loopsize,
     double &epsilonICP, double &epsilonSLAM,  int &nns_method, bool &exportPts, double &distLoop,
-    int &iterLoop, double &graphDist, int &octree, bool &cuda_enabled, reader_type &type)
+    int &iterLoop, double &graphDist, int &octree, bool &cuda_enabled, IOType &type)
 {
   int  c;
   // from unistd.h:
@@ -471,10 +471,14 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &rand,
       case '3':  // = --graphDist
         graphDist = atof(optarg);
         break;
-      case 'f': 
-        if (!Scan::toType(optarg, type))
-          abort ();
-        break;
+	    case 'f':
+        try {
+          type = formatname_to_io_type(optarg);
+        } catch (...) { // runtime_error
+          cerr << "Format " << optarg << " unknown." << endl;
+          abort();
+        }
+     break;
       case 'u':
         cuda_enabled = true;
         break;
@@ -522,7 +526,7 @@ void matchGraph6Dautomatic(double cldist, int loopsize, vector <Scan *> allScans
 					  bool meta_icp, int nns_method, bool cuda_enabled,
 					  loopSlam6D *my_loopSlam6D, graphSlam6D *my_graphSlam6D, int nrIt,
 					  double epsilonSLAM, double mdml, double mdmll, double graphDist,
-					  bool &eP, reader_type type)
+					  bool &eP, IOType type)
 {
   double cldist2 = sqr(cldist);
 
@@ -722,7 +726,7 @@ int main(int argc, char **argv)
   double graphDist  = cldist;
   int octree       = 0;  // employ randomized octree reduction?
   bool cuda_enabled    = false;
-  reader_type type    = UOS;
+  IOType type    = UOS;
 
   parseArgs(argc, argv, dir, red, rand, mdm, mdml, mdmll, mni, start, end,
       maxDist, minDist, quiet, veryQuiet, eP, meta, algo, loopSlam6DAlgo, lum6DAlgo, anim,

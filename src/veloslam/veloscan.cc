@@ -209,7 +209,7 @@ VeloScan::VeloScan(const VeloScan& s)
  * @param openFileForWriting Opens .frames files to store the
  *        scan matching results
  */
-void VeloScan::readScans(reader_type type,
+void VeloScan::readScans(IOType type,
                          int start, int end, string &_dir, int maxDist, int minDist,
                          bool openFileForWriting)
 {
@@ -237,7 +237,7 @@ void VeloScan::readScans(reader_type type,
 }
 
 
-void VeloScan::readScansRedSearch(reader_type type,
+void VeloScan::readScansRedSearch(IOType type,
                                   int start, int end, string &_dir, int maxDist, int minDist,
                                   double voxelSize, int nrpts, // reduction parameters
                                   int nns_method, bool cuda_enabled,

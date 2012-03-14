@@ -10,15 +10,20 @@ using namespace std;
 void icp6Dcuda::initGPUicp(float max_rad, float min_rad, int iter, int max_iter, 
 					  int max_proctime, float max_dev, const double trans[], const double trans_inv[])
 {
-  if (max_scnSize < Scan::max_points_red_size) {
+#ifndef WITH_SCANSERVER
+  unsigned int max_size = Scan::max_points_red_size;
+#else //WITH_SCANSERVER
+  unsigned int max_size = Scan::getMaxCountReduced();
+#endif //WITH_SCANSERVER
+  if (max_scnSize < max_size) {
     if (icp != 0) {
-	 delete icp;
-	 icp = 0;
+      delete icp;
+      icp = 0;
     }
   }
   if (icp == 0) {
-    max_scnSize = Scan::max_points_red_size;
-    icp = new CIcpGpuCuda((unsigned)10, ceil((float)Scan::max_points_red_size/10.f) ,
+    max_scnSize = max_size;
+    icp = new CIcpGpuCuda((unsigned)10, ceil((float)max_size/10.f) ,
 					 (unsigned)max_num_iterations);
     icp->setMaxProcTime((double) max_proctime);
     icp->setMaxDeviation((double) max_dev);
@@ -45,12 +50,16 @@ icp6Dcuda::icp6Dcuda(icp6Dminimizer *my_icp6Dminimizer, double max_dist_match,
  */
 int icp6Dcuda::match(Scan* PreviousScan, Scan* CurrentScan)
 {
+#ifndef WITH_SCANSERVER
   int mdlSize = PreviousScan->get_points_red_size(), scnSize = CurrentScan->get_points_red_size();
+#else //WITH_SCANSERVER
+  int mdlSize = PreviousScan->getCountReduced(), scnSize = CurrentScan->getCountReduced();
+#endif //WITH_SCANSERVER
   double** mdl;
   float** scn;
   const double *trans;
   double trans_inv[16];
-  trans = PreviousScan->getDAlign();
+  trans = PreviousScan->get_transMat();
   M4inv(trans, trans_inv);
 
   initGPUicp(sqrt(max_dist_match2), sqrt(max_dist_match2), max_num_iterations,
@@ -61,8 +70,13 @@ int icp6Dcuda::match(Scan* PreviousScan, Scan* CurrentScan)
   icp->setTrans_Trans_inv(trans, trans_inv);
   icp->setSize(10, ceil((float)max(mdlSize, scnSize)/10.0f));
 
+#ifndef WITH_SCANSERVER
   double **mod_dat = PreviousScan->get_org_points_red();
   double *const*scn_dat = CurrentScan->get_points_red();
+#else //WITH_SCANSERVER
+  DataXYZ scn_dat(CurrentScan->getXYZReduced());
+  DataXYZ mod_dat(PreviousScan->getXYZReducedOriginal());
+#endif //WITH_SCANSERVER
   mdl = h_idata;
   scn = fHstScn;
   cout << "model point cloud size is " << mdlSize << "\n";

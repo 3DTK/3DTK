@@ -1048,7 +1048,7 @@ void ExtrCalibFunc(int board_w, int board_h, int start, int end, bool optical, b
   * associating temperature values to the data points.
   */
 void ProjectAndMap(int start, int end, bool optical, bool quiet, string dir,
-reader_type type, int scale, double rot_angle, double minDist, double maxDist,
+IOType type, int scale, double rot_angle, double minDist, double maxDist,
 bool correction, int neighborhood, int method) {
 
   int nr_img = end - start + 1;
@@ -1555,7 +1555,7 @@ void usage(char* prog) {
   */
 
 int parseArgs(int argc, char **argv, string &dir, int &start, int &end, double
-&maxDist, double &minDist, reader_type &type, bool &optical, bool &chess, int
+&maxDist, double &minDist, IOType &type, bool &optical, bool &chess, int
 &width, int &height, bool &intrinsic, bool &extrinsic, bool &mapping, bool
 &correction, int &scale, int &neighborhood, double &angle, bool &quiet ) {
   // from unistd.h:
@@ -1599,9 +1599,13 @@ int parseArgs(int argc, char **argv, string &dir, int &start, int &end, double
 	   if (end < 0)     { cerr << "Error: Cannot end at a negative scan number.\n"; exit(1); }
 	   if (end < start) { cerr << "Error: <end> cannot be smaller than <start>.\n"; exit(1); }
 	   break;
-	 case 'f': 
-     if (!Scan::toType(optarg, type))
-       abort ();
+	 case 'f':
+     try {
+       type = formatname_to_io_type(optarg);
+     } catch (...) { // runtime_error
+       cerr << "Format " << optarg << " unknown." << endl;
+       abort();
+     }
      break;
 	 case 'q':
      quiet = true;
@@ -1686,7 +1690,7 @@ int main(int argc, char** argv) {
   int height = 6;
   double maxDist = -1;
   double minDist = -1;
-  reader_type type = UOS;
+  IOType type = UOS;
   bool optical = false;
   bool chess = false;
   bool intrinsic = false;

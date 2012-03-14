@@ -44,7 +44,7 @@ extern float minB[NUMDIM], maxB[NUMDIM];    /*box */
 extern float coord[NUMDIM];       /* hit point */
 
 
-template <class T> bool HitBoundingBox(T center[3], T size )
+template <class T> bool HitBoundingBox(const T center[3], T size )
 {
   minB[0] = center[0] - size;
   minB[1] = center[1] - size;

@@ -8,10 +8,16 @@
 /**
  * Overridden "<<" operator for sending a scan to a stream
  */
-inline ostream& operator<<(ostream& os, const Scan& s)
+inline ostream& operator<<(ostream& os, Scan& s)
 {
+#ifndef WITH_SCANSERVER
   for (unsigned int i = 0; i < s.points.size(); i++) {
     os << s.points[i] << endl;
+#else //WITH_SCANSERVER
+  DataXYZ xyz(s.getXYZ());
+  for(unsigned int i = 0; i < xyz.size(); ++i) {
+    os << xyz[i][0] << " " << xyz[i][1] << " " << xyz[i][2] << endl;
+#endif //WITH_SCANSERVER
   }
   return os;
 }
@@ -26,6 +32,7 @@ inline const double* Scan::getDAlign() const
     return dalignxf;
 }
 
+#ifndef WITH_SCANSERVER
 inline double** Scan::get_org_points_red() const
 {
   return points_red_lum;
@@ -53,6 +60,7 @@ inline void Scan::clearPoints() {
 inline void Scan::setPoints(vector <Point>* _points) {
   points = *_points;
 }
+#endif //WITH_SCANSERVER
 
 /**
  * Accessor for roboters transMat
@@ -90,6 +98,7 @@ inline const double* Scan::get_rPosQuat() const
   return rQuat;
 }
 
+#ifndef WITH_SCANSERVER
 /**
  * Accessor for 3D points
  * @return Vector of all points 
@@ -109,21 +118,6 @@ inline double* const* Scan::get_points_red() const
 }
 
 /**
- * Resets the pose of the scan to identity
- */
-inline void Scan::resetPose()
-{
-
-  double tinv[16];
-  M4inv(transMat, tinv);
-  transform(tinv, INVALID);
-
-  Matrix4ToEuler(transMat, rPosTheta, rPos);
-  
-  M4identity(dalignxf);
-}
-
-/**
  * Sets the file Nr
  */
 inline void Scan::setFileNr(int _fileNr)
@@ -137,6 +131,21 @@ inline void Scan::setFileNr(int _fileNr)
 inline int Scan::getFileNr() const
 {
   return fileNr;
+}
+#endif //WITH_SCANSERVER
+
+/**
+ * Resets the pose of the scan to identity
+ */
+inline void Scan::resetPose()
+{
+  double tinv[16];
+  M4inv(transMat, tinv);
+  transform(tinv, INVALID);
+  
+  Matrix4ToEuler(transMat, rPosTheta, rPos);
+  
+  M4identity(dalignxf);
 }
 
 /**

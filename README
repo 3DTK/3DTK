@@ -16,14 +16,26 @@ the proper redistributable package.
 
 Some Boost libraries (graph, regex, serialization) are needed to compile the slam6D program.
 If you are using Debian just do:
-aptitude install libboost-graph-dev libboost-regex-dev libboost-serialization-dev freeglut3-dev libxmu-dev libxi-dev
+
+  aptitude install libboost-graph-dev libboost-regex-dev libboost-serialization-dev freeglut3-dev libxmu-dev libxi-dev
+
 or, if you are still using Debian stable (lenny):
-aptitude install libboost-graph1.35-dev libboost-regex1.35-dev libboost-serialization1.35-dev freeglut3-dev libxmu-dev libxi-dev 
+
+  aptitude install libboost-graph1.35-dev libboost-regex1.35-dev libboost-serialization1.35-dev freeglut3-dev libxmu-dev libxi-dev
+
 for Ubuntu this would be:
-sudo aptitude install libboost-graph-dev libboost-regex-dev libboost-serialization-dev freeglut3-dev libxmu-dev libxi-dev
+
+  sudo aptitude install libboost-graph-dev libboost-regex-dev libboost-serialization-dev freeglut3-dev libxmu-dev libxi-dev
+
 SuSE users please use yast2 for installing the missing packages
+
+If compiled with the scanserver feature, boost needs to be at least version 1.46 and requires interprocess and filesystem to be present. The minimum ubuntu package list for this is oneiric.
+
+  sudo aptitude install libboost1.46-dev libboost-filesystem1.46-dev
+
 Additionally for CAD matching support the following dependencies must be satisfied (exemplarily for Ubuntu):
-sudo aptitude install libboost-filesystem-dev libboost-program-options-dev
+
+  sudo aptitude install libboost-filesystem-dev libboost-program-options-dev
 
 -------------------------------------------------------------------
 
@@ -102,7 +114,16 @@ PointDist           100.0
 /bin/planes -f riegl_txt -s 0 /home/nuechter/dat/bremen_city/ -r 50 -O 1 -m 5000
 /bin/show -s 0 -e 0 /home/dborrman/Jacobs/dat/bremen_city/ -f riegl_txt -l dat/planes/planes.list -r 10 -O 1 -m 5000
 
-------------------------------------------------
+-------------------------------------------------------------------
+The IO relevant parameters -f(ormat), -s(tart), -e(nd) can be omitted in slam6D
+and show if a 'format' file exists in the directory, which contains key=value
+lines (spaces are trimmed automatically) for format, start, end with the same
+values as in the commandline. These format-file parameters will be overwritten
+by commandline parameters so that the format-file will provide the right IO
+type and full index range and the user can overwrite the index range as he sees
+fit.
+
+-------------------------------------------------------------------
 A reference manual can be found in doc/refman.pdf resp.
 doc/html/index.html (type in 'make docu' to compile the doxygen
 documentation for the HTML files).
