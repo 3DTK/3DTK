@@ -318,7 +318,7 @@ ELSE(EXPORT_SHARED_LIBS)
   MESSAGE(STATUS "not exporting libraries")
 ENDIF(EXPORT_SHARED_LIBS)
 
-OPTION(WITH_SCANSERVER "Whether to build the new scanserver and integrate its functionality where it is already implemented in. ON/OFF" ON)
+OPTION(WITH_SCANSERVER "Whether to build the new scanserver and integrate its functionality where it is already implemented in. ON/OFF" OFF)
 
 OPTION(WITH_METRICS "Whether to use metrics in the scanserver. ON/OFF" OFF)
 
