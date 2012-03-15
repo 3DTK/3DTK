@@ -7,7 +7,14 @@ using namespace NEWMAT;
 #include <limits>
 #include "shapes/quadtree.h"
 #include <errno.h>
+#include <iterator>
+
+#ifdef _MSC_VER
+#include <windows.h>
+#include <direct.h>
+#else
 #include <dlfcn.h>
+#endif 
 #include <sys/stat.h>
 
 /**
@@ -267,7 +274,7 @@ double * const* Hough::deletePoints(vector<ConvexPlane*> &model, int &size) {
 void Hough::PHT() {
   unsigned int stop =
   (int)(allPoints->size()/100.0)*myConfigFileHough.Get_MinSizeAllPoints();
-  bool voted[allPoints->size()];
+  bool *voted = new bool[allPoints->size()];
   for(unsigned int i = 0; i < allPoints->size(); i++) {
     voted[i] = false;
   }
@@ -311,6 +318,7 @@ void Hough::PHT() {
   } 
   
   delete maxlist; 
+  delete[] voted;
 }
 
 /**
@@ -322,7 +330,7 @@ void Hough::PPHT() {
   (int)(allPoints->size()/100.0)*myConfigFileHough.Get_MinSizeAllPoints();
   while(stop < allPoints->size() && 
         planes.size() < (unsigned int)myConfigFileHough.Get_MaxPlanes()) {
-    bool voted[allPoints->size()];
+    bool *voted = new bool[allPoints->size()];
     for(unsigned int i = 0; i < allPoints->size(); i++) {
       voted[i] = false;
     }
@@ -346,9 +354,9 @@ void Hough::PPHT() {
       }
 
     } while(!voted[pint]);
-    
+   
+	delete[] voted;
   }
-  
 }
 
 /**
@@ -409,7 +417,7 @@ void Hough::APHT() {
       for(vector<int*>::iterator it = mergelist.begin(); it != mergelist.end();
     it++) {
         if(myConfigFileHough.Get_AccumulatorType() != 2) {
-          if( sqrt( 
+          if( sqrt((float) 
             ((*it)[3] - (tmp[3])) * ((*it)[3] - (tmp[3])) +
             ((*it)[1] - (tmp[1])) * ((*it)[1] - (tmp[1])) +
             ((*it)[2] - (tmp[2])) * ((*it)[2] - (tmp[2])) ) < 3.0) {
@@ -417,7 +425,7 @@ void Hough::APHT() {
             break;
           }
         } else { 
-          if( sqrt( 
+          if( sqrt( (float)
             ((*it)[4] - (tmp[4])) * ((*it)[4] - (tmp[4])) +
             ((*it)[1] - (tmp[1])) * ((*it)[1] - (tmp[1])) +
             ((*it)[2] - (tmp[2])) * ((*it)[2] - (tmp[2])) +
@@ -441,7 +449,7 @@ void Hough::APHT() {
         for(unsigned int k = 0; k < i; k++) {
           int * tmp2 = altlist[k];
           if(myConfigFileHough.Get_AccumulatorType() != 2) {
-            if( sqrt( 
+            if( sqrt( (float)
               ((tmp2)[3] - (tmp1[3])) * ((tmp2)[3] - (tmp1[3])) +
               ((tmp2)[1] - (tmp1[1])) * ((tmp2)[1] - (tmp1[1])) +
               ((tmp2)[2] - (tmp1[2])) * ((tmp2)[2] - (tmp1[2])) ) < 3.0) {
@@ -449,11 +457,11 @@ void Hough::APHT() {
               break;
             }
           } else { 
-            if( sqrt( 
+            if( sqrt( (float)(
               ((tmp2)[4] - (tmp1[4])) * ((tmp2)[4] - (tmp1[4])) +
               ((tmp2)[1] - (tmp1[1])) * ((tmp2)[1] - (tmp1[1])) +
               ((tmp2)[2] - (tmp1[2])) * ((tmp2)[2] - (tmp1[2])) +
-              ((tmp2)[3] - (tmp1[3])) * ((tmp2)[3] - (tmp1[3])) ) < 3.0) {
+              ((tmp2)[3] - (tmp1[3])) * ((tmp2)[3] - (tmp1[3]))) ) < 3.0) {
               treffer = true;
               break;
             }
@@ -994,7 +1002,7 @@ int Hough::cluster(vPtPair &pairs, double minx, double maxx, double miny, double
       }
     }
   }
-  int counter[region+1];
+  int *counter = new int[region+1];
   for(int i = 0; i <= region; i++) {
     counter[i] = 0;
   }
@@ -1004,7 +1012,7 @@ int Hough::cluster(vPtPair &pairs, double minx, double maxx, double miny, double
     }
   }
 
-  int linkedindex[linked.size()];
+  int *linkedindex = new int[linked.size()];
   for(unsigned int i = 0; i < linked.size(); i++) {
     linkedindex[i] = 0;
   }  
@@ -1016,6 +1024,8 @@ int Hough::cluster(vPtPair &pairs, double minx, double maxx, double miny, double
     }
   }
   
+  delete[] counter;
+
   int maxindex = 0;
   for(unsigned int i = 1; i < linked.size(); i++) {
     if(linkedindex[i] > linkedindex[maxindex]) {
@@ -1023,6 +1033,7 @@ int Hough::cluster(vPtPair &pairs, double minx, double maxx, double miny, double
     }
   }
  
+  delete[] linkedindex;
   set<int> max = linked[maxindex];
   int zaehler = 0;
   for(vitr = pairs.begin(); vitr != pairs.end(); vitr++) {
