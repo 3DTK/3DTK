@@ -1,6 +1,6 @@
 ﻿#ifndef __GRID_CELL_H__
 #define __GRID_CELL_H__
-
+ 
 #ifdef _MSC_VER
 #define snprintf _snprintf
 #undef _STDIO_DEFINED

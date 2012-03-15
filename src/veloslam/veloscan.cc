@@ -46,6 +46,7 @@ using std::stringstream;
 #include <cstring>
 using std::flush;
 
+#include "slam6d/Boctree.h"
 #include "veloslam/veloscan.h"
 #include "veloslam/trackermanager.h"
 
@@ -194,6 +195,15 @@ VeloScan::VeloScan(const VeloScan& s)
     : Scan(s)
 { }
 
+void VeloScan::setPoints(vector <Point>* _points) {
+
+	points.clear();
+	for (int i = 0; i < _points->size(); i++) {
+		Point  P=  (*_points)[i];
+		points.push_back(P);
+  }
+}
+
 /**
  * Reads specified scans from given directory.
  * Scan poses will NOT be initialized after a call
@@ -229,8 +239,6 @@ void VeloScan::readScans(IOType type,
         currentScan->setPoints(&ptss);    // copy points
         ptss.clear();                   // clear points
         allScans.push_back(currentScan);
-        cout << "removing dynamic objects ... ";
-        currentScan->GetAllofObject();
         cout << "done" << endl;
     }
     return;
@@ -274,8 +282,13 @@ void VeloScan::readScansRedSearch(IOType type,
 #endif
                 {
                     cout << "removing dynamic objects, reducing scan " << currentScan->getFileNr() << " and creating searchTree" << endl;
-                    currentScan->GetAllofObject();
-                    currentScan->calcReducedPoints(voxelSize, nrpts);
+
+					currentScan->FindingAllofObject();
+					currentScan->TrackingAllofObject();
+					currentScan->ClassifiAllofObject();
+					currentScan->ExchangePointCloud();
+
+                    currentScan->calcReducedPoints_byClassifi(voxelSize, nrpts, PointType());
                     currentScan->transform(currentScan->getTransMatOrg(), INVALID); //transform points to initial position
        //             currentScan->clearPoints();
                     currentScan->createTree(nns_method, cuda_enabled);
@@ -356,13 +369,14 @@ int VeloScan::TransferToCellArray()
     {
             count++;
             Point  &pt= points[i]; 
+			points[i].point_id =i; 
+			pt.point_id = i;  //important   for find point in  scans  ---raw points
 
 			// 选择在距离雷达的一定的范围内进行测试
             if(pt.rad <=MinRad || pt.rad>=MaxRad)
                 continue;
 
 		// 四个象限的散列 第一个象限  旋转坐标系
-
             if(pt.x >0 && pt.z>0 )
             {
                 if(pt.x > pt.z)
@@ -527,7 +541,6 @@ int VeloScan::CalcCellFeature(cell& cellobj, cellFeature& f)
 		   f.ave_x+=cellobj[i]->x;
 		   f.ave_z+=cellobj[i]->z;
 		   f.ave_y+=cellobj[i]->y;
-   
 
 		   if(cellobj[i]->point_type & POINT_TYPE_BELOW_R)
 			   f.cellType|=CELL_TYPE_BELOW_R;
@@ -669,7 +682,6 @@ int VeloScan::SearchNeigh(cluster& clu,charvv& flagvv,int i,int j)
 	//到了跟节点
     if(flagvv[i][j]==1)
         return 0;
-
     if(scanCellFeatureArray[i][j].size==0)
     {
         flagvv[i][j]=1;
@@ -806,6 +818,14 @@ int VeloScan::FindAndCalcScanClusterFeature()
 	for(i=0; i<clustersize; ++i)
 		CalcClusterFeature(scanClusterArray[i],scanClusterFeatureArray[i]);
 
+	return 0;
+}
+
+void VeloScan::ClassifiAllObject()
+{
+    int i,j;
+   int clustersize=scanClusterArray.size();                //总共有clustersize个集群
+
 	//Find moving Ojbects
 	for(i=0; i<clustersize; ++i)
 	{
@@ -834,17 +854,16 @@ int VeloScan::FindAndCalcScanClusterFeature()
 		}
 	
 	}
-
-	return 0;
 }
 
-void VeloScan::ExchangeNoObjectPointCloud()
+void VeloScan::ClassifibyTrackingAllObject(int currentNO ,int windowsize )
+{
+   trackMgr.ClassifiyTrackersObjects(Scan::allScans, currentNO, windowsize) ;
+}
+
+void VeloScan::MarkStaticorMovingPointCloud()
 {
 	int i,j,k;
-
-	// 存在跟踪的数组中
-	points_tracking= points;
-	points.clear();
 
 	//每个Cluster下面有几个Cell，每个Cell有很多点
 	int startofpoint  = 0;
@@ -857,15 +876,17 @@ void VeloScan::ExchangeNoObjectPointCloud()
 		{
 		   cellFeature &gcellFreature =  gFeatureCol[j];
 		   // 所有的Object全部参加运算
-		//   if( !(gcellFreature.cellType & CELL_TYPE_FOR_SLAM6D))
-		//	   continue;
-
 		   startofpoint += gcellFreature.pCell->size();
 		   cell &gCell =*( gcellFreature.pCell);
+
 		   for( k=0; k< gcellFreature.pCell->size();++k)
 		   {
-			Point p = *(gCell[k]);
-			points.push_back(p);
+			        // find Point in scan raw points by point_id;
+					Point p = *(gCell[k]);
+				   if( !(gcellFreature.cellType & CELL_TYPE_FOR_SLAM6D))
+					   points[ p.point_id].point_type =  POINT_TYPE_STATIC_OBJECT;
+				   else 
+					   points[ p.point_id].point_type =  POINT_TYPE_MOVING_OBJECT;
 		   }
 		
 		}
@@ -880,6 +901,96 @@ void VeloScan::FreeAllCellAndCluterMemory()
 
 	scanClusterArray.clear();;
 	scanClusterFeatureArray.clear();
+}
+
+void VeloScan::calcReducedPoints_byClassifi(double voxelSize, int nrpts, PointType pointtype)
+{
+  // no reduction needed
+  // copy vector of points to array of points to avoid
+  // further copying
+  int realCount =0;
+//  if (voxelSize <= 0.0) 
+  {
+    points_red = new double*[points.size()];
+
+    int end_loop = points_red_size = (int)points.size();
+	 int j=0;
+    for (int i = 0;  i < end_loop; i++) 
+	{
+		if(points[i].point_type &  POINT_TYPE_STATIC_OBJECT)
+		{
+			points_red[j] = new double[3];
+			points_red[j][0] = points[i].x;
+			points_red[j][1] = points[i].y;
+			points_red[j][2] = points[i].z;
+			j++;
+			realCount++;
+		}
+    }
+
+//    transform(transMatOrg, INVALID); //transform points to initial position
+    // update max num point in scan iff you have to do so
+	points_red_size = realCount;
+    if (points_red_size > (int)max_points_red_size) 
+		 
+		max_points_red_size = points_red_size;
+//       return;
+  }
+
+  // start reduction
+  
+  // build octree-tree from CurrentScan
+  double **ptsOct = 0;
+  ptsOct = new double*[realCount];
+
+  int num_pts = 0;
+  int end_loop = (int)realCount;
+  for (int i = 0; i < end_loop; i++) {
+    ptsOct[num_pts] = new double[3];
+    ptsOct[num_pts][0] =points_red[i][0] ;
+    ptsOct[num_pts][1] =points_red[i][1] ;
+    ptsOct[num_pts][2] = points_red[i][2];
+    num_pts++;
+  }
+  BOctTree<double> *oct = new BOctTree<double>(ptsOct, num_pts, voxelSize, pointtype);
+
+  vector<double*> center;
+  center.clear();
+
+  if (nrpts > 0) {
+    if (nrpts == 1) {
+      oct->GetOctTreeRandom(center);
+    }else {
+      oct->GetOctTreeRandom(center, nrpts);
+    }
+  } else {
+    oct->GetOctTreeCenter(center);
+  }
+
+  // storing it as reduced scan
+  points_red = new double*[center.size()];
+
+  end_loop = (int)center.size();
+  for (int i = 0; i < end_loop; i++) {
+    points_red[i] = new double[3];
+    points_red[i][0] = center[i][0];
+    points_red[i][1] = center[i][1];
+    points_red[i][2] = center[i][2];
+  }
+  points_red_size = center.size();
+
+  delete oct;
+  
+  end_loop = realCount;
+  for (int i = 0; i < end_loop; i++) {
+    delete [] ptsOct[i];
+  }
+  delete [] ptsOct;
+
+//  transform(transMatOrg, INVALID); //transform points to initial position
+
+  // update max num point in scan iff you have to do so
+  if (points_red_size > (int)max_points_red_size) max_points_red_size = points_red_size;
 }
 
 bool VeloScan::FilterNOMovingObjcets(clusterFeature &glu)
@@ -964,52 +1075,49 @@ bool VeloScan::FilterNOMovingObjcets(clusterFeature &glu)
 	//{
 	//	return false;
 	//}
-
+	 
 //	return true;
 }
-
-static int scancont =0;
-
-void VeloScan::GetAllofObject()
+  
+void VeloScan::FindingAllofObject()
 {
-	int i,j;
-	int size;
-
 	if(points.size() > 0)
 	{
-			//	noofframe +=1000;
-			//  保存整帧数据到PCD文件
-			//	SaveFrameInPCD();
-       
-			//  散列到饼型Cell中
-			TransferToCellArray();
-			//  计算相应的特征 并的到障碍物的Cell
-			CalcScanCellFeature();
-			//  聚类为Cluster对象
-			FindAndCalcScanClusterFeature();
-			//  开始跟踪，每帧进行一次
-			/////////////////////////////////////////////
-			trackMgr.HandleScan(*this);
+		//  散列到饼型Cell中
+		TransferToCellArray();
+		//  计算相应的特征 并的到障碍物的Cell
+		CalcScanCellFeature();
+		//  聚类为Cluster对象
+		FindAndCalcScanClusterFeature();
+	}
+    return;
+ }
 
-			//TRACE("DrawTrackers\n");
-	        
-//			if(scancont ==3)
-//    	     	Show(0);
 
-			scancont ++;
-			/////////////////////////////////////////////////
+void VeloScan::TrackingAllofObject()
+{
+	if(points.size() > 0)
+	{
+		 trackMgr.HandleScan(*this);
+	}
+    return;
+ }
 
-			//保存动态目标的对象到PCD文件
-			//	SaveAllofObject();
-			//	SaveNoObjectPointCloud();
-		//	ExchangeNoObjectPointCloud();
+void VeloScan::ClassifiAllofObject()
+{
+	if(points.size() > 0)
+	{
+		 ClassifiAllObject();
+	}
+    return;
+ }
 
-			// 显示处理的结果，用于调试。
-			//       Show(0);
-			//可以保存非运动目标的点到PCD文件中，看一下效果啊。
-
-			//需要清理所有的存储数据。
-		//   FreeAllCellAndCluterMemory();
+void VeloScan::ExchangePointCloud()
+{
+	if(points.size() > 0)
+	{
+         MarkStaticorMovingPointCloud();
+		//FreeAllCellAndCluterMemory();
 	}
     return;
  }

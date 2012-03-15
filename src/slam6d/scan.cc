@@ -4,15 +4,15 @@
  * @author Kai Lingemann. Institute of Computer Science, University of Osnabrueck, Germany.
  * @author Andreas Nuechter. Institute of Computer Science, University of Osnabrueck, Germany.
  */
-
+  
 #include "slam6d/scan.h"
 
 #ifdef _MSC_VER
 #if !defined _OPENMP && defined OPENMP 
 #define _OPENMP
 #endif
-#endif
-
+#endif 
+ 
 #ifdef _OPENMP
 #include <omp.h>
 #endif
@@ -449,6 +449,7 @@ Scan::Scan(const Scan& s)
   
   // TODO: make sure everything is copied
 }
+
 
 /**
  * Merges the scan's intrinsic coordinates with the robot position.

@@ -299,7 +299,7 @@ int main(int argc, char **argv)
   cout << "Export all 3D Points to file \"points.pts\"" << endl;
   ofstream redptsout("points.pts");
   for(unsigned int i = 0; i < Scan::allScans.size(); i++) {
-    const vector <Point> *points = Scan::allScans[i]->get_points();
+   const vector <Point> *points = Scan::allScans[i]->get_points();
     for(unsigned int j = 0; j < points->size(); j++) {
       redptsout << points->at(j) << endl;
     }
