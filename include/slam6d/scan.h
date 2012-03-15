@@ -4,7 +4,7 @@
  * @author Kai Lingemann. Institute of Computer Science, University of Osnabrueck, Germany.
  * @author Andreas Nuechter. Institute of Computer Science, University of Osnabrueck, Germany.
  */
-
+   
 #ifndef __SCAN_H__
 #define __SCAN_H__
 
@@ -162,6 +162,7 @@ public:
 #ifndef WITH_SCANSERVER
   inline const vector <Point>* get_points() const;
   inline double* const* get_points_red() const;
+  inline int get_points_red_size(void); 
   inline void setPoints(vector <Point> *_points);
   inline double* const* get_points_reduced() const;
   inline void setFileNr(int _fileNr);
@@ -184,7 +185,7 @@ public:
   inline double** get_org_points_red() const;
 #endif //WITH_SCANSERVER
 
-protected:
+public:
 
 #ifndef WITH_SCANSERVER
   class scanIOwrapper : public ScanIO {
@@ -207,6 +208,7 @@ protected:
   };
 #endif //WITH_SCANSERVER
   
+  protected:
   /**
    * The pose of the scan
    * Note: rPos/rPosTheta and transMat _should_

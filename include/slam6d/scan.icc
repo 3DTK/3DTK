@@ -4,7 +4,7 @@
  * @author Kai Lingemann. Institute of Computer Science, University of Osnabrueck, Germany.
  * @author Andreas Nuechter. Institute of Computer Science, University of Osnabrueck, Germany.
  */
-
+   
 /**
  * Overridden "<<" operator for sending a scan to a stream
  */
@@ -38,7 +38,7 @@ inline double** Scan::get_org_points_red() const
   return points_red_lum;
 }
 
-inline int Scan::get_points_red_size() const
+inline int Scan::get_points_red_size(void) const
 {
   return points_red_size;
 }
@@ -46,6 +46,11 @@ inline int Scan::get_points_red_size() const
 inline double* const* Scan::get_points_reduced() const
 {
   return (double* const*)points_red;
+}
+
+inline int Scan::get_points_red_size() 
+{
+  return   points_red_size;
 }
 
 inline const SearchTree* Scan::get_tree() const

@@ -10,7 +10,7 @@
 #define _OPENMP
 #endif
 #endif
-
+  
 #include <fstream>
 using std::ifstream;
 using std::ofstream;

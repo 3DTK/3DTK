@@ -129,7 +129,7 @@ const char * io_type_to_libname(IOType  type)
   case UOS_CAD:
     return "cad";
   case VELODYNE:
-    return "velodyne";
+    return "scan_io_velodyne";
   case VELODYNE_FRAMES:
     return "velodyne_frames";
   default:
