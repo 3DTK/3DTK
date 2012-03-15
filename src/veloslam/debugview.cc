@@ -3,7 +3,7 @@
 #define _OPENMP
 #endif
 #endif
-
+ 
 #include <fstream>
 using std::ifstream;
 using std::ofstream;
@@ -715,8 +715,8 @@ static void Draw(void)
 	glScalef(m_zoom, m_zoom, m_zoom);
 
 //    Draw_points_ZValue(Scan::allScans[0],  1,  0.8, 0.8, 0.8);
-    DrawAll_ScanPoints_Number(Scan::allScans,  1,  0.8, 0.8, 0.8, 100);
-	trackMgr.DrawTrackersMovtion_Long_Number_All(Scan::allScans, 100);
+    DrawAll_ScanPoints_Number(Scan::allScans,  1,  0.8, 0.8, 0.8, 6);
+	trackMgr.DrawTrackersMovtion_Long_Number_All(Scan::allScans, 6);
 
 
     glFlush();

@@ -1,7 +1,7 @@
 #ifndef _COLOR_UTIL
 #define _COLOR_UTIL
-
-#include "math_util.h"
+ 
+#include "veloslam/math_util.h"
 
 static int ColorTableShot[8][3]=
 {

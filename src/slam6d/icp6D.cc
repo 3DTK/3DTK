@@ -4,7 +4,7 @@
  * @author Kai Lingemann. Institute of Computer Science, University of Osnabrueck, Germany.
  * @author Andreas Nuechter. Institute of Computer Science, University of Osnabrueck, Germany.
  */
-
+ 
 #include "slam6d/icp6D.h"
 
 #ifdef _MSC_VER

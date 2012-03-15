@@ -4,7 +4,7 @@
 #include <vector>
 #include "slam6d/scan.h"
 #include "veloslam/tracker.h"
-
+ 
 using namespace std;
 
 struct ClusterStatus
@@ -24,7 +24,10 @@ public:
 	~TrackerManager(void);
 
 	/** @brief Initialize function */
-	int Init();
+	int Init(void);
+
+	/** @brief Initialize function */
+	int getNumberofTracker(void);
 
 	/** @brief 处理一帧数据，！！注意的是，这一帧必须已经被处理（投影和集群）过！！*/
 	int HandleScan(VeloScan& scanRef);
@@ -45,7 +48,10 @@ public:
 	int DrawTrackersMovtion_Long_Number(vector <Scan *> allScans, int n);
 
 	/** @brief 将所有的跟踪器运动情况画出来, what every size or lenght, 完整的连续轨迹*/
-	int TrackerManager::DrawTrackersMovtion_Long_Number_All(vector <Scan *> allScans, int n);
+	int DrawTrackersMovtion_Long_Number_All(vector <Scan *> allScans, int n);
+
+	/** @brief classification of tracking moving objects */
+	int ClassifiyTrackersObjects(vector <Scan *> allScans, int currentNO ,int windowsize);
 
 	/** @brief 跟踪过滤器，把一些不符合跟踪的cluster去掉*/
 	static bool TrackerFilter(clusterFeature &glu);

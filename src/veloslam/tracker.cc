@@ -8,8 +8,9 @@ Tracker::Tracker(void)
 	matchClusterID=-1;
 	colorIdx=-1;
 }
-
+ 
 Tracker::~Tracker(void)
 {
 
 }
+ 

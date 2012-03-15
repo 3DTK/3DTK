@@ -1,6 +1,6 @@
 #ifndef _MATHUTIL_H
 #define _MATHUTIL_H
-
+ 
 #include <math.h>
 #include <stdlib.h>
 #include <assert.h>
