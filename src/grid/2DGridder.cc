@@ -145,7 +145,7 @@ bool directoryExists(const string path )
 int parseArgs(int argc, char **argv,
 	      string &inputdir, string &outputdir,
 	      int& start, int& end, int& maxDist, int& minDist,
-	      bool &readInitial, IOType &type, bool& correctY,
+	      bool &readInitial, reader_type &type, bool& correctY,
 	      double &minHeight, double &maxHeight, long &resolution,
 	      bool &waypoints, bool &neighbours,
 	      int &parcelWidth, int &parcelHeight,
@@ -209,12 +209,8 @@ int parseArgs(int argc, char **argv,
           readInitial = true;
           break;
         case 'f':
-          try {
-            type = formatname_to_io_type(optarg);
-          } catch (...) { // runtime_error
-            cerr << "Format " << optarg << " unknown." << endl;
-            abort();
-          }
+          if (!Scan::toType(optarg, type))
+            abort ();
           break;
         case 'H':
           maxHeight = atoi(optarg);
@@ -329,7 +325,7 @@ int main(int argc, char **argv){
     int maxDistance = 2500;
     int minDistance = -1;
     bool readInitial = false;
-    IOType scantype  = UOS;
+    reader_type scantype  = UOS;
     bool correctY = false;
 
     double maxRelevantHeight = 50;

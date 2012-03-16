@@ -8,32 +8,25 @@ IF(WITH_SCAN_REDUCTION)
   IF (WIN32)
     target_link_libraries(scan_red scanlib ANN XGetopt)
   ENDIF(WIN32)
-
-  if(WITH_SCANSERVER)
-    target_link_libraries(scan_red scanclient)
-  endif(WITH_SCANSERVER)
   
 ENDIF(WITH_SCAN_REDUCTION)
 
-IF(WITH_SCAN_DIFF)
-  # scan_diff is not compatible with scanserver, see Scan::getNoPairsSimple/getPtPairsSimple
-  IF(NOT WITH_SCANSERVER)
-    add_executable(scan_diff scan_diff.cc)
-    add_executable(scan_diff2d scan_diff2d.cc ../show/colormanager.cc)
-    
-    IF(UNIX)
-      target_link_libraries(scan_diff scanlib dl ANN)
-      target_link_libraries(scan_diff2d scanlib dl ANN)
-    ENDIF(UNIX)
+IF(WITH_SCAN_DIFF) 
+  add_executable(scan_diff scan_diff.cc)
+  add_executable(scan_diff2d scan_diff2d.cc ../show/colormanager.cc)
+  
+  IF(UNIX)
+    target_link_libraries(scan_diff scanlib dl ANN)
+    target_link_libraries(scan_diff2d scanlib dl ANN)
+  ENDIF(UNIX)
 
-    IF (WIN32)
-      target_link_libraries(scan_diff scanlib ANN XGetopt)
-      target_link_libraries(scan_diff2d scanlib ANN XGetopt)
-    ENDIF(WIN32)
-  ENDIF(NOT WITH_SCANSERVER)
+  IF (WIN32)
+    target_link_libraries(scan_diff scanlib ANN XGetopt)
+    target_link_libraries(scan_diff2d scanlib ANN XGetopt)
+  ENDIF(WIN32)
 ENDIF(WITH_SCAN_DIFF)
 
-if(NOT WITH_SCANSERVER)
+
 add_library(scan_io_uos             SHARED scan_io_uos.cc            )
 add_library(scan_io_uos_map         SHARED scan_io_uos_map.cc        )
 add_library(scan_io_uos_frames      SHARED scan_io_uos_frames.cc     )
@@ -89,8 +82,7 @@ IF (WITH_RIVLIB)
     add_library(scan_io_riegl_project           SHARED scan_io_riegl_project.cc            )
     target_link_libraries(scan_io_riegl_project ${RIVLIB} scan_io_rxp ${LIBXML2_LIBRARIES})
   ENDIF(LIBXML2_FOUND)
-ENDIF(WITH_RIVLIB)
-endif(NOT WITH_SCANSERVER)
+ENDIF(WITH_RIVLIB) 
 
 IF(WITH_TOOLS)
   add_executable(frame_to_graph frame_to_graph.cc)
@@ -132,28 +124,23 @@ SET(SCANLIB_SRCS
   ghelix6DQ2.cc     gapx6D.cc         graphToro.cc      ann_kd.cc
   graphHOG-Man.cc   elch6D.cc         elch6Dquat.cc     elch6DunitQuat.cc 
   elch6Dslerp.cc    elch6Deuler.cc    loopToro.cc       loopHOG-Man.cc    
-  point_type.cc	    icp6Dquatscale.cc searchTree.cc     Boctree.cc
-  allocator.cc      ../scanserver/io_types.cc
+  point_type.cc	    icp6Dquatscale.cc searchTree.cc
   )
 
-if(WITH_METRICS)
-  set(SCANLIB_SRCS ${SCANLIB_SRCS} ../scanserver/metrics.cc)
-endif(WITH_METRICS)
-
-IF(WITH_SCANSERVER)
-  SET(SCANLIB_SRCS ${SCANLIB_SRCS} kdMeta.cc)
-ENDIF(WITH_SCANSERVER)
-
 add_library(scanlib STATIC ${SCANLIB_SRCS})
-
 IF(UNIX)
   target_link_libraries(scanlib dl)
 ENDIF(UNIX)
+
+IF(WIN32)
+  target_link_libraries(scanlib)
+ENDIF(WIN32)
 
 IF(EXPORT_SHARED_LIBS)
 add_library(scanlib_s SHARED ${SCANLIB_SRCS})
 #target_link_libraries(scanlib_s ${Boost_LIBRARIES} newmat)
 ENDIF(EXPORT_SHARED_LIBS)
+
 
 IF(WITH_CUDA)
   CUDA_COMPILE(CUDA_FILES cuda/CIcpGpuCuda.cu )
@@ -166,16 +153,13 @@ ELSE(WITH_CUDA)
 ENDIF(WITH_CUDA)
 
 IF(UNIX)
-  target_link_libraries(slam6D scanlib dl newmat sparse ANN)
+  target_link_libraries(slam6D dl scanlib newmat sparse ANN)
 ENDIF(UNIX)
 
 IF(WIN32)
   target_link_libraries(slam6D scanlib newmat sparse ANN XGetopt ${Boost_LIBRARIES})
 ENDIF(WIN32)
 
-if(WITH_SCANSERVER)
-  target_link_libraries(slam6D scanclient)
-endif(WITH_SCANSERVER)
 
 #IF(MSVC)
 #	INSTALL(TARGETS slam6D RUNTIME DESTINATION ${CMAKE_SOURCE_DIR}/windows)

@@ -68,13 +68,8 @@ double graphToro::doGraphSlam6D(Graph gr, vector <Scan *> allScans, int nrIt)
       memcpy(Pl0, allScans[last]->get_transMat(), 16 * sizeof(double));
       my_icp->match(start, end);
 
-#ifndef WITH_SCANSERVER
       delete start;
       delete end;
-#else //WITH_SCANSERVER
-      Scan::remove(start);
-      Scan::remove(end);
-#endif //WITH_SCANSERVER
     }
 
     M4inv(allScans[last]->get_transMat(), invers);

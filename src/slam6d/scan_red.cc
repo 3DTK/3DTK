@@ -11,7 +11,7 @@
  * @author Dorit Borrmann. Automation Group, Jacobs University Bremen gGmbH, Germany. 
  */
 #ifdef _MSC_VER
-#if !defined _OPENMP && defined OPENMP 
+#ifdef OPENMP
 #define _OPENMP
 #endif
 #endif
@@ -28,10 +28,8 @@ using std::ofstream;
 #include <errno.h>
 
 #include "slam6d/scan.h"
-#ifdef WITH_SCANSERVER
-#include "scanserver/clientInterface.h"
-#endif //WITH_SCANSERVER
 
+#include "slam6d/scan_io.h"
 #include "slam6d/globals.icc"
 
 #ifdef _OPENMP
@@ -120,7 +118,7 @@ void usage(char* prog)
  */
 int parseArgs(int argc, char **argv, string &dir, double &red, 
 		    int &start, int &end, int &maxDist, int &minDist, int &octree, 
-		    IOType &type)
+		    reader_type &type)
 {
   bool reduced = false;
   int  c;
@@ -159,13 +157,9 @@ int parseArgs(int argc, char **argv, string &dir, double &red,
 	   if (end < start) { cerr << "Error: <end> cannot be smaller than <start>.\n"; exit(1); }
 	   break;
 	 case 'f': 
-    try {
-      type = formatname_to_io_type(optarg);
-    } catch (...) { // runtime_error
-      cerr << "Format " << optarg << " unknown." << endl;
-      abort();
-    }
-    break;
+     if (!Scan::toType(optarg, type))
+       abort ();
+     break;
    case 'm':
 	   maxDist = atoi(optarg);
 	   break;
@@ -231,25 +225,15 @@ int main(int argc, char **argv)
   int    maxDist    = -1;
   int    minDist    = -1;
   int    octree     = 0;
-  IOType type    = RIEGL_TXT;
+  reader_type type    = RIEGL_TXT;
   
   parseArgs(argc, argv, dir, red, start, end, maxDist, minDist, octree, type);
 
-#ifdef WITH_SCANSERVER
-  try {
-    ClientInterface::create();
-  } catch(std::runtime_error& e) {
-    cerr << "ClientInterface could not be created: " << e.what() << endl;
-    cerr << "Start the scanserver first." << endl;
-    exit(-1);
-  }
-#endif //WITH_SCANSERVER
+  //@@@ to do :-)
 
   // Get Scans
-#ifndef WITH_SCANSERVER
   Scan::dir = dir;
   int fileNr = start;
-#endif //WITH_SCANSERVER
   string reddir = dir + "reduced"; 
  
 #ifdef _MSC_VER
@@ -266,7 +250,6 @@ int main(int argc, char **argv)
     exit(1);
   }
 
-#ifndef WITH_SCANSERVER
   while (fileNr <= end) {
     Scan::readScans(type, fileNr, fileNr, dir, maxDist, minDist, 0);
     const double* rPos = Scan::allScans[0]->get_rPos();
@@ -296,35 +279,8 @@ int main(int argc, char **argv)
 	  }
     redptsout.close();
     redptsout.clear();
-#else //WITH_SCANSERVER
-  Scan::readScans(type, start, end, dir, maxDist, minDist);
-  for(std::vector<Scan*>::iterator it = Scan::allScans.begin(); it != Scan::allScans.end(); ++it)
-  {
-    Scan* scan = *it;
-    const double* rPos = scan->get_rPos();
-    const double* rPosTheta = scan->get_rPosTheta();
+      
 
-    scan->calcReducedPoints(red, octree);
-
-    const char* id = scan->getIdentifier();
-    cout << "Writing Scan No. " << id;
-    cout << " with " << scan->getCountReduced() << " points" << endl; 
-    string scanFileName;
-    string poseFileName;
-
-    scanFileName = dir + "reduced/scan" + id + ".3d";
-    poseFileName = dir  + "reduced/scan" + id + ".pose";
-
-    ofstream redptsout(scanFileName.c_str());
-    DataXYZ xyz_r(scan->getXYZReduced());
-    for(unsigned int j = 0; j < xyz_r.size(); j++) {
-      //Points in global coordinate system
-      redptsout << xyz_r[j][0] << " " << xyz_r[j][1] << " " << xyz_r[j][2] << endl;
-    }
-    redptsout.close();
-    redptsout.clear();
-#endif //WITH_SCANSERVER
-    
     ofstream posout(poseFileName.c_str());
     
     posout << rPos[0] << " " 
@@ -337,19 +293,12 @@ int main(int argc, char **argv)
     posout.close();
     posout.clear();
 
-#ifndef WITH_SCANSERVER
     delete Scan::allScans[0];
     Scan::allScans.clear();
+    
     fileNr++;
-#endif //WITH_SCANSERVER
-  }
+  }   
 
   cout << endl << endl;
   cout << "Normal program end." << endl << endl;
-
-#ifdef WITH_SCANSERVER
-  Scan::clearScans();
-  ClientInterface::destroy();
-#endif //WITH_SCANSERVER
 }
-

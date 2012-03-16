@@ -7,7 +7,6 @@ using std::set;
 
 class colordisplay {
   public:
-  virtual ~colordisplay() {}
   inline void setColorManager(ColorManager *_cm) { cm = _cm; }
   
   void displayLOD(float lod) { 

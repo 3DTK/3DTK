@@ -94,7 +94,7 @@ void usage(char* prog) {
   */
 
 int parseArgs(int argc, char **argv, string &dir, double &red, int &start, int
-  &maxDist, int&minDist, int &octree, IOType &type, plane_alg &alg, bool
+  &maxDist, int&minDist, int &octree, reader_type &type, plane_alg &alg, bool
   &quiet) {
 
   bool reduced = false;
@@ -129,13 +129,9 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &start, int
 	   start = atoi(optarg);
 	   if (start < 0) { cerr << "Error: Cannot start at a negative scan number.\n"; exit(1); }
 	   break;
-	 case 'f':
-     try {
-       type = formatname_to_io_type(optarg);
-     } catch (...) { // runtime_error
-       cerr << "Format " << optarg << " unknown." << endl;
-       abort();
-     }
+	 case 'f': 
+     if (!Scan::toType(optarg, type))
+       abort ();
      break;
    case 'p': 
       if(strcasecmp(optarg, "rht") == 0) alg = RHT;
@@ -206,7 +202,7 @@ int main(int argc, char **argv)
   int    minDist    = -1;
   int    octree     = 0;
   bool   quiet = false;
-  IOType type    = UOS;
+  reader_type type    = UOS;
   plane_alg alg    = RHT;
   
   cout << "Parse args" << endl;

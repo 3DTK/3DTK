@@ -40,12 +40,6 @@ using std::endl;
 #include "slam6d/icp6Dsvd.h"
 #include "slam6d/icp6Dquat.h"
 
-#ifdef WITH_SCANSERVER
-#include "scanserver/clientInterface.h"
-#endif
-
-
-
 void usage(char* prog) {
 #ifndef _MSC_VER
   const string bold("\033[1m");
@@ -273,7 +267,7 @@ bool matchPlaneToBoard(vector<double *> &points, double *alignxf, int pattern, s
   return !(nr_matches < nr_points);
 }
 
-int parseArgs(int argc, char **argv, string &dir, double &red, int &start, int &end, int &pattern, int &maxDist, int &minDist, double &top, double &bottom, int &octree, IOType &type, bool
+int parseArgs(int argc, char **argv, string &dir, double &red, int &start, int &end, int &pattern, int &maxDist, int &minDist, double &top, double &bottom, int &octree, reader_type &type, bool
 &quiet) {
 
   bool reduced = false;
@@ -316,15 +310,11 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &start, int &
 	   if (end < 0) { cerr << "Error: Cannot end at a negative scan number.\n"; exit(1); }
 	   if (end < start) { cerr << "Error: <end> cannot be smaller than <start>.\n"; exit(1); }
 	   break;
-	 case 'f':
-     try {
-       type = formatname_to_io_type(optarg);
-     } catch (...) { // runtime_error
-       cerr << "Format " << optarg << " unknown." << endl;
-       abort();
-     }
+	 case 'f': 
+     if (!Scan::toType(optarg, type))
+       abort ();
      break;
-   case 'p':
+   case 'p': 
       pattern = atoi(optarg);
       if(pattern < 0 || pattern > 3) { cerr << "Error: choose pattern between 0 and 3!\n"; exit(1); }
       break;
@@ -399,35 +389,25 @@ int main(int argc, char **argv)
   int    pattern = 0;
   double bottom = -5;
   double top = 170;
-  IOType type    = UOS;
+  reader_type type    = UOS;
 
   cout << "Parse args" << endl;
   parseArgs(argc, argv, dir, red, start, end, pattern, maxDist, minDist, top, bottom, octree, type, quiet);
   Scan::dir = dir;
   int fileNr = start;
-  string calidir = dir + "/cali";
-  
-#ifdef WITH_SCANSERVER
-  try {
-    ClientInterface::create();
-  } catch(std::runtime_error& e) {
-    cerr << "ClientInterface could not be created: " << e.what() << endl;
-    cerr << "Start the scanserver first." << endl;
-    exit(-1);
-  }
-#endif //WITH_SCANSERVER
+  string calidir = dir + "/cali"; 
 
 #ifdef _MSC_VER
   int success = mkdir(calidir.c_str());
 #else
   int success = mkdir(calidir.c_str(), S_IRWXU|S_IRWXG|S_IRWXO);
 #endif
-  if(success == 0) {
+  if(success == 0) { 
     if(!quiet) {
       cout << "Writing calibration results to " << calidir << endl;
     }
   } else if(errno == EEXIST) {
-    cout << "Directory " << calidir << " exists already.  CONTINUE" << endl;
+    cout << "Directory " << calidir << " exists already.  CONTINUE" << endl; 
   } else {
     cerr << "Creating directory " << calidir << " failed" << endl;
     exit(1);
@@ -437,8 +417,7 @@ int main(int argc, char **argv)
   int successes = 0;
   int failures = 0;
   
-  long calitime = GetCurrentTimeInMilliSec();
-#ifndef WITH_SCANSERVER
+  long calitime = GetCurrentTimeInMilliSec(); 
   while (fileNr <= end) {
     Scan::readScans(type, fileNr, fileNr, dir, maxDist, minDist, 0);
 
@@ -452,32 +431,12 @@ int main(int argc, char **argv)
     for(int i = 0; i < 10; i++) {
       Scan::allScans[0]->transform(id, Scan::ICP, 0);  // write end pose
     }
-#else //WITH_SCANSERVER
-  Scan::readScansRedSearch(type, start, end, dir, filter, red, octree);
-  for(std::vector<Scan*>::iterator it = Scan::allScans.begin(); it != Scan::allScans.end(); ++it)
-  {
-    Scan* scan = *it;
-    string output = calidir + "/scan" + scan->getIdentifier() + ".3d";
-    cout << "Top: " << top << " Bottom: " << bottom << endl;
-    // set trimming, don't want to put it into readScansRedSearch too
-    scan->trim(top, bottom);
-
-    double id[16];
-    M4identity(id);
-    for(int i = 0; i < 10; i++) {
-      scan->transform(id, Scan::ICP, 0);  // write end pose
-    }
-#endif //WITH_SCANSERVER
     cout << "start plane detection" << endl;
-    long starttime = GetCurrentTimeInMilliSec();
+    long starttime = GetCurrentTimeInMilliSec(); 
     vector<double *> points;
     CollisionPlane<double> * plane;
     plane = new LightBulbPlane<double>(50,120);
-#ifndef WITH_SCANSERVER
     Ransac(*plane, Scan::allScans[0], &points);
-#else //WITH_SCANSERVER
-    Ransac(*plane, scan, &points);
-#endif //WITH_SCANSERVER
     starttime = (GetCurrentTimeInMilliSec() - starttime);
 
     cout << "nr points " << points.size() << endl;
@@ -506,21 +465,14 @@ int main(int argc, char **argv)
     delete plane;
 
     cout << "Time for Plane Detection " << starttime << endl;
-#ifndef WITH_SCANSERVER
     delete Scan::allScans[0];
     Scan::allScans.clear();
     fileNr++;
-#endif //WITH_SCANSERVER
   }
   calitime = (GetCurrentTimeInMilliSec() - calitime);
 
   cout << "Calibration done with " << successes << " successes and " << failures
   << " failures!" << endl;
   cout << "Time for Calibration " << calitime << endl;
-
-#ifdef WITH_SCANSERVER
-  Scan::clearScans();
-  ClientInterface::destroy();
-#endif //WITH_SCANSERVER
 }
 
