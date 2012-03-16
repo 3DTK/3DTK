@@ -11,7 +11,7 @@
  */
 
 #ifdef _MSC_VER
-#if !defined _OPENMP && defined OPENMP 
+#ifdef OPENMP
 #define _OPENMP
 #endif
 #endif
@@ -77,14 +77,6 @@ using std::ifstream;
 #include <strings.h>
 #endif
 
-#ifdef WITH_SCANSERVER
-#include "scanserver/clientInterface.h"
-#endif
-
-#ifdef WITH_METRICS
-#include "scanserver/metrics.h"
-#endif
-
 //  Handling Segmentation faults and CTRL-C
 void sigSEGVhandler (int v)
 {
@@ -95,11 +87,8 @@ void sigSEGVhandler (int v)
       << "# **************************** #" << endl
       << "  Segmentation fault or Crtl-C" << endl
       << "# **************************** #" << endl
-      << endl;
-#ifdef WITH_SCANSERVER
-      Scan::clearScans();
-#else //WITH_SCANSERVER
-    cout << "Saving registration information in .frames files" << endl;
+      << endl
+      << "Saving registration information in .frames files" << endl;
     vector <Scan*>::iterator Iter = Scan::allScans.begin();
     for( ; Iter != Scan::allScans.end(); ) {
       Iter = Scan::allScans.begin();
@@ -108,7 +97,6 @@ void sigSEGVhandler (int v)
       cout.flush(); 
     }
     cout << endl;
-#endif
   }
   exit(-1);
 }
@@ -141,7 +129,7 @@ void usage(char* prog)
     << "           6 = small angle approximation" << endl
     << "           7 = Lu & Milios style, i.e., uncertainty based, with Euler angles" << endl
     << "           8 = Lu & Milios style, i.e., uncertainty based, with Quaternion" << endl
-    << "           9 = unit quaternion with scale method by Horn" << endl
+		<< "           9 = unit quaternion with scale method by Horn" << endl
     << endl
     << bold << "  -A" << normal << " NR, " << bold << "--anim=" << normal << "NR   [default: first and last frame only]" << endl
     << "         if specified, use only every NR-th frame for animation" << endl
@@ -270,66 +258,6 @@ void usage(char* prog)
   exit(1);
 }
 
-/**
- * Make type, start and end a write once only class for parseFormatFile because
- * we know the directory only after the type, start and end parameters may have
- * been written already, so encapsulate this write once behaviour in this class.
- */
-template<typename T>
-class WriteOnce {
-public:
-  WriteOnce(T& value) : value(value), written(false) {}
-  WriteOnce& operator=(const T& other) { if(!written) { value = other; written = true; } return *this; }
-  operator T() const { return value; }
-private:
-  T& value;
-  bool written;
-};
-
-/**
- * Parsing of a formats file in the scan directory for default type and scan
- * index ranges without overwriting user set parameters. Does nothing if
- * file doesn't exist.
- * 
- * @param dir directory the scans and format file are contained in
- * @param type which ScanIO to use for the scans in that directory
- * @param start index for the first valid scan
- * @param end index for the last valid scan
- */
-void parseFormatFile(string& dir, WriteOnce<IOType>& type, WriteOnce<int>& start, WriteOnce<int>& end)
-{
-  ifstream file((dir+"format").c_str());
-  if(!file.good()) return;
-  
-  string line, key, value, format;
-  while(getline(file, line)) {
-    size_t pos = line.find('=');
-    key = trim(line.substr(0, pos - 0));
-    value = trim(line.substr(pos+1));
-    if(key == "format") {
-      try {
-        format = value;
-        type = formatname_to_io_type(format.c_str());
-      } catch (...) { // runtime_error
-        cerr << "Error while parsing format file: Format '" << format << "' unknown." << endl;
-        break;
-      }
-    } else if(key == "start") {
-      stringstream str(value.c_str());
-      int s;
-      str >> s;
-      start = s;
-    } else if(key == "end") {
-      stringstream str(value.c_str());
-      int e;
-      str >> e;
-      end = e;
-    } else {
-      cerr << "Error while parsing format file: Unknown key '" << key << "'" << endl;
-      break;
-    }
-  }
-}
 
 /** A function that parses the command-line arguments and sets the respective flags.
  * @param argc the number of arguments
@@ -366,15 +294,12 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &rand,
     bool &extrapolate_pose, bool &meta, int &algo, int &loopSlam6DAlgo, int &lum6DAlgo, int &anim,
     int &mni_lum, string &net, double &cldist, int &clpairs, int &loopsize,
     double &epsilonICP, double &epsilonSLAM,  int &nns_method, bool &exportPts, double &distLoop,
-    int &iterLoop, double &graphDist, int &octree, bool &cuda_enabled, IOType &type)
+    int &iterLoop, double &graphDist, int &octree, bool &cuda_enabled, reader_type &type)
 {
   int  c;
   // from unistd.h:
   extern char *optarg;
   extern int optind;
-  
-  WriteOnce<IOType> w_type(type);
-  WriteOnce<int> w_start(start), w_end(end);
 
   /* options descriptor */
   // 0: no arguments, 1: required argument, 2: optional argument
@@ -416,8 +341,9 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &rand,
   };
 
   cout << endl;
-  while ((c = getopt_long(argc, argv, "O:f:A:G:L:a:t:r:R:d:D:i:l:I:c:C:n:s:e:m:M:uqQp", longopts, NULL)) != -1) {
-    switch (c) {
+  while ((c = getopt_long(argc, argv, "O:f:A:G:L:a:t:r:R:d:D:i:l:I:c:C:n:s:e:m:M:uqQp", longopts, NULL)) != -1)
+    switch (c)
+    {
       case 'a':
         algo = atoi(optarg);
         if ((algo < 0) || (algo > 9)) {
@@ -425,12 +351,13 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &rand,
           exit(1);
         }	   
         break;
-      case 't':
+	 case 't':
         nns_method = atoi(optarg);
         if ((nns_method < 0) || (nns_method > 3)) {
           cerr << "Error: NNS Method not available." << endl;
           exit(1);
         }
+        	   
         break;  
       case 'L':
         loopSlam6DAlgo = atoi(optarg);
@@ -484,11 +411,11 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &rand,
         net = optarg;
         break;
       case 's':
-        w_start = atoi(optarg);
+        start = atoi(optarg);
         if (start < 0) { cerr << "Error: Cannot start at a negative scan number.\n"; exit(1); }
         break;
       case 'e':
-        w_end = atoi(optarg);
+        end = atoi(optarg);
         if (end < 0)     { cerr << "Error: Cannot end at a negative scan number.\n"; exit(1); }
         if (end < start) { cerr << "Error: <end> cannot be smaller than <start>.\n"; exit(1); }
         break;
@@ -534,13 +461,9 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &rand,
       case '3':  // = --graphDist
         graphDist = atof(optarg);
         break;
-      case 'f':
-        try {
-          w_type = formatname_to_io_type(optarg);
-        } catch (...) { // runtime_error
-          cerr << "Format " << optarg << " unknown." << endl;
-          abort();
-        }
+      case 'f': 
+        if (!Scan::toType(optarg, type))
+          abort ();
         break;
       case 'u':
         cuda_enabled = true;
@@ -551,7 +474,6 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &rand,
       default:
         abort ();
     }
-  }
 
   if (optind != argc-1) {
     cerr << "\n*** Directory missing ***" << endl;
@@ -564,8 +486,6 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &rand,
 #else
   if (dir[dir.length()-1] != '\\') dir = dir + "\\";
 #endif
-  
-  parseFormatFile(dir, w_type, w_start, w_end);
 
   return 0;
 }
@@ -592,7 +512,7 @@ void matchGraph6Dautomatic(double cldist, int loopsize, vector <Scan *> allScans
 					  bool meta_icp, int nns_method, bool cuda_enabled,
 					  loopSlam6D *my_loopSlam6D, graphSlam6D *my_graphSlam6D, int nrIt,
 					  double epsilonSLAM, double mdml, double mdmll, double graphDist,
-					  bool &eP, IOType type)
+					  bool &eP, reader_type type)
 {
   double cldist2 = sqr(cldist);
 
@@ -633,11 +553,7 @@ void matchGraph6Dautomatic(double cldist, int loopsize, vector <Scan *> allScans
         metas.push_back(allScans[i - 1]);
         Scan *meta_scan = new Scan(metas, nns_method, cuda_enabled);
         my_icp6D->match(meta_scan, allScans[i]);
-#ifndef WITH_SCANSERVER
         delete meta_scan;
-#else //WITH_SCANSERVER
-        Scan::remove(meta_scan);
-#endif //WITH_SCANSERVER
       } else {
         switch(type) {
           case UOS_MAP:
@@ -789,7 +705,7 @@ int main(int argc, char **argv)
   double graphDist  = cldist;
   int octree       = 0;  // employ randomized octree reduction?
   bool cuda_enabled    = false;
-  IOType type    = UOS;
+  reader_type type    = UOS;
 
   parseArgs(argc, argv, dir, red, rand, mdm, mdml, mdmll, mni, start, end,
       maxDist, minDist, quiet, veryQuiet, eP, meta, algo, loopSlam6DAlgo, lum6DAlgo, anim,
@@ -798,33 +714,10 @@ int main(int argc, char **argv)
 
   cout << "slam6D will proceed with the following parameters:" << endl;
   //@@@ to do :-)
-  // TODO: writer a proper TODO ^
-  
-#ifdef WITH_SCANSERVER
-  try {
-    ClientInterface::create();
-  } catch(std::runtime_error& e) {
-    cerr << "ClientInterface could not be created: " << e.what() << endl;
-    cerr << "Start the scanserver first." << endl;
-    exit(-1);
-  }
-#endif //WITH_SCANSERVER
-  
+
   // Get Scans
   Scan::readScansRedSearch(type, start, end, dir,
-    maxDist, minDist, red, octree, nns_method, cuda_enabled, true);
-  // check if we can actually work on scans
-  if(Scan::allScans.size() == 0) {
-    cerr << "No scans found. Did you use the correct format?" << endl;
-    exit(-1);
-  }
-  
-#ifdef WITH_SCANSERVER
-  // remove old frames before adding new ones
-  for(std::vector<Scan*>::iterator it = Scan::allScans.begin(); it != Scan::allScans.end(); ++it) {
-    (*it)->clearFrames();
-  }
-#endif //WITH_SCANSERVER
+					  maxDist, minDist, red, octree, nns_method, cuda_enabled, true);
   
   icp6Dminimizer *my_icp6Dminimizer = 0;
   switch (algo) {
@@ -853,17 +746,12 @@ int main(int argc, char **argv)
       my_icp6Dminimizer = new icp6D_LUMQUAT(quiet);
       break;
     case 9 :
-      my_icp6Dminimizer = new icp6D_QUAT_SCALE(quiet);
-      break;
+			my_icp6Dminimizer = new icp6D_QUAT_SCALE(quiet);
+			break;
   }
 
   // match the scans and print the time used
   long starttime = GetCurrentTimeInMilliSec();
-  
-#ifdef WITH_METRICS
-  Timer t = ClientMetric::matching_time.start();
-#endif //WITH_METRICS
-  
   if (mni_lum == -1 && loopSlam6DAlgo == 0) {
     icp6D *my_icp = 0;
     if (cuda_enabled) {
@@ -1013,10 +901,6 @@ int main(int argc, char **argv)
       }
     }
   }
-  
-#ifdef WITH_METRICS
-  ClientMetric::matching_time.end(t);
-#endif //WITH_METRICS
 
   long endtime = GetCurrentTimeInMilliSec() - starttime;
   cout << "Matching done in " << endtime << " milliseconds!!!" << endl;
@@ -1025,26 +909,16 @@ int main(int argc, char **argv)
     cout << "Export all 3D Points to file \"points.pts\"" << endl;
     ofstream redptsout("points.pts");
     for(unsigned int i = 0; i < Scan::allScans.size(); i++) {
-#ifndef WITH_SCANSERVER
       for (int j = 0; j < Scan::allScans[i]->get_points_red_size(); j++) {
         redptsout << Scan::allScans[i]->get_points_red()[j][0] << " "
           << Scan::allScans[i]->get_points_red()[j][1] << " "
           << Scan::allScans[i]->get_points_red()[j][2] << endl;
       }
-#else //WITH_SCANSERVER
-      DataXYZ xyz_r(Scan::allScans[i]->getXYZReduced());
-      for(unsigned int i = 0; i < xyz_r.size(); ++i) {
-        redptsout << xyz_r[i][0] << ' ' << xyz_r[i][1] << ' ' << xyz_r[i][2] << '\n';
-      }
-      redptsout << std::flush;
-#endif //WITH_SCANSERVER
-
     }
     redptsout.close();
     redptsout.clear();
   }
 
-#ifndef WITH_SCANSERVER
   cout << "Saving registration information in .frames files" << endl;
   vector <Scan*>::iterator Iter = Scan::allScans.begin();
   for( ; Iter != Scan::allScans.end(); ) {
@@ -1055,14 +929,6 @@ int main(int argc, char **argv)
   }
 
   Scan::allScans.clear();
-#else //WITH_SCANSERVER
-  // save frames permanently into files and delete scans
-  for(std::vector<Scan*>::iterator it = Scan::allScans.begin(); it != Scan::allScans.end(); ++it) {
-    (*it)->saveFrames();
-  }
-  // clean up scans
-  Scan::clearScans();
-#endif //WITH_SCANSERVER
 
   delete my_icp6Dminimizer;
 
@@ -1071,16 +937,4 @@ int main(int argc, char **argv)
     << (red < 0 && rand < 0 ? "(-> HINT: For a significant speedup, please use the '-r' or '-R' parameter <-)\n"
         : "")
     << endl;
-  
-  // print metric information
-#ifdef WITH_METRICS
-  ClientMetric::print();
-#ifdef WITH_SCANSERVER
-  ClientInterface::getInstance()->printMetrics();
-#endif //WITH_SCANSERVER
-#endif //WITH_METRICS
-  
-#ifdef WITH_SCANSERVER
-  ClientInterface::destroy();
-#endif //WITH_SCANSERVER
 }

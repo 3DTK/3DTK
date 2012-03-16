@@ -174,7 +174,6 @@ public:
   compactTree(vector<P *> &pts, double voxelSize, PointType _pointtype = PointType());
   
   compactTree(std::string filename, ScanColorManager *scm = 0) {
-    alloc = new PackedChunkAllocator;
     deserialize(filename); 
     if (scm) {
       scm->registerTree(this);
@@ -207,7 +206,7 @@ public:
   void serialize(std::string filename);
 protected:
   
-  Allocator* alloc;
+  PackedAllocator alloc;
   
   void AllPoints( cbitoct &node, vector<double*> &vp, double center[3], double size);
 
@@ -304,8 +303,6 @@ inline unsigned char childIndex(const double *center, const P *point);
   
 template <class P>
   compactTree::compactTree(vector<P *> &pts, double voxelSize, PointType _pointtype) {
-    alloc = new PackedChunkAllocator;
-    
     this->voxelSize = voxelSize;
 
     this->POINTDIM = pointtype.getPointDim();
@@ -339,7 +336,7 @@ template <class P>
       childcenter(center, newcenter[i], size, i);
     }
     // set up values
-    root = alloc->allocate<cbitoct>();    
+    root = alloc.allocate<cbitoct>();    
 
     countPointsAndQueue(pts, newcenter, sizeNew, *root, center);
     maxtargetpoints =  maxTargetPoints(*root);
@@ -408,7 +405,7 @@ template <class P>
       }
     }
     // create children
-    cbitunion<tshort> *children = alloc->allocate<cbitunion<tshort> >(n_children);    
+    cbitunion<tshort> *children = alloc.allocate<cbitunion<tshort> >(n_children);    
     cbitoct::link(parent, children);
 
     int count = 0;
@@ -441,7 +438,7 @@ template <class P>
     }
 
     // create children
-    cbitunion<tshort> *children = alloc->allocate<cbitunion<tshort> >(n_children);    
+    cbitunion<tshort> *children = alloc.allocate<cbitunion<tshort> >(n_children);    
     cbitoct::link(parent, children);
     int count = 0;
     for (int j = 0; j < 8; j++) {
@@ -462,7 +459,6 @@ template <class P>
   }
 template <class P>
     compactTree::compactTree(P * const* pts, int n, double voxelSize, PointType _pointtype , ScanColorManager *scm ) : pointtype(_pointtype) {
-    alloc = new PackedChunkAllocator;
     
     cm = 0;
     if (scm) {
@@ -518,7 +514,7 @@ template <class P>
       childcenter(center, newcenter[i], size, i);
     }
     // set up values
-    root = alloc->allocate<cbitoct>();    
+    root = alloc.allocate<cbitoct>();    
 
     countPointsAndQueue(pts, n, newcenter, sizeNew, *root, center);
     maxtargetpoints =  maxTargetPoints(*root);

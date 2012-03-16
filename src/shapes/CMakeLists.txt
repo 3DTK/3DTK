@@ -33,7 +33,7 @@ IF (WITH_SHAPE_DETECTION)
   ENDIF(UNIX)
 
   IF (WIN32)
-	  target_link_libraries(planes scanlib newmat XGetopt shapelib ANN)
+    target_link_libraries(planes scanlib newmat XGetopt)
 #    target_link_libraries(image scanlib newmat sparse ANN XGetopt)
   ENDIF(WIN32)
 

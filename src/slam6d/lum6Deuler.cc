@@ -17,7 +17,7 @@
  */
 
 #ifdef _MSC_VER
-#if !defined _OPENMP && defined OPENMP 
+#ifdef OPENMP
 #define _OPENMP
 #endif
 #endif

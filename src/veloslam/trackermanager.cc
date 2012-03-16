@@ -13,7 +13,7 @@
 #include <GL/glut.h>
 #else
 #include <GL/freeglut.h>
-#endif 
+#endif
 
 TrackerManager::TrackerManager(void)
 {
@@ -28,12 +28,6 @@ TrackerManager::~TrackerManager(void)
 int TrackerManager::Init(void)
 {
 	return 0;
-}
-
-	/** @brief Initialize function */
-int TrackerManager::getNumberofTracker(void)
-{
-	return  tracks.size();
 }
 
 /** 处理一帧数据，！！注意的是，这一帧必须已经被处理（投影和集群）过！！*/
@@ -703,95 +697,6 @@ int TrackerManager::DrawTrackersMovtion_Long_Number_All(vector <Scan *> allScans
 			//找到一个cluster后，遍历cell显示其所有的点
 		   }
 	}
-
-	return 0;
-}
-
-
-int TrackerManager::ClassifiyTrackersObjects(vector <Scan *> allScans, int currentNO ,int windowsize)
-{
-	 int i,j,k,colorIdx;
-
-	list<Tracker>::iterator it;
-
- //    int clustersize=scanClusterArray.size();                //总共有clustersize个集群
-	//	//Find moving Ojbects
-	//for(i=0; i<clustersize; ++i)
-	//{
- //    	clusterFeature &glu = scanClusterFeatureArray[i];
-	//	glu.clusterType != CLUSTER_TYPE_OBJECT;
-	//    if( FilterNOMovingObjcets(glu))
-	//	{
-	//			clusterFeature &gclu = 	scanClusterFeatureArray[i];
-	//			gclu.clusterType  |=CLUSTER_TYPE_MOVING_OBJECT;
-	//	}
-	//}
-
-	////Mark No Moving Ojbects CELLS
-	//int k;
-	//for(i=0; i<clustersize; ++i)
-	//{
- //    	clusterFeature &glu = scanClusterFeatureArray[i];
-	//	if( !(glu.clusterType & CLUSTER_TYPE_MOVING_OBJECT))
-	//	{
-	//			cluster  &gclu = 	scanClusterArray[i];
-	//			for(j =0; j< gclu.size() ; ++j)
-	//			{
-	//				cellFeature &gcF = *(gclu[j]);
-	//				gcF.cellType |= CELL_TYPE_FOR_SLAM6D;
-	//			}
-	//	}
-	//
-	//}
-
-//	for(it=tracks.begin();  it!=tracks.end();  it++)
-//	{
-//		Tracker &tracker=*it;
-//	//	if(tracker.missMatch == true)
-//	//		   continue;
-//	//	if(tracker.statusList.size() < n) 
-//	//		   continue;
-//	//	if(tracker.dataList.size()  < n) 
-//	//		   continue;
-//
-//		//	cerr << " object number  " << tracker.statusList.size() <<endl;
-//			for(int i =0;   i <tracker.statusList.size();  i++ )
-//			{  
-//				
-//			    Scan *firstScan = allScans[0];
-//                Scan *CurrentScan = allScans[i];
-//				double  deltaMat[16];
-//
-//				GetCurrecntdelteMat(*CurrentScan , *firstScan,  deltaMat);
-//				clusterFeature &glu1=tracker.statusList[i];
-//				cluster &gluData1=tracker.dataList[i];
-//
-//				colorIdx=tracker.colorIdx%8;
-//		//		DrawObjectPoint(gluData1, 1,  0.3, 0.3, 0.3,deltaMat);
-//				DrawObjectPoint(gluData1, 1,
-//					ColorTableShot[colorIdx][0],
-//					ColorTableShot[colorIdx][1], 
-//					ColorTableShot[colorIdx][2] ,
-//					deltaMat);
-//
-//				if (glu1.size < 8) continue;
-//				Point p1(glu1.avg_x, glu1.avg_y, glu1.avg_z);
-//				p1.transform(deltaMat);
-//				DrawPoint(p1,8,1,0,0);
-//
-//		    //cluster &gluData=scanRef.scanClusterArray[tracker.matchClusterID];
-//			//////////////////////
-////		    glLineWidth(3);
-////			glBegin(GL_LINES);
-//	//		if (glu2.size < 8) continue;
-////			Point p2(glu2.avg_x, glu2.avg_y,glu2.avg_z);
-//	
-////			DrawPoint(p2,8,1,1,0);
-//			//找到一个cluster后，遍历cell显示其所有的点
-//		   }
-//
-//
-//	}
 
 	return 0;
 }
