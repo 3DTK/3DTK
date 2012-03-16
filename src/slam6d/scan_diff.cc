@@ -14,7 +14,7 @@
  * @author Dorit Borrmann. Automation Group, Jacobs University Bremen gGmbH, Germany. 
  */
 #ifdef _MSC_VER
-#if !defined _OPENMP && defined OPENMP 
+#ifdef OPENMP
 #define _OPENMP
 #endif
 #endif
@@ -32,10 +32,8 @@ using std::ifstream;
 #include <errno.h>
 
 #include "slam6d/scan.h"
-#ifdef WITH_SCANSERVER
-#include "scanserver/clientInterface.h"
-#endif //WITH_SCANSERVER
 
+#include "slam6d/scan_io.h"
 #include "slam6d/globals.icc"
 
 #ifdef _OPENMP
@@ -122,7 +120,7 @@ void usage(char* prog)
  */
 int parseArgs(int argc, char **argv, string &dir, 
 		    int &start, int &end, int &maxDist, int &minDist, double &dist, 
-		    IOType &type, bool &desc)
+		    reader_type &type, bool &desc)
 {
   int  c;
   // from unistd.h:
@@ -157,13 +155,9 @@ int parseArgs(int argc, char **argv, string &dir,
 	   if (end < 0)     { cerr << "Error: Cannot end at a negative scan number.\n"; exit(1); }
 	   break;
 	 case 'f': 
-    try {
-      type = formatname_to_io_type(optarg);
-    } catch (...) { // runtime_error
-      cerr << "Format " << optarg << " unknown." << endl;
-      abort();
-    }
-    break;
+     if (!Scan::toType(optarg, type))
+       abort ();
+     break;
 	 case 'm':
 	   maxDist = atoi(optarg);
 	   break;
@@ -228,25 +222,13 @@ int main(int argc, char **argv)
   int    start = -1,   end = -1;
   int    maxDist    = -1;
   int    minDist    = -1;
-  IOType type    = RIEGL_TXT;
+  reader_type type    = RIEGL_TXT;
   bool desc = false;  
 
   parseArgs(argc, argv, dir, start, end, maxDist, minDist, dist, type, desc);
 
-#ifdef WITH_SCANSERVER
-  try {
-    ClientInterface::create();
-  } catch(std::runtime_error& e) {
-    cerr << "ClientInterface could not be created: " << e.what() << endl;
-    cerr << "Start the scanserver first." << endl;
-    exit(-1);
-  }
-#endif //WITH_SCANSERVER
-
   // Get Scans (all scans between start and end)
-#ifndef WITH_SCANSERVER
   Scan::dir = dir;
-#endif //WITH_SCANSERVER
   string diffdir = dir + "diff"; 
  
 #ifdef _MSC_VER
@@ -296,21 +278,21 @@ int main(int argc, char **argv)
   }
   while(frames_in.good()) {
     for (unsigned int i = 0; i < 17; frames_in >> inMatrix1[i++]);
-  }
+  } 
   frames_in.close();
   frames_in.clear();
   for(int i = 0; i < 16; i++) {
     cout << inMatrix1[i] << " ";
   }
-  cout << endl;
+  cout << endl; 
   
   Scan::readScans(type, start, end, dir, maxDist, minDist, 0);
   int endIndex = Scan::allScans.size() - 1;
 
   Scan::allScans[0]->calcReducedPoints(-1, 0);
-  Scan::allScans[0]->transform(inMatrix0, Scan::INVALID);
+  Scan::allScans[0]->transform(inMatrix0, Scan::INVALID);   
   Scan::allScans[endIndex]->calcReducedPoints(-1, 0);
-  Scan::allScans[endIndex]->transform(inMatrix1, Scan::INVALID);
+  Scan::allScans[endIndex]->transform(inMatrix1, Scan::INVALID);   
  
   cout  << Scan::allScans[0]->get_points_red_size() 
         << " " << Scan::allScans[endIndex]->get_points_red_size() << endl;

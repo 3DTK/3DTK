@@ -27,7 +27,7 @@ class importer;
  * The compiled class is available as shared object file
  */
 class ScanIO_rxp : public ScanIO {
-  std::tr1::shared_ptr<basic_rconnection> rc;
+  shared_ptr<basic_rconnection> rc;
   decoder_rxpmarker *dec;
   importer *imp;
 public:

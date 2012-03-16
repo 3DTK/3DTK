@@ -95,13 +95,8 @@ void loopToro::close_loop(const vector <Scan *> &allScans, int first, int last, 
 
   my_icp6D->match(start, end);
 
-#ifndef WITH_SCANSERVER
   delete start;
   delete end;
-#else //WITH_SCANSERVER
-  Scan::remove(start);
-  Scan::remove(end);
-#endif //WITH_SCANSERVER
 
   M4inv(allScans[last]->get_transMat(), invers);
   MMult(invers, allScans[first]->get_transMat(), rela);

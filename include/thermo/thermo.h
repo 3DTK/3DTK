@@ -18,7 +18,7 @@ void CalibFunc(int board_w, int board_h, int start, int end, bool optical, bool 
 void writeCalibParam(int images, int corner_exp, int board_w, CvMat* image_points, CvSize size, string dir);
 
 void ProjectAndMap(int start, int end, bool optical, bool quiet, string dir,
-IOType type, int scale, double rot_angle, double minDist, double maxDist,
+reader_type type, int scale, double rot_angle, double minDist, double maxDist,
 bool correction, int neighborhood, int method=0);
 
 bool readPoints(string filename, CvPoint3D32f *corners, int size) ;

@@ -224,7 +224,7 @@ void usage(char* prog)
  */
 int parseArgs(int argc, char **argv, string &dir, 
 		    int &start, int &end, int &maxDist, int &minDist, double &dist, 
-		    IOType &type, bool &desc, double &res, double &shift, int &mode)
+		    reader_type &type, bool &desc, double &res, double &shift, int &mode)
 {
   int  c;
   // from unistd.h:
@@ -270,14 +270,10 @@ int parseArgs(int argc, char **argv, string &dir,
 	   end = atoi(optarg);
 	   if (end < 0)     { cerr << "Error: Cannot end at a negative scan number.\n"; exit(1); }
 	   break;
-	 case 'f':
-    try {
-      type = formatname_to_io_type(optarg);
-    } catch (...) { // runtime_error
-      cerr << "Format " << optarg << " unknown." << endl;
-      abort();
-    }
-    break;
+	 case 'f': 
+     if (!Scan::toType(optarg, type))
+       abort ();
+     break;
 	 case 'm':
 	   maxDist = atoi(optarg);
 	   break;
@@ -342,7 +338,7 @@ int main(int argc, char **argv)
   int    start = -1,   end = -1;
   int    maxDist    = -1;
   int    minDist    = -1;
-  IOType type    = RIEGL_TXT;
+  reader_type type    = RIEGL_TXT;
   bool desc = false; 
   double resolution = 0.25;
   double shift = 0.5;

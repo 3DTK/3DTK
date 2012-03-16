@@ -5,7 +5,7 @@
  * @author Li Wei, Wuhan University, China
  * @author Li Ming, Wuhan University, China
  */
- 
+
 #ifndef __VELOSCAN_H__
 #define __VELOSCAN_H__
 
@@ -31,14 +31,13 @@ public:
   VeloScan(const double _rPos[3], const double _rPosTheta[3], vector<double *> &pts);
   VeloScan(const vector < VeloScan* >& MetaScan, int nns_method, bool cuda_enabled);
   VeloScan(const VeloScan& s);
-  void setPoints(vector <Point>* _points) ;
 
   ~VeloScan();
 
-  static void readScans(IOType type,
+  static void readScans(reader_type type,
 				    int start, int end, string &dir, int maxDist, int minDist,
 				    bool openFileForWriting = false);  
-  static void readScansRedSearch(IOType type,
+  static void readScansRedSearch(reader_type type,
 						   int start, int end, string &dir, int maxDist, int minDist,
 						   double voxelSize, int nrpts, // reduction parameters
 						   int nns_method, bool cuda_enabled, 
@@ -52,20 +51,13 @@ public:
   vector <VeloScan *> meta_parts;
   
   // FIXME
-  void FindingAllofObject();
-  void TrackingAllofObject();
-  void ExchangePointCloud();
-  void ClassifiAllofObject();
-
+  void GetAllofObject();
   int  CalcRadAndTheta();
 
   int TransferToCellArray();
   bool FilterNOMovingObjcets(clusterFeature &glu);
-  void MarkStaticorMovingPointCloud();
+  void ExchangeNoObjectPointCloud();
   void FreeAllCellAndCluterMemory();
-  void ClassifiAllObject();
-  void ClassifibyTrackingAllObject(int currentNO ,int windowsize);
-  void calcReducedPoints_byClassifi(double voxelSize, int nrpts, PointType pointtype);
   
   int CalcScanCellFeature();
   int CalcCellFeature(cell& cellobj,cellFeature& f);
@@ -85,7 +77,7 @@ public:
   	/**
 	* Vector for the scan data tracking object 
 	*/
-//	vector <Point> points_tracking;
+	vector <Point> points_tracking;
   	/**
 	* for tracking  
 	*/

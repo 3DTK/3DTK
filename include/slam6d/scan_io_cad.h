@@ -33,20 +33,20 @@ class ScanIO_CAD : public ScanIO {
 
   // default values for parameters / flags / etc
   // sampling parameters
-  static constexpr bool STD_STORE_CAD = false;    // don't save sampling
-  static constexpr float STD_SAMPLE_DIST = 0.5f;  // point distance of 0.5 (cm)
-  static constexpr bool STD_RND_SAMP = true;      // use random sampling
+  static const bool STD_STORE_CAD = false;    // don't save sampling
+  static const float STD_SAMPLE_DIST = 0.5f;  // point distance of 0.5 (cm)
+  static const bool STD_RND_SAMP = true;      // use random sampling
   // coordinate order
-  static constexpr unsigned int STD_X_INDEX = 0;  // cad x coord = uos x coord
-  static constexpr unsigned int STD_Y_INDEX = 2;  // cad y coord = uos z coord
-  static constexpr unsigned int STD_Z_INDEX = 1;  // cad z coord = uos y coord
+  static const unsigned int STD_X_INDEX = 0;  // cad x coord = uos x coord
+  static const unsigned int STD_Y_INDEX = 2;  // cad y coord = uos z coord
+  static const unsigned int STD_Z_INDEX = 1;  // cad z coord = uos y coord
   // scale factors
-  static constexpr float STD_SCALE_FACTOR = 0.1f; // general scale factor
-  static constexpr float STD_X_SCALE = 0.1f;      // scale for x axis
-  static constexpr float STD_Y_SCALE = 0.1f;      // scale for y axis
-  static constexpr float STD_Z_SCALE = 0.1f;      // scale for z axis
-  static constexpr bool STD_COMBINE_SCALES = false; // combine scale factors?
-  static constexpr bool STD_INVERT_AXIS = false;  // default inversion for axes
+  static const float STD_SCALE_FACTOR = 0.1f; // general scale factor
+  static const float STD_X_SCALE = 0.1f;      // scale for x axis
+  static const float STD_Y_SCALE = 0.1f;      // scale for y axis
+  static const float STD_Z_SCALE = 0.1f;      // scale for z axis
+  static const bool STD_COMBINE_SCALES = false; // combine scale factors?
+  static const bool STD_INVERT_AXIS = false;  // default inversion for axes
 
 
 public:

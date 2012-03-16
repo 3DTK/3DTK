@@ -9,10 +9,6 @@ ENDIF(WIN32)
 IF (UNIX)
   SET(SHOW_LIBS newmat dl ${GLUT_LIBRARIES} ${SHOW_LIBS}) 
 ENDIF(UNIX)
-
-IF(WITH_SCANSERVER)
-  SET(SHOW_LIBS ${SHOW_LIBS} scanclient)
-ENDIF(WITH_SCANSERVER)
   
 IF(WITH_GLEE)
   SET(SHOW_LIBS ${SHOW_LIBS} glee)
@@ -21,7 +17,7 @@ ENDIF(WITH_GLEE)
 SET(SHOW_SRCS NurbsPath.cc  PathGraph.cc vertexarray.cc  viewcull.cc colormanager.cc compacttree.cc scancolormanager.cc display.cc)
 
 IF (WITH_SHOW)
-  add_executable(show show.cc ${SHOW_SRCS})
+  add_executable(show show.cc ${SHOW_SRCS}) 
   target_link_libraries(show ${SHOW_LIBS})
 ENDIF(WITH_SHOW)
 
@@ -34,4 +30,4 @@ IF(WITH_VELOSLAM)
   add_executable(veloshow ../veloslam/veloshow.cc ../veloslam/veloscan.cc ../veloslam/debugview.cc ../veloslam/pcddump.cc ../veloslam/tracker.cc ../veloslam/trackermanager.cc ${SHOW_SRCS})
   target_link_libraries(veloshow ${SHOW_LIBS})
 ENDIF(WITH_VELOSLAM)  
-
+  

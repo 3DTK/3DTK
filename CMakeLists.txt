@@ -9,7 +9,7 @@ IF(WIN32)
 ELSE(WIN32)
   set(Boost_USE_STATIC_LIBS FALSE)
 ENDIF(WIN32)
-SET(Boost_ADDITIONAL_VERSIONS "1.42" "1.42.0" "1.44" "1.44.0" "1.45.0" "1.45" "1.46" "1.46.1" "1.47.0" "1.47")
+SET(Boost_ADDITIONAL_VERSIONS "1.42" "1.42.0" "1.44" "1.44.0" "1.45.0" "1.45" "1.47.0" "1.47")
 IF(WIN32)
   # for some unknown reason no one variant works on all windows platforms
   #  find_package( Boost REQUIRED)
@@ -145,7 +145,7 @@ ELSE(WITH_DAVID_3D_SCANNER)
   MESSAGE(STATUS "Without David scanner")
 ENDIF(WITH_DAVID_3D_SCANNER)
 
-## 
+## Tools 
 OPTION(WITH_TOOLS "Whether to build additional tools like convergence frame_to_graph etc. ON/OFF" ON)
 
 IF(WITH_TOOLS)
@@ -318,24 +318,6 @@ ELSE(EXPORT_SHARED_LIBS)
   MESSAGE(STATUS "not exporting libraries")
 ENDIF(EXPORT_SHARED_LIBS)
 
-OPTION(WITH_SCANSERVER "Whether to build the new scanserver and integrate its functionality where it is already implemented in. ON/OFF" OFF)
-
-OPTION(WITH_METRICS "Whether to use metrics in the scanserver. ON/OFF" OFF)
-
-IF(WITH_SCANSERVER)
-  MESSAGE(STATUS "With scanserver.")
-  SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DWITH_SCANSERVER")
-ELSE(WITH_SCANSERVER)
-  MESSAGE(STATUS "Without scanserver.")
-ENDIF(WITH_SCANSERVER)
-
-IF(WITH_METRICS)
-  MESSAGE(STATUS "With metrics in the scanserver.")
-  SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DWITH_METRICS")
-ELSE(WITH_METRICS)
-  MESSAGE(STATUS "Without metrics in the scanserver.")
-ENDIF(WITH_METRICS)
-
 IF(WIN32)
   SET(ADDITIONAL_CFLAGS "-O2" CACHE STRING"Additional flags given to the compiler ()" )
   include_directories(${CMAKE_SOURCE_DIR}/3rdparty/windows/)
@@ -344,7 +326,7 @@ IF(WIN32)
   add_library(XGetopt STATIC ${CMAKE_SOURCE_DIR}/3rdparty/windows/XGetopt.cpp)
   SET(CMAKE_STATIC_LIBRARY_SUFFIX "32.lib")
 ELSE(WIN32)
-  SET(ADDITIONAL_CFLAGS "-O3 -std=c++0x -msse3 -Wall -finline-functions -Wno-unused-but-set-variable -Wno-write-strings -Wno-char-subscripts -Wno-unused-result" CACHE STRING"Additional flags given to the compiler (-O3 -Wall -finline-functions -Wno-write-strings)" )
+  SET(ADDITIONAL_CFLAGS "-O3 -msse3 -Wall -finline-functions -Wno-write-strings -Wno-char-subscripts -Wno-unused-result" CACHE STRING"Additional flags given to the compiler (-O3 -Wall -finline-functions -Wno-write-strings -Wno-unused-result)" )
   # Add include path for OpenGL without GL/-prefix 
   # to avoid the include incompatibility between MACOS 
   # and linux
@@ -390,14 +372,6 @@ add_subdirectory(src/shapes)
 add_subdirectory(src/thermo)
 add_subdirectory(src/slam6d/sift)
 add_subdirectory(src/scanner)
-
-if(WITH_SCANSERVER)
-  # require additional boost components, namely filesystem for its path and
-  # directory abilites and the system dependency
-  find_package( Boost COMPONENTS filesystem system REQUIRED)
-  
-  add_subdirectory(src/scanserver)
-endif(WITH_SCANSERVER)
 
 IF(EXPORT_SHARED_LIBS)
 ## Compiling a shared library containing all of the project
