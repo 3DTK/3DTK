@@ -4,7 +4,7 @@
  *  @author Kai Lingemann. Institute of Computer Science, University of Osnabrueck, Germany.
  *  @author Andreas Nuechter. Institute of Computer Science, University of Osnabrueck, Germany.
  */
-
+ 
 #ifndef __POINT_H__
 #define __POINT_H__
 
@@ -25,11 +25,11 @@ public:
   /**
    *	Default constructor
    */
-  inline Point() { x = y = z = 0.0; type = 0; reflectance = 0.0; amplitude = 0.0; deviation = 0.0; rgb[0] = 255; rgb[1] = 255; rgb[2] = 255;};
+  inline Point() { x = y = z = 0.0;  point_id = 0;  type = 0; reflectance = 0.0; amplitude = 0.0; deviation = 0.0; rgb[0] = 255; rgb[1] = 255; rgb[2] = 255;};
   /**
    *	Copy constructor
    */
-  inline Point(const Point& p) { x = p.x; y = p.y; z = p.z; type = p.type;
+  inline Point(const Point& p) { x = p.x; y = p.y; z = p.z; type = p.type; point_id = p.point_id;
   reflectance = p.reflectance; amplitude = p.amplitude; deviation = p.deviation; rgb[0] = p.rgb[0]; rgb[1] = p.rgb[1]; rgb[2] = p.rgb[2];};
   /**
    *	Constructor with an array, i.e., vecctor of coordinates
@@ -102,12 +102,17 @@ public:
   double z;
   /// additional information about the point, e.g., semantic 
   int type;
-  ///  add type point  for veloscan
+
+  /////////////////////////for veloslam/////////////////////////////
+  ///  add type point  for veloscan for distiuguish moving or static
   int point_type;
-  ///  range  in 3D space cylindrical coordinates
+  ///  range  in 3D space cylindrical coordinates for veloscan porject into 2.5D grid
   double rad;
-  ///    tang in  cylindrical coordinates
+  ///    tang in  cylindrical coordinates for veloscan
   double tan_theta;
+  // point id in points for veloscan , you can use it find point.
+  long point_id;
+  /////////////////////////for veloslam/////////////////////////////
 
   // color information of the point between 0 and 255
   // rgb

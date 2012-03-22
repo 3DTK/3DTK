@@ -3,7 +3,7 @@
 #define _OPENMP
 #endif
 #endif
-
+ 
 #include <fstream>
 using std::ifstream;
 using std::ofstream;
@@ -64,15 +64,15 @@ GLenum doubleBuffer;
 int g_frame=0;
 float rotX = 0.0, rotY = 0.0;
 
-int x_lbefore,y_lbefore;          //记录鼠标按下时的坐标位置
+int x_lbefore,y_lbefore;         
 int x_rbefore,y_rbefore;
 int z_before1,z_before2;
 
-float x_move,y_move;		//记录模型平移
+float x_move,y_move;		
 float x_move_save,y_move_save;
-float x_rotate,y_rotate,z_rotate;  //记录模型旋转
+float x_rotate,y_rotate,z_rotate; 
 float x_rotate_save,y_rotate_save,z_rotate_save; 
-float m_zoom;				//缩放比例
+float m_zoom;			
 
 float m_aspect;
 
@@ -123,6 +123,21 @@ void  DrawTextRGB(float x, float y, float z, float r, float g, float b, char * o
 #endif
 }
 
+void  DrawTextRGB(Point P, float r, float g, float b, char * outputstring)
+{
+#ifdef _MSC_VER
+	glPushMatrix();
+	glColor3f(r,g,b);	
+	wglUseFontBitmaps(wglGetCurrentDC(), 0, 255, 100);
+
+	glListBase(100);
+	glRasterPos3f(P.x, P.y, P.z);
+	glCallLists( strlen(outputstring), GL_UNSIGNED_BYTE,  outputstring); 
+
+	glPopMatrix();
+#endif
+}
+
 //void  Draw_Cube_GL_RGB(gridClusterFeature&f,float r,float g,float b)
 //{
 //	    Draw_Cube_GL_RGB(f.min_x,
@@ -156,6 +171,38 @@ void   Draw_Line_GL_RGB(float x1, float y1, float z1,
 		glVertex3dv(dVect2);
 
 		glEnd();
+}
+
+void   Draw_Line_GL_RGB(Point P1, Point P2, int width,	float r,float g,float b, bool arrow)
+{
+		GLdouble dVect1[3];
+		GLdouble dVect2[3];
+
+		glLineWidth(width);
+		glBegin(GL_LINES);
+		glColor3d(r, g, b);
+
+		dVect1[0]=P1.x;
+		dVect1[1]=P1.y;
+		dVect1[2]=P1.z;
+		glVertex3dv(dVect1);
+
+		dVect2[0]=P2.x;
+		dVect2[1]=P2.y;
+		dVect2[2]=P2.z;
+		glVertex3dv(dVect2);
+
+		glEnd();
+
+		if(arrow)
+		{
+				glPushMatrix();
+				glTranslatef(1.0,   0.0f,   0.0f);
+				glRotatef(90.0f,0.0f,1.0f,0.0f);
+				glutWireCone(0.027,0.09,10,10);
+				glPopMatrix();
+		}
+
 }
 
 void  Draw_Line_GL(float x1, float y1, float z1,float x2, float y2, float z2)
@@ -389,7 +436,6 @@ void Draw_ALL_Cells_Points_IN_ref(VeloScan& scanRef1, VeloScan& scanR,  int psiz
 
 	for(int j=0; j <myCellArray.size(); j++)
 	{
-		//	 整个一周
 		cellColumn &column= myCellArray[j];
 		for(int i=0; i<column.size(); i++)
 		{
@@ -415,7 +461,6 @@ void Draw_ALL_Cells_Points(VeloScan& scanRef1,  int psize, float r, float g, flo
 
 	for(int j=0; j <myCellArray.size(); j++)
 	{
-		//	 整个一周
 		cellColumn &column= myCellArray[j];
 
 		for(int i=0; i<column.size(); i++)
@@ -452,7 +497,6 @@ void Draw_ALL_Object_TYPE_IN_ref(VeloScan& scanRef1, VeloScan& scanR,  int psize
       glLineWidth(1);
 	for(int j=0; j <myclusterArray.size(); j++)
 	{
-		//	 整个一周
 			clusterFeature& clusterobj= myclusterFeatureArray[j];
 
 			p.x= clusterobj.min_x;   p.y=clusterobj.min_y; p.z=clusterobj.min_z;
@@ -483,7 +527,6 @@ void Draw_ALL_Object_Points_TYPE_IN_ref(VeloScan& scanRef1, VeloScan& scanR,  in
 
 	for(int j=0; j <myclusterArray.size(); j++)
 	{
-		//	 整个一周
 			clusterFeature& clusterobj= myclusterFeatureArray[j];
 			cluster& cluster= myclusterArray[j];
 
@@ -516,7 +559,6 @@ void Draw_ALL_Object_TYPE(VeloScan& scanRef1,  int psize, float r, float g, floa
 
 	for(int j=0; j <myclusterArray.size(); j++)
 	{
-		//	 整个一周
 			clusterFeature& cellobj= myclusterFeatureArray[j];
 
 	//		if(cellobj.clusterType & TYPE ) 
@@ -554,8 +596,8 @@ static void Reshape(int w, int h)
 
 	gluPerspective(45.0f,
 						m_aspect,
-						0.0f,  // 看到的最近范围
-						4000.0f);   //看到的最远范围
+						0.0f,  
+						4000.0f);  
 
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
@@ -695,14 +737,12 @@ static void SpecialKey(int key, int x, int y)
 static void Draw(void)
 {
 	glClearColor(1.0, 1.0, 1.0, 1.0);
-	/////////清除颜色缓冲和深度缓冲////////
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 //	glClearColor(0.0, 0.0, 0.0, 0.0);
 
 	glClearColor(1.0, 1.0, 1.0, 1.0);
 	glLoadIdentity();
 
-	///////////处理各种变换///////////////
 	gluLookAt(m_eyex, 	m_eyey, 	 m_eyez,
 		m_centerx,	m_centery,	 m_centerz,
 		m_upx,		m_upy,		 m_upz);
@@ -715,8 +755,8 @@ static void Draw(void)
 	glScalef(m_zoom, m_zoom, m_zoom);
 
 //    Draw_points_ZValue(Scan::allScans[0],  1,  0.8, 0.8, 0.8);
-    DrawAll_ScanPoints_Number(Scan::allScans,  1,  0.8, 0.8, 0.8, 100);
-	trackMgr.DrawTrackersMovtion_Long_Number_All(Scan::allScans, 100);
+    DrawAll_ScanPoints_Number(Scan::allScans,  1,  0.8, 0.8, 0.8, 6);
+	trackMgr.DrawTrackersMovtion_Long_Number_All(Scan::allScans, 6);
 
 
     glFlush();
@@ -727,22 +767,17 @@ int Show(int frameno)
 {
     GLenum type;
 
-	// 视点选择的位置
 	m_eyex=0,  m_eyey=0,  m_eyez=80;
 	m_centerx=0,  m_centery=0, m_centerz=0;
 	m_upx=0,  m_upy=1, m_upz=0;
 
-   //记录模型平移
 	x_move=0.0;
 	y_move=0.0;
-	//记录模型旋转
 	x_rotate=0.0;
 	y_rotate=0.0;
 	z_rotate=0.0;
-	//缩放比例
 	m_zoom=0.01;
 
-	//记录鼠标按下时的坐标位置
 	x_lbefore=0,y_lbefore=0;
 	x_rbefore=0,y_rbefore=0;
 	z_before1=0,z_before2=0;

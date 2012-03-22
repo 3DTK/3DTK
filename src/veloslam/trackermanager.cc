@@ -13,7 +13,7 @@
 #include <GL/glut.h>
 #else
 #include <GL/freeglut.h>
-#endif
+#endif 
 
 TrackerManager::TrackerManager(void)
 {
@@ -30,7 +30,12 @@ int TrackerManager::Init(void)
 	return 0;
 }
 
-/** 处理一帧数据，！！注意的是，这一帧必须已经被处理（投影和集群）过！！*/
+	/** @brief Initialize function */
+int TrackerManager::getNumberofTracker(void)
+{
+	return  tracks.size();
+}
+
 int TrackerManager::HandleScan(VeloScan& scanRef)
 {
 
@@ -45,29 +50,15 @@ int TrackerManager::HandleScan(VeloScan& scanRef)
 	if(size==0)
 		return 0;
 
-	/**
-	0.初始化这一帧的状态
-	*/
-
 	clusterStatus.resize(size);
-
 
 	for(i=0; i<size;++i)
 		clusterStatus[i].Matched=false;
 
-	/**
-	1.过滤器过虑不符合要求的cluster
-	*/
 	FilterObject(scanRef);
 
-	/**
-	2.更新现有的tracker
-	*/
 	UpdateTrackers(scanRef);
 
-	/**
-	3.把剩下的没有匹配上的cluster加入tracker 列表
-	*/
 	AddTrackers(scanRef);
 
 	return 0;
@@ -81,16 +72,15 @@ int TrackerManager::AddTrackers(VeloScan& scanRef)
 
 	for(i=0; i<size;++i)
 	{
-		//运动目标的特征结构
+
 		clusterFeature &glu=scanRef.scanClusterFeatureArray[i];
 		cluster &gluData=scanRef.scanClusterArray[i];
 		if(clusterStatus[i].FilterRet==true&&clusterStatus[i].Matched==false)
 		{
 			Tracker newTracker;
 
-			//需要记录是那一帧开始跟踪
 			newTracker.frameNO =scanRef.scanid;
-			//目标是在那一帧中的
+
 			glu.frameNO= scanRef.scanid;
 
 			newTracker.statusList.push_back(glu);
@@ -114,7 +104,7 @@ int TrackerManager::FilterObject(VeloScan& scanRef)
 
 	for(i=0; i<size;++i)
 	{
-		//运动目标的特征结构
+
 		clusterFeature &glu=scanRef.scanClusterFeatureArray[i];
 		cluster &gluData=scanRef.scanClusterArray[i];
 		clusterStatus[i].FilterRet = TrackerManager::TrackerFilter(glu);
@@ -123,7 +113,7 @@ int TrackerManager::FilterObject(VeloScan& scanRef)
 
 }
 
-/** 跟踪过滤器，把一些不符合跟踪的cluster去掉*/
+
 bool TrackerManager::TrackerFilter(clusterFeature &glu)
 {
 	if(glu.size < 8)
@@ -131,12 +121,12 @@ bool TrackerManager::TrackerFilter(clusterFeature &glu)
 
 	return true; // no filter
 
-	/**树电杆之类**/
+
 	if( glu.size_z > 200 && ((glu.size_x>glu.size_y?glu.size_x:glu.size_y))<360)
 	{
 		return false;
 	}
-	/**至少3.5米长，但宽小于1.4m，所以不可能为车**/
+
 	else if((glu.size_y>350 && glu.size_x<140)|| (glu.size_x>350 && glu.size_y<140))
 	{
 		return false;
@@ -162,30 +152,26 @@ bool TrackerManager::TrackerFilter(clusterFeature &glu)
 		return true;
 	}
 
-	// 过滤掉超过15米的 超级大的物体肯定是建筑物
 	if(glu.size_x>1500 || glu.size_y>1500 || glu.size_x*glu.size_y >600*600 )
 	{
 		return false;
 	}
 
-	// 过滤过面积特别大的 特别细长的大物体，可能是栅栏
 	if(glu.size_x*glu.size_y >500*500  &&  glu.size_x/glu.size_y < 1.5)
 	{
 		return false;
 	}
 
-	//过滤掉1米二一下的 小目标	
 	if(glu.size_z < 100)
 	{
 		return false;
 	}
-	//过滤掉长宽高总和小于3米的 //有可能是行人
+
 	if((glu.size_x + glu.size_y + glu.size_z)<1.5)
 	{
 		return false;
 	}
 
-	// 过滤掉超过宽度超过3米的 
 	if(glu.size_y>300)
 	{
 		return false;
@@ -194,13 +180,11 @@ bool TrackerManager::TrackerFilter(clusterFeature &glu)
 	//if(glu.size_x<40||glu.size_y<40||glu.size_z<40)
 	//	continue;
 
-	//有可能是行人
 	if((glu.size_x + glu.size_y) <4)
 	{
 		return false;
 	}
 
-	//过滤掉长宽比大于3的  //有很多公汽符合这个条件
 	if(glu.size_x/glu.size_y>3.0)
 	{
 		return false;
@@ -221,20 +205,17 @@ int TrackerManager::MatchTrackers(VeloScan& scanRef,Tracker& tracker)
 	float sizeDiff;
 	float positionDiff;
 
-	/** 内层遍历ClusterArray*/
 	for(i=0; i<scanRef.scanClusterArray.size();++i)
 	{
-		//运动目标的特征结构
 		clusterFeature &glu=scanRef.scanClusterFeatureArray[i];
 		cluster &gluData=scanRef.scanClusterArray[i];
 
-		// 去掉过滤后的目标，不参加匹配跟踪
+		
 		if(clusterStatus.size()!=0   &&  clusterStatus[i].FilterRet==false)
 			continue;
 
 		if(tracker.statusList.size())
 		{
-			//跟踪门的设定.
 			radiusDiff=fabs(tracker.statusList.back().radius-glu.radius);
 			thetaDiff=fabs(tracker.statusList.back().theta-glu.theta);
 			sizeDiff =abs(tracker.statusList.back().size-glu.size);
@@ -248,11 +229,11 @@ int TrackerManager::MatchTrackers(VeloScan& scanRef,Tracker& tracker)
 	//				<<tracker.statusList.back().avg_z << "   " <<glu.avg_z <<"   " <<positionDiff <<endl;
 		//	if(radiusDiff<=12.0 && thetaDiff<=12.0 && sizeDiff <=8 )
 
-  			if(radiusDiff<=12.0 && thetaDiff<=12.0 )
-		//	if(radiusDiff<=12.0 && thetaDiff<=12.0 && sizeDiff <=8 && positionDiff <=800)
+//  			if(radiusDiff<=12.0 && thetaDiff<=12.0 )
+			if(radiusDiff<=12.0 && thetaDiff<=12.0 && sizeDiff <=8 && positionDiff <=300)
 			{
 			//	value= radiusDiff*1.0 + thetaDiff*1.0  +  sizeDiff*0.8 + positionDiff * 0.03 ;
-				value= radiusDiff*1.0 + thetaDiff*1.0  +  sizeDiff*0.8 ;
+				value= radiusDiff*1.0 + thetaDiff*1.0  +  sizeDiff*0.8 + positionDiff * 0.03 ;;
 				if(value<minValue)
 				{
 					minValue=value;
@@ -273,12 +254,12 @@ int TrackerManager::UpdateTrackers(VeloScan& scanRef)
 	int i,j;
 	int matchID;
 
-	/** 外层遍历tracks*/
 	list<Tracker>::iterator it;
-	for(it=tracks.begin();  it!=tracks.end();  it++)
+	int trackNO =0;
+	for(it=tracks.begin() ;  it!=tracks.end();  it++)
 	{
 		Tracker &tracker=*it;
-		//是新的一个目标么，如果是增加一个跟踪器
+		trackNO ++;
 		matchID=MatchTrackers(scanRef,  tracker); 
 
 		if(matchID==-1)
@@ -288,11 +269,11 @@ int TrackerManager::UpdateTrackers(VeloScan& scanRef)
 		}
 		else
 		{
+			scanRef.scanClusterFeatureArray[matchID].trackNO = trackNO;
 			// save feature
 			tracker.statusList.push_back(scanRef.scanClusterFeatureArray[matchID]);
 			// save data
 			tracker.dataList.push_back(scanRef.scanClusterArray[matchID]);
-			// 记录 ID
 			tracker.matchClusterID=matchID;
 			tracker.missMatch=false;
 			tracker.Matched = true;
@@ -306,7 +287,7 @@ int TrackerManager::UpdateTrackers(VeloScan& scanRef)
 	return 0;
 }
 
-/** 将这一帧的cluster画出来*/
+
 int TrackerManager::DrawScanCluster(VeloScan& scanRef)
 {
 	int i,j,k,colorIdx;
@@ -316,7 +297,7 @@ int TrackerManager::DrawScanCluster(VeloScan& scanRef)
 //	glBegin(GL_POINTS);
 	for(i=0; i<scanRef.scanClusterArray.size();++i)
 	{
-		//运动目标的特征结构
+
 		clusterFeature &glu=scanRef.scanClusterFeatureArray[i];
 		cluster &gluData=scanRef.scanClusterArray[i];
 		if( clusterStatus.size()!=0  &&  clusterStatus[i].FilterRet==false)
@@ -354,7 +335,7 @@ int TrackerManager::DrawScanCluster(VeloScan& scanRef)
 			}
 		}
 		*/
-		//找到一个cluster后，遍历cell显示其所有的点
+
 	}
 //	glEnd();
 
@@ -371,7 +352,6 @@ int TrackerManager::DrawTrackers(VeloScan& scanRef)
 
 	for(it=tracks.begin();  it!=tracks.end();  it++)
 	{
-		//运动目标的特征结构
 		Tracker &tracker=*it;
 		if(tracker.missMatch == true)
 			continue;
@@ -414,7 +394,7 @@ int TrackerManager::DrawTrackers(VeloScan& scanRef)
 
 		}
 
-		//找到一个cluster后，遍历cell显示其所有的点
+
 	}
 	glEnd();
 	return 0;
@@ -434,7 +414,7 @@ int TrackerManager::DrawTrackersMovtion(VeloScan& scanRef1, VeloScan& scanRef2)
 
 	for(it=tracks.begin();  it!=tracks.end();  it++)
 	{
-		//运动目标的特征结构
+
 		Tracker &tracker=*it;
 		if(tracker.missMatch == true)
 			continue;
@@ -528,7 +508,6 @@ int TrackerManager::DrawTrackersMovtion(VeloScan& scanRef1, VeloScan& scanRef2)
 
 		    glEnd();
 
-		//找到一个cluster后，遍历cell显示其所有的点
 		}
 	}
 
@@ -583,7 +562,6 @@ int TrackerManager::DrawTrackersMovtion_Long(vector <VeloScan *> allScans)
 //			Point p2(glu2.avg_x, glu2.avg_y,glu2.avg_z);
 	
 //			DrawPoint(p2,8,1,1,0);
-			//找到一个cluster后，遍历cell显示其所有的点
 		   }
 	}
 
@@ -638,7 +616,6 @@ int TrackerManager::DrawTrackersMovtion_Long_Number(vector <Scan *> allScans, in
 //			Point p2(glu2.avg_x, glu2.avg_y,glu2.avg_z);
 	
 //			DrawPoint(p2,8,1,1,0);
-			//找到一个cluster后，遍历cell显示其所有的点
 		   }
 	}
 
@@ -662,41 +639,153 @@ int TrackerManager::DrawTrackersMovtion_Long_Number_All(vector <Scan *> allScans
 	//		   continue;
 
 		//	cerr << " object number  " << tracker.statusList.size() <<endl;
-			for(int i =0;   i <tracker.statusList.size();  i++ )
+			for(int i =0;   i <tracker.statusList.size()-1;  i++ )
 			{  
 				
 			    Scan *firstScan = allScans[0];
                 Scan *CurrentScan = allScans[i];
+				Scan *CurrentScanNext = allScans[i+1];
 				double  deltaMat[16];
+				double  deltaMatNext[16];
 
 				GetCurrecntdelteMat(*CurrentScan , *firstScan,  deltaMat);
+				GetCurrecntdelteMat(*CurrentScanNext , *firstScan,  deltaMatNext);
+
 				clusterFeature &glu1=tracker.statusList[i];
 				cluster &gluData1=tracker.dataList[i];
+			    clusterFeature &glu2=tracker.statusList[i+1];
+				cluster &gluData2=tracker.dataList[i+1];
+
+				if (glu1.size < 8) continue;
+				if (glu2.size < 8) continue;
+
+				Point p1(glu1.avg_x, glu1.avg_y, glu1.avg_z);
+				Point p2(glu2.avg_x, glu2.avg_y, glu2.avg_z);
+				Point p1text(glu1.avg_x, glu1.avg_y+50, glu1.avg_z);
+				Point p2text(glu2.avg_x, glu2.avg_y+50, glu2.avg_z);
+
+				p1.transform(deltaMat);
+				p2.transform(deltaMatNext);
+				p1text.transform(deltaMat);
+				p2text.transform(deltaMatNext);
 
 				colorIdx=tracker.colorIdx%8;
-		//		DrawObjectPoint(gluData1, 1,  0.3, 0.3, 0.3,deltaMat);
+
 				DrawObjectPoint(gluData1, 1,
 					ColorTableShot[colorIdx][0],
 					ColorTableShot[colorIdx][1], 
 					ColorTableShot[colorIdx][2] ,
 					deltaMat);
 
-				if (glu1.size < 8) continue;
-				Point p1(glu1.avg_x, glu1.avg_y, glu1.avg_z);
-				p1.transform(deltaMat);
-				DrawPoint(p1,8,1,0,0);
+				char objectID[256];
+				sprintf(objectID, "%d", glu1.trackNO);
+		//		DrawTextRGB(p1text, 0,1,0,objectID );
 
-		    //cluster &gluData=scanRef.scanClusterArray[tracker.matchClusterID];
-			//////////////////////
-//		    glLineWidth(3);
-//			glBegin(GL_LINES);
-	//		if (glu2.size < 8) continue;
-//			Point p2(glu2.avg_x, glu2.avg_y,glu2.avg_z);
-	
-//			DrawPoint(p2,8,1,1,0);
-			//找到一个cluster后，遍历cell显示其所有的点
+				//colorIdx=(tracker.colorIdx+1)%8;
+				//DrawObjectPoint(gluData2, 1,
+				//	ColorTableShot[colorIdx][0],
+				//	ColorTableShot[colorIdx][1], 
+				//	ColorTableShot[colorIdx][2] ,
+				//	deltaMatNext);
+
+				sprintf(objectID, "%d", glu2.trackNO);
+		//		DrawTextRGB(p2text, 0,1,0,objectID );
+
+				DrawPoint(p1,8,1,0,0);
+				DrawPoint(p2,8,1,0,0);
+
+			   Draw_Line_GL_RGB(p1, p2, 3,	1, 0, 0, false);
+
 		   }
 	}
+
+	return 0;
+}
+
+
+int TrackerManager::ClassifiyTrackersObjects(vector <Scan *> allScans, int currentNO ,int windowsize)
+{
+	 int i,j,k,colorIdx;
+
+	list<Tracker>::iterator it;
+
+ //    int clustersize=scanClusterArray.size();            
+	//	//Find moving Ojbects
+	//for(i=0; i<clustersize; ++i)
+	//{
+ //    	clusterFeature &glu = scanClusterFeatureArray[i];
+	//	glu.clusterType != CLUSTER_TYPE_OBJECT;
+	//    if( FilterNOMovingObjcets(glu))
+	//	{
+	//			clusterFeature &gclu = 	scanClusterFeatureArray[i];
+	//			gclu.clusterType  |=CLUSTER_TYPE_MOVING_OBJECT;
+	//	}
+	//}
+
+	////Mark No Moving Ojbects CELLS
+	//int k;
+	//for(i=0; i<clustersize; ++i)
+	//{
+ //    	clusterFeature &glu = scanClusterFeatureArray[i];
+	//	if( !(glu.clusterType & CLUSTER_TYPE_MOVING_OBJECT))
+	//	{
+	//			cluster  &gclu = 	scanClusterArray[i];
+	//			for(j =0; j< gclu.size() ; ++j)
+	//			{
+	//				cellFeature &gcF = *(gclu[j]);
+	//				gcF.cellType |= CELL_TYPE_FOR_SLAM6D;
+	//			}
+	//	}
+	//
+	//}
+
+//	for(it=tracks.begin();  it!=tracks.end();  it++)
+//	{
+//		Tracker &tracker=*it;
+//	//	if(tracker.missMatch == true)
+//	//		   continue;
+//	//	if(tracker.statusList.size() < n) 
+//	//		   continue;
+//	//	if(tracker.dataList.size()  < n) 
+//	//		   continue;
+//
+//		//	cerr << " object number  " << tracker.statusList.size() <<endl;
+//			for(int i =0;   i <tracker.statusList.size();  i++ )
+//			{  
+//				
+//			    Scan *firstScan = allScans[0];
+//                Scan *CurrentScan = allScans[i];
+//				double  deltaMat[16];
+//
+//				GetCurrecntdelteMat(*CurrentScan , *firstScan,  deltaMat);
+//				clusterFeature &glu1=tracker.statusList[i];
+//				cluster &gluData1=tracker.dataList[i];
+//
+//				colorIdx=tracker.colorIdx%8;
+//		//		DrawObjectPoint(gluData1, 1,  0.3, 0.3, 0.3,deltaMat);
+//				DrawObjectPoint(gluData1, 1,
+//					ColorTableShot[colorIdx][0],
+//					ColorTableShot[colorIdx][1], 
+//					ColorTableShot[colorIdx][2] ,
+//					deltaMat);
+//
+//				if (glu1.size < 8) continue;
+//				Point p1(glu1.avg_x, glu1.avg_y, glu1.avg_z);
+//				p1.transform(deltaMat);
+//				DrawPoint(p1,8,1,0,0);
+//
+//		    //cluster &gluData=scanRef.scanClusterArray[tracker.matchClusterID];
+//			//////////////////////
+////		    glLineWidth(3);
+////			glBegin(GL_LINES);
+//	//		if (glu2.size < 8) continue;
+////			Point p2(glu2.avg_x, glu2.avg_y,glu2.avg_z);
+//	
+////			DrawPoint(p2,8,1,1,0);
+//		   }
+//
+//
+//	}
 
 	return 0;
 }
