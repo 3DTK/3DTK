@@ -168,7 +168,7 @@ public:
   inline const double* getDAlign_inv() const;
   inline double** get_org_points_red() const;
 
-protected:
+public:
 
   class scanIOwrapper : public ScanIO {
     public:
@@ -189,6 +189,7 @@ protected:
 
   };
   
+  protected:
   /**
    * The pose of the scan
    * Note: rPos/rPosTheta and transMat _should_

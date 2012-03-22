@@ -69,6 +69,8 @@ using std::ifstream;
 
 #include "veloslam/veloscan.h"
 #include "veloslam/debugview.h"
+#include "veloslam/tracker.h"
+#include "veloslam/trackermanager.h"
 
 #ifdef _MSC_VER
 #define strcasecmp _stricmp
@@ -86,6 +88,7 @@ using std::ifstream;
 #include <GL/freeglut.h>
 #endif
 
+extern TrackerManager trackMgr;
 
 //  Handling Segmentation faults and CTRL-C
 void sigSEGVhandler (int v)
@@ -665,6 +668,216 @@ void matchGraph6Dautomatic(double cldist, int loopsize, vector <Scan *> allScans
   }
 }
 
+icp6Dminimizer *  CreateICPalgo( int algo , bool quiet )
+{
+   icp6Dminimizer *my_icp6Dminimizer;
+   switch (algo) {
+    case 1 :
+      my_icp6Dminimizer = new icp6D_QUAT(quiet);
+      break;
+    case 2 :
+      my_icp6Dminimizer = new icp6D_SVD(quiet);
+      break;
+    case 3 :
+      my_icp6Dminimizer = new icp6D_ORTHO(quiet);
+      break;
+    case 4 :
+      my_icp6Dminimizer = new icp6D_DUAL(quiet);
+      break;
+    case 5 :
+      my_icp6Dminimizer = new icp6D_HELIX(quiet);
+      break;
+    case 6 :
+      my_icp6Dminimizer = new icp6D_APX(quiet);
+      break;
+    case 7 :
+      my_icp6Dminimizer = new icp6D_LUMEULER(quiet);
+      break;
+    case 8 :
+      my_icp6Dminimizer = new icp6D_LUMQUAT(quiet);
+      break;
+    case 9 :
+			my_icp6Dminimizer = new icp6D_QUAT_SCALE(quiet);
+			break;
+     }
+	  return my_icp6Dminimizer;
+ }
+
+int   FinalSLAM( double &red, int &rand,
+    double &mdm, double &mdml, double &mdmll,
+    int &mni, int &start, int &end, int &maxDist, int &minDist, bool &quiet, bool &veryQuiet,
+    bool &eP, bool &meta, int &algo, int &loopSlam6DAlgo, int &lum6DAlgo, int &anim,
+    int &mni_lum, string &net, double &cldist, int &clpairs, int &loopsize,
+    double &epsilonICP, double &epsilonSLAM,  int &nns_method, bool &exportPts, double &distLoop,
+    int &iterLoop, double &graphDist, int &octree, bool &cuda_enabled, reader_type &type
+	)
+{
+
+    icp6Dminimizer *my_icp6Dminimizer = 0;
+     my_icp6Dminimizer= CreateICPalgo( algo, quiet);
+
+	if (mni_lum == -1 && loopSlam6DAlgo == 0)
+	{
+		icp6D *my_icp = 0;
+		if (cuda_enabled) {
+#ifdef WITH_CUDA
+			my_icp = new icp6Dcuda(my_icp6Dminimizer, mdm, mni, quiet, meta, rand, eP,
+				anim, epsilonICP, nns_method, cuda_enabled);
+#else
+			cout << "slam6d was not compiled for excuting CUDA code" << endl;
+#endif
+		} else {
+			my_icp = new icp6D(my_icp6Dminimizer, mdm, mni, quiet, meta, rand, eP,
+				anim, epsilonICP, nns_method, cuda_enabled);
+		}
+
+		if (my_icp) my_icp->doICP(Scan::allScans);
+		delete my_icp;
+	} else if (clpairs > -1) {
+		//!!!!!!!!!!!!!!!!!!!!!!!!
+		icp6D *my_icp = 0;
+		if (cuda_enabled) {
+#ifdef WITH_CUDA
+			my_icp = new icp6Dcuda(my_icp6Dminimizer, mdm, mni, quiet, meta, rand, eP,
+				anim, epsilonICP, nns_method, cuda_enabled);
+#else
+			cout << "slam6d was not compiled for excuting CUDA code" << endl;
+#endif
+		} else {
+			my_icp = new icp6D(my_icp6Dminimizer, mdm, mni, quiet, meta, rand, eP,
+				anim, epsilonICP, nns_method, cuda_enabled);
+		}
+		my_icp->doICP(Scan::allScans);
+		graphSlam6D *my_graphSlam6D = new lum6DEuler(my_icp6Dminimizer, mdm, mdml, mni, quiet, meta,
+			rand, eP, anim, epsilonICP, nns_method, epsilonSLAM);
+		my_graphSlam6D->matchGraph6Dautomatic(Scan::allScans, mni_lum, clpairs, loopsize);
+		//!!!!!!!!!!!!!!!!!!!!!!!!
+	} else {
+		graphSlam6D *my_graphSlam6D = 0;
+		switch (lum6DAlgo) {
+		case 1 :
+			my_graphSlam6D = new lum6DEuler(my_icp6Dminimizer, mdm, mdml, mni, quiet, meta, rand, eP,
+				anim, epsilonICP, nns_method, epsilonSLAM);
+			break;
+		case 2 :
+			my_graphSlam6D = new lum6DQuat(my_icp6Dminimizer, mdm, mdml, mni, quiet, meta, rand, eP,
+				anim, epsilonICP, nns_method, epsilonSLAM);
+			break;
+		case 3 :
+			my_graphSlam6D = new ghelix6DQ2(my_icp6Dminimizer, mdm, mdml, mni, quiet, meta, rand, eP,
+				anim, epsilonICP, nns_method, epsilonSLAM);
+			break;
+		case 4 :
+			my_graphSlam6D = new gapx6D(my_icp6Dminimizer, mdm, mdml, mni, quiet, meta, rand, eP,
+				anim, epsilonICP, nns_method, epsilonSLAM);
+			break;
+		case 5 :
+			my_graphSlam6D = new graphToro(my_icp6Dminimizer, mdm, mdml, mni, quiet, meta, rand, eP,
+				-2, epsilonICP, nns_method, epsilonSLAM);
+			break;
+		case 6 :
+			my_graphSlam6D = new graphHOGMan(my_icp6Dminimizer, mdm, mdml, mni, quiet, meta, rand, eP,
+				-2, epsilonICP, nns_method, epsilonSLAM);
+			break;
+		}
+		// Construct Network
+		if (net != "none") {
+			icp6D *my_icp = 0;
+			if (cuda_enabled) {
+#ifdef WITH_CUDA
+				my_icp = new icp6Dcuda(my_icp6Dminimizer, mdm, mni, quiet, meta, rand, eP,
+					anim, epsilonICP, nns_method);
+#else
+				cout << "slam6d was not compiled for excuting CUDA code" << endl;
+#endif
+			} else {
+				my_icp = new icp6D(my_icp6Dminimizer, mdm, mni, quiet, meta, rand, eP,
+					anim, epsilonICP, nns_method);
+			}
+			my_icp->doICP(Scan::allScans);
+
+			Graph* structure;
+			structure = new Graph(net);
+			my_graphSlam6D->doGraphSlam6D(*structure, Scan::allScans, mni_lum);
+			if(mdmll > 0.0) {
+				my_graphSlam6D->set_mdmll(mdmll);
+				my_graphSlam6D->doGraphSlam6D(*structure, Scan::allScans, mni_lum);
+			}
+
+		} else {
+			icp6D *my_icp = 0;
+			if(algo > 0) {
+				if (cuda_enabled) {
+#ifdef WITH_CUDA
+					my_icp = new icp6Dcuda(my_icp6Dminimizer, mdm, mni, quiet, meta, rand, eP,
+						anim, epsilonICP, nns_method);
+#else
+					cout << "slam6d was not compiled for excuting CUDA code" << endl;
+#endif
+				} else {
+					my_icp = new icp6D(my_icp6Dminimizer, mdm, mni, quiet, meta, rand, eP,
+						anim, epsilonICP, nns_method);
+				}
+
+				loopSlam6D *my_loopSlam6D = 0;
+				switch(loopSlam6DAlgo) {
+				case 1:
+					my_loopSlam6D = new elch6Deuler(veryQuiet, my_icp6Dminimizer, distLoop, iterLoop,
+						rand, eP, 10, epsilonICP, nns_method);
+					break;
+				case 2:
+					my_loopSlam6D = new elch6Dquat(veryQuiet, my_icp6Dminimizer, distLoop, iterLoop,
+						rand, eP, 10, epsilonICP, nns_method);
+					break;
+				case 3:
+					my_loopSlam6D = new elch6DunitQuat(veryQuiet, my_icp6Dminimizer, distLoop, iterLoop,
+						rand, eP, 10, epsilonICP, nns_method);
+					break;
+				case 4:
+					my_loopSlam6D = new elch6Dslerp(veryQuiet, my_icp6Dminimizer, distLoop, iterLoop,
+						rand, eP, 10, epsilonICP, nns_method);
+					break;
+				case 5:
+					my_loopSlam6D = new loopToro(veryQuiet, my_icp6Dminimizer, distLoop, iterLoop,
+						rand, eP, 10, epsilonICP, nns_method);
+					break;
+				case 6:
+					my_loopSlam6D = new loopHOGMan(veryQuiet, my_icp6Dminimizer, distLoop, iterLoop,
+						rand, eP, 10, epsilonICP, nns_method);
+					break;
+				}
+
+				matchGraph6Dautomatic(cldist, loopsize, Scan::allScans, my_icp, meta,
+					nns_method, cuda_enabled, my_loopSlam6D, my_graphSlam6D,
+					mni_lum, epsilonSLAM, mdml, mdmll, graphDist, eP, type);
+				delete my_icp;
+				if(loopSlam6DAlgo > 0) {
+					delete my_loopSlam6D;
+				}
+			}
+			if(my_graphSlam6D > 0) {
+				delete my_graphSlam6D;
+			}
+		}
+	}
+	delete  my_icp6Dminimizer;
+	return 0;
+  }
+
+  void MatchTwoScan(icp6D *my_icp,  VeloScan* currentScan, int scanCount, bool eP )
+{
+         Scan *PreviousScan = 0;
+  		//////////////////////ICP//////////////////////
+		if (scanCount > 0)
+		{
+				PreviousScan =Scan::allScans[scanCount-1];
+				// extrapolate odometry // 以前一帧的坐标为基准
+				if (eP)
+						currentScan->mergeCoordinatesWithRoboterPosition(PreviousScan);
+
+   				my_icp->match(PreviousScan, currentScan);
+		}
+}
 /**
  * Main program for 6D SLAM.
  * Usage: bin/slam6D 'dir',
@@ -678,7 +891,7 @@ int main(int argc, char **argv)
   glutInit(&argc, argv);
 #else
   glutInit(&argc, argv);
-#endif   
+#endif
 
   signal (SIGSEGV, sigSEGVhandler);
   signal (SIGINT,  sigSEGVhandler);
@@ -730,199 +943,90 @@ int main(int argc, char **argv)
       nns_method, exportPts, distLoop, iterLoop, graphDist, octree, cuda_enabled, type);
 
   cout << "slam6D will proceed with the following parameters:" << endl;
-  //@@@ to do :-)
+
+   //@@@ to do :-)
 
   // Get Scans
-  VeloScan::readScansRedSearch(type, start, end, dir,
-						 maxDist, minDist, red, octree, nns_method, cuda_enabled, true);
-  
-  icp6Dminimizer *my_icp6Dminimizer = 0;
-  switch (algo) {
-    case 1 :
-      my_icp6Dminimizer = new icp6D_QUAT(quiet);
-      break;
-    case 2 :
-      my_icp6Dminimizer = new icp6D_SVD(quiet);
-      break;
-    case 3 :
-      my_icp6Dminimizer = new icp6D_ORTHO(quiet);
-      break;
-    case 4 :
-      my_icp6Dminimizer = new icp6D_DUAL(quiet);
-      break;
-    case 5 :
-      my_icp6Dminimizer = new icp6D_HELIX(quiet);
-      break;
-    case 6 :
-      my_icp6Dminimizer = new icp6D_APX(quiet);
-      break;
-    case 7 :
-      my_icp6Dminimizer = new icp6D_LUMEULER(quiet);
-      break;
-    case 8 :
-      my_icp6Dminimizer = new icp6D_LUMQUAT(quiet);
-      break;
-    case 9 :
-			my_icp6Dminimizer = new icp6D_QUAT_SCALE(quiet);
-			break;
-  }
+ // VeloScan::readScansRedSearch(type, start, end, dir,
+//						 maxDist, minDist, red, octree, nns_method, cuda_enabled, true);
 
-  // match the scans and print the time used
-  long starttime = GetCurrentTimeInMilliSec();
-  if (mni_lum == -1 && loopSlam6DAlgo == 0) {
+    icp6Dminimizer *my_icp6Dminimizer = 0;
+    my_icp6Dminimizer= CreateICPalgo( algo, quiet);
     icp6D *my_icp = 0;
-    if (cuda_enabled) {
-#ifdef WITH_CUDA	 
-      my_icp = new icp6Dcuda(my_icp6Dminimizer, mdm, mni, quiet, meta, rand, eP,
-					    anim, epsilonICP, nns_method, cuda_enabled);
-#else
-      cout << "slam6d was not compiled for excuting CUDA code" << endl;
-#endif	 
-    } else {
-      my_icp = new icp6D(my_icp6Dminimizer, mdm, mni, quiet, meta, rand, eP,
+    my_icp = new icp6D(my_icp6Dminimizer, mdm, mni, quiet, meta, rand, eP,
 					anim, epsilonICP, nns_method, cuda_enabled);
-    }
 
-    // check if CAD matching was selected as type
-    if (type == UOS_CAD)
+	if (my_icp==0)
+	{
+	   cerr<<  "can not create ICP " << endl;
+	   exit(0);
+	}
+
+    double eu[6] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+    vector <Point> ptss;
+    int _fileNr;
+    Scan::scanIOwrapper my_ScanIO(type);
+
+    int scanCount =0;
+    //Main Loop for ICP with Moving Object Detection and Tracking
+    while ((_fileNr =my_ScanIO.readScans(start, end, dir, maxDist, minDist, eu, ptss)) != -1)
     {
-      my_icp->set_cad_matching (true);
+		VeloScan::dir = dir;
+
+	    cout << scanCount << "*" << endl;
+        VeloScan *currentScan = new VeloScan(eu, maxDist);
+        currentScan->setFileNr(_fileNr);
+		currentScan->setPoints(&ptss);    // copy points
+		cout << "read scan " << (currentScan->get_points())->size() << endl;
+        ptss.clear();                  // clear points
+        Scan::allScans.push_back(currentScan);
+
+         currentScan->FindingAllofObject();
+         currentScan->TrackingAllofObject();
+		 cout << "all  cluster objects " << currentScan->scanClusterFeatureArray.size() << endl;
+		 cout << "all  cluster tracker " << trackMgr.getNumberofTracker() << endl;
+		 // mark the type of clusters.
+		 int windowsize =3;
+		 if(scanCount < windowsize )
+		     currentScan->ClassifiAllofObject();
+		 else
+		//	 currentScan->ClassifibyTrackingAllObject(scanCount, windowsize);
+		     currentScan->ClassifiAllofObject();
+
+         currentScan->ExchangePointCloud();
+
+         currentScan->calcReducedPoints_byClassifi(red, octree, PointType());
+		 cout << "reducing scan " << currentScan->get_points_red_size()  << endl;
+	     currentScan->transform(currentScan->getTransMatOrg(), Scan::INVALID); //transform points to initial position
+     //   currentScan->clearPoints();
+         currentScan->createTree(nns_method, cuda_enabled);
+
+//      cout << "matching two  scan " << currentScan->getFileNr() <<  endl;
+		 MatchTwoScan(my_icp,  currentScan,  scanCount,  eP);
+
+		 scanCount++;
+     ////////////////////////////////////////
     }
 
-    if (my_icp) my_icp->doICP(Scan::allScans);
+	delete my_icp6Dminimizer;
     delete my_icp;
-  } else if (clpairs > -1) {
-    //!!!!!!!!!!!!!!!!!!!!!!!!
-    icp6D *my_icp = 0;
-    if (cuda_enabled) {
-#ifdef WITH_CUDA	 
-      my_icp = new icp6Dcuda(my_icp6Dminimizer, mdm, mni, quiet, meta, rand, eP,
-					    anim, epsilonICP, nns_method, cuda_enabled);
-#else
-      cout << "slam6d was not compiled for excuting CUDA code" << endl;
-#endif	 
-    } else {
-      my_icp = new icp6D(my_icp6Dminimizer, mdm, mni, quiet, meta, rand, eP,
-					anim, epsilonICP, nns_method, cuda_enabled);
-    }
-    my_icp->doICP(Scan::allScans);
-    graphSlam6D *my_graphSlam6D = new lum6DEuler(my_icp6Dminimizer, mdm, mdml, mni, quiet, meta,
-        rand, eP, anim, epsilonICP, nns_method, epsilonSLAM);
-    my_graphSlam6D->matchGraph6Dautomatic(Scan::allScans, mni_lum, clpairs, loopsize);
-    //!!!!!!!!!!!!!!!!!!!!!!!!		  
-  } else {
-    graphSlam6D *my_graphSlam6D = 0;
-    switch (lum6DAlgo) {
-      case 1 :
-        my_graphSlam6D = new lum6DEuler(my_icp6Dminimizer, mdm, mdml, mni, quiet, meta, rand, eP,
-            anim, epsilonICP, nns_method, epsilonSLAM);
-        break;
-      case 2 :
-        my_graphSlam6D = new lum6DQuat(my_icp6Dminimizer, mdm, mdml, mni, quiet, meta, rand, eP,
-            anim, epsilonICP, nns_method, epsilonSLAM);
-        break;
-      case 3 : 
-        my_graphSlam6D = new ghelix6DQ2(my_icp6Dminimizer, mdm, mdml, mni, quiet, meta, rand, eP,
-            anim, epsilonICP, nns_method, epsilonSLAM);
-        break;
-      case 4 :
-        my_graphSlam6D = new gapx6D(my_icp6Dminimizer, mdm, mdml, mni, quiet, meta, rand, eP,
-            anim, epsilonICP, nns_method, epsilonSLAM);
-        break;
-      case 5 :
-        my_graphSlam6D = new graphToro(my_icp6Dminimizer, mdm, mdml, mni, quiet, meta, rand, eP,
-            -2, epsilonICP, nns_method, epsilonSLAM);
-        break;
-      case 6 :
-        my_graphSlam6D = new graphHOGMan(my_icp6Dminimizer, mdm, mdml, mni, quiet, meta, rand, eP,
-            -2, epsilonICP, nns_method, epsilonSLAM);
-        break;
-    }
-    // Construct Network
-    if (net != "none") {
-      icp6D *my_icp = 0;
-      if (cuda_enabled) {
-#ifdef WITH_CUDA	 
-        my_icp = new icp6Dcuda(my_icp6Dminimizer, mdm, mni, quiet, meta, rand, eP,
-            anim, epsilonICP, nns_method);
-#else
-        cout << "slam6d was not compiled for excuting CUDA code" << endl;
-#endif	 
-      } else {
-        my_icp = new icp6D(my_icp6Dminimizer, mdm, mni, quiet, meta, rand, eP,
-            anim, epsilonICP, nns_method);
-      }
-      my_icp->doICP(Scan::allScans);
 
-      Graph* structure;
-      structure = new Graph(net);
-      my_graphSlam6D->doGraphSlam6D(*structure, Scan::allScans, mni_lum);
-      if(mdmll > 0.0) {
-        my_graphSlam6D->set_mdmll(mdmll);
-        my_graphSlam6D->doGraphSlam6D(*structure, Scan::allScans, mni_lum);
-      }
+    Show(0);
 
-    } else {
-      icp6D *my_icp = 0;
-      if(algo > 0) {
-        if (cuda_enabled) {
-#ifdef WITH_CUDA	 
-          my_icp = new icp6Dcuda(my_icp6Dminimizer, mdm, mni, quiet, meta, rand, eP,
-						   anim, epsilonICP, nns_method);
-#else
-          cout << "slam6d was not compiled for excuting CUDA code" << endl;
-#endif	 
-        } else {
-          my_icp = new icp6D(my_icp6Dminimizer, mdm, mni, quiet, meta, rand, eP,
-					    anim, epsilonICP, nns_method);
-        }
+   long starttime = GetCurrentTimeInMilliSec();
 
-        loopSlam6D *my_loopSlam6D = 0;
-        switch(loopSlam6DAlgo) {
-          case 1:
-            my_loopSlam6D = new elch6Deuler(veryQuiet, my_icp6Dminimizer, distLoop, iterLoop,
-								    rand, eP, 10, epsilonICP, nns_method);
-            break;
-          case 2:
-            my_loopSlam6D = new elch6Dquat(veryQuiet, my_icp6Dminimizer, distLoop, iterLoop,
-								   rand, eP, 10, epsilonICP, nns_method);
-            break;
-          case 3:
-            my_loopSlam6D = new elch6DunitQuat(veryQuiet, my_icp6Dminimizer, distLoop, iterLoop,
-									  rand, eP, 10, epsilonICP, nns_method);
-            break;
-          case 4:
-            my_loopSlam6D = new elch6Dslerp(veryQuiet, my_icp6Dminimizer, distLoop, iterLoop,
-								    rand, eP, 10, epsilonICP, nns_method);
-            break;
-          case 5:
-            my_loopSlam6D = new loopToro(veryQuiet, my_icp6Dminimizer, distLoop, iterLoop,
-								 rand, eP, 10, epsilonICP, nns_method);
-            break;
-          case 6:
-            my_loopSlam6D = new loopHOGMan(veryQuiet, my_icp6Dminimizer, distLoop, iterLoop,
-								   rand, eP, 10, epsilonICP, nns_method);
-            break;
-        }
-
-        matchGraph6Dautomatic(cldist, loopsize, Scan::allScans, my_icp, meta,
-						nns_method, cuda_enabled, my_loopSlam6D, my_graphSlam6D,
-						mni_lum, epsilonSLAM, mdml, mdmll, graphDist, eP, type);
-        delete my_icp;
-        if(loopSlam6DAlgo > 0) {
-          delete my_loopSlam6D;
-        }
-      }
-      if(my_graphSlam6D > 0) {
-        delete my_graphSlam6D;
-      }
-    }
-  }
+  //Finall  graph Matching
+   FinalSLAM( red,  rand,
+     mdm,  mdml,  mdmll,
+     mni,  start,  end,  maxDist,  minDist,  quiet,  veryQuiet,
+     eP,  meta,  algo,  loopSlam6DAlgo,  lum6DAlgo,  anim,
+     mni_lum,  net,  cldist,  clpairs,  loopsize,
+     epsilonICP,  epsilonSLAM,   nns_method,  exportPts,  distLoop,
+     iterLoop,  graphDist,  octree,  cuda_enabled, type
+	);
 
   long endtime = GetCurrentTimeInMilliSec() - starttime;
   cout << "Matching done in " << endtime << " milliseconds!!!" << endl;
-
-  Show(0);
 
   if (exportPts) {
     cout << "Export all 3D Points to file \"points.pts\"" << endl;
@@ -944,12 +1048,12 @@ int main(int argc, char **argv)
     Iter = Scan::allScans.begin();
     delete (*Iter);
     cout << ".";
-    cout.flush(); 
+    cout.flush();
   }
 
   Scan::allScans.clear();
 
-  delete my_icp6Dminimizer;
+  //delete my_icp6Dminimizer;
 
   cout << endl << endl;
   cout << "Normal program end." << endl
