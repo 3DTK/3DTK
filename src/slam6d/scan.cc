@@ -11,6 +11,14 @@
 #endif
 #endif
 
+#ifdef _MSC_VER
+#define _NO_PARALLEL_READ
+#endif
+
+#ifdef __APPLE__
+#define _NO_PARALLEL_READ
+#endif
+
 #include <fstream>
 using std::ifstream;
 using std::ofstream;
@@ -1120,11 +1128,11 @@ void Scan::readScansRedSearch(reader_type type,
   int _fileNr;
   scanIOwrapper my_ScanIO(type);
 
-#ifndef _MSC_VER 
+#ifndef _NO_PARALLEL_READ
 #ifdef _OPENMP
-#pragma omp parallel
+  #pragma omp parallel
   {
-#pragma omp single nowait
+    #pragma omp single nowait
     {
 #endif
 #endif
@@ -1137,7 +1145,7 @@ void Scan::readScansRedSearch(reader_type type,
         ptss.clear();                  // clear points
         allScans.push_back(currentScan);
 
-#ifndef _MSC_VER 
+#ifndef _NO_PARALLEL_READ
 #ifdef _OPENMP
 #pragma omp task
 #endif
@@ -1150,9 +1158,10 @@ void Scan::readScansRedSearch(reader_type type,
           currentScan->createTree(nns_method, cuda_enabled);
         }
       }
-#ifndef _MSC_VER 
+
+#ifndef _NO_PARALLEL_READ
 #ifdef _OPENMP
-    }
+     }
   }
 #pragma omp taskwait
 #endif
