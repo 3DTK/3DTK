@@ -28,6 +28,12 @@ public:
 	float theta,radius;
 	int size;
 
+	/**inclined rectangle bounding box**/
+	float length;
+	float width;
+	float boxDirection;
+	double boxVex[4][2];
+
 	int frameNO;
 	int trackNO;
 		/*point的数量*/

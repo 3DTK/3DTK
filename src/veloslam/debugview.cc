@@ -150,12 +150,12 @@ void  DrawTextRGB(Point P, float r, float g, float b, char * outputstring)
 
 void   Draw_Line_GL_RGB(float x1, float y1, float z1,
 	                                    float x2, float y2, float z2,
-										float r,float g,float b)
+										float r,float g,float b,float width)
 {
 		GLdouble dVect1[3];
 		GLdouble dVect2[3];
 
-//		glLineWidth(wide);
+		glLineWidth(width);
 		glBegin(GL_LINES);
 		glColor3d(r, g, b);
 
@@ -231,6 +231,26 @@ void Draw_Cube_GL_RGB(float min_x, float min_y, float min_z,
 		Draw_Line_GL_RGB(max_x,max_y,min_z,max_x,max_y,max_z,r,g,b);
 		Draw_Line_GL_RGB(min_x,max_y,min_z,min_x,max_y,max_z,r,g,b);
 }
+
+void Draw_Inclined_Cube_GL_RGB(double rectangleVexPos[4][2],double min_z,double max_z,
+											float r,float g,float b,float width)
+{
+	Draw_Line_GL_RGB(rectangleVexPos[0][0],rectangleVexPos[0][1],min_z,rectangleVexPos[1][0],rectangleVexPos[1][1],min_z,r,g,b,width);
+	Draw_Line_GL_RGB(rectangleVexPos[1][0],rectangleVexPos[1][1],min_z,rectangleVexPos[2][0],rectangleVexPos[2][1],min_z,r,g,b,width);
+	Draw_Line_GL_RGB(rectangleVexPos[2][0],rectangleVexPos[2][1],min_z,rectangleVexPos[3][0],rectangleVexPos[3][1],min_z,r,g,b,width);
+	Draw_Line_GL_RGB(rectangleVexPos[3][0],rectangleVexPos[3][1],min_z,rectangleVexPos[0][0],rectangleVexPos[0][1],min_z,r,g,b,width);
+
+	Draw_Line_GL_RGB(rectangleVexPos[0][0],rectangleVexPos[0][1],max_z,rectangleVexPos[1][0],rectangleVexPos[1][1],max_z,r,g,b,width);
+	Draw_Line_GL_RGB(rectangleVexPos[1][0],rectangleVexPos[1][1],max_z,rectangleVexPos[2][0],rectangleVexPos[2][1],max_z,r,g,b,width);
+	Draw_Line_GL_RGB(rectangleVexPos[2][0],rectangleVexPos[2][1],max_z,rectangleVexPos[3][0],rectangleVexPos[3][1],max_z,r,g,b,width);
+	Draw_Line_GL_RGB(rectangleVexPos[3][0],rectangleVexPos[3][1],max_z,rectangleVexPos[0][0],rectangleVexPos[0][1],max_z,r,g,b,width);
+
+	Draw_Line_GL_RGB(rectangleVexPos[0][0],rectangleVexPos[0][1],min_z,rectangleVexPos[0][0],rectangleVexPos[0][1],max_z,r,g,b,width);
+	Draw_Line_GL_RGB(rectangleVexPos[1][0],rectangleVexPos[1][1],min_z,rectangleVexPos[1][0],rectangleVexPos[1][1],max_z,r,g,b,width);
+	Draw_Line_GL_RGB(rectangleVexPos[2][0],rectangleVexPos[2][1],min_z,rectangleVexPos[2][0],rectangleVexPos[2][1],max_z,r,g,b,width);
+	Draw_Line_GL_RGB(rectangleVexPos[3][0],rectangleVexPos[3][1],min_z,rectangleVexPos[3][0],rectangleVexPos[3][1],max_z,r,g,b,width);
+}
+
 
 void Draw_Cube_GL_RGB(clusterFeature&f, float r,float g,float b)
 {

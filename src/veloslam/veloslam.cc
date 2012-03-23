@@ -1049,7 +1049,7 @@ int main(int argc, char **argv)
     delete (*Iter);
     cout << ".";
     cout.flush();
-  }
+  } 
 
   Scan::allScans.clear();
 
