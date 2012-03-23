@@ -233,7 +233,10 @@ ELSE(WITH_SIFT)
   MESSAGE(STATUS "Without Sift")
 ENDIF(WITH_SIFT)
 
-
+## Special treatment for system specifics
+IF(APPLE)
+add_definitions(-Dfopen64=fopen -g)  
+ENDIF(APPLE)
 
 ## Multiple Cores 
 IF(APPLE)
@@ -335,6 +338,7 @@ ELSE(WIN32)
 ENDIF(WIN32)
 
 # Add OpenGL includes for MACOS if needed
+# The OSX OpenGL frameworks natively supports freeglut extensions
 IF(APPLE)
   include_directories(/System/Library/Frameworks/GLUT.framework/Headers)
   include_directories(/System/Library/Frameworks/OpenGL.framework/Headers)
