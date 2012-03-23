@@ -235,7 +235,7 @@ ENDIF(WITH_SIFT)
 
 ## Special treatment for system specifics
 IF(APPLE)
-add_definitions(-Dfopen64=fopen -g)  
+add_definitions(-Dfopen64=fopen)  
 ENDIF(APPLE)
 
 ## Multiple Cores 
