@@ -49,6 +49,7 @@ using std::flush;
 #include "slam6d/Boctree.h"
 #include "veloslam/veloscan.h"
 #include "veloslam/trackermanager.h"
+#include "veloslam/clusterboundingbox.h"
 
 #ifdef _OPENMP
 #include <omp.h>
@@ -802,8 +803,12 @@ int VeloScan::FindAndCalcScanClusterFeature()
 
 	
 	for(i=0; i<clustersize; ++i)
+	{
 		CalcClusterFeature(scanClusterArray[i],scanClusterFeatureArray[i]);
+		BoundingBox clusterBox;
+		clusterBox.CalBestRectangleBox(scanClusterArray[i],scanClusterFeatureArray[i]);
 
+	}
 	return 0;
 }
 
