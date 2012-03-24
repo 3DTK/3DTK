@@ -998,7 +998,7 @@ int main(int argc, char **argv)
          currentScan->calcReducedPoints_byClassifi(red, octree, PointType());
 		 cout << "reducing scan " << currentScan->get_points_red_size()  << endl;
 	     currentScan->transform(currentScan->getTransMatOrg(), Scan::INVALID); //transform points to initial position
-     //   currentScan->clearPoints();
+      //  currentScan->clearPoints();
          currentScan->createTree(nns_method, cuda_enabled);
 
 //      cout << "matching two  scan " << currentScan->getFileNr() <<  endl;
