@@ -899,7 +899,7 @@ void VeloScan::calcReducedPoints_byClassifi(double voxelSize, int nrpts, PointTy
   // copy vector of points to array of points to avoid
   // further copying
   int realCount =0;
-//  if (voxelSize <= 0.0) 
+  if (voxelSize <= 0.0) 
   {
     points_red = new double*[points.size()];
 
