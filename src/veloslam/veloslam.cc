@@ -71,6 +71,7 @@ using std::ifstream;
 #include "veloslam/debugview.h"
 #include "veloslam/tracker.h"
 #include "veloslam/trackermanager.h"
+#include "veloslam/intersection_detection.h"
 
 #ifdef _MSC_VER
 #define strcasecmp _stricmp
@@ -977,10 +978,10 @@ int main(int argc, char **argv)
         VeloScan *currentScan = new VeloScan(eu, maxDist);
         currentScan->setFileNr(_fileNr);
 		currentScan->setPoints(&ptss);    // copy points
-		cout << "read scan " << (currentScan->get_points())->size() << endl;
-        ptss.clear();                  // clear points
-        Scan::allScans.push_back(currentScan);
-
+		cout << "read scan " << (currentScan->get_points())->size() << endl;      
+		ptss.clear();                  // clear points
+		Scan::allScans.push_back(currentScan);
+		
          currentScan->FindingAllofObject();
          currentScan->TrackingAllofObject();
 		 cout << "all  cluster objects " << currentScan->scanClusterFeatureArray.size() << endl;
@@ -988,20 +989,23 @@ int main(int argc, char **argv)
 		 // mark the type of clusters.
 		 int windowsize =3;
 		 if(scanCount < windowsize )
+		 {
 		     currentScan->ClassifiAllofObject();
+		 }
 		 else
 		//	 currentScan->ClassifibyTrackingAllObject(scanCount, windowsize);
-		     currentScan->ClassifiAllofObject();
-
+		  {   currentScan->ClassifiAllofObject();
+		 }
          currentScan->ExchangePointCloud();
-
+		 /********  error    *****/
          currentScan->calcReducedPoints_byClassifi(red, octree, PointType());
 		 cout << "reducing scan " << currentScan->get_points_red_size()  << endl;
+
 	     currentScan->transform(currentScan->getTransMatOrg(), Scan::INVALID); //transform points to initial position
       //  currentScan->clearPoints();
          currentScan->createTree(nns_method, cuda_enabled);
 
-//      cout << "matching two  scan " << currentScan->getFileNr() <<  endl;
+      cout << "matching two  scan " << currentScan->getFileNr() <<  endl;
 		 MatchTwoScan(my_icp,  currentScan,  scanCount,  eP);
 
 		 scanCount++;
@@ -1027,6 +1031,12 @@ int main(int argc, char **argv)
 
   long endtime = GetCurrentTimeInMilliSec() - starttime;
   cout << "Matching done in " << endtime << " milliseconds!!!" << endl;
+
+
+  IntersectionDetection intersectionDetector;
+  intersectionDetector.DetectIntersection();
+  cout << "intersectionDetection done"<<endl;
+  
 
   if (exportPts) {
     cout << "Export all 3D Points to file \"points.pts\"" << endl;

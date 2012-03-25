@@ -13,13 +13,14 @@ struct IntersectionFeature
 	int slashEndRow;
 };
 
-class intersectionDetection
+class IntersectionDetection
 {
 public:
-	intersectionDetection();
-	~intersectionDetection();
+	IntersectionDetection();
+	~IntersectionDetection();
 
 	
+	int GetPointData();
 	int CalcRadAndTheta();
 	int CalPointCellPos(double x,double y,double z ,int * column,int * row);
 	int CalCellMinDis();
