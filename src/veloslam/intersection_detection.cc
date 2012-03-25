@@ -1,5 +1,7 @@
 #include "veloslam/intersection_detection.h"
-
+#include "veloslam/veloscan.h"
+#include <iostream>
+#include <fstream>
 #define  DefaultColumnSize 360
 
 
@@ -7,7 +9,7 @@ svm_model *m = svm_load_model("SegIter.model"); //载入训练好的模式
 svm_node *nod=new svm_node[361];
 
 
-intersectionDetection::intersectionDetection()
+IntersectionDetection::IntersectionDetection()
 {
 	slashWide=200;
     slashMaxLength=3500;
@@ -24,15 +26,31 @@ intersectionDetection::intersectionDetection()
 	CalcRadAndTheta();
 }
 
-intersectionDetection::~intersectionDetection()
+IntersectionDetection::~IntersectionDetection()
 {
 
 
 }
 
-int intersectionDetection::CalcRadAndTheta()
+int IntersectionDetection::GetPointData()
+{
+	for(unsigned int i = 0; i < Scan::allScans.size(); i++) 
+      for (int j = 0; j < Scan::allScans[i]->get_points_red_size(); j++)
+	  {
+		Point p;
+		p.x=Scan::allScans[i]->get_points_red()[j][0];
+	    p.y=Scan::allScans[i]->get_points_red()[j][1];
+		p.z=Scan::allScans[i]->get_points_red()[j][2];
+		allPoints_AfterRegstn.push_back(p);
+	  }
+
+	  return 0;
+}
+
+int IntersectionDetection::CalcRadAndTheta()
 {
 
+	GetPointData();
 	int i,j;
 	int size=  allPoints_AfterRegstn.size();
 
@@ -47,7 +65,7 @@ int intersectionDetection::CalcRadAndTheta()
 }
 
 
-int intersectionDetection::CalPointCellPos(double x,double y,double z ,int * column,int * row)
+int IntersectionDetection::CalPointCellPos(double x,double y,double z ,int * column,int * row)
 {
 	int i,j,count=0;
 	float flag;
@@ -197,7 +215,7 @@ int intersectionDetection::CalPointCellPos(double x,double y,double z ,int * col
 }
 
 
-int intersectionDetection::CalCellMinDis()
+int IntersectionDetection::CalCellMinDis()
 {
 
 	for(int i=0;i<cellNum;i++)
@@ -215,7 +233,7 @@ int intersectionDetection::CalCellMinDis()
 }
 
 
-int intersectionDetection::TransferToCellArray()
+int IntersectionDetection::TransferToCellArray()
 {
 
 	int i,j,count=0;
@@ -383,7 +401,7 @@ int intersectionDetection::TransferToCellArray()
 }
 
 
-int intersectionDetection:: CalcCellFeature(cell& cellobj, cellFeature& f)
+int IntersectionDetection:: CalcCellFeature(cell& cellobj, cellFeature& f)
 {
 	  int outlier;
 	   float lastMaxY;
@@ -479,7 +497,7 @@ int intersectionDetection:: CalcCellFeature(cell& cellobj, cellFeature& f)
 }
 
 
-int intersectionDetection::CalcAllCellFeature()
+int IntersectionDetection::CalcAllCellFeature()
 {
 	 int i,j;
 
@@ -516,10 +534,8 @@ int intersectionDetection::CalcAllCellFeature()
 
 }
 
-int intersectionDetection::CalWideSlashEdge_For_RoadShape(float Angle,int startColumID,int startCellID,float maxLength,float wide)
+int IntersectionDetection::CalWideSlashEdge_For_RoadShape(float Angle,int startColumID,int startCellID,float maxLength,float wide)
 {
-
-	int i,j;
 	float LengthX;
 	float LengthZ;
 	double sinAngle=sin(Angle*M_PI/180);
@@ -595,7 +611,7 @@ labelCalSlashEdge_For_RoadShape:
 }
 
 
-int intersectionDetection::DetectIntersection()
+int IntersectionDetection::DetectIntersection()
 {
 	int startColumn=0;
 	int startRow=30;
@@ -613,6 +629,14 @@ int intersectionDetection::DetectIntersection()
 		}
 		nod[360].index=-1;	
 		labelSVM= svm_predict(m,nod);
+
+		ofstream output;
+		output.open("intersection.txt");
+		output<<"labelSVM:"<<labelSVM<<endl;
+		for(int j=0;j<360;j++)
+			output<<j<<":"<<"  "<<nod[j].value;
+		output.close();
+
         if(labelSVM>0.5)
 			cout<<"intersection"<<endl;
 		else

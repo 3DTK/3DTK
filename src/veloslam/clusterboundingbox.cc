@@ -140,11 +140,11 @@ double BoundingBox::CalDirectionTwoPoints(double XPos1,double YPos1,double XPos2
 
  void  BoundingBox::CalBestRectangleBox(cluster &gluClusterData,clusterFeature &glu)
  {
-	 int minCircumferenceIndex;
+	 int minCircumferenceIndex=0;
 	 int bestBoxIndex;
-	 double minCircumference=allCandBox[0].circumference;
 	 if(!calCandidateBox)
 		 CalAllBoundingBox(gluClusterData);
+	double minCircumference=allCandBox[0].circumference;
 	 /**暂时以周长为最小的包围盒作为最佳矩形包围盒**/
 	    for(int i=0;i<allCandBox.size();i++)
 	  {
@@ -160,7 +160,6 @@ double BoundingBox::CalDirectionTwoPoints(double XPos1,double YPos1,double XPos2
 							allCandBox[bestBoxIndex].newMinXPointX,allCandBox[bestBoxIndex].newMinYPointY,
 							allCandBox[bestBoxIndex].newMaxXPointX,allCandBox[bestBoxIndex].newMinYPointY,
 	 };
-
 	 for(int i=0;i<4;i++)
 	 {
 		 CalCoordsAftRotation(clusterVex[i][0],clusterVex[i][1],
@@ -170,7 +169,6 @@ double BoundingBox::CalDirectionTwoPoints(double XPos1,double YPos1,double XPos2
 	 glu.width=allCandBox[bestBoxIndex].width;
 	 glu.boxDirection=allCandBox[bestBoxIndex].angle;
 
-	
 	///**画出得到的最佳矩形包围盒**/
 	 Draw_Inclined_Cube_GL_RGB(glu.boxVex,glu.min_z,glu.max_z,0.0,0.0,1.0,3);
 
