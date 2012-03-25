@@ -801,10 +801,12 @@ int VeloScan::FindAndCalcScanClusterFeature()
 	if(scanClusterFeatureArray.size()==0)
 		scanClusterFeatureArray.resize(clustersize);
 
-	
+	cout<<"clusterSize:"<<clustersize<<endl;
 	for(i=0; i<clustersize; ++i)
 	{
 		CalcClusterFeature(scanClusterArray[i],scanClusterFeatureArray[i]);
+				cout<<"K"<<endl;
+
 		BoundingBox clusterBox;
 		clusterBox.CalBestRectangleBox(scanClusterArray[i],scanClusterFeatureArray[i]);
 
@@ -901,11 +903,12 @@ void VeloScan::calcReducedPoints_byClassifi(double voxelSize, int nrpts, PointTy
   int realCount =0;
   if (voxelSize <= 0.0) 
   {
+	 
     points_red = new double*[points.size()];
 
     int end_loop = points_red_size = (int)points.size();
 	 int j=0;
-    for (int i = 0;  i < end_loop; i++) 
+	 for (int i = 0;  i < end_loop; i++) 
 	{
 		if(points[i].point_type &  POINT_TYPE_STATIC_OBJECT)
 		{
@@ -917,7 +920,6 @@ void VeloScan::calcReducedPoints_byClassifi(double voxelSize, int nrpts, PointTy
 			realCount++;
 		}
     }
-
 //    transform(transMatOrg, INVALID); //transform points to initial position
     // update max num point in scan iff you have to do so
 	points_red_size = realCount;
@@ -928,7 +930,6 @@ void VeloScan::calcReducedPoints_byClassifi(double voxelSize, int nrpts, PointTy
   }
 
   // start reduction
-  
   // build octree-tree from CurrentScan
   double **ptsOct = 0;
   ptsOct = new double*[realCount];
@@ -942,10 +943,11 @@ void VeloScan::calcReducedPoints_byClassifi(double voxelSize, int nrpts, PointTy
     ptsOct[num_pts][2] = points_red[i][2];
     num_pts++;
   }
+  /*****   error    *******/
   BOctTree<double> *oct = new BOctTree<double>(ptsOct, num_pts, voxelSize, pointtype);
-
   vector<double*> center;
   center.clear();
+
 
   if (nrpts > 0) {
     if (nrpts == 1) {
@@ -980,7 +982,8 @@ void VeloScan::calcReducedPoints_byClassifi(double voxelSize, int nrpts, PointTy
 //  transform(transMatOrg, INVALID); //transform points to initial position
 
   // update max num point in scan iff you have to do so
-  if (points_red_size > (int)max_points_red_size) max_points_red_size = points_red_size;
+  if (points_red_size > (int)max_points_red_size)
+	  max_points_red_size = points_red_size;
 }
 
 bool VeloScan::FilterNOMovingObjcets(clusterFeature &glu)
@@ -1074,7 +1077,10 @@ void VeloScan::FindingAllofObject()
 	{
 		TransferToCellArray();
 		CalcScanCellFeature();
+
 		FindAndCalcScanClusterFeature();
+		cout<<"d"<<endl;
+
 	}
     return;
  }
