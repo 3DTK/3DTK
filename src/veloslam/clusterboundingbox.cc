@@ -10,11 +10,11 @@
 
  bool operator<(const BesiegePoint & s1,const BesiegePoint & s2)
 {
-return s1.angle < s2.angle; 
+return s1.angle < s2.angle;
 }
 
- 
- 
+
+
 BoundingBox::BoundingBox(void)
 {
 	calCandidateBox=false;
@@ -32,13 +32,13 @@ BoundingBox::~BoundingBox(void)
 	 allCandBox.clear();
 	 minBoundingBox.clear();
  }
- /**计算选择坐标系后点的新坐标**/
+
 void BoundingBox::CalCoordsAftRotation(double x,double y,double *newX,double *newY,double theta)
 {
 
 	 *newY=y*cosf(theta*M_PI/180)-x*sinf(theta*M_PI/180);
 	 *newX=x*cosf(theta*M_PI/180)+y*sinf(theta*M_PI/180);
-			
+
 }
 
 
@@ -55,7 +55,6 @@ double BoundingBox::CalDirectionTwoPoints(double XPos1,double YPos1,double XPos2
 	return angle;
 }
 
-/**计算集群主方向和不规则包围盒**/
  void BoundingBox:: CalAllBoundingBox(cluster &gluClusterData)
  {
 
@@ -73,11 +72,11 @@ double BoundingBox::CalDirectionTwoPoints(double XPos1,double YPos1,double XPos2
 		  tempBoundingBox.newMinYPointY=1000000;
 		  for (int j = 0;  j <gluClusterData.size();j++)
 		  {
-			  
+
 			  cell* pcellObj= gluClusterData[j]->pCell;
 				  for(int k=0;k<pcellObj->size();k++)
 			  {
-				
+
 				   double newX,newY;
 				  CalCoordsAftRotation((*pcellObj)[k]->x,(*pcellObj)[k]->y,&newX,&newY,i);
 				  if(tempBoundingBox.newMaxXPointX<newX)
@@ -115,7 +114,7 @@ double BoundingBox::CalDirectionTwoPoints(double XPos1,double YPos1,double XPos2
 		  tempBoundingBox.area=(tempBoundingBox.newMaxXPointX-tempBoundingBox.newMinXPointX)*(tempBoundingBox.newMaxYPointY-tempBoundingBox.newMinYPointY);
 		  tempBoundingBox.circumference=((tempBoundingBox.newMaxXPointX-tempBoundingBox.newMinXPointX)+(tempBoundingBox.newMaxYPointY-tempBoundingBox.newMinYPointY))*2;
 		  tempBoundingBox.angle=i;
- 		
+
 		/**如果旋转后得出的结果在Y轴上比X轴长，统一为X轴为长轴**/
 		 if(tempBoundingBox.newMaxXPointX-tempBoundingBox.newMinXPointX<
 			  tempBoundingBox.newMaxYPointY- tempBoundingBox.newMinYPointY)
@@ -145,8 +144,8 @@ double BoundingBox::CalDirectionTwoPoints(double XPos1,double YPos1,double XPos2
 	 if(!calCandidateBox)
 		 CalAllBoundingBox(gluClusterData);
 	double minCircumference=allCandBox[0].circumference;
-	 /**暂时以周长为最小的包围盒作为最佳矩形包围盒**/
-	    for(int i=0;i<allCandBox.size();i++)
+
+      for(int i=0;i<allCandBox.size();i++)
 	  {
  		if(allCandBox[i].circumference<minCircumference)
 		  {
@@ -169,7 +168,6 @@ double BoundingBox::CalDirectionTwoPoints(double XPos1,double YPos1,double XPos2
 	 glu.width=allCandBox[bestBoxIndex].width;
 	 glu.boxDirection=allCandBox[bestBoxIndex].angle;
 
-	///**画出得到的最佳矩形包围盒**/
 	 Draw_Inclined_Cube_GL_RGB(glu.boxVex,glu.min_z,glu.max_z,0.0,0.0,1.0,3);
 
  }

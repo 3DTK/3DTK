@@ -7,12 +7,12 @@ IF(WIN32)
   ENDIF(CMAKE_SIZEOF_VOID_P EQUAL 8 )
 ENDIF(WIN32)
 IF (UNIX)
-  SET(SHOW_LIBS newmat dl ${GLUT_LIBRARIES} ${SHOW_LIBS}) 
+  SET(SHOW_LIBS newmat dl ${GLUT_LIBRARIES} ${SHOW_LIBS})
 ENDIF(UNIX)
 
 IF(WITH_VELOSLAM)
-  add_executable(veloslam veloslam.cc veloscan.cc debugview.cc pcddump.cc tracker.cc trackermanager.cc svm.cc clusterboundingbox.cc intersection_detection.cc KalmanFilter.cpp Matrix.cpp SegIter.model  ${SHOW_SRCS})
-  
+  add_executable(veloslam veloslam.cc veloscan.cc debugview.cc pcddump.cc tracker.cc trackermanager.cc svm.cc clusterboundingbox.cc intersection_detection.cc kalmanfilter.cc matrix.cc SegIter.model ${SHOW_SRCS})
+
 IF(UNIX)
   target_link_libraries(veloslam dl scanlib newmat sparse ANN ${SHOW_LIBS})
 ENDIF(UNIX)
