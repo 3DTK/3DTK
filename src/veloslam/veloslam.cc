@@ -108,7 +108,7 @@ void sigSEGVhandler (int v)
       Iter = Scan::allScans.begin();
       delete (*Iter);
       cout << ".";
-      cout.flush(); 
+      cout.flush();
     }
     cout << endl;
   }
@@ -203,7 +203,7 @@ void usage(char* prog)
     << endl
     << bold << "  -I" << normal << " NR, " << bold << "--iterSLAM=" << normal << "NR [default: 0]" << endl
     << "         sets the maximal number of iterations for SLAM to <NR>" << endl
-    << "         (if not set, graphSLAM is not executed)" << endl 
+    << "         (if not set, graphSLAM is not executed)" << endl
     << endl
     << bold << "  -l" << normal << " NR, " << bold << "--loopsize=" << normal << "NR [default: 20]" << endl
     << "         sets the size of a loop, i.e., a loop must exceed <NR> of scans" << endl
@@ -318,7 +318,7 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &rand,
   /* options descriptor */
   // 0: no arguments, 1: required argument, 2: optional argument
   static struct option longopts[] = {
-    { "format",          required_argument,   0,  'f' },  
+    { "format",          required_argument,   0,  'f' },
     { "algo",            required_argument,   0,  'a' },
     { "nns_method",      required_argument,   0,  't' },
     { "loop6DAlgo",      required_argument,   0,  'L' },
@@ -363,7 +363,7 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &rand,
         if ((algo < 0) || (algo > 9)) {
           cerr << "Error: ICP Algorithm not available." << endl;
           exit(1);
-        }	   
+        }
         break;
 	 case 't':
         nns_method = atoi(optarg);
@@ -371,8 +371,8 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &rand,
           cerr << "Error: NNS Method not available." << endl;
           exit(1);
         }
-        	   
-        break;  
+
+        break;
       case 'L':
         loopSlam6DAlgo = atoi(optarg);
         if (loopSlam6DAlgo < 0 || loopSlam6DAlgo > 6) {
@@ -475,7 +475,7 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &rand,
       case '3':  // = --graphDist
         graphDist = atof(optarg);
         break;
-      case 'f': 
+      case 'f':
         if (!Scan::toType(optarg, type))
           abort ();
         break;
@@ -978,10 +978,10 @@ int main(int argc, char **argv)
         VeloScan *currentScan = new VeloScan(eu, maxDist);
         currentScan->setFileNr(_fileNr);
 		currentScan->setPoints(&ptss);    // copy points
-		cout << "read scan " << (currentScan->get_points())->size() << endl;      
+		cout << "read scan " << (currentScan->get_points())->size() << endl;
 		ptss.clear();                  // clear points
 		Scan::allScans.push_back(currentScan);
-		
+
          currentScan->FindingAllofObject();
          currentScan->TrackingAllofObject();
 		 cout << "all  cluster objects " << currentScan->scanClusterFeatureArray.size() << endl;
@@ -994,7 +994,8 @@ int main(int argc, char **argv)
 		 }
 		 else
 		//	 currentScan->ClassifibyTrackingAllObject(scanCount, windowsize);
-		  {   currentScan->ClassifiAllofObject();
+		 {
+            currentScan->ClassifiAllofObject();
 		 }
          currentScan->ExchangePointCloud();
 		 /********  error    *****/
@@ -1036,7 +1037,7 @@ int main(int argc, char **argv)
   IntersectionDetection intersectionDetector;
   intersectionDetector.DetectIntersection();
   cout << "intersectionDetection done"<<endl;
-  
+
 
   if (exportPts) {
     cout << "Export all 3D Points to file \"points.pts\"" << endl;
@@ -1059,7 +1060,7 @@ int main(int argc, char **argv)
     delete (*Iter);
     cout << ".";
     cout.flush();
-  } 
+  }
 
   Scan::allScans.clear();
 

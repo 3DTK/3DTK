@@ -43,7 +43,7 @@ static int ColorTableCircle[16][3]=
 static float jet_colors[JET_COLORS_LUT_SIZE][3];
 static int jet_colors_initialized = 0;
 
-static inline void color_util_rand_color(float f[4], 
+static inline void color_util_rand_color(float f[4],
 										 double alpha,
 										 double min_intensity)
 {
@@ -64,23 +64,22 @@ again:
 /** Given an array of colors, a palette is created that linearly interpolates through all the colors. **/
 static void color_util_build_color_table(double color_palette[][3],
 										  int palette_size,
-										  float lut[][3], 
+										  float lut[][3],
 										  int lut_size)
 {
-    for (int idx = 0; idx < lut_size; idx++) 
+    for (int idx = 0; idx < lut_size; idx++)
 	{
         double znorm = ((double) idx) / lut_size;
 
         int color_index = (palette_size - 1) * znorm;
         double alpha = (palette_size - 1) * znorm - color_index;
-        
-        for (int i = 0; i < 3; i++) 
+
+        for (int i = 0; i < 3; i++)
 		{
             lut[idx][i] = color_palette[color_index][i] * (1.0 - alpha) + color_palette[color_index+1][i]*alpha;
-        }    
+        }
     }
 }
-
 
 
 static void init_color_table_jet()
@@ -93,14 +92,12 @@ static void init_color_table_jet()
     color_util_build_color_table(
 		jet,
 		sizeof(jet)/(sizeof(double)*3),
-		jet_colors, 
+		jet_colors,
 		JET_COLORS_LUT_SIZE);
 
     jet_colors_initialized = 1;
 }
 
-
-// v 在 0到1之间
 static inline float *color_util_jet(double v)
 {
     if (!jet_colors_initialized)
