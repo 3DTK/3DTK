@@ -45,17 +45,25 @@ public:
 
 	vector<ClusterStatus> clusterStatus;
 
+	void TrackerManagerReset(); //added by yuanjun
+
+	void GetTwoScanRoll(Scan *CurrentScan,Scan *preScan);//added by yuanjun
+
 private:
 	int UpdateTrackers(VeloScan& scanRef);
 
 	int AddTrackers(VeloScan& scanRef);
 
-	int MatchTrackers(VeloScan& scanRef,Tracker& tracker);
+	int MatchTrackers(VeloScan& scanRef,Tracker& tracker,float kg);
 
 	int FilterObject(VeloScan& scanRef);
 	
 	list<Tracker> tracks;
 
 	int colorIdx;
+
+	double delta_Theta[3],delta_Pos[3],rollAngle;//added by yuanjun
+
+	VeloScan *preScan; //added by yuanjun
 };
 
