@@ -5,6 +5,7 @@
 #include "veloslam/veloscan.h"
 #include "veloslam/trackermanager.h"
 #include "veloslam/debugview.h"
+#include "veloslam/kalmanfilter.h"
 
 #include <GL/gl.h>		    	/* OpenGL header file */
 #include <GL/glu.h>			/* OpenGL utilities header file */
@@ -13,9 +14,9 @@
 #include <GL/glut.h>
 #else
 #include <GL/freeglut.h>
-#endif 
+#endif
 
-#define KG 35 
+#define KG 35
 
 TrackerManager::TrackerManager(void)
 {
@@ -66,7 +67,7 @@ int TrackerManager::HandleScan(VeloScan& scanRef)
 	//	}
 	//}
 	//else
-	//{	
+	//{
 	//	GetTwoScanRoll(&scanRef,preScan);
 	//}
 	//rollAngle=delta_Theta[1];
@@ -260,13 +261,13 @@ int TrackerManager::MatchTrackers(VeloScan& scanRef,Tracker& tracker,float kg)
 			sizeDiff =abs(tracker.statusList.back().size-glu.size);
 			positionDiff = sqrt(sqr(tracker.statusList.back().avg_x -glu.avg_x) + sqr(tracker.statusList.back().avg_z -glu.avg_z) ) ;
 			value= radiusDiff*1.0 + thetaDiff*1.0  +  sizeDiff*0.8 + positionDiff * 0.03 ;
-			if(value<minValue)     
+			if(value<minValue)
 			{
 				minValue=value;
 				minID=i;
 				temp=glu;
 				flag=true;
-			}						
+			}
 
 		}
 
@@ -299,7 +300,7 @@ int TrackerManager::UpdateTrackers(VeloScan& scanRef)
 		if (!(tracker.missMatch))
 		{
 			matchID=MatchTrackers(scanRef,tracker,KG);
-		} 
+		}
 		else
 		{
 			matchID=MatchTrackers(scanRef,tracker,1.5*KG);
@@ -369,7 +370,7 @@ int TrackerManager::DrawScanCluster(VeloScan& scanRef)
 		if(scanRef.scanid ==5 )
 			   Draw_Cube_GL_RGB(glu, ColorTableShot[5][0], ColorTableShot[5][1], ColorTableShot[5][2]);
 
-		
+
 		/*
 		glColor3d(ColorTableShot[colorIdx][0],  ColorTableShot[colorIdx][1],  ColorTableShot[colorIdx][2]);
 
@@ -474,7 +475,7 @@ int TrackerManager::DrawTrackersMovtion(VeloScan& scanRef1, VeloScan& scanRef2)
 		///	continue;
 
 		if(tracker.statusList.size() > 1)
-		{  
+		{
 		//	cerr << " object number  " << tracker.statusList.size() <<endl;
 			clusterFeature &glu1=tracker.statusList[0];
 			clusterFeature &glu2=tracker.statusList[1];
@@ -486,7 +487,7 @@ int TrackerManager::DrawTrackersMovtion(VeloScan& scanRef1, VeloScan& scanRef2)
 			cluster &gluData2=tracker.dataList[1];
 	//		clusterFeature &glu3=tracker.statusList[2];
 			//  TRACE("Draw  tracker %d,len:%d\n",tracker.colorIdx,tracker.statusList.size());
-			
+
 			cell* pCell;
 			glBegin(GL_POINTS);
 			glPointSize(1);
@@ -538,14 +539,14 @@ int TrackerManager::DrawTrackersMovtion(VeloScan& scanRef1, VeloScan& scanRef2)
             glLineWidth(3);
 			//////////////////////
 			glBegin(GL_LINES);
-			
+
 			glColor3d(1, 0, 0);
 
     		Point p1(glu1.avg_x, glu1.avg_y, glu1.avg_z);
 			Point p2(glu2.avg_x, glu2.avg_y,glu2.avg_z);
-	
+
 			p2.transform(deltaMat);
-		
+
 			////////////////////////
 			dVect1[0]=p1.x;
 			dVect1[1]=p1.y;
@@ -576,14 +577,14 @@ int TrackerManager::DrawTrackersMovtion_Long(vector <VeloScan *> allScans)
 		Tracker &tracker=*it;
 		if(tracker.missMatch == true)
 			   continue;
-		if(tracker.statusList.size() <2) 
+		if(tracker.statusList.size() <2)
 			   continue;
-		if(tracker.dataList.size()  < 2) 
+		if(tracker.dataList.size()  < 2)
 			   continue;
 
 		//	cerr << " object number  " << tracker.statusList.size() <<endl;
 			for(int i =0; i <2 ;i ++)
-			{  
+			{
 			    Scan *firstScan = allScans[0];
                 Scan *CurrentScan = allScans[i];
 				double  deltaMat[16];
@@ -596,7 +597,7 @@ int TrackerManager::DrawTrackersMovtion_Long(vector <VeloScan *> allScans)
 		//		DrawObjectPoint(gluData1, 1,  0.3, 0.3, 0.3,deltaMat);
 				DrawObjectPoint(gluData1, 1,
 					ColorTableShot[colorIdx][0],
-					ColorTableShot[colorIdx][1], 
+					ColorTableShot[colorIdx][1],
 					ColorTableShot[colorIdx][2] ,
 					deltaMat);
 
@@ -611,7 +612,7 @@ int TrackerManager::DrawTrackersMovtion_Long(vector <VeloScan *> allScans)
 //			glBegin(GL_LINES);
 	//		if (glu2.size < 8) continue;
 //			Point p2(glu2.avg_x, glu2.avg_y,glu2.avg_z);
-	
+
 //			DrawPoint(p2,8,1,1,0);
 		   }
 	}
@@ -630,14 +631,14 @@ int TrackerManager::DrawTrackersMovtion_Long_Number(vector <Scan *> allScans, in
 		Tracker &tracker=*it;
 		if(tracker.missMatch == true)
 			   continue;
-		if(tracker.statusList.size() < n) 
+		if(tracker.statusList.size() < n)
 			   continue;
-		if(tracker.dataList.size()  < n) 
+		if(tracker.dataList.size()  < n)
 			   continue;
 
 		//	cerr << " object number  " << tracker.statusList.size() <<endl;
 			for(int i =0; i <n ;i ++)
-			{  
+			{
 			    Scan *firstScan = allScans[0];
                 Scan *CurrentScan = allScans[i];
 				double  deltaMat[16];
@@ -650,7 +651,7 @@ int TrackerManager::DrawTrackersMovtion_Long_Number(vector <Scan *> allScans, in
 		//		DrawObjectPoint(gluData1, 1,  0.3, 0.3, 0.3,deltaMat);
 				DrawObjectPoint(gluData1, 1,
 					ColorTableShot[colorIdx][0],
-					ColorTableShot[colorIdx][1], 
+					ColorTableShot[colorIdx][1],
 					ColorTableShot[colorIdx][2] ,
 					deltaMat);
 
@@ -665,7 +666,7 @@ int TrackerManager::DrawTrackersMovtion_Long_Number(vector <Scan *> allScans, in
 //			glBegin(GL_LINES);
 	//		if (glu2.size < 8) continue;
 //			Point p2(glu2.avg_x, glu2.avg_y,glu2.avg_z);
-	
+
 //			DrawPoint(p2,8,1,1,0);
 		   }
 	}
@@ -684,15 +685,15 @@ int TrackerManager::DrawTrackersMovtion_Long_Number_All(vector <Scan *> allScans
 		Tracker &tracker=*it;
 	//	if(tracker.missMatch == true)
 	//		   continue;
-	//	if(tracker.statusList.size() < n) 
+	//	if(tracker.statusList.size() < n)
 	//		   continue;
-	//	if(tracker.dataList.size()  < n) 
+	//	if(tracker.dataList.size()  < n)
 	//		   continue;
 
 		//	cerr << " object number  " << tracker.statusList.size() <<endl;
 			for(int i =0;   i <tracker.statusList.size()-1;  i++ )
-			{  
-				
+			{
+
 			    Scan *firstScan = allScans[0];
                 Scan *CurrentScan = allScans[i];
 				Scan *CurrentScanNext = allScans[i+1];
@@ -724,7 +725,7 @@ int TrackerManager::DrawTrackersMovtion_Long_Number_All(vector <Scan *> allScans
 
 				DrawObjectPoint(gluData1, 1,
 					ColorTableShot[colorIdx][0],
-					ColorTableShot[colorIdx][1], 
+					ColorTableShot[colorIdx][1],
 					ColorTableShot[colorIdx][2] ,
 					deltaMat);
 
@@ -735,7 +736,7 @@ int TrackerManager::DrawTrackersMovtion_Long_Number_All(vector <Scan *> allScans
 				//colorIdx=(tracker.colorIdx+1)%8;
 				//DrawObjectPoint(gluData2, 1,
 				//	ColorTableShot[colorIdx][0],
-				//	ColorTableShot[colorIdx][1], 
+				//	ColorTableShot[colorIdx][1],
 				//	ColorTableShot[colorIdx][2] ,
 				//	deltaMatNext);
 
@@ -760,7 +761,7 @@ int TrackerManager::ClassifiyTrackersObjects(vector <Scan *> allScans, int curre
 
 	list<Tracker>::iterator it;
 
- //    int clustersize=scanClusterArray.size();            
+ //    int clustersize=scanClusterArray.size();
 	//	//Find moving Ojbects
 	//for(i=0; i<clustersize; ++i)
 	//{
@@ -795,15 +796,15 @@ int TrackerManager::ClassifiyTrackersObjects(vector <Scan *> allScans, int curre
 //		Tracker &tracker=*it;
 //	//	if(tracker.missMatch == true)
 //	//		   continue;
-//	//	if(tracker.statusList.size() < n) 
+//	//	if(tracker.statusList.size() < n)
 //	//		   continue;
-//	//	if(tracker.dataList.size()  < n) 
+//	//	if(tracker.dataList.size()  < n)
 //	//		   continue;
 //
 //		//	cerr << " object number  " << tracker.statusList.size() <<endl;
 //			for(int i =0;   i <tracker.statusList.size();  i++ )
-//			{  
-//				
+//			{
+//
 //			    Scan *firstScan = allScans[0];
 //                Scan *CurrentScan = allScans[i];
 //				double  deltaMat[16];
@@ -816,7 +817,7 @@ int TrackerManager::ClassifiyTrackersObjects(vector <Scan *> allScans, int curre
 //		//		DrawObjectPoint(gluData1, 1,  0.3, 0.3, 0.3,deltaMat);
 //				DrawObjectPoint(gluData1, 1,
 //					ColorTableShot[colorIdx][0],
-//					ColorTableShot[colorIdx][1], 
+//					ColorTableShot[colorIdx][1],
 //					ColorTableShot[colorIdx][2] ,
 //					deltaMat);
 //
@@ -831,7 +832,7 @@ int TrackerManager::ClassifiyTrackersObjects(vector <Scan *> allScans, int curre
 ////			glBegin(GL_LINES);
 //	//		if (glu2.size < 8) continue;
 ////			Point p2(glu2.avg_x, glu2.avg_y,glu2.avg_z);
-//	
+//
 ////			DrawPoint(p2,8,1,1,0);
 //		   }
 //

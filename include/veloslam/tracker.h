@@ -1,6 +1,6 @@
 #pragma once
 #include "veloslam/veloscan.h"
-#include "veloslam/KalmanFilter.h"
+#include "veloslam/kalmanfilter.h"
 #include <deque>
 
 using namespace std;
