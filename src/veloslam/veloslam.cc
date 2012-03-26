@@ -865,7 +865,7 @@ int   FinalSLAM( double &red, int &rand,
 	return 0;
   }
 
-  void MatchTwoScan(icp6D *my_icp,  VeloScan* currentScan, int scanCount, bool eP )
+void MatchTwoScan(icp6D *my_icp, VeloScan* currentScan, int scanCount, bool eP )
 {
          Scan *PreviousScan = 0;
   		//////////////////////ICP//////////////////////
@@ -874,7 +874,7 @@ int   FinalSLAM( double &red, int &rand,
 				PreviousScan =Scan::allScans[scanCount-1];
 				// extrapolate odometry // 以前一帧的坐标为基准
 				if (eP)
-						currentScan->mergeCoordinatesWithRoboterPosition(PreviousScan);
+					currentScan->mergeCoordinatesWithRoboterPosition(PreviousScan);
 
    				my_icp->match(PreviousScan, currentScan);
 		}
@@ -934,9 +934,9 @@ int main(int argc, char **argv)
   double distLoop   = 700.0;
   int iterLoop      = 100;
   double graphDist  = cldist;
-  int octree       = 0;  // employ randomized octree reduction?
+  int octree  = 0;  // employ randomized octree reduction?
   bool cuda_enabled    = false;
-  reader_type type    = UOS;
+  reader_type type  = UOS;
 
   parseArgs(argc, argv, dir, red, rand, mdm, mdml, mdmll, mni, start, end,
       maxDist, minDist, quiet, veryQuiet, eP, meta, algo, loopSlam6DAlgo, lum6DAlgo, anim,
@@ -973,7 +973,6 @@ int main(int argc, char **argv)
     while ((_fileNr =my_ScanIO.readScans(start, end, dir, maxDist, minDist, eu, ptss)) != -1)
     {
 		VeloScan::dir = dir;
-
 	    cout << scanCount << "*" << endl;
         VeloScan *currentScan = new VeloScan(eu, maxDist);
         currentScan->setFileNr(_fileNr);
@@ -1006,7 +1005,7 @@ int main(int argc, char **argv)
       //  currentScan->clearPoints();
          currentScan->createTree(nns_method, cuda_enabled);
 
-      cout << "matching two  scan " << currentScan->getFileNr() <<  endl;
+         cout << "matching two  scan " << currentScan->getFileNr() <<  endl;
 		 MatchTwoScan(my_icp,  currentScan,  scanCount,  eP);
 
 		 scanCount++;

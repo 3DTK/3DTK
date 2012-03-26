@@ -13,11 +13,14 @@
 #include <GL/glut.h>
 #else
 #include <GL/freeglut.h>
-#endif
+#endif 
+
+#define KG 35 
 
 TrackerManager::TrackerManager(void)
 {
 	colorIdx=0;
+	rollAngle=0;
 }
 
 
@@ -55,11 +58,28 @@ int TrackerManager::HandleScan(VeloScan& scanRef)
 	for(i=0; i<size;++i)
 		clusterStatus[i].Matched=false;
 
+	//if (!preScan)
+	//{
+	//	for (i=0;i<6;i++)
+	//	{
+	//		delta_Theta[i]=0;
+	//	}
+	//}
+	//else
+	//{	
+	//	GetTwoScanRoll(&scanRef,preScan);
+	//}
+	//rollAngle=delta_Theta[1];
+
+	rollAngle=0;
+
 	FilterObject(scanRef);
 
 	UpdateTrackers(scanRef);
 
 	AddTrackers(scanRef);
+
+	/*preScan=&scanRef;*/
 
 	return 0;
 }
@@ -77,7 +97,9 @@ int TrackerManager::AddTrackers(VeloScan& scanRef)
 		cluster &gluData=scanRef.scanClusterArray[i];
 		if(clusterStatus[i].FilterRet==true&&clusterStatus[i].Matched==false)
 		{
-			Tracker newTracker;
+			Tracker newTracker(glu,rollAngle);
+
+			newTracker.kalmanFilter.timeUpdate();
 
 			newTracker.frameNO =scanRef.scanid;
 
@@ -194,56 +216,69 @@ bool TrackerManager::TrackerFilter(clusterFeature &glu)
 }
 
 
-int TrackerManager::MatchTrackers(VeloScan& scanRef,Tracker& tracker)
+int TrackerManager::MatchTrackers(VeloScan& scanRef,Tracker& tracker,float kg)
 {
 	int i;
 	int minID=-1;
-	int minValue=360;
-	int value;
+	float value,minValue=360.0;
 	float radiusDiff;
 	float thetaDiff;
 	float sizeDiff;
 	float positionDiff;
+	CMatrix standardDeviation(2,2),measurementErro(2,1);
+	Measurement predictMeasurement;
+	bool IsSmaller1,IsSmaller2,flag=false;
+	clusterFeature temp;
+	ObjectState movestate;
+
+	predictMeasurement=tracker.kalmanFilter.GetPredictMeasurement(rollAngle);
+
+	standardDeviation=tracker.kalmanFilter.CalMeasureDeviation();
 
 	for(i=0; i<scanRef.scanClusterArray.size();++i)
 	{
+
 		clusterFeature &glu=scanRef.scanClusterFeatureArray[i];
 		cluster &gluData=scanRef.scanClusterArray[i];
 
-
-		if(clusterStatus.size()!=0   &&  clusterStatus[i].FilterRet==false)
+		if(clusterStatus.size()!=0&&clusterStatus[i].FilterRet==false)
 			continue;
 
-		if(tracker.statusList.size())
+		measurementErro.m_pTMatrix[0][0]=glu.avg_x-predictMeasurement.x_measurement;
+		measurementErro.m_pTMatrix[1][0]=glu.avg_z-predictMeasurement.z_measurement;
+
+		IsSmaller1=(fabs(measurementErro.m_pTMatrix[0][0])<kg*standardDeviation.m_pTMatrix[0][0]);
+		IsSmaller2=(fabs(measurementErro.m_pTMatrix[1][0])<kg*standardDeviation.m_pTMatrix[1][1]);
+
+		if (IsSmaller1&&IsSmaller2)
 		{
+	/*		cout<<"The "<<i<<"th object is matching with tracker "<<tracker.trackerID<<endl
+				<<"with predictErro_x:"<<measurementErro.m_pTMatrix[0][0]<<"with predictErro_z:"<<measurementErro.m_pTMatrix[1][0]<<endl;*/
+
 			radiusDiff=fabs(tracker.statusList.back().radius-glu.radius);
 			thetaDiff=fabs(tracker.statusList.back().theta-glu.theta);
 			sizeDiff =abs(tracker.statusList.back().size-glu.size);
 			positionDiff = sqrt(sqr(tracker.statusList.back().avg_x -glu.avg_x) + sqr(tracker.statusList.back().avg_z -glu.avg_z) ) ;
-
-	//		cerr <<   tracks.size() << "   " << tracker.frameNO << "   " <<tracker.matchClusterID <<"   " <<tracker.colorIdx <<endl;
-	//		cerr <<  tracker.statusList.back().theta << "   " <<glu.theta <<"   " << thetaDiff <<"   "
-	//			    <<tracker.statusList.back().radius << "   " <<glu.radius <<"   " <<radiusDiff<<"   "
-	//				<<tracker.statusList.back().size << "   " <<glu.size <<"   " <<sizeDiff <<"   "
-	//				<<tracker.statusList.back().avg_x << "   " <<glu.avg_x <<"   " <<positionDiff <<"  "
-	//				<<tracker.statusList.back().avg_z << "   " <<glu.avg_z <<"   " <<positionDiff <<endl;
-		//	if(radiusDiff<=12.0 && thetaDiff<=12.0 && sizeDiff <=8 )
-
-//  			if(radiusDiff<=12.0 && thetaDiff<=12.0 )
-			if(radiusDiff<=12.0 && thetaDiff<=12.0 && sizeDiff <=8 && positionDiff <=300)
+			value= radiusDiff*1.0 + thetaDiff*1.0  +  sizeDiff*0.8 + positionDiff * 0.03 ;
+			if(value<minValue)     
 			{
-			//	value= radiusDiff*1.0 + thetaDiff*1.0  +  sizeDiff*0.8 + positionDiff * 0.03 ;
-				value= radiusDiff*1.0 + thetaDiff*1.0  +  sizeDiff*0.8 + positionDiff * 0.03 ;;
-				if(value<minValue)
-				{
-					minValue=value;
-					minID=i;
-				}
-
-			}
+				minValue=value;
+				minID=i;
+				temp=glu;
+				flag=true;
+			}						
 
 		}
 
+	}
+	if (flag)
+	{
+		tracker.kalmanFilter.stateUpdate(temp,rollAngle);
+		tracker.kalmanFilter.timeUpdate();
+		movestate=tracker.kalmanFilter.GetCurrentState();
+		//cout<<"The tracker with trackerID:"<<tracker.trackerID<<"is matched with the "<<minID<<"th object!"<<endl;
+		//cout	<<"with x_positon:"<<movestate.x_position<<", z_position:"<<movestate.z_positon<<endl;
+		//cout	<<"with x_speed:"<<movestate.x_speed<<", z_speed:"<<movestate.z_speed<<endl;
 	}
 	return minID;
 }
@@ -256,16 +291,30 @@ int TrackerManager::UpdateTrackers(VeloScan& scanRef)
 
 	list<Tracker>::iterator it;
 	int trackNO =0;
-	for(it=tracks.begin() ;  it!=tracks.end();  it++)
+	for(it=tracks.begin() ; it!=tracks.end(); )
 	{
 		Tracker &tracker=*it;
 		trackNO ++;
-		matchID=MatchTrackers(scanRef,  tracker);
 
+		if (!(tracker.missMatch))
+		{
+			matchID=MatchTrackers(scanRef,tracker,KG);
+		} 
+		else
+		{
+			matchID=MatchTrackers(scanRef,tracker,1.5*KG);
+		}
 		if(matchID==-1)
 		{
 			tracker.missMatch=true;
-			//	TRACE("Delete tracker %d\n",tracker.colorIdx);
+			tracker.missedTime++;
+			if (tracker.missedTime==3)
+			{
+				//cout<<"The tracker with trackerID:"<<tracker.trackerID<<" is terminated"<<endl;
+				it=tracks.erase(it);
+				continue;
+			}
+			it++;
 		}
 		else
 		{
@@ -280,10 +329,12 @@ int TrackerManager::UpdateTrackers(VeloScan& scanRef)
 
 			clusterStatus[matchID].Matched=true;
 			//	TRACE("Match  tracker %d,len:%d\n",tracker.colorIdx,tracker.statusList.size());
+			tracker.missedTime=0;
+			it++;
 		}
 
 	}
-	//tracks.remove_if();
+
 	return 0;
 }
 
@@ -318,7 +369,7 @@ int TrackerManager::DrawScanCluster(VeloScan& scanRef)
 		if(scanRef.scanid ==5 )
 			   Draw_Cube_GL_RGB(glu, ColorTableShot[5][0], ColorTableShot[5][1], ColorTableShot[5][2]);
 
-
+		
 		/*
 		glColor3d(ColorTableShot[colorIdx][0],  ColorTableShot[colorIdx][1],  ColorTableShot[colorIdx][2]);
 
@@ -423,7 +474,7 @@ int TrackerManager::DrawTrackersMovtion(VeloScan& scanRef1, VeloScan& scanRef2)
 		///	continue;
 
 		if(tracker.statusList.size() > 1)
-		{
+		{  
 		//	cerr << " object number  " << tracker.statusList.size() <<endl;
 			clusterFeature &glu1=tracker.statusList[0];
 			clusterFeature &glu2=tracker.statusList[1];
@@ -435,7 +486,7 @@ int TrackerManager::DrawTrackersMovtion(VeloScan& scanRef1, VeloScan& scanRef2)
 			cluster &gluData2=tracker.dataList[1];
 	//		clusterFeature &glu3=tracker.statusList[2];
 			//  TRACE("Draw  tracker %d,len:%d\n",tracker.colorIdx,tracker.statusList.size());
-
+			
 			cell* pCell;
 			glBegin(GL_POINTS);
 			glPointSize(1);
@@ -487,14 +538,14 @@ int TrackerManager::DrawTrackersMovtion(VeloScan& scanRef1, VeloScan& scanRef2)
             glLineWidth(3);
 			//////////////////////
 			glBegin(GL_LINES);
-
+			
 			glColor3d(1, 0, 0);
 
     		Point p1(glu1.avg_x, glu1.avg_y, glu1.avg_z);
 			Point p2(glu2.avg_x, glu2.avg_y,glu2.avg_z);
-
+	
 			p2.transform(deltaMat);
-
+		
 			////////////////////////
 			dVect1[0]=p1.x;
 			dVect1[1]=p1.y;
@@ -525,14 +576,14 @@ int TrackerManager::DrawTrackersMovtion_Long(vector <VeloScan *> allScans)
 		Tracker &tracker=*it;
 		if(tracker.missMatch == true)
 			   continue;
-		if(tracker.statusList.size() <2)
+		if(tracker.statusList.size() <2) 
 			   continue;
-		if(tracker.dataList.size()  < 2)
+		if(tracker.dataList.size()  < 2) 
 			   continue;
 
 		//	cerr << " object number  " << tracker.statusList.size() <<endl;
 			for(int i =0; i <2 ;i ++)
-			{
+			{  
 			    Scan *firstScan = allScans[0];
                 Scan *CurrentScan = allScans[i];
 				double  deltaMat[16];
@@ -545,7 +596,7 @@ int TrackerManager::DrawTrackersMovtion_Long(vector <VeloScan *> allScans)
 		//		DrawObjectPoint(gluData1, 1,  0.3, 0.3, 0.3,deltaMat);
 				DrawObjectPoint(gluData1, 1,
 					ColorTableShot[colorIdx][0],
-					ColorTableShot[colorIdx][1],
+					ColorTableShot[colorIdx][1], 
 					ColorTableShot[colorIdx][2] ,
 					deltaMat);
 
@@ -560,7 +611,7 @@ int TrackerManager::DrawTrackersMovtion_Long(vector <VeloScan *> allScans)
 //			glBegin(GL_LINES);
 	//		if (glu2.size < 8) continue;
 //			Point p2(glu2.avg_x, glu2.avg_y,glu2.avg_z);
-
+	
 //			DrawPoint(p2,8,1,1,0);
 		   }
 	}
@@ -579,14 +630,14 @@ int TrackerManager::DrawTrackersMovtion_Long_Number(vector <Scan *> allScans, in
 		Tracker &tracker=*it;
 		if(tracker.missMatch == true)
 			   continue;
-		if(tracker.statusList.size() < n)
+		if(tracker.statusList.size() < n) 
 			   continue;
-		if(tracker.dataList.size()  < n)
+		if(tracker.dataList.size()  < n) 
 			   continue;
 
 		//	cerr << " object number  " << tracker.statusList.size() <<endl;
 			for(int i =0; i <n ;i ++)
-			{
+			{  
 			    Scan *firstScan = allScans[0];
                 Scan *CurrentScan = allScans[i];
 				double  deltaMat[16];
@@ -599,7 +650,7 @@ int TrackerManager::DrawTrackersMovtion_Long_Number(vector <Scan *> allScans, in
 		//		DrawObjectPoint(gluData1, 1,  0.3, 0.3, 0.3,deltaMat);
 				DrawObjectPoint(gluData1, 1,
 					ColorTableShot[colorIdx][0],
-					ColorTableShot[colorIdx][1],
+					ColorTableShot[colorIdx][1], 
 					ColorTableShot[colorIdx][2] ,
 					deltaMat);
 
@@ -614,7 +665,7 @@ int TrackerManager::DrawTrackersMovtion_Long_Number(vector <Scan *> allScans, in
 //			glBegin(GL_LINES);
 	//		if (glu2.size < 8) continue;
 //			Point p2(glu2.avg_x, glu2.avg_y,glu2.avg_z);
-
+	
 //			DrawPoint(p2,8,1,1,0);
 		   }
 	}
@@ -633,15 +684,15 @@ int TrackerManager::DrawTrackersMovtion_Long_Number_All(vector <Scan *> allScans
 		Tracker &tracker=*it;
 	//	if(tracker.missMatch == true)
 	//		   continue;
-	//	if(tracker.statusList.size() < n)
+	//	if(tracker.statusList.size() < n) 
 	//		   continue;
-	//	if(tracker.dataList.size()  < n)
+	//	if(tracker.dataList.size()  < n) 
 	//		   continue;
 
 		//	cerr << " object number  " << tracker.statusList.size() <<endl;
 			for(int i =0;   i <tracker.statusList.size()-1;  i++ )
-			{
-
+			{  
+				
 			    Scan *firstScan = allScans[0];
                 Scan *CurrentScan = allScans[i];
 				Scan *CurrentScanNext = allScans[i+1];
@@ -673,7 +724,7 @@ int TrackerManager::DrawTrackersMovtion_Long_Number_All(vector <Scan *> allScans
 
 				DrawObjectPoint(gluData1, 1,
 					ColorTableShot[colorIdx][0],
-					ColorTableShot[colorIdx][1],
+					ColorTableShot[colorIdx][1], 
 					ColorTableShot[colorIdx][2] ,
 					deltaMat);
 
@@ -684,7 +735,7 @@ int TrackerManager::DrawTrackersMovtion_Long_Number_All(vector <Scan *> allScans
 				//colorIdx=(tracker.colorIdx+1)%8;
 				//DrawObjectPoint(gluData2, 1,
 				//	ColorTableShot[colorIdx][0],
-				//	ColorTableShot[colorIdx][1],
+				//	ColorTableShot[colorIdx][1], 
 				//	ColorTableShot[colorIdx][2] ,
 				//	deltaMatNext);
 
@@ -709,7 +760,7 @@ int TrackerManager::ClassifiyTrackersObjects(vector <Scan *> allScans, int curre
 
 	list<Tracker>::iterator it;
 
- //    int clustersize=scanClusterArray.size();
+ //    int clustersize=scanClusterArray.size();            
 	//	//Find moving Ojbects
 	//for(i=0; i<clustersize; ++i)
 	//{
@@ -744,15 +795,15 @@ int TrackerManager::ClassifiyTrackersObjects(vector <Scan *> allScans, int curre
 //		Tracker &tracker=*it;
 //	//	if(tracker.missMatch == true)
 //	//		   continue;
-//	//	if(tracker.statusList.size() < n)
+//	//	if(tracker.statusList.size() < n) 
 //	//		   continue;
-//	//	if(tracker.dataList.size()  < n)
+//	//	if(tracker.dataList.size()  < n) 
 //	//		   continue;
 //
 //		//	cerr << " object number  " << tracker.statusList.size() <<endl;
 //			for(int i =0;   i <tracker.statusList.size();  i++ )
-//			{
-//
+//			{  
+//				
 //			    Scan *firstScan = allScans[0];
 //                Scan *CurrentScan = allScans[i];
 //				double  deltaMat[16];
@@ -765,7 +816,7 @@ int TrackerManager::ClassifiyTrackersObjects(vector <Scan *> allScans, int curre
 //		//		DrawObjectPoint(gluData1, 1,  0.3, 0.3, 0.3,deltaMat);
 //				DrawObjectPoint(gluData1, 1,
 //					ColorTableShot[colorIdx][0],
-//					ColorTableShot[colorIdx][1],
+//					ColorTableShot[colorIdx][1], 
 //					ColorTableShot[colorIdx][2] ,
 //					deltaMat);
 //
@@ -780,7 +831,7 @@ int TrackerManager::ClassifiyTrackersObjects(vector <Scan *> allScans, int curre
 ////			glBegin(GL_LINES);
 //	//		if (glu2.size < 8) continue;
 ////			Point p2(glu2.avg_x, glu2.avg_y,glu2.avg_z);
-//
+//	
 ////			DrawPoint(p2,8,1,1,0);
 //		   }
 //
@@ -789,3 +840,20 @@ int TrackerManager::ClassifiyTrackersObjects(vector <Scan *> allScans, int curre
 
 	return 0;
 }
+
+void TrackerManager::TrackerManagerReset()
+{
+	clusterStatus.clear();
+	//tracks.clear();
+	list<Tracker>::iterator Iter;
+	Iter=tracks.begin();
+	for (;Iter!=tracks.end();Iter++)
+	{
+		Tracker temp=*Iter;
+		temp.TrackerReset();
+	}
+	tracks.clear();
+	preScan=0;
+	return;
+}
+
