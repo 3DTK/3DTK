@@ -41,7 +41,7 @@ public:
 
 	int ClassifiyTrackersObjects(vector <Scan *> allScans, int currentNO ,int windowsize);
 
-	static bool TrackerFilter(clusterFeature &glu);
+	static bool TrackerFilter(clusterFeature &glu, cluster &gluData);
 
 	vector<ClusterStatus> clusterStatus;
 

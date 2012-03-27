@@ -1,4 +1,3 @@
-
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
@@ -6,25 +5,19 @@
 #include "veloslam/debugview.h"
 #include "veloslam/clusterboundingbox.h"
 
-
-
  bool operator<(const BesiegePoint & s1,const BesiegePoint & s2)
 {
 return s1.angle < s2.angle;
 }
-
-
 
 BoundingBox::BoundingBox(void)
 {
 	calCandidateBox=false;
 }
 
-
 BoundingBox::~BoundingBox(void)
 {
 }
-
 
  void BoundingBox::Initial()
  {

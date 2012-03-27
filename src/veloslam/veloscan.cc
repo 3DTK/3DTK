@@ -814,6 +814,181 @@ int VeloScan::FindAndCalcScanClusterFeature()
 	return 0;
 }
 
+void VeloScan::FreeAllCellAndCluterMemory()
+{
+	scanCellArray.clear();
+	scanCellFeatureArray.clear();
+
+	scanClusterArray.clear();;
+	scanClusterFeatureArray.clear();
+}
+
+void VeloScan::calcReducedPoints_byClassifi(double voxelSize, int nrpts, PointType pointtype)
+{
+	// no reduction needed
+	// copy vector of points to array of points to avoid
+	// further copying
+	int realCount =0;
+
+	// load  only static part of scans in point_red for icp6D
+    points_red = new double*[points.size()];
+    int end_loop = points_red_size = (int)points.size();
+	int j=0;
+	for (int i = 0;  i < end_loop; i++)
+	{
+		if(points[i].point_type &  POINT_TYPE_STATIC_OBJECT)
+		{
+			points_red[j] = new double[3];
+			points_red[j][0] = points[i].x;
+			points_red[j][1] = points[i].y;
+			points_red[j][2] = points[i].z;
+			j++;
+			realCount++;
+		}
+    }
+//    transform(transMatOrg, INVALID); //transform points to initial position
+    // update max num point in scan iff you have to do so
+	points_red_size = realCount;
+    if (points_red_size > (int)max_points_red_size)
+		max_points_red_size = points_red_size;
+
+  // start reduction
+  // build octree-tree from CurrentScan
+  double **ptsOct = 0;
+  ptsOct = new double*[realCount];
+
+  int num_pts = 0;
+  end_loop = (int)realCount;
+  for (int i = 0; i < end_loop; i++) {
+    ptsOct[num_pts] = new double[3];
+    ptsOct[num_pts][0] =points_red[i][0] ;
+    ptsOct[num_pts][1] =points_red[i][1] ;
+    ptsOct[num_pts][2] = points_red[i][2];
+    num_pts++;
+  }
+  /*****   error    *******/
+  BOctTree<double> *oct = new BOctTree<double>(ptsOct, num_pts, voxelSize, pointtype);
+  vector<double*> center;
+  center.clear();
+
+  if (nrpts > 0) {
+    if (nrpts == 1) {
+      oct->GetOctTreeRandom(center);
+    }else {
+      oct->GetOctTreeRandom(center, nrpts);
+    }
+  } else {
+    oct->GetOctTreeCenter(center);
+  }
+
+  // storing it as reduced scan
+  points_red = new double*[center.size()];
+
+  end_loop = (int)center.size();
+  for (int i = 0; i < end_loop; i++) {
+    points_red[i] = new double[3];
+    points_red[i][0] = center[i][0];
+    points_red[i][1] = center[i][1];
+    points_red[i][2] = center[i][2];
+  }
+  points_red_size = center.size();
+
+  delete oct;
+
+  end_loop = realCount;
+  for (int i = 0; i < end_loop; i++) {
+    delete [] ptsOct[i];
+  }
+  delete [] ptsOct;
+
+//  transform(transMatOrg, INVALID); //transform points to initial position
+
+  // update max num point in scan iff you have to do so
+  if (points_red_size > (int)max_points_red_size)
+	  max_points_red_size = points_red_size;
+}
+
+// In one scans find which the more like moving object  such as  pedestrian,  car,  bus.
+bool FilterNOMovingObjcets(clusterFeature &glu,  cluster &gluData)
+{
+	// small object do not use it!
+	if(glu.size < 8)
+		return false; 
+
+	return true; // no filter
+	//if( glu.size_z > 200 && ((glu.size_x>glu.size_y?glu.size_x:glu.size_y))<360)
+	//{
+	//	return false;
+	//}
+
+	//else if((glu.size_z>350 && glu.size_x<140)|| (glu.size_x>350 && glu.size_z<140))
+	//{
+	//	return false;
+	//}
+	//else if(glu.size_z > 250 )
+	//{
+	//	return false;
+	//}
+	//else if((glu.size_x>glu.size_y?glu.size_x:glu.size_y)>420 && glu.size_z<130)
+	//{
+	//	return false;
+	//}
+
+	//else if((glu.size_x>glu.size_y?glu.size_x:glu.size_y)>3.5
+	//	&& ((glu.size_x>glu.size_y?glu.size_x:glu.size_y)/(glu.size_x<glu.size_y?glu.size_x:glu.size_y)>4))
+	//{
+	//	return false;
+	//}
+
+	//else if(glu.size_x<700 && glu.size_z<700 &&  glu.size_y > 100  )
+	//{
+	//	return true;
+	//}
+
+	//if(glu.size_x>1500 || glu.size_z>1500 || glu.size_x*glu.size_z >600*600 )
+	//{
+	//	return false;
+	//}
+
+	//if(glu.size_x*glu.size_z >500*500  &&  glu.size_x/glu.size_z < 1.5)
+	//{
+	//	return false;
+	//}
+
+	//if(glu.size_y < 100)
+	//{
+	//	return false;
+	//}
+
+	//if((glu.size_x + glu.size_y + glu.size_z)<1.5)
+	//{
+	//	return false;
+	//}
+
+	//if(glu.size_z>700)
+	//{
+	//	return false;
+	//}
+
+	//if(glu.size_x>700)
+	//{
+	//	return false;
+	//}
+
+	//if((glu.size_x + glu.size_z) <4)
+	//{
+	//	return false;
+	//}
+
+	//if(glu.size_x/glu.size_z>3.0)
+	//{
+	//	return false;
+	//}
+
+  //	return true;
+}
+
+// bi classification for distigushed the moving or static
 void VeloScan::ClassifiAllObject()
 {
     int i,j;
@@ -823,8 +998,9 @@ void VeloScan::ClassifiAllObject()
 	for(i=0; i<clustersize; ++i)
 	{
      	clusterFeature &glu = scanClusterFeatureArray[i];
+		cluster &gluData=scanClusterArray[i];
 		glu.clusterType != CLUSTER_TYPE_OBJECT;
-	    if( FilterNOMovingObjcets(glu))
+	    if( FilterNOMovingObjcets(glu,gluData))
 		{
 				clusterFeature &gclu = 	scanClusterFeatureArray[i];
 				gclu.clusterType  |=CLUSTER_TYPE_MOVING_OBJECT;
@@ -883,192 +1059,6 @@ void VeloScan::MarkStaticorMovingPointCloud()
 
 		}
 	}
-
-}
-
-void VeloScan::FreeAllCellAndCluterMemory()
-{
-	scanCellArray.clear();
-	scanCellFeatureArray.clear();
-
-	scanClusterArray.clear();;
-	scanClusterFeatureArray.clear();
-}
-
-void VeloScan::calcReducedPoints_byClassifi(double voxelSize, int nrpts, PointType pointtype)
-{
-  // no reduction needed
-  // copy vector of points to array of points to avoid
-  // further copying
-  int realCount =0;
- // if (voxelSize <= 0.0)
-  {
-
-    points_red = new double*[points.size()];
-
-    int end_loop = points_red_size = (int)points.size();
-	 int j=0;
-	 for (int i = 0;  i < end_loop; i++)
-	{
-		if(points[i].point_type &  POINT_TYPE_STATIC_OBJECT)
-		{
-			points_red[j] = new double[3];
-			points_red[j][0] = points[i].x;
-			points_red[j][1] = points[i].y;
-			points_red[j][2] = points[i].z;
-			j++;
-			realCount++;
-		}
-    }
-//    transform(transMatOrg, INVALID); //transform points to initial position
-    // update max num point in scan iff you have to do so
-	points_red_size = realCount;
-    if (points_red_size > (int)max_points_red_size)
-
-		max_points_red_size = points_red_size;
-//       return;
-  }
-
-  // start reduction
-  // build octree-tree from CurrentScan
-  double **ptsOct = 0;
-  ptsOct = new double*[realCount];
-
-  int num_pts = 0;
-  int end_loop = (int)realCount;
-  for (int i = 0; i < end_loop; i++) {
-    ptsOct[num_pts] = new double[3];
-    ptsOct[num_pts][0] =points_red[i][0] ;
-    ptsOct[num_pts][1] =points_red[i][1] ;
-    ptsOct[num_pts][2] = points_red[i][2];
-    num_pts++;
-  }
-  /*****   error    *******/
-  BOctTree<double> *oct = new BOctTree<double>(ptsOct, num_pts, voxelSize, pointtype);
-  vector<double*> center;
-  center.clear();
-
-
-  if (nrpts > 0) {
-    if (nrpts == 1) {
-      oct->GetOctTreeRandom(center);
-    }else {
-      oct->GetOctTreeRandom(center, nrpts);
-    }
-  } else {
-    oct->GetOctTreeCenter(center);
-  }
-
-  // storing it as reduced scan
-  points_red = new double*[center.size()];
-
-  end_loop = (int)center.size();
-  for (int i = 0; i < end_loop; i++) {
-    points_red[i] = new double[3];
-    points_red[i][0] = center[i][0];
-    points_red[i][1] = center[i][1];
-    points_red[i][2] = center[i][2];
-  }
-  points_red_size = center.size();
-
-  delete oct;
-
-  end_loop = realCount;
-  for (int i = 0; i < end_loop; i++) {
-    delete [] ptsOct[i];
-  }
-  delete [] ptsOct;
-
-//  transform(transMatOrg, INVALID); //transform points to initial position
-
-  // update max num point in scan iff you have to do so
-  if (points_red_size > (int)max_points_red_size)
-	  max_points_red_size = points_red_size;
-}
-
-bool VeloScan::FilterNOMovingObjcets(clusterFeature &glu)
-{
-	if(glu.size < 8)
-		return false; // small object do not use it!
-
-	return true; // no filter
-
-
-	//if( glu.size_z > 200 && ((glu.size_x>glu.size_y?glu.size_x:glu.size_y))<360)
-	//{
-	//	return false;
-	//}
-
-	//else if((glu.size_z>350 && glu.size_x<140)|| (glu.size_x>350 && glu.size_z<140))
-	//{
-	//	return false;
-	//}
-	//else if(glu.size_z > 250 )
-	//{
-	//	return false;
-	//}
-	//else if((glu.size_x>glu.size_y?glu.size_x:glu.size_y)>420 && glu.size_z<130)
-	//{
-	//	return false;
-	//}
-
-	//else if((glu.size_x>glu.size_y?glu.size_x:glu.size_y)>3.5
-	//	&& ((glu.size_x>glu.size_y?glu.size_x:glu.size_y)/(glu.size_x<glu.size_y?glu.size_x:glu.size_y)>4))
-	//{
-	//	return false;
-	//}
-
-	//else if(glu.size_x<700 && glu.size_z<700 &&  glu.size_y > 100  )
-	//{
-	//	return true;
-	//}
-
-
-	//if(glu.size_x>1500 || glu.size_z>1500 || glu.size_x*glu.size_z >600*600 )
-	//{
-	//	return false;
-	//}
-
-	//if(glu.size_x*glu.size_z >500*500  &&  glu.size_x/glu.size_z < 1.5)
-	//{
-	//	return false;
-	//}
-
-
-	//if(glu.size_y < 100)
-	//{
-	//	return false;
-	//}
-
-	//if((glu.size_x + glu.size_y + glu.size_z)<1.5)
-	//{
-	//	return false;
-	//}
-
-
-	//if(glu.size_z>700)
-	//{
-	//	return false;
-	//}
-
-	//if(glu.size_x>700)
-	//{
-	//	return false;
-	//}
-
-
-	//if((glu.size_x + glu.size_z) <4)
-	//{
-	//	return false;
-	//}
-
-
-	//if(glu.size_x/glu.size_z>3.0)
-	//{
-	//	return false;
-	//}
-
-//	return true;
 }
 
 void VeloScan::FindingAllofObject()
@@ -1077,10 +1067,7 @@ void VeloScan::FindingAllofObject()
 	{
 		TransferToCellArray();
 		CalcScanCellFeature();
-
 		FindAndCalcScanClusterFeature();
-		cout<<"d"<<endl;
-
 	}
     return;
  }
@@ -1090,7 +1077,8 @@ void VeloScan::TrackingAllofObject()
 {
 	if(points.size() > 0)
 	{
-		 trackMgr.HandleScan(*this);
+		VeloScan scanCurrent = *this;
+		trackMgr.HandleScan(scanCurrent);
 	}
     return;
  }
