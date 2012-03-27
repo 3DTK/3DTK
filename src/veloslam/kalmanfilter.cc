@@ -85,42 +85,63 @@ void KalmanFilter::InitialKalmanFilter(clusterFeature &glu)
 
 void KalmanFilter::timeUpdate()
 {
-    CMatrix T1,T2;
+ //   CMatrix T1,T2;
+	//X2=A*X1;
+ //   T1= A.Transpose();
+	//P2= A * P1 * T1 + Q;
 	X2=A*X1;
-    T1= A.Transpose();
-	P2= A * P1 * T1 + Q;
+	P2=A*P1*A.Transpose()+Q;
 }
 
 void KalmanFilter::stateUpdate(clusterFeature &glu,double rollangle)
 {
-    CMatrix T1,T2;
+ //   CMatrix T1,T2;
+	//Z.m_pTMatrix[0][0]=glu.avg_x;
+	//Z.m_pTMatrix[1][0]=glu.avg_z;
+
+	//CMatrix temp(2,2);
+ //   T1= H.Transpose();
+	//temp=H*P2*T1+R;
+ //   T2= temp.Inverse();
+	//K=P2*T1*T2;
+
+	//CalCoorRoll(rollangle);
+
+	//X2=CoordinateRoll*X2;
+
+ //   CMatrix T3,T4,T5;
+
+ //   T4=H*X2;
+ //   T3=Z-T4;
+ //   T5=K*T3;
+	//X1=X2+T5;
+
+	//CMatrix I(4,4);
+	//I.Eye();
+
+ //   CMatrix T6,T7,T8;
+ //   T6=K*H;
+ //   T7=I-T6;
+	//P1=T7*P2;
+
 	Z.m_pTMatrix[0][0]=glu.avg_x;
 	Z.m_pTMatrix[1][0]=glu.avg_z;
 
 	CMatrix temp(2,2);
-    T1= H.Transpose();
-	temp=H*P2*T1+R;
-    T2= temp.Inverse();
-	K=P2*T1*T2;
+	temp=H*P2*H.Transpose()+R;
+
+	K=P2*H.Transpose()*temp.Inverse();
 
 	CalCoorRoll(rollangle);
 
-	X2=CoordinateRoll*X2;
+	X2=CoordinateRoll*X2;//转换到当前坐标系下
 
-    CMatrix T3,T4,T5;
-
-    T4=H*X2;
-    T3=Z-T4;
-    T5=K*T3;
-	X1=X2+T5;
+	X1=X2+K*(Z-H*X2);
 
 	CMatrix I(4,4);
 	I.Eye();
 
-    CMatrix T6,T7,T8;
-    T6=K*H;
-    T7=I-T6;
-	P1=T7*P2;
+	P1=(I-K*H)*P2;
 }
 
 ObjectState KalmanFilter::GetCurrentState()
@@ -163,10 +184,12 @@ CMatrix KalmanFilter::CalMeasureDeviation()
 {
 	CMatrix Deviation(2,2),standardDeviation(2,2);
 
-    CMatrix T6,T7,T8;
-    T6=H.Transpose();
-    T7=P2*T6;
-	Deviation=H*T7+R;
+ //   CMatrix T6,T7,T8;
+ //   T6=H.Transpose();
+ //   T7=P2*T6;
+	//Deviation=H*T7+R;
+
+	Deviation=H*P2*H.Transpose()+R; //计算方差
 
 	for (int i=0;i<2;i++)
 	{
