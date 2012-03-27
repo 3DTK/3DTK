@@ -946,11 +946,6 @@ int main(int argc, char **argv)
   cout << "slam6D will proceed with the following parameters:" << endl;
 
    //@@@ to do :-)
-
-  // Get Scans
- // VeloScan::readScansRedSearch(type, start, end, dir,
-//						 maxDist, minDist, red, octree, nns_method, cuda_enabled, true);
-
     icp6Dminimizer *my_icp6Dminimizer = 0;
     my_icp6Dminimizer= CreateICPalgo( algo, quiet);
     icp6D *my_icp = 0;
@@ -992,12 +987,10 @@ int main(int argc, char **argv)
 		     currentScan->ClassifiAllofObject();
 		 }
 		 else
-		//	 currentScan->ClassifibyTrackingAllObject(scanCount, windowsize);
 		 {
-            currentScan->ClassifiAllofObject();
+    	 	 currentScan->ClassifibyTrackingAllObject(scanCount, windowsize);
 		 }
          currentScan->ExchangePointCloud();
-		 /********  error    *****/
          currentScan->calcReducedPoints_byClassifi(red, octree, PointType());
 		 cout << "reducing scan " << currentScan->get_points_red_size()  << endl;
 
@@ -1017,26 +1010,24 @@ int main(int argc, char **argv)
 
     Show(0);
 
-   long starttime = GetCurrentTimeInMilliSec();
+ //  long starttime = GetCurrentTimeInMilliSec();
 
-  //Finall  graph Matching
-   FinalSLAM( red,  rand,
-     mdm,  mdml,  mdmll,
-     mni,  start,  end,  maxDist,  minDist,  quiet,  veryQuiet,
-     eP,  meta,  algo,  loopSlam6DAlgo,  lum6DAlgo,  anim,
-     mni_lum,  net,  cldist,  clpairs,  loopsize,
-     epsilonICP,  epsilonSLAM,   nns_method,  exportPts,  distLoop,
-     iterLoop,  graphDist,  octree,  cuda_enabled, type
-	);
+ // //Finall  graph Matching
+ //  FinalSLAM( red,  rand,
+ //    mdm,  mdml,  mdmll,
+ //    mni,  start,  end,  maxDist,  minDist,  quiet,  veryQuiet,
+ //    eP,  meta,  algo,  loopSlam6DAlgo,  lum6DAlgo,  anim,
+ //    mni_lum,  net,  cldist,  clpairs,  loopsize,
+ //    epsilonICP,  epsilonSLAM,   nns_method,  exportPts,  distLoop,
+ //    iterLoop,  graphDist,  octree,  cuda_enabled, type
+	//);
 
-  long endtime = GetCurrentTimeInMilliSec() - starttime;
-  cout << "Matching done in " << endtime << " milliseconds!!!" << endl;
-
+ // long endtime = GetCurrentTimeInMilliSec() - starttime;
+ // cout << "Matching done in " << endtime << " milliseconds!!!" << endl;
 
   IntersectionDetection intersectionDetector;
   intersectionDetector.DetectIntersection();
   cout << "intersectionDetection done"<<endl;
-
 
   if (exportPts) {
     cout << "Export all 3D Points to file \"points.pts\"" << endl;

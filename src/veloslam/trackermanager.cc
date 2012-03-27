@@ -59,19 +59,6 @@ int TrackerManager::HandleScan(VeloScan& scanRef)
 	for(i=0; i<size;++i)
 		clusterStatus[i].Matched=false;
 
-	//if (!preScan)
-	//{
-	//	for (i=0;i<6;i++)
-	//	{
-	//		delta_Theta[i]=0;
-	//	}
-	//}
-	//else
-	//{
-	//	GetTwoScanRoll(&scanRef,preScan);
-	//}
-	//rollAngle=delta_Theta[1];
-
 	rollAngle=0;
 
 	FilterObject(scanRef);
@@ -130,92 +117,23 @@ int TrackerManager::FilterObject(VeloScan& scanRef)
 
 		clusterFeature &glu=scanRef.scanClusterFeatureArray[i];
 		cluster &gluData=scanRef.scanClusterArray[i];
-		clusterStatus[i].FilterRet = TrackerManager::TrackerFilter(glu);
+		clusterStatus[i].FilterRet = TrackerManager::TrackerFilter(glu, gluData);
 	}
 	return 0;
 
 }
 
 
-bool TrackerManager::TrackerFilter(clusterFeature &glu)
+bool TrackerManager::TrackerFilter(clusterFeature &glu, cluster &gluData)
 {
 	if(glu.size < 8)
 		return false; // small object do not use it!
 
-	return true; // no filter
-
-
-	if( glu.size_z > 200 && ((glu.size_x>glu.size_y?glu.size_x:glu.size_y))<360)
-	{
-		return false;
-	}
-
-	else if((glu.size_y>350 && glu.size_x<140)|| (glu.size_x>350 && glu.size_y<140))
-	{
-		return false;
-
-	}
-	else if(glu.size_z > 250 )
-	{
-		return false;
-	}
-	else if((glu.size_x>glu.size_y?glu.size_x:glu.size_y)>420 && glu.size_z<130)
-	{
-		return false;
-	}
-
-	else if((glu.size_x>glu.size_y?glu.size_x:glu.size_y)>3.5 && ((glu.size_x>glu.size_y?glu.size_x:glu.size_y)/(glu.size_x<glu.size_y?glu.size_x:glu.size_y)>4))
-	{
-		return false;
-	}
-
-	else if(glu.size_x<700 && glu.size_y<700 &&  glu.size_z > 100  )
-	{
-
-		return true;
-	}
-
-	if(glu.size_x>1500 || glu.size_y>1500 || glu.size_x*glu.size_y >600*600 )
-	{
-		return false;
-	}
-
-	if(glu.size_x*glu.size_y >500*500  &&  glu.size_x/glu.size_y < 1.5)
-	{
-		return false;
-	}
-
-	if(glu.size_z < 100)
-	{
-		return false;
-	}
-
-	if((glu.size_x + glu.size_y + glu.size_z)<1.5)
-	{
-		return false;
-	}
-
-	if(glu.size_y>300)
-	{
-		return false;
-	}
-
-	//if(glu.size_x<40||glu.size_y<40||glu.size_z<40)
-	//	continue;
-
-	if((glu.size_x + glu.size_y) <4)
-	{
-		return false;
-	}
-
-	if(glu.size_x/glu.size_y>3.0)
-	{
-		return false;
-	}
-
-	return true;
+   if (FilterNOMovingObjcets(glu, gluData ))
+	    return true;
+   else 
+	   return false;
 }
-
 
 int TrackerManager::MatchTrackers(VeloScan& scanRef,Tracker& tracker,float kg)
 {
@@ -369,7 +287,6 @@ int TrackerManager::DrawScanCluster(VeloScan& scanRef)
 			    Draw_Cube_GL_RGB(glu, ColorTableShot[4][0], ColorTableShot[4][1], ColorTableShot[4][2]);
 		if(scanRef.scanid ==5 )
 			   Draw_Cube_GL_RGB(glu, ColorTableShot[5][0], ColorTableShot[5][1], ColorTableShot[5][2]);
-
 
 		/*
 		glColor3d(ColorTableShot[colorIdx][0],  ColorTableShot[colorIdx][1],  ColorTableShot[colorIdx][2]);

@@ -19,6 +19,8 @@
 #include "veloslam/gridcell.h"
 #include "veloslam/gridcluster.h"
 
+ bool FilterNOMovingObjcets(clusterFeature &glu, cluster &gluData);
+
 /**
  * @brief 3D scan representation and implementation of dynamic velodyne scan matching
  */
@@ -58,9 +60,8 @@ public:
   void ClassifiAllofObject();
 
   int  CalcRadAndTheta();
-
   int TransferToCellArray();
-  bool FilterNOMovingObjcets(clusterFeature &glu);
+
   void MarkStaticorMovingPointCloud();
   void FreeAllCellAndCluterMemory();
   void ClassifiAllObject();
@@ -75,26 +76,15 @@ public:
   void SaveObjectsInPCD(int index, cluster &gClusterData );
   void SaveFrameInPCD( );
 
-  /** scanCellFeatureArray ºÍscanCellArrayÊÇÒ»Ò»¶ÔÓ¦µÄ¹ØÏµ£¬°üº¬ËùÓÐcellµÄÌØÕ÷ */
+  /** scanCellFeatureArray */
   cellArray scanCellArray;
   cellFeatureArray scanCellFeatureArray;
   
   clusterArray scanClusterArray;
   clusterFeatureArray scanClusterFeatureArray;
 
-  	/**
-	* Vector for the scan data tracking object 
-	*/
-//	vector <Point> points_tracking;
-  	/**
-	* for tracking  
-	*/
     bool isTrackerHandled;
-  	/**
-	* count scan number 
-	*/
 	long scanid;
-
 };
 
 #endif
