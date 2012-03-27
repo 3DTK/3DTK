@@ -29,9 +29,9 @@ using boost::graph_traits;
 #include "slam6d/globals.icc"
 #include "slam6d/elch6D.h"
 
-#ifdef _MSC_VER
-#define  tie tr1::tie
-#endif
+//#ifdef _MSC_VER
+//#define  tie tr1::tie
+//#endif
 
 
 /*void printout(graph_t &g, vector<Vertex> &p, vector<int> &d, double *weights)

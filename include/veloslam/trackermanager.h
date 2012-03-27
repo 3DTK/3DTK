@@ -39,6 +39,8 @@ public:
 
 	int DrawTrackersMovtion_Long_Number_All(vector <Scan *> allScans, int n);
 
+	int DrawTrackersContrailAfterFilted(vector <Scan *> allScans);
+
 	int ClassifiyTrackersObjects(vector <Scan *> allScans, int currentNO ,int windowsize);
 
 	static bool TrackerFilter(clusterFeature &glu, cluster &gluData);

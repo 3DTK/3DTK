@@ -5,6 +5,12 @@
 
 using namespace std;
 
+struct MoveState
+{
+	ObjectState targetState;
+	Scan *thisScan;
+};
+
 class Tracker
 {
 public:
@@ -23,6 +29,6 @@ public:
 	int frameNO;
 	int missedTime;//added by yuanjun
 	KalmanFilter kalmanFilter;//added by yuanjun
-
+	vector<MoveState> moveStateList;//added by yuanjun
 };
 
