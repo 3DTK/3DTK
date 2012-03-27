@@ -4,15 +4,13 @@
 #include <fstream>
 #define  DefaultColumnSize 360
 
-
 svm_model *m = svm_load_model("SegIter.model"); //载入训练好的模式
 svm_node *nod=new svm_node[361];
-
 
 IntersectionDetection::IntersectionDetection()
 {
 	slashWide=200;
-    slashMaxLength=3500;
+	slashMaxLength=3500;
 	slashAngleDefinition=1;
 
 	columnNum= 360;	
@@ -35,16 +33,16 @@ IntersectionDetection::~IntersectionDetection()
 int IntersectionDetection::GetPointData()
 {
 	for(unsigned int i = 0; i < Scan::allScans.size(); i++) 
-      for (int j = 0; j < Scan::allScans[i]->get_points_red_size(); j++)
-	  {
-		Point p;
-		p.x=Scan::allScans[i]->get_points_red()[j][0];
-	    p.y=Scan::allScans[i]->get_points_red()[j][1];
-		p.z=Scan::allScans[i]->get_points_red()[j][2];
-		allPoints_AfterRegstn.push_back(p);
-	  }
+		for (int j = 0; j < Scan::allScans[i]->get_points_red_size(); j++)
+		{
+			Point p;
+			p.x=Scan::allScans[i]->get_points_red()[j][0];
+			p.y=Scan::allScans[i]->get_points_red()[j][1];
+			p.z=Scan::allScans[i]->get_points_red()[j][2];
+			allPoints_AfterRegstn.push_back(p);
+		}
 
-	  return 0;
+		return 0;
 }
 
 int IntersectionDetection::CalcRadAndTheta()
@@ -217,7 +215,6 @@ int IntersectionDetection::CalPointCellPos(double x,double y,double z ,int * col
 
 int IntersectionDetection::CalCellMinDis()
 {
-
 	for(int i=0;i<cellNum;i++)
 	{
 		float halfCellAngle=180.0/columnNum;
@@ -403,134 +400,134 @@ int IntersectionDetection::TransferToCellArray()
 
 int IntersectionDetection:: CalcCellFeature(cell& cellobj, cellFeature& f)
 {
-	  int outlier;
-	   float lastMaxY;
-	   f.size=cellobj.size();
-	   f.cellType=0;
-	   
-	   if(f.size==0)
-	   {
-		   f.cellType|=CELL_TYPE_INVALID;
-		   return 0;
-	   }
-	   
-	   f.ave_x= f.ave_y = f.ave_z=0.0;
-	   f.delta_y=0;
-	
-	   int i=0;
-	   for(i=0; i<f.size; ++i)
-	   {
-		   f.ave_x+=cellobj[i]->x;
-		   f.ave_z+=cellobj[i]->z;
-		   f.ave_y+=cellobj[i]->y;
+	int outlier;
+	float lastMaxY;
+	f.size=cellobj.size();
+	f.cellType=0;
 
-		   if(i==0)
-		   {
-			   outlier=0;
-			   f.min_x=f.max_x=cellobj[i]->x;
-			   f.min_z=f.max_z=cellobj[i]->z;
-			   lastMaxY=f.min_y=f.max_y=cellobj[i]->y; 
-		   }
-		   else
-		   {
-			   if(f.max_x<cellobj[i]->x)		f.max_x=cellobj[i]->x;
-	
-			   if(f.min_x>cellobj[i]->x)	   f.min_x=cellobj[i]->x;
-	
-			   if(f.max_z<cellobj[i]->z)	   f.max_z=cellobj[i]->z;
-	
-			   if(f.min_z>cellobj[i]->z)    f.min_z=cellobj[i]->z;
-	
-			   if(f.max_y<cellobj[i]->y)
-			   {
-				   lastMaxY=f.max_y;
-				   f.max_y=cellobj[i]->y;
-				   outlier=i;
-			   }
-	
-			   if(f.min_y>cellobj[i]->y)
-				   f.min_y=cellobj[i]->y;
-		   }
-	   }
-	
-	   if(f.size>1)
-	   {
-		   int y=f.ave_y-cellobj[outlier]->y;
-		   y/=(f.size-1)*1.0;
-	
-		   if(cellobj[outlier]->y-y<50)
-		   {
-			   outlier=-1;
-			   f.ave_y/=f.size*1.0;
-		   }
-		   else
-		   {
-			   f.max_y=lastMaxY;
-			   f.ave_y=y;
-		   }
-	   }
-	   else
-	   {
-		   outlier=-1;
-		   f.ave_y/=f.size*1.0;
-	   }
-	
-	   f.ave_x/=f.size*1.0;
-	   f.ave_z/=f.size*1.0;
+	if(f.size==0)
+	{
+		f.cellType|=CELL_TYPE_INVALID;
+		return 0;
+	}
 
-	   for(i=0; i<f.size; ++i)
-	   {
-		   if(i==outlier)
-			   continue;
-		   f.delta_y+= absf(cellobj[i]->y - f.ave_y);
-	   }
+	f.ave_x= f.ave_y = f.ave_z=0.0;
+	f.delta_y=0;
 
-	   float threshold;
-   	   threshold=f.delta_y;
+	int i=0;
+	for(i=0; i<f.size; ++i)
+	{
+		f.ave_x+=cellobj[i]->x;
+		f.ave_z+=cellobj[i]->z;
+		f.ave_y+=cellobj[i]->y;
 
-	   float GridThresholdGroundDetect =120;
-	   if(threshold >  GridThresholdGroundDetect)
-		   f.cellType|=CELL_TYPE_ABOVE_DELTA_Y;
-	   else
-		   f.cellType|=CELL_TYPE_BELOW_DELTA_Y;
-    return 0;
+		if(i==0)
+		{
+			outlier=0;
+			f.min_x=f.max_x=cellobj[i]->x;
+			f.min_z=f.max_z=cellobj[i]->z;
+			lastMaxY=f.min_y=f.max_y=cellobj[i]->y; 
+		}
+		else
+		{
+			if(f.max_x<cellobj[i]->x)		f.max_x=cellobj[i]->x;
+
+			if(f.min_x>cellobj[i]->x)	   f.min_x=cellobj[i]->x;
+
+			if(f.max_z<cellobj[i]->z)	   f.max_z=cellobj[i]->z;
+
+			if(f.min_z>cellobj[i]->z)    f.min_z=cellobj[i]->z;
+
+			if(f.max_y<cellobj[i]->y)
+			{
+				lastMaxY=f.max_y;
+				f.max_y=cellobj[i]->y;
+				outlier=i;
+			}
+
+			if(f.min_y>cellobj[i]->y)
+				f.min_y=cellobj[i]->y;
+		}
+	}
+
+	if(f.size>1)
+	{
+		int y=f.ave_y-cellobj[outlier]->y;
+		y/=(f.size-1)*1.0;
+
+		if(cellobj[outlier]->y-y<50)
+		{
+			outlier=-1;
+			f.ave_y/=f.size*1.0;
+		}
+		else
+		{
+			f.max_y=lastMaxY;
+			f.ave_y=y;
+		}
+	}
+	else
+	{
+		outlier=-1;
+		f.ave_y/=f.size*1.0;
+	}
+
+	f.ave_x/=f.size*1.0;
+	f.ave_z/=f.size*1.0;
+
+	for(i=0; i<f.size; ++i)
+	{
+		if(i==outlier)
+			continue;
+		f.delta_y+= absf(cellobj[i]->y - f.ave_y);
+	}
+
+	float threshold;
+	threshold=f.delta_y;
+
+	float GridThresholdGroundDetect =120;
+	if(threshold >  GridThresholdGroundDetect)
+		f.cellType|=CELL_TYPE_ABOVE_DELTA_Y;
+	else
+		f.cellType|=CELL_TYPE_BELOW_DELTA_Y;
+	return 0;
 }
 
 
 int IntersectionDetection::CalcAllCellFeature()
 {
-	 int i,j;
+	int i,j;
 
-    if( cellArray_AfterRegstn.size()==0)
-        return -1;
+	if( cellArray_AfterRegstn.size()==0)
+		return -1;
 
-    if( cellFeatureArray_AfterRegstn.size()==0)
-    {
-        cellFeatureArray_AfterRegstn.resize(columnNum);
-        for(i=0; i<columnNum; ++i)
-            cellFeatureArray_AfterRegstn[i].resize(cellNum); 
-    }
+	if( cellFeatureArray_AfterRegstn.size()==0)
+	{
+		cellFeatureArray_AfterRegstn.resize(columnNum);
+		for(i=0; i<columnNum; ++i)
+			cellFeatureArray_AfterRegstn[i].resize(cellNum); 
+	}
 
-    for(j=0; j <columnNum; j++)
-    {
-        cellColumn &column=cellArray_AfterRegstn[j];
-        cellNum=column.size();
-        for( i=0; i<cellNum; i++)
-        {
-            cell &cellObj=cellArray_AfterRegstn[j][i];
-            cellFeature &feature=cellFeatureArray_AfterRegstn[j][i];
-			
+	for(j=0; j <columnNum; j++)
+	{
+		cellColumn &column=cellArray_AfterRegstn[j];
+		cellNum=column.size();
+		for( i=0; i<cellNum; i++)
+		{
+			cell &cellObj=cellArray_AfterRegstn[j][i];
+			cellFeature &feature=cellFeatureArray_AfterRegstn[j][i];
+
 			feature.columnID=j;
 			feature.cellID=i;
 
-            feature.pCell=&cellObj;
-            CalcCellFeature(cellObj,feature);
+			feature.pCell=&cellObj;
+			CalcCellFeature(cellObj,feature);
 
-	   //      if( feature.delta_y > 120)
-				// cellFeatureArray_AfterRegstn[j][i].cellType |= CELL_TYPE_ABOVE_DELTA_Y;
-        }
-    }
-    return 0;
+			//      if( feature.delta_y > 120)
+			// cellFeatureArray_AfterRegstn[j][i].cellType |= CELL_TYPE_ABOVE_DELTA_Y;
+		}
+	}
+	return 0;
 
 }
 
@@ -554,60 +551,60 @@ int IntersectionDetection::CalWideSlashEdge_For_RoadShape(float Angle,int startC
 	IntersectionFeature temp;
 	temp.slashLength=maxLength;
 	temp.angle=Angle;
-	
-		for(float k=0;k<maxLength;k+=moveInterval)
+
+	for(float k=0;k<maxLength;k+=moveInterval)
+	{
+		XPos+=sinAngle*moveInterval;
+		ZPos+=cosAngle*moveInterval;	
+		vexPointXPos1=XPos+halfWide*cosAngle;
+		vexPointZPos1=ZPos-halfWide*sinAngle;
+		vexPointXPos2=XPos-halfWide*cosAngle;
+		vexPointZPos2=ZPos+halfWide*sinAngle;
+
+		if(vexPointXPos1*vexPointXPos1+vexPointZPos1*vexPointZPos1>
+			vexPointXPos2*vexPointXPos2+vexPointZPos2*vexPointZPos2)
 		{
-			XPos+=sinAngle*moveInterval;
-			ZPos+=cosAngle*moveInterval;	
-			vexPointXPos1=XPos+halfWide*cosAngle;
-			vexPointZPos1=ZPos-halfWide*sinAngle;
-			vexPointXPos2=XPos-halfWide*cosAngle;
-			vexPointZPos2=ZPos+halfWide*sinAngle;
+			closePointX=vexPointXPos2;
+			closePointZ=vexPointZPos2;
+		}
+		else
+		{
+			closePointX=vexPointXPos1;
+			closePointZ=vexPointZPos1;
+		}
+		CalPointCellPos(closePointX,0,closePointZ,&pointColumn,&pointRow);
+		moveInterval=minCellDisList[pointRow];
 
-			if(vexPointXPos1*vexPointXPos1+vexPointZPos1*vexPointZPos1>
-				vexPointXPos2*vexPointXPos2+vexPointZPos2*vexPointZPos2)
-			{
-				closePointX=vexPointXPos2;
-				closePointZ=vexPointZPos2;
-			}
-			else
-			{
-				closePointX=vexPointXPos1;
-				closePointZ=vexPointZPos1;
-			}
-			CalPointCellPos(closePointX,0,closePointZ,&pointColumn,&pointRow);
-				moveInterval=minCellDisList[pointRow];
-			
-			for(float i=0;i<=wide;i+=moveInterval)
-			{
-				midPointX=vexPointXPos1-i*cosAngle*moveInterval;
-				midPointZ=vexPointZPos1+i*sinAngle*moveInterval;
-				CalPointCellPos(midPointX,0,midPointZ,&pointColumn,&pointRow);
+		for(float i=0;i<=wide;i+=moveInterval)
+		{
+			midPointX=vexPointXPos1-i*cosAngle*moveInterval;
+			midPointZ=vexPointZPos1+i*sinAngle*moveInterval;
+			CalPointCellPos(midPointX,0,midPointZ,&pointColumn,&pointRow);
 
-				if(pointRow>cellNum-1)
-				{
-					temp.slashEndColumn=pointColumn;
-					temp.slashEndRow=cellNum-1;
-					goto labelCalSlashEdge_For_RoadShape;
-				}
-				cellFeature& cellobj=cellFeatureArray_AfterRegstn[pointColumn][pointRow];
-				if(cellobj.cellType & CELL_TYPE_ABOVE_DELTA_Y )
-				{
-					temp.slashEndColumn=pointColumn;
-					temp.slashEndRow=pointRow;
-					temp.slashLength=k;
-					goto labelCalSlashEdge_For_RoadShape;
-
-				}
+			if(pointRow>cellNum-1)
+			{
+				temp.slashEndColumn=pointColumn;
+				temp.slashEndRow=cellNum-1;
+				goto labelCalSlashEdge_For_RoadShape;
 			}
-			
+			cellFeature& cellobj=cellFeatureArray_AfterRegstn[pointColumn][pointRow];
+			if(cellobj.cellType & CELL_TYPE_ABOVE_DELTA_Y )
+			{
+				temp.slashEndColumn=pointColumn;
+				temp.slashEndRow=pointRow;
+				temp.slashLength=k;
+				goto labelCalSlashEdge_For_RoadShape;
+
+			}
 		}
 
-labelCalSlashEdge_For_RoadShape:
-		temp.slashLength=temp.slashLength/100;//单位化为m
-		intersectionFeature.push_back(temp);
+	}
 
-		return 0;
+labelCalSlashEdge_For_RoadShape:
+	temp.slashLength=temp.slashLength/100;//单位化为m
+	intersectionFeature.push_back(temp);
+
+	return 0;
 }
 
 
@@ -621,27 +618,26 @@ int IntersectionDetection::DetectIntersection()
 		CalWideSlashEdge_For_RoadShape(i,startColumn,startRow,slashMaxLength,slashWide);
 	}
 
-	
-		for(int i=0;i<360;i++)
-		{
-			nod[i].index=i+1;
-			nod[i].value=intersectionFeature[i].slashLength/slashMaxLength;
-		}
-		nod[360].index=-1;	
-		labelSVM= svm_predict(m,nod);
+	for(int i=0;i<360;i++)
+	{
+		nod[i].index=i+1;
+		nod[i].value=intersectionFeature[i].slashLength/slashMaxLength;
+	}
+	nod[360].index=-1;	
+	labelSVM= svm_predict(m,nod);
 
-		ofstream output;
-		output.open("intersection.txt");
-		output<<"labelSVM:"<<labelSVM<<endl;
-		for(int j=0;j<360;j++)
-			output<<j<<":"<<"  "<<nod[j].value;
-		output.close();
+	ofstream output;
+	output.open("intersection.txt");
+	output<<"labelSVM:"<<labelSVM<<endl;
+	for(int j=0;j<360;j++)
+		output<<j<<":"<<"  "<<nod[j].value;
+	output.close();
 
-        if(labelSVM>0.5)
-			cout<<"intersection"<<endl;
-		else
-			cout<<"segment"<<endl;
+	if(labelSVM>0.5)
+		cout<<"intersection"<<endl;
+	else
+		cout<<"segment"<<endl;
 
-		return 0;
+	return 0;
 }
 

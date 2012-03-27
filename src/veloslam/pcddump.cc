@@ -49,3 +49,24 @@ using std::stringstream;
 
 #include <cstring>
 using std::flush;
+
+void DumptoFile(cluster &gluData1, string filename)
+{  
+	cell* pCell;
+    ofstream redptsout(filename);
+ 
+	for(int j=0; j<gluData1.size();++j)
+	{
+		pCell=gluData1[j]->pCell;
+		for(int k=0; k<pCell->size();++k)
+		{
+			redptsout <<(*pCell)[k]->x << " "
+				           <<(*pCell)[k]->y<< " "
+						   <<(*pCell)[k]->z<< endl;
+
+		}
+	}
+    redptsout.close();
+    redptsout.clear();
+}
+
