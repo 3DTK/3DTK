@@ -36,6 +36,7 @@ Tracker::Tracker(const Tracker &copyTracker)  //added by yuanjun
 	frameNO=copyTracker.frameNO;
 	kalmanFilter=copyTracker.kalmanFilter;
 	missedTime=copyTracker.missedTime;
+	moveStateList=copyTracker.moveStateList;
 }
 
 
@@ -43,5 +44,6 @@ void Tracker::TrackerReset()
 {
 	statusList.clear();
 	dataList.clear();
+	moveStateList.clear();
 	return;
 }
