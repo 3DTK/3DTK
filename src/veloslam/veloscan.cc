@@ -911,7 +911,7 @@ bool FilterNOMovingObjcets(clusterFeature &glu,  cluster &gluData)
 
 	//char  filename[256];
 	//string file;
-	//sprintf(filename, "c:\\filename%d.txt", objcount);
+	//sprintf(filename,"c:\\filename%d.txt", objcount);
 	//file =filename;
 	//DumpPointtoFile(gluData, file);
 	//DumpFeaturetoFile(glu, "c:\\feature");

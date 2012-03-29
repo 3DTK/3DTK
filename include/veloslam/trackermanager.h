@@ -4,7 +4,7 @@
 #include <vector>
 #include "slam6d/scan.h"
 #include "veloslam/tracker.h"
- 
+
 using namespace std;
 
 struct ClusterStatus
@@ -35,7 +35,7 @@ public:
 
 	int DrawTrackersMovtion_Long(vector <VeloScan *> allScans);
 
-   int DrawTrackersMovtion_Long_Number(vector <Scan *> allScans, int n);
+    int DrawTrackersMovtion_Long_Number(vector <Scan *> allScans, int n);
 
 	int DrawTrackersMovtion_Long_Number_All(vector <Scan *> allScans, int n);
 
@@ -59,7 +59,7 @@ private:
 	int MatchTrackers(VeloScan& scanRef,Tracker& tracker,float kg);
 
 	int FilterObject(VeloScan& scanRef);
-	
+
 	list<Tracker> tracks;
 
 	int colorIdx;

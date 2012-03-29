@@ -993,11 +993,11 @@ int main(int argc, char **argv)
 		 cout << "all  cluster tracker " << trackMgr.getNumberofTracker() << endl;
 		 // mark the type of clusters.
 		 int windowsize =3;
-		 if(scanCount < windowsize )
-		 {
-		     currentScan->ClassifiAllofObject();
-		 }
-		 else
+	//	 if(scanCount < windowsize )
+	//	 {
+	//	     currentScan->ClassifiAllofObject();
+	//	 }
+	//	 else
 		 {
     	 	 currentScan->ClassifibyTrackingAllObject(scanCount, windowsize);
 		 }
@@ -1017,6 +1017,7 @@ int main(int argc, char **argv)
 		 boost::mutex::scoped_lock lock(keymutex);
 	     keycond.wait(lock);
 	     glutPostRedisplay();
+
      ////////////////////////////////////////
     }
 
