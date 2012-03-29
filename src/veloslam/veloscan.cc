@@ -901,12 +901,12 @@ void VeloScan::calcReducedPoints_byClassifi(double voxelSize, int nrpts, PointTy
 	  max_points_red_size = points_red_size;
 }
 
-long objcount =0;
+//long objcount =0;
 // In one scans find which the more like moving object  such as  pedestrian,  car,  bus.
 bool FilterNOMovingObjcets(clusterFeature &glu,  cluster &gluData)
 {
 	// small object do not use it!
-	if(glu.size < 4)
+	if(glu.size < 3)
 		return false;
 
 	//char  filename[256];
