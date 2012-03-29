@@ -596,21 +596,18 @@ int TrackerManager::DrawTrackersMovtion_Long_Number_All(vector <Scan *> allScans
 	list<Tracker>::iterator it;
 	for(it=tracks.begin();  it!=tracks.end();  it++)
 	{
-		Tracker &tracker=*it;
-	//	if(tracker.missMatch == true)
-	//		   continue;
-	//	if(tracker.statusList.size() < n)
-	//		   continue;
-	//	if(tracker.dataList.size()  < n)
-	//		   continue;
-
-		//	cerr << " object number  " << tracker.statusList.size() <<endl;
-			for(int i =0;   i <tracker.statusList.size()-1;  i++ )
+		    Tracker &tracker=*it;
+            int size=tracker.statusList.size();
+			if (size < 3)
 			{
-
+				continue;
+			}
+			for(int i =0;   i <size-2;  i++ )
+			{
 			    Scan *firstScan = allScans[0];
                 Scan *CurrentScan = allScans[i];
 				Scan *CurrentScanNext = allScans[i+1];
+
 				double  deltaMat[16];
 				double  deltaMatNext[16];
 
@@ -622,8 +619,8 @@ int TrackerManager::DrawTrackersMovtion_Long_Number_All(vector <Scan *> allScans
 			    clusterFeature &glu2=tracker.statusList[i+1];
 				cluster &gluData2=tracker.dataList[i+1];
 
-				if (glu1.size < 8) continue;
-				if (glu2.size < 8) continue;
+		//		if (glu1.size < 8) continue;
+		//		if (glu2.size < 8) continue;
 
 				Point p1(glu1.avg_x, glu1.avg_y, glu1.avg_z);
 				Point p2(glu2.avg_x, glu2.avg_y, glu2.avg_z);
@@ -638,21 +635,36 @@ int TrackerManager::DrawTrackersMovtion_Long_Number_All(vector <Scan *> allScans
 				colorIdx=tracker.colorIdx%8;
 
                 if(tracker.moving_distance < 20.0)
-						DrawObjectPoint(gluData1, 1,
-							0.3,
-							0.3,
-							0.3,
+				{
+					DrawObjectPoint(gluData1, 1,
+							0.2,
+							0.2,
+							0.2,
 							deltaMat);
+					DrawObjectPoint(gluData2, 1,
+							0.2,
+							0.2,
+							0.2,
+							deltaMat);
+				}
                 else
-       					DrawObjectPoint(gluData1, 1,
+       			{	      
+					  DrawObjectPoint(gluData1, 1,
     						ColorTableShot[colorIdx][0],
     						ColorTableShot[colorIdx][1],
     						ColorTableShot[colorIdx][2] ,
-    						deltaMat);
+							deltaMat);
+
+					  DrawObjectPoint(gluData2, 1,
+    						ColorTableShot[colorIdx][0],
+    						ColorTableShot[colorIdx][1],
+    						ColorTableShot[colorIdx][2] ,
+							deltaMat);
+				}
 
 				char object_moving_distance[256];
-				sprintf(object_moving_distance, "%f ", tracker.moving_distance);
-				DrawTextRGB(p1text, 0, 1, 0, object_moving_distance );
+				sprintf(object_moving_distance, "%d  %4.2f ",  tracker.matchClusterID, tracker.moving_distance);
+				DrawTextRGB(p1text, 1, 0, 0, object_moving_distance );
 
 			//	char objectID[256];
 		//		sprintf(objectID, "%d", glu1.trackNO);
@@ -668,8 +680,8 @@ int TrackerManager::DrawTrackersMovtion_Long_Number_All(vector <Scan *> allScans
 			//	sprintf(objectID, "%d", glu2.trackNO);
 			//	DrawTextRGB(p2text, 0,1,0,objectID );
 
-				DrawPoint(p1,4,1,0,0);
-				DrawPoint(p2,4,1,0,0);
+				DrawPoint(p1,8,1,0,0);
+				DrawPoint(p2,8,0,1,0);
 
 			   Draw_Line_GL_RGB(p1, p2, 3,	1, 0, 0, false);
 
@@ -745,16 +757,13 @@ int TrackerManager::ClassifiyTrackersObjects(vector <Scan *> allScans, int curre
          tracker.moving_distance = 0.0;
 
          int size=tracker.statusList.size();
-         if (size<2)
+         if (size < 3)
          {
              continue;
          }
          movement =0;
-         for (int i=0;i<size-1;i++)
+         for (int i=0;i<size-2;i++)
          {
-//             Scan *firstScan = allScans[0];
-//             Scan *CurrentScan = tracker.statusList[i].thisScan;
-//             Scan *CurrentScanNext = tracker.statusList[i+1].thisScan;
              Scan *firstScan = allScans[0];
              Scan *CurrentScan = allScans[i];
      	 	 Scan *CurrentScanNext = allScans[i+1];
@@ -766,22 +775,27 @@ int TrackerManager::ClassifiyTrackersObjects(vector <Scan *> allScans, int curre
              GetCurrecntdelteMat(*CurrentScanNext , *firstScan,  deltaMatNext);
 
              clusterFeature &glu1=tracker.statusList[i];
-          //   cluster &gluData1=tracker.dataList[i];
              clusterFeature &glu2=tracker.statusList[i+1];
-          //   cluster &gluData2=tracker.dataList[i+1];
-
-      //     if (glu1.size < 8) continue;
-      //      if (glu2.size < 8) continue;
+			 
 		 	 Point p1(glu1.avg_x, glu1.avg_y, glu1.avg_z);
 			 Point p2(glu2.avg_x, glu2.avg_y, glu2.avg_z);
 
-             p1.transform(deltaMat);
-             p2.transform(deltaMatNext);
+  		   cout << " pose  no" << tracker.matchClusterID <<"  " 
+			       <<  p1.x  <<"  " <<  p2.x <<"  "
+				   <<  p1.y  <<"  " <<  p2.y <<"  " 
+				   <<  p1.z  <<"  " <<  p2.z <<"  " <<  movement <<"  " << endl;
 
+			 p1.transform(deltaMat);
+             p2.transform(deltaMatNext);
+			 //还没有姿态信息，所以计算结果是错误的。
              movement += sqrt( (p1.x -p2.x)*(p1.x -p2.x)
                       //        +(p1.y -p2.y)*(p1.y -p2.y)
-                              +(p1.z -p2.z)*(p1.z -p2.z) );
+                                          +(p1.z -p2.z)*(p1.z -p2.z) );
 
+ 		   cout << " tracker no" << tracker.matchClusterID <<"  " 
+			       <<  p1.x  <<"  " <<  p2.x <<"  "
+				   <<  p1.y  <<"  " <<  p2.y <<"  " 
+				   <<  p1.z  <<"  " <<  p2.z <<"  " <<  movement <<"  " << endl;
 
          }
 
@@ -794,7 +808,7 @@ int TrackerManager::ClassifiyTrackersObjects(vector <Scan *> allScans, int curre
     {
            Tracker &tracker=*it;
            redptsout<< tracker.moving_distance <<endl;
-		   cout << " tracker no" << tracker.matchClusterID <<" movement " << tracker.moving_distance <<endl;
+		   cout << " tracker " << tracker.matchClusterID <<" movement " << tracker.moving_distance <<endl;
     }
 
 	return 0;
