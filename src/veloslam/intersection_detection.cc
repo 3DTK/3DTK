@@ -4,7 +4,7 @@
 #include <fstream>
 #define  DefaultColumnSize 360
 
-svm_model *m = svm_load_model("SegIter.model"); //载入训练好的模式
+svm_model *m = svm_load_model("SegIter.model"); 
 svm_node *nod=new svm_node[361];
 
 IntersectionDetection::IntersectionDetection()

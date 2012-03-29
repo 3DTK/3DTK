@@ -19,9 +19,9 @@ using boost::graph_traits;
 #include "slam6d/globals.icc"
 using namespace NEWMAT;
 
-//#ifdef _MSC_VER
-//#define  tie tr1::tie
-//#endif
+#ifdef _MSC_VER
+#define  tie tr1::tie
+#endif
 
 /**
  * ELCH loop closing function using unit Quaternion

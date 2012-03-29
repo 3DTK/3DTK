@@ -3,7 +3,7 @@
 #define _OPENMP
 #endif
 #endif
- 
+
 #include <fstream>
 using std::ifstream;
 using std::ofstream;
@@ -15,6 +15,10 @@ using std::endl;
 
 #include <sstream>
 using std::stringstream;
+
+#include <boost/thread.hpp>
+#include <boost/thread/mutex.hpp>
+#include <boost/thread/condition.hpp>
 
 #include "slam6d/scan.h"
 #include "slam6d/Boctree.h"
@@ -59,26 +63,29 @@ using std::flush;
 
 #include "veloslam/color_util.h"
 
+boost::mutex keymutex;
+boost::condition keycond;
+
 GLenum doubleBuffer;
 
 int g_frame=0;
 float rotX = 0.0, rotY = 0.0;
 
-int x_lbefore,y_lbefore;         
+int x_lbefore,y_lbefore;
 int x_rbefore,y_rbefore;
 int z_before1,z_before2;
 
-float x_move,y_move;		
+float x_move,y_move;
 float x_move_save,y_move_save;
-float x_rotate,y_rotate,z_rotate; 
-float x_rotate_save,y_rotate_save,z_rotate_save; 
-float m_zoom;			
+float x_rotate,y_rotate,z_rotate;
+float x_rotate_save,y_rotate_save,z_rotate_save;
+float m_zoom;
 
 float m_aspect;
 
 //	gluLookAt(0,  0,  80,   0,   0,  0,   0,  1,  0);
-float m_eyex, m_eyey,  m_eyez; 
-float m_centerx,  m_centery, m_centerz; 
+float m_eyex, m_eyey,  m_eyez;
+float m_centerx,  m_centery, m_centerz;
 float m_upx, m_upy, m_upz;
 
 void DrawPointsRGB(Point p,    float r,     float g,    float b)
@@ -97,12 +104,12 @@ void DrawText(float x, float y, float z, char * outputstring)
 {
 #ifdef _MSC_VER
 	glPushMatrix();
-	glColor3f(1.0f,1.0f,1.0f);	
+	glColor3f(1.0f,1.0f,1.0f);
 	wglUseFontBitmaps(wglGetCurrentDC(), 0, 255, 100);
 
 	glListBase(100);
 	glRasterPos3f(x, y, z);
-	glCallLists( strlen(outputstring), GL_UNSIGNED_BYTE, outputstring); 
+	glCallLists( strlen(outputstring), GL_UNSIGNED_BYTE, outputstring);
 
 	glPopMatrix();
 #endif
@@ -112,12 +119,12 @@ void  DrawTextRGB(float x, float y, float z, float r, float g, float b, char * o
 {
 #ifdef _MSC_VER
 	glPushMatrix();
-	glColor3f(r,g,b);	
+	glColor3f(r,g,b);
 	wglUseFontBitmaps(wglGetCurrentDC(), 0, 255, 100);
 
 	glListBase(100);
 	glRasterPos3f(x, y, z);
-	glCallLists( strlen(outputstring), GL_UNSIGNED_BYTE,  outputstring); 
+	glCallLists( strlen(outputstring), GL_UNSIGNED_BYTE,  outputstring);
 
 	glPopMatrix();
 #endif
@@ -127,12 +134,12 @@ void  DrawTextRGB(Point P, float r, float g, float b, char * outputstring)
 {
 #ifdef _MSC_VER
 	glPushMatrix();
-	glColor3f(r,g,b);	
+	glColor3f(r,g,b);
 	wglUseFontBitmaps(wglGetCurrentDC(), 0, 255, 100);
 
 	glListBase(100);
 	glRasterPos3f(P.x, P.y, P.z);
-	glCallLists( strlen(outputstring), GL_UNSIGNED_BYTE,  outputstring); 
+	glCallLists( strlen(outputstring), GL_UNSIGNED_BYTE,  outputstring);
 
 	glPopMatrix();
 #endif
@@ -294,7 +301,7 @@ void Draw_points_ZValue_IN_ref(const vector <Point>& Points,  VeloScan& scanRef1
 
      Point p, q;
 	 double tempMat[16], deltaMat[16];
-	
+
 	 M4inv( scanR.getTransMatOrg(), tempMat);
      MMult(scanRef1.get_transMat(), tempMat, deltaMat);
 
@@ -370,7 +377,7 @@ void DrawObjectPoint(cluster &gluData1, int size , float r, float g, float b)
 {
 	cell* pCell;
 	GLdouble dVect1[3];
-	glPointSize(size); 
+	glPointSize(size);
 	glBegin(GL_POINTS);
 	glColor3d(r , g ,b);
 	for(int j=0; j<gluData1.size();++j)
@@ -392,7 +399,7 @@ void DrawObjectPoint(cluster &gluData1, int size , float r, float g, float b, do
 {
 	cell* pCell;
 	GLdouble dVect1[3];
-	glPointSize(size); 
+	glPointSize(size);
 	glBegin(GL_POINTS);
 	glColor3d(r , g ,b);
 	for(int j=0; j<gluData1.size();++j)
@@ -425,7 +432,7 @@ int DrawAll_ScanPoints_Number(vector <Scan *> allScans,  int psize, float r, flo
 {
 	 int i,j,k,colorIdx;
 	 for(int i =0; i <n ;i ++)
-	 {  
+	 {
 		 Scan *firstScan = allScans[0];
 		 Scan *CurrentScan = allScans[i];
 		 double  deltaMat[16];
@@ -467,9 +474,9 @@ void Draw_ALL_Cells_Points_IN_ref(VeloScan& scanRef1, VeloScan& scanR,  int psiz
 
 			if( cellobj.cellType & type)
 						Draw_Cube_GL_RGB(p.x,		p.y,		p.z,		q.x,   	q.y,		q.z,	r, g, b);
-					
+
 		}
-		
+
 	}
 }
 //	 CELL_TYPE_FOR_SLAM6D
@@ -496,16 +503,16 @@ void Draw_ALL_Cells_Points(VeloScan& scanRef1,  int psize, float r, float g, flo
 										cellobj.max_y,
 										cellobj.max_z,
 										r, g, b);
-					
+
 		}
-		
+
 	}
 }
 
 
 void Draw_ALL_Object_TYPE_IN_ref(VeloScan& scanRef1, VeloScan& scanR,  int psize, float r, float g, float b, int  TYPE)
 {
-	
+
 //	Pn+1 = dP ¡¤ Pn
 	  Point p, q;
  	 double deltaMat[16];
@@ -524,16 +531,16 @@ void Draw_ALL_Object_TYPE_IN_ref(VeloScan& scanRef1, VeloScan& scanR,  int psize
 			q.x= clusterobj.max_x;   q.y=clusterobj.max_y; q.z=clusterobj.max_z;
 			q.transform(deltaMat);
 
-	//		if(cellobj.clusterType & TYPE ) 
-		//	if(clusterobj.clusterType & TYPE ) 
+	//		if(cellobj.clusterType & TYPE )
+		//	if(clusterobj.clusterType & TYPE )
 				//	Draw_Cube_GL_RGB(p.x,		p.y,		p.z,		q.x,   	q.y,		q.z,	r, g, b);
-	
+
 	}
 }
 
 void Draw_ALL_Object_Points_TYPE_IN_ref(VeloScan& scanRef1, VeloScan& scanR,  int psize, float r, float g, float b, int  TYPE)
 {
-	
+
 //	Pn+1 = dP ¡¤ Pn
      Point p;
  	 double deltaMat[16];
@@ -571,7 +578,7 @@ void Draw_ALL_Object_Points_TYPE_IN_ref(VeloScan& scanRef1, VeloScan& scanR,  in
 }
 
 
-//CLUSTER_TYPE_OBJECT 
+//CLUSTER_TYPE_OBJECT
 void Draw_ALL_Object_TYPE(VeloScan& scanRef1,  int psize, float r, float g, float b, int  TYPE)
 {
 	clusterArray myclusterArray =scanRef1.scanClusterArray;
@@ -581,8 +588,8 @@ void Draw_ALL_Object_TYPE(VeloScan& scanRef1,  int psize, float r, float g, floa
 	{
 			clusterFeature& cellobj= myclusterFeatureArray[j];
 
-	//		if(cellobj.clusterType & TYPE ) 
-			if(cellobj.clusterType & CLUSTER_TYPE_OBJECT ) 
+	//		if(cellobj.clusterType & TYPE )
+			if(cellobj.clusterType & CLUSTER_TYPE_OBJECT )
 					Draw_Cube_GL_RGB(
 									cellobj.min_x,
 									cellobj.min_y,
@@ -592,7 +599,7 @@ void Draw_ALL_Object_TYPE(VeloScan& scanRef1,  int psize, float r, float g, floa
 									cellobj.max_z,
 									r, g, b);
 
-	/*		if(cellobj.clusterType & CLUSTER_TYPE_MOVING_OBJECT ) 
+	/*		if(cellobj.clusterType & CLUSTER_TYPE_MOVING_OBJECT )
 					Draw_Cube_GL_RGB(
 									cellobj.min_x,
 									cellobj.min_y,
@@ -616,18 +623,18 @@ static void Reshape(int w, int h)
 
 	gluPerspective(45.0f,
 						m_aspect,
-						0.0f,  
-						4000.0f);  
+						0.0f,
+						4000.0f);
 
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
 
 }
 
-#define KEY_ESC  27 
+#define KEY_ESC  27
 static void Key(unsigned char key, int x, int y)
 {
-    switch (key) 
+    switch (key)
 	{
       case KEY_ESC:
 	    exit(0);
@@ -748,9 +755,11 @@ static void SpecialKey(int key, int x, int y)
 		break;
 
 	case GLUT_KEY_F10:
+		printf("next\n");
+		keycond.notify_one();
+        Draw();
 		break;
 	}
-
 	glutPostRedisplay();
 }
 
@@ -774,10 +783,11 @@ static void Draw(void)
 	glTranslatef(x_move,y_move,0);
 	glScalef(m_zoom, m_zoom, m_zoom);
 
+	int scansize = Scan::allScans.size();
 //    Draw_points_ZValue(Scan::allScans[0],  1,  0.8, 0.8, 0.8);
-    DrawAll_ScanPoints_Number(Scan::allScans,  1,  0.8, 0.8, 0.8, 10);
-	trackMgr.DrawTrackersMovtion_Long_Number_All(Scan::allScans, 10);
-	trackMgr.DrawTrackersContrailAfterFilted(Scan::allScans);
+    DrawAll_ScanPoints_Number(Scan::allScans,  1,  0.8, 0.8, 0.8, scansize);
+	trackMgr.DrawTrackersMovtion_Long_Number_All(Scan::allScans, scansize);
+//	trackMgr.DrawTrackersContrailAfterFilted(Scan::allScans);
 
     glFlush();
  	glutSwapBuffers();
@@ -819,3 +829,14 @@ int Show(int frameno)
     return 0;
 }
 
+
+void ShowWraper()
+{
+	Show(0);
+}
+
+void StartShow()
+{
+	boost::thread t(ShowWraper);
+	//t.join();
+}
