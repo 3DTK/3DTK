@@ -24,6 +24,7 @@ using std::endl;
 using std::stringstream;
 
 #include "veloslam/veloscan.h"
+#include "veloslam/pcddump.h"
 #include "slam6d/Boctree.h"
 #include "slam6d/scan_io.h"
 #include "slam6d/d2tree.h"
@@ -47,10 +48,11 @@ using std::stringstream;
 #include <strings.h>
 #endif
 
+
 #include <cstring>
 using std::flush;
 
-void DumptoFile(cluster &gluData1, string filename)
+void DumpPointtoFile(cluster &gluData1, string filename)
 {  
 	cell* pCell;
     ofstream redptsout(filename);
@@ -70,3 +72,12 @@ void DumptoFile(cluster &gluData1, string filename)
     redptsout.clear();
 }
 
+void DumpFeaturetoFile(clusterFeature &glu, string filename)
+{  
+	ofstream redptsout("c:\\featue", ios::app);
+    redptsout <<glu.size_x << " "<< glu.size_y << " "<< glu.size_z <<" "<<
+		               glu.speed<< " "<< glu.speed_x<< " "<< glu.speed_y<<" "<< glu.pointNumber <<endl;
+
+    redptsout.close();
+    redptsout.clear();
+}
