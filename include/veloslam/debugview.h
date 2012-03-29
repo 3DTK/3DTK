@@ -4,6 +4,7 @@
 #include <vector>
 #include "veloslam/veloscan.h"
 #include "veloslam/tracker.h"
+extern void StartShow();
 
 void GetCurrecntdelteMat(Scan& CurrentScan ,  Scan& firstScan,  double *deltaMat);
 

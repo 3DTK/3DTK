@@ -89,6 +89,14 @@ using std::ifstream;
 #include <GL/freeglut.h>
 #endif
 
+#include <boost/thread.hpp>
+#include <boost/thread/mutex.hpp>
+#include <boost/thread/condition.hpp>
+
+using namespace boost;
+extern boost::mutex keymutex;
+extern boost::condition keycond;
+extern void StartShow();
 extern TrackerManager trackMgr;
 
 //  Handling Segmentation faults and CTRL-C
@@ -938,6 +946,8 @@ int main(int argc, char **argv)
   bool cuda_enabled    = false;
   reader_type type  = UOS;
 
+  StartShow();
+
   parseArgs(argc, argv, dir, red, rand, mdm, mdml, mdmll, mni, start, end,
       maxDist, minDist, quiet, veryQuiet, eP, meta, algo, loopSlam6DAlgo, lum6DAlgo, anim,
       mni_lum, net, cldist, clpairs, loopsize, epsilonICP, epsilonSLAM,
@@ -967,7 +977,8 @@ int main(int argc, char **argv)
     //Main Loop for ICP with Moving Object Detection and Tracking
     while ((_fileNr =my_ScanIO.readScans(start, end, dir, maxDist, minDist, eu, ptss)) != -1)
     {
-		VeloScan::dir = dir;
+
+	    VeloScan::dir = dir;
 	    cout << scanCount << "*" << endl;
         VeloScan *currentScan = new VeloScan(eu, maxDist);
         currentScan->setFileNr(_fileNr);
@@ -1001,14 +1012,18 @@ int main(int argc, char **argv)
          cout << "matching two  scan " << currentScan->getFileNr() <<  endl;
 		 MatchTwoScan(my_icp,  currentScan,  scanCount,  eP);
 
-		 scanCount++;
+         scanCount++;
+
+		 boost::mutex::scoped_lock lock(keymutex);
+	     keycond.wait(lock);
+	     glutPostRedisplay();
      ////////////////////////////////////////
     }
 
 	delete my_icp6Dminimizer;
     delete my_icp;
 
-    Show(0);
+//    Show(0);
 
  //  long starttime = GetCurrentTimeInMilliSec();
 

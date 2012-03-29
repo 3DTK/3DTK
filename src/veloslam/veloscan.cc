@@ -48,6 +48,7 @@ using std::flush;
 
 #include "slam6d/Boctree.h"
 #include "veloslam/veloscan.h"
+#include "veloslam/pcddump.h"
 #include "veloslam/trackermanager.h"
 #include "veloslam/clusterboundingbox.h"
 
@@ -88,9 +89,6 @@ float absf(float a)
 {
 	return a>0?a:-a;
 }
-
-
-extern int Show(int frameno);
 
 /**
  * default Constructor
@@ -346,7 +344,6 @@ int VeloScan::TransferToCellArray()
 
     int sectionSize=columnSize/8;
 
-	// 计算距离值和每个点的旋角
     CalcRadAndTheta();
 
     scanCellArray.resize(columnSize);
@@ -805,11 +802,8 @@ int VeloScan::FindAndCalcScanClusterFeature()
 	for(i=0; i<clustersize; ++i)
 	{
 		CalcClusterFeature(scanClusterArray[i],scanClusterFeatureArray[i]);
-				cout<<"K"<<endl;
-
 		BoundingBox clusterBox;
 		clusterBox.CalBestRectangleBox(scanClusterArray[i],scanClusterFeatureArray[i]);
-
 	}
 	return 0;
 }
@@ -848,7 +842,6 @@ void VeloScan::calcReducedPoints_byClassifi(double voxelSize, int nrpts, PointTy
     }
 //    transform(transMatOrg, INVALID); //transform points to initial position
     // update max num point in scan iff you have to do so
-	points_red_size = realCount;
     if (points_red_size > (int)max_points_red_size)
 		max_points_red_size = points_red_size;
 
@@ -908,12 +901,21 @@ void VeloScan::calcReducedPoints_byClassifi(double voxelSize, int nrpts, PointTy
 	  max_points_red_size = points_red_size;
 }
 
+long objcount =0;
 // In one scans find which the more like moving object  such as  pedestrian,  car,  bus.
 bool FilterNOMovingObjcets(clusterFeature &glu,  cluster &gluData)
 {
 	// small object do not use it!
-	if(glu.size < 8)
-		return false; 
+	if(glu.size < 4)
+		return false;
+
+	//char  filename[256];
+	//string file;
+	//sprintf(filename, "c:\\filename%d.txt", objcount);
+	//file =filename;
+	//DumpPointtoFile(gluData, file);
+	//DumpFeaturetoFile(glu, "c:\\feature");
+	//objcount++;
 
 	return true; // no filter
 	//if( glu.size_z > 200 && ((glu.size_x>glu.size_y?glu.size_x:glu.size_y))<360)
@@ -1077,10 +1079,8 @@ void VeloScan::TrackingAllofObject()
 {
 	if(points.size() > 0)
 	{
-		VeloScan scanCurrent = *this;
-		trackMgr.HandleScan(scanCurrent);
+		trackMgr.HandleScan(*this);
 	}
-    return;
  }
 
 void VeloScan::ClassifiAllofObject()
@@ -1089,7 +1089,6 @@ void VeloScan::ClassifiAllofObject()
 	{
 		 ClassifiAllObject();
 	}
-    return;
  }
 
 void VeloScan::ExchangePointCloud()

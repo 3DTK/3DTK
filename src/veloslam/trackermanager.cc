@@ -126,9 +126,6 @@ int TrackerManager::FilterObject(VeloScan& scanRef)
 
 bool TrackerManager::TrackerFilter(clusterFeature &glu, cluster &gluData)
 {
-	if(glu.size < 8)
-		return false; // small object do not use it!
-
    if (FilterNOMovingObjcets(glu, gluData ))
 	    return true;
    else 
