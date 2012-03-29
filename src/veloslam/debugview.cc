@@ -768,7 +768,6 @@ static void Draw(void)
 	glClearColor(1.0, 1.0, 1.0, 1.0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 //	glClearColor(0.0, 0.0, 0.0, 0.0);
-
 	glClearColor(1.0, 1.0, 1.0, 1.0);
 	glLoadIdentity();
 
@@ -784,7 +783,6 @@ static void Draw(void)
 	glScalef(m_zoom, m_zoom, m_zoom);
 
 	int scansize = Scan::allScans.size();
-//    Draw_points_ZValue(Scan::allScans[0],  1,  0.8, 0.8, 0.8);
     DrawAll_ScanPoints_Number(Scan::allScans,  1,  0.8, 0.8, 0.8, scansize);
 	trackMgr.DrawTrackersMovtion_Long_Number_All(Scan::allScans, scansize);
 //	trackMgr.DrawTrackersContrailAfterFilted(Scan::allScans);

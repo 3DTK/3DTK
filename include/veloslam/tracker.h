@@ -22,13 +22,18 @@ public:
 
 	deque<clusterFeature> statusList;
 	deque<cluster> dataList;
+
 	bool missMatch;
 	bool Matched;
 	int matchClusterID;
 	int colorIdx;
+
 	int frameNO;
 	int missedTime;//added by yuanjun
 	KalmanFilter kalmanFilter;//added by yuanjun
 	vector<MoveState> moveStateList;//added by yuanjun
+
+    //feature for movement
+    float moving_distance;
 };
 
