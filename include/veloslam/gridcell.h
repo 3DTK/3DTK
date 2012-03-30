@@ -21,8 +21,11 @@ typedef vector<charv> charvv;
 #define CELL_TYPE_BELOW_R        0x00000040
 #define CELL_TYPE_ABOVE_LIDAR       0x00000080
 #define CELL_TYPE_IN_OBSTACLE_RANGE 0x00000100
-#define CELL_TYPE_FOR_SLAM6D        0x00000200
-#define CELL_TYPE_NOT_HOLLOW        0x00000400
+#define CELL_TYPE_STATIC        0x00000200
+#define CELL_TYPE_MOVING        0x00000400
+#define CELL_TYPE_GROUND        0x00000800
+
+
 
 typedef vector<Point*> cell;
 typedef vector<cell> cellColumn;

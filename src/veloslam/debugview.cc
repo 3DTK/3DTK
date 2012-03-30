@@ -29,6 +29,7 @@ using std::stringstream;
 #include "veloslam/veloscan.h"
 #include "veloslam/trackermanager.h"
 #include "veloslam/debugview.h"
+#include "veloslam/velodefs.h"
 
 extern TrackerManager trackMgr;
 
@@ -440,12 +441,18 @@ int DrawAll_ScanPoints_Number(vector <Scan *> allScans,  int psize, float r, flo
 		 GetCurrecntdelteMat(*CurrentScan ,  *firstScan,  deltaMat);
 
 		 int size = (CurrentScan->get_points())->size();
-		 vector<Point> PP = *(CurrentScan->get_points());
+	//	 vector<Point> PP = *(CurrentScan->get_points());
 
 		 for(j=0; j <size; j++)
 		 {
-			 Point p =PP[j];
-			 DrawPoint(p,  psize , r , g ,  b,  deltaMat);
+			 // need more complex classification
+			 Point p = (*(CurrentScan->get_points()))[j];
+             if (p.type & POINT_TYPE_GROUND)  //ground
+ 			    DrawPoint(p,  psize , 0.8,   0.8,   0.8,  deltaMat);
+             if (p.type & POINT_TYPE_STATIC_OBJECT) //static
+                DrawPoint(p,  psize , 0.0,  0.0,   0.8,  deltaMat);
+             if (p.type & POINT_TYPE_MOVING_OBJECT) //moving
+ 			    DrawPoint(p,  psize , 0.8,   0.0,   0.0,  deltaMat);
 		 }
 	 }
 	return 0;
@@ -454,7 +461,7 @@ int DrawAll_ScanPoints_Number(vector <Scan *> allScans,  int psize, float r, flo
 void Draw_ALL_Cells_Points_IN_ref(VeloScan& scanRef1, VeloScan& scanR,  int psize, float r, float g, float b, int type)
 {
 //	Pn+1 = dP ¡¤ Pn
-		Point p, q;
+	 Point p, q;
 	 double deltaMat[16];
 
      GetCurrecntdelteMat(scanRef1 , scanR,  deltaMat);
@@ -589,7 +596,7 @@ void Draw_ALL_Object_TYPE(VeloScan& scanRef1,  int psize, float r, float g, floa
 			clusterFeature& cellobj= myclusterFeatureArray[j];
 
 	//		if(cellobj.clusterType & TYPE )
-			if(cellobj.clusterType & CLUSTER_TYPE_OBJECT )
+			if(cellobj.clusterType & CLUSTER_TYPE_STATIC_OBJECT )
 					Draw_Cube_GL_RGB(
 									cellobj.min_x,
 									cellobj.min_y,
@@ -597,9 +604,9 @@ void Draw_ALL_Object_TYPE(VeloScan& scanRef1,  int psize, float r, float g, floa
 									cellobj.max_x,
 									cellobj.max_y,
 									cellobj.max_z,
-									r, g, b);
+									1, 0, 1);
 
-	/*		if(cellobj.clusterType & CLUSTER_TYPE_MOVING_OBJECT )
+			if(cellobj.clusterType & CLUSTER_TYPE_MOVING_OBJECT )
 					Draw_Cube_GL_RGB(
 									cellobj.min_x,
 									cellobj.min_y,
@@ -607,8 +614,8 @@ void Draw_ALL_Object_TYPE(VeloScan& scanRef1,  int psize, float r, float g, floa
 									cellobj.max_x,
 									cellobj.max_y,
 									cellobj.max_z,
-									1, 1, 1);
-*/
+									0, 1, 0);
+
 	}
 }
 
@@ -754,11 +761,10 @@ static void SpecialKey(int key, int x, int y)
 	case GLUT_KEY_F9:
 		break;
 
-	case GLUT_KEY_F10:
+	case GLUT_KEY_F12:
 		printf("next\n");
 		keycond.notify_one();
-        Draw();
-		break;
+   		break;
 	}
 	glutPostRedisplay();
 }
@@ -783,8 +789,9 @@ static void Draw(void)
 	glScalef(m_zoom, m_zoom, m_zoom);
 
 	int scansize = Scan::allScans.size();
-    DrawAll_ScanPoints_Number(Scan::allScans,  1,  0.8, 0.8, 0.8, scansize);
-	trackMgr.DrawTrackersMovtion_Long_Number_All(Scan::allScans, scansize);
+    DrawAll_ScanPoints_Number(Scan::allScans, 1, 0.8, 0.8, 0.8, scansize);
+//  Draw_ALL_Object_TYPE(*(VeloScan *)( (Scan::allScans[scansize-1])) ,1, 1, 0, 0, 1   );
+//	trackMgr.DrawTrackersMovtion_Long_Number_All(Scan::allScans, scansize);
 //	trackMgr.DrawTrackersContrailAfterFilted(Scan::allScans);
 
     glFlush();
