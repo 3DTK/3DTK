@@ -4,7 +4,7 @@
  *  @author Kai Lingemann. Institute of Computer Science, University of Osnabrueck, Germany.
  *  @author Andreas Nuechter. Institute of Computer Science, University of Osnabrueck, Germany.
  */
- 
+
 #ifndef __POINT_H__
 #define __POINT_H__
 
@@ -34,15 +34,16 @@ public:
   /**
    *	Constructor with an array, i.e., vecctor of coordinates
    */
-  inline Point(const double *p) { x = p[0]; y = p[1]; z = p[2]; type = 0; reflectance = 0.0; amplitude = 0.0; deviation = 0.0; rgb[0] = 255; rgb[1] = 255; rgb[2] = 255;};
+  inline Point(const double *p) { x = p[0]; y = p[1]; z = p[2]; type = 0; reflectance = 0.0; amplitude = 0.0; deviation = 0.0;
+	rgb[0] = 255; rgb[1] = 255; rgb[2] = 255;};
   inline Point(const double *p, const char *c) { x = p[0]; y = p[1]; z = p[2]; rgb[0] = c[0]; rgb[1] = c[1]; rgb[2] = c[2];};
 
   /**
-   *	Constructor with three double values 
+   *	Constructor with three double values
    */
   inline Point(const double _x, const double _y, const double _z) { x = _x; y = _y; z = _z; };
   inline Point(const double _x, const double _y, const double _z, const char _r, const char _g, const char _b) { x = _x; y = _y; z = _z; rgb[0] = _r; rgb[1] = _g; rgb[2] = _b;};
-  
+
   static inline Point cross(const Point &X, const Point &Y) {
     Point res;
     res.x = X.y * Y.z - X.z * Y.y;
@@ -50,7 +51,7 @@ public:
     res.z = X.x * Y.y - X.y * Y.x;
     return res;
   };
-  
+
   static inline Point norm(const Point &p) {
     double l = sqrt(p.x*p.x + p.y*p.y + p.z*p.z);
     Point res(p.x/l, p.y/l, p.z/l);
@@ -62,30 +63,30 @@ public:
     res.x = x + p.x;
     res.y = y + p.y;
     res.z = z + p.z;
-    return res; 
+    return res;
   };
-  
+
   inline Point operator-(const Point &p) const {
     Point res;
     res.x = x - p.x;
     res.y = y - p.y;
     res.z = z - p.z;
-    return res; 
+    return res;
   };
-  
+
   inline Point& operator-=(const Point &p) {
     x -= p.x;
     y -= p.y;
     z -= p.z;
-    return *this; 
+    return *this;
   };
   inline Point& operator+=(const Point &p) {
     x += p.x;
     y += p.y;
     z += p.z;
-    return *this; 
+    return *this;
   };
-  
+
 
 
   inline void transform(const double alignxf[16]);
@@ -100,13 +101,11 @@ public:
   double y;
   /// z coordinate in 3D space
   double z;
-  /// additional information about the point, e.g., semantic 
+  /// additional information about the point, e.g., semantic
+  ///  also used in veloscan for distiuguish moving or static
   int type;
 
   /////////////////////////for veloslam/////////////////////////////
-  ///  add type point  for veloscan for distiuguish moving or static
-  int point_type;
-  ///  range  in 3D space cylindrical coordinates for veloscan porject into 2.5D grid
   double rad;
   ///    tang in  cylindrical coordinates for veloscan
   double tan_theta;
@@ -123,7 +122,7 @@ public:
   float deviation;
 };
 
-  
+
 inline Point operator*(const double &v, const Point &p) {
   Point res;
   res.x = v * p.x;

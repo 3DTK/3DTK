@@ -8,7 +8,7 @@
 #define CUDE_TYPE_IN_OBSTACLE_RANGE  0x00000002
 #define CUDE_TYPE_CONTAIN_SICK       0x00000400
 
-#define CLUSTER_TYPE_OBJECT          0x00000001
+#define CLUSTER_FEATURE_TYPE_OBJECT     0x00000001
 
 #define CLUSTER_TYPE_MOVING_OBJECT   0x00000002
 #define CLUSTER_TYPE_MOVING_OBJECT_PEDESTRIAN   0x00000004
@@ -16,7 +16,7 @@
 #define CLUSTER_TYPE_MOVING_OBJECT_CAR   0x00000010
 #define CLUSTER_TYPE_MOVING_OBJECT_ BUS  0x00000020
 
-#define CLUSTER_TYPE_STATIC_OBJECT_CONSTRUCTION   0x00010000
+#define CLUSTER_TYPE_STATIC_OBJECT   0x00010000
 #define CLUSTER_TYPE_STATIC_OBJECT_BUILDING     0x00020000
 #define CLUSTER_TYPE_STATIC_OBJECT_BILLBOARD   0x00040000
 #define CLUSTER_TYPE_STATIC_OBJECT_SCULPTURE   0x00080000
@@ -32,7 +32,7 @@ public:
 	float max_x,max_y,max_z;
 	float avg_x, avg_y, avg_z;
 	float min_y_x,   max_y_x;
-	float size_x,size_y,size_z;       //具体大小
+	float size_x,size_y,size_z;
 	float speed_x, speed_y, speed;
 
 	float theta, radius;
@@ -44,6 +44,7 @@ public:
 	double boxVex[4][2];
 
 	int frameNO;
+    int selfID;
 	int trackNO;
 
 	int pointNumber;

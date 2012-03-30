@@ -326,13 +326,12 @@ int read_one_packet ( FILE *fp, vector<Point> &ptss, int maxDist, int minDist )
 					point.rad  = sqrt(  x*x 	+  y*y );
 					point.tan_theta  = y/x;
 
-					point.point_type|=POINT_TYPE_INVALID;
+			//		point.type|=POINT_TYPE_INVALID;
 
 					//主要是为了保证左手系和屏幕显示的习惯相似
 					point.x=x*100;
 					point.y=z*100;
 					point.z=y*100;
-
    					{
 						ptss.push_back(point);
 					}
