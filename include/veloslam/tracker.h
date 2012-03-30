@@ -20,6 +20,7 @@ public:
 	~Tracker(void);
 	void TrackerReset();//added by yuanjun
 
+    // for log all the cluster for tracking
 	deque<clusterFeature> statusList;
 	deque<cluster> dataList;
 

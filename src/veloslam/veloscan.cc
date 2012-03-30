@@ -323,9 +323,9 @@ int VeloScan::TransferToCellArray()
 {
 #define  DefaultColumnSize 360
 
-    int columnSize= 360;	  //cfg.cfgPlaneDetect.ColumnSize;
-    int CellSize= 50;	 //cfg.cfgPlaneDetect.CellSize;
-    int MinRad=0;		//cfg.cfgPlaneDetect.MinRad;
+    int columnSize= 360;	//cfg.cfgPlaneDetect.ColumnSize;
+    int CellSize= 50;	    //cfg.cfgPlaneDetect.CellSize;
+    int MinRad=0;		    //cfg.cfgPlaneDetect.MinRad;
     int MaxRad=6000;		//cfg.cfgPlaneDetect.MaxRad
 
     if((MaxRad-MinRad)%CellSize!=0)
@@ -361,7 +361,6 @@ int VeloScan::TransferToCellArray()
     }
 
     int diff;
-//     printf("scanCellArray.size= %d\n",scanCellArray.size());
     for(i=0; i< points.size(); ++i)
     {
             count++;
@@ -532,8 +531,8 @@ int VeloScan::CalcCellFeature(cell& cellobj, cellFeature& f)
 		   f.ave_z+=cellobj[i]->z;
 		   f.ave_y+=cellobj[i]->y;
 
-		   if(cellobj[i]->point_type & POINT_TYPE_BELOW_R)
-			   f.cellType|=CELL_TYPE_BELOW_R;
+		//   if(cellobj[i]->type & POINT_TYPE_BELOW_R)
+		//	   f.cellType |=CELL_TYPE_BELOW_R;
 
 		   if(i==0)
 		   {
@@ -544,11 +543,11 @@ int VeloScan::CalcCellFeature(cell& cellobj, cellFeature& f)
 		   }
 		   else
 		   {
-			   if(f.max_x<cellobj[i]->x)		f.max_x=cellobj[i]->x;
+			   if(f.max_x<cellobj[i]->x)	f.max_x=cellobj[i]->x;
 
-			   if(f.min_x>cellobj[i]->x)	   f.min_x=cellobj[i]->x;
+			   if(f.min_x>cellobj[i]->x)	f.min_x=cellobj[i]->x;
 
-			   if(f.max_z<cellobj[i]->z)	   f.max_z=cellobj[i]->z;
+			   if(f.max_z<cellobj[i]->z)	f.max_z=cellobj[i]->z;
 
 			   if(f.min_z>cellobj[i]->z)    f.min_z=cellobj[i]->z;
 
@@ -601,10 +600,10 @@ int VeloScan::CalcCellFeature(cell& cellobj, cellFeature& f)
    	   threshold=f.delta_y;
 
 	   float GridThresholdGroundDetect =120;
-	   if(threshold >  GridThresholdGroundDetect)
-		   f.cellType|=CELL_TYPE_ABOVE_DELTA_Y;
+	   if( threshold >  GridThresholdGroundDetect)
+		   f.cellType =CELL_TYPE_STATIC;
 	   else
-		   f.cellType|=CELL_TYPE_BELOW_DELTA_Y;
+		   f.cellType =CELL_TYPE_GROUND;
 
     return 0;
 }
@@ -642,13 +641,13 @@ int VeloScan::CalcScanCellFeature()
             feature.pCell=&cellObj;
             CalcCellFeature(cellObj,feature);
 
-	         if( feature.delta_y > 120)
-             {
-				 scanCellFeatureArray[j][i].cellType |= CELL_TYPE_ABOVE_DELTA_Y;
-				 for(int k=0;k <scanCellArray[j][i].size(); k++)
-					 scanCellArray[j][i][k]->point_type |= POINT_TYPE_ABOVE_DELTA_Y;
-
-			 }
+//	         if( feature.delta_y > 120)
+//             {
+//				 scanCellFeatureArray[j][i].cellType |= CELL_TYPE_STATIC;
+//				 for(int k=0;k <scanCellArray[j][i].size(); k++)
+//					 scanCellArray[j][i][k]->type |= POINT_TYPE_ABOVE_DELTA_Y;
+//
+//			 }
 
         }
     }
@@ -672,7 +671,7 @@ int VeloScan::SearchNeigh(cluster& clu,charvv& flagvv,int i,int j)
         return 0;
     }
 
-    if(scanCellFeatureArray[i][j].cellType & CELL_TYPE_ABOVE_DELTA_Y)
+    if(scanCellFeatureArray[i][j].cellType & CELL_TYPE_STATIC)
     {
         flagvv[i][j]=1;
 
@@ -813,15 +812,13 @@ void VeloScan::FreeAllCellAndCluterMemory()
 	scanCellArray.clear();
 	scanCellFeatureArray.clear();
 
-	scanClusterArray.clear();;
+	scanClusterArray.clear();
 	scanClusterFeatureArray.clear();
 }
 
 void VeloScan::calcReducedPoints_byClassifi(double voxelSize, int nrpts, PointType pointtype)
 {
-	// no reduction needed
-	// copy vector of points to array of points to avoid
-	// further copying
+     // only copy the points marked POINT_TYPE_STATIC_OBJECT
 	int realCount =0;
 
 	// load  only static part of scans in point_red for icp6D
@@ -830,7 +827,7 @@ void VeloScan::calcReducedPoints_byClassifi(double voxelSize, int nrpts, PointTy
 	int j=0;
 	for (int i = 0;  i < end_loop; i++)
 	{
-		if(points[i].point_type &  POINT_TYPE_STATIC_OBJECT)
+		if(points[i].type &  POINT_TYPE_STATIC_OBJECT)
 		{
 			points_red[j] = new double[3];
 			points_red[j][0] = points[i].x;
@@ -841,6 +838,7 @@ void VeloScan::calcReducedPoints_byClassifi(double voxelSize, int nrpts, PointTy
 		}
     }
 //    transform(transMatOrg, INVALID); //transform points to initial position
+
     // update max num point in scan iff you have to do so
     if (points_red_size > (int)max_points_red_size)
 		max_points_red_size = points_red_size;
@@ -906,8 +904,9 @@ void VeloScan::calcReducedPoints_byClassifi(double voxelSize, int nrpts, PointTy
 bool FilterNOMovingObjcets(clusterFeature &glu,  cluster &gluData)
 {
 	// small object do not use it!
-	if(glu.size < 3)
-		return false;
+	//if(glu.size < 8)
+	//	return false;
+	//return true; // no filter
 
 	//char  filename[256];
 	//string file;
@@ -917,77 +916,77 @@ bool FilterNOMovingObjcets(clusterFeature &glu,  cluster &gluData)
 	//DumpFeaturetoFile(glu, "c:\\feature");
 	//objcount++;
 
-	return true; // no filter
-	//if( glu.size_z > 200 && ((glu.size_x>glu.size_y?glu.size_x:glu.size_y))<360)
-	//{
-	//	return false;
-	//}
+	// for debug moving object detections.
+	if( glu.size_z > 200 && ((glu.size_x>glu.size_y?glu.size_x:glu.size_y))<360)
+	{
+		return false;
+	}
 
-	//else if((glu.size_z>350 && glu.size_x<140)|| (glu.size_x>350 && glu.size_z<140))
-	//{
-	//	return false;
-	//}
-	//else if(glu.size_z > 250 )
-	//{
-	//	return false;
-	//}
-	//else if((glu.size_x>glu.size_y?glu.size_x:glu.size_y)>420 && glu.size_z<130)
-	//{
-	//	return false;
-	//}
+	else if((glu.size_z>350 && glu.size_x<140)|| (glu.size_x>350 && glu.size_z<140))
+	{
+		return false;
+	}
+	else if(glu.size_z > 250 )
+	{
+		return false;
+	}
+	else if((glu.size_x>glu.size_y?glu.size_x:glu.size_y)>420 && glu.size_z<130)
+	{
+		return false;
+	}
 
-	//else if((glu.size_x>glu.size_y?glu.size_x:glu.size_y)>3.5
-	//	&& ((glu.size_x>glu.size_y?glu.size_x:glu.size_y)/(glu.size_x<glu.size_y?glu.size_x:glu.size_y)>4))
-	//{
-	//	return false;
-	//}
+	else if((glu.size_x>glu.size_y?glu.size_x:glu.size_y)>3.5
+		&& ((glu.size_x>glu.size_y?glu.size_x:glu.size_y)/(glu.size_x<glu.size_y?glu.size_x:glu.size_y)>4))
+	{
+		return false;
+	}
 
-	//else if(glu.size_x<700 && glu.size_z<700 &&  glu.size_y > 100  )
-	//{
-	//	return true;
-	//}
+	else if(glu.size_x<700 && glu.size_z<700 &&  glu.size_y > 100  )
+	{
+		return true;
+	}
 
-	//if(glu.size_x>1500 || glu.size_z>1500 || glu.size_x*glu.size_z >600*600 )
-	//{
-	//	return false;
-	//}
+	if(glu.size_x>1500 || glu.size_z>1500 || glu.size_x*glu.size_z >600*600 )
+	{
+		return false;
+	}
 
-	//if(glu.size_x*glu.size_z >500*500  &&  glu.size_x/glu.size_z < 1.5)
-	//{
-	//	return false;
-	//}
+	if(glu.size_x*glu.size_z >500*500  &&  glu.size_x/glu.size_z < 1.5)
+	{
+		return false;
+	}
 
-	//if(glu.size_y < 100)
-	//{
-	//	return false;
-	//}
+	if(glu.size_y < 100)
+	{
+		return false;
+	}
 
-	//if((glu.size_x + glu.size_y + glu.size_z)<1.5)
-	//{
-	//	return false;
-	//}
+	if((glu.size_x + glu.size_y + glu.size_z)<1.5)
+	{
+		return false;
+	}
 
-	//if(glu.size_z>700)
-	//{
-	//	return false;
-	//}
+	if(glu.size_z>700)
+	{
+		return false;
+	}
 
-	//if(glu.size_x>700)
-	//{
-	//	return false;
-	//}
+	if(glu.size_x>700)
+	{
+		return false;
+	}
 
-	//if((glu.size_x + glu.size_z) <4)
-	//{
-	//	return false;
-	//}
+	if((glu.size_x + glu.size_z) <4)
+	{
+		return false;
+	}
 
-	//if(glu.size_x/glu.size_z>3.0)
-	//{
-	//	return false;
-	//}
+	if(glu.size_x/glu.size_z>3.0)
+	{
+		return false;
+	}
 
-  //	return true;
+  	return true;
 }
 
 // bi classification for distigushed the moving or static
@@ -1001,12 +1000,16 @@ void VeloScan::ClassifiAllObject()
 	{
      	clusterFeature &glu = scanClusterFeatureArray[i];
 		cluster &gluData=scanClusterArray[i];
-		glu.clusterType != CLUSTER_TYPE_OBJECT;
 	    if( FilterNOMovingObjcets(glu,gluData))
 		{
 				clusterFeature &gclu = 	scanClusterFeatureArray[i];
-				gclu.clusterType  |=CLUSTER_TYPE_MOVING_OBJECT;
+				gclu.clusterType  =CLUSTER_TYPE_MOVING_OBJECT;
 		}
+        else
+        {
+                clusterFeature &gclu = 	scanClusterFeatureArray[i];
+				gclu.clusterType  =CLUSTER_TYPE_STATIC_OBJECT;
+        }
 	}
 
 	//Mark No Moving Ojbects CELLS
@@ -1014,15 +1017,25 @@ void VeloScan::ClassifiAllObject()
 	for(i=0; i<clustersize; ++i)
 	{
      	clusterFeature &glu = scanClusterFeatureArray[i];
-		if( !(glu.clusterType & CLUSTER_TYPE_MOVING_OBJECT))
+		if(glu.clusterType & CLUSTER_TYPE_MOVING_OBJECT)
 		{
+				cluster  &gclu = 	scanClusterArray[i];
+			    for(j =0; j< gclu.size() ; ++j)
+				{
+					cellFeature &gcF = *(gclu[j]);
+					gcF.cellType = CELL_TYPE_MOVING;
+				}
+		}
+        if(glu.clusterType & CLUSTER_TYPE_STATIC_OBJECT)
+	    {
 				cluster  &gclu = 	scanClusterArray[i];
 				for(j =0; j< gclu.size() ; ++j)
 				{
 					cellFeature &gcF = *(gclu[j]);
-					gcF.cellType |= CELL_TYPE_FOR_SLAM6D;
+					gcF.cellType = CELL_TYPE_STATIC;
 				}
 		}
+
 
 	}
 }
@@ -1045,7 +1058,6 @@ void VeloScan::MarkStaticorMovingPointCloud()
 		for(j=0;j< rowMax; ++j)
 		{
 		   cellFeature &gcellFreature =  gFeatureCol[j];
-
 		   startofpoint += gcellFreature.pCell->size();
 		   cell &gCell =*( gcellFreature.pCell);
 
@@ -1053,10 +1065,12 @@ void VeloScan::MarkStaticorMovingPointCloud()
 		   {
 			        // find Point in scan raw points by point_id;
 					Point p = *(gCell[k]);
-				   if( !(gcellFreature.cellType & CELL_TYPE_FOR_SLAM6D))
-					   points[ p.point_id].point_type =  POINT_TYPE_STATIC_OBJECT;
-				   else
-					   points[ p.point_id].point_type =  POINT_TYPE_MOVING_OBJECT;
+				   if(gcellFreature.cellType & CELL_TYPE_STATIC)
+					   points[p.point_id].type = POINT_TYPE_STATIC_OBJECT;
+    			   if(gcellFreature.cellType & CELL_TYPE_MOVING)
+					   points[p.point_id].type = POINT_TYPE_MOVING_OBJECT;
+    			   if(gcellFreature.cellType & CELL_TYPE_GROUND)
+					   points[p.point_id].type = POINT_TYPE_GROUND;
 		   }
 
 		}

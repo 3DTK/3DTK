@@ -77,7 +77,7 @@ int TrackerManager::AddTrackers(VeloScan& scanRef)
 {
 	int i;
 	int size=scanRef.scanClusterArray.size();
-
+    // i is glu id in scan
 	for(i=0; i<size;++i)
 	{
 
@@ -89,12 +89,15 @@ int TrackerManager::AddTrackers(VeloScan& scanRef)
 
 			newTracker.kalmanFilter.timeUpdate();
 
+           // for find scan id for each cluster.
 			newTracker.frameNO =scanRef.scanid;
-
+//            cluster &gluData=scanRef.scanClusterArray[i];
 			glu.frameNO= scanRef.scanid;
+            glu.selfID = i;
 
 			newTracker.statusList.push_back(glu);
 			newTracker.dataList.push_back(gluData);
+
 			//		TRACE("Add track %d %f %f\n",colorIdx,glu.theta,glu.radius);
 			newTracker.colorIdx=colorIdx;
 			colorIdx++;
@@ -114,7 +117,6 @@ int TrackerManager::FilterObject(VeloScan& scanRef)
 
 	for(i=0; i<size;++i)
 	{
-
 		clusterFeature &glu=scanRef.scanClusterFeatureArray[i];
 		cluster &gluData=scanRef.scanClusterArray[i];
 		clusterStatus[i].FilterRet = TrackerManager::TrackerFilter(glu, gluData);
@@ -235,10 +237,17 @@ int TrackerManager::UpdateTrackers(VeloScan& scanRef)
 		else
 		{
 			scanRef.scanClusterFeatureArray[matchID].trackNO = trackNO;
+
+            clusterFeature &glu=scanRef.scanClusterFeatureArray[matchID];
+            cluster &gluData=scanRef.scanClusterArray[matchID];
+			glu.frameNO= scanRef.scanid;
+            glu.selfID = matchID;
+
 			// save feature
-			tracker.statusList.push_back(scanRef.scanClusterFeatureArray[matchID]);
+			tracker.statusList.push_back(glu);
 			// save data
-			tracker.dataList.push_back(scanRef.scanClusterArray[matchID]);
+			tracker.dataList.push_back(gluData);
+            // save the id
 			tracker.matchClusterID=matchID;
 			tracker.missMatch=false;
 			tracker.Matched = true;
@@ -648,7 +657,7 @@ int TrackerManager::DrawTrackersMovtion_Long_Number_All(vector <Scan *> allScans
 							deltaMat);
 				}
                 else
-       			{	      
+       			{
 					  DrawObjectPoint(gluData1, 1,
     						ColorTableShot[colorIdx][0],
     						ColorTableShot[colorIdx][1],
@@ -776,25 +785,25 @@ int TrackerManager::ClassifiyTrackersObjects(vector <Scan *> allScans, int curre
 
              clusterFeature &glu1=tracker.statusList[i];
              clusterFeature &glu2=tracker.statusList[i+1];
-			 
+
 		 	 Point p1(glu1.avg_x, glu1.avg_y, glu1.avg_z);
 			 Point p2(glu2.avg_x, glu2.avg_y, glu2.avg_z);
 
-  		   cout << " pose  no" << tracker.matchClusterID <<"  " 
+  		   cout << " pose  no" << tracker.matchClusterID <<"  "
 			       <<  p1.x  <<"  " <<  p2.x <<"  "
-				   <<  p1.y  <<"  " <<  p2.y <<"  " 
+				   <<  p1.y  <<"  " <<  p2.y <<"  "
 				   <<  p1.z  <<"  " <<  p2.z <<"  " <<  movement <<"  " << endl;
 
 			 p1.transform(deltaMat);
              p2.transform(deltaMatNext);
-			 //还没有姿态信息，所以计算结果是错误的。
+
              movement += sqrt( (p1.x -p2.x)*(p1.x -p2.x)
                       //        +(p1.y -p2.y)*(p1.y -p2.y)
                                           +(p1.z -p2.z)*(p1.z -p2.z) );
 
- 		   cout << " tracker no" << tracker.matchClusterID <<"  " 
+ 		   cout << " tracker no" << tracker.matchClusterID <<"  "
 			       <<  p1.x  <<"  " <<  p2.x <<"  "
-				   <<  p1.y  <<"  " <<  p2.y <<"  " 
+				   <<  p1.y  <<"  " <<  p2.y <<"  "
 				   <<  p1.z  <<"  " <<  p2.z <<"  " <<  movement <<"  " << endl;
 
          }
@@ -803,12 +812,74 @@ int TrackerManager::ClassifiyTrackersObjects(vector <Scan *> allScans, int curre
 
     }
 
-    ofstream redptsout("d:\\trackers.txt",  ios::app);
+    //ofstream redptsout("d:\\trackers.txt",  ios::app);
+    //for(it=tracks.begin();  it!=tracks.end();  it++)
+    //{
+    //       Tracker &tracker=*it;
+    //       redptsout<< tracker.moving_distance <<endl;
+		  // cout << " tracker " << tracker.matchClusterID <<" movement " << tracker.moving_distance <<endl;
+    //}
+
+   // mark all objets type such as moving or static
     for(it=tracks.begin();  it!=tracks.end();  it++)
     {
-           Tracker &tracker=*it;
-           redptsout<< tracker.moving_distance <<endl;
-		   cout << " tracker " << tracker.matchClusterID <<" movement " << tracker.moving_distance <<endl;
+		    Tracker &tracker=*it;
+            int size=tracker.statusList.size();
+			// no tracking all for slam
+			if (size < 3)
+			{
+				for(int i=0;i<size;i++)
+				{
+                //    VeloScan *CurrentScan = ( VeloScan *)( allScans[i]);
+     	 		//	clusterFeature &glu1=CurrentScan->scanClusterFeatureArray\
+                //                                [tracker.matchClusterID];
+		        //    cluster &gclu=CurrentScan->scanClusterArray\
+                //                                [tracker.matchClusterID];
+
+					clusterFeature &glu1=tracker.statusList[i];
+                    VeloScan *CurrentScan = ( VeloScan *)( allScans[glu1.frameNO]);
+                	clusterFeature &realglu1=CurrentScan->scanClusterFeatureArray[glu1.selfID];
+					cluster  &realgclu = CurrentScan->scanClusterArray[glu1.selfID];
+
+					realglu1.clusterType  = CLUSTER_TYPE_STATIC_OBJECT;
+					for(j =0; j< realgclu.size() ; ++j)
+					{
+							cellFeature &gcF = *(realgclu[j]);
+							gcF.cellType = CELL_TYPE_STATIC;
+					}
+				}
+				continue;
+			}
+
+			// for tracking classifiation //not transfrom to scan
+            for(int i=0;i<size;i++)
+            {
+                clusterFeature &glu1=tracker.statusList[i];
+                VeloScan *CurrentScan = ( VeloScan *)( allScans[glu1.frameNO]);
+                clusterFeature &realglu1=CurrentScan->scanClusterFeatureArray[glu1.selfID];
+                cluster  &realgclu = CurrentScan->scanClusterArray[glu1.selfID];
+
+                 if(tracker.moving_distance < 8.0)
+                 {
+					realglu1.clusterType = CLUSTER_TYPE_STATIC_OBJECT;
+                    for(j =0; j< realgclu.size() ; ++j)
+                    {
+                        cellFeature &gcF = *(realgclu[j]);
+                        gcF.cellType = CELL_TYPE_STATIC;
+                    }
+                 }
+                 else
+                 {
+                    realglu1.clusterType  = CLUSTER_TYPE_MOVING_OBJECT;
+                    for(j =0; j< realgclu.size() ; ++j)
+                    {
+                        cellFeature &gcF = *(realgclu[j]);
+                        gcF.cellType = CELL_TYPE_MOVING;
+                    }
+
+                 }
+
+            }
     }
 
 	return 0;

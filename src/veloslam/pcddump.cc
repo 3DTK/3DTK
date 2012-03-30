@@ -54,30 +54,30 @@ using std::flush;
 
 void DumpPointtoFile(cluster &gluData1, string filename)
 {  
-	cell* pCell;
-    ofstream redptsout(filename);
- 
-	for(int j=0; j<gluData1.size();++j)
-	{
-		pCell=gluData1[j]->pCell;
-		for(int k=0; k<pCell->size();++k)
-		{
-			redptsout <<(*pCell)[k]->x << " "
-				           <<(*pCell)[k]->y<< " "
-						   <<(*pCell)[k]->z<< endl;
+	//cell* pCell;
+ //   ofstream redptsout(filename);
+ //
+	//for(int j=0; j<gluData1.size();++j)
+	//{
+	//	pCell=gluData1[j]->pCell;
+	//	for(int k=0; k<pCell->size();++k)
+	//	{
+	//		redptsout <<(*pCell)[k]->x << " "
+	//			           <<(*pCell)[k]->y<< " "
+	//					   <<(*pCell)[k]->z<< endl;
 
-		}
-	}
-    redptsout.close();
-    redptsout.clear();
+	//	}
+	//}
+ //   redptsout.close();
+ //   redptsout.clear();
 }
 
 void DumpFeaturetoFile(clusterFeature &glu, string filename)
 {  
-	ofstream redptsout("c:\\featue", ios::app);
-    redptsout <<glu.size_x << " "<< glu.size_y << " "<< glu.size_z <<" "<<
-		               glu.speed<< " "<< glu.speed_x<< " "<< glu.speed_y<<" "<< glu.pointNumber <<endl;
+	//ofstream redptsout("c:\\featue", ios::app);
+ //   redptsout <<glu.size_x << " "<< glu.size_y << " "<< glu.size_z <<" "<<
+	//	               glu.speed<< " "<< glu.speed_x<< " "<< glu.speed_y<<" "<< glu.pointNumber <<endl;
 
-    redptsout.close();
-    redptsout.clear();
+ //   redptsout.close();
+ //   redptsout.clear();
 }
