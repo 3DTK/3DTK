@@ -773,7 +773,6 @@ static void Draw(void)
 {
 	glClearColor(1.0, 1.0, 1.0, 1.0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-//	glClearColor(0.0, 0.0, 0.0, 0.0);
 	glClearColor(1.0, 1.0, 1.0, 1.0);
 	glLoadIdentity();
 
@@ -808,7 +807,7 @@ int Show(int frameno)
 
 	x_move=0.0;
 	y_move=0.0;
-	x_rotate=0.0;
+	x_rotate=90.0;
 	y_rotate=0.0;
 	z_rotate=0.0;
 	m_zoom=0.01;
