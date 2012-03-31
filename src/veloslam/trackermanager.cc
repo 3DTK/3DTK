@@ -21,13 +21,38 @@
 int sliding_window_size = 6;
 int current_sliding_window_pos =0;
 Trajectory VelodyneTrajectory;
+VeloScan * g_pfirstScan;
+
+// is OK
+int GetScanID_in_SlidingWindow(int absNO, int current_pos, int  window_size)
+{
+        int firstNO=-1;
+             // relative scanID   absolute scanID
+             // absNO (6,7,8,9)  current_pos(6,7,8,9)  window_size =6
+		if(current_pos > window_size)
+         {    
+			 // in slidingwindow
+			 if(absNO  >= current_pos - window_size )
+                   firstNO =absNO - (current_pos - window_size );
+			 // out of slidingwindow
+			 else 
+				    firstNO = -1;  
+        }
+		else
+		{
+			  //in first scans
+              firstNO = absNO;
+		}
+	   cerr << " absNO  " << absNO  << " firstNO  "<<firstNO 
+		      << " current_pos  " << current_pos << " window_size  "<< window_size <<endl ;
+       return firstNO;
+}
 
 TrackerManager::TrackerManager(void)
 {
 	colorIdx=0;
 	rollAngle=0;
 }
-
 
 TrackerManager::~TrackerManager(void)
 {
@@ -154,12 +179,9 @@ int TrackerManager::MatchTrackers(VeloScan& scanRef,Tracker& tracker,float kg)
 	ObjectState movestate;
 
 	predictMeasurement=tracker.kalmanFilter.GetPredictMeasurement(rollAngle);
-
 	standardDeviation=tracker.kalmanFilter.CalMeasureDeviation();
-
 	for(i=0; i<scanRef.scanClusterArray.size();++i)
 	{
-
 		clusterFeature &glu=scanRef.scanClusterFeatureArray[i];
 		cluster &gluData=scanRef.scanClusterArray[i];
 
@@ -226,6 +248,7 @@ int TrackerManager::UpdateTrackers(VeloScan& scanRef)
 		{
 			matchID=MatchTrackers(scanRef,tracker,1.5*KG);
 		}
+
 		if(matchID==-1)
 		{
 			tracker.missMatch=true;
@@ -296,7 +319,7 @@ int TrackerManager::DrawScanCluster(VeloScan& scanRef)
 		if(scanRef.scanid ==4 )
 			    Draw_Cube_GL_RGB(glu, ColorTableShot[4][0], ColorTableShot[4][1], ColorTableShot[4][2]);
 		if(scanRef.scanid ==5 )
-			   Draw_Cube_GL_RGB(glu, ColorTableShot[5][0], ColorTableShot[5][1], ColorTableShot[5][2]);
+			    Draw_Cube_GL_RGB(glu, ColorTableShot[5][0], ColorTableShot[5][1], ColorTableShot[5][2]);
 
 		/*
 		glColor3d(ColorTableShot[colorIdx][0],  ColorTableShot[colorIdx][1],  ColorTableShot[colorIdx][2]);
@@ -617,20 +640,29 @@ int TrackerManager::DrawTrackersMovtion_Long_Number_All(vector <Scan *> allScans
 			}
 			for(int i =0;   i <size-2;  i++ )
 			{
-			    Scan *firstScan = allScans[0];
-                Scan *CurrentScan = allScans[i];
-				Scan *CurrentScanNext = allScans[i+1];
+				clusterFeature &glu1=tracker.statusList[i];
+				cluster &gluData1=tracker.dataList[i];
+			    clusterFeature &glu2=tracker.statusList[i+1];
+				cluster &gluData2=tracker.dataList[i+1];
+
+			    int firstNO = GetScanID_in_SlidingWindow(glu1.frameNO,
+                                 current_sliding_window_pos,
+                                 sliding_window_size);
+                int secondNO = GetScanID_in_SlidingWindow(glu2.frameNO,
+                                 current_sliding_window_pos,
+                                 sliding_window_size);;
+ 			   if(firstNO <0 || secondNO< 0 )
+				    continue;
+
+			    Scan *firstScan = (Scan *)g_pfirstScan;
+                Scan *CurrentScan = allScans[firstNO];
+				Scan *CurrentScanNext = allScans[secondNO];
 
 				double  deltaMat[16];
 				double  deltaMatNext[16];
 
 				GetCurrecntdelteMat(*CurrentScan , *firstScan,  deltaMat);
 				GetCurrecntdelteMat(*CurrentScanNext , *firstScan,  deltaMatNext);
-
-				clusterFeature &glu1=tracker.statusList[i];
-				cluster &gluData1=tracker.dataList[i];
-			    clusterFeature &glu2=tracker.statusList[i+1];
-				cluster &gluData2=tracker.dataList[i+1];
 
 		//		if (glu1.size < 8) continue;
 		//		if (glu2.size < 8) continue;
@@ -770,28 +802,46 @@ int TrackerManager::DrawEgoTrajectory()
 
 	return 0;
 }
+
 int TrackerManager::ClassifiyTrackersObjects(vector <Scan *> allScans, int currentNO ,int windowsize)
 {
 	int i,j,k,colorIdx;
     float movement;
 	list<Tracker>::iterator it;
 
-    for(it=tracks.begin();  it!=tracks.end();  it++)
+    for(it=tracks.begin(); it!=tracks.end(); it++)
     {
          Tracker &tracker=*it;
          tracker.moving_distance = 0.0;
 
          int size=tracker.statusList.size();
-         if (size < 3)
+         if (current_sliding_window_pos  < 3 ||  size <3)  //不处理前三帧和跟踪不到三个的。
          {
              continue;
          }
+
          movement =0;
-         for (int i=0;i<size-2;i++)
+         for ( i=0 ;i<size-2;i++)
          {
-             Scan *firstScan = allScans[0];
-             Scan *CurrentScan = allScans[i];
-     	 	 Scan *CurrentScanNext = allScans[i+1];
+             clusterFeature &glu1=tracker.statusList[i];
+             clusterFeature &glu2=tracker.statusList[i+1];
+
+		 	 Point p1(glu1.avg_x, glu1.avg_y, glu1.avg_z);
+			 Point p2(glu2.avg_x, glu2.avg_y, glu2.avg_z);
+
+             int firstNO = GetScanID_in_SlidingWindow(glu1.frameNO,
+                                 current_sliding_window_pos,
+                                 sliding_window_size);
+             int secondNO = GetScanID_in_SlidingWindow(glu2.frameNO,
+                                 current_sliding_window_pos,
+                                 sliding_window_size);;
+
+			 if(firstNO <0 || secondNO< 0 )
+				 continue;
+
+             Scan *firstScan = (Scan *)g_pfirstScan;  //the first scan.
+             Scan *CurrentScan = allScans[firstNO];
+     	 	 Scan *CurrentScanNext = allScans[secondNO];
 
              double  deltaMat[16];
              double  deltaMatNext[16];
@@ -799,31 +849,24 @@ int TrackerManager::ClassifiyTrackersObjects(vector <Scan *> allScans, int curre
              GetCurrecntdelteMat(*CurrentScan , *firstScan,  deltaMat);
              GetCurrecntdelteMat(*CurrentScanNext , *firstScan,  deltaMatNext);
 
-             clusterFeature &glu1=tracker.statusList[i];
-             clusterFeature &glu2=tracker.statusList[i+1];
-
-		 	 Point p1(glu1.avg_x, glu1.avg_y, glu1.avg_z);
-			 Point p2(glu2.avg_x, glu2.avg_y, glu2.avg_z);
-
-  		   cout << " pose  no" << tracker.matchClusterID <<"  "
-			       <<  p1.x  <<"  " <<  p2.x <<"  "
-				   <<  p1.y  <<"  " <<  p2.y <<"  "
-				   <<  p1.z  <<"  " <<  p2.z <<"  " <<  movement <<"  " << endl;
+  		   //  cout << " pose  no" << tracker.matchClusterID <<"  "
+			    //   <<  p1.x  <<"  " <<  p2.x <<"  "
+				   //<<  p1.y  <<"  " <<  p2.y <<"  "
+				   //<<  p1.z  <<"  " <<  p2.z <<"  " <<  movement <<"  " << endl;
 
 			 p1.transform(deltaMat);
              p2.transform(deltaMatNext);
 
              movement += sqrt( (p1.x -p2.x)*(p1.x -p2.x)
                       //        +(p1.y -p2.y)*(p1.y -p2.y)
-                                          +(p1.z -p2.z)*(p1.z -p2.z) );
+                                        +(p1.z -p2.z)*(p1.z -p2.z) );
 
- 		   cout << " tracker no" << tracker.matchClusterID <<"  "
-			       <<  p1.x  <<"  " <<  p2.x <<"  "
-				   <<  p1.y  <<"  " <<  p2.y <<"  "
-				   <<  p1.z  <<"  " <<  p2.z <<"  " <<  movement <<"  " << endl;
+ 		    // cout << " tracker no" << tracker.matchClusterID <<"  "
+			    //   <<  p1.x  <<"  " <<  p2.x <<"  "
+				   //<<  p1.y  <<"  " <<  p2.y <<"  "
+				   //<<  p1.z  <<"  " <<  p2.z <<"  " <<  movement <<"  " << endl;
 
          }
-
          tracker.moving_distance = movement/(size-1);
 
     }
@@ -845,25 +888,18 @@ int TrackerManager::ClassifiyTrackersObjects(vector <Scan *> allScans, int curre
 			// no tracking all for slam
 
 						// for tracking classifiation //not transfrom to scan
-			if(current_sliding_window_pos > sliding_window_size)
-				i= current_sliding_window_pos - sliding_window_size;
-
 			if (size < 3)
 			{
-				for( i=0;i<size;i++)
+				for(i=0;i<size;i++)
 				{
-                //    VeloScan *CurrentScan = ( VeloScan *)( allScans[i]);
-     	 		//	clusterFeature &glu1=CurrentScan->scanClusterFeatureArray\
-                //                                [tracker.matchClusterID];
-		        //    cluster &gclu=CurrentScan->scanClusterArray\
-                //                                [tracker.matchClusterID];
+         		  clusterFeature &glu1=tracker.statusList[i];
 
-					clusterFeature &glu1=tracker.statusList[i];
+	               currentScanNo= GetScanID_in_SlidingWindow(glu1.frameNO,
+                                                     current_sliding_window_pos,
+                                                     sliding_window_size);
 
-					if(glu1.frameNO > sliding_window_size || current_sliding_window_pos > sliding_window_size)
-						currentScanNo  =  glu1.frameNO - current_sliding_window_pos + sliding_window_size;
-					else
-						currentScanNo  =  glu1.frameNO;
+				    if(currentScanNo <0 )
+             			 continue;
 
                     VeloScan *CurrentScan = ( VeloScan *)( allScans[currentScanNo]);
                 	clusterFeature &realglu1=CurrentScan->scanClusterFeatureArray[glu1.selfID];
@@ -879,21 +915,24 @@ int TrackerManager::ClassifiyTrackersObjects(vector <Scan *> allScans, int curre
 				continue;
 			}
 
-
-
             for(i=0;i<size;i++)
             {
                 clusterFeature &glu1=tracker.statusList[i];
-				if(glu1.frameNO > sliding_window_size|| current_sliding_window_pos > sliding_window_size)
-					currentScanNo  =  glu1.frameNO - current_sliding_window_pos + sliding_window_size;
-				else
-					currentScanNo  =  glu1.frameNO;
+
+                currentScanNo= GetScanID_in_SlidingWindow(glu1.frameNO,
+                                                  current_sliding_window_pos,
+                                                  sliding_window_size);
+
+
+			    if(currentScanNo <0 )
+           				 continue;
 
                 VeloScan *CurrentScan = ( VeloScan *)( allScans[currentScanNo]);
                 clusterFeature &realglu1=CurrentScan->scanClusterFeatureArray[glu1.selfID];
                 cluster  &realgclu = CurrentScan->scanClusterArray[glu1.selfID];
 
-                 if(tracker.moving_distance < 8.0)
+          //       if(tracker.moving_distance < 8.0)
+				if(0)
                  {
 					realglu1.clusterType = CLUSTER_TYPE_STATIC_OBJECT;
                     for(j =0; j< realgclu.size() ; ++j)

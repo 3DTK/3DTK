@@ -17,17 +17,16 @@
 #include <omp.h>
 #endif
 
-#define WANT_STREAM ///< define the WANT stream :)
+//#define WANT_STREAM ///< define the WANT stream :)
 
-#include <string>
-using std::string;
-#include <iostream>
-using std::cout;
-using std::cerr;
-using std::endl;
-#include <fstream>
-using std::ifstream;
-
+//#include <string>
+//using std::string;
+//#include <iostream>
+//using std::cout;
+//using std::cerr;
+//using std::endl;
+//#include <fstream>
+//using std::ifstream;
 
 
 #include "slam6d/icp6Dapx.h"
@@ -101,6 +100,7 @@ extern TrackerManager trackMgr;
 extern  int sliding_window_size;
 extern  int current_sliding_window_pos;
 extern Trajectory VelodyneTrajectory;
+extern  VeloScan* g_pfirstScan;
 
 //  Handling Segmentation faults and CTRL-C
 void sigSEGVhandler (int v)
@@ -139,6 +139,7 @@ void usage(char* prog)
   const string bold("");
   const string normal("");
 #endif
+
   cout << endl
     << bold << "USAGE " << normal << endl
     << "   " << prog << " [options] directory" << endl << endl;
@@ -422,7 +423,7 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &rand,
         break;
       case 'd':
         mdm = atof(optarg);
-        break; 
+        break;
       case 'D':
         mdml = atof(optarg);
         break;
@@ -983,29 +984,31 @@ int main(int argc, char **argv)
     {
 
 	    VeloScan::dir = dir;
-	    cout << scanCount << "*" << endl;
+	//    cout << scanCount << "*" << endl;
         VeloScan *currentScan = new VeloScan(eu, maxDist);
+        if(scanCount == 0)
+            g_pfirstScan = new  VeloScan(*currentScan);
         currentScan->setFileNr(_fileNr);
         currentScan->scanid = scanCount; ///
 		currentScan->setPoints(&ptss);    // copy points
-		cout << "read scan " << (currentScan->get_points())->size() << endl;
+	//	cout << "read scan " << (currentScan->get_points())->size() << endl;
 		ptss.clear();                  // clear points
 		Scan::allScans.push_back(currentScan);
 
          currentScan->FindingAllofObject();
-     //    currentScan->TrackingAllofObject();
-		 cout << "all  cluster objects " << currentScan->scanClusterFeatureArray.size() << endl;
-	//	 cout << "all  cluster tracker " << trackMgr.getNumberofTracker() << endl;
+         currentScan->TrackingAllofObject();
+//		 cout << "all  cluster objects " << currentScan->scanClusterFeatureArray.size() << endl;
+//		 cout << "all  cluster tracker " << trackMgr.getNumberofTracker() << endl;
 		 // mark the type of clusters.
 		 int windowsize =3;
 	//	 if(scanCount < windowsize )
-	         currentScan->ClassifiAllofObject();
+	//      currentScan->ClassifiAllofObject();
 	//	 else
-    //	 	 currentScan->ClassifibyTrackingAllObject(scanCount, windowsize);
+    	 	 currentScan->ClassifibyTrackingAllObject(scanCount, windowsize);
 
          currentScan->ExchangePointCloud();
          currentScan->calcReducedPoints_byClassifi(red, octree, PointType());
-		 cout << "reducing scan " << currentScan->get_points_red_size()  << endl;
+	//	 cout << "reducing scan " << currentScan->get_points_red_size()  << endl;
 
 	     currentScan->transform(currentScan->getTransMatOrg(), Scan::INVALID); //transform points to initial position
          currentScan->createTree(nns_method, cuda_enabled);
@@ -1015,23 +1018,25 @@ int main(int argc, char **argv)
 		    MatchTwoScan(my_icp,  currentScan,  sliding_window_size,  eP);
          else
             MatchTwoScan(my_icp,  currentScan,  scanCount,  eP);
+
+		 ///////////////////////////////////////////
          const double* p;
          p = currentScan->get_rPos();
          Point x(p[0], p[1], p[2]);
          VelodyneTrajectory.path.push_back(x);
+
+		 //////////////////////////////////////////
          current_sliding_window_pos++;
          scanCount++;
          if(current_sliding_window_pos > sliding_window_size )
          {
-            //  currentScan->clearPoints();
-            vector <Scan*>::iterator Iter = Scan::allScans.begin();
+             vector <Scan*>::iterator Iter = Scan::allScans.begin();
              delete ((VeloScan*)(*Iter));
          }
 
 	   boost::mutex::scoped_lock lock(keymutex);
 	   keycond.wait(lock);
 	   glutPostRedisplay();
-
      ////////////////////////////////////////
     }
 
@@ -1055,32 +1060,32 @@ int main(int argc, char **argv)
  // long endtime = GetCurrentTimeInMilliSec() - starttime;
  // cout << "Matching done in " << endtime << " milliseconds!!!" << endl;
 
-  IntersectionDetection intersectionDetector;
-  intersectionDetector.DetectIntersection();
-  cout << "intersectionDetection done"<<endl;
+//  IntersectionDetection intersectionDetector;
+//  intersectionDetector.DetectIntersection();
+//  cout << "intersectionDetection done"<<endl;
 
-  if (exportPts) {
-    cout << "Export all 3D Points to file \"points.pts\"" << endl;
-    ofstream redptsout("points.pts");
-    for(unsigned int i = 0; i < Scan::allScans.size(); i++) {
-      for (int j = 0; j < Scan::allScans[i]->get_points_red_size(); j++) {
-        redptsout << Scan::allScans[i]->get_points_red()[j][0] << " "
-          << Scan::allScans[i]->get_points_red()[j][1] << " "
-          << Scan::allScans[i]->get_points_red()[j][2] << endl;
-      }
-    }
-    redptsout.close();
-    redptsout.clear();
-  }
+  //if (exportPts) {
+  //  cout << "Export all 3D Points to file \"points.pts\"" << endl;
+  //  ofstream redptsout("points.pts");
+  //  for(unsigned int i = 0; i < Scan::allScans.size(); i++) {
+  //    for (int j = 0; j < Scan::allScans[i]->get_points_red_size(); j++) {
+  //      redptsout << Scan::allScans[i]->get_points_red()[j][0] << " "
+  //        << Scan::allScans[i]->get_points_red()[j][1] << " "
+  //        << Scan::allScans[i]->get_points_red()[j][2] << endl;
+  //    }
+  //  }
+  //  redptsout.close();
+  //  redptsout.clear();
+  //}
 
-  cout << "Saving registration information in .frames files" << endl;
-  vector <Scan*>::iterator Iter = Scan::allScans.begin();
-  for( ; Iter != Scan::allScans.end(); ) {
-    Iter = Scan::allScans.begin();
-    delete (*Iter);
-    cout << ".";
-    cout.flush();
-  }
+  //cout << "Saving registration information in .frames files" << endl;
+  //vector <Scan*>::iterator Iter = Scan::allScans.begin();
+  //for( ; Iter != Scan::allScans.end(); ) {
+  //  Iter = Scan::allScans.begin();
+  //  delete (*Iter);
+  //  cout << ".";
+  //  cout.flush();
+  //}
 
   Scan::allScans.clear();
 

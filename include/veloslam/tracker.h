@@ -26,6 +26,7 @@ public:
 
 	bool missMatch;
 	bool Matched;
+
 	int matchClusterID;
 	int colorIdx;
 

@@ -168,8 +168,6 @@ public:
 	void SwapMatrixRow(unsigned int nRow1,unsigned int nRow2);
 
 	void SwapMatrixCol(unsigned int nCol1,unsigned int nCol2);
-
-
 };
 
 
