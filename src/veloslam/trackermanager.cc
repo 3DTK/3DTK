@@ -20,6 +20,7 @@
 
 int sliding_window_size = 6;
 int current_sliding_window_pos =0;
+Trajectory VelodyneTrajectory;
 
 TrackerManager::TrackerManager(void)
 {
@@ -757,6 +758,18 @@ int TrackerManager::DrawTrackersContrailAfterFilted(vector<Scan *> allScans)
 }
 
 
+int TrackerManager::DrawEgoTrajectory()
+{
+   	int i, size;
+    size =VelodyneTrajectory.path.size();
+	for(i=0; i< size; i++)
+	{
+        Point p = VelodyneTrajectory.path[i];
+ 		DrawPoint(p,4,0,1,0);
+     }
+
+	return 0;
+}
 int TrackerManager::ClassifiyTrackersObjects(vector <Scan *> allScans, int currentNO ,int windowsize)
 {
 	int i,j,k,colorIdx;
@@ -830,9 +843,9 @@ int TrackerManager::ClassifiyTrackersObjects(vector <Scan *> allScans, int curre
 		    Tracker &tracker=*it;
             int size=tracker.statusList.size();
 			// no tracking all for slam
-		 
+
 						// for tracking classifiation //not transfrom to scan
-			if(current_sliding_window_pos > sliding_window_size) 
+			if(current_sliding_window_pos > sliding_window_size)
 				i= current_sliding_window_pos - sliding_window_size;
 
 			if (size < 3)
@@ -846,8 +859,8 @@ int TrackerManager::ClassifiyTrackersObjects(vector <Scan *> allScans, int curre
                 //                                [tracker.matchClusterID];
 
 					clusterFeature &glu1=tracker.statusList[i];
-					
-					if(glu1.frameNO > sliding_window_size || current_sliding_window_pos > sliding_window_size) 
+
+					if(glu1.frameNO > sliding_window_size || current_sliding_window_pos > sliding_window_size)
 						currentScanNo  =  glu1.frameNO - current_sliding_window_pos + sliding_window_size;
 					else
 						currentScanNo  =  glu1.frameNO;
@@ -871,7 +884,7 @@ int TrackerManager::ClassifiyTrackersObjects(vector <Scan *> allScans, int curre
             for(i=0;i<size;i++)
             {
                 clusterFeature &glu1=tracker.statusList[i];
-				if(glu1.frameNO > sliding_window_size|| current_sliding_window_pos > sliding_window_size) 
+				if(glu1.frameNO > sliding_window_size|| current_sliding_window_pos > sliding_window_size)
 					currentScanNo  =  glu1.frameNO - current_sliding_window_pos + sliding_window_size;
 				else
 					currentScanNo  =  glu1.frameNO;

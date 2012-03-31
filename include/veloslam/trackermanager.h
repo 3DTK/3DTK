@@ -27,6 +27,8 @@ public:
 
 	int HandleScan(VeloScan& scanRef);
 
+    int DrawEgoTrajectory();
+
 	int DrawScanCluster(VeloScan& scanRef);
 
 	int DrawTrackers(VeloScan& scanRefs);
