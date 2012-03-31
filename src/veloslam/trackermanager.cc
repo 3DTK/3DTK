@@ -18,6 +18,9 @@
 
 #define KG 35
 
+int sliding_window_size = 6;
+int current_sliding_window_pos =0;
+
 TrackerManager::TrackerManager(void)
 {
 	colorIdx=0;
@@ -823,12 +826,18 @@ int TrackerManager::ClassifiyTrackersObjects(vector <Scan *> allScans, int curre
    // mark all objets type such as moving or static
     for(it=tracks.begin();  it!=tracks.end();  it++)
     {
+		    int currentScanNo =0;
 		    Tracker &tracker=*it;
             int size=tracker.statusList.size();
 			// no tracking all for slam
+		 
+						// for tracking classifiation //not transfrom to scan
+			if(current_sliding_window_pos > sliding_window_size) 
+				i= current_sliding_window_pos - sliding_window_size;
+
 			if (size < 3)
 			{
-				for(int i=0;i<size;i++)
+				for( i=0;i<size;i++)
 				{
                 //    VeloScan *CurrentScan = ( VeloScan *)( allScans[i]);
      	 		//	clusterFeature &glu1=CurrentScan->scanClusterFeatureArray\
@@ -837,7 +846,13 @@ int TrackerManager::ClassifiyTrackersObjects(vector <Scan *> allScans, int curre
                 //                                [tracker.matchClusterID];
 
 					clusterFeature &glu1=tracker.statusList[i];
-                    VeloScan *CurrentScan = ( VeloScan *)( allScans[glu1.frameNO]);
+					
+					if(glu1.frameNO > sliding_window_size || current_sliding_window_pos > sliding_window_size) 
+						currentScanNo  =  glu1.frameNO - current_sliding_window_pos + sliding_window_size;
+					else
+						currentScanNo  =  glu1.frameNO;
+
+                    VeloScan *CurrentScan = ( VeloScan *)( allScans[currentScanNo]);
                 	clusterFeature &realglu1=CurrentScan->scanClusterFeatureArray[glu1.selfID];
 					cluster  &realgclu = CurrentScan->scanClusterArray[glu1.selfID];
 
@@ -851,11 +866,17 @@ int TrackerManager::ClassifiyTrackersObjects(vector <Scan *> allScans, int curre
 				continue;
 			}
 
-			// for tracking classifiation //not transfrom to scan
-            for(int i=0;i<size;i++)
+
+
+            for(i=0;i<size;i++)
             {
                 clusterFeature &glu1=tracker.statusList[i];
-                VeloScan *CurrentScan = ( VeloScan *)( allScans[glu1.frameNO]);
+				if(glu1.frameNO > sliding_window_size|| current_sliding_window_pos > sliding_window_size) 
+					currentScanNo  =  glu1.frameNO - current_sliding_window_pos + sliding_window_size;
+				else
+					currentScanNo  =  glu1.frameNO;
+
+                VeloScan *CurrentScan = ( VeloScan *)( allScans[currentScanNo]);
                 clusterFeature &realglu1=CurrentScan->scanClusterFeatureArray[glu1.selfID];
                 cluster  &realgclu = CurrentScan->scanClusterArray[glu1.selfID];
 

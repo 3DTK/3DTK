@@ -72,8 +72,8 @@ using std::flush;
 #include <cstring>
 using std::flush;
 
-#include <GL/gl.h>			/* OpenGL header file */
-#include <GL/glu.h>			/* OpenGL utilities header file */
+#include <GL/gl.h>
+#include <GL/glu.h>
 
 #ifdef _MSC_VER
 #include <GL/glut.h>
@@ -178,14 +178,16 @@ VeloScan::VeloScan(const vector < VeloScan* >& MetaScan, int nns_method, bool cu
     // add Scan to ScanList
     allScans.push_back(this);
 
-    meta_parts = MetaScan;
+ //   meta_parts = MetaScan;
 }
 
 /**
  * Desctuctor
  */
 VeloScan::~VeloScan()
-{ }
+{
+	FreeAllCellAndCluterMemory();
+}
 
 /**
  * Copy constructor
@@ -809,9 +811,40 @@ int VeloScan::FindAndCalcScanClusterFeature()
 
 void VeloScan::FreeAllCellAndCluterMemory()
 {
+    int i,j;
+    int columnSize=scanCellArray.size();
+    int cellNumber=scanCellArray[0].size();
+
+    for(j=0; j <columnSize; j++)
+    {
+        cellColumn &column=scanCellArray[j];
+        cellFeatureColumn &columnFeature=scanCellFeatureArray[j];
+
+        cellNumber=column.size();
+        for( i=0; i<cellNumber; i++)
+        {
+            cell &cellObj=scanCellArray[j][i];
+            cellFeature &feature=scanCellFeatureArray[j][i];
+            cellObj.clear();
+
+        }
+        column.clear();
+        columnFeature.clear();
+    }
+
+
 	scanCellArray.clear();
 	scanCellFeatureArray.clear();
 
+
+    int ClusterSize=scanClusterArray.size();
+    for(j=0; j <ClusterSize; j++)
+    {
+        cluster &cludata=scanClusterArray[j];
+        clusterFeature &clu=scanClusterFeatureArray[j];
+        cludata.clear();
+  //      clu.clear();
+    }
 	scanClusterArray.clear();
 	scanClusterFeatureArray.clear();
 }
@@ -1110,7 +1143,6 @@ void VeloScan::ExchangePointCloud()
 	if(points.size() > 0)
 	{
          MarkStaticorMovingPointCloud();
-		//FreeAllCellAndCluterMemory();
 	}
     return;
  }

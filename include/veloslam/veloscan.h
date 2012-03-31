@@ -5,7 +5,7 @@
  * @author Li Wei, Wuhan University, China
  * @author Li Ming, Wuhan University, China
  */
- 
+
 #ifndef __VELOSCAN_H__
 #define __VELOSCAN_H__
 
@@ -39,20 +39,20 @@ public:
 
   static void readScans(reader_type type,
 				    int start, int end, string &dir, int maxDist, int minDist,
-				    bool openFileForWriting = false);  
+				    bool openFileForWriting = false);
   static void readScansRedSearch(reader_type type,
 						   int start, int end, string &dir, int maxDist, int minDist,
 						   double voxelSize, int nrpts, // reduction parameters
-						   int nns_method, bool cuda_enabled, 
-						   bool openFileForWriting = false);  
+						   int nns_method, bool cuda_enabled,
+						   bool openFileForWriting = false);
 
 public:
 
   /**
    * Vector storing single scans of a metascan
    */
-  vector <VeloScan *> meta_parts;
-  
+//  vector <VeloScan *> meta_parts;
+
   // FIXME
   void FindingAllofObject();
   void TrackingAllofObject();
@@ -67,7 +67,7 @@ public:
   void ClassifiAllObject();
   void ClassifibyTrackingAllObject(int currentNO ,int windowsize);
   void calcReducedPoints_byClassifi(double voxelSize, int nrpts, PointType pointtype);
-  
+
   int CalcScanCellFeature();
   int CalcCellFeature(cell& cellobj,cellFeature& f);
   int FindAndCalcScanClusterFeature();
@@ -79,12 +79,12 @@ public:
   /** scanCellFeatureArray */
   cellArray scanCellArray;
   cellFeatureArray scanCellFeatureArray;
-  
+
   clusterArray scanClusterArray;
   clusterFeatureArray scanClusterFeatureArray;
 
-    bool isTrackerHandled;
-	long scanid;
+  bool isTrackerHandled;
+  long scanid;
 };
 
 #endif

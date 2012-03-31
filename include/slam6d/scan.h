@@ -71,7 +71,7 @@ public:
 
   void transformAll(const double alignxf[16]);
   void transformAll(const double alignQuat[4], const double alignt[3]);
- 
+
   enum AlgoType {
     INVALID, ICP, ICPINACTIVE, LUM, ELCH, LOOPTORO, LOOPHOGMAN, GRAPHTORO, GRAPHHOGMAN
   };
@@ -86,47 +86,47 @@ public:
 				    const AlgoType type, int islum = 0);
   void transformToQuat(double rP[3], double rPQ[4],
 				   const AlgoType type, int islum = 0);
-  
+
   void toGlobal(double voxelSize, int nrpts);
   void calcReducedPoints(double voxelSize, int nrpts = 0, PointType _pointtype = PointType());
   void trim(double top, double bottom);
-  
+
   void createTree(int nns_method, bool cuda_enabled);
   static void createTrees(int nns_method, bool cuda_enabled);
   static void deleteTrees();
 
 //  static KDCacheItem* initCache(const Scan* Source, const Scan* Target);
-  
-  static void getPtPairs(vector <PtPair> *pairs, 
-					Scan* Source, Scan* Target, 
+
+  static void getPtPairs(vector <PtPair> *pairs,
+					Scan* Source, Scan* Target,
 					int thread_num,
 					int rnd, double max_dist_match2, double &sum,
 					double *centroid_m, double *centroid_d);
-  static void getNoPairsSimple(vector <double*> &diff, 
-					   Scan* Source, Scan* Target, 
+  static void getNoPairsSimple(vector <double*> &diff,
+					   Scan* Source, Scan* Target,
 					   int thread_num,
 					   double max_dist_match2);
-  static void getPtPairsSimple(vector <PtPair> *pairs, 
-						 Scan* Source, Scan* Target, 
+  static void getPtPairsSimple(vector <PtPair> *pairs,
+						 Scan* Source, Scan* Target,
 						 int thread_num,
 						 int rnd, double max_dist_match2,
 						 double *centroid_m, double *centroid_d);
-  static void getPtPairsParallel(vector <PtPair> *pairs, 
+  static void getPtPairsParallel(vector <PtPair> *pairs,
 						   Scan* Source, Scan* Target,
 						   int thread_num, int step,
 						   int rnd, double max_dist_match2,
 						   double *sum,
 						   double centroid_m[OPENMP_NUM_THREADS][3], double centroid_d[OPENMP_NUM_THREADS][3]);
-   
-  inline friend ostream& operator<<(ostream& os, const Scan& s); 
+
+  inline friend ostream& operator<<(ostream& os, const Scan& s);
   inline friend ostream& operator<<(ostream& os, const double matrix[16]);
 
   inline int get_points_red_size() const;
 
   inline void resetPose();
-  
+
   /**
-   * storing a list of (pointers to) all scans here 
+   * storing a list of (pointers to) all scans here
    */
   static vector <Scan *> allScans;
 
@@ -134,22 +134,22 @@ public:
    * max number of (reduced) points in the scans
    */
   static unsigned int max_points_red_size;
-  
+
   /**
    * The output directory
-   */  
+   */
   static string dir;
 
   static bool toType(const char* string, reader_type &type);
 
   static void readScans(reader_type type,
 				    int start, int end, string &dir, int maxDist, int minDist,
-				    bool openFileForWriting = false);  
+				    bool openFileForWriting = false);
   static void readScansRedSearch(reader_type type,
 						   int start, int end, string &dir, int maxDist, int minDist,
 						   double voxelSize, int nrpts, // reduction parameters
-						   int nns_method, bool cuda_enabled, 
-						   bool openFileForWriting = false);  
+						   int nns_method, bool cuda_enabled,
+						   bool openFileForWriting = false);
 
   inline const vector <Point>* get_points() const;
   inline double* const* get_points_red() const;
@@ -159,7 +159,7 @@ public:
   inline void setFileNr(int _fileNr);
   inline int  getFileNr() const;
   inline const double * getTransMatOrg() const;
-  
+
   inline void clearPoints();
 
   //FIXME
@@ -177,7 +177,7 @@ public:
     ~scanIOwrapper();
 
     virtual int readScans(int start, int end, string &dir, int maxDist, int mindist,
-				    double *euler, vector<Point> &ptss); 
+				    double *euler, vector<Point> &ptss);
     private:
     ScanIO *my_ScanIO;
 
@@ -188,7 +188,7 @@ public:
 #endif
 
   };
-  
+
   protected:
   /**
    * The pose of the scan
@@ -196,11 +196,11 @@ public:
    *       always represent the same pose!!!
    */
   double rPos[3],       ///< 3D position
-         rPosTheta[3],  ///< 3D rotation in Euler representation 
+         rPosTheta[3],  ///< 3D rotation in Euler representation
          rQuat[4],      ///< 3D rotation in Quaternion representation
          transMat[16];  ///< (4x4) transformation matrix
 
-  
+
   /**
     * run ICP on GPU instead of CPU
     */
@@ -239,8 +239,8 @@ public:
    */
   double **points_red;
 
-  /** 
-   * number elements of the array 
+  /**
+   * number elements of the array
    */
   int points_red_size;
 
@@ -257,9 +257,9 @@ public:
 
   ANNkd_tree *ann_kd_tree;
   void createANNTree();
-  
+
   /**
-   * Array for storing reduced points. The reduced points are copied and k-d trees 
+   * Array for storing reduced points. The reduced points are copied and k-d trees
    * can be constructed with pointers to these trees. This allows the computation
    * of fast corresponding points. Fast corresponding points exploint that a transformation
    * in one coordinate systems equals an inverse transformation in the other frame.
@@ -272,8 +272,8 @@ public:
   double** points_red_lum;
 
   /**
-   * The treeTransMat_inv holds the current transformation of a 3D scan that is stored 
-   * in a search tree. 
+   * The treeTransMat_inv holds the current transformation of a 3D scan that is stored
+   * in a search tree.
    */
   double treeTransMat_inv[16];
 
@@ -285,7 +285,7 @@ public:
 
   /**
    * The flag outputFrames specifies if .frames files should be created and written.
-   * In show or conversion tools this is usually unwanted, in slam6D we certainly 
+   * In show or conversion tools this is usually unwanted, in slam6D we certainly
    * need it.
    */
   static bool outputFrames;
@@ -299,19 +299,19 @@ public:
    * The actual scan number
    */
   unsigned int scanNr;
-  
+
   /**
    * The actual file number for the *.frames file
    */
   int fileNr;
-  
+
   /*
    * The stringstream sout buffers the frame file. It will be written to disk at
    * once at the end of the program. This reduces file operations and saves time.
    */
   stringstream sout;
 
-  /** 
+  /**
    * regard only points up to an (Euclidean) distance of maxDist
    * points are filtered during input)
    * store sqr(maxDist) here; saves taking the square root later!
