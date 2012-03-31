@@ -98,6 +98,8 @@ extern boost::mutex keymutex;
 extern boost::condition keycond;
 extern void StartShow();
 extern TrackerManager trackMgr;
+extern  int sliding_window_size;
+extern  int current_sliding_window_pos;
 
 //  Handling Segmentation faults and CTRL-C
 void sigSEGVhandler (int v)
@@ -946,7 +948,7 @@ int main(int argc, char **argv)
   bool cuda_enabled    = false;
   reader_type type  = UOS;
 
-  StartShow();
+ // StartShow();
 
   parseArgs(argc, argv, dir, red, rand, mdm, mdml, mdmll, mni, start, end,
       maxDist, minDist, quiet, veryQuiet, eP, meta, algo, loopSlam6DAlgo, lum6DAlgo, anim,
@@ -979,42 +981,51 @@ int main(int argc, char **argv)
     {
 
 	    VeloScan::dir = dir;
-	 //   cout << scanCount << "*" << endl;
+	    cout << scanCount << "*" << endl;
         VeloScan *currentScan = new VeloScan(eu, maxDist);
         currentScan->setFileNr(_fileNr);
-        currentScan->scanid = scanCount;
+        currentScan->scanid = scanCount; ///
 		currentScan->setPoints(&ptss);    // copy points
-	//	cout << "read scan " << (currentScan->get_points())->size() << endl;
+		cout << "read scan " << (currentScan->get_points())->size() << endl;
 		ptss.clear();                  // clear points
 		Scan::allScans.push_back(currentScan);
 
          currentScan->FindingAllofObject();
-         currentScan->TrackingAllofObject();
-	//	 cout << "all  cluster objects " << currentScan->scanClusterFeatureArray.size() << endl;
+     //    currentScan->TrackingAllofObject();
+		 cout << "all  cluster objects " << currentScan->scanClusterFeatureArray.size() << endl;
 	//	 cout << "all  cluster tracker " << trackMgr.getNumberofTracker() << endl;
 		 // mark the type of clusters.
 		 int windowsize =3;
-		 if(scanCount < windowsize )
+	//	 if(scanCount < windowsize )
 	         currentScan->ClassifiAllofObject();
-		 else
-    	 	 currentScan->ClassifibyTrackingAllObject(scanCount, windowsize);
+	//	 else
+    //	 	 currentScan->ClassifibyTrackingAllObject(scanCount, windowsize);
 
          currentScan->ExchangePointCloud();
          currentScan->calcReducedPoints_byClassifi(red, octree, PointType());
 		 cout << "reducing scan " << currentScan->get_points_red_size()  << endl;
 
 	     currentScan->transform(currentScan->getTransMatOrg(), Scan::INVALID); //transform points to initial position
-      //  currentScan->clearPoints();
          currentScan->createTree(nns_method, cuda_enabled);
 
      //    cout << "matching two  scan " << currentScan->getFileNr() <<  endl;
-		 MatchTwoScan(my_icp,  currentScan,  scanCount,  eP);
+         if(current_sliding_window_pos > sliding_window_size )
+		    MatchTwoScan(my_icp,  currentScan,  sliding_window_size,  eP);
+         else
+            MatchTwoScan(my_icp,  currentScan,  scanCount,  eP);
 
+         current_sliding_window_pos++;
          scanCount++;
+         if(current_sliding_window_pos > sliding_window_size )
+         {
+            //  currentScan->clearPoints();
+            vector <Scan*>::iterator Iter = Scan::allScans.begin();
+             delete ((VeloScan*)(*Iter));
+         }
 
-		 boost::mutex::scoped_lock lock(keymutex);
-	     keycond.wait(lock);
-	     glutPostRedisplay();
+	//	 boost::mutex::scoped_lock lock(keymutex);
+	// keycond.wait(lock);
+	// glutPostRedisplay();
 
      ////////////////////////////////////////
     }

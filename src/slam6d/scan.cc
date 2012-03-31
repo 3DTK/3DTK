@@ -5,7 +5,7 @@
  * @author Andreas Nuechter. Institute of Computer Science, University of Osnabrueck, Germany.
  */
 
-#ifdef _MSC_VER 
+#ifdef _MSC_VER
 #ifdef OPENMP
 #define _OPENMP
 #endif
@@ -85,7 +85,7 @@ Scan::Scan()
   M4identity(dalignxf);
 
   points_red_size = 0;
-  points_red = points_red_lum = 0; 
+  points_red = points_red_lum = 0;
 }
 
 
@@ -102,7 +102,7 @@ Scan::Scan(const double* euler, int maxDist)
   nns_method = 1;
   cuda_enabled = false;
   maxDist2 = (maxDist != -1 ? sqr(maxDist) : maxDist);
-  
+
   if (dir == "") {
     cerr << "ERROR: Directory has to be set before!" << endl;
     exit(1);
@@ -123,9 +123,9 @@ Scan::Scan(const double* euler, int maxDist)
 
   fileNr = 0;
   scanNr = numberOfScans++;
-  
+
   points_red_size = 0;
-  points_red = points_red_lum = 0; 
+  points_red = points_red_lum = 0;
   M4identity(dalignxf);
 }
 
@@ -189,7 +189,7 @@ Scan::Scan(const double _rPos[3], const double _rPosTheta[3], const int maxDist)
 
   fileNr = 0;
   scanNr = numberOfScans++;
-  
+
   points_red_size = 0;
   M4identity(dalignxf);
 }
@@ -227,7 +227,7 @@ Scan::Scan(const vector < Scan* >& MetaScan, int nns_method, bool cuda_enabled)
     numpts += MetaScan[i]->points_red_size;
   }
   points_red_size = numpts;
-  points_red = new double*[numpts];  
+  points_red = new double*[numpts];
   int k = 0;
   for (int i = 0; i < end_loop; i++) {
     for (int j = 0; j < MetaScan[i]->points_red_size; j++) {
@@ -244,7 +244,7 @@ Scan::Scan(const vector < Scan* >& MetaScan, int nns_method, bool cuda_enabled)
 
   // build new search tree
   createTree(nns_method, cuda_enabled);
-  
+
   // update max num point in scan iff you have to do so
   if (points_red_size > (int)max_points_red_size) max_points_red_size = points_red_size;
 
@@ -254,47 +254,47 @@ Scan::Scan(const vector < Scan* >& MetaScan, int nns_method, bool cuda_enabled)
   meta_parts = MetaScan;
 }
 
-  
+
 /**
  * Desctuctor
  */
 Scan::~Scan()
 {
-  if (outputFrames && fileNr != -1) {
-    string filename = dir + "scan" + to_string(fileNr, 3) + ".frames";
-    
-    ofstream fout(filename.c_str());
-    if (!fout.good()) {
-	 cerr << "ERROR: Cannot open file " << filename << endl;
-	 exit(1);
-    }
+	  if (outputFrames && fileNr != -1) {
+		string filename = dir + "scan" + to_string(fileNr, 3) + ".frames";
 
-    // write into file
-    fout << sout.str();
+		ofstream fout(filename.c_str());
+		if (!fout.good()) {
+		 cerr << "ERROR: Cannot open file " << filename << endl;
+		 exit(1);
+		}
 
-    fout.close();
-    fout.clear();
-  }
+		// write into file
+		fout << sout.str();
 
-  if (this->kd != 0) deleteTree();
+		fout.close();
+		fout.clear();
+	  }
 
-  // delete Scan from ScanList
-  vector <Scan*>::iterator Iter;
-  for(Iter = allScans.begin(); Iter != allScans.end();) {
-    if (*Iter == this) {
-	 allScans.erase(Iter);
-	 break;
-    } else {
-	 Iter++;
-    }
-  }
+   if (this->kd != 0) deleteTree();
 
-  for (int i = 0; i < points_red_size; i++) {
-    delete [] points_red[i];
-  }
-  delete [] points_red;
-  
-  points.clear();
+	  // delete Scan from ScanList
+	  vector <Scan*>::iterator Iter;
+	  for(Iter = allScans.begin(); Iter != allScans.end();) {
+		if (*Iter == this) {
+		 allScans.erase(Iter);
+		 break;
+		} else {
+		 Iter++;
+		}
+	  }
+
+	  for (int i = 0; i < points_red_size; i++) {
+		delete [] points_red[i];
+	  }
+	  delete [] points_red;
+
+     points.clear();
 }
 
 /**
@@ -313,7 +313,7 @@ Scan::Scan(const Scan& s)
   memcpy(transMatOrg, s.transMatOrg, sizeof(transMatOrg));
 
   // copy data points
-  for (unsigned int i = 0; i < s.points.size(); points.push_back(s.points[i++]));    
+  for (unsigned int i = 0; i < s.points.size(); points.push_back(s.points[i++]));
   // copy reduced data
   points_red_size = s.points_red_size;
   points_red = new double*[points_red_size];
@@ -365,23 +365,23 @@ void Scan::mergeCoordinatesWithRoboterPosition(const Scan* prevScan)
  * Unlike transform, points_red, colourmatrixes etc. are
  * not touched!
  * @param alignxf The transformationmatrix
- */ 
+ */
 void Scan::transformAll(const double alignxf[16])
 {
   int end_loop = (int)points.size();
-  
+
 #ifdef _OPENMP
 #pragma omp parallel for
 #endif
   for (int i = 0; i < end_loop; ++i)
     {
-	 
+
 	 points[i].transform(alignxf);
     }
 }
 
 /**
- * Transforms the scan by a given transformation and writes a new frame. The idea 
+ * Transforms the scan by a given transformation and writes a new frame. The idea
  * is to write for every transformation in all files, such that the show program
  * is able to determine, whcih scans have to be drawn in which color. Hidden scans
  * (or later processed scans) are written with INVALID.
@@ -410,7 +410,7 @@ void Scan::transform(const double alignxf[16], const AlgoType type, int islum)
    * We do need of course the transformation of the points_red array, since
    * thats a moving point cloud. The get ptPairs methods do _not_ consider
    * transformation of target points
-   */   
+   */
 #ifdef _OPENMP
 #pragma omp parallel for
 #endif
@@ -418,8 +418,8 @@ void Scan::transform(const double alignxf[16], const AlgoType type, int islum)
      points[i].transform(alignxf);
    }
 #endif
-   
-#ifdef DEBUG  
+
+#ifdef DEBUG
   cerr << alignxf << endl;
   cerr << "(" << rPos[0] << ", " << rPos[1] << ", " << rPos[2] << ", "
 	  << rPosTheta[0] << ", " << rPosTheta[1] << ", " << rPosTheta[2] << ") ---> ";
@@ -437,14 +437,14 @@ void Scan::transform(const double alignxf[16], const AlgoType type, int islum)
     points_red[i][1] = y_neu + alignxf[13];
     points_red[i][2] = z_neu + alignxf[14];
   }
-  
+
   double tempxf[16];
   MMult(alignxf, transMat, tempxf);
   memcpy(transMat, tempxf, sizeof(transMat));
   Matrix4ToEuler(transMat, rPosTheta, rPos);
   Matrix4ToQuat(transMat, rQuat);
-  
-#ifdef DEBUG  
+
+#ifdef DEBUG
   cerr << "(" << rPos[0] << ", " << rPos[1] << ", " << rPos[2] << ", "
 	  << rPosTheta[0] << ", " << rPosTheta[1] << ", " << rPosTheta[2] << ")" << endl;
 
@@ -510,7 +510,7 @@ void Scan::transform(const double alignxf[16], const AlgoType type, int islum)
 		  cerr << "ERROR: Cannot store frames." << endl;
 		  exit(1);
 		}
-		
+
 		if (allScans[0]->sout.good()) {
 		  allScans[0]->sout << allScans[0]->transMat << type << endl;
 		} else {
@@ -532,7 +532,7 @@ void Scan::transform(const double alignxf[16], const AlgoType type, int islum)
 
 
 /**
- * Transforms the scan by a given transformation and writes a new frame. The idea 
+ * Transforms the scan by a given transformation and writes a new frame. The idea
  * is to write for every transformation in all files, such that the show program
  * is able to determine, whcih scans have to be drawn in which color. Hidden scans
  * (or later processed scans) are written with INVALID.
@@ -652,7 +652,7 @@ void Scan::calcReducedPoints(double voxelSize, int nrpts, PointType pointtype)
   }
 
   // start reduction
-  
+
   // build octree-tree from CurrentScan
   double **ptsOct = 0;
   ptsOct = new double*[points.size()];
@@ -694,7 +694,7 @@ void Scan::calcReducedPoints(double voxelSize, int nrpts, PointType pointtype)
   points_red_size = center.size();
 
   delete oct;
-  
+
   end_loop = (int)points.size();
   for (int i = 0; i < num_pts; i++) {
     delete [] ptsOct[i];
@@ -734,7 +734,7 @@ void Scan::deleteTrees()
 #ifdef _OPENMP
 #pragma omp parallel for schedule(dynamic)
 #endif
-  for (i = 0; i < (int)allScans.size(); i++) { 
+  for (i = 0; i < (int)allScans.size(); i++) {
     allScans[i]->deleteTree();
   }
   return;
@@ -750,12 +750,12 @@ void Scan::deleteTrees()
  * @param Source Pointer to first scan
  * @param Target Pointer to second scan
  * @return Pointer to cache memory
- */ 
+ */
 /*
 KDCacheItem* Scan::initCache(const Scan* Source, const Scan* Target)
 {
   KDCacheItem *closest = 0;
-  
+
   // determine cache
   for(unsigned int i = 0; i < closest_cache.size(); i++) {
     if ((closest_cache[i]->SourceScanNr == Source->scanNr) &&
@@ -780,11 +780,11 @@ KDCacheItem* Scan::initCache(const Scan* Source, const Scan* Target)
   */
 
 /**
- * Calculates Source\Target 
+ * Calculates Source\Target
  * Calculates a set of corresponding point pairs and returns them. It
  * computes the k-d trees and deletes them after the pairs have been
  * found. This slow function should be used only for testing
- * 
+ *
  * @param pairs The resulting point pairs (vector will be filled)
  * @param Source The scan whose points are matched to Targets' points
  * @param Target The scan to whiche the opints are matched
@@ -793,8 +793,8 @@ KDCacheItem* Scan::initCache(const Scan* Source, const Scan* Target)
  * @param max_dist_match2 maximal allowed distance for matching
  */
 
-void Scan::getNoPairsSimple(vector <double*> &diff, 
-					   Scan* Source, Scan* Target, 
+void Scan::getNoPairsSimple(vector <double*> &diff,
+					   Scan* Source, Scan* Target,
 					   int thread_num,
 					   double max_dist_match2)
 {
@@ -803,7 +803,7 @@ void Scan::getNoPairsSimple(vector <double*> &diff,
 
   kd = new KDtree(Target->points_red, Target->points_red_size);
   numpts_target = Source->points_red_size;
-  
+
     cout << "Max: " << max_dist_match2 << endl;
   for (unsigned int i = 0; i < numpts_target; i++) {
 
@@ -817,9 +817,9 @@ void Scan::getNoPairsSimple(vector <double*> &diff,
     if (!closest) {
 	    diff.push_back(Source->points_red[i]);
 	    //diff.push_back(closest);
-    } 
+    }
   }
-  
+
   delete kd;
   return;
 }
@@ -828,7 +828,7 @@ void Scan::getNoPairsSimple(vector <double*> &diff,
  * Calculates a set of corresponding point pairs and returns them. It
  * computes the k-d trees and deletes them after the pairs have been
  * found. This slow function should be used only for testing
- * 
+ *
  * @param pairs The resulting point pairs (vector will be filled)
  * @param Source The scan whose points are matched to Targets' points
  * @param Target The scan to whiche the opints are matched
@@ -836,8 +836,8 @@ void Scan::getNoPairsSimple(vector <double*> &diff,
  * @param rnd randomized point selection
  * @param max_dist_match2 maximal allowed distance for matching
  */
-void Scan::getPtPairsSimple(vector <PtPair> *pairs, 
-					   Scan* Source, Scan* Target, 
+void Scan::getPtPairsSimple(vector <PtPair> *pairs,
+					   Scan* Source, Scan* Target,
 					   int thread_num,
 					   int rnd, double max_dist_match2,
 					   double *centroid_m, double *centroid_d)
@@ -863,7 +863,7 @@ void Scan::getPtPairsSimple(vector <PtPair> *pairs,
       centroid_m[2] += p[2];
       centroid_d[0] += closest[0];
       centroid_d[1] += closest[1];
-      centroid_d[2] += closest[2];	 
+      centroid_d[2] += closest[2];
       PtPair myPair(closest, p);
       pairs->push_back(myPair);
     }
@@ -888,7 +888,7 @@ void Scan::getPtPairsSimple(vector <PtPair> *pairs,
  * Here we implement the so called "fast corresponding points"; k-d
  * trees are not recomputed, instead the apply the inverse transformation
  * to to the given point set.
- * 
+ *
  * @param pairs The resulting point pairs (vector will be filled)
  * @param Source The scan whose points are matched to Targets' points
  * @param Target The scan to whiche the opints are matched
@@ -897,15 +897,15 @@ void Scan::getPtPairsSimple(vector <PtPair> *pairs,
  * @param max_dist_match2 maximal allowed distance for matching
  * @return a set of corresponding point pairs
  */
-void Scan::getPtPairs(vector <PtPair> *pairs, 
-				  Scan* Source, Scan* Target, 
+void Scan::getPtPairs(vector <PtPair> *pairs,
+				  Scan* Source, Scan* Target,
 				  int thread_num,
 				  int rnd, double max_dist_match2, double &sum,
 				  double *centroid_m, double *centroid_d)
 {
   Source->kd->getPtPairs(pairs, Source->dalignxf,
-      Target->points_red, 0, Target->points_red_size, 
-      thread_num, 
+      Target->points_red, 0, Target->points_red_size,
+      thread_num,
       rnd, max_dist_match2, sum, centroid_m, centroid_d, Target);
 }
 
@@ -915,18 +915,18 @@ void Scan::getPtPairs(vector <PtPair> *pairs,
  * The function uses the k-d trees stored the the scan class, thus
  * the function createTrees and delteTrees have to be called before
  * resp. afterwards.
- * 
+ *
  * @param pairs The resulting point pairs (vector will be filled)
  * @param Source The scan whose points are matched to Targets' points
  * @param Target The scan to whiche the opints are matched
- * @param thread_num The number of the thread that is computing ptPairs in parallel 
+ * @param thread_num The number of the thread that is computing ptPairs in parallel
  * @param step The number of steps for parallelization
  * @param rnd randomized point selection
  * @param max_dist_match2 maximal allowed distance for matching
  * @param sum The sum of distances of the points
  *
- * These intermediate values are for the parallel ICP algorithm 
- * introduced in the paper  
+ * These intermediate values are for the parallel ICP algorithm
+ * introduced in the paper
  * "The Parallel Iterative Closest Point Algorithm"
  *  by Langis / Greenspan / Godin, IEEE 3DIM 2001
  *
@@ -937,16 +937,16 @@ void Scan::getPtPairsParallel(vector <PtPair> *pairs, Scan* Source, Scan* Target
 						double *sum,
 						double centroid_m[OPENMP_NUM_THREADS][3], double centroid_d[OPENMP_NUM_THREADS][3])
 {
-  Source->kd->getPtPairs(&pairs[thread_num], Source->dalignxf, 
-      Target->points_red, thread_num * step, thread_num * step + step, 
-      thread_num, 
+  Source->kd->getPtPairs(&pairs[thread_num], Source->dalignxf,
+      Target->points_red, thread_num * step, thread_num * step + step,
+      thread_num,
       rnd, max_dist_match2, sum[thread_num],
       centroid_m[thread_num], centroid_d[thread_num], Target);
 }
 
 
 /**
- * Computes a search tree depending on the type this can be 
+ * Computes a search tree depending on the type this can be
  * a k-d tree od a cached k-d tree
  */
 void Scan::createTree(int nns_method, bool cuda_enabled)
@@ -971,15 +971,15 @@ void Scan::createTree(int nns_method, bool cuda_enabled)
   //  cout << "successfull" << endl;
 
   switch(nns_method)
-  { 
+  {
     case cachedKD:
         kd = new KDtree_cache(points_red_lum, points_red_size);
     break;
-    
+
     case simpleKD:
         kd = new KDtree(points_red_lum, points_red_size);
     break;
-    
+
     case ANNTree:
         kd = new ANNtree(points_red_lum, points_red_size);  //ANNKD
     break;
@@ -993,7 +993,7 @@ void Scan::createTree(int nns_method, bool cuda_enabled)
         kd = new BOctTree<double>(points_red_lum, points_red_size, 10.0, pointtype, true);
     break;
   }
-  
+
   if (cuda_enabled) createANNTree();
 
   return;
@@ -1001,7 +1001,7 @@ void Scan::createTree(int nns_method, bool cuda_enabled)
 
 void Scan::createANNTree()
 {
-#ifdef WITH_CUDA  
+#ifdef WITH_CUDA
   if(!ann_kd_tree){
     ann_kd_tree = new ANNkd_tree(points_red_lum, points_red_size, 3, 1, ANN_KD_STD);
     cout << "Cuda tree was generated with " << points_red_size << " points" << endl;
@@ -1021,12 +1021,11 @@ void Scan::deleteTree()
     delete [] points_red_lum[j];
   }
   delete [] points_red_lum;
-  
+
   delete kd;
-  
+
   return;
 }
-
 
 bool Scan::toType(const char* string, reader_type &type) {
   if (strcasecmp(string, "uos") == 0) type = UOS;
@@ -1072,22 +1071,22 @@ bool Scan::toType(const char* string, reader_type &type) {
 
 
 /**
- * Reads specified scans from given directory. 
- * Scan poses will NOT be initialized after a call 
- * to this function. It loads a shared lib where the 
+ * Reads specified scans from given directory.
+ * Scan poses will NOT be initialized after a call
+ * to this function. It loads a shared lib where the
  * actual file processing takes place
- * 
+ *
  * @param type Specifies the type of the flies to be loaded
  * @param start Starts to read with this scan
  * @param end Stops with this scan
  * @param _dir The drectory containing the data
  * @param maxDist Reads only Points up to this distance
  * @param minDist Reads only Points from this distance
- * @param openFileForWriting Opens .frames files to store the 
+ * @param openFileForWriting Opens .frames files to store the
  *        scan matching results
  */
 void Scan::readScans(reader_type type,
-		     int start, int end, string &_dir, int maxDist, int minDist, 
+		     int start, int end, string &_dir, int maxDist, int minDist,
 		     bool openFileForWriting)
 {
   outputFrames = openFileForWriting;
@@ -1100,7 +1099,7 @@ void Scan::readScans(reader_type type,
   // read Scan-by-scan until no scan is available anymore
   while ((_fileNr = my_ScanIO.readScans(start, end, dir, maxDist, minDist, eu, ptss)) != -1) {
     Scan *currentScan = new Scan(eu, maxDist);
-    
+
     currentScan->fileNr = _fileNr;
 
     currentScan->points = ptss;    // copy points
@@ -1116,9 +1115,9 @@ void Scan::toGlobal(double voxelSize, int nrpts) {
 }
 
 void Scan::readScansRedSearch(reader_type type,
-		     int start, int end, string &_dir, int maxDist, int minDist, 
+		     int start, int end, string &_dir, int maxDist, int minDist,
 						double voxelSize, int nrpts, // reduction parameters
-						int nns_method, bool cuda_enabled, 
+						int nns_method, bool cuda_enabled,
 						bool openFileForWriting)
 {
   outputFrames = openFileForWriting;
@@ -1170,7 +1169,7 @@ void Scan::readScansRedSearch(reader_type type,
   return;
 }
 
-  
+
 Scan::scanIOwrapper::scanIOwrapper(reader_type type){
   // load the lib
   string lib_string;
@@ -1292,14 +1291,14 @@ Scan::scanIOwrapper::scanIOwrapper(reader_type type){
   }
 
 #ifdef WIN32
-  lib_string += ".dll";	
+  lib_string += ".dll";
 #elif __APPLE__
-  lib_string = "lib/lib" + lib_string + ".dylib";	
+  lib_string = "lib/lib" + lib_string + ".dylib";
 #else
-  lib_string = "lib" + lib_string + ".so";	
+  lib_string = "lib" + lib_string + ".so";
 #endif
   cerr << "Loading shared lib " << lib_string;
-  
+
 #ifdef _MSC_VER
   hinstLib = LoadLibrary(lib_string.c_str());
   if (!hinstLib) {
@@ -1316,7 +1315,7 @@ Scan::scanIOwrapper::scanIOwrapper(reader_type type){
 	FreeLibrary(hinstLib);
     exit(-1);
   }
- 
+
 #else
   ptrScanIO = dlopen(lib_string.c_str(), RTLD_LAZY);
 
@@ -1326,7 +1325,7 @@ Scan::scanIOwrapper::scanIOwrapper(reader_type type){
   }
 
   cerr << " ... done." << endl << endl;
-  
+
   // reset the errors
   dlerror();
 
