@@ -43,9 +43,9 @@ public:
 	float boxDirection;
 	double boxVex[4][2];
 
-	int frameNO;
-    int selfID;
-	int trackNO;
+	int frameNO;  //in which scan
+    int selfID;   //which number in clusters
+	int trackNO;  //which track log it
 
 	int pointNumber;
 	unsigned int clusterType;

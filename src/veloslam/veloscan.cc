@@ -951,16 +951,16 @@ bool FilterNOMovingObjcets(clusterFeature &glu,  cluster &gluData)
 	//objcount++;
 
 	// for debug moving object detections.
-	if( glu.size_z > 200 && ((glu.size_x>glu.size_y?glu.size_x:glu.size_y))<360)
+	if( glu.size_y > 200 && ((glu.size_x>glu.size_y?glu.size_x:glu.size_y))<360)
 	{
 		return false;
 	}
 
-	else if((glu.size_z>350 && glu.size_x<140)|| (glu.size_x>350 && glu.size_z<140))
+	else if((glu.size_y>350 && glu.size_x<140)|| (glu.size_x>350 && glu.size_y<140))
 	{
 		return false;
 	}
-	else if(glu.size_z > 250 )
+	else if(glu.size_y > 250 )
 	{
 		return false;
 	}
@@ -984,8 +984,8 @@ bool FilterNOMovingObjcets(clusterFeature &glu,  cluster &gluData)
 	{
 		return false;
 	}
-
-	if(glu.size_x*glu.size_z >500*500  &&  glu.size_x/glu.size_z < 1.5)
+	// 
+	if (glu.size_x*glu.size_z > 500*500  &&  glu.size_x/glu.size_z < 1.5)
 	{
 		return false;
 	}
@@ -1010,12 +1010,12 @@ bool FilterNOMovingObjcets(clusterFeature &glu,  cluster &gluData)
 		return false;
 	}
 
-	if((glu.size_x + glu.size_z) <4)
+	if(( glu.size_x  +  glu.size_z)  <4)
 	{
 		return false;
 	}
 
-	if(glu.size_x/glu.size_z>3.0)
+	if( glu.size_x/glu.size_z> 3.0)
 	{
 		return false;
 	}
