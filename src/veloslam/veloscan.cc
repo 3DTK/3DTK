@@ -90,6 +90,10 @@ float absf(float a)
 	return a>0?a:-a;
 }
 
+Trajectory::Trajectory()
+{
+
+}
 /**
  * default Constructor
  */
@@ -832,11 +836,8 @@ void VeloScan::FreeAllCellAndCluterMemory()
         columnFeature.clear();
     }
 
-
 	scanCellArray.clear();
 	scanCellFeatureArray.clear();
-
-
     int ClusterSize=scanClusterArray.size();
     for(j=0; j <ClusterSize; j++)
     {
