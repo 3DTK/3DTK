@@ -20,6 +20,13 @@
 #include "veloslam/gridcluster.h"
 
  bool FilterNOMovingObjcets(clusterFeature &glu, cluster &gluData);
+class Trajectory
+{
+  public:
+     Trajectory();
+  public:
+     vector <Point> path;
+};
 
 /**
  * @brief 3D scan representation and implementation of dynamic velodyne scan matching

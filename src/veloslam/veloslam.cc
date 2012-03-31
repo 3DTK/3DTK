@@ -100,6 +100,7 @@ extern void StartShow();
 extern TrackerManager trackMgr;
 extern  int sliding_window_size;
 extern  int current_sliding_window_pos;
+extern Trajectory VelodyneTrajectory;
 
 //  Handling Segmentation faults and CTRL-C
 void sigSEGVhandler (int v)
@@ -421,7 +422,7 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &rand,
         break;
       case 'd':
         mdm = atof(optarg);
-        break;
+        break; 
       case 'D':
         mdml = atof(optarg);
         break;
@@ -948,7 +949,7 @@ int main(int argc, char **argv)
   bool cuda_enabled    = false;
   reader_type type  = UOS;
 
- // StartShow();
+
 
   parseArgs(argc, argv, dir, red, rand, mdm, mdml, mdmll, mni, start, end,
       maxDist, minDist, quiet, veryQuiet, eP, meta, algo, loopSlam6DAlgo, lum6DAlgo, anim,
@@ -974,6 +975,7 @@ int main(int argc, char **argv)
     vector <Point> ptss;
     int _fileNr;
     Scan::scanIOwrapper my_ScanIO(type);
+    StartShow();
 
     int scanCount =0;
     //Main Loop for ICP with Moving Object Detection and Tracking
@@ -1013,7 +1015,10 @@ int main(int argc, char **argv)
 		    MatchTwoScan(my_icp,  currentScan,  sliding_window_size,  eP);
          else
             MatchTwoScan(my_icp,  currentScan,  scanCount,  eP);
-
+         const double* p;
+         p = currentScan->get_rPos();
+         Point x(p[0], p[1], p[2]);
+         VelodyneTrajectory.path.push_back(x);
          current_sliding_window_pos++;
          scanCount++;
          if(current_sliding_window_pos > sliding_window_size )
@@ -1023,9 +1028,9 @@ int main(int argc, char **argv)
              delete ((VeloScan*)(*Iter));
          }
 
-	//	 boost::mutex::scoped_lock lock(keymutex);
-	// keycond.wait(lock);
-	// glutPostRedisplay();
+	   boost::mutex::scoped_lock lock(keymutex);
+	   keycond.wait(lock);
+	   glutPostRedisplay();
 
      ////////////////////////////////////////
     }
