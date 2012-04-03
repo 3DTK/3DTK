@@ -23,14 +23,18 @@ public:
     // for log all the cluster for tracking
 	deque<clusterFeature> statusList;
 	deque<cluster> dataList;
+	// log the tracker is or not Matched.
 
+	//	bool Matched or not;
 	bool missMatch;
-	bool Matched;
-
-	int matchClusterID;
+	//for log Cluster ID in lastScan.
+	int matchClusterID;  
+	//show different color.
 	int colorIdx;
+	// for log the lift length trackerID
+    int trackerID;
 
-	int frameNO;
+	//int frameNO;
 	int missedTime;//added by yuanjun
 	KalmanFilter kalmanFilter;//added by yuanjun
 	vector<MoveState> moveStateList;//added by yuanjun

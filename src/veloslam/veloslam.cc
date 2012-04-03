@@ -976,7 +976,7 @@ int main(int argc, char **argv)
     vector <Point> ptss;
     int _fileNr;
     Scan::scanIOwrapper my_ScanIO(type);
-    StartShow();
+ //   StartShow();
 
     int scanCount =0;
     //Main Loop for ICP with Moving Object Detection and Tracking
@@ -1034,9 +1034,9 @@ int main(int argc, char **argv)
              delete ((VeloScan*)(*Iter));
          }
 
-	   boost::mutex::scoped_lock lock(keymutex);
-	   keycond.wait(lock);
-	   glutPostRedisplay();
+	//   boost::mutex::scoped_lock lock(keymutex);
+	//   keycond.wait(lock);
+	//   glutPostRedisplay();
      ////////////////////////////////////////
     }
 
