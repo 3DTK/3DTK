@@ -101,6 +101,8 @@ extern  int sliding_window_size;
 extern  int current_sliding_window_pos;
 extern Trajectory VelodyneTrajectory;
 extern  VeloScan* g_pfirstScan;
+extern  int g_pause;
+
 
 //  Handling Segmentation faults and CTRL-C
 void sigSEGVhandler (int v)
@@ -312,12 +314,13 @@ void usage(char* prog)
  * @param algo specfies the used algorithm for rotation computation
  * @param lum6DAlgo specifies the used algorithm for global SLAM correction
  * @param loopsize defines the minimal loop size
+ * @param tracking select sematic algorithm of none/classification/tracking on/off the point classification mode
  * @return 0, if the parsing was successful. 1 otherwise
  */
 int parseArgs(int argc, char **argv, string &dir, double &red, int &rand,
     double &mdm, double &mdml, double &mdmll,
     int &mni, int &start, int &end, int &maxDist, int &minDist, bool &quiet, bool &veryQuiet,
-    bool &extrapolate_pose, bool &meta, int &algo, int &loopSlam6DAlgo, int &lum6DAlgo, int &anim,
+    bool &extrapolate_pose, bool &meta, int &algo,int &tracking, int &loopSlam6DAlgo, int &lum6DAlgo, int &anim,
     int &mni_lum, string &net, double &cldist, int &clpairs, int &loopsize,
     double &epsilonICP, double &epsilonSLAM,  int &nns_method, bool &exportPts, double &distLoop,
     int &iterLoop, double &graphDist, int &octree, bool &cuda_enabled, reader_type &type)
@@ -332,6 +335,7 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &rand,
   static struct option longopts[] = {
     { "format",          required_argument,   0,  'f' },
     { "algo",            required_argument,   0,  'a' },
+    { "tracking",        required_argument,   0,  'b' },
     { "nns_method",      required_argument,   0,  't' },
     { "loop6DAlgo",      required_argument,   0,  'L' },
     { "graphSlam6DAlgo", required_argument,   0,  'G' },
@@ -367,7 +371,7 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &rand,
   };
 
   cout << endl;
-  while ((c = getopt_long(argc, argv, "O:f:A:G:L:a:t:r:R:d:D:i:l:I:c:C:n:s:e:m:M:uqQp", longopts, NULL)) != -1)
+  while ((c = getopt_long(argc, argv, "O:f:A:G:L:a:b:t:r:R:d:D:i:l:I:c:C:n:s:e:m:M:uqQp", longopts, NULL)) != -1)
     switch (c)
     {
       case 'a':
@@ -376,6 +380,9 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &rand,
           cerr << "Error: ICP Algorithm not available." << endl;
           exit(1);
         }
+        break;
+      case 'b':
+          tracking = atoi(optarg);
         break;
 	 case 't':
         nns_method = atoi(optarg);
@@ -943,6 +950,7 @@ int main(int argc, char **argv)
   bool   exportPts  = false;
   int    loopSlam6DAlgo  = 0;
   int    lum6DAlgo  = 0;
+  int    tracking = 1;
   double distLoop   = 700.0;
   int iterLoop      = 100;
   double graphDist  = cldist;
@@ -953,7 +961,8 @@ int main(int argc, char **argv)
 
 
   parseArgs(argc, argv, dir, red, rand, mdm, mdml, mdmll, mni, start, end,
-      maxDist, minDist, quiet, veryQuiet, eP, meta, algo, loopSlam6DAlgo, lum6DAlgo, anim,
+      maxDist, minDist, quiet, veryQuiet, eP, meta, algo, tracking,
+      loopSlam6DAlgo, lum6DAlgo, anim,
       mni_lum, net, cldist, clpairs, loopsize, epsilonICP, epsilonSLAM,
       nns_method, exportPts, distLoop, iterLoop, graphDist, octree, cuda_enabled, type);
 
@@ -976,7 +985,8 @@ int main(int argc, char **argv)
     vector <Point> ptss;
     int _fileNr;
     Scan::scanIOwrapper my_ScanIO(type);
- //   StartShow();
+    if(!veryQuiet)
+        StartShow();
 
     int scanCount =0;
     //Main Loop for ICP with Moving Object Detection and Tracking
@@ -984,36 +994,50 @@ int main(int argc, char **argv)
     {
 
 	    VeloScan::dir = dir;
-	//    cout << scanCount << "*" << endl;
+	    cout << scanCount << "*" << endl;
         VeloScan *currentScan = new VeloScan(eu, maxDist);
         if(scanCount == 0)
             g_pfirstScan = new  VeloScan(*currentScan);
         currentScan->setFileNr(_fileNr);
         currentScan->scanid = scanCount; ///
 		currentScan->setPoints(&ptss);    // copy points
-	//	cout << "read scan " << (currentScan->get_points())->size() << endl;
+		cout << "read scan " << (currentScan->get_points())->size() << endl;
 		ptss.clear();                  // clear points
 		Scan::allScans.push_back(currentScan);
 
-         currentScan->FindingAllofObject();
-         currentScan->TrackingAllofObject();
-//		 cout << "all  cluster objects " << currentScan->scanClusterFeatureArray.size() << endl;
-//		 cout << "all  cluster tracker " << trackMgr.getNumberofTracker() << endl;
-		 // mark the type of clusters.
-		 int windowsize =3;
-	//	 if(scanCount < windowsize )
-	//      currentScan->ClassifiAllofObject();
-	//	 else
-    	 	 currentScan->ClassifibyTrackingAllObject(scanCount, windowsize);
-
-         currentScan->ExchangePointCloud();
-         currentScan->calcReducedPoints_byClassifi(red, octree, PointType());
-	//	 cout << "reducing scan " << currentScan->get_points_red_size()  << endl;
+         if(tracking ==1 )
+         {
+            currentScan->FindingAllofObject();
+            currentScan->ClassifiAllofObject();
+         }
+          if(tracking ==2 )
+          {
+            int windowsize =3;
+            currentScan->FindingAllofObject();
+            currentScan->TrackingAllofObject();
+            cout << "all  cluster objects " << currentScan->scanClusterFeatureArray.size() << endl;
+            cout << "all  cluster tracker " << trackMgr.getNumberofTracker() << endl;
+            // mark the type of clusters.
+            if(scanCount < windowsize )
+                currentScan->ClassifiAllofObject();
+            else
+                currentScan->ClassifibyTrackingAllObject(scanCount, windowsize);
+         }
+         if( tracking ==1 ||tracking ==2 )
+         {
+             currentScan->ExchangePointCloud();
+             currentScan->calcReducedPoints_byClassifi(red, octree, PointType());
+         }
+         else
+         {
+             currentScan->calcReducedPoints(red, octree);
+         }
+		 cout << "reducing scan " << currentScan->get_points_red_size()  << endl;
 
 	     currentScan->transform(currentScan->getTransMatOrg(), Scan::INVALID); //transform points to initial position
          currentScan->createTree(nns_method, cuda_enabled);
 
-     //    cout << "matching two  scan " << currentScan->getFileNr() <<  endl;
+         cout << "matching two  scan " << currentScan->getFileNr() <<  endl;
          if(current_sliding_window_pos > sliding_window_size )
 		    MatchTwoScan(my_icp,  currentScan,  sliding_window_size,  eP);
          else
@@ -1031,19 +1055,23 @@ int main(int argc, char **argv)
          if(current_sliding_window_pos > sliding_window_size )
          {
              vector <Scan*>::iterator Iter = Scan::allScans.begin();
-             delete ((VeloScan*)(*Iter));
+             VeloScan *deleteScan = (VeloScan*)(*Iter);
+    		 cout << "delete scan " << deleteScan->scanid  << endl;
+             delete deleteScan;
          }
 
-	//   boost::mutex::scoped_lock lock(keymutex);
-	//   keycond.wait(lock);
-	//   glutPostRedisplay();
+         if(!veryQuiet)
+    	 {
+            boost::mutex::scoped_lock lock(keymutex);
+            keycond.wait(lock);
+          //  if(g_pause)
+    	    glutPostRedisplay();
+         }
      ////////////////////////////////////////
     }
 
 	delete my_icp6Dminimizer;
     delete my_icp;
-
-//    Show(0);
 
  //  long starttime = GetCurrentTimeInMilliSec();
 

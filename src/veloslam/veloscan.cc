@@ -288,13 +288,7 @@ void VeloScan::readScansRedSearch(reader_type type,
                 {
                     cout << "removing dynamic objects, reducing scan " << currentScan->getFileNr() << " and creating searchTree" << endl;
 
-					currentScan->FindingAllofObject();
-					currentScan->TrackingAllofObject();
-					currentScan->ClassifiAllofObject();
-					currentScan->ExchangePointCloud();
-
-                    currentScan->calcReducedPoints_byClassifi(voxelSize, nrpts, PointType());
-                    currentScan->transform(currentScan->getTransMatOrg(), INVALID); //transform points to initial position
+	                currentScan->transform(currentScan->getTransMatOrg(), INVALID); //transform points to initial position
        //             currentScan->clearPoints();
                     currentScan->createTree(nns_method, cuda_enabled);
 
@@ -984,7 +978,7 @@ bool FilterNOMovingObjcets(clusterFeature &glu,  cluster &gluData)
 	{
 		return false;
 	}
-	// 
+	//
 	if (glu.size_x*glu.size_z > 500*500  &&  glu.size_x/glu.size_z < 1.5)
 	{
 		return false;

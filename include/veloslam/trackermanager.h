@@ -39,16 +39,6 @@ public:
 	 /////////////////////////////////////////////////////////////////
     int DrawEgoTrajectory();
 
-    int DrawScanCluster(VeloScan& scanRef);
-
-    int DrawTrackers(VeloScan& scanRefs);
-
-    int DrawTrackersMovtion(VeloScan& scanRef1,  VeloScan& scanRef2);
-
-    int DrawTrackersMovtion_Long(vector <VeloScan *> allScans);
-
-    int DrawTrackersMovtion_Long_Number(vector <Scan *> allScans, int n);
-
     int DrawTrackersMovtion_Long_Number_All(vector <Scan *> allScans, int n);
 
     int DrawTrackersContrailAfterFilted(vector <Scan *> allScans);
@@ -60,14 +50,19 @@ public:
 
 	int MatchTrackers(VeloScan& scanRef,Tracker& tracker,float kg);
 
+    int CalculateTrackersFeature(vector <Scan *> allScans, int currentNO ,int windowsize);
+
+    int MarkClassifiyTrackersResult(vector <Scan *> allScans, int currentNO ,int windowsize);
+
     int RemoveNoUsedTracker(VeloScan& scanRef);
 
 	int FilterObject(VeloScan& scanRef);
 
+
 	list<Tracker> tracks;
 	//log the new trackerNo should begin
     int trackerStartID;
-    //only for draw the color 
+    //only for draw the color
 	int colorIdx;
 	//log the cluster status such as  	bool FilterRet;	bool Matched;
 	vector<ClusterStatus> clusterStatus;  //should move in cluster struct
