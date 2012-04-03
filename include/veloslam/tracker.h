@@ -23,12 +23,12 @@ public:
     // for log all the cluster for tracking
 	deque<clusterFeature> statusList;
 	deque<cluster> dataList;
-	// log the tracker is or not Matched.
+ 	// log the tracker is or not Matched.
 
 	//	bool Matched or not;
 	bool missMatch;
 	//for log Cluster ID in lastScan.
-	int matchClusterID;  
+	int matchClusterID;
 	//show different color.
 	int colorIdx;
 	// for log the lift length trackerID

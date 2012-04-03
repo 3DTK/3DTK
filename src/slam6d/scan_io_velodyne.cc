@@ -329,6 +329,7 @@ int read_one_packet ( FILE *fp, vector<Point> &ptss, int maxDist, int minDist )
 			//		point.type|=POINT_TYPE_INVALID;
 
 					//主要是为了保证左手系和屏幕显示的习惯相似
+					point.type = POINT_TYPE_GROUND;
 					point.x=x*100;
 					point.y=z*100;
 					point.z=y*100;
