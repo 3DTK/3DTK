@@ -90,6 +90,8 @@ float m_eyex, m_eyey,  m_eyez;
 float m_centerx,  m_centery, m_centerz;
 float m_upx, m_upy, m_upz;
 
+int g_pause=0;
+
 void DrawPointsRGB(Point p,    float r,     float g,    float b)
 {
     GLdouble dVect1[3];
@@ -681,6 +683,11 @@ static void SpecialKey(int key, int x, int y)
 {
 	switch (key)
 	{
+    //case GLUT_KEY_P:
+    //    printf("next\n");
+    //    g_pause != g_pause;
+    //    cout << g_pause;
+    //    break;
 	case GLUT_KEY_UP:
 		x_move --;
 		break;
@@ -791,7 +798,7 @@ static void Draw(void)
 	int scansize = Scan::allScans.size();
     DrawAll_ScanPoints_Number(Scan::allScans, 1, 0.8, 0.8, 0.8, scansize);
 //  Draw_ALL_Object_TYPE(*(VeloScan *)( (Scan::allScans[scansize-1])) ,1, 1, 0, 0, 1   );
-	trackMgr.DrawTrackersMovtion_Long_Number_All(Scan::allScans, scansize);
+//	trackMgr.DrawTrackersMovtion_Long_Number_All(Scan::allScans, scansize);
     trackMgr.DrawEgoTrajectory();
 //	trackMgr.DrawTrackersContrailAfterFilted(Scan::allScans);
 

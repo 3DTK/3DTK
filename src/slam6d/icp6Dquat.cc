@@ -1,4 +1,4 @@
-/** @file 
+/** @file
  *  @brief Implementation of the ICP error function minimization via quaternions
  *  @author Andreas Nuechter. Jacobs University Bremen gGmbH, Germany.
  */
@@ -38,7 +38,7 @@ double icp6D_QUAT::Point_Point_Align(const vector<PtPair>& pairs, double *alignf
   int n = pairs.size();
 
   double sum = 0.0;
- 
+
   // the quaternion
   double q[7];
 
@@ -54,7 +54,7 @@ double icp6D_QUAT::Point_Point_Align(const vector<PtPair>& pairs, double *alignf
 //      cout << setprecision (10) << pairs[i].p1.x << " " << pairs[i].p1.y << " " << pairs[i].p1.z << endl;
 //      cout << pairs[i].p2.x << " " << pairs[i].p2.y << " " << pairs[i].p2.z << endl;
 
-    
+
     sum += sqr(pairs[i].p1.x - pairs[i].p2.x)
 	 + sqr(pairs[i].p1.y - pairs[i].p2.y)
 	 + sqr(pairs[i].p1.z - pairs[i].p2.z) ;
@@ -71,13 +71,13 @@ double icp6D_QUAT::Point_Point_Align(const vector<PtPair>& pairs, double *alignf
 
   double error = sqrt(sum / n);
   if (!quiet) {
-    cout.setf(ios::basefield);
-    cout << "QUAT RMS point-to-point error = "
-	    << resetiosflags(ios::adjustfield) << setiosflags(ios::internal)
-	    << resetiosflags(ios::floatfield) << setiosflags(ios::fixed)
-	    << std::setw(10) << std::setprecision(7)
-	    << error
-	    << "  using " << std::setw(6) << (int)pairs.size() << " points" << endl;
+     cout.setf(ios::basefield);
+     cout << "QUAT RMS point-to-point error = "
+	      << resetiosflags(ios::adjustfield) << setiosflags(ios::internal)
+	      << resetiosflags(ios::floatfield) << setiosflags(ios::fixed)
+	      << std::setw(10) << std::setprecision(7)
+	      << error
+	      << "  using " << std::setw(6) << (int)pairs.size() << " points" << endl;
   }
 
   double fact = 1 / double(n);
@@ -106,7 +106,7 @@ double icp6D_QUAT::Point_Point_Align(const vector<PtPair>& pairs, double *alignf
   for (i = 0; i < 3; i++)
     for (j = 0; j < 3; j++)
       Q[i+1][j+1] = S[i][j] + S[j][i] - ( i==j ? trace : 0);
-  
+
   maxEigenVector(Q, q);
 
   // calculate the rotation matrix
@@ -114,7 +114,7 @@ double icp6D_QUAT::Point_Point_Align(const vector<PtPair>& pairs, double *alignf
   quaternion2matrix(q, m);
 
   M4identity(alignfx);
-  
+
   alignfx[0] = m[0][0];
   alignfx[1] = m[1][0];
   alignfx[2] = m[2][0];
@@ -127,8 +127,8 @@ double icp6D_QUAT::Point_Point_Align(const vector<PtPair>& pairs, double *alignf
   alignfx[9] = m[1][2];
   alignfx[10] = m[2][2];
   alignfx[11] = 0.0;
-  
-  // calculate the translation vector, 
+
+  // calculate the translation vector,
   alignfx[12] = centroid_m[0] - m[0][0]*centroid_d[0] - m[0][1]*centroid_d[1] - m[0][2]*centroid_d[2];
   alignfx[13] = centroid_m[1] - m[1][0]*centroid_d[0] - m[1][1]*centroid_d[1] - m[1][2]*centroid_d[2];
   alignfx[14] = centroid_m[2] - m[2][0]*centroid_d[0] - m[2][1]*centroid_d[1] - m[2][2]*centroid_d[2];
@@ -162,22 +162,22 @@ void icp6D_QUAT::quaternion2matrix(double *q, double m[3][3])
 }
 
 int icp6D_QUAT::ferrari(double a, double b, double c, double d,	double rts[4])
-/* 
-     solve the quartic equation - 
+/*
+     solve the quartic equation -
 
-   x**4 + a*x**3 + b*x**2 + c*x + d = 0 
+   x**4 + a*x**3 + b*x**2 + c*x + d = 0
 
-     input - 
-   a,b,c,e - coeffs of equation. 
+     input -
+   a,b,c,e - coeffs of equation.
 
-     output - 
-   nquar - number of real roots. 
-   rts - array of root values. 
+     output -
+   nquar - number of real roots.
+   rts - array of root values.
 
      method :  Ferrari - Lagrange
      Theory of Equations, H.W. Turnbull p. 140 (1947)
 
-     calls  cubic, qudrtc 
+     calls  cubic, qudrtc
 */
 {
   int nquar,n1,n2;
@@ -258,17 +258,17 @@ int icp6D_QUAT::ferrari(double a, double b, double c, double d,	double rts[4])
 } /* ferrari */
 
 int icp6D_QUAT::qudrtc(double b, double c, double rts[4])
-/* 
-     solve the quadratic equation - 
+/*
+     solve the quadratic equation -
 
-         x**2+b*x+c = 0 
+         x**2+b*x+c = 0
 
 */
 {
   int nquad;
   double rtdis;
   double dis = b*b-4.0*c;
-  
+
   if (dis >= 0.0) {
     nquad = 2;
     rtdis = sqrt(dis);
@@ -286,20 +286,20 @@ int icp6D_QUAT::qudrtc(double b, double c, double rts[4])
 /**************************************************/
 
 double icp6D_QUAT::cubic(double p, double q, double r)
-/* 
-     find the lowest real root of the cubic - 
-       x**3 + p*x**2 + q*x + r = 0 
+/*
+     find the lowest real root of the cubic -
+       x**3 + p*x**2 + q*x + r = 0
 
-   input parameters - 
-     p,q,r - coeffs of cubic equation. 
+   input parameters -
+     p,q,r - coeffs of cubic equation.
 
-   output- 
-     cubic - a real root. 
+   output-
+     cubic - a real root.
 
-   method - 
-     see D.E. Littlewood, "A University Algebra" pp.173 - 6 
+   method -
+     see D.E. Littlewood, "A University Algebra" pp.173 - 6
 
-     Charles Prineas   April 1981 
+     Charles Prineas   April 1981
 
 */
 {
@@ -310,9 +310,9 @@ double icp6D_QUAT::cubic(double p, double q, double r)
   double m,mcube=0.0,n;
   double muo3,s,scube,t,cosk,sinsqk;
   double root;
-  
+
   double doubmax = sqrt(DBL_MAX);
-  
+
   m = 0.0;
   //nrts =0;
   if        ((p > doubmax) || (p <  -doubmax)) {
@@ -328,7 +328,7 @@ double icp6D_QUAT::cubic(double p, double q, double r)
     if (po3sq > doubmax) root =  -p;
     else {
       v = r + po3*(po3sq + po3sq - q);
-      if ((v > doubmax) || (v < -doubmax)) 
+      if ((v > doubmax) || (v < -doubmax))
 	root = -p;
       else {
 	vsq = v*v;
@@ -352,7 +352,7 @@ double icp6D_QUAT::cubic(double p, double q, double r)
 	wsq = uo3cu4 + vsq;
 	if (wsq >= 0.0) {
 	  //
-	  // cubic has one real root 
+	  // cubic has one real root
 	  //
 	  //nrts = 1;
 	  if (v <= 0.0) mcube = ( -v + sqrt(wsq))*.5;
@@ -364,7 +364,7 @@ double icp6D_QUAT::cubic(double p, double q, double r)
 	} else {
 	  //nrts = 3;
 	  //
-	  // cubic has three real roots 
+	  // cubic has three real roots
 	  //
 	  if (uo3 < 0.0) {
 	    muo3 = -uo3;
@@ -381,7 +381,7 @@ double icp6D_QUAT::cubic(double p, double q, double r)
 	    }
 	  } else
 	    //
-	    // cubic has multiple root -  
+	    // cubic has multiple root -
 	    //
 	    root = cbrt(v) - po3;
 	}
@@ -431,14 +431,14 @@ void icp6D_QUAT::maxEigenVector(double Q[4][4], double ev[4])
   }
   best[1] = best[2] = best[3] = 0; best[0] = 1;
   LU_solve(N, ipiv, best);
-  double len = 
-    best[0]*best[0] + best[1]*best[1] + 
+  double len =
+    best[0]*best[0] + best[1]*best[1] +
     best[2]*best[2] + best[3]*best[3];
   for (int i=1; i<4; i++) {
     curr[0] = curr[1] = curr[2] = curr[3] = 0; curr[i] = 1;
     LU_solve(N, ipiv, curr);
-    double tlen = 
-      curr[0]*curr[0] + curr[1]*curr[1] + 
+    double tlen =
+      curr[0]*curr[0] + curr[1]*curr[1] +
       curr[2]*curr[2] + curr[3]*curr[3];
     if (tlen > len) {
 	 len = tlen;
@@ -485,33 +485,33 @@ void icp6D_QUAT::characteristicPol(double Q[4][4], double c[4])
   c[0] = -Q[0][0] - Q[1][1] - Q[2][2] - Q[3][3];
 
   // b
-  c[1] = - q01_2 - q02_2 - q03_2 + q0011 - q12_2 - 
-    q13_2 + q0022 + q1122 - q23_2 + q0033 + q1133 + 
+  c[1] = - q01_2 - q02_2 - q03_2 + q0011 - q12_2 -
+    q13_2 + q0022 + q1122 - q23_2 + q0033 + q1133 +
     q2233;
 
   // c
-  c[2] = (q02_2 + q03_2 + q23_2)*Q[1][1] - 2*q0102*Q[1][2] + 
+  c[2] = (q02_2 + q03_2 + q23_2)*Q[1][1] - 2*q0102*Q[1][2] +
     (q12_2 + q13_2 + q23_2)*Q[0][0] +
-    (q01_2 + q03_2 - q0011 + q13_2 - q1133)*Q[2][2] - 
-    2*Q[0][3]*q0223 - 2*(q0103 + q1223)*Q[1][3] + 
+    (q01_2 + q03_2 - q0011 + q13_2 - q1133)*Q[2][2] -
+    2*Q[0][3]*q0223 - 2*(q0103 + q1223)*Q[1][3] +
     (q01_2 + q02_2 - q0011 + q12_2 - q0022)*Q[3][3];
-    
+
   // d
   c[3] = 2*(-Q[0][2]*Q[0][3]*Q[1][2] + q0103*Q[2][2] -
 	    Q[0][1]*q0223 + Q[0][0]*q1223)*Q[1][3] +
-    q02_2*q13_2 - q03_2*q1122 - q13_2*q0022 + 
-    2*Q[0][3]*Q[1][1]*q0223 - 2*q0103*q1223 + q01_2*q23_2 - 
+    q02_2*q13_2 - q03_2*q1122 - q13_2*q0022 +
+    2*Q[0][3]*Q[1][1]*q0223 - 2*q0103*q1223 + q01_2*q23_2 -
     q0011*q23_2 - q02_2*q1133 + q03_2*q12_2 +
-    2*q0102*Q[1][2]*Q[3][3] - q12_2*q0033 - q01_2*q2233 + 
+    2*q0102*Q[1][2]*Q[3][3] - q12_2*q0033 - q01_2*q2233 +
     q0011*q2233;
 }
 
-double icp6D_QUAT::Point_Point_Align_Parallel(const int openmp_num_threads, 
+double icp6D_QUAT::Point_Point_Align_Parallel(const int openmp_num_threads,
 					      const unsigned int n[OPENMP_NUM_THREADS],
-					      const double sum[OPENMP_NUM_THREADS], 
+					      const double sum[OPENMP_NUM_THREADS],
 					      const double centroid_m[OPENMP_NUM_THREADS][3],
-					      const double centroid_d[OPENMP_NUM_THREADS][3], 
-					      const double Si[OPENMP_NUM_THREADS][9], 
+					      const double centroid_d[OPENMP_NUM_THREADS][3],
+					      const double Si[OPENMP_NUM_THREADS][9],
 					      double *alignfx)
 {
   double s = 0.0;
@@ -520,13 +520,13 @@ double icp6D_QUAT::Point_Point_Align_Parallel(const int openmp_num_threads,
   double cm[3] = {0.0, 0.0, 0.0};  // centroid m
   double cd[3] = {0.0, 0.0, 0.0};  // centroid d
 
-  // Implementation according to the paper 
+  // Implementation according to the paper
   // "The Parallel Iterative Closest Point Algorithm"
   // by Langis / Greenspan / Godin, IEEE 3DIM 2001
   // formula (4)
   for (int i = 0; i < openmp_num_threads; i++) {
     s += sum[i];
-    pairs_size += n[i]; 
+    pairs_size += n[i];
     cm[0] += n[i] * centroid_m[i][0];
     cm[1] += n[i] * centroid_m[i][1];
     cm[2] += n[i] * centroid_m[i][2];
@@ -618,7 +618,7 @@ double icp6D_QUAT::Point_Point_Align_Parallel(const int openmp_num_threads,
   alignfx[10] = m[2][2];
   alignfx[11] = 0.0;
 
-  // calculate the translation vector, 
+  // calculate the translation vector,
   alignfx[12] = cm[0] - m[0][0]*cd[0] - m[0][1]*cd[1] - m[0][2]*cd[2];
   alignfx[13] = cm[1] - m[1][0]*cd[0] - m[1][1]*cd[1] - m[1][2]*cd[2];
   alignfx[14] = cm[2] - m[2][0]*cd[0] - m[2][1]*cd[1] - m[2][2]*cd[2];
