@@ -98,7 +98,7 @@ bool invert              = true;
 
 /**
  * Flag for indicating brid eyes view
- */  
+ */
 bool showTopView         = false;
 
 /**
@@ -108,9 +108,9 @@ bool addCameraView       = false;         //Is the view in add box mode?
 
 /**
  * Storing the apex angle of the camera
- */ 
+ */
 GLfloat cangle          = 60.0;          // Current camera opening mode
-GLfloat cangle_old      = cangle; 
+GLfloat cangle_old      = cangle;
 
 /**
  * Current rotation axis of the scene as quaternion
@@ -119,7 +119,7 @@ GLdouble quat[4]         ={0.0, 0.0, 0.0, 1.0};
 GLdouble Rquat[4]         ={0.0, 0.0, 0.0, 1.0};
 
 /**
- * Current translation of the scene 
+ * Current translation of the scene
  */
 GLdouble X               = 0.0, Y               = 0.0, Z               = 0.0;
 GLdouble RVX = 0.0, RVY = 0.0, RVZ = 0.0;
@@ -128,12 +128,12 @@ GLdouble RVX = 0.0, RVY = 0.0, RVZ = 0.0;
  * parallel zoom (similar to apex angle) for parallel projection
  */
 GLfloat pzoom = 2000.0;
-GLfloat pzoom_old = pzoom; 
+GLfloat pzoom_old = pzoom;
 
 
 /**
  * Mode of the fog (exp, exp2, linear)
- */ 
+ */
 GLint fogMode            = GL_EXP;
 
 /**
@@ -203,7 +203,7 @@ int current_height = START_HEIGHT;
 // the following values are scale dependant, i.e. all values are in m
 float neardistance = 0.10;
 double oldneardistance = 0.10;
-float maxfardistance = 400.0;; 
+float maxfardistance = 400.0;;
 double fardistance = 400.0;
 double oldfardistance = 40000.0;
 double movementSpeed = 0.1;
@@ -219,11 +219,11 @@ float LevelOfDetail = 0.0001;
 // Defines for Point Semantic
 #define TYPE_UNKNOWN         0x0000
 #define TYPE_OBJECT          0x0001
-#define TYPE_GROUND          0x0002 
-#define TYPE_CEILING         0x0003 
+#define TYPE_GROUND          0x0002
+#define TYPE_CEILING         0x0003
 
 unsigned int cam_choice             = 0;
-  
+
 static unsigned int path_iterator = 0;
 static int oldcamNavMode = 0;
 
@@ -253,7 +253,7 @@ int factor = 1;
 /**
  * program tries to have this framerate
  */
-float idealfps = 20.0;       
+float idealfps = 20.0;
 /**
  * value of the listBox fo Color Value and Colormap
  */
@@ -271,11 +271,11 @@ PointType pointtype;
  */
 set<sfloat *> *selected_points;
 /**
- * Select single points?  
+ * Select single points?
  */
 int select_voxels         = 0;
 /**
- * Select or unselect points ? 
+ * Select or unselect points ?
  */
 int selectOrunselect         = 1;
 /** octree depth for selecting groups of points */
@@ -301,7 +301,7 @@ void usage(char* prog)
   const string bold("");
   const string normal("");
 #endif
-  
+
   cout << endl
 	  << bold << "USAGE " << normal << endl
 	  << "   " << prog << " [options] directory" << endl << endl;
@@ -350,7 +350,7 @@ void usage(char* prog)
 	  << "         use 1 when point coordinates are in m, 0.01 when in cm and so forth. " << endl
 	  << "         " << endl
 	  << endl
-	  
+
     << bold << "  -R, --reflectance, --reflectivity" << normal << endl
 	  << "         use reflectivity values for coloring point clouds" << endl
 	  << "         only works when using octree display" << endl
@@ -382,7 +382,7 @@ void usage(char* prog)
 	  << "         --reflectance/--amplitude and similar parameters are therefore ignored." << endl
 	  << "         only works when using octree display" << endl
     << endl << endl;
-  
+
   exit(1);
 }
 
@@ -399,9 +399,9 @@ void usage(char* prog)
  * @param minDist parsing result - minimal distance
  * @param readInitial parsing result -  read a file containing a initial transformation matrix
  * @param type parsing result - file format to be read
- * @return 0, if the parsing was successful, 1 otherwise 
+ * @return 0, if the parsing was successful, 1 otherwise
  */
-int parseArgs(int argc,char **argv, string &dir, int& start, int& end, int& maxDist, int& minDist, 
+int parseArgs(int argc,char **argv, string &dir, int& start, int& end, int& maxDist, int& minDist,
               double &red, bool &readInitial, int &octree, PointType &ptype, float &fps, string &loadObj, bool &loadOct, bool &saveOct, int &origin, double &scale, reader_type &type)
 {
   unsigned int types = PointType::USE_NONE;
@@ -416,8 +416,8 @@ int parseArgs(int argc,char **argv, string &dir, int& start, int& end, int& maxD
   cout << endl;
   static struct option longopts[] = {
     { "origin",          optional_argument,   0,  'o' },
-    { "format",          required_argument,   0,  'f' },  
-    { "fps",             required_argument,   0,  'F' },  
+    { "format",          required_argument,   0,  'f' },
+    { "fps",             required_argument,   0,  'F' },
     { "scale",           required_argument,   0,  'S' },
     { "start",           required_argument,   0,  's' },
     { "end",             required_argument,   0,  'e' },
@@ -518,7 +518,7 @@ int parseArgs(int argc,char **argv, string &dir, int& start, int& end, int& maxD
      loadObj = optarg;
      break;
    case '2':
-     advanced_controls = true; 
+     advanced_controls = true;
      break;
    default:
      abort ();
@@ -529,7 +529,7 @@ int parseArgs(int argc,char **argv, string &dir, int& start, int& end, int& maxD
     usage(argv[0]);
   }
   dir = argv[optind];
-  
+
 #ifndef _MSC_VER
   if (dir[dir.length()-1] != '/') dir = dir + "/";
 #else
@@ -614,7 +614,7 @@ int readFrames(string dir, int start, int end, bool readInitial, reader_type &ty
     int frameCounter = 0;
 
     while (frame_in.good()) {
-      frameCounter++;	 
+      frameCounter++;
       double *transMatOpenGL = new double[16];
       int algoTypeInt;
       Scan::AlgoType algoType;
@@ -636,7 +636,7 @@ int readFrames(string dir, int start, int end, bool readInitial, reader_type &ty
         //	   memcpy(transMatOpenGL, transMat, 16*sizeof(double));
         MMult(mirror, transMat, transMatOpenGL);
       }
-      catch (const exception &e) {   
+      catch (const exception &e) {
         break;
       }
 	 Matrices.push_back(transMatOpenGL);
@@ -658,7 +658,7 @@ int readFrames(string dir, int start, int end, bool readInitial, reader_type &ty
   }
   if (MetaMatrix.size() == 0) {
     cerr << "*****************************************" << endl;
-    cerr << "** ERROR: No .frames could be found!   **" << endl; 
+    cerr << "** ERROR: No .frames could be found!   **" << endl;
     cerr << "*****************************************" << endl;
     cerr << " ERROR: Missing or empty directory: " << dir << endl << endl;
     return -1;
@@ -683,12 +683,12 @@ void generateFrames(int start, int end, bool identity) {
 
     for (int i = 0; i < 3; i++) {
       double *transMat = new double[16];
-      
+
       if (identity) {
         M4identity(transMat);
         transMat[10] = -1.0;
       } else {
-        EulerToMatrix4(Scan::allScans[index]->get_rPos(), Scan::allScans[index]->get_rPosTheta(), transMat ); 
+        EulerToMatrix4(Scan::allScans[index]->get_rPos(), Scan::allScans[index]->get_rPosTheta(), transMat );
       }
 
       Matrices.push_back(transMat);
@@ -724,7 +724,7 @@ void createDisplayLists(bool reduced)
     } else {
       color2 = 3* Scan::allScans[i]->get_points_red_size();
     }
-    
+
     // allocate memory
     vertexArray* myvertexArray1 = new vertexArray(color1);
     vertexArray* myvertexArray2 = new vertexArray(color2);
@@ -756,23 +756,23 @@ void createDisplayLists(bool reduced)
 
     glNewList(myvertexArray1->name, GL_COMPILE);
     //@
-    //glColor4d(0.44, 0.44, 0.44, 1.0);	
-    //glColor4d(0.66, 0.66, 0.66, 1.0);	
+    //glColor4d(0.44, 0.44, 0.44, 1.0);
+    //glColor4d(0.66, 0.66, 0.66, 1.0);
     glVertexPointer(3, GL_FLOAT, 0, myvertexArray1->array);
     glEnableClientState(GL_VERTEX_ARRAY);
     glDrawArrays(GL_POINTS, 0, myvertexArray1->numPointsToRender);
     glDisableClientState(GL_VERTEX_ARRAY);
-    glEndList();	
+    glEndList();
 
     glNewList(myvertexArray2->name, GL_COMPILE);
-    //glColor4d(1.0, 1.0, 1.0, 1.0);	
-    //glColor4d(0.0, 0.0, 0.0, 1.0);	
+    //glColor4d(1.0, 1.0, 1.0, 1.0);
+    //glColor4d(0.0, 0.0, 0.0, 1.0);
     glVertexPointer(3, GL_FLOAT, 0, myvertexArray2->array);
     glEnableClientState(GL_VERTEX_ARRAY);
     glDrawArrays(GL_POINTS, 0, myvertexArray2->numPointsToRender);
     glDisableClientState(GL_VERTEX_ARRAY);
-    glEndList();	
-    
+    glEndList();
+
     // append to vector
     vector<vertexArray*> vvertexArray;
     vvertexArray.push_back(myvertexArray1);
@@ -795,7 +795,7 @@ void initShow(int argc, char **argv){
   /* init OpenGL */
   /***************/
   glutInit(&argc,argv);
-  
+
   cout << "(wx)show - A highly efficient 3D point cloud viewer" << endl
        << "(c) Jacobs University Bremen gGmbH, Germany, since 2009" << endl
 	  << "    University of Osnabrueck, Germany, 2006 - 2009" << endl << endl;
@@ -803,8 +803,6 @@ void initShow(int argc, char **argv){
   if(argc <= 1){
     usage(argv[0]);
   }
-
-
 
   double red   = -1.0;
   int start = 0, end = -1, maxDist = -1, minDist = -1;
@@ -821,16 +819,16 @@ void initShow(int argc, char **argv){
   pose_file_name = new char[1024];
   path_file_name = new char[1024];
   selection_file_name = new char[1024];
-   
-  strncpy(pose_file_name, "pose.dat", 1024);  
-  strncpy(path_file_name, "path.dat", 1024);  
-  strncpy(selection_file_name, "selected.3d", 1024);  
-  
+
+  strncpy(pose_file_name, "pose.dat", 1024);
+  strncpy(path_file_name, "path.dat", 1024);
+  strncpy(selection_file_name, "selected.3d", 1024);
+
   parseArgs(argc, argv, dir, start, end, maxDist, minDist, red, readInitial,
   octree, pointtype, idealfps, loadObj, loadOct, saveOct, origin, scale, type);
 
   // modify all scale dependant variables
-  scale = 1.0 / scale; 
+  scale = 1.0 / scale;
   movementSpeed *= scale;
   neardistance *= scale;
   oldneardistance *= scale;
@@ -879,11 +877,11 @@ void initShow(int argc, char **argv){
   }
 
   if (!loadOct) {
-    if (r) generateFrames(start, start + Scan::allScans.size() - 1, false); 
+    if (r) generateFrames(start, start + Scan::allScans.size() - 1, false);
   } else {
-    if (r) generateFrames(start, start + octpts.size() - 1, true); 
+    if (r) generateFrames(start, start + octpts.size() - 1, true);
   }
-  
+
   int end_reduction = (int)Scan::allScans.size();
   #ifdef _OPENMP
   #pragma omp parallel for schedule(dynamic)
@@ -898,7 +896,7 @@ void initShow(int argc, char **argv){
   }
 
   cm = new ScanColorManager(4096, pointtype);
-  
+
   if (loadOct) {
     for (int i = start; i <= end; i++) {
       string scanFileName = dir + "scan" + to_string(i,3) + ".oct";
@@ -975,7 +973,7 @@ void initShow(int argc, char **argv){
   resetMinMax(0);
 
   selected_points = new set<sfloat*>[octpts.size()];
-  
+
   // sets (and computes if necessary) the pose that is used for the reset button
   setResetView(origin);
 

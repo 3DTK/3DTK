@@ -27,6 +27,7 @@ using std::ofstream;
 using std::cout;
 using std::cerr;
 using std::endl;
+using std::ios;
 
 #include <sstream>
 using std::stringstream;
@@ -163,7 +164,6 @@ Scan::Scan(const double _rPos[3], const double _rPosTheta[3], vector<double *> &
 
   pts.clear();
 }
-
 
 /**
  * Constructor
