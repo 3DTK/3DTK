@@ -190,6 +190,7 @@ VeloScan::VeloScan(const vector < VeloScan* >& MetaScan, int nns_method, bool cu
  */
 VeloScan::~VeloScan()
 {
+    delete [] points_red_type;
 	FreeAllCellAndCluterMemory();
 }
 
@@ -306,6 +307,50 @@ void VeloScan::readScansRedSearch(reader_type type,
 }
 
 
+int VeloScan::DumpScan(string filename)
+{
+    int i,j;
+    int size=  points.size();
+
+    cout << "Export all 3D Points to file \"streampoints.pts\"" << endl;
+    ofstream redptsout(filename, ios::app);
+
+    for(i=0; i< size; ++i)
+    {
+            redptsout << points[i].x << " "
+            << points[i].y << " "
+            << points[i].z << " "
+			<< points[i].type <<endl;
+    }
+
+    redptsout.close();
+    redptsout.clear();
+    return 0;
+}
+
+
+int VeloScan::DumpScanRedPoints(string filename)
+{
+    int i,j;
+    int size=  points.size();
+
+    cout << "Export all 3D Points "<<  filename << endl;
+    ofstream redptsout(filename, ios::app);
+
+    for(i=0; i< size; ++i)
+    {
+            redptsout << points_red[i][0] << " "
+            << points_red[i][1]  << " "
+            << points_red[i][2]  << " "
+			<< points_red_type[i] <<endl;
+    }
+
+    redptsout.close();
+    redptsout.clear();
+    return 0;
+}
+
+
 int VeloScan::CalcRadAndTheta()
 {
     int i,j;
@@ -319,14 +364,19 @@ int VeloScan::CalcRadAndTheta()
     return 0;
 }
 
-int VeloScan::TransferToCellArray()
+
+
+int VeloScan::TransferToCellArray(int maxDist, int minDist)
 {
 #define  DefaultColumnSize 360
 
     int columnSize= 360;	//cfg.cfgPlaneDetect.ColumnSize;
     int CellSize= 50;	    //cfg.cfgPlaneDetect.CellSize;
-    int MinRad=0;		    //cfg.cfgPlaneDetect.MinRad;
-    int MaxRad=6000;		//cfg.cfgPlaneDetect.MaxRad
+//    int MinRad=0;		    //cfg.cfgPlaneDetect.MinRad;
+//    int MaxRad=6000;		//cfg.cfgPlaneDetect.MaxRad
+
+    int MinRad=minDist;     //cfg.cfgPlaneDetect.MinRad;
+    int MaxRad=maxDist;      //cfg.cfgPlaneDetect.MaxRad
 
     if((MaxRad-MinRad)%CellSize!=0)
         CellSize=10;
@@ -505,8 +555,6 @@ int VeloScan::TransferToCellArray()
     }
 	return 0;
 }
-
-
 
 int VeloScan::CalcCellFeature(cell& cellobj, cellFeature& f)
 {
@@ -849,11 +897,21 @@ void VeloScan::calcReducedPoints_byClassifi(double voxelSize, int nrpts, PointTy
      // only copy the points marked POINT_TYPE_STATIC_OBJECT
 	int realCount =0;
 
+	for (int i = 0;  i < points.size(); i++)
+	{
+		if(points[i].type &  POINT_TYPE_STATIC_OBJECT)
+		{
+			realCount++;
+		}
+    }
 	// load  only static part of scans in point_red for icp6D
-    points_red = new double*[points.size()];
-    int end_loop = points_red_size = (int)points.size();
+    points_red = new double*[realCount];
+    points_red_type = new int[realCount];
+    int end_loop = points_red_size = realCount;
+
+    realCount=0;
 	int j=0;
-	for (int i = 0;  i < end_loop; i++)
+	for (int i = 0;  i < points.size(); i++)
 	{
 		if(points[i].type &  POINT_TYPE_STATIC_OBJECT)
 		{
@@ -861,6 +919,7 @@ void VeloScan::calcReducedPoints_byClassifi(double voxelSize, int nrpts, PointTy
 			points_red[j][0] = points[i].x;
 			points_red[j][1] = points[i].y;
 			points_red[j][2] = points[i].z;
+            points_red_type[j] = POINT_TYPE_STATIC_OBJECT;
 			j++;
 			realCount++;
 		}
@@ -1105,11 +1164,11 @@ void VeloScan::MarkStaticorMovingPointCloud()
 	}
 }
 
-void VeloScan::FindingAllofObject()
+void VeloScan::FindingAllofObject(int maxDist, int minDist)
 {
 	if(points.size() > 0)
 	{
-		TransferToCellArray();
+		TransferToCellArray(maxDist, minDist);
 		CalcScanCellFeature();
 		FindAndCalcScanClusterFeature();
 	}

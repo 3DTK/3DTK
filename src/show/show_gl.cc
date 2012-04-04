@@ -1366,6 +1366,7 @@ void initScreenWindow()
 
   update_view_rotate(0);
   glClearColor(0.0, 0.0, 0.0, 0.0);
+//  glClearColor(1.0, 1.0, 1.0, 1.0);
 }
 
 
