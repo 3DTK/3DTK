@@ -25,20 +25,23 @@ ENDIF(WIN32)
 ENDIF(WITH_VELOSLAM)
 
 IF(WITH_VELOSLAM)
+   SET(SHOW_SRCS ../show/NurbsPath.cc ../show/PathGraph.cc ../show/vertexarray.cc
+       ../show/viewcull.cc ../show/colormanager.cc ../show/compacttree.cc
+       ../show/scancolormanager.cc ../show/display.cc)
+
   add_executable(veloshow veloshow.cc veloscan.cc
       debugview.cc  pcddump.cc
       tracker.cc  trackermanager.cc drawtrackers.cc
       svm.cc  clusterboundingbox.cc
       kalmanfilter.cc matrix.cc
       intersection_detection.cc SegIter.model ${SHOW_SRCS})
-  target_link_libraries(veloshow ${SHOW_LIBS})
 
 IF(UNIX)
-  target_link_libraries(veloshow dl scanlib newmat sparse ANN ${SHOW_LIBS})
+  target_link_libraries(veloshow dl scanlib newmat sparse ANN  ${SHOW_LIBS})
 ENDIF(UNIX)
 
 IF(WIN32)
-  target_link_libraries(veloshow scanlib newmat sparse ANN XGetopt ${Boost_LIBRARIES} ${SHOW_LIBS})
+  target_link_libraries(veloshow scanlib newmat sparse ANN XGetopt ${Boost_LIBRARIES}  ${SHOW_LIBS})
 ENDIF(WIN32)
 
 ENDIF(WITH_VELOSLAM)

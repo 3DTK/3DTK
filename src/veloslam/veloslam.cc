@@ -17,18 +17,6 @@
 #include <omp.h>
 #endif
 
-//#define WANT_STREAM ///< define the WANT stream :)
-
-//#include <string>
-//using std::string;
-//#include <iostream>
-//using std::cout;
-//using std::cerr;
-//using std::endl;
-//#include <fstream>
-//using std::ifstream;
-
-
 #include "slam6d/icp6Dapx.h"
 #include "slam6d/icp6Dsvd.h"
 #include "slam6d/icp6Dquat.h"
@@ -1007,13 +995,13 @@ int main(int argc, char **argv)
 
          if(tracking ==1 )
          {
-            currentScan->FindingAllofObject();
+            currentScan->FindingAllofObject(maxDist, minDist);
             currentScan->ClassifiAllofObject();
          }
           if(tracking ==2 )
           {
             int windowsize =3;
-            currentScan->FindingAllofObject();
+            currentScan->FindingAllofObject(maxDist, minDist);
             currentScan->TrackingAllofObject();
             cout << "all  cluster objects " << currentScan->scanClusterFeatureArray.size() << endl;
             cout << "all  cluster tracker " << trackMgr.getNumberofTracker() << endl;
@@ -1044,6 +1032,18 @@ int main(int argc, char **argv)
             MatchTwoScan(my_icp,  currentScan,  scanCount,  eP);
 
 		 ///////////////////////////////////////////
+       //  if (exportPts)
+		 if (1)
+         {
+//            Scan *firstScan = (Scan *)g_pfirstScan;  //the first scan.
+//            double  deltaMat[16];
+//            GetCurrecntdelteMat(*currentScan , *firstScan,  deltaMat);
+//            currentScan->transformAll(deltaMat);
+//            currentScan->DumpScan("pointcloud.pts");
+//            currentScan->DumpScanRedPoints("Velo_PointCloud.pts");
+		 }
+
+         ///////////////////////////////////////////////////////////////////
          const double* p;
          p = currentScan->get_rPos();
          Point x(p[0], p[1], p[2]);

@@ -61,13 +61,16 @@ public:
 //  vector <VeloScan *> meta_parts;
 
   // FIXME
-  void FindingAllofObject();
+  void FindingAllofObject(int maxDist, int minDist);
   void TrackingAllofObject();
   void ExchangePointCloud();
   void ClassifiAllofObject();
 
-  int  CalcRadAndTheta();
-  int TransferToCellArray();
+  int DumpScan(string filename);
+  int DumpScanRedPoints(string filename);
+
+  int CalcRadAndTheta();
+  int TransferToCellArray(int maxDist, int minDist);
 
   void MarkStaticorMovingPointCloud();
   void FreeAllCellAndCluterMemory();
@@ -89,6 +92,9 @@ public:
 
   clusterArray scanClusterArray;
   clusterFeatureArray scanClusterFeatureArray;
+
+   // log the type of points_red;
+  int  *points_red_type;
 
   bool isTrackerHandled;
   long scanid;
