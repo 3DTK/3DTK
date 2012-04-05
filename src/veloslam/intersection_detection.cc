@@ -4,7 +4,7 @@
 #include <fstream>
 #define  DefaultColumnSize 360
 
-svm_model *m = svm_load_model("SegIter.model"); 
+svm_model *m = svm_load_model("SegIter.model");
 svm_node *nod=new svm_node[361];
 
 IntersectionDetection::IntersectionDetection()
@@ -13,13 +13,13 @@ IntersectionDetection::IntersectionDetection()
 	slashMaxLength=3500;
 	slashAngleDefinition=1;
 
-	columnNum= 360;	
+	columnNum= 360;
 	cellSize= 50;
 	MaxRad=6000;
 	if(MaxRad%cellSize!=0)
 		MaxRad=(MaxRad/cellSize+1)*cellSize;
 	cellNum=MaxRad/cellSize;
-	MinRad=0;		
+	MinRad=0;
 
 	CalcRadAndTheta();
 }
@@ -32,7 +32,7 @@ IntersectionDetection::~IntersectionDetection()
 
 int IntersectionDetection::GetPointData()
 {
-	for(unsigned int i = 0; i < Scan::allScans.size(); i++) 
+	for(unsigned int i = 0; i < Scan::allScans.size(); i++)
 		for (int j = 0; j < Scan::allScans[i]->get_points_red_size(); j++)
 		{
 			Point p;
@@ -54,7 +54,7 @@ int IntersectionDetection::CalcRadAndTheta()
 
 	for(i=0; i< size; ++i)
 	{
-		allPoints_AfterRegstn[i].rad  = sqrt(  allPoints_AfterRegstn[i].x*allPoints_AfterRegstn[i].x  
+		allPoints_AfterRegstn[i].rad  = sqrt(  allPoints_AfterRegstn[i].x*allPoints_AfterRegstn[i].x
 			+   allPoints_AfterRegstn[i].z*allPoints_AfterRegstn[i].z );
 		allPoints_AfterRegstn[i].tan_theta  = allPoints_AfterRegstn[i].z/allPoints_AfterRegstn[i].x;
 	}
@@ -257,7 +257,7 @@ int IntersectionDetection::TransferToCellArray()
 	for(i=0; i< allPoints_AfterRegstn.size(); ++i)
 	{
 		count++;
-		Point  &pt= allPoints_AfterRegstn[i]; 
+		Point  &pt= allPoints_AfterRegstn[i];
 
 		if(pt.rad <=MinRad || pt.rad>=MaxRad)
 			continue;
@@ -426,7 +426,7 @@ int IntersectionDetection:: CalcCellFeature(cell& cellobj, cellFeature& f)
 			outlier=0;
 			f.min_x=f.max_x=cellobj[i]->x;
 			f.min_z=f.max_z=cellobj[i]->z;
-			lastMaxY=f.min_y=f.max_y=cellobj[i]->y; 
+			lastMaxY=f.min_y=f.max_y=cellobj[i]->y;
 		}
 		else
 		{
@@ -505,7 +505,7 @@ int IntersectionDetection::CalcAllCellFeature()
 	{
 		cellFeatureArray_AfterRegstn.resize(columnNum);
 		for(i=0; i<columnNum; ++i)
-			cellFeatureArray_AfterRegstn[i].resize(cellNum); 
+			cellFeatureArray_AfterRegstn[i].resize(cellNum);
 	}
 
 	for(j=0; j <columnNum; j++)
@@ -555,7 +555,7 @@ int IntersectionDetection::CalWideSlashEdge_For_RoadShape(float Angle,int startC
 	for(float k=0;k<maxLength;k+=moveInterval)
 	{
 		XPos+=sinAngle*moveInterval;
-		ZPos+=cosAngle*moveInterval;	
+		ZPos+=cosAngle*moveInterval;
 		vexPointXPos1=XPos+halfWide*cosAngle;
 		vexPointZPos1=ZPos-halfWide*sinAngle;
 		vexPointXPos2=XPos-halfWide*cosAngle;
@@ -612,18 +612,19 @@ int IntersectionDetection::DetectIntersection()
 {
 	int startColumn=0;
 	int startRow=30;
-	double labelSVM;
+
 	for(float i=0;i<360;i+=slashAngleDefinition)
 	{
 		CalWideSlashEdge_For_RoadShape(i,startColumn,startRow,slashMaxLength,slashWide);
 	}
 
+	double labelSVM;
 	for(int i=0;i<360;i++)
 	{
 		nod[i].index=i+1;
 		nod[i].value=intersectionFeature[i].slashLength/slashMaxLength;
 	}
-	nod[360].index=-1;	
+	nod[360].index=-1;
 	labelSVM= svm_predict(m,nod);
 
 	ofstream output;

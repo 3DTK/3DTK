@@ -986,14 +986,40 @@ void VeloScan::calcReducedPoints_byClassifi(double voxelSize, int nrpts, PointTy
 	  max_points_red_size = points_red_size;
 }
 
+bool findBusCluster(clusterFeature &glu,  cluster &gluData)
+{
+  /*  double labelSVM;
+	for(int i=0;i<360;i++)
+	{
+		nod[i].index=i+1;
+		nod[i].value=intersectionFeature[i].slashLength/slashMaxLength;
+	}
+	nod[360].index=-1;
+	labelSVM= svm_predict(m,nod);
+
+	ofstream output;
+	output.open("intersection.txt");
+	output<<"labelSVM:"<<labelSVM<<endl;
+	for(int j=0;j<360;j++)
+		output<<j<<":"<<"  "<<nod[j].value;
+	output.close();
+
+	if(labelSVM>0.5)
+		cout<<"intersection"<<endl;
+	else
+		cout<<"segment"<<endl;
+	*/
+	return 0;
+}
+
 //long objcount =0;
 // In one scans find which the more like moving object  such as  pedestrian,  car,  bus.
 bool FilterNOMovingObjcets(clusterFeature &glu,  cluster &gluData)
 {
 	// small object do not use it!
-	//if(glu.size < 8)
-	//	return false;
-	//return true; // no filter
+	if(glu.size < 8)
+		return false;
+	return true; // no filter
 
 	//char  filename[256];
 	//string file;
@@ -1080,7 +1106,7 @@ bool FilterNOMovingObjcets(clusterFeature &glu,  cluster &gluData)
 void VeloScan::ClassifiAllObject()
 {
     int i,j;
-   int clustersize=scanClusterArray.size();
+    int clustersize=scanClusterArray.size();
 
 	//Find moving Ojbects
 	for(i=0; i<clustersize; ++i)

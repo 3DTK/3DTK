@@ -12,8 +12,8 @@ ENDIF(UNIX)
 
 IF(WITH_VELOSLAM)
   add_executable(veloslam veloslam.cc veloscan.cc debugview.cc pcddump.cc tracker.cc
-   trackermanager.cc drawtrackers.cc svm.cc clusterboundingbox.cc
-   intersection_detection.cc kalmanfilter.cc matrix.cc SegIter.model ${SHOW_SRCS})
+   trackermanager.cc drawtrackers.cc svm.cc clusterboundingbox.cc cluster_classification.cc
+   multiscan_random_field.cc intersection_detection.cc kalmanfilter.cc matrix.cc  SegIter.model)
 
 IF(UNIX)
   target_link_libraries(veloslam dl scanlib newmat sparse ANN ${SHOW_LIBS})
@@ -30,9 +30,9 @@ IF(WITH_VELOSLAM)
        ../show/scancolormanager.cc ../show/display.cc)
 
   add_executable(veloshow veloshow.cc veloscan.cc
-      debugview.cc  pcddump.cc
+      debugview.cc  pcddump.cc cluster_classification.cc
       tracker.cc  trackermanager.cc drawtrackers.cc
-      svm.cc  clusterboundingbox.cc
+      svm.cc  clusterboundingbox.cc multiscan_random_field.cc
       kalmanfilter.cc matrix.cc
       intersection_detection.cc SegIter.model ${SHOW_SRCS})
 
