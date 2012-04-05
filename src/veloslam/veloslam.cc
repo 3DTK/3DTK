@@ -90,6 +90,8 @@ extern  int current_sliding_window_pos;
 extern Trajectory VelodyneTrajectory;
 extern  VeloScan* g_pfirstScan;
 extern  int g_pause;
+extern  float  constant_static_or_moving;
+
 
 
 //  Handling Segmentation faults and CTRL-C
@@ -373,9 +375,9 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &rand,
           tracking = atoi(optarg);
         break;
 	 case 't':
-        nns_method = atoi(optarg);
-        if ((nns_method < 0) || (nns_method > 3)) {
-          cerr << "Error: NNS Method not available." << endl;
+        constant_static_or_moving = atof(optarg);
+        if ((constant_static_or_moving < 0) || (constant_static_or_moving > 300)) {
+          cerr << "Error: constant_static_or_moving not available." << endl;
           exit(1);
         }
 
@@ -979,7 +981,6 @@ int main(int argc, char **argv)
     //Main Loop for ICP with Moving Object Detection and Tracking
     while ((_fileNr =my_ScanIO.readScans(start, end, dir, maxDist, minDist, eu, ptss)) != -1)
     {
-
 	    VeloScan::dir = dir;
 	    cout << scanCount << "*" << endl;
         VeloScan *currentScan = new VeloScan(eu, maxDist);
@@ -1005,9 +1006,10 @@ int main(int argc, char **argv)
             cout << "all  cluster objects " << currentScan->scanClusterFeatureArray.size() << endl;
             cout << "all  cluster tracker " << trackMgr.getNumberofTracker() << endl;
             // mark the type of clusters.
-            if(scanCount < windowsize )
-                currentScan->ClassifiAllofObject();
-            else
+            //if(scanCount < windowsize )
+            //    currentScan->ClassifiAllofObject();
+            //else
+            cout<< "constant_static_or_moving is : " << constant_static_or_moving <<endl;
                 currentScan->ClassifibyTrackingAllObject(scanCount, windowsize);
          }
          if( tracking ==1 ||tracking ==2 )

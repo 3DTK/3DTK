@@ -6,7 +6,7 @@
 #include "veloslam/tracker.h"
 
 using namespace std;
-
+extern float  constant_static_or_moving;
 struct ClusterStatus
 {
 	bool FilterRet;
