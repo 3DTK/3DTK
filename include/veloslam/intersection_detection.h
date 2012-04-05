@@ -19,7 +19,7 @@ public:
 	IntersectionDetection();
 	~IntersectionDetection();
 
-	
+
 	int GetPointData();
 	int CalcRadAndTheta();
 	int CalPointCellPos(double x,double y,double z ,int * column,int * row);
@@ -37,20 +37,20 @@ private:
   int cellSize;
   int columnNum;
   int cellNum;
-  int MinRad;		
+  int MinRad;
   int MaxRad;
 
 
   vector <Point> allPoints_AfterRegstn;
   cellArray cellArray_AfterRegstn;
   cellFeatureArray cellFeatureArray_AfterRegstn;
-   float slashWide;
+  float slashWide;
   float slashMaxLength;
   float slashAngleDefinition;
   vector <float> minCellDisList;
   vector <IntersectionFeature> intersectionFeature;
 
-  
+
  /* clusterArray clusterArrayAfterRegstn;
   clusterFeatureArray clusterFeatureArray_AfterRegstn;
 */

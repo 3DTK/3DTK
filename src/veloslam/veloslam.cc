@@ -947,7 +947,6 @@ int main(int argc, char **argv)
   reader_type type  = UOS;
 
 
-
   parseArgs(argc, argv, dir, red, rand, mdm, mdml, mdmll, mni, start, end,
       maxDist, minDist, quiet, veryQuiet, eP, meta, algo, tracking,
       loopSlam6DAlgo, lum6DAlgo, anim,
