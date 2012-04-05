@@ -145,6 +145,7 @@ int TrackerManager::MatchTrackers(VeloScan& scanRef,Tracker& tracker,float kg)
 	float thetaDiff;
 	float sizeDiff;
 	float positionDiff;
+    float shapeDiff;
 	CMatrix standardDeviation(2,2),measurementErro(2,1);
 	Measurement predictMeasurement;
 	bool IsSmaller1,   IsSmaller2,   flag=false;
@@ -159,8 +160,8 @@ int TrackerManager::MatchTrackers(VeloScan& scanRef,Tracker& tracker,float kg)
 		cluster &gluData=scanRef.scanClusterArray[i];
 
         // filter out other objects.
-	//	if( clusterStatus.size()!=0 && clusterStatus[i].FilterRet==false)
-    	if( clusterStatus[i].FilterRet==false)
+		if( clusterStatus.size()!=0 && clusterStatus[i].FilterRet==false)
+    //	if( clusterStatus[i].FilterRet==false)
 			continue;
 
         // allways get the moving for current scans
@@ -179,9 +180,12 @@ int TrackerManager::MatchTrackers(VeloScan& scanRef,Tracker& tracker,float kg)
 				radiusDiff=fabs(tracker.statusList.back().radius-glu.radius);
 				thetaDiff=fabs(tracker.statusList.back().theta-glu.theta);
 				sizeDiff =abs(tracker.statusList.back().size-glu.size);
+                shapeDiff =fabs( fabs(tracker.statusList.back().size_x-glu.size_x) +
+                                 fabs(tracker.statusList.back().size_y-glu.size_y) +
+                                 fabs(tracker.statusList.back().size_z-glu.size_z) );
 				positionDiff = sqrt(sqr(tracker.statusList.back().avg_x -glu.avg_x) + sqr(tracker.statusList.back().avg_z -glu.avg_z) ) ;
 			}
-			value= radiusDiff*1.0 + thetaDiff*1.0  +  sizeDiff*0.8 + positionDiff * 0.03 ;
+			value= radiusDiff*1.0 + thetaDiff*1.0  +  sizeDiff*0.8 + shapeDiff*0.8 + positionDiff * 0.3 ;
 			if(value < minValue)
 			{
 				minValue=value;
@@ -484,8 +488,7 @@ int TrackerManager::MarkClassifiyTrackersResult(vector <Scan *> allScans, int cu
                   clusterFeature &realglu1=CurrentScan->scanClusterFeatureArray[glu1.selfID];
                   cluster  &realgclu = CurrentScan->scanClusterArray[glu1.selfID];
 
-            //      if(tracker.moving_distance < 8.0)
- /*              if(0)
+                  if(tracker.moving_distance < 8.0)
                    {
                       realglu1.clusterType = CLUSTER_TYPE_STATIC_OBJECT;
                       for(j =0; j< realgclu.size() ; ++j)
@@ -495,7 +498,6 @@ int TrackerManager::MarkClassifiyTrackersResult(vector <Scan *> allScans, int cu
                       }
                    }
                    else
-*/
                    {
                       realglu1.clusterType  = CLUSTER_TYPE_MOVING_OBJECT;
                       for(j =0; j< realgclu.size() ; ++j)
