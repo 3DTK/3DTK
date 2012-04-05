@@ -22,6 +22,7 @@ int sliding_window_size = 6;
 int current_sliding_window_pos =0;
 Trajectory VelodyneTrajectory;
 VeloScan * g_pfirstScan;
+float  constant_static_or_moving  = 8.0;
 
 // is OK
 int GetScanID_in_SlidingWindow(int absNO, int current_pos, int  window_size)
@@ -488,7 +489,7 @@ int TrackerManager::MarkClassifiyTrackersResult(vector <Scan *> allScans, int cu
                   clusterFeature &realglu1=CurrentScan->scanClusterFeatureArray[glu1.selfID];
                   cluster  &realgclu = CurrentScan->scanClusterArray[glu1.selfID];
 
-                  if(tracker.moving_distance < 8.0)
+                  if(tracker.moving_distance < constant_static_or_moving)
                    {
                       realglu1.clusterType = CLUSTER_TYPE_STATIC_OBJECT;
                       for(j =0; j< realgclu.size() ; ++j)
