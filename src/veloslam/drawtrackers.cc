@@ -26,12 +26,16 @@ extern VeloScan * g_pfirstScan;
 int TrackerManager::DrawTrackersMovtion_Long_Number_All(vector <Scan *> allScans, int n)
 {
 	 int i,j,k,colorIdx;
+	 Point p1,p2,p1text,p2text;
+ 	char object_moving_distance[256];
 
 	list<Tracker>::iterator it;
 	for(it=tracks.begin();  it!=tracks.end();  it++)
 	{
 		    Tracker &tracker=*it;
             int size=tracker.statusList.size();
+			int firstNO= -1;
+			int secondNO= -1;
 
             //////////////////////////////////////////////////////////
 			if (size < 3)
@@ -41,7 +45,7 @@ int TrackerManager::DrawTrackersMovtion_Long_Number_All(vector <Scan *> allScans
                     clusterFeature &glu1=tracker.statusList[i];
     				cluster &gluData1=tracker.dataList[i];
 
-    			    int firstNO = GetScanID_in_SlidingWindow(glu1.frameNO,
+    			    firstNO = GetScanID_in_SlidingWindow(glu1.frameNO,
                                      current_sliding_window_pos,
                                      sliding_window_size);
      			    if(firstNO <0)
@@ -55,38 +59,38 @@ int TrackerManager::DrawTrackersMovtion_Long_Number_All(vector <Scan *> allScans
 
     				GetCurrecntdelteMat(*CurrentScan , *firstScan,  deltaMat);
 
-    				Point p1(glu1.avg_x, glu1.avg_y, glu1.avg_z);
-//    				Point p1text(glu1.avg_x, glu1.avg_y+50, glu1.avg_z);
-      				Point p1text(glu1.avg_x+150, glu1.avg_y+80, glu1.avg_z+50);
+					p1.x = glu1.avg_x; p1.y= glu1.avg_y;p1.z=glu1.avg_z;
+					p1text.x= glu1.avg_x+150; p1text.y= glu1.avg_y+80; p1text.z=glu1.avg_z+50;
 
     				p1.transform(deltaMat);
     				p1text.transform(deltaMat);
 
     				colorIdx=tracker.colorIdx%8;
 
-                    if(tracker.moving_distance < 20.0)
-    				{
-    					DrawObjectPoint(gluData1, 1,
-    							0.2,
-    							0.2,
-    							0.2,
-    							deltaMat);
-    				}
-                    else
-           			{
-    					  DrawObjectPoint(gluData1, 1,
-        						ColorTableShot[colorIdx][0],
-        						ColorTableShot[colorIdx][1],
-        						ColorTableShot[colorIdx][2] ,
-    							deltaMat);
-    				}
+        //            if(tracker.moving_distance < constant_static_or_moving)
+    				//{
+    				//	DrawObjectPoint(gluData1, 1,
+    				//			0.2,
+    				//			0.2,
+    				//			0.2,
+    				//			deltaMat);
+    				//}
+        //            else
+        //   			{
+    				//	  DrawObjectPoint(gluData1, 1,
+        //						ColorTableShot[colorIdx][0],
+        //						ColorTableShot[colorIdx][1],
+        //						ColorTableShot[colorIdx][2] ,
+    				//			deltaMat);
+    				//}
 
-    				char object_moving_distance[256];
+                }  
+			      if(firstNO <0)
+    				    continue;
+
     				sprintf(object_moving_distance, "%d  %4.2f ",  tracker.matchClusterID, tracker.moving_distance);
     				DrawTextRGB(p1text, 1, 0, 0, object_moving_distance );
                  	DrawPoint(p1,8,1,0,0);
-
-                }
                 continue;
     		}
             ////////////////////////////////////////////////////////////
@@ -98,10 +102,10 @@ int TrackerManager::DrawTrackersMovtion_Long_Number_All(vector <Scan *> allScans
 			    clusterFeature &glu2=tracker.statusList[i+1];
 				cluster &gluData2=tracker.dataList[i+1];
 
-			    int firstNO = GetScanID_in_SlidingWindow(glu1.frameNO,
+			   firstNO = GetScanID_in_SlidingWindow(glu1.frameNO,
                                  current_sliding_window_pos,
                                  sliding_window_size);
-                int secondNO = GetScanID_in_SlidingWindow(glu2.frameNO,
+                secondNO = GetScanID_in_SlidingWindow(glu2.frameNO,
                                  current_sliding_window_pos,
                                  sliding_window_size);
  			   if(firstNO <0 || secondNO< 0 )
@@ -120,10 +124,15 @@ int TrackerManager::DrawTrackersMovtion_Long_Number_All(vector <Scan *> allScans
 		//		if (glu1.size < 8) continue;
 		//		if (glu2.size < 8) continue;
 
-				Point p1(glu1.avg_x, glu1.avg_y, glu1.avg_z);
-				Point p2(glu2.avg_x, glu2.avg_y, glu2.avg_z);
-				Point p1text(glu1.avg_x+150, glu1.avg_y+80, glu1.avg_z+50);
-				Point p2text(glu2.avg_x+150, glu2.avg_y+80, glu2.avg_z+50);
+		//		Point p1(glu1.avg_x, glu1.avg_y, glu1.avg_z);
+		//		Point p2(glu2.avg_x, glu2.avg_y, glu2.avg_z);
+		//		Point p1text(glu1.avg_x+150, glu1.avg_y+80, glu1.avg_z+50);
+		//		Point p2text(glu2.avg_x+150, glu2.avg_y+80, glu2.avg_z+50);
+
+				p1.x = glu1.avg_x; p1.y= glu1.avg_y;p1.z=glu1.avg_z;
+				p1text.x= glu1.avg_x+150; p1text.y= glu1.avg_y+80; p1text.z=glu1.avg_z+50;
+				p2.x = glu2.avg_x; p2.y= glu2.avg_y;  p2.z=glu2.avg_z;
+				p2text.x= glu2.avg_x+150; p2text.y= glu2.avg_y+80; p2text.z=glu2.avg_z+50;
 
 				p1.transform(deltaMat);
 				p2.transform(deltaMatNext);
@@ -132,7 +141,7 @@ int TrackerManager::DrawTrackersMovtion_Long_Number_All(vector <Scan *> allScans
 
 				colorIdx=tracker.colorIdx%8;
 
-                if(tracker.moving_distance < 20.0)
+           /*     if(tracker.moving_distance < constant_static_or_moving)
 				{
 					DrawObjectPoint(gluData1, 1,
 							0.2,
@@ -158,11 +167,9 @@ int TrackerManager::DrawTrackersMovtion_Long_Number_All(vector <Scan *> allScans
     						ColorTableShot[colorIdx][1],
     						ColorTableShot[colorIdx][2] ,
 							deltaMat);
-				}
+				}*/
 
-				char object_moving_distance[256];
-				sprintf(object_moving_distance, "%d  %4.2f ",  tracker.matchClusterID, tracker.moving_distance);
-				DrawTextRGB(p1text, 1, 0, 0, object_moving_distance );
+
 
 			//	char objectID[256];
 		//		sprintf(objectID, "%d", glu1.trackNO);
@@ -184,6 +191,11 @@ int TrackerManager::DrawTrackersMovtion_Long_Number_All(vector <Scan *> allScans
 			   Draw_Line_GL_RGB(p1, p2, 3,	1, 0, 0, false);
 
 		   }
+ 			   if(firstNO <0 || secondNO< 0 )
+				    continue;
+			
+				sprintf(object_moving_distance, "%d  %4.2f ",  tracker.matchClusterID, tracker.moving_distance);
+				DrawTextRGB(p1text, 1, 0, 0, object_moving_distance );
 	}
 
 	return 0;
