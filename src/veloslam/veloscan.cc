@@ -194,6 +194,24 @@ VeloScan::~VeloScan()
 	FreeAllCellAndCluterMemory();
 }
 
+
+int VeloScan::dumpFrames()
+{
+        string filename = dir + "scan" + to_string(fileNr, 3) + ".frames";
+        ofstream fout(filename.c_str());
+        if (!fout.good())
+        {
+            cerr << "ERROR: Cannot open file " << filename << endl;
+            return 1;
+        }       // write into file
+
+        fout << sout.str();
+        fout.close();
+        fout.clear();
+
+		return 0;
+}
+
 /**
  * Copy constructor
  */
