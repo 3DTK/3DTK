@@ -332,7 +332,7 @@ int VeloScan::DumpScan(string filename)
 int VeloScan::DumpScanRedPoints(string filename)
 {
     int i,j;
-    int size=  points.size();
+    int size= this->get_points_red_size();
 
     cout << "Export all 3D Points "<<  filename << endl;
     ofstream redptsout(filename, ios::app);
@@ -1017,14 +1017,14 @@ bool findBusCluster(clusterFeature &glu,  cluster &gluData)
 bool FilterNOMovingObjcets(clusterFeature &glu,  cluster &gluData)
 {
 	// small object do not use it!
-	if(glu.size <3)
+/*	if(glu.size <3)
 		return false;
     if(glu.size_x > 700 ||  glu.size_z > 700 )
 	{
 		return false;
 	}
 	return true; // no filter
-
+	*/
 	//char  filename[256];
 	//string file;
 	//sprintf(filename,"c:\\filename%d.txt", objcount);
