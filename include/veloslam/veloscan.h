@@ -41,6 +41,7 @@ public:
   VeloScan(const vector < VeloScan* >& MetaScan, int nns_method, bool cuda_enabled);
   VeloScan(const VeloScan& s);
   void setPoints(vector <Point>* _points) ;
+  int dumpFrames();
 
   ~VeloScan();
 

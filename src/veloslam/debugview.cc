@@ -72,6 +72,11 @@ using std::flush;
 #include "veloslam/color_util.h"
 
 bool DebugDrawFinished =false;
+bool save_animation=false;
+int anim_frame_rate;
+extern int scanCount;
+GLenum buffermode = GL_BACK;
+
 
 boost::mutex keymutex;
 boost::condition keycond;
@@ -630,6 +635,82 @@ void Draw_ALL_Object_TYPE(VeloScan& scanRef1,  int psize, float r, float g, floa
 	}
 }
 
+
+/* +++++++++-------------++++++++++++
+ * NAME
+ *   glDumpWindowPPM
+ * DESCRIPTION
+ *   writes an ppm file of the window
+ *   content
+ * PARAMETERS
+ *   filename
+ * RESULT
+ *  writes the framebuffer content
+ *  to a ppm file
++++++++++-------------++++++++++++ */
+void glDumpWindowPPM(const char *filename, GLenum mode)
+{
+  int win_height, win_width;
+  int i,j,k,l;                  // Counter variables
+  GLubyte *buffer;              // The GL Frame Buffer
+  unsigned char *ibuffer;       // The PPM Output Buffer
+  ofstream fp;                  // The PPM File
+
+  GLint viewport[4];
+  glGetIntegerv(GL_VIEWPORT, viewport);
+  win_height = viewport[3];
+  win_width  = viewport[2];
+
+  // Allocate memory for the the frame buffer and output buffer
+  buffer = new GLubyte[win_width * win_height * RGBA];
+  ibuffer = new unsigned char[win_width * win_height * RGB];
+
+  // Read window contents from GL frame buffer with glReadPixels
+  glFinish();
+  glReadBuffer(buffermode);
+  glReadPixels(0, 0, win_width, win_height,
+                       GL_RGBA, GL_UNSIGNED_BYTE, buffer);
+
+ //   glReadPixels(0, 0, win_width, win_height,
+//                        GL_RGB, GL_UNSIGNED_BYTE, buffer);
+  
+  // Open the output file
+  fp.open(filename, ios::out);
+
+  // Write a proper P6 PPM header
+  fp << "P6" << endl << "# CREATOR: 3D_Viewer by Andreas Nuechter, University of Osnabrueck"
+	<< endl << win_width  << " " << win_height << " " << UCHAR_MAX << endl;
+
+  // Loop through the frame buffer data, writing to the PPM file.  Be careful
+  //   to account for the frame buffer having 4 bytes per pixel while the
+  //   output file has 3 bytes per pixel
+  l = 0;
+  for (i = 0; i < win_height; i++)
+  {     // For each row
+    for (j = 0; j < win_width; j++)
+	{    // For each column
+   //   for (k = 0; k < RGB; k++)
+	  {        // For each RGB component
+        //cout << (RGBA*((win_height-1-i)*win_width+j)+k) << endl;
+        ibuffer[l++] = (unsigned char)   *(buffer + (RGBA*((win_height-1-i)*win_width+j)+1));
+		ibuffer[l++] = (unsigned char)   *(buffer + (RGBA*((win_height-1-i)*win_width+j)+2));
+        ibuffer[l++] = (unsigned char)   *(buffer + (RGBA*((win_height-1-i)*win_width+j)+0));
+      }                                  // end RGB
+    }                                    // end column
+  }                                      // end row
+
+  // to make a video do:
+  // for f in *ppm ; do convert -quality 100 $f `basename $f ppm`jpg; done
+  // mencoder "mf://*.jpg" -mf fps=10 -o test.avi -ovc lavc -lavcopts vcodec=msmpeg4v2:vbitrate=800
+  // Write output buffer to the file */
+  fp.write((const char*)ibuffer, sizeof(unsigned char) * (RGB * win_width * win_height));
+  fp.close();
+  fp.clear();
+  delete [] buffer;
+  delete [] ibuffer;
+}
+
+
 static void Reshape(int w, int h)
 {
     glViewport(0, 0, (GLint)w, (GLint)h);
@@ -814,6 +895,15 @@ static void Draw(void)
 //	trackMgr.DrawTrackersContrailAfterFilted(Scan::allScans);
 	glFlush();
  	glutSwapBuffers();
+
+    if(save_animation)
+    {
+       string scandirectory =".\\video\\";
+       string filename = scandirectory + "animframe"
+                    + to_string(scanCount,5) + ".ppm";
+       cout << "write " << filename << endl;
+       glDumpWindowPPM(filename.c_str(),0);
+    }
 
 	DebugDrawFinished =true;
 }
