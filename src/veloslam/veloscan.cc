@@ -1019,6 +1019,10 @@ bool FilterNOMovingObjcets(clusterFeature &glu,  cluster &gluData)
 	// small object do not use it!
 	if(glu.size < 8)
 		return false;
+    if(glu.size_x > 700 ||  glu.size_z > 700 )
+	{
+		return false;
+	}
 	return true; // no filter
 
 	//char  filename[256];
