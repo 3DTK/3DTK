@@ -91,8 +91,7 @@ extern Trajectory VelodyneTrajectory;
 extern  VeloScan* g_pfirstScan;
 extern  int g_pause;
 extern  float  constant_static_or_moving;
-
-
+extern bool DebugDrawFinished ;
 
 //  Handling Segmentation faults and CTRL-C
 void sigSEGVhandler (int v)
@@ -981,6 +980,12 @@ int main(int argc, char **argv)
     //Main Loop for ICP with Moving Object Detection and Tracking
     while ((_fileNr =my_ScanIO.readScans(start, end, dir, maxDist, minDist, eu, ptss)) != -1)
     {
+		 while(DebugDrawFinished ==false && !veryQuiet)
+		 {
+			 Sleep(1);
+			// cout << "sleep" <<endl;
+		 }
+
 	    VeloScan::dir = dir;
 	    cout << scanCount << "*" << endl;
         VeloScan *currentScan = new VeloScan(eu, maxDist);
@@ -1049,10 +1054,10 @@ int main(int argc, char **argv)
          p = currentScan->get_rPos();
          Point x(p[0], p[1], p[2]);
          VelodyneTrajectory.path.push_back(x);
-
 		 //////////////////////////////////////////
-         current_sliding_window_pos++;
-         scanCount++;
+
+           scanCount++;
+          current_sliding_window_pos++;
          if(current_sliding_window_pos > sliding_window_size )
          {
              vector <Scan*>::iterator Iter = Scan::allScans.begin();
@@ -1068,6 +1073,14 @@ int main(int argc, char **argv)
           //  if(g_pause)
     	    glutPostRedisplay();
          }
+
+		 while(DebugDrawFinished ==false && !veryQuiet)
+		 {
+			 Sleep(1);
+		//	 cout << "sleep" <<endl;
+		 }
+      
+
      ////////////////////////////////////////
     }
 
