@@ -1017,7 +1017,7 @@ bool findBusCluster(clusterFeature &glu,  cluster &gluData)
 bool FilterNOMovingObjcets(clusterFeature &glu,  cluster &gluData)
 {
 	// small object do not use it!
-	if(glu.size < 8)
+	if(glu.size <3)
 		return false;
     if(glu.size_x > 700 ||  glu.size_z > 700 )
 	{
