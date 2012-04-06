@@ -92,6 +92,9 @@ extern  VeloScan* g_pfirstScan;
 extern  int g_pause;
 extern  float  constant_static_or_moving;
 extern bool DebugDrawFinished ;
+extern bool save_animation;
+extern int anim_frame_rate;
+int scanCount =0;
 
 //  Handling Segmentation faults and CTRL-C
 void sigSEGVhandler (int v)
@@ -360,7 +363,7 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &rand,
   };
 
   cout << endl;
-  while ((c = getopt_long(argc, argv, "O:f:A:G:L:a:b:t:r:R:d:D:i:l:I:c:C:n:s:e:m:M:uqQp", longopts, NULL)) != -1)
+  while ((c = getopt_long(argc, argv, "O:v:f:A:G:L:a:b:t:r:R:d:D:i:l:I:c:C:n:s:e:m:M:uqQp", longopts, NULL)) != -1)
     switch (c)
     {
       case 'a':
@@ -373,6 +376,10 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &rand,
       case 'b':
           tracking = atoi(optarg);
         break;
+     case 'v':
+          save_animation = true;
+          anim_frame_rate = atoi(optarg);
+          break;
 	 case 't':
         constant_static_or_moving = atof(optarg);
         if ((constant_static_or_moving < 0) || (constant_static_or_moving > 300)) {
@@ -976,7 +983,6 @@ int main(int argc, char **argv)
     if(!veryQuiet)
         StartShow();
 
-    int scanCount =0;
     //Main Loop for ICP with Moving Object Detection and Tracking
     while ((_fileNr =my_ScanIO.readScans(start, end, dir, maxDist, minDist, eu, ptss)) != -1)
     {
@@ -990,7 +996,10 @@ int main(int argc, char **argv)
 	    cout << scanCount << "*" << endl;
         VeloScan *currentScan = new VeloScan(eu, maxDist);
         if(scanCount == 0)
-            g_pfirstScan = new  VeloScan(*currentScan);
+        {
+			g_pfirstScan = new  VeloScan(*currentScan);
+			currentScan->transform(currentScan->getTransMatOrg(), Scan::ICP); //transform points to initial position
+		}
         currentScan->setFileNr(_fileNr);
         currentScan->scanid = scanCount; ///
 		currentScan->setPoints(&ptss);    // copy points
@@ -1028,7 +1037,7 @@ int main(int argc, char **argv)
          }
 		 cout << "reducing scan " << currentScan->get_points_red_size()  << endl;
 
-	     currentScan->transform(currentScan->getTransMatOrg(), Scan::INVALID); //transform points to initial position
+	 //    currentScan->transform(currentScan->getTransMatOrg(), Scan::INVALID); //transform points to initial position
          currentScan->createTree(nns_method, cuda_enabled);
 
          cout << "matching two  scan " << currentScan->getFileNr() <<  endl;
@@ -1041,15 +1050,15 @@ int main(int argc, char **argv)
        //  if (exportPts)
 		 if (1)
          {
-
 //            Scan *firstScan = (Scan *)g_pfirstScan;  //the first scan.
 //            double  deltaMat[16];
 //            GetCurrecntdelteMat(*currentScan , *firstScan,  deltaMat);
 //            currentScan->transformAll(deltaMat);
 //            currentScan->DumpScan("pointcloud.pts");
-                currentScan->DumpScanRedPoints("Velo_PointCloud.pts");
+//             currentScan->DumpScanRedPoints("Velo_PointCloud.pts");
 		 }
 
+	//	 currentScan->dumpFrames();
          ///////////////////////////////////////////////////////////////////
          const double* p;
          p = currentScan->get_rPos();
@@ -1057,8 +1066,13 @@ int main(int argc, char **argv)
          VelodyneTrajectory.path.push_back(x);
 		 //////////////////////////////////////////
 
-           scanCount++;
-          current_sliding_window_pos++;
+         scanCount++;
+         current_sliding_window_pos++;
+         cout << " current_sliding_window_pos " << current_sliding_window_pos
+               << " scanCount "  << scanCount << endl
+               << " sliding_window_size " << sliding_window_size
+               << " current id " << currentScan->scanid  << endl;
+
          if(current_sliding_window_pos > sliding_window_size )
          {
              vector <Scan*>::iterator Iter = Scan::allScans.begin();
@@ -1080,7 +1094,7 @@ int main(int argc, char **argv)
 			 Sleep(1);
 		//	 cout << "sleep" <<endl;
 		 }
-      
+
 
      ////////////////////////////////////////
     }

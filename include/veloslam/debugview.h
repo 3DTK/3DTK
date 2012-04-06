@@ -1,9 +1,24 @@
 #pragma once
- 
+
 #include <list>
 #include <vector>
 #include "veloslam/veloscan.h"
 #include "veloslam/tracker.h"
+
+#include <GL/gl.h>			/* OpenGL header file */
+#include <GL/glu.h>			/* OpenGL utilities header file */
+
+#ifdef _MSC_VER
+#include <GL/glut.h>
+#else
+#include <GL/freeglut.h>
+#endif
+
+/** for Glut display mode */
+#define RGBA 4   ///< colors for GLUT display
+#define RGB 3    ///< colors for GLUT display
+extern GLenum buffermode;
+
 extern void StartShow();
 
 void GetCurrecntdelteMat(Scan& CurrentScan ,  Scan& firstScan,  double *deltaMat);
@@ -44,6 +59,9 @@ void Draw_ALL_Object(int frame,  int psize);
 void Draw_ALL_Object_TYPE_IN_ref(VeloScan& scanRef1, VeloScan& scanR,  int psize, float r, float g, float b, int  TYPE);
 void Draw_ALL_Object_Points_TYPE_IN_ref(VeloScan& scanRef1, VeloScan& scanR,  int psize, float r, float g, float b, int  TYPE);
 void Draw_ALL_Object_TYPE(VeloScan& scanRef1,  int psize, float r, float g, float b, int  TYPE);
+
+void glDumpWindowPPM(const char *filename, GLenum mode);
+void glWriteImagePPM(const char *filename, int scale, GLenum mode);
 
 static void Reshape(int w, int h);
 static void SpecialKey(int key, int x, int y);
