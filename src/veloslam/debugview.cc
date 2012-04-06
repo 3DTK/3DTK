@@ -71,6 +71,8 @@ using std::flush;
 
 #include "veloslam/color_util.h"
 
+bool DebugDrawFinished =false;
+
 boost::mutex keymutex;
 boost::condition keycond;
 
@@ -785,6 +787,7 @@ static void SpecialKey(int key, int x, int y)
 
 static void Draw(void)
 {
+	DebugDrawFinished =false;
 	glClearColor(1.0, 1.0, 1.0, 1.0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glClearColor(1.0, 1.0, 1.0, 1.0);
@@ -806,12 +809,13 @@ static void Draw(void)
 	int scansize = Scan::allScans.size();
     DrawAll_ScanPoints_Number(Scan::allScans, 1, 0.8, 0.8, 0.8, scansize);
 //  Draw_ALL_Object_TYPE(*(VeloScan *)( (Scan::allScans[scansize-1])) ,1, 1, 0, 0, 1   );
-//	trackMgr.DrawTrackersMovtion_Long_Number_All(Scan::allScans, scansize);
+	trackMgr.DrawTrackersMovtion_Long_Number_All(Scan::allScans, scansize);
     trackMgr.DrawEgoTrajectory();
 //	trackMgr.DrawTrackersContrailAfterFilted(Scan::allScans);
-
-    glFlush();
+	glFlush();
  	glutSwapBuffers();
+
+	DebugDrawFinished =true;
 }
 
 int Show(int frameno)

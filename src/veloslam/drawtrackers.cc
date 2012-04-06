@@ -90,7 +90,7 @@ int TrackerManager::DrawTrackersMovtion_Long_Number_All(vector <Scan *> allScans
 
     				sprintf(object_moving_distance, "%d  %4.2f ",  tracker.matchClusterID, tracker.moving_distance);
     				DrawTextRGB(p1text, 1, 0, 0, object_moving_distance );
-                 	DrawPoint(p1,8,1,0,0);
+                 	DrawPoint(p1,4,1,0,0);
                 continue;
     		}
             ////////////////////////////////////////////////////////////
@@ -185,8 +185,8 @@ int TrackerManager::DrawTrackersMovtion_Long_Number_All(vector <Scan *> allScans
 			//	sprintf(objectID, "%d", glu2.trackNO);
 			//	DrawTextRGB(p2text, 0,1,0,objectID );
 
-				DrawPoint(p1,8,1,0,0);
-				DrawPoint(p2,8,0,1,0);
+				DrawPoint(p1,4,1,0,0);
+				DrawPoint(p2,4,0,1,0);
 
 			   Draw_Line_GL_RGB(p1, p2, 3,	1, 0, 0, false);
 
