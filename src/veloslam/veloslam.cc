@@ -1041,12 +1041,13 @@ int main(int argc, char **argv)
        //  if (exportPts)
 		 if (1)
          {
+
 //            Scan *firstScan = (Scan *)g_pfirstScan;  //the first scan.
 //            double  deltaMat[16];
 //            GetCurrecntdelteMat(*currentScan , *firstScan,  deltaMat);
 //            currentScan->transformAll(deltaMat);
 //            currentScan->DumpScan("pointcloud.pts");
-//            currentScan->DumpScanRedPoints("Velo_PointCloud.pts");
+                currentScan->DumpScanRedPoints("Velo_PointCloud.pts");
 		 }
 
          ///////////////////////////////////////////////////////////////////
@@ -1068,8 +1069,8 @@ int main(int argc, char **argv)
 
          if(!veryQuiet)
     	 {
-            boost::mutex::scoped_lock lock(keymutex);
-            keycond.wait(lock);
+      //      boost::mutex::scoped_lock lock(keymutex);
+      //      keycond.wait(lock);
           //  if(g_pause)
     	    glutPostRedisplay();
          }
