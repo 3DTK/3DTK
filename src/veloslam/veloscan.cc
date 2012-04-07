@@ -83,7 +83,7 @@ using std::flush;
 #include "veloslam/velodefs.h"
 #include "veloslam/color_util.h"
 
-
+int scanCount =0;
 TrackerManager trackMgr;
 float absf(float a)
 {

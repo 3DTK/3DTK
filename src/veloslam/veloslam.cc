@@ -94,7 +94,7 @@ extern  float  constant_static_or_moving;
 extern bool DebugDrawFinished ;
 extern bool save_animation;
 extern int anim_frame_rate;
-int scanCount =0;
+extern int scanCount;
 
 //  Handling Segmentation faults and CTRL-C
 void sigSEGVhandler (int v)

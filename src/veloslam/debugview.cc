@@ -75,12 +75,10 @@ bool DebugDrawFinished =false;
 bool save_animation=false;
 int anim_frame_rate;
 extern int scanCount;
-GLenum buffermode = GL_BACK;
-
+GLenum buffermode_debugView = GL_BACK;
 
 boost::mutex keymutex;
 boost::condition keycond;
-
 GLenum doubleBuffer;
 
 int g_frame=0;
@@ -648,7 +646,7 @@ void Draw_ALL_Object_TYPE(VeloScan& scanRef1,  int psize, float r, float g, floa
  *  writes the framebuffer content
  *  to a ppm file
 +++++++++-------------++++++++++++ */
-void glDumpWindowPPM(const char *filename, GLenum mode)
+void glDumpWindowPPM_debugView(const char *filename, GLenum mode)
 {
   int win_height, win_width;
   int i,j,k,l;                  // Counter variables
@@ -667,7 +665,7 @@ void glDumpWindowPPM(const char *filename, GLenum mode)
 
   // Read window contents from GL frame buffer with glReadPixels
   glFinish();
-  glReadBuffer(buffermode);
+  glReadBuffer(buffermode_debugView);
   glReadPixels(0, 0, win_width, win_height,
                        GL_RGBA, GL_UNSIGNED_BYTE, buffer);
 
@@ -902,7 +900,7 @@ static void Draw(void)
        string filename = scandirectory + "animframe"
                     + to_string(scanCount,5) + ".ppm";
        cout << "write " << filename << endl;
-       glDumpWindowPPM(filename.c_str(),0);
+       glDumpWindowPPM_debugView(filename.c_str(),0);
     }
 
 	DebugDrawFinished =true;
