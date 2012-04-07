@@ -64,7 +64,6 @@ public:
 
 	int FilterObject(VeloScan& scanRef);
 
-
 	list<Tracker> tracks;
 	//log the new trackerNo should begin
     int trackerStartID;
