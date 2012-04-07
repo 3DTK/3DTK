@@ -454,7 +454,7 @@ int DrawAll_ScanPoints_Number(vector <Scan *> allScans,  int psize, float r, flo
 
 		 GetCurrecntdelteMat(*CurrentScan ,  *firstScan,  deltaMat);
 
-		 int size = (CurrentScan->get_points())->size();
+		 int size =(CurrentScan->get_points())->size();
 	//	 vector<Point> PP = *(CurrentScan->get_points());
 
 		 for(j=0; j <size; j++)

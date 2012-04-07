@@ -5,6 +5,8 @@
 #include "slam6d/scan.h"
 #include "veloslam/tracker.h"
 
+#define NO_SLIDING_WINDOW
+
 using namespace std;
 extern float  constant_static_or_moving;
 struct ClusterStatus
@@ -44,7 +46,11 @@ public:
     int DrawTrackersContrailAfterFilted(vector <Scan *> allScans);
     //////////////////////////////////////////////////////////////////
 public:
+    int ListTrackers();
+
 	int UpdateTrackers(VeloScan& scanRef);
+
+    int UpdateClustersPoistioninTrackers();
 
 	int AddTrackers(VeloScan& scanRef);
 

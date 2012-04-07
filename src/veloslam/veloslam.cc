@@ -1025,6 +1025,8 @@ int main(int argc, char **argv)
             //else
             cout<< "constant_static_or_moving is : " << constant_static_or_moving <<endl;
                 currentScan->ClassifibyTrackingAllObject(scanCount, windowsize);
+
+   //         trackMgr.ListTrackers();
          }
          if( tracking ==1 ||tracking ==2 )
          {
@@ -1041,10 +1043,12 @@ int main(int argc, char **argv)
          currentScan->createTree(nns_method, cuda_enabled);
 
          cout << "matching two  scan " << currentScan->getFileNr() <<  endl;
-         if(current_sliding_window_pos > sliding_window_size )
-		    MatchTwoScan(my_icp,  currentScan,  sliding_window_size,  eP);
-         else
+ //        if(current_sliding_window_pos > sliding_window_size )
+//		    MatchTwoScan(my_icp,  currentScan,  sliding_window_size,  eP);
+ //        else
             MatchTwoScan(my_icp,  currentScan,  scanCount,  eP);
+
+      // update the cluster position in trakers.
 
 		 ///////////////////////////////////////////
        //  if (exportPts)
@@ -1068,23 +1072,28 @@ int main(int argc, char **argv)
 
          scanCount++;
          current_sliding_window_pos++;
+
          cout << " current_sliding_window_pos " << current_sliding_window_pos
                << " scanCount "  << scanCount << endl
                << " sliding_window_size " << sliding_window_size
                << " current id " << currentScan->scanid  << endl;
 
+#ifdef  NO_SLIDING_WINDOW
+		// currentScan->DeletePoints();
+#else
          if(current_sliding_window_pos > sliding_window_size )
          {
              vector <Scan*>::iterator Iter = Scan::allScans.begin();
              VeloScan *deleteScan = (VeloScan*)(*Iter);
     		 cout << "delete scan " << deleteScan->scanid  << endl;
-             delete deleteScan;
+     //        delete deleteScan;
          }
+#endif
 
          if(!veryQuiet)
     	 {
-      //      boost::mutex::scoped_lock lock(keymutex);
-      //      keycond.wait(lock);
+        //    boost::mutex::scoped_lock lock(keymutex);
+         //   keycond.wait(lock);
           //  if(g_pause)
     	    glutPostRedisplay();
          }
