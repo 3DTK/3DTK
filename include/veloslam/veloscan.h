@@ -69,6 +69,7 @@ public:
 
   int DumpScan(string filename);
   int DumpScanRedPoints(string filename);
+  int DeletePoints();
 
   int CalcRadAndTheta();
   int TransferToCellArray(int maxDist, int minDist);
