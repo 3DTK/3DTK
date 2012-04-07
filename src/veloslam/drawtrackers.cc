@@ -36,12 +36,12 @@ int TrackerManager::DrawTrackersMovtion_Long_Number_All(vector <Scan *> allScans
             int size=tracker.statusList.size();
 			int firstNO= -1;
 			int secondNO= -1;
-
+     //     cout << "tracker number " << tracks.size() <<endl;
             //////////////////////////////////////////////////////////
 			if (size < 3)
 			{
                 for(int i =0;  i <size;  i++ )
-			   {
+			    {
                     clusterFeature &glu1=tracker.statusList[i];
     				cluster &gluData1=tracker.dataList[i];
 
@@ -84,14 +84,15 @@ int TrackerManager::DrawTrackersMovtion_Long_Number_All(vector <Scan *> allScans
     				//			deltaMat);
     				//}
 
-                }  
-			      if(firstNO <0)
-    				    continue;
+                }
+			 //     if(firstNO <0)
+    		//		    continue;
 
-    				sprintf(object_moving_distance, "%d  %4.2f ",  tracker.matchClusterID, tracker.moving_distance);
-    				DrawTextRGB(p1text, 1, 0, 0, object_moving_distance );
-                 	DrawPoint(p1,4,1,0,0);
-                continue;
+                    sprintf(object_moving_distance, "%d %d %4.2f ",
+                          tracker.trackerID, tracker.matchClusterID,  tracker.moving_distance);
+                    DrawTextRGB(p1text, 1, 0, 0, object_moving_distance );
+                    DrawPoint(p1,4,0,0,1);
+                    continue;
     		}
             ////////////////////////////////////////////////////////////
 
@@ -120,14 +121,6 @@ int TrackerManager::DrawTrackersMovtion_Long_Number_All(vector <Scan *> allScans
 
 				GetCurrecntdelteMat(*CurrentScan , *firstScan,  deltaMat);
 				GetCurrecntdelteMat(*CurrentScanNext , *firstScan,  deltaMatNext);
-
-		//		if (glu1.size < 8) continue;
-		//		if (glu2.size < 8) continue;
-
-		//		Point p1(glu1.avg_x, glu1.avg_y, glu1.avg_z);
-		//		Point p2(glu2.avg_x, glu2.avg_y, glu2.avg_z);
-		//		Point p1text(glu1.avg_x+150, glu1.avg_y+80, glu1.avg_z+50);
-		//		Point p2text(glu2.avg_x+150, glu2.avg_y+80, glu2.avg_z+50);
 
 				p1.x = glu1.avg_x; p1.y= glu1.avg_y;p1.z=glu1.avg_z;
 				p1text.x= glu1.avg_x+150; p1text.y= glu1.avg_y+80; p1text.z=glu1.avg_z+50;
@@ -185,17 +178,18 @@ int TrackerManager::DrawTrackersMovtion_Long_Number_All(vector <Scan *> allScans
 			//	sprintf(objectID, "%d", glu2.trackNO);
 			//	DrawTextRGB(p2text, 0,1,0,objectID );
 
-				DrawPoint(p1,4,1,0,0);
-				DrawPoint(p2,4,0,1,0);
+				DrawPoint(p1,4,0,1,1);
+				DrawPoint(p2,4,0,1,1);
 
 			   Draw_Line_GL_RGB(p1, p2, 3,	1, 0, 0, false);
 
 		   }
- 			   if(firstNO <0 || secondNO< 0 )
-				    continue;
-			
-				sprintf(object_moving_distance, "%d  %4.2f ",  tracker.matchClusterID, tracker.moving_distance);
-				DrawTextRGB(p1text, 1, 0, 0, object_moving_distance );
+ 		 //     if(firstNO <0)
+		//	    continue;
+
+			sprintf(object_moving_distance, "%d %d %4.2f ",
+             tracker.trackerID , tracker.matchClusterID, tracker.moving_distance);
+			DrawTextRGB(p1text, 0, 0, 1, object_moving_distance );
 	}
 
 	return 0;

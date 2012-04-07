@@ -194,6 +194,13 @@ VeloScan::~VeloScan()
 	FreeAllCellAndCluterMemory();
 }
 
+int VeloScan::DeletePoints()
+{
+	points.clear();
+    delete [] points_red_type;
+	FreeAllCellAndCluterMemory();
+	return 0;
+}
 
 int VeloScan::dumpFrames()
 {
@@ -1063,6 +1070,7 @@ bool FilterNOMovingObjcets(clusterFeature &glu,  cluster &gluData)
 	}
 	else if(glu.size_y > 250 )
 	{
+         // false
 		return false;
 	}
 	else if((glu.size_x>glu.size_y?glu.size_x:glu.size_y)>420 && glu.size_z<130)
@@ -1078,6 +1086,7 @@ bool FilterNOMovingObjcets(clusterFeature &glu,  cluster &gluData)
 
 	else if(glu.size_x<700 && glu.size_z<700 &&  glu.size_y > 100  )
 	{
+        //false
 		return true;
 	}
 

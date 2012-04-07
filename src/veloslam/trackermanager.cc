@@ -18,13 +18,13 @@
 
 #define KG 35
 
-int sliding_window_size = 6;
+int sliding_window_size = 3;
 int current_sliding_window_pos =0;
 Trajectory VelodyneTrajectory;
 VeloScan * g_pfirstScan;
 float  constant_static_or_moving  = 8.0;
 
-// is OK
+/*// is OK
 int GetScanID_in_SlidingWindow(int absNO, int current_pos, int  window_size)
 {
         int firstNO=-1;
@@ -48,6 +48,38 @@ int GetScanID_in_SlidingWindow(int absNO, int current_pos, int  window_size)
 	//	      << " current_pos  " << current_pos << " window_size  "<< window_size <<endl ;
        return firstNO;
 }
+*/
+
+int GetScanID_in_SlidingWindow(int absNO, int current_pos, int  window_size)
+{
+        int firstNO=-1;
+             // relative scanID   absolute scanID
+             // absNO (6,7,8,9)  current_pos(6,7,8,9)  window_size =6
+#ifdef  NO_SLIDING_WINDOW
+		 firstNO = absNO;
+#else
+		if(   (absNO  >=(current_pos - window_size) )
+           && (absNO  <= current_pos) )
+         {
+			 firstNO =absNO - (current_pos - window_size );
+        }
+		else
+		{
+			  //in first scans
+              firstNO = -1;
+		}
+
+       if(current_pos < window_size)
+       {
+            //in first scans
+             firstNO = absNO;
+       }
+#endif
+//	   cout << " absNO  " << absNO  << " firstNO  "<<firstNO
+//		      << " current_pos  " << current_pos << " window_size  "<< window_size <<endl ;
+       return firstNO;
+}
+
 
 TrackerManager::TrackerManager(void)
 {
@@ -297,8 +329,8 @@ int TrackerManager::AddTrackers(VeloScan& scanRef)
 			newTracker.statusList.push_back(glu);
 			newTracker.dataList.push_back(gluData);
 
-	//		cout << "Add track" << TrackerManager::trackerStartID <<" glu.selfID "<< glu.selfID
-    //              <<" scanid" <<scanRef.scanid << endl;
+			cout << "Add track" << TrackerManager::trackerStartID <<" glu.selfID "<< glu.selfID
+                  <<" scanid" <<scanRef.scanid << endl;
 
 			newTracker.colorIdx=colorIdx;
 			newTracker.matchClusterID=i;
@@ -312,6 +344,23 @@ int TrackerManager::AddTrackers(VeloScan& scanRef)
 	return 0;
 }
 
+int TrackerManager::ListTrackers()
+{
+    list<Tracker>::iterator it;
+    cout<<" tracker list : "<<endl;
+    for(it=tracks.begin() ; it!=tracks.end(); it++)
+	{
+		Tracker &tracker=*it;
+        cout<<" ID "<<tracker.trackerID
+            <<" matchClusterID "<<tracker.matchClusterID
+            <<" missMatch "   <<tracker.missMatch
+            <<" glusize "   <<tracker.statusList.size()
+            <<" moving_distance "   <<tracker.moving_distance
+            <<endl;
+    }
+	return 0;
+}
+
 // removednoUsedTrackers and out of sliding window's scans
 int TrackerManager::RemoveNoUsedTracker(VeloScan& scanRef)
 {
@@ -319,33 +368,33 @@ int TrackerManager::RemoveNoUsedTracker(VeloScan& scanRef)
 	int trackNO =0;
 	for(it=tracks.begin() ; it!=tracks.end(); it++)
 	{
-
 		Tracker &tracker=*it;
-        //removednoUsedTrackers
-        if (tracker.missedTime==3)
-        {
-       //     cout<<" erase tracker "<<tracker.trackerID<<" is terminated"<<endl;
-            it= tracks.erase(it);
-            continue;
-        }
 
-         // remove the out of sliding window's scans
-         for (int i =0; i<tracker.statusList.size()-1; i++)
-         {
-             clusterFeature &glu1= tracker.statusList[i];
-             cluster &gludata=tracker.dataList[i];
-             if(glu1.frameNO < current_sliding_window_pos - sliding_window_size
-                 || glu1.frameNO > current_sliding_window_pos)
-             {
-            //    cout<<" erase glu in  "<<tracker.trackerID
-           //        <<" glu1.frameNO "<< glu1.frameNO
-            //        <<" glu1 ID "<< glu1.trackNO
-            //        << endl;
-				    tracker.statusList.pop_front();
-                    tracker.dataList.pop_front();
-                    i++;
-             }
+		//// remove the out of sliding window's scans
+  //       for (int i =0; i<tracker.statusList.size(); i++)
+  //       {
+  //           clusterFeature &glu1= tracker.statusList[i];
+  //           cluster &gludata=tracker.dataList[i];
+  //           if(glu1.frameNO < current_sliding_window_pos - sliding_window_size
+  //               || glu1.frameNO > current_sliding_window_pos)
+  //           {
+  //              cout<<" erase glu in  "<< tracker.trackerID
+  //                     <<" glu1.frameNO "<< glu1.frameNO
+  //                     <<" glu1 ID "<< glu1.trackNO
+  //                     << endl;
+		//		//    tracker.statusList.pop_front();
+  //              //    tracker.dataList.pop_front();
+  //                  i++;
+  //           }
+  //       }
+
+        //removednoUsedTrackers
+        if (tracker.missedTime >2)
+        {
+            cout<<" erase tracker "<<tracker.trackerID<<" is terminated"<<endl;
+            it= tracks.erase(it);
          }
+
     }
 	return 0;
 }
@@ -376,13 +425,13 @@ int TrackerManager::CalculateTrackersFeature(vector <Scan *> allScans, int curre
          tracker.moving_distance = 0.0;
 
          int size=tracker.statusList.size();
-         if (current_sliding_window_pos  < 3 ||  size <3 )  //不处理前三帧和跟踪不到三个的。
+         if (size <2)  //不处理前三帧和跟踪不到三个的。
          {
              continue;
          }
 
          movement =0;
-         for ( i=0 ;i<size-2;i++)
+         for ( i=0;i<size-2;i++)
          {
              clusterFeature &glu1=tracker.statusList[i];
              clusterFeature &glu2=tracker.statusList[i+1];
@@ -395,7 +444,7 @@ int TrackerManager::CalculateTrackersFeature(vector <Scan *> allScans, int curre
                                  sliding_window_size);
              int secondNO = GetScanID_in_SlidingWindow(glu2.frameNO,
                                  current_sliding_window_pos,
-                                 sliding_window_size);;
+                                 sliding_window_size);
 
              if(firstNO <0 || secondNO< 0 )
                  continue;
@@ -489,16 +538,16 @@ int TrackerManager::MarkClassifiyTrackersResult(vector <Scan *> allScans, int cu
                   clusterFeature &realglu1=CurrentScan->scanClusterFeatureArray[glu1.selfID];
                   cluster  &realgclu = CurrentScan->scanClusterArray[glu1.selfID];
 
-                  if(tracker.moving_distance < constant_static_or_moving)
-                   {
-                      realglu1.clusterType = CLUSTER_TYPE_STATIC_OBJECT;
-                      for(j =0; j< realgclu.size() ; ++j)
-                      {
-                          cellFeature &gcF = *(realgclu[j]);
-                          gcF.cellType = CELL_TYPE_STATIC;
-                      }
-                   }
-                   else
+                  //if(tracker.moving_distance < constant_static_or_moving)
+                  // {
+                  //    realglu1.clusterType = CLUSTER_TYPE_STATIC_OBJECT;
+                  //    for(j =0; j< realgclu.size() ; ++j)
+                  //    {
+                  //        cellFeature &gcF = *(realgclu[j]);
+                  //        gcF.cellType = CELL_TYPE_STATIC;
+                  //    }
+                  // }
+                  // else
                    {
                       realglu1.clusterType  = CLUSTER_TYPE_MOVING_OBJECT;
                       for(j =0; j< realgclu.size() ; ++j)
@@ -523,4 +572,40 @@ int TrackerManager::ClassifiyTrackersObjects(vector <Scan *> allScans, int curre
 	return 0;
 }
 
+int TrackerManager::UpdateClustersPoistioninTrackers()
+{
+	int i,j;
+
+	list<Tracker>::iterator it;
+	for(it=tracks.begin() ; it!=tracks.end();it++ )
+	{
+		Tracker &tracker=*it;
+/*
+        	   firstNO = GetScanID_in_SlidingWindow(glu1.frameNO,
+                                 current_sliding_window_pos,
+                                 sliding_window_size);
+                secondNO = GetScanID_in_SlidingWindow(glu2.frameNO,
+                                 current_sliding_window_pos,
+                                 sliding_window_size);
+ 			   if(firstNO <0 || secondNO< 0 )
+				    continue;
+
+			    Scan *firstScan = (Scan *)g_pfirstScan;
+                Scan *CurrentScan = allScans[firstNO];
+				Scan *CurrentScanNext = allScans[secondNO];
+
+				double  deltaMat[16];
+				double  deltaMatNext[16];
+
+				GetCurrecntdelteMat(*CurrentScan , *firstScan,  deltaMat);
+				GetCurrecntdelteMat(*CurrentScanNext , *firstScan,  deltaMatNext);
+
+				p1.x = glu1.avg_x; p1.y= glu1.avg_y;p1.z=glu1.avg_z;
+				p1text.x= glu1.avg_x+150; p1text.y= glu1.avg_y+80; p1text.z=glu1.avg_z+50;
+				p2.x = glu2.avg_x; p2.y= glu2.avg_y;  p2.z=glu2.avg_z;
+				p2text.x= glu2.avg_x+150; p2text.y= glu2.avg_y+80; p2text.z=glu2.avg_z+50;
+*/
+	}
+	return 0;
+}
 
