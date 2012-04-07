@@ -1043,10 +1043,15 @@ int main(int argc, char **argv)
          currentScan->createTree(nns_method, cuda_enabled);
 
          cout << "matching two  scan " << currentScan->getFileNr() <<  endl;
- //        if(current_sliding_window_pos > sliding_window_size )
-//		    MatchTwoScan(my_icp,  currentScan,  sliding_window_size,  eP);
- //        else
-            MatchTwoScan(my_icp,  currentScan,  scanCount,  eP);
+
+ #ifdef  NO_SLIDING_WINDOW
+		MatchTwoScan(my_icp,  currentScan,  scanCount,  eP);
+#else
+         if(current_sliding_window_pos > sliding_window_size )
+    		    MatchTwoScan(my_icp,  currentScan,  sliding_window_size,  eP);
+         else
+                MatchTwoScan(my_icp,  currentScan,  scanCount,  eP);
+#endif 
 
       // update the cluster position in trakers.
 
@@ -1079,14 +1084,19 @@ int main(int argc, char **argv)
                << " current id " << currentScan->scanid  << endl;
 
 #ifdef  NO_SLIDING_WINDOW
-		// currentScan->DeletePoints();
+		 //if(current_sliding_window_pos > sliding_window_size )
+   //      {
+   //          VeloScan *deleteScan = (VeloScan*)(Scan::allScans[scanCount - sliding_window_size-1]);
+   // 		 cout << "clean scan " << deleteScan->scanid  << endl;
+		 //    deleteScan->DeletePoints();
+   //      }
 #else
          if(current_sliding_window_pos > sliding_window_size )
          {
              vector <Scan*>::iterator Iter = Scan::allScans.begin();
              VeloScan *deleteScan = (VeloScan*)(*Iter);
     		 cout << "delete scan " << deleteScan->scanid  << endl;
-     //        delete deleteScan;
+             delete deleteScan;
          }
 #endif
 

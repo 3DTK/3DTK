@@ -1042,14 +1042,15 @@ bool findBusCluster(clusterFeature &glu,  cluster &gluData)
 bool FilterNOMovingObjcets(clusterFeature &glu,  cluster &gluData)
 {
 	// small object do not use it!
-/*	if(glu.size <3)
+	if(glu.size <3)
 		return false;
     if(glu.size_x > 700 ||  glu.size_z > 700 )
-	{
+   	{
 		return false;
 	}
-	return true; // no filter
-	*/
+	return true;
+    // no filter
+
 	//char  filename[256];
 	//string file;
 	//sprintf(filename,"c:\\filename%d.txt", objcount);
@@ -1057,81 +1058,74 @@ bool FilterNOMovingObjcets(clusterFeature &glu,  cluster &gluData)
 	//DumpPointtoFile(gluData, file);
 	//DumpFeaturetoFile(glu, "c:\\feature");
 	//objcount++;
-
-	// for debug moving object detections.
-	if( glu.size_y > 200 && ((glu.size_x>glu.size_y?glu.size_x:glu.size_y))<360)
-	{
-		return false;
-	}
-
-	else if((glu.size_y>350 && glu.size_x<140)|| (glu.size_x>350 && glu.size_y<140))
-	{
-		return false;
-	}
-	else if(glu.size_y > 250 )
-	{
-         // false
-		return false;
-	}
-	else if((glu.size_x>glu.size_y?glu.size_x:glu.size_y)>420 && glu.size_z<130)
-	{
-		return false;
-	}
-
-	else if((glu.size_x>glu.size_y?glu.size_x:glu.size_y)>3.5
-		&& ((glu.size_x>glu.size_y?glu.size_x:glu.size_y)/(glu.size_x<glu.size_y?glu.size_x:glu.size_y)>4))
-	{
-		return false;
-	}
-
-	else if(glu.size_x<700 && glu.size_z<700 &&  glu.size_y > 100  )
-	{
-        //false
-		return true;
-	}
-
-	if(glu.size_x>1500 || glu.size_z>1500 || glu.size_x*glu.size_z >600*600 )
-	{
-		return false;
-	}
-	//
-	if (glu.size_x*glu.size_z > 500*500  &&  glu.size_x/glu.size_z < 1.5)
-	{
-		return false;
-	}
-
-	if(glu.size_y < 100)
-	{
-		return false;
-	}
-
-	if((glu.size_x + glu.size_y + glu.size_z)<1.5)
-	{
-		return false;
-	}
-
-	if(glu.size_z>700)
-	{
-		return false;
-	}
-
-	if(glu.size_x>700)
-	{
-		return false;
-	}
-
-	if(( glu.size_x  +  glu.size_z)  <4)
-	{
-		return false;
-	}
-
-	if( glu.size_x/glu.size_z> 3.0)
-	{
-		return false;
-	}
-
-  	return true;
 }
+
+//long objcount =0;
+// In one scans find which the more like moving object  such as  pedestrian,  car,  bus.
+bool FindMovingObjcets(clusterFeature &glu,  cluster &gluData)
+{
+	// for debug moving object detections.
+	   if( glu.size_y > 200 && ((glu.size_x>glu.size_y?glu.size_x:glu.size_y))<360)
+	   {
+		   return false;
+	   }
+	   else if((glu.size_y>350 && glu.size_x<140)|| (glu.size_x>350 && glu.size_y<140))
+	   {
+		   return false;
+	   }
+	   else if(glu.size_y > 250 )
+	   {
+		   return false;
+	   }
+	   else if((glu.size_x>glu.size_y?glu.size_x:glu.size_y)>420 && glu.size_z<130)
+	   {
+		   return false;
+	   }
+	   else if((glu.size_x>glu.size_y?glu.size_x:glu.size_y)>3.5
+		   && ((glu.size_x>glu.size_y?glu.size_x:glu.size_y)/(glu.size_x<glu.size_y?glu.size_x:glu.size_y)>4))
+	   {
+		   return false;
+	   }
+	   else if(glu.size_x<700 && glu.size_z<700 &&  glu.size_y > 100  )
+	   {
+		   return true;
+	   }
+	   if(glu.size_x>1500 || glu.size_z>1500 || glu.size_x*glu.size_z >600*600 )
+	   {
+		   return false;
+	   }
+	   if (glu.size_x*glu.size_z > 500*500  &&  glu.size_x/glu.size_z < 1.5)
+	   {
+		   return false;
+	   }
+	   if(glu.size_y < 100)
+	   {
+		   return false;
+	   }
+	   if((glu.size_x + glu.size_y + glu.size_z)<1.5)
+	   {
+		   return false;
+	   }
+	   if(glu.size_z>700)
+	   {
+		   return false;
+	   }
+	   if(glu.size_x>700)
+	   {
+		   return false;
+	   }
+	   if(( glu.size_x  +  glu.size_z)  <4)
+	   {
+		   return false;
+	   }
+	   if( glu.size_x/glu.size_z> 3.0)
+	   {
+		   return false;
+	   }
+
+	   return true;
+}
+
 
 // bi classification for distigushed the moving or static
 void VeloScan::ClassifiAllObject()
@@ -1144,15 +1138,17 @@ void VeloScan::ClassifiAllObject()
 	{
      	clusterFeature &glu = scanClusterFeatureArray[i];
 		cluster &gluData=scanClusterArray[i];
+
 	    if( FilterNOMovingObjcets(glu,gluData))
 		{
-				clusterFeature &gclu = 	scanClusterFeatureArray[i];
-				gclu.clusterType  =CLUSTER_TYPE_MOVING_OBJECT;
+               if(FindMovingObjcets(glu,gluData))
+				   glu.clusterType  =CLUSTER_TYPE_MOVING_OBJECT;
+               else
+				   glu.clusterType  =CLUSTER_TYPE_STATIC_OBJECT;
 		}
         else
         {
-                clusterFeature &gclu = 	scanClusterFeatureArray[i];
-				gclu.clusterType  =CLUSTER_TYPE_STATIC_OBJECT;
+				   glu.clusterType  =CLUSTER_TYPE_STATIC_OBJECT;
         }
 	}
 
