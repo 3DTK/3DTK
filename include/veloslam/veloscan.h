@@ -63,7 +63,7 @@ public:
 
   // FIXME
   void FindingAllofObject(int maxDist, int minDist);
-  void TrackingAllofObject();
+  void TrackingAllofObject(int trackingAlgo);
   void ExchangePointCloud();
   void ClassifiAllofObject();
 
@@ -100,6 +100,8 @@ public:
 
   bool isTrackerHandled;
   long scanid;
+
+  int clusterNum;//the number of clusters to be tracked, added by yuanjun
 };
 
 #endif

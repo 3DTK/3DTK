@@ -1065,6 +1065,7 @@ bool FilterNOMovingObjcets(clusterFeature &glu,  cluster &gluData)
 bool FindMovingObjcets(clusterFeature &glu,  cluster &gluData)
 {
 	// for debug moving object detections.
+
 	   if( glu.size_y > 200 && ((glu.size_x>glu.size_y?glu.size_x:glu.size_y))<360)
 	   {
 		   return false;
@@ -1229,11 +1230,11 @@ void VeloScan::FindingAllofObject(int maxDist, int minDist)
  }
 
 
-void VeloScan::TrackingAllofObject()
+void VeloScan::TrackingAllofObject(int trackingAlgo)
 {
 	if(points.size() > 0)
 	{
-		trackMgr.HandleScan(*this);
+		trackMgr.HandleScan(*this,trackingAlgo);
 	}
  }
 

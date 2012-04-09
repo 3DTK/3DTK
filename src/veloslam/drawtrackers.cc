@@ -38,6 +38,12 @@ int TrackerManager::DrawTrackersMovtion_Long_Number_All(vector <Scan *> allScans
 			int secondNO= -1;
      //     cout << "tracker number " << tracks.size() <<endl;
             //////////////////////////////////////////////////////////
+
+		/*	if (tracker.moving_distance<constant_static_or_moving||size==0)
+			{
+				continue;
+			}*/
+
 			if (size < 3)
 			{
                 for(int i =0;  i <size;  i++ )
@@ -88,8 +94,7 @@ int TrackerManager::DrawTrackersMovtion_Long_Number_All(vector <Scan *> allScans
 			 //     if(firstNO <0)
     		//		    continue;
 
-                    sprintf(object_moving_distance, "%d %d %4.2f ",
-                          tracker.trackerID, tracker.matchClusterID,  tracker.moving_distance);
+                    sprintf(object_moving_distance, "%d %d %4.2f ",tracker.trackerID, tracker.matchClusterID,  tracker.moving_distance);
                     DrawTextRGB(p1text, 1, 0, 0, object_moving_distance );
                     DrawPoint(p1,4,0,0,1);
                     continue;
@@ -187,8 +192,7 @@ int TrackerManager::DrawTrackersMovtion_Long_Number_All(vector <Scan *> allScans
  		 //     if(firstNO <0)
 		//	    continue;
 
-			sprintf(object_moving_distance, "%d %d %4.2f ",
-             tracker.trackerID , tracker.matchClusterID, tracker.moving_distance);
+			sprintf(object_moving_distance, "%d %d %4.2f ",tracker.trackerID , tracker.matchClusterID, tracker.moving_distance);
 			DrawTextRGB(p1text, 0, 0, 1, object_moving_distance );
 	}
 
@@ -203,7 +207,7 @@ int TrackerManager::DrawTrackersContrailAfterFilted(vector<Scan *> allScans)
 	{
 		Tracker &tracker=*it;
 		int size=tracker.moveStateList.size();
-		if (size<2)
+		if (size<3)
 		{
 			continue;
 		}
@@ -237,10 +241,10 @@ int TrackerManager::DrawTrackersContrailAfterFilted(vector<Scan *> allScans)
 			p1text.transform(deltaMat);
 			p2text.transform(deltaMatNext);
 
-			DrawPoint(p1,8,0,1,0);
-			DrawPoint(p2,8,0,1,0);
+			DrawPoint(p1,4,1,0,1);
+			DrawPoint(p2,4,1,0,1);
 
-			Draw_Line_GL_RGB(p1,p2,2,0,1,0,false);
+			Draw_Line_GL_RGB(p1,p2,2,1,0,1,false);
 		}
 
 	}

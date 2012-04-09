@@ -29,7 +29,7 @@ public:
 
 	int getNumberofTracker(void);
 
-	int HandleScan(VeloScan& scanRef);
+	int HandleScan(VeloScan& scanRef,int trackingAlgo);
 
   	int ClassifiyTrackersObjects(vector <Scan *> allScans, int currentNO ,int windowsize);
 
@@ -37,7 +37,7 @@ public:
 
 	void TrackerManagerReset(); //added by yuanjun
 
-//	void GetTwoScanRoll(Scan *CurrentScan, Scan *preScan);//added by yuanjun
+	void GetTwoScanRoll(Scan *CurrentScan, Scan *preScan);//added by yuanjun
 	 /////////////////////////////////////////////////////////////////
     int DrawEgoTrajectory();
 
@@ -64,6 +64,10 @@ public:
 
 	int FilterObject(VeloScan& scanRef);
 
+	CMatrix ConstructCostMatrix(VeloScan &scanRef,int *clusterIndex);
+
+	int MatchTracksWithClusters(VeloScan &scanRef);
+
 	list<Tracker> tracks;
 	//log the new trackerNo should begin
     int trackerStartID;
@@ -73,6 +77,7 @@ public:
 	vector<ClusterStatus> clusterStatus;  //should move in cluster struct
 
 	double delta_Theta[3],  delta_Pos[3],  rollAngle;//added by yuanjun
-//	VeloScan *preScan; //added by yuanjun
+
+	VeloScan *preScan; //added by yuanjun
 };
 
