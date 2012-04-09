@@ -32,13 +32,13 @@ public:
 
 	void timeUpdate();
 
-	void stateUpdate(clusterFeature &glu,double rollAngle);
+	void stateUpdate(clusterFeature &glu,double rollAngle,double *pos);
 
 	ObjectState GetCurrentState();
 
 	ObjectState GetPredictState();
 
-	Measurement GetPredictMeasurement(double rollAngle);
+	Measurement GetPredictMeasurement(double rollAngle,double *pos);
 
 	CMatrix CalMeasureDeviation();
 
