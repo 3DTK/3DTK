@@ -313,7 +313,7 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &rand,
     double &mdm, double &mdml, double &mdmll,
     int &mni, int &start, int &end, int &maxDist, int &minDist, bool &quiet, bool &veryQuiet,
     bool &extrapolate_pose, bool &meta, int &algo,int &tracking, int &loopSlam6DAlgo, int &lum6DAlgo, int &anim,
-    int &mni_lum, string &net, double &cldist, int &clpairs, int &loopsize,
+    int &mni_lum, string &net, double &cldist, int &clpairs, int &loopsize,int &trackingAlgo,
     double &epsilonICP, double &epsilonSLAM,  int &nns_method, bool &exportPts, double &distLoop,
     int &iterLoop, double &graphDist, int &octree, bool &cuda_enabled, reader_type &type)
 {
@@ -359,11 +359,12 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &rand,
     { "iterLoop",        required_argument,   0,  '1' }, // use the long format only
     { "graphDist",       required_argument,   0,  '3' }, // use the long format only
     { "cuda",            no_argument,         0,  'u' }, // cuda will be enabled
+	{ "trackingAlgo",    required_argument,   0,    'y'},//tracking algorithm
     { 0,           0,   0,   0}                    // needed, cf. getopt.h
   };
 
   cout << endl;
-  while ((c = getopt_long(argc, argv, "O:v:f:A:G:L:a:b:t:r:R:d:D:i:l:I:c:C:n:s:e:m:M:uqQp", longopts, NULL)) != -1)
+  while ((c = getopt_long(argc, argv, "O:v:f:A:G:L:a:b:t:r:R:d:D:i:l:I:c:C:n:s:e:m:M:y:uqQp", longopts, NULL)) != -1)
     switch (c)
     {
       case 'a':
@@ -463,6 +464,9 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &rand,
       case 'p':
         extrapolate_pose = false;
         break;
+	  case 'y':
+		trackingAlgo=atoi(optarg);//choose tracking algorithm
+		break;
       case 'A':
         anim = atoi(optarg);
         break;
@@ -953,12 +957,12 @@ int main(int argc, char **argv)
   int octree  = 0;  // employ randomized octree reduction?
   bool cuda_enabled    = false;
   reader_type type  = UOS;
-
+  int trackingAlgo=0;
 
   parseArgs(argc, argv, dir, red, rand, mdm, mdml, mdmll, mni, start, end,
       maxDist, minDist, quiet, veryQuiet, eP, meta, algo, tracking,
       loopSlam6DAlgo, lum6DAlgo, anim,
-      mni_lum, net, cldist, clpairs, loopsize, epsilonICP, epsilonSLAM,
+      mni_lum, net, cldist, clpairs, loopsize, trackingAlgo,epsilonICP, epsilonSLAM,
       nns_method, exportPts, distLoop, iterLoop, graphDist, octree, cuda_enabled, type);
 
   cout << "slam6D will proceed with the following parameters:" << endl;
@@ -1016,7 +1020,7 @@ int main(int argc, char **argv)
           {
             int windowsize =3;
             currentScan->FindingAllofObject(maxDist, minDist);
-            currentScan->TrackingAllofObject();
+            currentScan->TrackingAllofObject(trackingAlgo);
             cout << "all  cluster objects " << currentScan->scanClusterFeatureArray.size() << endl;
             cout << "all  cluster tracker " << trackMgr.getNumberofTracker() << endl;
             // mark the type of clusters.
@@ -1102,8 +1106,8 @@ int main(int argc, char **argv)
 
          if(!veryQuiet)
     	 {
-        //    boost::mutex::scoped_lock lock(keymutex);
-         //   keycond.wait(lock);
+            //boost::mutex::scoped_lock lock(keymutex);
+           // keycond.wait(lock);
           //  if(g_pause)
     	    glutPostRedisplay();
          }

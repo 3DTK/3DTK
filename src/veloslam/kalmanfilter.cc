@@ -85,43 +85,43 @@ void KalmanFilter::InitialKalmanFilter(clusterFeature &glu)
 
 void KalmanFilter::timeUpdate()
 {
- //   CMatrix T1,T2;
+	//   CMatrix T1,T2;
 	//X2=A*X1;
- //   T1= A.Transpose();
+	//   T1= A.Transpose();
 	//P2= A * P1 * T1 + Q;
 	X2=A*X1;
 	P2=A*P1*A.Transpose()+Q;
 }
 
-void KalmanFilter::stateUpdate(clusterFeature &glu,double rollangle)
+void KalmanFilter::stateUpdate(clusterFeature &glu,double rollangle,double *pos)
 {
- //   CMatrix T1,T2;
+	//   CMatrix T1,T2;
 	//Z.m_pTMatrix[0][0]=glu.avg_x;
 	//Z.m_pTMatrix[1][0]=glu.avg_z;
 
 	//CMatrix temp(2,2);
- //   T1= H.Transpose();
+	//   T1= H.Transpose();
 	//temp=H*P2*T1+R;
- //   T2= temp.Inverse();
+	//   T2= temp.Inverse();
 	//K=P2*T1*T2;
 
 	//CalCoorRoll(rollangle);
 
 	//X2=CoordinateRoll*X2;
 
- //   CMatrix T3,T4,T5;
+	//   CMatrix T3,T4,T5;
 
- //   T4=H*X2;
- //   T3=Z-T4;
- //   T5=K*T3;
+	//   T4=H*X2;
+	//   T3=Z-T4;
+	//   T5=K*T3;
 	//X1=X2+T5;
 
 	//CMatrix I(4,4);
 	//I.Eye();
 
- //   CMatrix T6,T7,T8;
- //   T6=K*H;
- //   T7=I-T6;
+	//   CMatrix T6,T7,T8;
+	//   T6=K*H;
+	//   T7=I-T6;
 	//P1=T7*P2;
 
 	Z.m_pTMatrix[0][0]=glu.avg_x;
@@ -134,7 +134,11 @@ void KalmanFilter::stateUpdate(clusterFeature &glu,double rollangle)
 
 	CalCoorRoll(rollangle);
 
-	X2=CoordinateRoll*X2;//转换到当前坐标系下
+	X2=CoordinateRoll*X2;
+
+	X2.m_pTMatrix[0][0]+=pos[0];
+	X2.m_pTMatrix[1][0]+=pos[2];
+
 
 	X1=X2+K*(Z-H*X2);
 
@@ -167,12 +171,14 @@ ObjectState KalmanFilter::GetPredictState()
 	return movestate;
 }
 
-Measurement KalmanFilter::GetPredictMeasurement(double rollAngle)
+Measurement KalmanFilter::GetPredictMeasurement(double rollAngle,double *pos)
 {
 	Measurement predictMeasurement;
 	CMatrix temp(2,1);
 	CalCoorRoll(rollAngle);
 	X2=CoordinateRoll*X2;
+	X2.m_pTMatrix[0][0]+=pos[0];
+	X2.m_pTMatrix[1][0]+=pos[2];
 	temp=H*X2;
 	predictMeasurement.x_measurement=temp.m_pTMatrix[0][0];
 	predictMeasurement.z_measurement=temp.m_pTMatrix[1][0];
@@ -184,9 +190,9 @@ CMatrix KalmanFilter::CalMeasureDeviation()
 {
 	CMatrix Deviation(2,2),standardDeviation(2,2);
 
- //   CMatrix T6,T7,T8;
- //   T6=H.Transpose();
- //   T7=P2*T6;
+	//   CMatrix T6,T7,T8;
+	//   T6=H.Transpose();
+	//   T7=P2*T6;
 	//Deviation=H*T7+R;
 
 	Deviation=H*P2*H.Transpose()+R; //计算方差
@@ -230,4 +236,5 @@ void KalmanFilter::CalCoorRoll(double angle)
 	CoordinateRoll.m_pTMatrix[3][2]=-sin(angle);
 	CoordinateRoll.m_pTMatrix[3][3]=cos(angle);
 }
+
 
