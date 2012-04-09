@@ -89,7 +89,7 @@ extern  int sliding_window_size;
 extern  int current_sliding_window_pos;
 extern Trajectory VelodyneTrajectory;
 extern  VeloScan* g_pfirstScan;
-extern  int g_pause;
+extern  bool   g_pause;
 extern  float  constant_static_or_moving;
 extern bool DebugDrawFinished ;
 extern bool save_animation;
@@ -1104,11 +1104,15 @@ int main(int argc, char **argv)
          }
 #endif
 
-         if(!veryQuiet)
+		 if(!veryQuiet)
     	 {
-            //boost::mutex::scoped_lock lock(keymutex);
-           // keycond.wait(lock);
-          //  if(g_pause)
+			 //if(g_pause)
+			 //{
+    //            boost::mutex::scoped_lock lock(keymutex);
+    //            keycond.wait(lock);
+		  //      g_pause = true;
+			 //}
+          
     	    glutPostRedisplay();
          }
 

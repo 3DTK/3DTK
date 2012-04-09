@@ -17,7 +17,7 @@
 #include <GL/freeglut.h>
 #endif
 
-#define KG 35
+#define KG  35
 #define BIGNUM 100000
 
 int sliding_window_size = 6;
@@ -479,7 +479,7 @@ int TrackerManager::CalculateTrackersFeature(vector <Scan *> allScans, int curre
          tracker.moving_distance = 0.0;
 
          int size=tracker.statusList.size();
-         if ( size <2 )  
+         if ( size <2 )
          {
              continue;
          }
