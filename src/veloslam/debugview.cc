@@ -101,7 +101,7 @@ float m_eyex, m_eyey,  m_eyez;
 float m_centerx,  m_centery, m_centerz;
 float m_upx, m_upy, m_upz;
 
-int g_pause=0;
+bool  g_pause=true;
 
 void DrawPointsRGB(Point p,    float r,     float g,    float b)
 {
@@ -853,7 +853,9 @@ static void SpecialKey(int key, int x, int y)
 	case GLUT_KEY_F8:
 		break;
 
-	case GLUT_KEY_F9:
+	case GLUT_KEY_F11:
+	       printf("paseu\n");
+           g_pause != g_pause;
 		break;
 
 	case GLUT_KEY_F12:
