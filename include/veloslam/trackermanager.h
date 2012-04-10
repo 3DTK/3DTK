@@ -5,7 +5,7 @@
 #include "slam6d/scan.h"
 #include "veloslam/tracker.h"
 
-#define NO_SLIDING_WINDOW
+//#define NO_SLIDING_WINDOW
 
 using namespace std;
 extern float  constant_static_or_moving;

@@ -146,6 +146,7 @@ int TrackerManager::HandleScan(VeloScan& scanRef,int trackingAlgo)
     //filter not good target object
 	FilterObject(scanRef);
 
+    cout << "HandleScan tracking " <<endl;
     //update same tracker this is need matching
 	switch (trackingAlgo)
 	{
@@ -524,7 +525,7 @@ int TrackerManager::CalculateTrackersFeature(vector <Scan *> allScans, int curre
 
 #ifdef NO_SLIDING_WINDOW
 			 if(glu1.frameNO>=current_sliding_window_pos - sliding_window_size&&glu2.frameNO <=current_sliding_window_pos)
-			 { 
+			 {
 				 movement += sqrt( (p1.x -p2.x)*(p1.x -p2.x)+(p1.z -p2.z)*(p1.z -p2.z) );
 				 n++;
 			 }
@@ -547,7 +548,7 @@ int TrackerManager::CalculateTrackersFeature(vector <Scan *> allScans, int curre
 		 {
 			 tracker.moving_distance=0;
 		 }
-		 
+
 #else
          tracker.moving_distance = movement/(size-1);
 #endif
@@ -686,8 +687,8 @@ int TrackerManager::UpdateClustersPoistioninTrackers()
 void TrackerManager::GetTwoScanRoll(Scan *CurrentScan,Scan *preScan)//???
 {
 	double tempMat[16],deltaMat[16];
-	M4inv(preScan->getTransMatOrg(), tempMat);   
-	MMult(CurrentScan->get_transMat(), tempMat,deltaMat); 
+	M4inv(preScan->getTransMatOrg(), tempMat);
+	MMult(CurrentScan->get_transMat(), tempMat,deltaMat);
 	Matrix4ToEuler(deltaMat,delta_Theta,delta_Pos);
 	//cout<<"delta_Theta: "<<delta_Theta[0]<<" "<<delta_Theta[1]<<" "<<delta_Theta[2]<<endl;
 	//cout<<"delta_pos: "<<delta_Pos[0]<<" "<<delta_Pos[1]<<" "<<delta_Pos[2]<<endl;
@@ -700,7 +701,7 @@ CMatrix TrackerManager::ConstructCostMatrix(VeloScan &scanRef,int *clusterIndex)
 	int clusterSize=scanRef.clusterNum;
 	int trackSize=getNumberofTracker();
 
-	int maxSize; 
+	int maxSize;
 	if (clusterSize!=trackSize)
 	{
 		maxSize=clusterSize>trackSize?clusterSize:trackSize;
@@ -712,7 +713,7 @@ CMatrix TrackerManager::ConstructCostMatrix(VeloScan &scanRef,int *clusterIndex)
 
 	CMatrix costMatrix(maxSize,maxSize);
 
-	int i=0,j,k;	
+	int i=0,j,k;
 	double costValue;
 	float radiusDiff;
 	float thetaDiff;
@@ -735,7 +736,7 @@ CMatrix TrackerManager::ConstructCostMatrix(VeloScan &scanRef,int *clusterIndex)
 		if (tracker.missMatch)
 		{
 			kg=1.5*KG;
-		} 
+		}
 		else
 		{
 			kg=KG;
@@ -792,7 +793,7 @@ CMatrix TrackerManager::ConstructCostMatrix(VeloScan &scanRef,int *clusterIndex)
 				}
 
 			}
-		} 
+		}
 		else
 		{
 			for (i=0;i<maxSize;i++)
@@ -855,12 +856,12 @@ int TrackerManager::MatchTracksWithClusters(VeloScan &scanRef)
 	lap(dim,assignCost,rowsol,colsol,u,v);
 
 	for (i=0;i<trackSize;i++)
-	{	
+	{
 		int col=rowsol[i];
 		if (assignCost[i][col]==BIGNUM)
 		{
 			missFlag[i]=true;
-		}		
+		}
 	}
 
 	int trackerIndex=-1;
@@ -875,8 +876,8 @@ int TrackerManager::MatchTracksWithClusters(VeloScan &scanRef)
 		{
 			tracker.missMatch=true;
 			tracker.missedTime++;
-			
-		} 
+
+		}
 		else
 		{
 			int clusterID=rowsol[trackerIndex];
