@@ -99,7 +99,9 @@ Trajectory::Trajectory()
  */
 VeloScan::VeloScan()
     : Scan()
-{ }
+{
+    isTrackerHandled =false;
+}
 
 /**
  * Constructor
@@ -109,11 +111,16 @@ VeloScan::VeloScan()
  */
 VeloScan::VeloScan(const double* euler, int maxDist)
     : Scan(euler, maxDist)
-{ }
+{
+    isTrackerHandled =false;
+
+}
 
 VeloScan::VeloScan(const double _rPos[3], const double _rPosTheta[3], vector<double *> &pts)
     : Scan(_rPos, _rPosTheta, pts)
-{ }
+{
+    isTrackerHandled =false;
+}
 
 /**
  * Constructor
@@ -123,7 +130,9 @@ VeloScan::VeloScan(const double _rPos[3], const double _rPosTheta[3], vector<dou
  */
 VeloScan::VeloScan(const double _rPos[3], const double _rPosTheta[3], const int maxDist)
     : Scan(_rPos, _rPosTheta, maxDist)
-{ }
+{
+    isTrackerHandled =false;
+}
 
 /**
  * Constructor for creating a metascan from a list of scans
@@ -136,6 +145,7 @@ VeloScan::VeloScan(const double _rPos[3], const double _rPosTheta[3], const int 
  */
 VeloScan::VeloScan(const vector < VeloScan* >& MetaScan, int nns_method, bool cuda_enabled)
 {
+    isTrackerHandled =false;
     kd = 0;
     ann_kd_tree = 0;
     scanNr = numberOfScans++;
