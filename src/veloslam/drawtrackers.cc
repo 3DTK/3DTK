@@ -94,9 +94,9 @@ int TrackerManager::DrawTrackersMovtion_Long_Number_All(vector <Scan *> allScans
 			 //     if(firstNO <0)
     		//		    continue;
 
-                    sprintf(object_moving_distance, "%d %d %4.2f ",tracker.trackerID, tracker.matchClusterID,  tracker.moving_distance);
-                    DrawTextRGB(p1text, 1, 0, 0, object_moving_distance );
-                    DrawPoint(p1,4,0,0,1);
+         //           sprintf(object_moving_distance, "%d %d %4.2f ",tracker.trackerID, tracker.matchClusterID,  tracker.moving_distance);
+          //          DrawTextRGB(p1text, 1, 0, 0, object_moving_distance );
+           //         DrawPoint(p1,4,0,0,1);
                     continue;
     		}
             ////////////////////////////////////////////////////////////
@@ -192,8 +192,8 @@ int TrackerManager::DrawTrackersMovtion_Long_Number_All(vector <Scan *> allScans
  		 //     if(firstNO <0)
 		//	    continue;
 
-			sprintf(object_moving_distance, "%d %d %4.2f ",tracker.trackerID , tracker.matchClusterID, tracker.moving_distance);
-			DrawTextRGB(p1text, 0, 0, 1, object_moving_distance );
+	//		sprintf(object_moving_distance, "%d %d %4.2f ",tracker.trackerID , tracker.matchClusterID, tracker.moving_distance);
+	//		DrawTextRGB(p1text, 0, 0, 1, object_moving_distance );
 	}
 
 	return 0;
