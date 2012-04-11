@@ -8,7 +8,7 @@ using namespace std;
 struct MoveState
 {
 	ObjectState targetState;
-	Scan *thisScan;
+	int frameNo;
 };
 
 class Tracker

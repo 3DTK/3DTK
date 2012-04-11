@@ -930,7 +930,7 @@ int main(int argc, char **argv)
   string dir;
   double red   = -1.0, mdmll = -1.0, mdml = 25.0, mdm = 25.0;
   int    rand  = -1,   mni = 50;
-  int    start = 0,   end = -1;
+int    start = 0,   end = -1;
   bool   quiet      = false;
   bool   veryQuiet  = false;
   int    maxDist    = -1;
@@ -999,6 +999,7 @@ int main(int argc, char **argv)
 	    VeloScan::dir = dir;
 	    cout << scanCount << "*" << endl;
         VeloScan *currentScan = new VeloScan(eu, maxDist);
+		currentScan->isTrackerHandled=false;
         if(scanCount == 0)
         {
 			g_pfirstScan = new  VeloScan(*currentScan);
@@ -1082,10 +1083,10 @@ int main(int argc, char **argv)
          scanCount++;
          current_sliding_window_pos++;
 
-         cout << " current_sliding_window_pos " << current_sliding_window_pos
-               << " scanCount "  << scanCount << endl
-               << " sliding_window_size " << sliding_window_size
-               << " current id " << currentScan->scanid  << endl;
+         //cout << " current_sliding_window_pos " << current_sliding_window_pos
+         //      << " scanCount "  << scanCount << endl
+         //      << " sliding_window_size " << sliding_window_size
+         //      << " current id " << currentScan->scanid  << endl;
 
 #ifdef  NO_SLIDING_WINDOW
 		 //if(current_sliding_window_pos > sliding_window_size )
