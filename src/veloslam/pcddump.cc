@@ -54,7 +54,7 @@ using std::flush;
 void DumpPointtoFile(cluster &gluData1, string filename)
 {
 	cell* pCell;
-    ofstream redptsout(filename);
+    ofstream redptsout(filename.c_str());
 
 	for(int j=0; j<gluData1.size();++j)
 	{
@@ -72,7 +72,7 @@ void DumpPointtoFile(cluster &gluData1, string filename)
 
 void DumpFeaturetoFile(clusterFeature &glu, string filename)
 {
-	ofstream redptsout(filename, ios::app);
+	ofstream redptsout(filename.c_str(), ios::app);
     redptsout <<glu.size_x << " "<< glu.size_y << " "<< glu.size_z <<" "<<
 	            glu.speed<< " "<< glu.speed_x<< " "<< glu.speed_y<<" "<< glu.pointNumber <<endl;
 
