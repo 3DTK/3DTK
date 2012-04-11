@@ -12,7 +12,6 @@ ENDIF(WIN32)
 SET(Boost_ADDITIONAL_VERSIONS "1.42" "1.42.0" "1.44" "1.44.0" "1.45.0" "1.45" "1.47.0" "1.47" "1.48" "1.49")
 IF(WIN32)
   # for some unknown reason no one variant works on all windows platforms
-  #  find_package( Boost REQUIRED)
   find_package( Boost COMPONENTS serialization graph regex thread date_time REQUIRED)
 ELSE(WIN32)
   find_package( Boost COMPONENTS serialization graph regex thread date_time REQUIRED)
@@ -27,7 +26,7 @@ endif()
 # Declare Options and modify build accordingly ##
 #################################################
 
-## FreeGLUT 
+## FreeGLUT
 OPTION(WITH_FREEGLUT "Whether freeglut is available. This enables iterative drawing in show. ON/OFF" ON)
 
 IF(WITH_FREEGLUT)
@@ -37,7 +36,7 @@ ELSE(WITH_FREEGLUT)
   MESSAGE(STATUS "Without freeglut")
 ENDIF(WITH_FREEGLUT)
 
-## Show 
+## Show
 OPTION(WITH_SHOW "Whether to build Show. This is the Visualization program of slam6d. ON/OFF" ON)
 
 IF(WITH_SHOW)
@@ -49,7 +48,7 @@ ELSE(WITH_SHOW)
   MESSAGE(STATUS "Without show")
 ENDIF(WITH_SHOW)
 
-## WXShow 
+## WXShow
 OPTION(WITH_WXSHOW "Whether to build WXShow. This is the wxwidgets variant of Show. ON/OFF" OFF)
 
 IF(WITH_WXSHOW)
@@ -57,7 +56,7 @@ IF(WITH_WXSHOW)
   FIND_PACKAGE(GLUT REQUIRED)
   find_package(wxWidgets COMPONENTS core base gl REQUIRED)
   # set wxWidgets_wxrc_EXECUTABLE to be ignored in the configuration
-  SET (wxWidgets_wxrc_EXECUTABLE " " CACHE INTERNAL "" FORCE) 
+  SET (wxWidgets_wxrc_EXECUTABLE " " CACHE INTERNAL "" FORCE)
   # wxWidgets include (this will do all the magic to configure everything)
   include( ${wxWidgets_USE_FILE})
   MESSAGE(STATUS "With wxshow")
@@ -73,7 +72,7 @@ ELSE(WITH_SHAPE_DETECTION)
   MESSAGE(STATUS "Without shape detection")
 ENDIF(WITH_SHAPE_DETECTION)
 
-## Thermo 
+## Thermo
 OPTION(WITH_THERMO "Whether to build executables for mutual calibration of laser scanner and camera. ON/OFF" OFF)
 IF(WITH_THERMO)
   FIND_PACKAGE(OpenCV REQUIRED)
@@ -94,7 +93,7 @@ IF(WITH_OCTREE_DISPLAY)
 ELSE(WITH_OCTREE_DISPLAY)
   MESSAGE(STATUS "Using displaylists: Warning potentially much slower")
 ENDIF(WITH_OCTREE_DISPLAY)
-#SET (WITH_OCTREE_DISPLAY ${WITH_OCTREE_DISPLAY} CACHE BOOL 
+#SET (WITH_OCTREE_DISPLAY ${WITH_OCTREE_DISPLAY} CACHE BOOL
 #"Whether to use octree display for efficiently culling scans ON/OFF" FORCE)
 
 
@@ -118,7 +117,7 @@ ELSE(WITH_GLEE)
   MESSAGE(STATUS "Not using opengl extensions")
 ENDIF(WITH_GLEE)
 
-## Gridder 
+## Gridder
 OPTION(WITH_GRIDDER "Whether to build the 2DGridder binary ON/OFF" ON)
 
 IF(WITH_GRIDDER)
@@ -136,7 +135,7 @@ ELSE(WITH_VELOSLAM)
   MESSAGE(STATUS "Without VELOSLAM")
 ENDIF(WITH_VELOSLAM)
 
-## Home-made Laserscanner 
+## Home-made Laserscanner
 OPTION(WITH_DAVID_3D_SCANNER "Whether to build the David scanner app for homemade laser scanners binary ON/OFF" OFF)
 
 IF(WITH_DAVID_3D_SCANNER)
@@ -145,7 +144,7 @@ ELSE(WITH_DAVID_3D_SCANNER)
   MESSAGE(STATUS "Without David scanner")
 ENDIF(WITH_DAVID_3D_SCANNER)
 
-## Tools 
+## Tools
 OPTION(WITH_TOOLS "Whether to build additional tools like convergence frame_to_graph etc. ON/OFF" ON)
 
 IF(WITH_TOOLS)
@@ -194,7 +193,7 @@ IF(WITH_RIVLIB)
   link_directories(${CMAKE_SOURCE_DIR}/3rdparty)
   SET(RIEGL_DIR ${CMAKE_SOURCE_DIR}/3rdparty/riegl/)
   IF(WIN32)
-    SET(RIVLIB ${RIEGL_DIR}libscanlib-mt.lib ${RIEGL_DIR}libctrllib-mt.lib ${RIEGL_DIR}libboost_system-mt-1_43_0-vns.lib) 
+    SET(RIVLIB ${RIEGL_DIR}libscanlib-mt.lib ${RIEGL_DIR}libctrllib-mt.lib ${RIEGL_DIR}libboost_system-mt-1_43_0-vns.lib)
   ELSE(WIN32)
     SET(RIVLIB ${RIEGL_DIR}libscanlib-mt-s.a ${RIEGL_DIR}libctrllib-mt-s.a ${RIEGL_DIR}libboost_system-mt-s-1_43_0-vns.a pthread)
   ENDIF(WIN32)
@@ -214,7 +213,7 @@ ELSE(WITH_CUDA)
   MESSAGE(STATUS "Compiling WITHOUT CUDA support")
 ENDIF(WITH_CUDA)
 
-## PMD 
+## PMD
 OPTION(WITH_PMD "Whether to build the PMD tools like grabVideoAnd3D calibrate etc. ON/OFF" OFF)
 
 IF(WITH_PMD)
@@ -224,7 +223,7 @@ ELSE(WITH_PMD)
   MESSAGE(STATUS "Without Tools")
 ENDIF(WITH_PMD)
 
-## SIFT 
+## SIFT
 OPTION(WITH_SIFT "Whether to compile registration based on sift features and autopano. ON/OFF" OFF)
 
 IF(WITH_SIFT)
@@ -235,10 +234,10 @@ ENDIF(WITH_SIFT)
 
 ## Special treatment for system specifics
 IF(APPLE)
-add_definitions(-Dfopen64=fopen)  
+add_definitions(-Dfopen64=fopen)
 ENDIF(APPLE)
 
-## Multiple Cores 
+## Multiple Cores
 IF(APPLE)
   SET(PROCESSOR_COUNT 2)
 ELSE(APPLE)
@@ -260,7 +259,7 @@ ELSE(OPENMP_FOUND AND WITH_OPENMP)
   SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DMAX_OPENMP_NUM_THREADS=1 -DOPENMP_NUM_THREADS=1")
 ENDIF(OPENMP_FOUND AND WITH_OPENMP)
 
-## TORO 
+## TORO
 OPTION(WITH_TORO "Whether to use TORO. ON/OFF" OFF)
 
 IF(WITH_TORO)
@@ -272,7 +271,7 @@ IF(WITH_TORO)
   ExternalProject_Add(toro3d
     SVN_REPOSITORY https://www.openslam.org/data/svn/toro/trunk
     SOURCE_DIR "${CMAKE_SOURCE_DIR}/3rdparty/toro"
-    CONFIGURE_COMMAND "" 
+    CONFIGURE_COMMAND ""
     BUILD_COMMAND make
     BUILD_IN_SOURCE 1
     INSTALL_COMMAND cp ${CMAKE_SOURCE_DIR}/3rdparty/toro/toro3d ${CMAKE_SOURCE_DIR}/bin/
@@ -283,7 +282,7 @@ ELSE(WITH_TORO)
 ENDIF(WITH_TORO)
 
 
-## HOGMAN 
+## HOGMAN
 OPTION(WITH_HOGMAN "Whether to use HOGMAN. ON/OFF" OFF)
 
 IF(WITH_HOGMAN)
@@ -298,7 +297,7 @@ IF(WITH_HOGMAN)
     CONFIGURE_COMMAND <SOURCE_DIR>/configure --prefix=<INSTALL_DIR>
     BUILD_COMMAND LD_LIBRARY_PATH=${CMAKE_SOURCE_DIR}/3rdparty/hogman/lib make
     BUILD_IN_SOURCE 1
-    INSTALL_COMMAND cp ${CMAKE_SOURCE_DIR}/3rdparty/hogman/bin/hogman3d ${CMAKE_SOURCE_DIR}/bin/ && 
+    INSTALL_COMMAND cp ${CMAKE_SOURCE_DIR}/3rdparty/hogman/bin/hogman3d ${CMAKE_SOURCE_DIR}/bin/ &&
     cp ${CMAKE_SOURCE_DIR}/3rdparty/hogman/lib/libhogman_csparse.so ${CMAKE_SOURCE_DIR}/lib/ &&
     cp ${CMAKE_SOURCE_DIR}/3rdparty/hogman/lib/libhogman_graph_optimizer_hogman.so ${CMAKE_SOURCE_DIR}/lib/ &&
     cp ${CMAKE_SOURCE_DIR}/3rdparty/hogman/lib/libhogman_graph_optimizer.so ${CMAKE_SOURCE_DIR}/lib/ &&
@@ -330,8 +329,8 @@ IF(WIN32)
   SET(CMAKE_STATIC_LIBRARY_SUFFIX "32.lib")
 ELSE(WIN32)
   SET(ADDITIONAL_CFLAGS "-O3 -msse3 -Wall -finline-functions -Wno-write-strings -Wno-char-subscripts -Wno-unused-result" CACHE STRING"Additional flags given to the compiler (-O3 -Wall -finline-functions -Wno-write-strings -Wno-unused-result)" )
-  # Add include path for OpenGL without GL/-prefix 
-  # to avoid the include incompatibility between MACOS 
+  # Add include path for OpenGL without GL/-prefix
+  # to avoid the include incompatibility between MACOS
   # and linux
     FIND_PATH(OPENGL_INC gl.h /usr/include/GL)
     include_directories(${OPENGL_INC})
@@ -356,7 +355,7 @@ SET( CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/lib )
 SET( CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/obj )
 SET( CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin )
 
-# Set include and link dirs ... 
+# Set include and link dirs ...
 include_directories(${CMAKE_SOURCE_DIR}/include)
 include_directories(${CMAKE_SOURCE_DIR}/3rdparty/)
 include_directories(${CMAKE_SOURCE_DIR}/3rdparty/glui)
@@ -379,8 +378,8 @@ add_subdirectory(src/scanner)
 
 IF(EXPORT_SHARED_LIBS)
 ## Compiling a shared library containing all of the project
-add_library(slam SHARED src/slam6d/icp6D.cc) 
-target_link_libraries(slam scanlib_s ANN_s sparse_s newmat_s) 
+add_library(slam SHARED src/slam6d/icp6D.cc)
+target_link_libraries(slam scanlib_s ANN_s sparse_s newmat_s)
 ENDIF(EXPORT_SHARED_LIBS)
 
 MESSAGE (STATUS "Build environment is set up!")
