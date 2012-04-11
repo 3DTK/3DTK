@@ -108,10 +108,13 @@ int TrackerManager::getNumberofTracker(void)
 int TrackerManager::HandleScan(VeloScan& scanRef,int trackingAlgo)
 {
     //each scan only process once.
+	
 	if(scanRef.isTrackerHandled==true)
 		return 0;
 	else
 		scanRef.isTrackerHandled=true;
+
+	//cout<<"HandleScan is running!"<<endl;
 
 	int i;
 	int size=scanRef.scanClusterArray.size();
@@ -129,24 +132,24 @@ int TrackerManager::HandleScan(VeloScan& scanRef,int trackingAlgo)
 		clusterStatus[i].FilterRet=false;
 	}
 
-	if (!preScan)
-	{
-		for (i=0;i<3;i++)
-		{
-			delta_Theta[i]=0;
-	        delta_Pos[i]=0;
-		}
-	}
-	else
-	{
-		GetTwoScanRoll(&scanRef,preScan);
-	}
+	//if (!preScan)
+	//{
+	//	for (i=0;i<3;i++)
+	//	{
+	//		delta_Theta[i]=0;
+	//        delta_Pos[i]=0;
+	//	}
+	//}
+	//else
+	//{
+	//	GetTwoScanRoll(&scanRef,preScan);
+	//}
 
-	rollAngle=delta_Theta[1];
+	//rollAngle=delta_Theta[1];
+
     //filter not good target object
 	FilterObject(scanRef);
 
-    cout << "HandleScan tracking " <<endl;
     //update same tracker this is need matching
 	switch (trackingAlgo)
 	{
@@ -158,13 +161,13 @@ int TrackerManager::HandleScan(VeloScan& scanRef,int trackingAlgo)
 		break;
 	}
 
-    //add no trackerd objects in to new tracker.
+    //add no tracked objects in to new tracker.
 	AddTrackers(scanRef);
 
     //Remove No used trackers
     RemoveNoUsedTracker(scanRef);
 
-	preScan=&scanRef;
+	//preScan=&scanRef;
 
 	return 0;
 }
@@ -267,7 +270,7 @@ int TrackerManager::MatchTrackers(VeloScan& scanRef,Tracker& tracker,float kg)
 	{
 		tracker.kalmanFilter.stateUpdate(temp,rollAngle,delta_Pos);
 		tracker.kalmanFilter.timeUpdate();
-		movestate=tracker.kalmanFilter.GetCurrentState();
+	//	movestate=tracker.kalmanFilter.GetCurrentState();
 
     //  cout<<"The tracker with trackerID:"<<tracker.trackerID<<"is matched with the "<<minID<<"th object!"<<endl;
 	//	cout<<"with x_positon:"<<movestate.x_position<<", z_position:"<<movestate.z_positon<<endl;
@@ -330,7 +333,7 @@ int TrackerManager::UpdateTrackers(VeloScan& scanRef)
 
 			MoveState targetMove;
 			targetMove.targetState=tracker.kalmanFilter.GetCurrentState();
-			targetMove.thisScan=&scanRef;
+			targetMove.frameNo=scanRef.scanid;
 			tracker.moveStateList.push_back(targetMove);
 
 			//FILE *fp=fopen("F:\\VeloSlamTemp\\bin\\Release\\Update.txt","a");
@@ -346,6 +349,7 @@ int TrackerManager::UpdateTrackers(VeloScan& scanRef)
 
 int TrackerManager::AddTrackers(VeloScan& scanRef)
 {
+	cout<<"AddTrackers is running!"<<endl;
 	int i;
 	int size=scanRef.scanClusterArray.size();
     // i is glu id in scan
@@ -362,7 +366,7 @@ int TrackerManager::AddTrackers(VeloScan& scanRef)
 
 			MoveState targetMove;
 			targetMove.targetState	=newTracker.kalmanFilter.GetCurrentState();
-			targetMove.thisScan=&scanRef;
+			targetMove.frameNo=scanRef.scanid;
 			newTracker.moveStateList.push_back(targetMove);
 
 			newTracker.kalmanFilter.timeUpdate();
@@ -408,6 +412,10 @@ int TrackerManager::ListTrackers()
 // removednoUsedTrackers and out of sliding window's scans
 int TrackerManager::RemoveNoUsedTracker(VeloScan& scanRef)
 {
+
+	cout<<"RemoveNoUsedTracker is running!"<<endl;
+	cout << " current_sliding_window_pos: " << current_sliding_window_pos << " current id " << scanRef.scanid<< endl;
+
 	list<Tracker>::iterator it;
 	int trackNO =0;
 	for(it=tracks.begin() ; it!=tracks.end();)
@@ -416,32 +424,36 @@ int TrackerManager::RemoveNoUsedTracker(VeloScan& scanRef)
 		Tracker &tracker=*it;
 
 #ifndef NO_SLIDING_WINDOW
-    	deque<clusterFeature>::iterator Iter1;
-		deque<cluster>::iterator Iter2;
-		vector<MoveState>::iterator Iter3;
-		Iter1=tracker.statusList.begin();
-		Iter2=tracker.dataList.begin();
-		Iter3=tracker.moveStateList.begin();
-
-		while(Iter1!=tracker.statusList.end())
+		if (!tracker.statusList.empty())
 		{
-			clusterFeature &tempClu=*Iter1;
-			if(tempClu.frameNO <current_sliding_window_pos - sliding_window_size
-				|| tempClu.frameNO >current_sliding_window_pos)
+			deque<clusterFeature>::iterator Iter1;
+			deque<cluster>::iterator Iter2;
+			vector<MoveState>::iterator Iter3;
+			Iter1=tracker.statusList.begin();
+			Iter2=tracker.dataList.begin();
+			Iter3=tracker.moveStateList.begin();
+
+			do
 			{
-				//cout<<"trackerID: "<<tracker.trackerID<<" cluster "<<tempClu.selfID<<" in "<< tempClu.frameNO<<" scan is deleted!"<<endl;
-				Iter1=tracker.statusList.erase(Iter1);
-				Iter2=tracker.dataList.erase(Iter2);
-				Iter3=tracker.moveStateList.erase(Iter3);
-				continue;
+				clusterFeature &tempClu=*Iter1;
+				if(tempClu.frameNO <current_sliding_window_pos - sliding_window_size
+					|| tempClu.frameNO >current_sliding_window_pos)
+				{
+					//cout<<"trackerID: "<<tracker.trackerID<<" cluster "<<tempClu.selfID<<" in "<< tempClu.frameNO<<" scan is deleted!"<<endl;
+					Iter1=tracker.statusList.erase(Iter1);
+					Iter2=tracker.dataList.erase(Iter2);
+					Iter3=tracker.moveStateList.erase(Iter3);
+					continue;
+				}
+				Iter1++;
+				Iter2++;
+				Iter3++;
 			}
-			Iter1++;
-			Iter2++;
-			Iter3++;
-		}
+			while(Iter1!=tracker.statusList.end());
+		}		
 #endif
 
-		if (tracker.missedTime==4)
+    	if (tracker.missedTime==4)
 		{
 			//cout<<" erase tracker "<<tracker.trackerID<<" is terminated"<<endl;
 			it= tracks.erase(it);
@@ -694,8 +706,6 @@ void TrackerManager::GetTwoScanRoll(Scan *CurrentScan,Scan *preScan)//???
 	//cout<<"delta_pos: "<<delta_Pos[0]<<" "<<delta_Pos[1]<<" "<<delta_Pos[2]<<endl;
 }
 
-
-
 CMatrix TrackerManager::ConstructCostMatrix(VeloScan &scanRef,int *clusterIndex)
 {
 	int clusterSize=scanRef.clusterNum;
@@ -791,7 +801,6 @@ CMatrix TrackerManager::ConstructCostMatrix(VeloScan &scanRef,int *clusterIndex)
 				{
 					costMatrix.m_pTMatrix[i][j]=BIGNUM;
 				}
-
 			}
 		}
 		else
@@ -811,6 +820,7 @@ CMatrix TrackerManager::ConstructCostMatrix(VeloScan &scanRef,int *clusterIndex)
 
 int TrackerManager::MatchTracksWithClusters(VeloScan &scanRef)
 {
+	cout<<"MatchTracksWithClusters is running!"<<endl;
 	if (tracks.empty())
 	{
 		return 0;
@@ -823,6 +833,19 @@ int TrackerManager::MatchTracksWithClusters(VeloScan &scanRef)
 	clusterIndex=new int[clusterSize];
 	costMatrix=ConstructCostMatrix(scanRef,clusterIndex);
 	int dim=costMatrix.m_nCol;
+
+	//FILE *fp=fopen("F:\\VeloSlamTemp\\bin\\Release\\CostMatix.txt","a");
+	//fprintf(fp,"scanID:%d\n",scanRef.scanid);
+	//for (int m=0;m<dim;m++)
+	//{
+	//	for (int l=0;l<dim;l++)
+	//	{
+	//		fprintf(fp,"%.1f\t",costMatrix.m_pTMatrix[m][l]);
+
+	//	}
+	//	fprintf(fp,"\n");
+	//}
+	//fclose(fp);
 
 	int *colsol,*rowsol;
 	colsol=new int[dim];
@@ -903,7 +926,7 @@ int TrackerManager::MatchTracksWithClusters(VeloScan &scanRef)
 
 			MoveState targetMove;
 			targetMove.targetState=tracker.kalmanFilter.GetCurrentState();
-			targetMove.thisScan=&scanRef;
+			targetMove.frameNo=scanRef.scanid;
 			tracker.moveStateList.push_back(targetMove);
 
 			//FILE *fp=fopen("F:\\VeloSlamTemp\\bin\\Release\\Lap.txt","a");

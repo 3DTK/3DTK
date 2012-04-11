@@ -78,6 +78,6 @@ public:
 
 	double delta_Theta[3],  delta_Pos[3],  rollAngle;//added by yuanjun
 
-	VeloScan *preScan; //added by yuanjun
+	//VeloScan *preScan; //added by yuanjun
 };
 
