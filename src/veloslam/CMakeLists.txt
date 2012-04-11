@@ -16,7 +16,7 @@ IF(WITH_VELOSLAM)
    multiscan_random_field.cc intersection_detection.cc kalmanfilter.cc matrix.cc lap.cc SegIter.model)
 
 IF(UNIX)
-  target_link_libraries(veloslam dl scanlib newmat sparse ANN ${SHOW_LIBS})
+  target_link_libraries(veloslam dl scanlib newmat sparse ANN ${Boost_LIBRARIES} ${SHOW_LIBS})
 ENDIF(UNIX)
 
 IF(WIN32)
