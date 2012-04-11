@@ -39,10 +39,10 @@ int TrackerManager::DrawTrackersMovtion_Long_Number_All(vector <Scan *> allScans
      //     cout << "tracker number " << tracks.size() <<endl;
             //////////////////////////////////////////////////////////
 
-		/*	if (tracker.moving_distance<constant_static_or_moving||size==0)
+			if (tracker.moving_distance<constant_static_or_moving||size==0)
 			{
 				continue;
-			}*/
+			}
 
 			if (size < 3)
 			{
@@ -207,15 +207,29 @@ int TrackerManager::DrawTrackersContrailAfterFilted(vector<Scan *> allScans)
 	{
 		Tracker &tracker=*it;
 		int size=tracker.moveStateList.size();
-		if (size<3)
+		int firstNO= -1;
+		int secondNO= -1;
+
+		if (size<3||tracker.moving_distance<constant_static_or_moving)
 		{
 			continue;
 		}
+
 		for (int i=0;i<size-1;i++)
 		{
-			Scan *firstScan = allScans[0];
-			Scan *CurrentScan = tracker.moveStateList[i].thisScan;
-			Scan *CurrentScanNext = tracker.moveStateList[i+1].thisScan;
+			firstNO = GetScanID_in_SlidingWindow(tracker.moveStateList[i].frameNo,
+				current_sliding_window_pos,
+				sliding_window_size);
+			secondNO = GetScanID_in_SlidingWindow(tracker.moveStateList[i+1].frameNo,
+				current_sliding_window_pos,
+				sliding_window_size);
+
+			if(firstNO <0 || secondNO< 0 )
+				continue;
+
+			Scan *firstScan = (Scan *)g_pfirstScan;
+			Scan *CurrentScan = allScans[firstNO];
+			Scan *CurrentScanNext = allScans[secondNO];
 
 			double  deltaMat[16];
 			double  deltaMatNext[16];
