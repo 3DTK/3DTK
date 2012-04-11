@@ -16,10 +16,6 @@ using std::endl;
 #include <sstream>
 using std::stringstream;
 
-#include <boost/thread.hpp>
-#include <boost/thread/mutex.hpp>
-#include <boost/thread/condition.hpp>
-
 #include "slam6d/scan.h"
 #include "slam6d/Boctree.h"
 #include "slam6d/scan_io.h"
@@ -35,6 +31,8 @@ using std::stringstream;
 #include <boost/thread/mutex.hpp>
 #include <boost/thread/condition.hpp>
 
+using namespace boost;
+using boost::thread;
 boost::mutex draw_mutex;
 
 extern TrackerManager trackMgr;
@@ -686,12 +684,12 @@ void glDumpWindowPPM_debugView(const char *filename, GLenum mode)
   for (i = 0; i < win_height; i++)
   {     // For each row
     for (j = 0; j < win_width; j++)
-	{    // For each column
+    {    // For each column
    //   for (k = 0; k < RGB; k++)
-	  {        // For each RGB component
+       {        // For each RGB component
         //cout << (RGBA*((win_height-1-i)*win_width+j)+k) << endl;
         ibuffer[l++] = (unsigned char)   *(buffer + (RGBA*((win_height-1-i)*win_width+j)+1));
-		ibuffer[l++] = (unsigned char)   *(buffer + (RGBA*((win_height-1-i)*win_width+j)+2));
+	ibuffer[l++] = (unsigned char)   *(buffer + (RGBA*((win_height-1-i)*win_width+j)+2));
         ibuffer[l++] = (unsigned char)   *(buffer + (RGBA*((win_height-1-i)*win_width+j)+0));
       }                                  // end RGB
     }                                    // end column

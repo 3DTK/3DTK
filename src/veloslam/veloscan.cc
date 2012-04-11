@@ -344,7 +344,7 @@ void VeloScan::readScansRedSearch(reader_type type,
 
 int VeloScan::DumpScan(string filename)
 {
-    int i,j;
+ /*   int i,j;
     int size=  points.size();
 
     cout << "Export all 3D Points to file \"streampoints.pts\"" << endl;
@@ -355,18 +355,18 @@ int VeloScan::DumpScan(string filename)
             redptsout << points[i].x << " "
             << points[i].y << " "
             << points[i].z << " "
-			<< points[i].type <<endl;
+            << points[i].type <<endl;
     }
 
     redptsout.close();
-    redptsout.clear();
+    redptsout.clear(); */
     return 0;
 }
 
 
 int VeloScan::DumpScanRedPoints(string filename)
 {
-    int i,j;
+  /*  int i,j;
     int size= this->get_points_red_size();
 
     cout << "Export all 3D Points "<<  filename << endl;
@@ -381,7 +381,7 @@ int VeloScan::DumpScanRedPoints(string filename)
     }
 
     redptsout.close();
-    redptsout.clear();
+    redptsout.clear(); */
     return 0;
 }
 
