@@ -348,7 +348,7 @@ int VeloScan::DumpScan(string filename)
     int size=  points.size();
 
     cout << "Export all 3D Points to file \"streampoints.pts\"" << endl;
-    ofstream redptsout(filename, ios::app);
+    ofstream redptsout(filename.c_str(), ios::app);
 
     for(i=0; i< size; ++i)
     {
@@ -370,7 +370,7 @@ int VeloScan::DumpScanRedPoints(string filename)
     int size= this->get_points_red_size();
 
     cout << "Export all 3D Points "<<  filename << endl;
-    ofstream redptsout(filename, ios::app);
+    ofstream redptsout(filename.c_str(), ios::app);
 
     for(i=0; i< size; ++i)
     {
