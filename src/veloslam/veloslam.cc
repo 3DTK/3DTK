@@ -76,6 +76,19 @@
 #include <GL/freeglut.h>
 #endif
 
+
+#ifndef _MSC_VER
+
+
+#include <time.h>
+void Sleep(unsigned int mseconds)
+{
+    clock_t goal = mseconds + clock();
+    while (goal > clock());
+}
+
+#endif
+
 #include <boost/thread.hpp>
 #include <boost/thread/mutex.hpp>
 #include <boost/thread/condition.hpp>
@@ -1056,7 +1069,7 @@ int    start = 0,   end = -1;
     		    MatchTwoScan(my_icp,  currentScan,  sliding_window_size,  eP);
          else
                 MatchTwoScan(my_icp,  currentScan,  scanCount,  eP);
-#endif 
+#endif
 
       // update the cluster position in trakers.
 
@@ -1113,7 +1126,7 @@ int    start = 0,   end = -1;
     //            keycond.wait(lock);
 		  //      g_pause = true;
 			 //}
-          
+
     	    glutPostRedisplay();
          }
 
