@@ -8,12 +8,40 @@
 
 #include "show_common.cc"
 
+#include <csignal>
+
+void signal_segv(int v)
+{
+  static bool segfault = false;
+  if(!segfault) {
+    segfault = true;
+    cout << endl << "Segmentation fault" << endl;
+    deinitShow();
+  }
+  exit(-1);
+}
+
+void signal_interrupt(int v)
+{
+  static bool segfault = false;
+  if(!segfault) {
+    segfault = true;
+    cout << endl << "Exiting by interrupt" << endl;
+    deinitShow();
+  }
+  exit(-1);
+}
+
 /**
  * Main function.
  * Reads the scan (scan000.3d, ...) and frames files (scan000.frames, ...) from the data directory.
  * The frames are used for animation of the matching process.
  */
-int main(int argc, char **argv){
+int main(int argc, char **argv)
+{
+  signal(SIGSEGV, signal_segv);
+  signal(SIGINT,  signal_interrupt);
+  signal(SIGTERM, signal_interrupt);
 
   initShow(argc, argv);
   initScreenWindow();

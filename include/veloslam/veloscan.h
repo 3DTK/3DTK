@@ -45,10 +45,15 @@ public:
 
   ~VeloScan();
 
-  static void readScans(reader_type type,
+  static void readScans(IOType type,
 				    int start, int end, string &dir, int maxDist, int minDist,
+<<<<<<< HEAD
+				    bool openFileForWriting = false);  
+  static void readScansRedSearch(IOType type,
+=======
 				    bool openFileForWriting = false);
   static void readScansRedSearch(reader_type type,
+>>>>>>> kure/master
 						   int start, int end, string &dir, int maxDist, int minDist,
 						   double voxelSize, int nrpts, // reduction parameters
 						   int nns_method, bool cuda_enabled,

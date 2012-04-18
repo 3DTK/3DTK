@@ -3,6 +3,11 @@
  *  @brief Representation of a 3D point type
  *  @author Jan Elsberg. Automation Group, Jacobs University Bremen gGmbH, Germany. 
  */
+
+#include "slam6d/point_type.h"
+
+#include "slam6d/scan.h"
+
 #include <string>
 using std::string;
 #include <iostream>
@@ -10,12 +15,11 @@ using std::cout;
 using std::cerr;
 using std::endl;
 
-#include <iostream>
 #include <fstream>
 #include <string.h>
 
-#include "slam6d/point.h"
-#include "slam6d/point_type.h"
+#include <stdexcept>
+using std::runtime_error;
 
 
 
@@ -139,3 +143,58 @@ const unsigned int PointType::USE_COLOR = 32;
 const unsigned int PointType::USE_TIME = 64;
 const unsigned int PointType::USE_INDEX = 128;
 
+
+void PointType::useScan(Scan* scan)
+{
+  // clear pointers first
+  m_xyz = 0; m_rgb = 0; m_reflectance = 0; m_amplitude = 0; m_type = 0; m_deviation = 0;
+  
+  // collectively load data to avoid unneccessary loading times due to split get("") calls
+  unsigned int types = DATA_XYZ;
+  if(hasColor()) types |= DATA_RGB;
+  if(hasReflectance()) types |= DATA_REFLECTANCE;
+  if(hasAmplitude()) types |= DATA_AMPLITUDE;
+  if(hasType()) types |= DATA_TYPE;
+  if(hasDeviation()) types |= DATA_DEVIATION;
+  scan->get(types);
+  
+  // access data
+  try {
+    m_xyz = new DataXYZ(scan->get("xyz"));
+    if(hasColor()) m_rgb = new DataRGB(scan->get("rgb"));
+    if(hasReflectance()) m_reflectance = new DataReflectance(scan->get("reflectance"));
+    if(hasAmplitude()) m_amplitude = new DataAmplitude(scan->get("amplitude"));
+    if(hasType()) m_type = new DataType(scan->get("type"));
+    if(hasDeviation()) m_deviation = new DataDeviation(scan->get("deviation"));
+    
+    // check if data is available, otherwise reset pointer to indicate that the scan doesn't prove this value
+    if(m_rgb && !m_rgb->valid()) { delete m_rgb; m_rgb = 0; }
+    if(m_reflectance && !m_reflectance->valid()) { delete m_reflectance; m_reflectance = 0; }
+    if(m_amplitude && !m_amplitude->valid()) { delete m_amplitude; m_amplitude = 0; }
+    if(m_type && !m_type->valid()) { delete m_type; m_type = 0; }
+    if(m_deviation && !m_deviation->valid()) { delete m_deviation; m_deviation = 0; }
+  } catch(runtime_error& e) {
+    // unlock everything again
+    clearScan();
+    throw e;
+  }
+}
+
+void PointType::clearScan()
+{
+  // unlock data access
+  if(m_xyz) delete m_xyz;
+  if(hasColor() && m_rgb) delete m_rgb;
+  if(hasReflectance() && m_reflectance) delete m_reflectance;
+  if(hasAmplitude() && m_amplitude) delete m_amplitude;
+  if(hasType() && m_type) delete m_type;
+  if(hasDeviation() && m_deviation) delete m_deviation;
+  
+  // TODO: scan->clear() on all of these types
+}
+
+
+unsigned int PointType::getScanSize(Scan* scan)
+{
+  return scan->size<DataXYZ>("xyz");
+}

@@ -10,6 +10,7 @@
 #include "slam6d/graph.h"
 
 #include "slam6d/scan.h"
+#include "slam6d/globals.icc"
 
 #include <fstream>
 using std::ifstream;

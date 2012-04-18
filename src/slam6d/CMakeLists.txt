@@ -1,3 +1,5 @@
+### SCAN_RED
+
 IF(WITH_SCAN_REDUCTION) 
   add_executable(scan_red scan_red.cc)
   
@@ -8,10 +10,11 @@ IF(WITH_SCAN_REDUCTION)
   IF (WIN32)
     target_link_libraries(scan_red scanlib ANN XGetopt)
   ENDIF(WIN32)
-  
 ENDIF(WITH_SCAN_REDUCTION)
 
-IF(WITH_SCAN_DIFF) 
+### SCAN_DIFF
+
+IF(WITH_SCAN_DIFF)
   add_executable(scan_diff scan_diff.cc)
   add_executable(scan_diff2d scan_diff2d.cc ../show/colormanager.cc)
   
@@ -26,63 +29,7 @@ IF(WITH_SCAN_DIFF)
   ENDIF(WIN32)
 ENDIF(WITH_SCAN_DIFF)
 
-
-add_library(scan_io_uos             SHARED scan_io_uos.cc            )
-add_library(scan_io_uos_map         SHARED scan_io_uos_map.cc        )
-add_library(scan_io_uos_frames      SHARED scan_io_uos_frames.cc     )
-add_library(scan_io_uos_map_frames  SHARED scan_io_uos_map_frames.cc )
-add_library(scan_io_old             SHARED scan_io_old.cc            )
-add_library(scan_io_x3d             SHARED scan_io_x3d.cc            )
-add_library(scan_io_asc             SHARED scan_io_asc.cc            )
-add_library(scan_io_rts             SHARED scan_io_rts.cc            )
-add_library(scan_io_iais            SHARED scan_io_iais.cc           )
-add_library(scan_io_rts_map         SHARED scan_io_rts_map.cc        )
-add_library(scan_io_front           SHARED scan_io_front.cc          )
-add_library(scan_io_riegl_txt       SHARED scan_io_riegl_txt.cc      )
-add_library(scan_io_riegl_rgb       SHARED scan_io_riegl_rgb.cc      )
-add_library(scan_io_riegl_bin       SHARED scan_io_riegl_bin.cc      )
-add_library(scan_io_zuf             SHARED scan_io_zuf.cc            )
-add_library(scan_io_xyz             SHARED scan_io_xyz.cc            )
-add_library(scan_io_ifp             SHARED scan_io_ifp.cc            )
-add_library(scan_io_ply             SHARED scan_io_ply.cc            )
-add_library(scan_io_wrl             SHARED scan_io_wrl.cc            )
-add_library(scan_io_zahn            SHARED scan_io_zahn.cc           )
-add_library(scan_io_ais             SHARED scan_io_ais.cc            )
-add_library(scan_io_uos_rgb         SHARED scan_io_uos_rgb.cc        )
-add_library(scan_io_txyzr           SHARED scan_io_txyzr.cc          )
-add_library(scan_io_xyzr            SHARED scan_io_xyzr.cc           )
-add_library(scan_io_leica_txt       SHARED scan_io_leica_txt.cc      )
-add_library(scan_io_xyz_rgb         SHARED scan_io_xyz_rgb.cc        )
-add_library(scan_io_ks              SHARED scan_io_ks.cc             )
-add_library(scan_io_ks_rgb          SHARED scan_io_ks_rgb.cc         )
-add_library(scan_io_stl             SHARED scan_io_stl.cc           )
-add_library(scan_io_pcl             SHARED scan_io_pcl.cc           )
-add_library(scan_io_pci             SHARED scan_io_pci.cc           )
-add_library(scan_io_velodyne        SHARED scan_io_velodyne.cc       )
-add_library(scan_io_velodyne_frames SHARED scan_io_velodyne_frames.cc)
-add_library(scan_io_oct             SHARED scan_io_oct.cc point_type.cc)
-IF(WIN32)
-target_link_libraries(scan_io_oct scanlib)
-#target_link_libraries(scan_io_oct scanlib_s)
-ENDIF(WIN32)
-
-IF (WITH_CAD)
-  IF(NOT WIN32)
-    add_library(scan_io_cad             SHARED scan_io_cad.cc)
-    target_link_libraries(scan_io_cad ${Boost_PROGRAM_OPTIONS_LIBRARY} ${Boost_FILESYSTEM_LIBRARY})
-  ENDIF(NOT WIN32)
-ENDIF (WITH_CAD)
-
-IF (WITH_RIVLIB)
-  add_library(scan_io_rxp           SHARED scan_io_rxp.cc            )
-  target_link_libraries(scan_io_rxp ${RIVLIB})
-
-  IF (LIBXML2_FOUND)
-    include_directories(${LIBXML2_INCLUDE_DIR})
-    add_library(scan_io_riegl_project           SHARED scan_io_riegl_project.cc            )
-    target_link_libraries(scan_io_riegl_project ${RIVLIB} scan_io_rxp ${LIBXML2_LIBRARIES})
-  ENDIF(LIBXML2_FOUND)
-ENDIF(WITH_RIVLIB) 
+### TOOLS
 
 IF(WITH_TOOLS)
   add_executable(frame_to_graph frame_to_graph.cc)
@@ -107,40 +54,50 @@ IF(WITH_TOOLS)
     target_link_libraries(convergence XGetopt)
     target_link_libraries(graph_balancer scanlib XGetopt  ${Boost_LIBRARIES})
     target_link_libraries(exportPoints scanlib ANN XGetopt  ${Boost_LIBRARIES})
-	target_link_libraries(frames2pose XGetopt)
-	target_link_libraries(pose2frames XGetopt)
+    target_link_libraries(frames2pose XGetopt)
+    target_link_libraries(pose2frames XGetopt)
     target_link_libraries(frames2riegl XGetopt)
     target_link_libraries(riegl2frames XGetopt)
 	target_link_libraries(toGlobal XGetopt)
   ENDIF(WIN32)
-
 ENDIF(WITH_TOOLS)
 
+### SCANLIB
+
 SET(SCANLIB_SRCS
-  kd.cc kdc.cc      scan.cc           d2tree.cc         graphSlam6D.cc 
+  kd.cc             kdManaged.cc      kdMeta.cc         graphSlam6D.cc 
   graph.cc          icp6Dapx.cc       icp6D.cc          icp6Dsvd.cc 
   icp6Dortho.cc     icp6Dquat.cc      icp6Dhelix.cc     icp6Dlumeuler.cc 
   icp6Dlumquat.cc   icp6Ddual.cc      lum6Deuler.cc     lum6Dquat.cc
   ghelix6DQ2.cc     gapx6D.cc         graphToro.cc      ann_kd.cc
   graphHOG-Man.cc   elch6D.cc         elch6Dquat.cc     elch6DunitQuat.cc 
   elch6Dslerp.cc    elch6Deuler.cc    loopToro.cc       loopHOG-Man.cc    
-  point_type.cc	    icp6Dquatscale.cc searchTree.cc
+  point_type.cc	    icp6Dquatscale.cc searchTree.cc     Boctree.cc
+  allocator.cc      d2tree.cc         
+  scan.cc           basicScan.cc      managedScan.cc    metaScan.cc
+  io_types.cc       pointfilter.cc
   )
 
+if(WITH_METRICS)
+  set(SCANLIB_SRCS ${SCANLIB_SRCS} metrics.cc)
+endif(WITH_METRICS)
+
 add_library(scanlib STATIC ${SCANLIB_SRCS})
+
+target_link_libraries(scanlib scanclient scanio)
+
 IF(UNIX)
   target_link_libraries(scanlib dl)
 ENDIF(UNIX)
 
-IF(WIN32)
-  target_link_libraries(scanlib)
-ENDIF(WIN32)
+### EXPORT SHARED LIBS
 
 IF(EXPORT_SHARED_LIBS)
 add_library(scanlib_s SHARED ${SCANLIB_SRCS})
 #target_link_libraries(scanlib_s ${Boost_LIBRARIES} newmat)
 ENDIF(EXPORT_SHARED_LIBS)
 
+### SLAM6D
 
 IF(WITH_CUDA)
   CUDA_COMPILE(CUDA_FILES cuda/CIcpGpuCuda.cu )
@@ -153,13 +110,12 @@ ELSE(WITH_CUDA)
 ENDIF(WITH_CUDA)
 
 IF(UNIX)
-  target_link_libraries(slam6D dl scanlib newmat sparse ANN)
+  target_link_libraries(slam6D scanlib newmat sparse ANN)
 ENDIF(UNIX)
 
 IF(WIN32)
   target_link_libraries(slam6D scanlib newmat sparse ANN XGetopt ${Boost_LIBRARIES})
 ENDIF(WIN32)
-
 
 #IF(MSVC)
 #	INSTALL(TARGETS slam6D RUNTIME DESTINATION ${CMAKE_SOURCE_DIR}/windows)
