@@ -1,148 +1,27 @@
-/**
- * @file
- * @brief Representation of a 3D scan
- * @author Kai Lingemann. Institute of Computer Science, University of Osnabrueck, Germany.
- * @author Andreas Nuechter. Institute of Computer Science, University of Osnabrueck, Germany.
- */
-
-/**
- * Overridden "<<" operator for sending a scan to a stream
- */
-inline ostream& operator<<(ostream& os, const Scan& s)
-{
-  for (unsigned int i = 0; i < s.points.size(); i++) {
-    os << s.points[i] << endl;
-  }
-  return os;
-}
-
-inline const ANNkd_tree* Scan::getANNTree() const
-{
-  return ann_kd_tree;
-}
-
-inline const double* Scan::getDAlign() const
-{
-    return dalignxf;
-}
-
-inline double** Scan::get_org_points_red() const
-{
-  return points_red_lum;
-}
-
-inline int Scan::get_points_red_size() const
-{
-  return points_red_size;
-}
-
-inline double* const* Scan::get_points_reduced() const
-{
-  return (double* const*)points_red;
-}
-
-inline const SearchTree* Scan::get_tree() const
-{
-  return kd;
-}
-inline void Scan::clearPoints() {
-  points.clear();
-  vector<Point>().swap(points);  //  swap trick, forces STL to free the memory
-}
-
-inline void Scan::setPoints(vector <Point>* _points) {
-  points = *_points;
-}
-
-/**
- * Accessor for roboters transMat
- * @return Roboter transformation as double[16]
- */
-inline const double* Scan::get_transMat() const
-{
-  return transMat;
-}
-
- /**
- * Accessor for roboter position
- * @return Roboter position as double[3] 
- */
-inline const double* Scan::get_rPos() const
-{
+inline const double* Scan::get_rPos() const {
   return rPos;
 }
- 
-/**
- * Accessor for roboter oritentation
- * @return Roboter orientation as double[3] 
- */
-inline const double* Scan::get_rPosTheta() const
-{
-  return rPosTheta;	
+
+inline const double* Scan::get_rPosTheta() const {
+  return rPosTheta;
 }
 
-/**
- * Accessor for roboter position
- * @return Roboter position as double[3] 
- */
-inline const double* Scan::get_rPosQuat() const
-{
+inline const double* Scan::get_rPosQuat() const {
   return rQuat;
 }
 
-/**
- * Accessor for 3D points
- * @return Vector of all points 
- */
-inline const vector <Point>* Scan::get_points() const
-{
-  return &points;
+inline const double* Scan::get_transMat() const {
+  return transMat;
 }
 
-/**
- * Accessor for 3D points
- * @return Vector of all reduced (or copied) points 
- */
-inline double* const* Scan::get_points_red() const
-{
-  return (double* const*)points_red;
-}
-
-/**
- * Resets the pose of the scan to identity
- */
-inline void Scan::resetPose()
-{
-
-  double tinv[16];
-  M4inv(transMat, tinv);
-  transform(tinv, INVALID);
-
-  Matrix4ToEuler(transMat, rPosTheta, rPos);
-  
-  M4identity(dalignxf);
-}
-
-/**
- * Sets the file Nr
- */
-inline void Scan::setFileNr(int _fileNr)
-{
-  fileNr = _fileNr;
-}
-
-/**
- * Gets the file Nr
- */
-inline int Scan::getFileNr() const
-{
-  return fileNr;
-}
-
-/**
- * Gets the inital odometry psoe
- */
-inline const double * Scan::getTransMatOrg() const
-{
+inline const double* Scan::get_transMatOrg() const {
   return transMatOrg;
+}
+
+inline const double* Scan::getDAlign() const {
+  return dalignxf;
+}
+
+inline ANNkd_tree* Scan::getANNTree() const {
+  return ann_kd_tree;
 }

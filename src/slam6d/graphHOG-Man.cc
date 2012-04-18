@@ -2,15 +2,18 @@
  * @file HOG-Man wrapper
  * @author Jochen Sprickerhof. Institute of Computer Science, University of Osnabrueck, Germany.
  */
+ 
+#include "slam6d/graphHOG-Man.h"
+
+#include "slam6d/metaScan.h"
+#include "slam6d/lum6Deuler.h"
+#include "slam6d/globals.icc"
 
 #include <fstream>
 using std::ofstream;
 using std::ifstream;
 #include <cfloat>
 #include <cstring>
-#include "slam6d/graphHOG-Man.h"
-#include "slam6d/lum6Deuler.h"
-#include "slam6d/globals.icc"
 using namespace NEWMAT;
 /**
  * This function is used to match a set of laser scans with any minimally
@@ -51,7 +54,7 @@ double graphHOGMan::doGraphSlam6D(Graph gr, vector <Scan *> allScans, int nrIt)
           meta_start.push_back(allScans[i]);
         }
       }
-      Scan *start = new Scan(meta_start, false, false);
+      MetaScan *start = new MetaScan(meta_start, false, false);
 
       //static size of metascan
       int offset_last_start = 2;
@@ -63,7 +66,7 @@ double graphHOGMan::doGraphSlam6D(Graph gr, vector <Scan *> allScans, int nrIt)
           meta_end.push_back(allScans[i]);
         }
       }
-      Scan *end = new Scan(meta_end, false, false);
+      MetaScan *end = new MetaScan(meta_end, false, false);
 
       memcpy(Pl0, allScans[last]->get_transMat(), 16 * sizeof(double));
       my_icp->match(start, end);

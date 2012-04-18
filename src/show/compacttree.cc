@@ -30,8 +30,7 @@ using std::list;
 #include "show/viewcull.h"
 
 compactTree::~compactTree(){
-  //deletetNodes(*root);
-  //delete root;
+  delete alloc;
 
   delete[] mins;
   delete[] maxs;
@@ -674,7 +673,7 @@ void compactTree::displayOctTree(double minsize ) {
 
 shortpointrep* compactTree::createPoints(lint length) {
   //shortpointrep *points = new shortpointrep[POINTDIM*length];
-  shortpointrep *points = alloc.allocate<shortpointrep> (POINTDIM*length);
+  shortpointrep *points = alloc->allocate<shortpointrep> (POINTDIM*length);
   return points;
 }
 void compactTree::deserialize(std::string filename ) {
@@ -729,7 +728,7 @@ void compactTree::deserialize(std::string filename ) {
 
   // read root node
   //root = new cbitoct();
-  root = alloc.allocate<cbitoct>();    
+  root = alloc->allocate<cbitoct>();    
   deserialize(file, *root );
   file.close();
 }
@@ -747,7 +746,7 @@ void compactTree::deserialize(std::ifstream &f, cbitoct &node) {
 
   // create children
   //cbitunion<tshort> *children = new cbitunion<tshort>[n_children];
-  cbitunion<tshort> *children = alloc.allocate<cbitunion<tshort> >(n_children);    
+  cbitunion<tshort> *children = alloc->allocate<cbitunion<tshort> >(n_children);    
   cbitoct::link(node, children);
 
   for (short i = 0; i < 8; i++) {

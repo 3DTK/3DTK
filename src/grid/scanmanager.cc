@@ -172,7 +172,7 @@ void scanmanager::readFrames(string dir, int start, int end,
  * @param correctYAxis if set, value 14 of the transformationmatrix will be set to 0
  */
 void scanmanager::startscan(string inputdir, string outputdir,
-			    reader_type scantype, int start, int end,
+			    IOType scantype, int start, int end,
 			    bool readInitial, int max_distance,
 			    int min_distance, bool correctYAxis)
 {

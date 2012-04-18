@@ -2,6 +2,7 @@
  *  @brief Representation of the optimized k-d tree. 
  *  @author Andreas Nuechter. Institute of Computer Science, University of Osnabrueck, Germany.
  *  @author Kai Lingemann. Institute of Computer Science, University of Osnabrueck, Germany.
+ *  @author Thomas Escher
  */
 
 #ifndef __KD_H__
@@ -11,7 +12,7 @@
 #include "slam6d/searchTree.h"
 
 #ifdef _MSC_VER
-#ifdef OPENMP
+#if !defined _OPENMP && defined OPENMP 
 #define _OPENMP
 #endif
 #endif
@@ -28,32 +29,14 @@
  * a given point, or to a ray).
  **/
 class KDtree : public SearchTree {
-
 public:
-
   KDtree(double **pts, int n);
   
-  /**
-   * destructor
-   */
-  virtual ~KDtree() {                
-    if (!npts) {
-#ifdef WITH_OPENMP_KD
-      omp_set_num_threads(OPENMP_NUM_THREADS);
-#pragma omp parallel for schedule(dynamic)
-#endif
-      for (int i = 0; i < 2; i++) {
-	   if (i == 0 && node.child1) delete node.child1; 
-        if (i == 1 && node.child2) delete node.child2; 
-	 }
-    } else {
-      if (leaf.p) delete [] leaf.p;
-    }
-  }
+  virtual ~KDtree();
 
-  double *FindClosest(double *_p, double maxdist2, int threadNum = 0) const;
+  virtual double *FindClosest(double *_p, double maxdist2, int threadNum = 0) const;
 
-private:
+protected:
   /**
    * storing the parameters of the k-d tree, i.e., the current closest point,
    * the distance to the current closest point and the point itself.
@@ -104,10 +87,8 @@ private:
       double **p;
     } leaf;
   };
-
+  
   void _FindClosest(int threadNum) const;
 };
 
 #endif
-
-
