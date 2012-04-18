@@ -223,7 +223,7 @@ int ScanIO_riegl_project::readScans(int start, int end, string &dir, int maxDist
 	  << "," << deg(euler[3]) << "," << deg(euler[4]) << ","  << deg(euler[5]) << ")" << endl;
   
   // open scanfile
-  shared_ptr<basic_rconnection> rc;
+  std::tr1::shared_ptr<basic_rconnection> rc;
   rc = basic_rconnection::create(scanFileName);
   rc->open();
 

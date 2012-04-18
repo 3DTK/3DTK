@@ -7,8 +7,12 @@
 #ifndef __SEARCHTREE_H__
 #define __SEARCHTREE_H__
 
+#include <vector>
+using std::vector;
+
 #include "searchCache.h"
-#include "scan.h"
+#include "ptpair.h"
+#include "data_types.h"
 
 /**
  * @brief The tree structure 
@@ -53,6 +57,16 @@ public:
    * virtual, i.e., must be implented by a derived class
    */
   virtual inline ~SearchTree() {};
+  
+  /**
+   * Aquire a lock on this tree, signaling that its resources are in use. Neccessary for cached data in the scanserver.
+   */
+  virtual inline void lock() {};
+  
+  /**
+   * Release the lock on this tree, signaling that its resources are aren't in use anymore. Neccessary for cached data in the scanserver.
+   */
+  virtual inline void unlock() {};
 
   /**
    * This Search function returns a pointer to the closest point
@@ -66,15 +80,19 @@ public:
    */
   virtual double *FindClosest(double *_p, double maxdist2, int threadNum = 0) const = 0 ;
 
-  
   virtual void getPtPairs(vector <PtPair> *pairs, 
 				  double *source_alignxf, 
-          double * const *q_points, unsigned int startindex, unsigned int nr_qpts,
+          double * const *q_points, unsigned int startindex, unsigned int endindex,
 				  int thread_num,
 				  int rnd, double max_dist_match2, double &sum,
-				  double *centroid_m, double *centroid_d,
-          Scan *Target);
-
+				  double *centroid_m, double *centroid_d);
+    
+  virtual void getPtPairs(vector <PtPair> *pairs,
+				  double *source_alignxf,
+          const DataXYZ& xyz_r, unsigned int startindex, unsigned int endindex,
+				  int thread_num,
+				  int rnd, double max_dist_match2, double &sum,
+				  double *centroid_m, double *centroid_d);
 };
 
 

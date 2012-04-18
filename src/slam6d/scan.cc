@@ -1,14 +1,15 @@
-/**
- * @file
- * @brief Implementation of a 3D scan and of 3D scan matching in all variants
- * @author Kai Lingemann. Institute of Computer Science, University of Osnabrueck, Germany.
- * @author Andreas Nuechter. Institute of Computer Science, University of Osnabrueck, Germany.
- */
+#include "slam6d/scan.h"
 
-#ifdef _MSC_VER
-#ifdef OPENMP
-#define _OPENMP
-#endif
+#include "slam6d/basicScan.h"
+#include "slam6d/managedScan.h"
+#include "slam6d/metaScan.h"
+#include "slam6d/searchTree.h"
+#include "slam6d/kd.h"
+#include "slam6d/Boctree.h"
+#include "slam6d/globals.icc"
+
+#ifdef WITH_METRICS
+#include "slam6d/metrics.h"
 #endif
 
 #ifdef _MSC_VER
@@ -19,322 +20,271 @@
 #define _NO_PARALLEL_READ
 #endif
 
-#include <fstream>
-using std::ifstream;
-using std::ofstream;
+using std::vector;
 
-#include <iostream>
-using std::cout;
-using std::cerr;
-using std::endl;
-using std::ios;
 
-#include <sstream>
-using std::stringstream;
 
-#include "slam6d/scan.h"
-#include "slam6d/Boctree.h"
-#include "slam6d/scan_io.h"
-#include "slam6d/d2tree.h"
-#include "slam6d/kd.h"
-#include "slam6d/kdc.h"
-#include "slam6d/ann_kd.h"
+vector<Scan*> Scan::allScans;
+bool Scan::scanserver = false;
 
-#ifdef _OPENMP
-#include <omp.h>
-#endif
 
-#ifdef _MSC_VER
-#include <windows.h>
-#else
-#include <dlfcn.h>
-#endif
 
-#ifdef _MSC_VER
-#define strcasecmp _stricmp
-#define strncasecmp _strnicmp
-#else
-#include <strings.h>
-#endif
+void Scan::openDirectory(bool scanserver, const std::string& path, IOType type,
+  int start, int end)
+{
+  Scan::scanserver = scanserver;
+  if(scanserver)
+    ManagedScan::openDirectory(path, type, start, end);
+  else
+    BasicScan::openDirectory(path, type, start, end);
+}
 
-using std::flush;
-
-vector <Scan *>  Scan::allScans;
-unsigned int     Scan::numberOfScans = 0;
-unsigned int     Scan::max_points_red_size = 0;
-bool             Scan::outputFrames = false;
-string           Scan::dir;
-
-/**
- * default Constructor
- */
+void Scan::closeDirectory()
+{
+  if(scanserver)
+    ManagedScan::closeDirectory();
+  else
+    BasicScan::closeDirectory();
+}
+  
 Scan::Scan()
 {
-  kd = 0;
-  ann_kd_tree = 0;
-  nns_method = 1;
-  scanNr = fileNr = 0;
-  cuda_enabled = false;
-  rPos[0] = 0;
-  rPos[1] = 0;
-  rPos[2] = 0;
-  rPosTheta[0] = 0;
-  rPosTheta[1] = 0;
-  rPosTheta[2] = 0;
+  unsigned int i;
+  
+  // pose and transformations
+  for(i = 0; i < 3; ++i) rPos[i] = 0;
+  for(i = 0; i < 3; ++i) rPosTheta[i] = 0;
+  for(i = 0; i < 4; ++i) rQuat[i] = 0;
   M4identity(transMat);
   M4identity(transMatOrg);
   M4identity(dalignxf);
-
-  points_red_size = 0;
-  points_red = points_red_lum = 0;
-}
-
-
-/**
- * Constructor
- * @param *euler 6D pose: estimation of the scan location, e.g. based on odometry
- * @param maxDist Regard only points up to an (Euclidean) distance of maxDist
- * transformation matrices when match (default: false)
- */
-Scan::Scan(const double* euler, int maxDist)
-{
-  kd = 0;
-  ann_kd_tree = 0;
-  nns_method = 1;
+  
+  // trees and reduction methods
   cuda_enabled = false;
-  maxDist2 = (maxDist != -1 ? sqr(maxDist) : maxDist);
-
-  if (dir == "") {
-    cerr << "ERROR: Directory has to be set before!" << endl;
-    exit(1);
-  }
-
-  rPos[0] = euler[0];
-  rPos[1] = euler[1];
-  rPos[2] = euler[2];
-  rPosTheta[0] = euler[3];
-  rPosTheta[1] = euler[4];
-  rPosTheta[2] = euler[5];
-  M4identity(transMat);
-  if (euler == 0) {
-    M4identity(transMatOrg);
-  } else {
-    EulerToMatrix4(euler, &euler[3], transMatOrg);
-  }
-
-  fileNr = 0;
-  scanNr = numberOfScans++;
-
-  points_red_size = 0;
-  points_red = points_red_lum = 0;
-  M4identity(dalignxf);
-}
-
-Scan::Scan(const double _rPos[3], const double _rPosTheta[3], vector<double *> &pts)
-{
+  nns_method = -1;
   kd = 0;
   ann_kd_tree = 0;
-  nns_method = 1;
-  cuda_enabled = false;
-  maxDist2 = -1;
-  rPos[0] = _rPos[0];
-  rPos[1] = _rPos[1];
-  rPos[2] = _rPos[2];
-  rPosTheta[0] = _rPosTheta[0];
-  rPosTheta[1] = _rPosTheta[1];
-  rPosTheta[2] = _rPosTheta[2];
-  M4identity(transMat);
-  EulerToMatrix4(_rPos, _rPosTheta, transMatOrg);
-
-  fileNr = 0;
-  scanNr = numberOfScans++;
-
-  points_red_size = 0;
-  M4identity(dalignxf);
-
-  points_red = new double*[pts.size()];
-
-  points_red_size = (int)pts.size();
-  for (int i = 0; i < points_red_size; i++) {
-    points_red[i] = pts[i];
-  }
-  transform(transMatOrg, INVALID); //transform points to initial position
-  // update max num point in scan iff you have to do so
-  if (points_red_size > (int)max_points_red_size) max_points_red_size = points_red_size;
-
-  pts.clear();
+  
+  // reduction on-demand
+  reduction_voxelSize = 0.0;
+  reduction_nrpts = 0;
+  reduction_pointtype = PointType();
+  
+  // flags
+  m_has_reduced = false;
+  
+  // octtree
+  octtree_reduction_voxelSize = 0.0;
+  octtree_voxelSize = 0.0;
+  octtree_pointtype = PointType();
+  octtree_loadOct = false;
+  octtree_saveOct = false;
 }
 
-/**
- * Constructor
- * @param _rPos[3] 3D position: estimation of the scan location, e.g. based on odometry
- * @param _rPosTheta[3] 3D orientation: estimation of the scan location, e.g. based on odometry
- * @param maxDist Regard only points up to an (Euclidean) distance of maxDist
- */
-Scan::Scan(const double _rPos[3], const double _rPosTheta[3], const int maxDist)
-{
-  kd = 0;
-  ann_kd_tree = 0;
-  nns_method = 1;
-  cuda_enabled = false;
-  maxDist2 = (maxDist != -1 ? sqr(maxDist) : maxDist);
-  rPos[0] = _rPos[0];
-  rPos[1] = _rPos[1];
-  rPos[2] = _rPos[2];
-  rPosTheta[0] = _rPosTheta[0];
-  rPosTheta[1] = _rPosTheta[1];
-  rPosTheta[2] = _rPosTheta[2];
-  M4identity(transMat);
-  EulerToMatrix4(_rPos, _rPosTheta, transMatOrg);
-
-  fileNr = 0;
-  scanNr = numberOfScans++;
-
-  points_red_size = 0;
-  M4identity(dalignxf);
-}
-
-/**
- * Constructor for creating a metascan from a list of scans
- * It joins all the points and contructs a new search tree
- * and reinitializes the cache, iff needed
- *
- * @param MetaScan Vector that contains the 3D scans
- * @param nns_method Indicates the version of the tree to be built
- * @param cuda_enabled indicated, if cuda should be used for NNS
- */
-Scan::Scan(const vector < Scan* >& MetaScan, int nns_method, bool cuda_enabled)
-{
-  kd = 0;
-  ann_kd_tree = 0;
-  this->cuda_enabled = cuda_enabled;
-  this->nns_method = nns_method;
-  scanNr = numberOfScans++;
-  rPos[0] = 0;
-  rPos[1] = 0;
-  rPos[2] = 0;
-  rPosTheta[0] = 0;
-  rPosTheta[1] = 0;
-  rPosTheta[2] = 0;
-  M4identity(transMat);
-  M4identity(transMatOrg);
-  M4identity(dalignxf);
-
-  // copy points
-  int numpts = 0;
-  int end_loop = (int)MetaScan.size();
-  for (int i = 0; i < end_loop; i++) {
-    numpts += MetaScan[i]->points_red_size;
-  }
-  points_red_size = numpts;
-  points_red = new double*[numpts];
-  int k = 0;
-  for (int i = 0; i < end_loop; i++) {
-    for (int j = 0; j < MetaScan[i]->points_red_size; j++) {
-	 points_red[k] = new double[3];
-	 points_red[k][0] = MetaScan[i]->points_red[j][0];
-	 points_red[k][1] = MetaScan[i]->points_red[j][1];
-	 points_red[k][2] = MetaScan[i]->points_red[j][2];
-	 k++;
-    }
-  }
-
-  fileNr = -1; // no need to store something from a meta scan!
-  scanNr = numberOfScans++;
-
-  // build new search tree
-  createTree(nns_method, cuda_enabled);
-
-  // update max num point in scan iff you have to do so
-  if (points_red_size > (int)max_points_red_size) max_points_red_size = points_red_size;
-
-  // add Scan to ScanList
-  allScans.push_back(this);
-
-  meta_parts = MetaScan;
-}
-
-
-/**
- * Desctuctor
- */
 Scan::~Scan()
 {
-	  if (outputFrames && fileNr != -1) {
-		string filename = dir + "scan" + to_string(fileNr, 3) + ".frames";
+  if(kd) delete kd;
+}
 
-		ofstream fout(filename.c_str());
-		if (!fout.good()) {
-		 cerr << "ERROR: Cannot open file " << filename << endl;
-		 exit(1);
-		}
+void Scan::setReductionParameter(double voxelSize, int nrpts, PointType pointtype)
+{
+  reduction_voxelSize = voxelSize;
+  reduction_nrpts = nrpts;
+  reduction_pointtype = pointtype;
+}
 
-		// write into file
-		fout << sout.str();
+void Scan::setSearchTreeParameter(int nns_method, bool cuda_enabled)
+{
+  searchtree_nnstype = nns_method;
+  searchtree_cuda_enabled = cuda_enabled;
+}
 
-		fout.close();
-		fout.clear();
-	  }
+void Scan::setOcttreeParameter(double reduction_voxelSize, double voxelSize, PointType pointtype, bool loadOct, bool saveOct)
+{
+  octtree_reduction_voxelSize = reduction_voxelSize;
+  octtree_voxelSize = voxelSize;
+  octtree_pointtype = pointtype;
+  octtree_loadOct = loadOct;
+  octtree_saveOct = saveOct;
+}
 
-   if (this->kd != 0) deleteTree();
+void Scan::clear(unsigned int types)
+{
+  if(types & DATA_XYZ) clear("xyz");
+  if(types & DATA_RGB) clear("rgb");
+  if(types & DATA_REFLECTANCE) clear("reflectance");
+  if(types & DATA_AMPLITUDE) clear("amplitude");
+  if(types & DATA_TYPE) clear("type");
+  if(types & DATA_DEVIATION) clear("deviation");
+}
 
-	  // delete Scan from ScanList
-	  vector <Scan*>::iterator Iter;
-	  for(Iter = allScans.begin(); Iter != allScans.end();) {
-		if (*Iter == this) {
-		 allScans.erase(Iter);
-		 break;
-		} else {
-		 Iter++;
-		}
-	  }
+SearchTree* Scan::getSearchTree()
+{
+  // if the search tree hasn't been created yet, calculate everything
+  if(kd == 0) {
+    createSearchTree();
+  }
+  return kd;
+}
 
-	  for (int i = 0; i < points_red_size; i++) {
-		delete [] points_red[i];
-	  }
-	  delete [] points_red;
-
-     points.clear();
+void Scan::toGlobal() {
+  calcReducedPoints();
+  transform(transMatOrg, INVALID);
 }
 
 /**
- * Copy constructor
+ * Computes a search tree depending on the type.
  */
-Scan::Scan(const Scan& s)
+void Scan::createSearchTree()
 {
-  rPos[0] = s.rPos[0];
-  rPos[1] = s.rPos[1];
-  rPos[2] = s.rPos[2];
-  rPosTheta[0] = s.rPosTheta[0];
-  rPosTheta[1] = s.rPosTheta[1];
-  rPosTheta[2] = s.rPosTheta[2];
+  // multiple threads will call this function at the same time because they all work on one pair of Scans, just let the first one (who sees a nullpointer) do the creation
+  boost::lock_guard<boost::mutex> lock(m_mutex_create_tree);
+  if(kd != 0) return;
+  
+  // make sure the original points are created before starting the measurement
+  DataXYZ xyz_orig(get("xyz reduced original"));
 
-  memcpy(transMat, s.transMat, sizeof(transMat));
-  memcpy(transMatOrg, s.transMatOrg, sizeof(transMatOrg));
+#ifdef WITH_METRICS
+  Timer tc = ClientMetric::create_tree_time.start();
+#endif //WITH_METRICS
+  
+  createSearchTreePrivate();
 
-  // copy data points
-  for (unsigned int i = 0; i < s.points.size(); points.push_back(s.points[i++]));
-  // copy reduced data
-  points_red_size = s.points_red_size;
-  points_red = new double*[points_red_size];
-  for (int i = 0; i < points_red_size; i++) {
-    points_red[i] = new double[3];
-    points_red[i][0] = s.points_red[i][0];
-    points_red[i][1] = s.points_red[i][1];
-    points_red[i][2] = s.points_red[i][2];
+#ifdef WITH_METRICS
+  ClientMetric::create_tree_time.end(tc);
+#endif //WITH_METRICS
+}
+
+void Scan::calcReducedOnDemand()
+{
+  // multiple threads will call this function at the same time because they all work on one pair of Scans, just let the first one (who sees count as zero) do the reduction
+  boost::lock_guard<boost::mutex> lock(m_mutex_reduction);
+  if(m_has_reduced) return;
+  
+#ifdef WITH_METRICS
+  Timer t = ClientMetric::on_demand_reduction_time.start();
+#endif //WITH_METRICS
+  
+  calcReducedOnDemandPrivate();
+  
+  m_has_reduced = true;
+  
+#ifdef WITH_METRICS
+  ClientMetric::on_demand_reduction_time.end(t);
+#endif //WITH_METRICS
+}
+
+void Scan::copyReducedToOriginal()
+{
+#ifdef WITH_METRICS
+  Timer t = ClientMetric::copy_original_time.start();
+#endif //WITH_METRICS
+  
+  DataXYZ xyz_r(get("xyz reduced"));
+  unsigned int size = xyz_r.size();
+  DataXYZ xyz_r_orig(create("xyz reduced original", sizeof(double)*3*size));
+  for(unsigned int i = 0; i < size; ++i) {
+    for(unsigned int j = 0; j < 3; ++j) {
+      xyz_r_orig[i][j] = xyz_r[i][j];
+    }
   }
-  memcpy(dalignxf, s.dalignxf, sizeof(dalignxf));
-  nns_method = s.nns_method;
-  cuda_enabled = s.cuda_enabled;
-  if (s.kd != 0) {
-    createTree(nns_method, cuda_enabled);
-    // update max num point in scan iff you have to do so
-    if (points_red_size > (int)max_points_red_size) max_points_red_size = points_red_size;
-  }
+  
+#ifdef WITH_METRICS
+  ClientMetric::copy_original_time.end(t);
+#endif //WITH_METRICS
+}  
 
-  scanNr = s.scanNr;
-  sout << s.sout.str();
-  maxDist2 = s.maxDist2;
+void Scan::copyOriginalToReduced()
+{
+#ifdef WITH_METRICS
+  Timer t = ClientMetric::copy_original_time.start();
+#endif //WITH_METRICS
+  
+  DataXYZ xyz_r_orig(get("xyz reduced original"));
+  unsigned int size = xyz_r_orig.size();
+  DataXYZ xyz_r(create("xyz reduced", sizeof(double)*3*size));
+  for(unsigned int i = 0; i < size; ++i) {
+    for(unsigned int j = 0; j < 3; ++j) {
+      xyz_r[i][j] = xyz_r_orig[i][j];
+    }
+  }
+  
+#ifdef WITH_METRICS
+  ClientMetric::copy_original_time.end(t);
+#endif //WITH_METRICS
+}
+
+
+
+/**
+ * Computes an octtree of the current scan, then getting the
+ * reduced points as the centers of the octree voxels.
+ */
+void Scan::calcReducedPoints()
+{
+#ifdef WITH_METRICS
+  Timer t = ClientMetric::scan_load_time.start();
+#endif //WITH_METRICS
+  
+  // get xyz to start the scan load, separated here for time measurement
+  DataXYZ xyz(get("xyz"));
+  
+  // if the scan hasn't been loaded we can't calculate anything
+  if(xyz.size() == 0)
+    throw runtime_error("Could not calculate reduced points, XYZ data is empty");
+  
+#ifdef WITH_METRICS
+  ClientMetric::scan_load_time.end(t);
+  Timer tl = ClientMetric::calc_reduced_points_time.start();
+#endif //WITH_METRICS
+  
+  // no reduction needed
+  // copy vector of points to array of points to avoid
+  // further copying
+  if(reduction_voxelSize <= 0.0) {
+    // copy the points
+    DataXYZ xyz_r(create("xyz reduced", sizeof(double)*3*xyz.size()));
+    for(unsigned int i = 0; i < xyz.size(); ++i) {
+      for(unsigned int j = 0; j < 3; ++j) {
+        xyz_r[i][j] = xyz[i][j];
+      }
+    }
+  } else {
+    // start reduction
+
+    // build octree-tree from CurrentScan
+    // put full data into the octtree
+    BOctTree<double> *oct = new BOctTree<double>(PointerArray<double>(xyz).get(),
+      xyz.size(), reduction_voxelSize, reduction_pointtype);
+
+    vector<double*> center;
+    center.clear();
+
+    if (reduction_nrpts > 0) {
+      if (reduction_nrpts == 1) {
+        oct->GetOctTreeRandom(center);
+      } else {
+        oct->GetOctTreeRandom(center, reduction_nrpts);
+      }
+    } else {
+      oct->GetOctTreeCenter(center);
+    }
+
+    // storing it as reduced scan
+    unsigned int size = center.size();
+    DataXYZ xyz_r(create("xyz reduced", sizeof(double)*3*size));
+    for(unsigned int i = 0; i < size; ++i) {
+      for(unsigned int j = 0; j < 3; ++j) {
+        xyz_r[i][j] = center[i][j];
+      }
+    }
+    
+    delete oct;
+  }
+  
+#ifdef WITH_METRICS
+  ClientMetric::calc_reduced_points_time.end(tl);
+#endif //WITH_METRICS
 }
 
 /**
@@ -342,7 +292,7 @@ Scan::Scan(const Scan& s)
  * @param prevScan The scan that's transformation is extrapolated,
  * i.e., odometry extrapolation
  *
- * For additional information see the follwoing paper (jfr2007.pdf):
+ * For additional information see the following paper (jfr2007.pdf):
  *
  * Andreas Nüchter, Kai Lingemann, Joachim Hertzberg, and Hartmut Surmann,
  * 6D SLAM - 3D Mapping Outdoor Environments Journal of Field Robotics (JFR),
@@ -351,33 +301,67 @@ Scan::Scan(const Scan& s)
  * August/September, 2007
  *
  */
-void Scan::mergeCoordinatesWithRoboterPosition(const Scan* prevScan)
+void Scan::mergeCoordinatesWithRoboterPosition(Scan* prevScan)
 {
   double tempMat[16], deltaMat[16];
-  M4inv(prevScan->transMatOrg, tempMat);
-  MMult(prevScan->transMat, tempMat, deltaMat);
+  M4inv(prevScan->get_transMatOrg(), tempMat);
+  MMult(prevScan->get_transMat(), tempMat, deltaMat);
   transform(deltaMat, INVALID); //apply delta transformation of the previous scan
 }
 
 /**
- * The method transforms all points (and only the points)
- * with the given transformationmatrix.
- * Unlike transform, points_red, colourmatrixes etc. are
- * not touched!
- * @param alignxf The transformationmatrix
- */
+ * The method transforms all points with the given transformation matrix.
+ */ 
 void Scan::transformAll(const double alignxf[16])
 {
-  int end_loop = (int)points.size();
+  DataXYZ xyz(get("xyz"));
+  
+  #pragma omp parallel for
+  for(unsigned int i = 0; i < xyz.size(); ++i) {
+    transform3(alignxf, xyz[i]);
+  }
+  // TODO: test for ManagedScan compability, may need a touch("xyz") to mark saving the new values
+}
 
-#ifdef _OPENMP
-#pragma omp parallel for
+//! Internal function of transform which alters the reduced points
+void Scan::transformReduced(const double alignxf[16])
+{
+#ifdef WITH_METRICS
+  Timer t = ClientMetric::transform_time.start();
+#endif //WITH_METRICS
+  
+  DataXYZ xyz_r(get("xyz reduced"));
+  #pragma omp parallel for
+  for(unsigned int i = 0; i < xyz_r.size(); ++i) {
+    transform3(alignxf, xyz_r[i]);
+  }
+  
+#ifdef WITH_METRICS
+  ClientMetric::transform_time.end(t);
+#endif //WITH_METRICS
+}
+
+//! Internal function of transform which handles the matrices
+void Scan::transformMatrix(const double alignxf[16])
+{
+  double tempxf[16];
+  
+  // apply alignxf to transMat and update pose vectors
+  MMult(alignxf, transMat, tempxf);
+  memcpy(transMat, tempxf, sizeof(transMat));
+  Matrix4ToEuler(transMat, rPosTheta, rPos);
+  Matrix4ToQuat(transMat, rQuat);
+  
+#ifdef DEBUG  
+  cerr << "(" << rPos[0] << ", " << rPos[1] << ", " << rPos[2] << ", "
+	  << rPosTheta[0] << ", " << rPosTheta[1] << ", " << rPosTheta[2] << ")" << endl;
+
+  cerr << transMat << endl;
 #endif
-  for (int i = 0; i < end_loop; ++i)
-    {
 
-	 points[i].transform(alignxf);
-    }
+  // apply alignxf to dalignxf
+  MMult(alignxf, dalignxf, tempxf);
+  memcpy(dalignxf, tempxf, sizeof(transMat));
 }
 
 /**
@@ -397,139 +381,94 @@ void Scan::transformAll(const double alignxf[16])
  */
 void Scan::transform(const double alignxf[16], const AlgoType type, int islum)
 {
-  int end_meta = (int)meta_parts.size();
-  for(int i = 0; i < end_meta; i++) {
+  /* TODO: meta-stuff later
+  unsigned int end_meta = meta_parts.size();
+  for(unsigned int i = 0; i < end_meta; i++) {
     meta_parts[i]->transform(alignxf, type, -1);
   }
-  int end_loop = (int)points.size();
-#ifdef TRANSFORM_ALL_POINTS
-  /*
-   * We dont't need to transform all points, since we use the array
-   * points_red all the time.
-   *
-   * We do need of course the transformation of the points_red array, since
-   * thats a moving point cloud. The get ptPairs methods do _not_ consider
-   * transformation of target points
-   */
-#ifdef _OPENMP
-#pragma omp parallel for
-#endif
-   for (int i = 0; i < end_loop; i++) {
-     points[i].transform(alignxf);
-   }
-#endif
+  */
 
+#ifdef TRANSFORM_ALL_POINTS
+  transformAll(alignxf);
+#endif //TRANSFORM_ALL_POINTS
+   
 #ifdef DEBUG
   cerr << alignxf << endl;
   cerr << "(" << rPos[0] << ", " << rPos[1] << ", " << rPos[2] << ", "
 	  << rPosTheta[0] << ", " << rPosTheta[1] << ", " << rPosTheta[2] << ") ---> ";
 #endif
 
-#ifdef _OPENMP
-#pragma omp parallel for
-#endif
-  for (int i = 0; i < points_red_size; i++) {
-    double x_neu, y_neu, z_neu;
-    x_neu = points_red[i][0] * alignxf[0] + points_red[i][1] * alignxf[4] + points_red[i][2] * alignxf[8];
-    y_neu = points_red[i][0] * alignxf[1] + points_red[i][1] * alignxf[5] + points_red[i][2] * alignxf[9];
-    z_neu = points_red[i][0] * alignxf[2] + points_red[i][1] * alignxf[6] + points_red[i][2] * alignxf[10];
-    points_red[i][0] = x_neu + alignxf[12];
-    points_red[i][1] = y_neu + alignxf[13];
-    points_red[i][2] = z_neu + alignxf[14];
-  }
-
-  double tempxf[16];
-  MMult(alignxf, transMat, tempxf);
-  memcpy(transMat, tempxf, sizeof(transMat));
-  Matrix4ToEuler(transMat, rPosTheta, rPos);
-  Matrix4ToQuat(transMat, rQuat);
-
-#ifdef DEBUG
-  cerr << "(" << rPos[0] << ", " << rPos[1] << ", " << rPos[2] << ", "
-	  << rPosTheta[0] << ", " << rPosTheta[1] << ", " << rPosTheta[2] << ")" << endl;
-
-  cerr << transMat << endl;
-#endif
-
-  MMult(alignxf, dalignxf, tempxf);
-  memcpy(dalignxf, tempxf, sizeof(transMat));
-
-  // store transformation
-  bool in_meta;
-  int  found = 0;
-  if (type != INVALID) {
+  // transform points
+  transformReduced(alignxf);
+  
+  // update matrices
+  transformMatrix(alignxf);
+  
+  // store transformation in frames
+  if(type != INVALID) {
+#ifdef WITH_METRICS
+    Timer t = ClientMetric::add_frames_time.start();
+#endif //WITH_METRICS
+    bool in_meta;
+    MetaScan* meta = dynamic_cast<MetaScan*>(this);
+    int found = 0;
+    unsigned int scans_size = allScans.size();
 
     switch (islum) {
     case -1:
-	 // write no tranformation
-	 break;
+      // write no tranformation
+      break;
     case 0:
-	 end_loop = (int)allScans.size();
-	 for (int iter = 0; iter < end_loop; iter++) {
-	   in_meta = false;
-	   for(int i = 0; i < end_meta; i++) {
-		if(meta_parts[i] == allScans[iter]) {
-		  found = iter;
-		  in_meta = true;
-		}
-	   }
-	   if (allScans[iter]->sout.good()) {
-		allScans[iter]->sout << allScans[iter]->transMat;
-		if (allScans[iter] == this || in_meta) {
-		  found = iter;
-		  allScans[iter]->sout << type << endl;
-		} else {
-		  if (found == 0) {
-		    allScans[iter]->sout << ICPINACTIVE << endl;
-		  } else {
-		    allScans[iter]->sout << INVALID << endl;
-		  }
-		}
-	   } else {
-		cerr << "ERROR: Cannot store frames." << endl;
-		exit(1);
-	   }
-	 }
-	 break;
+      for(unsigned int i = 0; i < scans_size; ++i) {
+        Scan* scan = allScans[i];
+        in_meta = false;
+        if(meta) {
+          for(unsigned int j = 0; j < meta->size(); ++j) {
+            if(meta->getScan(j) == scan) {
+              found = i;
+              in_meta = true;
+            }
+          }
+        }
+        
+        if(scan == this || in_meta) {
+          found = i;
+          scan->addFrame(type);
+        } else {
+          if(found == 0) {
+            scan->addFrame(ICPINACTIVE);
+          } else {
+            scan->addFrame(INVALID);
+          }
+        }
+      }
+      break;
     case 1:
-	 if (sout.good()) {
-	   sout << transMat << type << endl;
-	 } else {
-	   cerr << "ERROR: Cannot store frames." << endl;
-	   exit(1);
-	 }
-	 break;
+      addFrame(type);
+      break;
     case 2:
-	 end_loop = (int)allScans.size();
-	  for (int iter = 0; iter < end_loop; iter++) {
-	   if (allScans[iter] == this) {
-		found = iter;
-		if (sout.good()) {
-		  sout << transMat << type << endl;
-		} else {
-		  cerr << "ERROR: Cannot store frames." << endl;
-		  exit(1);
-		}
-
-		if (allScans[0]->sout.good()) {
-		  allScans[0]->sout << allScans[0]->transMat << type << endl;
-		} else {
-		  cerr << "ERROR: Cannot store frames." << endl;
-		  exit(1);
-		}
-		continue;
-	   }
-	   if (found != 0) {
-		allScans[iter]->sout << allScans[iter]->transMat << INVALID << endl;
-	   }
-	 }
-	 break;
+      for(unsigned int i = 0; i < scans_size; ++i) {
+        Scan* scan = allScans[i];
+        if(scan == this) {
+          found = i;
+          addFrame(type);
+          allScans[0]->addFrame(type);
+          continue;
+        }
+        if (found != 0) {
+          scan->addFrame(INVALID);
+        }
+      }
+      break;
     default:
-	 cerr << "invalid point transformation mode" << endl;
+      cerr << "invalid point transformation mode" << endl;
     }
+    
+#ifdef WITH_METRICS
+    ClientMetric::add_frames_time.end(t);
+#endif //WITH_METRICS
   }
 }
-
 
 /**
  * Transforms the scan by a given transformation and writes a new frame. The idea
@@ -550,12 +489,10 @@ void Scan::transform(const double alignxf[16], const AlgoType type, int islum)
 void Scan::transform(const double alignQuat[4], const double alignt[3],
 				 const AlgoType type, int islum)
 {
-
   double alignxf[16];
   QuatToMatrix4(alignQuat, alignt, alignxf);
   transform(alignxf, type, islum);
 }
-
 
 /**
  * Transforms the scan, so that the given Matrix
@@ -582,12 +519,23 @@ void Scan::transformToMatrix(double alignxf[16], const AlgoType type, int islum)
  */
 void Scan::transformToEuler(double rP[3], double rPT[3], const AlgoType type, int islum)
 {
+#ifdef WITH_METRICS
+  // called in openmp context in lum6Deuler.cc:422
+  ClientMetric::transform_time.set_threadsafety(true);
+  ClientMetric::add_frames_time.set_threadsafety(true);
+#endif //WITH_METRICS
+  
   double tinv[16];
   double alignxf[16];
   M4inv(transMat, tinv);
   transform(tinv, INVALID);
   EulerToMatrix4(rP, rPT, alignxf);
   transform(alignxf, type, islum);
+  
+#ifdef WITH_METRICS
+  ClientMetric::transform_time.set_threadsafety(false);
+  ClientMetric::add_frames_time.set_threadsafety(false);
+#endif //WITH_METRICS
 }
 
 /**
@@ -609,219 +557,43 @@ void Scan::transformToQuat(double rP[3], double rPQ[4], const AlgoType type, int
 }
 
 /**
- * Removes all points from the vector that are above or below a threshold
- * @param top upper threshold
- * @param bottom lower threshold
- */
-void Scan::trim(double top, double bottom)
-{
-  vector <Point> ptss;
-  for(vector<Point>::iterator it = this->points.begin(); it != this->points.end(); it++) {
-  //  cout << (*it).y << endl;
-    if((*it).y > bottom && (*it).y < top) {
-      ptss.push_back(*it);
-    }
-  }
-  points = ptss;
-}
-
-/**
- * Computes an octtree of the current scan, then getting the
- * reduced points as the centers of the octree voxels.
- * @param voxelSize The maximal size of each voxel
- */
-void Scan::calcReducedPoints(double voxelSize, int nrpts, PointType pointtype)
-{
-  // no reduction needed
-  // copy vector of points to array of points to avoid
-  // further copying
-  if (voxelSize <= 0.0) {
-    points_red = new double*[points.size()];
-
-    int end_loop = points_red_size = (int)points.size();
-    for (int i = 0; i < end_loop; i++) {
-	  points_red[i] = new double[3];
-	  points_red[i][0] = points[i].x;
-	  points_red[i][1] = points[i].y;
-	  points_red[i][2] = points[i].z;
-    }
-//    transform(transMatOrg, INVALID); //transform points to initial position
-    // update max num point in scan iff you have to do so
-    if (points_red_size > (int)max_points_red_size) max_points_red_size = points_red_size;
-    return;
-  }
-
-  // start reduction
-
-  // build octree-tree from CurrentScan
-  double **ptsOct = 0;
-  ptsOct = new double*[points.size()];
-
-  int num_pts = 0;
-  int end_loop = (int)points.size();
-  for (int i = 0; i < end_loop; i++) {
-    ptsOct[num_pts] = new double[3];
-    ptsOct[num_pts][0] = points[i].x;
-    ptsOct[num_pts][1] = points[i].y;
-    ptsOct[num_pts][2] = points[i].z;
-    num_pts++;
-  }
-  BOctTree<double> *oct = new BOctTree<double>(ptsOct, num_pts, voxelSize, pointtype);
-
-  vector<double*> center;
-  center.clear();
-
-  if (nrpts > 0) {
-    if (nrpts == 1) {
-      oct->GetOctTreeRandom(center);
-    }else {
-      oct->GetOctTreeRandom(center, nrpts);
-    }
-  } else {
-    oct->GetOctTreeCenter(center);
-  }
-
-  // storing it as reduced scan
-  points_red = new double*[center.size()];
-
-  end_loop = (int)center.size();
-  for (int i = 0; i < end_loop; i++) {
-    points_red[i] = new double[3];
-    points_red[i][0] = center[i][0];
-    points_red[i][1] = center[i][1];
-    points_red[i][2] = center[i][2];
-  }
-  points_red_size = center.size();
-
-  delete oct;
-
-  end_loop = (int)points.size();
-  for (int i = 0; i < num_pts; i++) {
-    delete [] ptsOct[i];
-  }
-  delete [] ptsOct;
-
-//  transform(transMatOrg, INVALID); //transform points to initial position
-
-  // update max num point in scan iff you have to do so
-  if (points_red_size > (int)max_points_red_size) max_points_red_size = points_red_size;
-}
-
-/**
- * Calculates the search trees for all scans
- */
-void Scan::createTrees(int nns_method, bool cuda_enabled)
-{
-  cerr << "create " << allScans.size() << " k-d trees " << flush;
-  int i;
-#ifdef _OPENMP
-#pragma omp parallel for schedule(dynamic)
-#endif
-    for (i = 0; i < (int)allScans.size(); i++) {
-	 allScans[i]->createTree(nns_method, cuda_enabled);
-  }
-  cerr << "... done." << endl;
-  return;
-}
-
-
-/**
- * Deletes all search trees
- */
-void Scan::deleteTrees()
-{
-  int i;
-#ifdef _OPENMP
-#pragma omp parallel for schedule(dynamic)
-#endif
-  for (i = 0; i < (int)allScans.size(); i++) {
-    allScans[i]->deleteTree();
-  }
-  return;
-}
-
-
-/**
- * This function returns a pointer to the cache memory. If the
- * cache already exists, the pointer to the memory is returned,
- * otheriwse a new memory chun is allocated
- * resp. afterwards.
- *
- * @param Source Pointer to first scan
- * @param Target Pointer to second scan
- * @return Pointer to cache memory
- */
-/*
-KDCacheItem* Scan::initCache(const Scan* Source, const Scan* Target)
-{
-  KDCacheItem *closest = 0;
-
-  // determine cache
-  for(unsigned int i = 0; i < closest_cache.size(); i++) {
-    if ((closest_cache[i]->SourceScanNr == Source->scanNr) &&
-        (closest_cache[i]->TargetScanNr == Target->scanNr)) {
-      closest = closest_cache[i]->item; 	                 // cache found
-      break;
-    }
-  }
-  // cache for this source/target pair not initialized
-  if (closest == 0) {
-    closest = new KDCacheItem[Target->points_red_size];
-    KDCache *nc = new KDCache;
-    nc->item = closest;
-    nc->SourceScanNr = Source->scanNr;
-    nc->TargetScanNr = Target->scanNr;
-    closest_cache.push_back(nc);                              // append cache
-  }
-
-  return closest;
-  return 0;
-}
-  */
-
-/**
  * Calculates Source\Target
  * Calculates a set of corresponding point pairs and returns them. It
  * computes the k-d trees and deletes them after the pairs have been
  * found. This slow function should be used only for testing
  *
  * @param pairs The resulting point pairs (vector will be filled)
- * @param Source The scan whose points are matched to Targets' points
- * @param Target The scan to whiche the opints are matched
+ * @param Target The scan to whiche the points are matched
  * @param thread_num number of the thread (for parallelization)
  * @param rnd randomized point selection
  * @param max_dist_match2 maximal allowed distance for matching
  */
 
-void Scan::getNoPairsSimple(vector <double*> &diff,
-					   Scan* Source, Scan* Target,
-					   int thread_num,
-					   double max_dist_match2)
+void Scan::getNoPairsSimple(vector <double*> &diff, 
+  Scan* Source, Scan* Target, 
+  int thread_num,
+  double max_dist_match2)
 {
-  unsigned int numpts_target;
-  KDtree *kd = 0;
-
-  kd = new KDtree(Target->points_red, Target->points_red_size);
-  numpts_target = Source->points_red_size;
-
-    cout << "Max: " << max_dist_match2 << endl;
-  for (unsigned int i = 0; i < numpts_target; i++) {
+  DataXYZ xyz_r(Source->get("xyz reduced"));
+  KDtree* kd = new KDtree(PointerArray<double>(Target->get("xyz reduced")).get(), Target->size<DataXYZ>("xyz reduced"));
+  
+  cout << "Max: " << max_dist_match2 << endl;
+  for (unsigned int i = 0; i < xyz_r.size(); i++) {
 
     double p[3];
-    p[0] = Source->points_red[i][0];
-    p[1] = Source->points_red[i][1];
-    p[2] = Source->points_red[i][2];
+    p[0] = xyz_r[i][0];
+    p[1] = xyz_r[i][1];
+    p[2] = xyz_r[i][2];
 
 
     double *closest = kd->FindClosest(p, max_dist_match2, thread_num);
     if (!closest) {
-	    diff.push_back(Source->points_red[i]);
+	    diff.push_back(xyz_r[i]);
 	    //diff.push_back(closest);
     }
   }
 
   delete kd;
-  return;
 }
 
 /**
@@ -831,39 +603,36 @@ void Scan::getNoPairsSimple(vector <double*> &diff,
  *
  * @param pairs The resulting point pairs (vector will be filled)
  * @param Source The scan whose points are matched to Targets' points
- * @param Target The scan to whiche the opints are matched
+ * @param Target The scan to whiche the points are matched
  * @param thread_num number of the thread (for parallelization)
  * @param rnd randomized point selection
  * @param max_dist_match2 maximal allowed distance for matching
  */
-void Scan::getPtPairsSimple(vector <PtPair> *pairs,
-					   Scan* Source, Scan* Target,
-					   int thread_num,
-					   int rnd, double max_dist_match2,
-					   double *centroid_m, double *centroid_d)
+void Scan::getPtPairsSimple(vector <PtPair> *pairs, 
+  Scan* Source, Scan* Target, 
+  int thread_num,
+  int rnd, double max_dist_match2,
+  double *centroid_m, double *centroid_d)
 {
-  unsigned int numpts_target;
-  KDtree *kd = 0;
+  KDtree* kd = new KDtree(PointerArray<double>(Source->get("xyz reduced")).get(), Source->size<DataXYZ>("xyz reduced"));
+  DataXYZ xyz_r(Target->get("xyz reduced"));
 
-  kd = new KDtree(Source->points_red, Source->points_red_size);
-  numpts_target = Target->points_red_size;
-
-  for (unsigned int i = 0; i < numpts_target; i++) {
+  for (unsigned int i = 0; i < xyz_r.size(); i++) {
     if (rnd > 1 && rand(rnd) != 0) continue;  // take about 1/rnd-th of the numbers only
 
     double p[3];
-    p[0] = Target->points_red[i][0];
-    p[1] = Target->points_red[i][1];
-    p[2] = Target->points_red[i][2];
+    p[0] = xyz_r[i][0];
+    p[1] = xyz_r[i][1];
+    p[2] = xyz_r[i][2];
 
     double *closest = kd->FindClosest(p, max_dist_match2, thread_num);
     if (closest) {
-      centroid_m[0] += p[0];
-      centroid_m[1] += p[1];
-      centroid_m[2] += p[2];
-      centroid_d[0] += closest[0];
-      centroid_d[1] += closest[1];
-      centroid_d[2] += closest[2];
+      centroid_m[0] += closest[0];
+      centroid_m[1] += closest[1];
+      centroid_m[2] += closest[2];
+      centroid_d[0] += p[0];
+      centroid_d[1] += p[1];
+      centroid_d[2] += p[2];
       PtPair myPair(closest, p);
       pairs->push_back(myPair);
     }
@@ -876,7 +645,6 @@ void Scan::getPtPairsSimple(vector <PtPair> *pairs,
   centroid_d[2] /= pairs[thread_num].size();
 
   delete kd;
-  return;
 }
 
 
@@ -891,22 +659,39 @@ void Scan::getPtPairsSimple(vector <PtPair> *pairs,
  *
  * @param pairs The resulting point pairs (vector will be filled)
  * @param Source The scan whose points are matched to Targets' points
- * @param Target The scan to whiche the opints are matched
+ * @param Target The scan to whiche the points are matched
  * @param thread_num number of the thread (for parallelization)
  * @param rnd randomized point selection
  * @param max_dist_match2 maximal allowed distance for matching
  * @return a set of corresponding point pairs
  */
-void Scan::getPtPairs(vector <PtPair> *pairs,
-				  Scan* Source, Scan* Target,
-				  int thread_num,
-				  int rnd, double max_dist_match2, double &sum,
-				  double *centroid_m, double *centroid_d)
+void Scan::getPtPairs(vector <PtPair> *pairs, 
+  Scan* Source, Scan* Target, 
+  int thread_num,
+  int rnd, double max_dist_match2, double &sum,
+  double *centroid_m, double *centroid_d)
 {
-  Source->kd->getPtPairs(pairs, Source->dalignxf,
-      Target->points_red, 0, Target->points_red_size,
+  // initialize centroids
+  for(unsigned int i = 0; i < 3; ++i) {
+    centroid_m[i] = 0;
+    centroid_d[i] = 0;
+  }
+  
+  // get point pairs
+  DataXYZ xyz_r(Target->get("xyz reduced"));
+  Source->getSearchTree()->getPtPairs(pairs, Source->dalignxf,
+      xyz_r, 0, xyz_r.size(),
       thread_num,
-      rnd, max_dist_match2, sum, centroid_m, centroid_d, Target);
+      rnd, max_dist_match2, sum, centroid_m, centroid_d);
+  
+  // normalize centroids
+  unsigned int size = pairs->size();
+  if(size != 0) {
+    for(unsigned int i = 0; i < 3; ++i) {
+      centroid_m[i] /= size;
+      centroid_d[i] /= size;
+    }
+  }
 }
 
 
@@ -918,8 +703,8 @@ void Scan::getPtPairs(vector <PtPair> *pairs,
  *
  * @param pairs The resulting point pairs (vector will be filled)
  * @param Source The scan whose points are matched to Targets' points
- * @param Target The scan to whiche the opints are matched
- * @param thread_num The number of the thread that is computing ptPairs in parallel
+ * @param Target The scan to whiche the points are matched
+ * @param thread_num The number of the thread that is computing ptPairs in parallel 
  * @param step The number of steps for parallelization
  * @param rnd randomized point selection
  * @param max_dist_match2 maximal allowed distance for matching
@@ -932,437 +717,61 @@ void Scan::getPtPairs(vector <PtPair> *pairs,
  *
  */
 void Scan::getPtPairsParallel(vector <PtPair> *pairs, Scan* Source, Scan* Target,
-						int thread_num, int step,
-						int rnd, double max_dist_match2,
-						double *sum,
-						double centroid_m[OPENMP_NUM_THREADS][3], double centroid_d[OPENMP_NUM_THREADS][3])
+  int thread_num, int step,
+  int rnd, double max_dist_match2,
+  double *sum,
+  double centroid_m[OPENMP_NUM_THREADS][3], double centroid_d[OPENMP_NUM_THREADS][3])
 {
-  Source->kd->getPtPairs(&pairs[thread_num], Source->dalignxf,
-      Target->points_red, thread_num * step, thread_num * step + step,
+  // initialize centroids
+  for(unsigned int i = 0; i < 3; ++i) {
+    centroid_m[thread_num][i] = 0;
+    centroid_d[thread_num][i] = 0;
+  }
+  
+  // get point pairs
+  SearchTree* search = Source->getSearchTree();
+  // differentiate between a meta scan (which has no reduced points) and a normal scan
+  // if Source is also a meta scan it already has a special meta-kd-tree
+  MetaScan* meta = dynamic_cast<MetaScan*>(Target);
+  if(meta) {
+    for(unsigned int i = 0; i < meta->size(); ++i) {
+      // determine step for each scan individually
+      DataXYZ xyz_r(meta->getScan(i)->get("xyz reduced"));
+      unsigned int max = xyz_r.size();
+      unsigned int step = max / OPENMP_NUM_THREADS;
+      // call ptpairs for each scan and accumulate ptpairs, centroids and sum
+      search->getPtPairs(&pairs[thread_num], Source->dalignxf,
+        xyz_r, step * thread_num, step * thread_num + step,
+        thread_num,
+        rnd, max_dist_match2, sum[thread_num],
+        centroid_m[thread_num], centroid_d[thread_num]);
+    }
+  } else {
+    DataXYZ xyz_r(Target->get("xyz reduced"));
+    search->getPtPairs(&pairs[thread_num], Source->dalignxf,
+      xyz_r, thread_num * step, thread_num * step + step,
       thread_num,
       rnd, max_dist_match2, sum[thread_num],
-      centroid_m[thread_num], centroid_d[thread_num], Target);
+      centroid_m[thread_num], centroid_d[thread_num]);
+  }
+  
+  // normalize centroids
+  unsigned int size = pairs[thread_num].size();
+  if(size != 0) {
+    for(unsigned int i = 0; i < 3; ++i) {
+      centroid_m[thread_num][i] /= size;
+      centroid_d[thread_num][i] /= size;
+    }
+  }
 }
 
-
-/**
- * Computes a search tree depending on the type this can be
- * a k-d tree od a cached k-d tree
- */
-void Scan::createTree(int nns_method, bool cuda_enabled)
+unsigned int Scan::getMaxCountReduced(ScanVector& scans)
 {
-  this->nns_method = nns_method;
-  this->cuda_enabled = cuda_enabled;
-  M4identity(dalignxf);
-  double temp[16];
-  memcpy(temp, transMat, sizeof(transMat));
-  M4inv(temp, treeTransMat_inv);
-
-  points_red_lum = new double*[points_red_size];
-  for (int j = 0; j < points_red_size; j++) {
-    points_red_lum[j] = new double[3];
-    points_red_lum[j][0] = points_red[j][0];
-    points_red_lum[j][1] = points_red[j][1];
-    points_red_lum[j][2] = points_red[j][2];
+  unsigned int max = 0;
+  for(std::vector<Scan*>::iterator it = scans.begin(); it != scans.end(); ++it) {
+    unsigned int count = (*it)->size<DataXYZ>("xyz reduced");
+    if(count > max)
+      max = count;
   }
-
-  //  cout << "d2 tree" << endl;
-  //  kd = new D2Tree(points_red_lum, points_red_size, 105);
-  //  cout << "successfull" << endl;
-
-  switch(nns_method)
-  {
-    case cachedKD:
-        kd = new KDtree_cache(points_red_lum, points_red_size);
-    break;
-
-    case simpleKD:
-        kd = new KDtree(points_red_lum, points_red_size);
-    break;
-
-    case ANNTree:
-        kd = new ANNtree(points_red_lum, points_red_size);  //ANNKD
-    break;
-    /*
-    case NaboKD:
-        kd = new NaboSearch(points_red_lum, points_red_size);
-    break;
-    */
-    case BOCTree:
-        PointType pointtype;
-        kd = new BOctTree<double>(points_red_lum, points_red_size, 10.0, pointtype, true);
-    break;
-  }
-
-  if (cuda_enabled) createANNTree();
-
-  return;
-}
-
-void Scan::createANNTree()
-{
-#ifdef WITH_CUDA
-  if(!ann_kd_tree){
-    ann_kd_tree = new ANNkd_tree(points_red_lum, points_red_size, 3, 1, ANN_KD_STD);
-    cout << "Cuda tree was generated with " << points_red_size << " points" << endl;
-  } else {
-    cout << "Cuda tree exists. No need for another creation" << endl;
-  }
-#endif
-}
-
-
-/**
- * Delete the search tree
- */
-void Scan::deleteTree()
-{
-  for (int j = 0; j < points_red_size; j++) {
-    delete [] points_red_lum[j];
-  }
-  delete [] points_red_lum;
-
-  delete kd;
-
-  return;
-}
-
-bool Scan::toType(const char* string, reader_type &type) {
-  if (strcasecmp(string, "uos") == 0) type = UOS;
-  else if (strcasecmp(string, "uos_map") == 0) type = UOS_MAP;
-  else if (strcasecmp(string, "uos_frames") == 0) type = UOS_FRAMES;
-  else if (strcasecmp(string, "uos_map_frames") == 0) type = UOS_MAP_FRAMES;
-  else if (strcasecmp(string, "uos_rgb") == 0) type = UOS_RGB;
-  else if (strcasecmp(string, "old") == 0) type = OLD;
-  else if (strcasecmp(string, "rts") == 0) type = RTS;
-  else if (strcasecmp(string, "rts_map") == 0) type = RTS_MAP;
-  else if (strcasecmp(string, "ifp") == 0) type = IFP;
-  else if (strcasecmp(string, "riegl_txt") == 0) type = RIEGL_TXT;
-  else if (strcasecmp(string, "riegl_project") == 0) type = RIEGL_PROJECT;
-  else if (strcasecmp(string, "riegl_rgb") == 0) type = RIEGL_RGB;
-  else if (strcasecmp(string, "riegl_bin") == 0) type = RIEGL_BIN;
-  else if (strcasecmp(string, "zahn") == 0) type = ZAHN;
-  else if (strcasecmp(string, "ply") == 0) type = PLY;
-  else if (strcasecmp(string, "wrl") == 0) type = WRL;
-  else if (strcasecmp(string, "xyz") == 0) type = XYZ;
-  else if (strcasecmp(string, "zuf") == 0) type = ZUF;
-  else if (strcasecmp(string, "asc") == 0) type = ASC;
-  else if (strcasecmp(string, "iais") == 0) type = IAIS;
-  else if (strcasecmp(string, "front") == 0) type = FRONT;
-  else if (strcasecmp(string, "x3d") == 0) type = X3D;
-  else if (strcasecmp(string, "rxp") == 0) type = RXP;
-  else if (strcasecmp(string, "ais") == 0) type = AIS;
-  else if (strcasecmp(string, "oct") == 0) type = OCT;
-  else if (strcasecmp(string, "txyzr") == 0) type = TXYZR;
-  else if (strcasecmp(string, "xyzr") == 0) type = XYZR;
-  else if (strcasecmp(string, "leica") == 0) type = LEICA;
-  else if (strcasecmp(string, "xyz_rgb") == 0) type = XYZ_RGB;
-  else if (strcasecmp(string, "ks") == 0) type = KS;
-  else if (strcasecmp(string, "ks_rgb") == 0) type = KS_RGB;
-  else if (strcasecmp(string, "stl") == 0) type = STL;
-  else if (strcasecmp(string, "pcl") == 0) type = PCL;
-  else if (strcasecmp(string, "pci") == 0) type = PCI;
-  else if (strcasecmp(string, "cad") == 0) type = UOS_CAD;
-  else if (strcasecmp(string, "velodyne") == 0) type = VELODYNE;
-  else if (strcasecmp(string, "velodyne_frames") == 0) type = VELODYNE_FRAMES;
-  else return false;
-  return true;
-}
-
-
-/**
- * Reads specified scans from given directory.
- * Scan poses will NOT be initialized after a call
- * to this function. It loads a shared lib where the
- * actual file processing takes place
- *
- * @param type Specifies the type of the flies to be loaded
- * @param start Starts to read with this scan
- * @param end Stops with this scan
- * @param _dir The drectory containing the data
- * @param maxDist Reads only Points up to this distance
- * @param minDist Reads only Points from this distance
- * @param openFileForWriting Opens .frames files to store the
- *        scan matching results
- */
-void Scan::readScans(reader_type type,
-		     int start, int end, string &_dir, int maxDist, int minDist,
-		     bool openFileForWriting)
-{
-  outputFrames = openFileForWriting;
-  dir = _dir;
-  double eu[6] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
-  vector <Point> ptss;
-  int _fileNr;
-  scanIOwrapper my_ScanIO(type);
-
-  // read Scan-by-scan until no scan is available anymore
-  while ((_fileNr = my_ScanIO.readScans(start, end, dir, maxDist, minDist, eu, ptss)) != -1) {
-    Scan *currentScan = new Scan(eu, maxDist);
-
-    currentScan->fileNr = _fileNr;
-
-    currentScan->points = ptss;    // copy points
-    ptss.clear();                  // clear points
-    allScans.push_back(currentScan);
-  }
-  return;
-}
-
-void Scan::toGlobal(double voxelSize, int nrpts) {
-  this->calcReducedPoints(voxelSize, nrpts);
-  this->transform(this->transMatOrg, INVALID);
-}
-
-void Scan::readScansRedSearch(reader_type type,
-		     int start, int end, string &_dir, int maxDist, int minDist,
-						double voxelSize, int nrpts, // reduction parameters
-						int nns_method, bool cuda_enabled,
-						bool openFileForWriting)
-{
-  outputFrames = openFileForWriting;
-  dir = _dir;
-  double eu[6] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
-  vector <Point> ptss;
-  int _fileNr;
-  scanIOwrapper my_ScanIO(type);
-
-#ifndef _NO_PARALLEL_READ
-#ifdef _OPENMP
-  #pragma omp parallel
-  {
-    #pragma omp single nowait
-    {
-#endif
-#endif
-      // read Scan-by-scan until no scan is available anymore
-      while ((_fileNr = my_ScanIO.readScans(start, end, dir, maxDist, minDist, eu, ptss)) != -1) {
-        Scan *currentScan = new Scan(eu, maxDist);
-        currentScan->fileNr = _fileNr;
-
-        currentScan->points = ptss;    // copy points
-        ptss.clear();                  // clear points
-        allScans.push_back(currentScan);
-
-#ifndef _NO_PARALLEL_READ
-#ifdef _OPENMP
-#pragma omp task
-#endif
-#endif
-        {
-          cout << "reducing scan " << currentScan->fileNr << " and creating searchTree" << endl;
-          currentScan->calcReducedPoints(voxelSize, nrpts);
-          currentScan->transform(currentScan->transMatOrg, INVALID); //transform points to initial position
-          currentScan->clearPoints();
-          currentScan->createTree(nns_method, cuda_enabled);
-        }
-      }
-
-#ifndef _NO_PARALLEL_READ
-#ifdef _OPENMP
-     }
-  }
-#pragma omp taskwait
-#endif
-#endif
-
-  return;
-}
-
-
-Scan::scanIOwrapper::scanIOwrapper(reader_type type){
-  // load the lib
-  string lib_string;
-  switch (type) {
-  case UOS:
-    lib_string = "scan_io_uos";
-    break;
-  case UOS_MAP:
-    lib_string = "scan_io_uos_map";
-    break;
-  case UOS_FRAMES:
-    lib_string = "scan_io_uos_frames";
-    break;
-  case UOS_MAP_FRAMES:
-    lib_string = "scan_io_uos_map_frames";
-    break;
-  case UOS_RGB:
-    lib_string = "scan_io_uos_rgb";
-    break;
-  case OLD:
-    lib_string = "scan_io_old";
-    break;
-  case RTS:
-    lib_string = "scan_io_rts";
-    break;
-  case RTS_MAP:
-    lib_string = "scan_io_rts_map";
-    break;
-  case IFP:
-    lib_string = "scan_io_ifp";
-    break;
-  case RIEGL_TXT:
-    lib_string = "scan_io_riegl_txt";
-    break;
-  case RIEGL_PROJECT:
-    lib_string = "scan_io_riegl_project";
-    break;
-  case RIEGL_RGB:
-    lib_string = "scan_io_riegl_rgb";
-    break;
-  case RIEGL_BIN:
-    lib_string = "scan_io_riegl_bin";
-    break;
-  case ZAHN:
-    lib_string = "scan_io_zahn";
-    break;
-  case PLY:
-    lib_string = "scan_io_ply";
-    break;
-  case WRL:
-    lib_string = "scan_io_wrl";
-    break;
-  case XYZ:
-    lib_string = "scan_io_xyz";
-    break;
-  case ZUF:
-    lib_string = "scan_io_zuf";
-    break;
-  case ASC:
-    lib_string = "scan_io_asc";
-    break;
-  case IAIS:
-    lib_string = "scan_io_iais";
-    break;
-  case FRONT:
-    lib_string = "scan_io_front";
-    break;
-  case X3D:
-    lib_string = "scan_io_x3d";
-    break;
-  case RXP:
-    lib_string = "scan_io_rxp";
-    break;
-  case AIS:
-    lib_string = "scan_io_ais";
-    break;
-  case OCT:
-    lib_string = "scan_io_oct";
-    break;
-  case TXYZR:
-    lib_string = "scan_io_txyzr";
-    break;
-  case XYZR:
-    lib_string = "scan_io_xyzr";
-    break;
-  case LEICA:
-    lib_string = "scan_io_leica_txt";
-    break;
-  case XYZ_RGB:
-    lib_string = "scan_io_xyz_rgb";
-    break;
-  case KS:
-    lib_string = "scan_io_ks";
-    break;
-  case KS_RGB:
-    lib_string = "scan_io_ks_rgb";
-    break;
-  case STL:
-    lib_string = "scan_io_stl";
-    break;
-  case PCL:
-    lib_string = "scan_io_pcl";
-    break;
-  case PCI:
-    lib_string = "scan_io_pci";
-    break;
-  case UOS_CAD:
-    lib_string = "scan_io_cad";
-    break;
-  case VELODYNE:
-    lib_string = "scan_io_velodyne";
-    break;
-  case VELODYNE_FRAMES:
-    lib_string = "scan_io_velodyne_frames";
-    break;
-  default:
-    cerr << "Don't recognize format " << type << endl;
-    return;
-  }
-
-#ifdef WIN32
-  lib_string += ".dll";
-#elif __APPLE__
-  lib_string = "lib/lib" + lib_string + ".dylib";
-#else
-  lib_string = "lib" + lib_string + ".so";
-#endif
-  cerr << "Loading shared lib " << lib_string;
-
-#ifdef _MSC_VER
-  hinstLib = LoadLibrary(lib_string.c_str());
-  if (!hinstLib) {
-    cerr << "Cannot load library: " << lib_string.c_str() << endl;
-    exit(-1);
-  }
-
-  cerr << " ... done." << endl << endl;
-
-  create_sio* create_ScanIO = (create_sio*)GetProcAddress(hinstLib, "create");
-
-  if (!create_ScanIO) {
-    cerr << "Cannot load symbol create " << endl;
-	FreeLibrary(hinstLib);
-    exit(-1);
-  }
-
-#else
-  ptrScanIO = dlopen(lib_string.c_str(), RTLD_LAZY);
-
-  if (!ptrScanIO) {
-    cerr << "Cannot load library: " << dlerror() << endl;
-    exit(-1);
-  }
-
-  cerr << " ... done." << endl << endl;
-
-  // reset the errors
-  dlerror();
-
-  // load the symbols
-  create_sio* create_ScanIO = (create_sio*)dlsym(ptrScanIO, "create");
-  const char* dlsym_error = dlerror();
-  if (dlsym_error) {
-    cerr << "Cannot load symbol create: " << dlsym_error << endl;
-    exit(-1);
-  }
-#endif
-
-  // create an instance of ScanIO
-  my_ScanIO = create_ScanIO();
-}
-
-Scan::scanIOwrapper::~scanIOwrapper(){
-#ifdef _MSC_VER
-  destroy_sio* destroy_ScanIO = (destroy_sio*)GetProcAddress(hinstLib, "destroy");
-
-  if (!destroy_ScanIO) {
-    cerr << "Cannot load symbol destroy " << endl;
-    FreeLibrary(hinstLib);
-    exit(-1);
-  }
-  destroy_ScanIO(my_ScanIO);
-#else
-  destroy_sio* destroy_ScanIO = (destroy_sio*)dlsym(ptrScanIO, "destroy");
-  const char* dlsym_error = dlerror();
-  if (dlsym_error) {
-    cerr << "Cannot load symbol create: " << dlsym_error << endl;
-    exit(-1);
-  }
-  destroy_ScanIO(my_ScanIO);
-#endif
-}
-
-int Scan::scanIOwrapper::readScans(int start, int end, string &dir, int maxDist, int minDist,double *euler, vector<Point> &ptss) {
-  return my_ScanIO->readScans(start, end, dir, maxDist, minDist, euler, ptss);
+  return max;
 }

@@ -2,6 +2,7 @@
  *  @brief An optimized k-d tree implementation
  *  @author Andreas Nuechter. Institute of Computer Science, University of Osnabrueck, Germany.
  *  @author Kai Lingemann. Institute of Computer Science, University of Osnabrueck, Germany.
+ *  @author Thomas Escher
  */
 
 #ifdef _MSC_VER
@@ -9,7 +10,7 @@
 #endif
 
 #include "slam6d/kd.h"
-#include "slam6d/globals.icc"          
+#include "slam6d/globals.icc"
 
 #include <iostream>
 using std::cout;
@@ -45,18 +46,18 @@ KDtree::KDtree(double **pts, int n)
     zmin = min(zmin, pts[i][2]);
     zmax = max(zmax, pts[i][2]);
   }
-
+  
   // Leaf nodes
   if ((n > 0) && (n <= 10)) {
-    leaf.p = new double*[n];
     npts = n;
+    leaf.p = new double*[n];
     memcpy(leaf.p, pts, n * sizeof(double *));
     return;
   }
-
+  
   // Else, interior nodes
   npts = 0;
-
+  
   node.center[0] = 0.5 * (xmin+xmax);
   node.center[1] = 0.5 * (ymin+ymax);
   node.center[2] = 0.5 * (zmin+zmax);
@@ -84,12 +85,11 @@ KDtree::KDtree(double **pts, int n)
   double splitval = node.center[node.splitaxis];
 
   if ( fabs(max(max(node.dx,node.dy),node.dz)) < 0.01 ) {
-    leaf.p = new double*[n];
     npts = n;
+    leaf.p = new double*[n];
     memcpy(leaf.p, pts, n * sizeof(double *));
     return;
   }
-
 
   double **left = pts, **right = pts + n - 1;
   while (1) {
@@ -101,6 +101,7 @@ KDtree::KDtree(double **pts, int n)
       break;
     swap(*left, *right);
   }
+  
   // Build subtrees
   int i;
 #ifdef WITH_OPENMP_KD                   // does anybody know the reason why this is slower ?? --Andreas
@@ -110,6 +111,22 @@ KDtree::KDtree(double **pts, int n)
   for (i = 0; i < 2; i++) {
     if (i == 0) node.child1 = new KDtree(pts,	left-pts);
     if (i == 1) node.child2 = new KDtree(left, n-(left-pts));
+  }
+}
+
+KDtree::~KDtree()
+{
+  if (!npts) {
+#ifdef WITH_OPENMP_KD
+    omp_set_num_threads(OPENMP_NUM_THREADS);
+#pragma omp parallel for schedule(dynamic)
+#endif
+    for (int i = 0; i < 2; i++) {
+      if (i == 0 && node.child1) delete node.child1;
+      if (i == 1 && node.child2) delete node.child2;
+    }
+  } else {
+      if (leaf.p) delete [] leaf.p;
   }
 }
 
@@ -140,8 +157,8 @@ void KDtree::_FindClosest(int threadNum) const
     for (int i = 0; i < npts; i++) {
       double myd2 = Dist2(params[threadNum].p, leaf.p[i]);
       if (myd2 < params[threadNum].closest_d2) {
-	   params[threadNum].closest_d2 = myd2;
-	   params[threadNum].closest = leaf.p[i];
+        params[threadNum].closest_d2 = myd2;
+        params[threadNum].closest = leaf.p[i];
       }
     }
     return;
@@ -168,5 +185,3 @@ void KDtree::_FindClosest(int threadNum) const
     }
   }
 }
-
-

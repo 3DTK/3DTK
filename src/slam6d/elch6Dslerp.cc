@@ -3,6 +3,12 @@
  * @author Jochen Sprickerhof. Institute of Computer Science, University of Osnabrueck, Germany.
  */
 
+#include "slam6d/elch6Dslerp.h"
+
+#include "slam6d/metaScan.h"
+#include "slam6d/lum6Dquat.h"
+#include "slam6d/globals.icc"
+
 #include <iostream>
 using std::cout;
 using std::cerr;
@@ -15,10 +21,6 @@ using std::ofstream;
 
 #include <boost/graph/graph_traits.hpp>
 using boost::graph_traits;
-
-#include "slam6d/elch6Dslerp.h"
-#include "slam6d/lum6Dquat.h"
-#include "slam6d/globals.icc"
 using namespace NEWMAT;
 /**
  * ELCH loop closing function using SLERP
@@ -74,7 +76,7 @@ void elch6Dslerp::close_loop(const vector <Scan *> &allScans, int first, int las
       meta_start.push_back(allScans[i]);
     }
   }
-  Scan *start = new Scan(meta_start, false, false);
+  MetaScan *start = new MetaScan(meta_start, false, false);
 
   //static size of metascan
   int offset_last_start = 2;
@@ -84,7 +86,7 @@ void elch6Dslerp::close_loop(const vector <Scan *> &allScans, int first, int las
   for(int i = last - offset_last_start; i <= last + offset_last_end && i < n; i++) {
     meta_end.push_back(allScans[i]);
   }
-  Scan *end = new Scan(meta_end, false, false);
+  MetaScan *end = new MetaScan(meta_end, false, false);
 
   double Pl0[16];
   memcpy(Pl0, allScans[last]->get_transMat(), 16 * sizeof(double));

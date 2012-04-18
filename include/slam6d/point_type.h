@@ -3,6 +3,13 @@
  *  @brief Representation of a 3D point type
  *  @author Jan Elsberg. Automation Group, Jacobs University Bremen gGmbH, Germany. 
  */
+
+#ifndef __POINT_TYPE_H__
+#define __POINT_TYPE_H__
+
+#include "point.h"
+#include "data_types.h"
+
 #include <string>
 using std::string;
 #include <iostream>
@@ -14,10 +21,8 @@ using std::endl;
 #include <fstream>
 #include <string.h>
 
-#include "slam6d/point.h"
+class Scan;
 
-#ifndef __POINT_TYPE_H__
-#define __POINT_TYPE_H__
 
 
 class PointType {
@@ -66,6 +71,20 @@ public:
 
   template <class T>
   Point createPoint(T *p);
+  
+  //! Aquire DataPointer objects from \a scan, determined by its types
+  void useScan(Scan* scan);
+  
+  //! Release the DataPointer objects
+  void clearScan();
+  
+  //! Create a point with attributes via the DataPointers from the scan
+  template<typename T>
+  T* createPoint(unsigned int i, unsigned int index = 0);
+  
+  //! Create an array with coordinate+attribute array per point with transfer of ownership
+  template<typename T>
+  T** createPointArray(Scan* scan);
 
 private:
   /**
@@ -89,72 +108,136 @@ private:
 
   bool hasType(unsigned int type);
 
+  unsigned int getScanSize(Scan* scan);
+
+  DataXYZ* m_xyz;
+  DataRGB* m_rgb;
+  DataReflectance* m_reflectance;
+  DataAmplitude* m_amplitude;
+  DataType* m_type;
+  DataDeviation* m_deviation;
 };
 
 
-  template <class T>
-  T *PointType::createPoint(const Point &P, unsigned int index ) {
-    unsigned int counter = 0;
+template <class T>
+T *PointType::createPoint(const Point &P, unsigned int index ) {
+  unsigned int counter = 0;
 
-    T *p = new T[pointdim];
-    p[counter++] = P.x;
-    p[counter++] = P.y;
-    p[counter++] = P.z;
-    if (types & USE_REFLECTANCE) {
-      p[counter++] = P.reflectance;
-    }
-    if (types & USE_AMPLITUDE) {
-      p[counter++] = P.amplitude;
-    }
-    if (types & USE_DEVIATION) {  
-      p[counter++] = P.deviation;
-    }
-    if (types & USE_TYPE) {  
-      p[counter++] = P.type;
-    }
-    if (types & USE_COLOR) {  
-      memcpy(&p[counter], P.rgb, 3);
-      counter++;
-    }
-    if (types & USE_TIME) {  
-//      p[counter++] = P.timestamp;
-    }
-    if (types & USE_INDEX) {  
-      p[counter++] = index; 
-    }
-
-    return p;
+  T *p = new T[pointdim];
+  p[counter++] = P.x;
+  p[counter++] = P.y;
+  p[counter++] = P.z;
+  if (types & USE_REFLECTANCE) {
+    p[counter++] = P.reflectance;
+  }
+  if (types & USE_AMPLITUDE) {
+    p[counter++] = P.amplitude;
+  }
+  if (types & USE_DEVIATION) {  
+    p[counter++] = P.deviation;
+  }
+  if (types & USE_TYPE) {  
+    p[counter++] = P.type;
+  }
+  if (types & USE_COLOR) {  
+    memcpy(&p[counter], P.rgb, 3);
+    counter++;
+  }
+  if (types & USE_TIME) {  
+//    p[counter++] = P.timestamp;
+  }
+  if (types & USE_INDEX) {  
+    p[counter++] = index; 
   }
 
-  template <class T>
-  Point PointType::createPoint(T *p) {
-    Point P;
-    unsigned int counter = 0;
+  return p;
+}
 
-    P.x = p[counter++];
-    P.y = p[counter++];
-    P.z = p[counter++];
-    if (types & USE_REFLECTANCE) {
-      P.reflectance = p[counter++];
-    }
-    if (types & USE_AMPLITUDE) {
-      P.amplitude = p[counter++];
-    }
-    if (types & USE_DEVIATION) {  
-      P.deviation = p[counter++];
-    }
-    if (types & USE_TYPE) {  
-      P.type = p[counter++];
-    }
-    if (types & USE_COLOR) {  
-      memcpy(P.rgb, &p[counter], 3);
-      counter++;
-    }
-    if (types & USE_TIME) {  
-//      P.timestamp = p[counter++];
-    }
+template <class T>
+Point PointType::createPoint(T *p) {
+  Point P;
+  unsigned int counter = 0;
 
-
-    return P;
+  P.x = p[counter++];
+  P.y = p[counter++];
+  P.z = p[counter++];
+  if (types & USE_REFLECTANCE) {
+    P.reflectance = p[counter++];
   }
+  if (types & USE_AMPLITUDE) {
+    P.amplitude = p[counter++];
+  }
+  if (types & USE_DEVIATION) {  
+    P.deviation = p[counter++];
+  }
+  if (types & USE_TYPE) {  
+    P.type = p[counter++];
+  }
+  if (types & USE_COLOR) {  
+    memcpy(P.rgb, &p[counter], 3);
+    counter++;
+  }
+  if (types & USE_TIME) {  
+//    P.timestamp = p[counter++];
+  }
+
+  return P;
+}
+
+template <class T>
+T *PointType::createPoint(unsigned int i, unsigned int index) {
+  unsigned int counter = 0;
+  T* p = new T[pointdim];
+
+  for(unsigned int j = 0; j < 3; ++j)
+    p[counter++] = (*m_xyz)[i][j];
+
+  // if a type is requested try to write the value if the scan provided one
+  if (types & USE_REFLECTANCE) {
+    p[counter++] = (m_reflectance? (*m_reflectance)[i]: 0);
+  }
+  if (types & USE_AMPLITUDE) {
+    p[counter++] = (m_amplitude? (*m_amplitude)[i]: 0);
+  }
+  if (types & USE_DEVIATION) {
+    p[counter++] = (m_deviation? (*m_deviation)[i]: 0);
+  }
+  if (types & USE_TYPE) {
+    p[counter++] = (m_type? (*m_type)[i]: 0);
+  }
+  if (types & USE_COLOR) {
+    if(m_rgb)
+      memcpy(&p[counter], (*m_rgb)[i], 3);
+    else
+      p[counter] = 0;
+    counter++;
+  }
+  if (types & USE_TIME) {
+  }
+  if (types & USE_INDEX) {
+    p[counter++] = index;
+  }
+
+  return p;
+}
+
+template<typename T>
+T** PointType::createPointArray(Scan* scan)
+{
+  // access data with prefetching
+  useScan(scan);
+  
+  // create a float array with requested attributes by pointtype via createPoint
+  unsigned int nrpts = getScanSize(scan);
+  T** pts = new T*[nrpts];
+  for(unsigned int i = 0; i < nrpts; i++) {
+    pts[i] = createPoint<T>(i);
+  }
+  
+  // unlock access to data, remove unneccessary data fields
+  clearScan();
+  
+  return pts;
+}
+  
 #endif

@@ -290,6 +290,20 @@ inline void MMult(const T *M1,
 }
 
 /**
+ * Transforms a vactor with a matrix (P = M * V)
+ * @param M the transformation matrix
+ * @param v the initial vector
+ * @param p the transformt vector
+ */
+template <class T>
+inline void VTrans(const T *M, const T *V, T *P)
+{
+    P[0] = M[0] * V[0] + M[4] * V[1] + M[8] * V[2] + M[12];
+    P[1] = M[1] * V[0] + M[5] * V[1] + M[9] * V[2] + M[13];
+    P[2] = M[2] * V[0] + M[6] * V[1] + M[10] * V[2] + M[14];
+}
+
+/**
  * Converts an Euler angle to a 3x3 matrix
  *
  * @param rPosTheta  vector of Euler angles
@@ -1266,5 +1280,12 @@ inline void transform3(const double *alignxf, const double *point, double *tpoin
   tpoint[2] = point[0] * alignxf[2] + point[1] * alignxf[6] + point[2] * alignxf[10] + alignxf[14];
 }
 
+inline std::string trim(const std::string& source)
+{
+  unsigned int start = 0, end = source.size() - 1;
+  while(source[start] == ' ') start++;
+  while(source[end] == ' ') end--;
+  return source.substr(start, end - start + 1);
+}
 
 #endif

@@ -3,6 +3,12 @@
  * @author Jochen Sprickerhof. Institute of Computer Science, University of Osnabrueck, Germany.
  */
 
+
+#include "slam6d/elch6Deuler.h"
+
+#include "slam6d/metaScan.h"
+#include "slam6d/lum6Deuler.h"
+
 #include <iostream>
 using std::cout;
 using std::cerr;
@@ -13,9 +19,6 @@ using std::ofstream;
 
 #include <boost/graph/graph_traits.hpp>
 using boost::graph_traits;
-
-#include "slam6d/elch6Deuler.h"
-#include "slam6d/lum6Deuler.h"
 using namespace NEWMAT;
 
 #ifdef _MSC_VER
@@ -58,12 +61,12 @@ void elch6Deuler::close_loop(const vector <Scan *> &allScans, int first, int las
   meta_start.push_back(allScans[first]);
   meta_start.push_back(allScans[first + 1]);
   meta_start.push_back(allScans[first + 2]);
-  Scan *start = new Scan(meta_start, false, false);
+  MetaScan *start = new MetaScan(meta_start, false, false);
   vector <Scan *> meta_end;
   meta_end.push_back(allScans[last - 2]);
   meta_end.push_back(allScans[last - 1]);
   meta_end.push_back(allScans[last]);
-  Scan *end = new Scan(meta_end, false, false);
+  MetaScan *end = new MetaScan(meta_end, false, false);
 
   for(int i = last - 2; i <= last; i++) {
     for(int j = 0; j < 6; j++) {
