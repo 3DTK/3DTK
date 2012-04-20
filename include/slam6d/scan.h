@@ -23,10 +23,7 @@ typedef std::vector<Scan*> ScanVector;
 class SearchTree;
 class ANNkd_tree;
 
-
-
 /** HOWTO scan
-
 First: Load scans (if you want to use the scanmanager, use ManagedScan)
 
   BasicScan/ManagedScan::openDirectory(path, type, start, end);
@@ -268,10 +265,7 @@ public:
 
 
   /* Common transformation and matching functions */
-
-
   void mergeCoordinatesWithRoboterPosition(Scan* prevScan);
-
   void transformAll(const double alignxf[16]);
   void transformAll(const double alignQuat[4], const double alignt[3]);
   
@@ -368,8 +362,6 @@ protected:
   
   //! Flags to load or save the octtrees from/to storage
   bool octtree_loadOct, octtree_saveOct;
-  
-  
   
   /**
    * Basic initializing constructor calling the initalization function.

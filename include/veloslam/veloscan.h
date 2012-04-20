@@ -20,6 +20,7 @@
 #include "veloslam/gridcluster.h"
 
  bool FilterNOMovingObjcets(clusterFeature &glu, cluster &gluData);
+
 class Trajectory
 {
   public:
@@ -47,13 +48,9 @@ public:
 
   static void readScans(IOType type,
 				    int start, int end, string &dir, int maxDist, int minDist,
-<<<<<<< HEAD
-				    bool openFileForWriting = false);  
-  static void readScansRedSearch(IOType type,
-=======
 				    bool openFileForWriting = false);
-  static void readScansRedSearch(reader_type type,
->>>>>>> kure/master
+
+  static void readScansRedSearch(IOType type,
 						   int start, int end, string &dir, int maxDist, int minDist,
 						   double voxelSize, int nrpts, // reduction parameters
 						   int nns_method, bool cuda_enabled,
