@@ -315,9 +315,9 @@ void Scan::mergeCoordinatesWithRoboterPosition(Scan* prevScan)
 void Scan::transformAll(const double alignxf[16])
 {
   DataXYZ xyz(get("xyz"));
-  
-  #pragma omp parallel for
-  for(unsigned int i = 0; i < xyz.size(); ++i) {
+  unsigned int i=0 ;
+//  #pragma omp parallel for
+  for(; i < xyz.size(); ++i) {
     transform3(alignxf, xyz[i]);
   }
   // TODO: test for ManagedScan compability, may need a touch("xyz") to mark saving the new values
@@ -331,8 +331,9 @@ void Scan::transformReduced(const double alignxf[16])
 #endif //WITH_METRICS
   
   DataXYZ xyz_r(get("xyz reduced"));
-  #pragma omp parallel for
-  for(unsigned int i = 0; i < xyz_r.size(); ++i) {
+  unsigned int i=0;
+ // #pragma omp parallel for
+  for( ; i < xyz_r.size(); ++i) {
     transform3(alignxf, xyz_r[i]);
   }
   

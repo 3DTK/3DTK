@@ -18,10 +18,10 @@ using std::stringstream;
 
 #include "slam6d/scan.h"
 #include "slam6d/Boctree.h"
-#include "slam6d/scan_io.h"
+//#include "slam6d/scan_io.h"
 #include "slam6d/d2tree.h"
 #include "slam6d/kd.h"
-#include "slam6d/kdc.h"
+//#include "slam6d/kdc.h"
 #include "veloslam/veloscan.h"
 #include "veloslam/trackermanager.h"
 #include "veloslam/debugview.h"
@@ -70,6 +70,7 @@ using std::flush;
 #include "veloslam/color_util.h"
 
 bool DebugDrawFinished =false;
+bool ICPFinished =false;
 bool save_animation=false;
 int anim_frame_rate;
 extern int scanCount;
@@ -86,8 +87,9 @@ int x_lbefore,y_lbefore;
 int x_rbefore,y_rbefore;
 int z_before1,z_before2;
 
-float x_move,y_move;
-float x_move_save,y_move_save;
+bool buttonSaveLeft,  buttonSaveMiddle ,  buttonSaveRight;
+float x_move,y_move,z_move;
+float x_move_save,y_move_save, z_move_save;
 float x_rotate,y_rotate,z_rotate;
 float x_rotate_save,y_rotate_save,z_rotate_save;
 float m_zoom;
@@ -433,6 +435,7 @@ void DrawObjectPoint(cluster &gluData1, int size , float r, float g, float b, do
 	glEnd();
 }
 
+//  change the mat for the firstScan  coodration.
 void GetCurrecntdelteMat(Scan& CurrentScan ,  Scan& firstScan,  double *deltaMat)
 {
 	 //Point p, q;
@@ -447,6 +450,7 @@ int DrawAll_ScanPoints_Number(vector <Scan *> allScans,  int psize, float r, flo
 	 for(int i =0; i <n ;i ++)
 	 {
 		 Scan *firstScan = (Scan *)(g_pfirstScan);
+//		 Scan *firstScan = allScans[0];
 		 Scan *CurrentScan = allScans[i];
 		 double  deltaMat[16];
 
@@ -669,7 +673,7 @@ void glDumpWindowPPM_debugView(const char *filename, GLenum mode)
 
  //   glReadPixels(0, 0, win_width, win_height,
 //                        GL_RGB, GL_UNSIGNED_BYTE, buffer);
-  
+
   // Open the output file
   fp.open(filename, ios::out);
 
@@ -717,9 +721,9 @@ static void Reshape(int w, int h)
     glLoadIdentity();
 
 	gluPerspective(45.0f,
-						m_aspect,
-						0.0f,
-						4000.0f);
+					m_aspect,
+					0.0f,
+					4000.0f);
 
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
@@ -734,6 +738,12 @@ static void Key(unsigned char key, int x, int y)
       case KEY_ESC:
 	    exit(0);
 		break;
+
+    //case GLUT_KEY_P:
+    //    printf("next\n");
+    //    g_pause != g_pause;
+    //    cout << g_pause;
+    //    break;
 
     }
 }
@@ -764,29 +774,129 @@ static void Key(unsigned char key, int x, int y)
 		#define GLUT_KEY_INSERT			  108
 */
 
+//GLUT_LEFT_BUTTON
+//GLUT_MIDDLE_BUTTON
+//GLUT_RIGHT_BUTTON
+
+//GLUT_DOWN
+//GLUT_UP
+
+static void MouseMove(int x, int y)
+{
+    int mod = glutGetModifiers();
+  	switch(mod)
+	{
+
+    	case GLUT_ACTIVE_CTRL :
+            x_rotate += (y - z_move_save)/100;
+            if (x_rotate > 360)
+              x_rotate=x_rotate - 360;
+            if (x_rotate < -360)
+              x_rotate=x_rotate + 360;
+    		cout << "Ctrl Held" << endl;
+            return;
+
+    	case GLUT_ACTIVE_SHIFT :
+            y_rotate += (y - z_move_save)/100;
+            if (y_rotate > 360)
+              y_rotate=y_rotate - 360;
+            if (y_rotate < -360)
+              y_rotate=y_rotate + 360;
+
+    		cout << "Shift Held" << endl;
+            return;
+
+    	case GLUT_ACTIVE_ALT :
+            float temp = (x - x_move_save)/100;
+     		z_rotate += atanf(temp);
+
+    		cout << "Alt Held" << endl;
+            return;
+
+  }
+
+ if(buttonSaveLeft)
+  {
+      x_move += (x - x_move_save)/100;
+      z_move += (y - z_move_save)/100;
+  }
+
+  if(buttonSaveMiddle)
+  {
+     float multiplay = (y - z_move_save)/1000;
+     m_zoom =m_zoom*(1+multiplay);
+  }
+
+  if(buttonSaveRight)
+  {
+      float multiplay = (y - z_move_save)/1000;
+      m_zoom =m_zoom*(1+multiplay);
+  }
+
+   cout << "mouse move " << buttonSaveLeft << buttonSaveMiddle <<buttonSaveRight << " "
+    << x  << "  "<< y <<endl;
+}
+
+static void PassiveMouseMove(int x, int y)
+{
+
+}
+
+static void MouseRotate(int x, int y, int z)
+{
+    cout << "mouse Rotate "  << x  << "  "<< y << "  "<< z <<endl;
+
+}
+
+static void MouseKey(int button, int state, int x, int y)
+{
+    x_move_save=x;
+    y_move_save;
+    z_move_save=y;
+
+	switch (button)
+	{
+	case GLUT_LEFT_BUTTON:
+        if(state == GLUT_DOWN)
+           buttonSaveLeft=true;
+        else
+           buttonSaveLeft=false;
+		break;
+
+	case GLUT_MIDDLE_BUTTON:
+        if(state == GLUT_DOWN)
+           buttonSaveMiddle=true;
+        else
+           buttonSaveMiddle=false;
+		break;
+
+	case GLUT_RIGHT_BUTTON:
+        if(state == GLUT_DOWN)
+           buttonSaveRight=true;
+        else
+           buttonSaveRight=false;
+		break;
+	}
+}
+
 static void SpecialKey(int key, int x, int y)
 {
 	switch (key)
 	{
-    //case GLUT_KEY_P:
-    //    printf("next\n");
-    //    g_pause != g_pause;
-    //    cout << g_pause;
-    //    break;
 	case GLUT_KEY_UP:
-		x_move --;
+		z_move --;
 		break;
 
 	case GLUT_KEY_DOWN:
-		x_move ++;
+		z_move ++;
 		break;
 
 	case GLUT_KEY_LEFT:
-		y_move --;
+		x_move --;
 		break;
 
 	case GLUT_KEY_RIGHT:
-		y_move ++;
+		x_move ++;
 		break;
 
 	case GLUT_KEY_PAGE_UP:
@@ -852,8 +962,8 @@ static void SpecialKey(int key, int x, int y)
 		break;
 
 	case GLUT_KEY_F11:
-	       printf("paseu\n");
-           g_pause != g_pause;
+	    printf("paseu\n");
+        g_pause != g_pause;
 		break;
 
 	case GLUT_KEY_F12:
@@ -880,17 +990,63 @@ static void Draw(void)
 	glRotatef(y_rotate,0,1,0);
 	glRotatef(z_rotate,0,0,1);
 
-	glTranslatef(x_move,y_move,0);
+	glTranslatef(x_move,y_move,z_move);
 	glScalef(m_zoom, m_zoom, m_zoom);
 
+	int scansize = Scan::allScans.size();
 //	boost::mutex::scoped_lock lock(draw_mutex);
 
-	int scansize = Scan::allScans.size();
-    DrawAll_ScanPoints_Number(Scan::allScans, 1, 0.8, 0.8, 0.8, scansize);
+  /*  Point p1, p2, p3;
+
+	if  (scansize <5)
+	{
+		DebugDrawFinished =true;
+		return ;
+	}
+
+    Scan *firstScan = (Scan *)g_pfirstScan;
+    Scan *CurrentScan = Scan::allScans[3];
+
+    if (CurrentScan == NULL)
+ 	{
+		DebugDrawFinished =true;
+		return ;
+	}
+
+    double  deltaMat[16];
+    double  deltaMatNext[16];
+
+    GetCurrecntdelteMat(*CurrentScan , *firstScan,  deltaMat);
+    double PosTheta[3];
+    double Pos[3];
+    Matrix4ToEuler(deltaMat, PosTheta, Pos);
+
+    cout << "  pose of current "
+         << "  " <<  PosTheta [0]
+         << "  " <<  PosTheta [1]
+         << "  " <<  PosTheta [2] <<endl;
+
+   // you need to find the direction of ego-vehicle.
+    p1.x = -4000 * cos ( PosTheta [1]) ;  p1.y= 2000;  p1.z= 4000 * sin ( PosTheta [1]);
+//    p1.x = 0 ;  p1.y= 15000;  p1.z= 0;
+
+    p2.x = 0; p2.y= 0;  p2.z= 0;
+    p3.x = 0; p3.y=200;  p3.z= 0;
+
+    p1.transform(deltaMat);
+    p2.transform(deltaMat);
+    p3.transform(deltaMat);
+
+    gluLookAt(p1.x,   p1.y,   p1.z,
+              p2.x,   p2.y,   p2.z,
+              p3.x,   p3.y,   p3.z);
+*/
+
+    DrawAll_ScanPoints_Number(Scan::allScans, 1, 0.8, 0.8, 0.8, scansize-1);
 //  Draw_ALL_Object_TYPE(*(VeloScan *)( (Scan::allScans[scansize-1])) ,1, 1, 0, 0, 1   );
-    trackMgr.DrawTrackersMovtion_Long_Number_All(Scan::allScans, scansize);
+    trackMgr.DrawTrackersMovtion_Long_Number_All(Scan::allScans, scansize-1);
     trackMgr.DrawEgoTrajectory();
-	trackMgr.DrawTrackersContrailAfterFilted(Scan::allScans);
+//	trackMgr.DrawTrackersContrailAfterFilted(Scan::allScans);
 	glFlush();
  	glutSwapBuffers();
 
@@ -912,20 +1068,27 @@ int Show(int frameno)
 
 	m_eyex=0,  m_eyey=0,  m_eyez=80;
 	m_centerx=0,  m_centery=0, m_centerz=0;
-	m_upx=0,  m_upy=1, m_upz=0;
+	m_upx=0,  m_upy=1,  m_upz=0;
+
+    buttonSaveLeft=false;
+    buttonSaveMiddle=false;
+    buttonSaveRight=false;
 
 	x_move=0.0;
 	y_move=0.0;
+    z_move=0.0;
+
 	x_rotate=90.0;
 	y_rotate=0.0;
 	z_rotate=0.0;
+
 	m_zoom=0.01;
 
 	x_lbefore=0,y_lbefore=0;
 	x_rbefore=0,y_rbefore=0;
 	z_before1=0,z_before2=0;
 
-    type = GLUT_RGB | GLUT_DEPTH|GLUT_DOUBLE;
+    type = GLUT_RGB | GLUT_DEPTH | GLUT_DOUBLE;
     glutInitDisplayMode(type);
 
     glutInitWindowSize(800, 600);
@@ -934,8 +1097,18 @@ int Show(int frameno)
     glutReshapeFunc(Reshape);
     glutKeyboardFunc(Key);
     glutSpecialFunc(SpecialKey);
+    glutMouseFunc(MouseKey);
+    glutMotionFunc(MouseMove);
+    glutPassiveMotionFunc(PassiveMouseMove);
+    glutSpaceballRotateFunc(MouseRotate);
 
     g_frame = frameno;
+
+    while(ICPFinished ==false)
+    {
+			 Sleep(1);
+		//	 cout << "sleep" <<endl;
+    }
     glutDisplayFunc(Draw);
     glutMainLoop();
 

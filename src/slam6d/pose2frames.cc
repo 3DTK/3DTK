@@ -82,8 +82,14 @@ int main(int argc, char **argv)
 
   for (;;) {
     if (end > -1 && fileCounter > end) break; // 'nuf read
+#ifndef _MSC_VER
     snprintf(frameFileName,255,"%sscan%.3d.frames",dir,fileCounter);
     snprintf(poseFileName,255,"%sscan%.3d.pose",dir,fileCounter++);
+# else
+    sprintf(frameFileName,"%sscan%.3d.frames",dir,fileCounter);
+    sprintf(poseFileName,"%sscan%.3d.pose",dir,fileCounter++);
+#endif
+
     pose_in.open(poseFileName);
 
     // read 3D scan

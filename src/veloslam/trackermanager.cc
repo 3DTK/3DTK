@@ -108,7 +108,7 @@ int TrackerManager::getNumberofTracker(void)
 int TrackerManager::HandleScan(VeloScan& scanRef,int trackingAlgo)
 {
     //each scan only process once.
-	
+
 	if(scanRef.isTrackerHandled==true)
 		return 0;
 	else
@@ -349,7 +349,7 @@ int TrackerManager::UpdateTrackers(VeloScan& scanRef)
 
 int TrackerManager::AddTrackers(VeloScan& scanRef)
 {
-	cout<<"AddTrackers is running!"<<endl;
+//	cout<<"AddTrackers is running!"<<endl;
 	int i;
 	int size=scanRef.scanClusterArray.size();
     // i is glu id in scan
@@ -413,8 +413,8 @@ int TrackerManager::ListTrackers()
 int TrackerManager::RemoveNoUsedTracker(VeloScan& scanRef)
 {
 
-	cout<<"RemoveNoUsedTracker is running!"<<endl;
-	cout << " current_sliding_window_pos: " << current_sliding_window_pos << " current id " << scanRef.scanid<< endl;
+//	cout<<"RemoveNoUsedTracker is running!"<<endl;
+//	cout << " current_sliding_window_pos: " << current_sliding_window_pos << " current id " << scanRef.scanid<< endl;
 
 	list<Tracker>::iterator it;
 	int trackNO =0;
@@ -450,7 +450,7 @@ int TrackerManager::RemoveNoUsedTracker(VeloScan& scanRef)
 				Iter3++;
 			}
 			while(Iter1!=tracker.statusList.end());
-		}		
+		}
 #endif
 
     	if (tracker.missedTime==4)
@@ -671,7 +671,7 @@ int TrackerManager::UpdateClustersPoistioninTrackers()
         	   firstNO = GetScanID_in_SlidingWindow(glu1.frameNO,
                                  current_sliding_window_pos,
                                  sliding_window_size);
-                secondNO = GetScanID_in_SlidingWindow(glu2.frameNO,
+               secondNO = GetScanID_in_SlidingWindow(glu2.frameNO,
                                  current_sliding_window_pos,
                                  sliding_window_size);
  			   if(firstNO <0 || secondNO< 0 )
@@ -735,12 +735,11 @@ CMatrix TrackerManager::ConstructCostMatrix(VeloScan &scanRef,int *clusterIndex)
 	float kg;
 
 	list<Tracker>::iterator it;
-	for(it=tracks.begin() ; it!=tracks.end();it++)
+	for(it=tracks.begin(); it!=tracks.end(); it++)
 	{
 		Tracker &tracker=*it;
 
 		predictMeasurement=tracker.kalmanFilter.GetPredictMeasurement(rollAngle,delta_Pos);
-
 		standardDeviation=tracker.kalmanFilter.CalMeasureDeviation();
 
 		if (tracker.missMatch)
@@ -820,7 +819,7 @@ CMatrix TrackerManager::ConstructCostMatrix(VeloScan &scanRef,int *clusterIndex)
 
 int TrackerManager::MatchTracksWithClusters(VeloScan &scanRef)
 {
-	cout<<"MatchTracksWithClusters is running!"<<endl;
+//	cout<<"MatchTracksWithClusters is running!"<<endl;
 	if (tracks.empty())
 	{
 		return 0;

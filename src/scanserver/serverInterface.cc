@@ -17,7 +17,9 @@ using namespace boost::interprocess;
 #include "scanserver/serverScan.h"
 #include "scanio/scan_io.h"
 
+#ifndef _MSC_VER
 #include <sys/mman.h> // mlock for avoiding swaps
+#endif
 
 #ifdef WITH_METRICS
 #include "slam6d/metrics.h"

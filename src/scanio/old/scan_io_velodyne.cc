@@ -2,7 +2,7 @@
  * @file
  * @brief Implementation of reading 3D scans
  * @author Andreas Nuechter. Jacobs University Bremen gGmbH
- * @author Dorit Borrmann. Smart Systems Group, Jacobs University Bremen gGmbH, Germany. 
+ * @author Dorit Borrmann. Smart Systems Group, Jacobs University Bremen gGmbH, Germany.
  */
 
 #include "veloslam/velodefs.h"
@@ -49,7 +49,7 @@ typedef struct raw_packet
   {
     unsigned char dat[1200];
     unsigned short revolution;
-    unsigned char status[4]; 
+    unsigned char status[4];
   } raw_packet_t;
 
 
@@ -58,7 +58,7 @@ typedef unsigned char BYTE;
 long CountOfLidar = 0;
 
 // 我们借到的雷达的标定数据
-double velodyne_calibrated[VELODYNE_NUM_LASERS][5] = 
+double velodyne_calibrated[VELODYNE_NUM_LASERS][5] =
 {
 		{	-7.1581192,	-4.5,	102,	21.560343,	-2.5999999},
 		{	-6.8178215,	-3.4000001,	125,	21.516994,	2.5999999},
@@ -157,7 +157,7 @@ int laser_phi_compare(const void *_a, const void *_b)
     int a = *((int*) _a);
     int b = *((int*) _b);
 
-    if (velodyne_calibrated[a][0] < velodyne_calibrated[b][0]) 
+    if (velodyne_calibrated[a][0] < velodyne_calibrated[b][0])
         return -1;
 
     return 1;
@@ -204,11 +204,11 @@ int velodyne_calib_precompute()
     //vertCorrection  rotCorrection  distCorrection  vertOffsetCorrection  horizOffsetCorrection
     for ( i = 0; i < VELODYNE_NUM_LASERS; i++ )
     {
-        vertCorrection[i] = ( velodyne_calibrated[i][0] ) * RADIANS_PER_LSB;
-        rotCorrection[i] = ( velodyne_calibrated[i][1] ) * RADIANS_PER_LSB;
+        vertCorrection[i] = velodyne_calibrated[i][0] * RADIANS_PER_LSB;
+        rotCorrection[i] =  velodyne_calibrated[i][1] * RADIANS_PER_LSB;
         distCorrection[i] = velodyne_calibrated[i][2] * METERS_PER_CM;
         vertoffsetCorrection[i] = velodyne_calibrated[i][3] * METERS_PER_CM;
-        horizdffsetCorrection[i] = velodyne_calibrated[i][4] * METERS_PER_CM;  
+        horizdffsetCorrection[i] = velodyne_calibrated[i][4] * METERS_PER_CM;
     }
 
     return 0;
@@ -218,7 +218,7 @@ int read_one_packet ( FILE *fp, vector<Point> &ptss, int maxDist, int minDist )
 {
   int maxDist2 = sqr(maxDist);
   int minDist2 = sqr(minDist);
-  
+
     int  c, i, j;
     unsigned char Head;
     BYTE buf[BLOCK_SIZE];
@@ -250,7 +250,7 @@ int read_one_packet ( FILE *fp, vector<Point> &ptss, int maxDist, int minDist )
 
     int circle_col = 0;
     int circle_row = 0;
-   
+
 	for ( c = 0 ; c < CIRCLELENGTH; c++ )
 	{
 #ifdef _MSC_VER
@@ -328,11 +328,10 @@ int read_one_packet ( FILE *fp, vector<Point> &ptss, int maxDist, int minDist )
 
 			//		point.type|=POINT_TYPE_INVALID;
 
-					//主要是为了保证左手系和屏幕显示的习惯相似
 					point.type = POINT_TYPE_GROUND;
 					point.x=x*100;
 					point.y=z*100;
-					point.z=y*100;
+					point.z=-y*100;
    					{
 						ptss.push_back(point);
 					}
@@ -351,11 +350,11 @@ int read_one_packet ( FILE *fp, vector<Point> &ptss, int maxDist, int minDist )
 
 /**
  * Reads specified scans from given directory in
- * the file format Riegl Laser Measurement GmbH 
+ * the file format Riegl Laser Measurement GmbH
  * uses. It will be compiled as shared lib.
  *
  * Scan poses will NOT be initialized after a call
- * to this function. Initial pose estimation works 
+ * to this function. Initial pose estimation works
  * only with the -p switch, i.e., trusting the initial
  * estimations by Riegl.
  *
@@ -367,8 +366,8 @@ int read_one_packet ( FILE *fp, vector<Point> &ptss, int maxDist, int minDist )
  * 2. Export acqusition location (after you have registered
  *    with the Riegl software)
  *    Export SOP
- *    Write out as .dat file 
- * 
+ *    Write out as .dat file
+ *
  * @param start Starts to read with this scan
  * @param end Stops with this scan
  * @param dir The directory from which to read
@@ -388,23 +387,23 @@ int ScanIO_velodyne::readScans(int start, int end, string &dir, int maxDist, int
 
   scanFileName = dir + "scan" + ".bin";
 #ifdef _MSC_VER
-  scan_in = fopen(scanFileName.c_str(),"rb");  
+  scan_in = fopen(scanFileName.c_str(),"rb");
 #else
-  scan_in = fopen64(scanFileName.c_str(),"rb");  
+  scan_in = fopen64(scanFileName.c_str(),"rb");
 #endif
 
   if(scan_in == NULL)
   {
     cerr<<scanFileName <<endl;
 	cerr << "ERROR: Missing file " << scanFileName <<" "<<strerror(errno)<< endl;
-	exit(1); 
+	exit(1);
 	return 0;
   }
 
   velodyne_calib_precompute();
   cout << "Processing Scan " << scanFileName;
   cout.flush();
-  
+
   ptss.reserve(12*32*CIRCLELENGTH);
 
  #ifdef _MSC_VER
@@ -418,10 +417,10 @@ int ScanIO_velodyne::readScans(int start, int end, string &dir, int maxDist, int
   read_one_packet(scan_in, ptss, maxDist, minDist);
   cout << " with " << ptss.size() << " Points";
   cout << " done " << fileCounter<<endl;
- 
+
   fclose(scan_in);
   fileCounter++;
-  
+
   return fileCounter-1;
 }
 
