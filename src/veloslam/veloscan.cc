@@ -783,7 +783,7 @@ int VeloScan::SearchNeigh(cluster& clu,charvv& flagvv,int i,int j)
     return 0;
 }
 
-int VeloScan::CalcClusterFeature(cluster& clu,clusterFeature& f)
+int VeloScan::CalcClusterFeature(cluster& clu, clusterFeature& f)
 {
     f.size=clu.size();
 

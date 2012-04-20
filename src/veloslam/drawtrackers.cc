@@ -25,8 +25,8 @@ extern VeloScan * g_pfirstScan;
 
 int TrackerManager::DrawTrackersMovtion_Long_Number_All(vector <Scan *> allScans, int n)
 {
-	 int i,j,k,colorIdx;
-	 Point p1,p2,p1text,p2text;
+	int i,j,k,colorIdx;
+    Point p1,p2,p1text,p2text;
  	char object_moving_distance[256];
 
 	list<Tracker>::iterator it;
@@ -58,6 +58,7 @@ int TrackerManager::DrawTrackersMovtion_Long_Number_All(vector <Scan *> allScans
     				    continue;
 
     			    Scan *firstScan = (Scan *)g_pfirstScan;
+    			//    Scan *firstScan = allScans[0];
                     Scan *CurrentScan = allScans[firstNO];
 
     				double  deltaMat[16];
@@ -108,7 +109,7 @@ int TrackerManager::DrawTrackersMovtion_Long_Number_All(vector <Scan *> allScans
 			    clusterFeature &glu2=tracker.statusList[i+1];
 				cluster &gluData2=tracker.dataList[i+1];
 
-			   firstNO = GetScanID_in_SlidingWindow(glu1.frameNO,
+			    firstNO = GetScanID_in_SlidingWindow(glu1.frameNO,
                                  current_sliding_window_pos,
                                  sliding_window_size);
                 secondNO = GetScanID_in_SlidingWindow(glu2.frameNO,
@@ -118,6 +119,7 @@ int TrackerManager::DrawTrackersMovtion_Long_Number_All(vector <Scan *> allScans
 				    continue;
 
 			    Scan *firstScan = (Scan *)g_pfirstScan;
+//			    Scan *firstScan = allScans[0];
                 Scan *CurrentScan = allScans[firstNO];
 				Scan *CurrentScanNext = allScans[secondNO];
 

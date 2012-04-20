@@ -34,7 +34,6 @@ public:
 	// for log the lift length trackerID
     int trackerID;
 
-	//int frameNO;
 	int missedTime;//added by yuanjun
 	KalmanFilter kalmanFilter;//added by yuanjun
 	vector<MoveState> moveStateList;//added by yuanjun
