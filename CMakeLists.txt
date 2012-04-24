@@ -118,7 +118,7 @@ ELSE(WITH_GLEE)
 ENDIF(WITH_GLEE)
 
 ## Gridder
-OPTION(WITH_GRIDDER "Whether to build the 2DGridder binary ON/OFF" ON)
+OPTION(WITH_GRIDDER "Whether to build the 2DGridder binary ON/OFF" OFF)
 
 IF(WITH_GRIDDER)
   MESSAGE(STATUS "With 2DGridder")
@@ -146,7 +146,7 @@ ENDIF(WITH_DAVID_3D_SCANNER)
 
 ## Tools
 
-OPTION(WITH_TOOLS "Whether to build additional tools like convergence frame_to_graph etc. ON/OFF" ON)
+OPTION(WITH_TOOLS "Whether to build additional tools like convergence frame_to_graph etc. ON/OFF" OFF)
 
 IF(WITH_TOOLS)
   MESSAGE(STATUS "With Tools")
@@ -157,7 +157,7 @@ ENDIF(WITH_TOOLS)
 
 
 ## Scan reduction
-OPTION(WITH_SCAN_REDUCTION "Whether to build the scan reduction binary scan_red ON/OFF" ON)
+OPTION(WITH_SCAN_REDUCTION "Whether to build the scan reduction binary scan_red ON/OFF" OFF)
 
 IF(WITH_SCAN_REDUCTION)
   MESSAGE(STATUS "With scan_red")
@@ -166,7 +166,7 @@ ELSE(WITH_SCAN_REDUCTION)
 ENDIF(WITH_SCAN_REDUCTION)
 
 ## Scan difference
-OPTION(WITH_SCAN_DIFF "Whether to build the scan_diff binary ON/OFF" ON)
+OPTION(WITH_SCAN_DIFF "Whether to build the scan_diff binary ON/OFF" OFF)
 
 IF(WITH_SCAN_DIFF)
   MESSAGE(STATUS "With scan_diff")
