@@ -15,8 +15,11 @@ using std::cout;
 using std::cerr;
 using std::endl;
 
+#ifdef _MSC_VER
+#include <windows.h>
+#else
 #include <sys/mman.h> // mlock for avoiding swaps
-
+#endif
 
 
 CacheManager::CacheManager(SegmentManager* sm, const char* shm_name, std::size_t cache_size) :
