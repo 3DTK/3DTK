@@ -2,13 +2,13 @@ cmake_minimum_required (VERSION 2.6.1)
 SET(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/3rdparty/CMakeModules" ${CMAKE_MODULE_PATH})
 project (Slam6D)
 
-
 #include_directories(OPENGL_INCLUDE_DIR)
 IF(WIN32)
   set(Boost_USE_STATIC_LIBS TRUE)
 ELSE(WIN32)
   set(Boost_USE_STATIC_LIBS FALSE)
 ENDIF(WIN32)
+
 SET(Boost_ADDITIONAL_VERSIONS "1.42" "1.42.0" "1.44" "1.44.0" "1.45.0" "1.45" "1.46" "1.46.1" "1.47.0" "1.47" "1.48" "1.49")
 IF(WIN32)
   # for some unknown reason no one variant works on all windows platforms
@@ -16,6 +16,7 @@ IF(WIN32)
 ELSE(WIN32)
   find_package( Boost COMPONENTS serialization graph regex filesystem system thread date_time REQUIRED)
 ENDIF(WIN32)
+
 if(Boost_FOUND)
   link_directories(${BOOST_LIBRARY_DIRS})
   include_directories(${Boost_INCLUDE_DIRS})
