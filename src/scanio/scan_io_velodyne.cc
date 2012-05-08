@@ -4,9 +4,9 @@
  * @author Andreas Nuechter. Jacobs University Bremen gGmbH
  * @author Dorit Borrmann. Smart Systems Group, Jacobs University Bremen gGmbH, Germany.
  */
-
+#include "slam6d/point.h"
 #include "veloslam/velodefs.h"
-#include "slam6d/scan_io_velodyne.h"
+#include "scanio/scan_io_velodyne.h"
 #include "slam6d/globals.icc"
 #include <fstream>
 using std::ifstream;
@@ -33,7 +33,7 @@ using namespace std;
 using namespace boost::filesystem;
 
 #define DATA_PATH_PREFIX "scan"
-#define DATA_PATH_SUFFIX ".pcap"
+#define DATA_PATH_SUFFIX ".bin"
 #define POSE_PATH_PREFIX "scan"
 #define POSE_PATH_SUFFIX ".pose"
 
@@ -63,7 +63,6 @@ typedef struct raw_packet
 typedef unsigned char BYTE;
 
 long CountOfLidar = 0;
-
 
 double velodyne_calibrated[VELODYNE_NUM_LASERS][5] =
 {
@@ -141,57 +140,6 @@ double horizdffsetCorrection[VELODYNE_NUM_LASERS];
 
 int physical2logical[VELODYNE_NUM_LASERS];
 int logical2physical[VELODYNE_NUM_LASERS];
-
-std::list<std::string> ScanIO_uos::readDirectory(const char* dir_path, unsigned int start, unsigned int end)
-{
-
-  std::list<std::string> identifiers;
-  for(unsigned int i = start; i <= end; ++i) {
-    // identifier is /d/d/d (000-999)
-    std::string identifier(to_string(i,3));
-    // scan consists of data (.3d) and pose (.pose) files
-    path data(dir_path);
-    data /= path(std::string(DATA_PATH_PREFIX) + identifier + DATA_PATH_SUFFIX);
-    path pose(dir_path);
-    pose /= path(std::string(POSE_PATH_PREFIX) + identifier + POSE_PATH_SUFFIX);
-    // stop if part of a scan is missing or end by absence is detected
-    if(!exists(data) || !exists(pose))
-      break;
-    identifiers.push_back(identifier);
-  }
-  return identifiers;
-}
-
-void ScanIO_uos::readPose(const char* dir_path, const char* identifier, double* pose)
-{
-  unsigned int i;
-  
-  path pose_path(dir_path);
-  pose_path /= path(std::string(POSE_PATH_PREFIX) + identifier + POSE_PATH_SUFFIX);
-  if(!exists(pose_path))
-    throw std::runtime_error(std::string("There is no pose file for [") + identifier + "] in [" + dir_path + "]");
-
-  // open pose file
-  ifstream pose_file(pose_path);
-  
-  // if the file is open, read contents
-  if(pose_file.good()) {
-    // read 6 plain doubles
-    for(i = 0; i < 6; ++i) pose_file >> pose[i];
-    pose_file.close();
-    
-    // convert angles from deg to rad
-    for(i = 3; i < 6; ++i) pose[i] = rad(pose[i]);
-  } else {
-    throw std::runtime_error(std::string("Pose file could not be opened for [") + identifier + "] in [" + dir_path + "]");
-  }
-}
-
-bool ScanIO_uos::supports(IODataType type)
-{
-  return !!(type & (DATA_XYZ));
-}
-
 
 double absf ( double a )
 {
@@ -272,10 +220,22 @@ int velodyne_calib_precompute()
     return 0;
 }
 
-int read_one_packet ( FILE *fp, vector<Point> &ptss, int maxDist, int minDist )
+int read_one_packet (
+    FILE *fp,
+    PointFilter& filter,
+    std::vector<double>* xyz,
+    std::vector<unsigned char>* rgb,
+    std::vector<float>* reflectance,
+    std::vector<float>* amplitude,
+    std::vector<int>* type,
+    std::vector<float>* deviation)
+//    vector<Point> &ptss,
+//    int maxDist,
+//    int minDist )
 {
-  int maxDist2 = sqr(maxDist);
-  int minDist2 = sqr(minDist);
+
+//  int maxDist2 = sqr(maxDist);
+//  int minDist2 = sqr(minDist);
 
     int  c, i, j;
     unsigned char Head;
@@ -283,8 +243,8 @@ int read_one_packet ( FILE *fp, vector<Point> &ptss, int maxDist, int minDist )
     Point point;
     BYTE *p;
     unsigned short *ps;
-    unsigned short *pshort;
     unsigned short *pt;
+    unsigned short *pshort;
 
     double ctheta;
     double theta, phi;
@@ -350,7 +310,7 @@ int read_one_packet ( FILE *fp, vector<Point> &ptss, int maxDist, int minDist )
 				pt = ( unsigned short * ) ( p + 4 + j * 3 );
 				distance = absf ( ( *pt ) * 0.002 );
 
-				if( distance < 60   &&	   distance > 2.2 )
+				if( distance < 120   &&	   distance > 2.2 )
 				{
 					BYTE *inty = ( BYTE * ) ( p + 4 + j * 3 + 2 );
 					intensity = *inty;
@@ -384,14 +344,20 @@ int read_one_packet ( FILE *fp, vector<Point> &ptss, int maxDist, int minDist )
 					point.rad  = sqrt(  x*x 	+  y*y );
 					point.tan_theta  = y/x;
 
-			//		point.type|=POINT_TYPE_INVALID;
-
 					point.type = POINT_TYPE_GROUND;
 					point.x=x*100;
 					point.y=z*100;
 					point.z=-y*100;
+
+                    double p[3];
+                    p[0] = point.x;
+                    p[1] = point.y;
+                    p[2] = point.z;
+
+                    if(filter.check(p))
    					{
-						ptss.push_back(point);
+						 for(int ii = 0; ii < 3; ++ii) xyz->push_back(p[ii]);
+                        type->push_back(POINT_TYPE_GROUND);
 					}
 				}
 			}
@@ -405,129 +371,111 @@ int read_one_packet ( FILE *fp, vector<Point> &ptss, int maxDist, int minDist )
     return 0;
 }
 
-
-
-/**
- * Reads specified scans from given directory in
- * the file format Riegl Laser Measurement GmbH
- * uses. It will be compiled as shared lib.
- *
- * Scan poses will NOT be initialized after a call
- * to this function. Initial pose estimation works
- * only with the -p switch, i.e., trusting the initial
- * estimations by Riegl.
- *
- * The scans have to be exported from the Riegl software
- * as follows:
- * 1. Export point cloud data to ASCII
- *    Use Scanners own Coordinate System (SOCS)
- *    X Y Z Range Theta Phi Reflectance
- * 2. Export acqusition location (after you have registered
- *    with the Riegl software)
- *    Export SOP
- *    Write out as .dat file
- *
- * @param start Starts to read with this scan
- * @param end Stops with this scan
- * @param dir The directory from which to read
- * @param maxDist Reads only Points up to this Distance
- * @param minDist Reads only Points from this Distance
- * @param euler Initital pose estimates (will not be applied to the points
- * @param ptss Vector containing the read points
- */
-int ScanIO_velodyne::readScans(int start, int end, string &dir, int maxDist, int minDist,
-						  double *euler, vector<Point> &ptss)
+std::list<std::string> ScanIO_velodyne::readDirectory(const char* dir_path, unsigned int start, unsigned int end)
 {
-  static int fileCounter = start;
-  string scanFileName;
-  FILE *scan_in;
+   fileStart = start;
+   fileEnd = end;
+   fileCounter = fileStart;
 
-  if (end > -1 && fileCounter > end) return -1; // 'nuf read
+   velodyne_calib_precompute();
 
-  scanFileName = dir + "scan" + ".bin";
-#ifdef _MSC_VER
-  scan_in = fopen(scanFileName.c_str(),"rb");
-#else
-  scan_in = fopen64(scanFileName.c_str(),"rb");
-#endif
+  std::list<std::string> identifiers;
 
-  if(scan_in == NULL)
-  {
-    cerr<<scanFileName <<endl;
-	cerr << "ERROR: Missing file " << scanFileName <<" "<<strerror(errno)<< endl;
-	exit(1);
-	return 0;
+  // we complete later for read more data files together.
+ /* for(unsigned int i = start; i <= end; ++i) {
+    // identifier is /d/d/d (000-999)
+    std::string identifier(to_string(i,3));
+    // scan consists of data (.3d) and pose (.pose) files
+    path data(dir_path);
+    data /= path(std::string(DATA_PATH_PREFIX) + identifier + DATA_PATH_SUFFIX);
+    path pose(dir_path);
+    pose /= path(std::string(POSE_PATH_PREFIX) + identifier + POSE_PATH_SUFFIX);
+    // stop if part of a scan is missing or end by absence is detected
+    if(!exists(data) || !exists(pose))
+      break;
+    identifiers.push_back(identifier);
   }
-
-  velodyne_calib_precompute();
-  cout << "Processing Scan " << scanFileName;
-  cout.flush();
-
-  ptss.reserve(12*32*CIRCLELENGTH);
-
- #ifdef _MSC_VER
-  fseek(scan_in, 24, SEEK_SET);
-  fseek(scan_in, (BLOCK_SIZE+BLOCK_OFFSET)*CIRCLELENGTH*fileCounter, SEEK_CUR);
-#else
-  fseeko(scan_in, 24, SEEK_SET);
-  fseeko(scan_in, (BLOCK_SIZE+BLOCK_OFFSET)*CIRCLELENGTH*fileCounter, SEEK_CUR);
-#endif
-
-  read_one_packet(scan_in, ptss, maxDist, minDist);
-  cout << " with " << ptss.size() << " Points";
-  cout << " done " << fileCounter<<endl;
-
-  fclose(scan_in);
-  fileCounter++;
-
-  return fileCounter-1;
+  */
+  return identifiers;
 }
 
-void ScanIO_uos::readScan(const char* dir_path, const char* identifier, PointFilter& filter, std::vector<double>* xyz, std::vector<unsigned char>* rgb, std::vector<float>* reflectance, std::vector<float>* amplitude, std::vector<int>* type, std::vector<float>* deviation)
+void ScanIO_velodyne::readPose(const char* dir_path, const char* identifier, double* pose)
 {
   unsigned int i;
-  
-  // error handling
-  path data_path(dir_path);
-  data_path /= path(std::string(DATA_PATH_PREFIX) + identifier + DATA_PATH_SUFFIX);
-  if(!exists(data_path))
-    throw std::runtime_error(std::string("There is no scan file for [") + identifier + "] in [" + dir_path + "]");
-  
-  if(xyz != 0) {
-    // open data file
-    ifstream data_file(data_path);
-    data_file.exceptions(ifstream::eofbit|ifstream::failbit|ifstream::badbit);
+  // on pose information for veloslam
+  for(i = 0; i < 6; ++i)  pose[i] = 0.0;
+  for(i = 3; i < 6; ++i)  pose[i] = 0.0;
 
-    
-    // aquire header informations
-  /* OPTIONAL: the header isn't always there, would require a sanity check
-    unsigned int n, m;
-    char[3] dummy;
-    data_file >> n;
-    for(unsigned int i = 0; i < 3; ++i) data_file >> dummy[i];
-    data_file >> m;
-    values.reserve(n*m*3);
-  */
-    // overread the first line
-    char dummy[255];
-    data_file.getline(dummy, 255);
-    
-    // read points
-    double point[3];
-    while(data_file.good()) {
-      try {
-        for(i = 0; i < 3; ++i) data_file >> point[i];
-      } catch(std::ios_base::failure& e) {
-        break;
-      }
-      
-      // apply filter and insert point
-      if(filter.check(point)) {
-        for(i = 0; i < 3; ++i) xyz->push_back(point[i]);
-      }
+  return;
+}
+
+bool ScanIO_velodyne::supports(IODataType type)
+{
+  return !!(type & (DATA_XYZ));
+}
+
+
+void ScanIO_velodyne::readScan(
+    const char* dir_path,
+    const char* identifier,
+    PointFilter& filter,
+    std::vector<double>* xyz,
+    std::vector<unsigned char>* rgb,
+    std::vector<float>* reflectance,
+    std::vector<float>* amplitude,
+    std::vector<int>* type,
+    std::vector<float>* deviation)
+{
+    unsigned int i;
+
+    string scanFileName;
+    FILE *scan_in;
+
+    scanFileName = dir_path;
+#ifdef _MSC_VER
+    scan_in = fopen(scanFileName.c_str(),"rb");
+#else
+    scan_in = fopen64(scanFileName.c_str(),"rb");
+#endif
+
+    if(scan_in == NULL)
+    {
+      cerr<<scanFileName <<endl;
+      cerr << "ERROR: Missing file " << scanFileName <<" "<<strerror(errno)<< endl;
+      exit(1);
+      return;
     }
-    data_file.close();
-  }
+
+    cout << "Processing Scan " << scanFileName;
+    cout.flush();
+
+    xyz->reserve(12*32*CIRCLELENGTH);
+
+ #ifdef _MSC_VER
+    fseek(scan_in, 24, SEEK_SET);
+    fseek(scan_in, (BLOCK_SIZE+BLOCK_OFFSET)*CIRCLELENGTH*fileCounter, SEEK_CUR);
+#else
+    fseeko(scan_in, 24, SEEK_SET);
+    fseeko(scan_in, (BLOCK_SIZE+BLOCK_OFFSET)*CIRCLELENGTH*fileCounter, SEEK_CUR);
+#endif
+
+    read_one_packet(
+                scan_in,
+                filter,
+                xyz,
+                rgb,
+                reflectance,
+                amplitude,
+                type,
+                deviation);
+
+    cout << " with " << xyz->size() << " Points";
+    cout << " done " << fileCounter<<endl;
+
+    fclose(scan_in);
+    // process next frames
+    fileCounter++;
+
 }
 
 /**
