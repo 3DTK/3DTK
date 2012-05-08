@@ -214,12 +214,15 @@ KDtreeMeta::Index* KDtreeMetaManaged::prepareTempIndices(const vector<Scan*>& sc
 
   m_temp_indices = new Index[n];
   unsigned int s = 0, j = 0;
+  unsigned int scansize = scans[s]->size<DataXYZ>("xyz reduced");
   for(unsigned int i = 0; i < n; ++i) {
     m_temp_indices[i].set(s, j++);
     // switch to next scan
-    if(j >= scans[s]->size<DataXYZ>("xyz reduced")) {
+    if(j >= scansize) {
       ++s;
       j = 0;
+      if(s < scans.size())
+        scansize = scans[s]->size<DataXYZ>("xyz reduced");
     }
   }
   return m_temp_indices;
