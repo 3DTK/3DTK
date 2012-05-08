@@ -144,8 +144,10 @@ int main(int argc, char** argv)
   // TODO
   
   // default parameters
-  std::size_t cache_size = 1500;
-  std::size_t data_size = 150;
+  //std::size_t cache_size = 1500;
+  //std::size_t data_size = 150;
+  std::size_t cache_size = 150;
+  std::size_t data_size = 15;
   string temporary_path = "temp";
   bool binary_scan_cache = true;
   
