@@ -23,10 +23,13 @@ endif(WITH_RIVLIB)
 #    target_link_libraries(scan_io_cad ${Boost_PROGRAM_OPTIONS_LIBRARY} ${Boost_FILESYSTEM_LIBRARY})
 #  ENDIF(NOT WIN32)
 #ENDIF (WITH_CAD)
-
 foreach(libname ${SCANIO_LIBNAMES})
+if(WIN32)
+  add_library(scan_io_${libname} STATIC scan_io_${libname}.cc)
+else(WIN32)
   add_library(scan_io_${libname} SHARED scan_io_${libname}.cc)
-  target_link_libraries(scan_io_${libname} pointfilter)
+endif(WIN32)  
+  target_link_libraries(scan_io_${libname} pointfilter ${Boost_FILESYSTEM_LIBRARY})
 endforeach(libname)
 
 if(WITH_RIVLIB)
@@ -36,8 +39,14 @@ if(WITH_RIVLIB)
   endif(LIBXML2_FOUND)
 endif(WITH_RIVLIB)
 
-add_library(scanio SHARED scan_io.cc ../slam6d/io_types.cc)
+if(WIN32)
+  add_library(scanio STATIC scan_io.cc ../slam6d/io_types.cc)
+else(WIN32)
+  add_library(scanio SHARED scan_io.cc ../slam6d/io_types.cc)
+endif(WIN32) 
 
 if(UNIX)
   target_link_libraries(scanio dl)
 endif(UNIX)
+
+

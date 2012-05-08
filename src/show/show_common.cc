@@ -1103,7 +1103,8 @@ set heuristic, do locking, catch exception, reset heuristic to default or old
 #endif // USE_GL_POINTS
 
   // load frames now that we know how many scans we actually loaded
-  unsigned int real_end = std::min((unsigned int)(end), (unsigned int)(start + octpts.size() - 1));
+  unsigned int real_end = min((unsigned int)(end), 
+	                                              (unsigned int)(start + octpts.size() - 1));
   if(readFrames(dir, start, real_end, readInitial, type))
     generateFrames(start, real_end, true);
   
