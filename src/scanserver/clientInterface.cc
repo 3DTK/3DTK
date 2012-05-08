@@ -219,9 +219,9 @@ void ClientInterface::sendMessage(message_t message)
   // process errors
   // TODO: better
   if(!m_error_message.empty()) {
-    std::string msg(m_error_message.c_str());
-    m_error_message.clear();
-    throw std::runtime_error(msg);
+      std::string msg(m_error_message.c_str());
+     m_error_message.clear();
+     throw std::runtime_error(msg);
   }
 }
 
