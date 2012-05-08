@@ -996,7 +996,7 @@ static void Draw(void)
 	int scansize = Scan::allScans.size();
 //	boost::mutex::scoped_lock lock(draw_mutex);
 
-  /*  Point p1, p2, p3;
+    Point p1, p2, p3;
 
 	if  (scansize <5)
 	{
@@ -1027,9 +1027,8 @@ static void Draw(void)
          << "  " <<  PosTheta [2] <<endl;
 
    // you need to find the direction of ego-vehicle.
-    p1.x = -4000 * cos ( PosTheta [1]) ;  p1.y= 2000;  p1.z= 4000 * sin ( PosTheta [1]);
-//    p1.x = 0 ;  p1.y= 15000;  p1.z= 0;
-
+//    p1.x = -4000 * cos ( PosTheta [1]) ;  p1.y= 2000;  p1.z= 4000 * sin ( PosTheta [1]);
+    p1.x = 0 ;  p1.y= 15000;  p1.z= 0;
     p2.x = 0; p2.y= 0;  p2.z= 0;
     p3.x = 0; p3.y=200;  p3.z= 0;
 
@@ -1040,7 +1039,6 @@ static void Draw(void)
     gluLookAt(p1.x,   p1.y,   p1.z,
               p2.x,   p2.y,   p2.z,
               p3.x,   p3.y,   p3.z);
-*/
 
     DrawAll_ScanPoints_Number(Scan::allScans, 1, 0.8, 0.8, 0.8, scansize-1);
 //  Draw_ALL_Object_TYPE(*(VeloScan *)( (Scan::allScans[scansize-1])) ,1, 1, 0, 0, 1   );
