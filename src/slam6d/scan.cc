@@ -382,12 +382,13 @@ void Scan::transformMatrix(const double alignxf[16])
  */
 void Scan::transform(const double alignxf[16], const AlgoType type, int islum)
 {
-  /* TODO: meta-stuff later
-  unsigned int end_meta = meta_parts.size();
-  for(unsigned int i = 0; i < end_meta; i++) {
-    meta_parts[i]->transform(alignxf, type, -1);
+  MetaScan* meta = dynamic_cast<MetaScan*>(this);
+  
+  if(meta) {
+    for(unsigned int i = 0; i < meta->size(); ++i) {
+      meta->getScan(i)->transform(alignxf, type, -1);
+    }
   }
-  */
 
 #ifdef TRANSFORM_ALL_POINTS
   transformAll(alignxf);
