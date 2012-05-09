@@ -232,15 +232,9 @@ int read_one_packet (
     std::vector<float>* amplitude,
     std::vector<int>* type,
     std::vector<float>* deviation)
-//    vector<Point> &ptss,
-//    int maxDist,
-//    int minDist )
 {
 
-//  int maxDist2 = sqr(maxDist);
-//  int minDist2 = sqr(minDist);
-
-    int  c, i, j;
+	int  c, i, j;
     unsigned char Head;
     BYTE buf[BLOCK_SIZE];
     Point point;
@@ -360,7 +354,6 @@ int read_one_packet (
                     if(filter.check(p))
    					{
 						 for(int ii = 0; ii < 3; ++ii) xyz->push_back(p[ii]);
-                      //  type->push_back(POINT_TYPE_GROUND);
 					}
 				}
 			}
@@ -377,9 +370,7 @@ int read_one_packet (
 std::list<std::string> ScanIO_velodyne::readDirectory(const char* dir_path, unsigned int start, unsigned int end)
 {
    std::list<std::string> identifiers;
-   fileStart = start;
-   fileEnd = end;
-   fileCounter = fileStart;
+   fileCounter = start;
 
    velodyne_calib_precompute();
    for(unsigned int i = start; i <= end; ++i) 
@@ -448,20 +439,16 @@ void ScanIO_velodyne::readScan(
     std::vector<float>* deviation)
 {
     unsigned int i;
-
     FILE *scan_in;
 
-  // error handling
     path data_path(dir_path);
     data_path /= path(std::string(DATA_PATH_PREFIX) +  DATA_PATH_SUFFIX);
     if(!exists(data_path))
         throw std::runtime_error(std::string("There is no scan file for [") + identifier + "] in [" + dir_path + "]");
-//	C:\slam6d_onsourceforge\slam6d\bin\Debug
+
 	char filename[256];
 	sprintf(filename, "%s%s%s",dir_path ,DATA_PATH_PREFIX,  DATA_PATH_SUFFIX );
-  //  ostrstream out1(filename,  sizeof(filename)); 
-	//out1 << data_path.c_str();
-	
+ 	
 #ifdef _MSC_VER
     scan_in = fopen(filename,"rb");
 #else
@@ -506,8 +493,6 @@ void ScanIO_velodyne::readScan(
 
     fclose(scan_in);
     // process next frames
-    fileCounter++;
-
 }
 
 /**
