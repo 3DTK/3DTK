@@ -26,9 +26,9 @@ public:
   virtual void readScan(const char* dir_path, const char* identifier, PointFilter& filter, std::vector<double>* xyz, std::vector<unsigned char>* rgb, std::vector<float>* reflectance, std::vector<float>* amplitude, std::vector<int>* type, std::vector<float>* deviation);
   virtual bool supports(IODataType type);
 
-  static int fileCounter;
-  static int fileStart;
-  static int fileEnd;
+  int fileCounter;
+  int fileStart;
+  int fileEnd;
 };
 
 #endif

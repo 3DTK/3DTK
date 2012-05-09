@@ -128,9 +128,9 @@ const char * io_type_to_libname(IOType  type)
   case UOS_CAD:
     return "cad";
   case VELODYNE:
-    return "velodyne";
+    return "scan_io_velodyne";
   case VELODYNE_FRAMES:
-    return "velodyne_frames";
+    return "scan_io_velodyne_frames";
   default:
     throw std::runtime_error(std::string("Io type ") + to_string(type) + std::string(" could not be matched to a library name"));
   }
