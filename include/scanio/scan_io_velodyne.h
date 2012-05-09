@@ -27,8 +27,6 @@ public:
   virtual bool supports(IODataType type);
 
   int fileCounter;
-  int fileStart;
-  int fileEnd;
 };
 
 #endif
