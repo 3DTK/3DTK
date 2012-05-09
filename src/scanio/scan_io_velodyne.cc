@@ -9,10 +9,13 @@
 #include "scanio/scan_io_velodyne.h"
 #include "slam6d/globals.icc"
 #include <fstream>
-using std::ifstream;
+#include<strstream> 
 #include <iostream>
+using std::ifstream;
+using std::ostrstream;
 using std::cerr;
 using std::endl;
+using std::ends;
 
 #include <algorithm>
 using std::swap;
@@ -357,7 +360,7 @@ int read_one_packet (
                     if(filter.check(p))
    					{
 						 for(int ii = 0; ii < 3; ++ii) xyz->push_back(p[ii]);
-                        type->push_back(POINT_TYPE_GROUND);
+                      //  type->push_back(POINT_TYPE_GROUND);
 					}
 				}
 			}
@@ -373,29 +376,27 @@ int read_one_packet (
 
 std::list<std::string> ScanIO_velodyne::readDirectory(const char* dir_path, unsigned int start, unsigned int end)
 {
+   std::list<std::string> identifiers;
    fileStart = start;
    fileEnd = end;
    fileCounter = fileStart;
 
    velodyne_calib_precompute();
+   for(unsigned int i = start; i <= end; ++i) 
+   {
+	   std::string identifier(to_string(i,3));
 
-  std::list<std::string> identifiers;
+	   path data(dir_path);
+	   data /= path(std::string(DATA_PATH_PREFIX) + DATA_PATH_SUFFIX);
 
-  // we complete later for read more data files together.
- /* for(unsigned int i = start; i <= end; ++i) {
-    // identifier is /d/d/d (000-999)
-    std::string identifier(to_string(i,3));
-    // scan consists of data (.3d) and pose (.pose) files
-    path data(dir_path);
-    data /= path(std::string(DATA_PATH_PREFIX) + identifier + DATA_PATH_SUFFIX);
-    path pose(dir_path);
-    pose /= path(std::string(POSE_PATH_PREFIX) + identifier + POSE_PATH_SUFFIX);
-    // stop if part of a scan is missing or end by absence is detected
-    if(!exists(data) || !exists(pose))
-      break;
-    identifiers.push_back(identifier);
-  }
-  */
+	   path pose(dir_path);
+	   pose /= path(std::string(POSE_PATH_PREFIX) + identifier + POSE_PATH_SUFFIX);
+
+	   if(!exists(data))
+		   break;
+	   identifiers.push_back(identifier);
+   }
+
   return identifiers;
 }
 
@@ -405,8 +406,28 @@ void ScanIO_velodyne::readPose(const char* dir_path, const char* identifier, dou
   // on pose information for veloslam
   for(i = 0; i < 6; ++i)  pose[i] = 0.0;
   for(i = 3; i < 6; ++i)  pose[i] = 0.0;
+   return;
 
-  return;
+/*    path pose_path(dir_path);
+  pose_path /= path(std::string(POSE_PATH_PREFIX) + identifier + POSE_PATH_SUFFIX);
+  if(!exists(pose_path))
+    throw std::runtime_error(std::string("There is no pose file for [") + identifier + "] in [" + dir_path + "]");
+
+  // open pose file
+  ifstream pose_file(pose_path);
+  
+  // if the file is open, read contents
+  if(pose_file.good()) {
+    // read 6 plain doubles
+    for(i = 0; i < 6; ++i) pose_file >> pose[i];
+    pose_file.close();
+    
+    // convert angles from deg to rad
+    for(i = 3; i < 6; ++i) pose[i] = rad(pose[i]);
+  } else {
+    throw std::runtime_error(std::string("Pose file could not be opened for [") + identifier + "] in [" + dir_path + "]");
+  }
+  */
 }
 
 bool ScanIO_velodyne::supports(IODataType type)
@@ -428,28 +449,39 @@ void ScanIO_velodyne::readScan(
 {
     unsigned int i;
 
-    string scanFileName;
     FILE *scan_in;
 
-    scanFileName = dir_path;
+  // error handling
+    path data_path(dir_path);
+    data_path /= path(std::string(DATA_PATH_PREFIX) +  DATA_PATH_SUFFIX);
+    if(!exists(data_path))
+        throw std::runtime_error(std::string("There is no scan file for [") + identifier + "] in [" + dir_path + "]");
+//	C:\slam6d_onsourceforge\slam6d\bin\Debug
+	char filename[256];
+	sprintf(filename, "%s%s%s",dir_path ,DATA_PATH_PREFIX,  DATA_PATH_SUFFIX );
+  //  ostrstream out1(filename,  sizeof(filename)); 
+	//out1 << data_path.c_str();
+	
 #ifdef _MSC_VER
-    scan_in = fopen(scanFileName.c_str(),"rb");
+    scan_in = fopen(filename,"rb");
 #else
-    scan_in = fopen64(scanFileName.c_str(),"rb");
+    scan_in = fopen64(filename,"rb");
 #endif
 
     if(scan_in == NULL)
     {
-      cerr<<scanFileName <<endl;
-      cerr << "ERROR: Missing file " << scanFileName <<" "<<strerror(errno)<< endl;
+      cerr<<data_path <<endl;
+      cerr << "ERROR: Missing file " << data_path <<" "<<strerror(errno)<< endl;
       exit(1);
       return;
     }
 
-    cout << "Processing Scan " << scanFileName;
+    cout << "Processing Scan " << data_path;
     cout.flush();
 
     xyz->reserve(12*32*CIRCLELENGTH);
+
+	fileCounter=  atoi(identifier);
 
  #ifdef _MSC_VER
     fseek(scan_in, 24, SEEK_SET);
