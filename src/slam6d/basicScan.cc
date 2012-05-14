@@ -130,9 +130,15 @@ void BasicScan::get(unsigned int types)
   if(m_filter_height_set)
     filter.setHeight(m_filter_top, m_filter_bottom);
 
-  sio->readScan(m_path.c_str(), m_identifier.c_str(),
-    filter,
-    &xyz, &rgb, &reflectance, &amplitude, &type, &deviation);
+  sio->readScan(m_path.c_str(),
+                m_identifier.c_str(),
+                filter,
+                &xyz,
+                &rgb,
+                &reflectance,
+                &amplitude,
+                &type,
+                &deviation);
 
   // for each requested and filled data vector, allocate and write contents to their new data fields
   if(types & DATA_XYZ && !xyz.empty()) {

@@ -23,10 +23,8 @@
 using std::vector;
 
 
-
 vector<Scan*> Scan::allScans;
 bool Scan::scanserver = false;
-
 
 
 void Scan::openDirectory(bool scanserver, const std::string& path, IOType type,
@@ -46,11 +44,11 @@ void Scan::closeDirectory()
   else
     BasicScan::closeDirectory();
 }
-  
+
 Scan::Scan()
 {
   unsigned int i;
-  
+
   // pose and transformations
   for(i = 0; i < 3; ++i) rPos[i] = 0;
   for(i = 0; i < 3; ++i) rPosTheta[i] = 0;
@@ -58,21 +56,21 @@ Scan::Scan()
   M4identity(transMat);
   M4identity(transMatOrg);
   M4identity(dalignxf);
-  
+
   // trees and reduction methods
   cuda_enabled = false;
   nns_method = -1;
   kd = 0;
   ann_kd_tree = 0;
-  
+
   // reduction on-demand
   reduction_voxelSize = 0.0;
   reduction_nrpts = 0;
   reduction_pointtype = PointType();
-  
+
   // flags
   m_has_reduced = false;
-  
+
   // octtree
   octtree_reduction_voxelSize = 0.0;
   octtree_voxelSize = 0.0;
@@ -140,14 +138,14 @@ void Scan::createSearchTree()
   // multiple threads will call this function at the same time because they all work on one pair of Scans, just let the first one (who sees a nullpointer) do the creation
   boost::lock_guard<boost::mutex> lock(m_mutex_create_tree);
   if(kd != 0) return;
-  
+
   // make sure the original points are created before starting the measurement
   DataXYZ xyz_orig(get("xyz reduced original"));
 
 #ifdef WITH_METRICS
   Timer tc = ClientMetric::create_tree_time.start();
 #endif //WITH_METRICS
-  
+
   createSearchTreePrivate();
 
 #ifdef WITH_METRICS
@@ -160,15 +158,15 @@ void Scan::calcReducedOnDemand()
   // multiple threads will call this function at the same time because they all work on one pair of Scans, just let the first one (who sees count as zero) do the reduction
   boost::lock_guard<boost::mutex> lock(m_mutex_reduction);
   if(m_has_reduced) return;
-  
+
 #ifdef WITH_METRICS
   Timer t = ClientMetric::on_demand_reduction_time.start();
 #endif //WITH_METRICS
-  
+
   calcReducedOnDemandPrivate();
-  
+
   m_has_reduced = true;
-  
+
 #ifdef WITH_METRICS
   ClientMetric::on_demand_reduction_time.end(t);
 #endif //WITH_METRICS
@@ -179,7 +177,7 @@ void Scan::copyReducedToOriginal()
 #ifdef WITH_METRICS
   Timer t = ClientMetric::copy_original_time.start();
 #endif //WITH_METRICS
-  
+
   DataXYZ xyz_r(get("xyz reduced"));
   unsigned int size = xyz_r.size();
   DataXYZ xyz_r_orig(create("xyz reduced original", sizeof(double)*3*size));
@@ -188,18 +186,18 @@ void Scan::copyReducedToOriginal()
       xyz_r_orig[i][j] = xyz_r[i][j];
     }
   }
-  
+
 #ifdef WITH_METRICS
   ClientMetric::copy_original_time.end(t);
 #endif //WITH_METRICS
-}  
+}
 
 void Scan::copyOriginalToReduced()
 {
 #ifdef WITH_METRICS
   Timer t = ClientMetric::copy_original_time.start();
 #endif //WITH_METRICS
-  
+
   DataXYZ xyz_r_orig(get("xyz reduced original"));
   unsigned int size = xyz_r_orig.size();
   DataXYZ xyz_r(create("xyz reduced", sizeof(double)*3*size));
@@ -208,7 +206,7 @@ void Scan::copyOriginalToReduced()
       xyz_r[i][j] = xyz_r_orig[i][j];
     }
   }
-  
+
 #ifdef WITH_METRICS
   ClientMetric::copy_original_time.end(t);
 #endif //WITH_METRICS
@@ -225,19 +223,19 @@ void Scan::calcReducedPoints()
 #ifdef WITH_METRICS
   Timer t = ClientMetric::scan_load_time.start();
 #endif //WITH_METRICS
-  
+
   // get xyz to start the scan load, separated here for time measurement
   DataXYZ xyz(get("xyz"));
-  
+
   // if the scan hasn't been loaded we can't calculate anything
   if(xyz.size() == 0)
     throw runtime_error("Could not calculate reduced points, XYZ data is empty");
-  
+
 #ifdef WITH_METRICS
   ClientMetric::scan_load_time.end(t);
   Timer tl = ClientMetric::calc_reduced_points_time.start();
 #endif //WITH_METRICS
-  
+
   // no reduction needed
   // copy vector of points to array of points to avoid
   // further copying
@@ -278,10 +276,10 @@ void Scan::calcReducedPoints()
         xyz_r[i][j] = center[i][j];
       }
     }
-    
+
     delete oct;
   }
-  
+
 #ifdef WITH_METRICS
   ClientMetric::calc_reduced_points_time.end(tl);
 #endif //WITH_METRICS
@@ -311,7 +309,7 @@ void Scan::mergeCoordinatesWithRoboterPosition(Scan* prevScan)
 
 /**
  * The method transforms all points with the given transformation matrix.
- */ 
+ */
 void Scan::transformAll(const double alignxf[16])
 {
   DataXYZ xyz(get("xyz"));
@@ -329,14 +327,14 @@ void Scan::transformReduced(const double alignxf[16])
 #ifdef WITH_METRICS
   Timer t = ClientMetric::transform_time.start();
 #endif //WITH_METRICS
-  
+
   DataXYZ xyz_r(get("xyz reduced"));
   unsigned int i=0;
  // #pragma omp parallel for
   for( ; i < xyz_r.size(); ++i) {
     transform3(alignxf, xyz_r[i]);
   }
-  
+
 #ifdef WITH_METRICS
   ClientMetric::transform_time.end(t);
 #endif //WITH_METRICS
@@ -346,14 +344,14 @@ void Scan::transformReduced(const double alignxf[16])
 void Scan::transformMatrix(const double alignxf[16])
 {
   double tempxf[16];
-  
+
   // apply alignxf to transMat and update pose vectors
   MMult(alignxf, transMat, tempxf);
   memcpy(transMat, tempxf, sizeof(transMat));
   Matrix4ToEuler(transMat, rPosTheta, rPos);
   Matrix4ToQuat(transMat, rQuat);
-  
-#ifdef DEBUG  
+
+#ifdef DEBUG
   cerr << "(" << rPos[0] << ", " << rPos[1] << ", " << rPos[2] << ", "
 	  << rPosTheta[0] << ", " << rPosTheta[1] << ", " << rPosTheta[2] << ")" << endl;
 
@@ -393,7 +391,7 @@ void Scan::transform(const double alignxf[16], const AlgoType type, int islum)
 #ifdef TRANSFORM_ALL_POINTS
   transformAll(alignxf);
 #endif //TRANSFORM_ALL_POINTS
-   
+
 #ifdef DEBUG
   cerr << alignxf << endl;
   cerr << "(" << rPos[0] << ", " << rPos[1] << ", " << rPos[2] << ", "
@@ -402,10 +400,10 @@ void Scan::transform(const double alignxf[16], const AlgoType type, int islum)
 
   // transform points
   transformReduced(alignxf);
-  
+
   // update matrices
   transformMatrix(alignxf);
-  
+
   // store transformation in frames
   if(type != INVALID) {
 #ifdef WITH_METRICS
@@ -432,7 +430,7 @@ void Scan::transform(const double alignxf[16], const AlgoType type, int islum)
             }
           }
         }
-        
+
         if(scan == this || in_meta) {
           found = i;
           scan->addFrame(type);
@@ -465,7 +463,7 @@ void Scan::transform(const double alignxf[16], const AlgoType type, int islum)
     default:
       cerr << "invalid point transformation mode" << endl;
     }
-    
+
 #ifdef WITH_METRICS
     ClientMetric::add_frames_time.end(t);
 #endif //WITH_METRICS
@@ -526,14 +524,14 @@ void Scan::transformToEuler(double rP[3], double rPT[3], const AlgoType type, in
   ClientMetric::transform_time.set_threadsafety(true);
   ClientMetric::add_frames_time.set_threadsafety(true);
 #endif //WITH_METRICS
-  
+
   double tinv[16];
   double alignxf[16];
   M4inv(transMat, tinv);
   transform(tinv, INVALID);
   EulerToMatrix4(rP, rPT, alignxf);
   transform(alignxf, type, islum);
-  
+
 #ifdef WITH_METRICS
   ClientMetric::transform_time.set_threadsafety(false);
   ClientMetric::add_frames_time.set_threadsafety(false);
@@ -571,14 +569,14 @@ void Scan::transformToQuat(double rP[3], double rPQ[4], const AlgoType type, int
  * @param max_dist_match2 maximal allowed distance for matching
  */
 
-void Scan::getNoPairsSimple(vector <double*> &diff, 
-  Scan* Source, Scan* Target, 
+void Scan::getNoPairsSimple(vector <double*> &diff,
+  Scan* Source, Scan* Target,
   int thread_num,
   double max_dist_match2)
 {
   DataXYZ xyz_r(Source->get("xyz reduced"));
   KDtree* kd = new KDtree(PointerArray<double>(Target->get("xyz reduced")).get(), Target->size<DataXYZ>("xyz reduced"));
-  
+
   cout << "Max: " << max_dist_match2 << endl;
   for (unsigned int i = 0; i < xyz_r.size(); i++) {
 
@@ -610,8 +608,8 @@ void Scan::getNoPairsSimple(vector <double*> &diff,
  * @param rnd randomized point selection
  * @param max_dist_match2 maximal allowed distance for matching
  */
-void Scan::getPtPairsSimple(vector <PtPair> *pairs, 
-  Scan* Source, Scan* Target, 
+void Scan::getPtPairsSimple(vector <PtPair> *pairs,
+  Scan* Source, Scan* Target,
   int thread_num,
   int rnd, double max_dist_match2,
   double *centroid_m, double *centroid_d)
@@ -667,8 +665,8 @@ void Scan::getPtPairsSimple(vector <PtPair> *pairs,
  * @param max_dist_match2 maximal allowed distance for matching
  * @return a set of corresponding point pairs
  */
-void Scan::getPtPairs(vector <PtPair> *pairs, 
-  Scan* Source, Scan* Target, 
+void Scan::getPtPairs(vector <PtPair> *pairs,
+  Scan* Source, Scan* Target,
   int thread_num,
   int rnd, double max_dist_match2, double &sum,
   double *centroid_m, double *centroid_d)
@@ -678,14 +676,14 @@ void Scan::getPtPairs(vector <PtPair> *pairs,
     centroid_m[i] = 0;
     centroid_d[i] = 0;
   }
-  
+
   // get point pairs
   DataXYZ xyz_r(Target->get("xyz reduced"));
   Source->getSearchTree()->getPtPairs(pairs, Source->dalignxf,
       xyz_r, 0, xyz_r.size(),
       thread_num,
       rnd, max_dist_match2, sum, centroid_m, centroid_d);
-  
+
   // normalize centroids
   unsigned int size = pairs->size();
   if(size != 0) {
@@ -706,7 +704,7 @@ void Scan::getPtPairs(vector <PtPair> *pairs,
  * @param pairs The resulting point pairs (vector will be filled)
  * @param Source The scan whose points are matched to Targets' points
  * @param Target The scan to whiche the points are matched
- * @param thread_num The number of the thread that is computing ptPairs in parallel 
+ * @param thread_num The number of the thread that is computing ptPairs in parallel
  * @param step The number of steps for parallelization
  * @param rnd randomized point selection
  * @param max_dist_match2 maximal allowed distance for matching
@@ -729,7 +727,7 @@ void Scan::getPtPairsParallel(vector <PtPair> *pairs, Scan* Source, Scan* Target
     centroid_m[thread_num][i] = 0;
     centroid_d[thread_num][i] = 0;
   }
-  
+
   // get point pairs
   SearchTree* search = Source->getSearchTree();
   // differentiate between a meta scan (which has no reduced points) and a normal scan
@@ -756,7 +754,7 @@ void Scan::getPtPairsParallel(vector <PtPair> *pairs, Scan* Source, Scan* Target
       rnd, max_dist_match2, sum[thread_num],
       centroid_m[thread_num], centroid_d[thread_num]);
   }
-  
+
   // normalize centroids
   unsigned int size = pairs[thread_num].size();
   if(size != 0) {

@@ -95,11 +95,12 @@ Trajectory::Trajectory()
 
 }
 
+
 /**
  * default Constructor
  */
 VeloScan::VeloScan()
-    : BasicScan()
+    : Scan()
 {
     isTrackerHandled =false;
 }
@@ -114,8 +115,6 @@ VeloScan::~VeloScan()
 
 int VeloScan::DeletePoints()
 {
-	//points.clear();
-   // delete [] points_red_type;
 	FreeAllCellAndCluterMemory();
 	return 0;
 }
@@ -127,10 +126,11 @@ VeloScan::VeloScan(const VeloScan& s)
     : Scan(s)
 { }
 
-void VeloScan::setPoints(vector <Point>* _points) {
-
+void VeloScan::setPoints(vector <Point>* _points)
+{
 	points.clear();
-	for (int i = 0; i < _points->size(); i++) {
+	for (int i = 0; i < _points->size(); i++)
+    {
 		Point  P=  (*_points)[i];
 		points.push_back(P);
   }
@@ -161,8 +161,6 @@ int VeloScan::TransferToCellArray(int maxDist, int minDist)
 
     int columnSize= 360;	//cfg.cfgPlaneDetect.ColumnSize;
     int CellSize= 50;	    //cfg.cfgPlaneDetect.CellSize;
-//    int MinRad=0;		    //cfg.cfgPlaneDetect.MinRad;
-//    int MaxRad=6000;		//cfg.cfgPlaneDetect.MaxRad
 
     int MinRad=minDist;     //cfg.cfgPlaneDetect.MinRad;
     int MaxRad=maxDist;      //cfg.cfgPlaneDetect.MaxRad
