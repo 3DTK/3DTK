@@ -27,17 +27,17 @@ public:
     bool loadOct, bool saveOct);
 
   virtual const char* getIdentifier() const { return m_shared_scan->getIdentifier(); }
-  
+
   virtual DataPointer get(const std::string& identifier);
   virtual void get(unsigned int types);
   virtual DataPointer create(const std::string& identifier, unsigned int size);
   virtual void clear(const std::string& identifier);
-  
+
   virtual unsigned int readFrames();
   virtual void saveFrames();
   virtual unsigned int getFrameCount();
   virtual void getFrame(unsigned int i, const double*& pose_matrix, AlgoType& type);
-  
+
 protected:
   virtual void createSearchTreePrivate();
   virtual void calcReducedOnDemandPrivate();
@@ -55,20 +55,19 @@ private:
 
   //! Voxelsize of the octtree used for reduction
   double show_reduction_voxelSize;
-  
+
   //! Which point to take out of the reduction octtree, 0 for center
   int show_reduction_nrpts;
-  
+
   //! Pointtype used for the reduction octtree
   PointType show_reduction_pointtype;
 
 
-  
   ManagedScan(SharedScan* shared_scan);
 
   //! Create reduced points for show
   void calcReducedShow();
-  
+
   //! Create Octtree for show
   void createOcttree();
 };
