@@ -21,7 +21,7 @@ IntersectionDetection::IntersectionDetection()
 	cellNum=MaxRad/cellSize;
 	MinRad=0;
 
-	CalcRadAndTheta();
+//	CalcRadAndTheta();
 }
 
 IntersectionDetection::~IntersectionDetection()
