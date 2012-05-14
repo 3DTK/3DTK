@@ -44,24 +44,8 @@ public:
   ~VeloScan();
 
   void setPoints(vector <Point>* _points) ;
-  int dumpFrames();
-
-  static void readScans(IOType type,
-				    int start, int end, string &dir, int maxDist, int minDist,
-				    bool openFileForWriting = false);
-
-  static void readScansRedSearch(IOType type,
-						   int start, int end, string &dir, int maxDist, int minDist,
-						   double voxelSize, int nrpts, // reduction parameters
-						   int nns_method, bool cuda_enabled,
-						   bool openFileForWriting = false);
 
 public:
-
-  /**
-   * Vector storing single scans of a metascan
-   */
-//  vector <VeloScan *> meta_parts;
 
   // FIXME
   void FindingAllofObject(int maxDist, int minDist);
@@ -99,15 +83,6 @@ public:
 
   bool isTrackerHandled;
   long scanid;
-
-    /**
-   * The actual file number for the *.frames file
-   */
-  int fileNr;
-   /**
-   * number elements of the array
-   */
-  int points_red_size;
 
   int clusterNum;//the number of clusters to be tracked, added by yuanjun
 };

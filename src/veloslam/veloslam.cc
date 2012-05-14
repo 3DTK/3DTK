@@ -1103,7 +1103,6 @@ int    start = 0,   end = -1;
 //             currentScan->DumpScanRedPoints("Velo_PointCloud.pts");
 		 }
 
-	//	 currentScan->dumpFrames();
          ///////////////////////////////////////////////////////////////////
          const double* p;
          p = currentScan->get_rPos();
