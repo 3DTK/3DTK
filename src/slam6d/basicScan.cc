@@ -33,17 +33,17 @@ void BasicScan::openDirectory(const std::string& path, IOType type, int start, i
 
   // create an instance of ScanIO
   ScanIO* sio = ScanIO::getScanIO(type);
-  
+
   // query available scans in the directory from the ScanIO
   std::list<std::string> identifiers(sio->readDirectory(path.c_str(), start, end));
-  
+
   Scan::allScans.reserve(identifiers.size());
-  
+
   // for each identifier, create a scan
   for(std::list<std::string>::iterator it = identifiers.begin(); it != identifiers.end(); ++it) {
     Scan::allScans.push_back(new BasicScan(path, *it, type));
   }
-  
+
 #ifdef WITH_METRICS
   ClientMetric::read_scan_time.end(t);
 #endif //WITH_METRICS
@@ -61,7 +61,7 @@ BasicScan::BasicScan(const std::string& path, const std::string& identifier, IOT
   m_path(path), m_identifier(identifier), m_type(type)
 {
   init();
-  
+
   // request pose from file
   double euler[6];
   ScanIO* sio = ScanIO::getScanIO(m_type);
@@ -72,13 +72,13 @@ BasicScan::BasicScan(const std::string& path, const std::string& identifier, IOT
   rPosTheta[0] = euler[3];
   rPosTheta[1] = euler[4];
   rPosTheta[2] = euler[5];
-  
+
   // write original pose matrix
   EulerToMatrix4(euler, &euler[3], transMatOrg);
-  
+
   // initialize transform matrices from the original one, could just copy transMatOrg to transMat instead
   transformMatrix(transMatOrg);
-  
+
   // reset the delta align matrix to represent only the transformations after local-to-global (transMatOrg) one
   M4identity(dalignxf);
 }
@@ -116,24 +116,24 @@ void BasicScan::setHeightFilter(double top, double bottom)
 void BasicScan::get(unsigned int types)
 {
   ScanIO* sio = ScanIO::getScanIO(m_type);
-  
+
   vector<double> xyz;
   vector<unsigned char> rgb;
   vector<float> reflectance;
   vector<float> amplitude;
   vector<int> type;
   vector<float> deviation;
-  
+
   PointFilter filter;
   if(m_filter_range_set)
     filter.setRange(m_filter_max, m_filter_min);
   if(m_filter_height_set)
     filter.setHeight(m_filter_top, m_filter_bottom);
-  
+
   sio->readScan(m_path.c_str(), m_identifier.c_str(),
     filter,
     &xyz, &rgb, &reflectance, &amplitude, &type, &deviation);
-  
+
   // for each requested and filled data vector, allocate and write contents to their new data fields
   if(types & DATA_XYZ && !xyz.empty()) {
     double* data = reinterpret_cast<double*>(create("xyz", sizeof(double) * xyz.size()).get_raw_pointer());
@@ -165,7 +165,7 @@ DataPointer BasicScan::get(const std::string& identifier)
 {
   // try to get data
   map<string, pair<unsigned char*, unsigned int>>::iterator it = m_data.find(identifier);
-  
+
   // create data fields
   if(it == m_data.end()) {
     // load from file
@@ -186,10 +186,10 @@ DataPointer BasicScan::get(const std::string& identifier)
     if(identifier == "octtree") {
       createOcttree();
     }
-    
+
     it = m_data.find(identifier);
   }
-  
+
     // if nothing can be loaded, return an empty pointer
   if(it == m_data.end())
     return DataPointer(0, 0);
@@ -252,7 +252,7 @@ void BasicScan::createSearchTreePrivate()
     default:
       throw runtime_error("SearchTree type not implemented");
   }
-  
+
   // TODO: make the switch cases above work with CUDA
   if (searchtree_cuda_enabled) createANNTree();
 }
@@ -283,7 +283,7 @@ void BasicScan::createOcttree()
 {
   string scanFileName = m_path + "scan" + m_identifier + ".oct";
   BOctTree<float>* btree = 0;
-  
+
   // try to load from file, if successful return
   if(octtree_loadOct && exists(scanFileName)) {
     btree = new BOctTree<float>(scanFileName);
@@ -298,7 +298,7 @@ void BasicScan::createOcttree()
     );
     return;
   }
-  
+
   // create octtree from scan
   if(octtree_reduction_voxelSize > 0) { // with reduction, only xyz points
     DataXYZ xyz_r(get("xyz reduced show"));
@@ -309,13 +309,13 @@ void BasicScan::createOcttree()
     btree = new BOctTree<float>(pts, nrpts, octtree_voxelSize, octtree_pointtype, true);
     for(unsigned int i = 0; i < nrpts; ++i) delete[] pts[i]; delete[] pts;
   }
-  
+
   // save created octtree
   if(octtree_saveOct) {
     cout << "Saving octree " << scanFileName << endl;
     btree->serialize(scanFileName);
   }
-  
+
   m_data.insert(
     std::make_pair(
       "octtree",
@@ -340,7 +340,7 @@ unsigned int BasicScan::readFrames()
       m_frames.push_back(Frame(transformation, type));
     } while(file.good());
   } catch(...) {}
-  
+
   return m_frames.size();
 }
 

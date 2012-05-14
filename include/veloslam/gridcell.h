@@ -8,6 +8,11 @@
 #endif
 
 #include "slam6d/scan.h"
+#include <cstring>
+#include <string>
+using std::string;
+#include <vector>
+using std::vector;
 
 typedef vector<char> charv;
 typedef vector<charv> charvv;

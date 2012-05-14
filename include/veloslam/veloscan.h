@@ -15,11 +15,14 @@
 #define  _USE_MATH_DEFINES
 #endif
 
+#include <vector>
+#include <map>
+
 #include "slam6d/scan.h"
 #include "veloslam/gridcell.h"
 #include "veloslam/gridcluster.h"
 
- bool FilterNOMovingObjcets(clusterFeature &glu, cluster &gluData);
+bool FilterNOMovingObjcets(clusterFeature &glu, cluster &gluData);
 
 class Trajectory
 {
@@ -29,22 +32,19 @@ class Trajectory
      vector <Point> path;
 };
 
+
 /**
  * @brief 3D scan representation and implementation of dynamic velodyne scan matching
  */
-class VeloScan : public Scan {
+class VeloScan : public BasicScan {
 
 public:
   VeloScan();
-  VeloScan(const double *euler, int maxDist = -1);
-  VeloScan(const double rPos[3], const double rPosTheta[3], int maxDist = -1);
-  VeloScan(const double _rPos[3], const double _rPosTheta[3], vector<double *> &pts);
-  VeloScan(const vector < VeloScan* >& MetaScan, int nns_method, bool cuda_enabled);
   VeloScan(const VeloScan& s);
+  ~VeloScan();
+
   void setPoints(vector <Point>* _points) ;
   int dumpFrames();
-
-  ~VeloScan();
 
   static void readScans(IOType type,
 				    int start, int end, string &dir, int maxDist, int minDist,
@@ -97,11 +97,17 @@ public:
   clusterArray scanClusterArray;
   clusterFeatureArray scanClusterFeatureArray;
 
-   // log the type of points_red;
-  int  *points_red_type;
-
   bool isTrackerHandled;
   long scanid;
+
+    /**
+   * The actual file number for the *.frames file
+   */
+  int fileNr;
+   /**
+   * number elements of the array
+   */
+  int points_red_size;
 
   int clusterNum;//the number of clusters to be tracked, added by yuanjun
 };
