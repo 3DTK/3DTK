@@ -105,10 +105,13 @@ void Sleep(unsigned int mseconds)
 using namespace boost;
 extern boost::mutex keymutex;
 extern boost::condition keycond;
+
+
 extern void StartShow();
 extern TrackerManager trackMgr;
 extern  int sliding_window_size;
 extern  int current_sliding_window_pos;
+
 extern Trajectory VelodyneTrajectory;
 extern  VeloScan* g_pfirstScan;
 extern  bool   g_pause;
@@ -116,6 +119,7 @@ extern  float  constant_static_or_moving;
 extern bool DebugDrawFinished ;
 extern bool ICPFinished;
 extern bool save_animation;
+
 extern int anim_frame_rate;
 extern int scanCount;
 
@@ -1010,6 +1014,7 @@ int    start = 0,   end = -1;
     double eu[6] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
     vector <Point> ptss;
     int _fileNr;
+
     Scan::scanIOwrapper my_ScanIO(type);
     if(!veryQuiet)
         StartShow();
@@ -1036,7 +1041,7 @@ int    start = 0,   end = -1;
         currentScan->setFileNr(_fileNr);
         currentScan->scanid = scanCount; ///
 		currentScan->setPoints(&ptss);    // copy points
-	//	cout << "read scan " << (currentScan->get_points())->size() << endl;
+
 		ptss.clear();                  // clear points
 		Scan::allScans.push_back(currentScan);
 
@@ -1090,19 +1095,6 @@ int    start = 0,   end = -1;
 #endif
 
       // update the cluster position in trakers.
-
-		 ///////////////////////////////////////////
-       //  if (exportPts)
-		 if (1)
-         {
-//            Scan *firstScan = (Scan *)g_pfirstScan;  //the first scan.
-//            double  deltaMat[16];
-//            GetCurrecntdelteMat(*currentScan , *firstScan,  deltaMat);
-//            currentScan->transformAll(deltaMat);
-//            currentScan->DumpScan("pointcloud.pts");
-//             currentScan->DumpScanRedPoints("Velo_PointCloud.pts");
-		 }
-
          ///////////////////////////////////////////////////////////////////
          const double* p;
          p = currentScan->get_rPos();
@@ -1140,13 +1132,6 @@ int    start = 0,   end = -1;
 
 		 if(!veryQuiet)
     	 {
-			 //if(g_pause)
-			 //{
-    //            boost::mutex::scoped_lock lock(keymutex);
-    //            keycond.wait(lock);
-		  //      g_pause = true;
-			 //}
-
     	    glutPostRedisplay();
          }
 

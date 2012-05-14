@@ -557,13 +557,11 @@ void Draw_ALL_Object_TYPE_IN_ref(VeloScan& scanRef1, VeloScan& scanR,  int psize
 	//		if(cellobj.clusterType & TYPE )
 		//	if(clusterobj.clusterType & TYPE )
 				//	Draw_Cube_GL_RGB(p.x,		p.y,		p.z,		q.x,   	q.y,		q.z,	r, g, b);
-
 	}
 }
 
 void Draw_ALL_Object_Points_TYPE_IN_ref(VeloScan& scanRef1, VeloScan& scanR,  int psize, float r, float g, float b, int  TYPE)
 {
-
 //	Pn+1 = dP ¡¤ Pn
      Point p;
  	 double deltaMat[16];
@@ -596,8 +594,7 @@ void Draw_ALL_Object_Points_TYPE_IN_ref(VeloScan& scanRef1, VeloScan& scanR,  in
 
 			}
 	}
-
-		glEnd();
+	glEnd();
 }
 
 
@@ -636,18 +633,6 @@ void Draw_ALL_Object_TYPE(VeloScan& scanRef1,  int psize, float r, float g, floa
 }
 
 
-/* +++++++++-------------++++++++++++
- * NAME
- *   glDumpWindowPPM
- * DESCRIPTION
- *   writes an ppm file of the window
- *   content
- * PARAMETERS
- *   filename
- * RESULT
- *  writes the framebuffer content
- *  to a ppm file
-+++++++++-------------++++++++++++ */
 void glDumpWindowPPM_debugView(const char *filename, GLenum mode)
 {
   int win_height, win_width;
