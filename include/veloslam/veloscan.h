@@ -36,7 +36,7 @@ class Trajectory
 /**
  * @brief 3D scan representation and implementation of dynamic velodyne scan matching
  */
-class VeloScan : public BasicScan {
+class VeloScan : public Scan {
 
 public:
   VeloScan();

@@ -23,7 +23,7 @@ public:
   virtual void setHeightFilter(double top, double bottom);
 
   virtual const char* getIdentifier() const { return m_identifier.c_str(); }
-  
+
   virtual DataPointer get(const std::string& identifier);
   virtual void get(unsigned int types);
   virtual DataPointer create(const std::string& identifier, unsigned int size);
@@ -33,7 +33,7 @@ public:
   virtual void saveFrames();
   virtual unsigned int getFrameCount();
   virtual void getFrame(unsigned int i, const double*& pose_matrix, AlgoType& type);
-  
+
 protected:
   virtual void createSearchTreePrivate();
   virtual void calcReducedOnDemandPrivate();
@@ -51,7 +51,6 @@ private:
   std::map<std::string, std::pair<unsigned char*, unsigned int>> m_data;
 
   std::vector<Frame> m_frames;
-  
 
 
   //! Constructor for openDirectory
@@ -61,7 +60,7 @@ private:
   void init();
 
   void createANNTree();
-  
+
   void createOcttree();
 };
 

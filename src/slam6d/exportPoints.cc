@@ -14,6 +14,9 @@ using std::ifstream;
 #include <stdexcept>
 using std::exception;
 
+#include <vector>
+#include <map>
+
 #include "slam6d/scan.h"
 #include "slam6d/globals.icc"
 
@@ -220,8 +223,8 @@ void readFrames(string dir, int start, int end, IOType &type)
 
     cout << "Reading Frames for 3D Scan " << frameFileName << "..." << endl;
 
-    vector <double*> Matrices;
-    vector <Scan::AlgoType> algoTypes;
+ //   vector <double*> Matrices;
+//    vector <Scan::AlgoType> algoTypes;
     double transMat[16];
     int algoTypeInt;
 
