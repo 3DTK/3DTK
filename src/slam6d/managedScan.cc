@@ -30,21 +30,21 @@ void ManagedScan::openDirectory(const std::string& path, IOType type, int start,
     cerr << "Start the scanserver first." << endl;
     exit(-1);
   }
-  
+
 #ifdef WITH_METRICS
   Timer t = ClientMetric::read_scan_time.start();
 #endif //WITH_METRICS
-  
+
   ClientInterface* client = ClientInterface::getInstance();
   shared_scans = client->readDirectory(path.c_str(), type, start, end);
-  
+
   for(SharedScanVector::iterator it = shared_scans->begin(); it != shared_scans->end(); ++it) {
     // add a scan with reference on the shared scan
     SharedScan* shared = it->get();
     ManagedScan* scan = new ManagedScan(shared);
     Scan::allScans.push_back(scan);
   }
-  
+
 #ifdef WITH_METRICS
   ClientMetric::read_scan_time.end(t);
 #endif //WITH_METRICS
@@ -84,13 +84,13 @@ ManagedScan::ManagedScan(SharedScan* shared_scan) :
   rPosTheta[0] = euler[3];
   rPosTheta[1] = euler[4];
   rPosTheta[2] = euler[5];
-  
+
   // write original pose matrix
   EulerToMatrix4(euler, &euler[3], transMatOrg);
-  
+
   // initialize transform matrices from the original one, could just copy transMatOrg to transMat instead
   transformMatrix(transMatOrg);
-  
+
   // reset the delta align matrix to represent only the transformations after local-to-global (transMatOrg) one
   M4identity(dalignxf);
 }
@@ -99,8 +99,6 @@ ManagedScan::~ManagedScan()
 {
   // TODO: something to do?
 }
-
-
 
 void ManagedScan::setRangeFilter(double max, double min)
 {
@@ -115,7 +113,7 @@ void ManagedScan::setHeightFilter(double top, double bottom)
 void ManagedScan::setReductionParameter(double voxelSize, int nrpts, PointType pointtype)
 {
   Scan::setReductionParameter(voxelSize, nrpts, pointtype);
-  
+
   // set parameters to invalidate old cache data
   stringstream s;
   s << voxelSize << " " << nrpts << " " << transMatOrg;
@@ -127,7 +125,7 @@ void ManagedScan::setShowReductionParameter(double voxelSize, int nrpts, PointTy
   show_reduction_voxelSize = voxelSize;
   show_reduction_nrpts = nrpts;
   show_reduction_pointtype = pointtype;
-  
+
   // set parameters to invalidate old cache data
   stringstream s;
   s << voxelSize << " " << nrpts;
@@ -137,7 +135,7 @@ void ManagedScan::setShowReductionParameter(double voxelSize, int nrpts, PointTy
 void ManagedScan::setOcttreeParameter(double reduction_voxelSize, double octtree_voxelSize, PointType pointtype, bool loadOct, bool saveOct)
 {
   Scan::setOcttreeParameter(reduction_voxelSize, octtree_voxelSize, pointtype, loadOct, saveOct);
-  
+
   // set octtree parameters to invalidate cached ones with other parameters (changing range/height is already handled)
   stringstream s;
   s << reduction_voxelSize << " " << octtree_voxelSize << " " << pointtype.toFlags();
@@ -220,8 +218,6 @@ void ManagedScan::clear(const std::string& identifier)
   // TODO: mark CacheObjects with a low priority for faster removal by the manager
 }
 
-
-
 void ManagedScan::createSearchTreePrivate()
 {
   switch(searchtree_nnstype)
@@ -237,7 +233,7 @@ void ManagedScan::createSearchTreePrivate()
     default:
       throw runtime_error("SearchTree type not implemented for ManagedScan");
   }
-  
+
   // TODO: look into CUDA compability
 }
 
@@ -285,7 +281,7 @@ void ManagedScan::calcReducedShow()
       xyz_r[i][j] = center[i][j];
     }
   }
-  
+
   delete oct;
 }
 
@@ -293,7 +289,7 @@ void ManagedScan::createOcttree()
 {
   string scanFileName = string(m_shared_scan->getDirPath()) + "scan" + getIdentifier() + ".oct";
   BOctTree<float>* btree = 0;
-  
+
   // if loadOct is given, load the octtree under blind assumption that parameters match
   if(octtree_loadOct && exists(scanFileName)) {
     btree = new BOctTree<float>(scanFileName);

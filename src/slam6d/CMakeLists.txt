@@ -13,7 +13,6 @@ IF(WITH_SCAN_REDUCTION)
 ENDIF(WITH_SCAN_REDUCTION)
 
 ### SCAN_DIFF
-
 IF(WITH_SCAN_DIFF)
   add_executable(scan_diff scan_diff.cc)
   add_executable(scan_diff2d scan_diff2d.cc ../show/colormanager.cc)
@@ -51,7 +50,7 @@ IF(WITH_TOOLS)
   
   IF (WIN32)
     target_link_libraries(frame_to_graph XGetopt)
-    target_link_libraries(convergence XGetopt)
+    target_link_libraries(convergence XGetopt ${Boost_LIBRARIES})
     target_link_libraries(graph_balancer scanlib XGetopt  ${Boost_LIBRARIES})
     target_link_libraries(exportPoints scanlib ANN XGetopt  ${Boost_LIBRARIES})
     target_link_libraries(frames2pose XGetopt)
