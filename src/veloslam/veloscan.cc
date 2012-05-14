@@ -94,105 +94,14 @@ Trajectory::Trajectory()
 {
 
 }
+
 /**
  * default Constructor
  */
 VeloScan::VeloScan()
-    : Scan()
+    : BasicScan()
 {
     isTrackerHandled =false;
-}
-
-/**
- * Constructor
- * @param *euler 6D pose: estimation of the scan location, e.g. based on odometry
- * @param maxDist Regard only points up to an (Euclidean) distance of maxDist
- * transformation matrices when match (default: false)
- */
-VeloScan::VeloScan(const double* euler, int maxDist)
-    : Scan(euler, maxDist)
-{
-    isTrackerHandled =false;
-
-}
-
-VeloScan::VeloScan(const double _rPos[3], const double _rPosTheta[3], vector<double *> &pts)
-    : Scan(_rPos, _rPosTheta, pts)
-{
-    isTrackerHandled =false;
-}
-
-/**
- * Constructor
- * @param _rPos[3] 3D position: estimation of the scan location, e.g. based on odometry
- * @param _rPosTheta[3] 3D orientation: estimation of the scan location, e.g. based on odometry
- * @param maxDist Regard only points up to an (Euclidean) distance of maxDist
- */
-VeloScan::VeloScan(const double _rPos[3], const double _rPosTheta[3], const int maxDist)
-    : Scan(_rPos, _rPosTheta, maxDist)
-{
-    isTrackerHandled =false;
-}
-
-/**
- * Constructor for creating a metascan from a list of scans
- * It joins all the points and contructs a new search tree
- * and reinitializes the cache, iff needed
- *
- * @param MetaScan Vector that contains the 3D scans
- * @param nns_method Indicates the version of the tree to be built
- * @param cuda_enabled indicated, if cuda should be used for NNS
- */
-VeloScan::VeloScan(const vector < VeloScan* >& MetaScan, int nns_method, bool cuda_enabled)
-{
-    isTrackerHandled =false;
-    kd = 0;
-    ann_kd_tree = 0;
-    scanNr = numberOfScans++;
-    rPos[0] = 0;
-    rPos[1] = 0;
-    rPos[2] = 0;
-    rPosTheta[0] = 0;
-    rPosTheta[1] = 0;
-    rPosTheta[2] = 0;
-    M4identity(transMat);
-    M4identity(transMatOrg);
-    M4identity(dalignxf);
-
-    // copy points
-    int numpts = 0;
-    int end_loop = (int)MetaScan.size();
-    for (int i = 0; i < end_loop; i++)
-    {
-        numpts += MetaScan[i]->points_red_size;
-    }
-    points_red_size = numpts;
-    points_red = new double*[numpts];
-    int k = 0;
-    for (int i = 0; i < end_loop; i++)
-    {
-        for (int j = 0; j < MetaScan[i]->points_red_size; j++)
-        {
-            points_red[k] = new double[3];
-            points_red[k][0] = MetaScan[i]->points_red[j][0];
-            points_red[k][1] = MetaScan[i]->points_red[j][1];
-            points_red[k][2] = MetaScan[i]->points_red[j][2];
-            k++;
-        }
-    }
-
-    fileNr = -1; // no need to store something from a meta scan!
-    scanNr = numberOfScans++;
-
-    // build new search tree
-    createTree(nns_method, cuda_enabled);
-    // update max num point in scan iff you have to do so
-    if (points_red_size > (int)max_points_red_size) max_points_red_size = points_red_size;
-
-    // add Scan to ScanList
-    allScans.push_back(this);
-
- //   meta_parts = MetaScan;
 }
 
 /**
@@ -200,33 +109,15 @@ VeloScan::VeloScan(const vector < VeloScan* >& MetaScan, int nns_method, bool cu
  */
 VeloScan::~VeloScan()
 {
-    delete [] points_red_type;
 	FreeAllCellAndCluterMemory();
 }
 
 int VeloScan::DeletePoints()
 {
-	points.clear();
-    delete [] points_red_type;
+	//points.clear();
+   // delete [] points_red_type;
 	FreeAllCellAndCluterMemory();
 	return 0;
-}
-
-int VeloScan::dumpFrames()
-{
-        string filename = dir + "scan" + to_string(fileNr, 3) + ".frames";
-        ofstream fout(filename.c_str());
-        if (!fout.good())
-        {
-            cerr << "ERROR: Cannot open file " << filename << endl;
-            return 1;
-        }       // write into file
-
-        fout << sout.str();
-        fout.close();
-        fout.clear();
-
-		return 0;
 }
 
 /**
@@ -245,151 +136,12 @@ void VeloScan::setPoints(vector <Point>* _points) {
   }
 }
 
-/**
- * Reads specified scans from given directory.
- * Scan poses will NOT be initialized after a call
- * to this function. It loads a shared lib where the
- * actual file processing takes place
- *
- * @param type Specifies the type of the flies to be loaded
- * @param start Starts to read with this scan
- * @param end Stops with this scan
- * @param _dir The drectory containing the data
- * @param maxDist Reads only Points up to this distance
- * @param minDist Reads only Points from this distance
- * @param openFileForWriting Opens .frames files to store the
- *        scan matching results
- */
-void VeloScan::readScans(IOType type,
-                         int start, int end, string &_dir, int maxDist, int minDist,
-                         bool openFileForWriting)
-{
-    outputFrames = openFileForWriting;
-    dir = _dir;
-    double eu[6] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
-    vector <Point> ptss;
-    int _fileNr;
-    scanIOwrapper my_ScanIO(type);
-
-    // read Scan-by-scan until no scan is available anymore
-    while ((_fileNr = my_ScanIO.readScans(start, end, dir, maxDist, minDist, eu, ptss)) != -1)
-    {
-        VeloScan *currentScan = new VeloScan(eu, maxDist);
-
-        currentScan->setFileNr(_fileNr);
-        currentScan->setPoints(&ptss);    // copy points
-        ptss.clear();                   // clear points
-        allScans.push_back(currentScan);
-        cout << "done" << endl;
-    }
-    return;
-}
-
-
-void VeloScan::readScansRedSearch(IOType type,
-                                  int start, int end, string &_dir, int maxDist, int minDist,
-                                  double voxelSize, int nrpts, // reduction parameters
-                                  int nns_method, bool cuda_enabled,
-                                  bool openFileForWriting)
-{
-    outputFrames = openFileForWriting;
-    dir = _dir;
-    double eu[6] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
-    vector <Point> ptss;
-    int _fileNr;
-    scanIOwrapper my_ScanIO(type);
-
-#ifndef _MSC_VER
-#ifdef _OPENMP
-    #pragma omp parallel
-    {
-        #pragma omp single nowait
-        {
-#endif
-#endif
-            // read Scan-by-scan until no scan is available anymore
-            while ((_fileNr = my_ScanIO.readScans(start, end, dir, maxDist, minDist, eu, ptss)) != -1)
-            {
-                VeloScan *currentScan = new VeloScan(eu, maxDist);
-                currentScan->setFileNr(_fileNr);
-                currentScan->setPoints(&ptss);    // copy points
-                ptss.clear();                  // clear points
-                allScans.push_back(currentScan);
-
-#ifndef _MSC_VER
-#ifdef _OPENMP
-                #pragma omp task
-#endif
-#endif
-                {
-                    cout << "removing dynamic objects, reducing scan " << currentScan->getFileNr() << " and creating searchTree" << endl;
-
-	                currentScan->transform(currentScan->getTransMatOrg(), INVALID); //transform points to initial position
-       //             currentScan->clearPoints();
-                    currentScan->createTree(nns_method, cuda_enabled);
-
-                }
-            }
-#ifndef _MSC_VER
-#ifdef _OPENMP
-        }
-    }
-    #pragma omp taskwait
-#endif
-#endif
-
-    return;
-}
-
-
-int VeloScan::DumpScan(string filename)
-{
- /*   int i,j;
-    int size=  points.size();
-
-    cout << "Export all 3D Points to file \"streampoints.pts\"" << endl;
-    ofstream redptsout(filename.c_str(), ios::app);
-
-    for(i=0; i< size; ++i)
-    {
-            redptsout << points[i].x << " "
-            << points[i].y << " "
-            << points[i].z << " "
-            << points[i].type <<endl;
-    }
-
-    redptsout.close();
-    redptsout.clear(); */
-    return 0;
-}
-
-
-int VeloScan::DumpScanRedPoints(string filename)
-{
-  /*  int i,j;
-    int size= this->get_points_red_size();
-
-    cout << "Export all 3D Points "<<  filename << endl;
-    ofstream redptsout(filename.c_str(), ios::app);
-
-    for(i=0; i< size; ++i)
-    {
-            redptsout << points_red[i][0] << " "
-            << points_red[i][1]  << " "
-            << points_red[i][2]  << " "
-			<< points_red_type[i] <<endl;
-    }
-
-    redptsout.close();
-    redptsout.clear(); */
-    return 0;
-}
-
 
 int VeloScan::CalcRadAndTheta()
 {
     int i,j;
-    int size=  points.size();
+    DataXYZ xyz(get("xyz"));
+    int size= xyz.size();
 
     for(i=0; i< size; ++i)
     {
@@ -400,10 +152,12 @@ int VeloScan::CalcRadAndTheta()
 }
 
 
-
 int VeloScan::TransferToCellArray(int maxDist, int minDist)
 {
 #define  DefaultColumnSize 360
+
+    DataXYZ xyz(get("xyz"));
+    int size= xyz.size();
 
     int columnSize= 360;	//cfg.cfgPlaneDetect.ColumnSize;
     int CellSize= 50;	    //cfg.cfgPlaneDetect.CellSize;
@@ -446,7 +200,7 @@ int VeloScan::TransferToCellArray(int maxDist, int minDist)
     }
 
     int diff;
-    for(i=0; i< points.size(); ++i)
+    for(i=0; i< size; ++i)
     {
             count++;
             Point  &pt= points[i];
@@ -941,7 +695,6 @@ void VeloScan::calcReducedPoints_byClassifi(double voxelSize, int nrpts, PointTy
     }
 	// load  only static part of scans in point_red for icp6D
     points_red = new double*[realCount];
-    points_red_type = new int[realCount];
     int end_loop = points_red_size = realCount;
 
     realCount=0;
@@ -954,7 +707,6 @@ void VeloScan::calcReducedPoints_byClassifi(double voxelSize, int nrpts, PointTy
 			points_red[j][0] = points[i].x;
 			points_red[j][1] = points[i].y;
 			points_red[j][2] = points[i].z;
-            points_red_type[j] = POINT_TYPE_STATIC_OBJECT;
 			j++;
 			realCount++;
 		}
@@ -1199,6 +951,8 @@ void VeloScan::ClassifibyTrackingAllObject(int currentNO ,int windowsize )
 void VeloScan::MarkStaticorMovingPointCloud()
 {
 	int i,j,k;
+    DataXYZ xyz(get("xyz"));
+    if(xyz.size() > 0)
 
 	int startofpoint  = 0;
 	int colMax=  scanCellFeatureArray.size();
@@ -1230,7 +984,8 @@ void VeloScan::MarkStaticorMovingPointCloud()
 
 void VeloScan::FindingAllofObject(int maxDist, int minDist)
 {
-	if(points.size() > 0)
+    DataXYZ xyz(get("xyz"));
+    if(xyz.size() > 0)
 	{
 		TransferToCellArray(maxDist, minDist);
 		CalcScanCellFeature();
@@ -1242,7 +997,8 @@ void VeloScan::FindingAllofObject(int maxDist, int minDist)
 
 void VeloScan::TrackingAllofObject(int trackingAlgo)
 {
-	if(points.size() > 0)
+     DataXYZ xyz(get("xyz"));
+    if(xyz.size() > 0)
 	{
 		trackMgr.HandleScan(*this,trackingAlgo);
 	}
@@ -1250,7 +1006,8 @@ void VeloScan::TrackingAllofObject(int trackingAlgo)
 
 void VeloScan::ClassifiAllofObject()
 {
-	if(points.size() > 0)
+    DataXYZ xyz(get("xyz"));
+    if(xyz.size() > 0)
 	{
 		 ClassifiAllObject();
 	}
@@ -1258,7 +1015,8 @@ void VeloScan::ClassifiAllofObject()
 
 void VeloScan::ExchangePointCloud()
 {
-	if(points.size() > 0)
+    DataXYZ xyz(get("xyz"));
+    if(xyz.size() > 0)
 	{
          MarkStaticorMovingPointCloud();
 	}

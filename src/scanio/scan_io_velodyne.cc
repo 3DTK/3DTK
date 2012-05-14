@@ -9,7 +9,7 @@
 #include "scanio/scan_io_velodyne.h"
 #include "slam6d/globals.icc"
 #include <fstream>
-#include<strstream> 
+#include<strstream>
 #include <iostream>
 using std::ifstream;
 using std::ostrstream;
@@ -370,10 +370,10 @@ int read_one_packet (
 std::list<std::string> ScanIO_velodyne::readDirectory(const char* dir_path, unsigned int start, unsigned int end)
 {
    std::list<std::string> identifiers;
-   fileCounter = start;
+//   fileCounter = start;
 
    velodyne_calib_precompute();
-   for(unsigned int i = start; i <= end; ++i) 
+   for(unsigned int i = start; i <= end; ++i)
    {
 	   std::string identifier(to_string(i,3));
 
@@ -398,27 +398,6 @@ void ScanIO_velodyne::readPose(const char* dir_path, const char* identifier, dou
   for(i = 0; i < 6; ++i)  pose[i] = 0.0;
   for(i = 3; i < 6; ++i)  pose[i] = 0.0;
    return;
-
-/*    path pose_path(dir_path);
-  pose_path /= path(std::string(POSE_PATH_PREFIX) + identifier + POSE_PATH_SUFFIX);
-  if(!exists(pose_path))
-    throw std::runtime_error(std::string("There is no pose file for [") + identifier + "] in [" + dir_path + "]");
-
-  // open pose file
-  ifstream pose_file(pose_path);
-  
-  // if the file is open, read contents
-  if(pose_file.good()) {
-    // read 6 plain doubles
-    for(i = 0; i < 6; ++i) pose_file >> pose[i];
-    pose_file.close();
-    
-    // convert angles from deg to rad
-    for(i = 3; i < 6; ++i) pose[i] = rad(pose[i]);
-  } else {
-    throw std::runtime_error(std::string("Pose file could not be opened for [") + identifier + "] in [" + dir_path + "]");
-  }
-  */
 }
 
 bool ScanIO_velodyne::supports(IODataType type)
@@ -448,7 +427,7 @@ void ScanIO_velodyne::readScan(
 
 	char filename[256];
 	sprintf(filename, "%s%s%s",dir_path ,DATA_PATH_PREFIX,  DATA_PATH_SUFFIX );
- 	
+
 #ifdef _MSC_VER
     scan_in = fopen(filename,"rb");
 #else
