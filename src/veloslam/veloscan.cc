@@ -128,34 +128,20 @@ VeloScan::VeloScan(const VeloScan& s)
 
 void VeloScan::setPoints(vector <Point>* _points)
 {
-	points.clear();
+
+/*	points.clear();
 	for (int i = 0; i < _points->size(); i++)
     {
 		Point  P=  (*_points)[i];
 		points.push_back(P);
-  }
-}
-
-
-int VeloScan::CalcRadAndTheta()
-{
-    int i,j;
-    DataXYZ xyz(get("xyz"));
-    int size= xyz.size();
-
-    for(i=0; i< size; ++i)
-    {
-		points[i].rad  = sqrt(  points[i].x*points[i].x   +   points[i].z*points[i].z );
-		points[i].tan_theta  = points[i].z/points[i].x;
     }
-    return 0;
+*/
 }
-
 
 int VeloScan::TransferToCellArray(int maxDist, int minDist)
 {
 #define  DefaultColumnSize 360
-
+    Point P;
     DataXYZ xyz(get("xyz"));
     int size= xyz.size();
 
@@ -181,8 +167,6 @@ int VeloScan::TransferToCellArray(int maxDist, int minDist)
 
     int sectionSize=columnSize/8;
 
-    CalcRadAndTheta();
-
     scanCellArray.resize(columnSize);
     for(i=0; i<columnSize; ++i)
         scanCellArray[i].resize(CellNumber);
@@ -198,21 +182,29 @@ int VeloScan::TransferToCellArray(int maxDist, int minDist)
     }
 
     int diff;
-    for(i=0; i< size; ++i)
+
+    for(i=0; i<size; ++i)
     {
             count++;
-            Point  &pt= points[i];
-			points[i].point_id =i;
+            Point pt;
+            pt.x = xyz[i][0];
+            pt.y = xyz[i][1];
+            pt.z = xyz[i][2];
+
 			pt.point_id = i;  //important   for find point in  scans  ---raw points
+
+            pt.rad = sqrt(pt.x*pt.x + pt.z*pt.z);
+            pt.tan_theta = pt.z/pt.x ;
 
             if(pt.rad <=MinRad || pt.rad>=MaxRad)
                 continue;
 
-            if(pt.x >0 && pt.z>0 )
+            // some point losted which on the vline or hline
+            if(pt.x >=0 && pt.z>=0 )
             {
                 if(pt.x > pt.z)
                 {
-                    flag=pt.tan_theta;
+                    flag= pt.tan_theta;
                     result=upper_bound(tanv.begin(),tanv.end(),flag);
                     if(result==tanv.end())
                     {
@@ -240,7 +232,7 @@ int VeloScan::TransferToCellArray(int maxDist, int minDist)
                 }
             }
 
-            else if(pt.x<0 && pt.z>0)
+            else if(pt.x <= 0 && pt.z >=0)
             {
                 if(-pt.x>pt.z)
                 {
@@ -271,7 +263,7 @@ int VeloScan::TransferToCellArray(int maxDist, int minDist)
                 }
             }
 
-            else if(pt.x<0&&pt.z<0)
+            else if(pt.x<=0 && pt.z<=0)
             {
                 if(-pt.x>-pt.z)
                 {
@@ -302,7 +294,7 @@ int VeloScan::TransferToCellArray(int maxDist, int minDist)
                 }
             }
 
-            else if(pt.x>0&&pt.z<0)
+            else if(pt.x>=0&&pt.z<=0)
             {
                 if(pt.x>-pt.z)
                 {
@@ -342,6 +334,8 @@ int VeloScan::TransferToCellArray(int maxDist, int minDist)
     }
 	return 0;
 }
+
+
 
 int VeloScan::CalcCellFeature(cell& cellobj, cellFeature& f)
 {
@@ -494,6 +488,13 @@ int VeloScan::SearchNeigh(cluster& clu,charvv& flagvv,int i,int j)
 {
     int columnSize=scanCellArray.size();
     int cellNumber=scanCellArray[0].size();
+
+	if(i==-1)
+		i= columnSize-1;
+
+	if(i==columnSize)
+		i= 0;
+
 
     if(i<0||i>=columnSize||j<0||j>=cellNumber)
         return 0;
@@ -684,91 +685,66 @@ void VeloScan::calcReducedPoints_byClassifi(double voxelSize, int nrpts, PointTy
      // only copy the points marked POINT_TYPE_STATIC_OBJECT
 	int realCount =0;
 
-	for (int i = 0;  i < points.size(); i++)
+    // get xyz to start the scan load, separated here for time measurement
+    DataXYZ xyz(get("xyz"));
+    DataType Pt(get("type"));
+
+    // if the scan hasn't been loaded we can't calculate anything
+    if(xyz.size() == 0)
+       throw runtime_error("Could not calculate reduced points, XYZ data is empty");
+
+	for (int i = 0;  i < xyz.size(); i++)
 	{
-		if(points[i].type &  POINT_TYPE_STATIC_OBJECT)
+		if( Pt[i] &  POINT_TYPE_STATIC_OBJECT)
 		{
 			realCount++;
 		}
     }
-	// load  only static part of scans in point_red for icp6D
-    points_red = new double*[realCount];
-    int end_loop = points_red_size = realCount;
 
+	// load  only static part of scans in point_red for icp6D
+    DataXYZ xyz_t(create("xyz reduced", sizeof(double)*3*realCount));
     realCount=0;
 	int j=0;
-	for (int i = 0;  i < points.size(); i++)
+	for (int i = 0;  i < xyz.size(); i++)
 	{
-		if(points[i].type &  POINT_TYPE_STATIC_OBJECT)
+		if( Pt[i] &  POINT_TYPE_STATIC_OBJECT)
 		{
-			points_red[j] = new double[3];
-			points_red[j][0] = points[i].x;
-			points_red[j][1] = points[i].y;
-			points_red[j][2] = points[i].z;
+			xyz_t[j][0] = xyz[i][0];
+			xyz_t[j][1] = xyz[i][1];
+			xyz_t[j][2] = xyz[i][2];
 			j++;
 			realCount++;
 		}
     }
-//    transform(transMatOrg, INVALID); //transform points to initial position
 
-    // update max num point in scan iff you have to do so
-    if (points_red_size > (int)max_points_red_size)
-		max_points_red_size = points_red_size;
+	// build octree-tree from CurrentScan
+    // put full data into the octtree
+    BOctTree<double> *oct = new BOctTree<double>(PointerArray<double>(xyz_t).get(),
+      xyz_t.size(), reduction_voxelSize, reduction_pointtype);
 
-  // start reduction
-  // build octree-tree from CurrentScan
-  double **ptsOct = 0;
-  ptsOct = new double*[realCount];
+    vector<double*> center;
+    center.clear();
 
-  int num_pts = 0;
-  end_loop = (int)realCount;
-  for (int i = 0; i < end_loop; i++) {
-    ptsOct[num_pts] = new double[3];
-    ptsOct[num_pts][0] =points_red[i][0] ;
-    ptsOct[num_pts][1] =points_red[i][1] ;
-    ptsOct[num_pts][2] = points_red[i][2];
-    num_pts++;
-  }
-  /*****   error    *******/
-  BOctTree<double> *oct = new BOctTree<double>(ptsOct, num_pts, voxelSize, pointtype);
-  vector<double*> center;
-  center.clear();
-
-  if (nrpts > 0) {
-    if (nrpts == 1) {
-      oct->GetOctTreeRandom(center);
-    }else {
-      oct->GetOctTreeRandom(center, nrpts);
+    if (reduction_nrpts > 0) {
+      if (reduction_nrpts == 1) {
+        oct->GetOctTreeRandom(center);
+      } else {
+        oct->GetOctTreeRandom(center, reduction_nrpts);
+      }
+    } else {
+      oct->GetOctTreeCenter(center);
     }
-  } else {
-    oct->GetOctTreeCenter(center);
-  }
 
-  // storing it as reduced scan
-  points_red = new double*[center.size()];
+    // storing it as reduced scan
+    unsigned int size = center.size();
+    DataXYZ xyz_r(create("xyz reduced", sizeof(double)*3*size));
+    for(unsigned int i = 0; i < size; ++i) {
+      for(unsigned int j = 0; j < 3; ++j) {
+        xyz_r[i][j] = center[i][j];
+      }
+    }
 
-  end_loop = (int)center.size();
-  for (int i = 0; i < end_loop; i++) {
-    points_red[i] = new double[3];
-    points_red[i][0] = center[i][0];
-    points_red[i][1] = center[i][1];
-    points_red[i][2] = center[i][2];
-  }
-  points_red_size = center.size();
-
-  delete oct;
-
-  end_loop = realCount;
-  for (int i = 0; i < end_loop; i++) {
-    delete [] ptsOct[i];
-  }
-  delete [] ptsOct;
-
-//  transform(transMatOrg, INVALID); //transform points to initial position
-
-  // update max num point in scan iff you have to do so
-  if (points_red_size > (int)max_points_red_size)
-	  max_points_red_size = points_red_size;
+    delete oct;
 }
 
 bool findBusCluster(clusterFeature &glu,  cluster &gluData)
@@ -950,7 +926,7 @@ void VeloScan::MarkStaticorMovingPointCloud()
 {
 	int i,j,k;
     DataXYZ xyz(get("xyz"));
-    if(xyz.size() > 0)
+	DataType Pt(get("type"));
 
 	int startofpoint  = 0;
 	int colMax=  scanCellFeatureArray.size();
@@ -969,11 +945,11 @@ void VeloScan::MarkStaticorMovingPointCloud()
 			        // find Point in scan raw points by point_id;
 					Point p = *(gCell[k]);
 				   if(gcellFreature.cellType & CELL_TYPE_STATIC)
-					   points[p.point_id].type = POINT_TYPE_STATIC_OBJECT;
+					   Pt[p.point_id] = POINT_TYPE_STATIC_OBJECT;
     			   if(gcellFreature.cellType & CELL_TYPE_MOVING)
-					   points[p.point_id].type = POINT_TYPE_MOVING_OBJECT;
+					   Pt[p.point_id] = POINT_TYPE_MOVING_OBJECT;
     			   if(gcellFreature.cellType & CELL_TYPE_GROUND)
-					   points[p.point_id].type = POINT_TYPE_GROUND;
+					   Pt[p.point_id] = POINT_TYPE_GROUND;
 		   }
 
 		}
