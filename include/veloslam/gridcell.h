@@ -14,8 +14,8 @@ using std::string;
 #include <vector>
 using std::vector;
 
-typedef vector<char> charv;
-typedef vector<charv> charvv;
+typedef std::vector<char> charv;
+typedef std::vector<charv> charvv;
 
 #define CELL_TYPE_INVALID        0x00000001
 #define CELL_TYPE_ABOVE_DELTA_R  0x00000002
@@ -30,11 +30,9 @@ typedef vector<charv> charvv;
 #define CELL_TYPE_MOVING        0x00000400
 #define CELL_TYPE_GROUND        0x00000800
 
-
-
-typedef vector<Point*> cell;
-typedef vector<cell> cellColumn;
-typedef vector<cellColumn> cellArray;
+typedef std::vector<Point*> cell;
+typedef std::vector<cell> cellColumn;
+typedef std::vector<cellColumn> cellArray;
 
 class cellFeature
 {
@@ -53,7 +51,7 @@ public:
 	int cellID;
 };
 
-typedef vector<cellFeature> cellFeatureColumn;
-typedef vector<cellFeatureColumn> cellFeatureArray;
+typedef std::vector<cellFeature> cellFeatureColumn;
+typedef std::vector<cellFeatureColumn> cellFeatureArray;
 
 #endif  //__GRID_CELL_H__

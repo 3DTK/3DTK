@@ -51,8 +51,8 @@ public:
 	unsigned int clusterType;
 };
 
-typedef vector<cellFeature*> cluster;
-typedef vector<cluster> clusterArray;
-typedef vector<clusterFeature> clusterFeatureArray;
+typedef std::vector<cellFeature*> cluster;
+typedef std::vector<cluster> clusterArray;
+typedef std::vector<clusterFeature> clusterFeatureArray;
 
 #endif  //__GRID_CLUSTER_H__

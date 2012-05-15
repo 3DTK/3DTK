@@ -21,7 +21,7 @@ extern GLenum buffermode_debugView;
 
 extern void StartShow();
 
-void  GetCurrecntdelteMat(Scan& CurrentScan ,  Scan& firstScan,  double *deltaMat);
+void  GetCurrecntdelteMat(Scan& CurrentScan ,  double *deltaMat);
 
 void  DrawText(float x, float y, float z, char * outputstring);
 void  DrawTextRGB(float x, float y, float z, float r, float g, float b, char * outputstring);

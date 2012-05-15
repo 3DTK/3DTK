@@ -43,10 +43,7 @@ public:
   VeloScan(const VeloScan& s);
   ~VeloScan();
 
-  void setPoints(vector <Point>* _points) ;
-
 public:
-
   // FIXME
   void FindingAllofObject(int maxDist, int minDist);
   void TrackingAllofObject(int trackingAlgo);
@@ -74,15 +71,15 @@ public:
   void SaveObjectsInPCD(int index, cluster &gClusterData );
   void SaveFrameInPCD( );
 
+  bool isTrackerHandled;
+  long scanid;
+
   /** scanCellFeatureArray */
   cellArray scanCellArray;
   cellFeatureArray scanCellFeatureArray;
 
   clusterArray scanClusterArray;
   clusterFeatureArray scanClusterFeatureArray;
-
-  bool isTrackerHandled;
-  long scanid;
 
   int clusterNum;//the number of clusters to be tracked, added by yuanjun
 };
