@@ -625,8 +625,8 @@ int VeloScan::FindAndCalcScanClusterFeature()
 	for(i=0; i<clustersize; ++i)
 	{
 		CalcClusterFeature(scanClusterArray[i],scanClusterFeatureArray[i]);
-		BoundingBox clusterBox;
-		clusterBox.CalBestRectangleBox(scanClusterArray[i],scanClusterFeatureArray[i]);
+//		BoundingBox clusterBox;
+//		clusterBox.CalBestRectangleBox(scanClusterArray[i],scanClusterFeatureArray[i]);
 	}
 	return 0;
 }
