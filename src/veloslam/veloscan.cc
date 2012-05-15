@@ -946,41 +946,26 @@ void VeloScan::MarkStaticorMovingPointCloud()
 
 void VeloScan::FindingAllofObject(int maxDist, int minDist)
 {
-    DataXYZ xyz(get("xyz"));
-    if(xyz.size() > 0)
-	{
-		TransferToCellArray(maxDist, minDist);
-		CalcScanCellFeature();
-		FindAndCalcScanClusterFeature();
-	}
+	TransferToCellArray(maxDist, minDist);
+	CalcScanCellFeature();
+	FindAndCalcScanClusterFeature();
+
     return;
  }
 
 
 void VeloScan::TrackingAllofObject(int trackingAlgo)
 {
-     DataXYZ xyz(get("xyz"));
-    if(xyz.size() > 0)
-	{
-		trackMgr.HandleScan(*this,trackingAlgo);
-	}
+	trackMgr.HandleScan(*this,trackingAlgo);
  }
 
 void VeloScan::ClassifiAllofObject()
 {
-    DataXYZ xyz(get("xyz"));
-    if(xyz.size() > 0)
-	{
-		 ClassifiAllObject();
-	}
+	 ClassifiAllObject();
  }
 
 void VeloScan::ExchangePointCloud()
 {
-    DataXYZ xyz(get("xyz"));
-    if(xyz.size() > 0)
-	{
-         MarkStaticorMovingPointCloud();
-	}
-    return;
+     MarkStaticorMovingPointCloud();
+     return;
  }

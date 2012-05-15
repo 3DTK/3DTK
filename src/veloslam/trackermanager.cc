@@ -387,7 +387,6 @@ int TrackerManager::ListTrackers()
 // removednoUsedTrackers and out of sliding window's scans
 int TrackerManager::RemoveNoUsedTracker(VeloScan& scanRef)
 {
-
 //	cout<<"RemoveNoUsedTracker is running!"<<endl;
 //	cout << " current_sliding_window_pos: " << current_sliding_window_pos << " current id " << scanRef.scanid<< endl;
 
@@ -492,15 +491,14 @@ int TrackerManager::CalculateTrackersFeature(vector <Scan *> allScans, int curre
              if(firstNO <0 || secondNO< 0 )
                  continue;
 
-             Scan *firstScan = (Scan *)g_pfirstScan;  //the first scan.
              Scan *CurrentScan = allScans[firstNO];
              Scan *CurrentScanNext = allScans[secondNO];
 
              double  deltaMat[16];
              double  deltaMatNext[16];
 
-             GetCurrecntdelteMat(*CurrentScan , *firstScan,  deltaMat);
-             GetCurrecntdelteMat(*CurrentScanNext , *firstScan,  deltaMatNext);
+             GetCurrecntdelteMat(*CurrentScan ,  deltaMat);
+             GetCurrecntdelteMat(*CurrentScanNext ,  deltaMatNext);
 
            //  cout << " pose  no" << tracker.matchClusterID <<"  "
                 //   <<  p1.x  <<"  " <<  p2.x <<"  "
@@ -630,7 +628,6 @@ int TrackerManager::ClassifiyTrackersObjects(vector <Scan *> allScans, int curre
 {
     CalculateTrackersFeature(allScans, currentNO, windowsize);
     MarkClassifiyTrackersResult(allScans, currentNO , windowsize);
-
 	return 0;
 }
 

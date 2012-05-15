@@ -315,11 +315,17 @@ void DrawPoint(Point  p, int size , float r, float g, float b, double deltaMat[1
 
 
 //  change the mat for the firstScan  coodration.
-void GetCurrecntdelteMat(Scan& CurrentScan ,  Scan& firstScan,  double *deltaMat)
+void GetCurrecntdelteMat(Scan& CurrentScan ,  double *deltaMat)
 {
 	 //Point p, q;
 	double tempMat[16];
-    M4inv(firstScan.get_transMat(), tempMat);
+	double  temp[16]=
+	{  1, 0, 0, 0,
+	   0, 1, 0, 0,
+	   0, 0, 1, 0,
+	   0, 0, 0, 1} ;
+
+    M4inv(temp, tempMat);
     MMult(CurrentScan.get_transMat(), tempMat, deltaMat);
 }
 
@@ -331,13 +337,12 @@ int DrawAll_ScanPoints_Number(vector <Scan *> allScans,  int psize, float r, flo
 
 	 for(int i =0; i <n ;i ++)
 	 {
-		 Scan *firstScan = (Scan *)(g_pfirstScan);
 		 Scan *CurrentScan = allScans[i];
 
          DataXYZ xyz(CurrentScan->get("xyz"));
          DataType Pt(CurrentScan->get("type"));
 
-		 GetCurrecntdelteMat(*CurrentScan ,  *firstScan,  deltaMat);
+		 GetCurrecntdelteMat(*CurrentScan ,   deltaMat);
 		 int size =xyz.size();
 
 		 for(j=0; j <size; j++)
@@ -407,7 +412,7 @@ void glDumpWindowPPM_debugView(const char *filename, GLenum mode)
        {        // For each RGB component
         //cout << (RGBA*((win_height-1-i)*win_width+j)+k) << endl;
         ibuffer[l++] = (unsigned char)   *(buffer + (RGBA*((win_height-1-i)*win_width+j)+1));
-	ibuffer[l++] = (unsigned char)   *(buffer + (RGBA*((win_height-1-i)*win_width+j)+2));
+	    ibuffer[l++] = (unsigned char)   *(buffer + (RGBA*((win_height-1-i)*win_width+j)+2));
         ibuffer[l++] = (unsigned char)   *(buffer + (RGBA*((win_height-1-i)*win_width+j)+0));
       }                                  // end RGB
     }                                    // end column
@@ -669,7 +674,6 @@ static void Draw(void)
 	glScalef(m_zoom, m_zoom, m_zoom);
 
 	int scansize = Scan::allScans.size();
-
     Point p1, p2, p3;
 
 	if  (scansize <5)
@@ -678,9 +682,7 @@ static void Draw(void)
 		return ;
 	}
 
-    Scan *firstScan = (Scan *)g_pfirstScan;
     Scan *CurrentScan = Scan::allScans[3];
-
     if (CurrentScan == NULL)
  	{
 		DebugDrawFinished =true;
@@ -689,8 +691,8 @@ static void Draw(void)
 
     double  deltaMat[16];
     double  deltaMatNext[16];
+    GetCurrecntdelteMat(*CurrentScan ,  deltaMat);
 
-    GetCurrecntdelteMat(*CurrentScan , *firstScan,  deltaMat);
     double PosTheta[3];
     double Pos[3];
     Matrix4ToEuler(deltaMat, PosTheta, Pos);
