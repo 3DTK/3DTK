@@ -126,18 +126,6 @@ VeloScan::VeloScan(const VeloScan& s)
     : Scan(s)
 { }
 
-void VeloScan::setPoints(vector <Point>* _points)
-{
-
-/*	points.clear();
-	for (int i = 0; i < _points->size(); i++)
-    {
-		Point  P=  (*_points)[i];
-		points.push_back(P);
-    }
-*/
-}
-
 int VeloScan::TransferToCellArray(int maxDist, int minDist)
 {
 #define  DefaultColumnSize 360

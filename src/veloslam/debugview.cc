@@ -18,10 +18,8 @@ using std::stringstream;
 
 #include "slam6d/scan.h"
 #include "slam6d/Boctree.h"
-//#include "slam6d/scan_io.h"
 #include "slam6d/d2tree.h"
 #include "slam6d/kd.h"
-//#include "slam6d/kdc.h"
 #include "veloslam/veloscan.h"
 #include "veloslam/trackermanager.h"
 #include "veloslam/debugview.h"
@@ -160,19 +158,9 @@ void  DrawTextRGB(Point P, float r, float g, float b, char * outputstring)
 #endif
 }
 
-//void  Draw_Cube_GL_RGB(gridClusterFeature&f,float r,float g,float b)
-//{
-//	    Draw_Cube_GL_RGB(f.min_x,
-//							f.min_y,
-//							f.min_z,
-//							f.max_x,
-//							f.max_y,
-//							f.max_z,r,g,b);
-//}
-
 void   Draw_Line_GL_RGB(float x1, float y1, float z1,
-	                                    float x2, float y2, float z2,
-										float r,float g,float b,float width)
+                        float x2, float y2, float z2,
+    					float r,float g,float b,float width)
 {
 		GLdouble dVect1[3];
 		GLdouble dVect2[3];
@@ -195,7 +183,11 @@ void   Draw_Line_GL_RGB(float x1, float y1, float z1,
 		glEnd();
 }
 
-void   Draw_Line_GL_RGB(Point P1, Point P2, int width,	float r,float g,float b, bool arrow)
+void   Draw_Line_GL_RGB(
+    Point P1, Point P2,
+    int width,
+    float r,float g,float b,
+    bool arrow)
 {
 		GLdouble dVect1[3];
 		GLdouble dVect2[3];
@@ -230,28 +222,28 @@ void   Draw_Line_GL_RGB(Point P1, Point P2, int width,	float r,float g,float b, 
 void  Draw_Line_GL(float x1, float y1, float z1,float x2, float y2, float z2)
 {
 	Draw_Line_GL_RGB(x1,y1,z1,
-		                           x2,y2,z2,
-								   0,1.0,0);
+                     x2,y2,z2,
+                     0,1.0,0);
 }
 
 void Draw_Cube_GL_RGB(float min_x, float min_y, float min_z,
-	                                    float max_x, float max_y, float max_z,
-										float r,float g,float b)
+                      float max_x, float max_y, float max_z,
+                      float r,float g,float b)
 {
-		Draw_Line_GL_RGB(min_x,min_y,max_z,max_x,min_y,max_z,r,g,b);
-		Draw_Line_GL_RGB(min_x,max_y,max_z,max_x,max_y,max_z,r,g,b);
-		Draw_Line_GL_RGB(min_x,max_y,min_z,max_x,max_y,min_z,r,g,b);
-		Draw_Line_GL_RGB(min_x,min_y,min_z,max_x,min_y,min_z,r,g,b);
+	Draw_Line_GL_RGB(min_x,min_y,max_z,max_x,min_y,max_z,r,g,b);
+	Draw_Line_GL_RGB(min_x,max_y,max_z,max_x,max_y,max_z,r,g,b);
+	Draw_Line_GL_RGB(min_x,max_y,min_z,max_x,max_y,min_z,r,g,b);
+	Draw_Line_GL_RGB(min_x,min_y,min_z,max_x,min_y,min_z,r,g,b);
 
-		Draw_Line_GL_RGB(min_x,min_y,max_z,min_x,max_y,max_z,r,g,b);
-		Draw_Line_GL_RGB(max_x,min_y,max_z,max_x,max_y,max_z,r,g,b);
-		Draw_Line_GL_RGB(min_x,min_y,min_z,min_x,max_y,min_z,r,g,b);
-		Draw_Line_GL_RGB(max_x,min_y,min_z,max_x,max_y,min_z,r,g,b);
+	Draw_Line_GL_RGB(min_x,min_y,max_z,min_x,max_y,max_z,r,g,b);
+	Draw_Line_GL_RGB(max_x,min_y,max_z,max_x,max_y,max_z,r,g,b);
+	Draw_Line_GL_RGB(min_x,min_y,min_z,min_x,max_y,min_z,r,g,b);
+	Draw_Line_GL_RGB(max_x,min_y,min_z,max_x,max_y,min_z,r,g,b);
 
-		Draw_Line_GL_RGB(min_x,min_y,min_z,min_x,min_y,max_z,r,g,b);
-		Draw_Line_GL_RGB(max_x,min_y,min_z,max_x,min_y,max_z,r,g,b);
-		Draw_Line_GL_RGB(max_x,max_y,min_z,max_x,max_y,max_z,r,g,b);
-		Draw_Line_GL_RGB(min_x,max_y,min_z,min_x,max_y,max_z,r,g,b);
+	Draw_Line_GL_RGB(min_x,min_y,min_z,min_x,min_y,max_z,r,g,b);
+	Draw_Line_GL_RGB(max_x,min_y,min_z,max_x,min_y,max_z,r,g,b);
+	Draw_Line_GL_RGB(max_x,max_y,min_z,max_x,max_y,max_z,r,g,b);
+	Draw_Line_GL_RGB(min_x,max_y,min_z,min_x,max_y,max_z,r,g,b);
 }
 
 void Draw_Inclined_Cube_GL_RGB(double rectangleVexPos[4][2],double min_z,double max_z,
@@ -276,88 +268,12 @@ void Draw_Inclined_Cube_GL_RGB(double rectangleVexPos[4][2],double min_z,double 
 
 void Draw_Cube_GL_RGB(clusterFeature&f, float r,float g,float b)
 {
-	    Draw_Cube_GL_RGB(f.min_x,
-							f.min_y,
-							f.min_z,
-							f.max_x,
-							f.max_y,
-							f.max_z,r,g,b);
-}
-
-void Draw_points_ZValue(const vector <Point>& Points,  int psize, float r, float g, float b, int type)
-{
-	int i,j;
-	float *pColor;
-	int size;
-	float x,y,z ;
-
-//	const vector <Point> *pPoints;
-//	pPoints = scanRef1.get_points();
-
-	glPointSize(psize);
-	glBegin(GL_POINTS);
-	int n =  Points.size();
-	for(j=0; j <n; j++)
-	{
-		Point p =Points[j];
-//		if(p.point_type & type)
-	    	DrawPointsRGB(p,	r, g,b);
-	}
-
-	glEnd();
-}
-
-void Draw_points_ZValue_IN_ref(const vector <Point>& Points,  VeloScan& scanRef1,  VeloScan& scanR, int psize, float r, float g, float b, int TYPE)
-{
-	int i,j;
-	float *pColor;
-	int size;
-	float x,y,z ;
-
-     Point p, q;
-	 double tempMat[16], deltaMat[16];
-
-	 M4inv( scanR.getTransMatOrg(), tempMat);
-     MMult(scanRef1.get_transMat(), tempMat, deltaMat);
-
-	//const vector <Point> *pPoints;
-	//pPoints = scanRef1.get_points();
-
-	glPointSize(psize);
-	glBegin(GL_POINTS);
-	int n = Points.size();
-	for(j=0; j <n; j++)
-	{
-		Point p = Points[j];
-		p.transform(deltaMat);
-		//		if(p.point_type & type)
-		DrawPointsRGB(p,	r, g,b);
-	}
-
-	glEnd();
-}
-
-
-void Draw_points_ZValue(VeloScan& scanRef1,  int psize, float r, float g, float b)
-{
-	int i,j;
-	float *pColor;
-	int size;
-	float x,y,z ;
-
-	const vector <Point> *pPoints;
-	pPoints = scanRef1.get_points();
-
-	glPointSize(psize);
-	glBegin(GL_POINTS);
-	int n =  (*pPoints).size();
-	for(j=0; j <n; j++)
-	{
-		Point p = (*pPoints)[j];
-		DrawPointsRGB(p,	r, g,b);
-	}
-
-	glEnd();
+    Draw_Cube_GL_RGB(f.min_x,
+     				f.min_y,
+					f.min_z,
+					f.max_x,
+					f.max_y,
+					f.max_z,r,g,b);
 }
 
 void DrawPoint(Point  p, int size , float r, float g, float b)
@@ -388,59 +304,13 @@ void DrawPoint(Point  p, int size , float r, float g, float b, double deltaMat[1
 		glEnd();
 }
 
-void DrawObjectPoint(cluster &gluData1, int size , float r, float g, float b)
-{
-	cell* pCell;
-	GLdouble dVect1[3];
-	glPointSize(size);
-	glBegin(GL_POINTS);
-	glColor3d(r , g ,b);
-	for(int j=0; j<gluData1.size();++j)
-	{
-		pCell=gluData1[j]->pCell;
-		for(int k=0; k<pCell->size();++k)
-		{
-			dVect1[0]=(*pCell)[k]->x;
-			dVect1[1]=(*pCell)[k]->y;
-			dVect1[2]=(*pCell)[k]->z;
-
-			glVertex3dv(dVect1);
-		}
-	}
-	glEnd();
-}
-
-void DrawObjectPoint(cluster &gluData1, int size , float r, float g, float b, double deltaMat[16] )
-{
-	cell* pCell;
-	GLdouble dVect1[3];
-	glPointSize(size);
-	glBegin(GL_POINTS);
-	glColor3d(r , g ,b);
-	for(int j=0; j<gluData1.size();++j)
-	{
-		pCell=gluData1[j]->pCell;
-		for(int k=0; k<pCell->size();++k)
-		{
-			Point pp((*pCell)[k]->x,  (*pCell)[k]->y,  (*pCell)[k]->z);
-			pp.transform(deltaMat);
-
-     		dVect1[0]=pp.x;
-			dVect1[1]=pp.y;
-			dVect1[2]=pp.z;
-
-			glVertex3dv(dVect1);
-		}
-	}
-	glEnd();
-}
 
 //  change the mat for the firstScan  coodration.
 void GetCurrecntdelteMat(Scan& CurrentScan ,  Scan& firstScan,  double *deltaMat)
 {
 	 //Point p, q;
 	double tempMat[16];
-    M4inv( firstScan.getTransMatOrg(), tempMat);
+    M4inv(firstScan.get_transMat(), tempMat);
     MMult(CurrentScan.get_transMat(), tempMat, deltaMat);
 }
 
@@ -450,14 +320,14 @@ int DrawAll_ScanPoints_Number(vector <Scan *> allScans,  int psize, float r, flo
 	 for(int i =0; i <n ;i ++)
 	 {
 		 Scan *firstScan = (Scan *)(g_pfirstScan);
-//		 Scan *firstScan = allScans[0];
 		 Scan *CurrentScan = allScans[i];
 		 double  deltaMat[16];
 
-		 GetCurrecntdelteMat(*CurrentScan ,  *firstScan,  deltaMat);
+         DataXYZ xyz(get("xyz"));
+         DataType Pt(get("type"));
 
+		 GetCurrecntdelteMat(*CurrentScan ,  *firstScan,  deltaMat);
 		 int size =(CurrentScan->get_points())->size();
-	//	 vector<Point> PP = *(CurrentScan->get_points());
 
 		 for(j=0; j <size; j++)
 		 {
@@ -472,164 +342,6 @@ int DrawAll_ScanPoints_Number(vector <Scan *> allScans,  int psize, float r, flo
 		 }
 	 }
 	return 0;
-}
-
-void Draw_ALL_Cells_Points_IN_ref(VeloScan& scanRef1, VeloScan& scanR,  int psize, float r, float g, float b, int type)
-{
-//	Pn+1 = dP ¡¤ Pn
-	 Point p, q;
-	 double deltaMat[16];
-
-     GetCurrecntdelteMat(scanRef1 , scanR,  deltaMat);
-	cellArray myCellArray =scanRef1.scanCellArray;
-	cellFeatureArray  myCellFeatureArray = scanRef1.scanCellFeatureArray;
-
-	for(int j=0; j <myCellArray.size(); j++)
-	{
-		cellColumn &column= myCellArray[j];
-		for(int i=0; i<column.size(); i++)
-		{
-			cellFeature& cellobj= myCellFeatureArray[j][i];
-			p.x= cellobj.min_x;   p.y=cellobj.min_y; p.z=cellobj.min_z;
-			p.transform(deltaMat);
-			q.x= cellobj.max_x;   q.y=cellobj.max_y; q.z=cellobj.max_z;
-			q.transform(deltaMat);
-
-			if( cellobj.cellType & type)
-						Draw_Cube_GL_RGB(p.x,		p.y,		p.z,		q.x,   	q.y,		q.z,	r, g, b);
-
-		}
-
-	}
-}
-//	 CELL_TYPE_FOR_SLAM6D
-// CELL_TYPE_ABOVE_DELTA_Y
-void Draw_ALL_Cells_Points(VeloScan& scanRef1,  int psize, float r, float g, float b, int type)
-{
-	cellArray myCellArray =scanRef1.scanCellArray;
-	cellFeatureArray  myCellFeatureArray = scanRef1.scanCellFeatureArray;
-
-	for(int j=0; j <myCellArray.size(); j++)
-	{
-		cellColumn &column= myCellArray[j];
-
-		for(int i=0; i<column.size(); i++)
-		{
-			cellFeature& cellobj= myCellFeatureArray[j][i];
-
-			if( cellobj.cellType & type)
-						Draw_Cube_GL_RGB(
-										cellobj.min_x,
-										cellobj.min_y,
-										cellobj.min_z,
-										cellobj.max_x,
-										cellobj.max_y,
-										cellobj.max_z,
-										r, g, b);
-
-		}
-
-	}
-}
-
-
-void Draw_ALL_Object_TYPE_IN_ref(VeloScan& scanRef1, VeloScan& scanR,  int psize, float r, float g, float b, int  TYPE)
-{
-
-//	Pn+1 = dP ¡¤ Pn
-	  Point p, q;
- 	 double deltaMat[16];
-     GetCurrecntdelteMat(scanRef1 , scanR,  deltaMat);
-
-	clusterArray myclusterArray =scanRef1.scanClusterArray;
-	clusterFeatureArray  myclusterFeatureArray =scanRef1.scanClusterFeatureArray;
-
-      glLineWidth(1);
-	for(int j=0; j <myclusterArray.size(); j++)
-	{
-			clusterFeature& clusterobj= myclusterFeatureArray[j];
-
-			p.x= clusterobj.min_x;   p.y=clusterobj.min_y; p.z=clusterobj.min_z;
-			p.transform(deltaMat);
-			q.x= clusterobj.max_x;   q.y=clusterobj.max_y; q.z=clusterobj.max_z;
-			q.transform(deltaMat);
-
-	//		if(cellobj.clusterType & TYPE )
-		//	if(clusterobj.clusterType & TYPE )
-				//	Draw_Cube_GL_RGB(p.x,		p.y,		p.z,		q.x,   	q.y,		q.z,	r, g, b);
-	}
-}
-
-void Draw_ALL_Object_Points_TYPE_IN_ref(VeloScan& scanRef1, VeloScan& scanR,  int psize, float r, float g, float b, int  TYPE)
-{
-//	Pn+1 = dP ¡¤ Pn
-     Point p;
- 	 double deltaMat[16];
-     GetCurrecntdelteMat(scanRef1 , scanR,  deltaMat);
-
-	clusterArray myclusterArray =scanRef1.scanClusterArray;
-	clusterFeatureArray  myclusterFeatureArray =scanRef1.scanClusterFeatureArray;
-
-	glPointSize(psize);
-	glBegin(GL_POINTS);
-
-	for(int j=0; j <myclusterArray.size(); j++)
-	{
-			clusterFeature& clusterobj= myclusterFeatureArray[j];
-			cluster& cluster= myclusterArray[j];
-
-			for(int k=0; k<cluster.size();++k)
-			{
-				cell* pCell=cluster[k]->pCell;
-				for(int l=0; l<pCell->size();++l)
-				{
-					p.x=(*pCell)[l]->x;
-					p.y=(*pCell)[l]->y;
-					p.z=(*pCell)[l]->z;
-
-					p.transform(deltaMat);
-					DrawPointsRGB(p,	r, g, b);
-
-				}
-
-			}
-	}
-	glEnd();
-}
-
-
-//CLUSTER_TYPE_OBJECT
-void Draw_ALL_Object_TYPE(VeloScan& scanRef1,  int psize, float r, float g, float b, int  TYPE)
-{
-	clusterArray myclusterArray =scanRef1.scanClusterArray;
-	clusterFeatureArray  myclusterFeatureArray =scanRef1.scanClusterFeatureArray;
-
-	for(int j=0; j <myclusterArray.size(); j++)
-	{
-			clusterFeature& cellobj= myclusterFeatureArray[j];
-
-	//		if(cellobj.clusterType & TYPE )
-			if(cellobj.clusterType & CLUSTER_TYPE_STATIC_OBJECT )
-					Draw_Cube_GL_RGB(
-									cellobj.min_x,
-									cellobj.min_y,
-									cellobj.min_z,
-									cellobj.max_x,
-									cellobj.max_y,
-									cellobj.max_z,
-									1, 0, 1);
-
-			if(cellobj.clusterType & CLUSTER_TYPE_MOVING_OBJECT )
-					Draw_Cube_GL_RGB(
-									cellobj.min_x,
-									cellobj.min_y,
-									cellobj.min_z,
-									cellobj.max_x,
-									cellobj.max_y,
-									cellobj.max_z,
-									0, 1, 0);
-
-	}
 }
 
 
@@ -724,47 +436,8 @@ static void Key(unsigned char key, int x, int y)
 	    exit(0);
 		break;
 
-    //case GLUT_KEY_P:
-    //    printf("next\n");
-    //    g_pause != g_pause;
-    //    cout << g_pause;
-    //    break;
-
     }
 }
-
-/*
-		#define GLUT_KEY_F1			1
-		#define GLUT_KEY_F2			2
-		#define GLUT_KEY_F3			3
-		#define GLUT_KEY_F4			4
-		#define GLUT_KEY_F5			5
-		#define GLUT_KEY_F6			6
-		#define GLUT_KEY_F7			7
-		#define GLUT_KEY_F8			8
-		#define GLUT_KEY_F9			9
-
-		#define GLUT_KEY_F10			10
-		#define GLUT_KEY_F11			11
-		#define GLUT_KEY_F12			12
-
-		#define GLUT_KEY_LEFT			          100
-		#define GLUT_KEY_UP			              101
-		#define GLUT_KEY_RIGHT			      102
-		#define GLUT_KEY_DOWN			      103
-		#define GLUT_KEY_PAGE_UP		      104
-		#define GLUT_KEY_PAGE_DOWN	  105
-		#define GLUT_KEY_HOME			      106
-		#define GLUT_KEY_END			          107
-		#define GLUT_KEY_INSERT			  108
-*/
-
-//GLUT_LEFT_BUTTON
-//GLUT_MIDDLE_BUTTON
-//GLUT_RIGHT_BUTTON
-
-//GLUT_DOWN
-//GLUT_UP
 
 static void MouseMove(int x, int y)
 {
@@ -979,7 +652,6 @@ static void Draw(void)
 	glScalef(m_zoom, m_zoom, m_zoom);
 
 	int scansize = Scan::allScans.size();
-//	boost::mutex::scoped_lock lock(draw_mutex);
 
     Point p1, p2, p3;
 
@@ -1026,10 +698,8 @@ static void Draw(void)
               p3.x,   p3.y,   p3.z);
 
     DrawAll_ScanPoints_Number(Scan::allScans, 1, 0.8, 0.8, 0.8, scansize-1);
-//  Draw_ALL_Object_TYPE(*(VeloScan *)( (Scan::allScans[scansize-1])) ,1, 1, 0, 0, 1   );
     trackMgr.DrawTrackersMovtion_Long_Number_All(Scan::allScans, scansize-1);
     trackMgr.DrawEgoTrajectory();
-//	trackMgr.DrawTrackersContrailAfterFilted(Scan::allScans);
 	glFlush();
  	glutSwapBuffers();
 
