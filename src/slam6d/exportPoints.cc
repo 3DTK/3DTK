@@ -275,38 +275,38 @@ int main(int argc, char **argv)
   int octree       = 0;  // employ randomized octree reduction?
   IOType type    = UOS;
 
-  parseArgs(argc, argv, dir, red, rand, start, end,
-      maxDist, minDist, eP, octree, type);
-
-  // Get Scans
-  Scan::readScans(type, start, end, dir, maxDist, minDist, true);
-
-  int end_reduction = (int)Scan::allScans.size();
-#ifdef _OPENMP
-#pragma omp parallel for schedule(dynamic)
-#endif
-  for (int iterator = 0; iterator < end_reduction; iterator++) {
-    if (red > 0) {
-      cout << "Reducing Scan No. " << iterator << endl;
-    } else {
-      cout << "Copying Scan No. " << iterator << endl;
-    }
-    // reduction filter for current scan!
-    Scan::allScans[iterator]->calcReducedPoints(red, octree);
-  }
-
-  if(eP) {
-    readFrames(dir, start, end, type);
-  }
-
-  cout << "Export all 3D Points to file \"points.pts\"" << endl;
-  ofstream redptsout("points.pts");
-  for(unsigned int i = 0; i < Scan::allScans.size(); i++) {
-    const vector <Point> *points = Scan::allScans[i]->get_points();
-    for(unsigned int j = 0; j < points->size(); j++) {
-      redptsout << points->at(j) << endl;
-    }
-  }
-  redptsout.close();
-  redptsout.clear();
+//  parseArgs(argc, argv, dir, red, rand, start, end,
+//      maxDist, minDist, eP, octree, type);
+//
+//  // Get Scans
+//  Scan::readScans(type, start, end, dir, maxDist, minDist, true);
+//
+//  int end_reduction = (int)Scan::allScans.size();
+//#ifdef _OPENMP
+//#pragma omp parallel for schedule(dynamic)
+//#endif
+//  for (int iterator = 0; iterator < end_reduction; iterator++) {
+//    if (red > 0) {
+//      cout << "Reducing Scan No. " << iterator << endl;
+//    } else {
+//      cout << "Copying Scan No. " << iterator << endl;
+//    }
+//    // reduction filter for current scan!
+//    Scan::allScans[iterator]->calcReducedPoints(red, octree);
+//  }
+//
+//  if(eP) {
+//    readFrames(dir, start, end, type);
+//  }
+//
+//  cout << "Export all 3D Points to file \"points.pts\"" << endl;
+//  ofstream redptsout("points.pts");
+//  for(unsigned int i = 0; i < Scan::allScans.size(); i++) {
+//    const vector <Point> *points = Scan::allScans[i]->get_points();
+//    for(unsigned int j = 0; j < points->size(); j++) {
+//      redptsout << points->at(j) << endl;
+//    }
+//  }
+//  redptsout.close();
+//  redptsout.clear();
 }

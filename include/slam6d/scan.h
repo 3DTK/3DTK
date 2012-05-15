@@ -398,6 +398,7 @@ protected:
   
   //! Inverse functionality of copyReducedToOriginal.
   void copyOriginalToReduced();
+
 private:
   //! flag for openDirectory and closeDirectory to distinguish the scans
   static bool scanserver;

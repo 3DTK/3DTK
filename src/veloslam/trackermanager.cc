@@ -1,6 +1,27 @@
+/**
+ * @file
+ * @brief Main programm for dynamic Velodyne SLAM
+ *
+ * @author Andreas Nuechter. Jacobs University Bremen, Germany
+ * @author YuanJun, Wuhan University, China
+ * @author ZhangLiang, Wuhan University, China
+ * @author Li Wei, Wuhan University, China
+ * @author Li Ming, Wuhan University, China
+ */
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
+#include<cmath>
+
+#ifdef _MSC_VER
+#include <windows.h>
+#else
+#include <dlfcn.h>
+#endif
+
+#include "slam6d/scan.h"
+#include "slam6d/globals.icc"
+
 #include "veloslam/color_util.h"
 #include "veloslam/veloscan.h"
 #include "veloslam/trackermanager.h"
@@ -8,14 +29,7 @@
 #include "veloslam/kalmanfilter.h"
 #include "veloslam/lap.h"
 
-#include <GL/gl.h>		   	/* OpenGL header file */
-#include <GL/glu.h>		/* OpenGL utilities header file */
 
-#ifdef _MSC_VER
-#include <GL/glut.h>
-#else
-#include <GL/freeglut.h>
-#endif
 
 #define KG  35
 #define BIGNUM 100000
@@ -209,7 +223,9 @@ int TrackerManager::MatchTrackers(VeloScan& scanRef,Tracker& tracker,float kg)
 					shapeDiff =fabs( fabs(tracker.statusList.back().size_x-glu.size_x) +
 									 fabs(tracker.statusList.back().size_y-glu.size_y) +
 									 fabs(tracker.statusList.back().size_z-glu.size_z) );
-					positionDiff = sqrt(sqr(tracker.statusList.back().avg_x -glu.avg_x) + sqr(tracker.statusList.back().avg_z -glu.avg_z) ) ;
+					positionDiff = sqrt(   (tracker.statusList.back().avg_x -glu.avg_x)*(tracker.statusList.back().avg_x -glu.avg_x) + 
+						                            (tracker.statusList.back().avg_z -glu.avg_z)*(tracker.statusList.back().avg_z -glu.avg_z)
+											  	) ;
 			}
 			value= radiusDiff*1.0 + thetaDiff*1.0  +  sizeDiff*0.8 + shapeDiff*0.8 + positionDiff * 0.3 ;
 			if(value < minValue)
