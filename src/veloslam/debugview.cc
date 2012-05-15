@@ -1,7 +1,22 @@
+/**
+ * @file
+ * @brief Main programm for dynamic Velodyne SLAM
+ *
+ * @author Andreas Nuechter. Jacobs University Bremen, Germany
+ * @author Li Wei, Wuhan University, China
+ * @author Li Ming, Wuhan University, China
+ */
+
 #ifdef _MSC_VER
 #ifdef OPENMP
 #define _OPENMP
 #endif
+#endif
+
+#ifdef _MSC_VER
+#include <windows.h>
+#else
+#include <dlfcn.h>
 #endif
 
 #include <fstream>
@@ -38,12 +53,6 @@ extern  VeloScan* g_pfirstScan;
 
 #ifdef _OPENMP
 #include <omp.h>
-#endif
-
-#ifdef _MSC_VER
-#include <windows.h>
-#else
-#include <dlfcn.h>
 #endif
 
 #ifdef _MSC_VER
@@ -189,33 +198,33 @@ void   Draw_Line_GL_RGB(
     float r,float g,float b,
     bool arrow)
 {
-		GLdouble dVect1[3];
-		GLdouble dVect2[3];
+	GLdouble dVect1[3];
+	GLdouble dVect2[3];
 
-		glLineWidth(width);
-		glBegin(GL_LINES);
-		glColor3d(r, g, b);
+	glLineWidth(width);
+	glBegin(GL_LINES);
+	glColor3d(r, g, b);
 
-		dVect1[0]=P1.x;
-		dVect1[1]=P1.y;
-		dVect1[2]=P1.z;
-		glVertex3dv(dVect1);
+	dVect1[0]=P1.x;
+	dVect1[1]=P1.y;
+	dVect1[2]=P1.z;
+	glVertex3dv(dVect1);
 
-		dVect2[0]=P2.x;
-		dVect2[1]=P2.y;
-		dVect2[2]=P2.z;
-		glVertex3dv(dVect2);
+	dVect2[0]=P2.x;
+	dVect2[1]=P2.y;
+	dVect2[2]=P2.z;
+	glVertex3dv(dVect2);
 
-		glEnd();
+	glEnd();
 
-		if(arrow)
-		{
-				glPushMatrix();
-				glTranslatef(1.0,   0.0f,   0.0f);
-				glRotatef(90.0f,0.0f,1.0f,0.0f);
-				glutWireCone(0.027,0.09,10,10);
-				glPopMatrix();
-		}
+	if(arrow)
+	{
+		glPushMatrix();
+		glTranslatef(1.0, 0.0f, 0.0f);
+		glRotatef(90.0f,0.0f,1.0f,0.0f);
+		glutWireCone(0.027,0.09,10,10);
+		glPopMatrix();
+	}
 
 }
 
@@ -317,22 +326,30 @@ void GetCurrecntdelteMat(Scan& CurrentScan ,  Scan& firstScan,  double *deltaMat
 int DrawAll_ScanPoints_Number(vector <Scan *> allScans,  int psize, float r, float g, float b, int n)
 {
 	 int i,j,k,colorIdx;
+	 Point p;
+   	 double  deltaMat[16];
+
 	 for(int i =0; i <n ;i ++)
 	 {
 		 Scan *firstScan = (Scan *)(g_pfirstScan);
 		 Scan *CurrentScan = allScans[i];
-		 double  deltaMat[16];
 
-         DataXYZ xyz(get("xyz"));
-         DataType Pt(get("type"));
+         DataXYZ xyz(CurrentScan->get("xyz"));
+         DataType Pt(CurrentScan->get("type"));
 
 		 GetCurrecntdelteMat(*CurrentScan ,  *firstScan,  deltaMat);
-		 int size =(CurrentScan->get_points())->size();
+		 int size =xyz.size();
 
 		 for(j=0; j <size; j++)
 		 {
 			 // need more complex classification
-			 Point p = (*(CurrentScan->get_points()))[j];
+             p.x  = xyz[j][0];
+             p.y  = xyz[j][1];
+             p.z  = xyz[j][2];
+             p.type = Pt[j];
+
+             p.transform(deltaMat);
+
              if (p.type & POINT_TYPE_GROUND)  //ground
  			    DrawPoint(p,  psize , 0.8,   0.8,   0.8,  deltaMat);
              if (p.type & POINT_TYPE_STATIC_OBJECT) //static
@@ -777,5 +794,4 @@ void ShowWraper()
 void StartShow()
 {
 	boost::thread t(ShowWraper);
-	//t.join();
 }

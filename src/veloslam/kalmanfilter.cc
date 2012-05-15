@@ -1,3 +1,12 @@
+/**
+ * @file
+ * @brief Main programm for dynamic Velodyne SLAM
+ *
+ * @author Andreas Nuechter. Jacobs University Bremen, Germany
+ * @author YuanJun, Wuhan University, China
+ * @author Li Wei, Wuhan University, China
+ * @author Li Ming, Wuhan University, China
+ */
 /***************By yuanjun**************************/
 #include "veloslam/kalmanfilter.h"
 #include "math.h"
