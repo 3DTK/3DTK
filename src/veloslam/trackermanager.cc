@@ -26,32 +26,6 @@ Trajectory VelodyneTrajectory;
 VeloScan * g_pfirstScan;
 float  constant_static_or_moving  = 20.0;
 
-/*
-int GetScanID_in_SlidingWindow(int absNO, int current_pos, int  window_size)
-{
-        int firstNO=-1;
-             // relative scanID   absolute scanID
-             // absNO (6,7,8,9)  current_pos(6,7,8,9)  window_size =6
-		if(current_pos > window_size)
-         {
-			 // in slidingwindow
-			 if(absNO  >= current_pos - window_size )
-                   firstNO =absNO - (current_pos - window_size );
-			 // out of slidingwindow
-			 else
-				    firstNO = -1;
-        }
-		else
-		{
-			  //in first scans
-              firstNO = absNO;
-		}
-	//   cout << " absNO  " << absNO  << " firstNO  "<<firstNO
-	//	      << " current_pos  " << current_pos << " window_size  "<< window_size <<endl ;
-       return firstNO;
-}
-*/
-
 int GetScanID_in_SlidingWindow(int absNO, int current_pos, int  window_size)
 {
         int firstNO=-1;
@@ -131,21 +105,6 @@ int TrackerManager::HandleScan(VeloScan& scanRef,int trackingAlgo)
 		clusterStatus[i].Matched=false;
 		clusterStatus[i].FilterRet=false;
 	}
-
-	//if (!preScan)
-	//{
-	//	for (i=0;i<3;i++)
-	//	{
-	//		delta_Theta[i]=0;
-	//        delta_Pos[i]=0;
-	//	}
-	//}
-	//else
-	//{
-	//	GetTwoScanRoll(&scanRef,preScan);
-	//}
-
-	//rollAngle=delta_Theta[1];
 
     //filter not good target object
 	FilterObject(scanRef);
@@ -699,7 +658,7 @@ int TrackerManager::UpdateClustersPoistioninTrackers()
 void TrackerManager::GetTwoScanRoll(Scan *CurrentScan,Scan *preScan)//???
 {
 	double tempMat[16],deltaMat[16];
-	M4inv(preScan->getTransMatOrg(), tempMat);
+	M4inv(preScan->get_transMat(), tempMat);
 	MMult(CurrentScan->get_transMat(), tempMat,deltaMat);
 	Matrix4ToEuler(deltaMat,delta_Theta,delta_Pos);
 	//cout<<"delta_Theta: "<<delta_Theta[0]<<" "<<delta_Theta[1]<<" "<<delta_Theta[2]<<endl;
