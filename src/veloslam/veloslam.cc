@@ -1125,7 +1125,7 @@ int main(int argc, char **argv)
 			 Sleep(1);
 			// cout << "sleep" <<endl;
 		 }
-	    VeloScan* currentScan = it;
+	    VeloScan* currentScan =(VeloScan*  ) *it;
 	    currentScan->setRangeFilter(maxDist, minDist);
 	    currentScan->setReductionParameter(red, octree);
 	    currentScan->setSearchTreeParameter(nns_method, cuda_enabled);
@@ -1248,15 +1248,16 @@ int main(int argc, char **argv)
 
    if (exportPts) 
    {
-    cout << "Export all 3D Points to file \"points.pts\"" << endl;
-    ofstream redptsout("points.pts");
-    for(unsigned int i = 0; i < Scan::allScans.size(); i++) {
-      DataXYZ xyz_r(Scan::allScans[i]->get("xyz reduced"));
-      for(unsigned int i = 0; i < xyz_r.size(); ++i) {
-        redptsout << xyz_r[i][0] << ' ' << xyz_r[i][1] << ' ' << xyz_r[i][2] << '\n';
-      }
-      redptsout << std::flush;
-    }
+		cout << "Export all 3D Points to file \"points.pts\"" << endl;
+		ofstream redptsout("points.pts");
+		for(unsigned int i = 0; i < Scan::allScans.size(); i++) 
+		{
+		  DataXYZ xyz_r(Scan::allScans[i]->get("xyz reduced"));
+		  for(unsigned int i = 0; i < xyz_r.size(); ++i) 
+			redptsout << xyz_r[i][0] << ' ' << xyz_r[i][1] << ' ' << xyz_r[i][2] << '\n';
+		  redptsout << std::flush;
+		}
+   }
 
 	for(ScanVector::iterator it = Scan::allScans.begin(); it != Scan::allScans.end(); ++it)
 	{

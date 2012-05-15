@@ -136,7 +136,7 @@ void Scan::toGlobal() {
 void Scan::createSearchTree()
 {
   // multiple threads will call this function at the same time because they all work on one pair of Scans, just let the first one (who sees a nullpointer) do the creation
-  boost::lock_guard<boost::mutex> lock(m_mutex_create_tree);
+//  boost::lock_guard<boost::mutex> lock(m_mutex_create_tree);
   if(kd != 0) return;
 
   // make sure the original points are created before starting the measurement
@@ -156,7 +156,7 @@ void Scan::createSearchTree()
 void Scan::calcReducedOnDemand()
 {
   // multiple threads will call this function at the same time because they all work on one pair of Scans, just let the first one (who sees count as zero) do the reduction
-  boost::lock_guard<boost::mutex> lock(m_mutex_reduction);
+//  boost::lock_guard<boost::mutex> lock(m_mutex_reduction);
   if(m_has_reduced) return;
 
 #ifdef WITH_METRICS

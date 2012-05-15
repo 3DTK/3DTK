@@ -31,7 +31,7 @@ if(WIN32)
 else(WIN32)
   add_library(scan_io_${libname} SHARED scan_io_${libname}.cc)
 endif(WIN32)  
-  target_link_libraries(scan_io_${libname} pointfilter ${Boost_PROGRAM_OPTIONS_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY})
+  target_link_libraries(scan_io_${libname} pointfilter ${Boost_LIBRARIES} ${Boost_PROGRAM_OPTIONS_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY})
 endforeach(libname)
 
 if(WITH_RIVLIB)
