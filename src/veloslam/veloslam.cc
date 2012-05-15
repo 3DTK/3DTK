@@ -427,6 +427,7 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &rand,
     { "format",          required_argument,   0,  'f' },
     { "algo",            required_argument,   0,  'a' },
     { "tracking",        required_argument,   0,  'b' },
+    { "track_value",      required_argument,   0,  'T' },
     { "nns_method",      required_argument,   0,  't' },
     { "loop6DAlgo",      required_argument,   0,  'L' },
     { "graphSlam6DAlgo", required_argument,   0,  'G' },
@@ -464,7 +465,7 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &rand,
   };
 
   cout << endl;
-  while ((c = getopt_long(argc, argv, "O:v:f:A:G:L:a:b:t:r:R:d:D:i:l:I:c:C:n:s:e:m:M:y:uqQp", longopts, NULL)) != -1)
+  while ((c = getopt_long(argc, argv, "T:O:v:f:A:G:L:a:b:t:r:R:d:D:i:l:I:c:C:n:S:s:e:m:M:y:u:q:Q:p", longopts, NULL)) != -1)
     switch (c)
     {
       case 'a':
@@ -487,6 +488,7 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &rand,
           cerr << "Error: constant_static_or_moving not available." << endl;
           exit(1);
         }
+		break;
      case 't':
         nns_method = atoi(optarg);
         if ((nns_method < 0) || (nns_method > 3)) {
@@ -611,7 +613,7 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &rand,
         cuda_enabled = true;
         break;
       case 'S':
-        scanserver = true;
+        scanserver = true;  // maybe some errors.
         break;
       case '?':
         usage(argv[0]);
@@ -620,6 +622,7 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &rand,
         abort ();
     }
 
+  scanserver = true;
   if (optind != argc-1)
   {
     cerr << "\n*** Directory missing ***" << endl;
@@ -1106,10 +1109,9 @@ int main(int argc, char **argv)
     exit(-1);
   }
   
-  
     double eu[6] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
     vector <Point> ptss;
-    int _fileNr;
+	veryQuiet =true;
 
     if(!veryQuiet)
         StartShow();
@@ -1123,7 +1125,6 @@ int main(int argc, char **argv)
   		 while(DebugDrawFinished ==false && !veryQuiet)
 		 {
 			 Sleep(1);
-			// cout << "sleep" <<endl;
 		 }
 	    VeloScan* currentScan =(VeloScan*  ) *it;
 	    currentScan->setRangeFilter(maxDist, minDist);
@@ -1132,14 +1133,7 @@ int main(int argc, char **argv)
 		currentScan->isTrackerHandled=false;
         currentScan->scanid = scanCount; ///		
 
-        if(scanCount == 0)
-        {
-		//	g_pfirstScan = new  VeloScan(*currentScan);
-	//		currentScan->transform(currentScan->getTransMatOrg(), Scan::ICP); //transform points to initial position
-		}
-//		Scan::allScans.push_back(currentScan);
          ICPFinished =false;
-
          if(tracking ==1 )
          {
             currentScan->FindingAllofObject(maxDist, minDist);
@@ -1149,17 +1143,8 @@ int main(int argc, char **argv)
           {
             int windowsize =3;
             currentScan->FindingAllofObject(maxDist, minDist);
-            // add new function for classification for tracking
             currentScan->TrackingAllofObject(trackingAlgo);
-        //    cout << "all  cluster objects " << currentScan->scanClusterFeatureArray.size() << endl;
-        //    cout << "all  cluster tracker " << trackMgr.getNumberofTracker() << endl;
-            // mark the type of clusters.
-            //if(scanCount < windowsize )
-            //    currentScan->ClassifiAllofObject();
-            //else
-        //    cout<< "constant_static_or_moving is : " << constant_static_or_moving <<endl;
-                currentScan->ClassifibyTrackingAllObject(scanCount, windowsize);
-
+            currentScan->ClassifibyTrackingAllObject(scanCount, windowsize);
    //         trackMgr.ListTrackers();
          }
          if( tracking ==0 || tracking ==1 ||tracking ==2 )
@@ -1168,13 +1153,7 @@ int main(int argc, char **argv)
              currentScan->calcReducedPoints_byClassifi(red, octree, PointType());
          }
 
-	//	 cout << "reducing scan " << currentScan->get_points_red_size()  << endl;
-
-	 //    currentScan->transform(currentScan->getTransMatOrg(), Scan::INVALID); //transform points to initial position
-//         currentScan->createTree(nns_method, cuda_enabled);
-
-    //     cout << "matching two  scan " << currentScan->getFileNr() <<  endl;
-
+		 currentScan->createSearchTree();
 #ifdef  NO_SLIDING_WINDOW
 		MatchTwoScan(my_icp,  currentScan,  scanCount,  eP);
 #else
@@ -1195,18 +1174,8 @@ int main(int argc, char **argv)
          scanCount++;
          current_sliding_window_pos++;
 
-         //cout << " current_sliding_window_pos " << current_sliding_window_pos
-         //      << " scanCount "  << scanCount << endl
-         //      << " sliding_window_size " << sliding_window_size
-         //      << " current id " << currentScan->scanid  << endl;
-
 #ifdef  NO_SLIDING_WINDOW
-		 //if(current_sliding_window_pos > sliding_window_size )
-   //      {
-   //          VeloScan *deleteScan = (VeloScan*)(Scan::allScans[scanCount - sliding_window_size-1]);
-   // 		 cout << "clean scan " << deleteScan->scanid  << endl;
-		 //    deleteScan->DeletePoints();
-   //      }
+
 #else
          if(current_sliding_window_pos > sliding_window_size )
          {
@@ -1218,7 +1187,6 @@ int main(int argc, char **argv)
 #endif
 
          ICPFinished =true;
-
 		 if(!veryQuiet)
     	 {
     	    glutPostRedisplay();
@@ -1227,10 +1195,7 @@ int main(int argc, char **argv)
 		 while(DebugDrawFinished ==false && !veryQuiet)
 		 {
 			 Sleep(1);
-		//	 cout << "sleep" <<endl;
 		 }
-
-
      ////////////////////////////////////////
     }
 
@@ -1266,14 +1231,11 @@ int main(int argc, char **argv)
 	}
   
     Scan::closeDirectory();
-	
+
 	delete my_icp6Dminimizer;
     delete my_icp;
 
+    cout << endl << endl;
+    cout << "Normal program end." << endl;
 
-  cout << endl << endl;
-  cout << "Normal program end." << endl
-    << (red < 0 && rand < 0 ? "(-> HINT: For a significant speedup, please use the '-r' or '-R' parameter <-)\n"
-        : "")
-    << endl;
 }
