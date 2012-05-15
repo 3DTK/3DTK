@@ -17,6 +17,12 @@
 #include <omp.h>
 #endif
 
+#ifdef _MSC_VER
+#include <windows.h>
+#else
+#include <dlfcn.h>
+#endif
+
 #include "slam6d/icp6Dapx.h"
 #include "slam6d/icp6Dsvd.h"
 #include "slam6d/icp6Dquat.h"
@@ -53,7 +59,6 @@
 #endif
 
 #include <csignal>
-
 #include "veloslam/veloscan.h"
 #include "veloslam/debugview.h"
 #include "veloslam/tracker.h"
@@ -80,7 +85,6 @@
 #include <GL/freeglut.h>
 #endif
 
-
 #ifndef _MSC_VER
 #include <time.h>
 void Sleep(unsigned int mseconds)
@@ -102,7 +106,7 @@ using std::endl;
 #include <fstream>
 using std::ifstream;
 
-include <boost/thread.hpp>
+#include <boost/thread.hpp>
 #include <boost/thread/mutex.hpp>
 #include <boost/thread/condition.hpp>
 
@@ -615,9 +619,9 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &rand,
       default:
         abort ();
     }
-  }
 
-  if (optind != argc-1) {
+  if (optind != argc-1)
+  {
     cerr << "\n*** Directory missing ***" << endl;
     usage(argv[0]);
   }
@@ -693,11 +697,12 @@ void matchGraph6Dautomatic(double cldist, int loopsize, vector <Scan *> allScans
     if(my_icp6D != NULL){
       cout << "ICP" << endl;
       // Matching strongly linked scans with ICPs
-      if(meta_icp) {
-        metas.push_back(allScans[i - 1]);
-        MetaScan* meta_scan = new MetaScan(metas);
-        my_icp6D->match(meta_scan, allScans[i]);
-        delete meta_scan;
+      if(meta_icp)
+	  {
+//        metas.push_back(allScans[i - 1]);
+//        MetaScan* meta_scan = new MetaScan(metas);
+//        my_icp6D->match(meta_scan, allScans[i]);
+        //delete meta_scan;
       } else {
         switch(type) {
           case UOS_MAP:
@@ -1120,7 +1125,7 @@ int main(int argc, char **argv)
 			 Sleep(1);
 			// cout << "sleep" <<endl;
 		 }
-	    VeloScan* currentScan = *it;
+	    VeloScan* currentScan = it;
 	    currentScan->setRangeFilter(maxDist, minDist);
 	    currentScan->setReductionParameter(red, octree);
 	    currentScan->setSearchTreeParameter(nns_method, cuda_enabled);
@@ -1129,13 +1134,10 @@ int main(int argc, char **argv)
 
         if(scanCount == 0)
         {
-			g_pfirstScan = new  VeloScan(*currentScan);
-			currentScan->transform(currentScan->getTransMatOrg(), Scan::ICP); //transform points to initial position
+		//	g_pfirstScan = new  VeloScan(*currentScan);
+	//		currentScan->transform(currentScan->getTransMatOrg(), Scan::ICP); //transform points to initial position
 		}
-
-
 //		Scan::allScans.push_back(currentScan);
-
          ICPFinished =false;
 
          if(tracking ==1 )
@@ -1169,7 +1171,7 @@ int main(int argc, char **argv)
 	//	 cout << "reducing scan " << currentScan->get_points_red_size()  << endl;
 
 	 //    currentScan->transform(currentScan->getTransMatOrg(), Scan::INVALID); //transform points to initial position
-         currentScan->createTree(nns_method, cuda_enabled);
+//         currentScan->createTree(nns_method, cuda_enabled);
 
     //     cout << "matching two  scan " << currentScan->getFileNr() <<  endl;
 

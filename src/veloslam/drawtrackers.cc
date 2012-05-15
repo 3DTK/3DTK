@@ -1,11 +1,28 @@
+/**
+ * @file
+ * @brief Main programm for dynamic Velodyne SLAM
+ *
+ * @author Andreas Nuechter. Jacobs University Bremen, Germany
+ * @author Li Wei, Wuhan University, China
+ * @author Li Ming, Wuhan University, China
+ */
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
+
+#ifdef _MSC_VER
+#include <windows.h>
+#else
+#include <dlfcn.h>
+#endif
+
 #include "veloslam/color_util.h"
 #include "veloslam/veloscan.h"
 #include "veloslam/trackermanager.h"
 #include "veloslam/debugview.h"
 #include "veloslam/kalmanfilter.h"
+
+
 
 #include <GL/gl.h>		    	/* OpenGL header file */
 #include <GL/glu.h>			/* OpenGL utilities header file */
