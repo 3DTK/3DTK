@@ -17,17 +17,6 @@
 #include <omp.h>
 #endif
 
-#define WANT_STREAM ///< define the WANT stream :)
-
-#include <string>
-using std::string;
-#include <iostream>
-using std::cout;
-using std::cerr;
-using std::endl;
-#include <fstream>
-using std::ifstream;
-
 #include "slam6d/icp6Dapx.h"
 #include "slam6d/icp6Dsvd.h"
 #include "slam6d/icp6Dquat.h"
@@ -78,6 +67,10 @@ using std::ifstream;
 #include <strings.h>
 #endif
 
+#ifdef WITH_METRICS
+#include "slam6d/metrics.h"
+#endif //WITH_METRICS
+
 #include <GL/gl.h>			/* OpenGL header file */
 #include <GL/glu.h>			/* OpenGL utilities header file */
 
@@ -98,7 +91,18 @@ void Sleep(unsigned int mseconds)
 
 #endif
 
-#include <boost/thread.hpp>
+#define WANT_STREAM ///< define the WANT stream :)
+
+#include <string>
+using std::string;
+#include <iostream>
+using std::cout;
+using std::cerr;
+using std::endl;
+#include <fstream>
+using std::ifstream;
+
+include <boost/thread.hpp>
 #include <boost/thread/mutex.hpp>
 #include <boost/thread/condition.hpp>
 
@@ -131,18 +135,16 @@ void sigSEGVhandler (int v)
     segfault = true;
     cout << endl
       << "# **************************** #" << endl
-      << "  Segmentation fault or Crtl-C" << endl
+      << "  Segmentation fault or Ctrl-C" << endl
       << "# **************************** #" << endl
-      << endl
-      << "Saving registration information in .frames files" << endl;
-    vector <Scan*>::iterator Iter = Scan::allScans.begin();
-    for( ; Iter != Scan::allScans.end(); ) {
-      Iter = Scan::allScans.begin();
-      delete (*Iter);
-      cout << ".";
-      cout.flush();
-    }
-    cout << endl;
+      << endl;
+    
+      // save frames and close scans
+      for(ScanVector::iterator it = Scan::allScans.begin(); it != Scan::allScans.end(); ++it) {
+        (*it)->saveFrames();
+      }
+      cout << "Frames saved." << endl;
+      Scan::closeDirectory();
   }
   exit(-1);
 }
@@ -160,7 +162,6 @@ void usage(char* prog)
   const string bold("");
   const string normal("");
 #endif
-
   cout << endl
     << bold << "USAGE " << normal << endl
     << "   " << prog << " [options] directory" << endl << endl;
@@ -176,7 +177,7 @@ void usage(char* prog)
     << "           6 = small angle approximation" << endl
     << "           7 = Lu & Milios style, i.e., uncertainty based, with Euler angles" << endl
     << "           8 = Lu & Milios style, i.e., uncertainty based, with Quaternion" << endl
-		<< "           9 = unit quaternion with scale method by Horn" << endl
+    << "           9 = unit quaternion with scale method by Horn" << endl
     << endl
     << bold << "  -A" << normal << " NR, " << bold << "--anim=" << normal << "NR   [default: first and last frame only]" << endl
     << "         if specified, use only every NR-th frame for animation" << endl
@@ -236,7 +237,7 @@ void usage(char* prog)
     << endl
     << bold << "  -I" << normal << " NR, " << bold << "--iterSLAM=" << normal << "NR [default: 0]" << endl
     << "         sets the maximal number of iterations for SLAM to <NR>" << endl
-    << "         (if not set, graphSLAM is not executed)" << endl
+    << "         (if not set, graphSLAM is not executed)" << endl 
     << endl
     << bold << "  -l" << normal << " NR, " << bold << "--loopsize=" << normal << "NR [default: 20]" << endl
     << "         sets the size of a loop, i.e., a loop must exceed <NR> of scans" << endl
@@ -277,6 +278,9 @@ void usage(char* prog)
     << bold << "  -Q, --veryquiet" << normal << endl
     << "         Very quiet mode. Suppress all messages, except in case of error." << endl
     << endl
+    << bold << "  -S, --scanserver" << normal << endl
+    << "         Use the scanserver as an input method and handling of scan data" << endl
+    << endl
     << bold << "  -r" << normal << " NR, " << bold << "--reduce=" << normal << "NR" << endl
     << "         turns on octree based point reduction (voxel size=<NR>)" << endl
     << endl
@@ -305,6 +309,66 @@ void usage(char* prog)
   exit(1);
 }
 
+/**
+ * Make type, start and end a write once only class for parseFormatFile because
+ * we know the directory only after the type, start and end parameters may have
+ * been written already, so encapsulate this write once behaviour in this class.
+ */
+template<typename T>
+class WriteOnce {
+public:
+  WriteOnce(T& value) : value(value), written(false) {}
+  WriteOnce& operator=(const T& other) { if(!written) { value = other; written = true; } return *this; }
+  operator T() const { return value; }
+private:
+  T& value;
+  bool written;
+};
+
+/**
+ * Parsing of a formats file in the scan directory for default type and scan
+ * index ranges without overwriting user set parameters. Does nothing if
+ * file doesn't exist.
+ * 
+ * @param dir directory the scans and format file are contained in
+ * @param type which ScanIO to use for the scans in that directory
+ * @param start index for the first valid scan
+ * @param end index for the last valid scan
+ */
+void parseFormatFile(string& dir, WriteOnce<IOType>& type, WriteOnce<int>& start, WriteOnce<int>& end)
+{
+  ifstream file((dir+"format").c_str());
+  if(!file.good()) return;
+  
+  string line, key, value, format;
+  while(getline(file, line)) {
+    size_t pos = line.find('=');
+    key = trim(line.substr(0, pos - 0));
+    value = trim(line.substr(pos+1));
+    if(key == "format") {
+      try {
+        format = value;
+        type = formatname_to_io_type(format.c_str());
+      } catch (...) { // runtime_error
+        cerr << "Error while parsing format file: Format '" << format << "' unknown." << endl;
+        break;
+      }
+    } else if(key == "start") {
+      stringstream str(value.c_str());
+      int s;
+      str >> s;
+      start = s;
+    } else if(key == "end") {
+      stringstream str(value.c_str());
+      int e;
+      str >> e;
+      end = e;
+    } else {
+      cerr << "Error while parsing format file: Unknown key '" << key << "'" << endl;
+      break;
+    }
+  }
+}
 
 /** A function that parses the command-line arguments and sets the respective flags.
  * @param argc the number of arguments
@@ -342,12 +406,16 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &rand,
     bool &extrapolate_pose, bool &meta, int &algo,int &tracking, int &loopSlam6DAlgo, int &lum6DAlgo, int &anim,
     int &mni_lum, string &net, double &cldist, int &clpairs, int &loopsize,int &trackingAlgo,
     double &epsilonICP, double &epsilonSLAM,  int &nns_method, bool &exportPts, double &distLoop,
-    int &iterLoop, double &graphDist, int &octree, bool &cuda_enabled, IOType &type)
+    int &iterLoop, double &graphDist, int &octree, bool &cuda_enabled, IOType &type,
+    bool& scanserver)
 {
   int  c;
   // from unistd.h:
   extern char *optarg;
   extern int optind;
+  
+  WriteOnce<IOType> w_type(type);
+  WriteOnce<int> w_start(start), w_end(end);
 
   /* options descriptor */
   // 0: no arguments, 1: required argument, 2: optional argument
@@ -387,6 +455,7 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &rand,
     { "graphDist",       required_argument,   0,  '3' }, // use the long format only
     { "cuda",            no_argument,         0,  'u' }, // cuda will be enabled
 	{ "trackingAlgo",    required_argument,   0,    'y'},//tracking algorithm
+    { "scanserver",      no_argument,         0,  'S' },
     { 0,           0,   0,   0}                    // needed, cf. getopt.h
   };
 
@@ -408,13 +477,18 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &rand,
           save_animation = true;
           anim_frame_rate = atoi(optarg);
           break;
-	 case 't':
+	 case 'T':
         constant_static_or_moving = atof(optarg);
         if ((constant_static_or_moving < 0) || (constant_static_or_moving > 300)) {
           cerr << "Error: constant_static_or_moving not available." << endl;
           exit(1);
         }
-
+     case 't':
+        nns_method = atoi(optarg);
+        if ((nns_method < 0) || (nns_method > 3)) {
+          cerr << "Error: NNS Method not available." << endl;
+          exit(1);
+        }
         break;
       case 'L':
         loopSlam6DAlgo = atoi(optarg);
@@ -468,13 +542,13 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &rand,
         net = optarg;
         break;
       case 's':
-        start = atoi(optarg);
-        if (start < 0) { cerr << "Error: Cannot start at a negative scan number.\n"; exit(1); }
+        w_start = atoi(optarg);
+        if (w_start < 0) { cerr << "Error: Cannot start at a negative scan number.\n"; exit(1); }
         break;
       case 'e':
-        end = atoi(optarg);
-        if (end < 0)     { cerr << "Error: Cannot end at a negative scan number.\n"; exit(1); }
-        if (end < start) { cerr << "Error: <end> cannot be smaller than <start>.\n"; exit(1); }
+        w_end = atoi(optarg);
+        if (w_end < 0)     { cerr << "Error: Cannot end at a negative scan number.\n"; exit(1); }
+        if (w_end < w_start) { cerr << "Error: <end> cannot be smaller than <start>.\n"; exit(1); }
         break;
       case 'm':
         maxDist = atoi(optarg);
@@ -522,15 +596,18 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &rand,
         graphDist = atof(optarg);
         break;
       case 'f':
-		   try {
-				  type = formatname_to_io_type(optarg);
-				} catch (...) { // runtime_error
-				  cerr << "Format " << optarg << " unknown." << endl;
-				  abort();
-				}
+        try {
+          w_type = formatname_to_io_type(optarg);
+        } catch (...) { // runtime_error
+          cerr << "Format " << optarg << " unknown." << endl;
+          abort();
+        }
         break;
       case 'u':
         cuda_enabled = true;
+        break;
+      case 'S':
+        scanserver = true;
         break;
       case '?':
         usage(argv[0]);
@@ -538,6 +615,7 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &rand,
       default:
         abort ();
     }
+  }
 
   if (optind != argc-1) {
     cerr << "\n*** Directory missing ***" << endl;
@@ -550,6 +628,8 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &rand,
 #else
   if (dir[dir.length()-1] != '\\') dir = dir + "\\";
 #endif
+  
+  parseFormatFile(dir, w_type, w_start, w_end);
 
   return 0;
 }
@@ -615,7 +695,7 @@ void matchGraph6Dautomatic(double cldist, int loopsize, vector <Scan *> allScans
       // Matching strongly linked scans with ICPs
       if(meta_icp) {
         metas.push_back(allScans[i - 1]);
-        Scan *meta_scan ; //= new Scan(metas, nns_method, cuda_enabled);
+        MetaScan* meta_scan = new MetaScan(metas);
         my_icp6D->match(meta_scan, allScans[i]);
         delete meta_scan;
       } else {
@@ -721,7 +801,7 @@ void matchGraph6Dautomatic(double cldist, int loopsize, vector <Scan *> allScans
 
 icp6Dminimizer *  CreateICPalgo( int algo , bool quiet )
 {
-   icp6Dminimizer *my_icp6Dminimizer;
+   icp6Dminimizer *my_icp6Dminimizer = 0;
    switch (algo) {
     case 1 :
       my_icp6Dminimizer = new icp6D_QUAT(quiet);
@@ -961,7 +1041,7 @@ int main(int argc, char **argv)
   string dir;
   double red   = -1.0, mdmll = -1.0, mdml = 25.0, mdm = 25.0;
   int    rand  = -1,   mni = 50;
-int    start = 0,   end = -1;
+  int    start = 0,   end = -1;
   bool   quiet      = false;
   bool   veryQuiet  = false;
   int    maxDist    = -1;
@@ -989,14 +1069,17 @@ int    start = 0,   end = -1;
   bool cuda_enabled    = false;
   IOType type  = UOS;
   int trackingAlgo=0;
+  bool scanserver = false;
 
   parseArgs(argc, argv, dir, red, rand, mdm, mdml, mdmll, mni, start, end,
       maxDist, minDist, quiet, veryQuiet, eP, meta, algo, tracking,
       loopSlam6DAlgo, lum6DAlgo, anim,
       mni_lum, net, cldist, clpairs, loopsize, trackingAlgo,epsilonICP, epsilonSLAM,
-      nns_method, exportPts, distLoop, iterLoop, graphDist, octree, cuda_enabled, type);
+      nns_method, exportPts, distLoop, iterLoop, graphDist, octree, cuda_enabled, type,
+      scanserver);
+	  
 
-  cout << "slam6D will proceed with the following parameters:" << endl;
+  cout << "VeloSLAM will proceed with the following parameters:" << endl;
 
    //@@@ to do :-)
     icp6Dminimizer *my_icp6Dminimizer = 0;
@@ -1011,39 +1094,47 @@ int    start = 0,   end = -1;
 	   exit(0);
 	}
 
+  VeloScan::openDirectory(scanserver, dir, type, start, end);
+  
+  if(VeloScan::allScans.size() == 0) {
+    cerr << "No scans found. Did you use the correct format?" << endl;
+    exit(-1);
+  }
+  
+  
     double eu[6] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
     vector <Point> ptss;
     int _fileNr;
 
-    Scan::scanIOwrapper my_ScanIO(type);
     if(!veryQuiet)
         StartShow();
     ICPFinished =true;
 
     //Main Loop for ICP with Moving Object Detection and Tracking
-    while ((_fileNr =my_ScanIO.readScans(start, end, dir, maxDist, minDist, eu, ptss)) != -1)
+    for(ScanVector::iterator it = Scan::allScans.begin();
+        it != Scan::allScans.end(); 
+		++it) 
     {
-		 while(DebugDrawFinished ==false && !veryQuiet)
+  		 while(DebugDrawFinished ==false && !veryQuiet)
 		 {
 			 Sleep(1);
 			// cout << "sleep" <<endl;
 		 }
-
-	    VeloScan::dir = dir;
-	//    cout << scanCount << "*" << endl;
-        VeloScan *currentScan = new VeloScan(eu, maxDist);
+	    VeloScan* currentScan = *it;
+	    currentScan->setRangeFilter(maxDist, minDist);
+	    currentScan->setReductionParameter(red, octree);
+	    currentScan->setSearchTreeParameter(nns_method, cuda_enabled);
 		currentScan->isTrackerHandled=false;
+        currentScan->scanid = scanCount; ///		
+
         if(scanCount == 0)
         {
 			g_pfirstScan = new  VeloScan(*currentScan);
 			currentScan->transform(currentScan->getTransMatOrg(), Scan::ICP); //transform points to initial position
 		}
-        currentScan->setFileNr(_fileNr);
-        currentScan->scanid = scanCount; ///
-		currentScan->setPoints(&ptss);    // copy points
 
-		ptss.clear();                  // clear points
-		Scan::allScans.push_back(currentScan);
+
+//		Scan::allScans.push_back(currentScan);
 
          ICPFinished =false;
 
@@ -1069,15 +1160,12 @@ int    start = 0,   end = -1;
 
    //         trackMgr.ListTrackers();
          }
-         if( tracking ==1 ||tracking ==2 )
+         if( tracking ==0 || tracking ==1 ||tracking ==2 )
          {
              currentScan->ExchangePointCloud();
              currentScan->calcReducedPoints_byClassifi(red, octree, PointType());
          }
-         else
-         {
-             currentScan->calcReducedPoints(red, octree);
-         }
+
 	//	 cout << "reducing scan " << currentScan->get_points_red_size()  << endl;
 
 	 //    currentScan->transform(currentScan->getTransMatOrg(), Scan::INVALID); //transform points to initial position
@@ -1129,7 +1217,6 @@ int    start = 0,   end = -1;
 
          ICPFinished =true;
 
-
 		 if(!veryQuiet)
     	 {
     	    glutPostRedisplay();
@@ -1145,9 +1232,6 @@ int    start = 0,   end = -1;
      ////////////////////////////////////////
     }
 
-	delete my_icp6Dminimizer;
-    delete my_icp;
-
  //  long starttime = GetCurrentTimeInMilliSec();
 
  // //Finall  graph Matching
@@ -1160,39 +1244,29 @@ int    start = 0,   end = -1;
  //    iterLoop,  graphDist,  octree,  cuda_enabled, type
 	//);
 
- // long endtime = GetCurrentTimeInMilliSec() - starttime;
- // cout << "Matching done in " << endtime << " milliseconds!!!" << endl;
+   if (exportPts) 
+   {
+    cout << "Export all 3D Points to file \"points.pts\"" << endl;
+    ofstream redptsout("points.pts");
+    for(unsigned int i = 0; i < Scan::allScans.size(); i++) {
+      DataXYZ xyz_r(Scan::allScans[i]->get("xyz reduced"));
+      for(unsigned int i = 0; i < xyz_r.size(); ++i) {
+        redptsout << xyz_r[i][0] << ' ' << xyz_r[i][1] << ' ' << xyz_r[i][2] << '\n';
+      }
+      redptsout << std::flush;
+    }
 
-//  IntersectionDetection intersectionDetector;
-//  intersectionDetector.DetectIntersection();
-//  cout << "intersectionDetection done"<<endl;
+	for(ScanVector::iterator it = Scan::allScans.begin(); it != Scan::allScans.end(); ++it)
+	{
+	    Scan* scan = *it;
+	    scan->saveFrames();
+	}
+  
+    Scan::closeDirectory();
+	
+	delete my_icp6Dminimizer;
+    delete my_icp;
 
-  //if (exportPts) {
-  //  cout << "Export all 3D Points to file \"points.pts\"" << endl;
-  //  ofstream redptsout("points.pts");
-  //  for(unsigned int i = 0; i < Scan::allScans.size(); i++) {
-  //    for (int j = 0; j < Scan::allScans[i]->get_points_red_size(); j++) {
-  //      redptsout << Scan::allScans[i]->get_points_red()[j][0] << " "
-  //        << Scan::allScans[i]->get_points_red()[j][1] << " "
-  //        << Scan::allScans[i]->get_points_red()[j][2] << endl;
-  //    }
-  //  }
-  //  redptsout.close();
-  //  redptsout.clear();
-  //}
-
-  //cout << "Saving registration information in .frames files" << endl;
-  //vector <Scan*>::iterator Iter = Scan::allScans.begin();
-  //for( ; Iter != Scan::allScans.end(); ) {
-  //  Iter = Scan::allScans.begin();
-  //  delete (*Iter);
-  //  cout << ".";
-  //  cout.flush();
-  //}
-
-  Scan::allScans.clear();
-
-  //delete my_icp6Dminimizer;
 
   cout << endl << endl;
   cout << "Normal program end." << endl
