@@ -1023,13 +1023,19 @@ int main(int argc, char **argv)
     redptsout.clear();
   }
 
-  for(ScanVector::iterator it = Scan::allScans.begin(); it != Scan::allScans.end(); ++it) {
+  const double* p;
+  ofstream redptsout("loopclose.pts");
+  for(ScanVector::iterator it = Scan::allScans.begin(); it != Scan::allScans.end(); ++it)
+  {
     Scan* scan = *it;
+	p = scan->get_rPos();
+	Point x(p[0], p[1], p[2]);
+    redptsout << x << endl;
     scan->saveFrames();
   }
+  redptsout.close();
   
   Scan::closeDirectory();
-
   delete my_icp6Dminimizer;
 
   cout << endl << endl;
