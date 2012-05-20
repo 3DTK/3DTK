@@ -3,6 +3,7 @@
  * @brief Implementation of reading 3D scans
  * @author Andreas Nuechter. Jacobs University Bremen gGmbH
  * @author Dorit Borrmann. Smart Systems Group, Jacobs University Bremen gGmbH, Germany.
+ * @author Mohammad Faisal. Smart Systems Group, Jacobs University Bremen gGmbH, Germany.
  */
 #include "slam6d/point.h"
 #include "veloslam/velodefs.h"
@@ -67,79 +68,101 @@ typedef unsigned char BYTE;
 
 long CountOfLidar = 0;
 
-double velodyne_calibrated[VELODYNE_NUM_LASERS][5] =
+//Changes the variable to be filled dynamically. Added a 6th variable to enable or disable a specific sensor
+double velodyne_calibrated[VELODYNE_NUM_LASERS][6];
+
+/**
+ * Method to fill the calibration data using the Velodyne64 calibration data from Wuhan.
+ */
+int backup()
 {
-		{	-7.1581192,	-4.5,	102,	21.560343,	-2.5999999},
-		{	-6.8178215,	-3.4000001,	125,	21.516994,	2.5999999},
-		{	0.31782165,	3,	130,	20.617426,	-2.5999999},
-		{	0.65811908,	4.5999999,	128,	20.574717,	2.5999999},
-		{	-6.4776502,	-0.5,	112,	21.473722,	-2.5999999},
-		{	-6.1375928,	1,	125,	21.430525,	2.5999999},
-		{	-8.520812,	-1.5,	106,	21.734608,	-2.5999999},
-		{	-8.1798887,	0.40000001,	127,	21.690901,	2.5999999},
-		{	-5.797637,	4,	111,	21.387396,	-2.5999999},
-		{	-5.4577708,	5.5,	126,	21.34433,	2.5999999},
-		{	-7.8391404,	3.0999999,	113,	21.647291,	-2.5999999},
-		{	-7.4985547,	4.5,	123,	21.603773,	2.5999999},
-		{	-3.0802133,	-4.5,	105,	21.044245,	-2.5999999},
-		{	-2.7406337,	-3.2,	133,	21.001518,	2.5999999},
-		{	-5.1179824,	-5.5,	110,	21.301321,	-2.5999999},
-		{	-4.7782598,	-4,	129,	21.258366,	2.5999999},
-		{	-2.4010365,	-0.2,	111,	20.958813,	-2.5999999},
-		{	-2.0614092,	1,	130,	20.916126,	2.5999999},
-		{	-4.4385905,	-1.2,	115,	21.215462,	-2.5999999},
-		{	-4.0989642,	0,	133,	21.172602,	2.5999999},
-		{	-1.7217404,	3.8,	113,	20.873451,	-2.5999999},
-		{	-1.3820176,	5,	130,	20.830786,	2.5999999},
-		{	-3.7593663,	3,	117,	21.129782,	-2.5999999},
-		{	-3.4197867,	4.5,	129,	21.086998,	2.5999999},
-		{	0.998555,	-4.5,	107,	20.531982,	-2.5999999},
-		{	1.339141,	-3.2,	131,	20.489222,	2.5999999},
-		{	-1.0422293,	-5.4000001,	128,	20.788124,	-2.5999999},
-		{	-0.70236301,	-4,	134,	20.745461,	2.5999999},
-		{	1.679889,	-0.5,	124,	20.446428,	-2.5999999},
-		{	2.0208123,	1,	136,	20.403601,	2.5999999},
-		{	-0.36240739,	-1.5,	131,	20.702793,	-2.5999999},
-		{	-0.022349782,	0.2,	136,	20.660116,	2.5999999},
-		{	-22.737886,	-7.8000002,	101,	16.019152,	-2.5999999},
-		{	-22.226072,	-5,	88,	15.954137,	2.5999999},
-		{	-11.513928,	4.5,	121,	14.680806,	-2.5999999},
-		{	-11.002114,	7.4000001,	88,	14.623099,	2.5999999},
-		{	-21.714685,	-1,	94,	15.889649,	-2.5999999},
-		{	-21.203688,	2,	88,	15.82566,	2.5999999},
-		{	-24.790272,	-2.5,	114,	16.284933,	-2.5999999},
-		{	-24.276321,	0.5,	89,	16.217583,	2.5999999},
-		{	-20.693031,	6,	98,	15.762167,	-2.5999999},
-		{	-20.182682,	9,	92,	15.699132,	2.5999999},
-		{	-23.762968,	4.5,	107,	16.15085,	-2.5999999},
-		{	-23.250172,	7.5,	80,	16.084715,	2.5999999},
-		{	-16.615318,	-7.5,	121,	15.26925,	-2.5999999},
-		{	-16.105938,	-5,	92,	15.209245,	2.5999999},
-		{	-19.672594,	-9,	119,	15.63654,	-2.5999999},
-		{	-19.162729,	-6,	89,	15.574372,	2.5999999},
-		{	-15.596496,	-1,	109,	15.14954,	-2.5999999},
-		{	-15.086954,	2,	88,	15.090119,	2.5999999},
-		{	-18.653046,	-2,	117,	15.51261,	-2.5999999},
-		{	-18.143503,	0.69999999,	88,	15.451235,	2.5999999},
-		{	-14.577271,	5.5,	112,	15.030966,	-2.5999999},
-		{	-14.067405,	8.3999996,	87,	14.972065,	2.5999999},
-		{	-17.634062,	5,	119,	15.390228,	-6.1999998},
-		{	-17.124681,	7.5,	97,	15.329572,	2.5999999},
-		{	-10.489829,	-7.5,	119,	14.565539,	-2.5999999},
-		{	-9.9770317,	-4.6999998,	95,	14.508112,	2.5999999},
-		{	-13.557318,	-8.5,	126,	14.913401,	-2.5999999},
-		{	-13.046968,	-6,	92,	14.854958,	2.5999999},
-		{	-9.4636793,	-1,	112,	14.450804,	-2.5999999},
-		{	-8.949728,	1.5,	93,	14.3936,	2.5999999},
-		{	-12.536313,	-2,	121,	14.796721,	-2.5999999},
-		{	-12.025314,	0.40000001,	96,	14.738676,	2.5999999},
-};
+	double velodyne_calibrated1[64][6] = 
+	{
+		{	-7.1581192,	-4.5,	102,	21.560343,	-2.5999999, 1},
+		{	-6.8178215,	-3.4000001,	125,	21.516994,	2.5999999, 1},
+		{	0.31782165,	3,	130,	20.617426,	-2.5999999, 1},
+		{	0.65811908,	4.5999999,	128,	20.574717,	2.5999999, 1},
+		{	-6.4776502,	-0.5,	112,	21.473722,	-2.5999999, 1},
+		{	-6.1375928,	1,	125,	21.430525,	2.5999999, 1},
+		{	-8.520812,	-1.5,	106,	21.734608,	-2.5999999, 1},
+		{	-8.1798887,	0.40000001,	127,	21.690901,	2.5999999, 1},
+		{	-5.797637,	4,	111,	21.387396,	-2.5999999, 1},
+		{	-5.4577708,	5.5,	126,	21.34433,	2.5999999, 1},
+		{	-7.8391404,	3.0999999,	113,	21.647291,	-2.5999999, 1},
+		{	-7.4985547,	4.5,	123,	21.603773,	2.5999999, 1},
+		{	-3.0802133,	-4.5,	105,	21.044245,	-2.5999999, 1},
+		{	-2.7406337,	-3.2,	133,	21.001518,	2.5999999, 1},
+		{	-5.1179824,	-5.5,	110,	21.301321,	-2.5999999, 1},
+		{	-4.7782598,	-4,	129,	21.258366,	2.5999999, 1},
+		{	-2.4010365,	-0.2,	111,	20.958813,	-2.5999999, 1},
+		{	-2.0614092,	1,	130,	20.916126,	2.5999999, 1},
+		{	-4.4385905,	-1.2,	115,	21.215462,	-2.5999999, 1},
+		{	-4.0989642,	0,	133,	21.172602,	2.5999999, 1},
+		{	-1.7217404,	3.8,	113,	20.873451,	-2.5999999, 1},
+		{	-1.3820176,	5,	130,	20.830786,	2.5999999, 1},
+		{	-3.7593663,	3,	117,	21.129782,	-2.5999999, 1},
+		{	-3.4197867,	4.5,	129,	21.086998,	2.5999999, 1},
+		{	0.998555,	-4.5,	107,	20.531982,	-2.5999999, 1},
+		{	1.339141,	-3.2,	131,	20.489222,	2.5999999, 1},
+		{	-1.0422293,	-5.4000001,	128,	20.788124,	-2.5999999, 1},
+		{	-0.70236301,	-4,	134,	20.745461,	2.5999999, 1},
+		{	1.679889,	-0.5,	124,	20.446428,	-2.5999999, 1},
+		{	2.0208123,	1,	136,	20.403601,	2.5999999, 1},
+		{	-0.36240739,	-1.5,	131,	20.702793,	-2.5999999, 1},
+		{	-0.022349782,	0.2,	136,	20.660116,	2.5999999, 1},
+		{	-22.737886,	-7.8000002,	101,	16.019152,	-2.5999999, 1},
+		{	-22.226072,	-5,	88,	15.954137,	2.5999999, 1},
+		{	-11.513928,	4.5,	121,	14.680806,	-2.5999999, 1},
+		{	-11.002114,	7.4000001,	88,	14.623099,	2.5999999, 1},
+		{	-21.714685,	-1,	94,	15.889649,	-2.5999999, 1},
+		{	-21.203688,	2,	88,	15.82566,	2.5999999, 1},
+		{	-24.790272,	-2.5,	114,	16.284933,	-2.5999999, 1},
+		{	-24.276321,	0.5,	89,	16.217583,	2.5999999, 1},
+		{	-20.693031,	6,	98,	15.762167,	-2.5999999, 1},
+		{	-20.182682,	9,	92,	15.699132,	2.5999999, 1},
+		{	-23.762968,	4.5,	107,	16.15085,	-2.5999999, 1},
+		{	-23.250172,	7.5,	80,	16.084715,	2.5999999, 1},
+		{	-16.615318,	-7.5,	121,	15.26925,	-2.5999999, 1},
+		{	-16.105938,	-5,	92,	15.209245,	2.5999999, 1},
+		{	-19.672594,	-9,	119,	15.63654,	-2.5999999, 1},
+		{	-19.162729,	-6,	89,	15.574372,	2.5999999, 1},
+		{	-15.596496,	-1,	109,	15.14954,	-2.5999999, 1},
+		{	-15.086954,	2,	88,	15.090119,	2.5999999, 1},
+		{	-18.653046,	-2,	117,	15.51261,	-2.5999999, 1},
+		{	-18.143503,	0.69999999,	88,	15.451235,	2.5999999, 1},
+		{	-14.577271,	5.5,	112,	15.030966,	-2.5999999, 1},
+		{	-14.067405,	8.3999996,	87,	14.972065,	2.5999999, 1},
+		{	-17.634062,	5,	119,	15.390228,	-6.1999998, 1},
+		{	-17.124681,	7.5,	97,	15.329572,	2.5999999, 1},
+		{	-10.489829,	-7.5,	119,	14.565539,	-2.5999999, 1},
+		{	-9.9770317,	-4.6999998,	95,	14.508112,	2.5999999, 1},
+		{	-13.557318,	-8.5,	126,	14.913401,	-2.5999999, 1},
+		{	-13.046968,	-6,	92,	14.854958,	2.5999999, 1},
+		{	-9.4636793,	-1,	112,	14.450804,	-2.5999999, 1},
+		{	-8.949728,	1.5,	93,	14.3936,	2.5999999, 1},
+		{	-12.536313,	-2,	121,	14.796721,	-2.5999999, 1},
+		{	-12.025314,	0.40000001,	96,	14.738676,	2.5999999, 1},
+	};
+
+	for ( int i = 0; i < VELODYNE_NUM_LASERS; i++ )
+	{
+	velodyne_calibrated[i][0] = velodyne_calibrated1[i][0];
+	velodyne_calibrated[i][1] = velodyne_calibrated1[i][1];
+	velodyne_calibrated[i][2] = velodyne_calibrated1[i][2];
+	velodyne_calibrated[i][3] = velodyne_calibrated1[i][3];
+	velodyne_calibrated[i][4] = velodyne_calibrated1[i][4];
+	velodyne_calibrated[i][5] = velodyne_calibrated1[i][5];
+	}
+
+	return 0;
+}
 
 double rotCorrection[VELODYNE_NUM_LASERS];
 double vertCorrection[VELODYNE_NUM_LASERS];
 double distCorrection[VELODYNE_NUM_LASERS];
 double vertoffsetCorrection[VELODYNE_NUM_LASERS];
 double horizdffsetCorrection[VELODYNE_NUM_LASERS];
+double enabled[VELODYNE_NUM_LASERS];	//New variable to change enabling and disabling of data.
 
 int physical2logical[VELODYNE_NUM_LASERS];
 int logical2physical[VELODYNE_NUM_LASERS];
@@ -210,7 +233,7 @@ int velodyne_calib_precompute()
         physical2logical[logical2physical[logical]] = logical;
     }
 
-    //vertCorrection  rotCorrection  distCorrection  vertOffsetCorrection  horizOffsetCorrection
+    //vertCorrection  rotCorrection  distCorrection  vertOffsetCorrection  horizOffsetCorrection  enable
     for ( i = 0; i < VELODYNE_NUM_LASERS; i++ )
     {
         vertCorrection[i] = velodyne_calibrated[i][0] * RADIANS_PER_LSB;
@@ -218,10 +241,72 @@ int velodyne_calib_precompute()
         distCorrection[i] = velodyne_calibrated[i][2] * METERS_PER_CM;
         vertoffsetCorrection[i] = velodyne_calibrated[i][3] * METERS_PER_CM;
         horizdffsetCorrection[i] = velodyne_calibrated[i][4] * METERS_PER_CM;
+	enabled[i] = velodyne_calibrated[i][5];
     }
 
     return 0;
 }
+
+
+int calibrate(string filename)
+{
+	int linecount = 0;
+	string line;
+	std::ifstream myfile (filename.c_str());
+	if (myfile.is_open())
+	{	
+		cout << "Using Calibration File"<<endl;
+		string data[5];
+		getline (myfile,line);
+		string theDelimiter = ",";
+		int j=0;
+		do
+		{
+			getline (myfile,line);
+			int i = 0;
+			size_t  start = 0, end = 0;
+			while ( end != string::npos  && i != 6)
+			{
+				end = line.find( theDelimiter, start);
+				data[i] = line.substr(start, (end == string::npos)?string::npos:end - start);
+				start = ((end>(string::npos - theDelimiter.size()))?string::npos:end + theDelimiter.size());
+				i++;
+			}
+
+			velodyne_calibrated[j][0] = atof(data[0].c_str());
+			velodyne_calibrated[j][1] = atof(data[1].c_str());
+			velodyne_calibrated[j][2] = atof(data[2].c_str());
+			velodyne_calibrated[j][3] = atof(data[3].c_str());
+			velodyne_calibrated[j][4] = atof(data[4].c_str());
+			velodyne_calibrated[j][5] = atof(data[5].c_str());
+			linecount++;
+			j++;
+		}
+		while(!myfile.eof());
+		
+		myfile.close();
+
+		if (linecount < 60)
+		{
+			for (int i = 32; i<64; i++)
+			{
+				velodyne_calibrated[i][0] = 0.0;
+				velodyne_calibrated[i][1] = 0.0;
+				velodyne_calibrated[i][2] = 0.0;
+				velodyne_calibrated[i][3] = 0.0;
+				velodyne_calibrated[i][4] = 0.0;
+				velodyne_calibrated[i][5] = 0.0;
+			}
+		}
+	}
+	else
+	{
+		cout << "Unable to open calibration file.\nUsing Wuhan hardcored values."<<endl;
+		backup();
+	}
+
+}
+
 
 int read_one_packet (
     FILE *fp,
@@ -346,12 +431,14 @@ int read_one_packet (
 					point.y=z*100;
 					point.z=-y*100;
 
-                    double p[3];
-                    p[0] = point.x;
-                    p[1] = point.y;
-                    p[2] = point.z;
+				        double p[3];
+				        p[0] = point.x;
+				        p[1] = point.y;
+				        p[2] = point.z;
 
-                    if(filter.check(p))
+					//Enable Check. Could be moved earlier to remove all the unnecessary calculations.
+					//Here to simplify the implementation
+			                if(filter.check(p) && (enabled[physicalNO]==1))
    					{
 						 for(int ii = 0; ii < 3; ++ii) xyz->push_back(p[ii]);
 					}
@@ -369,6 +456,11 @@ int read_one_packet (
 
 std::list<std::string> ScanIO_velodyne::readDirectory(const char* dir_path, unsigned int start, unsigned int end)
 {
+	//Calling the calibration method with the file name "calibration.txt" in the same folder as the scan.bin
+	string califilename;
+	string dir(dir_path);
+	califilename = dir + "calibration" + ".txt";
+	calibrate(califilename);
    std::list<std::string> identifiers;
 //   fileCounter = start;
 
