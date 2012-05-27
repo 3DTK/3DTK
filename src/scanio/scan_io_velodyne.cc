@@ -256,7 +256,7 @@ int calibrate(string filename)
 	if (myfile.is_open())
 	{	
 		cout << "Using Calibration File"<<endl;
-		string data[5];
+		string data[6];
 		getline (myfile,line);
 		string theDelimiter = ",";
 		int j=0;
@@ -265,7 +265,7 @@ int calibrate(string filename)
 			getline (myfile,line);
 			int i = 0;
 			size_t  start = 0, end = 0;
-			while ( end != string::npos  && i != 6)
+			while ( end != string::npos  && i < 6)
 			{
 				end = line.find( theDelimiter, start);
 				data[i] = line.substr(start, (end == string::npos)?string::npos:end - start);
