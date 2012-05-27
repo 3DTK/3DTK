@@ -305,6 +305,7 @@ int calibrate(string filename)
 		backup();
 	}
 
+	return 0;
 }
 
 
