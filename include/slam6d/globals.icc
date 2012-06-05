@@ -149,6 +149,19 @@ inline T deg(const T rad)
 
 
 /**
+ *  Calculates x^2
+ *
+ * @param   x  input scalar value
+ * @return  squared value
+ */
+template <class T>
+static inline T sqr(const T &x)
+{
+  return x*x;
+}
+
+
+/**
  * Computes the <i>squared</i> length of a 3-vector
  *
  * @param x   input 3-vector
@@ -454,19 +467,6 @@ static inline void Matrix4ToEuler(const double *alignxf, double *rPosTheta, doub
     rPos[1] = alignxf[13];
     rPos[2] = alignxf[14];
   }
-}
-
-
-/**
- *  Calculates x^2
- *
- * @param   x  input scalar value
- * @return  squared value
- */
-template <class T>
-static inline T sqr(const T &x)
-{
-  return x*x;
 }
 
 
