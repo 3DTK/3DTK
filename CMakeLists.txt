@@ -225,15 +225,6 @@ ELSE(WITH_PMD)
   MESSAGE(STATUS "Without Tools")
 ENDIF(WITH_PMD)
 
-## SIFT
-OPTION(WITH_SIFT "Whether to compile registration based on sift features and autopano. ON/OFF" OFF)
-
-IF(WITH_SIFT)
-  MESSAGE(STATUS "With Sift ")
-ELSE(WITH_SIFT)
-  MESSAGE(STATUS "Without Sift")
-ENDIF(WITH_SIFT)
-
 ## Special treatment for system specifics
 IF(APPLE)
 add_definitions(-Dfopen64=fopen)
@@ -386,7 +377,6 @@ add_subdirectory(src/grid)
 add_subdirectory(src/pmd)
 add_subdirectory(src/shapes)
 add_subdirectory(src/thermo)
-add_subdirectory(src/slam6d/sift)
 add_subdirectory(src/scanner)
 
 IF(EXPORT_SHARED_LIBS)
