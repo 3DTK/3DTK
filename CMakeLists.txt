@@ -225,6 +225,15 @@ ELSE(WITH_PMD)
   MESSAGE(STATUS "Without Tools")
 ENDIF(WITH_PMD)
 
+## FBR
+OPTION(WITH_FBR "Whether to compile feature base registration. ON/OFF" OFF)
+
+IF(WITH_FBR)
+  MESSAGE(STATUS "With FBR ")
+ELSE(WITH_FBR)
+  MESSAGE(STATUS "Without FBR")
+ENDIF(WITH_FBR)
+
 ## Special treatment for system specifics
 IF(APPLE)
 add_definitions(-Dfopen64=fopen)
@@ -377,6 +386,7 @@ add_subdirectory(src/grid)
 add_subdirectory(src/pmd)
 add_subdirectory(src/shapes)
 add_subdirectory(src/thermo)
+add_subdirectory(src/slam6d/fbr)
 add_subdirectory(src/scanner)
 
 IF(EXPORT_SHARED_LIBS)
