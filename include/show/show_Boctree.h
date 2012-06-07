@@ -160,7 +160,7 @@ public:
           GLfloat p[3] = {0.0, 0.0000, 0.0000005};
           glPointParameterfvARB(GL_POINT_DISTANCE_ATTENUATION_ARB, p);
           displayOctTreeCPAllCulled(m_tree->getRoot(), m_tree->getCenter(), m_tree->getSize(),
-            m_tree->getSize() / pow(2, min( (int)(ratio * m_tree->getMaxDepth()), m_tree->getMaxDepth() - 3) ));
+							 m_tree->getSize() / pow(2, min( (int)(ratio * m_tree->getMaxDepth()), (int)(m_tree->getMaxDepth() - 3))));
           p[0] = 1.0;
           p[2] = 0.0;
           glPointParameterfvARB(GL_POINT_DISTANCE_ATTENUATION_ARB, p);
