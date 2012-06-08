@@ -1,6 +1,6 @@
 #pragma once
 
-#include <cxtypes.h>
+#include <cxcore.h>
 
 struct Frame {
     CvMat *trn;

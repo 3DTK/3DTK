@@ -6,7 +6,7 @@
 #pragma once
 
 #include "pmdsdk2.h"
-#include <cxtypes.h>
+#include <cxcore.h>
 
 /**
  * @brief Structure for PMD IO, see initPMD.
