@@ -598,7 +598,7 @@ void BasicGLPane::idle() {
     paint();
 
     if(save_animation){
-      string filename = scandirectory + "animframe" + to_string(frameNr,5) + ".ppm";
+      string filename = scan_dir + "animframe" + to_string(frameNr,5) + ".ppm";
       cout << "write " << filename << endl;
       glDumpWindowPPM(filename.c_str(),0);
 
@@ -647,8 +647,8 @@ void BasicGLPane::idle() {
 
       //save the animation
       if(save_animation){
-        string filename = scandirectory + "animframe" + to_string(path_iterator,5) + ".ppm";
-        string jpgname = scandirectory + "animframe" + to_string(path_iterator,5) + ".jpg";
+        string filename = scan_dir + "animframe" + to_string(path_iterator,5) + ".ppm";
+        string jpgname = scan_dir + "animframe" + to_string(path_iterator,5) + ".jpg";
         cout << "written " << filename << " of " << path_vectorX.size() << " files" << endl;
         glWriteImagePPM(filename.c_str(), factor, 0);
         haveToUpdate = 6;

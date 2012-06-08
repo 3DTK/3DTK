@@ -209,7 +209,7 @@ int current_height = START_HEIGHT;
 // the following values are scale dependant, i.e. all values are in m
 float neardistance = 0.10;
 double oldneardistance = 0.10;
-float maxfardistance = 400.0;;
+float maxfardistance = 400.0;
 double fardistance = 400.0;
 double oldfardistance = 40000.0;
 double movementSpeed = 0.1;
