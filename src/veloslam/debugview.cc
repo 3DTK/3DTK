@@ -778,8 +778,12 @@ int Show(int frameno)
 
     while(ICPFinished ==false)
     {
-			 Sleep(1);
-		//	 cout << "sleep" <<endl;
+#ifdef _MSC_VER
+        Sleep(1);
+#else
+    usleep(10000);
+#endif
+    //	 cout << "sleep" <<endl;
     }
     glutDisplayFunc(Draw);
     glutMainLoop();
