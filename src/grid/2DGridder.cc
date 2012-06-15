@@ -384,8 +384,8 @@ int main(int argc, char **argv){
 	cout << "Reading scans " << i << " to " << endloop << " ... ";
 	scanmanager scanman;
 	scanman.startscan(scandir, outputdir, scantype, i, endloop,
-			  readInitial, maxDistance, minDistance,
-			  correctY);
+				   readInitial, maxDistance, minDistance,
+				   correctY);
 
 	cout << "Done."<< endl;
 		
