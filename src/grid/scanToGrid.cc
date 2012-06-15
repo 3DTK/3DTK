@@ -119,8 +119,8 @@ void scanToGrid::calculateNormvector(long x, long z,
  * @return pointer to the created grid.
  *         (Just gets allocated, does not get freed)
  */ 
-scanGrid* scanToGrid::createGrid(const Scan& scan,
-				 const double* transformation)
+scanGrid* scanToGrid::createGrid(Scan& scan,
+						   const double* transformation)
 {
     // Calculate the viewpoint of the scan
     double rPos[3];
@@ -137,21 +137,21 @@ scanGrid* scanToGrid::createGrid(const Scan& scan,
     double minX = 0;
     double minZ = 0;
 
-    
-    for(size_t i = 0; i < scan.get_points()->size(); ++i)
+    DataXYZ xyz(scan.get("xyz"));
+
+    for(size_t i = 0; i < xyz.size(); ++i)
     {
-	 const Point *it = &scan.get_points()->at(i);
+	 Point it = xyz[i];
 	
         // If the scan is not relevant, skip it
-	if(!isPointRelevant(*it))
+	if(!isPointRelevant(it))
 	    continue;	
 
-	if(it->x < minX) minX = it->x;
-	if(it->x > maxX) maxX = it->x;
-	if(it->z < minZ) minZ = it->z;
-	if(it->z > maxZ) maxZ = it->z;
+	if(it.x < minX) minX = it.x;
+	if(it.x > maxX) maxX = it.x;
+	if(it.z < minZ) minZ = it.z;
+	if(it.z > maxZ) maxZ = it.z;
 
-	++it;
     }
     
     // get offsets and sizes 
@@ -345,14 +345,16 @@ void scanToGrid::createPoint(scanGrid *grid, long x, long z, float weighting)
  * @param transformation The transformationmatrix
  * @return pointer to the grid
  */ 
-scanGrid* scanToGrid::convert(const Scan& scan, const double* transformation)
+scanGrid* scanToGrid::convert(Scan& scan, const double* transformation)
 {
     scanGrid* grid = createGrid(scan, transformation);
  
+    DataXYZ xyz(scan.get("xyz"));
+
     // go through all points and create the grid
-    for(size_t i = 0; i < scan.get_points()->size(); ++i)
+    for(size_t i = 0; i < xyz.size(); ++i)
     {
-	 Point p = scan.get_points()->at(i);
+	 Point p = xyz[i];
 
 	// if the scan is in the relevant area, create Point for it
 	if(isPointRelevant(p))

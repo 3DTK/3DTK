@@ -1,6 +1,7 @@
 #include <vector>
 
 #include "slam6d/scan.h"
+#include "slam6d/managedScan.h"
 
 /**
  * The class manages all scans and the frames of the scans
@@ -14,7 +15,7 @@ class scanmanager {
 
  private:    
     /** Vector for the transformation of all scans */
-    vector < vector <double*> > metaMatrix;
+    std::vector < std::vector <double*> > metaMatrix;
 
     /** @brief Reads the frame files that were created by Slam6D */
     void readFrames(string inputdir,
@@ -43,5 +44,5 @@ class scanmanager {
     Scan& getScan(int i);
 
     /** @brief Returns transformationmatrix with number i */
-    const vector <double*>& getMatrix(int i);
+    const std::vector <double*>& getMatrix(int i);
 };

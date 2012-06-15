@@ -61,7 +61,7 @@ class scanToGrid
     void calculateNormvector(long x, long z, double& xnorm, double &znorm);
 
     /** @brief Creates a new grid and sets the offsets */
-    scanGrid* createGrid(const Scan& scan, const double* transformation);
+    scanGrid* createGrid(Scan& scan, const double* transformation);
 
     /** @brief Creates the free points between the robot and the occupied point */
     void createWaypoints(scanGrid* grid, long x, long z, float weighting);
@@ -89,7 +89,7 @@ class scanToGrid
 	       bool neighbours);
 
     /** @brief Converts the scan to a grid */
-    scanGrid* convert(const Scan& scan, const double* transformation);
+    scanGrid* convert(Scan& scan, const double* transformation);
 };
 
 #endif
