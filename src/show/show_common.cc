@@ -696,8 +696,12 @@ int readFrames(string dir, int start, int end, bool readInitial, IOType &type)
     vector<Scan::AlgoType> algoTypes;
     
     // iterate over frames (stop if none were created) and pull/convert the frames into local containers
-    unsigned int frame_count = (*it)->readFrames();
-    if(frame_count == 0) break;
+    unsigned int frame_count;
+    try {
+      frame_count = (*it)->readFrames();
+    } catch(std::ios_base::failure& e) {
+      break;
+    }
     for(unsigned int i = 0; i < frame_count; ++i) {
       (*it)->getFrame(i, transformation, algoType);
       double* transMatOpenGL = new double[16];
