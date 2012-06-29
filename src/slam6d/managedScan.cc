@@ -275,7 +275,7 @@ void ManagedScan::calcReducedShow()
   }
 
   unsigned int size = center.size();
-  DataXYZ xyz_r(m_shared_scan->createXYZReducedShow(size));
+  TripleArray<float> xyz_r(m_shared_scan->createXYZReducedShow(size));
   for(unsigned int i = 0; i < size; ++i) {
     for(unsigned int j = 0; j < 3; ++j) {
       xyz_r[i][j] = center[i][j];
@@ -295,8 +295,8 @@ void ManagedScan::createOcttree()
     btree = new BOctTree<float>(scanFileName);
   } else {
     if(octtree_reduction_voxelSize > 0) { // with reduction, only xyz points
-      DataXYZ xyz_r(get("xyz reduced show"));
-      btree = new BOctTree<float>(PointerArray<double>(xyz_r).get(), xyz_r.size(), octtree_voxelSize, octtree_pointtype, true);
+      TripleArray<float> xyz_r(get("xyz reduced show"));
+      btree = new BOctTree<float>(PointerArray<float>(xyz_r).get(), xyz_r.size(), octtree_voxelSize, octtree_pointtype, true);
     } else { // without reduction, xyz + attribute points
       float** pts = octtree_pointtype.createPointArray<float>(this);
       unsigned int nrpts = size<DataXYZ>("xyz");
