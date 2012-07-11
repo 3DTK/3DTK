@@ -41,8 +41,6 @@ using std::stringstream;
 
 #include "slam6d/scan.h"
 #include "slam6d/Boctree.h"
-#include "slam6d/d2tree.h"
-#include "slam6d/kd.h"
 #include "veloslam/veloscan.h"
 #include "veloslam/trackermanager.h"
 #include "veloslam/debugview.h"
