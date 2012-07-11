@@ -1,3 +1,12 @@
+/*
+ * convexplane implementation
+ *
+ * Copyright (C) Dorit Borrmann
+ *
+ * Released under the GPL version 3.
+ *
+ */
+
 #include "shapes/convexplane.h"
 #include "slam6d/globals.icc"
 using std::string;

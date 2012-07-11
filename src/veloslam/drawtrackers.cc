@@ -1,6 +1,15 @@
+/*
+ * drawtrackers implementation
+ *
+ * Copyright (C) Li Wei, Li Ming, Andreas Nuechter,
+ *
+ * Released under the GPL version 3.
+ *
+ */
+
 /**
  * @file
- * @brief Main programm for dynamic Velodyne SLAM
+ * @brief 
  *
  * @author Andreas Nuechter. Jacobs University Bremen, Germany
  * @author Li Wei, Wuhan University, China

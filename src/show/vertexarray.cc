@@ -1,3 +1,12 @@
+/*
+ * vertexArray implementation
+ *
+ * Copyright (C) Jan Elseberg
+ *
+ * Released under the GPL version 3.
+ *
+ */
+
 #include "show/vertexarray.h"
 
 GLuint vertexArray::nameCounter = 0;

@@ -1,3 +1,12 @@
+/*
+ * io_tpyes implementation
+ *
+ * Copyright (C) Thomas Escher, Kai Lingemann, Andreas Nuechter
+ *
+ * Released under the GPL version 3.
+ *
+ */
+
 #include "slam6d/io_types.h"
 
 #include "slam6d/globals.icc"

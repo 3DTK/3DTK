@@ -1,3 +1,12 @@
+/*
+ * metascan implementation
+ *
+ * Copyright (C) Andreas Nuechter, Kai Lingemann, Thomas Escher
+ *
+ * Released under the GPL version 3.
+ *
+ */
+
 #include "slam6d/metaScan.h"
 
 #include "slam6d/kdMeta.h"

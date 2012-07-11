@@ -1,3 +1,12 @@
+/*
+ * feature_mathcer implementation
+ *
+ * Copyright (C) HamidReza Houshiar
+ *
+ * Released under the GPL version 3.
+ *
+ */
+
 #include "slam6d/fbr/feature_matcher.h"
 
 using namespace std;

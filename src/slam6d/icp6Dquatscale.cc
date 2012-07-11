@@ -1,7 +1,17 @@
+/*
+ * icp6Dquatscale implementation
+ *
+ * Copyright (C) Flavia Grosan, Alex Tandrau, Dorit Borrmann, Andreas Nuechter
+ *
+ * Released under the GPL version 3.
+ *
+ */
+
 /** @file 
  *  @brief Implementation of the ICP error function minimization via quaternions and scale factor
  *  @author Flavia Grosan, Alex Tandrau. Jacobs University Bremen gGmbH, Germany.
  *  @author Andreas Nuechter. Jacobs University Bremen gGmbH, Germany.
+ *  @author Dorit borrmann. Jacobs University Bremen gGmbH, Germany.
  */
 #include "slam6d/icp6Dquatscale.h"
 

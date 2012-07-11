@@ -1,3 +1,12 @@
+/*
+ * graph implementation
+ *
+ * Copyright (C) Dorit Borrmann, Jan Elseberg, Kai Lingemann, Andreas Nuechter
+ *
+ * Released under the GPL version 3.
+ *
+ */
+
 /**
  * @file 
  * @brief The implementation of a graph

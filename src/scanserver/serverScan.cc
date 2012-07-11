@@ -1,10 +1,17 @@
+/*
+ * serverScan implementation
+ *
+ * Copyright (C) Thomas Escher, Kai Lingemann
+ *
+ * Released under the GPL version 3.
+ *
+ */
+
 #include "scanserver/serverScan.h"
 
 #include "scanserver/cache/cacheManager.h"
 #include "scanserver/scanHandler.h"
 #include "scanserver/temporaryHandler.h"
-
-
 
 ServerScan::ServerScan(const ip::allocator<void, SegmentManager> & allocator,
     const SharedStringSharedPtr& dir_path_ptr, const char* io_identifier,

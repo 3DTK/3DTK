@@ -1,3 +1,13 @@
+/*
+ * graphToro implementation
+ *
+ * Copyright (C) Jochen Sprickerhof
+ *
+ * Released under the GPL version 3.
+ *
+ */
+
+
 /**
  * @file TORO wrapper
  * @author Jochen Sprickerhof. Institute of Computer Science, University of Osnabrueck, Germany.

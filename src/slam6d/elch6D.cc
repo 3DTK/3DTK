@@ -1,3 +1,12 @@
+/*
+ * elch6D implementation
+ *
+ * Copyright (C) Jochen Sprickerhof
+ *
+ * Released under the GPL version 3.
+ *
+ */
+
 /** @file graph balancer implementation and utility functions
  *  @author Jochen Sprickerhof. Institute of Computer Science, University of Osnabrueck, Germany.
  *

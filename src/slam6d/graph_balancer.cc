@@ -1,3 +1,12 @@
+/*
+ * graph_balancer implementation
+ *
+ * Copyright (C) Jochen Sprickerhof
+ *
+ * Released under the GPL version 3.
+ *
+ */
+
 /**
  * @file stand alone graph balancer implementation
  * reads graph in graphviz format and optimizes it

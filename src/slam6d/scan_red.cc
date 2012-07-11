@@ -1,3 +1,13 @@
+/*
+ * scan_red implementation
+ *
+ * Copyright (C) Dorit Borrmann
+ *
+ * Released under the GPL version 3.
+ *
+ */
+
+
 /**
  * @file
  * @brief Main program for reducing 3D scans.

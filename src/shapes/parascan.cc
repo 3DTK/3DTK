@@ -1,4 +1,11 @@
-/* parascan.c */
+/*
+ * parascan implementation
+ *
+ * Copyright (C) Dorit Borrmann
+ *
+ * Released under the GPL version 3.
+ *
+ */
 
 #include <stdio.h>
 #include <stdlib.h>

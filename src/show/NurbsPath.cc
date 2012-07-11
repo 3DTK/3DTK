@@ -1,3 +1,13 @@
+/*
+ * NurbsPath implementation
+ *
+ * Copyright (C)  Christof Soeger, Marcel Junker, Anton Fluegge, Hannes Schulz,
+                  Andreas Nuechter, Kai Lingemann, Jan Elseberg
+ *
+ * Released under the GPL version 3.
+ *
+ */
+
 #include "show/NurbsPath.h"
 #include <stdio.h>
 #include <iostream>

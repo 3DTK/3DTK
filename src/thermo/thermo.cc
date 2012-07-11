@@ -1,3 +1,12 @@
+/*
+ * thermo implementation
+ *
+ * Copyright (C) Dorit Borrmann
+ *
+ * Released under the GPL version 3.
+ *
+ */
+
 #include <errno.h>
 #include "thermo/thermo.h"
 #include "newmat/newmatap.h"
@@ -25,7 +34,6 @@ using namespace cvb;
 
 Float2D data1;
 Float2D data2;
-
 
 unsigned int BLOB_SIZE = 55;
 double AVG_THRES = 0.8;

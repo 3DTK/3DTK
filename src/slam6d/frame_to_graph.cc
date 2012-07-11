@@ -1,3 +1,13 @@
+/*
+ * frames_to_graph implementation
+ *
+ * Copyright (C) Jochen Sprickerhof
+ *
+ * Released under the GPL version 3.
+ *
+ */
+
+
 /* @file extracts the final poses from the frame files
  * @author Jochen Sprickerhof
  */

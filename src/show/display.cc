@@ -1,8 +1,12 @@
-//#include <string.h>
-//#include "show/viewcull.h"
-//#include "show/scancolormanager.h"
+/*
+ * display implementation
+ *
+ * Copyright (C) Dorit Borrmann, Jan Elseberg
+ *
+ * Released under the GPL version 3.
+ *
+ */
 
-//#include <glu.h>
 #include <glui.h>
 #include "show/display.h"
 #include "slam6d/globals.icc"

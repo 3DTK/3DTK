@@ -1,3 +1,12 @@
+/*
+ * toGlobal implementation
+ *
+ * Copyright (C) Jan Elseberg, Dorit Borrmann
+ *
+ * Released under the GPL version 3.
+ *
+ */
+
 #include <fstream>
 #include <iostream>
 using std::cout;

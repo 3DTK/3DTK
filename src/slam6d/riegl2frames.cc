@@ -1,3 +1,12 @@
+/*
+ * riegl2frames implementation
+ *
+ * Copyright (C) Dorit Borrmann, Jan Elseberg
+ *
+ * Released under the GPL version 3.
+ *
+ */
+
 #include <fstream>
 #include <iostream>
 using std::cout;

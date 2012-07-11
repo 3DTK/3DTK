@@ -57,7 +57,7 @@ IF(WITH_TOOLS)
     target_link_libraries(pose2frames XGetopt ${Boost_LIBRARIES})
     target_link_libraries(frames2riegl XGetopt ${Boost_LIBRARIES})
     target_link_libraries(riegl2frames XGetopt ${Boost_LIBRARIES})
-	target_link_libraries(toGlobal XGetopt ${Boost_LIBRARIES})
+    target_link_libraries(toGlobal XGetopt ${Boost_LIBRARIES})
   ENDIF(WIN32)
 ENDIF(WITH_TOOLS)
 
@@ -71,8 +71,8 @@ SET(SCANLIB_SRCS
   ghelix6DQ2.cc     gapx6D.cc         graphToro.cc      ann_kd.cc
   graphHOG-Man.cc   elch6D.cc         elch6Dquat.cc     elch6DunitQuat.cc 
   elch6Dslerp.cc    elch6Deuler.cc    loopToro.cc       loopHOG-Man.cc    
-  point_type.cc	    icp6Dquatscale.cc searchTree.cc     Boctree.cc
-  allocator.cc      d2tree.cc         
+  point_type.cc	icp6Dquatscale.cc searchTree.cc     Boctree.cc
+  allocator.cc               
   scan.cc           basicScan.cc      managedScan.cc    metaScan.cc
   io_types.cc       pointfilter.cc
   )

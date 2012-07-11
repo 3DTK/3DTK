@@ -1,3 +1,12 @@
+/*
+ * scan_io_rts implementation
+ *
+ * Copyright (C) Thomas Escher, Kai Lingemann, Andreas Nuechter
+ *
+ * Released under the GPL version 3.
+ *
+ */
+
 /**
  * @file
  * @brief Implementation of reading 3D scans

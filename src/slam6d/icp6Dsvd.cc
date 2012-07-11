@@ -1,3 +1,12 @@
+/*
+ * icp6Dsvd implementation
+ *
+ * Copyright (C) Kai Lingemann, Andreas Nuechter
+ *
+ * Released under the GPL version 3.
+ *
+ */
+
 /** @file 
  *  @brief Implementation of the ICP error function minimization via SVD
  *  @author Kai Lingemann. Institute of Computer Science, University of Osnabrueck, Germany.

@@ -1,7 +1,16 @@
+/*
+ * convergence implementation
+ *
+ * Copyright (C) Jochen Sprickerhof, Peter Schneider
+ *
+ * Released under the GPL version 3.
+ *
+ */
+
 /**
  * @file
  * @brief Implementation for generating a convergence graph of a scanseries frame
- * @author Jochen Sprickerhof
+ * @author Jochen Sprickerhof. Institute of Computer Science, University of Osnabrueck, Germany.
  * @author Peter Schneider. Institute of Computer Science, University of Koblenz, Germany.
  */
 

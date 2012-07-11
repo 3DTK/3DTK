@@ -1,6 +1,15 @@
+/*
+ * kalmanfilter implementation
+ *
+ * Copyright (C) YuanJun, Li Wei, Li Ming, Andreas Nuechter,
+ *
+ * Released under the GPL version 3.
+ *
+ */
+
 /**
  * @file
- * @brief Main programm for dynamic Velodyne SLAM
+ * @brief 
  *
  * @author Andreas Nuechter. Jacobs University Bremen, Germany
  * @author YuanJun, Wuhan University, China

@@ -1,9 +1,20 @@
+/*
+ * slam6D implementation
+ *
+ * Copyright (C) Andreas Nuechter, Kai Lingemann, Jochen Sprickerhof
+ *
+ * Released under the GPL version 3.
+ *
+ */
+
 /**
  * @file
  * @brief Main programm for matching 3D scans (6D SLAM)
  *
- * Main programm to match 3D scans with ICP and the globally consistent LUM approach.
- * Use -i from the command line to match with ICP, and -I to match 3D Scans using the LUM algorithm.
+ * Main programm to match 3D scans with ICP and the globally
+ * consistent matching approach.
+ * Use -i from the command line to match with ICP,
+ * and -I to match 3D Scans using the global algorithm.
  * 
  * @author Andreas Nuechter. Jacobs University Bremen gGmbH, Germany
  * @author Kai Lingemann. Institute of Computer Science, University of Osnabrueck, Germany.

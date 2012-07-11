@@ -1,3 +1,12 @@
+/*
+ * feature_based_registration implementation
+ *
+ * Copyright (C) HamidReza Houshiar
+ *
+ * Released under the GPL version 3.
+ *
+ */
+
 #include <stdio.h>
 #include <fstream>
 #include "slam6d/fbr/fbr_global.h"

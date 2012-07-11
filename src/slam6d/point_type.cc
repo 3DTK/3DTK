@@ -1,3 +1,12 @@
+/*
+ * point_type implementation
+ *
+ * Copyright (C) Jan Elseberg
+ *
+ * Released under the GPL version 3.
+ *
+ */
+
 /**
  *  @file
  *  @brief Representation of a 3D point type

@@ -1,18 +1,29 @@
+/*
+ * show_gl implementation
+ *
+ * Copyright (C) Kai Lingemann, Andreas Nuechter, Jan Elseberg, Dorit Borrmann
+ *
+ * Released under the GPL version 3.
+ *
+ */
+
 #include <string.h>
 #include <stdlib.h>
 #include "show/viewcull.h"
 #include "show/scancolormanager.h"
 
-bool fullydisplayed = true;   // true if all points have been drawn to the screen
-bool mousemoving = false;     // true iff a mouse button has been pressed inside a window, but hs not been released
-bool keypressed = false;     // true iff a key button has been pressed inside a window, but hs not been released
-double ptstodisplay = 100000;  
-double lastfps = idealfps;    // last frame rate    
-int pointmode = -1;
+bool   fullydisplayed = true;       // true if all points have been drawn to the screen
+bool   mousemoving    = false;      // true iff a mouse button has been pressed inside a window,
+                                    // but hs not been released
+bool   keypressed     = false;      // true iff a key button has been pressed inside a window,
+                                    // but hs not been released
+double ptstodisplay   = 100000;  
+double lastfps        = idealfps;   // last frame rate    
+int    pointmode      = -1;
 
+bool   smallfont      = true;
+bool   label          = true;
 
-bool smallfont = true;
-bool label = true;
 /**
  * Displays all data (i.e., points) that are to be displayed
  * @param mode spezification for drawing to screen or in selection mode
@@ -430,12 +441,16 @@ void DisplayItFunc(GLenum mode, bool interruptable)
 
   // do the model-transformation
   if (haveToUpdate == 6 && path_iterator < path_vectorX.size() ) {
-    gluLookAt(path_vectorX.at(path_iterator).x, path_vectorX.at(path_iterator).y, path_vectorZ.at(path_iterator).y,
-              lookat_vectorX.at(path_iterator).x, lookat_vectorX.at(path_iterator).y, lookat_vectorZ.at(path_iterator).y,
+    gluLookAt(path_vectorX.at(path_iterator).x,
+		    path_vectorX.at(path_iterator).y,
+		    path_vectorZ.at(path_iterator).y,
+              lookat_vectorX.at(path_iterator).x,
+		    lookat_vectorX.at(path_iterator).y,
+		    lookat_vectorZ.at(path_iterator).y,
               ups_vectorX.at(path_iterator).x - path_vectorX.at(path_iterator).x,
               ups_vectorX.at(path_iterator).y - path_vectorX.at(path_iterator).y, 
               ups_vectorZ.at(path_iterator).y - path_vectorZ.at(path_iterator).y);
-  }else {
+  } else {
     if (cameraNavMouseMode == 1) {
       glRotated( mouseRotX, 1, 0, 0);
       glRotated( mouseRotY, 0, 1, 0);
@@ -461,7 +476,6 @@ void DisplayItFunc(GLenum mode, bool interruptable)
 
     glTranslated(X, Y, Z);       // move camera	
   }
-
 
 //   cout << "Position  :" << X << " " << Y << " " << Z << endl;
 //   cout << "Quaternion:" << quat[0] << " " << quat[1] << " " << quat[2] << " " << quat[3] << endl;
@@ -512,7 +526,7 @@ void DisplayItFunc(GLenum mode, bool interruptable)
   //
   // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-  if(show_path == 1) {
+  if (show_path == 1) {
     double *pose;
     glColor4d(1.0, 0.0, 0.0, 1.0);
     glLineWidth(5);
@@ -555,14 +569,12 @@ void DisplayItFunc(GLenum mode, bool interruptable)
   }
   
   // if show path is true the draw path.
-  if(show_path == 1) {
+  if (show_path == 1) {
     DrawPath();
   }
   DrawObjects(mode);
   
-  //glPopMatrix();
-  if(label) DrawUrl();
-  
+  if (label) DrawUrl();
   
   // if show points is true the draw points
   if (show_points == 1) DrawPoints(mode, interruptable);
@@ -573,6 +585,7 @@ void DisplayItFunc(GLenum mode, bool interruptable)
   if (!invert) {
     glDisable(GL_COLOR_LOGIC_OP);
   }
+  
   // force draw the scene
   glFlush();
   glFinish();
@@ -654,7 +667,7 @@ void topView()
 	 
 	  Y = Y - 350.0;
 	  Z = Z + 500.0;
-    quat[0] = quat[1] = sqrt(0.5);
+	  quat[0] = quat[1] = sqrt(0.5);
 	  quat[2] = quat[3] = 0.0;
 	  mouseRotX = 90;
 	  mouseRotY = 0;
@@ -724,11 +737,8 @@ void callDeleteCamera(int dummy){
 
 void resetView(int dummy)
 {
-//  quat[0] = 1.0;
   cangle = 60.0;
   pzoom = defaultZoom; 
-//  quat[1] = quat[2] = quat[3] = X = Y = Z = 0.0;
-//  quat[1] = quat[2] = quat[3] = 0.0;
   X = RVX;
   Y = RVY;
   Z = RVZ;
@@ -782,12 +792,10 @@ void setView(double pos[3], double new_quat[4],
 }
   
 
-//---------------------------------------------------------------------------
 /**
  * This function is called when the viewer is created. This
  * acts as the display function.
  */
-
 void CallBackDisplayFunc()
 {
   if ((cangle_spinner != 0 && (fabs(cangle_old - cangle) > 0.5)) || 
@@ -815,8 +823,6 @@ void CallBackDisplayFunc()
   glutSwapBuffers(); 
 
 }
-//--------------------------------------------------------------------------------
-
 
 /**
  * This function is called when there is nothing to be done
@@ -918,27 +924,24 @@ void CallBackIdleFunc(void)
       cameraNavMouseMode = 0;
     }
 
-
-
-    //check if the user wants to animate both
-    //scan matching and the path at the same
+    // check if the user wants to animate both
+    // scan matching and the path at the same
     //time
 
-    //cout << "path_iterator: " << path_iterator << endl;
+    // cout << "path_iterator: " << path_iterator << endl;
     if(path_iterator < path_vectorX.size()){   // standard animation case
 
-      //call the path animation function
-      //hide both the cameras and the path
+      // call the path animation function
+      // hide both the cameras and the path
       show_cameras = 0;
       show_path = 0;
-      //increase the iteration count
+      // increase the iteration count
 
       path_iterator += 1;
-      //cout << "i am here" << endl;
-      //repaint the screen
+      // repaint the screen
       glutPostRedisplay();
 
-      //save the animation
+      // save the animation
       if(save_animation){
         string filename = scan_dir + "animframe" + to_string(path_iterator,5) + ".ppm";
         string jpgname = scan_dir + "animframe" + to_string(path_iterator,5) + ".jpg";
@@ -955,7 +958,6 @@ void CallBackIdleFunc(void)
       cameraNavMouseMode = oldcamNavMode;
       show_cameras = 1;
       show_path = 1;
-      //cout << "i am here instead" << endl;
       haveToUpdate = 0;
     }
   }
@@ -963,8 +965,6 @@ void CallBackIdleFunc(void)
 }
 
 
-
-//--------------------------------------------------------------------------------------------
 /**
  * This function handles the rotation of the view
  */
@@ -990,7 +990,6 @@ void update_view_rotate(int t)
 /**
  * This function handles the translation of view.
  */
-
 void update_view_translation(int t)
 {
   double obj_pos_button1[3];
@@ -1061,8 +1060,6 @@ void callTopView(int dummy)
   }
 }
 
-//---------------------------------------------------------------------------------
-
 /**
  * calls the cameraView function 
  * @param dummy not needed necessary for glui 
@@ -1091,7 +1088,7 @@ void callAddCamera(int dummy)
   
   updateCamera();
   
-  //signal to repaint screen
+  // signal to repaint screen
   haveToUpdate  = 1;
 }
 
@@ -1146,7 +1143,8 @@ void selectPoints(int x, int y) {
           cout << "Selected point: " << sp[0] << " " << sp[1] << " " << sp[2] << endl;
 
           if (sp2 != 0) {
-            cout << "Distance to last point: " << sqrt( sqr(sp2[0] - sp[0]) + sqr(sp2[1] - sp[1]) +sqr(sp2[2] - sp[2])  ) << endl; 
+            cout << "Distance to last point: "
+			  << sqrt( sqr(sp2[0] - sp[0]) + sqr(sp2[1] - sp[1]) + sqr(sp2[2] - sp[2])  ) << endl; 
           }
           sp2 = sp;
 
@@ -1188,9 +1186,8 @@ void selectPoints(int x, int y) {
   }
   glPopMatrix();
   glutPostRedisplay();
-  /////////////////////////////////////
 }
-//--------------------------------------------------------------------------------------
+
 void CallBackMouseFuncMoving(int button, int state, int x, int y)
 {
 
@@ -1376,8 +1373,6 @@ void CallBackMouseMotionFunc(int x, int y) {
 
 
 
-//--------------------------------------------------------------------------------
-
 void initScreenWindow()
 {
   // init display
@@ -1398,13 +1393,13 @@ void initScreenWindow()
   glutKeyboardUpFunc ( CallBackKeyboardUpFunc);
   glutMotionFunc ( CallBackMouseMotionFunc); 
   glutSpecialFunc ( CallBackSpecialFunc);
-//  glutEntryFunc ( CallBackEntryFunc);
+  // glutEntryFunc ( CallBackEntryFunc);
   GLUI_Master.set_glutReshapeFunc( CallBackReshapeFunc );
   GLUI_Master.set_glutIdleFunc( CallBackIdleFunc );
 
   update_view_rotate(0);
   glClearColor(0.0, 0.0, 0.0, 0.0);
-//  glClearColor(1.0, 1.0, 1.0, 1.0);
+  // glClearColor(1.0, 1.0, 1.0, 1.0);
 }
 
 
@@ -1552,7 +1547,10 @@ void glWriteImagePPM(const char *filename, int scale, GLenum mode)
         glLoadIdentity();
         label = false;
         if(!showTopView) {
-          glFrustum(neardistance*width, neardistance*(width + part_width), neardistance*(height), neardistance*(height + part_height), neardistance, fardistance);
+          glFrustum(neardistance*width, neardistance*(width + part_width),
+				neardistance*(height),
+				neardistance*(height + part_height),
+				neardistance, fardistance);
           glMatrixMode(GL_MODELVIEW);
           if(i==0 && j==0) {
             label = true; 
@@ -1641,7 +1639,6 @@ void CallBackReshapeFunc(int width, int height)
 
     // angle, aspect, near clip, far clip
     // get matrix
-//    gluPerspective(cangle, aspect, 1.0, 40000.0);
     gluPerspective(cangle, aspect, neardistance, fardistance); 
 
     // now use modelview-matrix as current matrix
@@ -1668,14 +1665,14 @@ void CallBackReshapeFunc(int width, int height)
     haveToUpdate = 1;
  
   }
-//  glDepthMask(false);
+  //  glDepthMask(false);
   glEnable(GL_BLEND); // TODO
   glBlendFunc(GL_ONE, GL_ZERO); // TODO
-  //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); // TODO
-  //glBlendFunc(GL_ONE, GL_ONE); // TODO
-  //glBlendFunc(GL_SRC_COLOR, GL_DST_COLOR);
+  // glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); // TODO
+  // glBlendFunc(GL_ONE, GL_ONE); // TODO
+  // glBlendFunc(GL_SRC_COLOR, GL_DST_COLOR);
   glHint(GL_POINT_SMOOTH_HINT, GL_NICEST);
- // TODO glDepthFunc(GL_LEQUAL);
+  // TODO glDepthFunc(GL_LEQUAL);
   glDepthFunc(GL_LESS); //TODO
   glEnable(GL_DEPTH_TEST);  
   glEnable (GL_POINT_SMOOTH);
@@ -1712,9 +1709,10 @@ void ProcessHitsFunc(GLint hits, GLuint buffer[])
   // find the respective name
 
   for(int iterator = (int)octpts.size()-1; iterator >= 0; iterator--) {
+    // iterate over the selected points as in DrawPoints
     for ( set<sfloat*>::iterator it = selected_points[iterator].begin();
-        it != selected_points[iterator].end(); it++) { // iterate over the selected points as in DrawPoints
-      if (index == *nit) { // if the current index is the current name
+        it != selected_points[iterator].end(); it++) {
+	 if (index == *nit) { // if the current index is the current name
         unsel_points.insert(*it);
         nit++;
       }
@@ -1751,38 +1749,32 @@ void InterfaceFunc(unsigned char key){
   return;
 }
 
-//-----------------------------------------------------------------
 
 void CallBackSpecialFunc(int key , int x, int y) {
   //KeyboardFunc(key + 214, false, false, false);
   // return;
 }
 
-
-
-//---------------------------------------------------------------------------------------
-
 /**
  * Function drawRobotPath
  * \brief This functions draws the path where the
  * robot has travelled along while taking the scans
  */
-
 void drawRobotPath(int dummy){
-  //clear the camera list as we are going to add the cameras
-  //in the path where the robot travelled.
+  // clear the camera list as we are going to add the cameras
+  // in the path where the robot travelled.
 
-  //lets loop through the entire frame files to extract the
-  //total number of places where the robot has taken the scans from
+  // lets loop through the entire frame files to extract the
+  // total number of places where the robot has taken the scans from
   for(unsigned int i = 0; i < MetaMatrix.size(); i++){
     //temp variable
     double *temp;
-    //Now, lets go to the last of each frame file to
-    //extract the transformation matrix obtained
-    //after scan matching has been done.
+    // Now, lets go to the last of each frame file to
+    // extract the transformation matrix obtained
+    // after scan matching has been done.
     glMultMatrixd(MetaMatrix[i].back());
 
-    //temp is final transformation matrix
+    // temp is final transformation matrix
     temp = MetaMatrix[i].back();
 
     Point campos(temp[12], temp[13] + 100, temp[14]);
@@ -1808,7 +1800,7 @@ void drawRobotPath(int dummy){
   }
   updateCamera();
    
-  //signal for the update of scene
+  // signal for the update of scene
   haveToUpdate = 1;
 }
 
@@ -1863,8 +1855,6 @@ int calcNoOfPoints(vector<PointXY> vec1, vector<PointXY> vec2)
 
   return distance/2;
 }
-
-//-----------------------------------------------------------------
 
 /**
  * This function handles the the keyboard input
