@@ -1,3 +1,13 @@
+/*
+ * icp6D implementation
+ *
+ * Copyright (C) Andreas Nuechter, Kai Lingemann
+ *
+ * Released under the GPL version 3.
+ *
+ */
+
+
 /**
  * @file 
  * @brief Implementation of 3D scan matching with ICP

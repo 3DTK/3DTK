@@ -1,3 +1,12 @@
+/*
+ * scan_io_velodyne implementation
+ *
+ * Copyright (C) Mohammad Faisal, Dorit Borrmann, Andreas Nuechter
+ *
+ * Released under the GPL version 3.
+ *
+ */
+
 /**
  * @file
  * @brief Implementation of reading 3D scans

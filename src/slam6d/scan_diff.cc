@@ -1,3 +1,13 @@
+/*
+ * scan_diff implementation
+ *
+ * Copyright (C) Dorit Borrmann
+ *
+ * Released under the GPL version 3.
+ *
+ */
+
+
 /**
  * @file
  * @brief Main program calculating difference of 3D scans.

@@ -1,3 +1,12 @@
+/*
+ * basicScan implementation
+ *
+ * Copyright (C) Thomas Escher, Kai Lingemann
+ *
+ * Released under the GPL version 3.
+ *
+ */
+
 #include "slam6d/basicScan.h"
 
 #include "scanio/scan_io.h"

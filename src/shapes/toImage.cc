@@ -1,10 +1,16 @@
+/*
+ * toImage implementation
+ *
+ * Copyright (C) Dorit Borrmann
+ *
+ * Released under the GPL version 3.
+ *
+ */
+
 /**
  * @file 
  * @author Dorit Borrmann. Institute of Computer Science, University of Osnabrueck, Germany.
 */
-
-//#include "sparse/csparse.h"
-
 #include <cfloat>
 #include <fstream>
 #ifndef _MSC_VER

@@ -1,8 +1,16 @@
+/*
+ * show_gl implementation
+ *
+ * Copyright (C) Kai Lingemann, Andreas Nuechter, Jan Elseberg, Dorit Borrmann, Amuz Tamrakars
+ *
+ * Released under the GPL version 3.
+ *
+ */
+
 /**
  * @file
  * @brief Implementation for displaying of a matched 3D scene
  * @author Andreas Nuechter. Institute of Computer Science, University of Osnabrueck, Germany.
- * @author Amuz T, Jacobs University Bremen, German
  * @author Kai Lingemann. Institute of Computer Science, University of Osnabrueck, Germany.
  */
 

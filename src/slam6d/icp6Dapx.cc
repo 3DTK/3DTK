@@ -1,7 +1,17 @@
-/** @file 
+/*
+ * icp6Dapx implementation
+ *
+ * Copyright (C) Andreas Nuechter
+ *
+ * Released under the GPL version 3.
+ *
+ */
+
+
+/**
+ *  @file 
  *  @brief Implementation of the ICP error function minimization via approximation
  *  @author Andreas Nuechter. Jacobs University Bremen gGmbH, Germany
- *  @author Kai Lingemann. Institute of Computer Science, University of Osnabrueck, Germany.
  */
 
 #include "slam6d/icp6Dapx.h"

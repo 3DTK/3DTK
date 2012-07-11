@@ -1,7 +1,15 @@
-/** @file 
- *  @brief Implementation of the ICP error function minimization via
- *  dual quaternions
+/*
+ * icp6Ddual implementation
  *
+ * Copyright (C) Andreas Nuechter, Alexandru-Eugen Ichim
+ *
+ * Released under the GPL version 3.
+ *
+ */
+
+/** @file 
+ *  @brief Implementation of the ICP error function minimization
+ *  via dual quaternions
  *
  *  @author Andreas Nuechter. Jacobs University Bremen gGmbH, Germany
  *  @author Alexandru-Eugen Ichim. Jacobs University Bremen gGmbH, Germany

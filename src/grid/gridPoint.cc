@@ -1,3 +1,12 @@
+/*
+ * gridPoint implementation
+ *
+ * Copyright (C) Uwe Hebbelmann, Sebastian Stock, Andre Schemschat
+ *
+ * Released under the GPL version 3.
+ *
+ */
+
 #include "grid/gridPoint.h"
 #include <cstdlib>
 #include <iostream>

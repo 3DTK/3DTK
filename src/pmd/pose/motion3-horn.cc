@@ -1,3 +1,12 @@
+/*
+ * motion3-horn implementation
+ *
+ * Copyright (C) Stanislav Serebryakov
+ *
+ * Released under the GPL version 3.
+ *
+ */
+
 #include <cv.h>
 
 static inline CvMat *mat3D() { return cvCreateMat(3,1,CV_32FC1); }

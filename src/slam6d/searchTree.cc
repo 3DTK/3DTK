@@ -1,14 +1,22 @@
+/*
+ * searchTree implementation
+ *
+ * Copyright (C) Jan Elseberg, Andreas Nuechter
+ *
+ * Released under the GPL version 3.
+ *
+ */
+
 /** 
  * @file 
  * @brief Representation of a general search trees
- * @author Jan Elseberg. Institute of Computer Science, University of Osnabrueck, Germany.
+ * @author Jan Elseberg. Jacobs University Bremen gGmbH, Germany
+ * @author Andreas Nuechter. Jacobs University Bremen gGmbH, Germany
  */
 
 #include "slam6d/searchTree.h"
 #include "slam6d/scan.h"
 #include "slam6d/globals.icc"
-
-
 
 void SearchTree::getPtPairs(vector <PtPair> *pairs, 
     double *source_alignxf,                          // source
@@ -71,8 +79,6 @@ void SearchTree::getPtPairs(vector <PtPair> *pairs,
 
   return;
 }
-
-
 
 void SearchTree::getPtPairs(vector <PtPair> *pairs, 
     double *source_alignxf,                          // source

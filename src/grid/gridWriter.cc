@@ -1,3 +1,12 @@
+/*
+ * gridWriter implementation
+ *
+ * Copyright (C) Uwe Hebbelmann, Sebastian Stock, Andre Schemschat
+ *
+ * Released under the GPL version 3.
+ *
+ */
+
 #include "grid/gridWriter.h"
 #include <iterator>
 #include <cstdlib>

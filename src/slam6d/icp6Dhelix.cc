@@ -1,3 +1,13 @@
+/*
+ * icp6Dhelix implementation
+ *
+ * Copyright (C) Peter Schneider, Andreas Nuechter
+ *
+ * Released under the GPL version 3.
+ *
+ */
+
+
 /** @file 
  *  @brief Implementation of the ICP error function minimization via helix-translation
  *  @author Peter Schneider. Institute of Computer Science, University of Koblenz and Landau, Germany.

@@ -1,3 +1,12 @@
+/*
+ * io_types implementation
+ *
+ * Copyright (C) Thomas Escher, Kai Lingemann
+ *
+ * Released under the GPL version 3.
+ *
+ */
+
 #include "scanserver/io_types.h"
 
 #ifdef _MSC_VER

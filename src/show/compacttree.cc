@@ -1,3 +1,12 @@
+/*
+ * compacttree implementation
+ *
+ * Copyright (C) Jan Elseberg, Kai Lingemann, Jan Elseberg
+ *
+ * Released under the GPL version 3.
+ *
+ */
+
 /**
  * @file 
  * @brief Efficient representation of an octree

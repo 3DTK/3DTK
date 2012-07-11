@@ -1,3 +1,12 @@
+/*
+ * veloscan implementation
+ *
+ * Copyright (C) Andreas Nuechter, Li Wei, Li Ming
+ *
+ * Released under the GPL version 3.
+ *
+ */
+
 /**
  * @file
  * @brief Implementation of a 3D scan and of 3D scan matching in all variants

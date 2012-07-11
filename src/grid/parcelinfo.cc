@@ -1,3 +1,12 @@
+/*
+ * parcelinfo implementation
+ *
+ * Copyright (C) Uwe Hebbelmann, Sebastian Stock, Andre Schemschat
+ *
+ * Released under the GPL version 3.
+ *
+ */
+
 #include "grid/parcelinfo.h"
 
 long parcelinfo::parcelwidth;
@@ -9,7 +18,7 @@ long parcelinfo::parcelheight;
  * @param offsetZ the z-offset
  * @param filename the filename of the parcel
  */
-parcelinfo:: parcelinfo(long offsetX, long offsetZ, std::string filename)
+parcelinfo::parcelinfo(long offsetX, long offsetZ, std::string filename)
 {
     this->offsetX = offsetX;
     this->offsetZ = offsetZ;

@@ -1,3 +1,12 @@
+/*
+ * scanmanager implementation
+ *
+ * Copyright (C) Uwe Hebbelmann, Sebastian Stock, Andre Schemschat
+ *
+ * Released under the GPL version 3.
+ *
+ */
+
 #include "grid/scanmanager.h"
 #include <cstring>
 #include "slam6d/globals.icc"

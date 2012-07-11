@@ -1,3 +1,12 @@
+/*
+ * image implementation
+ *
+ * Copyright (C) Dorit Borrmann
+ *
+ * Released under the GPL version 3.
+ *
+ */
+
 #include "shapes/image.h"
 #include "slam6d/globals.icc"
 #include <limits>
@@ -72,6 +81,7 @@ _resolution, const vector <Point> *points) {
   }
   
 }
+
 Image::Image(float _minw, float _maxw, float _minh, float _maxh, float _resolution, double * const* points, int size) {
   minh = _minh;
   minw = _minw;
@@ -122,6 +132,7 @@ Image::Image(float _minw, float _maxw, float _minh, float _maxh, float _resoluti
   }
   
 }
+
 Image::Image(float _minw, float _maxw, float _minh, float _maxh, float _resolution, const vector<double*> *points) {
   //TODO correct this!!!
   minh = _minh;

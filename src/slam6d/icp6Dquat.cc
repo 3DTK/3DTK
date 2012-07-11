@@ -1,3 +1,12 @@
+/*
+ * icp6Dquat implementation
+ *
+ * Copyright (C) Andreas Nuechter
+ *
+ * Released under the GPL version 3.
+ *
+ */
+
 /** @file
  *  @brief Implementation of the ICP error function minimization via quaternions
  *  @author Andreas Nuechter. Jacobs University Bremen gGmbH, Germany.

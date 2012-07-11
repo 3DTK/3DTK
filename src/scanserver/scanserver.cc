@@ -1,3 +1,12 @@
+/*
+ * tscanserver implementation
+ *
+ * Copyright (C) Thomas Escher, Kai Lingemann
+ *
+ * Released under the GPL version 3.
+ *
+ */
+
 /**
  * @file
  * @brief Dynamic management of scans.

@@ -1,18 +1,11 @@
-// =====================================================================================
-// 
-//       Filename:  test.cc
-// 
-//    Description:  
-// 
-//        Version:  1.0
-//        Created:  09/26/2010 12:15:50 AM
-//       Revision:  none
-//       Compiler:  g++
-// 
-//         Author:  Jan Elseberg (), jelseber@uos.de
-//        Company:  Universitaet Osnabrueck
-// 
-// =====================================================================================
+/*
+ * numberrec implementation
+ *
+ * Copyright (C) Jan Elseberg, Dorit Borrmann
+ *
+ * Released under the GPL version 3.
+ *
+ */
 
 #include <stdlib.h>
 #include <stdio.h>

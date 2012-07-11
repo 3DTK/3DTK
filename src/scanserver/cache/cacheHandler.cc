@@ -1,3 +1,12 @@
+/*
+ * cacheHandler implementation
+ *
+ * Copyright (C) Thomas Escher, Kai Lingemann
+ *
+ * Released under the GPL version 3.
+ *
+ */
+
 #include "scanserver/cache/cacheHandler.h"
 
 #include "scanserver/cache/cacheObject.h"

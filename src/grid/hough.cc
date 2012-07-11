@@ -1,3 +1,13 @@
+/*
+ * 2D hough transform for line detection implementation
+ *
+ * Copyright (C) Hartmut Surmann
+ *
+ * Released under the GPL version 3.
+ *
+ */
+
+
 /***************************************************************************
  *                            hough.c
  ***************************************************************************

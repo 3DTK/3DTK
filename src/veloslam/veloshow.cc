@@ -1,3 +1,12 @@
+/*
+ * veloshow implementation
+ *
+ * Copyright (C) Andreas Nuechter, Li Wei, Li Ming
+ *
+ * Released under the GPL version 3.
+ *
+ */
+
 /**
  * @file
  * @brief Implementation for displaying of a matched 3D scene

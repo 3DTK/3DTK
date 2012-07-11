@@ -1,3 +1,12 @@
+/*
+ * ann_kd implementation
+ *
+ * Copyright (C) Andreas Nuechter, Ulugbek Makhmudov 
+ *
+ * Released under the GPL version 3.
+ *
+ */
+
 /** @file 
  *  @brief Encapsules the implementation of ANN k-d trees. 
  *  @author Ulugbek Makhmudov, Jacobs University Bremen, Bremen, Germany.

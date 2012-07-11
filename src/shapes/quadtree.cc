@@ -1,3 +1,12 @@
+/*
+ * quadtree implementation
+ *
+ * Copyright (C) Dorit Borrmann
+ *
+ * Released under the GPL version 3.
+ *
+ */
+
 #include "shapes/quadtree.h"
 
 int QuadTree::anz;

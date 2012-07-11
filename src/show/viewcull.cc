@@ -1,3 +1,12 @@
+/*
+ * viewcull implementation
+ *
+ * Copyright (C) Jan Elseberg
+ *
+ * Released under the GPL version 3.
+ *
+ */
+
 /**
  * @file
  * @brief Frustrum culling routines
@@ -11,10 +20,6 @@
 
 #include <GL/glut.h>
 #include <GL/glu.h>
-/*
-#include <gl.h>
-#include <glut.h>
-*/
 #include "slam6d/globals.icc"
 
 /** The 6 planes of the viewing frustum */
@@ -429,7 +434,8 @@ int CubeInFrustum2( float x, float y, float z, float size )
       return 0;
    }
 
-   // box is in frustrum, now check wether all corners are within. If one is outside return 1 otherwise 2
+   // box is in frustrum, now check wether all corners are within.
+   // If one is outside return 1 otherwise 2
    for( p = 0; p < 6; p++ )
    {
       Fxm = frustum[p][0] * xm;

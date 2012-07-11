@@ -1,3 +1,12 @@
+/*
+ * ConfigFileHough implementation
+ *
+ * Copyright (C) Dorit Borrmann
+ *
+ * Released under the GPL version 3.
+ *
+ */
+
 #include "shapes/ConfigFileHough.h"
 #include <string.h>
 #include <stdio.h>

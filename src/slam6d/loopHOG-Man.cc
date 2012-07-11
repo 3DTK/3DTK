@@ -1,8 +1,16 @@
+/*
+ * loopHOG-Man implementation
+ *
+ * Copyright (C) Jochen Sprickerhof
+ *
+ * Released under the GPL version 3.
+ *
+ */
+
 /**
  * @file HOG-Man wrapper
  * @author Jochen Sprickerhof. Institute of Computer Science, University of Osnabrueck, Germany.
  */
-
 
 #include "slam6d/loopHOG-Man.h"
 

@@ -1,3 +1,12 @@
+/*
+ * metrics implementation
+ *
+ * Copyright (C) Kai Lingemann, Thomas Escher
+ *
+ * Released under the GPL version 3.
+ *
+ */
+
 #include "slam6d/metrics.h"
 
 #ifdef _MSC_VER

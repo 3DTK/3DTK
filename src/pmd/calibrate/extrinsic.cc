@@ -1,3 +1,12 @@
+/*
+ * extrinsic implementation
+ *
+ * Copyright (C) Stanislav Serebryakov
+ *
+ * Released under the GPL version 3.
+ *
+ */
+
 #include <cv.h>
 #include <highgui.h>
 #include <stdio.h>
