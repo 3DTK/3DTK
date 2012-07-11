@@ -1,3 +1,12 @@
+/*
+ * gapx6D implementation
+ *
+ * Copyright (C) Jan Elseberg, Andreas Nuechter
+ *
+ * Released under the GPL version 3.
+ *
+ */
+
 /**
  * @file 
  * @brief The implementation of globally consistent scan matching algorithm by using APX correction

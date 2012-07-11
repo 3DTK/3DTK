@@ -1,3 +1,12 @@
+/*
+ * grabFramesCam implementation
+ *
+ * Copyright (C) Stanislav Serebryakov
+ *
+ * Released under the GPL version 3.
+ *
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 

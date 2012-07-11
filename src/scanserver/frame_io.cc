@@ -1,3 +1,12 @@
+/*
+ * frame_io implementation
+ *
+ * Copyright (C) Thomas Escher, Kai Lingemann
+ *
+ * Released under the GPL version 3.
+ *
+ */
+
 #include "scanserver/frame_io.h"
 
 #include <vector>

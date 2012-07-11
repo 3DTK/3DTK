@@ -1,9 +1,19 @@
+/*
+ * scan_io_uos implementation
+ *
+ * Copyright (C) Thomas Escher, Kai Lingemann, Andreas Nuechter
+ *
+ * Released under the GPL version 3.
+ *
+ */
+
+
 /**
  * @file
  * @brief Implementation of reading 3D scans
  * @author Kai Lingemann. Institute of Computer Science, University of Osnabrueck, Germany.
  * @author Andreas Nuechter. Institute of Computer Science, University of Osnabrueck, Germany.
- * @author Thomas Escher
+ * @author Thomas Escher. Institute of Computer Science, University of Osnabrueck, Germany.
  */
 
 #include "scanio/scan_io_uos.h"

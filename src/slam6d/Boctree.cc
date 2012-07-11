@@ -1,3 +1,12 @@
+/*
+ * Boctree implementation
+ *
+ * Copyright (C) Jan Elseberg
+ *
+ * Released under the GPL version 3.
+ *
+ */
+
 #include "slam6d/Boctree.h"
 
 //! Start-of-the-program initializer for the sequence map.

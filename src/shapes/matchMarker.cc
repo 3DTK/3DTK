@@ -1,3 +1,12 @@
+/*
+ * matchMarker implementation
+ *
+ * Copyright (C) Dorit Borrmann
+ *
+ * Released under the GPL version 3.
+ *
+ */
+
 #include <string>
 using std::string;
 #include <iostream>

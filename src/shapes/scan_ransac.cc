@@ -1,3 +1,12 @@
+/*
+ * scan_ransac implementation
+ *
+ * Copyright (C) Dorit Borrmann
+ *
+ * Released under the GPL version 3.
+ *
+ */
+
 #define WANT_STREAM ///< define the WANT stream :)
 #include <string>
 using std::string;

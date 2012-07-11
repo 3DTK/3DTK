@@ -1,3 +1,12 @@
+/*
+ * veloslam implementation
+ *
+ * Copyright (C) Andreas Nuechter, Li Wei, Li Ming
+ *
+ * Released under the GPL version 3.
+ *
+ */
+
 /**
  * @file
  * @brief Main programm for dynamic Velodyne SLAM

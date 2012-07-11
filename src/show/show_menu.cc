@@ -1,3 +1,12 @@
+/*
+ * show_menu implementation
+ *
+ * Copyright (C) Kai Lingemann, Andreas Nuechter
+ *
+ * Released under the GPL version 3.
+ *
+ */
+
 /**
  * @file
  * @brief Functions for the menu panels of the viewer software
@@ -9,7 +18,7 @@
 // GUI variables
 
 GLUI *glui1,  ///< pointer to the glui window(s)
-     *glui2; ///< pointer to the glui window(s)
+     *glui2;  ///< pointer to the glui window(s)
 
 /** GLUI spinner for the fog */
 GLUI_Spinner    *fog_spinner;

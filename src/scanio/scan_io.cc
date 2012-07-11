@@ -1,3 +1,12 @@
+/*
+ * scan_io implementation
+ *
+ * Copyright (C) Thomas Escher, Kai Lingemann, Andreas Nuechter
+ *
+ * Released under the GPL version 3.
+ *
+ */
+
 #include "scanio/scan_io.h"
 
 using std::map;

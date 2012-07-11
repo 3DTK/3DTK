@@ -1,3 +1,12 @@
+/*
+ * clientinterface implementation
+ *
+ * Copyright (C) Thomas Escher, Kai Lingemann
+ *
+ * Released under the GPL version 3.
+ *
+ */
+
 #include "scanserver/clientInterface.h"
 
 #include <iostream>

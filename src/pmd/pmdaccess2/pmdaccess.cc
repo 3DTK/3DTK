@@ -1,3 +1,12 @@
+/*
+ * pmdaccess implementation
+ *
+ * Copyright (C) Stanislav Serebryakov
+ *
+ * Released under the GPL version 3.
+ *
+ */
+
 #include "pmddatadescription.h"
 #include "pmdsdk2.h"
 #include "pmdheader.h"

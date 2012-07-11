@@ -1,6 +1,16 @@
 /*
+ * David Scanner implementation
+ *
+ * Copyright (C) Vladislav Perelman
+ *
+ * Released under the GPL version 3.
+ *
+ */
+
+/*
  * david_scanner.cc
- * Program takes as an input path to the config file which needs to have all the necessary information for the program.
+ * Program takes as an input path to the config file which needs to
+ * have all the necessary information for the program.
  * Config file has to have (each on a new line, 9 lines in total):
  *
  * Path to the directory where frames from the video are stored
@@ -13,7 +23,9 @@
  * Path to the translation of the left board
  * Path to the translation of the right board
  *
- * Program computes the 3 point cloud of the object and stores it in the file scan000.3d, each point in the cloud is represented by the line in the file:
+ * Program computes the 3 point cloud of the object and stores it in the
+ * file scan000.3d, each point in the cloud is represented by the line
+ * in the file:
  * x y z r g b
  *
  *

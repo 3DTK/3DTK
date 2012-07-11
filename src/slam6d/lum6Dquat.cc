@@ -1,9 +1,16 @@
+/*
+ * lum6Dquat implementation
+ *
+ * Copyright (C) Andreas Nuechter, Jan Elseberg
+ *
+ * Released under the GPL version 3.
+ *
+ */
+
 /**
  * @file 
  * @brief The implementation of globally consistent scan matching algorithm
- * @author Dorit Borrman. Institute of Computer Science, University of Osnabrueck, Germany.
  * @author Jan Elseberg. Institute of Computer Science, University of Osnabrueck, Germany.
- * @author Kai Lingemann. Institute of Computer Science, University of Osnabrueck, Germany.
  * @author Andreas Nuechter. Institute of Computer Science, University of Osnabrueck, Germany.
  */
 

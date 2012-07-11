@@ -1,10 +1,18 @@
+/*
+ * wxshow implementation
+ *
+ * Copyright (C) Jan Elseberg
+ *
+ * Released under the GPL version 3.
+ *
+ */
+
 #include "show_common.cc"
 #include "wx/wx.h"
 #include "wx/sizer.h"
 #include "wx/glcanvas.h"
 #include "show/wxshow.h"
 #include "show/selectionframe.h"
-
 
 
 class SelectionImpl : public Selection {

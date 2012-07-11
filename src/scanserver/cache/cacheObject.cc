@@ -1,3 +1,12 @@
+/*
+ * cacheObject implementation
+ *
+ * Copyright (C) Thomas Escher, Kai Lingemann
+ *
+ * Released under the GPL version 3.
+ *
+ */
+
 #include "scanserver/cache/cacheObject.h"
 
 #include <stdexcept>
@@ -7,11 +16,7 @@ using std::string;
 
 using namespace boost::interprocess;
 
-
-
 managed_shared_memory* CacheObject::m_msm = 0;
-
-
 
 CacheObject::CacheObject() :
   m_size(0),

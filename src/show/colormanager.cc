@@ -1,3 +1,12 @@
+/*
+ * compacttree implementation
+ *
+ * Copyright (C) Jan Elseberg, Dorit Borrmann
+ *
+ * Released under the GPL version 3.
+ *
+ */
+
 #ifdef _MSC_VER
 #define  _USE_MATH_DEFINES
 #include <windows.h>

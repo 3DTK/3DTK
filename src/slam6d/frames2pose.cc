@@ -1,3 +1,13 @@
+/*
+ * frames2pose implementation
+ *
+ * Copyright (C) Dorit Borrmann
+ *
+ * Released under the GPL version 3.
+ *
+ */
+
+
 #include <fstream>
 #include <iostream>
 using std::cout;

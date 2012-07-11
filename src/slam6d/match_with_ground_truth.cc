@@ -1,3 +1,12 @@
+/*
+ * match_with_ground_truth implementation
+ *
+ * Copyright (C) Andreas Nuechter, Kai Lingemann, Jochen Sprickerhof
+ *
+ * Released under the GPL version 3.
+ *
+ */
+
 /**
  * @file
  * @brief Main programm for matching registered 3D scans against a 

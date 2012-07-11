@@ -1,7 +1,18 @@
+/*
+ * ghelix6DQ2 implementation
+ *
+ * Copyright (C) Peter Schneider, Jan Elseberg, Andreas Nuechter
+ *
+ * Released under the GPL version 3.
+ *
+ */
+
 /**
  * @file 
  * @brief The implementation of globally consistent scan matching algorithm by using helix correction
  * @author Peter Schneider. Institute of Computer Science, University of Koblenz, Germany.
+ * @author Andreas Nuechter. Jacobs University Bremen gGmbH, Germany
+ * @author Jan Elseberg. Jacobs University Bremen gGmbH, Germany
  */
 
 #ifdef _MSC_VER

@@ -1,3 +1,12 @@
+/*
+ * panorama implementation
+ *
+ * Copyright (C) HamidReza Houshiar
+ *
+ * Released under the GPL version 3.
+ *
+ */
+
 #include "slam6d/fbr/panorama.h"
 
 using namespace std;

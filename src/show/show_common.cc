@@ -1,3 +1,12 @@
+/*
+ * show_common implementation
+ *
+ * Copyright (C) Kai Lingemann, Andreas Nuechter, Jan Elseberg, Dorit Borrmann
+ *
+ * Released under the GPL version 3.
+ *
+ */
+
 #ifdef WITH_GLEE
 #include <GLee.h>
 #endif

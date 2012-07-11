@@ -1,3 +1,12 @@
+/*
+ * managedScan implementation
+ *
+ * Copyright (C) Kai Lingemann, Thomas Escher
+ *
+ * Released under the GPL version 3.
+ *
+ */
+
 #include "slam6d/managedScan.h"
 
 #include "scanserver/clientInterface.h"

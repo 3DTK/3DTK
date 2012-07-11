@@ -1,3 +1,13 @@
+/*
+ * elch6DunitQuat implementation
+ *
+ * Copyright (C) Jochen Sprickerhof
+ *
+ * Released under the GPL version 3.
+ *
+ */
+
+
 /**
  * @file ELCH implementation using unit Quaternions
  * @author Jochen Sprickerhof. Institute of Computer Science, University of Osnabrueck, Germany.

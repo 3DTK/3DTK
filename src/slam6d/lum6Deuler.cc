@@ -1,3 +1,12 @@
+/*
+ * lum6Deuler implementation
+ *
+ * Copyright (C) Dorit Borrmann, Jan Elseberg, Andreas Nuechter, Kai Lingemann
+ *
+ * Released under the GPL version 3.
+ *
+ */
+
 /**
  * @file 
  * @brief The implementation of globally consistent scan matching algorithm

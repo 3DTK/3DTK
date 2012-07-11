@@ -1,3 +1,12 @@
+/*
+ * PMD implementation
+ *
+ * Copyright (C) Stanislav Serebryakov
+ *
+ * Released under the GPL version 3.
+ *
+ */
+
 #include <cv.h>     /* IplImage, cvCreateImage */
 
 #include "pmdsdk2.h"

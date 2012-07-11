@@ -1,3 +1,12 @@
+/*
+ * allocator implementation
+ *
+ * Copyright (C) Thomas Escher, Kai Lingemann
+ *
+ * Released under the GPL version 3.
+ *
+ */
+
 #include "slam6d/allocator.h"
 
 using std::vector;

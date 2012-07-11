@@ -1,3 +1,12 @@
+/*
+ * metrics implementation
+ *
+ * Copyright (C) Thomas Escher, Kai Lingemann
+ *
+ * Released under the GPL version 3.
+ *
+ */
+
 #include "scanserver/metrics.h"
 
 #ifdef _MSC_VER

@@ -1,3 +1,12 @@
+/*
+ * accumulator implementation
+ *
+ * Copyright (C) Dorit Borrmann
+ *
+ * Released under the GPL version 3.
+ *
+ */
+
 #include "shapes/accumulator.h"
 #include <math.h>
 #include "slam6d/globals.icc"

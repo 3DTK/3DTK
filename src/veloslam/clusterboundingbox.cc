@@ -1,3 +1,12 @@
+/*
+ * clusterboundingbox implementation
+ *
+ * Copyright (C) Li Wei, Li Ming
+ *
+ * Released under the GPL version 3.
+ *
+ */
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>

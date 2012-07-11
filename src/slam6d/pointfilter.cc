@@ -1,3 +1,12 @@
+/*
+ * pointfilter implementation
+ *
+ * Copyright (C) Dorit Borrmann, Jan Elseberg
+ *
+ * Released under the GPL version 3.
+ *
+ */
+
 #include "slam6d/pointfilter.h"
 
 using std::string;

@@ -1,3 +1,12 @@
+/*
+ * intersection_detection implementation
+ *
+ * Copyright (C) Chen Long, Li Wei, Li Ming, Andreas Nuechter,
+ *
+ * Released under the GPL version 3.
+ *
+ */
+
 #include "veloslam/intersection_detection.h"
 #include "veloslam/veloscan.h"
 #include <iostream>

@@ -1,3 +1,12 @@
+/*
+ * scan implementation
+ *
+ * Copyright (C) Andreas Nuechter, Kai Lingemann, Dorit Borrmann, Jan Elseberg, Thomas Escher
+ *
+ * Released under the GPL version 3.
+ *
+ */
+
 #include "slam6d/scan.h"
 
 #include "slam6d/basicScan.h"

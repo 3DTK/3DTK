@@ -1,3 +1,12 @@
+/*
+ * tracker implementation
+ *
+ * Copyright (C) ZhangLiang, YuanJun, Li Wei, Li Ming, Andreas Nuechter
+ *
+ * Released under the GPL version 3.
+ *
+ */
+
 /**
  * @file
  * @brief Main programm for dynamic Velodyne SLAM

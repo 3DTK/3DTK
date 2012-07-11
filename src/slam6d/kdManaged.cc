@@ -1,8 +1,17 @@
+/*
+ * kdManaged implementation
+ *
+ * Copyright (C) Andreas Nuechter, Kai Lingemann, Thomas Escher
+ *
+ * Released under the GPL version 3.
+ *
+ */
+
 /** @file 
  *  @brief An optimized k-d tree implementation
  *  @author Andreas Nuechter. Institute of Computer Science, University of Osnabrueck, Germany.
  *  @author Kai Lingemann. Institute of Computer Science, University of Osnabrueck, Germany.
- *  @author Thomas Escher
+ *  @author Thomas Escher. Institute of Computer Science, University of Osnabrueck, Germany.
  */
 
 #ifdef _MSC_VER

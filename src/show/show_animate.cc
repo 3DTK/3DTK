@@ -1,3 +1,12 @@
+/*
+ * show_animate implementation
+ *
+ * Copyright (C) Kai Lingemann, Andreas Nuechter, Jan Elseberg, Dorit Borrmann
+ *
+ * Released under the GPL version 3.
+ *
+ */
+
 #include <fstream>
 using std::fstream;
 using std::ofstream;
