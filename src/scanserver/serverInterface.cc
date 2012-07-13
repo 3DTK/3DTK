@@ -135,6 +135,11 @@ void ServerInterface::saveFramesFile(SharedScan* scan)
   FrameIO::saveFile(scan->getDirPath(), scan->getIdentifier(), static_cast<ServerScan*>(scan)->getFrames());
 }
 
+void ServerInterface::clearFrames(SharedScan* scan)
+{
+  static_cast<ServerScan*>(scan)->getFrames().clear();
+}
+
 std::size_t ServerInterface::getCacheSize()
 {
   return m_cache_size;
@@ -277,6 +282,9 @@ void ServerInterface::run()
       } else
       if(m_message == MESSAGE_SAVE_FRAMES_FILE) {
         saveFramesFile(m_sharedscan_ptr.get());
+      } else
+      if(m_message == MESSAGE_CLEAR_FRAMES) {
+        clearFrames(m_sharedscan_ptr.get());
       } else
       if(m_message == MESSAGE_GET_CACHE_SIZE) {
         m_arg_size_t = getCacheSize();

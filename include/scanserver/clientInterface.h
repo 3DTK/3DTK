@@ -46,6 +46,7 @@ enum message_t {
   MESSAGE_ADD_FRAME,
   MESSAGE_LOAD_FRAMES_FILE,
   MESSAGE_SAVE_FRAMES_FILE,
+  MESSAGE_CLEAR_FRAMES,
   MESSAGE_GET_CACHE_SIZE,
   MESSAGE_PRINT_METRICS
 };
@@ -142,6 +143,9 @@ public:
 
   //! Called from SharedScan, requests saving frames into a file
   void saveFramesFile(SharedScan* scan);
+ 
+  //! Called from SharedScan, this removes all previous contained frames
+  void clearFrames(SharedScan* scan);
   
   //! Returns the CacheObject shared memory size for allocation and planning purposes
   std::size_t getCacheSize();

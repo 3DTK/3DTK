@@ -32,6 +32,7 @@ SharedScan::SharedScan(const ip::allocator<void, SegmentManager> & allocator,
   m_reduction_parameters(allocator),
   m_show_parameters(allocator),
   m_octtree_parameters(allocator),
+  m_load_frames_file(true),
   m_frames(allocator)
 {
   // until boost-1.47 ipc-strings can do garbage with g++-4.4 -O2 and higher (optimizations and versions)
@@ -138,10 +139,12 @@ void SharedScan::invalidateShow()
   m_octtree->invalidate<SharedScan::onInvalidation>();
 }
 
-void SharedScan::loadFrames()
+void SharedScan::clearFrames()
 {
   ClientInterface* client = ClientInterface::getInstance();
-  client->loadFramesFile(this);
+  client->clearFrames(this);
+  // don't try to load again from the still existing files
+  m_load_frames_file = false;
 }
 
 void SharedScan::addFrame(double* transformation, unsigned int type)
@@ -152,6 +155,13 @@ void SharedScan::addFrame(double* transformation, unsigned int type)
 
 const FrameVector& SharedScan::getFrames()
 {
+  // on a restart with existing frame files try to load these
+  if(m_frames.empty() && m_load_frames_file == true) {
+    ClientInterface* client = ClientInterface::getInstance();
+    client->loadFramesFile(this);
+    // don't try to load again if frames are still empty
+    m_load_frames_file = false;
+  }
   return m_frames;
 }
 
@@ -159,6 +169,8 @@ void SharedScan::saveFrames()
 {
   ClientInterface* client = ClientInterface::getInstance();
   client->saveFramesFile(this);
+  // we just saved the file, no need to read it
+  m_load_frames_file = false;
 }
 
 double* SharedScan::getPose()

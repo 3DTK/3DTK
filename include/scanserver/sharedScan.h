@@ -80,14 +80,14 @@ public:
   //! Set parameters and invalidate cache for reduced CacheObjects if it differs
   void setOcttreeParameters(const char* params);
 
-  //! Load frames file from storage
-  void loadFrames();
-
   //! Add a new frame with the current transformation and given type
   void addFrame(double* transformation, unsigned int type);
   
   //! Save frames into a file for later use
   void saveFrames();
+
+  //! Clear existing frames
+  void clearFrames();
   
   //! Get contained frames
   const FrameVector& getFrames();
@@ -159,6 +159,7 @@ private:
   SharedString m_reduction_parameters;
   SharedString m_show_parameters;
   SharedString m_octtree_parameters;
+  bool m_load_frames_file;
 
 protected:
   ip::offset_ptr<double> m_pose;
