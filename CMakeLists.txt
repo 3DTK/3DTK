@@ -73,6 +73,15 @@ ELSE(WITH_SHAPE_DETECTION)
   MESSAGE(STATUS "Without shape detection")
 ENDIF(WITH_SHAPE_DETECTION)
 
+## Interior reconstruction
+option(WITH_MODEL "Whether to build model executable for modelling interior environments. ON/OFF" OFF)
+
+if(WITH_MODEL)
+  message(STATUS "With interior reconstruction")
+else(WITH_MODEL)
+  message(STATUS "Without interior reconstruction")
+endif(WITH_MODEL)
+
 ## Thermo
 OPTION(WITH_THERMO "Whether to build executables for mutual calibration of laser scanner and camera. ON/OFF" OFF)
 IF(WITH_THERMO)
@@ -226,7 +235,7 @@ ELSE(WITH_PMD)
 ENDIF(WITH_PMD)
 
 ## FBR
-OPTION(WITH_FBR "Whether to compile feature base registration. ON/OFF" OFF)
+OPTION(WITH_FBR "Whether to compile feature based registration. ON/OFF" OFF)
 
 IF(WITH_FBR)
   MESSAGE(STATUS "With FBR ")
@@ -386,10 +395,9 @@ add_subdirectory(src/grid)
 add_subdirectory(src/pmd)
 add_subdirectory(src/shapes)
 add_subdirectory(src/thermo)
-IF(WITH_FBR)
-  add_subdirectory(src/slam6d/fbr)
-ENDIF(WITH_FBR)
+add_subdirectory(src/slam6d/fbr)
 add_subdirectory(src/scanner)
+add_subdirectory(src/model)
 
 IF(EXPORT_SHARED_LIBS)
 ## Compiling a shared library containing all of the project
