@@ -64,6 +64,9 @@ private:
 
   //! Relayed to FrameIO
   void saveFramesFile(SharedScan* scan);
+ 
+  //! Empties this SharedScan's FrameVector
+  void clearFrames(SharedScan* scan);
   
   //! Call from client
   std::size_t getCacheSize();

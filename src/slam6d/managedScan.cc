@@ -83,7 +83,8 @@ std::size_t ManagedScan::getMemorySize()
 
 ManagedScan::ManagedScan(SharedScan* shared_scan) :
   m_shared_scan(shared_scan),
-  m_reduced_ready(false)
+  m_reduced_ready(false),
+  m_reset_frames_on_write(true)
 {
   // request pose from the shared scan
   double* euler = m_shared_scan->getPose();
@@ -335,7 +336,7 @@ void ManagedScan::createOcttree()
 
 unsigned int ManagedScan::readFrames()
 {
-  m_shared_scan->loadFrames();
+  // automatically read on getFrames
   return m_shared_scan->getFrames().size();
 }
 
@@ -358,5 +359,9 @@ void ManagedScan::getFrame(unsigned int i, const double*& pose_matrix, AlgoType&
 
 void ManagedScan::addFrame(AlgoType type)
 {
+  if(m_reset_frames_on_write) {
+    m_shared_scan->clearFrames();
+    m_reset_frames_on_write = false;
+  }
   m_shared_scan->addFrame(transMat, static_cast<unsigned int>(type));
 }
