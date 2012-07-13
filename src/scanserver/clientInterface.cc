@@ -185,6 +185,24 @@ void ClientInterface::saveFramesFile(SharedScan* scan)
 #endif //WITH_METRICS
 }
 
+void ClientInterface::clearFrames(SharedScan* scan)
+{
+  // aquire client mutex for uninterrupted work
+  scoped_lock<interprocess_mutex> lock(m_mutex_client);
+  
+#ifdef WITH_METRICS
+  Timer t = ClientMetric::frames_time.start();
+#endif //WITH_METRICS
+
+  m_sharedscan_ptr = scan;
+  sendMessage(MESSAGE_CLEAR_FRAMES);
+  // TODO: remove the .frames-file if appropriate, clear all records
+  
+#ifdef WITH_METRICS
+  ClientMetric::frames_time.end(t);
+#endif //WITH_METRICS
+}
+
 std::size_t ClientInterface::getCacheSize()
 {
   // aquire client mutex for uninterrupted work
@@ -202,8 +220,6 @@ void ClientInterface::printMetrics()
   
   sendMessage(MESSAGE_PRINT_METRICS);
 }
-
-
 
 void ClientInterface::sendMessage(message_t message)
 {

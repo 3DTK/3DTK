@@ -53,6 +53,9 @@ private:
   //! Flag to keep track of whether we have to update/create reduced points at the start
   bool m_reduced_ready;
 
+  //! Flag to reset the persistent frames on write actions in slam to avoid a clear call
+  bool m_reset_frames_on_write;
+
   //! Voxelsize of the octtree used for reduction
   double show_reduction_voxelSize;
 
