@@ -43,7 +43,7 @@ After loading you might want to set parameters
 Access the contained data, will be loaded and calculated on demand
 
   DataXYZ xyz = scan->get("xyz");
-  DataXYZ reduced = scan->get("reduced");
+  DataXYZ reduced = scan->get("xyz reduced");
   DataRGB rgb = scan->get("rgb");
   
   xyz[i][0..2]

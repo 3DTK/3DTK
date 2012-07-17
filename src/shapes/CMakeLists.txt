@@ -14,11 +14,11 @@ IF (WITH_SHAPE_DETECTION)
 #  add_executable(shapes shapes.cc  geom_math.cc numberrec.cc  scan_ransac.cc )
 #
 #  IF(WIN32)
-#    target_link_libraries(shapes scanlib XGetopt netpbm Pgm2asc)
+#    target_link_libraries(shapes scan XGetopt netpbm Pgm2asc)
 #  ENDIF(WIN32)
 #
 #  IF (UNIX)
-#    target_link_libraries(shapes scanlib newmat dl netpbm Pgm2asc )
+#    target_link_libraries(shapes scan newmat dl netpbm Pgm2asc )
 #  ENDIF(UNIX)
 #  
   
@@ -27,24 +27,25 @@ IF (WITH_SHAPE_DETECTION)
 #  add_executable(matchMarker matchMarker.cc)
   
   IF(UNIX)
-    target_link_libraries(planes scanlib shapelib newmat dl ANN)
-#    target_link_libraries(image scanlib newmat sparse dl ANN )
-#    target_link_libraries(matchMarker scanlib newmat sparse dl ANN )
+    target_link_libraries(planes scan shape newmat dl ANN)
+#    target_link_libraries(image scan newmat sparse dl ANN )
+#    target_link_libraries(matchMarker scan newmat sparse dl ANN )
   ENDIF(UNIX)
 
   IF (WIN32)
-	  target_link_libraries(planes scanlib newmat XGetopt shapelib ANN)
-#    target_link_libraries(image scanlib newmat sparse ANN XGetopt)
+	  target_link_libraries(planes scan newmat XGetopt shape ANN)
+#    target_link_libraries(image scan newmat sparse ANN XGetopt)
   ENDIF(WIN32)
 
 SET(SHAPELIB_SRCS
   hough.cc convexplane.cc accumulator.cc hsm3d.cc ConfigFileHough.cc parascan.cc quadtree.cc geom_math.cc )
 
-add_library(shapelib STATIC ${SHAPELIB_SRCS})
+add_library(shape STATIC ${SHAPELIB_SRCS})
+
 #target_link_libraries(shapelib)
 IF(EXPORT_SHARED_LIBS)
-add_library(shapelib_s SHARED ${SHAPELIB_SRCS})
-#target_link_libraries(scanlib_s ${Boost_LIBRARIES} newmat)
+add_library(shape_s SHARED ${SHAPELIB_SRCS})
+#target_link_libraries(scan_s ${Boost_LIBRARIES} newmat)
 ENDIF(EXPORT_SHARED_LIBS)
 
 ENDIF(WITH_SHAPE_DETECTION)

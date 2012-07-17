@@ -2,8 +2,8 @@ if(WITH_MODEL)
 
     # Module name
     set(MODULE "Model")
-    set(UNIX_LIBS shapes scanlib newmat dl ANN)
-    set(WIN32_LIBS shapes scanlib newmat XGetopt)
+    set(UNIX_LIBS shape scan newmat dl ANN)
+    set(WIN32_LIBS shape scan newmat XGetopt)
 
     # Set CXX flags for CGAL
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -frounding-math")

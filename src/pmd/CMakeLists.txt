@@ -45,10 +45,10 @@ IF(WITH_PMD)
 
 
   add_executable(grabVideoAnd3D  ${OFFLINE_DIR}grabVideoAnd3D.cc cvpmd.cc pmdWrap.cc ) 
-  target_link_libraries(grabVideoAnd3D scanlib dl newmat ${PMD_LIBS})
+  target_link_libraries(grabVideoAnd3D scan dl newmat ${PMD_LIBS})
 
   add_executable(convertToSLAM6D  ${OFFLINE_DIR}convertToSLAM6D.cc cvpmd.cc pmdWrap.cc ) 
-  target_link_libraries(convertToSLAM6D scanlib dl newmat ${PMD_LIBS})
+  target_link_libraries(convertToSLAM6D scan dl newmat ${PMD_LIBS})
 
   add_executable(calibratePMD  ${CALIBRATE_DIR}calibrate.cc ) 
   target_link_libraries(calibratePMD ${PMD_LIBS})
@@ -57,12 +57,12 @@ IF(WITH_PMD)
   target_link_libraries(grabFramesCam ${PMD_LIBS})
 
   add_executable(grabFramesPMD  ${CALIBRATE_DIR}grabFramesPMD.cc cvpmd.cc pmdWrap.cc) 
-  target_link_libraries(grabFramesPMD scanlib newmat ${PMD_LIBS})
+  target_link_libraries(grabFramesPMD scan newmat ${PMD_LIBS})
 
   add_executable(extrinsicPMD  ${CALIBRATE_DIR}extrinsic.cc ) 
   target_link_libraries(extrinsicPMD ${PMD_LIBS})
 
   add_executable(pose  ${POSE_DIR}pose.cc ${POSE_DIR}history.cc cvpmd.cc pmdWrap.cc) 
-  target_link_libraries(pose scanlib newmat ${PMD_LIBS})
+  target_link_libraries(pose scan newmat ${PMD_LIBS})
 
 ENDIF(WITH_PMD)

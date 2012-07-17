@@ -26,24 +26,24 @@ private:
     /**
      * used to determine if vertical
      */
-    static const double _EPSILON_VERTICAL   = 0.02;
+    static constexpr double _EPSILON_VERTICAL   = 0.02;
 
     /**
      * used to determine if horizontal
      */
-    static const double _EPSILON_HORIZONTAL = 0.02;
+    static constexpr double _EPSILON_HORIZONTAL = 0.02;
 
     /**
      * if two planes are this close in cm
      * then they may be considered to be the same
      */
-    static const double _EPSILON_DISTANCE = 20;
+    static constexpr double _EPSILON_DISTANCE = 20;
 
     /**
      * if the length of the crossproduct of two normals is less than this
      * then the planes may be considered to be the same
      */
-    static const double _EPSILON_NORMAL_CROSS_PRODUCT = 2e-1;
+    static constexpr double _EPSILON_NORMAL_CROSS_PRODUCT = 2e-1;
 
 public:
     /**

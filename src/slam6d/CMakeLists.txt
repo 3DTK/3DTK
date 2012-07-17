@@ -4,11 +4,11 @@ IF(WITH_SCAN_REDUCTION)
   add_executable(scan_red scan_red.cc)
   
   IF(UNIX)
-    target_link_libraries(scan_red scanlib dl ANN)
+    target_link_libraries(scan_red scan dl ANN)
   ENDIF(UNIX)
 
   IF (WIN32)
-    target_link_libraries(scan_red scanlib ANN XGetopt)
+    target_link_libraries(scan_red scan ANN XGetopt)
   ENDIF(WIN32)
 ENDIF(WITH_SCAN_REDUCTION)
 
@@ -18,13 +18,13 @@ IF(WITH_SCAN_DIFF)
   add_executable(scan_diff2d scan_diff2d.cc ../show/colormanager.cc)
   
   IF(UNIX)
-    target_link_libraries(scan_diff scanlib dl ANN)
-    target_link_libraries(scan_diff2d scanlib dl ANN)
+    target_link_libraries(scan_diff scan dl ANN)
+    target_link_libraries(scan_diff2d scan dl ANN)
   ENDIF(UNIX)
 
   IF (WIN32)
-    target_link_libraries(scan_diff scanlib ANN XGetopt)
-    target_link_libraries(scan_diff2d scanlib ANN XGetopt)
+    target_link_libraries(scan_diff scan ANN XGetopt)
+    target_link_libraries(scan_diff2d scan ANN XGetopt)
   ENDIF(WIN32)
 ENDIF(WITH_SCAN_DIFF)
 
@@ -42,17 +42,17 @@ IF(WITH_TOOLS)
   add_executable(toGlobal toGlobal.cc)
 
   IF(UNIX)
-    target_link_libraries(graph_balancer scanlib ${Boost_GRAPH_LIBRARY} ${Boost_SERIALIZATION_LIBRARY} ${Boost_REGEX_LIBRARY})
-    target_link_libraries(exportPoints scanlib dl ANN)
-    target_link_libraries(toGlobal scanlib)
+    target_link_libraries(graph_balancer scan ${Boost_GRAPH_LIBRARY} ${Boost_SERIALIZATION_LIBRARY} ${Boost_REGEX_LIBRARY})
+    target_link_libraries(exportPoints scan dl ANN)
+    target_link_libraries(toGlobal scan)
   ENDIF(UNIX)
 
   
   IF (WIN32)
     target_link_libraries(frame_to_graph XGetopt ${Boost_LIBRARIES})
     target_link_libraries(convergence XGetopt ${Boost_LIBRARIES})
-    target_link_libraries(graph_balancer scanlib XGetopt  ${Boost_LIBRARIES})
-    target_link_libraries(exportPoints scanlib ANN XGetopt  ${Boost_LIBRARIES})
+    target_link_libraries(graph_balancer scan XGetopt  ${Boost_LIBRARIES})
+    target_link_libraries(exportPoints scan ANN XGetopt  ${Boost_LIBRARIES})
     target_link_libraries(frames2pose XGetopt ${Boost_LIBRARIES})
     target_link_libraries(pose2frames XGetopt ${Boost_LIBRARIES})
     target_link_libraries(frames2riegl XGetopt ${Boost_LIBRARIES})
@@ -74,26 +74,26 @@ SET(SCANLIB_SRCS
   point_type.cc	icp6Dquatscale.cc searchTree.cc     Boctree.cc
   allocator.cc               
   scan.cc           basicScan.cc      managedScan.cc    metaScan.cc
-  io_types.cc       pointfilter.cc
+  io_types.cc       io_utils.cc       pointfilter.cc
   )
 
 if(WITH_METRICS)
   set(SCANLIB_SRCS ${SCANLIB_SRCS} metrics.cc)
 endif(WITH_METRICS)
 
-add_library(scanlib STATIC ${SCANLIB_SRCS})
+add_library(scan STATIC ${SCANLIB_SRCS})
 
-target_link_libraries(scanlib scanclient scanio)
+target_link_libraries(scan scanclient scanio)
 
 IF(UNIX)
-  target_link_libraries(scanlib dl)
+  target_link_libraries(scan dl)
 ENDIF(UNIX)
 
 ### EXPORT SHARED LIBS
 
 IF(EXPORT_SHARED_LIBS)
-add_library(scanlib_s SHARED ${SCANLIB_SRCS})
-#target_link_libraries(scanlib_s ${Boost_LIBRARIES} newmat)
+add_library(scan_s SHARED ${SCANLIB_SRCS})
+#target_link_libraries(scan_s ${Boost_LIBRARIES} newmat)
 ENDIF(EXPORT_SHARED_LIBS)
 
 ### SLAM6D
@@ -109,11 +109,11 @@ ELSE(WITH_CUDA)
 ENDIF(WITH_CUDA)
 
 IF(UNIX)
-  target_link_libraries(slam6D scanlib newmat sparse ANN)
+  target_link_libraries(slam6D scan newmat sparse ANN)
 ENDIF(UNIX)
 
 IF(WIN32)
-  target_link_libraries(slam6D scanlib newmat sparse ANN XGetopt ${Boost_LIBRARIES})
+  target_link_libraries(slam6D scan newmat sparse ANN XGetopt ${Boost_LIBRARIES})
 ENDIF(WIN32)
 
 #IF(MSVC)

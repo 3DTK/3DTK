@@ -21,7 +21,6 @@ using namespace Eigen;
 #include <stdexcept>
 using namespace std;
 
-
 model::Plane3d::Plane3d() {
     // nothing to do
 }

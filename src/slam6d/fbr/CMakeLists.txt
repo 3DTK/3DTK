@@ -16,7 +16,7 @@ SET(FBR_REGISTRATION_SRC registration.cc)
 add_library(fbr_registration STATIC ${FBR_REGISTRATION_SRC})
 
 IF(WITH_FBR)
-SET(FBR_LIBS scanlib ANN ${OpenCV_LIBS})
+SET(FBR_LIBS scan ANN ${OpenCV_LIBS})
 
 add_executable(featurebasedregistration feature_based_registration.cc fbr_global.cc)
 target_link_libraries(featurebasedregistration fbr_cv_io fbr_panorama fbr_feature fbr_feature_matcher fbr_registration ${FBR_LIBS})
