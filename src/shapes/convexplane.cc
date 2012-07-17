@@ -1,7 +1,7 @@
 /*
  * convexplane implementation
  *
- * Copyright (C) Dorit Borrmann
+ * Copyright (C) Dorit Borrmann, Remus Dumitru, Andreas Nuechter
  *
  * Released under the GPL version 3.
  *
@@ -84,7 +84,7 @@ void ConvexPlane::JarvisMarchConvexHull(list<double*> &points, vector<double*> &
     }
     current = anchor;
   } while(start != anchor);
-  convex_hull.pop_back();
+  // convex_hull.pop_back();
   
   itr = points.begin();
   while(itr != points.end()) {
@@ -95,7 +95,7 @@ void ConvexPlane::JarvisMarchConvexHull(list<double*> &points, vector<double*> &
       itr++;
     }
   }
-  cout << "End of Convex " << convex_hull.size() << endl;
+  // cout << "End of Convex " << convex_hull.size() << endl;
 }
 
 /**
@@ -194,7 +194,7 @@ ConvexPlane::ConvexPlane(double plane[4], vector<Point> &points ) {
       case 'z': point[0] = p.x;
                 point[1] = p.y;
                 break;
-      default: cout << "OHOH" << endl;
+      default: throw runtime_error("default branch taken");
     }
     point_list.push_back(point);
   }
@@ -245,7 +245,7 @@ void ConvexPlane::writeNormal(string path, int counter) {
         center[1] += (*it)[1];
         center[2] += (rho - (*it)[0] * n[0] - (*it)[1] * n[1]) / n[2];
         break;
-      default: cout << "OHOH" << endl;
+      default: throw runtime_error("default branch taken");
     }
 
   }
@@ -291,13 +291,92 @@ void ConvexPlane::writePlane(string path, int counter) {
         out << (*it)[1] << " ";
         out << (rho - (*it)[0] * n[0] - (*it)[1] * n[1]) / n[2] << endl;
         break;
-      default: cout << "OHOH" << endl;
+      default: throw runtime_error("default branch taken");
     }
 
   }
   out.flush();
   out.close();
+}
 
+vector<double> ConvexPlane::getConvexHull() {
+    vector<double> hull;
+
+    for(vector<double*>::iterator it = convex_hull.begin();
+        it != convex_hull.end();
+        it++) {
+
+        double point[3];
+
+      switch(direction) {
+
+        case 'x':
+          point[0] = (rho - (*it)[0] * n[1] - (*it)[1] * n[2]) / n[0];
+          point[1] = (*it)[0];
+          point[2] = (*it)[1];
+          break;
+        case 'y':
+          point[0] = (*it)[0];
+          point[1] = (rho - (*it)[0] * n[0] - (*it)[1] * n[2]) / n[1];
+          point[2] = (*it)[1];
+          break;
+        case 'z':
+          point[0] = (*it)[0];
+          point[1] = (*it)[1];
+          point[2] = (rho - (*it)[0] * n[0] - (*it)[1] * n[1]) / n[2];
+          break;
+        default: throw runtime_error("default branch taken");
+      }
+
+      hull.push_back(point[0]);
+      hull.push_back(point[1]);
+      hull.push_back(point[2]);
+    }
+
+    return hull;
+}
+
+void ConvexPlane::getNormal(double* normal, double* origin) {
+    double center[3];
+    for(int i = 0; i < 3; i++) {
+      center[i] = 0.0;
+    }
+
+    for(vector<double*>::iterator it = convex_hull.begin();
+        it != convex_hull.end();
+        it++) {
+
+      switch(direction) {
+        case 'x':
+          center[0] += (rho - (*it)[0] * n[1] - (*it)[1] * n[2]) / n[0];
+          center[1] += (*it)[0];
+          center[2] += (*it)[1];
+          break;
+        case 'y':
+          center[0] += (*it)[0];
+          center[1] += (rho - (*it)[0] * n[0] - (*it)[1] * n[2]) / n[1];
+          center[2] += (*it)[1];
+          break;
+        case 'z':
+          center[0] += (*it)[0];
+          center[1] += (*it)[1];
+          center[2] += (rho - (*it)[0] * n[0] - (*it)[1] * n[1]) / n[2];
+          break;
+        default: throw runtime_error("default branch taken");
+      }
+    }
+
+    for(int i = 0; i < 3; i++) {
+      center[i] /= convex_hull.size();
+    }
+
+    normal[0] = n[0];
+    normal[1] = n[1];
+    normal[2] = n[2];
+
+    origin[0] = center[0];
+    origin[1] = center[1];
+    origin[2] = center[2];
 }
 
 void ConvexPlane::project(const double *p, double *p1) {

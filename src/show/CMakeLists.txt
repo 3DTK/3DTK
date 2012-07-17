@@ -1,4 +1,4 @@
-SET(SHOW_LIBS ${OPENGL_LIBRARIES} glui scanlib ANN)
+SET(SHOW_LIBS ${OPENGL_LIBRARIES} glui scan ANN)
 IF(WIN32)
  IF( CMAKE_SIZEOF_VOID_P EQUAL 8 )
     SET(SHOW_LIBS ${SHOW_LIBS}  ${CMAKE_SOURCE_DIR}/3rdparty/windows/x64/freeglut.lib XGetopt)

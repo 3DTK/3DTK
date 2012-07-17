@@ -20,11 +20,11 @@ IF (WITH_THERMO)
 #  add_executable(shapes shapes.cc  geom_math.cc numberrec.cc  scan_ransac.cc )
 #
 #  IF(WIN32)
-#    target_link_libraries(shapes scanlib XGetopt netpbm Pgm2asc)
+#    target_link_libraries(shapes scan XGetopt netpbm Pgm2asc)
 #  ENDIF(WIN32)
 #
 #  IF (UNIX)
-#    target_link_libraries(shapes scanlib newmat dl netpbm Pgm2asc )
+#    target_link_libraries(shapes scan newmat dl netpbm Pgm2asc )
 #  ENDIF(UNIX)
 #  
   
@@ -34,16 +34,16 @@ IF (WITH_THERMO)
   add_executable(thermo thermo.cc)
   
   IF(UNIX)
-    target_link_libraries(caliboard scanlib shapelib newmat dl ANN)
-    target_link_libraries(thermo scanlib shapelib newmat dl ANN)
-#    target_link_libraries(thermo scanlib shapelib newmat dl ANN)
-    target_link_libraries(thermo cv cvaux cxcore GL GLU highgui cvblob scanlib ANN)
+    target_link_libraries(caliboard scan shape newmat dl ANN)
+    target_link_libraries(thermo scan shape newmat dl ANN)
+#    target_link_libraries(thermo scan shape newmat dl ANN)
+    target_link_libraries(thermo cv cvaux cxcore GL GLU highgui cvblob scan ANN)
   ENDIF(UNIX)
 
   IF (WIN32)
-    target_link_libraries(caliboard scanlib shapelib newmat XGetopt ANN)
-#    target_link_libraries(thermo scanlib shapelib newmat XGetopt ANN)
-    target_link_libraries(thermo cv cvaux cxcore GL GLU highgui cvblob scanlib ANN)
+    target_link_libraries(caliboard scan shape newmat XGetopt ANN)
+#    target_link_libraries(thermo scan shape newmat XGetopt ANN)
+    target_link_libraries(thermo cv cvaux cxcore GL GLU highgui cvblob scan ANN)
   ENDIF(WIN32)
   
 

@@ -31,7 +31,7 @@ class Vector3d;
  */
 class Point3d {
 private:
-    static const double _EPSILON = 1.0e-3;
+    static constexpr double _EPSILON = 1.0e-3;
 
 public:
     double x;
