@@ -87,6 +87,9 @@ void usage(char* prog) {
 	  << "         start at scan NR (i.e., neglects the first NR scans)" << endl
 	  << "         [ATTENTION: counting naturally starts with 0]" << endl
 	  << endl
+	  << bold << "  -S, --scanserver" << normal << endl
+	  << "         Use the scanserver as an input method and handling of scan data" << endl
+	  << endl
     	  << endl << endl;
   
   cout << bold << "EXAMPLES " << normal << endl
@@ -103,9 +106,9 @@ void usage(char* prog) {
   */
 
 int parseArgs(int argc, char **argv, string &dir, double &red, int &start, int
-  &maxDist, int&minDist, int &octree, IOType &type, plane_alg &alg, bool
-  &quiet) {
-
+		    &maxDist, int&minDist, int &octree, IOType &type, plane_alg &alg, bool
+		    &quiet, bool& scanserver)
+{
   bool reduced = false;
   int  c;
   // from unistd.h:
@@ -123,12 +126,13 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &start, int
     { "plane",           required_argument,   0,  'p' },
     { "quiet",            no_argument,         0,  'q' },
     { "octree",          optional_argument,   0,  'O' },
+    { "scanserver",      no_argument,         0,  'S' },
     { 0,           0,   0,   0}                    // needed, cf. getopt.h
   };
 
   cout << endl;
   while ((c = getopt_long(argc, argv, "f:r:s:e:m:M:p:O:q", longopts, NULL)) != -1) 
-  switch (c)
+    switch (c)
 	 {
 	 case 'r':
 	   red = atof(optarg);
@@ -156,22 +160,25 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &start, int
       else abort();
       break;
 	 case 'q':
-     quiet = true;
+	   quiet = true;
      break;
-   case 'm':
+	 case 'm':
 	   maxDist = atoi(optarg);
 	   break;
 	 case 'O':
-     if (optarg) {
-       octree = atoi(optarg);
-     } else {
-       octree = 1;
-     }
+	   if (optarg) {
+		octree = atoi(optarg);
+	   } else {
+		octree = 1;
+	   }
 	   break;
 	 case 'M':
 	   minDist = atoi(optarg);
 	   break;
-   case '?':
+	 case 'S':
+        scanserver = true;
+        break;
+	 case '?':
 	   usage(argv[0]);
 	   return 1;
       default:
@@ -217,10 +224,10 @@ int main(int argc, char **argv)
   bool   quiet = false;
   IOType type    = UOS;
   plane_alg alg    = RHT;
+  bool   scanserver = false;
   
   cout << "Parse args" << endl;
-  parseArgs(argc, argv, dir, red, start, maxDist, minDist, octree, type, alg, quiet);
-  Scan::dir = dir;
+  parseArgs(argc, argv, dir, red, start, maxDist, minDist, octree, type, alg, quiet, scanserver);
   int fileNr = start;
   string planedir = dir + "planes"; 
 
@@ -239,17 +246,21 @@ int main(int argc, char **argv)
     cerr << "Creating directory " << planedir << " failed" << endl;
     exit(1);
   }
-  Scan::readScans(type, fileNr, fileNr, dir, maxDist, minDist, 0);
-  // reduction filter for current scan and transformation into global coordinate
-  // system
-  Scan::allScans[0]->toGlobal(red, octree);
+
+  Scan::openDirectory(scanserver, dir, type, fileNr, fileNr);
+  Scan* scan = Scan::allScans.front();
+  scan->setRangeFilter(maxDist, minDist);
+  scan->setReductionParameter(red, octree);
+  //    scan->setSearchTreeParameter(nns_method, use_cuda);
+  scan->toGlobal();
+
   double id[16];
   M4identity(id);
   for(int i = 0; i < 10; i++) {
-    Scan::allScans[0]->transform(id, Scan::ICP, 0);  // write end pose
+    scan->transform(id, Scan::ICP, 0);  // write end pose
   }
 
-  if(!quiet) cout << "start plane detection" << endl;
+  if (!quiet) cout << "start plane detection" << endl;
   long starttime = GetCurrentTimeInMilliSec(); 
   if(alg >= RANSAC) {
     vector<double *> points;
@@ -299,7 +310,7 @@ int main(int argc, char **argv)
                 break;
     }
 
-    hough.writePlanes();
+    hough.writePlanes(0);
     cout << "Write Planes done" << endl;
     starttime = (GetCurrentTimeInMilliSec() - starttime);
   }

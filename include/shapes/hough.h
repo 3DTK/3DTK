@@ -45,7 +45,7 @@ public:
   Hough(Scan * GlobalScan, bool quiet = true, std::string configFile = "bin/hough.cfg" );
   void SetScan(Scan*);
   ~Hough();
-  void RHT();
+  int  RHT();
   void SHT();
   void PHT();
   void PPHT();
@@ -60,7 +60,7 @@ public:
   int deletePoints(double * n, double rho);
   int deletePointsQuad(double * n, double rho);
 
-  void writePlanes();
+  int writePlanes(int startCount);
   void writePlanes(std::string);
   int cluster(vPtPair &pairs, double minx, double max, double miny, double maxy);
   void writePlanePoints(std::string);

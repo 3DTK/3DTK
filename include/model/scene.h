@@ -19,6 +19,7 @@
 #include "shapes/hough.h"
 #include "shapes/shape.h"
 #include "slam6d/Boctree.h"
+#include "slam6d/io_types.h"
 
 #include <vector>
 
@@ -81,12 +82,12 @@ public:
         this->nrPoints = 0;
     };
 
-    Scene(const reader_type& type,
-            const int& start, const int& end,
-            std::string dir,
-            const int& maxDist, const int& minDist,
-            const PlaneAlgorithm& alg, const int& octree, const double& red,
-            const vector<Pose6d>& poses);
+    Scene(const IOType& type,
+		const int& start, const int& end,
+		std::string dir, const bool& scanserver,
+		const int& maxDist, const int& minDist,
+		const PlaneAlgorithm& alg, const int& octree, const double& red,
+		const vector<Pose6d>& poses);
 
     Scene(const Scene& other);
     ~Scene();

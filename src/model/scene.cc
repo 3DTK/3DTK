@@ -42,19 +42,19 @@ const double model::Scene::MIN_EDGE_COV = 0.60;
 //==============================================================================
 //  Implementation
 //==============================================================================
-model::Scene::Scene(const reader_type& type,
-        const int& start, const int& end,
-        std::string dir,
-        const int& maxDist,  const int& minDist,
-        const PlaneAlgorithm& alg, const int& octree, const double& red,
-        const vector<Pose6d>& poses)
+model::Scene::Scene(const IOType& type,
+				const int& start, const int& end,
+				std::string dir, const bool& scanserver,
+				const int& maxDist,  const int& minDist,
+				const PlaneAlgorithm& alg, const int& octree, const double& red,
+				const vector<Pose6d>& poses)
 {
     if (!quiet) cout << endl << "== Creating scene..." << endl;
     if (!quiet) cout << endl << "== Reading scans..." << endl;
 
     // create an output directory for planes and for images
-    if (makeDir("./img")== false) {
-    	throw runtime_error("failed to create directory ./img");
+    if (makeDir(dir + "img/")== false) {
+    	throw runtime_error("failed to create directory " + dir + "img/");
     }
 
     // copy class fields here
@@ -65,13 +65,25 @@ model::Scene::Scene(const reader_type& type,
     M4identity(id);
 
     // begin the plane detection
-    Scan::dir = dir;
-    Scan::readScans(type, start, end, dir, maxDist, minDist, false);
+    //    Scan::dir = dir;
+    //    Scan::readScans(type, start, end, dir, maxDist, minDist, false);
+    Scan::openDirectory(scanserver, dir, type, start, end);
 
+    if(Scan::allScans.size() == 0) {
+	 cerr << "No scans found. Did you use the correct format?" << endl;
+	 exit(-1);
+    }
+    
     int nrPlanes = 0 , currScan = start;
-    for(vector <Scan*>::iterator scan = Scan::allScans.begin(); scan != Scan::allScans.end(); ++scan) {
+    //    for(vector <Scan*>::iterator scan = Scan::allScans.begin(); scan != Scan::allScans.end(); ++scan) {
+    for(ScanVector::iterator scan = Scan::allScans.begin(); scan != Scan::allScans.end(); ++scan) {
+     
         // prepare for plane detection
-        (*scan)->toGlobal(red, octree);
+	   (*scan)->setRangeFilter(maxDist, minDist);
+	   (*scan)->setReductionParameter(red, octree);
+	   // scan->setSearchTreeParameter(nns_method, cuda_enabled);
+
+        (*scan)->toGlobal();
         (*scan)->transform(id, Scan::ICP, 0);
 
         // read the pose of the current scan
@@ -131,11 +143,13 @@ model::Scene::Scene(const reader_type& type,
         }
 
         // keep the pointer to the points
-        const vector<Point>* points = (*scan)->get_points();
+	   DataXYZ points = (*scan)->get("xyz reduced");
+	   unsigned int points_size = points.size();
+	   //        const vector<Point>* points = (*scan)->get_points();
 
-        for (unsigned int i = 0; i < points->size(); ++i) {
+        for (unsigned int i = 0; i < points_size; ++i) {
             // XXX get_points returns a pointer
-            Point3d toPush(points->at(i).x, points->at(i).y, points->at(i).z);
+            Point3d toPush(points[i][0], points[i][1], points[i][2]);
             toPush.translate(pose.first);
             toPush.rotate(Point3d(0.0, 0.0, 0.0), pose.second);
             this->points.push_back(toPush);

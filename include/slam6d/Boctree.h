@@ -42,7 +42,6 @@ using std::list;
 namespace { namespace ip = boost::interprocess; }
 
 
-
 // forward declaration
 template <class T> union bitunion;
 

@@ -27,6 +27,8 @@ public:
   ~ConvexPlane();
   void writePlane(std::string, int counter);
   void writeNormal(std::string, int counter);
+  vector<double> getConvexHull();
+  void getNormal(double* normal, double* origin);
   void project(const double *p, double *p1);
 
   double n[3];
