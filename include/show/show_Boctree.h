@@ -742,7 +742,7 @@ protected:
               if (( 1 << i ) & node.leaf ) 
                 cm->setColor( &(children->getPoints()[1]) );
               else 
-                cm->setColor( pickPoint(children->node) );
+                cm->setColor( m_tree->pickPoint(children->node) );
             }
 
             glPointSize(size/2.0);
@@ -787,7 +787,7 @@ protected:
               if (( 1 << i ) & node.leaf ) 
                 cm->setColor( &(children->getPoints()[1]) );
               else 
-                cm->setColor( pickPoint(children->node) );
+                cm->setColor( m_tree->pickPoint(children->node) );
             }
 
             glPointSize(size/2.0);
