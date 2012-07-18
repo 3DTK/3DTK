@@ -583,7 +583,7 @@ public:
           // absolute pointer
           //return &(children->points[1].v);
           // offset pointer
-          return &(children->getPoints()[0].v);
+          return children->getPoints();
         } else { // recurse
           return pickPoint(children->node);
         }

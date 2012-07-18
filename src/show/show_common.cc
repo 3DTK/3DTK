@@ -714,6 +714,7 @@ void generateFrames(int start, int end, bool identity) {
     index++;
     MetaAlgoType.push_back(algoTypes);
     MetaMatrix.push_back(Matrices);
+    current_frame = MetaMatrix.back().size() - 1;
   }
 }
 
