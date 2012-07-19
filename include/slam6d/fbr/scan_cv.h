@@ -13,7 +13,6 @@
 #include "fbr_global.h"
 #include "slam6d/scan.h"
 #include "slam6d/managedScan.h"
-#include "riegl/scanlib.hpp"
 
 namespace fbr{
   /**
