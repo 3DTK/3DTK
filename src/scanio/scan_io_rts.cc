@@ -99,9 +99,6 @@ void ScanIO_rts::readPose(const char* dir_path, const char* identifier, double* 
       // convert
       for(i = 0; i < 3; ++i) p[i] *= 0.1;
       
-      // magic
-      p[3] = p[5] = p[1] = 0.0;
-      
       // add in poses
       for(i = 0; i < 6; ++i) poses.push_back(p[i]);
     }
