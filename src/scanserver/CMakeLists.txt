@@ -16,10 +16,10 @@ add_library(scanclient STATIC ${CLIENT_SRCS})
 # boost::interprocess
 set(CLIENT_LIBS ${Boost_LIBRARIES} pointfilter)
 
-if(UNIX)
-  # boost::interprocess uses pthread, requiring librt
+if(UNIX AND NOT APPLE)
+  # boost::interprocess uses pthread, requiring librt                                                                                                                                                           
   set(CLIENT_LIBS ${CLIENT_LIBS} rt)
-endif(UNIX)
+endif(UNIX AND NOT APPLE)
 
 target_link_libraries(scanclient ${CLIENT_LIBS})
 
