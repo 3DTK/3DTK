@@ -18,8 +18,14 @@
 #include <stdio.h>
 #include <math.h>
 
+#ifdef __APPLE__
+#include <GLUT/glut.h>
+#include <OpenGL/glu.h>
+#else
 #include <GL/glut.h>
 #include <GL/glu.h>
+#endif
+
 #include "slam6d/globals.icc"
 
 /** The 6 planes of the viewing frustum */
