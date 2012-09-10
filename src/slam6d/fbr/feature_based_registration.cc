@@ -58,13 +58,23 @@ void usage(int argc, char** argv){
   printf("\t\t-I minInlier \t\t threshold for min number of inliers in registration process\n");
   printf("\t\t-M mParam \t\t special matching paameter (knn for KNN and r for radius)\n");
   printf("\t\t-r registration \t registration method [ALL|ransac]\n");
-  printf("\t\t-V verbose \t\t level verboseness\n");
-  printf("\t\t-O outDir \t\t level output directory if not stated same as input\n");
+  printf("\t\t-V verbose \t\t level of verboseness\n");
+  printf("\t\t-O outDir \t\t output directory if not stated same as input\n");
+  printf("\n");
+  printf("\tExamples:\n");
+  printf("\tUsing Bremen City dataset:\n");
+  printf("\tLoading scan000.txt and scan001.txt:\n");
+  printf("\t\t %s ~/dir/to/bremen_city 0 1\n", argv[0]);
+  printf("\tLoading scan005.txt and scan006.txt and output panorma images and feature images and match images in ~/dir/to/bremen_city/out dir:\n");
+  printf("\t\t %s -V 1 -O ~/dir/to/bremen_city/out/ ~/dir/to/bremen_city 5 6 \n", argv[0]);
+  printf("\tLoading scan010.txt and scan011.txt using Mercator projection and SURF feature detector and SIFT descriptor:\n");
+  printf("\t\t %s -p MERCATOR -f SURF -d SIFT -O ~/dir/to/bremen_city/out/ ~/dir/to/bremen_city 10 11 \n", argv[0]);
   printf("\n");
   exit(1);
 }
 
 void parssArgs(int argc, char** argv, information& info){
+  cout<<"parssArgs"<<endl;
   time_t rawtime;
   struct tm *timeinfo;
   time(&rawtime);
@@ -142,6 +152,7 @@ void parssArgs(int argc, char** argv, information& info){
 	info.rMethod = stringToRegistrationMethod(optarg);
 	break;
       case 'V':
+	cout<<"verboos"<<endl;
 	info.verbose = atoi(optarg);
 	break;
       case 'O':
@@ -280,6 +291,7 @@ int main(int argc, char** argv){
   string out;
   cv::Mat outImage;
   parssArgs(argc, argv, info);
+  cout<<"out of parssArgs"<<endl;
   if(info.verbose >= 1) informationDescription(info);
 
   scan_cv fScan (info.dir, info.fScanNumber, info.sFormat);
