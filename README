@@ -29,15 +29,13 @@ or, if you are still using Debian stable (lenny):
 
 for Ubuntu this would be:
 
-  sudo aptitude install libboost-graph-dev libboost-regex-dev libboost-serialization-dev libboost1.46-dev libboost-filesystem1.46-dev freeglut3-dev libxmu-dev libxi-dev
+  sudo apt-get install libboost-all-dev libcv-dev freeglut3-dev libxmu-dev libxi-dev
 
 SuSE users please use yast2 for installing the missing packages
 
+Additionally you need some external tools (exemplarily for Ubuntu):
 
-Additionally for CAD matching support the following dependencies must
-be satisfied (exemplarily for Ubuntu):
-
-  sudo aptitude install libboost-program-options-dev
+  sudo apt-get install imagemagick ffmpeg libx264-120
 
 -------------------------------------------------------------------
 
