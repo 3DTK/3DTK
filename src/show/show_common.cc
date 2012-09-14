@@ -206,8 +206,8 @@ vector < vector <Scan::AlgoType> > MetaAlgoType;
  */
 int START_X              = 0;
 int START_Y              = 0;
-int START_WIDTH          = 720;
-int START_HEIGHT         = 576;
+int START_WIDTH          = 960;
+int START_HEIGHT         = 540;
 GLdouble aspect          = (double)START_WIDTH/(double)START_HEIGHT;          // Current aspect ratio
 bool advanced_controls = false;
 
