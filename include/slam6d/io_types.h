@@ -2,7 +2,7 @@
  * @file
  * @brief Scan types and mapping functions.
  *
- * @author Thomas Escher
+ * @author Thomas Escher, Billy Okal
  */
 
 #ifndef IO_TYPES_H
@@ -10,7 +10,7 @@
 
 //! IO types for file formats, distinguishing the use of ScanIOs
 enum IOType {
-  UOS, UOS_MAP, UOS_FRAMES, UOS_MAP_FRAMES, UOS_RGB, OLD, RTS, RTS_MAP, RIEGL_TXT, RIEGL_PROJECT, RIEGL_RGB, RIEGL_BIN, IFP, ZAHN, PLY, WRL, XYZ, ZUF, ASC, IAIS, FRONT, X3D, RXP, KIT, AIS, OCT, TXYZR, XYZR, XYZ_RGB, KS, KS_RGB, STL, LEICA, PCL, PCI, UOS_CAD, VELODYNE, VELODYNE_FRAMES
+  UOS, UOSR, UOS_MAP, UOS_FRAMES, UOS_MAP_FRAMES, UOS_RGB, OLD, RTS, RTS_MAP, RIEGL_TXT, RIEGL_PROJECT, RIEGL_RGB, RIEGL_BIN, IFP, ZAHN, PLY, WRL, XYZ, ZUF, ASC, IAIS, FRONT, X3D, RXP, KIT, AIS, OCT, TXYZR, XYZR, XYZ_RGB, KS, KS_RGB, STL, LEICA, PCL, PCI, UOS_CAD, VELODYNE, VELODYNE_FRAMES
 };
 
 //! Data channels in the scans
