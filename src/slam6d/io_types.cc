@@ -7,6 +7,7 @@
  *
  */
 
+
 #include "slam6d/io_types.h"
 
 #include "slam6d/globals.icc"
@@ -24,6 +25,7 @@
 IOType formatname_to_io_type(const char * string)
 {
   if (strcasecmp(string, "uos") == 0) return UOS;
+  else if (strcasecmp(string, "uosr") == 0) return UOSR;
   else if (strcasecmp(string, "uos_map") == 0) return UOS_MAP;
   else if (strcasecmp(string, "uos_frames") == 0) return UOS_FRAMES;
   else if (strcasecmp(string, "uos_map_frames") == 0) return UOS_MAP_FRAMES;
@@ -68,6 +70,8 @@ const char * io_type_to_libname(IOType  type)
   switch (type) {
   case UOS:
     return "scan_io_uos";
+  case UOSR:
+    return "scan_io_uosr";
   case UOS_MAP:
     return "scan_io_uos_map";
   case UOS_FRAMES:
