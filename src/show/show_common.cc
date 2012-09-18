@@ -141,6 +141,11 @@ GLdouble X               = 0.0, Y               = 0.0, Z               = 0.0;
 GLdouble RVX = 0.0, RVY = 0.0, RVZ = 0.0;
 
 /**
+ * Center of Mass coordinates
+ */
+GLdouble CoM[3] = { 0.0, 0.0, 0.0 };
+
+/**
  * parallel zoom (similar to apex angle) for parallel projection
  */
 GLfloat pzoom = 2000.0;
@@ -574,6 +579,7 @@ int parseArgs(int argc,char **argv, string &dir, int& start, int& end, int& maxD
 
 void setResetView(int origin) {
   if (origin == 1) {
+    // set origin to the pose of the first scan
     double *transmat = MetaMatrix[0].back();
     cout << transmat << endl;
 
@@ -589,18 +595,57 @@ void setResetView(int origin) {
     quat[2] = Rquat[2];
     quat[3] = Rquat[3];
   } else if (origin == 2) {
-    double center[3];
+    // set origin to the center of the first octree
+    double center[3], center_transformed[3];
 #ifdef USE_COMPACT_TREE
     ((compactTree*)octpts[0])->getCenter(center);
 #else
     ((Show_BOctTree<sfloat>*)octpts[0])->getCenter(center);
 #endif
-    RVX = -center[0];
-    RVY = -center[1];
-    RVZ = -center[2];
+    VTrans(MetaMatrix[0].back(), center, center_transformed);
+    RVX = -center_transformed[0];
+    RVY = -center_transformed[1];
+    RVZ = -center_transformed[2];
     X = RVX;
     Y = RVY;
     Z = RVZ;
+  } else if (origin == 3) {
+    // set origin to the center of mass of all scans
+  for (size_t i = 0; i < octpts.size(); ++i) {
+    vector <sfloat*> points;
+#ifdef USE_COMPACT_TREE
+    ((compactTree*)octpts[i])->AllPoints( points );
+#else
+    BOctTree<sfloat>* cur_tree = ((Show_BOctTree<sfloat>*)octpts[i])->getTree();
+    cur_tree->AllPoints( points );
+#endif
+
+    cout << "Scan " << i << " size: " << points.size() << endl;
+    double centroid[3] = {0., 0., 0.};
+    double centroid_transformed[3];;
+    for (size_t j = 0; j < points.size(); ++j) {
+      for (unsigned int k = 0; k < 3; ++k)
+        centroid[k] += points[j][k];
+    }
+    for (unsigned int k = 0; k < 3; ++k) {
+      centroid[k] /= (double)points.size();
+    }
+    VTrans(MetaMatrix[i].back(), centroid, centroid_transformed);
+    for (unsigned int k = 0; k < 3; ++k) {
+	 CoM[k] += centroid_transformed[k];
+    }
+  }
+  for (unsigned int k = 0; k < 3; ++k)
+    CoM[k] /= octpts.size() * 1.;
+
+  cout << "Center of Mass at: " << CoM[0] << ", " << CoM[1] << ", " << CoM[2] << endl;
+
+  RVX = -CoM[0];
+  RVY = -CoM[1];
+  RVZ = -CoM[2];
+  X = RVX;
+  Y = RVY;
+  Z = RVZ;
   }
 }
 
