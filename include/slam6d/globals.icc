@@ -303,7 +303,7 @@ inline void MMult(const T *M1,
 }
 
 /**
- * Transforms a vactor with a matrix (P = M * V)
+ * Transforms a vector with a matrix (P = M * V)
  * @param M the transformation matrix
  * @param v the initial vector
  * @param p the transformt vector
