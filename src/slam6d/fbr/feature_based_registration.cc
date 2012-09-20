@@ -40,17 +40,17 @@ struct information{
  */
 void usage(int argc, char** argv){
   printf("\n");
-  printf("USAGE: %s dir firstScanNumber secondScanNumber \n", argv[0]);
+  printf("USAGE: %s dir -s firstScanNumber -e secondScanNumber \n", argv[0]);
   printf("\n");
   printf("\n");
   printf("\tOptions:\n");
-  printf("\t\t-F scanFormat\t\t input scan file format [RIEGL_TXT|RXP|ALL SLAM6D SCAN_IO]\n");
+  printf("\t\t-f scanFormat\t\t input scan file format [RIEGL_TXT|RXP|ALL SLAM6D SCAN_IO]\n");
   printf("\t\t-W iWidth\t\t panorama image width\n");
   printf("\t\t-H iHeight\t\t panorama image height\n");
   printf("\t\t-p pMethod\t\t projection method [EQUIRECTANGULAR|CYLINDRICAL|MERCATOR|RECTILINEAR|PANNINI|STEREOGRAPHIC|ZAXIS]\n");
   printf("\t\t-N nImage\t\t number of images used for some projections\n");
   printf("\t\t-P pParam\t\t special projection parameter (d for Pannini and r for stereographic)\n");
-  printf("\t\t-f fMethod\t\t feature detection method [SURF|SIFT|ORB|FAST|STAR]\n");
+  printf("\t\t-F fMethod\t\t feature detection method [SURF|SIFT|ORB|FAST|STAR]\n");
   printf("\t\t-d dMethod\t\t feature description method [SURF|SIFT|ORB]\n");
   printf("\t\t-m mMethod\t\t feature matching method [BRUTEFORCE|FLANN|KNN|RADIUS|RATIO]\n");
   printf("\t\t-D minDistance \t\t threshold for min distance in registration process\n");
@@ -64,17 +64,16 @@ void usage(int argc, char** argv){
   printf("\tExamples:\n");
   printf("\tUsing Bremen City dataset:\n");
   printf("\tLoading scan000.txt and scan001.txt:\n");
-  printf("\t\t %s ~/dir/to/bremen_city 0 1\n", argv[0]);
+  printf("\t\t %s ~/dir/to/bremen_city -s 0 -e 1\n", argv[0]);
   printf("\tLoading scan005.txt and scan006.txt and output panorma images and feature images and match images in ~/dir/to/bremen_city/out dir:\n");
-  printf("\t\t %s -V 1 -O ~/dir/to/bremen_city/out/ ~/dir/to/bremen_city 5 6 \n", argv[0]);
+  printf("\t\t %s -V 1 -O ~/dir/to/bremen_city/out/ ~/dir/to/bremen_city -s 5 -e 6 \n", argv[0]);
   printf("\tLoading scan010.txt and scan011.txt using Mercator projection and SURF feature detector and SIFT descriptor:\n");
-  printf("\t\t %s -p MERCATOR -f SURF -d SIFT -O ~/dir/to/bremen_city/out/ ~/dir/to/bremen_city 10 11 \n", argv[0]);
+  printf("\t\t %s -p MERCATOR -F SURF -d SIFT -O ~/dir/to/bremen_city/out/ ~/dir/to/bremen_city -s 10 -e 11 \n", argv[0]);
   printf("\n");
   exit(1);
 }
 
 void parssArgs(int argc, char** argv, information& info){
-  cout<<"parssArgs"<<endl;
   time_t rawtime;
   struct tm *timeinfo;
   time(&rawtime);
@@ -106,10 +105,16 @@ void parssArgs(int argc, char** argv, information& info){
   int c;
   opterr = 0;
   //reade the command line and get the options
-  while ((c = getopt (argc, argv, "F:W:H:p:N:P:f:d:m:D:E:I:M:r:V:O:")) != -1)
+  while ((c = getopt (argc, argv, "F:W:H:p:N:P:f:d:m:D:E:I:M:r:V:O:s:e:")) != -1)
     switch (c)
       {
-      case 'F':
+      case 's':
+	info.fScanNumber = atoi(optarg);
+	break;
+      case 'e':
+	info.sScanNumber = atoi(optarg);
+	break;
+      case 'f':
 	info.sFormat = stringToScanFormat(optarg);
 	break;
       case 'W':
@@ -127,7 +132,7 @@ void parssArgs(int argc, char** argv, information& info){
       case 'P':
 	info.pParam = atoi(optarg);
 	break;
-      case 'f':
+      case 'F':
 	info.fMethod = stringToFeatureDetectorMethod(optarg);
 	break;
       case 'd':
@@ -152,7 +157,6 @@ void parssArgs(int argc, char** argv, information& info){
 	info.rMethod = stringToRegistrationMethod(optarg);
 	break;
       case 'V':
-	cout<<"verboos"<<endl;
 	info.verbose = atoi(optarg);
 	break;
       case 'O':
@@ -188,15 +192,15 @@ void parssArgs(int argc, char** argv, information& info){
     usage(argc, argv);
   }
 
-  if (optind > argc - 3)
+  if (optind > argc - 1)
     {
       cout<<"Too few input arguments. At least dir and two scan numbers are required."<<endl;
       usage(argc, argv);
     }
   
   info.dir = argv[optind];
-  info.fScanNumber = atoi(argv[optind+1]);
-  info.sScanNumber = atoi(argv[optind+2]);
+  //info.fScanNumber = atoi(argv[optind+1]);
+  //info.sScanNumber = atoi(argv[optind+2]);
   if(info.outDir.empty()) info.outDir = info.dir;
   else if(info.outDir.compare(info.outDir.size()-1, 1, "/") != 0) info.outDir += "/";
 }
@@ -291,7 +295,6 @@ int main(int argc, char** argv){
   string out;
   cv::Mat outImage;
   parssArgs(argc, argv, info);
-  cout<<"out of parssArgs"<<endl;
   if(info.verbose >= 1) informationDescription(info);
 
   scan_cv fScan (info.dir, info.fScanNumber, info.sFormat);
