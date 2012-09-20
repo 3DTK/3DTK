@@ -25,10 +25,20 @@ namespace fbr{
   void scan_cv::convertScanToMat(){
     bool scanserver = false;
     Scan::openDirectory(scanserver, sDir, sFormat, sNumber, sNumber);
+    if(Scan::allScans.size() == 0){
+      cerr << "No scans found. Did you use the correct format?" <<endl;
+      exit(-1);
+    }
     cout<<"loading "<<sDir<<" with scan number " <<sNumber<<"."<<endl;
     Scan * source = * Scan::allScans.begin();
     DataXYZ xyz = source->get("xyz");
-    DataReflectance xyz_reflectance = source->get("reflectance");
+    DataReflectance xyz_reflectance = (((DataReflectance)source->get("reflectance")).size() == 0) ?
+      source->create("reflectance", sizeof(float)*xyz.size())
+      : source->get("reflectance"); 
+    if(((DataReflectance)source->get("reflectance")).size() == 0){
+      for(unsigned int i = 0; i < xyz.size(); i++)
+	xyz_reflectance[i] = 255;
+    }
     nPoints = xyz.size();
     scan.create(nPoints,1,CV_32FC(4));
     scan = cv::Scalar::all(0); 
