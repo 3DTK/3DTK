@@ -139,6 +139,9 @@ public:
   
   //! Input filtering for all points based on their height
   virtual void setHeightFilter(double top, double bottom) = 0;
+
+  //! Input mutation to set range of all points to a constant value;
+  virtual void setRangeMutation(double range) { }
   
   //! Set reduction parameters, but don't reduce yet
   virtual void setReductionParameter(double voxelSize, int nrpts = 0,

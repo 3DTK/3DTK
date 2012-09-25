@@ -140,7 +140,7 @@ void newMenu()
 
   settings_panel = glui2->add_panel("Settings: ");
   
-  cangle_spinner = glui2->add_spinner_to_panel(settings_panel, "Apex Angle :   ", GLUI_SPINNER_FLOAT, &cangle);
+  cangle_spinner = glui2->add_spinner_to_panel(settings_panel, "Field of View :   ", GLUI_SPINNER_FLOAT, &cangle);
   cangle_spinner->set_float_limits( 1.0, 180.0 );
   cangle_spinner->set_speed( 20.0 );
   cangle_spinner->set_float_val(60.0);
