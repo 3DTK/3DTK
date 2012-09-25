@@ -31,6 +31,7 @@ public:
 
   PointFilter& setRange(double maxDist, double minDist);
   PointFilter& setHeight(double top, double bottom);
+  PointFilter& setRangeMutator(double range);
 
   //! Serialization function to convert it into a string, usable in the constructor
   std::string getParams();
@@ -106,6 +107,14 @@ public:
   virtual bool test(double* point);
 private:
   double m_bottom;
+};
+
+class RangeMutator : public Checker {
+public:
+  RangeMutator(const std::string& value);
+  virtual bool test(double* point);
+private:
+  double m_range;
 };
 
 #include "pointfilter.icc"

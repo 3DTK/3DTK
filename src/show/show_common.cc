@@ -396,6 +396,8 @@ void usage(char* prog)
 	  << "         only works when using octree display" << endl
     << bold << "  -c, --color" << endl << normal
 	  << "         use color RGB values for coloring point clouds" << endl
+    << bold << "  -b" << normal << " NR, " << bold << "--sphere=" << normal << "NR" << endl
+	  << "         map all measurements on a sphere (of radius NRcm)" << endl
     << bold << "  --saveOct" << endl << normal
 	  << "         stores all used scans as octrees in the given directory" << endl
 	  << "         All reflectivity/amplitude/deviation/type settings are stored as well." << endl
@@ -426,7 +428,8 @@ void usage(char* prog)
  */
 int parseArgs(int argc,char **argv, string &dir, int& start, int& end, int& maxDist, int& minDist, 
               double &red, bool &readInitial, int &octree, PointType &ptype, float &fps, string &loadObj,
-              bool &loadOct, bool &saveOct, int &origin, double &scale, IOType &type, bool& scanserver)
+              bool &loadOct, bool &saveOct, int &origin, double &scale, IOType &type, bool& scanserver, 
+	      double& sphereMode)
 {
   unsigned int types = PointType::USE_NONE;
   start   = 0;
@@ -445,7 +448,7 @@ int parseArgs(int argc,char **argv, string &dir, int& start, int& end, int& maxD
     { "origin",          optional_argument,   0,  'o' },
     { "format",          required_argument,   0,  'f' },
     { "fps",             required_argument,   0,  'F' },
-    { "scale",           required_argument,   0,  'S' },
+    { "scale",           required_argument,   0,  'C' },
     { "start",           required_argument,   0,  's' },
     { "end",             required_argument,   0,  'e' },
     { "reduce",          required_argument,   0,  'r' },
@@ -464,10 +467,11 @@ int parseArgs(int argc,char **argv, string &dir, int& start, int& end, int& maxD
     { "loadOct",         no_argument,         0,  '1' },
     { "advanced",        no_argument,         0,  '2' },
     { "scanserver",      no_argument,         0,  'S' },
+    { "sphere",          required_argument,   0,  'b' },
     { 0,           0,   0,   0}                    // needed, cf. getopt.h
   };
 
-  while ((c = getopt_long(argc, argv,"F:f:s:e:r:m:M:O:o:l:C:SwtRadhTc", longopts, NULL)) != -1) {
+  while ((c = getopt_long(argc, argv,"F:f:s:e:r:m:M:O:o:l:C:SwtRadhTcb", longopts, NULL)) != -1) {
     switch (c) {
       case 's':
         w_start = atoi(optarg);
@@ -553,6 +557,9 @@ int parseArgs(int argc,char **argv, string &dir, int& start, int& end, int& maxD
         break;
       case '2':
         advanced_controls = true; 
+        break;
+      case 'b':
+        sphereMode = atof(optarg);
         break;
       default:
         abort ();
@@ -891,6 +898,7 @@ void initShow(int argc, char **argv){
   int origin = 0;
   double scale = 0.01; // in m
   bool scanserver = false;
+  double sphereMode = 0.0;
 
   pose_file_name = new char[1024];
   path_file_name = new char[1024];
@@ -901,7 +909,8 @@ void initShow(int argc, char **argv){
   strncpy(selection_file_name, "selected.3d", 1024);
 
   parseArgs(argc, argv, dir, start, end, maxDist, minDist, red, readInitial,
-  octree, pointtype, idealfps, loadObj, loadOct, saveOct, origin, scale, type, scanserver);
+    octree, pointtype, idealfps, loadObj, loadOct, saveOct, origin, scale,
+    type, scanserver, sphereMode);
 
   // modify all scale dependant variables
   scale = 1.0 / scale;
@@ -950,7 +959,8 @@ void initShow(int argc, char **argv){
   for(ScanVector::iterator it = Scan::allScans.begin(); it != Scan::allScans.end(); ++it) {
     Scan* scan = *it;
     scan->setRangeFilter(maxDist, minDist);
-    if(red > 0) {
+    if (sphereMode > 0.0) scan->setRangeMutation(sphereMode);
+    if (red > 0) {
       // scanserver differentiates between reduced for slam and reduced for show, can handle both at the same time
       if(scanserver) {
         dynamic_cast<ManagedScan*>(scan)->setShowReductionParameter(red, octree);

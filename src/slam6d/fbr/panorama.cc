@@ -75,9 +75,9 @@ namespace fbr{
     if(mapMethod == FARTHEST){
       //adding the point with max distance
       if( iRange.at<float>(y,x) < range ){
-	iMap.at<cv::Vec3f>(y,x)[0] = (*it)[0];//x
-	iMap.at<cv::Vec3f>(y,x)[1] = (*it)[1];//y
-	iMap.at<cv::Vec3f>(y,x)[2] = (*it)[2];//z
+        iMap.at<cv::Vec3f>(y,x)[0] = (*it)[0];//x
+        iMap.at<cv::Vec3f>(y,x)[1] = (*it)[1];//y
+        iMap.at<cv::Vec3f>(y,x)[2] = (*it)[2];//z
       }
     }else if(mapMethod == EXTENDED){
       //adding all the points
@@ -131,6 +131,64 @@ namespace fbr{
 	
 	//create the iReflectance iRange and map
 	map(x, y, it, range);
+      }
+    }
+
+    //CONIC projection
+    if(pMethod == CONIC){
+      // set up maximum latitude and longitude angles of the robot 
+			double MIN_VERT_ANGLE = MIN_ANGLE * M_PI / 180.0, MAX_VERT_ANGLE = MAX_ANGLE * M_PI / 180.0,
+             MIN_HORIZ_ANGLE = -M_PI, MAX_HORIZ_ANGLE = M_PI;
+      // set up initial parameters according to MathWorld: http://mathworld.wolfram.com/AlbersEqual-AreaConicProjection.html
+      double Lat0 = 0., Long0 = 0.;
+      double Phi1 = -40. * M_PI / 180.0, Phi2 = 60 * M_PI / 180.0;
+      double n = (sin(Phi1) + sin(Phi2)) / 2.;
+      double C = sqr(cos(Phi1)) + 2 * n * sin(Phi1);
+      double Rho0 = sqrt(C - 2 * n * sin(Lat0)) / n;
+			// set up max values for x and y and add the longitude to x axis and latitude to y axis
+			double xmax = (1./n * sqrt(C - 2*n*sin( MIN_VERT_ANGLE )) ) * sin(n * (MAX_HORIZ_ANGLE - Long0));
+			double xmin = (1./n * sqrt(C - 2*n*sin( MIN_VERT_ANGLE )) ) * sin(n * (MIN_HORIZ_ANGLE - Long0));
+      double xFactor = (double) iWidth / ( xmax - xmin );
+      int widthMax = iWidth - 1;
+			double ymin = Rho0 - (1./n * sqrt(C - 2*n*sin(MIN_VERT_ANGLE)) ) * cos(n * ( 0. - Long0 ));
+			double ymax = Rho0 - (1./n * sqrt(C - 2*n*sin(MAX_VERT_ANGLE)) ) * cos(n * (MAX_HORIZ_ANGLE - Long0 ));
+      double yFactor = (double) iHeight / ( ymax - ymin );
+      //shift all the values to positive points on image 
+      int heightMax = iHeight - 1;
+      cv::MatIterator_<cv::Vec4f> it, end; 
+
+      for( it = scan.begin<cv::Vec4f>(), end = scan.end<cv::Vec4f>(); it != end; ++it){
+        double kart[3], polar[3], phi, theta, range;
+        kart[0] = (*it)[2]/100;
+        kart[1] = (*it)[0]/-100;
+        kart[2] = (*it)[1]/100;
+        toPolar(kart, polar);
+        //theta == polar[0] == scan [4]
+        //phi == polar[1] == scan [5]
+        //range == polar[2] == scan [3]
+        theta = polar[0] * 180 / M_PI;
+        phi = polar[1] * 180 / M_PI;
+        range = polar[2];
+        //phi == longitude == horizantal angle of view of [0:360] 
+        phi = 180.0 - phi;
+        phi *= M_PI / 180.0;
+        //theta == latitude == vertical angle of view of [-40:60]
+        theta -= 90;
+        theta *= -1;
+        theta *= M_PI / 180.0;
+
+				// add minimum x position as an offset
+        int x = (int) ( xFactor * (sqrt(C - 2 * n * sin( theta) ) / n * sin(n * (phi - Long0)) + fabs(xmin) ) );
+        if (x < 0) x = 0;
+        if (x > widthMax) x = widthMax;
+        
+        // add minimum y position as an offset
+        int y = (int) ( yFactor * (Rho0 - (1/n * sqrt(C - 2 * n * sin( theta) ) ) * cos(n * (phi - Long0)) + fabs( ymin ) ) );
+        y = heightMax - y;
+        if (y < 0) y = 0;
+        if (y > heightMax) y = heightMax;
+        //create the iReflectance iRange and map
+        map(x, y, it, range);
       }
     }
     

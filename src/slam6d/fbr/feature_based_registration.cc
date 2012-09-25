@@ -47,7 +47,7 @@ void usage(int argc, char** argv){
   printf("\t\t-f scanFormat\t\t input scan file format [RIEGL_TXT|RXP|ALL SLAM6D SCAN_IO]\n");
   printf("\t\t-W iWidth\t\t panorama image width\n");
   printf("\t\t-H iHeight\t\t panorama image height\n");
-  printf("\t\t-p pMethod\t\t projection method [EQUIRECTANGULAR|CYLINDRICAL|MERCATOR|RECTILINEAR|PANNINI|STEREOGRAPHIC|ZAXIS]\n");
+  printf("\t\t-p pMethod\t\t projection method [EQUIRECTANGULAR|CONIC|CYLINDRICAL|MERCATOR|RECTILINEAR|PANNINI|STEREOGRAPHIC|ZAXIS]\n");
   printf("\t\t-N nImage\t\t number of images used for some projections\n");
   printf("\t\t-P pParam\t\t special projection parameter (d for Pannini and r for stereographic)\n");
   printf("\t\t-F fMethod\t\t feature detection method [SURF|SIFT|ORB|FAST|STAR]\n");

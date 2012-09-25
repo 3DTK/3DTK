@@ -36,6 +36,7 @@ namespace fbr{
     PANNINI,
     STEREOGRAPHIC,
     ZAXIS,
+    CONIC,
   };
   /**
    * @enum panorama_map_method

@@ -20,6 +20,8 @@ using std::runtime_error;
 using std::cout;
 using std::endl;
 
+#include <cmath>
+
 
 
 map<string, Checker* (*)(const string&)>* PointFilter::factory = new map<string, Checker* (*)(const string&)>;
@@ -77,6 +79,14 @@ PointFilter& PointFilter::setHeight(double top, double bottom)
   return *this;
 }
 
+PointFilter& PointFilter::setRangeMutator(double range)
+{
+  m_changed = true;
+  stringstream s_range; s_range << range;
+  m_params["rangemutation"] = s_range.str();
+  return *this;
+}
+
 std::string PointFilter::getParams()
 {
   stringstream s;
@@ -126,6 +136,7 @@ namespace {
   CheckerFactory<CheckerRangeMin> min("rangemin");
   CheckerFactory<CheckerHeightTop> top("heighttop");
   CheckerFactory<CheckerHeightBottom> bottom("heightbottom");
+  CheckerFactory<RangeMutator> range_mutation("rangemutation");
 }
 
 
@@ -184,4 +195,19 @@ bool CheckerHeightBottom::test(double* point) {
   if(point[1] > m_bottom)
     return true;
   return false;
+}
+
+RangeMutator::RangeMutator(const std::string& value) {
+  stringstream s(value);
+  s >> m_range;
+}
+
+bool RangeMutator::test(double* point) {
+  double orig_range = sqrt(point[0]*point[0] + point[1]*point[1] + point[2]*point[2]);
+  double scale_mutation = m_range / orig_range;
+  point[0] *= scale_mutation;
+  point[1] *= scale_mutation;
+  point[2] *= scale_mutation;
+
+  return true;
 }

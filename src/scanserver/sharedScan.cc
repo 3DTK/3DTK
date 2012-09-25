@@ -28,6 +28,8 @@ SharedScan::SharedScan(const ip::allocator<void, SegmentManager> & allocator,
   m_prefetch(0),
   m_max_dist(0.0), m_min_dist(0.0),
   m_height_top(0.0), m_height_bottom(0.0),
+  m_range_mutator_param(0.0),
+  m_range_mutator_param_set(false),
   m_range_param_set(false), m_height_param_set(false),
   m_reduction_parameters(allocator),
   m_show_parameters(allocator),
@@ -84,6 +86,20 @@ void SharedScan::setHeightParameters(double top, double bottom)
   m_height_param_set = true;
 }
 
+void SharedScan::setRangeMutationParameters(double range)
+{
+  // if a non-first set differs from the previous ones, invalidate all COs
+  if(m_range_mutator_param_set) {
+    if(range != m_range_mutator_param) {
+      invalidateFull();
+      invalidateReduced();
+      invalidateShow();
+    }
+  }
+  m_range_mutator_param = range;
+  m_range_mutator_param_set = true;
+}
+
 void SharedScan::setReductionParameters(const char* params)
 {
   // if a non-first set differs from the previous ones, invalidate reduced COs
@@ -118,6 +134,9 @@ PointFilter SharedScan::getPointFilter() const
     r.setRange(m_max_dist, m_min_dist);
   if(m_height_param_set)
     r.setHeight(m_height_top, m_height_bottom);
+  if(m_range_mutator_param_set)
+    r.setRangeMutator(m_range_mutator_param);
+  
   return r;
 }
 
