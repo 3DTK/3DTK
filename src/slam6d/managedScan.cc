@@ -120,6 +120,12 @@ void ManagedScan::setHeightFilter(double top, double bottom)
   m_shared_scan->setHeightParameters(top, bottom);
 }
 
+void ManagedScan::setRangeMutation(double range)
+{
+  m_shared_scan->setRangeMutationParameters(range);
+}
+
+
 void ManagedScan::setReductionParameter(double voxelSize, int nrpts, PointType pointtype)
 {
   Scan::setReductionParameter(voxelSize, nrpts, pointtype);

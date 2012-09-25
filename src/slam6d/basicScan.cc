@@ -103,8 +103,10 @@ void BasicScan::init()
   m_filter_min = 0.0;
   m_filter_top = 0.0;
   m_filter_bottom = 0.0;
+  m_range_mutation = 0.0;
   m_filter_range_set = false;
   m_filter_height_set = false;
+  m_range_mutation_set = false;
 }
 
 
@@ -120,6 +122,12 @@ void BasicScan::setHeightFilter(double top, double bottom)
   m_filter_top = top;
   m_filter_bottom = bottom;
   m_filter_height_set = true;
+}
+
+void BasicScan::setRangeMutation(double range)
+{
+  m_range_mutation_set = true;
+  m_range_mutation = range;
 }
 
 void BasicScan::get(unsigned int types)
@@ -138,6 +146,8 @@ void BasicScan::get(unsigned int types)
     filter.setRange(m_filter_max, m_filter_min);
   if(m_filter_height_set)
     filter.setHeight(m_filter_top, m_filter_bottom);
+  if(m_range_mutation_set)
+    filter.setRangeMutator(m_range_mutation);
 
   sio->readScan(m_path.c_str(),
                 m_identifier.c_str(),

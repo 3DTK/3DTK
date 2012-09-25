@@ -71,6 +71,9 @@ public:
   //! Filter parameters for height checks when loading from file, invalidate cache for scan CacheObject if it differs
   void setHeightParameters(double top, double bottom);
 
+  //! Filter parameters for the range mutator for showing the spheres, invalidate cache for scan CacheObject if it differs
+  void setRangeMutationParameters(double range);
+    
   //! Set parameters and invalidate cache for reduced CacheObjects if it differs
   void setReductionParameters(const char* params);
 
@@ -142,7 +145,8 @@ public:
   inline IOType getIOType() const { return m_iotype; }
   inline float getMaxDist() const { return m_max_dist; }
   inline float getMinDist() const { return m_min_dist; }
-  inline double geHeightTop() const { return m_height_top; }
+  inline double getRangeMutator() const { return m_range_mutator_param; }
+  inline double getHeightTop() const { return m_height_top; }
   inline double getHeightBottom() const { return m_height_bottom; }
   
   //! Assembles an PointFilter with range/height parameters (if set) to use process-locally
@@ -155,7 +159,8 @@ private:
   unsigned int m_prefetch;
   double m_max_dist, m_min_dist;
   double m_height_top, m_height_bottom;
-  bool m_range_param_set, m_height_param_set;
+  double m_range_mutator_param;
+  bool m_range_mutator_param_set, m_range_param_set, m_height_param_set;
   SharedString m_reduction_parameters;
   SharedString m_show_parameters;
   SharedString m_octtree_parameters;

@@ -18,6 +18,8 @@ public:
 
   virtual void setRangeFilter(double max, double min);
   virtual void setHeightFilter(double top, double bottom);
+  virtual void setRangeMutation(double range);
+  
   virtual void setReductionParameter(double voxelSize, int nrpts = 0,
     PointType pointtype = PointType());
   void setShowReductionParameter(double voxelSize, int nrpts = 0,
