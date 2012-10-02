@@ -125,10 +125,11 @@ void usage(char* prog)
 	  << "         if NR >= 0, turns on octree based point reduction (voxel size=<NR>)" << endl
 	  << "         if NR < 0, turns on rescaling based reduction" << endl
 	  << endl
-       << bold << "  -I" << normal << " NR," << bold << "--rangeimage=" << normal << "MET" << endl
+       << bold << "  -I" << normal << " NR," << bold << "--rangeimage=" << normal << "NR" << endl
 	  << "         use rescaling of the range image as reduction method" << endl
 	  << "         if NR = 1 recovers ranges from range image" << endl
 	  << "         if NR = 2 interpolates 3D points in the image map" << endl
+       << "         if NR is omitted, then NR=1 is selected" << endl
 	  << endl
 	  << bold << "  -p" << normal << " MET," << bold << "--projection=" << normal << "MET" << endl
 	  << "         create range image using the MET projection method" << endl
@@ -336,13 +337,16 @@ int main(int argc, char **argv)
     exit(-1);
   }
 
+  string scanFileName;
+  string poseFileName;
+
   /// Use the OCTREE based reduction
   if (rangeimage == 0) {
     cout << endl << "Reducing point cloud using octrees" << endl;
     int scan_number = start;
     for(std::vector<Scan*>::iterator it = Scan::allScans.begin();
-	   it != Scan::allScans.end(); ++it,
-		++scan_number) {
+	it != Scan::allScans.end(); 
+	++it, ++scan_number) {
       Scan* scan = *it;
       const double* rPos = scan->get_rPos();
       const double* rPosTheta = scan->get_rPosTheta();
@@ -352,37 +356,23 @@ int main(int argc, char **argv)
       // get reduced points
       DataXYZ xyz_r(scan->get("xyz reduced"));
       unsigned int nPoints = xyz_r.size();
-      // convert scan to matrix
-      cv::Mat scan_cv;
-      scan_cv.create(nPoints, 1, CV_32FC(3));
-      scan_cv = cv::Scalar::all(0); 
-      cv::MatIterator_<cv::Vec3f> it = scan_cv.begin<cv::Vec3f>();
-      double zMax = numeric_limits<double>::min(); 
-      double zMin = numeric_limits<double>::max();
 
       const char* id = scan->getIdentifier();
       cout << "Writing Scan No. " << id;
       cout << " with " << xyz_r.size() << " points" << endl; 
-      string scanFileName = reddir + "/scan" + id + ".3d";
-      string poseFileName = reddir  + "/scan" + id + ".pose";
+      scanFileName = reddir + "/scan" + id + ".3d";
+      poseFileName = reddir  + "/scan" + id + ".pose";
 
       ofstream redptsout(scanFileName.c_str());
       for(unsigned int j = 0; j < nPoints; j++) {
-        redptsout << xyz_r[j][0] << " " << xyz_r[j][1] << " " << xyz_r[j][2] << endl;
-        (*it)[0] = xyz_r[j][0];
-        (*it)[1] = xyz_r[j][1];
-        (*it)[2] = xyz_r[j][2];
-        //finding min and max of z                                      
-        if (xyz_r[j][2]  > zMax) zMax = xyz_r[j][2];
-        if (xyz_r[j][2]  < zMin) zMin = xyz_r[j][2];
-        ++it;
+        redptsout << xyz_r[j][0] << " " 
+		  << xyz_r[j][1] << " " 
+		  << xyz_r[j][2] << endl;
       }
-
       redptsout.close();
       redptsout.clear();
 
       ofstream posout(poseFileName.c_str());
-      
       posout << rPos[0] << " " 
              << rPos[1] << " " 
              << rPos[2] << endl   
@@ -392,77 +382,76 @@ int main(int argc, char **argv)
       
       posout.close();
       posout.clear();
-
       if (scanserver) {
         scan->clear("xyz reduced");
       }
     }
   } else { /// use the RESIZE based reduction
     cout << endl << "Reducing point cloud by rescaling the range image" << endl;
-    int scan_number = start;
-    for(std::vector<Scan*>::iterator it = Scan::allScans.begin();
-	   it != Scan::allScans.end(); ++it,
-		++scan_number) {
-      Scan* scan = *it;
+
+    Scan::openDirectory(false, dir, type, start, end);
+    if (Scan::allScans.size() <= 0) {
+      cerr << "No scans found!" << endl;
+      exit(-1);
+    }
+
+    for (int scan_number = start; scan_number <= end; scan_number++) {
+
+      Scan* scan = Scan::allScans[scan_number];
       scan->setRangeFilter(maxDist, minDist);
-      // get points
-      DataXYZ xyz(scan->get("xyz"));
-      unsigned int nPoints = xyz.size();
-      // convert scan to matrix
-      cv::Mat scan_cv;
-      scan_cv.create(nPoints, 1, CV_32FC(3));
-      scan_cv = cv::Scalar::all(0); 
-      cv::MatIterator_<cv::Vec3f> it = scan_cv.begin<cv::Vec3f>();
-      double zMax = numeric_limits<double>::min(); 
-      double zMin = numeric_limits<double>::max();
+      const double* rPos = scan->get_rPos();
+      const double* rPosTheta = scan->get_rPosTheta();
+      
+      scanFileName = dir + "reduced/scan" + to_string(scan_number, 3) + ".3d";
+      poseFileName = dir + "reduced/scan" + to_string(scan_number, 3) + ".pose";
+      // Create a panorama. The iMap inside does all the tricks for us.
+      scan_cv sScan(dir, scan_number, type);
+      sScan.convertScanToMat();
 
-      const char* id = scan->getIdentifier();
-      cout << "Writing Scan No. " << id;
-      cout << " with " << xyz.size() << " points" << endl; 
-
-      for(unsigned int j = 0; j < nPoints; j++) {
-        //Points in global coordinate system
-        (*it)[0] = xyz[j][0];
-        (*it)[1] = xyz[j][1];
-        (*it)[2] = xyz[j][2];
-        //finding min and max of z                                      
-        if (xyz[j][2]  > zMax) zMax = xyz[j][2];
-        if (xyz[j][2]  < zMin) zMin = xyz[j][2];
-        ++it;
+      /// Project point cloud using the selected projection method
+      panorama image(IMAGE_WIDTH, IMAGE_HEIGHT, strToPMethod(projection));
+      image.createPanorama(sScan.getMatScan());
+      image.getDescription();
+      
+      /// Resize the range image, specify desired interpolation method
+      double scale = 1.0/red;
+      cv::Mat range_image_resized; // reflectance_image_resized;
+      string ofilename;
+      stringstream ss;
+      ss << setw(3) << setfill('0') << (scan_number);
+      ofilename = reddir + "/scan" + ss.str() + ".3d";
+      if (rangeimage == 1) {
+	resize(image.getRangeImage(), range_image_resized, cv::Size(), 
+	       scale, scale, cv::INTER_NEAREST);
+	// Recover point cloud from image and write scan to file
+	stringstream ss;
+	ss << setw(3) << setfill('0') << (scan_number); 
+	image.recoverPointCloud(range_image_resized, ofilename);
+      } else {
+	resize(image.getMap(), range_image_resized, cv::Size(), 
+	       scale, scale, cv::INTER_NEAREST);
+	ofstream redptsout(ofilename.c_str());
+	// Convert back to 3D.
+	for(int i = 0; i < range_image_resized.rows; i++) {
+	  for(int j = 0; j < range_image_resized.cols; j++) {
+	    cv::Vec3f vec = range_image_resized.at<cv::Vec3f>(i, j);
+	    double x = vec[0];
+	    double y = vec[1];
+	    double z = vec[2];
+	    redptsout << x << " " << y << " " << z << endl;
+	  }
+	}
       }
 
-	 /// Project point cloud using the selected projection method
-	 panorama image (IMAGE_WIDTH, IMAGE_HEIGHT, strToPMethod(projection));
-	 image.createPanorama(scan_cv);
-	 image.getDescription();
-	 
-	 /// Resize the range image, specify desired interpolation method
-	 double scale = 1.0/red;
-	 cv::Mat range_image_resized; // reflectance_image_resized;
-	 string ofilename;
-	 stringstream ss;
-	 ss << setw(3) << setfill('0') << (scan_number);
-	 ofilename = reddir + "/scan" + ss.str() + ".3d";
-	 if (rangeimage == 1) {
-	   resize(image.getRangeImage(), range_image_resized, cv::Size(), scale, scale, cv::INTER_NEAREST);
-	   // Recover point cloud from image and write scan to file
-	   stringstream ss;
-	   ss << setw(3) << setfill('0') << (scan_number); 
-	   image.recoverPointCloud(range_image_resized, ofilename);
-	 } else {
-	   resize(image.getMap(), range_image_resized, cv::Size(), scale, scale, cv::INTER_NEAREST);
-	   ofstream redptsout(ofilename.c_str());
-	   // Convert back to 3D.
-	   for(int i = 0; i < range_image_resized.rows; i++) {
-		for(int j = 0; j < range_image_resized.cols; j++) {
-		  cv::Vec3f vec = range_image_resized.at<cv::Vec3f>(i, j);
-		  double x = vec[0];
-		  double y = vec[1];
-		  double z = vec[2];
-		  redptsout << x << " " << y << " " << z << endl;
-		}
-	   }
-	 }
+      ofstream posout(poseFileName.c_str());
+      posout << rPos[0] << " " 
+             << rPos[1] << " " 
+             << rPos[2] << endl   
+             << deg(rPosTheta[0]) << " " 
+             << deg(rPosTheta[1]) << " " 
+             << deg(rPosTheta[2]) << endl;  
+      posout.clear();
+      posout.close();
     }
   }
 
