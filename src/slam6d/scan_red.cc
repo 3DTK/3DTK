@@ -1,7 +1,7 @@
 /*
  * scan_red implementation
  *
- * Copyright (C) Dorit Borrmann
+ * Copyright (C) Dorit Borrmann, Razvan-George Mihalyi, Remus Dumitru 
  *
  * Released under the GPL version 3.
  *
@@ -37,10 +37,14 @@ using std::endl;
 using std::ofstream;
 #include <errno.h>
 
+#include "slam6d/metaScan.h"
+#include "slam6d/io_utils.h"
 #include "slam6d/scan.h"
-#ifdef WITH_SCANSERVER
+#include "slam6d/fbr/fbr_global.h"
+#include "slam6d/fbr/panorama.h"
+#include "slam6d/fbr/scan_cv.h"
+
 #include "scanserver/clientInterface.h"
-#endif //WITH_SCANSERVER
 
 #include "slam6d/globals.icc"
 
@@ -67,6 +71,22 @@ using std::ofstream;
 #include <dlfcn.h>
 #endif
 
+//Vertical angle of view of scanner
+#define MAX_ANGLE 60.0
+#define MIN_ANGLE -40.0
+
+#define IMAGE_HEIGHT 1000
+#define IMAGE_WIDTH 3600
+
+using namespace fbr;
+
+projection_method strToPMethod(string method){
+  if(strcasecmp(method.c_str(), "EQUIRECTANGULAR") == 0) return EQUIRECTANGULAR;
+  else if(strcasecmp(method.c_str(), "CYLINDRICAL") == 0) return CYLINDRICAL;
+  else if(strcasecmp(method.c_str(), "MERCATOR") == 0) return MERCATOR;
+  else if(strcasecmp(method.c_str(), "CONIC") == 0) return CONIC;
+  else throw std::runtime_error(std::string("projection method ") + method + std::string(" is unknown"));
+}
 
 /**
  * Explains the usage of this program's command line parameters
@@ -84,13 +104,16 @@ void usage(char* prog)
 	  << bold << "USAGE " << normal << endl
 	  << "   " << prog << " [options] -r <NR> directory" << endl << endl;
   cout << bold << "OPTIONS" << normal << endl
-
+	  << bold << "  -s" << normal << " NR, " << bold << "--start=" << normal << "NR" << endl
+	  << "         start at scan NR (i.e., neglects the first NR scans)" << endl
+	  << "         [ATTENTION: counting naturally starts with 0]" << endl
+	  << endl
 	  << bold << "  -e" << normal << " NR, " << bold << "--end=" << normal << "NR" << endl
 	  << "         end after scan NR" << endl
 	  << endl
 	  << bold << "  -f" << normal << " F, " << bold << "--format=" << normal << "F" << endl
 	  << "         using shared library F for input" << endl
-	  << "         (chose F from {uos, uos_map, uos_rgb, uos_frames, uos_map_frames, old, rts, rts_map, ifp, riegl_txt, riegl_rgb, riegl_bin, zahn, ply})" << endl
+	  << "         (choose F from {uos, uos_map, uos_rgb, uos_frames, uos_map_frames, old, rts, rts_map, ifp, riegl_txt, riegl_rgb, riegl_bin, zahn, ply})" << endl
 	  << endl
 	  << bold << "  -m" << normal << " NR, " << bold << "--max=" << normal << "NR" << endl
 	  << "         neglegt all data points with a distance larger than NR 'units'" << endl
@@ -99,18 +122,26 @@ void usage(char* prog)
 	  << "         neglegt all data points with a distance smaller than NR 'units'" << endl
 	  << endl
 	  << bold << "  -r" << normal << " NR, " << bold << "--reduce=" << normal << "NR" << endl
-	  << "         turns on octree based point reduction (voxel size=<NR>)" << endl
+	  << "         if NR >= 0, turns on octree based point reduction (voxel size=<NR>)" << endl
+	  << "         if NR < 0, turns on rescaling based reduction" << endl
 	  << endl
-	  << bold << "  -s" << normal << " NR, " << bold << "--start=" << normal << "NR" << endl
-	  << "         start at scan NR (i.e., neglects the first NR scans)" << endl
-	  << "         [ATTENTION: counting naturally starts with 0]" << endl
+       << bold << "  -I" << normal << " NR," << bold << "--rangeimage=" << normal << "MET" << endl
+	  << "         use rescaling of the range image as reduction method" << endl
+	  << "         if NR = 1 recovers ranges from range image" << endl
+	  << "         if NR = 2 interpolates 3D points in the image map" << endl
 	  << endl
-    	  << endl << endl;
+	  << bold << "  -p" << normal << " MET," << bold << "--projection=" << normal << "MET" << endl
+	  << "         create range image using the MET projection method" << endl
+	  << "         (choose MET from [EQUIRECTANGULAR|CYLINDRICAL|MERCATOR|CONIC])" << endl
+    	  << bold << "  -S, --scanserver" << normal << endl
+	  << "         Use the scanserver as an input method and handling of scan data" << endl
+	  << endl << endl;
   
   cout << bold << "EXAMPLES " << normal << endl
 	  << "   " << prog << " -m 500 -r 5 dat" << endl
 	  << "   " << prog << " --max=5000 -r 10.2 dat" << endl
-	  << "   " << prog << " -s 2 -e 10 -r dat" << endl << endl;
+	  << "   " << prog << " -s 2 -e 10 -r dat" << endl
+	  << "   " << prog << " -s 0 -e 1 -r 10 -I=1  dat " << endl << endl;
   exit(1);
 }
 
@@ -124,19 +155,24 @@ void usage(char* prog)
  * @param end stopping at scan number 'end'
  * @param maxDist - maximal distance of points being loaded
  * @param minDist - minimal distance of points being loaded
+ * @param projection - projection method for building range image
  * @param quiet switches on/off the quiet mode
  * @param veryQuiet switches on/off the 'very quiet' mode
  * @return 0, if the parsing was successful. 1 otherwise
  */
 int parseArgs(int argc, char **argv, string &dir, double &red, 
-		    int &start, int &end, int &maxDist, int &minDist, int &octree, 
-		    IOType &type)
+		    int &start, int &end, int &maxDist, int &minDist,
+		    string &projection, int &octree, IOType &type,
+		    int &rangeimage, bool &scanserver)
 {
   bool reduced = false;
   int  c;
   // from unistd.h:
   extern char *optarg;
   extern int optind;
+
+  WriteOnce<IOType> w_type(type);
+  WriteOnce<int> w_start(start), w_end(end);
 
   /* options descriptor */
   // 0: no arguments, 1: required argument, 2: optional argument
@@ -148,11 +184,14 @@ int parseArgs(int argc, char **argv, string &dir, double &red,
     { "end",             required_argument,   0,  'e' },
     { "reduce",          required_argument,   0,  'r' },
     { "octree",          optional_argument,   0,  'O' },
+    { "rangeimage",      optional_argument,   0,  'I' },
+    { "projection",      required_argument,   0,  'p' },
+    { "scanserver",      no_argument,         0,  'S' },
     { 0,           0,   0,   0}                    // needed, cf. getopt.h
   };
 
   cout << endl;
-  while ((c = getopt_long(argc, argv, "f:r:s:e:m:M:O:", longopts, NULL)) != -1)
+  while ((c = getopt_long(argc, argv, "f:r:s:e:m:M:O:p:", longopts, NULL)) != -1)
     switch (c)
 	 {
 	 case 'r':
@@ -160,36 +199,49 @@ int parseArgs(int argc, char **argv, string &dir, double &red,
      reduced = true;
 	   break;
 	 case 's':
-	   start = atoi(optarg);
-	   if (start < 0) { cerr << "Error: Cannot start at a negative scan number.\n"; exit(1); }
+	   w_start = atoi(optarg);
+	   if (w_start < 0) { cerr << "Error: Cannot start at a negative scan number.\n"; exit(1); }
 	   break;
 	 case 'e':
-	   end = atoi(optarg);
-	   if (end < 0)     { cerr << "Error: Cannot end at a negative scan number.\n"; exit(1); }
-	   if (end < start) { cerr << "Error: <end> cannot be smaller than <start>.\n"; exit(1); }
+	   w_end = atoi(optarg);
+	   if (w_end < 0)     { cerr << "Error: Cannot end at a negative scan number.\n"; exit(1); }
+	   if (w_end < start) { cerr << "Error: <end> cannot be smaller than <start>.\n"; exit(1); }
 	   break;
 	 case 'f': 
-    try {
-      type = formatname_to_io_type(optarg);
-    } catch (...) { // runtime_error
-      cerr << "Format " << optarg << " unknown." << endl;
-      abort();
-    }
-    break;
+	   try {
+		w_type = formatname_to_io_type(optarg);
+	   } catch (...) { // runtime_error
+		cerr << "Format " << optarg << " unknown." << endl;
+		abort();
+	   }
+	   break;
    case 'm':
 	   maxDist = atoi(optarg);
 	   break;
 	 case 'O':
-     if (optarg) {
-       octree = atoi(optarg);
-     } else {
-       octree = 1;
-     }
+	   if (optarg) {
+		octree = atoi(optarg);
+	   } else {
+		octree = 1;
+	   }
 	   break;
 	 case 'M':
 	   minDist = atoi(optarg);
 	   break;
-   case '?':
+	 case 'I':
+	   if (optarg) {
+		rangeimage = atoi(optarg);
+	   } else {
+		rangeimage = 1;
+	   }
+	   break;
+	 case 'p':
+	   projection = optarg;
+	   break;
+	 case 'S':
+        scanserver = true;
+        break;
+	 case '?':
 	   usage(argv[0]);
 	   return 1;
       default:
@@ -212,6 +264,8 @@ int parseArgs(int argc, char **argv, string &dir, double &red,
   if (dir[dir.length()-1] != '\\') dir = dir + "\\";
 #endif
 
+  parseFormatFile(dir, w_type, w_start, w_end);
+
   return 0;
 }
 
@@ -227,7 +281,7 @@ int parseArgs(int argc, char **argv, string &dir, double &red,
 int main(int argc, char **argv)
 {
 
-  cout << "(c) Jacobs University Bremen, gGmbH, 2010" << endl << endl;
+  cout << "(c) Jacobs University Bremen, gGmbH, 2012" << endl << endl;
   
   if (argc <= 1) {
     usage(argv[0]);
@@ -236,30 +290,30 @@ int main(int argc, char **argv)
   // parsing the command line parameters
   // init, default values if not specified
   string dir;
-  double red   = -1.0;
-  int    start = 0,   end = -1;
-  int    maxDist    = -1;
-  int    minDist    = -1;
-  int    octree     = 0;
-  IOType type    = RIEGL_TXT;
+  double red            = -1.0;
+  int    start = 0, end = -1;
+  int    maxDist        = -1;
+  int    minDist        = -1;
+  string projection     = "EQUIRECTANGULAR";
+  int    octree         = 0;
+  IOType type           = RIEGL_TXT;
+  int    rangeimage     = 0;
+  bool   scanserver     = false;
   
-  parseArgs(argc, argv, dir, red, start, end, maxDist, minDist, octree, type);
+  parseArgs(argc, argv, dir, red, start, end, maxDist, minDist, projection,
+		  octree, type, rangeimage, scanserver);
 
-#ifdef WITH_SCANSERVER
-  try {
-    ClientInterface::create();
-  } catch(std::runtime_error& e) {
-    cerr << "ClientInterface could not be created: " << e.what() << endl;
-    cerr << "Start the scanserver first." << endl;
-    exit(-1);
+  if (scanserver) {
+    try {
+	 ClientInterface::create();
+    } catch(std::runtime_error& e) {
+	 cerr << "ClientInterface could not be created: " << e.what() << endl;
+	 cerr << "Start the scanserver first." << endl;
+	 exit(-1);
+    }
   }
-#endif //WITH_SCANSERVER
-
+  
   // Get Scans
-#ifndef WITH_SCANSERVER
-  Scan::dir = dir;
-  int fileNr = start;
-#endif //WITH_SCANSERVER
   string reddir = dir + "reduced"; 
  
 #ifdef _MSC_VER
@@ -276,90 +330,148 @@ int main(int argc, char **argv)
     exit(1);
   }
 
-#ifndef WITH_SCANSERVER
-  while (fileNr <= end) {
-    Scan::readScans(type, fileNr, fileNr, dir, maxDist, minDist, 0);
-    const double* rPos = Scan::allScans[0]->get_rPos();
-    const double* rPosTheta = Scan::allScans[0]->get_rPosTheta();
-    
-    // reduction filter for current scan!
-    
-    cout << "Reducing Scan No. " << fileNr << endl;
-    Scan::allScans[0]->calcReducedPoints(red, octree);
-    
-    
-    cout << "Writing Scan No. " << fileNr ;
-    cout << " with " << Scan::allScans[0]->get_points_red_size() << " points" << endl; 
-    string scanFileName;
-    string poseFileName;
-  
-    scanFileName = dir + "reduced/scan" + to_string(fileNr,3) + ".3d";
-    poseFileName = dir  + "reduced/scan" + to_string(fileNr,3) + ".pose";
-   
-     
-    ofstream redptsout(scanFileName.c_str());
-    for (int j = 0; j < Scan::allScans[0]->get_points_red_size(); j++) {
-         Point p(Scan::allScans[0]->get_points_red()[j]);
-         //Points in global coordinate system
-         redptsout << p.x << " " << p.y << " " << p.z << endl;
-         
-	  }
-    redptsout.close();
-    redptsout.clear();
-#else //WITH_SCANSERVER
-  Scan::readScans(type, start, end, dir, maxDist, minDist);
-  for(std::vector<Scan*>::iterator it = Scan::allScans.begin(); it != Scan::allScans.end(); ++it)
-  {
-    Scan* scan = *it;
-    const double* rPos = scan->get_rPos();
-    const double* rPosTheta = scan->get_rPosTheta();
+  Scan::openDirectory(scanserver, dir, type, start, end);
+  if(Scan::allScans.size() == 0) {
+    cerr << "No scans found. Did you use the correct format?" << endl;
+    exit(-1);
+  }
 
-    scan->calcReducedPoints(red, octree);
+  /// Use the OCTREE based reduction
+  if (rangeimage == 0) {
+    cout << endl << "Reducing point cloud using octrees" << endl;
+    int scan_number = start;
+    for(std::vector<Scan*>::iterator it = Scan::allScans.begin();
+	   it != Scan::allScans.end(); ++it,
+		++scan_number) {
+      Scan* scan = *it;
+      const double* rPos = scan->get_rPos();
+      const double* rPosTheta = scan->get_rPosTheta();
+      
+      scan->setRangeFilter(maxDist, minDist);
+      scan->setReductionParameter(red, octree);
+      // get reduced points
+      DataXYZ xyz_r(scan->get("xyz reduced"));
+      unsigned int nPoints = xyz_r.size();
+      // convert scan to matrix
+      cv::Mat scan_cv;
+      scan_cv.create(nPoints, 1, CV_32FC(3));
+      scan_cv = cv::Scalar::all(0); 
+      cv::MatIterator_<cv::Vec3f> it = scan_cv.begin<cv::Vec3f>();
+      double zMax = numeric_limits<double>::min(); 
+      double zMin = numeric_limits<double>::max();
 
-    const char* id = scan->getIdentifier();
-    cout << "Writing Scan No. " << id;
-    cout << " with " << scan->getCountReduced() << " points" << endl; 
-    string scanFileName;
-    string poseFileName;
+      const char* id = scan->getIdentifier();
+      cout << "Writing Scan No. " << id;
+      cout << " with " << xyz_r.size() << " points" << endl; 
+      string scanFileName = reddir + "/scan" + id + ".3d";
+      string poseFileName = reddir  + "/scan" + id + ".pose";
 
-    scanFileName = dir + "reduced/scan" + id + ".3d";
-    poseFileName = dir  + "reduced/scan" + id + ".pose";
+      ofstream redptsout(scanFileName.c_str());
+      for(unsigned int j = 0; j < nPoints; j++) {
+        redptsout << xyz_r[j][0] << " " << xyz_r[j][1] << " " << xyz_r[j][2] << endl;
+        (*it)[0] = xyz_r[j][0];
+        (*it)[1] = xyz_r[j][1];
+        (*it)[2] = xyz_r[j][2];
+        //finding min and max of z                                      
+        if (xyz_r[j][2]  > zMax) zMax = xyz_r[j][2];
+        if (xyz_r[j][2]  < zMin) zMin = xyz_r[j][2];
+        ++it;
+      }
 
-    ofstream redptsout(scanFileName.c_str());
-    DataXYZ xyz_r(scan->getXYZReduced());
-    for(unsigned int j = 0; j < xyz_r.size(); j++) {
-      //Points in global coordinate system
-      redptsout << xyz_r[j][0] << " " << xyz_r[j][1] << " " << xyz_r[j][2] << endl;
+      redptsout.close();
+      redptsout.clear();
+
+      ofstream posout(poseFileName.c_str());
+      
+      posout << rPos[0] << " " 
+             << rPos[1] << " " 
+             << rPos[2] << endl   
+             << deg(rPosTheta[0]) << " " 
+             << deg(rPosTheta[1]) << " " 
+             << deg(rPosTheta[2]) << endl;  
+      
+      posout.close();
+      posout.clear();
+
+      if (scanserver) {
+        scan->clear("xyz reduced");
+      }
     }
-    redptsout.close();
-    redptsout.clear();
-#endif //WITH_SCANSERVER
-    
-    ofstream posout(poseFileName.c_str());
-    
-    posout << rPos[0] << " " 
-           << rPos[1] << " " 
-           << rPos[2] << endl   
-           << deg(rPosTheta[0]) << " " 
-           << deg(rPosTheta[1]) << " " 
-           << deg(rPosTheta[2]) << endl;  
-    
-    posout.close();
-    posout.clear();
+  } else { /// use the RESIZE based reduction
+    cout << endl << "Reducing point cloud by rescaling the range image" << endl;
+    int scan_number = start;
+    for(std::vector<Scan*>::iterator it = Scan::allScans.begin();
+	   it != Scan::allScans.end(); ++it,
+		++scan_number) {
+      Scan* scan = *it;
+      scan->setRangeFilter(maxDist, minDist);
+      // get points
+      DataXYZ xyz(scan->get("xyz"));
+      unsigned int nPoints = xyz.size();
+      // convert scan to matrix
+      cv::Mat scan_cv;
+      scan_cv.create(nPoints, 1, CV_32FC(3));
+      scan_cv = cv::Scalar::all(0); 
+      cv::MatIterator_<cv::Vec3f> it = scan_cv.begin<cv::Vec3f>();
+      double zMax = numeric_limits<double>::min(); 
+      double zMin = numeric_limits<double>::max();
 
-#ifndef WITH_SCANSERVER
-    delete Scan::allScans[0];
-    Scan::allScans.clear();
-    fileNr++;
-#endif //WITH_SCANSERVER
+      const char* id = scan->getIdentifier();
+      cout << "Writing Scan No. " << id;
+      cout << " with " << xyz.size() << " points" << endl; 
+
+      for(unsigned int j = 0; j < nPoints; j++) {
+        //Points in global coordinate system
+        (*it)[0] = xyz[j][0];
+        (*it)[1] = xyz[j][1];
+        (*it)[2] = xyz[j][2];
+        //finding min and max of z                                      
+        if (xyz[j][2]  > zMax) zMax = xyz[j][2];
+        if (xyz[j][2]  < zMin) zMin = xyz[j][2];
+        ++it;
+      }
+
+	 /// Project point cloud using the selected projection method
+	 panorama image (IMAGE_WIDTH, IMAGE_HEIGHT, strToPMethod(projection));
+	 image.createPanorama(scan_cv);
+	 image.getDescription();
+	 
+	 /// Resize the range image, specify desired interpolation method
+	 double scale = 1.0/red;
+	 cv::Mat range_image_resized; // reflectance_image_resized;
+	 string ofilename;
+	 stringstream ss;
+	 ss << setw(3) << setfill('0') << (scan_number);
+	 ofilename = reddir + "/scan" + ss.str() + ".3d";
+	 if (rangeimage == 1) {
+	   resize(image.getRangeImage(), range_image_resized, cv::Size(), scale, scale, cv::INTER_NEAREST);
+	   // Recover point cloud from image and write scan to file
+	   stringstream ss;
+	   ss << setw(3) << setfill('0') << (scan_number); 
+	   image.recoverPointCloud(range_image_resized, ofilename);
+	 } else {
+	   resize(image.getMap(), range_image_resized, cv::Size(), scale, scale, cv::INTER_NEAREST);
+	   ofstream redptsout(ofilename.c_str());
+	   // Convert back to 3D.
+	   for(int i = 0; i < range_image_resized.rows; i++) {
+		for(int j = 0; j < range_image_resized.cols; j++) {
+		  cv::Vec3f vec = range_image_resized.at<cv::Vec3f>(i, j);
+		  double x = vec[0];
+		  double y = vec[1];
+		  double z = vec[2];
+		  redptsout << x << " " << y << " " << z << endl;
+		}
+	   }
+	 }
+    }
   }
 
   cout << endl << endl;
   cout << "Normal program end." << endl << endl;
 
-#ifdef WITH_SCANSERVER
-  Scan::clearScans();
-  ClientInterface::destroy();
-#endif //WITH_SCANSERVER
+  if (scanserver) {  
+    Scan::closeDirectory();
+    ClientInterface::destroy();
+  }
 }
 

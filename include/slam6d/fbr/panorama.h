@@ -59,6 +59,13 @@ namespace fbr{
      * @brief creates the panorama reflectance image and map.
      */
     void createPanorama(cv::Mat scan);
+    /**
+     * @brief recovers the point cloud from the panorama image and range information
+     * @param image - input range image to be converted to point cloud
+     * @param file - destination of .3d file containing the point cloud
+     */
+    void recoverPointCloud(const cv::Mat& range_image, const std::string& file);
+
     unsigned int getImageWidth();
     unsigned int getImageHeight();
     projection_method getProjectionMethod();
