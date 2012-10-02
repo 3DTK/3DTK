@@ -1,36 +1,32 @@
-### SCAN_RED
+### TOOLS
 
-IF(WITH_SCAN_REDUCTION) 
-  add_executable(scan_red scan_red.cc)
+IF(WITH_TOOLS)
+  FIND_PACKAGE(OpenCV REQUIRED)
+  ### SCAN_RED
+  add_executable(scan_red scan_red.cc fbr/fbr_global.cc fbr/panorama.cc fbr/scan_cv.cc)
   
   IF(UNIX)
-    target_link_libraries(scan_red scan dl ANN)
+    target_link_libraries(scan_red scan dl ANN fbr_cv_io fbr_panorama ${OpenCV_LIBS})
   ENDIF(UNIX)
 
   IF (WIN32)
     target_link_libraries(scan_red scan ANN XGetopt)
   ENDIF(WIN32)
-ENDIF(WITH_SCAN_REDUCTION)
 
-### SCAN_DIFF
-IF(WITH_SCAN_DIFF)
+  ### SCAN_DIFF
   add_executable(scan_diff scan_diff.cc)
-  add_executable(scan_diff2d scan_diff2d.cc ../show/colormanager.cc)
+  #  add_executable(scan_diff2d scan_diff2d.cc ../show/colormanager.cc)
   
   IF(UNIX)
     target_link_libraries(scan_diff scan dl ANN)
-    target_link_libraries(scan_diff2d scan dl ANN)
+    #    target_link_libraries(scan_diff2d scan dl ANN)
   ENDIF(UNIX)
 
   IF (WIN32)
     target_link_libraries(scan_diff scan ANN XGetopt)
-    target_link_libraries(scan_diff2d scan ANN XGetopt)
+    # target_link_libraries(scan_diff2d scan ANN XGetopt)
   ENDIF(WIN32)
-ENDIF(WITH_SCAN_DIFF)
 
-### TOOLS
-
-IF(WITH_TOOLS)
   add_executable(frame_to_graph frame_to_graph.cc)
   add_executable(convergence convergence.cc)
   add_executable(graph_balancer graph_balancer.cc)

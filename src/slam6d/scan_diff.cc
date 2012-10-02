@@ -40,18 +40,17 @@ using std::endl;
 using std::ofstream;
 using std::ifstream;
 #include <errno.h>
-
-#include "slam6d/scan.h"
-#ifdef WITH_SCANSERVER
-#include "scanserver/clientInterface.h"
-#endif //WITH_SCANSERVER
+#include <vector>
 
 #include "slam6d/globals.icc"
+#include "slam6d/io_utils.h"
+#include "slam6d/scan.h"
+
+#include "scanserver/clientInterface.h"
 
 #ifdef _OPENMP
 #include <omp.h>
 #endif
-
 
 #ifndef _MSC_VER
 #include <getopt.h>
@@ -60,15 +59,15 @@ using std::ifstream;
 #endif
 
 #ifdef _MSC_VER
-#define strcasecmp _stricmp
-#define strncasecmp _strnicmp
-#include <windows.h>
-#include <direct.h>
+  #define strcasecmp _stricmp
+  #define strncasecmp _strnicmp
+  #include <windows.h>
+  #include <direct.h>
 #else
-#include <sys/stat.h>
-#include <sys/types.h>
-#include <strings.h>
-#include <dlfcn.h>
+  #include <sys/stat.h>
+  #include <sys/types.h>
+  #include <strings.h>
+  #include <dlfcn.h>
 #endif
 
 
@@ -108,6 +107,8 @@ void usage(char* prog)
 	  << endl
 	  << bold << "  -d" << normal << " NR, " << bold << "--dist=" << normal << "NR" << endl
 	  << "         write all points that have no corresponding point closer than NR 'units'" << endl
+	  << bold << "  -S, --scanserver" << normal << endl
+	  << "         Use the scanserver as an input method and handling of scan data" << endl
     << endl << endl;
   
   cout << bold << "EXAMPLES " << normal << endl
@@ -132,12 +133,15 @@ void usage(char* prog)
  */
 int parseArgs(int argc, char **argv, string &dir, 
 		    int &start, int &end, int &maxDist, int &minDist, double &dist, 
-		    IOType &type, bool &desc)
+		    IOType &type, bool &desc, bool scanserver)
 {
   int  c;
   // from unistd.h:
   extern char *optarg;
   extern int optind;
+
+  WriteOnce<IOType> w_type(type);
+  WriteOnce<int> w_start(start), w_end(end);
 
   /* options descriptor */
   // 0: no arguments, 1: required argument, 2: optional argument
@@ -148,6 +152,7 @@ int parseArgs(int argc, char **argv, string &dir,
     { "start",           required_argument,   0,  's' },
     { "end",             required_argument,   0,  'e' },
     { "dist",            required_argument,   0,  'd' },
+    { "scanserver",      no_argument,         0,  'S' },
     { 0,           0,   0,   0}                    // needed, cf. getopt.h
   };
 
@@ -159,11 +164,11 @@ int parseArgs(int argc, char **argv, string &dir,
 	   dist = atof(optarg);
 	   break;
 	 case 's':
-	   start = atoi(optarg);
+	   w_start = atoi(optarg);
 	   if (start < 0) { cerr << "Error: Cannot start at a negative scan number.\n"; exit(1); }
 	   break;
 	 case 'e':
-	   end = atoi(optarg);
+	   w_end = atoi(optarg);
 	   if (end < 0)     { cerr << "Error: Cannot end at a negative scan number.\n"; exit(1); }
 	   break;
 	 case 'f': 
@@ -180,9 +185,12 @@ int parseArgs(int argc, char **argv, string &dir,
 	 case 'M':
 	   minDist = atoi(optarg);
 	   break;
-   case '?':
+	 case '?':
 	   usage(argv[0]);
 	   return 1;
+	 case 'S':
+        scanserver = true;
+        break;
       default:
 	   abort ();
       }
@@ -209,6 +217,8 @@ int parseArgs(int argc, char **argv, string &dir,
     desc = true;
   } 
 
+  parseFormatFile(dir, w_type, w_start, w_end);
+
   return 0;
 }
 
@@ -225,7 +235,7 @@ int parseArgs(int argc, char **argv, string &dir,
 int main(int argc, char **argv)
 {
 
-  cout << "(c) Jacobs University Bremen, gGmbH, 2010" << endl << endl;
+  cout << "(c) Jacobs University Bremen, gGmbH, 2012" << endl << endl;
   
   if (argc <= 1) {
     usage(argv[0]);
@@ -240,23 +250,20 @@ int main(int argc, char **argv)
   int    minDist    = -1;
   IOType type    = RIEGL_TXT;
   bool desc = false;  
+  bool scanserver = false;
 
-  parseArgs(argc, argv, dir, start, end, maxDist, minDist, dist, type, desc);
+  parseArgs(argc, argv, dir, start, end, maxDist, minDist, dist, type, desc, scanserver);
 
-#ifdef WITH_SCANSERVER
-  try {
-    ClientInterface::create();
-  } catch(std::runtime_error& e) {
-    cerr << "ClientInterface could not be created: " << e.what() << endl;
-    cerr << "Start the scanserver first." << endl;
-    exit(-1);
+  if (scanserver) {
+    try {
+	 ClientInterface::create();
+    } catch(std::runtime_error& e) {
+	 cerr << "ClientInterface could not be created: " << e.what() << endl;
+	 cerr << "Start the scanserver first." << endl;
+	 exit(-1);
+    }
   }
-#endif //WITH_SCANSERVER
 
-  // Get Scans (all scans between start and end)
-#ifndef WITH_SCANSERVER
-  Scan::dir = dir;
-#endif //WITH_SCANSERVER
   string diffdir = dir + "diff"; 
  
 #ifdef _MSC_VER
@@ -278,7 +285,7 @@ int main(int argc, char **argv)
   double inMatrix0[17];
   double inMatrix1[17];
   
-  cout << "Reading Scan No. " << start;
+  cout << "Reading Scan No. " << start << endl;
   framesFileName = dir  + "scan" + to_string(start,3) + ".frames";
   frames_in.open(framesFileName.c_str());
   
@@ -296,7 +303,7 @@ int main(int argc, char **argv)
   }
   cout << endl; 
   
-  cout << "Reading Scan No. " << end;
+  cout << "Reading Scan No. " << end << endl;
   framesFileName = dir  + "scan" + to_string(end,3) + ".frames";
   frames_in.open(framesFileName.c_str());
   
@@ -313,32 +320,40 @@ int main(int argc, char **argv)
     cout << inMatrix1[i] << " ";
   }
   cout << endl;
-  
-  Scan::readScans(type, start, end, dir, maxDist, minDist, 0);
-  int endIndex = Scan::allScans.size() - 1;
 
-  Scan::allScans[0]->calcReducedPoints(-1, 0);
-  Scan::allScans[0]->transform(inMatrix0, Scan::INVALID);
-  Scan::allScans[endIndex]->calcReducedPoints(-1, 0);
-  Scan::allScans[endIndex]->transform(inMatrix1, Scan::INVALID);
- 
-  cout  << Scan::allScans[0]->get_points_red_size() 
-        << " " << Scan::allScans[endIndex]->get_points_red_size() << endl;
+  Scan::openDirectory(scanserver, dir, type, start, end);
+
+  if(Scan::allScans.size() == 0) {
+    cerr << "No scans found. Did you use the correct format?" << endl;
+    exit(-1);
+  }  
+
+  Scan* scan_first = *(Scan::allScans.begin());
+  Scan* scan_second = *(Scan::allScans.end()-1);
+
+  scan_first->transform(inMatrix0, Scan::INVALID);
+  scan_second->transform(inMatrix1, Scan::INVALID);
+
+  DataXYZ xyz_first(scan_first->get("xyz"));
+  DataXYZ xyz_second(scan_second->get("xyz"));
+  
+  cout << "Scan " << scan_first->getIdentifier() << " with " << xyz_first.size() << " points" << endl;
+  cout << "Scan " << scan_second->getIdentifier() << " with " << xyz_second.size() << " points" << endl;
 
   int thread_num = 0;
-  vector<double*> diff;
+  std::vector<double*> diff;
   double transMat[16];
   
   if(desc) {
-    Scan::getNoPairsSimple(diff, Scan::allScans[endIndex], Scan::allScans[0], thread_num, dist);
+    Scan::getNoPairsSimple(diff, scan_second, scan_first, thread_num, dist);
     M4inv(inMatrix1, transMat);
     scanFileName = dir + "diff/scan" + to_string(end,3) + ".3d";
   } else {
-    Scan::getNoPairsSimple(diff, Scan::allScans[0], Scan::allScans[endIndex], thread_num, dist);
+    Scan::getNoPairsSimple(diff, scan_first, scan_second, thread_num, dist);
     M4inv(inMatrix0, transMat);
     scanFileName = dir + "diff/scan" + to_string(start,3) + ".3d";
   }
- 
+
   cout << endl; 
   for(int i = 0; i < 16; i++) {
     cout << transMat[i] << " ";
@@ -359,10 +374,18 @@ int main(int argc, char **argv)
  
   ptsout.close();
   ptsout.clear();
-      
-  delete Scan::allScans[0];
-  Scan::allScans.clear();
+
+  if (scanserver) {
+    scan_first->clear("xyz");
+    scan_second->clear("xyz");
+  }
 
   cout << endl << endl;
   cout << "Normal program end." << endl << endl;
+
+ if (scanserver) {
+  Scan::closeDirectory();
+ }
+
+  return 0;
 }
