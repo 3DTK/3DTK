@@ -166,25 +166,6 @@ ENDIF(WITH_TOOLS)
 
 
 
-## Scan reduction
-OPTION(WITH_SCAN_REDUCTION "Whether to build the scan reduction binary scan_red ON/OFF" OFF)
-
-IF(WITH_SCAN_REDUCTION)
-  MESSAGE(STATUS "With scan_red")
-ELSE(WITH_SCAN_REDUCTION)
-  MESSAGE(STATUS "Without scan_red")
-ENDIF(WITH_SCAN_REDUCTION)
-
-## Scan difference
-OPTION(WITH_SCAN_DIFF "Whether to build the scan_diff binary ON/OFF" OFF)
-
-IF(WITH_SCAN_DIFF)
-  MESSAGE(STATUS "With scan_diff")
-ELSE(WITH_SCAN_DIFF)
-  MESSAGE(STATUS "Without scan_diff")
-ENDIF(WITH_SCAN_DIFF)
-
-
 ## CAD matching
 OPTION (WITH_CAD "Wether to build with CAD import lib ON/OFF" OFF)
 
