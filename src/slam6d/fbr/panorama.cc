@@ -554,6 +554,155 @@ namespace fbr{
     }
   }
 
+  void panorama::recoverPointCloud(const cv::Mat& range_image, const string& file ) {
+    std::ofstream scan_file (file.c_str());
+    //recover from EQUIRECTANGULAR projection
+    if(pMethod == EQUIRECTANGULAR) {
+      double xFactor = (double) range_image.size().width / 2 / M_PI;
+      //int widthMax = range_image.size().width - 1;
+      double yFactor = (double) range_image.size().height / ((MAX_ANGLE - MIN_ANGLE) / 360 * 2 * M_PI);
+      double heightLow = (0 - MIN_ANGLE) / 360 * 2 * M_PI;
+      int heightMax = range_image.size().height - 1;
+
+      bool first_seen = true;
+      for (int row = 0; row < range_image.size().height; ++row) {
+        for (int col = 0; col < range_image.size().width; ++col) {
+          float range = range_image.at<float>(row, col);
+          float theta = (heightMax - row) / yFactor - heightLow; 
+          float phi = col / xFactor; 
+          phi *= 180.0 / M_PI;
+          phi = 360.0 - phi;
+          phi *= M_PI / 180.0;
+          theta *= 180.0 / M_PI;
+          theta *= -1;
+          theta += 90.0;
+          theta *= M_PI / 180.0;
+          double polar[3] = { theta, phi, range }, cartesian[3] = {0., 0., 0.}; 
+        	toKartesian(polar, cartesian);
+          if( fabs(cartesian[0]) < 1e-5 && fabs(cartesian[1]) < 1e-5 && fabs(cartesian[2]) < 1e-5) {
+            if (first_seen) first_seen = false;
+            else continue;
+          }
+          scan_file << -100. * cartesian[1] << " " << 100. * cartesian[2] << " " << 100. * cartesian[0] << endl;
+        }
+      }
+    }
+
+    //recover from CYLINDRICAL projection
+    if(pMethod == CYLINDRICAL) {
+      double xFactor = (double) range_image.size().width / 2 / M_PI;
+      //int widthMax = range_image.size().width - 1;
+      double yFactor = (double) range_image.size().height / (tan(MAX_ANGLE / 360 * 2 * M_PI) - tan(MIN_ANGLE / 360 * 2 * M_PI));
+      double heightLow = (MIN_ANGLE) / 360 * 2 * M_PI;
+      //int heightMax = range_image.size().height - 1;
+      
+      bool first_seen = true;
+      for (int row = 0; row < range_image.size().height; ++row) {
+        for (int col = 0; col < range_image.size().width; ++col) {
+          float range = range_image.at<float>(row, col);
+          float theta = atan2(row + yFactor * tan(heightLow), yFactor);
+          float phi = col / xFactor; 
+          phi *= 180.0 / M_PI;
+          phi = 360.0 - phi;
+          phi *= M_PI / 180.0;
+          theta *= 180.0 / M_PI;
+          theta *= -1;
+          theta += 90.0;
+          theta *= M_PI / 180.0;
+          double polar[3] = { theta, phi, range }, cartesian[3] = {0., 0., 0.}; 
+        	toKartesian(polar, cartesian);
+          if( fabs(cartesian[0]) < 1e-5 && fabs(cartesian[1]) < 1e-5 && fabs(cartesian[2]) < 1e-5) {
+            if (first_seen) first_seen = false;
+            else continue;
+          }
+          scan_file << -100. * cartesian[1] << " " << 100. * cartesian[2] << " " << 100. * cartesian[0] << endl;
+        }
+      }
+    }
+
+    //recover from MERCATOR projection
+    if(pMethod == MERCATOR) {
+      double xFactor = (double) range_image.size().width / 2 / M_PI;
+      double yFactor = (double) range_image.size().height / ( log( tan( MAX_ANGLE / 360 * 2 * M_PI ) + ( 1 / cos( MAX_ANGLE / 360 * 2 * M_PI ) ) ) - log ( tan( MIN_ANGLE / 360 * 2 * M_PI) + (1/cos(MIN_ANGLE / 360 * 2 * M_PI) ) ) );
+      double heightLow = log(tan(MIN_ANGLE / 360 * 2 * M_PI) + (1/cos(MIN_ANGLE / 360 * 2 * M_PI)));
+      int heightMax = range_image.size().height - 1;
+      
+      bool first_seen = true;
+      for (int row = 0; row < range_image.size().height; ++row) {
+        for (int col = 0; col < range_image.size().width; ++col) {
+          float range = range_image.at<float>(row, col);
+          float theta = 2 * atan2(exp((heightMax - row) / yFactor + heightLow), 1.) - M_PI_2;
+          float phi = col / xFactor; 
+          phi *= 180.0 / M_PI;
+          phi = 180.0 - phi;
+          phi *= M_PI / 180.0;
+          theta *= 180.0 / M_PI;
+          theta *= -1;
+          theta += 90.0;
+          theta *= M_PI / 180.0;
+          double polar[3] = { theta, phi, range }, cartesian[3] = {0., 0., 0.}; 
+        	toKartesian(polar, cartesian);
+          if( fabs(cartesian[0]) < 1e-5 && fabs(cartesian[1]) < 1e-5 && fabs(cartesian[2]) < 1e-5) {
+            if (first_seen) first_seen = false;
+            else continue;
+          }
+          scan_file << -100. * cartesian[1] << " " << 100. * cartesian[2] << " " << 100. * cartesian[0] << endl;
+        }
+      }
+    }
+
+    //recover from CONIC projection
+    if(pMethod == CONIC) {
+       // set up maximum latitude and longitude angles of the robot 
+			double MIN_VERT_ANGLE = MIN_ANGLE * M_PI / 180.0, MAX_VERT_ANGLE = MAX_ANGLE * M_PI / 180.0,
+             MIN_HORIZ_ANGLE = -M_PI, MAX_HORIZ_ANGLE = M_PI;
+      // set up initial parameters according to MathWorld: http://mathworld.wolfram.com/AlbersEqual-AreaConicProjection.html
+      double Lat0 = 0., Long0 = 0.;
+      double Phi1 = -40. * M_PI / 180.0, Phi2 = 60 * M_PI / 180.0;
+      double n = (sin(Phi1) + sin(Phi2)) / 2.;
+      double C = sqr(cos(Phi1)) + 2 * n * sin(Phi1);
+      double Rho0 = sqrt(C - 2 * n * sin(Lat0)) / n;
+			// set up max values for x and y and add the longitude to x axis and latitude to y axis
+			double xmax = (1./n * sqrt(C - 2*n*sin( MIN_VERT_ANGLE )) ) * sin(n * (MAX_HORIZ_ANGLE - Long0));
+			double xmin = (1./n * sqrt(C - 2*n*sin( MIN_VERT_ANGLE )) ) * sin(n * (MIN_HORIZ_ANGLE - Long0));
+      double xFactor = (double) range_image.size().width / ( xmax - xmin );
+			double ymin = Rho0 - (1./n * sqrt(C - 2*n*sin(MIN_VERT_ANGLE)) ) * cos(n * ( 0. - Long0 ));
+			double ymax = Rho0 - (1./n * sqrt(C - 2*n*sin(MAX_VERT_ANGLE)) ) * cos(n * (MAX_HORIZ_ANGLE - Long0 ));
+      double yFactor = (double) range_image.size().height / ( ymax - ymin );
+      int heightMax = range_image.size().height - 1;
+
+      bool first_seen = true;
+      for (int row = 0; row < range_image.size().height; ++row) {
+        for (int col = 0; col < range_image.size().width; ++col) {
+          float range = range_image.at<float>(row, col);
+          float x = col * 1. / xFactor - fabs(xmin);
+          float y = (heightMax - row) * 1. / yFactor - fabs(ymin);
+          float theta = asin((C - (x*x + (Rho0 - y) * (Rho0 - y)) * n * n) / (2 * n));
+          float phi = Long0 + (1./n) * atan2(x, Rho0 - y);
+
+          phi *= 180.0 / M_PI;
+          phi = 360.0 - phi;
+          phi *= M_PI / 180.0;
+          theta *= 180.0 / M_PI;
+          theta *= -1;
+          theta += 90.0;
+          theta *= M_PI / 180.0;
+
+          double polar[3] = { theta, phi, range }, cartesian[3] = {0., 0., 0.}; 
+        	toKartesian(polar, cartesian);
+          //if ( std::isnan(cartesian[0]) || std::isnan(cartesian[1]) || std::isnan(cartesian[2]) ) continue;
+          if( fabs(cartesian[0]) < 1e-5 && fabs(cartesian[1]) < 1e-5 && fabs(cartesian[2]) < 1e-5) {
+            if (first_seen) first_seen = false;
+            else continue;
+          }
+          scan_file << -100. * cartesian[1] << " " << 100. * cartesian[2] << " " << 100. * cartesian[0] << endl;
+        }
+      }
+    }
+
+    scan_file.close();      
+  }
+
   unsigned int panorama::getImageWidth(){
     return iWidth;
   }
@@ -595,8 +744,11 @@ namespace fbr{
   }
 
   void panorama::getDescription(){
-    cout<<"panorama created with width: "<<iWidth<<", and height: "<<iHeight<<", and projection method: "<<projectionMethodToString(pMethod)<<", number of images: "<<nImages<<", projection param: "<<pParam<<"."<<endl;
-    cout<<endl;
+    cout << "panorama created with width: " << iWidth << ", and height: "
+	    << iHeight << ", and projection method: " << projectionMethodToString(pMethod)
+	    << ", number of images: " << nImages << ", projection param: " << pParam << "."
+	    << endl;
+    cout << endl;
   }
 }
 
