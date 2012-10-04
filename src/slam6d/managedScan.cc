@@ -169,6 +169,9 @@ DataPointer ManagedScan::get(const std::string& identifier)
   if(identifier == "reflectance") {
     return m_shared_scan->getReflectance();
   } else
+  if(identifier == "temperature") {
+    return m_shared_scan->getTemperature();
+  } else
   if(identifier == "amplitude") {
     return m_shared_scan->getAmplitude();
   } else

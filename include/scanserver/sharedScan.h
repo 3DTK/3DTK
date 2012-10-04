@@ -102,6 +102,7 @@ public:
   DataXYZ getXYZ();
   DataRGB getRGB();
   DataReflectance getReflectance();
+  DataTemperature getTemperature();
   DataAmplitude getAmplitude();
   DataType getType();
   DataDeviation getDeviation();
@@ -168,7 +169,7 @@ private:
 
 protected:
   ip::offset_ptr<double> m_pose;
-  ip::offset_ptr<CacheObject> m_xyz, m_rgb, m_reflectance, m_amplitude, m_type, m_deviation,
+  ip::offset_ptr<CacheObject> m_xyz, m_rgb, m_reflectance, m_temperature, m_amplitude, m_type, m_deviation,
     m_xyz_reduced, m_xyz_reduced_original,
     m_show_reduced, m_octtree;
   FrameVector m_frames;

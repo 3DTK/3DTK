@@ -91,7 +91,7 @@ bool ScanIO_uosr::supports(IODataType type)
   return !!(type & ( DATA_REFLECTANCE | DATA_XYZ ));
 }
 
-void ScanIO_uosr::readScan(const char* dir_path, const char* identifier, PointFilter& filter, std::vector<double>* xyz, std::vector<unsigned char>* rgb, std::vector<float>* reflectance, std::vector<float>* amplitude, std::vector<int>* type, std::vector<float>* deviation)
+void ScanIO_uosr::readScan(const char* dir_path, const char* identifier, PointFilter& filter, std::vector<double>* xyz, std::vector<unsigned char>* rgb, std::vector<float>* reflectance, std::vector<float>* temperature, std::vector<float>* amplitude, std::vector<int>* type, std::vector<float>* deviation)
 {
   unsigned int i;
 

@@ -53,7 +53,7 @@ public:
    * @param identifier IO-specific identifier for the particular scan
    * @param filter Filter object which each point is tested on by its position
    */
-  virtual void readScan(const char* dir_path, const char* identifier, PointFilter& filter, std::vector<double>* xyz = 0, std::vector<unsigned char>* rgb = 0, std::vector<float>* reflectance = 0, std::vector<float>* amplitude = 0, std::vector<int>* type = 0, std::vector<float>* deviation = 0) = 0;
+  virtual void readScan(const char* dir_path, const char* identifier, PointFilter& filter, std::vector<double>* xyz = 0, std::vector<unsigned char>* rgb = 0, std::vector<float>* reflectance = 0, std::vector<float>* temperature = 0, std::vector<float>* amplitude = 0, std::vector<int>* type = 0, std::vector<float>* deviation = 0) = 0;
   
   /**
    * Returns whether this ScanIO can load the requested data from a scan.

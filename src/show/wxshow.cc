@@ -21,6 +21,7 @@ class SelectionImpl : public Selection {
 		SelectionImpl( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Selection"), bool advanced_controls = false, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( -1,-1 ), long style = wxDEFAULT_FRAME_STYLE|wxTAB_TRAVERSAL ) : Selection(parent, id, title, pos, size, style, advanced_controls) {
   
       if (pointtype.hasReflectance()) m_choice11->Append(wxT("reflectance"));
+      if (pointtype.hasTemperature()) m_choice11->Append(wxT("temperature"));
       if (pointtype.hasAmplitude()) m_choice11->Append(wxT("amplitude"));
       if (pointtype.hasDeviation()) m_choice11->Append(wxT("deviation"));
       if (pointtype.hasType()) m_choice11->Append(wxT("type"));
@@ -89,16 +90,21 @@ class SelectionImpl : public Selection {
             break;
           }
         case 2:
+          if (pointtype.hasTemperature()) {
+            cm->setCurrentType(PointType::USE_TEMPERATURE);
+            break;
+          }
+        case 3:
           if (pointtype.hasAmplitude()) {
             cm->setCurrentType(PointType::USE_AMPLITUDE);
             break;
           }
-        case 3:
+        case 4:
           if (pointtype.hasDeviation()) {
             cm->setCurrentType(PointType::USE_DEVIATION);
             break;
           }
-        case 4:
+        case 5:
           if (pointtype.hasType()) {
             cm->setCurrentType(PointType::USE_TYPE);
             break;

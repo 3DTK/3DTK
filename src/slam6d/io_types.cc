@@ -30,6 +30,8 @@ IOType formatname_to_io_type(const char * string)
   else if (strcasecmp(string, "uos_frames") == 0) return UOS_FRAMES;
   else if (strcasecmp(string, "uos_map_frames") == 0) return UOS_MAP_FRAMES;
   else if (strcasecmp(string, "uos_rgb") == 0) return UOS_RGB;
+  else if (strcasecmp(string, "uos_rrgbt") == 0) return UOS_RRGBT;
+  else if (strcasecmp(string, "uosr") == 0) return UOSR;
   else if (strcasecmp(string, "old") == 0) return OLD;
   else if (strcasecmp(string, "rts") == 0) return RTS;
   else if (strcasecmp(string, "rts_map") == 0) return RTS_MAP;
@@ -80,6 +82,8 @@ const char * io_type_to_libname(IOType  type)
     return "scan_io_uos_map_frames";
   case UOS_RGB:
     return "scan_io_uos_rgb";
+  case UOS_RRGBT:
+    return "scan_io_uos_rrgbt";
   case OLD:
     return "scan_io_old";
   case RTS:
