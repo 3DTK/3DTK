@@ -259,6 +259,7 @@ void newMenu()
   GLUI_RadioGroup *color_rog = glui1->add_radiogroup_to_panel( color_ro, &listboxColorVal, 0, &mapColorToValue );
   glui1->add_radiobutton_to_group( color_rog, "height");
   GLUI_RadioButton *rbrefl =  glui1->add_radiobutton_to_group( color_rog, "reflectance");
+  GLUI_RadioButton *rbtemp =  glui1->add_radiobutton_to_group( color_rog, "temperature");
   GLUI_RadioButton *rbampl = glui1->add_radiobutton_to_group( color_rog, "amplitude");
   GLUI_RadioButton *rbdevi = glui1->add_radiobutton_to_group( color_rog, "deviation");
   GLUI_RadioButton *rbtype = glui1->add_radiobutton_to_group( color_rog, "type");
@@ -267,6 +268,7 @@ void newMenu()
   //if (!(types & PointType::USE_DEVIATION)) rbdevi->disable(); 
   //if (!(types & PointType::USE_TYPE)) rbtype->disable(); 
   if (!(pointtype.hasReflectance())) rbrefl->disable(); 
+  if (!(pointtype.hasTemperature())) rbtemp->disable(); 
   if (!(pointtype.hasAmplitude())) rbampl->disable();
   if (!(pointtype.hasDeviation())) rbdevi->disable(); 
   if (!(pointtype.hasType())) rbtype->disable(); 
@@ -282,6 +284,7 @@ void newMenu()
   glui1->add_radiobutton_to_group(colorm_rog, "Hot");
   glui1->add_radiobutton_to_group(colorm_rog, "Rand");
   glui1->add_radiobutton_to_group(colorm_rog, "SHSV");
+  glui1->add_radiobutton_to_group(colorm_rog, "TEMP");
 
   GLUI_Panel *scans_color = glui1->add_rollout_to_panel(color_panel, "Color type:", false);
   scans_color->set_alignment(GLUI_ALIGN_LEFT);

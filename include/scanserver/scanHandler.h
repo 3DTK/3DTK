@@ -3,6 +3,7 @@
  * @brief 
  *
  * @author Thomas Escher
+ * @author Dorit Borrmann
  */
 
 #ifndef SCAN_HANDLER_H
@@ -48,6 +49,7 @@ private:
   static std::map<SharedScan*, std::vector<double>* > m_prefetch_xyz;
   static std::map<SharedScan*, std::vector<unsigned char>* > m_prefetch_rgb;
   static std::map<SharedScan*, std::vector<float>* > m_prefetch_reflectance;
+  static std::map<SharedScan*, std::vector<float>* > m_prefetch_temperature;
   static std::map<SharedScan*, std::vector<float>* > m_prefetch_amplitude;
   static std::map<SharedScan*, std::vector<int>* > m_prefetch_type;
   static std::map<SharedScan*, std::vector<float>* > m_prefetch_deviation;

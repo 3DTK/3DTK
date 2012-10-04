@@ -137,6 +137,7 @@ void BasicScan::get(unsigned int types)
   vector<double> xyz;
   vector<unsigned char> rgb;
   vector<float> reflectance;
+  vector<float> temperature;
   vector<float> amplitude;
   vector<int> type;
   vector<float> deviation;
@@ -155,6 +156,7 @@ void BasicScan::get(unsigned int types)
                 &xyz,
                 &rgb,
                 &reflectance,
+                &temperature,
                 &amplitude,
                 &type,
                 &deviation);
@@ -171,6 +173,10 @@ void BasicScan::get(unsigned int types)
   if(types & DATA_REFLECTANCE && !reflectance.empty()) {
     float* data = reinterpret_cast<float*>(create("reflectance", sizeof(float) * reflectance.size()).get_raw_pointer());
     for(unsigned int i = 0; i < reflectance.size(); ++i) data[i] = reflectance[i];
+  }
+  if(types & DATA_TEMPERATURE && !temperature.empty()) {
+    float* data = reinterpret_cast<float*>(create("temperature", sizeof(float) * temperature.size()).get_raw_pointer());
+    for(unsigned int i = 0; i < temperature.size(); ++i) data[i] = temperature[i];
   }
   if(types & DATA_AMPLITUDE && !amplitude.empty()) {
     int* data = reinterpret_cast<int*>(create("amplitude", sizeof(int) * amplitude.size()).get_raw_pointer());
@@ -197,6 +203,7 @@ DataPointer BasicScan::get(const std::string& identifier)
     if(identifier == "xyz") get(DATA_XYZ); else
     if(identifier == "rgb") get(DATA_RGB); else
     if(identifier == "reflectance") get(DATA_REFLECTANCE); else
+    if(identifier == "temperature") get(DATA_TEMPERATURE); else
     if(identifier == "amplitude") get(DATA_AMPLITUDE); else
     if(identifier == "type") get(DATA_TYPE); else
     if(identifier == "deviation") get(DATA_DEVIATION); else

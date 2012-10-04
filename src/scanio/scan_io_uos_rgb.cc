@@ -91,7 +91,7 @@ bool ScanIO_uos_rgb::supports(IODataType type)
   return !!(type & (DATA_XYZ | DATA_RGB));
 }
 
-void ScanIO_uos_rgb::readScan(const char* dir_path, const char* identifier, PointFilter& filter, std::vector<double>* xyz, std::vector<unsigned char>* rgb, std::vector<float>* reflectance, std::vector<float>* amplitude, std::vector<int>* type, std::vector<float>* deviation)
+void ScanIO_uos_rgb::readScan(const char* dir_path, const char* identifier, PointFilter& filter, std::vector<double>* xyz, std::vector<unsigned char>* rgb, std::vector<float>* reflectance, std::vector<float>* temperature, std::vector<float>* amplitude, std::vector<int>* type, std::vector<float>* deviation)
 {
   unsigned int i;
   
@@ -101,7 +101,7 @@ void ScanIO_uos_rgb::readScan(const char* dir_path, const char* identifier, Poin
   if(!exists(data_path))
     throw std::runtime_error(std::string("There is no scan file for [") + identifier + "] in [" + dir_path + "]");
   
-  if(xyz != 0 || rgb != 0) {
+  if(xyz != 0 && rgb != 0) {
     // open data file
     ifstream data_file(data_path);
     data_file.exceptions(ifstream::eofbit|ifstream::failbit|ifstream::badbit);

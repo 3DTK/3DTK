@@ -25,6 +25,8 @@ ServerScan::ServerScan(const ip::allocator<void, SegmentManager> & allocator,
   m_rgb->setCacheHandler(new ScanHandler(m_rgb.get(), cm, this, DATA_RGB));
   m_reflectance = cm->createCacheObject();
   m_reflectance->setCacheHandler(new ScanHandler(m_reflectance.get(), cm, this, DATA_REFLECTANCE));
+  m_temperature = cm->createCacheObject();
+  m_temperature->setCacheHandler(new ScanHandler(m_temperature.get(), cm, this, DATA_TEMPERATURE));
   m_amplitude = cm->createCacheObject();
   m_amplitude->setCacheHandler(new ScanHandler(m_amplitude.get(), cm, this, DATA_AMPLITUDE));
   m_type = cm->createCacheObject();

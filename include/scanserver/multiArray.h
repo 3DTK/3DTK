@@ -64,6 +64,7 @@ public:
 typedef TripleArray<double> DataXYZ;
 typedef TripleArray<unsigned char> DataRGB;
 typedef SingleArray<float> DataReflectance;
+typedef SingleArray<float> DataTemperature;
 typedef SingleArray<float> DataAmplitude;
 typedef SingleArray<int> DataType;
 typedef SingleArray<float> DataDeviation;
