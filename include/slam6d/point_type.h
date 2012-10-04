@@ -30,6 +30,7 @@ public:
 
   static const unsigned int USE_NONE;
   static const unsigned int USE_REFLECTANCE;
+  static const unsigned int USE_TEMPERATURE;
   static const unsigned int USE_AMPLITUDE;
   static const unsigned int USE_DEVIATION;
   static const unsigned int USE_HEIGHT;
@@ -43,6 +44,7 @@ public:
   PointType(unsigned int _types);
 
   bool hasReflectance();
+  bool hasTemperature();
   bool hasAmplitude();
   bool hasDeviation();
   bool hasType();
@@ -51,6 +53,7 @@ public:
   bool hasIndex();
 
   unsigned int getReflectance();
+  unsigned int getTemperature();
   unsigned int getAmplitude();
   unsigned int getDeviation(); 
   unsigned int getTime();
@@ -104,7 +107,7 @@ private:
   /**
    * Derived from types, to map type to the array index for each point
    **/
-  int dimensionmap[8];
+  int dimensionmap[9];
 
   bool hasType(unsigned int type);
 
@@ -113,6 +116,7 @@ private:
   DataXYZ* m_xyz;
   DataRGB* m_rgb;
   DataReflectance* m_reflectance;
+  DataTemperature* m_temperature;
   DataAmplitude* m_amplitude;
   DataType* m_type;
   DataDeviation* m_deviation;
@@ -129,6 +133,9 @@ T *PointType::createPoint(const Point &P, unsigned int index ) {
   p[counter++] = P.z;
   if (types & USE_REFLECTANCE) {
     p[counter++] = P.reflectance;
+  }
+  if (types & USE_TEMPERATURE) {
+    p[counter++] = P.temperature;
   }
   if (types & USE_AMPLITUDE) {
     p[counter++] = P.amplitude;
@@ -164,6 +171,9 @@ Point PointType::createPoint(T *p) {
   if (types & USE_REFLECTANCE) {
     P.reflectance = p[counter++];
   }
+  if (types & USE_TEMPERATURE) {
+    P.temperature = p[counter++];
+  }
   if (types & USE_AMPLITUDE) {
     P.amplitude = p[counter++];
   }
@@ -195,6 +205,9 @@ T *PointType::createPoint(unsigned int i, unsigned int index) {
   // if a type is requested try to write the value if the scan provided one
   if (types & USE_REFLECTANCE) {
     p[counter++] = (m_reflectance? (*m_reflectance)[i]: 0);
+  }
+  if (types & USE_TEMPERATURE) {
+    p[counter++] = (m_temperature? (*m_temperature)[i]: 0);
   }
   if (types & USE_AMPLITUDE) {
     p[counter++] = (m_amplitude? (*m_amplitude)[i]: 0);

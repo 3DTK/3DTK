@@ -122,7 +122,7 @@ bool ScanIO_rxp::supports(IODataType type)
   return !!(type & (DATA_XYZ | DATA_REFLECTANCE | DATA_AMPLITUDE | DATA_DEVIATION | DATA_TYPE));
 }
 
-void ScanIO_rxp::readScan(const char* dir_path, const char* identifier, PointFilter& filter, std::vector<double>* xyz, std::vector<unsigned char>* rgb, std::vector<float>* reflectance, std::vector<float>* amplitude, std::vector<int>* type, std::vector<float>* deviation)
+void ScanIO_rxp::readScan(const char* dir_path, const char* identifier, PointFilter& filter, std::vector<double>* xyz, std::vector<unsigned char>* rgb, std::vector<float>* reflectance, std::vector<float>* temperature, std::vector<float>* amplitude, std::vector<int>* type, std::vector<float>* deviation)
 {
   
   path data_path(dir_path);

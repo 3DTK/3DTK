@@ -30,6 +30,7 @@ bool ScanHandler::binary_caching = false;
 std::map<SharedScan*, std::vector<double>* > ScanHandler::m_prefetch_xyz;
 std::map<SharedScan*, std::vector<unsigned char>* > ScanHandler::m_prefetch_rgb;
 std::map<SharedScan*, std::vector<float>* > ScanHandler::m_prefetch_reflectance;
+std::map<SharedScan*, std::vector<float>* > ScanHandler::m_prefetch_temperature;
 std::map<SharedScan*, std::vector<float>* > ScanHandler::m_prefetch_amplitude;
 std::map<SharedScan*, std::vector<int>* > ScanHandler::m_prefetch_type;
 std::map<SharedScan*, std::vector<float>* > ScanHandler::m_prefetch_deviation;
@@ -158,6 +159,7 @@ bool ScanHandler::load()
   PrefetchVector<double> xyz(m_scan, m_prefetch_xyz);
   PrefetchVector<unsigned char> rgb(m_scan, m_prefetch_rgb);
   PrefetchVector<float> reflectance(m_scan, m_prefetch_reflectance);
+  PrefetchVector<float> temperature(m_scan, m_prefetch_temperature);
   PrefetchVector<float> amplitude(m_scan, m_prefetch_amplitude);
   PrefetchVector<int> type(m_scan, m_prefetch_type);
   PrefetchVector<float> deviation(m_scan, m_prefetch_deviation);
@@ -167,6 +169,7 @@ bool ScanHandler::load()
   if(m_data == DATA_XYZ) vec = &xyz;
   else if(m_data == DATA_RGB) vec = &rgb;
   else if(m_data == DATA_REFLECTANCE) vec = &reflectance;
+  else if(m_data == DATA_TEMPERATURE) vec = &temperature;
   else if(m_data == DATA_AMPLITUDE) vec = &amplitude;
   else if(m_data == DATA_TYPE) vec = &type;
   else if(m_data == DATA_DEVIATION) vec = &deviation;
@@ -187,6 +190,7 @@ bool ScanHandler::load()
     if(prefetch & DATA_XYZ) xyz.create();
     if(prefetch & DATA_RGB) rgb.create();
     if(prefetch & DATA_REFLECTANCE) reflectance.create();
+    if(prefetch & DATA_TEMPERATURE) temperature.create();
     if(prefetch & DATA_AMPLITUDE) amplitude.create();
     if(prefetch & DATA_TYPE) type.create();
     if(prefetch & DATA_DEVIATION) deviation.create();
@@ -196,7 +200,7 @@ bool ScanHandler::load()
       PointFilter filter(m_scan->getPointFilter());
       sio->readScan(m_scan->getDirPath(), m_scan->getIdentifier(),
         filter,
-        xyz.get(), rgb.get(), reflectance.get(), amplitude.get(), type.get(), deviation.get());
+        xyz.get(), rgb.get(), reflectance.get(), temperature.get(), amplitude.get(), type.get(), deviation.get());
     } catch(std::runtime_error& e) {
       // INFO
       // cerr << "[" << m_scan->getIdentifier() << "][" << m_data << "] ScanIO runtime_error: " << e.what() << endl;
@@ -229,6 +233,7 @@ bool ScanHandler::load()
   xyz.save();
   rgb.save();
   reflectance.save();
+  temperature.save();
   amplitude.save();
   type.save();
   deviation.save();

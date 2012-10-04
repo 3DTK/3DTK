@@ -515,6 +515,7 @@ void ScanIO_velodyne::readScan(
     std::vector<double>* xyz,
     std::vector<unsigned char>* rgb,
     std::vector<float>* reflectance,
+    std::vector<float>* temperature,
     std::vector<float>* amplitude,
     std::vector<int>* type,
     std::vector<float>* deviation)

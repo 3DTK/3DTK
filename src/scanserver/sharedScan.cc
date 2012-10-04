@@ -213,6 +213,10 @@ DataReflectance SharedScan::getReflectance() {
   return m_reflectance->getCacheData<SharedScan::onCacheMiss>();
 }
 
+DataTemperature SharedScan::getTemperature() {
+  return m_temperature->getCacheData<SharedScan::onCacheMiss>();
+}
+
 DataAmplitude SharedScan::getAmplitude() {
   return m_amplitude->getCacheData<SharedScan::onCacheMiss>();
 }

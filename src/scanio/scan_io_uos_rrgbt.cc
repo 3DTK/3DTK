@@ -1,21 +1,23 @@
 /*
- * scan_io_riegl_txt implementation
+ * scan_io_uos_rrgbt implementation
  *
- * Copyright (C) Thomas Escher, Kai Lingemann, Andreas Nuechter
+ * Copyright (C) Dorit Borrmann, Thomas Escher, Kai Lingemann, Andreas Nuechter
  *
  * Released under the GPL version 3.
  *
  */
 
+
 /**
  * @file
  * @brief Implementation of reading 3D scans
+ * @author Dorit Borrmann. School of Engineering and Science, Jacobs University * Bremen, Germany.
  * @author Kai Lingemann. Institute of Computer Science, University of Osnabrueck, Germany.
  * @author Andreas Nuechter. Institute of Computer Science, University of Osnabrueck, Germany.
- * @author Thomas Escher
+ * @author Thomas Escher. Institute of Computer Science, University of Osnabrueck, Germany.
  */
 
-#include "scanio/scan_io_riegl_txt.h"
+#include "scanio/scan_io_uos_rrgbt.h"
 
 #include <iostream>
 using std::cout;
@@ -36,13 +38,13 @@ using namespace boost::filesystem;
 
 
 #define DATA_PATH_PREFIX "scan"
-#define DATA_PATH_SUFFIX ".txt"
+#define DATA_PATH_SUFFIX ".3d"
 #define POSE_PATH_PREFIX "scan"
-#define POSE_PATH_SUFFIX ".dat"
+#define POSE_PATH_SUFFIX ".pose"
 
 
 
-std::list<std::string> ScanIO_riegl_txt::readDirectory(const char* dir_path, unsigned int start, unsigned int end)
+std::list<std::string> ScanIO_uos_rrgbt::readDirectory(const char* dir_path, unsigned int start, unsigned int end)
 {
   std::list<std::string> identifiers;
   for(unsigned int i = start; i <= end; ++i) {
@@ -61,7 +63,7 @@ std::list<std::string> ScanIO_riegl_txt::readDirectory(const char* dir_path, uns
   return identifiers;
 }
 
-void ScanIO_riegl_txt::readPose(const char* dir_path, const char* identifier, double* pose)
+void ScanIO_uos_rrgbt::readPose(const char* dir_path, const char* identifier, double* pose)
 {
   unsigned int i;
   
@@ -75,50 +77,23 @@ void ScanIO_riegl_txt::readPose(const char* dir_path, const char* identifier, do
   
   // if the file is open, read contents
   if(pose_file.good()) {
-    double rPos[3], rPosTheta[16];
-    double inMatrix[16], tMatrix[16];
-    
-    for (i = 0; i < 16; ++i)
-      pose_file >> inMatrix[i];
+    // read 6 plain doubles
+    for(i = 0; i < 6; ++i) pose_file >> pose[i];
     pose_file.close();
     
-    // transform input pose
-    tMatrix[0] = inMatrix[5];
-    tMatrix[1] = -inMatrix[9];
-    tMatrix[2] = -inMatrix[1];
-    tMatrix[3] = -inMatrix[13];
-    tMatrix[4] = -inMatrix[6];
-    tMatrix[5] = inMatrix[10];
-    tMatrix[6] = inMatrix[2];
-    tMatrix[7] = inMatrix[14];
-    tMatrix[8] = -inMatrix[4];
-    tMatrix[9] = inMatrix[8];
-    tMatrix[10] = inMatrix[0];
-    tMatrix[11] = inMatrix[12];
-    tMatrix[12] = -inMatrix[7];
-    tMatrix[13] = inMatrix[11];
-    tMatrix[14] = inMatrix[3];
-    tMatrix[15] = inMatrix[15];
-    
-    Matrix4ToEuler(tMatrix, rPosTheta, rPos);
-    
-    pose[0] = 100*rPos[0];
-    pose[1] = 100*rPos[1];
-    pose[2] = 100*rPos[2];
-    pose[3] = rPosTheta[0];
-    pose[4] = rPosTheta[1];
-    pose[5] = rPosTheta[2];
+    // convert angles from deg to rad
+    for(i = 3; i < 6; ++i) pose[i] = rad(pose[i]);
   } else {
     throw std::runtime_error(std::string("Pose file could not be opened for [") + identifier + "] in [" + dir_path + "]");
   }
 }
 
-bool ScanIO_riegl_txt::supports(IODataType type)
+bool ScanIO_uos_rrgbt::supports(IODataType type)
 {
-  return !!(type & (DATA_XYZ | DATA_REFLECTANCE));
+  return !!(type & (DATA_XYZ | DATA_REFLECTANCE | DATA_RGB | DATA_TEMPERATURE));
 }
 
-void ScanIO_riegl_txt::readScan(const char* dir_path, const char* identifier, PointFilter& filter, std::vector<double>* xyz, std::vector<unsigned char>* rgb, std::vector<float>* reflectance, std::vector<float>* temperature, std::vector<float>* amplitude, std::vector<int>* type, std::vector<float>* deviation)
+void ScanIO_uos_rrgbt::readScan(const char* dir_path, const char* identifier, PointFilter& filter, std::vector<double>* xyz, std::vector<unsigned char>* rgb, std::vector<float>* reflectance, std::vector<float>* temperature, std::vector<float>* amplitude, std::vector<int>* type, std::vector<float>* deviation)
 {
   unsigned int i;
   
@@ -128,45 +103,35 @@ void ScanIO_riegl_txt::readScan(const char* dir_path, const char* identifier, Po
   if(!exists(data_path))
     throw std::runtime_error(std::string("There is no scan file for [") + identifier + "] in [" + dir_path + "]");
   
-  if(xyz != 0 || reflectance != 0) {
+  if(xyz != 0 && rgb != 0 && reflectance != 0 && temperature != 0) {
     // open data file
     ifstream data_file(data_path);
     data_file.exceptions(ifstream::eofbit|ifstream::failbit|ifstream::badbit);
-
-    // read the point count
-    unsigned int count;
-    data_file >> count;
     
-    // reserve enough space for faster reading
-    xyz->reserve(3*count);
+    // overread the first line ignoring the header information
+    char dummy[255];
+    data_file.getline(dummy, 255);
     
     // read points
-    // z x y range theta phi reflectance
-    double point[7];
-    double tmp;
+    double point[4];
+    unsigned int color[3];
+    double temp;
     while(data_file.good()) {
       try {
-        for(i = 0; i < 7; ++i) data_file >> point[i];
+        for(i = 0; i < 4; ++i) data_file >> point[i];
+        for(i = 0; i < 3; ++i) data_file >> color[i];
+        data_file >> temp;
       } catch(std::ios_base::failure& e) {
         break;
       }
       
-      // the enemy's x/y/z is mapped to slam's z/x/y, shuffle time!
-      // invert x axis
-      // convert coordinate to cm
-      tmp = point[2];
-      point[2] = 100.0 * point[0];
-      point[0] = -100.0 * point[1]; 
-      point[1] = 100.0 * tmp;
-      
       // apply filter and insert point
       if(filter.check(point)) {
-        if(xyz != 0) {
-          for(i = 0; i < 3; ++i) xyz->push_back(point[i]);
-        }
-        if(reflectance != 0) {
-          reflectance->push_back(point[6]);
-        }
+        for(i = 0; i < 3; ++i) xyz->push_back(point[i]);
+        reflectance->push_back(point[3]);
+        for(i = 0; i < 3; ++i) rgb->push_back(
+          static_cast<unsigned char>(color[i]));  
+        temperature->push_back(temp);
       }
     }
     data_file.close();
@@ -186,7 +151,7 @@ extern "C" __declspec(dllexport) ScanIO* create()
 extern "C" ScanIO* create()
 #endif
 {
-  return new ScanIO_riegl_txt;
+  return new ScanIO_uos_rrgbt;
 }
 
 

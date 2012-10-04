@@ -1905,15 +1905,18 @@ void mapColorToValue(int dummy) {
       cm->setCurrentType(PointType::USE_REFLECTANCE);
       break;
     case 2:
-      cm->setCurrentType(PointType::USE_AMPLITUDE);
+      cm->setCurrentType(PointType::USE_TEMPERATURE);
       break;
     case 3:
-      cm->setCurrentType(PointType::USE_DEVIATION);
+      cm->setCurrentType(PointType::USE_AMPLITUDE);
       break;
     case 4:
-      cm->setCurrentType(PointType::USE_TYPE);
+      cm->setCurrentType(PointType::USE_DEVIATION);
       break;
     case 5:
+      cm->setCurrentType(PointType::USE_TYPE);
+      break;
+    case 6:
       cm->setCurrentType(PointType::USE_COLOR);
       break;
     default:
@@ -1930,6 +1933,7 @@ void changeColorMap(int dummy) {
   JetMap jm;
   HotMap hot;
   DiffMap diff;
+  TempMap temp;
 
   switch (listboxColorMapVal) {
     case 0:
@@ -1953,6 +1957,9 @@ void changeColorMap(int dummy) {
       break;
     case 6:
       cm->setColorMap(shsv);
+      break;
+    case 7:
+      cm->setColorMap(temp);
       break;
     default:
       break;

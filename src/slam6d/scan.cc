@@ -120,6 +120,7 @@ void Scan::clear(unsigned int types)
   if(types & DATA_XYZ) clear("xyz");
   if(types & DATA_RGB) clear("rgb");
   if(types & DATA_REFLECTANCE) clear("reflectance");
+  if(types & DATA_TEMPERATURE) clear("temperature");
   if(types & DATA_AMPLITUDE) clear("amplitude");
   if(types & DATA_TYPE) clear("type");
   if(types & DATA_DEVIATION) clear("deviation");

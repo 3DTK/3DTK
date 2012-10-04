@@ -21,7 +21,8 @@ class ColorMap {
       HSV = 2,
       JET = 3,
       HOT = 4,
-      SHSV = 5
+      SHSV = 5,
+      TEMP = 6
     };
 
     virtual ~ColorMap() {};
@@ -93,6 +94,34 @@ class HotMap : public ColorMap {
     } else {
       d[0] = 1.0; d[1] = 1.0; d[2] = (t-(2.0/3.0))/(1.0/3.0);
     }
+  }
+};
+
+class TempMap : public ColorMap {
+  public:
+  virtual void calcColor(float *d, unsigned int i, unsigned int buckets) {
+    float t = 1.0 - (float)i/(float)buckets;
+    
+    if(t <= 1.0/5.0) {
+      d[1] = d[2] = 0.0;
+      d[0] = t/(1.0/5.0);
+    } else if(t <=2.0/5.0) {
+      d[0] = 1.0;
+      d[1] = (t-(1.0/5.0))/(1.0/5.0);
+      d[2] = 0.0;
+    } else if(t <=3.0/5.0) {
+      d[0] = 1.0 - ((t-(2.0/5.0))/(1.0/5.0));
+      d[1] = 1.0;
+      d[2] = (t-(2.0/5.0))/(1.0/5.0);
+    } else if(t <=4.0/5.0) {
+      d[0] = 0.0;
+      d[1] = 1.0 - ((t-(3.0/5.0))/(1.0/5.0));
+      d[2] = 1.0;
+    } else {
+      d[0] = 0.0; 
+      d[1] = 0.0; 
+      d[2] = 1.0 - ((t-(4.0/5.0))/(1.3/5.0));
+    } 
   }
 };
 

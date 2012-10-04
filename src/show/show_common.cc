@@ -379,6 +379,10 @@ void usage(char* prog)
 	  << "         use reflectivity values for coloring point clouds" << endl
 	  << "         only works when using octree display" << endl
 	  << endl
+    << bold << "  -D, --temperature, --degree" << normal << endl
+	  << "         use temperature values for coloring point clouds" << endl
+	  << "         only works when using octree display" << endl
+	  << endl
     << bold << "  -a, --amplitude" << endl << normal
 	  << "         use amplitude values for coloring point clouds" << endl
 	  << "         only works when using octree display" << endl
@@ -457,6 +461,8 @@ int parseArgs(int argc,char **argv, string &dir, int& start, int& end, int& maxD
     { "octree",          optional_argument,   0,  'O' },
     { "reflectance",     no_argument,         0,  'R' },
     { "reflectivity",    no_argument,         0,  'R' },
+    { "temperature",     no_argument,         0,  'D' },
+    { "degree",          no_argument,         0,  'D' },
     { "amplitude",       no_argument,         0,  'a' },
     { "deviation",       no_argument,         0,  'd' },
     { "height",          no_argument,         0,  'h' },
@@ -471,7 +477,7 @@ int parseArgs(int argc,char **argv, string &dir, int& start, int& end, int& maxD
     { 0,           0,   0,   0}                    // needed, cf. getopt.h
   };
 
-  while ((c = getopt_long(argc, argv,"F:f:s:e:r:m:M:O:o:l:C:SwtRadhTcb", longopts, NULL)) != -1) {
+  while ((c = getopt_long(argc, argv,"F:f:s:e:r:m:M:O:o:l:C:SwtRDadhTcb", longopts, NULL)) != -1) {
     switch (c) {
       case 's':
         w_start = atoi(optarg);
@@ -514,6 +520,9 @@ int parseArgs(int argc,char **argv, string &dir, int& start, int& end, int& maxD
         return 1;
       case 'R':
         types |= PointType::USE_REFLECTANCE;
+        break;
+      case 'D':
+        types |= PointType::USE_TEMPERATURE;
         break;
       case 'a':
         types |= PointType::USE_AMPLITUDE;

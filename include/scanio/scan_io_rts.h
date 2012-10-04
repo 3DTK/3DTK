@@ -4,8 +4,8 @@
  * @author Thomas Escher
  */
 
-#ifndef __SCAN_IO_UOS_H__
-#define __SCAN_IO_UOS_H__
+#ifndef __SCAN_IO_RTS_H__
+#define __SCAN_IO_RTS_H__
 
 #include "scan_io.h"
 
@@ -20,7 +20,7 @@ class ScanIO_rts : public ScanIO {
 public:
   virtual std::list<std::string> readDirectory(const char* dir_path, unsigned int start, unsigned int end);
   virtual void readPose(const char* dir_path, const char* identifier, double* pose);
-  virtual void readScan(const char* dir_path, const char* identifier, PointFilter& filter, std::vector<double>* xyz, std::vector<unsigned char>* rgb, std::vector<float>* reflectance, std::vector<float>* amplitude, std::vector<int>* type, std::vector<float>* deviation);
+  virtual void readScan(const char* dir_path, const char* identifier, PointFilter& filter, std::vector<double>* xyz, std::vector<unsigned char>* rgb, std::vector<float>* reflectance, std::vector<float>* temperature, std::vector<float>* amplitude, std::vector<int>* type, std::vector<float>* deviation);
   virtual bool supports(IODataType type);
 private:
   std::string cached_dir;
