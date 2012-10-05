@@ -164,7 +164,16 @@ ELSE(WITH_TOOLS)
   MESSAGE(STATUS "Without Tools")
 ENDIF(WITH_TOOLS)
 
+## Segmentation
 
+OPTION(WITH_SEGMENTATION "Whether to build scan segmantion program ON/OFF" OFF)
+
+IF(WITH_SEGMENTATION)
+  MESSAGE(STATUS "With segmentation")
+  find_package (Boost COMPONENTS program_options REQUIRED)
+ELSE(WITH_SEGMENTATION)
+  MESSAGE(STATUS "Without segmentation")
+ENDIF(WITH_SEGMENTATION)
 
 ## CAD matching
 OPTION (WITH_CAD "Wether to build with CAD import lib ON/OFF" OFF)
@@ -370,6 +379,7 @@ add_subdirectory(3rdparty)
 add_subdirectory(src/slam6d)
 add_subdirectory(src/scanio)
 add_subdirectory(src/scanserver)
+add_subdirectory(src/segmentation)
 add_subdirectory(src/veloslam)
 add_subdirectory(src/show)
 add_subdirectory(src/grid)
