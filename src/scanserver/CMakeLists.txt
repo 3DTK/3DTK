@@ -42,7 +42,7 @@ set(SERVER_LIBS ${Boost_LIBRARIES} scanclient scanio)
 
 if(UNIX)
   # boost::interprocess uses pthread, requiring librt
-  #set(SERVER_LIBS ${SERVER_LIBS} rt)
+  set(SERVER_LIBS ${SERVER_LIBS} rt)
 endif(UNIX)
 
 if(WIN32)
