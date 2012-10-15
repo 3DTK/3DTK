@@ -34,6 +34,7 @@ namespace fbr{
     double zMax;
     double zMin;
     IOType sFormat;
+    bool scanserver;
     
   public:
     /**
@@ -41,8 +42,9 @@ namespace fbr{
      * @param dir directory of the input scan file
      * @param number input scan number
      * @param format input scan file format
+     * @param scanServer 
      */
-    scan_cv (string dir, unsigned int number, IOType format);
+    scan_cv (string dir, unsigned int number, IOType format, bool scanServer);
     /**
      * @brief read scan file and convert it to open cv Mat
      */

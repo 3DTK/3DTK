@@ -112,7 +112,12 @@ public:
   
   //! Create a new set of reduced points
   DataXYZ createXYZReduced(unsigned int size);
+
+
+  //! Create a new set of reflectance
+  DataReflectance createReflectance(unsigned int size);
   
+
   //! Reduced untransformed points
   DataXYZ getXYZReducedOriginal();
   

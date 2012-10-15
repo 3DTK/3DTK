@@ -18,7 +18,7 @@ set(CLIENT_LIBS ${Boost_LIBRARIES} pointfilter)
 
 if(UNIX AND NOT APPLE)
   # boost::interprocess uses pthread, requiring librt                                                                                                                                                           
-  #set(CLIENT_LIBS ${CLIENT_LIBS} rt)
+  set(CLIENT_LIBS ${CLIENT_LIBS} rt)
 endif(UNIX AND NOT APPLE)
 
 target_link_libraries(scanclient ${CLIENT_LIBS})
@@ -40,10 +40,10 @@ add_executable(scanserver ${SERVER_SRCS})
 # scanio for ScanHandler input
 set(SERVER_LIBS ${Boost_LIBRARIES} scanclient scanio)
 
-if(UNIX)
+if(UNIX AND NOT APPLE)
   # boost::interprocess uses pthread, requiring librt
   set(SERVER_LIBS ${SERVER_LIBS} rt)
-endif(UNIX)
+endif(UNIX AND NOT APPLE)
 
 if(WIN32)
   # 3rd party getopt library

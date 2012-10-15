@@ -46,6 +46,11 @@ namespace fbr{
   void feature_matcher::match(feature qFeature, feature tFeature){
     vector< cv::DMatch > qtInitialMatches, tqInitialMatches, gMatches;
     vector<vector<cv::DMatch> > qtInitialMatchesVector, tqInitialMatchesVector;
+    if(qFeature.getFeatures().size() == 0 || tFeature.getFeatures().size() == 0){
+      cout<<"No features has found in one or both scans!!"<<endl;
+      exit(-1);
+    }
+
     //Matching descriptors using one of the mMethods for SURF and SIFT feature descriptors
     if(qFeature.getDescriptorMethod() != tFeature.getDescriptorMethod()){
       cout<<"inputs features don't have the same descriptors!"<<endl;
@@ -98,11 +103,16 @@ namespace fbr{
 	  }
 	}	
       }
-      if(mMethod == BRUTEFORCE){
+      if(mMethod == BRUTEFORCE){	
+	//opencv 2.4
+#if (CV_MAJOR_VERSION >= 2) && (CV_MINOR_VERSION >= 4)
+	cv::BFMatcher matcher (cv::NORM_L2);
+#else  //older version of opencv than 2.4
 	cv::BruteForceMatcher< cv::L2<float> > matcher;
+#endif
 	matcher.match(qFeature.getDescriptors(), tFeature.getDescriptors(), qtInitialMatches);
 	matcher.match(tFeature.getDescriptors(), qFeature.getDescriptors(), tqInitialMatches);
-    }
+      }
       if(mMethod == FLANN){
 	cv::FlannBasedMatcher matcher;
 	matcher.match(qFeature.getDescriptors(), tFeature.getDescriptors(), qtInitialMatches);
@@ -123,12 +133,22 @@ namespace fbr{
     //Matching descriptors using BruteFore with Hamming distance for ORB descriptor
     else if(qFeature.getDescriptorMethod() == ORB_DES){
       if(mMethod == KNN){
+	//opencv 2.4
+#if (CV_MAJOR_VERSION >= 2) && (CV_MINOR_VERSION >= 4)
+	cv::BFMatcher matcher (cv::NORM_HAMMING);
+#else  //older version of opencv than 2.4
 	cv::BruteForceMatcher< cv::Hamming > matcher;
+#endif
 	matcher.knnMatch(qFeature.getDescriptors(), tFeature.getDescriptors(), qtInitialMatchesVector, knn);
 	matcher.knnMatch(tFeature.getDescriptors(), qFeature.getDescriptors(), tqInitialMatchesVector, knn);
       }
       if(mMethod == RADIUS){
+	//opencv 2.4
+#if (CV_MAJOR_VERSION >= 2) && (CV_MINOR_VERSION >= 4)
+	cv::BFMatcher matcher (cv::NORM_HAMMING);
+#else  //older version of opencv than 2.4
 	cv::BruteForceMatcher< cv::Hamming > matcher;
+#endif
 	matcher.radiusMatch(qFeature.getDescriptors(), tFeature.getDescriptors(), qtInitialMatchesVector, radius);
 	matcher.radiusMatch(tFeature.getDescriptors(), qFeature.getDescriptors(), tqInitialMatchesVector, radius);
       }
@@ -146,7 +166,12 @@ namespace fbr{
 	}
       }
       if(mMethod == RATIO){
+	//opencv 2.4
+#if (CV_MAJOR_VERSION >= 2) && (CV_MINOR_VERSION >= 4)
+	cv::BFMatcher matcher (cv::NORM_HAMMING);
+#else  //older version of opencv than 2.4
 	cv::BruteForceMatcher< cv::Hamming > matcher;
+#endif
 	matcher.knnMatch(qFeature.getDescriptors(), tFeature.getDescriptors(), qtInitialMatchesVector, 2);
 	for(unsigned int i = 0; i < qtInitialMatchesVector.size(); i++){
 	  float ratio = qtInitialMatchesVector[i][0].distance/qtInitialMatchesVector[i][1].distance;
@@ -167,7 +192,12 @@ namespace fbr{
 	}
       }
       if(mMethod == BRUTEFORCE){
+	//opencv 2.4
+#if (CV_MAJOR_VERSION >= 2) && (CV_MINOR_VERSION >= 4)
+	cv::BFMatcher matcher (cv::NORM_HAMMING);
+#else  //older version of opencv than 2.4
 	cv::BruteForceMatcher< cv::Hamming > matcher;
+#endif
 	matcher.match(qFeature.getDescriptors(), tFeature.getDescriptors(), qtInitialMatches);
 	matcher.match(tFeature.getDescriptors(), qFeature.getDescriptors(), tqInitialMatches); 
 	for(unsigned int i = 0; i < qtInitialMatches.size(); i++){
@@ -206,7 +236,7 @@ namespace fbr{
   vector<cv::DMatch> feature_matcher::getMatches(){
     return matches;
   }
-
+  
   matcher_method feature_matcher::getMatcherMethod(){
     return mMethod;
   }
