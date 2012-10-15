@@ -30,21 +30,29 @@ namespace fbr{
     double radius;
     unsigned int nOfMatches;
     unsigned int nOfFilteredMatches;
+    matching_filtration_method mFiltrationMethod;
     
-    void init(matcher_method method, int k, double r);
+    void init(matcher_method method, int k, double r, matching_filtration_method filtration);
+    void findMatches(feature qFeature, feature tFeature);
     
   public:
     feature_matcher();
     feature_matcher(matcher_method method);
     feature_matcher(matcher_method method, double p);
+    feature_matcher(matcher_method method, double p, matching_filtration_method filtration);
+
     void match(feature qFeature, feature tFeature);
+
     vector<cv::DMatch> getMatches();
     matcher_method getMatcherMethod();
+    matching_filtration_method getMatchingFiltrationMethod();
     unsigned int getKnn();
     double getRadius();
     unsigned int getNumberOfMatches();
     unsigned int getNumberOfFilteredMatches();
     void getDescription();
+
+    void setMatchingFiltrationMethod(matching_filtration_method method);
   };
 }
 #endif /* FEATURE_MATCHER_H_ */

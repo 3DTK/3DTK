@@ -13,39 +13,49 @@ using namespace std;
 
 namespace fbr{
   
-  void feature_matcher::init(matcher_method method, int k, double r){
+  void feature_matcher::init(matcher_method method, int k, double r, matching_filtration_method filtration){
     mMethod = method;
     knn = k;
     radius = r;
     nOfMatches = 0;
     nOfFilteredMatches = 0;
+    mFiltrationMethod = filtration;
   }
 
   feature_matcher::feature_matcher(){
-    init(RATIO, 0, 0);
+    init(RATIO, 0, 0, DISABLE_MATCHING_FILTER);
   }
 
   feature_matcher::feature_matcher(matcher_method method){
     if(method == KNN)
-      init(method, 3, 0);
+      init(method, 3, 0, DISABLE_MATCHING_FILTER);
     else if(method == RADIUS)
-      init(method, 0, 1);
+      init(method, 0, 1, DISABLE_MATCHING_FILTER);
     else
-      init(method, 0, 0);
+      init(method, 0, 0, DISABLE_MATCHING_FILTER);
   }
 
   feature_matcher::feature_matcher(matcher_method method, double p){
     if(method == KNN)
-      init(method, p, 0);
+      init(method, p, 0, DISABLE_MATCHING_FILTER);
     else if(method == RADIUS)
-      init(method, 0, p);
+      init(method, 0, p, DISABLE_MATCHING_FILTER);
     else
-      init(method, 0, 0);
+      init(method, 0, 0, DISABLE_MATCHING_FILTER);
   }
-  
-  void feature_matcher::match(feature qFeature, feature tFeature){
-    vector< cv::DMatch > qtInitialMatches, tqInitialMatches, gMatches;
-    vector<vector<cv::DMatch> > qtInitialMatchesVector, tqInitialMatchesVector;
+
+  feature_matcher::feature_matcher(matcher_method method, double p, matching_filtration_method filtration){
+    if(method == KNN)
+      init(method, p, 0, filtration);
+    else if(method == RADIUS)
+      init(method, 0, p, filtration);
+    else
+      init(method, 0, 0, filtration);
+  }
+
+  void feature_matcher::findMatches(feature qFeature, feature tFeature){
+    vector< cv::DMatch > qtInitialMatches;
+    vector<vector<cv::DMatch> > qtInitialMatchesVector;
     if(qFeature.getFeatures().size() == 0 || tFeature.getFeatures().size() == 0){
       cout<<"No features has found in one or both scans!!"<<endl;
       exit(-1);
@@ -57,51 +67,17 @@ namespace fbr{
       cout<<"qFeature DescriptorMethod="<<qFeature.getDescriptorMethod()<<endl;
       cout<<"tFeature DescriptorMethod="<<tFeature.getDescriptorMethod()<<endl;
     } else if( qFeature.getDescriptorMethod() == SURF_DES || qFeature.getDescriptorMethod() == SIFT_DES){
-      
       if(mMethod == KNN){
 	cv::FlannBasedMatcher matcher;
 	matcher.knnMatch(qFeature.getDescriptors(), tFeature.getDescriptors(), qtInitialMatchesVector, knn);
-	matcher.knnMatch(tFeature.getDescriptors(), qFeature.getDescriptors(), tqInitialMatchesVector, knn);
       }
       if(mMethod == RADIUS){
 	cv::FlannBasedMatcher matcher;
 	matcher.radiusMatch(qFeature.getDescriptors(), tFeature.getDescriptors(), qtInitialMatchesVector, radius);
-	matcher.radiusMatch(tFeature.getDescriptors(), qFeature.getDescriptors(), tqInitialMatchesVector, radius);
-      }
-      if(mMethod == KNN || mMethod == RADIUS){
-	//find the matches that has been found in both way
-	for(unsigned int i = 0; i < qtInitialMatchesVector.size(); i++){
-	  for(unsigned int j = 0; j < qtInitialMatchesVector[i].size(); j++){
-	    cv::DMatch forward = qtInitialMatchesVector[i][j];
-	    for(unsigned int k = 0; k < tqInitialMatchesVector[forward.trainIdx].size(); k++){
-	      cv::DMatch backward = tqInitialMatchesVector[forward.trainIdx][k];
-	      if(backward.trainIdx == forward.queryIdx)
-		matches.push_back(forward);
-	    }
-	    //matches.push_back(qtInitialMatchesVector[i][j]);
-	  }
-	}
       }
       if(mMethod == RATIO){
 	cv::FlannBasedMatcher matcher;
 	matcher.knnMatch(qFeature.getDescriptors(), tFeature.getDescriptors(), qtInitialMatchesVector, 2);
-	for(unsigned int i = 0; i < qtInitialMatchesVector.size(); i++){
-	  float ratio = qtInitialMatchesVector[i][0].distance/qtInitialMatchesVector[i][1].distance;
-	  if(ratio < 0.8)
-	    matches.push_back(qtInitialMatchesVector[i][0]);
-	}	
-	matcher.knnMatch(tFeature.getDescriptors(), qFeature.getDescriptors(), tqInitialMatchesVector, 2);
-	for(unsigned int i = 0; i < tqInitialMatchesVector.size(); i++){
-	  float ratio = tqInitialMatchesVector[i][0].distance/tqInitialMatchesVector[i][1].distance;
-	  if(ratio < 0.8){
-	    cv::DMatch tq_qt;
-	    tq_qt.queryIdx = tqInitialMatchesVector[i][0].trainIdx;
-	    tq_qt.trainIdx = tqInitialMatchesVector[i][0].queryIdx;
-	    tq_qt.imgIdx = tqInitialMatchesVector[i][0].imgIdx;
-	    tq_qt.distance = tqInitialMatchesVector[i][0].distance;
-	    matches.push_back(tq_qt);
-	  }
-	}	
       }
       if(mMethod == BRUTEFORCE){	
 	//opencv 2.4
@@ -111,26 +87,15 @@ namespace fbr{
 	cv::BruteForceMatcher< cv::L2<float> > matcher;
 #endif
 	matcher.match(qFeature.getDescriptors(), tFeature.getDescriptors(), qtInitialMatches);
-	matcher.match(tFeature.getDescriptors(), qFeature.getDescriptors(), tqInitialMatches);
+	qtInitialMatchesVector.push_back(qtInitialMatches);
       }
       if(mMethod == FLANN){
 	cv::FlannBasedMatcher matcher;
 	matcher.match(qFeature.getDescriptors(), tFeature.getDescriptors(), qtInitialMatches);
-	matcher.match(tFeature.getDescriptors(), qFeature.getDescriptors(), tqInitialMatches);
+	qtInitialMatchesVector.push_back(qtInitialMatches);
       }
-      if(mMethod == FLANN || mMethod == BRUTEFORCE)
-	{
-	  //add the intersection of both way matches
-	  for(unsigned int i = 0; i < qtInitialMatches.size(); i++){
-	    for(unsigned int j =0 ; j<tqInitialMatches.size(); j++){
-	      if(qtInitialMatches[i].queryIdx == tqInitialMatches[j].trainIdx && qtInitialMatches[i].trainIdx == tqInitialMatches[j].queryIdx){
-		matches.push_back(qtInitialMatches[i]);    
-	      }
-	    }
-	  }
-	}
     }
-    //Matching descriptors using BruteFore with Hamming distance for ORB descriptor
+    //Matching descriptors using Hamming distance for ORB descriptor
     else if(qFeature.getDescriptorMethod() == ORB_DES){
       if(mMethod == KNN){
 	//opencv 2.4
@@ -140,7 +105,6 @@ namespace fbr{
 	cv::BruteForceMatcher< cv::Hamming > matcher;
 #endif
 	matcher.knnMatch(qFeature.getDescriptors(), tFeature.getDescriptors(), qtInitialMatchesVector, knn);
-	matcher.knnMatch(tFeature.getDescriptors(), qFeature.getDescriptors(), tqInitialMatchesVector, knn);
       }
       if(mMethod == RADIUS){
 	//opencv 2.4
@@ -150,20 +114,6 @@ namespace fbr{
 	cv::BruteForceMatcher< cv::Hamming > matcher;
 #endif
 	matcher.radiusMatch(qFeature.getDescriptors(), tFeature.getDescriptors(), qtInitialMatchesVector, radius);
-	matcher.radiusMatch(tFeature.getDescriptors(), qFeature.getDescriptors(), tqInitialMatchesVector, radius);
-      }
-      if(mMethod == KNN || mMethod == RADIUS){
-	for(unsigned int i = 0; i < qtInitialMatchesVector.size(); i++){
-	  for(unsigned int j = 0; j < qtInitialMatchesVector[i].size(); j++){
-	    cv::DMatch forward = qtInitialMatchesVector[i][j];
-	    for(unsigned int k = 0; k < tqInitialMatchesVector[forward.trainIdx].size(); k++){
-	      cv::DMatch backward = tqInitialMatchesVector[forward.trainIdx][k];
-	      if(backward.trainIdx == forward.queryIdx)
-		matches.push_back(forward);
-	    }
-	    //matches.push_back(qtInitialMatchesVector[i][j]);
-	  }
-	}
       }
       if(mMethod == RATIO){
 	//opencv 2.4
@@ -173,23 +123,6 @@ namespace fbr{
 	cv::BruteForceMatcher< cv::Hamming > matcher;
 #endif
 	matcher.knnMatch(qFeature.getDescriptors(), tFeature.getDescriptors(), qtInitialMatchesVector, 2);
-	for(unsigned int i = 0; i < qtInitialMatchesVector.size(); i++){
-	  float ratio = qtInitialMatchesVector[i][0].distance/qtInitialMatchesVector[i][1].distance;
-	  if(ratio < 0.8)
-	    matches.push_back(qtInitialMatchesVector[i][0]);
-	}
-	matcher.knnMatch(tFeature.getDescriptors(), qFeature.getDescriptors(), tqInitialMatchesVector, 2);
-	for(unsigned int i = 0; i < tqInitialMatchesVector.size(); i++){
-	  float ratio = tqInitialMatchesVector[i][0].distance/tqInitialMatchesVector[i][1].distance;
-	  if(ratio < 0.8){
-	    cv::DMatch tq_qt;
-	    tq_qt.queryIdx = tqInitialMatchesVector[i][0].trainIdx;
-	    tq_qt.trainIdx = tqInitialMatchesVector[i][0].queryIdx;
-	    tq_qt.imgIdx = tqInitialMatchesVector[i][0].imgIdx;
-	    tq_qt.distance = tqInitialMatchesVector[i][0].distance;
-	    matches.push_back(tq_qt);
-	  }
-	}
       }
       if(mMethod == BRUTEFORCE){
 	//opencv 2.4
@@ -199,38 +132,54 @@ namespace fbr{
 	cv::BruteForceMatcher< cv::Hamming > matcher;
 #endif
 	matcher.match(qFeature.getDescriptors(), tFeature.getDescriptors(), qtInitialMatches);
-	matcher.match(tFeature.getDescriptors(), qFeature.getDescriptors(), tqInitialMatches); 
-	for(unsigned int i = 0; i < qtInitialMatches.size(); i++){
-	  for(unsigned int j =0 ; j<tqInitialMatches.size(); j++){
-	    if(qtInitialMatches[i].queryIdx == tqInitialMatches[j].trainIdx && qtInitialMatches[i].trainIdx == tqInitialMatches[j].queryIdx){
-	      matches.push_back(qtInitialMatches[i]);    
-	    }
-	  }
+	qtInitialMatchesVector.push_back(qtInitialMatches);
+      }
+    }
+    if(mMethod == RATIO){
+      for(unsigned int i = 0; i < qtInitialMatchesVector.size(); i++){
+	float ratio = qtInitialMatchesVector[i][0].distance/qtInitialMatchesVector[i][1].distance;
+	if(ratio < 0.66)
+	  matches.push_back(qtInitialMatchesVector[i][0]);
+      }
+    }else{
+      for(unsigned int i = 0; i < qtInitialMatchesVector.size(); i++){
+	for(unsigned int j = 0; j < qtInitialMatchesVector[i].size(); j++){
+	  matches.push_back(qtInitialMatchesVector[i][j]);
 	}
       }
     }
-    
-    //filter the matches with RANSAC and FundementalMatrix
-    vector<cv::Point2f> points_1, points_2;
-    for( unsigned int i = 0; i < matches.size(); i++ ){
-      //Get the keypoints from the intersection of both matches
-      points_1.push_back( qFeature.getFeatures()[ matches[i].queryIdx ].pt );
-      points_2.push_back( tFeature.getFeatures()[ matches[i].trainIdx ].pt );
+  }
+  
+  void feature_matcher::match(feature qFeature, feature tFeature){
+    vector< cv::DMatch > gMatches;
+    findMatches(qFeature, tFeature);
+
+    if(mFiltrationMethod == FUNDEMENTAL_MATRIX){
+      //filter the matches with RANSAC and FundementalMatrix
+      vector<cv::Point2f> points_1, points_2;
+      for( unsigned int i = 0; i < matches.size(); i++ ){
+	//Get the keypoints from the intersection of both matches
+	points_1.push_back( qFeature.getFeatures()[ matches[i].queryIdx ].pt );
+	points_2.push_back( tFeature.getFeatures()[ matches[i].trainIdx ].pt );
+      }
+      //calculating the fundemental matrix
+      cv::Mat fStatus;
+      cv::Mat fundementalMatrix = findFundamentalMat( points_1, points_2, cv::FM_RANSAC, 3, 0.99, fStatus);
+      cv::MatIterator_<uchar> it, end; 
+      int counter = 0;
+      //get the inliers from fundemental matrix
+      for( it = fStatus.begin<uchar>(), end = fStatus.end<uchar>(); it != end; ++it){
+	if(*it == 1)
+	  gMatches.push_back(matches[counter]);
+	counter++;
+      }
+      nOfMatches = matches.size();
+      matches = gMatches;
+      nOfFilteredMatches = matches.size();
+    }else{
+      nOfMatches = matches.size();
+      nOfFilteredMatches = matches.size(); 
     }
-    //calculating the fundemental matrix
-    cv::Mat fStatus;
-    cv::Mat fundementalMatrix = findFundamentalMat( points_1, points_2, cv::FM_RANSAC, 3, 0.99, fStatus);
-    cv::MatIterator_<uchar> it, end; 
-    int counter = 0;
-    //get the inliers from fundemental matrix
-    for( it = fStatus.begin<uchar>(), end = fStatus.end<uchar>(); it != end; ++it){
-      if(*it == 1)
-	gMatches.push_back(matches[counter]);
-      counter++;
-    }
-    nOfMatches = matches.size();
-    matches = gMatches;
-    nOfFilteredMatches = matches.size(); 
   }
   
   vector<cv::DMatch> feature_matcher::getMatches(){
@@ -241,6 +190,10 @@ namespace fbr{
     return mMethod;
   }
   
+  matching_filtration_method feature_matcher::getMatchingFiltrationMethod(){
+    return mFiltrationMethod;
+  }
+
   unsigned int feature_matcher::getKnn(){
     return  knn;
   }
@@ -258,7 +211,12 @@ namespace fbr{
   }
   
   void feature_matcher::getDescription(){
-    cout<<"number of Matches: "<<nOfMatches<<", number of Matches after filteration: "<<nOfFilteredMatches<<", matching method: "<<matcherMethodToString(mMethod)<<", knn: "<<knn<<", radius: "<<radius<<"."<<endl;
+    cout<<"number of Matches: "<<nOfMatches<<", number of Matches after filteration: "<<nOfFilteredMatches<<", matching method: "<<matcherMethodToString(mMethod)<<", matching filtration method: "<<matchingFiltrationMethodToString(mFiltrationMethod)<<", knn: "<<knn<<", radius: "<<radius<<"."<<endl;
     cout<<endl;
   }
+
+  void feature_matcher::setMatchingFiltrationMethod(matching_filtration_method method){
+    mFiltrationMethod = method;
+  }
+
 }
