@@ -22,6 +22,15 @@ namespace fbr{
     nPoints = 0;
     scanserver = scanServer;
   }
+  scan_cv::scan_cv(string dir, unsigned int number, IOType format){
+    sDir = dir;
+    sNumber = number;
+    sFormat = format;
+    zMax = numeric_limits<double>::min(); 
+    zMin = numeric_limits<double>::max();
+    nPoints = 0;
+    scanserver = false;
+  }
 
   void scan_cv::convertScanToMat(){
     Scan::openDirectory(scanserver, sDir, sFormat, sNumber, sNumber);
