@@ -11,14 +11,14 @@
 #include <stdexcept>
 
 namespace fbr{
+  
   string scanFormatToString(IOType format){
     return io_type_to_libname(format);
   }
-
+  
   IOType stringToScanFormat(string format){
     return formatname_to_io_type(format.c_str());
-  }
-  
+  }  
   string projectionMethodToString(projection_method method){
     string sMethod;
     switch(method){
@@ -199,5 +199,51 @@ namespace fbr{
     else if(strcasecmp(method.c_str(), "RANSAC") == 0) return RANSAC;
     else if(strcasecmp(method.c_str(), "DISABLE") == 0) return DISABLE;
     else throw std::runtime_error(std::string("registration method ") + method + std::string(" is unknown"));
+  }
+
+  string featureFiltrationMethodToString(feature_filtration_method method){
+    string fFiltrationMethod;
+    switch(method){
+    case OCCLUSION:
+      fFiltrationMethod = "OCCLUSION";
+      break;
+    case STANDARD_DEVIATION:
+      fFiltrationMethod = "STANDARD_DEVIATION";
+      break;
+    case DISABLE_FILTER:
+      fFiltrationMethod = "DISABLE_FILTER";
+      break;
+    default:
+      throw std::runtime_error(std::string("feature filtration method ") + to_string(method) + std::string(" could not be matched to a feature filtration method"));
+    }
+    return fFiltrationMethod;
+  }
+
+  feature_filtration_method stringToFeatureFiltrationMethod(string method){
+    if(strcasecmp(method.c_str(), "OCCLUSION") == 0) return OCCLUSION;
+    else if(strcasecmp(method.c_str(), "STANDARD_DEVIATION") == 0) return STANDARD_DEVIATION;
+    else if(strcasecmp(method.c_str(), "DISABLE_FILTER") == 0) return DISABLE_FILTER;
+    else throw std::runtime_error(std::string("feature filtration method ") + method + std::string(" is unknown"));
+  }
+
+  string matchingFiltrationMethodToString(matching_filtration_method method){
+    string mFiltrationMethod;
+    switch(method){
+    case FUNDEMENTAL_MATRIX:
+      mFiltrationMethod = "FUNDEMENTAL_MATRIX";
+      break;
+    case DISABLE_MATCHING_FILTER:
+      mFiltrationMethod = "DISABLE_MATCHING_FILTER";
+      break;
+    default:
+      throw std::runtime_error(std::string("matching filtration method ") + to_string(method) + std::string(" could not be matched to a matching filtration method"));
+    }
+    return mFiltrationMethod;
+  }
+
+  matching_filtration_method stringToMatchingFiltrationMethod(string method){
+    if(strcasecmp(method.c_str(), "FUNDEMENTAL_MATRIX") == 0) return FUNDEMENTAL_MATRIX;
+    else if(strcasecmp(method.c_str(), "DISABLE_MATCHING_FILTER") == 0) return DISABLE_MATCHING_FILTER;
+    else throw std::runtime_error(std::string("matching filtration method ") + method + std::string(" is unknown"));
   }
 }
