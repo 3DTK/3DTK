@@ -4,8 +4,8 @@ SET(FBR_IO_SRC scan_cv.cc)
 add_library(fbr_cv_io STATIC ${FBR_IO_SRC})
 
 SET(FBR_PANORAMA_SRC panorama.cc)
-add_library(fbr_panorama STATIC ${FBR_PANORAMA_SRC})
-#add_library(fbr_panorama STATIC ${FBR_PANORAMA_SRC} fbr_global.cc)
+#add_library(fbr_panorama STATIC ${FBR_PANORAMA_SRC})
+add_library(fbr_panorama STATIC ${FBR_PANORAMA_SRC} fbr_global.cc)
 
 
 SET(FBR_FEATURE_SRC feature.cc)
