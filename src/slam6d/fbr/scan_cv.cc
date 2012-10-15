@@ -13,17 +13,17 @@ using namespace std;
 
 namespace fbr{
 
-  scan_cv::scan_cv(string dir, unsigned int number, IOType format){
+  scan_cv::scan_cv(string dir, unsigned int number, IOType format, bool scanServer){
     sDir = dir;
     sNumber = number;
     sFormat = format;
     zMax = numeric_limits<double>::min(); 
     zMin = numeric_limits<double>::max();
     nPoints = 0;
-  } 
-  
+    scanserver = scanServer;
+  }
+
   void scan_cv::convertScanToMat(){
-    bool scanserver = false;
     Scan::openDirectory(scanserver, sDir, sFormat, sNumber, sNumber);
     if(Scan::allScans.size() == 0){
       cerr << "No scans found. Did you use the correct format?" <<endl;

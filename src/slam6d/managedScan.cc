@@ -226,8 +226,11 @@ DataPointer ManagedScan::create(const std::string& identifier, unsigned int size
   if(identifier == "xyz reduced original") {
     return m_shared_scan->createXYZReducedOriginal(size / (3*sizeof(double)));
   } else
-  {
-    throw runtime_error(string("Identifier '") + identifier + "' not compatible with ManagedScan::create. Upgrade SharedScan for this data field.");
+  if(identifier == "reflectance") {
+    return m_shared_scan->createReflectance(size / (1*sizeof(double)));
+  } else
+    {
+      throw runtime_error(string("Identifier '") + identifier + "' not compatible with ManagedScan::create. Upgrade SharedScan for this data field.");
   }
 }
 
