@@ -30,6 +30,7 @@ struct information{
   feature_descriptor_method dMethod;
   matcher_method mMethod;
   registration_method rMethod;
+  bool scanServer;
   
   int fSPoints, sSPoints, fFNum, sFNum, mNum, filteredMNum;
   double fSTime, sSTime, fPTime, sPTime, fFTime, sFTime, fDTime, sDTime, mTime, rTime; 
@@ -60,6 +61,7 @@ void usage(int argc, char** argv){
   printf("\t\t-r registration \t registration method [ALL|ransac]\n");
   printf("\t\t-V verbose \t\t level of verboseness\n");
   printf("\t\t-O outDir \t\t output directory if not stated same as input\n");
+  printf("\t\t-S scanServer \t\t Scan Server\n");
   printf("\n");
   printf("\tExamples:\n");
   printf("\tUsing Bremen City dataset:\n");
@@ -101,11 +103,12 @@ void parssArgs(int argc, char** argv, information& info){
   info.mMethod = RATIO;
   info.rMethod = RANSAC;
   info.outDir = "";
+  info.scanServer = false;
 
   int c;
   opterr = 0;
   //reade the command line and get the options
-  while ((c = getopt (argc, argv, "F:W:H:p:N:P:f:d:m:D:E:I:M:r:V:O:s:e:")) != -1)
+  while ((c = getopt (argc, argv, "F:W:H:p:N:P:f:d:m:D:E:I:M:r:V:O:s:e:S")) != -1)
     switch (c)
       {
       case 's':
@@ -161,6 +164,9 @@ void parssArgs(int argc, char** argv, information& info){
 	break;
       case 'O':
 	info.outDir = optarg;
+	break;
+      case 'S':
+	info.scanServer = true;
 	break;
       case '?':
 	cout<<"Unknown option character "<<optopt<<endl;
@@ -292,12 +298,13 @@ void info_yml(information info, double bError, double bErrorIdx, double* bAlign)
 }
 
 int main(int argc, char** argv){
+  cout<<CV_VERSION<<endl;
   string out;
   cv::Mat outImage;
   parssArgs(argc, argv, info);
   if(info.verbose >= 1) informationDescription(info);
 
-  scan_cv fScan (info.dir, info.fScanNumber, info.sFormat);
+  scan_cv fScan (info.dir, info.fScanNumber, info.sFormat, info.scanServer);
   if(info.verbose >= 4) info.fSTime = (double)cv::getTickCount();
   fScan.convertScanToMat();
   if(info.verbose >= 4) info.fSTime = ((double)cv::getTickCount() - info.fSTime)/cv::getTickFrequency();
@@ -328,7 +335,7 @@ int main(int argc, char** argv){
   if(info.verbose >= 4) info.fDTime = ((double)cv::getTickCount() - info.fDTime)/cv::getTickFrequency();
   if(info.verbose >= 2) fFeature.getDescription();
   
-  scan_cv sScan (info.dir, info.sScanNumber, info.sFormat);
+  scan_cv sScan (info.dir, info.sScanNumber, info.sFormat, info.scanServer);
   if(info.verbose >= 4) info.sSTime = (double)cv::getTickCount();
   sScan.convertScanToMat();
   if(info.verbose >= 4) info.sSTime = ((double)cv::getTickCount() - info.sSTime)/cv::getTickFrequency();
@@ -358,7 +365,7 @@ int main(int argc, char** argv){
   sFeature.featureDescription(sPanorama.getReflectanceImage(), info.dMethod);
   if(info.verbose >= 4) info.sDTime = ((double)cv::getTickCount() - info.sDTime)/cv::getTickFrequency();
   if(info.verbose >= 2) sFeature.getDescription();
- 
+
   feature_matcher matcher (info.mMethod, info.mParam);
   if(info.verbose >= 4) info.mTime = (double)cv::getTickCount();
   matcher.match(fFeature, sFeature);
