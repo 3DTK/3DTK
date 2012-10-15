@@ -45,6 +45,7 @@ namespace fbr{
      * @param scanServer 
      */
     scan_cv (string dir, unsigned int number, IOType format, bool scanServer);
+    scan_cv (string dir, unsigned int number, IOType format);
     /**
      * @brief read scan file and convert it to open cv Mat
      */
