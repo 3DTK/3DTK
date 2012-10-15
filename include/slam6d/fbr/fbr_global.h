@@ -82,6 +82,21 @@ namespace fbr{
     RANSAC,
     DISABLE,
   };
+  /**
+   * @enum feature_filtration_method
+   */
+  enum feature_filtration_method{
+    OCCLUSION,
+    STANDARD_DEVIATION,
+    DISABLE_FILTER,
+  };
+  /**
+   * @enum matching_filtration_method
+   */
+  enum matching_filtration_method{
+    FUNDEMENTAL_MATRIX,
+    DISABLE_MATCHING_FILTER,
+  };
   //RANSAC iteration       
 #define RANSACITR 20000
   //Inlier influence                                                     
@@ -101,5 +116,9 @@ namespace fbr{
   matcher_method stringToMatcherMethod(string method);
   string registrationMethodToString(registration_method method);
   registration_method stringToRegistrationMethod(string method);
+  string featureFiltrationMethodToString(feature_filtration_method method);
+  feature_filtration_method stringToFeatureFiltrationMethod(string method);
+  string matchingFiltrationMethodToString(matching_filtration_method method);
+  matching_filtration_method stringToMatchingFiltrationMethod(string method);
 }
 #endif /* FBR_GLOBAL_H_ */

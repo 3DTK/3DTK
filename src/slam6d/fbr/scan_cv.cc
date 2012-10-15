@@ -114,5 +114,5 @@ namespace fbr{
   void scan_cv::getDescription(){
     cout<<"load "<<sDir<<", with scan number: " <<sNumber<<", with "<<nPoints<<" points, sFormat: "<<scanFormatToString(sFormat)<<"."<<endl;
     cout<<endl;
-  }
+  }  
 }
