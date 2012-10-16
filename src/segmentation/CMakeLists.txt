@@ -1,6 +1,6 @@
 IF(WITH_SEGMENTATION)
   add_executable(scan2segments scan2segments.cc)
-  add_executable(fhsegmentation fhsegmentation.cc FHGraph.cpp disjoint-set.cpp segment-graph.cpp)
+  add_executable(fhsegmentation fhsegmentation.cc FHGraph.cc disjoint-set.cc segment-graph.cc)
 
   FIND_PACKAGE(OpenCV REQUIRED)
 
