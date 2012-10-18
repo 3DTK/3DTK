@@ -108,7 +108,7 @@ void showbits(char a)
         if (  ( 1 << i ) & node.leaf ) {   // if ith node is leaf get center
           // check if leaf contains shape
           if ( shape.isInCube(ccenter[0], ccenter[1], ccenter[2], size/2.0) ) {
-            pointrep *points = children->points;
+            pointrep *points = children->getPointreps();
             unsigned int length = points[0].length;
             T *point = &(points[1].v);  // first point
             for(unsigned int iterator = 0; iterator < length; iterator++ ) {
@@ -121,6 +121,7 @@ void showbits(char a)
           result += PointsOnShape( children->node, ccenter, size/2.0, shape);
         }
         ++children; // next child
+        //r++;
       }
     }
 
@@ -142,7 +143,7 @@ void showbits(char a)
         if (  ( 1 << i ) & node.leaf ) {   // if ith node is leaf get center
           // check if leaf contains shape
           if ( shape.isInCube(ccenter[0], ccenter[1], ccenter[2], size/2.0) ) {
-            pointrep *points = children->points;
+            pointrep *points = children->getPointreps();
             unsigned int length = points[0].length;
             T *point = &(points[1].v);  // first point
             for(unsigned int iterator = 0; iterator < length; iterator++ ) {
@@ -169,7 +170,6 @@ void showbits(char a)
   void DrawPoints(vector<T *> &p, bitoct &node, unsigned char nrp) {
     bitunion<T> *children;
     bitoct::getChildren(node, children);
-
     unsigned char n_children = POPCOUNT(node.valid);
     unsigned char r = randUC(n_children);
     if (r == n_children) r--;
@@ -217,8 +217,9 @@ void showbits(char a)
 
     if (leaf) {
 /*      cout << "STOPPED" << endl;
-      return;*/
-      pointrep *points = children[r].points;
+        return;*/
+     
+      pointrep *points = children[r].getPointreps();
       unsigned int length = points[0].length;
       if (length < nrp) return;
       if (length == nrp) {
@@ -227,7 +228,6 @@ void showbits(char a)
         }
         return;
       }
-
       // randomly get nrp points, we will not check if this succeeds in getting nrp distinct points
       for (char c = 0; c < nrp; c++) {
         int tmp = rand(points[0].length);

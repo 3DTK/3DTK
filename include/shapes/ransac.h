@@ -16,7 +16,6 @@ void Ransac(CollisionShape<T> &shape, Scan *scan, vector<T*> *best_points = 0) {
   // create octree from the points
   DataXYZ xyz(scan->get("xyz reduced"));
   RansacOctTree<T> *oct = new RansacOctTree<T>(PointerArray<double>(xyz).get(), xyz.size(), 50.0 );
-  
   cout << "start 5000 iterations" << endl;
   for(int i = 0; i < 5000; i++) {
     ps.clear();
