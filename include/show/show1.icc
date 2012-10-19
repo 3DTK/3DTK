@@ -4,6 +4,8 @@
  * @author Kai Lingemann. Institute of Computer Science, University of Osnabrueck, Germany.
  * @author Andreas Nuechter. Institute of Computer Science, University of Osnabrueck, Germany.
  */
+#ifndef __SHOW1_ICC__
+#define __SHOW1_ICC__
 
 #include "slam6d/globals.icc"
 
@@ -119,3 +121,4 @@ inline void QuaternionToAxisAngle(const double *quat, double *axis, double &angl
   axis[1] =  normalized_quat[1] / sin_a;
   axis[2] = -1.0 * normalized_quat[2] / sin_a;
 }
+#endif

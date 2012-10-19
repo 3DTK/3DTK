@@ -395,7 +395,7 @@ add_subdirectory(src/model)
 IF(EXPORT_SHARED_LIBS)
 ## Compiling a shared library containing all of the project
 add_library(slam SHARED src/slam6d/icp6D.cc)
-target_link_libraries(slam scanlib_s ANN_s sparse_s newmat_s)
+target_link_libraries(slam scan_s ANN_s sparse_s newmat_s show_s fbr_s)
 ENDIF(EXPORT_SHARED_LIBS)
 
 MESSAGE (STATUS "Build environment is set up!")

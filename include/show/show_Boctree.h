@@ -15,7 +15,7 @@
 #include "show/colordisplay.h"
 #include "slam6d/scan.h"
 
-
+using namespace show;
 
 /**
  * @brief Octree for show
