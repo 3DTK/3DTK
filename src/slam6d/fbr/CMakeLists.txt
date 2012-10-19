@@ -17,7 +17,8 @@ add_library(fbr_feature_matcher STATIC ${FBR_FEATURE_MATCHER_SRC})
 SET(FBR_REGISTRATION_SRC registration.cc)
 add_library(fbr_registration STATIC ${FBR_REGISTRATION_SRC})
 
-add_library(fbr STATIC ${FBR_IO_SRC} ${FBR_PANORAMA_SRC} ${FBR_FEATURE_SRC} ${FBR_FEATURE_MATCHER_SRC} ${FBR_REGISTRATION_SRC} fbr_global.cc)
+SET(FBR_SRC scan_cv.cc panorama.cc feature.cc feature_matcher.cc registration.cc fbr_global.cc)
+add_library(fbr STATIC ${FBR_SRC})
 
 IF(WITH_FBR)
 SET(FBR_LIBS scan ANN ${OpenCV_LIBS})
@@ -26,3 +27,10 @@ add_executable(featurebasedregistration feature_based_registration.cc fbr_global
 #target_link_libraries(featurebasedregistration fbr_cv_io fbr_panorama fbr_feature fbr_feature_matcher fbr_registration ${FBR_LIBS})
 target_link_libraries(featurebasedregistration fbr ${FBR_LIBS})
 ENDIF(WITH_FBR)
+
+### EXPORT SHARED LIBS
+
+IF(EXPORT_SHARED_LIBS)
+add_library(fbr_s SHARED ${FBR_SRC})
+target_link_libraries(fbr_s scan ANN ${OpenCV_LIBS})
+ENDIF(EXPORT_SHARED_LIBS)

@@ -27,6 +27,7 @@
 #endif
 
 #include "slam6d/globals.icc"
+namespace show{
 
 /** The 6 planes of the viewing frustum */
 float frustum[6][4];
@@ -843,3 +844,4 @@ bool CubeInFrustum( float x, float y, float z, float size )
 
 float minB[NUMDIM], maxB[NUMDIM];    /*box */
 float coord[NUMDIM];       /* hit point */
+}

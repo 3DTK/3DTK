@@ -90,6 +90,7 @@ ENDIF(UNIX)
 IF(EXPORT_SHARED_LIBS)
 add_library(scan_s SHARED ${SCANLIB_SRCS})
 #target_link_libraries(scan_s ${Boost_LIBRARIES} newmat)
+target_link_libraries(scan_s newmat sparse ANN scanclient pointfilter scanio)
 ENDIF(EXPORT_SHARED_LIBS)
 
 ### SLAM6D
