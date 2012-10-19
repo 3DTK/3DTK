@@ -7,14 +7,19 @@
 #include <windows.h>
 #include <GL/glu.h>
 #include <GL/glut.h>
+#elif __APPLE__
+#include <GLUT/glut.h>
+#include <OpenGl/glu.h>
+#include <stdbool.h>
 #else
-#include <glut.h>
-#include <glu.h>
+#include <GL/glut.h>
+#include <GL/glu.h>
 #include <stdbool.h>
 #endif
 
 #ifndef __VIEWCULL_H__
 #define __VIEWCULL_H__
+namespace show{
 
 /////////////////////////  Variable declarations...
 /** The 6 planes of the viewing frustum */
@@ -161,5 +166,5 @@ void remViewport();
 bool LOD(float x, float y, float z, float size);
 int LOD2(float x, float y, float z, float size);
 
-
+}
 #endif

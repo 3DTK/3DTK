@@ -38,6 +38,7 @@ using std::list;
 #include "show/scancolormanager.h"
 #include "show/viewcull.h"
 
+using namespace show;
 compactTree::~compactTree(){
   delete alloc;
 

@@ -12,6 +12,7 @@
 #include "show/viewcull.h"
 #include "show/scancolormanager.h"
 
+using namespace show;
 bool   fullydisplayed = true;       // true if all points have been drawn to the screen
 bool   mousemoving    = false;      // true iff a mouse button has been pressed inside a window,
                                     // but hs not been released

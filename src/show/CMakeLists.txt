@@ -26,3 +26,8 @@ IF(WITH_WXSHOW)
   target_link_libraries(wxshow ${wxWidgets_LIBRARIES} wxthings ${SHOW_LIBS})
 ENDIF(WITH_WXSHOW)
 
+### EXPORT SHARED LIBS 
+IF(EXPORT_SHARED_LIBS)
+add_library(show_s SHARED ${SHOW_SRCS})
+target_link_libraries(show_s ${SHOW_LIBS})
+ENDIF(EXPORT_SHARED_LIBS)
