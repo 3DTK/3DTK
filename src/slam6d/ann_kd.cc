@@ -39,9 +39,26 @@ using std::swap;
  * @param pts 3D array of points
  * @param n number of points
  */
-ANNtree::ANNtree(double **_pts, int n)
+ANNtree::ANNtree(PointerArray<double>&_pts, int n)
 {
-  pts = _pts;
+  /*
+  pts = new double*[n];
+  for(unsigned int i = 0; i < n; i++) {
+    pts[i] = new double[3];
+    pts[i][0] = _pts.get()[i][0];
+    pts[i][1] = _pts.get()[i][1];
+    pts[i][2] = _pts.get()[i][2];
+  }
+  */
+  pts = new double*[n];
+  double* tpts = new double[3*n];
+  for(unsigned int i = 0, j = 0; i < n; i++) {
+    pts[i] = &tpts[j];
+    tpts[j++] = _pts.get()[i][0];
+    tpts[j++] = _pts.get()[i][1];
+    tpts[j++] = _pts.get()[i][2];
+  }
+
   annkd = new ANNkd_tree(pts, n, 3, 1, ANN_KD_SUGGEST); // links to the constructor of ANNkd_tree
   cout << "ANNkd_tree was generated with " << n << " points" << endl;
   nn = new ANNdist[1];
@@ -60,6 +77,8 @@ ANNtree::~ANNtree()
   delete annkd; //links to the destructor of ANNkd_tree
   delete [] nn;
   delete [] nn_idx;
+  delete [] pts[0]; 
+  delete [] pts;
 }
 
 
@@ -76,10 +95,11 @@ double *ANNtree::FindClosest(double *_p, double maxdist2, int threadNum) const
 
 #pragma omp critical
   annkd->annkSearch(_p, 1, nn_idx, nn, 0.0);
+
   int idx = nn_idx[0];
-  
+ 
   if (Dist2(_p, pts[idx]) > maxdist2) return 0;
-   
+
   return pts[idx];
 }  
 

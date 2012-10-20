@@ -30,7 +30,7 @@ public:
   /**
    * Constructor using the point set pts and the num_of_pts n
    */
-  ANNtree(double **_pts, int n);
+  ANNtree(PointerArray<double>&_pts, int n);
   
   /**
    * destructor
@@ -58,7 +58,7 @@ private:
   ANNidxArray nn_idx; //temporary ANNdistArray instance to use for storing the nearest neighbor
 
   double** pts;
-      
+  
 };
 
 #endif
