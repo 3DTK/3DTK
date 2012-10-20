@@ -274,7 +274,7 @@ void BasicScan::createSearchTreePrivate()
       kd = new KDtree(ar.get(), xyz_orig.size());
       break;
     case ANNTree:
-      kd = new ANNtree(ar.get(), xyz_orig.size());
+      kd = new ANNtree(ar, xyz_orig.size());
       break;
     case BOCTree:
       kd = new BOctTree<double>(ar.get(), xyz_orig.size(), 10.0, PointType(), true);
