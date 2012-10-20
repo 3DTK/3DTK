@@ -3,7 +3,6 @@
  *  @author Remus Dumitru. Jacobs University Bremen, Germany
  *  @author Corneliu-Claudiu Prodescu. Jacobs University Bremen, Germany
  *  @author Andreas Nuechter. Institute of Computer Science, University of Osnabrueck, Germany.
- *  @author Andreas Nuechter. Institute of Computer Science, University of Osnabrueck, Germany.
  *  @author Kai Lingemann. Institute of Computer Science, University of Osnabrueck, Germany.
  *  @author Thomas Escher. Institute of Computer Science, University of Osnabrueck, Germany.
  */
