@@ -363,11 +363,15 @@ int read_one_packet (
 
 	for ( c = 0 ; c < CIRCLELENGTH; c++ )
 	{
-#ifdef _MSC_VER
+#ifdef _MSC_VER 
 		fseek(fp , BLOCK_OFFSET, SEEK_CUR);
 #else
+#ifdef __CYGWIN__
+		fseek(fp , BLOCK_OFFSET, SEEK_CUR);
+#else		
 		fseeko(fp , BLOCK_OFFSET, SEEK_CUR);
 #endif
+#endif		
 		size=fread ( buf, 1, BLOCK_SIZE, fp );
 
 		if(size<BLOCK_SIZE)
@@ -531,10 +535,14 @@ void ScanIO_velodyne::readScan(
 	char filename[256];
 	sprintf(filename, "%s%s%s",dir_path ,DATA_PATH_PREFIX,  DATA_PATH_SUFFIX );
 
-#ifdef _MSC_VER
+#ifdef _MSC_VER 
     scan_in = fopen(filename,"rb");
 #else
+#ifdef __CYGWIN__
+    scan_in = fopen(filename,"rb");
+#else    
     scan_in = fopen64(filename,"rb");
+#endif
 #endif
 
     if(scan_in == NULL)
@@ -552,12 +560,17 @@ void ScanIO_velodyne::readScan(
 
 	fileCounter=  atoi(identifier);
 
- #ifdef _MSC_VER
+#ifdef _MSC_VER 
+    fseek(scan_in, 24, SEEK_SET);
+    fseek(scan_in, (BLOCK_SIZE+BLOCK_OFFSET)*CIRCLELENGTH*fileCounter, SEEK_CUR);
+#else
+#ifdef __CYGWIN__     
     fseek(scan_in, 24, SEEK_SET);
     fseek(scan_in, (BLOCK_SIZE+BLOCK_OFFSET)*CIRCLELENGTH*fileCounter, SEEK_CUR);
 #else
     fseeko(scan_in, 24, SEEK_SET);
     fseeko(scan_in, (BLOCK_SIZE+BLOCK_OFFSET)*CIRCLELENGTH*fileCounter, SEEK_CUR);
+#endif    
 #endif
 
     read_one_packet(
