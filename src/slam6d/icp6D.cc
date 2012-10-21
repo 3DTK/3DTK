@@ -144,6 +144,7 @@ int icp6D::match(Scan* PreviousScan, Scan* CurrentScan)
 #pragma omp parallel 
     {
       int thread_num = omp_get_thread_num();
+
       Scan::getPtPairsParallel(pairs, PreviousScan, CurrentScan,
           thread_num, step,
           rnd, max_dist_match2,
@@ -182,7 +183,6 @@ int icp6D::match(Scan* PreviousScan, Scan* CurrentScan)
         }
       }
     } // end parallel
-    
     
     // do we have enough point pairs?
     unsigned int pairssize = 0;
@@ -330,6 +330,7 @@ void icp6D::doICP(vector <Scan *> allScans)
   vector < Scan* > meta_scans;
   Scan* my_MetaScan = 0;
 
+  
   for(unsigned int i = 0; i < allScans.size(); i++) {
     cout << i << "*" << endl;
 
