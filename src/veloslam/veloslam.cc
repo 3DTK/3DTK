@@ -1018,7 +1018,7 @@ void MatchTwoScan(icp6D *my_icp, VeloScan* currentScan, int scanCount, bool eP )
   		//////////////////////ICP//////////////////////
 		if (scanCount > 0)
 		{
-				PreviousScan =Scan::allScans[scanCount-1];
+				PreviousScan = Scan::allScans[scanCount-1];
 				// extrapolate odometry // 以前一帧的坐标为基准
 				if (eP)
 					currentScan->mergeCoordinatesWithRoboterPosition(PreviousScan);
@@ -1111,7 +1111,7 @@ int main(int argc, char **argv)
 	   exit(0);
 	}
 
-  VeloScan::openDirectory(scanserver, dir, type, start, end);
+  Scan::openDirectory(scanserver, dir, type, start, end);
   
   if(VeloScan::allScans.size() == 0) {
     cerr << "No scans found. Did you use the correct format?" << endl;
