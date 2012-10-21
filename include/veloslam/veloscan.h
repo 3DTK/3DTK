@@ -18,7 +18,7 @@
 #include <vector>
 #include <map>
 
-#include "slam6d/scan.h"
+#include "slam6d/basicScan.h"
 #include "veloslam/gridcell.h"
 #include "veloslam/gridcluster.h"
 
@@ -36,7 +36,7 @@ class Trajectory
 /**
  * @brief 3D scan representation and implementation of dynamic velodyne scan matching
  */
-class VeloScan : public Scan {
+class VeloScan : public BasicScan {
 
 public:
   VeloScan();

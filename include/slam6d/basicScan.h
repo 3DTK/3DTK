@@ -10,6 +10,8 @@
 
 class BasicScan : public Scan {
 public:
+  BasicScan() {};
+
   static void openDirectory(const std::string& path, IOType type, int start, int end);
   static void closeDirectory();
 /*
