@@ -103,8 +103,8 @@ public:
   };
   
   // delete copy-ctor and assignment, scans shouldn't be copied by basic class
-  //  Scan(const Scan& other) = delete;
-  //  Scan& operator=(const Scan& other) = delete;
+  Scan(const Scan& other) = delete;
+  Scan& operator=(const Scan& other) = delete;
   
   virtual ~Scan();
 
@@ -256,9 +256,7 @@ protected:
   
 public:
   
-  
   /* Direct creation of reduced points and search tree */
-  
   
   //! Apply reduction and initial transMatOrg transformation
   void toGlobal();
@@ -406,6 +404,7 @@ private:
   //! flag for openDirectory and closeDirectory to distinguish the scans
   static bool scanserver;
 
+public:
   //! Mutex for safely reducing points and creating the search tree just once in a multithreaded environment  
   // it can not be compiled  in win32 use boost 1.48, therefore we remeove it  temporarily
   boost::mutex m_mutex_reduction, m_mutex_create_tree;

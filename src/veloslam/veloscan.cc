@@ -109,7 +109,7 @@ Trajectory::Trajectory()
  * default Constructor
  */
 VeloScan::VeloScan()
-    : Scan()
+//    : BasicScan()
 {
     isTrackerHandled =false;
 }
@@ -131,9 +131,11 @@ int VeloScan::DeletePoints()
 /**
  * Copy constructor
  */
+/*
 VeloScan::VeloScan(const VeloScan& s)
-    : Scan(s)
+    : BasicScan(s)
 { }
+*/
 
 int VeloScan::TransferToCellArray(int maxDist, int minDist)
 {
