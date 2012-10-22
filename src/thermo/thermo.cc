@@ -1,12 +1,3 @@
-/*
- * thermo implementation
- *
- * Copyright (C) Dorit Borrmann
- *
- * Released under the GPL version 3.
- *
- */
-
 #include <errno.h>
 #include "thermo/thermo.h"
 #include "newmat/newmatap.h"
@@ -35,9 +26,10 @@ using namespace cvb;
 Float2D data1;
 Float2D data2;
 
-unsigned int BLOB_SIZE = 55;
+
+unsigned int BLOB_SIZE = 65;
 double AVG_THRES = 0.8;
-    
+unsigned int GRAY_TH = 65;    
 /**
   * Calculates the PCA of a two-dimensional point cloud
   * @param x x coordinate of the axis
@@ -198,7 +190,8 @@ void sortBlobs(double point_array[][2], int board_n, int board_h, int board_w, b
 IplImage* detectBlobs(IplImage *org_image, int &corner_exp, int board_h, int board_w, bool quiet, double point_array2[][2]) {
 
   IplImage *gray_image = cvCloneImage(org_image); 
-  cvThreshold(gray_image, gray_image, 140, 255, CV_THRESH_BINARY);
+  //cvThreshold(gray_image, gray_image, 100, 255, CV_THRESH_BINARY);
+  cvThreshold(gray_image, gray_image, GRAY_TH, 255, CV_THRESH_BINARY);
   IplImage *labelImg = cvCreateImage(cvGetSize(gray_image), IPL_DEPTH_LABEL, 1);
   
   // detect blobs
@@ -277,7 +270,7 @@ IplImage* detectBlobs(IplImage *org_image, int &corner_exp, int board_h, int boa
   * Connects the detected calibration features in the image with lines.
   */
 void drawLines(double point_array2[][2], int corner_exp, IplImage *image, bool color) {
-  for (int i = 0; i <= corner_exp - 2; i++) {
+  for (int i = 4; i <= corner_exp - 2; i++) {
     CvPoint pt1;
     CvPoint pt2;
     CvScalar s; 
@@ -312,7 +305,7 @@ void drawLines(double point_array2[][2], int corner_exp, IplImage *image, bool c
     } else {
       pt2.y = floor(point_array2[i + 1][1]) + 1;
     }
-    cvLine(image, pt1, pt2, s, 1, 8);
+    cvLine(image, pt1, pt2, s, 3, 8);
   }
   cvShowImage("Final Result", image);
 
@@ -354,8 +347,9 @@ IplImage* resizeImage(IplImage *source, int scale) {
 /**
   * Detects the corners of the chessboard pattern.
   */
-IplImage* detectCorners(IplImage *orgimage, int corner_exp, int board_h, int board_w, bool quiet, double point_array2[][2], int scale) {
+IplImage* detectCorners(IplImage *orgimage, int &corner_exp, int board_h, int board_w, bool quiet, double point_array2[][2], int scale) {
   
+  cout << "Scale: " << scale << endl;
   IplImage *image = resizeImage(orgimage, scale);
   CvSize size = cvGetSize(image);
   CvPoint2D32f* corners = new CvPoint2D32f[corner_exp];
@@ -369,21 +363,24 @@ IplImage* detectCorners(IplImage *orgimage, int corner_exp, int board_h, int boa
   }
   
   int found = cvFindChessboardCorners(image, board_sz, corners, &corner_exp, 
-                                      CV_CALIB_CB_ADAPTIVE_THRESH | CV_CALIB_CB_FILTER_QUADS);
+                                      CV_CALIB_CB_ADAPTIVE_THRESH
+                                      | CV_CALIB_CB_NORMALIZE_IMAGE | CV_CALIB_CB_FILTER_QUADS);
   
   cout << "found corners:" << corner_exp << endl;
   if (found != 0) {//if all corners found successfully
+  //if (corner_exp != 0) {//if all corners found successfully
     //Get Subpixel accuracy on those corners
     if(size.width > 400) {
       cvFindCornerSubPix(gray_image, corners, corner_exp, cvSize(11, 11), cvSize(-1, -1), 
                          cvTermCriteria( CV_TERMCRIT_EPS + CV_TERMCRIT_ITER, 30, 0.1));
     }
     else {
-      cvFindCornerSubPix(gray_image, corners, corner_exp, cvSize(2, 2), cvSize(-1, -1), 
+      cvFindCornerSubPix(gray_image, corners, corner_exp, cvSize(3, 3), cvSize(-1, -1), 
                          cvTermCriteria( CV_TERMCRIT_EPS + CV_TERMCRIT_ITER, 30, 0.1));
     }
   }
-	
+  cout << "blub " << found << endl;
+
   for (int i = 0; i < corner_exp; i++) {
     point_array2[i][0] = corners[i].x;
     point_array2[i][1] = corners[i].y;
@@ -411,8 +408,10 @@ image_points, CvSize size, string dir, string substring) {
     j = i % corner_exp;
 		CV_MAT_ELEM( *image_points2, float, i, 0) = CV_MAT_ELEM( *image_points, float, i, 0);
 		CV_MAT_ELEM( *image_points2, float,i,1) = CV_MAT_ELEM( *image_points, float, i, 1);
-		CV_MAT_ELEM(*object_points2, float, i, 0) = (j / board_w) * 8; 
-		CV_MAT_ELEM( *object_points2, float, i, 1) = (j % board_w) * 8;
+		CV_MAT_ELEM(*object_points2, float, i, 0) = (j / board_w) * 4; 
+		CV_MAT_ELEM( *object_points2, float, i, 1) = (j % board_w) * 4;
+		//CV_MAT_ELEM(*object_points2, float, i, 0) = (j / board_w) * 4; 
+		//CV_MAT_ELEM( *object_points2, float, i, 1) = (j % board_w) * 4;
 		CV_MAT_ELEM( *object_points2, float, i, 2) = 0.0f;
 	}
 	for (int i = 0; i < images; ++i) { //These are all the same number
@@ -465,10 +464,13 @@ image_points, CvSize size, string dir, string substring) {
 void CalibFunc(int board_w, int board_h, int start, int end, bool optical, bool
 chess, bool quiet, string dir, int scale) {
   cvNamedWindow("Original Image", 0);
-  cvResizeWindow( "Final Result", 320, 240 ); 
+  cvNamedWindow("Final Result", 0);
+  cvResizeWindow( "Original Image", 480, 640 ); 
+  cvResizeWindow( "Final Result", 480, 640 ); 
+  /*
   cvNamedWindow("Final Result", 0);
   cvResizeWindow( "Final Result", 320, 240 ); 
-
+  */
   int nr_img = end - start + 1;
 	if (nr_img == 0) {
 		cout << "ImageCount is zero!" << endl;
@@ -487,19 +489,21 @@ chess, bool quiet, string dir, int scale) {
 	int step = 0;
 	
   for (int count = start; count <= end; count++) {
-		string t;
+		cout << "count : " << count << endl;
+    string t;
     string t1;
 
     if(optical) {
-      t = dir + "/photo" + to_string(count, 3) + ".ppm";
-		  t1 = dir + "/cimage" + to_string(count, 3) + ".ppm";
+      //TODO t = dir + "/photo" + to_string(count, 3) + ".ppm";
+      t = dir + "/photo" + to_string(count, 3) + ".jpg";
+		  //t1 = dir + "/cimage" + to_string(count, 3) + ".ppm";
       //t = dir + to_string(count, 3) + "/photo" + to_string(count, 3) + ".ppm";
 		  //t1 = dir + to_string(count, 3) + "/cimage" + to_string(count, 3) + ".ppm";
     } else {
       //t = dir + to_string(count, 3) + "/image" + to_string(count, 3) + ".ppm";
 		  //t1 = dir + to_string(count, 3) + "/timage" + to_string(count, 3) + ".ppm";
       t = dir + "/image" + to_string(count, 3) + ".ppm";
-		  t1 = dir + "/timage" + to_string(count, 3) + ".ppm";
+		  //t1 = dir + "/timage" + to_string(count, 3) + ".ppm";
     }
     cout << t << endl;
 		//loading images and finding corners
@@ -515,41 +519,50 @@ chess, bool quiet, string dir, int scale) {
     double point_array2[corner_exp][2];
     IplImage *image;
     
+    int tmp_corners = corner_exp;
     if(chess) {
       cout << "detect corners" << endl;
-      image = detectCorners(image1, corner_exp, board_h, board_w, quiet, point_array2, scale);
+      image = detectCorners(image1, tmp_corners, board_h, board_w, quiet, point_array2, scale);
     } else {
       cout << "detect blob" << endl;
-      int tmp_corners = corner_exp;
       image = detectBlobs(image1, tmp_corners, board_h, board_w, quiet, point_array2);
     }
 
+    /*
     for(int i = 0; i < corner_exp; i++) {
       cout << (float) point_array2[i][0] << " " << (float) point_array2[i][1] <<
       endl;
     }
+    
 		//drawing the lines on the image now
+    */
 		drawLines(point_array2, corner_exp, image);
-
-		cout << "\nDo you want to use the data from this image ('y' or 'n'). 'x' aborts the calibration? : ";
-		int c = cvWaitKey(100);
-		if (c == 27) {
-			break;
-		}
+    //cvDrawChessboardCorners(image, size, point_array2, tmp_corners, true);
+    //cvShowImage("Final Result", image);
 		char in;
-		cin >> in;
-		if (in == 'y') {
-			cvSaveImage(t1.c_str(), image);
-			size = cvGetSize(image);
-			step = successes * corner_exp;
-			//appending corner data to a generic data structure for all images
-			for (int i = step, j = 0; j < corner_exp; ++i, ++j) {
-				CV_MAT_ELEM(*image_points, float,i,0) = (float) point_array2[j][0];
-				CV_MAT_ELEM(*image_points, float,i,1) = (float) point_array2[j][1];
+    if(tmp_corners == corner_exp) {
+      cout << "\nDo you want to use the data from this image ('y' or 'n'). 'x' aborts the calibration? : ";
+      in = 'y';
+      /*
+      int c = cvWaitKey(100);
+      if (c == 27) {
+        break;
       }
-			successes++;
-		} else if(in == 'x') {
-      break;
+      cin >> in;
+      */
+      if (in == 'y') {
+        //cvSaveImage(t1.c_str(), image);
+        size = cvGetSize(image);
+        step = successes * corner_exp;
+        //appending corner data to a generic data structure for all images
+        for (int i = step, j = 0; j < corner_exp; ++i, ++j) {
+          CV_MAT_ELEM(*image_points, float,i,0) = (float) point_array2[j][0];
+          CV_MAT_ELEM(*image_points, float,i,1) = (float) point_array2[j][1];
+        }
+        successes++;
+      } else if(in == 'x') {
+        break;
+      }
     }
 		cvReleaseImage(&image);
 		cvReleaseImage(&image1);
@@ -628,10 +641,19 @@ int realMedian(CvMat * vectors, int nr_vectors) {
  * Calculates the median of a set of vectors by iteratively calculating the
  * median and cropping outliers.
  */
-void filterMedian(CvMat * vectors, int nr_vectors, int threshold, CvMat * mean) {
-  
+void filterMedian(CvMat * vectors, int nr_vectors, int thres, CvMat * mean) {
+  int threshold = thres;
   // calculate Median
   int min_pos = realMedian(vectors, nr_vectors);
+  if(thres == 4) {
+    (CV_MAT_ELEM(*mean,float,0,0)) =  (CV_MAT_ELEM(*vectors,float,min_pos,0));
+    (CV_MAT_ELEM(*mean,float,0,1)) =  (CV_MAT_ELEM(*vectors,float,min_pos,1));
+    (CV_MAT_ELEM(*mean,float,0,2)) =  (CV_MAT_ELEM(*vectors,float,min_pos,2));
+    (CV_MAT_ELEM(*mean,float,0,3)) = (CV_MAT_ELEM(*vectors,float,min_pos,3));
+    (CV_MAT_ELEM(*mean,float,0,4)) = (CV_MAT_ELEM(*vectors,float,min_pos,4));
+    (CV_MAT_ELEM(*mean,float,0,5)) = (CV_MAT_ELEM(*vectors,float,min_pos,5));
+    return;
+  } 
   
   // crop outliers
   double x1 = (CV_MAT_ELEM(*vectors,float,min_pos,0));
@@ -663,15 +685,18 @@ void filterMedian(CvMat * vectors, int nr_vectors, int threshold, CvMat * mean) 
       count++;
     }
   }
+  cout << "min_pos " << min_pos << endl;
   // recurse 
-  if(threshold < 3) {
+  if(thres < 3) {
     filterMedian(some_vectors, count, ++threshold, mean);
     cvReleaseMat(&some_vectors);
   // determine result
   } else {
+    /* 
     x1 = (CV_MAT_ELEM(*some_vectors,float,min_pos,0));
     y1 = (CV_MAT_ELEM(*some_vectors,float,min_pos,1));
     z1 = (CV_MAT_ELEM(*some_vectors,float,min_pos,2));
+    */
     double x2 = 0;
     double y2 = 0;
     double z2 = 0;
@@ -727,16 +752,22 @@ void calculateExtrinsicsWithReprojectionCheck(CvMat * points2D, CvMat *
   for(int i = 0; i < successes; i++) {
     reprojectionError[i] = 0.0;
   }
-
-  for(int i = 0; i < successes; i++) {
+  
+  cout << "reprojectionError" << endl;
+  for(int i = 0; i < successes + 4; i++) {
     reprojectionError[i] = 0.0;
     CvMat * rotation = cvCreateMat(1, 3, CV_32FC1);
     CvMat * translation = cvCreateMat(1, 3, CV_32FC1);
-    
+    if(i==successes) cout << "now other stuff" << endl; 
     for(int k = 0; k < 3; k++) {
       CV_MAT_ELEM(*rotation, float, 0, k) = CV_MAT_ELEM(*rotation_vectors_temp, float, i, k);
       CV_MAT_ELEM(*translation, float, 0, k) = CV_MAT_ELEM(*translation_vectors_temp, float, i, k);
+      cerr << CV_MAT_ELEM(*translation, float, 0, k)<< " ";
     }
+    for(int k = 0; k < 3; k++) {
+      cerr << CV_MAT_ELEM(*rotation, float, 0, k)<< " ";
+    }
+    cerr << endl;
     for(int j = 0; j < successes; j++) {
       double tmp = 0;
       //calculate reprojection error
@@ -760,19 +791,20 @@ void calculateExtrinsicsWithReprojectionCheck(CvMat * points2D, CvMat *
       reprojectionError[i] += tmp;
       cvReleaseMat(&point_3Dcloud);
     }
+    cout << reprojectionError[i]/successes/30 << endl;
     cvReleaseMat(&rotation);
     cvReleaseMat(&translation);
   }
 
   int maxindex = -1;
   double max = DBL_MAX;
-  for(int i = 0; i < successes; i++) {
+  for(int i = 0; i < successes + 4; i++) {
     if(reprojectionError[i] < max) {
       maxindex = i;
       max = reprojectionError[i];
     } 
   }
-
+  cerr << "Reprojection error: " << max/successes << endl;
   CvMat * rotation = cvCreateMat(1, 3, CV_32FC1);
   CvMat * translation = cvCreateMat(1, 3, CV_32FC1);
   
@@ -812,27 +844,59 @@ void calculateExtrinsics(CvMat * rotation_vectors_temp, CvMat * translation_vect
 
 	for (int h = 0; h < successes; h++) {
 		for(int t = 0; t < 3; t++) {
-      CV_MAT_ELEM(*rotation_vectors,float,h,t) =CV_MAT_ELEM(*rotation_vectors_temp,float,h,t);
-		  CV_MAT_ELEM(*rotation_vector_mean,float,0,t) +=CV_MAT_ELEM(*rotation_vectors,float,h,t);
+      CV_MAT_ELEM(*rotation_vectors,float,h,t) = CV_MAT_ELEM(*rotation_vectors_temp,float,h,t);
+		  CV_MAT_ELEM(*rotation_vector_mean,float,0,t) += CV_MAT_ELEM(*rotation_vectors,float,h,t);
 
-		  CV_MAT_ELEM(*translation_vectors,float,h,t) =CV_MAT_ELEM(*translation_vectors_temp,float,h,t);
-		  CV_MAT_ELEM(*translation_vector_mean,float,0,t) +=CV_MAT_ELEM(*translation_vectors,float,h,t);
+		  CV_MAT_ELEM(*translation_vectors,float,h,t) = CV_MAT_ELEM(*translation_vectors_temp,float,h,t);
+		  CV_MAT_ELEM(*translation_vector_mean,float,0,t) += CV_MAT_ELEM(*translation_vectors,float,h,t);
 	    
-		  CV_MAT_ELEM(*vectors,float,h,t) =CV_MAT_ELEM(*translation_vectors_temp,float,h,t);
-		  CV_MAT_ELEM(*vectors,float,h,t + 3) =CV_MAT_ELEM(*rotation_vectors_temp,float,h,t);
+		  CV_MAT_ELEM(*vectors,float,h,t) = CV_MAT_ELEM(*translation_vectors_temp,float,h,t);
+		  CV_MAT_ELEM(*vectors,float,h,t + 3) = CV_MAT_ELEM(*rotation_vectors_temp,float,h,t);
+      cout << CV_MAT_ELEM(*translation_vectors,float,h,t) << " ";
     }
+    cout << endl;
   }
-	
+  	
+  // mean
+  cout << "Getting mean vector" << endl;
   for(int t = 0; t < 3; t++) {
     CV_MAT_ELEM(*rotation_vector_mean,float,0,t) /= successes;
-	  CV_MAT_ELEM(*translation_vector_mean,float,0,t) /= successes;
+	  CV_MAT_ELEM(*rotation_vectors_temp,float,successes,t) = CV_MAT_ELEM(*rotation_vector_mean,float,0,t);
+    CV_MAT_ELEM(*translation_vector_mean,float,0,t) /= successes;
+	  CV_MAT_ELEM(*translation_vectors_temp,float,successes,t) = CV_MAT_ELEM(*translation_vector_mean,float,0,t);
+    cout << CV_MAT_ELEM(*translation_vectors_temp,float,successes,t) << " ";
   }
+  cout << endl;
 
+	// getting the median vectors
+  // median
+  cout << "Getting median vector" << endl;
+  filterMedian(vectors, successes, 1, median);
+  cout << "Got median vector" << endl;
+  for(int t = 0; t < 3; t++) {
+    CV_MAT_ELEM(*translation_vector_median,float,0,t) = CV_MAT_ELEM(*median,float,0,t);
+	  CV_MAT_ELEM(*rotation_vector_median,float,0,t) = CV_MAT_ELEM(*median,float,0,t+3);
+	  CV_MAT_ELEM(*rotation_vectors_temp,float,successes + 1,t) = CV_MAT_ELEM(*rotation_vector_median,float,0,t);
+	  CV_MAT_ELEM(*translation_vectors_temp,float,successes + 1,t) = CV_MAT_ELEM(*translation_vector_median,float,0,t);
+	}
+  
+
+  // filtered median
+  cout << "Getting filtered median vector" << endl;
+  filterMedian(vectors, successes, 4, median);
+  cout << "Got filtered median vector" << endl;
+  for(int t = 0; t < 3; t++) {
+	  CV_MAT_ELEM(*rotation_vectors_temp,float,successes + 2,t) = CV_MAT_ELEM(*median,float,0,t+3);
+    CV_MAT_ELEM(*translation_vectors_temp,float,successes + 2,t) = CV_MAT_ELEM(*median,float,0,t); 
+	}
+  
+  // elementwise median
 	// finding the median of rotation and translation
 	// sorting the rotation vectors element by element
+	
+  sortElementByElement(vectors, 6, successes);
 	/*
-  sortElementByElement(rotation_vectors, 3, successes);
-	sortElementByElement(translation_vectors, 3, successes);
+  sortElementByElement(translation_vectors, 3, successes);
   	
 	if(!quiet) {
     cout << "number of successes : " << successes << endl;
@@ -849,18 +913,16 @@ void calculateExtrinsics(CvMat * rotation_vectors_temp, CvMat * translation_vect
 				<<CV_MAT_ELEM(*translation_vectors,float,i,2) << endl;
 	  }
   }
+  */
 	int index = successes / 2;
   for(int t = 0; t < 3; t++) {
     CV_MAT_ELEM(*translation_vector_median,float,0,t) = CV_MAT_ELEM(*translation_vectors,float,index,t);
 	  CV_MAT_ELEM(*rotation_vector_median,float,0,t) = CV_MAT_ELEM(*rotation_vectors,float,index,t);
 	}
-  */
-	// getting the median vectors
-  filterMedian(vectors, successes, 1, median);
   
   for(int t = 0; t < 3; t++) {
-    CV_MAT_ELEM(*translation_vector_median,float,0,t) = CV_MAT_ELEM(*median,float,0,t);
-	  CV_MAT_ELEM(*rotation_vector_median,float,0,t) = CV_MAT_ELEM(*median,float,0,t+3);
+	  CV_MAT_ELEM(*translation_vectors_temp,float,successes + 3,t) = CV_MAT_ELEM(*vectors,float,index,t);
+	  CV_MAT_ELEM(*rotation_vectors_temp,float,successes + 3,t) = CV_MAT_ELEM(*vectors,float,index,t+3);
 	}
 	
   cout << "mean rotation vector is :" << endl;
@@ -908,43 +970,48 @@ void calculateExtrinsics(CvMat * rotation_vectors_temp, CvMat * translation_vect
   * Main function for extrinsic calibration of laser scanner and camera.
   */
 void ExtrCalibFunc(int board_w, int board_h, int start, int end, bool optical, bool chess, bool quiet, string dir, int scale) {
-	int nr_img = end - start + 1;
+  int nr_img = end - start + 1;
   if (nr_img == 0) {
-		cout << "ImageCount is zero!" << endl;
-		return;
-	}
+    cout << "ImageCount is zero!" << endl;
+    return;
+  }
   cvNamedWindow("Original Image", 0);
-  cvResizeWindow( "Final Result", 320, 240 ); 
+  cvResizeWindow( "Original Image", 480, 640 ); 
   cvNamedWindow("Final Result", 0);
-  cvResizeWindow( "Final Result", 320, 240 ); 
-	
+  cvResizeWindow( "Final Result", 480, 640 ); 
+
   int corner_exp = board_w * board_h;
   CvSize board_sz = cvSize(board_w, board_h);
   CvSize size;
-	CvPoint3D32f* corners = new CvPoint3D32f[corner_exp];
-	//ALLOCATE STORAGE(depending upon the number of images in(in case if command line arguments are given )
-	//not on the basis of number of images in which all corner extracted/while in the other case the number is the same )
+  CvPoint3D32f* corners = new CvPoint3D32f[corner_exp];
+  //ALLOCATE STORAGE(depending upon the number of images in(in case if command line arguments are given )
+  //not on the basis of number of images in which all corner extracted/while in the other case the number is the same )
 
   string substring = optical? "Optical" : "";
   string file = dir + "Intrinsics" + substring + ".xml";
-	cout << file << endl;
+  cout << file << endl;
   CvMat *intrinsic = (CvMat*) cvLoad(file.c_str());
-	file = dir + "Distortion" + substring + ".xml";
-	CvMat *distortion = (CvMat*) cvLoad(file.c_str());
-	//for storing the rotations and translation vectors
-	CvMat* rotation_vectors_temp = cvCreateMat(nr_img, 3, CV_32FC1);
-	CvMat* translation_vectors_temp = cvCreateMat(nr_img, 3, CV_32FC1);
+  file = dir + "Distortion" + substring + ".xml";
+  CvMat *distortion = (CvMat*) cvLoad(file.c_str());
+  //for storing the rotations and translation vectors
+
+
+  CvMat* rotation_vectors_temp = cvCreateMat(nr_img + 4, 3, CV_32FC1);
+  CvMat* translation_vectors_temp = cvCreateMat(nr_img + 4, 3, CV_32FC1);
   CvMat* points3D = cvCreateMat(nr_img, corner_exp, CV_32FC3);
   CvMat* points2D = cvCreateMat(nr_img, corner_exp, CV_32FC2);
   int successes = 0;
 
+  int tmp_corners = corner_exp;
   for (int count = start; count <= end; count++) {
+    corner_exp = tmp_corners;
     string i;
     string p;
 
     cout << "Reading data " << to_string(count, 3) << endl;
     if(optical) {
-      i = dir + "/photo" + to_string(count, 3) + ".ppm";
+      //TODO i = dir + "/photo" + to_string(count, 3) + ".ppm";
+      i = dir + "/photo" + to_string(count, 3) + ".jpg";
     } else {
       i = dir + "/image" + to_string(count, 3) + ".ppm";
     }
@@ -960,11 +1027,13 @@ void ExtrCalibFunc(int board_w, int board_h, int start, int end, bool optical, b
       return;
     }
     cvShowImage("Original Image", image1);
+    IplImage* image2 = cvCloneImage(image1);
+    cvUndistort2(image1, image2, intrinsic, distortion);
+    cvShowImage("Final Result", image2);
 
     double point_array2[corner_exp][2];
     IplImage *image;
 
-    int tmp_corners = corner_exp;
     if(chess) {
       image = detectCorners(image1, corner_exp, board_h, board_w, quiet, point_array2, scale);
     } else {
@@ -975,89 +1044,311 @@ void ExtrCalibFunc(int board_w, int board_h, int start, int end, bool optical, b
       return;
     }
     //drawing the lines on the image now
-    drawLines(point_array2, corner_exp, image);
-    CvMat* image_points = cvCreateMat(corner_exp, 2, CV_32FC1);
-    CvMat* object_points = cvCreateMat(corner_exp, 3, CV_32FC1);
-    CvMat* Rotation = cvCreateMat(1, 3, CV_32FC1);
-    CvMat* Translation = cvCreateMat(1, 3, CV_32FC1);
-
-    cout << "\nDo you want to use the data from this image ('y' or 'n'). 'x' aborts the calibration? : ";
-    int c = cvWaitKey(100);
-    if (c == 27) {
-      break;
-    }
-    char in;
-    cin >> in;
     if(tmp_corners == corner_exp) {
-      if (in == 'y') {
-        size = cvGetSize(image);
-        //appending corner data to a generic data structure for all images
-        for (int j = 0; j < corner_exp; ++j) {
-          CV_MAT_ELEM(*image_points, float,j,0) = (float) point_array2[j][0];
-          CV_MAT_ELEM(*image_points, float,j,1) = (float) point_array2[j][1];
-          CV_MAT_ELEM(*object_points,float,j,0) = corners[j].x;
-          CV_MAT_ELEM(*object_points,float,j,1) = corners[j].y;
-          CV_MAT_ELEM(*object_points,float,j,2) = corners[j].z;
+      cout << tmp_corners << " " << corner_exp << endl;
+      drawLines(point_array2, corner_exp, image);
+      CvMat* image_points = cvCreateMat(corner_exp, 2, CV_32FC1);
+      CvMat* object_points = cvCreateMat(corner_exp, 3, CV_32FC1);
+      CvMat* Rotation = cvCreateMat(1, 3, CV_32FC1);
+      CvMat* Translation = cvCreateMat(1, 3, CV_32FC1);
 
+
+      char in;// = 'y';
+      size = cvGetSize(image);
+      //appending corner data to a generic data structure for all images
+      for (int j = 0; j < corner_exp; ++j) {
+        CV_MAT_ELEM(*image_points, float,j,0) = (float) point_array2[j][0];
+        CV_MAT_ELEM(*image_points, float,j,1) = (float) point_array2[j][1];
+        CV_MAT_ELEM(*object_points,float,j,0) = corners[j].x;
+        CV_MAT_ELEM(*object_points,float,j,1) = corners[j].y;
+        CV_MAT_ELEM(*object_points,float,j,2) = corners[j].z;
+
+        /*
+           cout << (float)point_array2[j][0] << " ";
+           cout << (float)point_array2[j][1] << " ";
+           cout << corners[j].x << " "; 
+           cout << corners[j].y << " ";
+           cout << corners[j].z << endl; 
+         */
+      }
+      cvFindExtrinsicCameraParams2(object_points, image_points, intrinsic, distortion, Rotation, Translation);
+      // append data to vectors
+      /*   
+           if(CV_MAT_ELEM(*Translation, float, 0, 1) > -30) 
+           if(CV_MAT_ELEM(*Translation, float, 0, 0) < -20) 
+           if(CV_MAT_ELEM(*Translation, float, 0, 1) > -4 ) 
+           if(CV_MAT_ELEM(*Translation, float, 0, 1) < -00) 
+           if(CV_MAT_ELEM(*Translation, float, 0, 2) > -12) 
+           if(CV_MAT_ELEM(*Translation, float, 0, 2) < -8 ) {
+       */
+      if(!quiet) cout << "Rotation is:" << endl;
+      for (int row = 0; row < 1; row++) {
+        for (int col = 0; col < 3; col++) {
+          if(!quiet) cout << CV_MAT_ELEM( *Rotation, float, row, col ) << "  ";
+          CV_MAT_ELEM( *rotation_vectors_temp, float, successes, col ) = CV_MAT_ELEM( *Rotation, float, row, col );
+        }
+        if(!quiet) cout << endl;
+      }
+      if(!quiet) cout << "Translation is:" << endl;
+      for (int row = 0; row < 1; row++) {
+        for (int col = 0; col < 3; col++) {
+          if(!quiet) cout << CV_MAT_ELEM( *Translation, float, row, col ) << "  ";
+          CV_MAT_ELEM( *translation_vectors_temp, float, successes, col ) = CV_MAT_ELEM( *Translation, float, row, col );
+        }
+        if(!quiet) cout << endl;
+      }
+      
+      cout << "\nDo you want to use the data from this image ('y' or 'n'). 'x' aborts the calibration? : ";
+      int c = cvWaitKey(100);
+      cin >> in;
+      if (c == 27) {
+        break;
+      }
+
+      if (in == 'y') {
+        for (int j = 0; j < corner_exp; ++j) {
           CV_MAT_ELEM(*points2D, CvPoint2D32f, successes, j).x = (float)point_array2[j][0];
           CV_MAT_ELEM(*points2D, CvPoint2D32f, successes, j).y = (float)point_array2[j][1];
           CV_MAT_ELEM(*points3D, CvPoint3D32f, successes, j).x = corners[j].x; 
           CV_MAT_ELEM(*points3D, CvPoint3D32f, successes, j).y = corners[j].y;
           CV_MAT_ELEM(*points3D, CvPoint3D32f, successes, j).z = corners[j].z; 
         }
-        cvFindExtrinsicCameraParams2(object_points, image_points, intrinsic, distortion, Rotation, Translation);
-        // append data to vectors
-        if(!quiet) cout << "Rotation is:" << endl;
-        for (int row = 0; row < 1; row++) {
-          for (int col = 0; col < 3; col++) {
-            if(!quiet) cout << CV_MAT_ELEM( *Rotation, float, row, col ) << "  ";
-            CV_MAT_ELEM( *rotation_vectors_temp, float, successes, col ) = CV_MAT_ELEM( *Rotation, float, row, col );
-          }
-          if(!quiet) cout << endl;
-        }
-        if(!quiet) cout << "Translation is:" << endl;
-        for (int row = 0; row < 1; row++) {
-          for (int col = 0; col < 3; col++) {
-            if(!quiet) cout << CV_MAT_ELEM( *Translation, float, row, col ) << "  ";
-            CV_MAT_ELEM( *translation_vectors_temp, float, successes, col ) = CV_MAT_ELEM( *Translation, float, row, col );
-          }
-          if(!quiet) cout << endl;
-        }
         successes++;
+        //                }
 
       } else if(in == 'x') {
         break;
       }
-    } 
+      //cvReleaseImage(&image);
+    cvReleaseMat(&image_points);
+    cvReleaseMat(&object_points);
+    cvReleaseMat(&Rotation);
+    cvReleaseMat(&Translation);
+    }
     cvReleaseImage(&image);
     cvReleaseImage(&image1);
-		cvReleaseMat(&image_points);
-		cvReleaseMat(&object_points);
-    cvReleaseMat(&Rotation);
-		cvReleaseMat(&Translation);
-	}//for loop for imagecount
+    cvReleaseImage(&image2);
+  }//for loop for imagecount
   cvDestroyWindow("Original Image");
   cvDestroyWindow("Final Result");
 
   cout << "Number of successes: " << successes << endl;
   // Now calculating mean and median rotation and trans
-  //calculateExtrinsics(rotation_vectors_temp, translation_vectors_temp, successes, dir, quiet, substring);
-	calculateExtrinsicsWithReprojectionCheck(points2D, points3D, rotation_vectors_temp, translation_vectors_temp, distortion, intrinsic, corner_exp, successes, dir, quiet, substring);
+  calculateExtrinsics(rotation_vectors_temp, translation_vectors_temp, successes, dir, quiet, substring);
+  calculateExtrinsicsWithReprojectionCheck(points2D, points3D, rotation_vectors_temp, translation_vectors_temp, distortion, intrinsic, corner_exp, successes, dir, quiet, substring);
   cvReleaseMat(&intrinsic);
   cvReleaseMat(&distortion);
   cvReleaseMat(&translation_vectors_temp);
-	cvReleaseMat(&rotation_vectors_temp);
+  cvReleaseMat(&rotation_vectors_temp);
   cvReleaseMat(&points2D);
   cvReleaseMat(&points3D);
 }
 
+//bool readFrames(char * dir, int index, double * rPos, rPosTheta) {
+//bool readFrames(char * dir, int index, double * inMatrix, double * rPos) {
+bool readFrames(const char * dir, int index, double * tMatrix, CvMat * inMatrix, CvMat * rPos) {
+  char frameFileName[255];
+  snprintf(frameFileName,255,"%sscan%.3d.frames",dir,index);
+  ifstream pose_in;
+  pose_in.open(frameFileName);
+  
+  if (!pose_in.good()) return false; // no more files in the directory
+
+  cout << "Reading frame " << frameFileName << "..." << endl;
+  double tmpMatrix[17];
+  while(pose_in.good()) {
+    for (unsigned int i = 0; i < 17; pose_in >> tMatrix[i++]);
+  }
+
+  M4inv(tMatrix, tmpMatrix);
+  
+  CV_MAT_ELEM(*inMatrix, float,0,0) = tmpMatrix[10];
+  CV_MAT_ELEM(*inMatrix, float,0,1) = -tmpMatrix[2];
+  CV_MAT_ELEM(*inMatrix, float,0,2) = tmpMatrix[6]; 
+  CV_MAT_ELEM(*inMatrix, float,1,0) = -tmpMatrix[8];
+  CV_MAT_ELEM(*inMatrix, float,1,1) = tmpMatrix[0];
+  CV_MAT_ELEM(*inMatrix, float,1,2) = -tmpMatrix[4];
+  CV_MAT_ELEM(*inMatrix, float,2,0) = tmpMatrix[9]; 
+  CV_MAT_ELEM(*inMatrix, float,2,1) = -tmpMatrix[1];
+  CV_MAT_ELEM(*inMatrix, float,2,2) = tmpMatrix[5];
+  
+  CV_MAT_ELEM(*rPos, float,0,0) = tmpMatrix[14];
+  CV_MAT_ELEM(*rPos, float,1,0) = -tmpMatrix[12];
+  CV_MAT_ELEM(*rPos, float,2,0) = tmpMatrix[13];
+  
+  return true;
+}
+
+void writeGlobalCameras(int start, int end, bool optical, bool quiet, string dir,
+    IOType type, int scale, double rot_angle, double minDist, double maxDist,
+    bool correction, int neighborhood, int method) {
+
+  string file;
+  int nr_img = end - start + 1;
+  if (nr_img < 1) {
+    cout << "ImageCount is zero!" << endl;
+    return;
+  }
+  string substring = optical? "Optical" : "";
+  switch(method) {
+    case 0:
+      file = dir + "Rotation" + substring + ".xml";
+      break; 
+    case 1:
+      file = dir + "RotationMedian" + substring + ".xml";
+      break;
+    case 2:
+      file = dir + "RotationMean" + substring + ".xml";
+      break;
+  }
+  CvMat *Rotation = (CvMat*) cvLoad(file.c_str());
+  switch(method) {
+    case 0:
+      file = dir + "Translation" + substring + ".xml";
+      break; 
+    case 1:
+      file = dir + "TranslationMedian" + substring + ".xml";
+      break;
+    case 2:
+      file = dir + "TranslationMean" + substring + ".xml";
+      break;
+  }
+  CvMat *Translation = (CvMat*) cvLoad(file.c_str());
+
+  double starttime = GetCurrentTimeInMilliSec();
+
+  stringstream outdat;
+  string outdir = dir + "/labscan-map"; 
+#ifdef _MSC_VER
+  int success = mkdir(outdir.c_str());
+#else
+  int success = mkdir(outdir.c_str(), S_IRWXU|S_IRWXG|S_IRWXO);
+#endif
+  if(success == 0) { 
+    cout << "Writing scans to " << outdir << endl;
+  } else if(errno == EEXIST) {
+    cout << "Directory " << outdir << " exists already.  CONTINUE" << endl; 
+  } else {
+    cerr << "Creating directory " << outdir << " failed" << endl;
+    exit(1);
+  }
+
+  for (int count = start; count <= end; count++) {
+    // filling the rotation matrix 
+
+    // reading the frame files 3D points and projecting them back to 2d
+    CvMat* inMatrix = cvCreateMat(3,3,CV_32FC1);
+    CvMat* rPos = cvCreateMat(3,1,CV_32FC1);
+    double * tMatrix = new double[17];
+    readFrames(dir.c_str(), count, tMatrix, inMatrix, rPos);
+
+    // TODO make sure correct points are printed 
+    /*
+       CV_MAT_ELEM(*point_3Dcloud, float,j,0) = p.z;
+       CV_MAT_ELEM(*point_3Dcloud, float,j,1) = -p.x;
+       CV_MAT_ELEM(*point_3Dcloud, float,j,2) = p.y; 
+     */
+
+    // write colored data  
+    int nrP360 = 9;
+    for(int p = 0; p < nrP360; p++) {
+      double angle = rot_angle * (p%nrP360);
+      int count0 = count * nrP360 + p;
+      string outname = outdir + "/image" + to_string(count0, 3) + ".mat";
+      
+      fstream outfile;
+      outfile.open(outname.c_str(), ios::out);
+      
+      CvMat* RotationI = cvCreateMat(3,1,CV_32FC1);
+      CvMat* TranslationI = cvCreateMat(3,1,CV_32FC1);
+      CvMat* rod40 = cvCreateMat(3,1,CV_32FC1);
+      cout << "Angle: " << angle << " " << rad(angle) << endl;
+      CV_MAT_ELEM(*rod40,float,0,0) = 0.0;
+      CV_MAT_ELEM(*rod40,float,1,0) = 0.0;
+      CV_MAT_ELEM(*rod40,float,2,0) = 1.0 * rad(angle);
+      CvMat* t40 = cvCreateMat(3,1,CV_32FC1);
+      CV_MAT_ELEM(*t40,float,0,0) = 0.0;
+      CV_MAT_ELEM(*t40,float,1,0) = 0.0;
+      CV_MAT_ELEM(*t40,float,2,0) = 0.0;
+      CvMat* rot_tmp = cvCreateMat(3,3,CV_32FC1);
+      CvMat* rod_comI = cvCreateMat(3,1,CV_32FC1);
+      CvMat* t_comI = cvCreateMat(3,1,CV_32FC1);
+      CvMat* rod_com = cvCreateMat(1,3,CV_32FC1);
+      CvMat* t_com = cvCreateMat(1,3,CV_32FC1);
+      for(int w = 0; w < 3; w++) {
+        CV_MAT_ELEM(*RotationI,float,w,0) = CV_MAT_ELEM(*Rotation,float,0,w);
+        CV_MAT_ELEM(*TranslationI,float,w,0) = CV_MAT_ELEM(*Translation,float,0,w);
+      }
+
+      cout << "Final Rotation" << endl;
+
+      cvComposeRT(rod40, t40, RotationI, TranslationI, rod_comI, t_comI);
+
+      for(int w = 0; w < 3; w++) {
+        CV_MAT_ELEM(*rod_com,float,0,w) = CV_MAT_ELEM(*rod_comI,float,w,0);
+        CV_MAT_ELEM(*t_com,float,0,w) = CV_MAT_ELEM(*t_comI,float,w,0);
+        /*
+           cout << CV_MAT_ELEM(*RotationI,float,w,0) << " ";
+           cout << CV_MAT_ELEM(*TranslationI,float,w,0) << " ";
+           cout << CV_MAT_ELEM(*rod40,float,w,0) << " ";
+           cout << CV_MAT_ELEM(*t40,float,w,0) << " ";
+           cout << CV_MAT_ELEM(*rod_comI,float,w,0) << " ";
+           cout << CV_MAT_ELEM(*t_comI,float,w,0) << endl;
+         */
+      }
+      cout << endl;
+
+      // transform into global coordinate system (inMatrix, rPos)
+      CvMat* t_globalI = cvCreateMat(3,1,CV_32FC1);
+      CvMat* r_globalI = cvCreateMat(3,1,CV_32FC1);
+      CvMat* rodglob = cvCreateMat(3,1,CV_32FC1);
+      cvRodrigues2(inMatrix, rodglob);
+      cvComposeRT(rodglob, rPos, rod_comI, t_comI, r_globalI, t_globalI);
+      //cvRodrigues2(r_globalI, rot_tmp);
+
+      cvReleaseMat(&rod40);
+      cvReleaseMat(&RotationI);
+      cvReleaseMat(&TranslationI);
+      cvReleaseMat(&t40);
+      cvReleaseMat(&rod_comI);
+      cvReleaseMat(&rod_com);
+      cvReleaseMat(&t_com);
+      cvReleaseMat(&t_comI);
+      cout << "Done projecting points" << endl;
+
+      CvMat* rotmatrix = cvCreateMat(3,3,CV_32FC1);
+      cvRodrigues2(r_globalI, rotmatrix);
+      
+      //cvSave(outname.c_str(), rotmatrix);
+      
+      for(int i = 0; i < 3; i++) {
+        for(int j = 0; j < 3; j++) {
+          outfile << CV_MAT_ELEM(*rotmatrix,float,i,j) << " ";   
+        }
+        
+        outfile << CV_MAT_ELEM(*t_globalI,float,i,0) << endl;
+      }
+      outfile << "0 0 0 1" << endl;
+      // checking whether projection lies within the image boundaries
+      cvReleaseMat(&rot_tmp);
+      
+      outfile.close();
+      outfile.flush();
+      
+    }
+
+  }
+  cvReleaseMat(&Rotation);
+  cvReleaseMat(&Translation);
+
+}
 /**
-  * Main function for projecting the 3D points onto the corresponding image and
-  * associating temperature values to the data points.
+  * Read scans 
+  * Read frames
   */
-void ProjectAndMap(int start, int end, bool optical, bool quiet, string dir,
-IOType type, int scale, double rot_angle, double minDist, double maxDist,
-bool correction, int neighborhood, int method) {
+void calculateGlobalCameras(int start, int end, bool optical, bool quiet, string dir,
+    IOType type, int scale, double rot_angle, double minDist, double maxDist,
+    bool correction, int neighborhood, int method) {
 
   int nr_img = end - start + 1;
   if (nr_img < 1) {
@@ -1094,18 +1385,14 @@ bool correction, int neighborhood, int method) {
   }
   CvMat *Translation = (CvMat*) cvLoad(file.c_str());
   CvMat* undistort = cvCreateMat(5,1,CV_32FC1);
-	for (int hh = 0; hh < 5; hh++) {
-	  CV_MAT_ELEM(*undistort, float,hh,0) = 0;
-	}
+  for (int hh = 0; hh < 5; hh++) {
+    CV_MAT_ELEM(*undistort, float,hh,0) = 0;
+  }
 
   double starttime = GetCurrentTimeInMilliSec();
 
-  // filling the rotation matrix 
-  double rPosTheta[3] = {0.0, rad(rot_angle), 0.0};
-  double rPos[3] = {0.0, 0.0, 0.0};
-  double alignxf[16];
-  EulerToMatrix4(rPos, rPosTheta, alignxf); 
-
+  stringstream outdat;
+  int pointcnt = 0;
   string outdir = dir + "/labscan-map"; 
 #ifdef _MSC_VER
   int success = mkdir(outdir.c_str());
@@ -1121,178 +1408,215 @@ bool correction, int neighborhood, int method) {
     exit(1);
   }
   for (int count = start; count <= end; count++) {
+    // filling the rotation matrix 
     CvMat* point_3Dcloud; 
     CvMat* point_2Dcloud; 
     CvMat* undistort_2Dcloud; 
-    
-    CvMat* point_3Dcloud_2;
-    CvMat* point_2Dcloud_2;
-    CvMat* undistort_2Dcloud_2; 
-
-    // loading images
-    int count0;
-    if(rot_angle < 180 && rot_angle > 0) {
-      count0 = count % 9 == 8 ? count - 8 : count + 1;
-    } else {
-      count0 = count % 9 == 0 ? count + 8 : count - 1;
-    }
-    string t, t0;
-    if(optical) {
-      t = dir + "/photo" + to_string(count, 3) + ".ppm";
-      t0 = dir + "/photo" + to_string(count0, 3) + ".ppm";
-    } else {
-      t = dir + "/image" + to_string(count, 3) + ".ppm";
-      t0 = dir + "/image" + to_string(count0, 3) + ".ppm";
-    }
-
-    IplImage* image = cvLoadImage(t.c_str(), -1);
-    if (!image) {
-      cout << "first image " << t << " cannot be loaded" << endl;
-      return;
-    }
-    CvSize size = cvGetSize(image); 
-
-    IplImage* image0;
-    if(fabs(rot_angle) > 1) {
-      image0 = cvLoadImage(t0.c_str(), -1);
-
-      if (!image0) {
-        cout << "second image " << t0 << " cannot be loaded" << endl;
-        return;
-      }
-      image0 = resizeImage(image0, scale);
-    }
-    image = resizeImage(image, scale);
-    if(image)
 
     // reading the 3D points and projecting them back to 2d
-    Scan::readScans(type, count, count, dir, maxDist, minDist, 0);
-    Scan::allScans[0]->calcReducedPoints(-1, 0);
-    point_3Dcloud = cvCreateMat(Scan::allScans[0]->get_points_red_size(), 3, CV_32FC1);
-    point_2Dcloud = cvCreateMat(Scan::allScans[0]->get_points_red_size(), 2, CV_32FC1);
-    undistort_2Dcloud = cvCreateMat(Scan::allScans[0]->get_points_red_size(), 2, CV_32FC1);
-    for (int j = 0; j < Scan::allScans[0]->get_points_red_size(); j++) {
-      CV_MAT_ELEM(*point_3Dcloud, float,j,0) = Scan::allScans[0]->get_points_red()[j][2];
-      CV_MAT_ELEM(*point_3Dcloud, float,j,1) = -Scan::allScans[0]->get_points_red()[j][0];
-      CV_MAT_ELEM(*point_3Dcloud, float,j,2) = Scan::allScans[0]->get_points_red()[j][1];
-    }
+    Scan::openDirectory(false, dir, type, count, count);
+    Scan::allScans[0]->setRangeFilter(-1, -1);
+    Scan::allScans[0]->setSearchTreeParameter(simpleKD, false);
+    Scan::allScans[0]->setReductionParameter(-1, 0);
     
-    cout << "Number of points read: " << Scan::allScans[0]->get_points_red_size() << endl;
-    cvProjectPoints2(point_3Dcloud, Rotation, Translation, intrinsic,
-        distortion, point_2Dcloud, NULL, NULL, NULL, NULL, NULL, 0);
-		
-    cvProjectPoints2(point_3Dcloud, Rotation, Translation, intrinsic,
-        undistort, undistort_2Dcloud, NULL, NULL, NULL, NULL, NULL, 0);
+    //Scan::readScans(type, count, count, dir, maxDist, minDist, 0);
+    DataXYZ reduced = Scan::allScans[0]->get("xyz reduced");
+    int red_size = reduced.size();
+    point_3Dcloud = cvCreateMat(red_size, 3, CV_32FC1);
+    cout << "Points: " << red_size << endl;
+    point_2Dcloud = cvCreateMat(red_size, 2, CV_32FC1);
+    undistort_2Dcloud = cvCreateMat(red_size, 2, CV_32FC1);
+    cout << "readScans done" << endl;
+    // read frames
+    //double * rPos = new double[3];
+    //double * rPosTheta= new double[3];
+    //readFrames(dir, count, rPos, rPosTheta);
 
-    // second image in case of overlap
-    if(fabs(rot_angle) > 1) {
-      point_3Dcloud_2 = cvCreateMat(Scan::allScans[0]->get_points_red_size(), 3, CV_32FC1);
-      point_2Dcloud_2 = cvCreateMat(Scan::allScans[0]->get_points_red_size(), 2, CV_32FC1);
-      undistort_2Dcloud_2 = cvCreateMat(Scan::allScans[0]->get_points_red_size(), 2, CV_32FC1);
-      for (int j = 0; j < Scan::allScans[0]->get_points_red_size(); j++) {
-        Point p(Scan::allScans[0]->get_points_red()[j]);
-        p.transform(alignxf);
+    CvMat* inMatrix = cvCreateMat(3,3,CV_32FC1);
+    CvMat* rPos = cvCreateMat(3,1,CV_32FC1);
+    double * tMatrix = new double[17];
+    readFrames(dir.c_str(), count, tMatrix, inMatrix, rPos);
+    Scan::allScans[0]->transform(tMatrix, Scan::INVALID, 0);
 
-        CV_MAT_ELEM(*point_3Dcloud_2, float,j,0) = p.z;
-        CV_MAT_ELEM(*point_3Dcloud_2, float,j,1) = -p.x;
-        CV_MAT_ELEM(*point_3Dcloud_2, float,j,2) = p.y; 
-      }
+    for (int j = 0; j < red_size; j++) {
+      Point p(reduced[j]);
+      // TODO make sure correct points are printed 
 
-      cvProjectPoints2(point_3Dcloud_2, Rotation, Translation, intrinsic,
-        distortion, point_2Dcloud_2, NULL, NULL, NULL, NULL, NULL, 0);
-		
-      cvProjectPoints2(point_3Dcloud_2, Rotation, Translation, intrinsic,
-        undistort, undistort_2Dcloud_2, NULL, NULL, NULL, NULL, NULL, 0);
-    } 
+      CV_MAT_ELEM(*point_3Dcloud, float,j,0) = p.z;
+      CV_MAT_ELEM(*point_3Dcloud, float,j,1) = -p.x;
+      CV_MAT_ELEM(*point_3Dcloud, float,j,2) = p.y; 
+
+    }
+    int nr_points = red_size; 
+    cout << "Number of points read: " << red_size << endl;
+    delete Scan::allScans[0];
+    Scan::allScans.clear();
+
     // write colored data  
     string outname = outdir + "/scan" + to_string(count, 3) + ".3d";
     fstream outfile;
     outfile.open(outname.c_str(), ios::out);
 
-    //for counting how many points get mapped to first and second image file
-    int point_map1 = 0;  // #points mapped to first image
-    int point_map2 = 0;  //    "      "    "  second image
-   
-    // checking whether projection lies within the image boundaries
-    for (int k = 0; k < Scan::allScans[0]->get_points_red_size(); k++) {
-      float px = CV_MAT_ELEM(*undistort_2Dcloud,float,k,0);
-      float py = CV_MAT_ELEM(*undistort_2Dcloud,float,k,1);
-      if (px < image->width - .5 && px >= 0 && py >= 0 && py < image->height - .5) {
-        px = CV_MAT_ELEM(*point_2Dcloud,float,k,0);
-        py = CV_MAT_ELEM(*point_2Dcloud,float,k,1);
-        if (px < image->width - .5 && px >= 0 && py >= 0 && py < image->height - .5) {
+
+    int nrP360 = 9;
+    for(int p = 0; p < nrP360; p++) {
+    //for(int p = 4; p < 5; p++) {
+      //double angle = rot_angle * (p%nrP360) + 2.0;
+      double angle = rot_angle * (p%nrP360);
+      cout << angle << endl;
+      // loading images
+      int count0 = count * nrP360 + p;
+
+      string t, t0;
+      if(optical) {
+        //TODO t = dir + "/photo" + to_string(count, 3) + ".ppm";
+        //t = dir + "/photo" + to_string(count0, 3) + "_2.jpg";
+        //t = dir + "/photo" + to_string(count0, 3) + "_90.jpg";
+        t = dir + "/photo" + to_string(count0, 3) + ".jpg";
+        //t = dir + "/photo" + to_string(count0, 3) + "_1.jpg";
+      } else {
+        t = dir + "/image" + to_string(count0, 3) + ".ppm";
+      }
+
+      IplImage* image = cvLoadImage(t.c_str(), -1);
+      if (!image) {
+        cout << "first image " << t << " cannot be loaded" << endl;
+        return;
+      }
+      CvSize size = cvGetSize(image); 
+
+      image = resizeImage(image, scale);
+
+
+      /** TODO!!!
+        * Transform rPos and rPosTheta into OpenCV (Rodrigues)
+        * cvComposeRT with rod_comI and t_comI
+        */
+      // rotate Rotation and Translation
+      CvMat* RotationI = cvCreateMat(3,1,CV_32FC1);
+      CvMat* TranslationI = cvCreateMat(3,1,CV_32FC1);
+      CvMat* rod40 = cvCreateMat(3,1,CV_32FC1);
+      cout << "Angle: " << angle << " " << rad(angle) << endl;
+      CV_MAT_ELEM(*rod40,float,0,0) = 0.0;
+      CV_MAT_ELEM(*rod40,float,1,0) = 0.0;
+      CV_MAT_ELEM(*rod40,float,2,0) = 1.0 * rad(angle);
+      cout << "tmp" << endl;
+      CvMat* t40 = cvCreateMat(3,1,CV_32FC1);
+      CV_MAT_ELEM(*t40,float,0,0) = 0.0;
+      CV_MAT_ELEM(*t40,float,1,0) = 0.0;
+      CV_MAT_ELEM(*t40,float,2,0) = 0.0;
+      cout << "tmp2" << endl;
+      CvMat* rot_tmp = cvCreateMat(3,3,CV_32FC1);
+      CvMat* rod_comI = cvCreateMat(3,1,CV_32FC1);
+      CvMat* t_comI = cvCreateMat(3,1,CV_32FC1);
+      CvMat* rod_com = cvCreateMat(1,3,CV_32FC1);
+      CvMat* t_com = cvCreateMat(1,3,CV_32FC1);
+      cout << "tmp3" << endl;
+      for(int w = 0; w < 3; w++) {
+        CV_MAT_ELEM(*RotationI,float,w,0) = CV_MAT_ELEM(*Rotation,float,0,w);
+        CV_MAT_ELEM(*TranslationI,float,w,0) = CV_MAT_ELEM(*Translation,float,0,w);
+      }
+      cout << endl;
+      cout << "Final Rotation" << endl;
+
+      cvComposeRT(rod40, t40, RotationI, TranslationI, rod_comI, t_comI);
+      for(int w = 0; w < 3; w++) {
+        CV_MAT_ELEM(*rod_com,float,0,w) = CV_MAT_ELEM(*rod_comI,float,w,0);
+        CV_MAT_ELEM(*t_com,float,0,w) = CV_MAT_ELEM(*t_comI,float,w,0);
+        cout << CV_MAT_ELEM(*RotationI,float,w,0) << " ";
+        cout << CV_MAT_ELEM(*TranslationI,float,w,0) << " ";
+        cout << CV_MAT_ELEM(*rod40,float,w,0) << " ";
+        cout << CV_MAT_ELEM(*t40,float,w,0) << " ";
+        cout << CV_MAT_ELEM(*rod_comI,float,w,0) << " ";
+        cout << CV_MAT_ELEM(*t_comI,float,w,0) << endl;
+      }
+      cout << endl;
+
+      cvRodrigues2(rod_comI, rot_tmp);
+      
+      // transform into global coordinate system (inMatrix, rPos)
+      CvMat* t_globalI = cvCreateMat(3,1,CV_32FC1);
+      CvMat* r_globalI = cvCreateMat(3,1,CV_32FC1);
+      CvMat* rodglob = cvCreateMat(3,1,CV_32FC1);
+      cvRodrigues2(inMatrix, rodglob);
+      cvComposeRT(rodglob, rPos, rod_comI, t_comI, r_globalI, t_globalI);
+      //TODO verify order
+      cvRodrigues2(r_globalI, rot_tmp);
+      
+      //cvComposeRT(rod_comI, t_comI, rodglob, rPos, r_globalI, t_globalI);
+       
+      
+      cvProjectPoints2(point_3Dcloud, r_globalI, t_globalI, intrinsic, distortion, point_2Dcloud, NULL, NULL, NULL, NULL, NULL, 0);
+      cvProjectPoints2(point_3Dcloud, r_globalI, t_globalI, intrinsic, undistort, undistort_2Dcloud, NULL, NULL, NULL, NULL, NULL, 0);
+      
+
+      // END TODO
+      // Project Points
+      /* 
+      cvProjectPoints2(point_3Dcloud, rod_comI, t_comI, intrinsic, distortion, point_2Dcloud, NULL, NULL, NULL, NULL, NULL, 0);
+      cvProjectPoints2(point_3Dcloud, rod_comI, t_comI, intrinsic, undistort, undistort_2Dcloud, NULL, NULL, NULL, NULL, NULL, 0);
+      */
+  
+      cvReleaseMat(&rod40);
+      cvReleaseMat(&RotationI);
+      cvReleaseMat(&TranslationI);
+      cvReleaseMat(&t40);
+      cvReleaseMat(&rod_comI);
+      cvReleaseMat(&rod_com);
+      cvReleaseMat(&t_com);
+      cvReleaseMat(&t_comI);
+      cout << "Done projecting points" << endl;
+
+      //for counting how many points get mapped to first and second image file
+      int point_map1 = 0;  // #points mapped to first image
+      int point_map2 = 0;  //    "      "    "  second image
+      int point_map3 = 0;  //    "      "    "  second image
+
+      // checking whether projection lies within the image boundaries
+      cout << "Now project points" << endl; 
+      for (int k = 0; k < nr_points; k++) {
+        float px = CV_MAT_ELEM(*undistort_2Dcloud,float,k,0);
+        float py = CV_MAT_ELEM(*undistort_2Dcloud,float,k,1);
+        if (px < image->width - .5 && px >= 0 && py >= 0 && py < image->height - .5 ) { 
           point_map1++;
-          int ppx = 0;
-          int ppy = 0;
-          if (px - int(px) < .5) {
-            ppx = int(px);
-          } else {
-            ppx = int(px) + 1;
-          }
-          if (py - int(py) < .5) {
-            ppy = int(py);
-          } else {
-            ppy = int(py) + 1;
-          }
-
-          CvScalar c;
-          c = cvGet2D(image, ppy, ppx);
-          // check for overlap
-          if(correction) {
-            vector<float> temp_vec;
-            float p_id = 1; // 1 for pixel, 0 for neighboring pixel
-            temp_vec.push_back(-(CV_MAT_ELEM(*point_3Dcloud,float,k,1)));
-            temp_vec.push_back((CV_MAT_ELEM(*point_3Dcloud,float,k,2)));
-            temp_vec.push_back((CV_MAT_ELEM(*point_3Dcloud,float,k,0)));
-            temp_vec.push_back(c.val[2]);
-            temp_vec.push_back(c.val[1]);
-            temp_vec.push_back(c.val[0]);
-            temp_vec.push_back(p_id);
-            if(neighborhood > 1) {
-              int limit = neighborhood / 2;
-
-              int lower_y = ppy - limit > 0 ? ppy - limit : 0;
-              int upper_y = ppy + limit < size.height ? ppy + limit : size.height - 1;
-              int lower_x = ppx - limit > 0 ? ppx - limit : 0;
-              int upper_x = ppx + limit < size.width ? ppx + limit : size.width - 1;
-
-              for (int y = lower_y; y < upper_y; y++) {
-                for (int x = lower_x; x < upper_x; x++) {
-                  if(x == ppx && y == ppy) {
-                    temp_vec[6] = 1;
-                  } else {
-                    temp_vec[6] = 0;
-                  }
-                  data1[y][x].push_back(temp_vec);
-                }
-              }
-
-            } else {
-              data1[ppy][ppx].push_back(temp_vec);
-            }
-            temp_vec.clear();
-          } else {
-          // write all the data
-            outfile << -(CV_MAT_ELEM(*point_3Dcloud,float,k,1))<<" ";
-            outfile << CV_MAT_ELEM(*point_3Dcloud,float,k,2)<<" ";
-            outfile << CV_MAT_ELEM(*point_3Dcloud,float,k,0)<<" ";
-            outfile << (c.val[0] - 1000.0)/10.0 << endl;
-            //outfile << c.val[2] <<" "<< c.val[1]<<" "<<c.val[0]<<endl;
-          }
-        } 
-      // second image
-      } else if(fabs(rot_angle) > 1) {
-        // check for overlap
-        px = CV_MAT_ELEM(*undistort_2Dcloud_2,float,k,0);
-        py = CV_MAT_ELEM(*undistort_2Dcloud_2,float,k,1);
-        if (px < image0->width - .5 && px >= 0 && py >= 0 && py < image0->height - .5) {
-          px = CV_MAT_ELEM(*point_2Dcloud_2,float,k,0);
-          py = CV_MAT_ELEM(*point_2Dcloud_2,float,k,1);
-          if (px < image0->width - .5 && px >= 0 && py >= 0 && py < image0->height - .5) {
+          px = CV_MAT_ELEM(*point_2Dcloud,float,k,0);
+          py = CV_MAT_ELEM(*point_2Dcloud,float,k,1);
+          if (px < image->width - .5 && px >= 0 && py >= 0 && py < image->height - .5) {
             point_map2++;
+            CvMat* tmp1 = cvCreateMat(1, 1, CV_32FC3);
+            CvMat* tmp2 = cvCreateMat(1, 1, CV_32FC3);
+            CV_MAT_ELEM(*tmp1, CvPoint3D32f, 0,0).x = CV_MAT_ELEM(*point_3Dcloud,float,k,0); 
+            CV_MAT_ELEM(*tmp1, CvPoint3D32f, 0,0).y = CV_MAT_ELEM(*point_3Dcloud,float,k,1); 
+            CV_MAT_ELEM(*tmp1, CvPoint3D32f, 0,0).z = CV_MAT_ELEM(*point_3Dcloud,float,k,2); 
+
+            cvTransform(tmp1, tmp2, rot_tmp);
+            cvReleaseMat(&tmp1); 
+
+            //double tmpz = CV_MAT_ELEM(*t_globalI, CV_32FC1, 2,0); 
+            double tmpz = -CV_MAT_ELEM(*t_globalI, float, 2,0); 
+            //double tmpz = CV_MAT_ELEM(*TranslationI, float, 2,0); 
+            
+            if(CV_MAT_ELEM(*tmp2, CvPoint3D32f, 0,0).z < tmpz) {
+              cvReleaseMat(&tmp2); 
+              continue; 
+            }
+
+            //cout  << CV_MAT_ELEM(*tmp2, CvPoint3D32f, 0, 0).x << " "
+            //      << CV_MAT_ELEM(*tmp2, CvPoint3D32f, 0, 0).y << " "
+            //      << CV_MAT_ELEM(*tmp2, CvPoint3D32f, 0, 0).z << endl;
+
+            cvReleaseMat(&tmp2); 
+            /*
+               outdat << CV_MAT_ELEM(*point_3Dcloud,float,k,0) << " "
+               << CV_MAT_ELEM(*point_3Dcloud,float,k,1) << " "
+               << CV_MAT_ELEM(*point_3Dcloud,float,k,2) << " "
+               << CV_MAT_ELEM(*tmp2, CvPoint3D32f, 0,0).x << " "  
+               << CV_MAT_ELEM(*tmp2, CvPoint3D32f, 0,0).y << " "
+               << CV_MAT_ELEM(*tmp2, CvPoint3D32f, 0,0).z << endl;
+             */
+            point_map3++;
             int ppx = 0;
             int ppy = 0;
-
             if (px - int(px) < .5) {
               ppx = int(px);
             } else {
@@ -1303,97 +1627,505 @@ bool correction, int neighborhood, int method) {
             } else {
               ppy = int(py) + 1;
             }
+
             CvScalar c;
+            c = cvGet2D(image, ppy, ppx);
+            // check for overlap
+            /*
+               if(correction) {
+               vector<float> temp_vec;
+               float p_id = 1; // 1 for pixel, 0 for neighboring pixel
+               temp_vec.push_back(-(CV_MAT_ELEM(*point_3Dcloud,float,k,1)));
+               temp_vec.push_back((CV_MAT_ELEM(*point_3Dcloud,float,k,2)));
+               temp_vec.push_back((CV_MAT_ELEM(*point_3Dcloud,float,k,0)));
+               temp_vec.push_back(c.val[2]);
+               temp_vec.push_back(c.val[1]);
+               temp_vec.push_back(c.val[0]);
+               temp_vec.push_back(p_id);
+               if(neighborhood > 1) {
+               int limit = neighborhood / 2;
 
-            c = cvGet2D(image0, ppy, ppx);
-            if(correction) {
-              vector<float> temp_vec;
-              float p2_id = 1;
-              temp_vec.push_back(-(CV_MAT_ELEM(*point_3Dcloud,float,k,1)));
-              temp_vec.push_back((CV_MAT_ELEM(*point_3Dcloud,float,k,2)));
-              temp_vec.push_back((CV_MAT_ELEM(*point_3Dcloud,float,k,0)));
-              temp_vec.push_back(c.val[2]);
-              temp_vec.push_back(c.val[1]);
-              temp_vec.push_back(c.val[0]);
-              temp_vec.push_back(p2_id);
-              if(neighborhood > 1) {
-                int neighbors = 3;
-                int limit = neighbors / 2;
+               int lower_y = ppy - limit > 0 ? ppy - limit : 0;
+               int upper_y = ppy + limit < size.height ? ppy + limit : size.height - 1;
+               int lower_x = ppx - limit > 0 ? ppx - limit : 0;
+               int upper_x = ppx + limit < size.width ? ppx + limit : size.width - 1;
 
-                int lower_y = ppy - limit > 0 ? ppy - limit : 0;
-                int upper_y = ppy + limit < size.height ? ppy + limit : size.height - 1;
-                int lower_x = ppx - limit > 0 ? ppx - limit : 0;
-                int upper_x = ppx + limit < size.width ? ppx + limit : size.width - 1;
+               for (int y = lower_y; y < upper_y; y++) {
+               for (int x = lower_x; x < upper_x; x++) {
+               if(x == ppx && y == ppy) {
+               temp_vec[6] = 1;
+               } else {
+               temp_vec[6] = 0;
+               }
+               data1[y][x].push_back(temp_vec);
+               }
+               }
 
-                for (int y = lower_y; y < upper_y; y++) {
-                  for (int x = lower_x; x < upper_x; x++) {
-                    if(x == ppx && y == ppy) {
-                      temp_vec[6] = 1;
-                    } else {
-                      temp_vec[6] = 0;
-                    }
-                    data2[y][x].push_back(temp_vec);
-                  }
-                }
+               } else {
+               data1[ppy][ppx].push_back(temp_vec);
+               }
+               temp_vec.clear();
+               } else {
+             */
+            // write all the data
 
-              } else {
-                data2[ppy][ppx].push_back(temp_vec);
-              }
-              temp_vec.clear();
+            outdat << -(CV_MAT_ELEM(*point_3Dcloud,float,k,1))<<" ";
+            outdat << CV_MAT_ELEM(*point_3Dcloud,float,k,2)<<" ";
+            outdat << CV_MAT_ELEM(*point_3Dcloud,float,k,0)<<" ";
+
+            if(optical) {
+              outdat << c.val[2] <<" "<< c.val[1]<<" "<<c.val[0]<<endl;
             } else {
-              // write all the data
-              outfile << -(CV_MAT_ELEM(*point_3Dcloud,float,k,1))<<" ";
-              outfile << CV_MAT_ELEM(*point_3Dcloud,float,k,2)<<" ";
-              outfile << CV_MAT_ELEM(*point_3Dcloud,float,k,0)<<" ";
-              outfile << (c.val[0] - 1000.0)/10.0 << endl;
-              //outfile << c.val[2] <<" "<< c.val[1]<<" "<<c.val[0]<<endl;
+              outdat << (c.val[0] - 1000.0)/10.0 << endl;
             }
+
+            pointcnt++;
+            if(pointcnt > 100) {
+              outfile.write(outdat.str().c_str(), outdat.str().size());
+              pointcnt = 0;
+              outdat.clear();
+              outdat.str("");
+            }
+
+            /*
+               outfile << -(CV_MAT_ELEM(*point_3Dcloud,float,k,1))<<" ";
+               outfile << CV_MAT_ELEM(*point_3Dcloud,float,k,2)<<" ";
+               outfile << CV_MAT_ELEM(*point_3Dcloud,float,k,0)<<" ";
+
+               if(optical) {
+               outfile << c.val[2] <<" "<< c.val[1]<<" "<<c.val[0]<<endl;
+               } else {
+               outfile << (c.val[0] - 1000.0)/10.0 << endl;
+               }
+            //outfile << c.val[2] <<" "<< c.val[1]<<" "<<c.val[0]<<endl;
+             */
+
+            //}
+          } 
+          // second image
+        } 
+
+
+      }
+
+      cout << "Done sorting points" << endl;
+
+      // write data with overlap correction
+      if(correction) {
+        CorrectErrorAndWrite(data1, outfile, size, optical);
+        cout << "Done first image" << endl;
+        if(fabs(rot_angle) > 1) {
+          if(size.width > 0 && size.height > 0) {
+            CorrectErrorAndWrite(data2, outfile, size, optical);
           }
         }
       }
 
-    }
-    // write data with overlap correction
-    if(correction) {
-      CorrectErrorAndWrite(data1, outfile, size);
-      if(fabs(rot_angle) > 1) {
-        if(size.width > 0 && size.height > 0) {
-          CorrectErrorAndWrite(data2, outfile, size);
+      cout << "Done correction" << endl;
+      // clean up
+      outfile.flush();
+
+      double endtime = GetCurrentTimeInMilliSec();
+      double time = endtime - starttime;
+      time = time/1000.0;
+      cout<<"runtime for scan " << count0 << " in seconds is: " << time << endl;
+
+      cout << point_map1 << " " << point_map2 << " " << point_map3 << endl;
+      cvReleaseImage(&image);
+      if(correction) {
+        for (int i = 0; i < size.height; i++) {
+          for (int j = 0; j < size.width; j++) {
+            data1[i][j].clear();
+            if(fabs(rot_angle) > 1) {
+              data2[i][j].clear();
+            }
+          }
         }
       }
+      cvReleaseMat(&rot_tmp);
     }
-
-    // clean up
-    outfile.flush();
     outfile.close();
 
-    delete Scan::allScans[0];
-    Scan::allScans.clear();
-
-    double endtime = GetCurrentTimeInMilliSec();
-    double time = endtime - starttime;
-    time = time/1000.0;
-    cout<<"runtime for scan " << count << " in seconds is: " << time << endl;
-
-    cvReleaseImage(&image);
     cvReleaseMat(&point_2Dcloud);
     cvReleaseMat(&point_3Dcloud);
     cvReleaseMat(&undistort_2Dcloud);
-    if(fabs(rot_angle) > 1) {
-      cvReleaseImage(&image0);
-      cvReleaseMat(&point_2Dcloud_2);
-      cvReleaseMat(&point_3Dcloud_2);
-      cvReleaseMat(&undistort_2Dcloud_2);
-    }
-    for (int i = 0; i < size.height; i++) {
-      for (int j = 0; j < size.width; j++) {
-        data1[i][j].clear();
-        data2[i][j].clear();
-      }
-    }
 
+    }
+  cvReleaseMat(&intrinsic);
+  cvReleaseMat(&distortion);
+  cvReleaseMat(&Rotation);
+  cvReleaseMat(&Translation);
+  cvReleaseMat(&undistort);
+
+}
+
+/**
+  * Main function for projecting the 3D points onto the corresponding image and
+  * associating temperature values to the data points.
+  */
+void ProjectAndMap(int start, int end, bool optical, bool quiet, string dir,
+    IOType type, int scale, double rot_angle, double minDist, double maxDist,
+    bool correction, int neighborhood, int method) {
+
+  int nr_img = end - start + 1;
+  if (nr_img < 1) {
+    cout << "ImageCount is zero!" << endl;
+    return;
+  }
+  string substring = optical? "Optical" : "";
+  string file = dir + "Intrinsics" + substring + ".xml";
+  CvMat *intrinsic = (CvMat*) cvLoad(file.c_str());
+  file = dir + "Distortion" + substring + ".xml";
+  CvMat *distortion = (CvMat*) cvLoad(file.c_str());
+  switch(method) {
+    case 0:
+      file = dir + "Rotation" + substring + ".xml";
+      break; 
+    case 1:
+      file = dir + "RotationMedian" + substring + ".xml";
+      break;
+    case 2:
+      file = dir + "RotationMean" + substring + ".xml";
+      break;
+  }
+  CvMat *Rotation = (CvMat*) cvLoad(file.c_str());
+  switch(method) {
+    case 0:
+      file = dir + "Translation" + substring + ".xml";
+      break; 
+    case 1:
+      file = dir + "TranslationMedian" + substring + ".xml";
+      break;
+    case 2:
+      file = dir + "TranslationMean" + substring + ".xml";
+      break;
+  }
+  CvMat *Translation = (CvMat*) cvLoad(file.c_str());
+  CvMat* undistort = cvCreateMat(5,1,CV_32FC1);
+  for (int hh = 0; hh < 5; hh++) {
+    CV_MAT_ELEM(*undistort, float,hh,0) = 0;
   }
 
+  double starttime = GetCurrentTimeInMilliSec();
+
+  stringstream outdat;
+  int pointcnt = 0;
+  string outdir = dir + "/labscan-map"; 
+#ifdef _MSC_VER
+  int success = mkdir(outdir.c_str());
+#else
+  int success = mkdir(outdir.c_str(), S_IRWXU|S_IRWXG|S_IRWXO);
+#endif
+  if(success == 0) { 
+    cout << "Writing scans to " << outdir << endl;
+  } else if(errno == EEXIST) {
+    cout << "Directory " << outdir << " exists already.  CONTINUE" << endl; 
+  } else {
+    cerr << "Creating directory " << outdir << " failed" << endl;
+    exit(1);
+  }
+  for (int count = start; count <= end; count++) {
+    // filling the rotation matrix 
+    CvMat* point_3Dcloud; 
+    CvMat* point_2Dcloud; 
+    CvMat* undistort_2Dcloud; 
+
+    // reading the 3D points and projecting them back to 2d
+    Scan::openDirectory(false, dir, type, count, count);
+    Scan::allScans[0]->setRangeFilter(-1, -1);
+    Scan::allScans[0]->setSearchTreeParameter(simpleKD, false);
+    Scan::allScans[0]->setReductionParameter(-1, 0);
+    
+    //Scan::readScans(type, count, count, dir, maxDist, minDist, 0);
+    DataXYZ reduced = Scan::allScans[0]->get("xyz reduced");
+    int red_size = reduced.size();
+
+    point_3Dcloud = cvCreateMat(red_size, 3, CV_32FC1);
+    cout << "Points: " << red_size << endl;
+    point_2Dcloud = cvCreateMat(red_size, 2, CV_32FC1);
+    undistort_2Dcloud = cvCreateMat(red_size, 2, CV_32FC1);
+    cout << "readScans done" << endl;
+    for (int j = 0; j < red_size; j++) {
+      Point p(reduced[j]);
+      // TODO make sure correct points are printed 
+
+      CV_MAT_ELEM(*point_3Dcloud, float,j,0) = p.z;
+      CV_MAT_ELEM(*point_3Dcloud, float,j,1) = -p.x;
+      CV_MAT_ELEM(*point_3Dcloud, float,j,2) = p.y; 
+
+    }
+    int nr_points = red_size; 
+    cout << "Number of points read: " << red_size << endl;
+    delete Scan::allScans[0];
+    Scan::allScans.clear();
+
+    // write colored data  
+    string outname = outdir + "/scan" + to_string(count, 3) + ".3d";
+    fstream outfile;
+    outfile.open(outname.c_str(), ios::out);
+
+
+    int nrP360 = 9;
+    for(int p = 0; p < nrP360; p++) {
+      //for(int p = 0; p < 9; p++) {
+      //double angle = rot_angle * (p%nrP360) + 2.0;
+      double angle = rot_angle * (p%nrP360);
+      cout << angle << endl;
+      // loading images
+      int count0 = count * nrP360 + p;
+
+      string t, t0;
+      if(optical) {
+        //TODO t = dir + "/photo" + to_string(count, 3) + ".ppm";
+        //t = dir + "/photo" + to_string(count0, 3) + "_2.jpg";
+        //t = dir + "/photo" + to_string(count0, 3) + "_90.jpg";
+        t = dir + "/photo" + to_string(count0, 3) + ".jpg";
+        //t = dir + "/photo" + to_string(count0, 3) + "_1.jpg";
+      } else {
+        t = dir + "/image" + to_string(count0, 3) + ".ppm";
+      }
+
+      IplImage* image = cvLoadImage(t.c_str(), -1);
+      if (!image) {
+        cout << "first image " << t << " cannot be loaded" << endl;
+        return;
+      }
+      CvSize size = cvGetSize(image); 
+
+      image = resizeImage(image, scale);
+
+      // rotate Rotation and Translation
+      CvMat* RotationI = cvCreateMat(3,1,CV_32FC1);
+      CvMat* TranslationI = cvCreateMat(3,1,CV_32FC1);
+      CvMat* rod40 = cvCreateMat(3,1,CV_32FC1);
+      cout << "Angle: " << angle << " " << rad(angle) << endl;
+      CV_MAT_ELEM(*rod40,float,0,0) = 0.0;
+      CV_MAT_ELEM(*rod40,float,1,0) = 0.0;
+      CV_MAT_ELEM(*rod40,float,2,0) = 1.0 * rad(angle);
+      cout << "tmp" << endl;
+      CvMat* t40 = cvCreateMat(3,1,CV_32FC1);
+      CV_MAT_ELEM(*t40,float,0,0) = 0.0;
+      CV_MAT_ELEM(*t40,float,1,0) = 0.0;
+      CV_MAT_ELEM(*t40,float,2,0) = 0.0;
+      cout << "tmp2" << endl;
+      CvMat* rot_tmp = cvCreateMat(3,3,CV_32FC1);
+      CvMat* rod_comI = cvCreateMat(3,1,CV_32FC1);
+      CvMat* t_comI = cvCreateMat(3,1,CV_32FC1);
+      CvMat* rod_com = cvCreateMat(1,3,CV_32FC1);
+      CvMat* t_com = cvCreateMat(1,3,CV_32FC1);
+      cout << "tmp3" << endl;
+      for(int w = 0; w < 3; w++) {
+        CV_MAT_ELEM(*RotationI,float,w,0) = CV_MAT_ELEM(*Rotation,float,0,w);
+        CV_MAT_ELEM(*TranslationI,float,w,0) = CV_MAT_ELEM(*Translation,float,0,w);
+      }
+      cout << endl;
+      cout << "Final Rotation" << endl;
+
+      cvComposeRT(rod40, t40, RotationI, TranslationI, rod_comI, t_comI);
+      for(int w = 0; w < 3; w++) {
+        CV_MAT_ELEM(*rod_com,float,0,w) = CV_MAT_ELEM(*rod_comI,float,w,0);
+        CV_MAT_ELEM(*t_com,float,0,w) = CV_MAT_ELEM(*t_comI,float,w,0);
+        cout << CV_MAT_ELEM(*RotationI,float,w,0) << " ";
+        cout << CV_MAT_ELEM(*TranslationI,float,w,0) << " ";
+        cout << CV_MAT_ELEM(*rod40,float,w,0) << " ";
+        cout << CV_MAT_ELEM(*t40,float,w,0) << " ";
+        cout << CV_MAT_ELEM(*rod_comI,float,w,0) << " ";
+        cout << CV_MAT_ELEM(*t_comI,float,w,0) << endl;
+      }
+      cout << endl;
+
+      cvRodrigues2(rod_comI, rot_tmp);
+
+      // Project Points
+      cvProjectPoints2(point_3Dcloud, rod_comI, t_comI, intrinsic, distortion, point_2Dcloud, NULL, NULL, NULL, NULL, NULL, 0);
+      cvProjectPoints2(point_3Dcloud, rod_comI, t_comI, intrinsic, undistort, undistort_2Dcloud, NULL, NULL, NULL, NULL, NULL, 0);
+
+      cvReleaseMat(&rod40);
+      cvReleaseMat(&RotationI);
+      cvReleaseMat(&TranslationI);
+      cvReleaseMat(&t40);
+      cvReleaseMat(&rod_comI);
+      cvReleaseMat(&rod_com);
+      cvReleaseMat(&t_com);
+      cvReleaseMat(&t_comI);
+      cout << "Done projecting points" << endl;
+
+      //for counting how many points get mapped to first and second image file
+      int point_map1 = 0;  // #points mapped to first image
+      int point_map2 = 0;  //    "      "    "  second image
+      int point_map3 = 0;  //    "      "    "  second image
+
+      // checking whether projection lies within the image boundaries
+      cout << "Now project points" << endl; 
+      for (int k = 0; k < nr_points; k++) {
+        float px = CV_MAT_ELEM(*undistort_2Dcloud,float,k,0);
+        float py = CV_MAT_ELEM(*undistort_2Dcloud,float,k,1);
+        if (px < image->width - .5 && px >= 0 && py >= 0 && py < image->height - .5 ) { 
+          point_map1++;
+          px = CV_MAT_ELEM(*point_2Dcloud,float,k,0);
+          py = CV_MAT_ELEM(*point_2Dcloud,float,k,1);
+          if (px < image->width - .5 && px >= 0 && py >= 0 && py < image->height - .5) {
+            point_map2++;
+            CvMat* tmp1 = cvCreateMat(1, 1, CV_32FC3);
+            CvMat* tmp2 = cvCreateMat(1, 1, CV_32FC3);
+            CV_MAT_ELEM(*tmp1, CvPoint3D32f, 0,0).x = CV_MAT_ELEM(*point_3Dcloud,float,k,0); 
+            CV_MAT_ELEM(*tmp1, CvPoint3D32f, 0,0).y = CV_MAT_ELEM(*point_3Dcloud,float,k,1); 
+            CV_MAT_ELEM(*tmp1, CvPoint3D32f, 0,0).z = CV_MAT_ELEM(*point_3Dcloud,float,k,2); 
+
+            cvTransform(tmp1, tmp2, rot_tmp);
+            cvReleaseMat(&tmp1); 
+
+
+            if(CV_MAT_ELEM(*tmp2, CvPoint3D32f, 0,0).z < 0) {
+              cvReleaseMat(&tmp2); 
+              continue; 
+            }
+            cvReleaseMat(&tmp2); 
+            /*
+               outdat << CV_MAT_ELEM(*point_3Dcloud,float,k,0) << " "
+               << CV_MAT_ELEM(*point_3Dcloud,float,k,1) << " "
+               << CV_MAT_ELEM(*point_3Dcloud,float,k,2) << " "
+               << CV_MAT_ELEM(*tmp2, CvPoint3D32f, 0,0).x << " "  
+               << CV_MAT_ELEM(*tmp2, CvPoint3D32f, 0,0).y << " "
+               << CV_MAT_ELEM(*tmp2, CvPoint3D32f, 0,0).z << endl;
+             */
+            point_map3++;
+            int ppx = 0;
+            int ppy = 0;
+            if (px - int(px) < .5) {
+              ppx = int(px);
+            } else {
+              ppx = int(px) + 1;
+            }
+            if (py - int(py) < .5) {
+              ppy = int(py);
+            } else {
+              ppy = int(py) + 1;
+            }
+
+            CvScalar c;
+            c = cvGet2D(image, ppy, ppx);
+            // check for overlap
+            /*
+               if(correction) {
+               vector<float> temp_vec;
+               float p_id = 1; // 1 for pixel, 0 for neighboring pixel
+               temp_vec.push_back(-(CV_MAT_ELEM(*point_3Dcloud,float,k,1)));
+               temp_vec.push_back((CV_MAT_ELEM(*point_3Dcloud,float,k,2)));
+               temp_vec.push_back((CV_MAT_ELEM(*point_3Dcloud,float,k,0)));
+               temp_vec.push_back(c.val[2]);
+               temp_vec.push_back(c.val[1]);
+               temp_vec.push_back(c.val[0]);
+               temp_vec.push_back(p_id);
+               if(neighborhood > 1) {
+               int limit = neighborhood / 2;
+
+               int lower_y = ppy - limit > 0 ? ppy - limit : 0;
+               int upper_y = ppy + limit < size.height ? ppy + limit : size.height - 1;
+               int lower_x = ppx - limit > 0 ? ppx - limit : 0;
+               int upper_x = ppx + limit < size.width ? ppx + limit : size.width - 1;
+
+               for (int y = lower_y; y < upper_y; y++) {
+               for (int x = lower_x; x < upper_x; x++) {
+               if(x == ppx && y == ppy) {
+               temp_vec[6] = 1;
+               } else {
+               temp_vec[6] = 0;
+               }
+               data1[y][x].push_back(temp_vec);
+               }
+               }
+
+               } else {
+               data1[ppy][ppx].push_back(temp_vec);
+               }
+               temp_vec.clear();
+               } else {
+             */
+            // write all the data
+
+            outdat << -(CV_MAT_ELEM(*point_3Dcloud,float,k,1))<<" ";
+            outdat << CV_MAT_ELEM(*point_3Dcloud,float,k,2)<<" ";
+            outdat << CV_MAT_ELEM(*point_3Dcloud,float,k,0)<<" ";
+
+            if(optical) {
+              outdat << c.val[2] <<" "<< c.val[1]<<" "<<c.val[0]<<endl;
+            } else {
+              outdat << (c.val[0] - 1000.0)/10.0 << endl;
+            }
+
+            pointcnt++;
+            if(pointcnt > 100) {
+              outfile.write(outdat.str().c_str(), outdat.str().size());
+              pointcnt = 0;
+              outdat.clear();
+              outdat.str("");
+            }
+
+            /*
+               outfile << -(CV_MAT_ELEM(*point_3Dcloud,float,k,1))<<" ";
+               outfile << CV_MAT_ELEM(*point_3Dcloud,float,k,2)<<" ";
+               outfile << CV_MAT_ELEM(*point_3Dcloud,float,k,0)<<" ";
+
+               if(optical) {
+               outfile << c.val[2] <<" "<< c.val[1]<<" "<<c.val[0]<<endl;
+               } else {
+               outfile << (c.val[0] - 1000.0)/10.0 << endl;
+               }
+            //outfile << c.val[2] <<" "<< c.val[1]<<" "<<c.val[0]<<endl;
+             */
+
+            //}
+          } 
+          // second image
+        } 
+
+
+      }
+
+      cout << "Done sorting points" << endl;
+
+      // write data with overlap correction
+      if(correction) {
+        CorrectErrorAndWrite(data1, outfile, size, optical);
+        cout << "Done first image" << endl;
+        if(fabs(rot_angle) > 1) {
+          if(size.width > 0 && size.height > 0) {
+            CorrectErrorAndWrite(data2, outfile, size, optical);
+          }
+        }
+      }
+
+      cout << "Done correction" << endl;
+      // clean up
+      outfile.flush();
+
+      double endtime = GetCurrentTimeInMilliSec();
+      double time = endtime - starttime;
+      time = time/1000.0;
+      cout<<"runtime for scan " << count0 << " in seconds is: " << time << endl;
+
+      cout << point_map1 << " " << point_map2 << " " << point_map3 << endl;
+      cvReleaseImage(&image);
+      if(correction) {
+        for (int i = 0; i < size.height; i++) {
+          for (int j = 0; j < size.width; j++) {
+            data1[i][j].clear();
+            if(fabs(rot_angle) > 1) {
+              data2[i][j].clear();
+            }
+          }
+        }
+      }
+      cvReleaseMat(&rot_tmp);
+    }
+    outfile.close();
+
+    cvReleaseMat(&point_2Dcloud);
+    cvReleaseMat(&point_3Dcloud);
+    cvReleaseMat(&undistort_2Dcloud);
+
+    }
   cvReleaseMat(&intrinsic);
   cvReleaseMat(&distortion);
   cvReleaseMat(&Rotation);
@@ -1424,7 +2156,7 @@ void sortDistances(float ** points, int size) {
   * Performs clustering on all points that are projected onto one pixel.
   * Writes only the points from the largest closest cluster.
   */
-void clusterSearch(float ** points, int size, double thresh1, double thres2, fstream &outfile) {
+void clusterSearch(float ** points, int size, double thresh1, double thres2, fstream &outfile, bool optical) {
   int position = 0;
   int cluster_count = 0;
 
@@ -1442,9 +2174,10 @@ void clusterSearch(float ** points, int size, double thresh1, double thres2, fst
     double * tmp = new double[4];
     tmp[0] = position;
     tmp[1] = j - 1;
-    tmp[2] = sum / (j - position);
+   // tmp[2] = sum / (j - position);
     // weird heuristic ;-) (clustersize/(rank of the cluster)) 
-    tmp[3] = (double)(j - position) / (clusters.size() + 1.0);
+    tmp[2] = (double)(j - position) / (clusters.size() + 1.0);
+    tmp[3] = (double)(j - position);
     if(tmp[3] > max_cluster) {
       max_position = clusters.size();
       max_cluster = tmp[3];
@@ -1453,11 +2186,22 @@ void clusterSearch(float ** points, int size, double thresh1, double thres2, fst
     position = j;
   }
 
+ /* 
+  max_position = 0;
+  for(int p = clusters.size() - 1; p > -1; p--) {
+    max_position = p;
+    break;
+  }
+  */
+
   for(int p = clusters[max_position][0]; p <= clusters[max_position][1]; p++) {    
     if(points[p][6] == 1) {
       outfile << points[p][0] << " " << points[p][1] << " " << points[p][2] << " ";
-      //outfile << points[p][3] << " " << points[p][4] << " " << points[p][5] << endl;
-      outfile << (points[p][5] - 1000.0)/10.0  << endl;
+      if(optical) {
+        outfile << points[p][3] << " " << points[p][4] << " " << points[p][5] << endl;
+      } else {
+        outfile << (points[p][5] - 1000.0)/10.0  << endl;
+      }
     }
   }
 
@@ -1466,10 +2210,11 @@ void clusterSearch(float ** points, int size, double thresh1, double thres2, fst
   }
 }
 
-void CorrectErrorAndWrite(Float2D &data, fstream &outfile, CvSize size) {
+void CorrectErrorAndWrite(Float2D &data, fstream &outfile, CvSize size, bool optical) {
   double thresh1 = 4;
   double thresh2 = 5;
-  
+ 
+  cout << size.height << " " << size.width << endl;
   // getting points mapping to one pixel
   for (int i = 0; i < size.height; i++) {
     for (int j = 0; j < size.width; j++) {
@@ -1486,8 +2231,7 @@ void CorrectErrorAndWrite(Float2D &data, fstream &outfile, CvSize size) {
         //sorting the points now in ascending order wrt distance
         sortDistances(points, tmp_size); 
         //look for clusters
-        clusterSearch(points, tmp_size, thresh1, thresh2, outfile);
-        
+        clusterSearch(points, tmp_size, thresh1, thresh2, outfile, optical);
         for (int k = 0; k < tmp_size; k++) {
           delete[] points[k];
         }
@@ -1607,7 +2351,7 @@ int parseArgs(int argc, char **argv, string &dir, int &start, int &end, double
 	   if (end < 0)     { cerr << "Error: Cannot end at a negative scan number.\n"; exit(1); }
 	   if (end < start) { cerr << "Error: <end> cannot be smaller than <start>.\n"; exit(1); }
 	   break;
-	 case 'f':
+	 case 'f': 
      try {
        type = formatname_to_io_type(optarg);
      } catch (...) { // runtime_error
@@ -1718,7 +2462,11 @@ int main(int argc, char** argv) {
   // either mapping
   if(mapping) {
     if(!quiet) cout << "Starting projecting and mapping image data to point cloud..." << endl;
-    ProjectAndMap(start, end, optical, quiet, dir, type, scale, rot_angle, minDist, maxDist, correction, neighborhood);
+    //TODO ProjectAndMap(start, end, optical, quiet, dir, type, scale, rot_angle, minDist, maxDist, correction, neighborhood);
+    
+    //calculateGlobalCameras(start, end, optical, quiet, dir, type, scale,
+    writeGlobalCameras(start, end, optical, quiet, dir, type, scale,
+    rot_angle, minDist, maxDist, correction, neighborhood, 0);
     if(!quiet) cout << "\nDONE" << endl;
     return 0;
   }

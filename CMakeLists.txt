@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 2.8.4)
+cmake_minimum_required (VERSION 2.8.2)
 SET(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/3rdparty/CMakeModules" ${CMAKE_MODULE_PATH})
 project (Slam6D)
 
