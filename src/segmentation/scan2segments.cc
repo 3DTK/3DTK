@@ -24,12 +24,15 @@ namespace po = boost::program_options;
 
 #include "slam6d/fbr/panorama.h"
 
+#include <opencv2/imgproc/imgproc.hpp>
+#include <opencv2/imgproc/imgproc_c.h>
+
 #include <sys/stat.h>
 #include <sys/types.h>
 
 enum image_type {M_RANGE, M_INTENSITY};
 
-enum segment_method {THRESHOLD, ADAPTIVE_THRESHOLD, PYR_MEAN_SHIFT, WATERSHED};
+enum segment_method {THRESHOLD, ADAPTIVE_THRESHOLD, PYR_MEAN_SHIFT, PYR_SEGMENTATION, WATERSHED};
 
 /* Function used to check that 'opt1' and 'opt2' are not specified
    at the same time. */
@@ -87,6 +90,7 @@ void validate(boost::any& v, const std::vector<std::string>& values,
     if(strcasecmp(arg.c_str(), "THRESHOLD") == 0) v = THRESHOLD;
     else if(strcasecmp(arg.c_str(), "ADAPTIVE_THRESHOLD") == 0) v = ADAPTIVE_THRESHOLD;
     else if(strcasecmp(arg.c_str(), "PYR_MEAN_SHIFT") == 0) v = PYR_MEAN_SHIFT;
+    else if(strcasecmp(arg.c_str(), "PYR_SEGMENTATION") == 0) v = PYR_SEGMENTATION;
     else if(strcasecmp(arg.c_str(), "WATERSHED") == 0) v = WATERSHED;
     else throw std::runtime_error(std::string("segmentation method ") + arg + std::string(" is unknown"));
 }
@@ -106,6 +110,23 @@ void validate(boost::any& v, const std::vector<std::string>& values,
     }
 }
 
+void segmentation_option_dependency(const po::variables_map & vm, segment_method stype, const char *option)
+{
+    if (vm.count("segment") && vm["segment"].as<segment_method>() == stype) {
+        if (!vm.count(option)) {
+            throw std::logic_error (string("this segmentation option needs ")+option+" to be set");
+        }
+    }
+}
+
+void segmentation_option_conflict(const po::variables_map & vm, segment_method stype, const char *option)
+{
+    if (vm.count("segment") && vm["segment"].as<segment_method>() == stype) {
+        if (vm.count(option)) {
+            throw std::logic_error (string("this segmentation option is incompatible with ")+option);
+        }
+    }
+}
 /*
  * parse commandline options, fill arguments
  */
@@ -114,7 +135,8 @@ void parse_options(int argc, char **argv, int &start, int &end,
         fbr::projection_method &ptype, string &dir, IOType &iotype,
         int &maxDist, int &minDist, int &nImages, int &pParam, bool &logarithm,
         float &cutoff, segment_method &stype, string &marker, bool &dump_pano,
-        bool &dump_seg, double &thresh, int &maxlevel, int &radius)
+        bool &dump_seg, double &thresh, int &maxlevel, int &radius,
+        double &pyrlinks, double &pyrcluster, int &pyrlevels)
 {
     po::options_description generic("Generic options");
     generic.add_options()
@@ -169,7 +191,7 @@ void parse_options(int argc, char **argv, int &start, int &end,
     segment.add_options()
         ("segment,g", po::value<segment_method>(&stype)->
          default_value(PYR_MEAN_SHIFT), "segmentation method (THRESHOLD, "
-         "ADAPTIVE_THRESHOLD, PYR_MEAN_SHIFT, WATERSHED)")
+         "ADAPTIVE_THRESHOLD, PYR_MEAN_SHIFT, PYR_SEGMENTATION, WATERSHED)")
         ("marker,K", po::value<string>(&marker),
          "marker mask for watershed segmentation")
         ("thresh,T", po::value<double>(&thresh),
@@ -178,6 +200,13 @@ void parse_options(int argc, char **argv, int &start, int &end,
          "maximum level for meanshift segmentation")
         ("radius,R", po::value<int>(&radius),
          "radius for meanshift segmentation")
+        ("links,l", po::value<double>(&pyrlinks),
+         "error threshold for establishing the links for pyramid segmentation")
+        ("clustering,c", po::value<double>(&pyrcluster),
+         "error threshold for the segments clustering for pyramid "
+         "segmentation")
+        ("levels,E", po::value<int>(&pyrlevels)->default_value(4),
+         "levels of pyramid segmentation")
         ("dump-seg,D", po::bool_switch(&dump_seg),
          "output segmentation image (for debugging)");
 
@@ -206,6 +235,9 @@ void parse_options(int argc, char **argv, int &start, int &end,
     // display help
     if (vm.count("help")) {
         cout << cmdline_options;
+        cout << "\nExample usage:\n"
+             << "bin/scan2segments -s 0 -e 0 -f riegl_txt --segment PYR_SEGMENTATION -l 50 -c 50 -E 4 -D -i ~/path/to/bremen_city\n" 
+             << "bin/scan2segments -s 0 -e 0 -f riegl_txt --segment PYR_SEGMENTATION -l 255 -c 30 -E 2 -D -i ~/path/to/bremen_city\n";
         exit(0);
     }
 
@@ -220,37 +252,36 @@ void parse_options(int argc, char **argv, int &start, int &end,
     else
         itype = M_INTENSITY;
 
-    // option dependencies on segmentation types
-    if (stype == WATERSHED) {
-        if (!vm.count("marker"))
-            throw std::logic_error("watershed segmentation requires --marker to be set");
-        if (vm.count("thresh"))
-            throw std::logic_error("watershed segmentation cannot be used with --thresh");
-        if (vm.count("maxlevel"))
-            throw std::logic_error("watershed segmentation cannot be used with --maxlevel");
-        if (vm.count("radius"))
-            throw std::logic_error("watershed segmentation cannot be used with --radius");
-    }
-    if (stype == THRESHOLD) {
-        if (!vm.count("thresh"))
-            throw std::logic_error("threshold segmentation requires --thresh to be set");
-        if (vm.count("marker"))
-            throw std::logic_error("threshold segmentation cannot be used with --marker");
-        if (vm.count("maxlevel"))
-            throw std::logic_error("threshold segmentation cannot be used with --maxlevel");
-        if (vm.count("radius"))
-            throw std::logic_error("threshold segmentation cannot be used with --radius");
-    }
-    if (stype == PYR_MEAN_SHIFT) {
-        if (!vm.count("maxlevel"))
-            throw std::logic_error("mean shift segmentation requires --maxlevel to be set");
-        if (!vm.count("radius"))
-            throw std::logic_error("mean shift segmentation requires --radius to be set");
-        if (vm.count("thresh"))
-            throw std::logic_error("mean shift segmentation cannot be used with --thresh");
-        if (vm.count("marker"))
-            throw std::logic_error("mean shift segmentation cannot be used with --marker");
-    }
+    segmentation_option_dependency(vm, WATERSHED, "marker");
+    segmentation_option_conflict(vm, WATERSHED, "thresh");
+    segmentation_option_conflict(vm, WATERSHED, "maxlevel");
+    segmentation_option_conflict(vm, WATERSHED, "radius");
+    segmentation_option_conflict(vm, WATERSHED, "links");
+    segmentation_option_conflict(vm, WATERSHED, "clustering");
+    segmentation_option_conflict(vm, WATERSHED, "levels");
+
+    segmentation_option_conflict(vm, THRESHOLD, "marker");
+    segmentation_option_dependency(vm, THRESHOLD, "thresh");
+    segmentation_option_conflict(vm, THRESHOLD, "maxlevel");
+    segmentation_option_conflict(vm, THRESHOLD, "radius");
+    segmentation_option_conflict(vm, THRESHOLD, "links");
+    segmentation_option_conflict(vm, THRESHOLD, "clustering");
+    segmentation_option_conflict(vm, THRESHOLD, "levels");
+
+    segmentation_option_conflict(vm, PYR_MEAN_SHIFT, "marker");
+    segmentation_option_conflict(vm, PYR_MEAN_SHIFT, "thresh");
+    segmentation_option_dependency(vm, PYR_MEAN_SHIFT, "maxlevel");
+    segmentation_option_dependency(vm, PYR_MEAN_SHIFT, "radius");
+    segmentation_option_conflict(vm, PYR_MEAN_SHIFT, "links");
+    segmentation_option_conflict(vm, PYR_MEAN_SHIFT, "clustering");
+    segmentation_option_conflict(vm, PYR_MEAN_SHIFT, "levels");
+
+    segmentation_option_conflict(vm, PYR_SEGMENTATION, "marker");
+    segmentation_option_conflict(vm, PYR_SEGMENTATION, "thresh");
+    segmentation_option_conflict(vm, PYR_SEGMENTATION, "maxlevel");
+    segmentation_option_conflict(vm, PYR_SEGMENTATION, "radius");
+    segmentation_option_dependency(vm, PYR_SEGMENTATION, "links");
+    segmentation_option_dependency(vm, PYR_SEGMENTATION, "clustering");
 
     // correct pParam and nImages for certain panorama types
     if (ptype == fbr::PANNINI && pParam == 0) {
@@ -430,6 +461,60 @@ cv::Mat calculatePyrMeanShift(vector<vector<cv::Vec3f>> &segmented_points,
     return res;
 }
 
+///TODO: need to pass *two* thresh params, see: http://bit.ly/WmFeub
+cv::Mat calculatePyrSegmentation(vector<vector<cv::Vec3f>> &segmented_points,
+        cv::Mat &img, vector<vector<vector<cv::Vec3f> > > extendedMap,
+        double thresh1, double thresh2, int pyrlevels)
+{
+    int i, j, idx;
+    int block_size = 1000;
+    IplImage ipl_img = img;
+    IplImage* ipl_original = &ipl_img;
+    IplImage* ipl_segmented = 0;
+
+    CvMemStorage* storage = cvCreateMemStorage(block_size);
+    CvSeq* comp = NULL;
+
+    // the following lines are required because the level must not be more
+    // than log2(min(width, height))
+    ipl_original->width &= -(1<<pyrlevels);
+    ipl_original->height &= -(1<<pyrlevels);
+
+    ipl_segmented = cvCloneImage( ipl_original );
+
+    // apply the pyramid segmentation algorithm
+    cvPyrSegmentation(ipl_original, ipl_segmented, storage, &comp, pyrlevels, thresh1+1, thresh2+1); 
+
+    // mapping of color value to component id
+    map<int, int> mapping;
+    unsigned int segments = comp->total;
+    for (unsigned int cur_seg = 0; cur_seg < segments; ++cur_seg) {
+      CvConnectedComp* cc = (CvConnectedComp*) cvGetSeqElem(comp, cur_seg);
+      // since images are single-channel grayscale, only the first value is
+      // of interest
+      mapping.insert(pair<int, int>(cc->value.val[0], cur_seg));
+    }
+
+    segmented_points.resize(segments);
+
+    uchar *data = (uchar *)ipl_segmented->imageData;
+    int step = ipl_segmented->widthStep;
+    for (i = 0; i < ipl_segmented->height; i++) {
+        for (j = 0; j < ipl_segmented->width; j++) {
+            idx = mapping[data[i*step+j]];
+            segmented_points[idx].insert(segmented_points[idx].end(),
+								  extendedMap[i][j].begin(),
+								  extendedMap[i][j].end());
+        }
+    }
+
+    // clearing memory
+    cvReleaseMemStorage(&storage);
+
+    cv::Mat res(ipl_segmented);
+    return res;
+}
+
 /*
  * calculate the adaptive threshold
  */
@@ -572,11 +657,13 @@ int main(int argc, char **argv)
     bool dump_pano, dump_seg;
     double thresh;
     int maxlevel, radius;
+    double pyrlinks, pyrcluster;
+    int pyrlevels;
 
     parse_options(argc, argv, start, end, scanserver, itype, width, height,
             ptype, dir, iotype, maxDist, minDist, nImages, pParam, logarithm,
             cutoff, stype, marker, dump_pano, dump_seg, thresh, maxlevel,
-            radius);
+            radius, pyrlinks, pyrcluster, pyrlevels);
 
     Scan::openDirectory(scanserver, dir, iotype, start, end);
 
@@ -623,6 +710,8 @@ int main(int argc, char **argv)
         } else if (stype == PYR_MEAN_SHIFT) {
             res = calculatePyrMeanShift(segmented_points, img, fPanorama.getExtendedMap(),
 								maxlevel, radius);
+        } else if (stype == PYR_SEGMENTATION) {
+            res = calculatePyrSegmentation(segmented_points, img, fPanorama.getExtendedMap(), pyrlinks, pyrcluster, pyrlevels);
         } else if (stype == ADAPTIVE_THRESHOLD) {
             res = calculateAdaptiveThreshold(segmented_points, img, fPanorama.getExtendedMap());
         } else if (stype == WATERSHED) {

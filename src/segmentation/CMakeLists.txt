@@ -1,5 +1,5 @@
 IF(WITH_SEGMENTATION)
-  add_executable(scan2segments scan2segments.cc)
+  add_executable(scan2segments scan2segments.cc ../slam6d/fbr/fbr_global.cc)
   add_executable(fhsegmentation fhsegmentation.cc FHGraph.cc disjoint-set.cc segment-graph.cc)
 
   FIND_PACKAGE(OpenCV REQUIRED)
