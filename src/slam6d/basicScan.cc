@@ -66,6 +66,38 @@ void BasicScan::closeDirectory()
   Scan::allScans.clear();
 }
 
+BasicScan::BasicScan(double *_rPos, double *_rPosTheta, vector<double*> points) {
+  init();
+  for(int i = 0; i < 3; i++) {
+    rPos[i] = _rPos[i];
+    rPosTheta[i] = _rPosTheta[i];
+  }
+  // write original pose matrix
+  EulerToMatrix4(rPos, rPosTheta, transMatOrg);
+
+  // initialize transform matrices from the original one, could just copy transMatOrg to transMat instead
+  transformMatrix(transMatOrg);
+
+  // reset the delta align matrix to represent only the transformations after local-to-global (transMatOrg) one
+  M4identity(dalignxf);
+  PointFilter filter;
+  if(m_filter_range_set)
+    filter.setRange(m_filter_max, m_filter_min);
+  if(m_filter_height_set)
+    filter.setHeight(m_filter_top, m_filter_bottom);
+  if(m_range_mutation_set)
+    filter.setRangeMutator(m_range_mutation);
+  
+  
+  double* data = reinterpret_cast<double*>(create("xyz", sizeof(double) * 3 * points.size()).get_raw_pointer());
+  int tmp = 0;
+  for(unsigned int i = 0; i < points.size(); ++i) {
+    for(unsigned int j = 0; j < 3; j++) {
+      data[tmp++] = points[i][j];
+    }
+  }
+}
+
 BasicScan::BasicScan(const std::string& path, const std::string& identifier, IOType type) :
   m_path(path), m_identifier(identifier), m_type(type)
 {

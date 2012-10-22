@@ -45,6 +45,7 @@ If a great portion of the RAM is used for the cache data, swapping will usually 
 
   * soft memlock unlimited
   * hard memlock unlimited
+After adding these lines and rebooting the system the scanserver can be started without superuser rights. 
 
 5. Using the octtree serialization feature in show with scanserver
 
