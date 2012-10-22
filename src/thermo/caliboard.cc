@@ -599,7 +599,7 @@ int main(int argc, char **argv)
 
     cout << nx << " " << ny << " " << nz << " " << d << endl;
     
-    if(isnan(d)) {
+    if(std::isnan(d)) {
       writeFalse(output);
       failures++;
     } else {
