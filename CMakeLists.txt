@@ -175,7 +175,18 @@ ELSE(WITH_SEGMENTATION)
   MESSAGE(STATUS "Without segmentation")
 ENDIF(WITH_SEGMENTATION)
 
+## Normals
+
+OPTION(WITH_NORMALS "Whether to build program for normal computation ON/OFF" OFF)
+
+IF(WITH_NORMALS)
+  MESSAGE(STATUS "With normals")
+ELSE(WITH_NORMALS)
+  MESSAGE(STATUS "Without normals")
+ENDIF(WITH_NORMALS)
+
 ## CAD matching
+
 OPTION (WITH_CAD "Wether to build with CAD import lib ON/OFF" OFF)
 
 IF (WITH_CAD)
@@ -380,6 +391,7 @@ add_subdirectory(src/slam6d)
 add_subdirectory(src/scanio)
 add_subdirectory(src/scanserver)
 add_subdirectory(src/segmentation)
+add_subdirectory(src/normals)
 add_subdirectory(src/veloslam)
 add_subdirectory(src/show)
 add_subdirectory(src/grid)
