@@ -94,7 +94,7 @@ public:
   //! Create tree by points
   template <class P>
   Show_BOctTree(P * const* pts, int n, T voxelSize, PointType pointtype = PointType(), ScanColorManager *scm = 0)
-  {
+  { 
     m_tree = new BOctTree<T>(pts, n, voxelSize, pointtype, true);
     init(scm);
   }

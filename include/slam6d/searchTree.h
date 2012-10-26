@@ -10,7 +10,6 @@
 #include <vector>
 using std::vector;
 
-#include "searchCache.h"
 #include "ptpair.h"
 #include "data_types.h"
 
@@ -94,62 +93,5 @@ public:
 				  int rnd, double max_dist_match2, double &sum,
 				  double *centroid_m, double *centroid_d);
 };
-
-
-/**
- * @brief The search tree structure 
- * 
- * A search tree holds the pointer to the data.
- * Furthermore, search functionality must be privided
- **/
-class CachedSearchTree : public SearchTree {
-public:  
-  /**
-   * Constructor (default)
-   */
-  inline CachedSearchTree() {};
-
-  /**
-   *	Constructor - Constructs a tree from the input.
-   * pure virtual, i.e., must be implented by a derived class
-   *	@param pts 3D array of points
-   *	@param n number of points
-   */
-  CachedSearchTree(double **pts, int n, CachedSearchTree *_parent = 0);
-
-  /**
-   *	Destructor - deletes the tree
-   * pure virtual, i.e., must be implented by a derived class
-   */
-  virtual inline ~CachedSearchTree() {};
-
-  /**
-   * This Search function returns a pointer to the closest point
-   * of the query point within maxdist2. This function searches from the
-   * root to the leafs.
-   *
-   * @param _p Pointer to query point
-   * @param maxdist2 Maximal distance for closest points
-   * @param threadNum If parallel threads share the search tree the thread num must be given
-   * @return A new cach Item
-   */
-  virtual SearchTreeCacheItem* FindClosestCacheInit(double *_p, double maxdist2, int threadNum = 0) = 0;
-
-  /**
-   * This Search function returns a pointer to the closest point
-   * of the query point within maxdist2. This function might be started
-   * from the leafs.
-   *
-   * @param _p Pointer to query point
-   * @param maxdist2 Maximal distance for closest points
-   * @param threadNum If parallel threads share the search tree the thread num must be given
-   * @return A new cach Item
-   */
-  virtual SearchTreeCacheItem* FindClosestCache(double *_p, double maxdist2, int threadNum = 0) = 0;
-  double *FindClosest(double *_p, double maxdist2, int threadNum = 0) const {
-    return 0; 
-  }
-};
-
 
 #endif
