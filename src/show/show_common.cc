@@ -1043,6 +1043,7 @@ void initShow(int argc, char **argv){
 #if !defined USE_COMPACT_TREE
     // show structures
     // associate show octtree with the scan and hand over octtree pointer ownership
+
     Show_BOctTree<sfloat>* tree = new Show_BOctTree<sfloat>(scan, data_oct, cm);
     
     // unlock cached octtree to enable creation of more octtres without blocking the space for full scan points

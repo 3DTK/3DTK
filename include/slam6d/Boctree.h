@@ -226,6 +226,9 @@ public:
 
     this->POINTDIM = pointtype.getPointDim();
 
+    //@@@
+    cout << "POINTDIM" << this->POINTDIM << endl;
+
     mins = alloc->allocate<T>(POINTDIM);
     maxs = alloc->allocate<T>(POINTDIM);
 
