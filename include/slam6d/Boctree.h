@@ -226,9 +226,6 @@ public:
 
     this->POINTDIM = pointtype.getPointDim();
 
-    //@@@
-    cout << "POINTDIM" << this->POINTDIM << endl;
-
     mins = alloc->allocate<T>(POINTDIM);
     maxs = alloc->allocate<T>(POINTDIM);
 
@@ -822,11 +819,24 @@ protected:
       if (  ( 1 << i ) & node.valid ) {   // if ith node exists
         childcenter(center, ccenter, size, i);  // childrens center
         if (  ( 1 << i ) & node.leaf ) {   // if ith node is leaf get center
-          T * cp = new T[3];
-          for (unsigned int iterator = 0; iterator < 3; iterator++) {
+          T * cp = new T[POINTDIM];
+          // compute average of reflectance values and store in last position of cp
+          pointrep* points = children->getPointreps();
+          unsigned int length = points[0].length;
+          T *point = &(points[1].v);
+          float reflectance_center = 0.;
+          for(unsigned int iterator = 0; iterator < length; iterator++ ) {          
+            reflectance_center += point[POINTDIM-1]; // add current reflectance
+            point+=BOctTree<T>::POINTDIM;     
+          }
+          reflectance_center /= length * 1.0;
+
+          for (unsigned int iterator = 0; iterator < POINTDIM-1; iterator++) {
             cp[iterator] = ccenter[iterator];
           }
+          cp[POINTDIM-1] = reflectance_center; // reflectance is the last dimension in POINTDIM
           c.push_back(cp);
+
         } else { // recurse
           GetOctTreeCenter(c, children->node, ccenter, size/2.0);
         }

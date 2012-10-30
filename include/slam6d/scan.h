@@ -390,10 +390,13 @@ protected:
   
   //! Internal function of transform which handles the matrices
   void transformMatrix(const double alignxf[16]);
-  
+
+  //@FIXME
+ public:  
   //! Creating reduced points
   void calcReducedPoints();
-  
+
+ protected:  
   //! Copies reduced points to original points without any transformation.
   void copyReducedToOriginal();
   
