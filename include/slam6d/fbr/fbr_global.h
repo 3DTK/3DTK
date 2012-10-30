@@ -18,7 +18,6 @@
 #endif
 //for opencv 2.4
 #if (CV_MAJOR_VERSION >= 2) && (CV_MINOR_VERSION >= 4)
-#include <blubberdiblub/opencv.hpp>
 #include <opencv2/nonfree/nonfree.hpp>
 #endif
 #include <math.h>
