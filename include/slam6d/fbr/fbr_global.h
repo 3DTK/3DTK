@@ -11,7 +11,11 @@
 #include <iostream>
 #include <vector>
 #include <fstream>
+#if (CV_MAJOR_VERSION >= 2) && (CV_MINOR_VERSION >= 3)
 #include <opencv2/opencv.hpp>
+#else
+#include <opencv/cv.h>
+#endif
 //for opencv 2.4
 #if (CV_MAJOR_VERSION >= 2) && (CV_MINOR_VERSION >= 4)
 #include <opencv2/nonfree/nonfree.hpp>
