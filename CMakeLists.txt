@@ -160,6 +160,7 @@ OPTION(WITH_TOOLS "Whether to build additional tools like convergence frame_to_g
 
 IF(WITH_TOOLS)
   MESSAGE(STATUS "With Tools")
+  find_package (Boost COMPONENTS program_options REQUIRED)
 ELSE(WITH_TOOLS)
   MESSAGE(STATUS "Without Tools")
 ENDIF(WITH_TOOLS)
