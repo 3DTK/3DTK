@@ -64,7 +64,7 @@ namespace fbr{
      * @param image - input range image to be converted to point cloud
      * @param file - destination of .3d file containing the point cloud
      */
-    void recoverPointCloud(const cv::Mat& range_image, const std::string& file);
+    void recoverPointCloud(const cv::Mat& range_image, cv::Mat& reflectance_image, vector<cv::Vec4f> &reduced_points);
 
     unsigned int getImageWidth();
     unsigned int getImageHeight();

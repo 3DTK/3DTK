@@ -554,8 +554,15 @@ namespace fbr{
     }
   }
 
-  void panorama::recoverPointCloud(const cv::Mat& range_image, const string& file ) {
-    std::ofstream scan_file (file.c_str());
+  void panorama::recoverPointCloud(const cv::Mat& range_image,
+          cv::Mat& reflectance_image, vector<cv::Vec4f> &reduced_points) {
+      if (range_image.cols != reflectance_image.cols
+              || range_image.rows != reflectance_image.rows) {
+          cerr << "range image and reflectance image have different geometries - using empty range image" << endl;
+          reflectance_image.create(range_image.size(), CV_8U);
+          reflectance_image = cv::Scalar::all(0);
+      }
+
     //recover from EQUIRECTANGULAR projection
     if(pMethod == EQUIRECTANGULAR) {
       double xFactor = (double) range_image.size().width / 2 / M_PI;
@@ -568,6 +575,7 @@ namespace fbr{
       for (int row = 0; row < range_image.size().height; ++row) {
         for (int col = 0; col < range_image.size().width; ++col) {
           float range = range_image.at<float>(row, col);
+          float reflectance = reflectance_image.at<uchar>(row,col)/255.0;
           float theta = (heightMax - row) / yFactor - heightLow; 
           float phi = col / xFactor; 
           phi *= 180.0 / M_PI;
@@ -583,7 +591,10 @@ namespace fbr{
             if (first_seen) first_seen = false;
             else continue;
           }
-          scan_file << -100. * cartesian[1] << " " << 100. * cartesian[2] << " " << 100. * cartesian[0] << endl;
+          reduced_points.push_back(cv::Vec4f(-100.0*cartesian[1],
+                      100.0*cartesian[2],
+                      100.0*cartesian[0],
+                      reflectance));
         }
       }
     }
@@ -600,6 +611,7 @@ namespace fbr{
       for (int row = 0; row < range_image.size().height; ++row) {
         for (int col = 0; col < range_image.size().width; ++col) {
           float range = range_image.at<float>(row, col);
+          float reflectance = reflectance_image.at<uchar>(row,col)/255.0;
           float theta = atan2(row + yFactor * tan(heightLow), yFactor);
           float phi = col / xFactor; 
           phi *= 180.0 / M_PI;
@@ -615,7 +627,10 @@ namespace fbr{
             if (first_seen) first_seen = false;
             else continue;
           }
-          scan_file << -100. * cartesian[1] << " " << 100. * cartesian[2] << " " << 100. * cartesian[0] << endl;
+          reduced_points.push_back(cv::Vec4f(-100.0*cartesian[1],
+                      100.0*cartesian[2],
+                      100.0*cartesian[0],
+                      reflectance));
         }
       }
     }
@@ -631,6 +646,7 @@ namespace fbr{
       for (int row = 0; row < range_image.size().height; ++row) {
         for (int col = 0; col < range_image.size().width; ++col) {
           float range = range_image.at<float>(row, col);
+          float reflectance = reflectance_image.at<uchar>(row,col)/255.0;
           float theta = 2 * atan2(exp((heightMax - row) / yFactor + heightLow), 1.) - M_PI_2;
           float phi = col / xFactor; 
           phi *= 180.0 / M_PI;
@@ -646,7 +662,10 @@ namespace fbr{
             if (first_seen) first_seen = false;
             else continue;
           }
-          scan_file << -100. * cartesian[1] << " " << 100. * cartesian[2] << " " << 100. * cartesian[0] << endl;
+          reduced_points.push_back(cv::Vec4f(-100.0*cartesian[1],
+                      100.0*cartesian[2],
+                      100.0*cartesian[0],
+                      reflectance));
         }
       }
     }
@@ -675,6 +694,7 @@ namespace fbr{
       for (int row = 0; row < range_image.size().height; ++row) {
         for (int col = 0; col < range_image.size().width; ++col) {
           float range = range_image.at<float>(row, col);
+          float reflectance = reflectance_image.at<uchar>(row,col)/255.0;
           float x = col * 1. / xFactor - fabs(xmin);
           float y = (heightMax - row) * 1. / yFactor - fabs(ymin);
           float theta = asin((C - (x*x + (Rho0 - y) * (Rho0 - y)) * n * n) / (2 * n));
@@ -695,12 +715,13 @@ namespace fbr{
             if (first_seen) first_seen = false;
             else continue;
           }
-          scan_file << -100. * cartesian[1] << " " << 100. * cartesian[2] << " " << 100. * cartesian[0] << endl;
+          reduced_points.push_back(cv::Vec4f(-100.0*cartesian[1],
+                      100.0*cartesian[2],
+                      100.0*cartesian[0],
+                      reflectance));
         }
       }
     }
-
-    scan_file.close();      
   }
 
   unsigned int panorama::getImageWidth(){
