@@ -82,7 +82,7 @@ bin/slam6D -s 1 -e 76 -r 10 -m 3000 -d 50 -i 1000 --epsICP=0.000001
 bin/show -s 1 -e 76 -m 3000 -f old /home/nuechter/dat/dat_mine1/
 
 (using bremen_city.zip from http://kos.informatik.uni-osnabrueck.de/3Dscans/)
-bin/scan_red -s 0 -e 12 -r 10 /home/nuechter/dat/bremen_city
+bin/scan_red -s 0 -e 12 -r OCTREE -v 10 --octree 0 -f RIEGL_TXT /home/nuechter/dat/bremen_city
 bin/slam6D -a 2 -q /home/nuechter/dat/bremen_city/reduced -f uos -d 150  
             -s 0 -e 12 --anim=1 -n /home/nuechter/dat/bremen_city/bremen.net
 		  -G 1 -D 100 -i 0 -I 50 -p --epsSLAM=0.0 
