@@ -1,8 +1,12 @@
 #ifndef __THERMO_H__
 #define __THERMO_H__
 
+#if (CV_MAJOR_VERSION == 2) && (CV_MINOR_VERSION < 2)
 #include <opencv/cv.h>
-#include <opencv/highgui.h>
+#else
+#include <opencv2/opencv.hpp>
+#endif
+//#include <opencv2/highgui.hpp>
 #include <string>
 #include <slam6d/scan.h>
 using namespace std;
@@ -18,6 +22,8 @@ IplImage* detectCorners(IplImage *orgimage, int &corner_exp, int board_h, int bo
 void CalibFunc(int board_w, int board_h, int start, int end, bool optical, bool chess, bool quiet, string dir, int scale=1);
 void writeCalibParam(int images, int corner_exp, int board_w, CvMat* image_points, CvSize size, string dir);
 
+void loadIntrinsicCalibration(CvMat * intrinsic, CvMat * distortion, string dir, bool optical=false) ;
+void loadExtrinsicCalibration(CvMat * Translation, CvMat * Rotation, string dir, int method, bool optical=false) ;
 void ProjectAndMap(int start, int end, bool optical, bool quiet, string dir,
 IOType type, int scale, double rot_angle, double minDist, double maxDist,
 bool correction, int neighborhood, int method=0);
