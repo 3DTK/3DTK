@@ -1189,7 +1189,7 @@ inline int LU_solve(const double A[4][4], const int indx[4], double b[4])
 }
 
 /**
- * Calculates the cross product of two 4-vectors
+ * Calculates the <i>cross</i> product of two 4-vectors
  *
  * @param x input 1
  * @param y input 2
@@ -1203,6 +1203,19 @@ static inline void Cross(const T *x, const T *y, T *result)
   result[1] = x[2] * y[0] - x[0] * y[2];
   result[2] = x[0] * y[1] - x[1] * y[0];
   return;
+}
+
+/**
+ * Computes the <i>dot</i> product of two 3-vector
+ *
+ * @param x   input 3-vector
+ * @param y   input 3-vector
+ * @return    dot product of x and y
+ */
+template <class T>
+inline T Dot(const T *x, const T *y)
+{
+  return x[0] * y[0] + x[1] * y[1] + x[2] * y[2];
 }
 
 /**
