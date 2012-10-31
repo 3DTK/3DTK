@@ -12,7 +12,7 @@ config: .build
 	touch .configured
 
 .configured: .build
-	cd .build && cmake ..
+	cd .build && cmake .. && cmake ..
 	touch .configured
 
 .build:
