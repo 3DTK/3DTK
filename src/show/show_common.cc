@@ -29,9 +29,6 @@ using std::ifstream;
 using std::exception;
 #include <algorithm>
 
-#ifdef WITH_METRICS
-#include "slam6d/metrics.h"
-#endif
 
 #ifdef _MSC_VER
 #include "XGetopt.h"
@@ -779,100 +776,6 @@ void generateFrames(int start, int end, bool identity) {
   }
 }
 
-
-
-/*
- * create display lists
- * @to do general framework for color & type definitions
- */
-void createDisplayLists(bool reduced)
-{
-  for(unsigned int s = 0; s < Scan::allScans.size() ; s++) {
-    Scan* scan = Scan::allScans[s];
-    
-    vertexArray* myvertexArray1;
-    vertexArray* myvertexArray2;
-    
-    // count points
-    unsigned int color1 = 0, color2 = 0;
-    if(!reduced) {
-      scan->get(DATA_XYZ | DATA_TYPE);
-      DataType type(scan->get("type"));
-      
-      if(type.valid()) {
-        for(unsigned int i = 0; i < type.size(); ++i) {
-          if(type[i] & TYPE_GROUND) {
-            color1 += 3;
-          } else {
-            color2 += 3;
-          }
-        }
-      } else {
-        color2 = 3 * scan->size<DataXYZ>("xyz");
-      }
-      
-      myvertexArray1 = new vertexArray(color1);
-      myvertexArray2 = new vertexArray(color2);
-      
-      color1 = 0; color2 = 0;
-      
-      DataXYZ xyz(scan->get("xyz"));
-      for(unsigned int i = 0; i < xyz.size(); ++i) {
-        if(type[i] & TYPE_GROUND) {
-          for(unsigned int j = 0; j < 3; ++j) {
-            myvertexArray1->array[color1++] = xyz[i][j];
-          }
-        } else {
-          for(unsigned int j = 0; j < 3; ++j) {
-            myvertexArray2->array[color2++] = xyz[i][j];
-          }
-        }
-      }
-    } else {
-      color2 = 3 * scan->size<DataXYZ>("xyz reduced");
-      
-      myvertexArray1 = new vertexArray(0);
-      myvertexArray2 = new vertexArray(color2);
-      
-      color2 = 0;
-      
-      DataXYZ xyz_r(scan->get("xyz reduced"));
-      for(unsigned int i = 0; i < xyz_r.size(); ++i) {
-        for(unsigned int j = 0; j < 3; ++j) {
-          myvertexArray2->array[color2++] = xyz_r[i][j];
-        }
-      }
-    }
-    
-   
-
-    glNewList(myvertexArray1->name, GL_COMPILE);
-    //@
-    //glColor4d(0.44, 0.44, 0.44, 1.0);
-    //glColor4d(0.66, 0.66, 0.66, 1.0);
-    glVertexPointer(3, GL_FLOAT, 0, myvertexArray1->array);
-    glEnableClientState(GL_VERTEX_ARRAY);
-    glDrawArrays(GL_POINTS, 0, myvertexArray1->numPointsToRender);
-    glDisableClientState(GL_VERTEX_ARRAY);
-    glEndList();
-
-    glNewList(myvertexArray2->name, GL_COMPILE);
-    //glColor4d(1.0, 1.0, 1.0, 1.0);
-    //glColor4d(0.0, 0.0, 0.0, 1.0);
-    glVertexPointer(3, GL_FLOAT, 0, myvertexArray2->array);
-    glEnableClientState(GL_VERTEX_ARRAY);
-    glDrawArrays(GL_POINTS, 0, myvertexArray2->numPointsToRender);
-    glDisableClientState(GL_VERTEX_ARRAY);
-    glEndList();
-
-    // append to vector
-    vector<vertexArray*> vvertexArray;
-    vvertexArray.push_back(myvertexArray1);
-    vvertexArray.push_back(myvertexArray2);
-    vvertexArrayList.push_back(vvertexArray);
-  }
-}
-
 void cycleLOD() {
   LevelOfDetail = 0.00001;
   for (unsigned int i = 0; i < octpts.size(); i++)
@@ -980,7 +883,6 @@ void initShow(int argc, char **argv){
   }
   cm = new ScanColorManager(4096, pointtype);
   
-#ifdef USE_GL_POINTS // use octtrees
 #ifdef USE_COMPACT_TREE
   cout << "Creating compact display octrees.." << endl;
 #else
@@ -1117,9 +1019,6 @@ set heuristic, do locking, catch exception, reset heuristic to default or old
   
 #endif // !COMPACT_TREE
 
-#else // not using octtrees
-  createDisplayLists(red > 0);
-#endif // USE_GL_POINTS
 
   // load frames now that we know how many scans we actually loaded
   unsigned int real_end = min((unsigned int)(end), 
