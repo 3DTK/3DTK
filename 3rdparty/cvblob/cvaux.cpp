@@ -23,6 +23,8 @@
 #include <cv.h>
 #elif (CV_MAJOR_VERSION == 2) && (CV_MINOR_VERSION < 2)
 #include <opencv/cv.h>
+#else
+#include <opencv2/opencv.hpp>
 #endif
 
 #include "cvblob.h"
