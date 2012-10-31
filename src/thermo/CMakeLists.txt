@@ -14,13 +14,13 @@ IF (WITH_THERMO)
   IF(UNIX)
     target_link_libraries(caliboard scan shape newmat dl ANN)
     target_link_libraries(thermo scan shape newmat dl ANN)
-    target_link_libraries(thermo cv cvaux cxcore GL GLU highgui cvblob scan ANN)
+    target_link_libraries(thermo GL GLU cvblob ${OpenCV_LIBS} scan ANN)
   ENDIF(UNIX)
 
   IF (WIN32)
     target_link_libraries(caliboard scan shape newmat XGetopt ANN)
     target_link_libraries(thermo scan shape newmat XGetopt ANN)
-    target_link_libraries(thermo cv cvaux cxcore GL GLU highgui cvblob scan ANN)
+    target_link_libraries(thermo GL GLU cvblob ${OpenCV_LIBS} scan ANN)
   ENDIF(WIN32)
   
 
