@@ -925,9 +925,7 @@ void initShow(int argc, char **argv){
 #endif
     }
   } else {
-#ifndef USE_GL_POINTS
-    createDisplayLists(red > 0);
-#elif USE_COMPACT_TREE
+#if USE_COMPACT_TREE
     cout << "Creating compact display octrees.." << endl;
     for(int i = 0; i < (int)Scan::allScans.size() ; i++) {
       compactTree *tree;
