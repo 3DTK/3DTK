@@ -190,7 +190,6 @@ void sortBlobs(double point_array[][2], int board_n, int board_h, int board_w, b
 IplImage* detectBlobs(IplImage *org_image, int &corner_exp, int board_h, int board_w, bool quiet, double point_array2[][2]) {
 
   IplImage *gray_image = cvCloneImage(org_image); 
-  //cvThreshold(gray_image, gray_image, 100, 255, CV_THRESH_BINARY);
   cvThreshold(gray_image, gray_image, GRAY_TH, 255, CV_THRESH_BINARY);
   IplImage *labelImg = cvCreateImage(cvGetSize(gray_image), IPL_DEPTH_LABEL, 1);
   
@@ -270,7 +269,7 @@ IplImage* detectBlobs(IplImage *org_image, int &corner_exp, int board_h, int boa
   * Connects the detected calibration features in the image with lines.
   */
 void drawLines(double point_array2[][2], int corner_exp, IplImage *image, bool color) {
-  for (int i = 4; i <= corner_exp - 2; i++) {
+  for (int i = 0; i <= corner_exp - 2; i++) {
     CvPoint pt1;
     CvPoint pt2;
     CvScalar s; 
@@ -368,7 +367,6 @@ IplImage* detectCorners(IplImage *orgimage, int &corner_exp, int board_h, int bo
   
   cout << "found corners:" << corner_exp << endl;
   if (found != 0) {//if all corners found successfully
-  //if (corner_exp != 0) {//if all corners found successfully
     //Get Subpixel accuracy on those corners
     if(size.width > 400) {
       cvFindCornerSubPix(gray_image, corners, corner_exp, cvSize(11, 11), cvSize(-1, -1), 
@@ -379,7 +377,6 @@ IplImage* detectCorners(IplImage *orgimage, int &corner_exp, int board_h, int bo
                          cvTermCriteria( CV_TERMCRIT_EPS + CV_TERMCRIT_ITER, 30, 0.1));
     }
   }
-  cout << "blub " << found << endl;
 
   for (int i = 0; i < corner_exp; i++) {
     point_array2[i][0] = corners[i].x;
@@ -410,8 +407,6 @@ image_points, CvSize size, string dir, string substring) {
 		CV_MAT_ELEM( *image_points2, float,i,1) = CV_MAT_ELEM( *image_points, float, i, 1);
 		CV_MAT_ELEM(*object_points2, float, i, 0) = (j / board_w) * 4; 
 		CV_MAT_ELEM( *object_points2, float, i, 1) = (j % board_w) * 4;
-		//CV_MAT_ELEM(*object_points2, float, i, 0) = (j / board_w) * 4; 
-		//CV_MAT_ELEM( *object_points2, float, i, 1) = (j % board_w) * 4;
 		CV_MAT_ELEM( *object_points2, float, i, 2) = 0.0f;
 	}
 	for (int i = 0; i < images; ++i) { //These are all the same number
@@ -423,10 +418,10 @@ image_points, CvSize size, string dir, string substring) {
 	CV_MAT_ELEM( *intrinsic_matrix, float, 1, 1 ) = 1.0f;
 	//CALIBRATE THE CAMERA!
 	cvCalibrateCamera2(object_points2, image_points2, point_counts2, size,
-			intrinsic_matrix, distortion_coeffs, Rotation, Translation, 0 //CV_CALIB_FIX_ASPECT_RATIO
+			intrinsic_matrix, distortion_coeffs, Rotation, Translation, 0 
 	);
-	// SAVE AND PRINT THE INTRINSICS AND DISTORTIONS
 	
+	// SAVE AND PRINT THE INTRINSICS AND DISTORTIONS
   string file = dir + "Intrinsics" + substring + ".xml";
   cvSave(file.c_str(), intrinsic_matrix);
 	file = dir + "Distortion" + substring + ".xml";
@@ -467,10 +462,6 @@ chess, bool quiet, string dir, int scale) {
   cvNamedWindow("Final Result", 0);
   cvResizeWindow( "Original Image", 480, 640 ); 
   cvResizeWindow( "Final Result", 480, 640 ); 
-  /*
-  cvNamedWindow("Final Result", 0);
-  cvResizeWindow( "Final Result", 320, 240 ); 
-  */
   int nr_img = end - start + 1;
 	if (nr_img == 0) {
 		cout << "ImageCount is zero!" << endl;
@@ -496,14 +487,10 @@ chess, bool quiet, string dir, int scale) {
     if(optical) {
       //TODO t = dir + "/photo" + to_string(count, 3) + ".ppm";
       t = dir + "/photo" + to_string(count, 3) + ".jpg";
-		  //t1 = dir + "/cimage" + to_string(count, 3) + ".ppm";
       //t = dir + to_string(count, 3) + "/photo" + to_string(count, 3) + ".ppm";
-		  //t1 = dir + to_string(count, 3) + "/cimage" + to_string(count, 3) + ".ppm";
     } else {
       //t = dir + to_string(count, 3) + "/image" + to_string(count, 3) + ".ppm";
-		  //t1 = dir + to_string(count, 3) + "/timage" + to_string(count, 3) + ".ppm";
       t = dir + "/image" + to_string(count, 3) + ".ppm";
-		  //t1 = dir + "/timage" + to_string(count, 3) + ".ppm";
     }
     cout << t << endl;
 		//loading images and finding corners
@@ -515,7 +502,6 @@ chess, bool quiet, string dir, int scale) {
     cvShowImage("Original Image", image1);
 	
     /////////////////////////////////////////////////////////////
-	
     double point_array2[corner_exp][2];
     IplImage *image;
     
@@ -579,7 +565,6 @@ chess, bool quiet, string dir, int scale) {
   writeCalibParam(successes, corner_exp, board_w, image_points, size, dir, substring); 
 
 	cvReleaseMat(&image_points);
-
 }
 
 /**
@@ -987,12 +972,9 @@ void ExtrCalibFunc(int board_w, int board_h, int start, int end, bool optical, b
   //ALLOCATE STORAGE(depending upon the number of images in(in case if command line arguments are given )
   //not on the basis of number of images in which all corner extracted/while in the other case the number is the same )
 
-  string substring = optical? "Optical" : "";
-  string file = dir + "Intrinsics" + substring + ".xml";
-  cout << file << endl;
-  CvMat *intrinsic = (CvMat*) cvLoad(file.c_str());
-  file = dir + "Distortion" + substring + ".xml";
-  CvMat *distortion = (CvMat*) cvLoad(file.c_str());
+  CvMat *intrinsic;
+  CvMat *distortion;
+  loadIntrinsicCalibration(intrinsic, distortion, dir, optical);
   //for storing the rotations and translation vectors
 
 
@@ -1134,6 +1116,7 @@ void ExtrCalibFunc(int board_w, int board_h, int start, int end, bool optical, b
 
   cout << "Number of successes: " << successes << endl;
   // Now calculating mean and median rotation and trans
+  string substring = optical? "Optical" : "";
   calculateExtrinsics(rotation_vectors_temp, translation_vectors_temp, successes, dir, quiet, substring);
   calculateExtrinsicsWithReprojectionCheck(points2D, points3D, rotation_vectors_temp, translation_vectors_temp, distortion, intrinsic, corner_exp, successes, dir, quiet, substring);
   cvReleaseMat(&intrinsic);
@@ -1189,31 +1172,9 @@ void writeGlobalCameras(int start, int end, bool optical, bool quiet, string dir
     cout << "ImageCount is zero!" << endl;
     return;
   }
-  string substring = optical? "Optical" : "";
-  switch(method) {
-    case 0:
-      file = dir + "Rotation" + substring + ".xml";
-      break; 
-    case 1:
-      file = dir + "RotationMedian" + substring + ".xml";
-      break;
-    case 2:
-      file = dir + "RotationMean" + substring + ".xml";
-      break;
-  }
-  CvMat *Rotation = (CvMat*) cvLoad(file.c_str());
-  switch(method) {
-    case 0:
-      file = dir + "Translation" + substring + ".xml";
-      break; 
-    case 1:
-      file = dir + "TranslationMedian" + substring + ".xml";
-      break;
-    case 2:
-      file = dir + "TranslationMean" + substring + ".xml";
-      break;
-  }
-  CvMat *Translation = (CvMat*) cvLoad(file.c_str());
+  CvMat *Rotation;
+  CvMat *Translation;
+  loadExtrinsicCalibration(Rotation, Translation, dir, method, optical);
 
   double starttime = GetCurrentTimeInMilliSec();
 
@@ -1355,35 +1316,13 @@ void calculateGlobalCameras(int start, int end, bool optical, bool quiet, string
     cout << "ImageCount is zero!" << endl;
     return;
   }
-  string substring = optical? "Optical" : "";
-  string file = dir + "Intrinsics" + substring + ".xml";
-  CvMat *intrinsic = (CvMat*) cvLoad(file.c_str());
-  file = dir + "Distortion" + substring + ".xml";
-  CvMat *distortion = (CvMat*) cvLoad(file.c_str());
-  switch(method) {
-    case 0:
-      file = dir + "Rotation" + substring + ".xml";
-      break; 
-    case 1:
-      file = dir + "RotationMedian" + substring + ".xml";
-      break;
-    case 2:
-      file = dir + "RotationMean" + substring + ".xml";
-      break;
-  }
-  CvMat *Rotation = (CvMat*) cvLoad(file.c_str());
-  switch(method) {
-    case 0:
-      file = dir + "Translation" + substring + ".xml";
-      break; 
-    case 1:
-      file = dir + "TranslationMedian" + substring + ".xml";
-      break;
-    case 2:
-      file = dir + "TranslationMean" + substring + ".xml";
-      break;
-  }
-  CvMat *Translation = (CvMat*) cvLoad(file.c_str());
+  CvMat *intrinsic;
+  CvMat *distortion;
+  loadIntrinsicCalibration(intrinsic, distortion, dir, optical);
+  CvMat *Rotation;
+  CvMat *Translation;
+  loadExtrinsicCalibration(Translation, Rotation, dir, method, optical);
+  
   CvMat* undistort = cvCreateMat(5,1,CV_32FC1);
   for (int hh = 0; hh < 5; hh++) {
     CV_MAT_ELEM(*undistort, float,hh,0) = 0;
@@ -1759,24 +1698,17 @@ void calculateGlobalCameras(int start, int end, bool optical, bool quiet, string
 
 }
 
-/**
-  * Main function for projecting the 3D points onto the corresponding image and
-  * associating temperature values to the data points.
-  */
-void ProjectAndMap(int start, int end, bool optical, bool quiet, string dir,
-    IOType type, int scale, double rot_angle, double minDist, double maxDist,
-    bool correction, int neighborhood, int method) {
-
-  int nr_img = end - start + 1;
-  if (nr_img < 1) {
-    cout << "ImageCount is zero!" << endl;
-    return;
-  }
+void loadIntrinsicCalibration(CvMat * intrinsic, CvMat * distortion, string dir, bool optical) {
   string substring = optical? "Optical" : "";
   string file = dir + "Intrinsics" + substring + ".xml";
-  CvMat *intrinsic = (CvMat*) cvLoad(file.c_str());
+  intrinsic = (CvMat*) cvLoad(file.c_str());
   file = dir + "Distortion" + substring + ".xml";
-  CvMat *distortion = (CvMat*) cvLoad(file.c_str());
+  distortion = (CvMat*) cvLoad(file.c_str());
+}  
+  
+void loadExtrinsicCalibration(CvMat * Translation, CvMat * Rotation, string dir, int method, bool optical) {
+  string substring = optical? "Optical" : "";
+  string file;
   switch(method) {
     case 0:
       file = dir + "Rotation" + substring + ".xml";
@@ -1788,7 +1720,7 @@ void ProjectAndMap(int start, int end, bool optical, bool quiet, string dir,
       file = dir + "RotationMean" + substring + ".xml";
       break;
   }
-  CvMat *Rotation = (CvMat*) cvLoad(file.c_str());
+  Rotation = (CvMat*) cvLoad(file.c_str());
   switch(method) {
     case 0:
       file = dir + "Translation" + substring + ".xml";
@@ -1800,17 +1732,10 @@ void ProjectAndMap(int start, int end, bool optical, bool quiet, string dir,
       file = dir + "TranslationMean" + substring + ".xml";
       break;
   }
-  CvMat *Translation = (CvMat*) cvLoad(file.c_str());
-  CvMat* undistort = cvCreateMat(5,1,CV_32FC1);
-  for (int hh = 0; hh < 5; hh++) {
-    CV_MAT_ELEM(*undistort, float,hh,0) = 0;
-  }
+  Translation = (CvMat*) cvLoad(file.c_str());
+}
 
-  double starttime = GetCurrentTimeInMilliSec();
-
-  stringstream outdat;
-  int pointcnt = 0;
-  string outdir = dir + "/labscan-map"; 
+void openOutputDirectory(string outdir) {
 #ifdef _MSC_VER
   int success = mkdir(outdir.c_str());
 #else
@@ -1824,38 +1749,139 @@ void ProjectAndMap(int start, int end, bool optical, bool quiet, string dir,
     cerr << "Creating directory " << outdir << " failed" << endl;
     exit(1);
   }
+}
+
+int openDirectory(CvMat* point_3Dcloud, string dir, IOType type, int count) {
+  // reading the 3D points and projecting them back to 2d
+  Scan::openDirectory(false, dir, type, count, count);
+  Scan::allScans[0]->setRangeFilter(-1, -1);
+  Scan::allScans[0]->setSearchTreeParameter(simpleKD, false);
+  Scan::allScans[0]->setReductionParameter(-1, 0);
+  
+  //Scan::readScans(type, count, count, dir, maxDist, minDist, 0);
+  DataXYZ reduced = Scan::allScans[0]->get("xyz reduced");
+  int red_size = reduced.size();
+  point_3Dcloud = cvCreateMat(red_size, 3, CV_32FC1);
+  for (int j = 0; j < red_size; j++) {
+    Point p(reduced[j]);
+    CV_MAT_ELEM(*point_3Dcloud, float,j,0) = p.z;
+    CV_MAT_ELEM(*point_3Dcloud, float,j,1) = -p.x;
+    CV_MAT_ELEM(*point_3Dcloud, float,j,2) = p.y; 
+  }
+  return red_size;
+}
+
+void loadImage(IplImage *image, string dir, int count0, bool optical, int scale){
+      string t, t0;
+      if(optical) {
+        t = dir + "/photo" + to_string(count0, 3) + ".jpg";
+      } else {
+        t = dir + "/image" + to_string(count0, 3) + ".ppm";
+      }
+
+      image = cvLoadImage(t.c_str(), -1);
+      if (!image) {
+        cout << "first image " << t << " cannot be loaded" << endl;
+        exit(0);
+      }
+      
+      image = resizeImage(image, scale);
+}
+
+void calculateGlobalPoses(CvMat *Translation, CvMat *Rotation, CvMat *t_comI,
+CvMat *rod_comI, double angle, CvMat *rot_tmp) {
+  CvMat* RotationI = cvCreateMat(3,1,CV_32FC1);
+  CvMat* TranslationI = cvCreateMat(3,1,CV_32FC1);
+  CvMat* rod40 = cvCreateMat(3,1,CV_32FC1);
+  //cout << "Angle: " << angle << " " << rad(angle) << endl;
+  CV_MAT_ELEM(*rod40,float,0,0) = 0.0;
+  CV_MAT_ELEM(*rod40,float,1,0) = 0.0;
+  CV_MAT_ELEM(*rod40,float,2,0) = 1.0 * rad(angle);
+  //cout << "tmp" << endl;
+  CvMat* t40 = cvCreateMat(3,1,CV_32FC1);
+  CV_MAT_ELEM(*t40,float,0,0) = 0.0;
+  CV_MAT_ELEM(*t40,float,1,0) = 0.0;
+  CV_MAT_ELEM(*t40,float,2,0) = 0.0;
+  rot_tmp = cvCreateMat(3,3,CV_32FC1);
+  //CvMat* rot_tmp = cvCreateMat(3,3,CV_32FC1);
+  rod_comI = cvCreateMat(3,1,CV_32FC1);
+  t_comI = cvCreateMat(3,1,CV_32FC1);
+  CvMat* rod_com = cvCreateMat(1,3,CV_32FC1);
+  CvMat* t_com = cvCreateMat(1,3,CV_32FC1);
+  for(int w = 0; w < 3; w++) {
+    CV_MAT_ELEM(*RotationI,float,w,0) = CV_MAT_ELEM(*Rotation,float,0,w);
+    CV_MAT_ELEM(*TranslationI,float,w,0) = CV_MAT_ELEM(*Translation,float,0,w);
+  }
+  //cout << endl;
+  //cout << "Final Rotation" << endl;
+
+  cvComposeRT(rod40, t40, RotationI, TranslationI, rod_comI, t_comI);
+  for(int w = 0; w < 3; w++) {
+    CV_MAT_ELEM(*rod_com,float,0,w) = CV_MAT_ELEM(*rod_comI,float,w,0);
+    CV_MAT_ELEM(*t_com,float,0,w) = CV_MAT_ELEM(*t_comI,float,w,0);
+    /*
+    cout << CV_MAT_ELEM(*RotationI,float,w,0) << " ";
+    cout << CV_MAT_ELEM(*TranslationI,float,w,0) << " ";
+    cout << CV_MAT_ELEM(*rod40,float,w,0) << " ";
+    cout << CV_MAT_ELEM(*t40,float,w,0) << " ";
+    cout << CV_MAT_ELEM(*rod_comI,float,w,0) << " ";
+    cout << CV_MAT_ELEM(*t_comI,float,w,0) << endl;
+    */
+  }
+  //cout << endl;
+
+  cvRodrigues2(rod_comI, rot_tmp);
+  cvReleaseMat(&rod40);
+  cvReleaseMat(&RotationI);
+  cvReleaseMat(&TranslationI);
+  cvReleaseMat(&t40);
+  cvReleaseMat(&rod_com);
+  cvReleaseMat(&t_com);
+
+}
+
+/**
+  * Main function for projecting the 3D points onto the corresponding image and
+  * associating temperature values to the data points.
+  */
+void ProjectAndMap(int start, int end, bool optical, bool quiet, string dir,
+    IOType type, int scale, double rot_angle, double minDist, double maxDist,
+    bool correction, int neighborhood, int method) {
+
+  int nr_img = end - start + 1;
+  if (nr_img < 1) {
+    cout << "ImageCount is zero!" << endl;
+    return;
+  }
+ 
+  CvMat *distortion;
+  CvMat *intrinsic;
+  CvMat *Translation;
+  CvMat *Rotation;
+  loadExtrinsicCalibration(Translation, Rotation,dir,method,optical);
+  loadIntrinsicCalibration(intrinsic,distortion,dir,optical);
+  CvMat* undistort = cvCreateMat(5,1,CV_32FC1);
+  for (int hh = 0; hh < 5; hh++) {
+    CV_MAT_ELEM(*undistort, float,hh,0) = 0;
+  }
+
+  double starttime = GetCurrentTimeInMilliSec();
+
+  stringstream outdat;
+  int pointcnt = 0;
+  string outdir = dir + "/labscan-map"; 
+  openOutputDirectory(outdir);
+  
   for (int count = start; count <= end; count++) {
     // filling the rotation matrix 
-    CvMat* point_3Dcloud; 
-    CvMat* point_2Dcloud; 
-    CvMat* undistort_2Dcloud; 
-
-    // reading the 3D points and projecting them back to 2d
-    Scan::openDirectory(false, dir, type, count, count);
-    Scan::allScans[0]->setRangeFilter(-1, -1);
-    Scan::allScans[0]->setSearchTreeParameter(simpleKD, false);
-    Scan::allScans[0]->setReductionParameter(-1, 0);
     
-    //Scan::readScans(type, count, count, dir, maxDist, minDist, 0);
-    DataXYZ reduced = Scan::allScans[0]->get("xyz reduced");
-    int red_size = reduced.size();
-
-    point_3Dcloud = cvCreateMat(red_size, 3, CV_32FC1);
-    cout << "Points: " << red_size << endl;
-    point_2Dcloud = cvCreateMat(red_size, 2, CV_32FC1);
-    undistort_2Dcloud = cvCreateMat(red_size, 2, CV_32FC1);
-    cout << "readScans done" << endl;
-    for (int j = 0; j < red_size; j++) {
-      Point p(reduced[j]);
-      // TODO make sure correct points are printed 
-
-      CV_MAT_ELEM(*point_3Dcloud, float,j,0) = p.z;
-      CV_MAT_ELEM(*point_3Dcloud, float,j,1) = -p.x;
-      CV_MAT_ELEM(*point_3Dcloud, float,j,2) = p.y; 
-
-    }
-    int nr_points = red_size; 
-    cout << "Number of points read: " << red_size << endl;
+    CvMat *point_3Dcloud;
+    int nr_points = openDirectory(point_3Dcloud, dir, type, count);
+    
+    CvMat* point_2Dcloud = cvCreateMat(nr_points, 2, CV_32FC1);
+    CvMat* undistort_2Dcloud = cvCreateMat(nr_points, 2, CV_32FC1);
+    
+    cout << "Number of points read: " << nr_points << endl;
     delete Scan::allScans[0];
     Scan::allScans.clear();
 
@@ -1874,80 +1900,22 @@ void ProjectAndMap(int start, int end, bool optical, bool quiet, string dir,
       // loading images
       int count0 = count * nrP360 + p;
 
-      string t, t0;
-      if(optical) {
-        //TODO t = dir + "/photo" + to_string(count, 3) + ".ppm";
-        //t = dir + "/photo" + to_string(count0, 3) + "_2.jpg";
-        //t = dir + "/photo" + to_string(count0, 3) + "_90.jpg";
-        t = dir + "/photo" + to_string(count0, 3) + ".jpg";
-        //t = dir + "/photo" + to_string(count0, 3) + "_1.jpg";
-      } else {
-        t = dir + "/image" + to_string(count0, 3) + ".ppm";
-      }
-
-      IplImage* image = cvLoadImage(t.c_str(), -1);
-      if (!image) {
-        cout << "first image " << t << " cannot be loaded" << endl;
-        return;
-      }
+      IplImage *image;
+      loadImage(image, dir, count0, optical, scale);
       CvSize size = cvGetSize(image); 
 
-      image = resizeImage(image, scale);
-
       // rotate Rotation and Translation
-      CvMat* RotationI = cvCreateMat(3,1,CV_32FC1);
-      CvMat* TranslationI = cvCreateMat(3,1,CV_32FC1);
-      CvMat* rod40 = cvCreateMat(3,1,CV_32FC1);
-      cout << "Angle: " << angle << " " << rad(angle) << endl;
-      CV_MAT_ELEM(*rod40,float,0,0) = 0.0;
-      CV_MAT_ELEM(*rod40,float,1,0) = 0.0;
-      CV_MAT_ELEM(*rod40,float,2,0) = 1.0 * rad(angle);
-      cout << "tmp" << endl;
-      CvMat* t40 = cvCreateMat(3,1,CV_32FC1);
-      CV_MAT_ELEM(*t40,float,0,0) = 0.0;
-      CV_MAT_ELEM(*t40,float,1,0) = 0.0;
-      CV_MAT_ELEM(*t40,float,2,0) = 0.0;
-      cout << "tmp2" << endl;
+      CvMat* rod_comI; 
+      CvMat* t_comI; 
       CvMat* rot_tmp = cvCreateMat(3,3,CV_32FC1);
-      CvMat* rod_comI = cvCreateMat(3,1,CV_32FC1);
-      CvMat* t_comI = cvCreateMat(3,1,CV_32FC1);
-      CvMat* rod_com = cvCreateMat(1,3,CV_32FC1);
-      CvMat* t_com = cvCreateMat(1,3,CV_32FC1);
-      cout << "tmp3" << endl;
-      for(int w = 0; w < 3; w++) {
-        CV_MAT_ELEM(*RotationI,float,w,0) = CV_MAT_ELEM(*Rotation,float,0,w);
-        CV_MAT_ELEM(*TranslationI,float,w,0) = CV_MAT_ELEM(*Translation,float,0,w);
-      }
-      cout << endl;
-      cout << "Final Rotation" << endl;
-
-      cvComposeRT(rod40, t40, RotationI, TranslationI, rod_comI, t_comI);
-      for(int w = 0; w < 3; w++) {
-        CV_MAT_ELEM(*rod_com,float,0,w) = CV_MAT_ELEM(*rod_comI,float,w,0);
-        CV_MAT_ELEM(*t_com,float,0,w) = CV_MAT_ELEM(*t_comI,float,w,0);
-        cout << CV_MAT_ELEM(*RotationI,float,w,0) << " ";
-        cout << CV_MAT_ELEM(*TranslationI,float,w,0) << " ";
-        cout << CV_MAT_ELEM(*rod40,float,w,0) << " ";
-        cout << CV_MAT_ELEM(*t40,float,w,0) << " ";
-        cout << CV_MAT_ELEM(*rod_comI,float,w,0) << " ";
-        cout << CV_MAT_ELEM(*t_comI,float,w,0) << endl;
-      }
-      cout << endl;
-
-      cvRodrigues2(rod_comI, rot_tmp);
+      calculateGlobalPoses(Translation, Rotation, t_comI, rod_comI, angle, rot_tmp);
 
       // Project Points
       cvProjectPoints2(point_3Dcloud, rod_comI, t_comI, intrinsic, distortion, point_2Dcloud, NULL, NULL, NULL, NULL, NULL, 0);
       cvProjectPoints2(point_3Dcloud, rod_comI, t_comI, intrinsic, undistort, undistort_2Dcloud, NULL, NULL, NULL, NULL, NULL, 0);
 
-      cvReleaseMat(&rod40);
-      cvReleaseMat(&RotationI);
-      cvReleaseMat(&TranslationI);
-      cvReleaseMat(&t40);
-      cvReleaseMat(&rod_comI);
-      cvReleaseMat(&rod_com);
-      cvReleaseMat(&t_com);
       cvReleaseMat(&t_comI);
+      cvReleaseMat(&rod_comI);
       cout << "Done projecting points" << endl;
 
       //for counting how many points get mapped to first and second image file
@@ -2126,6 +2094,7 @@ void ProjectAndMap(int start, int end, bool optical, bool quiet, string dir,
     cvReleaseMat(&undistort_2Dcloud);
 
     }
+  // Final cleanup  
   cvReleaseMat(&intrinsic);
   cvReleaseMat(&distortion);
   cvReleaseMat(&Rotation);
