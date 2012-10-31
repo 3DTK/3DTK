@@ -17,12 +17,6 @@ if(WITH_RIVLIB)
   endif(LIBXML2_FOUND)
 endif(WITH_RIVLIB)
     
-#IF (WITH_CAD)
-#  IF(NOT WIN32)
-#    add_library(scan_io_cad             SHARED scan_io_cad.cc)
-#    target_link_libraries(scan_io_cad ${Boost_PROGRAM_OPTIONS_LIBRARY} ${Boost_FILESYSTEM_LIBRARY})
-#  ENDIF(NOT WIN32)
-#ENDIF (WITH_CAD)
 
 foreach(libname ${SCANIO_LIBNAMES})
 if(WIN32)

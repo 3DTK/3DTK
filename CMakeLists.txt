@@ -1,6 +1,9 @@
 cmake_minimum_required (VERSION 2.8.2)
 SET(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/3rdparty/CMakeModules" ${CMAKE_MODULE_PATH})
-project (Slam6D)
+project (3DTK)
+
+
+
 
 #include_directories(OPENGL_INCLUDE_DIR)
 IF(WIN32)
@@ -27,8 +30,75 @@ endif()
 # Declare Options and modify build accordingly ##
 #################################################
 
+
+FUNCTION(ENFORCE_OPTION_DEP_3DTK option VALUE)
+  SET (${option} "${VALUE}" CACHE BOOL "${${option}_DESCRIPTION}" FORCE) # this option set to VALUE as advised
+  
+  #now make sure other dependencies are also true
+  FOREACH(d ${${option}_DEPENDENCIES}) # look through all my dependencies
+    STRING(REGEX REPLACE " +" ";" CMAKE_DEPENDENT_OPTION_DEP "${d}")
+
+    # check for a not in front
+    STRING(STRIP "${CMAKE_DEPENDENT_OPTION_DEP}" CMAKE_DEPENDENT_OPTION_DEP)
+    STRING(SUBSTRING "${CMAKE_DEPENDENT_OPTION_DEP}" 0 3 CMAKE_DEPENDENT_OPTION_DEP_3)
+    STRING(TOUPPER "${CMAKE_DEPENDENT_OPTION_DEP_3}" CMAKE_DEPENDENT_OPTION_DEP_3)
+    STRING(COMPARE EQUAL "${CMAKE_DEPENDENT_OPTION_DEP_3}" "NOT" CMAKE_DEPENDENT_OPTION_DEP_NOT)
+    #STRING(REPLACE "NOT " "" CMAKE_DEPENDENT_OPTION_DEP "${d}")
+    IF(CMAKE_DEPENDENT_OPTION_DEP_NOT) # we found a NOT
+      STRING(REPLACE "NOT;" "" CMAKE_DEPENDENT_OPTION_DEP "${CMAKE_DEPENDENT_OPTION_DEP}")
+      IF(${CMAKE_DEPENDENT_OPTION_DEP})  # dependency is met
+        ENFORCE_OPTION_DEP_3DTK(${CMAKE_DEPENDENT_OPTION_DEP} OFF)
+      ELSE(${CMAKE_DEPENDENT_OPTION_DEP}) # not met, make sure it is
+      ENDIF(${CMAKE_DEPENDENT_OPTION_DEP})
+    ELSE(CMAKE_DEPENDENT_OPTION_DEP_NOT)
+      IF(${CMAKE_DEPENDENT_OPTION_DEP})  # dependency is met
+      ELSE(${CMAKE_DEPENDENT_OPTION_DEP}) # not met, make sure it is
+        ENFORCE_OPTION_DEP_3DTK(${CMAKE_DEPENDENT_OPTION_DEP} ON)
+      ENDIF(${CMAKE_DEPENDENT_OPTION_DEP})
+    ENDIF(CMAKE_DEPENDENT_OPTION_DEP_NOT)
+  ENDFOREACH(d)
+  
+ENDFUNCTION(ENFORCE_OPTION_DEP_3DTK)
+
+MACRO(OPT_DEP option doc default depends)
+  OPTION(${option} "${doc}" "${default}")
+  SET(${option} "${${option}}" CACHE BOOL "${doc}" FORCE)
+  SET(${option}_DEPENDENCIES "${depends}" CACHE INTERNAL "" FORCE)
+  SET(${option}_DESCRIPTION "${doc}" CACHE INTERNAL "" FORCE)
+
+  IF (${option})
+    #MESSAGE(STATUS "Yes ${option} is true")
+    #  MESSAGE("FOREACH d in ${depends}")
+
+    FOREACH(d ${depends})
+      STRING(REGEX REPLACE " +" ";" CMAKE_DEPENDENT_OPTION_DEP "${d}")
+
+      # check for a not in front
+      STRING(STRIP "${CMAKE_DEPENDENT_OPTION_DEP}" CMAKE_DEPENDENT_OPTION_DEP)
+      STRING(SUBSTRING "${CMAKE_DEPENDENT_OPTION_DEP}" 0 3 CMAKE_DEPENDENT_OPTION_DEP_3)
+      STRING(TOUPPER "${CMAKE_DEPENDENT_OPTION_DEP_3}" CMAKE_DEPENDENT_OPTION_DEP_3)
+      STRING(COMPARE EQUAL "${CMAKE_DEPENDENT_OPTION_DEP_3}" "NOT" CMAKE_DEPENDENT_OPTION_DEP_NOT)
+      IF(CMAKE_DEPENDENT_OPTION_DEP_NOT) # we found a NOT
+        STRING(REPLACE "NOT;" "" CMAKE_DEPENDENT_OPTION_DEP "${CMAKE_DEPENDENT_OPTION_DEP}")
+        IF(${CMAKE_DEPENDENT_OPTION_DEP})  # dependency is met
+          ENFORCE_OPTION_DEP_3DTK(${CMAKE_DEPENDENT_OPTION_DEP} OFF)
+        ELSE(${CMAKE_DEPENDENT_OPTION_DEP}) # not met, make sure it is
+        ENDIF(${CMAKE_DEPENDENT_OPTION_DEP})
+      ELSE(CMAKE_DEPENDENT_OPTION_DEP_NOT)
+        IF(${CMAKE_DEPENDENT_OPTION_DEP})  # dependency is met
+        ELSE(${CMAKE_DEPENDENT_OPTION_DEP}) # not met, make sure it is
+          ENFORCE_OPTION_DEP_3DTK(${CMAKE_DEPENDENT_OPTION_DEP} ON)
+        ENDIF(${CMAKE_DEPENDENT_OPTION_DEP})
+      ENDIF(CMAKE_DEPENDENT_OPTION_DEP_NOT)
+    ENDFOREACH(d)
+
+  ENDIF(${option})
+ENDMACRO(OPT_DEP)
+
+
+
 ## FreeGLUT
-OPTION(WITH_FREEGLUT "Whether freeglut is available. This enables iterative drawing in show. ON/OFF" ON)
+OPT_DEP(WITH_FREEGLUT "Whether freeglut is available. This enables iterative drawing in show. ON/OFF" ON "")
 
 IF(WITH_FREEGLUT)
   MESSAGE(STATUS "With freeglut")
@@ -38,7 +108,7 @@ ELSE(WITH_FREEGLUT)
 ENDIF(WITH_FREEGLUT)
 
 ## Show
-OPTION(WITH_SHOW "Whether to build Show. This is the Visualization program of slam6d. ON/OFF" ON)
+OPT_DEP(WITH_SHOW "Whether to build Show. This is the Visualization program of slam6d. ON/OFF" ON "" )
 
 IF(WITH_SHOW)
   FIND_PACKAGE(OpenGL REQUIRED)
@@ -50,7 +120,7 @@ ELSE(WITH_SHOW)
 ENDIF(WITH_SHOW)
 
 ## WXShow
-OPTION(WITH_WXSHOW "Whether to build WXShow. This is the wxwidgets variant of Show. ON/OFF" OFF)
+OPT_DEP(WITH_WXSHOW "Whether to build WXShow. This is the wxwidgets variant of Show. ON/OFF" OFF "")
 
 IF(WITH_WXSHOW)
   FIND_PACKAGE(OpenGL REQUIRED)
@@ -61,12 +131,12 @@ IF(WITH_WXSHOW)
   # wxWidgets include (this will do all the magic to configure everything)
   include( ${wxWidgets_USE_FILE})
   MESSAGE(STATUS "With wxshow")
-ELSE(WITH_XWSHOW)
+ELSE(WITH_WXSHOW)
   MESSAGE(STATUS "Without wxshow")
 ENDIF(WITH_WXSHOW)
 
 ## Shapes
-OPTION(WITH_SHAPE_DETECTION "Whether to build shapes and planes executable for detecting planes. ON/OFF" OFF)
+OPT_DEP(WITH_SHAPE_DETECTION "Whether to build shapes and planes executable for detecting planes. ON/OFF" OFF "")
 IF(WITH_SHAPE_DETECTION)
   MESSAGE(STATUS "With shape detection")
 ELSE(WITH_SHAPE_DETECTION)
@@ -74,7 +144,7 @@ ELSE(WITH_SHAPE_DETECTION)
 ENDIF(WITH_SHAPE_DETECTION)
 
 ## Interior reconstruction
-option(WITH_MODEL "Whether to build model executable for modelling interior environments. ON/OFF" OFF)
+OPT_DEP(WITH_MODEL "Whether to build model executable for modelling interior environments. ON/OFF" OFF "")
 
 if(WITH_MODEL)
   message(STATUS "With interior reconstruction")
@@ -83,7 +153,7 @@ else(WITH_MODEL)
 endif(WITH_MODEL)
 
 ## Thermo
-OPTION(WITH_THERMO "Whether to build executables for mutual calibration of laser scanner and camera. ON/OFF" OFF)
+OPT_DEP(WITH_THERMO "Whether to build executables for mutual calibration of laser scanner and camera. ON/OFF" OFF "WITH_SHAPE_DETECTION")
 IF(WITH_THERMO)
   #for OpenCV 2.1
   FIND_PACKAGE(OpenCV REQUIRED)
@@ -97,21 +167,9 @@ ELSE(WITH_THERMO)
   MESSAGE(STATUS "Without thermo")
 ENDIF(WITH_THERMO)
 
-## Octree
-OPTION(WITH_OCTREE_DISPLAY "Whether to use octree display for efficiently culling scans ON/OFF" ON)
-
-IF(WITH_OCTREE_DISPLAY)
-  MESSAGE(STATUS "Using octree display")
-  SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DUSE_GL_POINTS")
-ELSE(WITH_OCTREE_DISPLAY)
-  MESSAGE(STATUS "Using displaylists: Warning potentially much slower")
-ENDIF(WITH_OCTREE_DISPLAY)
-#SET (WITH_OCTREE_DISPLAY ${WITH_OCTREE_DISPLAY} CACHE BOOL
-#"Whether to use octree display for efficiently culling scans ON/OFF" FORCE)
-
 
 ## Octree
-OPTION(WITH_COMPACT_OCTREE "Whether to use the compact octree display ON/OFF" OFF)
+OPT_DEP(WITH_COMPACT_OCTREE "Whether to use the compact octree display ON/OFF" OFF "")
 
 IF(WITH_COMPACT_OCTREE)
   MESSAGE(STATUS "Using compact octrees")
@@ -121,7 +179,7 @@ ELSE(WITH_COMPACT_OCTREE)
 ENDIF(WITH_COMPACT_OCTREE)
 
 ## Glee?
-OPTION(WITH_GLEE "Whether to use OpenGL extensions, requires glee. ON/OFF" OFF)
+OPT_DEP(WITH_GLEE "Whether to use OpenGL extensions, requires glee. ON/OFF" OFF "")
 
 IF(WITH_GLEE)
   MESSAGE(STATUS "Using opengl extensions")
@@ -131,7 +189,7 @@ ELSE(WITH_GLEE)
 ENDIF(WITH_GLEE)
 
 ## Gridder
-OPTION(WITH_GRIDDER "Whether to build the 2DGridder binary ON/OFF" OFF)
+OPT_DEP(WITH_GRIDDER "Whether to build the 2DGridder binary ON/OFF" OFF "")
 
 IF(WITH_GRIDDER)
   MESSAGE(STATUS "With 2DGridder")
@@ -140,7 +198,7 @@ ELSE(WITH_GRIDDER)
 ENDIF(WITH_GRIDDER)
 
 ## Dynamic VELOSLAM
-OPTION(WITH_VELOSLAM "Whether to build the Velodyne data processing (veloslam/veloshow) ON/OFF" OFF)
+OPT_DEP(WITH_VELOSLAM "Whether to build the Velodyne data processing (veloslam/veloshow) ON/OFF" OFF "WITH_SHOW")
 
 IF(WITH_VELOSLAM)
   MESSAGE(STATUS "With VELOSLAM")
@@ -149,7 +207,7 @@ ELSE(WITH_VELOSLAM)
 ENDIF(WITH_VELOSLAM)
 
 ## Home-made Laserscanner
-OPTION(WITH_DAVID_3D_SCANNER "Whether to build the David scanner app for homemade laser scanners binary ON/OFF" OFF)
+OPT_DEP(WITH_DAVID_3D_SCANNER "Whether to build the David scanner app for homemade laser scanners binary ON/OFF" OFF "")
 
 IF(WITH_DAVID_3D_SCANNER)
   MESSAGE(STATUS "With David scanner")
@@ -159,7 +217,7 @@ ENDIF(WITH_DAVID_3D_SCANNER)
 
 ## Tools
 
-OPTION(WITH_TOOLS "Whether to build additional tools like convergence frame_to_graph etc. ON/OFF" OFF)
+OPT_DEP(WITH_TOOLS "Whether to build additional tools like convergence frame_to_graph etc. ON/OFF" OFF "WITH_FBR")
 
 IF(WITH_TOOLS)
   MESSAGE(STATUS "With Tools")
@@ -170,7 +228,7 @@ ENDIF(WITH_TOOLS)
 
 ## Segmentation
 
-OPTION(WITH_SEGMENTATION "Whether to build scan segmantion program ON/OFF" OFF)
+OPT_DEP(WITH_SEGMENTATION "Whether to build scan segmantion program ON/OFF" OFF "WITH_FBR")
 
 IF(WITH_SEGMENTATION)
   MESSAGE(STATUS "With segmentation")
@@ -181,7 +239,7 @@ ENDIF(WITH_SEGMENTATION)
 
 ## Normals
 
-OPTION(WITH_NORMALS "Whether to build program for normal computation ON/OFF" OFF)
+OPT_DEP(WITH_NORMALS "Whether to build program for normal computation ON/OFF" OFF "WITH_FBR")
 
 IF(WITH_NORMALS)
   MESSAGE(STATUS "With normals")
@@ -189,19 +247,8 @@ ELSE(WITH_NORMALS)
   MESSAGE(STATUS "Without normals")
 ENDIF(WITH_NORMALS)
 
-## CAD matching
-
-OPTION (WITH_CAD "Wether to build with CAD import lib ON/OFF" OFF)
-
-IF (WITH_CAD)
-  MESSAGE (STATUS "With CAD import")
-  find_package (Boost COMPONENTS program_options filesystem REQUIRED)
-ELSE (WITH_CAD)
-  MESSAGE (STATUS "Without CAD import")
-ENDIF (WITH_CAD)
-
 ## RivLib
-OPTION(WITH_RIVLIB "Whether the RIEGL rivlib is present ON/OFF" OFF)
+OPT_DEP(WITH_RIVLIB "Whether the RIEGL rivlib is present ON/OFF" OFF "")
 
 IF(WITH_RIVLIB)
   MESSAGE(STATUS "Compiling a scan IO for RXP files")
@@ -220,7 +267,7 @@ ELSE(WITH_RIVLIB)
 ENDIF(WITH_RIVLIB)
 
 ## CUDA support, TODO depend on CUDA_FIND
-OPTION(WITH_CUDA "Compile with CUDA support" OFF)
+OPT_DEP(WITH_CUDA "Compile with CUDA support" OFF "")
 IF(WITH_CUDA)
   MESSAGE(STATUS "Compiling WITH CUDA support")
   FIND_PACKAGE(CUDA)
@@ -230,7 +277,7 @@ ELSE(WITH_CUDA)
 ENDIF(WITH_CUDA)
 
 ## PMD
-OPTION(WITH_PMD "Whether to build the PMD tools like grabVideoAnd3D calibrate etc. ON/OFF" OFF)
+OPT_DEP(WITH_PMD "Whether to build the PMD tools like grabVideoAnd3D calibrate etc. ON/OFF" OFF "")
 
 IF(WITH_PMD)
   FIND_PACKAGE(OpenGL REQUIRED)
@@ -240,7 +287,7 @@ ELSE(WITH_PMD)
 ENDIF(WITH_PMD)
 
 ## FBR
-OPTION(WITH_FBR "Whether to compile feature based registration. ON/OFF" OFF)
+OPT_DEP(WITH_FBR "Whether to compile feature based registration. ON/OFF" OFF "")
 
 IF(WITH_FBR)
   FIND_PACKAGE(OpenCV REQUIRED)
@@ -251,23 +298,10 @@ ELSE(WITH_FBR)
   MESSAGE(STATUS "Without FBR")
 ENDIF(WITH_FBR)
 
-## Special treatment for system specifics
-IF(APPLE)
-add_definitions(-Dfopen64=fopen)
-ENDIF(APPLE)
-
-## Multiple Cores
-IF(APPLE)
-  SET(PROCESSOR_COUNT 2)
-ELSE(APPLE)
-  INCLUDE(CountProcessors)
-  SET(NUMBER_OF_CPUS "${PROCESSOR_COUNT}" CACHE STRING "The number of processors to use (default: ${PROCESSOR_COUNT})" )
-ENDIF(APPLE)
-
 # OPEN
 FIND_PACKAGE(OpenMP)
 IF(OPENMP_FOUND)
-  OPTION(WITH_OPENMP "Whether to use parallel processing capabilities of OPENMP. ON/OFF" ON)
+  OPT_DEP(WITH_OPENMP "Whether to use parallel processing capabilities of OPENMP. ON/OFF" ON "")
 ENDIF(OPENMP_FOUND)
 
 IF(OPENMP_FOUND AND WITH_OPENMP)
@@ -279,7 +313,7 @@ ELSE(OPENMP_FOUND AND WITH_OPENMP)
 ENDIF(OPENMP_FOUND AND WITH_OPENMP)
 
 ## TORO
-OPTION(WITH_TORO "Whether to use TORO. ON/OFF" OFF)
+OPT_DEP(WITH_TORO "Whether to use TORO. ON/OFF" OFF "")
 
 IF(WITH_TORO)
   IF(WIN32)
@@ -302,7 +336,7 @@ ENDIF(WITH_TORO)
 
 
 ## HOGMAN
-OPTION(WITH_HOGMAN "Whether to use HOGMAN. ON/OFF" OFF)
+OPT_DEP(WITH_HOGMAN "Whether to use HOGMAN. ON/OFF" OFF "")
 
 IF(WITH_HOGMAN)
   # dependant on libqt4-devi
@@ -331,15 +365,19 @@ ELSE(WITH_HOGMAN)
   MESSAGE(STATUS "Without HOGMAN")
 ENDIF(WITH_HOGMAN)
 
-OPTION(EXPORT_SHARED_LIBS "Whether to build additional shared libraries for use in other projects. ON/OFF" OFF)
+OPT_DEP(EXPORT_SHARED_LIBS "Whether to build additional shared libraries for use in other projects. ON/OFF" OFF "WITH_SHOW;WITH_FBR")
 
 IF(EXPORT_SHARED_LIBS)
+  ## Compile a single shared library containing all of 3DTK
+  add_library(slam SHARED src/slam6d/icp6D.cc)
+  target_link_libraries(slam scan_s ANN_s sparse_s newmat_s show_s fbr_s)
   MESSAGE(STATUS "exporting additional libraries")
 ELSE(EXPORT_SHARED_LIBS)
   MESSAGE(STATUS "not exporting libraries")
 ENDIF(EXPORT_SHARED_LIBS)
 
-OPTION(WITH_METRICS "Whether to use metrics in slam6d. ON/OFF" OFF)
+
+OPT_DEP(WITH_METRICS "Whether to use metrics in slam6d. ON/OFF" OFF "")
 
 IF(WITH_METRICS)
   MESSAGE(STATUS "With metrics in slam6d.")
@@ -348,8 +386,25 @@ ELSE(WITH_METRICS)
   MESSAGE(STATUS "Without metrics in slam6d.")
 ENDIF(WITH_METRICS)
 
+#################################################
+# OPERATING SYSTEM SPECIFIC BEHAVIOUR          ##
+#################################################
+
+## Special treatment for system specifics
+IF(APPLE)
+add_definitions(-Dfopen64=fopen)
+ENDIF(APPLE)
+
+## Multiple Cores
+IF(APPLE)
+  SET(PROCESSOR_COUNT 2)
+ELSE(APPLE)
+  INCLUDE(CountProcessors)
+  SET(NUMBER_OF_CPUS "${PROCESSOR_COUNT}" CACHE STRING "The number of processors to use (default: ${PROCESSOR_COUNT})" )
+ENDIF(APPLE)
+
 IF(WIN32)
-  SET(ADDITIONAL_CFLAGS "-O2" CACHE STRING"Additional flags given to the compiler ()" )
+  SET(ADDITIONAL_CFLAGS "-O2" CACHE STRING "Additional flags given to the compiler ( -O2)" )
   include_directories(${CMAKE_SOURCE_DIR}/3rdparty/windows/)
   link_directories(${CMAKE_SOURCE_DIR}/3rdparty/windows)
   link_directories(${CMAKE_SOURCE_DIR}/3rdparty/windows/x64)
@@ -370,6 +425,30 @@ IF(APPLE)
   include_directories(/System/Library/Frameworks/GLUT.framework/Headers)
   include_directories(/System/Library/Frameworks/OpenGL.framework/Headers)
 ENDIF(APPLE)
+
+# hack to "circumvent" Debug and Release folders that are created under visual studio
+# this is why the INSTALL target has to be used in visual studio
+IF(MSVC)
+  INSTALL(DIRECTORY ${CMAKE_SOURCE_DIR}/bin/Release/ CONFIGURATIONS Release DESTINATION ${CMAKE_SOURCE_DIR}/windows FILES_MATCHING PATTERN "*.dll" PATTERN "*.exe")
+  IF( CMAKE_SIZEOF_VOID_P EQUAL 8 )
+	  INSTALL(DIRECTORY ${CMAKE_SOURCE_DIR}/3rdparty/windows/x64/ CONFIGURATIONS Release DESTINATION ${CMAKE_SOURCE_DIR}/windows FILES_MATCHING PATTERN "*.dll" PATTERN "*.exe")
+  ELSE( CMAKE_SIZEOF_VOID_P EQUAL 8 )
+	  INSTALL(DIRECTORY ${CMAKE_SOURCE_DIR}/3rdparty/windows/ CONFIGURATIONS Release DESTINATION ${CMAKE_SOURCE_DIR}/windows FILES_MATCHING PATTERN "*.dll" PATTERN "*.exe")
+  ENDIF(CMAKE_SIZEOF_VOID_P EQUAL 8 )
+
+  INSTALL(DIRECTORY ${CMAKE_SOURCE_DIR}/bin/Debug/ CONFIGURATIONS Debug DESTINATION ${CMAKE_SOURCE_DIR}/windows FILES_MATCHING PATTERN "*.dll" PATTERN "*.exe")
+  IF( CMAKE_SIZEOF_VOID_P EQUAL 8 )
+    INSTALL(DIRECTORY ${CMAKE_SOURCE_DIR}/3rdparty/windows/x64/ CONFIGURATIONS Debug DESTINATION ${CMAKE_SOURCE_DIR}/windows FILES_MATCHING PATTERN "*.dll" PATTERN "*.exe")
+  ELSE( CMAKE_SIZEOF_VOID_P EQUAL 8 )
+    INSTALL(DIRECTORY ${CMAKE_SOURCE_DIR}/3rdparty/windows/ CONFIGURATIONS Debug DESTINATION ${CMAKE_SOURCE_DIR}/windows FILES_MATCHING PATTERN "*.dll" PATTERN "*.exe")
+  ENDIF(CMAKE_SIZEOF_VOID_P EQUAL 8 )
+ENDIF(MSVC)
+
+
+
+#################################################
+# GENERAL PROJECT SETTINGS                     ##
+#################################################
 
 SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${ADDITIONAL_CFLAGS}")
 
@@ -405,35 +484,8 @@ add_subdirectory(src/grid)
 add_subdirectory(src/pmd)
 add_subdirectory(src/shapes)
 add_subdirectory(src/thermo)
-IF(WITH_FBR)
-  add_subdirectory(src/slam6d/fbr)
-ENDIF(WITH_FBR)
+add_subdirectory(src/slam6d/fbr)
 add_subdirectory(src/scanner)
 add_subdirectory(src/model)
 
-IF(EXPORT_SHARED_LIBS)
-## Compiling a shared library containing all of the project
-add_library(slam SHARED src/slam6d/icp6D.cc)
-target_link_libraries(slam scan_s ANN_s sparse_s newmat_s show_s fbr_s)
-ENDIF(EXPORT_SHARED_LIBS)
-
 MESSAGE (STATUS "Build environment is set up!")
-
-
-# hack to "circumvent" Debug and Release folders that are created under visual studio
-# this is why the INSTALL target has to be used in visual studio
-IF(MSVC)
-  INSTALL(DIRECTORY ${CMAKE_SOURCE_DIR}/bin/Release/ CONFIGURATIONS Release DESTINATION ${CMAKE_SOURCE_DIR}/windows FILES_MATCHING PATTERN "*.dll" PATTERN "*.exe")
-  IF( CMAKE_SIZEOF_VOID_P EQUAL 8 )
-	  INSTALL(DIRECTORY ${CMAKE_SOURCE_DIR}/3rdparty/windows/x64/ CONFIGURATIONS Release DESTINATION ${CMAKE_SOURCE_DIR}/windows FILES_MATCHING PATTERN "*.dll" PATTERN "*.exe")
-  ELSE( CMAKE_SIZEOF_VOID_P EQUAL 8 )
-	  INSTALL(DIRECTORY ${CMAKE_SOURCE_DIR}/3rdparty/windows/ CONFIGURATIONS Release DESTINATION ${CMAKE_SOURCE_DIR}/windows FILES_MATCHING PATTERN "*.dll" PATTERN "*.exe")
-  ENDIF(CMAKE_SIZEOF_VOID_P EQUAL 8 )
-
-  INSTALL(DIRECTORY ${CMAKE_SOURCE_DIR}/bin/Debug/ CONFIGURATIONS Debug DESTINATION ${CMAKE_SOURCE_DIR}/windows FILES_MATCHING PATTERN "*.dll" PATTERN "*.exe")
-  IF( CMAKE_SIZEOF_VOID_P EQUAL 8 )
-    INSTALL(DIRECTORY ${CMAKE_SOURCE_DIR}/3rdparty/windows/x64/ CONFIGURATIONS Debug DESTINATION ${CMAKE_SOURCE_DIR}/windows FILES_MATCHING PATTERN "*.dll" PATTERN "*.exe")
-  ELSE( CMAKE_SIZEOF_VOID_P EQUAL 8 )
-    INSTALL(DIRECTORY ${CMAKE_SOURCE_DIR}/3rdparty/windows/ CONFIGURATIONS Debug DESTINATION ${CMAKE_SOURCE_DIR}/windows FILES_MATCHING PATTERN "*.dll" PATTERN "*.exe")
-  ENDIF(CMAKE_SIZEOF_VOID_P EQUAL 8 )
-ENDIF(MSVC)
