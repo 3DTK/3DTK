@@ -33,7 +33,7 @@ set(CVBLOB_SRCS
 
 set_source_files_properties(${cvBlob_SRC}
                             PROPERTIES
-                            COMPILE_FLAGS "-O3"
+                            COMPILE_FLAGS "-O3 ${ADDITIONAL_OPENCV_FLAGS}"
 )
 
 add_library(cvblob STATIC ${CVBLOB_SRCS})
