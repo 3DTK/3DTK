@@ -42,11 +42,7 @@ void DrawPoints(GLenum mode, bool interruptable)
   if(frameNr != 0) {
     cm->setMode(ScanColorManager::MODE_ANIMATION);
 
-#ifdef USE_GL_POINTS
     for(int iterator = (int)octpts.size()-1; iterator >= 0; iterator--) {
-#else
-    for(int iterator = (int)Scan::allScans.size()-1; iterator >= 0; iterator--) {
-#endif
       // ignore scans that don't have any frames associated with them
       if((unsigned int)iterator >= MetaMatrix.size()) continue;
       // set usable frame
@@ -67,7 +63,6 @@ void DrawPoints(GLenum mode, bool interruptable)
 
 
       glPointSize(pointsize);
-#ifdef USE_GL_POINTS
         ExtractFrustum(pointsize);
         cm->selectColors(type);
         if (pointmode == 1 ) {
@@ -75,18 +70,6 @@ void DrawPoints(GLenum mode, bool interruptable)
         } else {
           octpts[iterator]->displayLOD(LevelOfDetail);
         }
-#else
-      for (unsigned int jterator = 0; jterator < vvertexArrayList[iterator].size(); jterator++) {
-
-        if ((jterator == 0) && vvertexArrayList[iterator][jterator]->numPointsToRender > 0) {
-          cm->selectColors(type);
-        }
-
-        if (vvertexArrayList[iterator][jterator]->numPointsToRender > 0) {
-          glCallList(vvertexArrayList[iterator][jterator]->name);
-        }
-      }
-#endif
       glPopMatrix();
     }
 
@@ -128,13 +111,8 @@ void DrawPoints(GLenum mode, bool interruptable)
 
       vector<int> sequence;
       calcPointSequence(sequence, current_frame);
-#ifdef USE_GL_POINTS
-      //for(int iterator = (int)octpts.size()-1; iterator >= 0; iterator--) {
       for(unsigned int i = 0; i < sequence.size(); i++) {
         int iterator = sequence[i];
-#else
-      for(int iterator = (int)Scan::allScans.size()-1; iterator >= 0; iterator--) {
-#endif
         // ignore scans that don't have any frames associated with them
         if((unsigned int)iterator >= MetaMatrix.size()) continue;
         // set usable frame
@@ -162,14 +140,6 @@ void DrawPoints(GLenum mode, bool interruptable)
         }
         glMultMatrixd(frame);
 
-#ifdef USE_GL_POINTS
-         //cout << endl << endl;  calcRay(570, 266, 1.0, 40000.0);
-         /* // for height mapped color in the vertex shader
-      GLfloat v[16];
-      for (unsigned int l = 0; l < 16; l++)
-        v[l] = MetaMatrix[iterator].back()[l];
-      glUniformMatrix4fvARB(glGetUniformLocationARB(p, "MYMAT"), 1, 0, v);
-      */
         ExtractFrustum(pointsize);
         if (pointmode == 1 ) {
           octpts[iterator]->display();
@@ -197,13 +167,6 @@ void DrawPoints(GLenum mode, bool interruptable)
           glPointSize(pointsize);
         }
         
-#else
-        for (unsigned int jterator = 0; jterator < vvertexArrayList[iterator].size(); jterator++) {
-          if (vvertexArrayList[iterator][jterator]->numPointsToRender > 0) {
-            glCallList(vvertexArrayList[iterator][jterator]->name);
-          }
-        }
-#endif
         glPopMatrix();
       }
     }
