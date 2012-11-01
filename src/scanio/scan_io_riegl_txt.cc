@@ -165,14 +165,7 @@ void ScanIO_riegl_txt::readScan(const char* dir_path, const char* identifier, Po
           for(i = 0; i < 3; ++i) xyz->push_back(point[i]);
         }
         if(reflectance != 0) {
-            double r = point[6];
-            r += 32;
-            r /= 64;
-            r -= 0.2;
-            r /= 0.3;
-            if (r < 0) r = 0;
-            if (r > 1) r = 1;
-          reflectance->push_back(r);
+          reflectance->push_back(point[6]);
         }
       }
     }
