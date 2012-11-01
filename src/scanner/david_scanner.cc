@@ -36,10 +36,18 @@
 #include <iostream>
 #include <string>
 #include <fstream>
+
+#if (defined(_WIN32) || defined(__WIN32__) || defined(__TOS_WIN__) || defined(__WINDOWS__) || (defined(__APPLE__) & defined(__MACH__)))
 #include <cv.h>
 #include <highgui.h>
 #include <cvaux.h>
 #include <cxcore.h>
+#elif (CV_MAJOR_VERSION == 2) && (CV_MINOR_VERSION < 2)
+#include <opencv/cv.h>
+#else
+#include <opencv2/opencv.hpp>
+#endif
+
 #include <math.h>
 #include <vector>
 #define PI 3.14159265
@@ -196,7 +204,7 @@ int main(int argc, char** argv){
 
 	//open file for writing
 	ofstream scanfile;
-	char scanname[10];
+	char scanname[20];
 	sprintf(scanname,"scan000.3d");
 	scanfile.open(scanname);
 
