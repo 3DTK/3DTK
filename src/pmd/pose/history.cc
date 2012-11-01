@@ -8,7 +8,13 @@
  */
 
 #include "history.h"
+#if (defined(_WIN32) || defined(__WIN32__) || defined(__TOS_WIN__) || defined(__WINDOWS__) || (defined(__APPLE__) & defined(__MACH__)))
 #include <cv.h>
+#elif (CV_MAJOR_VERSION == 2) && (CV_MINOR_VERSION < 2)
+#include <opencv/cv.h>
+#else
+#include <opencv2/opencv.hpp>
+#endif
 
 Frame *allocFrame3DData(CvSize pmdSz) {
     Frame *f = (Frame*)cvAlloc(sizeof(Frame));
