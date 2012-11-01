@@ -358,11 +358,11 @@ void Scan::calcReducedPoints()
           xyz_reduced[i][j] = reduced[i][j];
     }
     delete oct;
-    for (unsigned int i = 0; i < xyz.size(); ++i) {
-      delete[] xyz_reflectance[i];
-    }
-    delete[] xyz_reflectance;
   }
+  for (unsigned int i = 0; i < xyz.size(); ++i) {
+    delete[] xyz_reflectance[i];
+  }
+  delete[] xyz_reflectance;
 #ifdef WITH_METRICS
   ClientMetric::calc_reduced_points_time.end(tl);
 #endif //WITH_METRICS
