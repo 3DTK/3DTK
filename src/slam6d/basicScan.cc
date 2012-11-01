@@ -126,7 +126,10 @@ BasicScan::BasicScan(const std::string& path, const std::string& identifier, IOT
 
 BasicScan::~BasicScan()
 {
-  // TODO: clean m_data up
+  for (map<string, pair<unsigned char*, unsigned int>>::iterator it = m_data.begin(); it != m_data.end(); it++) {
+    delete it->second.first;
+  }
+
 }
 
 void BasicScan::init()
