@@ -109,7 +109,7 @@ void parse_options(int argc, char **argv, int &start, int &end, bool &scanserver
   if (vmap.count("help")) {
     cout << cmd_options << endl << endl;
     cout << "SAMPLE COMMAND FOR CALCULATING NORMALS" << endl;
-    cout << " bin/calculateNormals -s 0 -e 0 -f UOS -g AKNN -k 20 dat/" <<endl;
+    cout << " bin/normals -s 0 -e 0 -f UOS -g AKNN -k 20 dat/" <<endl;
     cout << endl << endl;
     cout << "SAMPLE COMMAND FOR VIEWING CALCULATING NORMALS IN RGB SPACE" << endl;
     cout << " bin/show -c -f UOS_RGB dat/normals/" << endl;
@@ -135,7 +135,6 @@ void calculateNormalsAKNN(vector<Point> &normals,vector<Point> &points, int k, c
   ANNpointArray pa = annAllocPts(points.size(), 3);
   for (size_t i=0; i<points.size(); ++i)
     {
-	 pa[i] = new ANNcoord[3];
 	 pa[i][0] = points[i].x;
 	 pa[i][1] = points[i].y;
 	 pa[i][2] = points[i].z;
@@ -195,8 +194,10 @@ void calculateNormalsAKNN(vector<Point> &normals,vector<Point> &points, int k, c
 	 n = n / n.NormFrobenius();
 	 normals.push_back(Point(n(1), n(2), n(3)));  	
     }
+
   delete[] nidx;
   delete[] d;
+  annDeallocPts(pa);
 }
 ////////////////////////////////////////////////////////////////
 /////////////NORMALS USING ADAPTIVE AKNN METHOD ////////////////
@@ -213,7 +214,6 @@ void calculateNormalsAdaptiveAKNN(vector<Point> &normals,vector<Point> &points,
   ANNpointArray pa = annAllocPts(points.size(), 3);
   for (size_t i=0; i<points.size(); ++i)
     {
-	 pa[i] = new ANNcoord[3];
 	 pa[i][0] = points[i].x;
 	 pa[i][1] = points[i].y;
 	 pa[i][2] = points[i].z;
@@ -295,6 +295,7 @@ void calculateNormalsAdaptiveAKNN(vector<Point> &normals,vector<Point> &points,
 	 n = n / n.NormFrobenius();
 	 normals.push_back(Point(n(1), n(2), n(3)));  
     }
+  annDeallocPts(pa);
 }
 
 ///////////////////////////////////////////////////////
