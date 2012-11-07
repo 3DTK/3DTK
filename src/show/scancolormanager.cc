@@ -27,7 +27,7 @@
 #include "slam6d/point_type.h"
 using std::vector;
 
-ScanColorManager::ScanColorManager(unsigned int _buckets, PointType type) : pointtype(type) {
+ScanColorManager::ScanColorManager(unsigned int _buckets, PointType type, bool animation_color) : pointtype(type), animationColor(animation_color) {
       valid = false;
       inverted = false;
       buckets = _buckets;
@@ -96,8 +96,10 @@ ScanColorManager::ScanColorManager(unsigned int _buckets, PointType type) : poin
           allScans[i]->setColorManager(scanManager[i]);
         }
       } else if (mode == ScanColorManager::MODE_ANIMATION) {
-        for (unsigned int i = 0; i < allScans.size(); i++) {
-          allScans[i]->setColorManager(0);
+        if (animationColor) {
+            for (unsigned int i = 0; i < allScans.size(); i++) {
+                allScans[i]->setColorManager(0);
+            }
         }
       } else if (mode == ScanColorManager::MODE_POINT_COLOR) {
         for (unsigned int i = 0; i < allScans.size(); i++) {
