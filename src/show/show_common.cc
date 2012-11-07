@@ -881,7 +881,11 @@ void initShow(int argc, char **argv){
       }
     }
   }
-  cm = new ScanColorManager(4096, pointtype);
+  if (sphereMode > 0.0) {
+    cm = new ScanColorManager(4096, pointtype, /* animation_color = */ false);
+  } else {
+    cm = new ScanColorManager(4096, pointtype, /* animation_color = */ true);
+  }
   
 #ifdef USE_COMPACT_TREE
   cout << "Creating compact display octrees.." << endl;
