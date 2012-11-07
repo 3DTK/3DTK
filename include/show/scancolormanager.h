@@ -36,7 +36,7 @@ class ScanColorManager {
   static const unsigned int MODE_ANIMATION;
   static const unsigned int MODE_POINT_COLOR;
 
-    ScanColorManager(unsigned int _buckets, PointType type);
+    ScanColorManager(unsigned int _buckets, PointType type, bool animation_color = true);
     
     void registerTree(colordisplay *b);
     
@@ -80,6 +80,8 @@ class ScanColorManager {
     /** maps valuetypes to point dimension for easier access */ 
     PointType pointtype;
     
+    bool animationColor;            /**< Alter colors when animating        */
+
     bool valid;
     bool colorScans;
     bool inverted;
