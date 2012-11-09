@@ -312,58 +312,6 @@ ELSE(OPENMP_FOUND AND WITH_OPENMP)
   SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DMAX_OPENMP_NUM_THREADS=1 -DOPENMP_NUM_THREADS=1")
 ENDIF(OPENMP_FOUND AND WITH_OPENMP)
 
-## TORO
-OPT_DEP(WITH_TORO "Whether to use TORO. ON/OFF" OFF "")
-
-IF(WITH_TORO)
-  IF(WIN32)
-    SET(Subversion_SVN_EXECUTABLE "svn.exe")
-  ENDIF(WIN32)
-  cmake_minimum_required (VERSION 2.8)
-  include(ExternalProject)
-  ExternalProject_Add(toro3d
-    SVN_REPOSITORY https://www.openslam.org/data/svn/toro/trunk
-    SOURCE_DIR "${CMAKE_SOURCE_DIR}/3rdparty/toro"
-    CONFIGURE_COMMAND ""
-    BUILD_COMMAND make
-    BUILD_IN_SOURCE 1
-    INSTALL_COMMAND cp ${CMAKE_SOURCE_DIR}/3rdparty/toro/toro3d ${CMAKE_SOURCE_DIR}/bin/
-    )
-  MESSAGE(STATUS "With TORO ")
-ELSE(WITH_TORO)
-  MESSAGE(STATUS "Without TORO")
-ENDIF(WITH_TORO)
-
-
-## HOGMAN
-OPT_DEP(WITH_HOGMAN "Whether to use HOGMAN. ON/OFF" OFF "")
-
-IF(WITH_HOGMAN)
-  # dependant on libqt4-devi
-  find_package( Qt4 REQUIRED)
-  # CMake of earlier versions do not have external project capabilities
-  cmake_minimum_required (VERSION 2.8)
-  include(ExternalProject)
-  ExternalProject_Add(hogman
-    SVN_REPOSITORY https://svn.openslam.org/data/svn/hog-man/trunk
-    SOURCE_DIR "${CMAKE_SOURCE_DIR}/3rdparty/hogman"
-    CONFIGURE_COMMAND <SOURCE_DIR>/configure --prefix=<INSTALL_DIR>
-    BUILD_COMMAND LD_LIBRARY_PATH=${CMAKE_SOURCE_DIR}/3rdparty/hogman/lib make
-    BUILD_IN_SOURCE 1
-    INSTALL_COMMAND cp ${CMAKE_SOURCE_DIR}/3rdparty/hogman/bin/hogman3d ${CMAKE_SOURCE_DIR}/bin/ &&
-    cp ${CMAKE_SOURCE_DIR}/3rdparty/hogman/lib/libhogman_csparse.so ${CMAKE_SOURCE_DIR}/lib/ &&
-    cp ${CMAKE_SOURCE_DIR}/3rdparty/hogman/lib/libhogman_graph_optimizer_hogman.so ${CMAKE_SOURCE_DIR}/lib/ &&
-    cp ${CMAKE_SOURCE_DIR}/3rdparty/hogman/lib/libhogman_graph_optimizer.so ${CMAKE_SOURCE_DIR}/lib/ &&
-    cp ${CMAKE_SOURCE_DIR}/3rdparty/hogman/lib/libhogman_graph.so ${CMAKE_SOURCE_DIR}/lib/ &&
-    cp ${CMAKE_SOURCE_DIR}/3rdparty/hogman/lib/libhogman_graph_viewer.so ${CMAKE_SOURCE_DIR}/lib/ &&
-    cp ${CMAKE_SOURCE_DIR}/3rdparty/hogman/lib/libhogman_math.so ${CMAKE_SOURCE_DIR}/lib/ &&
-    cp ${CMAKE_SOURCE_DIR}/3rdparty/hogman/lib/libhogman_qglviewer.so ${CMAKE_SOURCE_DIR}/lib/ &&
-    cp ${CMAKE_SOURCE_DIR}/3rdparty/hogman/lib/libhogman_stuff.so ${CMAKE_SOURCE_DIR}/lib/
-    )
-  MESSAGE(STATUS "With HOGMAN: Currently hogman needs to be compiled manually, please make sure hogman3d is somewhere in your PATH")
-ELSE(WITH_HOGMAN)
-  MESSAGE(STATUS "Without HOGMAN")
-ENDIF(WITH_HOGMAN)
 
 OPT_DEP(EXPORT_SHARED_LIBS "Whether to build additional shared libraries for use in other projects. ON/OFF" OFF "WITH_SHOW;WITH_FBR")
 
