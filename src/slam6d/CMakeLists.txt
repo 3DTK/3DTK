@@ -64,13 +64,11 @@ SET(SCANLIB_SRCS
   graph.cc          icp6Dapx.cc       icp6D.cc          icp6Dsvd.cc 
   icp6Dortho.cc     icp6Dquat.cc      icp6Dhelix.cc     icp6Dlumeuler.cc 
   icp6Dlumquat.cc   icp6Ddual.cc      lum6Deuler.cc     lum6Dquat.cc
-  ghelix6DQ2.cc     gapx6D.cc         graphToro.cc      ann_kd.cc
-  graphHOG-Man.cc   elch6D.cc         elch6Dquat.cc     elch6DunitQuat.cc 
-  elch6Dslerp.cc    elch6Deuler.cc    loopToro.cc       loopHOG-Man.cc    
+  ghelix6DQ2.cc     gapx6D.cc         ann_kd.cc         elch6D.cc
+  elch6Dquat.cc     elch6DunitQuat.cc elch6Dslerp.cc    elch6Deuler.cc    
   point_type.cc	icp6Dquatscale.cc searchTree.cc     Boctree.cc
-  allocator.cc               
   scan.cc           basicScan.cc      managedScan.cc    metaScan.cc
-  io_types.cc       io_utils.cc       pointfilter.cc
+  io_types.cc       io_utils.cc       pointfilter.cc    allocator.cc
   )
 
 if(WITH_METRICS)
