@@ -48,14 +48,10 @@
 #include "slam6d/lum6Deuler.h"
 #include "slam6d/lum6Dquat.h"
 #include "slam6d/ghelix6DQ2.h"
-#include "slam6d/graphToro.h"
-#include "slam6d/graphHOG-Man.h"
 #include "slam6d/elch6Deuler.h"
 #include "slam6d/elch6Dquat.h"
 #include "slam6d/elch6DunitQuat.h"
 #include "slam6d/elch6Dslerp.h"
-#include "slam6d/loopToro.h"
-#include "slam6d/loopHOG-Man.h"
 #include "slam6d/graphSlam6D.h"
 #include "slam6d/gapx6D.h"
 #include "slam6d/graph.h"
@@ -242,8 +238,6 @@ void usage(char* prog)
     << "           2 = Lu & Milios extension using using unit quaternions" << endl
     << "           3 = HELIX approximation by Hofer and Pottmann" << endl
     << "           4 = small angle approximation" << endl
-    << "           5 = TORO" << endl
-    << "           6 = HOG-Man" << endl
     << endl
     << bold << "  -i" << normal << " NR, " << bold << "--iter=" << normal << "NR [default: 50]" << endl
     << "         sets the maximal number of ICP iterations to <NR>" << endl
@@ -262,8 +256,6 @@ void usage(char* prog)
     << "           2 = quaternions " << endl
     << "           3 = unit quaternions" << endl
     << "           4 = SLERP (recommended)" << endl
-    << "           5 = TORO" << endl
-    << "           6 = HOG-Man" << endl
     << endl
     << bold << "  --metascan" << normal << endl
     << "         Match current scan against a meta scan of all previous scans (default match against the last scan only)" << endl
@@ -919,14 +911,6 @@ int   FinalSLAM( double &red, int &rand,
 			my_graphSlam6D = new gapx6D(my_icp6Dminimizer, mdm, mdml, mni, quiet, meta, rand, eP,
 				anim, epsilonICP, nns_method, epsilonSLAM);
 			break;
-		case 5 :
-			my_graphSlam6D = new graphToro(my_icp6Dminimizer, mdm, mdml, mni, quiet, meta, rand, eP,
-				-2, epsilonICP, nns_method, epsilonSLAM);
-			break;
-		case 6 :
-			my_graphSlam6D = new graphHOGMan(my_icp6Dminimizer, mdm, mdml, mni, quiet, meta, rand, eP,
-				-2, epsilonICP, nns_method, epsilonSLAM);
-			break;
 		}
 		// Construct Network
 		if (net != "none") {
@@ -983,14 +967,6 @@ int   FinalSLAM( double &red, int &rand,
 					break;
 				case 4:
 					my_loopSlam6D = new elch6Dslerp(veryQuiet, my_icp6Dminimizer, distLoop, iterLoop,
-						rand, eP, 10, epsilonICP, nns_method);
-					break;
-				case 5:
-					my_loopSlam6D = new loopToro(veryQuiet, my_icp6Dminimizer, distLoop, iterLoop,
-						rand, eP, 10, epsilonICP, nns_method);
-					break;
-				case 6:
-					my_loopSlam6D = new loopHOGMan(veryQuiet, my_icp6Dminimizer, distLoop, iterLoop,
 						rand, eP, 10, epsilonICP, nns_method);
 					break;
 				}
