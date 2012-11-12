@@ -12,6 +12,7 @@ using std::vector;
 
 #include "ptpair.h"
 #include "data_types.h"
+#include "pairingMode.h"
 
 /**
  * @brief The tree structure 
@@ -38,6 +39,7 @@ class Scan;
 class SearchTree : public Tree {
   friend class Scan;
 public:
+
   /**
    * Constructor (default)
    */
@@ -77,7 +79,9 @@ public:
    * @param threadNum If parallel threads share the search tree the thread num must be given
    * @return Pointer to closest point 
    */
-  virtual double *FindClosest(double *_p, double maxdist2, int threadNum = 0) const = 0 ;
+  virtual double *FindClosest(double *_p, double maxdist2, int threadNum = 0) const = 0;
+
+  virtual double *FindClosestAlongDir(double *_p, double *_dir, double maxdist2, int threadNum) const;
 
   virtual void getPtPairs(vector <PtPair> *pairs, 
 				  double *source_alignxf, 
@@ -88,10 +92,10 @@ public:
     
   virtual void getPtPairs(vector <PtPair> *pairs,
 				  double *source_alignxf,
-          const DataXYZ& xyz_r, unsigned int startindex, unsigned int endindex,
+          const DataXYZ& xyz_r, const DataNormal& normal_r, unsigned int startindex, unsigned int endindex,
 				  int thread_num,
 				  int rnd, double max_dist_match2, double &sum,
-				  double *centroid_m, double *centroid_d);
+          double *centroid_m, double *centroid_d, PairingMode pairing_mode = CLOSEST_POINT);
 };
 
 #endif

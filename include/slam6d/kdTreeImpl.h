@@ -76,10 +76,10 @@ public:
       }
       return;
     }
-  
+
     // Else, interior nodes
     npts = 0;
-  
+
     node.center[0] = 0.5 * (xmin+xmax);
     node.center[1] = 0.5 * (ymin+ymax);
     node.center[2] = 0.5 * (zmin+zmax);
@@ -126,7 +126,7 @@ public:
         break;
       std::swap(*left, *right);
     }
-  
+
     // Build subtrees
     int i;
 #ifdef WITH_OPENMP_KD                   // does anybody know the reason why this is slower ?? --Andreas
@@ -178,9 +178,9 @@ protected:
     struct {	 
       double center[3]; ///< storing the center of the voxel (R^3)
       double dx,  ///< defining the voxel itself
-	     dy,  ///< defining the voxel itself
-	     dz,  ///< defining the voxel itself
-	     r2;  ///< defining the voxel itself
+      dy,  ///< defining the voxel itself
+      dz,  ///< defining the voxel itself
+      r2;  ///< defining the voxel itself
       int splitaxis;   ///< defining the kind of splitaxis
       KDTreeImpl *child1;  ///< pointers to the childs
       KDTreeImpl *child2;  ///< pointers to the childs
@@ -214,8 +214,8 @@ protected:
 
     // Quick check of whether to abort  
     double approx_dist_bbox = max(max(fabs(params[threadNum].p[0]-node.center[0])-node.dx,
-                               fabs(params[threadNum].p[1]-node.center[1])-node.dy),
-						       fabs(params[threadNum].p[2]-node.center[2])-node.dz);
+                                      fabs(params[threadNum].p[1]-node.center[1])-node.dy),
+                                  fabs(params[threadNum].p[2]-node.center[2])-node.dz);
     if (approx_dist_bbox >= 0 && sqr(approx_dist_bbox) >= params[threadNum].closest_d2)
       return;
 
@@ -231,6 +231,44 @@ protected:
       if (sqr(myd) < params[threadNum].closest_d2) {
         node.child1->_FindClosest(pts, threadNum);
       }
+    }
+  }
+
+  void _FindClosestAlongDir(const PointData& pts, int threadNum) const {
+    AccessorFunc point;
+
+    // Leaf nodes
+    if (npts) {
+      for (int i=0; i < npts; i++) {
+        double p2p[] =  { params[threadNum].p[0] - point(pts, leaf.p[i])[0],
+                          params[threadNum].p[1] - point(pts, leaf.p[i])[1],
+                          params[threadNum].p[2] - point(pts, leaf.p[i])[2] };
+        double myd2 = Len2(p2p) - sqr(Dot(p2p, params[threadNum].dir));
+        if ((myd2 < params[threadNum].closest_d2)) {
+          params[threadNum].closest_d2 = myd2;
+          params[threadNum].closest = point(pts, leaf.p[i]);
+        }
+      }
+      return;
+    }
+
+
+    // Quick check of whether to abort
+    double p2c[] = { params[threadNum].p[0] - node.center[0],
+                     params[threadNum].p[1] - node.center[1],
+                     params[threadNum].p[2] - node.center[2] };
+    double myd2center = Len2(p2c) - sqr(Dot(p2c, params[threadNum].dir));
+    if (myd2center > node.r2 + params[threadNum].closest_d2 + 2.0f * max(node.r2, params[threadNum].closest_d2))
+      return;
+
+
+    // Recursive case
+    if (params[threadNum].p[node.splitaxis] < node.center[node.splitaxis] ) {
+      node.child1->_FindClosestAlongDir(pts, threadNum);
+      node.child2->_FindClosestAlongDir(pts, threadNum);
+    } else {
+      node.child2->_FindClosestAlongDir(pts, threadNum);
+      node.child1->_FindClosestAlongDir(pts, threadNum);
     }
   }
 };

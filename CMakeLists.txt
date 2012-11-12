@@ -239,7 +239,7 @@ ENDIF(WITH_SEGMENTATION)
 
 ## Normals
 
-OPT_DEP(WITH_NORMALS "Whether to build program for normal computation ON/OFF" OFF "WITH_FBR")
+OPT_DEP(WITH_NORMALS "Whether to build separate program for normal computation ON/OFF" OFF "WITH_FBR")
 
 IF(WITH_NORMALS)
   MESSAGE(STATUS "With normals")
