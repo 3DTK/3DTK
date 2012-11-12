@@ -18,16 +18,23 @@
 #include "slam6d/scan.h"
 #include "slam6d/globals.icc"
 
+#include <stdexcept>
+
+double *SearchTree::FindClosestAlongDir(double *_p, double *_dir, double maxdist2, int threadNum) const
+{
+  throw std::runtime_error("Method FindClosestAlongDir is not implemented");
+}
+
 void SearchTree::getPtPairs(vector <PtPair> *pairs, 
-    double *source_alignxf,                          // source
-    double * const *q_points, unsigned int startindex, unsigned int endindex,  // target
-    int thread_num,
-    int rnd, double max_dist_match2, double &sum,
-    double *centroid_m, double *centroid_d)
+                            double *source_alignxf,                          // source
+                            double * const *q_points, unsigned int startindex, unsigned int endindex,  // target
+                            int thread_num,
+                            int rnd, double max_dist_match2, double &sum,
+                            double *centroid_m, double *centroid_d)
 {
   // prepare this tree for resource access in FindClosest
   lock();
-  
+
   double local_alignxf_inv[16];
   M4inv(source_alignxf, local_alignxf_inv);
   
@@ -63,7 +70,7 @@ void SearchTree::getPtPairs(vector <PtPair> *pairs,
       sum += Len2(p12);
       
       pairs->push_back(myPair);
-    /*cout << "PTPAIR" << i << " " 
+      /*cout << "PTPAIR" << i << " "
       << p[0] << " "
       << p[1] << " "
       << p[2] << " - " 
@@ -81,11 +88,11 @@ void SearchTree::getPtPairs(vector <PtPair> *pairs,
 }
 
 void SearchTree::getPtPairs(vector <PtPair> *pairs, 
-    double *source_alignxf,                          // source
-    const DataXYZ& xyz_r, unsigned int startindex, unsigned int endindex,  // target
-    int thread_num,
-    int rnd, double max_dist_match2, double &sum,
-    double *centroid_m, double *centroid_d)
+                            double *source_alignxf,                          // source
+                            const DataXYZ& xyz_r, const DataNormal& normal_r, unsigned int startindex, unsigned int endindex,  // target
+                            int thread_num,
+                            int rnd, double max_dist_match2, double &sum,
+                            double *centroid_m, double *centroid_d, PairingMode pairing_mode)
 {
   // prepare this tree for resource access in FindClosest
   lock();
@@ -95,20 +102,53 @@ void SearchTree::getPtPairs(vector <PtPair> *pairs,
   
   // t is the original point from target, s is the (inverted) query point from target and then
   // the closest point in source
-  double t[3], s[3];
+  double t[3], s[3], normal[3];
   for (unsigned int i = startindex; i < endindex; i++) {
     if (rnd > 1 && rand(rnd) != 0) continue;  // take about 1/rnd-th of the numbers only
     
     t[0] = xyz_r[i][0];
     t[1] = xyz_r[i][1];
     t[2] = xyz_r[i][2];
-    
+
     transform3(local_alignxf_inv, t, s);
-    
-    double *closest = this->FindClosest(s, max_dist_match2, thread_num);
+
+    double *closest;
+
+    if (pairing_mode != CLOSEST_POINT) {
+      normal[0] = normal_r[i][0];
+      normal[1] = normal_r[i][1];
+      normal[2] = normal_r[i][2];
+      Normalize3(normal);
+    }
+
+    if (pairing_mode == CLOSEST_POINT_ALONG_NORMAL) {
+      transform3normal(local_alignxf_inv, normal);
+      closest = this->FindClosestAlongDir(s, normal, max_dist_match2, thread_num);
+
+      // discard points farther than 20 cm
+      if (closest && sqrt(Dist2(closest, s)) > 20) closest = NULL;
+    } else {
+      closest = this->FindClosest(s, max_dist_match2, thread_num);
+    }
+
     if (closest) {
       transform3(source_alignxf, closest, s);
-      
+
+      if (pairing_mode == CLOSEST_PLANE) {
+        // need to mutate s if we are looking for closest point-to-plane
+        // s_ = (n,s-t)*n + t
+        // to find the projection of s onto plane formed by normal n and point t
+        double tmp[3], s_[3];
+        double dot;
+        sub3(s, t, tmp);
+        dot = Dot(normal, tmp);
+        scal_mul3(normal, dot, tmp);
+        add3(tmp, t, s_);
+        s[0] = s_[0];
+        s[1] = s_[1];
+        s[2] = s_[2];
+      }
+
       // This should be right, model=Source=First=not moving
       centroid_m[0] += s[0];
       centroid_m[1] += s[1];
@@ -125,7 +165,7 @@ void SearchTree::getPtPairs(vector <PtPair> *pairs,
       sum += Len2(p12);
       
       pairs->push_back(myPair);
-    /*cout << "PTPAIR" << i << " " 
+      /*cout << "PTPAIR" << i << " "
       << p[0] << " "
       << p[1] << " "
       << p[2] << " - " 

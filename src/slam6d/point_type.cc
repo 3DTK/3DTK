@@ -46,17 +46,24 @@ PointType::PointType(unsigned int _types) : types(_types) {
 
   pointdim = 3;
   if (types & PointType::USE_REFLECTANCE) dimensionmap[1] = pointdim++;  
-  if (types & PointType::USE_TEMPERATURE) dimensionmap[2] = pointdim++;  
-  if (types & PointType::USE_AMPLITUDE) dimensionmap[3] = pointdim++;  
-  if (types & PointType::USE_DEVIATION) dimensionmap[4] = pointdim++;  
-  if (types & PointType::USE_TYPE) dimensionmap[5] = pointdim++; 
-  if (types & PointType::USE_COLOR) dimensionmap[6] = pointdim++; 
-  if (types & PointType::USE_TIME) dimensionmap[7] = pointdim++; 
-  if (types & PointType::USE_INDEX) dimensionmap[8] = pointdim++; 
+  if (types & PointType::USE_NORMAL) {
+    pointdim += 3;
+    dimensionmap[2] = pointdim;
+  }
+  if (types & PointType::USE_TEMPERATURE) dimensionmap[3] = pointdim++;  
+  if (types & PointType::USE_AMPLITUDE)   dimensionmap[4] = pointdim++;  
+  if (types & PointType::USE_DEVIATION)   dimensionmap[5] = pointdim++;  
+  if (types & PointType::USE_TYPE)        dimensionmap[6] = pointdim++; 
+  if (types & PointType::USE_COLOR)       dimensionmap[7] = pointdim++; 
+  if (types & PointType::USE_TIME)        dimensionmap[8] = pointdim++; 
+  if (types & PointType::USE_INDEX)       dimensionmap[9] = pointdim++; 
 }
 
 bool PointType::hasReflectance() {
   return hasType(USE_REFLECTANCE); 
+}
+bool PointType::hasNormal() {
+  return hasType(USE_NORMAL); 
 }
 bool PointType::hasTemperature() {
   return hasType(USE_TEMPERATURE); 
@@ -116,18 +123,20 @@ unsigned int PointType::getType(unsigned int type) {
     return dimensionmap[0];
   } else if (type == USE_REFLECTANCE) {
     return dimensionmap[1];
-  } else if (type == USE_TEMPERATURE) {
+  } else if (type == USE_NORMAL) {
     return dimensionmap[2];
-  } else if (type == USE_AMPLITUDE) {
+  } else if (type == USE_TEMPERATURE) {
     return dimensionmap[3];
-  } else if (type == USE_DEVIATION) {
+  } else if (type == USE_AMPLITUDE) {
     return dimensionmap[4];
-  } else if (type == USE_TYPE) {
+  } else if (type == USE_DEVIATION) {
     return dimensionmap[5];
-  } else if (type == USE_COLOR) {
+  } else if (type == USE_TYPE) {
     return dimensionmap[6];
-  } else if (type == USE_TIME) {
+  } else if (type == USE_COLOR) {
     return dimensionmap[7];
+  } else if (type == USE_TIME) {
+    return dimensionmap[8];
   } else {
     return 0;
   }
@@ -155,14 +164,15 @@ bool PointType::hasType(unsigned int type) {
 
 const unsigned int PointType::USE_NONE = 0;
 const unsigned int PointType::USE_REFLECTANCE = 1;
-const unsigned int PointType::USE_TEMPERATURE = 2;
-const unsigned int PointType::USE_AMPLITUDE = 4;
-const unsigned int PointType::USE_DEVIATION = 8;
-const unsigned int PointType::USE_HEIGHT = 16;
-const unsigned int PointType::USE_TYPE = 32;
-const unsigned int PointType::USE_COLOR = 64;
-const unsigned int PointType::USE_TIME = 128;
-const unsigned int PointType::USE_INDEX = 256;
+const unsigned int PointType::USE_NORMAL = 2;
+const unsigned int PointType::USE_TEMPERATURE = 4;
+const unsigned int PointType::USE_AMPLITUDE = 8;
+const unsigned int PointType::USE_DEVIATION = 16;
+const unsigned int PointType::USE_HEIGHT = 32;
+const unsigned int PointType::USE_TYPE = 64;
+const unsigned int PointType::USE_COLOR = 128;
+const unsigned int PointType::USE_TIME = 256;
+const unsigned int PointType::USE_INDEX = 512;
 
 
 void PointType::useScan(Scan* scan)

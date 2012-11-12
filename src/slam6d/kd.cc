@@ -67,3 +67,13 @@ double *KDtree::FindClosest(double *_p, double maxdist2, int threadNum) const
   _FindClosest(Void(), threadNum);
   return params[threadNum].closest;
 }
+
+double *KDtree::FindClosestAlongDir(double *_p, double *_dir, double maxdist2, int threadNum) const
+{
+  params[threadNum].closest = NULL;
+  params[threadNum].closest_d2 = maxdist2;
+  params[threadNum].p = _p;
+  params[threadNum].dir = _dir;
+  _FindClosestAlongDir(Void(), threadNum);
+  return params[threadNum].closest;
+}

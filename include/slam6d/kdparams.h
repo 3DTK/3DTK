@@ -32,6 +32,11 @@ public:
    */
   double *p;
 
+  /**
+   * pointer to direction vector, if we're using FindClosestAlongDir
+   */
+  double *dir;
+
   /** 
    * expand to 128 bytes to avoid false-sharing, 16 bytes from above + 28*4 bytes = 128 bytes
    */

@@ -242,6 +242,8 @@ DataPointer BasicScan::get(const std::string& identifier)
     if(identifier == "amplitude") get(DATA_AMPLITUDE); else
     if(identifier == "type") get(DATA_TYPE); else
     if(identifier == "deviation") get(DATA_DEVIATION); else
+    // normals on demand
+	 if(identifier == "normal") calcNormalsOnDemand(); else
     // reduce on demand
     if(identifier == "xyz reduced") calcReducedOnDemand(); else
     if(identifier == "xyz reduced original") calcReducedOnDemand(); else
@@ -326,11 +328,19 @@ void BasicScan::createSearchTreePrivate()
 
 void BasicScan::calcReducedOnDemandPrivate()
 {
-  // create reduced points and transform to initial position, save a copy of this for SearchTree
+  // create reduced points and transform to initial position,
+  // save a copy of this for SearchTree
   calcReducedPoints();
   transformReduced(transMatOrg);
   copyReducedToOriginal();
 }
+
+void BasicScan::calcNormalsOnDemandPrivate()
+{
+  // create normals
+  calcNormals();
+}
+
 
 void BasicScan::createANNTree()
 {

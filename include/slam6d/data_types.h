@@ -217,6 +217,7 @@ private:
 typedef TripleArray<double> DataXYZ;
 typedef TripleArray<float> DataXYZFloat;
 typedef TripleArray<unsigned char> DataRGB;
+typedef TripleArray<double> DataNormal;
 typedef SingleArray<float> DataReflectance;
 typedef SingleArray<float> DataTemperature;
 typedef SingleArray<float> DataAmplitude;

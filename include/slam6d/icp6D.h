@@ -15,6 +15,7 @@ using std::vector;
 
 #include "slam6d/scan.h"
 #include "slam6d/icp6Dminimizer.h"
+#include "slam6d/pairingMode.h"
 
 /**
  * @brief Representation of 3D scan matching with ICP.
@@ -38,15 +39,15 @@ public:
 	   double epsilonICP = 0.0000001,
 	   int nns_method = simpleKD,
 	   bool cuda_enabled = false,
-     bool cad_matching = false);
+	   bool cad_matching = false);
   
   /**
    * Destructor (empty, but needed, because virtual)
    */
   virtual ~icp6D() {};
   
-  void doICP(vector <Scan *> allScans);
-  virtual int match(Scan* PreviousScan, Scan* CurrentScan);
+  void doICP(vector <Scan *> allScans, PairingMode pairing_mode = CLOSEST_POINT);
+  virtual int match(Scan* PreviousScan, Scan* CurrentScan, PairingMode pairing_mode = CLOSEST_POINT);
   void covarianceEuler(Scan *scan1, Scan *scan2, NEWMAT::Matrix *C);
   void covarianceQuat(Scan *scan1, Scan *scan2, NEWMAT::Matrix *C);
   double Point_Point_Error(Scan* PreviousScan, Scan* CurrentScan, double max_dist_match, unsigned int *nrp=0);

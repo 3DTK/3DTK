@@ -1,7 +1,9 @@
 IF(WITH_NORMALS)
-  add_executable(normals normals.cc)
-
   FIND_PACKAGE(OpenCV REQUIRED)
 
-  target_link_libraries(normals newmat scan ANN fbr_cv_io fbr_panorama ${Boost_LIBRARIES} ${OpenCV_LIBS})
+  add_library(normals normals.cc)
+  target_link_libraries(normals newmat scan ANN fbr_cv_io fbr_panorama ${OpenCV_LIBS})
+
+  add_executable(calc_normals calc_normals.cc)
+  target_link_libraries(calc_normals normals ${Boost_LIBRARIES})
 ENDIF(WITH_NORMALS)

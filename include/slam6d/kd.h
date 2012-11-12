@@ -45,6 +45,8 @@ public:
   virtual ~KDtree();
 
   virtual double *FindClosest(double *_p, double maxdist2, int threadNum = 0) const;
+
+  virtual double *FindClosestAlongDir(double *_p, double *_dir, double maxdist2, int threadNum = 0) const;
 };
 
 #endif

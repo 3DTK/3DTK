@@ -61,7 +61,7 @@ ENDIF(WITH_TOOLS)
 
 SET(SCANLIB_SRCS
   kd.cc             kdManaged.cc      kdMeta.cc         graphSlam6D.cc 
-  graph.cc          icp6Dapx.cc       icp6D.cc          icp6Dsvd.cc 
+  graph.cc          icp6D.cc          icp6Dapx.cc       icp6Dsvd.cc 
   icp6Dortho.cc     icp6Dquat.cc      icp6Dhelix.cc     icp6Dlumeuler.cc 
   icp6Dlumquat.cc   icp6Ddual.cc      lum6Deuler.cc     lum6Dquat.cc
   ghelix6DQ2.cc     gapx6D.cc         ann_kd.cc         elch6D.cc
@@ -77,7 +77,9 @@ endif(WITH_METRICS)
 
 add_library(scan STATIC ${SCANLIB_SRCS})
 
-target_link_libraries(scan scanclient scanio)
+FIND_PACKAGE(OpenCV REQUIRED)
+
+target_link_libraries(scan scanclient scanio normals)
 
 IF(UNIX)
   target_link_libraries(scan dl)

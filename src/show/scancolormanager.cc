@@ -160,18 +160,6 @@ ScanColorManager::ScanColorManager(unsigned int _buckets, PointType type, bool a
         case Scan::ELCH:
           glColor4d(0.0, 1.0,0.0, 1.0);
           break;
-        case Scan::LOOPTORO:
-          glColor4d(0.0, 0.0, 1.0, 1.0);
-          break;
-        case Scan::LOOPHOGMAN:
-          glColor4d(0.0, 1.0, 1.0, 1.0);
-          break;
-        case Scan::GRAPHTORO:
-          glColor4d(1.0, 0.0, 1.0, 1.0);
-          break;
-        case Scan::GRAPHHOGMAN:
-          glColor4d(1.0, 1.0, 0.0, 1.0);
-          break;
         default:
           glColor4d(1.0, 1.0, 1.0, 1.0);
           break;
