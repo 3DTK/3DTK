@@ -17,6 +17,8 @@
 #include "slam6d/Boctree.h"
 #include "slam6d/globals.icc"
 
+#include "normals/normals.h"
+
 #ifdef WITH_METRICS
 #include "slam6d/metrics.h"
 #endif
@@ -37,7 +39,7 @@ bool Scan::scanserver = false;
 
 
 void Scan::openDirectory(bool scanserver, const std::string& path, IOType type,
-  int start, int end)
+                         int start, int end)
 {
   Scan::scanserver = scanserver;
   if(scanserver)
@@ -145,7 +147,9 @@ void Scan::toGlobal() {
  */
 void Scan::createSearchTree()
 {
-  // multiple threads will call this function at the same time because they all work on one pair of Scans, just let the first one (who sees a nullpointer) do the creation
+  // multiple threads will call this function at the same time because they
+  // all work on one pair of Scans, just let the first one (who sees a nullpointer)
+  // do the creation
   boost::lock_guard<boost::mutex> lock(m_mutex_create_tree);
   if(kd != 0) return;
 
@@ -165,7 +169,9 @@ void Scan::createSearchTree()
 
 void Scan::calcReducedOnDemand()
 {
-  // multiple threads will call this function at the same time because they all work on one pair of Scans, just let the first one (who sees count as zero) do the reduction
+  // multiple threads will call this function at the same time
+  // because they all work on one pair of Scans,
+  // just let the first one (who sees count as zero) do the reduction
   boost::lock_guard<boost::mutex> lock(m_mutex_reduction);
   if(m_has_reduced) return;
 
@@ -180,6 +186,17 @@ void Scan::calcReducedOnDemand()
 #ifdef WITH_METRICS
   ClientMetric::on_demand_reduction_time.end(t);
 #endif //WITH_METRICS
+}
+
+void Scan::calcNormalsOnDemand()
+{
+  // multiple threads will call this function at the same time
+  // because they all work on one pair of Scans,
+  // just let the first one (who sees count as zero) do the reduction
+  boost::lock_guard<boost::mutex> lock(m_mutex_normals);
+  if(m_has_normals) return;
+  calcNormalsOnDemandPrivate();
+  m_has_normals = true;
 }
 
 void Scan::copyReducedToOriginal()
@@ -223,7 +240,33 @@ void Scan::copyOriginalToReduced()
 }
 
 
-
+/**
+ * Computes normals for all points
+ */
+void Scan::calcNormals()
+{
+  cout << "calcNormals" << endl;
+  DataXYZ xyz(get("xyz"));
+  DataNormal xyz_normals(create("normal", sizeof(double)*3*xyz.size()));
+  if(xyz.size() == 0)
+    throw runtime_error("Could not calculate reduced points, XYZ data is empty");
+    
+  vector<Point> points;
+  points.reserve(xyz.size());
+  vector<Point> normals;
+  normals.reserve(xyz.size());
+  for(unsigned int j = 0; j < xyz.size(); j++) {
+    points.push_back(Point(xyz[j][0], xyz[j][1], xyz[j][2]));
+  }
+  const int K_NEIGHBOURS = 10;
+  calculateNormalsAKNN(normals, points, K_NEIGHBOURS, get_rPos());
+  for (unsigned int i = 0; i < normals.size(); ++i) {
+    xyz_normals[i][0] = normals[i].x;
+    xyz_normals[i][1] = normals[i].y;
+    xyz_normals[i][2] = normals[i].z;
+  }
+}
+    
 /**
  * Computes an octtree of the current scan, then getting the
  * reduced points as the centers of the octree voxels.
@@ -236,137 +279,110 @@ void Scan::calcReducedPoints()
 
 
   // get xyz to start the scan load, separated here for time measurement
-
   DataXYZ xyz(get("xyz"));
-  DataReflectance reflectance(get("reflectance"));
-  if(xyz.size() == 0)
-    throw runtime_error("Could not calculate reduced points, XYZ data is empty");
-
-  if (reflectance.size()==0) {
-
-    // no reduction needed
-    // copy vector of points to array of points to avoid
-    // further copying
-    if(reduction_voxelSize <= 0.0) {
-      // copy the points
-      DataXYZ xyz_reduced(create("xyz reduced", sizeof(double)*3*xyz.size()));
-      for(unsigned int i = 0; i < xyz.size(); ++i) {
-	for(unsigned int j = 0; j < 3; ++j) {
-	  xyz_reduced[i][j] = xyz[i][j];
-	}
-      }
-    } else {
-      // start reduction
-      // build octree-tree from CurrentScan
-      // put full data into the octtree
-      BOctTree<double> *oct = new BOctTree<double>(PointerArray<double>(xyz).get(),
-						   xyz.size(), reduction_voxelSize, reduction_pointtype);
-
-      vector<double*> center;
-      center.clear();
-      if (reduction_nrpts > 0) {
-	if (reduction_nrpts == 1) {
-	  oct->GetOctTreeRandom(center);
-	} else {
-	  oct->GetOctTreeRandom(center, reduction_nrpts);
-	}
-      } else {
-	oct->GetOctTreeCenter(center);
-      }
-      
-      // storing it as reduced scan
-      unsigned int size = center.size();
-      DataXYZ xyz_reduced(create("xyz reduced", sizeof(double)*3*size));
-      for(unsigned int i = 0; i < size; ++i) {
-	for(unsigned int j = 0; j < 3; ++j) {
-	  xyz_reduced[i][j] = center[i][j];
-	}
-      }
-      delete oct;
-    }
-  } else {
-    if(xyz.size() != reflectance.size())
-      throw runtime_error("Could not calculate reduced reflectance, reflectance size is different from points size");
-    double **xyz_reflectance = new double*[xyz.size()];
-    for (unsigned int i = 0; i < xyz.size(); ++i) {
-      xyz_reflectance[i] = new double[4];
-      for (unsigned int j = 0; j < 3; ++j) 
-	xyz_reflectance[i][j] = xyz[i][j];
-      xyz_reflectance[i][3] = reflectance[i];
-    }
-
+  DataXYZ xyz_normals(get(""));
+  if (reduction_pointtype.hasNormal()) {
+    DataXYZ my_xyz_normals(get("normal"));
+    xyz_normals =  my_xyz_normals;
+  }
+  DataReflectance reflectance(get(""));
+  if (reduction_pointtype.hasReflectance()) {
+    DataReflectance my_reflectance(get("reflectance"));
+    reflectance = my_reflectance;
+  }
+  
 #ifdef WITH_METRICS
-  ClientMetric::scan_load_time.end(t);
-  Timer tl = ClientMetric::calc_reduced_points_time.start();
+    ClientMetric::scan_load_time.end(t);
+    Timer tl = ClientMetric::calc_reduced_points_time.start();
 #endif //WITH_METRICS
-
-  // no reduction needed
-  // copy vector of points to array of points to avoid
-  // further copying
+  
   if(reduction_voxelSize <= 0.0) {
     // copy the points
-    if (reduction_pointtype.hasReflectance()) {   
-      DataXYZ xyz_reduced(create("xyz reduced", sizeof(double)*3*xyz.size()));
-      DataReflectance reflectance_reduced(create("reflectance reduced", sizeof(double)*reflectance.size()));
-      for(unsigned int i = 0; i < xyz.size(); ++i) { 
-        for(unsigned int j = 0; j < 3; ++j) 
-          xyz_reduced[i][j] = xyz[i][j];
-        reflectance_reduced[i] = reflectance[i];
-      }
-    } else {
-      DataXYZ xyz_reduced(create("xyz reduced", sizeof(double)*3*xyz.size()));
-      for(unsigned int i = 0; i < xyz.size(); ++i) {
-        for(unsigned int j = 0; j < 3; ++j) {
-          xyz_reduced[i][j] = xyz[i][j];
-        }
-      }
+    DataXYZ xyz_reduced(create("xyz reduced", sizeof(double)*3*xyz.size()));
+    for(unsigned int i = 0; i < xyz.size(); ++i) {
+	 for(unsigned int j = 0; j < 3; ++j) {
+	   xyz_reduced[i][j] = xyz[i][j];
+	 }
     }
+    if (reduction_pointtype.hasReflectance()) {
+	 DataReflectance reflectance_reduced(create("reflectance reduced", sizeof(float)*reflectance.size()));	 
+        for(unsigned int i = 0; i < xyz.size(); ++i) {
+           reflectance_reduced[i] = reflectance[i];
+        }
+    }
+    if (reduction_pointtype.hasNormal()) {
+	 DataNormal normal_reduced(create("normal reduced", sizeof(double)*3*xyz.size()));	 
+        for(unsigned int i = 0; i < xyz.size(); ++i) {
+		for(unsigned int j = 0; j < 3; ++j) {
+		  normal_reduced[i][j] = xyz_normals[i][j];
+		}
+        }
+    }
+
   } else {
+
+    double **xyz_in = new double*[xyz.size()];
+    for (unsigned int i = 0; i < xyz.size(); ++i) {
+      xyz_in[i] = new double[reduction_pointtype.getPointDim()];
+	 unsigned int j = 0;
+      for (; j < 3; ++j) 
+        xyz_in[i][j] = xyz[i][j];
+	 if (reduction_pointtype.hasReflectance())
+	   xyz_in[i][j++] = reflectance[i];
+	 if (reduction_pointtype.hasNormal())
+	   for (unsigned int l = 0; l < 3; ++l) 
+		xyz_in[i][j] = xyz_normals[i][l];
+    }
+
     // start reduction
     // build octree-tree from CurrentScan
     // put full data into the octtree
-    BOctTree<double> *oct = new BOctTree<double>(xyz_reflectance, xyz.size(), reduction_voxelSize, reduction_pointtype);
-    vector<double*> reduced;
-    reduced.clear();
+    BOctTree<double> *oct = new BOctTree<double>(xyz_in,
+									    xyz.size(),
+									    reduction_voxelSize,
+									    reduction_pointtype);	 
 
+    vector<double*> center;
+    center.clear();
     if (reduction_nrpts > 0) {
-      if (reduction_nrpts == 1) {
-        oct->GetOctTreeRandom(reduced);
-      } else {
-        oct->GetOctTreeRandom(reduced, reduction_nrpts);
-      }
+	 if (reduction_nrpts == 1) {
+	   oct->GetOctTreeRandom(center);
+	 } else {
+	   oct->GetOctTreeRandom(center, reduction_nrpts);
+	 }
     } else {
-      oct->GetOctTreeCenter(reduced);
+        oct->GetOctTreeCenter(center);
     }
-
+    
     // storing it as reduced scan
-    unsigned int size = reduced.size();
+    unsigned int size = center.size();
+    DataXYZ xyz_reduced(create("xyz reduced", sizeof(double)*3*size));
+    DataReflectance reflectance_reduced(get(""));
+    DataNormal normal_reduced(get("")); 
     if (reduction_pointtype.hasReflectance()) {
-      DataXYZ xyz_reduced(create("xyz reduced", sizeof(double)*3*size));
-      for(unsigned int i = 0; i < size; ++i) {
-        for(unsigned int j = 0; j < 3; ++j) {
-          xyz_reduced[i][j] = reduced[i][j];
-        }
-      }
-      DataReflectance reflectance_reduced(create("reflectance reduced", sizeof(float)*size));
-      for(unsigned int i = 0; i < size; ++i)
-        reflectance_reduced[i] = reduced[i][3];
-    } else {
-      DataXYZ xyz_reduced(create("xyz reduced", sizeof(double)*3*size));
-      for(unsigned int i = 0; i < size; ++i) 
-        for(unsigned int j = 0; j < 3; ++j)
-          xyz_reduced[i][j] = reduced[i][j];
+	 DataReflectance my_reflectance_reduced(create("reflectance reduced",
+										  sizeof(float)*size));
+	 reflectance_reduced = my_reflectance_reduced;
     }
-    delete oct;
+    if (reduction_pointtype.hasNormal()) {
+	 DataNormal my_normal_reduced(create("normal reduced", sizeof(double)*3*size));
+	 normal_reduced = my_normal_reduced; 
+    }
+    for(unsigned int i = 0; i < size; ++i) {
+	 unsigned int j = 0;
+	 for (; j < 3; ++j) 
+	   xyz_reduced[i][j] = center[i][j];
+	 if (reduction_pointtype.hasReflectance())
+	   reflectance_reduced[i] = center[i][j++];
+	 if (reduction_pointtype.hasNormal())
+	   for (unsigned int l = 0; l < 3; ++l) 
+		normal_reduced[i][l] = center[i][j++];
+    }
   }
-  for (unsigned int i = 0; i < xyz.size(); ++i) {
-    delete[] xyz_reflectance[i];
-  }
-  delete[] xyz_reflectance;
+
 #ifdef WITH_METRICS
-  ClientMetric::calc_reduced_points_time.end(tl);
-#endif //WITH_METRICS
-  }
+    ClientMetric::calc_reduced_points_time.end(tl);
+#endif //WITH_METRICS  
 }
 
 
@@ -399,7 +415,7 @@ void Scan::transformAll(const double alignxf[16])
 {
   DataXYZ xyz(get("xyz"));
   unsigned int i=0 ;
-//  #pragma omp parallel for
+  //  #pragma omp parallel for
   for(; i < xyz.size(); ++i) {
     transform3(alignxf, xyz[i]);
   }
@@ -415,10 +431,16 @@ void Scan::transformReduced(const double alignxf[16])
 
   DataXYZ xyz_reduced(get("xyz reduced"));
   unsigned int i=0;
- // #pragma omp parallel for
+  // #pragma omp parallel for
   for( ; i < xyz_reduced.size(); ++i) {
     transform3(alignxf, xyz_reduced[i]);
   }
+
+  DataNormal normal_reduced(get("normal reduced"));
+  for (unsigned int i = 0; i < normal_reduced.size(); ++i) {
+    transform3normal(alignxf, normal_reduced[i]);
+  }
+
 
 #ifdef WITH_METRICS
   ClientMetric::transform_time.end(t);
@@ -438,7 +460,7 @@ void Scan::transformMatrix(const double alignxf[16])
 
 #ifdef DEBUG
   cerr << "(" << rPos[0] << ", " << rPos[1] << ", " << rPos[2] << ", "
-	  << rPosTheta[0] << ", " << rPosTheta[1] << ", " << rPosTheta[2] << ")" << endl;
+       << rPosTheta[0] << ", " << rPosTheta[1] << ", " << rPosTheta[2] << ")" << endl;
 
   cerr << transMat << endl;
 #endif
@@ -480,7 +502,7 @@ void Scan::transform(const double alignxf[16], const AlgoType type, int islum)
 #ifdef DEBUG
   cerr << alignxf << endl;
   cerr << "(" << rPos[0] << ", " << rPos[1] << ", " << rPos[2] << ", "
-	  << rPosTheta[0] << ", " << rPosTheta[1] << ", " << rPosTheta[2] << ") ---> ";
+       << rPosTheta[0] << ", " << rPosTheta[1] << ", " << rPosTheta[2] << ") ---> ";
 #endif
 
   // transform points
@@ -572,7 +594,7 @@ void Scan::transform(const double alignxf[16], const AlgoType type, int islum)
  *         2  LUM transformation, last scan only
  */
 void Scan::transform(const double alignQuat[4], const double alignt[3],
-				 const AlgoType type, int islum)
+                     const AlgoType type, int islum)
 {
   double alignxf[16];
   QuatToMatrix4(alignQuat, alignt, alignxf);
@@ -655,9 +677,9 @@ void Scan::transformToQuat(double rP[3], double rPQ[4], const AlgoType type, int
  */
 
 void Scan::getNoPairsSimple(vector <double*> &diff,
-  Scan* Source, Scan* Target,
-  int thread_num,
-  double max_dist_match2)
+                            Scan* Source, Scan* Target,
+                            int thread_num,
+                            double max_dist_match2)
 {
   DataXYZ xyz_reduced(Source->get("xyz reduced"));
   KDtree* kd = new KDtree(PointerArray<double>(Target->get("xyz reduced")).get(), Target->size<DataXYZ>("xyz reduced"));
@@ -694,10 +716,10 @@ void Scan::getNoPairsSimple(vector <double*> &diff,
  * @param max_dist_match2 maximal allowed distance for matching
  */
 void Scan::getPtPairsSimple(vector <PtPair> *pairs,
-  Scan* Source, Scan* Target,
-  int thread_num,
-  int rnd, double max_dist_match2,
-  double *centroid_m, double *centroid_d)
+                            Scan* Source, Scan* Target,
+                            int thread_num,
+                            int rnd, double max_dist_match2,
+                            double *centroid_m, double *centroid_d)
 {
   KDtree* kd = new KDtree(PointerArray<double>(Source->get("xyz reduced")).get(), Source->size<DataXYZ>("xyz reduced"));
   DataXYZ xyz_reduced(Target->get("xyz reduced"));
@@ -751,10 +773,10 @@ void Scan::getPtPairsSimple(vector <PtPair> *pairs,
  * @return a set of corresponding point pairs
  */
 void Scan::getPtPairs(vector <PtPair> *pairs,
-  Scan* Source, Scan* Target,
-  int thread_num,
-  int rnd, double max_dist_match2, double &sum,
-  double *centroid_m, double *centroid_d)
+                      Scan* Source, Scan* Target,
+                      int thread_num,
+                      int rnd, double max_dist_match2, double &sum,
+                      double *centroid_m, double *centroid_d, PairingMode pairing_mode)
 {
   // initialize centroids
   for(unsigned int i = 0; i < 3; ++i) {
@@ -764,10 +786,12 @@ void Scan::getPtPairs(vector <PtPair> *pairs,
 
   // get point pairs
   DataXYZ xyz_reduced(Target->get("xyz reduced"));
+  DataNormal normal_reduced(Target->get("normal reduced"));
   Source->getSearchTree()->getPtPairs(pairs, Source->dalignxf,
-      xyz_reduced, 0, xyz_reduced.size(),
-      thread_num,
-      rnd, max_dist_match2, sum, centroid_m, centroid_d);
+                                      xyz_reduced, normal_reduced, 0, xyz_reduced.size(),
+                                      thread_num,
+                                      rnd, max_dist_match2, sum, centroid_m, centroid_d,
+                                      pairing_mode);
 
   // normalize centroids
   unsigned int size = pairs->size();
@@ -801,11 +825,14 @@ void Scan::getPtPairs(vector <PtPair> *pairs,
  *  by Langis / Greenspan / Godin, IEEE 3DIM 2001
  *
  */
-void Scan::getPtPairsParallel(vector <PtPair> *pairs, Scan* Source, Scan* Target,
-  int thread_num, int step,
-  int rnd, double max_dist_match2,
-  double *sum,
-  double centroid_m[OPENMP_NUM_THREADS][3], double centroid_d[OPENMP_NUM_THREADS][3])
+void Scan::getPtPairsParallel(vector <PtPair> *pairs,
+						Scan* Source, Scan* Target,
+                              int thread_num, int step,
+                              int rnd, double max_dist_match2,
+                              double *sum,
+                              double centroid_m[OPENMP_NUM_THREADS][3],
+						double centroid_d[OPENMP_NUM_THREADS][3],
+                              PairingMode pairing_mode)
 {
   // initialize centroids
   for(unsigned int i = 0; i < 3; ++i) {
@@ -822,22 +849,26 @@ void Scan::getPtPairsParallel(vector <PtPair> *pairs, Scan* Source, Scan* Target
     for(unsigned int i = 0; i < meta->size(); ++i) {
       // determine step for each scan individually
       DataXYZ xyz_reduced(meta->getScan(i)->get("xyz reduced"));
+      DataNormal normal_reduced(Target->get("normal reduced"));
       unsigned int max = xyz_reduced.size();
       unsigned int step = max / OPENMP_NUM_THREADS;
       // call ptpairs for each scan and accumulate ptpairs, centroids and sum
       search->getPtPairs(&pairs[thread_num], Source->dalignxf,
-        xyz_reduced, step * thread_num, step * thread_num + step,
-        thread_num,
-        rnd, max_dist_match2, sum[thread_num],
-        centroid_m[thread_num], centroid_d[thread_num]);
+                         xyz_reduced, normal_reduced,
+					step * thread_num, step * thread_num + step,
+                         thread_num,
+                         rnd, max_dist_match2, sum[thread_num],
+                         centroid_m[thread_num], centroid_d[thread_num], pairing_mode);
     }
   } else {
     DataXYZ xyz_reduced(Target->get("xyz reduced"));
+    DataNormal normal_reduced(Target->get("normal reduced"));
     search->getPtPairs(&pairs[thread_num], Source->dalignxf,
-      xyz_reduced, thread_num * step, thread_num * step + step,
-      thread_num,
-      rnd, max_dist_match2, sum[thread_num],
-      centroid_m[thread_num], centroid_d[thread_num]);
+                       xyz_reduced, normal_reduced,
+				   thread_num * step, thread_num * step + step,
+                       thread_num,
+                       rnd, max_dist_match2, sum[thread_num],
+                       centroid_m[thread_num], centroid_d[thread_num], pairing_mode);
   }
 
   // normalize centroids

@@ -101,6 +101,12 @@ public:
   double y;
   /// z coordinate in 3D space
   double z;
+  /// normal x direction in 3D space
+  double nx;
+  /// normal x direction in 3D space
+  double ny;
+  /// normal x direction in 3D space
+  double nz;
   /// additional information about the point, e.g., semantic
   ///  also used in veloscan for distiuguish moving or static
   int type;

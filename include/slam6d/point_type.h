@@ -30,6 +30,7 @@ public:
 
   static const unsigned int USE_NONE;
   static const unsigned int USE_REFLECTANCE;
+  static const unsigned int USE_NORMAL;
   static const unsigned int USE_TEMPERATURE;
   static const unsigned int USE_AMPLITUDE;
   static const unsigned int USE_DEVIATION;
@@ -44,6 +45,7 @@ public:
   PointType(unsigned int _types);
 
   bool hasReflectance();
+  bool hasNormal();
   bool hasTemperature();
   bool hasAmplitude();
   bool hasDeviation();
@@ -114,6 +116,7 @@ private:
   unsigned int getScanSize(Scan* scan);
 
   DataXYZ* m_xyz;
+  DataXYZ* m_normal;
   DataRGB* m_rgb;
   DataReflectance* m_reflectance;
   DataTemperature* m_temperature;
@@ -133,6 +136,11 @@ T *PointType::createPoint(const Point &P, unsigned int index ) {
   p[counter++] = P.z;
   if (types & USE_REFLECTANCE) {
     p[counter++] = P.reflectance;
+  }
+  if (types & USE_NORMAL) {
+    p[counter++] = P.nx;
+    p[counter++] = P.ny;
+    p[counter++] = P.nz;
   }
   if (types & USE_TEMPERATURE) {
     p[counter++] = P.temperature;
@@ -171,6 +179,11 @@ Point PointType::createPoint(T *p) {
   if (types & USE_REFLECTANCE) {
     P.reflectance = p[counter++];
   }
+  if (types & USE_NORMAL) {
+    p[counter++] = P.nx;
+    p[counter++] = P.ny;
+    p[counter++] = P.nz;
+  }
   if (types & USE_TEMPERATURE) {
     P.temperature = p[counter++];
   }
@@ -205,6 +218,10 @@ T *PointType::createPoint(unsigned int i, unsigned int index) {
   // if a type is requested try to write the value if the scan provided one
   if (types & USE_REFLECTANCE) {
     p[counter++] = (m_reflectance? (*m_reflectance)[i]: 0);
+  }
+  if (types & USE_NORMAL) {
+    for(unsigned int j = 0; j < 3; ++j)
+	 p[counter++] = (*m_normal)[i][j];
   }
   if (types & USE_TEMPERATURE) {
     p[counter++] = (m_temperature? (*m_temperature)[i]: 0);

@@ -626,9 +626,7 @@ void setResetView(int origin) {
     // set origin to the center of mass of all scans
   for (size_t i = 0; i < octpts.size(); ++i) {
     vector <sfloat*> points;
-#ifdef USE_COMPACT_TREE
-    ((compactTree*)octpts[i])->AllPoints( points );
-#else
+#ifndef USE_COMPACT_TREE
     BOctTree<sfloat>* cur_tree = ((Show_BOctTree<sfloat>*)octpts[i])->getTree();
     cur_tree->AllPoints( points );
 #endif

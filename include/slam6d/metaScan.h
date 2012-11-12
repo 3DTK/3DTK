@@ -34,6 +34,7 @@ public:
 protected:
   virtual void createSearchTreePrivate();
   virtual void calcReducedOnDemandPrivate() {}
+  virtual void calcNormalsOnDemandPrivate() {}
   virtual void addFrame(AlgoType type) {}
 private:
   std::vector<Scan*> m_scans;

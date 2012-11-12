@@ -92,7 +92,8 @@ icp6D::icp6D(icp6Dminimizer *my_icp6Dminimizer, double max_dist_match,
  * @param CurrentScan The current scan thas is to be matched
  * @return The number of iterations done in this matching run
  */
-int icp6D::match(Scan* PreviousScan, Scan* CurrentScan)
+int icp6D::match(Scan* PreviousScan, Scan* CurrentScan,
+                 PairingMode pairing_mode)
 {
   // If ICP shall not be applied, then just write
   // the identity matrix
@@ -148,7 +149,7 @@ int icp6D::match(Scan* PreviousScan, Scan* CurrentScan)
       Scan::getPtPairsParallel(pairs, PreviousScan, CurrentScan,
           thread_num, step,
           rnd, max_dist_match2,
-          sum, centroid_m, centroid_d);
+          sum, centroid_m, centroid_d, pairing_mode);
 
       n[thread_num] = (unsigned int)pairs[thread_num].size();
 
@@ -214,7 +215,7 @@ int icp6D::match(Scan* PreviousScan, Scan* CurrentScan)
     vector<PtPair> pairs;
    
     Scan::getPtPairs(&pairs, PreviousScan, CurrentScan, 0, rnd,
-        max_dist_match2, ret, centroid_m, centroid_d);
+        max_dist_match2, ret, centroid_m, centroid_d, pairing_mode);
 
     // do we have enough point pairs?
     if (pairs.size() > 3) {
@@ -281,7 +282,7 @@ double icp6D::Point_Point_Error(Scan* PreviousScan, Scan* CurrentScan, double ma
       Scan::getPtPairsParallel(pairs, PreviousScan, CurrentScan,
           thread_num, step,
           rnd, sqr(max_dist_match),
-          sum, centroid_m, centroid_d);
+          sum, centroid_m, centroid_d, CLOSEST_POINT);
 
     } 
 
@@ -299,7 +300,8 @@ double icp6D::Point_Point_Error(Scan* PreviousScan, Scan* CurrentScan, double ma
     double centroid_d[3] = {0.0, 0.0, 0.0};
     vector<PtPair> pairs;
 
-    Scan::getPtPairs(&pairs, PreviousScan, CurrentScan, 0, rnd, sqr(max_dist_match),error, centroid_m, centroid_d);
+    Scan::getPtPairs(&pairs, PreviousScan, CurrentScan, 0, rnd, sqr(max_dist_match),
+                     error, centroid_m, centroid_d, CLOSEST_POINT);
 
     // getPtPairs computes error as sum of squared distances
     error = 0;
@@ -322,7 +324,7 @@ double icp6D::Point_Point_Error(Scan* PreviousScan, Scan* CurrentScan, double ma
  * 
  * @param allScans Contains all necessary scans.
  */
-void icp6D::doICP(vector <Scan *> allScans)
+void icp6D::doICP(vector <Scan *> allScans, PairingMode pairing_mode)
 {
   double id[16];
   M4identity(id);
@@ -346,12 +348,12 @@ void icp6D::doICP(vector <Scan *> allScans)
 
     if (i > 0) {
       if (meta) {
-        match(my_MetaScan, CurrentScan);
+        match(my_MetaScan, CurrentScan, pairing_mode);
       } else
       if (cad_matching) {
-        match(allScans[0], CurrentScan);
+        match(allScans[0], CurrentScan, pairing_mode);
       } else {
-        match(PreviousScan, CurrentScan);
+        match(PreviousScan, CurrentScan, pairing_mode);
       }
     }
 
