@@ -3,7 +3,12 @@
 
 #include <vector>
 #include <slam6d/scan.h>
-#include <cv.h>
+#if (CV_MAJOR_VERSION == 2) && (CV_MINOR_VERSION < 2)
+#include <opencv/cv.h>
+#include <opencv/highgui.h>
+#else
+#include <opencv2/opencv.hpp>
+#endif
 
 void calculateNormalsAKNN(std::vector<Point> &normals,vector<Point> &points, int k,
                           const double _rPos[3] );
