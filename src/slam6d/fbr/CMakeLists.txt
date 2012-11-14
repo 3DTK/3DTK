@@ -5,7 +5,7 @@ SET(FBR_PANORAMA_SRC panorama.cc)
 add_library(fbr_panorama STATIC ${FBR_PANORAMA_SRC} fbr_global.cc)
 
 IF(WITH_FBR)
-IF(EXISTS "{$OpenCV_DIR}/opencv2")
+IF(OpenCV_VERSION_MAJOR GREATER 1 AND OpenCV_VERSION_MINOR GREATER 2)
 SET(FBR_FEATURE_SRC feature.cc)
 add_library(fbr_feature STATIC ${FBR_FEATURE_SRC})
 
@@ -31,7 +31,7 @@ add_library(fbr_s SHARED ${FBR_SRC})
 target_link_libraries(fbr_s scan_s ANN_s ${OpenCV_LIBS})
 ENDIF(EXPORT_SHARED_LIBS)
 
-ELSE(EXISTS "{$OpenCV_DIR}/opencv2")
+ELSE(OpenCV_VERSION_MAJOR GREATER 1 AND OpenCV_VERSION_MINOR GREATER 2)
   MESSAGE("OpenCV Version > 2.2 required for FBR")
-ENDIF(EXISTS "{$OpenCV_DIR}/opencv2")
+ENDIF(OpenCV_VERSION_MAJOR GREATER 1 AND OpenCV_VERSION_MINOR GREATER 2)
 ENDIF(WITH_FBR)
