@@ -1,13 +1,12 @@
-IF(WITH_FBR)
 FIND_PACKAGE(OpenCV REQUIRED)
 
 SET(FBR_IO_SRC scan_cv.cc)
 add_library(fbr_cv_io STATIC ${FBR_IO_SRC})
 
 SET(FBR_PANORAMA_SRC panorama.cc)
-#add_library(fbr_panorama STATIC ${FBR_PANORAMA_SRC})
 add_library(fbr_panorama STATIC ${FBR_PANORAMA_SRC} fbr_global.cc)
 
+IF(WITH_FBR)
 
 SET(FBR_FEATURE_SRC feature.cc)
 add_library(fbr_feature STATIC ${FBR_FEATURE_SRC})
