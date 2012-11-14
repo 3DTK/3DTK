@@ -1,7 +1,6 @@
 ### TOOLS
 
 IF(WITH_TOOLS)
-  FIND_PACKAGE(OpenCV REQUIRED)
   ### SCAN_RED
   add_executable(scan_red scan_red.cc fbr/fbr_global.cc fbr/panorama.cc fbr/scan_cv.cc)
   
@@ -55,6 +54,7 @@ IF(WITH_TOOLS)
     target_link_libraries(riegl2frames XGetopt ${Boost_LIBRARIES})
     target_link_libraries(toGlobal XGetopt ${Boost_LIBRARIES})
   ENDIF(WIN32)
+
 ENDIF(WITH_TOOLS)
 
 ### SCANLIB

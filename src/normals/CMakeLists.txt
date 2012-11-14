@@ -1,5 +1,3 @@
-FIND_PACKAGE(OpenCV REQUIRED)
-
 add_library(normals normals.cc)
 target_link_libraries(normals newmat scan ANN fbr_cv_io fbr_panorama ${OpenCV_LIBS})
 
