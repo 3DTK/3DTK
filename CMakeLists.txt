@@ -3,8 +3,6 @@ SET(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/3rdparty/CMakeModules" ${CMAKE_MODULE
 project (3DTK)
 
 
-
-
 #include_directories(OPENGL_INCLUDE_DIR)
 IF(WIN32)
   set(Boost_USE_STATIC_LIBS TRUE)
@@ -236,16 +234,6 @@ IF(WITH_SEGMENTATION)
 ELSE(WITH_SEGMENTATION)
   MESSAGE(STATUS "Without segmentation")
 ENDIF(WITH_SEGMENTATION)
-
-## Normals
-
-OPT_DEP(WITH_NORMALS "Whether to build separate program for normal computation ON/OFF" OFF "WITH_FBR")
-
-IF(WITH_NORMALS)
-  MESSAGE(STATUS "With normals")
-ELSE(WITH_NORMALS)
-  MESSAGE(STATUS "Without normals")
-ENDIF(WITH_NORMALS)
 
 ## RivLib
 OPT_DEP(WITH_RIVLIB "Whether the RIEGL rivlib is present ON/OFF" OFF "")

@@ -760,7 +760,7 @@ int main(int argc, char **argv)
   for(ScanVector::iterator it = Scan::allScans.begin(); it != Scan::allScans.end(); ++it) {
     Scan* scan = *it;
     scan->setRangeFilter(maxDist, minDist);
-    unsigned int types;
+    unsigned int types = 0;
     if ((pairing_mode == CLOSEST_POINT_ALONG_NORMAL) ||
 	   (pairing_mode == CLOSEST_PLANE)) {
 	 types = PointType::USE_NORMAL;
