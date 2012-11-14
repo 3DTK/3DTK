@@ -1,5 +1,4 @@
 IF (WITH_THERMO)
-  find_package(OpenCV REQUIRED)
 
   include_directories(${CMAKE_SOURCE_DIR}/3rdparty/cvblob)
   include_directories(${CMAKE_SOURCE_DIR}/include/shapes/)

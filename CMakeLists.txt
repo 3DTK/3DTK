@@ -13,9 +13,9 @@ ENDIF(WIN32)
 SET(Boost_ADDITIONAL_VERSIONS "1.42" "1.42.0" "1.44" "1.44.0" "1.45.0" "1.45" "1.46" "1.46.1" "1.47.0" "1.47" "1.48" "1.49")
 IF(WIN32)
   # for some unknown reason no one variant works on all windows platforms
-  find_package( Boost COMPONENTS serialization graph regex filesystem system thread date_time REQUIRED)
+  find_package( Boost COMPONENTS serialization graph regex filesystem system thread date_time program_options REQUIRED)
 ELSE(WIN32)
-  find_package( Boost COMPONENTS serialization graph regex filesystem system thread date_time REQUIRED)
+  find_package( Boost COMPONENTS serialization graph regex filesystem system thread date_time program_options REQUIRED)
 ENDIF(WIN32)
 
 if(Boost_FOUND)
@@ -23,6 +23,10 @@ if(Boost_FOUND)
   include_directories(${Boost_INCLUDE_DIRS})
   add_definitions(${Boost_LIB_DIAGNOSTIC_DEFINITIONS})
 endif()
+
+FIND_PACKAGE(OpenCV REQUIRED)
+include("3rdparty/CMakeModules/OpenCV.cmake")
+SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${ADDITIONAL_OPENCV_FLAGS}")
 
 #################################################
 # Declare Options and modify build accordingly ##
@@ -153,10 +157,6 @@ endif(WITH_MODEL)
 ## Thermo
 OPT_DEP(WITH_THERMO "Whether to build executables for mutual calibration of laser scanner and camera. ON/OFF" OFF "WITH_SHAPE_DETECTION")
 IF(WITH_THERMO)
-  #for OpenCV 2.1
-  FIND_PACKAGE(OpenCV REQUIRED)
-  include("3rdparty/CMakeModules/OpenCV.cmake")
-  SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${ADDITIONAL_OPENCV_FLAGS}")
   add_subdirectory(3rdparty/cvblob)
   include_directories(${CMAKE_SOURCE_DIR}/3rdparty/cvblob)
   link_directories(${CMAKE_SOURCE_DIR}/3rdparty/cvblob)
@@ -278,9 +278,6 @@ ENDIF(WITH_PMD)
 OPT_DEP(WITH_FBR "Whether to compile feature based registration. ON/OFF" OFF "")
 
 IF(WITH_FBR)
-  FIND_PACKAGE(OpenCV REQUIRED)
-  include("3rdparty/CMakeModules/OpenCV.cmake")
-  SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${ADDITIONAL_OPENCV_FLAGS}")
   MESSAGE(STATUS "With FBR ")
 ELSE(WITH_FBR)
   MESSAGE(STATUS "Without FBR")
