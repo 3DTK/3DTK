@@ -1,0 +1,25 @@
+1.
+--metascan segfaults when destroying the allscanlist.
+
+2.
+scanserver segfaults whith reflectances sometimes.
+
+3.
+scan_red with panorama range image and cylindrical coordinates does
+not work correctly.
+
+4.
+fast_normals does not work on SRI yet. Commented out.
+
+5.
+reflectance_reduced not in managedScan/scanserver
+
+6.
+normals not integrated managedScan/scanserver
+
+7.
+kdMeta/kdManaged does not support kNN nor range search yet
+
+8.
+Make our own knn efficient, then get rid of ANN ;-)
+
