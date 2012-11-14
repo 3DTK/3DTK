@@ -2,9 +2,9 @@
  *  @brief Representation of the optimized k-d tree.
  *  @author Remus Dumitru. Jacobs University Bremen, Germany
  *  @author Corneliu-Claudiu Prodescu. Jacobs University Bremen, Germany
- *  @author Andreas Nuechter. Institute of Computer Science, University of Osnabrueck, Germany.
- *  @author Kai Lingemann. Institute of Computer Science, University of Osnabrueck, Germany.
- *  @author Thomas Escher. Institute of Computer Science, University of Osnabrueck, Germany.
+ *  @author Andreas Nuechter. Jacobs University Bremen, Germany
+ *  @author Kai Lingemann. Inst. of CS, University of Osnabrueck, Germany
+ *  @author Thomas Escher. Inst. of CS, University of Osnabrueck, Germany
  */
 
 #ifndef __KD_TREE_IMPL_H__
@@ -22,6 +22,15 @@
 #ifdef _OPENMP
 #include <omp.h>
 #endif
+
+class PointCompare {
+public:
+    bool operator() (const std::pair<Point, double>& left,
+				 const std::pair<Point, double>& right)
+  {
+    return left.second > right.second;
+  }
+};
 
 /**
  * @brief The optimized k-d tree. 
@@ -178,9 +187,9 @@ protected:
     struct {	 
       double center[3]; ///< storing the center of the voxel (R^3)
       double dx,  ///< defining the voxel itself
-      dy,  ///< defining the voxel itself
-      dz,  ///< defining the voxel itself
-      r2;  ///< defining the voxel itself
+	        dy,  ///< defining the voxel itself
+	        dz,  ///< defining the voxel itself
+             r2;  ///< defining the voxel itself
       int splitaxis;   ///< defining the kind of splitaxis
       KDTreeImpl *child1;  ///< pointers to the childs
       KDTreeImpl *child2;  ///< pointers to the childs
@@ -213,10 +222,12 @@ protected:
     }
 
     // Quick check of whether to abort  
-    double approx_dist_bbox = max(max(fabs(params[threadNum].p[0]-node.center[0])-node.dx,
-                                      fabs(params[threadNum].p[1]-node.center[1])-node.dy),
-                                  fabs(params[threadNum].p[2]-node.center[2])-node.dz);
-    if (approx_dist_bbox >= 0 && sqr(approx_dist_bbox) >= params[threadNum].closest_d2)
+    double approx_dist_bbox =
+	 max(max(fabs(params[threadNum].p[0]-node.center[0])-node.dx,
+		    fabs(params[threadNum].p[1]-node.center[1])-node.dy),
+		fabs(params[threadNum].p[2]-node.center[2])-node.dz);
+    if (approx_dist_bbox >= 0 &&
+	   sqr(approx_dist_bbox) >= params[threadNum].closest_d2)
       return;
 
     // Recursive case
@@ -271,6 +282,105 @@ protected:
       node.child1->_FindClosestAlongDir(pts, threadNum);
     }
   }
+
+  void _FixedRangeSearch(const PointData& pts, int threadNum) const {
+    AccessorFunc point;
+
+    // Leaf nodes
+    if (npts) {
+	 for (int i = 0; i < npts; i++) {
+	   double myd2 = Dist2(params[threadNum].p, point(pts, leaf.p[i]));
+	   if (myd2 < params[threadNum].closest_d2) {
+		params[threadNum].closest = point(pts, leaf.p[i]);
+
+		Point newPt;
+		double* currPt = point(pts, leaf.p[i]);
+		newPt.x = currPt[0];
+		newPt.y = currPt[1];
+		newPt.z = currPt[2];
+		params[threadNum].heap.push_back(std::make_pair(newPt, myd2));
+		std::push_heap(params[threadNum].heap.begin(),
+					params[threadNum].heap.end(),
+					PointCompare());
+	   }
+	 }
+	 return;
+    }
+
+    // Quick check of whether to abort
+    double approx_dist_bbox =
+	 max(max(fabs(params[threadNum].p[0]-node.center[0])-node.dx,
+		    fabs(params[threadNum].p[1]-node.center[1])-node.dy),
+		fabs(params[threadNum].p[2]-node.center[2])-node.dz);
+    if (approx_dist_bbox >= 0 &&
+	   sqr(approx_dist_bbox) >= params[threadNum].closest_d2)
+	 return;
+
+    // Recursive case
+    double myd = node.center[node.splitaxis] - params[threadNum].p[node.splitaxis];
+    if (myd >= 0.0) {
+	 node.child1->_FixedRangeSearch(pts, threadNum);
+	 if (sqr(myd) < params[threadNum].closest_d2) {
+	   node.child2->_FixedRangeSearch(pts, threadNum);
+	 }
+    } else {
+	 node.child2->_FixedRangeSearch(pts, threadNum);
+	 if (sqr(myd) < params[threadNum].closest_d2) {
+	   node.child1->_FixedRangeSearch(pts, threadNum);
+	 }
+    }
+  }
+
+
+  void _KNNSearch(const PointData& pts, int threadNum) const {
+    AccessorFunc point;
+
+    // Leaf nodes
+    if (npts) {
+	 for (int i = 0; i < npts; i++) {
+	   double myd2 = Dist2(params[threadNum].p, point(pts, leaf.p[i]));
+
+	   if (myd2 < params[threadNum].closest_d2) {
+		Point newPt;
+		double* currPt = point(pts, leaf.p[i]);
+		newPt.x = currPt[0];
+		newPt.y = currPt[1];
+		newPt.z = currPt[2];
+		params[threadNum].heap.push_back(std::make_pair(newPt, myd2));
+		std::push_heap(params[threadNum].heap.begin(),
+					params[threadNum].heap.end(),
+					PointCompare());
+
+		params[threadNum].closest = point(pts, leaf.p[i]);
+	   }
+	 }
+	 return;
+    }
+
+    // Quick check of whether to abort
+    double approx_dist_bbox =
+	 max(max(fabs(params[threadNum].p[0]-node.center[0])-node.dx,
+		    fabs(params[threadNum].p[1]-node.center[1])-node.dy),
+		fabs(params[threadNum].p[2]-node.center[2])-node.dz);
+    if (approx_dist_bbox >= 0 &&
+	   sqr(approx_dist_bbox) >= params[threadNum].closest_d2)
+	 return;
+
+    // Recursive case
+    double myd = node.center[node.splitaxis] - params[threadNum].p[node.splitaxis];
+    if (myd >= 0.0) {
+	 node.child1->_KNNSearch(pts, threadNum);
+	 if (sqr(myd) < params[threadNum].closest_d2) {
+	   node.child2->_KNNSearch(pts, threadNum);
+	 }
+    } else {
+	 node.child2->_KNNSearch(pts, threadNum);
+	 if (sqr(myd) < params[threadNum].closest_d2) {
+	   node.child1->_KNNSearch(pts, threadNum);
+	 }
+    }
+  }
 };
+
 
 #endif

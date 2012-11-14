@@ -38,15 +38,31 @@ struct PtrAccessor {
  * capabilities (find nearest point to
  * a given point, or to a ray).
  **/
-class KDtree : public SearchTree, private KDTreeImpl<Void, double*, PtrAccessor> {
+class KDtree : public SearchTree, private KDTreeImpl<Void, double*, PtrAccessor>
+{
 public:
   KDtree(double **pts, int n);
   
   virtual ~KDtree();
 
-  virtual double *FindClosest(double *_p, double maxdist2, int threadNum = 0) const;
+  virtual double *FindClosest(double *_p,
+						double maxdist2,
+						int threadNum = 0) const;
 
-  virtual double *FindClosestAlongDir(double *_p, double *_dir, double maxdist2, int threadNum = 0) const;
+  virtual double *FindClosestAlongDir(double *_p,
+							   double *_dir,
+							   double maxdist2,
+							   int threadNum = 0) const;
+
+  virtual vector<Point> kNearestNeighbors(double *_p,
+								  int k,
+								  double sqRad2,
+								  int threadNum = 0) const;
+  
+  virtual vector<Point> fixedRangeSearch(double *_p,
+								 double sqRad2,
+								 int threadNum = 0) const;
+  
 };
 
 #endif
