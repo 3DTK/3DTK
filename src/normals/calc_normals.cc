@@ -235,9 +235,9 @@ int main(int argc, char** argv)
     }
 
     if(ntype == AKNN)
-      calculateNormalsAKNN(normals,points, k1, rPos);
+      calculateNormalsApxKNN(normals,points, k1, rPos);
     else if(ntype == ADAPTIVE_AKNN)
-      calculateNormalsAdaptiveAKNN(normals,points, k1, k2, rPos);
+      calculateNormalsAdaptiveApxKNN(normals,points, k1, k2, rPos);
     else
     {
       // create panorama
