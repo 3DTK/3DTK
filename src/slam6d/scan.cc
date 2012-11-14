@@ -259,7 +259,7 @@ void Scan::calcNormals()
     points.push_back(Point(xyz[j][0], xyz[j][1], xyz[j][2]));
   }
   const int K_NEIGHBOURS = 10;
-  calculateNormalsAKNN(normals, points, K_NEIGHBOURS, get_rPos());
+  calculateNormalsApxKNN(normals, points, K_NEIGHBOURS, get_rPos(), 1.0);
   for (unsigned int i = 0; i < normals.size(); ++i) {
     xyz_normals[i][0] = normals[i].x;
     xyz_normals[i][1] = normals[i].y;

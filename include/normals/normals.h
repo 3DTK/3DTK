@@ -10,14 +10,34 @@
 #include <opencv2/opencv.hpp>
 #endif
 
-void calculateNormalsAKNN(std::vector<Point> &normals,vector<Point> &points, int k,
-                          const double _rPos[3] );
-void calculateNormalsAdaptiveAKNN(vector<Point> &normals,vector<Point> &points,
-                                  int kmin, int kmax, const double _rPos[3]);
+void calculateNormalsApxKNN(std::vector<Point> &normals,
+					   vector<Point> &points,
+					   int k,
+					   const double _rPos[3],
+					   double eps = 0.0);
+
+void calculateNormalsAdaptiveApxKNN(std::vector<Point> &normals,
+							 vector<Point> &points,
+							 int k,
+							 const double _rPos[3],
+							 double eps = 0.0);
+
+void calculateNormalsKNN(std::vector<Point> &normals,
+					vector<Point> &points,
+					int k,
+					const double _rPos[3] );
+
+
+void calculateNormalsAdaptiveKNN(vector<Point> &normals,
+						   vector<Point> &points,
+						   int kmin, int kmax,
+						   const double _rPos[3]);
+
 void calculateNormalsPANORAMA(vector<Point> &normals,
                               vector<Point> &points,
                               vector< vector< vector< cv::Vec3f > > > extendedMap,
                               const double _rPos[3]);
+
 // TODO should be exported to separate library
 /*
  * retrieve a cv::Mat with x,y,z,r from a scan object
