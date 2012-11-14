@@ -18,7 +18,8 @@ void calculateNormalsApxKNN(std::vector<Point> &normals,
 
 void calculateNormalsAdaptiveApxKNN(std::vector<Point> &normals,
 							 vector<Point> &points,
-							 int k,
+							 int kmin,
+							 int kmax,
 							 const double _rPos[3],
 							 double eps = 0.0);
 
