@@ -27,7 +27,8 @@ double *SearchTree::FindClosestAlongDir(double *_p, double *_dir, double maxdist
 
 void SearchTree::getPtPairs(vector <PtPair> *pairs, 
                             double *source_alignxf,                          // source
-                            double * const *q_points, unsigned int startindex, unsigned int endindex,  // target
+                            double * const *q_points,
+					   unsigned int startindex, unsigned int endindex,  // target
                             int thread_num,
                             int rnd, double max_dist_match2, double &sum,
                             double *centroid_m, double *centroid_d)
@@ -89,10 +90,12 @@ void SearchTree::getPtPairs(vector <PtPair> *pairs,
 
 void SearchTree::getPtPairs(vector <PtPair> *pairs, 
                             double *source_alignxf,                          // source
-                            const DataXYZ& xyz_r, const DataNormal& normal_r, unsigned int startindex, unsigned int endindex,  // target
+                            const DataXYZ& xyz_r, const DataNormal& normal_r,
+					   unsigned int startindex, unsigned int endindex,  // target
                             int thread_num,
                             int rnd, double max_dist_match2, double &sum,
-                            double *centroid_m, double *centroid_d, PairingMode pairing_mode)
+                            double *centroid_m, double *centroid_d,
+					   PairingMode pairing_mode)
 {
   // prepare this tree for resource access in FindClosest
   lock();
