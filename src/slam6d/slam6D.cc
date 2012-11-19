@@ -700,7 +700,7 @@ int main(int argc, char **argv)
   cout << "slam6D - A highly efficient SLAM implementation based on scan matching" << endl
        << "         with 6 degrees of freedom" << endl
        << "(c) Jacobs University Bremen gGmbH, Germany, since 2009" << endl
-       << "    University of Osnabrueck, Germany, 2006 - 2009" << endl << endl;
+	  << "    University of Osnabrueck, Germany, since 2006" << endl << endl;
 
   if (argc <= 1) {
     usage(argv[0]);
