@@ -25,6 +25,7 @@ using std::cout;
 using std::cerr;
 using std::endl;
 #include <vector>
+#include <string.h>
 
 #ifdef _MSC_VER
 #include <windows.h>
