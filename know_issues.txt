@@ -3,6 +3,16 @@
 
 2.
 scanserver segfaults whith reflectances sometimes.
+E.g.,
+
+bin/scanserver -c 3500
+and
+bin/show -s 0 -e 1 -f riegl_txt --reflectance ~/dat/bremen_city --scanserver
+
+or
+bin/scanserver
+and
+bin/slam6D -s 0 -e 1 -f uosr dat --scanserver
 
 3.
 scan_red with panorama range image and cylindrical coordinates does
