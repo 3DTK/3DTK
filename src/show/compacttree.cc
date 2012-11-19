@@ -686,7 +686,9 @@ shortpointrep* compactTree::createPoints(lint length) {
   shortpointrep *points = alloc->allocate<shortpointrep> (POINTDIM*length);
   return points;
 }
-void compactTree::deserialize(std::string filename ) {
+
+void compactTree::deserialize(std::string filename)
+{
   char buffer[sizeof(float) * 20];
   float *p = reinterpret_cast<float*>(buffer);
 
