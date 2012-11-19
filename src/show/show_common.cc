@@ -847,8 +847,6 @@ void initShow(int argc, char **argv){
     string scanFileName = dir + "scan" + to_string(start,3) + ".oct";
     cout << "Getting point information from " << scanFileName << endl;
     cout << "Attention! All subsequent oct-files must be of the same type!" << endl;
-
-    pointtype = BOctTree<sfloat>::readType(scanFileName);
   }
   scan_dir = dir;
 
@@ -891,7 +889,7 @@ void initShow(int argc, char **argv){
   cout << "Creating display octrees.." << endl;
 #endif
 
-  if(loadOct) cout << "Loading octtrees from file where possible instead of creating them from scans." << endl;
+  if (loadOct) cout << "Loading octtrees from file where possible instead of creating them from scans." << endl;
   
   // for managed scans the input phase needs to know how much it can handle
   std::size_t free_mem = 0;
@@ -905,14 +903,26 @@ void initShow(int argc, char **argv){
 #ifdef USE_COMPACT_TREE // FIXME: change compact tree, then this case can be removed
     compactTree* tree;
     try {
-      if (red > 0) { // with reduction, only xyz points
-        DataXYZ xyz_r(scan->get("xyz reduced show"));
-        tree = new compactTree(PointerArray<double>(xyz_r).get(), xyz_r.size(), voxelSize, pointtype, cm);
-      } else { // without reduction, xyz + attribute points
-        sfloat** pts = pointtype.createPointArray<sfloat>(scan);
-        unsigned int nrpts = scan->size<DataXYZ>("xyz");
-        tree = new compactTree(pts, nrpts, voxelSize, pointtype, cm);
-        for(unsigned int i = 0; i < nrpts; ++i) delete[] pts[i]; delete[] pts;
+	 if (loadOct) {
+	   string sfName = dir + "scan" + to_string(i,3) + ".oct";
+	   cout << "Load " << sfName;
+	   tree = new compactTree(sfName, cm);
+	   cout << " done." << endl;
+	 } else {
+	   if (red > 0) { // with reduction, only xyz points
+		DataXYZ xyz_r(scan->get("xyz reduced show"));
+		tree = new compactTree(PointerArray<double>(xyz_r).get(), xyz_r.size(), voxelSize, pointtype, cm);
+	   } else { // without reduction, xyz + attribute points
+		sfloat** pts = pointtype.createPointArray<sfloat>(scan);
+		unsigned int nrpts = scan->size<DataXYZ>("xyz");
+		tree = new compactTree(pts, nrpts, voxelSize, pointtype, cm);
+		for(unsigned int i = 0; i < nrpts; ++i) delete[] pts[i];
+		delete[] pts;
+		if (saveOct) {
+		  string sfName = dir + "scan" + to_string(i,3) + ".oct";
+		  tree->serialize(sfName);
+		}
+	   }
       }
     } catch(...) {
       cout << "Scan " << i << " could not be loaded into memory, stopping here." << endl;
@@ -1024,7 +1034,7 @@ set heuristic, do locking, catch exception, reset heuristic to default or old
 
   // load frames now that we know how many scans we actually loaded
   unsigned int real_end = min((unsigned int)(end), 
-	                                              (unsigned int)(start + octpts.size() - 1));
+						(unsigned int)(start + octpts.size() - 1));
   if(readFrames(dir, start, real_end, readInitial, type))
     generateFrames(start, real_end, true);
   
