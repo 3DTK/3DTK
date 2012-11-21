@@ -1,7 +1,7 @@
 /*
- * scan_io_xyzr implementation
+ * scan_io_xyz implementation
  *
- * Copyright (C) Andreas Nuechter
+ * Copyright (C) Andreas Nuechter, Dorit Borrmann 
  *
  * Released under the GPL version 3.
  *
@@ -9,12 +9,14 @@
 
 
 /**
- * @file scan_io_xyzr.cc
- * @brief IO of a 3D scan in xyz file format plus a reflectance/intensity
+ * @file scan_io_xyz.cc
+ * @brief IO of a 3D scan in xyz file format (right-handed coordinate system,
+ * with z as height)
  * @author Andreas Nuechter. Jacobs University Bremen, Germany.
+ * @author Dorit Borrmann. Jacobs University Bremen, Germany.
  */
 
-#include "scanio/scan_io_xyzr.h"
+#include "scanio/scan_io_xyz.h"
 
 #include <iostream>
 using std::cout;
@@ -37,7 +39,7 @@ using namespace boost::filesystem;
 #define POSE_PATH_PREFIX "scan"
 #define POSE_PATH_SUFFIX ".pose"
 
-std::list<std::string> ScanIO_xyzr::readDirectory(const char* dir_path, 
+std::list<std::string> ScanIO_xyz::readDirectory(const char* dir_path, 
 						  unsigned int start, 
 						  unsigned int end)
 {
@@ -50,23 +52,15 @@ std::list<std::string> ScanIO_xyzr::readDirectory(const char* dir_path,
     data /= path(std::string(DATA_PATH_PREFIX) + identifier + DATA_PATH_SUFFIX);
     path pose(dir_path);
     pose /= path(std::string(POSE_PATH_PREFIX) + identifier + POSE_PATH_SUFFIX);
-    cout << data << endl;
     // stop if part of a scan is missing or end by absence is detected
-    cout << i << endl;
-    if(!exists(data)) {
-      cerr << "No data found!" << endl;
+    if(!exists(data) || !exists(pose))
       break;
-    }
-    if(!exists(pose)) {
-      cerr << "No pose files found!" << endl; 
-      break;
-    }
     identifiers.push_back(identifier);
   }
   return identifiers;
 }
 
-void ScanIO_xyzr::readPose(const char* dir_path, 
+void ScanIO_xyz::readPose(const char* dir_path, 
 			   const char* identifier, 
 			   double* pose)
 {
@@ -98,12 +92,12 @@ void ScanIO_xyzr::readPose(const char* dir_path,
   }
 }
 
-bool ScanIO_xyzr::supports(IODataType type)
+bool ScanIO_xyz::supports(IODataType type)
 {
-  return !!(type & ( DATA_REFLECTANCE | DATA_XYZ ));
+  return !!(type & ( DATA_XYZ ));
 }
 
-void ScanIO_xyzr::readScan(const char* dir_path, 
+void ScanIO_xyz::readScan(const char* dir_path, 
 			   const char* identifier, 
 			   PointFilter& filter, 
 			   std::vector<double>* xyz, 
@@ -144,12 +138,6 @@ void ScanIO_xyzr::readScan(const char* dir_path,
         data_file >> point[0];
         data_file >> point[1];
         point[0] *= -1.0;
-        data_file >> reflection;
-/*
-	point[0] -= 485531.0;
-	point[1] -= 5882078.400;
-	point[2] -= 52;
-*/
       } catch(std::ios_base::failure& e) {
         break;
       }
@@ -177,7 +165,7 @@ extern "C" __declspec(dllexport) ScanIO* create()
 extern "C" ScanIO* create()
 #endif
 {
-  return new ScanIO_xyzr;
+  return new ScanIO_xyz;
 }
 
 
