@@ -84,10 +84,16 @@ int main(int argc, char **argv)
   int  fileCounter = start;
   char frameFileName[255];
   char scanFileName[255];
+  char outFileName[255];
 
   ifstream frame_in;
   ifstream scan_in;
 
+  snprintf(outFileName,255,"%sscan%.3d.xyz",dir,fileCounter);
+  cout << outFileName << endl;
+  ofstream redptsout(outFileName);
+  stringstream outdat;
+  int pointcnt=0;
   for (;;) {
     if (end > -1 && fileCounter > end) break; // 'nuf read
     snprintf(frameFileName,255,"%sscan%.3d.frames",dir,fileCounter);
@@ -122,7 +128,7 @@ int main(int argc, char **argv)
     while(scan_in.good()) {
   /*    scan_in >> p.z >> p.x >> p.y >> range >> theta >> phi >> reflectance;
    */ //scan_in >> p.z >> p.x >> p.y >> range >> theta >> phi >> reflectance;
-      scan_in >> p.x >> p.y >> p.z; // >> p.reflectance;
+      scan_in >> p.x >> p.y >> p.z >> p.reflectance;
      /* p.x *= -100;
       p.y *= 100;
       p.z *= 100;
@@ -134,9 +140,21 @@ int main(int argc, char **argv)
       //cout << p.y << " " << p.z << " " << -p.x << endl;
       //cout << p.x*0.01 << " " << p.z*0.01 << " " << p.y*0.01 << " " << p.reflectance << endl;
       //cout << (int)p.x << " " << (int)p.y << " " << (int)p.z << endl;// << " " << p.reflectance << endl;
-      cout << p.x << " " << p.y << " " << p.z << endl;// << " " << p.reflectance << endl;
+      outdat << std::setprecision(15) << p.z << " " << -p.x << " " << p.y << " " << p.reflectance << endl;
+      pointcnt++;
+      if(pointcnt > 100) {
+        redptsout.write(outdat.str().c_str(), outdat.str().size());
+        pointcnt = 0;
+        outdat.clear();
+        outdat.str("");
+      }
 
     } 
+    redptsout.write(outdat.str().c_str(), outdat.str().size());
+    pointcnt = 0;
+    outdat.clear();
+    outdat.str("");
+
 
     scan_in.close();
     scan_in.clear();
@@ -144,6 +162,8 @@ int main(int argc, char **argv)
     frame_in.clear();
     cerr << " done." << endl;
   }
+  redptsout.close();
+  redptsout.clear();
 
 }
 

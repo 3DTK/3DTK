@@ -643,11 +643,13 @@ int main(int argc, char **argv)
 
       double alignxf[16];
       EulerToMatrix4(rPos, rPosTheta, alignxf);
+      cout << "A" << endl;
       if(matchPlaneToBoard(points, alignxf, pattern, output)) {
         successes++;
       } else {
         failures++;
       }
+      cout << "blub" << endl;
 
     }
    
