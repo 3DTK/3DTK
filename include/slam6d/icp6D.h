@@ -1,7 +1,7 @@
 /** @file 
  *  @brief Representation of 3D scan matching with ICP
- *  @author Kai Lingemann. Institute of Computer Science, University of Osnabrueck, Germany.
- *  @author Andreas Nuechter. Institute of Computer Science, University of Osnabrueck, Germany.
+ *  @author Kai Lingemann. Inst. of CS, University of Osnabrueck, Germany.
+ *  @author Andreas Nuechter. Inst. of CS, University of Osnabrueck, Germany.
  */
 
 #ifndef __ICP6D_H__
@@ -46,11 +46,17 @@ public:
    */
   virtual ~icp6D() {};
   
-  void doICP(vector <Scan *> allScans, PairingMode pairing_mode = CLOSEST_POINT);
-  virtual int match(Scan* PreviousScan, Scan* CurrentScan, PairingMode pairing_mode = CLOSEST_POINT);
+  void doICP(vector <Scan *> allScans,
+		   PairingMode pairing_mode = CLOSEST_POINT);
+  virtual int match(Scan* PreviousScan,
+				Scan* CurrentScan,
+				PairingMode pairing_mode = CLOSEST_POINT);
   void covarianceEuler(Scan *scan1, Scan *scan2, NEWMAT::Matrix *C);
   void covarianceQuat(Scan *scan1, Scan *scan2, NEWMAT::Matrix *C);
-  double Point_Point_Error(Scan* PreviousScan, Scan* CurrentScan, double max_dist_match, unsigned int *nrp=0);
+  double Point_Point_Error(Scan* PreviousScan,
+					  Scan* CurrentScan,
+					  double max_dist_match,
+					  unsigned int *nrp=0);
 
   inline int  get_rnd();
   inline bool get_meta();

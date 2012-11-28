@@ -10,7 +10,8 @@
 
 /**
  *  @file 
- *  @brief Implementation of the ICP error function minimization via approximation
+ *  @brief Implementation of the ICP error function minimization via
+           small angle approximation
  *  @author Andreas Nuechter. Jacobs University Bremen gGmbH, Germany
  */
 
@@ -34,8 +35,10 @@ using std::setiosflags;
  * @param alignxf The resulting transformation matrix
  * @return Error estimation of the matching (rms)
  */
-double icp6D_APX::Point_Point_Align(const vector<PtPair>& Pairs, double *alignxf,
-							 const double centroid_m[3], const double centroid_d[3])
+double icp6D_APX::Align(const vector<PtPair>& Pairs,
+				    double *alignxf,
+				    const double centroid_m[3],
+				    const double centroid_d[3])
 {
   int n = Pairs.size();
 
@@ -64,7 +67,8 @@ double icp6D_APX::Point_Point_Align(const vector<PtPair>& Pairs, double *alignxf
     p2[2] = Pairs[i].p2.z;
 
     double p12[3] = { p1[0] - p2[0], p1[1] - p2[1], p1[2] - p2[2] };
-    double p2c[3] = { p2[0] - centroid_d[0], p2[1] - centroid_d[1], p2[2] - centroid_d[2] };
+    double p2c[3] = { p2[0] - centroid_d[0], p2[1] - centroid_d[1],
+				  p2[2] - centroid_d[2] };
 
     sum += Len2(p12);
 
@@ -87,7 +91,8 @@ double icp6D_APX::Point_Point_Align(const vector<PtPair>& Pairs, double *alignxf
 	    << resetiosflags(ios::floatfield) << setiosflags(ios::fixed)
 	    << std::setw(10) << std::setprecision(7)
 	    << error
-	    << "  using " << std::setw(6) << (int)Pairs.size() << " points" << endl;
+	    << "  using " << std::setw(6) << (int)Pairs.size()
+	    << " points" << endl;
   }
 
   // Solve eqns
@@ -128,13 +133,13 @@ double icp6D_APX::Point_Point_Align(const vector<PtPair>& Pairs, double *alignxf
 }
 
 
-double icp6D_APX::Point_Point_Align_Parallel(const int openmp_num_threads, 
-									const unsigned int n[OPENMP_NUM_THREADS],
-									const double sum[OPENMP_NUM_THREADS], 
-									const double centroid_m[OPENMP_NUM_THREADS][3],
-									const double centroid_d[OPENMP_NUM_THREADS][3], 
-									const vector<PtPair> pairs[OPENMP_NUM_THREADS],
-									double *alignxf)
+double icp6D_APX::Align_Parallel(const int openmp_num_threads, 
+						   const unsigned int n[OPENMP_NUM_THREADS],
+						   const double sum[OPENMP_NUM_THREADS], 
+						   const double centroid_m[OPENMP_NUM_THREADS][3],
+						   const double centroid_d[OPENMP_NUM_THREADS][3],
+						   const vector<PtPair> pairs[OPENMP_NUM_THREADS],
+						   double *alignxf)
                          
 {
 

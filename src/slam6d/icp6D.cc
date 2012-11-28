@@ -11,8 +11,8 @@
 /**
  * @file 
  * @brief Implementation of 3D scan matching with ICP
- * @author Kai Lingemann. Institute of Computer Science, University of Osnabrueck, Germany.
- * @author Andreas Nuechter. Institute of Computer Science, University of Osnabrueck, Germany.
+ * @author Kai Lingemann. Inst. of CS, University of Osnabrueck, Germany.
+ * @author Andreas Nuechter. Inst. of CS, University of Osnabrueck, Germany.
  */
 
 #include "slam6d/icp6D.h"
@@ -193,16 +193,19 @@ int icp6D::match(Scan* PreviousScan, Scan* CurrentScan,
     if (pairssize > 3) {
       if ((my_icp6Dminimizer->getAlgorithmID() == 1) ||
           (my_icp6Dminimizer->getAlgorithmID() == 2) ) {
-        ret = my_icp6Dminimizer->Point_Point_Align_Parallel(OPENMP_NUM_THREADS,
-            n, sum, centroid_m, centroid_d, Si, 
-            alignxf);
+        ret = my_icp6Dminimizer->Align_Parallel(OPENMP_NUM_THREADS,
+									   n, sum,
+									   centroid_m, centroid_d,
+									   Si, alignxf);
       } else if (my_icp6Dminimizer->getAlgorithmID() == 6) {
-        ret = my_icp6Dminimizer->Point_Point_Align_Parallel(OPENMP_NUM_THREADS,
-            n, sum, centroid_m, centroid_d, 
-            pairs,
-            alignxf);
+        ret = my_icp6Dminimizer->Align_Parallel(OPENMP_NUM_THREADS,
+									   n, sum,
+									   centroid_m, centroid_d, 
+									   pairs,
+									   alignxf);
       } else {
-        cout << "This parallel minimization algorithm is not implemented !!!" << endl;
+        cout << "This parallel minimization algorithm is not implemented !!!"
+		   << endl;
         exit(-1);
       }
     } else {
@@ -219,10 +222,11 @@ int icp6D::match(Scan* PreviousScan, Scan* CurrentScan,
 
     // do we have enough point pairs?
     if (pairs.size() > 3) {
-      if (my_icp6Dminimizer->getAlgorithmID() == 3 || my_icp6Dminimizer->getAlgorithmID() == 8 ) {
+      if (my_icp6Dminimizer->getAlgorithmID() == 3 ||
+		my_icp6Dminimizer->getAlgorithmID() == 8 ) {
         memcpy(alignxf, CurrentScan->get_transMat(), sizeof(alignxf));
       }
-      ret = my_icp6Dminimizer->Point_Point_Align(pairs, alignxf, centroid_m, centroid_d);
+      ret = my_icp6Dminimizer->Align(pairs, alignxf, centroid_m, centroid_d);
     } else {
       break;
     }
@@ -230,18 +234,23 @@ int icp6D::match(Scan* PreviousScan, Scan* CurrentScan,
 #endif
 
     if ((iter == 0 && anim != -2) || ((anim > 0) && (iter % anim == 0))) {
-      CurrentScan->transform(alignxf, Scan::ICP, 0);   // transform the current scan
+	 // transform the current scan
+      CurrentScan->transform(alignxf, Scan::ICP, 0);  
     } else {
-      CurrentScan->transform(alignxf, Scan::ICP, -1);  // transform the current scan
+	 // transform the current scan
+      CurrentScan->transform(alignxf, Scan::ICP, -1);  
     }
     
-    if ((fabs(ret - prev_ret) < epsilonICP) && (fabs(ret - prev_prev_ret) < epsilonICP)) {
+    if ((fabs(ret - prev_ret) < epsilonICP) &&
+	   (fabs(ret - prev_prev_ret) < epsilonICP)) {
       double id[16];
       M4identity(id);
       if(anim == -2) {
-        CurrentScan->transform(id, Scan::ICP, -1);  // write end pose
+	   // write end pose
+        CurrentScan->transform(id, Scan::ICP, -1);  
       } else {
-        CurrentScan->transform(id, Scan::ICP, 0);  // write end pose
+	   // write end pose
+        CurrentScan->transform(id, Scan::ICP, 0);  
       }
     break;
     }
@@ -256,7 +265,11 @@ int icp6D::match(Scan* PreviousScan, Scan* CurrentScan,
  * 
  *
  */
-double icp6D::Point_Point_Error(Scan* PreviousScan, Scan* CurrentScan, double max_dist_match, unsigned int *np) {
+double icp6D::Point_Point_Error(Scan* PreviousScan,
+						  Scan* CurrentScan,
+						  double max_dist_match,
+						  unsigned int *np)
+{
   double error = 0;
   unsigned int nr_ppairs = 0;
 
@@ -280,9 +293,9 @@ double icp6D::Point_Point_Error(Scan* PreviousScan, Scan* CurrentScan, double ma
     {
       int thread_num = omp_get_thread_num();
       Scan::getPtPairsParallel(pairs, PreviousScan, CurrentScan,
-          thread_num, step,
-          rnd, sqr(max_dist_match),
-          sum, centroid_m, centroid_d, CLOSEST_POINT);
+						 thread_num, step,
+						 rnd, sqr(max_dist_match),
+						 sum, centroid_m, centroid_d, CLOSEST_POINT);
 
     } 
 
@@ -300,8 +313,10 @@ double icp6D::Point_Point_Error(Scan* PreviousScan, Scan* CurrentScan, double ma
     double centroid_d[3] = {0.0, 0.0, 0.0};
     vector<PtPair> pairs;
 
-    Scan::getPtPairs(&pairs, PreviousScan, CurrentScan, 0, rnd, sqr(max_dist_match),
-                     error, centroid_m, centroid_d, CLOSEST_POINT);
+    Scan::getPtPairs(&pairs, PreviousScan, CurrentScan, 0,
+				 rnd, sqr(max_dist_match),
+                     error, centroid_m, centroid_d,
+				 CLOSEST_POINT);
 
     // getPtPairs computes error as sum of squared distances
     error = 0;
@@ -319,6 +334,7 @@ double icp6D::Point_Point_Error(Scan* PreviousScan, Scan* CurrentScan, double ma
 //    return sqrt(error/nr_ppairs);
     return error/nr_ppairs;
 }
+
 /**
  * This function matches the scans only with ICP
  * 

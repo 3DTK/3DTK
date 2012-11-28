@@ -39,10 +39,13 @@ using namespace NEWMAT;
  * @param *alignfx The resulting transformation matrix
  * @return Error estimation of the matching (rms)
  */
-double icp6D_LUMEULER::Point_Point_Align(const vector<PtPair>& pairs, double *alignfx,
-		const double centroid_m[3], const double centroid_d[3])
+double icp6D_LUMEULER::Align(const vector<PtPair>& pairs,
+					    double *alignfx,
+					    const double centroid_m[3],
+					    const double centroid_d[3])
 {
-	// alignxf is filled with the current pose, rPos is the translation, rPosTheta are the 3 euler angles theta_x, theta_y, theta_z
+  // alignxf is filled with the current pose,
+  // rPos is the translation, rPosTheta are the 3 euler angles theta_x, theta_y, theta_z
 	double rPos[3], rPosTheta[3];
 	Matrix4ToEuler(alignfx, rPosTheta, rPos);
 

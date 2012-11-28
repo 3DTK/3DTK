@@ -34,6 +34,7 @@
 #include "slam6d/icp6Dlumeuler.h"
 #include "slam6d/icp6Dlumquat.h"
 #include "slam6d/icp6Dquatscale.h"
+#include "slam6d/icp6Dnapx.h"
 #include "slam6d/icp6D.h"
 #ifdef WITH_CUDA
 #include "slam6d/cuda/icp6Dcuda.h"
@@ -346,8 +347,8 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &rand,
     { "DlastSLAM",       required_argument,   0,  '4' }, // use the long format only
     { "epsICP",          required_argument,   0,  '5' }, // use the long format only
     { "epsSLAM",         required_argument,   0,  '6' }, // use the long format only
-    { "normalshoot",     no_argument,         0,  '7' }, // use the long format only
-    { "point-to-plane",  no_argument,         0,  'z' }, // use the long format only
+    { "normalshoot-simple",     no_argument,         0,  '7' }, // use the long format only
+    { "point-to-plane-simple",  no_argument,         0,  'z' }, // use the long format only
     { "exportAllPoints", no_argument,         0,  '8' },
     { "distLoop",        required_argument,   0,  '9' }, // use the long format only
     { "iterLoop",        required_argument,   0,  '1' }, // use the long format only
@@ -362,8 +363,8 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &rand,
     switch (c) {
     case 'a':
       algo = atoi(optarg);
-      if ((algo < 0) || (algo > 9)) {
-        cerr << "Error: ICP Algorithm not available." << endl;
+      if ((algo < 0) || (algo > 10)) {
+        cerr << "Error: ICP minimizer algorithm not available." << endl;
         exit(1);
       }
       break;
@@ -476,11 +477,11 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &rand,
     case '3':  // = --graphDist
       graphDist = atof(optarg);
       break;
-    case '7': // = --normalshoot
-      pairing_mode = CLOSEST_POINT_ALONG_NORMAL;
+    case '7': // = --normalshoot-simple
+      pairing_mode = CLOSEST_POINT_ALONG_NORMAL_SIMPLE;
       break;
-    case 'z': // = --point-to-plane
-      pairing_mode = CLOSEST_PLANE;
+    case 'z': // = --point-to-plane-simple
+      pairing_mode = CLOSEST_PLANE_SIMPLE;
       break;
     case 'f':
       try {
@@ -761,8 +762,8 @@ int main(int argc, char **argv)
     Scan* scan = *it;
     scan->setRangeFilter(maxDist, minDist);
     unsigned int types = 0;
-    if ((pairing_mode == CLOSEST_POINT_ALONG_NORMAL) ||
-	   (pairing_mode == CLOSEST_PLANE)) {
+    if ((pairing_mode == CLOSEST_POINT_ALONG_NORMAL_SIMPLE) ||
+	   (pairing_mode == CLOSEST_PLANE_SIMPLE)) {
 	 types = PointType::USE_NORMAL;
     }
      scan->setReductionParameter(red, octree, PointType(types));
@@ -797,6 +798,9 @@ int main(int argc, char **argv)
     break;
   case 9 :
     my_icp6Dminimizer = new icp6D_QUAT_SCALE(quiet);
+    break;
+  case 10 :
+    my_icp6Dminimizer = new icp6D_NAPX(quiet);
     break;
   }
 

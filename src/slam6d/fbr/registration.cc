@@ -131,7 +131,7 @@ namespace fbr{
     pointToArray(centroidq, centroidqd);
     pointToArray(centroidt, centroidtd);
     icp6D_QUAT q(true);
-    q.Point_Point_Align(pairs, align, centroidqd, centroidtd);
+    q.Align(pairs, align, centroidqd, centroidtd);
     //transform the matches with align if the error is less than minerror
     double iError = 0;
     unsigned int eIdx = 0;

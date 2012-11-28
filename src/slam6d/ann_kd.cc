@@ -52,7 +52,7 @@ ANNtree::ANNtree(PointerArray<double>&_pts, int n)
   */
   pts = new double*[n];
   double* tpts = new double[3*n];
-  for(unsigned int i = 0, j = 0; i < n; i++) {
+  for(int i = 0, j = 0; i < n; i++) {
     pts[i] = &tpts[j];
     tpts[j++] = _pts.get()[i][0];
     tpts[j++] = _pts.get()[i][1];

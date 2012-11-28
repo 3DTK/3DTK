@@ -1,8 +1,8 @@
 /**
  *  @file
- *   @brief Implemetnations of point pairs
- *  @author Kai Lingemann. Institute of Computer Science, University of Osnabrueck, Germany.
- *  @author Andreas Nuechter. Institute of Computer Science, University of Osnabrueck, Germany.
+ *  @brief Implemetnations of point pairs
+ *  @author Kai Lingemann. Inst. of CS, University of Osnabrueck, Germany.
+ *  @author Andreas Nuechter. Inst. of CS, University of Osnabrueck, Germany.
  */
 
 /**
@@ -12,6 +12,15 @@ inline PtPair::PtPair(double *_p1, double *_p2)
 {
   p1 = Point(_p1);
   p2 = Point(_p2);
+}
+
+inline PtPair::PtPair(double *_p1, double *_p2, double *_norm)
+{
+  p1 = Point(_p1);
+  p2 = Point(_p2);
+  p2.nx = _norm[0];
+  p2.ny = _norm[1];
+  p2.nz = _norm[2];
 }
 
 inline PtPair::PtPair(Point &_p1, Point &_p2)

@@ -38,8 +38,10 @@ using namespace NEWMAT;
  * @param *alignfx The resulting transformation matrix
  * @return Error estimation of the matching (rms)
  */
-double icp6D_ORTHO::Point_Point_Align(const vector<PtPair>& pairs, double *alignfx,
-		const double centroid_m[3], const double centroid_d[3])
+double icp6D_ORTHO::Align(const vector<PtPair>& pairs,
+					 double *alignfx,
+					 const double centroid_m[3],
+					 const double centroid_d[3])
 {
 	double error = 0;
 	double sum = 0.0;
