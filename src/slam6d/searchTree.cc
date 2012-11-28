@@ -20,18 +20,25 @@
 
 #include <stdexcept>
 
-double *SearchTree::FindClosestAlongDir(double *_p, double *_dir, double maxdist2, int threadNum) const
+double *SearchTree::FindClosestAlongDir(double *_p,
+								double *_dir,
+								double maxdist2,
+								int threadNum) const
 {
   throw std::runtime_error("Method FindClosestAlongDir is not implemented");
 }
 
 void SearchTree::getPtPairs(vector <PtPair> *pairs, 
-                            double *source_alignxf,                          // source
+                            double *source_alignxf,      // source
                             double * const *q_points,
-					   unsigned int startindex, unsigned int endindex,  // target
+					   unsigned int startindex,
+					   unsigned int endindex,       // target
                             int thread_num,
-                            int rnd, double max_dist_match2, double &sum,
-                            double *centroid_m, double *centroid_d)
+                            int rnd,
+					   double max_dist_match2,
+					   double &sum,
+                            double *centroid_m,
+					   double *centroid_d)
 {
   // prepare this tree for resource access in FindClosest
   lock();
@@ -71,15 +78,7 @@ void SearchTree::getPtPairs(vector <PtPair> *pairs,
       sum += Len2(p12);
       
       pairs->push_back(myPair);
-      /*cout << "PTPAIR" << i << " "
-      << p[0] << " "
-      << p[1] << " "
-      << p[2] << " - " 
-      << q_points[i][0] << " "
-      << q_points[i][1] << " "
-      << q_points[i][2] << "          " << Len2(p12) << endl; */
     }
-
   }
   
   // release resource access lock
@@ -89,12 +88,17 @@ void SearchTree::getPtPairs(vector <PtPair> *pairs,
 }
 
 void SearchTree::getPtPairs(vector <PtPair> *pairs, 
-                            double *source_alignxf,                          // source
-                            const DataXYZ& xyz_r, const DataNormal& normal_r,
-					   unsigned int startindex, unsigned int endindex,  // target
+                            double *source_alignxf,         // source
+                            const DataXYZ& xyz_r,
+					   const DataNormal& normal_r,
+					   unsigned int startindex,
+					   unsigned int endindex,          // target
                             int thread_num,
-                            int rnd, double max_dist_match2, double &sum,
-                            double *centroid_m, double *centroid_d,
+                            int rnd,
+					   double max_dist_match2,
+					   double &sum,
+                            double *centroid_m,
+					   double *centroid_d,
 					   PairingMode pairing_mode)
 {
   // prepare this tree for resource access in FindClosest
@@ -103,11 +107,13 @@ void SearchTree::getPtPairs(vector <PtPair> *pairs,
   double local_alignxf_inv[16];
   M4inv(source_alignxf, local_alignxf_inv);
   
-  // t is the original point from target, s is the (inverted) query point from target and then
+  // t is the original point from target,
+  // s is the (inverted) query point from target and then
   // the closest point in source
   double t[3], s[3], normal[3];
   for (unsigned int i = startindex; i < endindex; i++) {
-    if (rnd > 1 && rand(rnd) != 0) continue;  // take about 1/rnd-th of the numbers only
+    // take about 1/rnd-th of the numbers only
+    if (rnd > 1 && rand(rnd) != 0) continue; 
     
     t[0] = xyz_r[i][0];
     t[1] = xyz_r[i][1];
@@ -124,12 +130,15 @@ void SearchTree::getPtPairs(vector <PtPair> *pairs,
       Normalize3(normal);
     }
 
-    if (pairing_mode == CLOSEST_POINT_ALONG_NORMAL) {
+    if (pairing_mode == CLOSEST_POINT_ALONG_NORMAL_SIMPLE) {
       transform3normal(local_alignxf_inv, normal);
-      closest = this->FindClosestAlongDir(s, normal, max_dist_match2, thread_num);
+      closest = this->FindClosestAlongDir(s,
+								  normal,
+								  max_dist_match2,
+								  thread_num);
 
       // discard points farther than 20 cm
-      if (closest && sqrt(Dist2(closest, s)) > 20) closest = NULL;
+	 //     if (closest && sqrt(Dist2(closest, s)) > 20) closest = NULL;
     } else {
       closest = this->FindClosest(s, max_dist_match2, thread_num);
     }
@@ -137,7 +146,7 @@ void SearchTree::getPtPairs(vector <PtPair> *pairs,
     if (closest) {
       transform3(source_alignxf, closest, s);
 
-      if (pairing_mode == CLOSEST_PLANE) {
+      if (pairing_mode == CLOSEST_PLANE_SIMPLE) {
         // need to mutate s if we are looking for closest point-to-plane
         // s_ = (n,s-t)*n + t
         // to find the projection of s onto plane formed by normal n and point t
@@ -159,8 +168,8 @@ void SearchTree::getPtPairs(vector <PtPair> *pairs,
       centroid_d[0] += t[0];
       centroid_d[1] += t[1];
       centroid_d[2] += t[2];
-      
-      PtPair myPair(s, t);
+
+      PtPair myPair(s, t, normal);
       double p12[3] = { 
         myPair.p1.x - myPair.p2.x, 
         myPair.p1.y - myPair.p2.y,

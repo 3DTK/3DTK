@@ -24,6 +24,8 @@ public:
    * Constructor, by two 'point' pointers
    */
   inline PtPair(double *_p1, double *_p2);
+
+  inline PtPair(double *_p1, double *_p2, double *_norm);
   
   inline PtPair(Point &p1, Point &p2);
   

@@ -1,5 +1,6 @@
 /** @file 
- *  @brief Implementation of the virtual functor for ICP error function minimization
+ *  @brief Implementation of the virtual functor
+ *         for ICP error function minimization
  *  @author Andreas Nuechter. Jacobs University Bremen gGmbH, Germany
  */
 
@@ -53,30 +54,32 @@ public:
   // Scan Registration Problem, Journal Computer Vision and Image
   // Understanding (CVIU), Elsevier Science, Volume 114, Issue 8,
   // pp. 963-980, August 2010.
-  virtual double Point_Point_Align(const vector<PtPair>& Pairs, double *alignxf,
-							const double centroid_m[3], const double centroid_d[3]) = 0;
+  virtual double Align(const vector<PtPair>& Pairs,
+				   double *alignxf,
+				   const double centroid_m[3],
+				   const double centroid_d[3]) = 0;
   
   /**
    * aligning the point pairs parallel algorithms
    */
-  virtual double Point_Point_Align_Parallel(const int openmp_num_threads, 
-								    const unsigned int n[OPENMP_NUM_THREADS],
-								    const double sum[OPENMP_NUM_THREADS], 
-								    const double centroid_m[OPENMP_NUM_THREADS][3],
-								    const double centroid_d[OPENMP_NUM_THREADS][3], 
-								    const double Si[OPENMP_NUM_THREADS][9], 
-								    double *alignxf)
+  virtual double Align_Parallel(const int openmp_num_threads, 
+						  const unsigned int n[OPENMP_NUM_THREADS],
+						  const double sum[OPENMP_NUM_THREADS], 
+						  const double centroid_m[OPENMP_NUM_THREADS][3],
+						  const double centroid_d[OPENMP_NUM_THREADS][3], 
+						  const double Si[OPENMP_NUM_THREADS][9], 
+						  double *alignxf)
   {
     cout << "this function is not implemented!!!" << endl;
     exit(-1);
   }
-  virtual double Point_Point_Align_Parallel(const int openmp_num_threads, 
-								    const unsigned int n[OPENMP_NUM_THREADS],
-								    const double sum[OPENMP_NUM_THREADS], 
-								    const double centroid_m[OPENMP_NUM_THREADS][3],
-								    const double centroid_d[OPENMP_NUM_THREADS][3], 
-								    const vector<PtPair> pairs[OPENMP_NUM_THREADS],
-								    double *alignxf)
+  virtual double Align_Parallel(const int openmp_num_threads, 
+						  const unsigned int n[OPENMP_NUM_THREADS],
+						  const double sum[OPENMP_NUM_THREADS], 
+						  const double centroid_m[OPENMP_NUM_THREADS][3],
+						  const double centroid_d[OPENMP_NUM_THREADS][3], 
+						  const vector<PtPair> pairs[OPENMP_NUM_THREADS],
+						  double *alignxf)
   {
     cout << "this function is not implemented!!!" << endl;
     exit(-1);

@@ -9,8 +9,9 @@
 
 
 /** @file 
- *  @brief Implementation of the ICP error function minimization via helix-translation
- *  @author Peter Schneider. Institute of Computer Science, University of Koblenz and Landau, Germany.
+ *  @brief Implementation of the ICP error function minimization via
+ *         helix-translation
+ *  @author Peter Schneider. Inst. CS, Univ. of Koblenz and Landau, Germany.
  *  @author Andreas Nuechter. Jacobs University Bremen gGmbH, Germany
  */
 
@@ -44,8 +45,10 @@ using namespace NEWMAT;
  * @param alignxf The resulting transformation matrix
  * @return Error estimation of the matching (rms)
  */
-double icp6D_HELIX::Point_Point_Align(const vector<PtPair>& Pairs, double *alignxf,
-							   const double centroid_m[3], const double centroid_d[3])
+double icp6D_HELIX::Align(const vector<PtPair>& Pairs,
+					 double *alignxf,
+					 const double centroid_m[3],
+					 const double centroid_d[3])
 {
   int n = Pairs.size();
 
@@ -138,7 +141,9 @@ double icp6D_HELIX::Point_Point_Align(const vector<PtPair>& Pairs, double *align
 }
 
 
-void icp6D_HELIX::computeRt(const ColumnVector* ccs, const int vectorOffset, double *alignxf)
+void icp6D_HELIX::computeRt(const ColumnVector* ccs,
+					   const int vectorOffset,
+					   double *alignxf)
 {
   ColumnVector c(3), cs(3);
   c(1) = -(*ccs)(vectorOffset + 1);

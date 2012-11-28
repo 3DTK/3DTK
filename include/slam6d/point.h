@@ -1,8 +1,8 @@
 /**
  *  @file
  *  @brief Representation of a 3D point
- *  @author Kai Lingemann. Institute of Computer Science, University of Osnabrueck, Germany.
- *  @author Andreas Nuechter. Institute of Computer Science, University of Osnabrueck, Germany.
+ *  @author Kai Lingemann. Inst. of CS, University of Osnabrueck, Germany.
+ *  @author Andreas Nuechter. Inst. of CS, University of Osnabrueck, Germany.
  */
 
 #ifndef __POINT_H__
@@ -25,69 +25,38 @@ public:
   /**
    *	Default constructor
    */
-  inline Point() { x = y = z = 0.0;  point_id = 0;  type = 0; reflectance = 0.0; temperature = 0.0; amplitude = 0.0; deviation = 0.0; rgb[0] = 255; rgb[1] = 255; rgb[2] = 255;};
+  inline Point();
+  
   /**
    *	Copy constructor
    */
-  inline Point(const Point& p) { x = p.x; y = p.y; z = p.z; type = p.type; point_id = p.point_id;
-  reflectance = p.reflectance; temperature = p.temperature; amplitude = p.amplitude; deviation = p.deviation; rgb[0] = p.rgb[0]; rgb[1] = p.rgb[1]; rgb[2] = p.rgb[2];};
+  inline Point(const Point& p);
+  
   /**
    *	Constructor with an array, i.e., vecctor of coordinates
    */
-  inline Point(const double *p) { x = p[0]; y = p[1]; z = p[2]; type = 0; reflectance = 0.0; temperature = 0.0; amplitude = 0.0; deviation = 0.0; rgb[0] = 255; rgb[1] = 255; rgb[2] = 255;};
-  inline Point(const double *p, const char *c) { x = p[0]; y = p[1]; z = p[2]; type = 0; reflectance = 0.0; temperature = 0.0; amplitude = 0.0; deviation = 0.0; rgb[0] = c[0]; rgb[1] = c[1]; rgb[2] = c[2];};
+  inline Point(const double *p);
+
+  /**
+   *	Constructor with an array, i.e., vecctor of coordinates and color
+   */
+  inline Point(const double *p, const char *c);
 
   /**
    *	Constructor with three double values
    */
-  inline Point(const double _x, const double _y, const double _z) { x = _x; y = _y; z = _z; type = 0; reflectance = 0.0; temperature = 0.0; amplitude = 0.0; deviation = 0.0; rgb[0] = 255; rgb[1] = 255; rgb[2] = 255;};
-  inline Point(const double _x, const double _y, const double _z, const char _r,
-  const char _g, const char _b) { x = _x; y = _y; z = _z; type = 0; reflectance = 0.0; temperature = 0.0; amplitude = 0.0; deviation = 0.0; rgb[0] = 255; rgb[1] = 255; rgb[2] = 255; rgb[0] = _r; rgb[1] = _g; rgb[2] = _b;};
+  inline Point(const double _x, const double _y, const double _z);
 
-  static inline Point cross(const Point &X, const Point &Y) {
-    Point res;
-    res.x = X.y * Y.z - X.z * Y.y;
-    res.y = X.z * Y.x - X.x * Y.z;
-    res.z = X.x * Y.y - X.y * Y.x;
-    return res;
-  };
-
-  static inline Point norm(const Point &p) {
-    double l = sqrt(p.x*p.x + p.y*p.y + p.z*p.z);
-    Point res(p.x/l, p.y/l, p.z/l);
-    return res;
-  };
-
-  inline Point operator+(const Point &p) const {
-    Point res;
-    res.x = x + p.x;
-    res.y = y + p.y;
-    res.z = z + p.z;
-    return res;
-  };
-
-  inline Point operator-(const Point &p) const {
-    Point res;
-    res.x = x - p.x;
-    res.y = y - p.y;
-    res.z = z - p.z;
-    return res;
-  };
-
-  inline Point& operator-=(const Point &p) {
-    x -= p.x;
-    y -= p.y;
-    z -= p.z;
-    return *this;
-  };
-  inline Point& operator+=(const Point &p) {
-    x += p.x;
-    y += p.y;
-    z += p.z;
-    return *this;
-  };
-
-
+  /**
+   *	Constructor with three double values and three color values
+   */
+  inline Point(const double _x, const double _y, const double _z,
+			const char _r, const char _g, const char _b);
+ 
+  inline Point operator+(const Point &p) const;
+  inline Point operator-(const Point &p) const;
+  inline Point& operator-=(const Point &p);
+  inline Point& operator+=(const Point &p);
 
   inline void transform(const double alignxf[16]);
   inline double distance(const Point& p);
@@ -127,8 +96,22 @@ public:
   float temperature;
   float amplitude;
   float deviation;
-};
 
+  static inline Point cross(const Point &X, const Point &Y) {
+    Point res;
+    res.x = X.y * Y.z - X.z * Y.y;
+    res.y = X.z * Y.x - X.x * Y.z;
+    res.z = X.x * Y.y - X.y * Y.x;
+    return res;
+  };
+  
+  static inline Point norm(const Point &p) {
+    double l = sqrt(p.x*p.x + p.y*p.y + p.z*p.z);
+    Point res(p.x/l, p.y/l, p.z/l);
+    return res;
+  };
+  
+};
 
 inline Point operator*(const double &v, const Point &p) {
   Point res;
