@@ -8,8 +8,10 @@
  */
 
 /** @file 
- *  @brief Implementation of the ICP error function minimization via quaternions and scale factor
- *  @author Flavia Grosan, Alex Tandrau. Jacobs University Bremen gGmbH, Germany.
+ *  @brief Implementation of the ICP error function minimization via
+ *         quaternions and scale factor
+ *  @author Flavia Grosan, Jacobs University Bremen gGmbH, Germany.
+ *  @author Alex Tandrau. Jacobs University Bremen gGmbH, Germany.
  *  @author Andreas Nuechter. Jacobs University Bremen gGmbH, Germany.
  *  @author Dorit borrmann. Jacobs University Bremen gGmbH, Germany.
  */
@@ -38,8 +40,10 @@ using std::endl;
  * @param *alignfx The resulting transformation matrix
  * @return Error estimation of the matching (rms)
 */
-double icp6D_QUAT_SCALE::Point_Point_Align(const vector<PtPair>& pairs, double *alignfx,
-							  const double centroid_m[3], const double centroid_d[3])
+double icp6D_QUAT_SCALE::Align(const vector<PtPair>& pairs,
+						 double *alignfx,
+						 const double centroid_m[3],
+						 const double centroid_d[3])
 {
   int n = pairs.size();
 
@@ -83,9 +87,6 @@ double icp6D_QUAT_SCALE::Point_Point_Align(const vector<PtPair>& pairs, double *
     S[2][1] += pairs[i].p2.z * pairs[i].p1.y;
     S[2][2] += pairs[i].p2.z * pairs[i].p1.z;
   }
-
-	cout << "Centroid_d " << centroid_d[0] << " " << centroid_d[1] << " " << centroid_d[2] << endl;
-	cout << "Centroid_m " << centroid_m[0] << " " << centroid_m[1] << " " << centroid_m[2] << endl;
 
   double error = sqrt(sum / n);
   if (!quiet) {

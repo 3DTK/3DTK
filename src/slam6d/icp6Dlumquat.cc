@@ -37,10 +37,13 @@ using namespace NEWMAT;
  * @param *alignfx The resulting transformation matrix
  * @return Error estimation of the matching (rms)
  */
-double icp6D_LUMQUAT::Point_Point_Align(const vector<PtPair>& pairs, double *alignfx,
-		const double centroid_m[3], const double centroid_d[3])
+double icp6D_LUMQUAT::Align(const vector<PtPair>& pairs,
+					   double *alignfx,
+					   const double centroid_m[3],
+					   const double centroid_d[3])
 {
-	// alignfx is filled with the current pose, t is the translation, quat is the quaternion
+  // alignfx is filled with the current pose, t is the translation,
+  // quat is the quaternion
 	double t[3], quat[4];
 	Matrix4ToQuat(alignfx, quat, t);
 

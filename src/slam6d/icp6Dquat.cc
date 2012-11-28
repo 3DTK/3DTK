@@ -41,8 +41,10 @@ using std::endl;
  * @param *alignfx The resulting transformation matrix
  * @return Error estimation of the matching (rms)
 */
-double icp6D_QUAT::Point_Point_Align(const vector<PtPair>& pairs, double *alignfx,
-							  const double centroid_m[3], const double centroid_d[3])
+double icp6D_QUAT::Align(const vector<PtPair>& pairs,
+					double *alignfx,
+					const double centroid_m[3],
+					const double centroid_d[3])
 {
   int n = pairs.size();
 
@@ -515,13 +517,13 @@ void icp6D_QUAT::characteristicPol(double Q[4][4], double c[4])
     q0011*q2233;
 }
 
-double icp6D_QUAT::Point_Point_Align_Parallel(const int openmp_num_threads,
-					      const unsigned int n[OPENMP_NUM_THREADS],
-					      const double sum[OPENMP_NUM_THREADS],
-					      const double centroid_m[OPENMP_NUM_THREADS][3],
-					      const double centroid_d[OPENMP_NUM_THREADS][3],
-					      const double Si[OPENMP_NUM_THREADS][9],
-					      double *alignfx)
+double icp6D_QUAT::Align_Parallel(const int openmp_num_threads,
+						    const unsigned int n[OPENMP_NUM_THREADS],
+						    const double sum[OPENMP_NUM_THREADS],
+						    const double centroid_m[OPENMP_NUM_THREADS][3],
+						    const double centroid_d[OPENMP_NUM_THREADS][3],
+						    const double Si[OPENMP_NUM_THREADS][9],
+						    double *alignfx)
 {
   double s = 0.0;
   double ret;

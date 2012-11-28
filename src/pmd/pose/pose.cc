@@ -510,7 +510,7 @@ int main(int argc, char **argv) {
             centroidD[2] /= reprojected; 
 
             double transformMat[16];
-            try { alignError = pmdc->icp->Point_Point_Align(pairs, transformMat, centroidM, centroidD); }
+            try { alignError = pmdc->icp->Align(pairs, transformMat, centroidM, centroidD); }
             catch(...) { fprintf(stderr, "ERROR: matrix is singular!\n"); }
 
             if(!gl) printf( "%i: align error: %f, 3d pts count: %i, 2d pts count: %i\n"

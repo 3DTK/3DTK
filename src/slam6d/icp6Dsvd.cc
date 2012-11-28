@@ -9,8 +9,8 @@
 
 /** @file 
  *  @brief Implementation of the ICP error function minimization via SVD
- *  @author Kai Lingemann. Institute of Computer Science, University of Osnabrueck, Germany.
- *  @author Andreas Nuechter. Institute of Computer Science, University of Osnabrueck, Germany.
+ *  @author Kai Lingemann. Inst. of CS, University of Osnabrueck, Germany.
+ *  @author Andreas Nuechter. Inst. of CS, University of Osnabrueck, Germany.
  */
 
 #include "slam6d/icp6Dsvd.h"
@@ -35,8 +35,10 @@ using namespace NEWMAT;
  * @param *alignfx The resulting transformation matrix
  * @return Error estimation of the matching (rms)
 */
-double icp6D_SVD::Point_Point_Align(const vector<PtPair>& pairs, double *alignfx,
-							 const double centroid_m[3], const double centroid_d[3])
+double icp6D_SVD::Align(const vector<PtPair>& pairs,
+				    double *alignfx,
+				    const double centroid_m[3],
+				    const double centroid_d[3])
 {
   double error = 0;
   double sum = 0.0;
@@ -150,12 +152,12 @@ double icp6D_SVD::Point_Point_Align(const vector<PtPair>& pairs, double *alignfx
  * @param *alignfx The resulting transformation matrix
  * @return Error estimation of the matching (rms)
 */
-double icp6D_SVD::Point_Point_Align_Parallel(const int openmp_num_threads, 
-					     const unsigned int n[OPENMP_NUM_THREADS],
-					     const double sum[OPENMP_NUM_THREADS], 
-					     const double centroid_m[OPENMP_NUM_THREADS][3],
-					     const double centroid_d[OPENMP_NUM_THREADS][3], 
-					     const double Si[OPENMP_NUM_THREADS][9], double *alignxf)
+double icp6D_SVD::Align_Parallel(const int openmp_num_threads, 
+						   const unsigned int n[OPENMP_NUM_THREADS],
+						   const double sum[OPENMP_NUM_THREADS], 
+						   const double centroid_m[OPENMP_NUM_THREADS][3],
+						   const double centroid_d[OPENMP_NUM_THREADS][3], 
+						   const double Si[OPENMP_NUM_THREADS][9], double *alignxf)
 {
   double s = 0.0;
   double ret;
