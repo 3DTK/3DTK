@@ -117,4 +117,5 @@ void ScanIO::clearScanIOs()
     dlclose(ptrScanIO);
 #endif
   }
+  m_scanIOs.clear();
 }
