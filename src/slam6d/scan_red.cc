@@ -483,9 +483,7 @@ int main(int argc, char **argv)
             use_reflectance);
 
     for (int iter = start; iter <= end; iter++) {
-      
       Scan::openDirectory(scanserver, dir, iotype, iter, iter);
-
       if(Scan::allScans.size() == 0) {
         cerr << "No scans found. Did you use the correct format?" << endl;
         exit(-1);
