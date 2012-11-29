@@ -64,6 +64,7 @@ void BasicScan::closeDirectory()
   for(ScanVector::iterator it = Scan::allScans.begin(); it != Scan::allScans.end(); ++it)
     delete *it;
   Scan::allScans.clear();
+  ScanIO::clearScanIOs();
 }
 
 BasicScan::BasicScan(double *_rPos, double *_rPosTheta, vector<double*> points) {
@@ -127,7 +128,7 @@ BasicScan::BasicScan(const std::string& path, const std::string& identifier, IOT
 BasicScan::~BasicScan()
 {
   for (map<string, pair<unsigned char*, unsigned int>>::iterator it = m_data.begin(); it != m_data.end(); it++) {
-    delete it->second.first;
+    delete[] it->second.first;
   }
 
 }
@@ -272,7 +273,7 @@ DataPointer BasicScan::create(const std::string& identifier, unsigned int size)
   if(it != m_data.end()) {
     // try to reuse, otherwise reallocate
     if(it->second.second != size) {
-      delete it->second.first;
+      delete[] it->second.first;
       it->second.first = new unsigned char[size];
       it->second.second = size;
     }
@@ -295,7 +296,7 @@ void BasicScan::clear(const std::string& identifier)
 {
   map<string, pair<unsigned char*, unsigned int>>::iterator it = m_data.find(identifier);
   if(it != m_data.end()) {
-    delete it->second.first;
+    delete[] it->second.first;
     m_data.erase(it);
   }
 }

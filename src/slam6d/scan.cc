@@ -378,6 +378,11 @@ void Scan::calcReducedPoints()
 	   for (unsigned int l = 0; l < 3; ++l) 
 		normal_reduced[i][l] = center[i][j++];
     }
+    delete oct;
+    for(int i = 0; i < xyz.size(); i++) {
+      delete[] xyz_in[i];
+    }
+    delete[] xyz_in;
   }
 
 #ifdef WITH_METRICS
