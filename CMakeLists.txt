@@ -2,6 +2,15 @@ cmake_minimum_required (VERSION 2.8.2)
 SET(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/3rdparty/CMakeModules" ${CMAKE_MODULE_PATH})
 project (3DTK)
 
+# Hide CMake variables
+SET (CMAKE_INSTALL_PREFIX "/usr/local" CACHE INTERNAL "" FORCE)
+SET (CMAKE_BUILD_TYPE "" CACHE INTERNAL "" FORCE)
+
+
+# Set output directories for libraries and executables
+SET( CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/lib )
+SET( CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/obj )
+SET( CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin )
 
 #include_directories(OPENGL_INCLUDE_DIR)
 IF(WIN32)
@@ -375,15 +384,6 @@ ENDIF(MSVC)
 
 SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${ADDITIONAL_CFLAGS}")
 
-# Hide CMake variables
-SET (CMAKE_INSTALL_PREFIX "/usr/local" CACHE INTERNAL "" FORCE)
-SET (CMAKE_BUILD_TYPE "" CACHE INTERNAL "" FORCE)
-
-
-# Set output directories for libraries and executables
-SET( CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/lib )
-SET( CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/obj )
-SET( CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin )
 
 # Set include and link dirs ...
 include_directories(${CMAKE_SOURCE_DIR}/include)
