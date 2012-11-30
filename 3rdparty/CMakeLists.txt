@@ -89,3 +89,12 @@ IF(EXPORT_SHARED_LIBS)
 add_library(newmat_s SHARED ${NEWMAT_SOURCES})
 ENDIF(EXPORT_SHARED_LIBS)
 
+# Compile las library
+set( CMAKE_CXX_FLAGS "-O3 -Wall -Wno-deprecated -DNDEBUG -DUNORDERED -fPIC" )
+SET(LASLIB_DIR ${CMAKE_SOURCE_DIR}/3rdparty/lastools/laslib/src/)
+FILE(GLOB LASLIB_SRCS "${LASLIB_DIR}/*.cpp" "${LASLIB_DIR}/*.hpp")
+
+add_library(LAZ STATIC ${LASLIB_SRCS})
+IF(EXPORT_SHARED_LIBS)
+add_library(LAZ_s SHARED ${LASLIB_SRCS})
+ENDIF(EXPORT_SHARED_LIBS)

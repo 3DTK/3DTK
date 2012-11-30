@@ -1,3 +1,4 @@
+
 /*
  * veloslam implementation
  *
@@ -42,9 +43,6 @@
 #include "slam6d/icp6Dlumquat.h"
 #include "slam6d/icp6Dquatscale.h"
 #include "slam6d/icp6D.h"
-#ifdef WITH_CUDA
-#include "slam6d/cuda/icp6Dcuda.h"
-#endif
 #include "slam6d/lum6Deuler.h"
 #include "slam6d/lum6Dquat.h"
 #include "slam6d/ghelix6DQ2.h"
@@ -302,9 +300,6 @@ void usage(char* prog)
     << "           1 = cached k-d tree " << endl
     << "           2 = ANNTree " << endl
     << "           3 = BOCTree " << endl
-    << endl
-    << bold << "  -u" << normal <<", "<< bold<<"--cuda" << normal << endl
-    << "         this option activates icp running on GPU instead of CPU"<<endl
     << endl << endl;
 
   cout << bold << "EXAMPLES " << normal << endl
@@ -411,7 +406,7 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &rand,
     bool &extrapolate_pose, bool &meta, int &algo,int &tracking, int &loopSlam6DAlgo, int &lum6DAlgo, int &anim,
     int &mni_lum, string &net, double &cldist, int &clpairs, int &loopsize,int &trackingAlgo,
     double &epsilonICP, double &epsilonSLAM,  int &nns_method, bool &exportPts, double &distLoop,
-    int &iterLoop, double &graphDist, int &octree, bool &cuda_enabled, IOType &type,
+    int &iterLoop, double &graphDist, int &octree, IOType &type,
     bool& scanserver)
 {
   int  c;
@@ -459,8 +454,7 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &rand,
     { "distLoop",        required_argument,   0,  '9' }, // use the long format only
     { "iterLoop",        required_argument,   0,  '1' }, // use the long format only
     { "graphDist",       required_argument,   0,  '3' }, // use the long format only
-    { "cuda",            no_argument,         0,  'u' }, // cuda will be enabled
-	{ "trackingAlgo",    required_argument,   0,    'y'},//tracking algorithm
+    { "trackingAlgo",    required_argument,   0,  'y' }, //tracking algorithm
     { "scanserver",      no_argument,         0,  'S' },
     { 0,           0,   0,   0}                    // needed, cf. getopt.h
   };
@@ -610,9 +604,6 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &rand,
           abort();
         }
         break;
-      case 'u':
-        cuda_enabled = true;
-        break;
       case 'S':
         scanserver = true;  // maybe some errors.
         break;
@@ -661,7 +652,7 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &rand,
  * @param mdmll maximal distance match for global SLAM after all scans ar matched
  */
 void matchGraph6Dautomatic(double cldist, int loopsize, vector <Scan *> allScans, icp6D *my_icp6D,
-					  bool meta_icp, int nns_method, bool cuda_enabled,
+					  bool meta_icp, int nns_method, 
 					  loopSlam6D *my_loopSlam6D, graphSlam6D *my_graphSlam6D, int nrIt,
 					  double epsilonSLAM, double mdml, double mdmll, double graphDist,
 					  bool &eP, IOType type)
@@ -849,7 +840,7 @@ int   FinalSLAM( double &red, int &rand,
     bool &eP, bool &meta, int &algo, int &loopSlam6DAlgo, int &lum6DAlgo, int &anim,
     int &mni_lum, string &net, double &cldist, int &clpairs, int &loopsize,
     double &epsilonICP, double &epsilonSLAM,  int &nns_method, bool &exportPts, double &distLoop,
-    int &iterLoop, double &graphDist, int &octree, bool &cuda_enabled, IOType &type
+    int &iterLoop, double &graphDist, int &octree, IOType &type
 	)
 {
 
@@ -859,34 +850,16 @@ int   FinalSLAM( double &red, int &rand,
 	if (mni_lum == -1 && loopSlam6DAlgo == 0)
 	{
 		icp6D *my_icp = 0;
-		if (cuda_enabled) {
-#ifdef WITH_CUDA
-			my_icp = new icp6Dcuda(my_icp6Dminimizer, mdm, mni, quiet, meta, rand, eP,
-				anim, epsilonICP, nns_method, cuda_enabled);
-#else
-			cout << "slam6d was not compiled for excuting CUDA code" << endl;
-#endif
-		} else {
-			my_icp = new icp6D(my_icp6Dminimizer, mdm, mni, quiet, meta, rand, eP,
-				anim, epsilonICP, nns_method, cuda_enabled);
-		}
-
+		my_icp = new icp6D(my_icp6Dminimizer, mdm, mni, quiet, meta, rand, eP,
+					    anim, epsilonICP, nns_method);
+			
 		if (my_icp) my_icp->doICP(Scan::allScans);
 		delete my_icp;
 	} else if (clpairs > -1) {
 		//!!!!!!!!!!!!!!!!!!!!!!!!
 		icp6D *my_icp = 0;
-		if (cuda_enabled) {
-#ifdef WITH_CUDA
-			my_icp = new icp6Dcuda(my_icp6Dminimizer, mdm, mni, quiet, meta, rand, eP,
-				anim, epsilonICP, nns_method, cuda_enabled);
-#else
-			cout << "slam6d was not compiled for excuting CUDA code" << endl;
-#endif
-		} else {
-			my_icp = new icp6D(my_icp6Dminimizer, mdm, mni, quiet, meta, rand, eP,
-				anim, epsilonICP, nns_method, cuda_enabled);
-		}
+		my_icp = new icp6D(my_icp6Dminimizer, mdm, mni, quiet, meta, rand, eP,
+					    anim, epsilonICP, nns_method);
 		my_icp->doICP(Scan::allScans);
 		graphSlam6D *my_graphSlam6D = new lum6DEuler(my_icp6Dminimizer, mdm, mdml, mni, quiet, meta,
 			rand, eP, anim, epsilonICP, nns_method, epsilonSLAM);
@@ -915,17 +888,8 @@ int   FinalSLAM( double &red, int &rand,
 		// Construct Network
 		if (net != "none") {
 			icp6D *my_icp = 0;
-			if (cuda_enabled) {
-#ifdef WITH_CUDA
-				my_icp = new icp6Dcuda(my_icp6Dminimizer, mdm, mni, quiet, meta, rand, eP,
-					anim, epsilonICP, nns_method);
-#else
-				cout << "slam6d was not compiled for excuting CUDA code" << endl;
-#endif
-			} else {
-				my_icp = new icp6D(my_icp6Dminimizer, mdm, mni, quiet, meta, rand, eP,
-					anim, epsilonICP, nns_method);
-			}
+			my_icp = new icp6D(my_icp6Dminimizer, mdm, mni, quiet, meta, rand, eP,
+						    anim, epsilonICP, nns_method);
 			my_icp->doICP(Scan::allScans);
 
 			Graph* structure;
@@ -939,20 +903,11 @@ int   FinalSLAM( double &red, int &rand,
 		} else {
 			icp6D *my_icp = 0;
 			if(algo > 0) {
-				if (cuda_enabled) {
-#ifdef WITH_CUDA
-					my_icp = new icp6Dcuda(my_icp6Dminimizer, mdm, mni, quiet, meta, rand, eP,
-						anim, epsilonICP, nns_method);
-#else
-					cout << "slam6d was not compiled for excuting CUDA code" << endl;
-#endif
-				} else {
-					my_icp = new icp6D(my_icp6Dminimizer, mdm, mni, quiet, meta, rand, eP,
-						anim, epsilonICP, nns_method);
-				}
-
-				loopSlam6D *my_loopSlam6D = 0;
-				switch(loopSlam6DAlgo) {
+			  my_icp = new icp6D(my_icp6Dminimizer, mdm, mni, quiet, meta, rand, eP,
+							 anim, epsilonICP, nns_method);
+			  
+			  loopSlam6D *my_loopSlam6D = 0;
+			  switch(loopSlam6DAlgo) {
 				case 1:
 					my_loopSlam6D = new elch6Deuler(veryQuiet, my_icp6Dminimizer, distLoop, iterLoop,
 						rand, eP, 10, epsilonICP, nns_method);
@@ -972,7 +927,7 @@ int   FinalSLAM( double &red, int &rand,
 				}
 
 				matchGraph6Dautomatic(cldist, loopsize, Scan::allScans, my_icp, meta,
-					nns_method, cuda_enabled, my_loopSlam6D, my_graphSlam6D,
+					nns_method, my_loopSlam6D, my_graphSlam6D,
 					mni_lum, epsilonSLAM, mdml, mdmll, graphDist, eP, type);
 				delete my_icp;
 				if(loopSlam6DAlgo > 0) {
@@ -1059,7 +1014,6 @@ int main(int argc, char **argv)
   int iterLoop      = 100;
   double graphDist  = cldist;
   int octree  = 0;  // employ randomized octree reduction?
-  bool cuda_enabled    = false;
   IOType type  = UOS;
   int trackingAlgo=0;
   bool scanserver = false;
@@ -1068,7 +1022,7 @@ int main(int argc, char **argv)
       maxDist, minDist, quiet, veryQuiet, eP, meta, algo, tracking,
       loopSlam6DAlgo, lum6DAlgo, anim,
       mni_lum, net, cldist, clpairs, loopsize, trackingAlgo,epsilonICP, epsilonSLAM,
-      nns_method, exportPts, distLoop, iterLoop, graphDist, octree, cuda_enabled, type,
+      nns_method, exportPts, distLoop, iterLoop, graphDist, octree, type,
       scanserver);
 	  
 
@@ -1079,7 +1033,7 @@ int main(int argc, char **argv)
     my_icp6Dminimizer= CreateICPalgo( algo, quiet);
     icp6D *my_icp = 0;
     my_icp = new icp6D(my_icp6Dminimizer, mdm, mni, quiet, meta, rand, eP,
-					anim, epsilonICP, nns_method, cuda_enabled);
+					anim, epsilonICP, nns_method);
 
 	if (my_icp==0)
 	{
@@ -1114,7 +1068,7 @@ int main(int argc, char **argv)
 	    VeloScan* currentScan =(VeloScan*  ) *it;
 	    currentScan->setRangeFilter(maxDist, minDist);
 	    currentScan->setReductionParameter(red, octree);
-	    currentScan->setSearchTreeParameter(nns_method, cuda_enabled);
+	    currentScan->setSearchTreeParameter(nns_method);
 		currentScan->isTrackerHandled=false;
         currentScan->scanid = scanCount; ///		
 
@@ -1193,7 +1147,7 @@ int main(int argc, char **argv)
  //    eP,  meta,  algo,  loopSlam6DAlgo,  lum6DAlgo,  anim,
  //    mni_lum,  net,  cldist,  clpairs,  loopsize,
  //    epsilonICP,  epsilonSLAM,   nns_method,  exportPts,  distLoop,
- //    iterLoop,  graphDist,  octree,  cuda_enabled, type
+ //    iterLoop,  graphDist,  octree,  type
 	//);
 
    if (exportPts) 

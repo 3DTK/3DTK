@@ -10,6 +10,7 @@
 #include "slam6d/point.h"
 
 #include <vector>
+using std::vector;
 
 /**
  * @brief Contains the intermediate (static) values of a k-d tree 
@@ -42,12 +43,27 @@ public:
   double *dir;
 
   /**
-   * heap for KNN.
+   * vector of all neighbors within a given radius
    */
-  std::vector<std::pair<Point, double> > heap;
+  vector<double *> range_neighbors;
+  
+  /**
+   * pointer to k nearest neighbors
+   */
+  double **closest_neighbors;
+
+  /**
+   * distances to k closest neighbors
+   */
+  double *distances;
+  
+  /**
+   * k - the number of neihgbors we want to find
+   */
+  int k;
   
   /** 
-   * expand to 128 bytes to avoid false-sharing, 16 bytes from above + 28*4 bytes = 128 bytes
+   * add some padding to avoid false sharing
    */
   int padding[28];
 };

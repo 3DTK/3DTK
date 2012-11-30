@@ -254,16 +254,6 @@ ELSE(WITH_RIVLIB)
   MESSAGE(STATUS "Do NOT compile a scan IO for RXP")
 ENDIF(WITH_RIVLIB)
 
-## CUDA support, TODO depend on CUDA_FIND
-OPT_DEP(WITH_CUDA "Compile with CUDA support" OFF "")
-IF(WITH_CUDA)
-  MESSAGE(STATUS "Compiling WITH CUDA support")
-  FIND_PACKAGE(CUDA)
-  SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DWITH_CUDA")
-ELSE(WITH_CUDA)
-  MESSAGE(STATUS "Compiling WITHOUT CUDA support")
-ENDIF(WITH_CUDA)
-
 ## PMD
 OPT_DEP(WITH_PMD "Whether to build the PMD tools like grabVideoAnd3D calibrate etc. ON/OFF" OFF "")
 
@@ -402,6 +392,8 @@ include_directories(${CMAKE_SOURCE_DIR}/3rdparty/glui)
 include_directories(${CMAKE_SOURCE_DIR}/3rdparty/wxthings/include/)
 include_directories(${CMAKE_SOURCE_DIR}/3rdparty/ann_1.1.1_modified/include)
 include_directories(${CMAKE_SOURCE_DIR}/3rdparty/ann_1.1.1_modified/src)
+include_directories(${CMAKE_SOURCE_DIR}/3rdparty/lastools/laslib/src)
+include_directories(${CMAKE_SOURCE_DIR}/3rdparty/lastools/laslib/inc)
 link_directories(${CMAKE_SOURCE_DIR}/obj)
 link_directories(${CMAKE_SOURCE_DIR}/lib)
 

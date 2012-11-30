@@ -1366,7 +1366,7 @@ void calculateGlobalCameras(int start, int end, bool optical, bool quiet, string
     // reading the 3D points and projecting them back to 2d
     Scan::openDirectory(false, dir, type, count, count);
     Scan::allScans[0]->setRangeFilter(-1, -1);
-    Scan::allScans[0]->setSearchTreeParameter(simpleKD, false);
+    Scan::allScans[0]->setSearchTreeParameter(simpleKD);
     Scan::allScans[0]->setReductionParameter(-1, 0);
     
     //Scan::readScans(type, count, count, dir, maxDist, minDist, 0);
@@ -1770,7 +1770,7 @@ int openDirectory(CvMat* &point_3Dcloud, string dir, IOType type, int count) {
     exit(-1);
   }
   Scan::allScans[0]->setRangeFilter(-1, -1);
-  Scan::allScans[0]->setSearchTreeParameter(simpleKD, false);
+  Scan::allScans[0]->setSearchTreeParameter(simpleKD);
   Scan::allScans[0]->setReductionParameter(-1, 0);
   
   //Scan::readScans(type, count, count, dir, maxDist, minDist, 0);

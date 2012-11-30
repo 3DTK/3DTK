@@ -58,6 +58,8 @@ IOType formatname_to_io_type(const char * string)
   else if (strcasecmp(string, "ks") == 0) return KS;
   else if (strcasecmp(string, "ks_rgb") == 0) return KS_RGB;
   else if (strcasecmp(string, "stl") == 0) return STL;
+  else if (strcasecmp(string, "las") == 0) return LAZ;
+  else if (strcasecmp(string, "laz") == 0) return LAZ;
   else if (strcasecmp(string, "leica") == 0) return LEICA;
   else if (strcasecmp(string, "pcl") == 0) return PCL;
   else if (strcasecmp(string, "pci") == 0) return PCI;
@@ -136,6 +138,8 @@ const char * io_type_to_libname(IOType  type)
     return "scan_io_ks_rgb";
   case STL:
     return "stl";
+  case LAZ:
+    return "scan_io_laz";
   case LEICA:
     return "leica_txt";
   case PCL:

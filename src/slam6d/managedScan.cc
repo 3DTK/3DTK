@@ -206,7 +206,12 @@ DataPointer ManagedScan::get(const std::string& identifier)
       return m_shared_scan->getOcttree();
     createOcttree();
     return m_shared_scan->getOcttree();
-  }
+  } else
+  if(identifier == "normal reduced") {
+    cout << "FIXME Upgrade SharedScan for the normal reduced data field!"
+	    << endl;
+    return DataPointer(0,0);
+  } 
   {
     throw runtime_error(string("Identifier '") + identifier + "' not compatible with ManagedScan::get. Upgrade SharedScan for this data field.");
   }

@@ -184,10 +184,10 @@ bool matchPlaneToBoard(vector<double *> &points, double *alignxf, int pattern, s
   
   plane->setRangeFilter(-1, -1);
   plane->setReductionParameter(-1, 0);
-  plane->setSearchTreeParameter(simpleKD, false);
+  plane->setSearchTreeParameter(simpleKD);
   board->setRangeFilter(-1, -1);
   board->setReductionParameter(-1, 0);
-  board->setSearchTreeParameter(simpleKD, false);
+  board->setSearchTreeParameter(simpleKD);
   
   board->transform(alignxf, Scan::ICP, 0);
   
@@ -545,7 +545,7 @@ int main(int argc, char **argv)
     Scan::openDirectory(false, dir, type, fileNr, fileNr);
     Scan::allScans[0]->setRangeFilter(maxDist, minDist);
     Scan::allScans[0]->setHeightFilter(top, bottom);
-    Scan::allScans[0]->setSearchTreeParameter(simpleKD, false);
+    Scan::allScans[0]->setSearchTreeParameter(simpleKD);
 
     string output = calidir + "/scan" + to_string(fileNr,3) + ".3d";
     cout << "Top: " << top << " Bottom: " << bottom << endl;
