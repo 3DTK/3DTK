@@ -101,7 +101,7 @@ void ScanIO_laz::readScan(const char* dir_path,
   }
   // open data file
   LASreadOpener lasreadopener;
-  lasreadopener.set_file_name(data_path.c_str());
+  lasreadopener.set_file_name(data_path.string().c_str());
   LASreader* lasreader = lasreadopener.open();
 
   while (lasreader->read_point()) {
