@@ -15,7 +15,7 @@ bool TimeMetric::init = false;
 #endif
 
 TimeMetric::TimeMetric(unsigned int reserve) :
-  Metric(reserve)
+  Metric<double>(reserve)
 {
 #ifdef _MSC_VER
   if(!TimeMetric::init) {
@@ -53,7 +53,7 @@ void TimeMetric::end(Timer& start)
 }
 
 CounterMetric::CounterMetric(unsigned int reserve) :
-  Metric(reserve)
+  Metric<unsigned long long>(reserve)
 {
 }
 
