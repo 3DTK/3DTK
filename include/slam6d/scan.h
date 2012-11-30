@@ -33,12 +33,14 @@ Pass it to functions (by reference to link it to the same instance) or store it 
 
 After loading you might want to set parameters
 
-  for(ScanVector::iterator it = Scan::allScans.begin(); it != Scan::allScans.end(); ++it) {
+  for(ScanVector::iterator it = Scan::allScans.begin();
+      it != Scan::allScans.end();
+	 ++it) {
     Scan* scan = *it;
     scan->setRangeFilter(maxDist, minDist);
     scan->setHeightFilter(top, bottom); // thermo
     scan->setReductionParameter(voxelSize, nrpts[, pointtype]);
-    scan->setSearchTreeParameter(nns_method, use_cuda);
+    scan->setSearchTreeParameter(nns_method);
   }
 
 Access the contained data, will be loaded and calculated on demand
@@ -147,7 +149,7 @@ public:
     PointType pointtype = PointType());
   
   //! Set SearchTree type, but don't create it yet
-  void setSearchTreeParameter(int nns_method, bool cuda_enabled);
+  void setSearchTreeParameter(int nns_method);
   
   /**
    * Set octtree parameters for show
@@ -322,17 +324,11 @@ protected:
    */
   double dalignxf[16];
 
-  //! Run ICP on GPU instead of CPU
-  bool cuda_enabled;
-  
   //! Defines the method used for nearest neighbor search and which tree to use
   int nns_method;
   
   //! SearchTree for point pair matching, works on the search points
   SearchTree* kd;
-  
-  //! This KD tree is created only for the CUDA usages
-  ANNkd_tree* ann_kd_tree;
   
   //! Voxelsize of the octtree used for reduction
   double reduction_voxelSize;
@@ -346,9 +342,6 @@ protected:
   //! Type of the searchtree to be created
   int searchtree_nnstype;
   
-  //! Use CUDA for searching
-  bool searchtree_cuda_enabled;
-
   //! Flag whether "xyz reduced" has been initialized for this Scan yet
   bool m_has_reduced;
 

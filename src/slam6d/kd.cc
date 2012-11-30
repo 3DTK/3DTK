@@ -88,42 +88,48 @@ double *KDtree::FindClosestAlongDir(double *_p,
 }
 
 vector<Point> KDtree::kNearestNeighbors(double *_p,
-								int k,
-								double sqRad2,
+								int _k,
 								int threadNum) const
 {
-    vector<Point> result;
-    params[threadNum].closest = 0;
-    params[threadNum].closest_d2 = sqRad2;
-    params[threadNum].p = _p;
-    params[threadNum].heap.clear();
-    _KNNSearch(Void(), threadNum);
+  vector<Point> result;
+  params[threadNum].closest = 0;
+  params[threadNum].p = _p;
+  params[threadNum].k = _k;
 
-    while (k > 0 && params[threadNum].heap.empty() == false) {
-        Point pt = params[threadNum].heap.front().first;
-        result.push_back(pt);
-        std::pop_heap(params[threadNum].heap.begin(), params[threadNum].heap.end(), PointCompare());
-        params[threadNum].heap.pop_back();
-        k--;
-    }
+  // todo fix this C/C++ mixture
+  params[threadNum].closest_neighbors = (double **)calloc(_k, sizeof(double *) );
+  params[threadNum].distances = (double *)calloc(_k, sizeof(double));
 
-    return result;
+  _KNNSearch(Void(), threadNum);
+
+  free (params[threadNum].distances);
+
+  for (int i = 0; i < _k; i++) {
+    result.push_back(Point(params[threadNum].closest_neighbors[i][0],
+					  params[threadNum].closest_neighbors[i][1],
+					  params[threadNum].closest_neighbors[i][2]));
+  }
+  
+  free ( params[threadNum].closest_neighbors);
+  
+  return result;
 }
 
 vector<Point> KDtree::fixedRangeSearch(double *_p,
 							    double sqRad2,
 							    int threadNum) const
 {
-    vector<Point> result;
-    params[threadNum].closest = 0;
-    params[threadNum].closest_d2 = sqRad2;
-    params[threadNum].p = _p;
-    params[threadNum].heap.clear();
-    _FixedRangeSearch(Void(), threadNum);
-
-    for (vector<std::pair<Point, double> >::iterator it = params[threadNum].heap.begin(); it != params[threadNum].heap.end(); ++it) {
-        result.push_back(it->first);
-    }
-
-    return result;
+  vector<Point> result;
+  params[threadNum].closest = 0;
+  params[threadNum].closest_d2 = sqRad2;
+  params[threadNum].p = _p;
+  _FixedRangeSearch(Void(), threadNum);
+  
+  for (size_t i = 0; i < params[threadNum].range_neighbors.size(); i++) {
+    result.push_back(Point(params[threadNum].range_neighbors[i][0],
+					  params[threadNum].range_neighbors[i][1],
+					  params[threadNum].range_neighbors[i][2]));
+  }
+  
+  return result;
 }

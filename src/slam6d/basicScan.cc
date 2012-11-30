@@ -322,9 +322,6 @@ void BasicScan::createSearchTreePrivate()
     default:
       throw runtime_error("SearchTree type not implemented");
   }
-
-  // TODO: make the switch cases above work with CUDA
-  if (searchtree_cuda_enabled) createANNTree();
 }
 
 void BasicScan::calcReducedOnDemandPrivate()
@@ -342,20 +339,6 @@ void BasicScan::calcNormalsOnDemandPrivate()
   calcNormals();
 }
 
-
-void BasicScan::createANNTree()
-{
-  // TODO: metrics
-#ifdef WITH_CUDA
-  if(!ann_kd_tree) {
-    DataXYZ xyz_orig(get("xyz reduced original"));
-    ann_kd_tree = new ANNkd_tree(PointArray<double>(xyz_orig).get(), xyz_orig.size(), 3, 1, ANN_KD_STD);
-    cout << "Cuda tree was generated with " << xyz_orig.size() << " points" << endl;
-  } else {
-    cout << "Cuda tree exists. No need for another creation" << endl;
-  }
-#endif
-}
 
 void BasicScan::createOcttree()
 {
