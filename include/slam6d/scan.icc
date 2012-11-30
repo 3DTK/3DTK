@@ -22,6 +22,3 @@ inline const double* Scan::getDAlign() const {
   return dalignxf;
 }
 
-inline ANNkd_tree* Scan::getANNTree() const {
-  return ann_kd_tree;
-}

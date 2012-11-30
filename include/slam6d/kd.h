@@ -1,7 +1,7 @@
 /** @file 
  *  @brief Representation of the optimized k-d tree. 
- *  @author Andreas Nuechter. Institute of Computer Science, University of Osnabrueck, Germany.
- *  @author Kai Lingemann. Institute of Computer Science, University of Osnabrueck, Germany.
+ *  @author Andreas Nuechter. Inst. of CS, University of Osnabrueck, Germany.
+ *  @author Kai Lingemann. Inst. of CS, University of Osnabrueck, Germany.
  *  @author Thomas Escher
  */
 
@@ -56,7 +56,6 @@ public:
 
   virtual vector<Point> kNearestNeighbors(double *_p,
 								  int k,
-								  double sqRad2,
 								  int threadNum = 0) const;
   
   virtual vector<Point> fixedRangeSearch(double *_p,

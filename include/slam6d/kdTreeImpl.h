@@ -4,7 +4,8 @@
  *  @author Corneliu-Claudiu Prodescu. Jacobs University Bremen, Germany
  *  @author Andreas Nuechter. Jacobs University Bremen, Germany
  *  @author Kai Lingemann. Inst. of CS, University of Osnabrueck, Germany
- *  @author Thomas Escher. Inst. of CS, University of Osnabrueck, Germany
+ *  @author Momchil Ivanov Ivanov. Jacobs University Bremen, Germany
+ *  @author Igor Pener. Jacobs University Bremen, Germany
  */
 
 #ifndef __KD_TREE_IMPL_H__
@@ -291,17 +292,9 @@ protected:
 	 for (int i = 0; i < npts; i++) {
 	   double myd2 = Dist2(params[threadNum].p, point(pts, leaf.p[i]));
 	   if (myd2 < params[threadNum].closest_d2) {
-		params[threadNum].closest = point(pts, leaf.p[i]);
 
-		Point newPt;
-		double* currPt = point(pts, leaf.p[i]);
-		newPt.x = currPt[0];
-		newPt.y = currPt[1];
-		newPt.z = currPt[2];
-		params[threadNum].heap.push_back(std::make_pair(newPt, myd2));
-		std::push_heap(params[threadNum].heap.begin(),
-					params[threadNum].heap.end(),
-					PointCompare());
+		params[threadNum].range_neighbors.push_back(point(pts, leaf.p[i]));
+		
 	   }
 	 }
 	 return;
@@ -340,31 +333,33 @@ protected:
 	 for (int i = 0; i < npts; i++) {
 	   double myd2 = Dist2(params[threadNum].p, point(pts, leaf.p[i]));
 
-	   if (myd2 < params[threadNum].closest_d2) {
-		Point newPt;
-		double* currPt = point(pts, leaf.p[i]);
-		newPt.x = currPt[0];
-		newPt.y = currPt[1];
-		newPt.z = currPt[2];
-		params[threadNum].heap.push_back(std::make_pair(newPt, myd2));
-		std::push_heap(params[threadNum].heap.begin(),
-					params[threadNum].heap.end(),
-					PointCompare());
-
-		params[threadNum].closest = point(pts, leaf.p[i]);
-	   }
-	 }
-	 return;
+        for (int j = 0; j < params[threadNum].k; ++j)
+            if (params[threadNum].closest_neighbors[j] == NULL || params[threadNum].distances[j] > myd2) {
+            
+                for (int l = params[threadNum].k - 1; l > j; --l) {
+                    params[threadNum].closest_neighbors[l] = params[threadNum].closest_neighbors[l-1];
+                    params[threadNum].distances[l] = params[threadNum].distances[l-1];
+                }
+                
+                params[threadNum].closest_neighbors[j] = point(pts, leaf.p[i]);
+                params[threadNum].distances[j] = myd2;
+                break;
+            }
+      }
+      return;
     }
 
-    // Quick check of whether to abort
-    double approx_dist_bbox =
-	 max(max(fabs(params[threadNum].p[0]-node.center[0])-node.dx,
-		    fabs(params[threadNum].p[1]-node.center[1])-node.dy),
-		fabs(params[threadNum].p[2]-node.center[2])-node.dz);
-    if (approx_dist_bbox >= 0 &&
-	   sqr(approx_dist_bbox) >= params[threadNum].closest_d2)
-	 return;
+    int kN = params[threadNum].k-1;
+    if (params[threadNum].closest_neighbors[kN] != NULL) {
+        // Quick check of whether to abort  
+        double approx_dist_bbox
+		= max(max(fabs(params[threadNum].p[0]-node.center[0])-node.dx,
+				fabs(params[threadNum].p[1]-node.center[1])-node.dy),
+			 fabs(params[threadNum].p[2]-node.center[2])-node.dz);
+        if (approx_dist_bbox >= 0 &&
+		  sqr(approx_dist_bbox) >= params[threadNum].distances[kN])
+		return;
+    }
 
     // Recursive case
     double myd = node.center[node.splitaxis] - params[threadNum].p[node.splitaxis];

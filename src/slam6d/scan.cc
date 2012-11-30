@@ -69,10 +69,8 @@ Scan::Scan()
   M4identity(dalignxf);
 
   // trees and reduction methods
-  cuda_enabled = false;
   nns_method = -1;
   kd = 0;
-  ann_kd_tree = 0;
 
   // reduction on-demand
   reduction_voxelSize = 0.0;
@@ -102,10 +100,9 @@ void Scan::setReductionParameter(double voxelSize, int nrpts, PointType pointtyp
   reduction_pointtype = pointtype;
 }
 
-void Scan::setSearchTreeParameter(int nns_method, bool cuda_enabled)
+void Scan::setSearchTreeParameter(int nns_method)
 {
   searchtree_nnstype = nns_method;
-  searchtree_cuda_enabled = cuda_enabled;
 }
 
 void Scan::setOcttreeParameter(double reduction_voxelSize, double voxelSize, PointType pointtype, bool loadOct, bool saveOct)
@@ -280,12 +277,12 @@ void Scan::calcReducedPoints()
 
   // get xyz to start the scan load, separated here for time measurement
   DataXYZ xyz(get("xyz"));
-  DataXYZ xyz_normals(get(""));
+  DataXYZ xyz_normals(DataPointer(0, 0));
   if (reduction_pointtype.hasNormal()) {
     DataXYZ my_xyz_normals(get("normal"));
     xyz_normals =  my_xyz_normals;
   }
-  DataReflectance reflectance(get(""));
+  DataReflectance reflectance(DataPointer(0, 0));
   if (reduction_pointtype.hasReflectance()) {
     DataReflectance my_reflectance(get("reflectance"));
     reflectance = my_reflectance;
@@ -305,13 +302,15 @@ void Scan::calcReducedPoints()
 	 }
     }
     if (reduction_pointtype.hasReflectance()) {
-	 DataReflectance reflectance_reduced(create("reflectance reduced", sizeof(float)*reflectance.size()));	 
-        for(unsigned int i = 0; i < xyz.size(); ++i) {
+	 DataReflectance reflectance_reduced(create("reflectance reduced",
+								sizeof(float)*reflectance.size()));
+	 for(unsigned int i = 0; i < xyz.size(); ++i) {
            reflectance_reduced[i] = reflectance[i];
         }
     }
     if (reduction_pointtype.hasNormal()) {
-	 DataNormal normal_reduced(create("normal reduced", sizeof(double)*3*xyz.size()));	 
+	 DataNormal normal_reduced(create("normal reduced",
+							    sizeof(double)*3*xyz.size()));	 
         for(unsigned int i = 0; i < xyz.size(); ++i) {
 		for(unsigned int j = 0; j < 3; ++j) {
 		  normal_reduced[i][j] = xyz_normals[i][j];
@@ -357,15 +356,16 @@ void Scan::calcReducedPoints()
     // storing it as reduced scan
     unsigned int size = center.size();
     DataXYZ xyz_reduced(create("xyz reduced", sizeof(double)*3*size));
-    DataReflectance reflectance_reduced(get(""));
-    DataNormal normal_reduced(get("")); 
+    DataReflectance reflectance_reduced(DataPointer(0, 0));
+    DataNormal normal_reduced(DataPointer(0, 0)); 
     if (reduction_pointtype.hasReflectance()) {
 	 DataReflectance my_reflectance_reduced(create("reflectance reduced",
 										  sizeof(float)*size));
 	 reflectance_reduced = my_reflectance_reduced;
     }
     if (reduction_pointtype.hasNormal()) {
-	 DataNormal my_normal_reduced(create("normal reduced", sizeof(double)*3*size));
+	 DataNormal my_normal_reduced(create("normal reduced",
+								  sizeof(double)*3*size));
 	 normal_reduced = my_normal_reduced; 
     }
     for(unsigned int i = 0; i < size; ++i) {
@@ -379,7 +379,7 @@ void Scan::calcReducedPoints()
 		normal_reduced[i][l] = center[i][j++];
     }
     delete oct;
-    for(int i = 0; i < xyz.size(); i++) {
+    for(size_t i = 0; i < xyz.size(); i++) {
       delete[] xyz_in[i];
     }
     delete[] xyz_in;
