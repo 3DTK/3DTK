@@ -11,6 +11,12 @@ if(WITH_METRICS)
 endif(WITH_METRICS)
 
 add_library(scanclient STATIC ${CLIENT_SRCS})
+### EXPORT SHARED LIBS
+
+IF(EXPORT_SHARED_LIBS)
+add_library(scanclient_s SHARED ${CLIENT_SRCS})
+target_link_libraries(scanclient_s pointfilter ${Boost_LIBRARIES})
+ENDIF(EXPORT_SHARED_LIBS)
 
 # add libraries
 # boost::interprocess
