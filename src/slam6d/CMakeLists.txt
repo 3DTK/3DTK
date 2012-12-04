@@ -91,7 +91,7 @@ ENDIF(UNIX)
 IF(EXPORT_SHARED_LIBS)
 add_library(scan_s SHARED ${SCANLIB_SRCS})
 #target_link_libraries(scan_s ${Boost_LIBRARIES} newmat)
-target_link_libraries(scan_s newmat_s sparse_s ANN_s )
+target_link_libraries(scan_s scanclient_s newmat_s sparse_s ANN_s normals)
 ENDIF(EXPORT_SHARED_LIBS)
 
 ### SLAM6D

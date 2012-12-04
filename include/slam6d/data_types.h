@@ -15,7 +15,7 @@
 
 #ifndef DATA_TYPES_H
 #define DATA_TYPES_H
-
+#include <algorithm>
 
 /**
  * Representation of a pointer to a data field with no access methods.
@@ -38,8 +38,8 @@ protected:
     virtual ~PrivateImplementation() {}
   };
 public:
-  //  DataPointer& operator=(const DataPointer&) = delete;
-  //  DataPointer(const DataPointer&) = delete;
+  //DataPointer& operator=(const DataPointer&) = delete;
+  //DataPointer(const DataPointer&) = delete;
 
   /**
    * Ctor for the initial creation
@@ -47,9 +47,9 @@ public:
    * @param pointer base pointer to the data
    * @param size of the pointed data in bytes
    */
-  DataPointer(unsigned char* pointer, unsigned int size,
-    PrivateImplementation* private_impl = 0) :
-    m_pointer(pointer), m_size(size), m_private_impl(private_impl) {
+ DataPointer(unsigned char* pointer, unsigned int size,
+	     PrivateImplementation* private_impl = 0) :
+  m_pointer(pointer), m_size(size), m_private_impl(private_impl) {
   }
   
   /**
@@ -96,6 +96,16 @@ public:
 protected:
   unsigned char* m_pointer;
   unsigned int m_size;
+  inline void  shallowCopy(DataPointer& other) {
+    if(m_private_impl != 0)
+      delete m_private_impl;
+    m_pointer = other.m_pointer;
+    m_size = other.m_size;
+
+    m_private_impl = other.m_private_impl;
+    other.m_private_impl = 0;
+  }
+
 
 private:
   PrivateImplementation* m_private_impl;
@@ -116,7 +126,29 @@ public:
     DataPointer(temp)
   {
   }
+
+  SingleArray(DataPointer& temp) :
+    DataPointer(temp)
+  {
+  }
   
+  SingleArray(SingleArray& temp) :
+    DataPointer(temp)
+  {
+  }
+
+    //copy assignment operator moves the object
+        inline SingleArray& operator=(SingleArray & other)
+      {
+        if(&other!=this)
+	  {
+            //SingleArray temp(other);
+	    //std::swap(*this,temp);
+	    this->shallowCopy(other);
+	  }
+        return *this;
+      }
+    
   //! Represent the pointer as an array of T
   inline T& operator[](unsigned int i) const
   {
@@ -135,16 +167,39 @@ template<typename T>
 class TripleArray : public DataPointer {
 public:
   //! Cast return-by-value temporary DataPointer to this type of array
-  TripleArray(DataPointer&& temp) :
-    DataPointer(temp)
+ TripleArray(DataPointer&& temp) :
+  DataPointer(temp)
   {
   }
   
-  TripleArray(TripleArray&& temp) :
-    DataPointer(temp)
+ TripleArray(TripleArray&& temp) :
+  DataPointer(temp)
+  {
+  }
+
+ TripleArray(DataPointer& temp) :
+  DataPointer(temp)
   {
   }
   
+ TripleArray(TripleArray& temp) :
+  DataPointer(temp)
+  {
+  }
+
+
+    //copy assignment operator moves the object 
+        inline TripleArray& operator=(TripleArray & other)
+      {
+        if(&other!=this)
+	  {
+            //TripleArray temp(other);
+	    //std::swap(*this,temp);
+	    this->shallowCopy(other);
+	  }
+        return *this;
+      }
+
   //! Represent the pointer as an array of T[3]
   inline T* operator[](unsigned int i) const
   {
