@@ -29,5 +29,5 @@ ENDIF(WITH_WXSHOW)
 ### EXPORT SHARED LIBS 
 IF(EXPORT_SHARED_LIBS)
 add_library(show_s SHARED ${SHOW_SRCS})
-target_link_libraries(show_s newmat_s)
+target_link_libraries(show_s newmat_s ${Boost_LIBRARIES} ${SHOW_LIBS})
 ENDIF(EXPORT_SHARED_LIBS)
