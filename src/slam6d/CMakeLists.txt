@@ -40,6 +40,8 @@ IF(WITH_TOOLS)
     target_link_libraries(graph_balancer scan ${Boost_GRAPH_LIBRARY} ${Boost_SERIALIZATION_LIBRARY} ${Boost_REGEX_LIBRARY})
     target_link_libraries(exportPoints scan dl ANN)
     target_link_libraries(toGlobal scan)
+    target_link_libraries(convergence ${Boost_LIBRARIES})
+    target_link_libraries(pose2frames ${Boost_LIBRARIES})
   ENDIF(UNIX)
 
   
