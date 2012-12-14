@@ -1,7 +1,7 @@
 /*
  * pointfilter implementation
  *
- * Copyright (C) Dorit Borrmann, Jan Elseberg
+ * Copyright (C) by the 3DTK contributors
  *
  * Released under the GPL version 3.
  *
@@ -23,15 +23,13 @@ using std::endl;
 #include <cmath>
 
 
-
-map<string, Checker* (*)(const string&)>* PointFilter::factory = new map<string, Checker* (*)(const string&)>;
-
+map<string, Checker* (*)(const string&)>*
+PointFilter::factory = new map<string, Checker* (*)(const string&)>;
 
 
 PointFilter::PointFilter() :
   m_changed(true), m_checker(0)
-{
-}
+{ }
 
 PointFilter::PointFilter(const std::string& params) :
   m_changed(true), m_checker(0)
@@ -90,7 +88,9 @@ PointFilter& PointFilter::setRangeMutator(double range)
 std::string PointFilter::getParams()
 {
   stringstream s;
-  for(map<string, string>::iterator it = m_params.begin(); it != m_params.end(); ++it) {
+  for(map<string, string>::iterator it = m_params.begin();
+      it != m_params.end();
+      ++it) {
     s << (*it).first << " " << (*it).second << " ";
   }
   return s.str();
@@ -106,16 +106,17 @@ void PointFilter::createCheckers()
   
   // create new ones
   Checker** current = &m_checker;
-  for(map<string, string>::iterator it = m_params.begin(); it != m_params.end(); ++it) {
+  for(map<string, string>::iterator it = m_params.begin();
+      it != m_params.end();
+      ++it) {
     *current = (*factory)[it->first](it->second);
-    // if a Checker has been successfully created advance to its pointer in the chain
+    // if a Checker has been successfully created advance to
+    // its pointer in the chain
     if(*current) {
       current = &((*current)->m_next);
     }
   }
 }
-
-
 
 Checker::Checker() :
   m_next(0)
@@ -128,8 +129,6 @@ Checker::~Checker()
     delete m_next;
 }
 
-
-
 // create factory instaces for key string to factory function mapping
 namespace {
   CheckerFactory<CheckerRangeMax> max("rangemax");
@@ -138,8 +137,6 @@ namespace {
   CheckerFactory<CheckerHeightBottom> bottom("heightbottom");
   CheckerFactory<RangeMutator> range_mutation("rangemutation");
 }
-
-
 
 CheckerRangeMax::CheckerRangeMax(const std::string& value) {
   stringstream s(value);
@@ -155,8 +152,6 @@ bool CheckerRangeMax::test(double* point) {
   return false;
 }
 
-
-
 CheckerRangeMin::CheckerRangeMin(const std::string& value) {
   stringstream s(value);
   s >> m_min;
@@ -171,8 +166,6 @@ bool CheckerRangeMin::test(double* point) {
   return false;
 }
 
-
-
 CheckerHeightTop::CheckerHeightTop(const std::string& value) {
   stringstream s(value);
   s >> m_top;
@@ -183,8 +176,6 @@ bool CheckerHeightTop::test(double* point) {
     return true;
   return false;
 }
-
-
 
 CheckerHeightBottom::CheckerHeightBottom(const std::string& value) {
   stringstream s(value);
@@ -203,7 +194,9 @@ RangeMutator::RangeMutator(const std::string& value) {
 }
 
 bool RangeMutator::test(double* point) {
-  double orig_range = sqrt(point[0]*point[0] + point[1]*point[1] + point[2]*point[2]);
+  double orig_range = sqrt(point[0]*point[0]
+                           + point[1]*point[1]
+                           + point[2]*point[2]);
   double scale_mutation = m_range / orig_range;
   point[0] *= scale_mutation;
   point[1] *= scale_mutation;

@@ -1,7 +1,7 @@
 /*
- * scan_io_riegl_txt implementation
+ * slam6D implementation
  *
- * Copyright (C) Thomas Escher, Kai Lingemann, Andreas Nuechter
+ * Copyright (C) by the 3DTK contributors
  *
  * Released under the GPL version 3.
  *
@@ -10,9 +10,9 @@
 /**
  * @file
  * @brief Implementation of reading 3D scans
- * @author Kai Lingemann. Institute of Computer Science, University of Osnabrueck, Germany.
- * @author Andreas Nuechter. Institute of Computer Science, University of Osnabrueck, Germany.
- * @author Thomas Escher
+ * @author Kai Lingemann. Inst. of CS, University of Osnabrueck, Germany.
+ * @author Andreas Nuechter. Jacobs University Bremen gGmbH, Germany.
+ * @author Thomas Escher. Inst. of CS, University of Osnabrueck, Germany.
  */
 
 #include "scanio/scan_io_riegl_txt.h"
@@ -34,15 +34,15 @@ using namespace boost::filesystem;
 #include "slam6d/globals.icc"
 
 
-
 #define DATA_PATH_PREFIX "scan"
 #define DATA_PATH_SUFFIX ".txt"
 #define POSE_PATH_PREFIX "scan"
 #define POSE_PATH_SUFFIX ".dat"
 
 
-
-std::list<std::string> ScanIO_riegl_txt::readDirectory(const char* dir_path, unsigned int start, unsigned int end)
+std::list<std::string> ScanIO_riegl_txt::readDirectory(const char* dir_path,
+                                                       unsigned int start,
+                                                       unsigned int end)
 {
   std::list<std::string> identifiers;
   for(unsigned int i = start; i <= end; ++i) {
@@ -61,14 +61,19 @@ std::list<std::string> ScanIO_riegl_txt::readDirectory(const char* dir_path, uns
   return identifiers;
 }
 
-void ScanIO_riegl_txt::readPose(const char* dir_path, const char* identifier, double* pose)
+void ScanIO_riegl_txt::readPose(const char* dir_path,
+                                const char* identifier,
+                                double* pose)
 {
   unsigned int i;
   
   path pose_path(dir_path);
-  pose_path /= path(std::string(POSE_PATH_PREFIX) + identifier + POSE_PATH_SUFFIX);
+  pose_path /= path(std::string(POSE_PATH_PREFIX)
+                    + identifier
+                    + POSE_PATH_SUFFIX);
   if(!exists(pose_path))
-    throw std::runtime_error(std::string("There is no pose file for [") + identifier + "] in [" + dir_path + "]");
+    throw std::runtime_error(std::string("There is no pose file for [")
+                             + identifier + "] in [" + dir_path + "]");
 
   // open pose file
   ifstream pose_file(pose_path);
@@ -109,7 +114,8 @@ void ScanIO_riegl_txt::readPose(const char* dir_path, const char* identifier, do
     pose[4] = rPosTheta[1];
     pose[5] = rPosTheta[2];
   } else {
-    throw std::runtime_error(std::string("Pose file could not be opened for [") + identifier + "] in [" + dir_path + "]");
+    throw std::runtime_error(std::string("Pose file could not be opened for [")
+                             + identifier + "] in [" + dir_path + "]");
   }
 }
 
@@ -118,15 +124,27 @@ bool ScanIO_riegl_txt::supports(IODataType type)
   return !!(type & (DATA_XYZ | DATA_REFLECTANCE));
 }
 
-void ScanIO_riegl_txt::readScan(const char* dir_path, const char* identifier, PointFilter& filter, std::vector<double>* xyz, std::vector<unsigned char>* rgb, std::vector<float>* reflectance, std::vector<float>* temperature, std::vector<float>* amplitude, std::vector<int>* type, std::vector<float>* deviation)
+void ScanIO_riegl_txt::readScan(const char* dir_path,
+                                const char* identifier,
+                                PointFilter& filter,
+                                std::vector<double>* xyz,
+                                std::vector<unsigned char>* rgb,
+                                std::vector<float>* reflectance,
+                                std::vector<float>* temperature,
+                                std::vector<float>* amplitude,
+                                std::vector<int>* type,
+                                std::vector<float>* deviation)
 {
   unsigned int i;
-  
+
   // error handling
   path data_path(dir_path);
-  data_path /= path(std::string(DATA_PATH_PREFIX) + identifier + DATA_PATH_SUFFIX);
+  data_path /= path(std::string(DATA_PATH_PREFIX)
+				+ identifier
+				+ DATA_PATH_SUFFIX);
   if(!exists(data_path))
-    throw std::runtime_error(std::string("There is no scan file for [") + identifier + "] in [" + dir_path + "]");
+    throw std::runtime_error(std::string("There is no scan file for [")
+					    + identifier + "] in [" + dir_path + "]");
   
   if(xyz != 0 || reflectance != 0) {
     // open data file
@@ -183,7 +201,7 @@ void ScanIO_riegl_txt::readScan(const char* dir_path, const char* identifier, Po
 #ifdef _MSC_VER
 extern "C" __declspec(dllexport) ScanIO* create()
 #else
-extern "C" ScanIO* create()
+  extern "C" ScanIO* create()
 #endif
 {
   return new ScanIO_riegl_txt;
@@ -198,7 +216,7 @@ extern "C" ScanIO* create()
 #ifdef _MSC_VER
 extern "C" __declspec(dllexport) void destroy(ScanIO *sio)
 #else
-extern "C" void destroy(ScanIO *sio)
+  extern "C" void destroy(ScanIO *sio)
 #endif
 {
   delete sio;
@@ -207,6 +225,6 @@ extern "C" void destroy(ScanIO *sio)
 #ifdef _MSC_VER
 BOOL APIENTRY DllMain(HANDLE hModule, DWORD dwReason, LPVOID lpReserved)
 {
-	return TRUE;
+  return TRUE;
 }
 #endif

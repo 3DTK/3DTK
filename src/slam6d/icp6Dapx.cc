@@ -36,9 +36,9 @@ using std::setiosflags;
  * @return Error estimation of the matching (rms)
  */
 double icp6D_APX::Align(const vector<PtPair>& Pairs,
-				    double *alignxf,
-				    const double centroid_m[3],
-				    const double centroid_d[3])
+                        double *alignxf,
+                        const double centroid_m[3],
+                        const double centroid_d[3])
 {
   int n = Pairs.size();
 
@@ -68,7 +68,7 @@ double icp6D_APX::Align(const vector<PtPair>& Pairs,
 
     double p12[3] = { p1[0] - p2[0], p1[1] - p2[1], p1[2] - p2[2] };
     double p2c[3] = { p2[0] - centroid_d[0], p2[1] - centroid_d[1],
-				  p2[2] - centroid_d[2] };
+                      p2[2] - centroid_d[2] };
 
     sum += Len2(p12);
 
@@ -87,12 +87,12 @@ double icp6D_APX::Align(const vector<PtPair>& Pairs,
   if (!quiet) {
     cout.setf(ios::basefield);
     cout << "APX RMS point-to-point error = "
-	    << resetiosflags(ios::adjustfield) << setiosflags(ios::internal)
-	    << resetiosflags(ios::floatfield) << setiosflags(ios::fixed)
-	    << std::setw(10) << std::setprecision(7)
-	    << error
-	    << "  using " << std::setw(6) << (int)Pairs.size()
-	    << " points" << endl;
+         << resetiosflags(ios::adjustfield) << setiosflags(ios::internal)
+         << resetiosflags(ios::floatfield) << setiosflags(ios::fixed)
+         << std::setw(10) << std::setprecision(7)
+         << error
+         << "  using " << std::setw(6) << (int)Pairs.size()
+         << " points" << endl;
   }
 
   // Solve eqns
@@ -124,9 +124,12 @@ double icp6D_APX::Align(const vector<PtPair>& Pairs,
   alignxf[9]  = -sx*cy;
   alignxf[10] = cx*cy;
   alignxf[11] = 0;
-  alignxf[12] = centroid_m[0] - alignxf[0]*centroid_d[0] - alignxf[4]*centroid_d[1] - alignxf[8]*centroid_d[2];
-  alignxf[13] = centroid_m[1] - alignxf[1]*centroid_d[0] - alignxf[5]*centroid_d[1] - alignxf[9]*centroid_d[2];
-  alignxf[14] = centroid_m[2] - alignxf[2]*centroid_d[0] - alignxf[6]*centroid_d[1] - alignxf[10]*centroid_d[2];
+  alignxf[12] = centroid_m[0] - alignxf[0]*centroid_d[0] -
+    alignxf[4]*centroid_d[1] - alignxf[8]*centroid_d[2];
+  alignxf[13] = centroid_m[1] - alignxf[1]*centroid_d[0] -
+    alignxf[5]*centroid_d[1] - alignxf[9]*centroid_d[2];
+  alignxf[14] = centroid_m[2] - alignxf[2]*centroid_d[0] -
+    alignxf[6]*centroid_d[1] - alignxf[10]*centroid_d[2];
   alignxf[15] = 1;
 
   return error;
@@ -134,12 +137,12 @@ double icp6D_APX::Align(const vector<PtPair>& Pairs,
 
 
 double icp6D_APX::Align_Parallel(const int openmp_num_threads, 
-						   const unsigned int n[OPENMP_NUM_THREADS],
-						   const double sum[OPENMP_NUM_THREADS], 
-						   const double centroid_m[OPENMP_NUM_THREADS][3],
-						   const double centroid_d[OPENMP_NUM_THREADS][3],
-						   const vector<PtPair> pairs[OPENMP_NUM_THREADS],
-						   double *alignxf)
+                                 const unsigned int n[OPENMP_NUM_THREADS],
+                                 const double sum[OPENMP_NUM_THREADS], 
+                                 const double centroid_m[OPENMP_NUM_THREADS][3],
+                                 const double centroid_d[OPENMP_NUM_THREADS][3],
+                                 const vector<PtPair> pairs[OPENMP_NUM_THREADS],
+                                 double *alignxf)
                          
 {
 
@@ -150,9 +153,9 @@ double icp6D_APX::Align_Parallel(const int openmp_num_threads,
 
   for (int j=0;j < OPENMP_NUM_THREADS; j++)
     for (int k = 0;k < 3; k++) {
-	 for (int l = 0; l < 3; l++)
-	   At[j][k][l] = 0.0;
-	 Bt[j][k] = 0.0;
+      for (int l = 0; l < 3; l++)
+        At[j][k][l] = 0.0;
+      Bt[j][k] = 0.0;
     }
   double A[3][3];
   double B[3];
@@ -171,7 +174,7 @@ double icp6D_APX::Align_Parallel(const int openmp_num_threads,
   for (int i = 0; i < openmp_num_threads; i++) {
     s += sum[i];
     pairs_size += n[i];
-	 
+      
     // compute centroids for all the pairs
     cm[0] += n[i] * centroid_m[i][0];
     cm[1] += n[i] * centroid_m[i][1];
@@ -201,34 +204,55 @@ double icp6D_APX::Align_Parallel(const int openmp_num_threads,
   {
     int thread_num = omp_get_thread_num();
     for (unsigned int i = 0 ; i < (unsigned int)pairs[thread_num].size() ; i++)
-	 {
-	   At[thread_num][0][0] += (pairs[thread_num][i].p2.y - cd[1])*(pairs[thread_num][i].p2.y - cd[1]) +
-		(pairs[thread_num][i].p2.z - cd[2])*(pairs[thread_num][i].p2.z - cd[2]);
-	   At[thread_num][0][1] -= (pairs[thread_num][i].p2.x - cd[0])*(pairs[thread_num][i].p2.y - cd[1]);
-	   At[thread_num][0][2] -= (pairs[thread_num][i].p2.x - cd[0])*(pairs[thread_num][i].p2.z - cd[2]);
-	   At[thread_num][1][1] += (pairs[thread_num][i].p2.x - cd[0])*(pairs[thread_num][i].p2.x - cd[0]) +
-		(pairs[thread_num][i].p2.z - cd[2])*(pairs[thread_num][i].p2.z - cd[2]);
-	   At[thread_num][1][2] -= (pairs[thread_num][i].p2.y - cd[1])*(pairs[thread_num][i].p2.z - cd[2]);
-	   At[thread_num][2][2] += (pairs[thread_num][i].p2.x - cd[0])*(pairs[thread_num][i].p2.x - cd[0]) +
-		(pairs[thread_num][i].p2.y - cd[1])*(pairs[thread_num][i].p2.y - cd[1]);
-	 
-	   Bt[thread_num][0] += (pairs[thread_num][i].p1.z - pairs[thread_num][i].p2.z)
-		* (pairs[thread_num][i].p2.y - cd[1]) - (pairs[thread_num][i].p1.y - pairs[thread_num][i].p2.y)
-		* (pairs[thread_num][i].p2.z - cd[2]);	 
-	   Bt[thread_num][1] += (pairs[thread_num][i].p1.x - pairs[thread_num][i].p2.x)
-		* (pairs[thread_num][i].p2.z - cd[2]) - (pairs[thread_num][i].p1.z - pairs[thread_num][i].p2.z)
-		* (pairs[thread_num][i].p2.x - cd[0]);
-	   Bt[thread_num][2] += (pairs[thread_num][i].p1.y - pairs[thread_num][i].p2.y) *
-		(pairs[thread_num][i].p2.x - cd[0]) - (pairs[thread_num][i].p1.x - pairs[thread_num][i].p2.x)
-		* (pairs[thread_num][i].p2.y - cd[1]);
-	 }
+      {
+        At[thread_num][0][0] +=
+          (pairs[thread_num][i].p2.y - cd[1]) *
+          (pairs[thread_num][i].p2.y - cd[1]) +
+          (pairs[thread_num][i].p2.z - cd[2]) *
+          (pairs[thread_num][i].p2.z - cd[2]);
+        At[thread_num][0][1] -=
+          (pairs[thread_num][i].p2.x - cd[0]) *
+          (pairs[thread_num][i].p2.y - cd[1]);
+        At[thread_num][0][2] -=
+          (pairs[thread_num][i].p2.x - cd[0]) *
+          (pairs[thread_num][i].p2.z - cd[2]);
+        At[thread_num][1][1] +=
+          (pairs[thread_num][i].p2.x - cd[0]) *
+          (pairs[thread_num][i].p2.x - cd[0]) +
+          (pairs[thread_num][i].p2.z - cd[2]) *
+          (pairs[thread_num][i].p2.z - cd[2]);
+        At[thread_num][1][2] -=
+          (pairs[thread_num][i].p2.y - cd[1]) *
+          (pairs[thread_num][i].p2.z - cd[2]);
+        At[thread_num][2][2] +=
+          (pairs[thread_num][i].p2.x - cd[0]) *
+          (pairs[thread_num][i].p2.x - cd[0]) +
+          (pairs[thread_num][i].p2.y - cd[1]) *
+          (pairs[thread_num][i].p2.y - cd[1]);
+      
+        Bt[thread_num][0] +=
+          (pairs[thread_num][i].p1.z - pairs[thread_num][i].p2.z) *
+          (pairs[thread_num][i].p2.y - cd[1]) -
+          (pairs[thread_num][i].p1.y - pairs[thread_num][i].p2.y) *
+          (pairs[thread_num][i].p2.z - cd[2]);      
+        Bt[thread_num][1] +=
+          (pairs[thread_num][i].p1.x - pairs[thread_num][i].p2.x) *
+          (pairs[thread_num][i].p2.z - cd[2]) -
+          (pairs[thread_num][i].p1.z - pairs[thread_num][i].p2.z) *
+          (pairs[thread_num][i].p2.x - cd[0]);
+        Bt[thread_num][2] +=
+          (pairs[thread_num][i].p1.y - pairs[thread_num][i].p2.y) *
+          (pairs[thread_num][i].p2.x - cd[0]) -
+          (pairs[thread_num][i].p1.x - pairs[thread_num][i].p2.x) *
+          (pairs[thread_num][i].p2.y - cd[1]);
+      }
   }
 
   for (int j = 0;j < OPENMP_NUM_THREADS; j++)
     for (int k = 0; k < 3; k++) {
-	 for (int l = 0; l < 3; l++)
-	   A[k][l] += At[j][k][l] ;
-	 B[k] += Bt[j][k];
+      for (int l = 0; l < 3; l++)
+        A[k][l] += At[j][k][l] ;
+      B[k] += Bt[j][k];
     }
 
   // continue with linear solution
@@ -236,11 +260,11 @@ double icp6D_APX::Align_Parallel(const int openmp_num_threads,
   if (!quiet) {
     cout.setf(ios::basefield);
     cout << "PAPX RMS point-to-point error = "
-	    << resetiosflags(ios::adjustfield) << setiosflags(ios::internal)
-	    << resetiosflags(ios::floatfield) << setiosflags(ios::fixed)
-	    << std::setw(10) << std::setprecision(7)
-	    << error
-	    << "  using " << std::setw(6) << pairs_size << " points" << endl;
+         << resetiosflags(ios::adjustfield) << setiosflags(ios::internal)
+         << resetiosflags(ios::floatfield) << setiosflags(ios::fixed)
+         << std::setw(10) << std::setprecision(7)
+         << error
+         << "  using " << std::setw(6) << pairs_size << " points" << endl;
   }
    
   // Solve eqns
@@ -280,7 +304,7 @@ double icp6D_APX::Align_Parallel(const int openmp_num_threads,
   return error;
 #else
   cout << "Point_Point_Align_Parallel:"<< endl
-	  << "Please compile with OpenMP support to use this function" << endl;
+       << "Please compile with OpenMP support to use this function" << endl;
   exit(-1);
 #endif  
 } 

@@ -17,9 +17,15 @@ using namespace std;
 
 
 
-FHGraph::FHGraph(std::vector< Point >& ps, double weight(Point, Point), double sigma, double eps, int neighbors, float radius) :
-    points( ps ), V( ps.size() )
+FHGraph::FHGraph(DataXYZ *ps,
+			  double weight(Point, Point),
+			  double sigma,
+			  double eps,
+			  int neighbors,
+			  float radius) :
+    V( ps->size() )
 {
+  xyz = ps;
     /*
      * 1. create adjency list using a map<int, vector<half_edge> >
      * 2. use get_neighbors(e, max_dist) to get all the edges e' that are at a distance smaller than max_dist than e
@@ -31,14 +37,10 @@ FHGraph::FHGraph(std::vector< Point >& ps, double weight(Point, Point), double s
 
     compute_neighbors(weight, eps);
 
-
-    if ( sigma > 0.01 )
-    {
-        do_gauss(sigma);
-    }
-    else
-    {
-        without_gauss();
+    if ( sigma > 0.01 ) {
+	 do_gauss(sigma);
+    } else {
+	 without_gauss();
     }
 
     adjency_list.clear();
@@ -46,20 +48,19 @@ FHGraph::FHGraph(std::vector< Point >& ps, double weight(Point, Point), double s
 
 void FHGraph::compute_neighbors(double weight(Point, Point), double eps)
 {
+    adjency_list.reserve(xyz->size());
+    adjency_list.resize(xyz->size());
 
-    adjency_list.reserve(points.size());
-    adjency_list.resize(points.size());
-
-    ANNpointArray pa = annAllocPts(points.size(), 3);
-    for (size_t i=0; i<points.size(); ++i)
+    ANNpointArray pa = annAllocPts(xyz->size(), 3);
+    for (size_t i = 0; i < xyz->size(); ++i)
     {
         pa[i] = new ANNcoord[3];
-        pa[i][0] = points[i].x;
-        pa[i][1] = points[i].y;
-        pa[i][2] = points[i].z;
+        pa[i][0] = (*xyz)[i][0];
+        pa[i][1] = (*xyz)[i][1];
+        pa[i][2] = (*xyz)[i][2];
     }
 
-    ANNkd_tree t(pa, points.size(), 3);
+    ANNkd_tree t(pa, xyz->size(), 3);
 
     if ( radius < 0 ) // Using knn search
     {
@@ -67,7 +68,7 @@ void FHGraph::compute_neighbors(double weight(Point, Point), double eps)
         ANNidxArray n = new ANNidx[nr_neighbors];
         ANNdistArray d = new ANNdist[nr_neighbors];
 
-        for (size_t i=0; i<points.size(); ++i)
+        for (size_t i = 0; i < xyz->size(); ++i)
         {
             ANNpoint p = pa[i];
 
@@ -79,7 +80,7 @@ void FHGraph::compute_neighbors(double weight(Point, Point), double eps)
 
                 he e;
                 e.x = n[j];
-                e.w = weight(points[i], points[n[j]]);
+                e.w = weight(Point((*xyz)[i]), Point((*xyz)[n[j]]));
 
                 adjency_list[i].push_back(e);
             }
@@ -102,7 +103,7 @@ void FHGraph::compute_neighbors(double weight(Point, Point), double eps)
         const int MOD = 1000;
         int TMP = MOD;
 
-        for (size_t i=0; i<points.size(); ++i)
+        for (size_t i = 0; i < xyz->size(); ++i)
         {
             ANNpoint p = pa[i];
 
@@ -125,7 +126,7 @@ void FHGraph::compute_neighbors(double weight(Point, Point), double eps)
 
                 he e;
                 e.x = n[j];
-                e.w = weight(points[i], points[n[j]]);
+                e.w = weight(Point((*xyz)[i]), Point((*xyz)[n[j]]));
 
                 adjency_list[i].push_back(e);
             }
@@ -135,11 +136,15 @@ void FHGraph::compute_neighbors(double weight(Point, Point), double eps)
             if ( TMP==0 )
             {
                 TMP = MOD;
-                cout << "Point " << i << "/" << V << ", or "<< (i*100.0 / V) << "%\r"; cout.flush();
+                cout << "Point " << i << "/" << V << ", or "
+				 << (i*100.0 / V) << "%\r";
+			 cout.flush();
             }
             TMP --;
         }
-        cout << "Average nr of neighbors: " << (float) total / points.size() << endl;
+        cout << "Average nr of neighbors: "
+		   << (float) total / xyz->size()
+		   << endl;
 
     }
 
@@ -242,7 +247,7 @@ edge* FHGraph::getGraph()
 
 Point FHGraph::operator[](int index)
 {
-    return points[index];
+  return Point((*xyz)[index]);
 }
 
 int FHGraph::getNumPoints()
@@ -263,7 +268,7 @@ void vectorFree(T& t) {
 
 void FHGraph::dispose() {
     vectorFree(edges);
-    vectorFree(points);
+    //    vectorFree(points);
     vectorFree(adjency_list);
 }
 

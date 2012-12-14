@@ -1,16 +1,16 @@
 /*
  * point_type implementation
  *
- * Copyright (C) Jan Elseberg, Dorit Borrmann.
+ * Copyright (C) by the 3DTK contributors
  *
  * Released under the GPL version 3.
  *
  */
 
 /**
- *  @file
- *  @brief Representation of a 3D point type
- *  @author Jan Elsberg. Automation Group, Jacobs University Bremen gGmbH, Germany. 
+ * @file
+ * @brief Representation of a 3D point type
+ * @author Jan Elsberg. Jacobs University Bremen gGmbH, Germany. 
  */
 
 #include "slam6d/point_type.h"
@@ -30,19 +30,22 @@ using std::endl;
 #include <stdexcept>
 using std::runtime_error;
 
-
-
 PointType::PointType() {
   types = USE_NONE;
   pointdim = 3;
-  dimensionmap[1] = dimensionmap[2] = dimensionmap[3] = dimensionmap[4] = dimensionmap[5] = dimensionmap[6] = dimensionmap[7] = 1; // choose height per default  
-  dimensionmap[8] = 1;
-  dimensionmap[0] = 1;  // height 
+  // choose height per default  
+  dimensionmap[1] = dimensionmap[2] = dimensionmap[3] = 1;
+  dimensionmap[4] = dimensionmap[5] = dimensionmap[6] = 1; 
+  dimensionmap[7] = dimensionmap[8] = dimensionmap[0] = 1;
+  dimensionmap[9] = 1;  // height  
 }
 
 PointType::PointType(unsigned int _types) : types(_types) {
-  dimensionmap[1] = dimensionmap[2] = dimensionmap[3] = dimensionmap[4] = dimensionmap[5] = dimensionmap[6] = dimensionmap[7] = dimensionmap[8] = 1; // choose height per default  
-  dimensionmap[0] = 1;  // height 
+  // choose height per default  
+  dimensionmap[1] = dimensionmap[2] = dimensionmap[3] = 1;
+  dimensionmap[4] = dimensionmap[5] = dimensionmap[6] = 1; 
+  dimensionmap[7] = dimensionmap[8] = dimensionmap[0] = 1; 
+  dimensionmap[9] = 1;  // height 
 
   pointdim = 3;
   if (types & PointType::USE_REFLECTANCE) dimensionmap[1] = pointdim++;  
@@ -180,7 +183,8 @@ void PointType::useScan(Scan* scan)
   // clear pointers first
   m_xyz = 0; m_rgb = 0; m_reflectance = 0; m_temperature = 0; m_amplitude = 0; m_type = 0; m_deviation = 0;
   
-  // collectively load data to avoid unneccessary loading times due to split get("") calls
+  // collectively load data to avoid unneccessary loading times due
+  // to split get("") calls
   unsigned int types = DATA_XYZ;
   if(hasColor()) types |= DATA_RGB;
   if(hasReflectance()) types |= DATA_REFLECTANCE;
@@ -194,19 +198,34 @@ void PointType::useScan(Scan* scan)
   try {
     m_xyz = new DataXYZ(scan->get("xyz"));
     if(hasColor()) m_rgb = new DataRGB(scan->get("rgb"));
-    if(hasReflectance()) m_reflectance = new DataReflectance(scan->get("reflectance"));
-    if(hasTemperature()) m_temperature = new DataTemperature(scan->get("temperature"));
+    if(hasReflectance()) m_reflectance = new
+                           DataReflectance(scan->get("reflectance"));
+    if(hasTemperature()) m_temperature = new
+                           DataTemperature(scan->get("temperature"));
     if(hasAmplitude()) m_amplitude = new DataAmplitude(scan->get("amplitude"));
     if(hasType()) m_type = new DataType(scan->get("type"));
     if(hasDeviation()) m_deviation = new DataDeviation(scan->get("deviation"));
     
-    // check if data is available, otherwise reset pointer to indicate that the scan doesn't prove this value
-    if(m_rgb && !m_rgb->valid()) { delete m_rgb; m_rgb = 0; }
-    if(m_reflectance && !m_reflectance->valid()) { delete m_reflectance; m_reflectance = 0; }
-    if(m_temperature && !m_temperature->valid()) { delete m_temperature; m_temperature = 0; }
-    if(m_amplitude && !m_amplitude->valid()) { delete m_amplitude; m_amplitude = 0; }
-    if(m_type && !m_type->valid()) { delete m_type; m_type = 0; }
-    if(m_deviation && !m_deviation->valid()) { delete m_deviation; m_deviation = 0; }
+    // check if data is available, otherwise reset pointer
+    // to indicate that the scan doesn't prove this value
+    if (m_rgb && !m_rgb->valid()) {
+      delete m_rgb; m_rgb = 0;
+    }
+    if (m_reflectance && !m_reflectance->valid()) {
+      delete m_reflectance; m_reflectance = 0;
+    }
+    if (m_temperature && !m_temperature->valid()) {
+      delete m_temperature; m_temperature = 0;
+    }
+    if (m_amplitude && !m_amplitude->valid()) {
+      delete m_amplitude; m_amplitude = 0;
+    }
+    if (m_type && !m_type->valid()) {
+      delete m_type; m_type = 0;
+    }
+    if (m_deviation && !m_deviation->valid()) {
+      delete m_deviation; m_deviation = 0;
+    }
   } catch(runtime_error& e) {
     // unlock everything again
     clearScan();
@@ -217,13 +236,13 @@ void PointType::useScan(Scan* scan)
 void PointType::clearScan()
 {
   // unlock data access
-  if(m_xyz) delete m_xyz;
-  if(hasColor() && m_rgb) delete m_rgb;
-  if(hasReflectance() && m_reflectance) delete m_reflectance;
-  if(hasTemperature() && m_temperature) delete m_temperature;
-  if(hasAmplitude() && m_amplitude) delete m_amplitude;
-  if(hasType() && m_type) delete m_type;
-  if(hasDeviation() && m_deviation) delete m_deviation;
+  if (m_xyz) delete m_xyz;
+  if (hasColor() && m_rgb) delete m_rgb;
+  if (hasReflectance() && m_reflectance) delete m_reflectance;
+  if (hasTemperature() && m_temperature) delete m_temperature;
+  if (hasAmplitude() && m_amplitude) delete m_amplitude;
+  if (hasType() && m_type) delete m_type;
+  if (hasDeviation() && m_deviation) delete m_deviation;
   
   // TODO: scan->clear() on all of these types
 }

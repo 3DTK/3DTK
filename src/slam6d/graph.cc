@@ -10,10 +10,10 @@
 /**
  * @file 
  * @brief The implementation of a graph
- * @author Dorit Borrman. Institute of Computer Science, University of Osnabrueck, Germany.
- * @author Jan Elseberg. Institute of Computer Science, University of Osnabrueck, Germany.
- * @author Kai Lingemann. Institute of Computer Science, University of Osnabrueck, Germany.
- * @author Andreas Nuechter. Institute of Computer Science, University of Osnabrueck, Germany.
+ * @author Dorit Borrman. Inst. of CS, University of Osnabrueck, Germany.
+ * @author Jan Elseberg. Inst. of CS, University of Osnabrueck, Germany.
+ * @author Kai Lingemann. Inst. of CS, University of Osnabrueck, Germany.
+ * @author Andreas Nuechter. Inst. of CS, University of Osnabrueck, Germany.
  */
 
 #include "slam6d/graph.h"
@@ -63,13 +63,13 @@ Graph::Graph(const string &netfile)
   
   ifstream file(netfile.c_str());
   file >> local_nrScans
-	  >> local_nrLinks;
+       >> local_nrLinks;
 
   int f, t;
   for(int j = 0; j < local_nrLinks; j++) {
     if (!file.good()) {
-	 cerr << "Error while reading network structure" << endl;
-	 exit(1);
+      cerr << "Error while reading network structure" << endl;
+      exit(1);
     }
     file >> f >> t;
     cout << f << " " << t << endl;
@@ -79,8 +79,9 @@ Graph::Graph(const string &netfile)
 }
 
 /** 
- * Constructor to build a minimally connected Graph with a given number of scans.
- * The loop can optionally be closed, so that the first will be connected to the last scan.
+ * Constructor builds a minimally connected Graph with a given number of scans.
+ * The loop can optionally be closed,
+ * so that the first will be connected to the last scan.
  * 
  * @param nScans The number of Scans
  * @param loop Specifies whether the first and last scan should be linked
@@ -102,7 +103,7 @@ Graph::Graph(int nScans, bool loop)
     if (loop) {
       to.push_back(i != nrLinks - 1 ?  i + 1 : 0) ;
     } else {
-	 to.push_back(i + 1);
+      to.push_back(i + 1);
     }
   }
 }
@@ -123,10 +124,11 @@ Graph::Graph(int nodes, double cldist2, int loopsize)
   // nodes 
   for (int j = 0; j < nodes; j++) {
     for (int k = j + 1; k < nodes; k++) {
-	 if ((abs(k-j) > loopsize) &&
-		(Dist2(Scan::allScans[j]->get_rPos(), Scan::allScans[k]->get_rPos()) < cldist2)) {
-	   addLink(j, k);
-	 }
+      if ((abs(k-j) > loopsize) &&
+          (Dist2(Scan::allScans[j]->get_rPos(),
+                 Scan::allScans[k]->get_rPos()) < cldist2)) {
+        addLink(j, k);
+      }
     }
   }
 }
@@ -144,7 +146,7 @@ int Graph::getLink(int i, int fromTo)
 {
   if (i >= 0 && i < (int)from.size()) {
     if (fromTo == 0) return from[i];
-	else return to[i];
+     else return to[i];
   }
   return 0;
 }

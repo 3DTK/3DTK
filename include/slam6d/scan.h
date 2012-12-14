@@ -1,5 +1,14 @@
-#ifndef SCAN_H
-#define SCAN_H
+/*
+ * scan definition
+ *
+ * Copyright (C) by the 3DTK contributors
+ *
+ * Released under the GPL version 3.
+ *
+ */
+
+#ifndef __SCAN_H__
+#define __SCAN_H__
 
 #include "io_types.h"
 #include "data_types.h"
@@ -25,17 +34,19 @@ class SearchTree;
 class ANNkd_tree;
 
 /** HOWTO scan
-First: Load scans (if you want to use the scanmanager, use ManagedScan)
+
+  First: Load scans (if you want to use the scanmanager, use ManagedScan)
 
   BasicScan/ManagedScan::openDirectory(path, type, start, end);
 
-Pass it to functions (by reference to link it to the same instance) or store it in a global variable
+  Pass it to functions (by reference to link it to the same instance)
+  or store it in a global variable
 
-After loading you might want to set parameters
+  After loading you might want to set parameters
 
   for(ScanVector::iterator it = Scan::allScans.begin();
       it != Scan::allScans.end();
-	 ++it) {
+      ++it) {
     Scan* scan = *it;
     scan->setRangeFilter(maxDist, minDist);
     scan->setHeightFilter(top, bottom); // thermo
@@ -43,7 +54,7 @@ After loading you might want to set parameters
     scan->setSearchTreeParameter(nns_method);
   }
 
-Access the contained data, will be loaded and calculated on demand
+  Access the contained data, will be loaded and calculated on demand
 
   DataXYZ xyz = scan->get("xyz");
   DataXYZ reduced = scan->get("xyz reduced");
@@ -54,29 +65,34 @@ Access the contained data, will be loaded and calculated on demand
   
   unsigned int size = scan->size("xyz reduced");
 
-In order to use the prefetching of all requested data field in the scanserver, mark them for use. This is relevant for efficiency, which would otherwise cause loading the files each time another data field is requested.
+  To use the prefetching of all requested data field in the scanserver,
+  mark them for use. This is relevant for efficiency, which would
+  otherwise cause loading the files each time another data field is
+  requested.
 
   scan->get(DATA_XYZ | DATA_RGB | ...);
 
-Under circumstances the data fields are not available (e.g. no color in uos-type scans)
+  Under circumstances the data fields are not available (e.g. no color in
+  uos-type scans)
 
   DataRGB rgb = scan->get("rgb");
-  if(rgb.valid()) { ok, do something }
+  if (rgb.valid()) { ok, do something }
   
-If backward-compability to pointer arrays is needed, the PointerArray class can adapt
+  If backward-compability to pointer arrays is needed, the PointerArray
+  class can adapt
 
   BOctTree(PointerArray(scan->get("xyz")).get(), scan->size("xyz"), ...);
 
-If data isn't needed anymore, flag it for removal
+  If data isn't needed anymore, flag it for removal
 
   scan->clear("xyz");
   scan->clear(DATA_XYZ | DATA_RGB | ...);
   
-Creating data fields with the correct byte size
+  Creating data fields with the correct byte size
 
   scan->create("xyz somethingelse", sizeof(double)*3*N);
 
-Reading frames in show:
+  Reading frames in show:
 
   unsigned int size = scan->readFrames();
   
@@ -84,7 +100,7 @@ Reading frames in show:
   AlgoType type;
   scan->getFrame(i, pose, type);
 
-Last, if program ends, clean up
+  Last, if program ends, clean up
 
   Scan::closeDirectory(scans);
 
@@ -98,7 +114,6 @@ Last, if program ends, clean up
  * features to the deriving classes.
  */
 class Scan {
-  //friend class SearchTree; // TODO: is this neccessary?
 public:
   enum AlgoType { INVALID, ICP, ICPINACTIVE, LUM, ELCH };
   
@@ -122,8 +137,11 @@ public:
     * @param start first scan to use
     * @param end last scan to use, -1 means from start to last available
     */
-  static void openDirectory(bool scanserver, const std::string& path, IOType type,
-    int start, int end = -1);
+  static void openDirectory(bool scanserver,
+                            const std::string& path,
+                            IOType type,
+                            int start,
+                            int end = -1);
   
   /**
    * "Close" a directory by deleting all its scans and emptying the
@@ -133,7 +151,6 @@ public:
   
   
   /* Input filtering and parameter functions */
-  
   
   //! Input filtering for all points based on their euclidean length
   virtual void setRangeFilter(double max, double min) = 0;
@@ -157,12 +174,12 @@ public:
    * @param saveOct serialize octtree if not loaded by loadOct after creation
    */
   virtual void setOcttreeParameter(double reduction_voxelSize,
-    double octtree_voxelSize, PointType pointtype,
-    bool loadOct, bool saveOct);
-
+                                   double octtree_voxelSize,
+                                   PointType pointtype,
+                                   bool loadOct,
+                                   bool saveOct);
 
   /* Basic getter functions */
-
 
   inline const double* get_rPos() const;
   inline const double* get_rPosTheta() const;
@@ -175,16 +192,14 @@ public:
   inline const double* getDAlign() const;
   
   inline SearchTree* getSearchTree();
-  inline ANNkd_tree* getANNTree() const;
+  //  inline ANNkd_tree* getANNTree() const;
   
   virtual const char* getIdentifier() const = 0;
   
   //! Determine the maximum number of reduced points in \a scans
   static unsigned int getMaxCountReduced(ScanVector& scans);
   
-  
   /* Functions for altering data fields, implementation specific */
-  
   
   /**
    * Get the data field \a identifier, calculate it on demand if neccessary.
@@ -205,7 +220,8 @@ public:
   /**
    * Creates a data field \a identifier with \a size bytes.
    */
-  virtual DataPointer create(const std::string& identifier, unsigned int size) = 0;
+  virtual DataPointer create(const std::string& identifier,
+                             unsigned int size) = 0;
   
   /**
    * Clear the data field \a identifier, removing its allocated memory if
@@ -213,7 +229,8 @@ public:
    */
   virtual void clear(const std::string& identifier) = 0;
 
-  //! Extension to clear for more than one identifier, e.g. clear(DATA_XYZ | DATA_RGB);
+  //! Extension to clear for more than one identifier, e.g.
+  //  clear(DATA_XYZ | DATA_RGB);
   void clear(unsigned int types);
   
   /**
@@ -226,9 +243,7 @@ public:
     return (T(get(identifier))).size();
   }
 
-
   /* Frame handling functions */
-
 
   /**
    * Open the .frames-file and read its contents. If not read, the frame list
@@ -246,7 +261,9 @@ public:
   virtual unsigned int getFrameCount() = 0;
   
   //! Get contents of a frame, pass matrix pointer and type by reference
-  virtual void getFrame(unsigned int i, const double*& pose_matrix, AlgoType& type) = 0;
+  virtual void getFrame(unsigned int i,
+                        const double*& pose_matrix,
+                        AlgoType& type) = 0;
   
 protected:
   /**
@@ -265,46 +282,65 @@ public:
   //! Copy reduced points to original and create search tree on it
   void createSearchTree();
 
-
   /* Common transformation and matching functions */
   void mergeCoordinatesWithRoboterPosition(Scan* prevScan);
   void transformAll(const double alignxf[16]);
-  void transformAll(const double alignQuat[4], const double alignt[3]);
+  void transformAll(const double alignQuat[4],
+                    const double alignt[3]);
   
   void transform(const double alignxf[16],
-    const AlgoType type, int islum = 0);
+                 const AlgoType type, 
+                 int islum = 0);
   void transform(const double alignQuat[4],
-    const double alignt[3], const AlgoType type, int islum = 0);
+                 const double alignt[3], 
+                 const AlgoType type, 
+                 int islum = 0);
   void transformToMatrix(double alignxf[16],
-    const AlgoType type, int islum = 0);
-  void transformToEuler(double rP[3], double rPT[3],
-    const AlgoType type, int islum = 0);
-  void transformToQuat(double rP[3], double rPQ[4],
-    const AlgoType type, int islum = 0);
+                         const AlgoType type, 
+                         int islum = 0);
+  void transformToEuler(double rP[3], 
+                        double rPT[3],
+                        const AlgoType type, 
+                        int islum = 0);
+  void transformToQuat(double rP[3], 
+                       double rPQ[4],
+                       const AlgoType type, 
+                       int islum = 0);
   
   // Scan matching functions
   static void getPtPairs(std::vector<PtPair> *pairs,
-    Scan* Source, Scan* Target,
-    int thread_num,
-    int rnd, double max_dist_match2, double &sum,
-    double *centroid_m, double *centroid_d, PairingMode pairing_mode = CLOSEST_POINT);
+                         Scan* Source,
+                         Scan* Target,
+                         int thread_num,
+                         int rnd,
+                         double max_dist_match2,
+                         double &sum,
+                         double *centroid_m,
+                         double *centroid_d,
+                         PairingMode pairing_mode = CLOSEST_POINT);
   static void getNoPairsSimple(std::vector<double*> &diff,
-    Scan* Source, Scan* Target,
-    int thread_num,
-    double max_dist_match2);
+                               Scan* Source, Scan* Target,
+                               int thread_num,
+                               double max_dist_match2);
   static void getPtPairsSimple(std::vector<PtPair> *pairs,
-    Scan* Source, Scan* Target,
-    int thread_num,
-    int rnd, double max_dist_match2,
-    double *centroid_m, double *centroid_d);
+                               Scan* Source,
+                               Scan* Target,
+                               int thread_num,
+                               int rnd,
+                               double max_dist_match2,
+                               double *centroid_m,
+                               double *centroid_d);
   static void getPtPairsParallel(std::vector<PtPair> *pairs,
-    Scan* Source, Scan* Target,
-    int thread_num, int step,
-    int rnd, double max_dist_match2,
-    double *sum,
-    double centroid_m[OPENMP_NUM_THREADS][3],
-    double centroid_d[OPENMP_NUM_THREADS][3],
-    PairingMode pairing_mode);
+                                 Scan* Source,
+                                 Scan* Target,
+                                 int thread_num,
+                                 int step,
+                                 int rnd,
+                                 double max_dist_match2,
+                                 double *sum,
+                                 double centroid_m[OPENMP_NUM_THREADS][3],
+                                 double centroid_d[OPENMP_NUM_THREADS][3],
+                                 PairingMode pairing_mode);
 
 protected:
   /**
@@ -319,8 +355,9 @@ protected:
     transMatOrg[16]; //!< The original pose of the scan, e.g., from odometry
 
   /**
-   * The dalignxf transformation represents the delta transformation virtually applied
-   * to the tree and is used to compute are actual corresponding points.
+   * The dalignxf transformation represents the delta transformation
+   * virtually applied to the tree and is used to compute are actual
+   * corresponding points.
    */
   double dalignxf[16];
 
@@ -384,10 +421,12 @@ protected:
   //! Create specific SearchTree variants matching the capability of the Scan
   virtual void createSearchTreePrivate() = 0;
   
-  //! Create reduced points in a multithread-safe environment matching the capability of the Scan
+  //! Create reduced points in a multithread-safe environment matching
+  //  the capability of the Scan
   virtual void calcReducedOnDemandPrivate() = 0;
 
-  //! Create normals in a multithread-safe environment matching the capability of the Scan
+  //! Create normals in a multithread-safe environment matching
+  //  the capability of the Scan
   virtual void calcNormalsOnDemandPrivate() = 0;
   
   //! Creating normals
@@ -416,11 +455,12 @@ private:
   static bool scanserver;
 
 public:
-  //! Mutex for safely reducing points and creating the search tree just once in a multithreaded environment  
-  // it can not be compiled  in win32 use boost 1.48, therefore we remeove it  temporarily
+  //! Mutex for safely reducing points and creating the search tree
+  //  just once in a multithreaded environment it can not be compiled
+  //  in win32 use boost 1.48, therefore we remeove it temporarily
   boost::mutex m_mutex_reduction, m_mutex_create_tree, m_mutex_normals;
 };
 
 #include "scan.icc"
 
-#endif //SCAN_H
+#endif // __SCAN_H__

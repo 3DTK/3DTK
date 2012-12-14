@@ -9,8 +9,9 @@
 
 /**
  * @file 
- * @brief The implementation of globally consistent scan matching algorithm by using helix correction
- * @author Peter Schneider. Institute of Computer Science, University of Koblenz, Germany.
+ * @brief The implementation of globally consistent scan matching
+ *        algorithm by using helix correction
+ * @author Peter Schneider. Inst. of CS, University of Koblenz, Germany.
  * @author Andreas Nuechter. Jacobs University Bremen gGmbH, Germany
  * @author Jan Elseberg. Jacobs University Bremen gGmbH, Germany
  */
@@ -39,7 +40,8 @@ using std::ofstream;
  *
  * @param my_icp6Dminimizer Pointer to ICP minimization functor
  * @param mdm Maximum PtoP distance to which point pairs are collected for ICP
- * @param max_dist_match Maximum PtoP distance to which point pairs are collected for LUM
+ * @param max_dist_match Maximum PtoP distance to which point pairs are
+ *                       collected for global relaxation
  * @param max_num_iterations Maximal number of iterations for ICP
  * @param quiet Suspesses all output to std out
  * @param meta Indicates if metascan matching has to be used
@@ -51,13 +53,14 @@ using std::ofstream;
  * @param epsilonLUM Termination criterion for LUM
  */
 ghelix6DQ2::ghelix6DQ2(icp6Dminimizer *my_icp6Dminimizer,
-		   double mdm, double max_dist_match, 
-		   int max_num_iterations, bool quiet, bool meta, int rnd,
-		   bool eP, int anim, double epsilonICP, int nns_method, double epsilonLUM)
+             double mdm, double max_dist_match, 
+             int max_num_iterations, bool quiet, bool meta, int rnd,
+             bool eP, int anim, double epsilonICP, int nns_method,
+                       double epsilonLUM)
   : graphSlam6D(my_icp6Dminimizer,
-			 mdm, max_dist_match,
-			 max_num_iterations, quiet, meta, rnd,
-			 eP, anim, epsilonICP, nns_method, epsilonLUM)
+                mdm, max_dist_match,
+                max_num_iterations, quiet, meta, rnd,
+                eP, anim, epsilonICP, nns_method, epsilonLUM)
 { }
 
 
@@ -71,18 +74,23 @@ ghelix6DQ2::~ghelix6DQ2()
 
 
 /**
- * This function generates the matrices B and Bd that are used for solving B * c = Bd.
+ * This function generates the matrices B and Bd that are used for solving
+ * B * c = Bd.
  * This function has to be called once for every linked scan-pair.
  * 
  * @param firstScanNum The number of the first scan of the linked scan-pair
  * @param secondScanNum The number of the second scan of the linked scan-pair
  * @param ptpairs Vector that holds all point-pairs for the actual scan-pair
- * @param B Matrix with dimension (6*(number of scans-1)) x (6 * (number of scans-1)) 
+ * @param B Matrix with dimension
+ *          (6*(number of scans-1)) x (6 * (number of scans-1)) 
  * @param Bd Vector with dimension (6*(number of scans-1))
  * @return returns the sum of square distance
  */
-double ghelix6DQ2::genBBdForLinkedPair( int firstScanNum, int secondScanNum, vPtPair *ptpairs,
-								Matrix *B, ColumnVector *Bd )
+double ghelix6DQ2::genBBdForLinkedPair( int firstScanNum,
+                                        int secondScanNum,
+                                        vPtPair *ptpairs,
+                                        Matrix *B,
+                                        ColumnVector *Bd )
 {
   double Btemp1[6][3];
   double Btemp2[6][3];
@@ -93,7 +101,8 @@ double ghelix6DQ2::genBBdForLinkedPair( int firstScanNum, int secondScanNum, vPt
   memset(&bd1[0], 0, 6 * sizeof(double));
   memset(&bd2[0], 0, 6 * sizeof(double));
 
-  double p1x, p1y, p1z, p2x, p2y, p2z, pDistX, pDistY, pDistZ, px2Sq, py2Sq, pz2Sq;
+  double p1x, p1y, p1z, p2x, p2y, p2z;
+  double pDistX, pDistY, pDistZ, px2Sq, py2Sq, pz2Sq;
 
   int n = (*ptpairs).size();
   double sum = 0;
@@ -107,20 +116,13 @@ double ghelix6DQ2::genBBdForLinkedPair( int firstScanNum, int secondScanNum, vPt
     p2y = (*ptpairs)[i].p2.y;
     p2z = (*ptpairs)[i].p2.z;
 
-    //px1Sq = p1x * p1x;
-    //py1Sq = p1y * p1y;
-    //pz1Sq = p1z * p1z;
-
     px2Sq = p2x * p2x;
     py2Sq = p2y * p2y;
     pz2Sq = p2z * p2z;
 
     Btemp1[4][0] += -p2z;
-//  Btemp1[3][1] += p2z;
     Btemp1[5][0] += p2y;
-//  Btemp1[3][2] += -p2y;
     Btemp1[4][2] += p2x;
-//  Btemp1[5][1] += -p2x;
     Btemp1[0][0] += pz2Sq + py2Sq;
     Btemp1[1][0] += p2y*-p2x;
     Btemp1[2][0] += -p2z*p2x;
@@ -190,7 +192,7 @@ double ghelix6DQ2::genBBdForLinkedPair( int firstScanNum, int secondScanNum, vPt
     (*Bd)(matPlace1+5) += bd1[4];
     (*Bd)(matPlace1+6) += bd1[5];
   }
-//-------------------------------------------
+
   unsigned int matPlace2 = (secondScanNum-1) * 6;
  
   (*B)(matPlace2+4,matPlace2+4) += n;
@@ -227,9 +229,7 @@ double ghelix6DQ2::genBBdForLinkedPair( int firstScanNum, int secondScanNum, vPt
   (*Bd)(matPlace2+5) += bd2[4];
   (*Bd)(matPlace2+6) += bd2[5];
   
-//-------------------------------------------
-  if( firstScanNum != 0)
-  {  
+  if( firstScanNum != 0) {  
     (*B)(matPlace1+4,matPlace2+4) -= n;
     (*B)(matPlace1+5,matPlace2+5) -= n;
     (*B)(matPlace1+6,matPlace2+6) -= n;
@@ -255,7 +255,7 @@ double ghelix6DQ2::genBBdForLinkedPair( int firstScanNum, int secondScanNum, vPt
     (*B)(matPlace1+1,matPlace2+1) += -Btemp1[0][0];
     (*B)(matPlace1+2,matPlace2+2) += -Btemp1[1][1];
     (*B)(matPlace1+3,matPlace2+3) += -Btemp1[2][2];
-//----------------------------------------
+
     (*B)(matPlace2+4,matPlace1+4) -= n;
     (*B)(matPlace2+5,matPlace1+5) -= n;
     (*B)(matPlace2+6,matPlace1+6) -= n;
@@ -311,14 +311,15 @@ double ghelix6DQ2::doGraphSlam6D(Graph gr, vector <Scan *> allScans, int nrIt)
   for (int i=0; i < gr.getNrLinks(); i++) {
     int from = gr.getLink(i,0);
     int to = gr.getLink(i,1);
-    // shouldn't be necessary, just in case a (out of date) graph file is loaded:
+    // shouldn't be necessary
+    // just in case a (out of date) graph file is loaded:
     if (from < (int)allScans.size() && to < (int)allScans.size()) {
-	 out << allScans[from]->get_rPos()[0] << " " 
-	     << allScans[from]->get_rPos()[1] << " " 
-	     << allScans[from]->get_rPos()[2] << endl
-	     << allScans[to  ]->get_rPos()[0] << " " 
-	     << allScans[to  ]->get_rPos()[1] << " " 
-	     << allScans[to  ]->get_rPos()[2] << endl << endl;
+      out << allScans[from]->get_rPos()[0] << " " 
+          << allScans[from]->get_rPos()[1] << " " 
+          << allScans[from]->get_rPos()[2] << endl
+          << allScans[to  ]->get_rPos()[0] << " " 
+          << allScans[to  ]->get_rPos()[1] << " " 
+          << allScans[to  ]->get_rPos()[2] << endl << endl;
     }
   }
   out.close();
@@ -329,7 +330,7 @@ double ghelix6DQ2::doGraphSlam6D(Graph gr, vector <Scan *> allScans, int nrIt)
   double id[16];
   M4identity(id);
 
-  vPtPair **ptpairs = 0;                 // Contains sets of point pairs for all links
+  vPtPair **ptpairs = 0;        // Contains sets of point pairs for all links
   Matrix B ( 6 * (gr.getNrScans()-1), 6 * (gr.getNrScans()-1) );
   ColumnVector ccs( 6*(gr.getNrScans()-1) ), bd( 6*(gr.getNrScans()-1) );
 
@@ -340,8 +341,8 @@ double ghelix6DQ2::doGraphSlam6D(Graph gr, vector <Scan *> allScans, int nrIt)
   double ret = DBL_MAX;
 
   for(int iteration = 0;
-	 iteration < nrIt && ret > epsilonLUM;
-	 iteration++) {
+      iteration < nrIt && ret > epsilonLUM;
+      iteration++) {
     sum_position_diff = 0;
 
     if (nrIt > 1) cout << "Iteration match " << iteration << endl;
@@ -369,9 +370,9 @@ double ghelix6DQ2::doGraphSlam6D(Graph gr, vector <Scan *> allScans, int nrIt)
 #else
       int thread_num = 0;
 #endif
-	 double dummy_centroid_m[3];
-	 double dummy_centroid_d[3];
-	 double dummy_sum;
+      double dummy_centroid_m[3];
+      double dummy_centroid_d[3];
+      double dummy_sum;
 
    Scan::getPtPairs(ptpairs[i], FirstScan, SecondScan, thread_num,
        (int)my_icp->get_rnd(), (int)max_dist_match2_LUM, dummy_sum,
@@ -379,15 +380,16 @@ double ghelix6DQ2::doGraphSlam6D(Graph gr, vector <Scan *> allScans, int nrIt)
 
       // faulty network
       if (ptpairs[i]->size() <= 1) {
-	   cout << "Error: Link (" << gr.getLink(i,0)
-		   << " - " << gr.getLink(i, 1) << " ) is empty with "
-		   << ptpairs[i]->size() << " Corr. points. iteration = "
-		   << iteration << endl;
-	   //	   exit(1);
+        cout << "Error: Link (" << gr.getLink(i,0)
+             << " - " << gr.getLink(i, 1) << " ) is empty with "
+             << ptpairs[i]->size() << " Corr. points. iteration = "
+             << iteration << endl;
+        //        exit(1);
                      
       } else
        // build the matrix B and vector bd   
-        genBBdForLinkedPair( gr.getLink(i,0), gr.getLink(i,1), ptpairs[i], &B, &bd );
+        genBBdForLinkedPair( gr.getLink(i,0), gr.getLink(i,1),
+                             ptpairs[i], &B, &bd );
     }
     cout <<" building matrices done! "<<endl;
 
@@ -395,8 +397,8 @@ double ghelix6DQ2::doGraphSlam6D(Graph gr, vector <Scan *> allScans, int nrIt)
 
     // delete ptPairs
     for (int i = 0; i < gr.getNrLinks(); i++) {
-	 ptpairs[i]->clear();
-	 delete (ptpairs[i]);
+      ptpairs[i]->clear();
+      delete (ptpairs[i]);
     }
 
     ColumnVector t0(3), t(3), tlast(3);
@@ -411,32 +413,36 @@ double ghelix6DQ2::doGraphSlam6D(Graph gr, vector <Scan *> allScans, int nrIt)
  
       // Update the Pose
 
-	 cout << "Old pose estimate, Scan " << i << endl;
-	 cout <<  "x: " << allScans[i]->get_rPos()[0]
-		 << " y: " << allScans[i]->get_rPos()[1]
-		 << " z: " << allScans[i]->get_rPos()[2]
-		 << " tx: " << allScans[i]->get_rPosTheta()[0]
-		 << " ty: " << allScans[i]->get_rPosTheta()[1]
-		 << " tz: " << allScans[i]->get_rPosTheta()[2]
-		 << endl;
-	 
+      cout << "Old pose estimate, Scan " << i << endl;
+      cout <<  "x: " << allScans[i]->get_rPos()[0]
+           << " y: " << allScans[i]->get_rPos()[1]
+           << " z: " << allScans[i]->get_rPos()[2]
+           << " tx: " << allScans[i]->get_rPosTheta()[0]
+           << " ty: " << allScans[i]->get_rPosTheta()[1]
+           << " tz: " << allScans[i]->get_rPosTheta()[2]
+           << endl;
+      
       if (i < loop_end - 1) {
         allScans[i]->transform(alignxfLum, Scan::LUM, 1);
       } else {
         allScans[i]->transform(alignxfLum, Scan::LUM, 2);
       }
 
-	 cout <<  "x: " << allScans[i]->get_rPos()[0]
-		 << " y: " << allScans[i]->get_rPos()[1]
-		 << " z: " << allScans[i]->get_rPos()[2]
-		 << " tx: " << allScans[i]->get_rPosTheta()[0]
-		 << " ty: " << allScans[i]->get_rPosTheta()[1]
-		 << " tz: " << allScans[i]->get_rPosTheta()[2] << endl << endl;
+      cout <<  "x: " << allScans[i]->get_rPos()[0]
+           << " y: " << allScans[i]->get_rPos()[1]
+           << " z: " << allScans[i]->get_rPos()[2]
+           << " tx: " << allScans[i]->get_rPosTheta()[0]
+           << " ty: " << allScans[i]->get_rPosTheta()[1]
+           << " tz: " << allScans[i]->get_rPosTheta()[2] << endl << endl;
 
-	 sum_position_diff += sqrt( sqr(alignxfLum[12]) + sqr(alignxfLum[13]) +  sqr(alignxfLum[14]));
+      sum_position_diff += sqrt( sqr(alignxfLum[12]) +
+                                 sqr(alignxfLum[13]) +
+                                 sqr(alignxfLum[14]));
 
     }
-    cout << "Sum of Position differences = " << sum_position_diff << endl << endl;
+    cout << "Sum of Position differences = "
+         << sum_position_diff
+         << endl << endl;
     ret = (sum_position_diff / (double)gr.getNrScans());
   }
   delete [] ptpairs;

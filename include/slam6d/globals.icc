@@ -1,8 +1,17 @@
+/*
+ * global definition
+ *
+ * Copyright (C) by the 3DTK contributors
+ *
+ * Released under the GPL version 3.
+ *
+ */
+
 /**
  * @file
- * @brief Globally used functions
- * @author Kai Lingemann. Institute of Computer Science, University of Osnabrueck, Germany.
- * @author Andreas Nuechter. Institute of Computer Science, University of Osnabrueck, Germany.
+ * @brief Globally used functions as inlines
+ * @author Kai Lingemann. Inst. of CS, University of Osnabrueck, Germany.
+ * @author Andreas Nuechter. Jacobs University Bremen gGmbH, Germany.
  */
 
 #ifndef __GLOBALS_ICC__
@@ -13,32 +22,33 @@
 #define  _USE_MATH_DEFINES
 #include <math.h>
 
-inline int gettimeofday (struct timeval* tp, void* tzp) 
+inline int gettimeofday(struct timeval* tp, void* tzp) 
 {
   unsigned long t;
   t = timeGetTime();
   tp->tv_sec = t / 1000;
   tp->tv_usec = t % 1000;
-  return 0;      /* 0 indicates success. */
+  return 0; 
 }
-#else
+
+#else    // _MSC_VER
 #include <sys/time.h>
-#endif
+#endif   // _MSC_VER
 
 #define  _USE_MATH_DEFINES
 #include <math.h>
 
 #if defined(__CYGWIN__)
 # ifndef M_PI
-#  define M_PI		3.14159265358979323846
-#  define M_PI_2	1.57079632679489661923
-#  define M_PI_4	0.78539816339744830962
-#  define M_1_PI	0.31830988618379067154
-#  define M_2_PI	0.63661977236758134308
-#  define M_SQRT2	1.41421356237309504880
-#  define M_SQRT1_2	0.70710678118654752440
+#  define M_PI       3.14159265358979323846
+#  define M_PI_2     1.57079632679489661923
+#  define M_PI_4     0.78539816339744830962
+#  define M_1_PI     0.31830988618379067154
+#  define M_2_PI     0.63661977236758134308
+#  define M_SQRT2    1.41421356237309504880
+#  define M_SQRT1_2  0.70710678118654752440
 # endif
-#endif
+#endif // __CYGWIN__
 
 #include <algorithm>
 using std::min;
@@ -65,9 +75,12 @@ using std::runtime_error;
  *
  */
 inline unsigned char _my_popcount_3(unsigned char x) {
-  x -= (x >> 1) & 0x55;                //put count of each 2 bits into those 2 bits
-  x = (x & 0x33) + ((x >> 2) & 0x33);  //put count of each 4 bits into those 4 bits 
-  x = (x + (x >> 4)) & 0x0f;           //put count of each 8 bits into those 8 bits 
+  // put count of each 2 bits into those 2 bits
+  x -= (x >> 1) & 0x55;
+  // put count of each 4 bits into those 4 bits 
+  x = (x & 0x33) + ((x >> 2) & 0x33);
+  // put count of each 8 bits into those 8 bits   
+  x = (x + (x >> 4)) & 0x0f;           
   return x;
 }
 
@@ -124,7 +137,7 @@ inline ostream& operator<<(ostream& os, const double matrix[16])
  * @param is      stream
  * @param matrix  4x4 matrix sent to stream
  * @return stream
-*/
+ */
 inline istream& operator>>(istream& is, double matrix[16])
 {
   for (int i = 0; i < 16; i++) {
@@ -271,10 +284,10 @@ inline void M4identity( T *M )
  *  @param Mout output matrix
  *
  */
-template <class T>
+template <class T, class S>
 inline void MMult(const T *M1,
                   const T *M2,
-                  T *Mout)
+                  S *Mout)
 {
   Mout[ 0] = M1[ 0]*M2[ 0]+M1[ 4]*M2[ 1]+M1[ 8]*M2[ 2]+M1[12]*M2[ 3];
   Mout[ 1] = M1[ 1]*M2[ 0]+M1[ 5]*M2[ 1]+M1[ 9]*M2[ 2]+M1[13]*M2[ 3];
@@ -292,43 +305,6 @@ inline void MMult(const T *M1,
   Mout[13] = M1[ 1]*M2[12]+M1[ 5]*M2[13]+M1[ 9]*M2[14]+M1[13]*M2[15];
   Mout[14] = M1[ 2]*M2[12]+M1[ 6]*M2[13]+M1[10]*M2[14]+M1[14]*M2[15];
   Mout[15] = M1[ 3]*M2[12]+M1[ 7]*M2[13]+M1[11]*M2[14]+M1[15]*M2[15];
-}
-
-template <class T>
-inline void MMult(const T *M1,
-                  const T *M2,
-                  float *Mout)
-{
-  Mout[ 0] = M1[ 0]*M2[ 0]+M1[ 4]*M2[ 1]+M1[ 8]*M2[ 2]+M1[12]*M2[ 3];
-  Mout[ 1] = M1[ 1]*M2[ 0]+M1[ 5]*M2[ 1]+M1[ 9]*M2[ 2]+M1[13]*M2[ 3];
-  Mout[ 2] = M1[ 2]*M2[ 0]+M1[ 6]*M2[ 1]+M1[10]*M2[ 2]+M1[14]*M2[ 3];
-  Mout[ 3] = M1[ 3]*M2[ 0]+M1[ 7]*M2[ 1]+M1[11]*M2[ 2]+M1[15]*M2[ 3];
-  Mout[ 4] = M1[ 0]*M2[ 4]+M1[ 4]*M2[ 5]+M1[ 8]*M2[ 6]+M1[12]*M2[ 7];
-  Mout[ 5] = M1[ 1]*M2[ 4]+M1[ 5]*M2[ 5]+M1[ 9]*M2[ 6]+M1[13]*M2[ 7];
-  Mout[ 6] = M1[ 2]*M2[ 4]+M1[ 6]*M2[ 5]+M1[10]*M2[ 6]+M1[14]*M2[ 7];
-  Mout[ 7] = M1[ 3]*M2[ 4]+M1[ 7]*M2[ 5]+M1[11]*M2[ 6]+M1[15]*M2[ 7];
-  Mout[ 8] = M1[ 0]*M2[ 8]+M1[ 4]*M2[ 9]+M1[ 8]*M2[10]+M1[12]*M2[11];
-  Mout[ 9] = M1[ 1]*M2[ 8]+M1[ 5]*M2[ 9]+M1[ 9]*M2[10]+M1[13]*M2[11];
-  Mout[10] = M1[ 2]*M2[ 8]+M1[ 6]*M2[ 9]+M1[10]*M2[10]+M1[14]*M2[11];
-  Mout[11] = M1[ 3]*M2[ 8]+M1[ 7]*M2[ 9]+M1[11]*M2[10]+M1[15]*M2[11];
-  Mout[12] = M1[ 0]*M2[12]+M1[ 4]*M2[13]+M1[ 8]*M2[14]+M1[12]*M2[15];
-  Mout[13] = M1[ 1]*M2[12]+M1[ 5]*M2[13]+M1[ 9]*M2[14]+M1[13]*M2[15];
-  Mout[14] = M1[ 2]*M2[12]+M1[ 6]*M2[13]+M1[10]*M2[14]+M1[14]*M2[15];
-  Mout[15] = M1[ 3]*M2[12]+M1[ 7]*M2[13]+M1[11]*M2[14]+M1[15]*M2[15];
-}
-
-/**
- * Transforms a vector with a matrix (P = M * V)
- * @param M the transformation matrix
- * @param v the initial vector
- * @param p the transformt vector
- */
-template <class T>
-inline void VTrans(const T *M, const T *V, T *P)
-{
-  P[0] = M[0] * V[0] + M[4] * V[1] + M[8] * V[2] + M[12];
-  P[1] = M[1] * V[0] + M[5] * V[1] + M[9] * V[2] + M[13];
-  P[2] = M[2] * V[0] + M[6] * V[1] + M[10] * V[2] + M[14];
 }
 
 /**
@@ -409,7 +385,9 @@ inline void M3inv( const T *Min, T *Mout )
  * @param *rPosTheta Pointer to the angles (double[3])
  * @param *alignxf The calculated matrix
  */
-inline void EulerToMatrix4(const double *rPos, const double *rPosTheta, double *alignxf)
+inline void EulerToMatrix4(const double *rPos,
+                           const double *rPosTheta,
+                           double *alignxf)
 {
   double sx = sin(rPosTheta[0]);
   double cx = cos(rPosTheta[0]);
@@ -446,17 +424,19 @@ inline void EulerToMatrix4(const double *rPos, const double *rPosTheta, double *
  * @param rPos       output vector of trnaslation (position) if set
  *
  */
-static inline void Matrix4ToEuler(const double *alignxf, double *rPosTheta, double *rPos = 0)
+static inline void Matrix4ToEuler(const double *alignxf,
+                                  double *rPosTheta,
+                                  double *rPos = 0)
 {
   
   double _trX, _trY;
-  
+
+  // Calculate Y-axis angle 
   if(alignxf[0] > 0.0) {
     rPosTheta[1] = asin(alignxf[8]);
   } else {
     rPosTheta[1] = M_PI - asin(alignxf[8]);
   }
-  // rPosTheta[1] =  asin( alignxf[8]);           // Calculate Y-axis angle 
 
   double  C    =  cos( rPosTheta[1] );
   if ( fabs( C ) > 0.005 )  {                 // Gimball lock? 
@@ -508,7 +488,8 @@ static inline unsigned long GetCurrentTimeInMilliSec()
 #ifdef _MSC_VER
   SYSTEMTIME stime;
   GetSystemTime(&stime);
-  milliseconds = ((stime.wHour * 60 + stime.wMinute) * 60 +  stime.wSecond) * 1000 + stime.wMilliseconds;
+  milliseconds = ((stime.wHour * 60 + stime.wMinute) * 60
+                  +  stime.wSecond) * 1000 + stime.wMilliseconds;
 #else
   static struct timeval tv;
   gettimeofday(&tv, NULL);
@@ -546,35 +527,36 @@ inline double polardist(double* p, double *p2) {
   double stheta = sin(p[0]) * sin(p2[0]);
   double myd2 = acos( stheta * cos(p[1]) * cos(p2[1]) 
                       + stheta * sin(p[1]) * sin(p2[1])
-                      + cos(p[0]) * cos(p2[0]));
+                      + cos(p[0]) * cos(p2[0]) );
   return myd2;
 }
 
-
-
-inline void toKartesian(double *polar, double *kart) {
-  kart[0] = polar[2] * cos( polar[1] ) * sin( polar[0] );
-  kart[1] = polar[2] * sin( polar[1] ) * sin( polar[0] );
-  kart[2] = polar[2] * cos( polar[0] );
-
+/**
+ * Transforms a point from polar coordinates into cartesian
+ * coordinates 
+ */
+template <class T, class S>
+inline void toCartesian(const T *polar, S *cartesian) {
+  cartesian[0] = polar[2] * cos( polar[1] ) * sin( polar[0] );
+  cartesian[1] = polar[2] * sin( polar[1] ) * sin( polar[0] );
+  cartesian[2] = polar[2] * cos( polar[0] );
 }
 
 /**
-  * Transforms a point in cartesian coordinates into polar 
-  * coordinates 
-  */
-
-inline void toPolar(double *n, double *polar) {
+ * Transforms a point from cartesian coordinates into polar 
+ * coordinates 
+ */
+template <class T, class S>
+inline void toPolar(const T *_cartesian, S *polar) {
   double phi, theta, rho;
-  rho = Len(n);
-  Normalize3(n);
+  rho = Len(_cartesian);
+  T cartesian[3];
+  cartesian[0] = _cartesian[0];
+  cartesian[1] = _cartesian[1];
+  cartesian[2] = _cartesian[2];
+  Normalize3(cartesian);
 
-  // if(fabs(1 - fabs(n[1])) < 0.001)  {
-  // cout << "Y " << n[0] << " " << n[1] << " " << n[2] << endl;
-
-  phi = acos(n[2]);
-  //if ( fabs(phi) < 0.0001) phi = 0.0001;
-  //if ( fabs(M_PI - phi) < 0.0001) phi = 0.0001;
+  phi = acos(cartesian[2]);
 
   double theta0;
 
@@ -583,20 +565,18 @@ inline void toPolar(double *n, double *polar) {
   } else if(fabs(M_PI - phi) < 0.0001) {
     theta = 0.0;
   } else {
-    if(fabs(n[0]/sin(phi)) > 1.0) {
-      if(n[0]/sin(phi) < 0) {
+    if(fabs(cartesian[0]/sin(phi)) > 1.0) {
+      if(cartesian[0]/sin(phi) < 0) {
         theta0 = M_PI;
       } else {
         theta0 = 0.0;
       }
     } else {
-      theta0 = acos(n[0]/sin(phi));
-
+      theta0 = acos(cartesian[0]/sin(phi));
+      
     }
-
     
-    double sintheta = n[1]/sin(phi);
-
+    double sintheta = cartesian[1]/sin(phi);
     double EPS = 0.0001;
 
     if(fabs(sin(theta0) - sintheta) < EPS) {
@@ -605,18 +585,12 @@ inline void toPolar(double *n, double *polar) {
       theta = 2*M_PI - theta0;
     } else {
       theta = 0;
-      cout << "Fehler" << endl;
+      cout << "Error converting cartesian coordinates into polarr" << endl;
     }
-
   }
-  /* } else {
-    theta = 0.0;
-    phi = 0.0;
-  }*/
   polar[0] = phi;
   polar[1] = theta;
   polar[2] = rho;
-
 }
 
 /*
@@ -629,7 +603,7 @@ inline void toPolar(double *n, double *polar) {
  * @param j     column index j
  */
 template <class T>
-static inline void	M4_submat(const T *Min, T *Mout, int i, int j ) {
+static inline void     M4_submat(const T *Min, T *Mout, int i, int j ) {
   int di, dj, si, sj;
   // loop through 3x3 submatrix
   for( di = 0; di < 3; di ++ ) {
@@ -843,7 +817,9 @@ static inline void cholsl(unsigned int n,
  * @param t     input translation
  * @param mat   output matrix
  */
-static inline void QuatToMatrix4(const double *quat, const double *t, double *mat)
+static inline void QuatToMatrix4(const double *quat,
+                                 const double *t,
+                                 double *mat)
 {
   //  double q00 = quat[0]*quat[0];
   double q11 = quat[1]*quat[1];
@@ -885,13 +861,14 @@ static inline void QuatToMatrix4(const double *quat, const double *t, double *ma
  * @param quat    resulting quaternion
  * @param t       resulting translation
  */
-static inline void Matrix4ToQuat(const double *mat, double *quat, double *t = 0)
+static inline void Matrix4ToQuat(const double *mat,
+                                 double *quat,
+                                 double *t = 0)
 {
   
   double T, S, X, Y, Z, W;
   T = 1 + mat[0] + mat[5] + mat[10];
   if ( T > 0.00000001 ) { // to avoid large distortions!
-
     S = sqrt(T) * 2;
     X = ( mat[9] - mat[6] ) / S;
     Y = ( mat[2] - mat[8] ) / S;
@@ -975,9 +952,15 @@ static inline void QMult(const double *q1, const double *q2, double *q3) {
  * Quaternion SLERP
  * http://www.euclideanspace.com/maths/algebra/realNormedAlgebra/quaternions/slerp/
  */
-static inline void slerp(const double *qa, const double *qb, const double t, double *qm) {
+static inline void slerp(const double *qa,
+                         const double *qb,
+                         const double t,
+                         double *qm)
+{
   // Calculate angle between them.
-  double cosHalfTheta = qa[0] * qb[0] + qa[1] * qb[1] + qa[2] * qb[2] + qa[3] * qb[3];
+  double cosHalfTheta = qa[0] * qb[0] + qa[1] * qb[1]
+    + qa[2] * qb[2] + qa[3] * qb[3];
+  
   // if qa=qb or qa=-qb then theta = 0 and we can return qa
   if (fabs(cosHalfTheta) >= 1.0) {
     qm[0] = qa[0];
@@ -986,9 +969,11 @@ static inline void slerp(const double *qa, const double *qb, const double t, dou
     qm[3] = qa[3];
     return;
   }
+
   // Calculate temporary values.
   double halfTheta = acos(cosHalfTheta);
   double sinHalfTheta = sqrt(1.0 - cosHalfTheta * cosHalfTheta);
+
   // if theta = 180 degrees then result is not fully defined
   // we could rotate around any axis normal to qa or qb
   if (fabs(sinHalfTheta) < 0.001){
@@ -1001,6 +986,7 @@ static inline void slerp(const double *qa, const double *qb, const double t, dou
   }
   double ratioA = sin((1 - t) * halfTheta) / sinHalfTheta;
   double ratioB = sin(t * halfTheta) / sinHalfTheta; 
+
   //calculate Quaternion.
   qm[0] = (qa[0] * ratioA + qb[0] * ratioB);
   qm[1] = (qa[1] * ratioA + qb[1] * ratioB);
@@ -1022,13 +1008,15 @@ static inline void slerp(const double *qa, const double *qb, const double t, dou
  * the two rotations on that sphere.  Thus the distance
  * is never greater than pi/2.
  */
-inline double quat_dist(double quat1[4], double quat2[4]) {
-  double chordLength = std::fabs(quat1[0]*quat2[0] + quat1[1]*quat2[1] + quat1[2]*quat2[2] + quat1[3]*quat2[3]);
+inline double quat_dist(double quat1[4], double quat2[4])
+{
+  double chordLength = std::fabs(quat1[0]*quat2[0] +
+                                 quat1[1]*quat2[1] +
+                                 quat1[2]*quat2[2] +
+                                 quat1[3]*quat2[3]);
   if (chordLength > 1) chordLength = 1; // in case roundoff fouls us up
   return acos(chordLength) / M_PI * 180.0;
 }
-
-
 
 /**
  *  Converts a Rotation given by Axis-Angle and a Translation into a
@@ -1092,62 +1080,62 @@ inline int LU_factor( double A[4][4], int indx[4])
   int minMN = 4;
 
   for (j = 0; j < minMN; j++)
-  {
-
-    // find pivot in column j and  test for singularity.
-
-    jp = j;
-    t = fabs(A[j][j]);
-    for (i = j+1; i < M; i++)
-      if ( fabs(A[i][j]) > t)
-      {
-        jp = i;
-        t = fabs(A[i][j]);
-      }
-
-    indx[j] = jp;
-
-    // jp now has the index of maximum element
-    // of column j, below the diagonal
-
-    if ( A[jp][j] == 0 )
-      return 1;       // factorization failed because of zero pivot
-
-
-    if (jp != j)            // swap rows j and jp
-      for (k = 0; k < N; k++)
-      {
-        t = A[j][k];
-        A[j][k] = A[jp][k];
-        A[jp][k] =t;
-      }
-
-    if (j < M)                // compute elements j+1:M of jth column
     {
-      // note A(j,j), was A(jp,p) previously which was
-      // guarranteed not to be zero (Label #1)
-      //
-      double recp =  1.0 / A[j][j];
 
-      for (k = j+1; k < M; k++)
-        A[k][j] *= recp;
+      // find pivot in column j and  test for singularity.
+
+      jp = j;
+      t = fabs(A[j][j]);
+      for (i = j+1; i < M; i++)
+        if ( fabs(A[i][j]) > t)
+          {
+            jp = i;
+            t = fabs(A[i][j]);
+          }
+
+      indx[j] = jp;
+
+      // jp now has the index of maximum element
+      // of column j, below the diagonal
+
+      if ( A[jp][j] == 0 )
+        return 1;       // factorization failed because of zero pivot
+
+
+      if (jp != j)            // swap rows j and jp
+        for (k = 0; k < N; k++)
+          {
+            t = A[j][k];
+            A[j][k] = A[jp][k];
+            A[jp][k] =t;
+          }
+
+      if (j < M)                // compute elements j+1:M of jth column
+        {
+          // note A(j,j), was A(jp,p) previously which was
+          // guarranteed not to be zero (Label #1)
+          //
+          double recp =  1.0 / A[j][j];
+
+          for (k = j+1; k < M; k++)
+            A[k][j] *= recp;
+        }
+
+      if (j < minMN)
+        {
+          // rank-1 update to trailing submatrix:   E = E - x*y;
+          //
+          // E is the region A(j+1:M, j+1:N)
+          // x is the column vector A(j+1:M,j)
+          // y is row vector A(j,j+1:N)
+
+          int ii,jj;
+
+          for (ii = j+1; ii < M; ii++)
+            for (jj = j+1; jj < N; jj++)
+              A[ii][jj] -= A[ii][j]*A[j][jj];
+        }
     }
-
-    if (j < minMN)
-    {
-      // rank-1 update to trailing submatrix:   E = E - x*y;
-      //
-      // E is the region A(j+1:M, j+1:N)
-      // x is the column vector A(j+1:M,j)
-      // y is row vector A(j,j+1:N)
-
-      int ii,jj;
-
-      for (ii = j+1; ii < M; ii++)
-        for (jj = j+1; jj < N; jj++)
-          A[ii][jj] -= A[ii][j]*A[j][jj];
-    }
-  }
 
   return 0;
 }   
@@ -1169,23 +1157,23 @@ inline int LU_solve(const double A[4][4], const int indx[4], double b[4])
   double sum = 0.0;
 
   for (i = 0; i < n; i++) 
-  {
-    ip=indx[i];
-    sum=b[ip];
-    b[ip]=b[i];
-    if (ii)
-      for (j = ii;j <= i-1; j++)
-        sum -= A[i][j]*b[j];
-    else if (sum) ii=i;
-    b[i]=sum;
-  }
+    {
+      ip=indx[i];
+      sum=b[ip];
+      b[ip]=b[i];
+      if (ii)
+        for (j = ii;j <= i-1; j++)
+          sum -= A[i][j]*b[j];
+      else if (sum) ii=i;
+      b[i]=sum;
+    }
   for (i = n-1; i >= 0; i--) 
-  {
-    sum=b[i];
-    for (j = i+1; j < n; j++)
-      sum -= A[i][j]*b[j];
-    b[i]=sum/A[i][i];
-  }
+    {
+      sum=b[i];
+      for (j = i+1; j < n; j++)
+        sum -= A[i][j]*b[j];
+      b[i]=sum/A[i][i];
+    }
 
   return 0;
 }
@@ -1225,41 +1213,44 @@ inline T Dot(const T *x, const T *y)
  */
 static inline void QuatRPYEuler(const double *quat, double *euler)
 {
-	double n = sqrt(quat[0]*quat[0] + quat[1]*quat[1] + quat[2]*quat[2] + quat[3]*quat[3]);
-	double s = n > 0?2./(n*n):0.;
+  double n = sqrt(quat[0]*quat[0] +
+                  quat[1]*quat[1] +
+                  quat[2]*quat[2] +
+                  quat[3]*quat[3]);
+  double s = n > 0?2./(n*n):0.;
 
-	double m00, m10, m20, m21, m22;
-
-
-	double xs = quat[1]*s;
-	double ys = quat[2]*s;
-	double zs = quat[3]*s;
-
-	double wx = quat[0]*xs;
-	double wy = quat[0]*ys;
-	double wz = quat[0]*zs;
-
-	double xx = quat[1]*xs;
-	double xy = quat[1]*ys;
-	double xz = quat[1]*zs;
-
-	double yy = quat[2]*ys;
-	double yz = quat[2]*zs;
-
-	double zz = quat[3]*zs;
-
-	m00 = 1.0 - (yy + zz);
-	m22 = 1.0 - (xx + yy);
+  double m00, m10, m20, m21, m22;
 
 
-	m10 = xy + wz;
+  double xs = quat[1]*s;
+  double ys = quat[2]*s;
+  double zs = quat[3]*s;
 
-	m20 = xz - wy;
-	m21 = yz + wx;
+  double wx = quat[0]*xs;
+  double wy = quat[0]*ys;
+  double wz = quat[0]*zs;
 
-	euler[0] = atan2(m21,m22);
-	euler[1] = atan2(-m20,sqrt(m21*m21 + m22*m22));
-	euler[2] = atan2(m10,m00);
+  double xx = quat[1]*xs;
+  double xy = quat[1]*ys;
+  double xz = quat[1]*zs;
+
+  double yy = quat[2]*ys;
+  double yz = quat[2]*zs;
+
+  double zz = quat[3]*zs;
+
+  m00 = 1.0 - (yy + zz);
+  m22 = 1.0 - (xx + yy);
+
+
+  m10 = xy + wz;
+
+  m20 = xz - wy;
+  m21 = yz + wx;
+
+  euler[0] = atan2(m21,m22);
+  euler[1] = atan2(-m20,sqrt(m21*m21 + m22*m22));
+  euler[2] = atan2(m10,m00);
 }
 
 /**
@@ -1267,28 +1258,28 @@ static inline void QuatRPYEuler(const double *quat, double *euler)
  */
 static inline void RPYEulerQuat(const double *euler, double *quat)
 {
-	double sphi   = sin(euler[0]);
-	double stheta = sin(euler[1]);
-	double spsi   = sin(euler[2]);
-	double cphi   = cos(euler[0]);
-	double ctheta = cos(euler[1]);
-	double cpsi   = cos(euler[2]);
+  double sphi   = sin(euler[0]);
+  double stheta = sin(euler[1]);
+  double spsi   = sin(euler[2]);
+  double cphi   = cos(euler[0]);
+  double ctheta = cos(euler[1]);
+  double cpsi   = cos(euler[2]);
 
-	double _r[3][3] = { //create rotational Matrix
-                      {cpsi*ctheta, cpsi*stheta*sphi - spsi*cphi, cpsi*stheta*cphi + spsi*sphi},
-                      {spsi*ctheta, spsi*stheta*sphi + cpsi*cphi, spsi*stheta*cphi - cpsi*sphi},
-                      {    -stheta,                  ctheta*sphi,                  ctheta*cphi}
-                    };
+  double _r[3][3] = { // create rotational Matrix
+    {cpsi*ctheta, cpsi*stheta*sphi-spsi*cphi, cpsi*stheta*cphi+spsi*sphi},
+    {spsi*ctheta, spsi*stheta*sphi+cpsi*cphi, spsi*stheta*cphi-cpsi*sphi},
+    {    -stheta, ctheta*sphi,                ctheta*cphi}
+  };
 
 #define MY_MAX(a,b) (((a)>(b))?(a):(b))
-	double _w = sqrt(MY_MAX(0, 1 + _r[0][0] + _r[1][1] + _r[2][2]))/2.0;
-	double _x = sqrt(MY_MAX(0, 1 + _r[0][0] - _r[1][1] - _r[2][2]))/2.0;
-	double _y = sqrt(MY_MAX(0, 1 - _r[0][0] + _r[1][1] - _r[2][2]))/2.0;
-	double _z = sqrt(MY_MAX(0, 1 - _r[0][0] - _r[1][1] + _r[2][2]))/2.0;
-	quat[0] = _w;
-	quat[1] = (_r[2][1] - _r[1][2])>=0?fabs(_x):-fabs(_x);
-	quat[2] = (_r[0][2] - _r[2][0])>=0?fabs(_y):-fabs(_y);
-	quat[3] = (_r[1][0] - _r[0][1])>=0?fabs(_z):-fabs(_z);
+  double _w = sqrt(MY_MAX(0, 1 + _r[0][0] + _r[1][1] + _r[2][2]))/2.0;
+  double _x = sqrt(MY_MAX(0, 1 + _r[0][0] - _r[1][1] - _r[2][2]))/2.0;
+  double _y = sqrt(MY_MAX(0, 1 - _r[0][0] + _r[1][1] - _r[2][2]))/2.0;
+  double _z = sqrt(MY_MAX(0, 1 - _r[0][0] - _r[1][1] + _r[2][2]))/2.0;
+  quat[0] = _w;
+  quat[1] = (_r[2][1] - _r[1][2])>=0?fabs(_x):-fabs(_x);
+  quat[2] = (_r[0][2] - _r[2][0])>=0?fabs(_y):-fabs(_y);
+  quat[3] = (_r[1][0] - _r[0][1])>=0?fabs(_z):-fabs(_z);
 }
 
 
@@ -1315,14 +1306,24 @@ inline void transform3normal(const double *alignxf, double *normal)
   normal[2] = z;
 }
 
-inline void transform3(const double *alignxf, const double *point, double *tpoint)
+inline void transform3(const double *alignxf,
+                       const double *point,
+                       double *tpoint)
 {
-  tpoint[0] = point[0] * alignxf[0] + point[1] * alignxf[4] + point[2] * alignxf[8]  + alignxf[12];
-  tpoint[1] = point[0] * alignxf[1] + point[1] * alignxf[5] + point[2] * alignxf[9]  + alignxf[13];
-  tpoint[2] = point[0] * alignxf[2] + point[1] * alignxf[6] + point[2] * alignxf[10] + alignxf[14];
+  tpoint[0] = point[0] * alignxf[0] +
+    point[1] * alignxf[4] +
+    point[2] * alignxf[8] + alignxf[12];
+  tpoint[1] = point[0] * alignxf[1] +
+    point[1] * alignxf[5] +
+    point[2] * alignxf[9]  + alignxf[13];
+  tpoint[2] = point[0] * alignxf[2] +
+    point[1] * alignxf[6] +
+    point[2] * alignxf[10] + alignxf[14];
 }
 
-inline void scal_mul3(const double *vec_in, const double scalar, double *vec_out)
+inline void scal_mul3(const double *vec_in,
+                      const double scalar,
+                      double *vec_out)
 {
   vec_out[0] = vec_in[0] * scalar;
   vec_out[1] = vec_in[1] * scalar;
@@ -1352,4 +1353,4 @@ inline std::string trim(const std::string& source)
   return source.substr(start, end - start + 1);
 }
 
-#endif
+#endif // __GLOBALS_ICC__

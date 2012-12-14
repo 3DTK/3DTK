@@ -9,7 +9,7 @@
 
 /**
  * @file ELCH implementation using SLERP
- * @author Jochen Sprickerhof. Institute of Computer Science, University of Osnabrueck, Germany.
+ * @author Jochen Sprickerhof. Inst. of CS, University of Osnabrueck, Germany.
  */
 
 #include "slam6d/elch6Dslerp.h"
@@ -41,7 +41,10 @@ using namespace NEWMAT;
  * @param last indes of last laser scan in the loop
  * @param g graph for loop optimization
  */
-void elch6Dslerp::close_loop(const vector <Scan *> &allScans, int first, int last, graph_t &g)
+void elch6Dslerp::close_loop(const vector <Scan *> &allScans,
+                             int first,
+                             int last,
+                             graph_t &g)
 {
   int n = num_vertices(g);
   graph_t grb[4];
@@ -57,7 +60,12 @@ void elch6Dslerp::close_loop(const vector <Scan *> &allScans, int first, int las
     Matrix C(7, 7);
     int from = source(*ei, g);
     int to = target(*ei, g);
-    lum6DQuat::covarianceQuat(allScans[from], allScans[to], my_icp6D->get_nns_method(), my_icp6D->get_rnd(), my_icp6D->get_max_dist_match2(), &C);
+    lum6DQuat::covarianceQuat(allScans[from],
+                              allScans[to],
+                              my_icp6D->get_nns_method(),
+                              my_icp6D->get_rnd(),
+                              my_icp6D->get_max_dist_match2(),
+                              &C);
     C = C.i();
     for(int j = 0; j < 3; j++) {
 #ifdef _OPENMP
@@ -68,7 +76,10 @@ void elch6Dslerp::close_loop(const vector <Scan *> &allScans, int first, int las
 #ifdef _OPENMP
 #pragma omp critical
 #endif
-    add_edge(from, to, fabs(C(4, 4)) + fabs(C(5, 5)) + fabs(C(6, 6)) + fabs(C(7, 7)), grb[3]);
+    add_edge(from, to,
+             fabs(C(4, 4)) + fabs(C(5, 5)) +
+             fabs(C(6, 6)) + fabs(C(7, 7)),
+             grb[3]);
     li++;
     ei++;
   }
@@ -85,17 +96,19 @@ void elch6Dslerp::close_loop(const vector <Scan *> &allScans, int first, int las
       meta_start.push_back(allScans[i]);
     }
   }
-  MetaScan *start = new MetaScan(meta_start, false, false);
+  MetaScan *start = new MetaScan(meta_start, false);
 
   //static size of metascan
   int offset_last_start = 2;
   int offset_last_end = 0;
 
   vector <Scan *> meta_end;
-  for(int i = last - offset_last_start; i <= last + offset_last_end && i < n; i++) {
+  for(int i = last - offset_last_start;
+      i <= last + offset_last_end && i < n;
+      i++) {
     meta_end.push_back(allScans[i]);
   }
-  MetaScan *end = new MetaScan(meta_end, false, false);
+  MetaScan *end = new MetaScan(meta_end, false);
 
   double Pl0[16];
   memcpy(Pl0, allScans[last]->get_transMat(), 16 * sizeof(double));
@@ -129,7 +142,10 @@ void elch6Dslerp::close_loop(const vector <Scan *> &allScans, int first, int las
     axisangle[2] = deltaQ[2];
     axisangle[3] = deltaQ[3];
     QuatToAA(axisangle);
-    cout << "Delta: " << deltaT[0] << " " << deltaT[1] << " " << deltaT[2] << " " << axisangle[0] << " " << axisangle[1] << " " << axisangle[2] << " " << axisangle[3] << endl;
+    cout << "Delta: " << deltaT[0] << " " << deltaT[1] << " " << deltaT[2]
+         << " " << axisangle[0] << " " << axisangle[1]
+         << " " << axisangle[2] << " " << axisangle[3]
+         << endl;
   }
   
   //transform scans

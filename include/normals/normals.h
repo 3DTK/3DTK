@@ -1,5 +1,14 @@
-#ifndef NORMALS_H
-#define NORMALS_H
+/*
+ * normal definition
+ *
+ * Copyright (C) by the 3DTK contributors
+ *
+ * Released under the GPL version 3.
+ *
+ */
+
+#ifndef __NORMALS_H__
+#define __NORMALS_H__
 
 #include <vector>
 #include <slam6d/scan.h>
@@ -11,33 +20,44 @@
 #endif
 
 void calculateNormalsApxKNN(std::vector<Point> &normals,
-					   vector<Point> &points,
-					   int k,
-					   const double _rPos[3],
-					   double eps = 0.0);
+                            vector<Point> &points,
+                            int k,
+                            const double _rPos[3],
+                            double eps = 0.0);
 
 void calculateNormalsAdaptiveApxKNN(std::vector<Point> &normals,
-							 vector<Point> &points,
-							 int kmin,
-							 int kmax,
-							 const double _rPos[3],
-							 double eps = 0.0);
+                                    vector<Point> &points,
+                                    int kmin,
+                                    int kmax,
+                                    const double _rPos[3],
+                                    double eps = 0.0);
 
 void calculateNormalsKNN(std::vector<Point> &normals,
-					vector<Point> &points,
-					int k,
-					const double _rPos[3] );
+                         vector<Point> &points,
+                         int k,
+                         const double _rPos[3] );
 
 
 void calculateNormalsAdaptiveKNN(vector<Point> &normals,
-						   vector<Point> &points,
-						   int kmin, int kmax,
-						   const double _rPos[3]);
+                                 vector<Point> &points,
+                                 int kmin, int kmax,
+                                 const double _rPos[3]);
 
 void calculateNormalsPANORAMA(vector<Point> &normals,
                               vector<Point> &points,
-                              vector< vector< vector< cv::Vec3f > > > extendedMap,
+                              const vector< vector< vector< cv::Vec3f > > >
+                              extendedMap,
                               const double _rPos[3]);
+
+// see paper
+// Fast and Accurate Computation of Surface Normals from Range Images
+// by H. Badino, D. Huber, Y. Park and T. Kanade
+void calculateNormalsFAST(vector<Point> &normals,
+                          vector<Point> &points,
+                          const cv::Mat &img,
+                          const float max,
+                          const vector< vector< vector <cv::Vec3f> > >
+                          &extendedMap);
 
 // TODO should be exported to separate library
 /*
@@ -65,17 +85,17 @@ static inline cv::Mat scan2mat(Scan *source)
     y = xyz[i][1];
     z = xyz[i][2];
     if(xyz_reflectance.size() != 0)
-    {
-      reflectance = xyz_reflectance[i];
+      {
+        reflectance = xyz_reflectance[i];
 
-      //normalize the reflectance
-      reflectance += 32;
-      reflectance /= 64;
-      reflectance -= 0.2;
-      reflectance /= 0.3;
-      if (reflectance < 0) reflectance = 0;
-      if (reflectance > 1) reflectance = 1;
-    }
+        // normalize the reflectance
+        reflectance += 32;
+        reflectance /= 64;
+        reflectance -= 0.2;
+        reflectance /= 0.3;
+        if (reflectance < 0) reflectance = 0;
+        if (reflectance > 1) reflectance = 1;
+      }
 
     (*it)[0] = x;
     (*it)[1] = y;
@@ -89,67 +109,5 @@ static inline cv::Mat scan2mat(Scan *source)
   }
   return scan;
 }
-// TODO should be exported to separate library
-/*
- * convert a matrix of float values (range image) to a matrix of unsigned
- * eight bit characters using different techniques
- */
-static inline cv::Mat float2uchar(cv::Mat &source, bool logarithm, float cutoff)
-{
-  cv::Mat result(source.size(), CV_8U, cv::Scalar::all(0));
-  float max = 0;
-  // find maximum value
-  if (cutoff == 0.0) {
-    // without cutoff, just iterate through all values to find the largest
-    for (cv::MatIterator_<float> it = source.begin<float>();
-         it != source.end<float>(); ++it) {
-      float val = *it;
-      if (val > max) {
-        max = val;
-      }
-    }
-  } else {
-    // when a cutoff is specified, sort all the points by value and then
-    // specify the max so that <cutoff> values are larger than it
-    vector<float> sorted(source.cols*source.rows);
-    int i = 0;
-    for (cv::MatIterator_<float> it = source.begin<float>();
-         it != source.end<float>(); ++it, ++i) {
-      sorted[i] = *it;
-    }
-    std::sort(sorted.begin(), sorted.end());
-    max = sorted[(int)(source.cols*source.rows*(1.0-cutoff))];
-    cout << "A cutoff of " << cutoff << " resulted in a max value of " << max << endl;
-  }
 
-  cv::MatIterator_<float> src = source.begin<float>();
-  cv::MatIterator_<uchar> dst = result.begin<uchar>();
-  cv::MatIterator_<float> end = source.end<float>();
-  if (logarithm) {
-    // stretch values from 0 to max logarithmically over 0 to 255
-    // using the logarithm allows to represent smaller values with more
-    // precision and larger values with less
-    max = log(max+1);
-    for (; src != end; ++src, ++dst) {
-      float val = (log(*src+1)*255.0)/max;
-      if (val > 255)
-        *dst = 255;
-      else
-        *dst = (uchar)val;
-    }
-  } else {
-    // stretch values from 0 to max linearly over 0 to 255
-    for (; src != end; ++src, ++dst) {
-      float val = (*src*255.0)/max;
-      if (val > 255)
-        *dst = 255;
-      else
-        *dst = (uchar)val;
-    }
-  }
-  return result;
-}
-
-
-
-#endif // NORMALS_H
+#endif // __NORMALS_H__

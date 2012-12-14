@@ -1,10 +1,20 @@
 /*
  * scan implementation
  *
- * Copyright (C) Andreas Nuechter, Kai Lingemann, Dorit Borrmann, Jan Elseberg, Thomas Escher
+ * Copyright (C) by the 3DTK contributors
  *
  * Released under the GPL version 3.
  *
+ */
+
+/**
+ * @file scan.cc
+ * @brief the implementation for all scans (basic/managed)
+ * @author Andreas Nuechter. Jacobs University Bremen gGmbH, Germany. 
+ * @author Kai Lingemann. Inst. of CS. University of Osnabrueck, Germany.
+ * @author Dorit Borrmann. Jacobs University Bremen gGmbH, Germany. 
+ * @author Jan Elseberg. Jacobs University Bremen gGmbH, Germany. 
+ * @author Thomas Escher. Inst. of CS. University of Osnabrueck, Germany.
  */
 
 #include "slam6d/scan.h"
@@ -38,11 +48,14 @@ vector<Scan*> Scan::allScans;
 bool Scan::scanserver = false;
 
 
-void Scan::openDirectory(bool scanserver, const std::string& path, IOType type,
-                         int start, int end)
+void Scan::openDirectory(bool scanserver,
+                         const std::string& path,
+                         IOType type,
+                         int start,
+                         int end)
 {
   Scan::scanserver = scanserver;
-  if(scanserver)
+  if (scanserver)
     ManagedScan::openDirectory(path, type, start, end);
   else
     BasicScan::openDirectory(path, type, start, end);
@@ -50,7 +63,7 @@ void Scan::openDirectory(bool scanserver, const std::string& path, IOType type,
 
 void Scan::closeDirectory()
 {
-  if(scanserver)
+  if (scanserver)
     ManagedScan::closeDirectory();
   else
     BasicScan::closeDirectory();
@@ -90,10 +103,12 @@ Scan::Scan()
 
 Scan::~Scan()
 {
-  if(kd) delete kd;
+  if (kd) delete kd;
 }
 
-void Scan::setReductionParameter(double voxelSize, int nrpts, PointType pointtype)
+void Scan::setReductionParameter(double voxelSize,
+                                 int nrpts,
+                                 PointType pointtype)
 {
   reduction_voxelSize = voxelSize;
   reduction_nrpts = nrpts;
@@ -105,7 +120,11 @@ void Scan::setSearchTreeParameter(int nns_method)
   searchtree_nnstype = nns_method;
 }
 
-void Scan::setOcttreeParameter(double reduction_voxelSize, double voxelSize, PointType pointtype, bool loadOct, bool saveOct)
+void Scan::setOcttreeParameter(double reduction_voxelSize,
+                               double voxelSize,
+                               PointType pointtype,
+                               bool loadOct,
+                               bool saveOct)
 {
   octtree_reduction_voxelSize = reduction_voxelSize;
   octtree_voxelSize = voxelSize;
@@ -145,7 +164,8 @@ void Scan::toGlobal() {
 void Scan::createSearchTree()
 {
   // multiple threads will call this function at the same time because they
-  // all work on one pair of Scans, just let the first one (who sees a nullpointer)
+  // all work on one pair of Scans, just let the first one
+  // (who sees a null pointer)
   // do the creation
   boost::lock_guard<boost::mutex> lock(m_mutex_create_tree);
   if(kd != 0) return;
@@ -204,7 +224,8 @@ void Scan::copyReducedToOriginal()
 
   DataXYZ xyz_reduced(get("xyz reduced"));
   unsigned int size = xyz_reduced.size();
-  DataXYZ xyz_reduced_orig(create("xyz reduced original", sizeof(double)*3*size));
+  DataXYZ xyz_reduced_orig(create("xyz reduced original",
+                                  sizeof(double)*3*size));
   for(unsigned int i = 0; i < size; ++i) {
     for(unsigned int j = 0; j < 3; ++j) {
       xyz_reduced_orig[i][j] = xyz_reduced[i][j];
@@ -245,8 +266,8 @@ void Scan::calcNormals()
   cout << "calcNormals" << endl;
   DataXYZ xyz(get("xyz"));
   DataNormal xyz_normals(create("normal", sizeof(double)*3*xyz.size()));
-  if(xyz.size() == 0)
-    throw runtime_error("Could not calculate reduced points, XYZ data is empty");
+  if(xyz.size() == 0) throw
+      runtime_error("Could not calculate reduced points, XYZ data is empty");
     
   vector<Point> points;
   points.reserve(xyz.size());
@@ -255,7 +276,7 @@ void Scan::calcNormals()
   for(unsigned int j = 0; j < xyz.size(); j++) {
     points.push_back(Point(xyz[j][0], xyz[j][1], xyz[j][2]));
   }
-  const int K_NEIGHBOURS = 10;
+  const int K_NEIGHBOURS = 10;  //@FIXME
   calculateNormalsApxKNN(normals, points, K_NEIGHBOURS, get_rPos(), 1.0);
   for (unsigned int i = 0; i < normals.size(); ++i) {
     xyz_normals[i][0] = normals[i].x;
@@ -297,24 +318,24 @@ void Scan::calcReducedPoints()
     // copy the points
     DataXYZ xyz_reduced(create("xyz reduced", sizeof(double)*3*xyz.size()));
     for(unsigned int i = 0; i < xyz.size(); ++i) {
-	 for(unsigned int j = 0; j < 3; ++j) {
-	   xyz_reduced[i][j] = xyz[i][j];
-	 }
+      for(unsigned int j = 0; j < 3; ++j) {
+        xyz_reduced[i][j] = xyz[i][j];
+      }
     }
     if (reduction_pointtype.hasReflectance()) {
-	 DataReflectance reflectance_reduced(create("reflectance reduced",
-								sizeof(float)*reflectance.size()));
-	 for(unsigned int i = 0; i < xyz.size(); ++i) {
+      DataReflectance reflectance_reduced(create("reflectance reduced",
+                                        sizeof(float)*reflectance.size()));
+      for(unsigned int i = 0; i < xyz.size(); ++i) {
            reflectance_reduced[i] = reflectance[i];
         }
     }
     if (reduction_pointtype.hasNormal()) {
-	 DataNormal normal_reduced(create("normal reduced",
-							    sizeof(double)*3*xyz.size()));	 
+      DataNormal normal_reduced(create("normal reduced",
+                                       sizeof(double)*3*xyz.size()));      
         for(unsigned int i = 0; i < xyz.size(); ++i) {
-		for(unsigned int j = 0; j < 3; ++j) {
-		  normal_reduced[i][j] = xyz_normals[i][j];
-		}
+          for(unsigned int j = 0; j < 3; ++j) {
+            normal_reduced[i][j] = xyz_normals[i][j];
+          }
         }
     }
 
@@ -323,32 +344,32 @@ void Scan::calcReducedPoints()
     double **xyz_in = new double*[xyz.size()];
     for (unsigned int i = 0; i < xyz.size(); ++i) {
       xyz_in[i] = new double[reduction_pointtype.getPointDim()];
-	 unsigned int j = 0;
+      unsigned int j = 0;
       for (; j < 3; ++j) 
         xyz_in[i][j] = xyz[i][j];
-	 if (reduction_pointtype.hasReflectance())
-	   xyz_in[i][j++] = reflectance[i];
-	 if (reduction_pointtype.hasNormal())
-	   for (unsigned int l = 0; l < 3; ++l) 
-		xyz_in[i][j] = xyz_normals[i][l];
+      if (reduction_pointtype.hasReflectance())
+        xyz_in[i][j++] = reflectance[i];
+      if (reduction_pointtype.hasNormal())
+        for (unsigned int l = 0; l < 3; ++l) 
+          xyz_in[i][j] = xyz_normals[i][l];
     }
 
     // start reduction
     // build octree-tree from CurrentScan
     // put full data into the octtree
     BOctTree<double> *oct = new BOctTree<double>(xyz_in,
-									    xyz.size(),
-									    reduction_voxelSize,
-									    reduction_pointtype);	 
+                                                 xyz.size(),
+                                                 reduction_voxelSize,
+                                                 reduction_pointtype);      
 
     vector<double*> center;
     center.clear();
     if (reduction_nrpts > 0) {
-	 if (reduction_nrpts == 1) {
-	   oct->GetOctTreeRandom(center);
-	 } else {
-	   oct->GetOctTreeRandom(center, reduction_nrpts);
-	 }
+      if (reduction_nrpts == 1) {
+        oct->GetOctTreeRandom(center);
+      } else {
+        oct->GetOctTreeRandom(center, reduction_nrpts);
+      }
     } else {
         oct->GetOctTreeCenter(center);
     }
@@ -359,24 +380,24 @@ void Scan::calcReducedPoints()
     DataReflectance reflectance_reduced(DataPointer(0, 0));
     DataNormal normal_reduced(DataPointer(0, 0)); 
     if (reduction_pointtype.hasReflectance()) {
-	 DataReflectance my_reflectance_reduced(create("reflectance reduced",
-										  sizeof(float)*size));
-	 reflectance_reduced = my_reflectance_reduced;
+      DataReflectance my_reflectance_reduced(create("reflectance reduced",
+                                                    sizeof(float)*size));
+      reflectance_reduced = my_reflectance_reduced;
     }
     if (reduction_pointtype.hasNormal()) {
-	 DataNormal my_normal_reduced(create("normal reduced",
-								  sizeof(double)*3*size));
-	 normal_reduced = my_normal_reduced; 
+      DataNormal my_normal_reduced(create("normal reduced",
+                                          sizeof(double)*3*size));
+      normal_reduced = my_normal_reduced; 
     }
     for(unsigned int i = 0; i < size; ++i) {
-	 unsigned int j = 0;
-	 for (; j < 3; ++j) 
-	   xyz_reduced[i][j] = center[i][j];
-	 if (reduction_pointtype.hasReflectance())
-	   reflectance_reduced[i] = center[i][j++];
-	 if (reduction_pointtype.hasNormal())
-	   for (unsigned int l = 0; l < 3; ++l) 
-		normal_reduced[i][l] = center[i][j++];
+      unsigned int j = 0;
+      for (; j < 3; ++j) 
+        xyz_reduced[i][j] = center[i][j];
+      if (reduction_pointtype.hasReflectance())
+        reflectance_reduced[i] = center[i][j++];
+      if (reduction_pointtype.hasNormal())
+        for (unsigned int l = 0; l < 3; ++l) 
+          normal_reduced[i][l] = center[i][j++];
     }
     delete oct;
     for(size_t i = 0; i < xyz.size(); i++) {
@@ -410,7 +431,8 @@ void Scan::mergeCoordinatesWithRoboterPosition(Scan* prevScan)
   double tempMat[16], deltaMat[16];
   M4inv(prevScan->get_transMatOrg(), tempMat);
   MMult(prevScan->get_transMat(), tempMat, deltaMat);
-  transform(deltaMat, INVALID); //apply delta transformation of the previous scan
+  // apply delta transformation of the previous scan
+  transform(deltaMat, INVALID); 
 }
 
 /**
@@ -424,7 +446,8 @@ void Scan::transformAll(const double alignxf[16])
   for(; i < xyz.size(); ++i) {
     transform3(alignxf, xyz[i]);
   }
-  // TODO: test for ManagedScan compability, may need a touch("xyz") to mark saving the new values
+  // TODO: test for ManagedScan compability,
+  // may need a touch("xyz") to mark saving the new values
 }
 
 //! Internal function of transform which alters the reduced points
@@ -476,15 +499,18 @@ void Scan::transformMatrix(const double alignxf[16])
 }
 
 /**
- * Transforms the scan by a given transformation and writes a new frame. The idea
- * is to write for every transformation in all files, such that the show program
- * is able to determine, whcih scans have to be drawn in which color. Hidden scans
+ * Transforms the scan by a given transformation and writes a new frame.
+ * The idea is to write for every transformation in all files,
+ * such that the show program is able to determine,
+ * which scans have to be drawn in which color. Hidden scans
  * (or later processed scans) are written with INVALID.
  *
  * @param alignxf Transformation matrix
  * @param colour Specifies which colour should the written to the frames file
- * @param islum Is the transformtion part of LUM, i.e., all scans are transformed?
- *        In this case only LUM transformation is stored, otherwise all scans are processed
+ * @param islum Is the transformtion part of LUM, i.e., all scans
+ *              are transformed?
+ *              In this case only LUM transformation is stored, otherwise all
+ *              scans are processed
  *        -1  no transformation is stored
  *         0  ICP transformation
  *         1  LUM transformation, all scans except last scan
@@ -507,7 +533,8 @@ void Scan::transform(const double alignxf[16], const AlgoType type, int islum)
 #ifdef DEBUG
   cerr << alignxf << endl;
   cerr << "(" << rPos[0] << ", " << rPos[1] << ", " << rPos[2] << ", "
-       << rPosTheta[0] << ", " << rPosTheta[1] << ", " << rPosTheta[2] << ") ---> ";
+       << rPosTheta[0] << ", " << rPosTheta[1] << ", " << rPosTheta[2]
+       << ") ---> ";
 #endif
 
   // transform points
@@ -583,16 +610,19 @@ void Scan::transform(const double alignxf[16], const AlgoType type, int islum)
 }
 
 /**
- * Transforms the scan by a given transformation and writes a new frame. The idea
- * is to write for every transformation in all files, such that the show program
- * is able to determine, whcih scans have to be drawn in which color. Hidden scans
- * (or later processed scans) are written with INVALID.
+ * Transforms the scan by a given transformation and writes a new frame.
+ * The idea is to write for every transformation in all files, such that
+ * the show program is able to determine, whcih scans have to be drawn
+ * in which color. Hidden scans (or later processed scans) are written
+ * with INVALID.
  *
  * @param alignQuat Quaternion for the rotation
  * @param alignt    Translation vector
  * @param colour Specifies which colour should the written to the frames file
- * @param islum Is the transformtion part of LUM, i.e., all scans are transformed?
- *        In this case only LUM transformation is stored, otherwise all scans are processed
+ * @param islum Is the transformtion part of LUM, i.e., all scans are
+ *              transformed?
+ *              In this case only LUM transformation is stored, otherwise
+ *              all scans are processed
  *        -1  no transformation is stored
  *         0  ICP transformation
  *         1  LUM transformation, all scans except last scan
@@ -629,7 +659,10 @@ void Scan::transformToMatrix(double alignxf[16], const AlgoType type, int islum)
  * @param rPT Orientation as Euler angle to which this scan will be set
  * @param islum Is the transformation part of LUM?
  */
-void Scan::transformToEuler(double rP[3], double rPT[3], const AlgoType type, int islum)
+void Scan::transformToEuler(double rP[3],
+                            double rPT[3],
+                            const AlgoType type,
+                            int islum)
 {
 #ifdef WITH_METRICS
   // called in openmp context in lum6Deuler.cc:422
@@ -658,7 +691,10 @@ void Scan::transformToEuler(double rP[3], double rPT[3], const AlgoType type, in
  * @param rPQ Orientation as Quaternion to which this scan will be set
  * @param islum Is the transformation part of LUM?
  */
-void Scan::transformToQuat(double rP[3], double rPQ[4], const AlgoType type, int islum)
+void Scan::transformToQuat(double rP[3],
+                           double rPQ[4],
+                           const AlgoType type,
+                           int islum)
 {
   double tinv[16];
   double alignxf[16];
@@ -687,7 +723,9 @@ void Scan::getNoPairsSimple(vector <double*> &diff,
                             double max_dist_match2)
 {
   DataXYZ xyz_reduced(Source->get("xyz reduced"));
-  KDtree* kd = new KDtree(PointerArray<double>(Target->get("xyz reduced")).get(), Target->size<DataXYZ>("xyz reduced"));
+  KDtree* kd = new KDtree(
+                 PointerArray<double>(Target->get("xyz reduced")).get(),
+                 Target->size<DataXYZ>("xyz reduced"));
 
   cout << "Max: " << max_dist_match2 << endl;
   for (unsigned int i = 0; i < xyz_reduced.size(); i++) {
@@ -700,8 +738,8 @@ void Scan::getNoPairsSimple(vector <double*> &diff,
 
     double *closest = kd->FindClosest(p, max_dist_match2, thread_num);
     if (!closest) {
-	    diff.push_back(xyz_reduced[i]);
-	    //diff.push_back(closest);
+         diff.push_back(xyz_reduced[i]);
+         //diff.push_back(closest);
     }
   }
 
@@ -726,11 +764,14 @@ void Scan::getPtPairsSimple(vector <PtPair> *pairs,
                             int rnd, double max_dist_match2,
                             double *centroid_m, double *centroid_d)
 {
-  KDtree* kd = new KDtree(PointerArray<double>(Source->get("xyz reduced")).get(), Source->size<DataXYZ>("xyz reduced"));
+  KDtree* kd = new KDtree(
+                 PointerArray<double>(Source->get("xyz reduced")).get(),
+                 Source->size<DataXYZ>("xyz reduced"));
   DataXYZ xyz_reduced(Target->get("xyz reduced"));
 
   for (unsigned int i = 0; i < xyz_reduced.size(); i++) {
-    if (rnd > 1 && rand(rnd) != 0) continue;  // take about 1/rnd-th of the numbers only
+    // take about 1/rnd-th of the numbers only
+    if (rnd > 1 && rand(rnd) != 0) continue;  
 
     double p[3];
     p[0] = xyz_reduced[i][0];
@@ -781,7 +822,8 @@ void Scan::getPtPairs(vector <PtPair> *pairs,
                       Scan* Source, Scan* Target,
                       int thread_num,
                       int rnd, double max_dist_match2, double &sum,
-                      double *centroid_m, double *centroid_d, PairingMode pairing_mode)
+                      double *centroid_m, double *centroid_d,
+                      PairingMode pairing_mode)
 {
   // initialize centroids
   for(unsigned int i = 0; i < 3; ++i) {
@@ -793,9 +835,15 @@ void Scan::getPtPairs(vector <PtPair> *pairs,
   DataXYZ xyz_reduced(Target->get("xyz reduced"));
   DataNormal normal_reduced(Target->get("normal reduced"));
   Source->getSearchTree()->getPtPairs(pairs, Source->dalignxf,
-                                      xyz_reduced, normal_reduced, 0, xyz_reduced.size(),
+                                      xyz_reduced,
+                                      normal_reduced,
+                                      0,
+                                      xyz_reduced.size(),
                                       thread_num,
-                                      rnd, max_dist_match2, sum, centroid_m, centroid_d,
+                                      rnd,
+                                      max_dist_match2,
+                                      sum,
+                                      centroid_m, centroid_d,
                                       pairing_mode);
 
   // normalize centroids
@@ -818,7 +866,8 @@ void Scan::getPtPairs(vector <PtPair> *pairs,
  * @param pairs The resulting point pairs (vector will be filled)
  * @param Source The scan whose points are matched to Targets' points
  * @param Target The scan to whiche the points are matched
- * @param thread_num The number of the thread that is computing ptPairs in parallel
+ * @param thread_num The number of the thread that is computing ptPairs
+ *                   in parallel
  * @param step The number of steps for parallelization
  * @param rnd randomized point selection
  * @param max_dist_match2 maximal allowed distance for matching
@@ -831,12 +880,12 @@ void Scan::getPtPairs(vector <PtPair> *pairs,
  *
  */
 void Scan::getPtPairsParallel(vector <PtPair> *pairs,
-						Scan* Source, Scan* Target,
+                              Scan* Source, Scan* Target,
                               int thread_num, int step,
                               int rnd, double max_dist_match2,
                               double *sum,
                               double centroid_m[OPENMP_NUM_THREADS][3],
-						double centroid_d[OPENMP_NUM_THREADS][3],
+                              double centroid_d[OPENMP_NUM_THREADS][3],
                               PairingMode pairing_mode)
 {
   // initialize centroids
@@ -847,7 +896,8 @@ void Scan::getPtPairsParallel(vector <PtPair> *pairs,
 
   // get point pairs
   SearchTree* search = Source->getSearchTree();
-  // differentiate between a meta scan (which has no reduced points) and a normal scan
+  // differentiate between a meta scan (which has no reduced points)
+  // and a normal scan
   // if Source is also a meta scan it already has a special meta-kd-tree
   MetaScan* meta = dynamic_cast<MetaScan*>(Target);
   if(meta) {
@@ -860,20 +910,22 @@ void Scan::getPtPairsParallel(vector <PtPair> *pairs,
       // call ptpairs for each scan and accumulate ptpairs, centroids and sum
       search->getPtPairs(&pairs[thread_num], Source->dalignxf,
                          xyz_reduced, normal_reduced,
-					step * thread_num, step * thread_num + step,
+                         step * thread_num, step * thread_num + step,
                          thread_num,
                          rnd, max_dist_match2, sum[thread_num],
-                         centroid_m[thread_num], centroid_d[thread_num], pairing_mode);
+                         centroid_m[thread_num], centroid_d[thread_num],
+                         pairing_mode);
     }
   } else {
     DataXYZ xyz_reduced(Target->get("xyz reduced"));
     DataNormal normal_reduced(Target->get("normal reduced"));
     search->getPtPairs(&pairs[thread_num], Source->dalignxf,
                        xyz_reduced, normal_reduced,
-				   thread_num * step, thread_num * step + step,
+                       thread_num * step, thread_num * step + step,
                        thread_num,
                        rnd, max_dist_match2, sum[thread_num],
-                       centroid_m[thread_num], centroid_d[thread_num], pairing_mode);
+                       centroid_m[thread_num], centroid_d[thread_num],
+                       pairing_mode);
   }
 
   // normalize centroids
@@ -889,7 +941,9 @@ void Scan::getPtPairsParallel(vector <PtPair> *pairs,
 unsigned int Scan::getMaxCountReduced(ScanVector& scans)
 {
   unsigned int max = 0;
-  for(std::vector<Scan*>::iterator it = scans.begin(); it != scans.end(); ++it) {
+  for(std::vector<Scan*>::iterator it = scans.begin();
+      it != scans.end();
+      ++it) {
     unsigned int count = (*it)->size<DataXYZ>("xyz reduced");
     if(count > max)
       max = count;

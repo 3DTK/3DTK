@@ -1,6 +1,7 @@
 /*
  * scan_red implementation
  *
+ * Copyright (C) by the 3DTK contributors
  * Copyright (C) Dorit Borrmann, Razvan-George Mihalyi, Remus Dumitru 
  *
  * Released under the GPL version 3.
@@ -18,7 +19,9 @@
  * and 'dir' the directory of a set of scans
  * Reduced scans will be written to 'dir/reduced'
  *
- * @author Dorit Borrmann. Automation Group, Jacobs University Bremen gGmbH, Germany. 
+ * @author Dorit Borrmann. Jacobs University Bremen gGmbH, Germany.
+ * @author Razvan-George Mihalyi. Jacobs University Bremen gGmbH, Germany.
+ * @author Remus Dumitru. Jacobs University Bremen gGmbH, Germany.
  */
 #ifdef _MSC_VER
 #if !defined _OPENMP && defined OPENMP 
@@ -53,7 +56,6 @@ using std::ofstream;
 #include <omp.h>
 #endif
 
-
 #ifndef _MSC_VER
 #include <getopt.h>
 #else
@@ -84,10 +86,10 @@ enum reduction_method {OCTREE, RANGE, INTERPOLATE};
 void conflicting_options(const po::variables_map & vm,
                          const char *opt1, const char *opt2)
 {
-    if (vm.count(opt1) && !vm[opt1].defaulted()
-        && vm.count(opt2) && !vm[opt2].defaulted())
-        throw std::logic_error(string("Conflicting options '")
-                               + opt1 + "' and '" + opt2 + "'.");
+  if (vm.count(opt1) && !vm[opt1].defaulted()
+      && vm.count(opt2) && !vm[opt2].defaulted())
+    throw std::logic_error(string("Conflicting options '")
+                           + opt1 + "' and '" + opt2 + "'.");
 }
 
 /* Function used to check that if 'for_what' is specified, then
@@ -95,62 +97,71 @@ void conflicting_options(const po::variables_map & vm,
 void option_dependency(const po::variables_map & vm,
                        const char *for_what, const char *required_option)
 {
-    if (vm.count(for_what) && !vm[for_what].defaulted())
-        if (vm.count(required_option) == 0
-            || vm[required_option].defaulted())
-            throw std::logic_error(string("Option '") + for_what +
-                                   "' requires option '" +
-                                   required_option + "'.");
+  if (vm.count(for_what) && !vm[for_what].defaulted())
+    if (vm.count(required_option) == 0
+        || vm[required_option].defaulted())
+      throw std::logic_error(string("Option '") + for_what +
+                             "' requires option '" +
+                             required_option + "'.");
 }
 
 /*
  * validates panorama method specification
  */
 namespace fbr {
-    void validate(boost::any& v, const std::vector<std::string>& values,
-                  projection_method*, int) {
-        if (values.size() == 0)
-            throw std::runtime_error("Invalid model specification");
-        string arg = values.at(0);
-        if(strcasecmp(arg.c_str(), "EQUIRECTANGULAR") == 0) v = EQUIRECTANGULAR;
-        else if(strcasecmp(arg.c_str(), "CYLINDRICAL") == 0) v = CYLINDRICAL;
-        else if(strcasecmp(arg.c_str(), "MERCATOR") == 0) v = MERCATOR;
-        else if(strcasecmp(arg.c_str(), "CONIC") == 0) v = CONIC;
-        else throw std::runtime_error(std::string("projection method ") + arg + std::string(" is unknown"));
-    }
+  void validate(boost::any& v, const std::vector<std::string>& values,
+                projection_method*, int) {
+    if (values.size() == 0)
+      throw std::runtime_error("Invalid model specification");
+    string arg = values.at(0);
+    if(strcasecmp(arg.c_str(), "EQUIRECTANGULAR") == 0) v = EQUIRECTANGULAR;
+    else if(strcasecmp(arg.c_str(), "CYLINDRICAL") == 0) v = CYLINDRICAL;
+    else if(strcasecmp(arg.c_str(), "MERCATOR") == 0) v = MERCATOR;
+    else if(strcasecmp(arg.c_str(), "CONIC") == 0) v = CONIC;
+    else throw std::runtime_error(std::string("projection method ")
+                                  + arg
+                                  + std::string(" is unknown"));
+  }
 }
 
 /*
  * validates input type specification
  */
 void validate(boost::any& v, const std::vector<std::string>& values,
-    IOType*, int) {
-    if (values.size() == 0)
-        throw std::runtime_error("Invalid model specification");
-    string arg = values.at(0);
-    try {
-        v = formatname_to_io_type(arg.c_str());
-    } catch (...) { // runtime_error
-        throw std::runtime_error("Format " + arg + " unknown.");
-    }
+              IOType*, int) {
+  if (values.size() == 0)
+    throw std::runtime_error("Invalid model specification");
+  string arg = values.at(0);
+  try {
+    v = formatname_to_io_type(arg.c_str());
+  } catch (...) { // runtime_error
+    throw std::runtime_error("Format " + arg + " unknown.");
+  }
 }
 
-void reduction_option_dependency(const po::variables_map & vm, reduction_method stype, const char *option)
+void reduction_option_dependency(const po::variables_map & vm,
+                                 reduction_method stype,
+                                 const char *option)
 {
-    if (vm.count("reduction") && vm["reduction"].as<reduction_method>() == stype) {
-        if (!vm.count(option)) {
-            throw std::logic_error (string("this reduction option needs ")+option+" to be set");
-        }
+  if (vm.count("reduction") && vm["reduction"].as<reduction_method>() == stype)
+    {
+      if (!vm.count(option)) {
+        throw std::logic_error(string("this reduction option needs ")
+                               + option
+                               + " to be set");
     }
+  }
 }
 
 void reduction_option_conflict(const po::variables_map & vm, reduction_method stype, const char *option)
 {
-    if (vm.count("reduction") && vm["reduction"].as<reduction_method>() == stype) {
-        if (vm.count(option)) {
-            throw std::logic_error (string("this reduction option is incompatible with ")+option);
-        }
+  if (vm.count("reduction") && vm["reduction"].as<reduction_method>() == stype) {
+    if (vm.count(option)) {
+      throw std::logic_error(
+          string("this reduction option is incompatible with ") +
+          option);
     }
+  }
 }
 
 
@@ -158,258 +169,273 @@ void reduction_option_conflict(const po::variables_map & vm, reduction_method st
  * validates reduction method specification
  */
 void validate(boost::any& v, const std::vector<std::string>& values,
-        reduction_method*, int) {
-    if (values.size() == 0)
-        throw std::runtime_error("Invalid model specification");
-    string arg = values.at(0);
-    if(strcasecmp(arg.c_str(), "OCTREE") == 0) v = OCTREE;
-    else if(strcasecmp(arg.c_str(), "RANGE") == 0) v = RANGE;
-    else if(strcasecmp(arg.c_str(), "INTERPOLATE") == 0) v = INTERPOLATE;
-    else throw std::runtime_error(std::string("reduction method ") + arg + std::string(" is unknown"));
+              reduction_method*, int) {
+  if (values.size() == 0)
+    throw std::runtime_error("Invalid model specification");
+  string arg = values.at(0);
+  if(strcasecmp(arg.c_str(), "OCTREE") == 0) v = OCTREE;
+  else if(strcasecmp(arg.c_str(), "RANGE") == 0) v = RANGE;
+  else if(strcasecmp(arg.c_str(), "INTERPOLATE") == 0) v = INTERPOLATE;
+  else throw std::runtime_error(std::string("reduction method ")
+                                + arg
+                                + std::string(" is unknown"));
 }
 
 void parse_options(int argc, char **argv, int &start, int &end,
-        bool &scanserver, int &width, int &height,
-        fbr::projection_method &ptype, string &dir, IOType &iotype,
-        int &maxDist, int &minDist, reduction_method &rtype, double &scale,
-        double &voxel, int &octree, bool &use_reflectance)
+                   bool &scanserver, int &width, int &height,
+                   fbr::projection_method &ptype, string &dir, IOType &iotype,
+                   int &maxDist, int &minDist, reduction_method &rtype, double &scale,
+                   double &voxel, int &octree, bool &use_reflectance)
 {
-    po::options_description generic("Generic options");
-    generic.add_options()
-        ("help,h", "output this help message");
+  po::options_description generic("Generic options");
+  generic.add_options()
+    ("help,h", "output this help message");
 
-    po::options_description input("Input options");
-    input.add_options()
-        ("start,s", po::value<int>(&start)->default_value(0),
-         "start at scan <arg> (i.e., neglects the first <arg> scans) "
-         "[ATTENTION: counting naturally starts with 0]")
-        ("end,e", po::value<int>(&end)->default_value(-1),
-         "end after scan <arg>")
-        ("format,f", po::value<IOType>(&iotype)->default_value(UOS),
-         "using shared library <arg> for input. (chose F from {uos, uos_map, "
-         "uos_rgb, uos_frames, uos_map_frames, old, rts, rts_map, ifp, "
-         "riegl_txt, riegl_rgb, riegl_bin, zahn, ply})")
-        ("max,M", po::value<int>(&maxDist)->default_value(-1),
-         "neglegt all data points with a distance larger than <arg> 'units")
-        ("min,m", po::value<int>(&minDist)->default_value(-1),
-         "neglegt all data points with a distance smaller than <arg> 'units")
-        ("scanserver,S", po::bool_switch(&scanserver),
-         "Use the scanserver as an input method and handling of scan data");
+  po::options_description input("Input options");
+  input.add_options()
+    ("start,s", po::value<int>(&start)->default_value(0),
+     "start at scan <arg> (i.e., neglects the first <arg> scans) "
+     "[ATTENTION: counting naturally starts with 0]")
+    ("end,e", po::value<int>(&end)->default_value(-1),
+     "end after scan <arg>")
+    ("format,f", po::value<IOType>(&iotype)->default_value(UOS),
+     "using shared library <arg> for input. (chose F from {uos, uos_map, "
+     "uos_rgb, uos_frames, uos_map_frames, old, rts, rts_map, ifp, "
+     "riegl_txt, riegl_rgb, riegl_bin, zahn, ply})")
+    ("max,M", po::value<int>(&maxDist)->default_value(-1),
+     "neglegt all data points with a distance larger than <arg> 'units")
+    ("min,m", po::value<int>(&minDist)->default_value(-1),
+     "neglegt all data points with a distance smaller than <arg> 'units")
+    ("scanserver,S", po::bool_switch(&scanserver),
+     "Use the scanserver as an input method and handling of scan data");
 
-    po::options_description reduction("Reduction options");
-    reduction.add_options()
-        ("reduction,r", po::value<reduction_method>(&rtype)->required(),
-         "choose reduction method (OCTREE, RANGE, INTERPOLATE)")
-        ("scale,S", po::value<double>(&scale),
-         "scaling factor")
-        ("voxel,v", po::value<double>(&voxel),
-         "voxel size")
-        ("projection,P", po::value<fbr::projection_method>(&ptype),
-         "projection method or panorama image")
-        ("octree,O", po::value<int>(&octree),
-         "0 -> center\n1 -> random\nN>1 -> random N")
-        ("width,w", po::value<int>(&width),
-         "width of panorama")
-        ("height,h", po::value<int>(&height),
-         "height of panorama");
+  po::options_description reduction("Reduction options");
+  reduction.add_options()
+    ("reduction,r", po::value<reduction_method>(&rtype)->required(),
+     "choose reduction method (OCTREE, RANGE, INTERPOLATE)")
+    ("scale,S", po::value<double>(&scale),
+     "scaling factor")
+    ("voxel,v", po::value<double>(&voxel),
+     "voxel size")
+    ("projection,P", po::value<fbr::projection_method>(&ptype),
+     "projection method or panorama image")
+    ("octree,O", po::value<int>(&octree),
+     "0 -> center\n1 -> random\nN>1 -> random N")
+    ("width,w", po::value<int>(&width),
+     "width of panorama")
+    ("height,h", po::value<int>(&height),
+     "height of panorama");
 
-    po::options_description output("Output options");
-    output.add_options()
-        ("reflectance,R", po::bool_switch(&use_reflectance),
-         "Use reflectance when reducing points and save scan files in UOSR format");
+  po::options_description output("Output options");
+  output.add_options()
+    ("reflectance,R", po::bool_switch(&use_reflectance),
+     "Use reflectance when reducing points and save scan files in UOSR format");
 
-    po::options_description hidden("Hidden options");
-    hidden.add_options()
-        ("input-dir", po::value<string>(&dir), "input dir");
+  po::options_description hidden("Hidden options");
+  hidden.add_options()
+    ("input-dir", po::value<string>(&dir), "input dir");
 
-    // all options
-    po::options_description all;
-    all.add(generic).add(input).add(reduction).add(output).add(hidden);
+  // all options
+  po::options_description all;
+  all.add(generic).add(input).add(reduction).add(output).add(hidden);
 
-    // options visible with --help
-    po::options_description cmdline_options;
-    cmdline_options.add(generic).add(input).add(reduction).add(output);
+  // options visible with --help
+  po::options_description cmdline_options;
+  cmdline_options.add(generic).add(input).add(reduction).add(output);
 
-    // positional argument
-    po::positional_options_description pd;
-    pd.add("input-dir", 1);
+  // positional argument
+  po::positional_options_description pd;
+  pd.add("input-dir", 1);
 
-    // process options
-    po::variables_map vm;
-    po::store(po::command_line_parser(argc, argv).
-              options(all).positional(pd).run(), vm);
+  // process options
+  po::variables_map vm;
+  po::store(po::command_line_parser(argc, argv).
+            options(all).positional(pd).run(), vm);
 
-    // display help
-    if (vm.count("help")) {
-        cout << cmdline_options;
-        cout << endl
-            << "Example usage:" << endl
-            << "\t./bin/scan_red -s 0 -e 0 -f uos --reduction OCTREE --voxel 10 --octree 0 dat" << endl
-            << "\t./bin/scan_red -s 0 -e 0 -f uos --reduction RANGE --scale 0.5 --projection EQUIRECTANGULAR --width 3600 --height 1000 dat" << endl
-            << "\t./bin/scan_red -s 0 -e 0 -f uos --reduction INTERPOLATE --scale 0.2 --projection EQUIRECTANGULAR --width 3600 --height 1000 dat" << endl;
-        exit(0);
-    }
+  // display help
+  if (vm.count("help")) {
+    cout << cmdline_options;
+    cout << endl
+         << "Example usage:" << endl
+         << "\t./bin/scan_red -s 0 -e 0 -f uos --reduction OCTREE --voxel 10 --octree 0 dat" << endl
+         << "\t./bin/scan_red -s 0 -e 0 -f uos --reduction RANGE --scale 0.5 --projection EQUIRECTANGULAR --width 3600 --height 1000 dat" << endl
+         << "\t./bin/scan_red -s 0 -e 0 -f uos --reduction INTERPOLATE --scale 0.2 --projection EQUIRECTANGULAR --width 3600 --height 1000 dat" << endl;
+    exit(0);
+  }
 
-    po::notify(vm);
+  po::notify(vm);
 
-    reduction_option_dependency(vm, OCTREE, "voxel");
-    reduction_option_dependency(vm, OCTREE, "octree");
-    reduction_option_conflict(vm, OCTREE, "scale");
-    reduction_option_conflict(vm, OCTREE, "projection");
-    reduction_option_conflict(vm, OCTREE, "width");
-    reduction_option_conflict(vm, OCTREE, "height");
+  reduction_option_dependency(vm, OCTREE, "voxel");
+  reduction_option_dependency(vm, OCTREE, "octree");
+  reduction_option_conflict(vm, OCTREE, "scale");
+  reduction_option_conflict(vm, OCTREE, "projection");
+  reduction_option_conflict(vm, OCTREE, "width");
+  reduction_option_conflict(vm, OCTREE, "height");
 
-    reduction_option_conflict(vm, RANGE, "voxel");
-    reduction_option_conflict(vm, RANGE, "octree");
-    reduction_option_dependency(vm, RANGE, "scale");
-    reduction_option_dependency(vm, RANGE, "projection");
-    reduction_option_dependency(vm, RANGE, "width");
-    reduction_option_dependency(vm, RANGE, "height");
+  reduction_option_conflict(vm, RANGE, "voxel");
+  reduction_option_conflict(vm, RANGE, "octree");
+  reduction_option_dependency(vm, RANGE, "scale");
+  reduction_option_dependency(vm, RANGE, "projection");
+  reduction_option_dependency(vm, RANGE, "width");
+  reduction_option_dependency(vm, RANGE, "height");
 
-    reduction_option_conflict(vm, INTERPOLATE, "voxel");
-    reduction_option_conflict(vm, INTERPOLATE, "octree");
-    reduction_option_dependency(vm, INTERPOLATE, "scale");
-    reduction_option_dependency(vm, INTERPOLATE, "projection");
-    reduction_option_dependency(vm, INTERPOLATE, "width");
-    reduction_option_dependency(vm, INTERPOLATE, "height");
+  reduction_option_conflict(vm, INTERPOLATE, "voxel");
+  reduction_option_conflict(vm, INTERPOLATE, "octree");
+  reduction_option_dependency(vm, INTERPOLATE, "scale");
+  reduction_option_dependency(vm, INTERPOLATE, "projection");
+  reduction_option_dependency(vm, INTERPOLATE, "width");
+  reduction_option_dependency(vm, INTERPOLATE, "height");
 
 #ifndef _MSC_VER
-    if (dir[dir.length()-1] != '/') dir = dir + "/";
+  if (dir[dir.length()-1] != '/') dir = dir + "/";
 #else
-    if (dir[dir.length()-1] != '\\') dir = dir + "\\";
+  if (dir[dir.length()-1] != '\\') dir = dir + "\\";
 #endif
 }
 
 void createdirectory(string dir)
 {
-    int success = mkdir(dir.c_str(), S_IRWXU|S_IRWXG|S_IRWXO);
+  int success = mkdir(dir.c_str(), S_IRWXU|S_IRWXG|S_IRWXO);
 
-    if (success == 0 || errno == EEXIST) {
-        cout << "Writing to " << dir << endl;
-    } else {
-        cerr << "Creating directory " << dir << " failed" << endl;
-        exit(1);
-    }
+  if (success == 0 || errno == EEXIST) {
+    cout << "Writing to " << dir << endl;
+  } else {
+    cerr << "Creating directory " << dir << " failed" << endl;
+    exit(1);
+  }
 }
 
 void scan2mat(Scan *source, cv::Mat &mat)
 {
-    DataXYZ xyz = source->get("xyz");
-    DataReflectance xyz_reflectance = (((DataReflectance)source->get("reflectance")).size() == 0) ?
+  DataXYZ xyz = source->get("xyz");
+  DataReflectance xyz_reflectance
+    = (((DataReflectance)source->get("reflectance")).size() == 0) ?
       source->create("reflectance", sizeof(float)*xyz.size())
-      : source->get("reflectance"); 
-    if(((DataReflectance)source->get("reflectance")).size() == 0){
-      for(unsigned int i = 0; i < xyz.size(); i++)
-	xyz_reflectance[i] = 255;
-    }
-    unsigned int nPoints = xyz.size();
-    mat.create(nPoints,1,CV_32FC(4));
-    mat = cv::Scalar::all(0);
-    cv::MatIterator_<cv::Vec4f> it = mat.begin<cv::Vec4f>();
-    for(unsigned int i = 0; i < nPoints; i++){
-        float reflectance = xyz_reflectance[i];
-        //normalize the reflectance
-        reflectance += 32;
-        reflectance /= 64;
-        reflectance -= 0.2;
-        reflectance /= 0.3;
-        if (reflectance < 0) reflectance = 0;
-        if (reflectance > 1) reflectance = 1;
+    : source->get("reflectance"); 
+  if (((DataReflectance)source->get("reflectance")).size() == 0) {
+    for(unsigned int i = 0; i < xyz.size(); i++)
+      xyz_reflectance[i] = 255;
+  }
+  unsigned int nPoints = xyz.size();
+  mat.create(nPoints,1,CV_32FC(4));
+  mat = cv::Scalar::all(0);
+  cv::MatIterator_<cv::Vec4f> it = mat.begin<cv::Vec4f>();
+  for(unsigned int i = 0; i < nPoints; i++){
+    float reflectance = xyz_reflectance[i];
+    //normalize the reflectance
+    reflectance += 32;
+    reflectance /= 64;
+    reflectance -= 0.2;
+    reflectance /= 0.3;
+    if (reflectance < 0) reflectance = 0;
+    if (reflectance > 1) reflectance = 1;
 
-        (*it)[0] = xyz[i][0];
-        (*it)[1] = xyz[i][1];
-        (*it)[2] = xyz[i][2];
-        (*it)[3] = reflectance;
-        ++it;
-    }
+    (*it)[0] = xyz[i][0];
+    (*it)[1] = xyz[i][1];
+    (*it)[2] = xyz[i][2];
+    (*it)[3] = reflectance;
+    ++it;
+  }
 }
 
 void reduce_octree(Scan *scan, vector<cv::Vec4f> &reduced_points, int octree,
-        int red, bool use_reflectance)
+                   int red, bool use_reflectance)
 {
-    if (use_reflectance) {
-      unsigned int types = PointType::USE_REFLECTANCE;
-      PointType pointtype(types);
-      scan->setReductionParameter(red, octree, pointtype);
-      scan->calcReducedPoints();
+  if (use_reflectance) {
+    unsigned int types = PointType::USE_REFLECTANCE;
+    PointType pointtype(types);
+    scan->setReductionParameter(red, octree, pointtype);
+    scan->calcReducedPoints();
 
-      DataXYZ xyz_reduced(scan->get("xyz reduced"));
-      DataReflectance reflectance_reduced(scan->get("reflectance reduced"));
+    DataXYZ xyz_reduced(scan->get("xyz reduced"));
+    DataReflectance reflectance_reduced(scan->get("reflectance reduced"));
 
-      if (xyz_reduced.size() != reflectance_reduced.size()) {
-        cerr << "xyz_reduced size different than reflectance_reduced size" << endl;
-        return;
-      }
-    
-      for(unsigned int j = 0; j < xyz_reduced.size(); j++) {
-          reduced_points.push_back(cv::Vec4f(xyz_reduced[j][0], xyz_reduced[j][1], xyz_reduced[j][2], reflectance_reduced[j]));
-      }
-    } 
-    else {
-      scan->setReductionParameter(red, octree);
-      scan->calcReducedPoints();
-
-      DataXYZ xyz_reduced(scan->get("xyz reduced"));
-      for(unsigned int j = 0; j < xyz_reduced.size(); j++) {
-          reduced_points.push_back(cv::Vec4f(xyz_reduced[j][0], xyz_reduced[j][1], xyz_reduced[j][2], 0.0));
-      }
+    if (xyz_reduced.size() != reflectance_reduced.size()) {
+      cerr << "xyz_reduced size different than reflectance_reduced size"
+           << endl;
+      return;
     }
+    
+    for(unsigned int j = 0; j < xyz_reduced.size(); j++) {
+      reduced_points.push_back(cv::Vec4f(xyz_reduced[j][0],
+                                         xyz_reduced[j][1],
+                                         xyz_reduced[j][2],
+                                         reflectance_reduced[j]));
+    }
+  } 
+  else {
+    scan->setReductionParameter(red, octree);
+    scan->calcReducedPoints();
+
+    DataXYZ xyz_reduced(scan->get("xyz reduced"));
+    for(unsigned int j = 0; j < xyz_reduced.size(); j++) {
+      reduced_points.push_back(cv::Vec4f(xyz_reduced[j][0],
+                                         xyz_reduced[j][1],
+                                         xyz_reduced[j][2],
+                                         0.0));
+    }
+  }
 }
 
 void reduce_range(Scan *scan, vector<cv::Vec4f> &reduced_points, int width,
-        int height, fbr::projection_method ptype, double scale,
-        bool use_reflectance)
+                  int height, fbr::projection_method ptype, double scale,
+                  bool use_reflectance)
 {
-    panorama image(width, height, ptype);
-    cv::Mat mat;
-    scan2mat(scan, mat);
-    image.createPanorama(mat);
-    image.getDescription();
+  panorama image(width, height, ptype);
+  cv::Mat mat;
+  scan2mat(scan, mat);
+  image.createPanorama(mat);
+  image.getDescription();
 
-    cv::Mat range_image_resized;
-    cv::Mat reflectance_image_resized;
-    resize(image.getRangeImage(), range_image_resized, cv::Size(),
-            scale, scale, cv::INTER_NEAREST);
-    if (use_reflectance) {
-        resize(image.getReflectanceImage(), reflectance_image_resized,
-                cv::Size(), scale, scale, cv::INTER_NEAREST);
-    } else {
-        reflectance_image_resized.create(range_image_resized.size(), CV_8U);
-        reflectance_image_resized = cv::Scalar::all(0);
-    }
-    image.recoverPointCloud(range_image_resized, reflectance_image_resized, reduced_points);
+  cv::Mat range_image_resized;
+  cv::Mat reflectance_image_resized;
+  resize(image.getRangeImage(), range_image_resized, cv::Size(),
+         scale, scale, cv::INTER_NEAREST);
+  if (use_reflectance) {
+    resize(image.getReflectanceImage(), reflectance_image_resized,
+           cv::Size(), scale, scale, cv::INTER_NEAREST);
+  } else {
+    reflectance_image_resized.create(range_image_resized.size(), CV_8U);
+    reflectance_image_resized = cv::Scalar::all(0);
+  }
+  image.recoverPointCloud(range_image_resized,
+                          reflectance_image_resized,
+                          reduced_points);
 }
 
-void reduce_interpolation(Scan *scan, vector<cv::Vec4f> &reduced_points,
-        int width, int height, fbr::projection_method ptype, double scale,
-        bool use_reflectance)
+void reduce_interpolation(Scan *scan,
+                          vector<cv::Vec4f> &reduced_points,
+                          int width,
+                          int height,
+                          fbr::projection_method ptype,
+                          double scale,
+                          bool use_reflectance)
 {
-    panorama image(width, height, ptype);
-    cv::Mat mat;
-    scan2mat(scan, mat);
-    image.createPanorama(mat);
-    image.getDescription();
+  panorama image(width, height, ptype);
+  cv::Mat mat;
+  scan2mat(scan, mat);
+  image.createPanorama(mat);
+  image.getDescription();
 
-    cv::Mat range_image_resized;
-    cv::Mat reflectance_image_resized;
-    resize(image.getMap(), range_image_resized, cv::Size(),
-            scale, scale, cv::INTER_NEAREST);
-    if (use_reflectance) {
-        resize(image.getReflectanceImage(), reflectance_image_resized,
-                cv::Size(), scale, scale, cv::INTER_NEAREST);
+  cv::Mat range_image_resized;
+  cv::Mat reflectance_image_resized;
+  resize(image.getMap(), range_image_resized, cv::Size(),
+         scale, scale, cv::INTER_NEAREST);
+  if (use_reflectance) {
+    resize(image.getReflectanceImage(), reflectance_image_resized,
+           cv::Size(), scale, scale, cv::INTER_NEAREST);
+  }
+  for(int i = 0; i < range_image_resized.rows; i++) {
+    for(int j = 0; j < range_image_resized.cols; j++) {
+      cv::Vec3f vec = range_image_resized.at<cv::Vec3f>(i, j);
+      if (use_reflectance) {
+        reduced_points.push_back(cv::Vec4f(vec[0], vec[1], vec[2],
+                    reflectance_image_resized.at<uchar>(i, j)/255.0));
+      } else {
+        reduced_points.push_back(cv::Vec4f(vec[0], vec[1], vec[2], 0.0));
+      }
     }
-    for(int i = 0; i < range_image_resized.rows; i++) {
-        for(int j = 0; j < range_image_resized.cols; j++) {
-            cv::Vec3f vec = range_image_resized.at<cv::Vec3f>(i, j);
-            if (use_reflectance) {
-                reduced_points.push_back(cv::Vec4f(
-                            vec[0], vec[1], vec[2],
-                            reflectance_image_resized.at<uchar>(i, j)/255.0));
-            } else {
-                reduced_points.push_back(cv::Vec4f(vec[0], vec[1], vec[2], 0.0));
-            }
-        }
-    }
+  }
 }
 
 /*
@@ -417,15 +443,15 @@ void reduce_interpolation(Scan *scan, vector<cv::Vec4f> &reduced_points,
  */
 void write_uos(vector<cv::Vec4f> &points, string &dir, string id)
 {
-    ofstream outfile(dir + "/scan" + id + ".3d");
+  ofstream outfile(dir + "/scan" + id + ".3d");
 
-    outfile << "# header is ignored" << endl;
+  outfile << "# header is ignored" << endl;
 
-    for (vector<cv::Vec4f>::iterator it=points.begin(); it < points.end(); it++) {
-        outfile << (*it)[0] << " " << (*it)[1] << " " << (*it)[2] << endl;
-    }
+  for (vector<cv::Vec4f>::iterator it=points.begin(); it < points.end(); it++) {
+    outfile << (*it)[0] << " " << (*it)[1] << " " << (*it)[2] << endl;
+  }
 
-    outfile.close();
+  outfile.close();
 }
 
 /*
@@ -433,27 +459,27 @@ void write_uos(vector<cv::Vec4f> &points, string &dir, string id)
  */
 void write_uosr(vector<cv::Vec4f> &points, string &dir, string id)
 {
-    ofstream outfile(dir + "/scan" + id + ".3d");
+  ofstream outfile(dir + "/scan" + id + ".3d");
 
-    outfile << "# header is ignored" << endl;
+  outfile << "# header is ignored" << endl;
 
-    for (vector<cv::Vec4f>::iterator it=points.begin(); it < points.end(); it++) {
-        outfile << (*it)[0] << " " << (*it)[1] << " " << (*it)[2] << " " << (*it)[3] << endl;
-    }
+  for (vector<cv::Vec4f>::iterator it=points.begin(); it < points.end(); it++) {
+    outfile << (*it)[0] << " " << (*it)[1] << " " << (*it)[2] << " " << (*it)[3] << endl;
+  }
 
-    outfile.close();
+  outfile.close();
 }
 
 // write .pose files
 // .frames files can later be generated from them using ./bin/pose2frames
 void writeposefile(string &dir, const double* rPos, const double* rPosTheta, string id)
 {
-    ofstream posefile(dir + "/scan" + id + ".pose");
-    posefile << rPos[0] << " " << rPos[1] << " " << rPos[2] << endl;
-    posefile << deg(rPosTheta[0]) << " "
-          << deg(rPosTheta[1]) << " "
-          << deg(rPosTheta[2]) << endl;
-    posefile.close();
+  ofstream posefile(dir + "/scan" + id + ".pose");
+  posefile << rPos[0] << " " << rPos[1] << " " << rPos[2] << endl;
+  posefile << deg(rPosTheta[0]) << " "
+           << deg(rPosTheta[1]) << " "
+           << deg(rPosTheta[2]) << endl;
+  posefile.close();
 }
 
 /**
@@ -466,61 +492,86 @@ void writeposefile(string &dir, const double* rPos, const double* rPosTheta, str
  */
 int main(int argc, char **argv)
 {
-    int start, end;
-    bool scanserver;
-    int width, height;
-    int maxDist, minDist;
-    fbr::projection_method ptype;
-    string dir;
-    IOType iotype;
-    reduction_method rtype;
-    double scale, voxel;
-    int octree;
-    bool use_reflectance;
+  int start, end;
+  bool scanserver;
+  int width, height;
+  int maxDist, minDist;
+  fbr::projection_method ptype;
+  string dir;
+  IOType iotype;
+  reduction_method rtype;
+  double scale, voxel;
+  int octree;
+  bool use_reflectance;
 
-    parse_options(argc, argv, start, end, scanserver, width, height, ptype,
-            dir, iotype, maxDist, minDist, rtype, scale, voxel, octree,
-            use_reflectance);
+  parse_options(argc, argv, start, end, scanserver, width, height, ptype,
+                dir, iotype, maxDist, minDist, rtype, scale, voxel, octree,
+                use_reflectance);
 
-    for (int iter = start; iter <= end; iter++) {
-      Scan::openDirectory(scanserver, dir, iotype, iter, iter);
-      if(Scan::allScans.size() == 0) {
-        cerr << "No scans found. Did you use the correct format?" << endl;
-        exit(-1);
-      }
-
-      for(ScanVector::iterator it = Scan::allScans.begin(); it != Scan::allScans.end(); ++it) {
-        Scan* scan = *it;
-
-        scan->setRangeFilter(maxDist, minDist);
-
-        vector<cv::Vec4f> reduced_points;
-
-        string reddir = dir + "reduced";
-        createdirectory(reddir);
-
-        switch (rtype) {
-            case OCTREE:
-                reduce_octree(scan, reduced_points, octree, voxel, use_reflectance);
-                break;
-            case RANGE:
-                reduce_range(scan, reduced_points, width, height, ptype, scale, use_reflectance);
-                break;
-            case INTERPOLATE:
-                reduce_interpolation(scan, reduced_points, width, height, ptype, scale, use_reflectance);
-                break;
-            default:
-                cerr << "unknown method" << endl;
-                return 1;
-                break;
-        }
-	
-        if (use_reflectance)
-	  write_uosr(reduced_points, reddir, scan->getIdentifier());
-        else
-	  write_uos(reduced_points, reddir, scan->getIdentifier());
-        writeposefile(reddir, scan->get_rPos(), scan->get_rPosTheta(), scan->getIdentifier());
-      }
-      Scan::closeDirectory();
+  for (int iter = start; iter <= end; iter++) {
+    Scan::openDirectory(scanserver, dir, iotype, iter, iter);
+    if(Scan::allScans.size() == 0) {
+      cerr << "No scans found. Did you use the correct format?" << endl;
+      exit(-1);
     }
+
+    for(ScanVector::iterator it = Scan::allScans.begin();
+        it != Scan::allScans.end();
+        ++it) {
+      Scan* scan = *it;
+
+      scan->setRangeFilter(maxDist, minDist);
+
+      vector<cv::Vec4f> reduced_points;
+
+      string reddir = dir + "reduced";
+      createdirectory(reddir);
+
+      switch (rtype) {
+      case OCTREE:
+        reduce_octree(scan,
+                      reduced_points,
+                      octree,
+                      voxel,
+                      use_reflectance);
+        break;
+      case RANGE:
+        reduce_range(scan,
+                     reduced_points,
+                     width,
+                     height,
+                     ptype,
+                     scale,
+                     use_reflectance);
+        break;
+      case INTERPOLATE:
+        reduce_interpolation(scan,
+                             reduced_points,
+                             width,
+                             height,
+                             ptype,
+                             scale,
+                             use_reflectance);
+        break;
+      default:
+        cerr << "unknown method" << endl;
+        return 1;
+        break;
+      }
+     
+      if (use_reflectance)
+        write_uosr(reduced_points,
+                   reddir,
+                   scan->getIdentifier());
+      else
+        write_uos(reduced_points,
+                  reddir,
+                  scan->getIdentifier());
+      writeposefile(reddir,
+                    scan->get_rPos(),
+                    scan->get_rPosTheta(),
+                    scan->getIdentifier());
+    }
+    Scan::closeDirectory();
+  }
 }

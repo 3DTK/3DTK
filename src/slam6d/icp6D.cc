@@ -1,7 +1,7 @@
 /*
- * icp6D implementation
+ * icp implementation
  *
- * Copyright (C) Andreas Nuechter, Kai Lingemann
+ * Copyright (C) by the 3DTK contributors
  *
  * Released under the GPL version 3.
  *
@@ -51,7 +51,7 @@ using std::cerr;
 icp6D::icp6D(icp6Dminimizer *my_icp6Dminimizer, double max_dist_match,
 		   int max_num_iterations, bool quiet, bool meta, int rnd, bool eP,
 		   int anim, double epsilonICP, int nns_method, bool cuda_enabled,
-       bool cad_matching)
+		   bool cad_matching)
 {
   this->my_icp6Dminimizer = my_icp6Dminimizer;
   this->anim              = anim;
@@ -65,11 +65,15 @@ icp6D::icp6D(icp6Dminimizer *my_icp6Dminimizer, double max_dist_match,
   
   // checks
   if (max_dist_match < 0.0) {
-    cerr << "ERROR [ICP6D]: first parameter (max_dist_match) has to be >= 0," << endl;
+    cerr << "ERROR [ICP6D]: first parameter (max_dist_match) "
+	    << "has to be >= 0,"
+	    << endl;
     exit(1);
   }
   if (max_num_iterations < 0) {
-    cerr << "ERROR [ICP6D]: second parameter (max_num_iterations) has to be >= 0." << endl;
+    cerr << "ERROR [ICP6D]: second parameter (max_num_iterations)"
+	    << "has to be >= 0."
+	    << endl;
     exit(1);
   }
   
@@ -138,7 +142,8 @@ int icp6D::match(Scan* PreviousScan, Scan* CurrentScan,
     for (int i = 0; i < OPENMP_NUM_THREADS; i++) {
       sum[i] = centroid_m[i][0] = centroid_m[i][1] = centroid_m[i][2] = 0.0;
       centroid_d[i][0] = centroid_d[i][1] = centroid_d[i][2] = 0.0;
-      Si[i][0] = Si[i][1] = Si[i][2] = Si[i][3] = Si[i][4] = Si[i][5] = Si[i][6] = Si[i][7] = Si[i][8] = 0.0;
+      Si[i][0] = Si[i][1] = Si[i][2] = Si[i][3] = Si[i][4] = 0.0;
+	 Si[i][5] = Si[i][6] = Si[i][7] = Si[i][8] = 0.0;
       n[i] = 0;
     }
 
@@ -163,14 +168,6 @@ int icp6D::match(Scan* PreviousScan, Scan* CurrentScan,
           double qq[3] = {pairs[thread_num][i].p2.x - centroid_d[thread_num][0],
             pairs[thread_num][i].p2.y - centroid_d[thread_num][1],
             pairs[thread_num][i].p2.z - centroid_d[thread_num][2]};
-/*
-          double pp[3] = {pairs[thread_num][i].p1.x - centroid_d[thread_num][0],
-            pairs[thread_num][i].p1.y - centroid_d[thread_num][1],
-            pairs[thread_num][i].p1.z - centroid_d[thread_num][2]};
-          double qq[3] = {pairs[thread_num][i].p2.x - centroid_m[thread_num][0],
-            pairs[thread_num][i].p2.y - centroid_m[thread_num][1],
-            pairs[thread_num][i].p2.z - centroid_m[thread_num][2]};
-*/
           // formula (6)
           Si[thread_num][0] += pp[0] * qq[0];
           Si[thread_num][1] += pp[0] * qq[1];
@@ -299,8 +296,12 @@ double icp6D::Point_Point_Error(Scan* PreviousScan,
 
     } 
 
-    for (unsigned int thread_num = 0; thread_num < OPENMP_NUM_THREADS; thread_num++) {
-      for (unsigned int i = 0; i < (unsigned int)pairs[thread_num].size(); i++) {
+    for (unsigned int thread_num = 0;
+	    thread_num < OPENMP_NUM_THREADS;
+	    thread_num++) {
+      for (unsigned int i = 0;
+		 i < (unsigned int)pairs[thread_num].size();
+		 i++) {
         error += sqr(pairs[thread_num][i].p1.x - pairs[thread_num][i].p2.x)
           + sqr(pairs[thread_num][i].p1.y - pairs[thread_num][i].p2.y)
           + sqr(pairs[thread_num][i].p1.z - pairs[thread_num][i].p2.z);
@@ -331,7 +332,6 @@ double icp6D::Point_Point_Error(Scan* PreviousScan,
 #endif
 
     if (np) *np = nr_ppairs;
-//    return sqrt(error/nr_ppairs);
     return error/nr_ppairs;
 }
 
@@ -374,12 +374,12 @@ void icp6D::doICP(vector <Scan *> allScans, PairingMode pairing_mode)
     }
 
     // push processed scan
+    if ( meta && my_MetaScan) {
+      delete my_MetaScan;
+    }
     if ( meta && i != allScans.size()-1 ) {
       meta_scans.push_back(CurrentScan);
-      if (my_MetaScan) {
-        delete my_MetaScan;
-      }
-      my_MetaScan = new MetaScan(meta_scans, nns_method, cuda_enabled);
+      my_MetaScan = new MetaScan(meta_scans, nns_method);
     }
   }
 }
