@@ -9,9 +9,9 @@
 
 /** @file 
  *  @brief An optimized k-d tree implementation. MetaScan variant.
- *  @author Andreas Nuechter. Institute of Computer Science, University of Osnabrueck, Germany.
- *  @author Kai Lingemann. Institute of Computer Science, University of Osnabrueck, Germany.
- *  @author Thomas Escher. Institute of Computer Science, University of Osnabrueck, Germany.
+ *  @author Andreas Nuechter. Inst. of CS, University of Osnabrueck, Germany.
+ *  @author Kai Lingemann. Inst. of CS, University of Osnabrueck, Germany.
+ *  @author Thomas Escher. Inst. of CS, University of Osnabrueck, Germany.
  */
 
 #ifdef _MSC_VER
@@ -88,7 +88,9 @@ unsigned int KDtreeMetaManaged::getPointsSize(const vector<Scan*>& scans)
   return n;
 }
 
-double* KDtreeMetaManaged::FindClosest(double *_p, double maxdist2, int threadNum) const
+double* KDtreeMetaManaged::FindClosest(double *_p,
+                                       double maxdist2,
+                                       int threadNum) const
 {
   params[threadNum].closest = 0;
   params[threadNum].closest_d2 = maxdist2;
@@ -97,7 +99,10 @@ double* KDtreeMetaManaged::FindClosest(double *_p, double maxdist2, int threadNu
   return params[threadNum].closest;
 }
 
-double* KDtreeMetaManaged::FindClosestAlongDir(double *_p, double *_dir, double maxdist2, int threadNum) const
+double* KDtreeMetaManaged::FindClosestAlongDir(double *_p,
+                                               double *_dir,
+                                               double maxdist2,
+                                               int threadNum) const
 {
   params[threadNum].closest = NULL;
   params[threadNum].closest_d2 = maxdist2;

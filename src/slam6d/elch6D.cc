@@ -8,12 +8,13 @@
  */
 
 /** @file graph balancer implementation and utility functions
- *  @author Jochen Sprickerhof. Institute of Computer Science, University of Osnabrueck, Germany.
+ *  @author Jochen Sprickerhof. Inst. of CS, University of Osnabrueck, Germany.
  *
  * This file implements the paper (ecmr2009.pdf):
- * Jochen Sprickerhof, Andreas Nuechter, Kai Lingemann, Joachim Hertzberg. An Explicit
- * Loop Closing Technique for 6D SLAM, In Proceedings of the 4th European Conference on
- * Mobile Robots (ECMR '09), Mlini/Dubrovnic, Croatia, September 2009.
+ * Jochen Sprickerhof, Andreas Nuechter, Kai Lingemann, Joachim Hertzberg.
+ * An Explicit Loop Closing Technique for 6D SLAM,
+ * In Proceedings of the 4th European Conference on Mobile Robots (ECMR '09),
+ * Mlini/Dubrovnic, Croatia, September 2009.
  */
 
 #include <fstream>
@@ -43,7 +44,8 @@ using boost::graph_traits;
 #endif
 
 
-/*void printout(graph_t &g, vector<Vertex> &p, vector<int> &d, double *weights)
+/*
+void printout(graph_t &g, vector<Vertex> &p, vector<int> &d, double *weights)
 {
   cout << "distances and parents:" << endl;
   graph_traits <graph_t>::vertex_iterator vi, vend;
@@ -52,7 +54,8 @@ using boost::graph_traits;
       ", parent(" << *vi << ") = " << p[*vi] <<
       *vi << " " << weights[*vi] << endl;
   }
-}*/
+}
+*/
 
 /**
  * sets a filename for graph_weight_out and calls it
@@ -75,7 +78,8 @@ void elch6D::graph_weight_out(graph_t &g, int first, int last, double *weights)
  * @param weights the computed weights
  * @param out_file the file to write to
  */
-void elch6D::graph_weight_out(graph_t &g, int first, int last, double *weights, string &out_file)
+void elch6D::graph_weight_out(graph_t &g, int first, int last,
+                              double *weights, string &out_file)
 {
   ofstream dot_file(out_file.c_str());
   dot_file << "graph D {" << endl;
@@ -84,7 +88,8 @@ void elch6D::graph_weight_out(graph_t &g, int first, int last, double *weights, 
     dot_file << *vi << "[label=\"" << *vi << " (" <<
       weights[*vi] << ")\"];" << endl;
   }
-  boost::property_map<graph_t, edge_weight_t>::type weightmap = get(boost::edge_weight, g);
+  boost::property_map<graph_t, edge_weight_t>::type weightmap
+    = get(boost::edge_weight, g);
   graph_traits <graph_t>::edge_iterator ei, ei_end;
   for(tie(ei, ei_end) = edges(g); ei != ei_end; ei++) {
     dot_file << source(*ei, g) << " -- " << target(*ei, g) <<
@@ -111,18 +116,31 @@ void elch6D::graph_pos_out(graph_t &g, const vector <Scan *> &allScans)
  * @param allScans all laser scans
  * @param out_file the file to write to
  */
-void elch6D::graph_pos_out(graph_t &g, const vector <Scan *> &allScans, string &out_file)
+void elch6D::graph_pos_out(graph_t &g, const vector <Scan *> &allScans,
+                           string &out_file)
 {
   ofstream graph_file(out_file.c_str());
   ofstream graph2_file(("2" + out_file).c_str());
   graph_traits <graph_t>::edge_iterator ei, ei_end;
   for(tie(ei, ei_end) = edges(g); ei != ei_end; ei++) {
     if(source(*ei, g) + 1 != target(*ei, g)) {
-      graph2_file << allScans[source(*ei, g)]->get_rPos()[0] << " " << allScans[source(*ei, g)]->get_rPos()[1] << " " << allScans[source(*ei, g)]->get_rPos()[2] << endl;
-      graph2_file << allScans[target(*ei, g)]->get_rPos()[0] << " " << allScans[target(*ei, g)]->get_rPos()[1] << " " << allScans[target(*ei, g)]->get_rPos()[2] << endl << endl;
+      graph2_file << allScans[source(*ei, g)]->get_rPos()[0]
+                  << " " << allScans[source(*ei, g)]->get_rPos()[1]
+                  << " " << allScans[source(*ei, g)]->get_rPos()[2]
+                  << endl;
+      graph2_file << allScans[target(*ei, g)]->get_rPos()[0]
+                  << " " << allScans[target(*ei, g)]->get_rPos()[1]
+                  << " " << allScans[target(*ei, g)]->get_rPos()[2]
+                  << endl << endl;
     } else {
-      graph_file << allScans[source(*ei, g)]->get_rPos()[0] << " " << allScans[source(*ei, g)]->get_rPos()[1] << " " << allScans[source(*ei, g)]->get_rPos()[2] << endl;
-      graph_file << allScans[target(*ei, g)]->get_rPos()[0] << " " << allScans[target(*ei, g)]->get_rPos()[1] << " " << allScans[target(*ei, g)]->get_rPos()[2] << endl << endl;
+      graph_file << allScans[source(*ei, g)]->get_rPos()[0]
+                 << " " << allScans[source(*ei, g)]->get_rPos()[1]
+                 << " " << allScans[source(*ei, g)]->get_rPos()[2]
+                 << endl;
+      graph_file << allScans[target(*ei, g)]->get_rPos()[0] << " "
+                 << allScans[target(*ei, g)]->get_rPos()[1] << " "
+                 << allScans[target(*ei, g)]->get_rPos()[2]
+                 << endl << endl;
     }
   }
   graph_file.close();
@@ -135,7 +153,8 @@ void elch6D::graph_pos_out(graph_t &g, const vector <Scan *> &allScans, string &
  * @param allScans all laser scans
  * @param out_file the file to write to
  */
-void elch6D::dot_pos_out(graph_t &g, const vector <Scan *> &allScans, string &out_file)
+void elch6D::dot_pos_out(graph_t &g, const vector <Scan *> &allScans,
+                         string &out_file)
 {
   ofstream dot_file(out_file.c_str());
 
@@ -143,14 +162,17 @@ void elch6D::dot_pos_out(graph_t &g, const vector <Scan *> &allScans, string &ou
 
   int n = num_vertices(g);
   for(int i = 0; i < n; i++) {
-    dot_file << i << "[pos=\"" <<
-      allScans[i]->get_rPos()[0] << "," <<
-      allScans[i]->get_rPos()[2] << "\", label=\"\", height=0.1, width=0.1, fixedsize=true];" << endl;
+    dot_file << i << "[pos=\""
+             << allScans[i]->get_rPos()[0]
+             << "," << allScans[i]->get_rPos()[2]
+             << "\", label=\"\", height=0.1, width=0.1, fixedsize=true];"
+             << endl;
   }
   graph_traits <graph_t>::edge_iterator ei, ei_end;
   for(tie(ei, ei_end) = edges(g); ei != ei_end; ei++) {
     if(source(*ei, g) + 1 != target(*ei, g)) {
-      dot_file << source(*ei, g) << " -- " << target(*ei, g) << "[color=\"green\"];" << endl;
+      dot_file << source(*ei, g) << " -- " << target(*ei, g)
+               << "[color=\"green\"];" << endl;
     } else {
       dot_file << source(*ei, g) << " -- " << target(*ei, g) << ";" << endl;
     }
@@ -209,7 +231,8 @@ void elch6D::slim_graph_out(graph_t g, string &out_file)
         int one = *ai;
         ai++;
         int two = *ai;
-        if(degree(one, g) == 2 && degree(two, g) == 2 && one != me && two != me && one != two) {
+        if (degree(one, g) == 2 && degree(two, g) == 2
+            && one != me && two != me && one != two) {
           clear_vertex(me, g);
           add_edge(one, two, g);
           remove_vertex(me, g);
@@ -253,7 +276,9 @@ void elch6D::graph_balancer(graph_t &g, int f, int l, double *weights)
     dist = -1;
     // find shortest crossing for all vertices on the loop
     for(si = crossings.begin(); si != crossings.end(); ) {
-      dijkstra_shortest_paths(g, *si, boost::predecessor_map(p).distance_map(d));
+      dijkstra_shortest_paths(g,
+                              *si,
+                              boost::predecessor_map(p).distance_map(d));
       ei = si;
       ei++;
       // find shortest crossing for one vertex
@@ -282,8 +307,9 @@ void elch6D::graph_balancer(graph_t &g, int f, int l, double *weights)
     if(dist > -1) {
       remove_edge(*e_min, p_min[*e_min], g);
       for(int i = p_min[*e_min]; i != *s_min; i = p_min[i]) {
-        //even right with weights[*s_min] > weights[*e_min]! (math works)
-        weights[i] = weights[*s_min] + (weights[*e_min] - weights[*s_min]) * d_min[i] / d_min[*e_min];
+        // even right with weights[*s_min] > weights[*e_min]! (math works)
+        weights[i] = weights[*s_min] + (weights[*e_min] - weights[*s_min])
+          * d_min[i] / d_min[*e_min];
         remove_edge(i, p_min[i], g);
         if(degree(i, g) > 0) {
           crossings.push_back(i);

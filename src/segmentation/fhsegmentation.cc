@@ -36,7 +36,7 @@ using namespace std;
 
 /// validate IO types
 void validate(boost::any& v, const std::vector<std::string>& values,
-		    IOType*, int) {
+              IOType*, int) {
   if (values.size() == 0)
     throw std::runtime_error("Invalid model specification");
   string arg = values.at(0);
@@ -48,8 +48,10 @@ void validate(boost::any& v, const std::vector<std::string>& values,
 }
 
 /// Parse commandline options
-void parse_options(int argc, char **argv, int &start, int &end, bool &scanserver, int &max_dist, int &min_dist, string &dir,
-                   IOType &iotype, float &sigma, int &k, int &neighbors, float &eps, float &radius, int &min_size)
+void parse_options(int argc, char **argv, int &start, int &end,
+                   bool &scanserver, int &max_dist, int &min_dist, string &dir,
+                   IOType &iotype, float &sigma, int &k, int &neighbors,
+                   float &eps, float &radius, int &min_size)
 {
   /// ----------------------------------
   /// set up program commandline options
@@ -57,21 +59,46 @@ void parse_options(int argc, char **argv, int &start, int &end, bool &scanserver
   po::options_description cmd_options("Usage: fhsegmentation <options> where options are (default values in brackets)");
   cmd_options.add_options()
     ("help,?", "Display this help message")
-    ("start,s", po::value<int>(&start)->default_value(0), "Start at scan number <arg>")
-    ("end,e", po::value<int>(&end)->default_value(-1), "Stop at scan number <arg>")
-    ("scanserver,S", po::value<bool>(&scanserver)->default_value(false), "Use the scanserver as an input method")
-    ("format,f", po::value<IOType>(&iotype)->default_value(UOS),
-	"using shared library <arg> for input. (chose format from [uos|uosr|uos_map|"
-	"uos_rgb|uos_frames|uos_map_frames|old|rts|rts_map|ifp|"
-	"riegl_txt|riegl_rgb|riegl_bin|zahn|ply])")
-    ("max,M", po::value<int>(&max_dist)->default_value(-1),"neglegt all data points with a distance larger than <arg> 'units")
-    ("min,m", po::value<int>(&min_dist)->default_value(-1), "neglegt all data points with a distance smaller than <arg> 'units")
-    ("K,k", po::value<int>(&k)->default_value(1), "<arg> value of K value used in the FH segmentation")
-    ("neighbors,N", po::value<int>(&neighbors)->default_value(1), "use approximate <arg>-nearest neighbors search or limit the number of points")
-    ("sigma,v", po::value<float>(&sigma)->default_value(1.0), "Set the Gaussian variance  for smoothing to <arg>")
-    ("radius,r", po::value<float>(&radius)->default_value(-1.0), "Set the range of radius search to <arg>")
-    ("eps,E", po::value<float>(&eps)->default_value(1.0), "Set error threshold used by the AKNN algorithm to <arg>")
-    ("minsize,z", po::value<int>(&min_size)->default_value(0), "Keep segments of size at least <arg>")
+    ("start,s",
+     po::value<int>(&start)->default_value(0),
+     "Start at scan number <arg>")
+    ("end,e",
+     po::value<int>(&end)->default_value(-1),
+     "Stop at scan number <arg>")
+    ("scanserver,S",
+     po::value<bool>(&scanserver)->default_value(false),
+     "Use the scanserver as an input method")
+    ("format,f",
+     po::value<IOType>(&iotype)->default_value(UOS),
+     "using shared library <arg> for input. "
+     "(chose format from [uos|uosr|uos_map|"
+     "uos_rgb|uos_frames|uos_map_frames|old|rts|rts_map|ifp|"
+     "riegl_txt|riegl_rgb|riegl_bin|zahn|ply])")
+    ("max,M",
+     po::value<int>(&max_dist)->default_value(-1),
+     "neglegt all data points with a distance larger than <arg> 'units")
+    ("min,m",
+     po::value<int>(&min_dist)->default_value(-1),
+     "neglegt all data points with a distance smaller than <arg> 'units")
+    ("K,k",
+     po::value<int>(&k)->default_value(1),
+     "<arg> value of K value used in the FH segmentation")
+    ("neighbors,N",
+     po::value<int>(&neighbors)->default_value(1),
+     "use approximate <arg>-nearest neighbors search or "
+     "limit the number of points")
+    ("sigma,v",
+     po::value<float>(&sigma)->default_value(1.0),
+     "Set the Gaussian variance for smoothing to <arg>")
+    ("radius,r",
+     po::value<float>(&radius)->default_value(-1.0),
+     "Set the range of radius search to <arg>")
+    ("eps,E",
+     po::value<float>(&eps)->default_value(1.0),
+     "Set error threshold used by the AKNN algorithm to <arg>")
+    ("minsize,z",
+     po::value<int>(&min_size)->default_value(0),
+     "Keep segments of size at least <arg>")
     ;
 
   po::options_description hidden("Hidden options");
@@ -109,7 +136,6 @@ double weight2(Point a, Point b)
   return a.distance(b) * .5 + fabs(a.reflectance-b.reflectance) * .5;
 }
 
-
 /// Write a pose file with the specofied name
 void writePoseFiles(string dir, const double* rPos, const double* rPosTheta, int num, int outnum)
 {
@@ -118,11 +144,11 @@ void writePoseFiles(string dir, const double* rPos, const double* rPosTheta, int
     ofstream posout(poseFileName.c_str());
 
     posout << rPos[0] << " "
-		 << rPos[1] << " "
-		 << rPos[2] << endl
-		 << deg(rPosTheta[0]) << " "
-		 << deg(rPosTheta[1]) << " "
-		 << deg(rPosTheta[2]) << endl;
+           << rPos[1] << " "
+           << rPos[2] << endl
+           << deg(rPosTheta[0]) << " "
+           << deg(rPosTheta[1]) << " "
+           << deg(rPosTheta[2]) << endl;
     posout.clear();
     posout.close();
   }
@@ -137,8 +163,8 @@ void writeScanFiles(string dir, int outnum, const vector<vector<Point>* > cloud)
     ofstream scanout(scanFileName.c_str());
 
     for (int k = 0; k < (int)segment->size(); k++) {
-	 Point p = segment->at(k);
-	 scanout << p.x << " " << p.y << " " << p.z << endl;
+      Point p = segment->at(k);
+      scanout << p.x << " " << p.y << " " << p.z << endl;
     }
     scanout.close();
   }
@@ -162,18 +188,18 @@ int main(int argc, char** argv)
   int min_size;
 
   parse_options(argc, argv, start, end, scanserver, max_dist, min_dist,
-			 dir, iotype, sigma, k, neighbors, eps, radius, min_size);
+                dir, iotype, sigma, k, neighbors, eps, radius, min_size);
 
   /// ----------------------------------
   /// Prepare and read scans
   /// ----------------------------------
   if (scanserver) {
     try {
-	 ClientInterface::create();
+      ClientInterface::create();
     } catch(std::runtime_error& e) {
-	 cerr << "ClientInterface could not be created: " << e.what() << endl;
-	 cerr << "Start the scanserver first." << endl;
-	 exit(-1);
+      cerr << "ClientInterface could not be created: " << e.what() << endl;
+      cerr << "Start the scanserver first." << endl;
+      exit(-1);
     }
   }
 
@@ -215,37 +241,32 @@ int main(int argc, char** argv)
     /// read scan into points
     DataXYZ xyz(scan->get("xyz"));
     vector<Point> points;
-    points.reserve(xyz.size());
-
-    for(unsigned int j = 0; j < xyz.size(); j++) {
-	 Point p(xyz[j][0], xyz[j][1], xyz[j][2]);
-	 points.push_back(p);
-    }
 
     /// create the graph and get the segments
     cout << "creating graph" << endl;
-    FHGraph sgraph(points, weight2, sigma, eps, neighbors, radius);
+    FHGraph sgraph(&xyz, weight2, sigma, eps, neighbors, radius);
 
     cout << "segmenting graph" << endl;
     edge* sedges = sgraph.getGraph();
     universe* segmented = segment_graph(sgraph.getNumPoints(), 
-								sgraph.getNumEdges(), 
-								sedges, k);
+                                        sgraph.getNumEdges(), 
+                                        sedges,
+                                        k);
 
     cout << "post processing" << endl;
     for (int i = 0; i < sgraph.getNumEdges(); ++i)
-	 {
-	   int a = sedges[i].a;
-	   int b = sedges[i].b;
+      {
+        int a = sedges[i].a;
+        int b = sedges[i].b;
 
-	   int aa = segmented->find(a);
-	   int bb = segmented->find(b);
+        int aa = segmented->find(a);
+        int bb = segmented->find(b);
 
-	   if ( (aa!=bb) && 
-		   (segmented->size(aa) < min_size || 
-		    segmented->size(bb) < min_size) )
-		segmented->join(aa, bb);
-	 }
+        if ( (aa!=bb) && 
+             (segmented->size(aa) < min_size || 
+              segmented->size(bb) < min_size) )
+          segmented->join(aa, bb);
+      }
 
     delete[] sedges;
 
@@ -256,22 +277,22 @@ int main(int argc, char** argv)
     vector< vector<Point>* > clouds;
     clouds.reserve(nr);
     for (int i=0; i<nr; ++i)
-	 clouds.push_back( new vector<Point> );
+      clouds.push_back( new vector<Point> );
 
     map<int, int> components2cloud;
     int kk = 0;
 
-    for (int i = 0; i < sgraph.getNumPoints(); ++i)
-	 {
-	   int component = segmented->find(i);
-	   if ( components2cloud.find(component)==components2cloud.end() )
-		{
-		  components2cloud[component] = kk++;
-		  clouds[components2cloud[component]]->reserve(segmented->size(component));
-		}
-	   clouds[components2cloud[component]]->push_back(sgraph[i]);
-	 }
-
+    for (int i = 0; i < sgraph.getNumPoints(); ++i) {
+      int component = segmented->find(i);
+      if ( components2cloud.find(component)==components2cloud.end() )
+        {
+          components2cloud[component] = kk++;
+          clouds[components2cloud[component]]
+            ->reserve(segmented->size(component));
+        }
+      clouds[components2cloud[component]]->push_back(sgraph[i]);
+    }
+    
     // pose file (repeated for the number of segments
     writePoseFiles(dir, rPos, rPosTheta, clouds.size(), outscan);
     // scan files for all segments

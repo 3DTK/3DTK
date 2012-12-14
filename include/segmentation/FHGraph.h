@@ -1,16 +1,17 @@
 /**
-  * Point Cloud Segmentation using Felzenszwalb-Huttenlocher Algorithm
-  *
-  * Copyright (C) Jacobs University Bremen
-  *
-  * Released under the GPL version 3.
-  *
-  * @author Mihai-Cotizo Sima
-  */
+ * Point Cloud Segmentation using Felzenszwalb-Huttenlocher Algorithm
+ *
+ * Copyright (C) Jacobs University Bremen
+ *
+ * Released under the GPL version 3.
+ *
+ * @author Mihai-Cotizo Sima
+ * @author Andreas Nuechter
+ */
 
 
-#ifndef __FHGRAPH_H_
-#define __FHGRAPH_H_
+#ifndef __FHGRAPH_H__
+#define __FHGRAPH_H__
 
 #include <vector>
 #include <list>
@@ -22,29 +23,34 @@
 
 class FHGraph {
 public:
-    FHGraph(std::vector< Point >& ps, double weight(Point, Point), double sigma, double eps, int neighbors, float radius);
-    edge* getGraph();
-    Point operator[](int index);
-    int getNumPoints();
-    int getNumEdges();
+  FHGraph(DataXYZ *ps,
+		double weight(Point, Point),
+		double sigma,
+		double eps,
+		int neighbors,
+		float radius);
+  edge* getGraph();
+  Point operator[](int index);
+  int getNumPoints();
+  int getNumEdges();
 
-    void dispose();
+  void dispose();
+
 private:
-    void compute_neighbors(double weight(Point, Point), double eps);
-    void do_gauss(double sigma);
-    void without_gauss();
+  void compute_neighbors(double weight(Point, Point), double eps);
+  void do_gauss(double sigma);
+  void without_gauss();
 
-    std::vector<edge> edges;
-    std::vector<Point>& points;
-    int V;
-    int E;
+  std::vector<edge> edges;
+  DataXYZ *xyz;
+  int V;
+  int E;
 
-    int nr_neighbors;
-    float radius;
+  int nr_neighbors;
+  float radius;
 
-
-    struct he{ int x; float w; };
-    std::vector< std::list<he> > adjency_list;
+  struct he{ int x; float w; };
+  std::vector< std::list<he> > adjency_list;
 };
 
 #endif

@@ -19,6 +19,7 @@ namespace fbr{
     pMethod = method;
     nImages = numberOfImages;
     pParam = param;
+    maxRange = 0;
     if(mMethod == FARTHEST){
       iMap.create(iHeight, iWidth, CV_32FC(3));
       iMap = cv::Scalar::all(0);
@@ -70,26 +71,33 @@ namespace fbr{
   }
   
   void panorama::map(int x, int y, cv::MatIterator_<cv::Vec4f> it, double range){
-    iReflectance.at<uchar>(y,x) = (*it)[3]*255;//reflectance
-    iRange.at<float>(y,x) = range;//range
-    if(mapMethod == FARTHEST){
-      //adding the point with max distance
-      if( iRange.at<float>(y,x) < range ){
-        iMap.at<cv::Vec3f>(y,x)[0] = (*it)[0];//x
-        iMap.at<cv::Vec3f>(y,x)[1] = (*it)[1];//y
-        iMap.at<cv::Vec3f>(y,x)[2] = (*it)[2];//z
+    // reflectance
+    iReflectance.at<uchar>(y,x) = (*it)[3]*255;
+
+    // range
+    iRange.at<float>(y,x) = (float)range;
+
+    if (maxRange < (float)range)
+	 maxRange = (float)range;
+
+    //a dding the point with max distance
+    if (mapMethod == FARTHEST) {
+      if (iRange.at<float>(y,x) < range) {
+        iMap.at<cv::Vec3f>(y,x)[0] = (*it)[0]; // x
+        iMap.at<cv::Vec3f>(y,x)[1] = (*it)[1]; // y
+        iMap.at<cv::Vec3f>(y,x)[2] = (*it)[2]; // z
       }
-    }else if(mapMethod == EXTENDED){
-      //adding all the points
+    } else if(mapMethod == EXTENDED){
+      // adding all the points
       cv::Vec3f point;
-      point[0] = (*it)[0];//x
-      point[1] = (*it)[1];//y
-      point[2] = (*it)[2];//z
+      point[0] = (*it)[0]; // x
+      point[1] = (*it)[1]; // y
+      point[2] = (*it)[2]; // z
       extendedIMap[y][x].push_back(point);
     }
   }
 
-  void panorama::createPanorama(cv::Mat scan){
+  void panorama::createPanorama(cv::Mat scan) {
 
     //EQUIRECTANGULAR projection
     if(pMethod == EQUIRECTANGULAR){
@@ -117,6 +125,9 @@ namespace fbr{
 	range = polar[2];
 	//horizantal angle of view of [0:360] and vertical of [-40:60]
 	phi = 360.0 - phi;
+	//@
+	phi += 90; if (phi > 360) phi -= 360;
+	//@
 	phi = phi * 2.0 * M_PI / 360.0;
 	theta -= 90;
 	theta *= -1;
@@ -586,7 +597,7 @@ namespace fbr{
           theta += 90.0;
           theta *= M_PI / 180.0;
           double polar[3] = { theta, phi, range }, cartesian[3] = {0., 0., 0.}; 
-        	toKartesian(polar, cartesian);
+        	toCartesian(polar, cartesian);
           if( fabs(cartesian[0]) < 1e-5 && fabs(cartesian[1]) < 1e-5 && fabs(cartesian[2]) < 1e-5) {
             if (first_seen) first_seen = false;
             else continue;
@@ -622,7 +633,7 @@ namespace fbr{
           theta += 90.0;
           theta *= M_PI / 180.0;
           double polar[3] = { theta, phi, range }, cartesian[3] = {0., 0., 0.}; 
-        	toKartesian(polar, cartesian);
+        	toCartesian(polar, cartesian);
           if( fabs(cartesian[0]) < 1e-5 && fabs(cartesian[1]) < 1e-5 && fabs(cartesian[2]) < 1e-5) {
             if (first_seen) first_seen = false;
             else continue;
@@ -657,7 +668,7 @@ namespace fbr{
           theta += 90.0;
           theta *= M_PI / 180.0;
           double polar[3] = { theta, phi, range }, cartesian[3] = {0., 0., 0.}; 
-        	toKartesian(polar, cartesian);
+        	toCartesian(polar, cartesian);
           if( fabs(cartesian[0]) < 1e-5 && fabs(cartesian[1]) < 1e-5 && fabs(cartesian[2]) < 1e-5) {
             if (first_seen) first_seen = false;
             else continue;
@@ -709,7 +720,7 @@ namespace fbr{
           theta *= M_PI / 180.0;
 
           double polar[3] = { theta, phi, range }, cartesian[3] = {0., 0., 0.}; 
-        	toKartesian(polar, cartesian);
+        	toCartesian(polar, cartesian);
           //if ( std::isnan(cartesian[0]) || std::isnan(cartesian[1]) || std::isnan(cartesian[2]) ) continue;
           if( fabs(cartesian[0]) < 1e-5 && fabs(cartesian[1]) < 1e-5 && fabs(cartesian[2]) < 1e-5) {
             if (first_seen) first_seen = false;
@@ -730,6 +741,10 @@ namespace fbr{
 
   unsigned int panorama::getImageHeight(){
     return iHeight;
+  }
+
+  float panorama::getMaxRange(){
+    return maxRange;
   }
 
   projection_method panorama::getProjectionMethod(){

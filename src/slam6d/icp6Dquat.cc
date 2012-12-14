@@ -40,11 +40,11 @@ using std::endl;
  * @param pairs Vector of point pairs (pairs of corresponding points)
  * @param *alignfx The resulting transformation matrix
  * @return Error estimation of the matching (rms)
-*/
+ */
 double icp6D_QUAT::Align(const vector<PtPair>& pairs,
-					double *alignfx,
-					const double centroid_m[3],
-					const double centroid_d[3])
+                         double *alignfx,
+                         const double centroid_m[3],
+                         const double centroid_d[3])
 {
   int n = pairs.size();
 
@@ -62,13 +62,10 @@ double icp6D_QUAT::Align(const vector<PtPair>& pairs,
     for (j = 0; j < 3; j++)
       S[i][j] = 0;
   for (i=0; i<n; i++) {
-//      cout << setprecision (10) << pairs[i].p1.x << " " << pairs[i].p1.y << " " << pairs[i].p1.z << endl;
-//      cout << pairs[i].p2.x << " " << pairs[i].p2.y << " " << pairs[i].p2.z << endl;
-
 
     sum += sqr(pairs[i].p1.x - pairs[i].p2.x)
-	 + sqr(pairs[i].p1.y - pairs[i].p2.y)
-	 + sqr(pairs[i].p1.z - pairs[i].p2.z) ;
+      + sqr(pairs[i].p1.y - pairs[i].p2.y)
+      + sqr(pairs[i].p1.z - pairs[i].p2.z) ;
     S[0][0] += pairs[i].p2.x * pairs[i].p1.x;
     S[0][1] += pairs[i].p2.x * pairs[i].p1.y;
     S[0][2] += pairs[i].p2.x * pairs[i].p1.z;
@@ -82,13 +79,14 @@ double icp6D_QUAT::Align(const vector<PtPair>& pairs,
 
   double error = sqrt(sum / n);
   if (!quiet) {
-     cout.setf(ios::basefield);
-     cout << "QUAT RMS point-to-point error = "
-	      << resetiosflags(ios::adjustfield) << setiosflags(ios::internal)
-	      << resetiosflags(ios::floatfield) << setiosflags(ios::fixed)
-	      << std::setw(10) << std::setprecision(7)
-	      << error
-	      << "  using " << std::setw(6) << (int)pairs.size() << " points" << endl;
+    cout.setf(ios::basefield);
+    cout << "QUAT RMS point-to-point error = "
+         << resetiosflags(ios::adjustfield) << setiosflags(ios::internal)
+         << resetiosflags(ios::floatfield) << setiosflags(ios::fixed)
+         << std::setw(10) << std::setprecision(7)
+         << error
+         << "  using " << std::setw(6) << (int)pairs.size() << " points"
+         << endl;
   }
 
   double fact = 1 / double(n);
@@ -104,12 +102,12 @@ double icp6D_QUAT::Align(const vector<PtPair>& pairs,
   S[2][0] -= centroid_d[2] * centroid_m[0];
   S[2][1] -= centroid_d[2] * centroid_m[1];
   S[2][2] -= centroid_d[2] * centroid_m[2];
+
   // calculate the 4x4 symmetric matrix Q
   double trace = S[0][0] + S[1][1] + S[2][2];
   double A23 = S[1][2] - S[2][1];
   double A31 = S[2][0] - S[0][2];
   double A12 = S[0][1] - S[1][0];
-
   Q[0][0] = trace;
   Q[0][1] = Q[1][0] = A23;
   Q[0][2] = Q[2][0] = A31;
@@ -140,9 +138,13 @@ double icp6D_QUAT::Align(const vector<PtPair>& pairs,
   alignfx[11] = 0.0;
 
   // calculate the translation vector,
-  alignfx[12] = centroid_m[0] - m[0][0]*centroid_d[0] - m[0][1]*centroid_d[1] - m[0][2]*centroid_d[2];
-  alignfx[13] = centroid_m[1] - m[1][0]*centroid_d[0] - m[1][1]*centroid_d[1] - m[1][2]*centroid_d[2];
-  alignfx[14] = centroid_m[2] - m[2][0]*centroid_d[0] - m[2][1]*centroid_d[1] - m[2][2]*centroid_d[2];
+  alignfx[12] = centroid_m[0]
+    - m[0][0]*centroid_d[0] - m[0][1]*centroid_d[1] - m[0][2]*centroid_d[2];
+  alignfx[13] = centroid_m[1]
+    - m[1][0]*centroid_d[0]
+    - m[1][1]*centroid_d[1] - m[1][2]*centroid_d[2];
+  alignfx[14] = centroid_m[2]
+    - m[2][0]*centroid_d[0] - m[2][1]*centroid_d[1] - m[2][2]*centroid_d[2];
 
   return error;
 }
@@ -172,23 +174,23 @@ void icp6D_QUAT::quaternion2matrix(double *q, double m[3][3])
   m[2][1] = 2.0*(q23+q01);
 }
 
-int icp6D_QUAT::ferrari(double a, double b, double c, double d,	double rts[4])
+int icp6D_QUAT::ferrari(double a, double b, double c, double d,     double rts[4])
 /*
-     solve the quartic equation -
+  solve the quartic equation -
 
-   x**4 + a*x**3 + b*x**2 + c*x + d = 0
+  x**4 + a*x**3 + b*x**2 + c*x + d = 0
 
-     input -
-   a,b,c,e - coeffs of equation.
+  input -
+  a,b,c,e - coeffs of equation.
 
-     output -
-   nquar - number of real roots.
-   rts - array of root values.
+  output -
+  nquar - number of real roots.
+  rts - array of root values.
 
-     method :  Ferrari - Lagrange
-     Theory of Equations, H.W. Turnbull p. 140 (1947)
+  method :  Ferrari - Lagrange
+  Theory of Equations, H.W. Turnbull p. 140 (1947)
 
-     calls  cubic, qudrtc
+  calls  cubic, qudrtc
 */
 {
   int nquar,n1,n2;
@@ -214,47 +216,47 @@ int icp6D_QUAT::ferrari(double a, double b, double c, double d,	double rts[4])
     else {
       ef = -(.25*a*y + .5*c);
       if ( ((a > 0.0)&&(y > 0.0)&&(c > 0.0))
-	   || ((a > 0.0)&&(y < 0.0)&&(c < 0.0))
-	   || ((a < 0.0)&&(y > 0.0)&&(c < 0.0))
-	   || ((a < 0.0)&&(y < 0.0)&&(c > 0.0))
-	   ||  (a == 0.0)||(y == 0.0)||(c == 0.0)
-	   ) {
-	/* use ef - */
-	if ((b < 0.0)&&(y < 0.0)&&(esq > 0.0)) {
-	  e = sqrt(esq);
-	  f = ef/e;
-	} else if ((d < 0.0) && (fsq > 0.0)) {
-	  f = sqrt(fsq);
-	  e = ef/f;
-	} else {
-	  e = sqrt(esq);
-	  f = sqrt(fsq);
-	  if (ef < 0.0) f = -f;
-	}
+           || ((a > 0.0)&&(y < 0.0)&&(c < 0.0))
+           || ((a < 0.0)&&(y > 0.0)&&(c < 0.0))
+           || ((a < 0.0)&&(y < 0.0)&&(c > 0.0))
+           ||  (a == 0.0)||(y == 0.0)||(c == 0.0)
+           ) {
+        /* use ef - */
+        if ((b < 0.0)&&(y < 0.0)&&(esq > 0.0)) {
+          e = sqrt(esq);
+          f = ef/e;
+        } else if ((d < 0.0) && (fsq > 0.0)) {
+          f = sqrt(fsq);
+          e = ef/f;
+        } else {
+          e = sqrt(esq);
+          f = sqrt(fsq);
+          if (ef < 0.0) f = -f;
+        }
       } else {
-	e = sqrt(esq);
-	f = sqrt(fsq);
-	if (ef < 0.0) f = -f;
+        e = sqrt(esq);
+        f = sqrt(fsq);
+        if (ef < 0.0) f = -f;
       }
       /* note that e >= 0.0 */
       ainv2 = a*.5;
       g = ainv2 - e;
       gg = ainv2 + e;
       if ( ((b > 0.0)&&(y > 0.0))
-	   || ((b < 0.0)&&(y < 0.0)) ) {
-	if (( a > 0.0) && (e != 0.0)) g = (b + y)/gg;
-	else if (e != 0.0) gg = (b + y)/g;
+           || ((b < 0.0)&&(y < 0.0)) ) {
+        if (( a > 0.0) && (e != 0.0)) g = (b + y)/gg;
+        else if (e != 0.0) gg = (b + y)/g;
       }
       if ((y == 0.0)&&(f == 0.0)) {
-	h = 0.0;
-	hh = 0.0;
+        h = 0.0;
+        hh = 0.0;
       } else if ( ((f > 0.0)&&(y < 0.0))
-		  || ((f < 0.0)&&(y > 0.0)) ) {
-	hh = -.5*y + f;
-	h = d/hh;
+                  || ((f < 0.0)&&(y > 0.0)) ) {
+        hh = -.5*y + f;
+        h = d/hh;
       } else {
-	h = -.5*y - f;
-	hh = d/h;
+        h = -.5*y - f;
+        hh = d/h;
       }
       n1 = qudrtc(gg,hh,v1);
       n2 = qudrtc(g,h,v2);
@@ -270,9 +272,9 @@ int icp6D_QUAT::ferrari(double a, double b, double c, double d,	double rts[4])
 
 int icp6D_QUAT::qudrtc(double b, double c, double rts[4])
 /*
-     solve the quadratic equation -
+  solve the quadratic equation -
 
-         x**2+b*x+c = 0
+  x**2+b*x+c = 0
 
 */
 {
@@ -294,27 +296,27 @@ int icp6D_QUAT::qudrtc(double b, double c, double rts[4])
   }
   return nquad;
 } /* qudrtc */
-/**************************************************/
+
 
 double icp6D_QUAT::cubic(double p, double q, double r)
 /*
-     find the lowest real root of the cubic -
-       x**3 + p*x**2 + q*x + r = 0
+  find the lowest real root of the cubic -
+  x**3 + p*x**2 + q*x + r = 0
 
-   input parameters -
-     p,q,r - coeffs of cubic equation.
+  input parameters -
+  p,q,r - coeffs of cubic equation.
 
-   output-
-     cubic - a real root.
+  output-
+  cubic - a real root.
 
-   method -
-     see D.E. Littlewood, "A University Algebra" pp.173 - 6
+  method -
+  see D.E. Littlewood, "A University Algebra" pp.173 - 6
 
-     Charles Prineas   April 1981
+  Charles Prineas   April 1981
 
 */
 {
-  //int nrts;
+  // int nrts;
   double po3,po3sq,qo3;
   double uo3,u2o3,uo3sq4,uo3cu4;
   double v,vsq,wsq;
@@ -325,7 +327,7 @@ double icp6D_QUAT::cubic(double p, double q, double r)
   double doubmax = sqrt(DBL_MAX);
 
   m = 0.0;
-  //nrts =0;
+  // nrts =0;
   if        ((p > doubmax) || (p <  -doubmax)) {
     root = -p;
   } else if ((q > doubmax) || (q <  -doubmax)) {
@@ -340,69 +342,67 @@ double icp6D_QUAT::cubic(double p, double q, double r)
     else {
       v = r + po3*(po3sq + po3sq - q);
       if ((v > doubmax) || (v < -doubmax))
-	root = -p;
+        root = -p;
       else {
-	vsq = v*v;
-	qo3 = q/3.0;
-	uo3 = qo3 - po3sq;
-	u2o3 = uo3 + uo3;
-	if ((u2o3 > doubmax) || (u2o3 < -doubmax)) {
-	  if (p == 0.0) {
-	    if (q > 0.0) root =  -r/q;
-	    else         root =  -sqrt(-q);
-	  } else         root =  -q/p;
-	}
-	uo3sq4 = u2o3*u2o3;
-	if (uo3sq4 > doubmax) {
-	  if (p == 0.0) {
-	    if (q > 0.0) root = -r/q;
-	    else         root = -sqrt(fabs(q));
-	  } else         root = -q/p;
-	}
-	uo3cu4 = uo3sq4*uo3;
-	wsq = uo3cu4 + vsq;
-	if (wsq >= 0.0) {
-	  //
-	  // cubic has one real root
-	  //
-	  //nrts = 1;
-	  if (v <= 0.0) mcube = ( -v + sqrt(wsq))*.5;
-	  if (v  > 0.0) mcube = ( -v - sqrt(wsq))*.5;
-	  m = cbrt(mcube);
-	  if (m != 0.0) n = -uo3/m;
-	  else          n = 0.0;
-	  root = m + n - po3;
-	} else {
-	  //nrts = 3;
-	  //
-	  // cubic has three real roots
-	  //
-	  if (uo3 < 0.0) {
-	    muo3 = -uo3;
-	    s = sqrt(muo3);
-	    scube = s*muo3;
-	    t =  -v/(scube+scube);
-	    cosk = cos(acos(t)/3.0);
-	    if (po3 < 0.0)
-	      root = (s+s)*cosk - po3;
-	    else {
-	      sinsqk = 1.0 - cosk*cosk;
-	      if (sinsqk < 0.0) sinsqk = 0.0;
-	      root = s*( -cosk - sqrt(3*sinsqk)) - po3;
-	    }
-	  } else
-	    //
-	    // cubic has multiple root -
-	    //
-	    root = cbrt(v) - po3;
-	}
+        vsq = v*v;
+        qo3 = q/3.0;
+        uo3 = qo3 - po3sq;
+        u2o3 = uo3 + uo3;
+        if ((u2o3 > doubmax) || (u2o3 < -doubmax)) {
+          if (p == 0.0) {
+            if (q > 0.0) root =  -r/q;
+            else         root =  -sqrt(-q);
+          } else         root =  -q/p;
+        }
+        uo3sq4 = u2o3*u2o3;
+        if (uo3sq4 > doubmax) {
+          if (p == 0.0) {
+            if (q > 0.0) root = -r/q;
+            else         root = -sqrt(fabs(q));
+          } else         root = -q/p;
+        }
+        uo3cu4 = uo3sq4*uo3;
+        wsq = uo3cu4 + vsq;
+        if (wsq >= 0.0) {
+          //
+          // cubic has one real root
+          //
+          //nrts = 1;
+          if (v <= 0.0) mcube = ( -v + sqrt(wsq))*.5;
+          if (v  > 0.0) mcube = ( -v - sqrt(wsq))*.5;
+          m = cbrt(mcube);
+          if (m != 0.0) n = -uo3/m;
+          else          n = 0.0;
+          root = m + n - po3;
+        } else {
+          // nrts = 3;
+          //
+          // cubic has three real roots
+          //
+          if (uo3 < 0.0) {
+            muo3 = -uo3;
+            s = sqrt(muo3);
+            scube = s*muo3;
+            t =  -v/(scube+scube);
+            cosk = cos(acos(t)/3.0);
+            if (po3 < 0.0)
+              root = (s+s)*cosk - po3;
+            else {
+              sinsqk = 1.0 - cosk*cosk;
+              if (sinsqk < 0.0) sinsqk = 0.0;
+              root = s*( -cosk - sqrt(3*sinsqk)) - po3;
+            }
+          } else
+            //
+            // cubic has multiple root -
+            //
+            root = cbrt(v) - po3;
+        }
       }
     }
   }
   return root;
 } /* cubic */
-/***************************************/
-
 
 // calculate the maximum eigenvector of a symmetric
 // 4x4 matrix
@@ -428,6 +428,7 @@ void icp6D_QUAT::maxEigenVector(double Q[4][4], double ev[4])
   N[1][0]=Q[1][0]; N[1][1]=Q[1][1]-l;N[1][2]=Q[1][2]; N[1][3]=Q[1][3];
   N[2][0]=Q[2][0]; N[2][1]=Q[2][1] ;N[2][2]=Q[2][2]-l;N[2][3]=Q[2][3];
   N[3][0]=Q[3][0]; N[3][1]=Q[3][1] ;N[3][2]=Q[3][2];N[3][3]=Q[3][3]-l;
+
   // the columns of the inverted matrix should be multiples of
   // the eigenvector, pick the largest
   int ipiv[4];
@@ -452,11 +453,11 @@ void icp6D_QUAT::maxEigenVector(double Q[4][4], double ev[4])
       curr[0]*curr[0] + curr[1]*curr[1] +
       curr[2]*curr[2] + curr[3]*curr[3];
     if (tlen > len) {
-	 len = tlen;
-	 best[0] = curr[0];
-	 best[1] = curr[1];
-	 best[2] = curr[2];
-	 best[3] = curr[3];
+      len = tlen;
+      best[0] = curr[0];
+      best[1] = curr[1];
+      best[2] = curr[2];
+      best[3] = curr[3];
     }
   }
   // normalize the result
@@ -509,7 +510,7 @@ void icp6D_QUAT::characteristicPol(double Q[4][4], double c[4])
 
   // d
   c[3] = 2*(-Q[0][2]*Q[0][3]*Q[1][2] + q0103*Q[2][2] -
-	    Q[0][1]*q0223 + Q[0][0]*q1223)*Q[1][3] +
+            Q[0][1]*q0223 + Q[0][0]*q1223)*Q[1][3] +
     q02_2*q13_2 - q03_2*q1122 - q13_2*q0022 +
     2*Q[0][3]*Q[1][1]*q0223 - 2*q0103*q1223 + q01_2*q23_2 -
     q0011*q23_2 - q02_2*q1133 + q03_2*q12_2 +
@@ -518,12 +519,12 @@ void icp6D_QUAT::characteristicPol(double Q[4][4], double c[4])
 }
 
 double icp6D_QUAT::Align_Parallel(const int openmp_num_threads,
-						    const unsigned int n[OPENMP_NUM_THREADS],
-						    const double sum[OPENMP_NUM_THREADS],
-						    const double centroid_m[OPENMP_NUM_THREADS][3],
-						    const double centroid_d[OPENMP_NUM_THREADS][3],
-						    const double Si[OPENMP_NUM_THREADS][9],
-						    double *alignfx)
+                                 const unsigned int n[OPENMP_NUM_THREADS],
+                                 const double sum[OPENMP_NUM_THREADS],
+                                 const double centroid_m[OPENMP_NUM_THREADS][3],
+                                 const double centroid_d[OPENMP_NUM_THREADS][3],
+                                 const double Si[OPENMP_NUM_THREADS][9],
+                                 double *alignfx)
 {
   double s = 0.0;
   double ret;
@@ -556,11 +557,11 @@ double icp6D_QUAT::Align_Parallel(const int openmp_num_threads,
   if (!quiet) {
     cout.setf(ios::basefield);
     cout << "PQUAT RMS point-to-point error = "
-      << resetiosflags(ios::adjustfield) << setiosflags(ios::internal)
-      << resetiosflags(ios::floatfield) << setiosflags(ios::fixed)
-      << std::setw(10) << std::setprecision(7)
-      << ret
-      << "  using " << std::setw(6) << pairs_size << " points" << endl;
+         << resetiosflags(ios::adjustfield) << setiosflags(ios::internal)
+         << resetiosflags(ios::floatfield) << setiosflags(ios::fixed)
+         << std::setw(10) << std::setprecision(7)
+         << ret
+         << "  using " << std::setw(6) << pairs_size << " points" << endl;
   }
 
   double S[3][3];
@@ -576,7 +577,8 @@ double icp6D_QUAT::Align_Parallel(const int openmp_num_threads,
   for (int i = 0; i < openmp_num_threads; i++) {
     for(int j = 0; j < 3; j++){
       for(int k = 0; k < 3; k++){
-        S[j][k] += Si[i][k*3+j] + n[i] * ((centroid_d[i][j] - cd[j]) * (centroid_m[i][k] - cm[k])) ;
+        S[j][k] += Si[i][k*3+j]
+          + n[i] * ((centroid_d[i][j] - cd[j]) * (centroid_m[i][k] - cm[k])) ;
       }
     }
   }

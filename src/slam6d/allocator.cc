@@ -18,8 +18,6 @@ using std::runtime_error;
 
 #include <cstring> //memset
 
-
-
 ChunkAllocator::ChunkAllocator(unsigned int _csize) :
   chunksize(_csize), index(_csize), memsize(0), wastedspace(0)
 {}
@@ -65,7 +63,6 @@ unsigned char* ChunkAllocator::allocate(unsigned int size)
 }
 
 
-
 PackedChunkAllocator::PackedChunkAllocator(unsigned int _csize) :
   chunksize(_csize), memsize(0)
 {}
@@ -107,7 +104,9 @@ unsigned char* PackedChunkAllocator::allocate(unsigned int size)
     chunk = new unsigned char[chunksize];
     memset(chunk, 0, chunksize);
     memsize += chunksize;
-  } else {   // in case the requested memory is larger than our chunks, make a single chunk thats large enough
+  } else {
+    // in case the requested memory is larger than our chunks,
+    // make a single chunk thats large enough
     chunk = new unsigned char[size];
     memset(chunk, 0, size);
     memsize += size;
@@ -117,7 +116,8 @@ unsigned char* PackedChunkAllocator::allocate(unsigned int size)
   return chunk;
 }
 
-SequentialAllocator::SequentialAllocator(unsigned char* base_ptr, unsigned int max_size) :
+SequentialAllocator::SequentialAllocator(unsigned char* base_ptr,
+								 unsigned int max_size) :
   m_base_ptr(base_ptr), m_size(max_size), m_index(0)
 {}
 

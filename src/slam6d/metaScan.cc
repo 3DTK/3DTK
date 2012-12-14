@@ -1,22 +1,30 @@
 /*
- * metascan implementation
+ * metaScan implementation
  *
- * Copyright (C) Andreas Nuechter, Kai Lingemann, Thomas Escher
+ * Copyright (C) by the 3DTK contributors
  *
  * Released under the GPL version 3.
  *
  */
 
-#include "slam6d/metaScan.h"
+/**
+ * @file
+ * @brief metascan is a collection of scans whcih can be treated just as
+ *        a single scan
+ *
+ * @author Andreas Nuechter. Jacobs University Bremen gGmbH, Germany
+ * @author Kai Lingemann. Inst. of CS, University of Osnabrueck, Germany.
+ * @author Thomas Escher. Inst. of CS, University of Osnabrueck, Germany.
+ */
 
+#include "slam6d/metaScan.h"
 #include "slam6d/kdMeta.h"
 
 #ifdef WITH_METRICS
 #include "slam6d/metrics.h"
 #endif
 
-MetaScan::MetaScan(std::vector<Scan*> scans, int nns_method, bool cuda_enabled) :
-  m_scans(scans)
+MetaScan::MetaScan(std::vector<Scan*> scans, int nns_method) : m_scans(scans)
 {
   // add this to the global vector for addFrame reasons
   Scan::allScans.push_back(this);
@@ -25,7 +33,9 @@ MetaScan::MetaScan(std::vector<Scan*> scans, int nns_method, bool cuda_enabled) 
 MetaScan::~MetaScan()
 {
   // remove this from the global vector for addFrame reasons
-  for(ScanVector::iterator it = Scan::allScans.begin(); it != Scan::allScans.end(); ++it) {
+  for(ScanVector::iterator it = Scan::allScans.begin(); 
+      it != Scan::allScans.end(); 
+      ++it) {
     if(*it == this) {
       Scan::allScans.erase(it);
       break;
@@ -39,7 +49,9 @@ void MetaScan::createSearchTreePrivate()
   Timer tc = ClientMetric::create_metatree_time.start();
 #endif //WITH_METRICS
   
-  // TODO: there is no nns_type switch or cuda option for this one because no reduced points are copied, this could be implemented if e.g. cuda is required on metascans
+  // TODO: there is no nns_type switch option for this one 
+  // because no reduced points are copied, this could be 
+  // implemented if e.g. cuda is required on metascans
   kd = new KDtreeMetaManaged(m_scans);
   
 #ifdef WITH_METRICS

@@ -9,9 +9,9 @@
 
 /** @file 
  *  @brief An optimized k-d tree implementation
- *  @author Andreas Nuechter. Institute of Computer Science, University of Osnabrueck, Germany.
- *  @author Kai Lingemann. Institute of Computer Science, University of Osnabrueck, Germany.
- *  @author Thomas Escher. Institute of Computer Science, University of Osnabrueck, Germany.
+ *  @author Andreas Nuechter. Inst. of CS, University of Osnabrueck, Germany.
+ *  @author Kai Lingemann. Inst. of CS, University of Osnabrueck, Germany.
+ *  @author Thomas Escher. Inst. of CS, University of Osnabrueck, Germany.
  */
 
 #ifdef _MSC_VER
@@ -38,7 +38,9 @@ KDParams KDTreeImpl<PointData, AccessorData, AccessorFunc>::params[MAX_OPENMP_NU
 KDtreeManaged::KDtreeManaged(Scan* scan) :
   m_scan(scan), m_data(0), m_count_locking(0)
 {
-  create(scan->get("xyz reduced original"), prepareTempIndices(scan->size<DataXYZ>("xyz reduced original")), scan->size<DataXYZ>("xyz reduced original"));
+  create(scan->get("xyz reduced original"),
+         prepareTempIndices(scan->size<DataXYZ>("xyz reduced original")),
+         scan->size<DataXYZ>("xyz reduced original"));
   // allocate in prepareTempIndices, deleted here
   delete[] m_temp_indices;
 }
@@ -51,7 +53,9 @@ unsigned int* KDtreeManaged::prepareTempIndices(unsigned int n)
   return m_temp_indices;
 }
 
-double* KDtreeManaged::FindClosest(double *_p, double maxdist2, int threadNum) const
+double* KDtreeManaged::FindClosest(double *_p,
+                                   double maxdist2,
+                                   int threadNum) const
 {
   params[threadNum].closest = 0;
   params[threadNum].closest_d2 = maxdist2;
@@ -60,7 +64,10 @@ double* KDtreeManaged::FindClosest(double *_p, double maxdist2, int threadNum) c
   return params[threadNum].closest;
 }
 
-double* KDtreeManaged::FindClosestAlongDir(double *_p, double *_dir, double maxdist2, int threadNum) const
+double* KDtreeManaged::FindClosestAlongDir(double *_p,
+                                           double *_dir,
+                                           double maxdist2, int
+                                           threadNum) const
 {
   params[threadNum].closest = NULL;
   params[threadNum].closest_d2 = maxdist2;

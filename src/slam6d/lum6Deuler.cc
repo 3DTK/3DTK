@@ -11,17 +11,18 @@
  * @file 
  * @brief The implementation of globally consistent scan matching algorithm
  *
- * @author Dorit Borrman. Institute of Computer Science, University of Osnabrueck, Germany.
- * @author Jan Elseberg. Institute of Computer Science, University of Osnabrueck, Germany.
- * @author Kai Lingemann. Institute of Computer Science, University of Osnabrueck, Germany.
- * @author Andreas Nuechter. Institute of Computer Science, University of Osnabrueck, Germany.
+ * @author Dorit Borrman. Inst. of CS, University of Osnabrueck, Germany.
+ * @author Jan Elseberg. Inst. of CS, University of Osnabrueck, Germany.
+ * @author Kai Lingemann. Inst. of CS, University of Osnabrueck, Germany.
+ * @author Andreas Nuechter. Inst. of CS, University of Osnabrueck, Germany.
  *
- * A description of the algorithms implemented here can be found in the following paper
- * (ras2007.pdf):
+ * A description of the algorithms implemented here can be found in the
+ * following paper (ras2007.pdf):
  *
- * Dorit Borrmann, Jan Elseberg, Kai Lingemann, Andreas Nuechter, and Joachim Hertzberg.
- * Globally consistent 3D mapping with scan matching. Journal of Robotics and Autonomous
- * Systems (JRAS), Elsevier Science, Volume 56, Issue 2, ISSN 0921-8890, pages 130 - 142,
+ * Dorit Borrmann, Jan Elseberg, Kai Lingemann, Andreas Nuechter,
+ * and Joachim Hertzberg. Globally consistent 3D mapping with scan matching.
+ + Journal of Robotics and Autonomous Systems (JRAS), Elsevier Science,
+ + Volume 56, Issue 2, ISSN 0921-8890, pages 130 - 142,
  * February 2008
  */
 
@@ -46,7 +47,8 @@ using namespace NEWMAT;
  *
  * @param my_icp6Dminimizer Pointer to ICP minimization functor
  * @param mdm Maximum PtoP distance to which point pairs are collected for ICP
- * @param max_dist_match Maximum PtoP distance to which point pairs are collected for LUM
+ * @param max_dist_match Maximum PtoP distance to which point pairs are
+ *                       collected for LUM
  * @param max_num_iterations Maximal number of iterations for ICP
  * @param quiet Suspesses all output to std out
  * @param meta Indicates if metascan matching has to be used
@@ -58,13 +60,13 @@ using namespace NEWMAT;
  * @param epsilonLUM Termination criterion for LUM
  */
 lum6DEuler::lum6DEuler(icp6Dminimizer *my_icp6Dminimizer,
-				   double mdm, double max_dist_match, 
-				   int max_num_iterations, bool quiet, bool meta, int rnd,
-				   bool eP, int anim, double epsilonICP, int nns_method, double epsilonLUM)
+                       double mdm, double max_dist_match, 
+                       int max_num_iterations, bool quiet, bool meta, int rnd,
+                       bool eP, int anim, double epsilonICP, int nns_method, double epsilonLUM)
   : graphSlam6D(my_icp6Dminimizer,
-			 mdm, max_dist_match,
-			 max_num_iterations, quiet, meta, rnd,
-			 eP, anim, epsilonICP, nns_method, epsilonLUM)
+                mdm, max_dist_match,
+                max_num_iterations, quiet, meta, rnd,
+                eP, anim, epsilonICP, nns_method, epsilonLUM)
 { }
 
 
@@ -78,8 +80,8 @@ lum6DEuler::~lum6DEuler()
 
 
 /**
- * This function calculates the inverse covariances Cij and the Vector Cij*Dij for
- * two scans by finding pointpairs.
+ * This function calculates the inverse covariances Cij and the Vector
+ * Cij*Dij for two scans by finding pointpairs.
  * 
  * @param first pointer to the first scan of the link
  * @param second pointer to the second scan of the link
@@ -90,12 +92,14 @@ lum6DEuler::~lum6DEuler()
  * @param CD pointer to the vector Cij*Dij
  */
 void lum6DEuler::covarianceEuler(Scan *first, Scan *second, 
-						   int nns_method, int rnd, double max_dist_match2, 
+                                 int nns_method, int rnd, double max_dist_match2, 
                                  Matrix *C, ColumnVector *CD) 
 {
   // x,y,z       denote the coordinates of uk (Here averaged over ak and bk)
-  // sx,sy,sz    are the sums of their respective coordinates of uk over each paint pair
-  // xpy,xpz,ypz are the sums over x*x + y*y ,x*x + z*z and y*y + z*z respectively over each point pair
+  // sx,sy,sz    are the sums of their respective coordinates of uk over
+  //             each paint pair
+  // xpy,xpz,ypz are the sums over x*x + y*y ,x*x + z*z and y*y + z*z
+  //             respectively over each point pair
   // xy,yz,xz    are the sums over each respective multiplication 
   // dx,dy,dz    are the deltas in each coordinate of a point pair
   // ss          is the estimation of the covariance of sensing error
@@ -125,7 +129,7 @@ void lum6DEuler::covarianceEuler(Scan *first, Scan *second,
   double dummy_sum;
 
   Scan::getPtPairs(&uk, first, second, thread_num,
-      rnd, max_dist_match2, dummy_sum, dummy_centroid_m, dummy_centroid_d);
+                   rnd, max_dist_match2, dummy_sum, dummy_centroid_m, dummy_centroid_d);
 
   m = uk.size();
 
@@ -168,61 +172,63 @@ void lum6DEuler::covarianceEuler(Scan *first, Scan *second,
       MZ(5) += -y * dx + x * dy;
       MZ(6) += z * dx - x * dz;
     }
-	 // Now construct the symmetrical matrix MM
-	 MM(1,1) = MM(2,2) = MM(3,3) = m;
-	 MM(4,4) = ypz;
-	 MM(5,5) = xpy;
-	 MM(6,6) = xpz;
+    // Now construct the symmetrical matrix MM
+    MM(1,1) = MM(2,2) = MM(3,3) = m;
+    MM(4,4) = ypz;
+    MM(5,5) = xpy;
+    MM(6,6) = xpz;
     
-	 MM(1,5) = MM(5,1) = -sy;
-	 MM(1,6) = MM(6,1) = sz;
-	 MM(2,4) = MM(4,2) = -sz;
-	 MM(2,5) = MM(5,2) = sx;
-	 MM(3,4) = MM(4,3) = sy;
-	 MM(3,6) = MM(6,3) = -sx;
+    MM(1,5) = MM(5,1) = -sy;
+    MM(1,6) = MM(6,1) = sz;
+    MM(2,4) = MM(4,2) = -sz;
+    MM(2,5) = MM(5,2) = sx;
+    MM(3,4) = MM(4,3) = sy;
+    MM(3,6) = MM(6,3) = -sx;
     
-	 MM(4,5) = MM(5,4) = -xz;
-	 MM(4,6) = MM(6,4) = -xy;
-	 MM(5,6) = MM(6,5) = -yz;
+    MM(4,5) = MM(5,4) = -xz;
+    MM(4,6) = MM(6,4) = -xy;
+    MM(5,6) = MM(6,5) = -yz;
 
-	 // Calculate the pose difference estimation
-	 D = MM.i() * MZ ;
+    // Calculate the pose difference estimation
+    D = MM.i() * MZ ;
 
-	 // Again going through all point pairs to faster calculate s.
-	 // This cannot be done earlier as we need D, and therefore MM and MZ to do this
-	 for(int j = 0; j < m; j++){
-	   ak = uk[j].p1;
-	   bk = uk[j].p2;
+    // Again going through all point pairs to faster calculate s.
+    // This cannot be done earlier as we need D, and
+    // therefore MM and MZ to do this
+    for(int j = 0; j < m; j++){
+      ak = uk[j].p1;
+      bk = uk[j].p2;
    
-	   x = (ak.x + bk.x) / 2.0;
-	   y = (ak.y + bk.y) / 2.0;
-	   z = (ak.z + bk.z) / 2.0;
+      x = (ak.x + bk.x) / 2.0;
+      y = (ak.y + bk.y) / 2.0;
+      z = (ak.z + bk.z) / 2.0;
       
-	   ss += sqr(ak.x - bk.x - (D(1) - y * D(5) + z * D(6)))
-		+ sqr(ak.y - bk.y - (D(2) - z * D(4) + x * D(5)))
-		+ sqr(ak.z - bk.z - (D(3) + y * D(4) - x * D(6)));
-	 }
+      ss += sqr(ak.x - bk.x - (D(1) - y * D(5) + z * D(6)))
+        + sqr(ak.y - bk.y - (D(2) - z * D(4) + x * D(5)))
+        + sqr(ak.z - bk.z - (D(3) + y * D(4) - x * D(6)));
+    }
 
-	 ss =  ss / (2*m - 3);
-   // for dealing with numerical instabilities when identical point clouds are used in matching
-   if (ss  < 0.0000000000001) {
-     ss = 0.0;
-     MM(1,1) = MM(1,2) = MM(1,3) = 0.0;
-     MM(2,1) = MM(2,2) = MM(2,3) = 0.0;
-     MM(3,1) = MM(3,2) = MM(3,3) = 0.0;
-     MZ(6) = MZ(1) = MZ(2) = 0.0;
-     MZ(3) = MZ(4) = MZ(5) = 0.0;
-     *C = 0;
-     if(CD)
-       *CD = 0;
-     return;
-   }
-   ss = 1.0 / ss;
+    ss =  ss / (2*m - 3);
+    // for dealing with numerical instabilities when
+    // identical point clouds are used in matching
+    if (ss  < 0.0000000000001) {
+      ss = 0.0;
+      MM(1,1) = MM(1,2) = MM(1,3) = 0.0;
+      MM(2,1) = MM(2,2) = MM(2,3) = 0.0;
+      MM(3,1) = MM(3,2) = MM(3,3) = 0.0;
+      MZ(6) = MZ(1) = MZ(2) = 0.0;
+      MZ(3) = MZ(4) = MZ(5) = 0.0;
+      *C = 0;
+      if(CD)
+        *CD = 0;
+      return;
+    }
+    ss = 1.0 / ss;
 
-	 if (CD) {
-	   *CD = MZ * ss;
-	 }
-	 *C = MM * ss;
+    if (CD) {
+      *CD = MZ * ss;
+    }
+    *C = MM * ss;
 
   } else {
 
@@ -244,13 +250,19 @@ void lum6DEuler::covarianceEuler(Scan *first, Scan *second,
 /**
  * A function to fill the linear system G X = B.
  *
- * @param gr the Graph is used to map the given covariances C and CD matrices to the correct link
- * @param CD A vector containing all covariances C multiplied with their respective estimations D
- * @param C A vector containing all covariances C of the pose difference estimations D
+ * @param gr the Graph is used to map the given covariances C and CD
+ *           matrices to the correct link
+ * @param CD A vector containing all covariances C multiplied with
+ *           their respective estimations D
+ * @param C A vector containing all covariances C of the pose
+ *          difference estimations D
  * @param G The matrix G specifying the linear equation
  * @param B The vector B 
  */
-void lum6DEuler::FillGB3D(Graph *gr, GraphMatrix* G, ColumnVector* B,vector<Scan *> allScans )
+void lum6DEuler::FillGB3D(Graph *gr,
+                          GraphMatrix* G,
+                          ColumnVector* B,
+                          vector<Scan *> allScans )
 {
 #ifdef _OPENMP
 #pragma omp parallel for schedule(dynamic)
@@ -261,11 +273,10 @@ void lum6DEuler::FillGB3D(Graph *gr, GraphMatrix* G, ColumnVector* B,vector<Scan
     Scan *FirstScan  = allScans[gr->getLink(i,0)];
     Scan *SecondScan = allScans[gr->getLink(i,1)];
   
-    //    cout << "i " << i << " a: " << a << " b: " << b << endl; 
-
     Matrix Cab(6,6);
     ColumnVector CDab(6);
-    covarianceEuler(FirstScan, SecondScan, nns_method, (int)my_icp->get_rnd(), 
+    covarianceEuler(FirstScan, SecondScan,
+                    nns_method, (int)my_icp->get_rnd(), 
                     (int)max_dist_match2_LUM, &Cab, &CDab); 
 
 #pragma omp critical
@@ -285,8 +296,7 @@ void lum6DEuler::FillGB3D(Graph *gr, GraphMatrix* G, ColumnVector* B,vector<Scan
 
     }
   }
-
-//  G->print();
+  //  G->print();
 }
 
 /**
@@ -310,14 +320,15 @@ double lum6DEuler::doGraphSlam6D(Graph gr, vector <Scan *> allScans, int nrIt)
   for (int i=0; i < gr.getNrLinks(); i++) {
     int from = gr.getLink(i,0);
     int to = gr.getLink(i,1);
-    // shouldn't be necessary, just in case a (out of date) graph file is loaded:
+    // shouldn't be necessary, just in case a (out of date)
+    // graph file is loaded:
     if (from < (int)allScans.size() && to < (int)allScans.size()) {
-	 out << allScans[from]->get_rPos()[0] << " " 
-	     << allScans[from]->get_rPos()[1] << " " 
-	     << allScans[from]->get_rPos()[2] << endl
-	     << allScans[to  ]->get_rPos()[0] << " " 
-	     << allScans[to  ]->get_rPos()[1] << " " 
-	     << allScans[to  ]->get_rPos()[2] << endl << endl;
+      out << allScans[from]->get_rPos()[0] << " " 
+          << allScans[from]->get_rPos()[1] << " " 
+          << allScans[from]->get_rPos()[2] << endl
+          << allScans[to  ]->get_rPos()[0] << " " 
+          << allScans[to  ]->get_rPos()[1] << " " 
+          << allScans[to  ]->get_rPos()[2] << endl << endl;
     }
   }
   out.close();
@@ -331,11 +342,10 @@ double lum6DEuler::doGraphSlam6D(Graph gr, vector <Scan *> allScans, int nrIt)
   double ret = DBL_MAX;
 
   for(int iteration = 0;
-	 iteration < nrIt && ret > epsilonLUM;
-	 iteration++) {
+      iteration < nrIt && ret > epsilonLUM;
+      iteration++) {
 
-   if (nrIt > 1) cout << "Iteration " << iteration << endl;
-    
+    if (nrIt > 1) cout << "Iteration " << iteration << endl;
 
     // * Calculate X and CX from all Dij and Cij
     int n = (gr.getNrScans() - 1);
@@ -351,8 +361,6 @@ double lum6DEuler::doGraphSlam6D(Graph gr, vector <Scan *> allScans, int nrIt)
 
     delete G;
 
-    //cout << "X done!" << endl;
-
     double sum_position_diff = 0.0;
     
     // Start with second Scan
@@ -361,7 +369,7 @@ double lum6DEuler::doGraphSlam6D(Graph gr, vector <Scan *> allScans, int nrIt)
 #pragma omp parallel for reduction(+:sum_position_diff)
 #endif
     for(int i = 1; i < loop_end; i++){
-	 
+      
       // Now update the Poses
       Matrix Ha = IdentityMatrix(6);
       
@@ -409,12 +417,12 @@ double lum6DEuler::doGraphSlam6D(Graph gr, vector <Scan *> allScans, int nrIt)
       if(!quiet) {
         cout << "Old pose estimate, Scan " << i << endl;
         cout <<  "x: " << allScans[i]->get_rPos()[0]
-       << " y: " << allScans[i]->get_rPos()[1]
-       << " z: " << allScans[i]->get_rPos()[2]
-       << " tx: " << allScans[i]->get_rPosTheta()[0]
-       << " ty: " << allScans[i]->get_rPosTheta()[1]
-       << " tz: " << allScans[i]->get_rPosTheta()[2]
-       << endl;
+             << " y: " << allScans[i]->get_rPos()[1]
+             << " z: " << allScans[i]->get_rPos()[2]
+             << " tx: " << allScans[i]->get_rPosTheta()[0]
+             << " ty: " << allScans[i]->get_rPosTheta()[1]
+             << " tz: " << allScans[i]->get_rPosTheta()[2]
+             << endl;
       }
 
       double rPos[3];
@@ -428,18 +436,18 @@ double lum6DEuler::doGraphSlam6D(Graph gr, vector <Scan *> allScans, int nrIt)
       
       // Update the Pose
       if (i != gr.getNrScans() - 1) {
-	   allScans[i]->transformToEuler(rPos, rPosTheta, Scan::LUM, 1);
-	 } else {
-	   allScans[i]->transformToEuler(rPos, rPosTheta, Scan::LUM, 2);
-	 }
+        allScans[i]->transformToEuler(rPos, rPosTheta, Scan::LUM, 1);
+      } else {
+        allScans[i]->transformToEuler(rPos, rPosTheta, Scan::LUM, 2);
+      }
 
       if(!quiet) {
         cout <<  "x: " << allScans[i]->get_rPos()[0]
-       << " y: " << allScans[i]->get_rPos()[1]
-       << " z: " << allScans[i]->get_rPos()[2]
-       << " tx: " << allScans[i]->get_rPosTheta()[0]
-       << " ty: " << allScans[i]->get_rPosTheta()[1]
-       << " tz: " << allScans[i]->get_rPosTheta()[2] << endl << endl;
+             << " y: " << allScans[i]->get_rPos()[1]
+             << " z: " << allScans[i]->get_rPos()[2]
+             << " tx: " << allScans[i]->get_rPosTheta()[0]
+             << " ty: " << allScans[i]->get_rPosTheta()[1]
+             << " tz: " << allScans[i]->get_rPosTheta()[2] << endl << endl;
       }
 
       double x[3];

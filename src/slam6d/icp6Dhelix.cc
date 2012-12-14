@@ -46,9 +46,9 @@ using namespace NEWMAT;
  * @return Error estimation of the matching (rms)
  */
 double icp6D_HELIX::Align(const vector<PtPair>& Pairs,
-					 double *alignxf,
-					 const double centroid_m[3],
-					 const double centroid_d[3])
+                          double *alignxf,
+                          const double centroid_m[3],
+                          const double centroid_d[3])
 {
   int n = Pairs.size();
 
@@ -125,11 +125,11 @@ double icp6D_HELIX::Align(const vector<PtPair>& Pairs,
   if (!quiet) {
     cout.setf(ios::basefield);
     cout << "HELIX RMS point-to-point error = "
-	    << resetiosflags(ios::adjustfield) << setiosflags(ios::internal)
-	    << resetiosflags(ios::floatfield) << setiosflags(ios::fixed)
-	    << std::setw(10) << std::setprecision(7)
-	    << error
-	    << "  using " << std::setw(6) << n << " points" << endl;
+         << resetiosflags(ios::adjustfield) << setiosflags(ios::internal)
+         << resetiosflags(ios::floatfield) << setiosflags(ios::fixed)
+         << std::setw(10) << std::setprecision(7)
+         << error
+         << "  using " << std::setw(6) << n << " points" << endl;
   }
 
   ccs = matB.i() * bdVec;
@@ -142,8 +142,8 @@ double icp6D_HELIX::Align(const vector<PtPair>& Pairs,
 
 
 void icp6D_HELIX::computeRt(const ColumnVector* ccs,
-					   const int vectorOffset,
-					   double *alignxf)
+                            const int vectorOffset,
+                            double *alignxf)
 {
   ColumnVector c(3), cs(3);
   c(1) = -(*ccs)(vectorOffset + 1);
@@ -154,9 +154,9 @@ void icp6D_HELIX::computeRt(const ColumnVector* ccs,
   cs(3) = -(*ccs)(vectorOffset + 6); 
 
   double CLength = sqrt(c.SumSquare());
-  double rotationCheck = c(1)*cs(1) + c(2)*cs(2) + c(3)*cs(3);    //c.t() * cs;
+  double rotationCheck = c(1)*cs(1) + c(2)*cs(2) + c(3)*cs(3);  //c.t() * cs;
   Matrix R (3,3);
-  double angle = atan(CLength);                //bemerkung: hier minus gesetzt
+  double angle = atan(CLength);               // bemerkung: hier minus gesetzt
    
   ColumnVector g = c / CLength;
   double b0, b1, b2, b3;
