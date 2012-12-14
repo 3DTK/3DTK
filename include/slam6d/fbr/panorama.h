@@ -29,6 +29,7 @@ namespace fbr{
             input scan files(Mat from scan_cv class) in opencv Mat format
    * @param iReflectance panorama image from reflectance data             
    * @param iRange panorama image from range data             
+   * @param iColor panorama image from color data             
    * @param iMap panorama map of 3D cartesian coordinate of input scan
             (same points as iRange and iReflectance)
    * @param extendedIMap 3D vector as panorama map with all the points
@@ -45,6 +46,7 @@ namespace fbr{
     cv::Mat iReflectance;
     cv::Mat iMap;
     cv::Mat iRange;
+    cv::Mat iColor;
     float maxRange;
     vector<vector<vector<cv::Vec3f> > > extendedIMap;
     unsigned int iWidth;
@@ -64,6 +66,7 @@ namespace fbr{
              int y,
              cv::MatIterator_<cv::Vec4f> it,
              double range);
+    void mapColor(int x, int y, cv::MatIterator_<cv::Vec3f> itColor);
   public:
     /**
      * constructor of class panorama
@@ -93,9 +96,10 @@ namespace fbr{
               double param,
               panorama_map_method mapMethod);
     /**
-     * @brief creates the panorama reflectance image and map.
+     * @brief creates the panorama reflectance image and map and color image.
      */
     void createPanorama(cv::Mat scan);
+    void createPanorama(cv::Mat scan, cv::Mat color);
     /**
      * @brief recovers the point cloud from the panorama image and
               range information
@@ -115,6 +119,7 @@ namespace fbr{
     cv::Mat getReflectanceImage();
     cv::Mat getMap();
     cv::Mat getRangeImage();
+    cv::Mat getColorImage();
     vector<vector<vector<cv::Vec3f> > > getExtendedMap();
     panorama_map_method getMapMethod();
     void getDescription();

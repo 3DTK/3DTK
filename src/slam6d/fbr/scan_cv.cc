@@ -40,6 +40,7 @@ namespace fbr{
     }
     cout<<"loading "<<sDir<<" with scan number " <<sNumber<<"."<<endl;
     Scan * source = * Scan::allScans.begin();
+    source->get(DATA_XYZ | DATA_REFLECTANCE | DATA_RGB);
     DataXYZ xyz = source->get("xyz");
     DataReflectance xyz_reflectance = (((DataReflectance)source->get("reflectance")).size() == 0) ?
       source->create("reflectance", sizeof(float)*xyz.size())
@@ -48,18 +49,28 @@ namespace fbr{
       for(unsigned int i = 0; i < xyz.size(); i++)
 	xyz_reflectance[i] = 255;
     }
+    DataRGB xyz_rgb = source->get("rgb");
+    
     nPoints = xyz.size();
+    cv::MatIterator_<cv::Vec4f> it;
     scan.create(nPoints,1,CV_32FC(4));
     scan = cv::Scalar::all(0); 
-    cv::MatIterator_<cv::Vec4f> it;
     it = scan.begin<cv::Vec4f>();
+
+    cv::MatIterator_<cv::Vec3f> itColor;
+    if(xyz_rgb.size() != 0){
+      scanColor.create(nPoints,1,CV_32FC(3));
+      scanColor = cv::Scalar::all(0); 
+      itColor = scanColor.begin<cv::Vec3f>();
+    }
+
     for(unsigned int i = 0; i < nPoints; i++){
       float x, y, z, reflectance;
       x = xyz[i][0];
       y = xyz[i][1];
       z = xyz[i][2];
       reflectance = xyz_reflectance[i];
-      
+           
       //normalize the reflectance                                     
       reflectance += 32;
       reflectance /= 64;
@@ -72,7 +83,13 @@ namespace fbr{
       (*it)[1] = y;
       (*it)[2] = z;
       (*it)[3] = reflectance;
-      
+      if(xyz_rgb.size() != 0){
+	(*itColor)[0] = xyz_rgb[i][2];
+	(*itColor)[1] = xyz_rgb[i][1];
+	(*itColor)[2] = xyz_rgb[i][0];
+	++itColor;
+      }
+
       //finding min and max of z                                      
       if (z  > zMax) zMax = z;
       if (z  < zMin) zMin = z;
@@ -109,6 +126,11 @@ namespace fbr{
   cv::Mat scan_cv::getMatScan()
   {
     return scan;
+  }
+
+  cv::Mat scan_cv::getMatScanColor()
+  {
+    return scanColor;
   }
   
   void scan_cv::getDescription(){

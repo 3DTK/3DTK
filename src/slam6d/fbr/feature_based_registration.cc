@@ -209,6 +209,8 @@ void parssArgs(int argc, char** argv, information& info){
   //info.sScanNumber = atoi(argv[optind+2]);
   if(info.outDir.empty()) info.outDir = info.dir;
   else if(info.outDir.compare(info.outDir.size()-1, 1, "/") != 0) info.outDir += "/";
+  cout<<info.fScanNumber<<endl;
+  cout<<info.sScanNumber<<endl;
 }
 
 void informationDescription(information info){
@@ -311,13 +313,20 @@ int main(int argc, char** argv){
   if(info.verbose >= 2) fScan.getDescription();
   panorama fPanorama (info.iWidth, info.iHeight, info.pMethod, info.nImages, info.pParam);
   if(info.verbose >= 4) info.fPTime = (double)cv::getTickCount();
-  fPanorama.createPanorama(fScan.getMatScan());
+  if((fScan.getMatScanColor()).empty() == 1)
+    fPanorama.createPanorama(fScan.getMatScan());
+  else
+    fPanorama.createPanorama(fScan.getMatScan(), fScan.getMatScanColor());
   if(info.verbose >= 4) info.fPTime = ((double)cv::getTickCount() - info.fPTime)/cv::getTickFrequency();
   if(info.verbose >= 2) fPanorama.getDescription();
   //write panorama to image
   if(info.verbose >= 1){
     out = info.outDir+info.local_time+"_scan"+to_string(info.fScanNumber, 3)+"_"+projectionMethodToString(info.pMethod)+"_"+to_string(info.iWidth)+"x"+to_string(info.iHeight)+".jpg";
     imwrite(out, fPanorama.getReflectanceImage());
+    if((fPanorama.getColorImage()).empty() != 1){
+      out = info.outDir+info.local_time+"_scan"+to_string(info.fScanNumber, 3)+"_"+projectionMethodToString(info.pMethod)+"_"+to_string(info.iWidth)+"x"+to_string(info.iHeight)+"_color.jpg";
+      imwrite(out, fPanorama.getColorImage());
+    }
   }
   feature fFeature;
   if(info.verbose >= 4) info.fFTime = (double)cv::getTickCount();
@@ -342,13 +351,20 @@ int main(int argc, char** argv){
   if(info.verbose >= 2) sScan.getDescription();
   panorama sPanorama (info.iWidth, info.iHeight, info.pMethod, info.nImages, info.pParam);
   if(info.verbose >= 4) info.sPTime = (double)cv::getTickCount();
-  sPanorama.createPanorama(sScan.getMatScan());
+  if((sScan.getMatScanColor()).empty() == 1)
+    sPanorama.createPanorama(sScan.getMatScan());
+  else
+    sPanorama.createPanorama(sScan.getMatScan(), sScan.getMatScanColor());
   if(info.verbose >= 4) info.sPTime = ((double)cv::getTickCount() - info.sPTime)/cv::getTickFrequency();
   if(info.verbose >= 2) sPanorama.getDescription();
   //write panorama to image
   if(info.verbose >= 1){
     out = info.outDir+info.local_time+"_scan"+to_string(info.sScanNumber, 3)+"_"+projectionMethodToString(info.pMethod)+"_"+to_string(info.iWidth)+"x"+to_string(info.iHeight)+".jpg";
     imwrite(out, sPanorama.getReflectanceImage());
+    if((sPanorama.getColorImage()).empty() != 1){
+      out = info.outDir+info.local_time+"_scan"+to_string(info.sScanNumber, 3)+"_"+projectionMethodToString(info.pMethod)+"_"+to_string(info.iWidth)+"x"+to_string(info.iHeight)+"_color.jpg";
+      imwrite(out, sPanorama.getColorImage());
+    }
   }
   feature sFeature;
   if(info.verbose >= 4) info.sFTime = (double)cv::getTickCount();

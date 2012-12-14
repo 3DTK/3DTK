@@ -20,6 +20,7 @@ namespace fbr{
    * @brief class for 3D scans in open CV Mat data type
    * @param sDir name and dir of the input scan file
    * @param scan Mat data type which contains the 3D Scan
+   * @param scanColor Mat data type which contains the color of the 3D Scan
    * @param sNumber input scan number
    * @param nPoints Number of points
    * @param zmax max value in z direction
@@ -29,6 +30,7 @@ namespace fbr{
   class scan_cv{
     string sDir;
     cv::Mat scan;
+    cv::Mat scanColor;
     unsigned int sNumber;
     unsigned int nPoints;
     double zMax;
@@ -57,6 +59,7 @@ namespace fbr{
     double getZMax();
     IOType getScanFormat();
     cv::Mat getMatScan();
+    cv::Mat getMatScanColor();
     void getDescription();
   };
 }
