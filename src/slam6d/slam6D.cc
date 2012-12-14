@@ -1,7 +1,7 @@
 /*
  * slam6D implementation
  *
- * Copyright (C) Andreas Nuechter, Kai Lingemann, Jochen Sprickerhof
+ * Copyright (C) by the 3DTK contributors
  *
  * Released under the GPL version 3.
  *
@@ -17,8 +17,8 @@
  * and -I to match 3D Scans using the global algorithm.
  * 
  * @author Andreas Nuechter. Jacobs University Bremen gGmbH, Germany
- * @author Kai Lingemann. Institute of Computer Science, University of Osnabrueck, Germany.
- * @author Jochen Sprickerhof. Institute of Computer Science, University of Osnabrueck, Germany.
+ * @author Kai Lingemann. Inst. of CS, University of Osnabrueck, Germany.
+ * @author Jochen Sprickerhof. Inst. of CS, University of Osnabrueck, Germany.
  */
 
 #include "slam6d/scan.h"
@@ -101,9 +101,10 @@ void sigSEGVhandler (int v)
          << "  Segmentation fault or Ctrl-C" << endl
          << "# **************************** #" << endl
          << endl;
-    
     // save frames and close scans
-    for(ScanVector::iterator it = Scan::allScans.begin(); it != Scan::allScans.end(); ++it) {
+    for(ScanVector::iterator it = Scan::allScans.begin(); 
+     it != Scan::allScans.end(); 
+     ++it) {
       (*it)->saveFrames();
     }
     cout << "Frames saved." << endl;
@@ -337,18 +338,18 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &rand,
     { "veryquiet",       no_argument,         0,  'Q' },
     { "trustpose",       no_argument,         0,  'p' },
     { "anim",            required_argument,   0,  'A' },
-    { "metascan",        no_argument,         0,  '2' }, // use the long format only
-    { "DlastSLAM",       required_argument,   0,  '4' }, // use the long format only
-    { "epsICP",          required_argument,   0,  '5' }, // use the long format only
-    { "epsSLAM",         required_argument,   0,  '6' }, // use the long format only
-    { "normalshoot-simple",     no_argument,         0,  '7' }, // use the long format only
-    { "point-to-plane-simple",  no_argument,         0,  'z' }, // use the long format only
+    { "metascan",        no_argument,         0,  '2' }, // use the long format
+    { "DlastSLAM",       required_argument,   0,  '4' }, // use the long format
+    { "epsICP",          required_argument,   0,  '5' }, // use the long format
+    { "epsSLAM",         required_argument,   0,  '6' }, // use the long format
+    { "normalshoot-simple", no_argument,      0,  '7' }, // use the long format
+    { "point-to-plane-simple", no_argument,   0,  'z' }, // use the long format
     { "exportAllPoints", no_argument,         0,  '8' },
-    { "distLoop",        required_argument,   0,  '9' }, // use the long format only
-    { "iterLoop",        required_argument,   0,  '1' }, // use the long format only
-    { "graphDist",       required_argument,   0,  '3' }, // use the long format only
+    { "distLoop",        required_argument,   0,  '9' }, // use the long format
+    { "iterLoop",        required_argument,   0,  '1' }, // use the long format
+    { "graphDist",       required_argument,   0,  '3' }, // use the long format
     { "scanserver",      no_argument,         0,  'S' },
-    { 0,           0,   0,   0}                    // needed, cf. getopt.h
+    { 0,  0,   0,   0}                                   // needed, cf. getopt.h
   };
 
   cout << endl;
@@ -421,12 +422,21 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &rand,
       break;
     case 's':
       w_start = atoi(optarg);
-      if (start < 0) { cerr << "Error: Cannot start at a negative scan number.\n"; exit(1); }
+      if (start < 0) { 
+     cerr << "Error: Cannot start at a negative scan number." << endl; 
+     exit(1); 
+      }
       break;
     case 'e':
       w_end = atoi(optarg);
-      if (end < 0)     { cerr << "Error: Cannot end at a negative scan number.\n"; exit(1); }
-      if (end < start) { cerr << "Error: <end> cannot be smaller than <start>.\n"; exit(1); }
+      if (end < 0)     { 
+     cerr << "Error: Cannot end at a negative scan number." << endl; 
+     exit(1); 
+      }
+      if (end < start) { 
+     cerr << "Error: <end> cannot be smaller than <start>." << endl; 
+     exit(1); 
+      }
       break;
     case 'm':
       maxDist = atoi(optarg);
@@ -478,12 +488,12 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &rand,
       break;
     case 'f':
       try {
-	   w_type = formatname_to_io_type(optarg);
-	 } catch (...) { // runtime_error
-	   cerr << "Format " << optarg << " unknown." << endl;
-	   abort();
-	 }
-	 break;
+        w_type = formatname_to_io_type(optarg);
+      } catch (...) { // runtime_error
+        cerr << "Format " << optarg << " unknown." << endl;
+        abort();
+      }
+      break;
     case 'S':
       scanserver = true;
       break;
@@ -528,23 +538,23 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &rand,
  * @param nrIt The number of iterations the global SLAM-algorithm will run
  * @param epsilonSLAM epsilon for global SLAM iteration
  * @param mdml maximal distance match for global SLAM
- * @param mdmll maximal distance match for global SLAM after all scans ar matched
+ * @param mdmll max distance match for global SLAM after all scans are matched
  */
 void matchGraph6Dautomatic(double cldist,
-					  int loopsize,
-					  vector <Scan *> allScans,
-					  icp6D *my_icp6D,
+                           int loopsize,
+                           vector <Scan *> allScans,
+                           icp6D *my_icp6D,
                            bool meta_icp,
-					  int nns_method,
+                           int nns_method,
                            loopSlam6D *my_loopSlam6D,
-					  graphSlam6D *my_graphSlam6D,
-					  int nrIt,
+                           graphSlam6D *my_graphSlam6D,
+                           int nrIt,
                            double epsilonSLAM,
-					  double mdml,
-					  double mdmll,
-					  double graphDist,
+                           double mdml,
+                           double mdmll,
+                           double graphDist,
                            bool &eP,
-					  IOType type)
+                           IOType type)
 {
   double cldist2 = sqr(cldist);
 
@@ -698,10 +708,12 @@ int main(int argc, char **argv)
   signal (SIGSEGV, sigSEGVhandler);
   signal (SIGINT,  sigSEGVhandler);
 
-  cout << "slam6D - A highly efficient SLAM implementation based on scan matching" << endl
+  cout << "slam6D - "
+       << "A highly efficient SLAM implementation based on scan matching"
+       << endl
        << "         with 6 degrees of freedom" << endl
        << "(c) Jacobs University Bremen gGmbH, Germany, since 2009" << endl
-	  << "    University of Osnabrueck, Germany, since 2006" << endl << endl;
+       << "    University of Osnabrueck, Germany, since 2006" << endl << endl;
 
   if (argc <= 1) {
     usage(argv[0]);
@@ -717,8 +729,9 @@ int main(int argc, char **argv)
   bool   veryQuiet  = false;
   int    maxDist    = -1;
   int    minDist    = -1;
-  bool   eP         = true;  // should we extrapolate the pose??
-  bool   meta       = false;  // match against meta scan, or against LAST scan only?
+  bool   eP         = true;   // should we extrapolate the pose??
+  bool   meta       = false;  // match against meta scan,
+                              // or against LAST scan only?
   int    algo       = 1;
   int    mni_lum    = -1;
   double cldist     = 500;
@@ -735,14 +748,14 @@ int main(int argc, char **argv)
   double distLoop   = 700.0;
   int iterLoop      = 100;
   double graphDist  = cldist;
-  int octree       = 0;  // employ randomized octree reduction?
+  int octree       = 0;       // employ randomized octree reduction?
   IOType type    = UOS;
   bool scanserver = false;
   PairingMode pairing_mode = CLOSEST_POINT;
 
   parseArgs(argc, argv, dir, red, rand, mdm, mdml, mdmll, mni, start, end,
             maxDist, minDist, quiet, veryQuiet, eP, meta,
-		  algo, loopSlam6DAlgo, lum6DAlgo, anim,
+            algo, loopSlam6DAlgo, lum6DAlgo, anim,
             mni_lum, net, cldist, clpairs, loopsize, epsilonICP, epsilonSLAM,
             nns_method, exportPts, distLoop, iterLoop, graphDist, octree, type,
             scanserver, pairing_mode);
@@ -758,16 +771,18 @@ int main(int argc, char **argv)
     exit(-1);
   }
   
-  for(ScanVector::iterator it = Scan::allScans.begin(); it != Scan::allScans.end(); ++it) {
+  for(ScanVector::iterator it = Scan::allScans.begin();
+      it != Scan::allScans.end();
+      ++it) {
     Scan* scan = *it;
     scan->setRangeFilter(maxDist, minDist);
     unsigned int types = 0;
     if ((pairing_mode == CLOSEST_POINT_ALONG_NORMAL_SIMPLE) ||
-	   (pairing_mode == CLOSEST_PLANE_SIMPLE)) {
-	 types = PointType::USE_NORMAL;
+        (pairing_mode == CLOSEST_PLANE_SIMPLE)) {
+      types = PointType::USE_NORMAL;
     }
      scan->setReductionParameter(red, octree, PointType(types));
-	scan->setSearchTreeParameter(nns_method);
+     scan->setSearchTreeParameter(nns_method);
   }
   
   icp6Dminimizer *my_icp6Dminimizer = 0;
@@ -814,7 +829,7 @@ int main(int argc, char **argv)
   if (mni_lum == -1 && loopSlam6DAlgo == 0) {
     icp6D *my_icp = 0;
     my_icp = new icp6D(my_icp6Dminimizer, mdm, mni, quiet, meta, rand, eP,
-				   anim, epsilonICP, nns_method);
+                       anim, epsilonICP, nns_method);
 
     // check if CAD matching was selected as type
     if (type == UOS_CAD)
@@ -828,37 +843,46 @@ int main(int argc, char **argv)
     //!!!!!!!!!!!!!!!!!!!!!!!!
     icp6D *my_icp = 0;
     my_icp = new icp6D(my_icp6Dminimizer, mdm, mni, quiet, meta, rand, eP,
-				   anim, epsilonICP, nns_method);
+                       anim, epsilonICP, nns_method);
     my_icp->doICP(Scan::allScans, pairing_mode);
-    graphSlam6D *my_graphSlam6D = new lum6DEuler(my_icp6Dminimizer, mdm, mdml, mni, quiet, meta,
-                                                 rand, eP, anim, epsilonICP, nns_method, epsilonSLAM);
-    my_graphSlam6D->matchGraph6Dautomatic(Scan::allScans, mni_lum, clpairs, loopsize);
-    //!!!!!!!!!!!!!!!!!!!!!!!!		  
+    graphSlam6D *my_graphSlam6D = new lum6DEuler(my_icp6Dminimizer,
+                                                 mdm, mdml, mni, quiet, meta,
+                                                 rand, eP, anim, epsilonICP,
+                                                 nns_method, epsilonSLAM);
+    my_graphSlam6D->matchGraph6Dautomatic(Scan::allScans, mni_lum,
+                                          clpairs, loopsize);
+    //!!!!!!!!!!!!!!!!!!!!!!!!            
   } else {
     graphSlam6D *my_graphSlam6D = 0;
     switch (lum6DAlgo) {
     case 1 :
-      my_graphSlam6D = new lum6DEuler(my_icp6Dminimizer, mdm, mdml, mni, quiet, meta, rand, eP,
-                                      anim, epsilonICP, nns_method, epsilonSLAM);
+      my_graphSlam6D = new lum6DEuler(my_icp6Dminimizer, mdm, mdml, mni,
+                                      quiet, meta, rand, eP,
+                                      anim, epsilonICP, nns_method,
+                                      epsilonSLAM);
       break;
     case 2 :
-      my_graphSlam6D = new lum6DQuat(my_icp6Dminimizer, mdm, mdml, mni, quiet, meta, rand, eP,
+      my_graphSlam6D = new lum6DQuat(my_icp6Dminimizer, mdm, mdml, mni,
+                                     quiet, meta, rand, eP,
                                      anim, epsilonICP, nns_method, epsilonSLAM);
       break;
     case 3 :
-      my_graphSlam6D = new ghelix6DQ2(my_icp6Dminimizer, mdm, mdml, mni, quiet, meta, rand, eP,
-                                      anim, epsilonICP, nns_method, epsilonSLAM);
+      my_graphSlam6D = new ghelix6DQ2(my_icp6Dminimizer, mdm, mdml, mni,
+                                      quiet, meta, rand, eP,
+                                      anim, epsilonICP, nns_method,
+                                      epsilonSLAM);
       break;
     case 4 :
-      my_graphSlam6D = new gapx6D(my_icp6Dminimizer, mdm, mdml, mni, quiet, meta, rand, eP,
+      my_graphSlam6D = new gapx6D(my_icp6Dminimizer, mdm, mdml, mni,
+                                  quiet, meta, rand, eP,
                                   anim, epsilonICP, nns_method, epsilonSLAM);
       break;
     }
     // Construct Network
     if (net != "none") {
       icp6D *my_icp = 0;
-	 my_icp = new icp6D(my_icp6Dminimizer, mdm, mni, quiet, meta, rand, eP,
-					anim, epsilonICP, nns_method);
+      my_icp = new icp6D(my_icp6Dminimizer, mdm, mni, quiet, meta, rand, eP,
+                         anim, epsilonICP, nns_method);
       my_icp->doICP(Scan::allScans, pairing_mode);
 
       Graph* structure;
@@ -872,32 +896,41 @@ int main(int argc, char **argv)
     } else {
       icp6D *my_icp = 0;
       if(algo > 0) {
-	   my_icp = new icp6D(my_icp6Dminimizer, mdm, mni, quiet, meta, rand, eP,
-					  anim, epsilonICP, nns_method);
+        my_icp = new icp6D(my_icp6Dminimizer, mdm, mni, quiet, meta, rand, eP,
+                           anim, epsilonICP, nns_method);
 
         loopSlam6D *my_loopSlam6D = 0;
         switch(loopSlam6DAlgo) {
         case 1:
-          my_loopSlam6D = new elch6Deuler(veryQuiet, my_icp6Dminimizer, distLoop, iterLoop,
-                                          rand, eP, 10, epsilonICP, nns_method);
+          my_loopSlam6D = new elch6Deuler(veryQuiet, my_icp6Dminimizer,
+                                          distLoop, iterLoop,
+                                          rand, eP, 10, epsilonICP,
+                                          nns_method);
           break;
         case 2:
-          my_loopSlam6D = new elch6Dquat(veryQuiet, my_icp6Dminimizer, distLoop, iterLoop,
-                                         rand, eP, 10, epsilonICP, nns_method);
+          my_loopSlam6D = new elch6Dquat(veryQuiet, my_icp6Dminimizer,
+                                         distLoop, iterLoop,
+                                         rand, eP, 10, epsilonICP,
+                                         nns_method);
           break;
         case 3:
-          my_loopSlam6D = new elch6DunitQuat(veryQuiet, my_icp6Dminimizer, distLoop, iterLoop,
-                                             rand, eP, 10, epsilonICP, nns_method);
+          my_loopSlam6D = new elch6DunitQuat(veryQuiet, my_icp6Dminimizer,
+                                             distLoop, iterLoop,
+                                             rand, eP, 10, epsilonICP,
+                                             nns_method);
           break;
         case 4:
-          my_loopSlam6D = new elch6Dslerp(veryQuiet, my_icp6Dminimizer, distLoop, iterLoop,
-                                          rand, eP, 10, epsilonICP, nns_method);
+          my_loopSlam6D = new elch6Dslerp(veryQuiet, my_icp6Dminimizer,
+                                          distLoop, iterLoop,
+                                          rand, eP, 10, epsilonICP,
+                                          nns_method);
           break;
         }
 
         matchGraph6Dautomatic(cldist, loopsize, Scan::allScans, my_icp, meta,
                               nns_method, my_loopSlam6D, my_graphSlam6D,
-                              mni_lum, epsilonSLAM, mdml, mdmll, graphDist, eP, type);
+                              mni_lum, epsilonSLAM, mdml, mdmll, graphDist, eP,
+                              type);
         delete my_icp;
         if(loopSlam6DAlgo > 0) {
           delete my_loopSlam6D;
@@ -921,14 +954,15 @@ int main(int argc, char **argv)
     ofstream redptsout("points.pts");
     for(unsigned int i = 0; i < Scan::allScans.size(); i++) {
       DataXYZ xyz_r(Scan::allScans[i]->get("xyz reduced"));
-      DataNormal normal_r(Scan::allScans[i]->get("normal reduced"));
+      // DataNormal normal_r(Scan::allScans[i]->get("normal reduced"));
       for(unsigned int i = 0; i < xyz_r.size(); ++i) {
-        int r,g,b;
-        r = (int)(normal_r[i][0] * (127.5) + 127.5);
-        g = (int)(normal_r[i][1] * (127.5) + 127.5);
-        b = (int)(fabs(normal_r[i][2]) * (255.0));
+        // int r,g,b;
+        // r = (int)(normal_r[i][0] * (127.5) + 127.5);
+        // g = (int)(normal_r[i][1] * (127.5) + 127.5);
+        // b = (int)(fabs(normal_r[i][2]) * (255.0));
         redptsout << xyz_r[i][0] << ' ' << xyz_r[i][1] << ' ' << xyz_r[i][2]
-                  << ' ' << r << ' ' << g << ' ' << b << '\n';
+        // << ' ' << r << ' ' << g << ' ' << b 
+            << endl;
       }
       redptsout << std::flush;
     }
@@ -938,7 +972,9 @@ int main(int argc, char **argv)
 
   const double* p;
   ofstream redptsout("loopclose.pts");
-  for(ScanVector::iterator it = Scan::allScans.begin(); it != Scan::allScans.end(); ++it)
+  for(ScanVector::iterator it = Scan::allScans.begin(); 
+      it != Scan::allScans.end(); 
+      ++it)
   {
     Scan* scan = *it;
     p = scan->get_rPos();

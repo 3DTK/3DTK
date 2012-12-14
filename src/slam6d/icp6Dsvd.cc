@@ -36,13 +36,13 @@ using namespace NEWMAT;
  * @return Error estimation of the matching (rms)
 */
 double icp6D_SVD::Align(const vector<PtPair>& pairs,
-				    double *alignfx,
-				    const double centroid_m[3],
-				    const double centroid_d[3])
+                        double *alignfx,
+                        const double centroid_m[3],
+                        const double centroid_d[3])
 {
   double error = 0;
   double sum = 0.0;
-	
+     
   // Get centered PtPairs
   double** m = new double*[pairs.size()];
   double** d = new double*[pairs.size()];
@@ -79,7 +79,7 @@ double icp6D_SVD::Align(const vector<PtPair>& pairs,
   Matrix H(3,3), R(3,3);
   for(int j = 0; j < 3; j++){
     for(int k = 0; k < 3; k++){
-      H(j+1, k+1) = 0.0;	
+      H(j+1, k+1) = 0.0;     
     }
   }
   
@@ -132,7 +132,7 @@ double icp6D_SVD::Align(const vector<PtPair>& pairs,
   alignfx[15] = 1;
 
 
-  for(unsigned int i = 0; i <  pairs.size(); i++){
+  for(unsigned int i = 0; i <  pairs.size(); i++) {
     delete [] m[i];
     delete [] d[i];
   }
@@ -153,11 +153,12 @@ double icp6D_SVD::Align(const vector<PtPair>& pairs,
  * @return Error estimation of the matching (rms)
 */
 double icp6D_SVD::Align_Parallel(const int openmp_num_threads, 
-						   const unsigned int n[OPENMP_NUM_THREADS],
-						   const double sum[OPENMP_NUM_THREADS], 
-						   const double centroid_m[OPENMP_NUM_THREADS][3],
-						   const double centroid_d[OPENMP_NUM_THREADS][3], 
-						   const double Si[OPENMP_NUM_THREADS][9], double *alignxf)
+                                const unsigned int n[OPENMP_NUM_THREADS],
+                                const double sum[OPENMP_NUM_THREADS], 
+                                const double centroid_m[OPENMP_NUM_THREADS][3],
+                                const double centroid_d[OPENMP_NUM_THREADS][3], 
+                                const double Si[OPENMP_NUM_THREADS][9],
+                                double *alignxf)
 {
   double s = 0.0;
   double ret;
@@ -206,15 +207,15 @@ double icp6D_SVD::Align_Parallel(const int openmp_num_threads,
   Matrix H(3,3), R(3,3);
   for(int j = 0; j < 3; j++){
     for(int k = 0; k < 3; k++){
-      H(j+1, k+1) = 0.0;	
+      H(j+1, k+1) = 0.0;     
     }
   }
   // formula (5)
   for (int i = 0; i < openmp_num_threads; i++) {
     for(int j = 0; j < 3; j++){
       for(int k = 0; k < 3; k++){
- //       H(j+1, k+1) += Si[i][j*3+k] + n[i] * ((centroid_m[i][j] - cm[j]) * (centroid_d[i][k] - cd[k])) ;
-        H(j+1, k+1) += Si[i][k*3+j] + n[i] * ((centroid_d[i][j] - cd[j]) * (centroid_m[i][k] - cm[k])) ;
+        H(j+1, k+1) += Si[i][k*3+j] +
+          n[i] * ((centroid_d[i][j] - cd[j]) * (centroid_m[i][k] - cm[k])) ;
       }
     }
   }

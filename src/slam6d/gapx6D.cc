@@ -9,9 +9,10 @@
 
 /**
  * @file 
- * @brief The implementation of globally consistent scan matching algorithm by using APX correction
- * @author Andreas Nuechter. Institute of Computer Science, University of Osnabrueck, Germany.
- * @author Jan Elseberg. Institute of Computer Science, University of Osnabrueck, Germany.
+ * @brief The implementation of globally consistent scan matching algorithm
+ *        by using APX correction
+ * @author Andreas Nuechter. Inst. of CS, University of Osnabrueck, Germany.
+ * @author Jan Elseberg. Inst. of CS, University of Osnabrueck, Germany.
  */
 
 #ifdef _MSC_VER
@@ -38,7 +39,8 @@ using namespace NEWMAT;
  *
  * @param my_icp6Dminimizer Pointer to ICP minimization functor
  * @param mdm Maximum PtoP distance to which point pairs are collected for ICP
- * @param max_dist_match Maximum PtoP distance to which point pairs are collected for LUM
+ * @param max_dist_match Maximum PtoP distance to which point pairs are
+ *                        collected for LUM
  * @param max_num_iterations Maximal number of iterations for ICP
  * @param quiet Suspesses all output to std out
  * @param meta Indicates if metascan matching has to be used
@@ -50,13 +52,14 @@ using namespace NEWMAT;
  * @param epsilonLUM Termination criterion for LUM
  */
 gapx6D::gapx6D(icp6Dminimizer *my_icp6Dminimizer,
-			double mdm, double max_dist_match, 
-			int max_num_iterations, bool quiet, bool meta, int rnd,
-			bool eP, int anim, double epsilonICP, int nns_method, double epsilonLUM)
+               double mdm, double max_dist_match, 
+               int max_num_iterations, bool quiet, bool meta, int rnd,
+               bool eP, int anim, double epsilonICP, int nns_method,
+               double epsilonLUM)
   : graphSlam6D(my_icp6Dminimizer,
-			 mdm, max_dist_match,
-			 max_num_iterations, quiet, meta, rnd,
-			 eP, anim, epsilonICP, nns_method, epsilonLUM)
+                mdm, max_dist_match,
+                max_num_iterations, quiet, meta, rnd,
+                eP, anim, epsilonICP, nns_method, epsilonLUM)
 { }
 
 
@@ -70,11 +73,15 @@ gapx6D::~gapx6D()
 
 
 
-double gapx6D::genBAtransForLinkedPair( int firstScanNum, int secondScanNum, 
-							    double *centroids_m, double *centroids_d,
-							    SymmetricMatrix *B, ColumnVector *A, ColumnVector &X)
+double gapx6D::genBAtransForLinkedPair( int firstScanNum,
+                                        int secondScanNum, 
+                                        double *centroids_m,
+                                        double *centroids_d,
+                                        SymmetricMatrix *B,
+                                        ColumnVector *A,
+                                        ColumnVector &X)
 {
-	
+     
   Point cm(centroids_m); 
   Point cd(centroids_d); 
 
@@ -117,12 +124,12 @@ double gapx6D::genBAtransForLinkedPair( int firstScanNum, int secondScanNum,
 #endif
   {
     if(firstScanNum != 0) {
-	 A->Rows((firstScanNum-1)*3+1, (firstScanNum-1)*3+3) -= Ak1;
-	 B->element(firstScanNum -1, firstScanNum  - 1)      += 1;
-	 B->element(firstScanNum -1, secondScanNum - 1)      -= 1;
+      A->Rows((firstScanNum-1)*3+1, (firstScanNum-1)*3+3) -= Ak1;
+      B->element(firstScanNum -1, firstScanNum  - 1)      += 1;
+      B->element(firstScanNum -1, secondScanNum - 1)      -= 1;
     }
     A->Rows((secondScanNum-1)*3+1, (secondScanNum-1)*3+3) += Ak1; 
-    B->element(secondScanNum - 1, secondScanNum - 1)      += 1;	 
+    B->element(secondScanNum - 1, secondScanNum - 1)      += 1;      
   }    // of pragma omp critical
 
   return 1.0;
@@ -131,19 +138,25 @@ double gapx6D::genBAtransForLinkedPair( int firstScanNum, int secondScanNum,
 
 
 /**
- * This function generates the matrices B and Bd that are used for solving B * c = Bd.
+ * This function generates the matrices B and Bd that are used for
+ *   solving B * c = Bd.
  * This function has to be called once for every linked scan-pair.
  * 
  * @param firstScanNum The number of the first scan of the linked scan-pair
  * @param secondScanNum The number of the second scan of the linked scan-pair
  * @param ptpairs Vector that holds all point-pairs for the actual scan-pair
- * @param B Matrix with dimension (6*(number of scans-1)) x (6 * (number of scans-1)) 
+ * @param B Matrix with dimension
+ *          (6*(number of scans-1)) x (6 * (number of scans-1)) 
  * @param Bd Vector with dimension (6*(number of scans-1))
  * @return returns the sum of square distance
  */
-double gapx6D::genBArotForLinkedPair( int firstScanNum, int secondScanNum, vPtPair *ptpairs,
-							  double *centroids_m, double *centroids_d,
-                                     Matrix *B, ColumnVector *A)
+double gapx6D::genBArotForLinkedPair(int firstScanNum,
+                                     int secondScanNum,
+                                     vPtPair *ptpairs,
+                                     double *centroids_m,
+                                     double *centroids_d,
+                                     Matrix *B,
+                                     ColumnVector *A)
 {
   Matrix Mk(3,3), Dk(3,3);
   Matrix MkMkt(3,3), DkDkt(3,3), DkMkt(3,3), MkDkt(3,3);
@@ -200,18 +213,10 @@ double gapx6D::genBArotForLinkedPair( int firstScanNum, int secondScanNum, vPtPa
     p1xp1z = p1x * p1z;
     p1yp1z = p1y * p1z;
 
-    //p2xp1y = p2x * p1y;
-    //p2xp1z = p2x * p1z;
     p2yp1x = p2y * p1x;
-    //p2yp1z = p2y * p1z;
     p2zp1x = p2z * p1x;
     p2zp1y = p2z * p1y;
 
-    /*
-    p1xp2y = p1x * p2y;
-    p1xp2z = p1x * p2z;
-    p1yp2z = p1y * p2z;
-    */
     p1yp2x = p1y * p2x;
     p1zp2x = p1z * p2x;
     p1zp2y = p1z * p2y;
@@ -272,20 +277,34 @@ double gapx6D::genBArotForLinkedPair( int firstScanNum, int secondScanNum, vPtPa
 #ifdef _OPENMP
 #pragma omp critical (enterB)
 #endif
-    {
-	 if(firstScanNum != 0) {
-	   A->Rows((firstScanNum-1)*3+1, (firstScanNum-1)*3+3) += Ak1;
- 	   B->SubMatrix((firstScanNum-1)*3+1,(firstScanNum-1)*3+3, (firstScanNum-1)*3+1,(firstScanNum-1)*3+3) += MkMkt;
+  {
+    if(firstScanNum != 0) {
+      A->Rows((firstScanNum-1)*3+1,
+              (firstScanNum-1)*3+3) += Ak1;
+      B->SubMatrix((firstScanNum-1)*3+1,
+                   (firstScanNum-1)*3+3,
+                   (firstScanNum-1)*3+1,
+                   (firstScanNum-1)*3+3) += MkMkt;
 
- 	   B->SubMatrix((firstScanNum-1)*3+1,(firstScanNum-1)*3+3, (secondScanNum-1)*3+1,(secondScanNum-1)*3+3) +=  DkMkt;
-	   
- 	   B->SubMatrix((secondScanNum-1)*3+1,(secondScanNum-1)*3+3, (firstScanNum-1)*3+1,(firstScanNum-1)*3+3) +=  MkDkt;
-	   
-	 }
-	 A->Rows((secondScanNum-1)*3+1, (secondScanNum-1)*3+3) += Ak2;
-	 B->SubMatrix((secondScanNum-1)*3+1,(secondScanNum-1)*3+3, (secondScanNum-1)*3+1,(secondScanNum-1)*3+3) += DkDkt;
-	 
-    }    // of pragma omp critical
+      B->SubMatrix((firstScanNum-1)*3+1,
+                   (firstScanNum-1)*3+3,
+                   (secondScanNum-1)*3+1,
+                   (secondScanNum-1)*3+3) +=  DkMkt;
+        
+      B->SubMatrix((secondScanNum-1)*3+1,
+                   (secondScanNum-1)*3+3,
+                   (firstScanNum-1)*3+1,
+                   (firstScanNum-1)*3+3) +=  MkDkt;
+        
+    }
+    A->Rows((secondScanNum-1)*3+1,
+            (secondScanNum-1)*3+3) += Ak2;
+    B->SubMatrix((secondScanNum-1)*3+1,
+                 (secondScanNum-1)*3+3,
+                 (secondScanNum-1)*3+1,
+                 (secondScanNum-1)*3+3) += DkDkt;
+      
+  }    // of pragma omp critical
 
   return 1.0;
 }
@@ -314,14 +333,15 @@ double gapx6D::doGraphSlam6D(Graph gr, vector <Scan *> allScans, int nrIt)
   for (int i=0; i < gr.getNrLinks(); i++) {
     int from = gr.getLink(i,0);
     int to = gr.getLink(i,1);
-    // shouldn't be necessary, just in case a (out of date) graph file is loaded:
+    // shouldn't be necessary,
+    // just in case a (out of date) graph file is loaded:
     if (from < (int)allScans.size() && to < (int)allScans.size()) {
-	 out << allScans[from]->get_rPos()[0] << " " 
-	     << allScans[from]->get_rPos()[1] << " " 
-	     << allScans[from]->get_rPos()[2] << endl
-	     << allScans[to  ]->get_rPos()[0] << " " 
-	     << allScans[to  ]->get_rPos()[1] << " " 
-	     << allScans[to  ]->get_rPos()[2] << endl << endl;
+      out << allScans[from]->get_rPos()[0] << " " 
+          << allScans[from]->get_rPos()[1] << " " 
+          << allScans[from]->get_rPos()[2] << endl
+          << allScans[to  ]->get_rPos()[0] << " " 
+          << allScans[to  ]->get_rPos()[1] << " " 
+          << allScans[to  ]->get_rPos()[2] << endl << endl;
     }
   }
   out.close();
@@ -331,9 +351,11 @@ double gapx6D::doGraphSlam6D(Graph gr, vector <Scan *> allScans, int nrIt)
   // the IdentityMatrix to transform some Scans with
   double id[16];
   M4identity(id);
-  
-  vPtPair **ptpairs = 0;                           // Contains sets of point pairs for all links
-  double **centroids_m = 0, **centroids_d = 0;     // Contains centroids for all links
+
+  // Contains sets of point pairs for all links
+  vPtPair **ptpairs = 0;
+  // Contains centroids for all links
+  double **centroids_m = 0, **centroids_d = 0;     
   Matrix B ( 3 * (gr.getNrScans()-1), 3 * (gr.getNrScans()-1) );
   SymmetricMatrix Bt ( gr.getNrScans()-1 ); Bt = 0;
   ColumnVector X( 3*(gr.getNrScans()-1) ); X = 0;
@@ -347,13 +369,14 @@ double gapx6D::doGraphSlam6D(Graph gr, vector <Scan *> allScans, int nrIt)
   double ret = DBL_MAX;
 
   for(int iteration = 0;
-	 iteration < nrIt && ret > epsilonLUM;
-	 iteration++) {
+      iteration < nrIt && ret > epsilonLUM;
+      iteration++) {
     sum_position_diff = 0;
 
     if (nrIt > 1) cout << "Iteration match " << iteration << endl;
     
-    // Transform first scan to zero, otherwise updating poses would yield incorrect values
+    // Transform first scan to zero,
+    // otherwise updating poses would yield incorrect values
     //     if (iteration == 0) {
     //       double* tin = allScans[0]->transMat;
     //       double tout[16];
@@ -375,10 +398,10 @@ double gapx6D::doGraphSlam6D(Graph gr, vector <Scan *> allScans, int nrIt)
     centroids_m = new double *[gr.getNrLinks()];
     centroids_d = new double *[gr.getNrLinks()];
     for (int i = 0; i < gr.getNrLinks(); i++){
-	 centroids_m[i] = new double[3];
-	 centroids_m[i][0] = centroids_m[i][1] = centroids_m[i][2] = 0.0;
-	 centroids_d[i] = new double[3];
-	 centroids_d[i][0] = centroids_d[i][1] = centroids_d[i][2] = 0.0;
+      centroids_m[i] = new double[3];
+      centroids_m[i][0] = centroids_m[i][1] = centroids_m[i][2] = 0.0;
+      centroids_d[i] = new double[3];
+      centroids_d[i][0] = centroids_d[i][1] = centroids_d[i][2] = 0.0;
     }
     ptpairs = new vPtPair*[gr.getNrLinks()];
     for (int i = 0; i < gr.getNrLinks(); i++) {
@@ -403,22 +426,27 @@ double gapx6D::doGraphSlam6D(Graph gr, vector <Scan *> allScans, int nrIt)
 #endif
 
       double dummy_sum;
-		Scan::getPtPairs(ptpairs[i], FirstScan, SecondScan, thread_num,
-					  (int)my_icp->get_rnd(), (int)max_dist_match2_LUM, dummy_sum,
-					  centroids_m[i], centroids_d[i]);
+      Scan::getPtPairs(ptpairs[i], FirstScan, SecondScan, thread_num,
+                       (int)my_icp->get_rnd(), (int)max_dist_match2_LUM, dummy_sum,
+                       centroids_m[i], centroids_d[i]);
 
-	 // faulty network
-	 if (ptpairs[i]->size() <= 1) {
-	   cout << "Error: Link (" << gr.getLink(i,0)
-		   << " - " << gr.getLink(i, 1) << " ) is empty with "
-		   << ptpairs[i]->size() << " Corr. points. iteration = "
-		   << iteration << endl;
-	   //	   exit(1);
+      // faulty network
+      if (ptpairs[i]->size() <= 1) {
+        cout << "Error: Link (" << gr.getLink(i,0)
+             << " - " << gr.getLink(i, 1) << " ) is empty with "
+             << ptpairs[i]->size() << " Corr. points. iteration = "
+             << iteration << endl;
+        //        exit(1);
 
-	 } else
+      } else
 
-	   sum_position_diff += genBArotForLinkedPair( gr.getLink(i,0), gr.getLink(i,1), ptpairs[i],
-										  centroids_m[i], centroids_d[i], &B, &A);
+        sum_position_diff += genBArotForLinkedPair( gr.getLink(i,0),
+                                                    gr.getLink(i,1),
+                                                    ptpairs[i],
+                                                    centroids_m[i],
+                                                    centroids_d[i],
+                                                    &B,
+                                                    &A );
 
     }
     cout << " building rotation matrices done! " << endl;
@@ -429,8 +457,8 @@ double gapx6D::doGraphSlam6D(Graph gr, vector <Scan *> allScans, int nrIt)
     Bt = 0.0;
     A = 0.0;
     for ( int i = 0; i < end_loop; i++) {
-	 genBAtransForLinkedPair( gr.getLink(i,0), gr.getLink(i,1), 
-						 centroids_m[i], centroids_d[i], &Bt, &A, X);
+      genBAtransForLinkedPair( gr.getLink(i,0), gr.getLink(i,1), 
+                               centroids_m[i], centroids_d[i], &Bt, &A, X);
     }
     cout << " building translation matrices done! "<<endl;
     
@@ -445,13 +473,13 @@ double gapx6D::doGraphSlam6D(Graph gr, vector <Scan *> allScans, int nrIt)
 
     // delete ptPairs
     for (int i = 0; i < gr.getNrLinks(); i++) {
-	 ptpairs[i]->clear();
-	 delete (ptpairs[i]);
+      ptpairs[i]->clear();
+      delete (ptpairs[i]);
     }
     // delete centroids
     for (int i = 0; i < gr.getNrLinks(); i++){
-	 delete [] centroids_m[i];
-	 delete [] centroids_d[i];
+      delete [] centroids_m[i];
+      delete [] centroids_d[i];
     }
 
     ColumnVector t0(3), t(3), tlast(3);
@@ -460,42 +488,47 @@ double gapx6D::doGraphSlam6D(Graph gr, vector <Scan *> allScans, int nrIt)
     double alignxf[16];
 
     for(int i = 1; i < loop_end; i++)
-	 {
-	   vectorOffset = (i-1) * 3;
+      {
+        vectorOffset = (i-1) * 3;
 
-	   // Interpret results
-	   double x[3]  = { X(vectorOffset + 1), X(vectorOffset + 2), X(vectorOffset + 3) };
-	   double dx[3] = { T(vectorOffset + 1), T(vectorOffset + 2), T(vectorOffset + 3) };
+        // Interpret results
+        double x[3]  = { X(vectorOffset + 1),
+                         X(vectorOffset + 2),
+                         X(vectorOffset + 3) };
+        double dx[3] = { T(vectorOffset + 1),
+                         T(vectorOffset + 2),
+                         T(vectorOffset + 3) };
 
-	   icp6D_APX::computeRt(x, dx, alignxf);
-			 
-	   // Update the Pose
-	   cout << "Old pose estimate, Scan " << i << endl;
-	   cout <<  "x: " << allScans[i]->get_rPos()[0]
-		   << " y: " << allScans[i]->get_rPos()[1]
-		   << " z: " << allScans[i]->get_rPos()[2]
-		   << " tx: " << allScans[i]->get_rPosTheta()[0]
-		   << " ty: " << allScans[i]->get_rPosTheta()[1]
-		   << " tz: " << allScans[i]->get_rPosTheta()[2]
-		   << endl;
-	   
-	   if (i < loop_end - 1) {
-		allScans[i]->transform(alignxf, Scan::LUM, 1);
-	   } else {
-		allScans[i]->transform(alignxf, Scan::LUM, 2);
-	   }
-	   
-	   cout <<  "x: " << allScans[i]->get_rPos()[0]
-		   << " y: " << allScans[i]->get_rPos()[1]
-		   << " z: " << allScans[i]->get_rPos()[2]
-		   << " tx: " << allScans[i]->get_rPosTheta()[0]
-		   << " ty: " << allScans[i]->get_rPosTheta()[1]
-		   << " tz: " << allScans[i]->get_rPosTheta()[2] << endl << endl;
+        icp6D_APX::computeRt(x, dx, alignxf);
+                
+        // Update the Pose
+        cout << "Old pose estimate, Scan " << i << endl;
+        cout <<  "x: " << allScans[i]->get_rPos()[0]
+             << " y: " << allScans[i]->get_rPos()[1]
+             << " z: " << allScans[i]->get_rPos()[2]
+             << " tx: " << allScans[i]->get_rPosTheta()[0]
+             << " ty: " << allScans[i]->get_rPosTheta()[1]
+             << " tz: " << allScans[i]->get_rPosTheta()[2]
+             << endl;
+        
+        if (i < loop_end - 1) {
+          allScans[i]->transform(alignxf, Scan::LUM, 1);
+        } else {
+          allScans[i]->transform(alignxf, Scan::LUM, 2);
+        }
+        
+        cout <<  "x: " << allScans[i]->get_rPos()[0]
+             << " y: " << allScans[i]->get_rPos()[1]
+             << " z: " << allScans[i]->get_rPos()[2]
+             << " tx: " << allScans[i]->get_rPosTheta()[0]
+             << " ty: " << allScans[i]->get_rPosTheta()[1]
+             << " tz: " << allScans[i]->get_rPosTheta()[2] << endl << endl;
 
-	   sum_position_diff += Len(dx);	 
+        sum_position_diff += Len(dx);      
 
-	 }
-    cout << "Sum of Position differences = " << sum_position_diff << endl << endl;
+      }
+    cout << "Sum of Position differences = " << sum_position_diff
+         << endl << endl;
     ret = (sum_position_diff / (double)gr.getNrScans());
   }
 

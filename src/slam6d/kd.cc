@@ -1,7 +1,7 @@
 /*
  * kd implementation
  *
- * Copyright (C) Andreas Nuechter, Kai Lingemann, Thomas Escher
+ * Copyright (C) by the 3DTK contributors
  *
  * Released under the GPL version 3.
  *
@@ -64,8 +64,8 @@ KDtree::~KDtree()
  * @return Pointer to the closest point
  */
 double *KDtree::FindClosest(double *_p,
-					   double maxdist2,
-					   int threadNum) const
+                            double maxdist2,
+                            int threadNum) const
 {
   params[threadNum].closest = 0;
   params[threadNum].closest_d2 = maxdist2;
@@ -75,9 +75,9 @@ double *KDtree::FindClosest(double *_p,
 }
 
 double *KDtree::FindClosestAlongDir(double *_p,
-							 double *_dir,
-							 double maxdist2,
-							 int threadNum) const
+                                    double *_dir,
+                                    double maxdist2,
+                                    int threadNum) const
 {
   params[threadNum].closest = NULL;
   params[threadNum].closest_d2 = maxdist2;
@@ -88,8 +88,8 @@ double *KDtree::FindClosestAlongDir(double *_p,
 }
 
 vector<Point> KDtree::kNearestNeighbors(double *_p,
-								int _k,
-								int threadNum) const
+                                        int _k,
+                                        int threadNum) const
 {
   vector<Point> result;
   params[threadNum].closest = 0;
@@ -97,8 +97,10 @@ vector<Point> KDtree::kNearestNeighbors(double *_p,
   params[threadNum].k = _k;
 
   // todo fix this C/C++ mixture
-  params[threadNum].closest_neighbors = (double **)calloc(_k, sizeof(double *) );
-  params[threadNum].distances = (double *)calloc(_k, sizeof(double));
+  params[threadNum].closest_neighbors = (double **)calloc(_k,
+                                                          sizeof(double *) );
+  params[threadNum].distances = (double *)calloc(_k,
+                                                 sizeof(double));
 
   _KNNSearch(Void(), threadNum);
 
@@ -106,8 +108,8 @@ vector<Point> KDtree::kNearestNeighbors(double *_p,
 
   for (int i = 0; i < _k; i++) {
     result.push_back(Point(params[threadNum].closest_neighbors[i][0],
-					  params[threadNum].closest_neighbors[i][1],
-					  params[threadNum].closest_neighbors[i][2]));
+                           params[threadNum].closest_neighbors[i][1],
+                           params[threadNum].closest_neighbors[i][2]));
   }
   
   free ( params[threadNum].closest_neighbors);
@@ -116,8 +118,8 @@ vector<Point> KDtree::kNearestNeighbors(double *_p,
 }
 
 vector<Point> KDtree::fixedRangeSearch(double *_p,
-							    double sqRad2,
-							    int threadNum) const
+                                       double sqRad2,
+                                       int threadNum) const
 {
   vector<Point> result;
   params[threadNum].closest = 0;
@@ -127,8 +129,8 @@ vector<Point> KDtree::fixedRangeSearch(double *_p,
   
   for (size_t i = 0; i < params[threadNum].range_neighbors.size(); i++) {
     result.push_back(Point(params[threadNum].range_neighbors[i][0],
-					  params[threadNum].range_neighbors[i][1],
-					  params[threadNum].range_neighbors[i][2]));
+                           params[threadNum].range_neighbors[i][1],
+                           params[threadNum].range_neighbors[i][2]));
   }
   
   return result;

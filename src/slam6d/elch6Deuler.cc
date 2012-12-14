@@ -9,7 +9,7 @@
 
 /**
  * @file ELCH implementation using Euler angles
- * @author Jochen Sprickerhof. Institute of Computer Science, University of Osnabrueck, Germany.
+ * @author Jochen Sprickerhof. Inst. of CS, University of Osnabrueck, Germany.
  */
 
 
@@ -44,7 +44,10 @@ using namespace NEWMAT;
  * @param last indes of last laser scan in the loop
  * @param g graph for loop optimization
  */
-void elch6Deuler::close_loop(const vector <Scan *> &allScans, int first, int last, graph_t &g)
+void elch6Deuler::close_loop(const vector <Scan *> &allScans,
+                             int first,
+                             int last,
+                             graph_t &g)
 {
   int n = num_vertices(g);
   graph_t grb[6];
@@ -53,7 +56,12 @@ void elch6Deuler::close_loop(const vector <Scan *> &allScans, int first, int las
   for(tie(ei, ei_end) = edges(g); ei != ei_end; ei++) {
     int from = source(*ei, g);
     int to = target(*ei, g);
-    lum6DEuler::covarianceEuler(allScans[from], allScans[to], my_icp6D->get_nns_method(), my_icp6D->get_rnd(), my_icp6D->get_max_dist_match2(), &C);
+    lum6DEuler::covarianceEuler(allScans[from],
+                                allScans[to],
+                                my_icp6D->get_nns_method(),
+                                my_icp6D->get_rnd(),
+                                my_icp6D->get_max_dist_match2(),
+                                &C);
     C = C.i();
     for(int j = 0; j < 6; j++) {
       add_edge(from, to, fabs(C(j + 1, j + 1)), grb[j]);
@@ -70,12 +78,12 @@ void elch6Deuler::close_loop(const vector <Scan *> &allScans, int first, int las
   meta_start.push_back(allScans[first]);
   meta_start.push_back(allScans[first + 1]);
   meta_start.push_back(allScans[first + 2]);
-  MetaScan *start = new MetaScan(meta_start, false, false);
+  MetaScan *start = new MetaScan(meta_start, false);
   vector <Scan *> meta_end;
   meta_end.push_back(allScans[last - 2]);
   meta_end.push_back(allScans[last - 1]);
   meta_end.push_back(allScans[last]);
-  MetaScan *end = new MetaScan(meta_end, false, false);
+  MetaScan *end = new MetaScan(meta_end, false);
 
   for(int i = last - 2; i <= last; i++) {
     for(int j = 0; j < 6; j++) {
@@ -104,19 +112,27 @@ void elch6Deuler::close_loop(const vector <Scan *> &allScans, int first, int las
   delta[5] = allScans[last]->get_rPosTheta()[2] - delta[5];
 
   if(!quiet) {
-    cout << "Delta: " << delta[0] << " " << delta[1] << " " << delta[2] << " " << delta[3] << " " << delta[4] << " " << delta[5] << endl;
+    cout << "Delta: " << delta[0] << " " << delta[1] << " " << delta[2]
+         << " " << delta[3] << " " << delta[4] << " " << delta[5] << endl;
   }
 
   double rPos[3], rPosTheta[3];
   for(int i = 1; i < n; i++) {
-    rPos[0] = allScans[i]->get_rPos()[0] + delta[0] * (weights[0][i] - weights[0][0]);
-    rPos[1] = allScans[i]->get_rPos()[1] + delta[1] * (weights[1][i] - weights[1][0]);
-    rPos[2] = allScans[i]->get_rPos()[2] + delta[2] * (weights[2][i] - weights[2][0]);
-    rPosTheta[0] = allScans[i]->get_rPosTheta()[0] + delta[3] * (weights[3][i] - weights[3][0]);
-    rPosTheta[1] = allScans[i]->get_rPosTheta()[1] + delta[4] * (weights[4][i] - weights[4][0]);
-    rPosTheta[2] = allScans[i]->get_rPosTheta()[2] + delta[5] * (weights[5][i] - weights[5][0]);
+    rPos[0] = allScans[i]->get_rPos()[0] +
+      delta[0] * (weights[0][i] - weights[0][0]);
+    rPos[1] = allScans[i]->get_rPos()[1] +
+      delta[1] * (weights[1][i] - weights[1][0]);
+    rPos[2] = allScans[i]->get_rPos()[2] +
+      delta[2] * (weights[2][i] - weights[2][0]);
+    rPosTheta[0] = allScans[i]->get_rPosTheta()[0] +
+      delta[3] * (weights[3][i] - weights[3][0]);
+    rPosTheta[1] = allScans[i]->get_rPosTheta()[1] +
+      delta[4] * (weights[4][i] - weights[4][0]);
+    rPosTheta[2] = allScans[i]->get_rPosTheta()[2] +
+      delta[5] * (weights[5][i] - weights[5][0]);
 
-    allScans[i]->transformToEuler(rPos, rPosTheta, Scan::ELCH, i == n-1 ? 2 : 1);
+    allScans[i]->transformToEuler(rPos, rPosTheta,
+                                  Scan::ELCH, i == n-1 ? 2 : 1);
   }
 
   for(int i = 0; i < 6; i++) {

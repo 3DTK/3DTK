@@ -615,7 +615,7 @@ void setResetView(int origin) {
 #else
     ((Show_BOctTree<sfloat>*)octpts[0])->getCenter(center);
 #endif
-    VTrans(MetaMatrix[0].back(), center, center_transformed);
+    transform3(MetaMatrix[0].back(), center, center_transformed);
     RVX = -center_transformed[0];
     RVY = -center_transformed[1];
     RVZ = -center_transformed[2];
@@ -641,7 +641,7 @@ void setResetView(int origin) {
     for (unsigned int k = 0; k < 3; ++k) {
       centroid[k] /= (double)points.size();
     }
-    VTrans(MetaMatrix[i].back(), centroid, centroid_transformed);
+    transform3(MetaMatrix[i].back(), centroid, centroid_transformed);
     for (unsigned int k = 0; k < 3; ++k) {
 	 CoM[k] += centroid_transformed[k];
     }

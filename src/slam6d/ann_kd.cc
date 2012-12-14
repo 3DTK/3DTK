@@ -41,15 +41,6 @@ using std::swap;
  */
 ANNtree::ANNtree(PointerArray<double>&_pts, int n)
 {
-  /*
-  pts = new double*[n];
-  for(unsigned int i = 0; i < n; i++) {
-    pts[i] = new double[3];
-    pts[i][0] = _pts.get()[i][0];
-    pts[i][1] = _pts.get()[i][1];
-    pts[i][2] = _pts.get()[i][2];
-  }
-  */
   pts = new double*[n];
   double* tpts = new double[3*n];
   for(int i = 0, j = 0; i < n; i++) {
@@ -59,7 +50,8 @@ ANNtree::ANNtree(PointerArray<double>&_pts, int n)
     tpts[j++] = _pts.get()[i][2];
   }
 
-  annkd = new ANNkd_tree(pts, n, 3, 1, ANN_KD_SUGGEST); // links to the constructor of ANNkd_tree
+  // links to the constructor of ANNkd_tree
+  annkd = new ANNkd_tree(pts, n, 3, 1, ANN_KD_SUGGEST); 
   cout << "ANNkd_tree was generated with " << n << " points" << endl;
   nn = new ANNdist[1];
   nn_idx = new ANNidx[1];    

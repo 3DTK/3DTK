@@ -1,7 +1,7 @@
 /*
  * graphSlam6D implementation
  *
- * Copyright (C) Dorit Borrmann, Jan Elseberg, Kai Lingemann, Andreas Nuechter
+ * Copyright (C) by the 3DTK contributors
  *
  * Released under the GPL version 3.
  *
@@ -11,10 +11,10 @@
 /**
  * @file 
  * @brief The implementation of globally consistent scan matching algorithm
- * @author Dorit Borrman. Institute of Computer Science, University of Osnabrueck, Germany.
- * @author Jan Elseberg. Institute of Computer Science, University of Osnabrueck, Germany.
- * @author Kai Lingemann. Institute of Computer Science, University of Osnabrueck, Germany.
- * @author Andreas Nuechter. Institute of Computer Science, University of Osnabrueck, Germany.
+ * @author Dorit Borrman. Inst. of CS, University of Osnabrueck, Germany.
+ * @author Jan Elseberg. Inst. of CS, University of Osnabrueck, Germany.
+ * @author Kai Lingemann. Inst. of CS, University of Osnabrueck, Germany.
+ * @author Andreas Nuechter. Inst. of CS, University of Osnabrueck, Germany.
  */
 
 #ifdef _MSC_VER
@@ -38,7 +38,8 @@ using namespace NEWMAT;
  *
  * @param my_icp6Dminimizer Pointer to ICP minimization functor
  * @param mdm Maximum PtoP distance to which point pairs are collected for ICP
- * @param max_dist_match Maximum PtoP distance to which point pairs are collected for LUM
+ * @param max_dist_match Maximum PtoP distance to which point pairs are
+                         collected for LUM
  * @param max_num_iterations Maximal number of iterations for ICP
  * @param quiet Suspesses all output to std out
  * @param meta Indicates if metascan matching has to be used
@@ -50,9 +51,9 @@ using namespace NEWMAT;
  * @param epsilonLUM Termination criterion for LUM
  */
 graphSlam6D::graphSlam6D(icp6Dminimizer *my_icp6Dminimizer,
-					double mdm, double max_dist_match, 
-					int max_num_iterations, bool quiet, bool meta, int rnd,
-					bool eP, int anim, double epsilonICP, int nns_method, double epsilonLUM)
+                         double mdm, double max_dist_match, 
+                         int max_num_iterations, bool quiet, bool meta, int rnd,
+                         bool eP, int anim, double epsilonICP, int nns_method, double epsilonLUM)
 {
   this->nns_method = nns_method;
   this->quiet = quiet;
@@ -62,13 +63,14 @@ graphSlam6D::graphSlam6D(icp6Dminimizer *my_icp6Dminimizer,
   ctime = 0;
 
   this->my_icp = new icp6D(my_icp6Dminimizer, mdm, max_num_iterations,
-					  quiet, meta, rnd, eP, anim, epsilonICP, nns_method);
+                           quiet, meta, rnd, eP, anim, epsilonICP, nns_method);
 }
 
 graphSlam6D::~graphSlam6D()
  {
    cout << "Time spent in the SLAM backend:" << ctime << endl;
  }
+
 /**
  * This function is used to match a set of laser scans with any minimally
  * connected Graph, using the globally consistent LUM-algorithm in 3D.
@@ -78,7 +80,10 @@ graphSlam6D::~graphSlam6D()
  * @param clpairs minimal number of points aximal distance for closing loops
  * @param loopsize minimal loop size
  */
-void graphSlam6D::matchGraph6Dautomatic(vector <Scan *> allScans, int nrIt, int clpairs, int loopsize)
+void graphSlam6D::matchGraph6Dautomatic(vector <Scan *> allScans,
+                                        int nrIt,
+                                        int clpairs,
+                                        int loopsize)
 {
   // the IdentityMatrix to transform some Scans with
   double id[16];
@@ -129,7 +134,8 @@ void graphSlam6D::matchGraph6Dautomatic(vector <Scan *> allScans, int nrIt, int 
 }
 
 
-Graph *graphSlam6D::computeGraph6Dautomatic(vector <Scan *> allScans, int clpairs) 
+Graph *graphSlam6D::computeGraph6Dautomatic(vector <Scan *> allScans,
+                                            int clpairs) 
 {
   // the IdentityMatrix to transform some Scans with
   double id[16];
@@ -188,16 +194,16 @@ void graphSlam6D::writeMatrixPGM(const Matrix &G)
   string mf = "matrix" + to_string(matrixnum,4) + ".pgm";
   ofstream matrixout(mf.c_str());
   matrixout << "P2" << endl
-		  << "# CREATOR slam6D (c) Andreas Nuechter, 05/2007" << endl
-		  << n << " " << n << endl
-		  << 255 << endl;
+            << "# CREATOR slam6D (c) Andreas Nuechter, 05/2007" << endl
+            << n << " " << n << endl
+            << 255 << endl;
   for (int i = 0; i < n; i++) {
     for (int j = 0; j < n; j++) {
-	  if (G.element(i, j) > 0.001) {
-	    matrixout << 0 << " ";
-	  } else {
-	    matrixout << 255 << " ";
-	  }
+       if (G.element(i, j) > 0.001) {
+         matrixout << 0 << " ";
+       } else {
+         matrixout << 255 << " ";
+       }
     }
     matrixout << endl;
   }
@@ -259,7 +265,7 @@ ColumnVector graphSlam6D::solveCholesky(const Matrix &G, const ColumnVector &B)
   for (int i = 0; i < n; i++) {
     A[i] = new double[n];
     for (int j = 0; j < n; j++) {
-	 A[i][j] = G.element(i, j);
+      A[i][j] = G.element(i, j);
     }
     C[i] = B.element(i);
   }
@@ -294,7 +300,8 @@ ColumnVector graphSlam6D::solveCholesky(const Matrix &G, const ColumnVector &B)
  * @param G symmetric, positive definite Matrix, thus invertable
  * @param B column vector
  */
-ColumnVector graphSlam6D::solveSparseCholesky(const Matrix &G, const ColumnVector &B)
+ColumnVector graphSlam6D::solveSparseCholesky(const Matrix &G,
+                                              const ColumnVector &B)
 {
 
   long starttime = GetCurrentTimeInMilliSec();
@@ -313,14 +320,14 @@ ColumnVector graphSlam6D::solveSparseCholesky(const Matrix &G, const ColumnVecto
   double *x = new double[n];
   for (int i = 0; i < n; i++) {
     for (int j = 0; j < n; j++) {
-	 if (fabs(G.element(i, j)) > 0.00001) {
-	   cs_entry (T, i, j, G.element(i, j));
-	 }
+      if (fabs(G.element(i, j)) > 0.00001) {
+        cs_entry (T, i, j, G.element(i, j));
+      }
     }
     x[i] = B.element(i);
   }
   A = cs_triplet (T);
-  cs_dropzeros (A) ;			// drop zero entries
+  cs_dropzeros (A) ;               // drop zero entries
   cs_cholsol (A, x, 1) ;
   // copy values back  
   for (int i = 0; i < n; i++) {
@@ -336,7 +343,8 @@ ColumnVector graphSlam6D::solveSparseCholesky(const Matrix &G, const ColumnVecto
   return X;
 }
 
-ColumnVector graphSlam6D::solveSparseCholesky(GraphMatrix *G, const ColumnVector &B)
+ColumnVector graphSlam6D::solveSparseCholesky(GraphMatrix *G,
+                                              const ColumnVector &B)
 {
 
   long starttime = GetCurrentTimeInMilliSec();
@@ -354,7 +362,7 @@ ColumnVector graphSlam6D::solveSparseCholesky(GraphMatrix *G, const ColumnVector
   }
   G->convertToCS(T);
   A = cs_triplet (T);
-  cs_dropzeros (A) ;			// drop zero entries
+  cs_dropzeros (A) ;               // drop zero entries
 //  cs_print(T, 0);
   cs_cholsol (A, x, 1) ;
   // copy values back  
@@ -378,7 +386,8 @@ ColumnVector graphSlam6D::solveSparseCholesky(GraphMatrix *G, const ColumnVector
  * @param G invertable Matrix
  * @param B column vector
  */
-ColumnVector graphSlam6D::solveSparseQR(const Matrix &G, const ColumnVector &B)
+ColumnVector graphSlam6D::solveSparseQR(const Matrix &G,
+                                        const ColumnVector &B)
 {
   
 #ifdef WRITE_MATRIX_PGM
@@ -392,14 +401,14 @@ ColumnVector graphSlam6D::solveSparseQR(const Matrix &G, const ColumnVector &B)
   double *x = new double[n];
   for (int i = 0; i < n; i++) {
     for (int j = 0; j < n; j++) {
-	 if (fabs(G.element(i, j)) > 0.00001) {
-	   cs_entry (T, i, j, G.element(i, j));
-	 }
+      if (fabs(G.element(i, j)) > 0.00001) {
+        cs_entry (T, i, j, G.element(i, j));
+      }
     }
     x[i] = B.element(i);
   }
   A = cs_triplet (T);
-  cs_dropzeros (A) ;			// drop zero entries
+  cs_dropzeros (A) ;               // drop zero entries
   int order = 3;                   // for qr-ordering
   cs_qrsol ( A, x, order) ;
   // copy values back  
@@ -419,7 +428,10 @@ void graphSlam6D::set_mdmll(double mdmll) {
 }
 
 
-void GraphMatrix::add(const unsigned int i, const unsigned int j, Matrix &Cij) {
+void GraphMatrix::add(const unsigned int i,
+                      const unsigned int j,
+                      Matrix &Cij)
+{
   uipair ui(i,j);
   it = matrix.find( ui );
   if (it != matrix.end()) {
@@ -431,7 +443,9 @@ void GraphMatrix::add(const unsigned int i, const unsigned int j, Matrix &Cij) {
   }
 }
 
-void GraphMatrix::subtract(const unsigned int i, const  unsigned int j,Matrix &Cij) {
+void GraphMatrix::subtract(const unsigned int i,
+                           const  unsigned int j,
+                           Matrix &Cij) {
   uipair ui(i,j);
   it = matrix.find( ui );
   if (it != matrix.end()) {
@@ -448,7 +462,8 @@ void GraphMatrix::print() {
   for ( it = matrix.begin() ; it != matrix.end(); it++ ) {
     uimpair uim = *it;
     uipair ui = uim.first;
-    cout << ui.first << " " << ui.second << " :" << endl << *uim.second << endl;
+    cout << ui.first << " " << ui.second << " :"
+         << endl << *uim.second << endl;
   }
 }
 
@@ -468,7 +483,6 @@ void GraphMatrix::convertToCS(cs *T) {
     Matrix *C = it->second;
     a = it->first.first;
     b = it->first.second;
-//    cout << a << " " << b << " " << C << endl;
     imin = a*6;
     jmin = b*6;
 

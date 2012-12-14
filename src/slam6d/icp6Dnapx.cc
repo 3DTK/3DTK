@@ -7,7 +7,6 @@
  *
  */
 
-
 /**
  *  @file 
  *  @brief Implementation of the ICP error function minimization via
@@ -36,9 +35,9 @@ using std::setiosflags;
  * @return Error estimation of the matching (rms)
  */
 double icp6D_NAPX::Align(const vector<PtPair>& Pairs,
-					double *alignxf,
-					const double centroid_m[3],
-					const double centroid_d[3])
+                         double *alignxf,
+                         const double centroid_m[3],
+                         const double centroid_d[3])
 {
   int n = Pairs.size();
 
@@ -62,10 +61,10 @@ double icp6D_NAPX::Align(const vector<PtPair>& Pairs,
     norm[2] = Pairs[i].p2.nz;
 
     double d = (p1[0] - p2[0]) * norm[0]
-	 + (p1[1] - p2[1]) * norm[1]
-	 + (p1[2] - p2[2]) * norm[2];
+      + (p1[1] - p2[1]) * norm[1]
+      + (p1[2] - p2[2]) * norm[2];
     double p2c[3] = { p2[0] - centroid_d[0], p2[1] - centroid_d[1],
-				  p2[2] - centroid_d[2] };
+                      p2[2] - centroid_d[2] };
     double c[3];
     Cross(p2c, norm, c);
 
@@ -103,14 +102,13 @@ double icp6D_NAPX::Align(const vector<PtPair>& Pairs,
   if (!quiet) {
     cout.setf(ios::basefield);
     cout << "APX RMS point-to-plane error = "
-	    << resetiosflags(ios::adjustfield) << setiosflags(ios::internal)
-	    << resetiosflags(ios::floatfield) << setiosflags(ios::fixed)
-	    << std::setw(10) << std::setprecision(7)
-	    << error
-	    << "  using " << std::setw(6) << (int)Pairs.size()
-	    << " points" << endl;
+         << resetiosflags(ios::adjustfield) << setiosflags(ios::internal)
+         << resetiosflags(ios::floatfield) << setiosflags(ios::fixed)
+         << std::setw(10) << std::setprecision(7)
+         << error
+         << "  using " << std::setw(6) << (int)Pairs.size()
+         << " points" << endl;
   }
-
 
   // Solve eqns
   double diag[6];
