@@ -33,6 +33,9 @@ namespace fbr{
     iReflectance = cv::Scalar::all(0);
     iRange.create(iHeight, iWidth, CV_32FC(1));
     iRange = cv::Scalar::all(0);
+    iColor.create(iHeight, iWidth, CV_32FC(3));
+    iColor = cv::Scalar::all(0);
+
     mapMethod = mMethod;
   }
 
@@ -76,11 +79,11 @@ namespace fbr{
 
     // range
     iRange.at<float>(y,x) = (float)range;
-
+    
     if (maxRange < (float)range)
 	 maxRange = (float)range;
 
-    //a dding the point with max distance
+    // adding the point with max distance
     if (mapMethod == FARTHEST) {
       if (iRange.at<float>(y,x) < range) {
         iMap.at<cv::Vec3f>(y,x)[0] = (*it)[0]; // x
@@ -97,7 +100,21 @@ namespace fbr{
     }
   }
 
+  void panorama::mapColor(int x, int y, cv::MatIterator_<cv::Vec3f> itColor){
+    // rgb
+    iColor.at<cv::Vec3f>(y,x)[0] = (*itColor)[0];//r
+    iColor.at<cv::Vec3f>(y,x)[1] = (*itColor)[1];//g
+    iColor.at<cv::Vec3f>(y,x)[2] = (*itColor)[2];//b
+  }
+
   void panorama::createPanorama(cv::Mat scan) {
+    cout<<"createPanorma with one input"<<endl;
+    cv::Mat color;
+    cout<<color.empty()<<endl;
+    createPanorama(scan, color);
+  }
+
+  void panorama::createPanorama(cv::Mat scan, cv::Mat color){
 
     //EQUIRECTANGULAR projection
     if(pMethod == EQUIRECTANGULAR){
@@ -110,7 +127,10 @@ namespace fbr{
       int heightMax = iHeight - 1;
       
       cv::MatIterator_<cv::Vec4f> it, end; 
-      
+      cv::MatIterator_<cv::Vec3f> itColor;
+      if(color.empty() == 0)
+	itColor = color.begin<cv::Vec3f>();
+
       for( it = scan.begin<cv::Vec4f>(), end = scan.end<cv::Vec4f>(); it != end; ++it){
 	double kart[3], polar[3], phi, theta, range;
 	kart[0] = (*it)[2]/100;
@@ -142,32 +162,40 @@ namespace fbr{
 	
 	//create the iReflectance iRange and map
 	map(x, y, it, range);
+	//create the iColor
+	if(color.empty() == 0){
+	  mapColor(x, y, itColor);
+	  ++itColor;
+	}
       }
     }
 
     //CONIC projection
     if(pMethod == CONIC){
       // set up maximum latitude and longitude angles of the robot 
-			double MIN_VERT_ANGLE = MIN_ANGLE * M_PI / 180.0, MAX_VERT_ANGLE = MAX_ANGLE * M_PI / 180.0,
-             MIN_HORIZ_ANGLE = -M_PI, MAX_HORIZ_ANGLE = M_PI;
+      double MIN_VERT_ANGLE = MIN_ANGLE * M_PI / 180.0, MAX_VERT_ANGLE = MAX_ANGLE * M_PI / 180.0,
+	MIN_HORIZ_ANGLE = -M_PI, MAX_HORIZ_ANGLE = M_PI;
       // set up initial parameters according to MathWorld: http://mathworld.wolfram.com/AlbersEqual-AreaConicProjection.html
       double Lat0 = 0., Long0 = 0.;
       double Phi1 = -40. * M_PI / 180.0, Phi2 = 60 * M_PI / 180.0;
       double n = (sin(Phi1) + sin(Phi2)) / 2.;
       double C = sqr(cos(Phi1)) + 2 * n * sin(Phi1);
       double Rho0 = sqrt(C - 2 * n * sin(Lat0)) / n;
-			// set up max values for x and y and add the longitude to x axis and latitude to y axis
-			double xmax = (1./n * sqrt(C - 2*n*sin( MIN_VERT_ANGLE )) ) * sin(n * (MAX_HORIZ_ANGLE - Long0));
-			double xmin = (1./n * sqrt(C - 2*n*sin( MIN_VERT_ANGLE )) ) * sin(n * (MIN_HORIZ_ANGLE - Long0));
+      // set up max values for x and y and add the longitude to x axis and latitude to y axis
+      double xmax = (1./n * sqrt(C - 2*n*sin( MIN_VERT_ANGLE )) ) * sin(n * (MAX_HORIZ_ANGLE - Long0));
+      double xmin = (1./n * sqrt(C - 2*n*sin( MIN_VERT_ANGLE )) ) * sin(n * (MIN_HORIZ_ANGLE - Long0));
       double xFactor = (double) iWidth / ( xmax - xmin );
       int widthMax = iWidth - 1;
-			double ymin = Rho0 - (1./n * sqrt(C - 2*n*sin(MIN_VERT_ANGLE)) ) * cos(n * ( 0. - Long0 ));
-			double ymax = Rho0 - (1./n * sqrt(C - 2*n*sin(MAX_VERT_ANGLE)) ) * cos(n * (MAX_HORIZ_ANGLE - Long0 ));
+      double ymin = Rho0 - (1./n * sqrt(C - 2*n*sin(MIN_VERT_ANGLE)) ) * cos(n * ( 0. - Long0 ));
+      double ymax = Rho0 - (1./n * sqrt(C - 2*n*sin(MAX_VERT_ANGLE)) ) * cos(n * (MAX_HORIZ_ANGLE - Long0 ));
       double yFactor = (double) iHeight / ( ymax - ymin );
       //shift all the values to positive points on image 
       int heightMax = iHeight - 1;
       cv::MatIterator_<cv::Vec4f> it, end; 
-
+      cv::MatIterator_<cv::Vec3f> itColor;
+      if(color.empty() == 0)
+	itColor = color.begin<cv::Vec3f>();
+      
       for( it = scan.begin<cv::Vec4f>(), end = scan.end<cv::Vec4f>(); it != end; ++it){
         double kart[3], polar[3], phi, theta, range;
         kart[0] = (*it)[2]/100;
@@ -188,7 +216,7 @@ namespace fbr{
         theta *= -1;
         theta *= M_PI / 180.0;
 
-				// add minimum x position as an offset
+	// add minimum x position as an offset
         int x = (int) ( xFactor * (sqrt(C - 2 * n * sin( theta) ) / n * sin(n * (phi - Long0)) + fabs(xmin) ) );
         if (x < 0) x = 0;
         if (x > widthMax) x = widthMax;
@@ -200,6 +228,11 @@ namespace fbr{
         if (y > heightMax) y = heightMax;
         //create the iReflectance iRange and map
         map(x, y, it, range);
+	//create the iColor
+	if(color.empty() == 0){
+	  mapColor(x, y, itColor);
+	  ++itColor;
+	}
       }
     }
     
@@ -214,7 +247,10 @@ namespace fbr{
       int heightMax = iHeight - 1;
       
       cv::MatIterator_<cv::Vec4f> it, end; 
-      
+      cv::MatIterator_<cv::Vec3f> itColor;
+      if(color.empty() == 0)
+	itColor = color.begin<cv::Vec3f>();
+
       for( it = scan.begin<cv::Vec4f>(), end = scan.end<cv::Vec4f>(); it != end; ++it){
 	double kart[3], polar[3], phi, theta, range;
 	kart[0] = (*it)[2]/100;
@@ -243,6 +279,11 @@ namespace fbr{
 	
 	//create the iReflectance iRange and map
 	map(x, y, it, range);
+    	//create the iColor
+	if(color.empty() == 0){
+	  mapColor(x, y, itColor);
+	  ++itColor;
+	}
       }
     }
     
@@ -256,7 +297,10 @@ namespace fbr{
       int heightMax = iHeight - 1;
       
       cv::MatIterator_<cv::Vec4f> it, end; 
-      
+      cv::MatIterator_<cv::Vec3f> itColor;
+      if(color.empty() == 0)
+	itColor = color.begin<cv::Vec3f>();
+
       for( it = scan.begin<cv::Vec4f>(), end = scan.end<cv::Vec4f>(); it != end; ++it){
 	double kart[3], polar[3], phi, theta, range;
 	kart[0] = (*it)[2]/100;
@@ -285,6 +329,11 @@ namespace fbr{
 	
 	//create the iReflectance iRange and map
 	map(x, y, it, range);
+      	//create the iColor
+	if(color.empty() == 0){
+	  mapColor(x, y, itColor);
+	  ++itColor;
+	}
       }
     }
     
@@ -302,7 +351,10 @@ namespace fbr{
       
       //go through all points 
       cv::MatIterator_<cv::Vec4f> it, end; 
-      
+      cv::MatIterator_<cv::Vec3f> itColor;
+      if(color.empty() == 0)
+	itColor = color.begin<cv::Vec3f>();
+
       for( it = scan.begin<cv::Vec4f>(), end = scan.end<cv::Vec4f>(); it != end; ++it){
 	double kart[3], polar[3], phi, theta, range;
 	kart[0] = (*it)[2]/100;
@@ -358,6 +410,11 @@ namespace fbr{
 	    
 	    //create the iReflectance iRange and map
 	    map(x, y, it, range);
+	    //create the iColor
+	    if(color.empty() == 0){
+	      mapColor(x, y, itColor);
+	      ++itColor;
+	    }
 	  }
 	}
       }
@@ -377,7 +434,10 @@ namespace fbr{
       p1 = 0;
       
       cv::MatIterator_<cv::Vec4f> it, end; 
-         
+      cv::MatIterator_<cv::Vec3f> itColor;
+      if(color.empty() == 0)
+	itColor = color.begin<cv::Vec3f>();
+   
       for( it = scan.begin<cv::Vec4f>(), end = scan.end<cv::Vec4f>(); it != end; ++it){
 	double kart[3], polar[3], phi, theta, range;
 	kart[0] = (*it)[2]/100;
@@ -434,6 +494,11 @@ namespace fbr{
 		    
 	    //create the iReflectance iRange and map
 	    map(x, y, it, range);
+	    //create the iColor
+	    if(color.empty() == 0){
+	      mapColor(x, y, itColor);
+	      ++itColor;
+	    }
 	  }
 	}
       }
@@ -455,7 +520,10 @@ namespace fbr{
       
       //go through all points
       cv::MatIterator_<cv::Vec4f> it, end; 
-         
+      cv::MatIterator_<cv::Vec3f> itColor;
+      if(color.empty() == 0)
+	itColor = color.begin<cv::Vec3f>();
+   
       for( it = scan.begin<cv::Vec4f>(), end = scan.end<cv::Vec4f>(); it != end; ++it){
 	double kart[3], polar[3], phi, theta, range;
 	kart[0] = (*it)[2]/100;
@@ -512,6 +580,11 @@ namespace fbr{
 	    
 	    //create the iReflectance iRange and map
 	    map(x, y, it, range);
+	    //create the iColor
+	    if(color.empty() == 0){
+	      mapColor(x, y, itColor);
+	      ++itColor;
+	    }
 	  }
 	}
       }
@@ -531,7 +604,10 @@ namespace fbr{
       int heightMax = iHeight - 1;
       
       cv::MatIterator_<cv::Vec4f> it, end; 
-         
+      cv::MatIterator_<cv::Vec3f> itColor;
+      if(color.empty() == 0)
+	itColor = color.begin<cv::Vec3f>();
+   
       for( it = scan.begin<cv::Vec4f>(), end = scan.end<cv::Vec4f>(); it != end; ++it){
 	double kart[3], polar[3], phi, theta, range;
 	kart[0] = (*it)[2]/100;
@@ -561,18 +637,23 @@ namespace fbr{
 	
 	//create the iReflectance iRange and map
 	map(x, y, it, range);
+      	//create the iColor
+	if(color.empty() == 0){
+	  mapColor(x, y, itColor);
+	  ++itColor;
+	}
       }
     }
   }
 
   void panorama::recoverPointCloud(const cv::Mat& range_image,
-          cv::Mat& reflectance_image, vector<cv::Vec4f> &reduced_points) {
-      if (range_image.cols != reflectance_image.cols
-              || range_image.rows != reflectance_image.rows) {
-          cerr << "range image and reflectance image have different geometries - using empty range image" << endl;
-          reflectance_image.create(range_image.size(), CV_8U);
-          reflectance_image = cv::Scalar::all(0);
-      }
+				   cv::Mat& reflectance_image, vector<cv::Vec4f> &reduced_points) {
+    if (range_image.cols != reflectance_image.cols
+	|| range_image.rows != reflectance_image.rows) {
+      cerr << "range image and reflectance image have different geometries - using empty range image" << endl;
+      reflectance_image.create(range_image.size(), CV_8U);
+      reflectance_image = cv::Scalar::all(0);
+    }
 
     //recover from EQUIRECTANGULAR projection
     if(pMethod == EQUIRECTANGULAR) {
@@ -597,15 +678,16 @@ namespace fbr{
           theta += 90.0;
           theta *= M_PI / 180.0;
           double polar[3] = { theta, phi, range }, cartesian[3] = {0., 0., 0.}; 
-        	toCartesian(polar, cartesian);
-          if( fabs(cartesian[0]) < 1e-5 && fabs(cartesian[1]) < 1e-5 && fabs(cartesian[2]) < 1e-5) {
+	  toCartesian(polar, cartesian);
+         
+	  if( fabs(cartesian[0]) < 1e-5 && fabs(cartesian[1]) < 1e-5 && fabs(cartesian[2]) < 1e-5) {
             if (first_seen) first_seen = false;
             else continue;
           }
           reduced_points.push_back(cv::Vec4f(-100.0*cartesian[1],
-                      100.0*cartesian[2],
-                      100.0*cartesian[0],
-                      reflectance));
+					     100.0*cartesian[2],
+					     100.0*cartesian[0],
+					     reflectance));
         }
       }
     }
@@ -633,15 +715,16 @@ namespace fbr{
           theta += 90.0;
           theta *= M_PI / 180.0;
           double polar[3] = { theta, phi, range }, cartesian[3] = {0., 0., 0.}; 
-        	toCartesian(polar, cartesian);
+	  toCartesian(polar, cartesian);
+
           if( fabs(cartesian[0]) < 1e-5 && fabs(cartesian[1]) < 1e-5 && fabs(cartesian[2]) < 1e-5) {
             if (first_seen) first_seen = false;
             else continue;
           }
           reduced_points.push_back(cv::Vec4f(-100.0*cartesian[1],
-                      100.0*cartesian[2],
-                      100.0*cartesian[0],
-                      reflectance));
+					     100.0*cartesian[2],
+					     100.0*cartesian[0],
+					     reflectance));
         }
       }
     }
@@ -668,36 +751,37 @@ namespace fbr{
           theta += 90.0;
           theta *= M_PI / 180.0;
           double polar[3] = { theta, phi, range }, cartesian[3] = {0., 0., 0.}; 
-        	toCartesian(polar, cartesian);
+	  toCartesian(polar, cartesian);
+
           if( fabs(cartesian[0]) < 1e-5 && fabs(cartesian[1]) < 1e-5 && fabs(cartesian[2]) < 1e-5) {
             if (first_seen) first_seen = false;
             else continue;
           }
           reduced_points.push_back(cv::Vec4f(-100.0*cartesian[1],
-                      100.0*cartesian[2],
-                      100.0*cartesian[0],
-                      reflectance));
+					     100.0*cartesian[2],
+					     100.0*cartesian[0],
+					     reflectance));
         }
       }
     }
 
     //recover from CONIC projection
     if(pMethod == CONIC) {
-       // set up maximum latitude and longitude angles of the robot 
-			double MIN_VERT_ANGLE = MIN_ANGLE * M_PI / 180.0, MAX_VERT_ANGLE = MAX_ANGLE * M_PI / 180.0,
-             MIN_HORIZ_ANGLE = -M_PI, MAX_HORIZ_ANGLE = M_PI;
+      // set up maximum latitude and longitude angles of the robot 
+      double MIN_VERT_ANGLE = MIN_ANGLE * M_PI / 180.0, MAX_VERT_ANGLE = MAX_ANGLE * M_PI / 180.0,
+	MIN_HORIZ_ANGLE = -M_PI, MAX_HORIZ_ANGLE = M_PI;
       // set up initial parameters according to MathWorld: http://mathworld.wolfram.com/AlbersEqual-AreaConicProjection.html
       double Lat0 = 0., Long0 = 0.;
       double Phi1 = -40. * M_PI / 180.0, Phi2 = 60 * M_PI / 180.0;
       double n = (sin(Phi1) + sin(Phi2)) / 2.;
       double C = sqr(cos(Phi1)) + 2 * n * sin(Phi1);
       double Rho0 = sqrt(C - 2 * n * sin(Lat0)) / n;
-			// set up max values for x and y and add the longitude to x axis and latitude to y axis
-			double xmax = (1./n * sqrt(C - 2*n*sin( MIN_VERT_ANGLE )) ) * sin(n * (MAX_HORIZ_ANGLE - Long0));
-			double xmin = (1./n * sqrt(C - 2*n*sin( MIN_VERT_ANGLE )) ) * sin(n * (MIN_HORIZ_ANGLE - Long0));
+      // set up max values for x and y and add the longitude to x axis and latitude to y axis
+      double xmax = (1./n * sqrt(C - 2*n*sin( MIN_VERT_ANGLE )) ) * sin(n * (MAX_HORIZ_ANGLE - Long0));
+      double xmin = (1./n * sqrt(C - 2*n*sin( MIN_VERT_ANGLE )) ) * sin(n * (MIN_HORIZ_ANGLE - Long0));
       double xFactor = (double) range_image.size().width / ( xmax - xmin );
-			double ymin = Rho0 - (1./n * sqrt(C - 2*n*sin(MIN_VERT_ANGLE)) ) * cos(n * ( 0. - Long0 ));
-			double ymax = Rho0 - (1./n * sqrt(C - 2*n*sin(MAX_VERT_ANGLE)) ) * cos(n * (MAX_HORIZ_ANGLE - Long0 ));
+      double ymin = Rho0 - (1./n * sqrt(C - 2*n*sin(MIN_VERT_ANGLE)) ) * cos(n * ( 0. - Long0 ));
+      double ymax = Rho0 - (1./n * sqrt(C - 2*n*sin(MAX_VERT_ANGLE)) ) * cos(n * (MAX_HORIZ_ANGLE - Long0 ));
       double yFactor = (double) range_image.size().height / ( ymax - ymin );
       int heightMax = range_image.size().height - 1;
 
@@ -720,16 +804,17 @@ namespace fbr{
           theta *= M_PI / 180.0;
 
           double polar[3] = { theta, phi, range }, cartesian[3] = {0., 0., 0.}; 
-        	toCartesian(polar, cartesian);
+	  toCartesian(polar, cartesian);
+
           //if ( std::isnan(cartesian[0]) || std::isnan(cartesian[1]) || std::isnan(cartesian[2]) ) continue;
           if( fabs(cartesian[0]) < 1e-5 && fabs(cartesian[1]) < 1e-5 && fabs(cartesian[2]) < 1e-5) {
             if (first_seen) first_seen = false;
             else continue;
           }
           reduced_points.push_back(cv::Vec4f(-100.0*cartesian[1],
-                      100.0*cartesian[2],
-                      100.0*cartesian[0],
-                      reflectance));
+					     100.0*cartesian[2],
+					     100.0*cartesian[0],
+					     reflectance));
         }
       }
     }
@@ -770,6 +855,10 @@ namespace fbr{
   cv::Mat panorama::getRangeImage(){
     return iRange;
   }
+
+  cv::Mat panorama::getColorImage(){
+    return iColor;
+  }
   
   vector<vector<vector<cv::Vec3f> > > panorama::getExtendedMap(){
     return extendedIMap;
@@ -781,10 +870,11 @@ namespace fbr{
 
   void panorama::getDescription(){
     cout << "panorama created with width: " << iWidth << ", and height: "
-	    << iHeight << ", and projection method: " << projectionMethodToString(pMethod)
-	    << ", number of images: " << nImages << ", projection param: " << pParam << "."
-	    << endl;
+	 << iHeight << ", and projection method: " << projectionMethodToString(pMethod)
+	 << ", number of images: " << nImages << ", projection param: " << pParam << "."
+	 << endl;
     cout << endl;
   }
+
 }
 
