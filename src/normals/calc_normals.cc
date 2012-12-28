@@ -298,6 +298,7 @@ int main(int argc, char** argv)
                              points,
                              fPanorama.getRangeImage(),
                              fPanorama.getMaxRange(),
+                             rPos,
                              fPanorama.getExtendedMap());
     }
 

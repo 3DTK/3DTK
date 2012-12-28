@@ -56,6 +56,7 @@ void calculateNormalsFAST(vector<Point> &normals,
                           vector<Point> &points,
                           const cv::Mat &img,
                           const float max,
+					 const double _rPos[3],
                           const vector< vector< vector <cv::Vec3f> > >
                           &extendedMap);
 
