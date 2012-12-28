@@ -36,10 +36,10 @@ using namespace std;
 /////////////NORMALS USING AKNN METHOD ////////////////
 ///////////////////////////////////////////////////////
 void calculateNormalsApxKNN(vector<Point> &normals,
-					   vector<Point> &points,
-					   int k,
-					   const double _rPos[3],
-					   double eps)
+                            vector<Point> &points,
+                            int k,
+                            const double _rPos[3],
+                            double eps)
 {
   int nr_neighbors = k;
 
@@ -117,11 +117,11 @@ void calculateNormalsApxKNN(vector<Point> &normals,
 /////////////NORMALS USING ADAPTIVE AKNN METHOD ////////////////
 ////////////////////////////////////////////////////////////////
 void calculateNormalsAdaptiveApxKNN(vector<Point> &normals,
-							 vector<Point> &points,
-							 int kmin,
-							 int kmax,
-							 const double _rPos[3],
-							 double eps)
+                                    vector<Point> &points,
+                                    int kmin,
+                                    int kmax,
+                                    const double _rPos[3],
+                                    double eps)
 {
   ColumnVector rPos(3);
   for (int i = 0; i < 3; ++i)
@@ -217,9 +217,9 @@ void calculateNormalsAdaptiveApxKNN(vector<Point> &normals,
 /////////////NORMALS USING AKNN METHOD ////////////////
 ///////////////////////////////////////////////////////
 void calculateNormalsKNN(vector<Point> &normals,
-					vector<Point> &points,
-					int k,
-					const double _rPos[3] )
+                         vector<Point> &points,
+                         int k,
+                         const double _rPos[3] )
 {
   int nr_neighbors = k;
 
@@ -241,8 +241,8 @@ void calculateNormalsKNN(vector<Point> &normals,
     double p[3] = { pa[i][0], pa[i][1], pa[i][2] };
     
     vector<Point> temp = t.kNearestNeighbors(p,
-									nr_neighbors,
-									numeric_limits<double>::max());
+                                             nr_neighbors,
+                                             numeric_limits<double>::max());
     nr_neighbors = temp.size();
     
     Point mean(0.0,0.0,0.0);
@@ -251,11 +251,11 @@ void calculateNormalsKNN(vector<Point> &normals,
     Matrix U(3,3);
     DiagonalMatrix D(3);
 
-    // calculate mean for all the points	    	
+    // calculate mean for all the points              
     for (int j = 0; j < nr_neighbors; ++j) {
-	 mean.x += temp[j].x;
-	 mean.y += temp[j].y;
-	 mean.z += temp[j].z;
+      mean.x += temp[j].x;
+      mean.y += temp[j].y;
+      mean.z += temp[j].z;
     }
     mean.x /= nr_neighbors;
     mean.y /= nr_neighbors;
@@ -263,9 +263,9 @@ void calculateNormalsKNN(vector<Point> &normals,
 
     // calculate covariance = A for all the points
     for (int i = 0; i < nr_neighbors; ++i) {
-	 X(i+1, 1) = temp[i].x - mean.x;
-	 X(i+1, 2) = temp[i].y - mean.y;
-	 X(i+1, 3) = temp[i].z - mean.z;
+      X(i+1, 1) = temp[i].x - mean.x;
+      X(i+1, 2) = temp[i].y - mean.y;
+      X(i+1, 3) = temp[i].z - mean.z;
     }
     
     A << 1.0/nr_neighbors * X.t() * X;
@@ -285,10 +285,10 @@ void calculateNormalsKNN(vector<Point> &normals,
     point_vector = point_vector / point_vector.NormFrobenius();
     Real angle = (n.t() * point_vector).AsScalar();
     if (angle < 0) {
-	 n *= -1.0;
+      n *= -1.0;
     }
     n = n / n.NormFrobenius();
-    normals.push_back(Point(n(1), n(2), n(3)));  	
+    normals.push_back(Point(n(1), n(2), n(3)));       
   }
 
   for (size_t i = 0; i < points.size(); ++i) {
@@ -303,16 +303,16 @@ void calculateNormalsKNN(vector<Point> &normals,
 /////////////NORMALS USING ADAPTIVE AKNN METHOD ////////////////
 ////////////////////////////////////////////////////////////////
 void calculateNormalsAdaptiveKNN(vector<Point> &normals,
-						   vector<Point> &points,
-						   int kmin,
-						   int kmax,
-						   const double _rPos[3])
+                                 vector<Point> &points,
+                                 int kmin,
+                                 int kmax,
+                                 const double _rPos[3])
 {
   ColumnVector rPos(3);
   for (int i = 0; i < 3; ++i)
     rPos(i+1) = _rPos[i];
   
-  int nr_neighbors;	
+  int nr_neighbors;     
 
   double** pa = new double*[points.size()];
   for (size_t i = 0; i < points.size(); ++i) {
@@ -325,57 +325,57 @@ void calculateNormalsAdaptiveKNN(vector<Point> &normals,
   KDtree t(pa, points.size());
 
   Point mean(0.0,0.0,0.0);
-  double e1, e2, e3;	
-		
+  double e1, e2, e3;     
+          
   for (size_t i=0; i<points.size(); ++i) {
     Matrix U(3,3);
 
     double p[3] = { pa[i][0], pa[i][1], pa[i][2] };
     
     for(int kidx = kmin; kidx < kmax; kidx++) {
-	 nr_neighbors = kidx + 1;
+      nr_neighbors = kidx + 1;
 
-	 vector<Point> temp = t.kNearestNeighbors(p,
-									  nr_neighbors,
-									  numeric_limits<double>::max());
-	 nr_neighbors = temp.size();
-	 
-	 mean.x = mean.y = mean.z = 0.0;
-	 // calculate mean for all the points	    	
-	 for (int j=0; j<nr_neighbors; ++j) {
-	   mean.x += temp[j].x;
-	   mean.y += temp[j].y;
-	   mean.z += temp[j].z;
-	 }
-	 mean.x /= nr_neighbors;
-	 mean.y /= nr_neighbors;
-	 mean.z /= nr_neighbors;
+      vector<Point> temp = t.kNearestNeighbors(p,
+                                               nr_neighbors,
+                                               numeric_limits<double>::max());
+      nr_neighbors = temp.size();
+      
+      mean.x = mean.y = mean.z = 0.0;
+      // calculate mean for all the points              
+      for (int j=0; j<nr_neighbors; ++j) {
+        mean.x += temp[j].x;
+        mean.y += temp[j].y;
+        mean.z += temp[j].z;
+      }
+      mean.x /= nr_neighbors;
+      mean.y /= nr_neighbors;
+      mean.z /= nr_neighbors;
 
-	 Matrix X(nr_neighbors,3);
-	 SymmetricMatrix A(3);
-	 DiagonalMatrix D(3);
+      Matrix X(nr_neighbors,3);
+      SymmetricMatrix A(3);
+      DiagonalMatrix D(3);
 
-	 // calculate covariance = A for all the points
-	 for (int j = 0; j < nr_neighbors; ++j) {
-	   X(j+1, 1) = temp[j].x - mean.x;
-	   X(j+1, 2) = temp[j].y - mean.y;
-	   X(j+1, 3) = temp[j].z - mean.z;
-	 }
-			
-	 A << 1.0/nr_neighbors * X.t() * X;
-			
-	 EigenValues(A, D, U);
+      // calculate covariance = A for all the points
+      for (int j = 0; j < nr_neighbors; ++j) {
+        X(j+1, 1) = temp[j].x - mean.x;
+        X(j+1, 2) = temp[j].y - mean.y;
+        X(j+1, 3) = temp[j].z - mean.z;
+      }
+               
+      A << 1.0/nr_neighbors * X.t() * X;
+               
+      EigenValues(A, D, U);
 
-	 e1 = D(1);
-	 e2 = D(2);
-	 e3 = D(3);
-		
-	 // We take the particular k if the second maximum eigen value 
-	 // is at least 25 percent of the maximum eigen value
-	 if ((e1 > 0.25 * e2) && (fabs(1.0 - (double)e2/(double)e3) < 0.25)) 
-	   break;
+      e1 = D(1);
+      e2 = D(2);
+      e3 = D(3);
+          
+      // We take the particular k if the second maximum eigen value 
+      // is at least 25 percent of the maximum eigen value
+      if ((e1 > 0.25 * e2) && (fabs(1.0 - (double)e2/(double)e3) < 0.25)) 
+        break;
     }
-	 
+      
     // normal = eigenvector corresponding to lowest 
     // eigen value that is the 1rd column of matrix U
     ColumnVector n(3);
@@ -389,7 +389,7 @@ void calculateNormalsAdaptiveKNN(vector<Point> &normals,
     point_vector = point_vector / point_vector.NormFrobenius();
     Real angle = (n.t() * point_vector).AsScalar();
     if (angle < 0) {
-	 n *= -1.0;
+      n *= -1.0;
     }
     n = n / n.NormFrobenius();
     normals.push_back(Point(n(1), n(2), n(3)));  
@@ -409,7 +409,7 @@ void calculateNormalsAdaptiveKNN(vector<Point> &normals,
 void calculateNormalsPANORAMA(vector<Point> &normals,
                               vector<Point> &points,
                               const vector< vector< vector< cv::Vec3f > > >
-						  extendedMap,
+                                extendedMap,
                               const double _rPos[3])
 {
   ColumnVector rPos(3);
@@ -449,7 +449,7 @@ void calculateNormalsPANORAMA(vector<Point> &normals,
       cv::Vec3f p = extendedMap[i][j][0];
 
       // if no or too few neighbors point is found in the 4-neighboring pixels
-	 // then normal is set to zero
+      // then normal is set to zero
       if (nr_neighbors < 3)
       {
         points.push_back(Point(p[0], p[1], p[2]));
@@ -515,13 +515,18 @@ void calculateNormalsPANORAMA(vector<Point> &normals,
 //////FAST NORMALS USING PANORAMA EQUIRECTANGULAR RANGE IMAGE ///////////
 /////////////////////////////////////////////////////////////////////////
 void calculateNormalsFAST(vector<Point> &normals,
-					 vector<Point> &points,
-					 const cv::Mat &img,
-					 const float max,
-					 const vector< vector< vector <cv::Vec3f> > >
+                          vector<Point> &points,
+                          const cv::Mat &img,
+                          const float max,
+                          const double _rPos[3],
+                          const vector< vector< vector <cv::Vec3f> > >
                           &extendedMap)
 {
 
+  ColumnVector rPos(3);
+  for (int i = 0; i < 3; ++i)
+    rPos(i+1) = _rPos[i];
+  
   //!!!!!!!!!!
 
   int height = extendedMap.size();
@@ -529,11 +534,12 @@ void calculateNormalsFAST(vector<Point> &normals,
   
   ofstream human_pgm("image.range1", ios::out);
 
-  human_pgm << "P2\n" << width << " " << height << "\n" << (int)(max*100) << "\n";
+  human_pgm << "P2\n" << width << " " << height
+            << "\n" << (int)(max*100) << "\n";
   
   for (int i = 0; i < height; i++) {
     for (int j = width-1; j >= 0; j--) {
-	 human_pgm << (float)(img.at<float>(i,j)*100) << " ";
+      human_pgm << (float)(img.at<float>(i,j)*100) << " ";
     }
     human_pgm << endl;
   }
@@ -545,100 +551,113 @@ void calculateNormalsFAST(vector<Point> &normals,
   int nr_points = 0;
   for (size_t i = 0; i < extendedMap.size(); i++) {
     for (size_t j = 0; j < extendedMap[0].size(); j++) {
-	 double theta, phi, rho;
-	 double dRdTheta, dRdPhi;
-	 double n[3], m;
-	 nr_points = extendedMap[i][j].size();
-	 if (nr_points == 0 ) continue;
-	 
-	 for (int k = 0; k < nr_points; k++) {
-	   cv::Vec3f p = extendedMap[i][j][k];
+      double theta, phi, rho;
+      double dRdTheta, dRdPhi;
+      double n[3]; //, m;
+      nr_points = extendedMap[i][j].size();
+      if (nr_points == 0 ) continue;
+      
+      for (int k = 0; k < nr_points; k++) {
+        cv::Vec3f p = extendedMap[i][j][k];
 
-	   swap(p[1],p[2]);
-	   p[1]*=-1;
-	   
-	   double p_cart[3], p_polar[3];
-	   p_cart[0] = (double)(p[0]);
-	   p_cart[1] = (double)(p[1]);
-	   p_cart[2] = (double)(p[2]);
+        swap(p[1],p[2]);
+        p[1]*=-1;
+        
+        double p_cart[3];//, p_polar[3];
+        p_cart[0] = (double)(p[0]);
+        p_cart[1] = (double)(p[1]);
+        p_cart[2] = (double)(p[2]);
 
-	   static const double deg2rad = 3.1415 / 180.0;
-	   rho = sqrt(sqr(p_cart[0]) + sqr(p_cart[1]) + sqr(p_cart[2]));
-	   phi = acos(p_cart[2]/rho) - 30.0 * deg2rad;
-	   theta = atan2(p_cart[1], p_cart[0]) + 180.0 * deg2rad;
-	   	   
-	   /*
-		toPolar(p_cart, p_polar);
+        static const double deg2rad = 3.1415 / 180.0;
+        rho = sqrt(sqr(p_cart[0]) + sqr(p_cart[1]) + sqr(p_cart[2]));
+        phi = acos(p_cart[2]/rho) - 30.0 * deg2rad;
+        theta = atan2(p_cart[1], p_cart[0]) + 180.0 * deg2rad;
+                
+        /*
+          toPolar(p_cart, p_polar);
 
-	theta = p_polar[0] * 180 / M_PI;
-	phi = p_polar[1] * 180 / M_PI;
-	rho = p_polar[2];
-	//horizantal angle of view of [0:360] and vertical of [-40:60]
-	phi = 360.0 - phi;
-	//@
-	phi += 90; if (phi > 360) phi -= 360;
-	//@ 
-	phi = phi * 2.0 * M_PI / 360.0;
-	theta -= 90;
-	theta *= -1;
-	theta *= 2.0 * M_PI / 360.0;
+     theta = p_polar[0] * 180 / M_PI;
+     phi = p_polar[1] * 180 / M_PI;
+     rho = p_polar[2];
+     //horizantal angle of view of [0:360] and vertical of [-40:60]
+     phi = 360.0 - phi;
+     //@
+     phi += 90; if (phi > 360) phi -= 360;
+     //@ 
+     phi = phi * 2.0 * M_PI / 360.0;
+     theta -= 90;
+     theta *= -1;
+     theta *= 2.0 * M_PI / 360.0;
 
-	swap(phi,theta);
-	//	   phi -= rad(30.0);
+     swap(phi,theta);
+     //        phi -= rad(30.0);
 
-	*/
-	
-	   // Sobel Filter for the derivative
-	   dRdTheta = dRdPhi = 0.0;
-	   
-	   if (i == 0 || i == extendedMap.size()-1 ||
-		  j == 0 || j == extendedMap[0].size()-1) {
-		points.push_back(Point(p_cart[0], p_cart[1], p_cart[2]));
-		normals.push_back(Point(0.0, 0.0, 0.0));
-		continue;
-	   }
+     */
+     
+        // Sobel Filter for the derivative
+        dRdTheta = dRdPhi = 0.0;
+        
+        if (i == 0 || i == extendedMap.size()-1 ||
+            j == 0 || j == extendedMap[0].size()-1) {
+          points.push_back(Point(p_cart[0], p_cart[1], p_cart[2]));
+          normals.push_back(Point(0.0, 0.0, 0.0));
+          continue;
+        }
 
-	   int x = i; // extendedMap.size() - i;
-	   int y = j; // extendedMap[0].size() - j;
+        int x = i; // extendedMap.size() - i;
+        int y = j; // extendedMap[0].size() - j;
 
-	   dRdPhi += 100 * 10*img.at<float>(x-1,y);
-	   dRdPhi += 100 * 3 *img.at<float>(x-1,y-1);
-	   dRdPhi += 100 * 3 *img.at<float>(x-1,y+1);
-	   dRdPhi -= 100 * 10*img.at<float>(x+1,y);
-	   dRdPhi -= 100 * 3 *img.at<float>(x+1,y-1);
-	   dRdPhi -= 100 * 3 *img.at<float>(x+1,y+1);
-	   
-	   dRdTheta += 100 * 10*img.at<float>(x,y-1);
-	   dRdTheta += 100 * 3 *img.at<float>(x-1,y-1);
-	   dRdTheta += 100 * 3 *img.at<float>(x+1,y-1);
-	   dRdTheta -= 100 * 10*img.at<float>(x,y+1);
-	   dRdTheta -= 100 * 3 *img.at<float>(x-1,y+1);
-	   dRdTheta -= 100 * 3 *img.at<float>(x+1,y+1);
+        dRdPhi += 100 * 10*img.at<float>(x-1,y);
+        dRdPhi += 100 * 3 *img.at<float>(x-1,y-1);
+        dRdPhi += 100 * 3 *img.at<float>(x-1,y+1);
+        dRdPhi -= 100 * 10*img.at<float>(x+1,y);
+        dRdPhi -= 100 * 3 *img.at<float>(x+1,y-1);
+        dRdPhi -= 100 * 3 *img.at<float>(x+1,y+1);
+        
+        dRdTheta += 100 * 10*img.at<float>(x,y-1);
+        dRdTheta += 100 * 3 *img.at<float>(x-1,y-1);
+        dRdTheta += 100 * 3 *img.at<float>(x+1,y-1);
+        dRdTheta -= 100 * 10*img.at<float>(x,y+1);
+        dRdTheta -= 100 * 3 *img.at<float>(x-1,y+1);
+        dRdTheta -= 100 * 3 *img.at<float>(x+1,y+1);
 
-	   // add more weight to derivatives
-	   dRdTheta *= 20;
-	   dRdPhi *= 20;
+        // add more weight to derivatives
+        dRdTheta *= 20;
+        dRdPhi *= 20;
 
-  	   phi += rad(30.0);
-	   
-	   n[0] = cos(theta) * sin(phi) - sin(theta) * dRdTheta / rho / sin(phi) +
-		cos(theta) * cos(phi) * dRdPhi / rho;
-	   
-	   n[1] = sin(theta) * sin(phi) + cos(theta) * dRdTheta / rho / sin(phi) +
-		sin(theta) * cos(phi) * dRdPhi / rho;
-	   
-	   n[2] =  cos(phi) - sin(phi) * dRdPhi / rho;
+	   phi += rad(30.0);
+        
+        n[0] = cos(theta) * sin(phi) - sin(theta) * dRdTheta / rho / sin(phi) +
+          cos(theta) * cos(phi) * dRdPhi / rho;
+        
+        n[1] = sin(theta) * sin(phi) + cos(theta) * dRdTheta / rho / sin(phi) +
+          sin(theta) * cos(phi) * dRdPhi / rho;
+        
+        n[2] =  cos(phi) - sin(phi) * dRdPhi / rho;
 
-	   n[2] = -n[2];
-	   
-	   double m = sqrt( n[0]*n[0] + n[1]*n[1] + n[2]*n[2]);
-	   n[0] /= m; n[1] /= m; n[2] /= m;
+        n[2] = -n[2];
+        
+        p_cart[1]*=-1;
+        swap(p_cart[1],p_cart[2]);
 
-	   p_cart[1]*=-1;
-	   swap(p_cart[1],p_cart[2]);
-	   points.push_back(Point(p_cart[0], p_cart[1], p_cart[2]));
-	   normals.push_back(Point(n[0],n[1],n[2]));
-	 }
+        ColumnVector point_vector(3);
+        ColumnVector norm_vector(3);
+        norm_vector(1) = n[0];
+        norm_vector(2) = n[2];
+        norm_vector(3) = -1.0*n[1];
+        point_vector(1) = p_cart[0] - rPos(1);
+        point_vector(2) = p_cart[1] - rPos(2);
+        point_vector(3) = p_cart[2] - rPos(3);
+        point_vector = point_vector / point_vector.NormFrobenius();
+        Real angle = (norm_vector.t() * point_vector).AsScalar();
+        if (angle < 0) {
+          norm_vector *= -1.0;
+        }
+        norm_vector = norm_vector / norm_vector.NormFrobenius();
+        
+        points.push_back(Point(p_cart[0], p_cart[1], p_cart[2]));
+	   normals.push_back(Point(norm_vector(1),norm_vector(2),norm_vector(3)));
+      }
     }
   }
 }
