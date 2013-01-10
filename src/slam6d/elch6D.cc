@@ -31,7 +31,6 @@ using std::swap;
 
 #include <limits> //for old boost and new gcc
 using std::numeric_limits;
-#include <boost/graph/graphviz.hpp>
 #include <boost/graph/dijkstra_shortest_paths.hpp>
 #include <boost/graph/graph_traits.hpp>
 using boost::graph_traits;
@@ -178,73 +177,6 @@ void elch6D::dot_pos_out(graph_t &g, const vector <Scan *> &allScans,
     }
   }
   dot_file << "}";
-  dot_file.close();
-}
-
-/**
- * sets filename and calls graph_out
- * @param g the graph
- */
-void elch6D::graph_out(graph_t &g)
-{
-  string name("graph_" + to_string(num_vertices(g), 3) + ".dot");
-  graph_out(g, name);
-}
-
-/**
- * uses boost write_graphviz to write the graph
- * @param g the graph
- * @param out_file the file to write to
- */
-void elch6D::graph_out(graph_t &g, string &out_file)
-{
-  ofstream dot_file(out_file.c_str());
-  write_graphviz(dot_file, g);
-  dot_file.close();
-}
-
-/**
- * sets filename and calls slim_graph_out
- */
-void elch6D::slim_graph_out(graph_t g)
-{
-  string name("slim_graph_" + to_string(num_vertices(g), 3) + ".dot");
-  slim_graph_out(g, name);
-}
-
-/**
- * writes slim graph (supressing unimportant nodes)
- * @param g the graph
- * @param out_file the file to write to
- */
-void elch6D::slim_graph_out(graph_t g, string &out_file)
-{
-  bool todo;
-  graph_traits < graph_t >::vertex_iterator vi, vend;
-  graph_traits < graph_t >::adjacency_iterator ai;
-  do {
-    todo = false;
-    for(tie(vi, vend) = vertices(g); vi != vend; vi++) {
-      int me = *vi;
-      if(degree(me, g) == 2) {
-        ai = adjacent_vertices(me, g).first;
-        int one = *ai;
-        ai++;
-        int two = *ai;
-        if (degree(one, g) == 2 && degree(two, g) == 2
-            && one != me && two != me && one != two) {
-          clear_vertex(me, g);
-          add_edge(one, two, g);
-          remove_vertex(me, g);
-          todo = true;
-          break;
-        }
-      }
-    }
-  } while(todo);
-
-  ofstream dot_file(out_file.c_str());
-  write_graphviz(dot_file, g);
   dot_file.close();
 }
 
