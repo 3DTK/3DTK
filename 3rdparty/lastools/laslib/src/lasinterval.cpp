@@ -43,8 +43,8 @@
 using namespace std;
 
 #ifdef UNORDERED
-#include <tr1/unordered_map>
-using namespace tr1;
+#include <unordered_map>
+//using namespace tr1;
 typedef unordered_map<I32, LASintervalStartCell*> my_cell_hash;
 #else
 #include <hash_map>

@@ -118,8 +118,12 @@ public:
   enum AlgoType { INVALID, ICP, ICPINACTIVE, LUM, ELCH };
   
   // delete copy-ctor and assignment, scans shouldn't be copied by basic class
+#ifdef _MSC_VER
+  // FIXME
+#else
   Scan(const Scan& other) = delete;
   Scan& operator=(const Scan& other) = delete;
+#endif
   
   virtual ~Scan();
 
