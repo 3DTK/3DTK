@@ -41,9 +41,9 @@
 #include "bytestreamout_file.hpp"
 
 #ifdef UNORDERED
-#include <tr1/unordered_map>
+#include <unordered_map>
 using namespace std;
-using namespace tr1;
+//using namespace tr1;
 typedef unordered_map<I32,U32> my_cell_hash;
 #else
 #include <hash_map>

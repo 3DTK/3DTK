@@ -793,7 +793,7 @@ namespace fbr{
           float x = col * 1. / xFactor - fabs(xmin);
           float y = (heightMax - row) * 1. / yFactor - fabs(ymin);
           float theta = asin((C - (x*x + (Rho0 - y) * (Rho0 - y)) * n * n) / (2 * n));
-          float phi = Long0 + (1./n) * ::atan2(x, Rho0 - y);
+          float phi = Long0 + (1./n) * ::atan2(x, (float)Rho0 - y);
 
           phi *= 180.0 / M_PI;
           phi = 360.0 - phi;

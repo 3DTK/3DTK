@@ -13,6 +13,9 @@
 #include "fbr_global.h"
 #include "slam6d/scan.h"
 #include "slam6d/managedScan.h"
+#undef max
+#undef min
+#include <limits>
 
 namespace fbr{
   /**

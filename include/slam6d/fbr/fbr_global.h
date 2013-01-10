@@ -21,10 +21,19 @@
 #include <opencv2/nonfree/nonfree.hpp>
 #endif
 #include <math.h>
-#include <string>
+#ifdef _MSC_VER
+#define strcasecmp _stricmp
+#define strncasecmp _strnicmp
+#else
+#include <strings.h>
+#endif
 #include "slam6d/io_types.h"
 #include "slam6d/globals.icc"
-
+#ifndef _MSC_VER
+#include <getopt.h>
+#else
+#include "XGetopt.h"
+#endif
 using namespace std;
 
 namespace fbr{
