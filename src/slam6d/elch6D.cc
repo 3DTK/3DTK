@@ -34,6 +34,7 @@ using std::numeric_limits;
 #include <boost/graph/dijkstra_shortest_paths.hpp>
 #include <boost/graph/graph_traits.hpp>
 using boost::graph_traits;
+#include <boost/property_map/property_map.hpp>
 
 #include "slam6d/globals.icc"
 #include "slam6d/elch6D.h"
@@ -210,7 +211,8 @@ void elch6D::graph_balancer(graph_t &g, int f, int l, double *weights)
     for(si = crossings.begin(); si != crossings.end(); ) {
       dijkstra_shortest_paths(g,
                               *si,
-                              boost::predecessor_map(p).distance_map(d));
+                              predecessor_map(boost::make_iterator_property_map(p, get(boost::vertex_index, g))).
+                              distance_map(boost::make_iterator_property_map(d, get(boost::vertex_index, g))));
       ei = si;
       ei++;
       // find shortest crossing for one vertex
