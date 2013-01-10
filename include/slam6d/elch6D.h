@@ -22,11 +22,6 @@ class elch6D : public loopSlam6D {
     static void graph_pos_out(graph_t &g, const vector <Scan *> &allScans);
     static void graph_pos_out(graph_t &g, const vector <Scan *> &allScans, string &out_file);
     static void dot_pos_out(graph_t &g, const vector <Scan *> &allScans, string &out_file);
-    static void graph_out(graph_t &g);
-
-    static void graph_out(graph_t &g, string &out_file);
-    static void slim_graph_out(graph_t g);
-    static void slim_graph_out(graph_t g, string &out_file);
 };
 
 #endif
