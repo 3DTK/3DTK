@@ -90,7 +90,7 @@ add_library(newmat_s SHARED ${NEWMAT_SOURCES})
 ENDIF(EXPORT_SHARED_LIBS)
 
 # Compile las library
-set( CMAKE_CXX_FLAGS "-O3 -Wall -Wno-deprecated -DNDEBUG -DUNORDERED -fPIC" )
+set(CMAKE_CXX_FLAGS "-DNDEBUG -DUNORDERED -std=c++0x -fPIC" )
 SET(LASLIB_DIR ${CMAKE_SOURCE_DIR}/3rdparty/lastools/laslib/src/)
 FILE(GLOB LASLIB_SRCS "${LASLIB_DIR}/*.cpp" "${LASLIB_DIR}/*.hpp")
 
