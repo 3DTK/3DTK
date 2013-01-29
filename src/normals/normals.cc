@@ -13,7 +13,7 @@
  *
  * @author Vaibhav Kumar Mehta. Jacobs University Bremen gGmbH, Germany
  * @author Corneliu Claudiu Prodescu. Jacobs University Bremen gGmbH, Germany
- * @author Vladimir Komsyki. Jacobs University Bremen gGmbH, Germany
+ * @author Vladimir Komsiyski. Jacobs University Bremen gGmbH, Germany
  * @author Andreas Nuechter. Jacobs University Bremen gGmbH, Germany
  */
 

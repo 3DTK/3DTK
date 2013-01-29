@@ -1817,7 +1817,7 @@ int calcNoOfPoints(vector<PointXY> vec1, vector<PointXY> vec2)
     distance += sqrt(dx*dx + dy*dy + dz*dz );
   }
 
-  return distance/2;
+  return distance/8;
 }
 
 /**
