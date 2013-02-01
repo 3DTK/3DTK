@@ -112,7 +112,7 @@ vector<Point> KDtree::kNearestNeighbors(double *_p,
                            params[threadNum].closest_neighbors[i][2]));
   }
   
-  free ( params[threadNum].closest_neighbors);
+  free (params[threadNum].closest_neighbors);
   
   return result;
 }
@@ -125,6 +125,7 @@ vector<Point> KDtree::fixedRangeSearch(double *_p,
   params[threadNum].closest = 0;
   params[threadNum].closest_d2 = sqRad2;
   params[threadNum].p = _p;
+  range_neighbors.clear();
   _FixedRangeSearch(Void(), threadNum);
   
   for (size_t i = 0; i < params[threadNum].range_neighbors.size(); i++) {
