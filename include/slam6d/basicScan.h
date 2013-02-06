@@ -7,6 +7,7 @@
 #include <vector>
 #include <map>
 
+#include "slam6d/Boctree.h"
 
 class BasicScan : public Scan {
 public:
@@ -38,6 +39,9 @@ public:
   
   //! Constructor for creation of Scans without openDirectory
   BasicScan(double * rPos, double * rPosTheta, std::vector<double*> points);
+
+  //! Convert Scan to Octree
+  BOctTree<float>* convertScanToShowOcttree();
 
 protected:
   virtual void createSearchTreePrivate();

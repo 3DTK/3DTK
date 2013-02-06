@@ -14,6 +14,13 @@ using namespace std;
 namespace fbr{
   
   void panorama::init(unsigned int width, unsigned int height, projection_method method, unsigned int numberOfImages, double param, panorama_map_method mMethod){
+    //clear the containers
+    iReflectance.release();
+    iMap.release();
+    iRange.release();
+    iColor.release();
+    extendedIMap.clear();
+    //set the data
     iWidth = width;
     iHeight = height;
     pMethod = method;
@@ -37,6 +44,10 @@ namespace fbr{
     iColor = cv::Scalar::all(0);
 
     mapMethod = mMethod;
+  }
+  
+  panorama::panorama(){
+    init(3600, 1000, EQUIRECTANGULAR, 1, 0, FARTHEST);
   }
 
   panorama::panorama(unsigned int width, unsigned int height, projection_method method, unsigned int numberOfImages, double param, panorama_map_method mMethod){ 
