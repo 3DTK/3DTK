@@ -56,12 +56,6 @@ namespace fbr{
     double pParam;
     panorama_map_method mapMethod;
 
-    void init(unsigned int width,
-              unsigned int height,
-              projection_method method,
-              unsigned int numberOfImages,
-              double param,
-              panorama_map_method mapMethod);
     void map(int x,
              int y,
              cv::MatIterator_<cv::Vec4f> it,
@@ -77,6 +71,7 @@ namespace fbr{
      * @param param special parameter for pannini or stereographic projections
      * @param mapMethod mapping method for panorama image and 3D points
      */
+    panorama();
     panorama (unsigned int width,
               unsigned int height,
               projection_method method);
@@ -95,6 +90,14 @@ namespace fbr{
               unsigned int numberOfImages,
               double param,
               panorama_map_method mapMethod);
+
+    void init(unsigned int width,
+              unsigned int height,
+              projection_method method,
+              unsigned int numberOfImages,
+              double param,
+              panorama_map_method mapMethod);
+
     /**
      * @brief creates the panorama reflectance image and map and color image.
      */

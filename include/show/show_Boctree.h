@@ -42,8 +42,10 @@ protected:
 
   DataOcttree* m_cache_access;
   Scan* m_scan;
+  ScanColorManager* scm;
 
-  void init(ScanColorManager* scm) {
+  void init(ScanColorManager* _scm) {
+    scm = _scm;
     setColorManager(0);
     if (scm) {
       scm->registerTree(this);
@@ -58,6 +60,11 @@ protected:
   }
   
 public:
+  //return the scm
+  ScanColorManager* getScanColorManager()
+  {
+    return scm;
+  }
   //! Create with tree held in cache, lock indefinitely
   Show_BOctTree(Scan* scan, DataOcttree* cache_access, ScanColorManager* scm = 0)
   {

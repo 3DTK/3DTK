@@ -69,6 +69,7 @@ public:
   unsigned int getTime();
   unsigned int getIndex();
   unsigned int getType();
+  unsigned int getColor();
   unsigned int getType(unsigned int type);
    
   unsigned int getPointDim();

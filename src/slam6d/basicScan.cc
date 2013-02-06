@@ -439,6 +439,44 @@ void BasicScan::createOcttree()
                           )));
 }
 
+BOctTree<float>* BasicScan::convertScanToShowOcttree()
+{
+  string scanFileName = m_path + "scan" + m_identifier + ".oct";
+  BOctTree<float>* btree = 0;
+
+  // try to load from file, if successful return
+  if (octtree_loadOct && exists(scanFileName)) {
+    btree = new BOctTree<float>(scanFileName);
+    return btree;
+  }
+
+  // create octtree from scan
+  if (octtree_reduction_voxelSize > 0) { // with reduction, only xyz points
+    DataXYZ xyz_r(get("xyz reduced show"));
+    btree = new BOctTree<float>(PointerArray<double>(xyz_r).get(),
+                                xyz_r.size(),
+                                octtree_voxelSize,
+                                octtree_pointtype,
+                                true);
+  } else { // without reduction, xyz + attribute points
+    float** pts = octtree_pointtype.createPointArray<float>(this);
+    unsigned int nrpts = size<DataXYZ>("xyz");
+    btree = new BOctTree<float>(pts,
+                                nrpts,
+                                octtree_voxelSize,
+                                octtree_pointtype,
+                                true);
+    for(unsigned int i = 0; i < nrpts; ++i) delete[] pts[i]; delete[] pts;
+  }
+
+  // save created octtree            
+  if(octtree_saveOct) {
+    cout << "Saving octree " << scanFileName << endl;
+    btree->serialize(scanFileName);
+  }
+  return btree;
+}
+
 unsigned int BasicScan::readFrames()
 {
   string filename = m_path + "scan" + m_identifier + ".frames";
