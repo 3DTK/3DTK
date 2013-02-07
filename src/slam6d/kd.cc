@@ -125,7 +125,7 @@ vector<Point> KDtree::fixedRangeSearch(double *_p,
   params[threadNum].closest = 0;
   params[threadNum].closest_d2 = sqRad2;
   params[threadNum].p = _p;
-  range_neighbors.clear();
+  params[threadNum].range_neighbors.clear();
   _FixedRangeSearch(Void(), threadNum);
   
   for (size_t i = 0; i < params[threadNum].range_neighbors.size(); i++) {
