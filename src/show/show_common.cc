@@ -511,6 +511,18 @@ int parseArgs(int argc,char **argv, string &dir, int& start, int& end, int& maxD
           cerr << "Format " << optarg << " unknown." << endl;
           abort();
         }
+        switch (w_type) {
+          case UOS_RGB:
+          case UOS_RRGBT:
+          case RIEGL_RGB:
+          case XYZ_RGB:
+          case KS_RGB:
+            types |= PointType::USE_COLOR;
+            colorScanVal = 2;
+            break;
+          default:
+            break;
+        }
         break;
       case '?':
         usage(argv[0]);
@@ -1051,6 +1063,7 @@ set heuristic, do locking, catch exception, reset heuristic to default or old
   for (unsigned int i = 0; i < 256; i++) {
     keymap[i] = false;
   }
+  setScansColored(colorScanVal);
 }
 
 void deinitShow()
