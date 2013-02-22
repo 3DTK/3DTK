@@ -11,6 +11,7 @@
 #define __NORMALS_H__
 
 #include <vector>
+using std::vector;
 #include <slam6d/scan.h>
 #if (CV_MAJOR_VERSION == 2) && (CV_MINOR_VERSION < 2)
 #include <opencv/cv.h>

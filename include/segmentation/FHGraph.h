@@ -23,7 +23,7 @@
 
 class FHGraph {
 public:
-  FHGraph(DataXYZ *ps,
+  FHGraph(std::vector< Point > *ps,
 		double weight(Point, Point),
 		double sigma,
 		double eps,
@@ -42,7 +42,7 @@ private:
   void without_gauss();
 
   std::vector<edge> edges;
-  DataXYZ *xyz;
+  std::vector< Point > *pts;
   int V;
   int E;
 

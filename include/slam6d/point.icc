@@ -103,6 +103,27 @@ inline Point::Point(const double _x, const double _y, const double _z)
   rgb[2] = 255;
 }
 
+/**
+ *	Constructor with three double values
+ */
+inline Point::Point(const double _x, const double _y, const double _z,
+				const double _nx, const double _ny, const double _nz)
+{
+  nx = _nx;
+  ny = _ny;
+  nz = _nz;
+  x = _x;
+  y = _y;
+  z = _z;
+  type = 0;
+  reflectance = 0.0;
+  temperature = 0.0;
+  amplitude = 0.0;
+  deviation = 0.0;
+  rgb[0] = 255;
+  rgb[1] = 255;
+  rgb[2] = 255;
+}
 
 inline Point::Point(const double _x, const double _y, const double _z,
 				const char _r, const char _g, const char _b)

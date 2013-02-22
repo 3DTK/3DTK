@@ -24,6 +24,9 @@
 
 #include <segmentation/FHGraph.h>
 
+#include <normals/normals.h>
+#include <math.h>
+
 #ifdef _MSC_VER
 #define strcasecmp _stricmp
 #define strncasecmp _strnicmp
@@ -133,6 +136,9 @@ double weight1(Point a, Point b)
 
 double weight2(Point a, Point b)
 {
+  //return 0;
+  return (1 -(a.nx * b.nx + a.ny * b.ny + a.nz * b.nz));
+ 
   return a.distance(b) * .5 + fabs(a.reflectance-b.reflectance) * .5;
 }
 
@@ -240,11 +246,19 @@ int main(int argc, char** argv)
 
     /// read scan into points
     DataXYZ xyz(scan->get("xyz"));
+    DataNormal norm(scan->get("normal"));
     vector<Point> points;
+    points.reserve(xyz.size());
+
+    for(unsigned int j = 0; j < xyz.size(); j++) {
+	 Point p(xyz[j][0], xyz[j][1], xyz[j][2],
+		    norm[j][0], norm[j][1], norm[j][2]);
+	 points.push_back(p);
+    }
 
     /// create the graph and get the segments
     cout << "creating graph" << endl;
-    FHGraph sgraph(&xyz, weight2, sigma, eps, neighbors, radius);
+    FHGraph sgraph(&points, weight2, sigma, eps, neighbors, radius);
 
     cout << "segmenting graph" << endl;
     edge* sedges = sgraph.getGraph();
@@ -254,6 +268,7 @@ int main(int argc, char** argv)
                                         k);
 
     cout << "post processing" << endl;
+    /*    
     for (int i = 0; i < sgraph.getNumEdges(); ++i)
       {
         int a = sedges[i].a;
@@ -267,7 +282,7 @@ int main(int argc, char** argv)
               segmented->size(bb) < min_size) )
           segmented->join(aa, bb);
       }
-
+    */
     delete[] sedges;
 
     int nr = segmented->num_sets();
@@ -292,6 +307,8 @@ int main(int argc, char** argv)
         }
       clouds[components2cloud[component]]->push_back(sgraph[i]);
     }
+
+    
     
     // pose file (repeated for the number of segments
     writePoseFiles(dir, rPos, rPosTheta, clouds.size(), outscan);
