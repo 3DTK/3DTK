@@ -17,7 +17,7 @@ using namespace std;
 
 
 
-FHGraph::FHGraph(DataXYZ *ps,
+FHGraph::FHGraph(vector<Point> *ps,
 			  double weight(Point, Point),
 			  double sigma,
 			  double eps,
@@ -25,7 +25,7 @@ FHGraph::FHGraph(DataXYZ *ps,
 			  float radius) :
     V( ps->size() )
 {
-  xyz = ps;
+  pts = ps;
     /*
      * 1. create adjency list using a map<int, vector<half_edge> >
      * 2. use get_neighbors(e, max_dist) to get all the edges e' that are at a distance smaller than max_dist than e
@@ -48,19 +48,19 @@ FHGraph::FHGraph(DataXYZ *ps,
 
 void FHGraph::compute_neighbors(double weight(Point, Point), double eps)
 {
-    adjency_list.reserve(xyz->size());
-    adjency_list.resize(xyz->size());
+    adjency_list.reserve(pts->size());
+    adjency_list.resize(pts->size());
 
-    ANNpointArray pa = annAllocPts(xyz->size(), 3);
-    for (size_t i = 0; i < xyz->size(); ++i)
+    ANNpointArray pa = annAllocPts(pts->size(), 3);
+    for (size_t i = 0; i < pts->size(); ++i)
     {
         pa[i] = new ANNcoord[3];
-        pa[i][0] = (*xyz)[i][0];
-        pa[i][1] = (*xyz)[i][1];
-        pa[i][2] = (*xyz)[i][2];
+        pa[i][0] = (*pts)[i].x;
+        pa[i][1] = (*pts)[i].y;
+        pa[i][2] = (*pts)[i].z;
     }
 
-    ANNkd_tree t(pa, xyz->size(), 3);
+    ANNkd_tree t(pa, pts->size(), 3);
 
     if ( radius < 0 ) // Using knn search
     {
@@ -68,7 +68,7 @@ void FHGraph::compute_neighbors(double weight(Point, Point), double eps)
         ANNidxArray n = new ANNidx[nr_neighbors];
         ANNdistArray d = new ANNdist[nr_neighbors];
 
-        for (size_t i = 0; i < xyz->size(); ++i)
+        for (size_t i = 0; i < pts->size(); ++i)
         {
             ANNpoint p = pa[i];
 
@@ -80,7 +80,7 @@ void FHGraph::compute_neighbors(double weight(Point, Point), double eps)
 
                 he e;
                 e.x = n[j];
-                e.w = weight(Point((*xyz)[i]), Point((*xyz)[n[j]]));
+                e.w = weight(Point((*pts)[i]), Point((*pts)[n[j]]));
 
                 adjency_list[i].push_back(e);
             }
@@ -103,7 +103,7 @@ void FHGraph::compute_neighbors(double weight(Point, Point), double eps)
         const int MOD = 1000;
         int TMP = MOD;
 
-        for (size_t i = 0; i < xyz->size(); ++i)
+        for (size_t i = 0; i < pts->size(); ++i)
         {
             ANNpoint p = pa[i];
 
@@ -114,19 +114,21 @@ void FHGraph::compute_neighbors(double weight(Point, Point), double eps)
             d = new ANNdist[nret];
             t.annkFRSearch(p, sqradius, nret, n, d, eps);
 
+		  /*
             if ( nr_neighbors > 0 && nr_neighbors < nret )
             {
                 random_shuffle(n, n+nret);
                 nret = nr_neighbors;
             }
-
+		  */
+		  
             for (int j=0; j<nret; ++j)
             {
                 if ( n[j] == (int)i ) continue;
 
                 he e;
                 e.x = n[j];
-                e.w = weight(Point((*xyz)[i]), Point((*xyz)[n[j]]));
+                e.w = weight(Point((*pts)[i]), Point((*pts)[n[j]]));
 
                 adjency_list[i].push_back(e);
             }
@@ -143,7 +145,7 @@ void FHGraph::compute_neighbors(double weight(Point, Point), double eps)
             TMP --;
         }
         cout << "Average nr of neighbors: "
-		   << (float) total / xyz->size()
+		   << (float) total / pts->size()
 		   << endl;
 
     }
@@ -247,7 +249,7 @@ edge* FHGraph::getGraph()
 
 Point FHGraph::operator[](int index)
 {
-  return Point((*xyz)[index]);
+  return Point((*pts)[index]);
 }
 
 int FHGraph::getNumPoints()

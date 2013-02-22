@@ -52,6 +52,12 @@ public:
    */
   inline Point(const double _x, const double _y, const double _z,
 			const char _r, const char _g, const char _b);
+
+  /**
+   *	Constructor with three double values and three color values
+   */
+  inline Point(const double _x,  const double _y,  const double _z,
+			const double _nx, const double _ny, const double _nz);
  
   inline Point operator+(const Point &p) const;
   inline Point operator-(const Point &p) const;
