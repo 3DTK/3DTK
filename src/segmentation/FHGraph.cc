@@ -28,7 +28,8 @@ FHGraph::FHGraph(vector<Point> *ps,
   pts = ps;
     /*
      * 1. create adjency list using a map<int, vector<half_edge> >
-     * 2. use get_neighbors(e, max_dist) to get all the edges e' that are at a distance smaller than max_dist than e
+     * 2. use get_neighbors(e, max_dist) to get all the edges e'
+     *    that are at a distance smaller than max_dist than e
      * 3. using all these edges, compute the gaussian smoothed weight
      * 4. insert the edges in a new list
      */

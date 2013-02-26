@@ -6,6 +6,7 @@
   * Released under the GPL version 3.
   *
   * @author Billy Okal <b.okal@jacobs-university.de>
+  * @author Andreas Nuechter <a.nuechter@jacobs-university.de>
   * @author Mihai-Cotizo Sima
   * @file fhsegmentation.cc
   */
@@ -143,37 +144,48 @@ double weight2(Point a, Point b)
 }
 
 /// Write a pose file with the specofied name
-void writePoseFiles(string dir, const double* rPos, const double* rPosTheta, int num, int outnum)
+void writePoseFile(string dir,
+			    const double* rPos, const double* rPosTheta,
+			    int num)
 {
-  for (int i = outnum; i < num; i++) {
-    string poseFileName = dir + "segments/scan" + to_string(i, 3) + ".pose";
-    ofstream posout(poseFileName.c_str());
-
-    posout << rPos[0] << " "
-           << rPos[1] << " "
-           << rPos[2] << endl
-           << deg(rPosTheta[0]) << " "
-           << deg(rPosTheta[1]) << " "
-           << deg(rPosTheta[2]) << endl;
-    posout.clear();
-    posout.close();
-  }
+  string poseFileName = dir + "segments/scan" + to_string(num, 3) + ".pose";
+  ofstream posout(poseFileName.c_str());
+  
+  posout << rPos[0] << " "
+	    << rPos[1] << " "
+	    << rPos[2] << endl
+	    << deg(rPosTheta[0]) << " "
+	    << deg(rPosTheta[1]) << " "
+	    << deg(rPosTheta[2]) << endl;
+  posout.clear();
+  posout.close();
 }
 
 /// write scan files for all segments
-void writeScanFiles(string dir, int outnum, const vector<vector<Point>* > cloud)
+int writeScanFiles(string dir, int outnum, int min_size,
+			    const double* rPos, const double* rPosTheta,
+			    const vector<vector<Point>* > cloud)
 {
-  for (int i = outnum, j = 0; i < (int)cloud.size() && j < (int)cloud.size(); i++, j++) {
-    vector<Point>* segment = cloud[j];
-    string scanFileName = dir + "segments/scan" + to_string(i,3) + ".3d";
-    ofstream scanout(scanFileName.c_str());
-
-    for (int k = 0; k < (int)segment->size(); k++) {
-      Point p = segment->at(k);
-      scanout << p.x << " " << p.y << " " << p.z << endl;
+  int written = 0;
+  for (int i = outnum, j = 0;
+	  i < (int)cloud.size() && j < (int)cloud.size();
+	  j++) {
+    if ((min_size > 0) && ((int)cloud[j]->size() > min_size)) {
+	   vector<Point>* segment = cloud[j];
+	   string scanFileName = dir + "segments/scan" + to_string(i,3) + ".3d";
+	   ofstream scanout(scanFileName.c_str());
+	   
+	   for (int k = 0; k < (int)segment->size(); k++) {
+		Point p = segment->at(k);
+		scanout << p.x << " " << p.y << " " << p.z << endl;
+	   }
+	   scanout.close();
+	   writePoseFile(dir, rPos, rPosTheta, i);
+	   i++;
+	   written += 1;
     }
-    scanout.close();
   }
+  return written;
 }
 
 
@@ -247,6 +259,7 @@ int main(int argc, char** argv)
     /// read scan into points
     DataXYZ xyz(scan->get("xyz"));
     DataNormal norm(scan->get("normal"));
+   
     vector<Point> points;
     points.reserve(xyz.size());
 
@@ -267,31 +280,14 @@ int main(int argc, char** argv)
                                         sedges,
                                         k);
 
-    cout << "post processing" << endl;
-    /*    
-    for (int i = 0; i < sgraph.getNumEdges(); ++i)
-      {
-        int a = sedges[i].a;
-        int b = sedges[i].b;
-
-        int aa = segmented->find(a);
-        int bb = segmented->find(b);
-
-        if ( (aa!=bb) && 
-             (segmented->size(aa) < min_size || 
-              segmented->size(bb) < min_size) )
-          segmented->join(aa, bb);
-      }
-    */
-    delete[] sedges;
-
+    delete [] sedges;
     int nr = segmented->num_sets();
     cout << "Obtained " << nr << " segment(s)" << endl;
 
     /// write point clouds with segments
     vector< vector<Point>* > clouds;
     clouds.reserve(nr);
-    for (int i=0; i<nr; ++i)
+    for (int i = 0; i < nr; i++)
       clouds.push_back( new vector<Point> );
 
     map<int, int> components2cloud;
@@ -307,15 +303,15 @@ int main(int argc, char** argv)
         }
       clouds[components2cloud[component]]->push_back(sgraph[i]);
     }
-
     
-    
-    // pose file (repeated for the number of segments
-    writePoseFiles(dir, rPos, rPosTheta, clouds.size(), outscan);
     // scan files for all segments
-    writeScanFiles(dir, outscan, clouds);
+    int written = writeScanFiles(dir, outscan, min_size,
+						   rPos, rPosTheta,
+						   clouds);
 
-    outscan += clouds.size();
+    cout << "Written " << written << " segment(s) with at least size"
+	    << min_size << endl;
+    outscan += written;
 
     /// clean up
     sgraph.dispose();

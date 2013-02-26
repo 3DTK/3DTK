@@ -85,7 +85,7 @@ FIND_PACKAGE(OpenCV REQUIRED)
 target_link_libraries(scan scanclient scanio normals)
 
 IF(UNIX)
-  target_link_libraries(scan dl)
+  target_link_libraries(scan dl pthread)
 ENDIF(UNIX)
 
 ### EXPORT SHARED LIBS

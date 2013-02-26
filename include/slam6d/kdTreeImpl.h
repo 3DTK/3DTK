@@ -333,8 +333,8 @@ protected:
 	 for (int i = 0; i < npts; i++) {
 	   double myd2 = Dist2(params[threadNum].p, point(pts, leaf.p[i]));
 
-        for (int j = 0; j < params[threadNum].k; ++j)
-            if (params[threadNum].closest_neighbors[j] == NULL || params[threadNum].distances[j] > myd2) {
+        for (int j = 0; j < params[threadNum].k; j++)
+            if (params[threadNum].closest_neighbors[j] == 0 || params[threadNum].distances[j] > myd2) {
             
                 for (int l = params[threadNum].k - 1; l > j; --l) {
                     params[threadNum].closest_neighbors[l] = params[threadNum].closest_neighbors[l-1];
@@ -343,14 +343,13 @@ protected:
                 
                 params[threadNum].closest_neighbors[j] = point(pts, leaf.p[i]);
                 params[threadNum].distances[j] = myd2;
-                break;
             }
       }
       return;
     }
 
     int kN = params[threadNum].k-1;
-    if (params[threadNum].closest_neighbors[kN] != NULL) {
+    if (params[threadNum].closest_neighbors[kN] != 0) {
         // Quick check of whether to abort  
         double approx_dist_bbox
 		= max(max(fabs(params[threadNum].p[0]-node.center[0])-node.dx,
