@@ -39,7 +39,9 @@
 namespace po = boost::program_options;
 using namespace std;
 
-enum normal_method {AKNN, ADAPTIVE_AKNN, PANORAMA, PANORAMA_FAST};
+enum normal_method {KNN, ADAPTIVE_KNN,
+				AKNN, ADAPTIVE_AKNN,
+				PANORAMA, PANORAMA_FAST};
 
 /*
  * validates normal calculation method specification
@@ -49,7 +51,9 @@ void validate(boost::any& v, const std::vector<std::string>& values,
   if (values.size() == 0)
     throw std::runtime_error("Invalid model specification");
   string arg = values.at(0);
-  if (strcasecmp(arg.c_str(), "AKNN") == 0) v = AKNN;
+  if (strcasecmp(arg.c_str(), "KNN") == 0) v = KNN;
+  else if (strcasecmp(arg.c_str(), "ADAPTIVE_KNN") == 0) v = ADAPTIVE_KNN;
+  else if (strcasecmp(arg.c_str(), "AKNN") == 0) v = AKNN;
   else if (strcasecmp(arg.c_str(), "ADAPTIVE_AKNN") == 0) v = ADAPTIVE_AKNN;
   else if (strcasecmp(arg.c_str(), "PANORAMA") == 0) v = PANORAMA;
   else if (strcasecmp(arg.c_str(), "PANORAMA_FAST") == 0) v = PANORAMA_FAST;
@@ -107,7 +111,7 @@ void parse_options(int argc, char **argv, int &start, int &end,
       ("normal,g",
        po::value<normal_method>(&ntype)->default_value(AKNN),
        "normal calculation method "
-       "(AKNN, ADAPTIVE_AKNN, PANORAMA, PANORAMA_FAST)")
+       "(KNN, ADAPTIVE_KNN, AKNN, ADAPTIVE_AKNN, PANORAMA, PANORAMA_FAST)")
       ("K1,k",
        po::value<int>(&k1)->default_value(20),
        "<arg> value of K value used in the nearest neighbor search of ANN or"
@@ -277,9 +281,13 @@ int main(int argc, char** argv)
       points.push_back(Point(xyz[j][0], xyz[j][1], xyz[j][2]));
     }
 
-    if(ntype == AKNN)
+    if (ntype == KNN)
+      calculateNormalsKNN(normals, points, k1, rPos);
+    else if (ntype == ADAPTIVE_KNN)
+      calculateNormalsAdaptiveKNN(normals, points, k1, k2, rPos);
+    else if (ntype == AKNN)
       calculateNormalsApxKNN(normals, points, k1, rPos);
-    else if(ntype == ADAPTIVE_AKNN)
+    else if (ntype == ADAPTIVE_AKNN)
       calculateNormalsAdaptiveApxKNN(normals, points, k1, k2, rPos);
     else
     {
@@ -310,13 +318,13 @@ int main(int argc, char** argv)
     scanNumber++;
   }
 
+  cout << "Normal program end" << endl;
+
+  return 0;  
+
   // shutdown everything
   if (scanserver)
     ClientInterface::destroy();
 
   Scan::closeDirectory();
-
-  cout << "Normal program end" << endl;
-
-  return 0;
 }
