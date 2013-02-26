@@ -278,11 +278,13 @@ void Scan::calcNormals()
   }
   const int K_NEIGHBOURS = 10;  //@FIXME
   calculateNormalsApxKNN(normals, points, K_NEIGHBOURS, get_rPos(), 1.0);
+  // calculateNormalsKNN(normals, points, K_NEIGHBOURS, get_rPos());
   for (unsigned int i = 0; i < normals.size(); ++i) {
     xyz_normals[i][0] = normals[i].x;
     xyz_normals[i][1] = normals[i].y;
     xyz_normals[i][2] = normals[i].z;
   }
+  cout << "calcNormals done" << endl;
 }
     
 /**

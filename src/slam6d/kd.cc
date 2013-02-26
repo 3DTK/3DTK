@@ -91,29 +91,29 @@ vector<Point> KDtree::kNearestNeighbors(double *_p,
                                         int _k,
                                         int threadNum) const
 {
-  vector<Point> result;
+  vector<Point> result;    
   params[threadNum].closest = 0;
   params[threadNum].p = _p;
   params[threadNum].k = _k;
-
   // todo fix this C/C++ mixture
   params[threadNum].closest_neighbors = (double **)calloc(_k,
                                                           sizeof(double *) );
   params[threadNum].distances = (double *)calloc(_k,
                                                  sizeof(double));
-
+  
   _KNNSearch(Void(), threadNum);
-
+  
   free (params[threadNum].distances);
 
   for (int i = 0; i < _k; i++) {
+#pragma omp critical
     result.push_back(Point(params[threadNum].closest_neighbors[i][0],
                            params[threadNum].closest_neighbors[i][1],
                            params[threadNum].closest_neighbors[i][2]));
   }
   
   free (params[threadNum].closest_neighbors);
-  
+
   return result;
 }
 
@@ -129,6 +129,7 @@ vector<Point> KDtree::fixedRangeSearch(double *_p,
   _FixedRangeSearch(Void(), threadNum);
   
   for (size_t i = 0; i < params[threadNum].range_neighbors.size(); i++) {
+#pragma omp critical    
     result.push_back(Point(params[threadNum].range_neighbors[i][0],
                            params[threadNum].range_neighbors[i][1],
                            params[threadNum].range_neighbors[i][2]));
