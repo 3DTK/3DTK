@@ -19,10 +19,11 @@ ELSE(WIN32)
   set(Boost_USE_STATIC_LIBS FALSE)
 ENDIF(WIN32)
 
-SET(Boost_ADDITIONAL_VERSIONS "1.42" "1.42.0" "1.44" "1.44.0" "1.45.0" "1.45" "1.46" "1.46.1" "1.47.0" "1.47" "1.48" "1.49" "1.50" "1.51" "1.52")
+SET(Boost_ADDITIONAL_VERSIONS "1.42" "1.42.0" "1.44" "1.44.0" "1.45.0" "1.45" "1.46" "1.46.1" "1.47.0" "1.47" "1.48" "1.49" "1.50" 1.52" "1.53")
 IF(WIN32)
   # for some unknown reason no one variant works on all windows platforms
-  find_package( Boost COMPONENTS serialization graph regex filesystem system thread date_time program_options REQUIRED)
+  set(Boost_DEBUG 1)  
+  find_package( Boost COMPONENTS serialization graph regex filesystem system thread chrono date_time program_options REQUIRED)
 ELSE(WIN32)
   find_package( Boost COMPONENTS serialization graph regex filesystem system thread date_time program_options REQUIRED)
 ENDIF(WIN32)
@@ -32,6 +33,7 @@ if(Boost_FOUND)
   include_directories(${Boost_INCLUDE_DIRS})
   add_definitions(${Boost_LIB_DIAGNOSTIC_DEFINITIONS})
 endif()
+
 
 FIND_PACKAGE(OpenCV REQUIRED)
 include("3rdparty/CMakeModules/OpenCV.cmake")
