@@ -181,7 +181,9 @@ inline Point& Point::operator+=(const Point &p)
  *  Overridden "<<" operator for sending a point to a stream
  */
 inline ostream& operator<<(ostream& os, const Point& p) {
-  os << p.x << " " << p.y << " " << p.z;
+  os << p.x << " " << p.y << " " << p.z << " (";
+  os << p.nx << " " << p.ny << " " << p.nz << " ";
+  os << (int)p.rgb[0] << " " << (int)p.rgb[1] << " " << (int)p.rgb[2] << ")";
   return os;
 }
 

@@ -170,7 +170,7 @@ int writeScanFiles(string dir, int outnum, int min_size,
   for (int i = outnum, j = 0;
 	  i < (int)cloud.size() && j < (int)cloud.size();
 	  j++) {
-    if ((min_size > 0) && ((int)cloud[j]->size() > min_size)) {
+    if ((min_size <= 0) || ((int)cloud[j]->size() > min_size)) {
 	   vector<Point>* segment = cloud[j];
 	   string scanFileName = dir + "segments/scan" + to_string(i,3) + ".3d";
 	   ofstream scanout(scanFileName.c_str());
@@ -309,7 +309,7 @@ int main(int argc, char** argv)
 						   rPos, rPosTheta,
 						   clouds);
 
-    cout << "Written " << written << " segment(s) with at least size"
+    cout << "Written " << written << " segment(s) with at least size of "
 	    << min_size << endl;
     outscan += written;
 
