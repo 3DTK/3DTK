@@ -16,6 +16,12 @@
 #include "slam6d/fbr/feature_matcher.h"
 #include "slam6d/fbr/registration.h"
 
+#ifndef _MSC_VER
+#include <getopt.h>
+#else
+#include "XGetopt.h"
+#endif
+
 using namespace std;
 using namespace fbr;
 

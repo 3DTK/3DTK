@@ -22,7 +22,14 @@ SET(FBR_LIBS scan ANN ${OpenCV_LIBS})
 
 add_executable(featurebasedregistration feature_based_registration.cc fbr_global.cc)
 #target_link_libraries(featurebasedregistration fbr_cv_io fbr_panorama fbr_feature fbr_feature_matcher fbr_registration ${FBR_LIBS})
-target_link_libraries(featurebasedregistration fbr ${FBR_LIBS})
+
+IF (WIN32)
+  target_link_libraries(featurebasedregistration fbr ${FBR_LIBS} XGetopt)
+ENDIF(WIN32)
+
+IF(UNIX)
+  target_link_libraries(featurebasedregistration fbr ${FBR_LIBS})
+ENDIF(UNIX)
 
 ### EXPORT SHARED LIBS
 
