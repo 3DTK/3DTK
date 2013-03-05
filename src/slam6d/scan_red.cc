@@ -339,7 +339,7 @@ void scan2mat(Scan *source, cv::Mat &mat)
 }
 
 void reduce_octree(Scan *scan, vector<cv::Vec4f> &reduced_points, int octree,
-                   int red, bool use_reflectance)
+                   double red, bool use_reflectance)
 {
   if (use_reflectance) {
     unsigned int types = PointType::USE_REFLECTANCE;
