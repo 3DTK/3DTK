@@ -9,7 +9,7 @@ IF(WITH_TOOLS)
   ENDIF(UNIX)
 
   IF (WIN32)
-    target_link_libraries(scan_red scan ANN XGetopt)
+    target_link_libraries(scan_red scan ANN fbr_cv_io fbr_panorama ${OpenCV_LIBS} ${Boost_LIBRARIES} XGetopt)
   ENDIF(WIN32)
 
   ### SCAN_DIFF
@@ -23,7 +23,7 @@ IF(WITH_TOOLS)
 
   IF (WIN32)
     target_link_libraries(scan_diff scan ANN XGetopt)
-    # target_link_libraries(scan_diff2d scan ANN XGetopt)
+    # target_link_libraries(scan_diff2d scan dl ANN XGetopt)
   ENDIF(WIN32)
 
   add_executable(frame_to_graph frame_to_graph.cc)
@@ -54,7 +54,7 @@ IF(WITH_TOOLS)
     target_link_libraries(pose2frames XGetopt ${Boost_LIBRARIES})
     target_link_libraries(frames2riegl XGetopt ${Boost_LIBRARIES})
     target_link_libraries(riegl2frames XGetopt ${Boost_LIBRARIES})
-    target_link_libraries(toGlobal XGetopt ${Boost_LIBRARIES})
+    target_link_libraries(toGlobal scan XGetopt ${Boost_LIBRARIES})
   ENDIF(WIN32)
 
 ENDIF(WITH_TOOLS)
@@ -98,15 +98,7 @@ ENDIF(EXPORT_SHARED_LIBS)
 
 ### SLAM6D
 
-IF(WITH_CUDA)
-  CUDA_COMPILE(CUDA_FILES cuda/CIcpGpuCuda.cu )
-  add_executable(slam6D slam6D.cc cuda/icp6Dcuda.cc ${CUDA_FILES})
-  target_link_libraries(slam6D ${CUDA_LIBRARIES} ANN cudpp64)
-  CUDA_ADD_CUBLAS_TO_TARGET(slam6D)
-  CUDA_ADD_CUTIL_TO_TARGET(slam6D)
-ELSE(WITH_CUDA)
-  add_executable(slam6D slam6D.cc)
-ENDIF(WITH_CUDA)
+add_executable(slam6D slam6D.cc)
 
 IF(UNIX)
   target_link_libraries(slam6D scan newmat sparse ANN)
