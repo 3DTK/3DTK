@@ -26,9 +26,15 @@ namespace po = boost::program_options;
 
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/imgproc/imgproc_c.h>
+#include <opencv2/legacy/legacy.hpp>
 
 #include <sys/stat.h>
 #include <sys/types.h>
+
+#ifdef _MSC_VER
+#include <direct.h>
+#define mkdir(path,mode) _mkdir (path)
+#endif
 
 enum image_type {M_RANGE, M_INTENSITY};
 
@@ -483,8 +489,9 @@ cv::Mat calculatePyrSegmentation(vector<vector<cv::Vec3f>> &segmented_points,
     ipl_segmented = cvCloneImage( ipl_original );
 
     // apply the pyramid segmentation algorithm
+	/*
     cvPyrSegmentation(ipl_original, ipl_segmented, storage, &comp, pyrlevels, thresh1+1, thresh2+1); 
-
+	*/
     // mapping of color value to component id
     map<int, int> mapping;
     unsigned int segments = comp->total;
@@ -628,8 +635,7 @@ void writeposefiles(int num, string &segdir, const double* rPos, const double* r
 
 void createdirectory(string segdir)
 {
-    int success = mkdir(segdir.c_str(), S_IRWXU|S_IRWXG|S_IRWXO);
-
+	int success = mkdir(segdir.c_str(), S_IRWXU|S_IRWXG|S_IRWXO);
     if (success == 0 || errno == EEXIST) {
         cout << "Writing segmentations to " << segdir << endl;
     } else {

@@ -31,6 +31,8 @@
 #ifdef _MSC_VER
 #define strcasecmp _stricmp
 #define strncasecmp _strnicmp
+#include <direct.h>
+#define mkdir(path,mode) _mkdir (path)
 #else
 #include <strings.h>
 #endif
@@ -224,11 +226,7 @@ int main(int argc, char** argv)
   /// Make directory for saving the scan segments
   string segdir = dir + "segments";
 
-#ifdef _MSC_VER
-  int success = mkdir(segdir.c_str());
-#else
   int success = mkdir(segdir.c_str(), S_IRWXU|S_IRWXG|S_IRWXO);
-#endif
   if(success == 0) {
     cout << "Writing segments to " << segdir << endl;
   } else if(errno == EEXIST) {
