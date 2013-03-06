@@ -60,6 +60,8 @@ using std::ofstream;
 #include <getopt.h>
 #else
 #include "XGetopt.h"
+#include <direct.h>
+#define mkdir(path,mode) _mkdir (path)
 #endif
 
 #ifdef _MSC_VER
