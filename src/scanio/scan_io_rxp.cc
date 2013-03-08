@@ -224,7 +224,7 @@ void importer::on_echo_transformed(echo_type echo)
   point[1] = t.vertex[2]*100.0;
   point[2] = t.vertex[0]*100.0;
   
-  if(filter->check(point)) {
+  if(t.deviation < 10.0 && filter->check(point)) {
     if(xyz) {
       for(unsigned int i = 0; i < 3; ++i) xyz->push_back(point[i]);
     }
