@@ -424,19 +424,19 @@ void Hough::APHT() {
       for(vector<int*>::iterator it = mergelist.begin(); it != mergelist.end();
     it++) {
         if(myConfigFileHough.Get_AccumulatorType() != 2) {
-          if( sqrt(
+          if( sqrt((float)
             ((*it)[3] - (tmp[3])) * ((*it)[3] - (tmp[3])) +
             ((*it)[1] - (tmp[1])) * ((*it)[1] - (tmp[1])) +
-            ((*it)[2] - (tmp[2])) * ((*it)[2] - (tmp[2])) ) < 3.0) {
+            ((*it)[2] - (tmp[2])) * ((*it)[2] - (tmp[2])) ) < 3.0f) {
             insert = false;
             break;
           }
         } else { 
-          if( sqrt(
+          if( sqrt((float)
             ((*it)[4] - (tmp[4])) * ((*it)[4] - (tmp[4])) +
             ((*it)[1] - (tmp[1])) * ((*it)[1] - (tmp[1])) +
             ((*it)[2] - (tmp[2])) * ((*it)[2] - (tmp[2])) +
-            ((*it)[3] - (tmp[3])) * ((*it)[3] - (tmp[3])) ) < 3.0) {
+            ((*it)[3] - (tmp[3])) * ((*it)[3] - (tmp[3])) ) < 3.0f) {
             insert = false;
             break;
           }
@@ -456,19 +456,19 @@ void Hough::APHT() {
         for(unsigned int k = 0; k < i; k++) {
           int * tmp2 = altlist[k];
           if(myConfigFileHough.Get_AccumulatorType() != 2) {
-            if( sqrt(
+            if( sqrt((float)
               ((tmp2)[3] - (tmp1[3])) * ((tmp2)[3] - (tmp1[3])) +
               ((tmp2)[1] - (tmp1[1])) * ((tmp2)[1] - (tmp1[1])) +
-              ((tmp2)[2] - (tmp1[2])) * ((tmp2)[2] - (tmp1[2])) ) < 3.0) {
+              ((tmp2)[2] - (tmp1[2])) * ((tmp2)[2] - (tmp1[2])) ) < 3.0f) {
               treffer = true;
               break;
             }
           } else { 
-            if( sqrt(
+            if( sqrt((float)
               ((tmp2)[4] - (tmp1[4])) * ((tmp2)[4] - (tmp1[4])) +
               ((tmp2)[1] - (tmp1[1])) * ((tmp2)[1] - (tmp1[1])) +
               ((tmp2)[2] - (tmp1[2])) * ((tmp2)[2] - (tmp1[2])) +
-              ((tmp2)[3] - (tmp1[3])) * ((tmp2)[3] - (tmp1[3])) ) < 3.0) {
+              ((tmp2)[3] - (tmp1[3])) * ((tmp2)[3] - (tmp1[3])) ) < 3.0f) {
               treffer = true;
               break;
             }
