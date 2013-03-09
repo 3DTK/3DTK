@@ -32,6 +32,8 @@ using std::endl;
 #ifdef _MSC_VER
 #define strcasecmp _stricmp
 #define strncasecmp _strnicmp
+#include <float.h>
+#define isnan _isnan
 #include <windows.h>
 #include <direct.h>
 #else
@@ -39,6 +41,7 @@ using std::endl;
 #include <sys/types.h>
 #include <strings.h>
 #include <dlfcn.h>
+using std::isnan;
 #endif
 
 #include "shapes/hough.h"
@@ -599,7 +602,7 @@ int main(int argc, char **argv)
 
     cout << nx << " " << ny << " " << nz << " " << d << endl;
     
-    if(std::isnan(d)) {
+    if(isnan(d)) {
       writeFalse(output);
       failures++;
     } else {
