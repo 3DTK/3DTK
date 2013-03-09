@@ -33,7 +33,6 @@ using std::endl;
 #define strcasecmp _stricmp
 #define strncasecmp _strnicmp
 #include <float.h>
-#define std::isnan _isnan
 #include <windows.h>
 #include <direct.h>
 #else
@@ -602,7 +601,11 @@ int main(int argc, char **argv)
 
     cout << nx << " " << ny << " " << nz << " " << d << endl;
     
+#if #ifdef _MSC_VER
+	if(_isnan(d)) {
+#else
     if(std::isnan(d)) {
+#endif
       writeFalse(output);
       failures++;
     } else {
