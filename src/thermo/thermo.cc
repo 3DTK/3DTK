@@ -6,6 +6,8 @@ using namespace NEWMAT;
 #include "cvblob.h"
 using namespace cvb;
 
+#include <cmath>
+
 #include <slam6d/globals.icc>
 
 #ifndef _MSC_VER
@@ -15,6 +17,11 @@ using namespace cvb;
 #include "XGetopt.h"
 #define strcasecmp _stricmp
 #define strncasecmp _strnicmp
+#define snprintf sprintf_s
+static inline double round(double val)
+{   
+    return floor(val + 0.5);
+}
 #include <windows.h>
 #include <direct.h>
 #endif
@@ -39,7 +46,7 @@ unsigned int GRAY_TH = 65;
   * @param cy center y of the point cloud
   */
 
-void calcBoard(double point_array[][2], int board_n, double &x, double &y, double &cx, double &cy, bool pc) {    
+void calcBoard(vector<vector<double> > &point_array, int board_n, double &x, double &y, double &cx, double &cy, bool pc) {    
   cx = cy = 0;
   for (int a = 0; a < board_n; a++) {
     cx += point_array[a][0];
@@ -90,11 +97,12 @@ void calcBoard(double point_array[][2], int board_n, double &x, double &y, doubl
   * @param board_w number of columns
   * @param quiet if true, debug information is printed
   */
-void sortBlobs(double point_array[][2], int board_n, int board_h, int board_w, bool quiet) {
+void sortBlobs(vector<vector<double> > &point_array, int board_n, int board_h, int board_w, bool quiet) {
   double x, y, cx, cy;
   // align board using PCA
   calcBoard(point_array, board_n, x, y, cx, cy, board_h <= board_w);
-  double point_array2[board_n][2];
+//  double point_array2[board_n][2];
+  vector<vector<double> > point_array2(board_n, vector<double>(2));
   double angle = -atan2(y,x);
   for(int i = 0; i < board_n; i++) {
     double tmpx = point_array[i][0] - cx;
@@ -137,9 +145,11 @@ void sortBlobs(double point_array[][2], int board_n, int board_h, int board_w, b
   }
   // sorting the array rows now
   for (int x = 0; x < board_h; x++) {
-    double row_points[board_w][2];
-    double row_points2[board_w][2];
-    for (int y = 0; y < board_w; y++) {
+//    double row_points[board_w][2];
+//    double row_points2[board_w][2];
+	vector<vector<double> > row_points(board_w, vector<double>(2));
+	vector<vector<double> > row_points2(board_w, vector<double>(2));
+	for	(int y = 0; y < board_w; y++) {
       row_points[y][0] = point_array[x * board_w + y][0];
       row_points[y][1] = point_array[x * board_w + y][1];
       row_points2[y][0] = point_array2[x * board_w + y][0];
@@ -187,7 +197,7 @@ void sortBlobs(double point_array[][2], int board_n, int board_h, int board_w, b
 /**
   * Detects the blobs.
   */
-IplImage* detectBlobs(IplImage *org_image, int &corner_exp, int board_h, int board_w, bool quiet, double point_array2[][2]) {
+IplImage* detectBlobs(IplImage *org_image, int &corner_exp, int board_h, int board_w, bool quiet, vector<vector<double> > &point_array2) {
 
   IplImage *gray_image = cvCloneImage(org_image); 
   cvThreshold(gray_image, gray_image, GRAY_TH, 255, CV_THRESH_BINARY);
@@ -268,7 +278,7 @@ IplImage* detectBlobs(IplImage *org_image, int &corner_exp, int board_h, int boa
 /**
   * Connects the detected calibration features in the image with lines.
   */
-void drawLines(double point_array2[][2], int corner_exp, IplImage *image, bool color) {
+void drawLines(vector<vector<double> > &point_array2, int corner_exp, IplImage *image, bool color) {
   for (int i = 0; i <= corner_exp - 2; i++) {
     CvPoint pt1;
     CvPoint pt2;
@@ -346,7 +356,7 @@ IplImage* resizeImage(IplImage *source, int scale) {
 /**
   * Detects the corners of the chessboard pattern.
   */
-IplImage* detectCorners(IplImage *orgimage, int &corner_exp, int board_h, int board_w, bool quiet, double point_array2[][2], int scale) {
+IplImage* detectCorners(IplImage *orgimage, int &corner_exp, int board_h, int board_w, bool quiet, vector<vector<double> > &point_array2, int scale) {
   
   cout << "Scale: " << scale << endl;
   IplImage *image = resizeImage(orgimage, scale);
@@ -503,7 +513,8 @@ chess, bool quiet, string dir, int scale) {
     cvShowImage("Original Image", image1);
 	
     /////////////////////////////////////////////////////////////
-    double point_array2[corner_exp][2];
+//    double point_array2[corner_exp][2];
+	vector<vector<double> > point_array2(corner_exp, vector<double>(2));
     IplImage *image;
     
     int tmp_corners = corner_exp;
@@ -595,7 +606,8 @@ bool readPoints(string filename, CvPoint3D32f *corners, int size) {
   * that has the smallest distance to all other translation.
   */
 int realMedian(CvMat * vectors, int nr_vectors) {
-  double distances[nr_vectors];
+//  double distances[nr_vectors];
+  vector<double> distances(nr_vectors);	
 
   for(int i = 0; i < nr_vectors; i++) {
     double sum = 0;
@@ -736,7 +748,7 @@ void calculateExtrinsicsWithReprojectionCheck(CvMat * points2D, CvMat *
     * distortion, CvMat * intrinsics, int corners, int successes, string dir, bool quiet, string substring) {
   cout << dir << endl;
   int modsuccesses = successes + 4;
-  double reprojectionError[modsuccesses];
+  vector<double> reprojectionError(modsuccesses);
   for(int i = 0; i < modsuccesses; i++) {
     reprojectionError[i] = 0.0;
   }
@@ -1025,7 +1037,7 @@ void ExtrCalibFunc(int board_w, int board_h, int start, int end, bool optical, b
     cvUndistort2(image1, image2, intrinsic, distortion);
     cvShowImage("Final Result", image2);
 
-    double point_array2[corner_exp][2];
+    vector<vector<double> > point_array2(corner_exp, vector<double>(2));
     IplImage *image;
     
 

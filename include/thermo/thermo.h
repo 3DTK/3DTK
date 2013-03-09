@@ -14,10 +14,10 @@ using namespace std;
 //typedef vector<vector<float> > Float2D[1200][1600];
 typedef vector<vector<float> > Float2D[2592][3888];
 
-void calcBoard(double point_array[][2], int board_n, double &x, double &y, double &cx, double &cy, bool pc);    
-void sortBlobs(double point_array[][2], int board_n, int board_h, int board_w, bool quiet); 
-IplImage* detectBlobs(IplImage *org_image, int &corner_exp, int board_h, int board_w, bool quiet, double point_array2[][2]);
-void drawLines(double point_array2[][2], int corner_exp, IplImage *image, bool color=false);
+void calcBoard(vector<vector<double> > &point_array, int board_n, double &x, double &y, double &cx, double &cy, bool pc); 
+void sortBlobs(vector<vector<double> > &point_array, int board_n, int board_h, int board_w, bool quiet); 
+IplImage* detectBlobs(IplImage *org_image, int &corner_exp, int board_h, int board_w, bool quiet, vector<vector<double> > &point_array2);
+void drawLines(vector<vector<double> > &point_array2, int corner_exp, IplImage *image, bool color=false);
 IplImage* resizeImage(IplImage *source, int scale);
 IplImage* detectCorners(IplImage *orgimage, int &corner_exp, int board_h, int board_w, bool quiet, double point_array2[][2], int scale=1);
 void CalibFunc(int board_w, int board_h, int start, int end, bool optical, bool chess, bool quiet, string dir, int scale=1);

@@ -8,18 +8,17 @@ IF (WITH_THERMO)
   
   add_executable(caliboard caliboard.cc) 
   add_executable(thermo thermo.cc) 
-#  add_executable(thermo thermo.cc src/cvaux.cpp  src/cvblob.cpp  src/cvcolor.cpp src/cvcontour.cpp  src/cvlabel.cpp  src/cvtrack.cpp)
   
   IF(UNIX)
     target_link_libraries(caliboard scan shape newmat dl ANN)
     target_link_libraries(thermo scan shape newmat dl ANN)
-    target_link_libraries(thermo GL GLU cvblob ${OpenCV_LIBS} scan ANN)
+    target_link_libraries(thermo cvblob ${OpenCV_LIBS} scan ANN)
   ENDIF(UNIX)
 
   IF (WIN32)
     target_link_libraries(caliboard scan shape newmat XGetopt ANN)
     target_link_libraries(thermo scan shape newmat XGetopt ANN)
-    target_link_libraries(thermo GL GLU cvblob ${OpenCV_LIBS} scan ANN)
+    target_link_libraries(thermo cvblob ${OpenCV_LIBS} scan ANN)
   ENDIF(WIN32)
   
 
