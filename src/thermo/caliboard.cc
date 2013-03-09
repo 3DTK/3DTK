@@ -601,7 +601,7 @@ int main(int argc, char **argv)
 
     cout << nx << " " << ny << " " << nz << " " << d << endl;
     
-#if #ifdef _MSC_VER
+#ifdef _MSC_VER
 	if(_isnan(d)) {
 #else
     if(std::isnan(d)) {
