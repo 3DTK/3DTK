@@ -7,8 +7,14 @@
  *
  */
 
+
+#ifdef _MSC_VER
+#define  _USE_MATH_DEFINES
+#include <windows.h>
+#endif
+
 #ifdef WITH_GLEE
-#include <GLee.h>
+#include "glee/glee.h"
 #endif
 
 #include "show/show.h"
