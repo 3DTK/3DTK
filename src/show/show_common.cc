@@ -14,7 +14,7 @@
 #endif
 
 #ifdef WITH_GLEE
-#include "glee/glee.h"
+#include "glee/GLee.h"
 #endif
 
 #include "show/show.h"
