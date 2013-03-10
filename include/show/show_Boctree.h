@@ -123,6 +123,15 @@ public:
       delete m_tree;
   }
   
+  int pow(int base, int exponent) {
+    if (exponent == 0)
+        return 1;
+    else if (exponent % 2 == 0) {
+        int half_pow = pow(base, exponent / 2);
+        return half_pow * half_pow;
+	} else
+        return base * pow(base, exponent - 1);
+  }
   BOctTree<T>* getTree() const { return m_tree; }
   
   void serialize(const std::string& filename) const { m_tree->serialize(filename); }

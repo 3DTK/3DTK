@@ -98,3 +98,10 @@ add_library(LAZ STATIC ${LASLIB_SRCS})
 IF(EXPORT_SHARED_LIBS)
 add_library(LAZ_s SHARED ${LASLIB_SRCS})
 ENDIF(EXPORT_SHARED_LIBS)
+
+# Compile GLEE library 
+SET(GLEE_DIR ${CMAKE_SOURCE_DIR}/3rdparty/glee/)
+add_library(glee STATIC ${GLEE_DIR}glee.c)
+IF(EXPORT_SHARED_LIBS)
+add_library(glee_s SHARED ${GLEE_DIR}glee.c)
+ENDIF(EXPORT_SHARED_LIBS)
