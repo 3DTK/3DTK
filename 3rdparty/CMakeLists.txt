@@ -101,7 +101,7 @@ ENDIF(EXPORT_SHARED_LIBS)
 
 # Compile GLEE library 
 SET(GLEE_DIR ${CMAKE_SOURCE_DIR}/3rdparty/glee/)
-add_library(glee STATIC ${GLEE_DIR}glee.c)
+add_library(glee STATIC ${GLEE_DIR}GLee.c)
 IF(EXPORT_SHARED_LIBS)
-add_library(glee_s SHARED ${GLEE_DIR}glee.c)
+add_library(glee_s SHARED ${GLEE_DIR}GLee.c)
 ENDIF(EXPORT_SHARED_LIBS)
