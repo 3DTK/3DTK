@@ -53,6 +53,16 @@ public:
 							   double *_dir,
 							   double maxdist2,
 							   int threadNum = 0) const;
+  
+  virtual vector<Point> fixedRangeSearchAlongDir(double *_p,
+                  double *_dir,
+                  double maxdist2,
+                  int threadNum = 0) const;
+  
+  virtual vector<Point> fixedRangeSearchBetween2Points(double *_p,
+                  double *_dir,
+                  double maxdist2,
+                  int threadNum = 0) const;
 
   virtual vector<Point> kNearestNeighbors(double *_p,
 								  int k,

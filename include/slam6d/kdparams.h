@@ -42,6 +42,8 @@ public:
    */
   double *dir;
 
+  double dist_2;
+
   /**
    * vector of all neighbors within a given radius
    */
