@@ -117,6 +117,62 @@ vector<Point> KDtree::kNearestNeighbors(double *_p,
   return result;
 }
 
+
+vector<Point> KDtree::fixedRangeSearchBetween2Points(double *_p,
+                      double *_p0,
+                      double maxdist2,
+                      int threadNum) const {
+  vector<Point> result;
+  params[threadNum].closest = _p0;
+  params[threadNum].closest_d2 = maxdist2;
+  params[threadNum].p = _p;
+  params[threadNum].dist_2 = Dist2(_p, _p0);
+
+  double * _dir = new double[3];
+  for(int i = 0; i < 3; i++) {
+    _dir[i] = _p0[i] - _p[i];
+  }
+
+  Normalize3(_dir);
+  
+  params[threadNum].dir = _dir;
+  params[threadNum].range_neighbors.clear();
+
+  _fixedRangeSearchBetween2Points(Void(), threadNum);
+  
+  for (size_t i = 0; i < params[threadNum].range_neighbors.size(); i++) {
+    result.push_back(Point(params[threadNum].range_neighbors[i][0],
+                           params[threadNum].range_neighbors[i][1],
+                           params[threadNum].range_neighbors[i][2]));
+  }
+  
+  delete[] _dir;
+  return result;
+}
+
+
+vector<Point> KDtree::fixedRangeSearchAlongDir(double *_p,
+                      double *_dir,
+                      double maxdist2,
+                      int threadNum) const {
+  vector<Point> result;
+  params[threadNum].closest = NULL;
+  params[threadNum].closest_d2 = maxdist2;
+  params[threadNum].p = _p;
+  params[threadNum].dir = _dir;
+  params[threadNum].range_neighbors.clear();
+
+  _fixedRangeSearchAlongDir(Void(), threadNum);
+  
+  for (size_t i = 0; i < params[threadNum].range_neighbors.size(); i++) {
+    result.push_back(Point(params[threadNum].range_neighbors[i][0],
+                           params[threadNum].range_neighbors[i][1],
+                           params[threadNum].range_neighbors[i][2]));
+  }
+  
+  return result;
+}
+
 vector<Point> KDtree::fixedRangeSearch(double *_p,
                                        double sqRad2,
                                        int threadNum) const

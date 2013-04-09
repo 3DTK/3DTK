@@ -649,8 +649,8 @@ template <class T>
 static inline int M4inv(const T *Min, T *Mout )
 {
   T  mdet = M4det( Min );
-  if ( fabs( mdet ) < 0.0005 ) {
-    cout << "Error matrix inverting!" << endl;
+  if ( fabs( mdet ) < 0.00000000000005 ) {
+    cout << "Error matrix inverting! " << mdet << endl;
     M4identity( Mout );
     return( 0 );
   }
