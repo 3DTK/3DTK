@@ -284,6 +284,108 @@ protected:
     }
   }
 
+  void _fixedRangeSearchBetween2Points(const PointData& pts, int threadNum) const {
+    AccessorFunc point;
+    
+    // Leaf nodes
+    if (npts) {
+	    for (int i = 0; i < npts; i++) {
+        double p2p[] =  { params[threadNum].p[0] - point(pts, leaf.p[i])[0],
+                          params[threadNum].p[1] - point(pts, leaf.p[i])[1],
+                          params[threadNum].p[2] - point(pts, leaf.p[i])[2] };
+        double myd2 = Len2(p2p) - sqr(Dot(p2p, params[threadNum].dir));
+        if (myd2 < params[threadNum].closest_d2) {
+		    //  cout << point(pts, leaf.p[i])[0] << " " << point(pts, leaf.p[i])[1] << " " << point(pts, leaf.p[i])[2] << " " << myd2 << endl;
+          params[threadNum].range_neighbors.push_back(point(pts, leaf.p[i]));
+	      }
+	    }
+	    return;
+    }
+    
+    // Quick check of whether to abort
+    double c2c[] = { params[threadNum].p[0] - node.center[0],
+                     params[threadNum].p[1] - node.center[1],
+                     params[threadNum].p[2] - node.center[2] };
+    
+    double my_dist_2 = Len2(c2c); // Distance^2 camera node center
+    double myd2center = my_dist_2 - sqr(Dot(c2c, params[threadNum].dir));
+    //if (myd2center > (node.r2 + params[threadNum].closest_d2 + 2.0f * max(node.r2, params[threadNum].closest_d2)))
+    
+    double r = sqrt(node.r2);
+    if (myd2center > (node.r2 + params[threadNum].closest_d2 + 2.0f * r * sqrt(params[threadNum].closest_d2)))
+      return;
+    //if (myd2center > (node.r2 + params[threadNum].closest_d2 + 2.0f * sqrt(node.r2) * sqrt(params[threadNum].closest_d2))) return;
+
+    // check if not between points
+    
+    double p2c[] = { params[threadNum].closest[0] - node.center[0],
+                     params[threadNum].closest[1] - node.center[1],
+                     params[threadNum].closest[2] - node.center[2] };
+
+    double distXP2 = Len2(p2c);
+    if(params[threadNum].dist_2 > (distXP2 + node.r2 + 2.0f * r * sqrt(distXP2))) return;
+    
+    if(params[threadNum].dist_2 > (my_dist_2 + node.r2 + 2.0f * r * sqrt(my_dist_2))) return;
+    
+    // Recursive case
+    if (params[threadNum].p[node.splitaxis] < node.center[node.splitaxis] ) {
+      node.child1->_fixedRangeSearchAlongDir(pts, threadNum);
+      node.child2->_fixedRangeSearchAlongDir(pts, threadNum);
+    } else {
+      node.child2->_fixedRangeSearchAlongDir(pts, threadNum);
+      node.child1->_fixedRangeSearchAlongDir(pts, threadNum);
+    }
+  
+  }
+
+  
+  void _fixedRangeSearchAlongDir(const PointData& pts, int threadNum) const {
+    AccessorFunc point;
+    
+    // Leaf nodes
+    if (npts) {
+	    for (int i = 0; i < npts; i++) {
+        /*
+        double p2pb[] =  { point(pts, leaf.p[i])[0] - params[threadNum].p[0],
+                          point(pts, leaf.p[i])[1] - params[threadNum].p[1],
+                          point(pts, leaf.p[i])[2] - params[threadNum].p[2]};
+        double blub[3];
+        Cross(p2pb, params[threadNum].dir, blub);
+        double myd2b = Len2(blub) / Len2(params[threadNum].dir);
+	      */
+        
+        double p2p[] =  { params[threadNum].p[0] - point(pts, leaf.p[i])[0],
+                          params[threadNum].p[1] - point(pts, leaf.p[i])[1],
+                          params[threadNum].p[2] - point(pts, leaf.p[i])[2] };
+        double myd2 = Len2(p2p) - sqr(Dot(p2p, params[threadNum].dir));
+        if (myd2 < params[threadNum].closest_d2) {
+		    //  cout << point(pts, leaf.p[i])[0] << " " << point(pts, leaf.p[i])[1] << " " << point(pts, leaf.p[i])[2] << " " << myd2 << endl;
+          params[threadNum].range_neighbors.push_back(point(pts, leaf.p[i]));
+	      }
+	    }
+	    return;
+    }
+    
+    // Quick check of whether to abort
+    double p2c[] = { params[threadNum].p[0] - node.center[0],
+                     params[threadNum].p[1] - node.center[1],
+                     params[threadNum].p[2] - node.center[2] };
+    double myd2center = Len2(p2c) - sqr(Dot(p2c, params[threadNum].dir));
+    //if (myd2center > (node.r2 + params[threadNum].closest_d2 + 2.0f * max(node.r2, params[threadNum].closest_d2)))
+    if (myd2center > (node.r2 + params[threadNum].closest_d2 + 2.0f * sqrt(node.r2) * sqrt(params[threadNum].closest_d2)))
+      return;
+
+    // Recursive case
+    if (params[threadNum].p[node.splitaxis] < node.center[node.splitaxis] ) {
+      node.child1->_fixedRangeSearchAlongDir(pts, threadNum);
+      node.child2->_fixedRangeSearchAlongDir(pts, threadNum);
+    } else {
+      node.child2->_fixedRangeSearchAlongDir(pts, threadNum);
+      node.child1->_fixedRangeSearchAlongDir(pts, threadNum);
+    }
+  
+  }
+
   void _FixedRangeSearch(const PointData& pts, int threadNum) const {
     AccessorFunc point;
 

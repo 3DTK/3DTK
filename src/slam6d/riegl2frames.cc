@@ -124,7 +124,7 @@ int main(int argc, char **argv)
     tMatrix[8] = -inMatrix[4];
     tMatrix[9] = inMatrix[8];
     tMatrix[10] = inMatrix[0];
-    tMatrix[11] = 100*inMatrix[12];
+    tMatrix[11] = inMatrix[12];
     tMatrix[12] = -100*inMatrix[7];
     tMatrix[13] = 100*inMatrix[11];
     tMatrix[14] = 100*inMatrix[3];
