@@ -353,7 +353,7 @@ void Scan::calcReducedPoints()
         xyz_in[i][j++] = reflectance[i];
       if (reduction_pointtype.hasNormal())
         for (unsigned int l = 0; l < 3; ++l) 
-          xyz_in[i][j] = xyz_normals[i][l];
+          xyz_in[i][j++] = xyz_normals[i][l];
     }
 
     // start reduction
