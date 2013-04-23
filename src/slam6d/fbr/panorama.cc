@@ -13,7 +13,10 @@ using namespace std;
 
 namespace fbr{
   
-  void panorama::init(unsigned int width, unsigned int height, projection_method method, unsigned int numberOfImages, double param, panorama_map_method mMethod){
+  void panorama::init(unsigned int width, unsigned int height, projection_method method, unsigned int numberOfImages, double param, panorama_map_method mMethod, float min, float max){
+    //z Min and Max
+    zMin = min;
+    zMax = max;
     //clear the containers
     iReflectance.release();
     iMap.release();
@@ -156,10 +159,12 @@ namespace fbr{
 	range = polar[2];
 	//horizantal angle of view of [0:360] and vertical of [-40:60]
 	phi = 360.0 - phi;
+        phi *= M_PI / 180.0;
+	//phi = 360.0 - phi;
 	//@
-	phi += 90; if (phi > 360) phi -= 360;
+	//phi += 90; if (phi > 360) phi -= 360;
 	//@
-	phi = phi * 2.0 * M_PI / 360.0;
+	//phi = phi * 2.0 * M_PI / 360.0;
 	theta -= 90;
 	theta *= -1;
 	theta *= 2.0 * M_PI / 360.0;
@@ -603,8 +608,10 @@ namespace fbr{
     
     //ZAXIS projection
     if(pMethod == ZAXIS){
-      double zmin = -200;
-      double zmax = 4000;
+      //double zmin = -100;
+      double zmin = zMin;
+      //double zmax = 100;
+      double zmax = zMax;
       //adding the longitude to x axis and latitude to y axis
       double xFactor = (double) iWidth / 2 / M_PI;
       int widthMax = iWidth - 1;
