@@ -96,27 +96,31 @@ unsigned int PointType::getReflectance() {
 }
 
 unsigned int PointType::getTemperature() {
-  return dimensionmap[2];
-}
-
-unsigned int PointType::getAmplitude() {
   return dimensionmap[3];
 }
 
-unsigned int PointType::getDeviation() {
+unsigned int PointType::getAmplitude() {
   return dimensionmap[4];
 }
 
-unsigned int PointType::getTime() {
-  return dimensionmap[7];
+unsigned int PointType::getDeviation() {
+  return dimensionmap[5];
 }
 
-unsigned int PointType::getIndex() {
+unsigned int PointType::getTime() {
   return dimensionmap[8];
 }
 
+unsigned int PointType::getIndex() {
+  return dimensionmap[9];
+}
+
 unsigned int PointType::getType() {
-  return dimensionmap[5];
+  return dimensionmap[6];
+}
+
+unsigned int PointType::getColor() {
+  return dimensionmap[7];
 }
 
 unsigned int PointType::getType(unsigned int type) {
@@ -140,6 +144,8 @@ unsigned int PointType::getType(unsigned int type) {
     return dimensionmap[7];
   } else if (type == USE_TIME) {
     return dimensionmap[8];
+  } else if (type == USE_INDEX) {
+    return dimensionmap[9];
   } else {
     return 0;
   }
