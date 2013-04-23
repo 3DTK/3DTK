@@ -26,6 +26,9 @@ add_executable(featurebasedregistration feature_based_registration.cc fbr_global
 add_executable(panorama_matcher panorama_matcher.cc fbr_global.cc)
 target_link_libraries(panorama_matcher fbr ${FBR_LIBS})
 
+add_executable(panorama_creator panorama_creator.cc fbr_global.cc)
+target_link_libraries(panorama_creator fbr ${FBR_LIBS} show_s)
+
 IF (WIN32)
   target_link_libraries(featurebasedregistration fbr ${FBR_LIBS} XGetopt)
 ENDIF(WIN32)
