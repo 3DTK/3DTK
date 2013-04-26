@@ -16,6 +16,13 @@
 #undef max
 #undef min
 #include <limits>
+#include "show/scancolormanager.h"
+#include "show/show_Boctree.h"
+#include "slam6d/point_type.h"
+#include "show/show.h"
+#include "slam6d/data_types.h"
+#include "slam6d/Boctree.h"
+#include "slam6d/basicscan.h"
 
 namespace fbr{
   /**
@@ -29,6 +36,9 @@ namespace fbr{
    * @param zmax max value in z direction
    * @param zmin min value in z direction
    * @param sFormat input scan file format in IOType
+   * @param scanserver 
+   * @param loadOct
+   * @param saveOct
    */
   class scan_cv{
     string sDir;
@@ -40,7 +50,12 @@ namespace fbr{
     double zMin;
     IOType sFormat;
     bool scanserver;
-    
+    bool loadOct;
+    bool saveOct;
+    bool reflectance, color;
+    unsigned int types;
+    double voxelSize, red, scale;
+    scanner_type sType;
   public:
     /**
      * constructor of class scan_cv
@@ -48,9 +63,13 @@ namespace fbr{
      * @param number input scan number
      * @param format input scan file format
      * @param scanServer 
+     * @param loadOct
+     * @param saveOct
      */
+    scan_cv (string dir, unsigned int number, IOType format, bool scanServer, scanner_type type, bool lOct, bool sOct, bool Reflectance, bool Color);
     scan_cv (string dir, unsigned int number, IOType format, bool scanServer);
     scan_cv (string dir, unsigned int number, IOType format);
+
     /**
      * @brief read scan file and convert it to open cv Mat
      */

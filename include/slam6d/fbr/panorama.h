@@ -56,6 +56,7 @@ namespace fbr{
     double pParam;
     panorama_map_method mapMethod;
     float zMin, zMax;
+    double MAX_ANGLE, MIN_ANGLE;
 
     void map(int x,
              int y,
@@ -91,6 +92,16 @@ namespace fbr{
               unsigned int numberOfImages,
               double param,
               panorama_map_method mapMethod);
+    panorama (unsigned int width,
+              unsigned int height,
+              projection_method method,
+              unsigned int numberOfImages,
+              double param,
+              panorama_map_method mapMethod,
+	      float min,
+	      float max,
+	      double MINANGLE,
+	      double MAXANGLE);
 
     void init(unsigned int width,
               unsigned int height,
@@ -99,7 +110,9 @@ namespace fbr{
               double param,
               panorama_map_method mapMethod,
 	      float min = 0, 
-	      float max = 0);
+	      float max = 0,
+	      double MINANGLE = -40,
+	      double MAXANGLE = 60);
 
     /**
      * @brief creates the panorama reflectance image and map and color image.

@@ -39,9 +39,19 @@ using namespace std;
 namespace fbr{
   
   //Vertical angle of view of scanner
-#define MAX_ANGLE 60.0
-#define MIN_ANGLE -40.0
-  
+  //#define MAX_ANGLE 60.0
+  //#define MIN_ANGLE -40.0
+  //#define MAX_ANGLE 90.0
+  //#define MIN_ANGLE -65.0
+
+  /**
+   * @enum scanner_type
+   */
+  enum scanner_type{
+    NONE,
+    RIEGL,
+    FARO,
+  };
   /**
    * @enum projection_method
    */
@@ -117,6 +127,8 @@ namespace fbr{
 
   string scanFormatToString(IOType format);
   IOType stringToScanFormat(string format);
+  string scannerTypeToString(scanner_type type);
+  scanner_type stringToScannerType(string type);
   string projectionMethodToString(projection_method method);
   projection_method stringToProjectionMethod(string method);
   string panoramaMapMethodToString(panorama_map_method method);
