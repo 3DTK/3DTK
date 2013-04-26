@@ -269,10 +269,13 @@ int main(int argc, char** argv)
 	reflectance = 255;
 
       //normalize the reflectance
-      reflectance += 32;
-      reflectance /= 64;
-      reflectance -= 0.2;
-      reflectance /= 0.3;
+      //reflectance += 32;
+      //reflectance /= 64;
+      //reflectance -= 0.2;
+      //reflectance /= 0.3;
+      //reflectance -= 1200;
+      //reflectance /= 600;
+
       if (reflectance < 0) reflectance = 0;
       if (reflectance > 1) reflectance = 1;
       (*it)[3] = reflectance;

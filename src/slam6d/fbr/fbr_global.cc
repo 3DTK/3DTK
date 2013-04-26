@@ -19,6 +19,29 @@ namespace fbr{
   IOType stringToScanFormat(string format){
     return formatname_to_io_type(format.c_str());
   }  
+  string scannerTypeToString(scanner_type type){
+    string sType;
+    switch(type){
+    case NONE:
+      sType = "NONE";
+      break;
+    case RIEGL:
+      sType = "RIEGL";
+      break;
+    case FARO:
+      sType = "FARO";
+      break;
+    default:
+      throw std::runtime_error(std::string("scanner type") + to_string(type) + std::string(" could not be matched to a scanner type"));
+    }
+    return sType;
+  }
+  scanner_type stringToScannerType(string type){
+    if(strcasecmp(type.c_str(), "NONE") == 0) return NONE;
+    else if(strcasecmp(type.c_str(), "RIEGL") == 0) return RIEGL;
+    else if(strcasecmp(type.c_str(), "FARO") == 0) return FARO;
+    else throw std::runtime_error(std::string("scanner type ") + type + std::string(" is unknown"));
+  }
   string projectionMethodToString(projection_method method){
     string sMethod;
     switch(method){

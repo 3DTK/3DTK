@@ -385,29 +385,31 @@ int main(int argc, char** argv){
   }
 
   ///////
-  //cv::Mat reduced_range_image;
-  //cv::Mat reduced_reflectance_image;
-  //resize(fPanorama.getRangeImage(), reduced_range_image, cv::Size(), 0.5, 0.5, cv::INTER_NEAREST);
-  //resize(fPanorama.getReflectanceImage(), reduced_reflectance_image, cv::Size(), 0.5, 0.5, cv::INTER_NEAREST);
+  cv::Mat reduced_range_image;
+  cv::Mat reduced_reflectance_image;
+  cv::Mat reduced_map;
+  resize(fPanorama.getRangeImage(), reduced_range_image, cv::Size(), 0.75, 0.75, cv::INTER_NEAREST);
+  resize(fPanorama.getReflectanceImage(), reduced_reflectance_image, cv::Size(), 0.75, 0.75, cv::INTER_NEAREST);
+  resize(fPanorama.getMap(), reduced_map, cv::Size(), 0.75, 0.75, cv::INTER_NEAREST);
   
   ///////
 
   feature fFeature;
   if(info.verbose >= 4) info.fFTime = (double)cv::getTickCount();
-  fFeature.featureDetection(fPanorama.getReflectanceImage(), info.fMethod);
-  //fFeature.featureDetection(reduced_reflectance_image, info.fMethod);
+  //fFeature.featureDetection(fPanorama.getReflectanceImage(), info.fMethod);
+  fFeature.featureDetection(reduced_reflectance_image, info.fMethod);
   if(info.verbose >= 4) info.fFTime = ((double)cv::getTickCount() - info.fFTime)/cv::getTickFrequency();
   //write panorama with keypoints to image
   if(info.verbose >= 1){
-    drawer.DrawKeypoints(fPanorama.getReflectanceImage(), fFeature.getFeatures(), outImage, cv::Scalar::all(-1), cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS );
-    //drawer.DrawKeypoints(reduced_reflectance_image, fFeature.getFeatures(), outImage, cv::Scalar::all(-1), cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS );
+    //drawer.DrawKeypoints(fPanorama.getReflectanceImage(), fFeature.getFeatures(), outImage, cv::Scalar::all(-1), cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS );
+    drawer.DrawKeypoints(reduced_reflectance_image, fFeature.getFeatures(), outImage, cv::Scalar::all(-1), cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS );
     out = info.outDir+info.local_time+"_scan"+to_string(info.fScanNumber, 3)+"_"+projectionMethodToString(info.pMethod)+"_"+to_string(info.iWidth)+"x"+to_string(info.iHeight)+"_"+featureDetectorMethodToString(info.fMethod)+".jpg";
     imwrite(out, outImage);
     outImage.release();
   }
   if(info.verbose >= 4) info.fDTime = (double)cv::getTickCount();
-  fFeature.featureDescription(fPanorama.getReflectanceImage(), info.dMethod);
-  //fFeature.featureDescription(reduced_reflectance_image, info.dMethod);
+  //fFeature.featureDescription(fPanorama.getReflectanceImage(), info.dMethod);
+  fFeature.featureDescription(reduced_reflectance_image, info.dMethod);
   if(info.verbose >= 4) info.fDTime = ((double)cv::getTickCount() - info.fDTime)/cv::getTickFrequency();
   if(info.verbose >= 2) fFeature.getDescription();
   
@@ -437,30 +439,32 @@ int main(int argc, char** argv){
   }
 
     ///////
-  //cv::Mat reduced_range_image_2;
-  //cv::Mat reduced_reflectance_image_2;
-  //resize(sPanorama.getRangeImage(),reduced_range_image_2, cv::Size(), 0.5, 0.5, cv::INTER_NEAREST);
-  //resize(sPanorama.getReflectanceImage(),reduced_reflectance_image_2, cv::Size(), 0.5, 0.5, cv::INTER_NEAREST);
+  cv::Mat reduced_range_image_2;
+  cv::Mat reduced_reflectance_image_2;
+  cv::Mat reduced_map_2;
+  resize(sPanorama.getRangeImage(),reduced_range_image_2, cv::Size(), 0.75, 0.75, cv::INTER_NEAREST);
+  resize(sPanorama.getReflectanceImage(),reduced_reflectance_image_2, cv::Size(), 0.75, 0.75, cv::INTER_NEAREST);
+  resize(sPanorama.getMap(),reduced_map_2, cv::Size(), 0.75, 0.75, cv::INTER_NEAREST);
   
   ///////
 
 
   feature sFeature;
   if(info.verbose >= 4) info.sFTime = (double)cv::getTickCount();
-  sFeature.featureDetection(sPanorama.getReflectanceImage(), info.fMethod);
-  //sFeature.featureDetection(reduced_reflectance_image_2, info.fMethod);
+  //sFeature.featureDetection(sPanorama.getReflectanceImage(), info.fMethod);
+  sFeature.featureDetection(reduced_reflectance_image_2, info.fMethod);
   if(info.verbose >= 4) info.sFTime = ((double)cv::getTickCount() - info.sFTime)/cv::getTickFrequency();
   //write panorama with keypoints to image
   if(info.verbose >= 1){
-    drawer.DrawKeypoints(sPanorama.getReflectanceImage(), sFeature.getFeatures(), outImage, cv::Scalar::all(-1), cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS );
-    //drawer.DrawKeypoints(reduced_reflectance_image_2, sFeature.getFeatures(), outImage, cv::Scalar::all(-1), cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS );
+    //drawer.DrawKeypoints(sPanorama.getReflectanceImage(), sFeature.getFeatures(), outImage, cv::Scalar::all(-1), cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS );
+    drawer.DrawKeypoints(reduced_reflectance_image_2, sFeature.getFeatures(), outImage, cv::Scalar::all(-1), cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS );
     out = info.outDir+info.local_time+"_scan"+to_string(info.sScanNumber, 3)+"_"+projectionMethodToString(info.pMethod)+"_"+to_string(info.iWidth)+"x"+to_string(info.iHeight)+"_"+featureDetectorMethodToString(info.fMethod)+".jpg";
     imwrite(out, outImage);
     outImage.release();
   }
   if(info.verbose >= 4) info.sDTime = (double)cv::getTickCount();
-  sFeature.featureDescription(sPanorama.getReflectanceImage(), info.dMethod);
-  //sFeature.featureDescription(reduced_reflectance_image_2, info.dMethod);
+  //sFeature.featureDescription(sPanorama.getReflectanceImage(), info.dMethod);
+  sFeature.featureDescription(reduced_reflectance_image_2, info.dMethod);
   if(info.verbose >= 4) info.sDTime = ((double)cv::getTickCount() - info.sDTime)/cv::getTickFrequency();
   if(info.verbose >= 2) sFeature.getDescription();
 
@@ -471,54 +475,98 @@ int main(int argc, char** argv){
   if(info.verbose >= 2) matcher.getDescription();
   //write matcheed feature to image
   if(info.verbose >= 1){
-    drawer.DrawMatches(fPanorama.getReflectanceImage(), fFeature.getFeatures(), sPanorama.getReflectanceImage(), sFeature.getFeatures(), matcher.getMatches(), outImage, cv::Scalar::all(-1), cv::Scalar::all(-1), vector<char>(), cv::DrawMatchesFlags::NOT_DRAW_SINGLE_POINTS);
-    //drawer.DrawMatches(reduced_reflectance_image, fFeature.getFeatures(), reduced_reflectance_image_2, sFeature.getFeatures(), matcher.getMatches(), outImage, cv::Scalar::all(-1), cv::Scalar::all(-1), vector<char>(), cv::DrawMatchesFlags::NOT_DRAW_SINGLE_POINTS);
+    //drawer.DrawMatches(fPanorama.getReflectanceImage(), fFeature.getFeatures(), sPanorama.getReflectanceImage(), sFeature.getFeatures(), matcher.getMatches(), outImage, cv::Scalar::all(-1), cv::Scalar::all(-1), vector<char>(), cv::DrawMatchesFlags::NOT_DRAW_SINGLE_POINTS);
+    drawer.DrawMatches(reduced_reflectance_image, fFeature.getFeatures(), reduced_reflectance_image_2, sFeature.getFeatures(), matcher.getMatches(), outImage, cv::Scalar::all(-1), cv::Scalar::all(-1), vector<char>(), cv::DrawMatchesFlags::NOT_DRAW_SINGLE_POINTS);
     out = info.outDir+info.local_time+"_scan"+to_string(info.fScanNumber, 3)+"_scan"+to_string(info.sScanNumber, 3)+"_"+projectionMethodToString(info.pMethod)+"_"+to_string(info.iWidth)+"x"+to_string(info.iHeight)+"_"+featureDetectorMethodToString(info.fMethod)+"_"+featureDescriptorMethodToString(info.dMethod)+"_"+matcherMethodToString(info.mMethod)+".jpg";
     imwrite(out, outImage);
     outImage.release();
   }
 
   ///////////////
-  /*
-  cv::Mat map1, map2;
-  map1.create(info.iHeight, info.iWidth, CV_32FC(3));
-  map2.create(info.iHeight, info.iWidth, CV_32FC(3));
+  cout<<"convert red_point to mat"<<endl;
+  //cv::Mat map1, map2;
+  //map1.create(info.iHeight, info.iWidth, CV_32FC(3));
+  //map2.create(info.iHeight, info.iWidth, CV_32FC(3));
 
-  map1 = cv::Scalar::all(0);
-  map2 = cv::Scalar::all(0);
+  //map1 = cv::Scalar::all(0);
+  //map2 = cv::Scalar::all(0);
 
   vector<cv::Vec4f> reduced_points_1;
   vector<cv::Vec4f> reduced_points_2;
 
-  fPanorama.recoverPointCloud(reduced_range_image,
-                          reduced_reflectance_image,
-                          reduced_points_1);
-  sPanorama.recoverPointCloud(reduced_range_image_2,
-                          reduced_reflectance_image_2,
-                          reduced_points_2);
-
-  int count = 0;
-  for(int i = 0; i < reduced_range_image.rows; i++) {
-    for(int j = 0; j < reduced_range_image.cols; j++) {
-      cv::Vec4f vec_1 = reduced_points_1[count];
-      map1.at<cv::Vec3f>(i,j)[0] = vec_1[0]; // x
-      map1.at<cv::Vec3f>(i,j)[1] = vec_1[1]; // y
-      map1.at<cv::Vec3f>(i,j)[2] = vec_1[2]; // z
-
-      cv::Vec4f vec_2 = reduced_points_2[count];
-      map2.at<cv::Vec3f>(i,j)[0] = vec_2[0]; // x
-      map2.at<cv::Vec3f>(i,j)[1] = vec_2[1]; // y
-      map2.at<cv::Vec3f>(i,j)[2] = vec_2[2]; // z
-
-      count++;
+  cout<<"recover the points"<<endl;
+  //  fPanorama.recoverPointCloud(reduced_range_image,
+  //reduced_reflectance_image,
+  //reduced_points_1);
+  //sPanorama.recoverPointCloud(reduced_range_image_2,
+  //reduced_reflectance_image_2,
+  //reduced_points_2);
+  /*
+  for(int i = 0; i < reduced_range_image_2.rows; i++) {
+    for(int j = 0; j < reduced_range_image_2.cols; j++) {
+      cv::Vec3f vec2 = reduced_range_image_2.at<cv::Vec3f>(i, j);
+      cout<<i<<", "<<j<<endl;
+      cout<<vec2[0]<<endl;
+      cout<<vec2[1]<<endl;
+      cout<<vec2[2]<<endl;
+      //reduced_points_2.push_back(cv::Vec4f(vec2[0], vec2[1],vec2[2],0.0));
+      //reduced_reflectance_image_2.at<uchar>(i, j)/255.0));
     }
-    }*/
+  }
+
+  cout<<"hehe"<<endl;
+    for(int i = 0; i < reduced_range_image.rows; i++) {
+      for(int j = 0; j < reduced_range_image.cols; j++) {
+	cv::Vec3f vec = reduced_range_image.at<cv::Vec3f>(i, j);
+	reduced_points_1.push_back(cv::Vec4f(vec[0], vec[1], vec[2],0.0));
+	//reduced_reflectance_image.at<uchar>(i, j)/255.0));
+      }
+    }
+  */
+
+  cout<<"recover the points Done"<<endl;
+
+
+  /*cv::Mat redPoint1, redPoint2;
+  int np = reduced_points_1.size(); 
+  redPoint1.create(np,1,CV_32FC(4));
+  redPoint1= cv::Scalar::all(0);
+  cv::MatIterator_<cv::Vec4f> it;
+  it = redPoint1.begin<cv::Vec4f>();
+  for(int i = 0; i < np; i++){
+    (*it)[0] = reduced_points_1[i][0];
+    (*it)[1] = reduced_points_1[i][1];
+    (*it)[2] = reduced_points_1[i][2];
+    (*it)[3] = reduced_points_1[i][3];
+  }
+
+  np = reduced_points_2.size(); 
+  redPoint2.create(np,1,CV_32FC(4));
+  redPoint2= cv::Scalar::all(0);
+  cv::MatIterator_<cv::Vec4f> it2;
+  it2 = redPoint2.begin<cv::Vec4f>();
+  for(int i = 0; i < np; i++){
+    (*it2)[0] = reduced_points_2[i][0];
+    (*it2)[1] = reduced_points_2[i][1];
+    (*it2)[2] = reduced_points_2[i][2];
+    (*it2)[3] = reduced_points_2[i][3];
+  }
+
+
+  panorama redPanorama1 (1800, 500, info.pMethod, info.nImages, info.pParam, FARTHEST, fScan.getZMin(), fScan.getZMax(), info.MIN_ANGLE, info.MAX_ANGLE);
+  redPanorama1.createPanorama(redPoint1);
+
+  panorama redPanorama2 (1800, 500, info.pMethod, info.nImages, info.pParam, FARTHEST, fScan.getZMin(), fScan.getZMax(), info.MIN_ANGLE, info.MAX_ANGLE);
+  redPanorama1.createPanorama(redPoint2);
+  */
   ///////////////
 
   registration reg (info.minDistance, info.minError, info.minInlier, info.rMethod);
   if(info.verbose >= 4) info.rTime = (double)cv::getTickCount();
-  reg.findRegistration(fPanorama.getMap(), fFeature.getFeatures(), sPanorama.getMap(), sFeature.getFeatures(), matcher.getMatches());
-  //reg.findRegistration(map1, fFeature.getFeatures(), map2, sFeature.getFeatures(), matcher.getMatches());
+  //reg.findRegistration(fPanorama.getMap(), fFeature.getFeatures(), sPanorama.getMap(), sFeature.getFeatures(), matcher.getMatches());
+  cout<<"start the reg"<<endl;
+  //reg.findRegistration(redPanorama1.getMap(), fFeature.getFeatures(), redPanorama2.getMap(), sFeature.getFeatures(), matcher.getMatches());
+  reg.findRegistration(reduced_map, fFeature.getFeatures(), reduced_map_2, sFeature.getFeatures(), matcher.getMatches());
   if(info.verbose >= 4) info.rTime = ((double)cv::getTickCount() - info.rTime)/cv::getTickFrequency();
   if(info.verbose >= 2) reg.getDescription();
 
