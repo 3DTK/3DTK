@@ -23,26 +23,40 @@ SET(FBR_LIBS scan ANN ${OpenCV_LIBS})
 add_executable(featurebasedregistration feature_based_registration.cc fbr_global.cc)
 #target_link_libraries(featurebasedregistration fbr_cv_io fbr_panorama fbr_feature fbr_feature_matcher fbr_registration ${FBR_LIBS})
 
+IF (WIN32)
+  target_link_libraries(featurebasedregistration fbr ${FBR_LIBS} XGetopt show_s)
+ENDIF(WIN32)
+
+IF(UNIX)
+  target_link_libraries(featurebasedregistration fbr ${FBR_LIBS} show_s)
+ENDIF(UNIX)
+
+####
+add_executable(featurebasedregistration_red feature_based_registration_red.cc fbr_global.cc)
+#target_link_libraries(featurebasedregistration fbr_cv_io fbr_panorama fbr_feature fbr_feature_matcher fbr_registration ${FBR_LIBS})
+
+IF (WIN32)
+  target_link_libraries(featurebasedregistration_red fbr ${FBR_LIBS} XGetopt show_s)
+ENDIF(WIN32)
+
+IF(UNIX)
+  target_link_libraries(featurebasedregistration_red fbr ${FBR_LIBS} show_s)
+ENDIF(UNIX)
+
+#####
+
 add_executable(panorama_matcher panorama_matcher.cc fbr_global.cc)
 target_link_libraries(panorama_matcher fbr ${FBR_LIBS})
 
 add_executable(panorama_creator panorama_creator.cc fbr_global.cc)
 target_link_libraries(panorama_creator fbr ${FBR_LIBS} show_s)
 
-IF (WIN32)
-  target_link_libraries(featurebasedregistration fbr ${FBR_LIBS} XGetopt)
-ENDIF(WIN32)
-
-IF(UNIX)
-  target_link_libraries(featurebasedregistration fbr ${FBR_LIBS})
-ENDIF(UNIX)
-
 
 ### EXPORT SHARED LIBS
 
 IF(EXPORT_SHARED_LIBS)
 add_library(fbr_s SHARED ${FBR_SRC})
-target_link_libraries(fbr_s scan_s ANN_s ${OpenCV_LIBS})
+target_link_libraries(fbr_s scan_s ANN_s ${OpenCV_LIBS} show_s)
 ENDIF(EXPORT_SHARED_LIBS)
 
 ELSE(OpenCV_VERSION_MAJOR GREATER 1 AND OpenCV_VERSION_MINOR GREATER 2)

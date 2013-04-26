@@ -13,7 +13,10 @@ using namespace std;
 
 namespace fbr{
   
-  void panorama::init(unsigned int width, unsigned int height, projection_method method, unsigned int numberOfImages, double param, panorama_map_method mMethod, float min, float max){
+  void panorama::init(unsigned int width, unsigned int height, projection_method method, unsigned int numberOfImages, double param, panorama_map_method mMethod, float min, float max, double MINANGLE, double MAXANGLE){
+    //scanner max and min angle
+    MAX_ANGLE = MAXANGLE;
+    MIN_ANGLE = MINANGLE;
     //z Min and Max
     zMin = min;
     zMax = max;
@@ -51,6 +54,10 @@ namespace fbr{
   
   panorama::panorama(){
     init(3600, 1000, EQUIRECTANGULAR, 1, 0, FARTHEST);
+  }
+
+  panorama::panorama(unsigned int width, unsigned int height, projection_method method, unsigned int numberOfImages, double param, panorama_map_method mMethod, float min, float max, double MINANGLE, double MAXANGLE){ 
+    init(width, height, method, numberOfImages, param, mMethod, min, max, MINANGLE, MAXANGLE);
   }
 
   panorama::panorama(unsigned int width, unsigned int height, projection_method method, unsigned int numberOfImages, double param, panorama_map_method mMethod){ 
@@ -147,6 +154,7 @@ namespace fbr{
 
       for( it = scan.begin<cv::Vec4f>(), end = scan.end<cv::Vec4f>(); it != end; ++it){
 	double kart[3], polar[3], phi, theta, range;
+	
 	kart[0] = (*it)[2]/100;
 	kart[1] = (*it)[0]/-100;
 	kart[2] = (*it)[1]/100;
