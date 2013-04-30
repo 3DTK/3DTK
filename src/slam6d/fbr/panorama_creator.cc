@@ -13,7 +13,7 @@
 #include "show/show.h"
 #include "slam6d/data_types.h"
 #include "slam6d/Boctree.h"
-#include "slam6d/basicscan.h"
+#include "slam6d/basicScan.h"
 
 using namespace std;
 using namespace fbr;
