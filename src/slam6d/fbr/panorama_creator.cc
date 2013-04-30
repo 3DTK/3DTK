@@ -33,6 +33,8 @@ struct information{
   double scale;
   ScanColorManager *scm;
   bool reflectance, range, color;
+  scanner_type sType;
+  int MIN_ANGLE, MAX_ANGLE;
 } info;
 
 void usage(int argc, char** argv){
@@ -55,6 +57,9 @@ void usage(int argc, char** argv){
   printf("\t\t-S scale \t\t Scale\n");
   printf("\t\t-l loadOct \t\t load the Octtree\n");
   printf("\t\t-o saveOct \t\t save the Octtree\n");
+  printf("\t\t-t sType \t\t scanner type\n");
+  printf("\t\t-n MIN_ANGLE \t\t Scanner vertical view MIN_ANGLE \n");
+  printf("\t\t-x MAX_ANGLE \t\t Scanner vertical view MAX_ANGLE \n");
   printf("\n");
   exit(1);
 }
@@ -63,6 +68,9 @@ void parssArgs(int argc, char** argv, information& info){
   info.reflectance = false;
   info.range = false;
   info.color = false;
+  info.sType = NONE;
+  info.MIN_ANGLE = -40;
+  info.MAX_ANGLE = 60;
   
   info.red = -1.0;
   info.types = PointType::USE_NONE;
@@ -88,7 +96,7 @@ void parssArgs(int argc, char** argv, information& info){
   int c;
   opterr = 0;
   //reade the command line and get the options
-  while ((c = getopt (argc, argv, "W:H:p:N:P:f:O:s:e:r:RCAS:lo")) != -1)
+  while ((c = getopt (argc, argv, "W:H:p:N:P:f:O:s:e:r:RCAS:lot:n:x:")) != -1)
     switch (c)
       {
       case 's':
@@ -108,6 +116,9 @@ void parssArgs(int argc, char** argv, information& info){
 	break;
       case 'p':
 	info.pMethod = stringToProjectionMethod(optarg);
+	break;
+      case 't':
+	info.sType = stringToScannerType(optarg);
 	break;
       case 'N':
 	info.numberOfImages = atoi(optarg);
@@ -141,6 +152,13 @@ void parssArgs(int argc, char** argv, information& info){
       case 'o':
 	info.saveOct = true;
 	break;
+      case 'n':
+	info.MIN_ANGLE = atoi(optarg);
+	break;
+      case 'x':
+	info.MAX_ANGLE = atoi(optarg);
+	break;
+
       case '?':
 	cout<<"Unknown option character "<<optopt<<endl;
 	usage(argc, argv);
@@ -202,125 +220,36 @@ int main(int argc, char** argv)
 
   //opendirectory of the scans
   bool scanserver = false;
-  Scan::openDirectory(scanserver, info.dir, info.sFormat, info.start, info.end);  
-  
-  int number = info.start;
-  //get the firs scan
-  for (unsigned int s = 0 ; s < Scan::allScans.size(); s++){
-    PointType pointtype = PointType(info.types);
-    //if we want to load display file get pointtypes from the files first
-    if(info.loadOct) {
-      string scanFileName = info.dir + "scan" + to_string(number,3) + ".oct";
-      pointtype = BOctTree<sfloat>::readType(scanFileName);
-    }
+  for(int s = info.start; s <= info.end; s++){
+    scan_cv scan(info.dir, s, info.sFormat, scanserver, info.sType, info.loadOct, info.saveOct, info.reflectance, info.color);
 
-    info.scm = new ScanColorManager(4096, pointtype);  
+    scan.convertScanToMat();
 
-    Scan * source = Scan::allScans[s];
-    //set the parameters for the oct
-    source->setOcttreeParameter(info.red, info.voxelSize, pointtype, info.loadOct, info.saveOct);
-    
-    //loading oct
-    BOctTree<float>* btree = ((BasicScan*)source)->convertScanToShowOcttree();
-    
-    // show structures
-    // associate show octtree with the scan and hand over octtree pointer ownership
-    Show_BOctTree<sfloat>* tree = new Show_BOctTree<sfloat>(btree, info.scm);
-    
-    //get points from octtree and create panorama images
-    vector<float*> points;
-    tree->getTree()->AllPoints(points);
-        
-    unsigned int nPoints = points.size();
-    
-    //create the scan and color Mats
-    cv::Mat scan, scanColor;
-    cv::MatIterator_<cv::Vec4f> it;
-    scan.create(nPoints,1,CV_32FC(4));
-    scan = cv::Scalar::all(0);
-    it = scan.begin<cv::Vec4f>();
-
-    cv::MatIterator_<cv::Vec3f> itColor;
-    if(pointtype.hasColor()){
-      scanColor.create(nPoints,1,CV_32FC(3));
-      scanColor = cv::Scalar::all(0);
-      itColor = scanColor.begin<cv::Vec3f>();
-    }
-
-    float zMax = numeric_limits<double>::min(); 
-    float zMin = numeric_limits<double>::max();
-
-    //get the info from points
-    for(unsigned int i = 0; i < nPoints; i++){
-      (*it)[0] = points[i][0]; // x
-      (*it)[1] = points[i][1]; // y
-      (*it)[2] = points[i][2]; // z
-
-      //finding min and max of z                                      
-      if (points[i][2]  > zMax) zMax = points[i][2];
-      if (points[i][2]  < zMin) zMin = points[i][2];
-
-      float reflectance;
-      if(pointtype.hasReflectance()){
-	int idx = pointtype.getReflectance();
-	reflectance = points[i][idx];
-      }
-      else
-	reflectance = 255;
-
-      //normalize the reflectance
-      //reflectance += 32;
-      //reflectance /= 64;
-      //reflectance -= 0.2;
-      //reflectance /= 0.3;
-      //reflectance -= 1200;
-      //reflectance /= 600;
-
-      if (reflectance < 0) reflectance = 0;
-      if (reflectance > 1) reflectance = 1;
-      (*it)[3] = reflectance;
-
-      if(pointtype.hasColor())
-	{
-	  int idx = pointtype.getColor();
-	  (*itColor)[2] = ((unsigned char*) &(points[i][idx]))[0];
-	  (*itColor)[1] = ((unsigned char*) &(points[i][idx]))[1];
-	  (*itColor)[0] = ((unsigned char*) &(points[i][idx]))[2];
-	  ++itColor;
-	}
-      ++it;
-    }
-    
-    //print the zMin and zMax
-    cout<<"zMin = "<<zMin<<endl;
-    cout<<"zMax = "<<zMax<<endl;
-    
     //init the panorama
     fbr::panorama pImage;
-    pImage.init(info.pWidth, info.pHeight, info.pMethod, info.numberOfImages, info.pParam, info.mapMethod, zMin, zMax);
+    pImage.init(info.pWidth, info.pHeight, info.pMethod, info.numberOfImages, info.pParam, info.mapMethod, scan.getZMin(), scan.getZMax(), info.MIN_ANGLE, info.MAX_ANGLE);
     
     //create panorama
-    pImage.createPanorama(scan, scanColor);  
+    pImage.createPanorama(scan.getMatScan(), scan.getMatScanColor());  
     
     //write panorama to file
     string out;
     
     if(info.range){
-      out = info.outDir+to_string(number, 3)+"_"+projectionMethodToString(info.pMethod)+"_"+to_string(info.pWidth)+"x"+to_string(info.pHeight)+"_Range.jpg";
+      out = info.outDir+to_string(s, 3)+"_"+projectionMethodToString(info.pMethod)+"_"+to_string(info.pWidth)+"x"+to_string(info.pHeight)+"_Range.jpg";
       imwrite(out, pImage.getRangeImage());
     }
 
     if(info.reflectance){
-      out = info.outDir+to_string(number, 3)+"_"+projectionMethodToString(info.pMethod)+"_"+to_string(info.pWidth)+"x"+to_string(info.pHeight)+"_Reflectance.jpg";
+      out = info.outDir+to_string(s, 3)+"_"+projectionMethodToString(info.pMethod)+"_"+to_string(info.pWidth)+"x"+to_string(info.pHeight)+"_Reflectance.jpg";
       imwrite(out, pImage.getReflectanceImage());
     }
     
     if(info.color){
-      out = info.outDir+to_string(number, 3)+"_"+projectionMethodToString(info.pMethod)+"_"+to_string(info.pWidth)+"x"+to_string(info.pHeight)+"_Color.jpg";
+      out = info.outDir+to_string(s, 3)+"_"+projectionMethodToString(info.pMethod)+"_"+to_string(info.pWidth)+"x"+to_string(info.pHeight)+"_Color.jpg";
       imwrite(out, pImage.getReflectanceImage());
     }
 
-    number++;
   }
-  Scan::closeDirectory();
+
 }

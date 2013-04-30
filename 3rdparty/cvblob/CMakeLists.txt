@@ -17,6 +17,7 @@
 # along with cvBlob.  If not, see <http://www.gnu.org/licenses/>.
 #
 
+cmake_minimum_required(VERSION 2.4)
 IF (WITH_THERMO)
 
 MESSAGE(STATUS "With cvblob")
@@ -31,7 +32,7 @@ set(CVBLOB_SRCS
   cvcolor.cpp
 )
 
-set_source_files_properties(${cvBlob_SRC}
+set_source_files_properties(${cvBlob_SRCS}
                             PROPERTIES
                             COMPILE_FLAGS "-O3 ${ADDITIONAL_OPENCV_FLAGS}"
 )
@@ -40,6 +41,7 @@ add_library(cvblob STATIC ${CVBLOB_SRCS})
 
 IF(EXPORT_SHARED_LIBS)
 add_library(cvblob_s SHARED ${CVBLOB_SRCS})
+target_link_libraries(cvblob_s ${OpenCV_LIBS})
 ENDIF(EXPORT_SHARED_LIBS)
 
 ENDIF (WITH_THERMO)

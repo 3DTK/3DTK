@@ -104,7 +104,7 @@ void showbits(char a)
 //    printf("i: %u r: %d  parent %p   child[r]: %p \n", i, r, &node, children);
 //    r++;
 
-        childcenter(center, ccenter, size, i);  // childrens center
+	BOctTree<T>::childcenter(center, ccenter, size, i);  // childrens center
         if (  ( 1 << i ) & node.leaf ) {   // if ith node is leaf get center
           // check if leaf contains shape
           if ( shape.isInCube(ccenter[0], ccenter[1], ccenter[2], size/2.0) ) {
@@ -139,7 +139,7 @@ void showbits(char a)
 
     for (unsigned char i = 0; i < 8; i++) {
       if (  ( 1 << i ) & node.valid ) {   // if ith node exists
-        childcenter(center, ccenter, size, i);  // childrens center
+	BOctTree<T>::childcenter(center, ccenter, size, i);  // childrens center
         if (  ( 1 << i ) & node.leaf ) {   // if ith node is leaf get center
           // check if leaf contains shape
           if ( shape.isInCube(ccenter[0], ccenter[1], ccenter[2], size/2.0) ) {

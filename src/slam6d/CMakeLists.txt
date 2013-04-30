@@ -5,7 +5,7 @@ IF(WITH_TOOLS)
   add_executable(scan_red scan_red.cc fbr/fbr_global.cc fbr/panorama.cc fbr/scan_cv.cc)
   
   IF(UNIX)
-    target_link_libraries(scan_red scan dl ANN fbr_cv_io fbr_panorama ${OpenCV_LIBS} ${Boost_LIBRARIES})
+    target_link_libraries(scan_red scan dl ANN fbr_cv_io fbr_panorama ${OpenCV_LIBS} ${Boost_LIBRARIES} show_s)
   ENDIF(UNIX)
 
   IF (WIN32)

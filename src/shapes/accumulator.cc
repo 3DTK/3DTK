@@ -12,10 +12,11 @@
 #include "slam6d/globals.icc"
 #include <iostream>
 
-
 #ifdef _MSC_VER
 #define isnan(_X) ((_X) != (_X))
 #endif
+
+using namespace std;
 
 double* polar2normal(double theta, double phi) {
   double * n = new double[4];

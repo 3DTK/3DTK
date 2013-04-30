@@ -36,7 +36,7 @@
 #include <vector>
 #include <limits>
 
-#if (defined(_WIN32) || defined(__WIN32__) || defined(__TOS_WIN__) || defined(__WINDOWS__) || (defined(__APPLE__) & defined(__MACH__)))
+#if (defined(_WIN32) || defined(__WIN32__) || defined(__TOS_WIN__) || defined(__WINDOWS__))
 #include <cv.h>
 #elif (CV_MAJOR_VERSION == 2) && (CV_MINOR_VERSION < 2)
 #include <opencv/cv.h>
