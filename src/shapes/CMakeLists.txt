@@ -45,6 +45,7 @@ add_library(shape STATIC ${SHAPELIB_SRCS})
 #target_link_libraries(shapelib)
 IF(EXPORT_SHARED_LIBS)
 add_library(shape_s SHARED ${SHAPELIB_SRCS})
+target_link_libraries(shape_s ${Boost_LIBRARIES} newmat)
 #target_link_libraries(scan_s ${Boost_LIBRARIES} newmat)
 ENDIF(EXPORT_SHARED_LIBS)
 

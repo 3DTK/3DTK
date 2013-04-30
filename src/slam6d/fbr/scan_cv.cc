@@ -200,12 +200,14 @@ namespace fbr{
 	reflectance /= 0.3;
       }
       if(sType == FARO){
-	reflectance -= 1300;
-	reflectance /= 300;
+	reflectance -= 1250;
+	reflectance /= 800;
       }
       
-      if (reflectance < 0) reflectance = 0;
-      if (reflectance > 1) reflectance = 1;
+      if(sType != NONE){
+	if (reflectance < 0) reflectance = 0;
+	if (reflectance > 1) reflectance = 1;
+      }
       
       (*it)[0] = x;
       (*it)[1] = y;
