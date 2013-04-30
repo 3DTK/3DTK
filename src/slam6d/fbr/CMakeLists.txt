@@ -32,16 +32,16 @@ IF(UNIX)
 ENDIF(UNIX)
 
 ####
-add_executable(featurebasedregistration_red feature_based_registration_red.cc fbr_global.cc)
+#add_executable(featurebasedregistration_red feature_based_registration_red.cc fbr_global.cc)
 #target_link_libraries(featurebasedregistration fbr_cv_io fbr_panorama fbr_feature fbr_feature_matcher fbr_registration ${FBR_LIBS})
 
-IF (WIN32)
-  target_link_libraries(featurebasedregistration_red fbr ${FBR_LIBS} XGetopt show_s)
-ENDIF(WIN32)
+#IF (WIN32)
+#  target_link_libraries(featurebasedregistration_red fbr ${FBR_LIBS} XGetopt show_s)
+#ENDIF(WIN32)
 
-IF(UNIX)
-  target_link_libraries(featurebasedregistration_red fbr ${FBR_LIBS} show_s)
-ENDIF(UNIX)
+#IF(UNIX)
+#  target_link_libraries(featurebasedregistration_red fbr ${FBR_LIBS} show_s)
+#ENDIF(UNIX)
 
 #####
 

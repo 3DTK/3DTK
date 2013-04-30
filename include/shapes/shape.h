@@ -6,6 +6,7 @@ using std::vector;
 #include "slam6d/globals.icc"
 #include "newmat/newmatio.h"
 #include "newmat/newmatap.h"
+#include "geom_math.h"
 using namespace NEWMAT;
 
 

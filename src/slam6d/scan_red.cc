@@ -445,7 +445,7 @@ void reduce_interpolation(Scan *scan,
  */
 void write_uos(vector<cv::Vec4f> &points, string &dir, string id)
 {
-  ofstream outfile(dir + "/scan" + id + ".3d");
+  ofstream outfile((dir + "/scan" + id + ".3d").c_str());
 
   outfile << "# header is ignored" << endl;
 
@@ -461,7 +461,7 @@ void write_uos(vector<cv::Vec4f> &points, string &dir, string id)
  */
 void write_uosr(vector<cv::Vec4f> &points, string &dir, string id)
 {
-  ofstream outfile(dir + "/scan" + id + ".3d");
+  ofstream outfile((dir + "/scan" + id + ".3d").c_str());
 
   outfile << "# header is ignored" << endl;
 
@@ -476,7 +476,7 @@ void write_uosr(vector<cv::Vec4f> &points, string &dir, string id)
 // .frames files can later be generated from them using ./bin/pose2frames
 void writeposefile(string &dir, const double* rPos, const double* rPosTheta, string id)
 {
-  ofstream posefile(dir + "/scan" + id + ".pose");
+  ofstream posefile((dir + "/scan" + id + ".pose").c_str());
   posefile << rPos[0] << " " << rPos[1] << " " << rPos[2] << endl;
   posefile << deg(rPosTheta[0]) << " "
            << deg(rPosTheta[1]) << " "

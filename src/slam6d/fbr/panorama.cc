@@ -437,10 +437,12 @@ namespace fbr{
 	    //create the iColor
 	    if(color.empty() == 0){
 	      mapColor(x, y, itColor);
-	      ++itColor;
 	    }
 	  }
 	}
+	if(color.empty() == 0){
+	  ++itColor;
+	}	
       }
     }
     
@@ -520,10 +522,12 @@ namespace fbr{
 	    map(x, y, it, range);
 	    //create the iColor
 	    if(color.empty() == 0){
-	      mapColor(x, y, itColor);
-	      ++itColor;
+	      mapColor(x, y, itColor);	      
 	    }
 	  }
+	}
+	if(color.empty() == 0){
+	  ++itColor;	
 	}
       }
     }
@@ -607,9 +611,11 @@ namespace fbr{
 	    //create the iColor
 	    if(color.empty() == 0){
 	      mapColor(x, y, itColor);
-	      ++itColor;
 	    }
 	  }
+	}
+	if(color.empty() == 0){
+	  ++itColor;
 	}
       }
     }
@@ -694,8 +700,8 @@ namespace fbr{
         for (int col = 0; col < range_image.size().width; ++col) {
           float range = range_image.at<float>(row, col);
           float reflectance = reflectance_image.at<uchar>(row,col)/255.0;
-          float theta = (heightMax - row) / yFactor - heightLow; 
-          float phi = col / xFactor; 
+          float theta = (heightMax - row + 0.5) / yFactor - heightLow; 
+          float phi = (col + 0.5) / xFactor; 
           phi *= 180.0 / M_PI;
           phi = 360.0 - phi;
           phi *= M_PI / 180.0;
@@ -731,8 +737,8 @@ namespace fbr{
         for (int col = 0; col < range_image.size().width; ++col) {
           float range = range_image.at<float>(row, col);
           float reflectance = reflectance_image.at<uchar>(row,col)/255.0;
-          float theta = atan2(row + yFactor * tan(heightLow), yFactor);
-          float phi = col / xFactor; 
+          float theta = atan2(row + 0.5 + yFactor * tan(heightLow), yFactor);
+          float phi = (col + 0.5) / xFactor; 
           phi *= 180.0 / M_PI;
           phi = 360.0 - phi;
           phi *= M_PI / 180.0;
@@ -767,8 +773,8 @@ namespace fbr{
         for (int col = 0; col < range_image.size().width; ++col) {
           float range = range_image.at<float>(row, col);
           float reflectance = reflectance_image.at<uchar>(row,col)/255.0;
-          float theta = 2 * atan2(exp((heightMax - row) / yFactor + heightLow), 1.) - M_PI_2;
-          float phi = col / xFactor; 
+          float theta = 2 * atan2(exp((heightMax - row + 0.5) / yFactor + heightLow), 1.) - M_PI_2;
+          float phi = (col + 0.5) / xFactor; 
           phi *= 180.0 / M_PI;
           phi = 180.0 - phi;
           phi *= M_PI / 180.0;
