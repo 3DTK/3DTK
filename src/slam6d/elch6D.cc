@@ -39,17 +39,12 @@ using boost::graph_traits;
 #include "slam6d/globals.icc"
 #include "slam6d/elch6D.h"
 
-#ifdef _MSC_VER
-#define  tie tr1::tie
-#endif
-
-
 /*
 void printout(graph_t &g, vector<Vertex> &p, vector<int> &d, double *weights)
 {
   cout << "distances and parents:" << endl;
   graph_traits <graph_t>::vertex_iterator vi, vend;
-  for(tie(vi, vend) = vertices(g); vi != vend; vi++) {
+  for(boost::tuples::tie(vi, vend) = vertices(g); vi != vend; vi++) {
     cout << "distance(" << *vi << ") = " << d[*vi] <<
       ", parent(" << *vi << ") = " << p[*vi] <<
       *vi << " " << weights[*vi] << endl;
@@ -84,14 +79,14 @@ void elch6D::graph_weight_out(graph_t &g, int first, int last,
   ofstream dot_file(out_file.c_str());
   dot_file << "graph D {" << endl;
   graph_traits <graph_t>::vertex_iterator vi, vend;
-  for(tie(vi, vend) = vertices(g); vi != vend; vi++) {
+  for(boost::tuples::tie(vi, vend) = vertices(g); vi != vend; vi++) {
     dot_file << *vi << "[label=\"" << *vi << " (" <<
       weights[*vi] << ")\"];" << endl;
   }
   boost::property_map<graph_t, edge_weight_t>::type weightmap
     = get(boost::edge_weight, g);
   graph_traits <graph_t>::edge_iterator ei, ei_end;
-  for(tie(ei, ei_end) = edges(g); ei != ei_end; ei++) {
+  for(boost::tuples::tie(ei, ei_end) = edges(g); ei != ei_end; ei++) {
     dot_file << source(*ei, g) << " -- " << target(*ei, g) <<
       "[label=\"" << get(weightmap, *ei) << "\"];" << endl;
   }
@@ -122,7 +117,7 @@ void elch6D::graph_pos_out(graph_t &g, const vector <Scan *> &allScans,
   ofstream graph_file(out_file.c_str());
   ofstream graph2_file(("2" + out_file).c_str());
   graph_traits <graph_t>::edge_iterator ei, ei_end;
-  for(tie(ei, ei_end) = edges(g); ei != ei_end; ei++) {
+  for(boost::tuples::tie(ei, ei_end) = edges(g); ei != ei_end; ei++) {
     if(source(*ei, g) + 1 != target(*ei, g)) {
       graph2_file << allScans[source(*ei, g)]->get_rPos()[0]
                   << " " << allScans[source(*ei, g)]->get_rPos()[1]
@@ -169,7 +164,7 @@ void elch6D::dot_pos_out(graph_t &g, const vector <Scan *> &allScans,
              << endl;
   }
   graph_traits <graph_t>::edge_iterator ei, ei_end;
-  for(tie(ei, ei_end) = edges(g); ei != ei_end; ei++) {
+  for(boost::tuples::tie(ei, ei_end) = edges(g); ei != ei_end; ei++) {
     if(source(*ei, g) + 1 != target(*ei, g)) {
       dot_file << source(*ei, g) << " -- " << target(*ei, g)
                << "[color=\"green\"];" << endl;
@@ -273,7 +268,7 @@ void elch6D::graph_balancer(graph_t &g, int f, int l, double *weights)
     s = branches.front();
     branches.pop_front();
 
-    for(tie(ai, ai_end) = adjacent_vertices(s, g); ai != ai_end; ++ai) {
+    for(boost::tuples::tie(ai, ai_end) = adjacent_vertices(s, g); ai != ai_end; ++ai) {
       weights[*ai] = weights[s];
       if(degree(*ai, g) > 1) {
         branches.push_back(*ai);

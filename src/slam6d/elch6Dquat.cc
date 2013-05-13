@@ -30,10 +30,6 @@ using std::ofstream;
 using boost::graph_traits;
 using namespace NEWMAT;
 
-#ifdef _MSC_VER
-#define  tie tr1::tie
-#endif
-
 /**
  * ELCH loop closing function using Quaternions
  * matches first and last scan of a loop with ICP
@@ -53,7 +49,7 @@ void elch6Dquat::close_loop(const vector <Scan *> &allScans,
   graph_t grb[7];
   Matrix C(7, 7);
   graph_traits <graph_t>::edge_iterator ei, ei_end;
-  for(tie(ei, ei_end) = edges(g); ei != ei_end; ei++) {
+  for(boost::tuples::tie(ei, ei_end) = edges(g); ei != ei_end; ei++) {
     int from = source(*ei, g);
     int to = target(*ei, g);
     lum6DQuat::covarianceQuat(allScans[from],
