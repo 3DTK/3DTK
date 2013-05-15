@@ -95,8 +95,8 @@ int main(int argc, char** argv){
   panorama1 = cv::Scalar::all(0);
   panorama2 = cv::Scalar::all(0);
 
-  panorama1 = cv::imread(info.dir+"scan"+to_string(info.start, 3)+".jpg", CV_LOAD_IMAGE_GRAYSCALE );
-  panorama2 = cv::imread(info.dir+"scan"+to_string(info.end, 3)+".jpg", CV_LOAD_IMAGE_GRAYSCALE );
+  panorama1 = cv::imread(info.dir+"scan"+to_string(info.start, 3)+".png", CV_LOAD_IMAGE_GRAYSCALE );
+  panorama2 = cv::imread(info.dir+"scan"+to_string(info.end, 3)+".png", CV_LOAD_IMAGE_GRAYSCALE );
 
   feature feature1, feature2;
   
@@ -110,12 +110,12 @@ int main(int argc, char** argv){
   feature_drawer drawer;
   //cv::drawKeypoints(panorama1, feature1.getFeatures(), outImage, cv::Scalar::all(-1), cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS );
   drawer.DrawKeypoints(panorama1, feature1.getFeatures(), outImage, cv::Scalar::all(-1), cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS );
-  imwrite(info.outDir+"feature"+"-"+featureDetectorMethodToString(info.fMethod)+"-"+to_string(info.start, 3)+".jpg", outImage);
+  imwrite(info.outDir+"feature"+"-"+featureDetectorMethodToString(info.fMethod)+"-"+to_string(info.start, 3)+".png", outImage);
   outImage.release();
 
   //cv::drawKeypoints(panorama2, feature2.getFeatures(), outImage, cv::Scalar::all(-1), cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS );
   drawer.DrawKeypoints(panorama2, feature2.getFeatures(), outImage, cv::Scalar::all(-1), cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS );
-  imwrite(info.outDir+"feature"+"-"+featureDetectorMethodToString(info.fMethod)+"-"+to_string(info.end, 3)+".jpg", outImage);
+  imwrite(info.outDir+"feature"+"-"+featureDetectorMethodToString(info.fMethod)+"-"+to_string(info.end, 3)+".png", outImage);
   outImage.release();
 
   feature1.featureDescription(panorama1, info.dMethod);
@@ -126,6 +126,6 @@ int main(int argc, char** argv){
   matcher.match(feature1, feature2);
   //cv::drawMatches(panorama1, feature1.getFeatures(), panorama2, feature2.getFeatures(), matcher.getMatches(), outImage, cv::Scalar::all(-1), cv::Scalar::all(-1), vector<char>(), cv::DrawMatchesFlags::NOT_DRAW_SINGLE_POINTS);
   drawer.DrawMatches(panorama1, feature1.getFeatures(), panorama2, feature2.getFeatures(), matcher.getMatches(), outImage, cv::Scalar::all(-1), cv::Scalar::all(-1), vector<char>(), cv::DrawMatchesFlags::NOT_DRAW_SINGLE_POINTS);
-  imwrite(info.outDir+"match"+"-"+featureDetectorMethodToString(info.fMethod)+"-"+to_string(info.start, 3)+"_"+to_string(info.end, 3)+".jpg", outImage);
+  imwrite(info.outDir+"match"+"-"+featureDetectorMethodToString(info.fMethod)+"-"+to_string(info.start, 3)+"_"+to_string(info.end, 3)+".png", outImage);
   outImage.release();
 }
