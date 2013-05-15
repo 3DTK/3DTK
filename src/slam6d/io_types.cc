@@ -55,6 +55,7 @@ IOType formatname_to_io_type(const char * string)
   else if (strcasecmp(string, "txyzr") == 0) return TXYZR;
   else if (strcasecmp(string, "xyzr") == 0) return XYZR;
   else if (strcasecmp(string, "xyz_rgb") == 0) return XYZ_RGB;
+  else if (strcasecmp(string, "xyz_rrgb") == 0) return XYZ_RRGB;
   else if (strcasecmp(string, "ks") == 0) return KS;
   else if (strcasecmp(string, "ks_rgb") == 0) return KS_RGB;
   else if (strcasecmp(string, "stl") == 0) return STL;
@@ -66,6 +67,7 @@ IOType formatname_to_io_type(const char * string)
   else if (strcasecmp(string, "cad") == 0) return UOS_CAD;
   else if (strcasecmp(string, "velodyne") == 0) return VELODYNE;
   else if (strcasecmp(string, "velodyne_frames") == 0) return VELODYNE_FRAMES;
+  else if (strcasecmp(string, "uos_rrgb") == 0) return UOS_RRGB;
   else throw std::runtime_error(std::string("Io type ") + string + std::string(" is unknown"));
 }
 
@@ -132,6 +134,8 @@ const char * io_type_to_libname(IOType  type)
     return "scan_io_xyzr";
   case XYZ_RGB:
     return "scan_io_xyz_rgb";
+  case XYZ_RRGB:
+    return "scan_io_xyz_rrgb";
   case KS:
     return "scan_io_ks";
   case KS_RGB:
@@ -152,6 +156,8 @@ const char * io_type_to_libname(IOType  type)
     return "scan_io_velodyne";
   case VELODYNE_FRAMES:
     return "scan_io_velodyne_frames";
+  case UOS_RRGB:
+    return "scan_io_uos_rrgb";
   default:
     throw std::runtime_error(std::string("Io type ") + to_string(type) + std::string(" could not be matched to a library name"));
   }
