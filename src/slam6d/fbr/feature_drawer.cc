@@ -138,7 +138,7 @@ namespace fbr{
     line( outImg, 
 	  cv::Point(cvRound(pt1.x*draw_multiplier), cvRound(pt1.y*draw_multiplier)),
 	  cv::Point(cvRound(dpt2.x*draw_multiplier), cvRound(dpt2.y*draw_multiplier)),
-          color, 2, CV_AA, draw_shift_bits );
+          color, 4, CV_AA, draw_shift_bits );
   }
 
   void feature_drawer::DrawMatches( const cv::Mat& img1, const vector<cv::KeyPoint>& keypoints1,
