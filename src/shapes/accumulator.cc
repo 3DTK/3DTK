@@ -582,7 +582,7 @@ double* AccumulatorBall::getMax(int* cell) {
   double rho = (cell[1] + 0.5) *
   (double)myConfigFileHough.Get_RhoMax()/(double)myConfigFileHough.Get_RhoNum();
   double* polar = polar2normal(theta, phi);
-  if(isnan(polar[0])) {
+  if(std::isnan(polar[0])) {
     cout << cell[1] << " " << cell[2] << " " << cell[3] << endl;
     cout << theta <<" bla " << phi << endl;
   }
@@ -1723,7 +1723,7 @@ double* AccumulatorBallI::getMax(int* cell) {
   
   double rho = (cell[1] + 0.5) *
   (double)myConfigFileHough.Get_RhoMax()/(double)myConfigFileHough.Get_RhoNum();
-  if(isnan(polar[0])) {
+  if(std::isnan(polar[0])) {
     cout << cell[1] << " " << cell[2] << " " << cell[3] << endl;
     //cout << theta <<" bla " << phi << endl;
   }

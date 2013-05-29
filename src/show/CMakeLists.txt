@@ -1,4 +1,6 @@
-SET(SHOW_LIBS glui scan ANN ${OPENGL_LIBRARIES} normals newmat)
+SET(SHOW_LIBS glui scan ANN normals newmat ${OPENGL_LIBRARIES})
+SET(SHOW_LIBS_S glui scan_s ANN_s normals_s newmat_s ${OPENGL_LIBRARIES})
+
 IF(WIN32)
  IF( CMAKE_SIZEOF_VOID_P EQUAL 8 )
     SET(SHOW_LIBS ${SHOW_LIBS}  ${CMAKE_SOURCE_DIR}/3rdparty/windows/x64/freeglut.lib XGetopt)
@@ -26,8 +28,10 @@ IF(WITH_WXSHOW)
   target_link_libraries(wxshow ${wxWidgets_LIBRARIES} wxthings ${SHOW_LIBS})
 ENDIF(WITH_WXSHOW)
 
+add_library(showstatic STATIC ${SHOW_SRCS})
+
 ### EXPORT SHARED LIBS 
 IF(EXPORT_SHARED_LIBS)
 add_library(show_s SHARED ${SHOW_SRCS})
-target_link_libraries(show_s newmat_s ${Boost_LIBRARIES} ${SHOW_LIBS})
+target_link_libraries(show_s newmat_s ${Boost_LIBRARIES} ${SHOW_LIBS_S})
 ENDIF(EXPORT_SHARED_LIBS)

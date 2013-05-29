@@ -23,12 +23,16 @@ SET(FBR_LIBS scan ANN ${OpenCV_LIBS})
 add_executable(featurebasedregistration feature_based_registration.cc fbr_global.cc)
 #target_link_libraries(featurebasedregistration fbr_cv_io fbr_panorama fbr_feature fbr_feature_matcher fbr_registration ${FBR_LIBS})
 
+IF(WITH_GLEE)
+  SET(SHOW_LIBS ${SHOW_LIBS} glee)
+ENDIF(WITH_GLEE)
+
 IF (WIN32)
-  target_link_libraries(featurebasedregistration fbr ${FBR_LIBS} XGetopt show_s)
+  target_link_libraries(featurebasedregistration fbr ${FBR_LIBS} XGetopt showstatic ${SHOW_LIBS} ${OPENGL_LIBRARIES})
 ENDIF(WIN32)
 
 IF(UNIX)
-  target_link_libraries(featurebasedregistration fbr ${FBR_LIBS} show_s)
+  target_link_libraries(featurebasedregistration fbr ${FBR_LIBS} showstatic ${SHOW_LIBS} ${OPENGL_LIBRARIES})
 ENDIF(UNIX)
 
 ####
@@ -49,7 +53,7 @@ add_executable(panorama_matcher panorama_matcher.cc fbr_global.cc)
 target_link_libraries(panorama_matcher fbr ${FBR_LIBS})
 
 add_executable(panorama_creator panorama_creator.cc fbr_global.cc)
-target_link_libraries(panorama_creator fbr ${FBR_LIBS} show_s)
+target_link_libraries(panorama_creator fbr ${FBR_LIBS} showstatic ${SHOW_LIBS} ${OPENGL_LIBRARIES})
 
 
 ### EXPORT SHARED LIBS
