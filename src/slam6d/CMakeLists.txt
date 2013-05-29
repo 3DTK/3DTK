@@ -3,9 +3,13 @@
 IF(WITH_TOOLS)
   ### SCAN_RED
   add_executable(scan_red scan_red.cc fbr/fbr_global.cc fbr/panorama.cc fbr/scan_cv.cc)
+
+  IF(WITH_GLEE)
+    SET(SHOW_LIBS ${SHOW_LIBS} glee)
+  ENDIF(WITH_GLEE)
   
   IF(UNIX)
-    target_link_libraries(scan_red scan dl ANN fbr_cv_io fbr_panorama ${OpenCV_LIBS} ${Boost_LIBRARIES} show_s)
+    target_link_libraries(scan_red scan dl ANN fbr_cv_io fbr_panorama ${OpenCV_LIBS} ${Boost_LIBRARIES} showstatic ${OPENGL_LIBRARIES} ${SHOW_LIBS})
   ENDIF(UNIX)
 
   IF (WIN32)
@@ -93,7 +97,7 @@ ENDIF(UNIX)
 IF(EXPORT_SHARED_LIBS)
 add_library(scan_s SHARED ${SCANLIB_SRCS})
 #target_link_libraries(scan_s ${Boost_LIBRARIES} newmat)
-target_link_libraries(scan_s scanclient_s newmat_s sparse_s ANN_s normals)
+target_link_libraries(scan_s scanclient_s newmat_s sparse_s ANN_s normals_s)
 ENDIF(EXPORT_SHARED_LIBS)
 
 ### SLAM6D

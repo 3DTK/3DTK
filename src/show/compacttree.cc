@@ -32,10 +32,10 @@ using std::list;
 #include "slam6d/globals.icc"
 #include "slam6d/point_type.h"
 
+#include "show/scancolormanager.h"
 #include "slam6d/Boctree.h"
 #include "show/compacttree.h"
 #include "show/colormanager.h"
-#include "show/scancolormanager.h"
 #include "show/viewcull.h"
 
 using namespace show;

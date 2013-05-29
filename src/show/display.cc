@@ -7,7 +7,6 @@
  *
  */
 
-#include <glui.h>
 #include "show/display.h"
 #include "slam6d/globals.icc"
 #include <fstream>
@@ -24,6 +23,8 @@ using std::endl;
 #else
 #include <GL/glut.h>
 #endif
+
+#include <glui.h>
 
 
 double SDisplay::mirror[16] = {1,0,0,0,

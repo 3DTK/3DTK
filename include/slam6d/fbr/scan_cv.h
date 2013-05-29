@@ -1,8 +1,9 @@
 /**
  * @file scan_cv.h
  * @brief load 3D Scans in opencv format for featuer based registration.
- * This class is an 3D scan container for scans that have different scan file formats 
- * and add them to a OpenCV Mat data type also normalize the reflectance.
+ * This class is an 3D scan container for scans that have different scan
+ * file formats and add them to a OpenCV Mat data type also normalize the
+ * reflectance.
  * @author HamidReza Houshiar. Jacobs University Bremen gGmbH, Germany.
  * @date Date: 2012/05/9 2:00
  */
