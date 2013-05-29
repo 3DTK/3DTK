@@ -7,21 +7,11 @@
  *
  */
 
-#ifdef _MSC_VER
-#define  _USE_MATH_DEFINES
-#include <windows.h>
-#endif
-#ifdef __APPLE__
-#include <GLUT/glut.h>
-#else
-#include <GL/glut.h>
-#endif
-
+#include "show/scancolormanager.h"
 #include "slam6d/point.h"
 #include "slam6d/scan.h"
 #include "show/colordisplay.h"
 #include "show/colormanager.h"
-#include "show/scancolormanager.h"
 #include <vector>
 #include <float.h>
 #include "slam6d/point_type.h"

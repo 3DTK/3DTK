@@ -1,6 +1,10 @@
 #ifndef __SCANCOLORMANAGER_H__
 #define __SCANCOLORMANAGER_H__
 
+#ifdef WITH_GLEE
+#include "glee/GLee.h"
+#endif
+
 #ifdef _MSC_VER
 #define  _USE_MATH_DEFINES
 #include <windows.h>

@@ -1,5 +1,6 @@
 #ifndef __COLORDISPLAY_H__
 #define __COLORDISPLAY_H__
+
 #include "show/colormanager.h"
 #include "limits.h"
 #include <set>
