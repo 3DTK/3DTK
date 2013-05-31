@@ -117,11 +117,17 @@ ScanColorManager::ScanColorManager(unsigned int _buckets, PointType type, bool a
 //          JetMap m;
           float c[3] = {0,0,0};
           m.calcColor(c, i, allScans.size() );
-          ColorManager *cmc = new ColorManager(buckets, pointtype.getPointDim(), mins, maxs, c);
+          ColorManager *cmc = new ColorManager(buckets,
+									  pointtype.getPointDim(),
+									  mins, maxs,
+									  c);
           scanManager.push_back(cmc);
 
           // new colormanager for the color based on the color of the points
-          CColorManager *ccm = new CColorManager(buckets, pointtype.getPointDim(), mins, maxs, pointtype.getType(PointType::USE_COLOR));
+          CColorManager *ccm = new CColorManager(buckets,
+									    pointtype.getPointDim(),
+									    mins, maxs,
+									    pointtype.getType(PointType::USE_COLOR));
           colorsManager.push_back(ccm);
 
           allManager.push_back(cm);
