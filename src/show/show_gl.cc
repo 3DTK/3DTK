@@ -13,10 +13,13 @@
 #include "show/scancolormanager.h"
 
 using namespace show;
-bool   fullydisplayed = true;       // true if all points have been drawn to the screen
-bool   mousemoving    = false;      // true iff a mouse button has been pressed inside a window,
+bool   fullydisplayed = true;       // true if all points have been drawn to
+                                    // the screen
+bool   mousemoving    = false;      // true iff a mouse button has been pressed
+                                    // inside a window,
                                     // but hs not been released
-bool   keypressed     = false;      // true iff a key button has been pressed inside a window,
+bool   keypressed     = false;      // true iff a key button has been pressed
+                                    // inside a window,
                                     // but hs not been released
 double ptstodisplay   = 100000;  
 double lastfps        = idealfps;   // last frame rate    
@@ -43,6 +46,7 @@ void DrawPoints(GLenum mode, bool interruptable)
     cm->setMode(ScanColorManager::MODE_ANIMATION);
 
     for(int iterator = (int)octpts.size()-1; iterator >= 0; iterator--) {
+	 
       // ignore scans that don't have any frames associated with them
       if((unsigned int)iterator >= MetaMatrix.size()) continue;
       // set usable frame
@@ -57,7 +61,7 @@ void DrawPoints(GLenum mode, bool interruptable)
         type = MetaAlgoType[iterator][frameNr];
       }
       if(type == Scan::INVALID) continue;
-      cm->selectColors(type);	 
+      cm->selectColors(type);      
       glPushMatrix();
       glMultMatrixd(frame);
 
@@ -74,9 +78,10 @@ void DrawPoints(GLenum mode, bool interruptable)
     }
 
     setScansColored(0);
+
   } else {
 
-    if(mode == GL_SELECT){
+    if (mode == GL_SELECT){
       // select points mode
       // ------------------
       GLuint name = 0;
@@ -128,12 +133,14 @@ void DrawPoints(GLenum mode, bool interruptable)
         }
         if (type == Scan::INVALID) continue;
         glPushMatrix();
-        if (invert)                               // default: white points on black background
+        if (invert)                               
+          // default: white points on black background
           glColor4d(1.0, 1.0, 1.0, 0.0);
-        else                                      // black points on white background
+        else                                      
+          // black points on white background
           glColor4d(0.0, 0.0, 0.0, 0.0);
 
-      //  glMultMatrixd(MetaMatrix[iterator].back());
+        // glMultMatrixd(MetaMatrix[iterator].back());
         if (current_frame != (int)MetaMatrix.back().size() - 1) {
           cm->setMode(ScanColorManager::MODE_ANIMATION);
           cm->selectColors(type);
@@ -218,7 +225,9 @@ void DrawPath()
     //set the color 
     glColor4d(1.0, 1.0, 0.0, 1.0);
     //set the points
-    glVertex3f(lookat_vectorX.at(j).x,lookat_vectorX.at(j).y,lookat_vectorZ.at(j).y);
+    glVertex3f(lookat_vectorX.at(j).x,
+               lookat_vectorX.at(j).y,
+               lookat_vectorZ.at(j).y);
   }
   glEnd();
   
@@ -321,42 +330,6 @@ void DrawCameras(void)
     glEnd();
     glDisable(GL_LINE_STIPPLE);
 
-
-   /*
-    if (i+1 == cam_choice) {
-      glColor3f(1, 1, 0);
-      glPointSize(20);
-    } else {
-      glColor3f(0, 0, 1);
-      glPointSize(10);
-    }
-    glBegin(GL_POINTS);
-    glVertex3d(p.x, p.y, p.z);
-    glEnd();
-
-    if (i+1 == cam_choice) {
-      glColor3f(0, 1, 1);
-      glPointSize(20);
-    } else {
-      glColor3f(1, 0, 0);
-      glPointSize(10);
-    }
-    glBegin(GL_POINTS);
-    glVertex3d( l.x,  l.y,  l.z);
-    glEnd();
-
-    if (i+1 == cam_choice) {
-      glColor3f(1, 0, 1);
-      glPointSize(20);
-    } else {
-      glColor3f(0, 1, 0);
-      glPointSize(10);
-    }
-    glBegin(GL_POINTS);
-    glVertex3d( u.x,  u.y,  u.z);
-    glEnd();
-*/ 
-
     glPopMatrix();
   }
 }
@@ -372,7 +345,6 @@ void DisplayItFunc(GLenum mode, bool interruptable)
   /**
    * Color of the fog 
    */
-  
   GLfloat fogColor[4];
 
   if(!invert) {
@@ -406,14 +378,14 @@ void DisplayItFunc(GLenum mode, bool interruptable)
   // do the model-transformation
   if (haveToUpdate == 6 && path_iterator < path_vectorX.size() ) {
     gluLookAt(path_vectorX.at(path_iterator).x,
-		    path_vectorX.at(path_iterator).y,
-		    path_vectorZ.at(path_iterator).y,
+              path_vectorX.at(path_iterator).y,
+              path_vectorZ.at(path_iterator).y,
               lookat_vectorX.at(path_iterator).x,
-		    lookat_vectorX.at(path_iterator).y,
-		    lookat_vectorZ.at(path_iterator).y,
-              ups_vectorX.at(path_iterator).x - path_vectorX.at(path_iterator).x,
-              ups_vectorX.at(path_iterator).y - path_vectorX.at(path_iterator).y, 
-              ups_vectorZ.at(path_iterator).y - path_vectorZ.at(path_iterator).y);
+              lookat_vectorX.at(path_iterator).y,
+              lookat_vectorZ.at(path_iterator).y,
+              ups_vectorX.at(path_iterator).x-path_vectorX.at(path_iterator).x,
+              ups_vectorX.at(path_iterator).y-path_vectorX.at(path_iterator).y, 
+              ups_vectorZ.at(path_iterator).y-path_vectorZ.at(path_iterator).y);
   } else {
     if (cameraNavMouseMode == 1) {
       glRotated( mouseRotX, 1, 0, 0);
@@ -428,7 +400,7 @@ void DisplayItFunc(GLenum mode, bool interruptable)
       glMultMatrixd(mat);
 
       glGetFloatv(GL_MODELVIEW_MATRIX, view_rotate_button);
-      //glRotated(angle, axis[0], axis[1], axis[2]);    // rotate the camera
+      // rotate the camera
       double rPT[3];
       Matrix4ToEuler(mat, rPT);
       mouseRotX = deg(rPT[0]);
@@ -438,7 +410,7 @@ void DisplayItFunc(GLenum mode, bool interruptable)
     }
     updateControls();
 
-    glTranslated(X, Y, Z);       // move camera	
+    glTranslated(X, Y, Z);       // move camera     
   }
 
 //   cout << "Position  :" << X << " " << Y << " " << Z << endl;
@@ -455,13 +427,33 @@ void DisplayItFunc(GLenum mode, bool interruptable)
       fogColor[0] = fogColor[1] = fogColor[2] = fogColor[3] = 0.0;
     glEnable(GL_FOG);
     {
-      // ln(1/2^8) = -5.54517744 -> threshold at which the last color bit is gone due to fog
-      if (show_fog==1) {fogMode = GL_EXP; fardistance = min(5.54517744 / fogDensity, (double)maxfardistance);}
-      else if (show_fog==2) {fogMode = GL_EXP2; fardistance = min(sqrt(5.54517744) / fogDensity, (double)maxfardistance);}
-      else if (show_fog==3) {fogMode = GL_LINEAR; fardistance = 32000.0;}
-      else if (show_fog==4) {fogMode = GL_EXP; fardistance =    (double)maxfardistance; }
-      else if (show_fog==5) {fogMode = GL_EXP2; fardistance =   (double)maxfardistance; }
-      else if (show_fog==6) {fogMode = GL_LINEAR; fardistance = (double)maxfardistance;}
+      // ln(1/2^8) = -5.54517744
+      // --> threshold at which the last color bit is gone due to fog
+      if (show_fog==1) {
+        fogMode = GL_EXP;
+        fardistance = min(5.54517744 / fogDensity, (double)maxfardistance);
+      }
+      else if (show_fog==2) {
+        fogMode = GL_EXP2;
+        fardistance = min(sqrt(5.54517744) / fogDensity,
+                          (double)maxfardistance);
+      }
+      else if (show_fog==3) {
+        fogMode = GL_LINEAR;
+        fardistance = 32000.0;
+      }
+      else if (show_fog==4) {
+        fogMode = GL_EXP;
+        fardistance = (double)maxfardistance;
+      }
+      else if (show_fog==5) {
+        fogMode = GL_EXP2;
+        fardistance = (double)maxfardistance;
+      }
+      else if (show_fog==6) {
+        fogMode = GL_LINEAR;
+        fardistance = (double)maxfardistance;
+      }
       glFogi(GL_FOG_MODE, fogMode);
       glFogfv(GL_FOG_COLOR, fogColor);
       glFogf(GL_FOG_DENSITY, fogDensity);
@@ -474,7 +466,8 @@ void DisplayItFunc(GLenum mode, bool interruptable)
     fardistance = maxfardistance;
   }
   if (fardistance > maxfardistance) fardistance = maxfardistance;
-  if ( fabs(oldfardistance - fardistance) > 0.00001 || fabs(oldneardistance - neardistance) > 0.00001 ) {
+  if ( fabs(oldfardistance - fardistance) > 0.00001 ||
+       fabs(oldneardistance - neardistance) > 0.00001 ) {
     oldfardistance = fardistance;
     oldneardistance = neardistance;
     int viewport[4];
@@ -606,54 +599,59 @@ void DrawUrl() {
   glPopMatrix();
 
 }
+
 /**
  * Function topview. Set the screen for top view.
  */
 void topView()
 {
-  static GLdouble save_qx, save_qy, save_qz, save_qangle, save_X, save_Y, save_Z;
+  static GLdouble save_qx, save_qy, save_qz, save_qangle;
+  static GLdouble save_X, save_Y, save_Z;
   static GLdouble saveMouseRotX, saveMouseRotY, saveMouseRotZ;
   
   if (!showTopView) // set to top view
   {
-	  showTopView = true;
-	  // save current pose
-	  save_X      = X;
-	  save_Y      = Y;
-	  save_Z      = Z;
-	  save_qx     = quat[0];
-	  save_qy     = quat[1];
-	  save_qz     = quat[2];
-	  save_qangle = quat[3];
-	  saveMouseRotX = mouseRotX;
-	  saveMouseRotY = mouseRotY;
-	  saveMouseRotZ = mouseRotZ;
-	 
-	  Y = Y - 350.0;
-	  Z = Z + 500.0;
-	  quat[0] = quat[1] = sqrt(0.5);
-	  quat[2] = quat[3] = 0.0;
-	  mouseRotX = 90;
-	  mouseRotY = 0;
-	  mouseRotZ = 0;
-	 
-	  haveToUpdate = 2;
+    showTopView = true;
+    
+    // save current pose
+    save_X      = X;
+    save_Y      = Y;
+    save_Z      = Z;
+    save_qx     = quat[0];
+    save_qy     = quat[1];
+    save_qz     = quat[2];
+    save_qangle = quat[3];
+    saveMouseRotX = mouseRotX;
+    saveMouseRotY = mouseRotY;
+    saveMouseRotZ = mouseRotZ;
+      
+    Y = Y - 350.0;
+    Z = Z + 500.0;
+    quat[0] = quat[1] = sqrt(0.5);
+    quat[2] = quat[3] = 0.0;
+    mouseRotX = 90;
+    mouseRotY = 0;
+    mouseRotZ = 0;
+    
+    haveToUpdate = 2;
+       
   } else {
-	  showTopView = false;
-
-	  // restore old settings
-	  X = save_X;
-	  Y = save_Y;
-	  Z = save_Z;
-	  quat[0] = save_qx;
-	  quat[1] = save_qy;
-	  quat[2] = save_qz;
-	  quat[3] = save_qangle;
-	  mouseRotX = saveMouseRotX;
-	  mouseRotY = saveMouseRotY;
-	  mouseRotZ = saveMouseRotZ;
-	 
-	  haveToUpdate = 2;	 
+    
+    showTopView = false;
+    
+    // restore old settings
+    X = save_X;
+    Y = save_Y;
+    Z = save_Z;
+    quat[0] = save_qx;
+    quat[1] = save_qy;
+    quat[2] = save_qz;
+    quat[3] = save_qangle;
+    mouseRotX = saveMouseRotX;
+    mouseRotY = saveMouseRotY;
+    mouseRotZ = saveMouseRotZ;
+    
+    haveToUpdate = 2;      
   }
 }
 
@@ -662,32 +660,31 @@ void topView()
  * This function is called when the user wants to
  * delete a camera.
  */
-
 void callDeleteCamera(int dummy){
  
-  //iterator for the position of camera
-  //in the camera list
+  // iterator for the position of camera
+  // in the camera list
   vector<Point>::iterator position;
   vector<Point>::iterator positionL;
   vector<Point>::iterator positionU;
 
-  //calculate the position of the camera. we are referring
-  //to the selected camera
+  // calculate the position of the camera. we are referring
+  // to the selected camera
   position = cams.begin()+ (cam_choice-1);
   positionL = lookats.begin()+ (cam_choice-1);
   positionU = ups.begin()+ (cam_choice-1);
 
-  //if no camera present then return
+  // if no camera present then return
   if(cam_choice == 0)
     return;
 
-  //if the list is not empty then
+  // if the list is not empty then
   if(!cams.empty()){
-    //delete the camera from the position
+    // delete the camera from the position
     cams.erase(position);
     lookats.erase(positionL);
     ups.erase(positionU);
-    //reset the cam_choice spinner values
+    // reset the cam_choice spinner values
   }
   
   updateCamera();
@@ -721,7 +718,6 @@ void resetView(int dummy)
 /**
  * Function to set the viewer window back to a previously saved state.
  */
-
 void setView(double pos[3], double new_quat[4], 
              double newMouseRotX, double newMouseRotY, double newMouseRotZ, 
              double newCangle,
@@ -763,7 +759,7 @@ void setView(double pos[3], double new_quat[4],
 void CallBackDisplayFunc()
 {
   if ((cangle_spinner != 0 && (fabs(cangle_old - cangle) > 0.5)) || 
-	 (pzoom_spinner != 0 && (fabs(pzoom_old - pzoom) > 0.5))) {
+      (pzoom_spinner != 0 && (fabs(pzoom_old - pzoom) > 0.5))) {
 
     cangle_old = cangle;
     pzoom_old = pzoom;
@@ -771,7 +767,7 @@ void CallBackDisplayFunc()
     glGetIntegerv(GL_VIEWPORT, viewport);
     CallBackReshapeFunc(viewport[2],viewport[3]);
 #ifdef _MSC_VER
-	Sleep(25);
+     Sleep(25);
 #else
     usleep(250000);
 #endif
@@ -780,7 +776,7 @@ void CallBackDisplayFunc()
   glDrawBuffer(buffermode);
   // delete framebuffer and z-buffer
 
-  //Call the display function
+  // Call the display function
   DisplayItFunc(GL_RENDER );
   
   // show the rednered scene
@@ -803,7 +799,7 @@ void CallBackIdleFunc(void)
 
   if(glutGetWindow() != window_id)
     glutSetWindow(window_id);
-	 
+      
   // return as nothing has to be updated
   if (haveToUpdate == 0) {
     if (!fullydisplayed && !mousemoving && !keypressed && pointmode == 0
@@ -822,7 +818,7 @@ void CallBackIdleFunc(void)
     return;
   }
   // case: display is invalid - update it with all points
-/*  if (haveToUpdate == 7) {
+  /*  if (haveToUpdate == 7) {
     showall = true;
     glutPostRedisplay();
     haveToUpdate = 0;
@@ -850,24 +846,23 @@ void CallBackIdleFunc(void)
     }
     glutPostRedisplay();
 
-    if(save_animation){
-	    string filename = scan_dir + "animframe" + to_string(frameNr,5) + ".ppm";
-	    cout << "write " << filename << endl;
+    if (save_animation) {
+      string filename = scan_dir + "animframe" + to_string(frameNr,5) + ".ppm";
+      cout << "write " << filename << endl;
       int tmpUpdate = haveToUpdate;
       glWriteImagePPM(filename.c_str(), factor, 0);
       haveToUpdate = tmpUpdate;
 
-	    string jpgname = scan_dir + "animframe" + to_string(frameNr,5) + ".jpg";
-	    string systemcall = "convert -quality 100 -type TrueColor " + filename + " " + jpgname;	
-	    //	 cout << systemcall << endl;
-	    system(systemcall.c_str());
-	    systemcall = "rm " + filename;
-	    system(systemcall.c_str());
-	    //	 cout << systemcall << endl;
-      // for f in *ppm ; do convert -quality 100 -type TrueColor $f `basename $f ppm`jpg; done 
-   }
-    
+      string jpgname = scan_dir + "animframe" + to_string(frameNr,5) + ".jpg";
+      string systemcall = "convert -quality 100 -type TrueColor "
+        + filename + " " + jpgname;     
+      // cout << systemcall << endl;
+      system(systemcall.c_str());
+      systemcall = "rm " + filename;
+      system(systemcall.c_str());
+    }
   }
+
 #ifdef _MSC_VER
   Sleep(300);
   Sleep(anim_delay);
@@ -881,7 +876,7 @@ void CallBackIdleFunc(void)
   }
 
   // case: path animation
-  if(haveToUpdate == 6){
+  if (haveToUpdate == 6){
 
     if (path_iterator == 0) {
       oldcamNavMode = cameraNavMouseMode;  // remember state of old mousenav
@@ -890,7 +885,7 @@ void CallBackIdleFunc(void)
 
     // check if the user wants to animate both
     // scan matching and the path at the same
-    //time
+    // time
 
     // cout << "path_iterator: " << path_iterator << endl;
     if(path_iterator < path_vectorX.size()){   // standard animation case
@@ -907,38 +902,39 @@ void CallBackIdleFunc(void)
 
       // save the animation
       if(save_animation){
-        string filename = scan_dir + "animframe" + to_string(path_iterator,5) + ".ppm";
-        string jpgname = scan_dir + "animframe" + to_string(path_iterator,5) + ".jpg";
-        cout << "written " << filename << " of " << path_vectorX.size() << " files" << endl;
+        string filename = scan_dir + "animframe"
+          + to_string(path_iterator,5) + ".ppm";
+        string jpgname = scan_dir + "animframe"
+          + to_string(path_iterator,5) + ".jpg";
+
+        cout << "written " << filename << " of "
+             << path_vectorX.size() << " files" << endl;
         glWriteImagePPM(filename.c_str(), factor, 0);
-        string systemcall = "convert -quality 100 " + filename + " " + jpgname;	
+        string systemcall = "convert -quality 100 "
+          + filename + " " + jpgname;     
         system(systemcall.c_str());
-        systemcall = "rm " + filename;	
+        systemcall = "rm " + filename;     
         system(systemcall.c_str());
         haveToUpdate = 6;
-
       }
-    }else{                             // animation has just ended
+    } else {                             // animation has just ended
       cameraNavMouseMode = oldcamNavMode;
       show_cameras = 1;
       show_path = 1;
       haveToUpdate = 0;
     }
   }
-  
 }
 
 
 /**
  * This function handles the rotation of the view
  */
-
 void update_view_rotate(int t)
 {
   double view_rotate_button_quat[4];
 
   // convert the rotate button matrix to quaternion 
-  //Matrix4ToQuaternion(view_rotate_button, view_rotate_button_quat);
   double mat[16];
   for (int i = 0; i < 16; i++)
     mat[i] = view_rotate_button[i];
@@ -965,10 +961,15 @@ void update_view_translation(int t)
     } else obj_pos_button1[i] = 0.0;
   }
 
-  X = X + obj_pos_button1[0] * view_rotate_button[0] + obj_pos_button1[1] * view_rotate_button[1] + obj_pos_button1[2] * view_rotate_button[2]; 
-  Y = Y + obj_pos_button1[0] * view_rotate_button[4] + obj_pos_button1[1] * view_rotate_button[5] + obj_pos_button1[2] * view_rotate_button[6]; 
-  Z = Z + obj_pos_button1[0] * view_rotate_button[8] + obj_pos_button1[1] * view_rotate_button[9] + obj_pos_button1[2] * view_rotate_button[10]; 
-
+  X = X + obj_pos_button1[0] * view_rotate_button[0]
+    + obj_pos_button1[1] * view_rotate_button[1]
+    + obj_pos_button1[2] * view_rotate_button[2]; 
+  Y = Y + obj_pos_button1[0] * view_rotate_button[4]
+    + obj_pos_button1[1] * view_rotate_button[5]
+    + obj_pos_button1[2] * view_rotate_button[6]; 
+  Z = Z + obj_pos_button1[0] * view_rotate_button[8]
+    + obj_pos_button1[1] * view_rotate_button[9]
+    + obj_pos_button1[2] * view_rotate_button[10]; 
 }
 
 
@@ -981,8 +982,7 @@ void startAnimation(int dummy)
   if (MetaMatrix.size() > 0) {
     if (haveToUpdate != 3) {
       haveToUpdate = 3;
-    }
-    else // stop animation
+    } else // stop animation
       haveToUpdate = 4;
   }
 }
@@ -1086,14 +1086,9 @@ void selectPoints(int x, int y) {
     mouseRotZ = deg(rPT[2]);
   }
   updateControls();
-    glTranslated(X, Y, Z);       // move camera	
+    glTranslated(X, Y, Z);       // move camera     
 
     static sfloat *sp2 = 0;
-/*    for(int iterator = (int)octpts.size()-1; iterator >= 0; iterator--) {
-      if (!selected_points[iterator].empty()) sp2 = *selected_points[iterator].begin();
-
-      //        selected_points[iterator].clear();
-    }*/
     for(int iterator = (int)octpts.size()-1; iterator >= 0; iterator--) {
       glPushMatrix();
       glMultMatrixd(MetaMatrix[iterator].back());
@@ -1104,18 +1099,23 @@ void selectPoints(int x, int y) {
         sfloat *sp = 0;
         octpts[iterator]->selectRay(sp);
         if (sp != 0) {
-          cout << "Selected point: " << sp[0] << " " << sp[1] << " " << sp[2] << endl;
+          cout << "Selected point: "
+               << sp[0] << " " << sp[1] << " " << sp[2] << endl;
 
           if (sp2 != 0) {
             cout << "Distance to last point: "
-			  << sqrt( sqr(sp2[0] - sp[0]) + sqr(sp2[1] - sp[1]) + sqr(sp2[2] - sp[2])  ) << endl; 
+                 << sqrt( sqr(sp2[0] - sp[0]) +
+                          sqr(sp2[1] - sp[1]) +
+                          sqr(sp2[2] - sp[2])  )
+                 << endl; 
           }
           sp2 = sp;
 
           selected_points[iterator].insert(sp);
         }
       } else { // select multiple points with a given brushsize
-        octpts[iterator]->selectRayBrushSize(selected_points[iterator], brush_size);
+        octpts[iterator]->selectRayBrushSize(selected_points[iterator],
+                                             brush_size);
       }
 
       glPopMatrix();
@@ -1135,8 +1135,9 @@ void selectPoints(int x, int y) {
     glPushMatrix();
     glLoadIdentity();
 
-//    gluPickMatrix((GLdouble)x, (GLdouble)(viewport[3]-y), 10.0, 10.0, viewport);
-    gluPickMatrix((GLdouble)x, (GLdouble)(viewport[3]-y), brush_size*2, brush_size*2, viewport);
+    gluPickMatrix((GLdouble)x, (GLdouble)(viewport[3]-y),
+                  brush_size*2, brush_size*2,
+                  viewport);
     gluPerspective(cangle, aspect, neardistance, fardistance); 
     glMatrixMode(GL_MODELVIEW);
     DisplayItFunc(GL_SELECT);
@@ -1170,7 +1171,8 @@ void CallBackMouseFunc(int button, int state, int x, int y)
 {
   // Are we selecting points or moving the camera?
   if(cameraNavMouseMode != 1) { // selecting points
-    if (state == GLUT_DOWN && (button == GLUT_LEFT_BUTTON || button == GLUT_RIGHT_BUTTON)) {
+    if (state == GLUT_DOWN &&
+        (button == GLUT_LEFT_BUTTON || button == GLUT_RIGHT_BUTTON)) {
       selectPoints(x,y);
     }
   } else {
@@ -1189,7 +1191,8 @@ void CallBackMouseFunc(int button, int state, int x, int y)
 }
 
 
-void moveCamera(double x, double y, double z, double rotx, double roty, double rotz) {
+void moveCamera(double x, double y, double z,
+                double rotx, double roty, double rotz) {
   interruptDrawing();
   double mat[9];
   
@@ -1227,7 +1230,6 @@ void moveCamera(double x, double y, double z, double rotx, double roty, double r
   transX += x * mat[0] + y * mat[3] + z * mat[6];
   transY += x * mat[1] + y * mat[4] + z * mat[7];      
   transZ += x * mat[2] + y * mat[5] + z * mat[8];
-
 
   X += transX;
   Y += transY;
@@ -1315,14 +1317,16 @@ void CallBackMouseMotionFunc(int x, int y) {
         deltaMouseX *= 5;
         deltaMouseY *= 5;
       }
-      deltaMouseX *= movementSpeed/10.0;  // moving 10 pixels is equivalent to one key stroke
+      // moving 10 pixels is equivalent to one key stroke
+      deltaMouseX *= movementSpeed/10.0;  
       deltaMouseY *= movementSpeed/10.0;
       moveCamera(deltaMouseX, deltaMouseY, 0, 0,0,0);
     } else if( mouseNavButton == GLUT_MIDDLE_BUTTON ){
       if ( !showTopView ) {
         deltaMouseY *= -5;
       }
-      deltaMouseX *= movementSpeed/10.0;  // moving 10 pixels is equivalent to one key stroke
+      // moving 10 pixels is equivalent to one key stroke
+      deltaMouseX *= movementSpeed/10.0;  
       deltaMouseY *= movementSpeed/10.0;
       moveCamera(deltaMouseX, 0, deltaMouseY, 0,0,0);
     } else if ( mouseNavButton == GLUT_LEFT_BUTTON ){
@@ -1406,8 +1410,9 @@ void glDumpWindowPPM(const char *filename, GLenum mode)
   fp.open(filename, ios::out);
 
   // Write a proper P6 PPM header
-  fp << "P6" << endl << "# CREATOR: 3D_Viewer by Andreas Nuechter, University of Osnabrueck"
-	<< endl << win_width  << " " << win_height << " " << UCHAR_MAX << endl;
+  fp << "P6" << endl
+     << "# CREATOR: 3D_Viewer by Andreas Nuechter, University of Osnabrueck"
+     << endl << win_width  << " " << win_height << " " << UCHAR_MAX << endl;
 
   // Loop through the frame buffer data, writing to the PPM file.  Be careful
   //   to account for the frame buffer having 4 bytes per pixel while the
@@ -1512,9 +1517,9 @@ void glWriteImagePPM(const char *filename, int scale, GLenum mode)
         label = false;
         if(!showTopView) {
           glFrustum(neardistance*width, neardistance*(width + part_width),
-				neardistance*(height),
-				neardistance*(height + part_height),
-				neardistance, fardistance);
+                    neardistance*(height),
+                    neardistance*(height + part_height),
+                    neardistance, fardistance);
           glMatrixMode(GL_MODELVIEW);
           if(i==0 && j==0) {
             label = true; 
@@ -1534,17 +1539,24 @@ void glWriteImagePPM(const char *filename, int scale, GLenum mode)
         // Read window contents from GL frame buffer with glReadPixels
         glFinish();
         glReadBuffer(buffermode);
-        glReadPixels(0, 0, win_width, win_height, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
+        glReadPixels(0, 0,
+                     win_width, win_height,
+                     GL_RGBA, GL_UNSIGNED_BYTE,
+                     buffer);
        
-        // Loop through the frame buffer data, writing to the PPM file.  Be careful
-        //   to account for the frame buffer having 4 bytes per pixel while the
-        //   output file has 3 bytes per pixel
+        // Loop through the frame buffer data, writing to the PPM file.
+        // Be careful
+        // to account for the frame buffer having 4 bytes per pixel while the
+        // output file has 3 bytes per pixel
                                           // end row
         for (m = 0; m < win_height; m++) {     // For each row
           for (o = 0; o < win_width; o++) {    // For each column
             for (k = 0; k < RGB; k++) {        // For each RGB component
-              int l = (k+RGB*(image_width*((scale - 1 - i)*win_height + m) + j*win_width + o));
-              ibuffer[l]   = (unsigned char) *(buffer + (RGBA*((win_height-1-m)*win_width+o)+k));
+              int l = (k + RGB*(image_width*((scale - 1 - i)*win_height + m)
+                                + j*win_width + o));
+              ibuffer[l]   = (unsigned char)*(buffer +
+                                              (RGBA * ((win_height-1-m)
+                                                       * win_width+o)+k));
             }                                  // end RGB
           }                                    // end column
         }
@@ -1554,8 +1566,7 @@ void glWriteImagePPM(const char *filename, int scale, GLenum mode)
     }
    
     // show the starting scene 
-    
-  // Restore the original projection matrix
+    // Restore the original projection matrix
     glMatrixMode(GL_PROJECTION);
     glLoadMatrixd(savedMatrix);
     glMatrixMode(GL_MODELVIEW);
@@ -1572,11 +1583,14 @@ void glWriteImagePPM(const char *filename, int scale, GLenum mode)
     fp.open(filename, ios::out);
 
     // Write a proper P6 PPM header
-    fp << "P6" << endl << "# CREATOR: 3D_Viewer by Dorit Borrmann, Jacobs University Bremen gGmbH"
-    << endl << image_width  << " " << image_height << " " << UCHAR_MAX << endl;
+    fp << "P6" << endl
+       << "# CREATOR: 3D_Viewer by Dorit Borrmann, Jacobs University Bremen"
+       << endl
+       << image_width  << " " << image_height << " " << UCHAR_MAX << endl;
 
     // Write output buffer to the file 
-    fp.write((const char*)ibuffer, sizeof(unsigned char) * (RGB * image_width * image_height));
+    fp.write((const char*)ibuffer,
+             sizeof(unsigned char) * (RGB * image_width * image_height));
     fp.close();
     fp.clear();
     delete [] buffer;
@@ -1593,7 +1607,8 @@ void CallBackReshapeFunc(int width, int height)
     current_height = height;
     current_width = width;
   }
-  aspect = (double)width/(double)height;
+  aspect = (double)width / (double)height;
+  
   if (!showTopView) {
     // usage of the vsize of a structiewport
     glViewport(0, 0, (GLint)width, (GLint)height);
@@ -1619,9 +1634,9 @@ void CallBackReshapeFunc(int width, int height)
     glLoadIdentity ();
 
     // get matrix
-	 glOrtho ( -aspect * pzoom, aspect * pzoom,
-			 -1 * pzoom, pzoom,
-			 1.0, 32000.0 );
+      glOrtho ( -aspect * pzoom, aspect * pzoom,
+                -1 * pzoom, pzoom,
+                1.0, 32000.0 );
 
     // now use modelview-matrix as current matrix
     glMatrixMode(GL_MODELVIEW);
@@ -1629,6 +1644,7 @@ void CallBackReshapeFunc(int width, int height)
     haveToUpdate = 1;
  
   }
+  
   //  glDepthMask(false);
   glEnable(GL_BLEND); // TODO
   glBlendFunc(GL_ONE, GL_ZERO); // TODO
@@ -1647,8 +1663,8 @@ void CallBackReshapeFunc(int width, int height)
  */
 void ProcessHitsFunc(GLint hits, GLuint buffer[])
 {
-  //cout << "SIZE " << selected_points[0].size() << endl;
-  //cout << "processing " << endl;
+  // cout << "SIZE " << selected_points[0].size() << endl;
+  // cout << "processing " << endl;
   set<int> names;
   set<sfloat *> unsel_points;
 
@@ -1665,7 +1681,7 @@ void ProcessHitsFunc(GLint hits, GLuint buffer[])
       ptr++;
     }
   }
-  //cout << "number of names " << names.size() << endl;
+  // cout << "number of names " << names.size() << endl;
   if (names.empty()) return;
 
   int index = 0;
@@ -1676,7 +1692,7 @@ void ProcessHitsFunc(GLint hits, GLuint buffer[])
     // iterate over the selected points as in DrawPoints
     for ( set<sfloat*>::iterator it = selected_points[iterator].begin();
         it != selected_points[iterator].end(); it++) {
-	 if (index == *nit) { // if the current index is the current name
+      if (index == *nit) { // if the current index is the current name
         unsel_points.insert(*it);
         nit++;
       }
@@ -1689,15 +1705,15 @@ void ProcessHitsFunc(GLint hits, GLuint buffer[])
 
   cout << "Erasing " << endl;
   for (set<sfloat*>::iterator it = unsel_points.begin(); 
-      it != unsel_points.end(); it++) {  // iterate to the index as indicated by the name *ptr
-    for(int iterator = (int)octpts.size()-1; iterator >= 0; iterator--) { // erase for all scans
+      it != unsel_points.end(); it++) {
+    // iterate to the index as indicated by the name *ptr
+    for(int iterator = (int)octpts.size()-1; iterator >= 0; iterator--) {
+      // erase for all scans
       selected_points[iterator].erase(*it);
     }
   }
 
-
   cout << "processing done" << endl;
-  
 }
 
 
@@ -1706,16 +1722,17 @@ void ProcessHitsFunc(GLint hits, GLuint buffer[])
  * This function deals with all our keyboard activities
  */
 
-void InterfaceFunc(unsigned char key){
- 
+void InterfaceFunc(unsigned char key)
+{
   strncpy(path_file_name, path_filename_edit->get_text(), 1024);  
   strncpy(pose_file_name, pose_filename_edit->get_text(), 1024);  
   return;
 }
 
 
-void CallBackSpecialFunc(int key , int x, int y) {
-  //KeyboardFunc(key + 214, false, false, false);
+void CallBackSpecialFunc(int key , int x, int y)
+{
+  // KeyboardFunc(key + 214, false, false, false);
   // return;
 }
 
@@ -1724,14 +1741,14 @@ void CallBackSpecialFunc(int key , int x, int y) {
  * \brief This functions draws the path where the
  * robot has travelled along while taking the scans
  */
-void drawRobotPath(int dummy){
+void drawRobotPath(int dummy)
+{
   // clear the camera list as we are going to add the cameras
   // in the path where the robot travelled.
 
   // lets loop through the entire frame files to extract the
   // total number of places where the robot has taken the scans from
   for(unsigned int i = 0; i < MetaMatrix.size(); i++){
-    //temp variable
     double *temp;
     // Now, lets go to the last of each frame file to
     // extract the transformation matrix obtained
@@ -1794,7 +1811,10 @@ void calcInterpolatedCameras(vector<PointXY> vec1, vector<PointXY> vec2) {
     double curr_dist = sqrt(dx*dx + dy*dy + dz*dz);
     for(int j = 0; j < im_per_cam; j++) {
       count++;
-      NurbsPath::camRatio.push_back((distance2 + ((double)j * (curr_dist/(double)im_per_cam)))/(distance + 0.1));
+      NurbsPath::camRatio.push_back((distance2
+                                     + ((double)j
+                                        * (curr_dist/(double)im_per_cam)))
+                                    /(distance + 0.1));
     }
     
     distance2 += sqrt(dx*dx + dy*dy + dz*dz);
@@ -1814,22 +1834,24 @@ int calcNoOfPoints(vector<PointXY> vec1, vector<PointXY> vec2)
     dy = vec1.at(i+1).y - vec1.at(i).y;
     dz = vec2.at(i+1).y - vec2.at(i).y;
 
-    distance += sqrt(dx*dx + dy*dy + dz*dz );
+    distance += sqrt( dx*dx + dy*dy + dz*dz );
   }
 
-  return distance/2;
+  return distance / 2;  // change this to get faster animations
 }
 
 /**
  * This function handles the the keyboard input
  */
-void CallBackInterfaceFunc(unsigned char key, int x, int y) {
-  //call the interfacefunc. it deals with all our
-  //keyboard activities
+void CallBackInterfaceFunc(unsigned char key, int x, int y)
+{
+  // call the interfacefunc. it deals with all our
+  // keyboard activities
   InterfaceFunc(key);
 }
 
-void CallBackKeyboardUpFunc(unsigned char key, int x, int y) {
+void CallBackKeyboardUpFunc(unsigned char key, int x, int y)
+{
   keymap[key] = false;
   if (key >= 'A' && key <= 'Z') {
     keymap[key+ ('a'-'A')] = false;
@@ -1847,7 +1869,8 @@ void CallBackKeyboardUpFunc(unsigned char key, int x, int y) {
   keypressed = false;
 }
 
-void CallBackKeyboardFunc(unsigned char key, int x, int y) {
+void CallBackKeyboardFunc(unsigned char key, int x, int y)
+{
   keymap[key] = true;
   keypressed = true;
   bool cmd,alt,shift;
@@ -1860,7 +1883,8 @@ void CallBackKeyboardFunc(unsigned char key, int x, int y) {
   KeyboardFunc(key, cmd, alt, shift);
 }
 
-void mapColorToValue(int dummy) {
+void mapColorToValue(int dummy)
+{
   switch (listboxColorVal) {
     case 0:
       cm->setCurrentType(PointType::USE_HEIGHT);
@@ -1889,7 +1913,8 @@ void mapColorToValue(int dummy) {
   resetMinMax(0);
 }
 
-void changeColorMap(int dummy) {
+void changeColorMap(int dummy)
+{
   ColorMap c;
   GreyMap gm;
   HSVMap hsv;
@@ -1961,7 +1986,7 @@ void changePointMode(int dummy) {
   if (dummy == 0) {           // always display
     if (pointmode != 1) {  // standard mode
       pointmode = 1;
-      //never_box->set_int_val(0);
+      // never_box->set_int_val(0);
     } else {
       pointmode = 0;
     }
@@ -1977,11 +2002,13 @@ void changePointMode(int dummy) {
 }
 
 
-void callCameraUpdate(int dummy) {
+void callCameraUpdate(int dummy)
+{
   updateCamera();
 }
 
-void calcPointSequence(vector<int> &sequence, int frameNr) {
+void calcPointSequence(vector<int> &sequence, int frameNr)
+{
   sequence.clear();
   vector<pair<double, int> > dists;
   double x,y,z;
@@ -2000,7 +2027,8 @@ void calcPointSequence(vector<int> &sequence, int frameNr) {
     x = frame[12];
     y = frame[13];
     z = frame[14];
-    dists.push_back( pair<double, int>(sqr(X + x) + sqr(Y + y) + sqr(Z + z), i) );
+    dists.push_back( pair<double, int>(sqr(X + x) + sqr(Y + y) + sqr(Z + z),
+                                       i) );
   }
 
   sort( dists.begin(), dists.end());
