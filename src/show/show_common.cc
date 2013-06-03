@@ -134,13 +134,13 @@ GLfloat cangle_old      = cangle;
 /**
  * Current rotation axis of the scene as quaternion
  */
-GLdouble quat[4]         ={0.0, 0.0, 0.0, 1.0};
-GLdouble Rquat[4]         ={0.0, 0.0, 0.0, 1.0};
+GLdouble quat[4]         = {0.0, 0.0, 0.0, 1.0};
+GLdouble Rquat[4]        = {0.0, 0.0, 0.0, 1.0};
 
 /**
  * Current translation of the scene
  */
-GLdouble X               = 0.0, Y               = 0.0, Z               = 0.0;
+GLdouble X   = 0.0, Y   = 0.0, Z   = 0.0;
 GLdouble RVX = 0.0, RVY = 0.0, RVZ = 0.0;
 
 /**
@@ -216,29 +216,28 @@ int START_X              = 0;
 int START_Y              = 0;
 int START_WIDTH          = 960;
 int START_HEIGHT         = 540;
-GLdouble aspect          = (double)START_WIDTH/(double)START_HEIGHT;          // Current aspect ratio
+// Current aspect ratio
+GLdouble aspect          = (double)START_WIDTH/(double)START_HEIGHT;  
 bool advanced_controls = false;
 
-bool fullscreen = false;
-int current_width = START_WIDTH;
+bool fullscreen    = false;
+int current_width  = START_WIDTH;
 int current_height = START_HEIGHT;
 
 
 // the following values are scale dependant, i.e. all values are in m
-float neardistance = 0.10;
+float neardistance     = 0.10;
 double oldneardistance = 0.10;
-float maxfardistance = 400.0;
-double fardistance = 400.0;
-double oldfardistance = 40000.0;
-double movementSpeed = 0.1;
-double defaultZoom = 20.0;
-GLfloat fogDensity       = 0.1;
-double voxelSize = 0.20;
-
+float maxfardistance   = 400.0;
+double fardistance     = 400.0;
+double oldfardistance  = 40000.0;
+double movementSpeed   = 0.1;
+double defaultZoom     = 20.0;
+GLfloat fogDensity     = 0.1;
+double voxelSize       = 0.20;
 
 float adaption_rate = 1.0;
 float LevelOfDetail = 0.0001;
-
 
 // Defines for Point Semantic
 #define TYPE_UNKNOWN         0x0000
@@ -255,14 +254,17 @@ static int oldcamNavMode = 0;
  * Animation sould be saved to file
  */
 int save_animation         = 0;
+
 /**
  * If true, interpolation for camera path is based on distance, else always
  * the same number of images between two cameras.
  */
 int inter_by_dist          = 1;
 
-/**some variables for the camera path**/
-vector<PointXY> path_vectorX, path_vectorZ,  lookat_vectorX, lookat_vectorZ, ups_vectorX, ups_vectorZ;
+/** some variables for the camera path **/
+vector<PointXY> path_vectorX, path_vectorZ;
+vector<PointXY> lookat_vectorX, lookat_vectorZ;
+vector<PointXY> ups_vectorX, ups_vectorZ;
 vector<Point> cams;
 vector<Point> lookats;
 vector<Point> ups;
@@ -301,7 +303,7 @@ int select_voxels         = 0;
 /**
  * Select or unselect points ?
  */
-int selectOrunselect         = 1;
+int selectOrunselect      = 1;
 /** octree depth for selecting groups of points */
 int selection_depth = 1;
 int brush_size = 0;
@@ -327,93 +329,93 @@ void usage(char* prog)
 #endif
 
   cout << endl
-	  << bold << "USAGE " << normal << endl
-	  << "   " << prog << " [options] directory" << endl << endl;
+       << bold << "USAGE " << normal << endl
+       << "   " << prog << " [options] directory" << endl << endl;
   cout << bold << "OPTIONS" << normal << endl
 
-	  << bold << "  -e" << normal << " NR, " << bold << "--end=" << normal << "NR" << endl
-	  << "         end after scan NR" << endl
-	  << endl
-	  << bold << "  -f" << normal << " F, " << bold << "--format=" << normal << "F" << endl
-	  << "         using shared library F for input" << endl
-	  << "         (chose F from {uos, uos_map, uos_rgb, uos_frames, uos_map_frames, old, rts, rts_map, ifp, riegl_txt, riegl_rgb, riegl_bin, zahn, ply, wrl, xyz, zuf, iais, front, x3d, rxp, ais })" << endl
-	  << endl
-	  << bold << "  -F" << normal << " NR, " << bold << "--fps=" << normal << "NR [default: 20]" << endl
-	  << "         will attempt to display points with a framerate of NR" << endl
-	  << endl
-	  << bold << "  -l" << normal << " FILE, " << bold << "--loadObj=" << normal <<
+       << bold << "  -e" << normal << " NR, " << bold << "--end=" << normal << "NR" << endl
+       << "         end after scan NR" << endl
+       << endl
+       << bold << "  -f" << normal << " F, " << bold << "--format=" << normal << "F" << endl
+       << "         using shared library F for input" << endl
+       << "         (chose F from {uos, uos_map, uos_rgb, uos_frames, uos_map_frames, old, rts, rts_map, ifp, riegl_txt, riegl_rgb, riegl_bin, zahn, ply, wrl, xyz, zuf, iais, front, x3d, rxp, ais })" << endl
+       << endl
+       << bold << "  -F" << normal << " NR, " << bold << "--fps=" << normal << "NR [default: 20]" << endl
+       << "         will attempt to display points with a framerate of NR" << endl
+       << endl
+       << bold << "  -l" << normal << " FILE, " << bold << "--loadObj=" << normal <<
     "FILE" << endl
-	  << "         load objects specified in <FILE>" << endl
-	  << endl
-	  << endl
-	  << bold << "  -m" << normal << " NR, " << bold << "--max=" << normal << "NR" << endl
-	  << "         neglegt all data points with a distance larger than NR 'units'" << endl
-	  << endl
-	  << bold << "  -M" << normal << " NR, " << bold << "--min=" << normal << "NR" << endl
-	  << "         neglegt all data points with a distance smaller than NR 'units'" << endl
-	  << endl
-	  << bold << "  -O" << normal << "NR (optional), " << bold << "--octree=" << normal << "NR (optional)" << endl
-	  << "         use randomized octree based point reduction (pts per voxel=<NR>)" << endl
-	  << "         requires " << bold << "-r" << normal <<" or " << bold << "--reduce" << endl
-	  << endl
-	  << bold << "  -o" << normal << " NR, " << bold << "--origin=" << normal << "NR (optional)" << endl
-	  << "         sets the starting and reset position to: " << endl
-	  << "           0 = the origin of the coordinate system (default)" << endl
-	  << "           1 = the position of the first scan (default if --origin is in argument list)" << endl
-	  << "           2 = the center of the first scan" << endl
-	  << endl
+       << "         load objects specified in <FILE>" << endl
+       << endl
+       << endl
+       << bold << "  -m" << normal << " NR, " << bold << "--max=" << normal << "NR" << endl
+       << "         neglegt all data points with a distance larger than NR 'units'" << endl
+       << endl
+       << bold << "  -M" << normal << " NR, " << bold << "--min=" << normal << "NR" << endl
+       << "         neglegt all data points with a distance smaller than NR 'units'" << endl
+       << endl
+       << bold << "  -O" << normal << "NR (optional), " << bold << "--octree=" << normal << "NR (optional)" << endl
+       << "         use randomized octree based point reduction (pts per voxel=<NR>)" << endl
+       << "         requires " << bold << "-r" << normal <<" or " << bold << "--reduce" << endl
+       << endl
+       << bold << "  -o" << normal << " NR, " << bold << "--origin=" << normal << "NR (optional)" << endl
+       << "         sets the starting and reset position to: " << endl
+       << "           0 = the origin of the coordinate system (default)" << endl
+       << "           1 = the position of the first scan (default if --origin is in argument list)" << endl
+       << "           2 = the center of the first scan" << endl
+       << endl
             << bold << "  -S, --scanserver" << normal << endl
             << "           Use the scanserver as an input method and handling of scan data" << endl
             << endl
-	  << bold << "  -r" << normal << " NR, " << bold << "--reduce=" << normal << "NR" << endl
-	  << "         turns on octree based point reduction (voxel size=<NR>)" << endl
-	  << endl
-	  << bold << "  -s" << normal << " NR, " << bold << "--start=" << normal << "NR" << endl
-	  << "         start at scan NR (i.e., neglects the first NR scans)" << endl
-	  << "         [ATTENTION: counting naturally starts with 0]" << endl
-	  << endl
-	  << bold << "  -C" << normal << " NR, " << bold << "--scale=" << normal << "NR" << endl
-	  << "         scale factor to use (default: 0.01), modifies movement speed etc. " << endl
-	  << "         use 1 when point coordinates are in m, 0.01 when in cm and so forth. " << endl
-	  << "         " << endl
-	  << endl
+       << bold << "  -r" << normal << " NR, " << bold << "--reduce=" << normal << "NR" << endl
+       << "         turns on octree based point reduction (voxel size=<NR>)" << endl
+       << endl
+       << bold << "  -s" << normal << " NR, " << bold << "--start=" << normal << "NR" << endl
+       << "         start at scan NR (i.e., neglects the first NR scans)" << endl
+       << "         [ATTENTION: counting naturally starts with 0]" << endl
+       << endl
+       << bold << "  -C" << normal << " NR, " << bold << "--scale=" << normal << "NR" << endl
+       << "         scale factor to use (default: 0.01), modifies movement speed etc. " << endl
+       << "         use 1 when point coordinates are in m, 0.01 when in cm and so forth. " << endl
+       << "         " << endl
+       << endl
 
     << bold << "  -R, --reflectance, --reflectivity" << normal << endl
-	  << "         use reflectivity values for coloring point clouds" << endl
-	  << "         only works when using octree display" << endl
-	  << endl
+       << "         use reflectivity values for coloring point clouds" << endl
+       << "         only works when using octree display" << endl
+       << endl
     << bold << "  -D, --temperature, --degree" << normal << endl
-	  << "         use temperature values for coloring point clouds" << endl
-	  << "         only works when using octree display" << endl
-	  << endl
+       << "         use temperature values for coloring point clouds" << endl
+       << "         only works when using octree display" << endl
+       << endl
     << bold << "  -a, --amplitude" << endl << normal
-	  << "         use amplitude values for coloring point clouds" << endl
-	  << "         only works when using octree display" << endl
-	  << endl
+       << "         use amplitude values for coloring point clouds" << endl
+       << "         only works when using octree display" << endl
+       << endl
     << bold << "  -d, --deviation" << endl << normal
-	  << "         use amplitude values for coloring point clouds" << endl
-	  << "         only works when using octree display" << endl
-	  << endl
+       << "         use amplitude values for coloring point clouds" << endl
+       << "         only works when using octree display" << endl
+       << endl
     << bold << "  -h, --height" << endl << normal
-	  << "         use y-values for coloring point clouds" << endl
-	  << "         only works when using octree display" << endl
-	  << endl
+       << "         use y-values for coloring point clouds" << endl
+       << "         only works when using octree display" << endl
+       << endl
     << bold << "  -T, --type" << endl << normal
-	  << "         use type values for coloring point clouds" << endl
-	  << "         only works when using octree display" << endl
+       << "         use type values for coloring point clouds" << endl
+       << "         only works when using octree display" << endl
     << bold << "  -c, --color" << endl << normal
-	  << "         use color RGB values for coloring point clouds" << endl
+       << "         use color RGB values for coloring point clouds" << endl
     << bold << "  -b" << normal << " NR, " << bold << "--sphere=" << normal << "NR" << endl
-	  << "         map all measurements on a sphere (of radius NRcm)" << endl
+       << "         map all measurements on a sphere (of radius NRcm)" << endl
     << bold << "  --saveOct" << endl << normal
-	  << "         stores all used scans as octrees in the given directory" << endl
-	  << "         All reflectivity/amplitude/deviation/type settings are stored as well." << endl
-	  << "         only works when using octree display" << endl
+       << "         stores all used scans as octrees in the given directory" << endl
+       << "         All reflectivity/amplitude/deviation/type settings are stored as well." << endl
+       << "         only works when using octree display" << endl
     << bold << "  --loadOct" << endl << normal
-	  << "         only reads octrees from the given directory" << endl
-	  << "         All reflectivity/amplitude/deviation/type settings are read from file." << endl
-	  << "         --reflectance/--amplitude and similar parameters are therefore ignored." << endl
-	  << "         only works when using octree display" << endl
+       << "         only reads octrees from the given directory" << endl
+       << "         All reflectivity/amplitude/deviation/type settings are read from file." << endl
+       << "         --reflectance/--amplitude and similar parameters are therefore ignored." << endl
+       << "         only works when using octree display" << endl
     << endl << endl;
 
   exit(1);
@@ -433,10 +435,13 @@ void usage(char* prog)
  * @param type parsing result - file format to be read
  * @return 0, if the parsing was successful, 1 otherwise
  */
-int parseArgs(int argc,char **argv, string &dir, int& start, int& end, int& maxDist, int& minDist, 
-              double &red, bool &readInitial, int &octree, PointType &ptype, float &fps, string &loadObj,
-              bool &loadOct, bool &saveOct, int &origin, double &scale, IOType &type, bool& scanserver, 
-	      double& sphereMode)
+int parseArgs(int argc,char **argv,
+              string &dir, int& start, int& end, int& maxDist, int& minDist, 
+              double &red, bool &readInitial, int &octree,
+              PointType &ptype, float &fps, string &loadObj,
+              bool &loadOct, bool &saveOct, int &origin, double &scale,
+              IOType &type, bool& scanserver, 
+              double& sphereMode)
 {
   unsigned int types = PointType::USE_NONE;
   start   = 0;
@@ -484,12 +489,18 @@ int parseArgs(int argc,char **argv, string &dir, int& start, int& end, int& maxD
     switch (c) {
       case 's':
         w_start = atoi(optarg);
-        if (start < 0) { cerr << "Error: Cannot start at a negative scan number.\n"; exit(1); }
+        if (start < 0) {
+          cerr << "Error: Cannot start at a negative scan number.\n"; exit(1);
+        }
         break;
       case 'e':
         w_end = atoi(optarg);
-        if (end < 0)     { cerr << "Error: Cannot end at a negative scan number.\n"; exit(1); }
-        if (end < start) { cerr << "Error: <end> cannot be smaller than <start>.\n"; exit(1); }
+        if (end < 0) {
+          cerr << "Error: Cannot end at a negative scan number.\n"; exit(1);
+        }
+        if (end < start) {
+          cerr << "Error: <end> cannot be smaller than <start>.\n"; exit(1);
+        }
         break;
       case 'm':
         maxDist = atoi(optarg);
@@ -661,13 +672,14 @@ void setResetView(int origin) {
     }
     transform3(MetaMatrix[i].back(), centroid, centroid_transformed);
     for (unsigned int k = 0; k < 3; ++k) {
-	 CoM[k] += centroid_transformed[k];
+      CoM[k] += centroid_transformed[k];
     }
   }
   for (unsigned int k = 0; k < 3; ++k)
     CoM[k] /= octpts.size() * 1.;
 
-  cout << "Center of Mass at: " << CoM[0] << ", " << CoM[1] << ", " << CoM[2] << endl;
+  cout << "Center of Mass at: "
+       << CoM[0] << ", " << CoM[1] << ", " << CoM[2] << endl;
 
   RVX = -CoM[0];
   RVY = -CoM[1];
@@ -712,13 +724,16 @@ int readFrames(string dir, int start, int end, bool readInitial, IOType &type)
     memcpy(mirror, tempxf, sizeof(tempxf));
   }
 
-  for(std::vector<Scan*>::iterator it = Scan::allScans.begin(); it != Scan::allScans.end(); ++it) {
+  for(std::vector<Scan*>::iterator it = Scan::allScans.begin();
+      it != Scan::allScans.end();
+      ++it) {
     const double* transformation;
     Scan::AlgoType algoType;
     vector<double*> Matrices;
     vector<Scan::AlgoType> algoTypes;
     
-    // iterate over frames (stop if none were created) and pull/convert the frames into local containers
+    // iterate over frames (stop if none were created) and
+    // pull/convert the frames into local containers
     unsigned int frame_count;
     try {
       frame_count = (*it)->readFrames();
@@ -729,7 +744,8 @@ int readFrames(string dir, int start, int end, bool readInitial, IOType &type)
       (*it)->getFrame(i, transformation, algoType);
       double* transMatOpenGL = new double[16];
       
-      // apply mirror to convert (and initial frame if requested) the frame and save in opengl
+      // apply mirror to convert (and initial frame if requested)
+      // the frame and save in opengl
       MMult(mirror, transformation, transMatOpenGL);
 
       Matrices.push_back(transMatOpenGL);
@@ -739,7 +755,8 @@ int readFrames(string dir, int start, int end, bool readInitial, IOType &type)
     MetaAlgoType.push_back(algoTypes);
     MetaMatrix.push_back(Matrices);
     
-    if((type == UOS_MAP || type == UOS_MAP_FRAMES || type == RTS_MAP) && it == Scan::allScans.begin()) {
+    if((type == UOS_MAP || type == UOS_MAP_FRAMES || type == RTS_MAP)
+       && it == Scan::allScans.begin()) {
       MetaAlgoType.push_back(algoTypes);
       MetaMatrix.push_back(Matrices);
     }
@@ -778,7 +795,9 @@ void generateFrames(int start, int end, bool identity) {
         M4identity(transMat);
         transMat[10] = -1.0;
       } else {
-        EulerToMatrix4(Scan::allScans[index]->get_rPos(), Scan::allScans[index]->get_rPosTheta(), transMat );
+        EulerToMatrix4(Scan::allScans[index]->get_rPos(),
+                       Scan::allScans[index]->get_rPosTheta(),
+                       transMat );
       }
 
       Matrices.push_back(transMat);
@@ -808,7 +827,7 @@ void initShow(int argc, char **argv){
 
   cout << "(wx)show - A highly efficient 3D point cloud viewer" << endl
        << "(c) Jacobs University Bremen gGmbH, Germany, since 2009" << endl
-	  << "    University of Osnabrueck, Germany, 2006 - 2009" << endl << endl;
+       << "    University of Osnabrueck, Germany, 2006 - 2009" << endl << endl;
 
   if(argc <= 1){
     usage(argv[0]);
@@ -837,8 +856,8 @@ void initShow(int argc, char **argv){
   strncpy(selection_file_name, "selected.3d", 1024);
 
   parseArgs(argc, argv, dir, start, end, maxDist, minDist, red, readInitial,
-    octree, pointtype, idealfps, loadObj, loadOct, saveOct, origin, scale,
-    type, scanserver, sphereMode);
+            octree, pointtype, idealfps, loadObj, loadOct, saveOct, origin,
+            scale, type, scanserver, sphereMode);
 
   // modify all scale dependant variables
   scale = 1.0 / scale;
@@ -850,7 +869,6 @@ void initShow(int argc, char **argv){
   fogDensity /= scale;
   defaultZoom *= scale;
   voxelSize *= scale;
-//  oldfardistance *= scale;
 
   ////////////////////////
   SDisplay::readDisplays(loadObj, displays);
@@ -861,10 +879,11 @@ void initShow(int argc, char **argv){
   }
 
   // if we want to load display file get pointtypes from the files first
-  if(loadOct) {
+  if (loadOct) {
     string scanFileName = dir + "scan" + to_string(start,3) + ".oct";
     cout << "Getting point information from " << scanFileName << endl;
-    cout << "Attention! All subsequent oct-files must be of the same type!" << endl;
+    cout << "Attention! All subsequent oct-files must be of the same type!"
+         << endl;
   }
   scan_dir = dir;
 
@@ -877,17 +896,20 @@ void initShow(int argc, char **argv){
   // load all available scans
   Scan::openDirectory(scanserver, dir, type, start, end);
   
-  if(Scan::allScans.size() == 0) {
+  if (Scan::allScans.size() == 0) {
     cerr << "No scans found. Did you use the correct format?" << endl;
     exit(-1);
   }
   
-  for(ScanVector::iterator it = Scan::allScans.begin(); it != Scan::allScans.end(); ++it) {
+  for (ScanVector::iterator it = Scan::allScans.begin();
+       it != Scan::allScans.end();
+       ++it) {
     Scan* scan = *it;
     scan->setRangeFilter(maxDist, minDist);
     if (sphereMode > 0.0) scan->setRangeMutation(sphereMode);
     if (red > 0) {
-      // scanserver differentiates between reduced for slam and reduced for show, can handle both at the same time
+      // scanserver differentiates between reduced for slam and
+      // reduced for show, can handle both at the same time
       if(scanserver) {
         dynamic_cast<ManagedScan*>(scan)->setShowReductionParameter(red, octree);
       } else {
@@ -907,7 +929,9 @@ void initShow(int argc, char **argv){
   cout << "Creating display octrees.." << endl;
 #endif
 
-  if (loadOct) cout << "Loading octtrees from file where possible instead of creating them from scans." << endl;
+  if (loadOct)
+    cout << "Loading octtrees from file where possible instead of creating them from scans."
+         << endl;
   
   // for managed scans the input phase needs to know how much it can handle
   std::size_t free_mem = 0;
@@ -921,29 +945,35 @@ void initShow(int argc, char **argv){
 #ifdef USE_COMPACT_TREE // FIXME: change compact tree, then this case can be removed
     compactTree* tree;
     try {
-	 if (loadOct) {
-	   string sfName = dir + "scan" + to_string(i,3) + ".oct";
-	   cout << "Load " << sfName;
-	   tree = new compactTree(sfName, cm);
-	   cout << " done." << endl;
-	 } else {
-	   if (red > 0) { // with reduction, only xyz points
-		DataXYZ xyz_r(scan->get("xyz reduced show"));
-		tree = new compactTree(PointerArray<double>(xyz_r).get(), xyz_r.size(), voxelSize, pointtype, cm);
-	   } else { // without reduction, xyz + attribute points
-		sfloat** pts = pointtype.createPointArray<sfloat>(scan);
-		unsigned int nrpts = scan->size<DataXYZ>("xyz");
-		tree = new compactTree(pts, nrpts, voxelSize, pointtype, cm);
-		for(unsigned int i = 0; i < nrpts; ++i) delete[] pts[i];
-		delete[] pts;
-		if (saveOct) {
-		  string sfName = dir + "scan" + to_string(i,3) + ".oct";
-		  tree->serialize(sfName);
-		}
-	   }
+      if (loadOct) {
+        string sfName = dir + "scan" + to_string(i,3) + ".oct";
+        cout << "Load " << sfName;
+        tree = new compactTree(sfName, cm);
+        cout << " done." << endl;
+      } else {
+        if (red > 0) { // with reduction, only xyz points
+          DataXYZ xyz_r(scan->get("xyz reduced show"));
+          tree = new compactTree(PointerArray<double>(xyz_r).get(),
+                                 xyz_r.size(),
+                                 voxelSize,
+                                 pointtype,
+                                 cm);
+        } else { // without reduction, xyz + attribute points
+          sfloat** pts = pointtype.createPointArray<sfloat>(scan);
+          unsigned int nrpts = scan->size<DataXYZ>("xyz");
+          tree = new compactTree(pts, nrpts, voxelSize, pointtype, cm);
+          for(unsigned int i = 0; i < nrpts; ++i) delete[] pts[i];
+          delete[] pts;
+          if (saveOct) {
+            string sfName = dir + "scan" + to_string(i,3) + ".oct";
+            tree->serialize(sfName);
+          }
+        }
       }
     } catch(...) {
-      cout << "Scan " << i << " could not be loaded into memory, stopping here." << endl;
+      cout << "Scan " << i
+           << " could not be loaded into memory, stopping here."
+           << endl;
       break;
     }
 #else // FIXME: remove the case above
@@ -953,7 +983,9 @@ void initShow(int argc, char **argv){
     try {
       data_oct = new DataOcttree(scan->get("octtree"));
     } catch(runtime_error& e) {
-      cout << "Scan " << i << " could not be loaded into memory, stopping here." << endl;
+      cout << "Scan " << i
+           << " could not be loaded into memory, stopping here."
+           << endl;
       break;
     }
     BOctTree<float>* btree = &(data_oct->get());
@@ -963,7 +995,8 @@ void initShow(int argc, char **argv){
       // check if the octtree would actually fit with all the others
       if(tree_size > free_mem) {
         delete data_oct;
-        cout << "Stopping at scan " << i << ", no more octtrees could fit in memory." << endl;
+        cout << "Stopping at scan " << i
+             << ", no more octtrees could fit in memory." << endl;
         break;
       } else {
         // subtract available memory
@@ -974,11 +1007,13 @@ void initShow(int argc, char **argv){
     
 #if !defined USE_COMPACT_TREE
     // show structures
-    // associate show octtree with the scan and hand over octtree pointer ownership
+    // associate show octtree with the scan and
+    // hand over octtree pointer ownership
 
     Show_BOctTree<sfloat>* tree = new Show_BOctTree<sfloat>(scan, data_oct, cm);
     
-    // unlock cached octtree to enable creation of more octtres without blocking the space for full scan points
+    // unlock cached octtree to enable creation
+    // of more octtres without blocking the space for full scan points
     tree->unlockCachedTree();
 #endif
 
@@ -986,22 +1021,23 @@ void initShow(int argc, char **argv){
     octpts.push_back(tree);
     
     // print something
-#ifdef USE_COMPACT_TREE // TODO: change compact tree for memory footprint output, remove this case
+#ifdef USE_COMPACT_TREE
+    // TODO: change compact tree for memory footprint output, remove this case
     cout << "Scan " << i << " octree finished." << endl;
 #else
     cout << "Scan " << i << " octree finished (";
     bool space = false;
-    if(tree_size/1024/1024 > 0) {
+    if (tree_size/1024/1024 > 0) {
       cout << tree_size/1024/1024 << "M";
       space = true;
     }      
-    if((tree_size/1024)%1024 > 0) {
-      if(space) cout << " ";
+    if ((tree_size/1024)%1024 > 0) {
+      if (space) cout << " ";
       cout << (tree_size/1024)%1024 << "K";
       space = true;
     }
-    if(tree_size%1024 > 0) {
-      if(space) cout << " ";
+    if (tree_size%1024 > 0) {
+      if (space) cout << " ";
       cout << tree_size%1024 << "B";
     }
     cout << ")." << endl;
@@ -1009,11 +1045,12 @@ void initShow(int argc, char **argv){
   }
 
 /*
-TODO: to maximize space for octtrees, implement a heuristic to remove all
-CacheObjects sequentially from the start and pack octtrees one after another
-until it reaches the maximum size allowed, resetting the index, but causing the
-first to be locked again and stopping by catching the exception
-set heuristic, do locking, catch exception, reset heuristic to default or old
+  TODO: to maximize space for octtrees, implement a heuristic to remove all
+  CacheObjects sequentially from the start and pack octtrees one after another
+  until it reaches the maximum size allowed, resetting the index,
+  but causing the
+  first to be locked again and stopping by catching the exception
+  set heuristic, do locking, catch exception, reset heuristic to default or old
 */
 #if !defined USE_COMPACT_TREE
   if(scanserver) {
@@ -1024,7 +1061,9 @@ set heuristic, do locking, catch exception, reset heuristic to default or old
     unsigned int dots = (octpts.size() / 20);
     if(dots == 0) dots = 1;
     vector<colordisplay*>::iterator it_remove_first = octpts.end();
-    for(vector<colordisplay*>::iterator it = octpts.begin(); it != octpts.end(); ++it) {
+    for(vector<colordisplay*>::iterator it = octpts.begin();
+        it != octpts.end();
+        ++it) {
       if(!stop) {
         // try to lock the octtree in cache
         try {
@@ -1052,7 +1091,8 @@ set heuristic, do locking, catch exception, reset heuristic to default or old
 
   // load frames now that we know how many scans we actually loaded
   unsigned int real_end = min((unsigned int)(end), 
-						(unsigned int)(start + octpts.size() - 1));
+                              (unsigned int)(start + octpts.size() - 1));
+  
   if(readFrames(dir, start, real_end, readInitial, type))
     generateFrames(start, real_end, true);
   
@@ -1081,7 +1121,9 @@ void deinitShow()
   cout << "Cleaning up octtrees and scans." << endl;
   if(octpts.size()) {
     // delete octtrees to release the cache locks within
-    for(vector<colordisplay*>::iterator it = octpts.begin(); it!= octpts.end(); ++it) {
+    for(vector<colordisplay*>::iterator it = octpts.begin();
+        it!= octpts.end();
+        ++it) {
       delete *it;
     }
   }

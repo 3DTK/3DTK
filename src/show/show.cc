@@ -1,7 +1,7 @@
 /*
  * show_gl implementation
  *
- * Copyright (C) Kai Lingemann, Andreas Nuechter, Jan Elseberg, Dorit Borrmann, Amuz Tamrakars
+ * Copyright (C) Kai Lingemann, Andreas Nuechter, Jan Elseberg, Dorit Borrmann.
  *
  * Released under the GPL version 3.
  *
@@ -10,8 +10,10 @@
 /**
  * @file
  * @brief Implementation for displaying of a matched 3D scene
- * @author Andreas Nuechter. Institute of Computer Science, University of Osnabrueck, Germany.
- * @author Kai Lingemann. Institute of Computer Science, University of Osnabrueck, Germany.
+ * @author Andreas Nuechter. Institute of CS, University of Osnabrueck, Germany.
+ * @author Kai Lingemann. Institute of CS, University of Osnabrueck, Germany.
+ * @author Jan Elseberg. Jacobs University bremen gGmbH, Germany.
+ * @author Dorit Borrmann. Jacobs University bremen gGmbH, Germany.
  */
 
 #include "show_common.cc"
@@ -42,7 +44,8 @@ void signal_interrupt(int v)
 
 /**
  * Main function.
- * Reads the scan (scan000.3d, ...) and frames files (scan000.frames, ...) from the data directory.
+ * Reads the scan (scan000.3d, ...) and frames files (scan000.frames, ...)
+ * from the data directory.
  * The frames are used for animation of the matching process.
  */
 int main(int argc, char **argv)

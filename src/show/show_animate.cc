@@ -42,8 +42,12 @@ void calcUpPath()
   }
 
   // now get the nurbs path for the individual xy and xz plane
-  ups_vectorX = cam_nurbs_path.getNurbsPath(ups_listXY, nr_interpolations, inter_by_dist);
-  ups_vectorZ = cam_nurbs_path.getNurbsPath(ups_listXZ, nr_interpolations, inter_by_dist);
+  ups_vectorX = cam_nurbs_path.getNurbsPath(ups_listXY,
+								    nr_interpolations,
+								    inter_by_dist);
+  ups_vectorZ = cam_nurbs_path.getNurbsPath(ups_listXZ,
+								    nr_interpolations,
+								    inter_by_dist);
 }
 
 void calcLookAtPath()
@@ -61,7 +65,6 @@ void calcLookAtPath()
     lookat_listXY.push_back(temp);
   }
 
-
   // to interpolate with the xz coordinate.
   for (unsigned int i = 0; i < lookats.size(); i++) {
     temp.x = lookats[i].x;
@@ -70,8 +73,12 @@ void calcLookAtPath()
   }
 
   // now get the nurbs path for the individual xy and xz plane
-  lookat_vectorX = cam_nurbs_path.getNurbsPath(lookat_listXY, nr_interpolations, inter_by_dist);
-  lookat_vectorZ = cam_nurbs_path.getNurbsPath(lookat_listXZ, nr_interpolations, inter_by_dist);
+  lookat_vectorX = cam_nurbs_path.getNurbsPath(lookat_listXY,
+									  nr_interpolations,
+									  inter_by_dist);
+  lookat_vectorZ = cam_nurbs_path.getNurbsPath(lookat_listXZ,
+									  nr_interpolations,
+									  inter_by_dist);
 }
 
 void calcPath()
@@ -82,7 +89,7 @@ void calcPath()
 
   // if camera list is empty then return
   // to interpolate with the xy coordinate.
-  for(unsigned int i = 0;i < cams.size(); i++){
+  for(unsigned int i = 0;i < cams.size(); i++) {
     temp.x = cams[i].x; 
     temp.y = cams[i].y;
     path_listXY.push_back(temp);
@@ -98,41 +105,46 @@ void calcPath()
   nr_interpolations = calcNoOfPoints(path_listXY, path_listXZ);
   calcInterpolatedCameras(path_listXY, path_listXZ);
   // now get the nurbs path for the individual xy and xz plane
-  path_vectorX = cam_nurbs_path.getNurbsPath(path_listXY, nr_interpolations, inter_by_dist);
-  path_vectorZ = cam_nurbs_path.getNurbsPath(path_listXZ, nr_interpolations, inter_by_dist);
+  path_vectorX = cam_nurbs_path.getNurbsPath(path_listXY,
+									nr_interpolations,
+									inter_by_dist);
+  path_vectorZ = cam_nurbs_path.getNurbsPath(path_listXZ,
+									nr_interpolations,
+									inter_by_dist);
 }
 
-void updateCamera() {
+void updateCamera()
+{
   updateCamControls();
-  
   calcPath();
   calcLookAtPath();
   calcUpPath();
 }
 
 
-//------------------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 
 /**
  * This function saves the path drawn on the
  * screen to a file.
  */
-void savePath(int dummy) {
-  //output file stream
+void savePath(int dummy)
+{
+  // output file stream
   ofstream pathfile;
 
-  //open the output file
+  // open the output file
   pathfile.open(path_file_name, ios::out);
    
-  //if file not found then show error
+  // if file not found then show error
   if(!pathfile){
     cerr << "Error creating the path file." << endl;
     return;
   }
 
-  //store all the relevant information about the
-  //individual cameras in this file. however, start
-  //with the total number of cameras in the first line
+  // store all the relevant information about the
+  // individual cameras in this file. however, start
+  // with the total number of cameras in the first line
   pathfile << cams.size() << endl;
   for(unsigned int i =0; i< cams.size();i++) {
     pathfile << cams[i].x << endl;
@@ -146,13 +158,13 @@ void savePath(int dummy) {
     pathfile << ups[i].z << endl;
   }
 
-  //close the file after writing
+  // close the file after writing
   pathfile.clear();
   pathfile.close();
 }
 
  
-//--------------------------------------------------------------------------------------------
+//----------------------------------------------------------------------------
 
 /**
  * This function loads the path from the given
@@ -160,40 +172,40 @@ void savePath(int dummy) {
  */
 void loadPath(int dummy) {
 
-  //some temporary variables
+  // some temporary variables
   unsigned int length;
   float x, y, z;
   float lx, ly, lz;
   float ux, uy, uz;
 
-  //buffer variable
+  // buffer variable
   char buffer[2048];
 
-  //file stream
+  // file stream
   fstream pathFile;
 
-  //check if other files are open or not
+  // check if other files are open or not
   if(pathFile.is_open()){
-    //if open then close the file
+    // if open then close the file
     pathFile.clear();
     pathFile.close();
   }
 
-  //clear the camlist first
+  // clear the camlist first
   cams.clear();
   lookats.clear();
   ups.clear();
 
-  //open the path file
+  // open the path file
   pathFile.open(path_file_name, ios::in);
 
-  //read the first line containing info
-  //about no of cameras in the file
+  // read the first line containing info
+  // about no of cameras in the file
   pathFile.getline(buffer,2048);
   length = atoi(buffer);
 
-  //now for each camera extract the stored
-  //information
+  // now for each camera extract the stored
+  // information
   for(unsigned int i=0;i<length;i++) {
     pathFile.getline(buffer,2048);
     x = atof(buffer);
@@ -216,8 +228,8 @@ void loadPath(int dummy) {
     pathFile.getline(buffer,2048);
     uz = atof(buffer);
     
-    //feed the information to create a new
-    //camera with those values
+    // feed the information to create a new
+    // camera with those values
     Point p(x,y,z);
     Point l(lx,ly,lz);
     Point u(ux,uy,uz);
@@ -228,7 +240,7 @@ void loadPath(int dummy) {
   }
   updateCamera();
 
-  //now close the file
+  // now close the file
   pathFile.clear();
   pathFile.close();
 }
@@ -256,20 +268,20 @@ void loadPose(int dummy) {
   double fogDensity;
   bool invert;
 
-  //file stream
+  // file stream
   fstream poseFile;
 
 
-  //check if other files are open or not
+  // check if other files are open or not
   if(poseFile.is_open()){
 
-    //if open then close the file
+    // if open then close the file
     poseFile.clear();
     poseFile.close();
        
   }
 
-  //open the path file
+  // open the path file
   poseFile.open(pose_file_name, ios::in);
   if(!poseFile.good()) {
     cerr << "Error loading file " << pose_file_name << endl;
@@ -300,31 +312,34 @@ void loadPose(int dummy) {
 
 void savePose(int dummy) {
   cout << "Save" << endl;
-  //output file stream
+  // output file stream
   ofstream posefile;
 
-  //open the output file
+  // open the output file
   posefile.open(pose_file_name, ios::out);
    
-  //if file not found then show error
+  // if file not found then show error
   if(!posefile){
     cerr << "Error creating the pose file." << endl;
     return;
   }
 
-  //store all the relevant information about the
-  //individual camera position in this file. 
+  // store all the relevant information about the
+  // individual camera position in this file. 
    
   posefile << X << " " << Y << " " << Z << endl;
   for(int i = 0; i < 4; i++) {
     posefile << quat[i] << " ";
   }
-	posefile << mouseRotX << " " <<  mouseRotY << " " << mouseRotZ << " " <<cangle << endl;
-  posefile << showTopView << " " << cameraNavMouseMode << " " << pzoom << endl;
-  posefile << show_points << " " << show_path << " " << show_cameras << " " << pointsize << endl;
-  posefile << show_fog << " " << fogDensity << " " << invert << endl;
+	posefile << mouseRotX << " " <<  mouseRotY << " " << mouseRotZ << " "
+		    << cangle << endl;
+	posefile << showTopView << " " << cameraNavMouseMode << " "
+		    << pzoom << endl;
+	posefile << show_points << " " << show_path << " "
+		    << show_cameras << " " << pointsize << endl;
+	posefile << show_fog << " " << fogDensity << " " << invert << endl;
 
-  //close the file after writing
+  // close the file after writing
   posefile.clear();
   posefile.close();
   
@@ -334,7 +349,8 @@ void savePose(int dummy) {
   * This function saves the current view into a ppm-file with variable scale
   * factor.
   */
-void saveImage(int dummy) {
+void saveImage(int dummy)
+{
   static int imageNr = 0;
   string imageFileName;
   imageFileName = "image" + to_string(imageNr,3) + ".ppm";
@@ -347,13 +363,13 @@ void saveImage(int dummy) {
  *
  */
 void saveSelection(int dummy) {
-  //output file stream
+  // output file stream
   ofstream selectionfile;
 
-  //open the output file
+  // open the output file
   selectionfile.open(selection_file_name, ios::out);
    
-  //if file not found then show error
+  // if file not found then show error
   if(!selectionfile){
     cerr << "Error creating the seelction file." << endl;
     return;
@@ -361,18 +377,18 @@ void saveSelection(int dummy) {
 
   for(unsigned int i = 0; i < octpts.size(); i++) {
     selectionfile << "# points from scan nr " << i << endl; 
-    //for(int j = 0; j < selected_points[i].size(); j++) {
+    // for(int j = 0; j < selected_points[i].size(); j++) {
     for ( set<sfloat*>::iterator it = selected_points[i].begin();
         it != selected_points[i].end(); it++) {
       for (unsigned int k = 0; k < pointtype.getPointDim(); k++) {
-//        selectionfile << selected_points[i][j][k] << " ";
+	   //        selectionfile << selected_points[i][j][k] << " ";
         selectionfile << (*it)[k] << " ";
       }
       selectionfile << endl;
     }
   }
 
-  //close the file after writing
+  // close the file after writing
   selectionfile.clear();
   selectionfile.close();
 }
