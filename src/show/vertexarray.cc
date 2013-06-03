@@ -19,7 +19,7 @@ vertexArray::vertexArray(int _numPointsToRender) :
     name = nameCounter;
 }
 
-vertexArray::~vertexArray()
+vertexArray::~vertexArray ()
 {
   delete [] array;
 }
