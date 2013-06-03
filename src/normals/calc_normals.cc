@@ -24,10 +24,10 @@
 #include <slam6d/io_types.h>
 #include <slam6d/globals.icc>
 #include <slam6d/scan.h>
-#include "slam6d/fbr/panorama.h"
 #include <scanserver/clientInterface.h>
 
 #include <normals/normals.h>
+#include <normals/normals_panorama.h>
 
 #ifdef _MSC_VER
 #define strcasecmp _stricmp
