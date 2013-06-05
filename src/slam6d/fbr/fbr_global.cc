@@ -69,6 +69,9 @@ namespace fbr{
     case CONIC:
       sMethod = "CONIC";
       break;
+    case EQUALAREACYLINDRICAL:
+      sMethod = "EQUALAREACYLINDRICAL";
+      break;
     default:
       throw std::runtime_error(std::string("projection method ") + to_string(method) + std::string(" could not be matched to a projection method"));
     }
@@ -84,6 +87,7 @@ namespace fbr{
     else if(strcasecmp(method.c_str(), "STEREOGRAPHIC") == 0) return STEREOGRAPHIC;
     else if(strcasecmp(method.c_str(), "ZAXIS") == 0) return ZAXIS;
     else if(strcasecmp(method.c_str(), "CONIC") == 0) return CONIC;
+    else if(strcasecmp(method.c_str(), "EQUALAREACYLINDRICAL") == 0) return EQUALAREACYLINDRICAL;
     else throw std::runtime_error(std::string("projection method ") + method + std::string(" is unknown"));
   }
   

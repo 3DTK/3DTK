@@ -35,6 +35,7 @@ struct information{
   bool reflectance, range, color;
   scanner_type sType;
   int MIN_ANGLE, MAX_ANGLE;
+  bool iSizeOptimization;
 } info;
 
 void usage(int argc, char** argv){
@@ -47,7 +48,7 @@ void usage(int argc, char** argv){
   printf("\t\t-W pWidth\t\t panorama image width\n");
   printf("\t\t-H pHeight\t\t panorama image height\n");
   printf("\t\t-p pMethod\t\t projection method [EQUIRECTANGULAR|CONIC|CYLINDRICAL|MERCATOR|RECTILINEAR|PANNINI|STEREOGRAPHIC|ZAXIS]\n");
-  printf("\t\t-N numberOfImage\t\t number of images used for some projections\n");
+  printf("\t\t-N numberOfImage\t\t number of Horizontal images used for some projections\n");
   printf("\t\t-P pParam\t\t special projection parameter (d for Pannini and r for stereographic)\n");
   printf("\t\t-O outDir \t\t output directory if not stated same as input\n");
   printf("\t\t-r scan reduction \t\t reduces the scan size\n");
@@ -60,11 +61,13 @@ void usage(int argc, char** argv){
   printf("\t\t-t sType \t\t scanner type\n");
   printf("\t\t-n MIN_ANGLE \t\t Scanner vertical view MIN_ANGLE \n");
   printf("\t\t-x MAX_ANGLE \t\t Scanner vertical view MAX_ANGLE \n");
+  printf("\t\t-i iSizeOptimization \t\t Optimize the panorama image size based on projection \n");
   printf("\n");
   exit(1);
 }
 
 void parssArgs(int argc, char** argv, information& info){
+  info.iSizeOptimization = false;
   info.reflectance = false;
   info.range = false;
   info.color = false;
@@ -96,7 +99,7 @@ void parssArgs(int argc, char** argv, information& info){
   int c;
   opterr = 0;
   //reade the command line and get the options
-  while ((c = getopt (argc, argv, "W:H:p:N:P:f:O:s:e:r:RCAS:lot:n:x:")) != -1)
+  while ((c = getopt (argc, argv, "W:H:p:N:P:f:O:s:e:r:RCAS:lot:n:x:i")) != -1)
     switch (c)
       {
       case 's':
@@ -158,6 +161,9 @@ void parssArgs(int argc, char** argv, information& info){
       case 'x':
 	info.MAX_ANGLE = atoi(optarg);
 	break;
+      case 'i':
+	info.iSizeOptimization = true;
+	break;
 
       case '?':
 	cout<<"Unknown option character "<<optopt<<endl;
@@ -169,11 +175,11 @@ void parssArgs(int argc, char** argv, information& info){
 
   if(info.pMethod == PANNINI && info.pParam == 0){
     info.pParam = 1;
-    if(info.numberOfImages < 3) info.numberOfImages = 3;
+    if(info.numberOfImages < 2) info.numberOfImages = 2;
   }
   if(info.pMethod == STEREOGRAPHIC && info.pParam == 0){
     info.pParam = 2;
-    if(info.numberOfImages < 3) info.numberOfImages = 3;
+    if(info.numberOfImages < 2) info.numberOfImages = 2;
   }
   if(info.pMethod == RECTILINEAR && info.numberOfImages < 3)
     info.numberOfImages = 3;
@@ -227,11 +233,15 @@ int main(int argc, char** argv)
 
     //init the panorama
     fbr::panorama pImage;
-    pImage.init(info.pWidth, info.pHeight, info.pMethod, info.numberOfImages, info.pParam, info.mapMethod, scan.getZMin(), scan.getZMax(), info.MIN_ANGLE, info.MAX_ANGLE);
+    pImage.init(info.pWidth, info.pHeight, info.pMethod, info.numberOfImages, info.pParam, info.mapMethod, scan.getZMin(), scan.getZMax(), info.MIN_ANGLE, info.MAX_ANGLE, info.iSizeOptimization);
     
     //create panorama
     pImage.createPanorama(scan.getMatScan(), scan.getMatScanColor());  
     
+    //get the new panorama image size incase of optimized panorama size
+    info.pWidth = pImage.getImageWidth();
+    info.pHeight = pImage.getImageHeight();
+
     //write panorama to file
     string out;
     

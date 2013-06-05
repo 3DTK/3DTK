@@ -41,6 +41,7 @@ namespace fbr{
    * @param pParam special d parameter of Pannini projection
             (see Master Thesis for more info) or special R parameter of
             Stereographic projection (Master Thesis for more info)
+	    or phi_s for EQUALAREACYLINDRICAL projection
    */
   class panorama {
     cv::Mat iReflectance;
@@ -57,12 +58,17 @@ namespace fbr{
     panorama_map_method mapMethod;
     float zMin, zMax;
     double MAX_ANGLE, MIN_ANGLE;
+    bool iOptimization;
+
 
     void map(int x,
              int y,
              cv::MatIterator_<cv::Vec4f> it,
              double range);
     void mapColor(int x, int y, cv::MatIterator_<cv::Vec3f> itColor);
+    void initMat();
+    void setImageRatio(double xSize, double ySize);
+
   public:
     /**
      * constructor of class panorama
@@ -102,6 +108,17 @@ namespace fbr{
 	      float max,
 	      double MINANGLE,
 	      double MAXANGLE);
+    panorama (unsigned int width,
+              unsigned int height,
+              projection_method method,
+              unsigned int numberOfImages,
+              double param,
+              panorama_map_method mapMethod,
+	      float min,
+	      float max,
+	      double MINANGLE,
+	      double MAXANGLE,
+	      bool imageOptimization);
 
     void init(unsigned int width,
               unsigned int height,
@@ -112,7 +129,8 @@ namespace fbr{
 	      float min = 0, 
 	      float max = 0,
 	      double MINANGLE = -40,
-	      double MAXANGLE = 60);
+	      double MAXANGLE = 60,
+	      bool imageOptimization = false);
 
     /**
      * @brief creates the panorama reflectance image and map and color image.
