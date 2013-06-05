@@ -9,11 +9,11 @@ IF(WITH_TOOLS)
   ENDIF(WITH_GLEE)
   
   IF(UNIX)
-    target_link_libraries(scan_red scan dl ANN fbr_cv_io fbr_panorama ${OpenCV_LIBS} ${Boost_LIBRARIES} showstatic ${OPENGL_LIBRARIES} ${SHOW_LIBS})
+    target_link_libraries(scan_red scan dl ANN fbr_cv_io fbr_panorama ${OpenCV_LIBS} ${Boost_LIBRARIES} showstatic ${OPENGL_LIBRARIES} ${SHOW_LIBS} newmat)
   ENDIF(UNIX)
 
   IF (WIN32)
-    target_link_libraries(scan_red scan ANN fbr_cv_io fbr_panorama ${OpenCV_LIBS} ${Boost_LIBRARIES} XGetopt)
+    target_link_libraries(scan_red scan ANN fbr_cv_io fbr_panorama ${OpenCV_LIBS} ${Boost_LIBRARIES} XGetopt newmat)
   ENDIF(WIN32)
 
   ### SCAN_DIFF
@@ -21,12 +21,12 @@ IF(WITH_TOOLS)
   #  add_executable(scan_diff2d scan_diff2d.cc ../show/colormanager.cc)
   
   IF(UNIX)
-    target_link_libraries(scan_diff scan dl ANN)
+    target_link_libraries(scan_diff scan dl ANN newmat)
     #    target_link_libraries(scan_diff2d scan dl ANN)
   ENDIF(UNIX)
 
   IF (WIN32)
-    target_link_libraries(scan_diff scan ANN XGetopt)
+    target_link_libraries(scan_diff scan ANN XGetopt newmat)
     # target_link_libraries(scan_diff2d scan dl ANN XGetopt)
   ENDIF(WIN32)
 
@@ -42,7 +42,7 @@ IF(WITH_TOOLS)
 
   IF(UNIX)
     target_link_libraries(graph_balancer scan ${Boost_GRAPH_LIBRARY} ${Boost_SERIALIZATION_LIBRARY} ${Boost_REGEX_LIBRARY})
-    target_link_libraries(exportPoints scan dl ANN)
+    target_link_libraries(exportPoints scan dl ANN newmat)
     target_link_libraries(toGlobal scan)
     target_link_libraries(convergence ${Boost_LIBRARIES})
     target_link_libraries(pose2frames ${Boost_LIBRARIES})
@@ -53,7 +53,7 @@ IF(WITH_TOOLS)
     target_link_libraries(frame_to_graph XGetopt ${Boost_LIBRARIES})
     target_link_libraries(convergence XGetopt ${Boost_LIBRARIES})
     target_link_libraries(graph_balancer scan XGetopt  ${Boost_LIBRARIES})
-    target_link_libraries(exportPoints scan ANN XGetopt  ${Boost_LIBRARIES})
+    target_link_libraries(exportPoints scan ANN XGetopt  ${Boost_LIBRARIES} newmat)
     target_link_libraries(frames2pose XGetopt ${Boost_LIBRARIES})
     target_link_libraries(pose2frames XGetopt ${Boost_LIBRARIES})
     target_link_libraries(frames2riegl XGetopt ${Boost_LIBRARIES})
@@ -75,7 +75,7 @@ SET(SCANLIB_SRCS
   point_type.cc	icp6Dquatscale.cc searchTree.cc     Boctree.cc
   scan.cc           basicScan.cc      managedScan.cc    metaScan.cc
   io_types.cc       io_utils.cc       pointfilter.cc    allocator.cc
-  icp6Dnapx.cc 
+  icp6Dnapx.cc      normals.cc
   )
 
 if(WITH_METRICS)
@@ -86,7 +86,7 @@ add_library(scan STATIC ${SCANLIB_SRCS})
 
 FIND_PACKAGE(OpenCV REQUIRED)
 
-target_link_libraries(scan scanclient scanio normals)
+target_link_libraries(scan scanclient scanio)
 
 IF(UNIX)
   target_link_libraries(scan dl pthread)
@@ -96,8 +96,7 @@ ENDIF(UNIX)
 
 IF(EXPORT_SHARED_LIBS)
 add_library(scan_s SHARED ${SCANLIB_SRCS})
-#target_link_libraries(scan_s ${Boost_LIBRARIES} newmat)
-target_link_libraries(scan_s scanclient_s newmat_s sparse_s ANN_s normals_s)
+target_link_libraries(scan_s scanio scanclient_s newmat_s sparse_s ANN_s)
 ENDIF(EXPORT_SHARED_LIBS)
 
 ### SLAM6D

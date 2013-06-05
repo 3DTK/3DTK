@@ -42,6 +42,7 @@ struct information{
   bool loadOct, saveOct;
   bool reflectance, color;
   int MIN_ANGLE, MAX_ANGLE;
+  bool iSizeOptimization;
   
   int fSPoints, sSPoints, fFNum, sFNum, mNum, filteredMNum;
   double fSTime, sSTime, fPTime, sPTime, fFTime, sFTime, fDTime, sDTime, mTime, rTime; 
@@ -60,7 +61,7 @@ void usage(int argc, char** argv){
   printf("\t\t-W iWidth\t\t panorama image width\n");
   printf("\t\t-H iHeight\t\t panorama image height\n");
   printf("\t\t-p pMethod\t\t projection method [EQUIRECTANGULAR|CONIC|CYLINDRICAL|MERCATOR|RECTILINEAR|PANNINI|STEREOGRAPHIC|ZAXIS]\n");
-  printf("\t\t-N nImage\t\t number of images used for some projections\n");
+  printf("\t\t-N nImages\t\t number of Horizontal images used for some projections\n");
   printf("\t\t-P pParam\t\t special projection parameter (d for Pannini and r for stereographic)\n");
   printf("\t\t-F fMethod\t\t feature detection method [SURF|SIFT|ORB|FAST|STAR]\n");
   printf("\t\t-d dMethod\t\t feature description method [SURF|SIFT|ORB]\n");
@@ -79,7 +80,8 @@ void usage(int argc, char** argv){
   printf("\t\t-R reflectance \t\t Use Reflectance\n");
   printf("\t\t-C color \t\t Use Color\n");
   printf("\t\t-n MIN_ANGLE \t\t Scanner vertical view MIN_ANGLE \n");
-  printf("\t\t-x MAX_ANGLE \t\t Scanner vertical view MAX_ANGLE \n");
+  printf("\t\t-x MAX_ANGLE \t\t Scanner vertical view MAX_ANGLE \n"); 
+  printf("\t\t-i iSizeOptimization \t\t Optimize the panorama image size based on projection \n");
   printf("\n");
   printf("\tExamples:\n");
   printf("\tUsing Bremen City dataset:\n");
@@ -130,11 +132,12 @@ void parssArgs(int argc, char** argv, information& info){
   info.color = false;
   info.MIN_ANGLE = -40;
   info.MAX_ANGLE = 60;
+  info.iSizeOptimization = false;
 
   int c;
   opterr = 0;
   //reade the command line and get the options
-  while ((c = getopt (argc, argv, "F:W:H:p:N:P:f:d:m:D:E:I:M:r:V:O:s:e:St:loRCx:n:")) != -1)
+  while ((c = getopt (argc, argv, "F:W:H:p:N:P:f:d:m:D:E:I:M:r:V:O:s:e:St:loRCix:n:")) != -1)
     switch (c)
       {
       case 's':
@@ -215,6 +218,10 @@ void parssArgs(int argc, char** argv, information& info){
       case 'x':
 	info.MAX_ANGLE = atoi(optarg);
 	break;
+      case 'i':
+	info.iSizeOptimization = true;
+	break;
+
 
       case '?':
 	cout<<"Unknown option character "<<optopt<<endl;
@@ -225,11 +232,11 @@ void parssArgs(int argc, char** argv, information& info){
       }
   if(info.pMethod == PANNINI && info.pParam == 0){
     info.pParam = 1;
-    if(info.nImages < 3) info.nImages = 3;
+    if(info.nImages < 2) info.nImages = 2;
   }
   if(info.pMethod == STEREOGRAPHIC && info.pParam == 0){
     info.pParam = 2;
-    if(info.nImages < 3) info.nImages = 3;
+    if(info.nImages < 2) info.nImages = 2;
   }
   if(info.pMethod == RECTILINEAR && info.nImages < 3)
     info.nImages = 3;
@@ -313,7 +320,7 @@ void info_yml(information info, double bError, double bErrorIdx, double* bAlign)
   fs << "DIR" << info.dir;
   fs << "sFormat" << scanFormatToString(info.sFormat);
   fs << "pMethod" << projectionMethodToString(info.pMethod);
-  fs << "nImage" << info.nImages;
+  fs << "nImages" << info.nImages;
   fs << "pParam" << info.pParam;
   fs << "iWidth" << info.iWidth;
   fs << "iHeight" << info.iHeight;
@@ -364,12 +371,17 @@ int main(int argc, char** argv){
   fScan.convertScanToMat();
   if(info.verbose >= 4) info.fSTime = ((double)cv::getTickCount() - info.fSTime)/cv::getTickFrequency();
   if(info.verbose >= 2) fScan.getDescription();
-  panorama fPanorama (info.iWidth, info.iHeight, info.pMethod, info.nImages, info.pParam, FARTHEST, fScan.getZMin(), fScan.getZMax(), info.MIN_ANGLE, info.MAX_ANGLE);
+  panorama fPanorama (info.iWidth, info.iHeight, info.pMethod, info.nImages, info.pParam, FARTHEST, fScan.getZMin(), fScan.getZMax(), info.MIN_ANGLE, info.MAX_ANGLE, info.iSizeOptimization);
   if(info.verbose >= 4) info.fPTime = (double)cv::getTickCount();
   if((fScan.getMatScanColor()).empty() == 1)
     fPanorama.createPanorama(fScan.getMatScan());
   else
     fPanorama.createPanorama(fScan.getMatScan(), fScan.getMatScanColor());
+  
+  //get the new panorama size incase of optimized size panorama
+  info.iWidth = fPanorama.getImageWidth();
+  info.iHeight = fPanorama.getImageHeight();
+
   if(info.verbose >= 4) info.fPTime = ((double)cv::getTickCount() - info.fPTime)/cv::getTickFrequency();
   if(info.verbose >= 2) fPanorama.getDescription();
   //write panorama to image
@@ -384,30 +396,20 @@ int main(int argc, char** argv){
     }
   }
 
-  ///////
-  //cv::Mat reduced_range_image;
-  //cv::Mat reduced_reflectance_image;
-  //resize(fPanorama.getRangeImage(), reduced_range_image, cv::Size(), 0.5, 0.5, cv::INTER_NEAREST);
-  //resize(fPanorama.getReflectanceImage(), reduced_reflectance_image, cv::Size(), 0.5, 0.5, cv::INTER_NEAREST);
-  
-  ///////
 
   feature fFeature;
   if(info.verbose >= 4) info.fFTime = (double)cv::getTickCount();
   fFeature.featureDetection(fPanorama.getReflectanceImage(), info.fMethod);
-  //fFeature.featureDetection(reduced_reflectance_image, info.fMethod);
   if(info.verbose >= 4) info.fFTime = ((double)cv::getTickCount() - info.fFTime)/cv::getTickFrequency();
   //write panorama with keypoints to image
   if(info.verbose >= 1){
     drawer.DrawKeypoints(fPanorama.getReflectanceImage(), fFeature.getFeatures(), outImage, cv::Scalar::all(-1), cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS );
-    //drawer.DrawKeypoints(reduced_reflectance_image, fFeature.getFeatures(), outImage, cv::Scalar::all(-1), cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS );
     out = info.outDir+info.local_time+"_scan"+to_string(info.fScanNumber, 3)+"_"+projectionMethodToString(info.pMethod)+"_"+to_string(info.iWidth)+"x"+to_string(info.iHeight)+"_"+featureDetectorMethodToString(info.fMethod)+".png";
     imwrite(out, outImage);
     outImage.release();
   }
   if(info.verbose >= 4) info.fDTime = (double)cv::getTickCount();
   fFeature.featureDescription(fPanorama.getReflectanceImage(), info.dMethod);
-  //fFeature.featureDescription(reduced_reflectance_image, info.dMethod);
   if(info.verbose >= 4) info.fDTime = ((double)cv::getTickCount() - info.fDTime)/cv::getTickFrequency();
   if(info.verbose >= 2) fFeature.getDescription();
   
@@ -416,12 +418,17 @@ int main(int argc, char** argv){
   sScan.convertScanToMat();
   if(info.verbose >= 4) info.sSTime = ((double)cv::getTickCount() - info.sSTime)/cv::getTickFrequency();
   if(info.verbose >= 2) sScan.getDescription();
-  panorama sPanorama (info.iWidth, info.iHeight, info.pMethod, info.nImages, info.pParam, FARTHEST, sScan.getZMin(), sScan.getZMax(), info.MIN_ANGLE, info.MAX_ANGLE);
+  panorama sPanorama (info.iWidth, info.iHeight, info.pMethod, info.nImages, info.pParam, FARTHEST, sScan.getZMin(), sScan.getZMax(), info.MIN_ANGLE, info.MAX_ANGLE, info.iSizeOptimization);
   if(info.verbose >= 4) info.sPTime = (double)cv::getTickCount();
   if((sScan.getMatScanColor()).empty() == 1)
     sPanorama.createPanorama(sScan.getMatScan());
   else
     sPanorama.createPanorama(sScan.getMatScan(), sScan.getMatScanColor());
+
+  //get the new panorama size incase of optimized size panorama
+  info.iWidth = sPanorama.getImageWidth();
+  info.iHeight = sPanorama.getImageHeight();
+
   if(info.verbose >= 4) info.sPTime = ((double)cv::getTickCount() - info.sPTime)/cv::getTickFrequency();
   if(info.verbose >= 2) sPanorama.getDescription();
   //write panorama to image
@@ -436,31 +443,20 @@ int main(int argc, char** argv){
     }
   }
 
-    ///////
-  //cv::Mat reduced_range_image_2;
-  //cv::Mat reduced_reflectance_image_2;
-  //resize(sPanorama.getRangeImage(),reduced_range_image_2, cv::Size(), 0.5, 0.5, cv::INTER_NEAREST);
-  //resize(sPanorama.getReflectanceImage(),reduced_reflectance_image_2, cv::Size(), 0.5, 0.5, cv::INTER_NEAREST);
-  
-  ///////
-
 
   feature sFeature;
   if(info.verbose >= 4) info.sFTime = (double)cv::getTickCount();
   sFeature.featureDetection(sPanorama.getReflectanceImage(), info.fMethod);
-  //sFeature.featureDetection(reduced_reflectance_image_2, info.fMethod);
   if(info.verbose >= 4) info.sFTime = ((double)cv::getTickCount() - info.sFTime)/cv::getTickFrequency();
   //write panorama with keypoints to image
   if(info.verbose >= 1){
     drawer.DrawKeypoints(sPanorama.getReflectanceImage(), sFeature.getFeatures(), outImage, cv::Scalar::all(-1), cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS );
-    //drawer.DrawKeypoints(reduced_reflectance_image_2, sFeature.getFeatures(), outImage, cv::Scalar::all(-1), cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS );
     out = info.outDir+info.local_time+"_scan"+to_string(info.sScanNumber, 3)+"_"+projectionMethodToString(info.pMethod)+"_"+to_string(info.iWidth)+"x"+to_string(info.iHeight)+"_"+featureDetectorMethodToString(info.fMethod)+".png";
     imwrite(out, outImage);
     outImage.release();
   }
   if(info.verbose >= 4) info.sDTime = (double)cv::getTickCount();
   sFeature.featureDescription(sPanorama.getReflectanceImage(), info.dMethod);
-  //sFeature.featureDescription(reduced_reflectance_image_2, info.dMethod);
   if(info.verbose >= 4) info.sDTime = ((double)cv::getTickCount() - info.sDTime)/cv::getTickFrequency();
   if(info.verbose >= 2) sFeature.getDescription();
 
@@ -472,53 +468,14 @@ int main(int argc, char** argv){
   //write matcheed feature to image
   if(info.verbose >= 1){
     drawer.DrawMatches(fPanorama.getReflectanceImage(), fFeature.getFeatures(), sPanorama.getReflectanceImage(), sFeature.getFeatures(), matcher.getMatches(), outImage, cv::Scalar::all(-1), cv::Scalar::all(-1), vector<char>(), cv::DrawMatchesFlags::NOT_DRAW_SINGLE_POINTS);
-    //drawer.DrawMatches(reduced_reflectance_image, fFeature.getFeatures(), reduced_reflectance_image_2, sFeature.getFeatures(), matcher.getMatches(), outImage, cv::Scalar::all(-1), cv::Scalar::all(-1), vector<char>(), cv::DrawMatchesFlags::NOT_DRAW_SINGLE_POINTS);
     out = info.outDir+info.local_time+"_scan"+to_string(info.fScanNumber, 3)+"_scan"+to_string(info.sScanNumber, 3)+"_"+projectionMethodToString(info.pMethod)+"_"+to_string(info.iWidth)+"x"+to_string(info.iHeight)+"_"+featureDetectorMethodToString(info.fMethod)+"_"+featureDescriptorMethodToString(info.dMethod)+"_"+matcherMethodToString(info.mMethod)+".png";
     imwrite(out, outImage);
     outImage.release();
   }
 
-  ///////////////
-  /*
-  cv::Mat map1, map2;
-  map1.create(info.iHeight, info.iWidth, CV_32FC(3));
-  map2.create(info.iHeight, info.iWidth, CV_32FC(3));
-
-  map1 = cv::Scalar::all(0);
-  map2 = cv::Scalar::all(0);
-
-  vector<cv::Vec4f> reduced_points_1;
-  vector<cv::Vec4f> reduced_points_2;
-
-  fPanorama.recoverPointCloud(reduced_range_image,
-                          reduced_reflectance_image,
-                          reduced_points_1);
-  sPanorama.recoverPointCloud(reduced_range_image_2,
-                          reduced_reflectance_image_2,
-                          reduced_points_2);
-
-  int count = 0;
-  for(int i = 0; i < reduced_range_image.rows; i++) {
-    for(int j = 0; j < reduced_range_image.cols; j++) {
-      cv::Vec4f vec_1 = reduced_points_1[count];
-      map1.at<cv::Vec3f>(i,j)[0] = vec_1[0]; // x
-      map1.at<cv::Vec3f>(i,j)[1] = vec_1[1]; // y
-      map1.at<cv::Vec3f>(i,j)[2] = vec_1[2]; // z
-
-      cv::Vec4f vec_2 = reduced_points_2[count];
-      map2.at<cv::Vec3f>(i,j)[0] = vec_2[0]; // x
-      map2.at<cv::Vec3f>(i,j)[1] = vec_2[1]; // y
-      map2.at<cv::Vec3f>(i,j)[2] = vec_2[2]; // z
-
-      count++;
-    }
-    }*/
-  ///////////////
-
   registration reg (info.minDistance, info.minError, info.minInlier, info.rMethod);
   if(info.verbose >= 4) info.rTime = (double)cv::getTickCount();
   reg.findRegistration(fPanorama.getMap(), fFeature.getFeatures(), sPanorama.getMap(), sFeature.getFeatures(), matcher.getMatches());
-  //reg.findRegistration(map1, fFeature.getFeatures(), map2, sFeature.getFeatures(), matcher.getMatches());
   if(info.verbose >= 4) info.rTime = ((double)cv::getTickCount() - info.rTime)/cv::getTickFrequency();
   if(info.verbose >= 2) reg.getDescription();
 
