@@ -25,7 +25,7 @@
 
 #include <segmentation/FHGraph.h>
 
-#include <normals/normals.h>
+#include <slam6d/normals.h>
 #include <math.h>
 
 #ifdef _MSC_VER

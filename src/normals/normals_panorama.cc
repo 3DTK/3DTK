@@ -25,7 +25,7 @@
 #include "newmat/newmat.h"
 #include "newmat/newmatap.h"
 
-#include "normals/normals.h"
+#include "slam6d/normals.h"
 
 using namespace NEWMAT;
 using namespace std;
