@@ -26,7 +26,7 @@
 #include <slam6d/scan.h>
 #include <scanserver/clientInterface.h>
 
-#include <normals/normals.h>
+#include <slam6d/normals.h>
 #include <normals/normals_panorama.h>
 
 #ifdef _MSC_VER

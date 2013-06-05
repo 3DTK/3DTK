@@ -27,7 +27,7 @@
 #include "slam6d/Boctree.h"
 #include "slam6d/globals.icc"
 
-#include "normals/normals.h"
+#include "slam6d/normals.h"
 
 #ifdef WITH_METRICS
 #include "slam6d/metrics.h"
