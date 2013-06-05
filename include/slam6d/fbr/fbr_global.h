@@ -63,7 +63,8 @@ namespace fbr{
     PANNINI,
     STEREOGRAPHIC,
     ZAXIS,
-    CONIC
+    CONIC,
+    EQUALAREACYLINDRICAL
   };
   /**
    * @enum panorama_map_method
