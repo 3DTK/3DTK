@@ -57,6 +57,7 @@ namespace fbr{
     unsigned int types;
     double voxelSize, red, scale;
     scanner_type sType;
+    int maxDist, minDist;
   public:
     /**
      * constructor of class scan_cv
@@ -67,6 +68,7 @@ namespace fbr{
      * @param loadOct
      * @param saveOct
      */
+    scan_cv (string dir, unsigned int number, IOType format, bool scanServer, scanner_type type, bool lOct, bool sOct, bool Reflectance, bool Color, int MaxDist, int MinDist);
     scan_cv (string dir, unsigned int number, IOType format, bool scanServer, scanner_type type, bool lOct, bool sOct, bool Reflectance, bool Color);
     scan_cv (string dir, unsigned int number, IOType format, bool scanServer);
     scan_cv (string dir, unsigned int number, IOType format);
