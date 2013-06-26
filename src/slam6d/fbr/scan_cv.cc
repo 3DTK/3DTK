@@ -13,6 +13,27 @@ using namespace std;
 
 namespace fbr{
 
+  scan_cv::scan_cv(string dir, unsigned int number, IOType format, bool scanServer, scanner_type type, bool lOct, bool sOct, bool Reflectance, bool Color, int MaxDist, int MinDist){
+    sDir = dir;
+    sNumber = number;
+    sFormat = format;
+    zMax = numeric_limits<double>::min(); 
+    zMin = numeric_limits<double>::max();
+    nPoints = 0;
+    sType = type;
+    scanserver = scanServer;
+    loadOct = lOct;
+    saveOct = sOct;
+    reflectance = Reflectance;
+    color = Color;
+    types = PointType::USE_NONE;
+    if(reflectance)
+      types |= PointType::USE_REFLECTANCE;
+    if(color)
+      types |= PointType::USE_COLOR;
+    maxDist = MaxDist;
+    minDist = MinDist;
+  }
   scan_cv::scan_cv(string dir, unsigned int number, IOType format, bool scanServer, scanner_type type, bool lOct, bool sOct, bool Reflectance, bool Color){
     sDir = dir;
     sNumber = number;
@@ -31,6 +52,8 @@ namespace fbr{
       types |= PointType::USE_REFLECTANCE;
     if(color)
       types |= PointType::USE_COLOR;
+    maxDist = -1;
+    minDist = -1;
   }
 
   scan_cv::scan_cv(string dir, unsigned int number, IOType format, bool scanServer){
@@ -48,6 +71,8 @@ namespace fbr{
     color = false;
     types = PointType::USE_NONE;
     types |= PointType::USE_REFLECTANCE;
+    maxDist = -1;
+    minDist = -1;
   }
 
   scan_cv::scan_cv(string dir, unsigned int number, IOType format){
@@ -65,6 +90,8 @@ namespace fbr{
     color = false;
     types = PointType::USE_NONE;
     types |= PointType::USE_REFLECTANCE;
+    maxDist = -1;
+    minDist = -1;
   }
 
   void scan_cv::convertScanToMat(){
@@ -145,6 +172,10 @@ namespace fbr{
     ScanColorManager *scm = new ScanColorManager(4096, pointtype);  
 
     Scan * source =  Scan::allScans[0];
+
+    //set Range filteres for scan
+    source->setRangeFilter(maxDist, minDist);
+
     ///
     red = -1;
     scale = 0.01;
