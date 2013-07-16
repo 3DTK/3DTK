@@ -245,13 +245,13 @@ void BasicScan::get(unsigned int types)
       data[i] = temperature[i];
   }
   if(types & DATA_AMPLITUDE && !amplitude.empty()) {
-    int* data = reinterpret_cast<int*>(create("amplitude",
-                      sizeof(int) * amplitude.size()).get_raw_pointer());
+    float* data = reinterpret_cast<float*>(create("amplitude",
+                      sizeof(float) * amplitude.size()).get_raw_pointer());
     for(unsigned int i = 0; i < amplitude.size(); ++i) data[i] = amplitude[i];
   }
   if(types & DATA_TYPE && !type.empty()) {
-    float* data = reinterpret_cast<float*>(create("type",
-                      sizeof(double) * type.size()).get_raw_pointer());
+    int* data = reinterpret_cast<int*>(create("type",
+                      sizeof(int) * type.size()).get_raw_pointer());
     for(unsigned int i = 0; i < type.size(); ++i) data[i] = type[i];
   }
   if(types & DATA_DEVIATION && !deviation.empty()) {
