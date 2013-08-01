@@ -320,6 +320,17 @@ ELSE(WITH_METRICS)
   MESSAGE(STATUS "Without metrics in slam6d.")
 ENDIF(WITH_METRICS)
 
+OPT_DEP(WITH_ADDONS "Whether to download and use addons to 3DTK. ON/OFF" OFF "")
+IF(WITH_ADDONS)
+  execute_process(COMMAND svn co https://robotik.informatik.uni-wuerzburg.de/slam6dprivate/trunk/addons addons 
+                  WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+                  OUTPUT_QUIET
+                  ) 
+  MESSAGE(STATUS "With addons.")
+ELSE(WITH_ADDONS)
+  MESSAGE(STATUS "Without addons.")
+ENDIF(WITH_ADDONS)
+
 #################################################
 # OPERATING SYSTEM SPECIFIC BEHAVIOUR          ##
 #################################################
@@ -415,5 +426,9 @@ add_subdirectory(src/slam6d/fbr)
 add_subdirectory(src/scanner)
 add_subdirectory(src/model)
 add_subdirectory(3rdparty)
+IF(WITH_ADDONS)
+  MESSAGE(STATUS "With 3dtkaddons.")
+  add_subdirectory(addons)
+ENDIF(WITH_ADDONS)
 
 MESSAGE (STATUS "Build environment is set up!")
