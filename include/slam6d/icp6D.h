@@ -56,7 +56,8 @@ public:
   double Point_Point_Error(Scan* PreviousScan,
 					  Scan* CurrentScan,
 					  double max_dist_match,
-					  unsigned int *nrp=0);
+					  unsigned int *nrp=0,
+            double scale_max = 0.000001);
 
   inline int  get_rnd();
   inline bool get_meta();
