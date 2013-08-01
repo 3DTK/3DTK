@@ -265,8 +265,10 @@ int icp6D::match(Scan* PreviousScan, Scan* CurrentScan,
 double icp6D::Point_Point_Error(Scan* PreviousScan,
 						  Scan* CurrentScan,
 						  double max_dist_match,
-						  unsigned int *np)
+						  unsigned int *np,
+              double scale_max)
 {
+  double scale = log(scale_max) / (max_dist_match*max_dist_match);
   double error = 0;
   unsigned int nr_ppairs = 0;
 
@@ -302,9 +304,10 @@ double icp6D::Point_Point_Error(Scan* PreviousScan,
       for (unsigned int i = 0;
 		 i < (unsigned int)pairs[thread_num].size();
 		 i++) {
-        error += sqr(pairs[thread_num][i].p1.x - pairs[thread_num][i].p2.x)
+        double dist = sqr(pairs[thread_num][i].p1.x - pairs[thread_num][i].p2.x)
           + sqr(pairs[thread_num][i].p1.y - pairs[thread_num][i].p2.y)
           + sqr(pairs[thread_num][i].p1.z - pairs[thread_num][i].p2.z);
+      error -= 0.39894228 * exp(dist*scale);
       }
       nr_ppairs += (unsigned int)pairs[thread_num].size();
     }
@@ -323,10 +326,10 @@ double icp6D::Point_Point_Error(Scan* PreviousScan,
     error = 0;
 
     for (unsigned int i = 0; i < pairs.size(); i++) {
-      error += sqrt(
-          sqr(pairs[i].p1.x - pairs[i].p2.x)
+      double dist = sqr(pairs[i].p1.x - pairs[i].p2.x)
         + sqr(pairs[i].p1.y - pairs[i].p2.y)
         + sqr(pairs[i].p1.z - pairs[i].p2.z) );
+      error -= 0.39894228 * exp(dist*scale);
     }
     nr_ppairs = pairs.size();
 #endif
