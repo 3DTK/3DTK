@@ -27,7 +27,7 @@ namespace fbr{
    * @param bErrorIndex error index of registration with bAlign
    */
   class registration{
-    unsigned int minDistance;
+    double minDistance;
     double minError;
     unsigned int minInlier;
     registration_method rMethod;
@@ -73,7 +73,7 @@ namespace fbr{
 
   public:
     registration();
-    registration(unsigned int minD, double minE, unsigned int minI, registration_method method);
+    registration(double minD, double minE, unsigned int minI, registration_method method);
     /**
      * findRegistration : find the transformation matrix between two scans
      * @param fPMap first panorama map which is 3D points coresponding to fist panorama image
@@ -83,7 +83,7 @@ namespace fbr{
      * @param matches matched keypoints from first to second scan
      */
     void findRegistration(cv::Mat fPMap, vector<cv::KeyPoint> fKeypoints, cv::Mat sPMap, vector<cv::KeyPoint> sKeypoints, vector<cv::DMatch> matches);
-    unsigned int getMinDistance();
+    double getMinDistance();
     double getMinError();
     unsigned int getMinInlier();
     registration_method getRegistrationMethod();

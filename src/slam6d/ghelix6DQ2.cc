@@ -375,7 +375,7 @@ double ghelix6DQ2::doGraphSlam6D(Graph gr, vector <Scan *> allScans, int nrIt)
       double dummy_sum;
 
    Scan::getPtPairs(ptpairs[i], FirstScan, SecondScan, thread_num,
-       (int)my_icp->get_rnd(), (int)max_dist_match2_LUM, dummy_sum,
+       (int)my_icp->get_rnd(), max_dist_match2_LUM, dummy_sum,
        dummy_centroid_m, dummy_centroid_d);
 
       // faulty network

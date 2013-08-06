@@ -117,7 +117,7 @@ void graphSlam6D::matchGraph6Dautomatic(vector <Scan *> allScans,
         vPtPair temp;
         double sum_dummy;
         Scan::getPtPairs(&temp, FirstScan, SecondScan, thread_num,
-            my_icp->get_rnd(), (int)max_dist_match2_LUM, sum_dummy,
+            my_icp->get_rnd(), max_dist_match2_LUM, sum_dummy,
             centroid_m, centroid_d);
         if ((int)temp.size() > clpairs) {
 #ifdef _OPENMP
@@ -166,7 +166,7 @@ Graph *graphSlam6D::computeGraph6Dautomatic(vector <Scan *> allScans,
       vPtPair temp;
       double sum_dummy;
       Scan::getPtPairs(&temp, FirstScan, SecondScan, thread_num,
-          my_icp->get_rnd(), (int)max_dist_match2_LUM, sum_dummy,
+          my_icp->get_rnd(), max_dist_match2_LUM, sum_dummy,
           centroid_m, centroid_d);
       if ((int)temp.size() > clpairs) {
 #ifdef _OPENMP

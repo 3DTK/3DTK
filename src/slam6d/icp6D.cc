@@ -112,10 +112,14 @@ int icp6D::match(Scan* PreviousScan, Scan* CurrentScan,
   double ret = 0.0, prev_ret = 0.0, prev_prev_ret = 0.0;
   int iter = 0;
   double alignxf[16];
+long time = GetCurrentTimeInMilliSec();
+
   for (iter = 0; iter < max_num_iterations; iter++) {
 
     prev_prev_ret = prev_ret;
     prev_ret = ret;
+
+if (iter == 1) time = GetCurrentTimeInMilliSec();
 
 #ifdef _OPENMP
     // Implementation according to the paper 
@@ -252,6 +256,9 @@ int icp6D::match(Scan* PreviousScan, Scan* CurrentScan,
     break;
     }
   }
+  
+long endtime = GetCurrentTimeInMilliSec() - time;
+  cout << "TIME  " << endtime << "   ITER " << iter <<  endl;
   
   return iter;
 }

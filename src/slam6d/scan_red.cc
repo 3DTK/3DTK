@@ -1,5 +1,5 @@
 /*
- * scan_red implementation
+ * scan_red implxementation
  *
  * Copyright (C) by the 3DTK contributors
  * Copyright (C) Dorit Borrmann, Razvan-George Mihalyi, Remus Dumitru 
@@ -119,8 +119,34 @@ namespace fbr {
     if(strcasecmp(arg.c_str(), "EQUIRECTANGULAR") == 0) v = EQUIRECTANGULAR;
     else if(strcasecmp(arg.c_str(), "CYLINDRICAL") == 0) v = CYLINDRICAL;
     else if(strcasecmp(arg.c_str(), "MERCATOR") == 0) v = MERCATOR;
+
+
+    else if(strcasecmp(arg.c_str(), "RECTILINEAR") == 0) v = RECTILINEAR;
+    else if(strcasecmp(arg.c_str(), "PANNINI") == 0) v = PANNINI;
+    else if(strcasecmp(arg.c_str(), "STEREOGRAPHIC") == 0) v = STEREOGRAPHIC;
+    else if(strcasecmp(arg.c_str(), "EQUALAREACYLINDRICAL") == 0) v = EQUALAREACYLINDRICAL;
+
+
     else if(strcasecmp(arg.c_str(), "CONIC") == 0) v = CONIC;
     else throw std::runtime_error(std::string("projection method ")
+                                  + arg
+                                  + std::string(" is unknown"));
+  }
+}
+
+/*
+ * validates scanner type specification
+ */
+namespace fbr {
+  void validate(boost::any& v, const std::vector<std::string>& values,
+                scanner_type*, int) {
+    if (values.size() == 0)
+      throw std::runtime_error("Invalid scanner type");
+    string arg = values.at(0);
+    if(strcasecmp(arg.c_str(), "NONE") == 0) v = NONE;
+    else if(strcasecmp(arg.c_str(), "RIEGL") == 0) v = RIEGL;
+    else if(strcasecmp(arg.c_str(), "FARO") == 0) v = FARO;
+    else throw std::runtime_error(std::string("scanner type ")
                                   + arg
                                   + std::string(" is unknown"));
   }
@@ -187,7 +213,9 @@ void parse_options(int argc, char **argv, int &start, int &end,
                    bool &scanserver, int &width, int &height,
                    fbr::projection_method &ptype, string &dir, IOType &iotype,
                    int &maxDist, int &minDist, reduction_method &rtype, double &scale,
-                   double &voxel, int &octree, bool &use_reflectance)
+                   double &voxel, int &octree, bool &use_reflectance,
+		   int &MIN_ANGLE, int &MAX_ANGLE, int &nImages, double &pParam,
+		   fbr::scanner_type &sType, bool &loadOct, bool &use_color)
 {
   po::options_description generic("Generic options");
   generic.add_options()
@@ -209,7 +237,12 @@ void parse_options(int argc, char **argv, int &start, int &end,
     ("min,m", po::value<int>(&minDist)->default_value(-1),
      "neglegt all data points with a distance smaller than <arg> 'units")
     ("scanserver,S", po::bool_switch(&scanserver),
-     "Use the scanserver as an input method and handling of scan data");
+     "Use the scanserver as an input method and handling of scan data")
+    ("loadOct,l", po::bool_switch(&loadOct)->default_value(false),
+     "Use Octree to load data if it is available")
+    ("sType,t", po::value<fbr::scanner_type>(&sType),
+     "Choose scanner type");
+
 
   po::options_description reduction("Reduction options");
   reduction.add_options()
@@ -226,12 +259,26 @@ void parse_options(int argc, char **argv, int &start, int &end,
     ("width,w", po::value<int>(&width),
      "width of panorama")
     ("height,h", po::value<int>(&height),
-     "height of panorama");
+     "height of panorama")
+    ("minVangle,a", po::value<int>(&MIN_ANGLE)->default_value(-40),
+     "min vertical angle of view")
+    ("maxVangle,A", po::value<int>(&MAX_ANGLE)->default_value(60),
+     "max vertical angle of view")
+    ("nImages,n", po::value<int>(&nImages),
+     "number of horizontal images for some projections [pannini, rectilinear, stereographic]")
+    ("pParam,p", po::value<double>(&pParam),
+     "projection parameter for some projections [pannini, stereographic]");
+
+
+
+
 
   po::options_description output("Output options");
   output.add_options()
     ("reflectance,R", po::bool_switch(&use_reflectance),
-     "Use reflectance when reducing points and save scan files in UOSR format");
+     "Use reflectance when reducing points and save scan files in UOSR format")
+    ("color,C", po::bool_switch(&use_color)->default_value(false),
+     "Use color when reducing points and save scan files with color");
 
   po::options_description hidden("Hidden options");
   hidden.add_options()
@@ -338,6 +385,7 @@ void scan2mat(Scan *source, cv::Mat &mat)
     (*it)[3] = reflectance;
     ++it;
   }
+
 }
 
 void reduce_octree(Scan *scan, vector<cv::Vec4f> &reduced_points, int octree,
@@ -379,54 +427,74 @@ void reduce_octree(Scan *scan, vector<cv::Vec4f> &reduced_points, int octree,
   }
 }
 
-void reduce_range(Scan *scan, vector<cv::Vec4f> &reduced_points, int width,
+//void reduce_range(Scan *scan, vector<cv::Vec4f> &reduced_points, int width,
+void reduce_range(cv::Mat mat, vector<cv::Vec4f> &reduced_points, int width,
                   int height, fbr::projection_method ptype, double scale,
-                  bool use_reflectance)
+                  bool use_reflectance, 
+		  int MIN_ANGLE, int MAX_ANGLE, int nImages, double pParam,
+		  fbr::panorama_map_method mMethod, float zMin, float zMax,
+		  bool imageOptimization)
 {
-  panorama image(width, height, ptype);
-  cv::Mat mat;
-  scan2mat(scan, mat);
+  //panorama image(width, height, ptype);
+  panorama image(width, height, ptype, nImages, pParam, mMethod, zMin, zMax, MIN_ANGLE, MAX_ANGLE, imageOptimization);
+  //cv::Mat mat;
+  //scan2mat(scan, mat);
   image.createPanorama(mat);
   image.getDescription();
 
   cv::Mat range_image_resized;
   cv::Mat reflectance_image_resized;
+
   resize(image.getRangeImage(), range_image_resized, cv::Size(),
          scale, scale, cv::INTER_NEAREST);
+	 //scale, scale, cv::INTER_LINEAR);
+
   if (use_reflectance) {
     resize(image.getReflectanceImage(), reflectance_image_resized,
            cv::Size(), scale, scale, cv::INTER_NEAREST);
+	   //cv::Size(), scale, scale, cv::INTER_LINEAR);
   } else {
     reflectance_image_resized.create(range_image_resized.size(), CV_8U);
     reflectance_image_resized = cv::Scalar::all(0);
   }
+  
   image.recoverPointCloud(range_image_resized,
                           reflectance_image_resized,
                           reduced_points);
 }
 
-void reduce_interpolation(Scan *scan,
+//void reduce_interpolation(Scan *scan,
+void reduce_interpolation(cv::Mat mat,
                           vector<cv::Vec4f> &reduced_points,
                           int width,
                           int height,
                           fbr::projection_method ptype,
                           double scale,
-                          bool use_reflectance)
+                          bool use_reflectance,
+			  int MIN_ANGLE, int MAX_ANGLE, int nImages, double pParam,
+			  fbr::panorama_map_method mMethod, float zMin, float zMax,
+			  bool imageOptimization)
+
 {
-  panorama image(width, height, ptype);
-  cv::Mat mat;
-  scan2mat(scan, mat);
+  //panorama image(width, height, ptype);
+  panorama image(width, height, ptype, nImages, pParam, mMethod, zMin, zMax, MIN_ANGLE, MAX_ANGLE, imageOptimization);
+  //cv::Mat mat;
+  //scan2mat(scan, mat);
   image.createPanorama(mat);
   image.getDescription();
 
   cv::Mat range_image_resized;
   cv::Mat reflectance_image_resized;
   resize(image.getMap(), range_image_resized, cv::Size(),
-         scale, scale, cv::INTER_NEAREST);
+	 scale, scale, cv::INTER_NEAREST);
+	 //scale, scale, cv::INTER_LINEAR);
+
   if (use_reflectance) {
     resize(image.getReflectanceImage(), reflectance_image_resized,
-           cv::Size(), scale, scale, cv::INTER_NEAREST);
+	   cv::Size(), scale, scale, cv::INTER_NEAREST);
+	   //cv::Size(), scale, scale, cv::INTER_LINEAR);
   }
+  
   for(int i = 0; i < range_image_resized.rows; i++) {
     for(int j = 0; j < range_image_resized.cols; j++) {
       cv::Vec3f vec = range_image_resized.at<cv::Vec3f>(i, j);
@@ -434,7 +502,7 @@ void reduce_interpolation(Scan *scan,
         reduced_points.push_back(cv::Vec4f(vec[0], vec[1], vec[2],
                     reflectance_image_resized.at<uchar>(i, j)/255.0));
       } else {
-        reduced_points.push_back(cv::Vec4f(vec[0], vec[1], vec[2], 0.0));
+	reduced_points.push_back(cv::Vec4f(vec[0], vec[1], vec[2], 0.0));
       }
     }
   }
@@ -452,7 +520,6 @@ void write_uos(vector<cv::Vec4f> &points, string &dir, string id)
   for (vector<cv::Vec4f>::iterator it=points.begin(); it < points.end(); it++) {
     outfile << (*it)[0] << " " << (*it)[1] << " " << (*it)[2] << endl;
   }
-
   outfile.close();
 }
 
@@ -462,11 +529,13 @@ void write_uos(vector<cv::Vec4f> &points, string &dir, string id)
 void write_uosr(vector<cv::Vec4f> &points, string &dir, string id)
 {
   ofstream outfile((dir + "/scan" + id + ".3d").c_str());
-
+  
+  outfile.precision(20);
   outfile << "# header is ignored" << endl;
 
   for (vector<cv::Vec4f>::iterator it=points.begin(); it < points.end(); it++) {
-    outfile << (*it)[0] << " " << (*it)[1] << " " << (*it)[2] << " " << (*it)[3] << endl;
+    if((*it)[0]!=0 && (*it)[1]!=0 && (*it)[2]!=0)
+      outfile << (*it)[0] << " " << (*it)[1] << " " << (*it)[2] << " " << (*it)[3] << endl;
   }
 
   outfile.close();
@@ -505,75 +574,125 @@ int main(int argc, char **argv)
   double scale, voxel;
   int octree;
   bool use_reflectance;
+  
+  //scan
+  fbr::scanner_type sType;
+  bool loadOct, saveOct = false, use_color;
+  //panorama
+  int MIN_ANGLE, MAX_ANGLE;
+  int nImages = 1;
+  double pParam = 0;
+  fbr::panorama_map_method mMethod = FARTHEST;
+  float zMin = 0, zMax = 0;
+  bool imageOptimization = false;
+
 
   parse_options(argc, argv, start, end, scanserver, width, height, ptype,
                 dir, iotype, maxDist, minDist, rtype, scale, voxel, octree,
-                use_reflectance);
+                use_reflectance, MIN_ANGLE, MAX_ANGLE, nImages, pParam,
+		sType, loadOct, use_color);
 
   for (int iter = start; iter <= end; iter++) {
-    Scan::openDirectory(scanserver, dir, iotype, iter, iter);
-    if(Scan::allScans.size() == 0) {
-      cerr << "No scans found. Did you use the correct format?" << endl;
-      exit(-1);
-    }
+    
+    vector<cv::Vec4f> reduced_points;
+      
+    string reddir = dir + "reduced";
+    createdirectory(reddir);
+    
+    if(rtype == OCTREE)
+      {
+	Scan::openDirectory(scanserver, dir, iotype, iter, iter);
+	if(Scan::allScans.size() == 0) {
+	  cerr << "No scans found. Did you use the correct format?" << endl;
+	  exit(-1);
+	}
+	
+	Scan* scan = *Scan::allScans.begin();
+	
+	scan->setRangeFilter(maxDist, minDist);
+	
+	reduce_octree(scan,
+		      reduced_points,
+		      octree,
+		      voxel,
+		      use_reflectance);
+	
+	if (use_reflectance)
+	  write_uosr(reduced_points,
+		     reddir,
+		     scan->getIdentifier());
+	else
+	  write_uos(reduced_points,
+		    reddir,		  
+		    scan->getIdentifier());
+	
 
-    for(ScanVector::iterator it = Scan::allScans.begin();
-        it != Scan::allScans.end();
-        ++it) {
-      Scan* scan = *it;
-
-      scan->setRangeFilter(maxDist, minDist);
-
-      vector<cv::Vec4f> reduced_points;
-
-      string reddir = dir + "reduced";
-      createdirectory(reddir);
-
-      switch (rtype) {
-      case OCTREE:
-        reduce_octree(scan,
-                      reduced_points,
-                      octree,
-                      voxel,
-                      use_reflectance);
-        break;
-      case RANGE:
-        reduce_range(scan,
-                     reduced_points,
-                     width,
-                     height,
-                     ptype,
-                     scale,
-                     use_reflectance);
-        break;
-      case INTERPOLATE:
-        reduce_interpolation(scan,
-                             reduced_points,
-                             width,
-                             height,
-                             ptype,
-                             scale,
-                             use_reflectance);
-        break;
-      default:
-        cerr << "unknown method" << endl;
-        return 1;
-        break;
+	writeposefile(reddir,
+		      scan->get_rPos(),
+		      scan->get_rPosTheta(),
+		      scan->getIdentifier());
+	
       }
-     
-      if (use_reflectance)
-        write_uosr(reduced_points,
-                   reddir,
-                   scan->getIdentifier());
-      else
-        write_uos(reduced_points,
-                  reddir,
-                  scan->getIdentifier());
-      writeposefile(reddir,
-                    scan->get_rPos(),
-                    scan->get_rPosTheta(),
-                    scan->getIdentifier());
-    }
+    else
+      {
+	scan_cv sMat(dir, iter, iotype, scanserver, sType, loadOct, saveOct, use_reflectance, use_color);
+
+	if(rtype == RANGE)
+	  {
+	    sMat.convertScanToMat();
+	    reduce_range(sMat.getMatScan(),
+			 reduced_points,
+			 width,
+			 height,
+			 ptype,
+			 scale,
+			 use_reflectance,
+			 MIN_ANGLE,
+			 MAX_ANGLE,
+			 nImages,
+			 pParam,
+			 mMethod,
+			 zMin,
+			 zMax,
+			 imageOptimization);
+
+	    
+	  }
+	else if(rtype == INTERPOLATE)
+	  {
+	    sMat.convertScanToMat();
+	    reduce_interpolation(sMat.getMatScan(),
+				 reduced_points,
+				 width,
+				 height,
+				 ptype,
+				 scale,
+				 use_reflectance,
+				 MIN_ANGLE,
+				 MAX_ANGLE,
+				 nImages,
+				 pParam,
+				 mMethod,
+				 zMin,
+				 zMax,
+				 imageOptimization);
+	    
+	  }
+	else
+	  {
+	    cerr << "unknown method" << endl;
+	  }
+	
+	if (use_reflectance)
+	  write_uosr(reduced_points,
+		     reddir,
+		     to_string(iter,3));
+	else
+	  write_uos(reduced_points,
+		    reddir,		  
+		    to_string(iter,3));
+		
+      }
     Scan::closeDirectory();
   }
 }
