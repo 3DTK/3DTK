@@ -257,7 +257,7 @@ int main(int argc, char** argv)
     
     if(info.color){
       out = info.outDir+to_string(s, 3)+"_"+projectionMethodToString(info.pMethod)+"_"+to_string(info.pWidth)+"x"+to_string(info.pHeight)+"_Color.jpg";
-      imwrite(out, pImage.getReflectanceImage());
+      imwrite(out, pImage.getColorImage());
     }
 
   }

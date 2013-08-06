@@ -13,7 +13,7 @@ using namespace std;
 
 namespace fbr{
 
-  registration::registration(unsigned int minD, double minE, unsigned int minI, registration_method method){
+  registration::registration(double minD, double minE, unsigned int minI, registration_method method){
     minDistance = minD;
     minError = minE;
     minInlier = minI;
@@ -182,7 +182,7 @@ namespace fbr{
       }
   }
 
-  unsigned int registration::getMinDistance(){
+  double registration::getMinDistance(){
     return minDistance;
   }
 
