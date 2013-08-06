@@ -277,7 +277,7 @@ void lum6DEuler::FillGB3D(Graph *gr,
     ColumnVector CDab(6);
     covarianceEuler(FirstScan, SecondScan,
                     nns_method, (int)my_icp->get_rnd(), 
-                    (int)max_dist_match2_LUM, &Cab, &CDab); 
+                    max_dist_match2_LUM, &Cab, &CDab); 
 
 #pragma omp critical
     {

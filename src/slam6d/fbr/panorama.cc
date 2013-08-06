@@ -86,11 +86,6 @@ namespace fbr{
   }
   
   void panorama::map(int x, int y, cv::MatIterator_<cv::Vec4f> it, double range){
-    // reflectance
-    iReflectance.at<uchar>(y,x) = (*it)[3]*255;
-
-    // range
-    iRange.at<float>(y,x) = (float)range;
     
     if (maxRange < (float)range)
 	 maxRange = (float)range;
@@ -98,11 +93,23 @@ namespace fbr{
     // adding the point with max distance
     if (mapMethod == FARTHEST) {
       if (iRange.at<float>(y,x) < range) {
+	// reflectance
+	iReflectance.at<uchar>(y,x) = (*it)[3]*255;
+	
+	// range
+	iRange.at<float>(y,x) = (float)range;
+
         iMap.at<cv::Vec3f>(y,x)[0] = (*it)[0]; // x
         iMap.at<cv::Vec3f>(y,x)[1] = (*it)[1]; // y
         iMap.at<cv::Vec3f>(y,x)[2] = (*it)[2]; // z
       }
     } else if(mapMethod == EXTENDED){
+      // reflectance
+      iReflectance.at<uchar>(y,x) = (*it)[3]*255;
+      
+      // range
+      iRange.at<float>(y,x) = (float)range;
+      
       // adding all the points
       cv::Vec3f point;
       point[0] = (*it)[0]; // x
@@ -173,21 +180,27 @@ namespace fbr{
 	    */
 	    if((double)(iWidth/iHeight) >= 1)
 	      {
-		//iHeight stays the same
-		if((double)(tWidth/iHeight) >= 1)
-		  iWidth = tWidth;
-		//iWidth stays the same
-		if((double)(iWidth/tHeight) >= 1)
-		  iHeight = tHeight;
+		if((double)(xSize/ySize) >= 1)
+		  {
+		    //iHeight stays the same
+		    if((double)(tWidth/iHeight) >= 1)
+		      iWidth = tWidth;
+		    //iWidth stays the same
+		    else if((double)(iWidth/tHeight) >= 1)
+		      iHeight = tHeight;
+		  }
 	      }
 	    else
 	      {
-		//iHeight stays the same
-		if((double)(tWidth/iHeight) <= 1)
-		  iWidth = tWidth;
-		//iWidth stays the same
-		if((double)(iWidth/tHeight) <= 1)
-		  iHeight = tHeight;		
+		if((double)(xSize/ySize) < 1)
+		  {
+		    //iWidth stays the same
+		    if((double)(iWidth/tHeight) <= 1)
+		      iHeight = tHeight;		
+		    //iHeight stays the same
+		    else if((double)(tWidth/iHeight) <= 1)
+		      iWidth = tWidth;		
+		  }
 	      }
 	    cout<<"New Panorama Size is: "<<iWidth<<"X"<<iHeight<<endl;
 	    cout<<endl;
@@ -208,7 +221,7 @@ namespace fbr{
     if(pMethod == EQUIRECTANGULAR){
       //adding the longitude to x axis and latitude to y axis
       double xSize = 2 * M_PI;
-      double ySize =  ((MAX_ANGLE - MIN_ANGLE) / 360 * 2 * M_PI);
+      double ySize =  ((MAX_ANGLE - MIN_ANGLE) / 360.0 * 2.0 * M_PI);
       
       setImageRatio(xSize, ySize);
       initMat();      
@@ -217,7 +230,7 @@ namespace fbr{
       int widthMax = iWidth - 1;
       double yFactor = (double) iHeight / ySize;      
       //shift all the valuse to positive points on image 
-      double heightLow =(0 - MIN_ANGLE) / 360 * 2 * M_PI;
+      double heightLow =(0.0 - MIN_ANGLE) / 360.0 * 2.0 * M_PI;
       int heightMax = iHeight - 1;
 
       cv::MatIterator_<cv::Vec4f> it, end; 
@@ -932,10 +945,10 @@ namespace fbr{
 
     //recover from EQUIRECTANGULAR projection
     if(pMethod == EQUIRECTANGULAR) {
-      double xFactor = (double) range_image.size().width / 2 / M_PI;
+      double xFactor = (double) range_image.size().width / 2.0 / M_PI;
       //int widthMax = range_image.size().width - 1;
-      double yFactor = (double) range_image.size().height / ((MAX_ANGLE - MIN_ANGLE) / 360 * 2 * M_PI);
-      double heightLow = (0 - MIN_ANGLE) / 360 * 2 * M_PI;
+      double yFactor = (double) range_image.size().height / ((MAX_ANGLE - MIN_ANGLE) / 360.0 * 2.0 * M_PI);
+      double heightLow = (0.0 - MIN_ANGLE) / 360 * 2 * M_PI;
       int heightMax = range_image.size().height - 1;
 
       bool first_seen = true;
@@ -944,7 +957,7 @@ namespace fbr{
           float range = range_image.at<float>(row, col);
           float reflectance = reflectance_image.at<uchar>(row,col)/255.0;
           float theta = (heightMax - row + 0.5) / yFactor - heightLow; 
-          float phi = (col + 0.5) / xFactor; 
+          float phi = (col + 0.5 ) / xFactor; 
           phi *= 180.0 / M_PI;
           phi = 360.0 - phi;
           phi *= M_PI / 180.0;

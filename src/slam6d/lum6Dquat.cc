@@ -258,7 +258,7 @@ void lum6DQuat::FillGB3D(Graph *gr,Matrix* G,
     Matrix Cab;
     ColumnVector CDab;
     covarianceQuat(FirstScan, SecondScan, nns_method, (int)my_icp->get_rnd(), 
-                   (int)max_dist_match2_LUM, &Cab, &CDab); 
+                   max_dist_match2_LUM, &Cab, &CDab); 
 
     if(a >= 0){
       B->Rows(a*7+1,a*7+7) += CDab;

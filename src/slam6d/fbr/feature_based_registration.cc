@@ -29,7 +29,8 @@ using namespace fbr;
 struct information{
   string local_time;
   string dir, outDir;
-  int iWidth, iHeight, nImages, minDistance, minError, minInlier, fScanNumber, sScanNumber, verbose;
+  int iWidth, iHeight, nImages, fScanNumber, sScanNumber, verbose;
+  double minDistance, minError, minInlier;
   double pParam, mParam;
   IOType sFormat;
   projection_method pMethod;
@@ -162,7 +163,7 @@ void parssArgs(int argc, char** argv, information& info){
 	info.nImages = atoi(optarg);
 	break;
       case 'P':
-	info.pParam = atoi(optarg);
+	info.pParam = atof(optarg);
 	break;
       case 'F':
 	info.fMethod = stringToFeatureDetectorMethod(optarg);
@@ -174,16 +175,16 @@ void parssArgs(int argc, char** argv, information& info){
 	info.mMethod = stringToMatcherMethod(optarg);
 	break;
       case 'D':
-	info.minDistance = atoi(optarg);
+	info.minDistance = atof(optarg);
 	break;
       case 'E':
-	info.minError = atoi(optarg);
+	info.minError = atof(optarg);
 	break;
       case 'I':
-	info.minInlier = atoi(optarg);
+	info.minInlier = atof(optarg);
 	break;
       case 'M':
-	info.mParam = atoi(optarg);
+	info.mParam = atof(optarg);
 	break;
       case 'r':
 	info.rMethod = stringToRegistrationMethod(optarg);
@@ -379,19 +380,19 @@ int main(int argc, char** argv){
     fPanorama.createPanorama(fScan.getMatScan(), fScan.getMatScanColor());
   
   //get the new panorama size incase of optimized size panorama
-  info.iWidth = fPanorama.getImageWidth();
-  info.iHeight = fPanorama.getImageHeight();
+  //info.iWidth = fPanorama.getImageWidth();
+  //info.iHeight = fPanorama.getImageHeight();
 
   if(info.verbose >= 4) info.fPTime = ((double)cv::getTickCount() - info.fPTime)/cv::getTickFrequency();
   if(info.verbose >= 2) fPanorama.getDescription();
   //write panorama to image
   if(info.verbose >= 1){
-    out = info.outDir+info.local_time+"_scan"+to_string(info.fScanNumber, 3)+"_"+projectionMethodToString(info.pMethod)+"_"+to_string(info.iWidth)+"x"+to_string(info.iHeight)+".png";
+    out = info.outDir+info.local_time+"_scan"+to_string(info.fScanNumber, 3)+"_"+projectionMethodToString(info.pMethod)+"_"+to_string(fPanorama.getImageWidth())+"x"+to_string(fPanorama.getImageHeight())+".png";
     imwrite(out, fPanorama.getReflectanceImage());
-    out = info.outDir+info.local_time+"_scan"+to_string(info.fScanNumber, 3)+"_"+projectionMethodToString(info.pMethod)+"_"+to_string(info.iWidth)+"x"+to_string(info.iHeight)+"_Range.png";
+    out = info.outDir+info.local_time+"_scan"+to_string(info.fScanNumber, 3)+"_"+projectionMethodToString(info.pMethod)+"_"+to_string(fPanorama.getImageWidth())+"x"+to_string(fPanorama.getImageHeight())+"_Range.png";
     imwrite(out, fPanorama.getRangeImage());
     if((fPanorama.getColorImage()).empty() != 1){
-      out = info.outDir+info.local_time+"_scan"+to_string(info.fScanNumber, 3)+"_"+projectionMethodToString(info.pMethod)+"_"+to_string(info.iWidth)+"x"+to_string(info.iHeight)+"_color.png";
+      out = info.outDir+info.local_time+"_scan"+to_string(info.fScanNumber, 3)+"_"+projectionMethodToString(info.pMethod)+"_"+to_string(fPanorama.getImageWidth())+"x"+to_string(fPanorama.getImageHeight())+"_color.png";
       imwrite(out, fPanorama.getColorImage());
     }
   }
@@ -404,7 +405,7 @@ int main(int argc, char** argv){
   //write panorama with keypoints to image
   if(info.verbose >= 1){
     drawer.DrawKeypoints(fPanorama.getReflectanceImage(), fFeature.getFeatures(), outImage, cv::Scalar::all(-1), cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS );
-    out = info.outDir+info.local_time+"_scan"+to_string(info.fScanNumber, 3)+"_"+projectionMethodToString(info.pMethod)+"_"+to_string(info.iWidth)+"x"+to_string(info.iHeight)+"_"+featureDetectorMethodToString(info.fMethod)+".png";
+    out = info.outDir+info.local_time+"_scan"+to_string(info.fScanNumber, 3)+"_"+projectionMethodToString(info.pMethod)+"_"+to_string(fPanorama.getImageWidth())+"x"+to_string(fPanorama.getImageHeight())+"_"+featureDetectorMethodToString(info.fMethod)+".png";
     imwrite(out, outImage);
     outImage.release();
   }
@@ -426,19 +427,19 @@ int main(int argc, char** argv){
     sPanorama.createPanorama(sScan.getMatScan(), sScan.getMatScanColor());
 
   //get the new panorama size incase of optimized size panorama
-  info.iWidth = sPanorama.getImageWidth();
-  info.iHeight = sPanorama.getImageHeight();
+  //info.iWidth = sPanorama.getImageWidth();
+  //info.iHeight = sPanorama.getImageHeight();
 
   if(info.verbose >= 4) info.sPTime = ((double)cv::getTickCount() - info.sPTime)/cv::getTickFrequency();
   if(info.verbose >= 2) sPanorama.getDescription();
   //write panorama to image
   if(info.verbose >= 1){
-    out = info.outDir+info.local_time+"_scan"+to_string(info.sScanNumber, 3)+"_"+projectionMethodToString(info.pMethod)+"_"+to_string(info.iWidth)+"x"+to_string(info.iHeight)+".png";
+    out = info.outDir+info.local_time+"_scan"+to_string(info.sScanNumber, 3)+"_"+projectionMethodToString(info.pMethod)+"_"+to_string(fPanorama.getImageWidth())+"x"+to_string(fPanorama.getImageHeight())+".png";
     imwrite(out, sPanorama.getReflectanceImage());
-    out = info.outDir+info.local_time+"_scan"+to_string(info.sScanNumber, 3)+"_"+projectionMethodToString(info.pMethod)+"_"+to_string(info.iWidth)+"x"+to_string(info.iHeight)+"_Range.png";
+    out = info.outDir+info.local_time+"_scan"+to_string(info.sScanNumber, 3)+"_"+projectionMethodToString(info.pMethod)+"_"+to_string(fPanorama.getImageWidth())+"x"+to_string(fPanorama.getImageHeight())+"_Range.png";
     imwrite(out, sPanorama.getRangeImage());
     if((sPanorama.getColorImage()).empty() != 1){
-      out = info.outDir+info.local_time+"_scan"+to_string(info.sScanNumber, 3)+"_"+projectionMethodToString(info.pMethod)+"_"+to_string(info.iWidth)+"x"+to_string(info.iHeight)+"_color.png";
+      out = info.outDir+info.local_time+"_scan"+to_string(info.sScanNumber, 3)+"_"+projectionMethodToString(info.pMethod)+"_"+to_string(fPanorama.getImageWidth())+"x"+to_string(fPanorama.getImageHeight())+"_color.png";
       imwrite(out, sPanorama.getColorImage());
     }
   }
@@ -451,7 +452,7 @@ int main(int argc, char** argv){
   //write panorama with keypoints to image
   if(info.verbose >= 1){
     drawer.DrawKeypoints(sPanorama.getReflectanceImage(), sFeature.getFeatures(), outImage, cv::Scalar::all(-1), cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS );
-    out = info.outDir+info.local_time+"_scan"+to_string(info.sScanNumber, 3)+"_"+projectionMethodToString(info.pMethod)+"_"+to_string(info.iWidth)+"x"+to_string(info.iHeight)+"_"+featureDetectorMethodToString(info.fMethod)+".png";
+    out = info.outDir+info.local_time+"_scan"+to_string(info.sScanNumber, 3)+"_"+projectionMethodToString(info.pMethod)+"_"+to_string(fPanorama.getImageWidth())+"x"+to_string(fPanorama.getImageHeight())+"_"+featureDetectorMethodToString(info.fMethod)+".png";
     imwrite(out, outImage);
     outImage.release();
   }
@@ -459,6 +460,11 @@ int main(int argc, char** argv){
   sFeature.featureDescription(sPanorama.getReflectanceImage(), info.dMethod);
   if(info.verbose >= 4) info.sDTime = ((double)cv::getTickCount() - info.sDTime)/cv::getTickFrequency();
   if(info.verbose >= 2) sFeature.getDescription();
+
+
+  //get the new panorama size incase of optimized size panorama
+  info.iWidth = sPanorama.getImageWidth();
+  info.iHeight = sPanorama.getImageHeight();
 
   feature_matcher matcher (info.mMethod, info.mParam);
   if(info.verbose >= 4) info.mTime = (double)cv::getTickCount();

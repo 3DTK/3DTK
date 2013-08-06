@@ -427,7 +427,7 @@ double gapx6D::doGraphSlam6D(Graph gr, vector <Scan *> allScans, int nrIt)
 
       double dummy_sum;
       Scan::getPtPairs(ptpairs[i], FirstScan, SecondScan, thread_num,
-                       (int)my_icp->get_rnd(), (int)max_dist_match2_LUM, dummy_sum,
+                       (int)my_icp->get_rnd(), max_dist_match2_LUM, dummy_sum,
                        centroids_m[i], centroids_d[i]);
 
       // faulty network
