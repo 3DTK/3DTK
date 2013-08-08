@@ -46,7 +46,7 @@ int parseArgs(int argc,char **argv, char dir[255], int& start, int& end){
   extern int optind;
 
   cout << endl;
-  while ((c = getopt (argc, argv, "s:e:")) != -1)
+  while ((c = getopt (argc, argv, "s:e:h")) != -1)
     switch (c)
    {
    case 's':
@@ -58,6 +58,13 @@ int parseArgs(int argc,char **argv, char dir[255], int& start, int& end){
      if (end < 0)     { cerr << "Error: Cannot end at a negative scan number.\n"; exit(1); }
      if (end < start) { cerr << "Error: <end> cannot be smaller than <start>.\n"; exit(1); }
      break;
+   case 'h':
+     cout << "Usage: " << argv[0] << " [-s START] [-e END] DIRECTORY" << endl;
+     cout << endl;
+     cout << "Converts scans in UOSR format from START to END in DIRECTORY to" << endl;
+     cout << "one single scan in XYZR format in the same directory under a" << endl;
+     cout << "filename of the format scan{START}.xyz" << endl;
+     exit(0);
    }
 
   if (optind != argc-1) {
