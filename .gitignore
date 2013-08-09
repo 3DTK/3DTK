@@ -1,0 +1,5 @@
+.build/
+.configured
+bin/*
+lib/
+obj/
