@@ -9,7 +9,7 @@ IF(WITH_TOOLS)
   ENDIF(WITH_GLEE)
   
   IF(UNIX)
-    target_link_libraries(scan_red scan dl ANN fbr_cv_io fbr_panorama ${OpenCV_LIBS} ${Boost_LIBRARIES} showstatic ${OPENGL_LIBRARIES} ${SHOW_LIBS} newmat)
+    target_link_libraries(scan_red scan dl ANN fbr_cv_io fbr_panorama ${OpenCV_LIBS} ${Boost_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} showstatic ${OPENGL_LIBRARIES} ${SHOW_LIBS} newmat)
   ENDIF(UNIX)
 
   IF (WIN32)
@@ -21,7 +21,7 @@ IF(WITH_TOOLS)
   #  add_executable(scan_diff2d scan_diff2d.cc ../show/colormanager.cc)
   
   IF(UNIX)
-    target_link_libraries(scan_diff scan dl ANN newmat)
+    target_link_libraries(scan_diff scan dl ANN newmat ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY})
     #    target_link_libraries(scan_diff2d scan dl ANN)
   ENDIF(UNIX)
 
@@ -42,11 +42,11 @@ IF(WITH_TOOLS)
   add_executable(toGlobal toGlobal.cc)
 
   IF(UNIX)
-    target_link_libraries(graph_balancer scan ${Boost_GRAPH_LIBRARY} ${Boost_SERIALIZATION_LIBRARY} ${Boost_REGEX_LIBRARY})
-    target_link_libraries(exportPoints scan dl ANN newmat)
+    target_link_libraries(graph_balancer scan ${Boost_GRAPH_LIBRARY} ${Boost_SERIALIZATION_LIBRARY} ${Boost_REGEX_LIBRARY} ${Boost_SYSTEM_LIBRARY})
+    target_link_libraries(exportPoints scan dl ANN newmat ${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY})
     target_link_libraries(toGlobal scan)
-    target_link_libraries(convergence ${Boost_LIBRARIES})
-    target_link_libraries(pose2frames ${Boost_LIBRARIES})
+    target_link_libraries(convergence ${Boost_LIBRARIES} ${Boost_SYSTEM_LIBRARY})
+    target_link_libraries(pose2frames ${Boost_LIBRARIES} ${Boost_SYSTEM_LIBRARY})
   ENDIF(UNIX)
 
   
@@ -106,7 +106,7 @@ ENDIF(EXPORT_SHARED_LIBS)
 add_executable(slam6D slam6D.cc)
 
 IF(UNIX)
-  target_link_libraries(slam6D scan newmat sparse ANN)
+	target_link_libraries(slam6D scan newmat sparse ANN ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY})
 ENDIF(UNIX)
 
 IF(WIN32)
