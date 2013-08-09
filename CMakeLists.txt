@@ -246,6 +246,17 @@ ELSE(WITH_SEGMENTATION)
   MESSAGE(STATUS "Without segmentation")
 ENDIF(WITH_SEGMENTATION)
 
+## Collision detection
+
+OPT_DEP(WITH_COLLISION "Whether to build collision detection tools" OFF "WITH_COLLISION")
+
+IF(WITH_COLLISION)
+  MESSAGE(STATUS "With collision detection")
+  find_package (Boost COMPONENTS program_options REQUIRED)
+ELSE(WITH_COLLISION)
+  MESSAGE(STATUS "Without collision detection")
+ENDIF(WITH_COLLISION)
+
 ## RivLib
 OPT_DEP(WITH_RIVLIB "Whether the RIEGL rivlib is present ON/OFF" OFF "")
 
@@ -425,6 +436,7 @@ add_subdirectory(src/thermo)
 add_subdirectory(src/slam6d/fbr)
 add_subdirectory(src/scanner)
 add_subdirectory(src/model)
+add_subdirectory(src/collision)
 add_subdirectory(3rdparty)
 IF(WITH_ADDONS)
   MESSAGE(STATUS "With 3dtkaddons.")
