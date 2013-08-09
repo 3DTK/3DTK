@@ -32,16 +32,16 @@ IF (WIN32)
 ENDIF(WIN32)
 
 IF(UNIX)
-  target_link_libraries(featurebasedregistration fbr newmat ${FBR_LIBS} showstatic ${SHOW_LIBS} ${OPENGL_LIBRARIES})
+  target_link_libraries(featurebasedregistration fbr newmat ${FBR_LIBS} showstatic ${SHOW_LIBS} ${OPENGL_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY})
 ENDIF(UNIX)
 
 
 
 add_executable(panorama_matcher panorama_matcher.cc fbr_global.cc)
-target_link_libraries(panorama_matcher fbr ${FBR_LIBS})
+target_link_libraries(panorama_matcher fbr ${FBR_LIBS} ${Boost_SYSTEM_LIBRARY})
 
 add_executable(panorama_creator panorama_creator.cc fbr_global.cc)
-target_link_libraries(panorama_creator fbr newmat ${FBR_LIBS} showstatic ${SHOW_LIBS} ${OPENGL_LIBRARIES})
+target_link_libraries(panorama_creator fbr newmat ${FBR_LIBS} showstatic ${SHOW_LIBS} ${OPENGL_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY})
 
 
 ### EXPORT SHARED LIBS
