@@ -8,6 +8,9 @@
  */
 
 #include "slam6d/scan.h"
+#include "slam6d/frame.h"
+#include "slam6d/globals.icc"
+#include "slam6d/kd.h"
 
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -30,7 +33,8 @@ void validate(boost::any& v, const std::vector<std::string>& values,
     }
 }
 
-void parse_options(int argc, char **argv, int &start, int &end, bool &scanserver, IOType &iotype, string &dir)
+void parse_options(int argc, char **argv, int &start, int &end,
+        bool &scanserver, IOType &iotype, string &dir, string &trajectory)
 {
     po::options_description generic("Generic options");
     generic.add_options()
@@ -53,7 +57,8 @@ void parse_options(int argc, char **argv, int &start, int &end, bool &scanserver
 
     po::options_description hidden("Hidden options");
     hidden.add_options()
-        ("input-dir", po::value<string>(&dir), "input dir");
+        ("input-dir", po::value<string>(&dir), "input dir")
+        ("trajectory", po::value<string>(&trajectory), "trajectory");;
 
     // all options
     po::options_description all;
@@ -65,7 +70,7 @@ void parse_options(int argc, char **argv, int &start, int &end, bool &scanserver
 
     // positional argument
     po::positional_options_description pd;
-    pd.add("input-dir", 1);
+    pd.add("input-dir", 1).add("trajectory", 1);
 
     // process options
     po::variables_map vm;
@@ -80,17 +85,57 @@ void parse_options(int argc, char **argv, int &start, int &end, bool &scanserver
              << "\t" << argv[0] << " -s 0 -e 0 -f riegl_txt ~/path/to/bremen_city\n"; 
         exit(0);
     }
+
+    if (!vm.count("input-dir")) {
+        cout << "you have to specify an input directory" << endl;
+        exit(1);
+    }
+    if (!vm.count("trajectory")) {
+        cout << "you have to specify a trajectory" << endl;
+        exit(1);
+    }
+
+    if (dir[dir.length()-1] != '/') dir = dir + "/";
 }
 
 void createdirectory(string segdir)
 {
     int success = mkdir(segdir.c_str(), S_IRWXU|S_IRWXG|S_IRWXO);
     if (success == 0 || errno == EEXIST) {
-        cout << "Writing segmentations to " << segdir << endl;
+        cout << "Writing colliding points to " << segdir << endl;
     } else {
         cerr << "Creating directory " << segdir << " failed" << endl;
         exit(1);
     }
+}
+
+std::vector<Frame> read_trajectory(string filename)
+{
+    std::ifstream file(filename.c_str());
+    if (!file.good()) {
+        cout << "can't open " << filename << " for reading" << endl;
+        exit(1);
+    }
+    std::vector<Frame> positions;
+    double transformation[16];
+    unsigned int type;
+    std::string line;
+    while (std::getline(file, line)) {
+        std::istringstream iss(line);
+        iss >> transformation >> type;
+        positions.push_back(Frame(transformation, type));
+    }
+    return positions;
+}
+
+void write_xyzrgb(std::vector<Point> &points, string &dir, string id)
+{
+    ofstream outfile((dir + "/scan" + id + ".xyz").c_str());
+    for(std::vector<Point>::iterator it = points.begin(); it != points.end(); ++it) {
+        outfile << (*it).x << " " << (*it).y << " " << (*it).z << " 0" << endl;
+    }
+    outfile.close();
+
 }
 
 int main(int argc, char **argv)
@@ -98,10 +143,10 @@ int main(int argc, char **argv)
     // commandline arguments
     int start, end;
     bool scanserver;
-    string dir;
+    string dir, trajectoryfn;
     IOType iotype;
 
-    parse_options(argc, argv, start, end, scanserver, iotype, dir);
+    parse_options(argc, argv, start, end, scanserver, iotype, dir, trajectoryfn);
 
     Scan::openDirectory(scanserver, dir, iotype, start, end);
 
@@ -110,10 +155,33 @@ int main(int argc, char **argv)
       exit(-1);
     }
 
+    std::vector<Frame> trajectory = read_trajectory(trajectoryfn);
+
     string colldir;
+    colldir = dir + "collides";
+    createdirectory(colldir);
     for(ScanVector::iterator it = Scan::allScans.begin(); it != Scan::allScans.end(); ++it) {
         Scan* scan = *it;
-        colldir = dir + "collides" + scan->getIdentifier();
-        createdirectory(colldir);
+        DataXYZ points(scan->get("xyz"));
+        double** pa = new double*[points.size()];
+        for (size_t i = 0; i < points.size(); ++i) {
+            pa[i] = new double[3];
+            pa[i][0] = points[i][0];
+            pa[i][1] = points[i][1];
+            pa[i][2] = points[i][2];
+        }
+        KDtree t(pa, points.size());
+        int thread_num = 0; // add omp later
+        double sqRad2 = 6000;
+        vector<Point> colliding;
+        for(std::vector<Frame>::iterator it = trajectory.begin(); it != trajectory.end(); ++it) {
+            double point[3] = {0,0,0};
+            transform3((*it).transformation, point);
+            vector<Point> collidingsphere = t.fixedRangeSearch(point, sqRad2, thread_num);
+            cout << collidingsphere.size() << endl;
+            colliding.insert(colliding.end(), collidingsphere.begin(), collidingsphere.end());
+        }
+        write_xyzrgb(colliding, colldir, scan->getIdentifier());
     }
+
 }
