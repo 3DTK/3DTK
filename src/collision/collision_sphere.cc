@@ -18,6 +18,8 @@
 #include <boost/program_options.hpp>
 namespace po = boost::program_options;
 
+enum collision_method {CM_SPHERES, CM_MOVING_SPHERE};
+
 /*
  * validates input type specification
  */
@@ -33,8 +35,19 @@ void validate(boost::any& v, const std::vector<std::string>& values,
     }
 }
 
+void validate(boost::any& v, const std::vector<std::string>& values,
+        collision_method*, int) {
+    if (values.size() == 0)
+        throw std::runtime_error("Invalid model specification");
+    string arg = values.at(0);
+    if(strcasecmp(arg.c_str(), "SPHERES") == 0) v = CM_SPHERES;
+    else if(strcasecmp(arg.c_str(), "MOVING_SPHERE") == 0) v = CM_MOVING_SPHERE;
+    else throw std::runtime_error(std::string("collision method ") + arg + std::string(" is unknown"));
+}
+
 void parse_options(int argc, char **argv, int &start, int &end,
-        bool &scanserver, IOType &iotype, string &dir, string &trajectory)
+        bool &scanserver, IOType &iotype, string &dir, string &trajectory,
+        collision_method &cmethod, double &radius)
 {
     po::options_description generic("Generic options");
     generic.add_options()
@@ -54,6 +67,13 @@ void parse_options(int argc, char **argv, int &start, int &end,
         ("scanserver,S", po::value<bool>(&scanserver)->default_value(false),
          "Use the scanserver as an input method and handling of scan data");
 
+    po::options_description prog("Program specific options");
+    prog.add_options()
+        ("method,m", po::value<collision_method>(&cmethod)->
+         default_value(CM_SPHERES), "collision method (SPHERES, "
+         "MOVING_SPHERE)")
+        ("radius,r", po::value<double>(&radius)->default_value(70),
+         "radius of sphere");
 
     po::options_description hidden("Hidden options");
     hidden.add_options()
@@ -62,11 +82,11 @@ void parse_options(int argc, char **argv, int &start, int &end,
 
     // all options
     po::options_description all;
-    all.add(generic).add(input).add(hidden);
+    all.add(generic).add(input).add(prog).add(hidden);
 
     // options visible with --help
     po::options_description cmdline_options;
-    cmdline_options.add(generic).add(input);
+    cmdline_options.add(generic).add(input).add(prog);
 
     // positional argument
     po::positional_options_description pd;
@@ -145,8 +165,11 @@ int main(int argc, char **argv)
     bool scanserver;
     string dir, trajectoryfn;
     IOType iotype;
+    collision_method cmethod;
+    double radius;
 
-    parse_options(argc, argv, start, end, scanserver, iotype, dir, trajectoryfn);
+    parse_options(argc, argv, start, end, scanserver, iotype, dir,
+            trajectoryfn, cmethod, radius);
 
     Scan::openDirectory(scanserver, dir, iotype, start, end);
 
@@ -161,6 +184,7 @@ int main(int argc, char **argv)
     colldir = dir + "collides";
     createdirectory(colldir);
     for(ScanVector::iterator it = Scan::allScans.begin(); it != Scan::allScans.end(); ++it) {
+        /* build a KDtree from this scan */
         Scan* scan = *it;
         DataXYZ points(scan->get("xyz"));
         double** pa = new double*[points.size()];
@@ -171,15 +195,47 @@ int main(int argc, char **argv)
             pa[i][2] = points[i][2];
         }
         KDtree t(pa, points.size());
+        /* initialize variables */
         int thread_num = 0; // add omp later
-        double sqRad2 = 6000;
+        double sqRad2 = radius*radius;
         vector<Point> colliding;
-        for(std::vector<Frame>::iterator it = trajectory.begin(); it != trajectory.end(); ++it) {
-            double point[3] = {0,0,0};
-            transform3((*it).transformation, point);
-            vector<Point> collidingsphere = t.fixedRangeSearch(point, sqRad2, thread_num);
-            cout << collidingsphere.size() << endl;
-            colliding.insert(colliding.end(), collidingsphere.begin(), collidingsphere.end());
+        std::vector<Frame>::iterator it2 = trajectory.begin();
+        double point1[3] = {0,0,0};
+        /* execute according to collision method */
+        switch (cmethod) {
+            case CM_SPHERES:
+                /* for each point in the trajectory, find the colliding points
+                 * within the given radius */
+                for(; it2 != trajectory.end(); ++it2) {
+                    transform3((*it2).transformation, point1);
+                    vector<Point> collidingsphere = t.fixedRangeSearch(point1, sqRad2, thread_num);
+                    cout << collidingsphere.size() << endl;
+                    colliding.insert(colliding.end(), collidingsphere.begin(), collidingsphere.end());
+                }
+                break;
+            case CM_MOVING_SPHERE:
+                /* drive the path given by the trajectory and mark all points
+                 * within the given radius */
+                transform3((*it2).transformation, point1);
+                ++it2;
+                if (it2 == trajectory.end()) {
+                    cout << "need more than one point for moving sphere" << endl;
+                    exit(1);
+                }
+                for(; it2 != trajectory.end(); ++it2) {
+                    double point2[3] = {0,0,0};
+                    transform3((*it2).transformation, point2);
+                    vector<Point> collidingspherepath = t.fixedRangeSearchBetween2Points(point1, point2, sqRad2, thread_num);
+                    cout << collidingspherepath.size() << endl;
+                    colliding.insert(colliding.end(), collidingspherepath.begin(), collidingspherepath.end());
+                    point1[0] = point2[0];
+                    point1[1] = point2[1];
+                    point1[2] = point2[2];
+                }
+                break;
+            default:
+                cout << "collision method not implemented" << endl;
+                exit(1);
         }
         write_xyzrgb(colliding, colldir, scan->getIdentifier());
     }
