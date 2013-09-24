@@ -312,10 +312,12 @@ void informationDescription(information info){
   cout<<"Scanner Verticla field of view: "<<info.MIN_ANGLE<<"<-->"<<info.MAX_ANGLE<<endl;
   cout<<endl;
   cout<<"feature detector method: "<<featureDetectorMethodToString(info.fMethod)<<endl;
+  cout<<"feature filtration method: "<<featureFiltrationMethodToString(info.fFiltrationMethod)<<endl;
   cout<<"feature descriptor method: "<<featureDescriptorMethodToString(info.dMethod)<<endl;
   cout<<endl;
   cout<<"matcher parameter: "<<info.mParam<<endl;
   cout<<"matcher method: "<<matcherMethodToString(info.mMethod)<<endl;
+  cout<<"matching filtration method: "<<matchingFiltrationMethodToString(info.mFiltrationMethod)<<endl;
   cout<<endl;
   cout<<"min distacne: "<<info.minDistance<<endl;
   cout<<"min error: "<<info.minError<<endl;
