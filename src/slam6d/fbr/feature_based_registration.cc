@@ -430,7 +430,7 @@ int main(int argc, char** argv){
   feature fFeature(info.fMethod, info.dMethod, info.fFiltrationMethod);
   if(info.verbose >= 4) info.fFTime = (double)cv::getTickCount();
   //fFeature.featureDetection(fPanorama.getReflectanceImage(), info.fMethod); 
-  fFeature.featureDetection(fPanorama.getReflectanceImage()); 
+  fFeature.featureDetection(fPanorama.getReflectanceImage(), info.fMethod, fPanorama.getRangeImage(), info.fFiltrationMethod); 
   if(info.verbose >= 4) info.fFTime = ((double)cv::getTickCount() - info.fFTime)/cv::getTickFrequency();
 
   //write panorama with keypoints to image
@@ -487,7 +487,7 @@ int main(int argc, char** argv){
   feature sFeature(info.fMethod, info.dMethod, info.fFiltrationMethod);
   if(info.verbose >= 4) info.sFTime = (double)cv::getTickCount();
   //sFeature.featureDetection(sPanorama.getReflectanceImage(), info.fMethod);
-  sFeature.featureDetection(sPanorama.getReflectanceImage());
+  sFeature.featureDetection(sPanorama.getReflectanceImage(), info.fMethod, sPanorama.getRangeImage(), info.fFiltrationMethod); 
   if(info.verbose >= 4) info.sFTime = ((double)cv::getTickCount() - info.sFTime)/cv::getTickFrequency();
 
   //write panorama with keypoints to image
