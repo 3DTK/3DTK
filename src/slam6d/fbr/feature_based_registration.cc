@@ -36,7 +36,9 @@ struct information{
   projection_method pMethod;
   feature_detector_method fMethod;
   feature_descriptor_method dMethod;
+  feature_filtration_method fFiltrationMethod;
   matcher_method mMethod;
+  matching_filtration_method mFiltrationMethod;
   registration_method rMethod;
   bool scanServer;
   scanner_type sType;
@@ -61,28 +63,39 @@ void usage(int argc, char** argv){
   printf("\t\t-f scanFormat\t\t input scan file format [RIEGL_TXT|RXP|ALL SLAM6D SCAN_IO]\n");
   printf("\t\t-W iWidth\t\t panorama image width\n");
   printf("\t\t-H iHeight\t\t panorama image height\n");
+  printf("\t\t-t sType \t\t Scannner Type [RIEGL | FARO]\n");
+  printf("\t\t-n MIN_ANGLE \t\t Scanner vertical view MIN_ANGLE \n");
+  printf("\t\t-x MAX_ANGLE \t\t Scanner vertical view MAX_ANGLE \n"); 
+  printf("\n");
+  printf("\n");
   printf("\t\t-p pMethod\t\t projection method [EQUIRECTANGULAR|CONIC|CYLINDRICAL|MERCATOR|RECTILINEAR|PANNINI|STEREOGRAPHIC|ZAXIS]\n");
   printf("\t\t-N nImages\t\t number of Horizontal images used for some projections\n");
   printf("\t\t-P pParam\t\t special projection parameter (d for Pannini and r for stereographic)\n");
+  printf("\n");
+  printf("\n");
   printf("\t\t-F fMethod\t\t feature detection method [SURF|SIFT|ORB|FAST|STAR]\n");
+  printf("\t\t-a fFiltrationMethod\t feature filtration method [DISABLE_FILTER|STANDARD_DEVIATION|OCCLUSION]\n");
   printf("\t\t-d dMethod\t\t feature description method [SURF|SIFT|ORB]\n");
   printf("\t\t-m mMethod\t\t feature matching method [BRUTEFORCE|FLANN|KNN|RADIUS|RATIO]\n");
+  printf("\t\t-M mParam \t\t special matching paameter (knn for KNN and r for radius)\n");
+  printf("\t\t-A mFiltrationMethod\t feature matching filtrtion method [DISABLE_MATCHING_FILTER|FUNDEMENTAL_MATRIX]\n");
+  printf("\n");
+  printf("\n");
   printf("\t\t-D minDistance \t\t threshold for min distance in registration process\n");
   printf("\t\t-E minError \t\t threshold for min error in registration process\n");
   printf("\t\t-I minInlier \t\t threshold for min number of inliers in registration process\n");
-  printf("\t\t-M mParam \t\t special matching paameter (knn for KNN and r for radius)\n");
   printf("\t\t-r registration \t registration method [ALL|ransac]\n");
+  printf("\n");
+  printf("\n");
   printf("\t\t-V verbose \t\t level of verboseness\n");
   printf("\t\t-O outDir \t\t output directory if not stated same as input\n");
   printf("\t\t-S scanServer \t\t Scan Server\n");
-  printf("\t\t-t sType \t\t Scannner Type [RIEGL | FARO]\n");
   printf("\t\t-l loadOct \t\t Load Octree\n");
   printf("\t\t-o saveOct \t\t Save Octree\n");
   printf("\t\t-R reflectance \t\t Use Reflectance\n");
   printf("\t\t-C color \t\t Use Color\n");
-  printf("\t\t-n MIN_ANGLE \t\t Scanner vertical view MIN_ANGLE \n");
-  printf("\t\t-x MAX_ANGLE \t\t Scanner vertical view MAX_ANGLE \n"); 
-  printf("\t\t-i iSizeOptimization \t\t Optimize the panorama image size based on projection \n");
+  printf("\t\t-i iSizeOptimization \t Optimize the panorama image size based on projection \n");
+  printf("\n");
   printf("\n");
   printf("\tExamples:\n");
   printf("\tUsing Bremen City dataset:\n");
@@ -120,8 +133,10 @@ void parssArgs(int argc, char** argv, information& info){
   info.sFormat = RIEGL_TXT;
   info.pMethod = EQUIRECTANGULAR;
   info.fMethod = SIFT_DET;
+  info.fFiltrationMethod = DISABLE_FILTER;
   info.dMethod = SIFT_DES;
   info.mMethod = RATIO;
+  info.mFiltrationMethod = DISABLE_MATCHING_FILTER;
   info.rMethod = RANSAC;
   info.outDir = "";
   info.scanServer = false;
@@ -138,7 +153,8 @@ void parssArgs(int argc, char** argv, information& info){
   int c;
   opterr = 0;
   //reade the command line and get the options
-  while ((c = getopt (argc, argv, "F:W:H:p:N:P:f:d:m:D:E:I:M:r:V:O:s:e:St:loRCix:n:")) != -1)
+
+  while ((c = getopt (argc, argv, "a:A:Cd:D:e:E:f:F:H:iI:lm:M:n:N:oO:p:P:r:Rs:St:V:W:x:")) != -1)
     switch (c)
       {
       case 's':
@@ -221,6 +237,12 @@ void parssArgs(int argc, char** argv, information& info){
 	break;
       case 'i':
 	info.iSizeOptimization = true;
+	break;
+      case 'a':
+	info.fFiltrationMethod = stringToFeatureFiltrationMethod(optarg);
+	break;
+      case 'A':
+	info.mFiltrationMethod = stringToMatchingFiltrationMethod(optarg);
 	break;
 
 
@@ -366,12 +388,15 @@ int main(int argc, char** argv){
   feature_drawer drawer;
   parssArgs(argc, argv, info);
   if(info.verbose >= 1) informationDescription(info);
-
+  
+  //get first scan
   scan_cv fScan (info.dir, info.fScanNumber, info.sFormat, info.scanServer, info.sType, info.loadOct, info.saveOct, info.reflectance, info.color);
   if(info.verbose >= 4) info.fSTime = (double)cv::getTickCount();
   fScan.convertScanToMat();
   if(info.verbose >= 4) info.fSTime = ((double)cv::getTickCount() - info.fSTime)/cv::getTickFrequency();
   if(info.verbose >= 2) fScan.getDescription();
+
+  //create first panorama
   panorama fPanorama (info.iWidth, info.iHeight, info.pMethod, info.nImages, info.pParam, FARTHEST, fScan.getZMin(), fScan.getZMax(), info.MIN_ANGLE, info.MAX_ANGLE, info.iSizeOptimization);
   if(info.verbose >= 4) info.fPTime = (double)cv::getTickCount();
   if((fScan.getMatScanColor()).empty() == 1)
@@ -385,7 +410,8 @@ int main(int argc, char** argv){
 
   if(info.verbose >= 4) info.fPTime = ((double)cv::getTickCount() - info.fPTime)/cv::getTickFrequency();
   if(info.verbose >= 2) fPanorama.getDescription();
-  //write panorama to image
+
+  //write first panorama to image
   if(info.verbose >= 1){
     out = info.outDir+info.local_time+"_scan"+to_string(info.fScanNumber, 3)+"_"+projectionMethodToString(info.pMethod)+"_"+to_string(fPanorama.getImageWidth())+"x"+to_string(fPanorama.getImageHeight())+".png";
     imwrite(out, fPanorama.getReflectanceImage());
@@ -397,11 +423,14 @@ int main(int argc, char** argv){
     }
   }
 
-
-  feature fFeature;
+  //create first feature set
+  //feature fFeature;
+  feature fFeature(info.fMethod, info.dMethod, info.fFiltrationMethod);
   if(info.verbose >= 4) info.fFTime = (double)cv::getTickCount();
-  fFeature.featureDetection(fPanorama.getReflectanceImage(), info.fMethod);
+  //fFeature.featureDetection(fPanorama.getReflectanceImage(), info.fMethod); 
+  fFeature.featureDetection(fPanorama.getReflectanceImage()); 
   if(info.verbose >= 4) info.fFTime = ((double)cv::getTickCount() - info.fFTime)/cv::getTickFrequency();
+
   //write panorama with keypoints to image
   if(info.verbose >= 1){
     drawer.DrawKeypoints(fPanorama.getReflectanceImage(), fFeature.getFeatures(), outImage, cv::Scalar::all(-1), cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS );
@@ -409,16 +438,22 @@ int main(int argc, char** argv){
     imwrite(out, outImage);
     outImage.release();
   }
+  
+  //create first descriptor set
   if(info.verbose >= 4) info.fDTime = (double)cv::getTickCount();
-  fFeature.featureDescription(fPanorama.getReflectanceImage(), info.dMethod);
+  //fFeature.featureDescription(fPanorama.getReflectanceImage(), info.dMethod);
+  fFeature.featureDescription(fPanorama.getReflectanceImage());
   if(info.verbose >= 4) info.fDTime = ((double)cv::getTickCount() - info.fDTime)/cv::getTickFrequency();
   if(info.verbose >= 2) fFeature.getDescription();
   
+  //get secon scan
   scan_cv sScan (info.dir, info.sScanNumber, info.sFormat, info.scanServer, info.sType, info.loadOct, info.saveOct, info.reflectance, info.color);
   if(info.verbose >= 4) info.sSTime = (double)cv::getTickCount();
   sScan.convertScanToMat();
   if(info.verbose >= 4) info.sSTime = ((double)cv::getTickCount() - info.sSTime)/cv::getTickFrequency();
   if(info.verbose >= 2) sScan.getDescription();
+
+  //create secon panoram
   panorama sPanorama (info.iWidth, info.iHeight, info.pMethod, info.nImages, info.pParam, FARTHEST, sScan.getZMin(), sScan.getZMax(), info.MIN_ANGLE, info.MAX_ANGLE, info.iSizeOptimization);
   if(info.verbose >= 4) info.sPTime = (double)cv::getTickCount();
   if((sScan.getMatScanColor()).empty() == 1)
@@ -432,6 +467,7 @@ int main(int argc, char** argv){
 
   if(info.verbose >= 4) info.sPTime = ((double)cv::getTickCount() - info.sPTime)/cv::getTickFrequency();
   if(info.verbose >= 2) sPanorama.getDescription();
+
   //write panorama to image
   if(info.verbose >= 1){
     out = info.outDir+info.local_time+"_scan"+to_string(info.sScanNumber, 3)+"_"+projectionMethodToString(info.pMethod)+"_"+to_string(fPanorama.getImageWidth())+"x"+to_string(fPanorama.getImageHeight())+".png";
@@ -444,11 +480,14 @@ int main(int argc, char** argv){
     }
   }
 
-
-  feature sFeature;
+  //create secon feature set
+  //feature sFeature;
+  feature sFeature(info.fMethod, info.dMethod, info.fFiltrationMethod);
   if(info.verbose >= 4) info.sFTime = (double)cv::getTickCount();
-  sFeature.featureDetection(sPanorama.getReflectanceImage(), info.fMethod);
+  //sFeature.featureDetection(sPanorama.getReflectanceImage(), info.fMethod);
+  sFeature.featureDetection(sPanorama.getReflectanceImage());
   if(info.verbose >= 4) info.sFTime = ((double)cv::getTickCount() - info.sFTime)/cv::getTickFrequency();
+
   //write panorama with keypoints to image
   if(info.verbose >= 1){
     drawer.DrawKeypoints(sPanorama.getReflectanceImage(), sFeature.getFeatures(), outImage, cv::Scalar::all(-1), cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS );
@@ -456,8 +495,11 @@ int main(int argc, char** argv){
     imwrite(out, outImage);
     outImage.release();
   }
+
+  //create secon descriptor set
   if(info.verbose >= 4) info.sDTime = (double)cv::getTickCount();
-  sFeature.featureDescription(sPanorama.getReflectanceImage(), info.dMethod);
+  //sFeature.featureDescription(sPanorama.getReflectanceImage(), info.dMethod);
+  sFeature.featureDescription(sPanorama.getReflectanceImage());
   if(info.verbose >= 4) info.sDTime = ((double)cv::getTickCount() - info.sDTime)/cv::getTickFrequency();
   if(info.verbose >= 2) sFeature.getDescription();
 
@@ -466,11 +508,13 @@ int main(int argc, char** argv){
   info.iWidth = sPanorama.getImageWidth();
   info.iHeight = sPanorama.getImageHeight();
 
-  feature_matcher matcher (info.mMethod, info.mParam);
+  //match features
+  feature_matcher matcher (info.mMethod, info.mParam, info.mFiltrationMethod);
   if(info.verbose >= 4) info.mTime = (double)cv::getTickCount();
   matcher.match(fFeature, sFeature);
   if(info.verbose >= 4) info.mTime = ((double)cv::getTickCount() - info.mTime)/cv::getTickFrequency();
   if(info.verbose >= 2) matcher.getDescription();
+
   //write matcheed feature to image
   if(info.verbose >= 1){
     drawer.DrawMatches(fPanorama.getReflectanceImage(), fFeature.getFeatures(), sPanorama.getReflectanceImage(), sFeature.getFeatures(), matcher.getMatches(), outImage, cv::Scalar::all(-1), cv::Scalar::all(-1), vector<char>(), cv::DrawMatchesFlags::NOT_DRAW_SINGLE_POINTS);
@@ -479,6 +523,7 @@ int main(int argc, char** argv){
     outImage.release();
   }
 
+  //start the regisration
   registration reg (info.minDistance, info.minError, info.minInlier, info.rMethod);
   if(info.verbose >= 4) info.rTime = (double)cv::getTickCount();
   reg.findRegistration(fPanorama.getMap(), fFeature.getFeatures(), sPanorama.getMap(), sFeature.getFeatures(), matcher.getMatches());
