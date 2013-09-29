@@ -1,10 +1,10 @@
+IF(WITH_FBR)
 SET(FBR_IO_SRC scan_cv.cc)
 add_library(fbr_cv_io STATIC ${FBR_IO_SRC})
 
 SET(FBR_PANORAMA_SRC panorama.cc)
 add_library(fbr_panorama STATIC ${FBR_PANORAMA_SRC} fbr_global.cc)
 
-IF(WITH_FBR)
 IF(OpenCV_VERSION_MAJOR GREATER 1 AND OpenCV_VERSION_MINOR GREATER 2)
 SET(FBR_FEATURE_SRC feature.cc)
 add_library(fbr_feature STATIC ${FBR_FEATURE_SRC})
