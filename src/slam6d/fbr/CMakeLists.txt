@@ -35,14 +35,25 @@ IF(UNIX)
   target_link_libraries(featurebasedregistration fbr newmat ${FBR_LIBS} showstatic ${SHOW_LIBS} ${OPENGL_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY})
 ENDIF(UNIX)
 
-
-
 add_executable(panorama_matcher panorama_matcher.cc fbr_global.cc)
-target_link_libraries(panorama_matcher fbr ${FBR_LIBS} ${Boost_SYSTEM_LIBRARY})
+
+  IF(UNIX)
+   target_link_libraries(panorama_matcher fbr ${FBR_LIBS} ${Boost_SYSTEM_LIBRARY})
+  ENDIF(UNIX)
+
+  IF (WIN32)
+   target_link_libraries(panorama_matcher fbr ${FBR_LIBS} ${Boost_SYSTEM_LIBRARY} XGetOpt) 
+  ENDIF(WIN32)
 
 add_executable(panorama_creator panorama_creator.cc fbr_global.cc)
-target_link_libraries(panorama_creator fbr newmat ${FBR_LIBS} showstatic ${SHOW_LIBS} ${OPENGL_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY})
 
+  IF(UNIX)
+  target_link_libraries(panorama_creator fbr newmat ${FBR_LIBS} showstatic ${SHOW_LIBS} ${OPENGL_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY})
+  ENDIF(UNIX)
+
+  IF (WIN32)
+  target_link_libraries(panorama_creator fbr newmat ${FBR_LIBS} showstatic ${SHOW_LIBS} ${OPENGL_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} XGetOpt) 
+  ENDIF(WIN32)
 
 ### EXPORT SHARED LIBS
 
