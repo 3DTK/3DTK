@@ -1,6 +1,7 @@
 ### TOOLS
 
 IF(WITH_TOOLS)
+IF(WITH_FBR)
   ### SCAN_RED
   add_executable(scan_red scan_red.cc fbr/fbr_global.cc fbr/panorama.cc fbr/scan_cv.cc)
 
@@ -15,6 +16,7 @@ IF(WITH_TOOLS)
   IF (WIN32)
     target_link_libraries(scan_red scan ANN fbr_cv_io fbr_panorama ${OpenCV_LIBS} ${Boost_LIBRARIES} XGetopt newmat)
   ENDIF(WIN32)
+ENDIF(WITH_FBR)
 
   ### SCAN_DIFF
   add_executable(scan_diff scan_diff.cc)
