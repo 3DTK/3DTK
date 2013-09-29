@@ -281,9 +281,9 @@ OPT_DEP(WITH_PMD "Whether to build the PMD tools like grabVideoAnd3D calibrate e
 
 IF(WITH_PMD)
   FIND_PACKAGE(OpenGL REQUIRED)
-  MESSAGE(STATUS "With Tools")
+  MESSAGE(STATUS "With PMD")
 ELSE(WITH_PMD)
-  MESSAGE(STATUS "Without Tools")
+  MESSAGE(STATUS "Without PMD")
 ENDIF(WITH_PMD)
 
 ## FBR

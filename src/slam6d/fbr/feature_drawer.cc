@@ -130,9 +130,9 @@ namespace fbr{
     _DrawKeypoint( outImg1, kp1, color, flags );
     _DrawKeypoint( outImg2, kp2, color, flags );
 
-    cv::Point2f pt1 = kp1.pt,
-      pt2 = kp2.pt,
-      dpt2 = cv::Point2f( pt2.x, std::min(pt2.y+outImg1.rows, float(outImg.rows-1)) );
+    cv::Point2f pt1 = kp1.pt;
+    cv::Point2f pt2 = kp2.pt;
+    cv::Point2f dpt2 = cv::Point2f( pt2.x, min(pt2.y+outImg1.rows, float(outImg.rows-1)) );
     //dpt2 = Point2f( std::min(pt2.x+outImg1.cols, float(outImg.cols-1)), pt2.y );
 
     line( outImg, 
