@@ -21,7 +21,6 @@
 #include "slam6d/io_types.h"
 #include "slam6d/globals.icc"
 #include "slam6d/scan.h"
-#include "slam6d/fbr/panorama.h"
 #include "newmat/newmat.h"
 #include "newmat/newmatap.h"
 
