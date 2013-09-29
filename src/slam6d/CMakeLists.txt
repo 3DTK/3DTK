@@ -14,7 +14,7 @@ IF(WITH_FBR)
   ENDIF(UNIX)
 
   IF (WIN32)
-    target_link_libraries(scan_red scan ANN fbr_cv_io fbr_panorama ${OpenCV_LIBS} ${Boost_LIBRARIES} XGetopt newmat)
+    target_link_libraries(scan_red scan ANN fbr_cv_io fbr_panorama ${OpenCV_LIBS} ${Boost_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} showstatic XGetopt newmat)
   ENDIF(WIN32)
 ENDIF(WITH_FBR)
 
