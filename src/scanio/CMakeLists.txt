@@ -5,7 +5,7 @@ else(WIN32)
 endif(WIN32)
 
 set(SCANIO_LIBNAMES
-  uos uosr uos_rgb uos_rrgb uos_rrgbt xyzr xyz_rgb xyz_rrgb ply ks ks_rgb riegl_txt riegl_rgb rts velodyne laz
+  uos uosr uos_rgb uos_rrgb uos_rrgbt xyz xyzr xyz_rgb xyz_rrgb ply ks ks_rgb riegl_txt riegl_rgb rts velodyne laz
 )
 
 if(WITH_RIVLIB)
@@ -20,7 +20,6 @@ endif(WITH_RIVLIB)
 
 foreach(libname ${SCANIO_LIBNAMES})
 if(WIN32)
-  #add_library(scan_io_${libname} STATIC scan_io_${libname}.cc)
   add_library(scan_io_${libname} SHARED scan_io_${libname}.cc)
 else(WIN32)
   add_library(scan_io_${libname} SHARED scan_io_${libname}.cc)
