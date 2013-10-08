@@ -131,11 +131,12 @@ int main(int argc, char **argv)
 
     Point p;
 //    double range, theta, phi, reflectance;
+    unsigned int rgb[3];
     cout.precision(10);
     while(scan_in.good()) {
   /*    scan_in >> p.z >> p.x >> p.y >> range >> theta >> phi >> reflectance;
    */ //scan_in >> p.z >> p.x >> p.y >> range >> theta >> phi >> reflectance;
-      scan_in >> p.x >> p.y >> p.z >> p.reflectance;
+      scan_in >> p.x >> p.y >> p.z >> rgb[0] >> rgb[1] >> rgb[2];
      /* p.x *= -100;
       p.y *= 100;
       p.z *= 100;
@@ -147,7 +148,7 @@ int main(int argc, char **argv)
       //cout << p.y << " " << p.z << " " << -p.x << endl;
       //cout << p.x*0.01 << " " << p.z*0.01 << " " << p.y*0.01 << " " << p.reflectance << endl;
       //cout << (int)p.x << " " << (int)p.y << " " << (int)p.z << endl;// << " " << p.reflectance << endl;
-      outdat << std::setprecision(15) << p.z << " " << -p.x << " " << p.y << " " << p.reflectance << endl;
+      outdat << std::setprecision(15) << p.z*0.01 << " " << -p.x*0.01 << " " << p.y*0.01 << " " << rgb[0] << " " << rgb[1] << " " << rgb[2] << endl;
       pointcnt++;
       if(pointcnt > 100) {
         redptsout.write(outdat.str().c_str(), outdat.str().size());
