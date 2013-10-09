@@ -79,7 +79,7 @@ SET(SCANLIB_SRCS
   point_type.cc	icp6Dquatscale.cc searchTree.cc     Boctree.cc
   scan.cc           basicScan.cc      managedScan.cc    metaScan.cc
   io_types.cc       io_utils.cc       pointfilter.cc    allocator.cc
-  icp6Dnapx.cc      normals.cc
+  icp6Dnapx.cc      normals.cc        kdIndexed.cc
   )
 
 if(WITH_METRICS)
