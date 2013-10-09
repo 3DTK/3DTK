@@ -10,7 +10,8 @@
 #include "slam6d/scan.h"
 #include "slam6d/frame.h"
 #include "slam6d/globals.icc"
-#include "slam6d/kd.h"
+#include "slam6d/kdIndexed.h"
+#include "scanio/scan_io.h"
 
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -18,7 +19,7 @@
 #include <boost/program_options.hpp>
 namespace po = boost::program_options;
 
-enum collision_method {CM_SPHERES, CM_MOVING_SPHERE};
+enum collision_method {CM_SPHERES, CM_MOVING_SPHERE, CM_POINTCLOUD};
 
 /*
  * validates input type specification
@@ -42,6 +43,7 @@ void validate(boost::any& v, const std::vector<std::string>& values,
     string arg = values.at(0);
     if(strcasecmp(arg.c_str(), "SPHERES") == 0) v = CM_SPHERES;
     else if(strcasecmp(arg.c_str(), "MOVING_SPHERE") == 0) v = CM_MOVING_SPHERE;
+    else if(strcasecmp(arg.c_str(), "POINTCLOUD") == 0) v = CM_POINTCLOUD;
     else throw std::runtime_error(std::string("collision method ") + arg + std::string(" is unknown"));
 }
 
@@ -71,7 +73,7 @@ void parse_options(int argc, char **argv, int &start, int &end,
     prog.add_options()
         ("method,m", po::value<collision_method>(&cmethod)->
          default_value(CM_SPHERES), "collision method (SPHERES, "
-         "MOVING_SPHERE)")
+         "MOVING_SPHERE, POINTCLOUD)")
         ("radius,r", po::value<double>(&radius)->default_value(70),
          "radius of sphere");
 
@@ -102,7 +104,7 @@ void parse_options(int argc, char **argv, int &start, int &end,
     if (vm.count("help")) {
         cout << cmdline_options;
         cout << "\nExample usage:\n"
-             << "\t" << argv[0] << " -s 0 -e 0 -f riegl_txt ~/path/to/bremen_city\n"; 
+             << "\t" << argv[0] << " --method POINTCLOUD -s 0 -e 1 -f xyzr ../scantest ../scantest/scan000.path\n";
         exit(0);
     }
 
@@ -148,14 +150,64 @@ std::vector<Frame> read_trajectory(string filename)
     return positions;
 }
 
-void write_xyzrgb(std::vector<Point> &points, string &dir, string id)
+void write_xyzrgb(DataXYZ &points, string &dir, string id, bool* colliding)
 {
-    ofstream outfile((dir + "/scan" + id + ".xyz").c_str());
-    for(std::vector<Point>::iterator it = points.begin(); it != points.end(); ++it) {
-        outfile << (*it).x << " " << (*it).y << " " << (*it).z << " 0" << endl;
+    createdirectory(dir+"collides");
+    ofstream fcolliding((dir + "collides/scan" + id + ".xyz").c_str());
+    createdirectory(dir+"noncollides");
+    ofstream fnoncolliding((dir + "noncollides/scan" + id + ".xyz").c_str());
+    for (size_t i = 0; i < points.size(); ++i) {
+        if (colliding[i]) {
+            fcolliding << points[i][2] << " " << -points[i][0] << " " << points[i][1] << " 0" << endl;
+        } else {
+            fnoncolliding << points[i][2] << " " << -points[i][0] << " " << points[i][1] << " 0" << endl;
+        }
     }
-    outfile.close();
+    fcolliding.close();
+    fnoncolliding.close();
+}
 
+/*
+std::vector<Point> read_plymodel(string &pointmodelpath)
+{
+    IOType m_type = PLY;
+    ScanIO* sio = ScanIO::getScanIO(m_type);
+    PointFilter filter;
+    vector<double> xyz;
+    vector<unsigned char> rgb;
+    vector<float> reflectance;
+    sio->readScan(pointmodelpath.c_str(), "model", filter, &xyz, &rgb, &reflectance, NULL, NULL, NULL, NULL);
+    vector<Point> points;
+    for(std::vector<double>::iterator it = xyz.begin(); it != xyz.end();) {
+        double x = *it; ++it;
+        double y = *it; ++it;
+        double z = *it; ++it;
+        points.push_back(Point(x,y,z));
+    }
+    return points;
+}
+*/
+
+void fill_colliding(bool *allcolliding, std::vector<size_t> &newindices)
+{
+    for(std::vector<size_t>::iterator it = newindices.begin(); it != newindices.end(); ++it) {
+        allcolliding[*it] = true;
+    }
+}
+
+void handle_pointcloud(KDtreeIndexed &t, std::vector<Frame> &trajectory, std::vector<Point> &pointmodel, bool* colliding)
+{
+    double sqRad2 = 100;
+    int thread_num = 0;
+    for(std::vector<Frame>::iterator it2 = trajectory.begin(); it2 != trajectory.end(); ++it2) {
+        for(std::vector<Point>::iterator it = pointmodel.begin(); it != pointmodel.end(); ++it) {
+            Point p = *it;
+            double point1[3] = {p.x, p.y, p.z};
+            transform3((*it2).transformation, point1);
+            vector<size_t> collidingsphere = t.fixedRangeSearch(point1, sqRad2, thread_num);
+            fill_colliding(colliding, collidingsphere);
+        }
+    }
 }
 
 int main(int argc, char **argv)
@@ -178,27 +230,44 @@ int main(int argc, char **argv)
       exit(-1);
     }
 
+    // read trajectory in *.3d file format
     std::vector<Frame> trajectory = read_trajectory(trajectoryfn);
 
-    string colldir;
-    colldir = dir + "collides";
-    createdirectory(colldir);
-    for(ScanVector::iterator it = Scan::allScans.begin(); it != Scan::allScans.end(); ++it) {
+    ScanVector::iterator it = Scan::allScans.begin();
+    vector<Point> pointmodel;
+
+    // if matching against pointcloud, treat the first scan as the model
+    if(cmethod == CM_POINTCLOUD) {
+        if(Scan::allScans.size() == 1) {
+            cerr << "must supply more than one scan (the first is the model)" << endl;
+            exit(-1);
+        }
+        Scan* scan = *it;
+        DataXYZ points(scan->get("xyz"));
+        pointmodel.reserve(points.size());
+        for(unsigned int j = 0; j < points.size(); j++) {
+            pointmodel.push_back(Point(points[j][0], points[j][1], points[j][2]));
+        }
+        ++it;
+    }
+
+    for(; it != Scan::allScans.end(); ++it) {
         /* build a KDtree from this scan */
         Scan* scan = *it;
         DataXYZ points(scan->get("xyz"));
         double** pa = new double*[points.size()];
+        bool* colliding = new bool[points.size()];
         for (size_t i = 0; i < points.size(); ++i) {
             pa[i] = new double[3];
             pa[i][0] = points[i][0];
             pa[i][1] = points[i][1];
             pa[i][2] = points[i][2];
+            colliding[i] = false;
         }
-        KDtree t(pa, points.size());
+        KDtreeIndexed t(pa, points.size());
         /* initialize variables */
         int thread_num = 0; // add omp later
         double sqRad2 = radius*radius;
-        vector<Point> colliding;
         std::vector<Frame>::iterator it2 = trajectory.begin();
         double point1[3] = {0,0,0};
         /* execute according to collision method */
@@ -208,9 +277,9 @@ int main(int argc, char **argv)
                  * within the given radius */
                 for(; it2 != trajectory.end(); ++it2) {
                     transform3((*it2).transformation, point1);
-                    vector<Point> collidingsphere = t.fixedRangeSearch(point1, sqRad2, thread_num);
+                    vector<size_t> collidingsphere = t.fixedRangeSearch(point1, sqRad2, thread_num);
                     cout << collidingsphere.size() << endl;
-                    colliding.insert(colliding.end(), collidingsphere.begin(), collidingsphere.end());
+                    fill_colliding(colliding, collidingsphere);
                 }
                 break;
             case CM_MOVING_SPHERE:
@@ -225,19 +294,22 @@ int main(int argc, char **argv)
                 for(; it2 != trajectory.end(); ++it2) {
                     double point2[3] = {0,0,0};
                     transform3((*it2).transformation, point2);
-                    vector<Point> collidingspherepath = t.fixedRangeSearchBetween2Points(point1, point2, sqRad2, thread_num);
+                    vector<size_t> collidingspherepath = t.fixedRangeSearchBetween2Points(point1, point2, sqRad2, thread_num);
                     cout << collidingspherepath.size() << endl;
-                    colliding.insert(colliding.end(), collidingspherepath.begin(), collidingspherepath.end());
+                    fill_colliding(colliding, collidingspherepath);
                     point1[0] = point2[0];
                     point1[1] = point2[1];
                     point1[2] = point2[2];
                 }
                 break;
+            case CM_POINTCLOUD:
+                handle_pointcloud(t, trajectory, pointmodel, colliding);
+                break;
             default:
                 cout << "collision method not implemented" << endl;
                 exit(1);
         }
-        write_xyzrgb(colliding, colldir, scan->getIdentifier());
+        write_xyzrgb(points, dir, scan->getIdentifier(), colliding);
     }
 
 }
