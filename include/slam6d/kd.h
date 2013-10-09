@@ -38,7 +38,7 @@ struct PtrAccessor {
  * capabilities (find nearest point to
  * a given point, or to a ray).
  **/
-class KDtree : public SearchTree, private KDTreeImpl<Void, double*, PtrAccessor>
+class KDtree : public SearchTree, private KDTreeImpl<Void, double*, PtrAccessor, double*, PtrAccessor>
 {
 public:
   KDtree(double **pts, int n);
