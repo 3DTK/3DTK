@@ -51,7 +51,7 @@ struct IndexAccessor {
  **/
 class KDtreeMetaManaged : 
     public SearchTree,
-    private KDTreeImpl<const DataXYZ* const*, Index, IndexAccessor>
+    private KDTreeImpl<const DataXYZ* const*, Index, IndexAccessor, double*, IndexAccessor>
 {
 public:
   KDtreeMetaManaged(const vector<Scan*>& scans);

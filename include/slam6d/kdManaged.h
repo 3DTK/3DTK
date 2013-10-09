@@ -43,7 +43,7 @@ struct ArrayAccessor {
  **/
 class KDtreeManaged :
     public SearchTree,
-    private KDTreeImpl<const DataXYZ&, unsigned int, ArrayAccessor>
+    private KDTreeImpl<const DataXYZ&, unsigned int, ArrayAccessor, double*, ArrayAccessor>
 
 {
 public:
