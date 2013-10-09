@@ -39,8 +39,16 @@ public:
  * A kD tree for points, with limited
  * capabilities (find nearest point to
  * a given point, or to a ray).
+ *
+ * PointData    the type of the input point data
+ * AccessorData the type of indices
+ * AccessorFunc retrieves data of type double[3], given an index of type
+ *              AccessorData and the data of type PointData
+ * PointType    the type that is stored in kdparams
+ * ParamFunc    retrieves data of type PointType, given an index of type
+ *              AccessorData and the data of type PointData
  **/
-template<class PointData, class AccessorData, class AccessorFunc>
+template<class PointData, class AccessorData, class AccessorFunc, class PointType, class ParamFunc>
 class KDTreeImpl {
 public:
   inline KDTreeImpl() { }
@@ -167,10 +175,10 @@ protected:
 #ifdef __INTEL_COMPILER
   __declspec (align(16)) static KDParams params[MAX_OPENMP_NUM_THREADS];
 #else
-  static KDParams params[MAX_OPENMP_NUM_THREADS];
+  static KDParams<PointType> params[MAX_OPENMP_NUM_THREADS];
 #endif //__INTEL_COMPILER
 #else
-  static KDParams params[MAX_OPENMP_NUM_THREADS];
+  static KDParams<PointType> params[MAX_OPENMP_NUM_THREADS];
 #endif	
 
   /**
@@ -209,6 +217,7 @@ protected:
 
   void _FindClosest(const PointData& pts, int threadNum) const {
     AccessorFunc point;
+    ParamFunc   pointparam;
 
     // Leaf nodes
     if (npts) {
@@ -216,7 +225,7 @@ protected:
         double myd2 = Dist2(params[threadNum].p, point(pts, leaf.p[i]));
         if (myd2 < params[threadNum].closest_d2) {
           params[threadNum].closest_d2 = myd2;
-          params[threadNum].closest = point(pts, leaf.p[i]);
+          params[threadNum].closest = pointparam(pts, leaf.p[i]);
         }
       }
       return;
@@ -248,6 +257,7 @@ protected:
 
   void _FindClosestAlongDir(const PointData& pts, int threadNum) const {
     AccessorFunc point;
+    ParamFunc pointparam;
 
     // Leaf nodes
     if (npts) {
@@ -258,7 +268,7 @@ protected:
         double myd2 = Len2(p2p) - sqr(Dot(p2p, params[threadNum].dir));
         if ((myd2 < params[threadNum].closest_d2)) {
           params[threadNum].closest_d2 = myd2;
-          params[threadNum].closest = point(pts, leaf.p[i]);
+          params[threadNum].closest = pointparam(pts, leaf.p[i]);
         }
       }
       return;
@@ -286,6 +296,7 @@ protected:
 
   void _fixedRangeSearchBetween2Points(const PointData& pts, int threadNum) const {
     AccessorFunc point;
+    ParamFunc pointparam;
     
     // Leaf nodes
     if (npts) {
@@ -296,7 +307,7 @@ protected:
         double myd2 = Len2(p2p) - sqr(Dot(p2p, params[threadNum].dir));
         if (myd2 < params[threadNum].closest_d2) {
 		    //  cout << point(pts, leaf.p[i])[0] << " " << point(pts, leaf.p[i])[1] << " " << point(pts, leaf.p[i])[2] << " " << myd2 << endl;
-          params[threadNum].range_neighbors.push_back(point(pts, leaf.p[i]));
+          params[threadNum].range_neighbors.push_back(pointparam(pts, leaf.p[i]));
 	      }
 	    }
 	    return;
@@ -318,9 +329,9 @@ protected:
 
     // check if not between points
     
-    double p2c[] = { params[threadNum].closest[0] - node.center[0],
-                     params[threadNum].closest[1] - node.center[1],
-                     params[threadNum].closest[2] - node.center[2] };
+    double p2c[] = { params[threadNum].p0[0] - node.center[0],
+                     params[threadNum].p0[1] - node.center[1],
+                     params[threadNum].p0[2] - node.center[2] };
 
     double distXP2 = Len2(p2c);
     if(params[threadNum].dist_2 > (distXP2 + node.r2 + 2.0f * r * sqrt(distXP2))) return;
@@ -341,6 +352,7 @@ protected:
   
   void _fixedRangeSearchAlongDir(const PointData& pts, int threadNum) const {
     AccessorFunc point;
+    ParamFunc pointparam;
     
     // Leaf nodes
     if (npts) {
@@ -360,7 +372,7 @@ protected:
         double myd2 = Len2(p2p) - sqr(Dot(p2p, params[threadNum].dir));
         if (myd2 < params[threadNum].closest_d2) {
 		    //  cout << point(pts, leaf.p[i])[0] << " " << point(pts, leaf.p[i])[1] << " " << point(pts, leaf.p[i])[2] << " " << myd2 << endl;
-          params[threadNum].range_neighbors.push_back(point(pts, leaf.p[i]));
+          params[threadNum].range_neighbors.push_back(pointparam(pts, leaf.p[i]));
 	      }
 	    }
 	    return;
@@ -388,6 +400,7 @@ protected:
 
   void _FixedRangeSearch(const PointData& pts, int threadNum) const {
     AccessorFunc point;
+    ParamFunc pointparam;
 
     // Leaf nodes
     if (npts) {
@@ -395,7 +408,7 @@ protected:
 	   double myd2 = Dist2(params[threadNum].p, point(pts, leaf.p[i]));
 	   if (myd2 < params[threadNum].closest_d2) {
 
-		params[threadNum].range_neighbors.push_back(point(pts, leaf.p[i]));
+		params[threadNum].range_neighbors.push_back(pointparam(pts, leaf.p[i]));
 		
 	   }
 	 }
@@ -429,6 +442,7 @@ protected:
 
   void _KNNSearch(const PointData& pts, int threadNum) const {
     AccessorFunc point;
+    ParamFunc pointparam;
 
     // Leaf nodes
     if (npts) {
@@ -443,7 +457,7 @@ protected:
                     params[threadNum].distances[l] = params[threadNum].distances[l-1];
                 }
                 
-                params[threadNum].closest_neighbors[j] = point(pts, leaf.p[i]);
+                params[threadNum].closest_neighbors[j] = pointparam(pts, leaf.p[i]);
                 params[threadNum].distances[j] = myd2;
             }
       }

@@ -32,8 +32,8 @@ using std::swap;
 #include <cstring>
 
 // KDtree class static variables
-template<class PointData, class AccessorData, class AccessorFunc>
-KDParams KDTreeImpl<PointData, AccessorData, AccessorFunc>::params[MAX_OPENMP_NUM_THREADS];
+template<class PointData, class AccessorData, class AccessorFunc, class PointType, class ParamFunc>
+KDParams<PointType> KDTreeImpl<PointData, AccessorData, AccessorFunc, PointType, ParamFunc>::params[MAX_OPENMP_NUM_THREADS];
 
 KDtreeManaged::KDtreeManaged(Scan* scan) :
   m_scan(scan), m_data(0), m_count_locking(0)

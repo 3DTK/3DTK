@@ -19,21 +19,22 @@ using std::vector;
  * Includes the padding for parallelizetion
  * to avoid cache conflicts.
  **/
+template<class T>
 class KDParams
 {
 public:
   /** 
-   * pointer to the closest point.  size = 4 bytes of 32 bit machines 
+   * the closest point
    */
-  double *closest;
+  T closest;
 
   /** 
-   * distance to the closest point. size = 8 bytes 
+   * distance to the closest point
    */
   double closest_d2;
 
   /** 
-   * pointer to the point, size = 4 bytes of 32 bit machines 
+   * the point coordinate
    */
   double *p;
 
@@ -42,17 +43,19 @@ public:
    */
   double *dir;
 
+  double *p0;
+
   double dist_2;
 
   /**
    * vector of all neighbors within a given radius
    */
-  vector<double *> range_neighbors;
-  
+  vector<T> range_neighbors;
+ 
   /**
    * pointer to k nearest neighbors
    */
-  double **closest_neighbors;
+  T *closest_neighbors;
 
   /**
    * distances to k closest neighbors
@@ -60,14 +63,9 @@ public:
   double *distances;
   
   /**
-   * k - the number of neihgbors we want to find
+   * k - the number of neighbors we want to find
    */
   int k;
-  
-  /** 
-   * add some padding to avoid false sharing
-   */
-  int padding[28];
 };
 
 #endif
