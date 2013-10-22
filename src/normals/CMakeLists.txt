@@ -7,8 +7,8 @@ target_link_libraries(normals_panorama_s newmat_s scan_s fbr_s ${OpenCV_LIBS} ${
 ENDIF(EXPORT_SHARED_LIBS)
 
 
-IF(WITH_TOOLS)
+IF(WITH_TOOLS AND WITH_FBR)
   add_executable(calc_normals calc_normals.cc)
   #target_link_libraries(calc_normals normals normals_panorama ${Boost_LIBRARIES})
   target_link_libraries(calc_normals scan normals_panorama ${Boost_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY})
-ENDIF(WITH_TOOLS)
+ENDIF(WITH_TOOLS AND WITH_FBR)
