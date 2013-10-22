@@ -226,7 +226,7 @@ ENDIF(WITH_DAVID_3D_SCANNER)
 
 ## Tools
 
-OPT_DEP(WITH_TOOLS "Whether to build additional tools like convergence frame_to_graph etc. ON/OFF" OFF "WITH_TOOLS")
+OPT_DEP(WITH_TOOLS "Whether to build additional tools like convergence frame_to_graph etc. ON/OFF" OFF "")
 
 IF(WITH_TOOLS)
   MESSAGE(STATUS "With Tools")
