@@ -1,4 +1,6 @@
 IF(WITH_COLLISION)
   add_executable(collision_sphere collision_sphere.cc)
   target_link_libraries(collision_sphere scan ${Boost_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY})
+  add_executable(extract_hull extract_hull.cc)
+  target_link_libraries(extract_hull scan ${Boost_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY})
 ENDIF(WITH_COLLISION)
