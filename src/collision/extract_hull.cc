@@ -239,7 +239,7 @@ double* calculatenormalofface(std::vector<double*> const &vertices, std::vector<
 
 double calculateanglebetweenfaces(std::vector<double*> const &vertices,
         std::vector<size_t*> const &faces,
-        size_t face1, size_t face2, std::pair<size_t,size_t> &edge)
+        size_t face1, size_t face2, std::pair<size_t,size_t> const &edge)
 {
     // calculate normal vector of faces
     double *n1 = calculatenormalofface(vertices, faces, face1);
@@ -304,10 +304,11 @@ void highestfacesanitycheck(std::vector<double*> const &vertices,
 void surfacewalker(std::vector<double*> const &vertices,
         std::vector<size_t*> const &faces,
         std::map<std::pair<size_t, size_t>, std::vector<std::pair<size_t,size_t>>> const &edgetofaces,
-        std::vector<std::unordered_set <size_t>> const &vertextoneighbors)
+        std::vector<std::unordered_set <size_t>> const &vertextoneighbors,
+        std::vector<size_t> &surface)
 {
     // axis for which to search for the max
-    int axis = 0;
+    int axis = 1;
     // find an outer vertex
     // take the highest vertex
     size_t highestidx = 0;
@@ -339,7 +340,6 @@ void surfacewalker(std::vector<double*> const &vertices,
     highestfacesanitycheck(vertices, faces, highestface, axis);
     // now that we have the seed, fill the following unordered_set of faces
     // with the result of the following walk
-    std::vector<size_t> surface;
     std::vector<size_t> tocheck;
     std::unordered_set<size_t> checked;
     surface.push_back(highestface);
@@ -355,14 +355,10 @@ void surfacewalker(std::vector<double*> const &vertices,
         size_t v1 = faces[currentface][1];
         size_t v2 = faces[currentface][2];
 
-        std::vector<std::pair<size_t,size_t>> edges = {
-            std::make_pair(v0,v1),
-            std::make_pair(v1,v2),
-            std::make_pair(v2,v0)
-        };
-
-        for (auto it = edges.begin(); it != edges.end(); ++it) {
-            std::vector<std::pair<size_t,size_t>> edgefaces = edgetofaces.at(*it);
+        for (auto &it: {std::make_pair(v0,v1),
+                        std::make_pair(v1,v2),
+                        std::make_pair(v2,v0)}) {
+            std::vector<std::pair<size_t,size_t>> edgefaces = edgetofaces.at(it);
             auto it1 = edgefaces.begin();
             size_t face = it1->first;
             if (face == currentface) {
@@ -376,12 +372,12 @@ void surfacewalker(std::vector<double*> const &vertices,
             // more than two faces - we then need to calculate angles to make
             // a decision
             if (edgefaces.size() > 2) {
-                double angle = calculateanglebetweenfaces(vertices, faces, currentface, face, *it);
+                double angle = calculateanglebetweenfaces(vertices, faces, currentface, face, it);
                 ++it1;
                 for (;it1 != edgefaces.end();++it1) {
                     if (it1->first == currentface) // skip the current face
                         continue;
-                    double newangle = calculateanglebetweenfaces(vertices, faces, currentface, it1->first, *it);
+                    double newangle = calculateanglebetweenfaces(vertices, faces, currentface, it1->first, it);
                     if (newangle < angle) {
                         angle = newangle;
                         face = it1->first;
@@ -398,6 +394,38 @@ void surfacewalker(std::vector<double*> const &vertices,
         }
     }
     std::cout << "number of faces on surface: " << surface.size() << std::endl;
+}
+
+void writeobj(std::vector<double*> const &vertices,
+        std::vector<size_t*> const &faces,
+        std::vector<size_t> const &surface)
+{
+    std::ofstream fsurface("surface.obj");
+    // vector mapping the old vertex id to the new vertex id
+    // because the printed obj might have less vertices
+    std::vector<size_t> vertmap;
+    vertmap.reserve(vertices.size());
+    // write vertices
+    size_t numverts = 0;
+    for (auto &it : surface) {
+        for (auto &it2 : {0,1,2}) {
+            size_t vertid = faces[it][it2];
+            if (vertmap[vertid] == 0) {
+                numverts++;
+                vertmap[vertid] = numverts;
+                fsurface << "v " << vertices[vertid][0] << " "
+                                 << vertices[vertid][1] << " "
+                                 << vertices[vertid][2] << std::endl;
+            }
+        }
+    }
+    // write faces
+    for (auto &it : surface) {
+        fsurface << "f " << vertmap[faces[it][0]] << " "
+                         << vertmap[faces[it][1]] << " "
+                         << vertmap[faces[it][2]] << std::endl;
+    }
+    fsurface.close();
 }
 
 int main(int argc, char** argv)
@@ -430,6 +458,8 @@ int main(int argc, char** argv)
     }
     std::cerr << "size of map from edge to face (both edge directions): " << edgetofaces.size() << std::endl;
     std::cerr << "edges with more than two faces: " << edgeswithmorethantwofaces << std::endl;
-    surfacewalker(vertices, faces, edgetofaces, vertextoneighbors);
+    std::vector<size_t> surface;
+    surfacewalker(vertices, faces, edgetofaces, vertextoneighbors, surface);
+    writeobj(vertices, faces, surface);
     //get_concave_hull(vertices, faces);
 }
