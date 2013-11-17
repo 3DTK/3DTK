@@ -119,7 +119,7 @@ std::vector<Frame> read_trajectory(string filename)
     return positions;
 }
 
-void write_xyzr(DataXYZ &points, string &dir, std::vector<bool> &colliding)
+void write_xyzr(DataXYZ &points, string &dir, std::vector<bool> const &colliding)
 {
     cerr << "writing colliding points to " << dir << "scan002.xyz" << endl;
     ofstream fcolliding((dir + "scan002.xyz").c_str());
@@ -163,16 +163,16 @@ std::vector<Point> read_plymodel(string &pointmodelpath)
 }
 */
 
-void fill_colliding(std::vector<bool> allcolliding, std::vector<size_t> &newindices)
+void fill_colliding(std::vector<bool> &allcolliding, std::vector<size_t> const &newindices)
 {
-    for(std::vector<size_t>::iterator it = newindices.begin(); it != newindices.end(); ++it) {
-        allcolliding[*it] = true;
+    for(auto &it : newindices) {
+        allcolliding[it] = true;
     }
 }
 
-void handle_pointcloud(DataXYZ &model, DataXYZ &environ,
-                       std::vector<Frame> &trajectory,
-                       std::vector<bool> colliding,
+size_t handle_pointcloud(DataXYZ &model, DataXYZ &environ,
+                       std::vector<Frame> const &trajectory,
+                       std::vector<bool> &colliding,
                        double radius)
 {
     cerr << "reading model..." << endl;
@@ -201,19 +201,27 @@ void handle_pointcloud(DataXYZ &model, DataXYZ &environ,
     int thread_num = 0; // add omp later
     double sqRad2 = radius*radius;
     cerr << "computing collisions..." << endl;
-    for(std::vector<Frame>::iterator it2 = trajectory.begin(); it2 != trajectory.end(); ++it2) {
-        for(std::vector<Point>::iterator it = pointmodel.begin(); it != pointmodel.end(); ++it) {
-            Point p = *it;
-            double point1[3] = {p.x, p.y, p.z};
-            transform3((*it2).transformation, point1);
+    for(auto &it2 : trajectory) {
+        for(auto &it : pointmodel) {
+            double point1[3] = {it.x, it.y, it.z};
+            transform3(it2.transformation, point1);
             vector<size_t> collidingsphere = t.fixedRangeSearch(point1, sqRad2, thread_num);
             fill_colliding(colliding, collidingsphere);
+        }
+    }
+    size_t num_colliding = 0;
+    // the actual implementation of std::vector<bool> requires us to use the
+    // proxy iterator pattern with &&...
+    for (auto &&it : colliding) {
+        if (it) {
+            num_colliding++;
         }
     }
     for (i = 0; i < environ.size(); ++i) {
         delete[] pa[i];
     }
     delete[] pa;
+    return num_colliding;
 }
 
 int main(int argc, char **argv)
@@ -251,7 +259,7 @@ int main(int argc, char **argv)
     DataXYZ environ(it[1]->get("xyz"));
     std::vector<bool> colliding;
     colliding.reserve(environ.size());
-    handle_pointcloud(model, environ, trajectory, colliding, radius);
+    size_t num_colliding = handle_pointcloud(model, environ, trajectory, colliding, radius);
     //calculate_collidingdist();
     write_xyzr(environ, dir, colliding);
 }
