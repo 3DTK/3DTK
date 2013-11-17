@@ -119,17 +119,20 @@ std::vector<Frame> read_trajectory(string filename)
     return positions;
 }
 
-void write_xyzr(DataXYZ &points, string &dir, std::vector<bool> const &colliding)
+void write_xyzr(DataXYZ &points, string &dir,
+        std::vector<bool> const &colliding,
+        std::vector<double> const &dist_colliding)
 {
     cerr << "writing colliding points to " << dir << "scan002.xyz" << endl;
     ofstream fcolliding((dir + "scan002.xyz").c_str());
     cerr << "writing non-colliding points to " << dir << "scan003.xyz" << endl;
     ofstream fnoncolliding((dir + "scan003.xyz").c_str());
-    for (size_t i = 0; i < points.size(); ++i) {
+    for (size_t i = 0, j=0; i < points.size(); ++i) {
         if (colliding[i]) {
-            fcolliding << points[i][2] << " " << -points[i][0] << " " << points[i][1] << " 0" << endl;
+            fcolliding << points[i][2] << " " << -points[i][0] << " " << points[i][1] << " " << dist_colliding[j] << endl;
+            j++;
         } else {
-            fnoncolliding << points[i][2] << " " << -points[i][0] << " " << points[i][1] << " 0" << endl;
+            fnoncolliding << points[i][2] << " " << -points[i][0] << " " << points[i][1] << " 1000" << endl;
         }
     }
     fcolliding.close();
@@ -165,7 +168,7 @@ std::vector<Point> read_plymodel(string &pointmodelpath)
 
 void fill_colliding(std::vector<bool> &allcolliding, std::vector<size_t> const &newindices)
 {
-    for(auto &it : newindices) {
+    for(auto it : newindices) {
         allcolliding[it] = true;
     }
 }
@@ -201,8 +204,8 @@ size_t handle_pointcloud(DataXYZ &model, DataXYZ &environ,
     int thread_num = 0; // add omp later
     double sqRad2 = radius*radius;
     cerr << "computing collisions..." << endl;
-    for(auto &it2 : trajectory) {
-        for(auto &it : pointmodel) {
+    for(const auto &it2 : trajectory) {
+        for(const auto &it : pointmodel) {
             double point1[3] = {it.x, it.y, it.z};
             transform3(it2.transformation, point1);
             vector<size_t> collidingsphere = t.fixedRangeSearch(point1, sqRad2, thread_num);
@@ -212,16 +215,64 @@ size_t handle_pointcloud(DataXYZ &model, DataXYZ &environ,
     size_t num_colliding = 0;
     // the actual implementation of std::vector<bool> requires us to use the
     // proxy iterator pattern with &&...
-    for (auto &&it : colliding) {
-        if (it) {
+    for (i = 0; i < environ.size(); ++i) {
+        if (colliding[i]) {
             num_colliding++;
         }
     }
+    cerr << "colliding: " << num_colliding << endl;
     for (i = 0; i < environ.size(); ++i) {
         delete[] pa[i];
     }
     delete[] pa;
     return num_colliding;
+}
+
+void calculate_collidingdist(DataXYZ &environ,
+                             std::vector<bool> const &colliding,
+                             size_t num_colliding,
+                             std::vector<double> &dist_colliding)
+{
+    /* build a kdtree for the non-colliding points */
+    cerr << "reading environment..." << endl;
+    size_t num_noncolliding = environ.size() - num_colliding;
+    double** pa = new double*[num_noncolliding];
+    std::vector<size_t> idxmap;
+    idxmap.reserve(num_noncolliding);
+    for (size_t i = 0, j = 0; i < environ.size(); ++i) {
+        if (colliding[i]) {
+            continue;
+        }
+        pa[j] = new double[3];
+        pa[j][0] = environ[i][0];
+        pa[j][1] = environ[i][1];
+        pa[j][2] = environ[i][2];
+        idxmap[j] = i;
+        j++;
+    }
+    cerr << "noncolliding: " << num_noncolliding << endl;
+    cerr << "building kd tree..." << endl;
+    KDtreeIndexed t(pa, num_noncolliding);
+    int thread_num = 0; // add omp later
+    cerr << "computing distances..." << endl;
+    for (size_t i = 0; i < environ.size(); ++i) {
+        if (!colliding[i]) {
+            continue;
+        }
+        double point1[3] = {environ[i][0], environ[i][1], environ[i][2]};
+        // for this colliding point, find the closest non-colliding one
+        size_t c = t.FindClosest(point1, 1000000, thread_num);
+        /*if (colliding[c]) {
+            cerr << "result cannot be part of colliding points" << endl;
+            cerr << environ[i][0] << " " << environ[i][1] << " " << environ[i][2] << endl;
+            cerr << environ[c][0] << " " << environ[c][1] << " " << environ[c][2] << endl;
+            exit(1);
+        }*/
+        c = idxmap[c];
+        double point2[3] = {environ[c][0], environ[c][1], environ[c][2]};
+        double dist = sqrt(Dist2(point1, point2));
+        dist_colliding.push_back(dist);
+    }
 }
 
 int main(int argc, char **argv)
@@ -260,6 +311,12 @@ int main(int argc, char **argv)
     std::vector<bool> colliding;
     colliding.reserve(environ.size());
     size_t num_colliding = handle_pointcloud(model, environ, trajectory, colliding, radius);
-    //calculate_collidingdist();
-    write_xyzr(environ, dir, colliding);
+    if (num_colliding == 0) {
+        cerr << "nothing collides" << endl;
+        exit(0);
+    }
+    std::vector<double> dist_colliding;
+    dist_colliding.reserve(num_colliding);
+    calculate_collidingdist(environ, colliding, num_colliding, dist_colliding);
+    write_xyzr(environ, dir, colliding, dist_colliding);
 }
