@@ -119,7 +119,7 @@ std::vector<Frame> read_trajectory(string filename)
     return positions;
 }
 
-void write_xyzr(DataXYZ &points, string &dir, string id, bool* colliding)
+void write_xyzr(DataXYZ &points, string &dir, std::vector<bool> &colliding)
 {
     cerr << "writing colliding points to " << dir << "scan002.xyz" << endl;
     ofstream fcolliding((dir + "scan002.xyz").c_str());
@@ -163,16 +163,44 @@ std::vector<Point> read_plymodel(string &pointmodelpath)
 }
 */
 
-void fill_colliding(bool *allcolliding, std::vector<size_t> &newindices)
+void fill_colliding(std::vector<bool> allcolliding, std::vector<size_t> &newindices)
 {
     for(std::vector<size_t>::iterator it = newindices.begin(); it != newindices.end(); ++it) {
         allcolliding[*it] = true;
     }
 }
 
-void handle_pointcloud(KDtreeIndexed &t, std::vector<Frame> &trajectory, std::vector<Point> &pointmodel, bool* colliding, double sqRad2)
+void handle_pointcloud(DataXYZ &model, DataXYZ &environ,
+                       std::vector<Frame> &trajectory,
+                       std::vector<bool> colliding,
+                       double radius)
 {
-    int thread_num = 0;
+    cerr << "reading model..." << endl;
+    vector<Point> pointmodel;
+    pointmodel.reserve(model.size());
+    for(unsigned int j = 0; j < model.size(); j++) {
+        pointmodel.push_back(Point(model[j][0], model[j][1], model[j][2]));
+    }
+    cerr << "model: " << pointmodel.size() << endl;
+
+    /* build a KDtree from this scan */
+    cerr << "reading environment..." << endl;
+    double** pa = new double*[environ.size()];
+    size_t i;
+    for (i = 0; i < environ.size(); ++i) {
+        pa[i] = new double[3];
+        pa[i][0] = environ[i][0];
+        pa[i][1] = environ[i][1];
+        pa[i][2] = environ[i][2];
+        colliding[i] = false;
+    }
+    cerr << "environment: " << i-1 << endl;
+    cerr << "building kd tree..." << endl;
+    KDtreeIndexed t(pa, environ.size());
+    /* initialize variables */
+    int thread_num = 0; // add omp later
+    double sqRad2 = radius*radius;
+    cerr << "computing collisions..." << endl;
     for(std::vector<Frame>::iterator it2 = trajectory.begin(); it2 != trajectory.end(); ++it2) {
         for(std::vector<Point>::iterator it = pointmodel.begin(); it != pointmodel.end(); ++it) {
             Point p = *it;
@@ -182,6 +210,10 @@ void handle_pointcloud(KDtreeIndexed &t, std::vector<Frame> &trajectory, std::ve
             fill_colliding(colliding, collidingsphere);
         }
     }
+    for (i = 0; i < environ.size(); ++i) {
+        delete[] pa[i];
+    }
+    delete[] pa;
 }
 
 int main(int argc, char **argv)
@@ -209,45 +241,17 @@ int main(int argc, char **argv)
     std::vector<Frame> trajectory = read_trajectory(trajectoryfn);
 
     ScanVector::iterator it = Scan::allScans.begin();
-    vector<Point> pointmodel;
 
     // if matching against pointcloud, treat the first scan as the model
     if(Scan::allScans.size() != 2) {
-        cerr << "must supply more than one scan (the first is the model)" << endl;
+        cerr << "must supply two scans, the model and the environment in that order" << endl;
         exit(-1);
     }
-    Scan* scan = *it;
-    cerr << "reading model..." << endl;
-    DataXYZ points0(scan->get("xyz"));
-    pointmodel.reserve(points0.size());
-    for(unsigned int j = 0; j < points0.size(); j++) {
-        pointmodel.push_back(Point(points0[j][0], points0[j][1], points0[j][2]));
-    }
-    ++it;
-    cerr << "model: " << pointmodel.size() << endl;
-
-    /* build a KDtree from this scan */
-    scan = *it;
-    cerr << "reading environment..." << endl;
-    DataXYZ points1(scan->get("xyz"));
-    double** pa = new double*[points1.size()];
-    bool* colliding = new bool[points1.size()];
-    size_t i;
-    for (i = 0; i < points1.size(); ++i) {
-        pa[i] = new double[3];
-        pa[i][0] = points1[i][0];
-        pa[i][1] = points1[i][1];
-        pa[i][2] = points1[i][2];
-        colliding[i] = false;
-    }
-    cerr << "environment: " << i-1 << endl;
-    cerr << "building kd tree..." << endl;
-    KDtreeIndexed t(pa, points1.size());
-    /* initialize variables */
-    int thread_num = 0; // add omp later
-    double sqRad2 = radius*radius;
-    /* execute according to collision method */
-    cerr << "computing collisions..." << endl;
-    handle_pointcloud(t, trajectory, pointmodel, colliding, sqRad2);
-    write_xyzr(points1, dir, scan->getIdentifier(), colliding);
+    DataXYZ model(it[0]->get("xyz"));
+    DataXYZ environ(it[1]->get("xyz"));
+    std::vector<bool> colliding;
+    colliding.reserve(environ.size());
+    handle_pointcloud(model, environ, trajectory, colliding, radius);
+    //calculate_collidingdist();
+    write_xyzr(environ, dir, colliding);
 }
