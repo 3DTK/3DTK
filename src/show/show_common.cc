@@ -476,6 +476,7 @@ int parseArgs(int argc,char **argv,
     { "height",          no_argument,         0,  'h' },
     { "type",            no_argument,         0,  'T' },
     { "color",           no_argument,         0,  'c' },
+    { "dimensions",      required_argument,   0,  'x' },
     { "loadObj",         required_argument,   0,  'l' },
     { "saveOct",         no_argument,         0,  '0' },
     { "loadOct",         no_argument,         0,  '1' },
@@ -485,7 +486,7 @@ int parseArgs(int argc,char **argv,
     { 0,           0,   0,   0}                    // needed, cf. getopt.h
   };
 
-  while ((c = getopt_long(argc, argv,"F:f:s:e:r:m:M:O:o:l:C:SwtRDadhTcb", longopts, NULL)) != -1) {
+  while ((c = getopt_long(argc, argv,"F:f:s:e:r:m:M:O:o:l:x:C:SwtRDadhTcb", longopts, NULL)) != -1) {
     switch (c) {
       case 's':
         w_start = atoi(optarg);
@@ -564,6 +565,15 @@ int parseArgs(int argc,char **argv,
         break;
       case 'c':
         types |= PointType::USE_COLOR;
+        break;
+      case 'x':
+        if (sscanf(optarg, "%dx%d", &START_WIDTH, &START_HEIGHT) != 2) {
+            cerr << "Window dimensions must be given in format WxH" << endl;
+            exit(1);
+        }
+        aspect = (double)START_WIDTH/(double)START_HEIGHT;
+        current_width  = START_WIDTH;
+        current_height = START_HEIGHT;
         break;
       case 'F':
         fps = atof(optarg);
