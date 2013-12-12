@@ -13,6 +13,7 @@
 #include "slam6d/kdIndexed.h"
 #include "scanio/scan_io.h"
 
+#include <time.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 
@@ -197,13 +198,14 @@ size_t handle_pointcloud(DataXYZ &model, DataXYZ &environ,
         pa[i][2] = environ[i][2];
         colliding[i] = false;
     }
-    cerr << "environment: " << i-1 << endl;
+    cerr << "environment: " << i << endl;
     cerr << "building kd tree..." << endl;
     KDtreeIndexed t(pa, environ.size());
     /* initialize variables */
     int thread_num = 0; // add omp later
     double sqRad2 = radius*radius;
     cerr << "computing collisions..." << endl;
+    time_t before = time(NULL);
     for(const auto &it2 : trajectory) {
         for(const auto &it : pointmodel) {
             double point1[3] = {it.x, it.y, it.z};
@@ -220,7 +222,9 @@ size_t handle_pointcloud(DataXYZ &model, DataXYZ &environ,
             num_colliding++;
         }
     }
+    time_t after = time(NULL);
     cerr << "colliding: " << num_colliding << endl;
+    cerr << "took: " << difftime(after, before) << " seconds" << endl;
     for (i = 0; i < environ.size(); ++i) {
         delete[] pa[i];
     }
@@ -255,6 +259,7 @@ void calculate_collidingdist(DataXYZ &environ,
     KDtreeIndexed t(pa, num_noncolliding);
     int thread_num = 0; // add omp later
     cerr << "computing distances..." << endl;
+    time_t before = time(NULL);
     for (size_t i = 0; i < environ.size(); ++i) {
         if (!colliding[i]) {
             continue;
@@ -273,6 +278,8 @@ void calculate_collidingdist(DataXYZ &environ,
         double dist = sqrt(Dist2(point1, point2));
         dist_colliding.push_back(dist);
     }
+    time_t after = time(NULL);
+    cerr << "took: " << difftime(after, before) << " seconds" << endl;
 }
 
 int main(int argc, char **argv)
