@@ -196,3 +196,23 @@ vector<size_t> KDtreeIndexed::fixedRangeSearch(double *_p,
   
   return result;
 }
+
+vector<size_t> KDtreeIndexed::AABBSearch(double *_p,
+                                       double* _p0,
+                                       int threadNum) const
+{
+    if (_p[0] > _p0[0] || _p[1] > _p0[1] || _p[2] > _p0[2])
+        throw std::logic_error("invalid bbox");
+  vector<size_t> result;
+  params[threadNum].p = _p;
+  params[threadNum].p0 = _p0;
+  params[threadNum].range_neighbors.clear();
+  _AABBSearch(m_data, threadNum);
+
+  for (size_t i = 0; i < params[threadNum].range_neighbors.size(); i++) {
+#pragma omp critical
+    result.push_back(params[threadNum].range_neighbors[i]);
+  }
+
+  return result;
+}

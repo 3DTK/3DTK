@@ -398,6 +398,47 @@ protected:
   
   }
 
+  /*
+   * search for points inside the axis aligned bounding box given by p and p0
+   * where p[0] < p0[0] && p[1] < p0[1] && p[2] < p0[2]
+   */
+  void _AABBSearch(const PointData& pts, int threadNum) const {
+    AccessorFunc point;
+    ParamFunc pointparam;
+
+    // Leaf nodes
+    if (npts) {
+	 for (int i = 0; i < npts; i++) {
+         double* tp = point(pts, leaf.p[i]);
+         if (tp[0] >= params[threadNum].p[0] && tp[0] <= params[threadNum].p0[0]
+          && tp[1] >= params[threadNum].p[1] && tp[1] <= params[threadNum].p0[1]
+          && tp[2] >= params[threadNum].p[2] && tp[2] <= params[threadNum].p0[2]) {
+             params[threadNum].range_neighbors.push_back(pointparam(pts, leaf.p[i]));
+	   }
+	 }
+	 return;
+    }
+
+    // Quick check of whether to abort
+    if (node.center[0]+node.dx < params[threadNum].p[0]
+     || node.center[1]+node.dy < params[threadNum].p[1]
+     || node.center[2]+node.dz < params[threadNum].p[2]
+     || node.center[0]-node.dx > params[threadNum].p0[0]
+     || node.center[1]-node.dy > params[threadNum].p0[1]
+     || node.center[2]-node.dz > params[threadNum].p0[2])
+        return;
+
+    // Recursive case
+    if (node.center[node.splitaxis] > params[threadNum].p[node.splitaxis]) {
+        node.child1->_AABBSearch(pts, threadNum);
+        if (node.center[node.splitaxis] < params[threadNum].p0[node.splitaxis]) {
+            node.child2->_AABBSearch(pts, threadNum);
+        }
+    } else {
+        node.child2->_AABBSearch(pts, threadNum);
+    }
+  }
+
   void _FixedRangeSearch(const PointData& pts, int threadNum) const {
     AccessorFunc point;
     ParamFunc pointparam;

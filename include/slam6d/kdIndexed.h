@@ -31,6 +31,9 @@ struct IndexAccessor {
     }
 };
 
+// FIXME: for KNNSearch, the zero-th index has a special meaning
+// therefore, KNNSearch will work incorrectly if the first point is assigned
+// to the closest_neighbors member
 struct ParamAccessor {
     inline size_t operator() (double** data, size_t index) {
         return index;
@@ -77,6 +80,10 @@ public:
   virtual vector<size_t> fixedRangeSearch(double *_p,
 								 double sqRad2,
 								 int threadNum = 0) const;
+
+  virtual vector<size_t> AABBSearch(double *_p,
+                                 double* _p0,
+                                 int threadNum = 0) const;
 
 private:
   double **m_data;
