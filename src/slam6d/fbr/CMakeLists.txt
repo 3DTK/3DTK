@@ -58,7 +58,7 @@ add_executable(panorama_creator panorama_creator.cc fbr_global.cc)
 ### EXPORT SHARED LIBS
 
 IF(EXPORT_SHARED_LIBS)
-add_library(fbr_s SHARED ${FBR_SRC})
+add_library(fbr_s SHARED ${FBR_SRC} fbr_global.cc)
 target_link_libraries(fbr_s scan_s ANN_s ${OpenCV_LIBS} show_s)
 ENDIF(EXPORT_SHARED_LIBS)
 

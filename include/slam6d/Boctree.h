@@ -1142,7 +1142,7 @@ protected:
     y = (point[1] + add[1]) * mult;
     z = (point[2] + add[2]) * mult;
     
-    bitunion<T> *node = uroot; 
+    bitunion<T> *node = &(*uroot); 
     unsigned char child_index;
     unsigned int child_bit;
     unsigned int depth = 0;
@@ -1161,6 +1161,28 @@ protected:
       depth++;
     }
   }
+
+ public:
+
+  bool getPoint(T *point) {
+    float *treePoints;
+    unsigned int length;
+    getByIndex(point, treePoints, length);
+    for(unsigned int i = 0; i < length; i++)
+      {
+	if(point[0] == treePoints[i*POINTDIM] && point[1] == treePoints[i*POINTDIM+1] && point[2] == treePoints[i*POINTDIM+2])
+	  {
+	    for(unsigned int j = 3; j < POINTDIM; j++)
+	      {
+		point[j] = treePoints[i*POINTDIM+j];
+	      }
+	    return true;
+	  }
+      }
+    return false;
+  }
+
+ protected:
 
   template <class P>
   inline unsigned char childIndex(const T *center, const P *point) {
