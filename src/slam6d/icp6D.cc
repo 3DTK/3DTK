@@ -335,7 +335,7 @@ double icp6D::Point_Point_Error(Scan* PreviousScan,
     for (unsigned int i = 0; i < pairs.size(); i++) {
       double dist = sqr(pairs[i].p1.x - pairs[i].p2.x)
         + sqr(pairs[i].p1.y - pairs[i].p2.y)
-        + sqr(pairs[i].p1.z - pairs[i].p2.z) );
+        + sqr(pairs[i].p1.z - pairs[i].p2.z);
       error -= 0.39894228 * exp(dist*scale);
     }
     nr_ppairs = pairs.size();
