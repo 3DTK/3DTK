@@ -44,8 +44,9 @@ using namespace std;
 
 #ifdef UNORDERED
 #ifdef __APPLE__
-#include <tr1/unordered_map>
-using namespace std::tr1;
+//#include <tr1/unordered_map>
+//using namespace std::tr1;
+#include <unordered_map>
 #else
 #include <unordered_map>
 #endif

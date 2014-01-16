@@ -16,7 +16,7 @@ SET(FBR_REGISTRATION_SRC registration.cc)
 add_library(fbr_registration STATIC ${FBR_REGISTRATION_SRC})
 
 SET(FBR_SRC scan_cv.cc panorama.cc feature.cc feature_matcher.cc registration.cc fbr_global.cc feature_drawer.cc)
-add_library(fbr STATIC ${FBR_SRC})
+add_library(fbr STATIC ${FBR_SRC} fbr_global.cc)
 
 SET(FBR_LIBS scan ANN ${OpenCV_LIBS})
 
@@ -42,7 +42,7 @@ add_executable(panorama_matcher panorama_matcher.cc fbr_global.cc)
   ENDIF(UNIX)
 
   IF (WIN32)
-   target_link_libraries(panorama_matcher fbr ${FBR_LIBS} ${Boost_SYSTEM_LIBRARY} XGetOpt) 
+   target_link_libraries(panorama_matcher fbr ${FBR_LIBS} ${Boost_SYSTEM_LIBRARY} XGetopt) 
   ENDIF(WIN32)
 
 add_executable(panorama_creator panorama_creator.cc fbr_global.cc)
@@ -52,7 +52,7 @@ add_executable(panorama_creator panorama_creator.cc fbr_global.cc)
   ENDIF(UNIX)
 
   IF (WIN32)
-  target_link_libraries(panorama_creator fbr newmat ${FBR_LIBS} showstatic ${SHOW_LIBS} ${OPENGL_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} XGetOpt) 
+  target_link_libraries(panorama_creator fbr newmat ${FBR_LIBS} showstatic ${SHOW_LIBS} ${OPENGL_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} XGetopt) 
   ENDIF(WIN32)
 
 ### EXPORT SHARED LIBS
