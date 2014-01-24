@@ -54,8 +54,10 @@ IOType formatname_to_io_type(const char * string)
   else if (strcasecmp(string, "oct") == 0) return OCT;
   else if (strcasecmp(string, "txyzr") == 0) return TXYZR;
   else if (strcasecmp(string, "xyzr") == 0) return XYZR;
+  else if (strcasecmp(string, "leica_xyzr") == 0) return LEICA_XYZR;
   else if (strcasecmp(string, "xyz_rgb") == 0) return XYZ_RGB;
   else if (strcasecmp(string, "xyz_rrgb") == 0) return XYZ_RRGB;
+  else if (strcasecmp(string, "faro_xyz_rgbr") == 0) return FARO_XYZ_RGBR;
   else if (strcasecmp(string, "ks") == 0) return KS;
   else if (strcasecmp(string, "ks_rgb") == 0) return KS_RGB;
   else if (strcasecmp(string, "stl") == 0) return STL;
@@ -132,10 +134,14 @@ const char * io_type_to_libname(IOType  type)
     return "scan_io_txyzr";
   case XYZR:
     return "scan_io_xyzr";
+  case LEICA_XYZR:
+    return "scan_io_leica_xyzr";
   case XYZ_RGB:
     return "scan_io_xyz_rgb";
   case XYZ_RRGB:
     return "scan_io_xyz_rrgb";
+  case FARO_XYZ_RGBR:
+    return "scan_io_faro_xyz_rgbr";
   case KS:
     return "scan_io_ks";
   case KS_RGB:

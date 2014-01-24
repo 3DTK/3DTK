@@ -51,6 +51,7 @@ namespace fbr{
     NONE,
     RIEGL,
     FARO,
+    MANUAL
   };
   /**
    * @enum projection_method

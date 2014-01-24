@@ -225,6 +225,7 @@ int current_width  = START_WIDTH;
 int current_height = START_HEIGHT;
 
 
+double scale = 0.01; // in m
 // the following values are scale dependant, i.e. all values are in m
 float neardistance     = 0.10;
 double oldneardistance = 0.10;
@@ -853,7 +854,6 @@ void initShow(int argc, char **argv){
   bool saveOct = false;
   string loadObj;
   int origin = 0;
-  double scale = 0.01; // in m
   bool scanserver = false;
   double sphereMode = 0.0;
 
