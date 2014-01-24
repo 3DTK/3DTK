@@ -34,6 +34,7 @@ struct information{
   ScanColorManager *scm;
   bool reflectance, range, color;
   scanner_type sType;
+  double minReflectance, maxReflectance;
   int MIN_ANGLE, MAX_ANGLE;
   bool iSizeOptimization;
 } info;
@@ -47,21 +48,27 @@ void usage(int argc, char** argv){
   printf("\t\t-f scanFormat\t\t input scan file format [RIEGL_TXT|RXP|ALL SLAM6D SCAN_IO]\n");
   printf("\t\t-W pWidth\t\t panorama image width\n");
   printf("\t\t-H pHeight\t\t panorama image height\n");
+  printf("\t\t-t sType \t\t scanner type\n");
+  printf("\t\t-b minReflectance \t Min Reflectance for manual reflectance normalization\n");
+  printf("\t\t-B maxReflectance \t Max Reflectance for manual reflectance normalization\n");
+  printf("\t\t-n MIN_ANGLE \t\t Scanner vertical view MIN_ANGLE \n");
+  printf("\t\t-x MAX_ANGLE \t\t Scanner vertical view MAX_ANGLE \n");
+  printf("\n");
+  printf("\n");  
   printf("\t\t-p pMethod\t\t projection method [EQUIRECTANGULAR|CONIC|CYLINDRICAL|MERCATOR|RECTILINEAR|PANNINI|STEREOGRAPHIC|ZAXIS]\n");
-  printf("\t\t-N numberOfImage\t\t number of Horizontal images used for some projections\n");
+  printf("\t\t-N numberOfImage\t number of Horizontal images used for some projections\n");
   printf("\t\t-P pParam\t\t special projection parameter (d for Pannini and r for stereographic)\n");
+  printf("\t\t-i iSizeOptimization \t Optimize the panorama image size based on projection \n");
+  printf("\n");
+  printf("\n");
   printf("\t\t-O outDir \t\t output directory if not stated same as input\n");
-  printf("\t\t-r scan reduction \t\t reduces the scan size\n");
+  //printf("\t\t-r scan reduction \t\t reduces the scan size\n");
   printf("\t\t-R reflectance \t\t uses reflactance and creates the Reflectance image\n");
   printf("\t\t-C color \t\t uses color and creates the Color image\n");
   printf("\t\t-A range \t\t creates the Range image\n");
-  printf("\t\t-S scale \t\t Scale\n");
+  //printf("\t\t-S scale \t\t Scale\n");
   printf("\t\t-l loadOct \t\t load the Octtree\n");
   printf("\t\t-o saveOct \t\t save the Octtree\n");
-  printf("\t\t-t sType \t\t scanner type\n");
-  printf("\t\t-n MIN_ANGLE \t\t Scanner vertical view MIN_ANGLE \n");
-  printf("\t\t-x MAX_ANGLE \t\t Scanner vertical view MAX_ANGLE \n");
-  printf("\t\t-i iSizeOptimization \t\t Optimize the panorama image size based on projection \n");
   printf("\n");
   exit(1);
 }
@@ -95,11 +102,14 @@ void parssArgs(int argc, char** argv, information& info){
   info.sFormat = RIEGL_TXT;
   info.pMethod = EQUIRECTANGULAR;
   info.outDir = "";
+  info.minReflectance = -100;
+  info.maxReflectance = 100;
+
 
   int c;
   opterr = 0;
   //reade the command line and get the options
-  while ((c = getopt (argc, argv, "W:H:p:N:P:f:O:s:e:r:RCAS:lot:n:x:i")) != -1)
+  while ((c = getopt (argc, argv, "b:B:W:H:p:N:P:f:O:s:e:r:RCAS:lot:n:x:i")) != -1)
     switch (c)
       {
       case 's':
@@ -164,6 +174,13 @@ void parssArgs(int argc, char** argv, information& info){
       case 'i':
 	info.iSizeOptimization = true;
 	break;
+      case 'b':
+	info.minReflectance = atof(optarg);
+	break;
+      case 'B':
+	info.maxReflectance = atof(optarg);
+	break;
+
 
       case '?':
 	cout<<"Unknown option character "<<optopt<<endl;
@@ -203,18 +220,16 @@ void printInfo(information info){
   cout<<"Scan Format= "<<scanFormatToString(info.sFormat)<<endl;
   cout<<"Width= "<<info.pWidth<<endl;
   cout<<"Height= "<<info.pHeight<<endl;
+  cout<<"sType= "<<info.sType;
   cout<<"Projection Method= "<<projectionMethodToString(info.pMethod)<<endl;
   cout<<"Number of Images= "<<info.numberOfImages<<endl;
   cout<<"Projection Param= "<<info.pParam<<endl;
   cout<<"Out Dir= "<<info.outDir<<endl;
-  cout<<"Scan Reduction= "<<info.red<<endl;
   cout<<"Reflectance= "<<t.hasReflectance()<<endl;
   cout<<"Color= "<<t.hasColor()<<endl;
   cout<<"Range= "<<info.range<<endl;
-  cout<<"Scale= "<<info.scale<<endl;
   cout<<"Load Oct= "<<info.loadOct<<endl;
   cout<<"Save Oct= "<<info.saveOct<<endl;
-  cout<<"Voxel Size= "<<info.voxelSize<<endl;
   cout<<"Map Method= "<<panoramaMapMethodToString(info.mapMethod)<<endl;
 }
 
@@ -227,7 +242,7 @@ int main(int argc, char** argv)
   //opendirectory of the scans
   bool scanserver = false;
   for(int s = info.start; s <= info.end; s++){
-    scan_cv scan(info.dir, s, info.sFormat, scanserver, info.sType, info.loadOct, info.saveOct, info.reflectance, info.color);
+    scan_cv scan(info.dir, s, info.sFormat, scanserver, info.sType, info.loadOct, info.saveOct, info.reflectance, info.color, -1, -1, info.minReflectance, info.maxReflectance);
 
     scan.convertScanToMat();
 

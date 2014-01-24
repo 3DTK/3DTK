@@ -33,6 +33,8 @@ struct information{
   double minDistance, minError, minInlier;
   double pParam, mParam;
   IOType sFormat;
+  IOType secondScanFormat;
+  bool secondScanFormatFlag;
   projection_method pMethod;
   feature_detector_method fMethod;
   feature_descriptor_method dMethod;
@@ -42,6 +44,10 @@ struct information{
   registration_method rMethod;
   bool scanServer;
   scanner_type sType;
+  scanner_type secondScannerType;
+  bool secondScannerTypeFlag;
+  double minReflectance, maxReflectance;
+  double secondMinReflectance, secondMaxReflectance;
   bool loadOct, saveOct;
   bool reflectance, color;
   int MIN_ANGLE, MAX_ANGLE;
@@ -60,10 +66,16 @@ void usage(int argc, char** argv){
   printf("\n");
   printf("\n");
   printf("\tOptions:\n");
-  printf("\t\t-f scanFormat\t\t input scan file format [RIEGL_TXT|RXP|ALL SLAM6D SCAN_IO]\n");
+  printf("\t\t-f scanFormat\t\t first input scan file format [RIEGL_TXT|RXP|ALL SLAM6D SCAN_IO]\n");
+  printf("\t\t-y secondScanFormat\t second input scan file format [RIEGL_TXT|RXP|ALL SLAM6D SCAN_IO] if not specified same as fisrt scan format\n");
   printf("\t\t-W iWidth\t\t panorama image width\n");
   printf("\t\t-H iHeight\t\t panorama image height\n");
-  printf("\t\t-t sType \t\t Scannner Type [RIEGL | FARO]\n");
+  printf("\t\t-t sType \t\t first Scannner Type [RIEGL | FARO | MANUAL]\n");
+  printf("\t\t-T secondScannerType \t second Scannner Type [RIEGL | FARO | MANUAL] if not specified same as first scanner type\n");
+  printf("\t\t-b minReflectance \t first Min Reflectance for manual reflectance normalization if not specified same as first Min Reflectance\n");
+  printf("\t\t-B maxReflectance \t first Max Reflectance for manual reflectance normalization if not specified same as first Max Reflectance\n");
+  printf("\t\t-z secondMinReflectance  second Min Reflectance for manual reflectance normalization\n");
+  printf("\t\t-Z secondMaxReflectance  second Max Reflectance for manual reflectance normalization\n");
   printf("\t\t-n MIN_ANGLE \t\t Scanner vertical view MIN_ANGLE \n");
   printf("\t\t-x MAX_ANGLE \t\t Scanner vertical view MAX_ANGLE \n"); 
   printf("\n");
@@ -71,6 +83,7 @@ void usage(int argc, char** argv){
   printf("\t\t-p pMethod\t\t projection method [EQUIRECTANGULAR|CONIC|CYLINDRICAL|MERCATOR|RECTILINEAR|PANNINI|STEREOGRAPHIC|ZAXIS]\n");
   printf("\t\t-N nImages\t\t number of Horizontal images used for some projections\n");
   printf("\t\t-P pParam\t\t special projection parameter (d for Pannini and r for stereographic)\n");
+  printf("\t\t-i iSizeOptimization \t Optimize the panorama image size based on projection \n");
   printf("\n");
   printf("\n");
   printf("\t\t-F fMethod\t\t feature detection method [SURF|SIFT|ORB|FAST|STAR]\n");
@@ -94,7 +107,6 @@ void usage(int argc, char** argv){
   printf("\t\t-o saveOct \t\t Save Octree\n");
   printf("\t\t-R reflectance \t\t Use Reflectance\n");
   printf("\t\t-C color \t\t Use Color\n");
-  printf("\t\t-i iSizeOptimization \t Optimize the panorama image size based on projection \n");
   printf("\n");
   printf("\n");
   printf("\tExamples:\n");
@@ -131,6 +143,8 @@ void parssArgs(int argc, char** argv, information& info){
   info.mParam = 0;
   //===============================
   info.sFormat = RIEGL_TXT;
+  info.secondScanFormat = RIEGL_TXT;
+  info.secondScanFormatFlag = false;
   info.pMethod = EQUIRECTANGULAR;
   info.fMethod = SIFT_DET;
   info.fFiltrationMethod = DISABLE_FILTER;
@@ -142,6 +156,12 @@ void parssArgs(int argc, char** argv, information& info){
   info.scanServer = false;
   //=============================
   info.sType = stringToScannerType("RIEGL");
+  info.secondScannerType = stringToScannerType("RIEGL");
+  info.secondScannerTypeFlag = false;
+  info.minReflectance = -100;
+  info.maxReflectance = 100;
+  info.secondMinReflectance = -100;
+  info.secondMaxReflectance = 100;
   info.loadOct = false;
   info.saveOct = false;
   info.reflectance = true;
@@ -154,7 +174,7 @@ void parssArgs(int argc, char** argv, information& info){
   opterr = 0;
   //reade the command line and get the options
 
-  while ((c = getopt (argc, argv, "a:A:Cd:D:e:E:f:F:H:iI:lm:M:n:N:oO:p:P:r:Rs:St:V:W:x:")) != -1)
+  while ((c = getopt (argc, argv, "a:A:b:B:Cd:D:e:E:f:F:H:iI:lm:M:n:N:oO:p:P:r:Rs:St:T:V:W:x:y:z:Z:")) != -1)
     switch (c)
       {
       case 's':
@@ -166,6 +186,10 @@ void parssArgs(int argc, char** argv, information& info){
       case 'f':
 	info.sFormat = stringToScanFormat(optarg);
 	break;
+      case 'y':
+	info.secondScanFormat = stringToScanFormat(optarg);
+	info.secondScanFormatFlag = true;
+	break;       
       case 'W':
 	info.iWidth = atoi(optarg);
 	break;
@@ -217,6 +241,10 @@ void parssArgs(int argc, char** argv, information& info){
       case 't':
 	info.sType = stringToScannerType(optarg);
 	break;
+      case 'T':
+	info.secondScannerType = stringToScannerType(optarg);
+	info.secondScannerTypeFlag = true;
+	break;
       case 'l':
 	info.loadOct = true;
 	break;
@@ -244,6 +272,18 @@ void parssArgs(int argc, char** argv, information& info){
       case 'A':
 	info.mFiltrationMethod = stringToMatchingFiltrationMethod(optarg);
 	break;
+      case 'b':
+	info.minReflectance = atof(optarg);
+	break;
+      case 'B':
+	info.maxReflectance = atof(optarg);
+	break;
+      case 'z':
+	info.secondMinReflectance = atof(optarg);
+	break;
+      case 'Z':
+	info.secondMaxReflectance = atof(optarg);
+	break;
 
 
       case '?':
@@ -253,6 +293,16 @@ void parssArgs(int argc, char** argv, information& info){
       default:
 	usage(argc, argv);
       }
+  //check for second scanFormat and scannerType and min&maxReflectance
+  if(info.secondScanFormatFlag == false)
+    info.secondScanFormat = info.sFormat;
+  if(info.secondScannerTypeFlag == false)
+    {
+      info.secondScannerType = info.sType;
+      info.secondMinReflectance = info.minReflectance;
+      info.secondMaxReflectance = info.maxReflectance;
+    }
+
   if(info.pMethod == PANNINI && info.pParam == 0){
     info.pParam = 1;
     if(info.nImages < 2) info.nImages = 2;
@@ -299,8 +349,10 @@ void informationDescription(information info){
   cout<<"output dir: "<<info.outDir<<endl;
   cout<<"first scan number: "<<info.fScanNumber<<endl;
   cout<<"second scan number: "<<info.sScanNumber<<endl;
-  cout<<"scan format: "<<scanFormatToString(info.sFormat)<<endl;
-  cout<<"scanner type:"<<scannerTypeToString(info.sType)<<endl;
+  cout<<"first scan format: "<<scanFormatToString(info.sFormat)<<endl;
+  cout<<"second scan format: "<<scanFormatToString(info.secondScanFormat)<<endl;
+  cout<<"first scanner type:"<<scannerTypeToString(info.sType)<<endl;
+  cout<<"second scanner type:"<<scannerTypeToString(info.secondScannerType)<<endl;
   cout<<"reflectance: "<<info.reflectance<<endl;
   cout<<"color: "<<info.color<<endl;
   cout<<endl;
@@ -344,6 +396,7 @@ void info_yml(information info, double bError, double bErrorIdx, double* bAlign)
   fs << "param" << "{";
   fs << "DIR" << info.dir;
   fs << "sFormat" << scanFormatToString(info.sFormat);
+  fs << "secondScanFormat" << scanFormatToString(info.secondScanFormat);
   fs << "pMethod" << projectionMethodToString(info.pMethod);
   fs << "nImages" << info.nImages;
   fs << "pParam" << info.pParam;
@@ -392,7 +445,7 @@ int main(int argc, char** argv){
   if(info.verbose >= 1) informationDescription(info);
   
   //get first scan
-  scan_cv fScan (info.dir, info.fScanNumber, info.sFormat, info.scanServer, info.sType, info.loadOct, info.saveOct, info.reflectance, info.color);
+  scan_cv fScan (info.dir, info.fScanNumber, info.sFormat, info.scanServer, info.sType, info.loadOct, info.saveOct, info.reflectance, info.color, -1, -1, info.minReflectance, info.maxReflectance);
   if(info.verbose >= 4) info.fSTime = (double)cv::getTickCount();
   fScan.convertScanToMat();
   if(info.verbose >= 4) info.fSTime = ((double)cv::getTickCount() - info.fSTime)/cv::getTickFrequency();
@@ -449,7 +502,8 @@ int main(int argc, char** argv){
   if(info.verbose >= 2) fFeature.getDescription();
   
   //get secon scan
-  scan_cv sScan (info.dir, info.sScanNumber, info.sFormat, info.scanServer, info.sType, info.loadOct, info.saveOct, info.reflectance, info.color);
+  //scan_cv sScan (info.dir, info.sScanNumber, info.sFormat, info.scanServer, info.sType, info.loadOct, info.saveOct, info.reflectance, info.color, -1, -1, info.minReflectance, info.maxReflectance);
+  scan_cv sScan (info.dir, info.sScanNumber, info.secondScanFormat, info.scanServer, info.secondScannerType, info.loadOct, info.saveOct, info.reflectance, info.color, -1, -1, info.secondMinReflectance, info.secondMaxReflectance);
   if(info.verbose >= 4) info.sSTime = (double)cv::getTickCount();
   sScan.convertScanToMat();
   if(info.verbose >= 4) info.sSTime = ((double)cv::getTickCount() - info.sSTime)/cv::getTickFrequency();
