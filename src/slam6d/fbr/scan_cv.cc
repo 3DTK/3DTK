@@ -13,6 +13,31 @@ using namespace std;
 
 namespace fbr{
 
+
+  scan_cv::scan_cv(string dir, unsigned int number, IOType format, bool scanServer, scanner_type type, bool lOct, bool sOct, bool Reflectance, bool Color, int MaxDist, int MinDist, double _minReflectance, double _maxReflectance){
+    sDir = dir;
+    sNumber = number;
+    sFormat = format;
+    zMax = numeric_limits<double>::min(); 
+    zMin = numeric_limits<double>::max();
+    nPoints = 0;
+    sType = type;
+    scanserver = scanServer;
+    loadOct = lOct;
+    saveOct = sOct;
+    reflectance = Reflectance;
+    color = Color;
+    types = PointType::USE_NONE;
+    if(reflectance)
+      types |= PointType::USE_REFLECTANCE;
+    if(color)
+      types |= PointType::USE_COLOR;
+    maxDist = MaxDist;
+    minDist = MinDist;
+    minReflectance = _minReflectance;
+    maxReflectance = _maxReflectance;
+  }
+
   scan_cv::scan_cv(string dir, unsigned int number, IOType format, bool scanServer, scanner_type type, bool lOct, bool sOct, bool Reflectance, bool Color, int MaxDist, int MinDist){
     sDir = dir;
     sNumber = number;
@@ -33,6 +58,8 @@ namespace fbr{
       types |= PointType::USE_COLOR;
     maxDist = MaxDist;
     minDist = MinDist;
+    minReflectance = -100;
+    maxReflectance = 100;
   }
   scan_cv::scan_cv(string dir, unsigned int number, IOType format, bool scanServer, scanner_type type, bool lOct, bool sOct, bool Reflectance, bool Color){
     sDir = dir;
@@ -54,6 +81,8 @@ namespace fbr{
       types |= PointType::USE_COLOR;
     maxDist = -1;
     minDist = -1;
+    minReflectance = -100;
+    maxReflectance = 100;
   }
 
   scan_cv::scan_cv(string dir, unsigned int number, IOType format, bool scanServer){
@@ -73,6 +102,8 @@ namespace fbr{
     types |= PointType::USE_REFLECTANCE;
     maxDist = -1;
     minDist = -1;
+    minReflectance = -100;
+    maxReflectance = 100;
   }
 
   scan_cv::scan_cv(string dir, unsigned int number, IOType format){
@@ -92,6 +123,8 @@ namespace fbr{
     types |= PointType::USE_REFLECTANCE;
     maxDist = -1;
     minDist = -1;
+    minReflectance = -100;
+    maxReflectance = 100;
   }
 
   void scan_cv::convertScanToMat(){
@@ -233,6 +266,9 @@ namespace fbr{
       if(sType == FARO){
 	reflectance -= 1250;
 	reflectance /= 800;
+      }
+      if(sType == MANUAL){
+	reflectance = (reflectance - (minReflectance))/(maxReflectance-minReflectance);
       }
       
       if(sType != NONE){

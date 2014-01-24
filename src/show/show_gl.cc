@@ -1791,6 +1791,7 @@ void drawRobotPath(int dummy)
   * neighboring cameras.
   */
 void calcInterpolatedCameras(vector<PointXY> vec1, vector<PointXY> vec2) {
+// TODO incorporate the scaling factor!
   NurbsPath::camRatio.clear();
   double distance = 0.0;
   double dx, dy, dz;
@@ -1837,7 +1838,7 @@ int calcNoOfPoints(vector<PointXY> vec1, vector<PointXY> vec2)
     distance += sqrt( dx*dx + dy*dy + dz*dz );
   }
 
-  return distance / 2;  // change this to get faster animations
+  return (distance*scale) / 0.02;  // change this to get faster animations
 }
 
 /**

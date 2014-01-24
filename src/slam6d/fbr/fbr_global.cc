@@ -31,6 +31,9 @@ namespace fbr{
     case FARO:
       sType = "FARO";
       break;
+    case MANUAL:
+      sType = "MANUAL";
+      break;
     default:
       throw std::runtime_error(std::string("scanner type") + to_string(type) + std::string(" could not be matched to a scanner type"));
     }
@@ -40,6 +43,7 @@ namespace fbr{
     if(strcasecmp(type.c_str(), "NONE") == 0) return NONE;
     else if(strcasecmp(type.c_str(), "RIEGL") == 0) return RIEGL;
     else if(strcasecmp(type.c_str(), "FARO") == 0) return FARO;
+    else if(strcasecmp(type.c_str(), "MANUAL") == 0) return MANUAL;
     else throw std::runtime_error(std::string("scanner type ") + type + std::string(" is unknown"));
   }
   string projectionMethodToString(projection_method method){

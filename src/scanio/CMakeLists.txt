@@ -5,7 +5,7 @@ else(WIN32)
 endif(WIN32)
 
 set(SCANIO_LIBNAMES
-  uos uosr uos_rgb uos_rrgb uos_rrgbt xyz xyzr xyz_rgb xyz_rrgb ply ks ks_rgb riegl_txt riegl_rgb rts velodyne laz
+  uos uosr uos_rgb uos_rrgb uos_rrgbt xyz xyzr leica_xyzr xyz_rgb xyz_rrgb faro_xyz_rgbr ply ks ks_rgb riegl_txt riegl_rgb rts velodyne laz
 )
 
 if(WITH_RIVLIB)
