@@ -18,6 +18,8 @@ the proper redistributable package.
 
 Some Boost libraries (graph, regex, serialization, filesystem,
 interprocess) are needed to compile the slam6D program.
+3DTK is not compatible with boost version 1.49. Please make sure to use a
+different version.
 
 If you are using Debian just do:
 

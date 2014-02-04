@@ -1397,8 +1397,8 @@ void glDumpWindowPPM(const char *filename, GLenum mode)
   win_width  = viewport[2];
 
   // Allocate memory for the the frame buffer and output buffer
-  buffer = new GLubyte[win_width * win_height * RGBA];
-  ibuffer = new unsigned char[win_width * win_height * RGB];
+  buffer = new GLubyte[win_width * win_height * RGBA_];
+  ibuffer = new unsigned char[win_width * win_height * RGB_];
 
   // Read window contents from GL frame buffer with glReadPixels
   glFinish();
@@ -1420,10 +1420,10 @@ void glDumpWindowPPM(const char *filename, GLenum mode)
   l = 0;
   for (i = 0; i < win_height; i++) {     // For each row
     for (j = 0; j < win_width; j++) {    // For each column
-      for (k = 0; k < RGB; k++) {        // For each RGB component
-        //cout << (RGBA*((win_height-1-i)*win_width+j)+k) << endl;
+      for (k = 0; k < RGB_; k++) {        // For each RGB component
+        //cout << (RGBA_*((win_height-1-i)*win_width+j)+k) << endl;
         ibuffer[l++] = (unsigned char)
-          *(buffer + (RGBA*((win_height-1-i)*win_width+j)+k));
+          *(buffer + (RGBA_*((win_height-1-i)*win_width+j)+k));
       }                                  // end RGB
     }                                    // end column
   }                                      // end row
@@ -1432,7 +1432,7 @@ void glDumpWindowPPM(const char *filename, GLenum mode)
   // for f in *ppm ; do convert -quality 100 $f `basename $f ppm`jpg; done 
   // mencoder "mf://*.jpg" -mf fps=10 -o test.avi -ovc lavc -lavcopts vcodec=msmpeg4v2:vbitrate=800 
   // Write output buffer to the file */
-  fp.write((const char*)ibuffer, sizeof(unsigned char) * (RGB * win_width * win_height));
+  fp.write((const char*)ibuffer, sizeof(unsigned char) * (RGB_ * win_width * win_height));
   fp.close();
   fp.clear();
   delete [] buffer;
@@ -1494,8 +1494,8 @@ void glWriteImagePPM(const char *filename, int scale, GLenum mode)
     // Allocate memory for the the frame buffer and output buffer
     GLubyte *buffer;              // The GL Frame Buffer
     unsigned char *ibuffer;       // The PPM Output Buffer
-    buffer = new GLubyte[win_width * win_height * RGBA];
-    ibuffer = new unsigned char[image_width * image_height * RGB];
+    buffer = new GLubyte[win_width * win_height * RGBA_];
+    ibuffer = new unsigned char[image_width * image_height * RGB_];
     
     smallfont = (scale==1);
     double height;
@@ -1551,11 +1551,11 @@ void glWriteImagePPM(const char *filename, int scale, GLenum mode)
                                           // end row
         for (m = 0; m < win_height; m++) {     // For each row
           for (o = 0; o < win_width; o++) {    // For each column
-            for (k = 0; k < RGB; k++) {        // For each RGB component
-              int l = (k + RGB*(image_width*((scale - 1 - i)*win_height + m)
+            for (k = 0; k < RGB_; k++) {        // For each RGB component
+              int l = (k + RGB_*(image_width*((scale - 1 - i)*win_height + m)
                                 + j*win_width + o));
               ibuffer[l]   = (unsigned char)*(buffer +
-                                              (RGBA * ((win_height-1-m)
+                                              (RGBA_ * ((win_height-1-m)
                                                        * win_width+o)+k));
             }                                  // end RGB
           }                                    // end column
@@ -1590,7 +1590,7 @@ void glWriteImagePPM(const char *filename, int scale, GLenum mode)
 
     // Write output buffer to the file 
     fp.write((const char*)ibuffer,
-             sizeof(unsigned char) * (RGB * image_width * image_height));
+             sizeof(unsigned char) * (RGB_ * image_width * image_height));
     fp.close();
     fp.clear();
     delete [] buffer;
