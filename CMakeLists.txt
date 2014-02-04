@@ -19,7 +19,7 @@ ELSE(WIN32)
   set(Boost_USE_STATIC_LIBS FALSE)
 ENDIF(WIN32)
 
-SET(Boost_ADDITIONAL_VERSIONS "1.42" "1.42.0" "1.44" "1.44.0" "1.45.0" "1.45" "1.46" "1.46.1" "1.47.0" "1.47" "1.48" "1.49" "1.50" "1.52" "1.53")
+SET(Boost_ADDITIONAL_VERSIONS "1.42" "1.42.0" "1.44" "1.44.0" "1.45.0" "1.45" "1.46" "1.46.1" "1.47.0" "1.47" "1.48" "1.50" "1.52" "1.53" "1.55")
 IF(WIN32)
   # for some unknown reason no one variant works on all windows platforms
   set(Boost_DEBUG 1)  
@@ -333,10 +333,11 @@ ENDIF(WITH_METRICS)
 
 OPT_DEP(WITH_ADDONS "Whether to download and use addons to 3DTK. ON/OFF" OFF "")
 IF(WITH_ADDONS)
-  execute_process(COMMAND svn co https://robotik.informatik.uni-wuerzburg.de/slam6dprivate/trunk/addons addons 
-                  WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-                  OUTPUT_QUIET
-                  ) 
+  MESSAGE(STATUS "Compiling addons directory")
+  #execute_process(COMMAND svn co https://robotik.informatik.uni-wuerzburg.de/slam6dprivate/trunk/addons addons 
+  #                WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+  #                OUTPUT_QUIET
+  #                ) 
   MESSAGE(STATUS "With addons.")
 ELSE(WITH_ADDONS)
   MESSAGE(STATUS "Without addons.")

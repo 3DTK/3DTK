@@ -31,8 +31,8 @@ using std::vector;
 #include "show/scancolormanager.h"
 
 /** for Glut display mode */
-#define RGBA 4   ///< colors for GLUT display
-#define RGB 3    ///< colors for GLUT display
+#define RGBA_ 4   ///< colors for GLUT display
+#define RGB_ 3    ///< colors for GLUT display
 
 /** float value "nearly" zero? */
 #define DIV_EPSILON     0.001
