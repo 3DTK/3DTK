@@ -42,6 +42,7 @@ ENDIF(WITH_FBR)
   add_executable(pose2frames pose2frames.cc)
   add_executable(riegl2frames riegl2frames.cc)
   add_executable(toGlobal toGlobal.cc)
+  add_executable(average6DoFposes average6DoFposes.cc)
 
   IF(UNIX)
     target_link_libraries(graph_balancer scan ${Boost_GRAPH_LIBRARY} ${Boost_SERIALIZATION_LIBRARY} ${Boost_REGEX_LIBRARY} ${Boost_SYSTEM_LIBRARY})
@@ -51,7 +52,6 @@ ENDIF(WITH_FBR)
     target_link_libraries(pose2frames ${Boost_LIBRARIES} ${Boost_SYSTEM_LIBRARY})
   ENDIF(UNIX)
 
-  
   IF (WIN32)
     target_link_libraries(frame_to_graph XGetopt ${Boost_LIBRARIES})
     target_link_libraries(convergence XGetopt ${Boost_LIBRARIES})
@@ -64,6 +64,8 @@ ENDIF(WITH_FBR)
     target_link_libraries(riegl2frames XGetopt ${Boost_LIBRARIES})
     target_link_libraries(toGlobal scan XGetopt ${Boost_LIBRARIES})
   ENDIF(WIN32)
+
+  target_link_libraries(average6DoFposes newmat)
 
 ENDIF(WITH_TOOLS)
 
