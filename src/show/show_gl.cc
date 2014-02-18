@@ -43,7 +43,8 @@ void DrawPoints(GLenum mode, bool interruptable)
 
   // In case of animation
   if(frameNr != 0) {
-    cm->setMode(ScanColorManager::MODE_ANIMATION);
+    if (coloranim)
+      cm->setMode(ScanColorManager::MODE_ANIMATION);
 
     for(int iterator = (int)octpts.size()-1; iterator >= 0; iterator--) {
 	 
