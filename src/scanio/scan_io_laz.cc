@@ -19,6 +19,7 @@
  */
 
 #include "scanio/scan_io_laz.h"
+#include "scanio/helper.h"
 #include "slam6d/point.h"
 
 #include <iostream>
@@ -38,31 +39,16 @@ using namespace boost::filesystem;
 
 #include "slam6d/globals.icc"
 
-#define DATA_PATH_PREFIX "scan"
 #define LAZ_SUFFIX ".laz"
 #define LAS_SUFFIX ".las"
+#define DATA_PATH_PREFIX "scan"
 
 std::list<std::string> ScanIO_laz::readDirectory(const char* dir_path,
                       unsigned int start,
                       unsigned int end)
 {
-  std::list<std::string> identifiers;
-  for (unsigned int i = start; i <= end; ++i) {
-    // identifier is /d/d/d (000-999)
-    std::string identifier(to_string(i,3));
-    // scan consists of data (.las) and pose (.pose) files
-    path data(dir_path);
-    data /= path(std::string(DATA_PATH_PREFIX) + identifier + LAZ_SUFFIX);
-    // stop if part of a scan is missing or end by absence is detected
-    if (!exists(data)) {
-      // look for LAS suffix if LAZ suffix not present
-      data = dir_path;
-      data /= path(std::string(DATA_PATH_PREFIX) + identifier + LAS_SUFFIX);
-      if(!exists(data)) break;
-    }
-    identifiers.push_back(identifier);
-  }
-  return identifiers;
+    const char* suffixes[3] = { LAZ_SUFFIX, LAS_SUFFIX, NULL };
+    return readDirectoryHelper(dir_path, start, end, suffixes);
 }
 
 void ScanIO_laz::readPose(const char* dir_path,

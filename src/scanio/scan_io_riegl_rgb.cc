@@ -16,6 +16,7 @@
  */
 
 #include "scanio/scan_io_riegl_rgb.h"
+#include "scanio/helper.h"
 
 #include <iostream>
 using std::cout;
@@ -44,21 +45,8 @@ using namespace boost::filesystem;
 
 std::list<std::string> ScanIO_riegl_rgb::readDirectory(const char* dir_path, unsigned int start, unsigned int end)
 {
-  std::list<std::string> identifiers;
-  for(unsigned int i = start; i <= end; ++i) {
-    // identifier is /d/d/d (000-999)
-    std::string identifier(to_string(i,3));
-    // scan consists of data (.3d) and pose (.pose) files
-    path data(dir_path);
-    data /= path(std::string(DATA_PATH_PREFIX) + identifier + DATA_PATH_SUFFIX);
-    path pose(dir_path);
-    pose /= path(std::string(POSE_PATH_PREFIX) + identifier + POSE_PATH_SUFFIX);
-    // stop if part of a scan is missing or end by absence is detected
-    if(!exists(data) || !exists(pose))
-      break;
-    identifiers.push_back(identifier);
-  }
-  return identifiers;
+    const char* suffixes[2] = { DATA_PATH_SUFFIX, NULL };
+    return readDirectoryHelper(dir_path, start, end, suffixes);
 }
 
 void ScanIO_riegl_rgb::readPose(const char* dir_path, const char* identifier, double* pose)
@@ -120,65 +108,37 @@ bool ScanIO_riegl_rgb::supports(IODataType type)
 
 void ScanIO_riegl_rgb::readScan(const char* dir_path, const char* identifier, PointFilter& filter, std::vector<double>* xyz, std::vector<unsigned char>* rgb, std::vector<float>* reflectance, std::vector<float>* temperature, std::vector<float>* amplitude, std::vector<int>* type, std::vector<float>* deviation)
 {
-  unsigned int i;
-  
-  // error handling
-  path data_path(dir_path);
-  data_path /= path(std::string(DATA_PATH_PREFIX) + identifier + DATA_PATH_SUFFIX);
-  if(!exists(data_path))
-    throw std::runtime_error(std::string("There is no scan file for [") + identifier + "] in [" + dir_path + "]");
-  
-  if(xyz != 0 || rgb != 0 || reflectance != 0) {
-    // open data file
-    ifstream data_file(data_path);
-    data_file.exceptions(ifstream::eofbit|ifstream::failbit|ifstream::badbit);
+    // error handling
+    path data_path(dir_path);
+    data_path /= path(std::string(DATA_PATH_PREFIX) + identifier + DATA_PATH_SUFFIX);
+    if(!exists(data_path))
+        throw std::runtime_error(std::string("There is no scan file for [") + identifier + "] in [" + dir_path + "]");
 
-    // read the point count
-    unsigned int count;
-    data_file >> count;
-    
-    // reserve enough space for faster reading
-    if(xyz != 0) xyz->reserve(3*count);
-    if(rgb != 0) rgb->reserve(3*count);
-    
-    // read points
-    // z x y range theta phi r g b reflectance
-    double point[7];
-    unsigned int color[3];
-    double tmp;
-    while(data_file.good()) {
-      try {
-        for(i = 0; i < 6; ++i) data_file >> point[i];
-        for(i = 0; i < 3; ++i) data_file >> color[i];
-        data_file >> point[6];
-      } catch(std::ios_base::failure& e) {
-        break;
-      }
-      
-      // the enemy's x/y/z is mapped to slam's z/x/y, shuffle time!
-      // invert x axis
-      // convert coordinate to cm
-      tmp = point[2];
-      point[2] = 100.0 * point[0];
-      point[0] = -100.0 * point[1]; 
-      point[1] = 100.0 * tmp;
-      
-      // apply filter and insert point
-      if(filter.check(point)) {
-        if(xyz != 0) {
-          for(i = 0; i < 3; ++i) xyz->push_back(point[i]);
-        }
-        if(rgb != 0) {
-          for(i = 0; i < 3; ++i) rgb->push_back(
-            static_cast<unsigned char>(color[i]));  
-        }
-        if(reflectance != 0) {
-          reflectance->push_back(point[6]);
-        }
-      }
+    if(xyz != 0 || rgb != 0 || reflectance != 0) {
+        // open data file
+        ifstream data_file(data_path);
+        data_file.exceptions(ifstream::eofbit|ifstream::failbit|ifstream::badbit);
+
+        // read the point count
+        // TODO: read this in properly, check for errors
+        unsigned int count;
+        data_file >> count;
+
+        // reserve enough space for faster reading
+        if(xyz != 0) xyz->reserve(3*count);
+        if(rgb != 0) rgb->reserve(3*count);
+
+        // read points
+        // z x y range theta phi r g b reflectance
+        IODataType spec[11] = { DATA_XYZ, DATA_XYZ, DATA_XYZ,
+            DATA_DUMMY, DATA_DUMMY, DATA_DUMMY,
+            DATA_RGB, DATA_RGB, DATA_RGB, DATA_REFLECTANCE,
+            DATA_TERMINATOR };
+        ScanDataTransform_riegl transform;
+        readASCII(data_file, spec, transform, filter, xyz, rgb, reflectance);
+
+        data_file.close();
     }
-    data_file.close();
-  }
 }
 
 

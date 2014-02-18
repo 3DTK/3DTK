@@ -15,13 +15,15 @@ enum IOType {
 
 //! Data channels in the scans
 enum IODataType {
-  DATA_XYZ = 1<<0,
-  DATA_RGB = 1<<1,
-  DATA_REFLECTANCE = 1<<2,
-  DATA_TEMPERATURE = 1<<3,
-  DATA_AMPLITUDE = 1<<4,
-  DATA_TYPE = 1<<5,
-  DATA_DEVIATION = 1<<6
+  DATA_TERMINATOR = 0,
+  DATA_DUMMY = 1<<0,
+  DATA_XYZ = 1<<1,
+  DATA_RGB = 1<<2,
+  DATA_REFLECTANCE = 1<<3,
+  DATA_TEMPERATURE = 1<<4,
+  DATA_AMPLITUDE = 1<<5,
+  DATA_TYPE = 1<<6,
+  DATA_DEVIATION = 1<<7
 };
 
 IOType formatname_to_io_type(const char * string);
