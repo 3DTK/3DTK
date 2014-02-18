@@ -343,6 +343,17 @@ ELSE(WITH_ADDONS)
   MESSAGE(STATUS "Without addons.")
 ENDIF(WITH_ADDONS)
 
+OPT_DEP(WITH_TESTING "Whether to download and use testing data to 3DTK. ON/OFF" OFF "")
+IF(WITH_TESTING)
+  execute_process(COMMAND svn co https://robotik.informatik.uni-wuerzburg.de/testing testing 
+                  WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+                  OUTPUT_QUIET
+                  ) 
+  MESSAGE(STATUS "With testing.")
+ELSE(WITH_TESTING)
+  MESSAGE(STATUS "Without testing.")
+ENDIF(WITH_TESTING)
+
 #################################################
 # OPERATING SYSTEM SPECIFIC BEHAVIOUR          ##
 #################################################
@@ -443,5 +454,12 @@ IF(WITH_ADDONS)
   MESSAGE(STATUS "With 3dtkaddons.")
   add_subdirectory(addons)
 ENDIF(WITH_ADDONS)
+IF(WITH_TESTING)
+  MESSAGE(STATUS "With 3dtk testing.")
+  find_package(Boost COMPONENTS system filesystem unit_test_framework REQUIRED)
+  enable_testing()
+  add_subdirectory(testing/scanio)
+ENDIF(WITH_TESTING)
+
 
 MESSAGE (STATUS "Build environment is set up!")
