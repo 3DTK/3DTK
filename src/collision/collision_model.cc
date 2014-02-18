@@ -206,13 +206,18 @@ size_t handle_pointcloud(DataXYZ &model, DataXYZ &environ,
     double sqRad2 = radius*radius;
     cerr << "computing collisions..." << endl;
     time_t before = time(NULL);
+    int end = trajectory.size();
+    i = 0;
     for(const auto &it2 : trajectory) {
+        cerr << (i*100.0)/end << " %\r";
+        cerr.flush();
         for(const auto &it : pointmodel) {
             double point1[3] = {it.x, it.y, it.z};
             transform3(it2.transformation, point1);
             vector<size_t> collidingsphere = t.fixedRangeSearch(point1, sqRad2, thread_num);
             fill_colliding(colliding, collidingsphere);
         }
+        i++;
     }
     size_t num_colliding = 0;
     // the actual implementation of std::vector<bool> requires us to use the
