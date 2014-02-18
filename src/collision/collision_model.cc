@@ -35,7 +35,8 @@ void validate(boost::any& v, const std::vector<std::string>& values,
     }
 }
 
-void parse_options(int argc, char **argv, IOType &iotype, string &dir, double &radius)
+void parse_options(int argc, char **argv, IOType &iotype, string &dir,
+        double &radius, bool &calcdistances)
 {
     po::options_description generic("Generic options");
     generic.add_options()
@@ -51,7 +52,9 @@ void parse_options(int argc, char **argv, IOType &iotype, string &dir, double &r
     po::options_description prog("Program specific options");
     prog.add_options()
         ("radius,r", po::value<double>(&radius)->default_value(10),
-         "radius of sphere");
+         "radius of sphere")
+        ("calcdistances,d", po::value<bool>(&calcdistances)->default_value(false),
+         "calculate penetration distance");
 
     po::options_description hidden("Hidden options");
     hidden.add_options()
@@ -296,8 +299,9 @@ int main(int argc, char **argv)
     string dir;
     IOType iotype;
     double radius;
+    bool calcdistances;
 
-    parse_options(argc, argv, iotype, dir, radius);
+    parse_options(argc, argv, iotype, dir, radius, calcdistances);
 
     // read scan 0 (model) and 1 (environment) without scanserver
     Scan::openDirectory(false, dir, iotype, 0, 1);
@@ -332,6 +336,8 @@ int main(int argc, char **argv)
     }
     std::vector<double> dist_colliding;
     dist_colliding.reserve(num_colliding);
-    calculate_collidingdist(environ, colliding, num_colliding, dist_colliding);
+    if (calcdistances) {
+        calculate_collidingdist(environ, colliding, num_colliding, dist_colliding);
+    }
     write_xyzr(environ, dir, colliding, dist_colliding);
 }
