@@ -79,7 +79,10 @@ void parse_options(int argc, char **argv, IOType &iotype, string &dir, double &r
     if (vm.count("help")) {
         cout << cmdline_options;
         cout << "\nExample usage:\n"
-             << "\t" << argv[0] << " --method POINTCLOUD -s 0 -e 1 -f xyzr ../scantest ../scantest/scan000.path\n";
+             << "\t" << argv[0] << " --radius=10 -f xyzr ./dir\n";
+        cout << "The directory ./dir must contain the model as the first scan and\n";
+        cout << "the environment as the second scan. The frames file of the first\n";
+        cout << "scan is the trajectory.";
         exit(0);
     }
 
