@@ -7,6 +7,10 @@ endif
 all: .configured
 	cd .build && $(MAKE) --no-print-directory
 
+.PHONY: test
+test:
+	cd .build && CTEST_OUTPUT_ON_FAILURE=true $(MAKE) test
+
 config: .build
 	cd .build && ccmake ..
 	touch .configured
