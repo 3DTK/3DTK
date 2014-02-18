@@ -16,7 +16,8 @@ if(WITH_RIVLIB)
 #    target_link_libraries(scan_io_riegl_project ${RIVLIB} scan_io_rxp ${LIBXML2_LIBRARIES})
   endif(LIBXML2_FOUND)
 endif(WITH_RIVLIB)
-    
+
+add_library(scan_io_helper SHARED helper.cc)
 
 foreach(libname ${SCANIO_LIBNAMES})
 if(WIN32)
@@ -24,7 +25,7 @@ if(WIN32)
 else(WIN32)
   add_library(scan_io_${libname} SHARED scan_io_${libname}.cc)
 endif(WIN32)  
-  target_link_libraries(scan_io_${libname} pointfilter ${Boost_LIBRARIES} ${Boost_PROGRAM_OPTIONS_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY})
+  target_link_libraries(scan_io_${libname} scan_io_helper pointfilter ${Boost_LIBRARIES} ${Boost_PROGRAM_OPTIONS_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY})
 endforeach(libname)
 
 if(WITH_RIVLIB)

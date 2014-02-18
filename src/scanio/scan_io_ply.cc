@@ -18,6 +18,7 @@
  */
 
 #include "scanio/scan_io_ply.h"
+#include "scanio/helper.h"
 #include "slam6d/point.h"
 
 #include <iostream>
@@ -44,19 +45,8 @@ std::list<std::string> ScanIO_ply::readDirectory(const char* dir_path,
 									    unsigned int start,
 									    unsigned int end)
 {
-  std::list<std::string> identifiers;
-  for (unsigned int i = start; i <= end; ++i) {
-    // identifier is /d/d/d (000-999)
-    std::string identifier(to_string(i,3));
-    // scan consists of data (.3d) and pose (.pose) files
-    path data(dir_path);
-    data /= path(std::string(DATA_PATH_PREFIX) + identifier + DATA_PATH_SUFFIX);
-    // stop if part of a scan is missing or end by absence is detected
-    if (!exists(data))
-      break;
-    identifiers.push_back(identifier);
-  }
-  return identifiers;
+    const char* suffixes[2] = { DATA_PATH_SUFFIX, NULL };
+    return readDirectoryHelper(dir_path, start, end, suffixes);
 }
 
 void ScanIO_ply::readPose(const char* dir_path,
@@ -82,8 +72,6 @@ void ScanIO_ply::readScan(const char* dir_path,
 					 std::vector<int>* type,
 					 std::vector<float>* deviation)
 {
-  unsigned int i;
-  
   // error handling
   path data_path(dir_path);
   data_path /= path(std::string(DATA_PATH_PREFIX) +

@@ -16,6 +16,7 @@
  */
 
 #include "scanio/scan_io_rts.h"
+#include "scanio/helper.h"
 
 #include <iostream>
 using std::cout;
@@ -49,24 +50,8 @@ using namespace boost::filesystem;
 
 std::list<std::string> ScanIO_rts::readDirectory(const char* dir_path, unsigned int start, unsigned int end)
 {
-  std::list<std::string> identifiers;
-  // only a single pose file, can't do without one
-  path pose_path(dir_path);
-  pose_path /= POSE_PATH_FILE;
-  if(exists(pose_path)) {
-    for(unsigned int i = start; i <= end; ++i) {
-      // identifier is a number (0-\infty)
-      std::string identifier(to_string(i));
-      // scan consists of data (.3d) files
-      path data(dir_path);
-      data /= path(std::string(DATA_PATH_PREFIX) + identifier + DATA_PATH_SUFFIX);
-      // stop if part of a scan is missing or end by absence is detected
-      if(!exists(data))
-        break;
-      identifiers.push_back(identifier);
-    }
-  }
-  return identifiers;
+    const char* suffixes[2] = { DATA_PATH_SUFFIX, NULL };
+    return readDirectoryHelper(dir_path, start, end, suffixes, DATA_PATH_PREFIX);
 }
 
 void ScanIO_rts::readPose(const char* dir_path, const char* identifier, double* pose)
@@ -127,46 +112,27 @@ bool ScanIO_rts::supports(IODataType type)
 
 void ScanIO_rts::readScan(const char* dir_path, const char* identifier, PointFilter& filter, std::vector<double>* xyz, std::vector<unsigned char>* rgb, std::vector<float>* reflectance, std::vector<float>* temperature, std::vector<float>* amplitude, std::vector<int>* type, std::vector<float>* deviation)
 {
-  // TODO: Type and other columns?
-  unsigned int i;
-  
-  // error handling
-  path data_path(dir_path);
-  data_path /= path(std::string(DATA_PATH_PREFIX) + identifier + DATA_PATH_SUFFIX);
-  if(!exists(data_path))
-    throw std::runtime_error(std::string("There is no scan file for [") + identifier + "] in [" + dir_path + "]");
-  
-  if(xyz != 0) {
-    // open data file
-    ifstream data_file(data_path);
-    data_file.exceptions(ifstream::eofbit|ifstream::failbit|ifstream::badbit);
+    // TODO: Type and other columns?
 
-    // read points
-    // z x y type ? ?
-    double point[3];
-    int type, dummy;
-    while(data_file.good()) {
-      try {
-        data_file >> point[2] >> point[0] >> point[1];
-        data_file >> type >> dummy >> dummy;
-      } catch(std::ios_base::failure& e) {
-        break;
-      }
-      
-      // convert
-      point[0] *= 0.1;
-      point[1] *= -0.1;
-      point[2] *= 0.1;
-      
-      // apply filter and insert point
-      if(!(type & TYPE_INVALID)) {
-        if(filter.check(point)) {
-          for(i = 0; i < 3; ++i) xyz->push_back(point[i]);
-        }
-      }
+    // error handling
+    path data_path(dir_path);
+    data_path /= path(std::string(DATA_PATH_PREFIX) + identifier + DATA_PATH_SUFFIX);
+    if(!exists(data_path))
+        throw std::runtime_error(std::string("There is no scan file for [") + identifier + "] in [" + dir_path + "]");
+
+    if(xyz != 0) {
+        // open data file
+        ifstream data_file(data_path);
+        data_file.exceptions(ifstream::eofbit|ifstream::failbit|ifstream::badbit);
+
+        // read points
+        // z x y type ? ?
+        IODataType spec[7] = { DATA_XYZ, DATA_XYZ, DATA_XYZ, DATA_TYPE,
+            DATA_DUMMY, DATA_DUMMY, DATA_TERMINATOR };
+        ScanDataTransform_rts transform;
+        readASCII(data_file, spec, transform, filter, xyz, 0, 0, 0, 0, type);
+        data_file.close();
     }
-    data_file.close();
-  }
 }
 
 
