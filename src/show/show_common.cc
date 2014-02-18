@@ -359,11 +359,13 @@ void usage(char* prog)
        << "         use randomized octree based point reduction (pts per voxel=<NR>)" << endl
        << "         requires " << bold << "-r" << normal <<" or " << bold << "--reduce" << endl
        << endl
-       << bold << "  -o" << normal << " NR, " << bold << "--origin=" << normal << "NR (optional)" << endl
-       << "         sets the starting and reset position to: " << endl
-       << "           0 = the origin of the coordinate system (default)" << endl
-       << "           1 = the position of the first scan (default if --origin is in argument list)" << endl
-       << "           2 = the center of the first scan" << endl
+       << bold << "  -o" << normal << " NR, " << bold << "--origin=" << normal << "NR" << endl
+       << "         sets the starting and reset position according to the integer value of" << endl
+       << "         NR. Without this option, the starting and reset position are at the" << endl
+       << "         origin of the coordinate system." << endl
+       << "           NR = 0              = the center of mass of all scans" << endl
+       << "           NR = [1,2,3,...]    = the center of scan 0,1,2,..." << endl
+       << "           NR = [-1,-2,-3,...] = the position of scan 0,1,2,..." << endl
        << endl
             << bold << "  -S, --scanserver" << normal << endl
             << "           Use the scanserver as an input method and handling of scan data" << endl
@@ -440,8 +442,8 @@ int parseArgs(int argc,char **argv,
               string &dir, int& start, int& end, int& maxDist, int& minDist, 
               double &red, bool &readInitial, int &octree,
               PointType &ptype, float &fps, string &loadObj,
-              bool &loadOct, bool &saveOct, int &origin, double &scale,
-              IOType &type, bool& scanserver, 
+              bool &loadOct, bool &saveOct, int &origin, bool &originset,
+              double &scale, IOType &type, bool& scanserver, 
               double& sphereMode)
 {
   unsigned int types = PointType::USE_NONE;
@@ -458,7 +460,7 @@ int parseArgs(int argc,char **argv,
 
   cout << endl;
   static struct option longopts[] = {
-    { "origin",          optional_argument,   0,  'o' },
+    { "origin",          required_argument,   0,  'o' },
     { "format",          required_argument,   0,  'f' },
     { "fps",             required_argument,   0,  'F' },
     { "scale",           required_argument,   0,  'C' },
@@ -586,11 +588,8 @@ int parseArgs(int argc,char **argv,
         scanserver = true;
         break;
       case 'o':
-        if (optarg) {
-          origin = atoi(optarg);
-        } else {
-          origin = 1;
-        }
+        origin = atoi(optarg);
+        originset = true;
         break;
       case '0':
         saveOct = true;
@@ -631,74 +630,69 @@ int parseArgs(int argc,char **argv,
 }
 
 void setResetView(int origin) {
-  if (origin == 1) {
-    // set origin to the pose of the first scan
-    double *transmat = MetaMatrix[0].back();
-    cout << transmat << endl;
-
-    RVX = -transmat[12];
-    RVY = -transmat[13];
-    RVZ = -transmat[14];
-    Matrix4ToQuat(transmat, Rquat);
-    X = RVX;
-    Y = RVY;
-    Z = RVZ;
-    quat[0] = Rquat[0];
-    quat[1] = Rquat[1];
-    quat[2] = Rquat[2];
-    quat[3] = Rquat[3];
-  } else if (origin == 2) {
-    // set origin to the center of the first octree
-    double center[3], center_transformed[3];
-#ifdef USE_COMPACT_TREE
-    ((compactTree*)octpts[0])->getCenter(center);
-#else
-    ((Show_BOctTree<sfloat>*)octpts[0])->getCenter(center);
-#endif
-    transform3(MetaMatrix[0].back(), center, center_transformed);
-    RVX = -center_transformed[0];
-    RVY = -center_transformed[1];
-    RVZ = -center_transformed[2];
-    X = RVX;
-    Y = RVY;
-    Z = RVZ;
-  } else if (origin == 3) {
-    // set origin to the center of mass of all scans
-  for (size_t i = 0; i < octpts.size(); ++i) {
-    vector <sfloat*> points;
+    if (origin == 0) {
+        // set origin to the center of mass of all scans
+        for (size_t i = 0; i < octpts.size(); ++i) {
+            vector <sfloat*> points;
 #ifndef USE_COMPACT_TREE
-    BOctTree<sfloat>* cur_tree = ((Show_BOctTree<sfloat>*)octpts[i])->getTree();
-    cur_tree->AllPoints( points );
+            BOctTree<sfloat>* cur_tree = ((Show_BOctTree<sfloat>*)octpts[i])->getTree();
+            cur_tree->AllPoints( points );
 #endif
 
-    cout << "Scan " << i << " size: " << points.size() << endl;
-    double centroid[3] = {0., 0., 0.};
-    double centroid_transformed[3];;
-    for (size_t j = 0; j < points.size(); ++j) {
-      for (unsigned int k = 0; k < 3; ++k)
-        centroid[k] += points[j][k];
-    }
-    for (unsigned int k = 0; k < 3; ++k) {
-      centroid[k] /= (double)points.size();
-    }
-    transform3(MetaMatrix[i].back(), centroid, centroid_transformed);
-    for (unsigned int k = 0; k < 3; ++k) {
-      CoM[k] += centroid_transformed[k];
-    }
-  }
-  for (unsigned int k = 0; k < 3; ++k)
-    CoM[k] /= octpts.size() * 1.;
+            double centroid[3] = {0., 0., 0.};
+            double centroid_transformed[3];;
+            for (size_t j = 0; j < points.size(); ++j) {
+                for (unsigned int k = 0; k < 3; ++k)
+                    centroid[k] += points[j][k];
+            }
+            for (unsigned int k = 0; k < 3; ++k) {
+                centroid[k] /= (double)points.size();
+            }
+            transform3(MetaMatrix[i].back(), centroid, centroid_transformed);
+            for (unsigned int k = 0; k < 3; ++k) {
+                CoM[k] += centroid_transformed[k];
+            }
+        }
+        for (unsigned int k = 0; k < 3; ++k)
+            CoM[k] /= octpts.size() * 1.;
 
-  cout << "Center of Mass at: "
-       << CoM[0] << ", " << CoM[1] << ", " << CoM[2] << endl;
+        RVX = -CoM[0];
+        RVY = -CoM[1];
+        RVZ = -CoM[2];
+        X = RVX;
+        Y = RVY;
+        Z = RVZ;
+    } else if (origin > 0) {
+        // set origin to the center of the octree of scan origin-1
+        double center[3], center_transformed[3];
+#ifdef USE_COMPACT_TREE
+        ((compactTree*)octpts[origin-1])->getCenter(center);
+#else
+        ((Show_BOctTree<sfloat>*)octpts[origin-1])->getCenter(center);
+#endif
+        transform3(MetaMatrix[origin-1].back(), center, center_transformed);
+        RVX = -center_transformed[0];
+        RVY = -center_transformed[1];
+        RVZ = -center_transformed[2];
+        X = RVX;
+        Y = RVY;
+        Z = RVZ;
+    } else {
+        // set origin to the pose of scan 1-origin
+        double *transmat = MetaMatrix[1-origin].back();
 
-  RVX = -CoM[0];
-  RVY = -CoM[1];
-  RVZ = -CoM[2];
-  X = RVX;
-  Y = RVY;
-  Z = RVZ;
-  }
+        RVX = -transmat[12];
+        RVY = -transmat[13];
+        RVZ = -transmat[14];
+        Matrix4ToQuat(transmat, Rquat);
+        X = RVX;
+        Y = RVY;
+        Z = RVZ;
+        quat[0] = Rquat[0];
+        quat[1] = Rquat[1];
+        quat[2] = Rquat[2];
+        quat[3] = Rquat[3];
+    }
 }
 
 /*
@@ -854,6 +848,8 @@ void initShow(int argc, char **argv){
   bool saveOct = false;
   string loadObj;
   int origin = 0;
+  bool originset = false;
+  double scale = 0.01; // in m
   bool scanserver = false;
   double sphereMode = 0.0;
 
@@ -867,7 +863,7 @@ void initShow(int argc, char **argv){
 
   parseArgs(argc, argv, dir, start, end, maxDist, minDist, red, readInitial,
             octree, pointtype, idealfps, loadObj, loadOct, saveOct, origin,
-            scale, type, scanserver, sphereMode);
+            originset, scale, type, scanserver, sphereMode);
 
   // modify all scale dependant variables
   scale = 1.0 / scale;
@@ -1114,7 +1110,13 @@ void initShow(int argc, char **argv){
   selected_points = new set<sfloat*>[octpts.size()];
 
   // sets (and computes if necessary) the pose that is used for the reset button
-  setResetView(origin);
+  if (originset) {
+    setResetView(origin);
+  } else {
+      RVX = RVY = RVZ = X = Y = Z = 0.0;
+  }
+  cout << "View set to: " << X << ", " << Y << ", " << Z << endl;
+
 
   for (unsigned int i = 0; i < 256; i++) {
     keymap[i] = false;
