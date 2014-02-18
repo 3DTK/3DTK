@@ -194,6 +194,11 @@ double mouseRotZ = 0.0;
 
 bool keymap[256];
 
+/**
+ * draw scans in different color during animation
+ */
+bool coloranim = true;
+
 //@@@
 //int animate_both         = 0;             // Animate both scan matchin and path?
 
@@ -419,6 +424,8 @@ void usage(char* prog)
        << "         All reflectivity/amplitude/deviation/type settings are read from file." << endl
        << "         --reflectance/--amplitude and similar parameters are therefore ignored." << endl
        << "         only works when using octree display" << endl
+    << bold << " -A, --nocoloranim" << endl << normal
+       << "         do not switch to different color settings when displaying animation" << endl
     << endl << endl;
 
   exit(1);
@@ -486,10 +493,11 @@ int parseArgs(int argc,char **argv,
     { "advanced",        no_argument,         0,  '2' },
     { "scanserver",      no_argument,         0,  'S' },
     { "sphere",          required_argument,   0,  'b' },
+    { "noanimcolor",     no_argument,         0,  'A' },
     { 0,           0,   0,   0}                    // needed, cf. getopt.h
   };
 
-  while ((c = getopt_long(argc, argv,"F:f:s:e:r:m:M:O:o:l:x:C:SwtRDadhTcb", longopts, NULL)) != -1) {
+  while ((c = getopt_long(argc, argv,"F:f:s:e:r:m:M:O:o:l:x:C:SwtRDadhTcbA", longopts, NULL)) != -1) {
     switch (c) {
       case 's':
         w_start = atoi(optarg);
@@ -605,6 +613,9 @@ int parseArgs(int argc,char **argv,
         break;
       case 'b':
         sphereMode = atof(optarg);
+        break;
+      case 'A':
+        coloranim = false;
         break;
       default:
         abort ();
