@@ -17,6 +17,7 @@
 
 #include "scanio/scan_io_rxp.h"
 #include "riegl/scanlib.hpp"
+#include "scanio/helper.h"
 
 #include <iostream>
 using std::cout;
@@ -70,7 +71,7 @@ void ScanIO_rxp::readPose(const char* dir_path, const char* identifier, double* 
     for(i = 0; i < 6; ++i) pose[i] = 0.0;
     return;
   }
-  readPoseHelper(dir_path, identifier, pose)
+  readPoseHelper(dir_path, identifier, pose);
 }
 
 bool ScanIO_rxp::supports(IODataType type)
