@@ -86,7 +86,6 @@ std::list<std::string> readDirectoryHelper(const char *dir_path,
         for (const char **s = data_path_suffixes; *s != 0; s++) {
             path data(dir_path);
             data /= path(std::string(data_path_prefix) + identifier + *s);
-            cout << data << endl;
             if (exists(data)) {
                 found = true;
                 break;
