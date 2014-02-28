@@ -424,8 +424,10 @@ void usage(char* prog)
        << "         All reflectivity/amplitude/deviation/type settings are read from file." << endl
        << "         --reflectance/--amplitude and similar parameters are therefore ignored." << endl
        << "         only works when using octree display" << endl
-    << bold << " -A, --nocoloranim" << endl << normal
+    << bold << "  -A, --nocoloranim" << endl << normal
        << "         do not switch to different color settings when displaying animation" << endl
+    << bold << "  -2, --advanced" << endl << normal
+       << "         switch on advanced controls" << endl
     << endl << endl;
 
   exit(1);
@@ -497,7 +499,7 @@ int parseArgs(int argc,char **argv,
     { 0,           0,   0,   0}                    // needed, cf. getopt.h
   };
 
-  while ((c = getopt_long(argc, argv,"F:f:s:e:r:m:M:O:o:l:x:C:SwtRDadhTcbA", longopts, NULL)) != -1) {
+  while ((c = getopt_long(argc, argv,"F:f:s:e:r:m:M:O:o:l:x:C:SwtRDadhTcbA2", longopts, NULL)) != -1) {
     switch (c) {
       case 's':
         w_start = atoi(optarg);
