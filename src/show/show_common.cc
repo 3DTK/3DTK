@@ -411,21 +411,27 @@ void usage(char* prog)
     << bold << "  -T, --type" << endl << normal
        << "         use type values for coloring point clouds" << endl
        << "         only works when using octree display" << endl
+       << endl
     << bold << "  -c, --color" << endl << normal
        << "         use color RGB values for coloring point clouds" << endl
+       << endl
     << bold << "  -b" << normal << " NR, " << bold << "--sphere=" << normal << "NR" << endl
        << "         map all measurements on a sphere (of radius NRcm)" << endl
+       << endl
     << bold << "  --saveOct" << endl << normal
        << "         stores all used scans as octrees in the given directory" << endl
        << "         All reflectivity/amplitude/deviation/type settings are stored as well." << endl
        << "         only works when using octree display" << endl
+       << endl
     << bold << "  --loadOct" << endl << normal
        << "         only reads octrees from the given directory" << endl
        << "         All reflectivity/amplitude/deviation/type settings are read from file." << endl
        << "         --reflectance/--amplitude and similar parameters are therefore ignored." << endl
        << "         only works when using octree display" << endl
+       << endl
     << bold << "  -A, --nocoloranim" << endl << normal
        << "         do not switch to different color settings when displaying animation" << endl
+       << endl
     << bold << "  -2, --advanced" << endl << normal
        << "         switch on advanced controls" << endl
     << endl << endl;
