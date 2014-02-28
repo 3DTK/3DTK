@@ -83,9 +83,10 @@ std::list<std::string> readDirectoryHelper(const char *dir_path,
         std::string identifier(to_string(i, 3));
         // scan consists of data and pose files
         bool found = false;
-        for (const char *s = data_path_suffixes[0]; *s != 0; s++) {
+        for (const char **s = data_path_suffixes; *s != 0; s++) {
             path data(dir_path);
-            data /= path(std::string(data_path_prefix) + identifier + s);
+            data /= path(std::string(data_path_prefix) + identifier + *s);
+            cout << data << endl;
             if (exists(data)) {
                 found = true;
                 break;
