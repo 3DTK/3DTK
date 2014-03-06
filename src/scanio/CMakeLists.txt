@@ -18,7 +18,7 @@ if(WITH_RIVLIB)
 endif(WITH_RIVLIB)
 
 add_library(scan_io_helper SHARED helper.cc)
-target_link_libraries(scan_io_helper ${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY})
+target_link_libraries(scan_io_helper ${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY} pointfilter)
 
 foreach(libname ${SCANIO_LIBNAMES})
 if(WIN32)
