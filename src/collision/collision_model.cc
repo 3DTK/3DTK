@@ -53,7 +53,7 @@ void parse_options(int argc, char **argv, IOType &iotype, string &dir,
     prog.add_options()
         ("radius,r", po::value<double>(&radius)->default_value(10),
          "radius of sphere")
-        ("calcdistances,d", po::value<bool>(&calcdistances)->default_value(false),
+        ("calcdistances,d", po::value<bool>(&calcdistances)->zero_tokens(),
          "calculate penetration distance");
 
     po::options_description hidden("Hidden options");
