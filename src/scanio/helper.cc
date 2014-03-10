@@ -170,7 +170,14 @@ void uosHeaderTest(std::istream& infile, std::streamsize bufsize)
 {
     char *buffer = (char *)malloc(bufsize);
     std::streampos sp = infile.tellg();
-    infile.getline(buffer, bufsize, '\n');
+    try { 
+        infile.getline(buffer, bufsize, '\n');
+    } catch(std::ios::failure e) {
+        std::cerr << "error reading first line" << endl;
+        std::cerr << "did not find a newline after " << bufsize << " characters" << endl;
+        std::cerr << e.what() << endl;
+        return;
+    }
     // if uos header, skip it, otherwise reset
     if (!uosHeaderTest(buffer)) {
         infile.seekg(sp);
