@@ -166,6 +166,18 @@ bool uosHeaderTest(char *line)
     return true;
 }
 
+bool commentTest(char *line)
+{
+    char *cur;
+    // start with one or more whitespace
+    for (cur = line; isblank(*cur); ++cur);
+    // check if the first non-blank character is the comment character (#)
+    if (*cur == '#')
+        return true;
+    else
+        return false;
+}
+
 void uosHeaderTest(std::istream& infile, std::streamsize bufsize)
 {
     char *buffer = (char *)malloc(bufsize);
@@ -179,7 +191,7 @@ void uosHeaderTest(std::istream& infile, std::streamsize bufsize)
         return;
     }
     // if uos header, skip it, otherwise reset
-    if (!uosHeaderTest(buffer)) {
+    if (!commentTest(buffer) && !uosHeaderTest(buffer)) {
         infile.seekg(sp);
     }
     free(buffer);
