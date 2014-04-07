@@ -1009,7 +1009,8 @@ void initShow(int argc, char **argv){
       data_oct = new DataOcttree(scan->get("octtree"));
     } catch(runtime_error& e) {
       cout << "Scan " << i
-           << " could not be loaded into memory, stopping here."
+           << " could not be loaded into memory, stopping here. Reason: "
+           << e.what()
            << endl;
       break;
     }
