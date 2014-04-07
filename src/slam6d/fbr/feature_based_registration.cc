@@ -86,9 +86,17 @@ void usage(int argc, char** argv){
   printf("\t\t-i iSizeOptimization \t Optimize the panorama image size based on projection \n");
   printf("\n");
   printf("\n");
+#ifdef WITH_OPENCV_NONFREE
   printf("\t\t-F fMethod\t\t feature detection method [SURF|SIFT|ORB|FAST|STAR]\n");
+#else
+  printf("\t\t-F fMethod\t\t feature detection method [ORB|FAST|STAR]\n");
+#endif
   printf("\t\t-a fFiltrationMethod\t feature filtration method [DISABLE_FILTER|STANDARD_DEVIATION|OCCLUSION]\n");
+#ifdef WITH_OPENCV_NONFREE
   printf("\t\t-d dMethod\t\t feature description method [SURF|SIFT|ORB]\n");
+#else
+  printf("\t\t-d dMethod\t\t feature description method [ORB]\n");
+#endif
   printf("\t\t-m mMethod\t\t feature matching method [BRUTEFORCE|FLANN|KNN|RADIUS|RATIO]\n");
   printf("\t\t-M mParam \t\t special matching paameter (knn for KNN and r for radius)\n");
   printf("\t\t-A mFiltrationMethod\t feature matching filtrtion method [DISABLE_MATCHING_FILTER|FUNDEMENTAL_MATRIX]\n");
@@ -115,8 +123,10 @@ void usage(int argc, char** argv){
   printf("\t\t %s ~/dir/to/bremen_city -s 0 -e 1\n", argv[0]);
   printf("\tLoading scan005.txt and scan006.txt and output panorma images and feature images and match images in ~/dir/to/bremen_city/out dir:\n");
   printf("\t\t %s -V 1 -O ~/dir/to/bremen_city/out/ ~/dir/to/bremen_city -s 5 -e 6 \n", argv[0]);
+#ifdef WITH_OPENCV_NONFREE
   printf("\tLoading scan010.txt and scan011.txt using Mercator projection and SURF feature detector and SIFT descriptor:\n");
   printf("\t\t %s -p MERCATOR -F SURF -d SIFT -O ~/dir/to/bremen_city/out/ ~/dir/to/bremen_city -s 10 -e 11 \n", argv[0]);
+#endif
   printf("\n");
   exit(1);
 }
@@ -146,9 +156,14 @@ void parssArgs(int argc, char** argv, information& info){
   info.secondScanFormat = RIEGL_TXT;
   info.secondScanFormatFlag = false;
   info.pMethod = EQUIRECTANGULAR;
+#ifdef WITH_OPENCV_NONFREE
   info.fMethod = SIFT_DET;
-  info.fFiltrationMethod = DISABLE_FILTER;
   info.dMethod = SIFT_DES;
+#else
+  info.fMethod = ORB_DET;
+  info.dMethod = ORB_DES;
+#endif
+  info.fFiltrationMethod = DISABLE_FILTER;
   info.mMethod = RATIO;
   info.mFiltrationMethod = DISABLE_MATCHING_FILTER;
   info.rMethod = RANSAC;
@@ -317,10 +332,12 @@ void parssArgs(int argc, char** argv, information& info){
     info.mParam = 3;
   if(info.mMethod == RADIUS && info.mParam == 0)
     info.mParam = 100;
+#ifdef WITH_OPENCV_NONFREE
   if(info.dMethod == ORB_DES && info.fMethod == SIFT_DET){
     cout<<"Error: SIFT feature doesn't work with ORB descriptor."<<endl;
     usage(argc, argv);
   }
+#endif
   if(info.mMethod == FLANN && info.dMethod == ORB_DES){
     cout<<"Error: ORB descriptoronly works with BRUTEFORCE matcher."<<endl;
     usage(argc, argv);

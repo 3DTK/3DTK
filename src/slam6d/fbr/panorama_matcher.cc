@@ -25,8 +25,13 @@ void usage(int argc, char** argv){
   printf("\n");
   printf("\n");
   printf("\tOptions:\n");
+#ifdef WITH_OPENCV_NONFREE
   printf("\t\t-F fMethod\t\t feature detection method [SURF|SIFT|ORB|FAST|STAR]\n");
   printf("\t\t-D dMethod\t\t feature description method [SURF|SIFT|ORB]\n");
+#else
+  printf("\t\t-F fMethod\t\t feature detection method [ORB|FAST|STAR]\n");
+  printf("\t\t-D dMethod\t\t feature description method [ORB]\n");
+#endif
   printf("\t\t-M mMethod\t\t feature matching method [BRUTEFORCE|FLANN|KNN|RADIUS|RATIO]\n");
   printf("\t\t-O outDir \t\t output directory if not stated same as input\n");
   printf("\n");
@@ -36,8 +41,13 @@ void usage(int argc, char** argv){
 void parssArgs(int argc, char** argv, information& info){
 
   //default values
+#ifdef WITH_OPENCV_NONFREE
   info.fMethod = SIFT_DET;
   info.dMethod = SIFT_DES;
+#else
+  info.fMethod = ORB_DET;
+  info.dMethod = ORB_DES;
+#endif
   info.mMethod = RATIO;
   info.outDir = "";
 
