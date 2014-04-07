@@ -66,7 +66,9 @@ namespace fbr{
       cout<<"inputs features don't have the same descriptors!"<<endl;
       cout<<"qFeature DescriptorMethod="<<qFeature.getDescriptorMethod()<<endl;
       cout<<"tFeature DescriptorMethod="<<tFeature.getDescriptorMethod()<<endl;
-    } else if( qFeature.getDescriptorMethod() == SURF_DES || qFeature.getDescriptorMethod() == SIFT_DES){
+    }
+#ifdef WITH_OPENCV_NONFREE
+    else if( qFeature.getDescriptorMethod() == SURF_DES || qFeature.getDescriptorMethod() == SIFT_DES){
       if(mMethod == KNN){
 	cv::FlannBasedMatcher matcher;
 	matcher.knnMatch(qFeature.getDescriptors(), tFeature.getDescriptors(), qtInitialMatchesVector, knn);
@@ -95,6 +97,7 @@ namespace fbr{
 	qtInitialMatchesVector.push_back(qtInitialMatches);
       }
     }
+#endif
     //Matching descriptors using Hamming distance for ORB descriptor
     else if(qFeature.getDescriptorMethod() == ORB_DES){
       if(mMethod == KNN){

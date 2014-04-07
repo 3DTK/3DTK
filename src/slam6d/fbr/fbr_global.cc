@@ -119,12 +119,14 @@ namespace fbr{
   string featureDetectorMethodToString(feature_detector_method method){
     string sMethod;
     switch(method){
+#ifdef WITH_OPENCV_NONFREE
     case SIFT_DET:
       sMethod = "SIFT_DET";
       break;
     case SURF_DET:
       sMethod = "SURF_DET";
       break;
+#endif
     case ORB_DET:
       sMethod = "ORB_DET";
       break;
@@ -141,9 +143,12 @@ namespace fbr{
   }
   
   feature_detector_method stringToFeatureDetectorMethod(string method){
+#ifdef WITH_OPENCV_NONFREE
     if(strcasecmp(method.c_str(), "SIFT") == 0) return SIFT_DET;
     else if(strcasecmp(method.c_str(), "SURF") == 0) return SURF_DET;
-    else if(strcasecmp(method.c_str(), "ORB") == 0) return ORB_DET;
+    else
+#endif
+    if(strcasecmp(method.c_str(), "ORB") == 0) return ORB_DET;
     else if(strcasecmp(method.c_str(), "FAST") == 0) return FAST_DET;
     else if(strcasecmp(method.c_str(), "STAR") == 0) return STAR_DET;
     else throw std::runtime_error(std::string("feature detector method ") + method + std::string(" is unknown"));
@@ -152,12 +157,14 @@ namespace fbr{
   string featureDescriptorMethodToString(feature_descriptor_method method){
     string sMethod;
     switch(method){
+#ifdef WITH_OPENCV_NONFREE
     case SIFT_DES:
       sMethod = "SIFT_DES";
       break;
     case SURF_DES:
       sMethod = "SURF_DES";
       break;
+#endif
     case ORB_DES:
       sMethod = "ORB_DES";
       break;
@@ -168,9 +175,12 @@ namespace fbr{
   }
   
   feature_descriptor_method stringToFeatureDescriptorMethod(string method){
+#ifdef WITH_OPENCV_NONFREE
     if(strcasecmp(method.c_str(), "SIFT") == 0) return SIFT_DES;
     else if(strcasecmp(method.c_str(), "SURF") == 0) return SURF_DES;
-    else if(strcasecmp(method.c_str(), "ORB") == 0) return ORB_DES;
+    else
+#endif
+    if(strcasecmp(method.c_str(), "ORB") == 0) return ORB_DES;
     else throw std::runtime_error(std::string("feature descriptor method ") + method + std::string(" is unknown"));
   }
 
