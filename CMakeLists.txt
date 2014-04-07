@@ -176,6 +176,14 @@ ELSE(WITH_THERMO)
   MESSAGE(STATUS "Without thermo")
 ENDIF(WITH_THERMO)
 
+## OpenCV non-free
+OPT_DEP(WITH_OPENCV_NONFREE "Whether to use non-free (patent encumbered) OpenCV functionalities ON/OFF" OFF "")
+IF(WITH_OPENCV_NONFREE)
+  MESSAGE(STATUS "Using non-free OpenCV functionality")
+  SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DWITH_OPENCV_NONFREE")
+ELSE(WITH_OPENCV_NONFREE)
+  MESSAGE(STATUS "Not using non-free OpenCV functionality")
+ENDIF(WITH_OPENCV_NONFREE)
 
 ## Octree
 OPT_DEP(WITH_COMPACT_OCTREE "Whether to use the compact octree display ON/OFF" OFF "")

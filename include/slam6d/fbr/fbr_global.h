@@ -17,7 +17,7 @@
 #include <opencv2/opencv.hpp>
 #endif
 //for opencv 2.4
-#if (CV_MAJOR_VERSION >= 2) && (CV_MINOR_VERSION >= 4)
+#if (CV_MAJOR_VERSION >= 2) && (CV_MINOR_VERSION >= 4) && WITH_OPENCV_NONFREE
 #include <opencv2/nonfree/nonfree.hpp>
 #endif
 #include <math.h>
@@ -78,15 +78,19 @@ namespace fbr{
    * @enum feature_method
    */
   enum feature_detector_method{
+#ifdef WITH_OPENCV_NONFREE
     SIFT_DET,
     SURF_DET,
+#endif
     ORB_DET,
     FAST_DET,
     STAR_DET,
   };
   enum feature_descriptor_method{
+#ifdef WITH_OPENCV_NONFREE
     SIFT_DES,
     SURF_DES,
+#endif
     ORB_DES,
   };
   /**

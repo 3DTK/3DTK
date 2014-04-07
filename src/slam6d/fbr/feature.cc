@@ -14,8 +14,13 @@ using namespace std;
 namespace fbr{
 
   feature::feature(){
+#ifdef WITH_OPENCV_NONFREE
     fDetectorMethod = SIFT_DET;
     fDescriptorMethod = SIFT_DES;
+#else
+    fDetectorMethod = ORB_DET;
+    fDescriptorMethod = ORB_DES;
+#endif
     fFiltrationMethod = DISABLE_FILTER;
   }
   feature::feature(feature_detector_method detector, feature_descriptor_method descriptor, feature_filtration_method filtration){
@@ -28,6 +33,7 @@ namespace fbr{
     fFiltrationMethod = fMethod;
     switch(fDetectorMethod){
       //Detect the keypoints using SURF Detector
+#ifdef WITH_OPENCV_NONFREE
     case SURF_DET:{
       double minHessian = 400;
       cv::SurfFeatureDetector detector(minHessian);
@@ -40,6 +46,7 @@ namespace fbr{
       detector.detect(pImage, keypoints);
       break;
     }
+#endif
       //Detect the keypoints using ORB Detector
     case ORB_DET:{
       cv::OrbFeatureDetector detector;
@@ -77,6 +84,7 @@ namespace fbr{
     if(keypoints.size() == 0)
       featureDetection(pImage);
     switch(fDescriptorMethod){
+#ifdef WITH_OPENCV_NONFREE
     case SURF_DES:{
       //Create descriptor using SURF
       cv::SurfDescriptorExtractor extractor;
@@ -89,6 +97,7 @@ namespace fbr{
       extractor.compute(pImage, keypoints, descriptors);
       break;
     }
+#endif
     case ORB_DES:{
       //Create descriptor using ORB
       cv::OrbDescriptorExtractor extractor;
