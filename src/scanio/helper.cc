@@ -605,7 +605,7 @@ bool readASCII(std::istream& infile, IODataType* spec, ScanDataTransform& transf
         rgb_idx = 0;
     }
 
-    if (infile.bad()) {
+    if (infile.bad() && !infile.eof()) {
         perror("error while reading file");
         goto fail;
     }
