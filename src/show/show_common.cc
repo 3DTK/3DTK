@@ -429,7 +429,7 @@ void usage(char* prog)
        << "         --reflectance/--amplitude and similar parameters are therefore ignored." << endl
        << "         only works when using octree display" << endl
        << endl
-    << bold << "  -A, --nocoloranim" << endl << normal
+    << bold << "  -A, --noanimcolor" << endl << normal
        << "         do not switch to different color settings when displaying animation" << endl
        << endl
     << bold << "  -2, --advanced" << endl << normal
