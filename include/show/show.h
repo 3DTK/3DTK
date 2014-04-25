@@ -77,6 +77,7 @@ void callCameraUpdate(int dummy);
 void callDeleteCamera(int dummy);
 
 void pathAnimate(int dummy);
+void pathMatchingAnimate(int dummy);
 void savePath(int dummy);
 void loadPath(int dummy);
 void savePose(int dummy);

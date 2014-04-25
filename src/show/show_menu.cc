@@ -328,6 +328,7 @@ void newMenu()
   //always_box = glui2->add_checkbox_to_panel(nav_panel, "Always all Points", &dummy4, 0, &changePointMode);
   //glui1->add_checkbox_to_panel(path_panel, "Interpolate by Distance", &inter_by_dist);
   glui1->add_button_to_panel(path_panel, "Animate Path", 0, pathAnimate)->set_alignment( GLUI_ALIGN_CENTER);
+  glui1->add_button_to_panel(path_panel, "Animate Path and Matching", 0, pathMatchingAnimate)->set_alignment( GLUI_ALIGN_CENTER);
 
   /**** Position panel *******/
   
@@ -443,7 +444,11 @@ void pathAnimate(int dummy) {
  
 }
 
-
+void pathMatchingAnimate(int dummy) {
+  haveToUpdate = 8;
+  frameNr = 0;
+  path_iterator = 0;
+}
 /**
  * This function clears the selected points  
  */
