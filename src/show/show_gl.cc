@@ -377,7 +377,17 @@ void DisplayItFunc(GLenum mode, bool interruptable)
   glPolygonMode(GL_FRONT/*_AND_BACK*/, GL_LINE); 
 
   // do the model-transformation
-  if (haveToUpdate == 6 && path_iterator < path_vectorX.size() ) {
+  if (haveToUpdate == 8 && path_iterator < ups.size()) {
+          gluLookAt(cams.at(path_iterator).x,
+                    cams.at(path_iterator).y,
+                    cams.at(path_iterator).z,
+                    lookats.at(path_iterator).x,
+                    lookats.at(path_iterator).y,
+                    lookats.at(path_iterator).z,
+                    ups.at(path_iterator).x-cams.at(path_iterator).x,
+                    ups.at(path_iterator).y-cams.at(path_iterator).y,
+                    ups.at(path_iterator).z-cams.at(path_iterator).z);
+      } else if (haveToUpdate == 6 && path_iterator < path_vectorX.size()) {
     gluLookAt(path_vectorX.at(path_iterator).x,
               path_vectorX.at(path_iterator).y,
               path_vectorZ.at(path_iterator).y,
@@ -874,6 +884,48 @@ void CallBackIdleFunc(void)
   if (haveToUpdate == 4) { // stop animation
     frameNr = 0;  // delete these lines if you want a 'continue' functionality.
     haveToUpdate = 1;
+  }
+
+  // case: scan matching and path animation in lock-step
+  if (haveToUpdate == 8 ) {
+    if (path_iterator == 0) {
+      oldcamNavMode = cameraNavMouseMode;  // remember state of old mousenav
+      cameraNavMouseMode = 0;
+    }
+    frameNr += 1;
+    if(!(MetaMatrix.size() > 1 &&  frameNr < (int) MetaMatrix[1].size())){
+      frameNr = 0;
+      haveToUpdate = 4;
+      return;
+    }
+    cout << path_iterator << " " << ups.size() << endl;
+    if((false && path_iterator < path_vectorX.size()) || (true && path_iterator < ups.size())){   // standard animation case
+
+      // call the path animation function
+      // hide both the cameras and the path
+      show_cameras = 0;
+      show_path = 0;
+      // increase the iteration count
+
+      path_iterator += 1;
+      // repaint the screen
+      glutPostRedisplay();
+
+      // save the animation
+      if(save_animation){
+        string filename = scan_dir + "animframe"
+          + to_string(path_iterator,5) + ".ppm";
+        cout << "written " << filename << " of "
+             << path_vectorX.size() << " files" << endl;
+        glWriteImagePPM(filename.c_str(), factor, 0);
+        haveToUpdate = 8;
+      }
+    } else {                             // animation has just ended
+      cameraNavMouseMode = oldcamNavMode;
+      show_cameras = 1;
+      show_path = 1;
+      haveToUpdate = 0;
+    }
   }
 
   // case: path animation
