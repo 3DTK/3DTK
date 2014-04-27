@@ -94,12 +94,21 @@ void ScanIO_laz::readScan(const char* dir_path,
     double point[3] = { lasreader->point.get_x(),
 				    lasreader->point.get_y(),
 				    lasreader->point.get_z() };
+    double point_tmp[3];
 
     if(xyz != 0) {
 	 // changing to our coordinate system
-      xyz->push_back(-1.0*point[1]);
-      xyz->push_back(point[2]);
-      xyz->push_back(point[0]);
+	 point_tmp[0] = -1.0*point[1];
+	 point_tmp[1] = point[2];
+	 point_tmp[2] = point[0];  
+
+	 // apply filter
+	 if (filter.check(point_tmp)) {
+	   // push point
+	   xyz->push_back(point_tmp[0]);
+	   xyz->push_back(point_tmp[1]);
+	   xyz->push_back(point_tmp[2]);
+	 }
     }
     if (reflectance != 0) {
       /// if intensity doesn't exist, it's automatically set to 0.
