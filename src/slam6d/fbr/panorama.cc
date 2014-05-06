@@ -1,10 +1,19 @@
 /*
  * panorama implementation
  *
- * Copyright (C) HamidReza Houshiar
+ * Copyright (C) by the 3DTK contributors
  *
  * Released under the GPL version 3.
  *
+ */
+
+/**
+ * @file 
+ * @brief Implementation of panorama image generation
+ * @author HamidReza Houshiar, Jacobs University Bremen, Germany
+ * @author Andreas Nuechter. University of Wuerzburg, Germany.
+ * @author Julia Kauer. University of Wuerzburg, Germany.
+ * @author Lukas Gradl. University of Wuerzburg, Germany.
  */
 
 #include "slam6d/fbr/panorama.h"
@@ -932,7 +941,93 @@ namespace fbr{
 	}
       }
     }
+  
+
+
+    //AZIMUTHAL projection
+    if(pMethod == AZIMUTHAL){
+      // set up maximum latitude and longitude angles of the robot 
+      double MIN_VERT_ANGLE = MIN_ANGLE * M_PI / 180.0, MAX_VERT_ANGLE = MAX_ANGLE * M_PI / 180.0,
+	MIN_HORIZ_ANGLE = -M_PI, MAX_HORIZ_ANGLE = M_PI;
+      // set up initial parameters according to MathWorld: http://mathworld.wolfram.com/LambertAzimuthalEqual-AreaProjection.html
+      int Long0 = 0.;
+      double Phi1 = 0. * M_PI / 180.0;
+      // set up max values for x and y and add the longitude to x axis and latitude to y axis
+      // sqrt(2/(1+sin(Phi1)*sin(theta)+cos(Phi1)*cos(theta)*cos(phi-Long0)));
+      double xmax =  sqrt(2/(1+sin(Phi1)*sin(MAX_HORIZ_ANGLE)+cos(Phi1)*cos(MAX_HORIZ_ANGLE)*cos((MIN_VERT_ANGLE/2+MAX_VERT_ANGLE/2)-Long0)))*cos(MAX_HORIZ_ANGLE)*sin((MIN_VERT_ANGLE/2+MAX_VERT_ANGLE/2)-Long0);
+      double xmin = sqrt(2/(1+sin(Phi1)*sin(MIN_HORIZ_ANGLE)+cos(Phi1)*cos(MIN_HORIZ_ANGLE)*cos((MIN_VERT_ANGLE/2+MAX_VERT_ANGLE/2)-Long0)))*cos(MIN_HORIZ_ANGLE)*sin((MIN_VERT_ANGLE/2+MAX_VERT_ANGLE/2)-Long0);
+      double xSize =  ( xmax - xmin );
+
+      double ymin = xmin;     // the thing is supposed to be circular, isn't it?
+      double ymax = xmax;
+      double ySize =  ( ymax - ymin );
+      
+      setImageRatio(xSize, ySize);
+      initMat();   
+      
+      xSize=1/2.;
+      ySize=1/2.;
+
+      double xFactor = (double) iWidth / 2*xSize;
+      int widthMax = iWidth - 1;
+      double yFactor = (double) iHeight / 2*ySize;
+      //shift all the values to positive points on image 
+      int heightMax = iHeight - 1;
+      cv::MatIterator_<cv::Vec4f> it, end; 
+      cv::MatIterator_<cv::Vec3f> itColor;
+      if(color.empty() == 0)
+	itColor = color.begin<cv::Vec3f>();
+      
+      for( it = scan.begin<cv::Vec4f>(), end = scan.end<cv::Vec4f>(); it != end; ++it){
+	double kart[3], polar[3], phi, theta, range;
+	kart[0] = (*it)[2]/100;
+	kart[1] = (*it)[0]/-100;
+	kart[2] = (*it)[1]/100;
+	toPolar(kart, polar);
+	//theta == polar[0] == scan [4]
+	//phi == polar[1] == scan [5]
+	//range == polar[2] == scan [3]
+	theta = polar[0] * 180 / M_PI;
+	phi = polar[1] * 180 / M_PI;
+	range = polar[2];
+	//phi == longitude == horizantal angle of view of [0:360] 
+	phi = 180.0 - phi;
+	phi *= M_PI / 180.0;
+	//theta == latitude == vertical angle of view of [-40:60]
+	theta -= 90;
+	theta *= -1;
+	theta *= M_PI / 180.0;
+
+	//calculate kprime according to Mathworld article
+	double kprime = sqrt(2/(1+sin(Phi1)*sin(theta)+cos(Phi1)*cos(theta)*cos(phi-Long0)));
+
+	// add minimum x position as an offset
+	int x = (int) xFactor*kprime*cos(theta)*sin(phi-Long0);
+	x = widthMax/2 + x;
+	if (x < 0) x = 0;
+	if (x > widthMax) x = widthMax;
+        
+	// add minimum y position as an offset
+	int y = (int) yFactor*kprime*(cos(Phi1)*sin(theta)-sin(Phi1)*cos(theta)*cos(phi-Long0));
+	y = -y + heightMax/2;
+	if (y < 0) y = 0;
+	if (y > heightMax) y = heightMax;
+	//create the iReflectance iRange and map
+	map(x, y, it, range);
+	//create the iColor
+	if(color.empty() == 0){
+	  mapColor(x, y, itColor);
+	  ++itColor;
+	}
+      }
+    }
   }
+
+
+
+
+
+
 
   void panorama::recoverPointCloud(const cv::Mat& range_image,
 				   cv::Mat& reflectance_image, vector<cv::Vec4f> &reduced_points) {
