@@ -1,10 +1,16 @@
 /*
  * fbr_global implementation
  *
- * Copyright (C) HamidReza Houshiar
+ * Copyright (C) by the 3DTK contributors
  *
  * Released under the GPL version 3.
  *
+ */
+
+/**
+ * @file 
+ * @brief Implementation of global functions for feature based registration 
+ * @author HamidReza Houshiar, Jacobs University Bremen, Germany
  */
 
 #include "slam6d/fbr/fbr_global.h"
@@ -76,6 +82,9 @@ namespace fbr{
     case EQUALAREACYLINDRICAL:
       sMethod = "EQUALAREACYLINDRICAL";
       break;
+    case AZIMUTHAL:
+      sMethod = "AZIMUTHAL";
+      break;
     default:
       throw std::runtime_error(std::string("projection method ") + to_string(method) + std::string(" could not be matched to a projection method"));
     }
@@ -92,6 +101,7 @@ namespace fbr{
     else if(strcasecmp(method.c_str(), "ZAXIS") == 0) return ZAXIS;
     else if(strcasecmp(method.c_str(), "CONIC") == 0) return CONIC;
     else if(strcasecmp(method.c_str(), "EQUALAREACYLINDRICAL") == 0) return EQUALAREACYLINDRICAL;
+    else if(strcasecmp(method.c_str(), "AZIMUTHAL") == 0) return AZIMUTHAL;
     else throw std::runtime_error(std::string("projection method ") + method + std::string(" is unknown"));
   }
   
