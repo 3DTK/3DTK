@@ -65,7 +65,8 @@ namespace fbr{
     STEREOGRAPHIC,
     ZAXIS,
     CONIC,
-    EQUALAREACYLINDRICAL
+    EQUALAREACYLINDRICAL,
+    AZIMUTHAL
   };
   /**
    * @enum panorama_map_method
