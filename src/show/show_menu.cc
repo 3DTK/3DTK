@@ -40,6 +40,7 @@ GLUI_Spinner    *fps_spinner;
 GLUI_Spinner    *farplane_spinner;
 GLUI_Spinner    *nearplane_spinner;
 GLUI_Spinner    *lod_spinner;
+GLUI_Spinner    *threed_spinner;
 
 int window_id_menu1, ///< menue window ids
     window_id_menu2; ///< menue window ids
@@ -409,6 +410,12 @@ GLUI_SPINNER_INT, &factor);
     lod_spinner->set_float_limits( 0, 3.0 );
     lod_spinner->set_speed( 0.1 );
     lod_spinner->set_alignment(GLUI_ALIGN_RIGHT);
+
+    glui1->add_checkbox_to_panel(advanced_panel, "Shift Path for 3D", &path3D);
+    threed_spinner = glui1->add_spinner_to_panel(advanced_panel, "3D Shift :   ", GLUI_SPINNER_FLOAT, &shifted);
+    threed_spinner->set_float_limits( 0, 50.0 );
+    threed_spinner->set_speed( 0.1 );
+    threed_spinner->set_alignment(GLUI_ALIGN_RIGHT);
     
     glui1->add_separator();
   }

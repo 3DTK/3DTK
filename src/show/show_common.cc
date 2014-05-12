@@ -204,6 +204,9 @@ bool coloranim = true;
 
 int frameNr = 0;
 
+int path3D = 0;
+float shifted = 20.0;
+
 /**
  * Storing of all transformation (frames for animation) of all scans
  */
