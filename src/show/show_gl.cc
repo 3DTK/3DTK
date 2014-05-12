@@ -388,15 +388,72 @@ void DisplayItFunc(GLenum mode, bool interruptable)
                     ups.at(path_iterator).y-cams.at(path_iterator).y,
                     ups.at(path_iterator).z-cams.at(path_iterator).z);
       } else if (haveToUpdate == 6 && path_iterator < path_vectorX.size()) {
-    gluLookAt(path_vectorX.at(path_iterator).x,
-              path_vectorX.at(path_iterator).y,
-              path_vectorZ.at(path_iterator).y,
-              lookat_vectorX.at(path_iterator).x,
+    
+    if(path3D) {
+      /* To make 3D videos:
+      1. animate path (store images in folder left)
+      2. in advanced mode set "Shift Path for 3D" and the "3D Shift" for baseline
+      3. animate path again (store images in folder right)
+      4. append left and right images into one, reducing width of original images to half
+      
+      for (( c=1; c < 1000; c++ ))
+      do
+        `printf "convert +append -resize 480x540! left/animframe%05d.jpg right/animframe%05d.jpg long3D/animframe%05d.jpg" "$c" "$c" "$c"`
+      done
+      mencoder "mf://long3D/*.jpg" -mf fps=25 -o test.avi -ovc lavc -lavcopts vcodec=mjpeg:vbitrate=8000
+      
+      5. upload video to youtube, select in advanced options 3D Video, video is already in 3d format
+      */
+
+      double * lc = new double[3];
+      double * uc = new double[3];
+      double * n = new double[3];
+
+      Point l(lookat_vectorX.at(path_iterator).x,
               lookat_vectorX.at(path_iterator).y,
-              lookat_vectorZ.at(path_iterator).y,
-              ups_vectorX.at(path_iterator).x-path_vectorX.at(path_iterator).x,
-              ups_vectorX.at(path_iterator).y-path_vectorX.at(path_iterator).y, 
-              ups_vectorZ.at(path_iterator).y-path_vectorZ.at(path_iterator).y);
+              lookat_vectorZ.at(path_iterator).y);
+      Point p(path_vectorX.at(path_iterator).x,
+              path_vectorX.at(path_iterator).y,
+              path_vectorZ.at(path_iterator).y);
+      Point u(ups_vectorX.at(path_iterator).x - path_vectorX.at(path_iterator).x,
+              ups_vectorX.at(path_iterator).y - path_vectorX.at(path_iterator).y,
+              ups_vectorZ.at(path_iterator).y - path_vectorZ.at(path_iterator).y);
+
+      lc[0] = l.x - p.x;
+      lc[1] = l.y - p.y;
+      lc[2] = l.z - p.z;
+
+      uc[0] = u.x; 
+      uc[1] = u.y; 
+      uc[2] = u.z; 
+      
+      Cross(lc,uc,n);
+      Normalize3(n);
+      p.x = p.x + n[0] * shifted;
+      p.y = p.y + n[1] * shifted;
+      p.z = p.z + n[2] * shifted;
+      l.x = l.x + n[0] * shifted;
+      l.y = l.y + n[1] * shifted;
+      l.z = l.z + n[2] * shifted;
+
+      delete[] lc;
+      delete[] uc;
+      delete[] n;
+      
+      gluLookAt(p.x,p.y,p.z,l.x,l.y,l.z,u.x,u.y,u.z);
+
+    } else {
+
+      gluLookAt(path_vectorX.at(path_iterator).x,
+                path_vectorX.at(path_iterator).y,
+                path_vectorZ.at(path_iterator).y,
+                lookat_vectorX.at(path_iterator).x,
+                lookat_vectorX.at(path_iterator).y,
+                lookat_vectorZ.at(path_iterator).y,
+                ups_vectorX.at(path_iterator).x-path_vectorX.at(path_iterator).x,
+                ups_vectorX.at(path_iterator).y-path_vectorX.at(path_iterator).y, 
+                ups_vectorZ.at(path_iterator).y-path_vectorZ.at(path_iterator).y);
+    }
   } else {
     if (cameraNavMouseMode == 1) {
       glRotated( mouseRotX, 1, 0, 0);
