@@ -128,7 +128,7 @@ std::vector<Frame> read_trajectory(string filename)
 
 void write_xyzr(DataXYZ &points, string &dir,
         std::vector<bool> const &colliding,
-        std::vector<double> const &dist_colliding)
+        std::vector<float> const &dist_colliding)
 {
     cerr << "writing colliding points to " << dir << "scan002.xyz" << endl;
     ofstream fcolliding((dir + "scan002.xyz").c_str());
@@ -246,7 +246,7 @@ size_t handle_pointcloud(DataXYZ &model, DataXYZ &environ,
 void calculate_collidingdist(DataXYZ &environ,
                              std::vector<bool> const &colliding,
                              size_t num_colliding,
-                             std::vector<double> &dist_colliding)
+                             std::vector<float> &dist_colliding)
 {
     /* build a kdtree for the non-colliding points */
     cerr << "reading environment..." << endl;
@@ -286,7 +286,7 @@ void calculate_collidingdist(DataXYZ &environ,
         }*/
         c = idxmap[c];
         double point2[3] = {environ[c][0], environ[c][1], environ[c][2]};
-        double dist = sqrt(Dist2(point1, point2));
+        float dist = sqrt(Dist2(point1, point2));
         dist_colliding.push_back(dist);
     }
     time_t after = time(NULL);
@@ -334,10 +334,14 @@ int main(int argc, char **argv)
         cerr << "nothing collides" << endl;
         exit(0);
     }
-    std::vector<double> dist_colliding;
+    std::vector<float> dist_colliding;
     dist_colliding.reserve(num_colliding);
     if (calcdistances) {
         calculate_collidingdist(environ, colliding, num_colliding, dist_colliding);
+    } else {
+        for (size_t i = 0; i < num_colliding; ++i) {
+            dist_colliding[i] = 0;
+        }
     }
     write_xyzr(environ, dir, colliding, dist_colliding);
 }
