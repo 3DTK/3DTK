@@ -51,7 +51,7 @@ using namespace boost::filesystem;
 std::list<std::string> ScanIO_rts::readDirectory(const char* dir_path, unsigned int start, unsigned int end)
 {
     const char* suffixes[2] = { DATA_PATH_SUFFIX, NULL };
-    return readDirectoryHelper(dir_path, start, end, suffixes, DATA_PATH_PREFIX);
+    return readDirectoryHelper(dir_path, start, end, suffixes, DATA_PATH_PREFIX, 0);
 }
 
 void ScanIO_rts::readPose(const char* dir_path, const char* identifier, double* pose)
