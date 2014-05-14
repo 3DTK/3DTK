@@ -53,8 +53,8 @@ bool ScanDataTransform_rts::transform(double xyz[3], unsigned char rgb[3], float
     double tmp;
     tmp = xyz[2];
     xyz[2] = 0.1 * xyz[0];
-    xyz[0] = -0.1 * xyz[1];
-    xyz[1] = 0.1 * tmp;
+    xyz[0] = 0.1 * xyz[1];
+    xyz[1] = -0.1 * tmp;
 
     return true;
 }
@@ -75,12 +75,13 @@ std::list<std::string> readDirectoryHelper(const char *dir_path,
         unsigned int start,
         unsigned int end,
         const char **data_path_suffixes,
-        const char *data_path_prefix)
+        const char *data_path_prefix,
+        unsigned int id_len)
 {
     std::list<std::string> identifiers;
     for (unsigned int i = start; i <= end; ++i) {
         // identifier is /d/d/d (000-999)
-        std::string identifier(to_string(i, 3));
+        std::string identifier(to_string(i, id_len));
         // scan consists of data and pose files
         bool found = false;
         for (const char **s = data_path_suffixes; *s != 0; s++) {

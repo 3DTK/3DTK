@@ -40,7 +40,8 @@ std::list<std::string> readDirectoryHelper(
         unsigned int start,
         unsigned int end,
         const char** data_path_suffix,
-        const char* data_path_prefix = "scan");
+        const char* data_path_prefix = "scan",
+        unsigned int id_len = 3);
 void readPoseHelper(
         const char* dir_path,
         const char* identifier,
