@@ -467,6 +467,7 @@ IF(WITH_TESTING)
   find_package(Boost COMPONENTS system filesystem unit_test_framework REQUIRED)
   enable_testing()
   add_subdirectory(testing/scanio)
+  add_subdirectory(testing/kdtree)
 ENDIF(WITH_TESTING)
 
 
