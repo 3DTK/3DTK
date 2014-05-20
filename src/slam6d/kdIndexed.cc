@@ -78,7 +78,7 @@ size_t KDtreeIndexed::FindClosest(double *_p,
                             double maxdist2,
                             int threadNum) const
 {
-  params[threadNum].closest = 0;
+  params[threadNum].closest = std::numeric_limits<size_t>::max();
   params[threadNum].closest_d2 = maxdist2;
   params[threadNum].p = _p;
   _FindClosest(m_data, threadNum);
@@ -90,7 +90,7 @@ size_t KDtreeIndexed::FindClosestAlongDir(double *_p,
                                     double maxdist2,
                                     int threadNum) const
 {
-  params[threadNum].closest = 0;
+  params[threadNum].closest = std::numeric_limits<size_t>::max();
   params[threadNum].closest_d2 = maxdist2;
   params[threadNum].p = _p;
   params[threadNum].dir = _dir;
