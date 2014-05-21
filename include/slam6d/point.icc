@@ -176,6 +176,35 @@ inline Point& Point::operator+=(const Point &p)
   return *this;
 };
 
+inline bool Point::operator!=(const Point &p) const
+{
+  // check all properties except point_id
+  return (x != p.x) || (y != p.y) || (z != p.z)
+      || (nx != p.nx) || (ny != p.ny) || (nz != p.nz)
+      || (type != p.type)
+      || (reflectance != p.reflectance)
+      || (temperature != p.temperature)
+      || (amplitude != p.amplitude)
+      || (deviation != p.deviation)
+      || (rgb[0] != p.rgb[0])
+      || (rgb[1] != p.rgb[1])
+      || (rgb[2] != p.rgb[2]);
+}
+
+inline bool Point::operator==(const Point &p) const
+{
+  // check all properties except point_id
+  return (x == p.x) && (y == p.y) && (z == p.z)
+      && (nx == p.nx) && (ny == p.ny) && (nz == p.nz)
+      && (type == p.type)
+      && (reflectance == p.reflectance)
+      && (temperature == p.temperature)
+      && (amplitude == p.amplitude)
+      && (deviation == p.deviation)
+      && (rgb[0] == p.rgb[0])
+      && (rgb[1] == p.rgb[1])
+      && (rgb[2] == p.rgb[2]);
+}
 
 /**
  *  Overridden "<<" operator for sending a point to a stream
