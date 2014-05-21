@@ -255,8 +255,9 @@ namespace fbr{
       else
 	reflectance = 255;
       
-                 
-      //normalize the reflectance                                     
+      //normalize the reflectance                                           
+      reflectance = fbr::normalizeTheReflectance(reflectance, sType, minReflectance, maxReflectance);
+      /*
       if(sType == RIEGL){
 	reflectance += 32;
 	reflectance /= 64;
@@ -275,7 +276,8 @@ namespace fbr{
 	if (reflectance < 0) reflectance = 0;
 	if (reflectance > 1) reflectance = 1;
       }
-      
+      */
+
       (*it)[0] = x;
       (*it)[1] = y;
       (*it)[2] = z;

@@ -19,6 +19,7 @@
 #define __PANORAMA_H__
 
 #include "fbr_global.h"
+#include "slam6d/point_type.h"
 
 using namespace std;
 
@@ -42,6 +43,19 @@ namespace fbr{
             (see Master Thesis for more info) or special R parameter of
             Stereographic projection (Master Thesis for more info)
 	    or phi_s for EQUALAREACYLINDRICAL projection
+   * @param maxRange the maximum range of the scan
+   * @param mapMethod the method for creating the map [FARTHEST | EXTENDED]
+   * @param zMin, zMax min and max of Z
+   * @param MAX_ANGLE, MIN_ANGLE max and min vertical angle
+   * @param iOprimization flag for image size optimization method
+   * @param xSize, ySize, xFactor, yFactor, withMax, heightMax, heightLow Panormam method parameters
+   * @param MIN_VERT_ANGLE, MAX_VERT_ANGLE, MIN_HORIZ_ANGLE, MAX_HORIZ_ANGLE, Lat0, Long0, Ph1, Phi2, n, C, Rho0, 
+            xmax, xmin, ymin, ymax Conin projection params
+   * @param coscRectilinear rectilinear projection param
+   * @param sPannini pannini projection param
+   * @param k stereographic projetion param
+   * @param l0, p1, iMinx, iMaxx, iMiny, iMaxy, interval, min, max parameters for ptojection with more than one image
+   * @param kprime azimuthal projection param
    */
   class panorama {
     cv::Mat iReflectance;
@@ -60,6 +74,27 @@ namespace fbr{
     double MAX_ANGLE, MIN_ANGLE;
     bool iOptimization;
 
+    //panorama method params
+    double xSize, ySize;
+    double xFactor, yFactor;
+    int widthMax, heightMax;
+    double heightLow;
+    //conic params
+    double MIN_VERT_ANGLE, MAX_VERT_ANGLE, MIN_HORIZ_ANGLE, MAX_HORIZ_ANGLE;
+    double Lat0, Long0;
+    double Phi1, Phi2;
+    double n, C, Rho0;
+    double xmax, xmin, ymin, ymax;
+    //rectilinear params
+    double coscRectilinear;
+    //pannini params
+    double sPannini;
+    //stereographic params
+    double k;
+    //projections with more than one image
+    double l0, p1, iMinx, iMaxx, iMiny, iMaxy, interval, min, max;
+    //azimuthal projection
+    double kprime;
 
     void map(int x,
              int y,
@@ -68,6 +103,7 @@ namespace fbr{
     void mapColor(int x, int y, cv::MatIterator_<cv::Vec3f> itColor);
     void initMat();
     void setImageRatio(double xSize, double ySize);
+    void calcPanoramaPositionForAPoint(int &x, int &y, cv::MatIterator_<cv::Vec4f> it, double &range);
 
   public:
     /**
@@ -131,12 +167,24 @@ namespace fbr{
 	      double MINANGLE = -40,
 	      double MAXANGLE = 60,
 	      bool imageOptimization = false);
+    
+    void clear();
 
     /**
      * @brief creates the panorama reflectance image and map and color image.
      */
     void createPanorama(cv::Mat scan);
     void createPanorama(cv::Mat scan, cv::Mat color);
+    //create panorama point by point from octree
+    PointType pointtype;
+    scanner_type sType;
+    double minReflectance, maxReflectance;
+    void createPanoramaFromOctree(PointType pointtype_, scanner_type sType_, double minReflectacne_, double maxReflectance_);
+    //accept points from octree
+    template <class T>
+      void accept(T *point);
+    //add the point from octree to panorama
+    void addPointToPanorama(float x, float y, float z, float reflectance, float r, float g, float b);
     /**
      * @brief recovers the point cloud from the panorama image and
               range information
