@@ -152,5 +152,10 @@ namespace fbr{
   feature_filtration_method stringToFeatureFiltrationMethod(string method);
   string matchingFiltrationMethodToString(matching_filtration_method method);
   matching_filtration_method stringToMatchingFiltrationMethod(string method);
+
+  
+  //reflecrtance normaliation
+  float normalizeTheReflectance(float reflecrtance, scanner_type sType, double minReflectance, double maxReflectance);
+
 }
 #endif /* FBR_GLOBAL_H_ */
