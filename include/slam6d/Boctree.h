@@ -425,6 +425,8 @@ public:
   void GetOctTreeRandom(vector<T*>&c) { GetOctTreeRandom(c, *root); }
   void GetOctTreeRandom(vector<T*>&c, unsigned int ptspervoxel) { GetOctTreeRandom(c, ptspervoxel, *root); }
   void AllPoints(vector<T *> &vp) { AllPoints(*BOctTree<T>::root, vp); }
+  template <class Visitor>
+  void visit(Visitor &vClass) { visit(*BOctTree<T>::root, vClass); }
 
   long countNodes() { return 1 + countNodes(*root); } // computes number of inner nodes
   long countLeaves() { return countLeaves(*root); }   // computes number of leaves + points
@@ -717,6 +719,42 @@ protected:
           }
         } else { // recurse
           AllPoints( children->node, vp);
+        }
+        ++children; // next child
+      }
+    }
+  }
+
+  template <class Visitor>
+  void visit( bitoct &node, Visitor &vClass) {
+    bitunion<T> *children;
+    bitoct::getChildren(node, children);
+
+    for (short i = 0; i < 8; i++) {
+      if (  ( 1 << i ) & node.valid ) {   // if ith node exists
+        if (  ( 1 << i ) & node.leaf ) {   // if ith node is leaf get center
+          // absolute pointer
+          //pointrep *points = children->points;
+          // offset pointer
+          pointrep* points = children->getPointreps();
+          unsigned int length = points[0].length;
+          T *point = &(points[1].v);  // first point
+          for(unsigned int iterator = 0; iterator < length; iterator++ ) {
+            //T *p = new T[BOctTree<T>::POINTDIM];
+//            T *p = new T[3];
+//            p[0] = point[0]; p[1] = point[1]; p[2] = point[2];
+            T *p = new T[BOctTree<T>::POINTDIM];
+            for (unsigned int k = 0; k < BOctTree<T>::POINTDIM; k++)
+              p[k] = point[k];
+
+            //vp.push_back(p);
+	    vClass.accept(p);
+
+            //glVertex3f( point[0], point[1], point[2]);
+            point+=BOctTree<T>::POINTDIM;
+          }
+        } else { // recurse
+          visit( children->node, vClass);
         }
         ++children; // next child
       }

@@ -297,4 +297,35 @@ namespace fbr{
     else if(strcasecmp(method.c_str(), "DISABLE_MATCHING_FILTER") == 0) return DISABLE_MATCHING_FILTER;
     else throw std::runtime_error(std::string("matching filtration method ") + method + std::string(" is unknown"));
   }
+
+  //reflectance normalization
+  float normalizeTheReflectance(float reflectance, scanner_type sType, double minReflectance, double maxReflectance)
+  {
+    
+    //normalize the reflectance
+    if(sType == fbr::RIEGL)
+      {
+	reflectance += 32;
+	reflectance /= 64;
+	reflectance -= 0.2;
+	reflectance /= 0.3;
+      }
+    if(sType == fbr::FARO)
+      {
+	reflectance -= 1250;
+	reflectance /= 800;
+      }
+    if(sType == MANUAL)
+      {                                                                                                            
+	reflectance = (reflectance - (minReflectance))/(maxReflectance-minReflectance);
+      }
+    if(sType != fbr::NONE)
+      {
+	if (reflectance < 0) reflectance = 0;
+	if (reflectance > 1) reflectance = 1;
+      }
+    
+    return reflectance;
+  }
+
 }
