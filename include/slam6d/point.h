@@ -63,6 +63,8 @@ public:
   inline Point operator-(const Point &p) const;
   inline Point& operator-=(const Point &p);
   inline Point& operator+=(const Point &p);
+  inline bool operator!=(const Point &p) const;
+  inline bool operator==(const Point &p) const;
 
   inline void transform(const double alignxf[16]);
   inline double distance(const Point& p);
