@@ -71,7 +71,13 @@ public:
   virtual vector<Point> fixedRangeSearch(double *_p,
 								 double sqRad2,
 								 int threadNum = 0) const;
-  
+
+  virtual vector<Point> AABBSearch(double *_p,
+                                   double* _p0,
+                                   int threadNum = 0) const;
+
 };
+
+
 
 #endif
