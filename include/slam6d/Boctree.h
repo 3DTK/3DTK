@@ -245,7 +245,9 @@ public:
     center[0] = 0.5 * (mins[0] + maxs[0]);
     center[1] = 0.5 * (mins[1] + maxs[1]);
     center[2] = 0.5 * (mins[2] + maxs[2]);
+    
     size = max(max(0.5 * (maxs[0] - mins[0]), 0.5 * (maxs[1] - mins[1])), 0.5 * (maxs[2] - mins[2]));
+    cout << size << endl;
     size += 1.0; // for numerical reasons we increase size 
 
     // calculate new buckets
@@ -423,7 +425,7 @@ public:
 
   void GetOctTreeCenter(vector<T*>&c) { GetOctTreeCenter(c, *root, center, size); }
   void GetOctTreeRandom(vector<T*>&c) { GetOctTreeRandom(c, *root); }
-  void GetOctTreeRandom(vector<T*>&c, unsigned int ptspervoxel) { GetOctTreeRandom(c, ptspervoxel, *root); }
+  void GetOctTreeRandom(vector<T*>&c, int ptspervoxel) { GetOctTreeRandom(c, ptspervoxel, *root); }
   void AllPoints(vector<T *> &vp) { AllPoints(*BOctTree<T>::root, vp); }
   template <class Visitor>
   void visit(Visitor &vClass) { visit(*BOctTree<T>::root, vClass); }
@@ -906,10 +908,9 @@ protected:
     }
   } 
   
-  void GetOctTreeRandom(vector<T*>&c, unsigned int ptspervoxel, bitoct &node) {
+  void GetOctTreeRandom(vector<T*>&c, int ptspervoxel, bitoct &node) {
     bitunion<T> *children;
     bitoct::getChildren(node, children);
-
     for (short i = 0; i < 8; i++) {
       if (  ( 1 << i ) & node.valid ) {   // if ith node exists
         if (  ( 1 << i ) & node.leaf ) {   // if ith node is leaf
@@ -918,7 +919,17 @@ protected:
           // offset pointer
           pointrep* points = children->getPointreps();
           unsigned int length = points[0].length;
-          if (ptspervoxel >= length) {
+          // ignore points from voxels with less than -ptspervoxel points
+          if(ptspervoxel < 0) {
+            if(length > -ptspervoxel) {
+              for (unsigned int j = 0; j < length; j++) 
+                c.push_back(&(points[POINTDIM*j+1].v));
+
+              ++children; // next child
+             // continue;
+            }
+            continue;
+          } else if (ptspervoxel >= length) {
             for (unsigned int j = 0; j < length; j++) 
               c.push_back(&(points[POINTDIM*j+1].v));
 
