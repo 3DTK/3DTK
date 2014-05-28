@@ -366,7 +366,7 @@ void Scan::calcReducedPoints()
 
     vector<double*> center;
     center.clear();
-    if (reduction_nrpts > 0) {
+    if (reduction_nrpts != 0) {
       if (reduction_nrpts == 1) {
         oct->GetOctTreeRandom(center);
       } else {
