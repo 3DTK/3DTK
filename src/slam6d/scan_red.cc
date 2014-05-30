@@ -388,8 +388,8 @@ void scan2mat(Scan *source, cv::Mat &mat)
 
 }
 
-void reduce_octree(Scan *scan, vector<cv::Vec4f> &reduced_points, int octree,
-                   double red, bool use_reflectance)
+void reduce_octree(Scan *scan, vector<cv::Vec4f> &reduced_points, vector<cv::Vec3b> &color, 
+                   int octree, double red, bool use_reflectance, bool use_color)
 {
   if (use_reflectance) {
     unsigned int types = PointType::USE_REFLECTANCE;
@@ -412,8 +412,34 @@ void reduce_octree(Scan *scan, vector<cv::Vec4f> &reduced_points, int octree,
                                          xyz_reduced[j][2],
                                          reflectance_reduced[j]));
     }
-  } 
-  else {
+  } else if (use_color) {
+    unsigned int types = PointType::USE_COLOR;
+    PointType pointtype(types);
+    scan->setReductionParameter(red, octree, pointtype);
+    scan->calcReducedPoints();
+
+    DataXYZ xyz_reduced(scan->get("xyz reduced"));
+    DataRGB color_reduced(scan->get("color reduced"));
+
+    cout  << xyz_reduced.size() << " " << color_reduced.size() << endl;
+    
+    if (xyz_reduced.size() != color_reduced.size()) {
+      cerr << "xyz_reduced size different than color_reduced size"
+           << endl;
+      return;
+    }
+    
+    for(unsigned int j = 0; j < xyz_reduced.size(); j++) {
+      reduced_points.push_back(cv::Vec4f(xyz_reduced[j][0],
+                                         xyz_reduced[j][1],
+                                         xyz_reduced[j][2],
+                                         0.0));
+
+      color.push_back(cv::Vec3b(color_reduced[j][0],
+                                color_reduced[j][1],
+                                color_reduced[j][2]));
+    }
+  } else {
     scan->setReductionParameter(red, octree);
     scan->calcReducedPoints();
 
@@ -541,6 +567,27 @@ void write_uosr(vector<cv::Vec4f> &points, string &dir, string id)
   outfile.close();
 }
 
+/*
+ * given a vector of 3d points, write them out as uos_rgb files
+ */
+void write_uos_rgb(vector<cv::Vec4f> &points, vector<cv::Vec3b> &color, string &dir, string id)
+{
+  ofstream outfile((dir + "/scan" + id + ".3d").c_str());
+  
+  outfile.precision(20);
+  outfile << "# header is ignored" << endl;
+
+  vector<cv::Vec3b>::iterator cit=color.begin(); 
+  for (vector<cv::Vec4f>::iterator it=points.begin();  it < points.end(); it++) {
+    if((*it)[0]!=0 && (*it)[1]!=0 && (*it)[2]!=0)
+      outfile << (*it)[0] << " " << (*it)[1] << " " << (*it)[2] << " " 
+      << (int)(*cit)[0] << " " << (int)(*cit)[1] << " " << (int)(*cit)[2] << endl;
+      cit++;
+  }
+
+  outfile.close();
+}
+
 // write .pose files
 // .frames files can later be generated from them using ./bin/pose2frames
 void writeposefile(string &dir, const double* rPos, const double* rPosTheta, string id)
@@ -595,104 +642,118 @@ int main(int argc, char **argv)
   for (int iter = start; iter <= end; iter++) {
     
     vector<cv::Vec4f> reduced_points;
+    vector<cv::Vec3b> color;
       
     string reddir = dir + "reduced";
     createdirectory(reddir);
     
     if(rtype == OCTREE)
-      {
-	Scan::openDirectory(scanserver, dir, iotype, iter, iter);
-	if(Scan::allScans.size() == 0) {
-	  cerr << "No scans found. Did you use the correct format?" << endl;
-	  exit(-1);
-	}
-	
-	Scan* scan = *Scan::allScans.begin();
-	
-	scan->setRangeFilter(maxDist, minDist);
-	
-	reduce_octree(scan,
-		      reduced_points,
-		      octree,
-		      voxel,
-		      use_reflectance);
-	
-	if (use_reflectance)
-	  write_uosr(reduced_points,
-		     reddir,
-		     scan->getIdentifier());
-	else
-	  write_uos(reduced_points,
-		    reddir,		  
-		    scan->getIdentifier());
-	
-
-	writeposefile(reddir,
-		      scan->get_rPos(),
-		      scan->get_rPosTheta(),
-		      scan->getIdentifier());
-	
+    {
+      Scan::openDirectory(scanserver, dir, iotype, iter, iter);
+      if(Scan::allScans.size() == 0) {
+        cerr << "No scans found. Did you use the correct format?" << endl;
+        exit(-1);
       }
+
+      Scan* scan = *Scan::allScans.begin();
+
+      scan->setRangeFilter(maxDist, minDist);
+
+      reduce_octree(scan,
+          reduced_points,
+          color,
+          octree,
+          voxel,
+          use_reflectance,
+          use_color);
+
+      if (use_reflectance)
+        write_uosr(reduced_points,
+            reddir,
+            scan->getIdentifier());
+      else if(use_color)
+        write_uos_rgb(reduced_points,
+            color,
+            reddir,
+            scan->getIdentifier());
+      else
+        write_uos(reduced_points,
+            reddir,		  
+            scan->getIdentifier());
+
+
+      writeposefile(reddir,
+          scan->get_rPos(),
+          scan->get_rPosTheta(),
+          scan->getIdentifier());
+
+    }
     else
+    {
+      scan_cv sMat(dir, iter, iotype, scanserver, sType, loadOct, saveOct, use_reflectance, use_color);
+
+      if(rtype == RANGE)
       {
-	scan_cv sMat(dir, iter, iotype, scanserver, sType, loadOct, saveOct, use_reflectance, use_color);
+        sMat.convertScanToMat();
+        reduce_range(sMat.getMatScan(),
+            reduced_points,
+            width,
+            height,
+            ptype,
+            scale,
+            use_reflectance,
+            MIN_ANGLE,
+            MAX_ANGLE,
+            nImages,
+            pParam,
+            mMethod,
+            zMin,
+            zMax,
+            imageOptimization);
 
-	if(rtype == RANGE)
-	  {
-	    sMat.convertScanToMat();
-	    reduce_range(sMat.getMatScan(),
-			 reduced_points,
-			 width,
-			 height,
-			 ptype,
-			 scale,
-			 use_reflectance,
-			 MIN_ANGLE,
-			 MAX_ANGLE,
-			 nImages,
-			 pParam,
-			 mMethod,
-			 zMin,
-			 zMax,
-			 imageOptimization);
 
-	    
-	  }
-	else if(rtype == INTERPOLATE)
-	  {
-	    sMat.convertScanToMat();
-	    reduce_interpolation(sMat.getMatScan(),
-				 reduced_points,
-				 width,
-				 height,
-				 ptype,
-				 scale,
-				 use_reflectance,
-				 MIN_ANGLE,
-				 MAX_ANGLE,
-				 nImages,
-				 pParam,
-				 mMethod,
-				 zMin,
-				 zMax,
-				 imageOptimization);
-	    
-	  }
-	else
-	  {
-	    cerr << "unknown method" << endl;
-	  }
-	
-	if (use_reflectance)
-	  write_uosr(reduced_points,
-		     reddir,
-		     to_string(iter,3));
-	else
-	  write_uos(reduced_points,
-		    reddir,		  
-		    to_string(iter,3));
-		
       }
+      else if(rtype == INTERPOLATE)
+      {
+        sMat.convertScanToMat();
+        reduce_interpolation(sMat.getMatScan(),
+            reduced_points,
+            width,
+            height,
+            ptype,
+            scale,
+            use_reflectance,
+            MIN_ANGLE,
+            MAX_ANGLE,
+            nImages,
+            pParam,
+            mMethod,
+            zMin,
+            zMax,
+            imageOptimization);
+
+      }
+      else
+      {
+        cerr << "unknown method" << endl;
+      }
+
+      if (use_reflectance)
+        write_uosr(reduced_points,
+            reddir,
+            to_string(iter,3));
+      /* TODO
+      else if (use_color)
+        write_uos_rgb(reduced_points,
+            reddir,
+            to_string(iter,3));
+            */
+      else
+        write_uos(reduced_points,
+            reddir,		  
+            to_string(iter,3));
+
+    }
     Scan::closeDirectory();
   }
 }
