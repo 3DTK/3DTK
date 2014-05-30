@@ -310,6 +310,11 @@ void Scan::calcReducedPoints()
     DataReflectance my_reflectance(get("reflectance"));
     reflectance = my_reflectance;
   }
+  DataRGB rgb(DataPointer(0, 0));
+  if (reduction_pointtype.hasColor()) {
+    DataRGB my_rgb(get("rgb"));
+    rgb = my_rgb;
+  }
   
 #ifdef WITH_METRICS
     ClientMetric::scan_load_time.end(t);
@@ -329,6 +334,14 @@ void Scan::calcReducedPoints()
                                         sizeof(float)*reflectance.size()));
       for(unsigned int i = 0; i < xyz.size(); ++i) {
            reflectance_reduced[i] = reflectance[i];
+        }
+    }
+    if (reduction_pointtype.hasColor()) {
+      DataRGB rgb_reduced(create("color reduced", sizeof(unsigned char)*3*xyz.size()));
+      for(unsigned int i = 0; i < xyz.size(); ++i) {
+          for(unsigned int j = 0; j < 3; ++j) {
+            rgb_reduced[i][j] = rgb[i][j];
+          }
         }
     }
     if (reduction_pointtype.hasNormal()) {
@@ -351,6 +364,8 @@ void Scan::calcReducedPoints()
         xyz_in[i][j] = xyz[i][j];
       if (reduction_pointtype.hasReflectance())
         xyz_in[i][j++] = reflectance[i];
+      if (reduction_pointtype.hasColor())
+        memcpy(&xyz_in[i][j++], &rgb[i][0], 3);
       if (reduction_pointtype.hasNormal())
         for (unsigned int l = 0; l < 3; ++l) 
           xyz_in[i][j++] = xyz_normals[i][l];
@@ -380,11 +395,17 @@ void Scan::calcReducedPoints()
     unsigned int size = center.size();
     DataXYZ xyz_reduced(create("xyz reduced", sizeof(double)*3*size));
     DataReflectance reflectance_reduced(DataPointer(0, 0));
+    DataRGB rgb_reduced(DataPointer(0, 0));
     DataNormal normal_reduced(DataPointer(0, 0)); 
     if (reduction_pointtype.hasReflectance()) {
       DataReflectance my_reflectance_reduced(create("reflectance reduced",
                                                     sizeof(float)*size));
       reflectance_reduced = my_reflectance_reduced;
+    }
+    if (reduction_pointtype.hasColor()) {
+      DataRGB my_rgb_reduced(create("color reduced",
+                                          sizeof(unsigned char)*3*size));
+      rgb_reduced = my_rgb_reduced; 
     }
     if (reduction_pointtype.hasNormal()) {
       DataNormal my_normal_reduced(create("normal reduced",
@@ -397,6 +418,8 @@ void Scan::calcReducedPoints()
         xyz_reduced[i][j] = center[i][j];
       if (reduction_pointtype.hasReflectance())
         reflectance_reduced[i] = center[i][j++];
+      if (reduction_pointtype.hasColor())
+        memcpy(&rgb_reduced[i][0], &center[i][j++], 3);
       if (reduction_pointtype.hasNormal())
         for (unsigned int l = 0; l < 3; ++l) 
           normal_reduced[i][l] = center[i][j++];
