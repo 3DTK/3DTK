@@ -490,15 +490,19 @@ protected:
 	   double myd2 = Dist2(params[threadNum].p, point(pts, leaf.p[i]));
 
         for (int j = 0; j < params[threadNum].k; j++)
-            if (params[threadNum].distances[j] < 0.0f || params[threadNum].distances[j] > myd2) {
-            
+            if (params[threadNum].distances[j] < 0.0f) {
+                params[threadNum].closest_neighbors[j] = pointparam(pts, leaf.p[i]);
+                params[threadNum].distances[j] = myd2;
+                break;
+            } else if (params[threadNum].distances[j] > myd2) {
+                // move all other values one place up
                 for (int l = params[threadNum].k - 1; l > j; --l) {
                     params[threadNum].closest_neighbors[l] = params[threadNum].closest_neighbors[l-1];
                     params[threadNum].distances[l] = params[threadNum].distances[l-1];
                 }
-                
                 params[threadNum].closest_neighbors[j] = pointparam(pts, leaf.p[i]);
                 params[threadNum].distances[j] = myd2;
+                break;
             }
       }
       return;
@@ -515,7 +519,6 @@ protected:
 		  sqr(approx_dist_bbox) >= params[threadNum].distances[kN])
 		return;
     }
-
     // Recursive case
     double myd = node.center[node.splitaxis] - params[threadNum].p[node.splitaxis];
     if (myd >= 0.0) {
