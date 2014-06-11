@@ -72,6 +72,13 @@ public:
    * k - the number of neighbors we want to find
    */
   int k;
+
+  /**
+   * pre-calculated values for segment search functions
+   */
+  double *segment_dir; // vector from one point of the segment to the other
+  double segment_len2; // squared length of segment_dir
+  double *segment_n;   // segment_dir divided by segment_len2
 };
 
 #endif
