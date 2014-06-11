@@ -224,12 +224,19 @@ vector<size_t> KDtreeIndexed::segmentSearch_all(double *_p, double* _p0, double 
   params[threadNum].p = _p;
   params[threadNum].p0 = _p0;
   params[threadNum].range_neighbors.clear();
+  double *dir = new double[3]{_p0[0] - _p[0], _p0[1] - _p[1], _p0[2] - _p[2] };
+  double len2 = Len2(dir);
+  double *n = new double[3]{dir[0]/len2,dir[1]/len2,dir[2]/len2};
+  params[threadNum].segment_dir = dir;
+  params[threadNum].segment_len2 = len2;
+  params[threadNum].segment_n = n;
   _segmentSearch_all(m_data, threadNum);
   for (size_t i = 0; i < params[threadNum].range_neighbors.size(); i++) {
 #pragma omp critical
     result.push_back(params[threadNum].range_neighbors[i]);
   }
-
+  delete[] dir;
+  delete[] n;
   return result;
 }
 
@@ -243,6 +250,14 @@ size_t KDtreeIndexed::segmentSearch_1NearestPoint(double *_p, double* _p0, doubl
   params[threadNum].maxdist_d2 = maxdist2;
   params[threadNum].p = _p;
   params[threadNum].p0 = _p0;
+  double *dir = new double[3]{_p0[0] - _p[0], _p0[1] - _p[1], _p0[2] - _p[2] };
+  double len2 = Len2(dir);
+  double *n = new double[3]{dir[0]/len2,dir[1]/len2,dir[2]/len2};
+  params[threadNum].segment_dir = dir;
+  params[threadNum].segment_len2 = len2;
+  params[threadNum].segment_n = n;
   _segmentSearch_1NearestPoint(m_data, threadNum);
+  delete[] dir;
+  delete[] n;
   return params[threadNum].closest;
 }
