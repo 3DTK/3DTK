@@ -92,6 +92,7 @@ size_t KDtreeIndexed::FindClosestAlongDir(double *_p,
 {
   params[threadNum].closest = std::numeric_limits<size_t>::max();
   params[threadNum].closest_d2 = maxdist2;
+  params[threadNum].closest_d = sqrt(maxdist2);
   params[threadNum].p = _p;
   params[threadNum].dir = _dir;
   _FindClosestAlongDir(m_data, threadNum);
@@ -134,6 +135,7 @@ vector<size_t> KDtreeIndexed::fixedRangeSearchBetween2Points(double *_p,
   vector<size_t> result;
   params[threadNum].p0 = _p0;
   params[threadNum].closest_d2 = maxdist2;
+  params[threadNum].closest_d = sqrt(maxdist2);
   params[threadNum].p = _p;
   params[threadNum].dist_2 = Dist2(_p, _p0);
 
@@ -165,6 +167,7 @@ vector<size_t> KDtreeIndexed::fixedRangeSearchAlongDir(double *_p,
   vector<size_t> result;
   params[threadNum].closest = 0;
   params[threadNum].closest_d2 = maxdist2;
+  params[threadNum].closest_d = sqrt(maxdist2);
   params[threadNum].p = _p;
   params[threadNum].dir = _dir;
   params[threadNum].range_neighbors.clear();
@@ -221,6 +224,7 @@ vector<size_t> KDtreeIndexed::segmentSearch_all(double *_p, double* _p0, double 
 {
   vector<size_t> result;
   params[threadNum].maxdist_d2 = maxdist2;
+  params[threadNum].maxdist_d = sqrt(maxdist2);
   params[threadNum].p = _p;
   params[threadNum].p0 = _p0;
   params[threadNum].range_neighbors.clear();
@@ -248,6 +252,7 @@ size_t KDtreeIndexed::segmentSearch_1NearestPoint(double *_p, double* _p0, doubl
   params[threadNum].closest_d2 = sqr(sqrt(Dist2(_p,_p0))+sqrt(maxdist2));
   //params[threadNum].closest_d2 = 10000000000000;
   params[threadNum].maxdist_d2 = maxdist2;
+  params[threadNum].maxdist_d = sqrt(maxdist2);
   params[threadNum].p = _p;
   params[threadNum].p0 = _p0;
   double *dir = new double[3]{_p0[0] - _p[0], _p0[1] - _p[1], _p0[2] - _p[2] };

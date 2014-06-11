@@ -106,6 +106,7 @@ double* KDtreeMetaManaged::FindClosestAlongDir(double *_p,
 {
   params[threadNum].closest = NULL;
   params[threadNum].closest_d2 = maxdist2;
+  params[threadNum].closest_d = sqrt(maxdist2);
   params[threadNum].p = _p;
   params[threadNum].dir = _dir;
   _FindClosestAlongDir(m_data, threadNum);
