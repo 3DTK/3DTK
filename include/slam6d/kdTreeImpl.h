@@ -104,7 +104,7 @@ public:
     node.dx = 0.5 * (xmax-xmin);
     node.dy = 0.5 * (ymax-ymin);
     node.dz = 0.5 * (zmax-zmin);
-    node.r2 = sqr(node.dx) + sqr(node.dy) + sqr(node.dz);
+    node.r = sqrt(sqr(node.dx) + sqr(node.dy) + sqr(node.dz));
 
     // Find longest axis
     if (node.dx > node.dy) {
@@ -198,7 +198,7 @@ protected:
       double dx,  ///< defining the voxel itself
 	        dy,  ///< defining the voxel itself
 	        dz,  ///< defining the voxel itself
-             r2;  ///< defining the voxel itself
+             r;  ///< defining the voxel itself
       int splitaxis;   ///< defining the kind of splitaxis
       KDTreeImpl *child1;  ///< pointers to the childs
       KDTreeImpl *child2;  ///< pointers to the childs
@@ -280,7 +280,7 @@ protected:
                      params[threadNum].p[1] - node.center[1],
                      params[threadNum].p[2] - node.center[2] };
     double myd2center = Len2(p2c) - sqr(Dot(p2c, params[threadNum].dir));
-    if (myd2center > node.r2 + params[threadNum].closest_d2 + 2.0f * max(node.r2, params[threadNum].closest_d2))
+    if (myd2center > sqr(node.r + params[threadNum].closest_d))
       return;
 
 
@@ -322,8 +322,7 @@ protected:
     double myd2center = my_dist_2 - sqr(Dot(c2c, params[threadNum].dir));
     //if (myd2center > (node.r2 + params[threadNum].closest_d2 + 2.0f * max(node.r2, params[threadNum].closest_d2)))
     
-    double r = sqrt(node.r2);
-    if (myd2center > (node.r2 + params[threadNum].closest_d2 + 2.0f * r * sqrt(params[threadNum].closest_d2)))
+    if (myd2center > sqr(node.r + params[threadNum].closest_d))
       return;
     //if (myd2center > (node.r2 + params[threadNum].closest_d2 + 2.0f * sqrt(node.r2) * sqrt(params[threadNum].closest_d2))) return;
 
@@ -334,9 +333,9 @@ protected:
                      params[threadNum].p0[2] - node.center[2] };
 
     double distXP2 = Len2(p2c);
-    if(params[threadNum].dist_2 > (distXP2 + node.r2 + 2.0f * r * sqrt(distXP2))) return;
+    if(params[threadNum].dist_2 > sqr(distXP2 + node.r)) return;
     
-    if(params[threadNum].dist_2 > (my_dist_2 + node.r2 + 2.0f * r * sqrt(my_dist_2))) return;
+    if(params[threadNum].dist_2 > sqr(sqrt(my_dist_2) + node.r)) return;
     
     // Recursive case
     if (params[threadNum].p[node.splitaxis] < node.center[node.splitaxis] ) {
@@ -384,7 +383,7 @@ protected:
                      params[threadNum].p[2] - node.center[2] };
     double myd2center = Len2(p2c) - sqr(Dot(p2c, params[threadNum].dir));
     //if (myd2center > (node.r2 + params[threadNum].closest_d2 + 2.0f * max(node.r2, params[threadNum].closest_d2)))
-    if (myd2center > (node.r2 + params[threadNum].closest_d2 + 2.0f * sqrt(node.r2) * sqrt(params[threadNum].closest_d2)))
+    if (myd2center > sqr(node.r + params[threadNum].closest_d))
       return;
 
     // Recursive case
@@ -585,7 +584,7 @@ protected:
         proj[2] = params[threadNum].p[2] + t*params[threadNum].segment_n[2];
         comp = proj;
     }
-    if (Dist2(comp,node.center) > sqr(sqrt(node.r2)+sqrt(params[threadNum].maxdist_d2)))
+    if (Dist2(comp,node.center) > sqr(node.r+params[threadNum].maxdist_d))
         return;
 
     // Recursive case
@@ -645,11 +644,11 @@ protected:
     t = Dot(p2p, params[threadNum].segment_dir);
     if (t < 0.0) {
         // point is beyond point1 of the segment
-        if (Dist2(params[threadNum].p,node.center) > sqr(sqrt(node.r2)+sqrt(params[threadNum].maxdist_d2)))
+        if (Dist2(params[threadNum].p,node.center) > sqr(node.r+params[threadNum].maxdist_d))
             return;
     } else if (t > params[threadNum].segment_len2) {
         // point is beyond point2 of the segment
-        if (Dist2(params[threadNum].p0,node.center) > sqr(sqrt(node.r2)+sqrt(params[threadNum].maxdist_d2)))
+        if (Dist2(params[threadNum].p0,node.center) > sqr(node.r+params[threadNum].maxdist_d))
             return;
     } else {
         // point is within the segment
@@ -657,7 +656,7 @@ protected:
         proj[0] = params[threadNum].p[0] + t*params[threadNum].segment_n[0];
         proj[1] = params[threadNum].p[1] + t*params[threadNum].segment_n[1];
         proj[2] = params[threadNum].p[2] + t*params[threadNum].segment_n[2];
-        if (Dist2(proj,node.center) > sqr(sqrt(node.r2)+sqrt(params[threadNum].maxdist_d2)))
+        if (Dist2(proj,node.center) > sqr(node.r+params[threadNum].maxdist_d))
             return;
     }
 

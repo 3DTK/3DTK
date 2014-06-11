@@ -29,15 +29,17 @@ public:
   T closest;
 
   /** 
-   * distance to the closest point
+   * distance to the closest point squared and not squared
    */
   double closest_d2;
+  double closest_d;
 
   /**
-   * maximum distance to search in
+   * maximum distance to search in squared and not squared
    */
 
   double maxdist_d2;
+  double maxdist_d;
 
   /** 
    * the point coordinate
