@@ -216,3 +216,33 @@ vector<size_t> KDtreeIndexed::AABBSearch(double *_p,
 
   return result;
 }
+
+vector<size_t> KDtreeIndexed::segmentSearch_all(double *_p, double* _p0, double maxdist2, int threadNum) const
+{
+  vector<size_t> result;
+  params[threadNum].maxdist_d2 = maxdist2;
+  params[threadNum].p = _p;
+  params[threadNum].p0 = _p0;
+  params[threadNum].range_neighbors.clear();
+  _segmentSearch_all(m_data, threadNum);
+  for (size_t i = 0; i < params[threadNum].range_neighbors.size(); i++) {
+#pragma omp critical
+    result.push_back(params[threadNum].range_neighbors[i]);
+  }
+
+  return result;
+}
+
+size_t KDtreeIndexed::segmentSearch_1NearestPoint(double *_p, double* _p0, double maxdist2, int threadNum) const
+{
+  params[threadNum].closest = std::numeric_limits<size_t>::max();
+  // the furthest a point can be away is the distance between the points
+  // making the line segment plus maxdist
+  params[threadNum].closest_d2 = sqr(sqrt(Dist2(_p,_p0))+sqrt(maxdist2));
+  //params[threadNum].closest_d2 = 10000000000000;
+  params[threadNum].maxdist_d2 = maxdist2;
+  params[threadNum].p = _p;
+  params[threadNum].p0 = _p0;
+  _segmentSearch_1NearestPoint(m_data, threadNum);
+  return params[threadNum].closest;
+}
