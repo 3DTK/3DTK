@@ -536,13 +536,6 @@ protected:
     AccessorFunc point;
     ParamFunc pointparam;
     
-    double dir[] = {
-        params[threadNum].p0[0] - params[threadNum].p[0],
-        params[threadNum].p0[1] - params[threadNum].p[1],
-        params[threadNum].p0[2] - params[threadNum].p[2],
-    };
-    double len2 = Len2(dir);
-    double n[] = {dir[0]/len2,dir[1]/len2,dir[2]/len2};
     double p2p[3], proj[3];
     double t, *comp;
     // Leaf nodes
@@ -551,19 +544,19 @@ protected:
             p2p[0] = point(pts, leaf.p[i])[0] - params[threadNum].p[0];
             p2p[1] = point(pts, leaf.p[i])[1] - params[threadNum].p[1];
             p2p[2] = point(pts, leaf.p[i])[2] - params[threadNum].p[2];
-            t = Dot(p2p, dir);
+            t = Dot(p2p, params[threadNum].segment_dir);
             if (t < 0.0) {
                 // point is beyond point1 of the segment
                 comp = params[threadNum].p;
-            } else if (t > len2) {
+            } else if (t > params[threadNum].segment_len2) {
                 // point is beyond point2 of the segment
                 comp = params[threadNum].p0;
             } else {
                 // point is within the segment
                 // calculate its projection onto the line
-                proj[0] = params[threadNum].p[0] + t*n[0];
-                proj[1] = params[threadNum].p[1] + t*n[1];
-                proj[2] = params[threadNum].p[2] + t*n[2];
+                proj[0] = params[threadNum].p[0] + t*params[threadNum].segment_n[0];
+                proj[1] = params[threadNum].p[1] + t*params[threadNum].segment_n[1];
+                proj[2] = params[threadNum].p[2] + t*params[threadNum].segment_n[2];
                 comp = proj;
             }
             if (Dist2(comp,point(pts, leaf.p[i])) < params[threadNum].maxdist_d2) {
@@ -577,19 +570,19 @@ protected:
     p2p[0] = node.center[0] - params[threadNum].p[0];
     p2p[1] = node.center[1] - params[threadNum].p[1];
     p2p[2] = node.center[2] - params[threadNum].p[2];
-    t = Dot(p2p, dir);
+    t = Dot(p2p, params[threadNum].segment_dir);
     if (t < 0.0) {
         // point is beyond point1 of the segment
         comp = params[threadNum].p;
-    } else if (t > len2) {
+    } else if (t > params[threadNum].segment_len2) {
         // point is beyond point2 of the segment
         comp = params[threadNum].p0;
     } else {
         // point is within the segment
         // calculate projection
-        proj[0] = params[threadNum].p[0] + t*n[0];
-        proj[1] = params[threadNum].p[1] + t*n[1];
-        proj[2] = params[threadNum].p[2] + t*n[2];
+        proj[0] = params[threadNum].p[0] + t*params[threadNum].segment_n[0];
+        proj[1] = params[threadNum].p[1] + t*params[threadNum].segment_n[1];
+        proj[2] = params[threadNum].p[2] + t*params[threadNum].segment_n[2];
         comp = proj;
     }
     if (Dist2(comp,node.center) > sqr(sqrt(node.r2)+sqrt(params[threadNum].maxdist_d2)))
@@ -610,13 +603,6 @@ protected:
     AccessorFunc point;
     ParamFunc pointparam;
 
-    double dir[] = {
-        params[threadNum].p0[0] - params[threadNum].p[0],
-        params[threadNum].p0[1] - params[threadNum].p[1],
-        params[threadNum].p0[2] - params[threadNum].p[2],
-    };
-    double len2 = Len2(dir);
-    double n[] = {dir[0]/len2,dir[1]/len2,dir[2]/len2};
     double p2p[3], proj[3];
     double t, newdist2;
     // Leaf nodes
@@ -625,21 +611,21 @@ protected:
             p2p[0] = point(pts, leaf.p[i])[0] - params[threadNum].p[0];
             p2p[1] = point(pts, leaf.p[i])[1] - params[threadNum].p[1];
             p2p[2] = point(pts, leaf.p[i])[2] - params[threadNum].p[2];
-            t = Dot(p2p, dir);
+            t = Dot(p2p, params[threadNum].segment_dir);
             if (t < 0.0) {
                 // point is beyond point1 of the segment
                 if (Dist2(params[threadNum].p,point(pts, leaf.p[i])) >= params[threadNum].maxdist_d2)
                     continue;
-            } else if (t > len2) {
+            } else if (t > params[threadNum].segment_len2) {
                 // point is beyond point2 of the segment
                 if (Dist2(params[threadNum].p0,point(pts, leaf.p[i])) >= params[threadNum].maxdist_d2)
                     continue;
             } else {
                 // point is within the segment
                 // calculate its projection onto the line
-                proj[0] = params[threadNum].p[0] + t*n[0];
-                proj[1] = params[threadNum].p[1] + t*n[1];
-                proj[2] = params[threadNum].p[2] + t*n[2];
+                proj[0] = params[threadNum].p[0] + t*params[threadNum].segment_n[0];
+                proj[1] = params[threadNum].p[1] + t*params[threadNum].segment_n[1];
+                proj[2] = params[threadNum].p[2] + t*params[threadNum].segment_n[2];
                 if (Dist2(proj,point(pts, leaf.p[i])) >= params[threadNum].maxdist_d2)
                     continue;
             }
@@ -656,21 +642,21 @@ protected:
     p2p[0] = node.center[0] - params[threadNum].p[0];
     p2p[1] = node.center[1] - params[threadNum].p[1];
     p2p[2] = node.center[2] - params[threadNum].p[2];
-    t = Dot(p2p, dir);
+    t = Dot(p2p, params[threadNum].segment_dir);
     if (t < 0.0) {
         // point is beyond point1 of the segment
         if (Dist2(params[threadNum].p,node.center) > sqr(sqrt(node.r2)+sqrt(params[threadNum].maxdist_d2)))
             return;
-    } else if (t > len2) {
+    } else if (t > params[threadNum].segment_len2) {
         // point is beyond point2 of the segment
         if (Dist2(params[threadNum].p0,node.center) > sqr(sqrt(node.r2)+sqrt(params[threadNum].maxdist_d2)))
             return;
     } else {
         // point is within the segment
         // calculate projection
-        proj[0] = params[threadNum].p[0] + t*n[0];
-        proj[1] = params[threadNum].p[1] + t*n[1];
-        proj[2] = params[threadNum].p[2] + t*n[2];
+        proj[0] = params[threadNum].p[0] + t*params[threadNum].segment_n[0];
+        proj[1] = params[threadNum].p[1] + t*params[threadNum].segment_n[1];
+        proj[2] = params[threadNum].p[2] + t*params[threadNum].segment_n[2];
         if (Dist2(proj,node.center) > sqr(sqrt(node.r2)+sqrt(params[threadNum].maxdist_d2)))
             return;
     }
