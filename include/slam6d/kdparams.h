@@ -33,6 +33,12 @@ public:
    */
   double closest_d2;
 
+  /**
+   * maximum distance to search in
+   */
+
+  double maxdist_d2;
+
   /** 
    * the point coordinate
    */

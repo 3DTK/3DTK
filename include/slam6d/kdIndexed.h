@@ -85,6 +85,12 @@ public:
                                  double* _p0,
                                  int threadNum = 0) const;
 
+  virtual vector<size_t> segmentSearch_all(double *_p,
+          double* _p0, double maxdist2, int threadNum) const;
+
+  virtual size_t segmentSearch_1NearestPoint(double *_p,
+          double* _p0, double maxdist2, int threadNum) const;
+
 private:
   double **m_data;
   size_t m_size;

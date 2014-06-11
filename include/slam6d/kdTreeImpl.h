@@ -531,6 +531,158 @@ protected:
 	 }
     }
   }
+
+  void _segmentSearch_all(const PointData& pts, int threadNum) const {
+    AccessorFunc point;
+    ParamFunc pointparam;
+    
+    double dir[] = {
+        params[threadNum].p0[0] - params[threadNum].p[0],
+        params[threadNum].p0[1] - params[threadNum].p[1],
+        params[threadNum].p0[2] - params[threadNum].p[2],
+    };
+    double len2 = Len2(dir);
+    double p2p[3], proj[3];
+    double t, *comp;
+    // Leaf nodes
+    if (npts) {
+        for (int i = 0; i < npts; i++) {
+            p2p[0] = point(pts, leaf.p[i])[0] - params[threadNum].p[0];
+            p2p[1] = point(pts, leaf.p[i])[1] - params[threadNum].p[1];
+            p2p[2] = point(pts, leaf.p[i])[2] - params[threadNum].p[2];
+            t = Dot(p2p, dir);
+            if (t < 0.0) {
+                // point is beyond point1 of the segment
+                comp = params[threadNum].p;
+            } else if (t > len2) {
+                // point is beyond point2 of the segment
+                comp = params[threadNum].p0;
+            } else {
+                // point is within the segment
+                // calculate projection
+                proj[0] = params[threadNum].p[0] + t/len2*dir[0];
+                proj[1] = params[threadNum].p[1] + t/len2*dir[1];
+                proj[2] = params[threadNum].p[2] + t/len2*dir[2];
+                comp = proj;
+            }
+            if (Dist2(comp,point(pts, leaf.p[i])) < params[threadNum].maxdist_d2) {
+                params[threadNum].range_neighbors.push_back(pointparam(pts, leaf.p[i]));
+            }
+        }
+        return;
+    }
+    
+    // Quick check of whether to abort
+    /*p2p[0] = node.center[0] - params[threadNum].p[0];
+    p2p[1] = node.center[1] - params[threadNum].p[1];
+    p2p[2] = node.center[2] - params[threadNum].p[2];
+    t = Dot(p2p, dir);
+    if (t < 0.0) {
+        // point is beyond point1 of the segment
+        comp = params[threadNum].p;
+    } else if (t > len2) {
+        // point is beyond point2 of the segment
+        comp = params[threadNum].p0;
+    } else {
+        // point is within the segment
+        // calculate projection
+        proj[0] = params[threadNum].p[0] + t*dir[0];
+        proj[1] = params[threadNum].p[1] + t*dir[1];
+        proj[2] = params[threadNum].p[2] + t*dir[2];
+        comp = proj;
+    }
+    if (Dist2(comp,node.center) > sqr(sqrt(node.r2)+sqrt(params[threadNum].maxdist_d2)))
+        return;*/
+
+    // Recursive case
+    if (params[threadNum].p[node.splitaxis] < node.center[node.splitaxis] ) {
+      node.child1->_segmentSearch_all(pts, threadNum);
+      node.child2->_segmentSearch_all(pts, threadNum);
+    } else {
+      node.child2->_segmentSearch_all(pts, threadNum);
+      node.child1->_segmentSearch_all(pts, threadNum);
+    }
+  
+  }
+
+  void _segmentSearch_1NearestPoint(const PointData& pts, int threadNum) const {
+    AccessorFunc point;
+    ParamFunc pointparam;
+
+    double dir[] = {
+        params[threadNum].p0[0] - params[threadNum].p[0],
+        params[threadNum].p0[1] - params[threadNum].p[1],
+        params[threadNum].p0[2] - params[threadNum].p[2],
+    };
+    double len2 = Len2(dir);
+    double p2p[3], proj[3];
+    double t, newdist2;
+    // Leaf nodes
+    if (npts) {
+        for (int i = 0; i < npts; i++) {
+            p2p[0] = point(pts, leaf.p[i])[0] - params[threadNum].p[0];
+            p2p[1] = point(pts, leaf.p[i])[1] - params[threadNum].p[1];
+            p2p[2] = point(pts, leaf.p[i])[2] - params[threadNum].p[2];
+            t = Dot(p2p, dir);
+            if (t < 0.0) {
+                // point is beyond point1 of the segment
+                if (Dist2(params[threadNum].p,point(pts, leaf.p[i])) >= params[threadNum].maxdist_d2)
+                    continue;
+            } else if (t > len2) {
+                // point is beyond point2 of the segment
+                if (Dist2(params[threadNum].p0,point(pts, leaf.p[i])) >= params[threadNum].maxdist_d2)
+                    continue;
+            } else {
+                // point is within the segment
+                // calculate projection
+                proj[0] = params[threadNum].p[0] + (t/len2)*dir[0];
+                proj[1] = params[threadNum].p[1] + (t/len2)*dir[1];
+                proj[2] = params[threadNum].p[2] + (t/len2)*dir[2];
+                if (Dist2(proj,point(pts, leaf.p[i])) >= params[threadNum].maxdist_d2)
+                    continue;
+            }
+            newdist2 = Dist2(params[threadNum].p,point(pts, leaf.p[i]));
+            if (newdist2 < params[threadNum].closest_d2) {
+                params[threadNum].closest_d2 = newdist2;
+                params[threadNum].closest = pointparam(pts, leaf.p[i]);
+            }
+        }
+        return;
+    }
+
+    // Quick check of whether to abort
+    p2p[0] = node.center[0] - params[threadNum].p[0];
+    p2p[1] = node.center[1] - params[threadNum].p[1];
+    p2p[2] = node.center[2] - params[threadNum].p[2];
+    t = Dot(p2p, dir);
+    if (t < 0.0) {
+        // point is beyond point1 of the segment
+        if (Dist2(params[threadNum].p,node.center) > sqr(sqrt(node.r2)+sqrt(params[threadNum].maxdist_d2)))
+            return;
+    } else if (t > len2) {
+        // point is beyond point2 of the segment
+        if (Dist2(params[threadNum].p0,node.center) > sqr(sqrt(node.r2)+sqrt(params[threadNum].maxdist_d2)))
+            return;
+    } else {
+        // point is within the segment
+        // calculate projection
+        proj[0] = params[threadNum].p[0] + (t/len2)*dir[0];
+        proj[1] = params[threadNum].p[1] + (t/len2)*dir[1];
+        proj[2] = params[threadNum].p[2] + (t/len2)*dir[2];
+        if (Dist2(proj,node.center) > sqr(sqrt(node.r2)+sqrt(params[threadNum].maxdist_d2)))
+            return;
+    }
+
+    // Recursive case
+    if (params[threadNum].p[node.splitaxis] < node.center[node.splitaxis] ) {
+      node.child1->_segmentSearch_1NearestPoint(pts, threadNum);
+      node.child2->_segmentSearch_1NearestPoint(pts, threadNum);
+    } else {
+      node.child2->_segmentSearch_1NearestPoint(pts, threadNum);
+      node.child1->_segmentSearch_1NearestPoint(pts, threadNum);
+    }
+  
+  }
 };
 
 
