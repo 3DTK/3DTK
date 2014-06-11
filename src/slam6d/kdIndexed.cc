@@ -112,14 +112,19 @@ vector<size_t> KDtreeIndexed::kNearestNeighbors(double *_p,
                                                           sizeof(size_t) );
   params[threadNum].distances = (double *)calloc(_k,
                                                  sizeof(double));
-  
+   // initialize distances to an invalid value to indicate unset neighbors
+  for (int i = 0; i < _k; i++) {
+      params[threadNum].distances[i] = -1.0;
+  }
   _KNNSearch(m_data, threadNum);
   
   free (params[threadNum].distances);
 
   for (int i = 0; i < _k; i++) {
 #pragma omp critical
+    if (params[threadNum].distances[i] >= 0.0f) {
     result.push_back(params[threadNum].closest_neighbors[i]);
+    }
   }
   
   free (params[threadNum].closest_neighbors);
