@@ -490,7 +490,7 @@ protected:
 	   double myd2 = Dist2(params[threadNum].p, point(pts, leaf.p[i]));
 
         for (int j = 0; j < params[threadNum].k; j++)
-            if (params[threadNum].closest_neighbors[j] == 0 || params[threadNum].distances[j] > myd2) {
+            if (params[threadNum].distances[j] < 0.0f || params[threadNum].distances[j] > myd2) {
             
                 for (int l = params[threadNum].k - 1; l > j; --l) {
                     params[threadNum].closest_neighbors[l] = params[threadNum].closest_neighbors[l-1];
@@ -504,7 +504,7 @@ protected:
       return;
     }
 
-    int kN = params[threadNum].k-1;
+    /*int kN = params[threadNum].k-1;
     if (params[threadNum].closest_neighbors[kN] != 0) {
         // Quick check of whether to abort  
         double approx_dist_bbox
@@ -528,6 +528,13 @@ protected:
 	 if (sqr(myd) < params[threadNum].closest_d2) {
 	   node.child1->_KNNSearch(pts, threadNum);
 	 }
+    }*/
+    if (params[threadNum].p[node.splitaxis] < node.center[node.splitaxis] ) {
+      node.child1->_KNNSearch(pts, threadNum);
+      node.child2->_KNNSearch(pts, threadNum);
+    } else {
+      node.child2->_KNNSearch(pts, threadNum);
+      node.child1->_KNNSearch(pts, threadNum);
     }
   }
 

@@ -101,16 +101,23 @@ vector<Point> KDtree::kNearestNeighbors(double *_p,
                                                           sizeof(double *) );
   params[threadNum].distances = (double *)calloc(_k,
                                                  sizeof(double));
-  
+  // initialize distances to an invalid value to indicate unset neighbors
+  for (int i = 0; i < _k; i++) {
+      params[threadNum].distances[i] = -1.0;
+  }
+
   _KNNSearch(Void(), threadNum);
   
   free (params[threadNum].distances);
 
   for (int i = 0; i < _k; i++) {
 #pragma omp critical
+      // only push valid points
+    if (params[threadNum].distances[i] >= 0.0f) {
     result.push_back(Point(params[threadNum].closest_neighbors[i][0],
                            params[threadNum].closest_neighbors[i][1],
                            params[threadNum].closest_neighbors[i][2]));
+    }
   }
   
   free (params[threadNum].closest_neighbors);
