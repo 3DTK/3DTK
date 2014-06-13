@@ -590,6 +590,14 @@ protected:
     }
     
     // Quick check of whether to abort
+    double approx_dist_bbox =
+        max(max(fabs(params[threadNum].segment_center[0]-node.center[0])-node.dx,
+                    fabs(params[threadNum].segment_center[1]-node.center[1])-node.dy),
+                fabs(params[threadNum].segment_center[2]-node.center[2])-node.dz);
+    if (approx_dist_bbox >= 0 &&
+            sqr(approx_dist_bbox) >= params[threadNum].segment_r2)
+        return;
+    // Slower check of whether to abort
     p2p[0] = node.center[0] - params[threadNum].p[0];
     p2p[1] = node.center[1] - params[threadNum].p[1];
     p2p[2] = node.center[2] - params[threadNum].p[2];

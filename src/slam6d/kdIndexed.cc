@@ -233,9 +233,13 @@ vector<size_t> KDtreeIndexed::segmentSearch_all(double *_p, double* _p0, double 
   double *dir = new double[3]{_p0[0] - _p[0], _p0[1] - _p[1], _p0[2] - _p[2] };
   double len2 = Len2(dir);
   double *n = new double[3]{dir[0]/len2,dir[1]/len2,dir[2]/len2};
+  double *center = new double[3]{_p[0]+dir[0]*0.5, _p[1]+dir[1]*0.5, _p[2]+dir[2]*0.5};
+  double r2 = sqr(0.5*sqrt(len2)+sqrt(maxdist2));
   params[threadNum].segment_dir = dir;
   params[threadNum].segment_len2 = len2;
   params[threadNum].segment_n = n;
+  params[threadNum].segment_center = center;
+  params[threadNum].segment_r2 = r2;
   _segmentSearch_all(m_data, threadNum);
   for (size_t i = 0; i < params[threadNum].range_neighbors.size(); i++) {
 #pragma omp critical
@@ -243,6 +247,7 @@ vector<size_t> KDtreeIndexed::segmentSearch_all(double *_p, double* _p0, double 
   }
   delete[] dir;
   delete[] n;
+  delete[] center;
   return result;
 }
 
