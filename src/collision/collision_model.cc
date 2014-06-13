@@ -20,6 +20,9 @@
 #include <boost/program_options.hpp>
 namespace po = boost::program_options;
 
+enum collision_method { CTYPE1, CTYPE2 };
+enum penetrationdepth_method { PDTYPE1, PDTYPE2 };
+
 /*
  * validates input type specification
  */
@@ -35,8 +38,31 @@ void validate(boost::any& v, const std::vector<std::string>& values,
     }
 }
 
+void validate(boost::any& v, const std::vector<std::string>& values,
+        collision_method*, int) {
+    if (values.size() == 0)
+        throw std::runtime_error("Invalid model specification");
+    string arg = values.at(0);
+    if (strcasecmp(arg.c_str(), "type1") == 0) v = CTYPE1;
+    else if (strcasecmp(arg.c_str(), "type2") == 0) v = CTYPE2;
+    else throw std::runtime_error(std::string("collision method ")
+            + arg + std::string(" is unknown"));
+}
+
+void validate(boost::any& v, const std::vector<std::string>& values,
+        penetrationdepth_method*, int) {
+    if (values.size() == 0)
+        throw std::runtime_error("Invalid model specification");
+    string arg = values.at(0);
+    if (strcasecmp(arg.c_str(), "type1") == 0) v = PDTYPE1;
+    else if (strcasecmp(arg.c_str(), "type2") == 0) v = PDTYPE2;
+    else throw std::runtime_error(std::string("penetration depth method ")
+            + arg + std::string(" is unknown"));
+}
+
 void parse_options(int argc, char **argv, IOType &iotype, string &dir,
-        double &radius, bool &calcdistances)
+        double &radius, bool &calcdistances, collision_method &cmethod,
+        penetrationdepth_method &pdmethod)
 {
     po::options_description generic("Generic options");
     generic.add_options()
@@ -54,7 +80,9 @@ void parse_options(int argc, char **argv, IOType &iotype, string &dir,
         ("radius,r", po::value<double>(&radius)->default_value(10),
          "radius of sphere")
         ("calcdistances,d", po::value<bool>(&calcdistances)->zero_tokens(),
-         "calculate penetration distance");
+         "calculate penetration distance")
+        ("collisionmethod,c", po::value<collision_method>(&cmethod)->default_value(CTYPE1))
+        ("penetrationdepthmethod,p", po::value<penetrationdepth_method>(&pdmethod)->default_value(PDTYPE1));
 
     po::options_description hidden("Hidden options");
     hidden.add_options()
@@ -180,19 +208,11 @@ void fill_colliding(std::vector<bool> &allcolliding, std::vector<size_t> const &
     }
 }
 
-size_t handle_pointcloud(DataXYZ &model, DataXYZ &environ,
+size_t handle_pointcloud(std::vector<Point> &pointmodel, DataXYZ &environ,
                        std::vector<Frame> const &trajectory,
                        std::vector<bool> &colliding,
-                       double radius)
+                       double radius, collision_method cmethod)
 {
-    cerr << "reading model..." << endl;
-    vector<Point> pointmodel;
-    pointmodel.reserve(model.size());
-    for(unsigned int j = 0; j < model.size(); j++) {
-        pointmodel.push_back(Point(model[j][0], model[j][1], model[j][2]));
-    }
-    cerr << "model: " << pointmodel.size() << endl;
-
     /* build a KDtree from this scan */
     cerr << "reading environment..." << endl;
     double** pa = new double*[environ.size()];
@@ -212,18 +232,51 @@ size_t handle_pointcloud(DataXYZ &model, DataXYZ &environ,
     double sqRad2 = radius*radius;
     cerr << "computing collisions..." << endl;
     time_t before = time(NULL);
-    int end = trajectory.size();
+    int end;
     i = 0;
-    for(const auto &it2 : trajectory) {
-        cerr << (i*100.0)/end << " %\r";
-        cerr.flush();
-        for(const auto &it : pointmodel) {
-            double point1[3] = {it.x, it.y, it.z};
-            transform3(it2.transformation, point1);
-            vector<size_t> collidingsphere = t.fixedRangeSearch(point1, sqRad2, thread_num);
-            fill_colliding(colliding, collidingsphere);
-        }
-        i++;
+    switch (cmethod) {
+        case CTYPE1:
+            end = trajectory.size();
+            for(const auto &it2 : trajectory) {
+                cerr << (i*100.0)/end << " %\r";
+                cerr.flush();
+                for(const auto &it : pointmodel) {
+                    double point1[3] = {it.x, it.y, it.z};
+                    transform3(it2.transformation, point1);
+                    vector<size_t> collidingsphere = t.fixedRangeSearch(point1, sqRad2, thread_num);
+                    fill_colliding(colliding, collidingsphere);
+                }
+                i++;
+            }
+            break;
+        case CTYPE2:
+            end = pointmodel.size();
+            // we iterate over points instead of points on the trajectory so
+            // that we can reuse the previous transformation of the same point
+            for(const auto &it : pointmodel) {
+                cerr << (i*100.0)/end << " %\r";
+                cerr.flush();
+                auto it2 = trajectory.begin();
+                double point1[3], point2[3];
+                point1[0] = it.x;
+                point1[1] = it.y;
+                point1[2] = it.z;
+                transform3(it2->transformation, point1);
+                ++it2;
+                for (; it2 < trajectory.end(); ++it2) {
+                    point2[0] = it.x;
+                    point2[1] = it.y;
+                    point2[2] = it.z;
+                    transform3(it2->transformation, point2);
+                    vector<size_t> collidingsegment = t.segmentSearch_all(point1, point2, sqRad2, thread_num);
+                    fill_colliding(colliding, collidingsegment);
+                    point1[0] = point2[0];
+                    point1[1] = point2[1];
+                    point1[2] = point2[2];
+                }
+                i++;
+            }
+            break;
     }
     size_t num_colliding = 0;
     // the actual implementation of std::vector<bool> requires us to use the
@@ -252,8 +305,7 @@ void calculate_collidingdist(DataXYZ &environ,
     cerr << "reading environment..." << endl;
     size_t num_noncolliding = environ.size() - num_colliding;
     double** pa = new double*[num_noncolliding];
-    std::vector<size_t> idxmap;
-    idxmap.reserve(num_noncolliding);
+    size_t* idxmap = new size_t[num_colliding];
     for (size_t i = 0, j = 0; i < environ.size(); ++i) {
         if (colliding[i]) {
             continue;
@@ -291,6 +343,78 @@ void calculate_collidingdist(DataXYZ &environ,
     }
     time_t after = time(NULL);
     cerr << "took: " << difftime(after, before) << " seconds" << endl;
+    for (size_t i = 0; i < num_noncolliding; ++i) {
+        delete[] pa[i];
+    }
+    delete[] pa;
+    delete[] idxmap;
+}
+
+void calculate_collidingdist2(std::vector<Point> &pointmodel, DataXYZ &environ,
+                             std::vector<Frame> const &trajectory,
+                             std::vector<bool> const &colliding,
+                             size_t num_colliding,
+                             std::vector<float> &dist_colliding,
+                             double radius)
+{
+    /* build a kdtree for colliding points */
+    cerr << "reading environment..." << endl;
+    double** pa = new double*[num_colliding];
+    size_t* idxmap = new size_t[num_colliding];
+    for (size_t i = 0, j = 0; i < environ.size(); ++i) {
+        if (!colliding[i]) {
+            continue;
+        }
+        pa[j] = new double[3];
+        pa[j][0] = environ[i][0];
+        pa[j][1] = environ[i][1];
+        pa[j][2] = environ[i][2];
+        idxmap[j] = i;
+        j++;
+    }
+    cerr << "colliding: " << num_colliding << endl;
+    cerr << "building kd tree..." << endl;
+    KDtreeIndexed t(pa, num_colliding);
+    double sqRad2 = radius*radius;
+    int thread_num = 0; // add omp later
+    cerr << "computing distances..." << endl;
+    time_t before = time(NULL);
+    for(const auto &it2 : trajectory) {
+        for(const auto &it : pointmodel) {
+            double point1[3] = {it.x, it.y, it.z};
+            // the second point is the projection of the first point to the
+            // y-axis of the model
+            double point2[3] = {0, it.y, 0};
+            transform3(it2.transformation, point1);
+            transform3(it2.transformation, point2);
+            size_t c1 = t.segmentSearch_1NearestPoint(point1, point2, sqRad2, thread_num);
+            if (c1 < std::numeric_limits<size_t>::max()) {
+                size_t c2 = idxmap[c1];
+                point2[0] = environ[c2][0];
+                point2[1] = environ[c2][1];
+                point2[2] = environ[c2][2];
+                double dist2 = Dist2(point1, point2);
+                // now get all points around this closest point to mark them
+                // with the same penetration distance
+                vector<size_t> closestsphere = t.fixedRangeSearch(pa[c1], sqRad2, thread_num);
+                for (const auto &it3 : closestsphere) {
+                    if (dist_colliding[it3] < dist2) {
+                        dist_colliding[it3] = dist2;
+                    }
+                }
+            }
+        }
+    }
+    for (size_t i = 0; i < dist_colliding.size(); ++i) {
+        dist_colliding[i] = sqrt(dist_colliding[i]);
+    }
+    time_t after = time(NULL);
+    cerr << "took: " << difftime(after, before) << " seconds" << endl;
+    for (size_t i = 0; i < num_colliding; ++i) {
+        delete[] pa[i];
+    }
+    delete[] pa;
+    delete[] idxmap;
 }
 
 int main(int argc, char **argv)
@@ -300,8 +424,10 @@ int main(int argc, char **argv)
     IOType iotype;
     double radius;
     bool calcdistances;
+    collision_method cmethod;
+    penetrationdepth_method pdmethod;
 
-    parse_options(argc, argv, iotype, dir, radius, calcdistances);
+    parse_options(argc, argv, iotype, dir, radius, calcdistances, cmethod, pdmethod);
 
     // read scan 0 (model) and 1 (environment) without scanserver
     Scan::openDirectory(false, dir, iotype, 0, 1);
@@ -329,18 +455,31 @@ int main(int argc, char **argv)
     DataXYZ environ(it[1]->get("xyz"));
     std::vector<bool> colliding;
     colliding.reserve(environ.size());
-    size_t num_colliding = handle_pointcloud(model, environ, trajectory, colliding, radius);
+    cerr << "reading model..." << endl;
+    vector<Point> pointmodel;
+    pointmodel.reserve(model.size());
+    for(unsigned int j = 0; j < model.size(); j++) {
+        pointmodel.push_back(Point(model[j][0], model[j][1], model[j][2]));
+    }
+    cerr << "model: " << pointmodel.size() << endl;
+    size_t num_colliding = handle_pointcloud(pointmodel, environ, trajectory, colliding, radius, cmethod);
     if (num_colliding == 0) {
         cerr << "nothing collides" << endl;
         exit(0);
     }
     std::vector<float> dist_colliding;
     dist_colliding.reserve(num_colliding);
+    for (size_t i = 0; i < num_colliding; ++i) {
+        dist_colliding.push_back(0);
+    }
     if (calcdistances) {
-        calculate_collidingdist(environ, colliding, num_colliding, dist_colliding);
-    } else {
-        for (size_t i = 0; i < num_colliding; ++i) {
-            dist_colliding[i] = 0;
+        switch (pdmethod) {
+            case PDTYPE1:
+                calculate_collidingdist(environ, colliding, num_colliding, dist_colliding);
+                break;
+            case PDTYPE2:
+                calculate_collidingdist2(pointmodel, environ, trajectory, colliding, num_colliding, dist_colliding, radius);
+                break;
         }
     }
     write_xyzr(environ, dir, colliding, dist_colliding);
