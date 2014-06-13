@@ -29,10 +29,9 @@ public:
   T closest;
 
   /** 
-   * distance to the closest point squared and not squared
+   * distance to the closest point
    */
   double closest_d2;
-  double closest_d;
 
   /**
    * maximum distance to search in squared and not squared
@@ -53,7 +52,10 @@ public:
 
   double *p0;
 
-  double dist_2;
+  /**
+   * distance between two points for fixedRangeSearchBetween2Points
+   */
+  double dist;
 
   /**
    * vector of all neighbors within a given radius

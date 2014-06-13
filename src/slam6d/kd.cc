@@ -81,7 +81,6 @@ double *KDtree::FindClosestAlongDir(double *_p,
 {
   params[threadNum].closest = NULL;
   params[threadNum].closest_d2 = maxdist2;
-  params[threadNum].closest_d = sqrt(maxdist2);
   params[threadNum].p = _p;
   params[threadNum].dir = _dir;
   _FindClosestAlongDir(Void(), threadNum);
@@ -133,9 +132,8 @@ vector<Point> KDtree::fixedRangeSearchBetween2Points(double *_p,
   vector<Point> result;
   params[threadNum].closest = _p0;
   params[threadNum].closest_d2 = maxdist2;
-  params[threadNum].closest_d = sqrt(maxdist2);
   params[threadNum].p = _p;
-  params[threadNum].dist_2 = Dist2(_p, _p0);
+  params[threadNum].dist = sqrt(Dist2(_p, _p0));
 
   double * _dir = new double[3];
   for(int i = 0; i < 3; i++) {
@@ -167,7 +165,6 @@ vector<Point> KDtree::fixedRangeSearchAlongDir(double *_p,
   vector<Point> result;
   params[threadNum].closest = NULL;
   params[threadNum].closest_d2 = maxdist2;
-  params[threadNum].closest_d = sqrt(maxdist2);
   params[threadNum].p = _p;
   params[threadNum].dir = _dir;
   params[threadNum].range_neighbors.clear();
