@@ -215,6 +215,11 @@ protected:
     } leaf;
   };
 
+  /*
+   * TODO: benchmark what is faster:
+   *   - squaring the distance in the recursive case every time?
+   *   - or taking the square root once closest_d2 is updated?
+   */
   void _FindClosest(const PointData& pts, int threadNum) const {
     AccessorFunc point;
     ParamFunc   pointparam;
@@ -255,6 +260,11 @@ protected:
     }
   }
 
+  /*
+   * TODO: benchmark what is faster:
+   *   - squaring the distance in the check whether to abort every time?
+   *   - or taking the square root once closest_d2 is updated?
+   */
   void _FindClosestAlongDir(const PointData& pts, int threadNum) const {
     AccessorFunc point;
     ParamFunc pointparam;
@@ -280,7 +290,7 @@ protected:
                      params[threadNum].p[1] - node.center[1],
                      params[threadNum].p[2] - node.center[2] };
     double myd2center = Len2(p2c) - sqr(Dot(p2c, params[threadNum].dir));
-    if (myd2center > sqr(node.r + params[threadNum].closest_d))
+    if (myd2center > sqr(node.r + sqrt(params[threadNum].closest_d2)))
       return;
 
 
@@ -294,6 +304,11 @@ protected:
     }
   }
 
+  /*
+   * TODO: benchmark what is faster:
+   *   - squaring the distance in the check whether to abort every time?
+   *   - or taking the square root once closest_d2 is updated?
+   */
   void _fixedRangeSearchBetween2Points(const PointData& pts, int threadNum) const {
     AccessorFunc point;
     ParamFunc pointparam;
@@ -322,7 +337,7 @@ protected:
     double myd2center = my_dist_2 - sqr(Dot(c2c, params[threadNum].dir));
     //if (myd2center > (node.r2 + params[threadNum].closest_d2 + 2.0f * max(node.r2, params[threadNum].closest_d2)))
     
-    if (myd2center > sqr(node.r + params[threadNum].closest_d))
+    if (myd2center > sqr(node.r + sqrt(params[threadNum].closest_d2)))
       return;
     //if (myd2center > (node.r2 + params[threadNum].closest_d2 + 2.0f * sqrt(node.r2) * sqrt(params[threadNum].closest_d2))) return;
 
@@ -333,9 +348,9 @@ protected:
                      params[threadNum].p0[2] - node.center[2] };
 
     double distXP2 = Len2(p2c);
-    if(params[threadNum].dist_2 > sqr(distXP2 + node.r)) return;
+    if(params[threadNum].dist > distXP2 + node.r) return;
     
-    if(params[threadNum].dist_2 > sqr(sqrt(my_dist_2) + node.r)) return;
+    if(params[threadNum].dist > sqrt(my_dist_2) + node.r) return;
     
     // Recursive case
     if (params[threadNum].p[node.splitaxis] < node.center[node.splitaxis] ) {
@@ -349,6 +364,11 @@ protected:
   }
 
   
+  /*
+   * TODO: benchmark what is faster:
+   *   - squaring the distance in the check whether to abort every time?
+   *   - or taking the square root once closest_d2 is updated?
+   */
   void _fixedRangeSearchAlongDir(const PointData& pts, int threadNum) const {
     AccessorFunc point;
     ParamFunc pointparam;
@@ -383,7 +403,7 @@ protected:
                      params[threadNum].p[2] - node.center[2] };
     double myd2center = Len2(p2c) - sqr(Dot(p2c, params[threadNum].dir));
     //if (myd2center > (node.r2 + params[threadNum].closest_d2 + 2.0f * max(node.r2, params[threadNum].closest_d2)))
-    if (myd2center > sqr(node.r + params[threadNum].closest_d))
+    if (myd2center > sqr(node.r + sqrt(params[threadNum].closest_d2)))
       return;
 
     // Recursive case
@@ -438,6 +458,12 @@ protected:
     }
   }
 
+  /*
+   * TODO: benchmark what is faster:
+   *   - squaring the distance in the check whether to abort and the recursive
+   *     case every time?
+   *   - or taking the square root once closest_d2 is updated?
+   */
   void _FixedRangeSearch(const PointData& pts, int threadNum) const {
     AccessorFunc point;
     ParamFunc pointparam;
@@ -596,6 +622,12 @@ protected:
   
   }
 
+  /*
+   * TODO: benchmark what is faster:
+   *   - squaring the distance in the check whether to abort and the recursive
+   *     case every time?
+   *   - or taking the square root once closest_d2 is updated?
+   */
   void _segmentSearch_1NearestPoint(const PointData& pts, int threadNum) const {
     AccessorFunc point;
     ParamFunc pointparam;
