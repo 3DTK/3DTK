@@ -83,6 +83,8 @@ public:
   double *segment_dir; // vector from one point of the segment to the other
   double segment_len2; // squared length of segment_dir
   double *segment_n;   // segment_dir divided by segment_len2
+  double *segment_center; // center point of the segment
+  double segment_r2;   // bounding sphere of search area radius
 };
 
 #endif
