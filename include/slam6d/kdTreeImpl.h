@@ -508,7 +508,7 @@ protected:
       return;
     }
 
-    /*int kN = params[threadNum].k-1;
+    int kN = params[threadNum].k-1;
     if (params[threadNum].closest_neighbors[kN] != 0) {
         // Quick check of whether to abort  
         double approx_dist_bbox
@@ -520,18 +520,6 @@ protected:
 		return;
     }
     // Recursive case
-    double myd = node.center[node.splitaxis] - params[threadNum].p[node.splitaxis];
-    if (myd >= 0.0) {
-	 node.child1->_KNNSearch(pts, threadNum);
-	 if (sqr(myd) < params[threadNum].closest_d2) {
-	   node.child2->_KNNSearch(pts, threadNum);
-	 }
-    } else {
-	 node.child2->_KNNSearch(pts, threadNum);
-	 if (sqr(myd) < params[threadNum].closest_d2) {
-	   node.child1->_KNNSearch(pts, threadNum);
-	 }
-    }*/
     if (params[threadNum].p[node.splitaxis] < node.center[node.splitaxis] ) {
       node.child1->_KNNSearch(pts, threadNum);
       node.child2->_KNNSearch(pts, threadNum);
@@ -647,7 +635,17 @@ protected:
         return;
     }
 
-    // Quick check of whether to abort
+    // Quick check of whether to abort (weeds out all nodes that are too far
+    // away from the first point)
+    double approx_dist_bbox =
+        max(max(fabs(params[threadNum].p[0]-node.center[0])-node.dx,
+                    fabs(params[threadNum].p[1]-node.center[1])-node.dy),
+                fabs(params[threadNum].p[2]-node.center[2])-node.dz);
+    if (approx_dist_bbox >= 0 &&
+            sqr(approx_dist_bbox) >= params[threadNum].closest_d2)
+        return;
+    // Slower check of whether to abort (weeds out all nodes that are not in
+    // the area to search)
     p2p[0] = node.center[0] - params[threadNum].p[0];
     p2p[1] = node.center[1] - params[threadNum].p[1];
     p2p[2] = node.center[2] - params[threadNum].p[2];
@@ -671,14 +669,18 @@ protected:
     }
 
     // Recursive case
-    if (params[threadNum].p[node.splitaxis] < node.center[node.splitaxis] ) {
+    double myd = node.center[node.splitaxis] - params[threadNum].p[node.splitaxis];
+    if (myd >= 0.0) {
       node.child1->_segmentSearch_1NearestPoint(pts, threadNum);
-      node.child2->_segmentSearch_1NearestPoint(pts, threadNum);
+      if (sqr(myd) < params[threadNum].closest_d2) {
+        node.child2->_segmentSearch_1NearestPoint(pts, threadNum);
+      }
     } else {
       node.child2->_segmentSearch_1NearestPoint(pts, threadNum);
-      node.child1->_segmentSearch_1NearestPoint(pts, threadNum);
+      if (sqr(myd) < params[threadNum].closest_d2) {
+        node.child1->_segmentSearch_1NearestPoint(pts, threadNum);
+      }
     }
-  
   }
 };
 
