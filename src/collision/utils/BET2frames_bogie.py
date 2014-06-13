@@ -71,13 +71,14 @@ for line in fd:
     t,lon,lat,h,r,p,y = line.split()[:7]
     try:
         values.append((
-            float(t),
+            #float(t),
             m_lon*(float(lon)/100000-lons),
             m_lat*(float(lat)/100000-lats),
             float(h)-height,
-            float(r)*pi/180,
-            float(p)*pi/180,
-            float(y)*pi/180))
+            #float(r)*pi/180,
+            #float(p)*pi/180,
+            #float(y)*pi/180
+            ))
     except:
         pass
 
@@ -85,7 +86,7 @@ fd.close()
 
 lengths = list()
 # calculate list of line segment lengths
-for (_,x1,y1,z1,_,_,_),(_,x2,y2,z2,_,_,_) in pairwise(values):
+for (x1,y1,z1),(x2,y2,z2) in pairwise(values):
     a = x2-x1
     b = y2-y1
     c = z2-z1
@@ -103,7 +104,7 @@ rz = lambda y: np.matrix([[ cos(y),-sin(y),      0],
 
 # re-calculate yaw, pitch, roll
 # assume zero roll
-for i,(t,lon,lat,h,r,p,y) in enumerate(values):
+for i,(lon,lat,h) in enumerate(values):
     # find the point of the trajectory for the other bogie
     # only need to start searching after the sum of segments is greater than
     # the bogie length
@@ -113,7 +114,7 @@ for i,(t,lon,lat,h,r,p,y) in enumerate(values):
         if ssum > bogiedist:
             break
     inters = None
-    for (_,x1,y1,z1,_,_,_),(_,x2,y2,z2,_,_,_) in pairwise(values[i+j:]):
+    for (x1,y1,z1),(x2,y2,z2) in pairwise(values[i+j:]):
         inters = intersects_segment((x1,y1,z1),(x2,y2,z2),(lon,lat,h),bogiedist)
         if inters:
             break
