@@ -10,18 +10,14 @@
 #ifndef __WX_RANGE_H__
 #define __WX_RANGE_H__
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
-    #pragma interface "range.h"
-#endif
-
 #include "wx/things/thingdef.h"
 
-class WXDLLIMPEXP_THINGS wxRangeInt;
-class WXDLLIMPEXP_THINGS wxRangeDouble;
-class WXDLLIMPEXP_THINGS wxRangeIntSelection;
-class WXDLLIMPEXP_THINGS wxRangeDoubleSelection;
+class WXDLLIMPEXP_FWD_THINGS wxRangeInt;
+class WXDLLIMPEXP_FWD_THINGS wxRangeDouble;
+class WXDLLIMPEXP_FWD_THINGS wxRangeIntSelection;
+class WXDLLIMPEXP_FWD_THINGS wxRangeDoubleSelection;
 
-#include "wx/dynarray.h"
+#include <wx/dynarray.h>
 WX_DECLARE_OBJARRAY_WITH_DECL(wxRangeInt, wxArrayRangeInt, class WXDLLIMPEXP_THINGS);
 WX_DECLARE_OBJARRAY_WITH_DECL(wxRangeDouble, wxArrayRangeDouble, class WXDLLIMPEXP_THINGS);
 WX_DECLARE_OBJARRAY_WITH_DECL(wxRangeIntSelection, wxArrayRangeIntSelection, class WXDLLIMPEXP_THINGS);
@@ -38,7 +34,7 @@ WXDLLIMPEXP_DATA_THINGS(extern const wxRangeDouble) wxEmptyRangeDouble;
 class WXDLLIMPEXP_THINGS wxRangeInt
 {
 public:
-    inline wxRangeInt(int min_=0, int max_=0) : m_min(min_), m_max(max_) { }
+    wxRangeInt(int min_=0, int max_=0) : m_min(min_), m_max(max_) {}
 
     // Get the width of the range
     inline int GetRange() const { return m_max - m_min + 1; }
@@ -56,7 +52,7 @@ public:
     inline bool IsEmpty() const { return m_min > m_max; }
 
     // Swap the min and max values
-    inline void SwapMinMax() { register int temp=m_min; m_min=m_max; m_max=temp; }
+    inline void SwapMinMax() { int temp = m_min; m_min = m_max; m_max = temp; }
 
     // returns -1 for i < min, 0 for in range, +1 for i > m_max
     inline int Position(int i) const { return i < m_min ? -1 : (i > m_max ? 1 : 0); }
@@ -64,26 +60,26 @@ public:
     // Is this point or the range within this range
     inline bool Contains( int i ) const { return (i >= m_min) && (i <= m_max); }
     inline bool Contains( const wxRangeInt &r ) const
-        { return (r.m_min >= m_min) && (r.m_max <= m_max); }
+        { return (r.m_min >= m_min) && (r.m_max <= m_max) && !IsEmpty() && !r.IsEmpty(); }
 
     // returns if the range intersects the given range
     inline bool Intersects(const wxRangeInt& r) const
-        { return Intersect(r).IsEmpty();  }
-    // returns the intersection of the range with the other
+        { return !Intersect(r).IsEmpty();  }
+    // returns the intersection of the range with the other, check IsEmpty()
     inline wxRangeInt Intersect(const wxRangeInt& r) const
         { return wxRangeInt(wxMax(m_min, r.m_min), wxMin(m_max, r.m_max)); }
-    // returns the union of the range with the other
+    // returns the union of the range with the other, the min and max of the two
+    //   regardless of whether they don't overlap
     inline wxRangeInt Union(const wxRangeInt& r) const
-        { return wxRangeInt(wxMin(m_min, r.m_min), wxMax(m_max, r.m_max)); }
+        { return (IsEmpty() || r.IsEmpty()) ? wxEmptyRangeInt : wxRangeInt(wxMin(m_min, r.m_min), wxMax(m_max, r.m_max)); }
 
     // Is this point inside or touches +/- 1 of the range
     inline bool Touches( int i ) const
         { return !IsEmpty() && wxRangeInt(m_min-1, m_max+1).Contains(i); }
-    // Is the range adjoining this range
+    // Is the range inside or +/- 1 of this range (eg. is it adjoining?)
     inline bool Touches( const wxRangeInt &r ) const
-         { if (IsEmpty() || r.IsEmpty()) return false;
-           wxRangeInt rExp(m_min-1, m_max+1);
-           return rExp.Contains(r.m_min) || rExp.Contains(r.m_max); }
+         { return (IsEmpty() || r.IsEmpty()) ? false : r.Intersects(wxRangeInt(m_min-1, m_max+1)); }
+
     // combine this single point with the range by expanding the m_min/m_max to contain it
     //  if only_if_touching then only combine if i is just outside the range by +/-1
     //  returns true if the range has been changed at all, false if not
@@ -95,7 +91,7 @@ public:
     //   else if r is inside of this then this is the left side and right is the right
     //   else if r.m_min > m_min then this is the left side
     //   else if r.m_min < m_min this is the right side
-    bool Delete( const wxRangeInt &r, wxRangeInt *right=NULL );
+    bool Delete( const wxRangeInt &r, wxRangeInt *right = NULL );
 
     // operators
     // no copy ctor or assignment operator - the defaults are ok
@@ -139,7 +135,7 @@ public :
         }
 
     // Get the number of individual ranges
-    inline int GetCount() const { return m_ranges.GetCount(); }
+    inline size_t GetCount() const { return m_ranges.GetCount(); }
     // Get total number of items selected in all ranges, ie. sum of all wxRange::GetWidths
     int GetItemCount() const;
     // Get the ranges themselves to iterate though for example
@@ -189,7 +185,7 @@ protected :
 class WXDLLIMPEXP_THINGS wxRangeDouble
 {
 public:
-    inline wxRangeDouble(wxDouble min_=0, wxDouble max_=0) : m_min(min_), m_max(max_) {}
+    wxRangeDouble(wxDouble min_=0, wxDouble max_=0) : m_min(min_), m_max(max_) {}
 
     // Get the width of the range
     inline wxDouble GetRange() const { return m_max - m_min; }
@@ -207,25 +203,26 @@ public:
     inline bool IsEmpty() const { return m_min > m_max; }
 
     // Swap the min and max values
-    inline void SwapMinMax() { register wxDouble temp = m_min; m_min = m_max; m_max = temp; }
+    inline void SwapMinMax() { wxDouble temp = m_min; m_min = m_max; m_max = temp; }
 
     // returns -1 for i < min, 0 for in range, +1 for i > m_max
-    inline int Position(wxDouble i) const { return i < m_min ? -1 : i > m_max ? 1 : 0; }
+    inline int Position(wxDouble i) const { return i < m_min ? -1 : (i > m_max ? 1 : 0); }
 
     // Is this point or the range within this range
-    inline bool Contains( wxDouble i ) const { return (i>=m_min)&&(i<=m_max); }
+    inline bool Contains( wxDouble i ) const { return (i >= m_min) && (i <= m_max); }
     inline bool Contains( const wxRangeDouble &r ) const
-         { return (r.m_min>=m_min)&&(r.m_max<=m_max); }
+         { return (r.m_min >= m_min) && (r.m_max <= m_max) && !IsEmpty() && !r.IsEmpty(); }
 
     // returns if the range intersects the given range
     inline bool Intersects(const wxRangeDouble& r) const
-        { return Intersect(r).IsEmpty();  }
-    // returns the intersection of the range with the other
+        { return !Intersect(r).IsEmpty();  }
+    // returns the intersection of the range with the other, check IsEmpty()
     inline wxRangeDouble Intersect(const wxRangeDouble& r) const
         { return wxRangeDouble(wxMax(m_min, r.m_min), wxMin(m_max, r.m_max)); }
-    // returns the union of the range with the other
+    // returns the union of the range with the other, the min and max of the two
+    //   regardless of whether they don't overlap
     inline wxRangeDouble Union(const wxRangeDouble& r) const
-        { return wxRangeDouble(wxMin(m_min, r.m_min), wxMax(m_max, r.m_max)); }
+        { return (IsEmpty() || r.IsEmpty()) ? wxEmptyRangeDouble : wxRangeDouble(wxMin(m_min, r.m_min), wxMax(m_max, r.m_max)); }
 
     // no touches for double since what would be a good eps value?
 
@@ -240,7 +237,7 @@ public:
     //   else if r is inside of this then this is the left side and right is the right
     //   else if r.m_min > m_min then this is the left side
     //   else if r.m_min < m_min this is the right side
-    bool Delete( const wxRangeDouble &r, wxRangeDouble *right=NULL );
+    bool Delete( const wxRangeDouble &r, wxRangeDouble *right = NULL );
 
     // operators
     // no copy ctor or assignment operator - the defaults are ok
@@ -284,7 +281,7 @@ public :
         }
 
     // Get the number of individual ranges
-    inline int GetCount() const { return m_ranges.GetCount(); }
+    inline size_t GetCount() const { return m_ranges.GetCount(); }
     // Get the ranges themselves to iterate though for example
     const wxArrayRangeDouble& GetRangeArray() const { return m_ranges; }
     // Get a single range

@@ -25,16 +25,11 @@ Create the button with either a text or bitmap label.
 #ifndef _WX_MENUBTN_H_
 #define _WX_MENUBTN_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
-    #pragma interface "menubtn.h"
-#endif
-
 #include "wx/things/thingdef.h"
 #include "wx/things/toggle.h"
 
-class WXDLLEXPORT wxMenu;
-class WXDLLEXPORT wxBitmap;
-class WXDLLIMPEXP_THINGS wxCustomButton;
+class WXDLLIMPEXP_FWD_CORE wxMenu;
+class WXDLLIMPEXP_FWD_CORE wxBitmap;
 
 //-----------------------------------------------------------------------------
 // wxMenuButton styles
@@ -81,7 +76,7 @@ public:
                   const wxPoint& pos = wxDefaultPosition,
                   const wxSize& size = wxDefaultSize,
                   long style = 0,
-				  const wxValidator& val = wxDefaultValidator,
+                  const wxValidator& val = wxDefaultValidator,
                   const wxString& name = wxT("wxMenuButton"))
                   : wxControl()
     {
@@ -96,7 +91,7 @@ public:
                   const wxSize& size = wxDefaultSize,
                   int n = 0, const wxString choices[] = (const wxString *) NULL,
                   long style = 0,
-				  const wxValidator& val = wxDefaultValidator,
+                  const wxValidator& val = wxDefaultValidator,
                   const wxString& name = wxT("wxMenuButton"))
                   : wxControl()
     {
@@ -112,7 +107,7 @@ public:
                   const wxPoint& pos = wxDefaultPosition,
                   const wxSize& size = wxDefaultSize,
                   long style = 0,
-				  const wxValidator& val = wxDefaultValidator,
+                  const wxValidator& val = wxDefaultValidator,
                   const wxString& name = wxT("wxMenuButton"))
                   : wxControl()
     {

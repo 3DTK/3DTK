@@ -9,28 +9,27 @@
 // Licence:     wxWidgets licence
 /////////////////////////////////////////////////////////////////////////////
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
-    #pragma implementation "toggle.h"
-#endif
+#include "precomp.h"
 
 // For compilers that support precompilation, includes "wx/wx.h".
-#include "wx/wxprec.h"
+#include <wx/wxprec.h>
 
 #ifdef __BORLANDC__
     #pragma hdrstop
 #endif
 
 #ifndef WX_PRECOMP
-    #include "wx/control.h"
-    #include "wx/settings.h"
-    #include "wx/bitmap.h"
-    #include "wx/timer.h"
-    #include "wx/dc.h"
-    #include "wx/dcclient.h"
+    #include <wx/control.h>
+    #include <wx/settings.h>
+    #include <wx/bitmap.h>
+    #include <wx/timer.h>
+    #include <wx/dc.h>
+    #include <wx/dcclient.h>
 #endif // WX_PRECOMP
 
-#include "wx/tglbtn.h"
-#include "wx/image.h"
+#include <wx/tglbtn.h>
+#include <wx/image.h>
+#include <wx/renderer.h>
 #include "wx/things/toggle.h"
 
 // ==========================================================================
@@ -53,36 +52,38 @@ wxCustomButton::~wxCustomButton()
 
 void wxCustomButton::Init()
 {
-    m_focused = false;
-    m_labelMargin = wxSize(4,4);
+    m_focused      = false;
+    m_labelMargin  = wxSize(4,4);
     m_bitmapMargin = wxSize(2,2);
-    m_down = 0;
-    m_timer = NULL;
-    m_eventType = 0;
+    m_down         = 0;
+    m_timer        = NULL;
+    m_eventType    = 0;
     m_button_style = wxCUSTBUT_TOGGLE|wxCUSTBUT_BOTTOM;
 }
 
 bool wxCustomButton::Create(wxWindow* parent, wxWindowID id,
                             const wxString& label, const wxBitmap &bitmap,
-                            const wxPoint& pos, const wxSize& size,
+                            const wxPoint& pos, const wxSize& size_,
                             long style, const wxValidator& val,
                             const wxString& name)
 {
+    m_labelString = label;
+    if (bitmap.Ok()) m_bmpLabel = bitmap;
+    wxSize bestSize = DoGetBestSize_(parent);
+    wxSize size(size_.x<0 ? bestSize.x:size_.x, size_.y<0 ? bestSize.y:size_.y);
+
+    //SetInitialSize(size);
+
     if (!wxControl::Create(parent,id,pos,size,wxNO_BORDER|wxCLIP_CHILDREN,val,name))
         return false;
 
-    wxControl::SetLabel(label);
     wxControl::SetBackgroundColour(parent->GetBackgroundColour());
     wxControl::SetForegroundColour(parent->GetForegroundColour());
     wxControl::SetFont(parent->GetFont());
 
-    if (bitmap.Ok()) m_bmpLabel = bitmap;
-
     if (!SetButtonStyle(style)) return false;
 
-    wxSize bestSize = DoGetBestSize();
-    SetSize(wxSize(size.x<0 ? bestSize.x:size.x, size.y<0 ? bestSize.y:size.y));
-    SetBestSize(GetSize());
+    //SetBestSize(size);
 
     CalcLayout(true);
     return true;
@@ -123,7 +124,8 @@ bool wxCustomButton::SetButtonStyle(long style)
 
 void wxCustomButton::SetLabel( const wxString &label )
 {
-    wxControl::SetLabel(label);
+    m_labelString = label;
+    InvalidateBestSize();
     CalcLayout(true);
 }
 
@@ -153,7 +155,7 @@ void wxCustomButton::OnMouseEvents(wxMouseEvent& event)
 
         m_eventType = wxEVT_LEFT_UP;
 
-        if (wxRect(wxPoint(0,0), GetSize()).Inside(event.GetPosition()))
+        if (wxRect(wxPoint(0,0), GetSize()).Contains(event.GetPosition()))
         {
             if ((m_button_style & wxCUSTBUT_BUTTON) && (m_down > 0))
             {
@@ -188,7 +190,7 @@ void wxCustomButton::OnMouseEvents(wxMouseEvent& event)
 
         m_eventType = wxEVT_RIGHT_UP;
 
-        if (wxRect(wxPoint(0,0), GetSize()).Inside(event.GetPosition()))
+        if (wxRect(wxPoint(0,0), GetSize()).Contains(event.GetPosition()))
         {
             if ((m_button_style & wxCUSTBUT_BUTTON) && (m_down > 0))
             {
@@ -355,6 +357,7 @@ wxBitmap wxCustomButton::CreateBitmapDisabled(const wxBitmap &bitmap) const
 void wxCustomButton::SetBitmapLabel(const wxBitmap& bitmap)
 {
     m_bmpLabel = bitmap;
+    InvalidateBestSize();
     CalcLayout(true);
 }
 
@@ -372,8 +375,6 @@ void wxCustomButton::Redraw()
 
 void wxCustomButton::Paint( wxDC &dc )
 {
-    dc.BeginDrawing();
-
     int w, h;
     GetSize(&w,&h);
 
@@ -412,12 +413,31 @@ void wxCustomButton::Paint( wxDC &dc )
         foreColour = wxSystemSettings::GetColour(wxSYS_COLOUR_GRAYTEXT);
     }
 
+#if wxCHECK_VERSION(2, 8, 0)
+
+    // wxCONTROL_DISABLED
+    //flags may have the wxCONTROL_PRESSED, wxCONTROL_CURRENT or wxCONTROL_ISDEFAULT
+
+    int ren_flags = 0;
+    if (GetValue())
+        ren_flags |= wxCONTROL_PRESSED;
+    if (m_focused)
+        ren_flags |= wxCONTROL_CURRENT;
+    if (!IsEnabled())
+        ren_flags |= wxCONTROL_DISABLED;
+
+    wxRendererNative::Get().DrawPushButton(this, dc, wxRect(0, 0, w, h), ren_flags);
+
+#else
+
     wxBrush brush(backColour, wxSOLID);
     dc.SetBackground(brush);
     dc.SetBrush(brush);
     dc.SetPen(*wxTRANSPARENT_PEN);
 
     dc.DrawRectangle(0, 0, w, h);
+
+#endif // !wxCHECK_VERSION(2, 8, 0)
 
     if (bitmap.Ok())
         dc.DrawBitmap(bitmap, m_bitmapPos.x, m_bitmapPos.y, true );
@@ -430,6 +450,7 @@ void wxCustomButton::Paint( wxDC &dc )
         dc.DrawText(GetLabel(), m_labelPos.x, m_labelPos.y);
     }
 
+#if !wxCHECK_VERSION(2, 8, 0)
     if (GetValue())                                        // draw sunken border
     {
         dc.SetPen(*wxGREY_PEN);
@@ -448,11 +469,11 @@ void wxCustomButton::Paint( wxDC &dc )
         dc.SetPen(*wxGREY_PEN);
         dc.DrawLine(2,h-2,w-2,h-2); dc.DrawLine(w-2,h-2,w-2,1);
     }
+#endif // !wxCHECK_VERSION(2, 8, 0)
 
     dc.SetBackground(wxNullBrush);
     dc.SetBrush(wxNullBrush);
     dc.SetPen(wxNullPen);
-    dc.EndDrawing();
 }
 
 void wxCustomButton::OnSize( wxSizeEvent &event )
@@ -463,10 +484,10 @@ void wxCustomButton::OnSize( wxSizeEvent &event )
 
 void wxCustomButton::SetMargins(const wxSize &margin, bool fit)
 {
-    m_labelMargin = margin;
+    m_labelMargin  = margin;
     m_bitmapMargin = margin;
-    CalcLayout(true);
     if (fit) SetSize(DoGetBestSize());
+    CalcLayout(true);
 }
 void wxCustomButton::SetLabelMargin(const wxSize &margin, bool fit)
 {
@@ -483,34 +504,43 @@ void wxCustomButton::SetBitmapMargin(const wxSize &margin, bool fit)
 
 wxSize wxCustomButton::DoGetBestSize() const
 {
-    int lw=0, lh=0;
-    int bw=0, bh=0;
-    bool has_bitmap = false;
-    bool has_label = false;
+    return DoGetBestSize_((wxWindow*)this);
+}
 
-    if (!GetLabel().IsEmpty())
+wxSize wxCustomButton::DoGetBestSize_(wxWindow* win) const
+{
+    //((wxWindow*)this)->InvalidateBestSize();
+
+    int lw = 0, lh = 0;
+    int bw = 0, bh = 0;
+    bool has_bitmap = m_bmpLabel.Ok();
+    bool has_label  = !m_labelString.IsEmpty();
+
+    if (has_label)
     {
-        GetTextExtent(GetLabel(), &lw, &lh);
+        win->GetTextExtent(m_labelString, &lw, &lh);
         lw += 2*m_labelMargin.x;
         lh += 2*m_labelMargin.y;
-        has_label = true;
     }
-    if (m_bmpLabel.Ok())
+    if (has_bitmap)
     {
-        bw = m_bmpLabel.GetWidth() + 2*m_bitmapMargin.x;
+        bw = m_bmpLabel.GetWidth()  + 2*m_bitmapMargin.x;
         bh = m_bmpLabel.GetHeight() + 2*m_bitmapMargin.y;
-        has_bitmap = true;
     }
 
-    if ((m_button_style & wxCUSTBUT_LEFT) || (m_button_style & wxCUSTBUT_RIGHT))
+    if (((m_button_style & wxCUSTBUT_LEFT) != 0) || ((m_button_style & wxCUSTBUT_RIGHT) != 0))
     {
-        int h = bh > lh ? bh : lh;
-        if (has_bitmap && has_label) lw -= wxMin(m_labelMargin.x, m_bitmapMargin.x);
+        int h = (bh > lh) ? bh : lh;
+        if (has_bitmap && has_label)
+            lw -= wxMin(m_labelMargin.x, m_bitmapMargin.x);
+
         return wxSize(lw+bw, h);
     }
 
-    int w = bw > lw ? bw : lw;
-    if (has_bitmap && has_label) lh -= wxMin(m_labelMargin.y, m_bitmapMargin.y);
+    int w = (bw > lw) ? bw : lw;
+    if (has_bitmap && has_label)
+        lh -= wxMin(m_labelMargin.y, m_bitmapMargin.y);
+
     return wxSize(w, lh+bh);
 }
 
@@ -521,48 +551,50 @@ void wxCustomButton::CalcLayout(bool refresh)
 
     int bw = 0, bh = 0;
     int lw = 0, lh = 0;
+    bool has_bitmap = m_bmpLabel.Ok();
+    bool has_label  = !GetLabel().IsEmpty();
 
-    if (m_bmpLabel.Ok()) // assume they're all the same size
+    if (has_bitmap) // assume they're all the same size
     {
         bw = m_bmpLabel.GetWidth();
         bh = m_bmpLabel.GetHeight();
     }
-    wxString label = GetLabel();
-    if (!label.IsEmpty())
+
+    if (has_label)
     {
-        GetTextExtent(label, &lw, &lh);
+        GetTextExtent(GetLabel(), &lw, &lh);
     }
 
     // Center the label or bitmap if only one or the other
-    if (!m_bmpLabel.Ok())
+    if (!has_bitmap)
     {
         m_bitmapPos = wxPoint(0,0);
-        m_labelPos = wxPoint((w-lw)/2, (h-lh)/2);
+        m_labelPos  = wxPoint((w-lw)/2, (h-lh)/2);
     }
-    else if (label.IsEmpty())
+    else if (!has_label)
     {
         m_bitmapPos = wxPoint((w-bw)/2, (h-bh)/2);
-        m_labelPos = wxPoint(0,0);
+        m_labelPos  = wxPoint(0,0);
     }
-    else if (m_button_style & wxCUSTBUT_LEFT)
+    else if ((m_button_style & wxCUSTBUT_LEFT) != 0)
     {
         int mid_margin = wxMax(m_labelMargin.x, m_bitmapMargin.x);
         m_labelPos  = wxPoint((w - (bw+lw+m_labelMargin.x+m_bitmapMargin.x+mid_margin))/2 + m_labelMargin.x, (h - lh)/2);
         m_bitmapPos = wxPoint(m_labelPos.x + lw + mid_margin,         (h - bh)/2);
     }
-    else if (m_button_style & wxCUSTBUT_RIGHT)
+    else if ((m_button_style & wxCUSTBUT_RIGHT) != 0)
     {
         int mid_margin = wxMax(m_labelMargin.x, m_bitmapMargin.x);
         m_bitmapPos = wxPoint((w - (bw+lw+m_labelMargin.x+m_bitmapMargin.x+mid_margin))/2 + m_bitmapMargin.x, (h - bh)/2);
         m_labelPos  = wxPoint(m_bitmapPos.x + bw + mid_margin,        (h - lh)/2);
     }
-    else if (m_button_style & wxCUSTBUT_TOP)
+    else if ((m_button_style & wxCUSTBUT_TOP) != 0)
     {
         int mid_margin = wxMax(m_labelMargin.y, m_bitmapMargin.y);
         m_labelPos  = wxPoint((w - lw)/2, (h - (bh+lh+m_labelMargin.y+m_bitmapMargin.y+mid_margin))/2 + m_labelMargin.y);
         m_bitmapPos = wxPoint((w - bw)/2, m_labelPos.y + lh + mid_margin);
     }
-    else // if (m_button_style & wxCUSTBUT_BOTTOM)  DEFAULT
+    else // if ((m_button_style & wxCUSTBUT_BOTTOM) != 0)  DEFAULT
     {
         int mid_margin = wxMax(m_labelMargin.y, m_bitmapMargin.y);
         m_bitmapPos = wxPoint((w - bw)/2, (h - (bh+lh+m_labelMargin.y+m_bitmapMargin.y+mid_margin))/2 + m_bitmapMargin.y);

@@ -6,27 +6,26 @@
 // License:     wxWidgets
 /////////////////////////////////////////////////////////////////////////////
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
-    #pragma implementation "spinctld.h"
-#endif
+#include "precomp.h"
 
 // For compilers that support precompilation, includes "wx/wx.h".
-#include "wx/wxprec.h"
+#include <wx/wxprec.h>
 
 #ifdef __BORLANDC__
     #pragma hdrstop
 #endif
 
 #ifndef WX_PRECOMP
-    #include "wx/valtext.h"     // for wxTextValidator
-    #include "wx/textctrl.h"
+    #include <wx/valtext.h>     // for wxTextValidator
+    #include <wx/textctrl.h>
 #endif // WX_PRECOMP
 
+#include <wx/tooltip.h>
 #include "wx/things/spinctld.h"
 #include <math.h>
 
 #if wxCHECK_VERSION(2,5,0)
-    #include "wx/math.h"
+    #include <wx/math.h>
 #else
     #if defined(__VISUALC__) || defined(__BORLANDC__) || defined(__WATCOMC__)
         #include <float.h>
@@ -41,7 +40,7 @@
 #endif // wxCHECK_VERSION(2,5,0)
 
 // NOTES : if the textctrl is focused and the program is ending, a killfocus
-//         event is sent in MSW, this is why m_textCtrl is set to NULL in it's
+//         event is sent in MSW, this is why m_textCtrl is set to NULL in its
 //         destructor and there's so many checks for it not being NULL
 
 //----------------------------------------------------------------------------
@@ -188,7 +187,11 @@ bool wxSpinCtrlDbl::Create( wxWindow *parent, wxWindowID id,
                       wxTE_NOHIDESEL|wxTE_PROCESS_ENTER, validator);
 
     DoSetSize( pos.x, pos.y, width, height );
+#if wxCHECK_VERSION(2,8,2)
+    SetInitialSize(wxSize(width, height));
+#else
     SetBestSize(wxSize(width, height));
+#endif
 
     m_min = min;
     m_max = max;
@@ -269,6 +272,19 @@ wxSize wxSpinCtrlDbl::DoGetBestSize() const
     return s_spinctrl_bestSize;
 }
 
+void wxSpinCtrlDbl::DoSetToolTip( wxToolTip *tip )
+{
+    // forward tip to textctrl only since having the tip pop up on the buttons
+    // is distracting.
+    if (tip && m_textCtrl)
+    {
+        wxPrintf(wxT("TIP %s\n"), tip->GetTip().c_str());
+        m_textCtrl->SetToolTip(tip->GetTip());
+    }
+
+    wxControl::DoSetToolTip(tip);
+}
+
 void wxSpinCtrlDbl::DoSendEvent()
 {
     wxCommandEvent event( wxEVT_COMMAND_SPINCTRL_UPDATED, GetId() );
@@ -339,14 +355,14 @@ void wxSpinCtrlDbl::OnChar( wxKeyEvent &event )
             DoSendEvent();
             break;
         }
-        case WXK_PRIOR :  // pg-up
+        case WXK_PAGEUP :  // pg-up
         {
             if (m_textCtrl && m_textCtrl->IsModified()) SyncSpinToText(false);
             SetValue( m_value + m_increment * 10.0 * modifier );
             DoSendEvent();
             break;
         }
-        case WXK_NEXT :  // pg-down
+        case WXK_PAGEDOWN :  // pg-down
         {
             if (m_textCtrl && m_textCtrl->IsModified()) SyncSpinToText(false);
             SetValue( m_value - m_increment * 10.0 * modifier );
