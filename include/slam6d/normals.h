@@ -20,28 +20,29 @@ using std::vector;
 #include <opencv2/opencv.hpp>
 #endif
 
-void calculateNormalsApxKNN(std::vector<Point> &normals,
-                            vector<Point> &points,
-                            int k,
+void calculateNormalsApxKNN(vector<Point> &normals,
+                            const vector<Point> &points,
+                            const int k,
                             const double _rPos[3],
-                            double eps = 0.0);
+                            const double eps = 0.0);
 
-void calculateNormalsAdaptiveApxKNN(std::vector<Point> &normals,
-                                    vector<Point> &points,
-                                    int kmin,
-                                    int kmax,
+void calculateNormalsAdaptiveApxKNN(vector<Point> &normals,
+                                    const vector<Point> &points,
+                                    const int kmin,
+                                    const int kmax,
                                     const double _rPos[3],
-                                    double eps = 0.0);
+                                    const double eps = 0.0);
 
-void calculateNormalsKNN(std::vector<Point> &normals,
-                         vector<Point> &points,
-                         int k,
+void calculateNormalsKNN(vector<Point> &normals,
+                         const vector<Point> &points,
+                         const int k,
                          const double _rPos[3] );
 
 
 void calculateNormalsAdaptiveKNN(vector<Point> &normals,
-                                 vector<Point> &points,
-                                 int kmin, int kmax,
+                                 const vector<Point> &points,
+                                 const int kmin,
+						   const int kmax,
                                  const double _rPos[3]);
 
 #endif // __NORMALS_H__

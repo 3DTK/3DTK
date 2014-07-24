@@ -33,10 +33,10 @@ using namespace std;
 /////////////NORMALS USING AKNN METHOD ////////////////
 ///////////////////////////////////////////////////////
 void calculateNormalsApxKNN(vector<Point> &normals,
-                            vector<Point> &points,
-                            int k,
+                            const vector<Point> &points,
+                            const int k,
                             const double _rPos[3],
-                            double eps)
+                            const double eps)
 {
   int nr_neighbors = k;
 
@@ -114,11 +114,11 @@ void calculateNormalsApxKNN(vector<Point> &normals,
 /////////////NORMALS USING ADAPTIVE AKNN METHOD ////////////////
 ////////////////////////////////////////////////////////////////
 void calculateNormalsAdaptiveApxKNN(vector<Point> &normals,
-                                    vector<Point> &points,
-                                    int kmin,
-                                    int kmax,
+                                    const vector<Point> &points,
+                                    const int kmin,
+                                    const int kmax,
                                     const double _rPos[3],
-                                    double eps)
+                                    const double eps)
 {
   ColumnVector rPos(3);
   for (int i = 0; i < 3; ++i)
@@ -214,8 +214,8 @@ void calculateNormalsAdaptiveApxKNN(vector<Point> &normals,
 /////////////NORMALS USING AKNN METHOD ////////////////
 ///////////////////////////////////////////////////////
 void calculateNormalsKNN(vector<Point> &normals,
-                         vector<Point> &points,
-                         int k,
+                         const vector<Point> &points,
+                         const int k,
                          const double _rPos[3] )
 {
   int nr_neighbors = k;
@@ -314,9 +314,9 @@ void calculateNormalsKNN(vector<Point> &normals,
 /////////////NORMALS USING ADAPTIVE AKNN METHOD ////////////////
 ////////////////////////////////////////////////////////////////
 void calculateNormalsAdaptiveKNN(vector<Point> &normals,
-                                 vector<Point> &points,
-                                 int kmin,
-                                 int kmax,
+                                 const vector<Point> &points,
+                                 const int kmin,
+                                 const int kmax,
                                  const double _rPos[3])
 {
   ColumnVector rPos(3);

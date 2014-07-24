@@ -10,9 +10,9 @@ IF (WITH_THERMO)
   add_executable(thermo thermo.cc) 
   
   IF(UNIX)
-    target_link_libraries(caliboard scan shape newmat dl ANN)
-    target_link_libraries(thermo scan shape newmat dl ANN)
-    target_link_libraries(thermo cvblob ${OpenCV_LIBS} scan ANN)
+    target_link_libraries(caliboard scan shape newmat dl ANN ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY})
+    target_link_libraries(thermo scan shape newmat dl ANN ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY})
+    target_link_libraries(thermo cvblob ${OpenCV_LIBS} scan ANN ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY})
   ENDIF(UNIX)
 
   IF (WIN32)

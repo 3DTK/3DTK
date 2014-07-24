@@ -23,9 +23,9 @@ SET(Boost_ADDITIONAL_VERSIONS "1.42" "1.42.0" "1.44" "1.44.0" "1.45.0" "1.45" "1
 IF(WIN32)
   # for some unknown reason no one variant works on all windows platforms
   set(Boost_DEBUG 1)  
-  find_package( Boost COMPONENTS serialization graph regex filesystem system thread chrono date_time program_options REQUIRED)
+  find_package( Boost COMPONENTS serialization graph regex filesystem system thread chrono date_time program_options system REQUIRED)
 ELSE(WIN32)
-  find_package( Boost COMPONENTS serialization graph regex filesystem system thread date_time program_options REQUIRED)
+  find_package( Boost COMPONENTS serialization graph regex filesystem system thread date_time program_options system REQUIRED)
 ENDIF(WIN32)
 
 if(Boost_FOUND)
@@ -209,6 +209,7 @@ ENDIF(WITH_GLEE)
 OPT_DEP(WITH_GRIDDER "Whether to build the 2DGridder binary ON/OFF" OFF "")
 
 IF(WITH_GRIDDER)
+   find_package (Boost COMPONENTS system REQUIRED)
   MESSAGE(STATUS "With 2DGridder")
 ELSE(WITH_GRIDDER)
   MESSAGE(STATUS "Without 2DGridder")
