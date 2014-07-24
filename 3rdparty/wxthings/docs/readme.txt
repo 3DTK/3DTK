@@ -1,5 +1,9 @@
 readme.txt for wxThings
 
+==============================================================================
+File descriptions
+==============================================================================
+
 block.h/cpp - wxBlockInt is a wxGridSelection type class based on
 wxRect2DInt to store selected 2-D rectangular areas. It knows how to
 combine with other blocks. wxBlockIntSelection consists of an array
@@ -14,9 +18,14 @@ high. wxRangeDbl and wxRangeDblSelection is the same, but for double
 valued ranges.
 
 filebrws.h/cpp & filebrws_icons_wdr.h - wxFileBrowser is an Explorer
-type wiget with a tree view of dirs and a list/icon view of files with
-optional image preview. Not fully completed, but works. You need wxWidgets
-CVS HEAD, >= 2.5.
+type widget with a tree view of dirs and a list/icon view of files with
+optional image preview. You need wxWidgets >= 2.6.
+
+filedlgg.cpp Helper file for filebrws. It #includes the source of the
+wxGenericFileDialog listctrl which is used in the wxFileBrowser. This #include
+is a hack to not have to specify the path to the
+wxWidgets/src/generic/filedlgg.cpp in the make/project files. This file needs
+to be compiled in MSW since it is not compiled by wxWidgets into their library.
 
 geometry.h/cpp - wxCircleInt, wxCircleDouble, wxRay2DDouble, wxRay2DInt
 wxEllipseInt, wxEllipseDouble, etc... not fully finished.
@@ -77,3 +86,25 @@ is used for the comparison, the  other just follows). They can be
 DECLARED in headers, DEFINED in you  cpp files, or just used inline.
 Since they're macros you can set if they're for arrays of doubles,
 ints, chars...
+
+==============================================================================
+Compiling and Installing
+==============================================================================
+
+*nix systems
+------------
+
+You may use the Makefiles in the src/ and samples/things dir to compile the
+library and the sample program. These are very simple Makefiles that depend on
+the 'wx-config' script being in your path and that wxWidgets is properly
+configured and installed.
+
+Or use the configure script in the root directory. Use "configure --help" to
+see the different options.
+
+MSW using Visual Studio
+-----------------------
+
+Open the build/wxthings.dsw file and if using > VC 2003 allow it to convert it
+to a solution file. Select the build you want or use batch build and build
+both the lib and the sample.

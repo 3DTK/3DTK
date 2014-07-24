@@ -7,19 +7,17 @@
 // Licence:     wxWidgets
 /////////////////////////////////////////////////////////////////////////////
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
-    #pragma implementation "block.h"
-#endif
+#include "precomp.h"
 
 // For compilers that support precompilation, includes "wx.h".
-#include "wx/wxprec.h"
+#include <wx/wxprec.h>
 
 #ifdef __BORLANDC__
     #pragma hdrstop
 #endif
 
 #ifndef WX_PRECOMP
-    //#include "wx/object.h"
+    //#include <wx/object.h>
 #endif // WX_PRECOMP
 
 #include "wx/things/block.h"
@@ -29,10 +27,10 @@
 
 #define PRINT_BLOCK(msg, b) { wxPrintf(wxT("Block '%s' %lg %lg %lg %lg\n"), msg, (double)(b).m_x1, (double)(b).m_y1, (double)(b).m_x2, (double)(b).m_y2); }
 
-wxBlockInt const wxEmptyBlockInt(0, 0, -1, -1);
+wxBlockInt    const wxEmptyBlockInt(0, 0, -1, -1);
 wxBlockDouble const wxEmptyBlockDouble(0, 0, -1, -1);
 
-#include "wx/arrimpl.cpp"
+#include <wx/arrimpl.cpp>
 WX_DEFINE_OBJARRAY(wxArrayBlockInt);
 WX_DEFINE_OBJARRAY(wxArrayBlockDouble);
 WX_DEFINE_OBJARRAY(wxArrayBlockIntSelection);
@@ -44,7 +42,7 @@ WX_DEFINE_OBJARRAY(wxArrayBlockDoubleSelection);
 
 static int wxCMPFUNC_CONV wxblockint_sort_topleft_bottomright( wxBlockInt **a, wxBlockInt **b)
 {
-    register int y = ((*a)->m_y1 - (*b)->m_y1);
+    int y = ((*a)->m_y1 - (*b)->m_y1);
 
     if (y < 0) return -1;
     if (y == 0) return  ((*a)->m_x1 - (*b)->m_x1);
@@ -52,7 +50,7 @@ static int wxCMPFUNC_CONV wxblockint_sort_topleft_bottomright( wxBlockInt **a, w
 }
 static int wxCMPFUNC_CONV wxblockint_sort_topright_bottomleft( wxBlockInt **a, wxBlockInt **b)
 {
-    register int y = ((*a)->m_y1 - (*b)->m_y1);
+    int y = ((*a)->m_y1 - (*b)->m_y1);
 
     if (y < 0) return -1;
     if (y == 0) return  ((*a)->m_x2 - (*b)->m_x2);
@@ -61,7 +59,7 @@ static int wxCMPFUNC_CONV wxblockint_sort_topright_bottomleft( wxBlockInt **a, w
 
 static int wxCMPFUNC_CONV wxblockint_sort_bottomleft_topright( wxBlockInt **a, wxBlockInt **b)
 {
-    register int y = ((*a)->m_y2 - (*b)->m_y2);
+    int y = ((*a)->m_y2 - (*b)->m_y2);
 
     if (y > 0) return -1;
     if (y == 0) return  ((*a)->m_x1 - (*b)->m_x1);
@@ -69,7 +67,7 @@ static int wxCMPFUNC_CONV wxblockint_sort_bottomleft_topright( wxBlockInt **a, w
 }
 static int wxCMPFUNC_CONV wxblockint_sort_bottomright_topleft( wxBlockInt **a, wxBlockInt **b)
 {
-    register int y = ((*a)->m_y2 - (*b)->m_y2);
+    int y = ((*a)->m_y2 - (*b)->m_y2);
 
     if (y > 0) return -1;
     if (y == 0) return  ((*a)->m_x2 - (*b)->m_x2);
@@ -104,7 +102,7 @@ void wxArrayBlockIntSort(wxArrayBlockInt &blocks, wxBlockSort_Type type)
 
 static int wxCMPFUNC_CONV wxblockdouble_sort_topleft_bottomright( wxBlockDouble **a, wxBlockDouble **b)
 {
-    register wxDouble y = ((*a)->m_y1 - (*b)->m_y1);
+    wxDouble y = ((*a)->m_y1 - (*b)->m_y1);
 
     if (y < 0) return -1;
     if (y == 0) return  int((*a)->m_x1 - (*b)->m_x1);
@@ -112,7 +110,7 @@ static int wxCMPFUNC_CONV wxblockdouble_sort_topleft_bottomright( wxBlockDouble 
 }
 static int wxCMPFUNC_CONV wxblockdouble_sort_topright_bottomleft( wxBlockDouble **a, wxBlockDouble **b)
 {
-    register wxDouble y = ((*a)->m_y1 - (*b)->m_y1);
+    wxDouble y = ((*a)->m_y1 - (*b)->m_y1);
 
     if (y < 0) return -1;
     if (y == 0) return  int((*a)->m_x2 - (*b)->m_x2);
@@ -121,7 +119,7 @@ static int wxCMPFUNC_CONV wxblockdouble_sort_topright_bottomleft( wxBlockDouble 
 
 static int wxCMPFUNC_CONV wxblockdouble_sort_bottomleft_topright( wxBlockDouble **a, wxBlockDouble **b)
 {
-    register wxDouble y = ((*a)->m_y2 - (*b)->m_y2);
+    wxDouble y = ((*a)->m_y2 - (*b)->m_y2);
 
     if (y > 0) return -1;
     if (y == 0) return  int((*a)->m_x1 - (*b)->m_x1);
@@ -129,7 +127,7 @@ static int wxCMPFUNC_CONV wxblockdouble_sort_bottomleft_topright( wxBlockDouble 
 }
 static int wxCMPFUNC_CONV wxblockdouble_sort_bottomright_topleft( wxBlockDouble **a, wxBlockDouble **b)
 {
-    register wxDouble y = ((*a)->m_y2 - (*b)->m_y2);
+    wxDouble y = ((*a)->m_y2 - (*b)->m_y2);
 
     if (y > 0) return -1;
     if (y == 0) return  int((*a)->m_x2 - (*b)->m_x2);
@@ -205,6 +203,24 @@ void TestBlocks()
     fflush(stdout);
 }
 #endif //TEST_BLOCKS
+
+int wxBlockInt::IsLarger(const wxBlockInt &b) const
+{
+    wxInt32 width    = m_x2 - m_x1 + 1,
+            height   = m_y2 - m_y1 + 1,
+            b_width  = b.m_x2 - b.m_x1 + 1,
+            b_height = b.m_y2 - b.m_y1 + 1;
+
+    if ((width <= 0) || (height <= 0))
+        return (b_width > 0) && (b_height > 0) ? -1 : 0;
+    if ((b_width <= 0) || (b_height <= 0))
+        return (width > 0) && (height > 0) ? 1 : 0;
+
+    wxDouble w_bw = wxDouble(width)/b_width,
+             bh_h = wxDouble(b_height)/height;
+
+    return (w_bw == bh_h) ? 0 : ((w_bw > bh_h) ? 1 : -1);
+}
 
 bool wxBlockInt::Touches(const wxBlockInt &b) const // see Intersects
 {
@@ -337,6 +353,23 @@ bool wxBlockInt::Delete( const wxBlockInt &block,
 // wxBlockDouble
 //=============================================================================
 
+int wxBlockDouble::IsLarger(const wxBlockDouble &b) const
+{
+    wxDouble width    = m_x2 - m_x1,
+             height   = m_y2 - m_y1,
+             b_width  = b.m_x2 - b.m_x1,
+             b_height = b.m_y2 - b.m_y1;
+
+    if ((width <= 0) || (height <= 0))
+        return (b_width > 0) && (b_height > 0) ? -1 : 0;
+    if ((b_width <= 0) || (b_height <= 0))
+        return (width > 0) && (height > 0) ? 1 : 0;
+
+    wxDouble w_bw = width/b_width,
+             bh_h = b_height/height;
+    return (w_bw == bh_h) ? 0 : ((w_bw > bh_h) ? 1 : -1);
+}
+
 bool wxBlockDouble::Touches(const wxBlockDouble &b) const // see Intersects
 {
     if (((wxMax(m_x1, b.m_x1)) <= (wxMin(m_x2, b.m_x2))) &&
@@ -463,8 +496,8 @@ wxBlockInt wxBlockIntSelection::GetBlock( int index ) const
 wxArrayRangeInt wxBlockIntSelection::GetBlockCol(int col) const
 {
     wxArrayRangeInt ranges;
-    register int n, count = m_blocks.GetCount();
-    for (n=0; n<count; n++)
+    sized_t n, count = m_blocks.GetCount();
+    for (n = 0; n < count; n++)
     {
         if ((col >= m_blocks[n].m_x1) && (col <= m_blocks[n].m_x2))
         {
@@ -478,8 +511,8 @@ wxArrayRangeInt wxBlockIntSelection::GetBlockCol(int col) const
 wxArrayRangeInt wxBlockIntSelection::GetBlockRow(int row) const
 {
     wxArrayRangeInt ranges;
-    register int n, count = m_blocks.GetCount();
-    for (n=0; n<count; n++)
+    sized_t n, count = m_blocks.GetCount();
+    for (n = 0; n < count; n++)
     {
         if ((row >= m_blocks[n].m_y1) && (row <= m_blocks[n].m_y2))
             ranges.Add(wxRangeInt(m_blocks[n].m_x1, m_blocks[n].m_x2));
@@ -490,31 +523,31 @@ wxArrayRangeInt wxBlockIntSelection::GetBlockRow(int row) const
 
 wxBlockInt wxBlockIntSelection::GetBoundingBlock() const
 {
-    register int n, count = m_blocks.GetCount();
+    size_t n, count = m_blocks.GetCount();
     if (count == 0) return wxEmptyBlockInt;
     wxBlockInt bound = m_blocks[0];
-    for (n=1; n<count; n++) bound.Union(m_blocks[n]);
+    for (n = 1; n < count; n++) bound.Union(m_blocks[n]);
     return bound;
 }
 
 int wxBlockIntSelection::Index( int x, int y ) const
 {
-    register int n, count = m_blocks.GetCount();
-    for (n=0; n<count; n++)
+    size_t n, count = m_blocks.GetCount();
+    for (n = 0; n < count; n++)
     {
         if ( m_blocks[n].Contains(x, y) )
-            return n;
+            return (int)n;
     }
     return wxNOT_FOUND;
 }
 
 int wxBlockIntSelection::Index( const wxBlockInt &b ) const
 {
-    register int n, count = m_blocks.GetCount();
-    for (n=0; n<count; n++)
+    size_t n, count = m_blocks.GetCount();
+    for (n = 0; n < count; n++)
     {
         if (m_blocks[n].Intersects(b))
-            return n;
+            return (int)n;
     }
     return wxNOT_FOUND;
 }
@@ -532,7 +565,7 @@ bool wxBlockIntSelection::DeselectBlock( const wxBlockInt &block, bool combineNo
     bool done = false;
 
     wxBlockInt top, bottom, left, right;
-    for (int n=0; n<int(m_blocks.GetCount()); n++)
+    for (int n = 0; n < int(m_blocks.GetCount()); n++)
     {
         if (m_blocks[n].Delete(block, top, bottom, left, right))
         {
@@ -571,12 +604,12 @@ bool wxBlockIntSelection::SelectBlock( const wxBlockInt &block, bool combineNow,
 
     extra->Add(block);
 
-    int n, count = m_blocks.GetCount();
+    int n, count = (int)m_blocks.GetCount();
     wxBlockInt top, bottom, left, right;
 
-    for (n=0; n<count; n++)
+    for (n = 0; n < count; n++)
     {
-        for (int k=0; k<int(extra->GetCount()); k++)
+        for (int k = 0; k < int(extra->GetCount()); k++)
         {
             if (m_blocks[n].Combine(extra->Item(k), top, bottom, left, right))
             {
@@ -614,15 +647,15 @@ bool wxBlockIntSelection::Minimize()
 bool wxBlockIntSelection::DoMinimize(wxArrayBlockInt &blocks)
 {
     int n;
-    for (n=0; n<1000; n++) // should probably just take a few
+    for (n = 0; n < 1000; n++) // should probably just take a few
     {
         if (!DoDoMinimize(blocks)) break;
     }
 
 #ifdef CHECK_BLOCK_OVERLAP
-    for (size_t a=0; a<blocks.GetCount(); a++)
+    for (size_t a = 0; a < blocks.GetCount(); a++)
     {
-        for (size_t b=a+1; b<blocks.GetCount(); b++)
+        for (size_t b = a+1; b < blocks.GetCount(); b++)
         {
             if (blocks[a].Intersects(blocks[b]))
             {
@@ -640,9 +673,9 @@ bool wxBlockIntSelection::DoDoMinimize(wxArrayBlockInt &blocks)
 {
 //    wxBlockInt top, bottom, left, right;
     bool done = false;
-    for (int i=0; i<int(blocks.GetCount())-1; i++)
+    for (int i = 0; i < int(blocks.GetCount())-1; i++)
     {
-        for (int j=i+1; j<int(blocks.GetCount()); j++)
+        for (int j = i+1; j < int(blocks.GetCount()); j++)
         {
             if (blocks[i].Combine(blocks[j]))
             {
@@ -681,8 +714,8 @@ wxBlockDouble wxBlockDoubleSelection::GetBlock( int index ) const
 wxArrayRangeDouble wxBlockDoubleSelection::GetBlockCol(wxDouble col) const
 {
     wxArrayRangeDouble ranges;
-    register int n, count = m_blocks.GetCount();
-    for (n=0; n<count; n++)
+    sized_t n, count = m_blocks.GetCount();
+    for (n = 0; n < count; n++)
     {
         if ((col >= m_blocks[n].m_x1) && (col <= m_blocks[n].m_x2))
         {
@@ -696,8 +729,8 @@ wxArrayRangeDouble wxBlockDoubleSelection::GetBlockCol(wxDouble col) const
 wxArrayRangeDouble wxBlockDoubleSelection::GetBlockRow(wxDouble row) const
 {
     wxArrayRangeDouble ranges;
-    register int n, count = m_blocks.GetCount();
-    for (n=0; n<count; n++)
+    sized_t n, count = m_blocks.GetCount();
+    for (n = 0; n < count; n++)
     {
         if ((row >= m_blocks[n].m_y1) && (row <= m_blocks[n].m_y2))
             ranges.Add(wxRangeDouble(m_blocks[n].m_x1, m_blocks[n].m_x2));
@@ -708,32 +741,32 @@ wxArrayRangeDouble wxBlockDoubleSelection::GetBlockRow(wxDouble row) const
 
 wxBlockDouble wxBlockDoubleSelection::GetBoundingBlock() const
 {
-    register int n, count = m_blocks.GetCount();
+    size_t n, count = m_blocks.GetCount();
     if (count == 0) return wxEmptyBlockDouble;
     wxBlockDouble bound = m_blocks[0];
-    for (n=1; n<count; n++) bound.Union(m_blocks[n]);
+    for (n = 1; n < count; n++) bound.Union(m_blocks[n]);
     return bound;
 }
 
 int wxBlockDoubleSelection::Index( wxDouble x, wxDouble y ) const
 {
-    register int n, count = m_blocks.GetCount();
-    for (n=0; n<count; n++)
+    size_t n, count = m_blocks.GetCount();
+    for (n = 0; n < count; n++)
     {
         if ( (x >= m_blocks[n].m_x1) && (y >= m_blocks[n].m_y1) &&
              (x <= m_blocks[n].m_x2) && (y <= m_blocks[n].m_y2) )
-            return true;
+            return (int)n;
     }
     return wxNOT_FOUND;
 }
 
 int wxBlockDoubleSelection::Index( const wxBlockDouble &b ) const
 {
-    register int n, count = m_blocks.GetCount();
-    for (n=0; n<count; n++)
+    size_t n, count = m_blocks.GetCount();
+    for (n = 0; n < count; n++)
     {
         if (m_blocks[n].Intersects(b))
-            return n;
+            return (int)n;
     }
     return wxNOT_FOUND;
 }
@@ -751,7 +784,7 @@ bool wxBlockDoubleSelection::DeselectBlock( const wxBlockDouble &block, bool com
     bool done = false;
 
     wxBlockDouble top, bottom, left, right;
-    for (int n=0; n<int(m_blocks.GetCount()); n++)
+    for (int n = 0; n < int(m_blocks.GetCount()); n++)
     {
         if (m_blocks[n].Delete(block, top, bottom, left, right))
         {
@@ -781,9 +814,9 @@ bool wxBlockDoubleSelection::SelectBlock( const wxBlockDouble &block, bool combi
     extra.Add(block);
     wxBlockDouble top, bottom, left, right;
 
-    for (int n=0; n<int(m_blocks.GetCount()); n++)
+    for (int n = 0; n < int(m_blocks.GetCount()); n++)
     {
-        for (int k=0; k<int(extra.GetCount()); k++)
+        for (int k = 0; k < int(extra.GetCount()); k++)
         {
             bool done = false;
 
@@ -859,16 +892,16 @@ bool wxBlockDoubleSelection::Minimize()
 bool wxBlockDoubleSelection::DoMinimize(wxArrayBlockDouble &blocks)
 {
     int n;
-    for (n=0; n<1000; n++) // should probably just take < 10 at most
+    for (n = 0; n < 1000; n++) // should probably just take < 10 at most
     {
         if (!DoDoMinimize(blocks)) break;
     }
 
 #ifdef CHECK_BLOCK_OVERLAP
-    for (size_t a=0; a<blocks.GetCount(); a++)
+    for (size_t a = 0; a < blocks.GetCount(); a++)
     {
         printf("Checking wxBlockDoubleSelection::DoMinimize %d =", a); PRINT_BLOCK("", blocks[a])
-        for (size_t b=a+1; b<blocks.GetCount(); b++)
+        for (size_t b = a+1; b < blocks.GetCount(); b++)
         {
             if (blocks[a].Intersects(blocks[b]))
             {
@@ -889,9 +922,9 @@ bool wxBlockDoubleSelection::DoDoMinimize(wxArrayBlockDouble &blocks)
     //wxBlockDouble top, bottom, left, right;
     bool done = false;
 
-    for (int i=0; i<int(blocks.GetCount())-1; i++)
+    for (int i = 0; i < int(blocks.GetCount())-1; i++)
     {
-        for (int j=i+1; j<int(blocks.GetCount()); j++)
+        for (int j = i+1; j < int(blocks.GetCount()); j++)
         {
             if (blocks[i].Combine(blocks[j]))
             {
@@ -920,7 +953,7 @@ bool wxBlockDoubleSelection::DoDoMinimize(wxArrayBlockDouble &blocks)
 //=============================================================================
 
 wxBlockIntSelectionIterator::wxBlockIntSelectionIterator( const wxBlockIntSelection &sel,
-                                                          wxBISI_Type type )
+                                                          wxBLOCKINT_SELITER_Type type )
 {
     m_type = type;
     WX_APPEND_ARRAY(m_blocks, sel.GetBlockArray());
@@ -929,7 +962,7 @@ wxBlockIntSelectionIterator::wxBlockIntSelectionIterator( const wxBlockIntSelect
 }
 
 wxBlockIntSelectionIterator::wxBlockIntSelectionIterator( const wxArrayBlockInt &blocks,
-                                                          wxBISI_Type type )
+                                                          wxBLOCKINT_SELITER_Type type )
 {
     m_type = type;
     WX_APPEND_ARRAY(m_blocks, blocks);
@@ -945,7 +978,7 @@ void wxBlockIntSelectionIterator::Reset()
 
 bool wxBlockIntSelectionIterator::GetNext(wxBlockInt &block)
 {
-    wxCHECK_MSG(m_type == wxBISI_BLOCK, false, wxT("wrong selection type"));
+    wxCHECK_MSG(m_type == wxBLOCKINT_SELITER_BLOCK, false, wxT("wrong selection type"));
     if (m_block_index+1 < int(m_blocks.GetCount()))
     {
         ++m_block_index;
@@ -958,7 +991,7 @@ bool wxBlockIntSelectionIterator::GetNext(wxBlockInt &block)
 
 bool wxBlockIntSelectionIterator::GetNext(wxPoint2DInt &pt)
 {
-    wxCHECK_MSG(m_type == wxBISI_POINT, false, wxT("wrong selection type"));
+    wxCHECK_MSG(m_type == wxBLOCKINT_SELITER_POINT, false, wxT("wrong selection type"));
     if ((m_blocks.GetCount() < 1u) || (m_block_index >= int(m_blocks.GetCount())))
         return false;
 
@@ -1001,8 +1034,8 @@ bool wxBlockIntSelectionIterator::GetNext(wxPoint2DInt &pt)
 
 bool wxBlockIntSelectionIterator::IsInSelection(const wxPoint2DInt &pt) const
 {
-    register int n, count = m_blocks.GetCount();
-    for (n=0; n<count; n++)
+    size_t n, count = m_blocks.GetCount();
+    for (n = 0; n < count; n++)
     {
         if (m_blocks[n].Contains(pt))
             return true;
@@ -1047,8 +1080,8 @@ bool wxBlockDoubleSelectionIterator::GetNext(wxBlockDouble &block)
 
 bool wxBlockDoubleSelectionIterator::IsInSelection(const wxPoint2DDouble &pt) const
 {
-    register int n, count = m_blocks.GetCount();
-    for (n=0; n<count; n++)
+    size_t n, count = m_blocks.GetCount();
+    for (n = 0; n < count; n++)
     {
         if (m_blocks[n].Contains(pt))
             return true;

@@ -10,11 +10,7 @@
 #ifndef __WXIMAGER_GEOMETRY_H__
 #define __WXIMAGER_GEOMETRY_H__
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
-    #pragma interface "geometry.h"
-#endif
-
-#include "wx/geometry.h"
+#include <wx/geometry.h>
 #include "wx/things/thingdef.h"
 
 #define wxGEOMETRY_INF 1E100
@@ -22,23 +18,20 @@
 //-----------------------------------------------------------------------------
 // wxRay2DDouble uses point slope line format
 //
-//    y = mx+b, m=(x-x0)/(y-y0)
+//    y = mx+b, m=(y-y0)/(x-x0)
 //-----------------------------------------------------------------------------
 
 class WXDLLIMPEXP_THINGS wxRay2DDouble : public wxPoint2DDouble
 {
 public :
 
-    inline wxRay2DDouble(wxDouble x=0, wxDouble y=0, wxDouble slope=0)
-        { m_x = x; m_y = y; m_slope = slope; }
-    inline wxRay2DDouble(const wxPoint2DDouble &pt, wxDouble slope)
-        { m_x = pt.m_x; m_y = pt.m_y; m_slope = slope; }
-    inline wxRay2DDouble(wxDouble x1, wxDouble y1, wxDouble x2, wxDouble y2)
-        { m_x = x1; m_y = y1; m_slope = GetSlope(x1, y1, x2, y2); }
-    inline wxRay2DDouble(const wxPoint2DDouble &pt1, const wxPoint2DDouble &pt2)
-        { m_x = pt1.m_x; m_y = pt1.m_y; m_slope = GetSlope(pt1, pt2); }
-    inline wxRay2DDouble(const wxRay2DDouble &line)
-        { m_x = line.m_x; m_y = line.m_y; m_slope = line.m_slope; }
+    wxRay2DDouble(wxDouble x=0, wxDouble y=0, wxDouble slope=0) : wxPoint2DDouble(x, y), m_slope(slope) {}
+    inline wxRay2DDouble(const wxPoint2DDouble &pt, wxDouble slope) : wxPoint2DDouble(pt), m_slope(slope) {}
+    inline wxRay2DDouble(wxDouble x1, wxDouble y1, wxDouble x2, wxDouble y2) : wxPoint2DDouble(x1, y1)
+        { m_slope = GetSlope(x1, y1, x2, y2); }
+    inline wxRay2DDouble(const wxPoint2DDouble &pt1, const wxPoint2DDouble &pt2) : wxPoint2DDouble(pt1)
+        { m_slope = GetSlope(pt1, pt2); }
+    inline wxRay2DDouble(const wxRay2DDouble &line) : wxPoint2DDouble(line.m_x, line.m_y), m_slope(line.m_slope) {}
 
     inline wxDouble GetX() const { return m_x; }
     inline wxDouble GetY() const { return m_y; }
@@ -166,7 +159,7 @@ public :
 //-----------------------------------------------------------------------------
 // wxLine2DInt uses point slope line format
 //
-//    y = mx+b, m=(x-x0)/(y-y0)
+//    y = mx+b, m=(y-y0)/(x-x0)
 //-----------------------------------------------------------------------------
 /*
 class WXDLLIMPEXP_THINGS wxLine2DInt : wxRect2DInt
@@ -251,14 +244,9 @@ class WXDLLIMPEXP_THINGS wxCircleDouble : public wxPoint2DDouble
 {
 public :
 
-    inline wxCircleDouble(const wxCircleDouble &circle)
-        { m_x = circle.m_x; m_y = circle.m_y; m_r = circle.m_r; }
-
-    inline wxCircleDouble(wxDouble x=0, wxDouble y=0, wxDouble r=0)
-        { m_x = x; m_y = y; m_r = r; }
-
-    inline wxCircleDouble(const wxPoint2DDouble &origin, wxDouble r)
-        { m_x = origin.m_x; m_y = origin.m_y; m_r = r; }
+    inline wxCircleDouble(const wxCircleDouble &circle) : wxPoint2DDouble(circle.m_x, circle.m_y), m_r(circle.m_r) {}
+    inline wxCircleDouble(wxDouble x=0, wxDouble y=0, wxDouble r=0) : wxPoint2DDouble(x, y), m_r(r) {}
+    inline wxCircleDouble(const wxPoint2DDouble &origin, wxDouble r) : wxPoint2DDouble(origin), m_r(r) {}
 
     inline wxCircleDouble(const wxPoint2DDouble &p1,
                           const wxPoint2DDouble &p2,
@@ -331,12 +319,9 @@ class WXDLLIMPEXP_THINGS wxCircleInt : public wxPoint2DInt
 {
 public :
 
-    inline wxCircleInt(wxInt32 x=0, wxInt32 y=0, wxInt32 r=0)
-        { m_x = x; m_y = y; m_r = r; }
-    inline wxCircleInt(const wxPoint2DInt &origin, wxInt32 r)
-        { m_x = origin.m_x; m_y = origin.m_y; m_r = r; }
-    inline wxCircleInt(const wxCircleInt &circle)
-        { m_x = circle.m_x; m_y = circle.m_y; m_r = circle.m_r; }
+    inline wxCircleInt(wxInt32 x=0, wxInt32 y=0, wxInt32 r=0) : wxPoint2DInt(x, y), m_r(r) {}
+    inline wxCircleInt(const wxPoint2DInt &origin, wxInt32 r) : wxPoint2DInt(origin), m_r(r) {}
+    inline wxCircleInt(const wxCircleInt &circle) : wxPoint2DInt(circle.m_x, circle.m_y), m_r(circle.m_r) {}
 
     inline bool IsEmpty() const { return m_r <= 0; }
 

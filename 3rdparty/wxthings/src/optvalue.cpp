@@ -6,27 +6,25 @@
 // License  : wxWidgets v2
 /////////////////////////////////////////////////////////////////////////////
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
-    #pragma implementation "optvalue.h"
-#endif
+#include "precomp.h"
 
 // For compilers that support precompilation, includes "wx/wx.h"
-#include "wx/wxprec.h"
+#include <wx/wxprec.h>
 
 #ifdef __BORLANDC__
     #pragma hdrstop
 #endif
 
 #ifndef WX_PRECOMP
-    #include "wx/object.h"
-    #include "wx/string.h"
-    #include "wx/gdicmn.h"
+    #include <wx/object.h>
+    #include <wx/string.h>
+    #include <wx/gdicmn.h>
 #endif // WX_PRECOMP
 
-#include "wx/tokenzr.h"
+#include <wx/tokenzr.h>
 #include "wx/things/optvalue.h"
 
-#include "wx/arrimpl.cpp"
+#include <wx/arrimpl.cpp>
 WX_DEFINE_OBJARRAY(wxArrayOptionValue);
 
 //----------------------------------------------------------------------------
