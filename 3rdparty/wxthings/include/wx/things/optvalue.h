@@ -10,14 +10,10 @@
 #ifndef __WXOPTIONVALUE_H__
 #define __WXOPTIONVALUE_H__
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
-    #pragma interface "optvalue.h"
-#endif
-
 #include "wx/things/thingdef.h"
-class WXDLLIMPEXP_THINGS wxOptionValue;
+class WXDLLIMPEXP_FWD_THINGS wxOptionValue;
 
-#include "wx/dynarray.h"
+#include <wx/dynarray.h>
 WX_DECLARE_OBJARRAY_WITH_DECL(wxOptionValue, wxArrayOptionValue, class WXDLLIMPEXP_THINGS);
 
 //----------------------------------------------------------------------------
@@ -84,7 +80,7 @@ public:
     int HasOption(const wxString &name) const;
     // Search through the option names for this part returning the first match
     int FindOption(const wxString &part_of_option_name) const;
-    // delete this option, returns sucess
+    // delete this option, returns success
     bool DeleteOption(const wxString &name);
     bool DeleteOption( size_t n );
 
@@ -107,7 +103,7 @@ public:
     wxString GetOption(const wxString& name) const; // returns wxEmptyString if not found
     int GetOptionInt(const wxString& name) const;   // returns 0 if not found
 
-    // These return true on sucess otherwise the value is not modified
+    // These return true on success otherwise the value is not modified
     bool GetOption(const wxString& name, wxString &value ) const;
     bool GetOption(const wxString& name, int *value ) const;
     bool GetOption(const wxString& name, float *value ) const;

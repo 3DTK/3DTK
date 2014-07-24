@@ -7,19 +7,17 @@
 // Licence:     wxWidgets
 /////////////////////////////////////////////////////////////////////////////
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
-    #pragma implementation "range.h"
-#endif
+#include "precomp.h"
 
 // For compilers that support precompilation, includes "wx.h".
-#include "wx/wxprec.h"
+#include <wx/wxprec.h>
 
 #ifdef __BORLANDC__
     #pragma hdrstop
 #endif
 
 #ifndef WX_PRECOMP
-    #include "wx/utils.h"
+    #include <wx/utils.h>
 #endif // WX_PRECOMP
 
 #include "wx/things/range.h"
@@ -28,7 +26,7 @@
 const wxRangeInt wxEmptyRangeInt(0, -1);
 const wxRangeDouble wxEmptyRangeDouble(0, -1);
 
-#include "wx/arrimpl.cpp"
+#include <wx/arrimpl.cpp>
 WX_DEFINE_OBJARRAY(wxArrayRangeInt);
 WX_DEFINE_OBJARRAY(wxArrayRangeDouble);
 WX_DEFINE_OBJARRAY(wxArrayRangeIntSelection);
@@ -46,8 +44,8 @@ bool wxRangeInt::Combine(int i, bool only_if_touching)
 {
     if (only_if_touching)
     {
-        if      (i == m_min-1) { m_min--; return true; }
-        else if (i == m_max+1) { m_max++; return true; }
+        if      (i == m_min-1) { m_min = i; return true; }
+        else if (i == m_max+1) { m_max = i; return true; }
     }
     else
     {
@@ -63,11 +61,11 @@ bool wxRangeInt::Combine( const wxRangeInt &r, bool only_if_touching )
     {
         if (Touches(r))
         {
-            *this+=r;
+            *this += r;
             return true;
         }
     }
-    else
+    else if (!IsEmpty() && !r.IsEmpty())
     {
         bool added = false;
         if (r.m_min < m_min) { m_min = r.m_min; added = true; }
@@ -153,7 +151,7 @@ int wxRangeIntSelection::Index( int i ) const
 
 int wxRangeIntSelection::Index( const wxRangeInt &r ) const
 {
-    register int i, count = m_ranges.GetCount();
+    int i, count = m_ranges.GetCount();
     for (i=0; i<count; i++) if (m_ranges[i].Contains(r)) return i;
     return wxNOT_FOUND;
 }
@@ -190,7 +188,7 @@ int wxRangeIntSelection::NearestIndex( int i ) const
 
 int wxRangeIntSelection::GetItemCount() const
 {
-    register int i, items = 0, count = m_ranges.GetCount();
+    int i, items = 0, count = m_ranges.GetCount();
     for (i=0; i<count; i++) items += m_ranges[i].GetRange();
     return items;
 }
@@ -360,13 +358,13 @@ bool wxRangeDouble::Combine( const wxRangeDouble &r, bool only_if_touching )
 {
     if (only_if_touching)
     {
-        if (Contains(r))
+        if ((r.m_min <= m_max) && (r.m_max >= m_min))//Contains(r))
         {
             *this+=r;
             return true;
         }
     }
-    else
+    else if (!IsEmpty() && !r.IsEmpty())
     {
         bool added = false;
         if (r.m_min < m_min) { m_min = r.m_min; added = true; }
@@ -450,7 +448,7 @@ int wxRangeDoubleSelection::Index( wxDouble i ) const
     return wxNOT_FOUND;
 
 /*
-    for (register int j=0; j<count; j++)
+    for (int j = 0; j < count; j++)
     {
         if (m_ranges[j].Contains(i)) return j;
     }
@@ -459,14 +457,14 @@ int wxRangeDoubleSelection::Index( wxDouble i ) const
 
 int wxRangeDoubleSelection::Index( const wxRangeDouble &r ) const
 {
-    register int i, count = m_ranges.GetCount();
+    int i, count = m_ranges.GetCount();
     for (i=0; i<count; i++) if (m_ranges[i].Contains(r)) return i;
     return wxNOT_FOUND;
 }
 
 int wxRangeDoubleSelection::NearestIndex( wxDouble i ) const
 {
-    register int count = m_ranges.GetCount();
+    int count = m_ranges.GetCount();
     if (count < 1) return -1;
 
     if (i < m_ranges[0].m_min) return -1;
