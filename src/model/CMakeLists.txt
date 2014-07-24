@@ -21,11 +21,11 @@ if(WITH_MODEL)
     find_package(OpenCV REQUIRED)
     
     if(UNIX)
-        target_link_libraries(model ${UNIX_LIBS} ${LIB_CGAL} ${Boost_LIBS} ${LIB_GMP} ${OpenCV_LIBS})
+        target_link_libraries(model ${UNIX_LIBS} ${LIB_CGAL} ${Boost_LIBS} ${LIB_GMP} ${OpenCV_LIBS} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY})
     endif(UNIX)
 
     if (WIN32)
-        target_link_libraries(model ${UNIX_LIBS} ${LIB_CGAL} ${Boost_LIBS} ${LIB_GMP} ${OpenCV_LIBS})
+        target_link_libraries(model ${UNIX_LIBS} ${LIB_CGAL} ${Boost_LIBS} ${LIB_GMP} ${OpenCV_LIBS} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY})
     endif(WIN32)
 
 endif(WITH_MODEL)

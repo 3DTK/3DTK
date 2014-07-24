@@ -398,7 +398,7 @@ void DisplayItFunc(GLenum mode, bool interruptable)
       
       for (( c=1; c < 1000; c++ ))
       do
-        `printf "convert +append -resize 480x540! left/animframe%05d.jpg right/animframe%05d.jpg long3D/animframe%05d.jpg" "$c" "$c" "$c"`
+        `printf "convert +append -resize 960x1080! left/animframe%05d.jpg right/animframe%05d.jpg long3D/animframe%05d.jpg" "$c" "$c" "$c"`
       done
       mencoder "mf://long3D/*.jpg" -mf fps=25 -o test.avi -ovc lavc -lavcopts vcodec=mjpeg:vbitrate=8000
       
@@ -1948,7 +1948,7 @@ int calcNoOfPoints(vector<PointXY> vec1, vector<PointXY> vec2)
     distance += sqrt( dx*dx + dy*dy + dz*dz );
   }
 
-  return (distance*scale) / 0.02;  // change this to get faster animations
+  return (distance*scale) / 0.2;  // change this to get faster animations
 }
 
 /**
