@@ -15,11 +15,11 @@ IF(WITH_VELOSLAM)
    trackermanager.cc drawtrackers.cc kalmanfilter.cc matrix.cc lap.cc)
 
 IF(UNIX)
-  target_link_libraries(veloslam dl scan newmat sparse ANN ${Boost_LIBRARIES} ${SHOW_LIBS})
+  target_link_libraries(veloslam dl scan newmat sparse ANN ${Boost_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} ${Boost_THREAD_LIBRARY} ${SHOW_LIBS})
 ENDIF(UNIX)
 
 IF(WIN32)
-  target_link_libraries(veloslam scan newmat sparse ANN XGetopt ${Boost_LIBRARIES} ${SHOW_LIBS})
+  target_link_libraries(veloslam scan newmat sparse ANN XGetopt ${Boost_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} ${SHOW_LIBS})
 ENDIF(WIN32)
 ENDIF(WITH_VELOSLAM)
 
