@@ -41,6 +41,7 @@ ENDIF(WITH_FBR)
   add_executable(framesdiff2frames framesdiff2frames.cc)
   add_executable(pose2frames pose2frames.cc)
   add_executable(riegl2frames riegl2frames.cc)
+  add_executable(vigo23dtk vigo23dtk.cc)
   add_executable(toGlobal toGlobal.cc)
   add_executable(average6DoFposes average6DoFposes.cc)
 
