@@ -378,6 +378,31 @@ inline void M3inv( const T *Min, T *Mout )
   Mout[8] = (double) ( Min[0]*Min[4] - Min[1]*Min[3] ) / det;
 }
 
+/**
+ * Converts a right-hand-side matrix into a 3DTK matrix
+ * @param *inMatrix pointer to matrix (double[16])
+ * @param *outMatrixr pointer to matrix (double[16])
+ */
+inline void to3DTKMat(const double *inMatrix,
+				  double *outMatrix)
+{
+    outMatrix[0] = inMatrix[5];
+    outMatrix[1] = -inMatrix[9];
+    outMatrix[2] = -inMatrix[1];
+    outMatrix[3] = -inMatrix[13];
+    outMatrix[4] = -inMatrix[6];
+    outMatrix[5] = inMatrix[10];
+    outMatrix[6] = inMatrix[2];
+    outMatrix[7] = inMatrix[14];
+    outMatrix[8] = -inMatrix[4];
+    outMatrix[9] = inMatrix[8];
+    outMatrix[10] = inMatrix[0];
+    outMatrix[11] = inMatrix[12];
+    outMatrix[12] = -100*inMatrix[7];
+    outMatrix[13] = 100*inMatrix[11];
+    outMatrix[14] = 100*inMatrix[3];
+    outMatrix[15] = inMatrix[15];
+}
 
 /**
  * Converts a pose into a RT matrix
