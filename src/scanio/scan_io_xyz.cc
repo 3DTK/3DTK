@@ -57,7 +57,7 @@ void ScanIO_xyz::readPose(const char* dir_path,
 
 bool ScanIO_xyz::supports(IODataType type)
 {
-  return !!(type & ( DATA_XYZ ));
+  return !!(type & ( DATA_REFLECTANCE | DATA_XYZ ));
 }
 
 void ScanIO_xyz::readScan(const char* dir_path, 
@@ -91,6 +91,10 @@ void ScanIO_xyz::readScan(const char* dir_path,
         IODataType spec[4] = { DATA_XYZ, DATA_XYZ, DATA_XYZ, DATA_TERMINATOR };
         ScanDataTransform_xyz transform;
         readASCII(data_file, spec, transform, filter, xyz);
+
+	   for (unsigned int i = 0; i < xyz->size(); i++) {
+		reflectance->push_back(atoi(identifier));
+	   }
 
         data_file.close();
     }
