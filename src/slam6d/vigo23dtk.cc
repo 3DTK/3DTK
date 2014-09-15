@@ -1,5 +1,5 @@
 /*
- * riegl2frames implementation
+ * vigo2frames implementation
  *
  * Copyright (C) Andreas Nuechter
  *
