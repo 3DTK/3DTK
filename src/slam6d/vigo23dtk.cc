@@ -1,5 +1,5 @@
 /*
- * vigo2frames implementation
+ * vigo23dtk implementation
  *
  * Copyright (C) Andreas Nuechter
  *

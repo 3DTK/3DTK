@@ -25,8 +25,10 @@ using std::ifstream;
 using std::exception;
 
 #include <vector>
+using std::vector;
 #include <map>
 
+#include "slam6d/point.h"
 #include "slam6d/scan.h"
 #include "slam6d/globals.icc"
 
@@ -217,7 +219,7 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &rand,
   return 0;
 }
 
-void readFrames(string dir, int start, int end, IOType &type)
+void readFrames(string dir, int start, int end)
 {
   ifstream frame_in;
   int  fileCounter = start;
@@ -247,14 +249,7 @@ void readFrames(string dir, int start, int end, IOType &type)
       }
     }
 
-    if(type == UOS_MAP || type == UOS_MAP_FRAMES || type == RTS_MAP) {
-      Scan::allScans[fileCounter - start]->transformAll(transMat);
-      if(fileCounter == start+1) {
-        Scan::allScans[0]->transformAll(transMat);
-      }
-    } else {
-      Scan::allScans[fileCounter - start - 1]->transformAll(transMat);
-    }
+    Scan::allScans[fileCounter - start - 1]->transformAll(transMat);
 
     frame_in.close();
     frame_in.clear();
@@ -283,13 +278,18 @@ int main(int argc, char **argv)
   int    minDist    = -1;
   bool   eP         = true;  // should we extrapolate the pose??
   int octree       = 0;  // employ randomized octree reduction?
-  IOType type    = UOS;
+  IOType iotype    = UOS;
 
-//  parseArgs(argc, argv, dir, red, rand, start, end,
-//      maxDist, minDist, eP, octree, type);
-//
-//  // Get Scans
-//  Scan::readScans(type, start, end, dir, maxDist, minDist, true);
+  parseArgs(argc, argv, dir, red, rand, start, end,
+      maxDist, minDist, eP, octree, iotype);
+
+  // Get Scans
+  Scan::openDirectory(false, dir, iotype, start, end);
+  if(Scan::allScans.size() == 0) {
+    cerr << "No scans found. Did you use the correct format?" << endl;
+    exit(-1);
+  }
+  
 //
 //  int end_reduction = (int)Scan::allScans.size();
 //#ifdef _OPENMP
@@ -305,18 +305,30 @@ int main(int argc, char **argv)
 //    Scan::allScans[iterator]->calcReducedPoints(red, octree);
 //  }
 //
-//  if(eP) {
-//    readFrames(dir, start, end, type);
-//  }
-//
-//  cout << "Export all 3D Points to file \"points.pts\"" << endl;
-//  ofstream redptsout("points.pts");
-//  for(unsigned int i = 0; i < Scan::allScans.size(); i++) {
-//    const vector <Point> *points = Scan::allScans[i]->get_points();
-//    for(unsigned int j = 0; j < points->size(); j++) {
-//      redptsout << points->at(j) << endl;
-//    }
-//  }
-//  redptsout.close();
-//  redptsout.clear();
+  if(eP) {
+    readFrames(dir, start, end);
+  }
+  
+ cout << "Export all 3D Points to file \"points.pts\"" << endl;
+ ofstream redptsout("points.pts");
+ for(unsigned int i = 0; i < Scan::allScans.size(); i++) {
+   Scan *source = Scan::allScans[i];
+   DataXYZ xyz  = source->get("xyz");
+   DataReflectance xyz_reflectance
+	= (((DataReflectance)source->get("reflectance")).size() == 0) ?
+	source->create("reflectance", sizeof(float)*xyz.size())
+	: source->get("reflectance"); 
+   if (((DataReflectance)source->get("reflectance")).size() == 0) {
+	for(unsigned int i = 0; i < xyz.size(); i++)
+	  xyz_reflectance[i] = 255;
+   }
+   
+   for(unsigned int j = 0; j < xyz.size(); j++) {
+     redptsout << xyz[j][0] << " " << xyz[j][1] << " " << xyz[j][2] << " "
+			<< xyz_reflectance[j]
+			<< endl;
+   }
+ }
+ redptsout.close();
+ redptsout.clear();
 }
