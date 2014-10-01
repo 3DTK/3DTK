@@ -36,6 +36,7 @@ struct information{
   IOType secondScanFormat;
   bool secondScanFormatFlag;
   projection_method pMethod;
+  feature_detector_image_method fImage;
   feature_detector_method fMethod;
   feature_descriptor_method dMethod;
   feature_filtration_method fFiltrationMethod;
@@ -86,6 +87,7 @@ void usage(int argc, char** argv){
   printf("\t\t-i iSizeOptimization \t Optimize the panorama image size based on projection \n");
   printf("\n");
   printf("\n");
+  printf("\t\t-g fImage\t\t feature detection Image [Reclectance | Color] color works only if the Color is available\n");
 #ifdef WITH_OPENCV_NONFREE
   printf("\t\t-F fMethod\t\t feature detection method [SURF|SIFT|ORB|FAST|STAR]\n");
 #else
@@ -102,9 +104,9 @@ void usage(int argc, char** argv){
   printf("\t\t-A mFiltrationMethod\t feature matching filtrtion method [DISABLE_MATCHING_FILTER|FUNDEMENTAL_MATRIX]\n");
   printf("\n");
   printf("\n");
-  printf("\t\t-D minDistance \t\t threshold for min distance in registration process\n");
-  printf("\t\t-E minError \t\t threshold for min error in registration process\n");
-  printf("\t\t-I minInlier \t\t threshold for min number of inliers in registration process\n");
+  printf("\t\t-D minDistance \t\t threshold for min distance in registration process this defines the minimum distance between the three selected points for RANSAC algorithms to avoid small and tall shaped triagnles \n");
+  printf("\t\t-E minError \t\t threshold for min error in registration process this defines the minimum error between the transformed matches using calculated transformation matrix\n");
+  printf("\t\t-I minInlier \t\t threshold for min number of inliers in registration proces this threshold is used to determine if the calculated transformation matrix is a candiadte matrix\n");
   printf("\t\t-r registration \t registration method [ALL|ransac]\n");
   printf("\n");
   printf("\n");
@@ -156,6 +158,7 @@ void parssArgs(int argc, char** argv, information& info){
   info.secondScanFormat = RIEGL_TXT;
   info.secondScanFormatFlag = false;
   info.pMethod = EQUIRECTANGULAR;
+  info.fImage = REFLECTANCE;
 #ifdef WITH_OPENCV_NONFREE
   info.fMethod = SIFT_DET;
   info.dMethod = SIFT_DES;
@@ -189,7 +192,7 @@ void parssArgs(int argc, char** argv, information& info){
   opterr = 0;
   //reade the command line and get the options
 
-  while ((c = getopt (argc, argv, "a:A:b:B:Cd:D:e:E:f:F:H:iI:lm:M:n:N:oO:p:P:r:Rs:St:T:V:W:x:y:z:Z:")) != -1)
+  while ((c = getopt (argc, argv, "a:A:b:B:Cd:D:e:E:f:F:g:H:iI:lm:M:n:N:oO:p:P:r:Rs:St:T:V:W:x:y:z:Z:")) != -1)
     switch (c)
       {
       case 's':
@@ -299,6 +302,9 @@ void parssArgs(int argc, char** argv, information& info){
       case 'Z':
 	info.secondMaxReflectance = atof(optarg);
 	break;
+      case 'g':
+	info.fImage = stringToFeatureDetectorImageMethod(optarg);
+	break;
 
 
       case '?':
@@ -348,6 +354,12 @@ void parssArgs(int argc, char** argv, information& info){
       cout<<"Too few input arguments. At least dir and two scan numbers are required."<<endl;
       usage(argc, argv);
     }
+  //check for the fImage color it is only available if the Color is selected
+  if(info.color == false && info.fImage == COLOR)
+    {
+      cout<<"Warning: color feature image with only works with color option. Feature image set to reflectance."<<endl;
+      info.fImage = REFLECTANCE;
+    }
   
   info.dir = argv[optind];
   //info.fScanNumber = atoi(argv[optind+1]);
@@ -380,6 +392,7 @@ void informationDescription(information info){
   cout<<"projection method: "<<projectionMethodToString(info.pMethod)<<endl;
   cout<<"Scanner Verticla field of view: "<<info.MIN_ANGLE<<"<-->"<<info.MAX_ANGLE<<endl;
   cout<<endl;
+  cout<<"feature detector image method: "<<featureDetectorImageMethodToString(info.fImage)<<endl;
   cout<<"feature detector method: "<<featureDetectorMethodToString(info.fMethod)<<endl;
   cout<<"feature filtration method: "<<featureFiltrationMethodToString(info.fFiltrationMethod)<<endl;
   cout<<"feature descriptor method: "<<featureDescriptorMethodToString(info.dMethod)<<endl;
@@ -458,121 +471,297 @@ int main(int argc, char** argv){
   string out;
   cv::Mat outImage;
   feature_drawer drawer;
+  cv::Mat fColorImage;
+  cv::Mat fGrayscaleImage;
+  cv::Mat sColorImage;
+  cv::Mat sGrayscaleImage;
+  
   parssArgs(argc, argv, info);
+  //verbose
   if(info.verbose >= 1) informationDescription(info);
   
   //get first scan
-  scan_cv fScan (info.dir, info.fScanNumber, info.sFormat, info.scanServer, info.sType, info.loadOct, info.saveOct, info.reflectance, info.color, -1, -1, info.minReflectance, info.maxReflectance);
+  scan_cv fScan (info.dir, 
+		 info.fScanNumber, 
+		 info.sFormat, 
+		 info.scanServer, 
+		 info.sType, 
+		 info.loadOct, 
+		 info.saveOct, 
+		 info.reflectance, 
+		 info.color, 
+		 -1, 
+		 -1, 
+		 info.minReflectance, 
+		 info.maxReflectance);
+
+  //verbose
   if(info.verbose >= 4) info.fSTime = (double)cv::getTickCount();
+  
+  //convert first scan to Mat
   fScan.convertScanToMat();
+  
+  //verbose
   if(info.verbose >= 4) info.fSTime = ((double)cv::getTickCount() - info.fSTime)/cv::getTickFrequency();
   if(info.verbose >= 2) fScan.getDescription();
 
   //create first panorama
-  panorama fPanorama (info.iWidth, info.iHeight, info.pMethod, info.nImages, info.pParam, FARTHEST, fScan.getZMin(), fScan.getZMax(), info.MIN_ANGLE, info.MAX_ANGLE, info.iSizeOptimization);
-  if(info.verbose >= 4) info.fPTime = (double)cv::getTickCount();
-  if((fScan.getMatScanColor()).empty() == 1)
-    fPanorama.createPanorama(fScan.getMatScan());
-  else
-    fPanorama.createPanorama(fScan.getMatScan(), fScan.getMatScanColor());
-  
-  //get the new panorama size incase of optimized size panorama
-  //info.iWidth = fPanorama.getImageWidth();
-  //info.iHeight = fPanorama.getImageHeight();
+  panorama fPanorama (info.iWidth, 
+		      info.iHeight, 
+		      info.pMethod, 
+		      info.nImages, 
+		      info.pParam, 
+		      FARTHEST, 
+		      fScan.getZMin(), 
+		      fScan.getZMax(), 
+		      info.MIN_ANGLE, 
+		      info.MAX_ANGLE, 
+		      info.iSizeOptimization);
 
+  //verbose
+  if(info.verbose >= 4) info.fPTime = (double)cv::getTickCount();
+  
+  //generate the first panoramas
+  if((fScan.getMatScanColor()).empty() == 1)
+    {
+      //generate range and reflectance image
+      fPanorama.createPanorama(fScan.getMatScan());
+    }
+  else
+    {
+      //generate the range, reflectance, color and grayscale image (color and grayscale in CV_8U)
+      fPanorama.createPanorama(fScan.getMatScan(), fScan.getMatScanColor());
+      fPanorama.getColorImage().convertTo(fColorImage, CV_8U);
+      cvtColor(fColorImage, fGrayscaleImage, CV_BGRA2GRAY);
+    }
+  
+  //verbose
   if(info.verbose >= 4) info.fPTime = ((double)cv::getTickCount() - info.fPTime)/cv::getTickFrequency();
   if(info.verbose >= 2) fPanorama.getDescription();
 
   //write first panorama to image
+  //verbose
   if(info.verbose >= 1){
+    //reflectance image
     out = info.outDir+info.local_time+"_scan"+to_string(info.fScanNumber, 3)+"_"+projectionMethodToString(info.pMethod)+"_"+to_string(fPanorama.getImageWidth())+"x"+to_string(fPanorama.getImageHeight())+".png";
     imwrite(out, fPanorama.getReflectanceImage());
+    
+    //range image
     out = info.outDir+info.local_time+"_scan"+to_string(info.fScanNumber, 3)+"_"+projectionMethodToString(info.pMethod)+"_"+to_string(fPanorama.getImageWidth())+"x"+to_string(fPanorama.getImageHeight())+"_Range.png";
     imwrite(out, fPanorama.getRangeImage());
+    
     if((fPanorama.getColorImage()).empty() != 1){
+      //color image
       out = info.outDir+info.local_time+"_scan"+to_string(info.fScanNumber, 3)+"_"+projectionMethodToString(info.pMethod)+"_"+to_string(fPanorama.getImageWidth())+"x"+to_string(fPanorama.getImageHeight())+"_color.png";
       imwrite(out, fPanorama.getColorImage());
+
+      //grayscale image
+      out = info.outDir+info.local_time+"_scan"+to_string(info.fScanNumber, 3)+"_"+projectionMethodToString(info.pMethod)+"_"+to_string(fPanorama.getImageWidth())+"x"+to_string(fPanorama.getImageHeight())+"_gratscale.png";
+      imwrite(out, fGrayscaleImage);
     }
   }
 
   //create first feature set
-  //feature fFeature;
   feature fFeature(info.fMethod, info.dMethod, info.fFiltrationMethod);
+
+  //verbose
   if(info.verbose >= 4) info.fFTime = (double)cv::getTickCount();
-  //fFeature.featureDetection(fPanorama.getReflectanceImage(), info.fMethod); 
-  fFeature.featureDetection(fPanorama.getReflectanceImage(), info.fMethod, fPanorama.getRangeImage(), info.fFiltrationMethod); 
+  
+  //generate features from panorama
+  if(info.fImage == COLOR && fPanorama.getColorImage().empty() != 1)
+    {
+      //use grayscale image 
+      cout<<"using grayscale image."<<endl;
+      fFeature.featureDetection(fGrayscaleImage, info.fMethod, fPanorama.getRangeImage(), info.fFiltrationMethod); 
+    }
+  else
+    {
+      //use reflectance image
+      cout<<"using reflectance image."<<endl;
+      fFeature.featureDetection(fPanorama.getReflectanceImage(), info.fMethod, fPanorama.getRangeImage(), info.fFiltrationMethod); 
+    }
+
+  //verbose
   if(info.verbose >= 4) info.fFTime = ((double)cv::getTickCount() - info.fFTime)/cv::getTickFrequency();
 
   //write panorama with keypoints to image
   if(info.verbose >= 1){
-    drawer.DrawKeypoints(fPanorama.getReflectanceImage(), fFeature.getFeatures(), outImage, cv::Scalar::all(-1), cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS );
+    //verbose
+    if(info.fImage == COLOR && fPanorama.getColorImage().empty() != 1)
+      {
+	//use grayscale image
+	drawer.DrawKeypoints(fGrayscaleImage, fFeature.getFeatures(), outImage, cv::Scalar::all(-1), cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS );
+      }
+    else
+      {
+	//use reflectance image
+	drawer.DrawKeypoints(fPanorama.getReflectanceImage(), fFeature.getFeatures(), outImage, cv::Scalar::all(-1), cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS );
+      }
+
     out = info.outDir+info.local_time+"_scan"+to_string(info.fScanNumber, 3)+"_"+projectionMethodToString(info.pMethod)+"_"+to_string(fPanorama.getImageWidth())+"x"+to_string(fPanorama.getImageHeight())+"_"+featureDetectorMethodToString(info.fMethod)+".png";
     imwrite(out, outImage);
     outImage.release();
   }
   
   //create first descriptor set
+  //verbose
   if(info.verbose >= 4) info.fDTime = (double)cv::getTickCount();
-  //fFeature.featureDescription(fPanorama.getReflectanceImage(), info.dMethod);
-  fFeature.featureDescription(fPanorama.getReflectanceImage());
+  
+  //generate descriptors for features
+  if(info.fImage == COLOR && fPanorama.getColorImage().empty() != 1)
+    {
+      //use grayscale image
+      fFeature.featureDescription(fGrayscaleImage);
+    }
+  else
+    {
+      //use reflectance image
+      fFeature.featureDescription(fPanorama.getReflectanceImage());
+    }
+
+  //verbose
   if(info.verbose >= 4) info.fDTime = ((double)cv::getTickCount() - info.fDTime)/cv::getTickFrequency();
   if(info.verbose >= 2) fFeature.getDescription();
   
   //get secon scan
-  //scan_cv sScan (info.dir, info.sScanNumber, info.sFormat, info.scanServer, info.sType, info.loadOct, info.saveOct, info.reflectance, info.color, -1, -1, info.minReflectance, info.maxReflectance);
-  scan_cv sScan (info.dir, info.sScanNumber, info.secondScanFormat, info.scanServer, info.secondScannerType, info.loadOct, info.saveOct, info.reflectance, info.color, -1, -1, info.secondMinReflectance, info.secondMaxReflectance);
+  scan_cv sScan (info.dir, 
+		 info.sScanNumber, 
+		 info.secondScanFormat, 
+		 info.scanServer, 
+		 info.secondScannerType, 
+		 info.loadOct, 
+		 info.saveOct, 
+		 info.reflectance, 
+		 info.color, 
+		 -1, 
+		 -1, 
+		 info.secondMinReflectance, 
+		 info.secondMaxReflectance);
+  //verbose  
   if(info.verbose >= 4) info.sSTime = (double)cv::getTickCount();
+  
+  //convert second scan to Mat
   sScan.convertScanToMat();
+  
+  //verbose  
   if(info.verbose >= 4) info.sSTime = ((double)cv::getTickCount() - info.sSTime)/cv::getTickFrequency();
   if(info.verbose >= 2) sScan.getDescription();
 
-  //create secon panoram
-  panorama sPanorama (info.iWidth, info.iHeight, info.pMethod, info.nImages, info.pParam, FARTHEST, sScan.getZMin(), sScan.getZMax(), info.MIN_ANGLE, info.MAX_ANGLE, info.iSizeOptimization);
+  //create second panoram
+  panorama sPanorama (info.iWidth, 
+		      info.iHeight, 
+		      info.pMethod, 
+		      info.nImages, 
+		      info.pParam, 
+		      FARTHEST, 
+		      sScan.getZMin(), 
+		      sScan.getZMax(),
+		      info.MIN_ANGLE, 
+		      info.MAX_ANGLE, 
+		      info.iSizeOptimization);
+  
+  //verbose  
   if(info.verbose >= 4) info.sPTime = (double)cv::getTickCount();
+  
+  //generate the sceond panoramas
   if((sScan.getMatScanColor()).empty() == 1)
-    sPanorama.createPanorama(sScan.getMatScan());
+    {
+      //generate ranega and reflectance images
+      sPanorama.createPanorama(sScan.getMatScan());
+    }
   else
-    sPanorama.createPanorama(sScan.getMatScan(), sScan.getMatScanColor());
+    {
+      //generate the range, reflectance, color and grayscale image (color and grayscale in CV_8U)   
+      sPanorama.createPanorama(sScan.getMatScan(), sScan.getMatScanColor());
+      sPanorama.getColorImage().convertTo(sColorImage, CV_8U);
+      cvtColor(sColorImage, sGrayscaleImage, CV_BGRA2GRAY);
+    }
 
-  //get the new panorama size incase of optimized size panorama
-  //info.iWidth = sPanorama.getImageWidth();
-  //info.iHeight = sPanorama.getImageHeight();
-
+  //verbose
   if(info.verbose >= 4) info.sPTime = ((double)cv::getTickCount() - info.sPTime)/cv::getTickFrequency();
   if(info.verbose >= 2) sPanorama.getDescription();
 
-  //write panorama to image
+  //write second panorama to image
+  //verbose
   if(info.verbose >= 1){
+    //reflectance image
     out = info.outDir+info.local_time+"_scan"+to_string(info.sScanNumber, 3)+"_"+projectionMethodToString(info.pMethod)+"_"+to_string(fPanorama.getImageWidth())+"x"+to_string(fPanorama.getImageHeight())+".png";
     imwrite(out, sPanorama.getReflectanceImage());
+    
+    //range image
     out = info.outDir+info.local_time+"_scan"+to_string(info.sScanNumber, 3)+"_"+projectionMethodToString(info.pMethod)+"_"+to_string(fPanorama.getImageWidth())+"x"+to_string(fPanorama.getImageHeight())+"_Range.png";
     imwrite(out, sPanorama.getRangeImage());
+    
     if((sPanorama.getColorImage()).empty() != 1){
+      //color image
       out = info.outDir+info.local_time+"_scan"+to_string(info.sScanNumber, 3)+"_"+projectionMethodToString(info.pMethod)+"_"+to_string(fPanorama.getImageWidth())+"x"+to_string(fPanorama.getImageHeight())+"_color.png";
       imwrite(out, sPanorama.getColorImage());
+
+      //grayscale image
+      out = info.outDir+info.local_time+"_scan"+to_string(info.sScanNumber, 3)+"_"+projectionMethodToString(info.pMethod)+"_"+to_string(sPanorama.getImageWidth())+"x"+to_string(sPanorama.getImageHeight())+"_gratscale.png";
+      imwrite(out, sGrayscaleImage);
     }
   }
 
   //create secon feature set
-  //feature sFeature;
   feature sFeature(info.fMethod, info.dMethod, info.fFiltrationMethod);
+
+  //verbose
   if(info.verbose >= 4) info.sFTime = (double)cv::getTickCount();
-  //sFeature.featureDetection(sPanorama.getReflectanceImage(), info.fMethod);
-  sFeature.featureDetection(sPanorama.getReflectanceImage(), info.fMethod, sPanorama.getRangeImage(), info.fFiltrationMethod); 
+  
+  //generate features from panorama
+  if(info.fImage == COLOR && sPanorama.getColorImage().empty() != 1)
+    {
+      //use grayscale image
+      cout<<"using grayscale image."<<endl;
+      sFeature.featureDetection(sGrayscaleImage, info.fMethod, sPanorama.getRangeImage(), info.fFiltrationMethod); 
+    }
+  else
+    {
+      //use reflectance image
+      cout<<"using reflectance image."<<endl;
+      sFeature.featureDetection(sPanorama.getReflectanceImage(), info.fMethod, sPanorama.getRangeImage(), info.fFiltrationMethod); 
+    }
+
+  //verbose
   if(info.verbose >= 4) info.sFTime = ((double)cv::getTickCount() - info.sFTime)/cv::getTickFrequency();
 
   //write panorama with keypoints to image
   if(info.verbose >= 1){
-    drawer.DrawKeypoints(sPanorama.getReflectanceImage(), sFeature.getFeatures(), outImage, cv::Scalar::all(-1), cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS );
+    //verbose
+    if(info.fImage == COLOR && sPanorama.getColorImage().empty() != 1)
+      {
+	//use grayscale
+	drawer.DrawKeypoints(sGrayscaleImage, sFeature.getFeatures(), outImage, cv::Scalar::all(-1), cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS );
+      }
+    else
+      {
+	//use reflectance
+	drawer.DrawKeypoints(sPanorama.getReflectanceImage(), sFeature.getFeatures(), outImage, cv::Scalar::all(-1), cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS );
+      }
+
     out = info.outDir+info.local_time+"_scan"+to_string(info.sScanNumber, 3)+"_"+projectionMethodToString(info.pMethod)+"_"+to_string(fPanorama.getImageWidth())+"x"+to_string(fPanorama.getImageHeight())+"_"+featureDetectorMethodToString(info.fMethod)+".png";
     imwrite(out, outImage);
     outImage.release();
   }
 
-  //create secon descriptor set
+  //create second descriptor set
+  //verbose
   if(info.verbose >= 4) info.sDTime = (double)cv::getTickCount();
-  //sFeature.featureDescription(sPanorama.getReflectanceImage(), info.dMethod);
-  sFeature.featureDescription(sPanorama.getReflectanceImage());
+  
+  //generate descriptors for features
+  if(info.fImage == COLOR && sPanorama.getColorImage().empty() != 1)
+    {
+      //use grayscale image
+      sFeature.featureDescription(sGrayscaleImage);
+    }
+  else
+    {
+      //use reflectance image
+      sFeature.featureDescription(sPanorama.getReflectanceImage());
+    }
+
+  //verbose
   if(info.verbose >= 4) info.sDTime = ((double)cv::getTickCount() - info.sDTime)/cv::getTickFrequency();
   if(info.verbose >= 2) sFeature.getDescription();
 
@@ -581,25 +770,48 @@ int main(int argc, char** argv){
   info.iWidth = sPanorama.getImageWidth();
   info.iHeight = sPanorama.getImageHeight();
 
-  //match features
+  //create feature matcher
   feature_matcher matcher (info.mMethod, info.mParam, info.mFiltrationMethod);
+  
+  //verbose
   if(info.verbose >= 4) info.mTime = (double)cv::getTickCount();
+  
+  //match features
   matcher.match(fFeature, sFeature);
+  
+  //verbose
   if(info.verbose >= 4) info.mTime = ((double)cv::getTickCount() - info.mTime)/cv::getTickFrequency();
   if(info.verbose >= 2) matcher.getDescription();
 
-  //write matcheed feature to image
+  //write matcheed features to image
+  //verbose
   if(info.verbose >= 1){
-    drawer.DrawMatches(fPanorama.getReflectanceImage(), fFeature.getFeatures(), sPanorama.getReflectanceImage(), sFeature.getFeatures(), matcher.getMatches(), outImage, cv::Scalar::all(-1), cv::Scalar::all(-1), vector<char>(), cv::DrawMatchesFlags::NOT_DRAW_SINGLE_POINTS);
+    if(info.fImage == COLOR && fPanorama.getColorImage().empty() != 1 && sPanorama.getColorImage().empty() != 1)
+      {
+	//use grayscale image
+	drawer.DrawMatches(fGrayscaleImage, fFeature.getFeatures(), sGrayscaleImage, sFeature.getFeatures(), matcher.getMatches(), outImage, cv::Scalar::all(-1), cv::Scalar::all(-1), vector<char>(), cv::DrawMatchesFlags::NOT_DRAW_SINGLE_POINTS);
+      }
+    else
+      {
+	//use reflectance image
+	drawer.DrawMatches(fPanorama.getReflectanceImage(), fFeature.getFeatures(), sPanorama.getReflectanceImage(), sFeature.getFeatures(), matcher.getMatches(), outImage, cv::Scalar::all(-1), cv::Scalar::all(-1), vector<char>(), cv::DrawMatchesFlags::NOT_DRAW_SINGLE_POINTS);
+      }
+
     out = info.outDir+info.local_time+"_scan"+to_string(info.fScanNumber, 3)+"_scan"+to_string(info.sScanNumber, 3)+"_"+projectionMethodToString(info.pMethod)+"_"+to_string(info.iWidth)+"x"+to_string(info.iHeight)+"_"+featureDetectorMethodToString(info.fMethod)+"_"+featureDescriptorMethodToString(info.dMethod)+"_"+matcherMethodToString(info.mMethod)+".png";
     imwrite(out, outImage);
     outImage.release();
   }
 
-  //start the regisration
+  //start the regisration process
   registration reg (info.minDistance, info.minError, info.minInlier, info.rMethod);
+  
+  //verbose
   if(info.verbose >= 4) info.rTime = (double)cv::getTickCount();
+  
+  //find registration
   reg.findRegistration(fPanorama.getMap(), fFeature.getFeatures(), sPanorama.getMap(), sFeature.getFeatures(), matcher.getMatches());
+  
+  //verbose
   if(info.verbose >= 4) info.rTime = ((double)cv::getTickCount() - info.rTime)/cv::getTickFrequency();
   if(info.verbose >= 2) reg.getDescription();
 
@@ -626,6 +838,8 @@ int main(int argc, char** argv){
     frames.close();
   }
   
+  //write the yaml output
+  //verbose
   if(info.verbose >= 3){
     info.fSPoints = fScan.getNumberOfPoints();
     info.sSPoints = sScan.getNumberOfPoints();
