@@ -126,6 +126,29 @@ namespace fbr{
     else throw std::runtime_error(std::string("panorama map method ") + method + std::string(" is unknown"));
   }
 
+  string featureDetectorImageMethodToString(feature_detector_image_method method)
+  {
+    string sMethod;
+    switch(method){
+    case REFLECTANCE:
+      sMethod = "REFLECTANCE";
+      break;
+    case COLOR:
+      sMethod = "COLOR";
+      break;
+    default:
+      throw std::runtime_error(std::string("feature detector image ") + to_string(method) + std::string(" could not be matched to a feature detector image"));
+
+    }
+    return sMethod;
+  }
+
+  feature_detector_image_method stringToFeatureDetectorImageMethod(string method){
+    if(strcasecmp(method.c_str(), "REFLECTANCE") == 0) return REFLECTANCE;
+    else if(strcasecmp(method.c_str(), "COLOR") == 0) return COLOR;
+    else throw std::runtime_error(std::string("feature detector image ") + method + std::string(" is unknown"));
+  }
+
   string featureDetectorMethodToString(feature_detector_method method){
     string sMethod;
     switch(method){
