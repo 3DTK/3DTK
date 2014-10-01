@@ -76,6 +76,13 @@ namespace fbr{
     EXTENDED,
   };
   /**
+   * @enum feature_image
+   */
+  enum feature_detector_image_method{
+    REFLECTANCE,
+    COLOR,
+  };
+  /**
    * @enum feature_method
    */
   enum feature_detector_method{
@@ -141,6 +148,8 @@ namespace fbr{
   string panoramaMapMethodToString(panorama_map_method method);
   panorama_map_method stringToPanoramaMapMethod(string method);
   string featureDetectorMethodToString(feature_detector_method method);
+  feature_detector_image_method stringToFeatureDetectorImageMethod(string method);
+  string featureDetectorImageMethodToString(feature_detector_image_method method);
   feature_detector_method stringToFeatureDetectorMethod(string method);
   string featureDescriptorMethodToString(feature_descriptor_method method);
   feature_descriptor_method stringToFeatureDescriptorMethod(string method);
