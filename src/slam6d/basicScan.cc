@@ -105,6 +105,37 @@ void BasicScan::updateTransform(double *_rPos, double *_rPosTheta)
 
 }
 
+
+// TODO DOKU. Insert points with a DataPointer
+// create the DataPointer with the DataPointer
+BasicScan::BasicScan(double *_rPos,
+                     double *_rPosTheta)
+{
+  init();
+  for(int i = 0; i < 3; i++) {
+    rPos[i] = _rPos[i];
+    rPosTheta[i] = _rPosTheta[i];
+  }
+  // write original pose matrix
+  EulerToMatrix4(rPos, rPosTheta, transMatOrg);
+
+  // initialize transform matrices from the original one, 
+  // could just copy transMatOrg to transMat instead
+  transformMatrix(transMatOrg);
+
+  // reset the delta align matrix to represent only the transformations 
+  // after local-to-global (transMatOrg) one
+  M4identity(dalignxf);
+  PointFilter filter;
+  if(m_filter_range_set)
+    filter.setRange(m_filter_max, m_filter_min);
+  if(m_filter_height_set)
+    filter.setHeight(m_filter_top, m_filter_bottom);
+  if(m_range_mutation_set)
+    filter.setRangeMutator(m_range_mutation);
+}
+
+
 BasicScan::BasicScan(double *_rPos,
                      double *_rPosTheta,
                      vector<double*> points)
@@ -419,6 +450,33 @@ void BasicScan::calcNormalsOnDemandPrivate()
   calcNormals();
 }
 
+void BasicScan::saveBOctTree(std::string & filename)
+{
+
+  BOctTree<float>* btree = 0;
+
+  // create octtree from scan
+  if (octtree_reduction_voxelSize > 0) { // with reduction, only xyz points
+    DataXYZ xyz_r(get("xyz reduced show"));
+    btree = new BOctTree<float>(PointerArray<double>(xyz_r).get(),
+                                xyz_r.size(),
+                                octtree_voxelSize,
+                                octtree_pointtype,
+                                true);
+  } else { // without reduction, xyz + attribute points
+    float** pts = octtree_pointtype.createPointArray<float>(this);
+    unsigned int nrpts = size<DataXYZ>("xyz");
+    btree = new BOctTree<float>(pts,
+                                nrpts,
+                                octtree_voxelSize,
+                                octtree_pointtype,
+                                true);
+    for(unsigned int i = 0; i < nrpts; ++i) delete[] pts[i]; delete[] pts;
+  }
+
+  btree->serialize(filename);
+
+}
 
 void BasicScan::createOcttree()
 {
