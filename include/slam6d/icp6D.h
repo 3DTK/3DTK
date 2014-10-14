@@ -69,7 +69,8 @@ public:
   inline void set_max_num_iterations(int max_num_iterations);
   inline void set_cad_matching (bool cad_matching);
   inline bool get_cad_matching (void);
-  
+  inline void set_meta(bool meta);
+
 protected:
 
   /**
