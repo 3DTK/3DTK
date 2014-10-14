@@ -34,11 +34,16 @@ public:
   virtual void clear(const std::string& identifier);
   virtual unsigned int readFrames();
   virtual void saveFrames();
+  virtual void saveBOctTree(std::string & filename);
+
   virtual unsigned int getFrameCount();
   virtual void getFrame(unsigned int i, const double*& pose_matrix, AlgoType& type);
   
   //! Constructor for creation of Scans without openDirectory
   BasicScan(double * rPos, double * rPosTheta, std::vector<double*> points);
+  //! Constructor for creation of Scans without openDirectory,
+  // insert the points with the DataPointer
+  BasicScan(double * rPos, double * rPosTheta);
 
   virtual void updateTransform(double *_rPos, double *_rPosTheta);
 
