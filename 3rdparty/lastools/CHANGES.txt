@@ -6,7 +6,7 @@
 22 August 2012 -- added the '-pipe_on' option for a multi-stage LAStools pipeline
 11 August 2012 -- added on-the-fly buffered reading of LiDAR files (efficient with LAX)
 13 July 2012 -- NEW: lasoverage finds and flags overage points in the flightline overlap
-9 July 2012 -- fixed crash that occured when input had a corrupt VLRs without payload
+9 July 2012 -- fixed crash that occured when input had a corrupt VLRs without payload
 28 June 2012 -- blast2dem: ability to handle rasters with more than 65336 rows or cols
 12 June 2012 -- lasground: preserve classification by excluding points with '-ignore_class'
 12 June 2012 -- las2dem & blast2dem: removed limitation of maximal ncol being 65536

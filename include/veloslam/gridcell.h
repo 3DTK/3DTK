@@ -1,4 +1,4 @@
-﻿#ifndef __GRID_CELL_H__
+#ifndef __GRID_CELL_H__
 #define __GRID_CELL_H__
 
 #ifdef _MSC_VER

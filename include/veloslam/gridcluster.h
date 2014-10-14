@@ -1,4 +1,4 @@
-﻿#ifndef __GRID_CLUSTER_H__
+#ifndef __GRID_CLUSTER_H__
 #define __GRID_CLUSTER_H__
 
 #include "slam6d/scan.h"
