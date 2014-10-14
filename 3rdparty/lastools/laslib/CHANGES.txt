@@ -2,7 +2,7 @@
 13 September 2012 -- improved lasinfo output and fixed laszip bug for LAS 1.4 point types
 22 August 2012 -- added the '-pipe_on' option for a multi-stage LAStools pipeline
 11 August 2012 -- added on-the-fly buffered reading of LiDAR files (efficient with LAX)
-9 July 2012 -- fixed crash that occured when input had a corrupt VLRs without payload
+9 July 2012 -- fixed crash that occured when input had a corrupt VLRs without payload
 8 April 2012 -- added LASreader_bil for native read support of binary BIL grids
 27 March 2012 -- added LASreader_asc for native read support of ESRI ASC grids
 26 March 2012 -- even better output file naming with '-ocut 5' 
