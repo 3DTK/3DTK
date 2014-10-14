@@ -27,6 +27,15 @@ inline bool icp6D::get_meta()
 }
 
 /**
+ * Sets the meta-parameter
+ *
+ * @param meta if true, use meta
+ */
+inline void icp6D::set_meta(bool meta)
+{
+  this->meta = meta;
+}
+/**
  * Will return the anim flag
  *
  * @return the anim flag
