@@ -78,6 +78,33 @@ void BasicScan::closeDirectory()
   ScanIO::clearScanIOs();
 }
 
+// TODO check init state
+void BasicScan::updateTransform(double *_rPos, double *_rPosTheta)
+{
+  for(int i = 0; i < 3; i++) {
+    rPos[i] = _rPos[i];
+    rPosTheta[i] = _rPosTheta[i];
+  }
+  // write original pose matrix
+  EulerToMatrix4(rPos, rPosTheta, transMatOrg);
+
+  // initialize transform matrices from the original one,
+  // could just copy transMatOrg to transMat instead
+  transformMatrix(transMatOrg);
+
+  // reset the delta align matrix to represent only the transformations
+  // after local-to-global (transMatOrg) one
+  M4identity(dalignxf);
+  PointFilter filter;
+  if(m_filter_range_set)
+    filter.setRange(m_filter_max, m_filter_min);
+  if(m_filter_height_set)
+    filter.setHeight(m_filter_top, m_filter_bottom);
+  if(m_range_mutation_set)
+    filter.setRangeMutator(m_range_mutation);
+
+}
+
 BasicScan::BasicScan(double *_rPos,
                      double *_rPosTheta,
                      vector<double*> points)

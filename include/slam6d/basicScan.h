@@ -40,6 +40,8 @@ public:
   //! Constructor for creation of Scans without openDirectory
   BasicScan(double * rPos, double * rPosTheta, std::vector<double*> points);
 
+  virtual void updateTransform(double *_rPos, double *_rPosTheta);
+
   //! Convert Scan to Octree
   BOctTree<float>* convertScanToShowOcttree();
 
