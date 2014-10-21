@@ -77,9 +77,9 @@ void ScanIO_uos_rrgb::readScan(const char* dir_path, const char* identifier, Poi
         uosHeaderTest(data_file);
 
         IODataType spec[8] = { DATA_XYZ, DATA_XYZ, DATA_XYZ,
-            DATA_DUMMY, DATA_RGB, DATA_RGB, DATA_RGB, DATA_TERMINATOR };
+            DATA_REFLECTANCE, DATA_RGB, DATA_RGB, DATA_RGB, DATA_TERMINATOR };
         ScanDataTransform_identity transform;
-        readASCII(data_file, spec, transform, filter, xyz, rgb);
+        readASCII(data_file, spec, transform, filter, xyz, rgb, reflectance);
         
         data_file.close();
     }

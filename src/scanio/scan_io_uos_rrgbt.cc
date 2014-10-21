@@ -77,10 +77,10 @@ void ScanIO_uos_rrgbt::readScan(const char* dir_path, const char* identifier, Po
         uosHeaderTest(data_file);
 
         IODataType spec[9] = { DATA_XYZ, DATA_XYZ, DATA_XYZ,
-            DATA_DUMMY, DATA_RGB, DATA_RGB, DATA_RGB, DATA_TEMPERATURE,
+            DATA_REFLECTANCE, DATA_RGB, DATA_RGB, DATA_RGB, DATA_TEMPERATURE,
             DATA_TERMINATOR };
         ScanDataTransform_identity transform;
-        readASCII(data_file, spec, transform, filter, xyz);
+        readASCII(data_file, spec, transform, filter, xyz, rgb, reflectance, temperature);
         
         data_file.close();
     }

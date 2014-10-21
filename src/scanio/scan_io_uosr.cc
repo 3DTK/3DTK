@@ -67,7 +67,7 @@ void ScanIO_uosr::readScan(const char* dir_path, const char* identifier, PointFi
     if(!exists(data_path))
         throw std::runtime_error(std::string("There is no scan file for [") + identifier + "] in [" + dir_path + "]");
 
-    if(xyz != 0) {
+    if(xyz != 0 && reflectance != 0) {
         // open data file
         ifstream data_file(data_path);
         data_file.exceptions(ifstream::eofbit|ifstream::failbit|ifstream::badbit);
