@@ -1,10 +1,10 @@
 <package>
   <description brief="slam6d">
      Slam6D - This project consists of a software to register 3D point clouds
-     into a common coordinate system, as well as a viewer to display the szene.
+     into a common coordinate system, as well as a viewer to display the scene.
      For the registration, different ICP minimizing algorithms can be chosen,
      as well as global relaxation methods, aiming at generating an overall
-     globally consistent szene. Several formats for the point clouds are
+     globally consistent scene. Several formats for the point clouds are
      supported, new formats can be implemented easily.
   </description>
   <author>Andreas Nuechter, Kai Lingemann, Jochen Sprickerhof, Dorit Borrmann, Jan Elseberg</author>
