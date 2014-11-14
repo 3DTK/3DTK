@@ -239,7 +239,8 @@ OPT_DEP(WITH_TOOLS "Whether to build additional tools like convergence frame_to_
 
 IF(WITH_TOOLS)
   MESSAGE(STATUS "With Tools")
-  find_package (Boost COMPONENTS program_options REQUIRED)
+  # seems to override previous find_package command resulting in linker errors, either provide ALL necessary libs again or do not use
+  #find_package (Boost COMPONENTS serialization graph regex filesystem system thread chrono date_time program_options system REQUIRED)
 ELSE(WITH_TOOLS)
   MESSAGE(STATUS "Without Tools")
 ENDIF(WITH_TOOLS)
