@@ -25,7 +25,13 @@ using std::ofstream;
 #include <vector>
 using std::vector;
 
+#ifndef _MSC_VER
 #include <string.h>
+#else
+// string.h is for C-style strings, problematic with cout
+#include <string>
+#endif
+
 #include <cmath>
 
 #include "newmat/newmat.h"
