@@ -1177,8 +1177,12 @@ void callAddCamera(int dummy)
 }
 
 void selectPoints(int x, int y) {
-
+	// TODO smaller buffer ok for all OS?
+#ifdef _MSC_VER
+	GLuint selectBuf[BUFSIZE_WIN];
+#else
   GLuint selectBuf[BUFSIZE];
+#endif
   GLint hits;
   GLint viewport[4];
   if (selectOrunselect) {
@@ -1245,7 +1249,11 @@ void selectPoints(int x, int y) {
     // unselect points
     glGetIntegerv(GL_VIEWPORT, viewport);
 
+#ifdef _MSC_VER
+	glSelectBuffer(BUFSIZE_WIN, selectBuf);
+#else
     glSelectBuffer(BUFSIZE, selectBuf);
+#endif
     (void) glRenderMode(GL_SELECT);
 
     glInitNames();
@@ -1958,7 +1966,7 @@ int calcNoOfPoints(vector<PointXY> vec1, vector<PointXY> vec2)
     distance += sqrt( dx*dx + dy*dy + dz*dz );
   }
 
-  return (distance*scale) / 0.2;  // change this to get faster animations
+  return (distance*scale) / 0.02;  // change this to get faster animations
 }
 
 /**

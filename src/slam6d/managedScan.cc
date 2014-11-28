@@ -125,6 +125,11 @@ void ManagedScan::setHeightFilter(double top, double bottom)
   m_shared_scan->setHeightParameters(top, bottom);
 }
 
+void ManagedScan::setCustomFilter(string& cFiltStr)
+{
+  m_shared_scan->setCustomParameters(cFiltStr);
+}
+
 void ManagedScan::setRangeMutation(double range)
 {
   m_shared_scan->setRangeMutationParameters(range);

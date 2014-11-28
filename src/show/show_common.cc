@@ -360,6 +360,11 @@ void usage(char* prog)
        << bold << "  -m" << normal << " NR, " << bold << "--max=" << normal << "NR" << endl
        << "         neglegt all data points with a distance larger than NR 'units'" << endl
        << endl
+       << bold << "  -u" << normal << " STR, " << bold << "--customFilter=" << normal << "STR" << endl
+	   << "         apply custom filter, filter mode and data are specified as semicolon-seperated string:" << endl
+	   << "         STR: '{filterMode};{nrOfParams}[;param1][;param2][...]'" << endl
+	   << "         see filter implementation in pointfilter.cc for more detail." << endl
+       << endl
        << bold << "  -M" << normal << " NR, " << bold << "--min=" << normal << "NR" << endl
        << "         neglegt all data points with a distance smaller than NR 'units'" << endl
        << endl
@@ -462,7 +467,7 @@ int parseArgs(int argc,char **argv,
               PointType &ptype, float &fps, string &loadObj,
               bool &loadOct, bool &saveOct, int &origin, bool &originset,
               double &scale, IOType &type, bool& scanserver, 
-              double& sphereMode)
+              double& sphereMode, string& customFilter)
 {
   unsigned int types = PointType::USE_NONE;
   start   = 0;
@@ -505,10 +510,11 @@ int parseArgs(int argc,char **argv,
     { "scanserver",      no_argument,         0,  'S' },
     { "sphere",          required_argument,   0,  'b' },
     { "noanimcolor",     no_argument,         0,  'A' },
+    { "customFilter",    required_argument,   0,  'u' },
     { 0,           0,   0,   0}                    // needed, cf. getopt.h
   };
 
-  while ((c = getopt_long(argc, argv,"F:f:s:e:r:m:M:O:o:l:x:C:SwtRDadhTcbA2", longopts, NULL)) != -1) {
+  while ((c = getopt_long(argc, argv,"F:f:s:e:r:m:M:O:o:l:x:C:u:SwtRDadhTcbA2", longopts, NULL)) != -1) {
     switch (c) {
       case 's':
         w_start = atoi(optarg);
@@ -627,6 +633,9 @@ int parseArgs(int argc,char **argv,
         break;
       case 'A':
         coloranim = false;
+        break;
+      case 'u':
+        customFilter = optarg;
         break;
       default:
         abort ();
@@ -874,6 +883,8 @@ void initShow(int argc, char **argv){
   double scale = 0.01; // in m
   bool scanserver = false;
   double sphereMode = 0.0;
+  bool customFilterActive = false;
+  string customFilter;
 
   pose_file_name = new char[1024];
   path_file_name = new char[1024];
@@ -885,7 +896,7 @@ void initShow(int argc, char **argv){
 
   parseArgs(argc, argv, dir, start, end, maxDist, minDist, red, readInitial,
             octree, pointtype, idealfps, loadObj, loadOct, saveOct, origin,
-            originset, scale, type, scanserver, sphereMode);
+			originset, scale, type, scanserver, sphereMode, customFilter);
 
   // modify all scale dependant variables
   scale = 1.0 / scale;
@@ -928,12 +939,26 @@ void initShow(int argc, char **argv){
     cerr << "No scans found. Did you use the correct format?" << endl;
     exit(-1);
   }
+
+  // custom filter set? quick check, needs to contain at least one ';' 
+  // (proper checking will be done case specific in pointfilter.cc)
+  size_t pos = customFilter.find_first_of(";");
+  if (pos != std::string::npos){
+	  customFilterActive = true;
+  }
+  else {
+	  // give a warning if block filter has been inproperly specified
+	  if (customFilter.length() > 0){
+		  cerr << "Custom filter: specifying string has not been set properly, data will NOT be filtered." << endl;
+	  }
+  }
   
   for (ScanVector::iterator it = Scan::allScans.begin();
        it != Scan::allScans.end();
        ++it) {
     Scan* scan = *it;
     scan->setRangeFilter(maxDist, minDist);
+    if (customFilterActive) scan->setCustomFilter(customFilter);
     if (sphereMode > 0.0) scan->setRangeMutation(sphereMode);
     if (red > 0) {
       // scanserver differentiates between reduced for slam and

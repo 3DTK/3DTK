@@ -71,6 +71,9 @@ public:
   //! Filter parameters for height checks when loading from file, invalidate cache for scan CacheObject if it differs
   void setHeightParameters(double top, double bottom);
 
+  //! Filter parameters for block checks when loading from file, invalidate cache for scan CacheObject if it differs
+  void setCustomParameters(std::string& custFilterStr);
+
   //! Filter parameters for the range mutator for showing the spheres, invalidate cache for scan CacheObject if it differs
   void setRangeMutationParameters(double range);
     
@@ -166,7 +169,8 @@ private:
   double m_max_dist, m_min_dist;
   double m_height_top, m_height_bottom;
   double m_range_mutator_param;
-  bool m_range_mutator_param_set, m_range_param_set, m_height_param_set;
+  std::string customFilterStr;
+  bool m_range_mutator_param_set, m_range_param_set, m_height_param_set, m_custom_param_set;
   SharedString m_reduction_parameters;
   SharedString m_show_parameters;
   SharedString m_octtree_parameters;

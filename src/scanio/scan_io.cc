@@ -89,33 +89,35 @@ ScanIO * ScanIO::getScanIO(IOType iotype)
 
 void ScanIO::clearScanIOs()
 {
-  for(map<IOType, ScanIO*>::iterator it = m_scanIOs.begin(); it != m_scanIOs.end(); ++it) {
-    // figure out the full and correct library name
-    string libname(io_type_to_libname(it->first));
+  if (m_scanIOs.size()){
+    for (map<IOType, ScanIO*>::iterator it = m_scanIOs.begin(); it != m_scanIOs.end(); ++it) {
+      // figure out the full and correct library name
+      string libname(io_type_to_libname(it->first));
 #ifdef WIN32
-    libname += ".dll";
+      libname += ".dll";
 #elif __APPLE__
-    libname = "lib/lib" + libname + ".dylib";
+      libname = "lib/lib" + libname + ".dylib";
 #else
-    libname = "lib" + libname + ".so";
+      libname = "lib" + libname + ".so";
 #endif
     
-    // load library, destroy the allocated ScanIO and then remove it
+      // load library, destroy the allocated ScanIO and then remove it
 #ifdef _MSC_VER
-    HINSTANCE hinstLib = LoadLibrary(libname.c_str());
+      HINSTANCE hinstLib = LoadLibrary(libname.c_str());
     
-    destroy_sio* destroy_ScanIO = (destroy_sio*)GetProcAddress(hinstLib, "destroy");
-    destroy_ScanIO(it->second);
+      destroy_sio* destroy_ScanIO = (destroy_sio*)GetProcAddress(hinstLib, "destroy");
+      destroy_ScanIO(it->second);
     
-    FreeLibrary(hinstLib);
+      FreeLibrary(hinstLib);
 #else
-    void *ptrScanIO = dlopen(libname.c_str(), RTLD_LAZY);
+      void *ptrScanIO = dlopen(libname.c_str(), RTLD_LAZY);
     
-    destroy_sio* destroy_ScanIO = (destroy_sio*)dlsym(ptrScanIO, "destroy");
-    destroy_ScanIO(it->second);
+      destroy_sio* destroy_ScanIO = (destroy_sio*)dlsym(ptrScanIO, "destroy");
+      destroy_ScanIO(it->second);
     
-    dlclose(ptrScanIO);
+      dlclose(ptrScanIO);
 #endif
-  }
+    }
   m_scanIOs.clear();
+  }
 }
