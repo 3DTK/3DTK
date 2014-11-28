@@ -67,7 +67,7 @@ template <class T> bool HitBoundingBox(const T center[3], T size )
   float candidatePlane[NUMDIM];
 
   // Find candidate planes; this loop can be avoided if
-  //  rays cast all from the eye(assume perpsective view) 
+  //  rays cast all from the eye(assume perspective view) 
   for (i=0; i<NUMDIM; i++)
     if(origin[i] < minB[i]) {
       quadrant[i] = LEFT;

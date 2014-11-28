@@ -77,6 +77,14 @@ PointFilter& PointFilter::setHeight(double top, double bottom)
   return *this;
 }
 
+PointFilter& PointFilter::setCustom(const std::string& customFilterStr)
+{
+  m_changed = true;
+  std::string cFiltStr(customFilterStr);
+  m_params["customFilter"] = cFiltStr;
+  return *this;
+}
+
 PointFilter& PointFilter::setRangeMutator(double range)
 {
   m_changed = true;
@@ -125,7 +133,7 @@ Checker::Checker() :
 
 Checker::~Checker()
 {
-  if(m_next)
+  if (m_next)
     delete m_next;
 }
 
@@ -133,6 +141,7 @@ Checker::~Checker()
 namespace {
   CheckerFactory<CheckerRangeMax> max("rangemax");
   CheckerFactory<CheckerRangeMin> min("rangemin");
+  CheckerFactory<CheckerCustom> customFilter("customFilter");
   CheckerFactory<CheckerHeightTop> top("heighttop");
   CheckerFactory<CheckerHeightBottom> bottom("heightbottom");
   CheckerFactory<RangeMutator> range_mutation("rangemutation");
@@ -172,7 +181,7 @@ CheckerHeightTop::CheckerHeightTop(const std::string& value) {
 }
 
 bool CheckerHeightTop::test(double* point) {
-  if(point[1] < m_top)
+  if (point[1] < m_top)
     return true;
   return false;
 }
@@ -183,10 +192,101 @@ CheckerHeightBottom::CheckerHeightBottom(const std::string& value) {
 }
 
 bool CheckerHeightBottom::test(double* point) {
-  if(point[1] > m_bottom)
+  if (point[1] > m_bottom)
     return true;
   return false;
 }
+
+CheckerCustom::CheckerCustom(const std::string& value) {
+    try{
+		// every custom filter description is defined as 
+		// {filterMode};{nrOfParams}[;param1][;param2][...]
+      std::string str(value);
+      size_t pos = str.find_first_of(";");
+      stringstream ss(str.substr(0, pos));
+      ss >> filterMode;
+      
+      str = str.substr(pos + 1);
+      pos = str.find_first_of(";");
+	  stringstream ss2(str.substr(0, pos));
+	  ss2 >> nrOfParam;
+
+	  if (nrOfParam > 0){
+		  custParamsSet = true;
+		  custFiltParams = new double[nrOfParam];
+		  // initialize to 0
+		  for (size_t i = 0; i < nrOfParam; i++)
+		  {
+			  custFiltParams[i] = 0.0;
+		  }
+	  }
+	  // parse parameters for filter
+	  for (size_t i = 0; i < nrOfParam; i++)
+	  {
+		  str = str.substr(pos + 1);
+		  pos = str.find_first_of(";");
+		  if (pos == std::string::npos){
+			  if (i != nrOfParam - 1){
+			  // less than indicated parameters have been provided, error!
+			  throw runtime_error("Error parsing arguments for CustomFilter.");
+			  }
+			  else {
+				  // last param is not ended with ';'
+				  stringstream ss3(str);
+				  ss3 >> custFiltParams[i];
+				  break;
+			  }
+		  }
+		  stringstream ss3(str.substr(0, pos));
+		  ss3 >> custFiltParams[i];
+	  }
+
+    }
+    catch (...){
+        throw runtime_error("Error parsing arguments for CustomFilter.");
+    }
+}
+
+CheckerCustom::~CheckerCustom(){
+	if (custParamsSet)
+      delete[] custFiltParams;
+}
+
+bool CheckerCustom::test(double* point) {
+	bool filterTest = false;
+
+	try{
+		switch (filterMode)
+		{
+		case 0:
+			// Custom Filter 0: symetrical, axis-parallel cuboid
+			// all values inside the cuboid will be filtered (filterTest = false)
+			// parameters: xFilterRange yFilterRange zFilterRange
+			if (abs(point[0]) > custFiltParams[0] || abs(point[1]) > custFiltParams[1] || abs(point[2]) > custFiltParams[2])
+				filterTest = true;
+			break;
+		case 1:
+			// Custom Filter 1: asymetrical axis-parallel cuboid
+			// all values inside the cuboid will be filtered
+			// parameters: xFilterRangeLow xFilterRangeHigh yFilterRangeLow yFilterRangeHigh zFilterRangeLow zFilterRangeHigh
+			if (point[0] < custFiltParams[0] || point[0] > custFiltParams[1]
+				|| point[1] < custFiltParams[2] || point[1] > custFiltParams[3]
+				|| point[2] < custFiltParams[4] || point[2] > custFiltParams[5])
+				filterTest = true;
+			break;
+		default:
+			filterTest = true;
+			break;
+		}
+	}
+	catch (...){
+		// Error occured - deactivate filter
+		filterTest = true;
+	}
+
+	return filterTest;
+}
+
 
 RangeMutator::RangeMutator(const std::string& value) {
   stringstream s(value);

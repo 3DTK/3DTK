@@ -40,6 +40,7 @@ using std::vector;
 #define COMPARE_EPSILON 0.000001
 
 #define BUFSIZE 1048576 ///< defining the buffer size
+#define BUFSIZE_WIN 65536 ///< default buffer size leads to stack overflow in MSVC
 
 // This defines the floating point precision of the show program
 typedef float sfloat;

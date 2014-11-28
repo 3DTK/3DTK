@@ -86,6 +86,20 @@ void SharedScan::setHeightParameters(double top, double bottom)
   m_height_param_set = true;
 }
 
+void SharedScan::setCustomParameters(std::string& custFilterStr)
+{
+  // if a non-first set differs from the previous ones, invalidate all COs
+  if (m_custom_param_set) {
+	  if (customFilterStr.compare(custFilterStr) != 0) {
+      invalidateFull();
+      invalidateReduced();
+      invalidateShow();
+    }
+  }
+  customFilterStr = custFilterStr;
+  m_custom_param_set = true;
+}
+
 void SharedScan::setRangeMutationParameters(double range)
 {
   // if a non-first set differs from the previous ones, invalidate all COs
@@ -134,6 +148,8 @@ PointFilter SharedScan::getPointFilter() const
     r.setRange(m_max_dist, m_min_dist);
   if(m_height_param_set)
     r.setHeight(m_height_top, m_height_bottom);
+  if (m_custom_param_set)
+    r.setCustom(customFilterStr);
   if(m_range_mutator_param_set)
     r.setRangeMutator(m_range_mutator_param);
   
