@@ -31,6 +31,7 @@ public:
 
   PointFilter& setRange(double maxDist, double minDist);
   PointFilter& setHeight(double top, double bottom);
+  PointFilter& setCustom(const std::string& customFilterStr);
   PointFilter& setRangeMutator(double range);
 
   //! Serialization function to convert it into a string, usable in the constructor
@@ -107,6 +108,19 @@ public:
   virtual bool test(double* point);
 private:
   double m_bottom;
+};
+
+class CheckerCustom : public Checker {
+public:
+	CheckerCustom(const std::string& value);
+	~CheckerCustom();
+	virtual bool test(double* point);
+private:
+	int filterMode;
+	int nrOfParam;
+	// parameters for custom filter
+	bool custParamsSet = false;
+	double *custFiltParams;
 };
 
 class RangeMutator : public Checker {

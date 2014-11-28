@@ -68,13 +68,17 @@ void BasicScan::openDirectory(const std::string& path,
 void BasicScan::closeDirectory()
 {
   // clean up the scan vector
-  for(ScanVector::iterator it = Scan::allScans.begin(); 
+
+  // avoiding "Expression: vector iterators incompatible" on empty allScans-vector
+  if (Scan::allScans.size()){
+    for(ScanVector::iterator it = Scan::allScans.begin(); 
       it != Scan::allScans.end(); 
       ++it) {
-    delete *it; 
-    *it = 0;
+        delete *it; 
+        *it = 0;
+    }
+    Scan::allScans.clear();
   }
-  Scan::allScans.clear();
   ScanIO::clearScanIOs();
 }
 
@@ -100,6 +104,8 @@ void BasicScan::updateTransform(double *_rPos, double *_rPosTheta)
     filter.setRange(m_filter_max, m_filter_min);
   if(m_filter_height_set)
     filter.setHeight(m_filter_top, m_filter_bottom);
+  if (m_filter_custom_set)
+    filter.setCustom(customFilterStr);
   if(m_range_mutation_set)
     filter.setRangeMutator(m_range_mutation);
 
@@ -131,6 +137,8 @@ BasicScan::BasicScan(double *_rPos,
     filter.setRange(m_filter_max, m_filter_min);
   if(m_filter_height_set)
     filter.setHeight(m_filter_top, m_filter_bottom);
+  if (m_filter_custom_set)
+    filter.setCustom(customFilterStr);
   if(m_range_mutation_set)
     filter.setRangeMutator(m_range_mutation);
 }
@@ -160,6 +168,8 @@ BasicScan::BasicScan(double *_rPos,
     filter.setRange(m_filter_max, m_filter_min);
   if(m_filter_height_set)
     filter.setHeight(m_filter_top, m_filter_bottom);
+  if (m_filter_custom_set)
+    filter.setCustom(customFilterStr);
   if(m_range_mutation_set)
     filter.setRangeMutator(m_range_mutation);
     
@@ -222,6 +232,7 @@ void BasicScan::init()
   m_range_mutation = 0.0;
   m_filter_range_set = false;
   m_filter_height_set = false;
+  m_filter_custom_set = false;
   m_range_mutation_set = false;
 }
 
@@ -238,6 +249,12 @@ void BasicScan::setHeightFilter(double top, double bottom)
   m_filter_top = top;
   m_filter_bottom = bottom;
   m_filter_height_set = true;
+}
+
+void BasicScan::setCustomFilter(string& cFiltStr)
+{
+  customFilterStr = cFiltStr;	
+  m_filter_custom_set = true;
 }
 
 void BasicScan::setRangeMutation(double range)
@@ -263,6 +280,8 @@ void BasicScan::get(unsigned int types)
     filter.setRange(m_filter_max, m_filter_min);
   if(m_filter_height_set)
     filter.setHeight(m_filter_top, m_filter_bottom);
+  if (m_filter_custom_set)
+    filter.setCustom(customFilterStr);
   if(m_range_mutation_set)
     filter.setRangeMutator(m_range_mutation);
 

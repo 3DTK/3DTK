@@ -24,6 +24,7 @@ public:
 
   virtual void setRangeFilter(double max, double min);
   virtual void setHeightFilter(double top, double bottom);
+  virtual void setCustomFilter(string& cFiltStr);
   virtual void setRangeMutation(double range);
 
   virtual const char* getIdentifier() const { return m_identifier.c_str(); }
@@ -63,7 +64,8 @@ private:
   IOType m_type;
 
   double m_filter_max, m_filter_min, m_filter_top, m_filter_bottom, m_range_mutation;
-  bool m_filter_range_set, m_filter_height_set, m_range_mutation_set;
+  bool m_filter_range_set, m_filter_height_set, m_filter_custom_set, m_range_mutation_set;
+  string customFilterStr;
 
   std::map<std::string, std::pair<unsigned char*, unsigned int> > m_data;
 

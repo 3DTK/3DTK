@@ -162,6 +162,9 @@ public:
   //! Input filtering for all points based on their height
   virtual void setHeightFilter(double top, double bottom) = 0;
 
+  //! Input filtering for all points based on custom filtering schemes
+  virtual void setCustomFilter(string& customFilterStr) = 0;
+
   //! Input mutation to set range of all points to a constant value;
   virtual void setRangeMutation(double range) { }
   
