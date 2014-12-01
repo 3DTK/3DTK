@@ -931,6 +931,8 @@ void CallBackIdleFunc(void)
       glWriteImagePPM(filename.c_str(), factor, 0);
       haveToUpdate = tmpUpdate;
 
+	  // per default no conversion program available in Win
+#ifndef _WIN32
       string jpgname = scan_dir + "animframe" + to_string(frameNr,5) + ".jpg";
       string systemcall = "convert -quality 100 -type TrueColor "
         + filename + " " + jpgname;     
@@ -938,6 +940,7 @@ void CallBackIdleFunc(void)
       system(systemcall.c_str());
       systemcall = "rm " + filename;
       system(systemcall.c_str());
+#endif
     }
   }
 
@@ -1024,17 +1027,20 @@ void CallBackIdleFunc(void)
       if(save_animation){
         string filename = scan_dir + "animframe"
           + to_string(path_iterator,5) + ".ppm";
-        string jpgname = scan_dir + "animframe"
-          + to_string(path_iterator,5) + ".jpg";
 
         cout << "written " << filename << " of "
              << path_vectorX.size() << " files" << endl;
         glWriteImagePPM(filename.c_str(), factor, 0);
+		// per default no conversion program available in Win, stick with PPM
+#ifndef _WIN32
+        string jpgname = scan_dir + "animframe"
+          + to_string(path_iterator,5) + ".jpg";
         string systemcall = "convert -quality 100 "
           + filename + " " + jpgname;     
         system(systemcall.c_str());
         systemcall = "rm " + filename;     
         system(systemcall.c_str());
+#endif
         haveToUpdate = 6;
       }
     } else {                             // animation has just ended
@@ -1707,8 +1713,8 @@ void glWriteImagePPM(const char *filename, int scale, GLenum mode)
 
     ofstream fp;                  // The PPM File
 
-    // Open the output file
-    fp.open(filename, ios::out);
+    // Open the output file - need to open in binary mode to avoid formatting of special characters! (for example '\n'-character as '0x0D 0x0A' in Windows!)
+    fp.open(filename, ios::out | ios::binary);
 
     // Write a proper P6 PPM header
     fp << "P6" << endl
