@@ -323,14 +323,11 @@ ENDIF(OPENMP_FOUND AND WITH_OPENMP)
 OPT_DEP(EXPORT_SHARED_LIBS "Whether to build additional shared libraries for use in other projects. ON/OFF" OFF "WITH_SHOW;WITH_FBR")
 #OPT_DEP(EXPORT_SHARED_LIBS "Whether to build additional shared libraries for use in other projects. ON/OFF" OFF "WITH_SHOW")
 
-<<<<<<< HEAD
 IF(EXISTS "$ENV{ROS_ROOT}")
   SET(WITH_FBR ON)
   SET(EXPORT_SHARED_LIBS ON)
 ENDIF()
 
-=======
->>>>>>> revert conversion of CMakeLists.txt from unix to windows line terminators
 IF(EXPORT_SHARED_LIBS)
   ## Compile a single shared library containing all of 3DTK
   add_library(slam SHARED src/slam6d/icp6D.cc)
