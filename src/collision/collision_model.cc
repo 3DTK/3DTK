@@ -20,7 +20,7 @@
 #include <boost/program_options.hpp>
 namespace po = boost::program_options;
 
-enum collision_method { CTYPE1, CTYPE2 };
+enum collision_method { CTYPE1, CTYPE2, CTYPE3 };
 enum penetrationdepth_method { PDTYPE1, PDTYPE2 };
 
 /*
@@ -45,6 +45,7 @@ void validate(boost::any& v, const std::vector<std::string>& values,
     string arg = values.at(0);
     if (strcasecmp(arg.c_str(), "type1") == 0) v = CTYPE1;
     else if (strcasecmp(arg.c_str(), "type2") == 0) v = CTYPE2;
+    else if (strcasecmp(arg.c_str(), "type3") == 0) v = CTYPE3;
     else throw std::runtime_error(std::string("collision method ")
             + arg + std::string(" is unknown"));
 }
@@ -277,6 +278,8 @@ size_t handle_pointcloud(std::vector<Point> &pointmodel, DataXYZ &environ,
                 i++;
             }
             break;
+        default:
+            throw std::runtime_error("impossible");
     }
     size_t num_colliding = 0;
     // the actual implementation of std::vector<bool> requires us to use the
@@ -470,7 +473,15 @@ int main(int argc, char **argv)
         pointmodel.push_back(Point(model[j][0], model[j][1], model[j][2]));
     }
     cerr << "model: " << pointmodel.size() << endl;
-    size_t num_colliding = handle_pointcloud(pointmodel, environ, trajectory, colliding, radius, cmethod);
+    size_t num_colliding = 0;
+    if (cmethod == CTYPE3) {
+        num_colliding = environ.size();
+        for (unsigned int i = 0; i < environ.size(); ++i) {
+            colliding[i] = true;
+        }
+    } else {
+        num_colliding = handle_pointcloud(pointmodel, environ, trajectory, colliding, radius, cmethod);
+    }
     if (num_colliding == 0) {
         cerr << "nothing collides" << endl;
         exit(0);
