@@ -416,6 +416,7 @@ public:
   inline unsigned int getPointdim() const { return POINTDIM; }
   inline const bitoct& getRoot() const { return *root; }
   inline unsigned int getMaxDepth() const { return max_depth; }
+  inline T getRealVoxelSize() const { return real_voxelSize; }
   
   inline void getCenter(double _center[3]) const {
     _center[0] = center[0];
