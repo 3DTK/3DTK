@@ -305,7 +305,7 @@ void calculate_collidingdist(DataXYZ &environ,
     cerr << "reading environment..." << endl;
     size_t num_noncolliding = environ.size() - num_colliding;
     double** pa = new double*[num_noncolliding];
-    size_t* idxmap = new size_t[num_colliding];
+    size_t* idxmap = new size_t[num_noncolliding];
     for (size_t i = 0, j = 0; i < environ.size(); ++i) {
         if (colliding[i]) {
             continue;
@@ -323,10 +323,13 @@ void calculate_collidingdist(DataXYZ &environ,
     int thread_num = 0; // add omp later
     cerr << "computing distances..." << endl;
     time_t before = time(NULL);
+    int j = 0;
     for (size_t i = 0; i < environ.size(); ++i) {
         if (!colliding[i]) {
             continue;
         }
+        cerr << (j*100.0)/num_colliding << " %\r";
+        cerr.flush();
         double point1[3] = {environ[i][0], environ[i][1], environ[i][2]};
         // for this colliding point, find the closest non-colliding one
         size_t c = t.FindClosest(point1, 1000000, thread_num);
@@ -338,8 +341,8 @@ void calculate_collidingdist(DataXYZ &environ,
         }*/
         c = idxmap[c];
         double point2[3] = {environ[c][0], environ[c][1], environ[c][2]};
-        float dist = sqrt(Dist2(point1, point2));
-        dist_colliding.push_back(dist);
+        dist_colliding[j] = sqrt(Dist2(point1, point2));
+        j++;
     }
     time_t after = time(NULL);
     cerr << "took: " << difftime(after, before) << " seconds" << endl;
@@ -379,7 +382,11 @@ void calculate_collidingdist2(std::vector<Point> &pointmodel, DataXYZ &environ,
     int thread_num = 0; // add omp later
     cerr << "computing distances..." << endl;
     time_t before = time(NULL);
+    int i = 0;
+    int end = trajectory.size();
     for(const auto &it2 : trajectory) {
+        cerr << (i*100.0)/end << " %\r";
+        cerr.flush();
         for(const auto &it : pointmodel) {
             double point1[3] = {it.x, it.y, it.z};
             // the second point is the projection of the first point to the
@@ -404,6 +411,7 @@ void calculate_collidingdist2(std::vector<Point> &pointmodel, DataXYZ &environ,
                 }
             }
         }
+        i++;
     }
     for (size_t i = 0; i < dist_colliding.size(); ++i) {
         dist_colliding[i] = sqrt(dist_colliding[i]);
