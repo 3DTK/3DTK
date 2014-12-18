@@ -30,6 +30,7 @@ using std::vector;
 
 #include "slam6d/point.h"
 #include "slam6d/scan.h"
+#include "scanio/writer.h"
 #include "slam6d/globals.icc"
 
 #ifndef _MSC_VER
@@ -88,12 +89,17 @@ void usage(char* prog)
 	  << bold << "  -r" << normal << " NR, " << bold << "--reduce=" << normal << "NR" << endl
 	  << "         turns on octree based point reduction (voxel size=<NR>)" << endl
 	  << endl
-	  << bold << "  -R" << normal << " NR, " << bold << "--random=" << normal << "NR" << endl
+	  /*
+    << bold << "  -R" << normal << " NR, " << bold << "--random=" << normal << "NR" << endl
 	  << "         turns on randomized reduction, using about every <NR>-th point only" << endl
 	  << endl
+	  */
 	  << bold << "  -s" << normal << " NR, " << bold << "--start=" << normal << "NR" << endl
 	  << "         start at scan NR (i.e., neglects the first NR scans)" << endl
 	  << "         [ATTENTION: counting naturally starts with 0]" << endl
+	  << bold << "  -x" << "--xyz" << endl
+	  << "         export in xyz format (right handed coordinate system in m)" << endl
+   
 	  << endl
     	  << endl << endl;
   
@@ -108,7 +114,6 @@ void usage(char* prog)
  * @param argv the arguments
  * @param dir the directory
  * @param red using point reduction?
- * @param rand use randomized point reduction?
  * @param mdm maximal distance match
  * @param mdml maximal distance match for SLAM
  * @param mni maximal number of iterations
@@ -134,7 +139,7 @@ void usage(char* prog)
  */
 int parseArgs(int argc, char **argv, string &dir, double &red, int &rand,
 		    int &start, int &end, int &maxDist, int &minDist, bool &extrapolate_pose,
-		    int &octree, IOType &type)
+		    bool &use_xyz, bool &use_reflectance, bool &use_color, int &octree, IOType &type)
 {
   int  c;
   // from unistd.h:
@@ -149,13 +154,16 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &rand,
     { "end",             required_argument,   0,  'e' },
     { "reduce",          required_argument,   0,  'r' },
     { "octree",          optional_argument,   0,  'O' },
-    { "random",          required_argument,   0,  'R' },
     { "trustpose",       no_argument,         0,  'p' },
+    { "reflectance",     no_argument,         0,  'R' },
+    { "reflectivity",    no_argument,         0,  'R' },
+    { "color",           no_argument,         0,  'c' },
+    { "xyz",             no_argument,         0,  'x' },
     { 0,           0,   0,   0}                    // needed, cf. getopt.h
   };
 
   cout << endl;
-  while ((c = getopt_long(argc, argv, "f:s:e:r:O:R:m:M:p", longopts, NULL)) != -1)
+  while ((c = getopt_long(argc, argv, "f:s:e:r:O:Rm:M:pxc", longopts, NULL)) != -1)
     switch (c)
 	 {
 	 case 'r':
@@ -169,8 +177,11 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &rand,
        }
 	   break;
 	 case 'R':
-	   rand = atoi(optarg);
+     use_reflectance = true; 
 	   break;
+   case 'c':
+     use_color = true;
+     break;
 	 case 's':
 	   start = atoi(optarg);
 	   if (start < 0) { cerr << "Error: Cannot start at a negative scan number.\n"; exit(1); }
@@ -189,6 +200,9 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &rand,
 	 case 'p':
 	   extrapolate_pose = false;
 	   break;
+	 case 'x':
+     use_xyz = true;
+     break;
 	 case 'f':
     try {
       type = formatname_to_io_type(optarg);
@@ -277,11 +291,14 @@ int main(int argc, char **argv)
   int    maxDist    = -1;
   int    minDist    = -1;
   bool   eP         = true;  // should we extrapolate the pose??
+  bool   use_xyz = false;
+  bool   use_color = false;
+  bool   use_reflectance = false;
   int octree       = 0;  // employ randomized octree reduction?
   IOType iotype    = UOS;
 
   parseArgs(argc, argv, dir, red, rand, start, end,
-      maxDist, minDist, eP, octree, iotype);
+      maxDist, minDist, eP, use_xyz, use_reflectance, use_color, octree, iotype);
 
   // Get Scans
   Scan::openDirectory(false, dir, iotype, start, end);
@@ -309,44 +326,67 @@ int main(int argc, char **argv)
     readFrames(dir, start, end);
   }
   
- cout << "Export all 3D points to file \"points.pts\"" << endl;
- cout << "Export all 6DoF poses  to file \"poses.txt\"" << endl;
+ cout << "Export all 3D Points to file \"points.pts\"" << endl;
+ cout << "Export all 6DoF poses to file \"poses.txt\"" << endl;
+ cout << "Export all 6DoF matrices to file \"frames.txt\"" << endl;
  ofstream redptsout("points.pts");
  ofstream posesout("poses.txt");
- for(unsigned int i = 0; i < Scan::allScans.size(); i++) {
-   Scan *source = Scan::allScans[i];
-   DataXYZ xyz  = source->get("xyz");
-   DataReflectance xyz_reflectance
-	= (((DataReflectance)source->get("reflectance")).size() == 0) ?
-	source->create("reflectance", sizeof(float)*xyz.size())
-	: source->get("reflectance"); 
-   if (((DataReflectance)source->get("reflectance")).size() == 0) {
-	for(unsigned int i = 0; i < xyz.size(); i++)
-	  xyz_reflectance[i] = 255;
-   }
+ ofstream matricesout("frames.txt");
+  
+  for(unsigned int i = 0; i < Scan::allScans.size(); i++) {
+    Scan *source = Scan::allScans[i];
+    DataXYZ xyz  = source->get("xyz");
+    
+    if(use_reflectance) {
+      DataReflectance xyz_reflectance = (((DataReflectance)source->get("reflectance")).size() == 0) ?
+	      source->create("reflectance", sizeof(float)*xyz.size()) : source->get("reflectance"); 
+      if (((DataReflectance)source->get("reflectance")).size() == 0) {
+	      for(unsigned int i = 0; i < xyz.size(); i++) xyz_reflectance[i] = 255;
+      }
+      if(use_xyz) {
+        write_xyzr(xyz, xyz_reflectance, redptsout);
+      } else {
+        write_uosr(xyz, xyz_reflectance, redptsout);
+      }
+      
+    } else if(use_color) {
+      DataRGB xyz_color = (((DataRGB)source->get("color")).size() == 0) ?
+	    source->create("color", sizeof(unsigned char)*3*xyz.size()) : source->get("color"); 
+      if (((DataRGB)source->get("color")).size() == 0) {
+	      for(unsigned int i = 0; i < xyz.size(); i++) {
+	        xyz_color[i][0] = 0;
+	        xyz_color[i][1] = 0;
+	        xyz_color[i][2] = 0;
+        }
+      }
+      if(use_xyz) {
+        write_xyz_rgb(xyz, xyz_color, redptsout);
+      } else {
+        write_uos_rgb(xyz, xyz_color, redptsout);
+      }
+
+    } else {
+      if(use_xyz) {
+        write_xyz(xyz, redptsout);
+      } else {
+        write_uos(xyz, redptsout);
+      }
+    
+    }
+    if(use_xyz) {
+      writeTrajectoryXYZ(posesout, source->get_transMat(), false);
+      writeTrajectoryXYZ(matricesout, source->get_transMat(), true);
+    } else {
+      writeTrajectoryUOS(posesout, source->get_transMat(), false);
+      writeTrajectoryUOS(matricesout, source->get_transMat(), true);
+    }
+
+  }
    
-   for(unsigned int j = 0; j < xyz.size(); j++) {
-     redptsout << xyz[j][0] << " " << xyz[j][1] << " " << xyz[j][2] << " "
-			<< xyz_reflectance[j]
-			<< endl;
-   }
-   posesout << source->get_transMat()[ 0] << " "
-		  << source->get_transMat()[ 1] << " "
-		  << source->get_transMat()[ 2] << " "
-		  << source->get_transMat()[ 3] << " "
-		  << source->get_transMat()[ 4] << " "
-		  << source->get_transMat()[ 5] << " "
-		  << source->get_transMat()[ 6] << " "
-		  << source->get_transMat()[ 7] << " "
-		  << source->get_transMat()[ 8] << " "
-		  << source->get_transMat()[ 9] << " "
-		  << source->get_transMat()[10] << " "
-		  << source->get_transMat()[11] << " "
-		  << source->get_transMat()[12] << " "
-		  << source->get_transMat()[13] << " "
-		  << source->get_transMat()[14] << " "
-		  << source->get_transMat()[15] << endl;
- }
- redptsout.close();
- redptsout.clear();
+  redptsout.close();
+  redptsout.clear();
+  posesout.close();
+  posesout.clear();
+  matricesout.close();
+  matricesout.clear();
 }
