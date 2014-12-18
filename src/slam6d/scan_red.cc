@@ -49,6 +49,7 @@ using std::ofstream;
 #include "slam6d/fbr/scan_cv.h"
 
 #include "scanserver/clientInterface.h"
+#include "scanio/writer.h"
 
 #include "slam6d/globals.icc"
 
@@ -342,18 +343,6 @@ void parse_options(int argc, char **argv, int &start, int &end,
 #endif
 }
 
-void createdirectory(string dir)
-{
-  int success = mkdir(dir.c_str(), S_IRWXU|S_IRWXG|S_IRWXO);
-
-  if (success == 0 || errno == EEXIST) {
-    cout << "Writing to " << dir << endl;
-  } else {
-    cerr << "Creating directory " << dir << " failed" << endl;
-    exit(1);
-  }
-}
-
 void scan2mat(Scan *source, cv::Mat &mat)
 {
   DataXYZ xyz = source->get("xyz");
@@ -534,71 +523,6 @@ void reduce_interpolation(cv::Mat mat,
   }
 }
 
-/*
- * given a vector of 3d points, write them out as uos files
- */
-void write_uos(vector<cv::Vec4f> &points, string &dir, string id)
-{
-  ofstream outfile((dir + "/scan" + id + ".3d").c_str());
-
-  outfile << "# header is ignored" << endl;
-
-  for (vector<cv::Vec4f>::iterator it=points.begin(); it < points.end(); it++) {
-    outfile << (*it)[0] << " " << (*it)[1] << " " << (*it)[2] << endl;
-  }
-  outfile.close();
-}
-
-/*
- * given a vector of 3d points, write them out as uosr files
- */
-void write_uosr(vector<cv::Vec4f> &points, string &dir, string id)
-{
-  ofstream outfile((dir + "/scan" + id + ".3d").c_str());
-  
-  outfile.precision(20);
-  outfile << "# header is ignored" << endl;
-
-  for (vector<cv::Vec4f>::iterator it=points.begin(); it < points.end(); it++) {
-    if((*it)[0]!=0 && (*it)[1]!=0 && (*it)[2]!=0)
-      outfile << (*it)[0] << " " << (*it)[1] << " " << (*it)[2] << " " << (*it)[3] << endl;
-  }
-
-  outfile.close();
-}
-
-/*
- * given a vector of 3d points, write them out as uos_rgb files
- */
-void write_uos_rgb(vector<cv::Vec4f> &points, vector<cv::Vec3b> &color, string &dir, string id)
-{
-  ofstream outfile((dir + "/scan" + id + ".3d").c_str());
-  
-  outfile.precision(20);
-  outfile << "# header is ignored" << endl;
-
-  vector<cv::Vec3b>::iterator cit=color.begin(); 
-  for (vector<cv::Vec4f>::iterator it=points.begin();  it < points.end(); it++) {
-    if((*it)[0]!=0 && (*it)[1]!=0 && (*it)[2]!=0)
-      outfile << (*it)[0] << " " << (*it)[1] << " " << (*it)[2] << " " 
-      << (int)(*cit)[0] << " " << (int)(*cit)[1] << " " << (int)(*cit)[2] << endl;
-      cit++;
-  }
-
-  outfile.close();
-}
-
-// write .pose files
-// .frames files can later be generated from them using ./bin/pose2frames
-void writeposefile(string &dir, const double* rPos, const double* rPosTheta, string id)
-{
-  ofstream posefile((dir + "/scan" + id + ".pose").c_str());
-  posefile << rPos[0] << " " << rPos[1] << " " << rPos[2] << endl;
-  posefile << deg(rPosTheta[0]) << " "
-           << deg(rPosTheta[1]) << " "
-           << deg(rPosTheta[2]) << endl;
-  posefile.close();
-}
 
 /**
  * Main program for reducing scans.

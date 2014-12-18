@@ -3,7 +3,7 @@
 IF(WITH_TOOLS)
 IF(WITH_FBR)
   ### SCAN_RED
-  add_executable(scan_red scan_red.cc fbr/fbr_global.cc fbr/panorama.cc fbr/scan_cv.cc)
+  add_executable(scan_red scan_red.cc ../scanio/writer.cc fbr/fbr_global.cc fbr/panorama.cc fbr/scan_cv.cc)
 
   IF(WITH_GLEE)
     SET(SHOW_LIBS ${SHOW_LIBS} glee)
@@ -35,7 +35,7 @@ ENDIF(WITH_FBR)
   add_executable(frame_to_graph frame_to_graph.cc)
   add_executable(convergence convergence.cc)
   add_executable(graph_balancer graph_balancer.cc)
-  add_executable(exportPoints exportPoints.cc)
+  add_executable(exportPoints exportPoints.cc ../scanio/writer.cc)
   add_executable(frames2riegl frames2riegl.cc)
   add_executable(frames2pose frames2pose.cc)
   add_executable(framesdiff2frames framesdiff2frames.cc)
