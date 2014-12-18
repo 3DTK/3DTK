@@ -155,7 +155,7 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &rand,
   };
 
   cout << endl;
-  while ((c = getopt_long(argc, argv, "f:s:e:r:O:R:p", longopts, NULL)) != -1)
+  while ((c = getopt_long(argc, argv, "f:s:e:r:O:R:m:M:p", longopts, NULL)) != -1)
     switch (c)
 	 {
 	 case 'r':
@@ -309,8 +309,10 @@ int main(int argc, char **argv)
     readFrames(dir, start, end);
   }
   
- cout << "Export all 3D Points to file \"points.pts\"" << endl;
+ cout << "Export all 3D points to file \"points.pts\"" << endl;
+ cout << "Export all 6DoF poses  to file \"poses.txt\"" << endl;
  ofstream redptsout("points.pts");
+ ofstream posesout("poses.txt");
  for(unsigned int i = 0; i < Scan::allScans.size(); i++) {
    Scan *source = Scan::allScans[i];
    DataXYZ xyz  = source->get("xyz");
@@ -328,6 +330,22 @@ int main(int argc, char **argv)
 			<< xyz_reflectance[j]
 			<< endl;
    }
+   posesout << source->get_transMat()[ 0] << " "
+		  << source->get_transMat()[ 1] << " "
+		  << source->get_transMat()[ 2] << " "
+		  << source->get_transMat()[ 3] << " "
+		  << source->get_transMat()[ 4] << " "
+		  << source->get_transMat()[ 5] << " "
+		  << source->get_transMat()[ 6] << " "
+		  << source->get_transMat()[ 7] << " "
+		  << source->get_transMat()[ 8] << " "
+		  << source->get_transMat()[ 9] << " "
+		  << source->get_transMat()[10] << " "
+		  << source->get_transMat()[11] << " "
+		  << source->get_transMat()[12] << " "
+		  << source->get_transMat()[13] << " "
+		  << source->get_transMat()[14] << " "
+		  << source->get_transMat()[15] << endl;
  }
  redptsout.close();
  redptsout.clear();
