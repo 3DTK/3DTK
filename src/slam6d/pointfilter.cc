@@ -274,6 +274,17 @@ bool CheckerCustom::test(double* point) {
 				|| point[2] < custFiltParams[4] || point[2] > custFiltParams[5])
 				filterTest = true;
 			break;
+		case 2:
+			// As Custom Filter 1: asymetrical axis-parallel cuboid, with additional max range limitation
+			// parameters: xFilterRangeLow xFilterRangeHigh yFilterRangeLow yFilterRangeHigh zFilterRangeLow zFilterRangeHigh maxRange 
+			if (point[0] < custFiltParams[0] || point[0] > custFiltParams[1]
+				|| point[1] < custFiltParams[2] || point[1] > custFiltParams[3]
+				|| point[2] < custFiltParams[4] || point[2] > custFiltParams[5]){
+				if ((point[0] * point[0] + point[1] * point[1] + point[2] * point[2]) < (custFiltParams[6] * custFiltParams[6])){
+					filterTest = true;
+				}
+				break;
+			}
 		default:
 			filterTest = true;
 			break;

@@ -947,7 +947,7 @@ void initShow(int argc, char **argv){
 	  customFilterActive = true;
   }
   else {
-	  // give a warning if block filter has been inproperly specified
+	  // give a warning if custom filter has been inproperly specified
 	  if (customFilter.length() > 0){
 		  cerr << "Custom filter: specifying string has not been set properly, data will NOT be filtered." << endl;
 	  }

@@ -77,6 +77,11 @@ void usage(char* prog)
 	  << bold << "  -M" << normal << " NR, " << bold << "--min=" << normal << "NR" << endl
 	  << "         neglegt all data points with a distance smaller than NR 'units'" << endl
 	  << endl
+      << bold << "  -u" << normal << " STR, " << bold << "--customFilter=" << normal << "STR" << endl
+      << "         apply custom filter, filter mode and data are specified as semicolon-seperated string:" << endl
+      << "         STR: '{filterMode};{nrOfParams}[;param1][;param2][...]'" << endl
+      << "         see filter implementation in pointfilter.cc for more detail." << endl
+      << endl
 	  << bold << "  -O" << normal << " NR (optional), " << bold << "--octree=" << normal << "NR (optional)" << endl
 	  << "         use randomized octree based point reduction (pts per voxel=<NR>)" << endl
 	  << "         requires -r or --reduce" << endl
@@ -139,7 +144,7 @@ void usage(char* prog)
  */
 int parseArgs(int argc, char **argv, string &dir, double &red, int &rand,
 		    int &start, int &end, int &maxDist, int &minDist, bool &extrapolate_pose,
-		    bool &use_xyz, bool &use_reflectance, bool &use_color, int &octree, IOType &type)
+			bool &use_xyz, bool &use_reflectance, bool &use_color, int &octree, IOType &type, string& customFilter)
 {
   int  c;
   // from unistd.h:
@@ -159,11 +164,12 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &rand,
     { "reflectivity",    no_argument,         0,  'R' },
     { "color",           no_argument,         0,  'c' },
     { "xyz",             no_argument,         0,  'x' },
+    { "customFilter",    required_argument,   0,  'u' },
     { 0,           0,   0,   0}                    // needed, cf. getopt.h
   };
 
   cout << endl;
-  while ((c = getopt_long(argc, argv, "f:s:e:r:O:Rm:M:pxc", longopts, NULL)) != -1)
+  while ((c = getopt_long(argc, argv, "f:s:e:r:O:Rm:M:u:pxc", longopts, NULL)) != -1)
     switch (c)
 	 {
 	 case 'r':
@@ -201,8 +207,11 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &rand,
 	   extrapolate_pose = false;
 	   break;
 	 case 'x':
-     use_xyz = true;
-     break;
+       use_xyz = true;
+       break;
+     case 'u':
+       customFilter = optarg;
+       break;
 	 case 'f':
     try {
       type = formatname_to_io_type(optarg);
@@ -296,15 +305,40 @@ int main(int argc, char **argv)
   bool   use_reflectance = false;
   int octree       = 0;  // employ randomized octree reduction?
   IOType iotype    = UOS;
+  bool rangeFilterActive = false;
+  bool customFilterActive = false;
+  string customFilter;
 
   parseArgs(argc, argv, dir, red, rand, start, end,
-      maxDist, minDist, eP, use_xyz, use_reflectance, use_color, octree, iotype);
+	  maxDist, minDist, eP, use_xyz, use_reflectance, use_color, octree, iotype, customFilter);
+
+
+  rangeFilterActive = minDist > 0 || maxDist > 0;
+
+  // custom filter set? quick check, needs to contain at least one ';' 
+  // (proper checking will be done case specific in pointfilter.cc)
+  size_t pos = customFilter.find_first_of(";");
+  if (pos != std::string::npos){
+	  customFilterActive = true;
+  }
+  else {
+	  // give a warning if custom filter has been inproperly specified
+	  if (customFilter.length() > 0){
+		  cerr << "Custom filter: specifying string has not been set properly, data will NOT be filtered." << endl;
+	  }
+  }
 
   // Get Scans
   Scan::openDirectory(false, dir, iotype, start, end);
   if(Scan::allScans.size() == 0) {
     cerr << "No scans found. Did you use the correct format?" << endl;
     exit(-1);
+  }
+  
+  // if specified, filter scans
+  for (size_t i = 0; i < Scan::allScans.size(); i++)  {
+	 if(rangeFilterActive) Scan::allScans[i]->setRangeFilter(maxDist, minDist);
+	 if(customFilterActive) Scan::allScans[i]->setCustomFilter(customFilter);
   }
   
 //
