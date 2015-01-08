@@ -7,6 +7,11 @@
  *
  */
 
+#ifdef _WIN32
+#define NOMINMAX
+#include <direct.h>
+#endif
+
 #include "slam6d/scan.h"
 #include "slam6d/frame.h"
 #include "slam6d/globals.icc"
@@ -19,6 +24,11 @@
 
 #include <boost/program_options.hpp>
 namespace po = boost::program_options;
+
+#ifdef _MSC_VER
+#define strcasecmp _stricmp
+#define strncasecmp _strnicmp
+#endif
 
 enum collision_method { CTYPE1, CTYPE2, CTYPE3 };
 enum penetrationdepth_method { PDTYPE1, PDTYPE2 };
@@ -127,7 +137,12 @@ void parse_options(int argc, char **argv, IOType &iotype, string &dir,
 
 void createdirectory(string segdir)
 {
-    int success = mkdir(segdir.c_str(), S_IRWXU|S_IRWXG|S_IRWXO);
+    int success;
+#ifdef _WIN32
+    success = _mkdir(segdir.c_str());
+#else
+    success = mkdir(segdir.c_str(), S_IRWXU|S_IRWXG|S_IRWXO);
+#endif
     if (success == 0 || errno == EEXIST) {
         cout << "Writing colliding points to " << segdir << endl;
     } else {

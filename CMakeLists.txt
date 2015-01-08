@@ -262,7 +262,8 @@ OPT_DEP(WITH_COLLISION "Whether to build collision detection tools" OFF "WITH_CO
 
 IF(WITH_COLLISION)
   MESSAGE(STATUS "With collision detection")
-  find_package (Boost COMPONENTS program_options REQUIRED)
+  # as in WITH_TOOLS, seems to override previous find_package command resulting in linker errors, either provide ALL necessary libs again or do not use
+  # find_package (Boost COMPONENTS program_options REQUIRED)
 ELSE(WITH_COLLISION)
   MESSAGE(STATUS "Without collision detection")
 ENDIF(WITH_COLLISION)
