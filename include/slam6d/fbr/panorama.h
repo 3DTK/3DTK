@@ -18,102 +18,44 @@
 #ifndef __PANORAMA_H__
 #define __PANORAMA_H__
 
-#include "fbr_global.h"
+#include "slam6d/fbr/fbr_global.h"
 #include "slam6d/point_type.h"
+#include "slam6d/fbr/projection.h"
 
 using namespace std;
 
 namespace fbr{
   /**
    * @class panorama
-   *        create panorama images with different projection methods from
-            input scan files(Mat from scan_cv class) in opencv Mat format
-   * @param iReflectance panorama image from reflectance data             
-   * @param iRange panorama image from range data             
-   * @param iColor panorama image from color data             
-   * @param iMap panorama map of 3D cartesian coordinate of input scan
-            (same points as iRange and iReflectance)
-   * @param extendedIMap 3D vector as panorama map with all the points
-   * @param iWidth width of the panorama image (cols in opencv)
-   * @param iHeight height of panorama image (rows in opencv)
-   * @param pMethod projection method for panorama creation
-   * @param nImage number of images per scan specially for Rectilinear,
-            Pannini and Stereographic projections
-   * @param pParam special d parameter of Pannini projection
-            (see Master Thesis for more info) or special R parameter of
-            Stereographic projection (Master Thesis for more info)
-	    or phi_s for EQUALAREACYLINDRICAL projection
-   * @param maxRange the maximum range of the scan
-   * @param mapMethod the method for creating the map [FARTHEST | EXTENDED]
-   * @param zMin, zMax min and max of Z
-   * @param MAX_ANGLE, MIN_ANGLE max and min vertical angle
-   * @param iOprimization flag for image size optimization method
-   * @param xSize, ySize, xFactor, yFactor, withMax, heightMax, heightLow Panormam method parameters
-   * @param MIN_VERT_ANGLE, MAX_VERT_ANGLE, MIN_HORIZ_ANGLE, MAX_HORIZ_ANGLE, Lat0, Long0, Ph1, Phi2, n, C, Rho0, 
-            xmax, xmin, ymin, ymax Conin projection params
-   * @param coscRectilinear rectilinear projection param
-   * @param sPannini pannini projection param
-   * @param k stereographic projetion param
-   * @param l0, p1, iMinx, iMaxx, iMiny, iMaxy, interval, min, max parameters for ptojection with more than one image
-   * @param kprime azimuthal projection param
+   * create panorama images with use of projection class [different 
+   * projection methods] from input scan files(Mat from scan_cv class) 
+   * in opencv Mat format or Octtree files 
+   * @param iReflectance_ panorama image from reflectance data             
+   * @param iRange_ panorama image from range data             
+   * @param iColor_ panorama image from color data             
+   * @param iMap_ panorama map of 3D cartesian coordinate of input scan
+            (same points as iRange and iReflectance and iColor)
+   * @param extendedIMap_ 3D vector as panorama map with all the points
+   * @param maxRange_ the maximum range of the scan
+   * @param mapMethod_ the method for creating the map [FARTHEST | EXTENDED]
+   * @param projection_ pointer to projectionClass Handler
    */
   class panorama {
-    cv::Mat iReflectance;
-    cv::Mat iMap;
-    cv::Mat iRange;
-    cv::Mat iColor;
-    float maxRange;
-    vector<vector<vector<cv::Vec3f> > > extendedIMap;
-    unsigned int iWidth;
-    unsigned int iHeight;
-    projection_method pMethod;
-    unsigned int nImages;
-    double pParam;
-    panorama_map_method mapMethod;
-    float zMin, zMax;
-    double MAX_ANGLE, MIN_ANGLE;
-    bool iOptimization;
-
-    //panorama method params
-    double xSize, ySize;
-    double xFactor, yFactor;
-    int widthMax, heightMax;
-    double heightLow;
-    //conic params
-    double MIN_VERT_ANGLE, MAX_VERT_ANGLE, MIN_HORIZ_ANGLE, MAX_HORIZ_ANGLE;
-    double Lat0, Long0;
-    double Phi1, Phi2;
-    double n, C, Rho0;
-    double xmax, xmin, ymin, ymax;
-    //rectilinear params
-    double coscRectilinear;
-    //pannini params
-    double sPannini;
-    //stereographic params
-    double k;
-    //projections with more than one image
-    double l0, p1, iMinx, iMaxx, iMiny, iMaxy, interval, min, max;
-    //azimuthal projection
-    double kprime;
-
-    void map(int x,
-             int y,
-             cv::MatIterator_<cv::Vec4f> it,
-             double range);
-    void mapColor(int x, int y, cv::MatIterator_<cv::Vec3f> itColor);
-    void initMat();
-    void setImageRatio(double xSize, double ySize);
-    void calcPanoramaPositionForAPoint(int &x, int &y, cv::MatIterator_<cv::Vec4f> it, double &range);
-
+    
   public:
     /**
      * constructor of class panorama
-     * @param width the width of the panorama image
-     * @param height the height of the panorama image
-     * @param method the projection method
-     * @param images number of subsets to crate panorama image
-     * @param param special parameter for pannini or stereographic projections
-     * @param mapMethod mapping method for panorama image and 3D points
+     * @param width unsigned int the width of the panorama image
+     * @param height unsigned int the height of the panorama image
+     * @param method projection_method the projection method
+     * @param numberOfImages unsigned int number of subsets to create panorama image
+     * @param param double special parameter for pannini or stereographic projections
+     * @param mapMethod panorama_map_method mapping method for panorama image and 3D points
+     * @param minZ float the min value of Z
+     * @param maxZ float the max value of Z
+     * @param maxAngle double the vertcal max angle of scan
+     * @param minAngle double the vertcal min angle of scan
+     * @param imageSizeOptimization bool a flag for optimizing the image size
      */
     panorama();
     panorama (unsigned int width,
@@ -140,8 +82,8 @@ namespace fbr{
               unsigned int numberOfImages,
               double param,
               panorama_map_method mapMethod,
-	      float min,
-	      float max,
+	      float minZ,
+	      float maxZ,
 	      double MINANGLE,
 	      double MAXANGLE);
     panorama (unsigned int width,
@@ -150,11 +92,11 @@ namespace fbr{
               unsigned int numberOfImages,
               double param,
               panorama_map_method mapMethod,
-	      float min,
-	      float max,
+	      float minZ,
+	      float maxZ,
 	      double MINANGLE,
 	      double MAXANGLE,
-	      bool imageOptimization);
+	      bool imageSizeOptimization);
 
     void init(unsigned int width,
               unsigned int height,
@@ -162,52 +104,87 @@ namespace fbr{
               unsigned int numberOfImages,
               double param,
               panorama_map_method mapMethod,
-	      float min = 0, 
-	      float max = 0,
+	      float minZ = 0, 
+	      float maxZ = 0,
 	      double MINANGLE = -40,
 	      double MAXANGLE = 60,
-	      bool imageOptimization = false);
+	      bool imageSizeOptimization = false);
     
     void clear();
 
     /**
      * @brief creates the panorama reflectance image and map and color image.
      */
+    //create panorama from cv::Mat
     void createPanorama(cv::Mat scan);
     void createPanorama(cv::Mat scan, cv::Mat color);
+    
     //create panorama point by point from octree
-    PointType pointtype;
-    scanner_type sType;
-    double minReflectance, maxReflectance;
-    void createPanoramaFromOctree(PointType pointtype_, scanner_type sType_, double minReflectacne_, double maxReflectance_);
+    void createPanoramaFromOctree(PointType pointtype, scanner_type sType, double minReflectacne, double maxReflectance);
     //accept points from octree
     template <class T>
       void accept(T *point);
     //add the point from octree to panorama
     void addPointToPanorama(float x, float y, float z, float reflectance, float r, float g, float b);
+
     /**
      * @brief recovers the point cloud from the panorama image and
               range information
-     * @param image - input range image to be converted to point cloud
-     * @param file - destination of .3d file containing the point cloud
+     * @param imageIMAGE - input range image to be converted to point cloud
+     * @param reflectanceIMAGE - input reflectance image to be converted to point cloud
+     * @param reducedPoints - recoverd point cloud
      */
-    void recoverPointCloud(const cv::Mat& range_image,
-                           cv::Mat& reflectance_image,
-                           vector<cv::Vec4f> &reduced_points);
-
+    void recoverPointCloud(const cv::Mat& rangeImage,
+                           cv::Mat& reflectanceImage,
+                           vector<cv::Vec4f> &reducedPoints);
+    
+    //get params
     unsigned int getImageWidth();
     unsigned int getImageHeight();
     float getMaxRange();
     projection_method getProjectionMethod();
     unsigned int getNumberOfImages();
     double getProjectionParam();
-    cv::Mat getReflectanceImage();
-    cv::Mat getMap();
-    cv::Mat getRangeImage();
-    cv::Mat getColorImage();
-    vector<vector<vector<cv::Vec3f> > > getExtendedMap();
     panorama_map_method getMapMethod();
     void getDescription();
+
+    //get panorama and maps
+    cv::Mat getReflectanceImage();
+    cv::Mat getRangeImage();
+    /**
+     * Brief this function will normalize the range image to (0-1) 
+     */
+    cv::Mat getNormalizediRange();
+    cv::Mat getColorImage();
+    
+    cv::Mat getMap();
+    vector<vector<vector<cv::Vec3f> > > getExtendedMap();
+
+    
+  private:
+    /**
+     * Brief initializes the containers for map and range, reflectance and color images
+     */
+    void initMap();
+    void map(int x,
+             int y,
+             cv::MatIterator_<cv::Vec4f> it,
+	     cv::MatIterator_<cv::Vec3f> itColor,
+             double range);
+ 
+    //container and panorama params
+    cv::Mat iReflectance_;
+    cv::Mat iMap_;
+    cv::Mat iRange_;
+    cv::Mat iColor_;
+    float maxRange_;
+    vector<vector<vector<cv::Vec3f> > > extendedIMap_;
+    projection* projection_;
+    panorama_map_method mapMethod_;
+    //parameters for the creation of panoram from octree 
+    PointType pointtype_;
+    scanner_type sType_;
+    double minReflectance_, maxReflectance_;
   };
 }
 #endif // __PANORAMA_H__
