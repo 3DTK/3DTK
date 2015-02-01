@@ -74,6 +74,7 @@ namespace fbr{
   enum panorama_map_method{
     FARTHEST,
     EXTENDED,
+    FULL,
   };
   /**
    * @enum feature_image
