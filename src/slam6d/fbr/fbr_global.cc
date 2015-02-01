@@ -126,7 +126,7 @@ namespace fbr{
   panorama_map_method stringToPanoramaMapMethod(string method){
     if(strcasecmp(method.c_str(), "FARTHEST") == 0) return FARTHEST;
     else if(strcasecmp(method.c_str(), "EXTENDED") == 0) return EXTENDED;
-    else if(strcasecmp(method.c_str(), "FULL") == 0) return COMPRESSED;
+    else if(strcasecmp(method.c_str(), "FULL") == 0) return FULL;
     else throw std::runtime_error(std::string("panorama map method ") + method + std::string(" is unknown"));
   }
 
