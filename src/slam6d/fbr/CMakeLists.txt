@@ -4,7 +4,7 @@ IF(WITH_FBR)
 SET(FBR_IO_SRC scan_cv.cc)
 add_library(fbr_cv_io STATIC ${FBR_IO_SRC})
 
-SET(FBR_PANORAMA_SRC panorama.cc)
+SET(FBR_PANORAMA_SRC panorama.cc projection.cc)
 add_library(fbr_panorama STATIC ${FBR_PANORAMA_SRC} fbr_global.cc)
 
 IF(OpenCV_VERSION_MAJOR GREATER 1 AND OpenCV_VERSION_MINOR GREATER 2)
@@ -21,7 +21,7 @@ SET(FBR_GEOREFRENCING_SRC geoRefrencing.cc)
 add_library(fbr_geoRefrencing STATIC ${FBR_GEOREFRENCING_SRC} fbr_global.cc)
 
 
-SET(FBR_SRC scan_cv.cc panorama.cc feature.cc feature_matcher.cc registration.cc fbr_global.cc feature_drawer.cc geoRefrencing.cc)
+SET(FBR_SRC scan_cv.cc panorama.cc projection.cc feature.cc feature_matcher.cc registration.cc fbr_global.cc feature_drawer.cc geoRefrencing.cc)
 add_library(fbr STATIC ${FBR_SRC} fbr_global.cc)
 
 SET(FBR_LIBS scan ANN ${OpenCV_LIBS})
@@ -81,3 +81,13 @@ ELSE(OpenCV_VERSION_MAJOR GREATER 1 AND OpenCV_VERSION_MINOR GREATER 2)
   MESSAGE("OpenCV Version > 2.2 required for FBR")
 ENDIF(OpenCV_VERSION_MAJOR GREATER 1 AND OpenCV_VERSION_MINOR GREATER 2)
 ENDIF(WITH_FBR)
+
+
+####TEST
+#add_executable(fbr-icp fbr-icp.cc fbr_global.cc)
+
+ #IF(UNIX)
+    #target_link_libraries(fbr-icp fbr newmat ${FBR_LIBS} showstatic ${SHOW_LIBS} ${OPENGL_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY})
+    #target_link_libraries(fbr-icp fbr newmat sparse ${FBR_LIBS} showstatic ${SHOW_LIBS} ${OPENGL_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY})
+  #ENDIF(UNIX)
+
