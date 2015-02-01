@@ -37,6 +37,7 @@ struct information{
   double minReflectance, maxReflectance;
   int MIN_ANGLE, MAX_ANGLE;
   bool iSizeOptimization;
+  bool normalizeRange;
 } info;
 
 void usage(int argc, char** argv){
@@ -66,6 +67,7 @@ void usage(int argc, char** argv){
   printf("\t\t-R reflectance \t\t uses reflactance and creates the Reflectance image\n");
   printf("\t\t-C color \t\t uses color and creates the Color image\n");
   printf("\t\t-A range \t\t creates the Range image\n");
+  printf("\t\t-a normalizeiRange \t\t normalize the Range image to have values between 0--255\n");
   //printf("\t\t-S scale \t\t Scale\n");
   printf("\t\t-l loadOct \t\t load the Octtree\n");
   printf("\t\t-o saveOct \t\t save the Octtree\n");
@@ -77,6 +79,7 @@ void parssArgs(int argc, char** argv, information& info){
   info.iSizeOptimization = false;
   info.reflectance = false;
   info.range = false;
+  info.normalizeRange = false;
   info.color = false;
   info.sType = NONE;
   info.MIN_ANGLE = -40;
@@ -106,10 +109,11 @@ void parssArgs(int argc, char** argv, information& info){
   info.maxReflectance = 100;
 
 
+
   int c;
   opterr = 0;
   //reade the command line and get the options
-  while ((c = getopt (argc, argv, "b:B:W:H:p:N:P:f:O:s:e:r:RCAS:lot:n:x:i")) != -1)
+  while ((c = getopt (argc, argv, "b:B:W:H:p:N:P:f:O:s:e:r:RCAaS:lot:n:x:i")) != -1)
     switch (c)
       {
       case 's':
@@ -155,6 +159,9 @@ void parssArgs(int argc, char** argv, information& info){
 	break;
       case 'A':
 	info.range = true;
+	break;
+      case 'a':
+	info.normalizeRange = true;
 	break;
       case 'S':
 	info.scale = atoi(optarg);
@@ -220,7 +227,7 @@ void printInfo(information info){
   cout<<"Scan Format= "<<scanFormatToString(info.sFormat)<<endl;
   cout<<"Width= "<<info.pWidth<<endl;
   cout<<"Height= "<<info.pHeight<<endl;
-  cout<<"sType= "<<info.sType;
+  cout<<"sType= "<<info.sType<<endl;
   cout<<"Projection Method= "<<projectionMethodToString(info.pMethod)<<endl;
   cout<<"Number of Images= "<<info.numberOfImages<<endl;
   cout<<"Projection Param= "<<info.pParam<<endl;
@@ -262,7 +269,14 @@ int main(int argc, char** argv)
     
     if(info.range){
       out = info.outDir+to_string(s, 3)+"_"+projectionMethodToString(info.pMethod)+"_"+to_string(info.pWidth)+"x"+to_string(info.pHeight)+"_Range.jpg";
-      imwrite(out, pImage.getRangeImage());
+      if(info.normalizeRange == true)
+	{
+	  imwrite(out, pImage.getNormalizediRange());
+	}
+      else
+	{
+	  imwrite(out, pImage.getRangeImage());
+	}
     }
 
     if(info.reflectance){
