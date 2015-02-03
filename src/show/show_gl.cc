@@ -15,12 +15,12 @@
 using namespace show;
 bool   fullydisplayed = true;       // true if all points have been drawn to
                                     // the screen
-bool   mousemoving    = false;      // true iff a mouse button has been pressed
+bool   mousemoving    = false;      // true if a mouse button has been pressed
                                     // inside a window,
-                                    // but hs not been released
-bool   keypressed     = false;      // true iff a key button has been pressed
+                                    // but has not been released
+bool   keypressed     = false;      // true if a key button has been pressed
                                     // inside a window,
-                                    // but hs not been released
+                                    // but has not been released
 double ptstodisplay   = 100000;  
 double lastfps        = idealfps;   // last frame rate    
 int    pointmode      = -1;
@@ -945,7 +945,8 @@ void CallBackIdleFunc(void)
   }
 
 #ifdef _MSC_VER
-  Sleep(300);
+  // Extra Sleep is NOT necessary!
+  //Sleep(300);
   Sleep(anim_delay);
 #else
   usleep(anim_delay * 10000);
