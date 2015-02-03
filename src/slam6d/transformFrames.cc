@@ -46,7 +46,12 @@ using std::ifstream;
 
 #if WIN32
 #define snprintf sprintf_s
+#else
+#ifndef MAX_PATH
+#define MAX_PATH 255
 #endif 
+#endif 
+
 
 /**
  * Explains the usage of this program's command line parameters
