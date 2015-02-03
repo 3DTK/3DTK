@@ -136,7 +136,7 @@ void write_uos(DataXYZ &xyz, ofstream &file)
   if(file.good())
     for(unsigned int j = 0; j < xyz.size(); j++) {
       file << xyz[j][0] << " " << xyz[j][1] << " " << xyz[j][2] << " "
-			  << endl;
+              << endl;
     }
   
 }
@@ -146,8 +146,8 @@ void write_uosr(DataXYZ &xyz, DataReflectance &xyz_reflectance, ofstream &file)
   if(file.good() && xyz.size() == xyz_reflectance.size())
     for(unsigned int j = 0; j < xyz.size(); j++) {
       file << xyz[j][0] << " " << xyz[j][1] << " " << xyz[j][2] << " "
-			  << xyz_reflectance[j]
-			  << endl;
+              << xyz_reflectance[j]
+              << endl;
     }
   
 }
@@ -157,39 +157,39 @@ void write_uos_rgb(DataXYZ &xyz, DataRGB &rgb, ofstream &file)
   if(file.good() && xyz.size() == rgb.size())
     for(unsigned int j = 0; j < xyz.size(); j++) {
       file << xyz[j][0] << " " << xyz[j][1] << " " << xyz[j][2] << " "
-			  << rgb[j][0] << " " << rgb[j][1] << " " << rgb[j][2]
-			  << endl;
+              << rgb[j][0] << " " << rgb[j][1] << " " << rgb[j][2]
+              << endl;
     }
 }
 
-void write_xyz(DataXYZ &xyz, ofstream &file)
+void write_xyz(DataXYZ &xyz, ofstream &file, double scaleFac)
 {
   if(file.good())
     for(unsigned int j = 0; j < xyz.size(); j++) {
-      file << 0.01*xyz[j][2] << " " << -0.01*xyz[j][0] << " " << 0.01*xyz[j][1] << " "
-			  << endl;
+      file << scaleFac*xyz[j][2] << " " << -scaleFac*xyz[j][0] << " " << scaleFac*xyz[j][1] << " "
+              << endl;
     }
   
 }
 
-void write_xyzr(DataXYZ &xyz, DataReflectance &xyz_reflectance, ofstream &file)
+void write_xyzr(DataXYZ &xyz, DataReflectance &xyz_reflectance, ofstream &file, double scaleFac)
 {
   if(file.good() && xyz.size() == xyz_reflectance.size())
     for(unsigned int j = 0; j < xyz.size(); j++) {
-      file << 0.01*xyz[j][2] << " " << -0.01*xyz[j][0] << " " << 0.01*xyz[j][1] << " "
-			  << xyz_reflectance[j]
-			  << endl;
+      file << scaleFac*xyz[j][2] << " " << -scaleFac*xyz[j][0] << " " << scaleFac*xyz[j][1] << " "
+              << xyz_reflectance[j]
+              << endl;
     }
   
 }
 
-void write_xyz_rgb(DataXYZ &xyz, DataRGB &rgb, ofstream &file)
+void write_xyz_rgb(DataXYZ &xyz, DataRGB &rgb, ofstream &file, double scaleFac)
 {
   if(file.good() && xyz.size() == rgb.size())
     for(unsigned int j = 0; j < xyz.size(); j++) {
-      file << 0.01*xyz[j][2] << " " << -0.01*xyz[j][0] << " " << 0.01*xyz[j][1] << " "
-			  << rgb[j][0] << " " << rgb[j][1] << " " << rgb[j][2]
-			  << endl;
+      file << scaleFac*xyz[j][2] << " " << -scaleFac*xyz[j][0] << " " << scaleFac*xyz[j][1] << " "
+              << rgb[j][0] << " " << rgb[j][1] << " " << rgb[j][2]
+              << endl;
     }
 }
 
@@ -205,28 +205,30 @@ void writeposefile(string &dir, const double* rPos, const double* rPosTheta, str
   posefile.close();
 }
 
-void writeTrajectoryXYZ(ofstream &posesout, const double * transMat, bool mat)
+void writeTrajectoryXYZ(ofstream &posesout, const double * transMat, bool mat, double scaleFac)
 {
-  if(mat) 
+  if(mat)
   {
     posesout << transMat[10] << " "
      << -transMat[ 2] << " "
      << transMat[ 6] << " "
-     << transMat[14] << " "
+     << scaleFac*transMat[14] << " "
      << -transMat[ 8] << " "
      << transMat[ 0] << " "
      << -transMat[ 4] << " "
-     << -transMat[12] << " "
+     << scaleFac*-transMat[12] << " "
      << transMat[ 9] << " "
      << -transMat[ 1] << " "
      << transMat[ 5] << " "
-     << transMat[13] << " ";
-  }
-  posesout << 0.01*transMat[11] << " "
-   << -0.01*transMat[ 3] << " "
-   << -0.01*transMat[ 7] << " ";
-  if(mat) { 
-    posesout << transMat[15] << " ";
+     << scaleFac*transMat[13] << " "
+     << transMat[11] << " "
+     << -transMat[ 3] << " "
+     << -transMat[ 7] << " "
+     << transMat[15] << " ";
+  } else {
+    posesout << scaleFac*transMat[14] << " "
+    << scaleFac*-transMat[12] << " "
+    << scaleFac*transMat[13] << " ";
   }
   posesout << endl;
 }

@@ -14,11 +14,11 @@ void write_uos_rgb(vector<cv::Vec4f> &points, vector<cv::Vec3b> &color, string &
 void write_uos(DataXYZ &xyz, ofstream &file);
 void write_uosr(DataXYZ &xyz, DataReflectance &xyz_reflectance, ofstream &file);
 void write_uos_rgb(DataXYZ &xyz, DataRGB &rgb, ofstream &file);
-void write_xyz(DataXYZ &xyz, ofstream &file);
-void write_xyzr(DataXYZ &xyz, DataReflectance &xyz_reflectance, ofstream &file);
-void write_xyz_rgb(DataXYZ &xyz, DataRGB &rgb, ofstream &file);
+void write_xyz(DataXYZ &xyz, ofstream &file, double scaleFac = 0.01);
+void write_xyzr(DataXYZ &xyz, DataReflectance &xyz_reflectance, ofstream &file, double scaleFac = 0.01);
+void write_xyz_rgb(DataXYZ &xyz, DataRGB &rgb, ofstream &file, double scaleFac = 0.01);
 void writeposefile(string &dir, const double* rPos, const double* rPosTheta, string id);
-void writeTrajectoryXYZ(ofstream &posesout, const double * transMat, bool mat);
+void writeTrajectoryXYZ(ofstream &posesout, const double * transMat, bool mat, double scaleFac = 0.01);
 void writeTrajectoryUOS(ofstream &posesout, const double * transMat, bool mat);
 
 #endif
