@@ -371,10 +371,12 @@ void saveSelection(int dummy) {
    
   // if file not found then show error
   if(!selectionfile){
-    cerr << "Error creating the seelction file." << endl;
+    cerr << "Error creating the selection file." << endl;
     return;
   }
 
+  // need higher precision to accurately reload points
+  selectionfile.precision(8);
   for(unsigned int i = 0; i < octpts.size(); i++) {
     selectionfile << "# points from scan nr " << i << endl; 
     // for(int j = 0; j < selected_points[i].size(); j++) {

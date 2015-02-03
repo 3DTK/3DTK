@@ -110,6 +110,7 @@ void resetMinMax(int dummy);
 void setScansColored(int dummy);
 
 void saveSelection(int dummy);
+void loadSelection(int dummy);
 void clearSelection(int dummy);
 
 void updateControls();
