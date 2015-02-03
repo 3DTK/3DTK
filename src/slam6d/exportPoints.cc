@@ -59,57 +59,59 @@ void usage(char* prog)
   const string normal("");
 #endif
   cout << endl
-	  << bold << "USAGE " << normal << endl
-	  << "   " << prog << " [options] directory" << endl << endl;
+      << bold << "USAGE " << normal << endl
+      << "   " << prog << " [options] directory" << endl << endl;
   cout << bold << "OPTIONS" << normal << endl
 
-	  << endl
-	  << bold << "  -e" << normal << " NR, " << bold << "--end=" << normal << "NR" << endl
-	  << "         end after scan NR" << endl
-	  << endl
-	  << bold << "  -f" << normal << " F, " << bold << "--format=" << normal << "F" << endl
-	  << "         using shared library F for input" << endl
-	  << "         (chose F from {uos, uos_map, uos_rgb, uos_frames, uos_map_frames, old, rts, rts_map, ifp, riegl_txt, riegl_rgb, riegl_bin, zahn, ply})" << endl
-	  << endl
-	  << bold << "  -m" << normal << " NR, " << bold << "--max=" << normal << "NR" << endl
-	  << "         neglegt all data points with a distance larger than NR 'units'" << endl
-	  << endl
-	  << bold << "  -M" << normal << " NR, " << bold << "--min=" << normal << "NR" << endl
-	  << "         neglegt all data points with a distance smaller than NR 'units'" << endl
-	  << endl
+      << endl
+      << bold << "  -e" << normal << " NR, " << bold << "--end=" << normal << "NR" << endl
+      << "         end after scan NR" << endl
+      << endl
+      << bold << "  -f" << normal << " F, " << bold << "--format=" << normal << "F" << endl
+      << "         using shared library F for input" << endl
+      << "         (chose F from {uos, uos_map, uos_rgb, uos_frames, uos_map_frames, old, rts, rts_map, ifp, riegl_txt, riegl_rgb, riegl_bin, zahn, ply})" << endl
+      << endl
+      << bold << "  -m" << normal << " NR, " << bold << "--max=" << normal << "NR" << endl
+      << "         neglegt all data points with a distance larger than NR 'units'" << endl
+      << endl
+      << bold << "  -M" << normal << " NR, " << bold << "--min=" << normal << "NR" << endl
+      << "         neglegt all data points with a distance smaller than NR 'units'" << endl
+      << endl
       << bold << "  -u" << normal << " STR, " << bold << "--customFilter=" << normal << "STR" << endl
       << "         apply custom filter, filter mode and data are specified as semicolon-seperated string:" << endl
       << "         STR: '{filterMode};{nrOfParams}[;param1][;param2][...]'" << endl
       << "         see filter implementation in pointfilter.cc for more detail." << endl
       << endl
-	  << bold << "  -O" << normal << " NR (optional), " << bold << "--octree=" << normal << "NR (optional)" << endl
-	  << "         use randomized octree based point reduction (pts per voxel=<NR>)" << endl
-	  << "         requires -r or --reduce" << endl
-	  << endl
-	  << bold << "  -p, --trustpose" << normal << endl
-	  << "         Trust the pose file, do not extrapolate the last transformation." << endl
-	  << "         (just for testing purposes, or gps input.)" << endl
-	  << endl
-	  << endl
-	  << bold << "  -r" << normal << " NR, " << bold << "--reduce=" << normal << "NR" << endl
-	  << "         turns on octree based point reduction (voxel size=<NR>)" << endl
-	  << endl
-	  /*
+      << bold << "  -O" << normal << " NR (optional), " << bold << "--octree=" << normal << "NR (optional)" << endl
+      << "         use randomized octree based point reduction (pts per voxel=<NR>)" << endl
+      << "         requires -r or --reduce" << endl
+      << endl
+      << bold << "  -p, --trustpose" << normal << endl
+      << "         Trust the pose file, do not extrapolate the last transformation." << endl
+      << "         (just for testing purposes, or gps input.)" << endl
+      << endl
+      << endl
+      << bold << "  -r" << normal << " NR, " << bold << "--reduce=" << normal << "NR" << endl
+      << "         turns on octree based point reduction (voxel size=<NR>)" << endl
+      << endl
+      /*
     << bold << "  -R" << normal << " NR, " << bold << "--random=" << normal << "NR" << endl
-	  << "         turns on randomized reduction, using about every <NR>-th point only" << endl
-	  << endl
-	  */
-	  << bold << "  -s" << normal << " NR, " << bold << "--start=" << normal << "NR" << endl
-	  << "         start at scan NR (i.e., neglects the first NR scans)" << endl
-	  << "         [ATTENTION: counting naturally starts with 0]" << endl
-	  << bold << "  -x" << "--xyz" << endl
-	  << "         export in xyz format (right handed coordinate system in m)" << endl
+      << "         turns on randomized reduction, using about every <NR>-th point only" << endl
+      << endl
+      */
+      << bold << "  -s" << normal << " NR, " << bold << "--start=" << normal << "NR" << endl
+      << "         start at scan NR (i.e., neglects the first NR scans)" << endl
+      << "         [ATTENTION: counting naturally starts with 0]" << endl
+      << bold << "  -x" << "--xyz" << endl
+      << "         export in xyz format (right handed coordinate system in m)" << endl
+      << bold << "  -y" << normal << " NR, " << bold << "--scale=" << normal << "NR" << endl
+      << "         scale factor for export in XYZ format (default value is 0.01, so output will be in [m])" << endl
    
-	  << endl
-    	  << endl << endl;
+      << endl
+          << endl << endl;
   
   cout << bold << "EXAMPLES " << normal << endl
-	  << "   " << prog << " -s 2 -e 3 dat" << endl << endl;
+      << "   " << prog << " -s 2 -e 3 dat" << endl << endl;
   exit(1);
 }
 
@@ -143,8 +145,8 @@ void usage(char* prog)
  * @return 0, if the parsing was successful. 1 otherwise
  */
 int parseArgs(int argc, char **argv, string &dir, double &red, int &rand,
-		    int &start, int &end, int &maxDist, int &minDist, bool &extrapolate_pose,
-			bool &use_xyz, bool &use_reflectance, bool &use_color, int &octree, IOType &type, string& customFilter)
+            int &start, int &end, int &maxDist, int &minDist, bool &extrapolate_pose,
+            bool &use_xyz, bool &use_reflectance, bool &use_color, int &octree, IOType &type, string& customFilter, double &scaleFac)
 {
   int  c;
   // from unistd.h:
@@ -164,55 +166,59 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &rand,
     { "reflectivity",    no_argument,         0,  'R' },
     { "color",           no_argument,         0,  'c' },
     { "xyz",             no_argument,         0,  'x' },
+    { "scale",           required_argument,   0,  'y' },
     { "customFilter",    required_argument,   0,  'u' },
     { 0,           0,   0,   0}                    // needed, cf. getopt.h
   };
 
   cout << endl;
-  while ((c = getopt_long(argc, argv, "f:s:e:r:O:Rm:M:u:pxc", longopts, NULL)) != -1)
+  while ((c = getopt_long(argc, argv, "f:s:e:r:O:Rm:y:M:u:pxc", longopts, NULL)) != -1)
     switch (c)
-	 {
-	 case 'r':
-	   red = atof(optarg);
-	   break;
-	 case 'O':
+     {
+     case 'r':
+       red = atof(optarg);
+       break;
+     case 'O':
        if (optarg) {
          octree = atoi(optarg);
        } else {
          octree = 1;
        }
-	   break;
-	 case 'R':
+       break;
+     case 'R':
      use_reflectance = true; 
-	   break;
+       break;
    case 'c':
      use_color = true;
      break;
-	 case 's':
-	   start = atoi(optarg);
-	   if (start < 0) { cerr << "Error: Cannot start at a negative scan number.\n"; exit(1); }
-	   break;
-	 case 'e':
-	   end = atoi(optarg);
-	   if (end < 0)     { cerr << "Error: Cannot end at a negative scan number.\n"; exit(1); }
-	   if (end < start) { cerr << "Error: <end> cannot be smaller than <start>.\n"; exit(1); }
-	   break;
-	 case 'm':
-	   maxDist = atoi(optarg);
-	   break;
-	 case 'M':
-	   minDist = atoi(optarg);
-	   break;
-	 case 'p':
-	   extrapolate_pose = false;
-	   break;
-	 case 'x':
+     case 's':
+       start = atoi(optarg);
+       if (start < 0) { cerr << "Error: Cannot start at a negative scan number.\n"; exit(1); }
+       break;
+     case 'e':
+       end = atoi(optarg);
+       if (end < 0)     { cerr << "Error: Cannot end at a negative scan number.\n"; exit(1); }
+       if (end < start) { cerr << "Error: <end> cannot be smaller than <start>.\n"; exit(1); }
+       break;
+     case 'm':
+       maxDist = atoi(optarg);
+       break;
+     case 'M':
+       minDist = atoi(optarg);
+       break;
+     case 'p':
+       extrapolate_pose = false;
+       break;
+     case 'x':
        use_xyz = true;
+       break;
+     case 'y':
+       scaleFac = atof(optarg);
        break;
      case 'u':
        customFilter = optarg;
        break;
-	 case 'f':
+     case 'f':
     try {
       type = formatname_to_io_type(optarg);
     } catch (...) { // runtime_error
@@ -221,10 +227,10 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &rand,
     }
     break;
       case '?':
-	   usage(argv[0]);
-	   return 1;
+       usage(argv[0]);
+       return 1;
       default:
-	   abort ();
+       abort ();
       }
 
   if (optind != argc-1) {
@@ -261,7 +267,13 @@ void readFrames(string dir, int start, int end)
  //   vector <double*> Matrices;
 //    vector <Scan::AlgoType> algoTypes;
     double transMat[16];
+    double transMatOrig[16];
     int algoTypeInt;
+
+    frame_in >> transMatOrig >> algoTypeInt;
+    for (size_t i = 0; i < 16; i++) {
+        transMat[i] = transMatOrig[i];
+    }
 
     while (frame_in.good()) {
       try {
@@ -272,8 +284,16 @@ void readFrames(string dir, int start, int end)
       }
     }
 
-    Scan::allScans[fileCounter - start - 1]->transformAll(transMat);
+    // calculate RELATIVE transformation
+    double tinv[16];
+    M4inv(transMatOrig, tinv);
 
+    double tfin[16];
+    MMult(transMat, tinv, tfin);
+
+    Scan::allScans[fileCounter - start - 1]->transformAll(transMat);
+    // save final pose in scan
+    Scan::allScans[fileCounter - start - 1]->transformMatrix(tfin);
     frame_in.close();
     frame_in.clear();
   }
@@ -308,9 +328,10 @@ int main(int argc, char **argv)
   bool rangeFilterActive = false;
   bool customFilterActive = false;
   string customFilter;
+  double scaleFac = 0.01;
 
   parseArgs(argc, argv, dir, red, rand, start, end,
-	  maxDist, minDist, eP, use_xyz, use_reflectance, use_color, octree, iotype, customFilter);
+      maxDist, minDist, eP, use_xyz, use_reflectance, use_color, octree, iotype, customFilter, scaleFac);
 
 
   rangeFilterActive = minDist > 0 || maxDist > 0;
@@ -319,13 +340,13 @@ int main(int argc, char **argv)
   // (proper checking will be done case specific in pointfilter.cc)
   size_t pos = customFilter.find_first_of(";");
   if (pos != std::string::npos){
-	  customFilterActive = true;
+      customFilterActive = true;
   }
   else {
-	  // give a warning if custom filter has been inproperly specified
-	  if (customFilter.length() > 0){
-		  cerr << "Custom filter: specifying string has not been set properly, data will NOT be filtered." << endl;
-	  }
+      // give a warning if custom filter has been inproperly specified
+      if (customFilter.length() > 0){
+          cerr << "Custom filter: specifying string has not been set properly, data will NOT be filtered." << endl;
+      }
   }
 
   // Get Scans
@@ -337,8 +358,8 @@ int main(int argc, char **argv)
   
   // if specified, filter scans
   for (size_t i = 0; i < Scan::allScans.size(); i++)  {
-	 if(rangeFilterActive) Scan::allScans[i]->setRangeFilter(maxDist, minDist);
-	 if(customFilterActive) Scan::allScans[i]->setCustomFilter(customFilter);
+     if(rangeFilterActive) Scan::allScans[i]->setRangeFilter(maxDist, minDist);
+     if(customFilterActive) Scan::allScans[i]->setCustomFilter(customFilter);
   }
   
 //
@@ -361,11 +382,11 @@ int main(int argc, char **argv)
   }
   
  cout << "Export all 3D Points to file \"points.pts\"" << endl;
- cout << "Export all 6DoF poses to file \"poses.txt\"" << endl;
- cout << "Export all 6DoF matrices to file \"frames.txt\"" << endl;
+ cout << "Export all 6DoF poses to file \"positions.txt\"" << endl;
+ cout << "Export all 6DoF matrices to file \"poses.txt\"" << endl;
  ofstream redptsout("points.pts");
- ofstream posesout("poses.txt");
- ofstream matricesout("frames.txt");
+ ofstream posesout("positions.txt");
+ ofstream matricesout("poses.txt");
   
   for(unsigned int i = 0; i < Scan::allScans.size(); i++) {
     Scan *source = Scan::allScans[i];
@@ -373,43 +394,43 @@ int main(int argc, char **argv)
     
     if(use_reflectance) {
       DataReflectance xyz_reflectance = (((DataReflectance)source->get("reflectance")).size() == 0) ?
-	      source->create("reflectance", sizeof(float)*xyz.size()) : source->get("reflectance"); 
+          source->create("reflectance", sizeof(float)*xyz.size()) : source->get("reflectance"); 
       if (((DataReflectance)source->get("reflectance")).size() == 0) {
-	      for(unsigned int i = 0; i < xyz.size(); i++) xyz_reflectance[i] = 255;
+          for(unsigned int i = 0; i < xyz.size(); i++) xyz_reflectance[i] = 255;
       }
       if(use_xyz) {
-        write_xyzr(xyz, xyz_reflectance, redptsout);
+        write_xyzr(xyz, xyz_reflectance, redptsout, scaleFac);
       } else {
         write_uosr(xyz, xyz_reflectance, redptsout);
       }
       
     } else if(use_color) {
       DataRGB xyz_color = (((DataRGB)source->get("color")).size() == 0) ?
-	    source->create("color", sizeof(unsigned char)*3*xyz.size()) : source->get("color"); 
+        source->create("color", sizeof(unsigned char)*3*xyz.size()) : source->get("color"); 
       if (((DataRGB)source->get("color")).size() == 0) {
-	      for(unsigned int i = 0; i < xyz.size(); i++) {
-	        xyz_color[i][0] = 0;
-	        xyz_color[i][1] = 0;
-	        xyz_color[i][2] = 0;
+          for(unsigned int i = 0; i < xyz.size(); i++) {
+            xyz_color[i][0] = 0;
+            xyz_color[i][1] = 0;
+            xyz_color[i][2] = 0;
         }
       }
       if(use_xyz) {
-        write_xyz_rgb(xyz, xyz_color, redptsout);
+        write_xyz_rgb(xyz, xyz_color, redptsout, scaleFac);
       } else {
         write_uos_rgb(xyz, xyz_color, redptsout);
       }
 
     } else {
       if(use_xyz) {
-        write_xyz(xyz, redptsout);
+        write_xyz(xyz, redptsout, scaleFac);
       } else {
         write_uos(xyz, redptsout);
       }
     
     }
     if(use_xyz) {
-      writeTrajectoryXYZ(posesout, source->get_transMat(), false);
-      writeTrajectoryXYZ(matricesout, source->get_transMat(), true);
+      writeTrajectoryXYZ(posesout, source->get_transMat(), false, scaleFac);
+      writeTrajectoryXYZ(matricesout, source->get_transMat(), true, scaleFac);
     } else {
       writeTrajectoryUOS(posesout, source->get_transMat(), false);
       writeTrajectoryUOS(matricesout, source->get_transMat(), true);

@@ -442,13 +442,14 @@ protected:
   //! Internal function of transform which alters the reduced points
   void transformReduced(const double alignxf[16]);
   
-  //! Internal function of transform which handles the matrices
-  void transformMatrix(const double alignxf[16]);
 
   //@FIXME
 public:  
   //! Creating reduced points
   void calcReducedPoints();
+
+  //! Internal function of transform which handles the matrices
+  void transformMatrix(const double alignxf[16]);
 
 protected:  
   //! Copies reduced points to original points without any transformation.
