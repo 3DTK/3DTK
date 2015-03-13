@@ -92,7 +92,7 @@ void usage(char* prog)
         << "         frame files are in xyz format (right handed coordinate system in m);" << endl
         << "         with this flag, they will be converted to the 3DTK-coordinate system" << endl
         << "         before applying the transformation, and additionaly, files with converted" << endl
-        << "         input coordinates will be output " << endl
+        << "         input coordinates will be created " << endl
         << endl
 
         << endl << endl;
@@ -176,14 +176,14 @@ void matMulVec(double* mat4, double* v4, double* res) {
     res[3] = 1;
 }
 
-void printMat_OGLStyle(double *mat){
+void printMat_RowOrderStyle(double *mat){
     cout << mat[0] << "  " << mat[1] << "  " << mat[2] << "  " << mat[3] << endl;
     cout << mat[4] << "  " << mat[5] << "  " << mat[6] << "  " << mat[7] << endl;
     cout << mat[8] << "  " << mat[9] << "  " << mat[10] << "  " << mat[11] << endl;
     cout << mat[12] << "  " << mat[13] << "  " << mat[14] << "  " << mat[15] << endl << endl;
 }
 
-void printMat_J3dStyle(double *mat){
+void printMat_ColumnOrderStyle(double *mat){
     cout << mat[0] << "  " << mat[4] << "  " << mat[8] << "  " << mat[12] << endl;
     cout << mat[1] << "  " << mat[5] << "  " << mat[9] << "  " << mat[13] << endl;
     cout << mat[2] << "  " << mat[6] << "  " << mat[10] << "  " << mat[14] << endl;
@@ -254,20 +254,17 @@ void computeTransformation(int nrOfPts, string &inputFile, string &dir, bool rev
     my_icp6Dminimizer = new icp6D_SVD(false);
     my_icp6Dminimizer->Align(Pairs, alignxf, centroid_m, centroid_d);
 
-    // icp6Dminimizer does not seem to check for reflection case! 
-    // if Determinant < 0 --> possible solution would be to invert one column to avoid a reflection as a solution for the transformation?
+    // if Determinant < 0 --> computed matrix is a reflection
     if (M4det(alignxf)< 0) {
-        cerr << "Computed a reflection matrix as solution for point transformation - results might be erroneous!" << endl;
+        // icp6D_SVD tries to compensate for reflection, if the output still is one, input data is most likely degenerate
+        cerr << "Computed a reflection matrix as solution for point transformation - results would be erroneous!" << endl << "Canceling operation..." << endl;
         exit(1);
-        //alignxf[8] = -alignxf[8];
-        //alignxf[9] = -alignxf[9];
-        //alignxf[10] = -alignxf[10];
     }
-
-    printMat_OGLStyle(alignxf);
-    printMat_J3dStyle(alignxf);
+    printMat_RowOrderStyle(alignxf);
+    printMat_ColumnOrderStyle(alignxf);
 
     M4inv(alignxf, resTrans);
+
 }
 
 void modifyFrames(double* resTrans, string &dir, int start, int end, bool inputInXYZ){
@@ -332,7 +329,7 @@ void modifyFrames(double* resTrans, string &dir, int start, int end, bool inputI
             else {
                 // just copy values
                 for (size_t j = 0; j < 16; j++) {
-                    inputMat3DTK[i] = inputMat[i];
+                    inputMat3DTK[j] = inputMat[j];
                 }
             }
 
