@@ -3,7 +3,7 @@
  * @brife draws features and matches on panorma images
  * This class is a feature drawer that draws the keypoints found on a scan on a panorama image of the scan.
  * It also draws the matches between two scan on panorama images and draw a line between them.
- * @author HamidReza Houshiar. Jacobs University Bremen gGmbH, Germany.
+ * @author Hamidreza Houshiar. Jacobs University Bremen gGmbH, Germany.
  */
 
 #ifndef FEATURE_DRAWER_H_

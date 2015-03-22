@@ -10,7 +10,7 @@
 /**
  * @file 
  * @brief Implementation of global functions for feature based registration 
- * @author HamidReza Houshiar, Jacobs University Bremen, Germany
+ * @author Hamidreza Houshiar, Jacobs University Bremen, Germany
  */
 
 #include "slam6d/fbr/fbr_global.h"
@@ -117,6 +117,9 @@ namespace fbr{
     case FULL:
       sMethod = "FULL";
       break;
+    case NON:
+      sMethod = "NON";
+      break;
     default:
       throw std::runtime_error(std::string("panorama map method ") + to_string(method) + std::string(" could not be matched to a panorama map method"));
     }
@@ -127,9 +130,60 @@ namespace fbr{
     if(strcasecmp(method.c_str(), "FARTHEST") == 0) return FARTHEST;
     else if(strcasecmp(method.c_str(), "EXTENDED") == 0) return EXTENDED;
     else if(strcasecmp(method.c_str(), "FULL") == 0) return FULL;
+    else if(strcasecmp(method.c_str(), "NON") == 0) return NON;
     else throw std::runtime_error(std::string("panorama map method ") + method + std::string(" is unknown"));
   }
 
+  string panoramaFormatToString(panorama_format format){
+    string sFormat;
+    switch(format){
+    case PNG:
+      sFormat = "PNG";
+      break;
+    case JPEG:
+      sFormat = "JPEG";
+      break;
+    case JPEG2000:
+      sFormat = "JPEG2000";
+      break;
+    case TIFF:
+      sFormat = "TIFF";
+      break;
+    default:
+      throw std::runtime_error(std::string("panorama fromat ") + to_string(format) + std::string(" could not be matched to a panorama format"));
+    }
+    return sFormat;
+  }
+
+  string panoramaFormatToFileFormatString(panorama_format format){
+    string sFormat;
+    switch(format){
+    case PNG:
+      sFormat = "png";
+      break;
+    case JPEG:
+      sFormat = "jpg";
+      break;
+    case JPEG2000:
+      sFormat = "jp2";
+      break;
+    case TIFF:
+      sFormat = "tiff";
+      break;
+    default:
+      throw std::runtime_error(std::string("panorama fromat ") + to_string(format) + std::string(" could not be matched to a panorama format"));
+    }
+    return sFormat;
+  }
+ 
+  panorama_format stringToPanoramaFormat(string format){
+    if(strcasecmp(format.c_str(), "PNG") == 0) return PNG;
+    else if(strcasecmp(format.c_str(), "JPEG") == 0) return JPEG;
+    else if(strcasecmp(format.c_str(), "JPEG2000") == 0) return JPEG2000;
+    else if(strcasecmp(format.c_str(), "TIFF") == 0) return TIFF;
+    else throw std::runtime_error(std::string("panorama format ") + format + std::string(" is unknown"));
+  }
+  
   string featureDetectorImageMethodToString(feature_detector_image_method method)
   {
     string sMethod;

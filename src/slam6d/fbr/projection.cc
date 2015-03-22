@@ -10,7 +10,7 @@
 /**
  * @file 
  * @brief Implementation of panorama image projections
- * @author HamidReza Houshiar, Jacobs University Bremen, Germany
+ * @author Hamidreza Houshiar, Jacobs University Bremen, Germany
  * @author Andreas Nuechter. University of Wuerzburg, Germany.
  * @author Julia Kauer. University of Wuerzburg, Germany.
  * @author Lukas Gradl. University of Wuerzburg, Germany.
@@ -24,15 +24,15 @@ namespace fbr
 {
   projection::projection()
   {
-    init(3600, 1000, EQUIRECTANGULAR, 1, 0, 0, 0, -40, 60, false);
+    init(3600, 1000, EQUIRECTANGULAR, 1, 0, 0, 0, 0, 360, -40, 60, false);
   }
 
-  projection::projection(unsigned int width, unsigned int height, projection_method method, unsigned int numberOfImages, double param, double minZ, double maxZ, double minAngle, double maxAngle, bool imageSizeOptimization)
+  projection::projection(unsigned int width, unsigned int height, projection_method method, unsigned int numberOfImages, double param, double minZ, double maxZ, double minHorizAngle, double maxHorizAngle, double minVertAngle, double maxVertAngle, bool imageSizeOptimization)
   {
-    init(width, height, method, numberOfImages, param, minZ, maxZ, minAngle, maxAngle, imageSizeOptimization);
+    init(width, height, method, numberOfImages, param, minZ, maxZ, minHorizAngle, maxHorizAngle, minVertAngle, maxVertAngle, imageSizeOptimization);
   }
 
-  void  projection::init(unsigned int width, unsigned int height, projection_method method, unsigned int numberOfImages, double param, double minZ, double maxZ, double minAngle, double maxAngle, bool imageSizeOptimization)
+  void  projection::init(unsigned int width, unsigned int height, projection_method method, unsigned int numberOfImages, double param, double minZ, double maxZ, double minHorizAngle, double maxHorizAngle, double minVertAngle, double maxVertAngle, bool imageSizeOptimization)
   {
     //set the projection params
     //projection size
@@ -40,9 +40,6 @@ namespace fbr
     height_ = height;
     //optimization of projection size
     imageSizeOptimization_ = imageSizeOptimization;
-    //scanner==projection max and min angle
-    maxAngle_ = maxAngle;
-    minAngle_ = minAngle;
     //min and max of Z from user for zaxis projection
     minZ_ = minZ;
     maxZ_ = maxZ;
@@ -52,38 +49,40 @@ namespace fbr
     numberOfImages_ = numberOfImages;
     //projection specific param
     param_ = param;
+
+    //scanner==projection max and min angle
+    //change the max, min of horizontal and vertical from degree to rad    
+    maxHorizAngle_ = maxHorizAngle / 360.0 * 2.0 * M_PI;
+    minHorizAngle_ = minHorizAngle / 360.0 * 2.0 * M_PI;
+    maxVertAngle_ = maxVertAngle / 360.0 * 2.0 * M_PI;
+    minVertAngle_ = minVertAngle / 360.0 * 2.0 * M_PI;
     
     //based on projection method init the projection
     //EQUIRECTANGULAR projection
     if(method_ == EQUIRECTANGULAR)
       {
 	//adding the longitude to x axis and latitude to y axis
-	xSize_ = 2 * M_PI;
-	ySize_ =  ((maxAngle_ - minAngle_) / 360.0 * 2.0 * M_PI);
-	
+	xSize_ = maxHorizAngle_ - minHorizAngle_;
+	ySize_ = maxVertAngle_ - minVertAngle_;
+
 	setImageRatio();
 
 	xFactor_ = (double) width_ / xSize_;
 	widthMax_ = width_ - 1;
 	yFactor_ = (double) height_ / ySize_;      
 	//shift all the valuse to positive points on image 
-	heightLow_ = (0.0 - minAngle_) / 360.0 * 2.0 * M_PI;
+	heightLow_ = minVertAngle_;
 	heightMax_ = height_ - 1;	
       }
     
     //CONIC projection
     if(method_ == CONIC)
-      {
-	// set up maximum latitude and longitude angles of the robot 
-	minVertAngle_ = minAngle_ * M_PI / 180.0; 
-	maxVertAngle_ = maxAngle_ * M_PI / 180.0;
-	minHorizAngle_ = -M_PI; 
-	maxHorizAngle_ = M_PI;
+      {	
 	// set up initial parameters according to MathWorld: http://mathworld.wolfram.com/AlbersEqual-AreaConicProjection.html
-	lat0_ = 0.; 
-	long0_ = 0.;
-	phi1_ = -40. * M_PI / 180.0; 
-	phi2_ = 60 * M_PI / 180.0;
+	lat0_ = (minVertAngle_ + maxVertAngle_) / 2;
+	long0_ = (minHorizAngle_ + maxHorizAngle_) / 2;
+	phi1_ = minVertAngle_;
+	phi2_ = maxVertAngle_;
 	n_ = (sin(phi1_) + sin(phi2_)) / 2.;
 	c_ = sqr(cos(phi1_)) + 2 * n_ * sin(phi1_);
 	rho0_ = sqrt(c_ - 2 * n_ * sin(lat0_)) / n_;
@@ -91,9 +90,9 @@ namespace fbr
 	xMax_ = (1./n_ * sqrt(c_ - 2*n_*sin( minVertAngle_ )) ) * sin(n_ * (maxHorizAngle_ - long0_));
 	xMin_ = (1./n_ * sqrt(c_ - 2*n_*sin( minVertAngle_ )) ) * sin(n_ * (minHorizAngle_ - long0_));
 	xSize_ =  ( xMax_ - xMin_ );
-	
-	yMin_ = rho0_ - (1./n_ * sqrt(c_ - 2*n_*sin(minVertAngle_)) ) * cos(n_ * ( 0. - long0_ ));
+
 	yMax_ = rho0_ - (1./n_ * sqrt(c_ - 2*n_*sin(maxVertAngle_)) ) * cos(n_ * (maxHorizAngle_ - long0_ ));
+	yMin_ = rho0_ - (1./n_ * sqrt(c_ - 2*n_*sin(minVertAngle_)) ) * cos(n_ * ((minHorizAngle_ + maxHorizAngle_)/2 - long0_ ));
 	ySize_ =  ( yMax_ - yMin_ );
 	
 	setImageRatio();
@@ -109,8 +108,8 @@ namespace fbr
     if(method_ == CYLINDRICAL)
       {
 	//adding the longitude to x and tan(latitude) to y
-	xSize_ = 2 * M_PI;
-	ySize_ = (tan(maxAngle_ / 360 * 2 * M_PI) - tan(minAngle_ / 360 * 2 * M_PI));
+	xSize_ = maxHorizAngle_ - minHorizAngle_;
+	ySize_ = tan(maxVertAngle_) - tan(minVertAngle_);
       
 	setImageRatio();	
 	
@@ -118,15 +117,17 @@ namespace fbr
 	xFactor_ = (double) width_ / xSize_;
 	widthMax_ = width_ - 1;
 	yFactor_ = (double) height_ / ySize_;
-	heightLow_ = (minAngle_) / 360 * 2 * M_PI;
+	heightLow_ = minVertAngle_;
 	heightMax_ = height_ - 1;
       }
 
     //EQUALAREACYLINDRICAL projection
     if(method_ == EQUALAREACYLINDRICAL)
       {
-	xSize_ =  (2 * M_PI * cos(param_ / 360 * 2 * M_PI));
-	ySize_ =  ((sin(maxAngle_ / 360 * 2 * M_PI) - sin(minAngle_ / 360 * 2 * M_PI)) / cos(param_ / 360 * 2 * M_PI));
+	//change the param==phi_s to rad
+	param_ = param_ / 360.0 * 2 * M_PI;
+	xSize_ =  (maxHorizAngle_ - minHorizAngle_) * cos(param_);
+	ySize_ =  ((sin(maxVertAngle_) - sin(minVertAngle_)) / cos(param_));
       
 	setImageRatio();
       
@@ -134,7 +135,7 @@ namespace fbr
 	xFactor_ = (double) width_ / xSize_;
 	widthMax_ = width_ - 1;
 	yFactor_ = (double) height_ / ySize_;
-	heightLow_ = (minAngle_) / 360 * 2 * M_PI;
+	heightLow_ = minVertAngle_;
 	heightMax_ = height_ - 1;
       }
 
@@ -142,15 +143,15 @@ namespace fbr
     if(method_ == MERCATOR)
       {
 	//find the x and y range
-	xSize_ = 2 * M_PI;
-	ySize_ =  ( log( tan( maxAngle_ / 360 * 2 * M_PI ) + ( 1 / cos( maxAngle_ / 360 * 2 * M_PI ) ) ) - log ( tan( minAngle_ / 360 * 2 * M_PI) + (1/cos(minAngle_ / 360 * 2 * M_PI) ) ) );
+	xSize_ = maxHorizAngle_ - minHorizAngle_;
+	ySize_ =  ( log( tan( maxVertAngle_) + ( 1 / cos( maxVertAngle_) ) ) - log ( tan( minVertAngle_) + (1 / cos(minVertAngle_) ) ) );
       
 	setImageRatio();
       
 	xFactor_ = (double) width_ / xSize_;
 	widthMax_ = width_ - 1;
 	yFactor_ = (double) height_ / ySize_;
-	heightLow_ = log(tan(minAngle_ / 360 * 2 * M_PI) + (1/cos(minAngle_ / 360 * 2 * M_PI)));
+	heightLow_ = log(tan(minVertAngle_) + (1/cos(minVertAngle_)));
 	heightMax_ = height_ - 1;
       }
 
@@ -160,17 +161,15 @@ namespace fbr
 	//default value for numberOfImages_
 	if(numberOfImages_ < 3) numberOfImages_ = 3;
 	cout<<"Number of images per scan is: "<<numberOfImages_<<endl;
-	interval_ = 2 * M_PI / numberOfImages_;
-	//iMinY_ = -M_PI/9;
-	//iMaxY_ = 2*M_PI/9;
-	iMinY_ = minAngle_ * M_PI / 180;
-	iMaxY_ = maxAngle_ * M_PI / 180;
+	interval_ = (maxHorizAngle_ - minHorizAngle_) / numberOfImages_;
+	iMinY_ = minVertAngle_;
+	iMaxY_ = maxVertAngle_;
 
 	//latitude of projection center
 	p1_ = 0;
 
-	iMinX_ = 0 * interval_;
-	iMaxX_ = (0 + 1) * interval_;
+	iMinX_ = minHorizAngle_ + (0 * interval_);
+	iMaxX_ = minHorizAngle_ + ((0 + 1) * interval_);
 	//the longitude of projection center
 	l0_ = iMinX_ + interval_ / 2;
 	//finding the min and max of the x direction
@@ -197,16 +196,14 @@ namespace fbr
 	if(param_ == 0) param_ = 1;
 	if(numberOfImages_ < 2) numberOfImages_ = 2;
 	cout << "Parameter d is: " << param_ <<", Horizontal Number of images per scan is: " << numberOfImages_ << endl;
-	interval_ = 2 * M_PI / numberOfImages_;
-	//iMinY_ = -M_PI/9;
-	//iMaxY_ = 2*M_PI/9;
-	iMinY_ = minAngle_ * M_PI / 180;
-	iMaxY_ = maxAngle_ * M_PI / 180;
+	interval_ = (maxHorizAngle_ - minHorizAngle_) / numberOfImages_;
+	iMinY_ = minVertAngle_;
+	iMaxY_ = maxVertAngle_;
 	//latitude of projection center
 	p1_ = 0;
             
-	iMinX_ = 0 * interval_;
-	iMaxX_ = (0 + 1) * interval_;
+	iMinX_ = minHorizAngle_ + (0 * interval_);
+	iMaxX_ = minHorizAngle_ + ((0 + 1) * interval_);
 	//the longitude of projection center
 	l0_ = iMinX_ + interval_ / 2;
       
@@ -235,16 +232,14 @@ namespace fbr
 	if(numberOfImages_ < 2) numberOfImages_ = 2;
 	cout << "Paremeter R is:" << param_ << ", Number of images per scan is:" << numberOfImages_ << endl;
 	// l0_ and p1_ are the center of projection iminx, imaxx, iminy, imaxy are the bounderis of interval_s
-	interval_ = 2 * M_PI / numberOfImages_;
-	//iMinY_ = -M_PI/9;
-	//iMaxY_ = 2*M_PI/9;
-	iMinY_ = minAngle_ * M_PI / 180;
-	iMaxY_ = maxAngle_ * M_PI / 180;
+	interval_ = (maxHorizAngle_ - minHorizAngle_) / numberOfImages_;
+	iMinY_ = minVertAngle_;
+	iMaxY_ = maxVertAngle_;
 	//latitude of projection center
 	p1_ = 0;
       
-	iMinX_ = 0 * interval_;
-	iMaxX_ = (0 + 1) * interval_;
+	iMinX_ = minHorizAngle_ + (0 * interval_);
+	iMaxX_ = minHorizAngle_ + ((0 + 1) * interval_);
 	//longitude of projection center
 	l0_ = iMinX_ + interval_ / 2;
 	//use the R variable of stereographic projection mentioned in the thesis
@@ -270,7 +265,7 @@ namespace fbr
 	//double minZ_ = -100;
 	//double maxZ_ = 100;
 	//adding the longitude to x axis and latitude to y axis
-	xSize_ = 2 * M_PI;
+	xSize_ = maxHorizAngle_ - minHorizAngle_;
 	ySize_ = (maxZ_ - minZ_);
 
 	setImageRatio();
@@ -287,14 +282,9 @@ namespace fbr
     //AZIMUTHAL projection
     if(method_ == AZIMUTHAL)
       {
-	// set up maximum latitude and longitude angles of the robot 
-	minVertAngle_ = minAngle_ * M_PI / 180.0;
-	maxVertAngle_ = maxAngle_ * M_PI / 180.0;
-	minHorizAngle_ = -M_PI; 
-	maxHorizAngle_ = M_PI;
 	// set up initial parameters according to MathWorld: http://mathworld.wolfram.com/LambertAzimuthalEqual-AreaProjection.html
-	long0_ = 0.;
-	phi1_ = 0. * M_PI / 180.0;
+	long0_ = (minHorizAngle_ + maxHorizAngle_) / 2;
+	phi1_ = (minVertAngle_ + maxVertAngle_) / 2;
 
 	// set up max values for x and y and add the longitude to x axis and latitude to y axis
 	// sqrt(2/(1+sin(phi1_)*sin(theta)+cos(phi1_)*cos(theta)*cos(phi-long0_)));
@@ -322,227 +312,111 @@ namespace fbr
   void projection::recoverPointCloud(const cv::Mat& rangeImage,
 				   cv::Mat& reflectanceImage, vector<cv::Vec4f> &reducedPoints) 
   {
+    if(rangeImage.cols != width_ || rangeImage.rows != height_)
+      {
+	cout<<"rnage image size is different from input size."<<endl;
+	return;
+      }
+
     if (rangeImage.cols != reflectanceImage.cols
 	|| rangeImage.rows != reflectanceImage.rows) 
       {
-	cerr << "range image and reflectance image have different geometries - using empty range image" << endl;
+	cerr << "range image and reflectance image have different geometries - using empty reflectance image" << endl;
 	reflectanceImage.create(rangeImage.size(), CV_8U);
 	reflectanceImage = cv::Scalar::all(0);
       }
 
-    //recover from EQUIRECTANGULAR projection
-    if(method_ == EQUIRECTANGULAR) 
+    for (int row = 0; row < rangeImage.size().height; ++row) 
       {
-	xFactor_ = (double) rangeImage.size().width / 2.0 / M_PI;
-	//int widthMax_ = rangeImage.size().width - 1;
-	yFactor_ = (double) rangeImage.size().height / ((maxAngle_ - minAngle_) / 360.0 * 2.0 * M_PI);
-	heightLow_ = (0.0 - minAngle_) / 360 * 2 * M_PI;
-	heightMax_ = rangeImage.size().height - 1;
-
-	bool first_seen = true;
-	for (int row = 0; row < rangeImage.size().height; ++row) 
+	for (int col = 0; col < rangeImage.size().width; ++col) 
 	  {
-	    for (int col = 0; col < rangeImage.size().width; ++col) 
+	    double range,reflectance, x, y, z;
+	    range = rangeImage.at<float>(row, col);
+	    reflectance = reflectanceImage.at<uchar>(row,col)/255.0;
+	    
+	    calcPointFromPanoramaPosition(x, y, z, row, col, range);
+	    
+	    if( x < 1e-5 && y < 1e-5 && z < 1e-5) 
 	      {
-		float range = rangeImage.at<float>(row, col);
-		float reflectance = reflectanceImage.at<uchar>(row,col)/255.0;
-		float theta = (heightMax_ - row + 0.5) / yFactor_ - heightLow_; 
-		float phi = (col + 0.5 ) / xFactor_; 
-		phi *= 180.0 / M_PI;
-		phi = 360.0 - phi;
-		phi *= M_PI / 180.0;
-		theta *= 180.0 / M_PI;
-		theta *= -1;
-		theta += 90.0;
-		theta *= M_PI / 180.0;
-		double polar[3] = { theta, phi, range }, cartesian[3] = {0., 0., 0.}; 
-		toCartesian(polar, cartesian);
-         
-		if( fabs(cartesian[0]) < 1e-5 && fabs(cartesian[1]) < 1e-5 && fabs(cartesian[2]) < 1e-5) 
-		  {
-		    if (first_seen) first_seen = false;
-		    else continue;
-		  }
-		reducedPoints.push_back(cv::Vec4f(-100.0*cartesian[1],
-						   100.0*cartesian[2],
-						   100.0*cartesian[0],
-						   reflectance));
+		continue;
 	      }
-	  }
-      }
-
-    //recover from CYLINDRICAL projection
-    if(method_ == CYLINDRICAL) 
-      {
-	xFactor_ = (double) rangeImage.size().width / 2 / M_PI;
-	//int widthMax_ = rangeImage.size().width - 1;
-	yFactor_ = (double) rangeImage.size().height / (tan(maxAngle_ / 360 * 2 * M_PI) - tan(minAngle_ / 360 * 2 * M_PI));
-	heightLow_ = (minAngle_) / 360 * 2 * M_PI;
-	//int heightMax_ = rangeImage.size().height - 1;
-      
-	bool first_seen = true;
-	for (int row = 0; row < rangeImage.size().height; ++row) 
-	  {
-	    for (int col = 0; col < rangeImage.size().width; ++col) 
-	      {
-		float range = rangeImage.at<float>(row, col);
-		float reflectance = reflectanceImage.at<uchar>(row,col)/255.0;
-		float theta = atan2(row + 0.5 + yFactor_ * tan(heightLow_), yFactor_);
-		float phi = (col + 0.5) / xFactor_; 
-		phi *= 180.0 / M_PI;
-		phi = 360.0 - phi;
-		phi *= M_PI / 180.0;
-		theta *= 180.0 / M_PI;
-		theta *= -1;
-		theta += 90.0;
-		theta *= M_PI / 180.0;
-		double polar[3] = { theta, phi, range }, cartesian[3] = {0., 0., 0.}; 
-		toCartesian(polar, cartesian);
-
-		if( fabs(cartesian[0]) < 1e-5 && fabs(cartesian[1]) < 1e-5 && fabs(cartesian[2]) < 1e-5) 
-		  {
-		    if (first_seen) first_seen = false;
-		    else continue;
-		  }
-		reducedPoints.push_back(cv::Vec4f(-100.0*cartesian[1],
-						   100.0*cartesian[2],
-						   100.0*cartesian[0],
-						   reflectance));
-	      }
-	  }
-      }
-
-    //recover from MERCATOR projection
-    if(method_ == MERCATOR) 
-      {
-	xFactor_ = (double) rangeImage.size().width / 2 / M_PI;
-	yFactor_ = (double) rangeImage.size().height / ( log( tan( maxAngle_ / 360 * 2 * M_PI ) + ( 1 / cos( maxAngle_ / 360 * 2 * M_PI ) ) ) - log ( tan( minAngle_ / 360 * 2 * M_PI) + (1/cos(minAngle_ / 360 * 2 * M_PI) ) ) );
-	heightLow_ = log(tan(minAngle_ / 360 * 2 * M_PI) + (1/cos(minAngle_ / 360 * 2 * M_PI)));
-	heightMax_ = rangeImage.size().height - 1;
-      
-	bool first_seen = true;
-	for (int row = 0; row < rangeImage.size().height; ++row) 
-	  {
-	    for (int col = 0; col < rangeImage.size().width; ++col) 
-	      {
-		float range = rangeImage.at<float>(row, col);
-		float reflectance = reflectanceImage.at<uchar>(row,col)/255.0;
-		float theta = 2 * atan2(exp((heightMax_ - row + 0.5) / yFactor_ + heightLow_), 1.) - M_PI_2;
-		float phi = (col + 0.5) / xFactor_; 
-		phi *= 180.0 / M_PI;
-		phi = 180.0 - phi;
-		phi *= M_PI / 180.0;
-		theta *= 180.0 / M_PI;
-		theta *= -1;
-		theta += 90.0;
-		theta *= M_PI / 180.0;
-		double polar[3] = { theta, phi, range }, cartesian[3] = {0., 0., 0.}; 
-		toCartesian(polar, cartesian);
-
-		if( fabs(cartesian[0]) < 1e-5 && fabs(cartesian[1]) < 1e-5 && fabs(cartesian[2]) < 1e-5) 
-		  {
-		    if (first_seen) first_seen = false;
-		    else continue;
-		  }
-		reducedPoints.push_back(cv::Vec4f(-100.0*cartesian[1],
-						   100.0*cartesian[2],
-						   100.0*cartesian[0],
-						   reflectance));
-	      }
-	  }
-      }
-
-    //recover from CONIC projection
-    if(method_ == CONIC) 
-      {
-	// set up maximum latitude and longitude angles of the robot 
-	minVertAngle_ = minAngle_ * M_PI / 180.0; 
-	maxVertAngle_ = maxAngle_ * M_PI / 180.0;
-	minHorizAngle_ = -M_PI; 
-	maxHorizAngle_ = M_PI;
-	// set up initial parameters according to MathWorld: http://mathworld.wolfram.com/AlbersEqual-AreaConicProjection.html
-	lat0_ = 0.; 
-	long0_ = 0.;
-	phi1_ = -40. * M_PI / 180.0; 
-	phi2_ = 60 * M_PI / 180.0;
-	n_ = (sin(phi1_) + sin(phi2_)) / 2.;
-	c_ = sqr(cos(phi1_)) + 2 * n_ * sin(phi1_);
-	rho0_ = sqrt(c_ - 2 * n_ * sin(lat0_)) / n_;
-	// set up max values for x and y and add the longitude to x axis and latitude to y axis
-	xMax_ = (1./n_ * sqrt(c_ - 2*n_*sin( minVertAngle_ )) ) * sin(n_ * (maxHorizAngle_ - long0_));
-	xMin_ = (1./n_ * sqrt(c_ - 2*n_*sin( minVertAngle_ )) ) * sin(n_ * (minHorizAngle_ - long0_));
-	xFactor_ = (double) rangeImage.size().width / ( xMax_ - xMin_ );
-	yMin_ = rho0_ - (1./n_ * sqrt(c_ - 2*n_*sin(minVertAngle_)) ) * cos(n_ * ( 0. - long0_ ));
-	yMax_ = rho0_ - (1./n_ * sqrt(c_ - 2*n_*sin(maxVertAngle_)) ) * cos(n_ * (maxHorizAngle_ - long0_ ));
-	yFactor_ = (double) rangeImage.size().height / ( yMax_ - yMin_ );
-	heightMax_ = rangeImage.size().height - 1;
-
-	bool first_seen = true;
-	for (int row = 0; row < rangeImage.size().height; ++row) 
-	  {
-	    for (int col = 0; col < rangeImage.size().width; ++col) 
-	      {
-		float range = rangeImage.at<float>(row, col);
-		float reflectance = reflectanceImage.at<uchar>(row,col)/255.0;
-		float x = col * 1. / xFactor_ - fabs(xMin_);
-		float y = (heightMax_ - row) * 1. / yFactor_ - fabs(yMin_);
-		float theta = asin((c_ - (x*x + (rho0_ - y) * (rho0_ - y)) * n_ * n_) / (2 * n_));
-		float phi = long0_ + (1./n_) * ::atan2(x, (float)rho0_ - y);
-
-		phi *= 180.0 / M_PI;
-		phi = 360.0 - phi;
-		phi *= M_PI / 180.0;
-		theta *= 180.0 / M_PI;
-		theta *= -1;
-		theta += 90.0;
-		theta *= M_PI / 180.0;
-
-		double polar[3] = { theta, phi, range }, cartesian[3] = {0., 0., 0.}; 
-		toCartesian(polar, cartesian);
-
-		//if ( std::isnan(cartesian[0]) || std::isnan(cartesian[1]) || std::isnan(cartesian[2]) ) continue;
-		if( fabs(cartesian[0]) < 1e-5 && fabs(cartesian[1]) < 1e-5 && fabs(cartesian[2]) < 1e-5) 
-		  {
-		    if (first_seen) first_seen = false;
-		    else continue;
-		  }
-		reducedPoints.push_back(cv::Vec4f(-100.0*cartesian[1],
-						   100.0*cartesian[2],
-						   100.0*cartesian[0],
-						   reflectance));
-	      }
+	    reducedPoints.push_back(cv::Vec4f(x, y, z, reflectance));
 	  }
       }
   }
 
-  void projection::calcPanoramaPositionForAPoint(int &x, int &y, cv::MatIterator_<cv::Vec4f> it, double &range)
+  void projection::calcPointFromPanoramaPosition(double& x, double& y, double& z, int row, int col, double range)
   {
-
-    //EQUIRECTANGULAR projection
+    double theta, phi;
+    //get the theta and phi based on the projection 
     if(method_ == EQUIRECTANGULAR)
       {
+	theta = (heightMax_ - row + 0.5) / yFactor_ + heightLow_; 
+	phi = (col + 0.5 ) / xFactor_;
+      }
+    if(method_ == CYLINDRICAL)
+      {
+	theta = atan2(row + 0.5 + yFactor_ * tan(heightLow_), yFactor_);
+	phi = (col + 0.5) / xFactor_; 
+      }
+    if(method_ == MERCATOR)
+      {
+	theta = 2 * atan2(exp((heightMax_ - row + 0.5) / yFactor_ + heightLow_), 1.) - M_PI_2;
+	phi = (col + 0.5) / xFactor_;
+      }
+    if(method_ == CONIC)
+      {
+	float X = col * 1. / xFactor_ - fabs(xMin_);
+	float Y = (heightMax_ - row) * 1. / yFactor_ - fabs(yMin_);
+	theta = asin( (c_ - (X*X + (rho0_ - Y) * (rho0_ - Y)) * n_ * n_) / (2 * n_) );
+	phi = long0_ + (1./n_) * ::atan2(X, (float)rho0_ - Y);
+      }    
+    //other projections
+    
+    phi = (2 * M_PI) - phi;
+    theta *= -1;
+    theta += M_PI/2.0;
+    
+    
+    double polar[3] = { theta, phi, range }, cartesian[3] = {0., 0., 0.}; 
+    toCartesian(polar, cartesian);
+
+    x = -100.0 * cartesian[1];
+    y = 100.0 * cartesian[2];
+    z = 100.0 * cartesian[0];
+  }
+  
+  void projection::calcPanoramaPositionForAPoint(int &x, int &y, cv::MatIterator_<cv::Vec4f> it, double &range)
+  {
 	double kart[3], polar[3], phi, theta;
+	//get the x,y,z in right handed coordinate system in meters
 	kart[0] = (*it)[2]/100;
 	kart[1] = (*it)[0]/-100;
 	kart[2] = (*it)[1]/100;
+	//get the polar coordinte of x,y,z this is in rad
 	toPolar(kart, polar);
 	//theta == polar[0] == scan [4]
 	//phi == polar[1] == scan [5]
 	//range == polar[2] == scan [3]
-	theta = polar[0] * 180 / M_PI;
-	phi = polar[1] * 180 / M_PI;
+	theta = polar[0];
+	phi = polar[1];
 	range = polar[2];
-	//horizantal angle of view of [0:360] and vertical of [-40:60]
-	phi = 360.0 - phi;
-        phi *= M_PI / 180.0;
-	theta -= 90;
+	//horizantal angle of view of [0:360][minHorzAngle_:maxHorzAngle_] and vertical of [-40:60][minVertAngle_:maxVertAngle]
+        //phi == longitude == horizantal angle of view of [0:360] 
+	//shift it to clockwise instead of counter clockwise 
+	phi = (2 * M_PI) - phi;
+	//theta == latitude == vertical angle of view of [-40:60]
+	//shift the vertical angle instead of -90:90 to 0:180 from north to south pole
+	theta -= M_PI/2.0;
 	theta *= -1;
-	theta *= 2.0 * M_PI / 360.0;
-	
+    
+    //EQUIRECTANGULAR projection
+    if(method_ == EQUIRECTANGULAR)
+      {
 	x = (int) ( xFactor_ * phi);
 	if (x < 0) x = 0;
 	if (x > widthMax_) x = widthMax_;
-	y = (int) ( yFactor_ * (theta + heightLow_) );
+	y = (int) ( yFactor_ * (theta - heightLow_) );
 	y = heightMax_ - y;
 	if (y < 0) y = 0;
 	if (y > heightMax_) y = heightMax_;	
@@ -551,25 +425,6 @@ namespace fbr
     //CONIC projection
     if(method_ == CONIC)
       {
-	double kart[3], polar[3], phi, theta;
-        kart[0] = (*it)[2]/100;
-        kart[1] = (*it)[0]/-100;
-        kart[2] = (*it)[1]/100;
-        toPolar(kart, polar);
-        //theta == polar[0] == scan [4]
-        //phi == polar[1] == scan [5]
-        //range == polar[2] == scan [3]
-        theta = polar[0] * 180 / M_PI;
-        phi = polar[1] * 180 / M_PI;
-        range = polar[2];
-        //phi == longitude == horizantal angle of view of [0:360] 
-        phi = 180.0 - phi;
-        phi *= M_PI / 180.0;
-        //theta == latitude == vertical angle of view of [-40:60]
-        theta -= 90;
-        theta *= -1;
-        theta *= M_PI / 180.0;
-
 	// add minimum x position as an offset
         x = (int) ( xFactor_ * (sqrt(c_ - 2 * n_ * sin( theta) ) / n_ * sin(n_ * (phi - long0_)) + fabs(xMin_) ) );
         if (x < 0) x = 0;
@@ -585,24 +440,6 @@ namespace fbr
     //CYLINDRICAL projection
     if(method_ == CYLINDRICAL)
       {
-      	double kart[3], polar[3], phi, theta;
-	kart[0] = (*it)[2]/100;
-	kart[1] = (*it)[0]/-100;
-	kart[2] = (*it)[1]/100;
-	toPolar(kart, polar);
-	//theta == polar[0] == scan [4]
-	//phi == polar[1] == scan [5]
-	//range == polar[2] == scan [3]
-	theta = polar[0] * 180 / M_PI;
-	phi = polar[1] * 180 / M_PI;
-	range = polar[2];
-	//horizantal angle of view of [0:360] and vertical of [-40:60]
-	phi = 360.0 - phi;
-	phi = phi * 2.0 * M_PI / 360.0;
-	theta -= 90;
-	theta *= -1;
-	theta *= 2.0 * M_PI / 360.0;
-	
 	x = (int) ( xFactor_ * phi);
 	if (x < 0) x = 0;
 	if (x > widthMax_) x = widthMax_;
@@ -612,60 +449,21 @@ namespace fbr
 	if (y > heightMax_) y = heightMax_;	
       }
 
-
-
     //EQUALAREACYLINDRICAL projection
     if(method_ == EQUALAREACYLINDRICAL)
       {
-      	double kart[3], polar[3], phi, theta;
-	kart[0] = (*it)[2]/100;
-	kart[1] = (*it)[0]/-100;
-	kart[2] = (*it)[1]/100;
-	toPolar(kart, polar);
-	//theta == polar[0] == scan [4]
-	//phi == polar[1] == scan [5]
-	//range == polar[2] == scan [3]
-	theta = polar[0] * 180 / M_PI;
-	phi = polar[1] * 180 / M_PI;
-	range = polar[2];
-	//horizantal angle of view of [0:360] and vertical of [-40:60]
-	phi = 360.0 - phi;
-	phi = phi * 2.0 * M_PI / 360.0;
-	theta -= 90;
-	theta *= -1;
-	theta *= 2.0 * M_PI / 360.0;
-
-	x = (int) ( xFactor_ * (phi*cos(param_/360*2*M_PI)));
+	x = (int) ( xFactor_ * (phi*cos(param_)));
 	if (x < 0) x = 0;
 	if (x > widthMax_) x = widthMax_;
-	y = (int) ((double) yFactor_ * ((sin(theta) - sin(heightLow_)) / cos(param_/360*2*M_PI)));
+	y = (int) ((double) yFactor_ * ((sin(theta) - sin(heightLow_)) / cos(param_)));
 	y = heightMax_ - y;
 	if (y < 0) y = 0;
 	if (y > heightMax_) y = heightMax_;
       }
-
     
     //Mercator Projection
     if( method_ == MERCATOR)
       {
-      	double kart[3], polar[3], phi, theta;
-	kart[0] = (*it)[2]/100;
-	kart[1] = (*it)[0]/-100;
-	kart[2] = (*it)[1]/100;
-	toPolar(kart, polar);
-	//theta == polar[0] == scan [4]
-	//phi == polar[1] == scan [5]
-	//range == polar[2] == scan [3]
-	theta = polar[0] * 180 / M_PI;
-	phi = polar[1] * 180 / M_PI;
-	range = polar[2];
-	//horizantal angle of view of [0:360] and vertical of [-40:60]
-	phi = 360.0 - phi;
-	phi = phi * 2.0 * M_PI / 360.0;
-	theta -= 90;
-	theta *= -1;
-	theta *= 2.0 * M_PI / 360.0;
-
 	x = (int) ( xFactor_ * phi);
 	if (x < 0) x = 0;
 	if (x > widthMax_) x = widthMax_;
@@ -678,28 +476,10 @@ namespace fbr
     //RECTILINEAR projection
     if(method_ == RECTILINEAR)
       {
-      	double kart[3], polar[3], phi, theta;
-	kart[0] = (*it)[2]/100;
-	kart[1] = (*it)[0]/-100;
-	kart[2] = (*it)[1]/100;
-	toPolar(kart, polar);
-	//theta == polar[0] == scan [4]
-	//phi == polar[1] == scan [5]
-	//range == polar[2] == scan [3]
-	theta = polar[0] * 180 / M_PI;
-	phi = polar[1] * 180 / M_PI;
-	range = polar[2];
-	//horizantal angle of view of [0:360] and vertical of [-40:60]
-	phi = 360.0 - phi;
-	phi = phi * 2.0 * M_PI / 360.0;
-	theta -= 90;
-	theta *= -1;
-	theta *= 2.0 * M_PI / 360.0;
-	
 	for(unsigned int j = 0 ; j < numberOfImages_ ; j++)
 	  {
-	    iMinX_ = j * interval_;
-	    iMaxX_ = (j + 1) * interval_;
+	    iMinX_ = minHorizAngle_ + (j * interval_);
+	    iMaxX_ = minHorizAngle_ + ((j + 1) * interval_);
 	    //check for point in interval_
 	    if(phi <= iMaxX_ && phi >= iMinX_)
 	      {
@@ -741,28 +521,10 @@ namespace fbr
     //PANNINI projection
     if(method_ == PANNINI)
       {
-	double kart[3], polar[3], phi, theta;
-	kart[0] = (*it)[2]/100;
-	kart[1] = (*it)[0]/-100;
-	kart[2] = (*it)[1]/100;
-	toPolar(kart, polar);
-	//theta == polar[0] == scan [4]
-	//phi == polar[1] == scan [5]
-	//range == polar[2] == scan [3]
-	theta = polar[0] * 180 / M_PI;
-	phi = polar[1] * 180 / M_PI;
-	range = polar[2];
-	//horizantal angle of view of [0:360] and vertical of [minAngle_:maxAngle_]
-	phi = 360.0 - phi;
-	phi = phi * 2.0 * M_PI / 360.0;
-	theta -= 90;
-	theta *= -1;
-	theta *= 2.0 * M_PI / 360.0;
-
 	for(unsigned int i = 0 ; i < numberOfImages_ ; i++)
 	  {
-	    iMinX_ = i * interval_;
-	    iMaxX_ = (i + 1) * interval_;
+	    iMinX_ = minHorizAngle_ + (i * interval_);
+	    iMaxX_ = minHorizAngle_ + ((i + 1) * interval_);
 	    //check for point in interval_
 	    if(phi <= (iMaxX_) && phi >= (iMinX_))
 	      {
@@ -808,28 +570,10 @@ namespace fbr
     //STEREOGRAPHIC projection
     if(method_ == STEREOGRAPHIC)
       {
-      	double kart[3], polar[3], phi, theta;
-	kart[0] = (*it)[2]/100;
-	kart[1] = (*it)[0]/-100;
-	kart[2] = (*it)[1]/100;
-	toPolar(kart, polar);
-	//theta == polar[0] == scan [4]
-	//phi == polar[1] == scan [5]
-	//range == polar[2] == scan [3]
-	theta = polar[0] * 180 / M_PI;
-	phi = polar[1] * 180 / M_PI;
-	range = polar[2];
-	//horizantal angle of view of [0:360] and vertical of [-40:60]
-	phi = 360.0 - phi;
-	phi = phi * 2.0 * M_PI / 360.0;
-	theta -= 90;
-	theta *= -1;
-	theta *= 2.0 * M_PI / 360.0;
-	
 	for (unsigned int j = 0 ; j < numberOfImages_ ; j++)
 	  {
-	    iMinX_ = j * interval_;
-	    iMaxX_ = (j + 1) * interval_;
+	    iMinX_ = minHorizAngle_ + (j * interval_);
+	    iMaxX_ = minHorizAngle_ + ((j + 1) * interval_);
 	    //check for point in interval_s
 	    if(phi <= (iMaxX_) && phi >= (iMinX_))
 	      {
@@ -872,24 +616,6 @@ namespace fbr
     //ZAXIS projection
     if(method_ == ZAXIS)
       {
-      	double kart[3], polar[3], phi, theta;
-	kart[0] = (*it)[2]/100;
-	kart[1] = (*it)[0]/-100;
-	kart[2] = (*it)[1]/100;
-	toPolar(kart, polar);
-	//theta == polar[0] == scan [4]
-	//phi == polar[1] == scan [5]
-	//range == polar[2] == scan [3]
-	theta = polar[0] * 180 / M_PI;
-	phi = polar[1] * 180 / M_PI;
-	range = polar[2];
-	//horizantal angle of view of [0:360] and vertical of [-40:60]
-	phi = 360.0 - phi;
-	phi = phi * 2.0 * M_PI / 360.0;
-	theta -= 90;
-	theta *= -1;
-	theta *= 2.0 * M_PI / 360.0;
-
 	x = (int) ( xFactor_ * phi);
 	if (x < 0) x = 0;
 	if (x > widthMax_) x = widthMax_;
@@ -904,25 +630,6 @@ namespace fbr
     //AZIMUTHAL projection
     if(method_ == AZIMUTHAL)
       {
-	double kart[3], polar[3], phi, theta;
-	kart[0] = (*it)[2]/100;
-	kart[1] = (*it)[0]/-100;
-	kart[2] = (*it)[1]/100;
-	toPolar(kart, polar);
-	//theta == polar[0] == scan [4]
-	//phi == polar[1] == scan [5]
-	//range == polar[2] == scan [3]
-	theta = polar[0] * 180 / M_PI;
-	phi = polar[1] * 180 / M_PI;
-	range = polar[2];
-	//phi == longitude == horizantal angle of view of [0:360] 
-	phi = 180.0 - phi;
-	phi *= M_PI / 180.0;
-	//theta == latitude == vertical angle of view of [-40:60]
-	theta -= 90;
-	theta *= -1;
-	theta *= M_PI / 180.0;
-
 	//calculate kPrime_ according to Mathworld article
 	kPrime_ = sqrt(2/(1+sin(phi1_)*sin(theta)+cos(phi1_)*cos(theta)*cos(phi-long0_)));
 	
@@ -971,11 +678,12 @@ namespace fbr
   {
     if((xSize_/ySize_) != ((double)width_/height_))
       {
-	cout<<endl;
-	cout<<"!!Best Image Ratio (x/y) for this Projection is: "<<xSize_/ySize_<<endl;
-	cout<<"width_/height_: "<<(double)width_/height_<<endl;
 	if(imageSizeOptimization_ == true)
 	  {
+	    cout<<endl;
+	    cout<<"!!Best Image Ratio (x/y) for this Projection is: "<<xSize_/ySize_<<endl;
+	    cout<<"width_/height_: "<<(double)width_/height_<<endl;
+
 	    double tWidth, tHeight;
 	    int imageNumber = 1;
 	    if(method_ == RECTILINEAR || method_ == PANNINI || method_ == STEREOGRAPHIC)
