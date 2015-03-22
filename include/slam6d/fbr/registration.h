@@ -3,7 +3,7 @@
  * @brife register two scans.
  * This class register two scans with respect to the matched features.
  * It determines the transformation matrix.
- * @author HamidReza Houshiar. Jacobs University Bremen gGmbH, Germany.
+ * @author Hamidreza Houshiar. Jacobs University Bremen gGmbH, Germany.
  * @date Date: 2012/05/30 1:00
  */
 

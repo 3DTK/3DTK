@@ -1,7 +1,7 @@
 /**
  * @file fbr_global.h
  * @brief Globally used headers, functions, structures
- * @author HamidReza Houshiar. Jacobs University Bremen gGmbH, Germany.
+ * @author Hamidreza Houshiar. Jacobs University Bremen gGmbH, Germany.
  * @date 2012/05/9 14:00
  */
 
@@ -75,6 +75,16 @@ namespace fbr{
     FARTHEST,
     EXTENDED,
     FULL,
+    NON,
+  };
+  /**
+   * @enum panorama_format
+   */
+  enum panorama_format{
+    PNG,
+    JPEG,
+    JPEG2000,
+    TIFF,
   };
   /**
    * @enum feature_image
@@ -148,6 +158,9 @@ namespace fbr{
   projection_method stringToProjectionMethod(string method);
   string panoramaMapMethodToString(panorama_map_method method);
   panorama_map_method stringToPanoramaMapMethod(string method);
+  string panoramaFormatToString(panorama_format format);
+  string panoramaFormatToFileFormatString(panorama_format format);
+  panorama_format stringToPanoramaFormat(string format);
   string featureDetectorMethodToString(feature_detector_method method);
   feature_detector_image_method stringToFeatureDetectorImageMethod(string method);
   string featureDetectorImageMethodToString(feature_detector_image_method method);

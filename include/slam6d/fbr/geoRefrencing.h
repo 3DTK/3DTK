@@ -3,7 +3,7 @@
  * @brife geo refrence a scan with the set of corespondences.
  * This class geo refrence a scan with respect to the selected ponints.
  * It determines the transformation matrix.
- * @author HamidReza Houshiar. Jacobs University Bremen gGmbH, Germany.
+ * @author Hamidreza Houshiar. Jacobs University Bremen gGmbH, Germany.
  * @date Date: 2014/01/17 1:00
  */
 

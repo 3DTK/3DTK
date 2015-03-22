@@ -3,7 +3,7 @@
  * @brife matches two sets of features
  * This class is a feature matcher that findes the matching features.
  * It determines the matching features from two sets of feature descriptors and features.
- * @author HamidReza Houshiar. Jacobs University Bremen gGmbH, Germany.
+ * @author Hamidreza Houshiar. Jacobs University Bremen gGmbH, Germany.
  * @date Date: 2012/05/29 2:00
  */
 

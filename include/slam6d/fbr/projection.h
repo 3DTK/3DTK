@@ -37,10 +37,10 @@ namespace fbr{
             Stereographic projection (Master Thesis for more info)
 	    or phi_s for EQUALAREACYLINDRICAL projection
    * @param minZ_, maxZ_ min and max of Z
-   * @param maxAngle_, minAngle_ max and min vertical angle of scan
+   * @param maxVertAngle_, minVertAngle_, maxHorizAngle_, minHorizAngle_ max and min vertical and horizontalangle of scan
    * @param imageSizeOprimization_ flag for image size optimization method
    * @param xSize_, ySize_, xFactor_, yFactor_, withMax_, heightMax_, heightLow_ Panormam projection parameters
-   * @param minVertAngle_, maxVertAngle_, minHorizAngle_, maxHorizAngle_, lat0_, long0_, phi1_, phi2_, n_, c_, rho0_, 
+   * @param  lat0_, long0_, phi1_, phi2_, n_, c_, rho0_, 
             xMax_, xMin_, yMin_, yMax_ Coninc projection params
    * @param coscRectilinear_ rectilinear projection param
    * @param sPannini_ pannini projection param
@@ -60,15 +60,17 @@ namespace fbr{
      * @param param special parameter for pannini or stereographic projections
      * @param minZ float the min value of Z
      * @param maxZ float the max value of Z
-     * @param maxAngle double the vertcal max angle of scan
-     * @param minAngle double the vertcal min angle of scan
+     * @param maxHorizAngle double the horizontal max angle of scan
+     * @param minHorizAngle double the horizontal min angle of scan
+     * @param maxVertAngle double the vertcal max angle of scan
+     * @param minVertAngle double the vertcal min angle of scan
      * @param imageSizeOptimization bool a flag for optimizing the image size
      */
     projection();
-    projection(unsigned int width, unsigned int height, projection_method method, unsigned int numberOfImages, double param, double minZ, double maxZ, double minAngle, double maxAngle, bool imageSizeOptimization);
+    projection(unsigned int width, unsigned int height, projection_method method, unsigned int numberOfImages, double param, double minZ, double maxZ, double minHorizAngle, double maxHorizAngle, double minVertAngle, double maxVertAngle, bool imageSizeOptimization);
 
     //init the class
-    void init(unsigned int width, unsigned int height, projection_method method, unsigned int numberOfImages, double param, double minZ, double maxZ, double minAngle, double maxAngle, bool imageSizeOptimization);
+    void init(unsigned int width, unsigned int height, projection_method method, unsigned int numberOfImages, double param, double minZ, double maxZ, double minHorizAngle, double maxHorizAngle, double minVertAngle, double maxVertAngle, bool imageSizeOptimization);
 
     /**
      * @brief recovers the point cloud from the panorama image and
@@ -80,7 +82,16 @@ namespace fbr{
     void recoverPointCloud(const cv::Mat& rangeImage,
                            cv::Mat& reflectanceImage,
                            vector<cv::Vec4f> &reducedPoints);
-
+    /**
+     * @breif caclculates the x and y and z of the 3D point from panorama projection
+     * @param x - the x of point
+     * @param y - the y of point
+     * @param z - the z of point
+     * @param row - of the panorama
+     * @param col - of the panorama
+     * @param range - range of the point
+     */
+    void calcPointFromPanoramaPosition(double& x, double& y, double& z, int row, int col, double range);
     /**
      * @breif caclculates the x and y of the 3D point on panorama projection
      * @param x - the x on panorama
@@ -110,7 +121,7 @@ namespace fbr{
     unsigned int numberOfImages_;
     double param_;
     float minZ_, maxZ_;
-    double maxAngle_, minAngle_;
+    double minVertAngle_, maxVertAngle_, minHorizAngle_, maxHorizAngle_;
     bool imageSizeOptimization_;
     
     //panorama projeciton params
@@ -119,7 +130,6 @@ namespace fbr{
     int widthMax_, heightMax_;
     double heightLow_;
     //conic params
-    double minVertAngle_, maxVertAngle_, minHorizAngle_, maxHorizAngle_;
     double lat0_, long0_;
     double phi1_, phi2_;
     double n_, c_, rho0_;

@@ -84,8 +84,8 @@ namespace fbr{
               panorama_map_method mapMethod,
 	      float minZ,
 	      float maxZ,
-	      double MINANGLE,
-	      double MAXANGLE);
+	      double MINVERTANGLE,
+	      double MAXVERTANGLE);
     panorama (unsigned int width,
               unsigned int height,
               projection_method method,
@@ -94,10 +94,42 @@ namespace fbr{
               panorama_map_method mapMethod,
 	      float minZ,
 	      float maxZ,
-	      double MINANGLE,
-	      double MAXANGLE,
+	      double MINVERTANGLE,
+	      double MAXVERTANGLE,
 	      bool imageSizeOptimization);
 
+    panorama (unsigned int width,
+	      unsigned int height,
+	      projection_method method,
+	      unsigned int numberOfImages,
+	      double param,
+	      panorama_map_method mapMethod,
+	      float minZ,
+	      float maxZ,
+	      double MINVERTANGLE,
+	      double MAXAVERTNGLE,
+	      bool imageSizeOptimization,
+	      bool reflectance,
+	      bool range,
+	      bool color);
+    
+    panorama (unsigned int width,
+	      unsigned int height,
+	      projection_method method,
+	      unsigned int numberOfImages,
+	      double param,
+	      panorama_map_method mapMethod,
+	      float minZ,
+	      float maxZ,
+	      double MINHORIZANGLE,
+	      double MAXAHORIZNGLE,
+	      double MINVERTANGLE,
+	      double MAXAVERTNGLE,
+	      bool imageSizeOptimization,
+	      bool reflectance,
+	      bool range,
+	      bool color);
+    
     void init(unsigned int width,
               unsigned int height,
               projection_method method,
@@ -106,9 +138,14 @@ namespace fbr{
               panorama_map_method mapMethod,
 	      float minZ = 0, 
 	      float maxZ = 0,
-	      double MINANGLE = -40,
-	      double MAXANGLE = 60,
-	      bool imageSizeOptimization = false);
+	      double MINHORIZANGLE = 0,
+	      double MAXHORIZANGLE = 360,
+	      double MINVERTANGLE = -40,
+	      double MAXVERTANGLE = 60,
+	      bool imageSizeOptimization = false,
+	      bool reflectance = false,
+	      bool range = true,
+	      bool color = false);
     
     void clear();
 
@@ -154,7 +191,11 @@ namespace fbr{
     /**
      * Brief this function will normalize the range image to (0-1) 
      */
-    cv::Mat getNormalizediRange();
+    cv::Mat getNormalizedRangeImage(); 
+    /**
+     * Brief this function will put the flot range in to 24 bit rgb (3*8) type mat
+     */
+    cv::Mat get24BitThreeChannelRangeImage();
     cv::Mat getColorImage();
     
     cv::Mat getMap();
@@ -172,6 +213,10 @@ namespace fbr{
 	     cv::MatIterator_<cv::Vec3f> itColor,
              double range);
  
+    //flags for panorrama images
+    bool reflectance_;
+    bool range_;
+    bool color_;
     //container and panorama params
     cv::Mat iReflectance_;
     cv::Mat iMap_;
