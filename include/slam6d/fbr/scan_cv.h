@@ -4,7 +4,7 @@
  * This class is an 3D scan container for scans that have different scan
  * file formats and add them to a OpenCV Mat data type also normalize the
  * reflectance.
- * @author HamidReza Houshiar. Jacobs University Bremen gGmbH, Germany.
+ * @author Hamidreza Houshiar. Jacobs University Bremen gGmbH, Germany.
  * @date Date: 2012/05/9 2:00
  */
 

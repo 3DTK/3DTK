@@ -1,7 +1,7 @@
 /*
  * feature_based_registration implementation
  *
- * Copyright (C) HamidReza Houshiar
+ * Copyright (C) Hamidreza Houshiar
  *
  * Released under the GPL version 3.
  *
@@ -50,7 +50,7 @@ struct information{
   double minReflectance, maxReflectance;
   double secondMinReflectance, secondMaxReflectance;
   bool loadOct, saveOct;
-  bool reflectance, color;
+  bool reflectance, color, range;
   int MIN_ANGLE, MAX_ANGLE;
   bool iSizeOptimization;
   
@@ -184,6 +184,7 @@ void parssArgs(int argc, char** argv, information& info){
   info.saveOct = false;
   info.reflectance = true;
   info.color = false;
+  info.range = true;
   info.MIN_ANGLE = -40;
   info.MAX_ANGLE = 60;
   info.iSizeOptimization = false;
@@ -516,7 +517,10 @@ int main(int argc, char** argv){
 		      fScan.getZMax(), 
 		      info.MIN_ANGLE, 
 		      info.MAX_ANGLE, 
-		      info.iSizeOptimization);
+		      info.iSizeOptimization,
+		      info.reflectance,
+		      info.range,
+		      info.color);
 
   //verbose
   if(info.verbose >= 4) info.fPTime = (double)cv::getTickCount();
@@ -658,7 +662,10 @@ int main(int argc, char** argv){
 		      sScan.getZMax(),
 		      info.MIN_ANGLE, 
 		      info.MAX_ANGLE, 
-		      info.iSizeOptimization);
+		      info.iSizeOptimization,
+		      info.reflectance,
+		      info.range,
+		      info.color);
   
   //verbose  
   if(info.verbose >= 4) info.sPTime = (double)cv::getTickCount();

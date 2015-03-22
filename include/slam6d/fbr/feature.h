@@ -1,7 +1,7 @@
 /**
  * @file feature.h
  * @brief detects features on images and create the descriptor for them
- * @author HamidReza Houshiar. Jacobs University Bremen gGmbH, Germany.
+ * @author Hamidreza Houshiar. Jacobs University Bremen gGmbH, Germany.
  * @date Date: 2012/5/24/ 2:00
  */
 

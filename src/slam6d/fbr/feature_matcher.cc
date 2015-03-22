@@ -1,7 +1,7 @@
 /*
  * feature_mathcer implementation
  *
- * Copyright (C) HamidReza Houshiar
+ * Copyright (C) Hamidreza Houshiar
  *
  * Released under the GPL version 3.
  *

@@ -1,3 +1,12 @@
+/*
+ * panorama_matcher implementation
+ *
+ * Copyright (C) Hamidreza Houshiar
+ *
+ * Released under the GPL version 3.
+ *
+ */
+
 #include <stdio.h>
 #include <fstream>
 #include "slam6d/fbr/fbr_global.h"

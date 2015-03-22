@@ -64,17 +64,28 @@ add_executable(panorama_matcher panorama_matcher.cc fbr_global.cc)
   ENDIF(WIN32)
 
 
-###panorama creator
-add_executable(panorama_creator panorama_creator.cc fbr_global.cc)
+###scan to panorama
+add_executable(scan_to_panorama scan_to_panorama.cc fbr_global.cc)
 
   IF(UNIX)
-  target_link_libraries(panorama_creator fbr newmat ${FBR_LIBS} showstatic ${SHOW_LIBS} ${OPENGL_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY})
+  target_link_libraries(scan_to_panorama fbr newmat ${FBR_LIBS} showstatic ${SHOW_LIBS} ${OPENGL_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY})
   ENDIF(UNIX)
 
   IF (WIN32)
-  target_link_libraries(panorama_creator fbr newmat ${FBR_LIBS} showstatic ${SHOW_LIBS} ${OPENGL_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} XGetopt) 
+  target_link_libraries(scan_to_panorama fbr newmat ${FBR_LIBS} showstatic ${SHOW_LIBS} ${OPENGL_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} XGetopt) 
   ENDIF(WIN32)
 
+
+###panorama reader
+add_executable(panorama_to_scan panorama_to_scan.cc fbr_global.cc)
+
+  IF(UNIX)
+  target_link_libraries(panorama_to_scan fbr newmat ${FBR_LIBS} showstatic ${SHOW_LIBS} ${OPENGL_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY})
+  ENDIF(UNIX)
+
+  IF (WIN32)
+  target_link_libraries(panorama_to_scan fbr newmat ${FBR_LIBS} showstatic ${SHOW_LIBS} ${OPENGL_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} XGetopt) 
+  ENDIF(WIN32)
 
 
 ELSE(OpenCV_VERSION_MAJOR GREATER 1 AND OpenCV_VERSION_MINOR GREATER 2)

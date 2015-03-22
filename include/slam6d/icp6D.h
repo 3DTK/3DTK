@@ -70,7 +70,8 @@ public:
   inline void set_cad_matching (bool cad_matching);
   inline bool get_cad_matching (void);
   inline void set_meta(bool meta);
-
+  inline int get_nr_pointPair();
+  
 protected:
 
   /**
@@ -137,6 +138,11 @@ protected:
    * determines if CAD models are matched against one scan
    */
   bool cad_matching;
+
+  /**
+   * number of matched points in ICP
+   */
+  int nr_pointPair;
 };
 
 #include "icp6D.icc"

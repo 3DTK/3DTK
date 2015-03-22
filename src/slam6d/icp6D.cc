@@ -49,9 +49,9 @@ using std::cerr;
  * @param nns_method Selects NNS method to be used  
  */
 icp6D::icp6D(icp6Dminimizer *my_icp6Dminimizer, double max_dist_match,
-		   int max_num_iterations, bool quiet, bool meta, int rnd, bool eP,
-		   int anim, double epsilonICP, int nns_method, bool cuda_enabled,
-		   bool cad_matching)
+	     int max_num_iterations, bool quiet, bool meta, int rnd, bool eP,
+	     int anim, double epsilonICP, int nns_method, bool cuda_enabled,
+	     bool cad_matching)
 {
   this->my_icp6Dminimizer = my_icp6Dminimizer;
   this->anim              = anim;
@@ -66,14 +66,14 @@ icp6D::icp6D(icp6Dminimizer *my_icp6Dminimizer, double max_dist_match,
   // checks
   if (max_dist_match < 0.0) {
     cerr << "ERROR [ICP6D]: first parameter (max_dist_match) "
-	    << "has to be >= 0,"
-	    << endl;
+	 << "has to be >= 0,"
+	 << endl;
     exit(1);
   }
   if (max_num_iterations < 0) {
     cerr << "ERROR [ICP6D]: second parameter (max_num_iterations)"
-	    << "has to be >= 0."
-	    << endl;
+	 << "has to be >= 0."
+	 << endl;
     exit(1);
   }
   
@@ -88,6 +88,9 @@ icp6D::icp6D(icp6Dminimizer *my_icp6Dminimizer, double max_dist_match,
   // Set initial seed (for "real" random numbers)
   //  srand( (unsigned)time( NULL ) );
   this->cad_matching = cad_matching;
+
+  //set the number of point pairs to zero
+  nr_pointPair = 0;
 }
 
 /**
@@ -112,14 +115,14 @@ int icp6D::match(Scan* PreviousScan, Scan* CurrentScan,
   double ret = 0.0, prev_ret = 0.0, prev_prev_ret = 0.0;
   int iter = 0;
   double alignxf[16];
-long time = GetCurrentTimeInMilliSec();
-
+  long time = GetCurrentTimeInMilliSec();
+  
   for (iter = 0; iter < max_num_iterations; iter++) {
 
     prev_prev_ret = prev_ret;
     prev_ret = ret;
 
-if (iter == 1) time = GetCurrentTimeInMilliSec();
+    if (iter == 1) time = GetCurrentTimeInMilliSec();
 
 #ifdef _OPENMP
     // Implementation according to the paper 
@@ -147,7 +150,7 @@ if (iter == 1) time = GetCurrentTimeInMilliSec();
       sum[i] = centroid_m[i][0] = centroid_m[i][1] = centroid_m[i][2] = 0.0;
       centroid_d[i][0] = centroid_d[i][1] = centroid_d[i][2] = 0.0;
       Si[i][0] = Si[i][1] = Si[i][2] = Si[i][3] = Si[i][4] = 0.0;
-	 Si[i][5] = Si[i][6] = Si[i][7] = Si[i][8] = 0.0;
+      Si[i][5] = Si[i][6] = Si[i][7] = Si[i][8] = 0.0;
       n[i] = 0;
     }
 
@@ -156,9 +159,9 @@ if (iter == 1) time = GetCurrentTimeInMilliSec();
       int thread_num = omp_get_thread_num();
 
       Scan::getPtPairsParallel(pairs, PreviousScan, CurrentScan,
-          thread_num, step,
-          rnd, max_dist_match2,
-          sum, centroid_m, centroid_d, pairing_mode);
+			       thread_num, step,
+			       rnd, max_dist_match2,
+			       sum, centroid_m, centroid_d, pairing_mode);
 
       n[thread_num] = (unsigned int)pairs[thread_num].size();
 
@@ -167,11 +170,11 @@ if (iter == 1) time = GetCurrentTimeInMilliSec();
         for (unsigned int i = 0; i < n[thread_num]; i++) {
 
           double pp[3] = {pairs[thread_num][i].p1.x - centroid_m[thread_num][0],
-            pairs[thread_num][i].p1.y - centroid_m[thread_num][1],
-            pairs[thread_num][i].p1.z - centroid_m[thread_num][2]};
+			  pairs[thread_num][i].p1.y - centroid_m[thread_num][1],
+			  pairs[thread_num][i].p1.z - centroid_m[thread_num][2]};
           double qq[3] = {pairs[thread_num][i].p2.x - centroid_d[thread_num][0],
-            pairs[thread_num][i].p2.y - centroid_d[thread_num][1],
-            pairs[thread_num][i].p2.z - centroid_d[thread_num][2]};
+			  pairs[thread_num][i].p2.y - centroid_d[thread_num][1],
+			  pairs[thread_num][i].p2.z - centroid_d[thread_num][2]};
           // formula (6)
           Si[thread_num][0] += pp[0] * qq[0];
           Si[thread_num][1] += pp[0] * qq[1];
@@ -191,22 +194,25 @@ if (iter == 1) time = GetCurrentTimeInMilliSec();
     for (int i = 0; i < OPENMP_NUM_THREADS; i++) {
       pairssize += n[i];
     }
+    //add the number of point pair
+    nr_pointPair = pairssize;
+    
     if (pairssize > 3) {
       if ((my_icp6Dminimizer->getAlgorithmID() == 1) ||
           (my_icp6Dminimizer->getAlgorithmID() == 2) ) {
         ret = my_icp6Dminimizer->Align_Parallel(OPENMP_NUM_THREADS,
-									   n, sum,
-									   centroid_m, centroid_d,
-									   Si, alignxf);
+						n, sum,
+						centroid_m, centroid_d,
+						Si, alignxf);
       } else if (my_icp6Dminimizer->getAlgorithmID() == 6) {
         ret = my_icp6Dminimizer->Align_Parallel(OPENMP_NUM_THREADS,
-									   n, sum,
-									   centroid_m, centroid_d, 
-									   pairs,
-									   alignxf);
+						n, sum,
+						centroid_m, centroid_d, 
+						pairs,
+						alignxf);
       } else {
         cout << "This parallel minimization algorithm is not implemented !!!"
-		   << endl;
+	     << endl;
         exit(-1);
       }
     } else {
@@ -219,12 +225,15 @@ if (iter == 1) time = GetCurrentTimeInMilliSec();
     vector<PtPair> pairs;
    
     Scan::getPtPairs(&pairs, PreviousScan, CurrentScan, 0, rnd,
-        max_dist_match2, ret, centroid_m, centroid_d, pairing_mode);
+		     max_dist_match2, ret, centroid_m, centroid_d, pairing_mode);
 
+    //set the number of point paira
+    nr_pointPair = pairs.size();
+    
     // do we have enough point pairs?
     if (pairs.size() > 3) {
       if (my_icp6Dminimizer->getAlgorithmID() == 3 ||
-		my_icp6Dminimizer->getAlgorithmID() == 8 ) {
+	  my_icp6Dminimizer->getAlgorithmID() == 8 ) {
         memcpy(alignxf, CurrentScan->get_transMat(), sizeof(alignxf));
       }
       ret = my_icp6Dminimizer->Align(pairs, alignxf, centroid_m, centroid_d);
@@ -235,31 +244,30 @@ if (iter == 1) time = GetCurrentTimeInMilliSec();
 #endif
 
     if ((iter == 0 && anim != -2) || ((anim > 0) && (iter % anim == 0))) {
-	 // transform the current scan
+      // transform the current scan
       CurrentScan->transform(alignxf, Scan::ICP, 0);  
     } else {
-	 // transform the current scan
+      // transform the current scan
       CurrentScan->transform(alignxf, Scan::ICP, -1);  
     }
     
     if ((fabs(ret - prev_ret) < epsilonICP) &&
-	   (fabs(ret - prev_prev_ret) < epsilonICP)) {
+	(fabs(ret - prev_prev_ret) < epsilonICP)) {
       double id[16];
       M4identity(id);
       if(anim == -2) {
-	   // write end pose
+	// write end pose
         CurrentScan->transform(id, Scan::ICP, -1);  
       } else {
-	   // write end pose
+	// write end pose
         CurrentScan->transform(id, Scan::ICP, 0);  
       }
-    break;
+      break;
     }
   }
   
-long endtime = GetCurrentTimeInMilliSec() - time;
+  long endtime = GetCurrentTimeInMilliSec() - time;
   cout << "TIME  " << endtime << "   ITER " << iter <<  endl;
-  
   return iter;
 }
 
@@ -270,79 +278,79 @@ long endtime = GetCurrentTimeInMilliSec() - time;
  *
  */
 double icp6D::Point_Point_Error(Scan* PreviousScan,
-						  Scan* CurrentScan,
-						  double max_dist_match,
-						  unsigned int *np,
-              double scale_max)
+				Scan* CurrentScan,
+				double max_dist_match,
+				unsigned int *np,
+				double scale_max)
 {
   double scale = log(scale_max) / (max_dist_match*max_dist_match);
   double error = 0;
   unsigned int nr_ppairs = 0;
 
 #ifdef _OPENMP
-    omp_set_num_threads(OPENMP_NUM_THREADS);
+  omp_set_num_threads(OPENMP_NUM_THREADS);
 
-    int max = (int)CurrentScan->size<DataXYZ>("xyz reduced");
-    int step = max / OPENMP_NUM_THREADS;
+  int max = (int)CurrentScan->size<DataXYZ>("xyz reduced");
+  int step = max / OPENMP_NUM_THREADS;
 
-    vector<PtPair> pairs[OPENMP_NUM_THREADS];
-    double sum[OPENMP_NUM_THREADS];
-    double centroid_m[OPENMP_NUM_THREADS][3];
-    double centroid_d[OPENMP_NUM_THREADS][3];
+  vector<PtPair> pairs[OPENMP_NUM_THREADS];
+  double sum[OPENMP_NUM_THREADS];
+  double centroid_m[OPENMP_NUM_THREADS][3];
+  double centroid_d[OPENMP_NUM_THREADS][3];
 
-    for (int i = 0; i < OPENMP_NUM_THREADS; i++) {
-      sum[i] = centroid_m[i][0] = centroid_m[i][1] = centroid_m[i][2] = 0.0;
-      centroid_d[i][0] = centroid_d[i][1] = centroid_d[i][2] = 0.0;
-    }
+  for (int i = 0; i < OPENMP_NUM_THREADS; i++) {
+    sum[i] = centroid_m[i][0] = centroid_m[i][1] = centroid_m[i][2] = 0.0;
+    centroid_d[i][0] = centroid_d[i][1] = centroid_d[i][2] = 0.0;
+  }
 
 #pragma omp parallel 
-    {
-      int thread_num = omp_get_thread_num();
-      Scan::getPtPairsParallel(pairs, PreviousScan, CurrentScan,
-						 thread_num, step,
-						 rnd, sqr(max_dist_match),
-						 sum, centroid_m, centroid_d, CLOSEST_POINT);
+  {
+    int thread_num = omp_get_thread_num();
+    Scan::getPtPairsParallel(pairs, PreviousScan, CurrentScan,
+			     thread_num, step,
+			     rnd, sqr(max_dist_match),
+			     sum, centroid_m, centroid_d, CLOSEST_POINT);
 
-    } 
+  } 
 
-    for (unsigned int thread_num = 0;
-	    thread_num < OPENMP_NUM_THREADS;
-	    thread_num++) {
-      for (unsigned int i = 0;
-		 i < (unsigned int)pairs[thread_num].size();
-		 i++) {
-        double dist = sqr(pairs[thread_num][i].p1.x - pairs[thread_num][i].p2.x)
-          + sqr(pairs[thread_num][i].p1.y - pairs[thread_num][i].p2.y)
-          + sqr(pairs[thread_num][i].p1.z - pairs[thread_num][i].p2.z);
+  for (unsigned int thread_num = 0;
+       thread_num < OPENMP_NUM_THREADS;
+       thread_num++) {
+    for (unsigned int i = 0;
+	 i < (unsigned int)pairs[thread_num].size();
+	 i++) {
+      double dist = sqr(pairs[thread_num][i].p1.x - pairs[thread_num][i].p2.x)
+	+ sqr(pairs[thread_num][i].p1.y - pairs[thread_num][i].p2.y)
+	+ sqr(pairs[thread_num][i].p1.z - pairs[thread_num][i].p2.z);
       error -= 0.39894228 * exp(dist*scale);
-      }
-      nr_ppairs += (unsigned int)pairs[thread_num].size();
     }
+    nr_ppairs += (unsigned int)pairs[thread_num].size();
+  }
 #else
 
-    double centroid_m[3] = {0.0, 0.0, 0.0};
-    double centroid_d[3] = {0.0, 0.0, 0.0};
-    vector<PtPair> pairs;
+  double centroid_m[3] = {0.0, 0.0, 0.0};
+  double centroid_d[3] = {0.0, 0.0, 0.0};
+  vector<PtPair> pairs;
 
-    Scan::getPtPairs(&pairs, PreviousScan, CurrentScan, 0,
-				 rnd, sqr(max_dist_match),
-                     error, centroid_m, centroid_d,
-				 CLOSEST_POINT);
+  Scan::getPtPairs(&pairs, PreviousScan, CurrentScan, 0,
+		   rnd, sqr(max_dist_match),
+		   error, centroid_m, centroid_d,
+		   CLOSEST_POINT);
 
-    // getPtPairs computes error as sum of squared distances
-    error = 0;
+  // getPtPairs computes error as sum of squared distances
+  error = 0;
 
-    for (unsigned int i = 0; i < pairs.size(); i++) {
-      double dist = sqr(pairs[i].p1.x - pairs[i].p2.x)
-        + sqr(pairs[i].p1.y - pairs[i].p2.y)
-        + sqr(pairs[i].p1.z - pairs[i].p2.z);
-      error -= 0.39894228 * exp(dist*scale);
-    }
-    nr_ppairs = pairs.size();
+  for (unsigned int i = 0; i < pairs.size(); i++) {
+    double dist = sqr(pairs[i].p1.x - pairs[i].p2.x)
+      + sqr(pairs[i].p1.y - pairs[i].p2.y)
+      + sqr(pairs[i].p1.z - pairs[i].p2.z);
+    error -= 0.39894228 * exp(dist*scale);
+  }
+  nr_ppairs = pairs.size();
 #endif
 
-    if (np) *np = nr_ppairs;
-    return error/nr_ppairs;
+  if (np) *np = nr_ppairs;
+  return error/nr_ppairs;
 }
 
 /**
@@ -376,11 +384,11 @@ void icp6D::doICP(vector <Scan *> allScans, PairingMode pairing_mode)
       if (meta) {
         match(my_MetaScan, CurrentScan, pairing_mode);
       } else
-      if (cad_matching) {
-        match(allScans[0], CurrentScan, pairing_mode);
-      } else {
-        match(PreviousScan, CurrentScan, pairing_mode);
-      }
+	if (cad_matching) {
+	  match(allScans[0], CurrentScan, pairing_mode);
+	} else {
+	  match(PreviousScan, CurrentScan, pairing_mode);
+	}
     }
 
     // push processed scan

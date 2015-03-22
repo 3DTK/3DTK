@@ -105,3 +105,12 @@ inline bool icp6D::get_cad_matching (void)
 {
   return this->cad_matching;
 }
+
+/**
+ * Get the nr of point pairs
+ *
+ * @return the nr of point pairs
+ */
+inline int icp6D::get_nr_pointPair() {
+  return nr_pointPair;
+}
