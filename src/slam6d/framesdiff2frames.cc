@@ -28,48 +28,55 @@ using std::ofstream;
 #define snprintf sprintf_s
 #endif 
 
-int parseArgs(int argc,char **argv, char fframe1[255], char fframe2[255], char sframe[255]) { 
+void usage(int argc, char** argv)
+{
+  cout << "Usage: " << argv[0] << "  [-a filename] [-b filename] [-c filename]" << endl << endl;
+  
+  cout << "  -a filename  The name of the first .frames file of the first scan (to be retained)" << endl
+       << "  -b filename  The name of the second .frames file of the first scan (to be ignored)" << endl
+       << "  -c filename  The name of the .frames file of the second scan (to be replaced)" << endl
+       << endl;
+  cout << "Creates a unified .frames file out of the result of seperate calls to slam6d that involve the same scan." << endl;
+  cout << "The scenario is assumed to be as follows: Scan 1 has been matched to some other scan." << endl;
+  cout << "This results in a .frames file for Scan 1 (a). Scan 1 and Scan 2 are matched in a seperate call to slam6d." << endl;
+  cout << "This results in two .frames files, one for Scan 1 (b) and one for Scan 2 (c). This program computes a" << endl;
+  cout << "frame that can be used in conjunction with .frames file (a)." << endl;
+  exit(1);
+}
+void parseArgs(int argc,char **argv, char fframe1[255], char fframe2[255], char sframe[255]) { 
   int  c;
   // from unistd.h
   extern char *optarg;
   extern int optind;
-
+  int optionCount = 0;
+  
   while ((c = getopt (argc, argv, "a:b:c:")) != -1)
     switch (c)
-   {
-   case 'a':
-     strncpy(fframe1, optarg, 255);
-     break;
-   case 'b':
-     strncpy(fframe2, optarg, 255);
-     break;
-   case 'c':
-     strncpy(sframe, optarg, 255);
-     break;
-   }
-
-  //cout << fframe1 << " " << fframe2 << " "  << sframe << " " << optind << " " << argc << endl; 
-
-  if (optind != argc) {
-    cerr << "\n*** Directory missing ***\n" << endl; 
-    cerr << endl
-	  << "Usage: " << argv[0] << "  [-a filename] [-b filename] [-c filename]" << endl << endl;
-
-    cerr  << "  -a filename  The name of the first .frames file of the first scan (to be retained)" << endl
-          << "  -b filename  The name of the second .frames file of the first scan (to be ignored)" << endl
-          << "  -c filename  The name of the .frames file of the second scan (to be replaced)" << endl
-	        << endl;
-    cerr << "Creates a unified .frames file out of the result of seperate calls to slam6d that involve the same scan." << endl;
-    cerr << "The scenario is assumed to be as follows: Scan 1 has been matched to some other scan." << endl;
-    cerr << "This results in a .frames file for Scan 1 (a). Scan 1 and Scan 2 are matched in a seperate call to slam6d." << endl;
-    cerr << "This results in two .frames files, one for Scan 1 (b) and one for Scan 2 (c). This program computes a" << endl;
-    cerr << "frame that can be used in conjunction with .frames file (a)." << endl;
-    abort();
-  }
-
-  return 0;
+      {
+      case 'a':
+	strncpy(fframe1, optarg, 255);
+	optionCount++;
+	break;
+      case 'b':
+	strncpy(fframe2, optarg, 255);
+	optionCount++;
+	break;
+      case 'c':
+	strncpy(sframe, optarg, 255);
+	optionCount++;
+	break;
+      case '?':
+	usage(argc, argv);
+	break;
+      default:
+	usage(argc, argv);
+      }
+  if(optionCount != 3)
+    {
+      cout<<"Too few input options."<<endl;
+      usage(argc, argv);
+    }
 }
-
 
 void readFrame(char *filename, double *transmat) {
   ifstream file_in;
