@@ -119,7 +119,7 @@ private:
 	int filterMode;
 	int nrOfParam;
 	// parameters for custom filter
-	bool custParamsSet = false;
+     bool custParamsSet;
 	double *custFiltParams;
 };
 

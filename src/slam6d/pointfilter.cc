@@ -198,6 +198,7 @@ bool CheckerHeightBottom::test(double* point) {
 }
 
 CheckerCustom::CheckerCustom(const std::string& value) {
+  custParamsSet = false; 
     try{
       // every custom filter description is defined as 
       // {filterMode};{nrOfParams}[;param1][;param2][...]
