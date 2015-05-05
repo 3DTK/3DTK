@@ -85,6 +85,14 @@ namespace fbr{
     JPEG,
     JPEG2000,
     TIFF,
+    WebP,
+  };
+  /**
+   * @enum panorama_type
+   */
+  enum panorama_type{
+    ThreeChannel24BitRange,
+    ThreeGrayscaleRange,
   };
   /**
    * @enum feature_image
@@ -161,6 +169,8 @@ namespace fbr{
   string panoramaFormatToString(panorama_format format);
   string panoramaFormatToFileFormatString(panorama_format format);
   panorama_format stringToPanoramaFormat(string format);
+  string panoramaTypeToString(panorama_type type);
+  panorama_type stringToPanoramaType(string type);
   string featureDetectorMethodToString(feature_detector_method method);
   feature_detector_image_method stringToFeatureDetectorImageMethod(string method);
   string featureDetectorImageMethodToString(feature_detector_image_method method);

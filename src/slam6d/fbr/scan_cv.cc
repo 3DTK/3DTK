@@ -228,6 +228,7 @@ namespace fbr{
     vector<float*> points;
     tree->getTree()->AllPoints(points);
 
+    Scan::closeDirectory();
     
     nPoints = points.size();
     cv::MatIterator_<cv::Vec4f> it;
@@ -297,7 +298,6 @@ namespace fbr{
       
       ++it;
     }
-    Scan::closeDirectory();
   }
 
   string scan_cv::getScanDir(){
