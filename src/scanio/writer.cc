@@ -157,7 +157,7 @@ void write_uos_rgb(DataXYZ &xyz, DataRGB &rgb, ofstream &file)
   if(file.good() && xyz.size() == rgb.size())
     for(unsigned int j = 0; j < xyz.size(); j++) {
       file << xyz[j][0] << " " << xyz[j][1] << " " << xyz[j][2] << " "
-              << rgb[j][0] << " " << rgb[j][1] << " " << rgb[j][2]
+              << (int)rgb[j][0] << " " << (int)rgb[j][1] << " " << (int)rgb[j][2]
               << endl;
     }
 }
@@ -188,7 +188,7 @@ void write_xyz_rgb(DataXYZ &xyz, DataRGB &rgb, ofstream &file, double scaleFac)
   if(file.good() && xyz.size() == rgb.size())
     for(unsigned int j = 0; j < xyz.size(); j++) {
       file << scaleFac*xyz[j][2] << " " << -scaleFac*xyz[j][0] << " " << scaleFac*xyz[j][1] << " "
-              << rgb[j][0] << " " << rgb[j][1] << " " << rgb[j][2]
+              << (int)rgb[j][0] << " " << (int)rgb[j][1] << " " << (int)rgb[j][2]
               << endl;
     }
 }
