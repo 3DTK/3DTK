@@ -149,6 +149,9 @@ namespace fbr{
     case TIFF:
       sFormat = "TIFF";
       break;
+    case WebP:
+      sFormat = "WebP";
+      break;
     default:
       throw std::runtime_error(std::string("panorama fromat ") + to_string(format) + std::string(" could not be matched to a panorama format"));
     }
@@ -170,6 +173,9 @@ namespace fbr{
     case TIFF:
       sFormat = "tiff";
       break;
+    case WebP:
+      sFormat = "webp";
+      break;
     default:
       throw std::runtime_error(std::string("panorama fromat ") + to_string(format) + std::string(" could not be matched to a panorama format"));
     }
@@ -181,9 +187,31 @@ namespace fbr{
     else if(strcasecmp(format.c_str(), "JPEG") == 0) return JPEG;
     else if(strcasecmp(format.c_str(), "JPEG2000") == 0) return JPEG2000;
     else if(strcasecmp(format.c_str(), "TIFF") == 0) return TIFF;
+    else if(strcasecmp(format.c_str(), "WebP") == 0) return WebP;
     else throw std::runtime_error(std::string("panorama format ") + format + std::string(" is unknown"));
   }
   
+  string panoramaTypeToString(panorama_type type){
+    string sType;
+    switch(type){
+    case ThreeChannel24BitRange:
+      sType = "ThreeChannel24BitRange";
+      break;
+    case ThreeGrayscaleRange:
+      sType = "ThreeGrayscaleRange";
+      break;
+    default:
+      throw std::runtime_error(std::string("panorama type ") + to_string(type) + std::string(" could not be matched to a panorama type"));
+    }
+    return sType;
+  }
+ 
+  panorama_type stringToPanoramaType(string type){
+    if(strcasecmp(type.c_str(), "ThreeChannel24BitRange") == 0) return ThreeChannel24BitRange;
+    else if(strcasecmp(type.c_str(), "ThreeGrayscaleRange") == 0) return ThreeGrayscaleRange;
+    else throw std::runtime_error(std::string("panorama type ") + type + std::string(" is unknown"));
+  }
+
   string featureDetectorImageMethodToString(feature_detector_image_method method)
   {
     string sMethod;

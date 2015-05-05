@@ -47,6 +47,7 @@ struct information{
   bool reflectance, color, range;
   bool normalizeRange;
   bool threeChannelRange;
+  bool threeGrayscaleRange;
   bool saveOct, loadOct;  
 } info;
 
@@ -83,6 +84,7 @@ void usage(int argc, char** argv){
   printf("\t\t-A range \t\t\t creates the Range image\n");
   printf("\t\t-a normalizeiRange \t\t normalize the Range image to have values between 0--255\n");
   printf("\t\t-c threeChannelRange \t\t puts the range(meter*10000) value in a 3*8 bit rgb image\n");
+  printf("\t\t-g threeGrayscaleRange \t\t puts the range(meter*10000) value in three CVU8 grayscale images\n");
   printf("\t\t-l loadOct \t\t\t load the Octtree\n");
   printf("\t\t-o saveOct \t\t\t save the Octtree\n");
   printf("\n");
@@ -116,13 +118,14 @@ void parssArgs(int argc, char** argv, information& info){
   info.range = false;
   info.normalizeRange = false;
   info.threeChannelRange = false;
+  info.threeGrayscaleRange = false;
   info.saveOct = false;
   info.loadOct = false;
   
   int c;
   opterr = 0;
   //reade the command line and get the options
-  while ((c = getopt (argc, argv, "aAb:B:cCe:f:F:H:ilm:M:n:N:oO:p:P:Rs:S:t:w:W:x:")) != -1)
+  while ((c = getopt (argc, argv, "aAb:B:cCe:f:F:gH:ilm:M:n:N:oO:p:P:Rs:S:t:w:W:x:")) != -1)
     switch (c)
       {
       case 'a':
@@ -153,6 +156,10 @@ void parssArgs(int argc, char** argv, information& info){
 	break;
       case 'F':
 	info.panoramaFormat = stringToPanoramaFormat(optarg);
+	break;
+      case 'g':
+	info.threeGrayscaleRange = true;
+	info.range = true;
 	break;
       case 'H':
         info.panoramaHeight = atoi(optarg);
@@ -235,7 +242,7 @@ void parssArgs(int argc, char** argv, information& info){
     
   info.inDir = argv[optind];
   if(info.outDir.empty()) info.outDir = info.inDir;
-  else if(info.outDir.compare(info.outDir.size()-1, 1, "/") != 0) info.outDir += "/";
+  if(info.outDir.back() != '/') info.outDir += '/';
 }
 
 void printInfo(information info){
@@ -265,6 +272,7 @@ void printInfo(information info){
   cout<<"Range= "<<info.range<<endl;
   cout<<"Normalize Range= "<<info.normalizeRange<<endl;
   cout<<"Three Channel Range= "<<info.threeChannelRange<<endl;
+  cout<<"Three Gray Range= "<<info.threeGrayscaleRange<<endl;
   cout<<"Save Oct= "<<info.saveOct<<endl;
   cout<<"Load Oct= "<<info.loadOct<<endl;
   cout<<"-------------------------------"<<endl<<endl;
@@ -281,17 +289,16 @@ int main(int argc, char** argv)
   for(int s = info.start; s <= info.end; s++)
     {
       scan_cv scan(info.inDir, s, info.scanFormat, scanserver, info.scannerType, info.loadOct, info.saveOct, info.reflectance, info.color, -1, -1, info.minReflectance, info.maxReflectance);
-      
+
       scan.convertScanToMat();
-      
+
       //init the panorama
       fbr::panorama pImage;
       pImage.init(info.panoramaWidth, info.panoramaHeight, info.projectionMethod, info.numberOfImages, info.projectionParam, info.mapMethod, scan.getZMin(), scan.getZMax(), info.minHorizAngle, info.maxHorizAngle, info.minVertAngle, info.maxVertAngle, info.panoramaSizeOptimization, info.reflectance, info.range, info.color);
       
       //create panorama
       pImage.createPanorama(scan.getMatScan(), scan.getMatScanColor());
-      
-      
+            
       //get the new panorama image size incase of optimized panorama size
       info.panoramaWidth = pImage.getImageWidth();
       info.panoramaHeight = pImage.getImageHeight();
@@ -307,44 +314,60 @@ int main(int argc, char** argv)
       case JPEG:
 	panoramaFormatParams.push_back(CV_IMWRITE_JPEG_QUALITY);
 	panoramaFormatParams.push_back(info.panoramaFormatParam);
+	//panoramaFormatParams.push_back(CV_IMWRITE_JPEG_LUMA_QUALITY);
+	//panoramaFormatParams.push_back(100);
+	//panoramaFormatParams.push_back(CV_IMWRITE_JPEG_CHROMA_QUALITY);
+	//panoramaFormatParams.push_back(99);
 	break;
       case JPEG2000:
 	break;
       case TIFF:
 	break;
+	//case WebP:
+	//panoramaFormatParams.push_back(CV_IMWRITE_WEBP_QUALITY);
+	//panoramaFormatParams.push_back(info.panoramaFormatParam);
+	break;
       }
       
       if(info.range == true)
 	{
-	  //out = info.outDir+to_string(s, 3)+"_"+projectionMethodToString(info.projectionMethod)+"_"+to_string(info.panoramaWidth)+"x"+to_string(info.panoramaHeight)+"_Range."+panoramaFormatToFileFormatString(info.panoramaFormat);
 	  out = info.outDir+"scan"+to_string(s, 3)+"_"+projectionMethodToString(info.projectionMethod)+"_"+to_string(info.panoramaWidth)+"x"+to_string(info.panoramaHeight)+"_Range."+panoramaFormatToFileFormatString(info.panoramaFormat);
 	  imwrite(out, pImage.getRangeImage(), panoramaFormatParams);
 	}
       
       if(info.normalizeRange == true)
 	{
-	  //out = info.outDir+to_string(s, 3)+"_"+projectionMethodToString(info.projectionMethod)+"_"+to_string(info.panoramaWidth)+"x"+to_string(info.panoramaHeight)+"_NormalizedRange."+panoramaFormatToFileFormatString(info.panoramaFormat);
 	  out = info.outDir+"scan"+to_string(s, 3)+"_"+projectionMethodToString(info.projectionMethod)+"_"+to_string(info.panoramaWidth)+"x"+to_string(info.panoramaHeight)+"_NormalizedRange."+panoramaFormatToFileFormatString(info.panoramaFormat);
 	  imwrite(out, pImage.getNormalizedRangeImage(), panoramaFormatParams);
 	}
       
       if(info.threeChannelRange == true)
 	{
-	  //out = info.outDir+to_string(s, 3)+"_"+projectionMethodToString(info.projectionMethod)+"_"+to_string(info.panoramaWidth)+"x"+to_string(info.panoramaHeight)+"_24BitThreeChannelRange."+panoramaFormatToFileFormatString(info.panoramaFormat);
-	  out = info.outDir+"scan"+to_string(s, 3)+"_"+projectionMethodToString(info.projectionMethod)+"_"+to_string(info.panoramaWidth)+"x"+to_string(info.panoramaHeight)+"_24BitThreeChannelRange."+panoramaFormatToFileFormatString(info.panoramaFormat);
-	  imwrite(out, pImage.get24BitThreeChannelRangeImage(), panoramaFormatParams);
+	  out = info.outDir+"scan"+to_string(s, 3)+"_"+projectionMethodToString(info.projectionMethod)+"_"+to_string(info.panoramaWidth)+"x"+to_string(info.panoramaHeight)+"_ThreeChannel24BitRange."+panoramaFormatToFileFormatString(info.panoramaFormat);
+	  imwrite(out, pImage.getThreeChannel24BitRangeImage(), panoramaFormatParams);
 	}
       
+      if(info.threeGrayscaleRange == true)
+	{
+	  cv::Mat range1, range2, range3;
+	  pImage.getThreeGrayscaleRangeImages(range1, range2, range3);
+
+	  out = info.outDir+"scan"+to_string(s, 3)+"_"+projectionMethodToString(info.projectionMethod)+"_"+to_string(info.panoramaWidth)+"x"+to_string(info.panoramaHeight)+"_ThreeGrayscaleRange_1."+panoramaFormatToFileFormatString(info.panoramaFormat);
+	  imwrite(out, range1, panoramaFormatParams);
+	  out = info.outDir+"scan"+to_string(s, 3)+"_"+projectionMethodToString(info.projectionMethod)+"_"+to_string(info.panoramaWidth)+"x"+to_string(info.panoramaHeight)+"_ThreeGrayscaleRange_2."+panoramaFormatToFileFormatString(info.panoramaFormat);
+	  imwrite(out, range2, panoramaFormatParams);
+	  out = info.outDir+"scan"+to_string(s, 3)+"_"+projectionMethodToString(info.projectionMethod)+"_"+to_string(info.panoramaWidth)+"x"+to_string(info.panoramaHeight)+"_ThreeGrayscaleRange_3."+panoramaFormatToFileFormatString(info.panoramaFormat);
+	  imwrite(out, range3, panoramaFormatParams);
+	}
+
       if(info.reflectance == true)
 	{
-	  //out = info.outDir+to_string(s, 3)+"_"+projectionMethodToString(info.projectionMethod)+"_"+to_string(info.panoramaWidth)+"x"+to_string(info.panoramaHeight)+"_Reflectance."+panoramaFormatToFileFormatString(info.panoramaFormat);
 	  out = info.outDir+"scan"+to_string(s, 3)+"_"+projectionMethodToString(info.projectionMethod)+"_"+to_string(info.panoramaWidth)+"x"+to_string(info.panoramaHeight)+"_Reflectance."+panoramaFormatToFileFormatString(info.panoramaFormat);
 	  imwrite(out, pImage.getReflectanceImage(), panoramaFormatParams);
 	}
       
       if(info.color == true)
 	{
-	  //out = info.outDir+to_string(s, 3)+"_"+projectionMethodToString(info.projectionMethod)+"_"+to_string(info.panoramaWidth)+"x"+to_string(info.panoramaHeight)+"_Color."+panoramaFormatToFileFormatString(info.panoramaFormat);
 	  out = info.outDir+"scan"+to_string(s, 3)+"_"+projectionMethodToString(info.projectionMethod)+"_"+to_string(info.panoramaWidth)+"x"+to_string(info.panoramaHeight)+"_Color."+panoramaFormatToFileFormatString(info.panoramaFormat);
 	  imwrite(out, pImage.getColorImage(), panoramaFormatParams);
 	}

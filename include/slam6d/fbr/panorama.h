@@ -193,9 +193,13 @@ namespace fbr{
      */
     cv::Mat getNormalizedRangeImage(); 
     /**
-     * Brief this function will put the flot range in to 24 bit rgb (3*8) type mat
+     * Brief this function will put the float range in to 24 bit rgb (3*8) type mat
      */
-    cv::Mat get24BitThreeChannelRangeImage();
+    cv::Mat getThreeChannel24BitRangeImage();
+    /**
+     * Brief this function will put the float range in to three grayscale images
+     */
+    void getThreeGrayscaleRangeImages(cv::Mat& range1, cv::Mat& range2, cv::Mat& range3);
     cv::Mat getColorImage();
     
     cv::Mat getMap();

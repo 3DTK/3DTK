@@ -286,7 +286,7 @@ namespace fbr
     return normalizediRange;
   }
 
-  cv::Mat panorama::get24BitThreeChannelRangeImage()
+  cv::Mat panorama::getThreeChannel24BitRangeImage()
   {
     int width = projection_->getProjectionWidth();
     int height = projection_->getProjectionHeight();
@@ -310,6 +310,31 @@ namespace fbr
     return threeChannelRange;
   }
 
+  void panorama::getThreeGrayscaleRangeImages(cv::Mat& range1, cv::Mat& range2, cv::Mat& range3)
+  {
+    int width = projection_->getProjectionWidth();
+    int height = projection_->getProjectionHeight();
+
+    range1.create(height, width, CV_8UC1);
+    range2.create(height, width, CV_8UC1);
+    range3.create(height, width, CV_8UC1);
+    range1 = cv::Scalar::all(0);
+    range2 = cv::Scalar::all(0);
+    range3 = cv::Scalar::all(0);
+    for(int h = 0; h < height; h++)
+      {
+	for(int w = 0; w < width; w++)
+	  {
+	    unsigned char bytes[3];
+	    unsigned int rangeValue = (int)(iRange_.at<float>(h,w) * 10000);
+	    
+	    range1.at<uchar>(h,w) = (rangeValue >> 16) & 0xFF;
+	    range2.at<uchar>(h,w) = (rangeValue >> 8) & 0xFF;
+	    range3.at<uchar>(h,w) = rangeValue & 0xFF;
+	  }
+      }
+  }
+  
   cv::Mat panorama::getColorImage()
   {
     return iColor_;
