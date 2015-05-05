@@ -23,8 +23,12 @@ using namespace std;
 using namespace fbr;
 
 struct information{
+  panorama_type inputImageType;
+  string inputThreeChannel24BitRangeImage;
+  string inputThreeGrayscaleRangeImage1;
+  string inputThreeGrayscaleRangeImage2;
+  string inputThreeGrayscaleRangeImage3;
   string inputRangeImage;
-  string input24BitThreeChannelRangeImage;
   string inputReflectanceImage;
   string inputColorImage;
   int imageWidth, imageHeight;
@@ -37,10 +41,10 @@ struct information{
 void usage(int argc, char** argv)
 {
   printf("\n");
-  printf("USAGE: %s -c threechannel range image -O output dir\n", argv[0]);
+  printf("USAGE: %s input images -t the input image type -O output dir\n", argv[0]);
   printf("\n");
   printf("\n");
-  printf("\t-c 24BitThreeChannelRange\t load the 24 bit three channel range image\n");
+  printf("\t-t the input images type [ThreeChannel24BitRange|ThreeGrayscaleRange]\n");
   printf("\t-O output dir\t\t\t output Dir\n");
   printf("\n");
   printf("\tOptions:\n");
@@ -69,14 +73,11 @@ void parssArgs(int argc, char** argv, information& info)
   int c;
   opterr = 0;
   //reade the command line and get the options
-  while ((c = getopt (argc, argv, "A:c:C:m:n:p:R:O:w:x:")) != -1)
+  while ((c = getopt (argc, argv, "A:C:m:n:O:p:R:t:w:x:")) != -1)
     switch (c)
       {
-      case 'A':
+      case 'A':	
 	info.inputRangeImage = optarg;
-	break;
-      case 'c':
-	info.input24BitThreeChannelRangeImage = optarg;
 	break;
       case 'C':
 	info.inputColorImage = optarg;
@@ -87,16 +88,19 @@ void parssArgs(int argc, char** argv, information& info)
       case 'n':
 	info.minVertAngle = atoi(optarg);
 	break;
+      case 'O':
+	info.outputDir = optarg;
+	if(info.outputDir.back() != '/')
+	  info.outputDir += '/';
+	break;
       case 'p':
 	info.projectionMethod = stringToProjectionMethod(optarg);
 	break;
       case 'R':
 	info.inputReflectanceImage = optarg;
 	break;
-      case 'O':
-	info.outputDir = optarg;
-	if(info.outputDir.back() != '/')
-	  info.outputDir += '/';
+      case 't':
+	info.inputImageType = stringToPanoramaType(optarg);
 	break;
       case 'w':
 	info.maxHorizAngle = atoi(optarg);
@@ -117,16 +121,43 @@ void parssArgs(int argc, char** argv, information& info)
       cout<<"The output dir is not available."<<endl;
       usage(argc, argv);
     }
-  if(info.input24BitThreeChannelRangeImage.empty())
+  if(info.inputImageType == ThreeChannel24BitRange)
     {
-      cout<<"The three channel range image is not available."<<endl;
-      usage(argc, argv);
+      if(argc - optind != 1)
+	{
+	  cout<<"Error with  input arguments. The ThreeChannel24BitRange image is requiered"<<endl;
+	  usage(argc, argv);
+	}
+      else
+	{
+	  info.inputThreeChannel24BitRangeImage = argv[optind];
+	}
     }
+
+  if(info.inputImageType == ThreeGrayscaleRange)
+    {
+      if(argc - optind != 3)
+	{
+	  cout<<"Error with  input arguments. Three grayscale range images are requiered"<<endl;
+	  usage(argc, argv);
+	}
+      else
+	{
+	  info.inputThreeGrayscaleRangeImage1 = argv[optind];
+	  info.inputThreeGrayscaleRangeImage2 = argv[optind+1];
+	  info.inputThreeGrayscaleRangeImage3 = argv[optind+2];
+	}
+    }
+
 }
 
 void printInfo(information info)
 {
-  cout<<"Input 24 Bit Three Channel Range Image= "<<info.input24BitThreeChannelRangeImage<<endl;
+  cout<<"Input eange image type= "<<panoramaTypeToString(info.inputImageType)<<endl;
+  cout<<"Input Three Channel 24 Bit Range Image= "<<info.inputThreeChannel24BitRangeImage<<endl;
+  cout<<"Input Three Grayscale Range Image 1= "<<info.inputThreeGrayscaleRangeImage1<<endl;
+  cout<<"Input Three Grayscale Range Image 2= "<<info.inputThreeGrayscaleRangeImage2<<endl;
+  cout<<"Input Three Grayscale Range Image 3= "<<info.inputThreeGrayscaleRangeImage3<<endl;
   cout<<"Input Range Image= "<<info.inputRangeImage<<endl;
   cout<<"Input Reflectance Image= "<<info.inputReflectanceImage<<endl;
   cout<<"Input Color Image= "<<info.inputColorImage<<endl;
@@ -146,76 +177,121 @@ int main(int argc, char** argv)
 
   //panorama containers
   cv::Mat iRange;
-  cv::Mat i24BitThreeChannelRange;
+  cv::Mat iThreeChannel24BitRange;
+  cv::Mat iThreeGrayscaleRange1;
+  cv::Mat iThreeGrayscaleRange2;
+  cv::Mat iThreeGrayscaleRange3;
   cv::Mat iReflectance;
   cv::Mat iColor;
+
+  switch(info.inputImageType){
+  case ThreeChannel24BitRange:
+    if(info.inputThreeChannel24BitRangeImage.empty() == false)
+      {
+	iThreeChannel24BitRange = cv::imread(info.inputThreeChannel24BitRangeImage.c_str(), -1);
+	if(iThreeChannel24BitRange.type() != CV_8UC3)
+	  {
+	    cout<<"The Three Channel 24 Bit Range has a wrong type."<<endl;
+	    return 0;
+	  }
+	
+	info.imageHeight = iThreeChannel24BitRange.rows;
+	info.imageWidth = iThreeChannel24BitRange.cols;
+      }
+    else
+      {
+	cout<<"The Three Channel 24 Bit Range is not available."<<endl;
+	return 0;
+      }
+    break;
+  case ThreeGrayscaleRange:
+    if(info.inputThreeGrayscaleRangeImage1.empty() == false
+       && info.inputThreeGrayscaleRangeImage2.empty() == false
+       && info.inputThreeGrayscaleRangeImage3.empty() == false)
+      {
+	iThreeGrayscaleRange1 = cv::imread(info.inputThreeGrayscaleRangeImage1.c_str(), -1);
+	iThreeGrayscaleRange2 = cv::imread(info.inputThreeGrayscaleRangeImage2.c_str(), -1);
+	iThreeGrayscaleRange3 = cv::imread(info.inputThreeGrayscaleRangeImage3.c_str(), -1);
+	if(iThreeGrayscaleRange1.type() != CV_8UC1
+	   || iThreeGrayscaleRange2.type() != CV_8UC1
+	   || iThreeGrayscaleRange3.type() != CV_8UC1)
+	  {
+	    cout<<"One of the Three Grayscale Range images has a wrong type."<<endl;
+	    return 0;
+	  }
+	if(iThreeGrayscaleRange1.rows != iThreeGrayscaleRange2.rows
+	   || iThreeGrayscaleRange1.rows != iThreeGrayscaleRange3.rows
+	   || iThreeGrayscaleRange2.rows != iThreeGrayscaleRange3.rows
+	   || iThreeGrayscaleRange1.cols != iThreeGrayscaleRange2.cols
+	   || iThreeGrayscaleRange1.cols != iThreeGrayscaleRange3.cols
+	   || iThreeGrayscaleRange2.cols != iThreeGrayscaleRange3.cols)
+	  {
+	    cout<<"Input images are not the same size."<<endl;
+	    return 0;
+	  }
+	info.imageHeight = iThreeGrayscaleRange1.rows;
+	info.imageWidth = iThreeGrayscaleRange1.cols;
+      }
+    else
+      {
+	cout<<"The Three Channel 24 Bit Range is not available."<<endl;
+	return 0;
+      }
+    break;
+  default:
+    cout<<"The proper input range image is not avaialable."<<endl;
+    return 0;
+    break;
+  }
   
-  if(info.input24BitThreeChannelRangeImage.empty() == false)
-    {
-      i24BitThreeChannelRange = cv::imread(info.input24BitThreeChannelRangeImage.c_str(), 1);
-      if(i24BitThreeChannelRange.type() != CV_8UC3)
-	{
-	  cout<<"The 24 Bit Three Channel Range has a wrong type."<<endl;
-	  return 0;
-	}
-
-      info.imageHeight = i24BitThreeChannelRange.rows;
-      info.imageWidth = i24BitThreeChannelRange.cols;
-    }
-  else
-    {
-      cout<<"The 24 Bit Three Channel Range is not available."<<endl;
-      return 0;
-    }
-
   //TODO: check for type and channels as well
   if(info.inputRangeImage.empty() == false)
     {
-      iRange = cv::imread(info.inputRangeImage.c_str(), 1);
+      iRange = cv::imread(info.inputRangeImage.c_str(), -1);
       if(info.imageHeight != iRange.rows)
 	{
 	  iRange.release();
-	  cout<<"The Height of Range image is not the same as 24 Bit Three Channel Range image."<<endl;
+	  cout<<"The Height of Range image is not the same as Three Channel 24 Bit Range image."<<endl;
 	  cout<<"Not using Range image."<<endl;
 	}
       if(info.imageWidth != iRange.cols)
 	{
 	  iRange.release();
-	  cout<<"The Width of Range image is not the same as 24 Bit Three Channel Range image."<<endl;
+	  cout<<"The Width of Range image is not the same as Three Channel 24 Bit Range image."<<endl;
 	  cout<<"Not using Range image."<<endl;
 	}
     }
 
     if(info.inputReflectanceImage.empty() == false)
     {
-      iReflectance = cv::imread(info.inputReflectanceImage.c_str(), 1);
+      iReflectance = cv::imread(info.inputReflectanceImage.c_str(), -1);
       if(info.imageHeight != iReflectance.rows)
 	{
 	  iReflectance.release();
-	  cout<<"The Height of Reflectance image is not the same as 24 Bit Three Channel Range image."<<endl;
+	  cout<<"The Height of Reflectance image is not the same as Three Channel 24 Bit Range image."<<endl;
 	  cout<<"Not using Reflectance image."<<endl;
 	}
       if(info.imageWidth != iReflectance.cols)
 	{
 	  iReflectance.release();
-	  cout<<"The Width of Reflectance image is not the same as 24 Bit Three Channel Range image."<<endl;
+	  cout<<"The Width of Reflectance image is not the same as Three Channel 24 Bit Range image."<<endl;
 	  cout<<"Not using Reflectance image."<<endl;
 	}
     }
 
     if(info.inputColorImage.empty() == false)
     {
-      iColor = cv::imread(info.inputColorImage.c_str(), 1);
+      iColor = cv::imread(info.inputColorImage.c_str(), -1);
       if(info.imageHeight != iColor.rows)
 	{
 	  iColor.release();
-	  cout<<"The Height of color image is not the same as 24 Bit Three Channel Range image."<<endl;
+	  cout<<"The Height of color image is not the same as Three Channel 24 Bit Range image."<<endl;
 	  cout<<"Not using Color image."<<endl;
 	}
       if(info.imageWidth != iColor.cols)
 	{
 	  iColor.release();
-	  cout<<"The Width of Colore image is not the same as 24 Bit Three Channel Range image."<<endl;
+	  cout<<"The Width of Colore image is not the same as Three Channel 24 Bit Range image."<<endl;
 	  cout<<"Not using Color image."<<endl;
 	}
     }
@@ -223,13 +299,24 @@ int main(int argc, char** argv)
     projection proj(info.imageWidth, info.imageHeight, info.projectionMethod, -1, -1, -1, -1, info.minHorizAngle, info.maxHorizAngle, info.minVertAngle, info.maxVertAngle, false);
     
     //read the panorama and write it to a file
-    //get the name of outputscan from the input 24BitThreeChannelRange image
+    //get the name of outputscan from the input ThreeChannel24BitRange image
     //images are usualy in the scanXXX-info-image type.file format
+    string inputFile;
+    if(info.inputImageType == ThreeChannel24BitRange)
+      {
+	inputFile = info.inputThreeChannel24BitRangeImage;
+      }
+    else if(info.inputImageType == ThreeGrayscaleRange)
+      {
+	inputFile = info.inputThreeGrayscaleRangeImage1;
+      }
+
     string inputImageName;
     string outputScanName;
     std::size_t found;
-    found = info.input24BitThreeChannelRangeImage.find_last_of("/\\");
-    inputImageName = info.input24BitThreeChannelRangeImage.substr(found+1);
+    //found = info.inputThreeChannel24BitRangeImage.find_last_of("/\\");
+    found = inputFile.find_last_of("/\\");
+    inputImageName = inputFile.substr(found+1);
     found = inputImageName.find("_");
     if (found == std::string::npos)
       {
@@ -244,14 +331,28 @@ int main(int argc, char** argv)
 	  {
 	    float range = 0.0;
 	    unsigned char byte;
-	    byte = i24BitThreeChannelRange.at<cv::Vec3b>(h,w)[0];
-	    range+= byte<<16;
-	    byte = i24BitThreeChannelRange.at<cv::Vec3b>(h,w)[1];
-	    range+= byte<<8;
-	    byte = i24BitThreeChannelRange.at<cv::Vec3b>(h,w)[2];
-	    range+= byte;
-	    range/= 10000;
 
+	    if(info.inputImageType == ThreeChannel24BitRange)
+	      {
+		byte = iThreeChannel24BitRange.at<cv::Vec3b>(h,w)[0];
+		range+= byte<<16;
+		byte = iThreeChannel24BitRange.at<cv::Vec3b>(h,w)[1];
+		range+= byte<<8;
+		byte = iThreeChannel24BitRange.at<cv::Vec3b>(h,w)[2];
+		range+= byte;
+		range/= 10000;
+	      }
+	    else if(info.inputImageType == ThreeGrayscaleRange)
+	      {
+		byte = iThreeGrayscaleRange1.at<uchar>(h,w);
+		range+= byte<<16;
+		byte = iThreeGrayscaleRange2.at<uchar>(h,w);
+		range+= byte<<8;
+		byte = iThreeGrayscaleRange3.at<uchar>(h,w);
+		range+= byte;
+		range/= 10000;
+	      }
+		
 	    double x, y, z, reflectance, r, g, b;
 	    proj.calcPointFromPanoramaPosition(x, y, z, h, w, range);
 	    if(iReflectance.empty() == false)
@@ -264,7 +365,7 @@ int main(int argc, char** argv)
 		g =  iColor.at<cv::Vec3f>(h,w)[1];
 		b =  iColor.at<cv::Vec3f>(h,w)[2];
 	      }
-	    
+		
 	    if( fabs(x) > 1e-5 && fabs(y) > 1e-5 && fabs(z) > 1e-5) 
 	      {
 		
@@ -288,3 +389,5 @@ int main(int argc, char** argv)
 	  }
       }
 }
+
+
