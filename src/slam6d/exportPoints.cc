@@ -102,7 +102,7 @@ void usage(char* prog)
       << bold << "  -s" << normal << " NR, " << bold << "--start=" << normal << "NR" << endl
       << "         start at scan NR (i.e., neglects the first NR scans)" << endl
       << "         [ATTENTION: counting naturally starts with 0]" << endl
-      << bold << "  -x" << "--xyz" << endl
+      << bold << "  -x, --xyz" << endl
       << "         export in xyz format (right handed coordinate system in m)" << endl
       << bold << "  -y" << normal << " NR, " << bold << "--scale=" << normal << "NR" << endl
       << "         scale factor for export in XYZ format (default value is 0.01, so output will be in [m])" << endl
@@ -248,7 +248,7 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &rand,
   return 0;
 }
 
-void readFrames(string dir, int start, int end)
+void readFrames(string dir, int start, int end, bool extrapolate_pose=true)
 {
   ifstream frame_in;
   int  fileCounter = start;
@@ -291,9 +291,14 @@ void readFrames(string dir, int start, int end)
     double tfin[16];
     MMult(transMat, tinv, tfin);
 
-    Scan::allScans[fileCounter - start - 1]->transformAll(transMat);
-    // save final pose in scan
-    Scan::allScans[fileCounter - start - 1]->transformMatrix(tfin);
+    if(!extrapolate_pose) {
+      Scan::allScans[fileCounter - start - 1]->transformAll(transMatOrig);
+      //Scan::allScans[fileCounter - start - 1]->transformMatrix(tinv);
+    } else {
+      Scan::allScans[fileCounter - start - 1]->transformAll(transMat);
+      // save final pose in scan
+      Scan::allScans[fileCounter - start - 1]->transformMatrix(tfin);
+    }
     frame_in.close();
     frame_in.clear();
   }
@@ -357,29 +362,67 @@ int main(int argc, char **argv)
   }
   
   // if specified, filter scans
+  unsigned int types = PointType::USE_NONE;
+  //TODO check if all file formats are included
+  if(use_reflectance) {
+    switch (iotype) {
+      case UOSR:
+      case UOS_RRGBT:
+      case UOS_RRGB:
+      case RIEGL_TXT:
+      case RIEGL_PROJECT:
+      case RXP:
+      case TXYZR:
+      case XYZR:
+      case XYZ_RRGB:
+      case FARO_XYZ_RGBR:
+      case LEICA_XYZR:
+        types |= PointType::USE_REFLECTANCE;
+        break;
+      default:
+        break;
+    }
+  }
+  
+  if(use_color) {
+    switch (iotype) {
+      case UOS_RGB:
+      case UOS_RRGBT:
+      case RIEGL_RGB:
+      case XYZ_RGB:
+      case KS_RGB:
+        types |= PointType::USE_COLOR;
+        break;
+      default:
+         break;
+    }
+  }
+
   for (size_t i = 0; i < Scan::allScans.size(); i++)  {
      if(rangeFilterActive) Scan::allScans[i]->setRangeFilter(maxDist, minDist);
      if(customFilterActive) Scan::allScans[i]->setCustomFilter(customFilter);
   }
   
 //
-//  int end_reduction = (int)Scan::allScans.size();
-//#ifdef _OPENMP
-//#pragma omp parallel for schedule(dynamic)
-//#endif
-//  for (int iterator = 0; iterator < end_reduction; iterator++) {
-//    if (red > 0) {
-//      cout << "Reducing Scan No. " << iterator << endl;
-//    } else {
-//      cout << "Copying Scan No. " << iterator << endl;
-//    }
-//    // reduction filter for current scan!
-//    Scan::allScans[iterator]->calcReducedPoints(red, octree);
-//  }
-//
-  if(eP) {
-    readFrames(dir, start, end);
+  int end_reduction = (int)Scan::allScans.size();
+#ifdef _OPENMP
+#pragma omp parallel for schedule(dynamic)
+#endif
+  for (int iterator = 0; iterator < end_reduction; iterator++) {
+    if (red > 0) {
+      PointType pointtype(types);
+      cout << "Reducing Scan No. " << iterator << endl;
+      Scan::allScans[iterator]->setReductionParameter(red, octree, pointtype);
+      Scan::allScans[iterator]->calcReducedPoints();
+    } else {
+      cout << "Copying Scan No. " << iterator << endl;
+    }
+    // reduction filter for current scan!
   }
+
+  if(eP) {
+  }
+  readFrames(dir, start, end, eP);
   
  cout << "Export all 3D Points to file \"points.pts\"" << endl;
  cout << "Export all 6DoF poses to file \"positions.txt\"" << endl;
@@ -390,13 +433,17 @@ int main(int argc, char **argv)
   
   for(unsigned int i = 0; i < Scan::allScans.size(); i++) {
     Scan *source = Scan::allScans[i];
-    DataXYZ xyz  = source->get("xyz");
+    string red_string = red > 0 ? " reduced" : "";
+      
+    DataXYZ xyz  = source->get("xyz" + red_string);
     
     if(use_reflectance) {
-      DataReflectance xyz_reflectance = (((DataReflectance)source->get("reflectance")).size() == 0) ?
-          source->create("reflectance", sizeof(float)*xyz.size()) : source->get("reflectance"); 
-      if (((DataReflectance)source->get("reflectance")).size() == 0) {
-          for(unsigned int i = 0; i < xyz.size(); i++) xyz_reflectance[i] = 255;
+      DataReflectance xyz_reflectance = 
+          (((DataReflectance)source->get("reflectance" + red_string)).size() == 0) ? 
+          source->create("reflectance" + red_string, sizeof(float)*xyz.size()) : 
+          source->get("reflectance" + red_string);  
+      if (!(types & PointType::USE_REFLECTANCE)) {
+        for(unsigned int i = 0; i < xyz.size(); i++) xyz_reflectance[i] = 255;
       }
       if(use_xyz) {
         write_xyzr(xyz, xyz_reflectance, redptsout, scaleFac);
@@ -405,9 +452,12 @@ int main(int argc, char **argv)
       }
       
     } else if(use_color) {
-      DataRGB xyz_color = (((DataRGB)source->get("color")).size() == 0) ?
-        source->create("color", sizeof(unsigned char)*3*xyz.size()) : source->get("color"); 
-      if (((DataRGB)source->get("color")).size() == 0) {
+      string data_string = red > 0 ? "color reduced" : "rgb";
+      DataRGB xyz_color = 
+          (((DataRGB)source->get(data_string)).size() == 0) ?
+          source->create(data_string, sizeof(unsigned char)*3*xyz.size()) : 
+          source->get(data_string); 
+      if (!(types & PointType::USE_COLOR)) {
           for(unsigned int i = 0; i < xyz.size(); i++) {
             xyz_color[i][0] = 0;
             xyz_color[i][1] = 0;
