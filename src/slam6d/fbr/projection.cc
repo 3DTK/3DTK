@@ -315,7 +315,9 @@ namespace fbr
     if(rangeImage.cols != width_ || rangeImage.rows != height_)
       {
 	cout<<"rnage image size is different from input size."<<endl;
-	return;
+	cout<<"init the class with new params."<<endl;
+	init(rangeImage.cols, rangeImage.rows, method_, numberOfImages_, param_, minZ_, maxZ_, minHorizAngle_, maxHorizAngle_, minVertAngle_, maxVertAngle_, imageSizeOptimization_);
+	//return;
       }
 
     if (rangeImage.cols != reflectanceImage.cols
