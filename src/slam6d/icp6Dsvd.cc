@@ -100,6 +100,21 @@ double icp6D_SVD::Align(const vector<PtPair>& pairs,
   // Get rotation
   R = V*(U.t());
 
+  // Check if R turned out to be a reflection (likely because of large errors or coplanar input)
+  // (cf. Arun, Huang, and Blostein: "Least-Squares Fitting of Two 3-D Point Sets")
+  if(R.Determinant() < 0) {
+    V(1, 3) = -V(1, 3);
+    V(2, 3) = -V(2, 3);
+    V(3, 3) = -V(3, 3);
+    // unless input is extremely noisy or colinear, R should now be a rotation
+    R = V*(U.t());
+
+    if(R.Determinant() < 0) {
+      // if we still failed, at least give a warning
+      cerr << "Warning - icp6D_SVD::Align failed to compute a matching transformation - the returned solution is a reflection!" << endl;
+    }
+  }
+
   // Calculate translation
   double translation[3];
   ColumnVector col_vec(3);
