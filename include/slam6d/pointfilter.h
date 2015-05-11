@@ -11,6 +11,11 @@
 #include <string>
 #include <map>
 
+#include <vector>
+
+#define NOMINMAX
+#include "slam6d/globals.icc"
+
 class Checker;
 
 
@@ -110,17 +115,25 @@ private:
   double m_bottom;
 };
 
+class CustomFilterContainer {
+public:
+    CustomFilterContainer(const std::string& value);
+    ~CustomFilterContainer();
+    int filterMode;
+    int nrOfParam;
+    // parameters for custom filter
+    bool custParamsSet;
+    double *custFiltParams;
+};
+
 class CheckerCustom : public Checker {
 public:
-	CheckerCustom(const std::string& value);
-	~CheckerCustom();
-	virtual bool test(double* point);
+    CheckerCustom(const std::string& value);
+    ~CheckerCustom();
+    virtual bool test(double* point);
 private:
-	int filterMode;
-	int nrOfParam;
-	// parameters for custom filter
-     bool custParamsSet;
-	double *custFiltParams;
+    static std::vector<CustomFilterContainer> *filters;
+    static bool filtersInitialized;
 };
 
 class RangeMutator : public Checker {

@@ -47,9 +47,17 @@ void DrawPoints(GLenum mode, bool interruptable)
       cm->setMode(ScanColorManager::MODE_ANIMATION);
 
     for(int iterator = (int)octpts.size()-1; iterator >= 0; iterator--) {
-	 
+
       // ignore scans that don't have any frames associated with them
       if((unsigned int)iterator >= MetaMatrix.size()) continue;
+
+      // also ignore scans outside the selected range - if in advanced mode
+      if (advanced_controls){
+        // pay attention to offset (startScanIdx)
+        if ((unsigned int)iterator < startRangeScanIdx - startScanIdx) continue;
+        if ((unsigned int)iterator > endRangeScanIdx - startScanIdx) continue;
+      }
+
       // set usable frame
       double* frame;
       Scan::AlgoType type;
@@ -121,6 +129,14 @@ void DrawPoints(GLenum mode, bool interruptable)
         int iterator = sequence[i];
         // ignore scans that don't have any frames associated with them
         if((unsigned int)iterator >= MetaMatrix.size()) continue;
+
+        // also ignore scans outside the selected range - if in advanced mode
+        if (advanced_controls){
+          // pay attention to offset (startScanIdx)
+          if ((unsigned int)iterator < startRangeScanIdx - startScanIdx) continue;
+          if ((unsigned int)iterator > endRangeScanIdx - startScanIdx) continue;
+        }
+
         // set usable frame
         double* frame;
         Scan::AlgoType type;
@@ -567,6 +583,13 @@ void DisplayItFunc(GLenum mode, bool interruptable)
     glLineWidth(5);
     glBegin(GL_LINE_STRIP);
     for(unsigned int i = 0; i < MetaMatrix.size(); i++){
+
+      // also ignore scans outside the selected range - if in advanced mode
+      if (advanced_controls){
+        // pay attention to offset (startScanIdx)
+        if (i < startRangeScanIdx - startScanIdx) continue;
+        if (i > endRangeScanIdx - startScanIdx) continue;
+      }
       // set usable type
       Scan::AlgoType type;
       if((unsigned int)frameNr >= MetaMatrix[i].size()) {
@@ -958,7 +981,7 @@ void CallBackIdleFunc(void)
   }
 
   // case: scan matching and path animation in lock-step
-  if (haveToUpdate == 8 ) {
+  if (haveToUpdate == 8) {
     if (path_iterator == 0) {
       oldcamNavMode = cameraNavMouseMode;  // remember state of old mousenav
       cameraNavMouseMode = 0;
@@ -990,6 +1013,16 @@ void CallBackIdleFunc(void)
              << path_vectorX.size() << " files" << endl;
         glWriteImagePPM(filename.c_str(), factor, 0);
         haveToUpdate = 8;
+
+#ifndef _WIN32
+        string jpgname = scan_dir + "animframe"
+            + to_string(path_iterator, 5) + ".jpg";
+        string systemcall = "convert -quality 100 "
+            + filename + " " + jpgname;
+        system(systemcall.c_str());
+        systemcall = "rm " + filename;
+        system(systemcall.c_str());
+#endif
       }
     } else {                             // animation has just ended
       cameraNavMouseMode = oldcamNavMode;
@@ -1221,6 +1254,14 @@ void selectPoints(int x, int y) {
 
     static sfloat *sp2 = 0;
     for(int iterator = (int)octpts.size()-1; iterator >= 0; iterator--) {
+
+      // ignore scans outside the selected (currently visible) range - if in advanced mode
+      if (advanced_controls){
+        // pay attention to offset (startScanIdx)
+        if ((unsigned int)iterator < startRangeScanIdx - startScanIdx) continue;
+        if ((unsigned int)iterator > endRangeScanIdx - startScanIdx) continue;
+      }
+
       glPushMatrix();
       glMultMatrixd(MetaMatrix[iterator].back());
       calcRay(x, y, 1.0, 40000.0);
@@ -1440,6 +1481,11 @@ void KeyboardFunc(int key, bool control, bool alt, bool shift) {
   }
 }
 
+void CallBackCloseFunc() {
+  // this gets called when window is closed without using the "Quit" button - ensure regular shutdown to avoid crash
+  deinitShow();
+}
+
 void CallBackMouseMotionFunc(int x, int y) {
   double deltaMouseX = x - mouseNavX;
   double deltaMouseY = mouseNavY - y;
@@ -1496,6 +1542,7 @@ void initScreenWindow()
   glutKeyboardUpFunc ( CallBackKeyboardUpFunc);
   glutMotionFunc ( CallBackMouseMotionFunc); 
   glutSpecialFunc ( CallBackSpecialFunc);
+  glutCloseFunc(CallBackCloseFunc);
   // glutEntryFunc ( CallBackEntryFunc);
   GLUI_Master.set_glutReshapeFunc( CallBackReshapeFunc );
   GLUI_Master.set_glutIdleFunc( CallBackIdleFunc );
@@ -1865,7 +1912,7 @@ void InterfaceFunc(unsigned char key)
 }
 
 
-void CallBackSpecialFunc(int key , int x, int y)
+void CallBackSpecialFunc(int key, int x, int y)
 {
   // KeyboardFunc(key + 214, false, false, false);
   // return;
