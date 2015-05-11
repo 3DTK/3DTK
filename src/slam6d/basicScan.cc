@@ -586,6 +586,8 @@ unsigned int BasicScan::readFrames()
   string filename = m_path + "scan" + m_identifier + ".frames";
   ifstream file(filename.c_str());
   file.exceptions(ifstream::eofbit|ifstream::failbit|ifstream::badbit);
+  // clear frame vector here to allow reloading without (old) duplicates
+  m_frames.clear();
   try {
     double transformation[16];
     unsigned int type;

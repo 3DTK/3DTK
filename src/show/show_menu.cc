@@ -42,6 +42,12 @@ GLUI_Spinner    *nearplane_spinner;
 GLUI_Spinner    *lod_spinner;
 GLUI_Spinner    *threed_spinner;
 
+/** GLUI_Spinner for changing the scans displayed */
+GLUI_Spinner    *startScanIdx_spinner;
+GLUI_Spinner    *endScanIdx_spinner;
+
+
+
 int window_id_menu1, ///< menue window ids
     window_id_menu2; ///< menue window ids
 
@@ -310,10 +316,10 @@ void newMenu()
   anim_spinner->set_int_limits(0, 100);
   anim_spinner->set_speed(1);
   glui1->add_button("Animate", 0, startAnimation)->set_alignment(GLUI_ALIGN_CENTER);
-  
+
   glui1->add_separator();
 
-  
+
 /**** Path panel *******/
 
   path_panel = glui1->add_rollout("Camera Path :", false);
@@ -345,14 +351,14 @@ GLUI_SPINNER_INT, &factor);
   image_spinner->set_speed(1);
   image_spinner->set_alignment(GLUI_ALIGN_RIGHT);
   glui1->add_button_to_panel(pose_panel, "Save Image   ", 0, saveImage)->set_alignment(GLUI_ALIGN_CENTER);
-  
- 
+
+
   glui1->add_separator();
-  
+
   /**** Selection panel ******/
   selection_panel = glui1->add_rollout("Selection :", false);
   selection_panel->set_alignment(GLUI_ALIGN_LEFT);
-  
+
   selection_filename_edit = glui1->add_edittext_to_panel(selection_panel, "File: ", GLUI_EDITTEXT_TEXT, selection_file_name);
   selection_filename_edit->set_alignment(GLUI_ALIGN_LEFT);
   glui1->add_button_to_panel(selection_panel, "Save selected points   ", 0, saveSelection)->set_alignment(GLUI_ALIGN_CENTER);
@@ -417,7 +423,23 @@ GLUI_SPINNER_INT, &factor);
     threed_spinner->set_float_limits(0, 50.0);
     threed_spinner->set_speed(0.1);
     threed_spinner->set_alignment(GLUI_ALIGN_RIGHT);
-    
+
+    glui1->add_separator_to_panel(advanced_panel);
+    glui1->add_statictext_to_panel(advanced_panel, "Scan range selection:");
+    startScanIdx_spinner = glui1->add_spinner_to_panel(advanced_panel, "Start Idx: ", GLUI_SPINNER_INT, &startRangeScanIdx);
+    endScanIdx_spinner = glui1->add_spinner_to_panel(advanced_panel, "End Idx: ", GLUI_SPINNER_INT, &endRangeScanIdx);
+    // limit range to scan indices loaded
+    startScanIdx_spinner->set_int_limits(startScanIdx, endScanIdx);
+    startScanIdx_spinner->set_speed(1);
+    startScanIdx_spinner->set_alignment(GLUI_ALIGN_RIGHT);
+    startScanIdx_spinner->set_int_val(startScanIdx);
+    endScanIdx_spinner->set_int_limits(startScanIdx, endScanIdx);
+    endScanIdx_spinner->set_speed(1);
+    endScanIdx_spinner->set_alignment(GLUI_ALIGN_RIGHT);
+    endScanIdx_spinner->set_int_val(endScanIdx);
+    glui1->add_button_to_panel(advanced_panel, "Reload frames", 0, (GLUI_Update_CB)reloadFrames)->set_alignment(GLUI_ALIGN_CENTER);
+
+
     glui1->add_separator();
   }
 

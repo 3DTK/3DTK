@@ -346,6 +346,34 @@ int main(int argc, char **argv)
   size_t pos = customFilter.find_first_of(";");
   if (pos != std::string::npos){
       customFilterActive = true;
+
+      // check if customFilter is specified in file
+      if (customFilter.find("FILE;") == 0){
+          string selection_file_name = customFilter.substr(5, customFilter.length());
+          ifstream selectionfile;
+          // open the input file
+          selectionfile.open(selection_file_name, ios::in);
+
+          if (!selectionfile.good()){
+              cerr << "Error loading custom filter file " << selection_file_name << "!" << endl;
+              cerr << "Data will NOT be filtered!" << endl;
+              customFilterActive = false;
+          }
+          else {
+              string line;
+              string custFilt;
+              while (std::getline(selectionfile, line)){
+                  if (line.find("#") == 0) continue;
+                  custFilt = custFilt.append(line);
+                  custFilt = custFilt.append("/");
+              }
+              if (custFilt.length() > 0) {
+                  // last '/'
+                  customFilter = custFilt.substr(0, custFilt.length() - 1);
+              }
+          }
+          selectionfile.close();
+      }
   }
   else {
       // give a warning if custom filter has been inproperly specified
@@ -361,7 +389,6 @@ int main(int argc, char **argv)
     exit(-1);
   }
   
-  // if specified, filter scans
   unsigned int types = PointType::USE_NONE;
   //TODO check if all file formats are included
   if(use_reflectance) {
@@ -398,6 +425,7 @@ int main(int argc, char **argv)
     }
   }
 
+  // if specified, filter scans
   for (size_t i = 0; i < Scan::allScans.size(); i++)  {
      if(rangeFilterActive) Scan::allScans[i]->setRangeFilter(maxDist, minDist);
      if(customFilterActive) Scan::allScans[i]->setCustomFilter(customFilter);

@@ -207,6 +207,14 @@ int frameNr = 0;
 int path3D = 0;
 float shifted = 20.0;
 
+// custom scan range selection from GUI
+int startScanIdx;
+int endScanIdx;
+int startRangeScanIdx;
+int endRangeScanIdx;
+bool readIni;
+IOType scanIOtype;
+
 /**
  * Storing of all transformation (frames for animation) of all scans
  */
@@ -318,6 +326,9 @@ int selection_depth = 1;
 int brush_size = 0;
 char *selection_file_name;
 
+// show_gl needs to know this function for correct handling of close event
+void deinitShow();
+
 int current_frame = 0;
 #include "show_menu.cc"
 #include "show_animate.cc"
@@ -363,6 +374,8 @@ void usage(char* prog)
        << bold << "  -u" << normal << " STR, " << bold << "--customFilter=" << normal << "STR" << endl
 	   << "         apply custom filter, filter mode and data are specified as semicolon-seperated string:" << endl
 	   << "         STR: '{filterMode};{nrOfParams}[;param1][;param2][...]'" << endl
+	   << "         Multiple filters can be specified in a file (syntax in file is same as direct specification)" << endl
+	   << "         STR: 'FILE;{fileName}'" << endl
 	   << "         see filter implementation in pointfilter.cc for more detail." << endl
        << endl
        << bold << "  -M" << normal << " NR, " << bold << "--min=" << normal << "NR" << endl
@@ -854,6 +867,19 @@ void cycleLOD() {
 }
 
 
+void reloadFrames() {
+  // reload all frame files for live changes
+  // drop previously stored information
+
+  cout << "Reloading frame files..." << endl;
+
+  MetaMatrix.clear();
+  MetaAlgoType.clear();
+
+  if (readFrames(scan_dir, startScanIdx, endScanIdx, readIni, scanIOtype))
+    generateFrames(startScanIdx, endScanIdx, true);
+}
+
 void initShow(int argc, char **argv){
 
   /***************/
@@ -944,13 +970,43 @@ void initShow(int argc, char **argv){
   // (proper checking will be done case specific in pointfilter.cc)
   size_t pos = customFilter.find_first_of(";");
   if (pos != std::string::npos){
-	  customFilterActive = true;
+    customFilterActive = true;
+
+    // check if customFilter is specified in file
+    if (customFilter.find("FILE;") == 0){
+      string selection_file_name = customFilter.substr(5, customFilter.length());
+      ifstream selectionfile;
+      // open the input file
+      selectionfile.open(selection_file_name, ios::in);
+
+      if (!selectionfile.good()){
+        cerr << "Error loading custom filter file " << selection_file_name << "!" << endl;
+        cerr << "Data will NOT be filtered.!" << endl;
+        customFilterActive = false;
+      }
+      else {
+        string line;
+        string custFilt;
+        while (std::getline(selectionfile, line)){
+          // allow comment or empty lines
+          if (line.find("#") == 0) continue;
+          if (line.length() < 1) continue;
+          custFilt = custFilt.append(line);
+          custFilt = custFilt.append("/");
+        }
+        if (custFilt.length() > 0) {
+          // last '/'
+          customFilter = custFilt.substr(0, custFilt.length() - 1);
+        }
+      }
+      selectionfile.close();
+    }
   }
   else {
-	  // give a warning if custom filter has been inproperly specified
-	  if (customFilter.length() > 0){
-		  cerr << "Custom filter: specifying string has not been set properly, data will NOT be filtered." << endl;
-	  }
+    // give a warning if custom filter has been inproperly specified
+    if (customFilter.length() > 0){
+      cerr << "Custom filter: specifying string has not been set properly, data will NOT be filtered." << endl;
+    }
   }
   
   for (ScanVector::iterator it = Scan::allScans.begin();
@@ -1146,6 +1202,12 @@ void initShow(int argc, char **argv){
   // load frames now that we know how many scans we actually loaded
   unsigned int real_end = min((unsigned int)(end), 
                               (unsigned int)(start + octpts.size() - 1));
+
+  // necessary to save these to allow filtering of scans from view and reloading frames; could also make those global..
+  startScanIdx = start;
+  endScanIdx = real_end;
+  readIni = readInitial;
+  scanIOtype = type;
   
   if(readFrames(dir, start, real_end, readInitial, type))
     generateFrames(start, real_end, true);
