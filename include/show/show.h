@@ -121,6 +121,7 @@ bool isInterrupted();
 void checkForInterrupt();
 void interruptDrawing();
 void cycleLOD();
+void reloadFrames();
 
 enum { ROTATION_X, ROTATION_RX, ROTATION_Y, ROTATION_RY, ROTATION_Z, ROTATION_RZ };
   /** enumeration for translation */

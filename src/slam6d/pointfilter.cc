@@ -26,6 +26,9 @@ using std::endl;
 map<string, Checker* (*)(const string&)>*
 PointFilter::factory = new map<string, Checker* (*)(const string&)>;
 
+std::vector<CustomFilterContainer> *CheckerCustom::filters = new std::vector<CustomFilterContainer>;
+bool CheckerCustom::filtersInitialized = false;
+
 
 PointFilter::PointFilter() :
   m_changed(true), m_checker(0)
@@ -37,12 +40,12 @@ PointFilter::PointFilter(const std::string& params) :
   size_t start = 0, end = string::npos;
   while((end = params.find(' ', start)) != string::npos) {
     // extract the word (start-end+1) without the space (-1)
-    string key(params.substr(start, start-end));
+    string key(params.substr(start, start - end));
     end++;
     // get the second word position
     start = params.find(' ', end);
     // insert
-    m_params[key] = params.substr(end, (start-end));
+    m_params[key] = params.substr(end, (start - end));
     // advance to the character after space
     if(start != string::npos)
       start++;
@@ -111,7 +114,7 @@ void PointFilter::createCheckers()
     delete m_checker;
     m_checker = 0;
   }
-  
+
   // create new ones
   Checker** current = &m_checker;
   for(map<string, string>::iterator it = m_params.begin();
@@ -156,7 +159,7 @@ CheckerRangeMax::CheckerRangeMax(const std::string& value) {
 }
 
 bool CheckerRangeMax::test(double* point) {
-  if(point[0]*point[0] + point[1]*point[1] + point[2]*point[2] < m_max)
+  if(point[0] * point[0] + point[1] * point[1] + point[2] * point[2] < m_max)
     return true;
   return false;
 }
@@ -170,7 +173,7 @@ CheckerRangeMin::CheckerRangeMin(const std::string& value) {
 }
 
 bool CheckerRangeMin::test(double* point) {
-  if(point[0]*point[0] + point[1]*point[1] + point[2]*point[2] > m_min)
+  if(point[0] * point[0] + point[1] * point[1] + point[2] * point[2] > m_min)
     return true;
   return false;
 }
@@ -197,7 +200,7 @@ bool CheckerHeightBottom::test(double* point) {
   return false;
 }
 
-CheckerCustom::CheckerCustom(const std::string& value) {
+CustomFilterContainer::CustomFilterContainer(const std::string& value) {
   custParamsSet = false; 
     try{
       // every custom filter description is defined as 
@@ -206,7 +209,7 @@ CheckerCustom::CheckerCustom(const std::string& value) {
       size_t pos = str.find_first_of(";");
       stringstream ss(str.substr(0, pos));
       ss >> filterMode;
-      
+
       str = str.substr(pos + 1);
       pos = str.find_first_of(";");
       stringstream ss2(str.substr(0, pos));
@@ -221,6 +224,9 @@ CheckerCustom::CheckerCustom(const std::string& value) {
               custFiltParams[i] = 0.0;
           }
       }
+      else {
+          custParamsSet = false;
+      }
       // parse parameters for filter
       for (size_t i = 0; i < nrOfParam; i++)
       {
@@ -228,8 +234,8 @@ CheckerCustom::CheckerCustom(const std::string& value) {
           pos = str.find_first_of(";");
           if (pos == std::string::npos){
               if (i != nrOfParam - 1){
-              // less than indicated parameters have been provided, error!
-              throw runtime_error("Error parsing arguments for CustomFilter.");
+                // less than indicated parameters have been provided, error!
+                throw runtime_error("Error parsing arguments for CustomFilterContainer.");
               }
               else {
                   // last param is not ended with ';'
@@ -241,98 +247,147 @@ CheckerCustom::CheckerCustom(const std::string& value) {
           stringstream ss3(str.substr(0, pos));
           ss3 >> custFiltParams[i];
       }
-
     }
     catch (...){
-        throw runtime_error("Error parsing arguments for CustomFilter.");
+      throw runtime_error("Error parsing arguments for CustomFilterContainer.");
+    }
+}
+
+CustomFilterContainer::~CustomFilterContainer(){
+    //if (custParamsSet)
+    //    delete[] custFiltParams;
+}
+
+CheckerCustom::CheckerCustom(const std::string& value) {
+    // make sure to create and parse filters only once, otherwise every scan will have a vector, double[] etc... --> static class variable
+
+    // custom filter string consists of (possibly multiple) filter strings, and is defined as 
+    // {filterModeA};{nrOfParamsA}[;paramA1][;paramA2][...]/{filterModeB};{nrOfParamsB}[;paramB1][;paramB2][...]
+    if (!CheckerCustom::filtersInitialized){
+        CheckerCustom::filtersInitialized = true;
+        std::string str(value);
+        size_t pos;
+        size_t start = 0;
+        while ((pos = str.find_first_of("/", start)) != std::string::npos){
+            CustomFilterContainer cfc(str.substr(start, pos));
+            filters->push_back(cfc);
+
+            start = pos + 1;
+        }
+        // also parse last (or only) filter
+        CustomFilterContainer cfc(str.substr(start, str.length()));
+        filters->push_back(cfc);
     }
 }
 
 CheckerCustom::~CheckerCustom(){
-    if (custParamsSet)
-      delete[] custFiltParams;
 }
 
 bool CheckerCustom::test(double* point) {
     bool filterTest = false;
 
-    try{
-        switch (filterMode)
-        {
-        case 0:
-            // Custom Filter 0: symetrical, axis-parallel cuboid
-            // all values inside the cuboid will be filtered (filterTest = false)
-            // parameters: xFilterRange yFilterRange zFilterRange
-            if (abs(point[0]) > custFiltParams[0] || abs(point[1]) > custFiltParams[1] || abs(point[2]) > custFiltParams[2])
-                filterTest = true;
-            break;
-        case 1:
-            // Custom Filter 1: asymetrical axis-parallel cuboid
-            // all values inside the cuboid will be filtered
-            // parameters: xFilterRangeLow xFilterRangeHigh yFilterRangeLow yFilterRangeHigh zFilterRangeLow zFilterRangeHigh
-            if (point[0] < custFiltParams[0] || point[0] > custFiltParams[1]
-                || point[1] < custFiltParams[2] || point[1] > custFiltParams[3]
-                || point[2] < custFiltParams[4] || point[2] > custFiltParams[5])
-                filterTest = true;
-            break;
-        case 2:
-            // As Custom Filter 1: asymetrical axis-parallel cuboid, with additional max range limitation
-            // parameters: xFilterRangeLow xFilterRangeHigh yFilterRangeLow yFilterRangeHigh zFilterRangeLow zFilterRangeHigh maxRange 
-            if (point[0] < custFiltParams[0] || point[0] > custFiltParams[1]
-                || point[1] < custFiltParams[2] || point[1] > custFiltParams[3]
-                || point[2] < custFiltParams[4] || point[2] > custFiltParams[5]){
-                if ((point[0] * point[0] + point[1] * point[1] + point[2] * point[2]) < (custFiltParams[6] * custFiltParams[6])){
+    // point will be removed if ANY filter (in a custom filter file) applies
+    for (size_t i = 0; i < filters->size(); i++)	{
+        CustomFilterContainer cfc = (*filters)[i];
+        filterTest = false;
+        try{
+            switch (cfc.filterMode)
+            {
+            case 0:
+                // Custom Filter 0: symetrical, axis-parallel cuboid
+                // all values inside the cuboid will be filtered (filterTest = false)
+                // parameters: xFilterRange yFilterRange zFilterRange
+                if (abs(point[0]) > cfc.custFiltParams[0] || abs(point[1]) > cfc.custFiltParams[1] || abs(point[2]) > cfc.custFiltParams[2])
+                    filterTest = true;
+                break;
+            case 1:
+                // Custom Filter 1: asymetrical axis-parallel cuboid
+                // all values inside the cuboid will be filtered
+                // parameters: xFilterRangeLow xFilterRangeHigh yFilterRangeLow yFilterRangeHigh zFilterRangeLow zFilterRangeHigh
+                if (point[0] < cfc.custFiltParams[0] || point[0] > cfc.custFiltParams[1]
+                    || point[1] < cfc.custFiltParams[2] || point[1] > cfc.custFiltParams[3]
+                    || point[2] < cfc.custFiltParams[4] || point[2] > cfc.custFiltParams[5])
+                    filterTest = true;
+                break;
+            case 2:
+                // As Custom Filter 1: asymetrical axis-parallel cuboid, with additional max range limitation
+                // parameters: xFilterRangeLow xFilterRangeHigh yFilterRangeLow yFilterRangeHigh zFilterRangeLow zFilterRangeHigh maxRange 
+                if (point[0] < cfc.custFiltParams[0] || point[0] > cfc.custFiltParams[1]
+                    || point[1] < cfc.custFiltParams[2] || point[1] > cfc.custFiltParams[3]
+                    || point[2] < cfc.custFiltParams[4] || point[2] > cfc.custFiltParams[5]){
+                    if ((point[0] * point[0] + point[1] * point[1] + point[2] * point[2]) < (cfc.custFiltParams[6] * cfc.custFiltParams[6])){
+                        filterTest = true;
+                    }
+                    break;
+                }
+            case 10:
+                // Custom Filter 10: symetrical, axis-parallel cuboid
+                // all values outside the cuboid will be filtered (filterTest = false)
+                // parameters: xFilterRange yFilterRange zFilterRange
+                if (abs(point[0]) < cfc.custFiltParams[0] && abs(point[1]) < cfc.custFiltParams[1] && abs(point[2]) < cfc.custFiltParams[2])
+                    filterTest = true;
+                break;
+            case 11:
+                // Custom Filter 11: asymetrical axis-parallel cuboid
+                // all values outside the cuboid will be filtered
+                // parameters: xFilterRangeLow xFilterRangeHigh yFilterRangeLow yFilterRangeHigh zFilterRangeLow zFilterRangeHigh
+                if (point[0] > cfc.custFiltParams[0] && point[0] < cfc.custFiltParams[1]
+                    && point[1] > cfc.custFiltParams[2] && point[1] < cfc.custFiltParams[3]
+                    && point[2] > cfc.custFiltParams[4] && point[2] < cfc.custFiltParams[5]) {
                     filterTest = true;
                 }
                 break;
-            }
-        case 10:
-            // Custom Filter 10: symetrical, axis-parallel cuboid
-            // all values outside the cuboid will be filtered (filterTest = false)
-            // parameters: xFilterRange yFilterRange zFilterRange
-            if (abs(point[0]) < custFiltParams[0] && abs(point[1]) < custFiltParams[1] && abs(point[2]) < custFiltParams[2])
-                filterTest = true;
-            break;
-        case 11:
-            // Custom Filter 11: asymetrical axis-parallel cuboid
-            // all values outside the cuboid will be filtered
-            // parameters: xFilterRangeLow xFilterRangeHigh yFilterRangeLow yFilterRangeHigh zFilterRangeLow zFilterRangeHigh
-            if (point[0] > custFiltParams[0] && point[0] < custFiltParams[1]
-                && point[1] > custFiltParams[2] && point[1] < custFiltParams[3]
-                && point[2] > custFiltParams[4] && point[2] < custFiltParams[5]) {
-                filterTest = true;
-            }
-            break;
-        case 20:
-            // Custom Filter 20: two asymetrical axis-parallel cuboids, one inside the other
-            // all values outside the first (outer) cuboid, and inside the second (inner) cuboid will be filtered
-            // since the cuboids are supposed to overlap, only data in between the cuboids will remain
-            // parameters: xFilterRangeLow1 xFilterRangeHigh1 yFilterRangeLow1 yFilterRangeHigh1 zFilterRangeLow1 zFilterRangeHigh1 xFilterRangeLow2 xFilterRangeHigh2 yFilterRangeLow2 yFilterRangeHigh2 zFilterRangeLow2 zFilterRangeHigh2
+            case 20:
+                // Custom Filter 20: two asymetrical axis-parallel cuboids, one inside the other
+                // all values outside the first (outer) cuboid, and inside the second (inner) cuboid will be filtered
+                // since the cuboids are supposed to overlap, only data in between the cuboids will remain
+                // parameters: xFilterRangeLow1 xFilterRangeHigh1 yFilterRangeLow1 yFilterRangeHigh1 zFilterRangeLow1 zFilterRangeHigh1 xFilterRangeLow2 xFilterRangeHigh2 yFilterRangeLow2 yFilterRangeHigh2 zFilterRangeLow2 zFilterRangeHigh2
 
-            // inside first cuboid..?
-            if (point[0] > custFiltParams[0] && point[0] < custFiltParams[1]
-                && point[1] > custFiltParams[2] && point[1] < custFiltParams[3]
-                && point[2] > custFiltParams[4] && point[2] < custFiltParams[5]) {
-                // inside first
+                // inside first cuboid..?
+                if (point[0] > cfc.custFiltParams[0] && point[0] < cfc.custFiltParams[1]
+                    && point[1] > cfc.custFiltParams[2] && point[1] < cfc.custFiltParams[3]
+                    && point[2] > cfc.custFiltParams[4] && point[2] < cfc.custFiltParams[5]) {
+                    // inside first
 
-                // ... but outside second..?
-                if (point[0] < custFiltParams[6] || point[0] > custFiltParams[7]
-                    || point[1] < custFiltParams[8] || point[1] > custFiltParams[9]
-                    || point[2] < custFiltParams[10] || point[2] > custFiltParams[11]) {
+                    // ... but outside second..?
+                    if (point[0] < cfc.custFiltParams[6] || point[0] > cfc.custFiltParams[7]
+                        || point[1] < cfc.custFiltParams[8] || point[1] > cfc.custFiltParams[9]
+                        || point[2] < cfc.custFiltParams[10] || point[2] > cfc.custFiltParams[11]) {
+                        filterTest = true;
+                    }
+                }
+                break;
+            case 21:
+                // Custom Filter 21: simple sphere filter
+                // all values inside the sphere around given point will be filtered (filterTest = false)
+                // parameters: ptXCoord ptYCoord ptZCoord radius
+                if (sqrt(Dist2(point, cfc.custFiltParams)) > cfc.custFiltParams[3]){
                     filterTest = true;
                 }
+                break;
+            case 22:
+                // Custom Filter 22: simple sphere filter
+                // all values outside the sphere around given point will be filtered (filterTest = false)
+                // parameters: ptXCoord ptYCoord ptZCoord radius
+                if (sqrt(Dist2(point, cfc.custFiltParams)) < cfc.custFiltParams[3]){
+                    filterTest = true;
+                }
+                break;
+            default:
+                filterTest = true;
+                break;
             }
-            break;
-        default:
+
+            if (!filterTest){
+                // one of the tests has filtered the point -> break for loop and filter it
+                break;
+            }
+        }
+        catch (...){
+            // Error occured - deactivate filter
             filterTest = true;
-            break;
         }
     }
-    catch (...){
-        // Error occured - deactivate filter
-        filterTest = true;
-    }
-
     return filterTest;
 }
 
@@ -343,9 +398,9 @@ RangeMutator::RangeMutator(const std::string& value) {
 }
 
 bool RangeMutator::test(double* point) {
-  double orig_range = sqrt(point[0]*point[0]
-                           + point[1]*point[1]
-                           + point[2]*point[2]);
+  double orig_range = sqrt(point[0] * point[0]
+      + point[1] * point[1]
+      + point[2] * point[2]);
   double scale_mutation = m_range / orig_range;
   point[0] *= scale_mutation;
   point[1] *= scale_mutation;
