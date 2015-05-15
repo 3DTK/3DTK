@@ -246,7 +246,7 @@ void calculateNormalsKNN(vector<Point> &normals,
 	 
     for (size_t i = 0; i < points.size(); ++i) {
 	 
-	 double p[3] = { pa[i][0], pa[i][1], pa[i][2] };
+	 double p[3] = { points[i].x, points[i].y, points[i].z };
 	 
 	 vector<Point> temp = t.kNearestNeighbors(p,
 									  nr_neighbors,
@@ -345,7 +345,7 @@ void calculateNormalsAdaptiveKNN(vector<Point> &normals,
 
     for (size_t i = 0; i < points.size(); i++) {
 
-	 double p[3] = { pa[i][0], pa[i][1], pa[i][2] };
+	 double p[3] = { points[i].x, points[i].y, points[i].z };
 	 Matrix U(3,3);
 	 Point mean(0.0,0.0,0.0);
 	 int nr_neighbors;
