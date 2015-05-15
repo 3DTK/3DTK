@@ -20,7 +20,7 @@
 #include <ANN/ANN.h>
 #include "slam6d/io_types.h"
 #include "slam6d/globals.icc"
-#include "slam6d/kd.h"
+#include "slam6d/kdIndexed.h"
 #include "newmat/newmat.h"
 #include "newmat/newmatap.h"
 
@@ -232,8 +232,7 @@ void calculateNormalsKNN(vector<Point> &normals,
     pa[i][2] = points[i].z;
   }
 
-  KDtree t(pa, points.size());
-
+  KDtreeIndexed t(pa, points.size());
 #ifdef _OPENMP
   omp_set_num_threads(OPENMP_NUM_THREADS);
 #pragma omp parallel 
@@ -245,10 +244,10 @@ void calculateNormalsKNN(vector<Point> &normals,
 #endif
 	 
     for (size_t i = 0; i < points.size(); ++i) {
-	 
+
 	 double p[3] = { pa[i][0], pa[i][1], pa[i][2] };
 	 
-	 vector<Point> temp = t.kNearestNeighbors(p,
+	 vector<size_t> temp = t.kNearestNeighbors(p,
 									  nr_neighbors,
 									  thread_num);
 
@@ -262,9 +261,9 @@ void calculateNormalsKNN(vector<Point> &normals,
 
 	 // calculate mean for all the points              
 	 for (int j = 0; j < nr_neighbors; ++j) {
-	   mean.x += temp[j].x;
-	   mean.y += temp[j].y;
-	   mean.z += temp[j].z;
+	   mean.x += points[temp[j]].x;
+	   mean.y += points[temp[j]].y;
+	   mean.z += points[temp[j]].z;
 	 }
 	 mean.x /= nr_neighbors;
 	 mean.y /= nr_neighbors;
@@ -272,9 +271,9 @@ void calculateNormalsKNN(vector<Point> &normals,
 
 	 // calculate covariance = A for all the points
 	 for (int i = 0; i < nr_neighbors; ++i) {
-	   X(i+1, 1) = temp[i].x - mean.x;
-	   X(i+1, 2) = temp[i].y - mean.y;
-	   X(i+1, 3) = temp[i].z - mean.z;
+	   X(i+1, 1) = points[temp[i]].x - mean.x;
+	   X(i+1, 2) = points[temp[i]].y - mean.y;
+	   X(i+1, 3) = points[temp[i]].z - mean.z;
 	 }
 
 	 A << 1.0/nr_neighbors * X.t() * X;
@@ -331,7 +330,7 @@ void calculateNormalsAdaptiveKNN(vector<Point> &normals,
     pa[i][2] = points[i].z;
   }
 
-  KDtree t(pa, points.size());
+  KDtreeIndexed t(pa, points.size());
 
 #ifdef _OPENMP
   omp_set_num_threads(OPENMP_NUM_THREADS);
@@ -352,7 +351,7 @@ void calculateNormalsAdaptiveKNN(vector<Point> &normals,
 	 
 	 for(int kidx = kmin; kidx < kmax; kidx++) {
 	   nr_neighbors = kidx + 1;
-	   vector<Point> temp = t.kNearestNeighbors(p,
+	   vector<size_t> temp = t.kNearestNeighbors(p,
 									    nr_neighbors,
 									    thread_num);
 	   
@@ -361,9 +360,9 @@ void calculateNormalsAdaptiveKNN(vector<Point> &normals,
 	   mean.x = mean.y = mean.z = 0.0;
 	   // calculate mean for all the points              
 	   for (int j = 0; j < nr_neighbors; j++) {
-		mean.x += temp[j].x;
-		mean.y += temp[j].y;
-		mean.z += temp[j].z;
+		mean.x += points[temp[j]].x;
+		mean.y += points[temp[j]].y;
+		mean.z += points[temp[j]].z;
 	   }
 	   mean.x /= nr_neighbors;
 	   mean.y /= nr_neighbors;
@@ -376,9 +375,9 @@ void calculateNormalsAdaptiveKNN(vector<Point> &normals,
 	   
 	   // calculate covariance = A for all the points
 	   for (int j = 0; j < nr_neighbors; ++j) {
-		X(j+1, 1) = temp[j].x - mean.x;
-		X(j+1, 2) = temp[j].y - mean.y;
-		X(j+1, 3) = temp[j].z - mean.z;
+		X(j+1, 1) = points[temp[j]].x - mean.x;
+		X(j+1, 2) = points[temp[j]].y - mean.y;
+		X(j+1, 3) = points[temp[j]].z - mean.z;
 	   }
 	   
 	   A << 1.0/nr_neighbors * X.t() * X;
