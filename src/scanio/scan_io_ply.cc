@@ -166,7 +166,7 @@ void ScanIO_ply::readScan(const char* dir_path,
 	 }
 
 	 reflectance->push_back(p.reflectance);
-	 xyz->push_back(p.x * 100);
+	 xyz->push_back(p.x * -100);
 	 xyz->push_back(p.y * -100);
 	 xyz->push_back(p.z * 100);
 	 rgb->push_back(static_cast<unsigned char>(p.rgb[0]));
