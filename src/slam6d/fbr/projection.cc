@@ -396,7 +396,15 @@ namespace fbr
 	kart[1] = (*it)[0]/-100;
 	kart[2] = (*it)[1]/100;
 	//get the polar coordinte of x,y,z this is in rad
-	toPolar(kart, polar);
+	if(kart[0] != 0 && kart[1] != 0 && kart[2] != 0)
+	  toPolar(kart, polar);
+	else
+	  {
+	    x = 0;
+	    y = 0;
+	    return;
+	  }
+	  
 	//theta == polar[0] == scan [4]
 	//phi == polar[1] == scan [5]
 	//range == polar[2] == scan [3]

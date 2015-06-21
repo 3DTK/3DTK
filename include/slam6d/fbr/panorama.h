@@ -227,6 +227,7 @@ namespace fbr{
     cv::Mat iRange_;
     cv::Mat iColor_;
     float maxRange_;
+    float minRange_;
     vector<vector<vector<cv::Vec3f> > > extendedIMap_;
     projection* projection_;
     panorama_map_method mapMethod_;
