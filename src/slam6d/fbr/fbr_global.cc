@@ -407,6 +407,33 @@ namespace fbr{
     else throw std::runtime_error(std::string("matching filtration method ") + method + std::string(" is unknown"));
   }
 
+  string recoveredRangeFilterationMethodToString(recovered_range_filteration_method method)
+  {
+    string recoveredRangeFilterationMethod;
+    switch(method){
+    case INTERQUARTILE:
+      recoveredRangeFilterationMethod = "INTERQUARTILE";
+      break;
+    case INTERQUARTILE_AVERAGEDIFF:
+      recoveredRangeFilterationMethod = "INTERQUARTILE_AVERAGEDIFF";
+	break;
+    case DISABLE_RECOVERED_RANGE_FILTERATION:
+      recoveredRangeFilterationMethod = "DISABLE_RECOVERED_RANGE_FILTERATION";
+	break;
+    default:
+      throw std::runtime_error(std::string("recovered range filtration method ") + to_string(method) + std::string(" could not be matched to a recovered range filtration method"));
+    }
+    return recoveredRangeFilterationMethod;
+  }
+  
+  recovered_range_filteration_method stringToRecoveredRangeFilterationMethod(string method)
+  {
+    if(strcasecmp(method.c_str(), "INTERQUARTILE") == 0) return INTERQUARTILE;
+    else if(strcasecmp(method.c_str(), "INTERQUARTILE_AVERAGEDIFF") == 0) return INTERQUARTILE_AVERAGEDIFF;
+    else if(strcasecmp(method.c_str(), "DISABLE_RECOVERED_RANGE_FILTERATION") == 0) return DISABLE_RECOVERED_RANGE_FILTERATION;
+    else throw std::runtime_error(std::string("recovered range filtration method ") + method + std::string(" is unknown"));
+  }
+
   //reflectance normalization
   float normalizeTheReflectance(float reflectance, scanner_type sType, double minReflectance, double maxReflectance)
   {
@@ -435,6 +462,308 @@ namespace fbr{
       }
     
     return reflectance;
+  }
+
+  //color compare to sort color_value_Tuples in first three color order
+  bool colorCompare (const Color_Value_Tuple &lTuple, const Color_Value_Tuple &rTuple)
+  {
+    
+    if(get<0>(lTuple) == get<0>(rTuple))
+      {
+	if(get<1>(lTuple) == get<1>(rTuple))
+	  {
+	    return get<2>(lTuple) < get<2>(rTuple);
+	  }
+	else
+	  return get<1>(lTuple) < get<1>(rTuple);
+      }
+    else
+      return get<0>(lTuple) < get<0>(rTuple);
+  }
+  
+  //get all rgb colors sorted based on hsv
+  vector<unsigned int> getAllRGBSortedByHSL(unsigned int size)
+  {
+    vector<unsigned int> colorMap;
+    vector<Color_Value_Tuple> colors;
+
+    for(int C = 0; C <size*size; C++)
+      {
+	unsigned int R,G,B;
+	R = (C>>16) & 0xFF;
+	G = (C>>8) & 0xFF;
+	B = (C>>0) & 0xFF;
+
+	double dR = R/255.0;
+	double dG = G/255.0;
+	double dB = B/255.0;
+	
+	double dMax = std::max(dR, std::max(dG, dB));
+	double dMin = std::min(dR, std::min(dG, dB));
+	
+	double H = 0.0, S, L = (dMax + dMin) / 2;
+	
+	if(dMax == dMin)
+	  {
+	    H = S = 0; // achromatic
+	  }
+	else
+	  {
+	    double delta = dMax - dMin;
+	    S = L > 0.5 ? delta / (2 - dMax - dMin) : delta / (dMax + dMin);
+	    
+	    if(dMax == dR)
+	      H = (dG - dB) / delta + (dG < dB ? 6 : 0);
+	    else if(dMax == dG)
+	      H = (dB - dR) / delta + 2;
+	    else if(dMax == dB)
+	      H = (dR - dG) / delta + 4;
+	    
+	    H /= 6;
+	  }
+	colors.push_back(make_tuple(H, S, L, C));
+      }
+    
+    sort(colors.begin(), colors.end(), colorCompare);
+
+    for(vector<Color_Value_Tuple>::iterator itr = colors.begin(); itr != colors.end(); itr++)
+    {
+      unsigned int  colorVal = get<3>(*itr);
+      colorMap.push_back(colorVal);
+    }
+    return colorMap;
+  }
+
+  //get all rgb colors sorted based on hsl
+  vector<unsigned int> getAllRGBSortedByHSV(unsigned int size)
+  {
+    vector<unsigned int> colorMap;
+    vector<Color_Value_Tuple> colors;
+
+    for(int C = 0; C <size*size; C++)
+      {
+	unsigned int R,G,B;
+	R = (C>>16) & 0xFF;
+	G = (C>>8) & 0xFF;
+	B = (C>>0) & 0xFF;
+
+	double dR = R/255.0;
+	double dG = G/255.0;
+	double dB = B/255.0;
+	
+	double dMax = std::max(dR, std::max(dG, dB));
+	double dMin = std::min(dR, std::min(dG, dB));
+	
+	double H = 0.0, S, V = dMax;
+	double delta = dMax - dMin;
+	S = dMax == 0 ? 0 : delta / dMax;
+	
+	if(dMax == dMin)
+	  {
+	    H = 0; // achromatic
+	  }
+	else
+	  {
+	    if(dMax == dR)
+	      H = (dG - dB) / delta + (dG < dB ? 6 : 0);
+	    else if(dMax == dG)
+	      H = (dB - dR) / delta + 2;
+	    else if(dMax == dB)
+	      H = (dR - dG) / delta + 4;
+	    
+	    H /= 6;
+	  }
+	colors.push_back(make_tuple(H, S, V, C));
+      }
+    
+    sort(colors.begin(), colors.end(), colorCompare);
+
+    for(vector<Color_Value_Tuple>::iterator itr = colors.begin(); itr != colors.end(); itr++)
+    {
+      unsigned int  colorVal = get<3>(*itr);
+      colorMap.push_back(colorVal);
+    }
+    return colorMap;
+  }
+  
+  //get all rgb colors sorted based on rgb
+  vector<unsigned int> getAllRGBSortedByRGB(unsigned int size)
+  {
+    vector<unsigned int> colorMap;
+    vector<Color_Value_Tuple> colors;
+
+    for(int C = 0; C <size*size; C++)
+      {
+	unsigned int R,G,B;
+	R = (C>>16) & 0xFF;
+	G = (C>>8) & 0xFF;
+	B = (C>>0) & 0xFF;
+
+	colors.push_back(make_tuple(R, G, B, C));
+      }
+    
+    sort(colors.begin(), colors.end(), colorCompare);
+
+    for(vector<Color_Value_Tuple>::iterator itr = colors.begin(); itr != colors.end(); itr++)
+    {
+      unsigned int  colorVal = get<3>(*itr);
+      colorMap.push_back(colorVal);
+    }
+    return colorMap;
+  }
+
+
+  //get all rgb colors sorted based on rgb
+  vector<unsigned int> getAllRGBSortedByRBGB()
+  {
+    vector<unsigned int> colorMap;
+    
+    for (int j = 0; j < 256; j++)//red //255=interesting quirk
+      {
+	for (int k = 0; k < 16; k++)//blue_MSBs
+	  {
+	    for (int l = 0; l < 256; l++)//green 255=interesting quirk
+	      {
+		for (int m = 0; m < 16; m++)//blue_lsbs
+		  {
+		    //unsigned int  val = (j<<16)+(k<<12)+(l)+(m<<8);
+		    unsigned int  val = (j<<16) | (k<<12) | (l) | (m<<8);
+		    colorMap.push_back(val);
+		  }
+	      }
+	  }
+      }
+    
+    return colorMap;
+  }
+
+  //convert color value to rgb 1 bit by 1 bit
+  void colorToRGB1BitBy1Bit(unsigned int color, unsigned int &R, unsigned int &G, unsigned int &B)
+  {
+    unsigned char temp;
+    
+    //1 bit
+    temp = (color >> 23) & 0x01;
+    R = (temp << 7);
+    temp = (color >> 20) & 0x01;
+    R += (temp << 6);
+    temp = (color >> 17) & 0x01;
+    R += (temp << 5);
+    temp = (color >> 14) & 0x01;
+    R += (temp << 4);
+    temp = (color >> 11) & 0x01;
+    R += (temp << 3);
+    temp = (color >> 8) & 0x01;
+    R += (temp << 2);
+    temp = (color >> 5) & 0x01;
+    R += (temp << 1);
+    temp = (color >> 2) & 0x01;
+    R += (temp << 0);
+    
+    temp = (color >> 22) & 0x01;
+    G = (temp << 7);
+    temp = (color >> 19) & 0x01;
+    G += (temp << 6);
+    temp = (color >> 16) & 0x01;
+    G += (temp << 5);
+    temp = (color >> 13) & 0x01;
+    G += (temp << 4);
+    temp = (color >> 10) & 0x01;
+    G += (temp << 3);
+    temp = (color >> 7) & 0x01;
+    G += (temp << 2);
+    temp = (color >> 4) & 0x01;
+    G += (temp << 1);
+    temp = (color >> 1) & 0x01;
+    G += (temp << 0);
+    
+    temp = (color >> 21) & 0x01;
+    B = (temp << 7);
+    temp = (color >> 18) & 0x01;
+    B += (temp << 6);
+    temp = (color >> 15) & 0x01;
+    B += (temp << 5);
+    temp = (color >> 12) & 0x01;
+    B += (temp << 4);
+    temp = (color >> 9) & 0x01;
+    B += (temp << 3);
+    temp = (color >> 6) & 0x01;
+    B += (temp << 2);
+    temp = (color >> 3) & 0x01;
+    B += (temp << 1);
+    temp = (color >> 0) & 0x01;
+    B += (temp << 0);
+  }
+
+  //convert color value to rgb 2 bit by 2 bit
+  void colorToRGB2BitBy2Bit(unsigned int color, unsigned int &R, unsigned int &G, unsigned int &B)
+  {
+    unsigned char temp;
+
+    //2 bits
+    temp = (color >> 22) & 0x03;
+    R = (temp << 6);
+    temp = (color >> 16) & 0x03;
+    R += (temp << 4);
+    temp = (color >> 10) & 0x03;
+    R += (temp << 2);
+    temp = (color >> 4) & 0x03;
+    R += (temp << 0);
+    
+    temp = (color >> 20) & 0x03;
+    G = (temp << 6);
+    temp = (color >> 14) & 0x03;
+    G += (temp << 4);
+    temp = (color >> 8) & 0x03;
+    G += (temp << 2);
+    temp = (color >> 2) & 0x03;
+    G += (temp << 0);
+    
+    temp = (color >> 18) & 0x03;
+    B = (temp << 6);
+    temp = (color >> 12) & 0x03;
+    B += (temp << 4);
+    temp = (color >> 6) & 0x03;
+    B += (temp << 2);
+    temp = (color >> 0) & 0x03;
+    B += (temp << 0);
+  }
+
+  //convert color value to rgb 4 bit by 4 bit
+  void colorToRGB4BitBy4Bit(unsigned int color, unsigned int &R, unsigned int &G, unsigned int &B)
+  {
+    unsigned char temp;
+
+    //4bits
+    temp = (color >> 20) & 0x0F;
+    R = (temp << 4);
+    temp = (color >> 8) & 0x0F;
+    R += (temp << 0);
+    
+    temp = (color >> 16) & 0x0F;
+    G = (temp << 4);
+    temp = (color >> 4) & 0x0F;
+    G += (temp << 0);
+    
+    temp = (color >> 12) & 0x0F;
+    B = (temp << 4);
+    temp = (color >> 0) & 0x0F;
+    B += (temp << 0);
+  }
+
+  //convert color value to rgb 8 bit by 8 bit
+  void colorToRGB8BitBy8Bit(unsigned int color, unsigned int &R, unsigned int &G, unsigned int &B)
+  {
+    //8 bits
+    unsigned int temp;
+    temp = (color >> 16) & 0xFF;
+    R = (temp << 0);
+    
+    temp = (color >> 8) & 0xFF;
+    G = (temp << 0);
+    
+    temp = (color >> 0) & 0xFF;
+    B = (temp << 0);
   }
 
 }

@@ -1542,7 +1542,12 @@ void initScreenWindow()
   glutKeyboardUpFunc ( CallBackKeyboardUpFunc);
   glutMotionFunc ( CallBackMouseMotionFunc); 
   glutSpecialFunc ( CallBackSpecialFunc);
+#ifdef __APPLE__
+  glutWMCloseFunc(CallBackCloseFunc);
+#else
   glutCloseFunc(CallBackCloseFunc);
+#endif
+
   // glutEntryFunc ( CallBackEntryFunc);
   GLUI_Master.set_glutReshapeFunc( CallBackReshapeFunc );
   GLUI_Master.set_glutIdleFunc( CallBackIdleFunc );
