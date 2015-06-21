@@ -44,6 +44,8 @@ namespace fbr{
   //#define MAX_ANGLE 90.0
   //#define MIN_ANGLE -65.0
 
+  typedef tuple<double, double, double, unsigned int> Color_Value_Tuple;
+  
   /**
    * @enum scanner_type
    */
@@ -153,6 +155,14 @@ namespace fbr{
     FUNDEMENTAL_MATRIX,
     DISABLE_MATCHING_FILTER,
   };
+  /**
+   * @enum recovered_range_filteration_method
+   */
+  enum recovered_range_filteration_method{
+    INTERQUARTILE,
+    INTERQUARTILE_AVERAGEDIFF,
+    DISABLE_RECOVERED_RANGE_FILTERATION,
+  };
   //RANSAC iteration       
 #define RANSACITR 20000
   //Inlier influence                                                     
@@ -185,10 +195,32 @@ namespace fbr{
   feature_filtration_method stringToFeatureFiltrationMethod(string method);
   string matchingFiltrationMethodToString(matching_filtration_method method);
   matching_filtration_method stringToMatchingFiltrationMethod(string method);
-
+  string recoveredRangeFilterationMethodToString(recovered_range_filteration_method method);
+  recovered_range_filteration_method stringToRecoveredRangeFilterationMethod(string method);
   
   //reflecrtance normaliation
   float normalizeTheReflectance(float reflecrtance, scanner_type sType, double minReflectance, double maxReflectance);
 
+  //color compare to sort color_value_Tuples in first three color order
+  bool colorCompare (const Color_Value_Tuple &lTuple, const Color_Value_Tuple &rTuple);
+  //get all rgb colors sorted based on hsv
+  vector<unsigned int> getAllRGBSortedByHSL(unsigned int size = 4096);
+  //get all rgb colors sorted based on hsl
+  vector<unsigned int> getAllRGBSortedByHSV(unsigned int size = 4096);
+  //get all rgb colors sorted based on rgb
+  vector<unsigned int> getAllRGBSortedByRGB(unsigned int size = 4096);
+
+  //get all rgb colors sorted based on RBGB
+  vector<unsigned int> getAllRGBSortedByRBGB();
+
+  //convert color value to rgb 1 bit by 1 bit
+  void colorToRGB1BitBy1Bit(unsigned int color, unsigned int &R, unsigned int &G, unsigned int &B);
+  //convert color value to rgb 2 bit by 2 bit
+  void colorToRGB2BitBy2Bit(unsigned int color, unsigned int &R, unsigned int &G, unsigned int &B);
+  //convert color value to rgb 4 bit by 4 bit
+  void colorToRGB4BitBy4Bit(unsigned int color, unsigned int &R, unsigned int &G, unsigned int &B);
+  //convert color value to rgb 8 bit by 8 bit
+  void colorToRGB8BitBy8Bit(unsigned int color, unsigned int &R, unsigned int &G, unsigned int &B);
+  
 }
 #endif /* FBR_GLOBAL_H_ */

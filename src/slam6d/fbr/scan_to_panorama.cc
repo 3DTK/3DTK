@@ -60,7 +60,7 @@ void usage(int argc, char** argv){
   printf("\t\t-f scanFormat\t\t\t input scan file format [RIEGL_TXT|RXP|ALL SLAM6D SCAN_IO]\n");
   printf("\t\t-W panoramaWidth\t\t panorama image width\n");
   printf("\t\t-H panoramaHeight\t\t panorama image height\n");
-  printf("\t\t-t scannerType \t\t\t scanner type\n");
+  printf("\t\t-t scannerType \t\t\t scanner type[NONE | RIEGL | FARO | MANUAL]\n");
   printf("\t\t-b minReflectance \t\t Min Reflectance for manual reflectance normalization\n");
   printf("\t\t-B maxReflectance \t\t Max Reflectance for manual reflectance normalization\n");
   printf("\t\t-m minHorizAngle \t\t Scanner horizontal view minAngle \n");
@@ -343,6 +343,28 @@ int main(int argc, char** argv)
       
       if(info.threeChannelRange == true)
 	{
+
+	  //cout<<"ThreeChannelRange"<<endl;
+	  //cv::Mat iThreeChannel24BitRange = pImage.getThreeChannel24BitRangeImage();
+	  //for(int h = 0; h < info.panoramaHeight; h++)
+	  //{
+	  //for(int w = 0; w < info.panoramaWidth; w++)
+	  //{
+	  //float range = 0.0;
+	  //unsigned char byte;
+	  //byte = iThreeChannel24BitRange.at<cv::Vec3b>(h,w)[0];
+	  //range+= byte<<16;
+	  //byte = iThreeChannel24BitRange.at<cv::Vec3b>(h,w)[1];
+	  //range+= byte<<8;
+	  //byte = iThreeChannel24BitRange.at<cv::Vec3b>(h,w)[2];
+	  //range+= byte;
+	  //range/= 10000;
+	  //cout<<h<<" "<<w<<" "<<range<<endl;
+	  //}
+	  //cout<<endl;
+	  //}
+	  //cout<<"---------------------"<<endl;
+	  
 	  out = info.outDir+"scan"+to_string(s, 3)+"_"+projectionMethodToString(info.projectionMethod)+"_"+to_string(info.panoramaWidth)+"x"+to_string(info.panoramaHeight)+"_ThreeChannel24BitRange."+panoramaFormatToFileFormatString(info.panoramaFormat);
 	  imwrite(out, pImage.getThreeChannel24BitRangeImage(), panoramaFormatParams);
 	}
@@ -352,6 +374,26 @@ int main(int argc, char** argv)
 	  cv::Mat range1, range2, range3;
 	  pImage.getThreeGrayscaleRangeImages(range1, range2, range3);
 
+	  //cout<<"ThreeGtauScaleRange"<<endl;
+	  //for(int h = 0; h < info.panoramaHeight; h++)
+	  //{
+	  //for(int w = 0; w < info.panoramaWidth; w++)
+	  //{
+	  //float range = 0.0;
+	  //unsigned char byte;
+	  //byte = range1.at<uchar>(h,w);
+	  //range+= byte<<16;
+	  //byte = range2.at<uchar>(h,w);
+	  //range+= byte<<8;
+	  //byte = range3.at<uchar>(h,w);
+	  //range+= byte;
+	  //range/= 10000;
+	  //cout<<h<<" "<<w<<" "<<range<<endl;
+	  //}
+	  //cout<<endl;
+	  //}
+	  //cout<<"---------------------"<<endl;
+	  
 	  out = info.outDir+"scan"+to_string(s, 3)+"_"+projectionMethodToString(info.projectionMethod)+"_"+to_string(info.panoramaWidth)+"x"+to_string(info.panoramaHeight)+"_ThreeGrayscaleRange_1."+panoramaFormatToFileFormatString(info.panoramaFormat);
 	  imwrite(out, range1, panoramaFormatParams);
 	  out = info.outDir+"scan"+to_string(s, 3)+"_"+projectionMethodToString(info.projectionMethod)+"_"+to_string(info.panoramaWidth)+"x"+to_string(info.panoramaHeight)+"_ThreeGrayscaleRange_2."+panoramaFormatToFileFormatString(info.panoramaFormat);
