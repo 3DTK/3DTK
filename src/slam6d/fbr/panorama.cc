@@ -98,6 +98,7 @@ namespace fbr
     clear();
 
     maxRange_ = 0;
+    minRange_ = std::numeric_limits<int>::max();
     mapMethod_ = mMethod;
     reflectance_ = reflectance;
     range_ = range;
@@ -288,6 +289,8 @@ namespace fbr
 
   cv::Mat panorama::getThreeChannel24BitRangeImage()
   {
+    vector<unsigned int> colorMap = getAllRGBSortedByHSL();
+
     int width = projection_->getProjectionWidth();
     int height = projection_->getProjectionHeight();
 
@@ -298,12 +301,21 @@ namespace fbr
       {
 	for(int w = 0; w < width; w++)
 	  {
-	    unsigned char bytes[3];
+	    //unsigned char bytes[3];
 	    unsigned int rangeValue = (int)(iRange_.at<float>(h,w) * 10000);
 	    
-	    threeChannelRange.at<cv::Vec3b>(h,w)[0] = (rangeValue >> 16) & 0xFF;
-	    threeChannelRange.at<cv::Vec3b>(h,w)[1] = (rangeValue >> 8) & 0xFF;
-	    threeChannelRange.at<cv::Vec3b>(h,w)[2] = rangeValue & 0xFF;
+	    //threeChannelRange.at<cv::Vec3b>(h,w)[0] = (rangeValue >> 16) & 0xFF;
+	    //threeChannelRange.at<cv::Vec3b>(h,w)[1] = (rangeValue >> 8) & 0xFF;
+	    //threeChannelRange.at<cv::Vec3b>(h,w)[2] = rangeValue & 0xFF;
+
+	    unsigned int R, G, B;
+	    unsigned int color = colorMap[rangeValue];
+
+	    colorToRGB8BitBy8Bit(color, R, G, B);
+
+	    threeChannelRange.at<cv::Vec3b>(h,w)[0] = R;
+	    threeChannelRange.at<cv::Vec3b>(h,w)[1] = G;
+	    threeChannelRange.at<cv::Vec3b>(h,w)[2] = B;
 	  }
       }
     
@@ -312,6 +324,8 @@ namespace fbr
 
   void panorama::getThreeGrayscaleRangeImages(cv::Mat& range1, cv::Mat& range2, cv::Mat& range3)
   {
+    vector<unsigned int> colorMap = getAllRGBSortedByHSL();
+    
     int width = projection_->getProjectionWidth();
     int height = projection_->getProjectionHeight();
 
@@ -325,12 +339,21 @@ namespace fbr
       {
 	for(int w = 0; w < width; w++)
 	  {
-	    unsigned char bytes[3];
+	    //unsigned char bytes[3];
 	    unsigned int rangeValue = (int)(iRange_.at<float>(h,w) * 10000);
 	    
-	    range1.at<uchar>(h,w) = (rangeValue >> 16) & 0xFF;
-	    range2.at<uchar>(h,w) = (rangeValue >> 8) & 0xFF;
-	    range3.at<uchar>(h,w) = rangeValue & 0xFF;
+	    //range1.at<uchar>(h,w) = (rangeValue >> 16) & 0xFF;
+	    //range2.at<uchar>(h,w) = (rangeValue >> 8) & 0xFF;
+	    //range3.at<uchar>(h,w) = rangeValue & 0xFF;
+
+	    unsigned int R, G, B;
+	    unsigned int color = colorMap[rangeValue];
+
+	    colorToRGB8BitBy8Bit(color, R, G, B);
+
+	    range1.at<uchar>(h,w) = R;
+	    range2.at<uchar>(h,w) = G;
+	    range3.at<uchar>(h,w) = B;
 	  }
       }
   }
@@ -396,7 +419,10 @@ namespace fbr
   {    
     if (maxRange_ < (float)range)
       maxRange_ = (float)range;
+    if (minRange_ > (float)range)
+      minRange_ = (float)range;
 
+    
     if (iRange_.at<float>(y,x) < range) 
       {
 	// reflectance
