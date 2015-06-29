@@ -12,6 +12,7 @@
 #include "slam6d/fbr/fbr_global.h"
 #include "slam6d/fbr/panorama.h"
 #include "slam6d/fbr/projection.h"
+#include <unordered_map>
 
 #ifndef _MSC_VER
 #include <getopt.h>
@@ -205,7 +206,7 @@ bool filterRecoveredRange(information info, int height, int width, cv::Mat iThre
   bool interquartileStatus = true;
   bool averageDiffStatus= true;
   
-  //filtering only of the filteration method is != DISABLE_RECOVERED_RANGE_FILTERATION
+  //filtering only if the filteration method is != DISABLE_RECOVERED_RANGE_FILTERATION
   if(info.recoveredRangeFilterationMethod != DISABLE_RECOVERED_RANGE_FILTERATION)
     { 
       vector<float> rangeNeighbours;
@@ -456,34 +457,66 @@ int main(int argc, char** argv)
   outputScanName = inputImageName.substr (0, found);
   ofstream os(info.outputDir + outputScanName + ".3d");
 
+  //get the color map and add it to unordered map
+  vector<unsigned int> colorMapVector = getAllRGBSortedByHSL();
+  std::unordered_map<unsigned int, unsigned int> colorMap;
+  for(unsigned int c = 0; c < colorMapVector.size(); c++)
+    {
+      colorMap.insert({colorMapVector[c], c});
+    }
+  
   //calculate the range
   for(int h = 0; h < info.imageHeight; h++)
     {
       for(int w = 0; w < info.imageWidth; w++)
 	{
 	  float range = 0.0;
+	  unsigned int color = 0;
+	  unsigned int R = 0, G = 0, B = 0;;
 	  unsigned char byte;
 	  if(info.inputImageType == ThreeChannel24BitRange)
 	    {
-	      byte = iThreeChannel24BitRange.at<cv::Vec3b>(h,w)[0];
-	      range+= byte<<16;
-	      byte = iThreeChannel24BitRange.at<cv::Vec3b>(h,w)[1];
-	      range+= byte<<8;
-	      byte = iThreeChannel24BitRange.at<cv::Vec3b>(h,w)[2];
-	      range+= byte;
-	      range/= 10000;
+	      R = iThreeChannel24BitRange.at<cv::Vec3b>(h,w)[0];
+	      //range+= byte<<16;
+	      //R= byte<<16;
+	      G = iThreeChannel24BitRange.at<cv::Vec3b>(h,w)[1];
+	      //range+= byte<<8;
+	      //G= byte<<8;
+	      B = iThreeChannel24BitRange.at<cv::Vec3b>(h,w)[2];
+	      //range+= byte;
+	      //color+= byte;
+	      //range/= 10000;
 	    }
 	  else if(info.inputImageType == ThreeGrayscaleRange)
 	    {
-	      byte = iThreeGrayscaleRange1.at<uchar>(h,w);
-	      range+= byte<<16;
-	      byte = iThreeGrayscaleRange2.at<uchar>(h,w);
-	      range+= byte<<8;
-	      byte = iThreeGrayscaleRange3.at<uchar>(h,w);
-	      range+= byte;
-	      range/= 10000;
+	      R = iThreeGrayscaleRange1.at<uchar>(h,w);
+	      //range+= byte<<16;
+	      //color+= byte<<16;
+	      G = iThreeGrayscaleRange2.at<uchar>(h,w);
+	      //range+= byte<<8;
+	      //color+= byte<<8;
+	      B = iThreeGrayscaleRange3.at<uchar>(h,w);
+	      //range+= byte;
+	      //color+= byte;
+	      //range/= 10000;
 	    }
 
+	  color = (R<<16) | (G<<8) | (B);
+	  std::unordered_map<unsigned int , unsigned int>::const_iterator mapPair = colorMap.find (color);
+	  if ( mapPair == colorMap.end() )
+	    {
+	      std::cout << "not found";
+	      range = 0;
+	    }
+	  else
+	    {
+	      
+	      range = (unsigned int)mapPair->second;
+	      range/= 10000;
+	      //std::cout << myPair->first << " is " << myPair->second;
+	    }
+
+	  
 	  //get filteration status for pixel [h, w]
 	  //if no filteration it returns true
 	  bool filterationStatus = filterRecoveredRange(info, h, w, iThreeChannel24BitRange, iThreeGrayscaleRange1, iThreeGrayscaleRange2, iThreeGrayscaleRange3);
