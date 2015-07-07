@@ -28,7 +28,8 @@ for pos1,pos2 in pairwise(poses):
         continue
     lines += 1
     back = ((pos1[0]-pos2[0])/length,(pos1[1]-pos2[1])/length,(pos1[2]-pos2[2])/length)
-    outdata += "%s\n%s\n%s\n"%(pos1[0]+800*back[0],pos1[1]+800*back[1]+400.0,pos1[2]+800*back[2])
+    # FIXME: make the factor configurable
+    outdata += "%s\n%s\n%s\n"%(pos1[0]+8.0*back[0],pos1[1]+8.0*back[1]+4.0,pos1[2]+8.0*back[2])
     outdata += "%s\n%s\n%s\n"%pos1
     outdata += "%s\n%s\n%s\n"%(pos1[0],pos1[1]+1,pos1[2])
 
