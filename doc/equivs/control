@@ -1,0 +1,27 @@
+# you can use this control file to create a dummy .deb package
+# which you can then install to keep all the dependencies needed
+# to build 3dtk together. You can run the following commands:
+#  $ equivs-build doc/equivs/control
+#  $ sudo dpkg -i 3dtk-build-deps_1.0_all.deb
+#  $ sudo apt-get -f install
+Section: misc
+Priority: optional
+Standards-Version: 3.9.2
+
+Package: 3dtk-build-deps
+Depends:
+ cmake,
+ cmake-curses-gui,
+ libopencv-dev,
+ libboost-graph1.55-dev,
+ libboost-regex1.55-dev,
+ libboost-filesystem1.55-dev,
+ libboost-system1.55-dev,
+ libboost-thread1.55-dev,
+ libboost-date-time1.55-dev,
+ libboost-program-options1.55-dev,
+ freeglut3-dev,
+ libxmu-dev,
+ libgl1-mesa-dev,
+ libwxgtk3.0-dev,
+ libxml2-dev,
