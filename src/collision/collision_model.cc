@@ -183,6 +183,7 @@ void write_xyzr(DataXYZ &points, string &dir,
             fcolliding << points[i][2] << " " << -points[i][0] << " " << points[i][1] << " " << dist_colliding[j] << endl;
             j++;
         } else {
+            // FIXME: make the max distance configurable
             fnoncolliding << points[i][2] << " " << -points[i][0] << " " << points[i][1] << " 1000" << endl;
         }
     }
@@ -423,7 +424,7 @@ void calculate_collidingdist2(std::vector<Point> &pointmodel, DataXYZ &environ,
                 // with the same penetration distance
                 vector<size_t> closestsphere = t.fixedRangeSearch(pa[c1], sqRad2, thread_num);
                 for (const auto &it3 : closestsphere) {
-                    if (dist_colliding[it3] < dist2) {
+                    if (dist_colliding[it3] > dist2) {
                         dist_colliding[it3] = dist2;
                     }
                 }
@@ -504,7 +505,8 @@ int main(int argc, char **argv)
     std::vector<float> dist_colliding;
     dist_colliding.reserve(num_colliding);
     for (size_t i = 0; i < num_colliding; ++i) {
-        dist_colliding.push_back(0);
+        // FIXME: make the maximum colliding distance configurable
+        dist_colliding.push_back(1000);
     }
     if (calcdistances) {
         switch (pdmethod) {
