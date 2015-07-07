@@ -281,7 +281,7 @@ IF(WITH_RIVLIB)
   ELSE(WIN32)
     SET(RIVLIB ${RIEGL_DIR}libscanlib-mt-s.a ${RIEGL_DIR}libctrllib-mt-s.a ${RIEGL_DIR}libboost_system-mt-s-1_43_0-vns.a pthread)
   ENDIF(WIN32)
-  FIND_PACKAGE(LibXml2 )
+  FIND_PACKAGE(LibXml2 REQUIRED)
 
 ELSE(WITH_RIVLIB)
   MESSAGE(STATUS "Do NOT compile a scan IO for RXP")
