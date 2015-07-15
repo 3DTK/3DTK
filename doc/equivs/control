@@ -25,3 +25,4 @@ Depends:
  libgl1-mesa-dev,
  libwxgtk3.0-dev,
  libxml2-dev,
+ libarchive-dev,

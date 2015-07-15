@@ -61,29 +61,35 @@ bool ScanIO_uos_rrgbt::supports(IODataType type)
   return !!(type & (DATA_XYZ | DATA_REFLECTANCE | DATA_RGB | DATA_TEMPERATURE));
 }
 
+bool read_data(std::istream &data_file, PointFilter& filter,
+        std::vector<double>* xyz, std::vector<unsigned char>* rgb,
+        std::vector<float>* reflectance, std::vector<float>* temperature,
+        std::vector<float>* amplitude, std::vector<int>* type,
+        std::vector<float>* deviation)
+{
+    data_file.exceptions(ifstream::eofbit|ifstream::failbit|ifstream::badbit);
+
+    uosHeaderTest(data_file);
+
+    IODataType spec[9] = { DATA_XYZ, DATA_XYZ, DATA_XYZ,
+        DATA_REFLECTANCE, DATA_RGB, DATA_RGB, DATA_RGB, DATA_TEMPERATURE,
+        DATA_TERMINATOR };
+    ScanDataTransform_identity transform;
+    readASCII(data_file, spec, transform, filter, xyz, rgb, reflectance, temperature);
+
+    return true;
+}
+
 void ScanIO_uos_rrgbt::readScan(const char* dir_path, const char* identifier, PointFilter& filter, std::vector<double>* xyz, std::vector<unsigned char>* rgb, std::vector<float>* reflectance, std::vector<float>* temperature, std::vector<float>* amplitude, std::vector<int>* type, std::vector<float>* deviation)
 {
+    if(xyz == 0 || rgb == 0 || reflectance == 0 || temperature == 0)
+        return;
+
     // error handling
     path data_path(dir_path);
     data_path /= path(std::string(DATA_PATH_PREFIX) + identifier + DATA_PATH_SUFFIX);
-    if(!exists(data_path))
+    if (!open_path(data_path, filter, xyz, rgb, reflectance, temperature, amplitude, type, deviation, read_data))
         throw std::runtime_error(std::string("There is no scan file for [") + identifier + "] in [" + dir_path + "]");
-
-    if(xyz != 0 && rgb != 0 && reflectance != 0 && temperature != 0) {
-        // open data file
-        ifstream data_file(data_path);
-        data_file.exceptions(ifstream::eofbit|ifstream::failbit|ifstream::badbit);
-
-        uosHeaderTest(data_file);
-
-        IODataType spec[9] = { DATA_XYZ, DATA_XYZ, DATA_XYZ,
-            DATA_REFLECTANCE, DATA_RGB, DATA_RGB, DATA_RGB, DATA_TEMPERATURE,
-            DATA_TERMINATOR };
-        ScanDataTransform_identity transform;
-        readASCII(data_file, spec, transform, filter, xyz, rgb, reflectance, temperature);
-        
-        data_file.close();
-    }
 }
 
 
