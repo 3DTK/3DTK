@@ -1,6 +1,7 @@
 #ifndef __SCAN_IO_HELPER_H__
 #define __SCAN_IO_HELPER_H__
 
+#include <boost/filesystem/operations.hpp>
 #include <iostream>
 #include "slam6d/pointfilter.h"
 #include "slam6d/io_types.h"
@@ -62,6 +63,16 @@ bool readASCII(std::istream& infile,
         std::vector<int>* type = 0,
         std::vector<float>* deviation = 0,
         std::streamsize bufsize = 128);
+
+bool open_path(boost::filesystem::path data_path, PointFilter& filter,
+        std::vector<double>* xyz, std::vector<unsigned char>* rgb,
+        std::vector<float>* reflectance, std::vector<float>* temperature,
+        std::vector<float>* amplitude, std::vector<int>* type,
+        std::vector<float>* deviation, bool (*handler)(std::istream &,
+            PointFilter&, std::vector<double>*, std::vector<unsigned char>*,
+            std::vector<float>*, std::vector<float>*, std::vector<float>*,
+            std::vector<int>*, std::vector<float>*));
+
 #endif
 
 /* vim: set ts=4 sw=4 et: */

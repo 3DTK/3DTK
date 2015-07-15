@@ -106,39 +106,47 @@ bool ScanIO_riegl_rgb::supports(IODataType type)
   return !!(type & (DATA_XYZ | DATA_RGB | DATA_REFLECTANCE));
 }
 
+bool read_data(std::istream &data_file, PointFilter& filter,
+        std::vector<double>* xyz, std::vector<unsigned char>* rgb,
+        std::vector<float>* reflectance, std::vector<float>* temperature,
+        std::vector<float>* amplitude, std::vector<int>* type,
+        std::vector<float>* deviation)
+{
+    // open data file
+    data_file.exceptions(ifstream::eofbit|ifstream::failbit|ifstream::badbit);
+
+    // read the point count
+    // TODO: read this in properly, check for errors
+    unsigned int count;
+    data_file >> count;
+
+    // reserve enough space for faster reading
+    if(xyz != 0) xyz->reserve(3*count);
+    if(rgb != 0) rgb->reserve(3*count);
+
+    // read points
+    // z x y range theta phi r g b reflectance
+    IODataType spec[11] = { DATA_XYZ, DATA_XYZ, DATA_XYZ,
+        DATA_DUMMY, DATA_DUMMY, DATA_DUMMY,
+        DATA_RGB, DATA_RGB, DATA_RGB, DATA_REFLECTANCE,
+        DATA_TERMINATOR };
+    ScanDataTransform_riegl transform;
+    readASCII(data_file, spec, transform, filter, xyz, rgb, reflectance);
+
+    return true;
+}
+
+
 void ScanIO_riegl_rgb::readScan(const char* dir_path, const char* identifier, PointFilter& filter, std::vector<double>* xyz, std::vector<unsigned char>* rgb, std::vector<float>* reflectance, std::vector<float>* temperature, std::vector<float>* amplitude, std::vector<int>* type, std::vector<float>* deviation)
 {
+    if(xyz == 0 && rgb == 0 && reflectance == 0)
+        return;
+
     // error handling
     path data_path(dir_path);
     data_path /= path(std::string(DATA_PATH_PREFIX) + identifier + DATA_PATH_SUFFIX);
-    if(!exists(data_path))
+    if (!open_path(data_path, filter, xyz, rgb, reflectance, temperature, amplitude, type, deviation, read_data))
         throw std::runtime_error(std::string("There is no scan file for [") + identifier + "] in [" + dir_path + "]");
-
-    if(xyz != 0 || rgb != 0 || reflectance != 0) {
-        // open data file
-        ifstream data_file(data_path);
-        data_file.exceptions(ifstream::eofbit|ifstream::failbit|ifstream::badbit);
-
-        // read the point count
-        // TODO: read this in properly, check for errors
-        unsigned int count;
-        data_file >> count;
-
-        // reserve enough space for faster reading
-        if(xyz != 0) xyz->reserve(3*count);
-        if(rgb != 0) rgb->reserve(3*count);
-
-        // read points
-        // z x y range theta phi r g b reflectance
-        IODataType spec[11] = { DATA_XYZ, DATA_XYZ, DATA_XYZ,
-            DATA_DUMMY, DATA_DUMMY, DATA_DUMMY,
-            DATA_RGB, DATA_RGB, DATA_RGB, DATA_REFLECTANCE,
-            DATA_TERMINATOR };
-        ScanDataTransform_riegl transform;
-        readASCII(data_file, spec, transform, filter, xyz, rgb, reflectance);
-
-        data_file.close();
-    }
 }
 
 

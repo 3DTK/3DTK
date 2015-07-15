@@ -116,3 +116,15 @@ IF(APPLE)
   target_link_libraries(glee_s ${COREFOUNDATION_LIBRARY} ${OPENGL_LIBRARIES})
 ENDIF(APPLE)
 ENDIF(EXPORT_SHARED_LIBS)
+
+SET(LIBARCHIVE_CPP_WRAPPER_DIR ${CMAKE_SOURCE_DIR}/3rdparty/libarchive_cpp_wrapper-1.0.0/)
+add_library(libarchive_cpp_wrapper SHARED
+  ${LIBARCHIVE_CPP_WRAPPER_DIR}archive_entry.cpp
+  ${LIBARCHIVE_CPP_WRAPPER_DIR}archive_reader.cpp
+  ${LIBARCHIVE_CPP_WRAPPER_DIR}archive_reader_iterator.cpp
+  ${LIBARCHIVE_CPP_WRAPPER_DIR}archive_reader_entry_buffer.cpp
+  ${LIBARCHIVE_CPP_WRAPPER_DIR}archive_writer.cpp
+  ${LIBARCHIVE_CPP_WRAPPER_DIR}archive_exception.cpp
+)
+target_link_libraries(libarchive_cpp_wrapper ${LibArchive_LIBRARIES} )
+

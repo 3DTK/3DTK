@@ -34,6 +34,7 @@ if(Boost_FOUND)
   add_definitions(${Boost_LIB_DIAGNOSTIC_DEFINITIONS})
 endif()
 
+FIND_PACKAGE(LibArchive REQUIRED)
 
 FIND_PACKAGE(OpenCV REQUIRED)
 include("3rdparty/CMakeModules/OpenCV.cmake")
@@ -448,6 +449,7 @@ include_directories(${CMAKE_SOURCE_DIR}/3rdparty/ann_1.1.1_modified/include)
 include_directories(${CMAKE_SOURCE_DIR}/3rdparty/ann_1.1.1_modified/src)
 include_directories(${CMAKE_SOURCE_DIR}/3rdparty/lastools/laslib/src)
 include_directories(${CMAKE_SOURCE_DIR}/3rdparty/lastools/laslib/inc)
+include_directories(${CMAKE_SOURCE_DIR}/3rdparty/libarchive_cpp_wrapper-1.0.0)
 link_directories(${CMAKE_SOURCE_DIR}/obj)
 link_directories(${CMAKE_SOURCE_DIR}/lib)
 

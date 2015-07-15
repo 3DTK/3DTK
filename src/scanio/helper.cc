@@ -3,8 +3,7 @@
 #include <climits>
 #include "scanio/helper.h"
 #include "slam6d/globals.icc"
-
-using namespace boost::filesystem;
+#include "archive_reader.hpp"
 
 bool ScanDataTransform_identity::transform(double xyz[3], unsigned char rgb[3], float*  refl, float* temp, float* ampl, int* type, float* devi)
 {
@@ -70,6 +69,13 @@ bool ScanDataTransform_xyz::transform(double xyz[3], unsigned char rgb[3], float
     return true;
 }
 
+bool pathExistsDummy(std::istream &data_file, PointFilter& filter,
+        std::vector<double>* xyz, std::vector<unsigned char>* rgb,
+        std::vector<float>* reflectance, std::vector<float>* temperature,
+        std::vector<float>* amplitude, std::vector<int>* type,
+        std::vector<float>* deviation) {
+    return true;
+}
 
 std::list<std::string> readDirectoryHelper(const char *dir_path,
         unsigned int start,
@@ -85,9 +91,10 @@ std::list<std::string> readDirectoryHelper(const char *dir_path,
         // scan consists of data and pose files
         bool found = false;
         for (const char **s = data_path_suffixes; *s != 0; s++) {
-            path data(dir_path);
-            data /= path(std::string(data_path_prefix) + identifier + *s);
-            if (exists(data)) {
+            boost::filesystem::path data(dir_path);
+            data /= boost::filesystem::path(std::string(data_path_prefix) + identifier + *s);
+            PointFilter filter;
+            if (open_path(data, filter, NULL, NULL, NULL, NULL, NULL, NULL, NULL, pathExistsDummy)) {
                 found = true;
                 break;
             }
@@ -110,17 +117,17 @@ void readPoseHelper(const char *dir_path,
 {
     unsigned int i;
 
-    path pose_path(dir_path);
-    pose_path /= path(std::string(pose_path_prefix) + identifier +
+    boost::filesystem::path pose_path(dir_path);
+    pose_path /= boost::filesystem::path(std::string(pose_path_prefix) + identifier +
             pose_path_suffix);
-    if (!exists(pose_path)) {
+    if (!boost::filesystem::exists(pose_path)) {
         throw std::runtime_error(std::
                 string("There is no pose file for [") +
                 identifier + "] in [" + dir_path + "]");
     }
 
     // open pose file
-    ifstream pose_file(pose_path);
+    boost::filesystem::ifstream pose_file(pose_path);
 
     // if the file is open, read contents
     if (pose_file.good()) {
@@ -181,6 +188,22 @@ bool commentTest(char *line)
 
 void uosHeaderTest(std::istream& infile, std::streamsize bufsize)
 {
+    /* check if the first character in the stream is a hash without consuming
+     * the first character
+     *
+     * This is important because if the input file comes from a zip archive,
+     * then no seeking can be done in it. But seeking would be necessary after
+     * having done a getline() and then finding out that the first line is no
+     * comment.
+     *
+     * FIXME: the downside of this approach is that for the first line to be
+     * treated as a comment, the first character must be a hash and not be
+     * prepended by whitespaces. It would be better if it were possible to
+     * peek() a full line or to be able to seek back to the beginning in
+     * streams coming from libarchive as well.
+     */
+    if (infile.peek() != '#')
+        return;
     char *buffer = (char *)malloc(bufsize);
     std::streampos sp = infile.tellg();
     try { 
@@ -615,6 +638,49 @@ bool readASCII(std::istream& infile, IODataType* spec, ScanDataTransform& transf
 fail:
     free(buffer);
     return false;
+}
+
+bool open_path(boost::filesystem::path data_path, PointFilter& filter,
+        std::vector<double>* xyz, std::vector<unsigned char>* rgb,
+        std::vector<float>* reflectance, std::vector<float>* temperature,
+        std::vector<float>* amplitude, std::vector<int>* type,
+        std::vector<float>* deviation, bool (*handler)(std::istream &,
+            PointFilter&, std::vector<double>*, std::vector<unsigned char>*,
+            std::vector<float>*, std::vector<float>*, std::vector<float>*,
+            std::vector<int>*, std::vector<float>*))
+{
+    if (exists(data_path)) {
+        boost::filesystem::ifstream data_file(data_path);
+        return handler(data_file, filter, xyz, rgb, reflectance, temperature, amplitude, type, deviation);
+    } else {
+        boost::filesystem::path archivepath;
+        // go through all components
+        for(auto part = data_path.begin(); part != data_path.end(); ++part) {
+            archivepath /= *part;
+            if (boost::filesystem::is_directory(archivepath))
+                continue;
+            // if the current component was not a directory, try to
+            // open it as a file and try to find the remaining path
+            // in it
+            boost::filesystem::path remainder;
+            // strip off the part of the path that is the archive name
+            ++part;
+            for (; part != data_path.end(); ++part)
+                remainder /= *part;
+            // now try opening the path as an archive
+            boost::filesystem::ifstream fs(archivepath);
+            ns_archive::reader reader = ns_archive::reader::make_reader<ns_archive::ns_reader::format::_ALL, ns_archive::ns_reader::filter::_ALL>(fs, 10240);
+            for(auto e : reader)
+            {
+                if (e->get_header_value_pathname() == remainder) {
+                    istream &stream(e->get_stream());
+                    return handler(stream, filter, xyz, rgb, reflectance, temperature, amplitude, type, deviation);
+                }
+            }
+            break;
+        }
+        return false;
+    }
 }
 
 /* vim: set ts=4 sw=4 et: */
