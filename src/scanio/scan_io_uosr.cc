@@ -120,3 +120,4 @@ BOOL APIENTRY DllMain(HANDLE hModule, DWORD dwReason, LPVOID lpReserved)
 }
 #endif
 
+/* vim: set ts=4 sw=4 et: */

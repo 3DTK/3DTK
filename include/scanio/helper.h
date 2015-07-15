@@ -63,3 +63,5 @@ bool readASCII(std::istream& infile,
         std::vector<float>* deviation = 0,
         std::streamsize bufsize = 128);
 #endif
+
+/* vim: set ts=4 sw=4 et: */
