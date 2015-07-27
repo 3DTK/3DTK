@@ -489,6 +489,34 @@ bool checkSpec(IODataType* spec, std::vector<double>* xyz, std::vector<unsigned 
     return true;
 }
 
+std::function<bool (std::istream &data_file)> open_uos_file(
+        IODataType* spec, ScanDataTransform& transform, PointFilter& filter,
+        std::vector<double>* xyz, std::vector<unsigned char>* rgb,
+        std::vector<float>* reflectance, std::vector<float>* temperature,
+        std::vector<float>* amplitude, std::vector<int>* type,
+        std::vector<float>* deviation)
+{
+    return [=,&filter,&transform](std::istream &data_file) -> bool {
+        // open data file
+        data_file.exceptions(std::ifstream::eofbit|std::ifstream::failbit|std::ifstream::badbit);
+
+        char *firstline;
+        std::streamsize linelen;
+        linelen = uosHeaderTest(data_file, &firstline);
+        if (linelen < 0)
+            throw std::runtime_error("unable to read uos header");
+
+        ScanDataTransform_identity transform;
+        readASCII(data_file, firstline, linelen, spec, transform, filter, xyz, rgb, reflectance, temperature, amplitude, type, deviation);
+
+        if (firstline != NULL)
+            free(firstline);
+
+        return true;
+    };
+}
+
+
 bool handle_line(char *pos, std::streamsize linelen, unsigned int linenr, IODataType *currspec,
 ScanDataTransform& transform, PointFilter& filter, std::vector<double>* xyz, std::vector<unsigned
         char>* rgb, std::vector<float>* refl, std::vector<float>* temp,

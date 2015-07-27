@@ -60,43 +60,18 @@ bool ScanIO_uos::supports(IODataType type)
   return !!(type & (DATA_XYZ));
 }
 
-std::function<bool (std::istream &data_file)> read_data(PointFilter& filter,
-        std::vector<double>* xyz, std::vector<unsigned char>* rgb,
-        std::vector<float>* reflectance, std::vector<float>* temperature,
-        std::vector<float>* amplitude, std::vector<int>* type,
-        std::vector<float>* deviation)
-{
-    return [=,&filter](std::istream &data_file) -> bool {
-        // open data file
-        data_file.exceptions(ifstream::eofbit|ifstream::failbit|ifstream::badbit);
-
-        char *firstline;
-        std::streamsize linelen;
-        linelen = uosHeaderTest(data_file, &firstline);
-        if (linelen < 0)
-            throw std::runtime_error("unable to read uos header");
-
-        IODataType spec[4] = { DATA_XYZ, DATA_XYZ, DATA_XYZ, DATA_TERMINATOR };
-        ScanDataTransform_identity transform;
-        readASCII(data_file, firstline, linelen, spec, transform, filter, xyz);
-
-        if (firstline != NULL)
-            free(firstline);
-
-        return true;
-    };
-}
-
-
 void ScanIO_uos::readScan(const char* dir_path, const char* identifier, PointFilter& filter, std::vector<double>* xyz, std::vector<unsigned char>* rgb, std::vector<float>* reflectance, std::vector<float>* temperature, std::vector<float>* amplitude, std::vector<int>* type, std::vector<float>* deviation)
 {
     if(xyz == 0)
         return;
 
+    IODataType spec[4] = { DATA_XYZ, DATA_XYZ, DATA_XYZ, DATA_TERMINATOR };
+    ScanDataTransform_identity transform;
+
     // error handling
     path data_path(dir_path);
     data_path /= path(std::string(DATA_PATH_PREFIX) + identifier + DATA_PATH_SUFFIX);
-    if (!open_path(data_path, read_data(filter, xyz, rgb, reflectance, temperature, amplitude, type, deviation)))
+    if (!open_path(data_path, open_uos_file(spec, transform, filter, xyz, 0, 0, 0, 0, 0, 0)))
         throw std::runtime_error(std::string("There is no scan file for [") + identifier + "] in [" + dir_path + "]");
 }
 
