@@ -60,29 +60,31 @@ bool ScanIO_uos::supports(IODataType type)
   return !!(type & (DATA_XYZ));
 }
 
-bool read_data(std::istream &data_file, PointFilter& filter,
+std::function<bool (std::istream &data_file)> read_data(PointFilter& filter,
         std::vector<double>* xyz, std::vector<unsigned char>* rgb,
         std::vector<float>* reflectance, std::vector<float>* temperature,
         std::vector<float>* amplitude, std::vector<int>* type,
         std::vector<float>* deviation)
 {
-    // open data file
-    data_file.exceptions(ifstream::eofbit|ifstream::failbit|ifstream::badbit);
+    return [=,&filter](std::istream &data_file) -> bool {
+        // open data file
+        data_file.exceptions(ifstream::eofbit|ifstream::failbit|ifstream::badbit);
 
-    char *firstline;
-    std::streamsize linelen;
-    linelen = uosHeaderTest(data_file, &firstline);
-    if (linelen < 0)
-        throw std::runtime_error("unable to read uos header");
+        char *firstline;
+        std::streamsize linelen;
+        linelen = uosHeaderTest(data_file, &firstline);
+        if (linelen < 0)
+            throw std::runtime_error("unable to read uos header");
 
-    IODataType spec[4] = { DATA_XYZ, DATA_XYZ, DATA_XYZ, DATA_TERMINATOR };
-    ScanDataTransform_identity transform;
-    readASCII(data_file, firstline, linelen, spec, transform, filter, xyz);
+        IODataType spec[4] = { DATA_XYZ, DATA_XYZ, DATA_XYZ, DATA_TERMINATOR };
+        ScanDataTransform_identity transform;
+        readASCII(data_file, firstline, linelen, spec, transform, filter, xyz);
 
-    if (firstline != NULL)
-        free(firstline);
+        if (firstline != NULL)
+            free(firstline);
 
-    return true;
+        return true;
+    };
 }
 
 
@@ -94,7 +96,7 @@ void ScanIO_uos::readScan(const char* dir_path, const char* identifier, PointFil
     // error handling
     path data_path(dir_path);
     data_path /= path(std::string(DATA_PATH_PREFIX) + identifier + DATA_PATH_SUFFIX);
-    if (!open_path(data_path, filter, xyz, rgb, reflectance, temperature, amplitude, type, deviation, read_data))
+    if (!open_path(data_path, read_data(filter, xyz, rgb, reflectance, temperature, amplitude, type, deviation)))
         throw std::runtime_error(std::string("There is no scan file for [") + identifier + "] in [" + dir_path + "]");
 }
 

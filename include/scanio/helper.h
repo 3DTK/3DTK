@@ -66,14 +66,7 @@ bool readASCII(std::istream& infile,
         std::vector<float>* deviation = 0,
         std::streamsize bufsize = 128);
 
-bool open_path(boost::filesystem::path data_path, PointFilter& filter,
-        std::vector<double>* xyz, std::vector<unsigned char>* rgb,
-        std::vector<float>* reflectance, std::vector<float>* temperature,
-        std::vector<float>* amplitude, std::vector<int>* type,
-        std::vector<float>* deviation, bool (*handler)(std::istream &,
-            PointFilter&, std::vector<double>*, std::vector<unsigned char>*,
-            std::vector<float>*, std::vector<float>*, std::vector<float>*,
-            std::vector<int>*, std::vector<float>*));
+bool open_path(boost::filesystem::path data_path, std::function<bool (std::istream &)>);
 
 #endif
 

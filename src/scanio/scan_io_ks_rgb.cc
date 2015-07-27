@@ -68,29 +68,31 @@ bool ScanIO_ks_rgb::supports(IODataType type)
   return !!(type & (DATA_XYZ | DATA_RGB | DATA_REFLECTANCE | DATA_AMPLITUDE));
 }
 
-bool read_data(std::istream &data_file, PointFilter& filter,
+std::function<bool (std::istream &data_file)> read_data(PointFilter& filter,
         std::vector<double>* xyz, std::vector<unsigned char>* rgb,
         std::vector<float>* reflectance, std::vector<float>* temperature,
         std::vector<float>* amplitude, std::vector<int>* type,
         std::vector<float>* deviation)
 {
-    // TODO: support for amplitude and reflectance
-    // open data file
-    data_file.exceptions(ifstream::eofbit|ifstream::failbit|ifstream::badbit);
+    return [=,&filter](std::istream &data_file) -> bool {
+        // TODO: support for amplitude and reflectance
+        // open data file
+        data_file.exceptions(ifstream::eofbit|ifstream::failbit|ifstream::badbit);
 
-    // overread the first line
-    // TODO: how does the first line look like?
-    //       can we use uosHeaderTest() here?
-    char dummy[255];
-    data_file.getline(dummy, 255);
+        // overread the first line
+        // TODO: how does the first line look like?
+        //       can we use uosHeaderTest() here?
+        char dummy[255];
+        data_file.getline(dummy, 255);
 
-    IODataType spec[9] = { DATA_XYZ, DATA_XYZ, DATA_XYZ,
-        DATA_RGB, DATA_RGB, DATA_RGB,
-        DATA_AMPLITUDE, DATA_REFLECTANCE, DATA_TERMINATOR };
-    ScanDataTransform_ks transform;
-    readASCII(data_file, NULL, 0, spec, transform, filter, xyz, rgb, reflectance, 0, amplitude);
+        IODataType spec[9] = { DATA_XYZ, DATA_XYZ, DATA_XYZ,
+            DATA_RGB, DATA_RGB, DATA_RGB,
+            DATA_AMPLITUDE, DATA_REFLECTANCE, DATA_TERMINATOR };
+        ScanDataTransform_ks transform;
+        readASCII(data_file, NULL, 0, spec, transform, filter, xyz, rgb, reflectance, 0, amplitude);
 
-    return true;
+        return true;
+    };
 }
 
 void ScanIO_ks_rgb::readScan(const char* dir_path, const char* identifier, PointFilter& filter, std::vector<double>* xyz, std::vector<unsigned char>* rgb, std::vector<float>* reflectance, std::vector<float>* temperature, std::vector<float>* amplitude, std::vector<int>* type, std::vector<float>* deviation)
@@ -101,7 +103,7 @@ void ScanIO_ks_rgb::readScan(const char* dir_path, const char* identifier, Point
     // error handling
     path data_path(dir_path);
     data_path /= path(std::string(DATA_PATH_PREFIX) + identifier + DATA_PATH_SUFFIX);
-    if (!open_path(data_path, filter, xyz, rgb, reflectance, temperature, amplitude, type, deviation, read_data))
+    if (!open_path(data_path, read_data(filter, xyz, rgb, reflectance, temperature, amplitude, type, deviation)))
         throw std::runtime_error(std::string("There is no scan file for [") + identifier + "] in [" + dir_path + "]");
 }
 
