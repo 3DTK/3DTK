@@ -174,51 +174,72 @@ bool uosHeaderTest(char *line)
     return true;
 }
 
-bool commentTest(char *line)
+std::streamsize uosHeaderTest(std::istream& infile, char **line, std::streamsize bufsize)
 {
-    char *cur;
-    // start with one or more whitespace
-    for (cur = line; isblank(*cur); ++cur);
-    // check if the first non-blank character is the comment character (#)
-    if (*cur == '#')
-        return true;
-    else
-        return false;
-}
-
-void uosHeaderTest(std::istream& infile, std::streamsize bufsize)
-{
-    /* check if the first character in the stream is a hash without consuming
-     * the first character
+    /*
+     * in case the first line turned out not to be a uos header, this function
+     * originally just did a seekg() back to the beginning of the file. With
+     * the integration of libarchive this is not possible anymore because
+     * seeking backwards is not possible. So instead, if the first line is
+     * found not to be a header but actual data, the allocated buffer is
+     * returned so that it can later be passed to readACSII as the first line
+     * of the input.
      *
-     * This is important because if the input file comes from a zip archive,
-     * then no seeking can be done in it. But seeking would be necessary after
-     * having done a getline() and then finding out that the first line is no
-     * comment.
+     * An alternative to doing this would be to wrap the istream in another
+     * istream which supports buffering of the last X bytes read so that it is
+     * possible to seek back in the stream a couple of bytes. But implementing
+     * a streambuf class that does this, was deemed to complicated and hence
+     * this solution.
      *
-     * FIXME: the downside of this approach is that for the first line to be
-     * treated as a comment, the first character must be a hash and not be
-     * prepended by whitespaces. It would be better if it were possible to
-     * peek() a full line or to be able to seek back to the beginning in
-     * streams coming from libarchive as well.
+     * Should there ever exist such a wrapper class, then it can be used to
+     * answer this question: http://stackoverflow.com/questions/31478256/
      */
-    if (infile.peek() != '#')
-        return;
     char *buffer = (char *)malloc(bufsize);
     std::streampos sp = infile.tellg();
-    try { 
+    try {
         infile.getline(buffer, bufsize, '\n');
     } catch(std::ios::failure e) {
         std::cerr << "error reading first line" << endl;
         std::cerr << "did not find a newline after " << bufsize << " characters" << endl;
         std::cerr << e.what() << endl;
-        return;
+        free(buffer);
+        *line = NULL;
+        return -1;
     }
-    // if uos header, skip it, otherwise reset
-    if (!commentTest(buffer) && !uosHeaderTest(buffer)) {
-        infile.seekg(sp);
+    std::streamsize linelen = infile.gcount();
+    // if failure but eof not reached, break
+    if (infile.fail() && !infile.eof()) {
+        std::cerr << "cannot find line ending within " << bufsize <<
+            " characters and eof is not reached in line 1"<< endl;
+        free(buffer);
+        *line = NULL;
+        return -1;
     }
+    // if eof was not reached, then a terminator was found
+    // strip it off
+    if (!infile.eof()) {
+        buffer[linelen-1] = '\0';
+        linelen--;
+    }
+    // if the last character is \r replace it by \0
+    if (linelen >= 1 &&
+            buffer[linelen-1] == '\r' &&
+            buffer[linelen] == '\0') {
+        buffer[linelen-1] = '\0';
+        linelen--;
+    }
+    // the uos header must be at least five bytes because it is of the form
+    // A x B
+    // if no uos header or comment was found, then the first line was actual
+    // data which we return
+    if (linelen < 5 || !uosHeaderTest(buffer)) {
+        *line = buffer;
+        return linelen;
+    }
+    // otherwise, the first line was the header which we discard
     free(buffer);
+    *line = NULL;
+    return 0;
 }
 
 bool strtoval(char *pos, unsigned int linenr, double* ret)
@@ -358,6 +379,7 @@ bool storeval(char *pos, unsigned int linenr, IODataType currspec, double* xyz, 
             std::cerr << "too many values in line " << linenr << endl;
             return false;
         default:
+            std::cerr << "storeval failed at " << linenr << endl;
             return false;
     }
 }
@@ -475,7 +497,98 @@ bool checkSpec(IODataType* spec, std::vector<double>* xyz, std::vector<unsigned 
     return true;
 }
 
-bool readASCII(std::istream& infile, IODataType* spec, ScanDataTransform& transform, PointFilter& filter, std::vector<double>* xyz, std::vector<unsigned char>* rgb, std::vector<float>* refl, std::vector<float>* temp, std::vector<float>* ampl, std::vector<int>* type, std::vector<float>* devi, std::streamsize bufsize)
+bool handle_line(char *pos, std::streamsize linelen, unsigned int linenr, IODataType *currspec,
+ScanDataTransform& transform, PointFilter& filter, std::vector<double>* xyz, std::vector<unsigned
+        char>* rgb, std::vector<float>* refl, std::vector<float>* temp,
+        std::vector<float>* ampl, std::vector<int>* type, std::vector<float>*
+        devi)
+{
+    // temporary storage areas
+    double xyz_tmp[3];
+    unsigned char rgb_tmp[3];
+    float refl_tmp, temp_tmp, ampl_tmp, devi_tmp;
+    int type_tmp;
+    int xyz_idx = 0;
+    int rgb_idx = 0;
+
+    // skip over leading whitespace
+    for (; isblank(*pos); ++pos, --linelen);
+    // skip this line if it is empty
+    if (linelen == 0) {
+        return true;
+    }
+    // skip the line if it starts with the comment character
+    if (*pos == '#')
+        return true;
+
+    char *cur;
+    // now go through all fields and handle them according to the spec
+    for (cur = pos; *cur != '\0' && *cur != '#'; ++cur) {
+        // skip over everything that is not part of a field
+        if (!isblank(*cur))
+            continue;
+        // we found the end of a field so lets read its content
+        *cur = '\0';
+        if (!storeval(pos, linenr, *currspec, xyz_tmp, &xyz_idx, rgb_tmp,
+                    &rgb_idx, &refl_tmp, &temp_tmp, &ampl_tmp, &type_tmp, &devi_tmp))
+            return false;
+        currspec++;
+        // read in the remaining whitespace
+        pos = cur + 1;
+        for (; isblank(*pos); ++pos);
+        cur = pos - 1;
+    }
+    // read in last value (if any)
+    if (*pos != '#' && *pos != '\0') {
+        *cur = '\0';
+        // read in the last value
+        if (!storeval(pos, linenr, *currspec, xyz_tmp, &xyz_idx, rgb_tmp,
+                    &rgb_idx, &refl_tmp, &temp_tmp, &ampl_tmp, &type_tmp, &devi_tmp))
+            return false;
+        // check if more values were expected
+        currspec++;
+    }
+    if (*currspec != DATA_TERMINATOR) {
+        std::cerr << "less values than in spec in line " << linenr << endl;
+        return false;
+    }
+    // check if three values were read in for xyz and rgb 
+    if (xyz != 0 && xyz_idx != 3) {
+        std::cerr << "can't understand " << xyz_idx << " coordinate values in line " << linenr << endl;
+        return false;
+    }
+    if (rgb != 0 && rgb_idx != 3) {
+        std::cerr << "can't understand " << xyz_idx << " color values in line " << linenr << endl;
+        return false;
+    }
+    // apply transformations and filter data and append to vectors
+    if (transform.transform(xyz_tmp, rgb_tmp, &refl_tmp, &temp_tmp, &ampl_tmp, &type_tmp, &devi_tmp)
+            && (xyz == 0 || filter.check(xyz_tmp)) ) {
+        if (xyz != 0)
+            for (int i = 0; i < 3; ++i) xyz->push_back(xyz_tmp[i]);
+        if (rgb != 0)
+            for (int i = 0; i < 3; ++i) rgb->push_back(rgb_tmp[i]);
+        if (refl != 0)
+            refl->push_back(refl_tmp);
+        if (temp != 0)
+            temp->push_back(temp_tmp);
+        if (ampl != 0)
+            ampl->push_back(ampl_tmp);
+        if (type != 0)
+            type->push_back(type_tmp);
+        if (devi != 0)
+            devi->push_back(devi_tmp);
+    }
+
+    return true;
+}
+
+bool readASCII(std::istream& infile, char *firstline, std::streamsize
+        lenfirstline, IODataType* spec, ScanDataTransform& transform,
+        PointFilter& filter, std::vector<double>* xyz, std::vector<unsigned
+        char>* rgb, std::vector<float>* refl, std::vector<float>* temp,
+        std::vector<float>* ampl, std::vector<int>* type, std::vector<float>*
+        devi, std::streamsize bufsize)
 {
     /*
      * there seems to be no sane and fast way to read a file with multiple
@@ -500,30 +613,29 @@ bool readASCII(std::istream& infile, IODataType* spec, ScanDataTransform& transf
      * since nothing gives us what we want and is fast at the same time, we
      * roll our own solution...
      */
-    // temporary storage areas
-    double xyz_tmp[3];
-    int xyz_idx = 0;
-    unsigned char rgb_tmp[3];
-    int rgb_idx = 0;
-    float refl_tmp, temp_tmp, ampl_tmp, devi_tmp;
-    int type_tmp;
 
-
+    unsigned int linenr = 1;
     char *buffer = (char *)malloc(bufsize);
 
     // we want to support \n and \r\n delimiters so it's okay to use
     // istream::getline to read a line (it supports a byte limit)
     // we then check whether the last character is a \r and remove it
 
-    IODataType *currspec = spec;
-
     if (!checkSpec(spec, xyz, rgb, refl, temp, ampl, type, devi)) {
         std::cerr << "problems with spec" << endl;
         goto fail;
     }
 
-    for (unsigned int linenr = 1;;++linenr) {
-        try { 
+    if (firstline != NULL) {
+        if (!handle_line(firstline, lenfirstline, linenr, spec, transform, filter, xyz, rgb, refl, temp, ampl, type, devi))
+            goto fail;
+        ++linenr;
+    }
+
+    for (;;++linenr) {
+        if (infile.eof()) break;
+
+        try {
             infile.getline(buffer, bufsize, '\n');
         } catch(std::ios::failure e) {
             if (!infile.eof()) {
@@ -534,7 +646,6 @@ bool readASCII(std::istream& infile, IODataType* spec, ScanDataTransform& transf
                 break;
             }
         }
-        char *pos = buffer;
         std::streamsize linelen = infile.gcount();
         // if failure but eof not reached, break
         if (infile.fail() && !infile.eof()) {
@@ -553,80 +664,9 @@ bool readASCII(std::istream& infile, IODataType* spec, ScanDataTransform& transf
             buffer[linelen-1] = '\0';
             linelen--;
         }
-        // skip over leading whitespace
-        for (; *pos == ' ' || *pos == '\t'; ++pos, --linelen);
-        // skip this line if it is empty and exit if it's empty and the last
-        if (linelen == 0) {
-            if (infile.eof()) break;
-            else continue;
-        }
-        // skip the line if it starts with the comment character
-        if (*pos == '#')
-            continue;
 
-        char *cur;
-        // now go through all fields and handle them according to the spec
-        for (cur = pos; *cur != '\0' && *cur != '#'; ++cur) {
-            // skip over everything that is not part of a field
-            if (*cur != ' ' && *cur != '\t')
-                continue;
-            // we found the end of a field so lets read its content
-            *cur = '\0';
-            if (!storeval(pos, linenr, *currspec, xyz_tmp, &xyz_idx, rgb_tmp,
-                        &rgb_idx, &refl_tmp, &temp_tmp, &ampl_tmp, &type_tmp, &devi_tmp))
-                goto fail;
-            currspec++;
-            // read in the remaining whitespace
-            pos = cur + 1;
-            for (; *pos == ' ' || *pos == '\t'; ++pos);
-            cur = pos - 1;
-        }
-        // read in last value (if any)
-        if (*pos != '#' && *pos != '\0') {
-            *cur = '\0';
-            // read in the last value
-            if (!storeval(pos, linenr, *currspec, xyz_tmp, &xyz_idx, rgb_tmp,
-                        &rgb_idx, &refl_tmp, &temp_tmp, &ampl_tmp, &type_tmp, &devi_tmp))
-                goto fail;
-            // check if more values were expected
-            currspec++;
-        }
-        if (*currspec != DATA_TERMINATOR) {
-            std::cerr << "less values than in spec in line " << linenr << endl;
+        if (!handle_line(buffer, linelen, linenr, spec, transform, filter, xyz, rgb, refl, temp, ampl, type, devi))
             goto fail;
-        }
-        // check if three values were read in for xyz and rgb 
-        if (xyz != 0 && xyz_idx != 3) {
-            std::cerr << "can't understand " << xyz_idx << " coordinate values in line " << linenr << endl;
-            goto fail;
-        }
-        if (rgb != 0 && rgb_idx != 3) {
-            std::cerr << "can't understand " << xyz_idx << " color values in line " << linenr << endl;
-            goto fail;
-        }
-        // apply transformations and filter data and append to vectors
-        if (transform.transform(xyz_tmp, rgb_tmp, &refl_tmp, &temp_tmp, &ampl_tmp, &type_tmp, &devi_tmp)
-                && (xyz == 0 || filter.check(xyz_tmp)) ) {
-            if (xyz != 0)
-                for (int i = 0; i < 3; ++i) xyz->push_back(xyz_tmp[i]);
-            if (rgb != 0)
-                for (int i = 0; i < 3; ++i) rgb->push_back(rgb_tmp[i]);
-            if (refl != 0)
-                refl->push_back(refl_tmp);
-            if (temp != 0)
-                temp->push_back(temp_tmp);
-            if (ampl != 0)
-                ampl->push_back(ampl_tmp);
-            if (type != 0)
-                type->push_back(type_tmp);
-            if (devi != 0)
-                devi->push_back(devi_tmp);
-        }
-        // reset current spec
-        currspec = spec;
-        // reset indices
-        xyz_idx = 0;
-        rgb_idx = 0;
     }
 
     if (infile.bad() && !infile.eof()) {
@@ -658,6 +698,8 @@ bool open_path(boost::filesystem::path data_path, PointFilter& filter,
         for(auto part = data_path.begin(); part != data_path.end(); ++part) {
             archivepath /= *part;
             if (boost::filesystem::is_directory(archivepath))
+                continue;
+            if (!exists(archivepath))
                 continue;
             // if the current component was not a directory, try to
             // open it as a file and try to find the remaining path

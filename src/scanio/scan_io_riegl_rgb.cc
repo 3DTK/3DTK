@@ -131,7 +131,7 @@ bool read_data(std::istream &data_file, PointFilter& filter,
         DATA_RGB, DATA_RGB, DATA_RGB, DATA_REFLECTANCE,
         DATA_TERMINATOR };
     ScanDataTransform_riegl transform;
-    readASCII(data_file, spec, transform, filter, xyz, rgb, reflectance);
+    readASCII(data_file, NULL, 0, spec, transform, filter, xyz, rgb, reflectance);
 
     return true;
 }

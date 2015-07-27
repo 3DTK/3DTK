@@ -68,11 +68,18 @@ bool read_data(std::istream &data_file, PointFilter& filter,
     // open data file
     data_file.exceptions(ifstream::eofbit|ifstream::failbit|ifstream::badbit);
 
-    uosHeaderTest(data_file);
+    char *firstline;
+    std::streamsize linelen;
+    linelen = uosHeaderTest(data_file, &firstline);
+    if (linelen < 0)
+        throw std::runtime_error("unable to read uos header");
 
     IODataType spec[5] = { DATA_XYZ, DATA_XYZ, DATA_XYZ, DATA_REFLECTANCE, DATA_TERMINATOR };
     ScanDataTransform_identity transform;
-    readASCII(data_file, spec, transform, filter, xyz, 0, reflectance);
+    readASCII(data_file, firstline, linelen, spec, transform, filter, xyz, 0, reflectance);
+
+    if (firstline != NULL)
+        free(firstline);
 
     return true;
 }
