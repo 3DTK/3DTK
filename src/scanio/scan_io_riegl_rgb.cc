@@ -106,34 +106,36 @@ bool ScanIO_riegl_rgb::supports(IODataType type)
   return !!(type & (DATA_XYZ | DATA_RGB | DATA_REFLECTANCE));
 }
 
-bool read_data(std::istream &data_file, PointFilter& filter,
+std::function<bool (std::istream &data_file)> read_data(PointFilter& filter,
         std::vector<double>* xyz, std::vector<unsigned char>* rgb,
         std::vector<float>* reflectance, std::vector<float>* temperature,
         std::vector<float>* amplitude, std::vector<int>* type,
         std::vector<float>* deviation)
 {
-    // open data file
-    data_file.exceptions(ifstream::eofbit|ifstream::failbit|ifstream::badbit);
+    return [=,&filter](std::istream &data_file) -> bool {
+        // open data file
+        data_file.exceptions(ifstream::eofbit|ifstream::failbit|ifstream::badbit);
 
-    // read the point count
-    // TODO: read this in properly, check for errors
-    unsigned int count;
-    data_file >> count;
+        // read the point count
+        // TODO: read this in properly, check for errors
+        unsigned int count;
+        data_file >> count;
 
-    // reserve enough space for faster reading
-    if(xyz != 0) xyz->reserve(3*count);
-    if(rgb != 0) rgb->reserve(3*count);
+        // reserve enough space for faster reading
+        if(xyz != 0) xyz->reserve(3*count);
+        if(rgb != 0) rgb->reserve(3*count);
 
-    // read points
-    // z x y range theta phi r g b reflectance
-    IODataType spec[11] = { DATA_XYZ, DATA_XYZ, DATA_XYZ,
-        DATA_DUMMY, DATA_DUMMY, DATA_DUMMY,
-        DATA_RGB, DATA_RGB, DATA_RGB, DATA_REFLECTANCE,
-        DATA_TERMINATOR };
-    ScanDataTransform_riegl transform;
-    readASCII(data_file, NULL, 0, spec, transform, filter, xyz, rgb, reflectance);
+        // read points
+        // z x y range theta phi r g b reflectance
+        IODataType spec[11] = { DATA_XYZ, DATA_XYZ, DATA_XYZ,
+            DATA_DUMMY, DATA_DUMMY, DATA_DUMMY,
+            DATA_RGB, DATA_RGB, DATA_RGB, DATA_REFLECTANCE,
+            DATA_TERMINATOR };
+        ScanDataTransform_riegl transform;
+        readASCII(data_file, NULL, 0, spec, transform, filter, xyz, rgb, reflectance);
 
-    return true;
+        return true;
+    };
 }
 
 
@@ -145,7 +147,7 @@ void ScanIO_riegl_rgb::readScan(const char* dir_path, const char* identifier, Po
     // error handling
     path data_path(dir_path);
     data_path /= path(std::string(DATA_PATH_PREFIX) + identifier + DATA_PATH_SUFFIX);
-    if (!open_path(data_path, filter, xyz, rgb, reflectance, temperature, amplitude, type, deviation, read_data))
+    if (!open_path(data_path, read_data(filter, xyz, rgb, reflectance, temperature, amplitude, type, deviation)))
         throw std::runtime_error(std::string("There is no scan file for [") + identifier + "] in [" + dir_path + "]");
 }
 
