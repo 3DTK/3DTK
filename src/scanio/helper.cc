@@ -69,14 +69,6 @@ bool ScanDataTransform_xyz::transform(double xyz[3], unsigned char rgb[3], float
     return true;
 }
 
-bool pathExistsDummy(std::istream &data_file, PointFilter& filter,
-        std::vector<double>* xyz, std::vector<unsigned char>* rgb,
-        std::vector<float>* reflectance, std::vector<float>* temperature,
-        std::vector<float>* amplitude, std::vector<int>* type,
-        std::vector<float>* deviation) {
-    return true;
-}
-
 std::list<std::string> readDirectoryHelper(const char *dir_path,
         unsigned int start,
         unsigned int end,
@@ -94,7 +86,7 @@ std::list<std::string> readDirectoryHelper(const char *dir_path,
             boost::filesystem::path data(dir_path);
             data /= boost::filesystem::path(std::string(data_path_prefix) + identifier + *s);
             PointFilter filter;
-            if (open_path(data, filter, NULL, NULL, NULL, NULL, NULL, NULL, NULL, pathExistsDummy)) {
+            if (open_path(data, [](std::istream &data_file) -> bool { return true; })) {
                 found = true;
                 break;
             }
@@ -680,18 +672,11 @@ fail:
     return false;
 }
 
-bool open_path(boost::filesystem::path data_path, PointFilter& filter,
-        std::vector<double>* xyz, std::vector<unsigned char>* rgb,
-        std::vector<float>* reflectance, std::vector<float>* temperature,
-        std::vector<float>* amplitude, std::vector<int>* type,
-        std::vector<float>* deviation, bool (*handler)(std::istream &,
-            PointFilter&, std::vector<double>*, std::vector<unsigned char>*,
-            std::vector<float>*, std::vector<float>*, std::vector<float>*,
-            std::vector<int>*, std::vector<float>*))
+bool open_path(boost::filesystem::path data_path, std::function<bool (std::istream &)> handler)
 {
     if (exists(data_path)) {
         boost::filesystem::ifstream data_file(data_path);
-        return handler(data_file, filter, xyz, rgb, reflectance, temperature, amplitude, type, deviation);
+        return handler(data_file);
     } else {
         boost::filesystem::path archivepath;
         // go through all components
@@ -716,7 +701,7 @@ bool open_path(boost::filesystem::path data_path, PointFilter& filter,
             {
                 if (e->get_header_value_pathname() == remainder) {
                     istream &stream(e->get_stream());
-                    return handler(stream, filter, xyz, rgb, reflectance, temperature, amplitude, type, deviation);
+                    return handler(stream);
                 }
             }
             break;
