@@ -51,6 +51,12 @@ void readPoseHelper(
         const char* pose_path_prefix = "scan");
 std::streamsize uosHeaderTest(std::istream& infile, char **line, std::streamsize bufsize = 128);
 bool uosHeaderTest(char *line);
+std::function<bool (std::istream &data_file)> open_uos_file(
+        IODataType* spec, ScanDataTransform& transform, PointFilter& filter,
+        std::vector<double>* xyz, std::vector<unsigned char>* rgb,
+        std::vector<float>* reflectance, std::vector<float>* temperature,
+        std::vector<float>* amplitude, std::vector<int>* type,
+        std::vector<float>* deviation);
 bool readASCII(std::istream& infile,
         char *firstline,
         std::streamsize lenfirstline,
