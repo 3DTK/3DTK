@@ -88,7 +88,7 @@ bool read_data(std::istream &data_file, PointFilter& filter,
         DATA_RGB, DATA_RGB, DATA_RGB,
         DATA_AMPLITUDE, DATA_REFLECTANCE, DATA_TERMINATOR };
     ScanDataTransform_ks transform;
-    readASCII(data_file, spec, transform, filter, xyz, rgb, reflectance, 0, amplitude);
+    readASCII(data_file, NULL, 0, spec, transform, filter, xyz, rgb, reflectance, 0, amplitude);
 
     return true;
 }
