@@ -87,6 +87,8 @@ std::list<std::string> readDirectoryHelper(const char *dir_path,
             boost::filesystem::path data(dir_path);
             data /= boost::filesystem::path(std::string(data_path_prefix) + identifier + *s);
             PointFilter filter;
+            /* pass the identity function because we don't want to read data
+             * from the file but just find out whether it exists or not */
             if (open_path(data, [](std::istream &data_file) -> bool { return true; })) {
                 found = true;
                 break;
@@ -113,6 +115,8 @@ void readPoseHelper(const char *dir_path,
             pose_path_suffix);
 
 
+    /* the handler function passed to open_path() will fill the pose[] array
+     * */
     bool res = open_path(pose_path, [=](std::istream &data_file) -> bool {
                 // read 6 plain doubles
                 for (int i = 0; i < 6; ++i) data_file >> pose[i];
@@ -479,6 +483,15 @@ bool checkSpec(IODataType* spec, std::vector<double>* xyz, std::vector<unsigned 
     return true;
 }
 
+/* this is a wrapper around uosHeaderTest and readASCII which should work for
+ * most of the text based input formats like uos* and xyz*
+ *
+ * This function returns another function so that it can be passed to the
+ * open_path() function. This wrapping is necessary because the open_path()
+ * function only accepts a function taking the istream as an argument but
+ * the result of reading the istream has to be stored somewhere. Passing the
+ * pointers and references around correctly is part of this lambda wrapper.
+ * */
 std::function<bool (std::istream &data_file)> open_uos_file(
         IODataType* spec, ScanDataTransform& transform, PointFilter& filter,
         std::vector<double>* xyz, std::vector<unsigned char>* rgb,
@@ -507,6 +520,10 @@ std::function<bool (std::istream &data_file)> open_uos_file(
 }
 
 
+/* used by readASCII to read a single line
+ *
+ * splitting this function out of readASCII became necessary to facilitate the
+ * check against the optional first line */
 bool handle_line(char *pos, std::streamsize linelen, unsigned int linenr, IODataType *currspec,
 ScanDataTransform& transform, PointFilter& filter, std::vector<double>* xyz, std::vector<unsigned
         char>* rgb, std::vector<float>* refl, std::vector<float>* temp,
@@ -690,6 +707,10 @@ fail:
     return false;
 }
 
+/* a helper used by open_path and open_path writing. It goes through a path
+ * from root downward and if it encounters a component that is not a
+ * directory, it will pass this location plus the remainder to the handler
+ * function */
 bool find_path_archive(boost::filesystem::path data_path, std::function<bool (boost::filesystem::path, boost::filesystem::path)> handler)
 {
     boost::filesystem::path archivepath;
@@ -714,6 +735,9 @@ bool find_path_archive(boost::filesystem::path data_path, std::function<bool (bo
     return false;
 }
 
+/*
+ * open a path for reading such that part of the path can also be inside an archive
+ */
 bool open_path(boost::filesystem::path data_path, std::function<bool (std::istream &)> handler)
 {
     if (exists(data_path)) {
