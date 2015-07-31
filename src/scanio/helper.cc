@@ -4,6 +4,7 @@
 #include "scanio/helper.h"
 #include "slam6d/globals.icc"
 #include "archive_reader.hpp"
+#include "archive_writer.hpp"
 
 bool ScanDataTransform_identity::transform(double xyz[3], unsigned char rgb[3], float*  refl, float* temp, float* ampl, int* type, float* devi)
 {
@@ -689,31 +690,42 @@ fail:
     return false;
 }
 
+bool find_path_archive(boost::filesystem::path data_path, std::function<bool (boost::filesystem::path, boost::filesystem::path)> handler)
+{
+    boost::filesystem::path archivepath;
+    // go through all components
+    for(auto part = data_path.begin(); part != data_path.end(); ++part) {
+        archivepath /= *part;
+        if (boost::filesystem::is_directory(archivepath))
+            continue;
+        if (!exists(archivepath))
+            continue;
+        // if the current component was not a directory, try to
+        // open it as a file and try to find the remaining path
+        // in it
+        boost::filesystem::path remainder;
+        // strip off the part of the path that is the archive name
+        ++part;
+        for (; part != data_path.end(); ++part)
+            remainder /= *part;
+        // now try opening the path as an archive
+        return handler(archivepath, remainder);
+    }
+    return false;
+}
+
 bool open_path(boost::filesystem::path data_path, std::function<bool (std::istream &)> handler)
 {
     if (exists(data_path)) {
         boost::filesystem::ifstream data_file(data_path);
         return handler(data_file);
-    } else {
-        boost::filesystem::path archivepath;
-        // go through all components
-        for(auto part = data_path.begin(); part != data_path.end(); ++part) {
-            archivepath /= *part;
-            if (boost::filesystem::is_directory(archivepath))
-                continue;
-            if (!exists(archivepath))
-                continue;
-            // if the current component was not a directory, try to
-            // open it as a file and try to find the remaining path
-            // in it
-            boost::filesystem::path remainder;
-            // strip off the part of the path that is the archive name
-            ++part;
-            for (; part != data_path.end(); ++part)
-                remainder /= *part;
-            // now try opening the path as an archive
+    }
+
+    return find_path_archive(data_path, [=,&handler](boost::filesystem::path archivepath, boost::filesystem::path remainder) -> bool {
+            /* open the archive for reading */
             boost::filesystem::ifstream fs(archivepath);
             ns_archive::reader reader = ns_archive::reader::make_reader<ns_archive::ns_reader::format::_ALL, ns_archive::ns_reader::filter::_ALL>(fs, 10240);
+            /* and find the right archive member to read from */
             for(auto e : reader)
             {
                 if (e->get_header_value_pathname() == remainder) {
@@ -721,10 +733,33 @@ bool open_path(boost::filesystem::path data_path, std::function<bool (std::istre
                     return handler(stream);
                 }
             }
-            break;
-        }
-        return false;
+            return false;
+        });
+}
+
+bool open_path_writing(boost::filesystem::path data_path, std::function<bool (std::ostream &)> handler)
+{
+    if (exists(data_path)) {
+        boost::filesystem::ofstream data_file(data_path);
+        return handler(data_file);
     }
+
+    return find_path_archive(data_path, [=,&handler](boost::filesystem::path archivepath, boost::filesystem::path remainder) -> bool {
+            /* open the archive for writing */
+            boost::filesystem::ofstream fs(archivepath);
+            // FIXME: the writer format should be auto detected
+            ns_archive::writer writer = ns_archive::writer::make_writer<ns_archive::ns_writer::format::_TAR>(fs, 10240);
+            std::stringstream ss;
+            /* let the handler fill the stringstream */
+            bool ret = handler(ss);
+            if (!ret)
+                return false;
+            /* and write the entry to the archive */
+            ns_archive::entry out_entry(ss);
+            out_entry.set_header_value_pathname(remainder.string());
+            writer.add_entry(out_entry);
+            return true;
+        });
 }
 
 /* vim: set ts=4 sw=4 et: */
