@@ -107,36 +107,25 @@ void readPoseHelper(const char *dir_path,
         const char *pose_path_suffix,
         const char *pose_path_prefix)
 {
-    unsigned int i;
-
     boost::filesystem::path pose_path(dir_path);
     pose_path /= boost::filesystem::path(std::string(pose_path_prefix) + identifier +
             pose_path_suffix);
-    if (!boost::filesystem::exists(pose_path)) {
-        throw std::runtime_error(std::
-                string("There is no pose file for [") +
-                identifier + "] in [" + dir_path + "]");
-    }
 
-    // open pose file
-    boost::filesystem::ifstream pose_file(pose_path);
 
-    // if the file is open, read contents
-    if (pose_file.good()) {
-        // read 6 plain doubles
-        for (i = 0; i < 6; ++i)
-            pose_file >> pose[i];
-        pose_file.close();
+    bool res = open_path(pose_path, [=](std::istream &data_file) -> bool {
+                // read 6 plain doubles
+                for (int i = 0; i < 6; ++i) data_file >> pose[i];
 
-        // convert angles from deg to rad
-        for (i = 3; i < 6; ++i)
-            pose[i] = rad(pose[i]);
-    } else {
+                // convert angles from deg to rad
+                for (int i = 3; i < 6; ++i) pose[i] = rad(pose[i]);
+
+                return true;
+            });
+    if (!res)
         throw std::runtime_error(std::
                 string
                 ("Pose file could not be opened for [") +
                 identifier + "] in [" + dir_path + "]");
-    }
 }
 
 bool uosHeaderTest(char *line)
