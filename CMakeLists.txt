@@ -450,6 +450,7 @@ include_directories(${CMAKE_SOURCE_DIR}/3rdparty/ann_1.1.1_modified/src)
 include_directories(${CMAKE_SOURCE_DIR}/3rdparty/lastools/laslib/src)
 include_directories(${CMAKE_SOURCE_DIR}/3rdparty/lastools/laslib/inc)
 include_directories(${CMAKE_SOURCE_DIR}/3rdparty/libarchive_cpp_wrapper-1.0.0)
+include_directories(${LibArchive_INCLUDE_DIR})
 link_directories(${CMAKE_SOURCE_DIR}/obj)
 link_directories(${CMAKE_SOURCE_DIR}/lib)
 
