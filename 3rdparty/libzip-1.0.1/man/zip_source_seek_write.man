@@ -1,0 +1,48 @@
+.TH "ZIP_SOURCE_SEEK_WRITE" "3" "November 18, 2014" "NiH" "Library Functions Manual"
+.SH "NAME"
+\fBzip_source_seek_write\fP
+\- set write offset in zip source
+.SH "LIBRARY"
+libzip (-lzip)
+.SH "SYNOPSIS"
+zip.h
+int
+zip_source_seek_write zip_source_t *source zip_int64_t offset int whence
+.SH "DESCRIPTION"
+The function
+zip_source_seek_write
+sets the current write offset for
+source.
+Just like in
+fseek(3),
+depending on the
+\fIwhence\fP
+argument, the
+\fIoffset\fP
+is counted relative from:
+.TP SEEK_CURXX
+\fRSEEK_SET\fP
+start of file
+.TP SEEK_CURXX
+\fRSEEK_CUR\fP
+current write offset in file
+.TP SEEK_CURXX
+\fRSEEK_END\fP
+end of file
+.SH "RETURN VALUES"
+Upon successful completion 0 is returned.
+Otherwise, \-1 is returned and the error information in
+\fIsource\fP
+is set to indicate the error.
+.SH "SEE ALSO"
+libzip(3),
+zip_source(3),
+zip_source_begin_write(3),
+zip_source_commit_write(3),
+zip_source_rollback_write(3),
+zip_source_tell_write(3),
+zip_source_write(3)
+.SH "AUTHORS"
+Dieter Baron <dillo@nih.at>
+and
+Thomas Klausner <tk@giga.or.at>

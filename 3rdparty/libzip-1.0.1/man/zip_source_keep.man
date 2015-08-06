@@ -1,0 +1,23 @@
+.TH "ZIP_SOURCE_KEEP" "3" "November 18, 2014" "NiH" "Library Functions Manual"
+.SH "NAME"
+\fBzip_source_keep\fP
+\- increment reference count of zip data source
+.SH "LIBRARY"
+libzip (-lzip)
+.SH "SYNOPSIS"
+zip.h
+void
+zip_source_keep zip_source_t *source
+.SH "DESCRIPTION"
+The function
+zip_source_keep
+increments the reference count of
+\fIsource\fP.
+.SH "SEE ALSO"
+libzip(3),
+zip_source(3),
+zip_source_free(3)
+.SH "AUTHORS"
+Dieter Baron <dillo@nih.at>
+and
+Thomas Klausner <tk@giga.or.at>

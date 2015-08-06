@@ -1,0 +1,73 @@
+.TH "ZIP_FILE_EXTRA_FIELDS_COUNT" "3" "February 20, 2013" "NiH" "Library Functions Manual"
+.SH "NAME"
+\fBzip_file_extra_fields_count\fP,
+\fBzip_file_extra_fields_count_by_id\fP
+\- count extra fields for file in zip
+.SH "LIBRARY"
+libzip (-lzip)
+.SH "SYNOPSIS"
+zip.h
+zip_int16_t
+zip_file_extra_fields_count zip_t *archive zip_uint64_t index zip_flags_t flags
+zip_int16_t
+zip_file_extra_fields_count_by_id zip_t *archive zip_uint64_t index zip_uint16_t extra_field_id zip_flags_t flags
+.SH "DESCRIPTION"
+The
+zip_file_extra_fields_count
+function counts the extra fields for the file at position
+\fIindex\fP
+in the zip archive.
+.PP
+The following
+\fIflags\fP
+are supported:
+.TP ZIP_FL_CENTRALXX
+\fRZIP_FL_CENTRAL\fP
+Count extra fields from the archive's central directory.
+.TP ZIP_FL_CENTRALXX
+\fRZIP_FL_LOCAL\fP
+Count extra fields from the local file headers.
+.TP ZIP_FL_CENTRALXX
+\fRZIP_FL_UNCHANGED\fP
+Count the original unchanged extra fields, ignoring any changes made.
+.PP
+The
+zip_file_extra_fields_count_by_id
+function counts the extra fields with ID (two-byte signature)
+\fIextra_field_id\fP.
+The other arguments are the same as for
+zip_file_extra_fields_count.
+.PP
+Extra fields that are the same in the central directory and the local file
+header are merged into one.
+Therefore, the counts with
+\fRZIP_FL_CENTRAL\fP
+and
+\fRZIP_FL_LOCAL\fP
+do not need to add up to the same value as when given
+\fRZIP_FL_CENTRAL|ZIP_FL_LOCAL\fP
+at the same time.
+.SH "RETURN VALUES"
+Upon successful completion, the requested number of extra fields is returned.
+Otherwise, \-1 is returned and the error code in
+\fIarchive\fP
+is set to indicate the error.
+.SH "ERRORS"
+zip_file_extra_fields_count
+and
+zip_file_extra_fields_count_by_id
+fail if:
+.TP 17n
+[\fRZIP_ER_NOENT\fP]
+\fIindex\fP
+is not a valid file index in
+\fIarchive\fP.
+.SH "SEE ALSO"
+libzip(3),
+zip_file_extra_field_delete(3),
+zip_file_extra_field_get(3),
+zip_file_extra_field_set(3)
+.SH "AUTHORS"
+Dieter Baron <dillo@nih.at>
+and
+Thomas Klausner <tk@giga.or.at>

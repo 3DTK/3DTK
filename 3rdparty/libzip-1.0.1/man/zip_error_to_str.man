@@ -1,0 +1,40 @@
+.TH "ZIP_ERROR_TO_STR" "3" "December 2, 2014" "NiH" "Library Functions Manual"
+.SH "NAME"
+\fBzip_error_to_str\fP
+\- get string representation of zip error
+.SH "LIBRARY"
+libzip (-lzip)
+.SH "SYNOPSIS"
+zip.h
+int
+zip_error_to_str char *buf zip_uint64_t len int ze int se
+.SH "DESCRIPTION"
+The function
+zip_error_to_str
+is deprecated; use
+zip_error_init_with_code(3)
+and
+zip_error_strerror(3)
+instead.
+.PP
+Replace
+.nf
+char buf[BUFSIZE];
+zip_error_to_str(buf, sizeof(buf), ze, se);
+printf("%s", buf);
+.fi
+with
+.nf
+zip_error_t error;
+zip_error_init_with_code(&error, ze);
+printf("%s", zip_error_strerror(&error));
+zip_error_fini(&error);
+.fi
+.SH "SEE ALSO"
+libzip(3),
+zip_error_init_with_code(3),
+zip_error_strerror(3)
+.SH "AUTHORS"
+Dieter Baron <dillo@nih.at>
+and
+Thomas Klausner <tk@giga.or.at>

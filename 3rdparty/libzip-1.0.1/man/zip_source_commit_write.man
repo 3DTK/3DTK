@@ -1,0 +1,33 @@
+.TH "ZIP_SOURCE_COMMIT_WRITE" "3" "November 18, 2014" "NiH" "Library Functions Manual"
+.SH "NAME"
+\fBzip_source_commit_write\fP
+\- finalize changes to zip source
+.SH "LIBRARY"
+libzip (-lzip)
+.SH "SYNOPSIS"
+zip.h
+int
+zip_source_commit_write zip_source_t *source
+.SH "DESCRIPTION"
+The function
+zip_source_commit_write
+finishes writing data to
+source
+and replaces the original with the newly written data.
+.SH "RETURN VALUES"
+Upon successful completion 0 is returned.
+Otherwise, \-1 is returned and the error information in
+\fIsource\fP
+is set to indicate the error.
+.SH "SEE ALSO"
+libzip(3),
+zip_source(3),
+zip_source_begin_write(3),
+zip_source_rollback_write(3),
+zip_source_seek_write(3),
+zip_source_tell_write(3),
+zip_source_write(3)
+.SH "AUTHORS"
+Dieter Baron <dillo@nih.at>
+and
+Thomas Klausner <tk@giga.or.at>

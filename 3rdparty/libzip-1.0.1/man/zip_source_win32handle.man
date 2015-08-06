@@ -1,0 +1,77 @@
+.TH "ZIP_SOURCE_WIN32HANDLE" "3" "March 11, 2015" "NiH" "Library Functions Manual"
+.SH "NAME"
+\fBzip_source_win32handle\fP,
+\fBzip_source_win32handle_create\fP
+\- create data source from a Windows file handle
+.SH "LIBRARY"
+libzip (-lzip)
+.SH "SYNOPSIS"
+zip_source_t *
+zip_source_win32handle zip_t *archive HANDLE h zip_uint64_t start zip_int64_t len
+zip_source_t *
+zip_source_win32handle_create HANDLE h zip_uint64_t start zip_int64_t len zip_error_t *error
+.SH "DESCRIPTION"
+The functions
+zip_source_win32handle
+and
+zip_source_win32handle_create
+create a zip source from a Windows file handle.
+They open
+\fIfname\fP
+and read
+\fIlen\fP
+bytes from offset
+\fIstart\fP
+from it.
+If
+\fIlen\fP
+is 0 or \-1, the whole file (starting from
+\fIstart\fP)
+is used.
+.PP
+If the file supports seek, the source can be used to open a zip archive from.
+.PP
+The file is opened and read when the data from the source is used, usually by
+zip_close
+or
+zip_open_from_source.
+.SH "RETURN VALUES"
+Upon successful completion, the created source is returned.
+Otherwise,
+\fRNULL\fP
+is returned and the error code in
+\fIarchive\fP
+or
+\fIerror\fP
+is set to indicate the error.
+.SH "ERRORS"
+zip_source_w32handle
+and
+zip_source_w32handle_create
+fail if:
+.TP 17n
+[\fRZIP_ER_INVAL\fP]
+\fIfname\fP,
+\fIstart\fP,
+or
+\fIlen\fP
+are invalid.
+.TP 17n
+[\fRZIP_ER_MEMORY\fP]
+Required memory could not be allocated.
+.TP 17n
+[\fRZIP_ER_OPEN\fP]
+Opening
+\fIfname\fP
+failed.
+.SH "SEE ALSO"
+libzip(3),
+zip_add(3),
+zip_replace(3),
+zip_source(3),
+zip_source_win32a(3),
+zip_source_win32w(3)
+.SH "AUTHORS"
+Dieter Baron <dillo@nih.at>
+and
+Thomas Klausner <tk@giga.or.at>

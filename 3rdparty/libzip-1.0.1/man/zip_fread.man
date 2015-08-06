@@ -1,0 +1,30 @@
+.TH "ZIP_FREAD" "3" "March 10, 2009" "NiH" "Library Functions Manual"
+.SH "NAME"
+\fBzip_fread\fP
+\- read from file
+.SH "LIBRARY"
+libzip (-lzip)
+.SH "SYNOPSIS"
+zip.h
+zip_int64_t
+zip_fread zip_file_t *file void *buf zip_uint64_t nbytes
+.SH "DESCRIPTION"
+The
+zip_fread
+function reads at most
+\fInbytes\fP
+bytes from
+\fIfile\fP
+into
+\fIbuf\fP.
+.SH "RETURN VALUES"
+If successful, the number of bytes actually read is returned.
+Otherwise, \-1 is returned.
+.SH "SEE ALSO"
+libzip(3),
+zip_fclose(3),
+zip_fopen(3)
+.SH "AUTHORS"
+Dieter Baron <dillo@nih.at>
+and
+Thomas Klausner <tk@giga.or.at>

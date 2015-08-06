@@ -1,0 +1,25 @@
+.TH "ZIP_ADD_DIR" "3" "June 23, 2012" "NiH" "Library Functions Manual"
+.SH "NAME"
+\fBzip_add_dir\fP
+\- add directory to zip archive
+.SH "LIBRARY"
+libzip (-lzip)
+.SH "SYNOPSIS"
+zip.h
+zip_int64_t
+zip_add_dir zip_t *archive const char *name
+.SH "DESCRIPTION"
+The function
+zip_add_dir
+is the obsolete version of
+zip_dir_add(3).
+It is the same as calling
+zip_dir_add(3)
+with an empty flags argument.
+.SH "SEE ALSO"
+libzip(3),
+zip_dir_add(3)
+.SH "AUTHORS"
+Dieter Baron <dillo@nih.at>
+and
+Thomas Klausner <tk@giga.or.at>

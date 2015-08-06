@@ -1,0 +1,36 @@
+.TH "ZIP_ERROR_INIT" "3" "December 2, 2014" "NiH" "Library Functions Manual"
+.SH "NAME"
+\fBzip_error_init\fP,
+\fBzip_error_init_with_code\fP
+\- initialize zip_error structure
+.SH "LIBRARY"
+libzip (-lzip)
+.SH "SYNOPSIS"
+zip.h
+void
+zip_error_init zip_error_t *error
+void
+zip_error_init_with_code zip_error_t *error int ze
+.SH "DESCRIPTION"
+The
+zip_error_init
+function initializes the zip_error pointed to by
+\fIerror\fP.
+\fI*error\fP
+must be allocated before calling
+zip_error_init.
+.PP
+The
+zip_error_init_with_code
+function does the same, but additionally sets the zip error code to
+\fIze\fP
+and sets the system error code to the current
+errno(3)
+value, if appropriate.
+.SH "SEE ALSO"
+libzip(3),
+zip_error_fini(3)
+.SH "AUTHORS"
+Dieter Baron <dillo@nih.at>
+and
+Thomas Klausner <tk@giga.or.at>

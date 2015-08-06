@@ -1,0 +1,98 @@
+.TH "ZIP_ERRORS" "3" "March 10, 2009" "NiH" "Library Functions Manual"
+.SH "NAME"
+\fBzip_errors\fP
+\- list of all libzip error codes
+.SH "LIBRARY"
+libzip (-lzip)
+.SH "SYNOPSIS"
+zip.h
+.SH "DESCRIPTION"
+The following error codes are used by libzip:
+.TP XZIPXERXCOMPNOTSUPPXX
+[\fRZIP_ER_OK\fP]
+No error.
+.TP XZIPXERXCOMPNOTSUPPXX
+[\fRZIP_ER_MULTIDISK\fP]
+Multi-disk zip archives not supported.
+.TP XZIPXERXCOMPNOTSUPPXX
+[\fRZIP_ER_RENAME\fP]
+Renaming temporary file failed.
+.TP XZIPXERXCOMPNOTSUPPXX
+[\fRZIP_ER_CLOSE\fP]
+Closing zip archive failed.
+.TP XZIPXERXCOMPNOTSUPPXX
+[\fRZIP_ER_SEEK\fP]
+Seek error.
+.TP XZIPXERXCOMPNOTSUPPXX
+[\fRZIP_ER_READ\fP]
+Read error.
+.TP XZIPXERXCOMPNOTSUPPXX
+[\fRZIP_ER_WRITE\fP]
+Write error.
+.TP XZIPXERXCOMPNOTSUPPXX
+[\fRZIP_ER_CRC\fP]
+CRC error.
+.TP XZIPXERXCOMPNOTSUPPXX
+[\fRZIP_ER_ZIPCLOSED\fP]
+Containing zip archive was closed.
+.TP XZIPXERXCOMPNOTSUPPXX
+[\fRZIP_ER_NOENT\fP]
+No such file.
+.TP XZIPXERXCOMPNOTSUPPXX
+[\fRZIP_ER_EXISTS\fP]
+File already exists.
+.TP XZIPXERXCOMPNOTSUPPXX
+[\fRZIP_ER_OPEN\fP]
+Can't open file.
+.TP XZIPXERXCOMPNOTSUPPXX
+[\fRZIP_ER_TMPOPEN\fP]
+Failure to create temporary file.
+.TP XZIPXERXCOMPNOTSUPPXX
+[\fRZIP_ER_ZLIB\fP]
+Zlib error.
+.TP XZIPXERXCOMPNOTSUPPXX
+[\fRZIP_ER_MEMORY\fP]
+Malloc failure.
+.TP XZIPXERXCOMPNOTSUPPXX
+[\fRZIP_ER_CHANGED\fP]
+Entry has been changed.
+.TP XZIPXERXCOMPNOTSUPPXX
+[\fRZIP_ER_COMPNOTSUPP\fP]
+Compression method not supported.
+.TP XZIPXERXCOMPNOTSUPPXX
+[\fRZIP_ER_EOF\fP]
+Premature EOF.
+.TP XZIPXERXCOMPNOTSUPPXX
+[\fRZIP_ER_INVAL\fP]
+Invalid argument.
+.TP XZIPXERXCOMPNOTSUPPXX
+[\fRZIP_ER_NOZIP\fP]
+Not a zip archive.
+.TP XZIPXERXCOMPNOTSUPPXX
+[\fRZIP_ER_INTERNAL\fP]
+Internal error.
+.TP XZIPXERXCOMPNOTSUPPXX
+[\fRZIP_ER_INCONS\fP]
+Zip archive inconsistent.
+.TP XZIPXERXCOMPNOTSUPPXX
+[\fRZIP_ER_REMOVE\fP]
+Can't remove file.
+.TP XZIPXERXCOMPNOTSUPPXX
+[\fRZIP_ER_DELETED\fP]
+Entry has been deleted.
+.TP XZIPXERXCOMPNOTSUPPXX
+[\fRZIP_ER_ENCRNOTSUPP\fP]
+Encryption method not supported.
+.TP XZIPXERXCOMPNOTSUPPXX
+[\fRZIP_ER_RDONLY\fP]
+Read-only archive.
+.TP XZIPXERXCOMPNOTSUPPXX
+[\fRZIP_ER_NOPASSWD\fP]
+No password provided.
+.TP XZIPXERXCOMPNOTSUPPXX
+[\fRZIP_ER_WRONGPASSWD\fP]
+Wrong password provided.
+.SH "AUTHORS"
+Dieter Baron <dillo@nih.at>
+and
+Thomas Klausner <tk@giga.or.at>

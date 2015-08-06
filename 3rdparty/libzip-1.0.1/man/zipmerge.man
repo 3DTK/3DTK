@@ -1,0 +1,56 @@
+.TH "ZIPMERGE" "1" "April 29, 2015" "NiH" "General Commands Manual"
+.SH "NAME"
+\fBzipmerge\fP
+\- merge zip archives
+.SH "SYNOPSIS"
+\fBzipmerge\fP
+[\fB-DhIiSsV\fP]
+\fItarget-zip\fP
+\fIsource-zip\fP [\fIsource-zip ...\fP]
+.SH "DESCRIPTION"
+\fBzipmerge\fP
+merges the source zip archives
+\fIsource-zip\fP
+into the target zip archive
+\fItarget-zip\fP.
+By default, files in the source zip archives overwrite
+existing files of the same name in the target zip archive.
+.PP
+Supported options:
+.TP MMM
+\fB-D\fP
+Ignore directory components in file name comparisons.
+.TP MMM
+\fB-h\fP
+Display a short help message and exit.
+.TP MMM
+\fB-I\fP
+Ignore case in file name comparisons
+.TP MMM
+\fB-i\fP
+Ask before overwriting files.
+See also
+\fB-s\fP.
+.TP MMM
+\fB-S\fP
+Do not overwrite files that have the same size and
+CRC32 in both the source and target archives.
+.TP MMM
+\fB-s\fP
+When
+\fB-i\fP
+is given, do not before overwriting files that have the same size
+and CRC32.
+.TP MMM
+\fB-V\fP
+Display version information and exit.
+.SH "EXIT STATUS"
+\fBzipmerge\fP
+exits 0 on success and >1 if an error occurred.
+.SH "SEE ALSO"
+zipcmp(1),
+libzip(3)
+.SH "AUTHORS"
+Dieter Baron <dillo@nih.at>
+and
+Thomas Klausner <tk@giga.or.at>

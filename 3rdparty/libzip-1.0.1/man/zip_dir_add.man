@@ -1,0 +1,73 @@
+.TH "ZIP_DIR_ADD" "3" "December 4, 2014" "NiH" "Library Functions Manual"
+.SH "NAME"
+\fBzip_dir_add\fP
+\- add directory to zip archive
+.SH "LIBRARY"
+libzip (-lzip)
+.SH "SYNOPSIS"
+zip.h
+zip_int64_t
+zip_dir_add zip_t *archive const char *name zip_flags_t flags
+.SH "DESCRIPTION"
+The function
+zip_dir_add
+adds a directory to a zip archive.
+The argument
+\fIarchive\fP
+specifies the zip archive to which the directory should be added.
+\fIname\fP
+is the directory's name in the zip archive.
+The
+\fIflags\fP
+argument can be any of:
+.TP XZIPXFLXENCXSTRICTXX
+\fRZIP_FL_ENC_GUESS\fP
+Guess encoding of
+\fIname\fP
+(default).
+.TP XZIPXFLXENCXSTRICTXX
+\fRZIP_FL_ENC_UTF_8\fP
+Interpret
+\fIname\fP
+as UTF-8.
+.TP XZIPXFLXENCXSTRICTXX
+\fRZIP_FL_ENC_CP437\fP
+Interpret
+\fIname\fP
+as code page 437 (CP-437).
+.SH "RETURN VALUES"
+Upon successful completion, the index of the new entry in the archive
+is returned.
+Otherwise, \-1 is returned and the error code in
+\fIarchive\fP
+is set to indicate the error.
+.SH "ERRORS"
+zip_dir_add
+fails if:
+.TP 17n
+[\fRZIP_ER_EXISTS\fP]
+There is already an entry called
+\fIname\fP
+in the archive.
+.TP 17n
+[\fRZIP_ER_INVAL\fP]
+\fIarchive\fP
+or
+\fIname\fP
+are
+\fRNULL\fP,
+or invalid UTF-8 encoded file names.
+.TP 17n
+[\fRZIP_ER_MEMORY\fP]
+Required memory could not be allocated.
+.SH "SEE ALSO"
+libzip(3),
+zip_add(3)
+.SH "AUTHORS"
+Dieter Baron <dillo@nih.at>
+and
+Thomas Klausner <tk@giga.or.at>
+.SH "CAVEATS"
+zip_dir_add
+does not look in the file system, it just creates one entry in the
+archive for the provided name.

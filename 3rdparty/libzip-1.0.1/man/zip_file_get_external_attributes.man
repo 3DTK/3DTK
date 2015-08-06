@@ -1,0 +1,125 @@
+.TH "ZIP_FILE_GET_EXTERNAL_ATTRIBUTES" "3" "September 19, 2013" "NiH" "Library Functions Manual"
+.SH "NAME"
+\fBzip_file_get_external_attributes\fP
+\- get external attributes for file in zip
+.SH "LIBRARY"
+libzip (-lzip)
+.SH "SYNOPSIS"
+zip.h
+const char *
+zip_file_get_external_attributes zip_t *archive zip_uint64_t index zip_flags_t flags zip_uint8_t *opsys zip_uint32_t *attributes
+.SH "DESCRIPTION"
+The
+zip_file_get_external_attributes
+function returns the operating system and external attributes for the
+file at position
+\fIindex\fP
+in the zip archive.
+The external attributes usually contain the operating system-specific
+file permissions.
+If
+\fIflags\fP
+is set to
+\fRZIP_FL_UNCHANGED\fP,
+the original unchanged values are returned.
+If
+\fIopsys\fP
+or
+\fIattributes\fP
+are
+\fRNULL\fP,
+they are not filled in.
+.PP
+The following operating systems are defined by the zip specification:
+.TP
+\fRZIP_OPSYS_ACORN_RISC\fP
+.TP
+\fRZIP_OPSYS_ALTERNATE_MVS\fP
+.TP
+\fRZIP_OPSYS_AMIGA\fP
+.TP
+\fRZIP_OPSYS_ATARI_ST\fP
+.TP
+\fRZIP_OPSYS_BEOS\fP
+.TP
+\fRZIP_OPSYS_CPM\fP
+.TP
+\fRZIP_OPSYS_DOS\fP
+.TP
+\fRZIP_OPSYS_MACINTOSH\fP
+.TP
+\fRZIP_OPSYS_MVS\fP
+.TP
+\fRZIP_OPSYS_OPENVMS\fP
+.TP
+\fRZIP_OPSYS_OS_2\fP
+.TP
+\fRZIP_OPSYS_OS_400\fP
+.TP
+\fRZIP_OPSYS_OS_X\fP
+.TP
+\fRZIP_OPSYS_TANDEM\fP
+.TP
+\fRZIP_OPSYS_UNIX\fP
+.TP
+\fRZIP_OPSYS_VFAT\fP
+.TP
+\fRZIP_OPSYS_VM_CMS\fP
+.TP
+\fRZIP_OPSYS_VSE\fP
+.TP
+\fRZIP_OPSYS_WINDOWS_NTFS\fP
+(uncommon, use
+\fRZIP_OPSYS_DOS\fP
+instead)
+.TP
+\fRZIP_OPSYS_Z_SYSTEM\fP
+.PP
+The defines above follow the PKWARE Inc. Appnote; please note that
+the InfoZIP Appnote has a slightly different mapping.
+.SH "RETURN VALUES"
+Upon successful completion, 0 is returned.
+In case of an error,
+\fR\-1\fP
+is returned and the error code in
+\fIarchive\fP
+is set to indicate the error.
+.SH "EXAMPLES"
+The following code can be used to expand
+\fIattributes\fP
+if the operating system is
+\fRZIP_OPSYS_DOS\fP.
+.nf
+#include <sys/stat.h>
+
+#define FA_RDONLY       0x01            // FILE_ATTRIBUTE_READONLY
+#define FA_DIREC        0x10            // FILE_ATTRIBUTE_DIRECTORY
+
+static mode_t
+_zip_dos_attr2mode(zip_uint32_t attr)
+{
+   mode_t m = S_IRUSR | S_IRGRP | S_IROTH;
+   if (0 == (attr & FA_RDONLY))
+      m |= S_IWUSR | S_IWGRP | S_IWOTH;
+
+   if (attr & FA_DIREC)
+      m = (S_IFDIR | (m & ~S_IFMT)) | S_IXUSR | S_IXGRP | S_IXOTH;
+
+   return m;
+}
+.fi
+.SH "ERRORS"
+zip_file_get_external_attributes
+fails if:
+.TP 17n
+[\fRZIP_ER_INVAL\fP]
+\fIindex\fP
+is not a valid file index in
+\fIarchive\fP.
+.SH "SEE ALSO"
+libzip(3),
+zip_file_set_external_attributes(3)
+.SH "AUTHORS"
+Dieter Baron <dillo@nih.at>
+and
+Thomas Klausner <tk@giga.or.at>

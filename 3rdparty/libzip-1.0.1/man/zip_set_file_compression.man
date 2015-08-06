@@ -1,0 +1,73 @@
+.TH "ZIP_SET_FILE_COMPRESSION" "3" "May 1, 2012" "NiH" "Library Functions Manual"
+.SH "NAME"
+\fBzip_set_file_compression\fP
+\- set compression method for file in zip
+.SH "LIBRARY"
+libzip (-lzip)
+.SH "SYNOPSIS"
+zip.h
+int
+zip_set_file_compression zip_t *archive zip_uint64_t index zip_int32_t comp zip_uint32_t comp_flags
+.SH "DESCRIPTION"
+The
+zip_set_file_compression
+function sets the compression method for the file at position
+\fIindex\fP
+in the zip archive to
+\fIcomp\fP
+with the compression method specific
+\fIcomp_flags\fP.
+The
+\fIcomp\fP
+is the same as returned by
+zip_stat(3).
+For the
+\fIcomp\fP
+argument, currently only the following values are supported:
+.TP ZIP_CM_DEFLATE_XX
+\fRZIP_CM_DEFAULT\fP
+default compression; currently the same as
+\fRZIP_CM_DEFLATE\fP.
+.TP ZIP_CM_DEFLATE_XX
+\fRZIP_CM_STORE\fP
+Store the file uncompressed.
+.TP ZIP_CM_DEFLATE_XX
+\fRZIP_CM_DEFLATE\fP
+Deflate the file with the
+zlib(3)
+algorithm and default options
+.PP
+The
+\fIcomp_flags\fP
+argument is currently ignored.
+.PP
+The current compression method for a file in a zip archive can be
+determined using
+zip_stat(3).
+.SH "RETURN VALUES"
+Upon successful completion 0 is returned.
+Otherwise, \-1 is returned and the error information in
+\fIarchive\fP
+is set to indicate the error.
+.SH "ERRORS"
+zip_set_file_compression
+fails if:
+.TP 17n
+[\fRZIP_ER_INVAL\fP]
+\fIindex\fP
+is not a valid file index in
+\fIarchive\fP,
+or the argument combination is invalid.
+.TP 17n
+[\fRZIP_ER_COMPNOTSUPP\fP]
+Unsupported compression method requested.
+.TP 17n
+[\fRZIP_ER_RDONLY\fP]
+Read-only zip file, no changes allowed.
+.SH "SEE ALSO"
+libzip(3),
+zip_stat(3)
+.SH "AUTHORS"
+Dieter Baron <dillo@nih.at>
+and
+Thomas Klausner <tk@giga.or.at>

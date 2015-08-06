@@ -1,0 +1,114 @@
+.TH "ZIP_FOPEN" "3" "October 23, 2013" "NiH" "Library Functions Manual"
+.SH "NAME"
+\fBzip_fopen\fP,
+\fBzip_fopen_index\fP
+\- open file in zip archive for reading
+.SH "LIBRARY"
+libzip (-lzip)
+.SH "SYNOPSIS"
+zip.h
+zip_file_t *
+zip_fopen zip_t *archive const char *fname zip_flags_t flags
+zip_file_t *
+zip_fopen_index zip_t *archive zip_uint64_t index zip_flags_t flags
+.SH "DESCRIPTION"
+The
+zip_fopen
+function opens the file name
+\fIfname\fP
+in
+\fIarchive\fP.
+The
+\fIflags\fP
+argument specifies how the name lookup should be done, according to
+the values are described in
+zip_name_locate(3).
+Also, the following values may be
+\fIor\fP'ed
+to it.
+.TP ZIP_FL_COMPRESSED
+\fRZIP_FL_COMPRESSED\fP
+Read the compressed data.
+Otherwise the data is uncompressed by
+zip_fread.
+.TP ZIP_FL_COMPRESSED
+\fRZIP_FL_UNCHANGED\fP
+Read the original data from the zip archive, ignoring any changes made
+to the file.
+.PP
+The
+zip_fopen_index
+function opens the file at position
+\fIindex\fP.
+.PP
+If encrypted data is encountered, the functions call
+zip_fopen_encrypted(3)
+or
+zip_fopen_index_encrypted(3)
+respectively, using the default password set with
+zip_set_default_password(3).
+.SH "RETURN VALUES"
+Upon successful completion, a
+struct zip_file
+pointer is returned.
+Otherwise,
+\fRNULL\fP
+is returned and the error code in
+\fIarchive\fP
+is set to indicate the error.
+.SH "ERRORS"
+.TP 17n
+[\fRZIP_ER_CHANGED\fP]
+The file data has been changed.
+.TP 17n
+[\fRZIP_ER_COMPNOTSUPP\fP]
+The compression method used is not supported.
+.TP 17n
+[\fRZIP_ER_ENCRNOTSUPP\fP]
+The encryption method used is not supported.
+.TP 17n
+[\fRZIP_ER_MEMORY\fP]
+Required memory could not be allocated.
+.TP 17n
+[\fRZIP_ER_NOPASSWD\fP]
+The file is encrypted, but no password has been provided.
+.TP 17n
+[\fRZIP_ER_READ\fP]
+A file read error occurred.
+.TP 17n
+[\fRZIP_ER_SEEK\fP]
+A file seek error occurred.
+.TP 17n
+[\fRZIP_ER_WRONGPASSWD\fP]
+The provided password does not match the password used for encryption.
+Note that some incorrect passwords are not detected by the check done by
+zip_fopen.
+.TP 17n
+[\fRZIP_ER_ZLIB\fP]
+Initializing the zlib stream failed.
+.PP
+The function
+zip_fopen
+may also fail and set
+zip_err
+for any of the errors specified for the routine
+zip_name_locate(3).
+.PP
+The function
+zip_fopen_index
+may also fail with
+\fRZIP_ER_INVAL\fP
+if
+\fIindex\fP
+is invalid.
+.SH "SEE ALSO"
+libzip(3),
+zip_fclose(3),
+zip_fread(3),
+zip_get_num_entries(3),
+zip_name_locate(3),
+zip_set_default_password(3)
+.SH "AUTHORS"
+Dieter Baron <dillo@nih.at>
+and
+Thomas Klausner <tk@giga.or.at>

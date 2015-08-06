@@ -1,0 +1,40 @@
+.TH "ZIP_SOURCE_TELL_WRITE" "3" "November 18, 2014" "NiH" "Library Functions Manual"
+.SH "NAME"
+\fBzip_source_tell_write\fP
+\- report current write offset in zip source
+.SH "LIBRARY"
+libzip (-lzip)
+.SH "SYNOPSIS"
+zip.h
+zip_int64_t
+zip_source_tell_write zip_source_t *source
+.SH "DESCRIPTION"
+The function
+zip_source_tell_write
+returns the current write offset
+for
+source.
+The return value can be passed to
+zip_source_seek_write(3)
+with
+\fIwhence\fP
+set to
+\fRSEEK_SET\fP
+to return to the same location in the source.
+.SH "RETURN VALUES"
+Upon successful completion the current write offset is returned.
+Otherwise, \-1 is returned and the error information in
+\fIsource\fP
+is set to indicate the error.
+.SH "SEE ALSO"
+libzip(3),
+zip_source(3),
+zip_source_begin_write(3),
+zip_source_commit_write(3),
+zip_source_rollback_write(3),
+zip_source_tell_write(3),
+zip_source_write(3)
+.SH "AUTHORS"
+Dieter Baron <dillo@nih.at>
+and
+Thomas Klausner <tk@giga.or.at>

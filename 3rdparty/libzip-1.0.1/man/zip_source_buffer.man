@@ -1,0 +1,62 @@
+.TH "ZIP_SOURCE_BUFFER" "3" "October 17, 2014" "NiH" "Library Functions Manual"
+.SH "NAME"
+\fBzip_source_buffer\fP
+\- create zip data source from buffer
+.SH "LIBRARY"
+libzip (-lzip)
+.SH "SYNOPSIS"
+zip.h
+zip_source_t *
+zip_source_buffer zip_t *archive const void *data zip_uint64_t len int freep
+zip_source_t *
+zip_source_buffer_create const void *data zip_uint64_t len int freep zip_error_t *error
+.SH "DESCRIPTION"
+The functions
+zip_source_buffer
+and
+zip_source_buffer_create
+create a zip source from the buffer
+\fIdata\fP
+of size
+\fIlen\fP.
+If
+\fIfreep\fP
+is non-zero, the buffer will be freed when it is no longer needed.
+\fIdata\fP
+must remain valid for the lifetime of the created source.
+.PP
+The source can be used to open a zip archive from.
+.SH "RETURN VALUES"
+Upon successful completion, the created source is returned.
+Otherwise,
+\fRNULL\fP
+is returned and the error code in
+\fIarchive\fP
+or
+\fIerror\fP
+is set to indicate the error.
+.SH "ERRORS"
+zip_source_buffer
+and
+zip_source_buffer_create
+fail if:
+.TP 17n
+[\fRZIP_ER_INVAL\fP]
+\fIlen\fP
+is greater than zero and
+\fIdata\fP
+is
+\fRNULL\fP.
+.TP 17n
+[\fRZIP_ER_MEMORY\fP]
+Required memory could not be allocated.
+.SH "SEE ALSO"
+libzip(3),
+zip_add(3),
+zip_open_from_source(3),
+zip_replace(3),
+zip_source(3)
+.SH "AUTHORS"
+Dieter Baron <dillo@nih.at>
+and
+Thomas Klausner <tk@giga.or.at>

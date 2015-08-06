@@ -1,0 +1,50 @@
+.TH "ZIP_SET_ARCHIVE_COMMENT" "3" "July 22, 2012" "NiH" "Library Functions Manual"
+.SH "NAME"
+\fBzip_set_archive_comment\fP
+\- set zip archive comment
+.SH "LIBRARY"
+libzip (-lzip)
+.SH "SYNOPSIS"
+zip.h
+int
+zip_set_archive_comment zip_t *archive const char *comment zip_uint16_t len
+.SH "DESCRIPTION"
+The
+zip_set_archive_comment
+function sets the comment for the entire zip archive.
+If
+\fIcomment\fP
+is
+\fRNULL\fP
+and
+\fIlen\fP
+is 0, the archive comment will be removed.
+\fIcomment\fP
+must be encoded in ASCII or UTF-8.
+.SH "RETURN VALUES"
+Upon successful completion 0 is returned.
+Otherwise, \-1 is returned and the error information in
+\fIarchive\fP
+is set to indicate the error.
+.SH "ERRORS"
+zip_set_archive_comment
+fails if:
+.TP 17n
+[\fRZIP_ER_INVAL\fP]
+\fIlen\fP
+is less than 0 or longer than the maximum comment length in a zip file
+(65535), or
+\fIcomment\fP
+is not a valid UTF-8 encoded string.
+.TP 17n
+[\fRZIP_ER_MEMORY\fP]
+Required memory could not be allocated.
+.SH "SEE ALSO"
+libzip(3),
+zip_get_archive_comment(3),
+zip_get_file_comment(3),
+zip_set_file_comment(3)
+.SH "AUTHORS"
+Dieter Baron <dillo@nih.at>
+and
+Thomas Klausner <tk@giga.or.at>

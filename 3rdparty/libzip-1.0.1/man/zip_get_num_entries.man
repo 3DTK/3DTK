@@ -1,0 +1,35 @@
+.TH "ZIP_GET_NUM_ENTRIES" "3" "August 1, 2012" "NiH" "Library Functions Manual"
+.SH "NAME"
+\fBzip_get_num_entries\fP
+\- get number of files in archive
+.SH "LIBRARY"
+libzip (-lzip)
+.SH "SYNOPSIS"
+zip.h
+zip_int64_t
+zip_get_num_entries zip_t *archive zip_flags_t flags
+.SH "DESCRIPTION"
+The
+zip_get_num_entries
+function returns the number of files in
+\fIarchive\fP.
+If
+\fIflags\fP
+is set to
+\fRZIP_FL_UNCHANGED\fP,
+the original number of entries is returned.
+.SH "RETURN VALUES"
+zip_get_num_entries
+returns the number of files in the zip archive,
+or \-1 if
+\fIarchive\fP
+is
+\fRNULL\fP.
+.SH "SEE ALSO"
+libzip(3),
+zip_fopen_index(3),
+zip_stat_index(3)
+.SH "AUTHORS"
+Dieter Baron <dillo@nih.at>
+and
+Thomas Klausner <tk@giga.or.at>
