@@ -22,7 +22,7 @@ if(WIN32)
 else(WIN32)
   add_library(scan_io_helper SHARED helper.cc)
 endif(WIN32)
-target_link_libraries(scan_io_helper ${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY} pointfilter libarchive_cpp_wrapper)
+target_link_libraries(scan_io_helper ${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY} pointfilter zip)
 
 foreach(libname ${SCANIO_LIBNAMES})
 if(WIN32)
