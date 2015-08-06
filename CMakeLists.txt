@@ -34,7 +34,9 @@ if(Boost_FOUND)
   add_definitions(${Boost_LIB_DIAGNOSTIC_DEFINITIONS})
 endif()
 
-FIND_PACKAGE(LibArchive REQUIRED)
+if(NOT WIN32)
+  FIND_PACKAGE(LibZip REQUIRED)
+endif()
 
 FIND_PACKAGE(OpenCV REQUIRED)
 if(EXISTS "${OpenCV_DIR}/OpenCVConfig.cmake")
