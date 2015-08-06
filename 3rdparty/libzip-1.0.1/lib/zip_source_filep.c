@@ -183,7 +183,10 @@ create_temp_output(struct read_file *ctx)
     }
     sprintf(temp, "%s.XXXXXX", ctx->fname);
 
+    /* FIXME: make this work on windows *and* linux
     mask = umask(S_IXUSR | S_IRWXG | S_IRWXO);
+    */
+    mask = umask(_S_IREAD | _S_IWRITE);
     if ((tfd=mkstemp(temp)) == -1) {
         zip_error_set(&ctx->error, ZIP_ER_TMPOPEN, errno);
 	umask(mask);
