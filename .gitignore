@@ -1,5 +1,5 @@
-.build/
-.configured
-bin/*
-lib/
-obj/
+/.build/
+/.configured
+/bin/*
+/lib/
+/obj/
