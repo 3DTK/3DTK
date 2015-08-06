@@ -1,0 +1,43 @@
+.TH "ZIP_SOURCE_SEEK_COMPUTE_OFFSET" "1" "November 13, 2014" "NiH" "LOCAL"
+.SH "NAME"
+\fBzip_source_seek_compute_offset\fP
+\- validate arguments and compute offset
+.SH "LIBRARY"
+libzip (-lzip)
+.SH "SYNOPSIS"
+zip.h
+zip_int64_t
+zip_source_seek_compute_offset zip_uint64_t offset zip_uint64_t length void *data zip_uint64_t data_length zip_error_t *error
+.SH "DESCRIPTION"
+Use this function to compute the offset for a
+\fRZIP_SOURCE_SEEK\fP
+or
+\fRZIP_SOURCE_SEEK_WRITE\fP
+command.
+\fIdata\fP
+and
+\fIdata_length\fP
+are the arguments to the source callback,
+\fIoffset\fP
+is the current offset and
+\fIlength\fP
+is the length of the source data or, for
+\fRZIP_SOURCE_SEEK_WRITE\fP,
+the amount of data written.
+.SH "RETURN VALUES"
+On success, it returns the new offset, on error it returns \-1 and
+sets
+\fIerror\fP.
+.SH "ERRORS"
+zip_source_seek_compute_offset
+fails if:
+.TP 17n
+[\fRZIP_ER_INVAL\fP]
+One of the arguments is invalid or the seek would place the offset
+outside the data.
+.SH "SEE ALSO"
+zip_source_function(3)
+.SH "AUTHORS"
+Dieter Baron <dillo@nih.at>
+and
+Thomas Klausner <tk@giga.or.at>

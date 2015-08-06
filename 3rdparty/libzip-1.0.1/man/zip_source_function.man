@@ -1,0 +1,259 @@
+.TH "ZIP_SOURCE_FUNCTION" "3" "November 13, 2014" "NiH" "Library Functions Manual"
+.SH "NAME"
+\fBzip_source_function\fP
+\- create data source from function
+.SH "LIBRARY"
+libzip (-lzip)
+.SH "SYNOPSIS"
+zip.h
+zip_source_t *
+zip_source_function zip_t *archive zip_source_callback fn void *userdata
+zip_source_t *
+zip_source_function_create zip_source_callback fn void *userdata zip_error_t *error
+.SH "DESCRIPTION"
+The functions
+zip_source_function
+and
+zip_source_function_create
+creates a zip source from the user-provided function
+\fIfn\fP,
+which must be of the following type:
+.PP
+typedef zip_int64_t
+\fR(*\fPzip_source_callback\fR)\fP
+void *userdata void *data zip_uint64_t len zip_source_cmd_t cmd
+.PP
+\fIarchive\fP
+or
+\fIerror\fP
+are used for reporting errors and can be
+\fRNULL\fP.
+.PP
+When called by the library, the first argument is the
+\fIuserdata\fP
+argument supplied to the function.
+The next two arguments are a buffer
+\fIdata\fP
+of size
+\fIlen\fP
+when data is passed in or expected to be returned, or else
+\fRNULL\fP
+and 0.
+The last argument,
+\fIcmd\fP,
+specifies which action the function should perform.
+.PP
+Depending on the uses, there are three useful sets of commands to be supported by a
+zip_source_callback:
+.TP seekable-read-sourceXX
+read source
+Providing streamed data (for file data added to archives).
+Must support
+\fRZIP_SOURCE_OPEN\fP,
+\fRZIP_SOURCE_READ\fP,
+\fRZIP_SOURCE_CLOSE\fP,
+\fRZIP_SOURCE_STAT\fP,
+and
+\fRZIP_SOURCE_ERROR\fP.
+.TP seekable-read-sourceXX
+seekable read source
+Same as previous, but from a source allowing reading from arbitrary
+offsets (also for read-only zip archive).
+Must additionally support
+\fRZIP_SOURCE_SEEK\fP,
+\fRZIP_SOURCE_TELL\fP,
+and
+\fRZIP_SOURCE_SUPPORTS\fP.
+.TP seekable-read-sourceXX
+read/write source
+Same as previous, but additionally allowing writing (also for writable
+zip archives).
+Must additionally support
+\fRZIP_SOURCE_BEGIN_WRITE\fP,
+\fRZIP_SOURCE_COMMIT_WRITE\fP,
+\fRZIP_SOURCE_ROLLBACK_WRITE\fP,
+\fRZIP_SOURCE_SEEK_WRITE\fP,
+\fRZIP_SOURCE_TELL_WRITE\fP,
+and
+\fRZIP_SOURCE_REMOVE\fP.
+.SS "\fRZIP_SOURCE_BEGIN_WRITE\fP"
+Prepare the source for writing.
+Use this to create any temporary file(s).
+.SS "\fRZIP_SOURCE_CLOSE\fP"
+Reading is done.
+.SS "\fRZIP_SOURCE_COMMIT_WRITE\fP"
+Finish writing to the source.
+Replace the original data with the newly written data.
+Clean up temporary files or internal buffers.
+Subsequently opening and reading from the source should return the
+newly written data.
+.SS "\fRZIP_SOURCE_ERROR\fP"
+Get error information.
+\fIdata\fP
+points to an array of two ints, which should be filled with the libzip
+error code and the corresponding system error code for the error that
+occurred.
+See
+zip_errors(3)
+for details on the error codes.
+If the source stores error information in a zip_error_t, use
+zip_error_to_data(3)
+and return its return value.
+Otherwise, return 2 * sizeof(int).
+.SS "\fRZIP_SOURCE_FREE\fP"
+Clean up and free all resources, including
+\fIstate\fP.
+The callback function will not be called again.
+.SS "\fRZIP_SOURCE_OPEN\fP"
+Prepare for reading.
+.SS "\fRZIP_SOURCE_READ\fP"
+Read data into the buffer
+\fIdata\fP
+of size
+\fIlen\fP.
+Return the number of bytes placed into
+\fIdata\fP
+on success.
+.SS "\fRZIP_SOURCE_REMOVE\fP"
+Remove the underlying file.
+This is called if a zip archive is empty when closed.
+.SS "\fRZIP_SOURCE_ROLLBACK_WRITE\fP"
+Abort writing to the source.
+Discard written data.
+Clean up temporary files or internal buffers.
+Subsequently opening and reading from the source should return the
+original data.
+.SS "\fRZIP_SOURCE_SEEK\fP"
+Specify position to read next byte from, like
+fseek(3).
+Use
+ZIP_SOURCE_GET_ARGS(3)
+to decode the arguments into the following struct:
+.nf
+struct zip_source_args_seek {
+    zip_int64_t offset;
+    int whence;
+};
+.fi
+.PP
+If the size of the source's data is known, use
+zip_source_seek_compute_offset(3)
+to validate the arguments and compute the new offset.
+.SS "\fRZIP_SOURCE_SEEK_WRITE\fP"
+Specify position to write next byte to, like
+fseek(3).
+See
+\fRZIP_SOURCE_SEEK\fP
+for details.
+.SS "\fRZIP_SOURCE_STAT\fP"
+Get meta information for the input data.
+\fIdata\fP
+points to an allocated
+struct zip_stat,
+which should be initialized using
+zip_stat_init(3)
+and then filled in.
+Information only available after the source has been read (e.g. size)
+can be omitted in an earlier call.
+Return sizeof(struct zip_stat) on success.
+\fINOTE\fP:
+zip_source_function
+may be called with this argument even after being called with
+\fRZIP_SOURCE_CLOSE\fP.
+.SS "\fRZIP_SOURCE_SUPPORTS\fP"
+Return bitmap specifying which commands are supported.
+Use
+zip_source_make_command_bitmap(3).
+If this command is not implemented, the source is assumed to be a
+read source without seek support.
+.SS "\fRZIP_SOURCE_TELL\fP"
+Return the current read offset in the source, like
+ftell(3).
+.SS "\fRZIP_SOURCE_TELL_WRITE\fP"
+Return the current write offset in the source, like
+ftell(3).
+.SS "\fRZIP_SOURCE_WRITE\fP"
+Write data to the source.
+Return number of bytes written.
+.SS "Return Values"
+Commands should return \-1 on error.
+\fRZIP_SOURCE_ERROR\fP
+will be called to retrieve the error code.
+On success, commands return 0, unless specified otherwise in the
+description above.
+.SS "Calling Conventions"
+The library will always issue
+\fRZIP_SOURCE_OPEN\fP
+before issuing
+\fRZIP_SOURCE_READ\fP,
+\fRZIP_SOURCE_SEEK\fP,
+or
+\fRZIP_SOURCE_TELL\fP.
+When it no longer wishes to read from this source, it will issue
+\fRZIP_SOURCE_CLOSE\fP.
+If the library wishes to read the data again, it will issue
+\fRZIP_SOURCE_OPEN\fP
+a second time.
+If the function is unable to provide the data again, it should
+return \-1.
+.PP
+\fRZIP_SOURCE_BEGIN_WRITE\fP
+will be called before
+\fRZIP_SOURCE_WRITE\fP,
+\fRZIP_SOURCE_SEEK_WRITE\fP,
+or
+\fRZIP_SOURCE_TELL_WRITE\fP.
+When writing is complete, either
+\fRZIP_SOURCE_COMMIT_WRITE\fP
+or
+\fRZIP_SOURCE_ROLLBACK_WRITE\fP
+will be called.
+.PP
+\fRZIP_SOURCE_STAT\fP
+can be issued at any time.
+.PP
+\fRZIP_SOURCE_ERROR\fP
+will only be issued in response to the function
+returning \-1.
+.PP
+\fRZIP_SOURCE_FREE\fP
+will be the last command issued;
+if
+\fRZIP_SOURCE_OPEN\fP
+was called and succeeded,
+\fRZIP_SOURCE_CLOSE\fP
+will be called before
+\fRZIP_SOURCE_FREE\fP,
+and similarly for
+\fRZIP_SOURCE_BEGIN_WRITE\fP
+and
+\fRZIP_SOURCE_COMMIT_WRITE\fP
+or
+\fRZIP_SOURCE_ROLLBACK_WRITE\fP.
+.SH "RETURN VALUES"
+Upon successful completion, the created source is returned.
+Otherwise,
+\fRNULL\fP
+is returned and the error code in
+\fIarchive\fP
+or
+\fIerror\fP
+is set to indicate the error (unless
+it is
+\fRNULL\fP).
+.SH "ERRORS"
+zip_source_function
+fails if:
+.TP 17n
+[\fRZIP_ER_MEMORY\fP]
+Required memory could not be allocated.
+.SH "SEE ALSO"
+libzip(3),
+zip_add(3),
+zip_replace(3),
+zip_source(3),
+zip_stat_init(3)
+.SH "AUTHORS"
+Dieter Baron <dillo@nih.at>
+and
+Thomas Klausner <tk@giga.or.at>

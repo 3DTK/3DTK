@@ -1,0 +1,36 @@
+.TH "ZIP_DELETE" "3" "March 10, 2009" "NiH" "Library Functions Manual"
+.SH "NAME"
+\fBzip_delete\fP
+\- delete file from zip archive
+.SH "LIBRARY"
+libzip (-lzip)
+.SH "SYNOPSIS"
+zip.h
+int
+zip_delete zip_t *archive zip_uint64_t index
+.SH "DESCRIPTION"
+The file at position
+\fIindex\fP
+in the zip archive
+\fIarchive\fP
+is marked as deleted.
+.SH "RETURN VALUES"
+Upon successful completion 0 is returned.
+Otherwise, \-1 is returned and the error code in
+\fIarchive\fP
+is set to indicate the error.
+.SH "ERRORS"
+zip_delete
+fails if:
+.TP 17n
+[\fRZIP_ER_INVAL\fP]
+\fIindex\fP
+is not a valid file index in
+\fIarchive\fP.
+.SH "SEE ALSO"
+libzip(3),
+zip_unchange(3)
+.SH "AUTHORS"
+Dieter Baron <dillo@nih.at>
+and
+Thomas Klausner <tk@giga.or.at>

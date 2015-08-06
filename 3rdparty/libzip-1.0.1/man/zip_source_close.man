@@ -1,0 +1,30 @@
+.TH "ZIP_SOURCE_CLOSE" "3" "November 18, 2014" "NiH" "Library Functions Manual"
+.SH "NAME"
+\fBzip_source_close\fP
+\- open zip_source (which was open for reading)
+.SH "LIBRARY"
+libzip (-lzip)
+.SH "SYNOPSIS"
+zip.h
+int
+zip_source_close zip_source_t *source
+.SH "DESCRIPTION"
+The function
+zip_source_close
+closes
+source,
+indicating that no more data will be read.
+.SH "RETURN VALUES"
+Upon successful completion 0 is returned.
+Otherwise, \-1 is returned and the error information in
+\fIsource\fP
+is set to indicate the error.
+.SH "SEE ALSO"
+libzip(3),
+zip_source(3),
+zip_source_free(3),
+zip_source_open(3)
+.SH "AUTHORS"
+Dieter Baron <dillo@nih.at>
+and
+Thomas Klausner <tk@giga.or.at>

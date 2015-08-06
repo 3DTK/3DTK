@@ -1,0 +1,23 @@
+.TH "ZIP_ERROR_FINI" "3" "October 30, 2014" "NiH" "Library Functions Manual"
+.SH "NAME"
+\fBzip_error_fini\fP
+\- clean up zip_error structure
+.SH "LIBRARY"
+libzip (-lzip)
+.SH "SYNOPSIS"
+zip.h
+void
+zip_error_fini zip_error_t *ze
+.SH "DESCRIPTION"
+The
+zip_error_fini
+function cleans up and frees internally allocated memory of the
+zip_error pointed to by
+\fIze\fP.
+.SH "SEE ALSO"
+libzip(3),
+zip_error_init(3)
+.SH "AUTHORS"
+Dieter Baron <dillo@nih.at>
+and
+Thomas Klausner <tk@giga.or.at>

@@ -1,0 +1,23 @@
+.TH "ZIP_SOURCE_ERROR" "3" "November 18, 2014" "NiH" "Library Functions Manual"
+.SH "NAME"
+\fBzip_source_error\fP
+\- get zip error for data source
+.SH "LIBRARY"
+libzip (-lzip)
+.SH "SYNOPSIS"
+zip.h
+zip_error_t *
+zip_source_error zip_t *source
+.SH "DESCRIPTION"
+The
+zip_source_error
+function returns the zip error for the data source
+\fIsource\fP.
+.SH "SEE ALSO"
+libzip(3),
+zip_error_code_system(3),
+zip_error_code_zip(3)
+.SH "AUTHORS"
+Dieter Baron <dillo@nih.at>
+and
+Thomas Klausner <tk@giga.or.at>

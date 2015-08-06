@@ -1,0 +1,49 @@
+.TH "ZIP_FILE_SET_MTIME" "3" "August 5, 2014" "NiH" "Library Functions Manual"
+.SH "NAME"
+\fBzip_file_set_mtime\fP
+\- set last modification time (mtime) for file in zip
+.SH "LIBRARY"
+libzip (-lzip)
+.SH "SYNOPSIS"
+zip.h
+int
+zip_set_file_mtime zip_t *archive zip_uint64_t index time_t mtime zip_flags_t flags
+.SH "DESCRIPTION"
+The
+zip_file_set_mtime
+function sets the last modification time (mtime) for the file at
+position
+\fIindex\fP
+in the zip archive to
+\fImtime\fP.
+Currently, no support for any
+\fIflags\fP
+is implemented.
+.SH "RETURN VALUES"
+Upon successful completion 0 is returned.
+Otherwise, \-1 is returned and the error information in
+\fIarchive\fP
+is set to indicate the error.
+.SH "ERRORS"
+zip_file_set_mtime
+fails if:
+.TP 17n
+[\fRZIP_ER_INVAL\fP]
+\fIindex\fP
+is not a valid file index in
+\fIarchive\fP.
+.TP 17n
+[\fRZIP_ER_MEMORY\fP]
+Required memory could not be allocated.
+.TP 17n
+[\fRZIP_ER_RDONLY\fP]
+The
+\fIarchive\fP
+was opened in read-only mode.
+.SH "SEE ALSO"
+libzip(3),
+zip_stat(3)
+.SH "AUTHORS"
+Dieter Baron <dillo@nih.at>
+and
+Thomas Klausner <tk@giga.or.at>

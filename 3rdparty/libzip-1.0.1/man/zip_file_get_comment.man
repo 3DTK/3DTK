@@ -1,0 +1,81 @@
+.TH "ZIP_FILE_GET_COMMENT" "3" "September 19, 2013" "NiH" "Library Functions Manual"
+.SH "NAME"
+\fBzip_file_get_comment\fP
+\- get comment for file in zip
+.SH "LIBRARY"
+libzip (-lzip)
+.SH "SYNOPSIS"
+zip.h
+const char *
+zip_file_get_comment zip_t *archive zip_uint64_t index zip_uint32_t *lenp zip_flags_t flags
+.SH "DESCRIPTION"
+The
+zip_file_get_comment
+function returns the comment for the file at position
+\fIindex\fP
+in the zip archive.
+The name is in UTF-8 encoding unless
+\fRZIP_FL_ENC_RAW\fP
+was specified (see below).
+This pointer should not be modified or
+free(3)'d,
+and becomes invalid when
+\fIarchive\fP
+is closed.
+If
+\fIlenp\fP
+is not
+\fRNULL\fP,
+the integer to which it points will be set to the length of the
+comment.
+If
+\fIflags\fP
+is set to
+\fRZIP_FL_UNCHANGED\fP,
+the original unchanged comment is returned.
+.PP
+Additionally, the following
+\fIflags\fP
+are supported:
+.TP ZIP_FL_ENC_STRICTXX
+\fRZIP_FL_ENC_RAW\fP
+Return the unmodified comment as it is in the ZIP archive.
+.TP ZIP_FL_ENC_STRICTXX
+\fRZIP_FL_ENC_GUESS\fP
+(Default.)
+Guess the encoding of the comment in the ZIP archive and convert it
+to UTF-8, if necessary.
+.TP ZIP_FL_ENC_STRICTXX
+\fRZIP_FL_ENC_STRICT\fP
+Follow the ZIP specification for file names and extend it to file
+comments, expecting them to be encoded in CP-437 in the ZIP archive
+(except if it is a UTF-8 comment from the special extra field).
+Convert it to UTF-8.
+\fINote\fP:
+ASCII is a subset of both CP-437 and UTF-8.
+.SH "RETURN VALUES"
+Upon successful completion, a pointer to the comment is returned,
+or
+\fRNULL\fP
+if there is no comment.
+In case of an error,
+\fRNULL\fP
+is returned and the error code in
+\fIarchive\fP
+is set to indicate the error.
+.SH "ERRORS"
+zip_file_get_comment
+fails if:
+.TP 17n
+[\fRZIP_ER_INVAL\fP]
+\fIindex\fP
+is not a valid file index in
+\fIarchive\fP.
+.SH "SEE ALSO"
+libzip(3),
+zip_file_set_comment(3),
+zip_get_archive_comment(3)
+.SH "AUTHORS"
+Dieter Baron <dillo@nih.at>
+and
+Thomas Klausner <tk@giga.or.at>

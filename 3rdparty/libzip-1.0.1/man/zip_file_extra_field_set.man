@@ -1,0 +1,79 @@
+.TH "ZIP_FILE_EXTRA_FIELD_SET" "3" "February 20, 2013" "NiH" "Library Functions Manual"
+.SH "NAME"
+\fBzip_file_extra_field_set\fP
+\- set extra field for file in zip
+.SH "LIBRARY"
+libzip (-lzip)
+.SH "SYNOPSIS"
+zip.h
+int
+zip_file_extra_field_set zip_t *archive zip_uint64_t index zip_uint16_t extra_field_id zip_uint16_t extra_field_index const zip_uint8_t *extra_field_data zip_uint16_t len zip_flags_t flags
+.SH "DESCRIPTION"
+The
+zip_file_extra_field_set
+function sets the extra field with ID (two-byte signature)
+\fIextra_field_id\fP
+and index
+\fIextra_field_index\fP
+for the file at position
+\fIindex\fP
+in the zip archive.
+The extra field's data will be set to
+\fIextra_field_data\fP
+and length
+\fIlen\fP.
+If a new entry shall be appended, set
+\fIextra_field_index\fP
+to
+\fRZIP_EXTRA_FIELD_NEW\fP.
+.PP
+At least one of the following
+\fIflags\fP
+must be set:
+.TP ZIP_FL_CENTRALXX
+\fRZIP_FL_CENTRAL\fP
+Set extra field in the archive's central directory.
+.TP ZIP_FL_CENTRALXX
+\fRZIP_FL_LOCAL\fP
+Set extra field in the local file headers.
+.PP
+Please note that the extra field IDs 0x0001 (ZIP64 extension),
+0x6375 (Infozip UTF-8 comment), and
+0x7075 (Infozip UTF-8 file name) can not be set using
+zip_file_extra_field_set
+since they are set by
+libzip(3)
+automatically when needed.
+.SH "RETURN VALUES"
+Upon successful completion 0 is returned.
+Otherwise, \-1 is returned and the error code in
+\fIarchive\fP
+is set to indicate the error.
+.SH "ERRORS"
+zip_file_extra_field_set
+fails if:
+.TP 17n
+[\fRZIP_ER_INVAL\fP]
+The extra field size is too large (ID and length need 4 bytes; the
+maximum length of all extra fields for one file combined is 65536
+bytes).
+This error also occurs if
+\fIextra_field_index\fP
+is too large.
+.TP 17n
+[\fRZIP_ER_MEMORY\fP]
+Required memory could not be allocated.
+.TP 17n
+[\fRZIP_ER_NOENT\fP]
+\fIindex\fP
+is not a valid file index in
+\fIarchive\fP.
+.SH "SEE ALSO"
+libzip(3),
+zip_file_extra_field_delete(3),
+zip_file_extra_field_get(3),
+zip_file_extra_fields_count(3)
+.SH "AUTHORS"
+Dieter Baron <dillo@nih.at>
+and
+Thomas Klausner <tk@giga.or.at>

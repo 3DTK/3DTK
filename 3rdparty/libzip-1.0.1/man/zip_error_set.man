@@ -1,0 +1,32 @@
+.TH "ZIP_ERROR_SET" "3" "October 30, 2014" "NiH" "Library Functions Manual"
+.SH "NAME"
+\fBzip_error_set\fP
+\- fill in zip_error structure
+.SH "LIBRARY"
+libzip (-lzip)
+.SH "SYNOPSIS"
+zip.h
+void
+zip_error_set zip_error_t *ze int le int se
+.SH "DESCRIPTION"
+The
+zip_error_set
+function sets the zip_error pointed to by
+\fIze\fP
+to the libzip error code
+\fIle\fP
+and the system error code
+\fIse\fP.
+.PP
+\fIze\fP
+must be allocated and initialized with
+zip_error_fini(3)
+before calling
+zip_error set.
+.SH "SEE ALSO"
+libzip(3),
+zip_error_init(3)
+.SH "AUTHORS"
+Dieter Baron <dillo@nih.at>
+and
+Thomas Klausner <tk@giga.or.at>

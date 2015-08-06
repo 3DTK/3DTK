@@ -1,0 +1,40 @@
+.TH "ZIP_SOURCE_READ" "3" "November 18, 2014" "NiH" "Library Functions Manual"
+.SH "NAME"
+\fBzip_source_read\fP
+\- read data from zip source
+.SH "LIBRARY"
+libzip (-lzip)
+.SH "SYNOPSIS"
+zip.h
+zip_int64_t
+zip_source_read zip_source_t *source void *data zip_uint64_t len
+.SH "DESCRIPTION"
+The function
+zip_source_read
+reads up to
+\fIlen\fP
+bytes of data from
+\fIsource\fP
+at the current read offset into the buffer
+\fIdata\fP.
+.PP
+The zip source
+\fIsource\fP
+has to be opened for reading by calling
+zip_source_open(3)
+first.
+.SH "RETURN VALUES"
+Upon successful completion the number of bytes read is returned.
+Otherwise, \-1 is returned and the error information in
+\fIsource\fP
+is set to indicate the error.
+.SH "SEE ALSO"
+libzip(3),
+zip_source(3),
+zip_source_seek(3),
+zip_source_tell(3),
+zip_source_write(3)
+.SH "AUTHORS"
+Dieter Baron <dillo@nih.at>
+and
+Thomas Klausner <tk@giga.or.at>

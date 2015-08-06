@@ -1,0 +1,89 @@
+.TH "ZIP_CLOSE" "3" "February 13, 2012" "NiH" "Library Functions Manual"
+.SH "NAME"
+\fBzip_close\fP
+\- close zip archive
+.SH "LIBRARY"
+libzip (-lzip)
+.SH "SYNOPSIS"
+zip.h
+int
+zip_close zip_t *archive
+.SH "DESCRIPTION"
+The
+zip_close
+function closes
+\fIarchive\fP
+and frees the memory allocated for it.
+If any files within were changed, those changes are written to disk
+first.
+If writing changes fails,
+zip_close
+fails and
+\fIarchive\fP
+is left unchanged.
+If
+\fIarchive\fP
+contains no files, the file is completely removed (no empty archive is
+written).
+.PP
+To close a zip file without saving changes, use
+zip_discard(3).
+.SH "RETURN VALUES"
+Upon successful completion 0 is returned.
+Otherwise, \-1 is returned and the error code in
+\fIarchive\fP
+is set to indicate the error.
+.SH "ERRORS"
+zip_close
+will fail if:
+.TP 17n
+[\fRZIP_ER_EOF\fP]
+Unexpected end-of-file found while reading from a file.
+.TP 17n
+[\fRZIP_ER_INTERNAL\fP]
+The callback function of an added or replaced file returned an
+error but failed to report which.
+.TP 17n
+[\fRZIP_ER_INVAL\fP]
+The
+\fIpath\fP
+argument is
+\fRNULL\fP.
+.TP 17n
+[\fRZIP_ER_MEMORY\fP]
+Required memory could not be allocated.
+.TP 17n
+[\fRZIP_ER_NOZIP\fP]
+File is not a zip archive.
+.TP 17n
+[\fRZIP_ER_READ\fP]
+A file read failed.
+.TP 17n
+[\fRZIP_ER_RENAME\fP]
+A temporary file could not be renamed to its final name.
+.TP 17n
+[\fRZIP_ER_SEEK\fP]
+A file seek failed.
+.TP 17n
+[\fRZIP_ER_TMPOPEN\fP]
+A temporary file could not be created.
+.TP 17n
+[\fRZIP_ER_WRITE\fP]
+A file write failed.
+.TP 17n
+[\fRZIP_ER_ZLIB\fP]
+An error occurred while (de)compressing a stream with
+zlib(3).
+Additionally, any errors returned by the callback function
+for added or replaced files will be passed back.
+.SH "SEE ALSO"
+libzip(3),
+zip_discard(3),
+zip_error_get(3),
+zip_fdopen(3),
+zip_open(3),
+zip_strerror(3)
+.SH "AUTHORS"
+Dieter Baron <dillo@nih.at>
+and
+Thomas Klausner <tk@giga.or.at>

@@ -1,0 +1,40 @@
+.TH "ZIP_ADD" "3" "October 6, 2012" "NiH" "Library Functions Manual"
+.SH "NAME"
+\fBzip_add\fP,
+\fBzip_replace\fP
+\- add file to zip archive or replace file in zip archive
+.SH "LIBRARY"
+libzip (-lzip)
+.SH "SYNOPSIS"
+zip.h
+zip_int64_t
+zip_add zip_t *archive const char *name zip_source_t *source
+int
+zip_replace zip_t *archive zip_uint64_t index zip_source_t *source
+.SH "DESCRIPTION"
+The function
+zip_add
+is the obsolete version of
+zip_file_add(3).
+It is the same as calling
+zip_file_add(3)
+with an empty
+\fIflags\fP
+argument.
+Similarly, the
+zip_replace
+function is the obsolete version of
+zip_file_replace(3).
+It is the same as calling
+zip_file_replace(3)
+with an empty
+\fIflags\fP
+argument.
+.SH "SEE ALSO"
+libzip(3),
+zip_file_add(3),
+zip_file_replace(3)
+.SH "AUTHORS"
+Dieter Baron <dillo@nih.at>
+and
+Thomas Klausner <tk@giga.or.at>

@@ -1,0 +1,57 @@
+.TH "ZIPCMP" "1" "April 29, 2015" "NiH" "General Commands Manual"
+.SH "NAME"
+\fBzipcmp\fP
+\- compare contents of zip archives
+.SH "SYNOPSIS"
+\fBzipcmp\fP
+[\fB-hipqtVv\fP]
+\fIarchive1 archive2\fP
+.SH "DESCRIPTION"
+\fBzipcmp\fP
+compares the zip archives or directories
+\fIarchive1\fP
+and
+\fIarchive2\fP
+and checks if they contain the same files, comparing their names,
+uncompressed sizes, and CRCs.
+File order and compressed size differences are ignored.
+.PP
+Supported options:
+.TP MMM
+\fB-h\fP
+Display a short help message and exit.
+.TP MMM
+\fB-i\fP
+Compare names ignoring case distinctions.
+.TP MMM
+\fB-p\fP
+Enable paranoid checks.
+Compares extra fields and other meta data.
+(Automatically disabled if one of the archives is a directory.)
+.TP MMM
+\fB-q\fP
+Quiet mode.
+Compare
+\fB-v\fP.
+.TP MMM
+\fB-t\fP
+Test zip files by comparing the contents to their checksums.
+.TP MMM
+\fB-V\fP
+Display version information and exit.
+.TP MMM
+\fB-v\fP
+Verbose mode.
+Print details about differences to stdout.
+(This is the default.)
+.SH "EXIT STATUS"
+\fBzipcmp\fP
+exits 0 if the two archives contain the same files, 1 if they differ,
+and >1 if an error occurred.
+.SH "SEE ALSO"
+zipmerge(1),
+libzip(3)
+.SH "AUTHORS"
+Dieter Baron <dillo@nih.at>
+and
+Thomas Klausner <tk@giga.or.at>
