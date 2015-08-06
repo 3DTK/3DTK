@@ -1,0 +1,5 @@
+zlib can be rebuilt from source on windows by executing the following in the
+visual studio terminal while being in the unpacked zlib soures:
+
+"C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\vcvarsall.bat" x86_amd64
+nmake -f win32/Makefile.msc AS=ml64 LOC="-DASMV -DASMINF -I." OBJA="inffasx64.obj gvmat64.obj inffas8664.obj"
