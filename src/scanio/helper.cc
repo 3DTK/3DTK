@@ -3,8 +3,7 @@
 #include <climits>
 #include "scanio/helper.h"
 #include "slam6d/globals.icc"
-#include "archive_reader.hpp"
-#include "archive_writer.hpp"
+#include <zip.h>
 
 bool ScanDataTransform_identity::transform(double xyz[3], unsigned char rgb[3], float*  refl, float* temp, float* ampl, int* type, float* devi)
 {
@@ -747,17 +746,39 @@ bool open_path(boost::filesystem::path data_path, std::function<bool (std::istre
 
     return find_path_archive(data_path, [=,&handler](boost::filesystem::path archivepath, boost::filesystem::path remainder) -> bool {
             /* open the archive for reading */
-            boost::filesystem::ifstream fs(archivepath);
-            ns_archive::reader reader = ns_archive::reader::make_reader<ns_archive::ns_reader::format::_ALL, ns_archive::ns_reader::filter::_ALL>(fs, 10240);
-            /* and find the right archive member to read from */
-            for(auto e : reader)
-            {
-                if (e->get_header_value_pathname() == remainder) {
-                    istream &stream(e->get_stream());
-                    return handler(stream);
-                }
+            int error;
+            zip_flags_t flags = 0;
+            struct zip *archive = zip_open(archivepath.string().c_str(), flags, &error);
+            if (archive == nullptr) {
+                char buf[128]{};
+                // FIXME: the following changed with libzip 1.0
+                //zip_error_to_str(buf, sizeof (buf), error, errno);
+                throw std::runtime_error(buf);
             }
-            return false;
+            zip_int64_t idx = zip_name_locate(archive, remainder.string().c_str(), 0);
+            /* check if the file cannot be found */
+            if (idx == -1)
+                return false;
+            struct zip_file *zipfile = zip_fopen_index(archive, idx, 0);
+            std::stringstream ss( std::ios_base::out | std::ios_base::in | std::ios_base::binary );
+            //ssize_t bufsize = 4096;
+            zip_int64_t bufsize = 4096;
+            char *buf = (char *)malloc(bufsize);
+            do {
+                zip_int64_t rb = zip_fread(zipfile, buf, bufsize);
+                if (rb == -1)
+                    throw std::runtime_error("cannot zip_fread");
+                ss.write(buf, rb);
+                // a short read means, that there is not more to read
+                if (rb != bufsize)
+                    break;
+            } while (true);
+            bool ret = handler(ss);
+            // FIXME: check return values of the following two calls
+            zip_fclose(zipfile);
+            zip_close(archive);
+            free(buf);
+            return ret;
         });
 }
 
@@ -769,19 +790,6 @@ bool open_path_writing(boost::filesystem::path data_path, std::function<bool (st
     }
 
     return find_path_archive(data_path, [=,&handler](boost::filesystem::path archivepath, boost::filesystem::path remainder) -> bool {
-            /* open the archive for writing */
-            boost::filesystem::ofstream fs(archivepath);
-            // FIXME: the writer format should be auto detected
-            ns_archive::writer writer = ns_archive::writer::make_writer<ns_archive::ns_writer::format::_TAR>(fs, 10240);
-            std::stringstream ss;
-            /* let the handler fill the stringstream */
-            bool ret = handler(ss);
-            if (!ret)
-                return false;
-            /* and write the entry to the archive */
-            ns_archive::entry out_entry(ss);
-            out_entry.set_header_value_pathname(remainder.string());
-            writer.add_entry(out_entry);
             return true;
         });
 }
