@@ -44,11 +44,11 @@ add_executable(scanserver ${SERVER_SRCS})
 # boost::interprocess/filesystem
 # scanclient basic functionality
 # scanio for ScanHandler input
-set(SERVER_LIBS ${Boost_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} scanclient scanio pthread)
+set(SERVER_LIBS ${Boost_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} scanclient scanio)
 
 if(UNIX AND NOT APPLE)
   # boost::interprocess uses pthread, requiring librt
-  set(SERVER_LIBS ${SERVER_LIBS} rt)
+  set(SERVER_LIBS ${SERVER_LIBS} pthread rt)
 endif(UNIX AND NOT APPLE)
 
 if(WIN32)
