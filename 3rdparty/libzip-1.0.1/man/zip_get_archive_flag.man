@@ -1,0 +1,44 @@
+.TH "ZIP_GET_ARCHIVE_FLAG" "3" "April 29, 2015" "NiH" "Library Functions Manual"
+.SH "NAME"
+\fBzip_get_archive_flag\fP
+\- get status flags for zip
+.SH "LIBRARY"
+libzip (-lzip)
+.SH "SYNOPSIS"
+zip.h
+int
+zip_get_archive_flag zip_t *archive zip_flags_t flag zip_flags_t flags
+.SH "DESCRIPTION"
+The
+zip_get_archive_flag
+function returns if the flag
+\fIflag\fP
+is set for the archive
+\fIarchive\fP.
+The archive flags might have been changed with
+zip_set_archive_flag;
+if
+\fIflags\fP
+is set to
+\fRZIP_FL_UNCHANGED\fP,
+the original unchanged flags are tested.
+.PP
+Supported flags are:
+.TP XZIPXAFLXRDONLYXXX
+\fRZIP_AFL_RDONLY\fP
+The archive is read-only.
+.SH "RETURN VALUES"
+zip_get_archive_flag
+returns 1 if
+\fIflag\fP
+is set for
+\fIarchive\fP,
+0 if not,
+and \-1 if an error occurred.
+.SH "SEE ALSO"
+libzip(3),
+zip_set_archive_flag(3)
+.SH "AUTHORS"
+Dieter Baron <dillo@nih.at>
+and
+Thomas Klausner <tk@giga.or.at>

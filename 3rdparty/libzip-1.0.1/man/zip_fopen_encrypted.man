@@ -1,0 +1,77 @@
+.TH "ZIP_FOPEN_ENCRYPTED" "3" "July 22, 2012" "NiH" "Library Functions Manual"
+.SH "NAME"
+\fBzip_fopen_encrypted\fP,
+\fBzip_fopen_index_encrypted\fP
+\- open encrypted file in zip archive for reading
+.SH "LIBRARY"
+libzip (-lzip)
+.SH "SYNOPSIS"
+zip.h
+zip_file_t *
+zip_fopen_encrypted zip_t *archive const char *fname zip_flags_t flags const char *password
+zip_file_t *
+zip_fopen_index_encrypted zip_t *archive zip_uint64_t index zip_flags_t flags const char *password
+.SH "DESCRIPTION"
+The
+zip_fopen_encrypted
+function opens the encrypted file name
+\fIfname\fP
+in
+\fIarchive\fP
+using the password given in the
+\fIpassword\fP
+argument.
+The
+\fIflags\fP
+argument are the same as for
+zip_fopen(3).
+.PP
+The
+zip_fopen_index_encrypted
+function opens the file at position
+\fIindex\fP,
+see
+zip_fopen_index(3).
+These functions are called automatically by
+zip_fopen(3);
+you only need to call them if you want to specify a non-default password
+(see
+zip_set_default_password(3)).
+.SH "RETURN VALUES"
+Upon successful completion, a
+struct zip_file
+pointer is returned.
+Otherwise,
+\fRNULL\fP
+is returned and the error code in
+\fIarchive\fP
+is set to indicate the error.
+.SH "ERRORS"
+.TP ZIP_ER_ENCRNOTSUPPXX
+[\fRZIP_ER_NOPASSWD\fP]
+No password was provided.
+.PP
+The function
+zip_fopen_encrypted
+may also fail and set
+zip_err
+for any of the errors specified for the routine
+zip_fopen(3).
+.PP
+The function
+zip_fopen_index_encrypted
+may also fail and set
+zip_err
+for any of the errors specified for the routine
+zip_fopen_index(3).
+.SH "SEE ALSO"
+libzip(3),
+zip_fclose(3),
+zip_fopen(3),
+zip_fread(3),
+zip_get_num_entries(3),
+zip_name_locate(3)
+.SH "AUTHORS"
+Dieter Baron <dillo@nih.at>
+and
+Thomas Klausner <tk@giga.or.at>

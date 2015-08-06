@@ -1,0 +1,27 @@
+.TH "ZIP_UNCHANGE_ALL" "3" "April 23, 2006" "NiH" "Library Functions Manual"
+.SH "NAME"
+\fBzip_unchange_all\fP
+\- undo all changes in a zip archive
+.SH "LIBRARY"
+libzip (-lzip)
+.SH "SYNOPSIS"
+zip.h
+int
+zip_unchange_all zip_t *archive
+.SH "DESCRIPTION"
+All changes to files and global information in
+\fIarchive\fP
+are reverted.
+.SH "RETURN VALUES"
+Upon successful completion 0 is returned.
+Otherwise, \-1 is returned and the error code in
+\fIarchive\fP
+is set to indicate the error.
+.SH "SEE ALSO"
+libzip(3),
+zip_unchange(3),
+zip_unchange_archive(3)
+.SH "AUTHORS"
+Dieter Baron <dillo@nih.at>
+and
+Thomas Klausner <tk@giga.or.at>

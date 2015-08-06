@@ -1,0 +1,95 @@
+.TH "ZIP_SOURCE_STAT" "3" "November 18, 2014" "NiH" "Library Functions Manual"
+.SH "NAME"
+\fBzip_source_stat\fP
+\- get information about zip_source
+.SH "LIBRARY"
+libzip (-lzip)
+.SH "SYNOPSIS"
+zip.h
+int
+zip_source_stat zip_source_t *source zip_stat_t *sb
+.SH "DESCRIPTION"
+The
+zip_source_stat
+function obtains information about the zip source
+\fIsource\fP
+.PP
+The
+\fIsb\fP
+argument is a pointer to a
+struct zip_source_stat
+(shown below), into which information about the zip source is placed.
+.nf
+struct zip_source_stat {
+    zip_uint64_t valid;                 /* which fields have valid values */
+    const char *name;                   /* name of the file */
+    zip_uint64_t index;                 /* index within archive */
+    zip_uint64_t size;                  /* size of file (uncompressed) */
+    zip_uint64_t comp_size;             /* size of file (compressed) */
+    time_t mtime;                       /* modification time */
+    zip_uint32_t crc;                   /* crc of file data */
+    zip_uint16_t comp_method;           /* compression method used */
+    zip_uint16_t encryption_method;     /* encryption method used */
+    zip_uint32_t flags;                 /* reserved for future use */
+};
+.fi
+The structure pointed to by
+\fIsb\fP
+must be initialized with
+zip_stat_init 3
+before calling
+zip_source_stat.
+.PP
+The
+\fIvalid\fP
+field of the structure specifies which other fields are valid.
+Check if the flag defined by the following defines are in
+\fIvalid\fP
+before accessing the fields:
+.TP ZIP_SOURCE_STAT_ENCRYPTION_METHODXX
+\fRZIP_SOURCE_STAT_NAME\fP
+\fIname\fP
+.TP ZIP_SOURCE_STAT_ENCRYPTION_METHODXX
+\fRZIP_SOURCE_STAT_INDEX\fP
+\fIindex\fP
+.TP ZIP_SOURCE_STAT_ENCRYPTION_METHODXX
+\fRZIP_SOURCE_STAT_SIZE\fP
+\fIsize\fP
+.TP ZIP_SOURCE_STAT_ENCRYPTION_METHODXX
+\fRZIP_SOURCE_STAT_COMP_SIZE\fP
+\fIcomp_size\fP
+.TP ZIP_SOURCE_STAT_ENCRYPTION_METHODXX
+\fRZIP_SOURCE_STAT_MTIME\fP
+\fImtime\fP
+.TP ZIP_SOURCE_STAT_ENCRYPTION_METHODXX
+\fRZIP_SOURCE_STAT_CRC\fP
+\fIcrc\fP
+.TP ZIP_SOURCE_STAT_ENCRYPTION_METHODXX
+\fRZIP_SOURCE_STAT_COMP_METHOD\fP
+\fIcomp_method\fP
+.TP ZIP_SOURCE_STAT_ENCRYPTION_METHODXX
+\fRZIP_SOURCE_STAT_ENCRYPTION_METHOD\fP
+\fIencryption_method\fP
+.TP ZIP_SOURCE_STAT_ENCRYPTION_METHODXX
+\fRZIP_SOURCE_STAT_FLAGS\fP
+\fIflags\fP
+.PP
+\fINOTE\fP:
+Some fields may only be filled out after all data has been read from
+the source, for example the
+\fIcrc\fP
+or
+\fIsize\fP
+fields.
+.SH "RETURN VALUES"
+Upon successful completion 0 is returned.
+Otherwise, \-1 is returned and the error information in
+\fIsource\fP
+is set to indicate the error.
+.SH "SEE ALSO"
+libzip(3),
+zip_source(3)
+.SH "AUTHORS"
+Dieter Baron <dillo@nih.at>
+and
+Thomas Klausner <tk@giga.or.at>

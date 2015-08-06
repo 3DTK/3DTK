@@ -1,0 +1,45 @@
+.TH "ZIP_SOURCE_SEEK" "3" "November 18, 2014" "NiH" "Library Functions Manual"
+.SH "NAME"
+\fBzip_source_seek\fP
+\- set read offset in zip source
+.SH "LIBRARY"
+libzip (-lzip)
+.SH "SYNOPSIS"
+zip.h
+int
+zip_source_seek zip_source_t *source zip_int64_t offset int whence
+.SH "DESCRIPTION"
+The function
+zip_source_seek
+sets the current read offset for
+source.
+Just like in
+fseek(3),
+depending on the
+\fIwhence\fP
+argument, the
+\fIoffset\fP
+is counted relative from:
+.TP SEEK_CURXX
+\fRSEEK_SET\fP
+start of file
+.TP SEEK_CURXX
+\fRSEEK_CUR\fP
+current read offset in file
+.TP SEEK_CURXX
+\fRSEEK_END\fP
+end of file
+.SH "RETURN VALUES"
+Upon successful completion 0 is returned.
+Otherwise, \-1 is returned and the error information in
+\fIsource\fP
+is set to indicate the error.
+.SH "SEE ALSO"
+libzip(3),
+zip_source(3),
+zip_source_read(3),
+zip_source_tell(3)
+.SH "AUTHORS"
+Dieter Baron <dillo@nih.at>
+and
+Thomas Klausner <tk@giga.or.at>

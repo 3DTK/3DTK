@@ -1,0 +1,41 @@
+.TH "ZIP_SOURCE_GET_ARGS" "3" "October 30, 2014" "NiH" "Library Functions Manual"
+.SH "NAME"
+\fBZIP_SOURCE_GET_ARGS\fP
+\- validate and cast arguments to source callback
+.SH "LIBRARY"
+libzip (-lzip)
+.SH "SYNOPSIS"
+zip.h
+type *
+ZIP_SOURCE_GET_ARGS type void *data zip_uint64_t len zip_error_t *error
+.SH "DESCRIPTION"
+The
+ZIP_SOURCE_GET_ARGS
+macro casts
+\fIdata\fP
+to a pointer to
+\fItype\fP.
+.SH "RETURN VALUES"
+On success,
+ZIP_SOURCE_GET_ARGS
+returns
+\fIdata\fP.
+In case of error, it returns
+\fRNULL\fP
+and sets
+\fIerror\fP.
+.SH "ERRORS"
+ZIP_SOURCE_GET_ARGS
+fails if:
+.TP 17n
+[\fRZIP_ER_INVAL\fP]
+\fIlen\fP
+is less than the size of
+\fItype\fP
+.SH "SEE ALSO"
+libzip(3),
+zip_source_function(3)
+.SH "AUTHORS"
+Dieter Baron <dillo@nih.at>
+and
+Thomas Klausner <tk@giga.or.at>

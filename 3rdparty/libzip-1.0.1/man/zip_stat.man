@@ -1,0 +1,128 @@
+.TH "ZIP_STAT" "3" "July 22, 2012" "NiH" "Library Functions Manual"
+.SH "NAME"
+\fBzip_stat\fP,
+\fBzip_stat_index\fP
+\- get information about file
+.SH "LIBRARY"
+libzip (-lzip)
+.SH "SYNOPSIS"
+zip.h
+int
+zip_stat zip_t *archive const char *fname zip_flags_t flags zip_stat_t *sb
+int
+zip_stat_index zip_t *archive int index zip_flags_t flags zip_stat_t *sb
+.SH "DESCRIPTION"
+The
+zip_stat
+function obtains information about the file named
+\fIfname\fP
+in
+\fIarchive\fP.
+The
+\fIflags\fP
+argument specifies how the name lookup should be done.
+Its values are described in
+zip_name_locate(3).
+Also,
+\fRZIP_FL_UNCHANGED\fP
+may be
+\fIor\fP'ed
+to it to request information about the original file in the archive,
+ignoring any changes made.
+.PP
+The
+zip_stat_index
+function obtains information about the file at position
+\fIindex\fP.
+.PP
+The
+\fIsb\fP
+argument is a pointer to a
+struct zip_stat
+(shown below), into which information about the file is placed.
+.nf
+struct zip_stat {
+    zip_uint64_t valid;                 /* which fields have valid values */
+    const char *name;                   /* name of the file */
+    zip_uint64_t index;                 /* index within archive */
+    zip_uint64_t size;                  /* size of file (uncompressed) */
+    zip_uint64_t comp_size;             /* size of file (compressed) */
+    time_t mtime;                       /* modification time */
+    zip_uint32_t crc;                   /* crc of file data */
+    zip_uint16_t comp_method;           /* compression method used */
+    zip_uint16_t encryption_method;     /* encryption method used */
+    zip_uint32_t flags;                 /* reserved for future use */
+};
+.fi
+The structure pointed to by
+\fIsb\fP
+must be allocated before calling
+zip_stat
+or
+zip_stat_index.
+.PP
+The
+\fIvalid\fP
+field of the structure specifies which other fields are valid.
+Check if the flag defined by the following defines are in
+\fIvalid\fP
+before accessing the fields:
+.TP ZIP_STAT_ENCRYPTION_METHODXX
+\fRZIP_STAT_NAME\fP
+\fIname\fP
+.TP ZIP_STAT_ENCRYPTION_METHODXX
+\fRZIP_STAT_INDEX\fP
+\fIindex\fP
+.TP ZIP_STAT_ENCRYPTION_METHODXX
+\fRZIP_STAT_SIZE\fP
+\fIsize\fP
+.TP ZIP_STAT_ENCRYPTION_METHODXX
+\fRZIP_STAT_COMP_SIZE\fP
+\fIcomp_size\fP
+.TP ZIP_STAT_ENCRYPTION_METHODXX
+\fRZIP_STAT_MTIME\fP
+\fImtime\fP
+.TP ZIP_STAT_ENCRYPTION_METHODXX
+\fRZIP_STAT_CRC\fP
+\fIcrc\fP
+.TP ZIP_STAT_ENCRYPTION_METHODXX
+\fRZIP_STAT_COMP_METHOD\fP
+\fIcomp_method\fP
+.TP ZIP_STAT_ENCRYPTION_METHODXX
+\fRZIP_STAT_ENCRYPTION_METHOD\fP
+\fIencryption_method\fP
+.TP ZIP_STAT_ENCRYPTION_METHODXX
+\fRZIP_STAT_FLAGS\fP
+\fIflags\fP
+.SH "RETURN VALUES"
+Upon successful completion 0 is returned.
+Otherwise, \-1 is returned and the error information in
+\fIarchive\fP
+is set to indicate the error.
+.SH "ERRORS"
+The function
+zip_stat
+can fail for any of the errors specified for the routine
+zip_name_locate(3).
+.PP
+The function
+zip_stat_index
+fails and sets the error information to
+\fRZIP_ER_INVAL\fP
+if
+\fIindex\fP
+is invalid.
+If
+\fRZIP_FL_UNCHANGED\fP
+is not set and no information can be obtained from the source
+callback, the error information is set to
+\fRZIP_ER_CHANGED\fP.
+.SH "SEE ALSO"
+libzip(3),
+zip_get_num_entries(3),
+zip_name_locate(3),
+zip_stat_init(3)
+.SH "AUTHORS"
+Dieter Baron <dillo@nih.at>
+and
+Thomas Klausner <tk@giga.or.at>

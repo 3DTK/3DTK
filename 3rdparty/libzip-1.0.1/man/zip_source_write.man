@@ -1,0 +1,43 @@
+.TH "ZIP_SOURCE_WRITE" "3" "November 18, 2014" "NiH" "Library Functions Manual"
+.SH "NAME"
+\fBzip_source_write\fP
+\- write data to zip source
+.SH "LIBRARY"
+libzip (-lzip)
+.SH "SYNOPSIS"
+zip.h
+zip_int64_t
+zip_source_write zip_source_t *source const void *data zip_uint64_t len
+.SH "DESCRIPTION"
+The function
+zip_source_write
+writes
+\fIlen\fP
+bytes from the buffer
+\fIdata\fP
+to the zip source
+\fIsource\fP
+at the current write offset.
+.PP
+The zip source
+\fIsource\fP
+has to be prepared for writing by calling
+zip_source_begin_write(3)
+first.
+.SH "RETURN VALUES"
+Upon successful completion the number of bytes written is returned.
+Otherwise, \-1 is returned and the error information in
+\fIsource\fP
+is set to indicate the error.
+.SH "SEE ALSO"
+libzip(3),
+zip_source(3),
+zip_source_begin_write(3),
+zip_source_commit_write(3),
+zip_source_rollback_write(3),
+zip_source_seek_write(3),
+zip_source_tell_write(3)
+.SH "AUTHORS"
+Dieter Baron <dillo@nih.at>
+and
+Thomas Klausner <tk@giga.or.at>

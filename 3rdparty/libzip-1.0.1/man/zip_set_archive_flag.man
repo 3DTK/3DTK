@@ -1,0 +1,31 @@
+.TH "ZIP_SET_ARCHIVE_FLAG" "3" "April 29, 2015" "NiH" "Library Functions Manual"
+.SH "NAME"
+\fBzip_set_archive_flag\fP
+\- set zip archive flag
+.SH "LIBRARY"
+libzip (-lzip)
+.SH "SYNOPSIS"
+zip.h
+int
+zip_set_archive_flag zip_t *archive zip_flags_t flag int value
+.SH "DESCRIPTION"
+The
+zip_set_archive_flag
+function sets the flag
+\fIflag\fP
+for the archive
+\fIarchive\fP
+to the value
+\fIvalue\fP.
+.PP
+Currently there are no supported flags.
+.SH "RETURN VALUES"
+Upon successful completion 0 is returned, and \-1 if an error
+occurred.
+.SH "SEE ALSO"
+libzip(3),
+zip_get_archive_flag(3)
+.SH "AUTHORS"
+Dieter Baron <dillo@nih.at>
+and
+Thomas Klausner <tk@giga.or.at>

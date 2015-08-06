@@ -1,0 +1,65 @@
+.TH "ZIP_ERROR_GET" "3" "December 2, 2014" "NiH" "Library Functions Manual"
+.SH "NAME"
+\fBzip_error_get\fP,
+\fBzip_file_error_get\fP
+\- get error codes for archive or file
+.SH "LIBRARY"
+libzip (-lzip)
+.SH "SYNOPSIS"
+zip.h
+void
+zip_error_get zip_t *archive int *zep int *sep
+void
+zip_file_error_get zip_file_t *file int *zep int *sep
+.SH "DESCRIPTION"
+The functions
+zip_error_get
+and
+zip_file_error_get
+are deprecated.
+Use
+zip_error_code_system(3),
+zip_error_code_zip(3),
+zip_file_get_error(3),
+and
+zip_get_error(3)
+instead.
+.PP
+For
+zip_error_get,
+replace
+.nf
+int ze, se;
+zip_error_get(za, &ze, &se);
+.fi
+with
+.nf
+int ze, se;
+zip_error_t *error = zip_get_error(za);
+ze = zip_error_code_zip(error);
+se = zip_error_code_system(error);
+.fi
+For
+zip_file_error_get,
+replace
+.nf
+int ze, se;
+zip_file_error_get(zf, &ze, &se);
+.fi
+with
+.nf
+int ze, se;
+zip_error_t *error = zip_file_get_error(zf);
+ze = zip_error_code_zip(error);
+se = zip_error_code_system(error);
+.fi
+.SH "SEE ALSO"
+libzip(3),
+zip_error_code_system(3),
+zip_error_code_zip(3),
+zip_file_get_error(3),
+zip_get_error(3)
+.SH "AUTHORS"
+Dieter Baron <dillo@nih.at>
+and
+Thomas Klausner <tk@giga.or.at>
