@@ -747,7 +747,7 @@ bool open_path(boost::filesystem::path data_path, std::function<bool (std::istre
     return find_path_archive(data_path, [=,&handler](boost::filesystem::path archivepath, boost::filesystem::path remainder) -> bool {
             /* open the archive for reading */
             int error;
-            zip_flags_t flags = 0;
+            int flags = 0;
             struct zip *archive = zip_open(archivepath.string().c_str(), flags, &error);
             if (archive == nullptr) {
                 char buf[128]{};
