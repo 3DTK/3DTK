@@ -16,6 +16,11 @@ built the entire project.  Executables (and .dll's) will then reside
 in the "windows" folder. For running the binaries you need to install
 the proper redistributable package.
 
+Alternatively on Windows, execute the batch script build.cmd either from the
+command line or from the Explorer. It will download and extract the right
+versions of boost and opencv and then run cmake with the right configuration
+options.
+
 Some Boost libraries (graph, regex, serialization, filesystem,
 interprocess) are needed to compile the slam6D program.
 3DTK is not compatible with boost version 1.49. Please make sure to use a
