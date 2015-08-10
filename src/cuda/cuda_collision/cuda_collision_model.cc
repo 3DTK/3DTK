@@ -99,6 +99,7 @@ void parse_options(int argc, char **argv, IOType &iotype, string &dir,
 			"riegl_txt, riegl_rgb, riegl_bin, zahn, ply})");
 
 	po::options_description prog("Program specific options");
+#ifdef WITH_CUDA
 	prog.add_options()
 			("radius,r", po::value<double>(&radius)->default_value(10),
 			"radius of sphere")
@@ -107,6 +108,15 @@ void parse_options(int argc, char **argv, IOType &iotype, string &dir,
 			("collisionmethod,c", po::value<collision_method>(&cmethod)->default_value(CTYPE1))
 			("penetrationdepthmethod,p", po::value<penetrationdepth_method>(&pdmethod)->default_value(PDTYPE1))
 			("device,D", po::value<int>(&cuda_device)->default_value(0));
+#else
+	prog.add_options()
+			("radius,r", po::value<double>(&radius)->default_value(10),
+			"radius of sphere")
+			("calcdistances,d", po::value<bool>(&calcdistances)->zero_tokens(),
+			"calculate penetration distance")
+			("collisionmethod,c", po::value<collision_method>(&cmethod)->default_value(CTYPE1))
+			("penetrationdepthmethod,p", po::value<penetrationdepth_method>(&pdmethod)->default_value(PDTYPE1));
+#endif
 
 	po::options_description hidden("Hidden options");
 	hidden.add_options()

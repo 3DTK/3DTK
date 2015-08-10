@@ -25,6 +25,13 @@
 #include <boost/program_options.hpp>
 namespace po = boost::program_options;
 
+
+#ifdef WITH_CUDA
+#include "cuda/tools.h"
+#include "cuda/grid.h"
+#endif //WITH_CUDA
+
+
 #ifdef _MSC_VER
 #define strcasecmp _stricmp
 #define strncasecmp _strnicmp
@@ -73,7 +80,7 @@ void validate(boost::any& v, const std::vector<std::string>& values,
 
 void parse_options(int argc, char **argv, IOType &iotype, string &dir,
         double &radius, bool &calcdistances, collision_method &cmethod,
-        penetrationdepth_method &pdmethod)
+        penetrationdepth_method &pdmethod, int &cuda_device)
 {
     po::options_description generic("Generic options");
     generic.add_options()
@@ -93,7 +100,8 @@ void parse_options(int argc, char **argv, IOType &iotype, string &dir,
         ("calcdistances,d", po::value<bool>(&calcdistances)->zero_tokens(),
          "calculate penetration distance")
         ("collisionmethod,c", po::value<collision_method>(&cmethod)->default_value(CTYPE1))
-        ("penetrationdepthmethod,p", po::value<penetrationdepth_method>(&pdmethod)->default_value(PDTYPE1));
+        ("penetrationdepthmethod,p", po::value<penetrationdepth_method>(&pdmethod)->default_value(PDTYPE1))
+		("device,D", po::value<int>(&cuda_device)->default_value(0));
 
     po::options_description hidden("Hidden options");
     hidden.add_options()
@@ -315,6 +323,214 @@ size_t handle_pointcloud(std::vector<Point> &pointmodel, DataXYZ &environ,
     return num_colliding;
 }
 
+#ifdef WITH_CUDA
+
+///////////////////////////////////////////////////////////////////////////////
+// Creates a 4x4 rotation matrix, takes radians NOT degrees
+void rotationMatrix(float angle, float x, float y, float z, double mMatrix[16])
+{
+    float vecLength, sinSave, cosSave, oneMinusCos;
+    float xx, yy, zz, xy, yz, zx, xs, ys, zs;
+
+    // If NULL vector passed in, this will blow up...
+    if(x==0.0f && y==0.0f && z==0.0f)
+    {
+		static double identity[16]={ 1.0f, 0.0f, 0.0f, 0.0f,
+                                     0.0f, 1.0f, 0.0f, 0.0f,
+                                     0.0f, 0.0f, 1.0f, 0.0f,
+                                     0.0f, 0.0f, 0.0f, 1.0f };
+
+		memcpy(mMatrix, identity, 16*sizeof(double));
+        return;
+    }
+
+    // Scale vector
+    vecLength=(float)sqrt( x*x+y*y+z*z );
+
+    // Rotation matrix is normalized
+    x /=vecLength;
+    y /=vecLength;
+    z /=vecLength;
+        
+    sinSave=(float)sin(angle);
+    cosSave=(float)cos(angle);
+    oneMinusCos=1.0f-cosSave;
+
+    xx=x*x;
+    yy=y*y;
+    zz=z*z;
+    xy=x*y;
+    yz=y*z;
+    zx=z*x;
+    xs=x*sinSave;
+    ys=y*sinSave;
+    zs=z*sinSave;
+
+    mMatrix[0]=(oneMinusCos*xx)+cosSave;
+    mMatrix[4]=(oneMinusCos*xy)-zs;
+    mMatrix[8]=(oneMinusCos*zx)+ys;
+    mMatrix[12]=0.0f;
+
+    mMatrix[1]=(oneMinusCos*xy)+zs;
+    mMatrix[5]=(oneMinusCos*yy)+cosSave;
+    mMatrix[9]=(oneMinusCos*yz)-xs;
+    mMatrix[13]=0.0f;
+
+    mMatrix[2]=(oneMinusCos*zx)-ys;
+    mMatrix[6]=(oneMinusCos*yz)+xs;
+    mMatrix[10]=(oneMinusCos*zz)+cosSave;
+    mMatrix[14]=0.0f;
+
+    mMatrix[3]=0.0f;
+    mMatrix[7]=0.0f;
+    mMatrix[11]=0.0f;
+    mMatrix[15]=1.0f;
+}
+void multiplyMatrix(const double* m1, const double* m2, double* mProduct )
+{
+	mProduct[0]=m1[0]*m2[0]+m1[4]*m2[1]+m1[8]*m2[2]+m1[12]*m2[3];
+	mProduct[4]=m1[0]*m2[4]+m1[4]*m2[5]+m1[8]*m2[6]+m1[12]*m2[7];
+	mProduct[8]=m1[0]*m2[8]+m1[4]*m2[9]+m1[8]*m2[10]+m1[12]*m2[11];
+	mProduct[12]=m1[0]*m2[12]+m1[4]*m2[13]+m1[8]*m2[14]+m1[12]*m2[15];
+
+	mProduct[1]=m1[1]*m2[0]+m1[5]*m2[1]+m1[9]*m2[2]+m1[13]*m2[3];
+	mProduct[5]=m1[1]*m2[4]+m1[5]*m2[5]+m1[9]*m2[6]+m1[13]*m2[7];
+	mProduct[9]=m1[1]*m2[8]+m1[5]*m2[9]+m1[9]*m2[10]+m1[13]*m2[11];
+	mProduct[13]=m1[1]*m2[12]+m1[5]*m2[13]+m1[9]*m2[14]+m1[13]*m2[15];
+
+	mProduct[2]=m1[2]*m2[0]+m1[6]*m2[1]+m1[10]*m2[2]+m1[14]*m2[3];
+	mProduct[6]=m1[2]*m2[4]+m1[6]*m2[5]+m1[10]*m2[6]+m1[14]*m2[7];
+	mProduct[10]=m1[2]*m2[8]+m1[6]*m2[9]+m1[10]*m2[10]+m1[14]*m2[11];
+	mProduct[14]=m1[2]*m2[12]+m1[6]*m2[13]+m1[10]*m2[14]+m1[14]*m2[15];
+
+	mProduct[3]=m1[3]*m2[0]+m1[7]*m2[1]+m1[11]*m2[2]+m1[15]*m2[3];
+	mProduct[7]=m1[3]*m2[4]+m1[7]*m2[5]+m1[11]*m2[6]+m1[15]*m2[7];
+	mProduct[11]=m1[3]*m2[8]+m1[7]*m2[9]+m1[11]*m2[10]+m1[15]*m2[11];
+	mProduct[15]=m1[3]*m2[12]+m1[7]*m2[13]+m1[11]*m2[14]+m1[15]*m2[15];     
+}
+
+size_t cuda_handle_pointcloud(int cuda_device, std::vector<Point> &pointmodel, DataXYZ &environ,
+		std::vector<Frame> const &trajectory,
+		std::vector<bool> &colliding,
+		double radius, collision_method cmethod)
+{
+	const clock_t begin_time = clock();
+	
+	//colliding
+	for(unsigned int i=0;i<colliding.size();++i)
+	{
+		colliding[i]=false;
+	}
+	
+	
+	CuGrid grid(cuda_device);
+	
+	
+	double *env_xyz=new double[environ.size()*3];
+	//Copy data
+	for(unsigned int i=0;i<environ.size();++i)
+	{
+		env_xyz[3*i+0]=-environ[i][1];
+		env_xyz[3*i+1]=environ[i][2];
+		env_xyz[3*i+2]=environ[i][0];
+	}
+	grid.SetD(env_xyz,environ.size());	//xyz swaped
+	delete[] env_xyz;
+	
+	//grid.SetD((double*)environ.get_raw_pointer(),environ.size());
+	
+	double *tmp_xyz=new double[pointmodel.size()*3];
+	//Copy data
+	for(unsigned int i=0;i<pointmodel.size();++i)
+	{
+		tmp_xyz[3*i+0]=-pointmodel[i].y;	//xyz swaped
+		tmp_xyz[3*i+1]=pointmodel[i].z;
+		tmp_xyz[3*i+2]=pointmodel[i].x;
+		/*
+		tmp_xyz[3*i+0]=pointmodel[i].x;
+		tmp_xyz[3*i+1]=pointmodel[i].y;
+		tmp_xyz[3*i+2]=pointmodel[i].z;*/
+	}
+	grid.SetM(tmp_xyz,pointmodel.size());
+	
+	
+	grid.SetRadius(radius);
+	
+	for(unsigned int i=0;i<trajectory.size();++i)
+	{
+		printf("Trajectory: %d / %lu\n",i,trajectory.size());
+	
+		//Create scale matrix
+		double mat_scale[16];
+		double mat[16];
+		
+		for(int i=0;i<16;++i)
+		{
+			mat_scale[i]=0;
+		}
+		mat_scale[0]=mat_scale[5]=mat_scale[10]=mat_scale[15]=grid.params.scale;
+		
+		multiplyMatrix(trajectory[i].transformation,mat_scale,mat);
+		
+		grid.SetM(tmp_xyz,pointmodel.size());
+		grid.TransformM(mat);
+		
+		vector<int> output=grid.fixedRangeSearch();
+		
+		//Fill colliding
+		for(unsigned int i=0;i<colliding.size() && i<output.size();++i)
+		{
+			if(output[i] != -1)
+				colliding[i]=true;
+		}
+		
+	}
+	
+	
+	delete[] tmp_xyz;
+	
+	
+	
+	
+	
+	printf("Line %d\t%f seconds\n",__LINE__,float( clock () - begin_time ) /  CLOCKS_PER_SEC);
+	
+	
+	size_t num_colliding = 0;
+	// the actual implementation of std::vector<bool> requires us to use the
+	// proxy iterator pattern with &&...
+	for (unsigned int i = 0; i < environ.size(); ++i)
+	{
+		if (colliding[i])
+		{
+			num_colliding++;
+		}
+	}
+	
+	
+	float time = float( clock () - begin_time ) /  CLOCKS_PER_SEC;
+	printf("colliding: %lu / %u\n",num_colliding,environ.size());
+	cerr << "took: " << time << " seconds" << endl;
+	
+	
+	/*
+	FILE *f=fopen("output-red20-coll.asc","w");
+	if(f)
+	{
+		printf("Saving output-red20.asc\n");
+		for(int i=0;i<grid.GetDsize();i+=20)
+		{
+			if(colliding[i])
+				fprintf(f,"%f %f %f 255 0 0\n",grid.GetD()[3*i+0],grid.GetD()[3*i+1],grid.GetD()[3*i+2]);
+			else
+				fprintf(f,"%f %f %f 0 128 0\n",grid.GetD()[3*i+0],grid.GetD()[3*i+1],grid.GetD()[3*i+2]);
+		}
+		fclose(f);
+	}*/
+	
+	return num_colliding;
+}
+#endif //WITH_CUDA
 void calculate_collidingdist(DataXYZ &environ,
                              std::vector<bool> const &colliding,
                              size_t num_colliding,
@@ -446,6 +662,10 @@ void calculate_collidingdist2(std::vector<Point> &pointmodel, DataXYZ &environ,
 
 int main(int argc, char **argv)
 {
+#ifdef WITH_CUDA
+	PrintCudaInfo();
+#endif
+	
     // commandline arguments
     string dir;
     IOType iotype;
@@ -454,7 +674,9 @@ int main(int argc, char **argv)
     collision_method cmethod;
     penetrationdepth_method pdmethod;
 
-    parse_options(argc, argv, iotype, dir, radius, calcdistances, cmethod, pdmethod);
+	int cuda_device=0;
+	
+    parse_options(argc, argv, iotype, dir, radius, calcdistances, cmethod, pdmethod,cuda_device);
 
     // read scan 0 (model) and 1 (environment) without scanserver
     Scan::openDirectory(false, dir, iotype, 0, 1);
@@ -496,7 +718,14 @@ int main(int argc, char **argv)
             colliding[i] = true;
         }
     } else {
+#ifdef WITH_CUDA
+		cerr << "CUDA enabled\n";
+		num_colliding = cuda_handle_pointcloud(cuda_device,pointmodel, environ, trajectory, colliding, radius, cmethod);
+		// FIXME: when there is no CUDA devices use CPU version
+#else
+		cerr << "CUDA disabled\n";
         num_colliding = handle_pointcloud(pointmodel, environ, trajectory, colliding, radius, cmethod);
+#endif
     }
     if (num_colliding == 0) {
         cerr << "nothing collides" << endl;
