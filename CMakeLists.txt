@@ -290,6 +290,8 @@ IF(WITH_CUDA)
   FIND_PACKAGE(CUDA REQUIRED)         
   include_directories(${FOUND_CUDA_NVCC_INCLUDE})
   
+  add_definitions(-DWITH_CUDA)
+  
   #owerrite users input - need to be fixed
   #select all NVIDIA GPU arch which support unified memory (CUDA toolkit >= 6.0) and arch>=30
   set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS};-gencode arch=compute_30,code=sm_30;-gencode arch=compute_35,code=sm_35;-gencode arch=compute_50,code=sm_50;-gencode arch=compute_52,code=sm_52)
@@ -503,7 +505,7 @@ add_subdirectory(src/scanner)
 add_subdirectory(src/model)
 add_subdirectory(src/collision)
 add_subdirectory(src/cuda)
-add_subdirectory(src/cuda/cuda_collision)
+#add_subdirectory(src/cuda/cuda_collision)
 add_subdirectory(3rdparty)
 IF(WITH_ADDONS)
   MESSAGE(STATUS "With 3dtkaddons.")
