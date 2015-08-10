@@ -283,6 +283,25 @@ ELSE(WITH_COLLISION)
   MESSAGE(STATUS "Without collision detection")
 ENDIF(WITH_COLLISION)
 
+## CUDA accelerated collision detection
+OPT_DEP(WITH_CUDA "Whether to build CUDA accelerated collision detection tools" OFF "WITH_CUDA")
+
+IF(WITH_CUDA)
+  FIND_PACKAGE(CUDA REQUIRED)         
+  include_directories(${FOUND_CUDA_NVCC_INCLUDE})
+  
+  #owerrite users input - need to be fixed
+  #select all NVIDIA GPU arch which support unified memory (CUDA toolkit >= 6.0) and arch>=30
+  set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS};-gencode arch=compute_30,code=sm_30;-gencode arch=compute_35,code=sm_35;-gencode arch=compute_50,code=sm_50;-gencode arch=compute_52,code=sm_52)
+  
+  message("CUDA_NVCC_FLAGS = ${CUDA_NVCC_FLAGS}")
+  
+  MESSAGE(STATUS "With CUDA accelerated collision detection")
+ELSE(WITH_CUDA)
+  MESSAGE(STATUS "Without CUDA accelerated collision detection")
+ENDIF(WITH_CUDA)
+
+
 ## RivLib
 OPT_DEP(WITH_RIVLIB "Whether the RIEGL rivlib is present ON/OFF" OFF "")
 
