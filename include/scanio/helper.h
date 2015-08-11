@@ -73,6 +73,8 @@ bool readASCII(std::istream& infile,
         std::streamsize bufsize = 128);
 
 bool open_path(boost::filesystem::path data_path, std::function<bool (std::istream &)>);
+bool open_path_writing(boost::filesystem::path data_path, std::function<bool (std::ostream &)> handler);
+bool write_multiple(std::map<std::string,std::string> contentmap);
 
 #endif
 
