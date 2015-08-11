@@ -80,7 +80,7 @@ void validate(boost::any& v, const std::vector<std::string>& values,
 
 void parse_options(int argc, char **argv, IOType &iotype, string &dir,
         double &radius, bool &calcdistances, collision_method &cmethod,
-        penetrationdepth_method &pdmethod, int &cuda_device)
+        penetrationdepth_method &pdmethod, bool &use_cuda, int &cuda_device)
 {
     po::options_description generic("Generic options");
     generic.add_options()
@@ -99,8 +99,9 @@ void parse_options(int argc, char **argv, IOType &iotype, string &dir,
          "radius of sphere")
         ("calcdistances,d", po::value<bool>(&calcdistances)->zero_tokens(),
          "calculate penetration distance")
-        ("collisionmethod,c", po::value<collision_method>(&cmethod)->default_value(CTYPE1))
+        ("collisionmethod,c", po::value<collision_method>(&cmethod)->default_value(CTYPE1),"use without CUDA")
         ("penetrationdepthmethod,p", po::value<penetrationdepth_method>(&pdmethod)->default_value(PDTYPE1))
+        ("use cuda,C", po::value<bool>(&use_cuda)->zero_tokens(),"Use NVIDIA CUDA?")
 		("device,D", po::value<int>(&cuda_device)->default_value(0));
 
     po::options_description hidden("Hidden options");
@@ -662,10 +663,6 @@ void calculate_collidingdist2(std::vector<Point> &pointmodel, DataXYZ &environ,
 
 int main(int argc, char **argv)
 {
-#ifdef WITH_CUDA
-	PrintCudaInfo();
-#endif
-	
     // commandline arguments
     string dir;
     IOType iotype;
@@ -673,10 +670,10 @@ int main(int argc, char **argv)
     bool calcdistances;
     collision_method cmethod;
     penetrationdepth_method pdmethod;
-
+	bool use_cuda=0;
 	int cuda_device=0;
 	
-    parse_options(argc, argv, iotype, dir, radius, calcdistances, cmethod, pdmethod,cuda_device);
+    parse_options(argc, argv, iotype, dir, radius, calcdistances, cmethod, pdmethod, use_cuda, cuda_device);
 
     // read scan 0 (model) and 1 (environment) without scanserver
     Scan::openDirectory(false, dir, iotype, 0, 1);
@@ -711,22 +708,45 @@ int main(int argc, char **argv)
         pointmodel.push_back(Point(model[j][0], model[j][1], model[j][2]));
     }
     cerr << "model: " << pointmodel.size() << endl;
+	
     size_t num_colliding = 0;
-    if (cmethod == CTYPE3) {
-        num_colliding = environ.size();
-        for (unsigned int i = 0; i < environ.size(); ++i) {
-            colliding[i] = true;
-        }
-    } else {
+	if(use_cuda)
+	{
 #ifdef WITH_CUDA
-		cerr << "CUDA enabled\n";
+		
+		if(!ValidCUDADevice(cuda_device))
+		{
+			cerr << "No such CUDA device: " << cuda_device << endl;
+			PrintCudaInfo();
+			exit(-1);
+		}
+		
+		cerr << "built with CUDA; use_cuda selected; will use CUDA\n";
 		num_colliding = cuda_handle_pointcloud(cuda_device,pointmodel, environ, trajectory, colliding, radius, cmethod);
 		// FIXME: when there is no CUDA devices use CPU version
 #else
-		cerr << "CUDA disabled\n";
-        num_colliding = handle_pointcloud(pointmodel, environ, trajectory, colliding, radius, cmethod);
+		cerr << "built without CUDA; use_cuda selected\n";
+		cerr << "EXIT\n";
+		return -1;
 #endif
-    }
+	}
+	else
+	{
+#ifdef WITH_CUDA
+		cerr << "built with CUDA; will NOT use CUDA\n";
+#else
+		cerr << "built without CUDA; will NOT use CUDA\n";
+#endif
+	
+		if (cmethod == CTYPE3) {
+			num_colliding = environ.size();
+			for (unsigned int i = 0; i < environ.size(); ++i) {
+				colliding[i] = true;
+			}
+		} else {
+			num_colliding = handle_pointcloud(pointmodel, environ, trajectory, colliding, radius, cmethod);
+		}
+	}
     if (num_colliding == 0) {
         cerr << "nothing collides" << endl;
         exit(0);
