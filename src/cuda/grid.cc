@@ -113,11 +113,6 @@ void CuGrid::SetD(double *d_xyz, int numpoints)
 	
 	FindBoundingBox(d_d_xyz, bbox_env, dsize);
 	
-	printf("BBOX    :\t \tMIN\tMAX\n");
-	printf("         \tX\t%f\t%f\n",bbox_env[0],bbox_env[1]);
-	printf("         \tY\t%f\t%f\n",bbox_env[2],bbox_env[3]);
-	printf("         \tZ\t%f\t%f\n",bbox_env[4],bbox_env[5]);
-	
 	double scale_inv=fabs(bbox_env[0]);
 	for(int i=1;i<6;++i)
 	{
@@ -127,26 +122,25 @@ void CuGrid::SetD(double *d_xyz, int numpoints)
 		}
 	}
 	params.scale=0.95/scale_inv;
-	printf("scale_inv = %lf\n",scale_inv);
-	printf("scale = %lf\n",params.scale);
 	
 	//Scale environment;
 	//TODO: Use CudaTransformScan here!
-	for (int i=0;i<dsize*3;++i)
+	//for (int i=0;i<dsize*3;++i)
+	//{
+	//	d_d_xyz[i]*=params.scale;
+	//}
+	//Create scale matrix
+	double *mat_scale;
+	cudaMallocManaged((void**)&mat_scale,sizeof(double)*16,cudaMemAttachGlobal);
+
+	for(int i=0;i<16;++i)
 	{
-		d_d_xyz[i]*=params.scale;
+		mat_scale[i]=0;
 	}
-	
-	
-	FindBoundingBox(d_d_xyz, bbox_env, dsize);
-	
-	printf("New BBOX:\t \tMIN\tMAX\n");
-	printf("         \tX\t%f\t%f\n",bbox_env[0],bbox_env[1]);
-	printf("         \tY\t%f\t%f\n",bbox_env[2],bbox_env[3]);
-	printf("         \tZ\t%f\t%f\n",bbox_env[4],bbox_env[5]);
-	
-	
-	
+	mat_scale[0]=mat_scale[5]=mat_scale[10]=mat_scale[15]=params.scale;
+    cudaDeviceSynchronize();
+	cudaTransformScan(d_d_xyz,mat_scale,dsize);
+	cudaFree(mat_scale);
 }
 
 
@@ -176,8 +170,6 @@ vector<int> CuGrid::fixedRangeSearch()
 	int *_d_table_of_buckets; 
 	int *d_num_points_in_bucket; 
 	int *_d_NN;
-	int _thresholdOfPointsINNER=200; 
-	int _thresholdOfPointsOUTER=200; 
 	double *_d_temp_distances; 
 
 	CheckCudaError();
@@ -201,9 +193,7 @@ vector<int> CuGrid::fixedRangeSearch()
 					d_num_points_in_bucket, 
 					_d_NN,
 					 msize, 
-					 dsize, 
-					 _thresholdOfPointsINNER, 
-					 _thresholdOfPointsOUTER, 
+					 dsize,
 					 params.buckets(), 
 					_d_temp_distances, 
 					params.max_dist);
@@ -241,9 +231,8 @@ void CuGrid::SetRadius(double radius)
 			break;
 		params.buckets(i);
 	}
-	printf("num_buckets = %d\n",params.buckets());
+	
 	params.max_dist=radius*params.scale;
-	printf("radius = %lf m (%lf)\n",radius,params.max_dist);
 	
 }
 void CuGrid::TransformM(double *mat)

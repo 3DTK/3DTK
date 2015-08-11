@@ -99,9 +99,9 @@ void parse_options(int argc, char **argv, IOType &iotype, string &dir,
          "radius of sphere")
         ("calcdistances,d", po::value<bool>(&calcdistances)->zero_tokens(),
          "calculate penetration distance")
-        ("collisionmethod,c", po::value<collision_method>(&cmethod)->default_value(CTYPE1),"use without CUDA")
+        ("collisionmethod,c", po::value<collision_method>(&cmethod)->default_value(CTYPE1),"CPU collision method")
         ("penetrationdepthmethod,p", po::value<penetrationdepth_method>(&pdmethod)->default_value(PDTYPE1))
-        ("use cuda,C", po::value<bool>(&use_cuda)->zero_tokens(),"Use NVIDIA CUDA?")
+        ("usecuda,C", po::value<bool>(&use_cuda)->zero_tokens(),"Use NVIDIA CUDA")
 		("device,D", po::value<int>(&cuda_device)->default_value(0));
 
     po::options_description hidden("Hidden options");
@@ -489,12 +489,6 @@ size_t cuda_handle_pointcloud(int cuda_device, std::vector<Point> &pointmodel, D
 	
 	
 	delete[] tmp_xyz;
-	
-	
-	
-	
-	
-	printf("Line %d\t%f seconds\n",__LINE__,float( clock () - begin_time ) /  CLOCKS_PER_SEC);
 	
 	
 	size_t num_colliding = 0;
