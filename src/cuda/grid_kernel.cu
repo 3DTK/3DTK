@@ -136,14 +136,6 @@ void getKernelDim(dim3 &_block, dim3 &_thread, int num_points)
 	_thread.x = 1024; _thread.y = 1; _thread.z = 1;
 
 }
-/*
-void getKernelDimBuckets(dim3 &_block, dim3 &_thread, int num_buckets)
-{
-	_block.x = num_buckets;  _block.y = num_buckets; _block.z = 1;
-	_thread.x = num_buckets; _thread.y = 1; _thread.z = 1;
-}
-
-*/
 
 __device__ int getThreadId(int bx, int by, int bz, int tx, int ty, int tz)
 {
@@ -344,7 +336,7 @@ __global__ void kernel_CountPointsInBuckets(unsigned int *_d_index, int *_d_tabl
 			_d_table_of_buckets[temp_index_of_bucket] = 0;
 			d_num_points_in_bucket[temp_index_of_bucket] = amount_of_points;
 		}
-		else //index != 0
+		else
 		{
 			amount_of_points = 1;
 			temp_index_of_bucket = _d_index[index];
@@ -374,235 +366,6 @@ __global__ void kernel_CountPointsInBuckets(unsigned int *_d_index, int *_d_tabl
 	
 }
 
-__global__ void kernel_FindNN(int *_d_NN, unsigned int *_d_index, int * d_num_points_in_bucket, 
-					int * _d_table_of_buckets, unsigned int * _d_sorted_table_of_points, int numpoints_d, 
-					int _thresholdOfPointsINNER, int _thresholdOfPointsOUTER, int num_buckets,
-					double *_d_temp_distances, int _case, 
-					double _additionalDistanceCheck,
-					double *_xRef, double *_yRef, double *_zRef,
-					double *_xToAlign, double *_yToAlign, double *_zToAlign, int repeat, int step)
-{
-	int index = getThreadId(blockIdx.x,blockIdx.y,blockIdx.z, threadIdx.x, threadIdx.y,threadIdx.z);
-
-	if(index < numpoints_d)
-	{
-		int temp_curr_ind = _d_index[index];
-		int curr_ind = 0;
-		switch(_case)
-		{
-			case 0:	{curr_ind = temp_curr_ind - num_buckets * num_buckets - num_buckets - 1;	break;}
-			case 1:	{curr_ind = temp_curr_ind - num_buckets - 1;	break;	}
-			case 2:{curr_ind = temp_curr_ind + num_buckets * num_buckets - num_buckets - 1;	break;	}
-			case 3:	{curr_ind = temp_curr_ind - num_buckets * num_buckets - 1;	break;	}
-			case 4:	{curr_ind = temp_curr_ind - 1;	break;	}
-			case 5:	{curr_ind = temp_curr_ind + num_buckets * num_buckets - 1;break;	}
-			case 6:{curr_ind = temp_curr_ind - num_buckets * num_buckets + num_buckets - 1;	break;	}
-			case 7:	{curr_ind = temp_curr_ind + num_buckets - 1;	break;	}
-			case 8:	{curr_ind = temp_curr_ind + num_buckets * num_buckets + num_buckets - 1;	break;}
-			case 9:	{curr_ind = temp_curr_ind - num_buckets * num_buckets - num_buckets;	break;	}
-			case 10:{curr_ind = temp_curr_ind - num_buckets;break;	}
-			case 11:{curr_ind = temp_curr_ind + num_buckets * num_buckets - num_buckets;	break;}
-			case 12:{curr_ind = temp_curr_ind - num_buckets * num_buckets;	break;	}
-			case 13:{curr_ind = temp_curr_ind;	break;	}
-			case 14:{curr_ind = temp_curr_ind + num_buckets * num_buckets;break;	}
-			case 15:{curr_ind = temp_curr_ind - num_buckets * num_buckets + num_buckets;	break;	}
-			case 16:{curr_ind = temp_curr_ind + num_buckets;break;	}
-			case 17:{curr_ind = temp_curr_ind + num_buckets * num_buckets + num_buckets;	break;	}
-			case 18:{curr_ind = temp_curr_ind - num_buckets * num_buckets - num_buckets + 1;	break;	}
-			case 19:{curr_ind = temp_curr_ind - num_buckets + 1;	break;	}
-			case 20:{curr_ind = temp_curr_ind + num_buckets * num_buckets - num_buckets + 1;	break;	}
-			case 21:{curr_ind = temp_curr_ind - num_buckets * num_buckets + 1;break;	}
-			case 22:{curr_ind = temp_curr_ind + 1;	break;	}
-			case 23:{curr_ind = temp_curr_ind + num_buckets * num_buckets+1;	break;	}
-			case 24:{curr_ind = temp_curr_ind - num_buckets * num_buckets + num_buckets + 1;	break;	}
-			case 25:{curr_ind = temp_curr_ind + num_buckets + 1;break;	}
-			case 26:{curr_ind = temp_curr_ind + num_buckets * num_buckets + num_buckets + 1;	break;
-			}
-		}
-		
-		////////////////////////////////////d_compute_min_distances//////////////////////////////////////////////////////////////////////
-		double d_min_distance = _d_temp_distances[index];
-		double x_reference;
-		double y_reference;
-		double z_reference;
-
-		double xRef = _xToAlign[index];
-		double yRef = _yToAlign[index];
-		double zRef = _zToAlign[index];
-
-		//printf("A%d\n",index);
-
-		int index_result = -1;
-		int index_of_bucket = curr_ind;
-
-		if(index_of_bucket<0)index_of_bucket = 0;
-		if(index_of_bucket >= num_buckets*num_buckets*num_buckets) index_of_bucket = num_buckets*num_buckets*num_buckets-1;
-
-		int number_of_points_in_bucket = d_num_points_in_bucket[index_of_bucket];//tu konflikt czytania
-		int first_element_index = _d_table_of_buckets[index_of_bucket];				//tu konflikt czytania
-
-		double temp_min_dist;
-
-		if(_case == 13)
-		{
-			if(number_of_points_in_bucket > _thresholdOfPointsINNER)
-				number_of_points_in_bucket = _thresholdOfPointsINNER;
-
-		}else
-		{
-			if(number_of_points_in_bucket > _thresholdOfPointsOUTER)
-				number_of_points_in_bucket = _thresholdOfPointsOUTER;
-		}
-
-		int endIndex = (repeat+1) * step;
-		if(endIndex > number_of_points_in_bucket)
-		{
-			endIndex = number_of_points_in_bucket;
-		}
-
-		//printf("B%d  index_of_bucket = %d endIndex=%d\n",index,index_of_bucket,endIndex);
-
-		for(int ii = repeat * step; ii < endIndex; ii++)
-		{
-			int index_of_point_in_sorted_table_of_points = _d_sorted_table_of_points[first_element_index + ii];//tu konflikt czytania
-
-			x_reference = _xRef[index_of_point_in_sorted_table_of_points];
-			y_reference = _yRef[index_of_point_in_sorted_table_of_points];
-			z_reference = _zRef[index_of_point_in_sorted_table_of_points];
-
-
-			temp_min_dist = sqrtf((xRef - x_reference)*(xRef -x_reference) +  
-								  (yRef - y_reference)*(yRef -y_reference) + 
-								  (zRef - z_reference)*(zRef -z_reference)); 
-
-			if(temp_min_dist < d_min_distance) 
-			{
-				d_min_distance = temp_min_dist;
-				index_result = index_of_point_in_sorted_table_of_points;
-			}
-		}
-		//printf("C%d\n",index);
-
-		if(index_result != -1)
-		{
-			if(d_min_distance < _additionalDistanceCheck )
-			{
-				_d_NN[index] = index_result;
-				_d_temp_distances[index] = d_min_distance;
-				//__syncthreads();
-			}
-		}
-	}
-}
-__global__ void kernel_FindNN_ALL(int *_d_NN, unsigned int *_d_index, int * d_num_points_in_bucket, 
-					int * _d_table_of_buckets, unsigned int * _d_sorted_table_of_points, int numpoints_d, 
-					int num_buckets,
-					double *_d_temp_distances, int _case, 
-					double _additionalDistanceCheck,
-					double *_xRef, double *_yRef, double *_zRef,
-					double *_xToAlign, double *_yToAlign, double *_zToAlign)
-{
-	int index = getThreadId(blockIdx.x,blockIdx.y,blockIdx.z, threadIdx.x, threadIdx.y,threadIdx.z);
-
-	if(index < numpoints_d)
-	{
-		int temp_curr_ind = _d_index[index];
-		int curr_ind = 0;
-		switch(_case)
-		{
-			case 0:	{curr_ind = temp_curr_ind - num_buckets * num_buckets - num_buckets - 1;	break;}
-			case 1:	{curr_ind = temp_curr_ind - num_buckets - 1;	break;	}
-			case 2:{curr_ind = temp_curr_ind + num_buckets * num_buckets - num_buckets - 1;	break;	}
-			case 3:	{curr_ind = temp_curr_ind - num_buckets * num_buckets - 1;	break;	}
-			case 4:	{curr_ind = temp_curr_ind - 1;	break;	}
-			case 5:	{curr_ind = temp_curr_ind + num_buckets * num_buckets - 1;break;	}
-			case 6:{curr_ind = temp_curr_ind - num_buckets * num_buckets + num_buckets - 1;	break;	}
-			case 7:	{curr_ind = temp_curr_ind + num_buckets - 1;	break;	}
-			case 8:	{curr_ind = temp_curr_ind + num_buckets * num_buckets + num_buckets - 1;	break;}
-			case 9:	{curr_ind = temp_curr_ind - num_buckets * num_buckets - num_buckets;	break;	}
-			case 10:{curr_ind = temp_curr_ind - num_buckets;break;	}
-			case 11:{curr_ind = temp_curr_ind + num_buckets * num_buckets - num_buckets;	break;}
-			case 12:{curr_ind = temp_curr_ind - num_buckets * num_buckets;	break;	}
-			case 13:{curr_ind = temp_curr_ind;	break;	}
-			case 14:{curr_ind = temp_curr_ind + num_buckets * num_buckets;break;	}
-			case 15:{curr_ind = temp_curr_ind - num_buckets * num_buckets + num_buckets;	break;	}
-			case 16:{curr_ind = temp_curr_ind + num_buckets;break;	}
-			case 17:{curr_ind = temp_curr_ind + num_buckets * num_buckets + num_buckets;	break;	}
-			case 18:{curr_ind = temp_curr_ind - num_buckets * num_buckets - num_buckets + 1;	break;	}
-			case 19:{curr_ind = temp_curr_ind - num_buckets + 1;	break;	}
-			case 20:{curr_ind = temp_curr_ind + num_buckets * num_buckets - num_buckets + 1;	break;	}
-			case 21:{curr_ind = temp_curr_ind - num_buckets * num_buckets + 1;break;	}
-			case 22:{curr_ind = temp_curr_ind + 1;	break;	}
-			case 23:{curr_ind = temp_curr_ind + num_buckets * num_buckets+1;	break;	}
-			case 24:{curr_ind = temp_curr_ind - num_buckets * num_buckets + num_buckets + 1;	break;	}
-			case 25:{curr_ind = temp_curr_ind + num_buckets + 1;break;	}
-			case 26:{curr_ind = temp_curr_ind + num_buckets * num_buckets + num_buckets + 1;	break;
-			}
-		}
-		
-		////////////////////////////////////d_compute_min_distances//////////////////////////////////////////////////////////////////////
-		double d_min_distance = _d_temp_distances[index];
-		double x_reference;
-		double y_reference;
-		double z_reference;
-
-		double xRef = _xToAlign[index];
-		double yRef = _yToAlign[index];
-		double zRef = _zToAlign[index];
-
-		//printf("A%d\n",index);
-
-		int index_result = -1;
-		int index_of_bucket = curr_ind;
-
-		if(index_of_bucket<0)index_of_bucket = 0;
-		if(index_of_bucket >= num_buckets*num_buckets*num_buckets) index_of_bucket = num_buckets*num_buckets*num_buckets-1;
-
-		int number_of_points_in_bucket = d_num_points_in_bucket[index_of_bucket];//tu konflikt czytania
-		int first_element_index = _d_table_of_buckets[index_of_bucket];				//tu konflikt czytania
-
-		double temp_min_dist;
-
-		
-
-		int endIndex = number_of_points_in_bucket;
-		
-
-		//printf("B%d  index_of_bucket = %d endIndex=%d\n",index,index_of_bucket,endIndex);
-
-		for(int ii = 0; ii < endIndex; ii++)
-		{
-			int index_of_point_in_sorted_table_of_points = _d_sorted_table_of_points[first_element_index + ii];//tu konflikt czytania
-
-			x_reference = _xRef[index_of_point_in_sorted_table_of_points];
-			y_reference = _yRef[index_of_point_in_sorted_table_of_points];
-			z_reference = _zRef[index_of_point_in_sorted_table_of_points];
-
-
-			temp_min_dist = sqrtf((xRef - x_reference)*(xRef -x_reference) +  
-								  (yRef - y_reference)*(yRef -y_reference) + 
-								  (zRef - z_reference)*(zRef -z_reference)); 
-
-			if(temp_min_dist < d_min_distance) 
-			{
-				d_min_distance = temp_min_dist;
-				index_result = index_of_point_in_sorted_table_of_points;
-			}
-		}
-		//printf("C%d\n",index);
-
-		if(index_result != -1)
-		{
-			if(d_min_distance < _additionalDistanceCheck )
-			{
-				_d_NN[index] = index_result;
-				_d_temp_distances[index] = d_min_distance;
-				//__syncthreads();
-			}
-		}
-	}
-	
-}
 __global__ void kernel_FindNN_ALL(int *_d_NN, unsigned int *_d_index, int * d_num_points_in_bucket, 
 					int * _d_table_of_buckets, unsigned int * _d_sorted_table_of_points, int numpoints_d, 
 					int num_buckets,
@@ -649,7 +412,6 @@ __global__ void kernel_FindNN_ALL(int *_d_NN, unsigned int *_d_index, int * d_nu
 			}
 		}
 		
-		////////////////////////////////////d_compute_min_distances//////////////////////////////////////////////////////////////////////
 		double d_min_distance = _d_temp_distances[index];
 		double x_reference;
 		double y_reference;
@@ -659,29 +421,22 @@ __global__ void kernel_FindNN_ALL(int *_d_NN, unsigned int *_d_index, int * d_nu
 		double yRef = dxyz[3*index+1];
 		double zRef = dxyz[3*index+2];
 
-		//printf("A%d\n",index);
-
 		int index_result = -1;
 		int index_of_bucket = curr_ind;
 
 		if(index_of_bucket<0)index_of_bucket = 0;
 		if(index_of_bucket >= num_buckets*num_buckets*num_buckets) index_of_bucket = num_buckets*num_buckets*num_buckets-1;
 
-		int number_of_points_in_bucket = d_num_points_in_bucket[index_of_bucket];//tu konflikt czytania
-		int first_element_index = _d_table_of_buckets[index_of_bucket];				//tu konflikt czytania
+		int number_of_points_in_bucket = d_num_points_in_bucket[index_of_bucket];
+		int first_element_index = _d_table_of_buckets[index_of_bucket];
 
 		double temp_min_dist;
 
-		
-
 		int endIndex = number_of_points_in_bucket;
 		
-
-		//printf("B%d  index_of_bucket = %d endIndex=%d\n",index,index_of_bucket,endIndex);
-
 		for(int ii = 0; ii < endIndex; ii++)
 		{
-			int index_of_point_in_sorted_table_of_points = _d_sorted_table_of_points[first_element_index + ii];//tu konflikt czytania
+			int index_of_point_in_sorted_table_of_points = _d_sorted_table_of_points[first_element_index + ii];
 
 			x_reference = mxyz[3*index_of_point_in_sorted_table_of_points+0];
 			y_reference = mxyz[3*index_of_point_in_sorted_table_of_points+1];
@@ -698,15 +453,12 @@ __global__ void kernel_FindNN_ALL(int *_d_NN, unsigned int *_d_index, int * d_nu
 				index_result = index_of_point_in_sorted_table_of_points;
 			}
 		}
-		//printf("C%d\n",index);
-
 		if(index_result != -1)
 		{
 			if(d_min_distance < _additionalDistanceCheck )
 			{
 				_d_NN[index] = index_result;
 				_d_temp_distances[index] = d_min_distance;
-				//__syncthreads();
 			}
 		}
 	}
@@ -721,93 +473,39 @@ void cudaFindNN(double *d_mxyz,
 				int *d_num_points_in_bucket, 
 				int *_d_NN,
 				int numpoints_m, 
-				int numpoints_d, 
-				int _thresholdOfPointsINNER, 
-				int _thresholdOfPointsOUTER, 
+				int numpoints_d,
 				int num_buckets, 
 				double *_d_temp_distances, 
 				double _additionalDistanceCheck)
 {
 	CUDA_CHECK_ERROR();
-	size_t mfree,mtot;
+	
 	dim3 block_m, block_d;
-	//dim3 blockToFill;
 	dim3 thread_m, thread_d;
-	//dim3 threadToFill;
 	
 	getKernelDim(block_m, thread_m , numpoints_m);
 	getKernelDim(block_d, thread_d , numpoints_d);
-	//getKernelDimBuckets(blockToFill, threadToFill, num_buckets);
-	
-	printf("block_m: %d %d %d   thread_m: %d %d %d\n",block_m.x,block_m.y,block_m.z,thread_m.x,thread_m.y,thread_m.z);
-	printf("block_d: %d %d %d   thread_d: %d %d %d\n",block_d.x,block_d.y,block_d.z,thread_d.x,thread_d.y,thread_d.z);
-	
-	cudaMemGetInfo(&mfree,&mtot);
-	printf("Now %lf MB is free from %lf MB total\n",mfree/(1024*1024.0),mtot/(1024*1024.0));
 	
 	CUDA_CHECK_ERROR();
 	//Indexes for M
 	kernel_ComputeIndexes<<<block_m, thread_m>>>(index_m, d_mxyz, numpoints_m, num_buckets);
 	cudaDeviceSynchronize();
-	cudaMemGetInfo(&mfree,&mtot);
-	printf("Now %lf MB is free from %lf MB total\n",mfree/(1024*1024.0),mtot/(1024*1024.0));
-	//kernel_initKey<<<block_m, thread_m>>>(_d_keysReference, numpoints_m);  //use sequence instead
-	/*printf("--------sequence-----_d_keysReference-------\n");
 	
-	for(int i=0;i<numpoints_m;++i)
-	{
-		printf("_d_keysReference[%d] = %d\n",i,_d_keysReference[i]);
-	}
-	printf("---------kernel_ComputeIndexes-----------\n");
 	
-	for(int i=0;i<numpoints_m;++i)
-	{
-		printf("index_m[%d] = %d\n",i,index_m[i]);
-	}printf("--------sequence-----_d_keysReference-------\n");
-	
-	for(int i=0;i<numpoints_m;++i)
-	{
-		printf("_d_keysReference[%d] = %d\n",i,_d_keysReference[i]);
-	}
-		*/
 	CUDA_CHECK_ERROR();
 	thrust::device_ptr <unsigned int> dev_ptrindex_m ( index_m );
 	CUDA_CHECK_ERROR();
 	thrust::device_ptr <unsigned int> dev_ptr_d_keysReference ( _d_keysReference );
 	CUDA_CHECK_ERROR();
-	/*printf("--------sequence-----_d_keysReference-------\n");
 	
-	for(int i=0;i<numpoints_m;++i)
-	{
-		printf("_d_keysReference[%d] = %d\n",i,_d_keysReference[i]);
-	}*/
 	thrust::sequence(dev_ptr_d_keysReference,dev_ptr_d_keysReference+numpoints_m);
 	CUDA_CHECK_ERROR();
 	
 	cudaDeviceSynchronize();
-	/*printf("--------sequence-----_d_keysReference-------\n");
 	
-	for(int i=0;i<numpoints_m;++i)
-	{
-		printf("_d_keysReference[%d] = %d\n",i,_d_keysReference[i]);
-	}*/
 	thrust::sort_by_key (dev_ptrindex_m , dev_ptrindex_m + numpoints_m, dev_ptr_d_keysReference );
 	CUDA_CHECK_ERROR();
 	cudaDeviceSynchronize();
-	/*printf("----------sort_by_key----------\n");
-	
-	for(int i=0;i<numpoints_m;++i)
-	{
-		printf("index_m[%d] = %d\n",i,index_m[i]);
-	}
-	for(int i=0;i<numpoints_m;++i)
-	{
-		printf("_d_keysReference[%d] = %d\n",i,_d_keysReference[i]);
-	}
-	
-	
-	printf("\n\n\n\n");
-	*/
 	
 	thrust::device_ptr <int> dev_ptr_d_table_of_buckets(_d_table_of_buckets);
 	CUDA_CHECK_ERROR();
@@ -817,94 +515,28 @@ void cudaFindNN(double *d_mxyz,
 	CUDA_CHECK_ERROR();
 	thrust::fill(dev_ptrd_num_points_in_bucket,dev_ptrd_num_points_in_bucket+num_buckets*num_buckets*num_buckets,-1);
 	
-	//kernerl_Fill<<<blockToFill, threadToFill>>>(_d_table_of_buckets, num_buckets, -1);
-	//kernerl_Fill<<<blockToFill, threadToFill>>>(d_num_points_in_bucket, num_buckets, -1);
-	
 	cudaDeviceSynchronize();
 	CUDA_CHECK_ERROR();
-	cudaMemGetInfo(&mfree,&mtot);
-	printf("Now %lf MB is free from %lf MB total\n",mfree/(1024*1024.0),mtot/(1024*1024.0));
-	/*
-	printf("----------_d_table_of_buckets----------\n");
-	
-	for(int i=0;i<num_buckets*num_buckets*num_buckets;++i)
-	{
-		printf("_d_table_of_buckets[%d] = %d\n",i,_d_table_of_buckets[i]);
-	}
-	
-	printf("----------d_num_points_in_bucket----------\n");
-	
-	for(int i=0;i<num_buckets*num_buckets*num_buckets;++i)
-	{
-		printf("d_num_points_in_bucket[%d] = %d\n",i,d_num_points_in_bucket[i]);
-	}
-	 */
 	
 	cudaDeviceSynchronize();
 	kernel_CountPointsInBuckets<<<block_m, thread_m>>>(index_m, _d_table_of_buckets, d_num_points_in_bucket, numpoints_m);
 	cudaDeviceSynchronize();
 	CUDA_CHECK_ERROR();
-		/*
-	thrust::device_ptr <double> dev_ptr_d_temp_double_mem ( _d_temp_double_mem );
-	thrust::device_ptr <double> dev_ptr_d_table_m_d ( _d_table_m_d );
-	thrust::device_ptr <double> dev_ptr_d_table_C ( _d_table_C );
-*/
 	
-
-
 	//Indexes for D
 	kernel_ComputeIndexes<<<block_d, thread_d>>>(index_d, d_dxyz, numpoints_d, num_buckets);
 	cudaDeviceSynchronize();
 	
-	//kernel_fill_NN_by_value<<<block_d, thread_d>>>(_d_NN, numpoints_d, -1);	
-	//cudaDeviceSynchronize();
 	thrust::device_ptr <int> dev_ptrd__d_NN(_d_NN);
 	thrust::fill(dev_ptrd__d_NN,dev_ptrd__d_NN+numpoints_d,-1);
 	
 	CUDA_CHECK_ERROR();
 	
-	
-	cudaMemGetInfo(&mfree,&mtot);
-	printf("Now %lf MB is free from %lf MB total\n",mfree/(1024*1024.0),mtot/(1024*1024.0));
-	
-	//kernel_fill_temp_distances_by_value<<<block_d, thread_d>>>(_d_temp_distances, numpoints_d, 2.0f);	
-	//cudaDeviceSynchronize();
 	thrust::device_ptr <double> dev_ptrd__d_temp_distances(_d_temp_distances);
 	thrust::fill(dev_ptrd__d_temp_distances,dev_ptrd__d_temp_distances+numpoints_d,2);
 
-
-		CUDA_CHECK_ERROR();
-/*
-	int step = 10;
-	int iter13 ;
-
-	for(int kkk = 0; kkk < 27; kkk++)
-	{
-		if(kkk == 13)
-		{
-			iter13 = _thresholdOfPointsINNER/step + 1;
-		}
-		else
-		{
-			iter13 = _thresholdOfPointsOUTER/step + 1;
-		}
-
-		for(int kk = 0; kk < iter13; kk++)
-		{
-			kernel_FindNN<<<block_d, thread_d>>>(_d_NN, index_d, d_num_points_in_bucket, 
-					_d_table_of_buckets, _d_keysReference, numpoints_d, 
-					_thresholdOfPointsINNER, _thresholdOfPointsOUTER, num_buckets,
-					_d_temp_distances, kkk, 
-					_additionalDistanceCheck,
-					d_mx, d_my, d_mz, 
-					d_dx,d_dy, d_dz,kk,step);
-			cudaDeviceSynchronize();
-		CUDA_CHECK_ERROR();
-		}
-	}*/
+	CUDA_CHECK_ERROR();
 		
-		
-	
 	for(int kkk = 0; kkk < 27; kkk++)
 	{
 
@@ -918,50 +550,10 @@ void cudaFindNN(double *d_mxyz,
 		cudaDeviceSynchronize();
 		CUDA_CHECK_ERROR();
 	}
-
-	
-	cudaMemGetInfo(&mfree,&mtot);
-	printf("Now %lf MB is free from %lf MB total\n",mfree/(1024*1024.0),mtot/(1024*1024.0));
-
 }
-
-/*
-__global__ void kernel_bbox(double *d_x, double *d_y, double *d_z, 
-							double *bbox, unsigned int size)
-{
-	int index = getThreadId(blockIdx.x,blockIdx.y,blockIdx.z, threadIdx.x, threadIdx.y,threadIdx.z);
-	
-	//Initialize the bbox with max values
-	if(index==0)
-	{
-		bbox[0]=DBL_MAX;	//Xmin
-		bbox[1]=-DBL_MAX;	//Xmax
-		
-		bbox[2]=DBL_MAX;	//Ymin
-		bbox[3]=-DBL_MAX;	//Ymax
-		
-		bbox[4]=DBL_MAX;	//Zmin
-		bbox[5]=-DBL_MAX;	//Zmax
-	}
-	
-	__syncthreads();
-	
-	if(index<size)
-	{
-		
-	}
-}*/
-
 
 void FindBoundingBox(double *d_x, double *d_y, double *d_z, double *bbox, unsigned int size)
 {
-	/*
-	dim3 blocks, threads;
-	getKernelDim(blocks, threads , size);
-	
-	kernel_bbox<<<blocks,threads>>>(d_x,d_y,d_z,size);
-	*/
-	
 	// X       Y       Z
 	bbox[0]=bbox[2]=bbox[4]=DBL_MAX;	//MIN
 	bbox[1]=bbox[3]=bbox[5]=-DBL_MAX;	//MAX
