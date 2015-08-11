@@ -750,10 +750,11 @@ bool open_path(boost::filesystem::path data_path, std::function<bool (std::istre
             int flags = 0;
             struct zip *archive = zip_open(archivepath.string().c_str(), flags, &error);
             if (archive == nullptr) {
-                char buf[128]{};
                 // FIXME: the following changed with libzip 1.0
+                //char buf[128]{};
                 //zip_error_to_str(buf, sizeof (buf), error, errno);
-                throw std::runtime_error(buf);
+                //throw std::runtime_error(buf);
+                throw std::runtime_error("zip_open failed");
             }
             zip_int64_t idx = zip_name_locate(archive, remainder.string().c_str(), 0);
             /* check if the file cannot be found */
@@ -790,8 +791,99 @@ bool open_path_writing(boost::filesystem::path data_path, std::function<bool (st
     }
 
     return find_path_archive(data_path, [=,&handler](boost::filesystem::path archivepath, boost::filesystem::path remainder) -> bool {
+            /* open the archive for reading */
+            int error;
+            int flags = 0;
+            std::stringstream ss( std::ios_base::out | std::ios_base::in | std::ios_base::binary );
+            if (!handler(ss))
+                return false;
+            struct zip *archive = zip_open(archivepath.string().c_str(), flags, &error);
+            if (archive == nullptr) {
+                // FIXME: the following changed with libzip 1.0
+                //char buf[128]{};
+                //zip_error_to_str(buf, sizeof (buf), error, errno);
+                throw std::runtime_error("zip_open failed");
+            }
+            std::string data = ss.str();
+            struct zip_source *source = zip_source_buffer(archive, data.c_str(), data.length(), 0);
+            if (source == nullptr) {
+                // FIXME: the following changed with libzip 1.0
+                //char buf[128]{};
+                //zip_error_to_str(buf, sizeof (buf), error, errno);
+                //throw std::runtime_error(buf);
+                throw std::runtime_error("zip_source_buffer_create failed");
+            }
+            zip_int64_t idx = zip_name_locate(archive, remainder.string().c_str(), 0);
+            if (idx == -1) {
+                zip_int64_t newidx = zip_file_add(archive, remainder.string().c_str(), source, 0);
+                if (newidx == -1)
+                    throw std::runtime_error("zip_file_add failed");
+            } else {
+                int ret = zip_file_replace(archive, idx, source, 0);
+                if (ret == -1)
+                    throw std::runtime_error("zip_file_replace failed");
+            }
+            zip_close(archive);
             return true;
         });
+}
+
+bool write_multiple(std::map<std::string,std::string> contentmap)
+{
+    std::map<std::string, struct zip *> archivehandles;
+    for (auto it=contentmap.begin(); it != contentmap.end(); ++it) {
+        std::string path = it->first;
+        std::string content = it->second;
+
+        if (boost::filesystem::exists(path)) {
+            boost::filesystem::ofstream data_file(path);
+            data_file << content;
+            data_file.close();
+            continue;
+        }
+
+        find_path_archive(path, [=,&archivehandles](boost::filesystem::path archivepath, boost::filesystem::path remainder) -> bool {
+            auto ah_it = archivehandles.find(archivepath.string());
+            if (ah_it == archivehandles.end()) {
+                int error;
+                int flags = 0;
+                struct zip *archive = zip_open(archivepath.string().c_str(), flags, &error);
+                if (archive == nullptr) {
+                    // FIXME: the following changed with libzip 1.0
+                    //char buf[128]{};
+                    //zip_error_to_str(buf, sizeof (buf), error, errno);
+                    throw std::runtime_error("zip_open failed");
+                }
+                ah_it = archivehandles.insert(std::pair<std::string, struct zip *>(archivepath.string(), archive)).first;
+            }
+            struct zip *archive = ah_it->second;
+            struct zip_source *source = zip_source_buffer(archive, content.c_str(), content.length(), 0);
+            if (source == nullptr) {
+                // FIXME: the following changed with libzip 1.0
+                //char buf[128]{};
+                //zip_error_to_str(buf, sizeof (buf), error, errno);
+                //throw std::runtime_error(buf);
+                throw std::runtime_error("zip_source_buffer_create failed");
+            }
+            zip_int64_t idx = zip_name_locate(archive, remainder.string().c_str(), 0);
+            if (idx == -1) {
+                zip_int64_t newidx = zip_file_add(archive, remainder.string().c_str(), source, 0);
+                if (newidx == -1)
+                    throw std::runtime_error("zip_file_add failed");
+            } else {
+                int ret = zip_file_replace(archive, idx, source, 0);
+                if (ret == -1)
+                    throw std::runtime_error("zip_file_replace failed");
+            }
+            return true;
+        });
+    }
+
+    for (auto it=archivehandles.begin(); it != archivehandles.end(); ++it) {
+        zip_close(it->second);
+    }
+
+    return true;
 }
 
 /* vim: set ts=4 sw=4 et: */
