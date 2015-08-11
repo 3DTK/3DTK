@@ -54,8 +54,8 @@ int SetCudaDevice(int cuda_device)
 void PrintCudaInfo()
 {
     int deviceCount = 0;
-    cudaError_t error_id = cudaGetDeviceCount(&deviceCount);
-    printf("cudaGetDeviceCount returned %d (%s)\n", (int)error_id, cudaGetErrorString(error_id));
+	cudaGetDeviceCount(&deviceCount);
+	CheckCudaError();
 
 	// This function call returns 0 if there are no CUDA capable devices.
     if (deviceCount == 0)
@@ -74,6 +74,7 @@ void PrintCudaInfo()
         cudaSetDevice(dev);
         cudaDeviceProp deviceProp;
         cudaGetDeviceProperties(&deviceProp, dev);
+		CheckCudaError();
 
         printf("\nDevice %d: \"%s\"\n", dev, deviceProp.name);
 
@@ -93,7 +94,6 @@ void PrintCudaInfo()
         printf("  GPU Max Clock rate:                            %.0f MHz (%0.2f GHz)\n", deviceProp.clockRate * 1e-3f, deviceProp.clockRate * 1e-6f);
 
 
-#if CUDART_VERSION >= 5000
         // This is supported in CUDA 5.0 (runtime API device properties)
         printf("  Memory Clock rate:                             %.0f Mhz\n", deviceProp.memoryClockRate * 1e-3f);
         printf("  Memory Bus Width:                              %d-bit\n",   deviceProp.memoryBusWidth);
@@ -102,24 +102,6 @@ void PrintCudaInfo()
         {
             printf("  L2 Cache Size:                                 %d bytes\n", deviceProp.l2CacheSize);
         }
-
-#else
-        // This only available in CUDA 4.0-4.2 (but these were only exposed in the CUDA Driver API)
-        int memoryClock;
-        getCudaAttribute<int>(&memoryClock, CU_DEVICE_ATTRIBUTE_MEMORY_CLOCK_RATE, dev);
-        printf("  Memory Clock rate:                             %.0f Mhz\n", memoryClock * 1e-3f);
-        int memBusWidth;
-        getCudaAttribute<int>(&memBusWidth, CU_DEVICE_ATTRIBUTE_GLOBAL_MEMORY_BUS_WIDTH, dev);
-        printf("  Memory Bus Width:                              %d-bit\n", memBusWidth);
-        int L2CacheSize;
-        getCudaAttribute<int>(&L2CacheSize, CU_DEVICE_ATTRIBUTE_L2_CACHE_SIZE, dev);
-
-        if (L2CacheSize)
-        {
-            printf("  L2 Cache Size:                                 %d bytes\n", L2CacheSize);
-        }
-
-#endif
 
         printf("  Maximum Texture Dimension Size (x,y,z)         1D=(%d), 2D=(%d, %d), 3D=(%d, %d, %d)\n",
                deviceProp.maxTexture1D   , deviceProp.maxTexture2D[0], deviceProp.maxTexture2D[1],
@@ -224,12 +206,11 @@ void PrintCudaInfo()
         }
     }
 
-    printf("\n");
-    std::string sProfileString = "deviceQuery, CUDA Driver = CUDART";
+    std::string sProfileString = "";
     char cTemp[16];
 
     // driver version
-    sProfileString += ", CUDA Driver Version = ";
+    sProfileString += "CUDA Driver Version = ";
 #if defined(WIN32) || defined(_WIN32) || defined(WIN64) || defined(_WIN64)
     sprintf_s(cTemp, 10, "%d.%d", driverVersion/1000, (driverVersion%100)/10);
 #else
@@ -272,6 +253,22 @@ void PrintCudaInfo()
     sProfileString += "\n";
     printf("%s", sProfileString.c_str());
 
-    printf("Result = PASS\n\n");
+}
 
+bool ValidCUDADevice(int device)
+{
+    int deviceCount = 0;
+    cudaError_t error_id = cudaGetDeviceCount(&deviceCount);
+	if(!error_id)
+	{
+		if(device<deviceCount)
+		{
+			return 1;
+		}
+		else
+		{
+			return 0;
+		}
+	}
+	return 0;
 }
