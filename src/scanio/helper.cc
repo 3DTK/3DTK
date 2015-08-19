@@ -815,11 +815,19 @@ bool open_path_writing(boost::filesystem::path data_path, std::function<bool (st
             }
             zip_int64_t idx = zip_name_locate(archive, remainder.string().c_str(), 0);
             if (idx == -1) {
+#ifdef LIBZIP_OLD
+                zip_int64_t newidx = zip_add(archive, remainder.string().c_str(), source);
+#else
                 zip_int64_t newidx = zip_file_add(archive, remainder.string().c_str(), source, 0);
+#endif
                 if (newidx == -1)
                     throw std::runtime_error("zip_file_add failed");
             } else {
+#ifdef LIBZIP_OLD
+                int ret = zip_replace(archive, idx, source);
+#else
                 int ret = zip_file_replace(archive, idx, source, 0);
+#endif
                 if (ret == -1)
                     throw std::runtime_error("zip_file_replace failed");
             }
@@ -867,11 +875,19 @@ bool write_multiple(std::map<std::string,std::string> contentmap)
             }
             zip_int64_t idx = zip_name_locate(archive, remainder.string().c_str(), 0);
             if (idx == -1) {
+#ifdef LIBZIP_OLD
+                zip_int64_t newidx = zip_add(archive, remainder.string().c_str(), source);
+#else
                 zip_int64_t newidx = zip_file_add(archive, remainder.string().c_str(), source, 0);
+#endif
                 if (newidx == -1)
                     throw std::runtime_error("zip_file_add failed");
             } else {
+#ifdef LIBZIP_OLD
+                int ret = zip_replace(archive, idx, source);
+#else
                 int ret = zip_file_replace(archive, idx, source, 0);
+#endif
                 if (ret == -1)
                     throw std::runtime_error("zip_file_replace failed");
             }
