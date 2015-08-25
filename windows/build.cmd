@@ -1,3 +1,6 @@
+:: the path where you want the resulting binaries
+set outdir=C:/slam6d/
+
 :: this script must have the extension .cmd under windows or otherwise (if
 :: it's named .bat for example) %ERRORLEVEL% will not be reset but keep being
 :: false even if executions of commands succeed
@@ -87,7 +90,8 @@ if not exist %opencvdir% (
 	-DZLIB_INCLUDE_DIR:PATH=%sourcedir%/3rdparty/windows/zlib ^
 	-DGLUT_INCLUDE_DIR:PATH=%sourcedir%/3rdparty/windows ^
 	-DOpenCV_DIR:PATH=%opencvdir%/opencv/build ^
-	..
+	-DOUTPUT_DIRECTORY:PATH=%outdir% ^
+	%sourcedir%
 
 if %ERRORLEVEL% GEQ 1 (
 	echo cmake config failed
