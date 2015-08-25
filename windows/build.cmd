@@ -1,6 +1,9 @@
 :: the path where you want the resulting binaries
 set outdir=C:/slam6d/
 
+:: the build type (one of Debug, Release, RelWithDebInfo and MinSizeRel)
+set buildtype=Release
+
 :: this script must have the extension .cmd under windows or otherwise (if
 :: it's named .bat for example) %ERRORLEVEL% will not be reset but keep being
 :: false even if executions of commands succeed
@@ -98,7 +101,7 @@ if %ERRORLEVEL% GEQ 1 (
 	exit /B 1
 )
 
-"%cmakeexe%" --build .
+"%cmakeexe%" --build . --config %buildtype%
 
 if %ERRORLEVEL% GEQ 1 (
 	echo cmake --build failed
