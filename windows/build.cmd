@@ -119,9 +119,27 @@ if %ERRORLEVEL% GEQ 1 (
 	exit /B 1
 )
 
+call:copy %sourcedir%/3rdparty/windows/x64/freeglut.dll %outdir%/bin/%buildtype%
+
+if %ERRORLEVEL% GEQ 1 (
+	echo copy failed
+	exit /B 1
+)
+
 pause
 
 goto:eof
+
+:: we cannot use the normal "copy" command because that one does not support
+:: forward slashes in paths even though the rest of the world (including
+:: windows file explorer) does
+:copy
+	powershell -command ^
+		"Copy-Item """"%~1"""" """"%~2"""""
+	if %ERRORLEVEL% GEQ 1 (
+		exit /B 1
+	)
+	exit /B 0
 
 :checkmd5
 	powershell -command ^
