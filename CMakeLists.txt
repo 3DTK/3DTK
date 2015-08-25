@@ -6,11 +6,16 @@ project (3DTK)
 SET (CMAKE_INSTALL_PREFIX "/usr/local" CACHE INTERNAL "" FORCE)
 SET (CMAKE_BUILD_TYPE "" CACHE INTERNAL "" FORCE)
 
+# being able to set the output directory to a different one than the default
+# (the source directory) is important for platforms like windows, where the
+# produced binaries cannot be run if being placed in certain locations (like on
+# a network drive)
+SET(OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}" CACHE PATH "The directory where the output will be placed into lib, obj and bin subdirectories (default: ${CMAKE_SOURCE_DIR})" )
 
 # Set output directories for libraries and executables
-SET( CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/lib )
-SET( CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/obj )
-SET( CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin )
+SET( CMAKE_LIBRARY_OUTPUT_DIRECTORY ${OUTPUT_DIRECTORY}/lib )
+SET( CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${OUTPUT_DIRECTORY}/obj )
+SET( CMAKE_RUNTIME_OUTPUT_DIRECTORY ${OUTPUT_DIRECTORY}/bin )
 
 #include_directories(OPENGL_INCLUDE_DIR)
 IF(WIN32)
