@@ -1,3 +1,16 @@
+:: this script is to build 3dtk on 64bit windows with visual studio 2013
+:: if you require support for 32bit windows, please send patches
+:: this was tested on Windos 7 64bit
+
+:: you might want to configure the following variables before you run this
+:: script:
+
+:: the path to your CMake executable
+set cmakeexe=C:/Program Files (x86)/CMake/bin/cmake.exe
+
+:: the path where the 3dtk sources are
+set sourcedir=Z:/slam6d/
+
 :: the path where you want the resulting binaries
 set outdir=C:/slam6d/
 
@@ -33,8 +46,6 @@ set buildtype=Release
 
 @echo off
 
-set cmakeexe=C:/Program Files (x86)/CMake/bin/cmake.exe
-set sourcedir=Z:/slam6d/
 set opencvdir=%sourcedir%/3rdparty/opencv/
 set boostdir=%sourcedir%/3rdparty/boost/
 
