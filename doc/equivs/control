@@ -34,3 +34,4 @@ Depends:
  zlib1g-dev,
  libnewmat10-dev,
  libann-dev,
+ libsuitesparse-dev,
