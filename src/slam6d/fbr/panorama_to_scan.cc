@@ -210,7 +210,7 @@ bool filterRecoveredRange(information info, int height, int width, cv::Mat iThre
   if(info.recoveredRangeFilterationMethod != DISABLE_RECOVERED_RANGE_FILTERATION)
     { 
       vector<float> rangeNeighbours;
-      float range;
+      float range = 0.0;
       for(int i = -info.numberOfNeighbours; i <= info.numberOfNeighbours; i++)
 	{
 	  for(int j = -info.numberOfNeighbours; j <= info.numberOfNeighbours; j++)
@@ -287,7 +287,7 @@ bool filterRecoveredRange(information info, int height, int width, cv::Mat iThre
 	  double average = 0.0;
 	  if(rangeNeighbours.size() != 0)
 	    {
-	      for(int r = 0; r < rangeNeighbours.size(); r++)
+	      for(unsigned int r = 0; r < rangeNeighbours.size(); r++)
 		average += rangeNeighbours[r];
 	      
 	      average /= rangeNeighbours.size();
@@ -473,7 +473,6 @@ int main(int argc, char** argv)
 	  float range = 0.0;
 	  unsigned int color = 0;
 	  unsigned int R = 0, G = 0, B = 0;;
-	  unsigned char byte;
 	  if(info.inputImageType == ThreeChannel24BitRange)
 	    {
 	      R = iThreeChannel24BitRange.at<cv::Vec3b>(h,w)[0];

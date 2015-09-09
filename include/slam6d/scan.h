@@ -378,7 +378,7 @@ protected:
   double reduction_voxelSize;
   
   //! Which point to take out of the reduction octtree, 0 for center
-  int reduction_nrpts;
+  unsigned int reduction_nrpts;
   
   //! Pointtype used for the reduction octtree
   PointType reduction_pointtype;

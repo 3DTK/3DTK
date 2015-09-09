@@ -47,7 +47,6 @@ void parseArgs(int argc,char **argv, char fframe1[255], char fframe2[255], char 
   int  c;
   // from unistd.h
   extern char *optarg;
-  extern int optind;
   int optionCount = 0;
   
   while ((c = getopt (argc, argv, "a:b:c:")) != -1)

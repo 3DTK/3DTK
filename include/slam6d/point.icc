@@ -61,6 +61,7 @@ inline Point::Point(const double *p)
   z = p[2];
   nx = 1.0; ny = nz = 0.0;
   type = 0;
+  point_id = 0;
   reflectance = 0.0;
   temperature = 0.0;
   amplitude = 0.0;
@@ -75,6 +76,7 @@ inline Point::Point(const double *p, const char *c)
   x = p[0]; y = p[1]; z = p[2];
   nx = 1.0; ny = nz = 0.0;
   type = 0;
+  point_id = 0;
   reflectance = 0.0;
   temperature = 0.0;
   amplitude = 0.0;
@@ -94,6 +96,7 @@ inline Point::Point(const double _x, const double _y, const double _z)
   z = _z;
   nx = 1.0; ny = nz = 0.0;
   type = 0;
+  point_id = 0;
   reflectance = 0.0;
   temperature = 0.0;
   amplitude = 0.0;
@@ -116,6 +119,7 @@ inline Point::Point(const double _x, const double _y, const double _z,
   y = _y;
   z = _z;
   type = 0;
+  point_id = 0;
   reflectance = 0.0;
   temperature = 0.0;
   amplitude = 0.0;
@@ -133,6 +137,7 @@ inline Point::Point(const double _x, const double _y, const double _z,
   z = _z;
   nx = 1.0; ny = nz = 0.0;
   type = 0;
+  point_id = 0;
   reflectance = 0.0;
   temperature = 0.0;
   amplitude = 0.0;

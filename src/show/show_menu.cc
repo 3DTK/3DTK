@@ -505,13 +505,14 @@ void loadSelection(int dummy){
         return;
     }
     string line;
-    int currScanNr = -1;
+    unsigned int currScanNr;
+	bool scanIndexLoaded = false;
     vector<sfloat*> allPtsOfScanInFile;
     while (std::getline(selectionfile, line)){
         // comment line? "(# points from scan nr i)"
         if (line.at(0) != '#'){
             // data line without previous comment line indicating scan index
-            if (currScanNr < 0){
+            if (!scanIndexLoaded){
                 cerr << "Invalid format for selection file " << selection_file_name << "!" << endl;
                 return;
             }
@@ -527,14 +528,14 @@ void loadSelection(int dummy){
             allPtsOfScanInFile.push_back(posVals);
         }
         else {
-            if (currScanNr >= 0){ // points for scan index have been loaded
+            if (scanIndexLoaded){ // points for scan index have been loaded
                 if (currScanNr >= octpts.size()){ // data for a scan index larger than amount of currently loaded scans has been loaded
                     cerr << "Selection file" << selection_file_name << " does not correspond to currently loaded scans!" << endl;
                     return;
                 }
                 // at least one scan has already been parsed - search corresponding points in scan data now
                 vector<sfloat*> allPtsOfScan;
-                int foundCorrespondences = 0;
+                unsigned int foundCorrespondences = 0;
                 dynamic_cast<Show_BOctTree<sfloat>*>(octpts[currScanNr])->getTree()->AllPoints(allPtsOfScan);
                 for (size_t i = 0; i < allPtsOfScan.size(); i++){
                     // for each scan point, search a matching point loaded from file..
@@ -572,6 +573,7 @@ void loadSelection(int dummy){
             string currScanIdxStr = line.substr(line.rfind(' ') + 1, line.size() - 1);
             std::istringstream issNr(currScanIdxStr);
             issNr >> currScanNr;
+			scanIndexLoaded = true;
         }
     }
 
@@ -583,7 +585,7 @@ void loadSelection(int dummy){
         }
         // at least one scan has already been parsed - search corresponding points in scan data now
         vector<sfloat*> allPtsOfScan;
-        int foundCorrespondences = 0;
+        unsigned int foundCorrespondences = 0;
         dynamic_cast<Show_BOctTree<sfloat>*>(octpts[currScanNr])->getTree()->AllPoints(allPtsOfScan);
         for (size_t i = 0; i < allPtsOfScan.size(); i++){
             // for each scan point, search a matching point loaded from file..

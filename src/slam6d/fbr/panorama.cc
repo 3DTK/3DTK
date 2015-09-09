@@ -291,15 +291,15 @@ namespace fbr
   {
     vector<unsigned int> colorMap = getAllRGBSortedByHSL();
 
-    int width = projection_->getProjectionWidth();
-    int height = projection_->getProjectionHeight();
+    unsigned int width = projection_->getProjectionWidth();
+    unsigned int height = projection_->getProjectionHeight();
 
     cv::Mat threeChannelRange;
     threeChannelRange.create(height, width, CV_8UC3);
     threeChannelRange = cv::Scalar::all(0);
-    for(int h = 0; h < height; h++)
+    for(unsigned int h = 0; h < height; h++)
       {
-	for(int w = 0; w < width; w++)
+	for(unsigned int w = 0; w < width; w++)
 	  {
 	    //unsigned char bytes[3];
 	    unsigned int rangeValue = (int)(iRange_.at<float>(h,w) * 10000);
@@ -378,8 +378,8 @@ namespace fbr
 
   void panorama::initMap()
   {
-    int width = projection_->getProjectionWidth();
-    int height = projection_->getProjectionHeight();
+    unsigned int width = projection_->getProjectionWidth();
+    unsigned int height = projection_->getProjectionHeight();
     if(mapMethod_ == FARTHEST)
       {
 	iMap_.create(height, width, CV_32FC(3));

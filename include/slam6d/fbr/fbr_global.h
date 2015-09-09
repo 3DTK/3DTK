@@ -87,7 +87,6 @@ namespace fbr{
     JPEG,
     JPEG2000,
     TIFF,
-    WebP,
   };
   /**
    * @enum panorama_type

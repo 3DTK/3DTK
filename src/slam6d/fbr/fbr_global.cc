@@ -149,9 +149,6 @@ namespace fbr{
     case TIFF:
       sFormat = "TIFF";
       break;
-    case WebP:
-      sFormat = "WebP";
-      break;
     default:
       throw std::runtime_error(std::string("panorama fromat ") + to_string(format) + std::string(" could not be matched to a panorama format"));
     }
@@ -173,9 +170,6 @@ namespace fbr{
     case TIFF:
       sFormat = "tiff";
       break;
-    case WebP:
-      sFormat = "webp";
-      break;
     default:
       throw std::runtime_error(std::string("panorama fromat ") + to_string(format) + std::string(" could not be matched to a panorama format"));
     }
@@ -187,7 +181,6 @@ namespace fbr{
     else if(strcasecmp(format.c_str(), "JPEG") == 0) return JPEG;
     else if(strcasecmp(format.c_str(), "JPEG2000") == 0) return JPEG2000;
     else if(strcasecmp(format.c_str(), "TIFF") == 0) return TIFF;
-    else if(strcasecmp(format.c_str(), "WebP") == 0) return WebP;
     else throw std::runtime_error(std::string("panorama format ") + format + std::string(" is unknown"));
   }
   
@@ -487,7 +480,7 @@ namespace fbr{
     vector<unsigned int> colorMap;
     vector<Color_Value_Tuple> colors;
 
-    for(int C = 0; C <size*size; C++)
+    for(unsigned int C = 0; C <size*size; C++)
       {
 	unsigned int R,G,B;
 	R = (C>>16) & 0xFF;
@@ -540,7 +533,7 @@ namespace fbr{
     vector<unsigned int> colorMap;
     vector<Color_Value_Tuple> colors;
 
-    for(int C = 0; C <size*size; C++)
+    for(unsigned int C = 0; C <size*size; C++)
       {
 	unsigned int R,G,B;
 	R = (C>>16) & 0xFF;
@@ -592,7 +585,7 @@ namespace fbr{
     vector<unsigned int> colorMap;
     vector<Color_Value_Tuple> colors;
 
-    for(int C = 0; C <size*size; C++)
+    for(unsigned int C = 0; C <size*size; C++)
       {
 	unsigned int R,G,B;
 	R = (C>>16) & 0xFF;

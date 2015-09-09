@@ -8,9 +8,9 @@
  */
 #ifdef _WIN32
 #define _USE_MATH_DEFINES
-#include <iostream>
 #endif
 
+#include <iostream>
 #include <fstream>
 #include <sstream>
 #include <string>

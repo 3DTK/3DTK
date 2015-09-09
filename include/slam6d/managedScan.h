@@ -64,7 +64,7 @@ private:
   double show_reduction_voxelSize;
 
   //! Which point to take out of the reduction octtree, 0 for center
-  int show_reduction_nrpts;
+  unsigned int show_reduction_nrpts;
 
   //! Pointtype used for the reduction octtree
   PointType show_reduction_pointtype;
