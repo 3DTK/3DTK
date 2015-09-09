@@ -97,7 +97,7 @@ add_library(scan STATIC ${SCANLIB_SRCS})
 
 FIND_PACKAGE(OpenCV REQUIRED)
 
-target_link_libraries(scan scanclient scanio ann newmat sparse)
+target_link_libraries(scan scanclient scanio ann newmat cxsparse)
 
 IF(UNIX)
   target_link_libraries(scan dl pthread)
@@ -107,7 +107,7 @@ ENDIF(UNIX)
 
 IF(EXPORT_SHARED_LIBS)
 add_library(scan_s SHARED ${SCANLIB_SRCS})
-target_link_libraries(scan_s scanio scanclient_s newmat_s sparse_s ann_s)
+target_link_libraries(scan_s scanio scanclient_s newmat_s cxsparse_s ann_s)
 ENDIF(EXPORT_SHARED_LIBS)
 
 ### SLAM6D
@@ -115,11 +115,11 @@ ENDIF(EXPORT_SHARED_LIBS)
 add_executable(slam6D slam6D.cc)
 
 IF(UNIX)
-	target_link_libraries(slam6D scan newmat sparse ann ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY})
+	target_link_libraries(slam6D scan newmat cxsparse ann ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY})
 ENDIF(UNIX)
 
 IF(WIN32)
-  target_link_libraries(slam6D scan newmat sparse ann XGetopt ${Boost_LIBRARIES})
+  target_link_libraries(slam6D scan newmat cxsparse ann XGetopt ${Boost_LIBRARIES})
 ENDIF(WIN32)
 
 #IF(MSVC)
