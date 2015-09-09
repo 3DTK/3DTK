@@ -41,6 +41,8 @@ class CollisionShape {
 
   virtual CollisionShape<T>& operator=(const CollisionShape<T> &other) {return *this;};
 
+  virtual ~CollisionShape() {};
+
 //  virtual bool valid() = 0;
 };
 
@@ -185,6 +187,7 @@ class CollisionPlane : public CollisionShape<T> {
     _d = d;
   }
 
+  virtual ~CollisionPlane() {};
 
   protected:
     T maxDist;

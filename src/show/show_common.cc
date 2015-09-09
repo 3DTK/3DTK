@@ -476,7 +476,7 @@ void usage(char* prog)
  */
 int parseArgs(int argc,char **argv,
               string &dir, int& start, int& end, int& maxDist, int& minDist, 
-              double &red, bool &readInitial, int &octree,
+              double &red, bool &readInitial, unsigned int &octree,
               PointType &ptype, float &fps, string &loadObj,
               bool &loadOct, bool &saveOct, int &origin, bool &originset,
               double &scale, IOType &type, bool& scanserver, 
@@ -900,7 +900,7 @@ void initShow(int argc, char **argv){
   string dir;
   bool readInitial = false;
   IOType type  = UOS;
-  int octree = 0;
+  unsigned int octree = 0;
   bool loadOct = false;
   bool saveOct = false;
   string loadObj;

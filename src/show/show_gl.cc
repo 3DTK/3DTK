@@ -54,8 +54,8 @@ void DrawPoints(GLenum mode, bool interruptable)
       // also ignore scans outside the selected range - if in advanced mode
       if (advanced_controls){
         // pay attention to offset (startScanIdx)
-        if ((unsigned int)iterator < startRangeScanIdx - startScanIdx) continue;
-        if ((unsigned int)iterator > endRangeScanIdx - startScanIdx) continue;
+        if (iterator < startRangeScanIdx - startScanIdx) continue;
+        if (iterator > endRangeScanIdx - startScanIdx) continue;
       }
 
       // set usable frame
@@ -133,8 +133,8 @@ void DrawPoints(GLenum mode, bool interruptable)
         // also ignore scans outside the selected range - if in advanced mode
         if (advanced_controls){
           // pay attention to offset (startScanIdx)
-          if ((unsigned int)iterator < startRangeScanIdx - startScanIdx) continue;
-          if ((unsigned int)iterator > endRangeScanIdx - startScanIdx) continue;
+          if (iterator < startRangeScanIdx - startScanIdx) continue;
+          if (iterator > endRangeScanIdx - startScanIdx) continue;
         }
 
         // set usable frame
@@ -418,7 +418,7 @@ void DisplayItFunc(GLenum mode, bool interruptable)
       do
         `printf "convert +append -resize 960x1080! left/animframe%05d.jpg right/animframe%05d.jpg long3D/animframe%05d.jpg" "$c" "$c" "$c"`
       done
-      mencoder "mf://long3D/*.jpg" -mf fps=25 -o test.avi -ovc lavc -lavcopts vcodec=mjpeg:vbitrate=8000
+      mencoder "mf://long3D/?*.jpg" -mf fps=25 -o test.avi -ovc lavc -lavcopts vcodec=mjpeg:vbitrate=8000
       
       5a. upload video to youtube, select in advanced options 3D Video, video is already in 3d format
 
@@ -427,7 +427,7 @@ void DisplayItFunc(GLenum mode, bool interruptable)
       do
         `printf "composite -stereo +0 left/animframe%05d.jpg right/animframe%05d.jpg stereo3D/animframe%05d.jpg" "$c" "$c" "$c"`
       done
-      mencoder "mf://stereo3D/*.jpg" -mf fps=25 -o test.avi -ovc lavc -lavcopts vcodec=mjpeg:vbitrate=8000
+      mencoder "mf://stereo3D/?*.jpg" -mf fps=25 -o test.avi -ovc lavc -lavcopts vcodec=mjpeg:vbitrate=8000
 
       */
 
@@ -582,7 +582,7 @@ void DisplayItFunc(GLenum mode, bool interruptable)
     glColor4d(1.0, 0.0, 0.0, 1.0);
     glLineWidth(5);
     glBegin(GL_LINE_STRIP);
-    for(unsigned int i = 0; i < MetaMatrix.size(); i++){
+    for(int i = 0; (unsigned int)i < MetaMatrix.size(); i++){
 
       // also ignore scans outside the selected range - if in advanced mode
       if (advanced_controls){
@@ -1258,8 +1258,8 @@ void selectPoints(int x, int y) {
       // ignore scans outside the selected (currently visible) range - if in advanced mode
       if (advanced_controls){
         // pay attention to offset (startScanIdx)
-        if ((unsigned int)iterator < startRangeScanIdx - startScanIdx) continue;
-        if ((unsigned int)iterator > endRangeScanIdx - startScanIdx) continue;
+        if (iterator < startRangeScanIdx - startScanIdx) continue;
+        if (iterator > endRangeScanIdx - startScanIdx) continue;
       }
 
       glPushMatrix();

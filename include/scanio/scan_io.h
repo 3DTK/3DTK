@@ -76,6 +76,8 @@ public:
   
   //! Delete all ScanIO instances and (lazy) try to unload the libraries.
   static void clearScanIOs();
+
+  virtual ~ScanIO() = 0;
 private:
   static std::map<IOType, ScanIO *> m_scanIOs;
 };

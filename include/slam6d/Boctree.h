@@ -426,7 +426,7 @@ public:
 
   void GetOctTreeCenter(vector<T*>&c) { GetOctTreeCenter(c, *root, center, size); }
   void GetOctTreeRandom(vector<T*>&c) { GetOctTreeRandom(c, *root); }
-  void GetOctTreeRandom(vector<T*>&c, int ptspervoxel) { GetOctTreeRandom(c, ptspervoxel, *root); }
+  void GetOctTreeRandom(vector<T*>&c, int ptspervoxel, bool mode) { GetOctTreeRandom(c, ptspervoxel, mode, *root); }
   void AllPoints(vector<T *> &vp) { AllPoints(*BOctTree<T>::root, vp); }
   template <class Visitor>
   void visit(Visitor &vClass) { visit(*BOctTree<T>::root, vClass); }
@@ -909,7 +909,7 @@ protected:
     }
   } 
   
-  void GetOctTreeRandom(vector<T*>&c, int ptspervoxel, bitoct &node) {
+  void GetOctTreeRandom(vector<T*>&c, unsigned int ptspervoxel, bool mode, bitoct &node) {
     bitunion<T> *children;
     bitoct::getChildren(node, children);
     for (short i = 0; i < 8; i++) {
@@ -921,8 +921,8 @@ protected:
           pointrep* points = children->getPointreps();
           unsigned int length = points[0].length;
           // ignore points from voxels with less than -ptspervoxel points
-          if(ptspervoxel < 0) {
-            if(length > -ptspervoxel) {
+          if(mode) {
+            if(length > ptspervoxel) {
               for (unsigned int j = 0; j < length; j++) 
                 c.push_back(&(points[POINTDIM*j+1].v));
 
@@ -946,7 +946,7 @@ protected:
             c.push_back(&(points[POINTDIM*(*it)+1].v));
 
         } else { // recurse
-          GetOctTreeRandom(c, ptspervoxel, children->node);
+          GetOctTreeRandom(c, ptspervoxel, mode, children->node);
         }
         ++children; // next child
       }

@@ -276,12 +276,12 @@ void modifyFrames(double* resTrans, string &dir, int start, int end, bool inputI
     ofstream modFrames_out;
     ofstream modFrames_out2;
 
-    for (size_t i = start; i <= end; i++){
-        snprintf(inputFileName, 255, "%sscan%.3d.frames", dir.c_str(), i);
-        snprintf(modFramesFileName, 255, "%sMODIFIED_scan%.3d.frames", dir.c_str(), i);
+    for (ssize_t i = start; i <= end; i++){
+        snprintf(inputFileName, 255, "%sscan%.3zd.frames", dir.c_str(), i);
+        snprintf(modFramesFileName, 255, "%sMODIFIED_scan%.3zd.frames", dir.c_str(), i);
 
         if (inputInXYZ){
-            snprintf(modInputFileName, 255, "%sMODIFIED_ORIG_scan%.3d.frames", dir.c_str(), i);
+            snprintf(modInputFileName, 255, "%sMODIFIED_ORIG_scan%.3zd.frames", dir.c_str(), i);
         }
         cout << "Processing Scan " << inputFileName << "..." << endl;
         cout.flush();
