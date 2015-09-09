@@ -75,6 +75,7 @@ add_library(wxthings STATIC
 )
 ENDIF(WITH_WXSHOW)
 
+if (WIN32)
 # Compile sparse library 
 SET(SPARSE_DIR ${CMAKE_SOURCE_DIR}/3rdparty/suitesparse/)
 SET(SPARSE_SOURCES
@@ -135,6 +136,7 @@ add_library(cxsparse STATIC ${SPARSE_SOURCES})
 IF(EXPORT_SHARED_LIBS)
 	add_library(cxsparse_s SHARED ${SPARSE_SOURCES})
 ENDIF(EXPORT_SHARED_LIBS)
+endif(WIN32)
 
 
 if(WIN32)
