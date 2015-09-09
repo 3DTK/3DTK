@@ -4,6 +4,10 @@
 #  $ equivs-build doc/equivs/control
 #  $ sudo dpkg -i 3dtk-build-deps_1.0_all.deb
 #  $ sudo apt-get -f install
+#
+# these instructions are for Ubuntu Trusty 14.04 and Debian Jessie
+#
+# for Debian Stretch, boost 1.55 was replaced by 1.58
 Section: misc
 Priority: optional
 Standards-Version: 3.9.2
