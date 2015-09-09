@@ -328,8 +328,6 @@ OPT_DEP(WITH_RIVLIB "Whether the RIEGL rivlib is present ON/OFF" OFF "")
 
 IF(WITH_RIVLIB)
   MESSAGE(STATUS "Compiling a scan IO for RXP files")
-  include_directories(${CMAKE_SOURCE_DIR}/3rdparty)
-  link_directories(${CMAKE_SOURCE_DIR}/3rdparty)
   SET(RIEGL_DIR ${CMAKE_SOURCE_DIR}/3rdparty/riegl/)
   IF(WIN32)
     SET(RIVLIB ${RIEGL_DIR}libscanlib-mt.lib ${RIEGL_DIR}libctrllib-mt.lib ${RIEGL_DIR}libboost_system-mt-1_43_0-vns.lib)
@@ -510,13 +508,8 @@ SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${ADDITIONAL_CFLAGS}")
 
 # Set include and link dirs ...
 include_directories(${CMAKE_SOURCE_DIR}/include)
-include_directories(${CMAKE_SOURCE_DIR}/3rdparty/)
-include_directories(${CMAKE_SOURCE_DIR}/3rdparty/glui)
+include_directories(${CMAKE_SOURCE_DIR}/3rdparty/glui_v2_2_modified)
 include_directories(${CMAKE_SOURCE_DIR}/3rdparty/wxthings/include/)
-include_directories(${CMAKE_SOURCE_DIR}/3rdparty/ann_1.1.1_modified/include)
-include_directories(${CMAKE_SOURCE_DIR}/3rdparty/ann_1.1.1_modified/src)
-include_directories(${CMAKE_SOURCE_DIR}/3rdparty/lastools/laslib/src)
-include_directories(${CMAKE_SOURCE_DIR}/3rdparty/lastools/laslib/inc)
 link_directories(${CMAKE_SOURCE_DIR}/obj)
 link_directories(${CMAKE_SOURCE_DIR}/lib)
 

@@ -28,7 +28,7 @@
 #else
 #include "veloslam/veloscan.h"
 #endif
-#include "glui/glui.h"  /* Header File For The glui functions */
+#include "glui.h"  /* Header File For The glui functions */
 #include <fstream>
 using std::ifstream;
 #include <stdexcept>
