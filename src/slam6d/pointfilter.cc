@@ -297,7 +297,7 @@ bool CheckerCustom::test(double* point) {
                 // Custom Filter 0: symetrical, axis-parallel cuboid
                 // all values inside the cuboid will be filtered (filterTest = false)
                 // parameters: xFilterRange yFilterRange zFilterRange
-                if (abs(point[0]) > cfc.custFiltParams[0] || abs(point[1]) > cfc.custFiltParams[1] || abs(point[2]) > cfc.custFiltParams[2])
+                if (fabs(point[0]) > cfc.custFiltParams[0] || fabs(point[1]) > cfc.custFiltParams[1] || fabs(point[2]) > cfc.custFiltParams[2])
                     filterTest = true;
                 break;
             case 1:
@@ -324,7 +324,7 @@ bool CheckerCustom::test(double* point) {
                 // Custom Filter 10: symetrical, axis-parallel cuboid
                 // all values outside the cuboid will be filtered (filterTest = false)
                 // parameters: xFilterRange yFilterRange zFilterRange
-                if (abs(point[0]) < cfc.custFiltParams[0] && abs(point[1]) < cfc.custFiltParams[1] && abs(point[2]) < cfc.custFiltParams[2])
+                if (fabs(point[0]) < cfc.custFiltParams[0] && fabs(point[1]) < cfc.custFiltParams[1] && fabs(point[2]) < cfc.custFiltParams[2])
                     filterTest = true;
                 break;
             case 11:
