@@ -76,10 +76,64 @@ add_library(wxthings STATIC
 ENDIF(WITH_WXSHOW)
 
 # Compile sparse library 
-SET(SPARSE_DIR ${CMAKE_SOURCE_DIR}/3rdparty/sparse/)
-add_library(sparse STATIC ${SPARSE_DIR}csparse.cc)
+SET(SPARSE_DIR ${CMAKE_SOURCE_DIR}/3rdparty/suitesparse/)
+SET(SPARSE_SOURCES
+	${SPARSE_DIR}cs_add.c
+	${SPARSE_DIR}cs_amd.c
+	${SPARSE_DIR}cs_chol.c
+	${SPARSE_DIR}cs_cholsol.c
+	${SPARSE_DIR}cs_compress.c
+	${SPARSE_DIR}cs_convert.c
+	${SPARSE_DIR}cs_counts.c
+	${SPARSE_DIR}cs_cumsum.c
+	${SPARSE_DIR}cs_dfs.c
+	${SPARSE_DIR}cs_dmperm.c
+	${SPARSE_DIR}cs_droptol.c
+	${SPARSE_DIR}cs_dropzeros.c
+	${SPARSE_DIR}cs_dupl.c
+	${SPARSE_DIR}cs_entry.c
+	${SPARSE_DIR}cs_ereach.c
+	${SPARSE_DIR}cs_etree.c
+	${SPARSE_DIR}cs_fkeep.c
+	${SPARSE_DIR}cs_gaxpy.c
+	${SPARSE_DIR}cs_happly.c
+	${SPARSE_DIR}cs_house.c
+	${SPARSE_DIR}cs_ipvec.c
+	${SPARSE_DIR}cs_leaf.c
+	${SPARSE_DIR}cs_load.c
+	${SPARSE_DIR}cs_lsolve.c
+	${SPARSE_DIR}cs_ltsolve.c
+	${SPARSE_DIR}cs_lu.c
+	${SPARSE_DIR}cs_lusol.c
+	${SPARSE_DIR}cs_malloc.c
+	${SPARSE_DIR}cs_maxtrans.c
+	${SPARSE_DIR}cs_multiply.c
+	${SPARSE_DIR}cs_norm.c
+	${SPARSE_DIR}cs_permute.c
+	${SPARSE_DIR}cs_pinv.c
+	${SPARSE_DIR}cs_post.c
+	${SPARSE_DIR}cs_print.c
+	${SPARSE_DIR}cs_pvec.c
+	${SPARSE_DIR}cs_qr.c
+	${SPARSE_DIR}cs_qrsol.c
+	${SPARSE_DIR}cs_randperm.c
+	${SPARSE_DIR}cs_reach.c
+	${SPARSE_DIR}cs_scatter.c
+	${SPARSE_DIR}cs_scc.c
+	${SPARSE_DIR}cs_schol.c
+	${SPARSE_DIR}cs_spsolve.c
+	${SPARSE_DIR}cs_sqr.c
+	${SPARSE_DIR}cs_symperm.c
+	${SPARSE_DIR}cs_tdfs.c
+	${SPARSE_DIR}cs_transpose.c
+	${SPARSE_DIR}cs_updown.c
+	${SPARSE_DIR}cs_usolve.c
+	${SPARSE_DIR}cs_util.c
+	${SPARSE_DIR}cs_utsolve.c
+	)
+add_library(cxsparse STATIC ${SPARSE_SOURCES})
 IF(EXPORT_SHARED_LIBS)
-add_library(sparse_s SHARED ${SPARSE_DIR}csparse.cc)
+	add_library(cxsparse_s SHARED ${SPARSE_SOURCES})
 ENDIF(EXPORT_SHARED_LIBS)
 
 
