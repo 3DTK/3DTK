@@ -83,6 +83,7 @@ add_library(sparse_s SHARED ${SPARSE_DIR}csparse.cc)
 ENDIF(EXPORT_SHARED_LIBS)
 
 
+if(WIN32)
 # Compile newmat library
 SET(NEWMAT_DIR ${CMAKE_SOURCE_DIR}/3rdparty/newmat/)
 SET(NEWMAT_SOURCES ${NEWMAT_DIR}newmat1.cpp ${NEWMAT_DIR}newmat2.cpp ${NEWMAT_DIR}newmat3.cpp ${NEWMAT_DIR}newmat4.cpp ${NEWMAT_DIR}newmat5.cpp ${NEWMAT_DIR}newmat6.cpp ${NEWMAT_DIR}newmat7.cpp ${NEWMAT_DIR}newmat8.cpp ${NEWMAT_DIR}newmatex.cpp ${NEWMAT_DIR}bandmat.cpp ${NEWMAT_DIR}submat.cpp ${NEWMAT_DIR}myexcept.cpp ${NEWMAT_DIR}cholesky.cpp ${NEWMAT_DIR}evalue.cpp ${NEWMAT_DIR}fft.cpp ${NEWMAT_DIR}hholder.cpp ${NEWMAT_DIR}jacobi.cpp ${NEWMAT_DIR}newfft.cpp ${NEWMAT_DIR}sort.cpp ${NEWMAT_DIR}svd.cpp ${NEWMAT_DIR}newmatrm.cpp ${NEWMAT_DIR}newmat9.cpp)
@@ -90,6 +91,7 @@ add_library(newmat STATIC ${NEWMAT_SOURCES})
 IF(EXPORT_SHARED_LIBS)
 add_library(newmat_s SHARED ${NEWMAT_SOURCES})
 ENDIF(EXPORT_SHARED_LIBS)
+endif(WIN32)
 
 # Compile las library
 set(CMAKE_CXX_FLAGS "-DNDEBUG -DUNORDERED -std=c++0x -fPIC" )
