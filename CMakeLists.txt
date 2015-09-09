@@ -280,6 +280,16 @@ ELSE(WITH_SEGMENTATION)
   MESSAGE(STATUS "Without segmentation")
 ENDIF(WITH_SEGMENTATION)
 
+## LASlib
+
+OPT_DEP(WITH_LASLIB "Whether to build LASlib based scanio library" OFF WITH_LASLIB)
+
+IF(WITH_LASLIB)
+  MESSAGE(STATUS "With LASlib")
+ELSE(WITH_LASLIB)
+  MESSAGE(STATUS "Without LASlib")
+ENDIF(WITH_LASLIB)
+
 ## Collision detection
 
 OPT_DEP(WITH_COLLISION "Whether to build collision detection tools" OFF "WITH_COLLISION")

@@ -5,7 +5,7 @@ else(WIN32)
 endif(WIN32)
 
 set(SCANIO_LIBNAMES
-  uos uosr uos_rgb uos_rrgb uos_rrgbt xyz xyzr leica_xyzr xyz_rgb xyz_rgba xyz_rrgb faro_xyz_rgbr ply ks ks_rgb riegl_txt riegl_rgb rts velodyne laz
+  uos uosr uos_rgb uos_rrgb uos_rrgbt xyz xyzr leica_xyzr xyz_rgb xyz_rgba xyz_rrgb faro_xyz_rgbr ply ks ks_rgb riegl_txt riegl_rgb rts velodyne
 )
 
 if(WITH_RIVLIB)
@@ -16,6 +16,10 @@ if(WITH_RIVLIB)
 #    target_link_libraries(scan_io_riegl_project ${RIVLIB} scan_io_rxp ${LIBXML2_LIBRARIES})
   endif(LIBXML2_FOUND)
 endif(WITH_RIVLIB)
+
+if(WITH_LASLIB)
+  set(SCANIO_LIBNAMES ${SCANIO_LIBNAMES} laz)
+endif(WITH_LASLIB)
 
 if(WIN32)
   add_library(scan_io_helper STATIC helper.cc)
@@ -40,7 +44,9 @@ if(WITH_RIVLIB)
   endif(LIBXML2_FOUND)
 endif(WITH_RIVLIB)
 
+if(WITH_LASLIB)
 target_link_libraries(scan_io_laz LAZ)
+endif(WITH_LASLIB)
 
 if(WIN32)
   add_library(scanio STATIC scan_io.cc ../slam6d/io_types.cc)
