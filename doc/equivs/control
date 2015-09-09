@@ -32,3 +32,4 @@ Depends:
  libxml2-dev,
  libzip-dev,
  zlib1g-dev,
+ libann-dev,
