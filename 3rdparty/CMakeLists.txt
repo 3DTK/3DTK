@@ -93,6 +93,7 @@ add_library(newmat_s SHARED ${NEWMAT_SOURCES})
 ENDIF(EXPORT_SHARED_LIBS)
 endif(WIN32)
 
+if (WITH_LASLIB)
 # Compile las library
 set(CMAKE_CXX_FLAGS "-DNDEBUG -DUNORDERED -std=c++0x -fPIC" )
 SET(LASLIB_DIR ${CMAKE_SOURCE_DIR}/3rdparty/lastools/laslib/src/)
@@ -102,6 +103,7 @@ add_library(LAZ STATIC ${LASLIB_SRCS})
 IF(EXPORT_SHARED_LIBS)
 add_library(LAZ_s SHARED ${LASLIB_SRCS})
 ENDIF(EXPORT_SHARED_LIBS)
+endif(WITH_LASLIB)
 
 # Compile GLEE library 
 IF (APPLE)
