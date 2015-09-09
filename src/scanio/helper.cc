@@ -180,7 +180,6 @@ std::streamsize uosHeaderTest(std::istream& infile, char **line, std::streamsize
      * answer this question: http://stackoverflow.com/questions/31478256/
      */
     char *buffer = (char *)malloc(bufsize);
-    std::streampos sp = infile.tellg();
     try {
         infile.getline(buffer, bufsize, '\n');
     } catch(std::ios::failure e) {

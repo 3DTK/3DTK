@@ -578,7 +578,7 @@ void loadSelection(int dummy){
     }
 
     // search for corresponding points for last scan index as well
-    if (currScanNr >= 0){ // points for scan index have been loaded
+    if (scanIndexLoaded){ // points for scan index have been loaded
         if (currScanNr >= octpts.size()){ // data for a scan index larger than amount of currently loaded scans has been loaded
             cerr << "Selection file" << selection_file_name << " does not correspond to currently loaded scans!" << endl;
             return;
