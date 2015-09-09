@@ -4,10 +4,6 @@
 #  $ equivs-build doc/equivs/control
 #  $ sudo dpkg -i 3dtk-build-deps_1.0_all.deb
 #  $ sudo apt-get -f install
-#
-# these instructions are for Ubuntu Trusty 14.04 and Debian Jessie
-#
-# for Debian Stretch, boost 1.55 was replaced by 1.58
 Section: misc
 Priority: optional
 Standards-Version: 3.9.2
@@ -18,13 +14,13 @@ Depends:
  cmake,
  cmake-curses-gui,
  libopencv-dev,
- libboost-graph1.55-dev,
- libboost-regex1.55-dev,
- libboost-filesystem1.55-dev,
- libboost-system1.55-dev,
- libboost-thread1.55-dev,
- libboost-date-time1.55-dev,
- libboost-program-options1.55-dev,
+ libboost-graph-dev,
+ libboost-regex-dev,
+ libboost-filesystem-dev,
+ libboost-system-dev,
+ libboost-thread-dev,
+ libboost-date-time-dev,
+ libboost-program-options-dev,
  freeglut3-dev,
  libxmu-dev,
  libgl1-mesa-dev,
