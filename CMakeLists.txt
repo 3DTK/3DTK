@@ -433,7 +433,6 @@ ELSE(OPENMP_FOUND AND WITH_OPENMP)
 ENDIF(OPENMP_FOUND AND WITH_OPENMP)
 
 IF(WIN32)
-  SET(ADDITIONAL_CFLAGS "-O2" CACHE STRING "Additional flags given to the compiler ( -O2)" )
   include_directories(${CMAKE_SOURCE_DIR}/3rdparty/windows/)
   include_directories(${CMAKE_SOURCE_DIR}/3rdparty/windows/zlib/)
    include_directories(${CMAKE_SOURCE_DIR}/3rdparty/windows/GL)
@@ -443,13 +442,25 @@ IF(WIN32)
   add_library(XGetopt STATIC ${CMAKE_SOURCE_DIR}/3rdparty/windows/XGetopt.cpp)
   SET(CMAKE_STATIC_LIBRARY_SUFFIX "32.lib")
 ELSE(WIN32)
-  SET(ADDITIONAL_CFLAGS "-O3 -std=c++0x -msse3 -Wall -finline-functions -Wno-unused-but-set-variable -Wno-write-strings -Wno-char-subscripts -Wno-unused-result" CACHE STRING "Additional flags given to the compiler (-O3 -Wall -finline-functions -Wno-write-strings)" )
   # Add include path for OpenGL without GL/-prefix
   # to avoid the include incompatibility between MACOS
   # and linux
     FIND_PATH(OPENGL_INC gl.h /usr/include/GL)
     include_directories(${OPENGL_INC})
 ENDIF(WIN32)
+
+if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+  # using Clang
+  SET(ADDITIONAL_CFLAGS "-O3 -std=c++0x -msse3 -Wall -Wno-write-strings -Wno-char-subscripts -Wno-unused-result" CACHE STRING "Additional flags given to the compiler (-O3 -Wall -Wno-write-strings)" )
+elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+  # using GCC
+  SET(ADDITIONAL_CFLAGS "-O3 -std=c++0x -msse3 -Wall -finline-functions -Wno-unused-but-set-variable -Wno-write-strings -Wno-char-subscripts -Wno-unused-result" CACHE STRING "Additional flags given to the compiler (-O3 -Wall -finline-functions -Wno-write-strings)" )
+elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel")
+  # using Intel C++
+elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
+  # using Visual Studio C++
+  SET(ADDITIONAL_CFLAGS "-O2" CACHE STRING "Additional flags given to the compiler ( -O2)" )
+endif()
 
 # Add OpenGL includes for MACOS if needed
 # The OSX OpenGL frameworks natively supports freeglut extensions
