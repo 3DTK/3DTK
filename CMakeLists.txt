@@ -427,12 +427,13 @@ add_definitions(-Dfopen64=fopen)
 ENDIF(APPLE)
 
 ## Multiple Cores
-IF(APPLE)
-  SET(PROCESSOR_COUNT 2)
-ELSE(APPLE)
-  INCLUDE(CountProcessors)
+include(ProcessorCount)
+ProcessorCount(PROCESSOR_COUNT)
+if(NOT PROCESSOR_COUNT EQUAL 0)
   SET(NUMBER_OF_CPUS "${PROCESSOR_COUNT}" CACHE STRING "The number of processors to use (default: ${PROCESSOR_COUNT})" )
-ENDIF(APPLE)
+else()
+  SET(NUMBER_OF_CPUS "1" CACHE STRING "The number of processors to use (default: 1)" )
+endif()
 
 # OPENMP_NUM_THREADS
 IF(OPENMP_FOUND AND WITH_OPENMP)
