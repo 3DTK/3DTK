@@ -32,4 +32,5 @@ Depends:
  libxml2-dev,
  libzip-dev,
  zlib1g-dev,
+ libnewmat10-dev,
  libann-dev,
