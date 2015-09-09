@@ -24,7 +24,7 @@
 #endif
 
 #include "slam6d/graphSlam6D.h"
-#include "sparse/csparse.h"
+#include "suitesparse/cs.h"
 
 #include <cfloat>
 #include <fstream>
@@ -326,9 +326,9 @@ ColumnVector graphSlam6D::solveSparseCholesky(const Matrix &G,
     }
     x[i] = B.element(i);
   }
-  A = cs_triplet (T);
+  A = cs_compress (T);
   cs_dropzeros (A) ;               // drop zero entries
-  cs_cholsol (A, x, 1) ;
+  cs_cholsol (1, A, x) ;
   // copy values back  
   for (int i = 0; i < n; i++) {
     X.element(i) = x[i];
@@ -361,10 +361,10 @@ ColumnVector graphSlam6D::solveSparseCholesky(GraphMatrix *G,
     x[i] = B.element(i);
   }
   G->convertToCS(T);
-  A = cs_triplet (T);
+  A = cs_compress (T);
   cs_dropzeros (A) ;               // drop zero entries
 //  cs_print(T, 0);
-  cs_cholsol (A, x, 1) ;
+  cs_cholsol (1, A, x) ;
   // copy values back  
   for (int i = 0; i < n; i++) {
     X.element(i) = x[i];
@@ -407,10 +407,10 @@ ColumnVector graphSlam6D::solveSparseQR(const Matrix &G,
     }
     x[i] = B.element(i);
   }
-  A = cs_triplet (T);
+  A = cs_compress (T);
   cs_dropzeros (A) ;               // drop zero entries
   int order = 3;                   // for qr-ordering
-  cs_qrsol ( A, x, order) ;
+  cs_qrsol (order, A, x) ;
   // copy values back  
   for (int i = 0; i < n; i++) {
     X.element(i) = x[i];

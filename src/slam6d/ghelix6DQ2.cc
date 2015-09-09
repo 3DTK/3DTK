@@ -24,7 +24,7 @@
 
 #include "slam6d/ghelix6DQ2.h"
 #include "slam6d/icp6Dhelix.h"
-#include "sparse/csparse.h"
+#include "suitesparse/cs.h"
 
 #include <cfloat>
 #include <fstream>
