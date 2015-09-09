@@ -1,3 +1,4 @@
+if (WIN32)
 # Compile ANN library
 SET(ANN_DIR ${CMAKE_SOURCE_DIR}/3rdparty/ann_1.1.1_modified/src/)
 SET(ANN_SRCS 
@@ -24,6 +25,7 @@ ENDIF(EXPORT_SHARED_LIBS)
 if (WIN32)
   SET_TARGET_PROPERTIES(ANN PROPERTIES COMPILE_FLAGS -DDLL_EXPORTS)
 endif(WIN32)
+endif()
 
 # Compile glui library
 SET(GLUI_DIR ${CMAKE_SOURCE_DIR}/3rdparty/glui/)
