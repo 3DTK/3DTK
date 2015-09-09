@@ -61,7 +61,7 @@ template <class T> bool HitBoundingBox(const T center[3], T size )
 
   bool inside = true;
   char quadrant[NUMDIM];
-  register int i;
+  int i;
   int whichPlane;
   float maxT[NUMDIM];
   float candidatePlane[NUMDIM];

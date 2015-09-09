@@ -598,6 +598,9 @@ protected:
       }
     }
   }
+  // this is because otherwise the following line is overriding selectRay from
+  // the base class
+  using colordisplay::selectRay;
   void selectRay(set<T *> &selpoints, const bitoct &node, const T* center, T size, int max_depth, int depth = 0) {
     if (depth < max_depth &&  !HitBoundingBox(center, size ))return;
 

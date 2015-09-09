@@ -3,7 +3,7 @@
  * @author Jochen Sprickerhof. Institute of Computer Science, University of Osnabrueck, Germany.
  */
 
-#ifndef __ELCH6D_UINTQUAT_H__
+#ifndef __ELCH6D_UNITQUAT_H__
 #define __ELCH6D_UNITQUAT_H__
 
 #include "elch6D.h"
