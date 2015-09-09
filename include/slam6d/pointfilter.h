@@ -65,7 +65,7 @@ private:
 class Checker {
 public:
   Checker();
-  ~Checker();
+  virtual ~Checker() = 0;
 
   //! Testing function
   virtual bool test(double* point) = 0;
@@ -120,7 +120,7 @@ public:
     CustomFilterContainer(const std::string& value);
     ~CustomFilterContainer();
     int filterMode;
-    int nrOfParam;
+    unsigned int nrOfParam;
     // parameters for custom filter
     bool custParamsSet;
     double *custFiltParams;

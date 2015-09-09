@@ -323,10 +323,6 @@ int main(int argc, char** argv)
 	break;
       case TIFF:
 	break;
-	//case WebP:
-	//panoramaFormatParams.push_back(CV_IMWRITE_WEBP_QUALITY);
-	//panoramaFormatParams.push_back(info.panoramaFormatParam);
-	break;
       }
       
       if(info.range == true)

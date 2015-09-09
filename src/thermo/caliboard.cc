@@ -162,6 +162,9 @@ bool matchPlaneToBoard(vector<double *> &points, double *alignxf, int pattern, s
       halfwidth = 22.5;
       halfheight = 30.5;
       break;
+    default:
+	  fprintf(stderr, "unknown pattern: %d", pattern);
+	  return false;
   }
 
   for(double i = -halfwidth; i <= halfwidth; i+=w_step) {
@@ -180,7 +183,7 @@ bool matchPlaneToBoard(vector<double *> &points, double *alignxf, int pattern, s
   Scan * plane = new BasicScan(rPos, rPosTheta, points);
   Scan * board = new BasicScan(rPos, rPosTheta, boardpoints);
   
-  for(int i = 0; i < boardpoints.size(); i++) {
+  for(unsigned int i = 0; i < boardpoints.size(); i++) {
     delete[] boardpoints[i];
   }
   

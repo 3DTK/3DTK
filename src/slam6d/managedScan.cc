@@ -332,7 +332,10 @@ void ManagedScan::calcReducedShow()
     if(show_reduction_nrpts == 1) {
       oct->GetOctTreeRandom(center);
     } else {
-      oct->GetOctTreeRandom(center, show_reduction_nrpts);
+		// FIXME: add option to pass true to GetOctTreeRandom()
+		//        in the past this was done by letting reduction_nrpts be
+		//        negative but ultimately this should be an extra variable
+      oct->GetOctTreeRandom(center, show_reduction_nrpts, false);
     }
   } else {
     oct->GetOctTreeCenter(center);

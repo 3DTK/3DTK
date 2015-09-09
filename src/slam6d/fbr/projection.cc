@@ -312,7 +312,11 @@ namespace fbr
   void projection::recoverPointCloud(const cv::Mat& rangeImage,
 				   cv::Mat& reflectanceImage, vector<cv::Vec4f> &reducedPoints) 
   {
-    if(rangeImage.cols != width_ || rangeImage.rows != height_)
+    assert (rangeImage.dims == 2);
+    assert (rangeImage.cols > 0);
+    assert (rangeImage.rows > 0);
+
+    if((unsigned int)rangeImage.cols != width_ || (unsigned int)rangeImage.rows != height_)
       {
 	cout<<"rnage image size is different from input size."<<endl;
 	cout<<"init the class with new params."<<endl;
@@ -350,29 +354,31 @@ namespace fbr
   void projection::calcPointFromPanoramaPosition(double& x, double& y, double& z, int row, int col, double range)
   {
     double theta, phi;
-    //get the theta and phi based on the projection 
-    if(method_ == EQUIRECTANGULAR)
-      {
-	theta = (heightMax_ - row + 0.5) / yFactor_ + heightLow_; 
-	phi = (col + 0.5 ) / xFactor_;
-      }
-    if(method_ == CYLINDRICAL)
-      {
-	theta = atan2(row + 0.5 + yFactor_ * tan(heightLow_), yFactor_);
-	phi = (col + 0.5) / xFactor_; 
-      }
-    if(method_ == MERCATOR)
-      {
-	theta = 2 * atan2(exp((heightMax_ - row + 0.5) / yFactor_ + heightLow_), 1.) - M_PI_2;
-	phi = (col + 0.5) / xFactor_;
-      }
-    if(method_ == CONIC)
-      {
-	float X = col * 1. / xFactor_ - fabs(xMin_);
-	float Y = (heightMax_ - row) * 1. / yFactor_ - fabs(yMin_);
-	theta = asin( (c_ - (X*X + (rho0_ - Y) * (rho0_ - Y)) * n_ * n_) / (2 * n_) );
-	phi = long0_ + (1./n_) * ::atan2(X, (float)rho0_ - Y);
-      }    
+    //get the theta and phi based on the projection
+	switch(method_) {
+		case EQUIRECTANGULAR:
+			theta = (heightMax_ - row + 0.5) / yFactor_ + heightLow_;
+			phi = (col + 0.5 ) / xFactor_;
+			break;
+		case CYLINDRICAL:
+			theta = atan2(row + 0.5 + yFactor_ * tan(heightLow_), yFactor_);
+			phi = (col + 0.5) / xFactor_;
+			break;
+		case MERCATOR:
+			theta = 2 * atan2(exp((heightMax_ - row + 0.5) / yFactor_ + heightLow_), 1.) - M_PI_2;
+			phi = (col + 0.5) / xFactor_;
+			break;
+		case CONIC:
+			{
+				float X = col * 1. / xFactor_ - fabs(xMin_);
+				float Y = (heightMax_ - row) * 1. / yFactor_ - fabs(yMin_);
+				theta = asin( (c_ - (X*X + (rho0_ - Y) * (rho0_ - Y)) * n_ * n_) / (2 * n_) );
+				phi = long0_ + (1./n_) * ::atan2(X, (float)rho0_ - Y);
+				break;
+			}
+		default:
+			throw std::runtime_error("unknown method");
+	}
     //other projections
     
     phi = (2 * M_PI) - phi;

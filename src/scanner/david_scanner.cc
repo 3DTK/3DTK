@@ -264,11 +264,11 @@ int main(int argc, char** argv){
 		int threshold = 50; //original threshold for Hough transform, incremented if too many groups of lines found
 		IplImage* color_dst;
 		IplImage* tmpImage;
-		int minX1, minX2, maxX1, maxX2;
+		int minX1 = 0, minX2 = 0, maxX1 = 0, maxX2 = 0;
 		CvSeq* lines = 0;
-		CvPoint* line1;
-		CvPoint* line2;
-		int count_groups;
+		CvPoint* line1 = NULL;
+		CvPoint* line2 = NULL;
+		int count_groups = -1;
 
 		//incrementing thresholds until only 2 groups of lines can be found
 		while(!good){
@@ -334,6 +334,11 @@ int main(int argc, char** argv){
 		cvReleaseMemStorage(&storage);
 		cvReleaseImage(&dst);
 		}
+
+		assert (count_groups != -1);
+		assert (line1 != NULL);
+		assert (line2 != NULL);
+
 		//at this point we have found at most 2 groups of lines, we need to take only 1 line from each group
 		//basically finding the left-most and right-most point of each group and draw a line between those points, removing all the other lines.
 		//starting and ending points of 2 lines

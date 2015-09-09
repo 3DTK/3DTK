@@ -19,10 +19,8 @@
 #include "scanio/scan_io_velodyne.h"
 #include "slam6d/globals.icc"
 #include <fstream>
-#include<strstream>
 #include <iostream>
 using std::ifstream;
-using std::ostrstream;
 using std::cerr;
 using std::endl;
 using std::ends;
@@ -352,7 +350,6 @@ int read_one_packet (
     float distance;
     float corredistance;
     int intensity;
-    int physical;
     int size;
 
     unsigned short rot;
@@ -388,6 +385,8 @@ int read_one_packet (
 				Head = 0;
 			else if ( *ps == 0xDDFF )
 				Head = 32;
+			else
+				return -1;
 
 			pshort = ( unsigned short * ) ( p + 2 );
 			rot = ( ( unsigned short ) ( *pshort ) / 100.0 );
@@ -524,7 +523,6 @@ void ScanIO_velodyne::readScan(
     std::vector<int>* type,
     std::vector<float>* deviation)
 {
-    unsigned int i;
     FILE *scan_in;
 
     path data_path(dir_path);
