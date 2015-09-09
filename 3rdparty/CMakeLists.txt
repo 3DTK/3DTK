@@ -25,10 +25,13 @@ ENDIF(EXPORT_SHARED_LIBS)
 if (WIN32)
   SET_TARGET_PROPERTIES(ANN PROPERTIES COMPILE_FLAGS -DDLL_EXPORTS)
 endif(WIN32)
+
+include_directories(${CMAKE_SOURCE_DIR}/3rdparty/ann_1.1.1_modified/include)
+include_directories(${CMAKE_SOURCE_DIR}/3rdparty/ann_1.1.1_modified/src)
 endif()
 
 # Compile glui library
-SET(GLUI_DIR ${CMAKE_SOURCE_DIR}/3rdparty/glui/)
+SET(GLUI_DIR ${CMAKE_SOURCE_DIR}/3rdparty/glui_v2_2_modified/)
 add_library(glui STATIC 
  ${GLUI_DIR}glui_add_controls.cpp 
  ${GLUI_DIR}glui.cpp 
@@ -77,7 +80,7 @@ ENDIF(WITH_WXSHOW)
 
 if (WIN32)
 # Compile sparse library 
-SET(SPARSE_DIR ${CMAKE_SOURCE_DIR}/3rdparty/suitesparse/)
+SET(SPARSE_DIR ${CMAKE_SOURCE_DIR}/3rdparty/cxsparse-4.4.4/suitesparse/)
 SET(SPARSE_SOURCES
 	${SPARSE_DIR}cs_add.c
 	${SPARSE_DIR}cs_amd.c
@@ -136,6 +139,8 @@ add_library(cxsparse STATIC ${SPARSE_SOURCES})
 IF(EXPORT_SHARED_LIBS)
 	add_library(cxsparse_s SHARED ${SPARSE_SOURCES})
 ENDIF(EXPORT_SHARED_LIBS)
+
+include_directories(${CMAKE_SOURCE_DIR}/3rdparty/cxsparse-4.4.4)
 endif(WIN32)
 
 
@@ -147,6 +152,8 @@ add_library(newmat STATIC ${NEWMAT_SOURCES})
 IF(EXPORT_SHARED_LIBS)
 add_library(newmat_s SHARED ${NEWMAT_SOURCES})
 ENDIF(EXPORT_SHARED_LIBS)
+
+include_directories(${CMAKE_SOURCE_DIR}/3rdparty/newmat-10)
 endif(WIN32)
 
 if (WITH_LASLIB)
@@ -159,6 +166,9 @@ add_library(LAZ STATIC ${LASLIB_SRCS})
 IF(EXPORT_SHARED_LIBS)
 add_library(LAZ_s SHARED ${LASLIB_SRCS})
 ENDIF(EXPORT_SHARED_LIBS)
+
+include_directories(${CMAKE_SOURCE_DIR}/3rdparty/lastools/laslib/src)
+include_directories(${CMAKE_SOURCE_DIR}/3rdparty/lastools/laslib/inc)
 endif(WITH_LASLIB)
 
 if (WIN32 AND WITH_GLEE)
