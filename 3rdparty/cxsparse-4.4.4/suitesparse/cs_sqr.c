@@ -4,9 +4,9 @@ static CS_INT cs_vcount (const cs *A, css *S)
 {
     CS_INT i, k, p, pa, n = A->n, m = A->m, *Ap = A->p, *Ai = A->i, *next, *head,
         *tail, *nque, *pinv, *leftmost, *w, *parent = S->parent ;
-    S->pinv = pinv = cs_malloc (m+n, sizeof (CS_INT)) ;        /* allocate pinv, */
-    S->leftmost = leftmost = cs_malloc (m, sizeof (CS_INT)) ;  /* and leftmost */
-    w = cs_malloc (m+3*n, sizeof (CS_INT)) ;   /* get workspace */
+    S->pinv = pinv = (CS_INT *) cs_malloc (m+n, sizeof (CS_INT)) ;        /* allocate pinv, */
+    S->leftmost = leftmost = (CS_INT *) cs_malloc (m, sizeof (CS_INT)) ;  /* and leftmost */
+    w = (CS_INT *) cs_malloc (m+3*n, sizeof (CS_INT)) ;   /* get workspace */
     if (!pinv || !w || !leftmost)
     {
         cs_free (w) ;                       /* pinv and leftmost freed later */
@@ -63,7 +63,7 @@ css *cs_sqr (CS_INT order, const cs *A, CS_INT qr)
     css *S ;
     if (!CS_CSC (A)) return (NULL) ;        /* check inputs */
     n = A->n ;
-    S = cs_calloc (1, sizeof (css)) ;       /* allocate result S */
+    S = (css *) cs_calloc (1, sizeof (css)) ;       /* allocate result S */
     if (!S) return (NULL) ;                 /* out of memory */
     S->q = cs_amd (order, A) ;              /* fill-reducing ordering */
     if (order && !S->q) return (cs_sfree (S)) ;

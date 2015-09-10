@@ -10,13 +10,13 @@ csn *cs_lu (const cs *A, const css *S, double tol)
     if (!CS_CSC (A) || !S) return (NULL) ;          /* check inputs */
     n = A->n ;
     q = S->q ; lnz = S->lnz ; unz = S->unz ;
-    x = cs_malloc (n, sizeof (CS_ENTRY)) ;            /* get CS_ENTRY workspace */
-    xi = cs_malloc (2*n, sizeof (CS_INT)) ;            /* get CS_INT workspace */
-    N = cs_calloc (1, sizeof (csn)) ;               /* allocate result */
+    x = (CS_ENTRY *) cs_malloc (n, sizeof (CS_ENTRY)) ;            /* get CS_ENTRY workspace */
+    xi = (CS_INT *) cs_malloc (2*n, sizeof (CS_INT)) ;            /* get CS_INT workspace */
+    N = (csn *) cs_calloc (1, sizeof (csn)) ;               /* allocate result */
     if (!x || !xi || !N) return (cs_ndone (N, NULL, xi, x, 0)) ;
     N->L = L = cs_spalloc (n, n, lnz, 1, 0) ;       /* allocate result L */
     N->U = U = cs_spalloc (n, n, unz, 1, 0) ;       /* allocate result U */
-    N->pinv = pinv = cs_malloc (n, sizeof (CS_INT)) ;  /* allocate result pinv */
+    N->pinv = pinv = (CS_INT *) cs_malloc (n, sizeof (CS_INT)) ;  /* allocate result pinv */
     if (!L || !U || !pinv) return (cs_ndone (N, NULL, xi, x, 0)) ;
     Lp = L->p ; Up = U->p ;
     for (i = 0 ; i < n ; i++) x [i] = 0 ;           /* clear workspace */

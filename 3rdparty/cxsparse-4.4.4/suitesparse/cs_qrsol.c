@@ -14,7 +14,7 @@ CS_INT cs_qrsol (CS_INT order, const cs *A, CS_ENTRY *b)
     {
         S = cs_sqr (order, A, 1) ;          /* ordering and symbolic analysis */
         N = cs_qr (A, S) ;                  /* numeric QR factorization */
-        x = cs_calloc (S ? S->m2 : 1, sizeof (CS_ENTRY)) ;    /* get workspace */
+        x = (CS_ENTRY *) cs_calloc (S ? S->m2 : 1, sizeof (CS_ENTRY)) ;    /* get workspace */
         ok = (S && N && x) ;
         if (ok)
         {
@@ -32,7 +32,7 @@ CS_INT cs_qrsol (CS_INT order, const cs *A, CS_ENTRY *b)
         AT = cs_transpose (A, 1) ;          /* Ax=b is underdetermined */
         S = cs_sqr (order, AT, 1) ;         /* ordering and symbolic analysis */
         N = cs_qr (AT, S) ;                 /* numeric QR factorization of A' */
-        x = cs_calloc (S ? S->m2 : 1, sizeof (CS_ENTRY)) ;    /* get workspace */
+        x = (CS_ENTRY *) cs_calloc (S ? S->m2 : 1, sizeof (CS_ENTRY)) ;    /* get workspace */
         ok = (AT && S && N && x) ;
         if (ok)
         {
