@@ -9,9 +9,9 @@ cs *cs_add (const cs *A, const cs *B, CS_ENTRY alpha, CS_ENTRY beta)
     if (A->m != B->m || A->n != B->n) return (NULL) ;
     m = A->m ; anz = A->p [A->n] ;
     n = B->n ; Bp = B->p ; Bx = B->x ; bnz = Bp [n] ;
-    w = cs_calloc (m, sizeof (CS_INT)) ;                       /* get workspace */
+    w = (CS_INT *) cs_calloc (m, sizeof (CS_INT)) ;                       /* get workspace */
     values = (A->x != NULL) && (Bx != NULL) ;
-    x = values ? cs_malloc (m, sizeof (CS_ENTRY)) : NULL ;    /* get workspace */
+    x = values ? (CS_ENTRY *) cs_malloc (m, sizeof (CS_ENTRY)) : NULL ;    /* get workspace */
     C = cs_spalloc (m, n, anz + bnz, values, 0) ;           /* allocate result*/
     if (!C || !w || (values && !x)) return (cs_done (C, w, x, 0)) ;
     Cp = C->p ; Ci = C->i ; Cx = C->x ;

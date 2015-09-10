@@ -10,7 +10,7 @@ CS_INT cs_cholsol (CS_INT order, const cs *A, CS_ENTRY *b)
     n = A->n ;
     S = cs_schol (order, A) ;               /* ordering and symbolic analysis */
     N = cs_chol (A, S) ;                    /* numeric Cholesky factorization */
-    x = cs_malloc (n, sizeof (CS_ENTRY)) ;    /* get workspace */
+    x = (CS_ENTRY *) cs_malloc (n, sizeof (CS_ENTRY)) ;    /* get workspace */
     ok = (S && N && x) ;
     if (ok)
     {

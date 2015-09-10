@@ -12,7 +12,7 @@ CS_INT cs_updown (cs *L, CS_INT sigma, const cs *C, const CS_INT *parent)
     Lp = L->p ; Li = L->i ; Lx = L->x ; n = L->n ;
     Cp = C->p ; Ci = C->i ; Cx = C->x ;
     if ((p = Cp [0]) >= Cp [1]) return (1) ;        /* return if C empty */
-    w = cs_malloc (n, sizeof (CS_ENTRY)) ;          /* get workspace */
+    w = (CS_ENTRY *) cs_malloc (n, sizeof (CS_ENTRY)) ;          /* get workspace */
     if (!w) return (0) ;                            /* out of memory */
     f = Ci [p] ;
     for ( ; p < Cp [1] ; p++) f = CS_MIN (f, Ci [p]) ;  /* f = min (find (C)) */

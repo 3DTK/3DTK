@@ -6,7 +6,7 @@ CS_INT cs_dupl (cs *A)
     CS_ENTRY *Ax ;
     if (!CS_CSC (A)) return (0) ;               /* check inputs */
     m = A->m ; n = A->n ; Ap = A->p ; Ai = A->i ; Ax = A->x ;
-    w = cs_malloc (m, sizeof (CS_INT)) ;           /* get workspace */
+    w = (CS_INT *) cs_malloc (m, sizeof (CS_INT)) ;           /* get workspace */
     if (!w) return (0) ;                        /* out of memory */
     for (i = 0 ; i < m ; i++) w [i] = -1 ;      /* row i not yet seen */
     for (j = 0 ; j < n ; j++)
