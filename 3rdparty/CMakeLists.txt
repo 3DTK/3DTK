@@ -16,18 +16,15 @@ SET(ANN_SRCS
   ${ANN_DIR}bd_pr_search.cpp 
   ${ANN_DIR}bd_fix_rad_search.cpp 
   ${ANN_DIR}perf.cpp)
-add_library(ANN STATIC ${ANN_SRCS})
+add_library(ann STATIC ${ANN_SRCS})
 IF(EXPORT_SHARED_LIBS)
-add_library(ANN_s SHARED ${ANN_SRCS})
+add_library(ann_s SHARED ${ANN_SRCS})
 ENDIF(EXPORT_SHARED_LIBS)
 
 # on windows systems the DLL_EXPORTS is required
 if (WIN32)
-  SET_TARGET_PROPERTIES(ANN PROPERTIES COMPILE_FLAGS -DDLL_EXPORTS)
+  SET_TARGET_PROPERTIES(ann PROPERTIES COMPILE_FLAGS -DDLL_EXPORTS)
 endif(WIN32)
-
-include_directories(${CMAKE_SOURCE_DIR}/3rdparty/ann_1.1.1_modified/include)
-include_directories(${CMAKE_SOURCE_DIR}/3rdparty/ann_1.1.1_modified/src)
 endif()
 
 # Compile glui library
@@ -135,25 +132,28 @@ SET(SPARSE_SOURCES
 	${SPARSE_DIR}cs_util.c
 	${SPARSE_DIR}cs_utsolve.c
 	)
+# force suitesparse to be compiled in CXX mode. This is necessary because MSVC
+# will compile them in C mode due to their .c file extension but that in turn
+# will fail because of the line "#define cs_complex_t double _Complex" in cs.h
+# does not work in C mode in MSVC
+# this is because MSVC does not support C99...
+SET_SOURCE_FILES_PROPERTIES( ${SPARSE_SOURCES} PROPERTIES LANGUAGE CXX )
 add_library(cxsparse STATIC ${SPARSE_SOURCES})
 IF(EXPORT_SHARED_LIBS)
 	add_library(cxsparse_s SHARED ${SPARSE_SOURCES})
 ENDIF(EXPORT_SHARED_LIBS)
 
-include_directories(${CMAKE_SOURCE_DIR}/3rdparty/cxsparse-4.4.4)
 endif(WIN32)
 
 
 if(WIN32)
 # Compile newmat library
-SET(NEWMAT_DIR ${CMAKE_SOURCE_DIR}/3rdparty/newmat/)
+SET(NEWMAT_DIR ${CMAKE_SOURCE_DIR}/3rdparty/newmat-10/newmat/)
 SET(NEWMAT_SOURCES ${NEWMAT_DIR}newmat1.cpp ${NEWMAT_DIR}newmat2.cpp ${NEWMAT_DIR}newmat3.cpp ${NEWMAT_DIR}newmat4.cpp ${NEWMAT_DIR}newmat5.cpp ${NEWMAT_DIR}newmat6.cpp ${NEWMAT_DIR}newmat7.cpp ${NEWMAT_DIR}newmat8.cpp ${NEWMAT_DIR}newmatex.cpp ${NEWMAT_DIR}bandmat.cpp ${NEWMAT_DIR}submat.cpp ${NEWMAT_DIR}myexcept.cpp ${NEWMAT_DIR}cholesky.cpp ${NEWMAT_DIR}evalue.cpp ${NEWMAT_DIR}fft.cpp ${NEWMAT_DIR}hholder.cpp ${NEWMAT_DIR}jacobi.cpp ${NEWMAT_DIR}newfft.cpp ${NEWMAT_DIR}sort.cpp ${NEWMAT_DIR}svd.cpp ${NEWMAT_DIR}newmatrm.cpp ${NEWMAT_DIR}newmat9.cpp)
 add_library(newmat STATIC ${NEWMAT_SOURCES})
 IF(EXPORT_SHARED_LIBS)
 add_library(newmat_s SHARED ${NEWMAT_SOURCES})
 ENDIF(EXPORT_SHARED_LIBS)
-
-include_directories(${CMAKE_SOURCE_DIR}/3rdparty/newmat-10)
 endif(WIN32)
 
 if (WITH_LASLIB)

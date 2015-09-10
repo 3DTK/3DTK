@@ -8,7 +8,7 @@
 #define __SCAN_IO_LAZ_H__
 
 #include "scan_io.h"
-#include "lastools/laslib/inc/lasreader.hpp"
+#include "laslib/inc/lasreader.hpp"
 
 /**
  * @brief 3D scan loader for las/laz scans
