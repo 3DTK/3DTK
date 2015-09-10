@@ -8,9 +8,9 @@ csn *cs_chol (const cs *A, const css *S)
     csn *N ;
     if (!CS_CSC (A) || !S || !S->cp || !S->parent) return (NULL) ;
     n = A->n ;
-    N = cs_calloc (1, sizeof (csn)) ;       /* allocate result */
-    c = cs_malloc (2*n, sizeof (CS_INT)) ;     /* get CS_INT workspace */
-    x = cs_malloc (n, sizeof (CS_ENTRY)) ;    /* get CS_ENTRY workspace */
+    N = (csn *) cs_calloc (1, sizeof (csn)) ;       /* allocate result */
+    c = (CS_INT *) cs_malloc (2*n, sizeof (CS_INT)) ;     /* get CS_INT workspace */
+    x = (CS_ENTRY *) cs_malloc (n, sizeof (CS_ENTRY)) ;    /* get CS_ENTRY workspace */
     cp = S->cp ; pinv = S->pinv ; parent = S->parent ;
     C = pinv ? cs_symperm (A, pinv, 1) : ((cs *) A) ;
     E = pinv ? C : NULL ;           /* E is alias for A, or a copy E=A(p,p) */

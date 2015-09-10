@@ -1,8 +1,14 @@
 #include "cs.h"
 
+#ifdef __cplusplus
+#define I cs_complex_t(0.0, 1.0)
+#define cimag imag
+#define creal real
+#endif
+
 /* convert from complex to real (int version) */
 /* C = real(A) if real is true, imag(A) otherwise */
-cs_di *cs_i_real (cs_ci *A, int real)
+cs_di *cs_i_real (cs_ci *A, int r)
 {
     cs_di *C ;
     int n, triplet, nn, p, nz, *Ap, *Ai, *Cp, *Ci ;
@@ -18,7 +24,7 @@ cs_di *cs_i_real (cs_ci *A, int real)
     nn = triplet ? nz : (n+1) ;
     for (p = 0 ; p < nz ; p++) Ci [p] = Ai [p] ;
     for (p = 0 ; p < nn ; p++) Cp [p] = Ap [p] ;
-    for (p = 0 ; p < nz ; p++) Cx [p] = real ? creal (Ax [p]) : cimag (Ax [p]) ;
+    for (p = 0 ; p < nz ; p++) Cx [p] = r ? creal (Ax [p]) : cimag (Ax [p]) ;
     if (triplet) C->nz = nz ;
     return (C) ;
 }
@@ -48,7 +54,7 @@ cs_ci *cs_i_complex (cs_di *A, int real)
 
 /* convert from complex to real (cs_long_t version) */
 /* C = real(A) if real is true, imag(A) otherwise */
-cs_dl *cs_l_real (cs_cl *A, cs_long_t real)
+cs_dl *cs_l_real (cs_cl *A, cs_long_t r)
 {
     cs_dl *C ;
     cs_long_t n, triplet, nn, p, nz, *Ap, *Ai, *Cp, *Ci ;
@@ -64,7 +70,7 @@ cs_dl *cs_l_real (cs_cl *A, cs_long_t real)
     nn = triplet ? nz : (n+1) ;
     for (p = 0 ; p < nz ; p++) Ci [p] = Ai [p] ;
     for (p = 0 ; p < nn ; p++) Cp [p] = Ap [p] ;
-    for (p = 0 ; p < nz ; p++) Cx [p] = real ? creal (Ax [p]) : cimag (Ax [p]) ;
+    for (p = 0 ; p < nz ; p++) Cx [p] = r ? creal (Ax [p]) : cimag (Ax [p]) ;
     if (triplet) C->nz = nz ;
     return (C) ;
 }

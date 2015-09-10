@@ -2,15 +2,15 @@
 /* allocate a sparse matrix (triplet form or compressed-column form) */
 cs *cs_spalloc (CS_INT m, CS_INT n, CS_INT nzmax, CS_INT values, CS_INT triplet)
 {
-    cs *A = cs_calloc (1, sizeof (cs)) ;    /* allocate the cs struct */
+    cs *A = (cs *) cs_calloc (1, sizeof (cs)) ;    /* allocate the cs struct */
     if (!A) return (NULL) ;                 /* out of memory */
     A->m = m ;                              /* define dimensions and nzmax */
     A->n = n ;
     A->nzmax = nzmax = CS_MAX (nzmax, 1) ;
     A->nz = triplet ? 0 : -1 ;              /* allocate triplet or comp.col */
-    A->p = cs_malloc (triplet ? nzmax : n+1, sizeof (CS_INT)) ;
-    A->i = cs_malloc (nzmax, sizeof (CS_INT)) ;
-    A->x = values ? cs_malloc (nzmax, sizeof (CS_ENTRY)) : NULL ;
+    A->p = (CS_INT *) cs_malloc (triplet ? nzmax : n+1, sizeof (CS_INT)) ;
+    A->i = (CS_INT *) cs_malloc (nzmax, sizeof (CS_INT)) ;
+    A->x = values ? (CS_ENTRY *) cs_malloc (nzmax, sizeof (CS_ENTRY)) : NULL ;
     return ((!A->p || !A->i || (values && !A->x)) ? cs_spfree (A) : A) ;
 }
 
@@ -20,9 +20,9 @@ CS_INT cs_sprealloc (cs *A, CS_INT nzmax)
     CS_INT ok, oki, okj = 1, okx = 1 ;
     if (!A) return (0) ;
     if (nzmax <= 0) nzmax = (CS_CSC (A)) ? (A->p [A->n]) : A->nz ;
-    A->i = cs_realloc (A->i, nzmax, sizeof (CS_INT), &oki) ;
-    if (CS_TRIPLET (A)) A->p = cs_realloc (A->p, nzmax, sizeof (CS_INT), &okj) ;
-    if (A->x) A->x = cs_realloc (A->x, nzmax, sizeof (CS_ENTRY), &okx) ;
+    A->i = (CS_INT *) cs_realloc (A->i, nzmax, sizeof (CS_INT), &oki) ;
+    if (CS_TRIPLET (A)) A->p = (CS_INT *) cs_realloc (A->p, nzmax, sizeof (CS_INT), &okj) ;
+    if (A->x) A->x = (CS_ENTRY *) cs_realloc (A->x, nzmax, sizeof (CS_ENTRY), &okx) ;
     ok = (oki && okj && okx) ;
     if (ok) A->nzmax = nzmax ;
     return (ok) ;
@@ -65,12 +65,12 @@ css *cs_sfree (css *S)
 csd *cs_dalloc (CS_INT m, CS_INT n)
 {
     csd *D ;
-    D = cs_calloc (1, sizeof (csd)) ;
+    D = (csd *) cs_calloc (1, sizeof (csd)) ;
     if (!D) return (NULL) ;
-    D->p = cs_malloc (m, sizeof (CS_INT)) ;
-    D->r = cs_malloc (m+6, sizeof (CS_INT)) ;
-    D->q = cs_malloc (n, sizeof (CS_INT)) ;
-    D->s = cs_malloc (n+6, sizeof (CS_INT)) ;
+    D->p = (CS_INT *) cs_malloc (m, sizeof (CS_INT)) ;
+    D->r = (CS_INT *) cs_malloc (m+6, sizeof (CS_INT)) ;
+    D->q = (CS_INT *) cs_malloc (n, sizeof (CS_INT)) ;
+    D->s = (CS_INT *) cs_malloc (n+6, sizeof (CS_INT)) ;
     return ((!D->p || !D->r || !D->q || !D->s) ? cs_dfree (D) : D) ;
 }
 
