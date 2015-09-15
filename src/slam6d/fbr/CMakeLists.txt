@@ -25,13 +25,17 @@ IF(WITH_FBR)
     SET(FBR_SRC scan_cv.cc panorama.cc projection.cc feature.cc feature_matcher.cc registration.cc fbr_global.cc feature_drawer.cc geoRefrencing.cc)
     add_library(fbr STATIC ${FBR_SRC} fbr_global.cc)
 
-    SET(FBR_LIBS scan ANN ${OpenCV_LIBS})
+    SET(FBR_LIBS scan ann ${OpenCV_LIBS})
 
 
     ### EXPORT SHARED LIBS
     IF(EXPORT_SHARED_LIBS)
       add_library(fbr_s SHARED ${FBR_SRC} fbr_global.cc)
+      if (WIN32)
       target_link_libraries(fbr_s scan_s ANN_s ${OpenCV_LIBS} show_s)
+      else(WIN32)
+      target_link_libraries(fbr_s scan_s ann ${OpenCV_LIBS} show_s)
+      endif(WIN32)
     ENDIF(EXPORT_SHARED_LIBS)
 
 
