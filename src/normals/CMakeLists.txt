@@ -3,7 +3,11 @@ target_link_libraries(normals_panorama newmat scan fbr_cv_io fbr_panorama ${Open
 
 IF(EXPORT_SHARED_LIBS)
 add_library(normals_panorama_s SHARED normals_panorama.cc)
+if (WIN32)
 target_link_libraries(normals_panorama_s newmat_s scan_s fbr_s ${OpenCV_LIBS} ${Boost_LIBRARIES})
+else(WIN32)
+target_link_libraries(normals_panorama_s newmat scan_s fbr_s ${OpenCV_LIBS} ${Boost_LIBRARIES})
+endif(WIN32)
 ENDIF(EXPORT_SHARED_LIBS)
 
 
