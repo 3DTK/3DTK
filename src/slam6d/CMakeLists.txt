@@ -107,7 +107,11 @@ ENDIF(UNIX)
 
 IF(EXPORT_SHARED_LIBS)
 add_library(scan_s SHARED ${SCANLIB_SRCS})
-target_link_libraries(scan_s scanio scanclient_s newmat_s cxsparse_s ann_s)
+if (WIN32)
+  target_link_libraries(scan_s scanio scanclient_s newmat_s cxsparse_s ann_s)
+else(WIN32)
+  target_link_libraries(scan_s scanio scanclient_s newmat cxsparse ann)
+endif(WIN32)
 ENDIF(EXPORT_SHARED_LIBS)
 
 ### SLAM6D

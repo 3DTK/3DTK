@@ -29,7 +29,7 @@ endif()
 
 # Compile glui library
 SET(GLUI_DIR ${CMAKE_SOURCE_DIR}/3rdparty/glui_v2_2_modified/)
-add_library(glui STATIC 
+add_library(glui SHARED
  ${GLUI_DIR}glui_add_controls.cpp 
  ${GLUI_DIR}glui.cpp 
  ${GLUI_DIR}glui_bitmap_img_data.cpp 
