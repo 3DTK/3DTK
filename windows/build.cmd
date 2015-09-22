@@ -2,6 +2,10 @@
 :: if you require support for 32bit windows, please send patches
 :: this was tested on Windos 7 64bit
 
+:: To run CL.exe manually from a terminal, you must first setup your
+:: environment using a call to
+:: C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\vcvarsall.bat
+
 :: you might want to configure the following variables before you run this
 :: script:
 
