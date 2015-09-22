@@ -29,7 +29,7 @@ endif()
 
 # Compile glui library
 SET(GLUI_DIR ${CMAKE_SOURCE_DIR}/3rdparty/glui-2.36/)
-add_library(glui SHARED
+SET(GLUI_SRCS
  ${GLUI_DIR}algebra3.cpp
  ${GLUI_DIR}arcball.cpp
  ${GLUI_DIR}glui_add_controls.cpp
@@ -64,6 +64,13 @@ add_library(glui SHARED
  ${GLUI_DIR}quaternion.cpp
  ${GLUI_DIR}viewmodel.cpp
 )
+add_library(glui STATIC ${GLUI_SRCS})
+if (WIN32)
+	target_link_libraries(glui freeglut)
+endif(WIN32)
+IF(EXPORT_SHARED_LIBS)
+	add_library(glui_s SHARED ${GLUI_SRCS})
+ENDIF(EXPORT_SHARED_LIBS)
 
 IF(WITH_WXSHOW)
 
