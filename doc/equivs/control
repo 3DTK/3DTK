@@ -31,3 +31,9 @@ Depends:
  libnewmat10-dev,
  libann-dev,
  libsuitesparse-dev,
+# these are optional dependencies for certain features
+#    eigen3 for src/model
+#    cgal   for src/model
+Recommends:
+ libeigen3-dev,
+ libcgal-dev,
