@@ -728,7 +728,7 @@ void VeloScan::calcReducedPoints_byClassifi(double voxelSize, int nrpts, PointTy
       if (reduction_nrpts == 1) {
         oct->GetOctTreeRandom(center);
       } else {
-        oct->GetOctTreeRandom(center, reduction_nrpts);
+        oct->GetOctTreeRandom(center, reduction_nrpts, false);
       }
     } else {
       oct->GetOctTreeCenter(center);
