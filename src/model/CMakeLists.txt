@@ -2,7 +2,7 @@ if(WITH_MODEL)
 
     # Module name
     set(MODULE "Model")
-    set(UNIX_LIBS shape scan newmat dl ANN)
+    set(UNIX_LIBS shape scan newmat dl ann)
     set(WIN32_LIBS shape scan newmat XGetopt)
 
     # Set CXX flags for CGAL
