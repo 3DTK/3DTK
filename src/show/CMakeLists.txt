@@ -2,7 +2,7 @@ SET(SHOW_LIBS glui scan ann newmat ${OPENGL_LIBRARIES} ${Boost_SYSTEM_LIBRARY} $
 if (WIN32)
 SET(SHOW_LIBS_S glui scan_s ann_s newmat_s ${OPENGL_LIBRARIES})
 else(WIN32)
-SET(SHOW_LIBS_S glui scan_s ann newmat ${OPENGL_LIBRARIES})
+SET(SHOW_LIBS_S glui_s scan_s ann newmat ${OPENGL_LIBRARIES})
 endif(WIN32)
 
 IF(WIN32)
