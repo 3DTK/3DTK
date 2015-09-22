@@ -211,7 +211,7 @@ void newMenu()
   
   static int dummy4;
   always_box = glui2->add_checkbox_to_panel(nav_panel, "Always all Points", &dummy4, 0, &changePointMode);
-  glui2->set_glutMouseFunc(CallBackMouseFuncMoving);
+  //glui2->set_glutMouseFunc(CallBackMouseFuncMoving);
   static int dummy5 = 1;
   never_box =  glui2->add_checkbox_to_panel(nav_panel, "Always reduce Points", &dummy5, 1, &changePointMode );
   
@@ -446,7 +446,7 @@ GLUI_SPINNER_INT, &factor);
   /****** A 'quit' button *****/
   glui1->add_button("Quit", 0, (GLUI_Update_CB)exit)->set_alignment(GLUI_ALIGN_CENTER);
 
-  glui1->set_glutMouseFunc(CallBackMouseFuncMoving);
+  //glui1->set_glutMouseFunc(CallBackMouseFuncMoving);
   /**** Link windows to GLUI, and register idle callback ******/
   glutSetWindow(window_id);
   glui1->set_main_gfx_window(window_id);  // right

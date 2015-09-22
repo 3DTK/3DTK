@@ -24,7 +24,7 @@ using std::endl;
 #include <GL/glut.h>
 #endif
 
-#include <glui.h>
+#include <GL/glui.h>
 
 
 double SDisplay::mirror[16] = {1,0,0,0,
