@@ -524,7 +524,7 @@ SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${ADDITIONAL_CFLAGS}")
 
 # Set include and link dirs ...
 include_directories(${CMAKE_SOURCE_DIR}/include)
-include_directories(${CMAKE_SOURCE_DIR}/3rdparty/glui_v2_2_modified)
+include_directories(${CMAKE_SOURCE_DIR}/3rdparty/glui-2.36/include/)
 include_directories(${CMAKE_SOURCE_DIR}/3rdparty/wxthings/include/)
 link_directories(${CMAKE_SOURCE_DIR}/obj)
 link_directories(${CMAKE_SOURCE_DIR}/lib)

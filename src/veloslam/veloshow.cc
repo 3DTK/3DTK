@@ -25,7 +25,7 @@
 #include "show/vertexarray.h"
 #include "slam6d/scan.h"
 #include "veloslam/veloscan.h"
-#include "glui/glui.h"  /* Header File For The glui functions */
+#include "GL/glui.h"  /* Header File For The glui functions */
 #include <fstream>
 using std::ifstream;
 #include <stdexcept>

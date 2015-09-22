@@ -28,33 +28,42 @@ endif(WIN32)
 endif()
 
 # Compile glui library
-SET(GLUI_DIR ${CMAKE_SOURCE_DIR}/3rdparty/glui_v2_2_modified/)
+SET(GLUI_DIR ${CMAKE_SOURCE_DIR}/3rdparty/glui-2.36/)
 add_library(glui SHARED
- ${GLUI_DIR}glui_add_controls.cpp 
- ${GLUI_DIR}glui.cpp 
- ${GLUI_DIR}glui_bitmap_img_data.cpp 
- ${GLUI_DIR}glui_bitmaps.cpp 
- ${GLUI_DIR}glui_button.cpp
- ${GLUI_DIR}glui_edittext.cpp
- ${GLUI_DIR}glui_checkbox.cpp 
- ${GLUI_DIR}glui_node.cpp 
- ${GLUI_DIR}glui_radio.cpp 
- ${GLUI_DIR}glui_statictext.cpp 
- ${GLUI_DIR}glui_panel.cpp 
- ${GLUI_DIR}glui_separator.cpp 
- ${GLUI_DIR}glui_spinner.cpp 
- ${GLUI_DIR}glui_control.cpp 
- ${GLUI_DIR}glui_column.cpp 
- ${GLUI_DIR}glui_translation.cpp 
- ${GLUI_DIR}glui_rotation.cpp 
- ${GLUI_DIR}glui_mouse_iaction.cpp 
- ${GLUI_DIR}glui_listbox.cpp 
- ${GLUI_DIR}glui_rollout.cpp 
- ${GLUI_DIR}arcball.cpp 
  ${GLUI_DIR}algebra3.cpp
- ${GLUI_DIR}quaternion.cpp )
- 
-
+ ${GLUI_DIR}arcball.cpp
+ ${GLUI_DIR}glui_add_controls.cpp
+ ${GLUI_DIR}glui_bitmap_img_data.cpp
+ ${GLUI_DIR}glui_bitmaps.cpp
+ ${GLUI_DIR}glui_button.cpp
+ ${GLUI_DIR}glui_checkbox.cpp
+ ${GLUI_DIR}glui_column.cpp
+ ${GLUI_DIR}glui_commandline.cpp
+ ${GLUI_DIR}glui_control.cpp
+ ${GLUI_DIR}glui.cpp
+ ${GLUI_DIR}glui_edittext.cpp
+ ${GLUI_DIR}glui_filebrowser.cpp
+ ${GLUI_DIR}glui_listbox.cpp
+ ${GLUI_DIR}glui_list.cpp
+ ${GLUI_DIR}glui_mouse_iaction.cpp
+ ${GLUI_DIR}glui_node.cpp
+ ${GLUI_DIR}glui_panel.cpp
+ ${GLUI_DIR}glui_radio.cpp
+ ${GLUI_DIR}glui_rollout.cpp
+ ${GLUI_DIR}glui_rotation.cpp
+ ${GLUI_DIR}glui_scrollbar.cpp
+ ${GLUI_DIR}glui_separator.cpp
+ ${GLUI_DIR}glui_spinner.cpp
+ ${GLUI_DIR}glui_statictext.cpp
+ ${GLUI_DIR}glui_string.cpp
+ ${GLUI_DIR}glui_textbox.cpp
+ ${GLUI_DIR}glui_translation.cpp
+ ${GLUI_DIR}glui_tree.cpp
+ ${GLUI_DIR}glui_treepanel.cpp
+ ${GLUI_DIR}glui_window.cpp
+ ${GLUI_DIR}quaternion.cpp
+ ${GLUI_DIR}viewmodel.cpp
+)
 
 IF(WITH_WXSHOW)
 
