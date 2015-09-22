@@ -1,4 +1,4 @@
-SET(SHOW_LIBS ${OPENGL_LIBRARIES} glui scan ANN)
+SET(SHOW_LIBS ${OPENGL_LIBRARIES} glui scan ann)
 IF(WIN32)
  IF( CMAKE_SIZEOF_VOID_P EQUAL 8 )
     SET(SHOW_LIBS ${SHOW_LIBS}  ${CMAKE_SOURCE_DIR}/3rdparty/windows/x64/freeglut.lib XGetopt)
@@ -15,11 +15,11 @@ IF(WITH_VELOSLAM)
    trackermanager.cc drawtrackers.cc kalmanfilter.cc matrix.cc lap.cc)
 
 IF(UNIX)
-  target_link_libraries(veloslam dl scan newmat sparse ANN ${Boost_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} ${Boost_THREAD_LIBRARY} ${SHOW_LIBS})
+  target_link_libraries(veloslam dl scan newmat cxsparse ann ${Boost_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} ${Boost_THREAD_LIBRARY} ${SHOW_LIBS})
 ENDIF(UNIX)
 
 IF(WIN32)
-  target_link_libraries(veloslam scan newmat sparse ANN XGetopt ${Boost_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} ${SHOW_LIBS})
+  target_link_libraries(veloslam scan newmat cxsparse ann XGetopt ${Boost_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} ${SHOW_LIBS})
 ENDIF(WIN32)
 ENDIF(WITH_VELOSLAM)
 
