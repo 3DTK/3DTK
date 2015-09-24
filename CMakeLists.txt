@@ -475,6 +475,8 @@ IF(WIN32)
   ENDIF (CMAKE_SIZEOF_VOID_P EQUAL 8)
   add_library(XGetopt STATIC ${CMAKE_SOURCE_DIR}/3rdparty/windows/XGetopt.cpp)
   SET(CMAKE_STATIC_LIBRARY_SUFFIX "32.lib")
+  # to be able to use numeric_limits<int>::max() and friends on windows
+  SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DNOMINMAX")
 ELSE(WIN32)
   # Add include path for OpenGL without GL/-prefix
   # to avoid the include incompatibility between MACOS
