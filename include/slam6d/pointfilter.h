@@ -13,7 +13,6 @@
 
 #include <vector>
 
-#define NOMINMAX
 #include "slam6d/globals.icc"
 
 class Checker;

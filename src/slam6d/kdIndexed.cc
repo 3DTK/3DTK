@@ -18,7 +18,6 @@
 
 #ifdef _MSC_VER
 #define  _USE_MATH_DEFINES
-#define NOMINMAX
 #endif
 
 #include "slam6d/kdIndexed.h"
