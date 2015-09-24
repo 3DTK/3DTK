@@ -120,16 +120,6 @@ static inline int imax(int a, int b)
     return (a > b) ? a : b;
 }
 
-static inline float fmin(float a, float b)
-{
-	return (a < b) ? a : b;
-}
-
-static inline float fmax(float a, float b)
-{
-	return (a > b) ? a : b;
-}
-
 static inline int iclamp(int v, int minv, int maxv)
 {
     return imax(minv, imin(v, maxv));
