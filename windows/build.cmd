@@ -104,9 +104,9 @@ if not exist %opencvdir% (
 	-DZLIB_LIBRARY:FILEPATH=%sourcedir%/3rdparty/windows/zlib.lib ^
 	-DBOOST_LIBRARYDIR:PATH=%boostdir%/lib64-msvc-12.0 ^
 	-DBOOST_ROOT:PATH=%boostdir% ^
-	-DGLUT_glut_LIBRARY:FILEPATH=%sourcedir%/3rdparty/windows/freeglut.dll ^
+	-DGLUT_glut_LIBRARY:FILEPATH=%sourcedir%/3rdparty/windows/freeglut/lib/x64/freeglut.lib ^
 	-DZLIB_INCLUDE_DIR:PATH=%sourcedir%/3rdparty/windows/zlib ^
-	-DGLUT_INCLUDE_DIR:PATH=%sourcedir%/3rdparty/windows ^
+	-DGLUT_INCLUDE_DIR:PATH=%sourcedir%/3rdparty/windows/freeglut/include ^
 	-DOpenCV_DIR:PATH=%opencvdir%/opencv/build ^
 	-DOUTPUT_DIRECTORY:PATH=%outdir% ^
 	%sourcedir%
@@ -123,7 +123,7 @@ if %ERRORLEVEL% GEQ 1 (
 	exit /B 1
 )
 
-call:copy %sourcedir%/3rdparty/windows/x64/freeglut.dll %outdir%/bin/%buildtype%
+call:copy %sourcedir%/3rdparty/windows/freeglut/bin/x64/freeglut.dll %outdir%/bin/%buildtype%
 
 if %ERRORLEVEL% GEQ 1 (
 	echo copy failed
