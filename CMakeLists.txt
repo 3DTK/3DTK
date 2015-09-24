@@ -482,15 +482,15 @@ ELSE(WIN32)
     include_directories(${OPENGL_INC})
 ENDIF(WIN32)
 
-if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+if (${CMAKE_CXX_COMPILER_ID} STREQUAL Clang)
   # using Clang
   SET(ADDITIONAL_CFLAGS "-O3 -std=c++0x -msse3 -Wall -Wno-write-strings -Wno-char-subscripts -Wno-unused-result" CACHE STRING "Additional flags given to the compiler (-O3 -Wall -Wno-write-strings)" )
-elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+elseif (${CMAKE_CXX_COMPILER_ID} STREQUAL GNU)
   # using GCC
   SET(ADDITIONAL_CFLAGS "-O3 -std=c++0x -msse3 -Wall -finline-functions -Wno-unused-but-set-variable -Wno-write-strings -Wno-char-subscripts -Wno-unused-result" CACHE STRING "Additional flags given to the compiler (-O3 -Wall -finline-functions -Wno-write-strings)" )
-elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel")
+elseif (${CMAKE_CXX_COMPILER_ID} STREQUAL Intel)
   # using Intel C++
-elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
+elseif (${CMAKE_CXX_COMPILER_ID} STREQUAL MSVC)
   # using Visual Studio C++
   SET(ADDITIONAL_CFLAGS "-O2" CACHE STRING "Additional flags given to the compiler ( -O2)" )
 endif()
