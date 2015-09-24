@@ -1,6 +1,5 @@
 #ifdef _MSC_VER
 #define  _USE_MATH_DEFINES
-#define NOMINMAX
 #endif
 
 #include "cuda/grid.h"
