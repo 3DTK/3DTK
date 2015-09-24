@@ -276,7 +276,7 @@ void modifyFrames(double* resTrans, string &dir, int start, int end, bool inputI
     ofstream modFrames_out;
     ofstream modFrames_out2;
 
-    for (ssize_t i = start; i <= end; i++){
+    for (int i = start; i <= end; i++){
         snprintf(inputFileName, 255, "%sscan%.3zd.frames", dir.c_str(), i);
         snprintf(modFramesFileName, 255, "%sMODIFIED_scan%.3zd.frames", dir.c_str(), i);
 
