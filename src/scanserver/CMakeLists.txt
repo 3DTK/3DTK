@@ -8,15 +8,15 @@ set(CLIENT_SRCS
 
 if(WITH_METRICS)
   set(CLIENT_SRCS ${CLIENT_SRCS} ../slam6d/metrics.cc)
-endif(WITH_METRICS)
+endif()
 
 add_library(scanclient STATIC ${CLIENT_SRCS})
 ### EXPORT SHARED LIBS
 
-IF(EXPORT_SHARED_LIBS)
+if(EXPORT_SHARED_LIBS)
 add_library(scanclient_s SHARED ${CLIENT_SRCS})
 target_link_libraries(scanclient_s pointfilter ${Boost_LIBRARIES})
-ENDIF(EXPORT_SHARED_LIBS)
+endif()
 
 # add libraries
 # boost::interprocess
@@ -25,7 +25,7 @@ set(CLIENT_LIBS ${Boost_LIBRARIES} pointfilter)
 if(UNIX AND NOT APPLE)
   # boost::interprocess uses pthread, requiring librt                                                                                                                                                           
   set(CLIENT_LIBS ${CLIENT_LIBS} rt)
-endif(UNIX AND NOT APPLE)
+endif()
 
 target_link_libraries(scanclient ${CLIENT_LIBS})
 
@@ -49,11 +49,11 @@ set(SERVER_LIBS ${Boost_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LI
 if(UNIX AND NOT APPLE)
   # boost::interprocess uses pthread, requiring librt
   set(SERVER_LIBS ${SERVER_LIBS} pthread rt)
-endif(UNIX AND NOT APPLE)
+endif()
 
 if(WIN32)
   # 3rd party getopt library
   set(SERVER_LIBS ${SERVER_LIBS} XGetopt)
-endif(WIN32)
+endif()
 
 target_link_libraries(scanserver ${SERVER_LIBS})

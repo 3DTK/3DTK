@@ -1,4 +1,4 @@
-IF (WITH_THERMO)
+if (WITH_THERMO)
 
   include_directories(${CMAKE_SOURCE_DIR}/3rdparty/cvblob)
   include_directories(${CMAKE_SOURCE_DIR}/include/shapes/)
@@ -9,17 +9,17 @@ IF (WITH_THERMO)
   add_executable(caliboard caliboard.cc) 
   add_executable(thermo thermo.cc) 
   
-  IF(UNIX)
+  if(UNIX)
     target_link_libraries(caliboard scan shape newmat dl ann ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY})
     target_link_libraries(thermo scan shape newmat dl ann ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY})
     target_link_libraries(thermo cvblob ${OpenCV_LIBS} scan ann ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY})
-  ENDIF(UNIX)
+  endif()
 
-  IF (WIN32)
+  if (WIN32)
     target_link_libraries(caliboard scan shape newmat XGetopt ann)
     target_link_libraries(thermo scan shape newmat XGetopt ann)
     target_link_libraries(thermo cvblob ${OpenCV_LIBS} scan ann)
-  ENDIF(WIN32)
+  endif()
   
 
-ENDIF(WITH_THERMO)
+endif()

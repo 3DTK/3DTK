@@ -1,10 +1,10 @@
-IF (WITH_SHAPE_DETECTION)
+if (WITH_SHAPE_DETECTION)
   include_directories(${CMAKE_SOURCE_DIR}/3rdparty/gocr-0.48/src)
   include_directories(${CMAKE_SOURCE_DIR}/3rdparty/gocr-0.48/include)
   include_directories(${CMAKE_SOURCE_DIR}/include/shapes/)
   
 #  # Compile gocr library
-#  SET(GOCR_DIR ${CMAKE_SOURCE_DIR}/3rdparty/gocr-0.48/src/)
+#  set(GOCR_DIR ${CMAKE_SOURCE_DIR}/3rdparty/gocr-0.48/src/)
 #  add_library(Pgm2asc SHARED  ${GOCR_DIR}gocr.c ${GOCR_DIR}pgm2asc.c ${GOCR_DIR}box.c ${GOCR_DIR}database.c 
 #                              ${GOCR_DIR}detect.c ${GOCR_DIR}barcode.c ${GOCR_DIR}lines.c ${GOCR_DIR}list.c 
 #                              ${GOCR_DIR}ocr0.c ${GOCR_DIR}ocr0n.c ${GOCR_DIR}ocr1.c ${GOCR_DIR}otsu.c 
@@ -13,40 +13,40 @@ IF (WITH_SHAPE_DETECTION)
 
 #  add_executable(shapes shapes.cc  geom_math.cc numberrec.cc  scan_ransac.cc )
 #
-#  IF(WIN32)
+#  if(WIN32)
 #    target_link_libraries(shapes scan XGetopt netpbm Pgm2asc)
-#  ENDIF(WIN32)
+#  endif()
 #
-#  IF (UNIX)
+#  if (UNIX)
 #    target_link_libraries(shapes scan newmat dl netpbm Pgm2asc )
-#  ENDIF(UNIX)
+#  endif()
 #  
   
   add_executable(planes plane.cc)
 #  add_executable(image toImage.cc image.cc hough.cc convexplane.cc accumulator.cc hsm3d.cc ConfigFileHough.cc parascan.cc quadtree.cc geom_math.cc )
 #  add_executable(matchMarker matchMarker.cc)
   
-  IF(UNIX)
+  if(UNIX)
     target_link_libraries(planes scan shape newmat dl ann ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY})
 #    target_link_libraries(image scan newmat sparse dl ANN )
 #    target_link_libraries(matchMarker scan newmat sparse dl ANN )
-  ENDIF(UNIX)
+  endif()
 
-  IF (WIN32)
+  if (WIN32)
 	  target_link_libraries(planes scan newmat XGetopt shape ann)
 #    target_link_libraries(image scan newmat sparse ANN XGetopt)
-  ENDIF(WIN32)
+  endif()
 
-SET(SHAPELIB_SRCS
+set(SHAPELIB_SRCS
   hough.cc convexplane.cc accumulator.cc hsm3d.cc ConfigFileHough.cc parascan.cc quadtree.cc geom_math.cc )
 
 add_library(shape STATIC ${SHAPELIB_SRCS})
 
 #target_link_libraries(shapelib)
-IF(EXPORT_SHARED_LIBS)
+if(EXPORT_SHARED_LIBS)
 add_library(shape_s SHARED ${SHAPELIB_SRCS})
 target_link_libraries(shape_s ${Boost_LIBRARIES} newmat)
 #target_link_libraries(scan_s ${Boost_LIBRARIES} newmat)
-ENDIF(EXPORT_SHARED_LIBS)
+endif()
 
-ENDIF(WITH_SHAPE_DETECTION)
+endif()
