@@ -1,26 +1,26 @@
-SET(SHOW_LIBS ${OPENGL_LIBRARIES} glui scan ann)
-IF(WIN32)
-  SET(SHOW_LIBS ${SHOW_LIBS} ${GLUT_LIBRARIES} XGetopt)
-ENDIF(WIN32)
-IF (UNIX)
-  SET(SHOW_LIBS newmat dl ${GLUT_LIBRARIES} ${SHOW_LIBS})
-ENDIF(UNIX)
+set(SHOW_LIBS ${OPENGL_LIBRARIES} glui scan ann)
+if(WIN32)
+  set(SHOW_LIBS ${SHOW_LIBS} ${GLUT_LIBRARIES} XGetopt)
+endif()
+if (UNIX)
+  set(SHOW_LIBS newmat dl ${GLUT_LIBRARIES} ${SHOW_LIBS})
+endif()
 
-IF(WITH_VELOSLAM)
+if(WITH_VELOSLAM)
   add_executable(veloslam veloslam.cc veloscan.cc debugview.cc pcddump.cc tracker.cc
    trackermanager.cc drawtrackers.cc kalmanfilter.cc matrix.cc lap.cc)
 
-IF(UNIX)
+if(UNIX)
   target_link_libraries(veloslam dl scan newmat cxsparse ann ${Boost_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} ${Boost_THREAD_LIBRARY} ${SHOW_LIBS})
-ENDIF(UNIX)
+endif()
 
-IF(WIN32)
+if(WIN32)
   target_link_libraries(veloslam scan newmat cxsparse ann XGetopt ${Boost_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} ${SHOW_LIBS})
-ENDIF(WIN32)
-ENDIF(WITH_VELOSLAM)
+endif()
+endif()
 
-#IF(WITH_VELOSLAM)
- #  SET(SHOW_SRCS ../show/NurbsPath.cc ../show/PathGraph.cc ../show/vertexarray.cc
+#if(WITH_VELOSLAM)
+ #  set(SHOW_SRCS ../show/NurbsPath.cc ../show/PathGraph.cc ../show/vertexarray.cc
  #      ../show/viewcull.cc ../show/colormanager.cc ../show/compacttree.cc
  #      ../show/scancolormanager.cc ../show/display.cc)
 
@@ -31,15 +31,15 @@ ENDIF(WITH_VELOSLAM)
  #     kalmanfilter.cc matrix.cc lap.cc 
  #     intersection_detection.cc SegIter.model ${SHOW_SRCS})
 
-#IF(UNIX)
+#if(UNIX)
 #  target_link_libraries(veloshow dl scan newmat sparse ANN  ${SHOW_LIBS})
-#ENDIF(UNIX)
+#endif()
 
-#IF(WIN32)
+#if(WIN32)
 #  target_link_libraries(veloshow scan newmat sparse ANN XGetopt ${Boost_LIBRARIES}  ${SHOW_LIBS})
-#ENDIF(WIN32)
+#endif()
 
-#ENDIF(WITH_VELOSLAM)
+#endif()
 
 
 

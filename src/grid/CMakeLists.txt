@@ -1,12 +1,12 @@
-IF(WITH_GRIDDER)
+if(WITH_GRIDDER)
   add_executable(2DGridder 2DGridder.cc line.cc gridlines.cc hough.cc viewpointinfo.cc gridWriter.cc parcelmanager.cc parcel.cc parcelinfo.cc scanGrid.cc grid.cc scanToGrid.cc gridPoint.cc scanmanager.cc) 
 
-  IF (UNIX)
+  if (UNIX)
     target_link_libraries(2DGridder scan dl ann ${Boost_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY})
-  ENDIF(UNIX)
+  endif()
 
-  IF (WIN32)
+  if (WIN32)
     target_link_libraries(2DGridder scan ann XGetopt)
-  ENDIF(WIN32)
+  endif()
 
-ENDIF(WITH_GRIDDER)
+endif()

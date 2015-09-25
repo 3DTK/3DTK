@@ -1,20 +1,20 @@
-IF(WITH_PMD)
+if(WITH_PMD)
   include_directories(${CMAKE_SOURCE_DIR}/include/pmd/pmdaccess2)
   include_directories(${CMAKE_SOURCE_DIR}/include/pmd/pose)
   include_directories(${CMAKE_SOURCE_DIR}/include/pmd)
   
 
-  FIND_LIBRARY(LIBCONFIG_LIBRARY_DIR libconfig.so)
-  FIND_LIBRARY(LIBGLFW_LIBRARY_DIR libglfw.so)
+  find_library(LIBCONFIG_LIBRARY_DIR libconfig.so)
+  find_library(LIBGLFW_LIBRARY_DIR libglfw.so)
 
-  IF(NOT WIN32)
-    FIND_PACKAGE(LibXml2 REQUIRED)
-  ENDIF(NOT WIN32)
+  if(NOT WIN32)
+    find_package(LibXml2 REQUIRED)
+  endif()
 
-  FIND_PACKAGE(XMLRPC REQUIRED c++)
-  FIND_PACKAGE(OpenCV REQUIRED )
+  find_package(XMLRPC REQUIRED c++)
+  find_package(OpenCV REQUIRED )
 
-  FIND_PATH(FTGL_INCLUDE_DIR
+  find_path(FTGL_INCLUDE_DIR
     NAMES ftgl.h
     PATHS /usr/local/include
     /usr/include
@@ -22,26 +22,26 @@ IF(WITH_PMD)
     /usr/include/freetype2
     NO_DEFAULT_PATH)
   
-  FIND_PATH(freetype_INCLUDE_DIRS
+  find_path(freetype_INCLUDE_DIRS
     NAMES freetype/config/ftheader.h 
     PATHS /usr/local/include
     /usr/include/freetype2
     NO_DEFAULT_PATH)
 
-  #MESSAGE(STATUS ${FTGL_INCLUDE_DIR})
-  #MESSAGE(STATUS ${freetype_INCLUDE_DIRS})
+  #message(STATUS ${FTGL_INCLUDE_DIR})
+  #message(STATUS ${freetype_INCLUDE_DIRS})
   include_directories(${FTGL_INCLUDE_DIR})
   include_directories(${freetype_INCLUDE_DIRS})
 
 
-  SET(PMDACCESS_DIR   pmdaccess2/)
-  SET(POSE_DIR        pose/)
-  SET(OFFLINE_DIR     offline/)
-  SET(CALIBRATE_DIR   calibrate/)
+  set(PMDACCESS_DIR   pmdaccess2/)
+  set(POSE_DIR        pose/)
+  set(OFFLINE_DIR     offline/)
+  set(CALIBRATE_DIR   calibrate/)
 
   add_library(pmdaccess2 STATIC ${PMDACCESS_DIR}pmdaccess.cc)
   
-  SET(PMD_LIBS pmdaccess2 config glfw GL GLU ftgl xmlrpc_util glfw xmlrpc_client xmlrpc xmlrpc++ xmlrpc_client++ xmlrpc_xmltok xmlrpc_xmlparse ${OpenCV_LIBS} )
+  set(PMD_LIBS pmdaccess2 config glfw GL GLU ftgl xmlrpc_util glfw xmlrpc_client xmlrpc xmlrpc++ xmlrpc_client++ xmlrpc_xmltok xmlrpc_xmlparse ${OpenCV_LIBS} )
 
 
   add_executable(grabVideoAnd3D  ${OFFLINE_DIR}grabVideoAnd3D.cc cvpmd.cc pmdWrap.cc ) 
@@ -65,4 +65,4 @@ IF(WITH_PMD)
   add_executable(pose  ${POSE_DIR}pose.cc ${POSE_DIR}history.cc cvpmd.cc pmdWrap.cc) 
   target_link_libraries(pose scan newmat ${PMD_LIBS})
 
-ENDIF(WITH_PMD)
+endif()
