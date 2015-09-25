@@ -22,10 +22,10 @@ if(WITH_FLOORPLAN)
     
     if(UNIX)
         target_link_libraries(floorplan ${UNIX_LIBS} ${LIB_CGAL} ${Boost_LIBS} ${LIB_GMP} ${OpenCV_LIBS})
-    endif(UNIX)
+    endif()
 
     if (WIN32)
         target_link_libraries(floorplan ${UNIX_LIBS} ${LIB_CGAL} ${Boost_LIBS} ${LIB_GMP} ${OpenCV_LIBS})
-    endif(WIN32)
+    endif()
 
-endif(WITH_FLOORPLAN)
+endif()
