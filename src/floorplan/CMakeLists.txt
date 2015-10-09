@@ -9,7 +9,7 @@ if(WITH_FLOORPLAN)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -frounding-math")
     
     # Sources
-    file(GLOB SOURCES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "*.cc")
+    set(SOURCES colorGradient.cc  floorPlan.cc  floorplan_extractor.cc  Makefile  plane3d.cc point3d.cc  rotation3d.cc  scene.cc  util.cc  vector3d.cc)
     
     # Binaries
     add_executable(floorplan ${SOURCES})
