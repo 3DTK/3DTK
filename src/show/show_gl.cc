@@ -502,7 +502,8 @@ void DisplayItFunc(GLenum mode, bool interruptable)
       mouseRotZ = deg(rPT[2]);
     
     }
-    updateControls();
+    if (!nogui)
+      updateControls();
 
     glTranslated(X, Y, Z);       // move camera     
   }
