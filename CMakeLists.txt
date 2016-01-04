@@ -2,6 +2,9 @@ cmake_minimum_required (VERSION 2.8.2)
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/3rdparty/CMakeModules" ${CMAKE_MODULE_PATH})
 project (3DTK)
 
+# cmake no longer defines WIN32 on cygwin
+set(CMAKE_LEGACY_CYGWIN_WIN32 0) # remove when cmake >= 2.8.4 is required
+
 # Hide CMake variables
 set (CMAKE_INSTALL_PREFIX "/usr/local" CACHE INTERNAL "" FORCE)
 set (CMAKE_BUILD_TYPE "" CACHE INTERNAL "" FORCE)
