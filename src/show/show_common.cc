@@ -17,7 +17,6 @@
 #include "glee/GLee.h"
 #endif
 
-#include "show/show.h"
 #include "show/show_Boctree.h"
 #include "show/compacttree.h"
 #include "show/NurbsPath.h"
@@ -28,6 +27,7 @@
 #else
 #include "veloslam/veloscan.h"
 #endif
+#include "show/show.h"
 #include "GL/glui.h"  /* Header File For The glui functions */
 #include <fstream>
 using std::ifstream;

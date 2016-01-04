@@ -13,6 +13,9 @@
 #define  _USE_MATH_DEFINES
 #include <windows.h>
 #endif
+#ifdef __CYGWIN__
+#include <windef.h>
+#endif
 #ifdef __APPLE__
 #include <GLUT/glut.h>
 #elif WITH_FREEGLUT
