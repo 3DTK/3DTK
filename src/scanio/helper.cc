@@ -507,7 +507,6 @@ std::function<bool (std::istream &data_file)> open_uos_file(
         if (linelen < 0)
             throw std::runtime_error("unable to read uos header");
 
-        ScanDataTransform_identity transform;
         readASCII(data_file, firstline, linelen, spec, transform, filter, xyz, rgb, reflectance, temperature, amplitude, type, deviation);
 
         if (firstline != NULL)
