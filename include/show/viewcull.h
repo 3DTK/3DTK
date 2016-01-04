@@ -2,7 +2,9 @@
 #include <stdio.h>
 #include <math.h>
 
-
+#ifdef __CYGWIN__
+#include <windef.h>
+#endif
 #ifdef _MSC_VER
 #include <windows.h>
 #include <GL/glu.h>
