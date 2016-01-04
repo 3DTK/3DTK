@@ -57,7 +57,8 @@ int main(int argc, char **argv)
   initShow(argc, argv);
   initScreenWindow();
 
-  newMenu();
+  if (!nogui)
+    newMenu();
   glutMainLoop();
 }
 

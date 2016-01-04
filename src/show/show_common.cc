@@ -199,6 +199,11 @@ bool keymap[256];
  */
 bool coloranim = true;
 
+/**
+ * hide the gui
+ */
+bool nogui = false;
+
 //@@@
 //int animate_both         = 0;             // Animate both scan matchin and path?
 
@@ -524,6 +529,7 @@ int parseArgs(int argc,char **argv,
     { "sphere",          required_argument,   0,  'b' },
     { "noanimcolor",     no_argument,         0,  'A' },
     { "customFilter",    required_argument,   0,  'u' },
+    { "nogui",           no_argument,         0,  'G' },
     { 0,           0,   0,   0}                    // needed, cf. getopt.h
   };
 
@@ -649,6 +655,9 @@ int parseArgs(int argc,char **argv,
         break;
       case 'u':
         customFilter = optarg;
+        break;
+      case 'G':
+        nogui = true;
         break;
       default:
         abort ();
