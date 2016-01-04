@@ -798,6 +798,11 @@ int readFrames(string dir, int start, int end, bool readInitial, IOType &type)
     } catch(std::ios_base::failure& e) {
       break;
     }
+
+	if (frame_count == 0) {
+		break;
+	}
+
     for(unsigned int i = 0; i < frame_count; ++i) {
       (*it)->getFrame(i, transformation, algoType);
       double* transMatOpenGL = new double[16];
