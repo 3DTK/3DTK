@@ -40,6 +40,8 @@ ScanIO * ScanIO::getScanIO(IOType iotype)
   libname += ".dll";
 #elif __APPLE__
   libname = "lib/lib" + libname + ".dylib";
+#elif __CYGWIN__
+  libname = "cyg" + libname + ".dll";
 #else
   libname = "lib" + libname + ".so";
 #endif
@@ -97,6 +99,8 @@ void ScanIO::clearScanIOs()
       libname += ".dll";
 #elif __APPLE__
       libname = "lib/lib" + libname + ".dylib";
+#elif __CYGWIN__
+      libname = "cyg" + libname + ".dll";
 #else
       libname = "lib" + libname + ".so";
 #endif

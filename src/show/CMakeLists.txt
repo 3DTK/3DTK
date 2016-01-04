@@ -2,6 +2,8 @@ set(SHOW_LIBS glui scan ann newmat ${GLUT_LIBRARIES} ${OPENGL_LIBRARIES} ${Boost
 if (WIN32)
   set(SHOW_LIBS ${SHOW_LIBS} XGetopt)
   set(SHOW_LIBS_S glui scan_s ann_s newmat_s XGetopt ${GLUT_LIBRARIES} ${OPENGL_LIBRARIES})
+elseif(CYGWIN)
+  set(SHOW_LIBS_S glui scan_s ann_s newmat_s XGetopt ${GLUT_LIBRARIES} ${OPENGL_LIBRARIES})
 else()
   set(SHOW_LIBS_S glui_s scan_s ann newmat ${GLUT_LIBRARIES} ${OPENGL_LIBRARIES})
 endif()
