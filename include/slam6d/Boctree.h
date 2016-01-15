@@ -247,7 +247,7 @@ public:
     center[2] = 0.5 * (mins[2] + maxs[2]);
     
     size = max(max(0.5 * (maxs[0] - mins[0]), 0.5 * (maxs[1] - mins[1])), 0.5 * (maxs[2] - mins[2]));
-    cout << size << endl;
+    //   cout << size << endl;
     size += 1.0; // for numerical reasons we increase size 
 
     // calculate new buckets
