@@ -59,56 +59,59 @@ void usage(char* prog)
   const string normal("");
 #endif
   cout << endl
-      << bold << "USAGE " << normal << endl
-      << "   " << prog << " [options] directory" << endl << endl;
+	  << bold << "USAGE " << normal << endl
+	  << "   " << prog << " [options] directory" << endl << endl;
   cout << bold << "OPTIONS" << normal << endl
-
-      << endl
-      << bold << "  -e" << normal << " NR, " << bold << "--end=" << normal << "NR" << endl
-      << "         end after scan NR" << endl
-      << endl
-      << bold << "  -f" << normal << " F, " << bold << "--format=" << normal << "F" << endl
-      << "         using shared library F for input" << endl
-      << "         (chose F from {uos, uos_map, uos_rgb, uos_frames, uos_map_frames, old, rts, rts_map, ifp, riegl_txt, riegl_rgb, riegl_bin, zahn, ply})" << endl
-      << endl
-      << bold << "  -m" << normal << " NR, " << bold << "--max=" << normal << "NR" << endl
-      << "         neglegt all data points with a distance larger than NR 'units'" << endl
-      << endl
-      << bold << "  -M" << normal << " NR, " << bold << "--min=" << normal << "NR" << endl
-      << "         neglegt all data points with a distance smaller than NR 'units'" << endl
-      << endl
-      << bold << "  -u" << normal << " STR, " << bold << "--customFilter=" << normal << "STR" << endl
-      << "         apply custom filter, filter mode and data are specified as semicolon-seperated string:" << endl
-      << "         STR: '{filterMode};{nrOfParams}[;param1][;param2][...]'" << endl
-      << "         see filter implementation in pointfilter.cc for more detail." << endl
-      << endl
-      << bold << "  -O" << normal << " NR (optional), " << bold << "--octree=" << normal << "NR (optional)" << endl
-      << "         use randomized octree based point reduction (pts per voxel=<NR>)" << endl
-      << "         requires -r or --reduce" << endl
-      << endl
-      << bold << "  -p, --trustpose" << normal << endl
-      << "         Trust the pose file, do not extrapolate the last transformation." << endl
-      << "         (just for testing purposes, or gps input.)" << endl
-      << endl
-      << endl
-      << bold << "  -r" << normal << " NR, " << bold << "--reduce=" << normal << "NR" << endl
-      << "         turns on octree based point reduction (voxel size=<NR>)" << endl
-      << endl
-      /*
-    << bold << "  -R" << normal << " NR, " << bold << "--random=" << normal << "NR" << endl
+	  << endl
+	  << bold << "  -e" << normal << " NR, " << bold << "--end=" << normal << "NR" << endl
+	  << "         end after scan NR" << endl
+	  << endl
+	  << bold << "  -f" << normal << " F, " << bold << "--format=" << normal << "F" << endl
+	  << "         using shared library F for input" << endl
+	  << "         (chose F from {uos, uos_map, uos_rgb, uos_frames, uos_map_frames, old, rts, rts_map, ifp, riegl_txt, riegl_rgb, riegl_bin, zahn, ply})" << endl
+	  << endl
+	  << bold << "  -m" << normal << " NR, " << bold << "--max=" << normal << "NR" << endl
+	  << "         neglegt all data points with a distance larger than NR 'units'" << endl
+	  << endl
+	  << bold << "  -M" << normal << " NR, " << bold << "--min=" << normal << "NR" << endl
+	  << "         neglegt all data points with a distance smaller than NR 'units'" << endl
+	  << endl
+	  << bold << "  -u" << normal << " STR, " << bold << "--customFilter=" << normal << "STR" << endl
+	  << "         apply custom filter, filter mode and data are specified as semicolon-seperated string:" << endl
+	  << "         STR: '{filterMode};{nrOfParams}[;param1][;param2][...]'" << endl
+	  << "         see filter implementation in pointfilter.cc for more detail." << endl
+	  << endl
+	  << bold << "  -O" << normal << " NR (optional), " << bold << "--octree=" << normal << "NR (optional)" << endl
+	  << "         use randomized octree based point reduction (pts per voxel=<NR>)" << endl
+	  << "         requires -r or --reduce" << endl
+	  << endl
+	  << bold << "  -p, --trustpose" << normal << endl
+	  << "         Trust the pose file, do not extrapolate the last transformation." << endl
+	  << "         (just for testing purposes, or gps input.)" << endl
+	  << endl
+	  << endl
+	  << bold << "  -r" << normal << " NR, " << bold << "--reduce=" << normal << "NR" << endl
+	  << "         turns on octree based point reduction (voxel size=<NR>)" << endl
+	  << endl
+    /*
+	 << bold << "  -R" << normal << " NR, " << bold << "--random=" << normal << "NR" << endl
       << "         turns on randomized reduction, using about every <NR>-th point only" << endl
       << endl
-      */
-      << bold << "  -s" << normal << " NR, " << bold << "--start=" << normal << "NR" << endl
-      << "         start at scan NR (i.e., neglects the first NR scans)" << endl
-      << "         [ATTENTION: counting naturally starts with 0]" << endl
-      << bold << "  -x, --xyz" << endl
-      << "         export in xyz format (right handed coordinate system in m)" << endl
-      << bold << "  -y" << normal << " NR, " << bold << "--scale=" << normal << "NR" << endl
-      << "         scale factor for export in XYZ format (default value is 0.01, so output will be in [m])" << endl
-   
-      << endl
-          << endl << endl;
+    */
+	  << bold << "  -s" << normal << " NR, " << bold << "--start=" << normal << "NR" << endl
+	  << "         start at scan NR (i.e., neglects the first NR scans)" << endl
+	  << "         [ATTENTION: counting naturally starts with 0]" << endl
+	  << endl
+	  << bold << "  -c, --color" << endl
+	  << "         export in color as RGB" << endl
+	  << endl
+	  << bold << "  -x, --xyz" << endl
+	  << "         export in xyz format (right handed coordinate system in m)" << endl
+	  << endl
+	  << bold << "  -y" << normal << " NR, " << bold << "--scale=" << normal << "NR" << endl
+	  << "         scale factor for export in XYZ format (default value is 0.01, so output will be in [m])" << endl
+	  << endl
+	  << endl << endl;
   
   cout << bold << "EXAMPLES " << normal << endl
       << "   " << prog << " -s 2 -e 3 dat" << endl << endl;
@@ -186,11 +189,11 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &rand,
        }
        break;
      case 'R':
-     use_reflectance = true; 
+	  use_reflectance = true; 
        break;
-   case 'c':
-     use_color = true;
-     break;
+	case 'c':
+	  use_color = true;
+	  break;
      case 's':
        start = atoi(optarg);
        if (start < 0) { cerr << "Error: Cannot start at a negative scan number.\n"; exit(1); }
