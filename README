@@ -1,5 +1,8 @@
 -------------------------------------------------------------------
 
+For installation instructions on Ubuntu and Debian, please have a look at the
+INSTALL file.
+
 To compile the project simply call "make". This will configure slam6d
 using the default settings. If you wish to configure the project using
 custom settings do: "make config". This command requires ccmake be
@@ -25,24 +28,6 @@ Some Boost libraries (graph, regex, serialization, filesystem,
 interprocess) are needed to compile the slam6D program.
 3DTK is not compatible with boost version 1.49. Please make sure to use a
 different version.
-
-If you are using Debian just do:
-
-  aptitude install libboost-graph-dev libboost-regex-dev libboost-serialization-dev freeglut3-dev libxmu-dev libxi-dev
-
-or, if you are still using Debian stable (lenny):
-
-  aptitude install libboost-graph1.35-dev libboost-regex1.35-dev libboost-serialization1.35-dev freeglut3-dev libxmu-dev libxi-dev
-
-for Ubuntu this would be:
-
-  sudo apt-get install libboost-all-dev libcv-dev freeglut3-dev libxmu-dev libxi-dev
-
-SuSE users please use yast2 for installing the missing packages
-
-Additionally you need some external tools (exemplarily for Ubuntu):
-
-  sudo apt-get install imagemagick ffmpeg libx264-120
 
 -------------------------------------------------------------------
 
