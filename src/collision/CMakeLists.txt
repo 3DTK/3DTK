@@ -7,4 +7,7 @@ if(WITH_COLLISION)
   endif()
   add_executable(extract_hull extract_hull.cc)
   target_link_libraries(extract_hull scan ${Boost_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY})
+
+  add_executable(segment_colliding segment_colliding.cc)
+  target_link_libraries(segment_colliding scan ${Boost_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY})
 endif()
