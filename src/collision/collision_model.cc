@@ -178,10 +178,35 @@ std::vector<Frame> read_trajectory(string filename)
     return positions;
 }
 
-void write_xyzr(DataXYZ &points, string &dir,
+void write_xyzr(DataXYZ &points, DataReflectance &refl, string &dir,
         std::vector<bool> const &colliding,
         std::vector<float> const &dist_colliding)
 {
+	// sanity checks
+    if (points.size() != refl.size() || points.size() != colliding.size()) {
+		cerr << "differing data lengths: " << points.size() << " vs. " << refl.size() << " vs. " << colliding.size() << endl;
+		return;
+	}
+	// find the minimum and maximum for reflectance and penetration depth
+	double min_refl, max_refl, min_pd, max_pd;
+	min_refl = min_pd = std::numeric_limits<double>::max();
+	max_refl = max_pd = std::numeric_limits<double>::min();
+	for (size_t i = 0; i < refl.size(); ++i) {
+		if (refl[i] < min_refl)
+			min_refl = refl[i];
+		if (refl[i] > max_refl)
+			max_refl = refl[i];
+	}
+	for (size_t i = 0; i < dist_colliding.size(); ++i) {
+		if (dist_colliding[i] < min_pd)
+			min_pd = dist_colliding[i];
+		if (dist_colliding[i] > max_pd)
+			max_pd = dist_colliding[i];
+	}
+	cout << "min refl: " << min_refl << endl;
+	cout << "max refl: " << max_refl << endl;
+	cout << "min pd: " << min_pd << endl;
+	cout << "max pd: " << max_pd << endl;
     cerr << "writing colliding points to " << dir << "scan002.xyz" << endl;
     ofstream fcolliding((dir + "scan002.xyz").c_str());
     cerr << "writing non-colliding points to " << dir << "scan003.xyz" << endl;
@@ -247,7 +272,6 @@ size_t handle_pointcloud(std::vector<Point> &pointmodel, DataXYZ &environ,
         pa[i][0] = environ[i][0];
         pa[i][1] = environ[i][1];
         pa[i][2] = environ[i][2];
-        colliding[i] = false;
     }
     cerr << "environment: " << i << endl;
     cerr << "building kd tree..." << endl;
@@ -592,7 +616,6 @@ void calculate_collidingdist2(std::vector<Point> &pointmodel, DataXYZ &environ,
     /* build a kdtree for colliding points */
     cerr << "reading environment..." << endl;
     double** pa = new double*[num_colliding];
-    size_t* idxmap = new size_t[num_colliding];
     for (size_t i = 0, j = 0; i < environ.size(); ++i) {
         if (!colliding[i]) {
             continue;
@@ -601,7 +624,6 @@ void calculate_collidingdist2(std::vector<Point> &pointmodel, DataXYZ &environ,
         pa[j][0] = environ[i][0];
         pa[j][1] = environ[i][1];
         pa[j][2] = environ[i][2];
-        idxmap[j] = i;
         j++;
     }
     cerr << "colliding: " << num_colliding << endl;
@@ -624,24 +646,23 @@ void calculate_collidingdist2(std::vector<Point> &pointmodel, DataXYZ &environ,
             transform3(it2.transformation, point1);
             transform3(it2.transformation, point2);
             size_t c1 = t.segmentSearch_1NearestPoint(point1, point2, sqRad2, thread_num);
-            if (c1 < std::numeric_limits<size_t>::max()) {
-                size_t c2 = idxmap[c1];
-                point2[0] = environ[c2][0];
-                point2[1] = environ[c2][1];
-                point2[2] = environ[c2][2];
-                double dist2 = Dist2(point1, point2);
-                // now get all points around this closest point to mark them
-                // with the same penetration distance
-                vector<size_t> closestsphere = t.fixedRangeSearch(pa[c1], sqRad2, thread_num);
-                for (const auto &it3 : closestsphere) {
-                    if (dist_colliding[it3] > dist2) {
-                        dist_colliding[it3] = dist2;
-                    }
-                }
-            }
+            if (c1 >= std::numeric_limits<size_t>::max()) {
+				// found nothing
+				continue;
+			}
+			double dist2 = Dist2(point1, pa[c1]);
+			// now get all points around this closest point to mark them
+			// with the same penetration distance
+			vector<size_t> closestsphere = t.fixedRangeSearch(pa[c1], sqRad2, thread_num);
+			for (const auto &it3 : closestsphere) {
+				if (dist2 < dist_colliding[it3]) {
+					dist_colliding[it3] = dist2;
+				}
+			}
         }
         i++;
     }
+	// turn the squared distances into normal ones
     for (size_t i = 0; i < dist_colliding.size(); ++i) {
         dist_colliding[i] = sqrt(dist_colliding[i]);
     }
@@ -651,7 +672,6 @@ void calculate_collidingdist2(std::vector<Point> &pointmodel, DataXYZ &environ,
         delete[] pa[i];
     }
     delete[] pa;
-    delete[] idxmap;
 }
 
 int main(int argc, char **argv)
@@ -692,11 +712,11 @@ int main(int argc, char **argv)
     }
     DataXYZ model(it[0]->get("xyz"));
     DataXYZ environ(it[1]->get("xyz"));
+    DataReflectance refl(it[1]->get("reflectance"));
     std::vector<bool> colliding;
-    colliding.reserve(environ.size());
+    colliding.resize(environ.size(), false); // by default, nothing collides
     cerr << "reading model..." << endl;
     vector<Point> pointmodel;
-    pointmodel.reserve(model.size());
     for(unsigned int j = 0; j < model.size(); j++) {
         pointmodel.push_back(Point(model[j][0], model[j][1], model[j][2]));
     }
@@ -745,11 +765,8 @@ int main(int argc, char **argv)
         exit(0);
     }
     std::vector<float> dist_colliding;
-    dist_colliding.reserve(num_colliding);
-    for (size_t i = 0; i < num_colliding; ++i) {
-        // FIXME: make the maximum colliding distance configurable
-        dist_colliding.push_back(1000);
-    }
+	// FIXME: make the maximum colliding distance configurable
+    dist_colliding.resize(num_colliding, 1000);
     if (calcdistances) {
         switch (pdmethod) {
             case PDTYPE1:
@@ -760,5 +777,5 @@ int main(int argc, char **argv)
                 break;
         }
     }
-    write_xyzr(environ, dir, colliding, dist_colliding);
+    write_xyzr(environ, refl, dir, colliding, dist_colliding);
 }
