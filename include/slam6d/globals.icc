@@ -144,12 +144,20 @@ inline ostream& operator<<(ostream& os, const double matrix[16])
  */
 inline istream& operator>>(istream& is, double matrix[16])
 {
-  double tmp;
+  // FIXME: do proper error handling
+  //        Since we cannot return success or failure in this overloaded
+  //        operator any error handling must happen through exceptions.
+  //        The following error conditions should be handled using custom
+  //        exceptions:
+  //
+  //           - the file ended before all entries could be read but at least
+  //             one entry was read successfully
+  //           - the file ended before all entries could be read but no entry
+  //             was read (this happens when given a stream where only the next
+  //             read would trigger the eof)
+  //           - the value read was not a number
   for (int i = 0; i < 16; i++) {
-    if (!is.good()) throw runtime_error("Not enough elements to read for >>(istream&, double[16])");
-    is >> tmp;
-    if (std::isnan(tmp)) throw runtime_error("will not write out NAN value for >>(istream&, double[16])");
-    matrix[i] = tmp;
+    is >> matrix[i];
   }
   return is;
 }
