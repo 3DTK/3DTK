@@ -595,9 +595,7 @@ unsigned int BasicScan::readFrames()
       file >> transformation >> type;
       m_frames.push_back(Frame(transformation, type));
     } while(file.good());
-  } catch(std::exception const& e){
-     cout << "Error reading " << filename << ": " << e.what() << endl;
-  }
+  } catch(...) {}
 
   return m_frames.size();
 }
