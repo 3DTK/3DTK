@@ -144,10 +144,12 @@ inline ostream& operator<<(ostream& os, const double matrix[16])
  */
 inline istream& operator>>(istream& is, double matrix[16])
 {
+  double tmp;
   for (int i = 0; i < 16; i++) {
     if (!is.good()) throw runtime_error("Not enough elements to read for >>(istream&, double[16])");
-    if (std::isnan(matrix[i])) throw runtime_error("will not write out NAN value for >>(istream&, double[16])");
-    is >> matrix[i];
+    is >> tmp;
+    if (std::isnan(tmp)) throw runtime_error("will not write out NAN value for >>(istream&, double[16])");
+    matrix[i] = tmp;
   }
   return is;
 }
