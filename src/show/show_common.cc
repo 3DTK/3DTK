@@ -902,7 +902,8 @@ void initShow(int argc, char **argv){
   glutInit(&argc,argv);
 
   cout << "(wx)show - A highly efficient 3D point cloud viewer" << endl
-       << "(c) Jacobs University Bremen gGmbH, Germany, since 2009" << endl
+       << "(c) University of Wuergburg, Germany, since 2013" << endl
+       << "    Jacobs University Bremen gGmbH, Germany, 2009 - 2013" << endl
        << "    University of Osnabrueck, Germany, 2006 - 2009" << endl << endl;
 
   if(argc <= 1){
