@@ -712,8 +712,9 @@ int main(int argc, char **argv)
        << "A highly efficient SLAM implementation based on scan matching"
        << endl
        << "         with 6 degrees of freedom" << endl
-       << "(c) Jacobs University Bremen gGmbH, Germany, since 2009" << endl
-       << "    University of Osnabrueck, Germany, since 2006" << endl << endl;
+       << "(c) University of Wuergburg, Germany, since 2013" << endl
+       << "    Jacobs University Bremen gGmbH, Germany, 2009 - 2013" << endl
+       << "    University of Osnabrueck, Germany, 2006 - 2009" << endl << endl;
 
   if (argc <= 1) {
     usage(argv[0]);
