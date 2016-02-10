@@ -128,6 +128,70 @@ class TempMap : public ColorMap {
   }
 };
 
+/*
+ * For collision detection three pointclouds have to be presented and colored
+ * differently:
+ *   1. colliding points
+ *   2. non-colliding points
+ *   3. model
+ *
+ * Volkswagen wants the following coloring scheme:
+ *
+ *   - environment in grayscale
+ *   - model in orange
+ *   - colliding points in
+ *       - green for 0-3 cm
+ *       - blue for 3-5 cm
+ *       - red for 5-10 cm
+ *
+ * Reflectance values encode the above in the following way:
+ *
+ *   - -1 <= r < 0: colliding
+ *   - 0 <= r < 1: non-colliding
+ *   - 1: model
+ *
+ * Which means the intervals for the collidings points are:
+ *
+ *   - -0.3 <= r < 0: green
+ *   - -0.5 <= r < 0.3: blue
+ *   - r < 0.5
+ *
+ * The exact colorvalues for green, blue, red and orange are:
+ *
+ *   - green: 0x0eee00
+ *   - blue: 0x1e90ff
+ *   - red: 0xff0000
+ *   - orange: 0xff8c00
+ */
+class VWMap : public ColorMap {
+  public:
+  virtual void calcColor(float *d, unsigned int i, unsigned int buckets) {
+    float t = 2.0 * (float)i/(float)buckets - 1.0;
+	if (t < -0.5) {
+		// red
+		d[0] = 1;
+		d[1] = 0;
+		d[2] = 0;
+	} else if (t < -0.3) {
+		// blue
+		d[0] = 30.0/255.0;
+		d[1] = 144.0 / 255.0;
+		d[2] = 1;
+	} else if (t < 0) {
+		// green
+		d[0] = 14.0 / 255.0;
+		d[1] = 238.0 / 255.0;
+		d[2] = 0;
+	} else if (t < 1) {
+		d[0] = d[1] = d[2] = t; // gray
+	} else {
+		d[0] = 1.0;
+		d[1] = 0.55;
+		d[2] = 0.0;
+	}
+  }
+};
+
 class DiffMap : public ColorMap {
   public:
   virtual void calcColor(float *d, unsigned int i, unsigned int buckets);
