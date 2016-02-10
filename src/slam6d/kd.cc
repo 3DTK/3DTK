@@ -110,7 +110,6 @@ vector<Point> KDtree::kNearestNeighbors(double *_p,
   free (params[threadNum].distances);
 
   for (int i = 0; i < _k; i++) {
-#pragma omp critical
       // only push valid points
     if (params[threadNum].distances[i] >= 0.0f) {
     result.push_back(Point(params[threadNum].closest_neighbors[i][0],
@@ -192,7 +191,6 @@ vector<Point> KDtree::fixedRangeSearch(double *_p,
   _FixedRangeSearch(Void(), threadNum);
   
   for (size_t i = 0; i < params[threadNum].range_neighbors.size(); i++) {
-#pragma omp critical    
     result.push_back(Point(params[threadNum].range_neighbors[i][0],
                            params[threadNum].range_neighbors[i][1],
                            params[threadNum].range_neighbors[i][2]));
@@ -214,7 +212,6 @@ vector<Point> KDtree::AABBSearch(double *_p,
     _AABBSearch(Void(), threadNum);
 
     for (size_t i = 0; i < params[threadNum].range_neighbors.size(); i++) {
-#pragma omp critical    
     result.push_back(Point(params[threadNum].range_neighbors[i][0],
                            params[threadNum].range_neighbors[i][1],
                            params[threadNum].range_neighbors[i][2]));
