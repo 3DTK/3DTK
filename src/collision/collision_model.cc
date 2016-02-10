@@ -79,7 +79,8 @@ void validate(boost::any& v, const std::vector<std::string>& values,
 
 void parse_options(int argc, char **argv, IOType &iotype, string &dir,
         double &radius, bool &calcdistances, collision_method &cmethod,
-        penetrationdepth_method &pdmethod, bool &use_cuda, int &cuda_device)
+        penetrationdepth_method &pdmethod, bool &use_cuda, int &cuda_device,
+		double &voxel, int &octree, bool &reduce)
 {
     po::options_description generic("Generic options");
     generic.add_options()
@@ -103,17 +104,24 @@ void parse_options(int argc, char **argv, IOType &iotype, string &dir,
         ("usecuda,C", po::value<bool>(&use_cuda)->zero_tokens(),"Use NVIDIA CUDA")
 		("device,D", po::value<int>(&cuda_device)->default_value(0));
 
+	po::options_description reduction("Reduction options");
+	reduction.add_options()
+		("voxel,v", po::value<double>(&voxel)->default_value(5.0),
+		 "voxel size") // FIXME: we could compute the optimal voxel size from the search radius such that we could ensure no "holes" no matter where points in adjacent voxels are located
+		("octree,O", po::value<int>(&octree)->default_value(10),
+		 "0 -> center\n1 -> random\nN>1 -> random N");
+
     po::options_description hidden("Hidden options");
     hidden.add_options()
         ("input-dir", po::value<string>(&dir), "input dir");
 
     // all options
     po::options_description all;
-    all.add(generic).add(input).add(prog).add(hidden);
+    all.add(generic).add(input).add(prog).add(reduction).add(hidden);
 
     // options visible with --help
     po::options_description cmdline_options;
-    cmdline_options.add(generic).add(input).add(prog);
+    cmdline_options.add(generic).add(input).add(prog).add(reduction);
 
     // positional argument
     po::positional_options_description pd;
@@ -135,6 +143,10 @@ void parse_options(int argc, char **argv, IOType &iotype, string &dir,
         cout << "scan is the trajectory.";
         exit(0);
     }
+
+	if (vm.count("voxel") || vm.count("octree")) {
+		reduce = true;
+	}
 
     if (!vm.count("input-dir")) {
         cout << "you have to specify an input directory" << endl;
@@ -694,8 +706,11 @@ int main(int argc, char **argv)
     penetrationdepth_method pdmethod;
 	bool use_cuda=0;
 	int cuda_device=0;
+	double voxel;
+	int octree;
+	bool reduce;
 	
-    parse_options(argc, argv, iotype, dir, radius, calcdistances, cmethod, pdmethod, use_cuda, cuda_device);
+    parse_options(argc, argv, iotype, dir, radius, calcdistances, cmethod, pdmethod, use_cuda, cuda_device, voxel, octree, reduce);
 
     // read scan 0 (model) and 1 (environment) without scanserver
     Scan::openDirectory(false, dir, iotype, 0, 1);
@@ -719,9 +734,19 @@ int main(int argc, char **argv)
         cerr << "must supply two scans, the model and the environment in that order" << endl;
         exit(-1);
     }
-    DataXYZ model(it[0]->get("xyz"));
-    DataXYZ environ(it[1]->get("xyz"));
-    DataReflectance refl(it[1]->get("reflectance"));
+
+	if (reduce) {
+		it[0]->setReductionParameter(voxel, octree, PointType::USE_NONE);
+		it[1]->setReductionParameter(voxel, octree, PointType::USE_REFLECTANCE);
+		std::cerr << "calculate point reduction of model..." << std::endl;
+		it[0]->calcReducedPoints();
+		std::cerr << "calculate point reduction of environment..." << std::endl;
+		it[1]->calcReducedPoints();
+	}
+
+    DataXYZ model(reduce ? it[0]->get("xyz reduced") : it[0]->get("xyz"));
+    DataXYZ environ(reduce ? it[1]->get("xyz reduced") : it[1]->get("xyz"));
+    DataReflectance refl(reduce ? it[1]->get("reflectance reduced") : it[1]->get("reflectance"));
     std::vector<bool> colliding;
     colliding.resize(environ.size(), false); // by default, nothing collides
     cerr << "reading model..." << endl;
