@@ -287,56 +287,71 @@ size_t handle_pointcloud(std::vector<Point> &pointmodel, DataXYZ &environ,
     /* build a KDtree from this scan */
     cerr << "reading environment..." << endl;
     double** pa = new double*[environ.size()];
-    size_t i;
-    for (i = 0; i < environ.size(); ++i) {
+    for (size_t i = 0; i < environ.size(); ++i) {
         pa[i] = new double[3];
         pa[i][0] = environ[i][0];
         pa[i][1] = environ[i][1];
         pa[i][2] = environ[i][2];
     }
-    cerr << "environment: " << i << endl;
+    cerr << "environment: " << environ.size() << endl;
     cerr << "building kd tree..." << endl;
     KDtreeIndexed t(pa, environ.size());
     /* initialize variables */
-    int thread_num = 0; // add omp later
     double sqRad2 = radius*radius;
     cerr << "computing collisions..." << endl;
     time_t before = time(NULL);
+
     int end;
-    i = 0;
+    int thread_num = 0;
+#ifdef _OPENMP
+    omp_set_num_threads(OPENMP_NUM_THREADS);
+#endif
     switch (cmethod) {
         case CTYPE1:
             end = trajectory.size();
-            for(const auto &it2 : trajectory) {
-                cerr << (i*100.0)/end << " %\r";
+#ifdef _OPENMP
+#pragma omp parallel shared(end, trajectory, colliding) private(thread_num)
+#pragma omp for schedule(dynamic)
+#endif
+            for(size_t j = 0; j < trajectory.size(); ++j) {
+#ifdef _OPENMP
+		thread_num = omp_get_thread_num();
+#endif
+                cerr << (j*100.0)/end << " %\r";
                 cerr.flush();
                 for(const auto &it : pointmodel) {
                     double point1[3] = {it.x, it.y, it.z};
-                    transform3(it2.transformation, point1);
+                    transform3(trajectory[j].transformation, point1);
                     vector<size_t> collidingsphere = t.fixedRangeSearch(point1, sqRad2, thread_num);
                     fill_colliding(colliding, collidingsphere);
                 }
-                i++;
             }
             break;
         case CTYPE2:
             end = pointmodel.size();
             // we iterate over points instead of points on the trajectory so
             // that we can reuse the previous transformation of the same point
-            for(const auto &it : pointmodel) {
-                cerr << (i*100.0)/end << " %\r";
+#ifdef _OPENMP
+#pragma omp parallel shared(end, trajectory, colliding) private(thread_num)
+#pragma omp for schedule(dynamic)
+#endif
+            for(size_t j = 0; j < pointmodel.size(); ++j) {
+#ifdef _OPENMP
+		thread_num = omp_get_thread_num();
+#endif
+                cerr << (j*100.0)/end << " %\r";
                 cerr.flush();
                 auto it2 = trajectory.begin();
                 double point1[3], point2[3];
-                point1[0] = it.x;
-                point1[1] = it.y;
-                point1[2] = it.z;
+                point1[0] = pointmodel[j].x;
+                point1[1] = pointmodel[j].y;
+                point1[2] = pointmodel[j].z;
                 transform3(it2->transformation, point1);
                 ++it2;
                 for (; it2 < trajectory.end(); ++it2) {
-                    point2[0] = it.x;
-                    point2[1] = it.y;
-                    point2[2] = it.z;
+                    point2[0] = pointmodel[j].x;
+                    point2[1] = pointmodel[j].y;
+                    point2[2] = pointmodel[j].z;
                     transform3(it2->transformation, point2);
                     vector<size_t> collidingsegment = t.segmentSearch_all(point1, point2, sqRad2, thread_num);
                     fill_colliding(colliding, collidingsegment);
@@ -344,7 +359,6 @@ size_t handle_pointcloud(std::vector<Point> &pointmodel, DataXYZ &environ,
                     point1[1] = point2[1];
                     point1[2] = point2[2];
                 }
-                i++;
             }
             break;
         default:
@@ -353,7 +367,7 @@ size_t handle_pointcloud(std::vector<Point> &pointmodel, DataXYZ &environ,
     size_t num_colliding = 0;
     // the actual implementation of std::vector<bool> requires us to use the
     // proxy iterator pattern with &&...
-    for (i = 0; i < environ.size(); ++i) {
+    for (size_t i = 0; i < environ.size(); ++i) {
         if (colliding[i]) {
             num_colliding++;
         }
@@ -361,7 +375,7 @@ size_t handle_pointcloud(std::vector<Point> &pointmodel, DataXYZ &environ,
     time_t after = time(NULL);
     cerr << "colliding: " << num_colliding << endl;
     cerr << "took: " << difftime(after, before) << " seconds" << endl;
-    for (i = 0; i < environ.size(); ++i) {
+    for (size_t i = 0; i < environ.size(); ++i) {
         delete[] pa[i];
     }
     delete[] pa;
