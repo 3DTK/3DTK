@@ -120,7 +120,6 @@ vector<size_t> KDtreeIndexed::kNearestNeighbors(double *_p,
   free (params[threadNum].distances);
 
   for (int i = 0; i < _k; i++) {
-#pragma omp critical
     if (params[threadNum].distances[i] >= 0.0f) {
     result.push_back(params[threadNum].closest_neighbors[i]);
     }
@@ -195,7 +194,6 @@ vector<size_t> KDtreeIndexed::fixedRangeSearch(double *_p,
   _FixedRangeSearch(m_data, threadNum);
   
   for (size_t i = 0; i < params[threadNum].range_neighbors.size(); i++) {
-#pragma omp critical    
     result.push_back(params[threadNum].range_neighbors[i]);
   }
   
@@ -215,7 +213,6 @@ vector<size_t> KDtreeIndexed::AABBSearch(double *_p,
   _AABBSearch(m_data, threadNum);
 
   for (size_t i = 0; i < params[threadNum].range_neighbors.size(); i++) {
-#pragma omp critical
     result.push_back(params[threadNum].range_neighbors[i]);
   }
 
@@ -242,7 +239,6 @@ vector<size_t> KDtreeIndexed::segmentSearch_all(double *_p, double* _p0, double 
   params[threadNum].segment_r2 = r2;
   _segmentSearch_all(m_data, threadNum);
   for (size_t i = 0; i < params[threadNum].range_neighbors.size(); i++) {
-#pragma omp critical
     result.push_back(params[threadNum].range_neighbors[i]);
   }
   delete[] dir;
