@@ -21,7 +21,7 @@ if(WITH_FLOORPLAN)
     find_package(OpenCV REQUIRED)
     
     if(UNIX)
-        target_link_libraries(floorplan ${UNIX_LIBS} ${LIB_CGAL} ${Boost_LIBS} ${LIB_GMP} ${OpenCV_LIBS})
+        target_link_libraries(floorplan ${UNIX_LIBS} ${LIB_CGAL} ${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY} ${Boost_LIBS} ${LIB_GMP} ${OpenCV_LIBS})
     endif()
 
     if (WIN32)
