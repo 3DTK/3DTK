@@ -215,10 +215,9 @@ class ColorManager {
       }
 
       colormap = new float*[buckets + 1];  // allow a color more for values equal to max
-      for (unsigned int i = 0; i < buckets; i++) {
+      for (unsigned int i = 0; i <= buckets; i++) {
         colormap[i] = new float[3];
       }
-      colormap[buckets] = new float[3];
       
       mins = new float[pointdim];
       maxs = new float[pointdim];
@@ -265,10 +264,9 @@ class ColorManager {
     }
 
     virtual void setColorMap(ColorMap &cm) {
-      for (unsigned int i = 0; i < buckets; i++) {
+      for (unsigned int i = 0; i <= buckets; i++) {
         cm.calcColor(colormap[i], i, buckets);
       }
-      cm.calcColor(colormap[buckets], buckets-1, buckets);
       convertToTexture1D();
     }
 
