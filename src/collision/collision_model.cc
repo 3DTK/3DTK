@@ -180,7 +180,7 @@ std::vector<Frame> read_trajectory(string filename)
 
 void write_xyzr(DataXYZ &points, DataReflectance &refl, string &dir,
         std::vector<bool> const &colliding,
-        std::vector<float> const &dist_colliding)
+        std::vector<float> const &dist_colliding, double radius)
 {
 	// sanity checks
     if (points.size() != refl.size() || points.size() != colliding.size()) {
@@ -211,13 +211,22 @@ void write_xyzr(DataXYZ &points, DataReflectance &refl, string &dir,
     ofstream fcolliding((dir + "scan002.xyz").c_str());
     cerr << "writing non-colliding points to " << dir << "scan003.xyz" << endl;
     ofstream fnoncolliding((dir + "scan003.xyz").c_str());
+	double r;
     for (size_t i = 0, j=0; i < points.size(); ++i) {
         if (colliding[i]) {
-            fcolliding << points[i][2] << " " << -points[i][0] << " " << points[i][1] << " " << dist_colliding[j] << endl;
+			// Convert from left handed to right handed and normalize
+			// penetration distance to values -1 <= r < 0.
+			// Since penetration distances always start at and are always
+			// greater than 0 we don't need to shift.
+			// We cap penetration distances at the configured search radius.
+			r = fmax(-1.0*(dist_colliding[j]/radius),-1.0);
+            fcolliding << points[i][2] << " " << -points[i][0] << " " << points[i][1] << " " << r << endl;
             j++;
         } else {
-            // FIXME: make the max distance configurable
-            fnoncolliding << points[i][2] << " " << -points[i][0] << " " << points[i][1] << " 1000" << endl;
+			// convert from left handed to right handed and normalize
+			// reflectance to values 0 <= r < 1
+			r = (refl[i]-min_refl)/(max_refl-min_refl+1);
+            fnoncolliding << points[i][2] << " " << -points[i][0] << " " << points[i][1] << " " << r << endl;
         }
     }
     fcolliding.close();
@@ -777,5 +786,5 @@ int main(int argc, char **argv)
                 break;
         }
     }
-    write_xyzr(environ, refl, dir, colliding, dist_colliding);
+    write_xyzr(environ, refl, dir, colliding, dist_colliding, radius);
 }
