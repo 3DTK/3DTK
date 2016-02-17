@@ -1536,13 +1536,13 @@ void initScreenWindow()
   window_id = glutCreateWindow("3D_Viewer");
 
   glutDisplayFunc( CallBackDisplayFunc );
-  glutReshapeFunc( CallBackReshapeFunc );
+  GLUI_Master.set_glutReshapeFunc( CallBackReshapeFunc );
   
-  glutMouseFunc  ( CallBackMouseFunc );
-  glutKeyboardFunc ( CallBackKeyboardFunc);
+  GLUI_Master.set_glutMouseFunc  ( CallBackMouseFunc );
+  GLUI_Master.set_glutKeyboardFunc ( CallBackKeyboardFunc);
   glutKeyboardUpFunc ( CallBackKeyboardUpFunc);
   glutMotionFunc ( CallBackMouseMotionFunc); 
-  glutSpecialFunc ( CallBackSpecialFunc);
+  GLUI_Master.set_glutSpecialFunc ( CallBackSpecialFunc);
 #ifdef __APPLE__
   glutWMCloseFunc(CallBackCloseFunc);
 #else
