@@ -304,7 +304,6 @@ size_t handle_pointcloud(std::vector<Point> &pointmodel, DataXYZ &environ,
     time_t before = time(NULL);
 
     int end;
-    int thread_num = 0;
 #ifdef _OPENMP
     omp_set_num_threads(OPENMP_NUM_THREADS);
 #endif
@@ -312,12 +311,13 @@ size_t handle_pointcloud(std::vector<Point> &pointmodel, DataXYZ &environ,
         case CTYPE1:
             end = trajectory.size();
 #ifdef _OPENMP
-#pragma omp parallel shared(end, trajectory, colliding) private(thread_num)
-#pragma omp for schedule(dynamic)
+#pragma omp parallel for schedule(dynamic)
 #endif
             for(size_t j = 0; j < trajectory.size(); ++j) {
 #ifdef _OPENMP
-		thread_num = omp_get_thread_num();
+		int thread_num = omp_get_thread_num();
+#else
+		int thread_num = 0;
 #endif
                 cerr << (j*100.0)/end << " %\r";
                 cerr.flush();
@@ -334,12 +334,13 @@ size_t handle_pointcloud(std::vector<Point> &pointmodel, DataXYZ &environ,
             // we iterate over points instead of points on the trajectory so
             // that we can reuse the previous transformation of the same point
 #ifdef _OPENMP
-#pragma omp parallel shared(end, trajectory, colliding) private(thread_num)
-#pragma omp for schedule(dynamic)
+#pragma omp parallel for schedule(dynamic)
 #endif
             for(size_t j = 0; j < pointmodel.size(); ++j) {
 #ifdef _OPENMP
-		thread_num = omp_get_thread_num();
+		int thread_num = omp_get_thread_num();
+#else
+		int thread_num = 0;
 #endif
                 cerr << (j*100.0)/end << " %\r";
                 cerr.flush();
@@ -596,8 +597,11 @@ void calculate_collidingdist(DataXYZ &environ,
     size_t num_noncolliding = environ.size() - num_colliding;
     double** pa = new double*[num_noncolliding];
     size_t* idxmap = new size_t[num_noncolliding];
-    for (size_t i = 0, j = 0; i < environ.size(); ++i) {
+    size_t* colliding_idx = new size_t[num_colliding];
+    for (size_t i = 0, j = 0, k = 0; i < environ.size(); ++i) {
         if (colliding[i]) {
+			colliding_idx[k] = i;
+			k++;
             continue;
         }
         pa[j] = new double[3];
@@ -610,17 +614,24 @@ void calculate_collidingdist(DataXYZ &environ,
     cerr << "noncolliding: " << num_noncolliding << endl;
     cerr << "building kd tree..." << endl;
     KDtreeIndexed t(pa, num_noncolliding);
-    int thread_num = 0; // add omp later
+#ifdef _OPENMP
+	omp_set_num_threads(OPENMP_NUM_THREADS);
+#endif
     cerr << "computing distances..." << endl;
     time_t before = time(NULL);
-    int j = 0;
-    for (size_t i = 0; i < environ.size(); ++i) {
-        if (!colliding[i]) {
-            continue;
-        }
-        cerr << (j*100.0)/num_colliding << " %\r";
+#ifdef _OPENMP
+#pragma omp parallel for schedule(dynamic)
+#endif
+    for (size_t i = 0; i < num_colliding; ++i) {
+#ifdef _OPENMP
+		int thread_num = omp_get_thread_num();
+#else
+		int thread_num = 0;
+#endif
+        cerr << (i*100.0)/num_colliding << " %\r";
         cerr.flush();
-        double point1[3] = {environ[i][0], environ[i][1], environ[i][2]};
+		size_t idx = colliding_idx[i];
+        double point1[3] = {environ[idx][0], environ[idx][1], environ[idx][2]};
         // for this colliding point, find the closest non-colliding one
         size_t c = t.FindClosest(point1, 1000000, thread_num);
         /*if (colliding[c]) {
@@ -631,8 +642,7 @@ void calculate_collidingdist(DataXYZ &environ,
         }*/
         c = idxmap[c];
         double point2[3] = {environ[c][0], environ[c][1], environ[c][2]};
-        dist_colliding[j] = sqrt(Dist2(point1, point2));
-        j++;
+        dist_colliding[i] = sqrt(Dist2(point1, point2));
     }
     time_t after = time(NULL);
     cerr << "took: " << difftime(after, before) << " seconds" << endl;
@@ -667,12 +677,21 @@ void calculate_collidingdist2(std::vector<Point> &pointmodel, DataXYZ &environ,
     cerr << "building kd tree..." << endl;
     KDtreeIndexed t(pa, num_colliding);
     double sqRad2 = radius*radius;
-    int thread_num = 0; // add omp later
+#ifdef _OPENMP
+	omp_set_num_threads(OPENMP_NUM_THREADS);
+#endif
     cerr << "computing distances..." << endl;
     time_t before = time(NULL);
-    int i = 0;
     int end = trajectory.size();
-    for(const auto &it2 : trajectory) {
+#ifdef _OPENMP
+#pragma omp parallel for schedule(dynamic)
+#endif
+    for(size_t i = 0; i < trajectory.size(); ++i) {
+#ifdef _OPENMP
+		int thread_num = omp_get_thread_num();
+#else
+		int thread_num = 0;
+#endif
         cerr << (i*100.0)/end << " %\r";
         cerr.flush();
         for(const auto &it : pointmodel) {
@@ -680,8 +699,8 @@ void calculate_collidingdist2(std::vector<Point> &pointmodel, DataXYZ &environ,
             // the second point is the projection of the first point to the
             // y-axis of the model
             double point2[3] = {0, it.y, 0};
-            transform3(it2.transformation, point1);
-            transform3(it2.transformation, point2);
+            transform3(trajectory[i].transformation, point1);
+            transform3(trajectory[i].transformation, point2);
             size_t c1 = t.segmentSearch_1NearestPoint(point1, point2, sqRad2, thread_num);
             if (c1 >= std::numeric_limits<size_t>::max()) {
 				// found nothing
@@ -691,13 +710,13 @@ void calculate_collidingdist2(std::vector<Point> &pointmodel, DataXYZ &environ,
 			// now get all points around this closest point to mark them
 			// with the same penetration distance
 			vector<size_t> closestsphere = t.fixedRangeSearch(pa[c1], sqRad2, thread_num);
+#pragma omp critical
 			for (const auto &it3 : closestsphere) {
 				if (dist2 < dist_colliding[it3]) {
 					dist_colliding[it3] = dist2;
 				}
 			}
         }
-        i++;
     }
 	// turn the squared distances into normal ones
     for (size_t i = 0; i < dist_colliding.size(); ++i) {
