@@ -106,9 +106,9 @@ void parse_options(int argc, char **argv, IOType &iotype, string &dir,
 
 	po::options_description reduction("Reduction options");
 	reduction.add_options()
-		("voxel,v", po::value<double>(&voxel)->default_value(5.0),
+		("voxel,v", po::value<double>(&voxel),
 		 "voxel size") // FIXME: we could compute the optimal voxel size from the search radius such that we could ensure no "holes" no matter where points in adjacent voxels are located
-		("octree,O", po::value<int>(&octree)->default_value(10),
+		("octree,O", po::value<int>(&octree),
 		 "0 -> center\n1 -> random\nN>1 -> random N");
 
     po::options_description hidden("Hidden options");
@@ -146,6 +146,8 @@ void parse_options(int argc, char **argv, IOType &iotype, string &dir,
 
 	if (vm.count("voxel") || vm.count("octree")) {
 		reduce = true;
+	} else {
+		reduce = false;
 	}
 
     if (!vm.count("input-dir")) {
