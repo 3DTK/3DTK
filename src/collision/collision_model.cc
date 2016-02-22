@@ -97,7 +97,7 @@ void parse_options(int argc, char **argv, IOType &iotype, string &dir,
     prog.add_options()
         ("radius,r", po::value<double>(&radius)->default_value(10),
          "radius of sphere")
-        ("calcdistances,d", po::bool_switch()->default_value(false),
+        ("calcdistances,d", po::bool_switch(&calcdistances)->default_value(false),
          "calculate penetration distance")
 #ifdef _OPENMP
         ("jobs,j", po::value<int>(&jobs)->default_value(1),
