@@ -97,7 +97,7 @@ void parse_options(int argc, char **argv, IOType &iotype, string &dir,
     prog.add_options()
         ("radius,r", po::value<double>(&radius)->default_value(10),
          "radius of sphere")
-        ("calcdistances,d", po::value<bool>(&calcdistances)->zero_tokens(),
+        ("calcdistances,d", po::bool_switch()->default_value(false),
          "calculate penetration distance")
         ("collisionmethod,c", po::value<collision_method>(&cmethod)->default_value(CTYPE1),"CPU collision method")
         ("penetrationdepthmethod,p", po::value<penetrationdepth_method>(&pdmethod)->default_value(PDTYPE1))
