@@ -304,7 +304,7 @@ size_t handle_pointcloud(std::vector<Point> &pointmodel, DataXYZ &environ,
     KDtreeIndexed t(pa, environ.size());
     /* initialize variables */
     double sqRad2 = radius*radius;
-    cerr << "computing collisions..." << endl;
+    cerr << "computing collisions with r = " << radius << " and " << jobs << " threads" << endl;
     time_t before = time(NULL);
 
     int end;
