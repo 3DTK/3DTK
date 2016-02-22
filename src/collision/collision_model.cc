@@ -80,7 +80,7 @@ void validate(boost::any& v, const std::vector<std::string>& values,
 void parse_options(int argc, char **argv, IOType &iotype, string &dir,
         double &radius, bool &calcdistances, collision_method &cmethod,
         penetrationdepth_method &pdmethod, bool &use_cuda, int &cuda_device,
-		double &voxel, int &octree, bool &reduce)
+		double &voxel, int &octree, bool &reduce, int &jobs)
 {
     po::options_description generic("Generic options");
     generic.add_options()
@@ -99,6 +99,10 @@ void parse_options(int argc, char **argv, IOType &iotype, string &dir,
          "radius of sphere")
         ("calcdistances,d", po::bool_switch()->default_value(false),
          "calculate penetration distance")
+#ifdef _OPENMP
+        ("jobs,j", po::value<int>(&jobs)->default_value(1),
+         "number of threads to run in parallel. Default: 1")
+#endif
         ("collisionmethod,c", po::value<collision_method>(&cmethod)->default_value(CTYPE1),"CPU collision method")
         ("penetrationdepthmethod,p", po::value<penetrationdepth_method>(&pdmethod)->default_value(PDTYPE1))
         ("usecuda,C", po::value<bool>(&use_cuda)->zero_tokens(),"Use NVIDIA CUDA")
@@ -284,7 +288,7 @@ void fill_colliding(std::vector<bool> &allcolliding, std::vector<size_t> const &
 size_t handle_pointcloud(std::vector<Point> &pointmodel, DataXYZ &environ,
                        std::vector<Frame> const &trajectory,
                        std::vector<bool> &colliding,
-                       double radius, collision_method cmethod)
+                       double radius, collision_method cmethod, int jobs)
 {
     /* build a KDtree from this scan */
     cerr << "reading environment..." << endl;
@@ -305,7 +309,7 @@ size_t handle_pointcloud(std::vector<Point> &pointmodel, DataXYZ &environ,
 
     int end;
 #ifdef _OPENMP
-    omp_set_num_threads(OPENMP_NUM_THREADS);
+    omp_set_num_threads(jobs);
 #endif
     switch (cmethod) {
         case CTYPE1:
@@ -590,7 +594,7 @@ size_t cuda_handle_pointcloud(int cuda_device, std::vector<Point> &pointmodel, D
 void calculate_collidingdist(DataXYZ &environ,
                              std::vector<bool> const &colliding,
                              size_t num_colliding,
-                             std::vector<float> &dist_colliding)
+                             std::vector<float> &dist_colliding, int jobs)
 {
     /* build a kdtree for the non-colliding points */
     cerr << "reading environment..." << endl;
@@ -615,7 +619,7 @@ void calculate_collidingdist(DataXYZ &environ,
     cerr << "building kd tree..." << endl;
     KDtreeIndexed t(pa, num_noncolliding);
 #ifdef _OPENMP
-	omp_set_num_threads(OPENMP_NUM_THREADS);
+	omp_set_num_threads(jobs);
 #endif
     cerr << "computing distances..." << endl;
     time_t before = time(NULL);
@@ -658,7 +662,7 @@ void calculate_collidingdist2(std::vector<Point> &pointmodel, DataXYZ &environ,
                              std::vector<bool> const &colliding,
                              size_t num_colliding,
                              std::vector<float> &dist_colliding,
-                             double radius)
+                             double radius, int jobs)
 {
     /* build a kdtree for colliding points */
     cerr << "reading environment..." << endl;
@@ -678,7 +682,7 @@ void calculate_collidingdist2(std::vector<Point> &pointmodel, DataXYZ &environ,
     KDtreeIndexed t(pa, num_colliding);
     double sqRad2 = radius*radius;
 #ifdef _OPENMP
-	omp_set_num_threads(OPENMP_NUM_THREADS);
+	omp_set_num_threads(jobs);
 #endif
     cerr << "computing distances..." << endl;
     time_t before = time(NULL);
@@ -744,8 +748,9 @@ int main(int argc, char **argv)
 	double voxel;
 	int octree;
 	bool reduce;
+	int jobs=1;
 	
-    parse_options(argc, argv, iotype, dir, radius, calcdistances, cmethod, pdmethod, use_cuda, cuda_device, voxel, octree, reduce);
+    parse_options(argc, argv, iotype, dir, radius, calcdistances, cmethod, pdmethod, use_cuda, cuda_device, voxel, octree, reduce, jobs);
 
     // read scan 0 (model) and 1 (environment) without scanserver
     Scan::openDirectory(false, dir, iotype, 0, 1);
@@ -826,7 +831,7 @@ int main(int argc, char **argv)
 				colliding[i] = true;
 			}
 		} else {
-			num_colliding = handle_pointcloud(pointmodel, environ, trajectory, colliding, radius, cmethod);
+			num_colliding = handle_pointcloud(pointmodel, environ, trajectory, colliding, radius, cmethod, jobs);
 		}
 	}
     if (num_colliding == 0) {
@@ -839,10 +844,10 @@ int main(int argc, char **argv)
     if (calcdistances) {
         switch (pdmethod) {
             case PDTYPE1:
-                calculate_collidingdist(environ, colliding, num_colliding, dist_colliding);
+                calculate_collidingdist(environ, colliding, num_colliding, dist_colliding, jobs);
                 break;
             case PDTYPE2:
-                calculate_collidingdist2(pointmodel, environ, trajectory, colliding, num_colliding, dist_colliding, radius);
+                calculate_collidingdist2(pointmodel, environ, trajectory, colliding, num_colliding, dist_colliding, radius, jobs);
                 break;
         }
     }
