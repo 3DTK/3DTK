@@ -71,12 +71,10 @@ void Scan::closeDirectory()
 
 Scan::Scan()
 {
-  unsigned int i;
-
   // pose and transformations
-  for(i = 0; i < 3; ++i) rPos[i] = 0;
-  for(i = 0; i < 3; ++i) rPosTheta[i] = 0;
-  for(i = 0; i < 4; ++i) rQuat[i] = 0;
+  for(size_t i = 0; i < 3; ++i) rPos[i] = 0;
+  for(size_t i = 0; i < 3; ++i) rPosTheta[i] = 0;
+  for(size_t i = 0; i < 4; ++i) rQuat[i] = 0;
   M4identity(transMat);
   M4identity(transMatOrg);
   M4identity(dalignxf);
@@ -223,11 +221,17 @@ void Scan::copyReducedToOriginal()
 #endif //WITH_METRICS
 
   DataXYZ xyz_reduced(get("xyz reduced"));
-  unsigned int size = xyz_reduced.size();
+  // check if we can create a large enough array. The maximum size_t on 32 bit
+  // is around 4.2 billion which is too little for scans with more than 179
+  // million points
+  if (sizeof(size_t) == 4 && xyz_reduced.size() > ((size_t)(-1))/sizeof(double)/3) {
+      throw runtime_error("Insufficient size of size_t datatype");
+  }
+  size_t size = xyz_reduced.size();
   DataXYZ xyz_reduced_orig(create("xyz reduced original",
                                   sizeof(double)*3*size));
-  for(unsigned int i = 0; i < size; ++i) {
-    for(unsigned int j = 0; j < 3; ++j) {
+  for(size_t i = 0; i < size; ++i) {
+    for(size_t j = 0; j < 3; ++j) {
       xyz_reduced_orig[i][j] = xyz_reduced[i][j];
     }
   }
@@ -244,10 +248,16 @@ void Scan::copyOriginalToReduced()
 #endif //WITH_METRICS
 
   DataXYZ xyz_reduced_orig(get("xyz reduced original"));
-  unsigned int size = xyz_reduced_orig.size();
+  // check if we can create a large enough array. The maximum size_t on 32 bit
+  // is around 4.2 billion which is too little for scans with more than 179
+  // million points
+  if (sizeof(size_t) == 4 && xyz_reduced_orig.size() > ((size_t)(-1))/sizeof(double)/3) {
+      throw runtime_error("Insufficient size of size_t datatype");
+  }
+  size_t size = xyz_reduced_orig.size();
   DataXYZ xyz_reduced(create("xyz reduced", sizeof(double)*3*size));
-  for(unsigned int i = 0; i < size; ++i) {
-    for(unsigned int j = 0; j < 3; ++j) {
+  for(size_t i = 0; i < size; ++i) {
+    for(size_t j = 0; j < 3; ++j) {
       xyz_reduced[i][j] = xyz_reduced_orig[i][j];
     }
   }
@@ -265,6 +275,12 @@ void Scan::calcNormals()
 {
   cout << "calcNormals" << endl;
   DataXYZ xyz(get("xyz"));
+  // check if we can create a large enough array. The maximum size_t on 32 bit
+  // is around 4.2 billion which is too little for scans with more than 179
+  // million points
+  if (sizeof(size_t) == 4 && xyz.size() > ((size_t)(-1))/sizeof(double)/3) {
+      throw runtime_error("Insufficient size of size_t datatype");
+  }
   DataNormal xyz_normals(create("normal", sizeof(double)*3*xyz.size()));
   if(xyz.size() == 0) throw
       runtime_error("Could not calculate reduced points, XYZ data is empty");
@@ -273,13 +289,13 @@ void Scan::calcNormals()
   points.reserve(xyz.size());
   vector<Point> normals;
   normals.reserve(xyz.size());
-  for(unsigned int j = 0; j < xyz.size(); j++) {
+  for(size_t j = 0; j < xyz.size(); j++) {
     points.push_back(Point(xyz[j][0], xyz[j][1], xyz[j][2]));
   }
   const int K_NEIGHBOURS = 10;  //@FIXME
   calculateNormalsApxKNN(normals, points, K_NEIGHBOURS, get_rPos(), 1.0);
   // calculateNormalsKNN(normals, points, K_NEIGHBOURS, get_rPos());
-  for (unsigned int i = 0; i < normals.size(); ++i) {
+  for (size_t i = 0; i < normals.size(); ++i) {
     xyz_normals[i][0] = normals[i].x;
     xyz_normals[i][1] = normals[i].y;
     xyz_normals[i][2] = normals[i].z;
@@ -323,32 +339,56 @@ void Scan::calcReducedPoints()
   
   if(reduction_voxelSize <= 0.0) {
     // copy the points
+    // check if we can create a large enough array. The maximum size_t on 32 bit
+    // is around 4.2 billion which is too little for scans with more than 179
+    // million points
+    if (sizeof(size_t) == 4 && xyz.size() > ((size_t)(-1))/sizeof(double)/3) {
+        throw runtime_error("Insufficient size of size_t datatype");
+    }
     DataXYZ xyz_reduced(create("xyz reduced", sizeof(double)*3*xyz.size()));
-    for(unsigned int i = 0; i < xyz.size(); ++i) {
-      for(unsigned int j = 0; j < 3; ++j) {
+    for(size_t i = 0; i < xyz.size(); ++i) {
+      for(size_t j = 0; j < 3; ++j) {
         xyz_reduced[i][j] = xyz[i][j];
       }
     }
     if (reduction_pointtype.hasReflectance()) {
+      // check if we can create a large enough array. The maximum size_t on 32 bit
+      // is around 4.2 billion which is too little for scans with more than 1.07
+      // billion points
+      if (sizeof(size_t) == 4 && reflectance.size() > ((size_t)(-1))/sizeof(float)) {
+              throw runtime_error("Insufficient size of size_t datatype");
+      }
       DataReflectance reflectance_reduced(create("reflectance reduced",
                                         sizeof(float)*reflectance.size()));
-      for(unsigned int i = 0; i < xyz.size(); ++i) {
+      for(size_t i = 0; i < xyz.size(); ++i) {
            reflectance_reduced[i] = reflectance[i];
         }
     }
     if (reduction_pointtype.hasColor()) {
+      // check if we can create a large enough array. The maximum size_t on 32 bit
+      // is around 4.2 billion which is too little for scans with more than 1.4
+      // billion points
+      if (sizeof(size_t) == 4 && xyz.size() > ((size_t)(-1))/sizeof(unsigned char)/3) {
+              throw runtime_error("Insufficient size of size_t datatype");
+      }
       DataRGB rgb_reduced(create("color reduced", sizeof(unsigned char)*3*xyz.size()));
-      for(unsigned int i = 0; i < xyz.size(); ++i) {
-          for(unsigned int j = 0; j < 3; ++j) {
+      for(size_t i = 0; i < xyz.size(); ++i) {
+          for(size_t j = 0; j < 3; ++j) {
             rgb_reduced[i][j] = rgb[i][j];
           }
         }
     }
     if (reduction_pointtype.hasNormal()) {
+      // check if we can create a large enough array. The maximum size_t on 32 bit
+      // is around 4.2 billion which is too little for scans with more than 179
+      // million points
+      if (sizeof(size_t) == 4 && xyz.size() > ((size_t)(-1))/sizeof(double)/3) {
+          throw runtime_error("Insufficient size of size_t datatype");
+      }
       DataNormal normal_reduced(create("normal reduced",
                                        sizeof(double)*3*xyz.size()));      
-        for(unsigned int i = 0; i < xyz.size(); ++i) {
-          for(unsigned int j = 0; j < 3; ++j) {
+        for(size_t i = 0; i < xyz.size(); ++i) {
+          for(size_t j = 0; j < 3; ++j) {
             normal_reduced[i][j] = xyz_normals[i][j];
           }
         }
@@ -357,9 +397,9 @@ void Scan::calcReducedPoints()
   } else {
 
     double **xyz_in = new double*[xyz.size()];
-    for (unsigned int i = 0; i < xyz.size(); ++i) {
+    for (size_t i = 0; i < xyz.size(); ++i) {
       xyz_in[i] = new double[reduction_pointtype.getPointDim()];
-      unsigned int j = 0;
+      size_t j = 0;
       for (; j < 3; ++j) 
         xyz_in[i][j] = xyz[i][j];
       if (reduction_pointtype.hasReflectance())
@@ -367,7 +407,7 @@ void Scan::calcReducedPoints()
       if (reduction_pointtype.hasColor())
         memcpy(&xyz_in[i][j++], &rgb[i][0], 3);
       if (reduction_pointtype.hasNormal())
-        for (unsigned int l = 0; l < 3; ++l) 
+        for (size_t l = 0; l < 3; ++l) 
           xyz_in[i][j++] = xyz_normals[i][l];
     }
 
@@ -395,28 +435,52 @@ void Scan::calcReducedPoints()
     }
     
     // storing it as reduced scan
-    unsigned int size = center.size();
+    // check if we can create a large enough array. The maximum size_t on 32 bit
+    // is around 4.2 billion which is too little for scans with more than 179
+    // million points
+    if (sizeof(size_t) == 4 && center.size() > ((size_t)(-1))/sizeof(double)/3) {
+        throw runtime_error("Insufficient size of size_t datatype");
+    }
+    size_t size = center.size();
     DataXYZ xyz_reduced(create("xyz reduced", sizeof(double)*3*size));
     DataReflectance reflectance_reduced(DataPointer(0, 0));
     DataRGB rgb_reduced(DataPointer(0, 0));
     DataNormal normal_reduced(DataPointer(0, 0)); 
     if (reduction_pointtype.hasReflectance()) {
+      // check if we can create a large enough array. The maximum size_t on 32 bit
+      // is around 4.2 billion which is too little for scans with more than 1.07
+      // billion points
+      if (sizeof(size_t) == 4 && size > ((size_t)(-1))/sizeof(float)) {
+              throw runtime_error("Insufficient size of size_t datatype");
+      }
       DataReflectance my_reflectance_reduced(create("reflectance reduced",
                                                     sizeof(float)*size));
       reflectance_reduced = my_reflectance_reduced;
     }
     if (reduction_pointtype.hasColor()) {
+      // check if we can create a large enough array. The maximum size_t on 32 bit
+      // is around 4.2 billion which is too little for scans with more than 1.4
+      // billion points
+      if (sizeof(size_t) == 4 && size > ((size_t)(-1))/sizeof(unsigned char)/3) {
+              throw runtime_error("Insufficient size of size_t datatype");
+      }
       DataRGB my_rgb_reduced(create("color reduced",
                                           sizeof(unsigned char)*3*size));
       rgb_reduced = my_rgb_reduced; 
     }
     if (reduction_pointtype.hasNormal()) {
+      // check if we can create a large enough array. The maximum size_t on 32 bit
+      // is around 4.2 billion which is too little for scans with more than 179
+      // million points
+      if (sizeof(size_t) == 4 && center.size() > ((size_t)(-1))/sizeof(double)/3) {
+          throw runtime_error("Insufficient size of size_t datatype");
+      }
       DataNormal my_normal_reduced(create("normal reduced",
                                           sizeof(double)*3*size));
       normal_reduced = my_normal_reduced; 
     }
-    for(unsigned int i = 0; i < size; ++i) {
-      unsigned int j = 0;
+    for(size_t i = 0; i < size; ++i) {
+      size_t j = 0;
       for (; j < 3; ++j) 
         xyz_reduced[i][j] = center[i][j];
       if (reduction_pointtype.hasReflectance())
@@ -424,7 +488,7 @@ void Scan::calcReducedPoints()
       if (reduction_pointtype.hasColor())
         memcpy(&rgb_reduced[i][0], &center[i][j++], 3);
       if (reduction_pointtype.hasNormal())
-        for (unsigned int l = 0; l < 3; ++l) 
+        for (size_t l = 0; l < 3; ++l) 
           normal_reduced[i][l] = center[i][j++];
     }
     delete oct;
@@ -469,7 +533,7 @@ void Scan::mergeCoordinatesWithRoboterPosition(Scan* prevScan)
 void Scan::transformAll(const double alignxf[16])
 {
   DataXYZ xyz(get("xyz"));
-  unsigned int i=0 ;
+  size_t i=0 ;
   //  #pragma omp parallel for
   for(; i < xyz.size(); ++i) {
     transform3(alignxf, xyz[i]);
@@ -486,14 +550,14 @@ void Scan::transformReduced(const double alignxf[16])
 #endif //WITH_METRICS
 
   DataXYZ xyz_reduced(get("xyz reduced"));
-  unsigned int i=0;
+  size_t i=0;
   // #pragma omp parallel for
   for( ; i < xyz_reduced.size(); ++i) {
     transform3(alignxf, xyz_reduced[i]);
   }
 
   DataNormal normal_reduced(get("normal reduced"));
-  for (unsigned int i = 0; i < normal_reduced.size(); ++i) {
+  for (size_t i = 0; i < normal_reduced.size(); ++i) {
     transform3normal(alignxf, normal_reduced[i]);
   }
 
@@ -549,7 +613,7 @@ void Scan::transform(const double alignxf[16], const AlgoType type, int islum)
   MetaScan* meta = dynamic_cast<MetaScan*>(this);
   
   if(meta) {
-    for(unsigned int i = 0; i < meta->size(); ++i) {
+    for(size_t i = 0; i < meta->size(); ++i) {
       meta->getScan(i)->transform(alignxf, type, -1);
     }
   }
@@ -579,18 +643,18 @@ void Scan::transform(const double alignxf[16], const AlgoType type, int islum)
     bool in_meta;
     MetaScan* meta = dynamic_cast<MetaScan*>(this);
     int found = 0;
-    unsigned int scans_size = allScans.size();
+    size_t scans_size = allScans.size();
 
     switch (islum) {
     case -1:
       // write no tranformation
       break;
     case 0:
-      for(unsigned int i = 0; i < scans_size; ++i) {
+      for(size_t i = 0; i < scans_size; ++i) {
         Scan* scan = allScans[i];
         in_meta = false;
         if(meta) {
-          for(unsigned int j = 0; j < meta->size(); ++j) {
+          for(size_t j = 0; j < meta->size(); ++j) {
             if(meta->getScan(j) == scan) {
               found = i;
               in_meta = true;
@@ -614,7 +678,7 @@ void Scan::transform(const double alignxf[16], const AlgoType type, int islum)
       addFrame(type);
       break;
     case 2:
-      for(unsigned int i = 0; i < scans_size; ++i) {
+      for(size_t i = 0; i < scans_size; ++i) {
         Scan* scan = allScans[i];
         if(scan == this) {
           found = i;
@@ -756,7 +820,7 @@ void Scan::getNoPairsSimple(vector <double*> &diff,
                  Target->size<DataXYZ>("xyz reduced"));
 
   cout << "Max: " << max_dist_match2 << endl;
-  for (unsigned int i = 0; i < xyz_reduced.size(); i++) {
+  for (size_t i = 0; i < xyz_reduced.size(); i++) {
 
     double p[3];
     p[0] = xyz_reduced[i][0];
@@ -797,7 +861,7 @@ void Scan::getPtPairsSimple(vector <PtPair> *pairs,
                  Source->size<DataXYZ>("xyz reduced"));
   DataXYZ xyz_reduced(Target->get("xyz reduced"));
 
-  for (unsigned int i = 0; i < xyz_reduced.size(); i++) {
+  for (size_t i = 0; i < xyz_reduced.size(); i++) {
     // take about 1/rnd-th of the numbers only
     if (rnd > 1 && rand(rnd) != 0) continue;  
 
@@ -854,7 +918,7 @@ void Scan::getPtPairs(vector <PtPair> *pairs,
                       PairingMode pairing_mode)
 {
   // initialize centroids
-  for(unsigned int i = 0; i < 3; ++i) {
+  for(size_t i = 0; i < 3; ++i) {
     centroid_m[i] = 0;
     centroid_d[i] = 0;
   }
@@ -875,9 +939,9 @@ void Scan::getPtPairs(vector <PtPair> *pairs,
                                       pairing_mode);
 
   // normalize centroids
-  unsigned int size = pairs->size();
+  size_t size = pairs->size();
   if(size != 0) {
-    for(unsigned int i = 0; i < 3; ++i) {
+    for(size_t i = 0; i < 3; ++i) {
       centroid_m[i] /= size;
       centroid_d[i] /= size;
     }
@@ -917,7 +981,7 @@ void Scan::getPtPairsParallel(vector <PtPair> *pairs,
                               PairingMode pairing_mode)
 {
   // initialize centroids
-  for(unsigned int i = 0; i < 3; ++i) {
+  for(size_t i = 0; i < 3; ++i) {
     centroid_m[thread_num][i] = 0;
     centroid_d[thread_num][i] = 0;
   }
@@ -929,12 +993,12 @@ void Scan::getPtPairsParallel(vector <PtPair> *pairs,
   // if Source is also a meta scan it already has a special meta-kd-tree
   MetaScan* meta = dynamic_cast<MetaScan*>(Target);
   if(meta) {
-    for(unsigned int i = 0; i < meta->size(); ++i) {
+    for(size_t i = 0; i < meta->size(); ++i) {
       // determine step for each scan individually
       DataXYZ xyz_reduced(meta->getScan(i)->get("xyz reduced"));
       DataNormal normal_reduced(Target->get("normal reduced"));
-      unsigned int max = xyz_reduced.size();
-      unsigned int step = max / OPENMP_NUM_THREADS;
+      size_t max = xyz_reduced.size();
+      size_t step = max / OPENMP_NUM_THREADS;
       // call ptpairs for each scan and accumulate ptpairs, centroids and sum
       search->getPtPairs(&pairs[thread_num], Source->dalignxf,
                          xyz_reduced, normal_reduced,
@@ -957,22 +1021,22 @@ void Scan::getPtPairsParallel(vector <PtPair> *pairs,
   }
 
   // normalize centroids
-  unsigned int size = pairs[thread_num].size();
+  size_t size = pairs[thread_num].size();
   if(size != 0) {
-    for(unsigned int i = 0; i < 3; ++i) {
+    for(size_t i = 0; i < 3; ++i) {
       centroid_m[thread_num][i] /= size;
       centroid_d[thread_num][i] /= size;
     }
   }
 }
 
-unsigned int Scan::getMaxCountReduced(ScanVector& scans)
+size_t Scan::getMaxCountReduced(ScanVector& scans)
 {
-  unsigned int max = 0;
+  size_t max = 0;
   for(std::vector<Scan*>::iterator it = scans.begin();
       it != scans.end();
       ++it) {
-    unsigned int count = (*it)->size<DataXYZ>("xyz reduced");
+    size_t count = (*it)->size<DataXYZ>("xyz reduced");
     if(count > max)
       max = count;
   }

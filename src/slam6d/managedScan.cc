@@ -248,7 +248,7 @@ void ManagedScan::get(unsigned int types)
   m_shared_scan->prefetch(types);
 }
 
-DataPointer ManagedScan::create(const std::string& identifier, unsigned int size)
+DataPointer ManagedScan::create(const std::string& identifier, size_t size)
 {
   // map identifiers to functions in SharedScan and scale back size
   // from bytes to number of points
@@ -341,10 +341,10 @@ void ManagedScan::calcReducedShow()
     oct->GetOctTreeCenter(center);
   }
 
-  unsigned int size = center.size();
+  size_t size = center.size();
   TripleArray<float> xyz_r(m_shared_scan->createXYZReducedShow(size));
-  for(unsigned int i = 0; i < size; ++i) {
-    for(unsigned int j = 0; j < 3; ++j) {
+  for(size_t i = 0; i < size; ++i) {
+    for(size_t j = 0; j < 3; ++j) {
       xyz_r[i][j] = center[i][j];
     }
   }
@@ -374,13 +374,13 @@ void ManagedScan::createOcttree()
                                   true);
     } else { // without reduction, xyz + attribute points
       float** pts = octtree_pointtype.createPointArray<float>(this);
-      unsigned int nrpts = size<DataXYZ>("xyz");
+      size_t nrpts = size<DataXYZ>("xyz");
       btree = new BOctTree<float>(pts,
                                   nrpts,
                                   octtree_voxelSize,
                                   octtree_pointtype,
                                   true);
-      for(unsigned int i = 0; i < nrpts; ++i) delete[] pts[i]; delete[] pts;
+      for(size_t i = 0; i < nrpts; ++i) delete[] pts[i]; delete[] pts;
     }
     // save created octtree
     if(octtree_saveOct) {
@@ -391,7 +391,7 @@ void ManagedScan::createOcttree()
 
   // copy tree into cache
   try {
-    unsigned int size = btree->getMemorySize();
+    size_t size = btree->getMemorySize();
     unsigned char* mem_ptr
       = m_shared_scan->createOcttree(size).get_raw_pointer();
     new(mem_ptr) BOctTree<float>(*btree, mem_ptr, size);
@@ -404,7 +404,7 @@ void ManagedScan::createOcttree()
 }
 
 
-unsigned int ManagedScan::readFrames()
+size_t ManagedScan::readFrames()
 {
   // automatically read on getFrames
   return m_shared_scan->getFrames().size();
@@ -415,12 +415,12 @@ void ManagedScan::saveFrames()
   m_shared_scan->saveFrames();
 }
 
-unsigned int ManagedScan::getFrameCount()
+size_t ManagedScan::getFrameCount()
 {
   return m_shared_scan->getFrames().size();
 }
 
-void ManagedScan::getFrame(unsigned int i,
+void ManagedScan::getFrame(size_t i,
                            const double*& pose_matrix,
                            AlgoType& type)
 {
