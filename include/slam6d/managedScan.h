@@ -33,13 +33,13 @@ public:
 
   virtual DataPointer get(const std::string& identifier);
   virtual void get(unsigned int types);
-  virtual DataPointer create(const std::string& identifier, unsigned int size);
+  virtual DataPointer create(const std::string& identifier, size_t size);
   virtual void clear(const std::string& identifier);
 
-  virtual unsigned int readFrames();
+  virtual size_t readFrames();
   virtual void saveFrames();
-  virtual unsigned int getFrameCount();
-  virtual void getFrame(unsigned int i, const double*& pose_matrix, AlgoType& type);
+  virtual size_t getFrameCount();
+  virtual void getFrame(size_t i, const double*& pose_matrix, AlgoType& type);
 
 protected:
   virtual void createSearchTreePrivate();
@@ -64,7 +64,7 @@ private:
   double show_reduction_voxelSize;
 
   //! Which point to take out of the reduction octtree, 0 for center
-  unsigned int show_reduction_nrpts;
+  size_t show_reduction_nrpts;
 
   //! Pointtype used for the reduction octtree
   PointType show_reduction_pointtype;

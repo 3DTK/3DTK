@@ -20,10 +20,10 @@ public:
   virtual ~MetaScan();
 
   //! How many scans this meta scan contains
-  unsigned int size() const;
+  size_t size() const;
 
   //! Return the contained scan
-  Scan* getScan(unsigned int i) const;
+  Scan* getScan(size_t i) const;
 
   virtual void setRangeFilter(double max, double min) {}
   virtual void setHeightFilter(double top, double bottom) {}
@@ -36,18 +36,18 @@ public:
 
   virtual void get(unsigned int types) {}
 
-  virtual DataPointer create(const std::string& identifier, unsigned int size)
+  virtual DataPointer create(const std::string& identifier, size_t size)
   { return DataPointer(0, 0); }
 
   virtual void clear(const std::string& identifier) {}
 
-  virtual unsigned int readFrames() { return 0; }
+  virtual size_t readFrames() { return 0; }
 
   virtual void saveFrames() {}
 
-  virtual unsigned int getFrameCount() { return 0; }
+  virtual size_t getFrameCount() { return 0; }
 
-  virtual void getFrame(unsigned int i,
+  virtual void getFrame(size_t i,
                         const double*& pose_matrix,
                         AlgoType& type) {}
   

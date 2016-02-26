@@ -59,12 +59,12 @@ void MetaScan::createSearchTreePrivate()
 #endif //WITH_METRICS
 }
 
-unsigned int MetaScan::size() const
+size_t MetaScan::size() const
 {
   return m_scans.size();
 }
 
-Scan* MetaScan::getScan(unsigned int i) const
+Scan* MetaScan::getScan(size_t i) const
 {
   return m_scans.at(i);
 }
