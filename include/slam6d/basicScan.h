@@ -31,14 +31,14 @@ public:
 
   virtual DataPointer get(const std::string& identifier);
   virtual void get(unsigned int types);
-  virtual DataPointer create(const std::string& identifier, unsigned int size);
+  virtual DataPointer create(const std::string& identifier, size_t size);
   virtual void clear(const std::string& identifier);
-  virtual unsigned int readFrames();
+  virtual size_t readFrames();
   virtual void saveFrames();
   virtual void saveBOctTree(std::string & filename);
 
-  virtual unsigned int getFrameCount();
-  virtual void getFrame(unsigned int i, const double*& pose_matrix, AlgoType& type);
+  virtual size_t getFrameCount();
+  virtual void getFrame(size_t i, const double*& pose_matrix, AlgoType& type);
   
   //! Constructor for creation of Scans without openDirectory
   BasicScan(double * rPos, double * rPosTheta, std::vector<double*> points);
@@ -67,7 +67,7 @@ private:
   bool m_filter_range_set, m_filter_height_set, m_filter_custom_set, m_range_mutation_set;
   string customFilterStr;
 
-  std::map<std::string, std::pair<unsigned char*, unsigned int> > m_data;
+  std::map<std::string, std::pair<unsigned char*, size_t> > m_data;
 
   std::vector<Frame> m_frames;
 

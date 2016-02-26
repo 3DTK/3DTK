@@ -172,12 +172,18 @@ BasicScan::BasicScan(double *_rPos,
     filter.setCustom(customFilterStr);
   if(m_range_mutation_set)
     filter.setRangeMutator(m_range_mutation);
-    
+  
+  // check if we can create a large enough array. The maximum size_t on 32 bit
+  // is around 4.2 billion which is too little for scans with more than 179
+  // million points
+  if (sizeof(size_t) == 4 && points.size() > ((size_t)(-1))/sizeof(double)/3) {
+      throw runtime_error("Insufficient size of size_t datatype");
+  }
   double* data = reinterpret_cast<double*>(create("xyz", 
                      sizeof(double) * 3 * points.size()).get_raw_pointer());
   int tmp = 0;
-  for(unsigned int i = 0; i < points.size(); ++i) {
-    for(unsigned int j = 0; j < 3; j++) {
+  for(size_t i = 0; i < points.size(); ++i) {
+    for(size_t j = 0; j < 3; j++) {
       data[tmp++] = points[i][j];
     }
   }
@@ -216,7 +222,7 @@ BasicScan::BasicScan(const std::string& path,
 BasicScan::~BasicScan()
 {
   for (map<string, pair<unsigned char*, 
-         unsigned int>>::iterator it = m_data.begin(); 
+         size_t>>::iterator it = m_data.begin(); 
        it != m_data.end(); 
        it++) {
     delete [] it->second.first;
@@ -299,49 +305,91 @@ void BasicScan::get(unsigned int types)
   // for each requested and filled data vector,
   // allocate and write contents to their new data fields
   if(types & DATA_XYZ && !xyz.empty()) {
+    // check if we can create a large enough array. The maximum size_t on 32 bit
+    // is around 4.2 billion which is too little for scans with more than 537
+    // million points
+    if (sizeof(size_t) == 4 && xyz.size() > ((size_t)(-1))/sizeof(double)) {
+            throw runtime_error("Insufficient size of size_t datatype");
+    }
     double* data = reinterpret_cast<double*>(create("xyz",
                       sizeof(double) * xyz.size()).get_raw_pointer());
-    for(unsigned int i = 0; i < xyz.size(); ++i) data[i] = xyz[i];
+    for(size_t i = 0; i < xyz.size(); ++i) data[i] = xyz[i];
   }
   if(types & DATA_RGB && !rgb.empty()) {
+    // check if we can create a large enough array. The maximum size_t on 32 bit
+    // is around 4.2 billion which is too little for scans with more than 4.2
+    // billion points
+    if (sizeof(size_t) == 4 && rgb.size() > ((size_t)(-1))/sizeof(unsigned char)) {
+            throw runtime_error("Insufficient size of size_t datatype");
+    }
     unsigned char* data = reinterpret_cast<unsigned char*>(create("rgb",
                       sizeof(unsigned char) * rgb.size()).get_raw_pointer());
-    for(unsigned int i = 0; i < rgb.size(); ++i)
+    for(size_t i = 0; i < rgb.size(); ++i)
       data[i] = rgb[i];
   }
   if(types & DATA_REFLECTANCE && !reflectance.empty()) {
+    // check if we can create a large enough array. The maximum size_t on 32 bit
+    // is around 4.2 billion which is too little for scans with more than 1.07
+    // billion points
+    if (sizeof(size_t) == 4 && reflectance.size() > ((size_t)(-1))/sizeof(float)) {
+            throw runtime_error("Insufficient size of size_t datatype");
+    }
     float* data = reinterpret_cast<float*>(create("reflectance",
                       sizeof(float) * reflectance.size()).get_raw_pointer());
-    for(unsigned int i = 0; i < reflectance.size(); ++i)
+    for(size_t i = 0; i < reflectance.size(); ++i)
       data[i] = reflectance[i];
   }
   if(types & DATA_TEMPERATURE && !temperature.empty()) {
+    // check if we can create a large enough array. The maximum size_t on 32 bit
+    // is around 4.2 billion which is too little for scans with more than 1.07
+    // billion points
+    if (sizeof(size_t) == 4 && temperature.size() > ((size_t)(-1))/sizeof(float)) {
+            throw runtime_error("Insufficient size of size_t datatype");
+    }
     float* data = reinterpret_cast<float*>(create("temperature",
                       sizeof(float) * temperature.size()).get_raw_pointer());
-    for(unsigned int i = 0; i < temperature.size(); ++i)
+    for(size_t i = 0; i < temperature.size(); ++i)
       data[i] = temperature[i];
   }
   if(types & DATA_AMPLITUDE && !amplitude.empty()) {
+    // check if we can create a large enough array. The maximum size_t on 32 bit
+    // is around 4.2 billion which is too little for scans with more than 1.07
+    // billion points
+    if (sizeof(size_t) == 4 && amplitude.size() > ((size_t)(-1))/sizeof(float)) {
+            throw runtime_error("Insufficient size of size_t datatype");
+    }
     float* data = reinterpret_cast<float*>(create("amplitude",
                       sizeof(float) * amplitude.size()).get_raw_pointer());
-    for(unsigned int i = 0; i < amplitude.size(); ++i) data[i] = amplitude[i];
+    for(size_t i = 0; i < amplitude.size(); ++i) data[i] = amplitude[i];
   }
   if(types & DATA_TYPE && !type.empty()) {
+    // check if we can create a large enough array. The maximum size_t on 32 bit
+    // is around 4.2 billion which is too little for scans with more than 1.07
+    // billion points
+    if (sizeof(size_t) == 4 && type.size() > ((size_t)(-1))/sizeof(float)) {
+            throw runtime_error("Insufficient size of size_t datatype");
+    }
     int* data = reinterpret_cast<int*>(create("type",
                       sizeof(int) * type.size()).get_raw_pointer());
-    for(unsigned int i = 0; i < type.size(); ++i) data[i] = type[i];
+    for(size_t i = 0; i < type.size(); ++i) data[i] = type[i];
   }
   if(types & DATA_DEVIATION && !deviation.empty()) {
+    // check if we can create a large enough array. The maximum size_t on 32 bit
+    // is around 4.2 billion which is too little for scans with more than 1.07
+    // billion points
+    if (sizeof(size_t) == 4 && deviation.size() > ((size_t)(-1))/sizeof(float)) {
+            throw runtime_error("Insufficient size of size_t datatype");
+    }
     float* data = reinterpret_cast<float*>(create("deviation",
                       sizeof(float) * deviation.size()).get_raw_pointer());
-    for(unsigned int i = 0; i < deviation.size(); ++i) data[i] = deviation[i];
+    for(size_t i = 0; i < deviation.size(); ++i) data[i] = deviation[i];
   }
 }
 
 DataPointer BasicScan::get(const std::string& identifier)
 {
   // try to get data
-  map<string, pair<unsigned char*, unsigned int>>::iterator
+  map<string, pair<unsigned char*, size_t>>::iterator
     it = m_data.find(identifier);
 
   // create data fields
@@ -398,9 +446,9 @@ DataPointer BasicScan::get(const std::string& identifier)
 }
 
 DataPointer BasicScan::create(const std::string& identifier,
-                              unsigned int size)
+                              size_t size)
 {
-  map<string, pair<unsigned char*, unsigned int>>::iterator
+  map<string, pair<unsigned char*, size_t>>::iterator
     it = m_data.find(identifier);
   if(it != m_data.end()) {
     // try to reuse, otherwise reallocate
@@ -420,7 +468,7 @@ DataPointer BasicScan::create(const std::string& identifier,
 
 void BasicScan::clear(const std::string& identifier)
 {
-  map<string, pair<unsigned char*, unsigned int>>::iterator
+  map<string, pair<unsigned char*, size_t>>::iterator
     it = m_data.find(identifier);
   if(it != m_data.end()) {
     delete[] it->second.first;
@@ -484,13 +532,13 @@ void BasicScan::saveBOctTree(std::string & filename)
                                 true);
   } else { // without reduction, xyz + attribute points
     float** pts = octtree_pointtype.createPointArray<float>(this);
-    unsigned int nrpts = size<DataXYZ>("xyz");
+    size_t nrpts = size<DataXYZ>("xyz");
     btree = new BOctTree<float>(pts,
                                 nrpts,
                                 octtree_voxelSize,
                                 octtree_pointtype,
                                 true);
-    for(unsigned int i = 0; i < nrpts; ++i) delete[] pts[i]; delete[] pts;
+    for(size_t i = 0; i < nrpts; ++i) delete[] pts[i]; delete[] pts;
   }
 
   btree->serialize(filename);
@@ -522,13 +570,13 @@ void BasicScan::createOcttree()
                                 true);
   } else { // without reduction, xyz + attribute points
     float** pts = octtree_pointtype.createPointArray<float>(this);
-    unsigned int nrpts = size<DataXYZ>("xyz");
+    size_t nrpts = size<DataXYZ>("xyz");
     btree = new BOctTree<float>(pts,
                                 nrpts,
                                 octtree_voxelSize,
                                 octtree_pointtype,
                                 true);
-    for(unsigned int i = 0; i < nrpts; ++i) delete[] pts[i]; delete[] pts;
+    for(size_t i = 0; i < nrpts; ++i) delete[] pts[i]; delete[] pts;
   }
 
   // save created octtree            
@@ -564,13 +612,13 @@ BOctTree<float>* BasicScan::convertScanToShowOcttree()
                                 true);
   } else { // without reduction, xyz + attribute points
     float** pts = octtree_pointtype.createPointArray<float>(this);
-    unsigned int nrpts = size<DataXYZ>("xyz");
+    size_t nrpts = size<DataXYZ>("xyz");
     btree = new BOctTree<float>(pts,
                                 nrpts,
                                 octtree_voxelSize,
                                 octtree_pointtype,
                                 true);
-    for(unsigned int i = 0; i < nrpts; ++i) delete[] pts[i]; delete[] pts;
+    for(size_t i = 0; i < nrpts; ++i) delete[] pts[i]; delete[] pts;
   }
 
   // save created octtree            
@@ -581,7 +629,7 @@ BOctTree<float>* BasicScan::convertScanToShowOcttree()
   return btree;
 }
 
-unsigned int BasicScan::readFrames()
+size_t BasicScan::readFrames()
 {
   string filename = m_path + "scan" + m_identifier + ".frames";
   ifstream file(filename.c_str());
@@ -613,12 +661,12 @@ void BasicScan::saveFrames()
   file.close();
 }
 
-unsigned int BasicScan::getFrameCount()
+size_t BasicScan::getFrameCount()
 {
   return m_frames.size();
 }
 
-void BasicScan::getFrame(unsigned int i,
+void BasicScan::getFrame(size_t i,
                          const double*& pose_matrix,
                          AlgoType& type)
 {

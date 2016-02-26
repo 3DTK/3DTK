@@ -63,7 +63,7 @@ class ANNkd_tree;
   xyz[i][0..2]
   reflectance[i]
   
-  unsigned int size = scan->size("xyz reduced");
+  size_t size = scan->size("xyz reduced");
 
   To use the prefetching of all requested data field in the scanserver,
   mark them for use. This is relevant for efficiency, which would
@@ -94,7 +94,7 @@ class ANNkd_tree;
 
   Reading frames in show:
 
-  unsigned int size = scan->readFrames();
+  size_t size = scan->readFrames();
   
   const double* pose;
   AlgoType type;
@@ -204,7 +204,7 @@ public:
   virtual const char* getIdentifier() const = 0;
   
   //! Determine the maximum number of reduced points in \a scans
-  static unsigned int getMaxCountReduced(ScanVector& scans);
+  static size_t getMaxCountReduced(ScanVector& scans);
   
   /* Functions for altering data fields, implementation specific */
   
@@ -228,7 +228,7 @@ public:
    * Creates a data field \a identifier with \a size bytes.
    */
   virtual DataPointer create(const std::string& identifier,
-                             unsigned int size) = 0;
+                             size_t size) = 0;
   
   /**
    * Clear the data field \a identifier, removing its allocated memory if
@@ -246,7 +246,7 @@ public:
    * e.g size<DataXYZ>("xyz reduced")
    */
   template<typename T>
-  unsigned int size(const std::string& identifier) {
+  size_t size(const std::string& identifier) {
     return (T(get(identifier))).size();
   }
 
@@ -257,7 +257,7 @@ public:
    * will be empty.
    * @return count of frames if file has been read, zero otherwise
    */
-  virtual unsigned int readFrames() = 0;
+  virtual size_t readFrames() = 0;
   
   /**
    * Write the accumulated frames into a .frames-file.
@@ -265,10 +265,10 @@ public:
   virtual void saveFrames() = 0;
   
   //! Count of frames
-  virtual unsigned int getFrameCount() = 0;
+  virtual size_t getFrameCount() = 0;
   
   //! Get contents of a frame, pass matrix pointer and type by reference
-  virtual void getFrame(unsigned int i,
+  virtual void getFrame(size_t i,
                         const double*& pose_matrix,
                         AlgoType& type) = 0;
   
@@ -378,7 +378,7 @@ protected:
   double reduction_voxelSize;
   
   //! Which point to take out of the reduction octtree, 0 for center
-  unsigned int reduction_nrpts;
+  size_t reduction_nrpts;
   
   //! Pointtype used for the reduction octtree
   PointType reduction_pointtype;
