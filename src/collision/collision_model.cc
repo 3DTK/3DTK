@@ -371,6 +371,9 @@ size_t handle_pointcloud(std::vector<Point> &pointmodel, DataXYZ &environ,
         default:
             throw std::runtime_error("impossible");
     }
+	// print an empty line to start new output not in the same line that
+	// contained the progress output but the next
+	cerr << endl;
     size_t num_colliding = 0;
     // the actual implementation of std::vector<bool> requires us to use the
     // proxy iterator pattern with &&...
@@ -648,6 +651,9 @@ void calculate_collidingdist(DataXYZ &environ,
         double point2[3] = {environ[c][0], environ[c][1], environ[c][2]};
         dist_colliding[i] = sqrt(Dist2(point1, point2));
     }
+	// print an empty line to start new output not in the same line that
+	// contained the progress output but the next
+	cerr << endl;
     time_t after = time(NULL);
     cerr << "took: " << difftime(after, before) << " seconds" << endl;
     for (size_t i = 0; i < num_noncolliding; ++i) {
@@ -722,6 +728,9 @@ void calculate_collidingdist2(std::vector<Point> &pointmodel, DataXYZ &environ,
 			}
         }
     }
+	// print an empty line to start new output not in the same line that
+	// contained the progress output but the next
+	cerr << endl;
 	// turn the squared distances into normal ones
     for (size_t i = 0; i < dist_colliding.size(); ++i) {
         dist_colliding[i] = sqrt(dist_colliding[i]);
