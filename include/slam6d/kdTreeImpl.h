@@ -75,7 +75,7 @@ public:
     double xmin = point(pts, indices[0])[0], xmax = point(pts, indices[0])[0];
     double ymin = point(pts, indices[0])[1], ymax = point(pts, indices[0])[1];
     double zmin = point(pts, indices[0])[2], zmax = point(pts, indices[0])[2];
-    for(unsigned int i = 1; i < n; i++) {
+    for(size_t i = 1; i < n; i++) {
       xmin = min(xmin, point(pts, indices[i])[0]);
       xmax = max(xmax, point(pts, indices[i])[0]);
       ymin = min(ymin, point(pts, indices[i])[1]);
@@ -89,7 +89,7 @@ public:
       npts = n;
       leaf.p = new AccessorData[n];
       // fill leaf index array with indices
-      for(unsigned int i = 0; i < n; ++i) {
+      for(size_t i = 0; i < n; ++i) {
         leaf.p[i] = indices[i];
       }
       return;
@@ -128,7 +128,7 @@ public:
       npts = n;
       leaf.p = new AccessorData[n];
       // fill leaf index array with indices
-      for(unsigned int i = 0; i < n; ++i) {
+      for(size_t i = 0; i < n; ++i) {
         leaf.p[i] = indices[i];
       }
       return;
