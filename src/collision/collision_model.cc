@@ -776,6 +776,8 @@ int main(int argc, char **argv)
     // read trajectory in *.3d file format
     std::vector<Frame> trajectory = read_trajectory(trajectoryfn);
 
+	cerr << "opening scan directory" << endl;
+
     ScanVector::iterator it = Scan::allScans.begin();
 
     // if matching against pointcloud, treat the first scan as the model
