@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 from scipy import interpolate
 import numpy as np
@@ -10,10 +10,10 @@ def pairwise(iterable):
     "s -> (s0,s1), (s1,s2), (s2, s3), ..."
     a, b = itertools.tee(iterable)
     next(b, None)
-    return itertools.izip(a, b)
+    return zip(a, b)
 
 if len(sys.argv) not in [2,3]:
-    print "usage: %s segsize [file.frames]"
+    print("usage: %s segsize [file.frames]"%sys.argv[0])
     exit(1)
 
 segsize = float(sys.argv[1])
@@ -61,7 +61,9 @@ tck,u = interpolate.splprep([poses_x,poses_y,poses_z],s=smoothing)
 unew = np.linspace(0,1.0,subdiv)
 out = interpolate.splev(unew,tck)
 
-print >>sys.stderr, "overall length: %f"%length
+print("overall length: %f"%length, file=sys.stderr)
 
 for x,y,z in zip(*out):
-    print "1 0 0 0 0 1 0 0 0 0 1 0 %f %f %f 1 3"%(x,y,z)
+    # we use str() instead of "%f" because it intelligently chooses the right
+    # number of significant digits
+    print("1 0 0 0 0 1 0 0 0 0 1 0 %s %s %s 1 3"%(str(x),str(y),str(z)))
