@@ -47,7 +47,7 @@ public:
    * @param pointer base pointer to the data
    * @param size of the pointed data in bytes
    */
- DataPointer(unsigned char* pointer, unsigned int size,
+ DataPointer(unsigned char* pointer, size_t size,
 	     PrivateImplementation* private_impl = 0) :
   m_pointer(pointer), m_size(size), m_private_impl(private_impl) {
   }
@@ -95,7 +95,7 @@ public:
   
 protected:
   unsigned char* m_pointer;
-  unsigned int m_size;
+  size_t m_size;
   inline void  shallowCopy(DataPointer& other) {
     if(m_private_impl != 0)
       delete m_private_impl;
@@ -150,13 +150,13 @@ public:
       }
     
   //! Represent the pointer as an array of T
-  inline T& operator[](unsigned int i) const
+  inline T& operator[](size_t i) const
   {
     return *(reinterpret_cast<T*>(m_pointer) + i);
   }
   
   //! The number of T instances in this array
-  unsigned int size() {
+  size_t size() {
     return m_size / sizeof(T);
   }
 };
@@ -201,13 +201,13 @@ public:
       }
 
   //! Represent the pointer as an array of T[3]
-  inline T* operator[](unsigned int i) const
+  inline T* operator[](size_t i) const
   {
     return reinterpret_cast<T*>(m_pointer) + (i*3);
   }
   
   //! The number of T[3] instances in this array
-  unsigned int size() const {
+  size_t size() const {
     return m_size / (3 * sizeof(T));
   }
 };
@@ -235,7 +235,7 @@ public:
   }
   
   //! There is only one object in here
-  unsigned int size() const {
+  size_t size() const {
     return 1;
   }
 };
@@ -251,9 +251,9 @@ class PointerArray {
 public:
   //! Create a temporary array and fill it sequentially with pointers to points
   PointerArray(const TripleArray<T>& data) {
-    unsigned int size = data.size();
+    size_t size = data.size();
     m_array = new T*[size];
-    for(unsigned int i = 0; i < size; ++i)
+    for(size_t i = 0; i < size; ++i)
       m_array[i] = data[i];
   }
   
