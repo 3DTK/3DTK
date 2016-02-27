@@ -586,22 +586,71 @@ ScanDataTransform& transform, PointFilter& filter, std::vector<double>* xyz, std
         return false;
     }
     // apply transformations and filter data and append to vectors
+    //
+    // We catch out-of-memory exceptions which might easily happen because
+    // double the actual amount of memory is needed in the worst case. This is
+    // because the vector container will double the reserved memory when the
+    // currently reserved size becomes full.
+    //
+    // FIXME: use a datastructure that allocates memory more conservatively
+    //
+    // FIXME: instead of using a different datastructure, another idea would
+    //        be to use mmap-ed file(s) with the respective data inside
     if (transform.transform(xyz_tmp, rgb_tmp, &refl_tmp, &temp_tmp, &ampl_tmp, &type_tmp, &devi_tmp)
             && (xyz == 0 || filter.check(xyz_tmp)) ) {
-        if (xyz != 0)
-            for (int i = 0; i < 3; ++i) xyz->push_back(xyz_tmp[i]);
-        if (rgb != 0)
-            for (int i = 0; i < 3; ++i) rgb->push_back(rgb_tmp[i]);
-        if (refl != 0)
-            refl->push_back(refl_tmp);
-        if (temp != 0)
-            temp->push_back(temp_tmp);
-        if (ampl != 0)
-            ampl->push_back(ampl_tmp);
-        if (type != 0)
-            type->push_back(type_tmp);
-        if (devi != 0)
-            devi->push_back(devi_tmp);
+            if (xyz != 0)
+                for (int i = 0; i < 3; ++i) {
+                    try {
+                        xyz->push_back(xyz_tmp[i]);
+                    } catch (std::bad_alloc& ba){
+                        std::cerr << "handle_line: Cannot add element to xyz vector with " << xyz->size() << " elements." << std::endl;
+                        throw;
+                    }
+                }
+            if (rgb != 0)
+                for (int i = 0; i < 3; ++i) {
+                    try {
+                        rgb->push_back(rgb_tmp[i]);
+                    } catch (std::bad_alloc& ba){
+                        std::cerr << "handle_line: Cannot add element to rgb vector with " << rgb->size() << " elements." << std::endl;
+                        throw;
+                    }
+                }
+            if (refl != 0)
+                try {
+                    refl->push_back(refl_tmp);
+                } catch (std::bad_alloc& ba){
+                    std::cerr << "handle_line: Cannot add element to refl vector with " << refl->size() << " elements." << std::endl;
+                    throw;
+                }
+            if (temp != 0)
+                try {
+                    temp->push_back(temp_tmp);
+                } catch (std::bad_alloc& ba){
+                    std::cerr << "handle_line: Cannot add element to temp vector with " << temp->size() << " elements." << std::endl;
+                    throw;
+                }
+            if (ampl != 0)
+                try {
+                    ampl->push_back(ampl_tmp);
+                } catch (std::bad_alloc& ba){
+                    std::cerr << "handle_line: Cannot add element to ampl vector with " << ampl->size() << " elements." << std::endl;
+                    throw;
+                }
+            if (type != 0)
+                try {
+                    type->push_back(type_tmp);
+                } catch (std::bad_alloc& ba){
+                    std::cerr << "handle_line: Cannot add element to type vector with " << type->size() << " elements." << std::endl;
+                    throw;
+                }
+            if (devi != 0)
+                try {
+                    devi->push_back(devi_tmp);
+                } catch (std::bad_alloc& ba){
+                    std::cerr << "handle_line: Cannot add element to devi vector with " << devi->size() << " elements." << std::endl;
+                    throw;
+                }
     }
 
     return true;
