@@ -13,7 +13,7 @@
 set cmakeexe=C:/Program Files (x86)/CMake/bin/cmake.exe
 
 :: the path where the 3dtk sources are
-set sourcedir=Z:/slam6d/
+set sourcedir=Z:/3dtk/
 
 :: the path where you want the resulting binaries
 set outdir=C:/slam6d/
@@ -50,14 +50,14 @@ set buildtype=Release
 
 @echo off
 
-set opencvdir=%sourcedir%/3rdparty/opencv/
-set boostdir=%sourcedir%/3rdparty/boost/
+set opencvdir=%outdir%/3rdparty/opencv/
+set boostdir=%outdir%/3rdparty/boost/
 
-set boostexe=boost_1_58_0-msvc-12.0-64.exe
+set boostexe=%outdir%/boost_1_58_0-msvc-12.0-64.exe
 set boosturl=http://netcologne.dl.sourceforge.net/project/boost/boost-binaries/1.58.0/boost_1_58_0-msvc-12.0-64.exe
 set boosthash=5f-b8-23-3b-ad-cf-d5-a6-28-12-a2-30-06-35-db-c9
 
-set opencvexe=opencv-2.4.9.exe
+set opencvexe=%outdir%/opencv-2.4.9.exe
 set opencvurl=http://freefr.dl.sourceforge.net/project/opencvlibrary/opencv-win/2.4.9/opencv-2.4.9.exe
 set opencvhash=cd-c4-be-ed-03-07-e9-02-c3-a5-1f-71-45-bd-5d-c7
 
