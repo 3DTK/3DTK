@@ -182,7 +182,7 @@ std::streamsize uosHeaderTest(std::istream& infile, char **line, std::streamsize
     char *buffer = (char *)malloc(bufsize);
     try {
         infile.getline(buffer, bufsize, '\n');
-    } catch(std::ios::failure e) {
+    } catch(std::ios_base::failure e) {
         std::cerr << "error reading first line" << endl;
         std::cerr << "did not find a newline after " << bufsize << " characters" << endl;
         std::cerr << e.what() << endl;
@@ -710,7 +710,7 @@ bool readASCII(std::istream& infile, char *firstline, std::streamsize
 
         try {
             infile.getline(buffer, bufsize, '\n');
-        } catch(std::ios::failure e) {
+        } catch(std::ios_base::failure e) {
             if (!infile.eof()) {
                 std::cerr << "error reading a line in line " << linenr << endl;
                 std::cerr << e.what() << endl;
