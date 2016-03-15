@@ -900,7 +900,7 @@ bool write_multiple(std::map<std::string,std::string> contentmap)
             continue;
         }
 
-        find_path_archive(path, [=,&archivehandles](boost::filesystem::path archivepath, boost::filesystem::path remainder) -> bool {
+        bool ret = find_path_archive(path, [=,&archivehandles](boost::filesystem::path archivepath, boost::filesystem::path remainder) -> bool {
             auto ah_it = archivehandles.find(archivepath.string());
             if (ah_it == archivehandles.end()) {
                 int error;
@@ -943,6 +943,9 @@ bool write_multiple(std::map<std::string,std::string> contentmap)
             }
             return true;
         });
+        if (!ret) {
+            throw std::runtime_error("cannot find zip archive component in path");
+        }
     }
 
     for (auto it=archivehandles.begin(); it != archivehandles.end(); ++it) {
