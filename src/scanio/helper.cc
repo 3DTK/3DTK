@@ -890,7 +890,10 @@ bool write_multiple(std::map<std::string,std::string> contentmap)
         std::string path = it->first;
         std::string content = it->second;
 
-        if (boost::filesystem::exists(path)) {
+        // check if the directory part of the frames file exists and is a
+        // directory
+        boost::filesystem::path dirname = boost::filesystem::path(path).parent_path();
+        if (boost::filesystem::is_directory(dirname)) {
             boost::filesystem::ofstream data_file(path);
             data_file << content;
             data_file.close();
