@@ -21,6 +21,8 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
+#include <boost/algorithm/string.hpp>
+
 #include <boost/program_options.hpp>
 namespace po = boost::program_options;
 
@@ -80,7 +82,8 @@ void validate(boost::any& v, const std::vector<std::string>& values,
 void parse_options(int argc, char **argv, IOType &iotype, string &dir,
         double &radius, bool &calcdistances, collision_method &cmethod,
         penetrationdepth_method &pdmethod, bool &use_cuda, int &cuda_device,
-		double &voxel, int &octree, bool &reduce, int &jobs)
+		double &voxel, int &octree, bool &reduce, int &jobs,
+		std::string &transform)
 {
     po::options_description generic("Generic options");
     generic.add_options()
@@ -102,6 +105,7 @@ void parse_options(int argc, char **argv, IOType &iotype, string &dir,
 #ifdef _OPENMP
         ("jobs,j", po::value<int>(&jobs)->default_value(1),
          "number of threads to run in parallel. Default: 1")
+		("transform", po::value<std::string>(&transform)->default_value("1:0:0:0:0:1:0:0:0:0:1:0:0:0:0:1"))
 #endif
         ("collisionmethod,c", po::value<collision_method>(&cmethod)->default_value(CTYPE1),"CPU collision method")
         ("penetrationdepthmethod,p", po::value<penetrationdepth_method>(&pdmethod)->default_value(PDTYPE1))
@@ -790,8 +794,20 @@ int main(int argc, char **argv)
 	int octree;
 	bool reduce;
 	int jobs=1;
+	std::string transform;
 	
-    parse_options(argc, argv, iotype, dir, radius, calcdistances, cmethod, pdmethod, use_cuda, cuda_device, voxel, octree, reduce, jobs);
+    parse_options(argc, argv, iotype, dir, radius, calcdistances, cmethod, pdmethod, use_cuda, cuda_device, voxel, octree, reduce, jobs, transform);
+
+	vector<std::string> transmat_str;
+	boost::split(transmat_str, transform, boost::is_any_of(":"));
+	if (transmat_str.size() != 16) {
+		cerr << "invalid --transform string, must be of form X:X:X:X:X:X:X:X:X:X:X:X:X:X:X:X" << endl;
+		exit(-1);
+	}
+	double transmat[16];
+	for (int i = 0; i < 16; ++i) {
+		transmat[i] = std::stod(transmat_str[i]);
+	}
 
     // read scan 0 (model) and 1 (environment) without scanserver
     Scan::openDirectory(false, dir, iotype, 0, 1);
@@ -835,7 +851,10 @@ int main(int argc, char **argv)
     cerr << "reading model..." << endl;
     vector<Point> pointmodel;
     for(unsigned int j = 0; j < model.size(); j++) {
-        pointmodel.push_back(Point(model[j][0], model[j][1], model[j][2]));
+		double point[3] = {model[j][0], model[j][1], model[j][2]};
+		// apply the given transformation to every point of the model
+        transform3(transmat, point);
+        pointmodel.push_back(Point(point[0], point[1], point[2]));
     }
     cerr << "model: " << pointmodel.size() << endl;
 	
