@@ -317,7 +317,15 @@ size_t handle_pointcloud(std::vector<Point> &pointmodel, DataXYZ &environ,
 #ifdef _OPENMP
 #pragma omp parallel for schedule(dynamic)
 #endif
-            for(size_t j = 0; j < trajectory.size(); ++j) {
+            for(
+#if defined(_MSC_VER) and defined(_OPENMP)
+		// MSVC only supports OpenMP 2.5 where the counter must be signed
+		// There is also no ssize_t on non-POSIX platforms but sizeof(long) == sizeof(void*)
+		long
+#else
+		size_t
+#endif
+		j = 0; j < trajectory.size(); ++j) {
 #ifdef _OPENMP
 		int thread_num = omp_get_thread_num();
 #else
@@ -340,7 +348,15 @@ size_t handle_pointcloud(std::vector<Point> &pointmodel, DataXYZ &environ,
 #ifdef _OPENMP
 #pragma omp parallel for schedule(dynamic)
 #endif
-            for(size_t j = 0; j < pointmodel.size(); ++j) {
+            for(
+#if defined(_MSC_VER) and defined(_OPENMP)
+		// MSVC only supports OpenMP 2.5 where the counter must be signed
+		// There is also no ssize_t on non-POSIX platforms but sizeof(long) == sizeof(void*)
+		long
+#else
+		size_t
+#endif
+		j = 0; j < pointmodel.size(); ++j) {
 #ifdef _OPENMP
 		int thread_num = omp_get_thread_num();
 #else
@@ -629,11 +645,19 @@ void calculate_collidingdist(DataXYZ &environ,
 #ifdef _OPENMP
 #pragma omp parallel for schedule(dynamic)
 #endif
-    for (size_t i = 0; i < num_colliding; ++i) {
-#ifdef _OPENMP
-		int thread_num = omp_get_thread_num();
+    for (
+#if defined(_MSC_VER) and defined(_OPENMP)
+	// MSVC only supports OpenMP 2.5 where the counter must be signed
+	// There is also no ssize_t on non-POSIX platforms but sizeof(long) == sizeof(void*)
+	long
 #else
-		int thread_num = 0;
+	size_t
+#endif
+	i = 0; i < num_colliding; ++i) {
+#ifdef _OPENMP
+	int thread_num = omp_get_thread_num();
+#else
+	int thread_num = 0;
 #endif
         cerr << (i*100.0)/num_colliding << " %\r";
         cerr.flush();
@@ -696,11 +720,19 @@ void calculate_collidingdist2(std::vector<Point> &pointmodel, DataXYZ &environ,
 #ifdef _OPENMP
 #pragma omp parallel for schedule(dynamic)
 #endif
-    for(size_t i = 0; i < trajectory.size(); ++i) {
-#ifdef _OPENMP
-		int thread_num = omp_get_thread_num();
+    for(
+#if defined(_MSC_VER) and defined(_OPENMP)
+	// MSVC only supports OpenMP 2.5 where the counter must be signed
+	// There is also no ssize_t on non-POSIX platforms but sizeof(long) == sizeof(void*)
+	long
 #else
-		int thread_num = 0;
+	size_t
+#endif
+	i = 0; i < trajectory.size(); ++i) {
+#ifdef _OPENMP
+	int thread_num = omp_get_thread_num();
+#else
+	int thread_num = 0;
 #endif
         cerr << (i*100.0)/end << " %\r";
         cerr.flush();
