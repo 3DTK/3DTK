@@ -147,8 +147,9 @@ void parse_options(int argc, char **argv, IOType &iotype, string &dir,
         cout << "\nExample usage:\n"
              << "\t" << argv[0] << " --radius=10 -f xyzr ./dir\n";
         cout << "The directory ./dir must contain the model as the first scan and\n";
-        cout << "the environment as the second scan. The frames file of the first\n";
-        cout << "scan is the trajectory.";
+        cout << "the environment as the second scan. The trajectory is given as\n";
+        cout << "the file trajectory.txt containing the right-handed transformation\n";
+	cout << "matrices in row-major order.";
         exit(0);
     }
 
@@ -189,12 +190,31 @@ std::vector<Frame> read_trajectory(string filename)
         exit(1);
     }
     std::vector<Frame> positions;
+    double tmp[16];
     double transformation[16];
-    unsigned int type;
+    unsigned int type = 2;
     std::string line;
     while (std::getline(file, line)) {
         std::istringstream iss(line);
-        iss >> transformation >> type;
+        iss >> tmp;
+	// transformation.txt contains right handed transformations in row-major
+	// order, so some conversion is needed
+	transformation[0] = tmp[5];
+	transformation[1] = -tmp[9];
+	transformation[2] = -tmp[1];
+	transformation[3] = -tmp[13];
+	transformation[4] = -tmp[6];
+	transformation[5] = tmp[10];
+	transformation[6] = tmp[2];
+	transformation[7] = -tmp[14];
+	transformation[8] = -tmp[4];
+	transformation[9] = tmp[8];
+	transformation[10] = tmp[0];
+	transformation[11] = tmp[12];
+	transformation[12] = -tmp[7];
+	transformation[13] = tmp[11];
+	transformation[14] = tmp[3];
+	transformation[15] = tmp[15];
         positions.push_back(Frame(transformation, type));
     }
     return positions;
@@ -817,8 +837,8 @@ int main(int argc, char **argv)
       exit(-1);
     }
 
-    // trajectory is the *.frames file of the model
-    string trajectoryfn = dir+"scan000.frames";
+    // trajectory file of the model
+    string trajectoryfn = dir+"trajectory.txt";
 
     cerr << "reading trajectory from " << trajectoryfn << endl;
     // read trajectory in *.3d file format
