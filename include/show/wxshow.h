@@ -23,6 +23,7 @@ public:
   void prepare3DViewport(int topleft_x, int topleft_y, int bottomrigth_x, int bottomrigth_y);
     
   // events
+  void animate();
   void idle();
   void idle_event(wxIdleEvent& event);
   void mouseMoved(wxMouseEvent& event);
