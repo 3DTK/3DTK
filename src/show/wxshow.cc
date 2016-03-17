@@ -326,8 +326,8 @@ class SelectionImpl : public Selection {
   public:
     void updateControls() {
       if (!MetaMatrix.empty()) {
-        frame_spin->SetRange(0, MetaMatrix[0].size()-1);
-        frame_spin->SetValue(current_frame);
+        //frame_spin->SetRange(0, MetaMatrix[0].size()-1);
+        //frame_spin->SetValue(current_frame);
       }
       m_spinCtrl61->SetValue(mincolor_value);
       m_spinCtrl6->SetValue(maxcolor_value);
@@ -349,7 +349,9 @@ class ControlImpl : public Controls {
     }
 		virtual void OnParallelZoom( wxSpinEvent& event ) { 
       haveToUpdate = 2;
-      pzoom = ((wxSpinCtrlDbl*)event.GetEventObject())->GetValue();
+      //pzoom = ((wxSpinCtrlDbl*)event.GetEventObject())->GetValue();
+      double val = ((wxSpinCtrlDbl*)event.GetEventObject())->GetValue();
+      pzoom = pow(2.0, val);
       event.Skip(); 
     }
 		virtual void OnTopView( wxCommandEvent& event ) {
@@ -400,7 +402,9 @@ class ControlImpl : public Controls {
   public:
     void updateControls() {
       apex_spinner->SetValue(cangle);
-      parallel_spinner->SetValue(pzoom);
+
+      double zoom = log(pzoom) / log(2.0);
+      parallel_spinner->SetValue(zoom);
 
       if(showTopView) {
         apex_spinner->Disable();
@@ -549,6 +553,39 @@ void BasicGLPane::mouseEvent(wxMouseEvent& event)
   }
 }
 
+void BasicGLPane::animate() {
+  if (path_iterator == 0) {
+    oldcamNavMode = cameraNavMouseMode;  // remember state of old mousenav
+    cameraNavMouseMode = 0;
+  }
+  for (path_iterator = 0; path_iterator < path_vectorX.size(); path_iterator++) {
+      cout << "Anim: " << path_iterator << " of " << path_vectorX.size() << endl;
+
+      //call the path animation function
+      //hide both the cameras and the path
+      show_cameras = 0;
+      show_path = 0;
+      //increase the iteration count
+
+      //repaint the screen
+      paint();
+
+      //save the animation
+      if(save_animation){
+        string filename = scan_dir + "animframe" + to_string(path_iterator,5) + ".ppm";
+        string jpgname = scan_dir + "animframe" + to_string(path_iterator,5) + ".jpg";
+        cout << "written " << filename << " of " << path_vectorX.size() << " files" << endl;
+        glWriteImagePPM(filename.c_str(), factor, 0);
+        haveToUpdate = 6;
+      }
+    }
+  cameraNavMouseMode = oldcamNavMode;
+  show_cameras = 1;
+  show_path = 1;
+  //cout << "i am here instead" << endl;
+  haveToUpdate = 0;
+}
+
 void BasicGLPane::idle() {
   if(glutGetWindow() != window_id)
     glutSetWindow(window_id);
@@ -633,12 +670,14 @@ void BasicGLPane::idle() {
 
   // case: path animation
   if(haveToUpdate == 6){
+    animate();
 
+    /*
     if (path_iterator == 0) {
       oldcamNavMode = cameraNavMouseMode;  // remember state of old mousenav
       cameraNavMouseMode = 0;
-    }
 
+    }
 
 
     //check if the user wants to animate both
@@ -655,7 +694,7 @@ void BasicGLPane::idle() {
       //increase the iteration count
 
       path_iterator += 1;
-      //cout << "i am here" << endl;
+      cout << "Anim: " << path_iterator << " of " << path_vectorX.size() << endl;
       //repaint the screen
       paint();
 
@@ -675,6 +714,7 @@ void BasicGLPane::idle() {
       //cout << "i am here instead" << endl;
       haveToUpdate = 0;
     }
+    */
   }
 }
 
@@ -797,6 +837,7 @@ void BasicGLPane::paint(bool interruptable)
     glDrawBuffer(buffermode);
     // delete framebuffer and z-buffer
 
+    //cout << "paint " << haveToUpdate << " " << path_iterator << endl;
     //Call the display function
     DisplayItFunc(GL_RENDER, interruptable);
 

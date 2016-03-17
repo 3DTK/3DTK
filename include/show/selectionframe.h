@@ -114,7 +114,7 @@ class Selection : public wxFrame
 		wxPanel* m_panel413112;
 		wxStaticText* m_staticText413112;
 		
-		wxSpinCtrl* frame_spin;
+//		wxSpinCtrl* frame_spin;
 		wxPanel* m_panel4131111;
 		wxStaticText* m_staticText4131111;
 		
