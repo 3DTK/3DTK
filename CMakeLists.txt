@@ -538,6 +538,12 @@ if(MSVC)
   else()
     install(DIRECTORY ${CMAKE_SOURCE_DIR}/3rdparty/windows/ CONFIGURATIONS Debug DESTINATION ${CMAKE_SOURCE_DIR}/windows FILES_MATCHING PATTERN "*.dll" PATTERN "*.exe")
   endif()
+
+  if( CMAKE_SIZEOF_VOID_P EQUAL 8 )
+    file(COPY ${CMAKE_SOURCE_DIR}/3rdparty/windows/freeglut/bin/x64/freeglut.dll DESTINATION ${OUTPUT_DIRECTORY}/bin)
+  else()
+    file(COPY ${CMAKE_SOURCE_DIR}/3rdparty/windows/freeglut/bin/freeglut.dll DESTINATION ${OUTPUT_DIRECTORY}/bin)
+  endif()
 endif()
 
 
