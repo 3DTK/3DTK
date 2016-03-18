@@ -123,14 +123,7 @@ if %ERRORLEVEL% GEQ 1 (
 	exit /B 1
 )
 
-call:copy %sourcedir%/3rdparty/windows/freeglut/bin/x64/freeglut.dll %outdir%/bin/%buildtype%
-
-if %ERRORLEVEL% GEQ 1 (
-	echo copy failed
-	exit /B 1
-)
-
-pause
+:: pause
 
 goto:eof
 
