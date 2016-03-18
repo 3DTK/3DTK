@@ -116,7 +116,7 @@ if %ERRORLEVEL% GEQ 1 (
 	exit /B 1
 )
 
-"%cmakeexe%" --build . --config %buildtype%
+"%cmakeexe%" --build . --config %buildtype% -- /m
 
 if %ERRORLEVEL% GEQ 1 (
 	echo cmake --build failed
