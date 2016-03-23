@@ -352,15 +352,42 @@ OPT_DEP(WITH_RIVLIB "Whether the RIEGL rivlib is present ON/OFF" OFF "")
 
 if(WITH_RIVLIB)
   message(STATUS "Compiling a scan IO for RXP files")
-  set(RIEGL_DIR ${CMAKE_SOURCE_DIR}/3rdparty/riegl/)
-  include_directories(${CMAKE_SOURCE_DIR}/3rdparty)
-  if(WIN32)
-    set(RIVLIB ${RIEGL_DIR}libscanlib-mt.lib ${RIEGL_DIR}libctrllib-mt.lib ${RIEGL_DIR}libboost_system-mt-1_43_0-vns.lib)
-  else()
-    set(RIVLIB ${RIEGL_DIR}libscanlib-mt-s.a ${RIEGL_DIR}libctrllib-mt-s.a ${RIEGL_DIR}libboost_system-mt-s-1_43_0-vns.a pthread)
-  endif()
-  find_package(LibXml2 REQUIRED)
 
+  if(UNIX)
+    set(RiVLib_USE_STATIC_RUNTIME ON)
+
+    if(CMAKE_SIZEOF_VOID_P EQUAL 8 AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 5.0) # 64bit GCC5
+      set(RiVLib_DIR "${CMAKE_SOURCE_DIR}/3rdparty/rivlib-2_2_1-x86_64-linux-gcc55/cmake/")
+    elseif(CMAKE_SIZEOF_VOID_P EQUAL 4 AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 5.0) # 32bit GCC4
+      set(RiVLib_DIR "${CMAKE_SOURCE_DIR}/3rdparty/rivlib-2_2_1-power-linux-gcc44/cmake/")
+    endif ()
+  elseif(WIN32)
+    # TODO: Add RiVLib for WIN32 platform
+  endif()
+
+  find_package(RiVLib QUIET COMPONENTS scanlib)
+
+  if(${RiVLib_FOUND})
+    include_directories(${RiVLib_INCLUDE_DIRS})
+  else()
+    # TODO: Remove this if nobody is using the old RiVLib anymore.
+    #       Change QUIET to REQUIRED in the find_package call for RiVLib above.
+
+    message(STATUS "Cannot find current RiVLib. Trying to build scan IO for RXP files with old scanlib.")
+
+    add_definitions(-DWITH_OLD_RIVLIB)
+
+    find_package(LibXml2 REQUIRED)
+    include_directories(${LIBXML2_INCLUDE_DIR})
+
+    set(RIEGL_DIR ${CMAKE_SOURCE_DIR}/3rdparty/riegl/)
+    include_directories(${CMAKE_SOURCE_DIR}/3rdparty)
+    if(WIN32)
+      set(RiVLib_SCANLIB_LIBRARY ${RIEGL_DIR}libscanlib-mt.lib ${RIEGL_DIR}libctrllib-mt.lib ${RIEGL_DIR}libboost_system-mt-1_43_0-vns.lib ${LIBXML2_LIBRARIES})
+    else()
+      set(RiVLib_SCANLIB_LIBRARY ${RIEGL_DIR}libscanlib-mt-s.a ${RIEGL_DIR}libctrllib-mt-s.a ${RIEGL_DIR}libboost_system-mt-s-1_43_0-vns.a pthread ${LIBXML2_LIBRARIES})
+    endif()
+  endif()
 else()
   message(STATUS "Do NOT compile a scan IO for RXP")
 endif()
