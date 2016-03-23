@@ -13,7 +13,6 @@
 #include "riegl/scanlib.hpp"
 using namespace scanlib;
 using namespace std;
-using namespace std::tr1;
 
 class importer;
 
@@ -33,7 +32,11 @@ public:
 
   ScanIO_rxp() : dec(0), imp(0) {}
 private:
+#ifdef WITH_OLD_RIVLIB
   std::tr1::shared_ptr<basic_rconnection> rc;
+#else
+  std::shared_ptr<basic_rconnection> rc;
+#endif
   decoder_rxpmarker *dec;
   importer *imp;
   std::string old_path;

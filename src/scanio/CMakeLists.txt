@@ -10,11 +10,6 @@ set(SCANIO_LIBNAMES
 
 if(WITH_RIVLIB)
   set(SCANIO_LIBNAMES ${SCANIO_LIBNAMES} rxp)
-  if(LIBXML2_FOUND)
-    include_directories(${LIBXML2_INCLUDE_DIR})
-#    set(SCANIO_LIBNAMES ${SCANIO_LIBNAMES} riegl_project)
-#    target_link_libraries(scan_io_riegl_project ${RIVLIB} scan_io_rxp ${LIBXML2_LIBRARIES})
-  endif()
 endif()
 
 if(WITH_LASLIB)
@@ -39,10 +34,7 @@ endif()
 endforeach()
 
 if(WITH_RIVLIB)
-  target_link_libraries(scan_io_rxp ${RIVLIB})
-  if(LIBXML2_FOUND)
-    target_link_libraries(scan_io_rxp ${LIBXML2_LIBRARIES}) #scan_io_riegl_project ${RIVLIB})
-  endif()
+  target_link_libraries(scan_io_rxp ${RiVLib_SCANLIB_LIBRARY})
 endif()
 
 if(WITH_LASLIB)
@@ -58,5 +50,3 @@ endif()
 if(UNIX)
   target_link_libraries(scanio dl)
 endif()
-
-
