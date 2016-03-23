@@ -81,8 +81,8 @@ bool ScanIO_rxp::supports(IODataType type)
 
 void ScanIO_rxp::readScan(const char* dir_path, const char* identifier, PointFilter& filter, std::vector<double>* xyz, std::vector<unsigned char>* rgb, std::vector<float>* reflectance, std::vector<float>* temperature, std::vector<float>* amplitude, std::vector<int>* type, std::vector<float>* deviation)
 {
-  
-  path data_path(dir_path);
+  // RiVLib requires the absolute path to scan files
+  path data_path(canonical(dir_path));
   
   // distinguish file and directory
   if(is_regular_file(data_path)) {
