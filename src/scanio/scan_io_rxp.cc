@@ -37,7 +37,6 @@ using namespace boost::filesystem;
 
 using namespace scanlib;
 using namespace std;
-using namespace std::tr1;
 
 
 
