@@ -62,6 +62,7 @@ inline typename my_managed_shared_ptr<T, ManagedMemory>::type
 }
 #else
 #define my_make_managed_shared_ptr make_managed_shared_ptr
+#define my_managed_shared_ptr ip::managed_shared_ptr
 #endif
 
 // hide the boost namespace and shorten others
@@ -82,7 +83,7 @@ typedef ip::allocator<char, SegmentManager> CharAllocator;
 typedef ip::basic_string<char, std::char_traits<char>, CharAllocator> SharedString;
 
 // shared pointer for shared strings
-typedef ip::managed_shared_ptr<SharedString, ip::managed_shared_memory>::type SharedStringSharedPtr;
+typedef my_managed_shared_ptr<SharedString, ip::managed_shared_memory>::type SharedStringSharedPtr;
 
 class CacheObject;
 
