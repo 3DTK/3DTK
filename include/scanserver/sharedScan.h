@@ -18,6 +18,52 @@
 #include <boost/interprocess/containers/string.hpp>
 #include <boost/interprocess/containers/vector.hpp>
 
+/*
+ * The following hack is only necessary for boost version 1.49 and older.
+ *
+ * In these versions, the copy constructor was missing from the boost
+ * shared_ptr. Since we cannot modify the original shared_ptr, we just
+ * subclass it and add a copy constructor to that class. We then also create a
+ * new managed_shared_ptr based on that new shared_ptr class.
+ */
+#include <boost/version.hpp>
+#if BOOST_VERSION <= 104900
+template<class T, class U, class V> class my_shared_ptr : public boost::interprocess::shared_ptr<T, U, V>
+{
+public:
+   my_shared_ptr(T *a, U b, V c) : boost::interprocess::shared_ptr<T, U, V>(a, b, c) {};
+   my_shared_ptr(const my_shared_ptr &r) {};
+};
+
+//!Returns the type of a shared pointer
+//!of type T with the allocator boost::interprocess::allocator allocator
+//!and boost::interprocess::deleter deleter
+//!that can be constructed in the given managed segment type.
+template<class T, class ManagedMemory>
+struct my_managed_shared_ptr
+{
+   typedef typename ManagedMemory::template allocator<void>::type void_allocator;
+   typedef typename ManagedMemory::template deleter<T>::type      deleter;
+   typedef my_shared_ptr< T, void_allocator, deleter>                type;
+};
+
+//!Returns an instance of a shared pointer constructed
+//!with the default allocator and deleter from a pointer
+//!of type T that has been allocated in the passed managed segment
+template<class T, class ManagedMemory>
+inline typename my_managed_shared_ptr<T, ManagedMemory>::type
+   my_make_managed_shared_ptr(T *constructed_object, ManagedMemory &managed_memory)
+{
+   return typename my_managed_shared_ptr<T, ManagedMemory>::type
+   ( constructed_object
+   , managed_memory.template get_allocator<void>()
+   , managed_memory.template get_deleter<T>()
+   );
+}
+#else
+#define my_make_managed_shared_ptr make_managed_shared_ptr
+#endif
+
 // hide the boost namespace and shorten others
 namespace
 {

@@ -56,7 +56,7 @@ SharedScanVector* ServerInterface::readDirectory(const char * dir_path, IOType t
   
   // share the directory path string between all scans because it's the same
   // BUG: before boost-1.47, gcc -O2 and higher caused several boost::ipc:string instances having errors with garbage characters in between and/or more at the end, this is to avoid that problem
-  SharedStringSharedPtr dir_path_ptr = make_managed_shared_ptr(
+  SharedStringSharedPtr dir_path_ptr = my_make_managed_shared_ptr(
     segment_manager->construct<SharedString>(anonymous_instance)(dir_path, allocator), *segment_manager);
   
   // for each identifier, create a scan
