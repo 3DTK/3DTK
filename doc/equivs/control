@@ -34,6 +34,8 @@ Depends:
 # these are optional dependencies for certain features
 #    eigen3 for src/model
 #    cgal   for src/model
+#    imagemagick to convert from ppm
 Recommends:
+ imagemagick,
  libeigen3-dev,
  libcgal-dev,
