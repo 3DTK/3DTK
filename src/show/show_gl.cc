@@ -961,9 +961,15 @@ void CallBackIdleFunc(void)
       string systemcall = "convert -quality 100 -type TrueColor "
         + filename + " " + jpgname;     
       // cout << systemcall << endl;
-      system(systemcall.c_str());
-      systemcall = "rm " + filename;
-      system(systemcall.c_str());
+      int ret = system(systemcall.c_str());
+	  if (ret == -1) {
+		  cerr << "child process cannot be created (-1): " << systemcall << endl;
+	  } else if (ret == 0) {
+		  systemcall = "rm " + filename;
+		  system(systemcall.c_str()); // ignore if removing doesn't work
+	  } else {
+		  cerr << "unknown error " << ret << " when running: " << systemcall << endl;
+	  }
 #endif
     }
   }
@@ -1020,9 +1026,15 @@ void CallBackIdleFunc(void)
             + to_string(path_iterator, 5) + ".jpg";
         string systemcall = "convert -quality 100 "
             + filename + " " + jpgname;
-        system(systemcall.c_str());
-        systemcall = "rm " + filename;
-        system(systemcall.c_str());
+		int ret = system(systemcall.c_str());
+		if (ret == -1) {
+			cerr << "child process cannot be created (-1): " << systemcall << endl;
+		} else if (ret == 0) {
+			systemcall = "rm " + filename;
+			system(systemcall.c_str()); // ignore if removing doesn't work
+		} else {
+			cerr << "unknown error " << ret << " when running: " << systemcall << endl;
+		}
 #endif
       }
     } else {                             // animation has just ended
@@ -1072,9 +1084,15 @@ void CallBackIdleFunc(void)
           + to_string(path_iterator,5) + ".jpg";
         string systemcall = "convert -quality 100 "
           + filename + " " + jpgname;     
-        system(systemcall.c_str());
-        systemcall = "rm " + filename;     
-        system(systemcall.c_str());
+		int ret = system(systemcall.c_str());
+		if (ret == -1) {
+			cerr << "child process cannot be created (-1): " << systemcall << endl;
+		} else if (ret == 0) {
+			systemcall = "rm " + filename;
+			system(systemcall.c_str()); // ignore if removing doesn't work
+		} else {
+			cerr << "unknown error " << ret << " when running: " << systemcall << endl;
+		}
 #endif
         haveToUpdate = 6;
       }
