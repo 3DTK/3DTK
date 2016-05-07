@@ -711,6 +711,12 @@ double optimize_quad_generic(apriltag_family_t *family, image_u8_t *im, struct q
                         this_quad->p[i][1] = best_quad->p[i][1] + sy*stepsize;
                         quad_update_homographies(this_quad);
 
+                        // Skip if the inverse of homography H does not exist
+                        if (this_quad->Hinv == NULL) {
+                            quad_destroy(this_quad);
+                            continue;
+                        }
+
                         double this_score = score(family, im, this_quad, user);
 
                         if (this_score > this_best_score) {
