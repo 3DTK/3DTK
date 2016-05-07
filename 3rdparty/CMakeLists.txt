@@ -210,3 +210,6 @@ endif(WIN32 AND WITH_GLEE)
 IF(WIN32)
   add_subdirectory(libzip-1.0.1)
 ENDIF()
+
+# Compile AprilTags library if required
+add_subdirectory(apriltag)
