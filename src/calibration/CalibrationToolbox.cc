@@ -16,13 +16,50 @@ CalibrationToolbox::CalibrationToolbox(Settings &s) :
         imagePath(s.picturePath),
         pictureHandler(s.decimate, s.blur, s.threads, s.debug, s.refine_edges, s.refine_decodes, s.refine_pose,
                        s.tagFamily) {
-    calcBoardCornerPositions(settings.calibrationPattern);
-    int count = 1;
-    for (string path : this->imagePath) {
-        this->initImage(path);
-        cout << "initImage succeed (" << path << ")" << endl;
-        cout << "read picture and matchTags succeed \npicture " << count << "/" << this->imagePath.size() << "\n" << endl;
-        count++;
+    if(s.calibrationPattern != Settings::FROM_FILES) {
+        calcBoardCornerPositions(settings.calibrationPattern);
+        int count = 1;
+        for (string path : this->imagePath) {
+            this->initImage(path);
+            cout << "initImage succeed (" << path << ")" << endl;
+            cout << "read picture and matchTags succeed \npicture " << count << "/" << this->imagePath.size() << "\n" <<
+            endl;
+            count++;
+        }
+    }else{
+        int count = 1;
+        for (string path : this->imagePath) {
+            vector<Point2f> imgpoints;
+            vector<Point3f> patpoints;
+            ifstream pointfile;
+            string line;
+            pointfile.open(path, ios_base::in);
+            if(!pointfile){
+                cerr << "can't read: " << path << endl;
+            }else{
+                while (getline(pointfile, line)){
+                    char* fEnd;
+                    float xi,yi,xp,yp,zp;
+                    xi = strtof (line.c_str(), &fEnd);
+                    yi = strtof (fEnd, &fEnd);
+                    xp = strtof (fEnd, &fEnd);
+                    yp = strtof (fEnd, &fEnd);
+                    zp = strtof (fEnd, NULL);
+                    imgpoints.push_back(Point2f(xi,yi));
+                    patpoints.push_back(Point3f(xp,yp,zp));
+                    line = "";
+                }
+            }
+
+            if(imgpoints.size() > 4 && patpoints.size() > 4){
+                this->vecImagePoints.push_back(imgpoints);
+                this->vecPatternPoints.push_back(patpoints);
+            } else{
+                cout << path << "\n has not enough points" << endl;
+            }
+            cout << "file read succeed (" << path << ")" << "\npicture " << count << "/" << this->imagePath.size() << "\n" << endl;
+            count++;
+        }
     }
 
 }
@@ -111,7 +148,7 @@ void CalibrationToolbox::initImage(string path) {
             cout << "count of detected Points: " << this->pictureHandler.getPointList().size() << endl;
         }
 
-        if (this->settings.visualize && this->pictureHandler.getPointList().size() > 0) {
+        if (this->settings.visualize && this->pictureHandler.getPointList().size() > 0) { //FIXME
             static int i = 0;
 
             Mat image = imread(path);

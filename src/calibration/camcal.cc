@@ -99,7 +99,7 @@ int main(int argc, const char * argv[]) {
                 ("help,h", "produce help message")
 
                 ("patterntype", po::value<string>(),
-                 "set Patterntype, default APRILTAG, allowed APRILTAG, CHESSBOARD, CIRCLES_GRID")
+                 "set Patterntype, default APRILTAG, allowed APRILTAG, CHESSBOARD, CIRCLES_GRID; use FROM_FILES to read point pairs (2d 3d) from file")
 
                 ("board-x", po::value<int>(&bx), "set board size x value")
                 ("board-y", po::value<int>(&by), "set board size y value")
@@ -127,7 +127,7 @@ int main(int argc, const char * argv[]) {
 
                 ("tagFamily", po::value<string>(&settings.tagFamily)->default_value("tag36h11"), "set AprilTag TagFamily")
 
-                ("path-pictures,P", po::value<string>(&dirpath)->required(), "set path to pictures")
+                ("path-pictures,P", po::value<string>(&dirpath), "set path to pictures; if use FROM_FILES, path to this files")
 
                 ("path-pattern,S", po::value<string>(&settings.patternPath), "set path to file with pattern coordinates")
 
@@ -170,6 +170,8 @@ int main(int argc, const char * argv[]) {
                 settings.calibrationPattern = Settings::CHESSBOARD;
             }else if(vm["patterntype"].as<string>().compare("CIRCLES_GRID") == 0){
                 settings.calibrationPattern = Settings::CIRCLES_GRID;
+            }else if(vm["patterntype"].as<string>().compare("FROM_FILES") == 0){
+                settings.calibrationPattern = Settings::FROM_FILES;
             }else{
                 cerr << "patterntype is invalid!, use --help for more information" << endl;
                 return 1;
@@ -206,70 +208,100 @@ int main(int argc, const char * argv[]) {
         cout << "for calibration with APRILTAGS need pattern file, use --help for more information" <<endl;
         return 1;
     }
-    // read pictures from path
-    cout <<"read pictures: " << endl;
-    DIR *dir;
-    struct dirent *dirzeiger;
-    int counter = 0;
-    if((dir=opendir(dirpath.c_str())) != NULL) {
-        while ((dirzeiger = readdir(dir)) != NULL) {
-            stringstream pic;
-            pic << dirpath << (*dirzeiger).d_name;
-            string picstring = pic.str();
-            string defaultdendung = "";
-            std::transform(picstring.begin(), picstring.end(), picstring.begin(), ::tolower);
-            size_t found = string::npos;
-            if(dateiendung.length() != 0) {
-                std::transform(dateiendung.begin(), dateiendung.end(), dateiendung.begin(), ::tolower);
-                found = picstring.find(dateiendung);
-            }else{
-                defaultdendung = ".jpg";
-                found = picstring.find(defaultdendung);
-                if(found == string::npos){
-                    defaultdendung = ".jpeg";
+    if(settings.calibrationPattern != Settings::FROM_FILES) {
+        // read pictures from path
+        cout << "read pictures: " << endl;
+        DIR *dir;
+        dirpath = dirpath + "/";
+        struct dirent *dirzeiger;
+        int counter = 0;
+        if ((dir = opendir(dirpath.c_str())) != NULL) {
+            while ((dirzeiger = readdir(dir)) != NULL) {
+                stringstream pic;
+                pic << dirpath << (*dirzeiger).d_name;
+                string picstring = pic.str();
+                string defaultdendung = "";
+                std::transform(picstring.begin(), picstring.end(), picstring.begin(), ::tolower);
+                size_t found = string::npos;
+                if (dateiendung.length() != 0) {
+                    std::transform(dateiendung.begin(), dateiendung.end(), dateiendung.begin(), ::tolower);
+                    found = picstring.find(dateiendung);
+                } else {
+                    defaultdendung = ".jpg";
                     found = picstring.find(defaultdendung);
+                    if (found == string::npos) {
+                        defaultdendung = ".jpeg";
+                        found = picstring.find(defaultdendung);
+                    }
+                    if (found == string::npos) {
+                        defaultdendung = ".jpe";
+                        found = picstring.find(defaultdendung);
+                    }
+                    if (found == string::npos) {
+                        defaultdendung = ".png";
+                        found = picstring.find(defaultdendung);
+                    }
+                    if (found == string::npos) {
+                        defaultdendung = ".tiff";
+                        found = picstring.find(defaultdendung);
+                    }
+                    if (found == string::npos) {
+                        defaultdendung = ".tif";
+                        found = picstring.find(defaultdendung);
+                    }
+                    if (found == string::npos) {
+                        defaultdendung = ".ppm";
+                        found = picstring.find(defaultdendung);
+                    }
+                    if (found == string::npos) {
+                        defaultdendung = ".pgm";
+                        found = picstring.find(defaultdendung);
+                    }
+                    if (found == string::npos) {
+                        defaultdendung = ".bmp";
+                        found = picstring.find(defaultdendung);
+                    }
                 }
-                if(found == string::npos){
-                    defaultdendung = ".jpe";
-                    found = picstring.find(defaultdendung);
-                }
-                if(found == string::npos){
-                    defaultdendung = ".png";
-                    found = picstring.find(defaultdendung);
-                }
-                if(found == string::npos){
-                    defaultdendung = ".tiff";
-                    found = picstring.find(defaultdendung);
-                }
-                if(found == string::npos){
-                    defaultdendung = ".tif";
-                    found = picstring.find(defaultdendung);
-                }
-                if(found == string::npos){
-                    defaultdendung = ".ppm";
-                    found = picstring.find(defaultdendung);
-                }
-                if(found == string::npos){
-                    defaultdendung = ".pgm";
-                    found = picstring.find(defaultdendung);
-                }
-                if(found == string::npos){
-                    defaultdendung = ".bmp";
-                    found = picstring.find(defaultdendung);
+                size_t endung = picstring.find("detections");
+                if (found != string::npos && endung == string::npos) {
+                    settings.picturePath.push_back(pic.str());
+                    cout << pic.str() << endl;
+                    counter++;
                 }
             }
-            size_t endung = picstring.find("detections");
-            if (found != string::npos && endung == string::npos) {
-                settings.picturePath.push_back(pic.str());
-                cout << pic.str() << endl;
-                counter ++;
-            }
+            cout << "\n" << counter << " pictures read" << endl;
         }
-        cout << "\n" << counter << " pictures read" << endl;
-    }
-    if(counter == 0){
-        cout << "no pictures found! pleas check path, use --help for more information" << endl;
-        return 1;
+        if (counter == 0) {
+            cout << "no pictures found! pleas check path, use --help for more information" << endl;
+            return 1;
+        }
+    }else{
+        cout << "read pictures: " << endl;
+        DIR *dir;
+        dirpath = dirpath + "/";
+        struct dirent *dirzeiger;
+        int counter = 0;
+        if ((dir = opendir(dirpath.c_str())) != NULL) {
+            while ((dirzeiger = readdir(dir)) != NULL) {
+                stringstream pic;
+                pic << dirpath << (*dirzeiger).d_name;
+                string picstring = pic.str();
+                string defaultdendung = ".correspondence";
+                std::transform(picstring.begin(), picstring.end(), picstring.begin(), ::tolower);
+                size_t found = string::npos;
+                found = picstring.find(defaultdendung);
+                if (found != string::npos) {
+                    settings.picturePath.push_back(pic.str());
+                    cout << pic.str() << endl;
+                    counter++;
+                }
+            }
+            cout << "\n" << counter << " files read" << endl;
+        }
+        if(counter == 0){
+            cout << "no files found! pleas check path, use --help for more information" << endl;
+            return 1;
+        }
     }
     if(extrinsic && estMatFile.length()== 0){
         cout << "for parameter --extrinsic nee also --initial-camera-matrix" << endl;
