@@ -293,6 +293,16 @@ else()
   message(STATUS "Without Tools")
 endif()
 
+## Calibration
+
+OPT_DEP(WITH_CALIBRATION "Whether to build calibration tools. ON/OFF" OFF "")
+
+if(WITH_CALIBRATION)
+  message(STATUS "With calibration")
+else()
+  message(STATUS "Without calibration")
+endif()
+
 ## Segmentation
 
 OPT_DEP(WITH_SEGMENTATION "Whether to build scan segmantion program ON/OFF" OFF "WITH_FBR")
@@ -599,6 +609,7 @@ add_subdirectory(src/scanner)
 add_subdirectory(src/model)
 add_subdirectory(src/collision)
 add_subdirectory(src/cuda)
+add_subdirectory(src/calibration)
 add_subdirectory(3rdparty)
 if(WITH_ADDONS)
   message(STATUS "With 3dtkaddons.")
