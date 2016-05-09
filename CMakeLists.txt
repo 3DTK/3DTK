@@ -612,5 +612,10 @@ if(WITH_TESTING)
   add_subdirectory(testing/kdtree)
 endif()
 
+# Dummy target with all header files
+# This is a hint for some IDEs, such as Qt Creator, to show all headers in the project tree
+file(GLOB_RECURSE 3DTK_HEADER_FILES "include/*.h")
+add_custom_target(headers SOURCES ${3DTK_HEADER_FILES})
+
 
 message (STATUS "Build environment is set up!")
