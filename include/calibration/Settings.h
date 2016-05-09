@@ -26,7 +26,7 @@ class Settings
 {
 public:
     Settings() : goodInput(false) {}
-    enum Pattern { NOT_EXISTING, CHESSBOARD, CIRCLES_GRID, ASYMMETRIC_CIRCLES_GRID, APRILTAG};
+    enum Pattern { NOT_EXISTING, CHESSBOARD, CIRCLES_GRID, ASYMMETRIC_CIRCLES_GRID, APRILTAG, FROM_FILES};
     enum InputType {INVALID, CAMERA, VIDEO_FILE, IMAGE_LIST};
     enum PatternType {APRIL_2D, APRIL_3D};
 

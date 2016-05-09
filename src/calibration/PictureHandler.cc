@@ -75,7 +75,7 @@ using namespace cv;
             cout << "Time to detect circles grid: " << end.tv_sec - start.tv_sec << " sec" << endl;
 
         }else if (pattern == Settings::ASYMMETRIC_CIRCLES_GRID){
-            //TODO ASYMMETRIC_CIRCLES_GRID
+            //TODO implement ASYMMETRIC_CIRCLES_GRID
             cout << "ASYMMETRIC_CIRCLES_GRID not implemented" << endl;
         }
         return found;
