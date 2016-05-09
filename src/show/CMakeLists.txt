@@ -2,6 +2,8 @@ set(SHOW_LIBS glui scan ann newmat ${GLUT_LIBRARIES} ${OPENGL_LIBRARIES} ${Boost
 if (WIN32)
   set(SHOW_LIBS ${SHOW_LIBS} XGetopt)
   set(SHOW_LIBS_S glui scan_s ann_s newmat_s XGetopt ${GLUT_LIBRARIES} ${OPENGL_LIBRARIES})
+elseif(APPLE)
+  set(SHOW_LIBS_S glui scan_s ann_s newmat_s XGetopt ${GLUT_LIBRARIES} ${OPENGL_LIBRARIES})
 elseif(CYGWIN)
   set(SHOW_LIBS_S glui scan_s ann_s newmat_s XGetopt ${GLUT_LIBRARIES} ${OPENGL_LIBRARIES})
 else()
@@ -29,6 +31,6 @@ add_library(showstatic STATIC ${SHOW_SRCS})
 
 ### EXPORT SHARED LIBS 
 if(EXPORT_SHARED_LIBS)
-add_library(show_s SHARED ${SHOW_SRCS})
-target_link_libraries(show_s ${Boost_LIBRARIES} ${SHOW_LIBS_S})
+  add_library(show_s SHARED ${SHOW_SRCS})
+  target_link_libraries(show_s ${Boost_LIBRARIES} ${SHOW_LIBS_S})
 endif()
