@@ -4,3 +4,4 @@
 /lib/
 /obj/
 /CMakeLists.txt.user
+/3rdparty/riegl
