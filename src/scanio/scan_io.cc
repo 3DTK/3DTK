@@ -39,7 +39,7 @@ ScanIO * ScanIO::getScanIO(IOType iotype)
 #ifdef WIN32
   libname += ".dll";
 #elif __APPLE__
-  libname = "lib/lib" + libname + ".dylib";
+  libname = "lib" + libname + ".dylib";
 #elif __CYGWIN__
   libname = "cyg" + libname + ".dll";
 #else
