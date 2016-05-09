@@ -9,6 +9,7 @@ if(WITH_CALIBRATION)
         Chessboard.cc
     )
     add_executable(camcal camcal.cc ${CAMCAL_SOURCES})
+
     target_link_libraries(camcal apriltag ${OpenCV_LIBRARIES} ${Boost_LIBRARIES})
 
     add_executable(undistort undistort.cc)

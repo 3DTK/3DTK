@@ -21,10 +21,10 @@ set( CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${OUTPUT_DIRECTORY}/obj )
 set( CMAKE_RUNTIME_OUTPUT_DIRECTORY ${OUTPUT_DIRECTORY}/bin )
 # Set output directories for multi-config builds (like with MSVC)
 foreach( OUTPUTCONFIG ${CMAKE_CONFIGURATION_TYPES} )
-    string( TOUPPER ${OUTPUTCONFIG} OUTPUTCONFIG )
-    set( CMAKE_LIBRARY_OUTPUT_DIRECTORY_${OUTPUTCONFIG} ${OUTPUT_DIRECTORY}/lib )
-    set( CMAKE_ARCHIVE_OUTPUT_DIRECTORY_${OUTPUTCONFIG} ${OUTPUT_DIRECTORY}/obj )
-    set( CMAKE_RUNTIME_OUTPUT_DIRECTORY_${OUTPUTCONFIG} ${OUTPUT_DIRECTORY}/bin )
+  string( TOUPPER ${OUTPUTCONFIG} OUTPUTCONFIG )
+  set( CMAKE_LIBRARY_OUTPUT_DIRECTORY_${OUTPUTCONFIG} ${OUTPUT_DIRECTORY}/lib )
+  set( CMAKE_ARCHIVE_OUTPUT_DIRECTORY_${OUTPUTCONFIG} ${OUTPUT_DIRECTORY}/obj )
+  set( CMAKE_RUNTIME_OUTPUT_DIRECTORY_${OUTPUTCONFIG} ${OUTPUT_DIRECTORY}/bin )
 endforeach( OUTPUTCONFIG CMAKE_CONFIGURATION_TYPES )
 
 #include_directories(OPENGL_INCLUDE_DIR)
@@ -37,7 +37,7 @@ endif()
 set(Boost_ADDITIONAL_VERSIONS "1.42" "1.42.0" "1.44" "1.44.0" "1.45.0" "1.45" "1.46" "1.46.1" "1.47.0" "1.47" "1.48" "1.50" "1.52" "1.53" "1.55" "1.56")
 if(WIN32)
   # for some unknown reason no one variant works on all windows platforms
-  set(Boost_DEBUG 1)  
+  set(Boost_DEBUG 1)
   find_package( Boost COMPONENTS serialization graph regex filesystem system thread chrono date_time program_options system REQUIRED)
 else()
   find_package( Boost COMPONENTS serialization graph regex filesystem system thread date_time program_options system REQUIRED)
@@ -59,19 +59,25 @@ if(NOT WIN32)
   endif()
 endif()
 
-find_package(OpenCV REQUIRED)
+
+
+if(APPLE)
+  find_package(OpenCV REQUIRED HINTS "/usr/local/opt/opencv3/share/OpenCV/")
+  include_directories("${OpenCV_INCLUDE_DIRS}")
+endif()
+
 if(EXISTS "${OpenCV_DIR}/OpenCVConfig.cmake")
   include("${OpenCV_DIR}/OpenCVConfig.cmake")
   set(ADDITIONAL_OPENCV_FLAGS
-                          "-DCV_MINOR_VERSION=${OpenCV_VERSION_MINOR} -DCV_MAJOR_VERSION=${OpenCV_VERSION_MAJOR}"
-                          CACHE STRING "OpenCV Version Defines)"
-                          )
+          "-DCV_MINOR_VERSION=${OpenCV_VERSION_MINOR} -DCV_MAJOR_VERSION=${OpenCV_VERSION_MAJOR}"
+          CACHE STRING "OpenCV Version Defines)"
+          )
   ## Include the standard CMake script
 else()
   set(ADDITIONAL_OPENCV_FLAGS
-                          ""
-                          CACHE STRING "OpenCV Version Defines (BLUB)"
-                          )
+          ""
+          CACHE STRING "OpenCV Version Defines (BLUB)"
+          )
 endif()
 set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${ADDITIONAL_OPENCV_FLAGS}")
 
@@ -82,7 +88,7 @@ set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${ADDITIONAL_OPENCV_FLAGS}")
 
 function(ENFORCE_OPTION_DEP_3DTK option VALUE)
   set (${option} "${VALUE}" CACHE BOOL "${${option}_DESCRIPTION}" FORCE) # this option set to VALUE as advised
-  
+
   #now make sure other dependencies are also true
   foreach(d ${${option}_DEPENDENCIES}) # look through all my dependencies
     string(REGEX REPLACE " +" ";" CMAKE_DEPENDENT_OPTION_DEP "${d}")
@@ -106,7 +112,7 @@ function(ENFORCE_OPTION_DEP_3DTK option VALUE)
       endif()
     endif()
   endforeach()
-  
+
 endfunction()
 
 macro(OPT_DEP option doc default depends)
@@ -257,7 +263,7 @@ endif()
 OPT_DEP(WITH_GRIDDER "Whether to build the 2DGridder binary ON/OFF" OFF "")
 
 if(WITH_GRIDDER)
-   find_package (Boost COMPONENTS system REQUIRED)
+  find_package (Boost COMPONENTS system REQUIRED)
   message(STATUS "With 2DGridder")
 else()
   message(STATUS "Without 2DGridder")
@@ -340,17 +346,17 @@ endif()
 OPT_DEP(WITH_CUDA "Whether to build CUDA accelerated collision detection tools" OFF "WITH_CUDA")
 
 if(WITH_CUDA)
-  find_package(CUDA REQUIRED)         
+  find_package(CUDA REQUIRED)
   include_directories(${FOUND_CUDA_NVCC_INCLUDE})
-  
+
   add_definitions(-DWITH_CUDA)
-  
+
   #owerrite users input - need to be fixed
   #select all NVIDIA GPU arch which support unified memory (CUDA toolkit >= 6.0) and arch>=30
   set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS};-gencode arch=compute_30,code=sm_30;-gencode arch=compute_35,code=sm_35;-gencode arch=compute_50,code=sm_50;-gencode arch=compute_52,code=sm_52)
-  
+
   message("CUDA_NVCC_FLAGS = ${CUDA_NVCC_FLAGS}")
-  
+
   message(STATUS "With CUDA accelerated collision detection")
 else()
   message(STATUS "Without CUDA accelerated collision detection")
@@ -432,11 +438,11 @@ if(EXPORT_SHARED_LIBS)
   ## Compile a single shared library containing all of 3DTK
   add_library(slam SHARED src/slam6d/icp6D.cc)
   if (WIN32)
-  target_link_libraries(slam scan_s ANN_s cxsparse_s newmat_s show_s fbr_s)
+    target_link_libraries(slam scan_s ANN_s cxsparse_s newmat_s show_s fbr_s)
   elseif(CYGWIN)
-  target_link_libraries(slam scan_s ANN_s cxsparse newmat_s show_s fbr_s)
+    target_link_libraries(slam scan_s ANN_s cxsparse newmat_s show_s fbr_s)
   else()
-  target_link_libraries(slam scan_s ann cxsparse newmat show_s fbr_s)
+    target_link_libraries(slam scan_s ann cxsparse newmat show_s fbr_s)
   endif()
   message(STATUS "exporting additional libraries")
 else()
@@ -456,10 +462,10 @@ endif()
 OPT_DEP(WITH_ADDONS "Whether to download and use addons to 3DTK. ON/OFF" OFF "")
 if(WITH_ADDONS)
   message(STATUS "Compiling addons directory")
-  #execute_process(COMMAND svn co https://robotik.informatik.uni-wuerzburg.de/slam6dprivate/trunk/addons addons 
+  #execute_process(COMMAND svn co https://robotik.informatik.uni-wuerzburg.de/slam6dprivate/trunk/addons addons
   #                WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
   #                OUTPUT_QUIET
-  #                ) 
+  #                )
   message(STATUS "With addons.")
 else()
   message(STATUS "Without addons.")
@@ -467,10 +473,10 @@ endif()
 
 OPT_DEP(WITH_TESTING "Whether to download and use testing data to 3DTK. ON/OFF" OFF "")
 if(WITH_TESTING)
-  execute_process(COMMAND svn co https://robotik.informatik.uni-wuerzburg.de/testing testing 
-                  WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-                  OUTPUT_QUIET
-                  ) 
+  execute_process(COMMAND svn co https://robotik.informatik.uni-wuerzburg.de/testing testing
+          WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+          OUTPUT_QUIET
+          )
   message(STATUS "With testing.")
 else()
   message(STATUS "Without testing.")
@@ -482,7 +488,7 @@ endif()
 
 ## Special treatment for system specifics
 if(APPLE)
-add_definitions(-Dfopen64=fopen)
+  add_definitions(-Dfopen64=fopen)
 endif()
 
 ## Multiple Cores
@@ -501,6 +507,12 @@ if(OPENMP_FOUND AND WITH_OPENMP)
 else()
   message(STATUS "Without OpenMP")
   set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DMAX_OPENMP_NUM_THREADS=1 -DOPENMP_NUM_THREADS=1")
+endif()
+
+# include newmat for Mac
+if(APPLE)
+  include_directories(${CMAKE_SOURCE_DIR}/3rdparty/newmat-10)
+  include_directories(${CMAKE_SOURCE_DIR}/3rdparty/cxsparse-4.4.4)
 endif()
 
 if(WIN32)
@@ -528,8 +540,8 @@ else()
   # Add include path for OpenGL without GL/-prefix
   # to avoid the include incompatibility between MACOS
   # and linux
-    find_path(OPENGL_INC gl.h /usr/include/GL)
-    include_directories(${OPENGL_INC})
+  find_path(OPENGL_INC gl.h /usr/include/GL)
+  include_directories(${OPENGL_INC})
 endif()
 
 if (${CMAKE_CXX_COMPILER_ID} STREQUAL Clang)
@@ -557,9 +569,9 @@ endif()
 if(MSVC)
   install(DIRECTORY ${CMAKE_SOURCE_DIR}/bin/Release/ CONFIGURATIONS Release DESTINATION ${CMAKE_SOURCE_DIR}/windows FILES_MATCHING PATTERN "*.dll" PATTERN "*.exe")
   if( CMAKE_SIZEOF_VOID_P EQUAL 8 )
-	  install(DIRECTORY ${CMAKE_SOURCE_DIR}/3rdparty/windows/x64/ CONFIGURATIONS Release DESTINATION ${CMAKE_SOURCE_DIR}/windows FILES_MATCHING PATTERN "*.dll" PATTERN "*.exe")
+    install(DIRECTORY ${CMAKE_SOURCE_DIR}/3rdparty/windows/x64/ CONFIGURATIONS Release DESTINATION ${CMAKE_SOURCE_DIR}/windows FILES_MATCHING PATTERN "*.dll" PATTERN "*.exe")
   else()
-	  install(DIRECTORY ${CMAKE_SOURCE_DIR}/3rdparty/windows/ CONFIGURATIONS Release DESTINATION ${CMAKE_SOURCE_DIR}/windows FILES_MATCHING PATTERN "*.dll" PATTERN "*.exe")
+    install(DIRECTORY ${CMAKE_SOURCE_DIR}/3rdparty/windows/ CONFIGURATIONS Release DESTINATION ${CMAKE_SOURCE_DIR}/windows FILES_MATCHING PATTERN "*.dll" PATTERN "*.exe")
   endif()
 
   install(DIRECTORY ${CMAKE_SOURCE_DIR}/bin/Debug/ CONFIGURATIONS Debug DESTINATION ${CMAKE_SOURCE_DIR}/windows FILES_MATCHING PATTERN "*.dll" PATTERN "*.exe")
@@ -627,6 +639,5 @@ endif()
 # This is a hint for some IDEs, such as Qt Creator, to show all headers in the project tree
 file(GLOB_RECURSE 3DTK_HEADER_FILES "include/*.h")
 add_custom_target(headers SOURCES ${3DTK_HEADER_FILES})
-
 
 message (STATUS "Build environment is set up!")
