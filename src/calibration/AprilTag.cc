@@ -139,11 +139,13 @@ int AprilTag3f::compair(AprilTag2f aprilTag2f){
     if(this->id == aprilTag2f.id) return 0;
     if(this->id > aprilTag2f.id) return 1;
     if(this->id < aprilTag2f.id) return -1;
+    return 0;
 }
 
 int AprilTag3f::compair(AprilTag3f aprilTag3f){
     if(this->id == aprilTag3f.id && this->point1 == aprilTag3f.point1 && this->point2 == aprilTag3f.point2 && this->point3 == aprilTag3f.point3 && this->point4 == aprilTag3f.point4) return 0;
     if(this->id != aprilTag3f.id) return -1;
+    return 0;
 }
 
 std::string AprilTag3f::toString(){
@@ -185,12 +187,14 @@ AprilTag2f::~AprilTag2f(){
 int AprilTag2f::compair(AprilTag2f aprilTag2f){
     if(this->id == aprilTag2f.id && this->point1 == aprilTag2f.point1 && this->point2 == aprilTag2f.point2 && this->point3 == aprilTag2f.point3 && this->point4 == aprilTag2f.point4) return 0;
     if(this->id != aprilTag2f.id) return -1;
+    return 0;
 }
 
 int AprilTag2f::compair(AprilTag3f aprilTag3f){
     if(this->id == aprilTag3f.id) return 0;
     if(this->id > aprilTag3f.id) return 1;
     if(this->id < aprilTag3f.id) return -1;
+    return 0;
 }
 
 std::string AprilTag2f::toString(){
