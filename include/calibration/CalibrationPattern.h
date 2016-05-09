@@ -13,7 +13,6 @@
 #include <opencv2/core/core.hpp>
 #include <map>
 #include "calibration/Settings.h"
-#include "calibration/3dPattern.h"
 #include "calibration/AprilTag.h"
 #include <fstream>
 
