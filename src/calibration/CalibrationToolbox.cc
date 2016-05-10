@@ -148,30 +148,6 @@ void CalibrationToolbox::initImage(string path) {
             cout << "count of detected Points: " << this->pictureHandler.getPointList().size() << endl;
         }
 
-        if (this->settings.visualize && this->pictureHandler.getPointList().size() > 0) { //FIXME
-            static int i = 0;
-
-            Mat image = imread(path);
-            cvtColor(image, image, CV_BGR2GRAY);
-            cvtColor(image, image, CV_GRAY2BGR);
-
-            std::stringstream imgss;
-            imgss << settings.visualizePath << "image" << i << ".png";
-            cv::imwrite(imgss.str(), image);
-
-            for (AprilTag2f tag : this->pictureHandler.getPointList()) {
-                circle(image, tag.point1, 1, Scalar(0, 0, 255), 2);
-                circle(image, tag.point2, 1, Scalar(0, 255, 0), 2);
-                circle(image, tag.point3, 1, Scalar(255, 0, 0), 2);
-                circle(image, tag.point4, 1, Scalar(0, 255, 255), 2);
-            }
-
-            std::stringstream detss;
-            detss << settings.visualizePath << "detections" << i << ".png";
-            cv::imwrite(detss.str(), image);
-
-            i++;
-        }
         this->matchTags();
     } else if(settings.calibrationPattern == Settings::CHESSBOARD){
         if (FILE *detecFile = fopen((path + ".detections").c_str(), "r")) {
@@ -214,7 +190,7 @@ void CalibrationToolbox::initImage(string path) {
 }
 
 int CalibrationToolbox::calibrate() {
-    Mat cameraMatrix, distCoeffs;
+    //Mat cameraMatrix, distCoeffs;
 
     //int mode = s.inputType == Settings::IMAGE_LIST ? CAPTURING : DETECTION;
     //clock_t prevTimestamp = 0;
@@ -222,10 +198,11 @@ int CalibrationToolbox::calibrate() {
     //const char ESC_KEY = 27;
     Mat image = imread(imagePath[0], CV_LOAD_IMAGE_COLOR);
     Size imageSize = image.size();
+    this->settings.imageSize = imageSize;
 
     // Draw the corners.
     //drawChessboardCorners( image, settings.boardSize, Mat(this->vecPatternPoints), true );
-    runCalibrationAndSave(settings, imageSize, cameraMatrix, distCoeffs, vecImagePoints);
+    runCalibrationAndSave(settings, imageSize, camMatrix, distorCoeff, vecImagePoints);
 
     return 0;
 }
@@ -313,36 +290,6 @@ bool CalibrationToolbox::runCalibration(Settings &s, Size &imageSize, Mat &camer
     totalAvgErr = computeReprojectionErrors(objectPoints, imagePoints,
                                             rvecs, tvecs, cameraMatrix, distCoeffs, reprojErrs);
 
-    if (this->settings.visualize) {
-        Mat pointsImage = Mat_<cv::Vec3b>::zeros(imageSize.height, imageSize.width);
-
-        for (int i = 0; i < (int) objectPoints.size(); i++) {
-            std::stringstream imgss;
-            imgss << settings.visualizePath << "/image" << i << ".png";
-            Mat reprojImage = cv::imread(imgss.str());
-
-            vector<Point2f> imagePoints2;
-            projectPoints(Mat(objectPoints[i]), rvecs[i], tvecs[i], cameraMatrix, distCoeffs, imagePoints2);
-            double err = norm(Mat(imagePoints[i]), Mat(imagePoints2), CV_L2);
-
-            for (Point2f p : imagePoints[i]) {
-                circle(reprojImage, p, 1, Scalar(0, 0, 255), 2);
-
-                circle(pointsImage, p, 1, Scalar(255, 255, 255), 2);
-            }
-
-            for (Point2f p : imagePoints2) {
-                circle(reprojImage, p, 1, Scalar(0, 255, 0), 2);
-            }
-
-            std::stringstream ss;
-            ss << settings.visualizePath << "/reprojection" << i << ".png";
-            cv::imwrite(ss.str(), reprojImage);
-        }
-
-        cv::imwrite(settings.visualizePath + "/points.png", pointsImage);
-    }
-
     return ok;
 }
 
@@ -424,17 +371,17 @@ void CalibrationToolbox::saveCameraParams(Settings &s, Size &imageSize, Mat &cam
 
 bool CalibrationToolbox::runCalibrationAndSave(Settings &s, Size imageSize, Mat &cameraMatrix, Mat &distCoeffs,
                                                vector<vector<Point2f> > imagePoints) {
-    vector<Mat> rvecs, tvecs;
+    //vector<Mat> rvecs, tvecs;
     vector<float> reprojErrs;
     double totalAvgErr = 0;
 
-    bool ok = runCalibration(s, imageSize, cameraMatrix, distCoeffs, imagePoints, rvecs, tvecs,
+    bool ok = runCalibration(s, imageSize, cameraMatrix, distCoeffs, imagePoints, rvector, tvector,
                              reprojErrs, totalAvgErr);
     cout << (ok ? "Calibration succeeded" : "Calibration failed")
     << ". avg re projection error = " << totalAvgErr;
 
     if (ok)
-        saveCameraParams(s, imageSize, cameraMatrix, distCoeffs, rvecs, tvecs, reprojErrs,
+        saveCameraParams(s, imageSize, cameraMatrix, distCoeffs, rvector, tvector, reprojErrs,
                          imagePoints, totalAvgErr, false);
     return ok;
 }
@@ -472,20 +419,63 @@ void CalibrationToolbox::estimateInitial3DCameraMatrix(Settings &s, vector<vecto
 }
 
 int CalibrationToolbox::computeExtrinsic() {
-    vector<Mat> rvecs, tvecs;
+    camMatrix = settings.estCameraMatrix;
+    distorCoeff = settings.estDistCoeff;
+    //vector<Mat> rvecs, tvecs;
     vector<float> reprojErrs;
-    Mat cameraMatrix = settings.estCameraMatrix;
-    Mat distCoeff = settings.estDistCoeff;
+    //Mat cameraMatrix = settings.estCameraMatrix;
+    //Mat distCoeff = settings.estDistCoeff;
     double totalAvgErr = 0;
     Mat image = imread(imagePath[0], CV_LOAD_IMAGE_COLOR);
     Size imageSize = image.size();
     for(int i = 0; i < vecImagePoints.size(); i++){
         Mat rvec, tvec;
-        solvePnP(vecPatternPoints[i], vecImagePoints[i], cameraMatrix, distCoeff, rvec, tvec, false, CV_ITERATIVE);
-        rvecs.push_back(rvec);
-        tvecs.push_back(tvec);
+        solvePnP(vecPatternPoints[i], vecImagePoints[i], camMatrix, distorCoeff, rvec, tvec, false, CV_ITERATIVE);
+        rvector.push_back(rvec);
+        tvector.push_back(tvec);
     }
-    saveCameraParams(settings, imageSize, settings.estCameraMatrix, settings.estDistCoeff, rvecs, tvecs, reprojErrs,vecImagePoints, totalAvgErr, false);
+    saveCameraParams(settings, imageSize, settings.estCameraMatrix, settings.estDistCoeff, rvector, tvector, reprojErrs,vecImagePoints, totalAvgErr, false);
 
     return 1;
+}
+
+void CalibrationToolbox::visualize(bool readCameraParamFromFile){
+    if(readCameraParamFromFile){
+        this->camMatrix = settings.estCameraMatrix;
+        this->distorCoeff = settings.estDistCoeff;
+    }
+    static int i = 0;
+    Mat pointsImage = Mat_<cv::Vec3b>::zeros(settings.imageSize.height, settings.imageSize.width);
+    for(string path : this->imagePath) {
+        boost::filesystem::path filename(path);
+        //gefunden Punkte bgr
+        Mat image = imread(path);
+        vector<Point2f> imagePoints2;
+        cvtColor(image, image, CV_BGR2GRAY);
+        cvtColor(image, image, CV_GRAY2BGR);
+
+        std::stringstream detss;
+        detss << settings.visualizePath << "/" << filename.filename().string() << ".detections" << ".png";
+        std::stringstream ss;
+        ss << settings.visualizePath << "/" << filename.filename().string() << ".reprojection" << ".png";
+
+        for(Point2f point2f : this->vecImagePoints[i]){
+            circle(image, point2f, 1, Scalar(255,0,0),2);
+            if(!readCameraParamFromFile) {
+                projectPoints(Mat(vecPatternPoints[i]), rvector[i], tvector[i], camMatrix, distorCoeff, imagePoints2);
+                double err = norm(Mat(vecImagePoints[i]), Mat(imagePoints2), CV_L2);
+            }
+            circle(pointsImage, point2f, 1, Scalar(255, 255, 255), 2);
+        }
+        if(!readCameraParamFromFile) {
+            cv::imwrite(detss.str(), image);
+        }
+
+        for (Point2f p : imagePoints2) {
+            circle(image, p, 1, Scalar(0, 255, 0), 2);
+        }
+        cv::imwrite(ss.str(), image);
+        i++;
+    }
+    cv::imwrite(settings.visualizePath + "/points.png", pointsImage);
 }
