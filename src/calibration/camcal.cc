@@ -276,7 +276,7 @@ int main(int argc, const char * argv[]) {
             return 1;
         }
     }else{
-        cout << "read pictures: " << endl;
+        cout << "read files: " << endl;
         DIR *dir;
         dirpath = dirpath + "/";
         struct dirent *dirzeiger;
@@ -304,7 +304,11 @@ int main(int argc, const char * argv[]) {
         }
     }
     if(extrinsic && estMatFile.length()== 0){
-        cout << "for parameter --extrinsic nee also --initial-camera-matrix" << endl;
+        cout << "for parameter --extrinsic need also --initial-camera-matrix" << endl;
+        return 1;
+    }
+    if(settings.visualize && onlydetect && estMatFile.length()== 0){
+        cout << "for parameter --visualize with --no-calibration need --initial-camera-matrix" << endl;
         return 1;
     }
     settings.estimationXML = dirpath + "/ESTIMATION"+xmlFileName;
@@ -328,6 +332,9 @@ int main(int argc, const char * argv[]) {
     } else if(!onlydetect) {
         cout << "start calibration" << endl;
         calTool.calibrate();
+    }
+    if(settings.visualize){
+        calTool.visualize(onlydetect);
     }
 
     return 0;
