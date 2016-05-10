@@ -62,6 +62,12 @@ private:
      */
     Settings settings;
 
+    Mat camMatrix;
+
+    vector<Mat> rvector;
+    vector<Mat> tvector;
+    Mat distorCoeff;
+
     /**
      * match the detected tags form image and pattern
      */
@@ -130,6 +136,11 @@ public:
      * compute extrinsic parameters
      */
     int computeExtrinsic();
+
+    /**
+     * draw detected points to an image
+     */
+    void visualize(bool readCameraParamFromFile);
 };
 
 
