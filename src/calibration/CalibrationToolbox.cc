@@ -95,9 +95,9 @@ void CalibrationToolbox::matchTags() {
                     imgEstPoints.push_back(aprilTag2f.point4);
 
                     patEstPoints.push_back(Point3f(aprilTag3f.point1.x, aprilTag3f.point1.y, 0));
-                    patEstPoints.push_back(Point3f(aprilTag3f.point2.x, aprilTag3f.point1.y, 0));
-                    patEstPoints.push_back(Point3f(aprilTag3f.point3.x, aprilTag3f.point1.y, 0));
-                    patEstPoints.push_back(Point3f(aprilTag3f.point4.x, aprilTag3f.point1.y, 0));
+                    patEstPoints.push_back(Point3f(aprilTag3f.point2.x, aprilTag3f.point2.y, 0));
+                    patEstPoints.push_back(Point3f(aprilTag3f.point3.x, aprilTag3f.point3.y, 0));
+                    patEstPoints.push_back(Point3f(aprilTag3f.point4.x, aprilTag3f.point4.y, 0));
                 }
                 break;
             }
