@@ -392,7 +392,7 @@ void CalibrationToolbox::estimateInitial3DCameraMatrix(Settings &s, vector<vecto
     vector<Mat> rvecs, tvecs;
     Mat distCoeffs;
     vector<float> reprojErrs;
-    distCoeffs = Mat::zeros(8, 1, CV_64F);
+    distCoeffs = Mat::zeros(5, 1, CV_64F);
     double totalAvgErr = 0;
     if (s.picturesForDstimateInitial3DCameraMatrix > estimateImagePoints.size())
         s.picturesForDstimateInitial3DCameraMatrix = estimateImagePoints.size();
@@ -404,7 +404,7 @@ void CalibrationToolbox::estimateInitial3DCameraMatrix(Settings &s, vector<vecto
 
 
     double estRMS = calibrateCamera(this->estimatePatternPoints, this->estimateImagePoints, imageSize, cameraMatrix,
-                                    distCoeffs, rvecs, tvecs, s.flag | CV_CALIB_FIX_K1| CV_CALIB_FIX_K2| CV_CALIB_FIX_K3| CV_CALIB_FIX_K4 | CV_CALIB_FIX_K5);
+                                    distCoeffs, rvecs, tvecs, CV_CALIB_FIX_K1| CV_CALIB_FIX_K2| CV_CALIB_FIX_K3| CV_CALIB_FIX_K4 | CV_CALIB_FIX_K5);
     totalAvgErr = computeReprojectionErrors(this->estimatePatternPoints, this->estimateImagePoints, rvecs, tvecs,
                                             cameraMatrix, distCoeffs, reprojErrs);
     cout << "Re-projection error for estimate: " << estRMS << endl;
