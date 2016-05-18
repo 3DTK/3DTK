@@ -129,6 +129,8 @@ int main(int argc, const char * argv[]) {
 
                 ("path-pictures,P", po::value<string>(&dirpath), "set path to pictures; if use FROM_FILES, path to this files")
 
+                ("read-pictures-form-file,F", po::value<string>(&dirpath), "read pictures filename form .txt file")
+
                 ("path-pattern,S", po::value<string>(&settings.patternPath), "set path to file with pattern coordinates")
 
                 ("picturetype,T", po::value<string>(&dateiendung), "default read all files with png, jpeg, jpg, jpe, tif, tiff, ppm, pgm, bpm")
@@ -204,72 +206,90 @@ int main(int argc, const char * argv[]) {
         cout << "not implemented" << endl;
         return 1;
     }
-    if(settings.calibrationPattern == Settings::APRILTAG && settings.patternPath.length() == 0){
+    if(settings.calibrationPattern == Settings::APRILTAG && settings.patternPath.length() == 0 && (!onlydetect || extrinsic)){
         cout << "for calibration with APRILTAGS need pattern file, use --help for more information" <<endl;
         return 1;
     }
     if(settings.calibrationPattern != Settings::FROM_FILES) {
-        // read pictures from path
-        cout << "read pictures: " << endl;
-        DIR *dir;
-        dirpath = dirpath + "/";
-        struct dirent *dirzeiger;
         int counter = 0;
-        if ((dir = opendir(dirpath.c_str())) != NULL) {
-            while ((dirzeiger = readdir(dir)) != NULL) {
-                stringstream pic;
-                pic << dirpath << (*dirzeiger).d_name;
-                string picstring = pic.str();
-                string defaultdendung = "";
-                std::transform(picstring.begin(), picstring.end(), picstring.begin(), ::tolower);
-                size_t found = string::npos;
-                if (dateiendung.length() != 0) {
-                    std::transform(dateiendung.begin(), dateiendung.end(), dateiendung.begin(), ::tolower);
-                    found = picstring.find(dateiendung);
-                } else {
-                    defaultdendung = ".jpg";
-                    found = picstring.find(defaultdendung);
-                    if (found == string::npos) {
-                        defaultdendung = ".jpeg";
+        if(vm.count("path-pictures")) {
+            dirpath = dirpath + "/";
+            // read pictures from path
+            cout << "read pictures: " << endl;
+            DIR *dir;
+            struct dirent *dirzeiger;
+            if ((dir = opendir(dirpath.c_str())) != NULL) {
+                while ((dirzeiger = readdir(dir)) != NULL) {
+                    stringstream pic;
+                    pic << dirpath << (*dirzeiger).d_name;
+                    string picstring = pic.str();
+                    string defaultdendung = "";
+                    std::transform(picstring.begin(), picstring.end(), picstring.begin(), ::tolower);
+                    size_t found = string::npos;
+                    if (dateiendung.length() != 0) {
+                        std::transform(dateiendung.begin(), dateiendung.end(), dateiendung.begin(), ::tolower);
+                        found = picstring.find(dateiendung);
+                    } else {
+                        defaultdendung = ".jpg";
                         found = picstring.find(defaultdendung);
+                        if (found == string::npos) {
+                            defaultdendung = ".jpeg";
+                            found = picstring.find(defaultdendung);
+                        }
+                        if (found == string::npos) {
+                            defaultdendung = ".jpe";
+                            found = picstring.find(defaultdendung);
+                        }
+                        if (found == string::npos) {
+                            defaultdendung = ".png";
+                            found = picstring.find(defaultdendung);
+                        }
+                        if (found == string::npos) {
+                            defaultdendung = ".tiff";
+                            found = picstring.find(defaultdendung);
+                        }
+                        if (found == string::npos) {
+                            defaultdendung = ".tif";
+                            found = picstring.find(defaultdendung);
+                        }
+                        if (found == string::npos) {
+                            defaultdendung = ".ppm";
+                            found = picstring.find(defaultdendung);
+                        }
+                        if (found == string::npos) {
+                            defaultdendung = ".pgm";
+                            found = picstring.find(defaultdendung);
+                        }
+                        if (found == string::npos) {
+                            defaultdendung = ".bmp";
+                            found = picstring.find(defaultdendung);
+                        }
                     }
-                    if (found == string::npos) {
-                        defaultdendung = ".jpe";
-                        found = picstring.find(defaultdendung);
-                    }
-                    if (found == string::npos) {
-                        defaultdendung = ".png";
-                        found = picstring.find(defaultdendung);
-                    }
-                    if (found == string::npos) {
-                        defaultdendung = ".tiff";
-                        found = picstring.find(defaultdendung);
-                    }
-                    if (found == string::npos) {
-                        defaultdendung = ".tif";
-                        found = picstring.find(defaultdendung);
-                    }
-                    if (found == string::npos) {
-                        defaultdendung = ".ppm";
-                        found = picstring.find(defaultdendung);
-                    }
-                    if (found == string::npos) {
-                        defaultdendung = ".pgm";
-                        found = picstring.find(defaultdendung);
-                    }
-                    if (found == string::npos) {
-                        defaultdendung = ".bmp";
-                        found = picstring.find(defaultdendung);
+                    size_t endung = picstring.find("detections");
+                    if (found != string::npos && endung == string::npos) {
+                        settings.picturePath.push_back(pic.str());
+                        cout << pic.str() << endl;
+                        counter++;
                     }
                 }
-                size_t endung = picstring.find("detections");
-                if (found != string::npos && endung == string::npos) {
-                    settings.picturePath.push_back(pic.str());
-                    cout << pic.str() << endl;
-                    counter++;
-                }
+                cout << "\n" << counter << " pictures read" << endl;
             }
-            cout << "\n" << counter << " pictures read" << endl;
+        }else if(vm.count("read-pictures-form-file")){
+            cout << "read pictures from file: " << dirpath << endl;
+            //TODO read pics from file
+            ifstream file;
+            file.open(dirpath.c_str(), ios::in);
+            string line = "";
+            while (getline(file, line))
+            {
+                //string line = "";
+                //getline(file, line);
+                cout << "picture " << line << endl;
+                settings.picturePath.push_back(line);
+                line ="";
+                counter ++;
+            }
+            file.close();
         }
         if (counter == 0) {
             cout << "no pictures found! pleas check path, use --help for more information" << endl;
@@ -307,12 +327,13 @@ int main(int argc, const char * argv[]) {
         cout << "for parameter --extrinsic need also --initial-camera-matrix" << endl;
         return 1;
     }
-    if(settings.visualize && onlydetect && estMatFile.length()== 0){
-        cout << "for parameter --visualize with --no-calibration need --initial-camera-matrix" << endl;
-        return 1;
-    }
-    settings.estimationXML = dirpath + "/ESTIMATION"+xmlFileName;
-    settings.outputFileName =dirpath + "/" + xmlFileName;
+    //if(settings.visualize && onlydetect && estMatFile.length()== 0){
+    //    cout << "for parameter --visualize with --no-calibration need --initial-camera-matrix" << endl;
+    //    return 1;
+    //}
+    settings.estimationXML = "ESTIMATION"+xmlFileName; /** dirpath + "/ESTIMATION"+xmlFileName; **/
+    settings.outputFileName = xmlFileName; /** dirpath + "/" + xmlFileName; **/
+
 
     if(estMatFile.length() != 0){
         settings.estFromInput = true;
@@ -333,8 +354,10 @@ int main(int argc, const char * argv[]) {
         cout << "start calibration" << endl;
         calTool.calibrate();
     }
-    if(settings.visualize){
-        calTool.visualize(onlydetect);
+    if(settings.visualize && (extrinsic || !onlydetect)){
+        calTool.visualize(false);
+    }else if(settings.visualize){
+        calTool.visualize(true);
     }
 
     return 0;
