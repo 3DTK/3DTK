@@ -88,6 +88,21 @@ void B3DPSReader::readTrajectory(string filename, map<uint64_t, double*> &poses,
         
         double *pose = new double[8];
         iffileps.read((char*)pose, sizeof(double)*8);
+
+        // assume that values will not be greater than the size of the
+        // observable universe in meter
+        if (fabs(pose[0]) > 4.4e26
+         || fabs(pose[1]) > 4.4e26
+         || fabs(pose[2]) > 4.4e26
+         || fabs(pose[3]) > 4.4e26
+         || fabs(pose[4]) > 4.4e26
+         || fabs(pose[5]) > 4.4e26
+         || fabs(pose[6]) > 4.4e26
+         || fabs(pose[7]) > 4.4e26) {
+            std::cerr << "read implausibly large value" << std::endl;
+            break;
+        }
+
         poses[linenr] = pose;
        
 //       cout << std::setprecision(20) << linenr << " " << pose[0] << " XYZ " << pose[1] << " " << pose[2] << " " << pose[3] << endl;
