@@ -511,6 +511,7 @@ int parseArgs(int argc,char **argv,
     { "max",             required_argument,   0,  'm' },
     { "min",             required_argument,   0,  'M' },
     { "octree",          optional_argument,   0,  'O' },
+    { "time",            no_argument,         0,  't' },
     { "reflectance",     no_argument,         0,  'R' },
     { "reflectivity",    no_argument,         0,  'R' },
     { "temperature",     no_argument,         0,  'D' },
@@ -560,7 +561,7 @@ int parseArgs(int argc,char **argv,
         red = atof(optarg);
         break;
       case 't':
-        readInitial = true;
+        types |= PointType::USE_TIME;
         break;
       case 'O':
         if (optarg) {
@@ -949,6 +950,10 @@ void initShow(int argc, char **argv){
   fogDensity /= scale;
   defaultZoom *= scale;
   voxelSize *= scale;
+
+  if (type == B3D ) {
+	  voxelSize = 0.2;
+  }
 
   ////////////////////////
   SDisplay::readDisplays(loadObj, displays);

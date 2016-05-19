@@ -601,6 +601,7 @@ set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${ADDITIONAL_CFLAGS}")
 include_directories(${CMAKE_SOURCE_DIR}/include)
 include_directories(${CMAKE_SOURCE_DIR}/3rdparty/glui-2.36/include/)
 include_directories(${CMAKE_SOURCE_DIR}/3rdparty/wxthings/include/)
+include_directories(${CMAKE_SOURCE_DIR}/3rdparty/b3dfile)
 link_directories(${CMAKE_SOURCE_DIR}/obj)
 link_directories(${CMAKE_SOURCE_DIR}/lib)
 

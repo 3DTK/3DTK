@@ -1,9 +1,13 @@
 ### TOOLS
 
 if(WITH_TOOLS)
-  if(WITH_FBR)
-    ### SCAN_RED
-    add_executable(scan_red scan_red.cc ../scanio/writer.cc fbr/fbr_global.cc fbr/panorama.cc fbr/scan_cv.cc)
+  add_executable(b3dto3d b3dto3d.cc)
+  IF(UNIX)
+    target_link_libraries(b3dto3d b3dfile scan dl ann ${Boost_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} showstatic ${OPENGL_LIBRARIES} ${SHOW_LIBS} newmat)
+  ENDIF(UNIX)
+if(WITH_FBR)
+  ### SCAN_RED
+  add_executable(scan_red scan_red.cc ../scanio/writer.cc fbr/fbr_global.cc fbr/panorama.cc fbr/scan_cv.cc)
 
   if(WITH_GLEE)
     set(SHOW_LIBS ${SHOW_LIBS} glee)
@@ -44,6 +48,9 @@ if(WITH_TOOLS)
     target_link_libraries(scan_diff scan ann XGetopt newmat)
     # target_link_libraries(scan_diff2d scan dl ann XGetopt)
   endif()
+
+  add_executable(bps2txt bps2txt.cc)
+  target_link_libraries(bps2txt b3dfile)
 
   add_executable(frame_to_graph frame_to_graph.cc)
   add_executable(convergence convergence.cc)
