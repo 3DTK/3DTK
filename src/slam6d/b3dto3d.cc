@@ -1,18 +1,7 @@
-#ifdef _MSC_VER
-#if !defined _OPENMP && defined OPENMP 
-#define _OPENMP
-#endif
-#endif
-
-#define WANT_STREAM ///< define the WANT stream :)
+#include <unistd.h>
 #include <string>
-using std::string;
 #include <iostream>
-using std::cout;
-using std::cerr;
-using std::endl;
-#include <fstream>
-using std::ofstream;
+#include <sys/stat.h>
 #include <errno.h>
 
 #include "slam6d/metaScan.h"
@@ -22,93 +11,92 @@ using std::ofstream;
 
 #include "slam6d/globals.icc"
 
-#ifdef _OPENMP
-#include <omp.h>
-#endif
-
-#ifndef _MSC_VER
-#include <getopt.h>
-#else
-#include "XGetopt.h"
-#include <direct.h>
-#define mkdir(path,mode) _mkdir (path)
-#endif
-
-#ifdef _MSC_VER
-#define strcasecmp _stricmp
-#define strncasecmp _strnicmp
-#include <windows.h>
-#include <direct.h>
-#else
-#include <sys/stat.h>
-#include <sys/types.h>
-#include <strings.h>
-#include <dlfcn.h>
-#endif
-
 #include "b3dpsreader.h"
 
-/**
- * Main program for reducing scans.
- * Usage: bin/scan_red -r <NR> 'dir',
- * Use -r for octree based reduction  (voxel size=<NR>)
- * and 'dir' the directory of a set of scans
- * Reduced scans will be written to 'dir/reduced'
- * 
- */
 int main(int argc, char **argv)
 {
-  int index = atoi(argv[1]); // which b3d file to use
-  int start = atoi(argv[2]); // offset for output
-
-  std::string dir = argv[3];
-
-  char b3d[255];
-  char bps[255];
-  char outFileName[255];
-  snprintf(b3d,255,"%sscan%.3d.b3d", dir.c_str(), index);
-  snprintf(bps,255,"%sscan%.3d.bps", dir.c_str(), index);
-  cout << "Read from " << b3d << " and " << bps << endl;
-  
-  double calinv[16];
-  double calibration[16];
-  double rPos[3] = {0.3, 0.0, -0.1};
-  double rPosTheta[3] = {rad(0.0), rad(0.0), -rad(30.0)};
-  EulerToMatrix4(rPos, rPosTheta, calinv);
-  M4inv(calinv, calibration);
-        
-  double scaling[16] =
-  { 0, 0, 100, 0,
-    -100, 0, 0, 0,
-    0, 100, 0, 0,
-    0, 0, 0, 1 };       
-  //        double scaling[16]; M4identity(scaling);
-  
-  B3DPSReader *reader = new B3DPSReader(b3d, bps);
-
-
-  int fileCounter = start;
-  int length = 720;
-  vector<double *> points;
-  while(true) {
-    reader->getNextGlobal(points, scaling, calibration, length);
-    if (points.empty()) break;
-
-    snprintf(outFileName,255,"%sscan%.3d.3d",dir.c_str(), fileCounter);
-    FILE *file = fopen(outFileName, "w");
-    for (unsigned int i=0; i < points.size(); i++) {
-      fprintf(file, "%lf %lf %lf\n", points[i][0], points[i][1], points[i][2]);
+    if (argc != 3 && argc != 4) {
+        std::cerr << "usage: " << argv[0] << " pointcloud.b3d output_directory [poses.bps]" << std::endl;
+        return 1;
     }
-    fclose(file);
-    cout << "Wrote " << points.size() << " points to " << outFileName << endl;
 
-    reader->deleteGlobalPoints(points);
+    char *b3d_fname = argv[1];
 
-    snprintf(outFileName,255,"%sscan%.3d.pose",dir.c_str(), fileCounter);
-    ofstream posefile(outFileName);
-    posefile << "0 0 0" << endl << "0 0 0" << endl; 
-    posefile.close();
+    if (access(b3d_fname, F_OK ) == -1) {
+        std::cerr << "file does not exist: " << b3d_fname << std::endl;
+        return 1;
+    }
 
-    fileCounter++;
-  }
+    if (strlen(b3d_fname) < 4 || strcmp(b3d_fname+strlen(b3d_fname)-4, ".b3d") != 0) {
+        std::cerr << "file does not end in .b3d: " << b3d_fname << std::endl;
+        return 1;
+    }
+
+    char *bps_fname;
+
+    if (argc == 4) {
+        bps_fname = argv[3];
+    } else {
+        bps_fname = strdup(b3d_fname);
+        bps_fname[strlen(bps_fname) - 3] = 'b';
+        bps_fname[strlen(bps_fname) - 2] = 'p';
+        bps_fname[strlen(bps_fname) - 1] = 's';
+    }
+
+    if (access(bps_fname, F_OK ) == -1) {
+        std::cerr << "file does not exist: " << b3d_fname << std::endl;
+        return 1;
+    }
+
+    char *out_dirname = argv[2];
+
+    if (mkdir(out_dirname, 0755) != 0 && errno != EEXIST) {
+        std::cerr << "Cannot create directory: " << out_dirname << std::endl;
+        return 1;
+    }
+
+    double calibration[16];
+    //double calinv[16];
+    //double rPos[3] = {0.3, 0.0, -0.1};
+    //double rPosTheta[3] = {rad(0.0), rad(0.0), -rad(30.0)};
+    //EulerToMatrix4(rPos, rPosTheta, calinv);
+    //M4inv(calinv, calibration);
+    M4identity(calibration);
+
+    double scaling[16] = { 0,    0,   100, 0,
+        -100, 0,   0,   0,
+        0,    100, 0,   0,
+        0,    0,   0,   1 };
+    //        double scaling[16]; M4identity(scaling);
+
+    B3DPSReader *reader = new B3DPSReader(b3d_fname, bps_fname);
+
+
+    char outFileName[255];
+    vector<double *> points;
+    for (size_t i = 0;;++i) {
+        reader->getNextGlobal(points, scaling, calibration);
+        if (points.empty()) break;
+
+        snprintf(outFileName,255,"%s/scan%03d.3d",out_dirname, i);
+        FILE *file = fopen(outFileName, "w");
+        if (file == NULL) {
+            std::cerr << "cannot open: " << outFileName << std::endl;
+            return 1;
+        }
+        for (unsigned int i=0; i < points.size(); i++) {
+            fprintf(file, "%lf %lf %lf\n", points[i][0], points[i][1], points[i][2]);
+        }
+        fclose(file);
+        //cout << "Wrote " << points.size() << " points to " << outFileName << endl;
+
+        reader->deleteGlobalPoints(points);
+
+        snprintf(outFileName,255,"%s/scan%03d.pose",out_dirname, i);
+        ofstream posefile(outFileName);
+        posefile << "0 0 0" << endl << "0 0 0" << endl; 
+        posefile.close();
+    }
 }
+
+/* vim: set ts=4 sw=4 et: */
