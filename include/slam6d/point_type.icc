@@ -105,8 +105,18 @@ T *PointType::createPoint(unsigned int i, unsigned int index)
   unsigned int counter = 0;
   T* p = new T[pointdim];
 
-  for(unsigned int j = 0; j < 3; ++j)
-    p[counter++] = (*m_xyz)[i][j];
+  for(unsigned int j = 0; j < 3; ++j) {
+    p[counter] = (*m_xyz)[i][j];
+    /* m_xyz is of type DataXYZ which is a TripleArray<double>
+     * if the template T of this class is a smaller container like
+     * float, then it can happen that p stores infinity.
+     * We make sure that p can hold the values in m_xyz by
+     * checking that their difference is sufficiently small */
+    if (fabs(p[counter] - (*m_xyz)[i][j]) > 0.001) {
+      std::cerr << "warning: Point is unable to hold the requested value. Difference: " << fabs(p[counter] - (*m_xyz)[i][j]) << std::endl;
+    }
+    counter++;
+  }
 
   // if a type is requested try to write the value if the scan provided one
   if (types & USE_REFLECTANCE) {
