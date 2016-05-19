@@ -5,7 +5,7 @@ else()
 endif()
 
 set(SCANIO_LIBNAMES
-  uos uosr uos_rgb uos_rrgb uos_rrgbt xyz xyzr leica_xyzr xyz_rgb xyz_rgba xyz_rrgb faro_xyz_rgbr ply ks ks_rgb riegl_txt riegl_rgb rts velodyne
+  uos uosr uos_rgb uos_rrgb uos_rrgbt xyz xyzr leica_xyzr xyz_rgb xyz_rgba xyz_rrgb faro_xyz_rgbr ply ks ks_rgb riegl_txt riegl_rgb rts velodyne b3d
 )
 
 if(WITH_RIVLIB)
@@ -32,6 +32,7 @@ else()
 endif()  
   target_link_libraries(scan_io_${libname} scan_io_helper pointfilter ${Boost_LIBRARIES} ${Boost_PROGRAM_OPTIONS_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY})
 endforeach()
+target_link_libraries(scan_io_b3d b3dfile)
 
 if(WITH_RIVLIB)
   target_link_libraries(scan_io_rxp ${RiVLib_SCANLIB_LIBRARY})

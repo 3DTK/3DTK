@@ -70,6 +70,7 @@ IOType formatname_to_io_type(const char * string)
   else if (strcasecmp(string, "velodyne") == 0) return VELODYNE;
   else if (strcasecmp(string, "velodyne_frames") == 0) return VELODYNE_FRAMES;
   else if (strcasecmp(string, "uos_rrgb") == 0) return UOS_RRGB;
+  else if (strcasecmp(string, "b3d") == 0) return B3D;
   else throw std::runtime_error(std::string("Io type ") + string + std::string(" is unknown"));
 }
 
@@ -164,6 +165,8 @@ const char * io_type_to_libname(IOType  type)
     return "scan_io_velodyne_frames";
   case UOS_RRGB:
     return "scan_io_uos_rrgb";
+  case B3D:
+    return "scan_io_b3d";
   default:
     throw std::runtime_error(std::string("Io type ") + to_string(type) + std::string(" could not be matched to a library name"));
   }

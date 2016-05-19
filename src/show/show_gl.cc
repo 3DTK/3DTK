@@ -351,6 +351,136 @@ void DrawCameras(void)
   }
 }
 
+void DrawScala() {
+	glDisable(GL_FOG);
+	if (!showTopView) return;
+	glMatrixMode(GL_MODELVIEW);
+	glPushMatrix();
+	glLoadIdentity();
+	glMatrixMode(GL_PROJECTION);
+
+	// Save the current projection matrix
+	glPushMatrix();
+	// Make the current matrix the identity matrix
+	glLoadIdentity();
+
+	// Set the projection (to 2D orthographic)
+	double z = 100.0;
+	glOrtho(0.0,current_width,0.0,current_height,-z,z);
+
+	double length = 200;
+	double bigtick = 20;
+	double smalltick = 10;
+
+	double scala;
+	int precision;
+	// choose largest scala that fits on the screen, starting with 1 million
+	for (int i = 10; i > -10; i--) {
+		if (i >= 0 ) precision = 0;
+		else precision = -i;
+		scala = pow(10.0, (double)i) * 5.0; // check 50
+		length = (scala * current_height ) / (2.0 * pzoom);
+		if (length < 0.8 * current_height ) { break; }
+
+		scala = pow(10.0, (double)i) * 2.0; // check 20
+		length = (scala * current_height ) / (2.0 * pzoom);
+		if (length < 0.8 * current_height ) { break; }
+
+		scala = pow(10.0, (double)i) ; // check 10
+		length = (scala * current_height ) / (2.0 * pzoom);
+		if (length < 0.8 * current_height ) { break; }
+	}
+	char ymaxtext[100] = "";
+	char yhalftext[100] = "";
+	char yticktext[][100] = {"", "", "", ""};
+	sprintf(ymaxtext, "%.*lf", precision, scala);
+	if (scala < 10.0) precision += 1;
+	sprintf(yhalftext, "%.*lf", precision, scala/2);
+	for (int i = 1; i < 5; i++) {
+		double tick = (scala / 5.0 ) * (double)i;
+		sprintf(yticktext[i-1], "%.*lf", precision, tick);
+	}
+
+	int maxtext = max(strlen(ymaxtext), strlen(yhalftext));
+
+	int textoffset = 5;
+	int offset = textoffset + 8 * maxtext + 10;
+	int yoffset = (current_height - length) / 2.0;
+	int xoffset = (current_width - length) / 2.0;
+
+
+	glLineWidth(1);
+	glColor4d(1.0,0.0,0.0,0.4);
+	glBegin(GL_LINES);
+	glVertex3f(offset           , yoffset                  , z);
+	glVertex3f(offset           , yoffset + length         , z);
+
+	glVertex3f(offset           , yoffset                  , z);
+	glVertex3f(offset + bigtick , yoffset                  , z); // start
+
+	glVertex3f(offset           , yoffset + length         , z);
+	glVertex3f(offset + bigtick , yoffset + length         , z); // end
+
+	glVertex3f(offset           , yoffset + (length / 2.0) , z);
+	glVertex3f(offset + bigtick , yoffset + (length / 2.0) , z); // middle
+
+	for (int i = 1; i < 5; i++) {
+		double tick = (length / 5.0 ) * (double)i;
+		glVertex3f(offset             , yoffset + tick , z);
+		glVertex3f(offset + smalltick , yoffset + tick , z);
+	}
+	glEnd();
+
+	glBlendFunc(GL_ONE, GL_ZERO);
+	glColor3f(1,1,1);
+	glRasterPos3f(textoffset              , yoffset + length - 4     , z);
+	_glutBitmapString(GLUT_BITMAP_8_BY_13 , ymaxtext);
+	glRasterPos3f(textoffset              , yoffset + length/2.0 - 4 , z);
+	_glutBitmapString(GLUT_BITMAP_8_BY_13, yhalftext);
+
+	for (int i = 1; i < 5; i++) {
+		double tick = (length / 5.0 ) * (double)i;
+		glRasterPos3f(textoffset              , yoffset + tick -4 , z);
+		_glutBitmapString(GLUT_BITMAP_8_BY_13 , yticktext[i-1]);
+	}
+
+
+	glColor4d(0.0,1.0,0.0,0.4);
+	glBegin(GL_LINES);
+	glVertex3f(xoffset                  , offset           , z);
+	glVertex3f(xoffset + length         , offset           , z);
+
+	glVertex3f(xoffset                  , offset           , z);
+	glVertex3f(xoffset                  , offset + bigtick , z); // start
+
+	glVertex3f(xoffset + length         , offset           , z);
+	glVertex3f(xoffset + length         , offset + bigtick , z); // end
+
+	glVertex3f(xoffset + (length / 2.0) , offset           , z);
+	glVertex3f(xoffset + (length / 2.0) , offset + bigtick , z); // middle
+
+	for (int i = 1; i < 5; i++) {
+		double tick = (length / 5.0 ) * (double)i;
+		glVertex3f( xoffset + tick ,offset             , z);
+		glVertex3f( xoffset + tick ,offset + smalltick , z);
+	}
+	glEnd();
+
+	/*
+	   glBegin(GL_LINES);
+	   glVertex3f(offset         , offset , z); // length
+	   glVertex3f(offset+length , offset , z);
+	   glEnd();
+	   */
+
+	// Restore the original projection matrix
+	glPopMatrix();
+	glMatrixMode(GL_MODELVIEW);
+	glPopMatrix();
+
+}
+
+
 //-----------------------------------------------------------------------------------
 
   
@@ -515,6 +645,7 @@ void DisplayItFunc(GLenum mode, bool interruptable)
 //   cout << endl;
   
   // process fog
+  DrawScala();
   if (show_fog > 0) {
     if (show_fog > 3) 
       fogColor[0] = fogColor[1] = fogColor[2] = fogColor[3] = 1.0;
@@ -1437,6 +1568,7 @@ void KeyboardFunc(int key, bool control, bool alt, bool shift) {
   double stepsize = movementSpeed; 
   if (shift) stepsize *= 10.0;
   if (control) stepsize *= 0.1;
+  if (alt) stepsize *= 100.0;
 
   double rotsize = 0.2 * stepsize;
 
