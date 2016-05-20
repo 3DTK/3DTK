@@ -268,7 +268,7 @@ bool CalibrationToolbox::runCalibration(Settings &s, Size &imageSize, Mat &camer
 
     int flags = 0;
 
-    if (settings.pattern == Settings::APRIL_3D) {
+    if (settings.calibrationPattern == Settings::APRILTAG && settings.pattern == Settings::APRIL_3D) {
         if(settings.estFromInput){
             cameraMatrix = s.estCameraMatrix;
         } else {
