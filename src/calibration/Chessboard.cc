@@ -60,10 +60,10 @@ vector<Point2f> Chessboard::readPoint2fChessboardFromFile(string path){
                 x = strtof (line.c_str(), &fEnd);
                 y = strtof (fEnd, NULL);
                 points.push_back(cv::Point2f(x,y));
-            }else if(header && line.find("#CESSBOARD")!=std::string::npos) {
+            } else if(header && line.find("#CHESSBOARD")!=std::string::npos) {
                 //HEADER
                 header = false;
-            }else{
+            } else{
                 cout << "invalid document!" << endl;
                 return points;
             }
