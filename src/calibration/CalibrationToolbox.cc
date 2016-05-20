@@ -153,6 +153,7 @@ void CalibrationToolbox::initImage(string path) {
         if (FILE *detecFile = fopen((path + ".detections").c_str(), "r")) {
             fclose(detecFile);
             this->vecImagePoints.push_back(Chessboard::readPoint2fChessboardFromFile(path + ".detections"));
+            this->vecPatternPoints.push_back(this->chessboardCorners);
             cout << "points load from file" << endl;
         } else {
             this->pictureHandler.loadImage(path);
