@@ -22,7 +22,6 @@ vector<Point3f> Chessboard::readPoint3fChessboardFromFile(string path){
         bool header = true;
         while (getline(file, line)){
             if(!header){//neue ID
-                line = "";
                 char* fEnd;
                 float x,y,z;
                 x = strtof (line.c_str(), &fEnd);
@@ -54,7 +53,6 @@ vector<Point2f> Chessboard::readPoint2fChessboardFromFile(string path){
         bool header = true;
         while (getline(file, line)){
             if(!header){//neue ID
-                line = "";
                 char* fEnd;
                 float x,y,z;
                 x = strtof (line.c_str(), &fEnd);
