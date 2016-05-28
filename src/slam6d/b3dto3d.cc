@@ -56,12 +56,12 @@ int main(int argc, char **argv)
     }
 
     double calibration[16];
-    //double calinv[16];
-    //double rPos[3] = {0.3, 0.0, -0.1};
-    //double rPosTheta[3] = {rad(0.0), rad(0.0), -rad(30.0)};
-    //EulerToMatrix4(rPos, rPosTheta, calinv);
-    //M4inv(calinv, calibration);
-    M4identity(calibration);
+    double calinv[16];
+    double rPos[3] = {0.3, 0.0, -0.1};
+    double rPosTheta[3] = {rad(0.0), rad(0.0), -rad(30.0)};
+    EulerToMatrix4(rPos, rPosTheta, calinv);
+    M4inv(calinv, calibration);
+    //M4identity(calibration);
 
     double scaling[16] = { 0,    0,   100, 0,
         -100, 0,   0,   0,

@@ -1,14 +1,16 @@
-# Finds ANN
-#
+# - Find ANN
+# Find the native ANN includes and library
 # This module defines
-#  ANN_INCLUDE_DIRS
-#  ANN_LIBRARIES
-#  ANN_FOUND
+#  ANN_INCLUDE_DIR, where to find ANN/ANN.h, etc.
+#  ANN_LIBRARIES, the libraries needed to use ANN.
+#  ANN_FOUND, If false, do not try to use ANN.
+# also defined, but not for general use are
+#  ANN_LIBRARY, where to find the ANN library.
 
 include(FindPackageHandleStandardArgs)
 
 find_path(ANN_INCLUDE_DIR ANN/ANN.h)
-find_library(ANN_LIBRARY ann)
+find_library(ANN_LIBRARY ANN)
 
 find_package_handle_standard_args(ANN DEFAULT_MSG
     ANN_LIBRARY ANN_INCLUDE_DIR)
