@@ -602,6 +602,7 @@ include_directories(${CMAKE_SOURCE_DIR}/include)
 include_directories(${CMAKE_SOURCE_DIR}/3rdparty/glui-2.36/include/)
 include_directories(${CMAKE_SOURCE_DIR}/3rdparty/wxthings/include/)
 include_directories(${CMAKE_SOURCE_DIR}/3rdparty/b3dfile)
+include_directories(${CMAKE_SOURCE_DIR}/3rdparty/newmat-10)
 link_directories(${CMAKE_SOURCE_DIR}/obj)
 link_directories(${CMAKE_SOURCE_DIR}/lib)
 
