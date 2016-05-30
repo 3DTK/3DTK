@@ -232,7 +232,7 @@ void parse_options(int argc, char **argv, int &start, int &end,
     ("format,f", po::value<IOType>(&iotype)->default_value(UOS),
      "using shared library <arg> for input. (chose F from {uos, uos_map, "
      "uos_rgb, uos_frames, uos_map_frames, old, rts, rts_map, ifp, "
-     "riegl_txt, riegl_rgb, riegl_bin, zahn, ply})")
+     "riegl_txt, riegl_rgb, riegl_bin, zahn, ply, las})")
     ("max,M", po::value<int>(&maxDist)->default_value(-1),
      "neglegt all data points with a distance larger than <arg> 'units")
     ("min,m", po::value<int>(&minDist)->default_value(-1),
@@ -254,7 +254,8 @@ void parse_options(int argc, char **argv, int &start, int &end,
     ("voxel,v", po::value<double>(&voxel),
      "voxel size")
     ("projection,P", po::value<fbr::projection_method>(&ptype),
-     "projection method or panorama image")
+     "projection method or panorama image. Following Methods can be used: EQUIRECTANGULAR|CONIC|CYLINDRICAL|MERCATOR|RECTILINEAR|PANNINI|STEREOGRAPHIC|EQUALAREACYLINDRICAL      *Not all Projections may work with RANGE-reduction")
+
     ("octree,O", po::value<int>(&octree),
      "0 -> center\n1 -> random\nN>1 -> random N")
     ("width,w", po::value<int>(&width),
@@ -269,6 +270,7 @@ void parse_options(int argc, char **argv, int &start, int &end,
      "number of horizontal images for some projections [pannini, rectilinear, stereographic]")
     ("pParam,p", po::value<double>(&pParam),
      "projection parameter for some projections [pannini, stereographic]");
+
 
 
 

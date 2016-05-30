@@ -2,7 +2,7 @@ if(WITH_FLOORPLAN)
 
     # Module name
     set(MODULE "Floorplan")
-    set(UNIX_LIBS scan newmat dl ANN)
+    set(UNIX_LIBS scan newmat dl ann)
     set(WIN32_LIBS scan newmat XGetopt)
 
     # Set CXX flags for CGAL

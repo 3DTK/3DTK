@@ -70,7 +70,7 @@ void usage(int argc, char** argv){
   printf("\n");
   printf("\n");
   printf("\t\t-M mapMethod\t\t\t panorama map method [FARTHEST|EXTENDED|FULL]\n");
-  printf("\t\t-p projectionMethod\t\t projection method [EQUIRECTANGULAR|CONIC|CYLINDRICAL|MERCATOR|RECTILINEAR|PANNINI|STEREOGRAPHIC|ZAXIS]\n");
+  printf("\t\t-p projectionMethod\t\t projection method [AZIMUTHAL|CONIC|CYLINDRICAL|EQUALAREACYLINDRICAL|EQUIRECTANGULAR|MERCATOR|PANNINI|RECTILINEAR|STEREOGRAPHIC|ZAXIS]\n");
   printf("\t\t-F panoramaFormat\t\t panorama format [PNG|JPEG|JPEG2000|TIFF]\n");
   printf("\t\t-S panoramaFormatParam\t\t panorama format param panorama format related param mostly compression param\n");
   printf("\t\t-N numberOfImage\t\t number of Horizontal images used for some projections\n");

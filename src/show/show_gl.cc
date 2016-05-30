@@ -2176,7 +2176,7 @@ int calcNoOfPoints(vector<PointXY> vec1, vector<PointXY> vec2)
     distance += sqrt( dx*dx + dy*dy + dz*dz );
   }
 
-  return (distance*scale) / 0.02;  // change this to get faster animations
+  return (distance*scale) / 0.2;  // change this to get faster animations
 }
 
 /**
