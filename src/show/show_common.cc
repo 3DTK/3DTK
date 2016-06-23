@@ -240,6 +240,7 @@ int START_HEIGHT         = 540;
 // Current aspect ratio
 GLdouble aspect          = (double)START_WIDTH/(double)START_HEIGHT;  
 bool advanced_controls = false;
+bool anim_convert_jpg  = true;
 
 bool fullscreen    = false;
 int current_width  = START_WIDTH;
@@ -531,10 +532,11 @@ int parseArgs(int argc,char **argv,
     { "noanimcolor",     no_argument,         0,  'A' },
     { "customFilter",    required_argument,   0,  'u' },
     { "nogui",           no_argument,         0,  'G' },
+    { "no-anim-convert-jpg", no_argument,     0,  'J' },
     { 0,           0,   0,   0}                    // needed, cf. getopt.h
   };
 
-  while ((c = getopt_long(argc, argv,"F:f:s:e:r:m:M:O:o:l:x:C:u:SwtRDadhTcbA2", longopts, NULL)) != -1) {
+  while ((c = getopt_long(argc, argv,"F:f:s:e:r:m:M:O:o:l:x:C:u:SwtRDadhTcbA2J", longopts, NULL)) != -1) {
     switch (c) {
       case 's':
         w_start = atoi(optarg);
@@ -659,6 +661,9 @@ int parseArgs(int argc,char **argv,
         break;
       case 'G':
         nogui = true;
+        break;
+      case 'J':
+        anim_convert_jpg = false;
         break;
       default:
         abort ();
