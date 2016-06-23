@@ -109,12 +109,22 @@ T *PointType::createPoint(unsigned int i, unsigned int index)
     p[counter] = (*m_xyz)[i][j];
     /* m_xyz is of type DataXYZ which is a TripleArray<double>
      * if the template T of this class is a smaller container like
-     * float, then it can happen that p stores infinity.
-     * We make sure that p can hold the values in m_xyz by
-     * checking that their difference is sufficiently small */
-    if (fabs(p[counter] - (*m_xyz)[i][j]) > 0.001) {
-      std::cerr << "warning: Point is unable to hold the requested value. Difference: " << fabs(p[counter] - (*m_xyz)[i][j]) << std::endl;
+     * float, then it can happen that p stores infinity. It can
+     * also happen that if the part in front of the comma is very
+     * large, that the difference between the original double
+     * and the smaller type (like float) is greater than large
+     * epsilons like 0.1. So to make sure that the conversion
+     * did not create implausible values, we divide both values
+     * by each other and check if the result is reasonably close
+     * to 1. To avoid division by zero we also check for that */
+    if (abs((*m_xyz)[i][j]) < 1e16) {
+      if (abs(p[counter]) > 1e16) {
+        std::cerr << "warning: Point is unable to hold the requested value. Before: " << p[counter] << " After: " << (*m_xyz)[i][j] << std::endl;
+      }
+    } else if (abs(p[counter]/(*m_xyz)[i][j] - 1) > 1e16) {
+      std::cerr << "warning: Point is unable to hold the requested value. Before: " << p[counter] << " After: " << (*m_xyz)[i][j] << std::endl;
     }
+
     counter++;
   }
 
