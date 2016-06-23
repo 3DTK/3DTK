@@ -1088,18 +1088,21 @@ void CallBackIdleFunc(void)
 
 	  // per default no conversion program available in Win
 #ifndef _WIN32
-      string jpgname = scan_dir + "animframe" + to_string(frameNr,5) + ".jpg";
-      string systemcall = "convert -quality 100 -type TrueColor "
-        + filename + " " + jpgname;     
-      // cout << systemcall << endl;
-      int ret = system(systemcall.c_str());
-	  if (ret == -1) {
-		  cerr << "child process cannot be created (-1): " << systemcall << endl;
-	  } else if (ret == 0) {
-		  systemcall = "rm " + filename;
-		  system(systemcall.c_str()); // ignore if removing doesn't work
-	  } else {
-		  cerr << "unknown error " << ret << " when running: " << systemcall << endl;
+	  if (anim_convert_jpg) {
+		  string jpgname = scan_dir + "animframe" + to_string(frameNr,5) + ".jpg";
+		  string systemcall = "convert -quality 100 -type TrueColor "
+			  + filename + " " + jpgname;     
+		  // cout << systemcall << endl;
+		  int ret = system(systemcall.c_str());
+		  if (ret == -1) {
+			  cerr << "child process cannot be created (-1): " << systemcall << endl;
+		  } else if (ret == 0) {
+			  systemcall = "rm " + filename;
+			  system(systemcall.c_str()); // ignore if removing doesn't work
+			  cerr << "converted " << filename << " to " << jpgname << ".jpg" << endl;
+		  } else {
+			  cerr << "unknown error " << ret << " when running: " << systemcall << endl;
+		  }
 	  }
 #endif
     }
@@ -1153,18 +1156,21 @@ void CallBackIdleFunc(void)
         haveToUpdate = 8;
 
 #ifndef _WIN32
-        string jpgname = scan_dir + "animframe"
-            + to_string(path_iterator, 5) + ".jpg";
-        string systemcall = "convert -quality 100 "
-            + filename + " " + jpgname;
-		int ret = system(systemcall.c_str());
-		if (ret == -1) {
-			cerr << "child process cannot be created (-1): " << systemcall << endl;
-		} else if (ret == 0) {
-			systemcall = "rm " + filename;
-			system(systemcall.c_str()); // ignore if removing doesn't work
-		} else {
-			cerr << "unknown error " << ret << " when running: " << systemcall << endl;
+		if (anim_convert_jpg) {
+			string jpgname = scan_dir + "animframe"
+				+ to_string(path_iterator, 5) + ".jpg";
+			string systemcall = "convert -quality 100 "
+				+ filename + " " + jpgname;
+			int ret = system(systemcall.c_str());
+			if (ret == -1) {
+				cerr << "child process cannot be created (-1): " << systemcall << endl;
+			} else if (ret == 0) {
+				systemcall = "rm " + filename;
+				system(systemcall.c_str()); // ignore if removing doesn't work
+				cerr << "converted " << filename << " to " << jpgname << ".jpg" << endl;
+			} else {
+				cerr << "unknown error " << ret << " when running: " << systemcall << endl;
+			}
 		}
 #endif
       }
@@ -1211,18 +1217,21 @@ void CallBackIdleFunc(void)
         glWriteImagePPM(filename.c_str(), factor, 0);
 		// per default no conversion program available in Win, stick with PPM
 #ifndef _WIN32
-        string jpgname = scan_dir + "animframe"
-          + to_string(path_iterator,5) + ".jpg";
-        string systemcall = "convert -quality 100 "
-          + filename + " " + jpgname;     
-		int ret = system(systemcall.c_str());
-		if (ret == -1) {
-			cerr << "child process cannot be created (-1): " << systemcall << endl;
-		} else if (ret == 0) {
-			systemcall = "rm " + filename;
-			system(systemcall.c_str()); // ignore if removing doesn't work
-		} else {
-			cerr << "unknown error " << ret << " when running: " << systemcall << endl;
+		if (anim_convert_jpg) {
+			string jpgname = scan_dir + "animframe"
+				+ to_string(path_iterator,5) + ".jpg";
+			string systemcall = "convert -quality 100 "
+				+ filename + " " + jpgname;     
+			int ret = system(systemcall.c_str());
+			if (ret == -1) {
+				cerr << "child process cannot be created (-1): " << systemcall << endl;
+			} else if (ret == 0) {
+				systemcall = "rm " + filename;
+				system(systemcall.c_str()); // ignore if removing doesn't work
+				cerr << "converted " << filename << " to " << jpgname << ".jpg" << endl;
+			} else {
+				cerr << "unknown error " << ret << " when running: " << systemcall << endl;
+			}
 		}
 #endif
         haveToUpdate = 6;
