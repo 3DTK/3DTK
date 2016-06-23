@@ -113,8 +113,10 @@ GLfloat Y_button;
 GLfloat Z_button;
 /** GLUI spinner for choosing the camera */
 GLUI_Spinner    *cam_spinner;
-/** GLUI spinner for choosing the animation delay */
+/** GLUI spinner for choosing the animation factor */
 GLUI_Spinner    *anim_spinner;
+/** GLUI spinner for choosing the interpolation factor */
+GLUI_Spinner    *interp_spinner;
 /** Panel for the camera controls **/
 GLUI_Panel *cam_panel;
 /** ListBox for choosing which value to map to a color  */
@@ -326,6 +328,11 @@ void newMenu()
   path_panel->set_alignment(GLUI_ALIGN_LEFT);
   path_filename_edit = glui1->add_edittext_to_panel(path_panel, "File: ", GLUI_EDITTEXT_TEXT, path_file_name);
   path_filename_edit->set_alignment(GLUI_ALIGN_LEFT);
+  interp_spinner = glui1->add_spinner_to_panel(path_panel, "Interpolation factor:", GLUI_SPINNER_FLOAT, &path_interp_factor);
+  interp_spinner->set_float_limits(0.0000001, 10.0);
+  interp_spinner->set_speed(25.0);
+  interp_spinner->set_float_val(path_interp_factor);
+  interp_spinner->set_alignment(GLUI_ALIGN_LEFT);
   glui1->add_button_to_panel(path_panel, "Save Path   ", 0, savePath)->set_alignment(GLUI_ALIGN_CENTER);
   glui1->add_button_to_panel(path_panel, "Load Path   ", 0, loadPath)->set_alignment(GLUI_ALIGN_CENTER);
   glui1->add_button_to_panel(path_panel, "Load Robot P.", 0, drawRobotPath)->set_alignment(GLUI_ALIGN_CENTER);
