@@ -53,6 +53,12 @@ void ScanIO_xyz_rgb::readPose(const char* dir_path,
     readPoseHelper(dir_path, identifier, pose);
 }
 
+time_t ScanIO_xyz_rgb::lastModified(const char* dir_path, const char* identifier)
+{
+  const char* suffixes[2] = { DATA_PATH_SUFFIX, NULL };
+  return lastModifiedHelper(dir_path, identifier, suffixes);
+}
+
 bool ScanIO_xyz_rgb::supports(IODataType type)
 {
   return !!(type & ( DATA_XYZ | DATA_RGB));

@@ -58,6 +58,12 @@ void ScanIO_laz::readPose(const char* dir_path,
   for (unsigned int i = 0; i < 6; ++i) pose[i] = 0.0;
 }
 
+time_t ScanIO_laz::lastModified(const char* dir_path, const char* identifier)
+{
+  const char* suffixes[3] = { LAZ_SUFFIX, LAS_SUFFIX, NULL };
+  return lastModifiedHelper(dir_path, identifier, suffixes);
+}
+
 bool ScanIO_laz::supports(IODataType type)
 {
   return !!(type & (DATA_XYZ | DATA_REFLECTANCE | DATA_RGB));
