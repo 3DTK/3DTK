@@ -269,6 +269,12 @@ void BasicScan::setRangeMutation(double range)
   m_range_mutation = range;
 }
 
+time_t BasicScan::getLastModified()
+{
+  ScanIO* sio = ScanIO::getScanIO(m_type);
+  return sio->lastModified(m_path.c_str(), m_identifier.c_str());
+}
+
 void BasicScan::get(unsigned int types)
 {
   ScanIO* sio = ScanIO::getScanIO(m_type);
@@ -549,15 +555,19 @@ void BasicScan::createOcttree()
 {
   string scanFileName = m_path + "scan" + m_identifier + ".oct";
   BOctTree<float>* btree = 0;
+  boost::filesystem::path octpath(scanFileName);
 
   // try to load from file, if successful return
-  if (octtree_loadOct && exists(scanFileName)) {
-    btree = new BOctTree<float>(scanFileName);
-    m_data.insert(std::make_pair("octtree",
-             std::make_pair(reinterpret_cast<unsigned char*>(btree),
-             0 // or memorySize()?
-             )));
-    return;
+  // If autoOct is true, then only load the octtree if it is newer than
+  // the underlying data.
+  if (octtree_loadOct && exists(scanFileName) &&
+     (!octtree_autoOct || getLastModified() < boost::filesystem::last_write_time(octpath))) {
+        btree = new BOctTree<float>(scanFileName);
+        m_data.insert(std::make_pair("octtree",
+                 std::make_pair(reinterpret_cast<unsigned char*>(btree),
+                 0 // or memorySize()?
+                 )));
+        return;
   }
 
   // create octtree from scan
@@ -579,8 +589,12 @@ void BasicScan::createOcttree()
     for(size_t i = 0; i < nrpts; ++i) delete[] pts[i]; delete[] pts;
   }
 
-  // save created octtree            
-  if(octtree_saveOct) {
+  // save created octtree
+  // If autoOct is true, then only save the octree if it is older than the
+  // underlying data
+  if(octtree_saveOct &&
+      (!octtree_autoOct || !boost::filesystem::exists(scanFileName) ||
+        getLastModified() > boost::filesystem::last_write_time(octpath))) {
     cout << "Saving octree " << scanFileName << endl;
     btree->serialize(scanFileName);
   }
@@ -595,9 +609,13 @@ BOctTree<float>* BasicScan::convertScanToShowOcttree()
 {
   string scanFileName = m_path + "scan" + m_identifier + ".oct";
   BOctTree<float>* btree = 0;
+  boost::filesystem::path octpath(scanFileName);
 
   // try to load from file, if successful return
-  if (octtree_loadOct && exists(scanFileName)) {
+  // If autoOct is true, then only load the octtree if it is newer than
+  // the underlying data.
+  if (octtree_loadOct && exists(scanFileName) &&
+     (!octtree_autoOct || getLastModified() < boost::filesystem::last_write_time(octpath))) {
     btree = new BOctTree<float>(scanFileName);
     return btree;
   }
@@ -621,8 +639,12 @@ BOctTree<float>* BasicScan::convertScanToShowOcttree()
     for(size_t i = 0; i < nrpts; ++i) delete[] pts[i]; delete[] pts;
   }
 
-  // save created octtree            
-  if(octtree_saveOct) {
+  // save created octtree
+  // If autoOct is true, then only save the octree if it is older than the
+  // underlying data
+  if(octtree_saveOct &&
+      (!octtree_autoOct || !boost::filesystem::exists(scanFileName) ||
+        getLastModified() > boost::filesystem::last_write_time(octpath))) {
     cout << "Saving octree " << scanFileName << endl;
     btree->serialize(scanFileName);
   }

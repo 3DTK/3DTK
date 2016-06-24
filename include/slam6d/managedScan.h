@@ -27,7 +27,7 @@ public:
     PointType pointtype = PointType());
   virtual void setOcttreeParameter(double reduction_voxelSize,
     double octtree_voxelSize, PointType pointtype,
-    bool loadOct, bool saveOct);
+    bool loadOct, bool saveOct, bool autoOct=false);
 
   virtual const char* getIdentifier() const { return m_shared_scan->getIdentifier(); }
 
