@@ -101,6 +101,12 @@ void ScanIO_riegl_rgb::readPose(const char* dir_path, const char* identifier, do
   }
 }
 
+time_t ScanIO_riegl_rgb::lastModified(const char* dir_path, const char* identifier)
+{
+  const char* suffixes[2] = { DATA_PATH_SUFFIX, NULL };
+  return lastModifiedHelper(dir_path, identifier, suffixes);
+}
+
 bool ScanIO_riegl_rgb::supports(IODataType type)
 {
   return !!(type & (DATA_XYZ | DATA_RGB | DATA_REFLECTANCE));

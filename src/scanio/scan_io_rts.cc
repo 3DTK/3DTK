@@ -105,6 +105,12 @@ void ScanIO_rts::readPose(const char* dir_path, const char* identifier, double* 
   return;
 }
 
+time_t ScanIO_rts::lastModified(const char* dir_path, const char* identifier)
+{
+  const char* suffixes[2] = { DATA_PATH_SUFFIX, NULL };
+  return lastModifiedHelper(dir_path, identifier, suffixes);
+}
+
 bool ScanIO_rts::supports(IODataType type)
 {
   return !!(type & (DATA_XYZ));

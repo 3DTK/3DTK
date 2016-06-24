@@ -36,6 +36,13 @@ class ScanDataTransform_xyz : public ScanDataTransform {
         bool transform(double xyz[3], unsigned char rgb[3], float*  refl, float* temp, float* ampl, int* type, float* devi);
 };
 
+time_t lastModifiedHelper(
+        const char *dir_path,
+        const char *identifier,
+        const char **data_path_suffixes,
+        const char* data_path_prefix = "scan",
+        unsigned int id_len = 3);
+
 std::list<std::string> readDirectoryHelper(
         const char* dir_path,
         unsigned int start,

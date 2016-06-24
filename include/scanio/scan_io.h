@@ -56,6 +56,12 @@ public:
   virtual void readScan(const char* dir_path, const char* identifier, PointFilter& filter, std::vector<double>* xyz = 0, std::vector<unsigned char>* rgb = 0, std::vector<float>* reflectance = 0, std::vector<float>* temperature = 0, std::vector<float>* amplitude = 0, std::vector<int>* type = 0, std::vector<float>* deviation = 0) = 0;
   
   /**
+   * Given a scan identifier, get the modification time of this particular
+   * scan from the underlying file system.
+   */
+  virtual time_t lastModified(const char* dir_path, const char* identifier) = 0;
+
+  /**
    * Returns whether this ScanIO can load the requested data from a scan.
    *
    * @param type data channel request

@@ -60,6 +60,12 @@ void ScanIO_ks::readPose(const char* dir_path, const char* identifier, double* p
     for(unsigned int i = 0; i < 3; ++i) pose[i] *= 100.0;
 }
 
+time_t ScanIO_ks::lastModified(const char* dir_path, const char* identifier)
+{
+  const char* suffixes[2] = { DATA_PATH_SUFFIX, NULL };
+  return lastModifiedHelper(dir_path, identifier, suffixes, DATA_PATH_PREFIX);
+}
+
 bool ScanIO_ks::supports(IODataType type)
 {
   return !!(type & (DATA_XYZ));

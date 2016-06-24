@@ -15,6 +15,7 @@
  */
 
 #include "scanio/scan_io_leica_xyzr.h"
+#include "scanio/helper.h"
 
 #include <iostream>
 using std::cout;
@@ -96,6 +97,12 @@ void ScanIO_leica_xyzr::readPose(const char* dir_path,
 			     + identifier + "] in [" 
 			     + dir_path + "]");
   }
+}
+
+time_t ScanIO_leica_xyzr::lastModified(const char* dir_path, const char* identifier)
+{
+  const char* suffixes[2] = { DATA_PATH_SUFFIX, NULL };
+  return lastModifiedHelper(dir_path, identifier, suffixes);
 }
 
 bool ScanIO_leica_xyzr::supports(IODataType type)

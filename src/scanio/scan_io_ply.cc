@@ -56,6 +56,12 @@ void ScanIO_ply::readPose(const char* dir_path,
   for (unsigned int i = 0; i < 6; ++i) pose[i] = 0.0;
 }
 
+time_t ScanIO_ply::lastModified(const char* dir_path, const char* identifier)
+{
+  const char* suffixes[2] = { DATA_PATH_SUFFIX, NULL };
+  return lastModifiedHelper(dir_path, identifier, suffixes);
+}
+
 bool ScanIO_ply::supports(IODataType type)
 {
   return !!(type & (DATA_XYZ | DATA_REFLECTANCE | DATA_RGB));
