@@ -457,6 +457,12 @@ void usage(char* prog)
        << "         --reflectance/--amplitude and similar parameters are therefore ignored." << endl
        << "         only works when using octree display" << endl
        << endl
+    << bold << "  --autoOct" << endl << normal
+       << "         like --loadOct and --saveOct used together except that it only loads" << endl
+       << "         the octrees if they are newer than the underlying data and only stores" << endl
+       << "         octrees if they either didn't exist yet or are older than the underlying." << endl
+       << "         data." << endl
+       << endl
     << bold << "  -A, --noanimcolor" << endl << normal
        << "         do not switch to different color settings when displaying animation" << endl
        << endl
@@ -485,7 +491,7 @@ int parseArgs(int argc,char **argv,
               string &dir, int& start, int& end, int& maxDist, int& minDist, 
               double &red, bool &readInitial, unsigned int &octree,
               PointType &ptype, float &fps, string &loadObj,
-              bool &loadOct, bool &saveOct, int &origin, bool &originset,
+              bool &loadOct, bool &saveOct, bool &autoOct, int &origin, bool &originset,
               double &scale, IOType &type, bool& scanserver, 
               double& sphereMode, string& customFilter)
 {
@@ -527,6 +533,7 @@ int parseArgs(int argc,char **argv,
     { "loadObj",         required_argument,   0,  'l' },
     { "saveOct",         no_argument,         0,  '0' },
     { "loadOct",         no_argument,         0,  '1' },
+    { "autoOct",         no_argument,         0,  0   },
     { "advanced",        no_argument,         0,  '2' },
     { "scanserver",      no_argument,         0,  'S' },
     { "sphere",          required_argument,   0,  'b' },
@@ -537,8 +544,20 @@ int parseArgs(int argc,char **argv,
     { 0,           0,   0,   0}                    // needed, cf. getopt.h
   };
 
-  while ((c = getopt_long(argc, argv,"F:f:s:e:r:m:M:O:o:l:x:C:u:SwtRDadhTcbA2J", longopts, NULL)) != -1) {
+  int option_index = 0;
+
+
+  while ((c = getopt_long(argc, argv,"F:f:s:e:r:m:M:O:o:l:x:C:u:SwtRDadhTcbA2J", longopts, &option_index)) != -1) {
     switch (c) {
+      case 0:
+        if (strcmp(longopts[option_index].name, "autoOct") == 0) {
+          saveOct = true;
+          loadOct = true;
+          autoOct = true;
+        } else {
+          abort();
+        }
+        break;
       case 's':
         w_start = atoi(optarg);
         if (start < 0) {
@@ -925,6 +944,7 @@ void initShow(int argc, char **argv){
   unsigned int octree = 0;
   bool loadOct = false;
   bool saveOct = false;
+  bool autoOct = false;
   string loadObj;
   int origin = 0;
   bool originset = false;
@@ -943,7 +963,7 @@ void initShow(int argc, char **argv){
   strncpy(selection_file_name, "selected.3d", 1024);
 
   parseArgs(argc, argv, dir, start, end, maxDist, minDist, red, readInitial,
-            octree, pointtype, idealfps, loadObj, loadOct, saveOct, origin,
+            octree, pointtype, idealfps, loadObj, loadOct, saveOct, autoOct, origin,
 			originset, scale, type, scanserver, sphereMode, customFilter);
 
   // modify all scale dependant variables
@@ -1112,7 +1132,7 @@ void initShow(int argc, char **argv){
       break;
     }
 #else // FIXME: remove the case above
-    scan->setOcttreeParameter(red, voxelSize, pointtype, loadOct, saveOct);
+    scan->setOcttreeParameter(red, voxelSize, pointtype, loadOct, saveOct, autoOct);
     
     DataOcttree* data_oct;
     try {
