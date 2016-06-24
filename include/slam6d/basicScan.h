@@ -29,6 +29,7 @@ public:
 
   virtual const char* getIdentifier() const { return m_identifier.c_str(); }
 
+  virtual time_t getLastModified();
   virtual DataPointer get(const std::string& identifier);
   virtual void get(unsigned int types);
   virtual DataPointer create(const std::string& identifier, size_t size);
