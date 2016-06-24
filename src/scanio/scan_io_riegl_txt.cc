@@ -107,6 +107,12 @@ void ScanIO_riegl_txt::readPose(const char* dir_path,
   }
 }
 
+time_t ScanIO_riegl_txt::lastModified(const char* dir_path, const char* identifier)
+{
+  const char* suffixes[2] = { DATA_PATH_SUFFIX, NULL };
+  return lastModifiedHelper(dir_path, identifier, suffixes);
+}
+
 bool ScanIO_riegl_txt::supports(IODataType type)
 {
   return !!(type & (DATA_XYZ | DATA_REFLECTANCE));

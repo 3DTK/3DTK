@@ -54,6 +54,12 @@ void ScanIO_uos_rgb::readPose(const char* dir_path, const char* identifier, doub
     readPoseHelper(dir_path, identifier, pose);
 }
 
+time_t ScanIO_uos_rgb::lastModified(const char* dir_path, const char* identifier)
+{
+  const char* suffixes[2] = { DATA_PATH_SUFFIX, NULL };
+  return lastModifiedHelper(dir_path, identifier, suffixes);
+}
+
 bool ScanIO_uos_rgb::supports(IODataType type)
 {
   return !!(type & (DATA_XYZ | DATA_RGB));

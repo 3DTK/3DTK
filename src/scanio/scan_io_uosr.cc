@@ -54,6 +54,12 @@ void ScanIO_uosr::readPose(const char* dir_path, const char* identifier, double*
     readPoseHelper(dir_path, identifier, pose);
 }
 
+time_t ScanIO_uosr::lastModified(const char* dir_path, const char* identifier)
+{
+  const char* suffixes[2] = { DATA_PATH_SUFFIX, NULL };
+  return lastModifiedHelper(dir_path, identifier, suffixes);
+}
+
 bool ScanIO_uosr::supports(IODataType type)
 {
   return !!(type & ( DATA_REFLECTANCE | DATA_XYZ ));

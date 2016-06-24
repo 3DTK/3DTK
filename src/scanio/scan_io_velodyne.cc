@@ -18,6 +18,7 @@
 #include "veloslam/velodefs.h"
 #include "scanio/scan_io_velodyne.h"
 #include "slam6d/globals.icc"
+#include "scanio/helper.h"
 #include <fstream>
 #include <iostream>
 using std::ifstream;
@@ -503,6 +504,12 @@ void ScanIO_velodyne::readPose(const char* dir_path, const char* identifier, dou
   for(i = 0; i < 6; ++i)  pose[i] = 0.0;
   for(i = 3; i < 6; ++i)  pose[i] = 0.0;
    return;
+}
+
+time_t ScanIO_velodyne::lastModified(const char* dir_path, const char* identifier)
+{
+  const char* suffixes[2] = { DATA_PATH_SUFFIX, NULL };
+  return lastModifiedHelper(dir_path, identifier, suffixes);
 }
 
 bool ScanIO_velodyne::supports(IODataType type)

@@ -53,6 +53,12 @@ void ScanIO_xyzr::readPose(const char* dir_path,
     readPoseHelper(dir_path, identifier, pose);
 }
 
+time_t ScanIO_xyzr::lastModified(const char* dir_path, const char* identifier)
+{
+  const char* suffixes[2] = { DATA_PATH_SUFFIX, NULL };
+  return lastModifiedHelper(dir_path, identifier, suffixes);
+}
+
 bool ScanIO_xyzr::supports(IODataType type)
 {
   return !!(type & ( DATA_REFLECTANCE | DATA_XYZ ));

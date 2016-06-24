@@ -63,6 +63,12 @@ scaling
 */
 }
 
+time_t ScanIO_ks_rgb::lastModified(const char* dir_path, const char* identifier)
+{
+  const char* suffixes[2] = { DATA_PATH_SUFFIX, NULL };
+  return lastModifiedHelper(dir_path, identifier, suffixes);
+}
+
 bool ScanIO_ks_rgb::supports(IODataType type)
 {
   return !!(type & (DATA_XYZ | DATA_RGB | DATA_REFLECTANCE | DATA_AMPLITUDE));

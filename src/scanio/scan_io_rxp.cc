@@ -73,6 +73,12 @@ void ScanIO_rxp::readPose(const char* dir_path, const char* identifier, double* 
   readPoseHelper(dir_path, identifier, pose);
 }
 
+time_t ScanIO_rxp::lastModified(const char* dir_path, const char* identifier)
+{
+  const char* suffixes[2] = { DATA_PATH_SUFFIX, NULL };
+  return lastModifiedHelper(dir_path, identifier, suffixes);
+}
+
 bool ScanIO_rxp::supports(IODataType type)
 {
   return !!(type & (DATA_XYZ | DATA_REFLECTANCE | DATA_AMPLITUDE | DATA_DEVIATION | DATA_TYPE));

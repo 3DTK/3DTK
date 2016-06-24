@@ -23,6 +23,7 @@ public:
   virtual void readPose(const char* dir_path,
 				    const char* identifier,
 				    double* pose);
+  virtual time_t lastModified(const char* dir_path, const char* identifier);
   virtual void readScan(const char* dir_path,
 				    const char* identifier,
 				    PointFilter& filter,

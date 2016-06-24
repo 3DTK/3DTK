@@ -61,6 +61,12 @@ void ScanIO_b3d::readPose(const char* dir_path, const char* identifier, double* 
 {
 }
 
+time_t ScanIO_b3d::lastModified(const char* dir_path, const char* identifier)
+{
+  const char* suffixes[2] = { DATA_PATH_SUFFIX, NULL };
+  return lastModifiedHelper(dir_path, identifier, suffixes);
+}
+
 bool ScanIO_b3d::supports(IODataType type)
 {
   return !!(type & (DATA_XYZ));

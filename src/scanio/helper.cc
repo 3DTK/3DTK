@@ -69,6 +69,23 @@ bool ScanDataTransform_xyz::transform(double xyz[3], unsigned char rgb[3], float
     return true;
 }
 
+time_t lastModifiedHelper(const char *dir_path,
+        const char *identifier,
+        const char **data_path_suffixes,
+        const char *data_path_prefix,
+        unsigned int id_len)
+{
+    for (const char **s = data_path_suffixes; *s != 0; s++) {
+        boost::filesystem::path data(dir_path);
+        data /= boost::filesystem::path(std::string(data_path_prefix) + identifier + *s);
+        if (boost::filesystem::exists(data)) {
+            return boost::filesystem::last_write_time(data);
+        }
+    }
+    throw std::runtime_error(std::string("Data file could not be opened for [") +
+            identifier + "] in [" + dir_path + "]");
+}
+
 std::list<std::string> readDirectoryHelper(const char *dir_path,
         unsigned int start,
         unsigned int end,

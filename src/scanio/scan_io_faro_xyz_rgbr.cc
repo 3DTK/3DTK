@@ -53,6 +53,12 @@ void ScanIO_faro_xyz_rgbr::readPose(const char* dir_path,
     readPoseHelper(dir_path, identifier, pose);
 }
 
+time_t ScanIO_faro_xyz_rgbr::lastModified(const char* dir_path, const char* identifier)
+{
+  const char* suffixes[2] = { DATA_PATH_SUFFIX, NULL };
+  return lastModifiedHelper(dir_path, identifier, suffixes);
+}
+
 bool ScanIO_faro_xyz_rgbr::supports(IODataType type)
 {
   return !!(type & ( DATA_REFLECTANCE | DATA_XYZ | DATA_RGB));
