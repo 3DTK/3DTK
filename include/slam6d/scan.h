@@ -184,7 +184,8 @@ public:
                                    double octtree_voxelSize,
                                    PointType pointtype,
                                    bool loadOct,
-                                   bool saveOct);
+                                   bool saveOct,
+                                   bool autoOct=false);
 
   /* Basic getter functions */
 
@@ -402,7 +403,7 @@ protected:
   PointType octtree_pointtype;
   
   //! Flags to load or save the octtrees from/to storage
-  bool octtree_loadOct, octtree_saveOct;
+  bool octtree_loadOct, octtree_saveOct, octtree_autoOct;
   
   /**
    * Basic initializing constructor calling the initalization function.

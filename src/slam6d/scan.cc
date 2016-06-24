@@ -97,6 +97,7 @@ Scan::Scan()
   octtree_pointtype = PointType();
   octtree_loadOct = false;
   octtree_saveOct = false;
+  octtree_autoOct = false;
 }
 
 Scan::~Scan()
@@ -122,13 +123,15 @@ void Scan::setOcttreeParameter(double reduction_voxelSize,
                                double voxelSize,
                                PointType pointtype,
                                bool loadOct,
-                               bool saveOct)
+                               bool saveOct,
+                               bool autoOct)
 {
   octtree_reduction_voxelSize = reduction_voxelSize;
   octtree_voxelSize = voxelSize;
   octtree_pointtype = pointtype;
   octtree_loadOct = loadOct;
   octtree_saveOct = saveOct;
+  octtree_autoOct = autoOct;
 }
 
 void Scan::clear(unsigned int types)

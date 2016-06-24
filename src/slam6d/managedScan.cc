@@ -164,13 +164,15 @@ void ManagedScan::setOcttreeParameter(double reduction_voxelSize,
                                       double octtree_voxelSize,
                                       PointType pointtype,
                                       bool loadOct,
-                                      bool saveOct)
+                                      bool saveOct,
+                                      bool autoOct)
 {
   Scan::setOcttreeParameter(reduction_voxelSize,
                             octtree_voxelSize,
                             pointtype,
                             loadOct,
-                            saveOct);
+                            saveOct,
+                            autoOct);
   // set octtree parameters to invalidate cached ones with other
   // parameters (changing range/height is already handled)
   stringstream s;
