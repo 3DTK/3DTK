@@ -482,6 +482,16 @@ else()
   message(STATUS "Without testing.")
 endif()
 
+## Language Bindings
+
+OPT_DEP(WITH_PYTHON "Whether to build python bindings" OFF "WITH_PYTHON")
+
+if(WITh_PYTHON)
+  message(STATUS "With python bindings")
+else()
+  message(STATUS "Without python bindings")
+endif()
+
 #################################################
 # OPERATING SYSTEM SPECIFIC BEHAVIOUR          ##
 #################################################
@@ -625,6 +635,7 @@ add_subdirectory(src/collision)
 add_subdirectory(src/cuda)
 add_subdirectory(src/calibration)
 add_subdirectory(3rdparty)
+add_subdirectory(bindings)
 if(WITH_ADDONS)
   message(STATUS "With 3dtkaddons.")
   add_subdirectory(addons)
