@@ -13,7 +13,7 @@ endif()
 add_library(scanclient STATIC ${CLIENT_SRCS})
 ### EXPORT SHARED LIBS
 
-if(EXPORT_SHARED_LIBS)
+if(EXPORT_SHARED_LIBS OR WITH_PYTHON)
 add_library(scanclient_s SHARED ${CLIENT_SRCS})
 target_link_libraries(scanclient_s pointfilter ${Boost_LIBRARIES})
 endif()
