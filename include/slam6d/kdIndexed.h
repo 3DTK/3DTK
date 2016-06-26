@@ -47,9 +47,13 @@ struct ParamAccessor {
  * capabilities (find nearest point to
  * a given point, or to a ray).
  **/
-class KDtreeIndexed : private KDTreeImpl<double**, size_t, IndexAccessor, size_t, ParamAccessor>
+class KDtreeIndexed : protected KDTreeImpl<double**, size_t, IndexAccessor, size_t, ParamAccessor>
 {
+protected:
+  KDtreeIndexed() {}; /* only supposed to be used by derived classes */
+
 public:
+
   KDtreeIndexed(double **pts, size_t n);
   
   virtual ~KDtreeIndexed();
@@ -91,7 +95,7 @@ public:
   virtual size_t segmentSearch_1NearestPoint(double *_p,
           double* _p0, double maxdist2, int threadNum) const;
 
-private:
+protected:
   double **m_data;
   size_t m_size;
 
