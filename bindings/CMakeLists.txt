@@ -1,0 +1,6 @@
+if(WITH_PYTHON)
+	set(Python_ADDITIONAL_VERSIONS 3.5)
+	find_package(Boost 1.45.0 COMPONENTS python-py35 REQUIRED)
+	find_package(PythonLibs REQUIRED)
+	add_subdirectory(python)
+endif()

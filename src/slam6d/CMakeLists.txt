@@ -138,7 +138,7 @@ endif()
 
 ### EXPORT SHARED LIBS
 
-if(EXPORT_SHARED_LIBS)
+if(EXPORT_SHARED_LIBS OR WITH_PYTHON)
   add_library(scan_s SHARED ${SCANLIB_SRCS})
   if (WIN32)
     target_link_libraries(scan_s scanio scanclient_s newmat_s cxsparse_s ann_s)
