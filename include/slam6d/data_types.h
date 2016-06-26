@@ -60,12 +60,11 @@ public:
    * imlementation has to be taken away. The temporary inside that constructor
    * isn't seen as temporary anymore, so we need a simple reference-ctor.
    */
-  DataPointer(DataPointer& other) {
+  DataPointer(const DataPointer& other) {
     m_pointer = other.m_pointer;
     m_size = other.m_size;
     // take ownership of this value, other is a temporary and will deconstruct
     m_private_impl = other.m_private_impl;
-    other.m_private_impl = 0;
   };
   
   /**
@@ -96,14 +95,13 @@ public:
 protected:
   unsigned char* m_pointer;
   size_t m_size;
-  inline void  shallowCopy(DataPointer& other) {
+  inline void  shallowCopy(const DataPointer& other) {
     if(m_private_impl != 0)
       delete m_private_impl;
     m_pointer = other.m_pointer;
     m_size = other.m_size;
 
     m_private_impl = other.m_private_impl;
-    other.m_private_impl = 0;
   }
 
 
@@ -177,19 +175,19 @@ public:
   {
   }
 
- TripleArray(DataPointer& temp) :
+ TripleArray(const DataPointer& temp) :
   DataPointer(temp)
   {
   }
   
- TripleArray(TripleArray& temp) :
+ TripleArray(const TripleArray& temp) :
   DataPointer(temp)
   {
   }
 
 
     //copy assignment operator moves the object 
-        inline TripleArray& operator=(TripleArray & other)
+        inline TripleArray& operator=(const TripleArray & other)
       {
         if(&other!=this)
 	  {
