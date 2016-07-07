@@ -33,6 +33,7 @@ endif()
   target_link_libraries(scan_io_${libname} scan_io_helper pointfilter ${Boost_LIBRARIES} ${Boost_PROGRAM_OPTIONS_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY})
 endforeach()
 target_link_libraries(scan_io_b3d b3dfile)
+target_link_libraries(scan_io_ply rply)
 
 if(WITH_RIVLIB)
   target_link_libraries(scan_io_rxp ${RiVLib_SCANLIB_LIBRARY})
