@@ -219,3 +219,5 @@ ENDIF()
 
 # Compile AprilTags library if required
 add_subdirectory(apriltag-2015-03-18)
+
+add_subdirectory(rply-1.1.4)
