@@ -20,6 +20,7 @@
 #include "scanio/scan_io_ply.h"
 #include "scanio/helper.h"
 #include "slam6d/point.h"
+#include "rply.h"
 
 #include <iostream>
 using std::cout;
@@ -67,6 +68,22 @@ bool ScanIO_ply::supports(IODataType type)
   return !!(type & (DATA_XYZ | DATA_REFLECTANCE | DATA_RGB));
 }
 
+int vertex_cb(p_ply_argument argument) {
+	std::vector<double> *data;
+	ply_get_argument_user_data(argument, (void**)&data, NULL);
+	double value = ply_get_argument_value(argument);
+	data->push_back(value);
+	return 1;
+}
+
+int rgb_cb(p_ply_argument argument) {
+	std::vector<unsigned char> *data;
+	ply_get_argument_user_data(argument, (void**)&data, NULL);
+	double value = ply_get_argument_value(argument);
+	data->push_back(value);
+	return 1;
+}
+
 void ScanIO_ply::readScan(const char* dir_path,
 					 const char* identifier,
 					 PointFilter& filter,
@@ -86,100 +103,23 @@ void ScanIO_ply::readScan(const char* dir_path,
     throw std::runtime_error(std::string("There is no scan file for [")
 					    + identifier + "] in [" + dir_path + "]");
 
-  // open data file
-  ifstream data_file;
-  data_file.open(data_path);
-  data_file.exceptions(ifstream::eofbit|ifstream::failbit|ifstream::badbit);
-  
-  if(xyz != 0 && rgb != 0 && reflectance != 0) {
-
-    // read ply file
-    bool binary = false;
-    char dummy[256];
-    char str[20]; // whatever size
-    double matrix[16];
-    int matrixPos = 0;
-    int nr;
-    float d1,d2,d3,d4;
-
-    // header
-    int counter = -2;
-    do {
-	 if (counter > -2) counter++;
-	 if (data_file.good()) {
-	   data_file.getline(dummy, 255);
-	 }
-	 if (strncmp(dummy, "format", 6) == 0) {
-	   if (dummy[7] == 'a') binary = false;
-	   else if (dummy[7] == 'b') binary = true;
-	   else { cerr << "Don't recognize the format!" << endl; exit(1); }
-	 }
-	 else if (strncmp(dummy, "element vertex", 14) == 0) {
-	   sscanf(dummy,"%s %*s %d",str,&nr);
-	   counter++;
-	 }
-	 else if (strncmp(dummy, "matrix", 6) == 0) {
-	   sscanf(dummy,"%s %f %f %f %f", str, &d1, &d2, &d3, &d4);
-	   matrix[matrixPos++] = d1;
-	   matrix[matrixPos++] = d2;
-	   matrix[matrixPos++] = d3;
-	   matrix[matrixPos++] = d4;
-	 }    
-    } while (!(strncmp(dummy, "end_header",10) == 0 || !data_file.good()));
-
-    if (matrixPos > 0) {
-	 double rPosTheta[3];
-	 double rPos[3];
-	 Matrix4ToEuler(matrix, rPosTheta, rPos);
-    }
-
-    for (int i=0; i < nr; i++) {	 
-	 Point p;
-	 float data, confidence, intensity;
-	 float dummy;
-	 int r, g, b;
-	 if (!binary) {
-	   switch(counter) {
-        case 6:
-        case 12:
-          data_file >> p.z >> p.y >> p.x >> r >> g >> b;
-          break;
-        case 9:
-		data_file >> p.z >> p.y >> p.x
-				>> dummy >> dummy >> dummy
-				>> r >> g >> b;
-          break;
-        default: 
-		data_file >> p.z >> p.x >> p.y >> confidence >> intensity;
-          break;
-	   }
-	   if(counter == 6 || counter == 9 || counter == 12) {
-		p.rgb[0] = (char)r;
-		p.rgb[1] = (char)g;
-		p.rgb[2] = (char)b;
-	   } else {
-		p.reflectance = intensity;
-	   }
-	 } else {
-	   data_file.read((char*)&data, sizeof(float));
-	   p.z = (double)data;
-	   data_file.read((char*)&data, sizeof(float));
-	   p.x = (double)data;
-	   data_file.read((char*)&data, sizeof(float));
-	   p.y = (double)data;
-	   data_file.read((char*)&confidence, sizeof(float));
-	   data_file.read((char*)&intensity, sizeof(float));
-	 }
-
-	 reflectance->push_back(p.reflectance);
-	 xyz->push_back(p.x * -100);
-	 xyz->push_back(p.y * -100);
-	 xyz->push_back(p.z * 100);
-	 rgb->push_back(static_cast<unsigned char>(p.rgb[0]));
-	 rgb->push_back(static_cast<unsigned char>(p.rgb[1]));
-	 rgb->push_back(static_cast<unsigned char>(p.rgb[2]));
-    }
+  p_ply ply = ply_open(data_path.string().c_str(), NULL, 0, NULL);
+  if (!ply) {
+	  throw std::runtime_error("ply_open failed");
   }
+  if (!ply_read_header(ply)) {
+	  throw std::runtime_error("ply_read_header failed");
+  }
+  long num = ply_set_read_cb(ply, "vertex", "x", vertex_cb, xyz, 0);
+  ply_set_read_cb(ply, "vertex", "y", vertex_cb, xyz, 0);
+  ply_set_read_cb(ply, "vertex", "z", vertex_cb, xyz, 0);
+  ply_set_read_cb(ply, "vertex", "red", rgb_cb, rgb, 0);
+  ply_set_read_cb(ply, "vertex", "green", rgb_cb, rgb, 0);
+  ply_set_read_cb(ply, "vertex", "blue", rgb_cb, rgb, 0);
+  if (!ply_read(ply)) {
+	  throw std::runtime_error("ply_read failed");
+  }
+  ply_close(ply);
 }
 
 
