@@ -310,6 +310,10 @@ void lum6DEuler::FillGB3D(Graph *gr,
  */
 double lum6DEuler::doGraphSlam6D(Graph gr, vector <Scan *> allScans, int nrIt)
 {
+    if (gr.getNrScans() <= 0) {
+        throw runtime_error("Zero scans in graph");
+    }
+    
 #ifdef WRITE_GRAPH_NET
   // for debug only:
   static int d = 0;
@@ -349,7 +353,7 @@ double lum6DEuler::doGraphSlam6D(Graph gr, vector <Scan *> allScans, int nrIt)
 
     // * Calculate X and CX from all Dij and Cij
     int n = (gr.getNrScans() - 1);
-    
+
     // Construct the linear equation system..
     GraphMatrix *G = new GraphMatrix();
     ColumnVector B(6*n);
