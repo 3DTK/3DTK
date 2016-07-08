@@ -486,7 +486,7 @@ endif()
 
 OPT_DEP(WITH_PYTHON "Whether to build python bindings" OFF "WITH_PYTHON")
 
-if(WITh_PYTHON)
+if(WITH_PYTHON)
   message(STATUS "With python bindings")
 else()
   message(STATUS "Without python bindings")
