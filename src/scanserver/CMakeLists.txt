@@ -15,7 +15,7 @@ add_library(scanclient STATIC ${CLIENT_SRCS})
 
 if(EXPORT_SHARED_LIBS OR WITH_PYTHON)
 add_library(scanclient_s SHARED ${CLIENT_SRCS})
-target_link_libraries(scanclient_s pointfilter ${Boost_LIBRARIES})
+target_link_libraries(scanclient_s pointfilter ${Boost_LIBRARIES} ${Boost_FILESYSTEM_LIBRARY})
 endif()
 
 # add libraries
