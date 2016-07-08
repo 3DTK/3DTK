@@ -125,12 +125,12 @@ public:
   {
   }
 
-  SingleArray(DataPointer& temp) :
+  SingleArray(const DataPointer& temp) :
     DataPointer(temp)
   {
   }
   
-  SingleArray(SingleArray& temp) :
+  SingleArray(const SingleArray& temp) :
     DataPointer(temp)
   {
   }
