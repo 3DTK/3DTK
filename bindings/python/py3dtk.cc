@@ -5,6 +5,10 @@
 #include <boost/python.hpp>
 #include <boost/python/suite/indexing/vector_indexing_suite.hpp>
 
+#if PY_MAJOR_VERSION != 3
+	#error require python3
+#endif
+
 using namespace boost::python;
 
 DataPointer (Scan::*getByString)(const std::string&) = &Scan::get;
