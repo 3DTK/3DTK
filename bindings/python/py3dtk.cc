@@ -11,8 +11,64 @@
 
 using namespace boost::python;
 
-DataPointer (Scan::*getByString)(const std::string&) = &Scan::get;
-void (Scan::*getByType)(unsigned int) = &Scan::get;
+DataPointer (Scan::*scan_getByString)(const std::string&) = &Scan::get;
+void (Scan::*scan_getByType)(unsigned int) = &Scan::get;
+
+boost::python::tuple scan_get_rPos(Scan &s)
+{
+	const double *rPos = s.get_rPos();
+	boost::python::list l;
+	for (int i = 0; i < 3; ++i) {
+		l.append(rPos[i]);
+	}
+	return boost::python::tuple(l);
+}
+
+void scan_transform(Scan &s, boost::python::tuple m, const Scan::AlgoType type)
+{
+	bool islum = 0;
+	const double matrix[16] = {
+		boost::python::extract<double>(m[0])(),
+		boost::python::extract<double>(m[1])(),
+		boost::python::extract<double>(m[2])(),
+		boost::python::extract<double>(m[3])(),
+		boost::python::extract<double>(m[4])(),
+		boost::python::extract<double>(m[5])(),
+		boost::python::extract<double>(m[6])(),
+		boost::python::extract<double>(m[7])(),
+		boost::python::extract<double>(m[8])(),
+		boost::python::extract<double>(m[9])(),
+		boost::python::extract<double>(m[10])(),
+		boost::python::extract<double>(m[11])(),
+		boost::python::extract<double>(m[12])(),
+		boost::python::extract<double>(m[13])(),
+		boost::python::extract<double>(m[14])(),
+		boost::python::extract<double>(m[15])()
+	};
+	s.transform(matrix, type, islum);
+}
+
+boost::python::tuple pyM4identity()
+{
+	boost::python::list l;
+	l.append(1.0f);
+	l.append(0.0f);
+	l.append(0.0f);
+	l.append(0.0f);
+	l.append(0.0f);
+	l.append(1.0f);
+	l.append(0.0f);
+	l.append(0.0f);
+	l.append(0.0f);
+	l.append(0.0f);
+	l.append(1.0f);
+	l.append(0.0f);
+	l.append(0.0f);
+	l.append(0.0f);
+	l.append(0.0f);
+	l.append(1.0f);
+	return boost::python::tuple(l);
+}
 
 // given a DataXYZ and an index, assemble a Python tuple to return
 // that contains the xyz data
@@ -27,6 +83,22 @@ boost::python::tuple DataXYZ_getitem(DataXYZ &s, size_t index)
 	} else {
 		PyErr_SetString(PyExc_IndexError, "index out of range");
 		throw_error_already_set();
+		// because of the thrown exception, this will never be reached
+		// we do this to make the compiler happy
+		return boost::python::tuple();
+	}
+}
+
+float DataReflectance_getitem(DataReflectance &s, size_t index)
+{
+	if (index >= 0 && index < s.size()) {
+		return s[index];
+	} else {
+		PyErr_SetString(PyExc_IndexError, "index out of range");
+		throw_error_already_set();
+		// because of the thrown exception, this will never be reached
+		// we do this to make the compiler happy
+		return 0.0f;
 	}
 }
 
@@ -129,16 +201,33 @@ BOOST_PYTHON_MODULE(py3dtk)
 		.value("B3D", B3D)
         ;
 
+	enum_<Scan::AlgoType>("AlgoType")
+		.value("INVALID", Scan::INVALID)
+		.value("ICP", Scan::ICP)
+		.value("ICPINACTIVE", Scan::ICPINACTIVE)
+		.value("LUM", Scan::LUM)
+		.value("ELCH", Scan::ELCH);
+
 	def("openDirectory", Scan::openDirectory);
+
+	def("M4identity", pyM4identity);
 
 	class_<DataPointer>("DataPointer", boost::python::no_init);
 	// DataXYZ is a TripleArray<double>
 	class_<DataXYZ, boost::python::bases<DataPointer>>("DataXYZ", boost::python::init<DataPointer&>())
 		.def("__getitem__", &DataXYZ_getitem);
 
+	class_<DataReflectance, boost::python::bases<DataPointer>>("DataReflectance", boost::python::init<DataPointer&>())
+		.def("__getitem__", &DataReflectance_getitem);
+
 	// Scan is not copyable and has no init
 	class_<Scan, boost::noncopyable>("Scan", boost::python::no_init)
-		.def("getByString", getByString);
+		.def("get", scan_getByString)
+		.def("get", scan_getByType)
+		.def("get_rPos", scan_get_rPos)
+		.def("toGlobal", &Scan::toGlobal)
+		.def("setRangeFilter", &Scan::setRangeFilter)
+		.def("transform", scan_transform);
 	// BasicScan derives from Scan, is not copyable and has no init
 	class_<BasicScan, boost::noncopyable, boost::python::bases<Scan>>("BasicScan", boost::python::no_init);
 
