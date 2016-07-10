@@ -24,9 +24,18 @@ boost::python::tuple scan_get_rPos(Scan &s)
 	return boost::python::tuple(l);
 }
 
-void scan_transform(Scan &s, boost::python::tuple m, const Scan::AlgoType type)
+boost::python::tuple scan_get_transMatOrg(Scan &s)
 {
-	bool islum = 0;
+	const double *transMatOrg = s.get_transMatOrg();
+	boost::python::list l;
+	for (int i = 0; i < 16; ++i) {
+		l.append(transMatOrg[i]);
+	}
+	return boost::python::tuple(l);
+}
+
+void scan_transform(Scan &s, boost::python::tuple m, const Scan::AlgoType type, bool islum = 0)
+{
 	const double matrix[16] = {
 		boost::python::extract<double>(m[0])(),
 		boost::python::extract<double>(m[1])(),
@@ -46,6 +55,29 @@ void scan_transform(Scan &s, boost::python::tuple m, const Scan::AlgoType type)
 		boost::python::extract<double>(m[15])()
 	};
 	s.transform(matrix, type, islum);
+}
+
+void scan_transformAll(Scan &s, boost::python::tuple m)
+{
+	const double matrix[16] = {
+		boost::python::extract<double>(m[0])(),
+		boost::python::extract<double>(m[1])(),
+		boost::python::extract<double>(m[2])(),
+		boost::python::extract<double>(m[3])(),
+		boost::python::extract<double>(m[4])(),
+		boost::python::extract<double>(m[5])(),
+		boost::python::extract<double>(m[6])(),
+		boost::python::extract<double>(m[7])(),
+		boost::python::extract<double>(m[8])(),
+		boost::python::extract<double>(m[9])(),
+		boost::python::extract<double>(m[10])(),
+		boost::python::extract<double>(m[11])(),
+		boost::python::extract<double>(m[12])(),
+		boost::python::extract<double>(m[13])(),
+		boost::python::extract<double>(m[14])(),
+		boost::python::extract<double>(m[15])()
+	};
+	s.transformAll(matrix);
 }
 
 boost::python::tuple pyM4identity()
@@ -225,9 +257,11 @@ BOOST_PYTHON_MODULE(py3dtk)
 		.def("get", scan_getByString)
 		.def("get", scan_getByType)
 		.def("get_rPos", scan_get_rPos)
+		.def("get_transMatOrg", scan_get_transMatOrg)
 		.def("toGlobal", &Scan::toGlobal)
 		.def("setRangeFilter", &Scan::setRangeFilter)
-		.def("transform", scan_transform);
+		.def("transform", scan_transform)
+		.def("transformAll", scan_transformAll);
 	// BasicScan derives from Scan, is not copyable and has no init
 	class_<BasicScan, boost::noncopyable, boost::python::bases<Scan>>("BasicScan", boost::python::no_init);
 
