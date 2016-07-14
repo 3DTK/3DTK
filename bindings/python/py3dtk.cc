@@ -156,6 +156,18 @@ class KDtreeIndexedWrapper : public KDtreeIndexed
 			delete[] m_temp_indices;
 		}
 
+		size_t FindClosest(boost::python::tuple _p, double sqRad2)
+		{
+			double *_pv = new double[3];
+			_pv[0] = extract<double>(_p[0]);
+			_pv[1] = extract<double>(_p[1]);
+			_pv[2] = extract<double>(_p[2]);
+			int threadNum = 0;
+			size_t res = KDtreeIndexed::FindClosest(_pv, sqRad2, threadNum);
+			delete[] _pv;
+			return res;
+		}
+
 		boost::python::list fixedRangeSearch(boost::python::tuple _p, double sqRad2)
 		{
 			double *_pv = new double[3];
@@ -261,7 +273,8 @@ BOOST_PYTHON_MODULE(py3dtk)
 		.def("toGlobal", &Scan::toGlobal)
 		.def("setRangeFilter", &Scan::setRangeFilter)
 		.def("transform", scan_transform)
-		.def("transformAll", scan_transformAll);
+		.def("transformAll", scan_transformAll)
+		.def("getIdentifier", &Scan::getIdentifier);
 	// BasicScan derives from Scan, is not copyable and has no init
 	class_<BasicScan, boost::noncopyable, boost::python::bases<Scan>>("BasicScan", boost::python::no_init);
 
@@ -278,6 +291,7 @@ BOOST_PYTHON_MODULE(py3dtk)
 	scope().attr("allScans") = object(ptr(&Scan::allScans));
 
 	class_<KDtreeIndexedWrapper>("KDtreeIndexed", boost::python::init<boost::python::list>())
+		.def("FindClosest", &KDtreeIndexedWrapper::FindClosest)
 		.def("fixedRangeSearch", &KDtreeIndexedWrapper::fixedRangeSearch);
 		
 }
