@@ -1,6 +1,7 @@
 #include "slam6d/scan.h"
 #include "slam6d/basicScan.h"
 #include "slam6d/kdIndexed.h"
+#include "slam6d/kd.h"
 
 #include <boost/python.hpp>
 #include <boost/python/suite/indexing/vector_indexing_suite.hpp>
@@ -193,6 +194,79 @@ class KDtreeIndexedWrapper : public KDtreeIndexed
 		}
 };
 
+// we need to wrap KDtree because its constructor takes a double**
+// which boost python cannot handle directly
+class KDtreeWrapper : public KDtree
+{
+	private:
+		double **m_data;
+		size_t m_size;
+
+	public:
+		KDtreeWrapper(boost::python::list l) : KDtree()
+		{
+			size_t len = extract<std::size_t>(l.attr("__len__")());
+			double** pa = new double*[len];
+			for (size_t i = 0; i < len; ++i) {
+				boost::python::tuple t = extract<boost::python::tuple>(l[i]);
+				pa[i] = new double[3];
+				pa[i][0] = extract<double>(t[0]);
+				pa[i][1] = extract<double>(t[1]);
+				pa[i][2] = extract<double>(t[2]);
+			}
+			m_data = pa;
+			m_size = len;
+			create(Void(), m_data, m_size);
+		}
+
+		boost::python::object FindClosest(boost::python::tuple _p, double sqRad2)
+		{
+			double *_pv = new double[3];
+			_pv[0] = extract<double>(_p[0]);
+			_pv[1] = extract<double>(_p[1]);
+			_pv[2] = extract<double>(_p[2]);
+			int threadNum = 0;
+			double *closest = KDtree::FindClosest(_pv, sqRad2, threadNum);
+			delete[] _pv;
+			if (closest == 0) {
+				return boost::python::object(); // return None
+			}
+			boost::python::list l;
+			for (int i = 0; i < 3; i++) {
+				l.append(closest[i]);
+			}
+			return boost::python::tuple(l);
+		}
+
+		boost::python::list fixedRangeSearch(boost::python::tuple _p, double sqRad2)
+		{
+			double *_pv = new double[3];
+			_pv[0] = extract<double>(_p[0]);
+			_pv[1] = extract<double>(_p[1]);
+			_pv[2] = extract<double>(_p[2]);
+			int threadNum = 0;
+			std::vector<Point> res = KDtree::fixedRangeSearch(_pv, sqRad2, threadNum);
+			boost::python::list l;
+			for (auto &it: res) {
+				boost::python::list p;
+				p.append(it.x);
+				p.append(it.y);
+				p.append(it.z);
+				l.append(boost::python::tuple(p));
+			}
+			delete[] _pv;
+			return l;
+		}
+
+		~KDtreeWrapper()
+		{
+			for (size_t i = 0; i < m_size; ++i) {
+				delete[] m_data[i];
+			}
+			delete[] m_data;
+		}
+};
+
 
 BOOST_PYTHON_MODULE(py3dtk)
 {
@@ -297,4 +371,7 @@ BOOST_PYTHON_MODULE(py3dtk)
 		.def("FindClosest", &KDtreeIndexedWrapper::FindClosest)
 		.def("fixedRangeSearch", &KDtreeIndexedWrapper::fixedRangeSearch);
 		
+	class_<KDtreeWrapper>("KDtree", boost::python::init<boost::python::list>())
+		.def("FindClosest", &KDtreeWrapper::FindClosest)
+		.def("fixedRangeSearch", &KDtreeWrapper::fixedRangeSearch);
 }
