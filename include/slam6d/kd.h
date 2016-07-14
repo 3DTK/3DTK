@@ -22,9 +22,6 @@
 #include <omp.h>
 #endif
 
-
-struct Void { };
-
 struct PtrAccessor {
     inline double *operator() (Void, double* indices) {
         return indices;

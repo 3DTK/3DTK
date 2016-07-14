@@ -23,8 +23,6 @@
 #endif
 
 
-struct Void { };
-
 struct IndexAccessor {
     inline double *operator() (double** data, size_t index) {
         return data[index];

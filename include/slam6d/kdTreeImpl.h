@@ -24,6 +24,8 @@
 #include <omp.h>
 #endif
 
+struct Void {};
+
 class PointCompare {
 public:
     bool operator() (const std::pair<Point, double>& left,
