@@ -14,7 +14,7 @@ def dist(p):
 py3dtk.openDirectory(False, "dat", py3dtk.IOType.UOS, 0, -1)
 points=list()
 for s in py3dtk.allScans:
-    xyz = py3dtk.DataXYZ(s.getByString("xyz"))
+    xyz = py3dtk.DataXYZ(s.get("xyz"))
     points.extend(xyz)
 
 kdtree = py3dtk.KDtreeIndexed(points)
