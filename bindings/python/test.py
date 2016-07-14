@@ -1,3 +1,5 @@
+#!/usr/bin/python3
+
 import py3dtk
 from math import sqrt
 
