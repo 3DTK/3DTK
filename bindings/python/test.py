@@ -1,6 +1,15 @@
 #!/usr/bin/python3
 
-import py3dtk
+import sys
+import os
+
+sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..', 'lib'))
+try:
+        import py3dtk
+except ImportError:
+        print("Cannot find py3dtk module. Try recompiling 3dtk with WITH_PYTHON set to ON", file=sys.stderr)
+        exit(1)
+
 from math import sqrt
 
 query = (10,0,0)
