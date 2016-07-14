@@ -256,6 +256,9 @@ BOOST_PYTHON_MODULE(py3dtk)
 
 	def("M4identity", pyM4identity);
 
+	def("formatname_to_io_type", formatname_to_io_type);
+	def("io_type_to_libname", io_type_to_libname);
+
 	class_<DataPointer>("DataPointer", boost::python::no_init);
 	// DataXYZ is a TripleArray<double>
 	class_<DataXYZ, boost::python::bases<DataPointer>>("DataXYZ", boost::python::init<DataPointer&>())
