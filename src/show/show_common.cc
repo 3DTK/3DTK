@@ -231,6 +231,11 @@ vector < vector <double*> > MetaMatrix;
 vector < vector <Scan::AlgoType> > MetaAlgoType;
 
 /**
+ * Trajectory loaded from file for visualization
+ */
+vector<double*> trajectory;
+
+/**
  * Window position
  */
 int START_X              = 0;
@@ -493,7 +498,7 @@ int parseArgs(int argc,char **argv,
               PointType &ptype, float &fps, string &loadObj,
               bool &loadOct, bool &saveOct, bool &autoOct, int &origin, bool &originset,
               double &scale, IOType &type, bool& scanserver, 
-              double& sphereMode, string& customFilter)
+              double& sphereMode, string& customFilter, string& trajectoryFile)
 {
   unsigned int types = PointType::USE_NONE;
   start   = 0;
@@ -541,6 +546,7 @@ int parseArgs(int argc,char **argv,
     { "customFilter",    required_argument,   0,  'u' },
     { "nogui",           no_argument,         0,  'G' },
     { "no-anim-convert-jpg", no_argument,     0,  'J' },
+    { "trajectory-file", required_argument,   0,  0   },
     { 0,           0,   0,   0}                    // needed, cf. getopt.h
   };
 
@@ -554,6 +560,8 @@ int parseArgs(int argc,char **argv,
           saveOct = true;
           loadOct = true;
           autoOct = true;
+        } else if (strcmp(longopts[option_index].name, "trajectory-file") == 0) {
+          trajectoryFile = optarg;
         } else {
           abort();
         }
@@ -953,6 +961,7 @@ void initShow(int argc, char **argv){
   double sphereMode = 0.0;
   bool customFilterActive = false;
   string customFilter;
+  string trajectoryFile;
 
   pose_file_name = new char[1024];
   path_file_name = new char[1024];
@@ -963,8 +972,9 @@ void initShow(int argc, char **argv){
   strncpy(selection_file_name, "selected.3d", 1024);
 
   parseArgs(argc, argv, dir, start, end, maxDist, minDist, red, readInitial,
-            octree, pointtype, idealfps, loadObj, loadOct, saveOct, autoOct, origin,
-			originset, scale, type, scanserver, sphereMode, customFilter);
+            octree, pointtype, idealfps, loadObj, loadOct, saveOct, autoOct,
+            origin, originset, scale, type, scanserver, sphereMode,
+            customFilter, trajectoryFile);
 
   // modify all scale dependant variables
   scale = 1.0 / scale;
@@ -1278,6 +1288,32 @@ void initShow(int argc, char **argv){
     keymap[i] = false;
   }
   setScansColored(colorScanVal);
+
+  if (trajectoryFile.size() > 0) {
+    ifstream file(trajectoryFile);
+
+    if (file.good()) {
+      double tmp[3];
+      string line;
+      while (getline(file, line)) {
+        istringstream iss(line);
+        iss >> tmp;
+
+        double* position = new double[3];
+        position[0] = tmp[0];
+        position[1] = tmp[1];
+        position[2] = -tmp[2];
+
+        trajectory.push_back(position);
+      }
+
+      cout << "Loaded trajectory from file with " << trajectory.size() << " positions." << endl;
+
+      file.close();
+    } else {
+      cout << "Couldn't open trajectory file for reading!" << endl;
+    }
+  }
 }
 
 void deinitShow()
@@ -1297,6 +1333,11 @@ void deinitShow()
   }
   
   Scan::closeDirectory();
+
+  for (double* it : trajectory) {
+    delete it;
+  }
+  trajectory.clear();
 }
 
 /**
