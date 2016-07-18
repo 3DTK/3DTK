@@ -753,6 +753,19 @@ void DisplayItFunc(GLenum mode, bool interruptable)
     glEnd();
   }
 
+  // Draw trajectory from file
+  if (trajectory.size() > 0) {
+    glColor4d(1.0, 0.0, 0.0, 1.0);
+    glLineWidth(5);
+    glBegin(GL_LINE_STRIP);
+
+    for (size_t i = 0; i < trajectory.size(); i++) {
+      glVertex3f(trajectory.at(i)[0], trajectory.at(i)[1], trajectory.at(i)[2]);
+    }
+
+    glEnd();
+  }
+
   // if show camera is true then draw cameras.
   if (show_cameras == 1) {
     DrawCameras();
