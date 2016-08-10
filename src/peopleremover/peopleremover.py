@@ -282,6 +282,12 @@ def main():
 					f1.write("%f %f %f %d\n" % (x,y,z,r))
 				else:
 					f2.write("%f %f %f %d\n" % (x,y,z,r))
+	for pose in ["scan000.pose", "scan001.pose"]:
+		with open(pose, "w") as f:
+			f.write("0 0 0\n0 0 0\n");
+	for frames in ["scan000.frames", "scan001.frames"]:
+		with open(frames, "w") as f:
+			f.write("1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 2\n");
 	print("", file=sys.stderr)
 	print("done", file=sys.stderr)
 
