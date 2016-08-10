@@ -48,14 +48,29 @@ def mp_proc(l):
 #   by John Amanatides, Andrew Woo
 #   Eurographics ’87
 #   http://www.cs.yorku.ca/~amana/research/grid.pdf
-def walk_voxels(start, end, voxel_size, voxel_occupied_by_slice, current_slice, max_search_distance):
+def walk_voxels(start, end, voxel_size, voxel_occupied_by_slice, current_slice, max_search_distance, diff, max_target_dist, max_target_proximity):
 	#print("from: %f %f %f" % start)
 	#print("to: %f %f %f" % end)
+	direction = (end[0] - start[0], end[1] - start[1], end[2] - start[2])
+	dist = math.sqrt(direction[0]*direction[0]+direction[1]*direction[1]+direction[2]*direction[2])
+	# check if the point is too far away
+	if max_target_dist is not None:
+		if dist > max_target_dist:
+			return set() 
+	# compute the t value representing the desired search radius
+	if max_search_distance is None:
+		tMax = 1.0
+	else:
+		tMax = max_search_distance/dist
+		if tMax > 1.0:
+			tMax = 1.0
+	# optionally subtract the set target proximity
+	if max_target_proximity is not None:
+		tMax -= max_target_proximity/dist
 	X, Y, Z = voxel_of_point(start, voxel_size)
 	endX, endY, endZ = voxel_of_point(end, voxel_size)
 	#print("start: %d %d %d" % (X, Y, Z))
 	#print("end: %d %d %d" % (endX, endY, endZ))
-	direction = (end[0] - start[0], end[1] - start[1], end[2] - start[2])
 	#print("direction: %f %f %f" % direction)
 	# tMax*: value t at which the segment crosses the first voxel boundary in the given direction
 	# stepX: in which direction to increase the voxel count (1 or -1)
@@ -98,11 +113,6 @@ def walk_voxels(start, end, voxel_size, voxel_occupied_by_slice, current_slice, 
 	#print("max: %f %f %f" % (tMaxX, tMaxY, tMaxZ))
 	empty_voxels = set()
 	#i = 0
-	# compute the t value representing the desired search radius
-	if max_search_distance == -1:
-		tMax = 0.9
-	else:
-		tMax = max_search_distance/(voxel_size*math.sqrt(direction[0]*direction[0]+direction[1]*direction[1]+direction[2]*direction[2]))
 	# iterate until either:
 	#  - the final voxel is reached
 	#  - tMax is reached by all tMax-coordinates
@@ -144,7 +154,7 @@ def walk_voxels(start, end, voxel_size, voxel_occupied_by_slice, current_slice, 
 		# is close to the current slice (use difference of 10 slices)
 		#diff = 285 # full circle: 570
 		#diff = 140
-		diff = 0
+		#diff = 0
 		if diff == 0:
 			if current_slice not in voxel_occupied_by_slice[(X, Y, Z)]:
 				empty_voxels.add((X, Y, Z))
@@ -191,12 +201,16 @@ def main():
 	parser.add_argument("-s", "--start", type=int)
 	parser.add_argument("-e", "--end", type=int)
 	parser.add_argument("-f", "--format", type=formatname_to_io_type)
-	parser.add_argument("--max-search-distance", type=int)
+	parser.add_argument("--max-search-distance", type=float, default=None, help="Absolute distance from the scanner to the target point that voxels are marked as free. The default is to always mark all voxels up to the target point as free.")
+	parser.add_argument("--max-target-distance", type=float, default=None, help="Maximum distance a point is allowed to be away from the scanner for a line to be shot at it. The default is to shoot a line to all points.")
+	parser.add_argument("--max-target-proximity", type=float, default=None, help="Absolute distance from the target point (or from the --max-search-distance if set and greater than the current target point distance) up to which voxels are marked as free. ")
 	parser.add_argument("-j", "--jobs", type=int, default=1)
+	parser.add_argument("--voxel-size", type=float, default=10)
+	parser.add_argument("--diff", type=int, default=0, help="Number of scans before and after the current scan that are grouped together.")
 	parser.add_argument("directory")
 	args = parser.parse_args()
 
-	voxel_size = 10
+	voxel_size = args.voxel_size
 
 	points_by_slice = list()
 	trajectory = list()
@@ -212,7 +226,7 @@ def main():
 	scanserver = False
 	py3dtk.openDirectory(scanserver, args.directory, args.format, args.start, args.end)
 	for i,s in enumerate(py3dtk.allScans, start=args.start):
-		print("%f" % (((i+1)*100)/len_trajectory), end="\r", file=sys.stderr)
+		print("%f" % ((((i-args.start)+1)*100)/len_trajectory), end="\r", file=sys.stderr)
 		# transform all points into the global coordinate system
 		s.transformAll(s.get_transMatOrg())
 		# ignore points that are closer than 10 units
@@ -226,7 +240,7 @@ def main():
 		for (x,y,z),r in zip(xyz,refl):
 			points.add((x,y,z,r))
 		points_by_slice.append(points)
-		print("number of points in scan %d: %d" % (i, len(points)), file=sys.stderr)
+		#print("number of points in scan %d: %d" % (i, len(points)), file=sys.stderr)
 
 	print("calculate voxel occupation", file=sys.stderr)
 
@@ -253,8 +267,8 @@ def main():
 		for i, pos in enumerate(trajectory):
 			print("%f" % (((i+1)*100)/len_trajectory), end="\r", file=sys.stderr)
 			for j,(x,y,z,_) in enumerate(points_by_slice[i]):
-				print("%f (%d)" % (((i+1)*100)/len_trajectory, j), end="\r", file=sys.stderr)
-				free = walk_voxels(pos, (x,y,z), voxel_size, voxel_occupied_by_slice, i, args.max_search_distance)
+				#print("%f (%d)" % (((i+1)*100)/len_trajectory, j), end="\r", file=sys.stderr)
+				free = walk_voxels(pos, (x,y,z), voxel_size, voxel_occupied_by_slice, i, args.max_search_distance, args.diff, args.max_target_distance, args.max_target_proximity)
 				free_voxels |= free
 	else:
 		jobs = []
