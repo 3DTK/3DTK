@@ -117,8 +117,8 @@ T *PointType::createPoint(unsigned int i, unsigned int index)
      * did not create implausible values, we divide both values
      * by each other and check if the result is reasonably close
      * to 1. To avoid division by zero we also check for that */
-    if (abs((*m_xyz)[i][j]) < 1e16) {
-      if (abs(p[counter]) > 1e16) {
+    if (std::abs((*m_xyz)[i][j]) < 1e16) {
+      if (std::abs(p[counter]) > 1e16) {
         std::cerr << "warning: Point is unable to hold the requested value. Before: " << p[counter] << " After: " << (*m_xyz)[i][j] << std::endl;
       }
     } else if (abs(p[counter]/(*m_xyz)[i][j] - 1) > 1e16) {
