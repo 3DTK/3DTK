@@ -67,7 +67,7 @@ def walk_voxels(start, end, voxel_size, voxel_occupied_by_slice, current_slice, 
 	# optionally subtract the set target proximity
 	if max_target_proximity is not None:
 		tMax -= max_target_proximity/dist
-	X, Y, Z = voxel_of_point(start, voxel_size)
+	startX, startY, startZ = X, Y, Z = voxel_of_point(start, voxel_size)
 	endX, endY, endZ = voxel_of_point(end, voxel_size)
 	#print("start: %d %d %d" % (X, Y, Z))
 	#print("end: %d %d %d" % (endX, endY, endZ))
@@ -111,6 +111,11 @@ def walk_voxels(start, end, voxel_size, voxel_occupied_by_slice, current_slice, 
 	#print("steps: %d %d %d" % (stepX, stepY, stepZ))
 	#print("deltas: %f %f %f" % (tDeltaX, tDeltaY, tDeltaZ))
 	#print("max: %f %f %f" % (tMaxX, tMaxY, tMaxZ))
+	# in contrast to the original algorithm by John Amanatides and Andrew 
+	# Woo we increment a counter and multiply the step size instead of
+	# adding up the steps. Doing the latter might introduce errors because
+	# due to floating point precision errors, 0.1+0.1+0.1 is unequal 3*0.1.
+	multX = multY = multZ = 0
 	empty_voxels = set()
 	#i = 0
 	# iterate until either:
@@ -132,17 +137,21 @@ def walk_voxels(start, end, voxel_size, voxel_occupied_by_slice, current_slice, 
 		#i += 1
 		if tMaxX < tMaxY:
 			if tMaxX < tMaxZ:
-				X += stepX
+				multX += 1
+				X = startX + multX*stepX
 				tMaxX += tDeltaX
 			else:
-				Z += stepZ
+				multZ += 1
+				Z = startZ + multZ*stepZ
 				tMaxZ += tDeltaZ
 		else:
 			if tMaxY < tMaxZ:
-				Y += stepY
+				multY += 1
+				Y = startY + multY*stepY
 				tMaxY += tDeltaY
 			else:
-				Z += stepZ
+				multZ += 1
+				Z = startZ + multZ*stepZ
 				tMaxZ += tDeltaZ
 		#print("%f %f %f" % (tMaxX, tMaxY, tMaxZ))
 		# if the voxel has no point in it at all, continue searching
@@ -150,6 +159,15 @@ def walk_voxels(start, end, voxel_size, voxel_occupied_by_slice, current_slice, 
 			# we don't need to add this voxel to the empty voxel list because it was
 			# empty to begin with
 			continue
+		# The following implements a sliding window within which voxels
+		# that also contain points with a similar index as the current
+		# slice are not marked as free. Instead, the search aborts
+		# early.
+		# If no points around the current slice are found in the voxel,
+		# then the points in it were seen from a very different scanner
+		# position and thus, these points are actually not there and
+		# the voxel must be marked as free.
+
 		# if the voxel has a point in it, only abort if the slice number
 		# is close to the current slice (use difference of 10 slices)
 		#diff = 285 # full circle: 570
