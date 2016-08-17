@@ -34,8 +34,8 @@ void ManagedScan::openDirectory(const std::string& path,
   try {
     ClientInterface::create();
   } catch(std::runtime_error& e) {
-    cerr << "ClientInterface could not be created: " << e.what() << endl;
-    cerr << "Start the scanserver first." << endl;
+    std::cerr << "ClientInterface could not be created: " << e.what() << std::endl;
+    std::cerr << "Start the scanserver first." << std::endl;
     exit(-1);
   }
 
@@ -125,7 +125,7 @@ void ManagedScan::setHeightFilter(double top, double bottom)
   m_shared_scan->setHeightParameters(top, bottom);
 }
 
-void ManagedScan::setCustomFilter(string& cFiltStr)
+void ManagedScan::setCustomFilter(std::string& cFiltStr)
 {
   m_shared_scan->setCustomParameters(cFiltStr);
 }
@@ -234,12 +234,12 @@ DataPointer ManagedScan::get(const std::string& identifier)
                         return m_shared_scan->getOcttree();
                       } else
                         if(identifier == "normal reduced") {
-                          cout << "FIXME Upgrade SharedScan for the normal reduced data field!"
-                               << endl;
+                          std::cout << "FIXME Upgrade SharedScan for the normal reduced data field!"
+                               << std::endl;
                           return DataPointer(0,0);
                         } 
   {
-    throw runtime_error(string("Identifier '") + identifier
+    throw runtime_error(std::string("Identifier '") + identifier
                         + "' not compatible with ManagedScan::get. "
                         + "Upgrade SharedScan for this data field.");
   }
@@ -263,7 +263,7 @@ DataPointer ManagedScan::create(const std::string& identifier, size_t size)
       if(identifier == "reflectance") {
         return m_shared_scan->createReflectance(size / (1*sizeof(double)));
       } else {
-        throw runtime_error(string("Identifier '") + identifier
+        throw runtime_error(std::string("Identifier '") + identifier
                             + "' not compatible with ManagedScan::create. "
                             + "Upgrade SharedScan for this data field.");
         }
@@ -356,7 +356,7 @@ void ManagedScan::calcReducedShow()
 
 void ManagedScan::createOcttree()
 {
-  string scanFileName = string(m_shared_scan->getDirPath())
+  std::string scanFileName = std::string(m_shared_scan->getDirPath())
     + "scan"
     + getIdentifier()
     + ".oct";
@@ -386,7 +386,7 @@ void ManagedScan::createOcttree()
     }
     // save created octtree
     if(octtree_saveOct) {
-      cout << "Saving octree " << scanFileName << endl;
+      std::cout << "Saving octree " << scanFileName << std::endl;
       btree->serialize(scanFileName);
     }
   }

@@ -695,7 +695,7 @@ void Scan::transform(const double alignxf[16], const AlgoType type, int islum)
       }
       break;
     default:
-      cerr << "invalid point transformation mode" << endl;
+      std::cerr << "invalid point transformation mode" << std::endl;
     }
 
 #ifdef WITH_METRICS

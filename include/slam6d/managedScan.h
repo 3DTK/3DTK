@@ -18,7 +18,7 @@ public:
 
   virtual void setRangeFilter(double max, double min);
   virtual void setHeightFilter(double top, double bottom);
-  virtual void setCustomFilter(string& cFiltStr);
+  virtual void setCustomFilter(std::string& cFiltStr);
   virtual void setRangeMutation(double range);
   
   virtual void setReductionParameter(double voxelSize, int nrpts = 0,
