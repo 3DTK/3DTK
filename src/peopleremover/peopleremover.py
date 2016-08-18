@@ -245,16 +245,19 @@ def main():
 	py3dtk.openDirectory(scanserver, args.directory, args.format, args.start, args.end)
 	for i,s in enumerate(py3dtk.allScans, start=args.start):
 		print("%f" % ((((i-args.start)+1)*100)/len_trajectory), end="\r", file=sys.stderr)
-		# transform all points into the global coordinate system
-		s.transformAll(s.get_transMatOrg())
 		# ignore points that are closer than 10 units
 		s.setRangeFilter(-1, 10)
+		# transform all points into the global coordinate system
+		s.transformAll(s.get_transMatOrg())
 		# add the current position to the trajectory
 		trajectory.append(s.get_rPos())
 		# add all the points into their respective slices
 		points = set()
 		xyz = py3dtk.DataXYZ(s.get("xyz"))
 		refl = py3dtk.DataReflectance(s.get("reflectance"))
+		if len(xyz) != len(refl):
+			print("unequal lengths %d %d in %d" % (len(xyz), len(refl), i))
+			exit(1)
 		for (x,y,z),r in zip(xyz,refl):
 			points.add((x,y,z,r))
 		points_by_slice.append(points)
