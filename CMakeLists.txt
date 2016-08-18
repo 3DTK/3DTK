@@ -342,6 +342,16 @@ else()
   message(STATUS "Without collision detection")
 endif()
 
+## People remover
+
+OPT_DEP(WITH_PEOPLEREMOVER "Whether to build people remover tools" OFF "WITH_PEOPLEREMOVER")
+
+if(WITH_PEOPLEREMOVER)
+  message(STATUS "With people remover")
+else()
+  message(STATUS "Without people remover")
+endif()
+
 ## CUDA accelerated collision detection
 OPT_DEP(WITH_CUDA "Whether to build CUDA accelerated collision detection tools" OFF "WITH_CUDA")
 
@@ -633,6 +643,7 @@ add_subdirectory(src/slam6d/fbr)
 add_subdirectory(src/scanner)
 add_subdirectory(src/model)
 add_subdirectory(src/collision)
+add_subdirectory(src/peopleremover)
 add_subdirectory(src/cuda)
 add_subdirectory(src/calibration)
 add_subdirectory(3rdparty)
