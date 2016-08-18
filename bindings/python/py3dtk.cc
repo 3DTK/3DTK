@@ -122,6 +122,11 @@ boost::python::tuple DataXYZ_getitem(DataXYZ &s, size_t index)
 	}
 }
 
+size_t DataXYZ_length(DataXYZ &s)
+{
+	return s.size();
+}
+
 float DataReflectance_getitem(DataReflectance &s, size_t index)
 {
 	if (index >= 0 && index < s.size()) {
@@ -133,6 +138,11 @@ float DataReflectance_getitem(DataReflectance &s, size_t index)
 		// we do this to make the compiler happy
 		return 0.0f;
 	}
+}
+
+size_t DataReflectance_length(DataReflectance &s)
+{
+	return s.size();
 }
 
 // we need to wrap KDtreeIndexed because its constructor takes a double**
@@ -336,10 +346,12 @@ BOOST_PYTHON_MODULE(py3dtk)
 	class_<DataPointer>("DataPointer", boost::python::no_init);
 	// DataXYZ is a TripleArray<double>
 	class_<DataXYZ, boost::python::bases<DataPointer>>("DataXYZ", boost::python::init<DataPointer&>())
-		.def("__getitem__", &DataXYZ_getitem);
+		.def("__getitem__", &DataXYZ_getitem)
+		.def("__len__", &DataXYZ_length);
 
 	class_<DataReflectance, boost::python::bases<DataPointer>>("DataReflectance", boost::python::init<DataPointer&>())
-		.def("__getitem__", &DataReflectance_getitem);
+		.def("__getitem__", &DataReflectance_getitem)
+		.def("__len__", &DataReflectance_length);
 
 	// Scan is not copyable and has no init
 	class_<Scan, boost::noncopyable>("Scan", boost::python::no_init)
