@@ -314,9 +314,9 @@ def main():
 			for x,y,z,r in points:
 				voxel = voxel_of_point((x,y,z), voxel_size)
 				if voxel not in free_voxels:
-					f1.write("%f %f %f %d\n" % (x,y,z,r))
+					f1.write("%s %s %s %s\n" % (x.hex(),y.hex(),z.hex(),r.hex()))
 				else:
-					f2.write("%f %f %f %d\n" % (x,y,z,r))
+					f2.write("%s %s %s %s\n" % (x.hex(),y.hex(),z.hex(),r.hex()))
 	for pose in ["scan000.pose", "scan001.pose"]:
 		with open(pose, "w") as f:
 			f.write("0 0 0\n0 0 0\n");

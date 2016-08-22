@@ -266,10 +266,13 @@ int main()
 		delete[] trajectory[i];
 	}
 
-	std::ofstream out_static("scan000.3d");
-	std::ofstream out_dynamic("scan001.3d");
-	out_static << std::setprecision(4);
-	out_static << std::fixed;
+	/*
+	 * we use a FILE object instead of an ofstream to write the data because
+	 * it gives better performance (probably because it's buffered) and
+	 * because of the availability of fprintf
+	 */
+	FILE *out_static = fopen("scan000.3d", "w");
+	FILE *out_dynamic = fopen("scan001.3d", "w");
 	for (size_t i = 0; i < points_by_slice.size(); ++i) {
 		for (size_t j = 0; j < points_by_slice[i].size(); ++j) {
 			double x = std::get<0>(points_by_slice[i][j]);
@@ -278,15 +281,20 @@ int main()
 			double r = std::get<3>(points_by_slice[i][j]);
 			ssize_t X, Y, Z;
 			voxel_of_point(x,y,z,voxel_size, &X, &Y, &Z);
+			FILE *out;
 			if (free_voxels.find(std::make_tuple(X,Y,Z)) == free_voxels.end()) {
-				out_static << x << " " << y << " " << z << " " << r << std::endl;
+				out = out_static;
 			} else {
-				out_dynamic << x << " " << y << " " << z << " " << r << std::endl;
+				out = out_dynamic;
 			}
+			// we print the mantissa with 13 hexadecimal digits because the
+			// mantissa for double precision is 52 bits long which is 6.5
+			// bytes and thus 13 hexadecimal digits
+			fprintf(out, "%.013a %.013a %.013a %.013a\n", x, y, z, r);
 		}
 	}
-	out_static.close();
-	out_dynamic.close();
+	fclose(out_static);
+	fclose(out_dynamic);
 
 	return 0;
 }
