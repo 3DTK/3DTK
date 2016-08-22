@@ -106,6 +106,13 @@ struct voxel voxel_of_point(const double* p, double voxel_size)
 			py_div(p[2], voxel_size));
 }
 
+/*
+ * walk voxels as described in
+ *   Fast Voxel Traversal Algorithm for Ray Tracing
+ *   by John Amanatides, Andrew Woo
+ *   Eurographics ’87
+ *   http://www.cs.yorku.ca/~amana/research/grid.pdf
+ */
 void walk_voxels(
 		const double * const start_pos,
 		const double * const end_pos,
@@ -124,12 +131,14 @@ void walk_voxels(
 	direction[1] = end_pos[1] - start_pos[1];
 	direction[2] = end_pos[2] - start_pos[2];
 	const double dist = sqrt(direction[0]*direction[0]+direction[1]*direction[1]+direction[2]*direction[2]);
+	// check if the point is too far away
 	if (max_target_dist != -1) {
 		if (dist > max_target_dist) {
 			return;
 		}
 	}
 	double tMax;
+	// compute the t value representing the desired search radius
 	if (max_search_distance == -1) {
 		tMax = 1.0;
 	} else {
@@ -138,6 +147,7 @@ void walk_voxels(
 			tMax = 1.0;
 		}
 	}
+	// optionally subtract the set target proximity
 	if (max_target_proximity != -1) {
 		tMax -= max_target_proximity/dist;
 	}
@@ -148,6 +158,11 @@ void walk_voxels(
 	double tDeltaY, tMaxY;
 	double tDeltaZ, tMaxZ;
 	char stepX, stepY, stepZ;
+	/*
+	 * tMax*: value t at which the segment crosses the first voxel boundary in the given direction
+	 * stepX: in which direction to increase the voxel count (1 or -1)
+	 * tDelta*: value t needed to span the voxel size in the given direction up to the target
+	 */
 	if (direction[0] == 0) {
 		tDeltaX = 0;
 		stepX = 0;
@@ -175,6 +190,12 @@ void walk_voxels(
 		tDeltaZ = stepZ*voxel_size/direction[2];
 		tMaxZ = tDeltaZ * (1.0 - py_mod(stepZ*(start_pos[2]/voxel_size), 1.0));
 	}
+	/*
+	 * if we step into negative direction and the starting point happened to
+	 * fall exactly onto the voxel boundary, then we need to reset the
+	 * respective tMax value as we'd otherwise skip the first voxel in that
+	 * direction
+	 */
 	if (stepX == -1 && tMaxX == tDeltaX) {
 		tMaxX = 0.0;
 	}
@@ -184,13 +205,34 @@ void walk_voxels(
 	if (stepZ == -1 && tMaxZ == tDeltaZ) {
 		tMaxZ = 0.0;
 	}
+	/*
+	 * in contrast to the original algorithm by John Amanatides and Andrew Woo
+	 * we increment a counter and multiply the step size instead of adding up
+	 * the steps. Doing the latter might introduce errors because due to
+	 * floating point precision errors, 0.1+0.1+0.1 is unequal 3*0.1.
+	 */
 	size_t multX = 0, multY = 0, multZ = 0;
 	const double epsilon = 1e-13;
+	/*
+	 * iterate until either:
+	 *  - the final voxel is reached
+	 *  - tMax is reached by all tMax-coordinates
+	 *  - the current voxel contains points of (or around) the current scan
+	 */
 	while (cur_voxel != end_voxel) {
+		// if we implemented the algorithm correctly, the following should
+		// never happen, thus commenting it out
+		/*
 		if (tMaxX > 1.0+epsilon && tMaxY > 1.0+epsilon && tMaxZ > 1.0+epsilon) {
 			std::cerr << "error 1" << start_pos[0] << " " << start_pos[1] << " " << start_pos[2] << " " << end_pos[0] << " " << end_pos[1] << " " << end_pos[2] << std::endl;
-			break;
+			exit(1)
 		}
+		*/
+		/*
+		 * We need an epsilon to support cases in which we end up searching up
+		 * to the target voxel (with tMax = 1.0) and the target coordinate
+		 * being exactly on the voxel boundary.
+		 */
 		if (tMaxX > tMax-epsilon && tMaxY > tMax-epsilon && tMaxZ > tMax-epsilon) {
 			break;
 		}
@@ -217,30 +259,46 @@ void walk_voxels(
 		}
 		std::unordered_map<struct voxel, std::set<size_t>>::const_iterator scanslices_it =
 			voxel_occupied_by_slice.find(cur_voxel);
+		// if voxel has no points at all, continue searching without marking
+		// the current voxel as free as it had no points to begin with
 		if (scanslices_it == voxel_occupied_by_slice.end()) {
 			continue;
 		}
 		std::set<size_t> scanslices = scanslices_it->second;
+		/*
+		 * The following implements a sliding window within which voxels
+		 * that also contain points with a similar index as the current
+		 * slice are not marked as free. Instead, the search aborts
+		 * early.
+		 * If no points around the current slice are found in the voxel,
+		 * then the points in it only were seen from a very different scanner
+		 * position and thus, these points are actually not there and
+		 * the voxel must be marked as free.
+		 *
+		 * if the voxel has a point in it, only abort if the slice number
+		 * is close to the current slice
+		 */
 		if (diff == 0) {
-			if (scanslices.find(current_slice) == scanslices.end()) {
-				result.insert(cur_voxel);
-				continue;
+			// if the voxel contains the current slice, abort the search
+			if (scanslices.find(current_slice) != scanslices.end()) {
+				break;
 			}
-			break;
 		} else {
 			size_t window_start = current_slice - diff;
+			// subtracting diff from an unsigned value might underflow it,
+			// this check resets the window start to zero in that case
 			if (diff > current_slice) {
 				window_start = 0;
 			}
 			// first element that is equivalent or goes after value
 			std::set<size_t>::iterator lower_bound = scanslices.lower_bound(window_start);
-			if (lower_bound == scanslices.end() || *lower_bound > current_slice + diff) {
-				result.insert(cur_voxel);
-				continue;
-			} else {
+			// if elements in the set are found around the neighborhood of the
+			// current slice, abort the search
+			if (lower_bound != scanslices.end() && *lower_bound <= current_slice + diff) {
 				break;
 			}
 		}
+		result.insert(cur_voxel);
 	}
 	delete[] direction;
 	return;
@@ -269,6 +327,7 @@ int main(int argc, char* argv[])
 	std::vector<const double*> trajectory;
 	std::unordered_map<struct voxel, std::set<size_t>> voxel_occupied_by_slice;
 	for(size_t i = 0; i < Scan::allScans.size(); ++i) {
+		Scan* scan = Scan::allScans[i];
 		/* The range filter must be set *before* transformAll() because
 		 * otherwise, transformAll will move the point coordinates such that
 		 * the rangeFilter doesn't filter the right points anymore. This in
@@ -278,7 +337,6 @@ int main(int argc, char* argv[])
 		 * coordinates. This in turn can lead to the situation that the vector
 		 * for xyz and reflectance are of different length.
 		 */
-		Scan* scan = Scan::allScans[i];
 		scan->setRangeFilter(-1, 10);
 		scan->transformAll(scan->get_transMatOrg());
 		trajectory.push_back(scan->get_rPos());
