@@ -1,6 +1,5 @@
 #include <unordered_map>
 #include <set>
-#include <tuple>
 #include <boost/functional/hash.hpp>
 #include <limits>
 #include <iostream>
@@ -10,18 +9,48 @@
 #include "slam6d/scan.h"
 
 /*
+ * instead of this struct we could also use an std::tuple which would be
+ * equally fast and use the same amount of memory but I just don't like the
+ * verbosity of the syntax and how to access members via std::get<>(v)
+ */
+struct voxel{
+	ssize_t x;
+	ssize_t y;
+	ssize_t z;
+
+	voxel(const ssize_t X, const ssize_t Y, const ssize_t Z)
+		: x(X), y(Y), z(Z) {}
+
+	bool operator<(const struct voxel& rhs) const
+	{
+		if (x != rhs.x) {
+			return x < rhs.x;
+		}
+		if (y != rhs.y) {
+			return y < rhs.y;
+		}
+		return z < rhs.z;
+	}
+
+	bool operator==(const struct voxel& rhs) const
+	{
+		return x == rhs.x && y == rhs.y && z == rhs.z;
+	}
+};
+
+/*
  * define a hash function for 3-tuples
  */
 namespace std
 {
-	template<> struct hash<std::tuple<ssize_t, ssize_t, ssize_t>>
+	template<> struct hash<struct voxel>
 	{
-		std::size_t operator()(std::tuple<ssize_t, ssize_t, ssize_t> const& t) const
+		std::size_t operator()(struct voxel const& t) const
 		{
 			std::size_t seed = 0;
-			boost::hash_combine(seed, std::get<0>(t));
-			boost::hash_combine(seed, std::get<1>(t));
-			boost::hash_combine(seed, std::get<2>(t));
+			boost::hash_combine(seed, t.x);
+			boost::hash_combine(seed, t.y);
+			boost::hash_combine(seed, t.z);
 			return seed;
 		}
 	};
@@ -57,18 +86,18 @@ double py_mod(double a, double b)
 	return r;
 }
 
-void voxel_of_point(double x, double y, double z, double voxel_size, ssize_t *X, ssize_t *Y, ssize_t *Z)
+void voxel_of_point(const double* p, double voxel_size, ssize_t *X, ssize_t *Y, ssize_t *Z)
 {
-	*X = py_div(x, voxel_size);
-	*Y = py_div(y, voxel_size);
-	*Z = py_div(z, voxel_size);
+	*X = py_div(p[0], voxel_size);
+	*Y = py_div(p[1], voxel_size);
+	*Z = py_div(p[2], voxel_size);
 }
 
-std::set<std::tuple<ssize_t,ssize_t,ssize_t>> walk_voxels(
-		double *start,
-		double *end,
+std::set<struct voxel> walk_voxels(
+		const double *start,
+		const double *end,
 		double voxel_size,
-		std::unordered_map<std::tuple<ssize_t, ssize_t, ssize_t>, std::set<size_t>> const& voxel_occupied_by_slice,
+		std::unordered_map<struct voxel, std::set<size_t>> const& voxel_occupied_by_slice,
 		size_t current_slice,
 		double max_search_distance,
 		size_t diff,
@@ -83,7 +112,7 @@ std::set<std::tuple<ssize_t,ssize_t,ssize_t>> walk_voxels(
 	double dist = sqrt(direction[0]*direction[0]+direction[1]*direction[1]+direction[2]*direction[2]);
 	if (max_target_dist != -1) {
 		if (dist > max_target_dist) {
-			return std::set<std::tuple<ssize_t,ssize_t,ssize_t>>();
+			return std::set<struct voxel>();
 		}
 	}
 	double tMax;
@@ -99,10 +128,10 @@ std::set<std::tuple<ssize_t,ssize_t,ssize_t>> walk_voxels(
 		tMax -= max_target_proximity/dist;
 	}
 	ssize_t X, Y, Z;
-	voxel_of_point(start[0],start[1],start[2],voxel_size, &X, &Y, &Z);
+	voxel_of_point(start,voxel_size, &X, &Y, &Z);
 	ssize_t startX = X, startY = Y, startZ = Z;
 	ssize_t endX, endY, endZ;
-	voxel_of_point(end[0],end[1],end[2],voxel_size, &endX, &endY, &endZ);
+	voxel_of_point(end,voxel_size, &endX, &endY, &endZ);
 	double tDeltaX, tMaxX;
 	double tDeltaY, tMaxY;
 	double tDeltaZ, tMaxZ;
@@ -144,7 +173,7 @@ std::set<std::tuple<ssize_t,ssize_t,ssize_t>> walk_voxels(
 		tMaxZ = 0.0;
 	}
 	size_t multX = 0, multY = 0, multZ = 0;
-	std::set<std::tuple<ssize_t,ssize_t,ssize_t>> empty_voxels;
+	std::set<struct voxel> empty_voxels;
 	double epsilon = 1e-13;
 	while (X != endX || Y != endY || Z != endZ) {
 		if (tMaxX > 1.0+epsilon && tMaxY > 1.0+epsilon && tMaxZ > 1.0+epsilon) {
@@ -175,13 +204,14 @@ std::set<std::tuple<ssize_t,ssize_t,ssize_t>> walk_voxels(
 				tMaxZ += tDeltaZ;
 			}
 		}
-		auto scanslices = voxel_occupied_by_slice.find(std::make_tuple(X,Y,Z));
+		struct voxel v = voxel(X,Y,Z);
+		auto scanslices = voxel_occupied_by_slice.find(v);
 		if (scanslices == voxel_occupied_by_slice.end()) {
 			continue;
 		}
 		if (diff == 0) {
 			if (scanslices->second.find(current_slice) == scanslices->second.end()) {
-				empty_voxels.insert(std::make_tuple(X,Y,Z));
+				empty_voxels.insert(v);
 				continue;
 			}
 			break;
@@ -197,7 +227,7 @@ std::set<std::tuple<ssize_t,ssize_t,ssize_t>> walk_voxels(
 				}
 			}
 			if (found == false) {
-				empty_voxels.insert(std::make_tuple(X,Y,Z));
+				empty_voxels.insert(v);
 				continue;
 			} else {
 				break;
@@ -226,8 +256,9 @@ int main(int argc, char* argv[])
 		exit(-1);
 	}
 
-	std::vector<std::vector<std::tuple<double,double,double,double>>> points_by_slice;
-	std::vector<double*> trajectory;
+	std::vector<std::vector<double*>> points_by_slice;
+	std::vector<std::vector<double>> reflectances_by_slice;
+	std::vector<const double*> trajectory;
 	for(ScanVector::iterator scan = Scan::allScans.begin(); scan != Scan::allScans.end(); ++scan) {
 		/* The range filter must be set *before* transformAll() because
 		 * otherwise, transformAll will move the point coordinates such that
@@ -240,46 +271,38 @@ int main(int argc, char* argv[])
 		 */
 		(*scan)->setRangeFilter(-1, 10);
 		(*scan)->transformAll((*scan)->get_transMatOrg());
-		double *rPos = new double[3];
-		rPos[0] = (*scan)->get_rPos()[0];
-		rPos[1] = (*scan)->get_rPos()[1];
-		rPos[2] = (*scan)->get_rPos()[2];
-		trajectory.push_back(rPos);
+		trajectory.push_back((*scan)->get_rPos());
 		DataXYZ xyz((*scan)->get("xyz"));
 		DataReflectance refl((*scan)->get("reflectance"));
-		std::vector<std::tuple<double,double,double,double>> points;
+		std::vector<double*> points;
+		std::vector<double> reflectances;
 		if (xyz.size() != refl.size()) {
 			exit(1);
 		}
 		for (size_t i = 0; i < xyz.size(); ++i) {
-			points.push_back(std::make_tuple(xyz[i][0],xyz[i][1],xyz[i][2],refl[i]));
+			points.push_back(xyz[i]);
+			reflectances.push_back(refl[i]);
 		}
 		points_by_slice.push_back(points);
+		reflectances_by_slice.push_back(reflectances);
 	}
 
-	std::unordered_map<std::tuple<ssize_t, ssize_t, ssize_t>, std::set<size_t>> voxel_occupied_by_slice;
+	std::unordered_map<struct voxel, std::set<size_t>> voxel_occupied_by_slice;
 	for (size_t i = 0; i < points_by_slice.size(); ++i) {
 		for (size_t j = 0; j < points_by_slice[i].size(); ++j) {
-			double x = std::get<0>(points_by_slice[i][j]);
-			double y = std::get<1>(points_by_slice[i][j]);
-			double z = std::get<2>(points_by_slice[i][j]);
 			ssize_t X, Y, Z;
-			voxel_of_point(x,y,z,voxel_size, &X, &Y, &Z);
-			voxel_occupied_by_slice[std::make_tuple(X,Y,Z)].insert(i);
+			voxel_of_point(points_by_slice[i][j],voxel_size, &X, &Y, &Z);
+			voxel_occupied_by_slice[voxel(X,Y,Z)].insert(i);
 		}
 	}
 
-	std::set<std::tuple<ssize_t,ssize_t,ssize_t>> free_voxels;
+	std::set<struct voxel> free_voxels;
 
 	for (size_t i = 0; i < trajectory.size(); ++i) {
 		for (size_t j = 0; j < points_by_slice[i].size(); ++j) {
-			double *pointPos = new double[3];
-			pointPos[0] = std::get<0>(points_by_slice[i][j]);
-			pointPos[1] = std::get<1>(points_by_slice[i][j]);
-			pointPos[2] = std::get<2>(points_by_slice[i][j]);
-			std::set<std::tuple<ssize_t,ssize_t,ssize_t>> free = walk_voxels(
+			std::set<struct voxel> free = walk_voxels(
 					trajectory[i],
-					pointPos,
+					points_by_slice[i][j],
 					voxel_size,
 					voxel_occupied_by_slice,
 					i,
@@ -288,18 +311,13 @@ int main(int argc, char* argv[])
 					max_target_distance,
 					max_target_proximity
 					);
-			for (std::set<std::tuple<ssize_t,ssize_t,ssize_t>>::iterator it = free.begin(); it != free.end(); ++it) {
+			for (std::set<struct voxel>::iterator it = free.begin(); it != free.end(); ++it) {
 				free_voxels.insert(*it);
 			}
-			delete[] pointPos;
 		}
 	}
 
 	std::cout << free_voxels.size() << " " << voxel_occupied_by_slice.size() << std::endl;
-
-	for (size_t i = 0; i < trajectory.size(); ++i) {
-		delete[] trajectory[i];
-	}
 
 	/*
 	 * we use a FILE object instead of an ofstream to write the data because
@@ -310,14 +328,10 @@ int main(int argc, char* argv[])
 	FILE *out_dynamic = fopen("scan001.3d", "w");
 	for (size_t i = 0; i < points_by_slice.size(); ++i) {
 		for (size_t j = 0; j < points_by_slice[i].size(); ++j) {
-			double x = std::get<0>(points_by_slice[i][j]);
-			double y = std::get<1>(points_by_slice[i][j]);
-			double z = std::get<2>(points_by_slice[i][j]);
-			double r = std::get<3>(points_by_slice[i][j]);
 			ssize_t X, Y, Z;
-			voxel_of_point(x,y,z,voxel_size, &X, &Y, &Z);
+			voxel_of_point(points_by_slice[i][j],voxel_size, &X, &Y, &Z);
 			FILE *out;
-			if (free_voxels.find(std::make_tuple(X,Y,Z)) == free_voxels.end()) {
+			if (free_voxels.find(voxel(X,Y,Z)) == free_voxels.end()) {
 				out = out_static;
 			} else {
 				out = out_dynamic;
@@ -325,7 +339,12 @@ int main(int argc, char* argv[])
 			// we print the mantissa with 13 hexadecimal digits because the
 			// mantissa for double precision is 52 bits long which is 6.5
 			// bytes and thus 13 hexadecimal digits
-			fprintf(out, "%.013a %.013a %.013a %.013a\n", x, y, z, r);
+			fprintf(out, "%.013a %.013a %.013a %.013a\n",
+					points_by_slice[i][j][0],
+					points_by_slice[i][j][1],
+					points_by_slice[i][j][2],
+					reflectances_by_slice[i][j]
+					);
 		}
 	}
 	fclose(out_static);
