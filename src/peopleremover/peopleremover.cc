@@ -8,6 +8,10 @@
 #include "scanio/scan_io.h"
 #include "slam6d/scan.h"
 
+#ifdef _OPENMP
+#include <omp.h>
+#endif
+
 /*
  * instead of this struct we could also use an std::tuple which would be
  * equally fast and use the same amount of memory but I just don't like the
@@ -102,26 +106,27 @@ struct voxel voxel_of_point(const double* p, double voxel_size)
 			py_div(p[2], voxel_size));
 }
 
-std::set<struct voxel> walk_voxels(
-		const double *start_pos,
-		const double *end_pos,
-		double voxel_size,
+void walk_voxels(
+		const double * const start_pos,
+		const double * const end_pos,
+		const double voxel_size,
 		std::unordered_map<struct voxel, std::set<size_t>> const& voxel_occupied_by_slice,
-		size_t current_slice,
-		double max_search_distance,
-		size_t diff,
-		double max_target_dist,
-		double max_target_proximity
+		const size_t current_slice,
+		const double max_search_distance,
+		const size_t diff,
+		const double max_target_dist,
+		const double max_target_proximity,
+		std::set<struct voxel> &result
 		)
 {
 	double *direction = new double[3];
 	direction[0] = end_pos[0] - start_pos[0];
 	direction[1] = end_pos[1] - start_pos[1];
 	direction[2] = end_pos[2] - start_pos[2];
-	double dist = sqrt(direction[0]*direction[0]+direction[1]*direction[1]+direction[2]*direction[2]);
+	const double dist = sqrt(direction[0]*direction[0]+direction[1]*direction[1]+direction[2]*direction[2]);
 	if (max_target_dist != -1) {
 		if (dist > max_target_dist) {
-			return std::set<struct voxel>();
+			return;
 		}
 	}
 	double tMax;
@@ -136,9 +141,9 @@ std::set<struct voxel> walk_voxels(
 	if (max_target_proximity != -1) {
 		tMax -= max_target_proximity/dist;
 	}
-	struct voxel start_voxel = voxel_of_point(start_pos,voxel_size);
-	struct voxel cur_voxel = start_voxel;
-	struct voxel end_voxel = voxel_of_point(end_pos,voxel_size);
+	const struct voxel start_voxel = voxel_of_point(start_pos,voxel_size);
+	struct voxel cur_voxel = voxel(start_voxel);
+	const struct voxel end_voxel = voxel_of_point(end_pos,voxel_size);
 	double tDeltaX, tMaxX;
 	double tDeltaY, tMaxY;
 	double tDeltaZ, tMaxZ;
@@ -180,8 +185,7 @@ std::set<struct voxel> walk_voxels(
 		tMaxZ = 0.0;
 	}
 	size_t multX = 0, multY = 0, multZ = 0;
-	std::set<struct voxel> empty_voxels;
-	double epsilon = 1e-13;
+	const double epsilon = 1e-13;
 	while (cur_voxel != end_voxel) {
 		if (tMaxX > 1.0+epsilon && tMaxY > 1.0+epsilon && tMaxZ > 1.0+epsilon) {
 			std::cerr << "error 1" << start_pos[0] << " " << start_pos[1] << " " << start_pos[2] << " " << end_pos[0] << " " << end_pos[1] << " " << end_pos[2] << std::endl;
@@ -211,29 +215,27 @@ std::set<struct voxel> walk_voxels(
 				tMaxZ += tDeltaZ;
 			}
 		}
-		auto scanslices = voxel_occupied_by_slice.find(cur_voxel);
-		if (scanslices == voxel_occupied_by_slice.end()) {
+		std::unordered_map<struct voxel, std::set<size_t>>::const_iterator scanslices_it =
+			voxel_occupied_by_slice.find(cur_voxel);
+		if (scanslices_it == voxel_occupied_by_slice.end()) {
 			continue;
 		}
+		std::set<size_t> scanslices = scanslices_it->second;
 		if (diff == 0) {
-			if (scanslices->second.find(current_slice) == scanslices->second.end()) {
-				empty_voxels.insert(cur_voxel);
+			if (scanslices.find(current_slice) == scanslices.end()) {
+				result.insert(cur_voxel);
 				continue;
 			}
 			break;
 		} else {
-			bool found = false;
-			for (std::set<size_t>::iterator it = scanslices->second.begin(); it != scanslices->second.end(); ++it) {
-				// it is important that we do not subtract values from *it or
-				// current_slice because both are unsigned values and if they
-				// are too small, then subtraction might underflow them
-				if ((*it + diff >= current_slice) && (*it <= (current_slice + diff))) {
-					found = true;
-					break;
-				}
+			size_t window_start = current_slice - diff;
+			if (diff > current_slice) {
+				window_start = 0;
 			}
-			if (found == false) {
-				empty_voxels.insert(cur_voxel);
+			// first element that is equivalent or goes after value
+			std::set<size_t>::iterator lower_bound = scanslices.lower_bound(window_start);
+			if (lower_bound == scanslices.end() || *lower_bound > current_slice + diff) {
+				result.insert(cur_voxel);
 				continue;
 			} else {
 				break;
@@ -241,7 +243,7 @@ std::set<struct voxel> walk_voxels(
 		}
 	}
 	delete[] direction;
-	return empty_voxels;
+	return;
 }
 
 int main(int argc, char* argv[])
@@ -298,9 +300,15 @@ int main(int argc, char* argv[])
 
 	std::set<struct voxel> free_voxels;
 
+	time_t before = time(NULL);
+#ifdef _OPENMP
+	omp_set_num_threads(OPENMP_NUM_THREADS);
+#pragma omp parallel for schedule(dynamic)
+#endif
 	for (size_t i = 0; i < trajectory.size(); ++i) {
+		std::set<struct voxel> free;
 		for (size_t j = 0; j < points_by_slice[i].size(); ++j) {
-			std::set<struct voxel> free = walk_voxels(
+			walk_voxels(
 					trajectory[i],
 					points_by_slice[i][j],
 					voxel_size,
@@ -309,13 +317,19 @@ int main(int argc, char* argv[])
 					max_search_distance,
 					diff,
 					max_target_distance,
-					max_target_proximity
+					max_target_proximity,
+					free
 					);
-			for (std::set<struct voxel>::iterator it = free.begin(); it != free.end(); ++it) {
-				free_voxels.insert(*it);
-			}
+		}
+#ifdef _OPENMP
+#pragma omp critical
+#endif
+		for (std::set<struct voxel>::iterator it = free.begin(); it != free.end(); ++it) {
+			free_voxels.insert(*it);
 		}
 	}
+	time_t after = time(NULL);
+	std::cerr << "took: " << difftime(after, before) << " seconds" << std::endl;
 
 	std::cout << free_voxels.size() << " " << voxel_occupied_by_slice.size() << std::endl;
 
