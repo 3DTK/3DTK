@@ -21,6 +21,9 @@ struct voxel{
 	voxel(const ssize_t X, const ssize_t Y, const ssize_t Z)
 		: x(X), y(Y), z(Z) {}
 
+	voxel(const struct voxel &other)
+		: x(other.x), y(other.y), z(other.z) {}
+
 	bool operator<(const struct voxel& rhs) const
 	{
 		if (x != rhs.x) {
@@ -35,6 +38,11 @@ struct voxel{
 	bool operator==(const struct voxel& rhs) const
 	{
 		return x == rhs.x && y == rhs.y && z == rhs.z;
+	}
+
+	bool operator!=(const struct voxel& rhs) const
+	{
+		return x != rhs.x || y != rhs.y || z != rhs.z;
 	}
 };
 
@@ -86,16 +94,17 @@ double py_mod(double a, double b)
 	return r;
 }
 
-void voxel_of_point(const double* p, double voxel_size, ssize_t *X, ssize_t *Y, ssize_t *Z)
+struct voxel voxel_of_point(const double* p, double voxel_size)
 {
-	*X = py_div(p[0], voxel_size);
-	*Y = py_div(p[1], voxel_size);
-	*Z = py_div(p[2], voxel_size);
+	return voxel(
+			py_div(p[0], voxel_size),
+			py_div(p[1], voxel_size),
+			py_div(p[2], voxel_size));
 }
 
 std::set<struct voxel> walk_voxels(
-		const double *start,
-		const double *end,
+		const double *start_pos,
+		const double *end_pos,
 		double voxel_size,
 		std::unordered_map<struct voxel, std::set<size_t>> const& voxel_occupied_by_slice,
 		size_t current_slice,
@@ -106,9 +115,9 @@ std::set<struct voxel> walk_voxels(
 		)
 {
 	double *direction = new double[3];
-	direction[0] = end[0] - start[0];
-	direction[1] = end[1] - start[1];
-	direction[2] = end[2] - start[2];
+	direction[0] = end_pos[0] - start_pos[0];
+	direction[1] = end_pos[1] - start_pos[1];
+	direction[2] = end_pos[2] - start_pos[2];
 	double dist = sqrt(direction[0]*direction[0]+direction[1]*direction[1]+direction[2]*direction[2]);
 	if (max_target_dist != -1) {
 		if (dist > max_target_dist) {
@@ -127,11 +136,9 @@ std::set<struct voxel> walk_voxels(
 	if (max_target_proximity != -1) {
 		tMax -= max_target_proximity/dist;
 	}
-	ssize_t X, Y, Z;
-	voxel_of_point(start,voxel_size, &X, &Y, &Z);
-	ssize_t startX = X, startY = Y, startZ = Z;
-	ssize_t endX, endY, endZ;
-	voxel_of_point(end,voxel_size, &endX, &endY, &endZ);
+	struct voxel start_voxel = voxel_of_point(start_pos,voxel_size);
+	struct voxel cur_voxel = start_voxel;
+	struct voxel end_voxel = voxel_of_point(end_pos,voxel_size);
 	double tDeltaX, tMaxX;
 	double tDeltaY, tMaxY;
 	double tDeltaZ, tMaxZ;
@@ -143,7 +150,7 @@ std::set<struct voxel> walk_voxels(
 	} else {
 		stepX = direction[0] > 0 ? 1 : -1;
 		tDeltaX = stepX*voxel_size/direction[0];
-		tMaxX = tDeltaX * (1.0 - py_mod(stepX*(start[0]/voxel_size), 1.0));
+		tMaxX = tDeltaX * (1.0 - py_mod(stepX*(start_pos[0]/voxel_size), 1.0));
 	}
 	if (direction[1] == 0) {
 		tDeltaY = 0;
@@ -152,7 +159,7 @@ std::set<struct voxel> walk_voxels(
 	} else {
 		stepY = direction[1] > 0 ? 1 : -1;
 		tDeltaY = stepY*voxel_size/direction[1];
-		tMaxY = tDeltaY * (1.0 - py_mod(stepY*(start[1]/voxel_size), 1.0));
+		tMaxY = tDeltaY * (1.0 - py_mod(stepY*(start_pos[1]/voxel_size), 1.0));
 	}
 	if (direction[2] == 0) {
 		tDeltaZ = 0;
@@ -161,7 +168,7 @@ std::set<struct voxel> walk_voxels(
 	} else {
 		stepZ = direction[2] > 0 ? 1 : -1;
 		tDeltaZ = stepZ*voxel_size/direction[2];
-		tMaxZ = tDeltaZ * (1.0 - py_mod(stepZ*(start[2]/voxel_size), 1.0));
+		tMaxZ = tDeltaZ * (1.0 - py_mod(stepZ*(start_pos[2]/voxel_size), 1.0));
 	}
 	if (stepX == -1 && tMaxX == tDeltaX) {
 		tMaxX = 0.0;
@@ -175,9 +182,9 @@ std::set<struct voxel> walk_voxels(
 	size_t multX = 0, multY = 0, multZ = 0;
 	std::set<struct voxel> empty_voxels;
 	double epsilon = 1e-13;
-	while (X != endX || Y != endY || Z != endZ) {
+	while (cur_voxel != end_voxel) {
 		if (tMaxX > 1.0+epsilon && tMaxY > 1.0+epsilon && tMaxZ > 1.0+epsilon) {
-			std::cerr << "error 1" << start[0] << " " << start[1] << " " << start[2] << " " << end[0] << " " << end[1] << " " << end[2] << std::endl;
+			std::cerr << "error 1" << start_pos[0] << " " << start_pos[1] << " " << start_pos[2] << " " << end_pos[0] << " " << end_pos[1] << " " << end_pos[2] << std::endl;
 			break;
 		}
 		if (tMaxX > tMax-epsilon && tMaxY > tMax-epsilon && tMaxZ > tMax-epsilon) {
@@ -186,32 +193,31 @@ std::set<struct voxel> walk_voxels(
 		if (tMaxX < tMaxY) {
 			if (tMaxX < tMaxZ) {
 				multX += 1;
-				X = startX + multX*stepX;
+				cur_voxel.x = start_voxel.x + multX*stepX;
 				tMaxX += tDeltaX;
 			} else {
 				multZ += 1;
-				Z = startZ + multZ*stepZ;
+				cur_voxel.z = start_voxel.z + multZ*stepZ;
 				tMaxZ += tDeltaZ;
 			}
 		} else {
 			if (tMaxY < tMaxZ) {
 				multY += 1;
-				Y = startY + multY*stepY;
+				cur_voxel.y = start_voxel.y + multY*stepY;
 				tMaxY += tDeltaY;
 			} else {
 				multZ += 1;
-				Z = startZ + multZ*stepZ;
+				cur_voxel.z = start_voxel.z + multZ*stepZ;
 				tMaxZ += tDeltaZ;
 			}
 		}
-		struct voxel v = voxel(X,Y,Z);
-		auto scanslices = voxel_occupied_by_slice.find(v);
+		auto scanslices = voxel_occupied_by_slice.find(cur_voxel);
 		if (scanslices == voxel_occupied_by_slice.end()) {
 			continue;
 		}
 		if (diff == 0) {
 			if (scanslices->second.find(current_slice) == scanslices->second.end()) {
-				empty_voxels.insert(v);
+				empty_voxels.insert(cur_voxel);
 				continue;
 			}
 			break;
@@ -227,7 +233,7 @@ std::set<struct voxel> walk_voxels(
 				}
 			}
 			if (found == false) {
-				empty_voxels.insert(v);
+				empty_voxels.insert(cur_voxel);
 				continue;
 			} else {
 				break;
@@ -259,7 +265,8 @@ int main(int argc, char* argv[])
 	std::vector<std::vector<double*>> points_by_slice;
 	std::vector<std::vector<double>> reflectances_by_slice;
 	std::vector<const double*> trajectory;
-	for(ScanVector::iterator scan = Scan::allScans.begin(); scan != Scan::allScans.end(); ++scan) {
+	std::unordered_map<struct voxel, std::set<size_t>> voxel_occupied_by_slice;
+	for(size_t i = 0; i < Scan::allScans.size(); ++i) {
 		/* The range filter must be set *before* transformAll() because
 		 * otherwise, transformAll will move the point coordinates such that
 		 * the rangeFilter doesn't filter the right points anymore. This in
@@ -269,31 +276,24 @@ int main(int argc, char* argv[])
 		 * coordinates. This in turn can lead to the situation that the vector
 		 * for xyz and reflectance are of different length.
 		 */
-		(*scan)->setRangeFilter(-1, 10);
-		(*scan)->transformAll((*scan)->get_transMatOrg());
-		trajectory.push_back((*scan)->get_rPos());
-		DataXYZ xyz((*scan)->get("xyz"));
-		DataReflectance refl((*scan)->get("reflectance"));
+		Scan* scan = Scan::allScans[i];
+		scan->setRangeFilter(-1, 10);
+		scan->transformAll(scan->get_transMatOrg());
+		trajectory.push_back(scan->get_rPos());
+		DataXYZ xyz(scan->get("xyz"));
+		DataReflectance refl(scan->get("reflectance"));
 		std::vector<double*> points;
 		std::vector<double> reflectances;
 		if (xyz.size() != refl.size()) {
 			exit(1);
 		}
-		for (size_t i = 0; i < xyz.size(); ++i) {
-			points.push_back(xyz[i]);
-			reflectances.push_back(refl[i]);
+		for (size_t j = 0; j < xyz.size(); ++j) {
+			points.push_back(xyz[j]);
+			reflectances.push_back(refl[j]);
+			voxel_occupied_by_slice[voxel_of_point(xyz[j],voxel_size)].insert(i);
 		}
 		points_by_slice.push_back(points);
 		reflectances_by_slice.push_back(reflectances);
-	}
-
-	std::unordered_map<struct voxel, std::set<size_t>> voxel_occupied_by_slice;
-	for (size_t i = 0; i < points_by_slice.size(); ++i) {
-		for (size_t j = 0; j < points_by_slice[i].size(); ++j) {
-			ssize_t X, Y, Z;
-			voxel_of_point(points_by_slice[i][j],voxel_size, &X, &Y, &Z);
-			voxel_occupied_by_slice[voxel(X,Y,Z)].insert(i);
-		}
 	}
 
 	std::set<struct voxel> free_voxels;
@@ -328,10 +328,8 @@ int main(int argc, char* argv[])
 	FILE *out_dynamic = fopen("scan001.3d", "w");
 	for (size_t i = 0; i < points_by_slice.size(); ++i) {
 		for (size_t j = 0; j < points_by_slice[i].size(); ++j) {
-			ssize_t X, Y, Z;
-			voxel_of_point(points_by_slice[i][j],voxel_size, &X, &Y, &Z);
 			FILE *out;
-			if (free_voxels.find(voxel(X,Y,Z)) == free_voxels.end()) {
+			if (free_voxels.find(voxel_of_point(points_by_slice[i][j],voxel_size)) == free_voxels.end()) {
 				out = out_static;
 			} else {
 				out = out_dynamic;
