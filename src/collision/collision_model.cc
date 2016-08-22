@@ -48,7 +48,7 @@ void validate(boost::any& v, const std::vector<std::string>& values,
     IOType*, int) {
     if (values.size() == 0)
         throw std::runtime_error("Invalid model specification");
-    string arg = values.at(0);
+    std::string arg = values.at(0);
     try {
         v = formatname_to_io_type(arg.c_str());
     } catch (...) { // runtime_error
@@ -60,7 +60,7 @@ void validate(boost::any& v, const std::vector<std::string>& values,
         collision_method*, int) {
     if (values.size() == 0)
         throw std::runtime_error("Invalid model specification");
-    string arg = values.at(0);
+    std::string arg = values.at(0);
     if (strcasecmp(arg.c_str(), "type1") == 0) v = CTYPE1;
     else if (strcasecmp(arg.c_str(), "type2") == 0) v = CTYPE2;
     else if (strcasecmp(arg.c_str(), "type3") == 0) v = CTYPE3;
@@ -72,14 +72,14 @@ void validate(boost::any& v, const std::vector<std::string>& values,
         penetrationdepth_method*, int) {
     if (values.size() == 0)
         throw std::runtime_error("Invalid model specification");
-    string arg = values.at(0);
+    std::string arg = values.at(0);
     if (strcasecmp(arg.c_str(), "type1") == 0) v = PDTYPE1;
     else if (strcasecmp(arg.c_str(), "type2") == 0) v = PDTYPE2;
     else throw std::runtime_error(std::string("penetration depth method ")
             + arg + std::string(" is unknown"));
 }
 
-void parse_options(int argc, char **argv, IOType &iotype, string &dir,
+void parse_options(int argc, char **argv, IOType &iotype, std::string &dir,
         double &radius, bool &calcdistances, collision_method &cmethod,
         penetrationdepth_method &pdmethod, bool &use_cuda, int &cuda_device,
 		double &voxel, int &octree, bool &reduce, int &jobs,
@@ -121,7 +121,7 @@ void parse_options(int argc, char **argv, IOType &iotype, string &dir,
 
     po::options_description hidden("Hidden options");
     hidden.add_options()
-        ("input-dir", po::value<string>(&dir), "input dir");
+        ("input-dir", po::value<std::string>(&dir), "input dir");
 
     // all options
     po::options_description all;
@@ -143,13 +143,13 @@ void parse_options(int argc, char **argv, IOType &iotype, string &dir,
 
     // display help
     if (vm.count("help")) {
-        cout << cmdline_options;
-        cout << "\nExample usage:\n"
+        std::cout << cmdline_options;
+        std::cout << "\nExample usage:\n"
              << "\t" << argv[0] << " --radius=10 -f xyzr ./dir\n";
-        cout << "The directory ./dir must contain the model as the first scan and\n";
-        cout << "the environment as the second scan. The trajectory is given as\n";
-        cout << "the file trajectory.txt containing the right-handed transformation\n";
-	cout << "matrices in row-major order.";
+        std::cout << "The directory ./dir must contain the model as the first scan and\n";
+        std::cout << "the environment as the second scan. The trajectory is given as\n";
+        std::cout << "the file trajectory.txt containing the right-handed transformation\n";
+	std::cout << "matrices in row-major order.";
         exit(0);
     }
 
@@ -160,13 +160,13 @@ void parse_options(int argc, char **argv, IOType &iotype, string &dir,
 	}
 
     if (!vm.count("input-dir")) {
-        cout << "you have to specify an input directory" << endl;
+        std::cout << "you have to specify an input directory" << std::endl;
         exit(1);
     }
     if (dir[dir.length()-1] != '/') dir = dir + "/";
 }
 
-void createdirectory(string segdir)
+void createdirectory(std::string segdir)
 {
     int success;
 #ifdef _WIN32
@@ -175,18 +175,18 @@ void createdirectory(string segdir)
     success = mkdir(segdir.c_str(), S_IRWXU|S_IRWXG|S_IRWXO);
 #endif
     if (success == 0 || errno == EEXIST) {
-        cout << "Writing colliding points to " << segdir << endl;
+        std::cout << "Writing colliding points to " << segdir << std::endl;
     } else {
-        cerr << "Creating directory " << segdir << " failed" << endl;
+        std::cerr << "Creating directory " << segdir << " failed" << std::endl;
         exit(1);
     }
 }
 
-std::vector<Frame> read_trajectory(string filename)
+std::vector<Frame> read_trajectory(std::string filename)
 {
     std::ifstream file(filename.c_str());
     if (!file.good()) {
-        cout << "can't open " << filename << " for reading" << endl;
+        std::cout << "can't open " << filename << " for reading" << std::endl;
         exit(1);
     }
     std::vector<Frame> positions;
@@ -220,13 +220,13 @@ std::vector<Frame> read_trajectory(string filename)
     return positions;
 }
 
-void write_xyzr(DataXYZ &points, DataReflectance &refl, string &dir,
+void write_xyzr(DataXYZ &points, DataReflectance &refl, std::string &dir,
         std::vector<bool> const &colliding,
         std::vector<float> const &dist_colliding, double radius)
 {
 	// sanity checks
     if (points.size() != refl.size() || points.size() != colliding.size()) {
-		cerr << "differing data lengths: " << points.size() << " vs. " << refl.size() << " vs. " << colliding.size() << endl;
+		std::cerr << "differing data lengths: " << points.size() << " vs. " << refl.size() << " vs. " << colliding.size() << std::endl;
 		return;
 	}
 	// find the minimum and maximum for reflectance and penetration depth
@@ -245,13 +245,13 @@ void write_xyzr(DataXYZ &points, DataReflectance &refl, string &dir,
 		if (dist_colliding[i] > max_pd)
 			max_pd = dist_colliding[i];
 	}
-	cout << "min refl: " << min_refl << endl;
-	cout << "max refl: " << max_refl << endl;
-	cout << "min pd: " << min_pd << endl;
-	cout << "max pd: " << max_pd << endl;
-    cerr << "writing colliding points to " << dir << "scan002.xyz" << endl;
+	std::cout << "min refl: " << min_refl << std::endl;
+	std::cout << "max refl: " << max_refl << std::endl;
+	std::cout << "min pd: " << min_pd << std::endl;
+	std::cout << "max pd: " << max_pd << std::endl;
+    std::cerr << "writing colliding points to " << dir << "scan002.xyz" << std::endl;
     ofstream fcolliding((dir + "scan002.xyz").c_str());
-    cerr << "writing non-colliding points to " << dir << "scan003.xyz" << endl;
+    std::cerr << "writing non-colliding points to " << dir << "scan003.xyz" << std::endl;
     ofstream fnoncolliding((dir + "scan003.xyz").c_str());
 	double r;
     for (size_t i = 0, j=0; i < points.size(); ++i) {
@@ -262,22 +262,22 @@ void write_xyzr(DataXYZ &points, DataReflectance &refl, string &dir,
 			// greater than 0 we don't need to shift.
 			// We cap penetration distances at the configured search radius.
 			r = fmax(-1.0*(dist_colliding[j]/radius),-1.0);
-            fcolliding << points[i][2] << " " << -points[i][0] << " " << points[i][1] << " " << r << endl;
+            fcolliding << points[i][2] << " " << -points[i][0] << " " << points[i][1] << " " << r << std::endl;
             j++;
         } else {
 			// convert from left handed to right handed and normalize
 			// reflectance to values 0 <= r < 1
 			r = (refl[i]-min_refl)/(max_refl-min_refl+1);
-            fnoncolliding << points[i][2] << " " << -points[i][0] << " " << points[i][1] << " " << r << endl;
+            fnoncolliding << points[i][2] << " " << -points[i][0] << " " << points[i][1] << " " << r << std::endl;
         }
     }
     fcolliding.close();
     fnoncolliding.close();
     ofstream pcolliding((dir + "scan002.pose").c_str());
-    pcolliding << "0 0 0" << endl << "0 0 0" << endl;
+    pcolliding << "0 0 0" << std::endl << "0 0 0" << std::endl;
     pcolliding.close();
     ofstream pnoncolliding((dir + "scan003.pose").c_str());
-    pnoncolliding << "0 0 0" << endl << "0 0 0" << endl;
+    pnoncolliding << "0 0 0" << std::endl << "0 0 0" << std::endl;
     pnoncolliding.close();
 }
 
@@ -315,7 +315,7 @@ size_t handle_pointcloud(std::vector<Point> &pointmodel, DataXYZ &environ,
                        double radius, collision_method cmethod, int jobs)
 {
     /* build a KDtree from this scan */
-    cerr << "reading environment..." << endl;
+    std::cerr << "reading environment..." << std::endl;
     double** pa = new double*[environ.size()];
     for (size_t i = 0; i < environ.size(); ++i) {
         pa[i] = new double[3];
@@ -323,12 +323,12 @@ size_t handle_pointcloud(std::vector<Point> &pointmodel, DataXYZ &environ,
         pa[i][1] = environ[i][1];
         pa[i][2] = environ[i][2];
     }
-    cerr << "environment: " << environ.size() << endl;
-    cerr << "building kd tree..." << endl;
+    std::cerr << "environment: " << environ.size() << std::endl;
+    std::cerr << "building kd tree..." << std::endl;
     KDtreeIndexed t(pa, environ.size());
     /* initialize variables */
     double sqRad2 = radius*radius;
-    cerr << "computing collisions with r = " << radius << " and " << jobs << " threads" << endl;
+    std::cerr << "computing collisions with r = " << radius << " and " << jobs << " threads" << std::endl;
     time_t before = time(NULL);
 
     int end;
@@ -355,8 +355,8 @@ size_t handle_pointcloud(std::vector<Point> &pointmodel, DataXYZ &environ,
 #else
 		int thread_num = 0;
 #endif
-                cerr << (j*100.0)/end << " %\r";
-                cerr.flush();
+                std::cerr << (j*100.0)/end << " %\r";
+                std::cerr.flush();
                 for(const auto &it : pointmodel) {
                     double point1[3] = {it.x, it.y, it.z};
                     transform3(trajectory[j].transformation, point1);
@@ -386,8 +386,8 @@ size_t handle_pointcloud(std::vector<Point> &pointmodel, DataXYZ &environ,
 #else
 		int thread_num = 0;
 #endif
-                cerr << (j*100.0)/end << " %\r";
-                cerr.flush();
+                std::cerr << (j*100.0)/end << " %\r";
+                std::cerr.flush();
                 auto it2 = trajectory.begin();
                 double point1[3], point2[3];
                 point1[0] = pointmodel[j].x;
@@ -413,7 +413,7 @@ size_t handle_pointcloud(std::vector<Point> &pointmodel, DataXYZ &environ,
     }
 	// print an empty line to start new output not in the same line that
 	// contained the progress output but the next
-	cerr << endl;
+	std::cerr << std::endl;
     size_t num_colliding = 0;
     // the actual implementation of std::vector<bool> requires us to use the
     // proxy iterator pattern with &&...
@@ -423,8 +423,8 @@ size_t handle_pointcloud(std::vector<Point> &pointmodel, DataXYZ &environ,
         }
     }
     time_t after = time(NULL);
-    cerr << "colliding: " << num_colliding << endl;
-    cerr << "took: " << difftime(after, before) << " seconds" << endl;
+    std::cerr << "colliding: " << num_colliding << std::endl;
+    std::cerr << "took: " << difftime(after, before) << " seconds" << std::endl;
     for (size_t i = 0; i < environ.size(); ++i) {
         delete[] pa[i];
     }
@@ -613,7 +613,7 @@ size_t cuda_handle_pointcloud(int cuda_device, std::vector<Point> &pointmodel, D
 	
 	float time = float( clock () - begin_time ) /  CLOCKS_PER_SEC;
 	printf("colliding: %lu / %u\n",num_colliding,environ.size());
-	cerr << "took: " << time << " seconds" << endl;
+	std::cerr << "took: " << time << " seconds" << std::endl;
 	
 	
 	/*
@@ -640,7 +640,7 @@ void calculate_collidingdist(DataXYZ &environ,
                              std::vector<float> &dist_colliding, int jobs)
 {
     /* build a kdtree for the non-colliding points */
-    cerr << "reading environment..." << endl;
+    std::cerr << "reading environment..." << std::endl;
     size_t num_noncolliding = environ.size() - num_colliding;
     double** pa = new double*[num_noncolliding];
     size_t* idxmap = new size_t[num_noncolliding];
@@ -658,13 +658,13 @@ void calculate_collidingdist(DataXYZ &environ,
         idxmap[j] = i;
         j++;
     }
-    cerr << "noncolliding: " << num_noncolliding << endl;
-    cerr << "building kd tree..." << endl;
+    std::cerr << "noncolliding: " << num_noncolliding << std::endl;
+    std::cerr << "building kd tree..." << std::endl;
     KDtreeIndexed t(pa, num_noncolliding);
 #ifdef _OPENMP
 	omp_set_num_threads(jobs);
 #endif
-    cerr << "computing distances..." << endl;
+    std::cerr << "computing distances..." << std::endl;
     time_t before = time(NULL);
 #ifdef _OPENMP
 #pragma omp parallel for schedule(dynamic)
@@ -683,16 +683,16 @@ void calculate_collidingdist(DataXYZ &environ,
 #else
 	int thread_num = 0;
 #endif
-        cerr << (i*100.0)/num_colliding << " %\r";
-        cerr.flush();
+        std::cerr << (i*100.0)/num_colliding << " %\r";
+        std::cerr.flush();
 		size_t idx = colliding_idx[i];
         double point1[3] = {environ[idx][0], environ[idx][1], environ[idx][2]};
         // for this colliding point, find the closest non-colliding one
         size_t c = t.FindClosest(point1, 1000000, thread_num);
         /*if (colliding[c]) {
-            cerr << "result cannot be part of colliding points" << endl;
-            cerr << environ[i][0] << " " << environ[i][1] << " " << environ[i][2] << endl;
-            cerr << environ[c][0] << " " << environ[c][1] << " " << environ[c][2] << endl;
+            std::cerr << "result cannot be part of colliding points" << std::endl;
+            std::cerr << environ[i][0] << " " << environ[i][1] << " " << environ[i][2] << std::endl;
+            std::cerr << environ[c][0] << " " << environ[c][1] << " " << environ[c][2] << std::endl;
             exit(1);
         }*/
         c = idxmap[c];
@@ -701,9 +701,9 @@ void calculate_collidingdist(DataXYZ &environ,
     }
 	// print an empty line to start new output not in the same line that
 	// contained the progress output but the next
-	cerr << endl;
+	std::cerr << std::endl;
     time_t after = time(NULL);
-    cerr << "took: " << difftime(after, before) << " seconds" << endl;
+    std::cerr << "took: " << difftime(after, before) << " seconds" << std::endl;
     for (size_t i = 0; i < num_noncolliding; ++i) {
         delete[] pa[i];
     }
@@ -719,7 +719,7 @@ void calculate_collidingdist2(std::vector<Point> &pointmodel, DataXYZ &environ,
                              double radius, int jobs)
 {
     /* build a kdtree for colliding points */
-    cerr << "reading environment..." << endl;
+    std::cerr << "reading environment..." << std::endl;
     double** pa = new double*[num_colliding];
     for (size_t i = 0, j = 0; i < environ.size(); ++i) {
         if (!colliding[i]) {
@@ -731,14 +731,14 @@ void calculate_collidingdist2(std::vector<Point> &pointmodel, DataXYZ &environ,
         pa[j][2] = environ[i][2];
         j++;
     }
-    cerr << "colliding: " << num_colliding << endl;
-    cerr << "building kd tree..." << endl;
+    std::cerr << "colliding: " << num_colliding << std::endl;
+    std::cerr << "building kd tree..." << std::endl;
     KDtreeIndexed t(pa, num_colliding);
     double sqRad2 = radius*radius;
 #ifdef _OPENMP
 	omp_set_num_threads(jobs);
 #endif
-    cerr << "computing distances..." << endl;
+    std::cerr << "computing distances..." << std::endl;
     time_t before = time(NULL);
     int end = trajectory.size();
 #ifdef _OPENMP
@@ -758,8 +758,8 @@ void calculate_collidingdist2(std::vector<Point> &pointmodel, DataXYZ &environ,
 #else
 	int thread_num = 0;
 #endif
-        cerr << (i*100.0)/end << " %\r";
-        cerr.flush();
+        std::cerr << (i*100.0)/end << " %\r";
+        std::cerr.flush();
         for(const auto &it : pointmodel) {
             double point1[3] = {it.x, it.y, it.z};
             // the second point is the projection of the first point to the
@@ -786,13 +786,13 @@ void calculate_collidingdist2(std::vector<Point> &pointmodel, DataXYZ &environ,
     }
 	// print an empty line to start new output not in the same line that
 	// contained the progress output but the next
-	cerr << endl;
+	std::cerr << std::endl;
 	// turn the squared distances into normal ones
     for (size_t i = 0; i < dist_colliding.size(); ++i) {
         dist_colliding[i] = sqrt(dist_colliding[i]);
     }
     time_t after = time(NULL);
-    cerr << "took: " << difftime(after, before) << " seconds" << endl;
+    std::cerr << "took: " << difftime(after, before) << " seconds" << std::endl;
     for (size_t i = 0; i < num_colliding; ++i) {
         delete[] pa[i];
     }
@@ -802,7 +802,7 @@ void calculate_collidingdist2(std::vector<Point> &pointmodel, DataXYZ &environ,
 int main(int argc, char **argv)
 {
     // commandline arguments
-    string dir;
+    std::string dir;
     IOType iotype;
     double radius;
     bool calcdistances;
@@ -821,7 +821,7 @@ int main(int argc, char **argv)
 	vector<std::string> transmat_str;
 	boost::split(transmat_str, transform, boost::is_any_of(":"));
 	if (transmat_str.size() != 16) {
-		cerr << "invalid --transform string, must be of form X:X:X:X:X:X:X:X:X:X:X:X:X:X:X:X" << endl;
+		std::cerr << "invalid --transform string, must be of form X:X:X:X:X:X:X:X:X:X:X:X:X:X:X:X" << std::endl;
 		exit(-1);
 	}
 	double transmat[16];
@@ -833,24 +833,24 @@ int main(int argc, char **argv)
     Scan::openDirectory(false, dir, iotype, 0, 1);
 
     if(Scan::allScans.size() == 0) {
-      cerr << "No scans found. Did you use the correct format?" << endl;
+      std::cerr << "No scans found. Did you use the correct format?" << std::endl;
       exit(-1);
     }
 
     // trajectory file of the model
-    string trajectoryfn = dir+"trajectory.txt";
+    std::string trajectoryfn = dir+"trajectory.txt";
 
-    cerr << "reading trajectory from " << trajectoryfn << endl;
+    std::cerr << "reading trajectory from " << trajectoryfn << std::endl;
     // read trajectory in *.3d file format
     std::vector<Frame> trajectory = read_trajectory(trajectoryfn);
 
-	cerr << "opening scan directory" << endl;
+	std::cerr << "opening scan directory" << std::endl;
 
     ScanVector::iterator it = Scan::allScans.begin();
 
     // if matching against pointcloud, treat the first scan as the model
     if(Scan::allScans.size() != 2) {
-        cerr << "must supply two scans, the model and the environment in that order" << endl;
+        std::cerr << "must supply two scans, the model and the environment in that order" << std::endl;
         exit(-1);
     }
 
@@ -868,7 +868,7 @@ int main(int argc, char **argv)
     DataReflectance refl(reduce ? it[1]->get("reflectance reduced") : it[1]->get("reflectance"));
     std::vector<bool> colliding;
     colliding.resize(environ.size(), false); // by default, nothing collides
-    cerr << "reading model..." << endl;
+    std::cerr << "reading model..." << std::endl;
     vector<Point> pointmodel;
     for(unsigned int j = 0; j < model.size(); j++) {
 		double point[3] = {model[j][0], model[j][1], model[j][2]};
@@ -876,7 +876,7 @@ int main(int argc, char **argv)
         transform3(transmat, point);
         pointmodel.push_back(Point(point[0], point[1], point[2]));
     }
-    cerr << "model: " << pointmodel.size() << endl;
+    std::cerr << "model: " << pointmodel.size() << std::endl;
 	
     size_t num_colliding = 0;
 	if(use_cuda)
@@ -885,26 +885,26 @@ int main(int argc, char **argv)
 		
 		if(!ValidCUDADevice(cuda_device))
 		{
-			cerr << "No such CUDA device: " << cuda_device << endl;
+			std::cerr << "No such CUDA device: " << cuda_device << std::endl;
 			PrintCudaInfo();
 			exit(-1);
 		}
 		
-		cerr << "built with CUDA; use_cuda selected; will use CUDA\n";
+		std::cerr << "built with CUDA; use_cuda selected; will use CUDA\n";
 		num_colliding = cuda_handle_pointcloud(cuda_device,pointmodel, environ, trajectory, colliding, radius, cmethod);
 		// FIXME: when there is no CUDA devices use CPU version
 #else
-		cerr << "built without CUDA; use_cuda selected\n";
-		cerr << "EXIT\n";
+		std::cerr << "built without CUDA; use_cuda selected\n";
+		std::cerr << "EXIT\n";
 		return -1;
 #endif
 	}
 	else
 	{
 #ifdef WITH_CUDA
-		cerr << "built with CUDA; will NOT use CUDA\n";
+		std::cerr << "built with CUDA; will NOT use CUDA\n";
 #else
-		cerr << "built without CUDA; will NOT use CUDA\n";
+		std::cerr << "built without CUDA; will NOT use CUDA\n";
 #endif
 	
 		if (cmethod == CTYPE3) {
@@ -917,7 +917,7 @@ int main(int argc, char **argv)
 		}
 	}
     if (num_colliding == 0) {
-        cerr << "nothing collides" << endl;
+        std::cerr << "nothing collides" << std::endl;
         exit(0);
     }
     std::vector<float> dist_colliding;
