@@ -22,7 +22,7 @@ public:
   static void loadFile(const char* dir, const char* identifier, FrameVector& frames);
 
   //! Saves a frames file from a shared frames vector
-  static void saveFile(const char* dir, const char* identifier, const FrameVector& frames);
+  static void saveFile(const char* dir, const char* identifier, const FrameVector& frames, bool append = false);
 };
 
 #endif //SCANSERVER_FRAME_IO_H

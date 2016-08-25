@@ -43,7 +43,7 @@ public:
 
   virtual size_t readFrames() { return 0; }
 
-  virtual void saveFrames() {}
+  virtual void saveFrames(bool append = false) {}
 
   virtual size_t getFrameCount() { return 0; }
 

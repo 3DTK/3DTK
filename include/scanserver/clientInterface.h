@@ -142,7 +142,7 @@ public:
   void loadFramesFile(SharedScan* scan);
 
   //! Called from SharedScan, requests saving frames into a file
-  void saveFramesFile(SharedScan* scan);
+  void saveFramesFile(SharedScan* scan, bool append = false);
  
   //! Called from SharedScan, this removes all previous contained frames
   void clearFrames(SharedScan* scan);

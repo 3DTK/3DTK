@@ -3,6 +3,8 @@
 
 #include <boost/filesystem/operations.hpp>
 #include <iostream>
+#include <string>
+#include <sstream>
 #include "slam6d/pointfilter.h"
 #include "slam6d/io_types.h"
 

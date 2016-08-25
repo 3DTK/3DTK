@@ -130,9 +130,9 @@ void ServerInterface::loadFramesFile(SharedScan* scan)
   FrameIO::loadFile(scan->getDirPath(), scan->getIdentifier(), static_cast<ServerScan*>(scan)->getFrames());
 }
 
-void ServerInterface::saveFramesFile(SharedScan* scan)
+void ServerInterface::saveFramesFile(SharedScan* scan, bool append)
 {
-  FrameIO::saveFile(scan->getDirPath(), scan->getIdentifier(), static_cast<ServerScan*>(scan)->getFrames());
+  FrameIO::saveFile(scan->getDirPath(), scan->getIdentifier(), static_cast<ServerScan*>(scan)->getFrames(), append);
 }
 
 void ServerInterface::clearFrames(SharedScan* scan)

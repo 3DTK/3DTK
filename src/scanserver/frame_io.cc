@@ -29,19 +29,23 @@ void FrameIO::loadFile(const char* dir, const char* identifier, FrameVector& fra
   
   // read the file
   ifstream frames_file(frames_path);
+  std::string line;
   std::vector<double> transformations;
   double dvalue;
   unsigned int uivalue;
   std::vector<unsigned int> types;
-  while(frames_file.good()) {
+  while(std::getline(frames_file, line) ) {
     unsigned int i;
-    for(i = 0; i < 16 && frames_file.good(); ++i) {
-      frames_file >> dvalue;
+    //ignore comment lines starting with # 
+    if (line[0] == '#') continue;
+    std::istringstream line_stream(line);
+    for(i = 0; i < 16 && line_stream.good(); ++i) {
+      line_stream >> dvalue;
       transformations.push_back(dvalue);
     }
     // sanity check if no more values were read
     if(i != 16) break;
-    frames_file >> uivalue;
+    line_stream >> uivalue;
     types.push_back(uivalue);
   }
   frames_file.close();
@@ -53,14 +57,15 @@ void FrameIO::loadFile(const char* dir, const char* identifier, FrameVector& fra
     frames[i].set(&(transformations[i*16]), types[i]);
 }
 
-void FrameIO::saveFile(const char* dir, const char* identifier, const FrameVector& frames)
+void FrameIO::saveFile(const char* dir, const char* identifier, const FrameVector& frames, bool append)
 {
   // assemble path
   path frames_path(dir);
   frames_path /= (std::string(FRAMES_PATH_PREFIX) + identifier + FRAMES_PATH_SUFFIX);
   
   // write into the file
-  ofstream frames_file(frames_path);
+  std::ios_base::openmode open_mode = append ? std::ios_base::app : std::ios_base::out;
+  ofstream frames_file(frames_path, open_mode);
   for(FrameVector::const_iterator it = frames.begin(); it != frames.end(); ++it) {
     for(unsigned int i = 0; i < 16; ++i)
       frames_file << it->transformation[i] << " ";

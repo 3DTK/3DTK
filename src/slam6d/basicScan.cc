@@ -199,7 +199,11 @@ BasicScan::BasicScan(const std::string& path,
   // request pose from file
   double euler[6];
   ScanIO* sio = ScanIO::getScanIO(m_type);
-  sio->readPose(m_path.c_str(), m_identifier.c_str(), euler);
+  if (Scan::continue_processing) {
+    sio->readPoseFromFrames(m_path.c_str(), m_identifier.c_str(), euler);    
+  } else {
+    sio->readPose(m_path.c_str(), m_identifier.c_str(), euler);
+  }
   rPos[0] = euler[0];
   rPos[1] = euler[1];
   rPos[2] = euler[2];
@@ -653,7 +657,8 @@ BOctTree<float>* BasicScan::convertScanToShowOcttree()
 
 size_t BasicScan::readFrames()
 {
-  string filename = m_path + "scan" + m_identifier + ".frames";
+  string filename = "scan" + m_identifier + ".frames";
+  string line;
   ifstream file(filename.c_str());
   file.exceptions(ifstream::eofbit|ifstream::failbit|ifstream::badbit);
   // clear frame vector here to allow reloading without (old) duplicates
@@ -662,7 +667,11 @@ size_t BasicScan::readFrames()
     double transformation[16];
     unsigned int type;
     do {
-      file >> transformation >> type;
+      getline(file, line);
+      //ignore comment lines starting with #
+      if(line[0]=='#') continue;
+      std::istringstream line_stream(line);
+      line_stream >> transformation >> type;
       m_frames.push_back(Frame(transformation, type));
     } while(file.good());
   } catch(...) {}
@@ -670,10 +679,14 @@ size_t BasicScan::readFrames()
   return m_frames.size();
 }
 
-void BasicScan::saveFrames()
+void BasicScan::saveFrames(bool append)
 {
   string filename = m_path + "scan" + m_identifier + ".frames";
-  ofstream file(filename.c_str());
+  std::ios_base::openmode open_mode;
+
+  if(append) open_mode = std::ios_base::app;
+  else open_mode = std::ios_base::out;
+  ofstream file(filename.c_str(), open_mode);
   for(vector<Frame>::iterator it = m_frames.begin();
       it != m_frames.end();
       ++it) {
