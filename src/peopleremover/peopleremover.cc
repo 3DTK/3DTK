@@ -358,7 +358,7 @@ int main(int argc, char* argv[])
 
 	std::set<struct voxel> free_voxels;
 
-	time_t before = time(NULL);
+	clock_t before = clock();
 #ifdef _OPENMP
 	omp_set_num_threads(OPENMP_NUM_THREADS);
 #pragma omp parallel for schedule(dynamic)
@@ -386,8 +386,8 @@ int main(int argc, char* argv[])
 			free_voxels.insert(*it);
 		}
 	}
-	time_t after = time(NULL);
-	std::cerr << "took: " << difftime(after, before) << " seconds" << std::endl;
+	clock_t after = clock();
+	std::cerr << "took: " << ((double)(after-before))/CLOCKS_PER_SEC << " seconds" << std::endl;
 
 	std::cout << free_voxels.size() << " " << voxel_occupied_by_slice.size() << std::endl;
 
