@@ -11,6 +11,7 @@
 
 #include "slam6d/io_types.h"
 #include "slam6d/pointfilter.h"
+#include "scanio/helper.h"
 
 #include <string>
 #include <list>
@@ -45,6 +46,18 @@ public:
    * @param pose Pointer to an existing double[6] array where the pose is saved in
    */
   virtual void readPose(const char* dir_path, const char* identifier, double* pose) = 0;
+  
+  /**
+   * Reads the pose from a dedicated pose file or from the scan file.
+   *
+   * @param dir_path The directory the scan is contained in
+   * @param scan_identifier IO-specific identifier for the particular scan
+   * @param pose Pointer to an existing double[6] array where the pose is saved in
+   */
+  virtual void readPoseFromFrames(const char* dir_path, const char* identifier, double* pose)
+  {
+    readPoseHelper(dir_path, identifier, pose, ".frames");
+  }
 
   /**
    * Given a scan identifier, load the contents of this particular scan.

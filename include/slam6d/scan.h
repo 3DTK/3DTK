@@ -131,6 +131,12 @@ public:
   //  also used in transform for adding frames for each scan at the same time
   static std::vector<Scan*> allScans;
   
+  // continue processing from last frames entry
+  static bool continue_processing;
+  
+  // current processing command
+  static string processing_command;
+  
   /**
     * Attempt to read a directory under \a path and return its read scans.
     * No scans are loaded at this point, only checked if all exist.
@@ -155,7 +161,12 @@ public:
   
   
   /* Input filtering and parameter functions */
-  
+  // continue processing using existing .frames files
+  static void continueProcessing(bool continue_processing = true); 
+
+  // set string of current processing command
+  static void setProcessingCommand(int argc, char** argv); 
+
   //! Input filtering for all points based on their euclidean length
   virtual void setRangeFilter(double max, double min) = 0;
   
@@ -263,7 +274,7 @@ public:
   /**
    * Write the accumulated frames into a .frames-file.
    */
-  virtual void saveFrames() = 0;
+  virtual void saveFrames(bool append = false) = 0;
   
   //! Count of frames
   virtual size_t getFrameCount() = 0;

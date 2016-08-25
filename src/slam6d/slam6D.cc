@@ -105,7 +105,7 @@ void sigSEGVhandler (int v)
     for(ScanVector::iterator it = Scan::allScans.begin(); 
      it != Scan::allScans.end(); 
      ++it) {
-      (*it)->saveFrames();
+      (*it)->saveFrames(Scan::continue_processing);
     }
     cout << "Frames saved." << endl;
     Scan::closeDirectory();
@@ -155,6 +155,9 @@ void usage(char* prog)
        << endl
        << bold << "  --cache" << normal << endl
        << "         turns on cached k-d tree search" << endl
+       << endl
+       << bold << "  --continue" << normal << endl
+       << "         continue using last frames entry as starting pose" << endl
        << endl
        << bold << "  -d" << normal << " NR, " << bold << "--dist=" << normal << "NR   [default: 25]" << endl
        << "         sets the maximal point-to-point distance for matching with ICP to <NR> 'units'" << endl
@@ -301,7 +304,7 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &rand,
               int &mni_lum, string &net, double &cldist, int &clpairs, int &loopsize,
               double &epsilonICP, double &epsilonSLAM,  int &nns_method, bool &exportPts, double &distLoop,
               int &iterLoop, double &graphDist, int &octree, IOType &type,
-              bool& scanserver, PairingMode& pairing_mode)
+              bool& scanserver, PairingMode& pairing_mode, bool &continue_processing)
 {
   int  c;
   // from unistd.h:
@@ -349,12 +352,22 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &rand,
     { "iterLoop",        required_argument,   0,  '1' }, // use the long format
     { "graphDist",       required_argument,   0,  '3' }, // use the long format
     { "scanserver",      no_argument,         0,  'S' },
+    { "continue",        no_argument,         0,  0 },
     { 0,  0,   0,   0}                                   // needed, cf. getopt.h
   };
+  
+  int option_index = 0;
 
   cout << endl;
-  while ((c = getopt_long(argc, argv, "O:f:A:G:L:a:t:r:R:d:D:i:l:I:c:C:n:s:e:m:M:uqQpS", longopts, NULL)) != -1) {
+  while ((c = getopt_long(argc, argv, "O:f:A:G:L:a:t:r:R:d:D:i:l:I:c:C:n:s:e:m:M:uqQpS", longopts, &option_index)) != -1) {
     switch (c) {
+    case 0:
+        if (strcmp(longopts[option_index].name, "continue") == 0) {
+          continue_processing = true;
+        } else {
+          abort();
+        }
+        break;
     case 'a':
       algo = atoi(optarg);
       if ((algo < 0) || (algo > 10)) {
@@ -753,20 +766,23 @@ int main(int argc, char **argv)
   IOType type    = UOS;
   bool scanserver = false;
   PairingMode pairing_mode = CLOSEST_POINT;
-
+  bool continue_processing = false;
+  
   parseArgs(argc, argv, dir, red, rand, mdm, mdml, mdmll, mni, start, end,
             maxDist, minDist, quiet, veryQuiet, eP, meta,
             algo, loopSlam6DAlgo, lum6DAlgo, anim,
             mni_lum, net, cldist, clpairs, loopsize, epsilonICP, epsilonSLAM,
             nns_method, exportPts, distLoop, iterLoop, graphDist, octree, type,
-            scanserver, pairing_mode);
+            scanserver, pairing_mode, continue_processing);
 
   cout << "slam6D will proceed with the following parameters:" << endl;
   //@@@ to do :-)
   // TODO: writer a proper TODO ^
   
+  if (continue_processing) Scan::continueProcessing();
+  Scan::setProcessingCommand(argc, argv);
   Scan::openDirectory(scanserver, dir, type, start, end);
-  
+
   if(Scan::allScans.size() == 0) {
     cerr << "No scans found. Did you use the correct format?" << endl;
     exit(-1);
@@ -927,7 +943,6 @@ int main(int argc, char **argv)
                                           nns_method);
           break;
         }
-
         matchGraph6Dautomatic(cldist, loopsize, Scan::allScans, my_icp, meta,
                               nns_method, my_loopSlam6D, my_graphSlam6D,
                               mni_lum, epsilonSLAM, mdml, mdmll, graphDist, eP,
@@ -981,7 +996,7 @@ int main(int argc, char **argv)
     p = scan->get_rPos();
     Point x(p[0], p[1], p[2]);
     redptsout << x << endl;
-    scan->saveFrames();
+    scan->saveFrames(continue_processing);
   }
   redptsout.close();
   

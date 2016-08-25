@@ -35,7 +35,7 @@ public:
   virtual DataPointer create(const std::string& identifier, size_t size);
   virtual void clear(const std::string& identifier);
   virtual size_t readFrames();
-  virtual void saveFrames();
+  virtual void saveFrames(bool append = false);
   virtual void saveBOctTree(std::string & filename);
 
   virtual size_t getFrameCount();

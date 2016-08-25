@@ -200,10 +200,10 @@ const FrameVector& SharedScan::getFrames()
   return m_frames;
 }
 
-void SharedScan::saveFrames()
+void SharedScan::saveFrames(bool append)
 {
   ClientInterface* client = ClientInterface::getInstance();
-  client->saveFramesFile(this);
+  client->saveFramesFile(this, append);
   // we just saved the file, no need to read it
   m_load_frames_file = false;
 }
