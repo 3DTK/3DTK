@@ -47,7 +47,7 @@ using std::vector;
 vector<Scan*> Scan::allScans;
 bool Scan::scanserver = false;
 bool Scan::continue_processing = false;
-string Scan::processing_command;
+std::string Scan::processing_command;
 
 
 void Scan::openDirectory(bool scanserver,
@@ -78,7 +78,7 @@ void Scan::continueProcessing(bool continue_processing)
 
 void Scan::setProcessingCommand(int argc, char** argv)
 {
-  string cmd;
+  std::string cmd;
   for(unsigned int arg_idx = 0; arg_idx < argc; arg_idx++) {
     cmd += argv[arg_idx];
     if(arg_idx < argc - 1) cmd += " ";

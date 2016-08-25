@@ -28,6 +28,7 @@ using std::string;
 using std::map;
 using std::pair;
 using std::vector;
+using std::string;
 
 #include <boost/filesystem/operations.hpp>
 using namespace boost::filesystem;

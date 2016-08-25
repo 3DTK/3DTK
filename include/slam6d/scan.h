@@ -135,7 +135,7 @@ public:
   static bool continue_processing;
   
   // current processing command
-  static string processing_command;
+  static std::string processing_command;
   
   /**
     * Attempt to read a directory under \a path and return its read scans.
