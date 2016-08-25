@@ -63,7 +63,7 @@ private:
   void loadFramesFile(SharedScan* scan);
 
   //! Relayed to FrameIO
-  void saveFramesFile(SharedScan* scan);
+  void saveFramesFile(SharedScan* scan, bool append = false);
  
   //! Empties this SharedScan's FrameVector
   void clearFrames(SharedScan* scan);

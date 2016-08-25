@@ -134,13 +134,28 @@ void readPoseHelper(const char *dir_path,
     /* the handler function passed to open_path() will fill the pose[] array
      * */
     bool res = open_path(pose_path, [=](std::istream &data_file) -> bool {
-                // read 6 plain doubles
-                for (int i = 0; i < 6; ++i) data_file >> pose[i];
-
-                // convert angles from deg to rad
-                for (int i = 3; i < 6; ++i) pose[i] = rad(pose[i]);
-
-                return true;
+                //get pose from .frames files
+                if(strcmp(pose_path_suffix, ".frames") == 0) {
+                  double tMatrix[17];
+                  double rPos[3], rPosTheta[3];
+                  std::string buffer, line;
+                  while(getline(data_file, buffer)) line = buffer;
+                  std::istringstream iss(line);
+                  for (unsigned int i = 0; i < 17; iss >> tMatrix[i++]);
+                  Matrix4ToEuler(tMatrix, rPosTheta, rPos);
+                  for (unsigned int i = 0; i < 3; i++) {
+                    pose[i] = rPos[i];
+                    pose[i+3] = rPosTheta[i];
+                  }
+                  return true;
+                //read pose from .pose files
+                } else {
+                  // read 6 plain doubles
+                  for (int i = 0; i < 6; ++i) data_file >> pose[i];
+                  // convert angles from deg to rad
+                  for (int i = 3; i < 6; ++i) pose[i] = rad(pose[i]);
+                  return true;
+                }
             });
     if (!res)
         throw std::runtime_error(std::

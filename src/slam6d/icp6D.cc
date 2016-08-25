@@ -251,8 +251,9 @@ int icp6D::match(Scan* PreviousScan, Scan* CurrentScan,
       CurrentScan->transform(alignxf, Scan::ICP, -1);  
     }
     
-    if ((fabs(ret - prev_ret) < epsilonICP) &&
-	(fabs(ret - prev_prev_ret) < epsilonICP)) {
+    if (((fabs(ret - prev_ret) < epsilonICP) &&
+	(fabs(ret - prev_prev_ret) < epsilonICP) ||
+    iter == max_num_iterations - 1)) {
       double id[16];
       M4identity(id);
       if(anim == -2) {

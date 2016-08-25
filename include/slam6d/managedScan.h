@@ -37,7 +37,7 @@ public:
   virtual void clear(const std::string& identifier);
 
   virtual size_t readFrames();
-  virtual void saveFrames();
+  virtual void saveFrames(bool append = false);
   virtual size_t getFrameCount();
   virtual void getFrame(size_t i, const double*& pose_matrix, AlgoType& type);
 

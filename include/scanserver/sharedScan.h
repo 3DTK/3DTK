@@ -137,7 +137,7 @@ public:
   void addFrame(double* transformation, unsigned int type);
   
   //! Save frames into a file for later use
-  void saveFrames();
+  void saveFrames(bool append = false);
 
   //! Clear existing frames
   void clearFrames();

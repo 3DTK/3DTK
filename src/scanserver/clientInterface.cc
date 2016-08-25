@@ -168,7 +168,7 @@ void ClientInterface::loadFramesFile(SharedScan* scan)
 #endif //WITH_METRICS
 }
 
-void ClientInterface::saveFramesFile(SharedScan* scan)
+void ClientInterface::saveFramesFile(SharedScan* scan, bool append)
 {
   // aquire client mutex for uninterrupted work
   scoped_lock<interprocess_mutex> lock(m_mutex_client);
