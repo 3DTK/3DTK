@@ -129,7 +129,7 @@ add_library(scan STATIC ${SCANLIB_SRCS})
 
 find_package(OpenCV REQUIRED)
 
-target_link_libraries(scan scanclient scanio ann newmat cxsparse)
+target_link_libraries(scan scanclient scanio scan_io_helper ann newmat cxsparse ${OpenCV_LIBS})
 
 if(UNIX)
   target_link_libraries(scan dl pthread)

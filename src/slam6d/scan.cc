@@ -79,7 +79,7 @@ void Scan::continueProcessing(bool continue_processing)
 void Scan::setProcessingCommand(int argc, char** argv)
 {
   std::string cmd;
-  for(unsigned int arg_idx = 0; arg_idx < argc; arg_idx++) {
+  for(int arg_idx = 0; arg_idx < argc; arg_idx++) {
     cmd += argv[arg_idx];
     if(arg_idx < argc - 1) cmd += " ";
   }
