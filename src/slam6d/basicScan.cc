@@ -658,7 +658,7 @@ BOctTree<float>* BasicScan::convertScanToShowOcttree()
 
 size_t BasicScan::readFrames()
 {
-  string filename = "scan" + m_identifier + ".frames";
+  string filename = m_path + "scan" + m_identifier + ".frames";
   string line;
   ifstream file(filename.c_str());
   file.exceptions(ifstream::eofbit|ifstream::failbit|ifstream::badbit);
