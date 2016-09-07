@@ -411,6 +411,9 @@ void usage(char* prog)
        << bold << "  -r" << normal << " NR, " << bold << "--reduce=" << normal << "NR" << endl
        << "         turns on octree based point reduction (voxel size=<NR>)" << endl
        << endl
+       << bold << "  --stepsize" << normal << " NR" << endl
+       << "         reduce point cloud by including only every NRth scanline. " << endl
+       << endl
        << bold << "  -s" << normal << " NR, " << bold << "--start=" << normal << "NR" << endl
        << "         start at scan NR (i.e., neglects the first NR scans)" << endl
        << "         [ATTENTION: counting naturally starts with 0]" << endl
@@ -498,7 +501,7 @@ int parseArgs(int argc,char **argv,
               PointType &ptype, float &fps, string &loadObj,
               bool &loadOct, bool &saveOct, bool &autoOct, int &origin, bool &originset,
               double &scale, IOType &type, bool& scanserver, 
-              double& sphereMode, string& customFilter, string& trajectoryFile)
+              double& sphereMode, string& customFilter, string& trajectoryFile, int &stepsize)
 {
   unsigned int types = PointType::USE_NONE;
   start   = 0;
@@ -547,6 +550,7 @@ int parseArgs(int argc,char **argv,
     { "nogui",           no_argument,         0,  'G' },
     { "no-anim-convert-jpg", no_argument,     0,  'J' },
     { "trajectory-file", required_argument,   0,  0   },
+    { "stepsize",            required_argument,   0,  0   },
     { 0,           0,   0,   0}                    // needed, cf. getopt.h
   };
 
@@ -562,6 +566,8 @@ int parseArgs(int argc,char **argv,
           autoOct = true;
         } else if (strcmp(longopts[option_index].name, "trajectory-file") == 0) {
           trajectoryFile = optarg;
+        } else if (strcmp(longopts[option_index].name, "stepsize") == 0) {
+          stepsize = atoi(optarg);
         } else {
           abort();
         }
@@ -816,9 +822,11 @@ int readFrames(string dir, int start, int end, bool readInitial, IOType &type)
     memcpy(mirror, tempxf, sizeof(tempxf));
   }
 
+  int ScanNr=0;
   for(std::vector<Scan*>::iterator it = Scan::allScans.begin();
       it != Scan::allScans.end();
       ++it) {
+    ScanNr++;
     const double* transformation;
     Scan::AlgoType algoType;
     vector<double*> Matrices;
@@ -925,7 +933,7 @@ void reloadFrames() {
   MetaAlgoType.clear();
 
   if (readFrames(scan_dir, startScanIdx, endScanIdx, readIni, scanIOtype))
-    generateFrames(startScanIdx, endScanIdx, true);
+    generateFrames(startScanIdx, endScanIdx, false /*use .pose*/);
 }
 
 void initShow(int argc, char **argv){
@@ -962,6 +970,7 @@ void initShow(int argc, char **argv){
   bool customFilterActive = false;
   string customFilter;
   string trajectoryFile;
+  int stepsize = 1;
 
   pose_file_name = new char[1024];
   path_file_name = new char[1024];
@@ -974,7 +983,7 @@ void initShow(int argc, char **argv){
   parseArgs(argc, argv, dir, start, end, maxDist, minDist, red, readInitial,
             octree, pointtype, idealfps, loadObj, loadOct, saveOct, autoOct,
             origin, originset, scale, type, scanserver, sphereMode,
-            customFilter, trajectoryFile);
+            customFilter, trajectoryFile, stepsize);
 
   // modify all scale dependant variables
   scale = 1.0 / scale;
@@ -1065,6 +1074,8 @@ void initShow(int argc, char **argv){
     }
   }
   
+  int scanNr = 0;
+  vector<Scan*> valid_scans;
   for (ScanVector::iterator it = Scan::allScans.begin();
        it != Scan::allScans.end();
        ++it) {
@@ -1081,7 +1092,13 @@ void initShow(int argc, char **argv){
         scan->setReductionParameter(red, octree);
       }
     }
+    scanNr++;
+    if ((scanNr-1)%stepsize != 0 || scan->size<DataXYZ>("xyz") == 0) delete scan; 
+    else valid_scans.push_back(scan);
   }
+  //Remove scans if some got invalid due to filtering
+  if(Scan::allScans.size() < valid_scans.size()) Scan::allScans = valid_scans;
+
   if (sphereMode > 0.0) {
     cm = new ScanColorManager(4096, pointtype, /* animation_color = */ false);
   } else {
@@ -1266,8 +1283,9 @@ void initShow(int argc, char **argv){
   scanIOtype = type;
   
   if(readFrames(dir, start, real_end, readInitial, type))
-    generateFrames(start, real_end, true);
-  
+    generateFrames(start, real_end, false /*use .pose*/);
+  else cout << "Using existing frames..." << endl;
+
   cm->setCurrentType(PointType::USE_HEIGHT);
   //ColorMap cmap;
   //cm->setColorMap(cmap);
