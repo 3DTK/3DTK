@@ -1097,7 +1097,7 @@ void initShow(int argc, char **argv){
     else valid_scans.push_back(scan);
   }
   //Remove scans if some got invalid due to filtering
-  if(Scan::allScans.size() < valid_scans.size()) Scan::allScans = valid_scans;
+  if(Scan::allScans.size() > valid_scans.size()) Scan::allScans = valid_scans;
 
   if (sphereMode > 0.0) {
     cm = new ScanColorManager(4096, pointtype, /* animation_color = */ false);
