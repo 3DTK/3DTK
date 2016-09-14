@@ -296,7 +296,6 @@ if(WITH_TOOLS)
   # seems to override previous find_package command resulting in linker errors, either provide ALL necessary libs again or do not use
   #find_package (Boost COMPONENTS serialization graph regex filesystem system thread chrono date_time program_options system REQUIRED)
   #link_directories()
-  include_directories(${CMAKE_SOURCE_DIR}/3rdparty/b3dfile)
 else()
   message(STATUS "Without Tools")
 endif()
@@ -531,6 +530,9 @@ else()
   set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DMAX_OPENMP_NUM_THREADS=1 -DOPENMP_NUM_THREADS=1")
 endif()
 
+
+# 3rdparty
+include_directories(${CMAKE_SOURCE_DIR}/3rdparty/b3dfile)
 # include newmat for Mac
 if(APPLE)
   include_directories(${CMAKE_SOURCE_DIR}/3rdparty/newmat-10)
