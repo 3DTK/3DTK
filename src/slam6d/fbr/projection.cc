@@ -81,8 +81,10 @@ namespace fbr
 	// set up initial parameters according to MathWorld: http://mathworld.wolfram.com/AlbersEqual-AreaConicProjection.html
 	lat0_ = (minVertAngle_ + maxVertAngle_) / 2;
 	long0_ = (minHorizAngle_ + maxHorizAngle_) / 2;
-	phi1_ = minVertAngle_;
-	phi2_ = maxVertAngle_;
+	//phi1_ = minVertAngle_;
+	phi1_ = -40 / 180.0 * M_PI;
+	//phi2_ = maxVertAngle_;
+	phi2_ = 60 / 180.0 * M_PI;
 	n_ = (sin(phi1_) + sin(phi2_)) / 2.;
 	c_ = sqr(cos(phi1_)) + 2 * n_ * sin(phi1_);
 	rho0_ = sqrt(c_ - 2 * n_ * sin(lat0_)) / n_;
@@ -262,8 +264,8 @@ namespace fbr
     //ZAXIS projection
     if(method_ == ZAXIS)
       {
-	//double minZ_ = -100;
-	//double maxZ_ = 100;
+	double minZ_ = -100;
+	double maxZ_ = 100;
 	//adding the longitude to x axis and latitude to y axis
 	xSize_ = maxHorizAngle_ - minHorizAngle_;
 	ySize_ = (maxZ_ - minZ_);

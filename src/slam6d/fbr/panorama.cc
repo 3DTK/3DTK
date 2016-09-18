@@ -196,7 +196,7 @@ namespace fbr
 
   void panorama::addPointToPanorama(float x, float y, float z, float reflectance, float r, float g, float b)
   {
-    if(iReflectance_.empty() == false)
+    if(iRange_.empty() == false)
       {
 	cv::Mat point(1,1,CV_32FC(4),cv::Scalar(x,y,z,reflectance));
 	cv::Mat pointColor(1,1,CV_32FC(3),cv::Scalar(r,g,b));
@@ -283,13 +283,14 @@ namespace fbr
   cv::Mat panorama::getNormalizedRangeImage()
   {
     cv::Mat normalizediRange;
-    iRange_.convertTo(normalizediRange, CV_8UC1, 255.0);
+    iRange_.convertTo(normalizediRange, CV_8UC1, -255.0/(maxRange_ - minRange_), maxRange_ * 255.0/(maxRange_ - minRange_));
     return normalizediRange;
   }
 
   cv::Mat panorama::getThreeChannel24BitRangeImage()
   {
-    vector<unsigned int> colorMap = getAllRGBSortedByHSL();
+    //vector<unsigned int> colorMap = getAllRGBSortedByHSL();
+    vector<unsigned int> colorMap = getAllRGBSortedByRGB();
 
     unsigned int width = projection_->getProjectionWidth();
     unsigned int height = projection_->getProjectionHeight();
@@ -324,7 +325,8 @@ namespace fbr
 
   void panorama::getThreeGrayscaleRangeImages(cv::Mat& range1, cv::Mat& range2, cv::Mat& range3)
   {
-    vector<unsigned int> colorMap = getAllRGBSortedByHSL();
+    //vector<unsigned int> colorMap = getAllRGBSortedByHSL();
+    vector<unsigned int> colorMap = getAllRGBSortedByRGB();
     
     int width = projection_->getProjectionWidth();
     int height = projection_->getProjectionHeight();
@@ -415,6 +417,7 @@ namespace fbr
       }
   }
 
+  //TODO: this needs to handle the case that range_ is false and iRange is not initialized
   void panorama::map(int x, int y, cv::MatIterator_<cv::Vec4f> it, cv::MatIterator_<cv::Vec3f> itColor, double range)
   {    
     if (maxRange_ < (float)range)
@@ -422,7 +425,6 @@ namespace fbr
     if (minRange_ > (float)range)
       minRange_ = (float)range;
 
-    
     if (iRange_.at<float>(y,x) < range) 
       {
 	// reflectance
