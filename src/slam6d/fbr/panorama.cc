@@ -425,7 +425,7 @@ namespace fbr
     if (minRange_ > (float)range)
       minRange_ = (float)range;
 
-    if (iRange_.at<float>(y,x) < range) 
+    if (range_ == false || iRange_.at<float>(y,x) < range) 
       {
 	// reflectance
 	if(reflectance_ == true)
@@ -445,7 +445,7 @@ namespace fbr
     // adding the point with max distance
     if (mapMethod_ == FARTHEST) 
       {
-	if (iRange_.at<float>(y,x) < range) 
+	if (range_ == false || iRange_.at<float>(y,x) < range) 
 	  {
 	    //adding farthest point
 	    iMap_.at<cv::Vec3f>(y,x)[0] = (*it)[0]; // x
