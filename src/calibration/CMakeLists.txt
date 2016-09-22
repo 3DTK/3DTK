@@ -9,8 +9,8 @@ if(WITH_CALIBRATION)
         Chessboard.cc
     )
     add_executable(camcal camcal.cc ${CAMCAL_SOURCES})
-    target_link_libraries(camcal apriltag ${OpenCV_LIBRARIES} ${Boost_LIBRARIES})
+    target_link_libraries(camcal apriltag ${OpenCV_LIBRARIES} ${Boost_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY})
 
     add_executable(undistort undistort.cc)
-    target_link_libraries(undistort ${OpenCV_LIBRARIES} ${Boost_LIBRARIES})
+    target_link_libraries(undistort ${OpenCV_LIBRARIES} ${Boost_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY})
 endif()
