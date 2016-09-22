@@ -3,6 +3,9 @@
 #include "slam6d/scan.h"
 #include "slam6d/managedScan.h"
 
+#include <string>
+using std::string;
+
 /**
  * The class manages all scans and the frames of the scans
  * It reads all scans and frame information and holds an object for the
