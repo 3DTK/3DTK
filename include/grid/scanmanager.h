@@ -4,7 +4,6 @@
 #include "slam6d/managedScan.h"
 
 #include <string>
-using std::string;
 
 /**
  * The class manages all scans and the frames of the scans
@@ -21,7 +20,7 @@ class scanmanager {
     std::vector < std::vector <double*> > metaMatrix;
 
     /** @brief Reads the frame files that were created by Slam6D */
-    void readFrames(string inputdir,
+    void readFrames(std::string inputdir,
 		    int start,
 		    int end,
 		    bool readInitial,
@@ -35,7 +34,7 @@ class scanmanager {
     ~scanmanager();
 
     /** @brief Reads scans, frames and the transformationmatrix */
-    void startscan(string inputdir, string outputdir, IOType scantype,
+    void startscan(std::string inputdir, std::string outputdir, IOType scantype,
 		   int start, int end, bool readInitial, 
 		   int max_distance, int min_distance,
 		   bool correctYAxis);
