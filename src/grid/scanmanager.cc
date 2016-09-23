@@ -58,7 +58,7 @@ scanmanager::~scanmanager()
  * @param readInitial read a file containing a initial transformation matrix and apply it
  * @param correctYAxis if set, value 14 of the transformationmatrix will be set to 0
  */
-void scanmanager::readFrames(string dir, int start, int end,
+void scanmanager::readFrames(std::string dir, int start, int end,
 					    bool readInitial, bool correctYAxis)
 {
 
@@ -70,7 +70,7 @@ void scanmanager::readFrames(string dir, int start, int end,
   double initialTransform[16];
   if (readInitial) {
     cout << "Initial Transform:" << endl;
-    string initialTransformFileName = dir + "initital.frame";
+	std::string initialTransformFileName = dir + "initital.frame";
     ifstream initial_in(initialTransformFileName.c_str());
     if (!initial_in.good()) {
       cout << "Error opening " << initialTransformFileName << endl;
@@ -142,7 +142,7 @@ void scanmanager::readFrames(string dir, int start, int end,
  * @param min_distance the minimal distance
  * @param correctYAxis if set, value 14 of the transformationmatrix will be set to 0
  */
-void scanmanager::startscan(string inputdir, string outputdir,
+void scanmanager::startscan(std::string inputdir, std::string outputdir,
 			    IOType scantype, int start, int end,
 			    bool readInitial, int max_distance,
 			    int min_distance, bool correctYAxis)
