@@ -26,7 +26,6 @@ namespace po = boost::program_options;
 
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/imgproc/imgproc_c.h>
-#include <opencv2/legacy/legacy.hpp>
 
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -518,7 +517,11 @@ cv::Mat calculatePyrSegmentation(vector<vector<cv::Vec3f>> &segmented_points,
     // clearing memory
     cvReleaseMemStorage(&storage);
 
+#if CV_MAJOR_VERSION <= 2
     cv::Mat res(ipl_segmented);
+#else
+	cv::Mat res = cv::cvarrToMat(ipl_segmented);
+#endif
     return res;
 }
 

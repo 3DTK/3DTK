@@ -245,9 +245,11 @@ namespace fbr{
     case FAST_DET:
       sMethod = "FAST_DET";
       break;
+#if CV_MAJOR_VERSION <= 2
     case STAR_DET:
       sMethod = "STAR_DET";
       break;
+#endif
     default:
       throw std::runtime_error(std::string("feature detector method ") + to_string(method) + std::string(" could not be matched to a feature detector method"));
     }
@@ -262,7 +264,9 @@ namespace fbr{
 #endif
     if(strcasecmp(method.c_str(), "ORB") == 0) return ORB_DET;
     else if(strcasecmp(method.c_str(), "FAST") == 0) return FAST_DET;
+#if CV_MAJOR_VERSION <= 2
     else if(strcasecmp(method.c_str(), "STAR") == 0) return STAR_DET;
+#endif
     else throw std::runtime_error(std::string("feature detector method ") + method + std::string(" is unknown"));
   }
   
