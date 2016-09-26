@@ -49,22 +49,34 @@ namespace fbr{
 #endif
       //Detect the keypoints using ORB Detector
     case ORB_DET:{
+#if CV_MAJOR_VERSION <= 2
       cv::OrbFeatureDetector detector;
       detector.detect(pImage, keypoints);
+#else
+      auto detector = cv::ORB::create();
+      detector->detect(pImage, keypoints);
+#endif
       break;
     }
       //Detect the keypoints using FAST Detector
     case FAST_DET:{
+#if CV_MAJOR_VERSION <= 2
       cv::FastFeatureDetector detector;
       detector.detect(pImage, keypoints);
+#else
+      auto detector = cv::FastFeatureDetector::create();
+      detector->detect(pImage, keypoints);
+#endif
       break;
     }
       //Detect the keypoints using STAR Detector
+#if CV_MAJOR_VERSION <= 2
     case STAR_DET:{
       cv::StarFeatureDetector detector;
       detector.detect(pImage, keypoints);
       break;
     }
+#endif
     }
     featureFiltration(pImage, rImage);
   }
@@ -100,8 +112,13 @@ namespace fbr{
 #endif
     case ORB_DES:{
       //Create descriptor using ORB
+#if CV_MAJOR_VERSION <= 2
       cv::OrbDescriptorExtractor extractor;
       extractor.compute(pImage, keypoints, descriptors);
+#else
+      auto extractor = cv::ORB::create();
+      extractor->compute(pImage, keypoints, descriptors);
+#endif
       break;
     }
     } 
