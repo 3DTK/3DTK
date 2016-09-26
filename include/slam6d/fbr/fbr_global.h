@@ -112,7 +112,9 @@ namespace fbr{
 #endif
     ORB_DET,
     FAST_DET,
+#if CV_MAJOR_VERSION <= 2
     STAR_DET,
+#endif
   };
   enum feature_descriptor_method{
 #ifdef WITH_OPENCV_NONFREE
