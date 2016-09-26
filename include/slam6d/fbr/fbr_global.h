@@ -17,7 +17,7 @@
 #include <opencv2/opencv.hpp>
 #endif
 //for opencv 2.4
-#if (CV_MAJOR_VERSION >= 2) && (CV_MINOR_VERSION >= 4) && WITH_OPENCV_NONFREE
+#if (CV_MAJOR_VERSION >= 3 || ((CV_MAJOR_VERSION == 2) && (CV_MINOR_VERSION >= 4))) && WITH_OPENCV_NONFREE
 #include <opencv2/nonfree/nonfree.hpp>
 #endif
 #include <math.h>
