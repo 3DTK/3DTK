@@ -83,7 +83,7 @@ namespace fbr{
       }
       if(mMethod == BRUTEFORCE){	
 	//opencv 2.4
-#if (CV_MAJOR_VERSION >= 2) && (CV_MINOR_VERSION >= 4)
+#if CV_MAJOR_VERSION >= 3 || ((CV_MAJOR_VERSION == 2) && (CV_MINOR_VERSION >= 4))
 	cv::BFMatcher matcher (cv::NORM_L2);
 #else  //older version of opencv than 2.4
 	cv::BruteForceMatcher< cv::L2<float> > matcher;
@@ -102,7 +102,7 @@ namespace fbr{
     else if(qFeature.getDescriptorMethod() == ORB_DES){
       if(mMethod == KNN){
 	//opencv 2.4
-#if (CV_MAJOR_VERSION >= 2) && (CV_MINOR_VERSION >= 4)
+#if CV_MAJOR_VERSION >= 3 || ((CV_MAJOR_VERSION == 2) && (CV_MINOR_VERSION >= 4))
 	cv::BFMatcher matcher (cv::NORM_HAMMING);
 #else  //older version of opencv than 2.4
 	cv::BruteForceMatcher< cv::Hamming > matcher;
@@ -111,7 +111,7 @@ namespace fbr{
       }
       if(mMethod == RADIUS){
 	//opencv 2.4
-#if (CV_MAJOR_VERSION >= 2) && (CV_MINOR_VERSION >= 4)
+#if CV_MAJOR_VERSION >= 3 || ((CV_MAJOR_VERSION == 2) && (CV_MINOR_VERSION >= 4))
 	cv::BFMatcher matcher (cv::NORM_HAMMING);
 #else  //older version of opencv than 2.4
 	cv::BruteForceMatcher< cv::Hamming > matcher;
@@ -120,7 +120,7 @@ namespace fbr{
       }
       if(mMethod == RATIO){
 	//opencv 2.4
-#if (CV_MAJOR_VERSION >= 2) && (CV_MINOR_VERSION >= 4)
+#if CV_MAJOR_VERSION >= 3 || ((CV_MAJOR_VERSION == 2) && (CV_MINOR_VERSION >= 4))
 	cv::BFMatcher matcher (cv::NORM_HAMMING);
 #else  //older version of opencv than 2.4
 	cv::BruteForceMatcher< cv::Hamming > matcher;
@@ -129,7 +129,7 @@ namespace fbr{
       }
       if(mMethod == BRUTEFORCE){
 	//opencv 2.4
-#if (CV_MAJOR_VERSION >= 2) && (CV_MINOR_VERSION >= 4)
+#if CV_MAJOR_VERSION >= 3 || ((CV_MAJOR_VERSION == 2) && (CV_MINOR_VERSION >= 4))
 	cv::BFMatcher matcher (cv::NORM_HAMMING);
 #else  //older version of opencv than 2.4
 	cv::BruteForceMatcher< cv::Hamming > matcher;
