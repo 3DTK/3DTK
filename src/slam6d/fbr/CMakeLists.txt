@@ -7,7 +7,7 @@ if(WITH_FBR)
   set(FBR_PANORAMA_SRC panorama.cc projection.cc)
   add_library(fbr_panorama STATIC ${FBR_PANORAMA_SRC} fbr_global.cc)
 
-  if(OpenCV_VERSION_MAJOR GREATER 1 AND OpenCV_VERSION_MINOR GREATER 2)
+  if(OpenCV_VERSION VERSION_GREATER 2.1.0)
 
     set(FBR_FEATURE_SRC feature.cc)
     add_library(fbr_feature STATIC ${FBR_FEATURE_SRC})
