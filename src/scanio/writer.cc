@@ -131,66 +131,188 @@ void write_uos_rgb(vector<cv::Vec4f> &points, vector<cv::Vec3b> &color, string &
   outfile.close();
 }
 
-void write_uos(DataXYZ &xyz, ofstream &file)
+void write_uos(DataXYZ &xyz, FILE *file, bool hexfloat)
 {
-  if(file.good())
-    for(unsigned int j = 0; j < xyz.size(); j++) {
-      file << xyz[j][0] << " " << xyz[j][1] << " " << xyz[j][2] << " "
-              << endl;
-    }
-  
+	if (hexfloat) {
+		for(unsigned int j = 0; j < xyz.size(); j++) {
+			// we print the mantissa with 13 hexadecimal digits because the
+			// mantissa for double precision is 52 bits long which is 6.5
+			// bytes and thus 13 hexadecimal digits
+			fprintf(file, "%.013a %.013a %.013a\n",
+					xyz[j][0], xyz[j][1], xyz[j][2]);
+		}
+	} else {
+		for(unsigned int j = 0; j < xyz.size(); j++) {
+			// 17 significant digits are required to encode a double
+			// precision IEEE754 floating point number. Proof: the
+			// number of significant digits of the epsilon between 1.0
+			// and the next representable value has 16 significant digits.
+			// Adding that epsilon to 1.0 leads to a number with 17
+			// significant digits.
+			// We use %e because it's the only format that allows to set
+			// the overall significant digits (and not just the digits
+			// after the radix character).
+			fprintf(file, "%.016e %.016e %.016e\n",
+					xyz[j][0], xyz[j][1], xyz[j][2]);
+		}
+	}
 }
 
-void write_uosr(DataXYZ &xyz, DataReflectance &xyz_reflectance, ofstream &file)
+void write_uosr(DataXYZ &xyz, DataReflectance &xyz_reflectance, FILE *file, bool hexfloat)
 {
-  if(file.good() && xyz.size() == xyz_reflectance.size())
-    for(unsigned int j = 0; j < xyz.size(); j++) {
-      file << xyz[j][0] << " " << xyz[j][1] << " " << xyz[j][2] << " "
-              << xyz_reflectance[j]
-              << endl;
-    }
-  
+	if(xyz.size() != xyz_reflectance.size()) {
+		throw std::runtime_error("xyz and reflectance vector are of different length");
+	}
+	if (hexfloat) {
+		for(unsigned int j = 0; j < xyz.size(); j++) {
+			// we print the mantissa with 13 hexadecimal digits because the
+			// mantissa for double precision is 52 bits long which is 6.5
+			// bytes and thus 13 hexadecimal digits
+			fprintf(file, "%.013a %.013a %.013a %.013a\n",
+					xyz[j][0], xyz[j][1], xyz[j][2], xyz_reflectance[j]);
+		}
+	} else {
+		for(unsigned int j = 0; j < xyz.size(); j++) {
+			// 17 significant digits are required to encode a double
+			// precision IEEE754 floating point number. Proof: the
+			// number of significant digits of the epsilon between 1.0
+			// and the next representable value has 16 significant digits.
+			// Adding that epsilon to 1.0 leads to a number with 17
+			// significant digits.
+			// We use %e because it's the only format that allows to set
+			// the overall significant digits (and not just the digits
+			// after the radix character).
+			fprintf(file, "%.016e %.016e %.016e %.016e\n",
+					xyz[j][0], xyz[j][1], xyz[j][2], xyz_reflectance[j]);
+		}
+	} 
 }
 
-void write_uos_rgb(DataXYZ &xyz, DataRGB &rgb, ofstream &file)
+void write_uos_rgb(DataXYZ &xyz, DataRGB &rgb, FILE *file, bool hexfloat)
 {
-  if(file.good() && xyz.size() == rgb.size())
-    for(unsigned int j = 0; j < xyz.size(); j++) {
-      file << xyz[j][0] << " " << xyz[j][1] << " " << xyz[j][2] << " "
-              << (int)rgb[j][0] << " " << (int)rgb[j][1] << " " << (int)rgb[j][2]
-              << endl;
-    }
+	if(xyz.size() != rgb.size()) {
+		throw std::runtime_error("xyz and rgb vector are of different length");
+	}
+	if (hexfloat) {
+		for(unsigned int j = 0; j < xyz.size(); j++) {
+			// we print the mantissa with 13 hexadecimal digits because the
+			// mantissa for double precision is 52 bits long which is 6.5
+			// bytes and thus 13 hexadecimal digits
+			fprintf(file, "%.013a %.013a %.013a %d %d %d\n",
+					xyz[j][0], xyz[j][1], xyz[j][2],
+					(int)rgb[j][0], (int)rgb[j][1], (int)rgb[j][2]);
+		}
+	} else {
+		for(unsigned int j = 0; j < xyz.size(); j++) {
+			// 17 significant digits are required to encode a double
+			// precision IEEE754 floating point number. Proof: the
+			// number of significant digits of the epsilon between 1.0
+			// and the next representable value has 16 significant digits.
+			// Adding that epsilon to 1.0 leads to a number with 17
+			// significant digits.
+			// We use %e because it's the only format that allows to set
+			// the overall significant digits (and not just the digits
+			// after the radix character).
+			fprintf(file, "%.016e %.016e %.016e %d %d %d\n",
+					xyz[j][0], xyz[j][1], xyz[j][2],
+					(int)rgb[j][0], (int)rgb[j][1], (int)rgb[j][2]);
+		}
+	}
 }
 
-void write_xyz(DataXYZ &xyz, ofstream &file, double scaleFac)
+void write_xyz(DataXYZ &xyz, FILE *file, double scaleFac, bool hexfloat)
 {
-  if(file.good())
-    for(unsigned int j = 0; j < xyz.size(); j++) {
-      file << scaleFac*xyz[j][2] << " " << -scaleFac*xyz[j][0] << " " << scaleFac*xyz[j][1] << " "
-              << endl;
-    }
-  
+	if (hexfloat) {
+		for(unsigned int j = 0; j < xyz.size(); j++) {
+			// we print the mantissa with 13 hexadecimal digits because the
+			// mantissa for double precision is 52 bits long which is 6.5
+			// bytes and thus 13 hexadecimal digits
+			fprintf(file, "%.013a %.013a %.013a\n",
+					scaleFac*xyz[j][2], -scaleFac*xyz[j][0], scaleFac*xyz[j][1]);
+		}
+	} else {
+		for(unsigned int j = 0; j < xyz.size(); j++) {
+			// 17 significant digits are required to encode a double
+			// precision IEEE754 floating point number. Proof: the
+			// number of significant digits of the epsilon between 1.0
+			// and the next representable value has 16 significant digits.
+			// Adding that epsilon to 1.0 leads to a number with 17
+			// significant digits.
+			// We use %e because it's the only format that allows to set
+			// the overall significant digits (and not just the digits
+			// after the radix character).
+			fprintf(file, "%.016e %.016e %.016e\n",
+					scaleFac*xyz[j][2], -scaleFac*xyz[j][0], scaleFac*xyz[j][1]);
+		}
+	}
 }
 
-void write_xyzr(DataXYZ &xyz, DataReflectance &xyz_reflectance, ofstream &file, double scaleFac)
+void write_xyzr(DataXYZ &xyz, DataReflectance &xyz_reflectance, FILE *file, double scaleFac, bool hexfloat)
 {
-  if(file.good() && xyz.size() == xyz_reflectance.size())
-    for(unsigned int j = 0; j < xyz.size(); j++) {
-      file << scaleFac*xyz[j][2] << " " << -scaleFac*xyz[j][0] << " " << scaleFac*xyz[j][1] << " "
-              << xyz_reflectance[j]
-              << endl;
-    }
-  
+	if(xyz.size() != xyz_reflectance.size()) {
+		throw std::runtime_error("xyz and reflectance vector are of different length");
+	}
+	if (hexfloat) {
+		for(unsigned int j = 0; j < xyz.size(); j++) {
+			// we print the mantissa with 13 hexadecimal digits because the
+			// mantissa for double precision is 52 bits long which is 6.5
+			// bytes and thus 13 hexadecimal digits
+			fprintf(file, "%.013a %.013a %.013a %.013a\n",
+					scaleFac*xyz[j][2],
+					-scaleFac*xyz[j][0],
+					scaleFac*xyz[j][1],
+					xyz_reflectance[j]);
+		}
+	} else {
+		for(unsigned int j = 0; j < xyz.size(); j++) {
+			// 17 significant digits are required to encode a double
+			// precision IEEE754 floating point number. Proof: the
+			// number of significant digits of the epsilon between 1.0
+			// and the next representable value has 16 significant digits.
+			// Adding that epsilon to 1.0 leads to a number with 17
+			// significant digits.
+			// We use %e because it's the only format that allows to set
+			// the overall significant digits (and not just the digits
+			// after the radix character).
+			fprintf(file, "%.016e %.016e %.016e %.016e\n",
+					scaleFac*xyz[j][2],
+					-scaleFac*xyz[j][0],
+					scaleFac*xyz[j][1],
+					xyz_reflectance[j]);
+		}
+	}
 }
 
-void write_xyz_rgb(DataXYZ &xyz, DataRGB &rgb, ofstream &file, double scaleFac)
+void write_xyz_rgb(DataXYZ &xyz, DataRGB &rgb, FILE *file, double scaleFac, bool hexfloat)
 {
-  if(file.good() && xyz.size() == rgb.size())
-    for(unsigned int j = 0; j < xyz.size(); j++) {
-      file << scaleFac*xyz[j][2] << " " << -scaleFac*xyz[j][0] << " " << scaleFac*xyz[j][1] << " "
-              << (int)rgb[j][0] << " " << (int)rgb[j][1] << " " << (int)rgb[j][2]
-              << endl;
-    }
+	if(xyz.size() != rgb.size()) {
+		throw std::runtime_error("xyz and rgb vector are of different length");
+	}
+	if (hexfloat) {
+		for(unsigned int j = 0; j < xyz.size(); j++) {
+			// we print the mantissa with 13 hexadecimal digits because the
+			// mantissa for double precision is 52 bits long which is 6.5
+			// bytes and thus 13 hexadecimal digits
+			fprintf(file, "%.013a %.013a %.013a %d %d %d\n",
+					scaleFac*xyz[j][2], -scaleFac*xyz[j][0], scaleFac*xyz[j][1],
+					(int)rgb[j][0], (int)rgb[j][1], (int)rgb[j][2]);
+		}
+	} else {
+		for(unsigned int j = 0; j < xyz.size(); j++) {
+			// 17 significant digits are required to encode a double
+			// precision IEEE754 floating point number. Proof: the
+			// number of significant digits of the epsilon between 1.0
+			// and the next representable value has 16 significant digits.
+			// Adding that epsilon to 1.0 leads to a number with 17
+			// significant digits.
+			// We use %e because it's the only format that allows to set
+			// the overall significant digits (and not just the digits
+			// after the radix character).
+			fprintf(file, "%.016e %.016e %.016e %d %d %d\n",
+					scaleFac*xyz[j][2], -scaleFac*xyz[j][0], scaleFac*xyz[j][1],
+					(int)rgb[j][0], (int)rgb[j][1], (int)rgb[j][2]);
+		}
+	}
 }
 
 // write .pose files
