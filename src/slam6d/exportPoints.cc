@@ -105,6 +105,9 @@ void usage(char* prog)
 	  << bold << "  -c, --color" << endl
 	  << "         export in color as RGB" << endl
 	  << endl
+	  << bold << "  -R, --reflectance, --reflectivity" << endl
+	  << "         export in reflectance" << endl
+	  << endl
 	  << bold << "  -x, --xyz" << endl
 	  << "         export in xyz format (right handed coordinate system in m)" << endl
 	  << endl
