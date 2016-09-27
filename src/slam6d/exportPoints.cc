@@ -152,7 +152,8 @@ void usage(char* prog)
  */
 int parseArgs(int argc, char **argv, string &dir, double &red, int &rand,
             int &start, int &end, int &maxDist, int &minDist, bool &extrapolate_pose,
-            bool &use_xyz, bool &use_reflectance, bool &use_color, int &octree, IOType &type, string& customFilter, double &scaleFac)
+            bool &use_xyz, bool &use_reflectance, bool &use_color, int &octree, IOType &type, string& customFilter, double &scaleFac,
+	    bool &hexfloat)
 {
   int  c;
   // from unistd.h:
@@ -174,13 +175,25 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &rand,
     { "xyz",             no_argument,         0,  'x' },
     { "scale",           required_argument,   0,  'y' },
     { "customFilter",    required_argument,   0,  'u' },
+    { "hexfloat",        no_argument,         0,  0 },
     { 0,           0,   0,   0}                    // needed, cf. getopt.h
   };
 
   cout << endl;
-  while ((c = getopt_long(argc, argv, "f:s:e:r:O:Rm:y:M:u:pxc", longopts, NULL)) != -1)
+  int option_index = 0;
+  const char *name;
+  while ((c = getopt_long(argc, argv, "f:s:e:r:O:Rm:y:M:u:pxc", longopts, &option_index)) != -1)
     switch (c)
      {
+	     case 0:
+		     name = longopts[option_index].name;
+		     if (strcmp(name, "hexfloat") == 0) {
+			     hexfloat = true;
+		     } else {
+			     cerr << "unknown longopt: " << name << endl;
+			     usage(argv[0]);
+		     }
+		     break;
      case 'r':
        red = atof(optarg);
        break;
@@ -340,9 +353,11 @@ int main(int argc, char **argv)
   bool customFilterActive = false;
   string customFilter;
   double scaleFac = 0.01;
+  bool hexfloat = false;
 
   parseArgs(argc, argv, dir, red, rand, start, end,
-      maxDist, minDist, eP, use_xyz, use_reflectance, use_color, octree, iotype, customFilter, scaleFac);
+      maxDist, minDist, eP, use_xyz, use_reflectance, use_color, octree, iotype, customFilter, scaleFac,
+      hexfloat);
 
 
   rangeFilterActive = minDist > 0 || maxDist > 0;
@@ -461,7 +476,7 @@ int main(int argc, char **argv)
  cout << "Export all 3D Points to file \"points.pts\"" << endl;
  cout << "Export all 6DoF poses to file \"positions.txt\"" << endl;
  cout << "Export all 6DoF matrices to file \"poses.txt\"" << endl;
- ofstream redptsout("points.pts");
+ FILE *redptsout = fopen("points.pts", "w");
  ofstream posesout("positions.txt");
  ofstream matricesout("poses.txt");
   
@@ -480,9 +495,9 @@ int main(int argc, char **argv)
         for(unsigned int i = 0; i < xyz.size(); i++) xyz_reflectance[i] = 255;
       }
       if(use_xyz) {
-        write_xyzr(xyz, xyz_reflectance, redptsout, scaleFac);
+        write_xyzr(xyz, xyz_reflectance, redptsout, scaleFac, hexfloat);
       } else {
-        write_uosr(xyz, xyz_reflectance, redptsout);
+        write_uosr(xyz, xyz_reflectance, redptsout, hexfloat);
       }
       
     } else if(use_color) {
@@ -499,16 +514,16 @@ int main(int argc, char **argv)
         }
       }
       if(use_xyz) {
-        write_xyz_rgb(xyz, xyz_color, redptsout, scaleFac);
+        write_xyz_rgb(xyz, xyz_color, redptsout, scaleFac, hexfloat);
       } else {
-        write_uos_rgb(xyz, xyz_color, redptsout);
+        write_uos_rgb(xyz, xyz_color, redptsout, hexfloat);
       }
 
     } else {
       if(use_xyz) {
-        write_xyz(xyz, redptsout, scaleFac);
+        write_xyz(xyz, redptsout, scaleFac, hexfloat);
       } else {
-        write_uos(xyz, redptsout);
+        write_uos(xyz, redptsout, hexfloat);
       }
     
     }
@@ -522,8 +537,7 @@ int main(int argc, char **argv)
 
   }
    
-  redptsout.close();
-  redptsout.clear();
+  fclose(redptsout);
   posesout.close();
   posesout.clear();
   matricesout.close();
