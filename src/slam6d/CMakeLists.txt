@@ -129,7 +129,7 @@ add_library(scan STATIC ${SCANLIB_SRCS})
 
 find_package(OpenCV REQUIRED)
 
-target_link_libraries(scan scanclient scanio scan_io_helper ann newmat cxsparse ${OpenCV_LIBS})
+target_link_libraries(scan scanclient scan_io_helper scanio ann newmat cxsparse ${OpenCV_LIBS})
 
 if(UNIX)
   target_link_libraries(scan dl pthread)
@@ -144,11 +144,11 @@ endif()
 if(EXPORT_SHARED_LIBS OR WITH_PYTHON)
   add_library(scan_s SHARED ${SCANLIB_SRCS})
   if (WIN32)
-    target_link_libraries(scan_s scanio scanclient_s newmat_s cxsparse_s ann_s)
+    target_link_libraries(scan_s scan_io_helper scanio scanclient_s newmat_s cxsparse_s ann_s)
   elseif(APPLE)
-    target_link_libraries(scan_s scanio scanclient_s newmat_s cxsparse_s ann_s)
+    target_link_libraries(scan_s scan_io_helper scanio scanclient_s newmat_s cxsparse_s ann_s)
   else()
-    target_link_libraries(scan_s scanio scanclient_s newmat cxsparse ann)
+    target_link_libraries(scan_s scan_io_helper scanio scanclient_s newmat cxsparse ann)
   endif()
 endif()
 
