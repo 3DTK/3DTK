@@ -407,13 +407,13 @@ GLUI_SPINNER_INT, &factor);
 
     farplane_spinner = glui1->add_spinner_to_panel(advanced_panel, "farplane :   ",
         GLUI_SPINNER_FLOAT, &maxfardistance);
-    farplane_spinner->set_float_limits(1, 100000);
+    farplane_spinner->set_float_limits(1, 1000000);
     farplane_spinner->set_speed(1);
     farplane_spinner->set_alignment(GLUI_ALIGN_RIGHT);
     
     nearplane_spinner = glui1->add_spinner_to_panel(advanced_panel, "nearplane :   ",
         GLUI_SPINNER_FLOAT, &neardistance);
-    nearplane_spinner->set_int_limits(1, 100000);
+    nearplane_spinner->set_int_limits(1, 1000000);
     nearplane_spinner->set_speed(1);
     nearplane_spinner->set_alignment(GLUI_ALIGN_RIGHT);
 
