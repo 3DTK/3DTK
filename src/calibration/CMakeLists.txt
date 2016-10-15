@@ -1,5 +1,5 @@
 if(WITH_CALIBRATION)
-    include_directories("${CMAKE_SOURCE_DIR}/3rdparty/apriltag-2015-03-18/")
+    include_directories(${APRILTAG_INCLUDE_DIRS})
 
     set(CAMCAL_SOURCES
         CalibrationPattern.cc
