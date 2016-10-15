@@ -26,6 +26,7 @@ if(WITH_FBR)
     add_library(fbr STATIC ${FBR_SRC} fbr_global.cc)
 
     set(FBR_LIBS scan ann ${OpenCV_LIBS})
+    target_link_libraries(fbr ${FBR_LIBS})
 
 
     ### EXPORT SHARED LIBS
@@ -49,11 +50,11 @@ if(WITH_FBR)
     endif()
 
     if (WIN32)
-      target_link_libraries(featurebasedregistration fbr newmat ${FBR_LIBS} XGetopt showstatic ${SHOW_LIBS} ${OPENGL_LIBRARIES})
+      target_link_libraries(featurebasedregistration fbr newmat XGetopt showstatic ${SHOW_LIBS} ${OPENGL_LIBRARIES})
     endif()
 
     if(UNIX)
-      target_link_libraries(featurebasedregistration fbr newmat ${FBR_LIBS} showstatic ${SHOW_LIBS} ${OPENGL_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY})
+      target_link_libraries(featurebasedregistration fbr newmat showstatic ${SHOW_LIBS} ${OPENGL_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY})
     endif()
 
 
@@ -61,11 +62,11 @@ if(WITH_FBR)
     add_executable(panorama_matcher panorama_matcher.cc fbr_global.cc)
 
     if(UNIX)
-      target_link_libraries(panorama_matcher fbr ${FBR_LIBS} ${Boost_SYSTEM_LIBRARY})
+      target_link_libraries(panorama_matcher fbr ${Boost_SYSTEM_LIBRARY})
     endif()
 
     if (WIN32)
-      target_link_libraries(panorama_matcher fbr ${FBR_LIBS} ${Boost_SYSTEM_LIBRARY} XGetopt) 
+      target_link_libraries(panorama_matcher fbr ${Boost_SYSTEM_LIBRARY} XGetopt)
     endif()
 
 
@@ -73,11 +74,11 @@ if(WITH_FBR)
     add_executable(scan_to_panorama scan_to_panorama.cc fbr_global.cc)
 
     if(UNIX)
-      target_link_libraries(scan_to_panorama fbr newmat ${FBR_LIBS} showstatic ${SHOW_LIBS} ${OPENGL_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY})
+      target_link_libraries(scan_to_panorama fbr newmat showstatic ${SHOW_LIBS} ${OPENGL_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY})
     endif()
 
     if (WIN32)
-      target_link_libraries(scan_to_panorama fbr newmat ${FBR_LIBS} showstatic ${SHOW_LIBS} ${OPENGL_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} XGetopt) 
+      target_link_libraries(scan_to_panorama fbr newmat showstatic ${SHOW_LIBS} ${OPENGL_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} XGetopt)
     endif()
 
 
@@ -85,11 +86,11 @@ if(WITH_FBR)
     add_executable(panorama_to_scan panorama_to_scan.cc fbr_global.cc)
 
     if(UNIX)
-      target_link_libraries(panorama_to_scan fbr newmat ${FBR_LIBS} showstatic ${SHOW_LIBS} ${OPENGL_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY})
+      target_link_libraries(panorama_to_scan fbr newmat showstatic ${SHOW_LIBS} ${OPENGL_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY})
     endif()
 
     if (WIN32)
-      target_link_libraries(panorama_to_scan fbr newmat ${FBR_LIBS} showstatic ${SHOW_LIBS} ${OPENGL_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} XGetopt) 
+      target_link_libraries(panorama_to_scan fbr newmat showstatic ${SHOW_LIBS} ${OPENGL_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} XGetopt)
     endif()
 
 
