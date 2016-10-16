@@ -95,6 +95,17 @@ def cart2geo(v):
     # latitude, longitude
     return theta,phi
 
+# inspiring work for spherical quad trees:
+#
+# "Navigating through Triangle Meshes Implemented as Linear Quadtrees" by Michael Lee and Hanan Samet
+# "Traversing the Triangle Elements of an Icosahedral Spherical Representation in Constant-Time" by Michael Lee and Hanan Samet
+# "Indexing the Sphere with the Hierarchical Triangular Mesh" by Alexander S. Szalay, Jim Gray, George Fekete, Peter Z. Kunszt, Peter Kukol, Ani Thakar
+# "SEARCHABLE SKY COVERAGE OF ASTRONOMICAL OBSERVATIONS: FOOTPRINTS AND EXPOSURES" by Tamás Budavári, Alexander S. Szalay and György Fekete
+# "A Hierarchical Spatial Data Structure for Global Geographic Information Systems" by Michael F. Goodchild and Yang Shiren
+# "Rendering and managing spherical data with sphere quadtrees" by György Fekete
+# "Comparing Geometrical Properties of Global Grids" by A. Jon Kimerling, Kevin Sahr, Denis White, and Lian Song
+# "Geodesic Discrete Global Grid Systems" by Kevin Sahr, Denis White, and A. Jon Kimerling
+# 
 class QuadTree:
     def __init__(self, v1, v2, v3, pts):
         self.v1 = v1
@@ -138,6 +149,11 @@ class QuadTree:
         else:
             return "(%s, %s, %s, %s)" % (str(self.t1),str(self.t2),str(self.t3),str(self.t4))
 
+
+    # an overview of all possible configurations of a triangle and a search
+    # radius is given on page 14 of:
+    #
+    # "Indexing the Sphere with the Hierarchical Triangular Mesh" by Alexander S. Szalay, Jim Gray, George Fekete, Peter Z. Kunszt, Peter Kukol, Ani Thakar
     def search(self, p, r):
         if self.pts is not None:
             res = []
