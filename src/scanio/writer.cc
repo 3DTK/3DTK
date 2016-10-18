@@ -80,11 +80,16 @@ void createdirectory(string dir)
 /*
  * given a vector of 3d points, write them out as uos files
  */
-void write_uos(vector<cv::Vec4f> &points, string &dir, string id)
+void write_uos(vector<cv::Vec4f> &points, string &dir, string id, bool high_precision)
 {
   ofstream outfile((dir + "/scan" + id + ".3d").c_str());
 
   outfile << "# header is ignored" << endl;
+  if(high_precision) {
+    outfile.precision(20);
+  } else {
+    outfile.precision(10);
+  }
 
   for (vector<cv::Vec4f>::iterator it=points.begin(); it < points.end(); it++) {
     outfile << (*it)[0] << " " << (*it)[1] << " " << (*it)[2] << endl;
@@ -95,11 +100,14 @@ void write_uos(vector<cv::Vec4f> &points, string &dir, string id)
 /*
  * given a vector of 3d points, write them out as uosr files
  */
-void write_uosr(vector<cv::Vec4f> &points, string &dir, string id)
+void write_uosr(vector<cv::Vec4f> &points, string &dir, string id, bool high_precision)
 {
   ofstream outfile((dir + "/scan" + id + ".3d").c_str());
-  
-  outfile.precision(20);
+  if(high_precision) {
+    outfile.precision(20);
+  } else {
+    outfile.precision(10);
+  }
   outfile << "# header is ignored" << endl;
 
   for (vector<cv::Vec4f>::iterator it=points.begin(); it < points.end(); it++) {
@@ -113,11 +121,15 @@ void write_uosr(vector<cv::Vec4f> &points, string &dir, string id)
 /*
  * given a vector of 3d points, write them out as uos_rgb files
  */
-void write_uos_rgb(vector<cv::Vec4f> &points, vector<cv::Vec3b> &color, string &dir, string id)
+void write_uos_rgb(vector<cv::Vec4f> &points, vector<cv::Vec3b> &color, string &dir, string id, bool high_precision)
 {
   ofstream outfile((dir + "/scan" + id + ".3d").c_str());
   
-  outfile.precision(20);
+  if(high_precision) {
+    outfile.precision(20);
+  } else {
+    outfile.precision(10);
+  }
   outfile << "# header is ignored" << endl;
 
   vector<cv::Vec3b>::iterator cit=color.begin(); 
@@ -131,9 +143,9 @@ void write_uos_rgb(vector<cv::Vec4f> &points, vector<cv::Vec3b> &color, string &
   outfile.close();
 }
 
-void write_uos(DataXYZ &xyz, FILE *file, bool hexfloat)
+void write_uos(DataXYZ &xyz, FILE *file, bool hexfloat, bool high_precision)
 {
-	if (hexfloat) {
+  if (hexfloat) {
 		for(unsigned int j = 0; j < xyz.size(); j++) {
 			// we print the mantissa with 13 hexadecimal digits because the
 			// mantissa for double precision is 52 bits long which is 6.5
@@ -152,13 +164,18 @@ void write_uos(DataXYZ &xyz, FILE *file, bool hexfloat)
 			// We use %e because it's the only format that allows to set
 			// the overall significant digits (and not just the digits
 			// after the radix character).
-			fprintf(file, "%.016e %.016e %.016e\n",
-					xyz[j][0], xyz[j][1], xyz[j][2]);
+			if(high_precision) {
+        fprintf(file, "%.016e %.016e %.016e\n",
+					  xyz[j][0], xyz[j][1], xyz[j][2]);
+      } else {
+        fprintf(file, "%lf %lf %lf\n",
+					  xyz[j][0], xyz[j][1], xyz[j][2]);
+      }
 		}
 	}
 }
 
-void write_uosr(DataXYZ &xyz, DataReflectance &xyz_reflectance, FILE *file, bool hexfloat)
+void write_uosr(DataXYZ &xyz, DataReflectance &xyz_reflectance, FILE *file, bool hexfloat, bool high_precision)
 {
 	if(xyz.size() != xyz_reflectance.size()) {
 		throw std::runtime_error("xyz and reflectance vector are of different length");
@@ -182,13 +199,18 @@ void write_uosr(DataXYZ &xyz, DataReflectance &xyz_reflectance, FILE *file, bool
 			// We use %e because it's the only format that allows to set
 			// the overall significant digits (and not just the digits
 			// after the radix character).
-			fprintf(file, "%.016e %.016e %.016e %.016e\n",
+			if(high_precision) {
+			  fprintf(file, "%.016e %.016e %.016e %.016e\n",
 					xyz[j][0], xyz[j][1], xyz[j][2], xyz_reflectance[j]);
+      } else {
+        fprintf(file, "%lf %lf %lf %lf\n",
+					xyz[j][0], xyz[j][1], xyz[j][2], xyz_reflectance[j]);
+      }
 		}
 	} 
 }
 
-void write_uos_rgb(DataXYZ &xyz, DataRGB &rgb, FILE *file, bool hexfloat)
+void write_uos_rgb(DataXYZ &xyz, DataRGB &rgb, FILE *file, bool hexfloat, bool high_precision)
 {
 	if(xyz.size() != rgb.size()) {
 		throw std::runtime_error("xyz and rgb vector are of different length");
@@ -213,14 +235,20 @@ void write_uos_rgb(DataXYZ &xyz, DataRGB &rgb, FILE *file, bool hexfloat)
 			// We use %e because it's the only format that allows to set
 			// the overall significant digits (and not just the digits
 			// after the radix character).
-			fprintf(file, "%.016e %.016e %.016e %d %d %d\n",
-					xyz[j][0], xyz[j][1], xyz[j][2],
+			if(high_precision) {
+			  fprintf(file, "%.016e %.016e %.016e %d %d %d\n",
+					xyz[j][0], xyz[j][1], xyz[j][2], 
 					(int)rgb[j][0], (int)rgb[j][1], (int)rgb[j][2]);
+      } else {
+        fprintf(file, "%lf %lf %lf %d %d %d\n",
+					xyz[j][0], xyz[j][1], xyz[j][2], 
+					(int)rgb[j][0], (int)rgb[j][1], (int)rgb[j][2]);
+      }
 		}
 	}
 }
 
-void write_xyz(DataXYZ &xyz, FILE *file, double scaleFac, bool hexfloat)
+void write_xyz(DataXYZ &xyz, FILE *file, double scaleFac, bool hexfloat, bool high_precision)
 {
 	if (hexfloat) {
 		for(unsigned int j = 0; j < xyz.size(); j++) {
@@ -241,13 +269,18 @@ void write_xyz(DataXYZ &xyz, FILE *file, double scaleFac, bool hexfloat)
 			// We use %e because it's the only format that allows to set
 			// the overall significant digits (and not just the digits
 			// after the radix character).
-			fprintf(file, "%.016e %.016e %.016e\n",
-					scaleFac*xyz[j][2], -scaleFac*xyz[j][0], scaleFac*xyz[j][1]);
+			if(high_precision) {
+			  fprintf(file, "%.016e %.016e %.016e\n",
+					  scaleFac*xyz[j][2], -scaleFac*xyz[j][0], scaleFac*xyz[j][1]);
+      } else {
+        fprintf(file, "%lf %lf %lf\n",
+					  scaleFac*xyz[j][2], -scaleFac*xyz[j][0], scaleFac*xyz[j][1]);
+      }
 		}
 	}
 }
 
-void write_xyzr(DataXYZ &xyz, DataReflectance &xyz_reflectance, FILE *file, double scaleFac, bool hexfloat)
+void write_xyzr(DataXYZ &xyz, DataReflectance &xyz_reflectance, FILE *file, double scaleFac, bool hexfloat, bool high_precision)
 {
 	if(xyz.size() != xyz_reflectance.size()) {
 		throw std::runtime_error("xyz and reflectance vector are of different length");
@@ -274,16 +307,24 @@ void write_xyzr(DataXYZ &xyz, DataReflectance &xyz_reflectance, FILE *file, doub
 			// We use %e because it's the only format that allows to set
 			// the overall significant digits (and not just the digits
 			// after the radix character).
-			fprintf(file, "%.016e %.016e %.016e %.016e\n",
-					scaleFac*xyz[j][2],
-					-scaleFac*xyz[j][0],
-					scaleFac*xyz[j][1],
-					xyz_reflectance[j]);
+			if(high_precision) {
+			  fprintf(file, "%.016e %.016e %.016e %.016e\n",
+					  scaleFac*xyz[j][2],
+					  -scaleFac*xyz[j][0],
+					  scaleFac*xyz[j][1],
+					  xyz_reflectance[j]);
+                        } else {
+                          fprintf(file, "%lf %lf %lf %lf\n",
+					  scaleFac*xyz[j][2],
+					  -scaleFac*xyz[j][0],
+					  scaleFac*xyz[j][1],
+					  xyz_reflectance[j]);
+      }
 		}
 	}
 }
 
-void write_xyz_rgb(DataXYZ &xyz, DataRGB &rgb, FILE *file, double scaleFac, bool hexfloat)
+void write_xyz_rgb(DataXYZ &xyz, DataRGB &rgb, FILE *file, double scaleFac, bool hexfloat, bool high_precision)
 {
 	if(xyz.size() != rgb.size()) {
 		throw std::runtime_error("xyz and rgb vector are of different length");
@@ -308,10 +349,16 @@ void write_xyz_rgb(DataXYZ &xyz, DataRGB &rgb, FILE *file, double scaleFac, bool
 			// We use %e because it's the only format that allows to set
 			// the overall significant digits (and not just the digits
 			// after the radix character).
-			fprintf(file, "%.016e %.016e %.016e %d %d %d\n",
-					scaleFac*xyz[j][2], -scaleFac*xyz[j][0], scaleFac*xyz[j][1],
-					(int)rgb[j][0], (int)rgb[j][1], (int)rgb[j][2]);
-		}
+			if(high_precision) {
+        fprintf(file, "%.016e %.016e %.016e %d %d %d\n",
+					  scaleFac*xyz[j][2], -scaleFac*xyz[j][0], scaleFac*xyz[j][1],
+					  (int)rgb[j][0], (int)rgb[j][1], (int)rgb[j][2]);
+		  } else {
+        fprintf(file, "%lf %lf %lf %d %d %d\n",
+					  scaleFac*xyz[j][2], -scaleFac*xyz[j][0], scaleFac*xyz[j][1],
+					  (int)rgb[j][0], (int)rgb[j][1], (int)rgb[j][2]);
+      }
+    }
 	}
 }
 
