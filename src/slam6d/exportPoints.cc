@@ -102,21 +102,21 @@ void usage(char* prog)
 	  << "         STR: '{filterMode};{nrOfParams}[;param1][;param2][...]'" << endl
 	  << "         see filter implementation in pointfilter.cc for more detail." << endl
 	  << endl
-	  << bold << "  -c, --color" << endl
+	  << bold << "  -c, --color" << endl << normal
 	  << "         export in color as RGB" << endl
 	  << endl
-	  << bold << "  -R, --reflectance, --reflectivity" << endl
+	  << bold << "  -R, --reflectance, --reflectivity" << endl << normal
 	  << "         export in reflectance" << endl
 	  << endl
-	  << bold << "  -x, --xyz" << endl
+	  << bold << "  -x, --xyz" << endl << normal
 	  << "         export in xyz format (right handed coordinate system in m)" << endl
 	  << endl
 	  << bold << "  -y" << normal << " NR, " << bold << "--scale=" << normal << "NR" << endl
 	  << "         scale factor for export in XYZ format (default value is 0.01, so output will be in [m])" << endl
-	  << bold << "  -h, --highprecision" << endl
+	  << bold << "  -H, --highprecision" << endl << normal
 	  << "         export points with full double precision" << endl
 	  << endl
-	  << bold << "  --hexfloat" << endl
+	  << bold << "  --hexfloat" << endl << normal
 	  << "         export points with hexadecimal digits" << endl
 	  << endl
 	  << endl
@@ -181,8 +181,9 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &rand,
     { "xyz",             no_argument,         0,  'x' },
     { "scale",           required_argument,   0,  'y' },
     { "customFilter",    required_argument,   0,  'u' },
-    { "hexfloat",        no_argument,         0,  0 },
-    { "highprecision",   no_argument,         0,  'h' },
+    { "hexfloat",        no_argument,         0,   0 },
+    { "highprecision",   no_argument,         0,  'H' },
+    { "help",            no_argument,         0,  'h' },
     { 0,           0,   0,   0}                    // needed, cf. getopt.h
   };
 
@@ -226,7 +227,7 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &rand,
        if (end < 0)     { cerr << "Error: Cannot end at a negative scan number.\n"; exit(1); }
        if (end < start) { cerr << "Error: <end> cannot be smaller than <start>.\n"; exit(1); }
        break;
-     case 'h':
+     case 'H':
        high_precision = true;
        break;
      case 'm':
@@ -255,6 +256,7 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &rand,
       abort();
     }
     break;
+      case 'h':
       case '?':
        usage(argv[0]);
        return 1;
