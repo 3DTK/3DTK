@@ -444,6 +444,8 @@ GLUI_SPINNER_INT, &factor);
     endScanIdx_spinner->set_speed(1);
     endScanIdx_spinner->set_alignment(GLUI_ALIGN_RIGHT);
     endScanIdx_spinner->set_int_val(endScanIdx);
+    glui1->add_button_to_panel(advanced_panel, "Step up", 0, (GLUI_Update_CB)stepScansUp)->set_alignment(GLUI_ALIGN_CENTER);
+    glui1->add_button_to_panel(advanced_panel, "Step down", 0, (GLUI_Update_CB)stepScansDown)->set_alignment(GLUI_ALIGN_CENTER);
     glui1->add_button_to_panel(advanced_panel, "Reload frames", 0, (GLUI_Update_CB)reloadFrames)->set_alignment(GLUI_ALIGN_CENTER);
 
 
@@ -469,6 +471,21 @@ GLUI_SPINNER_INT, &factor);
   GLUI_Master.set_glutSpecialFunc(CallBackSpecialFunc);
 }
 
+/**
+ * This function is called when the scan range is supposed to be increased by
+ * one.
+ */
+void stepScansUp(int dummy) {
+  startRangeScanIdx++;
+  endRangeScanIdx++;
+  haveToUpdate=1; 
+}
+
+void stepScansDown(int dummy) {
+  startRangeScanIdx--;
+  endRangeScanIdx--;
+  haveToUpdate=1; 
+}
 
 /**
  * This function is called when a user starts to animate the generated path
