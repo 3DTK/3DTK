@@ -76,18 +76,13 @@ void usage(char* prog)
 	  << bold << "  -M" << normal << " NR, " << bold << "--min=" << normal << "NR" << endl
 	  << "         neglegt all data points with a distance smaller than NR 'units'" << endl
 	  << endl
-	  << bold << "  -u" << normal << " STR, " << bold << "--customFilter=" << normal << "STR" << endl
-	  << "         apply custom filter, filter mode and data are specified as semicolon-seperated string:" << endl
-	  << "         STR: '{filterMode};{nrOfParams}[;param1][;param2][...]'" << endl
-	  << "         see filter implementation in pointfilter.cc for more detail." << endl
-	  << endl
 	  << bold << "  -O" << normal << " NR (optional), " << bold << "--octree=" << normal << "NR (optional)" << endl
 	  << "         use randomized octree based point reduction (pts per voxel=<NR>)" << endl
 	  << "         requires -r or --reduce" << endl
 	  << endl
 	  << bold << "  -p, --trustpose" << normal << endl
-	  << "         Trust the pose file, do not extrapolate the last transformation." << endl
-	  << "         (just for testing purposes, or gps input.)" << endl
+	  << "         Trust the pose file, do not use the information stored in the .frames." << endl
+	  << "         (just for testing purposes.)" << endl
 	  << endl
 	  << endl
 	  << bold << "  -r" << normal << " NR, " << bold << "--reduce=" << normal << "NR" << endl
@@ -102,6 +97,11 @@ void usage(char* prog)
 	  << "         start at scan NR (i.e., neglects the first NR scans)" << endl
 	  << "         [ATTENTION: counting naturally starts with 0]" << endl
 	  << endl
+	  << bold << "  -u" << normal << " STR, " << bold << "--customFilter=" << normal << "STR" << endl
+	  << "         apply custom filter, filter mode and data are specified as semicolon-seperated string:" << endl
+	  << "         STR: '{filterMode};{nrOfParams}[;param1][;param2][...]'" << endl
+	  << "         see filter implementation in pointfilter.cc for more detail." << endl
+	  << endl
 	  << bold << "  -c, --color" << endl
 	  << "         export in color as RGB" << endl
 	  << endl
@@ -113,6 +113,12 @@ void usage(char* prog)
 	  << endl
 	  << bold << "  -y" << normal << " NR, " << bold << "--scale=" << normal << "NR" << endl
 	  << "         scale factor for export in XYZ format (default value is 0.01, so output will be in [m])" << endl
+	  << bold << "  -h, --highprecision" << endl
+	  << "         export points with full double precision" << endl
+	  << endl
+	  << bold << "  --hexfloat" << endl
+	  << "         export points with hexadecimal digits" << endl
+	  << endl
 	  << endl
 	  << endl << endl;
   
@@ -136,8 +142,8 @@ void usage(char* prog)
  * @param minDist - minimal distance of points being loaded
  * @param quiet switches on/off the quiet mode
  * @param veryQuiet switches on/off the 'very quiet' mode
- * @param extrapolate_pose - i.e., extrapolating the odometry by the last transformation
- *        (vs. taking the pose file as <b>exact</b>)
+ * @param use_pose - i.e., use the original pose information instead of using
+ * the final transformation from the frames 
  * @param meta match against all scans (= meta scan), or against the last scan only???
  * @param anim selects the rotation representation for the matching algorithm
  * @param mni_lum sets the maximal number of iterations for SLAM
@@ -151,9 +157,9 @@ void usage(char* prog)
  * @return 0, if the parsing was successful. 1 otherwise
  */
 int parseArgs(int argc, char **argv, string &dir, double &red, int &rand,
-            int &start, int &end, int &maxDist, int &minDist, bool &extrapolate_pose,
+            int &start, int &end, int &maxDist, int &minDist, bool &use_pose,
             bool &use_xyz, bool &use_reflectance, bool &use_color, int &octree, IOType &type, string& customFilter, double &scaleFac,
-	    bool &hexfloat)
+	    bool &hexfloat, bool &high_precision)
 {
   int  c;
   // from unistd.h:
@@ -168,7 +174,7 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &rand,
     { "end",             required_argument,   0,  'e' },
     { "reduce",          required_argument,   0,  'r' },
     { "octree",          optional_argument,   0,  'O' },
-    { "trustpose",       no_argument,         0,  'p' },
+    { "trust_pose",      no_argument,         0,  'p' },
     { "reflectance",     no_argument,         0,  'R' },
     { "reflectivity",    no_argument,         0,  'R' },
     { "color",           no_argument,         0,  'c' },
@@ -176,13 +182,14 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &rand,
     { "scale",           required_argument,   0,  'y' },
     { "customFilter",    required_argument,   0,  'u' },
     { "hexfloat",        no_argument,         0,  0 },
+    { "highprecision",   no_argument,         0,  'h' },
     { 0,           0,   0,   0}                    // needed, cf. getopt.h
   };
 
   cout << endl;
   int option_index = 0;
   const char *name;
-  while ((c = getopt_long(argc, argv, "f:s:e:r:O:Rm:y:M:u:pxc", longopts, &option_index)) != -1)
+  while ((c = getopt_long(argc, argv, "f:s:e:r:O:Rm:y:M:u:pxch", longopts, &option_index)) != -1)
     switch (c)
      {
 	     case 0:
@@ -219,6 +226,9 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &rand,
        if (end < 0)     { cerr << "Error: Cannot end at a negative scan number.\n"; exit(1); }
        if (end < start) { cerr << "Error: <end> cannot be smaller than <start>.\n"; exit(1); }
        break;
+     case 'h':
+       high_precision = true;
+       break;
      case 'm':
        maxDist = atoi(optarg);
        break;
@@ -226,7 +236,7 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &rand,
        minDist = atoi(optarg);
        break;
      case 'p':
-       extrapolate_pose = false;
+       use_pose = true;
        break;
      case 'x':
        use_xyz = true;
@@ -267,56 +277,54 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &rand,
   return 0;
 }
 
-void readFrames(string dir, int start, int end, bool extrapolate_pose=true)
+void readFrames(string dir, int start, int end, bool use_pose=false)
 {
   ifstream frame_in;
   int  fileCounter = start;
   string frameFileName;
+  if((int)(start + Scan::allScans.size() - 1) > end) end = start + Scan::allScans.size() - 1;
   for (;;) {
     if (end > -1 && fileCounter > end) break; // 'nuf read
+    
     frameFileName = dir + "scan" + to_string(fileCounter++,3) + ".frames";
+    if(!use_pose) {
 
-    frame_in.open(frameFileName.c_str());
+      frame_in.open(frameFileName.c_str());
 
-    // read 3D scan
-    if (!frame_in.good()) break; // no more files in the directory
+      // read 3D scan
+      if (!frame_in.good()) break; // no more files in the directory
 
-    cout << "Reading Frames for 3D Scan " << frameFileName << "..." << endl;
+      cout << "Reading Frames for 3D Scan " << frameFileName << "..." << endl;
 
- //   vector <double*> Matrices;
-//    vector <Scan::AlgoType> algoTypes;
-    double transMat[16];
-    double transMatOrig[16];
-    int algoTypeInt;
+      double transMat[16];
+      int algoTypeInt;
 
-    frame_in >> transMatOrig >> algoTypeInt;
-    for (size_t i = 0; i < 16; i++) {
-        transMat[i] = transMatOrig[i];
-    }
-
-    while (frame_in.good()) {
-      try {
-        frame_in >> transMat >> algoTypeInt;
+      while (frame_in.good()) {
+        try {
+          frame_in >> transMat >> algoTypeInt;
+        }
+        catch (const exception &e) {   
+          break;
+        }
       }
-      catch (const exception &e) {   
-        break;
-      }
-    }
 
-    // calculate RELATIVE transformation
-    double tinv[16];
-    M4inv(transMatOrig, tinv);
+      // calculate RELATIVE transformation
+      /*
+      double tinv[16];
+      M4inv(transMatOrig, tinv);
 
-    double tfin[16];
-    MMult(transMat, tinv, tfin);
-
-    if(!extrapolate_pose) {
-      Scan::allScans[fileCounter - start - 1]->transformAll(transMatOrig);
+      double tfin[16];
+      MMult(transMat, tinv, tfin);
+      //Scan::allScans[fileCounter - start - 1]->transformMatrix(tfin);
       //Scan::allScans[fileCounter - start - 1]->transformMatrix(tinv);
-    } else {
-      Scan::allScans[fileCounter - start - 1]->transformAll(transMat);
       // save final pose in scan
-      Scan::allScans[fileCounter - start - 1]->transformMatrix(tfin);
+      //Scan::allScans[fileCounter - start - 1]->transformMatrix(tfin);
+      */
+      Scan::allScans[fileCounter - start - 1]->transformAll(transMat);
+    
+    } else {
+      const double * transMatOrig = Scan::allScans[fileCounter - start - 1]->get_transMatOrg();
+      Scan::allScans[fileCounter - start - 1]->transformAll(transMatOrig);
     }
     frame_in.close();
     frame_in.clear();
@@ -343,7 +351,7 @@ int main(int argc, char **argv)
   int    start = 0,   end = -1;
   int    maxDist    = -1;
   int    minDist    = -1;
-  bool   eP         = true;  // should we extrapolate the pose??
+  bool   uP         = false;  // should we use the pose information instead of the frames?? 
   bool   use_xyz = false;
   bool   use_color = false;
   bool   use_reflectance = false;
@@ -354,10 +362,11 @@ int main(int argc, char **argv)
   string customFilter;
   double scaleFac = 0.01;
   bool hexfloat = false;
+  bool high_precision = false;
 
   parseArgs(argc, argv, dir, red, rand, start, end,
-      maxDist, minDist, eP, use_xyz, use_reflectance, use_color, octree, iotype, customFilter, scaleFac,
-      hexfloat);
+      maxDist, minDist, uP, use_xyz, use_reflectance, use_color, octree, iotype, customFilter, scaleFac,
+      hexfloat, high_precision);
 
 
   rangeFilterActive = minDist > 0 || maxDist > 0;
@@ -469,9 +478,7 @@ int main(int argc, char **argv)
     // reduction filter for current scan!
   }
 
-  if(eP) {
-  }
-  readFrames(dir, start, end, eP);
+  readFrames(dir, start, end, uP);
   
  cout << "Export all 3D Points to file \"points.pts\"" << endl;
  cout << "Export all 6DoF poses to file \"positions.txt\"" << endl;
@@ -495,9 +502,9 @@ int main(int argc, char **argv)
         for(unsigned int i = 0; i < xyz.size(); i++) xyz_reflectance[i] = 255;
       }
       if(use_xyz) {
-        write_xyzr(xyz, xyz_reflectance, redptsout, scaleFac, hexfloat);
+        write_xyzr(xyz, xyz_reflectance, redptsout, scaleFac, hexfloat, high_precision);
       } else {
-        write_uosr(xyz, xyz_reflectance, redptsout, hexfloat);
+        write_uosr(xyz, xyz_reflectance, redptsout, hexfloat, high_precision);
       }
       
     } else if(use_color) {
@@ -514,16 +521,16 @@ int main(int argc, char **argv)
         }
       }
       if(use_xyz) {
-        write_xyz_rgb(xyz, xyz_color, redptsout, scaleFac, hexfloat);
+        write_xyz_rgb(xyz, xyz_color, redptsout, scaleFac, hexfloat, high_precision);
       } else {
-        write_uos_rgb(xyz, xyz_color, redptsout, hexfloat);
+        write_uos_rgb(xyz, xyz_color, redptsout, hexfloat, high_precision);
       }
 
     } else {
       if(use_xyz) {
-        write_xyz(xyz, redptsout, scaleFac, hexfloat);
+        write_xyz(xyz, redptsout, scaleFac, hexfloat, high_precision);
       } else {
-        write_uos(xyz, redptsout, hexfloat);
+        write_uos(xyz, redptsout, hexfloat, high_precision);
       }
     
     }

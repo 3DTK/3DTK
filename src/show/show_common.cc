@@ -501,7 +501,8 @@ int parseArgs(int argc,char **argv,
               PointType &ptype, float &fps, string &loadObj,
               bool &loadOct, bool &saveOct, bool &autoOct, int &origin, bool &originset,
               double &scale, IOType &type, bool& scanserver, 
-              double& sphereMode, string& customFilter, string& trajectoryFile, int &stepsize)
+              double& sphereMode, string& customFilter, string& trajectoryFile,
+              int &stepsize, bool &identity)
 {
   unsigned int types = PointType::USE_NONE;
   start   = 0;
@@ -537,6 +538,7 @@ int parseArgs(int argc,char **argv,
     { "height",          no_argument,         0,  'h' },
     { "type",            no_argument,         0,  'T' },
     { "color",           no_argument,         0,  'c' },
+    { "identity",        no_argument,         0,  'i' },
     { "dimensions",      required_argument,   0,  'x' },
     { "loadObj",         required_argument,   0,  'l' },
     { "saveOct",         no_argument,         0,  '0' },
@@ -557,7 +559,7 @@ int parseArgs(int argc,char **argv,
   int option_index = 0;
 
 
-  while ((c = getopt_long(argc, argv,"F:f:s:e:r:m:M:O:o:l:x:C:u:SwtRDadhTcbA2J", longopts, &option_index)) != -1) {
+  while ((c = getopt_long(argc, argv,"F:f:s:e:r:m:M:O:o:l:x:C:u:SwtRDadhTcbA2Ji", longopts, &option_index)) != -1) {
     switch (c) {
       case 0:
         if (strcmp(longopts[option_index].name, "autoOct") == 0) {
@@ -586,6 +588,9 @@ int parseArgs(int argc,char **argv,
         if (end < start) {
           cerr << "Error: <end> cannot be smaller than <start>.\n"; exit(1);
         }
+        break;
+      case 'i':
+        identity = true;
         break;
       case 'm':
         maxDist = atoi(optarg);
@@ -893,16 +898,20 @@ void generateFrames(int start, int end, bool identity) {
     vector <double*> Matrices;
     vector <Scan::AlgoType> algoTypes;
 
+    double mirror[16];
+    M4identity(mirror);
+    mirror[10] = -1.0;
     for (int i = 0; i < 3; i++) {
-      double *transMat = new double[16];
+      double * transMat = new double[16];
 
       if (identity) {
-        M4identity(transMat);
-        transMat[10] = -1.0;
+        for(int j = 0; j < 16; j++) transMat[j] = mirror[j];
       } else {
+        double tmpxf[16];
         EulerToMatrix4(Scan::allScans[index]->get_rPos(),
                        Scan::allScans[index]->get_rPosTheta(),
-                       transMat );
+                       tmpxf );
+        MMult(mirror, tmpxf, transMat);
       }
 
       Matrices.push_back(transMat);
@@ -971,6 +980,7 @@ void initShow(int argc, char **argv){
   string customFilter;
   string trajectoryFile;
   int stepsize = 1;
+  bool identity = false;
 
   pose_file_name = new char[1024];
   path_file_name = new char[1024];
@@ -983,7 +993,7 @@ void initShow(int argc, char **argv){
   parseArgs(argc, argv, dir, start, end, maxDist, minDist, red, readInitial,
             octree, pointtype, idealfps, loadObj, loadOct, saveOct, autoOct,
             origin, originset, scale, type, scanserver, sphereMode,
-            customFilter, trajectoryFile, stepsize);
+            customFilter, trajectoryFile, stepsize, identity);
 
   // modify all scale dependant variables
   scale = 1.0 / scale;
@@ -1283,7 +1293,7 @@ void initShow(int argc, char **argv){
   scanIOtype = type;
   
   if(readFrames(dir, start, real_end, readInitial, type))
-    generateFrames(start, real_end, false /*use .pose*/);
+    generateFrames(start, real_end, identity /*use .pose or identity*/);
   else cout << "Using existing frames..." << endl;
 
   cm->setCurrentType(PointType::USE_HEIGHT);
