@@ -503,6 +503,16 @@ else()
   message(STATUS "Without python bindings")
 endif()
 
+## ROS
+
+OPT_DEP(WITH_ROS "Whether or not to build ROS related components" OFF "WITH_ROS")
+
+if(WITH_ROS)
+  message(STATUS "With ROS support")
+else()
+  message(STATUS "Without ROS support")
+endif()
+
 #################################################
 # OPERATING SYSTEM SPECIFIC BEHAVIOUR          ##
 #################################################
@@ -649,6 +659,7 @@ add_subdirectory(src/collision)
 add_subdirectory(src/peopleremover)
 add_subdirectory(src/cuda)
 add_subdirectory(src/calibration)
+add_subdirectory(src/ros)
 add_subdirectory(3rdparty)
 add_subdirectory(bindings)
 if(WITH_ADDONS)
