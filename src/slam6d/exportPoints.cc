@@ -190,7 +190,7 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &rand,
   cout << endl;
   int option_index = 0;
   const char *name;
-  while ((c = getopt_long(argc, argv, "f:s:e:r:O:Rm:y:M:u:pxch", longopts, &option_index)) != -1)
+  while ((c = getopt_long(argc, argv, "f:s:e:r:O:Rm:y:M:u:pxchH", longopts, &option_index)) != -1)
     switch (c)
      {
 	     case 0:
