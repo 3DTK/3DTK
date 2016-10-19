@@ -18,8 +18,8 @@ if(WITH_ROS)
   include_directories(${catkin_INCLUDE_DIRS})
 
   pkg_check_modules(OROCOS_BFL REQUIRED orocos-bfl)
-  include_directories(${BFL_INCLUDE_DIRS})
-  link_directories(${BFL_LIBRARY_DIRS})
+  include_directories(${OROCOS_BFL_INCLUDE_DIRS})
+  link_directories(${OROCOS_BFL_LIBRARY_DIRS})
 
   add_subdirectory(riegl)
   add_subdirectory(volksbotRT)
