@@ -16,7 +16,6 @@ if(WITH_ROS)
 
   include_directories(${CATKIN_DEVEL_PREFIX}/include)
   include_directories(${catkin_INCLUDE_DIRS})
-  include_directories(${EIGEN3_INCLUDE_DIRS})
 
   pkg_check_modules(BFL REQUIRED bfl)
   include_directories(${BFL_INCLUDE_DIRS})
