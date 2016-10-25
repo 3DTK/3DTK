@@ -79,13 +79,20 @@
 #include "slam6d/metrics.h"
 #endif //WITH_METRICS
 
+#ifdef TARGET_OS_MAC
+#include <GL/glew.h>
+#include <Gl/glui.h>
+#else
 #include <GL/gl.h>			/* OpenGL header file */
 #include <GL/glu.h>			/* OpenGL utilities header file */
+#endif
 
 #ifdef _MSC_VER
 #include <GL/glut.h>
 #else
+#ifndef TARGET_OS_MAC
 #include <GL/freeglut.h>
+#endif
 #endif
 
 #ifndef _MSC_VER
@@ -950,7 +957,7 @@ void MatchTwoScan(icp6D *my_icp, VeloScan* currentScan, int scanCount, bool eP )
 		if (scanCount > 0)
 		{
 				PreviousScan = Scan::allScans[scanCount-1];
-				// extrapolate odometry // 以前一帧的坐标为基准
+				// extrapolate odometry // 锟斤拷前一帧锟斤拷锟斤拷锟斤拷为锟斤拷准
 				if (eP)
 					currentScan->mergeCoordinatesWithRoboterPosition(PreviousScan);
 
