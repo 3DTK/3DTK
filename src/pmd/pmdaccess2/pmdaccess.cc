@@ -20,7 +20,7 @@
 #include <stdio.h>
 #include <xmlrpc-c/base.hpp>
 #include <xmlrpc-c/client_simple.hpp>
-
+#include <unistd.h>
 
 
 int sockfd;

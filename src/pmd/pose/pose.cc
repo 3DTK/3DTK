@@ -24,7 +24,7 @@
 #endif
 
 // GL: GLFW (window etc, ala glut) and FTGL (text rendering)
-#include <GL/glfw.h>
+#include <GLFW/glfw3.h>
 #include <ftgl.h>
 
 // PMD-related stuff
