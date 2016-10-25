@@ -31,13 +31,20 @@
 #include "veloslam/debugview.h"
 #include "veloslam/kalmanfilter.h"
 
-#include <GL/gl.h>		    	/* OpenGL header file */
+#ifdef TARGET_OS_MAC
+#include <GL/glew.h>
+#include <Gl/glui.h>
+#else
+#include <GL/gl.h>			/* OpenGL header file */
 #include <GL/glu.h>			/* OpenGL utilities header file */
+#endif
 
 #ifdef _MSC_VER
 #include <GL/glut.h>
 #else
+#ifndef TARGET_OS_MAC
 #include <GL/freeglut.h>
+#endif
 #endif
 
 #define KG 35
