@@ -19,7 +19,6 @@
 #define to_degrees(x) ( (x) * (180.0 / M_PI ))
 
 void sincos(double ra, double * sinra, double* cosra);
-int isless(double x, double y);
 
 
 //inline int isfinite(double x) { return _finite(x); }
