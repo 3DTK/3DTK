@@ -5,13 +5,20 @@
 #include "veloslam/veloscan.h"
 #include "veloslam/tracker.h"
 
+#ifdef TARGET_OS_MAC
+#include <GL/glew.h>
+#include <Gl/glui.h>
+#else
 #include <GL/gl.h>			/* OpenGL header file */
 #include <GL/glu.h>			/* OpenGL utilities header file */
+#endif
 
 #ifdef _MSC_VER
 #include <GL/glut.h>
 #else
+#ifndef TARGET_OS_MAC
 #include <GL/freeglut.h>
+#endif
 #endif
 
 /** for Glut display mode */
