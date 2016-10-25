@@ -311,7 +311,7 @@ void readFrames(string dir, int start, int end, bool use_pose=false)
       }
 
       // calculate RELATIVE transformation
-      /*
+      const double * transMatOrig = Scan::allScans[fileCounter - start - 1]->get_transMatOrg();
       double tinv[16];
       M4inv(transMatOrig, tinv);
 
@@ -320,8 +320,8 @@ void readFrames(string dir, int start, int end, bool use_pose=false)
       //Scan::allScans[fileCounter - start - 1]->transformMatrix(tfin);
       //Scan::allScans[fileCounter - start - 1]->transformMatrix(tinv);
       // save final pose in scan
-      //Scan::allScans[fileCounter - start - 1]->transformMatrix(tfin);
-      */
+      Scan::allScans[fileCounter - start - 1]->transformMatrix(tfin);
+      
       Scan::allScans[fileCounter - start - 1]->transformAll(transMat);
     
     } else {
