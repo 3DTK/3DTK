@@ -49,7 +49,7 @@ if(Boost_FOUND)
   add_definitions(${Boost_LIB_DIAGNOSTIC_DEFINITIONS})
 endif()
 
-if(NOT WIN32)
+if(NOT WIN32 AND NOT APPLE)
   find_package(LibZip REQUIRED)
   if(${LIBZIP_VERSION} VERSION_LESS 0.11.2)
     set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DLIBZIP_OLD")
@@ -59,7 +59,10 @@ if(NOT WIN32)
   endif()
 endif()
 
-
+if(APPLE)
+  find_package(LibZip REQUIRED)
+  include_directories("${LIBZIP_INCLUDE_DIR_ZIPCONF}")
+endif()
 
 if(APPLE)
   find_package(OpenCV REQUIRED HINTS "/usr/local/opt/opencv3/share/OpenCV/")
