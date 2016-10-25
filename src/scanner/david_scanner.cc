@@ -50,6 +50,8 @@
 
 #include <math.h>
 #include <vector>
+#include <opencv2/calib3d/calib3d_c.h>
+
 #define PI 3.14159265
 using namespace std;
 
