@@ -755,6 +755,7 @@ void model::Scene::detectPotentialOpenings(const LabeledPlane3d& surf,
     cv::Mat labelsMat(nrSamples, 1, CV_32FC1, labels);
 
     // set up the SVM parameters
+#if CV_MAJOR_VERSION <= 2
     cv::SVMParams params;
     params.svm_type = cv::SVM::NU_SVC;
     params.kernel_type = cv::SVM::RBF;
@@ -767,6 +768,13 @@ void model::Scene::detectPotentialOpenings(const LabeledPlane3d& surf,
     // create SVM and train it
     cv::SVM svm;
     svm.train_auto(trainingMat, labelsMat, cv::Mat(), cv::Mat(), params); // XXX with or without auto
+#else
+	cv::Ptr<cv::ml::SVM> svm = cv::ml::SVM::create();
+	svm->setType(cv::ml::SVM::NU_SVC);
+	svm->setKernel(cv::ml::SVM::RBF);
+	svm->setTermCriteria(cv::TermCriteria(cv::TermCriteria::MAX_ITER, 1000, 1e-6));
+	svm->train(trainingMat, cv::ml::ROW_SAMPLE, labelsMat);
+#endif
 
     // store these openings, and filter some more later on
     std::vector<CandidateOpening> tempOpenings;
@@ -788,7 +796,11 @@ void model::Scene::detectPotentialOpenings(const LabeledPlane3d& surf,
         cv::Mat candidateMat(1, nrFeatures, CV_32FC1, candidateData);
 
         // decide of which type the current opening is
+#if CV_MAJOR_VERSION <= 2
         float response = svm.predict(candidateMat);
+#else
+        float response = svm->predict(candidateMat);
+#endif
         if (response == mainLabel) {
             tempOpenings.push_back(*it);
         }
