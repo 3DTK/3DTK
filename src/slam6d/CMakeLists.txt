@@ -121,10 +121,6 @@ set(SCANLIB_SRCS
         icp6Dnapx.cc      normals.cc        kdIndexed.cc
         )
 
-if(WITH_METRICS)
-  set(SCANLIB_SRCS ${SCANLIB_SRCS} metrics.cc)
-endif()
-
 add_library(scan STATIC ${SCANLIB_SRCS})
 
 find_package(OpenCV REQUIRED)
