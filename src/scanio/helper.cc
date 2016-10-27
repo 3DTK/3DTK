@@ -261,8 +261,12 @@ std::streamsize uosHeaderTest(std::istream& infile, char **line, std::streamsize
 bool strtoval(char *pos, unsigned int linenr, double* ret)
 {
     char *endptr;
-    errno = 0;
+    errno = 0;   
+    char *saved_locale;
+    saved_locale = setlocale(LC_NUMERIC, "C");
     double val = strtod(pos, &endptr);
+    setlocale(LC_NUMERIC, saved_locale);
+
     if (errno == ERANGE) {
         std::cerr << "error in line " << linenr << endl;
         if (val == HUGE_VAL) {
@@ -289,7 +293,11 @@ bool strtoval(char *pos, unsigned int linenr, float* ret)
 {
     char *endptr;
     errno = 0;
+    char *saved_locale;
+    saved_locale = setlocale(LC_NUMERIC, "C");
     float val = strtof(pos, &endptr);
+    setlocale(LC_NUMERIC, saved_locale);
+
     if (errno == ERANGE) {
         std::cerr << "error in line " << linenr << endl;
         if (val == HUGE_VALF) {
@@ -316,7 +324,11 @@ bool strtoval(char *pos, unsigned int linenr, unsigned char* ret)
 {
     char *endptr;
     errno = 0;
+    char *saved_locale;
+    saved_locale = setlocale(LC_NUMERIC, "C");
     long val = strtol(pos, &endptr, 10);
+    setlocale(LC_NUMERIC, saved_locale);
+
     if (errno != 0 && val == 0) {
         std::cerr << "error in line " << linenr << endl;
         perror("strol");
@@ -346,7 +358,10 @@ bool strtoval(char *pos, unsigned int linenr, int* ret)
 {
     char *endptr;
     errno = 0;
+    char *saved_locale;
+    saved_locale = setlocale(LC_NUMERIC, "C");
     long val = strtol(pos, &endptr, 10);
+    setlocale(LC_NUMERIC, saved_locale);
     if (errno != 0 && val == 0) {
         std::cerr << "error in line " << linenr << endl;
         perror("strol");

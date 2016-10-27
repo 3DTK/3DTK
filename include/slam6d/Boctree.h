@@ -434,7 +434,8 @@ public:
   long countNodes() { return 1 + countNodes(*root); } // computes number of inner nodes
   long countLeaves() { return countLeaves(*root); }   // computes number of leaves + points
   long countOctLeaves() { return countOctLeaves(*root); } // computes number of leaves
-
+  long countPoints() { return countPoints(*root); } // computes number of points
+    
   void deserialize(std::string filename ) {
     char buffer[sizeof(T) * 20];
     T *p = reinterpret_cast<T*>(buffer);
@@ -1001,6 +1002,25 @@ protected:
           result ++;
         } else { // recurse
           result += countTrueLeaves(children->node);
+        }
+        ++children; // next child
+      }
+    }
+    return result;
+  }
+
+  long countPoints(bitoct &node) {
+    long result = 0;
+    bitunion<T> *children;
+    bitoct::getChildren(node, children);
+
+    for (short i = 0; i < 8; i++) {
+      if (  ( 1 << i ) & node.valid ) {   // if ith node exists
+        if (  ( 1 << i ) & node.leaf ) {   // if ith node is leaf
+          long nrpts = children->getLength();
+          result += nrpts;
+        } else { // recurse
+          result += countLeaves(children->node);
         }
         ++children; // next child
       }
