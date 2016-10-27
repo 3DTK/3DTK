@@ -88,7 +88,7 @@ void CalibrationToolbox::matchTags() {
                 patPoints.push_back(aprilTag3f.point4);
 
                 //Punkte mit ID zwischen minEstID und maxEstID
-                if (find(settings.estIDs.begin(), settings.estIDs.end(), aprilTag2f.id) != settings.estIDs.end()) {
+                if (settings.pattern == Settings::APRIL_3D && find(settings.estIDs.begin(), settings.estIDs.end(), aprilTag2f.id) != settings.estIDs.end()) {
                     imgEstPoints.push_back(aprilTag2f.point1);
                     imgEstPoints.push_back(aprilTag2f.point2);
                     imgEstPoints.push_back(aprilTag2f.point3);
