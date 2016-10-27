@@ -216,7 +216,7 @@ namespace fbr
       }
     else
       {
-	cout<<"Panorma has not been initialized!";
+	cout<<"Panorama has not been initialized!";
       }
   }
 

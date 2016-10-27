@@ -612,7 +612,13 @@ void BasicScan::createOcttree()
 
 BOctTree<float>* BasicScan::convertScanToShowOcttree()
 {
-  string scanFileName = m_path + "scan" + m_identifier + ".oct";
+  string scanFileName;
+  if (m_path.back() == '/') {
+    scanFileName = m_path + "scan" + m_identifier + ".oct";
+  } else {
+    scanFileName = m_path + "/scan" + m_identifier + ".oct";
+  }
+
   BOctTree<float>* btree = 0;
   boost::filesystem::path octpath(scanFileName);
 
@@ -624,7 +630,6 @@ BOctTree<float>* BasicScan::convertScanToShowOcttree()
     btree = new BOctTree<float>(scanFileName);
     return btree;
   }
-
   // create octtree from scan
   if (octtree_reduction_voxelSize > 0) { // with reduction, only xyz points
     DataXYZ xyz_r(get("xyz reduced show"));
@@ -634,6 +639,7 @@ BOctTree<float>* BasicScan::convertScanToShowOcttree()
                                 octtree_pointtype,
                                 true);
   } else { // without reduction, xyz + attribute points
+
     float** pts = octtree_pointtype.createPointArray<float>(this);
     size_t nrpts = size<DataXYZ>("xyz");
     btree = new BOctTree<float>(pts,
@@ -650,7 +656,6 @@ BOctTree<float>* BasicScan::convertScanToShowOcttree()
   if(octtree_saveOct &&
       (!octtree_autoOct || !boost::filesystem::exists(scanFileName) ||
         getLastModified() > boost::filesystem::last_write_time(octpath))) {
-    cout << "Saving octree " << scanFileName << endl;
     btree->serialize(scanFileName);
   }
   return btree;
