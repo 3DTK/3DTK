@@ -6,6 +6,7 @@ import math
 import argparse
 from multiprocessing import Pool
 import os
+from functools import cmp_to_key
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..', 'lib'))
 try:
@@ -13,6 +14,17 @@ try:
 except ImportError:
     print("Cannot find py3dtk module. Try recompiling 3dtk with WITH_PYTHON set to ON", file=sys.stderr)
     exit(1)
+
+sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..', 'src', 'spherical_quadtree'))
+import spherical_quadtree as sq
+
+def dist2(a,b):
+    x1,x2,x3 = a
+    y1,y2,y3 = b
+    d1 = x1-y1
+    d2 = x2-y2
+    d3 = x3-y3
+    return d1*d1+d2*d2+d3*d3
 
 def iter_baskets_from(items, maxbaskets):
     '''generates evenly balanced baskets from indexable iterable'''
@@ -51,6 +63,8 @@ def mp_proc(l):
 def walk_voxels(start, end, voxel_size, voxel_occupied_by_slice, current_slice, max_search_distance, diff, max_target_dist, max_target_proximity):
     #print("from: %f %f %f" % start)
     #print("to: %f %f %f" % end)
+    if max_search_distance == 0:
+        return set()
     direction = (end[0] - start[0], end[1] - start[1], end[2] - start[2])
     dist = math.sqrt(direction[0]*direction[0]+direction[1]*direction[1]+direction[2]*direction[2])
     # check if the point is too far away
@@ -154,6 +168,7 @@ def walk_voxels(start, end, voxel_size, voxel_occupied_by_slice, current_slice, 
                 Z = startZ + multZ*stepZ
                 tMaxZ += tDeltaZ
         #print("%f %f %f" % (tMaxX, tMaxY, tMaxZ))
+        #print("visiting voxel: %d %d %d"%(X,Y,Z))
         # if the voxel has no point in it at all, continue searching
         if (X, Y, Z) not in voxel_occupied_by_slice:
             # we don't need to add this voxel to the empty voxel list because it was
@@ -175,6 +190,7 @@ def walk_voxels(start, end, voxel_size, voxel_occupied_by_slice, current_slice, 
         #diff = 0
         if diff == 0:
             if current_slice not in voxel_occupied_by_slice[(X, Y, Z)]:
+                #print("adding to empty voxels: %d %d %d"%(X,Y,Z))
                 empty_voxels.add((X, Y, Z))
                 continue
             break
@@ -213,6 +229,8 @@ def formatname_to_io_type(string):
         return py3dtk.IOType.XYZR
     if string.lower() == "riegl_txt":
         return py3dtk.IOType.RIEGL_TXT
+    if string.lower() == "rxp":
+        return py3dtk.IOType.RXP
 
 def main():
     parser = argparse.ArgumentParser()
@@ -246,22 +264,21 @@ def main():
     for i,s in enumerate(py3dtk.allScans, start=args.start):
         print("%f" % ((((i-args.start)+1)*100)/len_trajectory), end="\r", file=sys.stderr)
         # ignore points that are closer than 10 units
-        s.setRangeFilter(-1, 10)
+        #s.setRangeFilter(-1, 100)
+        xyz_orig = list(py3dtk.DataXYZ(s.get("xyz")))
         # transform all points into the global coordinate system
         s.transformAll(s.get_transMatOrg())
         # add the current position to the trajectory
         trajectory.append(s.get_rPos())
         # add all the points into their respective slices
-        points = set()
-        xyz = py3dtk.DataXYZ(s.get("xyz"))
+        xyz = list(py3dtk.DataXYZ(s.get("xyz")))
         refl = py3dtk.DataReflectance(s.get("reflectance"))
-        if len(xyz) != len(refl):
+        if len(xyz) != len(refl) or len(xyz_orig) != len(refl):
             print("unequal lengths %d %d in %d" % (len(xyz), len(refl), i))
             exit(1)
-        for (x,y,z),r in zip(xyz,refl):
-            points.add((x,y,z,r))
+        points = list(zip(xyz,xyz_orig,refl))
         points_by_slice.append(points)
-        #print("number of points in scan %d: %d" % (i, len(points)), file=sys.stderr)
+        print("number of points in scan %d: %d" % (i, len(points)), file=sys.stderr)
 
     print("calculate voxel occupation", file=sys.stderr)
 
@@ -269,7 +286,7 @@ def main():
 
     for i, points in enumerate(points_by_slice):
         print("%f" % (((i+1)*100)/len_trajectory), end="\r", file=sys.stderr)
-        for x,y,z,_ in points:
+        for (x,y,z),_,_ in points:
             voxel_occupied_by_slice[voxel_of_point((x,y,z), voxel_size)].add(i)
     print("", file=sys.stderr)
 
@@ -285,11 +302,114 @@ def main():
 
     # if requested, split the work into jobs
     if args.jobs == 1:
+        voxel_diagonal = math.sqrt(3*voxel_size*voxel_size)
         for i, pos in enumerate(trajectory):
-            print("%f" % (((i+1)*100)/len_trajectory), end="\r", file=sys.stderr)
-            for j,(x,y,z,_) in enumerate(points_by_slice[i]):
+            #print("%f" % (((i+1)*100)/len_trajectory), end="\r", file=sys.stderr)
+            # Sort the points by their distance from the scanner in ascending
+            # order.
+            # for every element of the list
+            xyz = sorted(points_by_slice[i], key=cmp_to_key(lambda a,b: dist2((0,0,0),a[1]) - dist2((0,0,0),b[1])))
+            print("d: ", math.sqrt(dist2(xyz[0][1], (0,0,0))))
+            # build a quad tree
+            qtree = sq.QuadTree([p for _,p,_ in xyz])
+            kdtree = py3dtk.KDtree([p for _,p,_ in xyz])
+            maxranges = [None]*len(xyz)
+            # for each point in this scan (starting from the point closest to
+            # the scanner) use its normal to calculate until when the line of
+            # sight up to the point should be searched and apply the same limit
+            # to all the points in its "shadow"
+            for j,(_,p,_) in enumerate(xyz):
+                # point was already assigned a maximum range
+                if maxranges[j] is not None:
+                    continue
+                # distance of the point from the scanner
+                k_nearest = kdtree.kNearestNeighbors(p, 20)
+                normal = py3dtk.calculateNormal(k_nearest)
+                if sq.length(normal) < 0.99999 or sq.length(normal) > 1.00001:
+                    raise Exception("normal vector is not of unit length")
+                # make sure that the normal vector points *toward* the scanner
+                p_norm = sq.norm(p)
+                angle_cos = normal[0]*p_norm[0]+normal[1]*p_norm[1]+normal[2]*p_norm[2]
+                # we don't need to calculate the acos to get the real angle
+                # between the point vector and the normal because values less
+                # than zero map to angles of more than 90 degrees
+                if angle_cos >= 0:
+                    # make sure that the normal turns toward the scanner
+                    normal = (-1*normal[0], -1*normal[1], -1*normal[2])
+                # we only want to traverse the lines of sight until they hit
+                # the plane that lies a voxel diagonal above the current point
+                # in normal direction
+                # the base of that plane:
+                p_base = (p[0]+normal[0]*voxel_diagonal,
+                        p[1]+normal[1]*voxel_diagonal,
+                        p[2]+normal[2]*voxel_diagonal)
+                # the dividend should stay the same as it's only dependent on
+                # the base of the plane
+                dividend = p_base[0]*normal[0]+p_base[1]*normal[1]+p_base[2]*normal[2]
+                # calculate the divisor for the current point
+                divisor = p_norm[0]*normal[0]+p_norm[1]*normal[1]+p_norm[2]*normal[2]
+                if dividend/divisor > sq.length(p):
+                    raise Exception("p got lengthened: ", dividend/divisor)
+                maxranges[j] = dividend/divisor
+                if maxranges[j] < 0:
+                    maxranges[j] = 0
+                # check
+                new_p = maxranges[j]*p[0], maxranges[j]*p[1], maxranges[j]*p[2]
+                diff = p[0]-new_p[0], p[1]-new_p[1], p[2]-new_p[2]
+                #print(sq.length(diff))
+                #print(sq.length(p)-maxranges[j])
+                # now find all the points in the shadow of this one
+                # the size of the shadow is determined by the angle under
+                # which the voxel diagonal is seen at that distance
+                angle = 2*math.atan2(voxel_diagonal, 2*sq.length(p))
+                for k in qtree.search(p_norm, angle):
+                    p_k = xyz[k][1]
+                    p_k_norm = sq.norm(p_k)
+                    divisor = p_k_norm[0]*normal[0]+p_k_norm[1]*normal[1]+p_k_norm[2]*normal[2]
+                    d = dividend/divisor
+                    if d > sq.length(p_k):
+                        continue
+                    if d < 0:
+                        d = 0
+                    if maxranges[k] is not None and maxranges[k] < d:
+                        # point is already covered by a closer one
+                        continue
+                    maxranges[k] = d
+            #maxranges = [m-2*voxel_diagonal for m in maxranges]
+            # sanity check
+            #for j,p in enumerate(xyz):
+            #    r = math.sqrt(dist2(pos,p))
+            #    if r < maxranges[j]:
+            #        raise Exception("duck")
+            with open("scan%03d.pose" % (i+2), "w") as f:
+                print("%f %f %f"%pos, file=f)
+                print("0 0 0", file=f)
+            with open("scan%03d.3d" % (i+2), "w") as f:
+                for j,(_,p,_) in enumerate(xyz):
+                    maxrange = maxranges[j]
+                    d = tuple(p)
+                    r = sq.length(d)
+                    #if r < 100:
+                    #    raise Exception("duck 3: %f" % r)
+                    factor = maxrange/r
+                    if factor > 1:
+                        raise Exception("duck 2: %f" % factor)
+                    if factor < 0:
+                        raise Exception("duck 3: ", factor, maxrange, r)
+                    d = d[0]*factor, d[1]*factor, d[2]*factor
+                    #if math.sqrt(dist2(d, (0,0,0))) < 100:
+                    #    raise Exception("duck: %f" % math.sqrt(dist2(d, (0,0,0))))
+                    print("%f %f %f 0" % d, file=f)
+
+            for j,(p,_,_) in enumerate(xyz):
                 #print("%f (%d)" % (((i+1)*100)/len_trajectory, j), end="\r", file=sys.stderr)
-                free = walk_voxels(pos, (x,y,z), voxel_size, voxel_occupied_by_slice, i, args.max_search_distance, args.diff, args.max_target_distance, args.max_target_proximity)
+                if args.max_search_distance is None:
+                    maxrange = maxranges[j]
+                else:
+                    maxrange = min(maxranges[j], args.max_search_distance)
+                #maxrange = None
+                free = walk_voxels(pos, p, voxel_size, voxel_occupied_by_slice, i, maxrange, args.diff, args.max_target_distance, args.max_target_proximity)
+                #print(free)
                 free_voxels |= free
     else:
         jobs = []
@@ -307,22 +427,23 @@ def main():
     print("number of freed voxels: %d (%f %%)" % (len(free_voxels), 100*len(free_voxels)/len(voxel_occupied_by_slice)), file=sys.stderr)
 
     print("write result", file=sys.stderr)
-
     with open("scan000.3d", "w") as f1, open("scan001.3d", "w") as f2:
         for i, points in enumerate(points_by_slice):
             print("%f" % (((i+1)*100)/len_trajectory), end="\r", file=sys.stderr)
-            for x,y,z,r in points:
+            for (x,y,z),_,r in points:
                 voxel = voxel_of_point((x,y,z), voxel_size)
                 if voxel not in free_voxels:
-                    f1.write("%s %s %s %s\n" % (x.hex(),y.hex(),z.hex(),r.hex()))
+                    #f1.write("%s %s %s %s\n" % (x.hex(),y.hex(),z.hex(),r.hex()))
+                    f1.write("%f %f %f %f\n"%(x,y,z,r))
                 else:
-                    f2.write("%s %s %s %s\n" % (x.hex(),y.hex(),z.hex(),r.hex()))
+                    #f2.write("%s %s %s %s\n" % (x.hex(),y.hex(),z.hex(),r.hex()))
+                    f2.write("%f %f %f %f\n"%(x,y,z,r))
     for pose in ["scan000.pose", "scan001.pose"]:
         with open(pose, "w") as f:
             f.write("0 0 0\n0 0 0\n");
-    for frames in ["scan000.frames", "scan001.frames"]:
-        with open(frames, "w") as f:
-            f.write("1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 2\n");
+    #for frames in ["scan000.frames", "scan001.frames"]:
+    #    with open(frames, "w") as f:
+    #        f.write("1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 2\n");
     print("", file=sys.stderr)
     print("done", file=sys.stderr)
 
