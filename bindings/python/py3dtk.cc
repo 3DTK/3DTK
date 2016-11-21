@@ -2,6 +2,7 @@
 #include "slam6d/basicScan.h"
 #include "slam6d/kdIndexed.h"
 #include "slam6d/kd.h"
+#include "slam6d/normals.h"
 
 #include <boost/python.hpp>
 #include <boost/python/suite/indexing/vector_indexing_suite.hpp>
@@ -278,6 +279,24 @@ class KDtreeWrapper : public KDtree
 };
 
 
+boost::python::tuple calculateNormalWrapper(boost::python::list pts) {
+	size_t num_pts = extract<std::size_t>(pts.attr("__len__")());
+	vector<Point> points;
+	points.reserve(num_pts);
+	for (size_t i = 0; i < num_pts; ++i) {
+		boost::python::tuple t = extract<boost::python::tuple>(pts[i]);
+		points.push_back(Point(extract<double>(t[0]), extract<double>(t[1]), extract<double>(t[2])));
+	}
+	double norm[3];
+	calculateNormal(points, norm);
+	boost::python::list p;
+	p.append(norm[0]);
+	p.append(norm[1]);
+	p.append(norm[2]);
+	return boost::python::tuple(p);
+}
+
+
 BOOST_PYTHON_MODULE(py3dtk)
 {
 	enum_<IOType>("IOType")
@@ -386,4 +405,6 @@ BOOST_PYTHON_MODULE(py3dtk)
 	class_<KDtreeWrapper>("KDtree", boost::python::init<boost::python::list>())
 		.def("FindClosest", &KDtreeWrapper::FindClosest)
 		.def("fixedRangeSearch", &KDtreeWrapper::fixedRangeSearch);
+
+	def("calculateNormal", calculateNormalWrapper);
 }
