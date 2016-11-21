@@ -196,6 +196,22 @@ class KDtreeIndexedWrapper : public KDtreeIndexed
 			return l;
 		}
 
+		boost::python::list kNearestNeighbors(boost::python::tuple _p, size_t k)
+		{
+			double *_pv = new double[3];
+			_pv[0] = extract<double>(_p[0]);
+			_pv[1] = extract<double>(_p[1]);
+			_pv[2] = extract<double>(_p[2]);
+			int threadNum = 0;
+			std::vector<size_t> res = KDtreeIndexed::kNearestNeighbors(_pv, k, threadNum);
+			boost::python::list l;
+			for (auto &it: res) {
+				l.append(it);
+			}
+			delete[] _pv;
+			return l;
+		}
+
 		~KDtreeIndexedWrapper()
 		{
 			for (size_t i = 0; i < m_size; ++i) {
@@ -257,6 +273,26 @@ class KDtreeWrapper : public KDtree
 			_pv[2] = extract<double>(_p[2]);
 			int threadNum = 0;
 			std::vector<Point> res = KDtree::fixedRangeSearch(_pv, sqRad2, threadNum);
+			boost::python::list l;
+			for (auto &it: res) {
+				boost::python::list p;
+				p.append(it.x);
+				p.append(it.y);
+				p.append(it.z);
+				l.append(boost::python::tuple(p));
+			}
+			delete[] _pv;
+			return l;
+		}
+
+		boost::python::list kNearestNeighbors(boost::python::tuple _p, size_t k)
+		{
+			double *_pv = new double[3];
+			_pv[0] = extract<double>(_p[0]);
+			_pv[1] = extract<double>(_p[1]);
+			_pv[2] = extract<double>(_p[2]);
+			int threadNum = 0;
+			std::vector<Point> res = KDtree::kNearestNeighbors(_pv, k, threadNum);
 			boost::python::list l;
 			for (auto &it: res) {
 				boost::python::list p;
@@ -400,11 +436,13 @@ BOOST_PYTHON_MODULE(py3dtk)
 
 	class_<KDtreeIndexedWrapper>("KDtreeIndexed", boost::python::init<boost::python::list>())
 		.def("FindClosest", &KDtreeIndexedWrapper::FindClosest)
-		.def("fixedRangeSearch", &KDtreeIndexedWrapper::fixedRangeSearch);
+		.def("fixedRangeSearch", &KDtreeIndexedWrapper::fixedRangeSearch)
+		.def("kNearestNeighbors", &KDtreeIndexedWrapper::kNearestNeighbors);
 		
 	class_<KDtreeWrapper>("KDtree", boost::python::init<boost::python::list>())
 		.def("FindClosest", &KDtreeWrapper::FindClosest)
-		.def("fixedRangeSearch", &KDtreeWrapper::fixedRangeSearch);
+		.def("fixedRangeSearch", &KDtreeWrapper::fixedRangeSearch)
+		.def("kNearestNeighbors", &KDtreeWrapper::kNearestNeighbors);
 
 	def("calculateNormal", calculateNormalWrapper);
 }
