@@ -106,7 +106,7 @@ def cart2geo(v):
 # "Comparing Geometrical Properties of Global Grids" by A. Jon Kimerling, Kevin Sahr, Denis White, and Lian Song
 # "Geodesic Discrete Global Grid Systems" by Kevin Sahr, Denis White, and A. Jon Kimerling
 # 
-class QuadTree:
+class QuadNode:
     def __init__(self, v1, v2, v3, pts):
         self.v1 = v1
         self.v2 = v2
@@ -138,10 +138,10 @@ class QuadTree:
                 pts4.append(p)
             else:
                 raise Exception("impossible")
-        self.t1 = QuadTree(v1,v4,v6,pts1)
-        self.t2 = QuadTree(v2,v5,v4,pts2)
-        self.t3 = QuadTree(v3,v6,v5,pts3)
-        self.t4 = QuadTree(v4,v5,v6,pts4)
+        self.t1 = QuadNode(v1,v4,v6,pts1)
+        self.t2 = QuadNode(v2,v5,v4,pts2)
+        self.t3 = QuadNode(v3,v6,v5,pts3)
+        self.t4 = QuadNode(v4,v5,v6,pts4)
 
     def __str__(self):
         if self.pts is not None:
@@ -198,6 +198,57 @@ class QuadTree:
         res.extend(self.t4.getall())
         return res
 
+class QuadTree:
+    def __init__(self, pts):
+        # project all points onto a unit sphere
+        self.pts = [ norm(v) for v in pts ]
+
+        # create a list containing the eight sides of the octahedron
+        mainvertices = []
+        for x in [-1,1]:
+            for y in [-1,1]:
+                for z in [-1,1]:
+                    # make sure that the vertices of the triangle are given in the same
+                    # order
+                    # i.e. make sure that the normal vector always points outward
+                    if (x > 0) ^ (y > 0) ^ (z > 0) == True:
+                        v1 = (x,0,0)
+                        v2 = (0,y,0)
+                        v3 = (0,0,z)
+                    else:
+                        v1 = (0,0,z)
+                        v2 = (0,y,0)
+                        v3 = (x,0,0)
+                    mainvertices.append((v1,v2,v3))
+
+        buckets = [[],[],[],[],[],[],[],[]]
+        print("sorting points into 8 areas", file=sys.stderr)
+        before = time.time()
+        for x,y,z in self.pts:
+            idx = int(x > 0) << 2 | int(y > 0) << 1 | int(z > 0)
+            ## the following is just a check to make sure that our assignment
+            ## algorithm works. It can be commented out after it has been verified
+            ## that the algorithm works.
+            #v1,v2,v3 = mainvertices[idx]
+            #if tripleproduct(v1,v2,(x,y,z)) > 0 and tripleproduct(v2,v3,(x,y,z)) > 0 and tripleproduct(v3,v1,(x,y,z)) > 0:
+            #    pass
+            #else:
+            #    raise Exception("duck")
+            buckets[idx].append((x,y,z))
+        after = time.time()
+        print("took: %f" % (after-before), file=sys.stderr)
+        print("constructing trees", file=sys.stderr)
+        before = time.time()
+        self.trees = [ QuadNode(v1,v2,v3,b) for b,(v1,v2,v3) in zip(buckets,mainvertices)]
+        after = time.time()
+        print("took: %f" % (after-before), file=sys.stderr)
+
+    def search(self, p, radius):
+        res = []
+        for t in self.trees:
+            res.extend(t.search(p,radius))
+        return res
+
 def main():
     fmt = py3dtk.IOType.UOS
     start = end = 0
@@ -212,44 +263,7 @@ def main():
     xyz = [ norm(v) for v in py3dtk.DataXYZ(py3dtk.allScans[0].get("xyz")) ]
     tp = [ cart2geo(v) for v in xyz ]
     random.seed(0)
-    mainvertices = []
-    for x in [-1,1]:
-        for y in [-1,1]:
-            for z in [-1,1]:
-                # make sure that the vertices of the triangle are given in the same
-                # order
-                # i.e. make sure that the normal vector always points outward
-                if (x > 0) ^ (y > 0) ^ (z > 0) == True:
-                    v1 = (x,0,0)
-                    v2 = (0,y,0)
-                    v3 = (0,0,z)
-                else:
-                    v1 = (0,0,z)
-                    v2 = (0,y,0)
-                    v3 = (x,0,0)
-                mainvertices.append((v1,v2,v3))
-
-    buckets = [[],[],[],[],[],[],[],[]]
-    print("sorting points into 8 areas", file=sys.stderr)
-    before = time.time()
-    for x,y,z in xyz:
-        idx = int(x > 0) << 2 | int(y > 0) << 1 | int(z > 0)
-        ## the following is just a check to make sure that our assignment
-        ## algorithm works. It can be commented out after it has been verified
-        ## that the algorithm works.
-        #v1,v2,v3 = mainvertices[idx]
-        #if tripleproduct(v1,v2,(x,y,z)) > 0 and tripleproduct(v2,v3,(x,y,z)) > 0 and tripleproduct(v3,v1,(x,y,z)) > 0:
-        #    pass
-        #else:
-        #    raise Exception("duck")
-        buckets[idx].append((x,y,z))
-    after = time.time()
-    print("took: %f" % (after-before), file=sys.stderr)
-    print("constructing trees", file=sys.stderr)
-    before = time.time()
-    trees = [ QuadTree(v1,v2,v3,b) for b,(v1,v2,v3) in zip(buckets,mainvertices)]
-    after = time.time()
-    print("took: %f" % (after-before), file=sys.stderr)
+    qtree = QuadTree(py3dtk.DataXYZ(py3dtk.allScans[0].get("xyz")))
     success = True
     for i in range(1000):
         p = random.choice(xyz)
@@ -296,8 +310,7 @@ def main():
         res4 = []
         # finally, use the quad-tree to do the searches
         before = time.time()
-        for t in trees:
-            res4.extend(t.search(p,radius))
+        res4 = qtree.search(p, radius)
         after = time.time()
         t_tree = after-before
         # to be able to compare the sets, we must convert the lists in
