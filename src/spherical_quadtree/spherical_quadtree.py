@@ -107,45 +107,48 @@ def cart2geo(v):
 # "Geodesic Discrete Global Grid Systems" by Kevin Sahr, Denis White, and A. Jon Kimerling
 # 
 class QuadNode:
-    def __init__(self, v1, v2, v3, pts):
+    def __init__(self, v1, v2, v3, indices, pts):
+        self.pts = pts
         self.v1 = v1
         self.v2 = v2
         self.v3 = v3
         self.ccp, self.ccr = circumcircle(v1,v2,v3)
-        if len(pts) <= 100:
+        if len(indices) <= 100:
+            # make this a leave node
             self.t1 = None
             self.t2 = None
             self.t3 = None
             self.t4 = None
-            self.pts = pts
+            self.indices = indices
             return
-        self.pts = None
+        self.indices = None
         v4 = middle(v1,v2)
         v5 = middle(v2,v3)
         v6 = middle(v3,v1)
-        pts1 = []
-        pts2 = []
-        pts3 = []
-        pts4 = []
-        for p in pts:
+        indices1 = []
+        indices2 = []
+        indices3 = []
+        indices4 = []
+        for i in indices:
+            p = self.pts[i]
             if tripleproduct(v1,v4,p) > 0 and tripleproduct(v4,v6,p) > 0 and tripleproduct(v6,v1,p) > 0:
-                pts1.append(p)
+                indices1.append(i)
             elif tripleproduct(v2,v5,p) > 0 and tripleproduct(v5,v4,p) > 0 and tripleproduct(v4,v2,p) > 0:
-                pts2.append(p)
+                indices2.append(i)
             elif tripleproduct(v3,v6,p) > 0 and tripleproduct(v6,v5,p) > 0 and tripleproduct(v5,v3,p) > 0:
-                pts3.append(p)
+                indices3.append(i)
             elif tripleproduct(v4,v5,p) > 0 and tripleproduct(v5,v6,p) > 0 and tripleproduct(v6,v4,p) > 0:
-                pts4.append(p)
+                indices4.append(i)
             else:
                 raise Exception("impossible")
-        self.t1 = QuadNode(v1,v4,v6,pts1)
-        self.t2 = QuadNode(v2,v5,v4,pts2)
-        self.t3 = QuadNode(v3,v6,v5,pts3)
-        self.t4 = QuadNode(v4,v5,v6,pts4)
+        self.t1 = QuadNode(v1,v4,v6,indices1, pts)
+        self.t2 = QuadNode(v2,v5,v4,indices2, pts)
+        self.t3 = QuadNode(v3,v6,v5,indices3, pts)
+        self.t4 = QuadNode(v4,v5,v6,indices4, pts)
 
     def __str__(self):
-        if self.pts is not None:
-            return "%d" % len(self.pts)
+        if self.indices is not None:
+            return "%d" % len(self.indices)
         else:
             return "(%s, %s, %s, %s)" % (str(self.t1),str(self.t2),str(self.t3),str(self.t4))
 
@@ -155,19 +158,20 @@ class QuadNode:
     #
     # "Indexing the Sphere with the Hierarchical Triangular Mesh" by Alexander S. Szalay, Jim Gray, George Fekete, Peter Z. Kunszt, Peter Kukol, Ani Thakar
     def search(self, p, r):
-        if self.pts is not None:
+        if self.indices is not None:
             res = []
-            for q in self.pts:
+            for i in self.indices:
+                q = self.pts[i]
                 dot = p[0]*q[0]+p[1]*q[1]+p[2]*q[2]
                 # The dot product of the vector with itself might lead to a
                 # number slightly greater than 1.0 due to floating point
                 # inaccuracies.
                 if dot >= 1.0:
-                    res.append(q)
+                    res.append(i)
                     continue
                 angle = acos(dot)
                 if angle < r:
-                    res.append(q)
+                    res.append(i)
             return res
         dot = p[0]*self.ccp[0] + p[1]*self.ccp[1] + p[2]*self.ccp[2]
         angle = acos(dot)
@@ -189,8 +193,8 @@ class QuadNode:
         return res
 
     def getall(self):
-        if self.pts is not None:
-            return self.pts
+        if self.indices is not None:
+            return self.indices
         res = []
         res.extend(self.t1.getall())
         res.extend(self.t2.getall())
@@ -204,6 +208,12 @@ class QuadTree:
         self.pts = [ norm(v) for v in pts ]
 
         # create a list containing the eight sides of the octahedron
+        #
+        # we choose the octahedron because it is trivial to check whether a
+        # point falls into one of the faces by aligning the octahendron with
+        # the coordinate axis (it then boils down to a check of the signs) and
+        # because the fewer faces, the fewer triangle checks have to be done to
+        # figure out into which face a point falls
         mainvertices = []
         for x in [-1,1]:
             for y in [-1,1]:
@@ -222,9 +232,9 @@ class QuadTree:
                     mainvertices.append((v1,v2,v3))
 
         buckets = [[],[],[],[],[],[],[],[]]
-        print("sorting points into 8 areas", file=sys.stderr)
+        print("sorting points into %d areas" % len(buckets), file=sys.stderr)
         before = time.time()
-        for x,y,z in self.pts:
+        for i,(x,y,z) in enumerate(self.pts):
             idx = int(x > 0) << 2 | int(y > 0) << 1 | int(z > 0)
             ## the following is just a check to make sure that our assignment
             ## algorithm works. It can be commented out after it has been verified
@@ -234,12 +244,12 @@ class QuadTree:
             #    pass
             #else:
             #    raise Exception("duck")
-            buckets[idx].append((x,y,z))
+            buckets[idx].append(i)
         after = time.time()
         print("took: %f" % (after-before), file=sys.stderr)
         print("constructing trees", file=sys.stderr)
         before = time.time()
-        self.trees = [ QuadNode(v1,v2,v3,b) for b,(v1,v2,v3) in zip(buckets,mainvertices)]
+        self.trees = [ QuadNode(v1,v2,v3,b,self.pts) for b,(v1,v2,v3) in zip(buckets,mainvertices)]
         after = time.time()
         print("took: %f" % (after-before), file=sys.stderr)
 
@@ -310,7 +320,7 @@ def main():
         res4 = []
         # finally, use the quad-tree to do the searches
         before = time.time()
-        res4 = qtree.search(p, radius)
+        res4 = [xyz[i] for i in qtree.search(p, radius)]
         after = time.time()
         t_tree = after-before
         # to be able to compare the sets, we must convert the lists in
