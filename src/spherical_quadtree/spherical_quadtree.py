@@ -131,16 +131,18 @@ class QuadNode:
         indices4 = []
         for i in indices:
             p = self.pts[i]
-            if tripleproduct(v1,v4,p) > 0 and tripleproduct(v4,v6,p) > 0 and tripleproduct(v6,v1,p) > 0:
+            # we must use >= or otherwise points exactly on the triangle
+            # borders will not be matched by any triangle.
+            if tripleproduct(v1,v4,p) >= 0 and tripleproduct(v4,v6,p) >= 0 and tripleproduct(v6,v1,p) >= 0:
                 indices1.append(i)
-            elif tripleproduct(v2,v5,p) > 0 and tripleproduct(v5,v4,p) > 0 and tripleproduct(v4,v2,p) > 0:
+            elif tripleproduct(v2,v5,p) >= 0 and tripleproduct(v5,v4,p) >= 0 and tripleproduct(v4,v2,p) >= 0:
                 indices2.append(i)
-            elif tripleproduct(v3,v6,p) > 0 and tripleproduct(v6,v5,p) > 0 and tripleproduct(v5,v3,p) > 0:
+            elif tripleproduct(v3,v6,p) >= 0 and tripleproduct(v6,v5,p) >= 0 and tripleproduct(v5,v3,p) >= 0:
                 indices3.append(i)
-            elif tripleproduct(v4,v5,p) > 0 and tripleproduct(v5,v6,p) > 0 and tripleproduct(v6,v4,p) > 0:
+            elif tripleproduct(v4,v5,p) >= 0 and tripleproduct(v5,v6,p) >= 0 and tripleproduct(v6,v4,p) >= 0:
                 indices4.append(i)
             else:
-                raise Exception("impossible")
+                raise Exception("impossible for %f %f %f"%p)
         self.t1 = QuadNode(v1,v4,v6,indices1, pts)
         self.t2 = QuadNode(v2,v5,v4,indices2, pts)
         self.t3 = QuadNode(v3,v6,v5,indices3, pts)
