@@ -252,8 +252,37 @@ void calculateNormalsKNN(vector<Point> &normals,
 									  nr_neighbors,
 									  thread_num);
 
-	 nr_neighbors = temp.size();
+	 double norm[3];
+	 calculateNormal(temp, norm);
+	 ColumnVector n(3);
+	 n(1) = norm[0];
+	 n(2) = norm[1];
+	 n(3) = norm[2];
     
+	 ColumnVector point_vector(3);
+	 point_vector(1) = p[0] - rPos(1);
+	 point_vector(2) = p[1] - rPos(2);
+	 point_vector(3) = p[2] - rPos(3);
+	 point_vector = point_vector / point_vector.NormFrobenius();
+	 Real angle = (n.t() * point_vector).AsScalar();
+	 if (angle < 0) {
+	   n *= -1.0;
+	 }
+	 n = n / n.NormFrobenius();
+#pragma omp critical
+	 normals.push_back(Point(n(1), n(2), n(3)));       
+    }
+  }
+    
+  for (size_t i = 0; i < points.size(); ++i) {
+    delete[] pa[i];
+  }
+  delete[] pa;
+}
+
+void calculateNormal(vector<Point> temp, double *norm) {
+	 int nr_neighbors = temp.size();
+
 	 Point mean(0.0,0.0,0.0);
 	 Matrix X(nr_neighbors,3);
 	 SymmetricMatrix A(3);
@@ -283,32 +312,10 @@ void calculateNormalsKNN(vector<Point> &normals,
 
 	 // normal = eigenvector corresponding to lowest 
 	 // eigen value that is the 1st column of matrix U
-	 ColumnVector n(3);
-	 n(1) = U(1,1);
-	 n(2) = U(2,1);
-	 n(3) = U(3,1);
-    
-	 ColumnVector point_vector(3);
-	 point_vector(1) = p[0] - rPos(1);
-	 point_vector(2) = p[1] - rPos(2);
-	 point_vector(3) = p[2] - rPos(3);
-	 point_vector = point_vector / point_vector.NormFrobenius();
-	 Real angle = (n.t() * point_vector).AsScalar();
-	 if (angle < 0) {
-	   n *= -1.0;
-	 }
-	 n = n / n.NormFrobenius();
-#pragma omp critical
-	 normals.push_back(Point(n(1), n(2), n(3)));       
-    }
-  }
-    
-  for (size_t i = 0; i < points.size(); ++i) {
-    delete[] pa[i];
-  }
-  delete[] pa;
+	 norm[0] = U(1,1);
+	 norm[1] = U(2,1);
+	 norm[2] = U(3,1);
 }
-
 
 ////////////////////////////////////////////////////////////////
 /////////////NORMALS USING ADAPTIVE AKNN METHOD ////////////////
