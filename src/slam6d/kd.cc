@@ -107,8 +107,6 @@ vector<Point> KDtree::kNearestNeighbors(double *_p,
 
   _KNNSearch(Void(), threadNum);
   
-  free (params[threadNum].distances);
-
   for (int i = 0; i < _k; i++) {
       // only push valid points
     if (params[threadNum].distances[i] >= 0.0f) {
@@ -119,6 +117,7 @@ vector<Point> KDtree::kNearestNeighbors(double *_p,
   }
   
   free (params[threadNum].closest_neighbors);
+  free (params[threadNum].distances);
 
   return result;
 }
