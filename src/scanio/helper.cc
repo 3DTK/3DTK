@@ -215,11 +215,16 @@ std::streamsize uosHeaderTest(std::istream& infile, char **line, std::streamsize
     try {
         infile.getline(buffer, bufsize, '\n');
     } catch(std::ios_base::failure e) {
+        free(buffer);
+        *line = NULL;
+        if (infile.eof()) {
+            // if the EOF was before the first newline, then the file was in
+            // fact empty
+            return 0;
+        }
         std::cerr << "error reading first line" << endl;
         std::cerr << "did not find a newline after " << bufsize << " characters" << endl;
         std::cerr << e.what() << endl;
-        free(buffer);
-        *line = NULL;
         return -1;
     }
     std::streamsize linelen = infile.gcount();
@@ -747,8 +752,10 @@ bool readASCII(std::istream& infile, char *firstline, std::streamsize
     }
 
     if (firstline != NULL) {
-        if (!handle_line(firstline, lenfirstline, linenr, spec, transform, filter, xyz, rgb, refl, temp, ampl, type, devi))
+        if (!handle_line(firstline, lenfirstline, linenr, spec, transform, filter, xyz, rgb, refl, temp, ampl, type, devi)) {
+            std::cerr << "failed to handle first line" << endl;
             goto fail;
+        }
         ++linenr;
     }
 
@@ -785,8 +792,10 @@ bool readASCII(std::istream& infile, char *firstline, std::streamsize
             linelen--;
         }
 
-        if (!handle_line(buffer, linelen, linenr, spec, transform, filter, xyz, rgb, refl, temp, ampl, type, devi))
+        if (!handle_line(buffer, linelen, linenr, spec, transform, filter, xyz, rgb, refl, temp, ampl, type, devi)) {
+            std::cerr << "problem handling line" << endl;
             goto fail;
+        }
     }
 
     if (infile.bad() && !infile.eof()) {
