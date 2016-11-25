@@ -253,7 +253,8 @@ void calculateNormalsKNN(vector<Point> &normals,
 									  thread_num);
 
 	 double norm[3];
-	 calculateNormal(temp, norm);
+	 double eigen[3];
+	 calculateNormal(temp, norm, eigen);
 	 ColumnVector n(3);
 	 n(1) = norm[0];
 	 n(2) = norm[1];
@@ -280,7 +281,7 @@ void calculateNormalsKNN(vector<Point> &normals,
   delete[] pa;
 }
 
-void calculateNormal(vector<Point> temp, double *norm) {
+void calculateNormal(vector<Point> temp, double *norm, double *eigen) {
 	 int nr_neighbors = temp.size();
 
 	 Point mean(0.0,0.0,0.0);
@@ -315,6 +316,11 @@ void calculateNormal(vector<Point> temp, double *norm) {
 	 norm[0] = U(1,1);
 	 norm[1] = U(2,1);
 	 norm[2] = U(3,1);
+
+	 // eigen values can be used to check the quality of the normal
+	 eigen[0] = D(1);
+	 eigen[1] = D(2);
+	 eigen[2] = D(3);
 }
 
 ////////////////////////////////////////////////////////////////

@@ -328,9 +328,9 @@ def main():
                     continue
                 # distance of the point from the scanner
                 k_nearest = kdtree.kNearestNeighbors(p, 20)
-                normal = py3dtk.calculateNormal(k_nearest)
-                # make sure that the normal vector points *toward* the scanner
+                normal, _ = py3dtk.calculateNormal(k_nearest)
                 p_norm = sq.norm(p)
+                # make sure that the normal vector points *toward* the scanner
                 angle_cos = normal[0]*p_norm[0]+normal[1]*p_norm[1]+normal[2]*p_norm[2]
                 # we don't need to calculate the acos to get the real angle
                 # between the point vector and the normal because values less
