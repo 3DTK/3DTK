@@ -117,8 +117,6 @@ vector<size_t> KDtreeIndexed::kNearestNeighbors(double *_p,
   }
   _KNNSearch(m_data, threadNum);
   
-  free (params[threadNum].distances);
-
   for (int i = 0; i < _k; i++) {
     if (params[threadNum].distances[i] >= 0.0f) {
     result.push_back(params[threadNum].closest_neighbors[i]);
@@ -126,6 +124,7 @@ vector<size_t> KDtreeIndexed::kNearestNeighbors(double *_p,
   }
   
   free (params[threadNum].closest_neighbors);
+  free (params[threadNum].distances);
 
   return result;
 }
