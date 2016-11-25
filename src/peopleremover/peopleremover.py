@@ -427,16 +427,61 @@ def main():
 
     print("number of freed voxels: %d (%f %%)" % (len(free_voxels), 100*len(free_voxels)/len(voxel_occupied_by_slice)), file=sys.stderr)
 
+    print("calculate half-free voxels")
+    half_voxels = defaultdict(set)
+    for voxel in free_voxels:
+        freed_slices = voxel_occupied_by_slice[voxel]
+        neighbor_voxels = set([
+                (voxel[0]-1, voxel[1]-1, voxel[2]-1),
+                (voxel[0]-1, voxel[1]-1, voxel[2]+0),
+                (voxel[0]-1, voxel[1]-1, voxel[2]+1),
+                (voxel[0]-1, voxel[1]+0, voxel[2]-1),
+                (voxel[0]-1, voxel[1]+0, voxel[2]+0),
+                (voxel[0]-1, voxel[1]+0, voxel[2]+1),
+                (voxel[0]-1, voxel[1]+1, voxel[2]-1),
+                (voxel[0]-1, voxel[1]+1, voxel[2]+0),
+                (voxel[0]-1, voxel[1]+1, voxel[2]+1),
+                (voxel[0]+0, voxel[1]-1, voxel[2]-1),
+                (voxel[0]+0, voxel[1]-1, voxel[2]+0),
+                (voxel[0]+0, voxel[1]-1, voxel[2]+1),
+                (voxel[0]+0, voxel[1]+0, voxel[2]-1),
+                #(voxel[0]+0, voxel[1]+0, voxel[2]+0), this is the current voxel
+                (voxel[0]+0, voxel[1]+0, voxel[2]+1),
+                (voxel[0]+0, voxel[1]+1, voxel[2]-1),
+                (voxel[0]+0, voxel[1]+1, voxel[2]+0),
+                (voxel[0]+0, voxel[1]+1, voxel[2]+1),
+                (voxel[0]+1, voxel[1]-1, voxel[2]-1),
+                (voxel[0]+1, voxel[1]-1, voxel[2]+0),
+                (voxel[0]+1, voxel[1]-1, voxel[2]+1),
+                (voxel[0]+1, voxel[1]+0, voxel[2]-1),
+                (voxel[0]+1, voxel[1]+0, voxel[2]+0),
+                (voxel[0]+1, voxel[1]+0, voxel[2]+1),
+                (voxel[0]+1, voxel[1]+1, voxel[2]-1),
+                (voxel[0]+1, voxel[1]+1, voxel[2]+0),
+                (voxel[0]+1, voxel[1]+1, voxel[2]+1),
+                ])
+        # remove voxels that were already marked as free from the neighbor
+        neighbor_voxels -= free_voxels
+        for neighbor in neighbor_voxels:
+            # check if there is anything in the current neighbor
+            if neighbor not in voxel_occupied_by_slice:
+                continue
+            half_voxels[neighbor] |= freed_slices
+    # make sure that no voxels are completely cleared
+    half_voxels = {v:i for v,i in half_voxels.items() if i != voxel_occupied_by_slice[v]}
+
     print("write result", file=sys.stderr)
     with open("scan000.3d", "w") as f1, open("scan001.3d", "w") as f2:
         for i, points in enumerate(points_by_slice):
             print("%f" % (((i+1)*100)/len_trajectory), end="\r", file=sys.stderr)
             for (x,y,z),_,r in points:
                 voxel = voxel_of_point((x,y,z), voxel_size)
-                if voxel not in free_voxels:
-                    f1.write("%s %s %s %s\n" % (x.hex(),y.hex(),z.hex(),r.hex()))
-                else:
+                if voxel in free_voxels or i in half_voxels.get(voxel, set()):
+                    # this point is in a voxel marked as free or is a point
+                    # from a slice index that was freed in an adjacent voxel
                     f2.write("%s %s %s %s\n" % (x.hex(),y.hex(),z.hex(),r.hex()))
+                else:
+                    f1.write("%s %s %s %s\n" % (x.hex(),y.hex(),z.hex(),r.hex()))
     for pose in ["scan000.pose", "scan001.pose"]:
         with open(pose, "w") as f:
             f.write("0 0 0\n0 0 0\n");
