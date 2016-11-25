@@ -34,17 +34,13 @@ def voxel_of_point(point, voxel_size):
 #   by John Amanatides, Andrew Woo
 #   Eurographics ’87
 #   http://www.cs.yorku.ca/~amana/research/grid.pdf
-def walk_voxels(start, end, voxel_size, voxel_occupied_by_slice, current_slice, max_search_distance, diff, max_target_dist):
+def walk_voxels(start, end, voxel_size, voxel_occupied_by_slice, current_slice, max_search_distance, diff):
     #print("from: %f %f %f" % start)
     #print("to: %f %f %f" % end)
     if max_search_distance == 0:
         return set()
     direction = (end[0] - start[0], end[1] - start[1], end[2] - start[2])
     dist = math.sqrt(direction[0]*direction[0]+direction[1]*direction[1]+direction[2]*direction[2])
-    # check if the point is too far away
-    if max_target_dist is not None:
-        if dist > max_target_dist:
-            return set() 
     # compute the t value representing the desired search radius
     if max_search_distance is None:
         tMax = 1.0
@@ -208,12 +204,11 @@ def main():
     parser.add_argument("-s", "--start", type=int)
     parser.add_argument("-e", "--end", type=int)
     parser.add_argument("-f", "--format", type=formatname_to_io_type)
-    parser.add_argument("--max-search-distance", type=float, default=None, help="Absolute distance from the scanner to the target point that voxels are marked as free. The default is to always mark all voxels up to the target point as free.")
-    parser.add_argument("--max-target-distance", type=float, default=None, help="Maximum distance a point is allowed to be away from the scanner for a line to be shot at it. The default is to shoot a line to all points.")
     parser.add_argument("--fuzz", type=float, default=0, help="How fuzzy the data is. I.e. how far points on a perfect plane are allowed to lie away from it in the scan.")
     parser.add_argument("--voxel-size", type=float, default=10)
     parser.add_argument("--diff", type=int, default=0, help="Number of scans before and after the current scan that are grouped together.")
     parser.add_argument("--no-subvoxel-accuracy", action='store_true', help="Do not calculate with subvoxel accuracy")
+    parser.add_argument("--no-compute-normals", action='store_true', help="Do not compute surface offsets by their normal vectors")
     parser.add_argument("directory")
     args = parser.parse_args()
 
@@ -250,6 +245,13 @@ def main():
             print("unequal lengths %d %d in %d" % (len(xyz), len(refl), i))
             exit(1)
         points = list(zip(xyz,xyz_orig,refl))
+        if not args.no_compute_normals:
+            # sort points by their distance from the scanner for normal
+            # computation later
+            # Precompute the distances so that they are not computed multiple
+            # times while sorting
+            distances = { p:sq.length(p) for p in xyz_orig }
+            points = sorted(points, key=cmp_to_key(lambda a,b: distances[a[1]] - distances[b[1]]))
         points_by_slice.append(points)
         print("number of points in scan %d: %d" % (i, len(points)), file=sys.stderr)
 
@@ -273,112 +275,106 @@ def main():
 
     free_voxels = set()
 
+    maxranges = []
     for i, pos in enumerate(trajectory):
-        #print("%f" % (((i+1)*100)/len_trajectory), end="\r", file=sys.stderr)
-        # Sort the points by their distance from the scanner in ascending
-        # order.
-        # Precompute the distances so that they are not computed multiple
-        # times while sorting
-        distances = { p:sq.length(p) for _,p,_ in points_by_slice[i] }
-        xyz = sorted(points_by_slice[i], key=cmp_to_key(lambda a,b: distances[a[1]] - distances[b[1]]))
-        # build a quad tree
-        print("building spherical quad tree", file=sys.stderr)
-        qtree = sq.QuadTree([p for _,p,_ in xyz])
-        print("building k-d tree", file=sys.stderr)
-        kdtree = py3dtk.KDtree([p for _,p,_ in xyz])
-        print("calculating ranges")
-        maxranges = [None]*len(xyz)
-        # for each point in this scan (starting from the point closest to
-        # the scanner) use its normal to calculate until when the line of
-        # sight up to the point should be searched and apply the same limit
-        # to all the points in its "shadow"
-        for j,(_,p,_) in enumerate(xyz):
-            # point was already assigned a maximum range
-            if maxranges[j] is not None:
-                continue
-            # distance of the point from the scanner
-            k_nearest = kdtree.kNearestNeighbors(p, 20)
-            normal, _ = py3dtk.calculateNormal(k_nearest)
-            p_norm = sq.norm(p)
-            # make sure that the normal vector points *toward* the scanner
-            angle_cos = normal[0]*p_norm[0]+normal[1]*p_norm[1]+normal[2]*p_norm[2]
-            # we don't need to calculate the acos to get the real angle
-            # between the point vector and the normal because values less
-            # than zero map to angles of more than 90 degrees
-            if angle_cos >= 0:
-                # make sure that the normal turns toward the scanner
-                normal = (-1*normal[0], -1*normal[1], -1*normal[2])
-            # we only want to traverse the lines of sight until they hit
-            # the plane that lies a voxel diagonal above the current point
-            # in normal direction
-            # the base of that plane:
-            p_base = (p[0]+normal[0]*(voxel_diagonal+args.fuzz),
-                    p[1]+normal[1]*(voxel_diagonal+args.fuzz),
-                    p[2]+normal[2]*(voxel_diagonal+args.fuzz))
-            # the dividend should stay the same as it's only dependent on
-            # the base of the plane
-            dividend = p_base[0]*normal[0]+p_base[1]*normal[1]+p_base[2]*normal[2]
-            # calculate the divisor for the current point
-            divisor = p_norm[0]*normal[0]+p_norm[1]*normal[1]+p_norm[2]*normal[2]
-            if dividend/divisor > sq.length(p):
-                raise Exception("p got lengthened: ", dividend/divisor)
-            maxranges[j] = dividend/divisor
-            # the scanner itself is situated close to the plane that p
-            # is part of. Thus, shoot no ray to this point at all.
-            if maxranges[j] < 0:
-                maxranges[j] = 0
-            # points must not be too close or otherwise they will shadow
-            # *all* the points
-            if sq.length(p) < voxel_diagonal:
-                raise Exception("point too close to scanner")
-            # now find all the points in the shadow of this one
-            # the size of the shadow is determined by the angle under
-            # which the voxel diagonal is seen at that distance
-            angle = math.asin(voxel_diagonal/sq.length(p))
-            for k in qtree.search(p_norm, angle):
-                p_k = xyz[k][1]
-                p_k_norm = sq.norm(p_k)
-                divisor = p_k_norm[0]*normal[0]+p_k_norm[1]*normal[1]+p_k_norm[2]*normal[2]
-                d = dividend/divisor
-                # even though p_k is further away from the scanner than p
-                # and inside the shadow of p, it is still on top of or
-                # in front of (from the point of view of the scanner) of
-                # the plane that p is part of. Thus, we process this point
-                # later
-                if d > sq.length(p_k):
+        maxranges.append([None]*len(points_by_slice[i]))
+    if not args.no_compute_normals:
+        for i, pos in enumerate(trajectory):
+            # build a quad tree
+            print("building spherical quad tree", file=sys.stderr)
+            qtree = sq.QuadTree([p for _,p,_ in points_by_slice[i]])
+            print("building k-d tree", file=sys.stderr)
+            kdtree = py3dtk.KDtree([p for _,p,_ in points_by_slice[i]])
+            print("calculating ranges")
+            # for each point in this scan (starting from the point closest to
+            # the scanner) use its normal to calculate until when the line of
+            # sight up to the point should be searched and apply the same limit
+            # to all the points in its "shadow"
+            for j,(_,p,_) in enumerate(points_by_slice[i]):
+                # point was already assigned a maximum range
+                if maxranges[i][j] is not None:
                     continue
+                # distance of the point from the scanner
+                k_nearest = kdtree.kNearestNeighbors(p, 20)
+                normal, _ = py3dtk.calculateNormal(k_nearest)
+                p_norm = sq.norm(p)
+                # make sure that the normal vector points *toward* the scanner
+                angle_cos = normal[0]*p_norm[0]+normal[1]*p_norm[1]+normal[2]*p_norm[2]
+                # we don't need to calculate the acos to get the real angle
+                # between the point vector and the normal because values less
+                # than zero map to angles of more than 90 degrees
+                if angle_cos >= 0:
+                    # make sure that the normal turns toward the scanner
+                    normal = (-1*normal[0], -1*normal[1], -1*normal[2])
+                # we only want to traverse the lines of sight until they hit
+                # the plane that lies a voxel diagonal above the current point
+                # in normal direction
+                # the base of that plane:
+                p_base = (p[0]+normal[0]*(voxel_diagonal+args.fuzz),
+                        p[1]+normal[1]*(voxel_diagonal+args.fuzz),
+                        p[2]+normal[2]*(voxel_diagonal+args.fuzz))
+                # the dividend should stay the same as it's only dependent on
+                # the base of the plane
+                dividend = p_base[0]*normal[0]+p_base[1]*normal[1]+p_base[2]*normal[2]
+                # calculate the divisor for the current point
+                divisor = p_norm[0]*normal[0]+p_norm[1]*normal[1]+p_norm[2]*normal[2]
+                if dividend/divisor > sq.length(p):
+                    raise Exception("p got lengthened: ", dividend/divisor)
+                maxranges[i][j] = dividend/divisor
                 # the scanner itself is situated close to the plane that p
                 # is part of. Thus, shoot no ray to this point at all.
-                if d < 0:
-                    d = 0
-                # point is already covered by a closer one
-                if maxranges[k] is not None and maxranges[k] < d:
-                    continue
-                maxranges[k] = d
-        #with open("scan%03d.pose" % (i+2), "w") as f:
-        #    print("%f %f %f"%pos, file=f)
-        #    print("0 0 0", file=f)
-        #with open("scan%03d.3d" % (i+2), "w") as f:
-        #    for j,(_,p,_) in enumerate(xyz):
-        #        maxrange = maxranges[j]
-        #        d = tuple(p)
-        #        r = sq.length(d)
-        #        factor = maxrange/r
-        #        if factor > 1:
-        #            raise Exception("duck 2: %f" % factor)
-        #        if factor < 0:
-        #            raise Exception("duck 3: ", factor, maxrange, r)
-        #        d = d[0]*factor, d[1]*factor, d[2]*factor
-        #        print("%f %f %f 0" % d, file=f)
-        print("walk voxels")
+                if maxranges[i][j] < 0:
+                    maxranges[i][j] = 0
+                # points must not be too close or otherwise they will shadow
+                # *all* the points
+                if sq.length(p) < voxel_diagonal:
+                    raise Exception("point too close to scanner")
+                # now find all the points in the shadow of this one
+                # the size of the shadow is determined by the angle under
+                # which the voxel diagonal is seen at that distance
+                angle = math.asin(voxel_diagonal/sq.length(p))
+                for k in qtree.search(p_norm, angle):
+                    p_k = points_by_slice[i][k][1]
+                    p_k_norm = sq.norm(p_k)
+                    divisor = p_k_norm[0]*normal[0]+p_k_norm[1]*normal[1]+p_k_norm[2]*normal[2]
+                    d = dividend/divisor
+                    # even though p_k is further away from the scanner than p
+                    # and inside the shadow of p, it is still on top of or
+                    # in front of (from the point of view of the scanner) of
+                    # the plane that p is part of. Thus, we process this point
+                    # later
+                    if d > sq.length(p_k):
+                        continue
+                    # the scanner itself is situated close to the plane that p
+                    # is part of. Thus, shoot no ray to this point at all.
+                    if d < 0:
+                        d = 0
+                    # point is already covered by a closer one
+                    if maxranges[i][k] is not None and maxranges[i][k] < d:
+                        continue
+                    maxranges[i][k] = d
+            #with open("scan%03d.pose" % (i+2), "w") as f:
+            #    print("%f %f %f"%pos, file=f)
+            #    print("0 0 0", file=f)
+            #with open("scan%03d.3d" % (i+2), "w") as f:
+            #    for j,(_,p,_) in enumerate(points_by_slice[i]):
+            #        maxrange = maxranges[i][j]
+            #        d = tuple(p)
+            #        r = sq.length(d)
+            #        factor = maxrange/r
+            #        if factor > 1:
+            #            raise Exception("duck 2: %f" % factor)
+            #        if factor < 0:
+            #            raise Exception("duck 3: ", factor, maxrange, r)
+            #        d = d[0]*factor, d[1]*factor, d[2]*factor
+            #        print("%f %f %f 0" % d, file=f)
 
-        for j,(p,_,_) in enumerate(xyz):
+    print("walk voxels")
+    for i, pos in enumerate(trajectory):
+        #print("%f" % (((i+1)*100)/len_trajectory), end="\r", file=sys.stderr)
+        for j,(p,_,_) in enumerate(points_by_slice[i]):
             #print("%f (%d)" % (((i+1)*100)/len_trajectory, j), end="\r", file=sys.stderr)
-            if args.max_search_distance is None:
-                maxrange = maxranges[j]
-            else:
-                maxrange = min(maxranges[j], args.max_search_distance)
-            free = walk_voxels(pos, p, voxel_size, voxel_occupied_by_slice, i, maxrange, args.diff, args.max_target_distance)
+            free = walk_voxels(pos, p, voxel_size, voxel_occupied_by_slice, i, maxranges[i][j], args.diff)
             free_voxels |= free
         
     print("", file=sys.stderr)
