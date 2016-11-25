@@ -366,7 +366,7 @@ def main():
                 # now find all the points in the shadow of this one
                 # the size of the shadow is determined by the angle under
                 # which the voxel diagonal is seen at that distance
-                angle = 2*math.atan2(voxel_diagonal, 2*sq.length(p))
+                angle = math.asin(voxel_diagonal/sq.length(p))
                 for k in qtree.search(p_norm, angle):
                     p_k = xyz[k][1]
                     p_k_norm = sq.norm(p_k)
