@@ -324,11 +324,19 @@ boost::python::tuple calculateNormalWrapper(boost::python::list pts) {
 		points.push_back(Point(extract<double>(t[0]), extract<double>(t[1]), extract<double>(t[2])));
 	}
 	double norm[3];
-	calculateNormal(points, norm);
+	double eigen[3];
+	calculateNormal(points, norm, eigen);
+	boost::python::list p1;
+	p1.append(norm[0]);
+	p1.append(norm[1]);
+	p1.append(norm[2]);
+	boost::python::list p2;
+	p2.append(eigen[0]);
+	p2.append(eigen[1]);
+	p2.append(eigen[2]);
 	boost::python::list p;
-	p.append(norm[0]);
-	p.append(norm[1]);
-	p.append(norm[2]);
+	p.append(boost::python::tuple(p1));
+	p.append(boost::python::tuple(p2));
 	return boost::python::tuple(p);
 }
 

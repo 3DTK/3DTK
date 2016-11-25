@@ -45,6 +45,6 @@ void calculateNormalsAdaptiveKNN(vector<Point> &normals,
 						   const int kmax,
                                  const double _rPos[3]);
 
-void calculateNormal(vector<Point> temp, double *norm);
+void calculateNormal(vector<Point> temp, double *norm, double *eigen);
 
 #endif // __NORMALS_H__
