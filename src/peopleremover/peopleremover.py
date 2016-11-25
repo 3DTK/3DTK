@@ -241,6 +241,7 @@ def main():
     parser.add_argument("--max-target-distance", type=float, default=None, help="Maximum distance a point is allowed to be away from the scanner for a line to be shot at it. The default is to shoot a line to all points.")
     parser.add_argument("--max-target-proximity", type=float, default=None, help="Absolute distance from the target point (or from the --max-search-distance if set and greater than the current target point distance) up to which voxels are marked as free. ")
     parser.add_argument("-j", "--jobs", type=int, default=1)
+    parser.add_argument("--fuzz", type=float, default=0, help="How fuzzy the data is. I.e. how far points on a perfect plane are allowed to lie away from it in the scan.")
     parser.add_argument("--voxel-size", type=float, default=10)
     parser.add_argument("--diff", type=int, default=0, help="Number of scans before and after the current scan that are grouped together.")
     parser.add_argument("directory")
@@ -343,9 +344,9 @@ def main():
                 # the plane that lies a voxel diagonal above the current point
                 # in normal direction
                 # the base of that plane:
-                p_base = (p[0]+normal[0]*voxel_diagonal,
-                        p[1]+normal[1]*voxel_diagonal,
-                        p[2]+normal[2]*voxel_diagonal)
+                p_base = (p[0]+normal[0]*(voxel_diagonal+args.fuzz),
+                        p[1]+normal[1]*(voxel_diagonal+args.fuzz),
+                        p[2]+normal[2]*(voxel_diagonal+args.fuzz))
                 # the dividend should stay the same as it's only dependent on
                 # the base of the plane
                 dividend = p_base[0]*normal[0]+p_base[1]*normal[1]+p_base[2]*normal[2]
