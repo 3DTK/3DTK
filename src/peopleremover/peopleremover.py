@@ -217,6 +217,7 @@ def main():
     parser.add_argument("--fuzz", type=float, default=0, help="How fuzzy the data is. I.e. how far points on a perfect plane are allowed to lie away from it in the scan.")
     parser.add_argument("--voxel-size", type=float, default=10)
     parser.add_argument("--diff", type=int, default=0, help="Number of scans before and after the current scan that are grouped together.")
+    parser.add_argument("--no-subvoxel-accuracy", action='store_true', help="Do not calculate with subvoxel accuracy")
     parser.add_argument("directory")
     args = parser.parse_args()
 
@@ -388,48 +389,49 @@ def main():
 
     print("number of freed voxels: %d (%f %%)" % (len(free_voxels), 100*len(free_voxels)/len(voxel_occupied_by_slice)), file=sys.stderr)
 
-    print("calculate half-free voxels")
     half_voxels = defaultdict(set)
-    for voxel in free_voxels:
-        freed_slices = voxel_occupied_by_slice[voxel]
-        neighbor_voxels = set([
-                (voxel[0]-1, voxel[1]-1, voxel[2]-1),
-                (voxel[0]-1, voxel[1]-1, voxel[2]+0),
-                (voxel[0]-1, voxel[1]-1, voxel[2]+1),
-                (voxel[0]-1, voxel[1]+0, voxel[2]-1),
-                (voxel[0]-1, voxel[1]+0, voxel[2]+0),
-                (voxel[0]-1, voxel[1]+0, voxel[2]+1),
-                (voxel[0]-1, voxel[1]+1, voxel[2]-1),
-                (voxel[0]-1, voxel[1]+1, voxel[2]+0),
-                (voxel[0]-1, voxel[1]+1, voxel[2]+1),
-                (voxel[0]+0, voxel[1]-1, voxel[2]-1),
-                (voxel[0]+0, voxel[1]-1, voxel[2]+0),
-                (voxel[0]+0, voxel[1]-1, voxel[2]+1),
-                (voxel[0]+0, voxel[1]+0, voxel[2]-1),
-                #(voxel[0]+0, voxel[1]+0, voxel[2]+0), this is the current voxel
-                (voxel[0]+0, voxel[1]+0, voxel[2]+1),
-                (voxel[0]+0, voxel[1]+1, voxel[2]-1),
-                (voxel[0]+0, voxel[1]+1, voxel[2]+0),
-                (voxel[0]+0, voxel[1]+1, voxel[2]+1),
-                (voxel[0]+1, voxel[1]-1, voxel[2]-1),
-                (voxel[0]+1, voxel[1]-1, voxel[2]+0),
-                (voxel[0]+1, voxel[1]-1, voxel[2]+1),
-                (voxel[0]+1, voxel[1]+0, voxel[2]-1),
-                (voxel[0]+1, voxel[1]+0, voxel[2]+0),
-                (voxel[0]+1, voxel[1]+0, voxel[2]+1),
-                (voxel[0]+1, voxel[1]+1, voxel[2]-1),
-                (voxel[0]+1, voxel[1]+1, voxel[2]+0),
-                (voxel[0]+1, voxel[1]+1, voxel[2]+1),
-                ])
-        # remove voxels that were already marked as free from the neighbor
-        neighbor_voxels -= free_voxels
-        for neighbor in neighbor_voxels:
-            # check if there is anything in the current neighbor
-            if neighbor not in voxel_occupied_by_slice:
-                continue
-            half_voxels[neighbor] |= freed_slices
-    # make sure that no voxels are completely cleared
-    half_voxels = {v:i for v,i in half_voxels.items() if i != voxel_occupied_by_slice[v]}
+    if not args.no_subvoxel_accuracy:
+        print("calculate half-free voxels")
+        for voxel in free_voxels:
+            freed_slices = voxel_occupied_by_slice[voxel]
+            neighbor_voxels = set([
+                    (voxel[0]-1, voxel[1]-1, voxel[2]-1),
+                    (voxel[0]-1, voxel[1]-1, voxel[2]+0),
+                    (voxel[0]-1, voxel[1]-1, voxel[2]+1),
+                    (voxel[0]-1, voxel[1]+0, voxel[2]-1),
+                    (voxel[0]-1, voxel[1]+0, voxel[2]+0),
+                    (voxel[0]-1, voxel[1]+0, voxel[2]+1),
+                    (voxel[0]-1, voxel[1]+1, voxel[2]-1),
+                    (voxel[0]-1, voxel[1]+1, voxel[2]+0),
+                    (voxel[0]-1, voxel[1]+1, voxel[2]+1),
+                    (voxel[0]+0, voxel[1]-1, voxel[2]-1),
+                    (voxel[0]+0, voxel[1]-1, voxel[2]+0),
+                    (voxel[0]+0, voxel[1]-1, voxel[2]+1),
+                    (voxel[0]+0, voxel[1]+0, voxel[2]-1),
+                    #(voxel[0]+0, voxel[1]+0, voxel[2]+0), this is the current voxel
+                    (voxel[0]+0, voxel[1]+0, voxel[2]+1),
+                    (voxel[0]+0, voxel[1]+1, voxel[2]-1),
+                    (voxel[0]+0, voxel[1]+1, voxel[2]+0),
+                    (voxel[0]+0, voxel[1]+1, voxel[2]+1),
+                    (voxel[0]+1, voxel[1]-1, voxel[2]-1),
+                    (voxel[0]+1, voxel[1]-1, voxel[2]+0),
+                    (voxel[0]+1, voxel[1]-1, voxel[2]+1),
+                    (voxel[0]+1, voxel[1]+0, voxel[2]-1),
+                    (voxel[0]+1, voxel[1]+0, voxel[2]+0),
+                    (voxel[0]+1, voxel[1]+0, voxel[2]+1),
+                    (voxel[0]+1, voxel[1]+1, voxel[2]-1),
+                    (voxel[0]+1, voxel[1]+1, voxel[2]+0),
+                    (voxel[0]+1, voxel[1]+1, voxel[2]+1),
+                    ])
+            # remove voxels that were already marked as free from the neighbor
+            neighbor_voxels -= free_voxels
+            for neighbor in neighbor_voxels:
+                # check if there is anything in the current neighbor
+                if neighbor not in voxel_occupied_by_slice:
+                    continue
+                half_voxels[neighbor] |= freed_slices
+        # make sure that no voxels are completely cleared
+        half_voxels = {v:i for v,i in half_voxels.items() if i != voxel_occupied_by_slice[v]}
 
     print("write result", file=sys.stderr)
     with open("scan000.3d", "w") as f1, open("scan001.3d", "w") as f2:
