@@ -1103,7 +1103,7 @@ void initShow(int argc, char **argv){
       }
     }
     scanNr++;
-    if ((scanNr-1)%stepsize != 0 || scan->size<DataXYZ>("xyz") == 0) delete scan; 
+    if ((scanNr-1)%stepsize != 0) delete scan; 
     else valid_scans.push_back(scan);
   }
   //Remove scans if some got invalid due to filtering
