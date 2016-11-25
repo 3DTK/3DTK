@@ -264,7 +264,7 @@ def main():
     for i,s in enumerate(py3dtk.allScans, start=args.start):
         print("%f" % ((((i-args.start)+1)*100)/len_trajectory), end="\r", file=sys.stderr)
         # ignore points that are closer than 10 units
-        #s.setRangeFilter(-1, 100)
+        s.setRangeFilter(-1, 100)
         xyz_orig = list(py3dtk.DataXYZ(s.get("xyz")))
         # transform all points into the global coordinate system
         s.transformAll(s.get_transMatOrg())
@@ -307,12 +307,16 @@ def main():
             #print("%f" % (((i+1)*100)/len_trajectory), end="\r", file=sys.stderr)
             # Sort the points by their distance from the scanner in ascending
             # order.
-            # for every element of the list
-            xyz = sorted(points_by_slice[i], key=cmp_to_key(lambda a,b: dist2((0,0,0),a[1]) - dist2((0,0,0),b[1])))
-            print("d: ", math.sqrt(dist2(xyz[0][1], (0,0,0))))
+            # Precompute the distances so that they are not computed multiple
+            # times while sorting
+            distances = { p:sq.length(p) for _,p,_ in points_by_slice[i] }
+            xyz = sorted(points_by_slice[i], key=cmp_to_key(lambda a,b: distances[a[1]] - distances[b[1]]))
             # build a quad tree
+            print("building spherical quad tree", file=sys.stderr)
             qtree = sq.QuadTree([p for _,p,_ in xyz])
+            print("building k-d tree", file=sys.stderr)
             kdtree = py3dtk.KDtree([p for _,p,_ in xyz])
+            print("calculating ranges")
             maxranges = [None]*len(xyz)
             # for each point in this scan (starting from the point closest to
             # the scanner) use its normal to calculate until when the line of
@@ -325,8 +329,6 @@ def main():
                 # distance of the point from the scanner
                 k_nearest = kdtree.kNearestNeighbors(p, 20)
                 normal = py3dtk.calculateNormal(k_nearest)
-                if sq.length(normal) < 0.99999 or sq.length(normal) > 1.00001:
-                    raise Exception("normal vector is not of unit length")
                 # make sure that the normal vector points *toward* the scanner
                 p_norm = sq.norm(p)
                 angle_cos = normal[0]*p_norm[0]+normal[1]*p_norm[1]+normal[2]*p_norm[2]
@@ -351,13 +353,10 @@ def main():
                 if dividend/divisor > sq.length(p):
                     raise Exception("p got lengthened: ", dividend/divisor)
                 maxranges[j] = dividend/divisor
+                # the scanner itself is situated close to the plane that p
+                # is part of. Thus, shoot no ray to this point at all.
                 if maxranges[j] < 0:
                     maxranges[j] = 0
-                # check
-                new_p = maxranges[j]*p[0], maxranges[j]*p[1], maxranges[j]*p[2]
-                diff = p[0]-new_p[0], p[1]-new_p[1], p[2]-new_p[2]
-                #print(sq.length(diff))
-                #print(sq.length(p)-maxranges[j])
                 # now find all the points in the shadow of this one
                 # the size of the shadow is determined by the angle under
                 # which the voxel diagonal is seen at that distance
@@ -367,39 +366,37 @@ def main():
                     p_k_norm = sq.norm(p_k)
                     divisor = p_k_norm[0]*normal[0]+p_k_norm[1]*normal[1]+p_k_norm[2]*normal[2]
                     d = dividend/divisor
+                    # even though p_k is further away from the scanner than p
+                    # and inside the shadow of p, it is still on top of or
+                    # in front of (from the point of view of the scanner) of
+                    # the plane that p is part of. Thus, we process this point
+                    # later
                     if d > sq.length(p_k):
                         continue
+                    # the scanner itself is situated close to the plane that p
+                    # is part of. Thus, shoot no ray to this point at all.
                     if d < 0:
                         d = 0
+                    # point is already covered by a closer one
                     if maxranges[k] is not None and maxranges[k] < d:
-                        # point is already covered by a closer one
                         continue
                     maxranges[k] = d
-            #maxranges = [m-2*voxel_diagonal for m in maxranges]
-            # sanity check
-            #for j,p in enumerate(xyz):
-            #    r = math.sqrt(dist2(pos,p))
-            #    if r < maxranges[j]:
-            #        raise Exception("duck")
-            with open("scan%03d.pose" % (i+2), "w") as f:
-                print("%f %f %f"%pos, file=f)
-                print("0 0 0", file=f)
-            with open("scan%03d.3d" % (i+2), "w") as f:
-                for j,(_,p,_) in enumerate(xyz):
-                    maxrange = maxranges[j]
-                    d = tuple(p)
-                    r = sq.length(d)
-                    #if r < 100:
-                    #    raise Exception("duck 3: %f" % r)
-                    factor = maxrange/r
-                    if factor > 1:
-                        raise Exception("duck 2: %f" % factor)
-                    if factor < 0:
-                        raise Exception("duck 3: ", factor, maxrange, r)
-                    d = d[0]*factor, d[1]*factor, d[2]*factor
-                    #if math.sqrt(dist2(d, (0,0,0))) < 100:
-                    #    raise Exception("duck: %f" % math.sqrt(dist2(d, (0,0,0))))
-                    print("%f %f %f 0" % d, file=f)
+            #with open("scan%03d.pose" % (i+2), "w") as f:
+            #    print("%f %f %f"%pos, file=f)
+            #    print("0 0 0", file=f)
+            #with open("scan%03d.3d" % (i+2), "w") as f:
+            #    for j,(_,p,_) in enumerate(xyz):
+            #        maxrange = maxranges[j]
+            #        d = tuple(p)
+            #        r = sq.length(d)
+            #        factor = maxrange/r
+            #        if factor > 1:
+            #            raise Exception("duck 2: %f" % factor)
+            #        if factor < 0:
+            #            raise Exception("duck 3: ", factor, maxrange, r)
+            #        d = d[0]*factor, d[1]*factor, d[2]*factor
+            #        print("%f %f %f 0" % d, file=f)
+            print("walk voxels")
 
             for j,(p,_,_) in enumerate(xyz):
                 #print("%f (%d)" % (((i+1)*100)/len_trajectory, j), end="\r", file=sys.stderr)
@@ -407,9 +404,7 @@ def main():
                     maxrange = maxranges[j]
                 else:
                     maxrange = min(maxranges[j], args.max_search_distance)
-                #maxrange = None
                 free = walk_voxels(pos, p, voxel_size, voxel_occupied_by_slice, i, maxrange, args.diff, args.max_target_distance, args.max_target_proximity)
-                #print(free)
                 free_voxels |= free
     else:
         jobs = []
@@ -433,17 +428,15 @@ def main():
             for (x,y,z),_,r in points:
                 voxel = voxel_of_point((x,y,z), voxel_size)
                 if voxel not in free_voxels:
-                    #f1.write("%s %s %s %s\n" % (x.hex(),y.hex(),z.hex(),r.hex()))
-                    f1.write("%f %f %f %f\n"%(x,y,z,r))
+                    f1.write("%s %s %s %s\n" % (x.hex(),y.hex(),z.hex(),r.hex()))
                 else:
-                    #f2.write("%s %s %s %s\n" % (x.hex(),y.hex(),z.hex(),r.hex()))
-                    f2.write("%f %f %f %f\n"%(x,y,z,r))
+                    f2.write("%s %s %s %s\n" % (x.hex(),y.hex(),z.hex(),r.hex()))
     for pose in ["scan000.pose", "scan001.pose"]:
         with open(pose, "w") as f:
             f.write("0 0 0\n0 0 0\n");
-    #for frames in ["scan000.frames", "scan001.frames"]:
-    #    with open(frames, "w") as f:
-    #        f.write("1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 2\n");
+    for frames in ["scan000.frames", "scan001.frames"]:
+        with open(frames, "w") as f:
+            f.write("1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 2\n");
     print("", file=sys.stderr)
     print("done", file=sys.stderr)
 
