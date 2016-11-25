@@ -259,12 +259,14 @@ def main():
     print("voxel size: %f" % voxel_size, file=sys.stderr)
     print("reading data...", file=sys.stderr)
 
+    voxel_diagonal = math.sqrt(3*voxel_size*voxel_size)
+
     scanserver = False
     py3dtk.openDirectory(scanserver, args.directory, args.format, args.start, args.end)
     for i,s in enumerate(py3dtk.allScans, start=args.start):
         print("%f" % ((((i-args.start)+1)*100)/len_trajectory), end="\r", file=sys.stderr)
-        # ignore points that are closer than 10 units
-        s.setRangeFilter(-1, 100)
+        # ignore points that are closer than a voxel diagonal
+        s.setRangeFilter(-1, voxel_diagonal)
         xyz_orig = list(py3dtk.DataXYZ(s.get("xyz")))
         # transform all points into the global coordinate system
         s.transformAll(s.get_transMatOrg())
@@ -302,7 +304,6 @@ def main():
 
     # if requested, split the work into jobs
     if args.jobs == 1:
-        voxel_diagonal = math.sqrt(3*voxel_size*voxel_size)
         for i, pos in enumerate(trajectory):
             #print("%f" % (((i+1)*100)/len_trajectory), end="\r", file=sys.stderr)
             # Sort the points by their distance from the scanner in ascending
@@ -357,6 +358,10 @@ def main():
                 # is part of. Thus, shoot no ray to this point at all.
                 if maxranges[j] < 0:
                     maxranges[j] = 0
+                # points must not be too close or otherwise they will shadow
+                # *all* the points
+                if sq.length(p) < voxel_diagonal:
+                    raise Exception("point too close to scanner")
                 # now find all the points in the shadow of this one
                 # the size of the shadow is determined by the angle under
                 # which the voxel diagonal is seen at that distance
