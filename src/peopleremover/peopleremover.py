@@ -34,7 +34,7 @@ def voxel_of_point(point, voxel_size):
 #   by John Amanatides, Andrew Woo
 #   Eurographics ’87
 #   http://www.cs.yorku.ca/~amana/research/grid.pdf
-def walk_voxels(start, end, voxel_size, voxel_occupied_by_slice, current_slice, max_search_distance, diff, max_target_dist, max_target_proximity):
+def walk_voxels(start, end, voxel_size, voxel_occupied_by_slice, current_slice, max_search_distance, diff, max_target_dist):
     #print("from: %f %f %f" % start)
     #print("to: %f %f %f" % end)
     if max_search_distance == 0:
@@ -52,9 +52,6 @@ def walk_voxels(start, end, voxel_size, voxel_occupied_by_slice, current_slice, 
         tMax = max_search_distance/dist
         if tMax > 1.0:
             tMax = 1.0
-    # optionally subtract the set target proximity
-    if max_target_proximity is not None:
-        tMax -= max_target_proximity/dist
     startX, startY, startZ = X, Y, Z = voxel_of_point(start, voxel_size)
     endX, endY, endZ = voxel_of_point(end, voxel_size)
     #print("start: %d %d %d" % (X, Y, Z))
@@ -213,7 +210,6 @@ def main():
     parser.add_argument("-f", "--format", type=formatname_to_io_type)
     parser.add_argument("--max-search-distance", type=float, default=None, help="Absolute distance from the scanner to the target point that voxels are marked as free. The default is to always mark all voxels up to the target point as free.")
     parser.add_argument("--max-target-distance", type=float, default=None, help="Maximum distance a point is allowed to be away from the scanner for a line to be shot at it. The default is to shoot a line to all points.")
-    parser.add_argument("--max-target-proximity", type=float, default=None, help="Absolute distance from the target point (or from the --max-search-distance if set and greater than the current target point distance) up to which voxels are marked as free. ")
     parser.add_argument("--fuzz", type=float, default=0, help="How fuzzy the data is. I.e. how far points on a perfect plane are allowed to lie away from it in the scan.")
     parser.add_argument("--voxel-size", type=float, default=10)
     parser.add_argument("--diff", type=int, default=0, help="Number of scans before and after the current scan that are grouped together.")
@@ -382,7 +378,7 @@ def main():
                 maxrange = maxranges[j]
             else:
                 maxrange = min(maxranges[j], args.max_search_distance)
-            free = walk_voxels(pos, p, voxel_size, voxel_occupied_by_slice, i, maxrange, args.diff, args.max_target_distance, args.max_target_proximity)
+            free = walk_voxels(pos, p, voxel_size, voxel_occupied_by_slice, i, maxrange, args.diff, args.max_target_distance)
             free_voxels |= free
         
     print("", file=sys.stderr)
