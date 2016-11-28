@@ -135,6 +135,11 @@ void ManagedScan::setRangeMutation(double range)
   m_shared_scan->setRangeMutationParameters(range);
 }
 
+void ManagedScan::setScaleFilter(double scale)
+{
+  m_shared_scan->setScaleParameters(scale);
+}
+
 
 void ManagedScan::setReductionParameter(double voxelSize,
                                         int nrpts,

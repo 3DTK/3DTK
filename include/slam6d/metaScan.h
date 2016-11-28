@@ -28,6 +28,7 @@ public:
   virtual void setRangeFilter(double max, double min) {}
   virtual void setHeightFilter(double top, double bottom) {}
   virtual void setCustomFilter(std::string& cFiltStr) {}
+  virtual void setScaleFilter(double scale) {}
 
   virtual const char* getIdentifier() const { return "metascan"; }
   

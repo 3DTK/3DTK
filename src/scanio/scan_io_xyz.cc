@@ -63,7 +63,7 @@ time_t ScanIO_xyz::lastModified(const char* dir_path, const char* identifier)
 
 bool ScanIO_xyz::supports(IODataType type)
 {
-  return !!(type & ( DATA_REFLECTANCE | DATA_XYZ ));
+  return !!(type & ( DATA_XYZ ));
 }
 
 void ScanIO_xyz::readScan(const char* dir_path, 
@@ -92,10 +92,6 @@ void ScanIO_xyz::readScan(const char* dir_path,
         throw std::runtime_error(std::string("There is no scan file for [") 
                 + identifier + "] in [" 
                 + dir_path + "]");
-
-    for (unsigned int i = 0; i < xyz->size(); i++) {
-        reflectance->push_back(atoi(identifier));
-    }
 }
 
 

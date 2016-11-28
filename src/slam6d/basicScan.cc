@@ -109,6 +109,8 @@ void BasicScan::updateTransform(double *_rPos, double *_rPosTheta)
     filter.setCustom(customFilterStr);
   if(m_range_mutation_set)
     filter.setRangeMutator(m_range_mutation);
+  if(m_filter_scale_set)
+    filter.setScale(m_filter_scale);
 
 }
 
@@ -142,6 +144,8 @@ BasicScan::BasicScan(double *_rPos,
     filter.setCustom(customFilterStr);
   if(m_range_mutation_set)
     filter.setRangeMutator(m_range_mutation);
+  if(m_filter_scale_set)
+    filter.setScale(m_filter_scale);
 }
 
 
@@ -173,6 +177,8 @@ BasicScan::BasicScan(double *_rPos,
     filter.setCustom(customFilterStr);
   if(m_range_mutation_set)
     filter.setRangeMutator(m_range_mutation);
+  if(m_filter_scale_set)
+    filter.setScale(m_filter_scale);
   
   // check if we can create a large enough array. The maximum size_t on 32 bit
   // is around 4.2 billion which is too little for scans with more than 179
@@ -241,10 +247,12 @@ void BasicScan::init()
   m_filter_top = 0.0;
   m_filter_bottom = 0.0;
   m_range_mutation = 0.0;
+  m_filter_scale = 0.0;
   m_filter_range_set = false;
   m_filter_height_set = false;
   m_filter_custom_set = false;
   m_range_mutation_set = false;
+  m_filter_scale_set = false;
 }
 
 
@@ -274,6 +282,12 @@ void BasicScan::setRangeMutation(double range)
   m_range_mutation = range;
 }
 
+void BasicScan::setScaleFilter(double scale)
+{
+  m_filter_scale = scale;
+  m_filter_scale_set = true;
+}
+
 time_t BasicScan::getLastModified()
 {
   ScanIO* sio = ScanIO::getScanIO(m_type);
@@ -301,6 +315,8 @@ void BasicScan::get(unsigned int types)
     filter.setCustom(customFilterStr);
   if(m_range_mutation_set)
     filter.setRangeMutator(m_range_mutation);
+  if(m_filter_scale_set)
+    filter.setScale(m_filter_scale);
 
   sio->readScan(m_path.c_str(),
                 m_identifier.c_str(),
@@ -612,13 +628,7 @@ void BasicScan::createOcttree()
 
 BOctTree<float>* BasicScan::convertScanToShowOcttree()
 {
-  string scanFileName;
-  if (m_path.back() == '/') {
-    scanFileName = m_path + "scan" + m_identifier + ".oct";
-  } else {
-    scanFileName = m_path + "/scan" + m_identifier + ".oct";
-  }
-
+  string scanFileName = m_path + "scan" + m_identifier + ".oct";
   BOctTree<float>* btree = 0;
   boost::filesystem::path octpath(scanFileName);
 

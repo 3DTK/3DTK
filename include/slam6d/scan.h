@@ -178,7 +178,10 @@ public:
 
   //! Input mutation to set range of all points to a constant value;
   virtual void setRangeMutation(double range) { }
-  
+
+  //! Input filter to set the scale of the pointclouds so evrything is in cm
+  virtual void setScaleFilter(double scale) { }
+
   //! Set reduction parameters, but don't reduce yet
   virtual void setReductionParameter(double voxelSize, int nrpts = 0,
     PointType pointtype = PointType());

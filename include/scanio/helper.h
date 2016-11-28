@@ -38,6 +38,11 @@ class ScanDataTransform_xyz : public ScanDataTransform {
         bool transform(double xyz[3], unsigned char rgb[3], float*  refl, float* temp, float* ampl, int* type, float* devi);
 };
 
+class ScanDataTransform_pts : public ScanDataTransform {
+    public:
+        bool transform(double xyz[3], unsigned char rgb[3], float*  refl, float* temp, float* ampl, int* type, float* devi);
+};
+
 time_t lastModifiedHelper(
         const char *dir_path,
         const char *identifier,
