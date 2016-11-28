@@ -96,6 +96,14 @@ PointFilter& PointFilter::setRangeMutator(double range)
   return *this;
 }
 
+PointFilter& PointFilter::setScale(double scale)
+{
+  m_changed = true;
+  stringstream s_scale; s_scale << scale;
+  m_params["scale"] = s_scale.str();
+  return *this;
+}
+
 std::string PointFilter::getParams()
 {
   stringstream s;
@@ -148,6 +156,7 @@ namespace {
   CheckerFactory<CheckerHeightTop> top("heighttop");
   CheckerFactory<CheckerHeightBottom> bottom("heightbottom");
   CheckerFactory<RangeMutator> range_mutation("rangemutation");
+  CheckerFactory<CheckerScale> scale("scale");
 }
 
 CheckerRangeMax::CheckerRangeMax(const std::string& value) {
@@ -405,6 +414,19 @@ bool RangeMutator::test(double* point) {
   point[0] *= scale_mutation;
   point[1] *= scale_mutation;
   point[2] *= scale_mutation;
+
+  return true;
+}
+
+CheckerScale::CheckerScale(const std::string& value) {
+  stringstream s(value);
+  s >> m_scale;
+}
+
+bool CheckerScale::test(double* point) {
+  point[0] *= m_scale;
+  point[1] *= m_scale;
+  point[2] *= m_scale;
 
   return true;
 }

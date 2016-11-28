@@ -20,6 +20,7 @@ public:
   virtual void setHeightFilter(double top, double bottom);
   virtual void setCustomFilter(std::string& cFiltStr);
   virtual void setRangeMutation(double range);
+  virtual void setScaleFilter(double scale);
   
   virtual void setReductionParameter(double voxelSize, int nrpts = 0,
     PointType pointtype = PointType());

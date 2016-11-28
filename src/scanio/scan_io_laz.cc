@@ -1,4 +1,4 @@
- /*
+/*
  * scan_io_laz implementation
  *
  * Copyright (C) Dorit Borrmann, Thomas Escher, Kai Lingemann, Andreas Nuechter
@@ -44,16 +44,16 @@ using namespace boost::filesystem;
 #define DATA_PATH_PREFIX "scan"
 
 std::list<std::string> ScanIO_laz::readDirectory(const char* dir_path,
-                      unsigned int start,
-                      unsigned int end)
+						 unsigned int start,
+						 unsigned int end)
 {
-    const char* suffixes[3] = { LAZ_SUFFIX, LAS_SUFFIX, NULL };
-    return readDirectoryHelper(dir_path, start, end, suffixes);
+  const char* suffixes[3] = { LAZ_SUFFIX, LAS_SUFFIX, NULL };
+  return readDirectoryHelper(dir_path, start, end, suffixes);
 }
 
 void ScanIO_laz::readPose(const char* dir_path,
-           const char* identifier,
-           double* pose)
+			  const char* identifier,
+			  double* pose)
 {
   for (unsigned int i = 0; i < 6; ++i) pose[i] = 0.0;
 }
@@ -70,15 +70,15 @@ bool ScanIO_laz::supports(IODataType type)
 }
 
 void ScanIO_laz::readScan(const char* dir_path,
-           const char* identifier,
-           PointFilter& filter,
-           std::vector<double>* xyz,
-           std::vector<unsigned char>* rgb,
-           std::vector<float>* reflectance,
-           std::vector<float>* temperature,
-           std::vector<float>* amplitude,
-           std::vector<int>* type,
-           std::vector<float>* deviation)
+			  const char* identifier,
+			  PointFilter& filter,
+			  std::vector<double>* xyz,
+			  std::vector<unsigned char>* rgb,
+			  std::vector<float>* reflectance,
+			  std::vector<float>* temperature,
+			  std::vector<float>* amplitude,
+			  std::vector<int>* type,
+			  std::vector<float>* deviation)
 {
   // error handling
   path data_path(dir_path);
@@ -89,7 +89,7 @@ void ScanIO_laz::readScan(const char* dir_path,
     data_path /= path(std::string(DATA_PATH_PREFIX) + identifier + LAS_SUFFIX);
     if(!exists(data_path))
       throw std::runtime_error(std::string("There is no scan file for [")
-                + identifier + "] in [" + dir_path + "]");
+			       + identifier + "] in [" + dir_path + "]");
   }
   // open data file
   LASreadOpener lasreadopener;
@@ -98,23 +98,28 @@ void ScanIO_laz::readScan(const char* dir_path,
 
   while (lasreader->read_point()) {
     double point[3] = { lasreader->point.get_x(),
-				    lasreader->point.get_y(),
-				    lasreader->point.get_z() };
+			lasreader->point.get_y(),
+			lasreader->point.get_z() };
     double point_tmp[3];
 
     if(xyz != 0) {
-	 // changing to our coordinate system
-	 point_tmp[0] = -1.0*point[1];
-	 point_tmp[1] = point[2];
-	 point_tmp[2] = point[0];  
+      // changing to our coordinate system
+      //point_tmp[0] = -1.0*point[1];
+      //point_tmp[1] = point[2];
+      //point_tmp[2] = point[0];
 
-	 // apply filter
-	 if (filter.check(point_tmp)) {
-	   // push point
-	   xyz->push_back(point_tmp[0]);
-	   xyz->push_back(point_tmp[1]);
-	   xyz->push_back(point_tmp[2]);
-	 }
+      //las and laz are usually in pts coordiante system (x is left to right, y is bottom to up, z is front to back)
+      point_tmp[0] = point[0];
+      point_tmp[1] = point[1];
+      point_tmp[2] = -1 * point[2];
+
+      // apply filter
+      if (filter.check(point_tmp)) {
+	// push point
+	xyz->push_back(point_tmp[0]);
+	xyz->push_back(point_tmp[1]);
+	xyz->push_back(point_tmp[2]);
+      }
     }
     if (reflectance != 0) {
       /// if intensity doesn't exist, it's automatically set to 0.
@@ -147,7 +152,7 @@ void ScanIO_laz::readScan(const char* dir_path,
 #ifdef _MSC_VER
 extern "C" __declspec(dllexport) ScanIO* create()
 #else
-extern "C" ScanIO* create()
+  extern "C" ScanIO* create()
 #endif
 {
   return new ScanIO_laz;
@@ -162,7 +167,7 @@ extern "C" ScanIO* create()
 #ifdef _MSC_VER
 extern "C" __declspec(dllexport) void destroy(ScanIO *sio)
 #else
-extern "C" void destroy(ScanIO *sio)
+  extern "C" void destroy(ScanIO *sio)
 #endif
 {
   delete sio;

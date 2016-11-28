@@ -37,6 +37,7 @@ public:
   PointFilter& setHeight(double top, double bottom);
   PointFilter& setCustom(const std::string& customFilterStr);
   PointFilter& setRangeMutator(double range);
+  PointFilter& setScale(double scale); // 1 for cm, 100 for m, 0.1 for mm to bring the data into cm
 
   //! Serialization function to convert it into a string, usable in the constructor
   std::string getParams();
@@ -141,6 +142,14 @@ public:
   virtual bool test(double* point);
 private:
   double m_range;
+};
+
+class CheckerScale : public Checker {
+public:
+  CheckerScale(const std::string& value);
+  virtual bool test(double* point);
+private:
+  double m_scale;
 };
 
 #include "pointfilter.icc"

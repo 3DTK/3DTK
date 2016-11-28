@@ -123,7 +123,10 @@ public:
 
   //! Filter parameters for the range mutator for showing the spheres, invalidate cache for scan CacheObject if it differs
   void setRangeMutationParameters(double range);
-    
+
+  //! Filter parameters for scaling the points so all pointclouds are in cm
+  void setScaleParameters(double scale);
+
   //! Set parameters and invalidate cache for reduced CacheObjects if it differs
   void setReductionParameters(const char* params);
 
@@ -202,6 +205,7 @@ public:
   inline float getMaxDist() const { return m_max_dist; }
   inline float getMinDist() const { return m_min_dist; }
   inline double getRangeMutator() const { return m_range_mutator_param; }
+  inline double getScale() const { return m_scale; }
   inline double getHeightTop() const { return m_height_top; }
   inline double getHeightBottom() const { return m_height_bottom; }
   
@@ -216,8 +220,9 @@ private:
   double m_max_dist, m_min_dist;
   double m_height_top, m_height_bottom;
   double m_range_mutator_param;
+  double m_scale;
   std::string customFilterStr;
-  bool m_range_mutator_param_set, m_range_param_set, m_height_param_set, m_custom_param_set;
+  bool m_range_mutator_param_set, m_range_param_set, m_height_param_set, m_custom_param_set, m_scale_param_set;
   SharedString m_reduction_parameters;
   SharedString m_show_parameters;
   SharedString m_octtree_parameters;
