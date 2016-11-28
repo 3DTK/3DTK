@@ -1,7 +1,7 @@
 /*
- * scan_io_faro_xyz_rgbr implementation
+ * scan_io_ptsr implementation
  *
- * Copyright (C) Andreas Nuechter
+ * Copyright (C) Andreas Nuechter, Dorit Borrmann 
  *
  * Released under the GPL version 3.
  *
@@ -9,12 +9,13 @@
 
 
 /**
- * @file scan_io_faro_xyz_rgbr.cc
- * @brief IO of a 3D scan in xyz file format plus a reflectance/intensity
- * @author Andreas Nuechter. Jacobs University Bremen, Germany.
+ * @file scan_io_ptsr.cc
+ * @brief IO of a 3D scan in pts file format (right-handed coordinate system,
+ * with x from left to right, y from bottom to up, z from front to back)
+ * @author Hamidreza Houshiar. DenkmalDaten Winkler KG. Co. Muenster, Germany
  */
 
-#include "scanio/scan_io_faro_xyz_rgbr.h"
+#include "scanio/scan_io_ptsr.h"
 #include "scanio/helper.h"
 
 #include <iostream>
@@ -34,11 +35,11 @@ using namespace boost::filesystem;
 #include "slam6d/globals.icc"
 
 #define DATA_PATH_PREFIX "scan"
-#define DATA_PATH_SUFFIX ".xyz"
+#define DATA_PATH_SUFFIX ".pts"
 #define POSE_PATH_PREFIX "scan"
 #define POSE_PATH_SUFFIX ".pose"
 
-std::list<std::string> ScanIO_faro_xyz_rgbr::readDirectory(const char* dir_path, 
+std::list<std::string> ScanIO_ptsr::readDirectory(const char* dir_path, 
 						  unsigned int start, 
 						  unsigned int end)
 {
@@ -46,25 +47,25 @@ std::list<std::string> ScanIO_faro_xyz_rgbr::readDirectory(const char* dir_path,
     return readDirectoryHelper(dir_path, start, end, suffixes);
 }
 
-void ScanIO_faro_xyz_rgbr::readPose(const char* dir_path, 
+void ScanIO_ptsr::readPose(const char* dir_path, 
 			   const char* identifier, 
 			   double* pose)
 {
     readPoseHelper(dir_path, identifier, pose);
 }
 
-time_t ScanIO_faro_xyz_rgbr::lastModified(const char* dir_path, const char* identifier)
+time_t ScanIO_ptsr::lastModified(const char* dir_path, const char* identifier)
 {
   const char* suffixes[2] = { DATA_PATH_SUFFIX, NULL };
   return lastModifiedHelper(dir_path, identifier, suffixes);
 }
 
-bool ScanIO_faro_xyz_rgbr::supports(IODataType type)
+bool ScanIO_ptsr::supports(IODataType type)
 {
-  return !!(type & ( DATA_REFLECTANCE | DATA_XYZ | DATA_RGB));
+  return !!(type & ( DATA_REFLECTANCE | DATA_XYZ ));
 }
 
-void ScanIO_faro_xyz_rgbr::readScan(const char* dir_path, 
+void ScanIO_ptsr::readScan(const char* dir_path, 
 			   const char* identifier, 
 			   PointFilter& filter, 
 			   std::vector<double>* xyz, 
@@ -75,19 +76,19 @@ void ScanIO_faro_xyz_rgbr::readScan(const char* dir_path,
 			   std::vector<int>* type, 
 			   std::vector<float>* deviation)
 {
-    if(xyz == 0 || rgb == 0 || reflectance == 0)
+    if(xyz == 0 || reflectance == 0)
         return;
 
-    IODataType spec[10] = { DATA_DUMMY, DATA_DUMMY, DATA_XYZ, DATA_XYZ, DATA_XYZ,
-			    DATA_RGB, DATA_RGB, DATA_RGB, DATA_REFLECTANCE, DATA_TERMINATOR };
-    ScanDataTransform_xyz transform;
+    IODataType spec[5] = { DATA_XYZ, DATA_XYZ, DATA_XYZ,
+        DATA_REFLECTANCE, DATA_TERMINATOR };
+    ScanDataTransform_pts transform;
 
     // error handling
     path data_path(dir_path);
     data_path /= path(std::string(DATA_PATH_PREFIX) 
             + identifier 
             + DATA_PATH_SUFFIX);
-    if (!open_path(data_path, open_uos_file(spec, transform, filter, xyz, rgb, reflectance, 0, 0, 0, 0)))
+    if (!open_path(data_path, open_uos_file(spec, transform, filter, xyz, 0, reflectance, 0, 0, 0, 0)))
         throw std::runtime_error(std::string("There is no scan file for [") 
                 + identifier + "] in [" 
                 + dir_path + "]");
@@ -106,7 +107,7 @@ extern "C" __declspec(dllexport) ScanIO* create()
 extern "C" ScanIO* create()
 #endif
 {
-  return new ScanIO_faro_xyz_rgbr;
+  return new ScanIO_ptsr;
 }
 
 

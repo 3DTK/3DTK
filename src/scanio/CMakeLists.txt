@@ -5,7 +5,8 @@ else()
 endif()
 
 set(SCANIO_LIBNAMES
-  uos uosr uos_rgb uos_rrgb uos_rrgbt xyz xyzr leica_xyzr xyz_rgb xyz_rgba xyz_rrgb faro_xyz_rgbr ply ks ks_rgb riegl_txt riegl_rgb rts velodyne b3d
+  
+  b3d faro_xyz_rgbr ks ks_rgb leica_xyzr ply pts ptsr pts_rgb pts_rgbr pts_rrgb riegl_rgb riegl_txt rts uos uosr uos_rgb uos_rgbr uos_rrgb uos_rrgbt velodyne xyz xyzr xyz_rgb xyz_rgba xyz_rgbr xyz_rrgb
 )
 
 if(WITH_RIVLIB)

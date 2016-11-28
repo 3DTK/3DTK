@@ -69,6 +69,16 @@ bool ScanDataTransform_xyz::transform(double xyz[3], unsigned char rgb[3], float
     return true;
 }
 
+bool ScanDataTransform_pts::transform(double xyz[3], unsigned char rgb[3], float*  refl, float* temp, float* ampl, int* type, float* devi)
+{
+    double tmp;
+    xyz[0] = xyz[0];
+    xyz[1] = xyz[1];
+    xyz[2] = -1 * xyz[2];
+
+    return true;
+}
+
 time_t lastModifiedHelper(const char *dir_path,
         const char *identifier,
         const char **data_path_suffixes,
