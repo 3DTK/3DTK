@@ -146,6 +146,10 @@ void usage(char* prog)
        << bold << "  -A" << normal << " NR, " << bold << "--anim=" << normal << "NR   [default: first and last frame only]" << endl
        << "         if specified, use only every NR-th frame for animation" << endl
        << endl
+       << bold << "  -b" << normal << " NR, " << bold << "--bucketSize=" << normal << "NR   [default: 20]" << endl
+       << "         specifies the bucket size for leafs of the k-d tree. During construction of the" << endl
+       << "         tree, any subtree of at most this size will be replaced by an array." << endl
+       << endl
        << bold << "  -c" << normal << " NR, " << bold << "--cldist=" << normal << "NR   [default: 500]" << endl
        << "         specifies the maximal distance for closed loops" << endl
        << endl
@@ -240,9 +244,6 @@ void usage(char* prog)
        << bold << "  -Q, --veryquiet" << normal << endl
        << "         Very quiet mode. Suppress all messages, except in case of error." << endl
        << endl
-       << bold << "  -S, --scanserver" << normal << endl
-       << "         Use the scanserver as an input method and handling of scan data" << endl
-       << endl
        << bold << "  -r" << normal << " NR, " << bold << "--reduce=" << normal << "NR" << endl
        << "         turns on octree based point reduction (voxel size=<NR>)" << endl
        << endl
@@ -252,6 +253,9 @@ void usage(char* prog)
        << bold << "  -s" << normal << " NR, " << bold << "--start=" << normal << "NR" << endl
        << "         start at scan NR (i.e., neglects the first NR scans)" << endl
        << "         [ATTENTION: counting naturally starts with 0]" << endl
+       << endl
+       << bold << "  -S, --scanserver" << normal << endl
+       << "         Use the scanserver as an input method and handling of scan data" << endl
        << endl
        << bold << "  -t" << normal << " NR, " << bold << "--nns_method=" << normal << "NR   [default: 1]" << endl
        << "         selects the Nearest Neighbor Search Algorithm" << endl
@@ -295,6 +299,7 @@ void usage(char* prog)
  * @param algo specfies the used algorithm for rotation computation
  * @param lum6DAlgo specifies the used algorithm for global SLAM correction
  * @param loopsize defines the minimal loop size
+ * @param bucketSize defines the k-d treeleaf bucket size
  * @return 0, if the parsing was successful. 1 otherwise
  */
 int parseArgs(int argc, char **argv, string &dir, double &red, int &rand,
@@ -304,7 +309,7 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &rand,
               int &mni_lum, string &net, double &cldist, int &clpairs, int &loopsize,
               double &epsilonICP, double &epsilonSLAM,  int &nns_method, bool &exportPts, double &distLoop,
               int &iterLoop, double &graphDist, int &octree, IOType &type,
-              bool& scanserver, PairingMode& pairing_mode, bool &continue_processing)
+              bool& scanserver, PairingMode& pairing_mode, bool &continue_processing, int &bucketSize)
 {
   int  c;
   // from unistd.h:
@@ -315,7 +320,7 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &rand,
   WriteOnce<int> w_start(start), w_end(end);
 
   /* options descriptor */
-  // 0: no arguments, 1: required argument, 2: optional argument
+  /* TODO rework the last column (it does not need to be a char) */
   static struct option longopts[] = {
     { "format",          required_argument,   0,  'f' },  
     { "algo",            required_argument,   0,  'a' },
@@ -352,22 +357,19 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &rand,
     { "iterLoop",        required_argument,   0,  '1' }, // use the long format
     { "graphDist",       required_argument,   0,  '3' }, // use the long format
     { "scanserver",      no_argument,         0,  'S' },
-    { "continue",        no_argument,         0,  0 },
+    { "continue",        no_argument,         0,  '0' }, // use the long format
+    { "bucketSize",      required_argument,   0,  'b' },
     { 0,  0,   0,   0}                                   // needed, cf. getopt.h
   };
   
   int option_index = 0;
 
   cout << endl;
-  while ((c = getopt_long(argc, argv, "O:f:A:G:L:a:t:r:R:d:D:i:l:I:c:C:n:s:e:m:M:uqQpS", longopts, &option_index)) != -1) {
+  while ((c = getopt_long(argc, argv, "O:f:A:G:L:a:t:r:R:d:D:i:l:I:c:C:n:s:e:m:M:b:uqQpS", longopts, &option_index)) != -1) {
     switch (c) {
-    case 0:
-        if (strcmp(longopts[option_index].name, "continue") == 0) {
-          continue_processing = true;
-        } else {
-          abort();
-        }
-        break;
+    case '0':
+      continue_processing = true;
+      break;
     case 'a':
       algo = atoi(optarg);
       if ((algo < 0) || (algo > 10)) {
@@ -509,6 +511,13 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &rand,
       break;
     case 'S':
       scanserver = true;
+      break;
+    case 'b':
+      bucketSize = atoi(optarg);
+      if (bucketSize < 1) {
+        cerr << "Error: <bucketSize> must be positive." << endl;
+        exit(1);
+      }
       break;
     case '?':
       usage(argv[0]);
@@ -767,13 +776,14 @@ int main(int argc, char **argv)
   bool scanserver = false;
   PairingMode pairing_mode = CLOSEST_POINT;
   bool continue_processing = false;
+  int bucketSize = 20;
   
   parseArgs(argc, argv, dir, red, rand, mdm, mdml, mdmll, mni, start, end,
             maxDist, minDist, quiet, veryQuiet, eP, meta,
             algo, loopSlam6DAlgo, lum6DAlgo, anim,
             mni_lum, net, cldist, clpairs, loopsize, epsilonICP, epsilonSLAM,
             nns_method, exportPts, distLoop, iterLoop, graphDist, octree, type,
-            scanserver, pairing_mode, continue_processing);
+            scanserver, pairing_mode, continue_processing, bucketSize);
 
   cout << "slam6D will proceed with the following parameters:" << endl;
   //@@@ to do :-)
@@ -799,7 +809,7 @@ int main(int argc, char **argv)
       types = PointType::USE_NORMAL;
     }
      scan->setReductionParameter(red, octree, PointType(types));
-     scan->setSearchTreeParameter(nns_method);
+     scan->setSearchTreeParameter(nns_method, bucketSize);
   }
   
   icp6Dminimizer *my_icp6Dminimizer = 0;

@@ -511,7 +511,7 @@ void BasicScan::createSearchTreePrivate()
   switch(searchtree_nnstype)
     {
     case simpleKD:
-      kd = new KDtree(ar.get(), xyz_orig.size());
+      kd = new KDtree(ar.get(), xyz_orig.size(), searchtree_bucketsize);
       break;
     case ANNTree:
       kd = new ANNtree(ar, xyz_orig.size());

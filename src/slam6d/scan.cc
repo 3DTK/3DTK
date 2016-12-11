@@ -131,9 +131,10 @@ void Scan::setReductionParameter(double voxelSize,
   reduction_pointtype = pointtype;
 }
 
-void Scan::setSearchTreeParameter(int nns_method)
+void Scan::setSearchTreeParameter(int nns_method, int bucketSize)
 {
   searchtree_nnstype = nns_method;
+  searchtree_bucketsize = bucketSize;
 }
 
 void Scan::setOcttreeParameter(double reduction_voxelSize,
