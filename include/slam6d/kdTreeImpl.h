@@ -41,7 +41,13 @@ public:
  * A kD tree for points, with limited
  * capabilities (find nearest point to
  * a given point, or to a ray).
- *
+ * 
+ * You can hand over a whole scan of points and limit the operations on them by
+ * specifying the indices of only a few of them. These indices are not necessarily
+ * numeric though; they could also be the points themselves. This varies between the
+ * supplied implementations (e.g. KDtree, KDtreeIndexed) and is a result of the
+ * definition of these template parameters:
+ * 
  * PointData    the type of the input point data
  * AccessorData the type of indices
  * AccessorFunc retrieves data of type double[3], given an index of type
@@ -70,24 +76,35 @@ public:
     }
   }
 
-  virtual void create(PointData pts, AccessorData *indices, size_t n) {
+  virtual void create(PointData pts, AccessorData *indices, size_t n,
+                      unsigned int bucketSize = 20) {
     AccessorFunc point;
     
-    // Find bbox
-    double xmin = point(pts, indices[0])[0], xmax = point(pts, indices[0])[0];
-    double ymin = point(pts, indices[0])[1], ymax = point(pts, indices[0])[1];
-    double zmin = point(pts, indices[0])[2], zmax = point(pts, indices[0])[2];
+    // Find bbox and centroid
+    double mins[3], maxs[3];
+    double centroid[3];
+    
+    for (int i = 0; i < 3; i++) {
+      // Initialize with first point
+      mins[i] = point(pts, indices[0])[i];
+      maxs[i] = point(pts, indices[0])[i];
+      centroid[i] = point(pts, indices[0])[i];
+    }
+    
     for(size_t i = 1; i < n; i++) {
-      xmin = min(xmin, point(pts, indices[i])[0]);
-      xmax = max(xmax, point(pts, indices[i])[0]);
-      ymin = min(ymin, point(pts, indices[i])[1]);
-      ymax = max(ymax, point(pts, indices[i])[1]);
-      zmin = min(zmin, point(pts, indices[i])[2]);
-      zmax = max(zmax, point(pts, indices[i])[2]);
+      for (int j = 0; j < 3; j++) {
+        mins[j] = min(mins[j], point(pts, indices[i])[j]);
+        maxs[j] = max(maxs[j], point(pts, indices[i])[j]);
+        centroid[j] += point(pts, indices[i])[j];
+      }
+    }
+    
+    for (int i = 0; i < 3; i++) {
+      centroid[i] /= n;
     }
 
     // Leaf nodes
-    if ((n > 0) && (n <= 10)) {
+    if ((n > 0) && (n <= bucketSize)) {
       npts = n;
       leaf.p = new AccessorData[n];
       // fill leaf index array with indices
@@ -100,12 +117,13 @@ public:
     // Else, interior nodes
     npts = 0;
 
-    node.center[0] = 0.5 * (xmin+xmax);
-    node.center[1] = 0.5 * (ymin+ymax);
-    node.center[2] = 0.5 * (zmin+zmax);
-    node.dx = 0.5 * (xmax-xmin);
-    node.dy = 0.5 * (ymax-ymin);
-    node.dz = 0.5 * (zmax-zmin);
+    for (int i = 0; i < 3; i++) {
+      node.center[i] = 0.5 * (mins[i]+maxs[i]);
+    }
+    
+    node.dx = 0.5 * (maxs[0]-mins[0]);
+    node.dy = 0.5 * (maxs[1]-mins[1]);
+    node.dz = 0.5 * (maxs[2]-mins[2]);
     node.r = sqrt(sqr(node.dx) + sqr(node.dy) + sqr(node.dz));
 
     // Find longest axis
@@ -123,9 +141,7 @@ public:
       }
     }
 
-    // Partition
-    double splitval = node.center[node.splitaxis];
-
+    // Put points that were measured very closely together in the same bucket
     if ( fabs(max(max(node.dx,node.dy),node.dz)) < 0.01 ) {
       npts = n;
       leaf.p = new AccessorData[n];
@@ -136,11 +152,20 @@ public:
       return;
     }
 
-    AccessorData* left = indices, * right = indices + n - 1;
+    // Partition
+    
+    // Old method, splitting at the center of the bbox
+    // double splitval = node.center[node.splitaxis];
+
+    // Now we split at the centroid (average of all points)
+    node.splitval = centroid[node.splitaxis];
+    
+    AccessorData* left = indices,
+                * right = indices + n - 1;
     while(true) {
-      while(point(pts, *left)[node.splitaxis] < splitval)
+      while(point(pts, *left)[node.splitaxis] < node.splitval)
         left++;
-      while(point(pts, *right)[node.splitaxis] >= splitval)
+      while(point(pts, *right)[node.splitaxis] >= node.splitval)
         right--;
       if(right < left)
         break;
@@ -151,16 +176,17 @@ public:
     int i;
 #ifdef WITH_OPENMP_KD                   // does anybody know the reason why this is slower ?? --Andreas
     omp_set_num_threads(OPENMP_NUM_THREADS);
+    // we probably need to use a different OMP construct here (like "task") --Johannes B.
 #pragma omp parallel for schedule(dynamic) 
 #endif
     for (i = 0; i < 2; i++) {
       if (i == 0) {
         node.child1 = new KDTreeImpl();
-        node.child1->create(pts, indices, left - indices);
+        node.child1->create(pts, indices, left - indices, bucketSize);
       }
       if (i == 1) {
         node.child2 = new KDTreeImpl();
-        node.child2->create(pts, left, n - (left - indices));
+        node.child2->create(pts, left, n - (left - indices), bucketSize);
       }
     }
   }
@@ -202,6 +228,7 @@ protected:
 	        dz,  ///< defining the voxel itself
              r;  ///< defining the voxel itself
       int splitaxis;   ///< defining the kind of splitaxis
+      double splitval; ///< position of the split
       KDTreeImpl *child1;  ///< pointers to the childs
       KDTreeImpl *child2;  ///< pointers to the childs
     } node;
@@ -248,7 +275,7 @@ protected:
       return;
 
     // Recursive case
-    double myd = node.center[node.splitaxis] - params[threadNum].p[node.splitaxis];
+    double myd = node.splitval - params[threadNum].p[node.splitaxis];
     if (myd >= 0.0) {
       node.child1->_FindClosest(pts, threadNum);
       if (sqr(myd) < params[threadNum].closest_d2) {
@@ -297,7 +324,7 @@ protected:
 
 
     // Recursive case
-    if (params[threadNum].p[node.splitaxis] < node.center[node.splitaxis] ) {
+    if (params[threadNum].p[node.splitaxis] < node.splitval) {
       node.child1->_FindClosestAlongDir(pts, threadNum);
       node.child2->_FindClosestAlongDir(pts, threadNum);
     } else {
@@ -355,7 +382,7 @@ protected:
     if(params[threadNum].dist > sqrt(my_dist_2) + node.r) return;
     
     // Recursive case
-    if (params[threadNum].p[node.splitaxis] < node.center[node.splitaxis] ) {
+    if (params[threadNum].p[node.splitaxis] < node.splitval) {
       node.child1->_fixedRangeSearchAlongDir(pts, threadNum);
       node.child2->_fixedRangeSearchAlongDir(pts, threadNum);
     } else {
@@ -409,7 +436,7 @@ protected:
       return;
 
     // Recursive case
-    if (params[threadNum].p[node.splitaxis] < node.center[node.splitaxis] ) {
+    if (params[threadNum].p[node.splitaxis] < node.splitval) {
       node.child1->_fixedRangeSearchAlongDir(pts, threadNum);
       node.child2->_fixedRangeSearchAlongDir(pts, threadNum);
     } else {
@@ -450,7 +477,7 @@ protected:
         return;
 
     // Recursive case
-    if (node.center[node.splitaxis] > params[threadNum].p[node.splitaxis]) {
+    if (node.splitval > params[threadNum].p[node.splitaxis]) {
         node.child1->_AABBSearch(pts, threadNum);
         if (node.center[node.splitaxis] < params[threadNum].p0[node.splitaxis]) {
             node.child2->_AABBSearch(pts, threadNum);
@@ -493,7 +520,7 @@ protected:
 	 return;
 
     // Recursive case
-    double myd = node.center[node.splitaxis] - params[threadNum].p[node.splitaxis];
+    double myd = node.splitval - params[threadNum].p[node.splitaxis];
     if (myd >= 0.0) {
 	 node.child1->_FixedRangeSearch(pts, threadNum);
 	 if (sqr(myd) < params[threadNum].closest_d2) {
@@ -548,7 +575,7 @@ protected:
 		return;
     }
     // Recursive case
-    if (params[threadNum].p[node.splitaxis] < node.center[node.splitaxis] ) {
+    if (params[threadNum].p[node.splitaxis] < node.splitval) {
       node.child1->_KNNSearch(pts, threadNum);
       node.child2->_KNNSearch(pts, threadNum);
     } else {
@@ -622,7 +649,7 @@ protected:
         return;
 
     // Recursive case
-    if (params[threadNum].p[node.splitaxis] < node.center[node.splitaxis] ) {
+    if (params[threadNum].p[node.splitaxis] < node.splitval) {
       node.child1->_segmentSearch_all(pts, threadNum);
       node.child2->_segmentSearch_all(pts, threadNum);
     } else {
@@ -711,7 +738,7 @@ protected:
     }
 
     // Recursive case
-    double myd = node.center[node.splitaxis] - params[threadNum].p[node.splitaxis];
+    double myd = node.splitval - params[threadNum].p[node.splitaxis];
     if (myd >= 0.0) {
       node.child1->_segmentSearch_1NearestPoint(pts, threadNum);
       if (sqr(myd) < params[threadNum].closest_d2) {

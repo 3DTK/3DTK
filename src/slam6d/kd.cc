@@ -46,9 +46,9 @@ KDParams<PointType> KDTreeImpl<PointData, AccessorData, AccessorFunc, PointType,
  * @param pts 3D array of points
  * @param n number of points
  */
-KDtree::KDtree(double **pts, int n)
+KDtree::KDtree(double **pts, int n, int bucketSize)
 {
-    create(Void(), pts, n);
+    create(Void(), pts, n, bucketSize);
 }
 
 KDtree::~KDtree()

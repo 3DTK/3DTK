@@ -22,3 +22,6 @@ inline const double* Scan::getDAlign() const {
   return dalignxf;
 }
 
+inline const int Scan::getBucketSize() const {
+  return searchtree_bucketsize;
+}

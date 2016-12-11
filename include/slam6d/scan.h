@@ -187,7 +187,7 @@ public:
     PointType pointtype = PointType());
   
   //! Set SearchTree type, but don't create it yet
-  void setSearchTreeParameter(int nns_method);
+  void setSearchTreeParameter(int nns_method, int bucketSize = 20);
   
   /**
    * Set octtree parameters for show
@@ -215,6 +215,8 @@ public:
   
   inline SearchTree* getSearchTree();
   //  inline ANNkd_tree* getANNTree() const;
+  
+  inline const int getBucketSize() const;
   
   virtual const char* getIdentifier() const = 0;
   
@@ -400,6 +402,9 @@ protected:
   
   //! Type of the searchtree to be created
   int searchtree_nnstype;
+  
+  //! Leaf node size of a k-d tree
+  int searchtree_bucketsize;
   
   //! Flag whether "xyz reduced" has been initialized for this Scan yet
   bool m_has_reduced;

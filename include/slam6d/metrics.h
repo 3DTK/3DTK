@@ -80,7 +80,7 @@ private:
 #ifdef _MSC_VER
   typedef LARGE_INTEGER Timer;
 #else
-  typedef timeval Timer;
+  typedef timespec Timer;
 #endif
 
 /**

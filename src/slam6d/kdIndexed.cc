@@ -46,11 +46,11 @@ KDParams<PointType> KDTreeImpl<PointData, AccessorData, AccessorFunc, PointType,
  * @param pts 3D array of points
  * @param n number of points
  */
-KDtreeIndexed::KDtreeIndexed(double **pts, size_t n)
+KDtreeIndexed::KDtreeIndexed(double **pts, size_t n, int bucketSize)
 {
     m_data = pts;
     m_size = n;
-    create(pts, prepareTempIndices(n), n);
+    create(pts, prepareTempIndices(n), n, bucketSize);
     delete[] m_temp_indices;
 }
 

@@ -31,7 +31,7 @@ Timer TimeMetric::start()
 #ifdef _MSC_VER
   QueryPerformanceCounter(&start);
 #else
-  gettimeofday(&start, 0);
+  clock_gettime(CLOCK_MONOTONIC, &start);
 #endif
   return start;
 }
@@ -44,10 +44,10 @@ void TimeMetric::end(Timer& start)
   QueryPerformanceCounter(&end);
   delta = (double)(end.QuadPart - start.QuadPart) / frequency.QuadPart;
 #else
-  timeval end;
-  gettimeofday(&end, 0);
-  delta = (double)(end.tv_sec - start.tv_sec)
-    + (double)(end.tv_usec - start.tv_usec) / 1000000.0;
+  timespec end;
+  clock_gettime(CLOCK_MONOTONIC, &end);
+  delta = (double)(end.tv_sec  - start.tv_sec)
+        + (double)(end.tv_nsec - start.tv_nsec) * 1e-9;
 #endif
   commit(delta);
 }

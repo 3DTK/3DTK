@@ -46,7 +46,8 @@ KDtreeMetaManaged::KDtreeMetaManaged(const vector<Scan*>& scans) :
   m_data = new DataXYZ*[m_size];
   
   lock();
-  create(m_data, prepareTempIndices(scans), getPointsSize(scans));
+  create(m_data, prepareTempIndices(scans), getPointsSize(scans),
+         scans[0]->getBucketSize());
   unlock();
   
   // allocate in prepareTempIndices, deleted here

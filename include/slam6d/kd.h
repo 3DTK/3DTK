@@ -41,10 +41,13 @@ protected:
   KDtree() {}; /* only supposed to be used by derived classes */
 
 public:
-  KDtree(double **pts, int n);
+  KDtree(double **pts,
+         int n,
+         int bucketSize = 20);
   
   virtual ~KDtree();
-
+  
+  // FIXME this file has tab width of 5
   virtual double *FindClosest(double *_p,
 						double maxdist2,
 						int threadNum = 0) const;

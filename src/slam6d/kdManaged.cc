@@ -40,7 +40,8 @@ KDtreeManaged::KDtreeManaged(Scan* scan) :
 {
   create(scan->get("xyz reduced original"),
          prepareTempIndices(scan->size<DataXYZ>("xyz reduced original")),
-         scan->size<DataXYZ>("xyz reduced original"));
+         scan->size<DataXYZ>("xyz reduced original"),
+         scan->getBucketSize());
   // allocate in prepareTempIndices, deleted here
   delete[] m_temp_indices;
 }
