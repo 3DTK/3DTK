@@ -1,6 +1,13 @@
 if(WITH_FBR)
   set(FBR_LIBS scan ${OpenCV_LIBS})
 
+  if(WITH_OPENCV_NONFREE)
+    message(STATUS "Using non-free OpenCV functionality")
+    add_definitions(-DWITH_OPENCV_NONFREE)
+  else()
+    message(STATUS "Not using non-free OpenCV functionality")
+  endif()
+
   ### Export Static Libs
   set(FBR_IO_SRC scan_cv.cc)
   add_library(fbr_cv_io STATIC ${FBR_IO_SRC})
