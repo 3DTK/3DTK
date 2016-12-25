@@ -158,13 +158,6 @@ endmacro()
 ## FreeGLUT
 OPT_DEP(WITH_FREEGLUT "Whether freeglut is available. This enables iterative drawing in show. ON/OFF" ON "")
 
-if(WITH_FREEGLUT)
-  message(STATUS "With freeglut")
-  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DWITH_FREEGLUT")
-else()
-  message(STATUS "Without freeglut")
-endif()
-
 ## Show
 OPT_DEP(WITH_SHOW "Whether to build Show. This is the Visualization program of slam6d. ON/OFF" ON "" )
 
@@ -235,32 +228,12 @@ endif()
 
 ## OpenCV non-free
 OPT_DEP(WITH_OPENCV_NONFREE "Whether to use non-free (patent encumbered) OpenCV functionalities ON/OFF" OFF "")
-if(WITH_OPENCV_NONFREE)
-  message(STATUS "Using non-free OpenCV functionality")
-  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DWITH_OPENCV_NONFREE")
-else()
-  message(STATUS "Not using non-free OpenCV functionality")
-endif()
 
 ## Octree
 OPT_DEP(WITH_COMPACT_OCTREE "Whether to use the compact octree display ON/OFF" OFF "")
 
-if(WITH_COMPACT_OCTREE)
-  message(STATUS "Using compact octrees")
-  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DUSE_COMPACT_TREE")
-else()
-  message(STATUS "Not using compact octreees: Warning uses more memory")
-endif()
-
 ## Glee?
 OPT_DEP(WITH_GLEE "Whether to use OpenGL extensions, requires glee. ON/OFF" OFF "")
-
-if(WITH_GLEE)
-  message(STATUS "Using opengl extensions")
-  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DWITH_GLEE")
-else()
-  message(STATUS "Not using opengl extensions")
-endif()
 
 ## Gridder
 OPT_DEP(WITH_GRIDDER "Whether to build the 2DGridder binary ON/OFF" OFF "")
@@ -363,8 +336,6 @@ if(WITH_CUDA)
   find_package(CUDA REQUIRED)
   include_directories(${FOUND_CUDA_NVCC_INCLUDE})
 
-  add_definitions(-DWITH_CUDA)
-
   #owerrite users input - need to be fixed
   #select all NVIDIA GPU arch which support unified memory (CUDA toolkit >= 6.0) and arch>=30
   set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS};-gencode arch=compute_30,code=sm_30;-gencode arch=compute_35,code=sm_35;-gencode arch=compute_50,code=sm_50;-gencode arch=compute_52,code=sm_52)
@@ -464,14 +435,7 @@ else()
 endif()
 
 
-OPT_DEP(WITH_METRICS "Whether to use metrics in slam6d. ON/OFF" OFF "")
-
-if(WITH_METRICS)
-  message(STATUS "With metrics in slam6d.")
-  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DWITH_METRICS")
-else()
-  message(STATUS "Without metrics in slam6d.")
-endif()
+OPT_DEP(WITH_METRICS "Whether to use time metrics. ON/OFF" OFF "")
 
 OPT_DEP(WITH_ADDONS "Whether to download and use addons to 3DTK. ON/OFF" OFF "")
 if(WITH_ADDONS)

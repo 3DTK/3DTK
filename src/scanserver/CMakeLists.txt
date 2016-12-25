@@ -7,7 +7,11 @@ set(CLIENT_SRCS
 )
 
 if(WITH_METRICS)
+  message(STATUS "With metrics.")
+  add_definitions(-DWITH_METRICS)
   set(CLIENT_SRCS ${CLIENT_SRCS} ../slam6d/metrics.cc)
+else()
+  message(STATUS "Without metrics.")
 endif()
 
 add_library(scanclient STATIC ${CLIENT_SRCS})
