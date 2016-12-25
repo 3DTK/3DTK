@@ -1,3 +1,10 @@
+if(WITH_METRICS)
+  message(STATUS "With metrics in slam6d.")
+  add_definitions(-DWITH_METRICS)
+else()
+  message(STATUS "Without metrics in slam6d.")
+endif()
+
 ### TOOLS
 
 if(WITH_TOOLS)
@@ -13,6 +20,7 @@ if(WITH_FBR)
   add_executable(scan_red scan_red.cc ../scanio/writer.cc fbr/fbr_global.cc fbr/panorama.cc fbr/scan_cv.cc)
 
   if(WITH_GLEE)
+    # TODO can we remove OpenGL extensions from the scan reduction program?
     set(SHOW_LIBS ${SHOW_LIBS} glee)
   endif()
   

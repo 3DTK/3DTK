@@ -1,6 +1,7 @@
 if(WITH_COLLISION)
   add_executable(collision_model collision_model.cc)
   if(WITH_CUDA)
+    add_definitions(-DWITH_CUDA)
     target_link_libraries(collision_model cudaslam scan ${Boost_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY})
   else()
     target_link_libraries(collision_model scan ${Boost_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY})
