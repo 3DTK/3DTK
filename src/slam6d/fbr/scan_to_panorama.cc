@@ -79,7 +79,7 @@ void usage(int argc, char** argv){
   printf("\n");
   printf("\n");
   printf("\t\t-O outDir \t\t\t output directory if not stated same as input\n");
-  printf("\t\t-R reflectance \t\t\t uses reflactance and creates the Reflectance image\n");
+  printf("\t\t-R reflectance \t\t\t uses reflactance and creates the Reflectance image (for rxp input, the scanner type (-t) has to be set to RIEGL)\n");
   printf("\t\t-C color \t\t\t uses color and creates the Color image\n");
   printf("\t\t-A range \t\t\t creates the Range image\n");
   printf("\t\t-a normalizeiRange \t\t normalize the Range image to have values between 0--255\n");
@@ -88,6 +88,8 @@ void usage(int argc, char** argv){
   printf("\t\t-l loadOct \t\t\t load the Octtree\n");
   printf("\t\t-o saveOct \t\t\t save the Octtree\n");
   printf("\n");
+  printf("\tExamples:\n");
+  printf("\t\t%s -s 4 -e 4 -f rxp -t RIEGL -R -F PNG -p EQUIRECTANGULAR wü_city", argv[0]);
   exit(1);
 }
 
