@@ -18,14 +18,6 @@ except ImportError:
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..', 'src', 'spherical_quadtree'))
 import spherical_quadtree as sq
 
-def dist2(a,b):
-    x1,x2,x3 = a
-    y1,y2,y3 = b
-    d1 = x1-y1
-    d2 = x2-y2
-    d3 = x3-y3
-    return d1*d1+d2*d2+d3*d3
-
 def voxel_of_point(point, voxel_size):
     return int(point[0]//voxel_size), int(point[1]//voxel_size), int(point[2]//voxel_size)
 
