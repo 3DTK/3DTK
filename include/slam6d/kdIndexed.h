@@ -52,7 +52,7 @@ protected:
 
 public:
 
-  KDtreeIndexed(double **pts, size_t n, int bucketSize);
+  KDtreeIndexed(double **pts, size_t n, int bucketSize = 20);
   
   virtual ~KDtreeIndexed();
 
