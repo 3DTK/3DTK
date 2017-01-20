@@ -27,9 +27,11 @@ def voxel_of_point(point, voxel_size):
 #   Eurographics ’87
 #   http://www.cs.yorku.ca/~amana/research/grid.pdf
 def walk_voxels(start, end, voxel_size, voxel_occupied_by_slice, current_slice, max_search_distance, diff):
+    # FIXME: check if start==end
     #print("from: %f %f %f" % start)
     #print("to: %f %f %f" % end)
     if max_search_distance == 0:
+        # FIXME: should return a set containing only the start voxel
         return set()
     direction = (end[0] - start[0], end[1] - start[1], end[2] - start[2])
     dist = math.sqrt(direction[0]*direction[0]+direction[1]*direction[1]+direction[2]*direction[2])
@@ -381,35 +383,14 @@ def main():
         print("calculate half-free voxels")
         for voxel in free_voxels:
             freed_slices = voxel_occupied_by_slice[voxel]
-            neighbor_voxels = set([
-                    (voxel[0]-1, voxel[1]-1, voxel[2]-1),
-                    (voxel[0]-1, voxel[1]-1, voxel[2]+0),
-                    (voxel[0]-1, voxel[1]-1, voxel[2]+1),
-                    (voxel[0]-1, voxel[1]+0, voxel[2]-1),
-                    (voxel[0]-1, voxel[1]+0, voxel[2]+0),
-                    (voxel[0]-1, voxel[1]+0, voxel[2]+1),
-                    (voxel[0]-1, voxel[1]+1, voxel[2]-1),
-                    (voxel[0]-1, voxel[1]+1, voxel[2]+0),
-                    (voxel[0]-1, voxel[1]+1, voxel[2]+1),
-                    (voxel[0]+0, voxel[1]-1, voxel[2]-1),
-                    (voxel[0]+0, voxel[1]-1, voxel[2]+0),
-                    (voxel[0]+0, voxel[1]-1, voxel[2]+1),
-                    (voxel[0]+0, voxel[1]+0, voxel[2]-1),
-                    #(voxel[0]+0, voxel[1]+0, voxel[2]+0), this is the current voxel
-                    (voxel[0]+0, voxel[1]+0, voxel[2]+1),
-                    (voxel[0]+0, voxel[1]+1, voxel[2]-1),
-                    (voxel[0]+0, voxel[1]+1, voxel[2]+0),
-                    (voxel[0]+0, voxel[1]+1, voxel[2]+1),
-                    (voxel[0]+1, voxel[1]-1, voxel[2]-1),
-                    (voxel[0]+1, voxel[1]-1, voxel[2]+0),
-                    (voxel[0]+1, voxel[1]-1, voxel[2]+1),
-                    (voxel[0]+1, voxel[1]+0, voxel[2]-1),
-                    (voxel[0]+1, voxel[1]+0, voxel[2]+0),
-                    (voxel[0]+1, voxel[1]+0, voxel[2]+1),
-                    (voxel[0]+1, voxel[1]+1, voxel[2]-1),
-                    (voxel[0]+1, voxel[1]+1, voxel[2]+0),
-                    (voxel[0]+1, voxel[1]+1, voxel[2]+1),
-                    ])
+            neighbor_voxels = set()
+            vradius = 2
+            for ix in range(0-vradius, 1+vradius):
+                for iy in range(0-vradius, 1+vradius):
+                    for iz in range(0-vradius, 1+vradius):
+                        neighbor_voxels.add((voxel[0]+ix, voxel[1]+iy, voxel[2]+iz))
+            # remove the current voxel
+            neighbor_voxels.remove(voxel)
             # remove voxels that were already marked as free from the neighbor
             neighbor_voxels -= free_voxels
             for neighbor in neighbor_voxels:
@@ -418,7 +399,7 @@ def main():
                     continue
                 half_voxels[neighbor] |= freed_slices
         # make sure that no voxels are completely cleared
-        half_voxels = {v:i for v,i in half_voxels.items() if i != voxel_occupied_by_slice[v]}
+        #half_voxels = {v:i for v,i in half_voxels.items() if i != voxel_occupied_by_slice[v]}
 
     print("write result", file=sys.stderr)
     with open("scan000.3d", "w") as f1, open("scan001.3d", "w") as f2:
