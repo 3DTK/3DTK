@@ -278,6 +278,33 @@ class QuadTree:
             res.extend(t.search(p,radius))
         return res
 
+    def dump_ply(self):
+        faces = list()
+        for t in self.trees:
+            def walk(t, l):
+                if t.indices is not None or l == 0:
+                    # if it is a child node, dump the vertex indices
+                    faces.append((t.v1, t.v2, t.v3))
+                    return
+                walk(t.t1, l-1)
+                walk(t.t2, l-1)
+                walk(t.t3, l-1)
+                walk(t.t4, l-1)
+            walk(t, 100)
+        print("ply")
+        print("format ascii 1.0")
+        print("element vertex", len(self.vertices))
+        print("property float x")
+        print("property float y")
+        print("property float z")
+        print("element face", len(faces))
+        print("property list uchar int vertex_indices")
+        print("end_header")
+        for v in self.vertices:
+            print("%f %f %f"%v)
+        for f in faces:
+            print("3 %d %d %d"%f)
+
 def main():
     fmt = py3dtk.IOType.UOS
     start = end = 0
