@@ -35,9 +35,17 @@ def tripleproduct(a, b, c):
     return u*c[0]+v*c[1]+w*c[2]
 
 # calculate the mid-point between two points on the surface of a unit sphere
-def middle(p, q):
+def middle(a, b, vertices, middlemap):
+    i = middlemap.get((a,b))
+    if i is not None:
+        return i
+    p = vertices[a]
+    q = vertices[b]
     m = (p[0]+q[0])/2, (p[1]+q[1])/2, (p[2]+q[2])/2
-    return norm(m)
+    vertices.append(norm(m))
+    i = len(vertices) - 1
+    middlemap[(a,b)] = i
+    return i
 
 # calculate the circumcircle of a triangle in 3D and return the unit vector of
 # the center of the circumcircle as well as the angle theta of the sphere cap
@@ -107,14 +115,19 @@ def cart2geo(v):
 # "Geodesic Discrete Global Grid Systems" by Kevin Sahr, Denis White, and A. Jon Kimerling
 # 
 class QuadNode:
-    def __init__(self, v1, v2, v3, indices, pts):
+    def __init__(self, v1, v2, v3, indices, pts, vertices, middlemap):
         self.pts = pts
+        # nodes do not need access to the triangle vertices for searching
+        # We only store them to dump the vertices in PLY format later
         self.v1 = v1
         self.v2 = v2
         self.v3 = v3
-        self.ccp, self.ccr = circumcircle(v1,v2,v3)
+        w1 = vertices[v1]
+        w2 = vertices[v2]
+        w3 = vertices[v3]
+        self.ccp, self.ccr = circumcircle(w1,w2,w3)
         if len(indices) <= 100:
-            # make this a leave node
+            # make this a leaf node
             self.t1 = None
             self.t2 = None
             self.t3 = None
@@ -122,9 +135,12 @@ class QuadNode:
             self.indices = indices
             return
         self.indices = None
-        v4 = middle(v1,v2)
-        v5 = middle(v2,v3)
-        v6 = middle(v3,v1)
+        v4 = middle(v1,v2, vertices, middlemap)
+        v5 = middle(v2,v3, vertices, middlemap)
+        v6 = middle(v3,v1, vertices, middlemap)
+        w4 = vertices[v4]
+        w5 = vertices[v5]
+        w6 = vertices[v6]
         indices1 = []
         indices2 = []
         indices3 = []
@@ -133,20 +149,20 @@ class QuadNode:
             p = self.pts[i]
             # we must use >= or otherwise points exactly on the triangle
             # borders will not be matched by any triangle.
-            if tripleproduct(v1,v4,p) >= 0 and tripleproduct(v4,v6,p) >= 0 and tripleproduct(v6,v1,p) >= 0:
+            if tripleproduct(w1,w4,p) >= 0 and tripleproduct(w4,w6,p) >= 0 and tripleproduct(w6,w1,p) >= 0:
                 indices1.append(i)
-            elif tripleproduct(v2,v5,p) >= 0 and tripleproduct(v5,v4,p) >= 0 and tripleproduct(v4,v2,p) >= 0:
+            elif tripleproduct(w2,w5,p) >= 0 and tripleproduct(w5,w4,p) >= 0 and tripleproduct(w4,w2,p) >= 0:
                 indices2.append(i)
-            elif tripleproduct(v3,v6,p) >= 0 and tripleproduct(v6,v5,p) >= 0 and tripleproduct(v5,v3,p) >= 0:
+            elif tripleproduct(w3,w6,p) >= 0 and tripleproduct(w6,w5,p) >= 0 and tripleproduct(w5,w3,p) >= 0:
                 indices3.append(i)
-            elif tripleproduct(v4,v5,p) >= 0 and tripleproduct(v5,v6,p) >= 0 and tripleproduct(v6,v4,p) >= 0:
+            elif tripleproduct(w4,w5,p) >= 0 and tripleproduct(w5,w6,p) >= 0 and tripleproduct(w6,w4,p) >= 0:
                 indices4.append(i)
             else:
                 raise Exception("impossible for %f %f %f"%p)
-        self.t1 = QuadNode(v1,v4,v6,indices1, pts)
-        self.t2 = QuadNode(v2,v5,v4,indices2, pts)
-        self.t3 = QuadNode(v3,v6,v5,indices3, pts)
-        self.t4 = QuadNode(v4,v5,v6,indices4, pts)
+        self.t1 = QuadNode(v1,v4,v6,indices1, pts, vertices, middlemap)
+        self.t2 = QuadNode(v2,v5,v4,indices2, pts, vertices, middlemap)
+        self.t3 = QuadNode(v3,v6,v5,indices3, pts, vertices, middlemap)
+        self.t4 = QuadNode(v4,v5,v6,indices4, pts, vertices, middlemap)
 
     def __str__(self):
         if self.indices is not None:
@@ -161,6 +177,8 @@ class QuadNode:
     # "Indexing the Sphere with the Hierarchical Triangular Mesh" by Alexander S. Szalay, Jim Gray, George Fekete, Peter Z. Kunszt, Peter Kukol, Ani Thakar
     def search(self, p, r):
         if self.indices is not None:
+            # this is a leaf node, so we check all the points for whether they
+            # fulfill the angular distance criterion r from the query point p
             res = []
             for i in self.indices:
                 q = self.pts[i]
@@ -216,21 +234,19 @@ class QuadTree:
         # the coordinate axis (it then boils down to a check of the signs) and
         # because the fewer faces, the fewer triangle checks have to be done to
         # figure out into which face a point falls
+        self.vertices = [(-1,0,0),(1,0,0,),(0,-1,0),(0,1,0),(0,0,-1),(0,0,1)]
         mainvertices = []
         for x in [-1,1]:
             for y in [-1,1]:
                 for z in [-1,1]:
+                    v1 = 0 if x < 0 else 1
+                    v2 = 2 if y < 0 else 3
+                    v3 = 4 if z < 0 else 5
                     # make sure that the vertices of the triangle are given in the same
                     # order
                     # i.e. make sure that the normal vector always points outward
-                    if (x > 0) ^ (y > 0) ^ (z > 0) == True:
-                        v1 = (x,0,0)
-                        v2 = (0,y,0)
-                        v3 = (0,0,z)
-                    else:
-                        v1 = (0,0,z)
-                        v2 = (0,y,0)
-                        v3 = (x,0,0)
+                    if (x > 0) ^ (y > 0) ^ (z > 0) == False:
+                        v1, v3 = v3, v1
                     mainvertices.append((v1,v2,v3))
 
         buckets = [[],[],[],[],[],[],[],[]]
@@ -249,9 +265,10 @@ class QuadTree:
             buckets[idx].append(i)
         after = time.time()
         print("took: %f" % (after-before), file=sys.stderr)
+        middlemap = dict()
         print("constructing trees", file=sys.stderr)
         before = time.time()
-        self.trees = [ QuadNode(v1,v2,v3,b,self.pts) for b,(v1,v2,v3) in zip(buckets,mainvertices)]
+        self.trees = [ QuadNode(v1,v2,v3,b,self.pts,self.vertices,middlemap) for b,(v1,v2,v3) in zip(buckets,mainvertices)]
         after = time.time()
         print("took: %f" % (after-before), file=sys.stderr)
 
