@@ -236,15 +236,15 @@ void calculateNormalsKNN(vector<Point> &normals,
 
 #ifdef _OPENMP
   omp_set_num_threads(OPENMP_NUM_THREADS);
-#pragma omp parallel 
-  {
-    int thread_num = omp_get_thread_num();
-#else
-  {
-    int thread_num = 0;
+
+#pragma omp parallel for schedule(dynamic)
 #endif
-	 
     for (size_t i = 0; i < points.size(); ++i) {
+#ifdef _OPENMP
+     int thread_num = omp_get_thread_num();
+#else
+     int thread_num = 0;
+#endif
 	 
 	 double p[3] = { points[i].x, points[i].y, points[i].z };
 	 
@@ -273,7 +273,6 @@ void calculateNormalsKNN(vector<Point> &normals,
 #pragma omp critical
 	 normals.push_back(Point(n(1), n(2), n(3)));       
     }
-  }
     
   for (size_t i = 0; i < points.size(); ++i) {
     delete[] pa[i];
@@ -348,15 +347,15 @@ void calculateNormalsAdaptiveKNN(vector<Point> &normals,
 
 #ifdef _OPENMP
   omp_set_num_threads(OPENMP_NUM_THREADS);
-#pragma omp parallel
-  {
-    int thread_num = omp_get_thread_num();
-#else
-  {
-    int thread_num = 0;
-#endif
 
+#pragma omp parallel for schedule(dynamic)
+#endif
     for (size_t i = 0; i < points.size(); i++) {
+#ifdef _OPENMP
+	 int thread_num = omp_get_thread_num();
+#else
+	 int thread_num = 0;
+#endif
 
 	 double p[3] = { points[i].x, points[i].y, points[i].z };
 	 Matrix U(3,3);
@@ -426,7 +425,6 @@ void calculateNormalsAdaptiveKNN(vector<Point> &normals,
 #pragma omp critical	 
 	 normals.push_back(Point(n(1), n(2), n(3)));  
     }
-  }
   
   for (size_t i = 0; i < points.size(); ++i) {
     delete[] pa[i];
