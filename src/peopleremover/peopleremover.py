@@ -89,6 +89,9 @@ def walk_voxels(start, end, voxel_size, voxel_occupied_by_slice, current_slice, 
     # adding up the steps. Doing the latter might introduce errors because
     # due to floating point precision errors, 0.1+0.1+0.1 is unequal 3*0.1.
     multX = multY = multZ = 0
+    tMaxXStart = tMaxX
+    tMaxYStart = tMaxY
+    tMaxZStart = tMaxZ
     empty_voxels = set()
     #i = 0
     # iterate until either:
@@ -112,20 +115,20 @@ def walk_voxels(start, end, voxel_size, voxel_occupied_by_slice, current_slice, 
             if tMaxX < tMaxZ:
                 multX += 1
                 X = startX + multX*stepX
-                tMaxX += tDeltaX
+                tMaxX = tMaxXStart + multX*tDeltaX
             else:
                 multZ += 1
                 Z = startZ + multZ*stepZ
-                tMaxZ += tDeltaZ
+                tMaxZ = tMaxZStart + multZ*tDeltaZ
         else:
             if tMaxY < tMaxZ:
                 multY += 1
                 Y = startY + multY*stepY
-                tMaxY += tDeltaY
+                tMaxY = tMaxYStart + multY*tDeltaY
             else:
                 multZ += 1
                 Z = startZ + multZ*stepZ
-                tMaxZ += tDeltaZ
+                tMaxZ = tMaxZStart + multZ*tDeltaZ
         #print("%f %f %f" % (tMaxX, tMaxY, tMaxZ))
         #print("visiting voxel: %d %d %d"%(X,Y,Z))
         # if the voxel has no point in it at all, continue searching
