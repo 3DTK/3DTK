@@ -234,6 +234,8 @@ void calculateNormalsKNN(vector<Point> &normals,
 
   KDtree t(pa, points.size());
 
+  normals.reserve(points.size());
+
 #ifdef _OPENMP
   omp_set_num_threads(OPENMP_NUM_THREADS);
 
@@ -344,6 +346,8 @@ void calculateNormalsAdaptiveKNN(vector<Point> &normals,
   }
 
   KDtree t(pa, points.size());
+
+  normals.reserve(points.size());
 
 #ifdef _OPENMP
   omp_set_num_threads(OPENMP_NUM_THREADS);
