@@ -258,7 +258,7 @@ int main(int argc, char** argv)
   /// Initialize and perform normal calculation
   /// -----------------------------------------
   std::vector<Scan*>::iterator it = Scan::allScans.begin();
-  int scanNumber = 0;
+  int scanNumber = start;
 
   for( ; it != Scan::allScans.end(); ++it) {
     Scan* scan = *it;
