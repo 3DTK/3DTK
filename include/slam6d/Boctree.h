@@ -1020,7 +1020,7 @@ protected:
           long nrpts = children->getLength();
           result += nrpts;
         } else { // recurse
-          result += countLeaves(children->node);
+          result += countPoints(children->node);
         }
         ++children; // next child
       }
