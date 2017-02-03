@@ -36,6 +36,6 @@ for more information about Homebrew have a look at http://brew.sh/index_de.html
 After this the commands to install the dependencies are 
 
 $ brew update
-$ brew install cmake boost libzip homebrew/science/opencv3 homebrew/science/ann
+$ brew install cmake boost libzip homebrew/science/opencv3 homebrew/science/ann eigen freeglut suite-sparse
 
 To compile 3dtk follow the instructions at the README file. 
