@@ -1,6 +1,6 @@
 -------------------------------------------------------------------
 
-For installation instructions on Ubuntu and Debian, please have a look at the
+For installation instructions on Ubuntu, Debian and macOS, please have a look at the
 INSTALL file.
 
 To compile the project simply call "make". This will configure slam6d
