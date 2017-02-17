@@ -23,6 +23,19 @@ class colordisplay {
     if (cm) cm->unload();
   }
 
+  // these are needed on windows so that show can be used as a library 
+  // we need to call the ExtractFrustum in a same process as the draw function on windows
+  void extractFrustumAndDisplayLOD(float lod, short detail) {
+	  if (cm) cm->load();
+	  extractFrustumAndDrawLOD(lod, detail);
+	  if (cm) cm->unload();
+  };
+  void extractFrustumAndDisplay(short detail) {
+	  if (cm) cm->load();
+	  extractFrustumAndDraw(detail);
+	  if (cm) cm->unload();
+  }
+
   virtual void selectRay(float * &point) {};
   virtual void selectRay(double * &point) {};
   virtual void selectRay(set<float*> &points, int depth=INT_MAX) {};
@@ -36,6 +49,11 @@ class colordisplay {
   
   virtual void drawLOD(float lod) = 0; 
   virtual void draw() = 0; 
+  
+  // these are needed on windows so that show can be used as a library 
+  // we need to call the ExtractFrustum in a same process as the draw function on windows
+  virtual void extractFrustumAndDrawLOD(float lod, short detail) = 0;
+  virtual void extractFrustumAndDraw(short detail) = 0;
   
   ColorManager *cm;
 };
