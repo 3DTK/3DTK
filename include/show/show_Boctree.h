@@ -194,6 +194,19 @@ public:
     glEnd();
   }
   
+  // these are needed on windows so that show can be used as a library 
+  // we need to call the ExtractFrustum in a same process as the draw function on windows
+  void extractFrustumAndDrawLOD(float ratio, short detail)
+  {
+	  ExtractFrustum(detail);
+	  drawLOD(ratio);
+  }
+  void extractFrustumAndDraw(short detail)
+  {
+	  ExtractFrustum(detail);
+	  draw();
+  }
+
   // reroute center call (for recast from colordisplay to show_bocttree)
   void getCenter(double _center[3]) const {
     m_tree->getCenter(_center);
