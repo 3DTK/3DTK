@@ -155,10 +155,10 @@ using namespace cv;
              apriltag_detection_t *det;
              zarray_get(detections, i, &det);
              AprilTag2f aprilTag2f = AprilTag2f(det->id);
-             aprilTag2f.point1 = Point2f((float)((det->p)[0][0]), (float)((det->p)[0][1]));
-             aprilTag2f.point2 = Point2f((float)((det->p)[1][0]), (float)((det->p)[1][1]));
-             aprilTag2f.point3 = Point2f((float)((det->p)[2][0]), (float)((det->p)[2][1]));
-             aprilTag2f.point4 = Point2f((float)((det->p)[3][0]), (float)((det->p)[3][1]));
+             aprilTag2f.point4 = Point2f((float)((det->p)[0][0]), (float)((det->p)[0][1]));
+             aprilTag2f.point3 = Point2f((float)((det->p)[1][0]), (float)((det->p)[1][1]));
+             aprilTag2f.point2 = Point2f((float)((det->p)[2][0]), (float)((det->p)[2][1]));
+             aprilTag2f.point1 = Point2f((float)((det->p)[3][0]), (float)((det->p)[3][1]));
              this->pointMap.push_back(aprilTag2f);
              apriltag_detection_destroy(det);
          }
