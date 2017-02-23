@@ -460,13 +460,19 @@ void CalibrationToolbox::visualize(bool readCameraParamFromFile){
         std::stringstream ss;
         ss << settings.visualizePath << "/" << filename.filename().string() << ".reprojection" << ".png";
 
+        uint colorIndex = 0;
+        Scalar colorMap[4] = {Scalar(0,0,255), Scalar(0,255,0), Scalar(255,0,0), Scalar(0,255,255)};
+
         for(Point2f point2f : this->vecImagePoints[i]){
-            circle(image, point2f, 1, Scalar(255,0,0),2);
+            circle(image, point2f, 1, colorMap[colorIndex],2);
             if(!readCameraParamFromFile) {
                 projectPoints(Mat(vecPatternPoints[i]), rvector[i], tvector[i], camMatrix, distorCoeff, imagePoints2);
                 double err = norm(Mat(vecImagePoints[i]), Mat(imagePoints2), CV_L2);
             }
             circle(pointsImage, point2f, 1, Scalar(255, 255, 255), 2);
+
+            colorIndex++;
+            if (colorIndex > 3) colorIndex = 0;
         }
         if(!readCameraParamFromFile) {
             cv::imwrite(detss.str(), image);
