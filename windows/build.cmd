@@ -18,14 +18,14 @@ set outdir=C:/slam6d/
 :: the build type (one of Debug, Release, RelWithDebInfo and MinSizeRel)
 set buildtype=Release
 
-:: this script must have the extension .cmd under windows or otherwise (if
+:: This script must have the extension .cmd under windows or otherwise (if
 :: it's named .bat for example) %ERRORLEVEL% will not be reset but keep being
-:: false even if executions of commands succeed
+:: false even if executions of commands succeed.
 ::
-:: this script uses embedded powershell to download files and check their md5
+:: This script uses embedded powershell to download files and check their md5
 :: sums. The script is not written in powershell itself to avoid stupid popups
-:: about this script being insecure, do you really want to execute it, yadda,
-:: yadda...
+:: about this script being insecure. I wonder why there are no popups if
+:: powershell is used from within a batch file like this script does...
 ::
 :: Because of powershell, this script needs either Windows 7 or an earlier
 :: Windows version with powershell (>= 5.0) installed. The powershell version
@@ -33,16 +33,19 @@ set buildtype=Release
 ::
 :: This script hardcodes the visual studio version. This is because MSVC 14.0
 :: is the last version with downloadable binaries available for boost and
-:: opencv
+:: opencv.
 ::
-:: the source directory must not be in the root of a drive letter under
+:: The source directory must not be in the root of a drive letter under
 :: windows. See:
 ::  - http://stackoverflow.com/questions/31871972/
 ::  - http://public.kitware.com/pipermail/cmake/2015-August/061332.html
 ::  - http://www.cmake.org/Bug/view.php?id=15134
 ::  - http://www.cmake.org/Bug/view.php?id=10072
 ::
-:: also, *never* change this file while the script is still running. It seems
+:: The output directory must *not* be a network drive or otherwise Windows
+:: will refuse to load any dll from it.
+::
+:: Also, *never* change this file while the script is still running. It seems
 :: that on windows, the script is not read into memory and executed by the
 :: interpreter but instead read on demand.
 
