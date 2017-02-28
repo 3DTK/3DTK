@@ -241,7 +241,15 @@ void calculateNormalsKNN(vector<Point> &normals,
 
 #pragma omp parallel for schedule(dynamic)
 #endif
-    for (size_t i = 0; i < points.size(); ++i) {
+    for (
+#if defined(_MSC_VER) and defined(_OPENMP)
+	// MSVC only supports OpenMP 2.5 where the counter must be signed
+	// There is also no ssize_t on non-POSIX platforms but sizeof(long) == sizeof(void*)
+	long
+#else
+	size_t
+#endif
+	i = 0; i < points.size(); ++i) {
 #ifdef _OPENMP
      int thread_num = omp_get_thread_num();
 #else
@@ -354,7 +362,15 @@ void calculateNormalsAdaptiveKNN(vector<Point> &normals,
 
 #pragma omp parallel for schedule(dynamic)
 #endif
-    for (size_t i = 0; i < points.size(); i++) {
+    for (
+#if defined(_MSC_VER) and defined(_OPENMP)
+	// MSVC only supports OpenMP 2.5 where the counter must be signed
+	// There is also no ssize_t on non-POSIX platforms but sizeof(long) == sizeof(void*)
+	long
+#else
+	size_t
+#endif
+	i = 0; i < points.size(); i++) {
 #ifdef _OPENMP
 	 int thread_num = omp_get_thread_num();
 #else
