@@ -148,6 +148,12 @@ if not exist %cmakedir% (
 	)
 )
 
+:: use setlocal to make sure that the directory is only changed for this part
+:: of the script and not on the outside
+setlocal
+:: need /d if %outdir% is a different drive letter than the current working
+:: directory
+cd /d %outdir%
 "%cmakeexe%" ^
 	-G "Visual Studio 14 2015 Win64" ^
 	-DZLIB_LIBRARY:FILEPATH=%sourcedir%/3rdparty/windows/zlib.lib ^
@@ -171,6 +177,7 @@ if %ERRORLEVEL% GEQ 1 (
 	echo cmake --build failed
 	exit /B 1
 )
+endlocal
 
 echo "build successful!"
 
