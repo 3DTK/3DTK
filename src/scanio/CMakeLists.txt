@@ -53,4 +53,6 @@ endif()
 
 if(UNIX)
   target_link_libraries(scanio dl scan_io_helper ${Boost_SYSTEM_LIBRARY})
+else()
+  target_link_libraries(scanio scan_io_helper ${Boost_SYSTEM_LIBRARY})
 endif()
