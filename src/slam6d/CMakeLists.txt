@@ -100,8 +100,8 @@ if(WITH_FBR)
     target_link_libraries(frame_to_graph XGetopt ${Boost_LIBRARIES})
     target_link_libraries(convergence XGetopt ${Boost_LIBRARIES})
     target_link_libraries(graph_balancer scan XGetopt ${Boost_GRAPH_LIBRARY} ${Boost_SERIALIZATION_LIBRARY} ${Boost_REGEX_LIBRARY} ${Boost_LIBRARIES})
-    target_link_libraries(exportPoints scan ann XGetopt  ${Boost_LIBRARIES} ${OpenCV_LIBS} newmat)
-    target_link_libraries(transformFrames scan ann XGetopt  ${Boost_LIBRARIES} ${OpenCV_LIBS} newmat)
+    target_link_libraries(exportPoints scan ann XGetopt  ${Boost_LIBRARIES} newmat)
+    target_link_libraries(transformFrames scan ann XGetopt  ${Boost_LIBRARIES} newmat)
     target_link_libraries(frames2pose XGetopt ${Boost_LIBRARIES})
     target_link_libraries(framesdiff2frames XGetopt ${Boost_LIBRARIES})
     target_link_libraries(pose2frames XGetopt ${Boost_LIBRARIES})
@@ -131,9 +131,7 @@ set(SCANLIB_SRCS
 
 add_library(scan STATIC ${SCANLIB_SRCS})
 
-find_package(OpenCV REQUIRED)
-
-target_link_libraries(scan scanclient scan_io_helper scanio ann newmat cxsparse ${OpenCV_LIBS})
+target_link_libraries(scan scanclient scan_io_helper scanio ann newmat cxsparse)
 
 if(UNIX)
   target_link_libraries(scan dl pthread)
