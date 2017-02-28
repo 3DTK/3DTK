@@ -31,7 +31,7 @@ set buildtype=Release
 :: Windows version with powershell (>= 5.0) installed. The powershell version
 :: requirement comes from the Expand-Archive function.
 ::
-:: this script hardcodes the visual studio version. This is because MSVC 12.0
+:: This script hardcodes the visual studio version. This is because MSVC 14.0
 :: is the last version with downloadable binaries available for boost and
 :: opencv
 ::
@@ -80,13 +80,13 @@ set cmakezip=%outdir%/cmake-3.7.2-win64-x64.zip
 set cmakeurl=https://cmake.org/files/v3.7/cmake-3.7.2-win64-x64.zip
 set cmakehash=b5-e9-fa-6c-cb-56-06-66-84-19-2f-4f-1d-30-54-93
 
-set boostexe=%outdir%/boost_1_58_0-msvc-12.0-64.exe
-set boosturl=http://netcologne.dl.sourceforge.net/project/boost/boost-binaries/1.58.0/boost_1_58_0-msvc-12.0-64.exe
-set boosthash=5f-b8-23-3b-ad-cf-d5-a6-28-12-a2-30-06-35-db-c9
+set boostexe=%outdir%/boost_1_63_0-msvc-14.0-64.exe
+set boosturl=https://downloads.sourceforge.net/project/boost/boost-binaries/1.63.0/boost_1_63_0-msvc-14.0-64.exe
+set boosthash=e6-87-21-e0-da-79-18-df-0c-d7-86-e9-f2-25-98-39
 
-set opencvexe=%outdir%/opencv-2.4.9.exe
-set opencvurl=http://freefr.dl.sourceforge.net/project/opencvlibrary/opencv-win/2.4.9/opencv-2.4.9.exe
-set opencvhash=cd-c4-be-ed-03-07-e9-02-c3-a5-1f-71-45-bd-5d-c7
+set opencvexe=%outdir%/opencv-3.2.0-vc14.exe
+set opencvurl=https://downloads.sourceforge.net/project/opencvlibrary/opencv-win/3.2.0/opencv-3.2.0-vc14.exe
+set opencvhash=76-31-e7-08-a9-ae-03-65-69-e4-00-ba-43-88-68-61
 
 if not exist %boostdir% (
 	if not exist %boostexe% (
@@ -146,7 +146,7 @@ if not exist %cmakedir% (
 )
 
 "%cmakeexe%" ^
-	-G "Visual Studio 12 2013 Win64" ^
+	-G "Visual Studio 14 2015 Win64" ^
 	-DZLIB_LIBRARY:FILEPATH=%sourcedir%/3rdparty/windows/zlib.lib ^
 	-DBOOST_LIBRARYDIR:PATH=%boostdir%/lib64-msvc-12.0 ^
 	-DBOOST_ROOT:PATH=%boostdir% ^
