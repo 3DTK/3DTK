@@ -9,9 +9,6 @@
 :: you might want to configure the following variables before you run this
 :: script:
 
-:: the path to your CMake executable
-set cmakeexe=C:/Program Files (x86)/CMake/bin/cmake.exe
-
 :: the path where the 3dtk sources are
 set sourcedir=Z:/3dtk/
 
@@ -30,8 +27,9 @@ set buildtype=Release
 :: about this script being insecure, do you really want to execute it, yadda,
 :: yadda...
 ::
-:: because of powershell, this script needs either Windows 7 or an earlier
-:: Windows version with powershell (>= 2.0) installed
+:: Because of powershell, this script needs either Windows 7 or an earlier
+:: Windows version with powershell (>= 5.0) installed. The powershell version
+:: requirement comes from the Expand-Archive function.
 ::
 :: this script hardcodes the visual studio version. This is because MSVC 12.0
 :: is the last version with downloadable binaries available for boost and
@@ -52,6 +50,12 @@ set buildtype=Release
 
 set opencvdir=%outdir%/3rdparty/opencv/
 set boostdir=%outdir%/3rdparty/boost/
+set cmakedir=%outdir%/3rdparty/cmake/
+
+set cmakeexe=%outdir%/3rdparty/cmake/cmake-3.7.2-win64-x64/bin/cmake.exe
+set cmakezip=%outdir%/cmake-3.7.2-win64-x64.zip
+set cmakeurl=https://cmake.org/files/v3.7/cmake-3.7.2-win64-x64.zip
+set cmakehash=b5-e9-fa-6c-cb-56-06-66-84-19-2f-4f-1d-30-54-93
 
 set boostexe=%outdir%/boost_1_58_0-msvc-12.0-64.exe
 set boosturl=http://netcologne.dl.sourceforge.net/project/boost/boost-binaries/1.58.0/boost_1_58_0-msvc-12.0-64.exe
@@ -95,6 +99,25 @@ if not exist %opencvdir% (
 	%opencvexe% -o"%opencvdir%" -y
 	if %ERRORLEVEL% GEQ 1 (
 		echo opencv install failed
+		exit /B 1
+	)
+)
+
+if not exist %cmakedir% (
+	if not exist %cmakezip% (
+		echo downloading %cmakezip%...
+		call:download %cmakeurl% %cmakezip%
+	)
+	echo checking md5sum of %cmakezip%...
+	call:checkmd5 %cmakezip% %cmakehash%
+	if ERRORLEVEL 1 (
+		echo md5sum mismatch
+		exit /B 1
+	)
+	echo extracting %cmakezip% into %cmakedir%...
+	call:unzip %cmakezip% %cmakedir%
+	if %ERRORLEVEL% GEQ 1 (
+		echo cmake unzip failed
 		exit /B 1
 	)
 )
@@ -164,3 +187,12 @@ goto:eof
 		exit /B 1
 	)
 	exit /B 0
+
+:unzip
+	powershell -command ^
+		"Expand-Archive """"%~1"""" -DestinationPath """"%~2"""""
+	if %ERRORLEVEL% GEQ 1 (
+		exit /B 1
+	)
+	exit /B 0
+
