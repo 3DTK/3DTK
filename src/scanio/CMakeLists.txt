@@ -20,10 +20,11 @@ endif()
 
 if(WIN32)
   add_library(scan_io_helper STATIC helper.cc)
+  target_link_libraries(scan_io_helper zip ${Boost_LIBRARIES} ${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY} pointfilter )
 else()
   add_library(scan_io_helper SHARED helper.cc)
+  target_link_libraries(scan_io_helper ${LIBZIP_LIBRARY} ${Boost_LIBRARIES} ${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY} pointfilter )
 endif()
-target_link_libraries(scan_io_helper ${LIBZIP_LIBRARY} ${Boost_LIBRARIES} ${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY} pointfilter )
 
 foreach(libname ${SCANIO_LIBNAMES})
 if(WIN32)
