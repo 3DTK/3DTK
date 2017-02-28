@@ -66,9 +66,9 @@ endif()
 
 if(APPLE)
   find_package(OpenCV REQUIRED HINTS "/usr/local/opt/opencv3/share/OpenCV/")
-  include_directories("${OpenCV_INCLUDE_DIRS}")
 endif()
 
+include_directories(${OpenCV_INCLUDE_DIRS})
 if(EXISTS "${OpenCV_DIR}/OpenCVConfig.cmake")
   include("${OpenCV_DIR}/OpenCVConfig.cmake")
   set(ADDITIONAL_OPENCV_FLAGS
