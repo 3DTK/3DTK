@@ -123,7 +123,7 @@ if %ERRORLEVEL% GEQ 1 (
 	exit /B 1
 )
 
-:: pause
+echo "build successful!"
 
 goto:eof
 
