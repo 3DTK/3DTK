@@ -26,6 +26,13 @@
 
 #include "slam6d/normals.h"
 
+#if (CV_MAJOR_VERSION == 2) && (CV_MINOR_VERSION < 2)
+#include <opencv/cv.h>
+#include <opencv/highgui.h>
+#else
+#include <opencv2/opencv.hpp>
+#endif
+
 using namespace NEWMAT;
 using namespace std;
 
