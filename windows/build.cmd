@@ -48,6 +48,29 @@ set buildtype=Release
 
 @echo off
 
+if not exist %sourcedir% (
+	echo %sourcedir% does not exist. Make sure the sourcedir variable is set to the path of the 3DTK sources.
+	exit /B 1
+)
+
+
+for %%p in (
+		%sourcedir%/3rdparty/windows/freeglut/lib/x64/freeglut.lib
+		%sourcedir%/3rdparty/windows/freeglut/include
+		%sourcedir%/3rdparty/windows/zlib.lib
+		%sourcedir%/3rdparty/windows/zlib
+	) do (
+		if not exist %%p (
+			echo %%p does not exist - does %sourcedir% really contain the 3DTK sources?
+			exit /B 1
+		)
+)
+
+if not exist %outdir% (
+	echo %outdir% does not exist. Make sure the outdir variable is set to an existing path.
+	exit /B 1
+)
+
 set opencvdir=%outdir%/3rdparty/opencv/
 set boostdir=%outdir%/3rdparty/boost/
 set cmakedir=%outdir%/3rdparty/cmake/
