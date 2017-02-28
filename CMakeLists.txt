@@ -66,6 +66,11 @@ endif()
 
 if(APPLE)
   find_package(OpenCV REQUIRED HINTS "/usr/local/opt/opencv3/share/OpenCV/")
+else()
+  if(WIN32)
+    set(OpenCV_STATIC ON)
+  endif()
+  find_package(OpenCV REQUIRED)
 endif()
 
 include_directories(${OpenCV_INCLUDE_DIRS})
