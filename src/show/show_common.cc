@@ -30,17 +30,11 @@
 #include "show/show.h"
 #include "GL/glui.h"  /* Header File For The glui functions */
 #include <fstream>
-using std::ifstream;
 #include <stdexcept>
-using std::exception;
 #include <algorithm>
+#include <map>
 
-
-#ifdef _MSC_VER
-#include "XGetopt.h"
-#else
-#include <getopt.h>
-#endif
+#include <boost/program_options.hpp>
 
 #ifdef _MSC_VER
 #define strcasecmp _stricmp
@@ -63,6 +57,9 @@ using std::exception;
 #include "slam6d/point_type.h"
 #include "slam6d/io_utils.h"
 #include "show/display.h"
+
+using std::ifstream;
+using std::exception;
 
 /**
  * This vector contains the pointer to a vertex array for
@@ -347,142 +344,7 @@ int current_frame = 0;
 #include "show_gl.cc"
 
 /**
- * Explains the usage of this program's command line parameters
- * @param prog name of the program
- */
-void usage(char* prog)
-{
-#ifndef _MSC_VER
-  const string bold("\033[1m");
-  const string normal("\033[m");
-#else
-  const string bold("");
-  const string normal("");
-#endif
-
-  cout << endl
-       << bold << "USAGE " << normal << endl
-       << "   " << prog << " [options] directory" << endl << endl;
-  cout << bold << "OPTIONS" << normal << endl
-
-       << bold << "  -e" << normal << " NR, " << bold << "--end=" << normal << "NR" << endl
-       << "         end after scan NR" << endl
-       << endl
-       << bold << "  -f" << normal << " F, " << bold << "--format=" << normal << "F" << endl
-       << "         using shared library F for input" << endl
-       << "         (chose F from {uos, uos_map, uos_rgb, uos_frames, uos_map_frames, old, rts, rts_map, ifp, riegl_txt, riegl_rgb, riegl_bin, zahn, ply, wrl, xyz, zuf, iais, front, x3d, rxp, ais })" << endl
-       << endl
-       << bold << "  -F" << normal << " NR, " << bold << "--fps=" << normal << "NR [default: 20]" << endl
-       << "         will attempt to display points with a framerate of NR" << endl
-       << endl
-       << bold << "  -l" << normal << " FILE, " << bold << "--loadObj=" << normal <<
-    "FILE" << endl
-       << "         load objects specified in <FILE>" << endl
-       << endl
-       << endl
-       << bold << "  -m" << normal << " NR, " << bold << "--max=" << normal << "NR" << endl
-       << "         neglegt all data points with a distance larger than NR 'units'" << endl
-       << endl
-       << bold << "  -u" << normal << " STR, " << bold << "--customFilter=" << normal << "STR" << endl
-	   << "         apply custom filter, filter mode and data are specified as semicolon-seperated string:" << endl
-	   << "         STR: '{filterMode};{nrOfParams}[;param1][;param2][...]'" << endl
-	   << "         Multiple filters can be specified in a file (syntax in file is same as direct specification)" << endl
-	   << "         STR: 'FILE;{fileName}'" << endl
-	   << "         see filter implementation in pointfilter.cc for more detail." << endl
-       << endl
-       << bold << "  -M" << normal << " NR, " << bold << "--min=" << normal << "NR" << endl
-       << "         neglegt all data points with a distance smaller than NR 'units'" << endl
-       << endl
-       << bold << "  -O" << normal << "NR (optional), " << bold << "--octree=" << normal << "NR (optional)" << endl
-       << "         use randomized octree based point reduction (pts per voxel=<NR>)" << endl
-       << "         requires " << bold << "-r" << normal <<" or " << bold << "--reduce" << endl
-       << endl
-       << bold << "  -o" << normal << " NR, " << bold << "--origin=" << normal << "NR" << endl
-       << "         sets the starting and reset position according to the integer value of" << endl
-       << "         NR. Without this option, the starting and reset position are at the" << endl
-       << "         origin of the coordinate system." << endl
-       << "           NR = 0              = the center of mass of all scans" << endl
-       << "           NR = [1,2,3,...]    = the center of scan 0,1,2,..." << endl
-       << "           NR = [-1,-2,-3,...] = the position of scan 0,1,2,..." << endl
-       << endl
-            << bold << "  -S, --scanserver" << normal << endl
-            << "           Use the scanserver as an input method and handling of scan data" << endl
-            << endl
-       << bold << "  -r" << normal << " NR, " << bold << "--reduce=" << normal << "NR" << endl
-       << "         turns on octree based point reduction (voxel size=<NR>)" << endl
-       << endl
-       << bold << "  --stepsize" << normal << " NR" << endl
-       << "         reduce point cloud by including only every NRth scanline. " << endl
-       << endl
-       << bold << "  -s" << normal << " NR, " << bold << "--start=" << normal << "NR" << endl
-       << "         start at scan NR (i.e., neglects the first NR scans)" << endl
-       << "         [ATTENTION: counting naturally starts with 0]" << endl
-       << endl
-       << bold << "  -C" << normal << " NR, " << bold << "--scale=" << normal << "NR" << endl
-       << "         scale factor to use (default: 0.01), modifies movement speed etc. " << endl
-       << "         use 1 when point coordinates are in m, 0.01 when in cm and so forth. " << endl
-       << "         " << endl
-       << endl
-
-    << bold << "  -R, --reflectance, --reflectivity" << normal << endl
-       << "         use reflectivity values for coloring point clouds" << endl
-       << "         only works when using octree display" << endl
-       << endl
-    << bold << "  -D, --temperature, --degree" << normal << endl
-       << "         use temperature values for coloring point clouds" << endl
-       << "         only works when using octree display" << endl
-       << endl
-    << bold << "  -a, --amplitude" << endl << normal
-       << "         use amplitude values for coloring point clouds" << endl
-       << "         only works when using octree display" << endl
-       << endl
-    << bold << "  -d, --deviation" << endl << normal
-       << "         use amplitude values for coloring point clouds" << endl
-       << "         only works when using octree display" << endl
-       << endl
-    << bold << "  -h, --height" << endl << normal
-       << "         use y-values for coloring point clouds" << endl
-       << "         only works when using octree display" << endl
-       << endl
-    << bold << "  -T, --type" << endl << normal
-       << "         use type values for coloring point clouds" << endl
-       << "         only works when using octree display" << endl
-       << endl
-    << bold << "  -c, --color" << endl << normal
-       << "         use color RGB values for coloring point clouds" << endl
-       << endl
-    << bold << "  -b" << normal << " NR, " << bold << "--sphere=" << normal << "NR" << endl
-       << "         map all measurements on a sphere (of radius NRcm)" << endl
-       << endl
-    << bold << "  --saveOct" << endl << normal
-       << "         stores all used scans as octrees in the given directory" << endl
-       << "         All reflectivity/amplitude/deviation/type settings are stored as well." << endl
-       << "         only works when using octree display" << endl
-       << endl
-    << bold << "  --loadOct" << endl << normal
-       << "         only reads octrees from the given directory" << endl
-       << "         All reflectivity/amplitude/deviation/type settings are read from file." << endl
-       << "         --reflectance/--amplitude and similar parameters are therefore ignored." << endl
-       << "         only works when using octree display" << endl
-       << endl
-    << bold << "  --autoOct" << endl << normal
-       << "         like --loadOct and --saveOct used together except that it only loads" << endl
-       << "         the octrees if they are newer than the underlying data and only stores" << endl
-       << "         octrees if they either didn't exist yet or are older than the underlying." << endl
-       << "         data." << endl
-       << endl
-    << bold << "  -A, --noanimcolor" << endl << normal
-       << "         do not switch to different color settings when displaying animation" << endl
-       << endl
-    << bold << "  -2, --advanced" << endl << normal
-       << "         switch on advanced controls" << endl
-    << endl << endl;
-
-  exit(1);
-}
-
-/**
- * A function that parses the command-line arguments and sets the respective flags.
+ * Parse argv and config files into output variables.
  *
  * @param argc the number of arguments
  * @param argv the arguments
@@ -491,8 +353,25 @@ void usage(char* prog)
  * @param end parsing result - stopping at scan number 'end'
  * @param maxDist parsing result - maximal distance
  * @param minDist parsing result - minimal distance
- * @param readInitial parsing result -  read a file containing a initial transformation matrix
+ * @param red parsing result - reduce points with octtree
+ * @param readInitial ignored
+ * @param octtree parsing result - reduce points with randomized octtree
+ * @param ptype parsing result - PointType of the input
+ * @param fps parsing result - max. fps
+ * @param loadObj parsing result
+ * @param loadOct parsing result - load cached octtrees
+ * @param saveOct parsing result - save octtree caches
+ * @param autoOct parsing result - load, save, invalidate cached octtrees
+ * @param origin parsing result - mode for setting the origin
+ * @param originset parsing result - if origin was modified
+ * @param scale parsing result - measurement scale
  * @param type parsing result - file format to be read
+ * @param scanserver parsing result - use scanserver program
+ * @param sphereMode parsing result - map input points onto sphere
+ * @param customFilter parsing result
+ * @param trajectoryFile parsing result
+ * @param stepsize parsing result - skip input lines
+ * @param identity parsing result
  * @return 0, if the parsing was successful, 1 otherwise
  */
 int parseArgs(int argc,char **argv,
@@ -504,226 +383,299 @@ int parseArgs(int argc,char **argv,
               double& sphereMode, string& customFilter, string& trajectoryFile,
               int &stepsize, bool &identity)
 {
+  using namespace boost::program_options;
+
+  // Temporary parsing variables
   unsigned int types = PointType::USE_NONE;
-  start   = 0;
-  end     = -1; // -1 indicates no limitation
-  maxDist = -1; // -1 indicates no limitation
-  int  c;
-  // from unistd.h
-  extern char *optarg;
-  extern int optind;
-  
-  WriteOnce<IOType> w_type(type);
-  WriteOnce<int> w_start(start), w_end(end);
+  string format;
 
-  cout << endl;
-  static struct option longopts[] = {
-    { "origin",          required_argument,   0,  'o' },
-    { "format",          required_argument,   0,  'f' },
-    { "fps",             required_argument,   0,  'F' },
-    { "scale",           required_argument,   0,  'C' },
-    { "start",           required_argument,   0,  's' },
-    { "end",             required_argument,   0,  'e' },
-    { "reduce",          required_argument,   0,  'r' },
-    { "max",             required_argument,   0,  'm' },
-    { "min",             required_argument,   0,  'M' },
-    { "octree",          optional_argument,   0,  'O' },
-    { "time",            no_argument,         0,  't' },
-    { "reflectance",     no_argument,         0,  'R' },
-    { "reflectivity",    no_argument,         0,  'R' },
-    { "temperature",     no_argument,         0,  'D' },
-    { "degree",          no_argument,         0,  'D' },
-    { "amplitude",       no_argument,         0,  'a' },
-    { "deviation",       no_argument,         0,  'd' },
-    { "height",          no_argument,         0,  'h' },
-    { "type",            no_argument,         0,  'T' },
-    { "color",           no_argument,         0,  'c' },
-    { "identity",        no_argument,         0,  'i' },
-    { "dimensions",      required_argument,   0,  'x' },
-    { "loadObj",         required_argument,   0,  'l' },
-    { "saveOct",         no_argument,         0,  '0' },
-    { "loadOct",         no_argument,         0,  '1' },
-    { "autoOct",         no_argument,         0,  0   },
-    { "advanced",        no_argument,         0,  '2' },
-    { "scanserver",      no_argument,         0,  'S' },
-    { "sphere",          required_argument,   0,  'b' },
-    { "noanimcolor",     no_argument,         0,  'A' },
-    { "customFilter",    required_argument,   0,  'u' },
-    { "nogui",           no_argument,         0,  'G' },
-    { "no-anim-convert-jpg", no_argument,     0,  'J' },
-    { "trajectory-file", required_argument,   0,  0   },
-    { "stepsize",            required_argument,   0,  0   },
-    { 0,           0,   0,   0}                    // needed, cf. getopt.h
-  };
+  options_description gui_options("GUI options");
+  gui_options.add_options()
+    ("nogui,G", bool_switch(&nogui),
+      "Turn off GUI")
+    ("fps,F", value(&fps)->default_value(20), "Maximum framerate")
+    ("dimensions,x", value<string>(),
+      "Window dimensions in WxH format.")
+    ("scale,C", value(&scale)->default_value(0.01),
+      "Scale factor to use. Influences movement speed etc. "
+      "Use 1 when point coordinates are in meters, 0.01 when in centimeters "
+      "and so forth.")
+    ("noanimcolor,A",
+      bool_switch(&coloranim)
+        ->implicit_value(false)
+        ->default_value(true),
+      "Do not switch to different color settings when displaying animation")
+    ("advanced,2", bool_switch(&advanced_controls),
+      "Switch on advanced controls")
+    ;
 
-  int option_index = 0;
+  options_description color_options("Point coloring");
+  color_options.add_options()
+    ("color,c", bool_switch(),
+      "Use color RGB values for coloring point clouds.")
+    ("reflectance,R", bool_switch(), // XXX had to drop --reflectivity
+      "Use reflectance values for coloring point clouds. "
+      "Only works when using octree display.")
+    ("temperature,degree,D", bool_switch(),
+      "Use temperature values for coloring point clouds. "
+      "Only works when using octree display.")
+    ("amplitude,a", bool_switch(),
+      "Use amplitude values for coloring point clouds. "
+      "Only works when using octree display.")
+    ("deviation,d", bool_switch(),
+      "Use deviation values for coloring point clouds. "
+      "Only works when using octree display.")
+    ("height,h", bool_switch(),
+      "Use y-height values for coloring point clouds. "
+      "Only works when using octree display.")
+    ("type,T", bool_switch(),
+      "Use type values for coloring point clouds. "
+      "Only works when using octree display.")
+    ("time,t", bool_switch()) // TODO description
+    ;
 
+  options_description scan_options("Scan selection");
+  scan_options.add_options()
+    ("scanserver,S", bool_switch(&scanserver),
+      "Use the scanserver as an input method and for handling scan data.")
+    ("start,s", value(&start), "Start at this scan number (0-based)")
+    ("end,e", value(&end), "Stop at this scan number (0-based)")
+    ("format,f", value(&format)->default_value("uos"),
+      "The input files are read with this shared library.\n"
+      "Available values: uos, uos_map, uos_rgb, uos_frames, uos_map_frames, "
+      "old, rts, rts_map, ifp, riegl_txt, riegl_rgb, riegl_bin, zahn, ply, "
+      "wrl, xyz, zuf, iais, front, x3d, rxp, ais.")
+    ;
 
-  while ((c = getopt_long(argc, argv,"F:f:s:e:r:m:M:O:o:l:x:C:u:SwtRDadhTcbA2Ji", longopts, &option_index)) != -1) {
-    switch (c) {
-      case 0:
-        if (strcmp(longopts[option_index].name, "autoOct") == 0) {
-          saveOct = true;
-          loadOct = true;
-          autoOct = true;
-        } else if (strcmp(longopts[option_index].name, "trajectory-file") == 0) {
-          trajectoryFile = optarg;
-        } else if (strcmp(longopts[option_index].name, "stepsize") == 0) {
-          stepsize = atoi(optarg);
-        } else {
-          abort();
-        }
-        break;
-      case 's':
-        w_start = atoi(optarg);
-        if (start < 0) {
-          cerr << "Error: Cannot start at a negative scan number.\n"; exit(1);
-        }
-        break;
-      case 'e':
-        w_end = atoi(optarg);
-        if (end < 0) {
-          cerr << "Error: Cannot end at a negative scan number.\n"; exit(1);
-        }
-        if (end < start) {
-          cerr << "Error: <end> cannot be smaller than <start>.\n"; exit(1);
-        }
-        break;
-      case 'i':
-        identity = true;
-        break;
-      case 'm':
-        maxDist = atoi(optarg);
-        break;
-      case 'M':
-        minDist = atoi(optarg);
-        break;
-      case 'r':
-        red = atof(optarg);
-        break;
-      case 't':
-        types |= PointType::USE_TIME;
-        break;
-      case 'O':
-        if (optarg) {
-          octree = atoi(optarg);
-        } else {
-          octree = 1;
-        }
-        break;
-      case 'f':
-        try {
-          w_type = formatname_to_io_type(optarg);
-        } catch (...) { // runtime_error
-          cerr << "Format " << optarg << " unknown." << endl;
-          abort();
-        }
-        switch (w_type) {
-          case UOS_RGB:
-          case UOS_RRGBT:
-          case RIEGL_RGB:
-          case XYZ_RGB:
-          case KS_RGB:
-            types |= PointType::USE_COLOR;
-            colorScanVal = 2;
-            break;
-          default:
-            break;
-        }
-        break;
-      case '?':
-        usage(argv[0]);
-        return 1;
-      case 'R':
-        types |= PointType::USE_REFLECTANCE;
-        break;
-      case 'D':
-        types |= PointType::USE_TEMPERATURE;
-        break;
-      case 'a':
-        types |= PointType::USE_AMPLITUDE;
-        break;
-      case 'd':
-        types |= PointType::USE_DEVIATION;
-        break;
-      case 'h':
-        types |= PointType::USE_HEIGHT;
-        break;
-      case 'T':
-        types |= PointType::USE_TYPE;
-        break;
-      case 'c':
+  options_description reduction_options("Point reduction");
+  reduction_options.add_options()
+    ("min,M", value(&minDist),
+      "Neglect all points closer than this to the origin")
+    ("max,m", value(&maxDist),
+      "Neglect all points further than this from the origin")
+    ("reduce,r", value(&red),
+      "Turn on octree based point reduction with a voxel size of n.")
+    ("octree,O", value(&octree)->implicit_value(1),
+      "Enable randomized octree based point reduction with arg points per voxel. "
+      "Requires --reduce (-r).") // TODO where is this enforced?
+    ("stepsize", value(&stepsize)->default_value(1),
+      "Reduce point cloud by including only every arg-th scanline.")
+    ;
+
+  options_description point_options("Point transformation");
+  point_options.add_options()
+    ("origin,o", value(&origin),
+      "Set the starting and reset position according to n. By default, the "
+      "starting and reset position are at the origin of the"
+      "coordinate system.\n"
+      "arg = 0             : the center of mass of all scans\n"
+      "arg = [1,2,3,...]   : the center of scan 0,1,2,... (arg-1)\n"
+      "arg = [-1,-2,-3,...]: the position of scan 0,1,2,... (-arg-1)\n")
+    ("sphere,b", value(&sphereMode),
+      "Map all measurements on a sphere of radius n.")
+    ;
+
+  options_description file_options("Octree caching");
+  file_options.add_options()
+    ("saveOct", bool_switch(&saveOct),
+      "Store all used scans as octrees in the input directory. "
+      "All reflectivity/amplitude/deviation/type settings are stored as well. "
+      "Only works when using octree display.")
+    ("loadOct", bool_switch(&loadOct),
+      "Only reads octrees from the given directory. "
+      "All reflectivity/amplitude/deviation/type settings are read from file. "
+      "--reflectance/--amplitude and similar parameters are therefore ignored. "
+      "Only works when using octree display.")
+    ("autoOct", bool_switch(&autoOct),
+      "Like --loadOct and --saveOct used together except that it only loads "
+      "the octrees if they are newer than the underlying data and only stores "
+      "octrees if they either didn't exist yet or are older than the "
+      "underlying data.")
+    ;
+
+  options_description other_options("Other options");
+  other_options.add_options()
+    ("help,?", "Display this help text")
+    ("loadObj,l", value(&loadObj),
+      "Load objects specified in this file")
+    ("customFilter,u", value(&customFilter),
+      "Apply a custom filter. Filter mode and data are specified as a "
+      "semicolon-seperated string:\n"
+      "\"{filterMode};{nrOfParams}[;param1][;param2][...]\"\n"
+      "Multiple filters can be specified in a file (syntax in file is same as "
+      "direct specification)\n"
+      "\"FILE;{fileName}\"\n"
+      "See filter implementation in src/slam6d/pointfilter.cc for more detail.")
+    ("no-anim-convert-jpg,J",
+      bool_switch(&anim_convert_jpg)
+        ->implicit_value(false)
+        ->default_value(true)) // TODO description
+    ("trajectory-file", value(&trajectoryFile)) // TODO description
+    ("identity,i", bool_switch(&identity)) //TODO description
+    ;
+
+  options_description cmdline_options("");
+  cmdline_options.add_options()
+    ("input-dir", value(&dir),
+      "Positional: Directory where the scan files are located")
+    ;
+  cmdline_options
+    .add(gui_options)
+    .add(color_options)
+    .add(scan_options)
+    .add(reduction_options)
+    .add(point_options)
+    .add(file_options)
+    .add(other_options)
+    ;
+
+  options_description format_file_options("./input-dir/format file options");
+  format_file_options.add(scan_options);
+
+  positional_options_description pd;
+  pd.add("input-dir", 1);
+
+  // Parse the options into this map
+  variables_map vm;
+
+  // First parse, but we are only interested in the input directory
+  try {
+    store(
+      command_line_parser(argc, argv)
+        .positional(pd)
+        .options(cmdline_options)
+        .run()
+      , vm);
+  } catch (const logic_error &e) {
+    // logic_error is the superclass for all boost::program_options errors
+    cerr << "Error: " << e.what() << endl;
+    return 1;
+  }
+  notify(vm);
+
+  // Parse ./format file in the input directory
+  ifstream format_file((dir + "/format").c_str());
+  if (format_file) {
+    try {
+      store(parse_config_file(format_file, format_file_options), vm);
+    } catch (const logic_error &e) {
+      cerr << "Error: " << e.what() << endl;
+      return 1;
+    }
+    notify(vm);
+  }
+
+  // Command line options now overwrite ./format file
+  try {
+    store(
+      command_line_parser(argc, argv)
+        .options(cmdline_options)
+        // no .positional() here
+        .run()
+      , vm);
+  } catch (const logic_error &e) {
+    cerr << "Error: " << e.what() << endl;
+    return 1;
+  }
+  notify(vm);
+
+  // Help text
+  if (vm.count("help")) {
+    cout << "Usage: " << argv[0] << " [options] <input-dir>" << endl << endl;
+    cout << cmdline_options << endl;
+    return 1;
+  }
+
+  // Error handling
+  if (start < 0) {
+    cerr << "Error: Cannot start at a negative scan number." << endl;
+    return 1;
+  }
+  if (vm.count("end") && end < 0) {
+    cerr << "Error: Cannot end at a negative scan number." << endl;
+    return 1;
+  }
+  if (0 < end && end < start) {
+    cerr << "Error: <end> (" << end << ") cannot be smaller than <start> ("
+         << start << ")." << endl;
+    return 1;
+  }
+
+  // Additional logic
+
+  // autoOct implies loadOct and saveOct
+  if (autoOct) {
+    loadOct = true;
+    saveOct = true;
+  }
+
+  // Read --format to IOType
+  if (vm.count("format")) {
+    try {
+      type = formatname_to_io_type(format.c_str());
+    } catch (const std::runtime_error &e) {
+      cerr << "Error while reading --format: " << e.what() << endl;
+      return 1;
+    }
+
+    // RGB formats imply colored points
+    switch (type) {
+      case UOS_RGB:
+      case UOS_RRGBT:
+      case RIEGL_RGB:
+      case XYZ_RGB:
+      case KS_RGB:
         types |= PointType::USE_COLOR;
-        break;
-      case 'x':
-        if (sscanf(optarg, "%dx%d", &START_WIDTH, &START_HEIGHT) != 2) {
-            cerr << "Window dimensions must be given in format WxH" << endl;
-            exit(1);
-        }
-        aspect = (double)START_WIDTH/(double)START_HEIGHT;
-        current_width  = START_WIDTH;
-        current_height = START_HEIGHT;
-        break;
-      case 'F':
-        fps = atof(optarg);
-        break;
-      case 'C':
-        scale = atof(optarg);
-        break;
-      case 'S':
-        scanserver = true;
-        break;
-      case 'o':
-        origin = atoi(optarg);
-        originset = true;
-        break;
-      case '0':
-        saveOct = true;
-        break;
-      case '1':
-        loadOct = true;
-        break;
-      case 'l':
-        loadObj = optarg;
-        break;
-      case '2':
-        advanced_controls = true; 
-        break;
-      case 'b':
-        sphereMode = atof(optarg);
-        break;
-      case 'A':
-        coloranim = false;
-        break;
-      case 'u':
-        customFilter = optarg;
-        break;
-      case 'G':
-        nogui = true;
-        break;
-      case 'J':
-        anim_convert_jpg = false;
+        colorScanVal = 2;
         break;
       default:
-        abort ();
+        break;
     }
   }
 
-  if (optind != argc-1) {
-    cerr << "\n*** Directory missing ***" << endl;
-    usage(argv[0]);
-  }
-  dir = argv[optind];
+  // Translate color bool_switches to a bitset
+  std::map<string, unsigned int> point_type_flags({
+    {"reflectance", PointType::USE_REFLECTANCE},
+    {"temperature", PointType::USE_TEMPERATURE},
+    {"amplitude", PointType::USE_AMPLITUDE},
+    {"deviation", PointType::USE_DEVIATION},
+    {"height", PointType::USE_HEIGHT},
+    {"type", PointType::USE_TYPE},
+    {"color", PointType::USE_COLOR},
+    {"time", PointType::USE_TIME}
+  });
 
+  for (auto const &kv_pair : point_type_flags) {
+    if (vm.count(kv_pair.first)) {
+      types |= kv_pair.second;
+    }
+  }
+
+  ptype = PointType(types);
+
+  // Parse window dimensions
+  if (vm.count("dimensions")) {
+    if (sscanf(vm["dimensions"].as<string>().c_str(), "%dx%d",
+               &START_WIDTH, &START_HEIGHT) != 2) {
+      cerr << "Error: Window dimensions must be given in format WxH" << endl;
+      return 1;
+    }
+    aspect = (double)START_WIDTH/(double)START_HEIGHT;
+    current_width  = START_WIDTH;
+    current_height = START_HEIGHT;
+  }
+
+  if (vm.count("origin")) {
+    originset = true;
+  }
+
+  // Append trailing slash to input directory
 #ifndef _MSC_VER
   if (dir[dir.length()-1] != '/') dir = dir + "/";
 #else
   if (dir[dir.length()-1] != '\\') dir = dir + "\\";
 #endif
-  
-  parseFormatFile(dir, w_type, w_start, w_end);
 
-  ptype = PointType(types);
   return 0;
 }
 
@@ -956,11 +908,6 @@ void initShow(int argc, char **argv){
        << "(c) University of Wuerzburg, Germany, since 2013" << endl
        << "    Jacobs University Bremen gGmbH, Germany, 2009 - 2013" << endl
        << "    University of Osnabrueck, Germany, 2006 - 2009" << endl << endl;
-
-  if(argc <= 1){
-    usage(argv[0]);
-  }
-
   double red   = -1.0;
   int start = 0, end = -1, maxDist = -1, minDist = -1;
   string dir;
@@ -990,10 +937,15 @@ void initShow(int argc, char **argv){
   strncpy(path_file_name, "path.dat", 1024);
   strncpy(selection_file_name, "selected.3d", 1024);
 
+  int parseError =
   parseArgs(argc, argv, dir, start, end, maxDist, minDist, red, readInitial,
             octree, pointtype, idealfps, loadObj, loadOct, saveOct, autoOct,
             origin, originset, scale, type, scanserver, sphereMode,
             customFilter, trajectoryFile, stepsize, identity);
+
+  if (parseError != 0) {
+    exit(parseError);
+  }
 
   // modify all scale dependant variables
   scale = 1.0 / scale;
