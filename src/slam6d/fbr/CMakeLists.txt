@@ -94,6 +94,15 @@ if(WITH_FBR)
       target_link_libraries(scan_to_panorama fbr newmat showstatic ${SHOW_LIBS} ${OPENGL_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} XGetopt)
     endif()
 
+    ###click tool
+    add_executable(click_tool click_tool.cc fbr_global.cc)
+    if(UNIX)
+      target_link_libraries(click_tool fbr newmat ${FBR_LIBS} showstatic ${SHOW_LIBS} ${OPENGL_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY})
+    endif()
+
+    if (WIN32)
+      target_link_libraries(click_tool fbr newmat ${FBR_LIBS} showstatic ${SHOW_LIBS} ${OPENGL_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} XGetopt) 
+    endif()
 
     ###panorama reader
     add_executable(panorama_to_scan panorama_to_scan.cc fbr_global.cc)
