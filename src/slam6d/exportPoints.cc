@@ -119,6 +119,8 @@ void usage(char* prog)
 	  << bold << "  --hexfloat" << endl << normal
 	  << "         export points with hexadecimal digits" << endl
 	  << endl
+    << bold << "  -n" << normal << " NR, " << bold << "--frame=" << normal << "NR" << endl
+    << "         uses frame NR for export" << endl    
 	  << endl
 	  << endl << endl;
   
@@ -159,7 +161,7 @@ void usage(char* prog)
 int parseArgs(int argc, char **argv, string &dir, double &red, int &rand,
             int &start, int &end, int &maxDist, int &minDist, bool &use_pose,
             bool &use_xyz, bool &use_reflectance, bool &use_color, int &octree, IOType &type, string& customFilter, double &scaleFac,
-	    bool &hexfloat, bool &high_precision)
+	    bool &hexfloat, bool &high_precision, int &frame)
 {
   int  c;
   // from unistd.h:
@@ -183,6 +185,7 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &rand,
     { "customFilter",    required_argument,   0,  'u' },
     { "hexfloat",        no_argument,         0,   0 },
     { "highprecision",   no_argument,         0,  'H' },
+    { "frame",           required_argument,   0,  'n' },
     { "help",            no_argument,         0,  'h' },
     { 0,           0,   0,   0}                    // needed, cf. getopt.h
   };
@@ -190,7 +193,7 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &rand,
   cout << endl;
   int option_index = 0;
   const char *name;
-  while ((c = getopt_long(argc, argv, "f:s:e:r:O:Rm:y:M:u:pxchH", longopts, &option_index)) != -1)
+  while ((c = getopt_long(argc, argv, "f:s:e:r:O:Rm:y:M:u:n:pxchH", longopts, &option_index)) != -1)
     switch (c)
      {
 	     case 0:
@@ -248,6 +251,9 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &rand,
      case 'u':
        customFilter = optarg;
        break;
+     case 'n':
+       frame = atoi(optarg);
+       break;  
      case 'f':
     try {
       type = formatname_to_io_type(optarg);
@@ -279,7 +285,7 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &rand,
   return 0;
 }
 
-void readFrames(string dir, int start, int end, bool use_pose=false)
+void readFrames(string dir, int start, int end, int frame, bool use_pose=false)
 {
   ifstream frame_in;
   int  fileCounter = start;
@@ -301,7 +307,10 @@ void readFrames(string dir, int start, int end, bool use_pose=false)
       double transMat[16];
       int algoTypeInt;
 
+      int frameCounter = 0;
       while (frame_in.good()) {
+        if (frame != -1 && frameCounter > frame) break;
+        frameCounter++;
         try {
           frame_in >> transMat >> algoTypeInt;
         }
@@ -365,16 +374,17 @@ int main(int argc, char **argv)
   double scaleFac = 0.01;
   bool hexfloat = false;
   bool high_precision = false;
+  int frame = -1;
 
   parseArgs(argc, argv, dir, red, rand, start, end,
       maxDist, minDist, uP, use_xyz, use_reflectance, use_color, octree, iotype, customFilter, scaleFac,
-      hexfloat, high_precision);
+      hexfloat, high_precision, frame);
 
 
   rangeFilterActive = minDist > 0 || maxDist > 0;
 
   // custom filter set? quick check, needs to contain at least one ';' 
-  // (proper checking will be done case specific in pointfilter.cc)
+  // (proper chsecking will be done case specific in pointfilter.cc)
   size_t pos = customFilter.find_first_of(";");
   if (pos != std::string::npos){
       customFilterActive = true;
@@ -480,7 +490,7 @@ int main(int argc, char **argv)
     // reduction filter for current scan!
   }
 
-  readFrames(dir, start, end, uP);
+  readFrames(dir, start, end, frame, uP);
   
  cout << "Export all 3D Points to file \"points.pts\"" << endl;
  cout << "Export all 6DoF poses to file \"positions.txt\"" << endl;
@@ -497,9 +507,11 @@ int main(int argc, char **argv)
     
     if(use_reflectance) {
       DataReflectance xyz_reflectance = 
-          (((DataReflectance)source->get("reflectance" + red_string)).size() == 0) ? 
+          (((DataReflectance)source->get("reflectance" + red_string)).size() == 0) ?
+ 
           source->create("reflectance" + red_string, sizeof(float)*xyz.size()) : 
-          source->get("reflectance" + red_string);  
+          source->get("reflectance" + red_string); 
+ 
       if (!(types & PointType::USE_REFLECTANCE)) {
         for(unsigned int i = 0; i < xyz.size(); i++) xyz_reflectance[i] = 255;
       }
