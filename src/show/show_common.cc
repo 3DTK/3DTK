@@ -514,12 +514,9 @@ int parseArgs(int argc,char **argv,
     ("identity,i", bool_switch(&identity)) //TODO description
     ;
 
-  options_description cmdline_options("");
-  cmdline_options.add_options()
-    ("input-dir", value(&dir),
-      "Positional: Directory where the scan files are located")
-    ;
-  cmdline_options
+  // These options will be displayed in the help text
+  options_description visible_options("");
+  visible_options
     .add(gui_options)
     .add(color_options)
     .add(scan_options)
@@ -529,11 +526,20 @@ int parseArgs(int argc,char **argv,
     .add(other_options)
     ;
 
-  options_description format_file_options("./input-dir/format file options");
-  format_file_options.add(scan_options);
+  options_description cmdline_options("");
+  cmdline_options.add(visible_options);
+  cmdline_options.add_options()
+    ("input-dir", value(&dir),
+      "Positional: Directory where the scan files are located")
+    ;
 
   positional_options_description pd;
   pd.add("input-dir", 1);
+
+  // These options are allowed in the ./input-dir/format file
+  options_description format_file_options("./input-dir/format file options");
+  format_file_options.add(scan_options);
+
 
   // Parse the options into this map
   variables_map vm;
@@ -581,8 +587,8 @@ int parseArgs(int argc,char **argv,
 
   // Help text
   if (vm.count("help")) {
-    cout << "Usage: " << argv[0] << " [options] <input-dir>" << endl << endl;
-    cout << cmdline_options << endl;
+    cout << "Usage: " << argv[0] << " [options] <input-dir>" << endl;
+    cout << visible_options << endl;
     return 1;
   }
 
@@ -908,6 +914,7 @@ void initShow(int argc, char **argv){
        << "(c) University of Wuerzburg, Germany, since 2013" << endl
        << "    Jacobs University Bremen gGmbH, Germany, 2009 - 2013" << endl
        << "    University of Osnabrueck, Germany, 2006 - 2009" << endl << endl;
+
   double red   = -1.0;
   int start = 0, end = -1, maxDist = -1, minDist = -1;
   string dir;
