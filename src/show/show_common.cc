@@ -344,7 +344,13 @@ int current_frame = 0;
 #include "show_gl.cc"
 
 /**
- * Parse argv and config files into output variables.
+ * Parses arguments to `show`. The arguments come from these sources:
+ *  - user config file in ~/.config/3dtk/show.ini
+ *  - a file named "format" in the input directory
+ *  - command line arguments
+ *
+ * Config files have an "option=value" pair on each line with option names just
+ * like the command line arguments.
  *
  * @param argc the number of arguments
  * @param argv the arguments
@@ -536,11 +542,6 @@ int parseArgs(int argc,char **argv,
   positional_options_description pd;
   pd.add("input-dir", 1);
 
-  // These options are allowed in the ./input-dir/format file
-  options_description format_file_options("./input-dir/format file options");
-  format_file_options.add(scan_options);
-
-
   // Parse the options into this map
   variables_map vm;
 
@@ -559,11 +560,33 @@ int parseArgs(int argc,char **argv,
   }
   notify(vm);
 
+  // Parse global config file in $XDG_CONFIG_HOME/3dtk/show.ini
+  char *home_c = getenv("HOME");
+  char *config_home_c = getenv("XDG_CONFIG_HOME");
+  string config_home;
+  if (config_home_c && *config_home_c != '\0') {
+    config_home = config_home_c;
+  } else {
+    config_home = string(home_c) + "/.config";
+  }
+
+  cout << (config_home + "/3dtk/show.ini") << endl;;
+  ifstream config_file((config_home + "/3dtk/show.ini").c_str());
+  if (config_file) {
+    try {
+      store(parse_config_file(config_file, visible_options), vm);
+    } catch (const logic_error &e) {
+      cerr << "Error: " << e.what() << endl;
+      return 1;
+    }
+    notify(vm);
+  }
+
   // Parse ./format file in the input directory
   ifstream format_file((dir + "/format").c_str());
   if (format_file) {
     try {
-      store(parse_config_file(format_file, format_file_options), vm);
+      store(parse_config_file(format_file, visible_options), vm);
     } catch (const logic_error &e) {
       cerr << "Error: " << e.what() << endl;
       return 1;
