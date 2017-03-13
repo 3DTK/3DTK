@@ -155,11 +155,13 @@ public:
     // Partition
     
     // Old method, splitting at the center of the bbox
-    // double splitval = node.center[node.splitaxis];
+    node.splitval = node.center[node.splitaxis];
 
     // Now we split at the centroid (average of all points)
-    node.splitval = centroid[node.splitaxis];
-    
+    // FIXME: using the average results in wrong computation as evident by
+    //        comparing to the brute-force method from the unit tests
+    // node.splitval = centroid[node.splitaxis];
+
     AccessorData* left = indices,
                 * right = indices + n - 1;
     while(true) {
