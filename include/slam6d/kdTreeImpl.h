@@ -479,7 +479,7 @@ protected:
     // Recursive case
     if (node.splitval > params[threadNum].p[node.splitaxis]) {
         node.child1->_AABBSearch(pts, threadNum);
-        if (node.center[node.splitaxis] < params[threadNum].p0[node.splitaxis]) {
+        if (node.splitval < params[threadNum].p0[node.splitaxis]) {
             node.child2->_AABBSearch(pts, threadNum);
         }
     } else {
