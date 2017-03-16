@@ -8,7 +8,7 @@ all: .configured
 	cd .build && $(MAKE) --no-print-directory
 
 .PHONY: test
-test:
+test: .configured
 	cd .build && CTEST_OUTPUT_ON_FAILURE=true $(MAKE) test
 
 config: .build
