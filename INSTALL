@@ -38,4 +38,9 @@ After this the commands to install the dependencies are
 $ brew update
 $ brew install cmake boost libzip homebrew/science/opencv3 homebrew/science/ann eigen freeglut suite-sparse
 
-To compile 3dtk follow the instructions at the README file. 
+To compile 3dtk follow the instructions at the README file.
+
+Fedora 25
+=========
+
+$ dhf install make gcc gcc-c++ libzip-devel ann-devel boost-devel opencv-devel mesa-libGL-devel freeglut-devel libXmu-devel libXi-devel suitesparse-devel
