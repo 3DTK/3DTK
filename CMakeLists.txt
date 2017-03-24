@@ -61,6 +61,10 @@ if(NOT WIN32 AND NOT APPLE)
   endif()
 endif()
 
+if(WIN32 OR CYGWIN)
+  set(ANN_LIBRARIES ann)
+endif()
+
 # The newmat package is optional and will be compiled from 3rdparty if it
 # wasn't found. We don't use an operating system specific switch because
 # there are some Linux distributions (like Fedora) that do not ship newmat.
