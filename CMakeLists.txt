@@ -64,6 +64,14 @@ if(NOT WIN32 AND NOT APPLE)
   endif()
 endif()
 
+# The newmat package is optional and will be compiled from 3rdparty if it
+# wasn't found. We don't use an operating system specific switch because
+# there are some Linux distributions (like Fedora) that do not ship newmat.
+find_package(Newmat)
+if(NOT ${NEWMAT_FOUND})
+  include_directories(${CMAKE_SOURCE_DIR}/3rdparty/newmat-10)
+endif()
+
 if(APPLE)
   find_package(LibZip REQUIRED)
   include_directories("${LIBZIP_INCLUDE_DIR_ZIPCONF}")
@@ -516,16 +524,13 @@ endif()
 
 # 3rdparty
 include_directories(${CMAKE_SOURCE_DIR}/3rdparty/b3dfile)
-# include newmat for Mac
 if(APPLE)
-  include_directories(${CMAKE_SOURCE_DIR}/3rdparty/newmat-10)
   include_directories(${CMAKE_SOURCE_DIR}/3rdparty/cxsparse-4.4.4)
 endif()
 
 if(WIN32)
   include_directories(${CMAKE_SOURCE_DIR}/3rdparty/ann_1.1.1_modified/include)
   include_directories(${CMAKE_SOURCE_DIR}/3rdparty/cxsparse-4.4.4)
-  include_directories(${CMAKE_SOURCE_DIR}/3rdparty/newmat-10)
   include_directories(${CMAKE_SOURCE_DIR}/3rdparty/windows/)
   include_directories(${CMAKE_SOURCE_DIR}/3rdparty/windows/zlib/)
   include_directories(${CMAKE_SOURCE_DIR}/3rdparty/libzip-1.0.1/lib/)
@@ -542,7 +547,6 @@ if(WIN32)
   set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DNOMINMAX")
 elseif(CYGWIN)
   include_directories(${CMAKE_SOURCE_DIR}/3rdparty/ann_1.1.1_modified/include)
-  include_directories(${CMAKE_SOURCE_DIR}/3rdparty/newmat-10)
 else()
   # Add include path for OpenGL without GL/-prefix
   # to avoid the include incompatibility between MACOS
