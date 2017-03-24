@@ -39,11 +39,11 @@ if(WITH_VELOSLAM)
    trackermanager.cc drawtrackers.cc kalmanfilter.cc matrix.cc lap.cc)
 
   if(UNIX)
-    target_link_libraries(veloslam dl scan newmat cxsparse ann ${Boost_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} ${Boost_THREAD_LIBRARY} ${SHOW_LIBS})
+    target_link_libraries(veloslam dl scan newmat cxsparse ${ANN_LIBRARIES} ${Boost_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} ${Boost_THREAD_LIBRARY} ${SHOW_LIBS})
   endif()
 
   if(WIN32)
-    target_link_libraries(veloslam scan newmat cxsparse ann XGetopt ${Boost_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} ${SHOW_LIBS})
+    target_link_libraries(veloslam scan newmat cxsparse ${ANN_LIBRARIES} XGetopt ${Boost_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} ${SHOW_LIBS})
   endif()
 endif()
 
@@ -60,11 +60,11 @@ endif()
  #     intersection_detection.cc SegIter.model ${SHOW_SRCS})
 
 #if(UNIX)
-#  target_link_libraries(veloshow dl scan newmat sparse ANN  ${SHOW_LIBS})
+#  target_link_libraries(veloshow dl scan newmat sparse ${ANN_LIBRARIES}  ${SHOW_LIBS})
 #endif()
 
 #if(WIN32)
-#  target_link_libraries(veloshow scan newmat sparse ANN XGetopt ${Boost_LIBRARIES}  ${SHOW_LIBS})
+#  target_link_libraries(veloshow scan newmat sparse ${ANN_LIBRARIES} XGetopt ${Boost_LIBRARIES}  ${SHOW_LIBS})
 #endif()
 
 #endif()
