@@ -176,7 +176,7 @@ add_library(newmat STATIC ${NEWMAT_SOURCES})
 IF(EXPORT_SHARED_LIBS)
 add_library(newmat_s SHARED ${NEWMAT_SOURCES})
 ENDIF(EXPORT_SHARED_LIBS)
-endif(WIN32 OR CYGWIN OR APPLE)
+endif()
 
 if (WITH_LASLIB)
 # Compile las library
