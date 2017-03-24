@@ -561,7 +561,6 @@ std::function<bool (std::istream &data_file)> open_uos_file(
 {
     return [=,&filter,&transform](std::istream &data_file) -> bool {
         // open data file
-        data_file.exceptions(std::ifstream::eofbit|std::ifstream::failbit|std::ifstream::badbit);
 
         char *firstline;
         std::streamsize linelen;
