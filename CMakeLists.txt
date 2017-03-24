@@ -50,6 +50,11 @@ if(Boost_FOUND)
 endif()
 
 if(NOT WIN32 AND NOT APPLE)
+  # help FindCXSparse to find the header on Fedora and Debian until this bug is fixed:
+  # https://github.com/ceres-solver/ceres-solver/issues/262
+  set(CXSPARSE_INCLUDE_DIR_HINTS /usr/include/suitesparse)
+  find_package(CXSparse REQUIRED)
+
   find_package(LibZip REQUIRED)
   if(${LIBZIP_VERSION} VERSION_LESS 0.11.2)
     set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DLIBZIP_OLD")
