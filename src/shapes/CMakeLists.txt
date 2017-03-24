@@ -27,14 +27,14 @@ if (WITH_SHAPE_DETECTION)
 #  add_executable(matchMarker matchMarker.cc)
   
   if(UNIX)
-    target_link_libraries(planes scan shape newmat dl ann ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY})
-#    target_link_libraries(image scan newmat sparse dl ANN )
-#    target_link_libraries(matchMarker scan newmat sparse dl ANN )
+    target_link_libraries(planes scan shape newmat dl ${ANN_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY})
+#    target_link_libraries(image scan newmat sparse dl ${ANN_LIBRARIES} )
+#    target_link_libraries(matchMarker scan newmat sparse dl ${ANN_LIBRARIES} )
   endif()
 
   if (WIN32)
 	  target_link_libraries(planes scan newmat XGetopt shape ann)
-#    target_link_libraries(image scan newmat sparse ANN XGetopt)
+#    target_link_libraries(image scan newmat sparse ${ANN_LIBRARIES} XGetopt)
   endif()
 
 set(SHAPELIB_SRCS

@@ -48,7 +48,7 @@ if(WITH_FBR)
       if (WIN32)
       target_link_libraries(fbr_s scan_s ANN_s ${OpenCV_LIBS} show_s)
       else()
-      target_link_libraries(fbr_s scan_s ann ${OpenCV_LIBS} show_s)
+      target_link_libraries(fbr_s scan_s ${ANN_LIBRARIES} ${OpenCV_LIBS} show_s)
       endif()
     endif()
 
