@@ -570,7 +570,6 @@ int parseArgs(int argc,char **argv,
     config_home = string(home_c) + "/.config";
   }
 
-  cout << (config_home + "/3dtk/show.ini") << endl;;
   ifstream config_file((config_home + "/3dtk/show.ini").c_str());
   if (config_file) {
     try {
@@ -609,7 +608,7 @@ int parseArgs(int argc,char **argv,
   notify(vm);
 
   // Help text
-  if (vm.count("help")) {
+  if (argc == 1 || vm.count("help")) {
     cout << "Usage: " << argv[0] << " [options] <input-dir>" << endl;
     cout << visible_options << endl;
     return 1;
