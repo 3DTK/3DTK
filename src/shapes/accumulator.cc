@@ -1354,12 +1354,11 @@ int* AccumulatorCube::accumulateAPHT(Point p) {
 
 double* AccumulatorCube::getMax(int* cell) {
   buffer_point bp;
-  bp.face = cell[2] + 1;
-  bp.i = cell[3] + 1;
-  bp.j = cell[4] + 1;
+  bp.face = cell[1] + 1;
+  bp.i = cell[2];
+  bp.j = cell[3];
 
-  
-  double rho = (cell[1] + 0.5) *
+  double rho = (cell[0] + 0.5) *
   (double)myConfigFileHough.Get_RhoMax()/(double)myConfigFileHough.Get_RhoNum();
   double* polar = coords_cube_to_s2(bp, nrCells); 
   double* polar2 = new double[4];
