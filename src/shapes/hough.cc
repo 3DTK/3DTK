@@ -286,14 +286,16 @@ void Hough::PHT() {
     voted[i] = false;
   }
 
+  cout << stop << endl;
   unsigned int i = 0;
   while(i < stop && planes.size() < (unsigned int)myConfigFileHough.Get_MaxPlanes()) {
     unsigned int pint = (int) (((*allPoints).size())*(rand()/(RAND_MAX+1.0)));
 
-    if(!voted[i]) {
+    if(!voted[pint]) {
       Point p = (*allPoints)[pint];
       acc->accumulate(p);
       i++;
+      voted[pint] = true;
     }
     
   }
@@ -508,7 +510,7 @@ void Hough::APHT() {
   if(stability[myConfigFileHough.Get_MaxPlanes()] >= myConfigFileHough.Get_AccumulatorMax() * myConfigFileHough.Get_PlaneRatio()) {
     maxpos = myConfigFileHough.Get_MaxPlanes();
   }
-  
+
   for(int i = 0; i <= maxpos; i++) {
     double * n = acc->getMax(mergelist[i]); 
     deletePoints(n, n[3]);
