@@ -460,6 +460,7 @@ int main(int argc, char **argv)
       case RIEGL_RGB:
       case XYZ_RGB:
       case KS_RGB:
+      case PLY:
         types |= PointType::USE_COLOR;
         break;
       default:
