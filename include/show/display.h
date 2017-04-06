@@ -74,23 +74,31 @@ class PlaneDisplay : public SDisplay {
   static SDisplay* readFromFile(string &filename, float* color);
   virtual void displayObject();
 
-  private:
 
   PlaneDisplay(vector<float*> &p, float* c);
+  private:
   vector<float *> points;
   float * color;
 
 };
 
+
 class GroupPlaneDisplay : public SDisplay {
   public:
   static SDisplay* readFromFile(string &filename);
   virtual void displayObject();
+  vector<PlaneDisplay*> planes;
 
-  private:
 
   GroupPlaneDisplay(vector<PlaneDisplay*> &p);
-  vector<PlaneDisplay*> planes;
+};
+
+class BoxDisplay : public GroupPlaneDisplay {
+  public:
+  static SDisplay* readFromFile(string &filename);
+  virtual void displayObject();
+  private:
+  BoxDisplay(vector<PlaneDisplay*> &p);
 };
 
 #endif
