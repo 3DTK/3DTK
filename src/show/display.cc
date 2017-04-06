@@ -63,6 +63,8 @@ void SDisplay::readDisplays(string &filename, vector<SDisplay*> &displays) {
         displays.push_back(LineDisplay::readFromFile(objectfile));
       } else if(strcmp(type.c_str(), "GroupPlane") == 0) {
         displays.push_back(GroupPlaneDisplay::readFromFile(objectfile));
+      } else if(strcmp(type.c_str(), "Box") == 0) {
+        displays.push_back(BoxDisplay::readFromFile(objectfile));
       } else {
         cerr << "Unknown SDisplay Object" << endl;
       }
@@ -184,6 +186,165 @@ void LineDisplay::displayObject() {
 
 
 }
+
+
+BoxDisplay::BoxDisplay(vector<PlaneDisplay*> &p) : GroupPlaneDisplay(p)  {
+  //planes = p;
+}
+
+SDisplay* BoxDisplay::readFromFile(string &filename) {
+  ifstream input;
+  input.open(filename.c_str());
+  vector<PlaneDisplay*> planes;
+  if(input.good()) {
+    double minx, maxx, miny, maxy, minz, maxz;
+    int end = filename.find_last_of('/');
+    string dir = filename.substr(0, end);
+    string tmp;
+    input >> minx;
+    input >> maxx;
+    input >> miny;
+    input >> maxy;
+    input >> minz;
+    input >> maxz;
+
+    try {
+      for(int i = 0; i < 6; i++) {
+        float * color = new float[3];
+        for(int i = 0; i < 3; i++) {
+          color[i] = rand()/((double)RAND_MAX);
+        }
+        vector<float*> points;
+        float *p1 = new float[3];
+        float *p2 = new float[3];
+        float *p3 = new float[3];
+        float *p4 = new float[3];
+        switch(i) {
+          case 0: 
+            p1[0] = minx;
+            p1[1] = miny;
+            p1[2] = minz;
+            points.push_back(p1);
+            p2[0] = minx;
+            p2[1] = maxy;
+            p2[2] = minz;
+            points.push_back(p2);
+            p3[0] = maxx;
+            p3[1] = maxy;
+            p3[2] = minz;
+            points.push_back(p3);
+            p4[0] = maxx;
+            p4[1] = miny;
+            p4[2] = minz;
+            points.push_back(p4);
+            break;
+          case 1:
+            p1[0] = minx;
+            p1[1] = miny;
+            p1[2] = maxz;
+            points.push_back(p1);
+            p2[0] = minx;
+            p2[1] = maxy;
+            p2[2] = maxz;
+            points.push_back(p2);
+            p3[0] = maxx;
+            p3[1] = maxy;
+            p3[2] = maxz;
+            points.push_back(p3);
+            p4[0] = maxx;
+            p4[1] = miny;
+            p4[2] = maxz;
+            points.push_back(p4);
+            break;
+          case 2: 
+            p1[2] = minz;
+            p1[1] = miny;
+            p1[0] = minx;
+            points.push_back(p1);
+            p2[2] = minz;
+            p2[1] = maxy;
+            p2[0] = minx;
+            points.push_back(p2);
+            p3[2] = maxz;
+            p3[1] = maxy;
+            p3[0] = minx;
+            points.push_back(p3);
+            p4[2] = maxz;
+            p4[1] = miny;
+            p4[0] = minx;
+            points.push_back(p4);
+            break;
+          case 3:
+            p1[2] = minz;
+            p1[1] = miny;
+            p1[0] = maxx;
+            points.push_back(p1);
+            p2[2] = minz;
+            p2[1] = maxy;
+            p2[0] = maxx;
+            points.push_back(p2);
+            p3[2] = maxz;
+            p3[1] = maxy;
+            p3[0] = maxx;
+            points.push_back(p3);
+            p4[2] = maxz;
+            p4[1] = miny;
+            p4[0] = maxx;
+            points.push_back(p4);
+            break;
+          case 4: 
+            p1[0] = minx;
+            p1[2] = minz;
+            p1[1] = miny;
+            points.push_back(p1);
+            p2[0] = minx;
+            p2[2] = maxz;
+            p2[1] = miny;
+            points.push_back(p2);
+            p3[0] = maxx;
+            p3[2] = maxz;
+            p3[1] = miny;
+            points.push_back(p3);
+            p4[0] = maxx;
+            p4[2] = minz;
+            p4[1] = miny;
+            points.push_back(p4);
+            break;
+          case 5:
+            p1[0] = minx;
+            p1[2] = minz;
+            p1[1] = maxy;
+            points.push_back(p1);
+            p2[0] = minx;
+            p2[2] = maxz;
+            p2[1] = maxy;
+            points.push_back(p2);
+            p3[0] = maxx;
+            p3[2] = maxz;
+            p3[1] = maxy;
+            points.push_back(p3);
+            p4[0] = maxx;
+            p4[2] = minz;
+            p4[1] = maxy;
+            points.push_back(p4);
+            break;
+        }
+        planes.push_back(new PlaneDisplay(points, color));
+      }
+    } catch(...) {}
+  }
+  input.close();
+  input.clear();
+  return new BoxDisplay(planes);
+
+}
+
+void BoxDisplay::displayObject() {
+  for(unsigned int i = 0; i < planes.size(); i++) {
+    planes[i]->displayObject();
+  }
+}
+
 
 GroupPlaneDisplay::GroupPlaneDisplay(vector<PlaneDisplay*> &p) {
   planes = p;
