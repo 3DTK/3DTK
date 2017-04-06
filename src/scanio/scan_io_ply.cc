@@ -28,6 +28,7 @@ using std::cerr;
 using std::endl;
 #include <vector>
 #include <string.h>
+#include <map>
 
 #ifdef _MSC_VER
 #include <windows.h>
@@ -110,12 +111,77 @@ void ScanIO_ply::readScan(const char* dir_path,
   if (!ply_read_header(ply)) {
 	  throw std::runtime_error("ply_read_header failed");
   }
-  long num = ply_set_read_cb(ply, "vertex", "x", vertex_cb, xyz, 0);
+
+  p_ply_element vertex_el = ply_get_next_element(ply, NULL);
+  const char *vertex_el_name;
+  if (!ply_get_element_info(vertex_el, &vertex_el_name, NULL)) {
+	  throw std::runtime_error("ply_get_element_info failed");
+  }
+
+  if (strncmp(vertex_el_name, "vertex", 6)) {
+	  throw std::runtime_error("expected first ply element to be vertex");
+  }
+
+  if (ply_get_next_element(ply, vertex_el) != NULL) {
+	  throw std::runtime_error("expected only one element in ply file");
+  }
+
+  // make a map of the property names and their types
+  std::map<std::string,e_ply_type> properties;
+  p_ply_property prop = NULL;
+  for (;;) {
+	  prop = ply_get_next_property(vertex_el, prop);
+	  if (prop == NULL) {
+		  break;
+	  }
+	  const char *prop_name;
+	  e_ply_type prop_type;
+	  if (!ply_get_property_info(prop, &prop_name, &prop_type, NULL, NULL)) {
+		  throw std::runtime_error("ply_get_property_info failed");
+	  }
+	  properties.insert(std::pair<std::string,e_ply_type>(std::string(prop_name), prop_type));
+  }
+
+  if (properties.find(std::string("x")) == properties.end()
+		  || properties.find(std::string("y")) == properties.end()
+		  || properties.find(std::string("z")) == properties.end()) {
+	  throw std::runtime_error("ply file does not contain x/y/z coordinates");
+  }
+
+  ply_set_read_cb(ply, "vertex", "x", vertex_cb, xyz, 0);
   ply_set_read_cb(ply, "vertex", "y", vertex_cb, xyz, 0);
   ply_set_read_cb(ply, "vertex", "z", vertex_cb, xyz, 0);
-  ply_set_read_cb(ply, "vertex", "red", rgb_cb, rgb, 0);
-  ply_set_read_cb(ply, "vertex", "green", rgb_cb, rgb, 0);
-  ply_set_read_cb(ply, "vertex", "blue", rgb_cb, rgb, 0);
+
+  // We somehow want to extract color information from the PLY file, so we are
+  // looking for properties named "red", "green" and "blue" or named
+  // "diffuse_red", "diffuse_green" and "diffuse_blue". We use whichever is
+  // found but default to the former if both are present.
+  if (properties.find(std::string("red")) != properties.end()
+		  && properties.find(std::string("green")) != properties.end()
+		  && properties.find(std::string("blue")) != properties.end()) {
+	  if (properties[std::string("red")] != PLY_UCHAR
+	   || properties[std::string("green")] != PLY_UCHAR
+	   || properties[std::string("blue")] != PLY_UCHAR) {
+		  throw std::runtime_error("ply color values must be of type uchar");
+	  }
+	  ply_set_read_cb(ply, "vertex", "red", rgb_cb, rgb, 0);
+	  ply_set_read_cb(ply, "vertex", "green", rgb_cb, rgb, 0);
+	  ply_set_read_cb(ply, "vertex", "blue", rgb_cb, rgb, 0);
+  } else if (properties.find(std::string("diffuse_red")) != properties.end()
+		  && properties.find(std::string("diffuse_green")) != properties.end()
+		  && properties.find(std::string("diffuse_blue")) != properties.end()) {
+	  if (properties[std::string("diffuse_red")] != PLY_UCHAR
+	   || properties[std::string("diffuse_green")] != PLY_UCHAR
+	   || properties[std::string("diffuse_blue")] != PLY_UCHAR) {
+		  throw std::runtime_error("ply color values must be of type uchar");
+	  }
+	  ply_set_read_cb(ply, "vertex", "diffuse_red", rgb_cb, rgb, 0);
+	  ply_set_read_cb(ply, "vertex", "diffuse_green", rgb_cb, rgb, 0);
+	  ply_set_read_cb(ply, "vertex", "diffuse_blue", rgb_cb, rgb, 0);
+  } else {
+	  throw std::runtime_error("ply file contains no color information");
+  }
+
   if (!ply_read(ply)) {
 	  throw std::runtime_error("ply_read failed");
   }
