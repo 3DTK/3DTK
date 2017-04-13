@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<package>
+  <name>3DTK</name>
+  <version>0.0.0</version>
+  <description>3DTK - The 3D Toolkit</description>
+
+  <maintainer email="slam6d-discuss@lists.sourceforge.net">The 3DTK developers</maintainer>
+  <license>GPLv3</license>
+  <url type="website">http://threedtk.de/</url>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <export>
+  </export>
+</package>
