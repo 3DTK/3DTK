@@ -49,6 +49,8 @@ enum plane_alg {
   RHT, SHT, PHT, PPHT, APHT, RANSAC
 };
 
+float cube_size;
+
 void usage(char* prog) {
 #ifndef _MSC_VER
   const string bold("\033[1m");
@@ -90,6 +92,9 @@ void usage(char* prog) {
 	  << bold << "  -S, --scanserver" << normal << endl
 	  << "         Use the scanserver as an input method and handling of scan data" << endl
 	  << endl
+      << bold << "  -c, --cubesize" << normal << endl
+      << "         Use cubesize to change the size of the smallest cube in the octtree" << endl
+      << endl
     	  << endl << endl;
   
   cout << bold << "EXAMPLES " << normal << endl
@@ -107,7 +112,7 @@ void usage(char* prog) {
 
 int parseArgs(int argc, char **argv, string &dir, double &red, int &start, int
 		    &maxDist, int&minDist, int &octree, IOType &type, plane_alg &alg, bool
-		    &quiet, bool& scanserver)
+		    &quiet, bool& scanserver, float &cube_size)
 {
   bool reduced = false;
   int  c;
@@ -124,6 +129,7 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &start, int
     { "start",           required_argument,   0,  's' },
     { "reduce",          required_argument,   0,  'r' },
     { "plane",           required_argument,   0,  'p' },
+    { "cubesize",        required_argument,   0,  'c' },
     { "quiet",            no_argument,         0,  'q' },
     { "octree",          optional_argument,   0,  'O' },
     { "scanserver",      no_argument,         0,  'S' },
@@ -161,7 +167,10 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &start, int
       break;
 	 case 'q':
 	   quiet = true;
-     break;
+       break;
+     case 'c':
+       cube_size = atoi(optarg);
+       break;
 	 case 'm':
 	   maxDist = atoi(optarg);
 	   break;
@@ -225,9 +234,10 @@ int main(int argc, char **argv)
   IOType type    = UOS;
   plane_alg alg    = RHT;
   bool   scanserver = false;
+  float cube_size = 50.0;
   
   cout << "Parse args" << endl;
-  parseArgs(argc, argv, dir, red, start, maxDist, minDist, octree, type, alg, quiet, scanserver);
+  parseArgs(argc, argv, dir, red, start, maxDist, minDist, octree, type, alg, quiet, scanserver, cube_size);
   int fileNr = start;
   string planedir = dir + "planes"; 
 
@@ -263,29 +273,52 @@ int main(int argc, char **argv)
   if (!quiet) cout << "start plane detection" << endl;
   long starttime = GetCurrentTimeInMilliSec(); 
   if(alg >= RANSAC) {
-    vector<double *> points;
-    CollisionPlane<double> * plane;
-    plane = new CollisionPlane<double>(1.0); // 1.0 cm maxdist
-    Ransac(*plane, Scan::allScans[0], &points);
-    starttime = (GetCurrentTimeInMilliSec() - starttime);
+      Hough hough(Scan::allScans[0], quiet);
 
-    cout << "nr points " << points.size() << endl;
-    double nx,ny,nz,d;
-    plane->getPlane(nx,ny,nz,d);
-    if(!quiet) cout << "DONE " << endl;
+      if(cube_size != 50.0) {
+          cout << "alternate cube size of octtree: " << cube_size << endl;
+      }
 
-    if(!quiet) cout << nx << " " << ny << " " << nz << " " << d << endl;
+      DataXYZ xyz(Scan::allScans[0]->get("xyz reduced"));
+      RansacOctTree<double>* oct = new RansacOctTree<double>(PointerArray<double>(xyz).get(), xyz.size(), cube_size );
 
-    /* 
-    for (unsigned int i = 0; i < points.size(); i++) {
-      cerr << points[i][0] << " " << points[i][1] << " " << points[i][2] << endl;
-    }
-    */
-    for(int i = points.size() - 1; i > -1; i--) {
-      delete[] points[i];
-    }
-    
-    delete plane;
+      unsigned int stop = (unsigned int)(hough.allPoints->size()/100.0)*hough.myConfigFileHough.Get_MinSizeAllPoints();
+      int counter = 0;
+      while(hough.allPoints->size() > stop &&
+            hough.planes.size() < (unsigned int)hough.myConfigFileHough.Get_MaxPlanes() &&
+            counter < (int)hough.myConfigFileHough.Get_TrashMax()) {
+
+          vector<double *> points;
+          CollisionPlane<double> * plane;
+          plane = new CollisionPlane<double>(1.0); // 1.0 cm maxdist
+          Ransac(*plane, oct, &points);
+
+          cout << "nr points " << points.size() << endl;
+          double nx,ny,nz,d;
+          plane->getPlane(nx,ny,nz,d);
+          if(!quiet) cout << "DONE " << endl;
+
+          if(!quiet) cout << nx << " " << ny << " " << nz << " " << d << endl;
+
+          double * normal = new double[4];
+          normal[0] = nx;
+          normal[1] = ny;
+          normal[2] = nz;
+
+          for(int i = points.size() - 1; i > -1; i--) {
+              delete[] points[i];
+          }
+
+          hough.deletePoints(normal, -d);
+          delete plane;
+          delete normal;
+      }
+
+      hough.writePlanes(0);
+      delete oct;
+      starttime = (GetCurrentTimeInMilliSec() - starttime);
+
+
   } else {
     Hough hough(Scan::allScans[0], quiet);
     starttime = (GetCurrentTimeInMilliSec() - starttime);
