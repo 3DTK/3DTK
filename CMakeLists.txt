@@ -535,7 +535,15 @@ if(MSVC)
   endif()
 endif()
 
+#################################################
+# Robot Operating System (ROS) Integration     ##
+#################################################
 
+if( catkin_FOUND )
+  catkin_package(
+    INCLUDE_DIRS include addons/include
+  )
+endif()
 
 #################################################
 # GENERAL PROJECT SETTINGS                     ##
