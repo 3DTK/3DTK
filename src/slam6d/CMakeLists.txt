@@ -171,5 +171,5 @@ if(WIN32)
 endif()
 
 #if(MSVC)
-#	install(TARGETS slam6D RUNTIME DESTINATION ${CMAKE_SOURCE_DIR}/windows)
+#	install(TARGETS slam6D RUNTIME DESTINATION ${PROJECT_SOURCE_DIR}/windows)
 #endif()

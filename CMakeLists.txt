@@ -1,6 +1,6 @@
 cmake_minimum_required (VERSION 2.8.2)
-set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/3rdparty/CMakeModules" ${CMAKE_MODULE_PATH})
 project (3DTK)
+set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/3rdparty/CMakeModules" ${CMAKE_MODULE_PATH})
 
 # cmake no longer defines WIN32 on cygwin
 set(CMAKE_LEGACY_CYGWIN_WIN32 0) # remove when cmake >= 2.8.4 is required
@@ -13,7 +13,7 @@ set (CMAKE_BUILD_TYPE "" CACHE INTERNAL "" FORCE)
 # (the source directory) is important for platforms like windows, where the
 # produced binaries cannot be run if being placed in certain locations (like on
 # a network drive)
-set(OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}" CACHE PATH "The directory where the output will be placed into lib, obj and bin subdirectories (default: ${CMAKE_SOURCE_DIR})" )
+set(OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}" CACHE PATH "The directory where the output will be placed into lib, obj and bin subdirectories (default: ${PROJECT_SOURCE_DIR})" )
 
 # Set output directories for libraries and executables
 set( CMAKE_LIBRARY_OUTPUT_DIRECTORY ${OUTPUT_DIRECTORY}/lib )
@@ -70,7 +70,7 @@ endif()
 # there are some Linux distributions (like Fedora) that do not ship newmat.
 find_package(Newmat)
 if(NOT ${NEWMAT_FOUND})
-  include_directories(${CMAKE_SOURCE_DIR}/3rdparty/newmat-10)
+  include_directories(${PROJECT_SOURCE_DIR}/3rdparty/newmat-10)
 endif()
 
 if(APPLE)
@@ -238,8 +238,8 @@ endif()
 OPT_DEP(WITH_THERMO "Whether to build executables for mutual calibration of laser scanner and camera. ON/OFF" OFF "WITH_SHAPE_DETECTION")
 if(WITH_THERMO)
   add_subdirectory(3rdparty/cvblob)
-  include_directories(${CMAKE_SOURCE_DIR}/3rdparty/cvblob)
-  link_directories(${CMAKE_SOURCE_DIR}/3rdparty/cvblob)
+  include_directories(${PROJECT_SOURCE_DIR}/3rdparty/cvblob)
+  link_directories(${PROJECT_SOURCE_DIR}/3rdparty/cvblob)
   message(STATUS "With thermo")
 else()
   message(STATUS "Without thermo")
@@ -373,7 +373,7 @@ OPT_DEP(WITH_RIVLIB "Whether the RIEGL rivlib is present ON/OFF" OFF "")
 if(WITH_RIVLIB)
   message(STATUS "Compiling a scan IO for RXP files")
 
-  set(RIEGL_DIR ${CMAKE_SOURCE_DIR}/3rdparty/riegl/)
+  set(RIEGL_DIR ${PROJECT_SOURCE_DIR}/3rdparty/riegl/)
 
   if(UNIX)
     set(RiVLib_USE_STATIC_RUNTIME ON)
@@ -394,7 +394,7 @@ if(WITH_RIVLIB)
     find_package(LibXml2 REQUIRED)
     include_directories(${LIBXML2_INCLUDE_DIR})
 
-    include_directories(${CMAKE_SOURCE_DIR}/3rdparty)
+    include_directories(${PROJECT_SOURCE_DIR}/3rdparty)
     if(WIN32)
       set(RiVLib_SCANLIB_LIBRARY ${RIEGL_DIR}libscanlib-mt.lib ${RIEGL_DIR}libctrllib-mt.lib ${RIEGL_DIR}libboost_system-mt-1_43_0-vns.lib ${LIBXML2_LIBRARIES})
     else()
@@ -460,7 +460,7 @@ OPT_DEP(WITH_ADDONS "Whether to download and use addons to 3DTK. ON/OFF" OFF "")
 if(WITH_ADDONS)
   message(STATUS "Compiling addons directory")
   #execute_process(COMMAND svn co https://robotik.informatik.uni-wuerzburg.de/slam6dprivate/trunk/addons addons
-  #                WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+  #                WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
   #                OUTPUT_QUIET
   #                )
   message(STATUS "With addons.")
@@ -524,30 +524,30 @@ endif()
 
 
 # 3rdparty
-include_directories(${CMAKE_SOURCE_DIR}/3rdparty/b3dfile)
+include_directories(${PROJECT_SOURCE_DIR}/3rdparty/b3dfile)
 if(APPLE)
-  include_directories(${CMAKE_SOURCE_DIR}/3rdparty/cxsparse-4.4.4)
+  include_directories(${PROJECT_SOURCE_DIR}/3rdparty/cxsparse-4.4.4)
 endif()
 
 if(WIN32)
-  include_directories(${CMAKE_SOURCE_DIR}/3rdparty/ann_1.1.1_modified/include)
-  include_directories(${CMAKE_SOURCE_DIR}/3rdparty/cxsparse-4.4.4)
-  include_directories(${CMAKE_SOURCE_DIR}/3rdparty/windows/)
-  include_directories(${CMAKE_SOURCE_DIR}/3rdparty/windows/zlib/)
-  include_directories(${CMAKE_SOURCE_DIR}/3rdparty/libzip-1.0.1/lib/)
-  link_directories(${CMAKE_SOURCE_DIR}/3rdparty/windows)
+  include_directories(${PROJECT_SOURCE_DIR}/3rdparty/ann_1.1.1_modified/include)
+  include_directories(${PROJECT_SOURCE_DIR}/3rdparty/cxsparse-4.4.4)
+  include_directories(${PROJECT_SOURCE_DIR}/3rdparty/windows/)
+  include_directories(${PROJECT_SOURCE_DIR}/3rdparty/windows/zlib/)
+  include_directories(${PROJECT_SOURCE_DIR}/3rdparty/libzip-1.0.1/lib/)
+  link_directories(${PROJECT_SOURCE_DIR}/3rdparty/windows)
   link_directories(${BOOST_LIBRARYDIR})
   if( CMAKE_SIZEOF_VOID_P EQUAL 8 )
-    link_directories(${CMAKE_SOURCE_DIR}/3rdparty/windows/freeglut/lib/x64/)
+    link_directories(${PROJECT_SOURCE_DIR}/3rdparty/windows/freeglut/lib/x64/)
   else ()
-    link_directories(${CMAKE_SOURCE_DIR}/3rdparty/windows/freeglut/lib/)
+    link_directories(${PROJECT_SOURCE_DIR}/3rdparty/windows/freeglut/lib/)
   endif ()
-  add_library(XGetopt STATIC ${CMAKE_SOURCE_DIR}/3rdparty/windows/XGetopt.cpp)
+  add_library(XGetopt STATIC ${PROJECT_SOURCE_DIR}/3rdparty/windows/XGetopt.cpp)
   set(CMAKE_STATIC_LIBRARY_SUFFIX "32.lib")
   # to be able to use numeric_limits<int>::max() and friends on windows
   set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DNOMINMAX")
 elseif(CYGWIN)
-  include_directories(${CMAKE_SOURCE_DIR}/3rdparty/ann_1.1.1_modified/include)
+  include_directories(${PROJECT_SOURCE_DIR}/3rdparty/ann_1.1.1_modified/include)
 else()
   # Add include path for OpenGL without GL/-prefix
   # to avoid the include incompatibility between MACOS
@@ -579,24 +579,24 @@ endif()
 # hack to "circumvent" Debug and Release folders that are created under visual studio
 # this is why the INSTALL target has to be used in visual studio
 if(MSVC)
-  install(DIRECTORY ${CMAKE_SOURCE_DIR}/bin/Release/ CONFIGURATIONS Release DESTINATION ${CMAKE_SOURCE_DIR}/windows FILES_MATCHING PATTERN "*.dll" PATTERN "*.exe")
+  install(DIRECTORY ${PROJECT_SOURCE_DIR}/bin/Release/ CONFIGURATIONS Release DESTINATION ${PROJECT_SOURCE_DIR}/windows FILES_MATCHING PATTERN "*.dll" PATTERN "*.exe")
   if( CMAKE_SIZEOF_VOID_P EQUAL 8 )
-    install(DIRECTORY ${CMAKE_SOURCE_DIR}/3rdparty/windows/x64/ CONFIGURATIONS Release DESTINATION ${CMAKE_SOURCE_DIR}/windows FILES_MATCHING PATTERN "*.dll" PATTERN "*.exe")
+    install(DIRECTORY ${PROJECT_SOURCE_DIR}/3rdparty/windows/x64/ CONFIGURATIONS Release DESTINATION ${PROJECT_SOURCE_DIR}/windows FILES_MATCHING PATTERN "*.dll" PATTERN "*.exe")
   else()
-    install(DIRECTORY ${CMAKE_SOURCE_DIR}/3rdparty/windows/ CONFIGURATIONS Release DESTINATION ${CMAKE_SOURCE_DIR}/windows FILES_MATCHING PATTERN "*.dll" PATTERN "*.exe")
+    install(DIRECTORY ${PROJECT_SOURCE_DIR}/3rdparty/windows/ CONFIGURATIONS Release DESTINATION ${PROJECT_SOURCE_DIR}/windows FILES_MATCHING PATTERN "*.dll" PATTERN "*.exe")
   endif()
 
-  install(DIRECTORY ${CMAKE_SOURCE_DIR}/bin/Debug/ CONFIGURATIONS Debug DESTINATION ${CMAKE_SOURCE_DIR}/windows FILES_MATCHING PATTERN "*.dll" PATTERN "*.exe")
+  install(DIRECTORY ${PROJECT_SOURCE_DIR}/bin/Debug/ CONFIGURATIONS Debug DESTINATION ${PROJECT_SOURCE_DIR}/windows FILES_MATCHING PATTERN "*.dll" PATTERN "*.exe")
   if( CMAKE_SIZEOF_VOID_P EQUAL 8 )
-    install(DIRECTORY ${CMAKE_SOURCE_DIR}/3rdparty/windows/x64/ CONFIGURATIONS Debug DESTINATION ${CMAKE_SOURCE_DIR}/windows FILES_MATCHING PATTERN "*.dll" PATTERN "*.exe")
+    install(DIRECTORY ${PROJECT_SOURCE_DIR}/3rdparty/windows/x64/ CONFIGURATIONS Debug DESTINATION ${PROJECT_SOURCE_DIR}/windows FILES_MATCHING PATTERN "*.dll" PATTERN "*.exe")
   else()
-    install(DIRECTORY ${CMAKE_SOURCE_DIR}/3rdparty/windows/ CONFIGURATIONS Debug DESTINATION ${CMAKE_SOURCE_DIR}/windows FILES_MATCHING PATTERN "*.dll" PATTERN "*.exe")
+    install(DIRECTORY ${PROJECT_SOURCE_DIR}/3rdparty/windows/ CONFIGURATIONS Debug DESTINATION ${PROJECT_SOURCE_DIR}/windows FILES_MATCHING PATTERN "*.dll" PATTERN "*.exe")
   endif()
 
   if( CMAKE_SIZEOF_VOID_P EQUAL 8 )
-    file(COPY ${CMAKE_SOURCE_DIR}/3rdparty/windows/freeglut/bin/x64/freeglut.dll DESTINATION ${OUTPUT_DIRECTORY}/bin)
+    file(COPY ${PROJECT_SOURCE_DIR}/3rdparty/windows/freeglut/bin/x64/freeglut.dll DESTINATION ${OUTPUT_DIRECTORY}/bin)
   else()
-    file(COPY ${CMAKE_SOURCE_DIR}/3rdparty/windows/freeglut/bin/freeglut.dll DESTINATION ${OUTPUT_DIRECTORY}/bin)
+    file(COPY ${PROJECT_SOURCE_DIR}/3rdparty/windows/freeglut/bin/freeglut.dll DESTINATION ${OUTPUT_DIRECTORY}/bin)
   endif()
 endif()
 
@@ -610,12 +610,12 @@ set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${ADDITIONAL_CFLAGS}")
 
 
 # Set include and link dirs ...
-include_directories(${CMAKE_SOURCE_DIR}/include)
-include_directories(${CMAKE_SOURCE_DIR}/3rdparty/glui-2.36/include/)
-include_directories(${CMAKE_SOURCE_DIR}/3rdparty/wxthings/include/)
-include_directories(${CMAKE_SOURCE_DIR}/3rdparty/rply-1.1.4)
-link_directories(${CMAKE_SOURCE_DIR}/obj)
-link_directories(${CMAKE_SOURCE_DIR}/lib)
+include_directories(${PROJECT_SOURCE_DIR}/include)
+include_directories(${PROJECT_SOURCE_DIR}/3rdparty/glui-2.36/include/)
+include_directories(${PROJECT_SOURCE_DIR}/3rdparty/wxthings/include/)
+include_directories(${PROJECT_SOURCE_DIR}/3rdparty/rply-1.1.4)
+link_directories(${PROJECT_SOURCE_DIR}/obj)
+link_directories(${PROJECT_SOURCE_DIR}/lib)
 
 add_subdirectory(src/slam6d)
 add_subdirectory(src/scanio)

@@ -1,6 +1,6 @@
 if (WIN32 OR CYGWIN)
 # Compile ANN library
-SET(ANN_DIR ${CMAKE_SOURCE_DIR}/3rdparty/ann_1.1.1_modified/src/)
+SET(ANN_DIR ${PROJECT_SOURCE_DIR}/3rdparty/ann_1.1.1_modified/src/)
 SET(ANN_SRCS 
   ${ANN_DIR}ANN.cpp
   ${ANN_DIR}brute.cpp 
@@ -28,7 +28,7 @@ endif(WIN32)
 endif()
 
 # Compile glui library
-SET(GLUI_DIR ${CMAKE_SOURCE_DIR}/3rdparty/glui-2.36/)
+SET(GLUI_DIR ${PROJECT_SOURCE_DIR}/3rdparty/glui-2.36/)
 SET(GLUI_SRCS
  ${GLUI_DIR}algebra3.cpp
  ${GLUI_DIR}arcball.cpp
@@ -75,7 +75,7 @@ ENDIF(EXPORT_SHARED_LIBS)
 IF(WITH_WXSHOW)
 
 # Compile wxthings library
-SET(WXTHINGS_DIR ${CMAKE_SOURCE_DIR}/3rdparty/wxthings/src/)
+SET(WXTHINGS_DIR ${PROJECT_SOURCE_DIR}/3rdparty/wxthings/src/)
 add_library(wxthings STATIC 
   ${WXTHINGS_DIR}block.cpp
   ${WXTHINGS_DIR}bmpcombo.cpp
@@ -93,7 +93,7 @@ ENDIF(WITH_WXSHOW)
 
 if (WIN32)
 # Compile sparse library 
-SET(SPARSE_DIR ${CMAKE_SOURCE_DIR}/3rdparty/cxsparse-4.4.4/suitesparse/)
+SET(SPARSE_DIR ${PROJECT_SOURCE_DIR}/3rdparty/cxsparse-4.4.4/suitesparse/)
 SET(SPARSE_SOURCES
 	${SPARSE_DIR}cs_add.c
 	${SPARSE_DIR}cs_amd.c
@@ -161,7 +161,7 @@ ENDIF(EXPORT_SHARED_LIBS)
 
 endif(WIN32)
 
-SET(B3DDIR ${CMAKE_SOURCE_DIR}/3rdparty/b3dfile/)
+SET(B3DDIR ${PROJECT_SOURCE_DIR}/3rdparty/b3dfile/)
 add_library(b3dfile STATIC ${B3DDIR}b3dpsreader.cpp)
 set_target_properties(b3dfile PROPERTIES POSITION_INDEPENDENT_CODE ON)
 IF(EXPORT_SHARED_LIBS)
@@ -170,7 +170,7 @@ ENDIF(EXPORT_SHARED_LIBS)
 
 if(NOT ${NEWMAT_FOUND})
 # Compile newmat library
-SET(NEWMAT_DIR ${CMAKE_SOURCE_DIR}/3rdparty/newmat-10/newmat/)
+SET(NEWMAT_DIR ${PROJECT_SOURCE_DIR}/3rdparty/newmat-10/newmat/)
 SET(NEWMAT_SOURCES ${NEWMAT_DIR}newmat1.cpp ${NEWMAT_DIR}newmat2.cpp ${NEWMAT_DIR}newmat3.cpp ${NEWMAT_DIR}newmat4.cpp ${NEWMAT_DIR}newmat5.cpp ${NEWMAT_DIR}newmat6.cpp ${NEWMAT_DIR}newmat7.cpp ${NEWMAT_DIR}newmat8.cpp ${NEWMAT_DIR}newmatex.cpp ${NEWMAT_DIR}bandmat.cpp ${NEWMAT_DIR}submat.cpp ${NEWMAT_DIR}myexcept.cpp ${NEWMAT_DIR}cholesky.cpp ${NEWMAT_DIR}evalue.cpp ${NEWMAT_DIR}fft.cpp ${NEWMAT_DIR}hholder.cpp ${NEWMAT_DIR}jacobi.cpp ${NEWMAT_DIR}newfft.cpp ${NEWMAT_DIR}sort.cpp ${NEWMAT_DIR}svd.cpp ${NEWMAT_DIR}newmatrm.cpp ${NEWMAT_DIR}newmat9.cpp)
 add_library(newmat STATIC ${NEWMAT_SOURCES})
 IF(EXPORT_SHARED_LIBS)
@@ -181,7 +181,7 @@ endif()
 if (WITH_LASLIB)
 # Compile las library
 set(CMAKE_CXX_FLAGS "-DNDEBUG -DUNORDERED -std=c++0x -fPIC" )
-SET(LASLIB_DIR ${CMAKE_SOURCE_DIR}/3rdparty/lastools/laslib/src/)
+SET(LASLIB_DIR ${PROJECT_SOURCE_DIR}/3rdparty/lastools/laslib/src/)
 FILE(GLOB LASLIB_SRCS "${LASLIB_DIR}/*.cpp" "${LASLIB_DIR}/*.hpp")
 
 add_library(LAZ STATIC ${LASLIB_SRCS})
@@ -189,8 +189,8 @@ IF(EXPORT_SHARED_LIBS)
 add_library(LAZ_s SHARED ${LASLIB_SRCS})
 ENDIF(EXPORT_SHARED_LIBS)
 
-include_directories(${CMAKE_SOURCE_DIR}/3rdparty/lastools/laslib/src)
-include_directories(${CMAKE_SOURCE_DIR}/3rdparty/lastools/laslib/inc)
+include_directories(${PROJECT_SOURCE_DIR}/3rdparty/lastools/laslib/src)
+include_directories(${PROJECT_SOURCE_DIR}/3rdparty/lastools/laslib/inc)
 endif(WITH_LASLIB)
 
 if (WIN32 AND WITH_GLEE)
@@ -199,7 +199,7 @@ IF (APPLE)
   FIND_LIBRARY(COREFOUNDATION_LIBRARY CoreFoundation )
 ENDIF (APPLE)
 
-SET(GLEE_DIR ${CMAKE_SOURCE_DIR}/3rdparty/glee/)
+SET(GLEE_DIR ${PROJECT_SOURCE_DIR}/3rdparty/glee/)
 add_library(glee STATIC ${GLEE_DIR}GLee.c)
 IF(APPLE)
   target_link_libraries(glee ${COREFOUNDATION_LIBRARY} ${OPENGL_LIBRARIES})
