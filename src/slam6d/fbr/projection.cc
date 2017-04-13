@@ -71,7 +71,6 @@ namespace fbr
 	widthMax_ = width_ - 1;
 	yFactor_ = (double) height_ / ySize_;      
 	//shift all the valuse to positive points on image 
-	heightLow_ = minVertAngle_;
 	heightMax_ = height_ - 1;	
       }
     
@@ -119,7 +118,6 @@ namespace fbr
 	xFactor_ = (double) width_ / xSize_;
 	widthMax_ = width_ - 1;
 	yFactor_ = (double) height_ / ySize_;
-	heightLow_ = minVertAngle_;
 	heightMax_ = height_ - 1;
       }
 
@@ -137,7 +135,6 @@ namespace fbr
 	xFactor_ = (double) width_ / xSize_;
 	widthMax_ = width_ - 1;
 	yFactor_ = (double) height_ / ySize_;
-	heightLow_ = minVertAngle_;
 	heightMax_ = height_ - 1;
       }
 
@@ -153,15 +150,16 @@ namespace fbr
 	xFactor_ = (double) width_ / xSize_;
 	widthMax_ = width_ - 1;
 	yFactor_ = (double) height_ / ySize_;
-	heightLow_ = log(tan(minVertAngle_) + (1/cos(minVertAngle_)));
 	heightMax_ = height_ - 1;
       }
 
     //RECTILINEAR projection
     if(method_ == RECTILINEAR)
       {
-	//default value for numberOfImages_
-	if(numberOfImages_ < 3) numberOfImages_ = 3;
+	// this gets the min number of images based on the horizontal angle of the data
+	// and the 2/3*M_PI angle as the max for pannini
+	int minNumberOfImages = ceil((maxHorizAngle_ - minHorizAngle_)/(2.0/3.0*M_PI)); 
+	if(numberOfImages_ < minNumberOfImages) numberOfImages_ = minNumberOfImages;
 	cout<<"Number of images per scan is: "<<numberOfImages_<<endl;
 	interval_ = (maxHorizAngle_ - minHorizAngle_) / numberOfImages_;
 	iMinY_ = minVertAngle_;
@@ -196,7 +194,10 @@ namespace fbr
 
 	//default values for numberOfImages_ and dPannini==param_
 	if(param_ == 0) param_ = 1;
-	if(numberOfImages_ < 2) numberOfImages_ = 2;
+	// this gets the min number of images based on the horizontal angle of the data
+	// and the M_PI angle as the max for pannini
+	int minNumberOfImages = ceil((maxHorizAngle_ - minHorizAngle_)/M_PI); 
+	if(numberOfImages_ < minNumberOfImages) numberOfImages_ = minNumberOfImages;
 	cout << "Parameter d is: " << param_ <<", Horizontal Number of images per scan is: " << numberOfImages_ << endl;
 	interval_ = (maxHorizAngle_ - minHorizAngle_) / numberOfImages_;
 	iMinY_ = minVertAngle_;
@@ -229,10 +230,13 @@ namespace fbr
     //STEREOGRAPHIC projection
     if(method_ == STEREOGRAPHIC)
       {
-	//default values for numberOfImages_ and rStereographic==param_
+	//default value for rStereographic==param_
 	if(param_ == 0) param_ = 2;
-	if(numberOfImages_ < 2) numberOfImages_ = 2;
-	cout << "Paremeter R is:" << param_ << ", Number of images per scan is:" << numberOfImages_ << endl;
+	// this gets the min number of images based on the horizontal angle of the data
+	// and the M_PI angle as the max for pannini
+	int minNumberOfImages = ceil((maxHorizAngle_ - minHorizAngle_)/M_PI); 
+	if(numberOfImages_ < minNumberOfImages) numberOfImages_ = minNumberOfImages;
+	cout << "Paremeter R is: " << param_ << ", Number of images per scan is: " << numberOfImages_ << endl;
 	// l0_ and p1_ are the center of projection iminx, imaxx, iminy, imaxy are the bounderis of interval_s
 	interval_ = (maxHorizAngle_ - minHorizAngle_) / numberOfImages_;
 	iMinY_ = minVertAngle_;
@@ -277,7 +281,6 @@ namespace fbr
 	cout << "ZMAX= " << maxZ_ << " ZMIN= "<< minZ_ << endl;
 	yFactor_ = (double) height_ / ySize_;
 	//shift all the valuse to positive points on image 
-	heightLow_ = minZ_;
 	heightMax_ = height_ - 1;
       }
     
@@ -431,10 +434,11 @@ namespace fbr
     //EQUIRECTANGULAR projection
     if(method_ == EQUIRECTANGULAR)
       {
-	x = (int) ( xFactor_ * phi);
+	/// minHorizAngle_ and minVertAngle_ are used to shift the data to start from min angles
+	x = (int) ( xFactor_ * (phi - minHorizAngle_));
 	if (x < 0) x = 0;
 	if (x > widthMax_) x = widthMax_;
-	y = (int) ( yFactor_ * (theta - heightLow_) );
+	y = (int) ( yFactor_ * (theta - minVertAngle_) );
 	y = heightMax_ - y;
 	if (y < 0) y = 0;
 	if (y > heightMax_) y = heightMax_;	
@@ -458,10 +462,11 @@ namespace fbr
     //CYLINDRICAL projection
     if(method_ == CYLINDRICAL)
       {
-	x = (int) ( xFactor_ * phi);
+	/// minHorizAngle_ and minVertAngle_ are used to shift the data to start from min angles
+	x = (int) ( xFactor_ * (phi - minHorizAngle_));
 	if (x < 0) x = 0;
 	if (x > widthMax_) x = widthMax_;
-	y = (int) ((double) yFactor_ * (tan(theta) - tan(heightLow_)));
+	y = (int) ((double) yFactor_ * (tan(theta) - tan(minVertAngle_)));
 	y = heightMax_ - y;
 	if (y < 0) y = 0;
 	if (y > heightMax_) y = heightMax_;	
@@ -470,10 +475,11 @@ namespace fbr
     //EQUALAREACYLINDRICAL projection
     if(method_ == EQUALAREACYLINDRICAL)
       {
-	x = (int) ( xFactor_ * (phi*cos(param_)));
+	/// minHorizAngle_ and minVertAngle_ are used to shift the data to start from min angles
+	x = (int) ( xFactor_ * ((phi - minHorizAngle_) * cos(param_)));
 	if (x < 0) x = 0;
 	if (x > widthMax_) x = widthMax_;
-	y = (int) ((double) yFactor_ * ((sin(theta) - sin(heightLow_)) / cos(param_)));
+	y = (int) ((double) yFactor_ * ((sin(theta) - sin(minVertAngle_)) / cos(param_)));
 	y = heightMax_ - y;
 	if (y < 0) y = 0;
 	if (y > heightMax_) y = heightMax_;
@@ -482,10 +488,11 @@ namespace fbr
     //Mercator Projection
     if( method_ == MERCATOR)
       {
-	x = (int) ( xFactor_ * phi);
+	/// minHorizAngle_ and minVertAngle_ are used to shift the data to start from min angles
+	x = (int) ( xFactor_ * (phi - minHorizAngle_));
 	if (x < 0) x = 0;
 	if (x > widthMax_) x = widthMax_;
-	y = (int) ( yFactor_ * (log(tan(theta) + (1/cos(theta))) - heightLow_) );
+	y = (int) ( yFactor_ * ( (log(tan(theta) + (1/cos(theta)))) - (log(tan(minVertAngle_) + (1/cos(minVertAngle_)))) ) );
 	y = heightMax_ - y;
 	if (y < 0) y = 0;
 	if (y > heightMax_) y = heightMax_;	
@@ -634,12 +641,12 @@ namespace fbr
     //ZAXIS projection
     if(method_ == ZAXIS)
       {
-	x = (int) ( xFactor_ * phi);
+	x = (int) ( xFactor_ * (phi - minHorizAngle_));
 	if (x < 0) x = 0;
 	if (x > widthMax_) x = widthMax_;
 	
 	///////////////////check this
-	y = (int) ( yFactor_ * ((*it)[1] - heightLow_) );
+	y = (int) ( yFactor_ * ((*it)[1] - minZ_) );
 	y = heightMax_ - y;
 	if (y < 0) y = 0;
 	if (y > heightMax_) y = heightMax_;
