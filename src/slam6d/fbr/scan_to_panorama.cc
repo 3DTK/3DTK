@@ -227,14 +227,10 @@ void parssArgs(int argc, char** argv, information& info){
 
   if(info.projectionMethod == PANNINI && info.projectionParam == 0){
     info.projectionParam = 1;
-    if(info.numberOfImages < 2) info.numberOfImages = 2;
   }
   if(info.projectionMethod == STEREOGRAPHIC && info.projectionParam == 0){
     info.projectionParam = 2;
-    if(info.numberOfImages < 2) info.numberOfImages = 2;
   }
-  if(info.projectionMethod == RECTILINEAR && info.numberOfImages < 3)
-    info.numberOfImages = 3;
 
   if (optind > argc - 1)
     {
