@@ -15,7 +15,7 @@ endif()
 
 if(WITH_LASLIB)
   set(SCANIO_LIBNAMES ${SCANIO_LIBNAMES} laz)
-  include_directories(${CMAKE_SOURCE_DIR}/3rdparty/lastools/)
+  include_directories(${PROJECT_SOURCE_DIR}/3rdparty/lastools/)
 endif()
 
 if(WIN32)

@@ -1,7 +1,7 @@
 if(WITH_PMD)
-  include_directories(${CMAKE_SOURCE_DIR}/include/pmd/pmdaccess2)
-  include_directories(${CMAKE_SOURCE_DIR}/include/pmd/pose)
-  include_directories(${CMAKE_SOURCE_DIR}/include/pmd)
+  include_directories(${PROJECT_SOURCE_DIR}/include/pmd/pmdaccess2)
+  include_directories(${PROJECT_SOURCE_DIR}/include/pmd/pose)
+  include_directories(${PROJECT_SOURCE_DIR}/include/pmd)
   
 
   find_library(LIBCONFIG_LIBRARY_DIR libconfig.so)
