@@ -61,6 +61,11 @@ public:
 //    exit(0);
   }
 
+  void PointsOnShapeAndDelete(CollisionShape<T> &shape, vector<T *> &points) {
+      PointsOnShapeAndDelete(*BOctTree<T>::root, BOctTree<T>::center, BOctTree<T>::size, shape, points);
+//  exit(0);
+  }
+
 protected:
 void showbits(char a)
 {
@@ -164,6 +169,44 @@ void showbits(char a)
         ++children; // next child
       }
     }
+  }
+
+  void PointsOnShapeAndDelete(bitoct &node, T *center, T size, CollisionShape<T> &shape, vector<T*> &vpoints) {
+      if (! shape.isInCube(center[0], center[1], center[2], size)) {
+          return;
+      }
+      T ccenter[3];
+      bitunion<T> *children;
+      bitoct::getChildren(node, children);
+
+      for (unsigned char i = 0; i < 8; i++) {
+          if (  ( 1 << i ) & node.valid ) {   // if ith node exists
+              BOctTree<T>::childcenter(center, ccenter, size, i);  // childrens center
+              if (  ( 1 << i ) & node.leaf ) {   // if ith node is leaf get center
+                  // check if leaf contains shape
+                  if ( shape.isInCube(ccenter[0], ccenter[1], ccenter[2], size/2.0) ) {
+                      pointrep *points = children->getPointreps();
+                      unsigned int length = points[0].length;
+                      T *point = &(points[1].v);  // first point
+                      for(unsigned int iterator = 0; iterator < length; iterator++ ) {
+//              cerr << point[0] << " " << point[1] << " " << point[2] << endl;
+                          if ( shape.containsPoint(point) ) {
+                               T * p = new T[BOctTree<T>::POINTDIM];
+                              for (unsigned int iterator = 0; iterator < BOctTree<T>::POINTDIM; iterator++) {
+                                  p[iterator] = point[iterator];
+                              }
+                              vpoints.push_back(p);
+                          }
+                          point+= BOctTree<T>::POINTDIM;
+                      }
+                      points[0].length = 0;
+                  }
+              } else { // recurse
+                  PointsOnShapeAndDelete( children->node, ccenter, size/2.0, shape, vpoints);
+              }
+              ++children; // next child
+          }
+      }
   }
 
 
