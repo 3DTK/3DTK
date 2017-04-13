@@ -1,8 +1,8 @@
 if (WITH_THERMO)
 
-  include_directories(${CMAKE_SOURCE_DIR}/3rdparty/cvblob)
-  include_directories(${CMAKE_SOURCE_DIR}/include/shapes/)
-  include_directories(${CMAKE_SOURCE_DIR}/include/thermo/)
+  include_directories(${PROJECT_SOURCE_DIR}/3rdparty/cvblob)
+  include_directories(${PROJECT_SOURCE_DIR}/include/shapes/)
+  include_directories(${PROJECT_SOURCE_DIR}/include/thermo/)
   include_directories(/usr/include/)
   include_directories(/usr/include/opencv)
   

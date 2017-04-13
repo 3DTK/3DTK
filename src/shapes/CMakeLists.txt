@@ -1,10 +1,10 @@
 if (WITH_SHAPE_DETECTION)
-  include_directories(${CMAKE_SOURCE_DIR}/3rdparty/gocr-0.48/src)
-  include_directories(${CMAKE_SOURCE_DIR}/3rdparty/gocr-0.48/include)
-  include_directories(${CMAKE_SOURCE_DIR}/include/shapes/)
+  include_directories(${PROJECT_SOURCE_DIR}/3rdparty/gocr-0.48/src)
+  include_directories(${PROJECT_SOURCE_DIR}/3rdparty/gocr-0.48/include)
+  include_directories(${PROJECT_SOURCE_DIR}/include/shapes/)
   
 #  # Compile gocr library
-#  set(GOCR_DIR ${CMAKE_SOURCE_DIR}/3rdparty/gocr-0.48/src/)
+#  set(GOCR_DIR ${PROJECT_SOURCE_DIR}/3rdparty/gocr-0.48/src/)
 #  add_library(Pgm2asc SHARED  ${GOCR_DIR}gocr.c ${GOCR_DIR}pgm2asc.c ${GOCR_DIR}box.c ${GOCR_DIR}database.c 
 #                              ${GOCR_DIR}detect.c ${GOCR_DIR}barcode.c ${GOCR_DIR}lines.c ${GOCR_DIR}list.c 
 #                              ${GOCR_DIR}ocr0.c ${GOCR_DIR}ocr0n.c ${GOCR_DIR}ocr1.c ${GOCR_DIR}otsu.c 
