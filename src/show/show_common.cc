@@ -346,7 +346,7 @@ int current_frame = 0;
 /**
  * Parses arguments to `show`. The arguments come from these sources:
  *  - user config file in ~/.config/3dtk/show.ini
- *  - a file named "format" in the input directory
+ *  - a file named "config" in the input directory
  *  - command line arguments
  *
  * Config files have an "option=value" pair on each line with option names just
@@ -394,6 +394,7 @@ int parseArgs(int argc,char **argv,
   // Temporary parsing variables
   unsigned int types = PointType::USE_NONE;
   string format;
+  bool no_points, no_cameras, no_path, no_fog;
 
   options_description gui_options("GUI options");
   gui_options.add_options()
@@ -402,41 +403,72 @@ int parseArgs(int argc,char **argv,
     ("fps,F", value(&fps)->default_value(20), "Maximum framerate")
     ("dimensions,x", value<string>(),
       "Window dimensions in WxH format.")
+    ("advanced,2", bool_switch(&advanced_controls),
+      "Switch on advanced controls")
+    ;
+  options_description display_options("Display options");
+  display_options.add_options()
     ("scale,C", value(&scale)->default_value(0.01),
       "Scale factor to use. Influences movement speed etc. "
       "Use 1 when point coordinates are in meters, 0.01 when in centimeters "
       "and so forth.")
-    ("noanimcolor,A",
-      bool_switch(&coloranim)
-        ->implicit_value(false)
-        ->default_value(true),
-      "Do not switch to different color settings when displaying animation")
-    ("advanced,2", bool_switch(&advanced_controls),
-      "Switch on advanced controls")
+    ("fov", value(&cangle)->default_value(60),
+      "Horizontal field of view angle in degrees. "
+      "The vertical angle depends on window size.")
+    ("topview", bool_switch(&showTopView), // FIXME starts out with a view from the front, need to call topView()
+      "Initialize the camera above the point cloud with parallel projection.")
+    ("no-points", bool_switch(&no_points),
+      "Initially, do not draw points.")
+    ("no-cameras", bool_switch(&no_cameras),
+      "Initially, do not draw cameras.")
+    ("no-path", bool_switch(&no_path),
+      "Initially, do not draw camera path.")
+    ("no-fog", bool_switch(&no_fog),
+      "Initially turn off fog.")
+    ("fog-type", value(&show_fog)->default_value(1),
+      "How fog dims points with distance:\n"
+      "0   = no fog\n"
+      "1   = exponential\n"
+      "2   = exponential squared\n"
+      "3   = linear\n"
+      "4-6 = inverted options 1-3 (further is brighter)") // FIXME? during testing, these did not do anything
+    ("fog-density", value(&fogDensity)->default_value(0.1),
+      "Fog density. Useful values are between 0 and 1.")
+    ("position", value<string>(),
+      "Camera starting position, given as \"%lf,%lf,%lf\" for x, y, z.")
+    ("rotation", value<string>(),
+      "Camera starting rotation, given as a quaternion \"%lf,%lf,%lf,%lf\".")
     ;
 
   options_description color_options("Point coloring");
   color_options.add_options()
     ("color,c", bool_switch(),
-      "Use color RGB values for coloring point clouds.")
+      "Use included RGB values for coloring points.")
     ("reflectance,R", bool_switch(), // XXX had to drop --reflectivity
-      "Use reflectance values for coloring point clouds. "
-      "Only works when using octree display.")
-    ("temperature,degree,D", bool_switch(),
-      "Use temperature values for coloring point clouds. "
-      "Only works when using octree display.")
+      "Use reflectance values for coloring point clouds.")
+    ("temperature,D", bool_switch(),
+      "Use temperature values for coloring point clouds.")
     ("amplitude,a", bool_switch(),
-      "Use amplitude values for coloring point clouds. "
-      "Only works when using octree display.")
+      "Use amplitude values for coloring point clouds.")
     ("deviation,d", bool_switch(),
-      "Use deviation values for coloring point clouds. "
-      "Only works when using octree display.")
+      "Use deviation values for coloring point clouds.")
     ("height,h", bool_switch(),
-      "Use y-height values for coloring point clouds. "
-      "Only works when using octree display.")
+      "Use y-height values for coloring point clouds.")
     ("type,T", bool_switch(),
-      "Use type values for coloring point clouds. "
-      "Only works when using octree display.")
+      "Use type values for coloring point clouds.")
+    ("colormap", value<string>(),
+      "With which colors to color the points, according to their color value "
+      "in a spectrum. Available color maps are: solid, grey, hsv, jet, hot, "
+      "rand, shsv, temp.")
+    ("colormin", value(&mincolor_value),
+      "Minimum value for mapping the color spectrum.")
+    ("colormax", value(&maxcolor_value),
+      "Maximum value for mapping the color spectrum.")
+    ("noanimcolor,A",
+      bool_switch(&coloranim)
+        ->implicit_value(false)
+        ->default_value(true),
+      "Do not switch to different color settings when displaying animation")
     ("time,t", bool_switch()) // TODO description
     ;
 
@@ -472,13 +504,15 @@ int parseArgs(int argc,char **argv,
   point_options.add_options()
     ("origin,o", value(&origin),
       "Set the starting and reset position according to n. By default, the "
-      "starting and reset position are at the origin of the"
-      "coordinate system.\n"
+      "starting and reset position are at the origin of the "
+      "coordinate system. Also try --position.\n"
       "arg = 0             : the center of mass of all scans\n"
       "arg = [1,2,3,...]   : the center of scan 0,1,2,... (arg-1)\n"
       "arg = [-1,-2,-3,...]: the position of scan 0,1,2,... (-arg-1)\n")
     ("sphere,b", value(&sphereMode),
-      "Map all measurements on a sphere of radius n.")
+      "Map all measurements on a sphere of this radius.")
+    ("pointsize", value(&pointsize),
+      "Size of each point in pixels.")
     ;
 
   options_description file_options("Octree caching");
@@ -524,6 +558,7 @@ int parseArgs(int argc,char **argv,
   options_description visible_options("");
   visible_options
     .add(gui_options)
+    .add(display_options)
     .add(color_options)
     .add(scan_options)
     .add(reduction_options)
@@ -535,8 +570,7 @@ int parseArgs(int argc,char **argv,
   options_description cmdline_options("");
   cmdline_options.add(visible_options);
   cmdline_options.add_options()
-    ("input-dir", value(&dir),
-      "Positional: Directory where the scan files are located")
+    ("input-dir", value(&dir)) // Where the scan files are located
     ;
 
   positional_options_description pd;
@@ -570,10 +604,10 @@ int parseArgs(int argc,char **argv,
     config_home = string(home_c) + "/.config";
   }
 
-  ifstream config_file((config_home + "/3dtk/show.ini").c_str());
-  if (config_file) {
+  ifstream user_config_file((config_home + "/3dtk/show.ini").c_str());
+  if (user_config_file) {
     try {
-      store(parse_config_file(config_file, visible_options), vm);
+      store(parse_config_file(user_config_file, visible_options), vm);
     } catch (const logic_error &e) {
       cerr << "Error: " << e.what() << endl;
       return 1;
@@ -581,11 +615,11 @@ int parseArgs(int argc,char **argv,
     notify(vm);
   }
 
-  // Parse ./format file in the input directory
-  ifstream format_file((dir + "/format").c_str());
-  if (format_file) {
+  // Parse ./config file in the input directory
+  ifstream local_config_file((dir + "/config").c_str());
+  if (local_config_file) {
     try {
-      store(parse_config_file(format_file, visible_options), vm);
+      store(parse_config_file(local_config_file, visible_options), vm);
     } catch (const logic_error &e) {
       cerr << "Error: " << e.what() << endl;
       return 1;
@@ -593,7 +627,7 @@ int parseArgs(int argc,char **argv,
     notify(vm);
   }
 
-  // Command line options now overwrite ./format file
+  // Command line options now overwrite ./config file
   try {
     store(
       command_line_parser(argc, argv)
@@ -661,6 +695,12 @@ int parseArgs(int argc,char **argv,
     }
   }
 
+  // Set drawing options from flags
+  show_points = !no_points;
+  show_cameras = !no_cameras;
+  show_path = !no_path;
+  if (no_fog) show_fog = 0;
+
   // Translate color bool_switches to a bitset
   std::map<string, unsigned int> point_type_flags({
     {"reflectance", PointType::USE_REFLECTANCE},
@@ -681,6 +721,28 @@ int parseArgs(int argc,char **argv,
 
   ptype = PointType(types);
 
+  // Parse --colormap
+  if (vm.count("colormap")) {
+    std::map<string, int> colormap_values({
+      {"solid", 0},
+      {"grey", 1},
+      {"hsv", 2},
+      {"jet", 3},
+      {"hot", 4},
+      {"rand", 5},
+      {"shsv", 6},
+      {"temp", 7}
+    });
+
+    for (auto const &kv_pair : colormap_values) {
+      if (vm["colormap"].as<string>() == kv_pair.first) {
+        listboxColorMapVal = kv_pair.second;
+	// FIXME also need to call changeColorMap after some unknown thing is initialized
+	break;
+      }
+    }
+  }
+
   // Parse window dimensions
   if (vm.count("dimensions")) {
     if (sscanf(vm["dimensions"].as<string>().c_str(), "%dx%d",
@@ -691,6 +753,33 @@ int parseArgs(int argc,char **argv,
     aspect = (double)START_WIDTH/(double)START_HEIGHT;
     current_width  = START_WIDTH;
     current_height = START_HEIGHT;
+  }
+
+  // Parse camera coordinates
+  if (vm.count("position")) {
+    if (sscanf(vm["position"].as<string>().c_str(), "%lf,%lf,%lf",
+               &RVX, &RVY, &RVZ) != 3) {
+      cerr << "Error: Camera coordinates must be given as \"X,Y,Z\"" << endl;
+      return 1;
+    }
+    X = RVX;
+    Y = RVY;
+    Z = RVZ;
+  }
+
+  // Parse camera rotation
+  if (vm.count("rotation")) {
+    if (sscanf(vm["rotation"].as<string>().c_str(), "%lf,%lf,%lf,%lf",
+               &Rquat[0], &Rquat[1], &Rquat[2], &Rquat[3]) != 4) {
+      cerr << "Error: Camera rotation must be given as \"X,Y,Z,W\"" << endl;
+      return 1;
+    }
+    for (int i = 0; i < 4; i++) {
+      quat[i] = Rquat[i];
+    }
+
+    // FIXME does not work as intended
+    QuaternionToMatrix4(Rquat, view_rotate_button); // TODO move this dirty hack into show_menu.cc
   }
 
   if (vm.count("origin")) {
@@ -1287,11 +1376,10 @@ void initShow(int argc, char **argv){
   // sets (and computes if necessary) the pose that is used for the reset button
   if (originset) {
     setResetView(origin);
-  } else {
-      RVX = RVY = RVZ = X = Y = Z = 0.0;
   }
-  cout << "View set to: " << X << ", " << Y << ", " << Z << endl;
-
+  if (X != 0 || Y != 0 || Z != 0) {
+    cout << "View set to: " << X << ", " << Y << ", " << Z << endl;
+  }
 
   for (unsigned int i = 0; i < 256; i++) {
     keymap[i] = false;
