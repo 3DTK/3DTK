@@ -152,7 +152,6 @@ void newMenu()
   cangle_spinner = glui2->add_spinner_to_panel(settings_panel, "Field of View :   ", GLUI_SPINNER_FLOAT, &cangle);
   cangle_spinner->set_float_limits(1.0, 180.0);
   cangle_spinner->set_speed(20.0);
-  cangle_spinner->set_float_val(60.0);
   cangle_spinner->set_alignment(GLUI_ALIGN_RIGHT);
 
   pzoom_spinner = glui2->add_spinner_to_panel(settings_panel, "Parallel Zoom :", GLUI_SPINNER_FLOAT, &pzoom);
@@ -254,7 +253,6 @@ void newMenu()
   fog_spinner = glui1->add_spinner("Fog Density:", GLUI_SPINNER_FLOAT, &fogDensity);
   fog_spinner->set_float_limits(0.0, 1.0);
   fog_spinner->set_speed(0.5);
-  fog_spinner->set_float_val(0.001);
   fog_spinner->set_alignment(GLUI_ALIGN_LEFT);
 
 
