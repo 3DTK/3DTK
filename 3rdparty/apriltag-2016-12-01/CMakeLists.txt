@@ -32,4 +32,4 @@ add_library(apriltag ${SOURCES})
 target_link_libraries(apriltag pthread)
 set_target_properties(apriltag PROPERTIES EXCLUDE_FROM_ALL true)
 
-set(APRILTAG_INCLUDE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}" CACHE INTERNAL "AprilTag include directories" FORCE PARENT_SCOPE)
+set(APRILTAG_INCLUDE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}" CACHE INTERNAL "AprilTag include directories" FORCE)
