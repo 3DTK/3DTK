@@ -73,9 +73,19 @@ int vertex_cb(p_ply_argument argument) {
 	std::vector<double> *data;
 	ply_get_argument_user_data(argument, (void**)&data, NULL);
 	double value = ply_get_argument_value(argument);
-	data->push_back(value);
+  data->push_back(value);
 	return 1;
 }
+
+int vertex_cb_i(p_ply_argument argument) {
+	std::vector<double> *data;
+	ply_get_argument_user_data(argument, (void**)&data, NULL);
+	double value = ply_get_argument_value(argument);
+  value = -value;
+  data->push_back(value);
+	return 1;
+}
+
 
 int rgb_cb(p_ply_argument argument) {
 	std::vector<unsigned char> *data;
@@ -149,7 +159,7 @@ void ScanIO_ply::readScan(const char* dir_path,
   }
 
   ply_set_read_cb(ply, "vertex", "x", vertex_cb, xyz, 0);
-  ply_set_read_cb(ply, "vertex", "y", vertex_cb, xyz, 0);
+  ply_set_read_cb(ply, "vertex", "y", vertex_cb_i, xyz, 0);
   ply_set_read_cb(ply, "vertex", "z", vertex_cb, xyz, 0);
 
   // We somehow want to extract color information from the PLY file, so we are
