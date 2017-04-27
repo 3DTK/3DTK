@@ -205,6 +205,22 @@ public:
   inline void getCenter(double center[3]) const;
 
   void serialize(std::string filename);
+ 
+  // FIX to compile compact octree again
+  // TODO: check if this does what it's supposed to do
+  // these are needed on windows so that show can be used as a library 
+  // we need to call the ExtractFrustum in a same process as the draw function on windows
+  void extractFrustumAndDrawLOD(float ratio, short detail)
+  { 
+	  show::ExtractFrustum(detail);
+	  drawLOD(ratio);
+  }
+  void extractFrustumAndDraw(short detail)
+  {
+	  show::ExtractFrustum(detail);
+	  draw();
+  }
+
 protected:
   
   Allocator* alloc;
@@ -455,6 +471,7 @@ template <class P>
       }
     }
   }
+  
 
   template <class T>
   void compactTree::selectRay(T * &point) { 
