@@ -174,105 +174,6 @@ void readPoseHelper(const char *dir_path,
                 identifier + "] in [" + dir_path + "]");
 }
 
-bool uosHeaderTest(char *line)
-{
-    char *cur, *old;
-    old = line;
-    // start with one or more digits
-    for (cur = old; isdigit(*cur); ++cur);
-    // check if anything was read in
-    if (cur == old)
-        return false;
-    old = cur;
-    // follow with one space, one 'x' and one space
-    if (old[0] == '\0' || old[0] != ' '
-            || old[1] == '\0' || old[1] != 'x'
-            || old[2] == '\0' || old[2] != ' ')
-        return false;
-    old+=3;
-    // end with one or more digits
-    for (cur = old; isdigit(*cur); ++cur);
-    // check if anything was read in
-    if (cur == old)
-        return false;
-    // check if the last character is the end of the line
-    if (cur[0] != '\0' && (cur[0] != '\r' || cur[1] != '\0'))
-        return false;
-    return true;
-}
-
-std::streamsize uosHeaderTest(std::istream& infile, char **line, std::streamsize bufsize)
-{
-    /*
-     * in case the first line turned out not to be a uos header, this function
-     * originally just did a seekg() back to the beginning of the file. With
-     * the integration of libarchive this is not possible anymore because
-     * seeking backwards is not possible. So instead, if the first line is
-     * found not to be a header but actual data, the allocated buffer is
-     * returned so that it can later be passed to readACSII as the first line
-     * of the input.
-     *
-     * An alternative to doing this would be to wrap the istream in another
-     * istream which supports buffering of the last X bytes read so that it is
-     * possible to seek back in the stream a couple of bytes. But implementing
-     * a streambuf class that does this, was deemed to complicated and hence
-     * this solution.
-     *
-     * Should there ever exist such a wrapper class, then it can be used to
-     * answer this question: http://stackoverflow.com/questions/31478256/
-     */
-    char *buffer = (char *)malloc(bufsize);
-    try {
-        infile.getline(buffer, bufsize, '\n');
-    } catch(std::ios_base::failure e) {
-        free(buffer);
-        *line = NULL;
-        if (infile.eof()) {
-            // if the EOF was before the first newline, then the file was in
-            // fact empty
-            return 0;
-        }
-        std::cerr << "error reading first line" << endl;
-        std::cerr << "did not find a newline after " << bufsize << " characters" << endl;
-        std::cerr << e.what() << endl;
-        return -1;
-    }
-    std::streamsize linelen = infile.gcount();
-    // if failure but eof not reached, break
-    if (infile.fail() && !infile.eof()) {
-        std::cerr << "cannot find line ending within " << bufsize <<
-            " characters and eof is not reached in line 1"<< endl;
-        free(buffer);
-        *line = NULL;
-        return -1;
-    }
-    // if eof was not reached, then a terminator was found
-    // strip it off
-    if (!infile.eof()) {
-        buffer[linelen-1] = '\0';
-        linelen--;
-    }
-    // if the last character is \r replace it by \0
-    if (linelen >= 1 &&
-            buffer[linelen-1] == '\r' &&
-            buffer[linelen] == '\0') {
-        buffer[linelen-1] = '\0';
-        linelen--;
-    }
-    // the uos header must be at least five bytes because it is of the form
-    // A x B
-    // if no uos header or comment was found, then the first line was actual
-    // data which we return
-    if (linelen < 5 || !uosHeaderTest(buffer)) {
-        *line = buffer;
-        return linelen;
-    }
-    // otherwise, the first line was the header which we discard
-    free(buffer);
-    *line = NULL;
-    return 0;
-}
-
 bool strtoval(char *pos, unsigned int linenr, double* ret)
 {
     char *endptr;
@@ -543,7 +444,7 @@ bool checkSpec(IODataType* spec, std::vector<double>* xyz, std::vector<unsigned 
     return true;
 }
 
-/* this is a wrapper around uosHeaderTest and readASCII which should work for
+/* this is a wrapper around readASCII which should work for
  * most of the text based input formats like uos* and xyz*
  *
  * This function returns another function so that it can be passed to the
@@ -560,20 +461,7 @@ std::function<bool (std::istream &data_file)> open_uos_file(
         std::vector<float>* deviation)
 {
     return [=,&filter,&transform](std::istream &data_file) -> bool {
-        // open data file
-
-        char *firstline;
-        std::streamsize linelen;
-        linelen = uosHeaderTest(data_file, &firstline);
-        if (linelen < 0)
-            throw std::runtime_error("unable to read uos header");
-
-        bool ret = readASCII(data_file, firstline, linelen, spec, transform, filter, xyz, rgb, reflectance, temperature, amplitude, type, deviation);
-
-        if (firstline != NULL)
-            free(firstline);
-
-        return ret;
+        return readASCII(data_file, spec, transform, filter, xyz, rgb, reflectance, temperature, amplitude, type, deviation);
     };
 }
 
@@ -717,8 +605,7 @@ ScanDataTransform& transform, PointFilter& filter, std::vector<double>* xyz, std
     return true;
 }
 
-bool readASCII(std::istream& infile, char *firstline, std::streamsize
-        lenfirstline, IODataType* spec, ScanDataTransform& transform,
+bool readASCII(std::istream& infile, IODataType* spec, ScanDataTransform& transform,
         PointFilter& filter, std::vector<double>* xyz, std::vector<unsigned
         char>* rgb, std::vector<float>* refl, std::vector<float>* temp,
         std::vector<float>* ampl, std::vector<int>* type, std::vector<float>*
@@ -751,6 +638,11 @@ bool readASCII(std::istream& infile, char *firstline, std::streamsize
     unsigned int linenr = 1;
     char *buffer = (char *)malloc(bufsize);
 
+    // if garbage is found at the top of the file, then we are liberal and
+    // just skip over it. We allow up to 10 lines of garbage at the file top
+    // to abort early and not print potentially millions of read errors.
+    int header = 10;
+
     // we want to support \n and \r\n delimiters so it's okay to use
     // istream::getline to read a line (it supports a byte limit)
     // we then check whether the last character is a \r and remove it
@@ -758,14 +650,6 @@ bool readASCII(std::istream& infile, char *firstline, std::streamsize
     if (!checkSpec(spec, xyz, rgb, refl, temp, ampl, type, devi)) {
         std::cerr << "problems with spec" << endl;
         goto fail;
-    }
-
-    if (firstline != NULL) {
-        if (!handle_line(firstline, lenfirstline, linenr, spec, transform, filter, xyz, rgb, refl, temp, ampl, type, devi)) {
-            std::cerr << "failed to handle first line" << endl;
-            goto fail;
-        }
-        ++linenr;
     }
 
     for (;;++linenr) {
@@ -802,8 +686,17 @@ bool readASCII(std::istream& infile, char *firstline, std::streamsize
         }
 
         if (!handle_line(buffer, linelen, linenr, spec, transform, filter, xyz, rgb, refl, temp, ampl, type, devi)) {
-            std::cerr << "problem handling line" << endl;
-            goto fail;
+            std::cerr << "unable to parse line " << linenr << endl;
+            // A line contained an error, so we decrement the header variable
+            header -= 1;
+            // If we decrement too much, we start quit with an error
+            if (header < 0) {
+                goto fail;
+            }
+        } else if (header >= 0) {
+            // A line was successfully read. This means the header is over and
+            // no more errors must follow.
+            header = -1;
         }
     }
 
