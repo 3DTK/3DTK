@@ -18,7 +18,7 @@ using namespace std;
     vector<double> xyz, truexyz = { 1.0, 2.0, 3.0 }; \
     PointFilter filter; \
     ScanDataTransform_identity transform; \
-    BOOST_CHECK(readASCII(inf, NULL, 0, spec, transform, filter, &xyz) == true); \
+    BOOST_CHECK(readASCII(inf, spec, transform, filter, &xyz) == true); \
     BOOST_CHECK_EQUAL_COLLECTIONS(xyz.begin(), xyz.end(), truexyz.begin(), truexyz.end()); } while(0)
 
 // test succeeds if reading fails
@@ -27,7 +27,7 @@ using namespace std;
     vector<double> xyz; \
     PointFilter filter; \
     ScanDataTransform_identity transform; \
-    BOOST_CHECK(readASCII(inf, NULL, 0, spec, transform, filter, &xyz) == false); } while(0)
+    BOOST_CHECK(readASCII(inf, spec, transform, filter, &xyz) == false); } while(0)
 
 // test succeeds if six values can successfully be read
 #define readASCII3 do { \
@@ -35,7 +35,7 @@ using namespace std;
     vector<double> xyz, truexyz = { 1.0, 2.0, 3.0, 4.0, 5.0, 6.0 }; \
     PointFilter filter; \
     ScanDataTransform_identity transform; \
-    BOOST_CHECK(readASCII(inf, NULL, 0, spec, transform, filter, &xyz) == true); \
+    BOOST_CHECK(readASCII(inf, spec, transform, filter, &xyz) == true); \
     BOOST_CHECK_EQUAL_COLLECTIONS(xyz.begin(), xyz.end(), truexyz.begin(), truexyz.end()); } while(0)
 
 // test succeeds if zero values can successfully be read
@@ -44,7 +44,7 @@ using namespace std;
     vector<double> xyz; \
     PointFilter filter; \
     ScanDataTransform_identity transform; \
-    BOOST_CHECK(readASCII(inf, NULL, 0, spec, transform, filter, &xyz) == true); \
+    BOOST_CHECK(readASCII(inf, spec, transform, filter, &xyz) == true); \
     BOOST_CHECK(xyz.size() == 0); } while(0)
 
 TEST(normal1)         { istringstream inf("1.0 2.0 +3.0");       readASCII1; }
@@ -57,8 +57,11 @@ TEST(preceedingSpace2) { istringstream inf("  1 2 3");             readASCII1; }
 TEST(trailingSpace)   { istringstream inf("1 2 3 ");             readASCII1; }
 TEST(multipleSpaces)  { istringstream inf("1   2 3");            readASCII1; }
 TEST(mixedTabsSpaces) { istringstream inf("1  \t2 3");           readASCII1; }
-TEST(trailingGarbage) { istringstream inf("1aa 2 3");            readASCII2; }
-TEST(noNumber)        { istringstream inf("aa 2 3");             readASCII2; }
+TEST(beginningGarbage) { istringstream inf("blub\nbla\n1 2 3");  readASCII1; }
+TEST(trailingGarbage) { istringstream inf("1aa 2 3");            readASCII4; }
+TEST(garbage10)       { istringstream inf("a\nb\nc\nd\ne\nf\ng\nh\ni\nj\n1 2 3"); readASCII1; }
+TEST(garbage11)       { istringstream inf("a\nb\nc\nd\ne\nf\ng\nh\ni\nj\nk\n1 2 3"); readASCII2; }
+TEST(noNumber)        { istringstream inf("aa 2 3");             readASCII4; }
 TEST(windowsLine)     { istringstream inf("1 2 3\r\n");          readASCII1; }
 TEST(multipleLines)   { istringstream inf("1 2 3\n4 5 6\n");     readASCII3; }
 TEST(emptyLines)      { istringstream inf("1 2 3\n\n\n4 5 6\n"); readASCII3; }
@@ -75,56 +78,36 @@ TEST(empty4)          { istringstream inf("   ");                readASCII4; }
 TEST(empty5)          { istringstream inf("\n\n\n\n");           readASCII4; }
 TEST(empty6)          { istringstream inf("\r\n\r\n");           readASCII4; }
 
+
 TEST(spec1) {
     IODataType spec[5] = { DATA_XYZ, DATA_XYZ, DATA_XYZ, DATA_XYZ, DATA_TERMINATOR };
     vector<double> xyz; PointFilter filter; ScanDataTransform_identity transform;
     istringstream inf("1.0 2.0 3.0");
-    BOOST_CHECK(readASCII(inf, NULL, 0, spec, transform, filter, &xyz) == false);
+    BOOST_CHECK(readASCII(inf, spec, transform, filter, &xyz) == false);
 }
 TEST(spec2) {
     IODataType spec[3] = { DATA_XYZ, DATA_XYZ, DATA_TERMINATOR };
     vector<double> xyz; PointFilter filter; ScanDataTransform_identity transform;
     istringstream inf("1.0 2.0 3.0");
-    BOOST_CHECK(readASCII(inf, NULL, 0, spec, transform, filter, &xyz) == false);
+    BOOST_CHECK(readASCII(inf, spec, transform, filter, &xyz) == false);
 }
 TEST(spec3) {
     IODataType spec[5] = { DATA_XYZ, DATA_XYZ, DATA_XYZ, DATA_REFLECTANCE, DATA_TERMINATOR };
     vector<double> xyz; PointFilter filter; ScanDataTransform_identity transform;
     istringstream inf("1.0 2.0 3.0 4.0");
-    BOOST_CHECK(readASCII(inf, NULL, 0, spec, transform, filter, &xyz) == false);
+    BOOST_CHECK(readASCII(inf, spec, transform, filter, &xyz) == false);
 }
 TEST(spec4) {
     IODataType spec[4] = { DATA_XYZ, DATA_XYZ, DATA_XYZ, DATA_TERMINATOR };
     vector<double> xyz; vector<float> refl; PointFilter filter; ScanDataTransform_identity transform;
     istringstream inf("1.0 2.0 3.0");
-    BOOST_CHECK(readASCII(inf, NULL, 0, spec, transform, filter, &xyz, 0, &refl) == false);
+    BOOST_CHECK(readASCII(inf, spec, transform, filter, &xyz, 0, &refl) == false);
 }
 TEST(spec5) {
     IODataType spec[5] = { DATA_XYZ, DATA_XYZ, DATA_DUMMY, DATA_XYZ, DATA_TERMINATOR };
     vector<double> xyz; PointFilter filter; ScanDataTransform_identity transform;
     istringstream inf("1.0 2.0 foobar 3.0");
-    BOOST_CHECK(readASCII(inf, NULL, 0, spec, transform, filter, &xyz) == true);
-}
-
-
-TEST(uosheader1)      { BOOST_CHECK(uosHeaderTest("0 x 0") == true); }
-TEST(uosheader2)      { BOOST_CHECK(uosHeaderTest("0 x 0\r") == true); }
-TEST(uosheader3)      { BOOST_CHECK(uosHeaderTest("100 x 100") == true); }
-TEST(uosheader4)      { BOOST_CHECK(uosHeaderTest("0 y 0") == false); }
-TEST(uosheader5)      {
-	istringstream inf("1.0 2.0 3.0");
-    char *firstline;
-    std::streamsize linelen;
-	linelen = uosHeaderTest(inf, &firstline);
-    BOOST_CHECK(linelen == 11);
-    vector<unsigned char> rgb;
-    IODataType spec[4] = { DATA_XYZ, DATA_XYZ, DATA_XYZ, DATA_TERMINATOR };
-    vector<double> xyz, truexyz = { 1.0, 2.0, 3.0 };
-    PointFilter filter;
-    ScanDataTransform_identity transform;
-    BOOST_CHECK(readASCII(inf, firstline, linelen, spec, transform, filter, &xyz) == true);
-    BOOST_CHECK_EQUAL_COLLECTIONS(xyz.begin(), xyz.end(), truexyz.begin(), truexyz.end());
-    free(firstline);
+    BOOST_CHECK(readASCII(inf, spec, transform, filter, &xyz) == true);
 }
 
 /* vim: set ts=4 sw=4 et: */
