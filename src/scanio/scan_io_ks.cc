@@ -88,7 +88,7 @@ std::function<bool (std::istream &data_file)> read_data(PointFilter& filter,
 
         IODataType spec[4] = { DATA_XYZ, DATA_XYZ, DATA_XYZ, DATA_TERMINATOR };
         ScanDataTransform_ks transform;
-        readASCII(data_file, NULL, 0, spec, transform, filter, xyz);
+        readASCII(data_file, spec, transform, filter, xyz);
 
         return true;
     };
