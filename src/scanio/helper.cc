@@ -71,7 +71,6 @@ bool ScanDataTransform_xyz::transform(double xyz[3], unsigned char rgb[3], float
 
 bool ScanDataTransform_pts::transform(double xyz[3], unsigned char rgb[3], float*  refl, float* temp, float* ampl, int* type, float* devi)
 {
-    double tmp;
     xyz[0] = xyz[0];
     xyz[1] = xyz[1];
     xyz[2] = -1 * xyz[2];
