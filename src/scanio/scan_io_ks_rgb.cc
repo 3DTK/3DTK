@@ -83,8 +83,6 @@ std::function<bool (std::istream &data_file)> read_data(PointFilter& filter,
     return [=,&filter](std::istream &data_file) -> bool {
         // TODO: support for amplitude and reflectance
         // open data file
-        data_file.exceptions(ifstream::eofbit|ifstream::failbit|ifstream::badbit);
-
         // overread the first line
         // TODO: how does the first line look like?
         //       can we use uosHeaderTest() here?
