@@ -34,7 +34,7 @@ add_test(test_scanio_helper_run ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/test_scanio_he
 add_test(test_scanio_helper_build "${CMAKE_COMMAND}" --build ${CMAKE_BINARY_DIR} --target test_scanio_helper)
 set_tests_properties(test_scanio_helper_run PROPERTIES DEPENDS test_scanio_helper_build)
 
-add_test(test_scanio_readscans_run ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/test_scanio_readscans "${PROJECT_SOURCE_DIR}")
+add_test(test_scanio_readscans_run ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/test_scanio_readscans -- "${PROJECT_SOURCE_DIR}")
 add_test(test_scanio_readscans_build "${CMAKE_COMMAND}" --build ${CMAKE_BINARY_DIR} --target test_scanio_readscans)
 set_tests_properties(test_scanio_readscans_run PROPERTIES DEPENDS "test_scanio_readscans_build;test_libscan_io_uos_build;test_libscan_io_xyz_build test_icosphere")
 
