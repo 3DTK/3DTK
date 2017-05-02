@@ -120,8 +120,6 @@ std::function<bool (std::istream &data_file)> read_data(PointFilter& filter,
 {
     return [=,&filter](std::istream &data_file) -> bool {
         // open data file
-        data_file.exceptions(ifstream::eofbit|ifstream::failbit|ifstream::badbit);
-
         // read the point count
         // TODO: read this in properly, check for errors
         unsigned int count;

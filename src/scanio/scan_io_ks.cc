@@ -78,8 +78,6 @@ std::function<bool (std::istream &data_file)> read_data(PointFilter& filter,
         std::vector<float>* deviation)
 {
     return [=,&filter](std::istream &data_file) -> bool {
-        data_file.exceptions(ifstream::eofbit|ifstream::failbit|ifstream::badbit);
-
         // overread the first line
         // TODO: what does the first line look like?
         //       can we use uosHeaderTest() here?
