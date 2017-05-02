@@ -68,8 +68,6 @@ void ScanIO_rts::readPose(const char* dir_path, const char* identifier, double* 
 
     // open pose file once and read all poses
     ifstream pose_file(pose_path);
-    pose_file.exceptions(ifstream::eofbit|ifstream::failbit|ifstream::badbit);
-
     vector<double> poses;
     double p[6], timestamp;
     while(pose_file.good()) {
@@ -124,8 +122,6 @@ std::function<bool (std::istream &data_file)> read_data(PointFilter& filter,
 {
     return [=,&filter](std::istream &data_file) -> bool {
         // open data file
-        data_file.exceptions(ifstream::eofbit|ifstream::failbit|ifstream::badbit);
-
         // read points
         // z x y type ? ?
         IODataType spec[7] = { DATA_XYZ, DATA_XYZ, DATA_XYZ, DATA_TYPE,

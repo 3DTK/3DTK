@@ -136,8 +136,6 @@ void ScanIO_leica_xyzr::readScan(const char* dir_path,
   if(xyz != 0) {
     // open data file
     ifstream data_file(data_path);
-    data_file.exceptions(ifstream::eofbit|ifstream::failbit|ifstream::badbit);
-
     // overread the first line ignoring the header information
     char dummy[255];
     data_file.getline(dummy, 255);
