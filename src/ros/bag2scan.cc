@@ -455,12 +455,10 @@ int main(int argc, char** argv)
     tmap->setOffset(tdiff);
     if (linescans) {
       LineScanImporter lsi(rxpfile, tmap, outputpath, &cal, lines, stopandgo, types, start, end, mapstring);
-      lsi.import(); // FileImporter is mutlithreaded, so wait till its done...
-      lsi.finish();
+      lsi.import();
     } else {
       FileImporter fi(rxpfile, tmap, outputpath, &cal, lines, stopandgo, rieglcoord, norobot, types, start, end, mapstring);
-      fi.import(); // FileImporter is mutlithreaded, so wait till its done...
-      fi.finish();
+      fi.import();
     }
   } else {
     /////////////////////////

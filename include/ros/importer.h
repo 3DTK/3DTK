@@ -21,6 +21,10 @@
 #include <tf/transform_listener.h>
 #include <nav_msgs/Odometry.h>
 
+#include <boost/asio/io_service.hpp>
+#include <boost/bind.hpp>
+#include <boost/thread/thread.hpp>
+
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
@@ -253,36 +257,35 @@ class FileImporter
         int start=-1, int end=-1, string _mapstring="/odom_combined") 
       : timedImporter(_rxpfile, _tmap, _cal, _lines, _stopandgo, _rieglcoord, _norobot, _pointtype, start, end, _mapstring) {
         outputpath = _outputpath;
-      }
-    
-    ~FileImporter() {
-      finish();
-    }
 
-    /**
-     * Waits for all threads to finish
-     */
-    void finish() {
-      for (unsigned int i = 0; i < threadlist.size(); i++) {
-        pthread_join( *threadlist[i], NULL );
-        delete threadlist[i];
+        ioservice = boost::make_shared<boost::asio::io_service>();
+        // create a work object to keep ioservice running
+        work = boost::make_shared<boost::asio::io_service::work>(*ioservice);
+        threads = boost::make_shared<boost::thread_group>();
+        for (std::size_t i = 0; i < boost::thread::hardware_concurrency(); i++) {
+          threads->create_thread(boost::bind(&boost::asio::io_service::run, ioservice));
+        }
       }
-      threadlist.clear();
+
+    ~FileImporter() {
+      // destroy work object to allow ioservice to shutdown
+      work.reset();
+      // wait for all threads to finish
+      threads->join_all();
     }
 
   protected:
     void frameStop(scanstruct *scan);
+    static void writeScan(scanstruct *scan);
   private:
     // the path to write scans to
     string outputpath;
 
-    // a list of threads we started
-    vector<pthread_t*> threadlist;
-
-
+    // threadpool used for writing scans in parallel
+    boost::shared_ptr<boost::asio::io_service> ioservice;
+    boost::shared_ptr<boost::asio::io_service::work> work;
+    boost::shared_ptr<boost::thread_group> threads;
 };
-
-void *writeScan(void *_scan);
 
 class LineScanImporter
     : public timedImporter
@@ -294,33 +297,36 @@ class LineScanImporter
       : timedImporter(_rxpfile, _tmap, _cal, _lines, _stopandgo, false, false,
       _pointtype, start, end, _mapstring, true) {
         outputpath = _outputpath;
-      }
-    
-    ~LineScanImporter() {
-      finish();
+
+        ioservice = boost::make_shared<boost::asio::io_service>();
+        // create a work object to keep ioservice running
+        work = boost::make_shared<boost::asio::io_service::work>(*ioservice);
+        threads = boost::make_shared<boost::thread_group>();
+        for (std::size_t i = 0; i < boost::thread::hardware_concurrency(); i++) {
+          threads->create_thread(boost::bind(&boost::asio::io_service::run, ioservice));
+        }
     }
 
-    /**
-     * Waits for all threads to finish
-     */
-    void finish() {
-      for (unsigned int i = 0; i < threadlist.size(); i++) {
-        pthread_join( *threadlist[i], NULL );
-        delete threadlist[i];
-      }
-      threadlist.clear();
+    ~LineScanImporter() {
+      // destroy work object to allow ioservice to shutdown
+      work.reset();
+      // wait for all threads to finish
+      threads->join_all();
     }
 
   protected:
     void frameStop(scanstruct *scan);
+    static void writeLineScan(scanstruct *scan);
   private:
     // the path to write scans to
     string outputpath;
 
-    // a list of threads we started
-    vector<pthread_t*> threadlist;
+    // threadpool used for writing scans in parallel
+    boost::shared_ptr<boost::asio::io_service> ioservice;
+    boost::shared_ptr<boost::asio::io_service::work> work;
+    boost::shared_ptr<boost::thread_group> threads;
 };
-void *writeLineScan(void *_scan);
+
 
 class ScanImporter
     : public timedImporter

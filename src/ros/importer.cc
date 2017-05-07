@@ -236,20 +236,18 @@ void timedImporter::transform_buffer() {
 
 void FileImporter::frameStop(scanstruct *scan) {
   scan->setPath(outputpath);
-  pthread_t *thread = new pthread_t();
-  pthread_create( thread, NULL, writeScan, (void*)scan);
-  threadlist.push_back(thread);
+
+  ioservice->post(boost::bind(&FileImporter::writeScan, scan));
 }
 
 /**
  * function that is executed in a seperate thread to write a scan to file
  *
  */
-void *writeScan(void *_scan) {
-  if (!_scan) return 0;
+void FileImporter::writeScan(scanstruct *scan) {
+  if (!scan) return;
  
   std::ofstream o;     // file stream for scan
-  scanstruct *scan = (scanstruct *)_scan;
   string scanFileName = scan->outputpath + "scan"+ to_string(scan->index,3) + ".3d";
   string poseFileName = scan->outputpath + "scan"+ to_string(scan->index,3) + ".pose";
   string framesFileName = scan->outputpath + "scan"+ to_string(scan->index,3) + ".frames";
@@ -365,7 +363,6 @@ void *writeScan(void *_scan) {
 
   ROS_INFO("Done with scan %u ", scan->index);
   delete scan;
-  return 0;
 }
 
 
@@ -533,20 +530,17 @@ int cc = 0;
 void LineScanImporter::frameStop(scanstruct *scan) {
   scan->setPath(outputpath);
 
-  pthread_t *thread = new pthread_t();
-  pthread_create( thread, NULL, writeLineScan, (void*)scan);
-  threadlist.push_back(thread);
+  ioservice->post(boost::bind(&LineScanImporter::writeLineScan, scan));
 }
 
 /**
  * function that is executed in a seperate thread to write a scan to file
  *
  */
-void *writeLineScan(void *_scan) {
-  if (!_scan) return 0;
+void LineScanImporter::writeLineScan(scanstruct *scan) {
+  if (!scan) return;
  
   std::ofstream o;     // file stream for scan
-  scanstruct *scan = (scanstruct *)_scan;
   string scanFileName = scan->outputpath + "scan"+ to_string(scan->index,3) + ".3d";
   string poseFileName = scan->outputpath + "scan"+ to_string(scan->index,3) + ".pose";
   string framesFileName = scan->outputpath + "scan"+ to_string(scan->index,3) + ".frames";
@@ -618,5 +612,4 @@ void *writeLineScan(void *_scan) {
 
   //ROS_INFO("Done with scan %u ", scan->index);
   delete scan;
-  return 0;
 }
