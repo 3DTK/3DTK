@@ -487,7 +487,7 @@ else()
   # Add include path for OpenGL without GL/-prefix
   # to avoid the include incompatibility between MACOS
   # and linux
-  find_path(OPENGL_INC gl.h /usr/include/GL)
+  find_path(OPENGL_INC NAMES gl.h GL/gl.h PATHS /usr/include/GL)
   include_directories(${OPENGL_INC})
 endif()
 
