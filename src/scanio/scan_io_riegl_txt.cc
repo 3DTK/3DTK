@@ -125,11 +125,10 @@ std::function<bool (std::istream &data_file)> read_data(PointFilter& filter,
         std::vector<float>* deviation)
 {
     return [=,&filter](std::istream &data_file) -> bool {
-        // open data file
-        // read the point count
-        // TODO: read this in properly, check for errors
         unsigned int count;
-        data_file >> count;
+        if (!(data_file >> count)) {
+          return false;
+        }
 
         // reserve enough space for faster reading
         xyz->reserve(3*count);
