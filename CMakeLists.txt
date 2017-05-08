@@ -53,6 +53,8 @@ endif()
 
 if(NOT WIN32)
   find_package(CXSparse REQUIRED)
+  link_directories(${CXSPARSE_LIBRARIES})
+  include_directories(${CXSPARSE_INCLUDE_DIRS})
 
   find_package(LibZip REQUIRED)
   if(${LIBZIP_VERSION} VERSION_LESS 0.11.2)
