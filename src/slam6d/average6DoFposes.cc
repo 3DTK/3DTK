@@ -78,7 +78,7 @@ int main(int argc, char **argv)
 
   if (argc != 2) usage(argv[0]);
   
-  snprintf(FileName,255,argv[1]);
+  snprintf(FileName,255,"%s",argv[1]);
   pose_in.open(FileName);
   if (!pose_in.good()) {
     usage(argv[0]);
