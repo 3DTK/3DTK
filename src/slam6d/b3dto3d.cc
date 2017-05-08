@@ -78,7 +78,7 @@ int main(int argc, char **argv)
         reader->getNextGlobal(points, scaling, calibration);
         if (points.empty()) break;
 
-        snprintf(outFileName,255,"%s/scan%03d.3d",out_dirname, i);
+        snprintf(outFileName,255,"%s/scan%03zu.3d",out_dirname, i);
         FILE *file = fopen(outFileName, "w");
         if (file == NULL) {
             std::cerr << "cannot open: " << outFileName << std::endl;
@@ -92,7 +92,7 @@ int main(int argc, char **argv)
 
         reader->deleteGlobalPoints(points);
 
-        snprintf(outFileName,255,"%s/scan%03d.pose",out_dirname, i);
+        snprintf(outFileName,255,"%s/scan%03zu.pose",out_dirname, i);
         ofstream posefile(outFileName);
         posefile << "0 0 0" << endl << "0 0 0" << endl; 
         posefile.close();
