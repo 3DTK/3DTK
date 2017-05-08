@@ -1326,7 +1326,9 @@ void readScan(int s, bool & scanserver){
 int main(int argc, char** argv){
 
  cout << "using opencv "<< CV_VERSION <<endl;
-    if(CV_VERSION != "2.4.9")cout << "Please notice that this code was written for Opencv 2.4.9."<<endl;
+    if(strcmp(CV_VERSION, "2.4.9") != 0) {
+        cout << "Please notice that this code was written for Opencv 2.4.9." << endl;
+    }
     
     cout << "using boost " << BOOST_VERSION / 100000 << "." << BOOST_VERSION / 100 % 1000 << "." << BOOST_VERSION % 100 <<endl;
     if(BOOST_VERSION != 105500)cout << "Please notice that this code was written for boost 1.55.0."<<endl;
