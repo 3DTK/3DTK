@@ -132,6 +132,9 @@ std::function<bool (std::istream &data_file)> read_data(PointFilter& filter,
 
         // reserve enough space for faster reading
         xyz->reserve(3*count);
+        if (reflectance != nullptr) {
+            reflectance->reserve(count);
+        }
 
         // read points
         // z x y range theta phi reflectance
