@@ -139,9 +139,7 @@ std::function<bool (std::istream &data_file)> read_data(PointFilter& filter,
             DATA_DUMMY, DATA_DUMMY, DATA_DUMMY, DATA_REFLECTANCE,
             DATA_TERMINATOR };
         ScanDataTransform_riegl transform;
-        readASCII(data_file, spec, transform, filter, xyz, 0, reflectance);
-
-        return true;
+        return readASCII(data_file, spec, transform, filter, xyz, nullptr, reflectance);
     };
 }
 
