@@ -151,6 +151,7 @@ int main(int argc, char* argv[])
     string inDir;
     int startIndex;
     int endIndex;
+    double yawAngle;
 
     po::options_description generic("Generic options");
     generic.add_options()
@@ -162,7 +163,9 @@ int main(int argc, char* argv[])
              "start at scan <arg> (i.e., neglects the first <arg> scans) "
              "[ATTENTION: counting naturally starts with 0]")
             ("end,e", po::value<int>(&endIndex)->default_value(-1),
-             "end after scan <arg>");
+             "end after scan <arg>")
+            ("yaw", po::value<double>(&yawAngle)->default_value(0),
+             "yaw angle of the scanner from north in degrees");
 
     po::options_description hidden("Hidden options");
     hidden.add_options()
@@ -232,10 +235,11 @@ int main(int argc, char* argv[])
 
         double roll = median(importer._rollVector.begin(), importer._rollVector.end());
         double pitch = median(importer._pitchVector.begin(), importer._pitchVector.end());
-        double yaw = 0;
+        double yaw = yawAngle * M_PI / 180;
 
         cout << "Roll: " << roll * 180 / M_PI << " deg" << endl;
         cout << "Pitch: " << pitch * 180 / M_PI << " deg" << endl;
+        cout << "Yaw: " << yaw * 180 / M_PI << " deg" << endl;
 
         double lat = bestGpsInfo.lat;
         double lon = bestGpsInfo.lon;
