@@ -915,11 +915,7 @@ int readFrames(string dir, int start, int end, bool readInitial, IOType &type)
     // iterate over frames (stop if none were created) and
     // pull/convert the frames into local containers
     unsigned int frame_count;
-    try {
-      frame_count = (*it)->readFrames();
-    } catch(std::ios_base::failure& e) {
-      break;
-    }
+    frame_count = (*it)->readFrames();
 
 	if (frame_count == 0) {
 		break;
