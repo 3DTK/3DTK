@@ -42,6 +42,14 @@ void signal_interrupt(int v)
   exit(-1);
 }
 
+void saveImageAndExit(int dummy)
+{
+	// set pointmode to 1 to enforce rendering of all visible points
+	pointmode = 1;
+	saveImage(0);
+	exit(0);
+}
+
 /**
  * Main function.
  * Reads the scan (scan000.3d, ...) and frames files (scan000.frames, ...)
@@ -57,8 +65,11 @@ int main(int argc, char **argv)
   initShow(argc, argv);
   initScreenWindow();
 
-  if (!nogui)
+  if (!nogui && !takescreenshot)
     newMenu();
+  else if (takescreenshot) {
+    glutTimerFunc(0, &saveImageAndExit, 0);
+  }
   glutMainLoop();
 }
 
