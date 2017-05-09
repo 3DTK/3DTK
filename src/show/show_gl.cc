@@ -632,7 +632,7 @@ void DisplayItFunc(GLenum mode, bool interruptable)
       mouseRotZ = deg(rPT[2]);
     
     }
-    if (!nogui)
+    if (!nogui && !takescreenshot)
       updateControls();
 
     glTranslated(X, Y, Z);       // move camera     

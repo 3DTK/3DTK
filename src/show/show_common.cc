@@ -201,6 +201,11 @@ bool coloranim = true;
  */
 bool nogui = false;
 
+/**
+ * take a screenshot and exit
+ */
+bool takescreenshot = false;
+
 //@@@
 //int animate_both         = 0;             // Animate both scan matchin and path?
 
@@ -536,6 +541,7 @@ int parseArgs(int argc,char **argv,
   options_description other_options("Other options");
   other_options.add_options()
     ("help,?", "Display this help text")
+    ("screenshot", bool_switch(&takescreenshot), "Take screenshot and exit")
     ("loadObj,l", value(&loadObj),
       "Load objects specified in this file")
     ("customFilter,u", value(&customFilter),
