@@ -1,21 +1,4 @@
-/*
- * show_menu implementation
- *
- * Copyright (C) Kai Lingemann, Andreas Nuechter
- *
- * Released under the GPL version 3.
- *
- */
-
-/**
- * @file
- * @brief Functions for the menu panels of the viewer software
- * @author Kai Lingemann. Institute of Computer Science, University of Osnabrueck, Germany.
- * @author Andreas Nuechter. Institute of Computer Science, University of Osnabrueck, Germany.
- */
-#include "show/colormanager.h"
-
-// GUI variables
+#include "show/show_menu.h"
 
 GLUI *glui1,  ///< pointer to the glui window(s)
      *glui2;  ///< pointer to the glui window(s)
@@ -645,4 +628,3 @@ void loadSelection(int dummy){
     selectionfile.clear();
     selectionfile.close();
 }
-

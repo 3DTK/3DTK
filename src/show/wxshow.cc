@@ -7,7 +7,7 @@
  *
  */
 
-#include "show_common.cc"
+#include "show/show_common.h"
 #include "wx/wx.h"
 #include "wx/sizer.h"
 #include "wx/glcanvas.h"
