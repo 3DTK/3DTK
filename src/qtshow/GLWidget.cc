@@ -9,9 +9,13 @@ void DisplayItFunc(GLenum mode, bool interruptable = false);
 extern GLfloat cangle, cangle_old, pzoom, pzoom_old;
 extern GLenum buffermode;
 
+GLWidget::GLWidget(QWidget *parent)
+  : QOpenGLWidget(parent)
+{}
+
 void GLWidget::initializeGL() {
   initializeOpenGLFunctions();
-  glClearColor(0f, 0f, 0f, 1.0f);
+  glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 }
 
 void GLWidget::resizeGL(int w, int h) {
