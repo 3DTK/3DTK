@@ -16,7 +16,7 @@
  * @author Dorit Borrmann. Jacobs University bremen gGmbH, Germany.
  */
 
-#include "show_common.cc"
+#include "show/show_common.h"
 
 #include <csignal>
 

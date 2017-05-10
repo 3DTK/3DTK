@@ -1,22 +1,6 @@
-/*
- * show_animate implementation
- *
- * Copyright (C) Kai Lingemann, Andreas Nuechter, Jan Elseberg, Dorit Borrmann
- *
- * Released under the GPL version 3.
- *
- */
+#include "show/show_animate.h"
 
-#include <fstream>
-using std::fstream;
-using std::ofstream;
-using std::ios;
-#include <iostream>
-using std::cout;
-using std::cerr;
-using std::endl;
-
-static int nr_interpolations = 0;
+int nr_interpolations = 0;
 
 void calcUpPath()
 {
@@ -394,4 +378,3 @@ void saveSelection(int dummy) {
   selectionfile.clear();
   selectionfile.close();
 }
-
