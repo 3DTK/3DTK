@@ -32,7 +32,7 @@ public:
 
   virtual time_t getLastModified();
   virtual DataPointer get(const std::string& identifier);
-  virtual void get(unsigned int types);
+  virtual void get(IODataType types);
   virtual DataPointer create(const std::string& identifier, size_t size);
   virtual void clear(const std::string& identifier);
   virtual size_t readFrames();

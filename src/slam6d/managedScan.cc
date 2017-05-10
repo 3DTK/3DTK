@@ -250,7 +250,7 @@ DataPointer ManagedScan::get(const std::string& identifier)
   }
 }
 
-void ManagedScan::get(unsigned int types)
+void ManagedScan::get(IODataType types)
 {
   m_shared_scan->prefetch(types);
 }

@@ -191,3 +191,13 @@ const char * io_type_to_libname(IOType  type)
     throw std::runtime_error(std::string("Io type ") + to_string(type) + std::string(" could not be matched to a library name"));
   }
 }
+
+IODataType operator|=(IODataType a, IODataType b)
+{
+	return static_cast<IODataType>(static_cast<unsigned int>(a) | static_cast<unsigned int>(b));
+}
+
+IODataType operator|(IODataType a, IODataType b)
+{
+	return static_cast<IODataType>(static_cast<unsigned int>(a) | static_cast<unsigned int>(b));
+}
