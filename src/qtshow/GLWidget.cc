@@ -6,6 +6,7 @@
 
 void CallBackReshapeFunc(int w, int h);
 void DisplayItFunc(GLenum mode, bool interruptable = false);
+void moveCamera(double, double, double, double, double, double); 
 extern GLfloat cangle, cangle_old, pzoom, pzoom_old;
 extern GLenum buffermode;
 
@@ -38,5 +39,20 @@ void GLWidget::paintGL() {
 
   // Call the display function
   DisplayItFunc(GL_RENDER );
+}
 
+void GLWidget::mousePressEvent(QMouseEvent *event) {
+  lastMousePos = event->pos();
+}
+
+void GLWidget::mouseMoveEvent(QMouseEvent *event) {
+  float dx = event->x() - lastMousePos.x();
+  float dy = event->y() - lastMousePos.y();
+
+  if (event->buttons() & Qt::LeftButton) {
+    moveCamera(0,0,0,dy,dx,0);
+  }
+  update();
+
+  lastMousePos = event->pos();
 }
