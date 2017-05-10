@@ -16,7 +16,7 @@ else()
   message(STATUS "Not using opengl extensions")
 endif()
 
-set(SHOW_SRCS NurbsPath.cc  PathGraph.cc vertexarray.cc  viewcull.cc colormanager.cc compacttree.cc scancolormanager.cc display.cc show_common.cc show_menu.cc show_gl.cc show_animate.cc)
+add_library(show_objects OBJECT NurbsPath.cc  PathGraph.cc vertexarray.cc  viewcull.cc colormanager.cc compacttree.cc scancolormanager.cc display.cc show_common.cc show_menu.cc show_gl.cc show_animate.cc)
 
 if(WITH_FREEGLUT)
   message(STATUS "With freeglut")
@@ -33,19 +33,19 @@ else()
 endif()
 
 if (WITH_SHOW)
-  add_executable(show show.cc ${SHOW_SRCS})
+  add_executable(show show.cc $<TARGET_OBJECTS:show_objects>)
   target_link_libraries(show ${SHOW_LIBS})
 endif()
 
 if(WITH_WXSHOW)
-  add_executable(wxshow wxshow.cc selectionframe.cc ${SHOW_SRCS})
+  add_executable(wxshow wxshow.cc selectionframe.cc $<TARGET_OBJECTS:show_objects>)
   target_link_libraries(wxshow ${wxWidgets_LIBRARIES} wxthings ${SHOW_LIBS})
 endif()
 
-add_library(showstatic STATIC ${SHOW_SRCS})
+add_library(showstatic STATIC $<TARGET_OBJECTS:show_objects>)
 
 ### EXPORT SHARED LIBS 
 if(EXPORT_SHARED_LIBS)
-  add_library(show_s SHARED ${SHOW_SRCS})
+  add_library(show_s SHARED $<TARGET_OBJECTS:show_objects>)
   target_link_libraries(show_s ${Boost_LIBRARIES} ${SHOW_LIBS_S})
 endif()
