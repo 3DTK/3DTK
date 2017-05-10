@@ -2,15 +2,15 @@
 
 #include <QApplication>
 
-#include "qtshow/GLWidget.h"
+#include "qtshow/MainWindow.h"
 
 #include "../show/show_common.cc"
 
 int main(int argc, char *argv[]){
   QApplication app(argc, argv);
   initShow(argc, argv);
-  GLWidget widget;
-  widget.show();
+  MainWindow mainWindow;
+  mainWindow.show();
   return app.exec();
 }
 void updateCamControls() {}
