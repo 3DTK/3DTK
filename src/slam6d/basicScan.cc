@@ -298,6 +298,10 @@ void BasicScan::get(IODataType types)
 {
   ScanIO* sio = ScanIO::getScanIO(m_type);
 
+  if (!sio->supports(types)) {
+	  return;
+  }
+
   vector<double> xyz;
   vector<unsigned char> rgb;
   vector<float> reflectance;
