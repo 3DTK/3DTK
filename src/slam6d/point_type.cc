@@ -191,7 +191,7 @@ void PointType::useScan(Scan* scan)
   
   // collectively load data to avoid unneccessary loading times due
   // to split get("") calls
-  unsigned int types = DATA_XYZ;
+  IODataType types = DATA_XYZ;
   if(hasColor()) types |= DATA_RGB;
   if(hasReflectance()) types |= DATA_REFLECTANCE;
   if(hasTemperature()) types |= DATA_TEMPERATURE;

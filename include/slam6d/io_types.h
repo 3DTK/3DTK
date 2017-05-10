@@ -13,7 +13,7 @@ enum IOType {
   AIS, ASC, B3D, FARO_XYZ_RGBR, FRONT, IAIS, IFP, KS, KS_RGB, LAZ, LEICA, LEICA_XYZR, OCT, OLD, PCI, PCL, PLY, PTS, PTSR, PTS_RGB, PTS_RGBR, PTS_RRGB, RIEGL_BIN, RIEGL_PROJECT, RIEGL_RGB, RIEGL_TXT, RTS, RTS_MAP, RXP, STL, TXYZR, UOS, UOSR, UOS_CAD, UOS_FRAMES, UOS_MAP, UOS_MAP_FRAMES, UOS_RGB, UOS_RGBR, UOS_RRGB, UOS_RRGBT, VELODYNE, VELODYNE_FRAMES, WRL, X3D, XYZ, XYZR, XYZ_RGB, XYZ_RGBR, XYZ_RRGB, ZAHN, ZUF};
 
 //! Data channels in the scans
-enum IODataType {
+enum IODataType : unsigned int {
   DATA_TERMINATOR = 0,
   DATA_DUMMY = 1<<0,
   DATA_XYZ = 1<<1,
@@ -24,6 +24,10 @@ enum IODataType {
   DATA_TYPE = 1<<6,
   DATA_DEVIATION = 1<<7
 };
+
+IODataType operator|=(IODataType a, IODataType b);
+
+IODataType operator|(IODataType a, IODataType b);
 
 IOType formatname_to_io_type(const char * string);
 

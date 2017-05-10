@@ -294,7 +294,7 @@ time_t BasicScan::getLastModified()
   return sio->lastModified(m_path.c_str(), m_identifier.c_str());
 }
 
-void BasicScan::get(unsigned int types)
+void BasicScan::get(IODataType types)
 {
   ScanIO* sio = ScanIO::getScanIO(m_type);
 

@@ -35,7 +35,7 @@ public:
   virtual DataPointer get(const std::string& identifier) 
   { return DataPointer(0, 0); }
 
-  virtual void get(unsigned int types) {}
+  virtual void get(IODataType types) {}
 
   virtual DataPointer create(const std::string& identifier, size_t size)
   { return DataPointer(0, 0); }

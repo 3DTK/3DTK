@@ -239,7 +239,7 @@ public:
    * This feature is neccessary to load multiple data fields at once, not all
    * one by one with each get("...") access.
    */
-  virtual void get(unsigned int types) = 0;
+  virtual void get(IODataType types) = 0;
   
   /**
    * Creates a data field \a identifier with \a size bytes.
@@ -255,7 +255,7 @@ public:
 
   //! Extension to clear for more than one identifier, e.g.
   //  clear(DATA_XYZ | DATA_RGB);
-  void clear(unsigned int types);
+  void clear(IODataType types);
   
   /**
    * Get the size of \a identifier as if it were requested and size() called
