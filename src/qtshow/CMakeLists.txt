@@ -1,0 +1,10 @@
+if(WITH_QTSHOW)
+  find_package(Qt5Widgets)
+  find_package(Qt5OpenGL)
+  set(CMAKE_AUTOMOC ON)
+  add_definitions(-DWITH_FREEGLUT)
+
+  add_executable(qtshow qtshow.cc GLWidget.cc)
+  qt5_use_modules(qtshow Widgets OpenGL)
+  target_link_libraries(qtshow showstatic ${SHOW_LIBS} ${QT_LIBRARIES})
+endif()
