@@ -14,7 +14,7 @@
 using namespace boost::python;
 
 DataPointer (Scan::*scan_getByString)(const std::string&) = &Scan::get;
-void (Scan::*scan_getByType)(IODataType) = &Scan::get;
+void (Scan::*scan_getByType)(unsigned int) = &Scan::get;
 
 boost::python::tuple scan_get_rPos(Scan &s)
 {
