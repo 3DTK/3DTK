@@ -136,9 +136,12 @@ else()
   message(STATUS "Without wxshow")
 endif()
 
+## QtShow
+OPT_DEP(WITH_QTSHOW "Whether to build QtShow. This is the Qt variant of Show. ON/OFF" OFF "")
+
 ## GLUT and OpenGL
 
-if(WITH_FREEGLUT OR WITH_SHOW OR WITH_WXSHOW)
+if(WITH_FREEGLUT OR WITH_SHOW OR WITH_WXSHOW OR WITH_QTSHOW)
   find_package(OpenGL REQUIRED)
   find_package(GLUT REQUIRED)
   include_directories(${GLUT_INCLUDE_DIR})
@@ -567,6 +570,7 @@ add_subdirectory(src/segmentation)
 add_subdirectory(src/normals)
 add_subdirectory(src/veloslam)
 add_subdirectory(src/show)
+add_subdirectory(src/qtshow)
 add_subdirectory(src/grid)
 add_subdirectory(src/pmd)
 add_subdirectory(src/shapes)
