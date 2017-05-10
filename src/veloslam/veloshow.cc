@@ -298,9 +298,9 @@ char *selection_file_name;
 
 int current_frame = 0;
 
-#include "../show/show_menu.cc"
-#include "../show/show_animate.cc"
-#include "../show/show_gl.cc"
+#include "show/show_menu.h"
+#include "show/show_animate.h"
+#include "show/show_gl.h"
 
 /**
  * Explains the usage of this program's command line parameters

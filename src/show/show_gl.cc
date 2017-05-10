@@ -1,18 +1,5 @@
-/*
- * show_gl implementation
- *
- * Copyright (C) Kai Lingemann, Andreas Nuechter, Jan Elseberg, Dorit Borrmann
- *
- * Released under the GPL version 3.
- *
- */
+#include "show/show_gl.h"
 
-#include <string.h>
-#include <stdlib.h>
-#include "show/viewcull.h"
-#include "show/scancolormanager.h"
-
-using namespace show;
 bool   fullydisplayed = true;       // true if all points have been drawn to
                                     // the screen
 bool   mousemoving    = false;      // true if a mouse button has been pressed

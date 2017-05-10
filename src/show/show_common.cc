@@ -1,65 +1,5 @@
-/*
- * show_common implementation
- *
- * Copyright (C) Kai Lingemann, Andreas Nuechter, Jan Elseberg, Dorit Borrmann
- *
- * Released under the GPL version 3.
- *
- */
+#include "show/show_common.h"
 
-
-#ifdef _MSC_VER
-#define  _USE_MATH_DEFINES
-#include <windows.h>
-#endif
-
-#ifdef WITH_GLEE
-#include "glee/GLee.h"
-#endif
-
-#include "show/show_Boctree.h"
-#include "show/compacttree.h"
-#include "show/NurbsPath.h"
-#include "show/vertexarray.h"
-#ifndef DYNAMIC_OBJECT_REMOVAL
-#include "slam6d/scan.h"
-#include "slam6d/managedScan.h"
-#else
-#include "veloslam/veloscan.h"
-#endif
-#include "show/show.h"
-#include "GL/glui.h"  /* Header File For The glui functions */
-#include <fstream>
-#include <stdexcept>
-#include <algorithm>
-#include <map>
-
-#include <boost/program_options.hpp>
-
-#ifdef _MSC_VER
-#define strcasecmp _stricmp
-#define strncasecmp _strnicmp
-#else
-#include <strings.h>
-#endif
-
-
-#ifdef _MSC_VER
-#if !defined _OPENMP && defined OPENMP 
-#define _OPENMP
-#endif
-#endif
-
-#ifdef _OPENMP
-#include <omp.h>
-#endif
-
-#include "slam6d/point_type.h"
-#include "slam6d/io_utils.h"
-#include "show/display.h"
-
-using std::ifstream;
-using std::exception;
 
 /**
  * This vector contains the pointer to a vertex array for
@@ -277,8 +217,8 @@ float LevelOfDetail = 0.0001;
 
 unsigned int cam_choice             = 0;
 
-static unsigned int path_iterator = 0;
-static int oldcamNavMode = 0;
+unsigned int path_iterator = 0;
+int oldcamNavMode = 0;
 
 /**
  * Animation sould be saved to file
@@ -344,9 +284,6 @@ char *selection_file_name;
 void deinitShow();
 
 int current_frame = 0;
-#include "show_menu.cc"
-#include "show_animate.cc"
-#include "show_gl.cc"
 
 /**
  * Parses arguments to `show`. The arguments come from these sources:
@@ -1439,8 +1376,4 @@ void deinitShow()
   trajectory.clear();
 }
 
-/**
- * Global program scope destructor workaround to clean up data regardless of
- * the way of program exit.
- */
 struct Deinit { ~Deinit() { deinitShow(); } } deinit;

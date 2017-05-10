@@ -16,7 +16,7 @@ else()
   message(STATUS "Not using opengl extensions")
 endif()
 
-set(SHOW_SRCS NurbsPath.cc  PathGraph.cc vertexarray.cc  viewcull.cc colormanager.cc compacttree.cc scancolormanager.cc display.cc)
+set(SHOW_SRCS NurbsPath.cc  PathGraph.cc vertexarray.cc  viewcull.cc colormanager.cc compacttree.cc scancolormanager.cc display.cc show_common.cc show_menu.cc show_gl.cc show_animate.cc)
 
 if(WITH_FREEGLUT)
   message(STATUS "With freeglut")
