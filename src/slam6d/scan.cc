@@ -152,7 +152,7 @@ void Scan::setOcttreeParameter(double reduction_voxelSize,
   octtree_autoOct = autoOct;
 }
 
-void Scan::clear(unsigned int types)
+void Scan::clear(IODataType types)
 {
   if(types & DATA_XYZ) clear("xyz");
   if(types & DATA_RGB) clear("rgb");
