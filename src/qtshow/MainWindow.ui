@@ -1,0 +1,444 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1062</width>
+    <height>725</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>MainWindow</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QGridLayout" name="gridLayout">
+    <item row="0" column="0">
+     <widget class="GLWidget" name="glWidget"/>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>1062</width>
+     <height>30</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuFile">
+    <property name="title">
+     <string>&amp;File</string>
+    </property>
+    <addaction name="actionOpen"/>
+    <addaction name="actionOpenRecent"/>
+    <addaction name="separator"/>
+    <addaction name="actionQuit"/>
+   </widget>
+   <widget class="QMenu" name="menuHelp">
+    <property name="title">
+     <string>Help</string>
+    </property>
+    <addaction name="actionAbout3DTK"/>
+   </widget>
+   <addaction name="menuFile"/>
+   <addaction name="menuHelp"/>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+  <widget class="QDockWidget" name="dockObjects">
+   <property name="windowTitle">
+    <string>Ob&amp;jects</string>
+   </property>
+   <attribute name="dockWidgetArea">
+    <number>2</number>
+   </attribute>
+   <widget class="QWidget" name="dockWidgetContents_3">
+    <layout class="QFormLayout" name="formLayout_4">
+     <item row="0" column="0">
+      <widget class="QWidget" name="widget_2" native="true">
+       <property name="minimumSize">
+        <size>
+         <width>0</width>
+         <height>0</height>
+        </size>
+       </property>
+       <layout class="QVBoxLayout" name="verticalLayout">
+        <item>
+         <widget class="QCheckBox" name="checkDrawPoints">
+          <property name="layoutDirection">
+           <enum>Qt::LeftToRight</enum>
+          </property>
+          <property name="autoFillBackground">
+           <bool>false</bool>
+          </property>
+          <property name="text">
+           <string>Draw Points</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QCheckBox" name="checkDrawCamera">
+          <property name="layoutDirection">
+           <enum>Qt::LeftToRight</enum>
+          </property>
+          <property name="text">
+           <string>Draw Camera</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QCheckBox" name="checkDrawPath">
+          <property name="text">
+           <string>Draw Path</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </item>
+     <item row="1" column="0">
+      <widget class="QLabel" name="labelPointSize">
+       <property name="text">
+        <string>Point Si&amp;ze:</string>
+       </property>
+       <property name="buddy">
+        <cstring>spinBoxPointSize</cstring>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="1">
+      <widget class="QSpinBox" name="spinBoxPointSize">
+       <property name="suffix">
+        <string> px</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </widget>
+  </widget>
+  <widget class="QDockWidget" name="dockFog">
+   <property name="windowTitle">
+    <string>Fo&amp;g</string>
+   </property>
+   <attribute name="dockWidgetArea">
+    <number>2</number>
+   </attribute>
+   <widget class="QWidget" name="dockWidgetContents_4">
+    <layout class="QFormLayout" name="formLayout_5">
+     <item row="0" column="0">
+      <widget class="QLabel" name="labelFogType">
+       <property name="text">
+        <string>Fog Type:</string>
+       </property>
+       <property name="buddy">
+        <cstring>comboBoxFogType</cstring>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="1">
+      <widget class="QComboBox" name="comboBoxFogType">
+       <item>
+        <property name="text">
+         <string>No Fog</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>exp Fog</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>exp² Fog</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>linear Fog</string>
+        </property>
+       </item>
+      </widget>
+     </item>
+     <item row="1" column="1">
+      <widget class="QCheckBox" name="checkBoxInvertFog">
+       <property name="text">
+        <string>Inverted</string>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="0">
+      <widget class="QLabel" name="labelFogDensity">
+       <property name="text">
+        <string>Fog &amp;Density:</string>
+       </property>
+       <property name="buddy">
+        <cstring>doubleSpinBoxFogDensity</cstring>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="1">
+      <widget class="QDoubleSpinBox" name="doubleSpinBoxFogDensity"/>
+     </item>
+    </layout>
+   </widget>
+  </widget>
+  <widget class="QDockWidget" name="dockColor">
+   <property name="windowTitle">
+    <string>&amp;Color</string>
+   </property>
+   <attribute name="dockWidgetArea">
+    <number>2</number>
+   </attribute>
+   <widget class="QWidget" name="dockWidgetContents_7">
+    <layout class="QVBoxLayout" name="verticalLayout_2">
+     <item>
+      <widget class="QGroupBox" name="groupBox_4">
+       <property name="title">
+        <string>Color from Value</string>
+       </property>
+       <layout class="QFormLayout" name="formLayout_2">
+        <item row="0" column="0">
+         <widget class="QLabel" name="labelColorFromValue">
+          <property name="text">
+           <string>Color from Val&amp;ue:</string>
+          </property>
+          <property name="buddy">
+           <cstring>comboBoxColorFromValue</cstring>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1">
+         <widget class="QComboBox" name="comboBoxColorFromValue">
+          <item>
+           <property name="text">
+            <string>Height</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Reflectance</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Temperature</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Altitude</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Deviation</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Type</string>
+           </property>
+          </item>
+         </widget>
+        </item>
+        <item row="1" column="0">
+         <widget class="QLabel" name="labelMinColorValue">
+          <property name="text">
+           <string>Minimum Value:</string>
+          </property>
+          <property name="buddy">
+           <cstring>doubleSpinBoxMinColorValue</cstring>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1">
+         <widget class="QDoubleSpinBox" name="doubleSpinBoxMinColorValue"/>
+        </item>
+        <item row="2" column="0">
+         <widget class="QLabel" name="labelMaxColorValue">
+          <property name="text">
+           <string>Ma&amp;ximum Value:</string>
+          </property>
+          <property name="buddy">
+           <cstring>doubleSpinBoxMaxColorValue</cstring>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="1">
+         <widget class="QDoubleSpinBox" name="doubleSpinBoxMaxColorValue"/>
+        </item>
+        <item row="3" column="0">
+         <widget class="QCheckBox" name="checkBoxAutoRecalcMinMax">
+          <property name="layoutDirection">
+           <enum>Qt::LeftToRight</enum>
+          </property>
+          <property name="text">
+           <string>Auto:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="1">
+         <widget class="QPushButton" name="pushButtonRecalcMinMax">
+          <property name="text">
+           <string>Recalculate</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </item>
+     <item>
+      <widget class="QWidget" name="widget" native="true">
+       <layout class="QFormLayout" name="formLayout">
+        <item row="0" column="0">
+         <widget class="QLabel" name="labelColorType">
+          <property name="text">
+           <string>Color Type:</string>
+          </property>
+          <property name="buddy">
+           <cstring>comboBoxColorType</cstring>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1">
+         <widget class="QComboBox" name="comboBoxColorType">
+          <item>
+           <property name="text">
+            <string>None</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>By Scan ID</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Color by Points</string>
+           </property>
+          </item>
+         </widget>
+        </item>
+        <item row="1" column="0">
+         <widget class="QLabel" name="labelColorMap">
+          <property name="text">
+           <string>Colormap:</string>
+          </property>
+          <property name="buddy">
+           <cstring>comboBoxColorMap</cstring>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1">
+         <widget class="QComboBox" name="comboBoxColorMap">
+          <item>
+           <property name="text">
+            <string>Solid</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Gray</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>HSV</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Jet</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Hot</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Rand</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>SHSV</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>TEMP</string>
+           </property>
+          </item>
+         </widget>
+        </item>
+        <item row="2" column="1">
+         <widget class="QCheckBox" name="checkBoxInvertColors">
+          <property name="text">
+           <string>Inverted</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </item>
+    </layout>
+   </widget>
+  </widget>
+  <action name="actionQuit">
+   <property name="text">
+    <string>&amp;Quit</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::QuitRole</enum>
+   </property>
+  </action>
+  <action name="actionOpen">
+   <property name="text">
+    <string>&amp;Open...</string>
+   </property>
+  </action>
+  <action name="actionOpenRecent">
+   <property name="text">
+    <string>Open Recent</string>
+   </property>
+   <property name="shortcutContext">
+    <enum>Qt::WidgetWithChildrenShortcut</enum>
+   </property>
+  </action>
+  <action name="actionAbout3DTK">
+   <property name="text">
+    <string>About 3DTK</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::AboutRole</enum>
+   </property>
+  </action>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>GLWidget</class>
+   <extends>QOpenGLWidget</extends>
+   <header>qtshow/GLWidget.h</header>
+  </customwidget>
+ </customwidgets>
+ <tabstops>
+  <tabstop>checkDrawPoints</tabstop>
+  <tabstop>checkDrawCamera</tabstop>
+  <tabstop>checkDrawPath</tabstop>
+  <tabstop>comboBoxColorFromValue</tabstop>
+  <tabstop>doubleSpinBoxMinColorValue</tabstop>
+  <tabstop>doubleSpinBoxMaxColorValue</tabstop>
+  <tabstop>checkBoxAutoRecalcMinMax</tabstop>
+  <tabstop>pushButtonRecalcMinMax</tabstop>
+  <tabstop>comboBoxColorType</tabstop>
+  <tabstop>comboBoxColorMap</tabstop>
+  <tabstop>checkBoxInvertColors</tabstop>
+ </tabstops>
+ <resources/>
+ <connections/>
+</ui>
