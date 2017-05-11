@@ -10,9 +10,15 @@ if(WITH_ROS)
       rosbag
       tf
       laser_geometry
+      pcl_conversions
+      tf_conversions
   )
   find_package(Eigen3 REQUIRED)
+  find_package(PCL REQUIRED)
   find_package(PkgConfig)
+
+  # Necessary on Debian stretch for linking PCL correctly
+  find_package(Qt5Widgets)
 
   include_directories(${CATKIN_DEVEL_PREFIX}/include)
   include_directories(${catkin_INCLUDE_DIRS})
@@ -28,4 +34,7 @@ if(WITH_ROS)
   target_link_libraries(bag2scan scan ${catkin_LIBRARIES} ${RiVLib_SCANLIB_LIBRARY} ${OROCOS_BFL_LIBRARIES})
   add_dependencies(bag2scan riegl_generate_messages_cpp)
   add_dependencies(bag2scan volksbotRT_generate_messages_cpp)
+
+  add_executable(cartographer2scan cartographer2scan.cc)
+  target_link_libraries(cartographer2scan ${catkin_LIBRARIES} ${PCL_LIBRARIES})
 endif()
