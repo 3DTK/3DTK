@@ -363,7 +363,6 @@ else()
 endif()
 
 # OPEN
-find_package(llvm)
 find_package(OpenMP)
 if(OPENMP_FOUND)
   message(STATUS "fount OpenMP")
