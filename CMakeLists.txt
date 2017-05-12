@@ -53,7 +53,7 @@ endif()
 
 if(NOT WIN32)
   find_package(CXSparse REQUIRED)
-  link_directories(${CXSPARSE_LIBRARIES})
+  link_directories(${CXSPARSE_LIBRARY_DIR})
   include_directories(${CXSPARSE_INCLUDE_DIRS})
 
   find_package(LibZip REQUIRED)
@@ -363,10 +363,15 @@ else()
 endif()
 
 # OPEN
+find_package(llvm)
 find_package(OpenMP)
 if(OPENMP_FOUND)
+  message(STATUS "fount OpenMP")
   OPT_DEP(WITH_OPENMP "Whether to use parallel processing capabilities of OPENMP. ON/OFF" ON "")
+else()
+  message(STATUS "can't found OpenMP")
 endif()
+
 
 OPT_DEP(EXPORT_SHARED_LIBS "Whether to build additional shared libraries for use in other projects. ON/OFF" OFF "WITH_SHOW;WITH_FBR")
 #OPT_DEP(EXPORT_SHARED_LIBS "Whether to build additional shared libraries for use in other projects. ON/OFF" OFF "WITH_SHOW")
@@ -554,6 +559,9 @@ endif()
 
 set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${ADDITIONAL_CFLAGS}")
 
+if(APPLE)
+  set(CMAKE_MACOSX_RPATH 1)
+endif()
 
 # Set include and link dirs ...
 include_directories(${PROJECT_SOURCE_DIR}/include)
