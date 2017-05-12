@@ -9,7 +9,6 @@ endif()
 
 if(WITH_TOOLS)
   add_executable(b3dto3d b3dto3d.cc)
-    #add_executable(scan2dem scan2dem.cpp)
   IF(UNIX)
     target_link_libraries(b3dto3d b3dfile scan dl ${ANN_LIBRARIES} ${Boost_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} showstatic ${OPENGL_LIBRARIES} ${SHOW_LIBS} newmat)
   ENDIF(UNIX)
