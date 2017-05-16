@@ -690,7 +690,6 @@ size_t BasicScan::readFrames()
 	  if(line[0]=='#') continue;
 	  std::istringstream line_stream(line);
 	  line_stream >> transformation >> type;
-	  cout << "push to m_frames" << endl;
 	  m_frames.push_back(Frame(transformation, type));
   }
 
