@@ -28,12 +28,21 @@
 using namespace std;
 using namespace boost;
 
+namespace std {
+ostream& operator<<(ostream &os, const vector<string> &vec) {
+    for (auto item : vec) {
+        os << item << " ";
+    }
+    return os;
+}
+}
+
 template <typename It>
-typename std::iterator_traits<It>::value_type median(It begin, It end)
+typename iterator_traits<It>::value_type median(It begin, It end)
 {
-    auto size = std::distance(begin, end);
-    std::nth_element(begin, begin + size / 2, end);
-    return *std::next(begin, size / 2);
+    auto size = distance(begin, end);
+    nth_element(begin, begin + size / 2, end);
+    return *next(begin, size / 2);
 }
 
 void setTransform(double *transmat, double *mat, double x, double y, double z)
@@ -58,7 +67,6 @@ void setTransform(double *transmat, double *mat, double x, double y, double z)
     transmat[13] =  z;
     transmat[14] =  x;
     transmat[15] = 1;
-
 }
 
 void addStaticTransforms(tf::Transformer *l, ros::Time t)
@@ -76,40 +84,44 @@ int main(int argc, char* argv[])
 {
     string bagfile;
     string trajectoryfile;
+    vector<string> topicsScans;
+    double scale;
     string outdir;
 
-    boost::program_options::options_description desc("Allowed options");
+    program_options::options_description desc("Allowed options");
     desc.add_options()
             ("help,h", "produce help message")
-            ("bag,b", boost::program_options::value<std::string>(&bagfile)->required(), "input ros bag file")
-            ("trajectory,t", boost::program_options::value<std::string>(&trajectoryfile)->required(), "input trajectory file")
-            ("output,o", boost::program_options::value<std::string>(&outdir)->required(), "output folder")
+            ("bag,b", program_options::value<string>(&bagfile)->required(), "input ros bag file")
+            ("trajectory,t", program_options::value<string>(&trajectoryfile)->required(), "input trajectory file")
+            ("topics", program_options::value<vector<string> >(&topicsScans)->multitoken()->default_value(vector<string> {"horizontal_laser_3d", "vertical_laser_3d"}), "Topics with PointCloud2 messages for export")
+            ("scale", program_options::value<double>(&scale)->default_value(0.01), "Scale of exported point cloud")
+            ("output,o", program_options::value<string>(&outdir)->required(), "output folder")
             ;
 
-    boost::program_options::variables_map vm;
-    boost::program_options::store(boost::program_options::parse_command_line(argc, argv, desc), vm);
+    program_options::variables_map vm;
+    program_options::store(program_options::parse_command_line(argc, argv, desc), vm);
 
     if (vm.count("help")) {
-        std::cout << desc << std::endl;
+        cout << desc << endl;
         return EXIT_SUCCESS;
     }
 
-    boost::program_options::notify(vm);
+    program_options::notify(vm);
 
-    boost::filesystem::create_directory(outdir);
+    filesystem::create_directory(outdir);
 
 
-    std::ifstream data(trajectoryfile);
+    ifstream data(trajectoryfile);
 
     tf::Transformer *l = new tf::Transformer(true, ros::Duration(3600));
 
-    std::string line;
-    while(std::getline(data,line))
+    string line;
+    while(getline(data,line))
     {
-        boost::trim(line);
+        trim(line);
 
-        std::vector<std::string> words;
-        boost::split(words, line, boost::is_any_of("\t "), boost::token_compress_on);
+        vector<string> words;
+        split(words, line, is_any_of("\t "), token_compress_on);
 
         if (words.at(0).find("\%") != string::npos) {
             continue;
@@ -123,14 +135,14 @@ int main(int argc, char* argv[])
         double time, x, y, z, qw, qx, qy, qz;
 
         try {
-            time = std::stod(words.at(0));
-            x = std::stod(words.at(1));
-            y = std::stod(words.at(2));
-            z = std::stod(words.at(3));
-            qw = std::stod(words.at(4));
-            qx = std::stod(words.at(5));
-            qy = std::stod(words.at(6));
-            qz = std::stod(words.at(7));
+            time = stod(words.at(0));
+            x = stod(words.at(1));
+            y = stod(words.at(2));
+            z = stod(words.at(3));
+            qw = stod(words.at(4));
+            qx = stod(words.at(5));
+            qy = stod(words.at(6));
+            qz = stod(words.at(7));
         } catch (...) {
             cout << "ERROR: Read invalid line" << endl;
             continue;
@@ -151,23 +163,19 @@ int main(int argc, char* argv[])
         l->setTransform(trans);
         addStaticTransforms(l, trans.stamp_);
 
-        cout << std::setprecision(20) << time << endl;
+        cout << setprecision(20) << time << endl;
     }
 
     cout << "Done reading trajectory." << endl;
 
 
     rosbag::Bag bag(bagfile);
-
-    vector<string> topicsScans;
-    topicsScans.push_back("horizontal_laser_3d");
-    topicsScans.push_back("vertical_laser_3d");
-    rosbag::View tfviewScans(bag, rosbag::TopicQuery(topicsScans));
+    rosbag::View viewScans(bag, rosbag::TopicQuery(topicsScans));
 
     tf::StampedTransform startTransform;
     long index = 0;
 
-    for (rosbag::MessageInstance const m : tfviewScans) {
+    for (rosbag::MessageInstance const m : viewScans) {
         sensor_msgs::PointCloud2ConstPtr message = m.instantiate<sensor_msgs::PointCloud2>();
 
         tf::StampedTransform baseTransform;
@@ -176,6 +184,7 @@ int main(int argc, char* argv[])
             l->lookupTransform ("/map", "/base_link", m.getTime(), baseTransform);
             l->lookupTransform ("/base_link", message->header.frame_id, m.getTime(), laserTransform);
         } catch (...) {
+            cout << "failed lookup!" << endl;
             continue;
         }
 
@@ -202,7 +211,7 @@ int main(int argc, char* argv[])
             float yout = pcorr(2);
             float zout = pcorr(0);
 
-            scanFile << xout * 100.0 << " " << yout * 100.0 << " " << zout * 100.0 << endl;
+            scanFile << xout / scale << " " << yout / scale << " " << zout / scale << endl;
         }
 
         scanFile.close();
@@ -230,7 +239,7 @@ int main(int argc, char* argv[])
         double transmat[16];
         setTransform(transmat, rotmat, X, Y, Z);
 
-        std::ofstream o;
+        ofstream o;
         string poseFileName = outdir + "/scan" + to_string(index,3) + ".pose";
         double rP[3];
         double rPT[3];
