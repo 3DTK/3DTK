@@ -4,7 +4,7 @@
 
 #include "qtshow/MainWindow.h"
 
-#include "../show/show_common.cc"
+#include "show/show_common.h"
 
 int main(int argc, char *argv[]){
   QApplication app(argc, argv);

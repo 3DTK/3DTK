@@ -2,13 +2,9 @@
 
 #include <GL/glu.h>
 
+#include "show/show_common.h"
+#include "show/show_gl.h"
 #include "qtshow/GLWidget.h"
-
-void CallBackReshapeFunc(int w, int h);
-void DisplayItFunc(GLenum mode, bool interruptable = false);
-void moveCamera(double, double, double, double, double, double); 
-extern GLfloat cangle, cangle_old, pzoom, pzoom_old;
-extern GLenum buffermode;
 
 GLWidget::GLWidget(QWidget *parent)
   : QOpenGLWidget(parent)
@@ -38,7 +34,7 @@ void GLWidget::paintGL() {
   // delete framebuffer and z-buffer
 
   // Call the display function
-  DisplayItFunc(GL_RENDER );
+  DisplayItFunc(GL_RENDER, false);
 }
 
 void GLWidget::mousePressEvent(QMouseEvent *event) {
