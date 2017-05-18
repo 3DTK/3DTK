@@ -47,8 +47,120 @@ void GLWidget::mouseMoveEvent(QMouseEvent *event) {
 
   if (event->buttons() & Qt::LeftButton) {
     moveCamera(0,0,0,dy,dx,0);
+    update();
   }
-  update();
 
   lastMousePos = event->pos();
+}
+
+void GLWidget::setDrawPoints(bool drawPoints) {
+  show_points = drawPoints;
+  update();
+}
+
+void GLWidget::setDrawCameras(bool drawCameras) {
+  show_cameras = drawCameras;
+  update();
+}
+
+void GLWidget::setDrawPath(bool drawPath) {
+  show_path = drawPath;
+  update();
+}
+
+void GLWidget::setPointSize(int pointSize) {
+  pointsize = pointSize;
+  update();
+}
+
+void GLWidget::setFogType(int fogType) {
+  this->fogType = fogType;
+  updateFogType();
+  update();
+}
+
+void GLWidget::setFogInverted(bool fogInverted) {
+  this->fogInverted = fogInverted;
+  updateFogType();
+  update();
+}
+
+void GLWidget::updateFogType() {
+  show_fog = fogType;
+  if (fogInverted && fogType != 0) {
+    show_fog += 3;
+  }
+}
+
+void GLWidget::setFogDensity(double _fogDensity) {
+  fogDensity = _fogDensity;
+  update();
+}
+
+void GLWidget::setColorProperty(int colorProperty) {
+  listboxColorVal = colorProperty;
+  mapColorToValue(42);
+  if (autoRecalculateColor) {
+    recalculateColor();
+  }
+  update();
+}
+
+void GLWidget::setColorMinimumValue(double colorMinimum) {
+  if (mincolor_value != colorMinimum) {
+    mincolor_value = colorMinimum;
+    minmaxChanged(0);
+    emit colorMinimumValueChanged(colorMinimum);
+    update();
+  }
+}
+
+void GLWidget::setColorMaximumValue(double colorMaximum) {
+  if (maxcolor_value != colorMaximum) {
+    maxcolor_value = colorMaximum;
+    minmaxChanged(0);
+    emit colorMaximumValueChanged(colorMaximum);
+    update();
+  }
+}
+
+void GLWidget::setAutoRecalculateColor(bool autoRecalculate) {
+  autoRecalculateColor = autoRecalculate;
+  if (autoRecalculateColor) {
+    recalculateColor();
+  }
+}
+
+void GLWidget::recalculateColor() {
+  double temp_mincolor_value = mincolor_value;
+  double temp_maxcolor_value = maxcolor_value;
+
+  resetMinMax(0);
+
+  if (temp_mincolor_value != mincolor_value) {
+    emit colorMinimumValueChanged(mincolor_value);
+    update();
+  }
+
+  if (temp_maxcolor_value != maxcolor_value) {
+    emit colorMaximumValueChanged(maxcolor_value);
+    update();
+  }
+}
+
+void GLWidget::setColorType(int colorType) {
+  colorScanVal = colorType;
+  setScansColored(0);
+  update();
+}
+
+void GLWidget::setColorMap(int colorMap) {
+  listboxColorMapVal = colorMap;
+  changeColorMap(0);
+  update();
+}
+
+void GLWidget::setColorInverted(bool colorInverted) {
+  invert = !colorInverted;
+  update();
 }
