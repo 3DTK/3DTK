@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>QtShow — 3DTK</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout">
@@ -40,7 +40,7 @@
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
-     <string>Help</string>
+     <string>He&amp;lp</string>
     </property>
     <addaction name="actionAbout3DTK"/>
    </widget>
@@ -59,33 +59,27 @@
     <layout class="QFormLayout" name="formLayout_4">
      <item row="0" column="0">
       <widget class="QWidget" name="widget_2" native="true">
-       <property name="minimumSize">
-        <size>
-         <width>0</width>
-         <height>0</height>
-        </size>
-       </property>
        <layout class="QVBoxLayout" name="verticalLayout">
         <item>
          <widget class="QCheckBox" name="checkDrawPoints">
-          <property name="layoutDirection">
-           <enum>Qt::LeftToRight</enum>
-          </property>
-          <property name="autoFillBackground">
-           <bool>false</bool>
-          </property>
           <property name="text">
            <string>Draw Points</string>
+          </property>
+          <property name="checked">
+           <bool>true</bool>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QCheckBox" name="checkDrawCamera">
+         <widget class="QCheckBox" name="checkDrawCameras">
           <property name="layoutDirection">
            <enum>Qt::LeftToRight</enum>
           </property>
           <property name="text">
-           <string>Draw Camera</string>
+           <string>Draw Cameras</string>
+          </property>
+          <property name="checked">
+           <bool>true</bool>
           </property>
          </widget>
         </item>
@@ -93,6 +87,9 @@
          <widget class="QCheckBox" name="checkDrawPath">
           <property name="text">
            <string>Draw Path</string>
+          </property>
+          <property name="checked">
+           <bool>true</bool>
           </property>
          </widget>
         </item>
@@ -113,6 +110,12 @@
       <widget class="QSpinBox" name="spinBoxPointSize">
        <property name="suffix">
         <string> px</string>
+       </property>
+       <property name="minimum">
+        <number>1</number>
+       </property>
+       <property name="maximum">
+        <number>10</number>
        </property>
       </widget>
      </item>
@@ -180,7 +183,23 @@
       </widget>
      </item>
      <item row="2" column="1">
-      <widget class="QDoubleSpinBox" name="doubleSpinBoxFogDensity"/>
+      <widget class="QDoubleSpinBox" name="doubleSpinBoxFogDensity">
+       <property name="accelerated">
+        <bool>true</bool>
+       </property>
+       <property name="decimals">
+        <number>5</number>
+       </property>
+       <property name="maximum">
+        <double>1.000000000000000</double>
+       </property>
+       <property name="singleStep">
+        <double>0.000010000000000</double>
+       </property>
+       <property name="value">
+        <double>0.000000000000000</double>
+       </property>
+      </widget>
      </item>
     </layout>
    </widget>
@@ -197,21 +216,21 @@
      <item>
       <widget class="QGroupBox" name="groupBox_4">
        <property name="title">
-        <string>Color from Value</string>
+        <string>Color from Property</string>
        </property>
        <layout class="QFormLayout" name="formLayout_2">
         <item row="0" column="0">
-         <widget class="QLabel" name="labelColorFromValue">
+         <widget class="QLabel" name="labelColorProperty">
           <property name="text">
-           <string>Color from Val&amp;ue:</string>
+           <string>Property:</string>
           </property>
           <property name="buddy">
-           <cstring>comboBoxColorFromValue</cstring>
+           <cstring>comboBoxColorProperty</cstring>
           </property>
          </widget>
         </item>
         <item row="0" column="1">
-         <widget class="QComboBox" name="comboBoxColorFromValue">
+         <widget class="QComboBox" name="comboBoxColorProperty">
           <item>
            <property name="text">
             <string>Height</string>
@@ -247,7 +266,7 @@
         <item row="1" column="0">
          <widget class="QLabel" name="labelMinColorValue">
           <property name="text">
-           <string>Minimum Value:</string>
+           <string>Minim&amp;um Value:</string>
           </property>
           <property name="buddy">
            <cstring>doubleSpinBoxMinColorValue</cstring>
@@ -255,7 +274,17 @@
          </widget>
         </item>
         <item row="1" column="1">
-         <widget class="QDoubleSpinBox" name="doubleSpinBoxMinColorValue"/>
+         <widget class="QDoubleSpinBox" name="doubleSpinBoxMinColorValue">
+          <property name="accelerated">
+           <bool>true</bool>
+          </property>
+          <property name="minimum">
+           <double>-999999.000000000000000</double>
+          </property>
+          <property name="maximum">
+           <double>999999.000000000000000</double>
+          </property>
+         </widget>
         </item>
         <item row="2" column="0">
          <widget class="QLabel" name="labelMaxColorValue">
@@ -268,13 +297,20 @@
          </widget>
         </item>
         <item row="2" column="1">
-         <widget class="QDoubleSpinBox" name="doubleSpinBoxMaxColorValue"/>
+         <widget class="QDoubleSpinBox" name="doubleSpinBoxMaxColorValue">
+          <property name="accelerated">
+           <bool>true</bool>
+          </property>
+          <property name="minimum">
+           <double>-999999.000000000000000</double>
+          </property>
+          <property name="maximum">
+           <double>999999.000000000000000</double>
+          </property>
+         </widget>
         </item>
         <item row="3" column="0">
          <widget class="QCheckBox" name="checkBoxAutoRecalcMinMax">
-          <property name="layoutDirection">
-           <enum>Qt::LeftToRight</enum>
-          </property>
           <property name="text">
            <string>Auto:</string>
           </property>
@@ -404,7 +440,7 @@
   </action>
   <action name="actionOpenRecent">
    <property name="text">
-    <string>Open Recent</string>
+    <string>Open &amp;Recent</string>
    </property>
    <property name="shortcutContext">
     <enum>Qt::WidgetWithChildrenShortcut</enum>
@@ -412,7 +448,7 @@
   </action>
   <action name="actionAbout3DTK">
    <property name="text">
-    <string>About 3DTK</string>
+    <string>&amp;About 3DTK</string>
    </property>
    <property name="menuRole">
     <enum>QAction::AboutRole</enum>
@@ -424,13 +460,32 @@
    <class>GLWidget</class>
    <extends>QOpenGLWidget</extends>
    <header>qtshow/GLWidget.h</header>
+   <slots>
+    <signal>colorMinimumValueChanged(double)</signal>
+    <signal>colorMaximumValueChanged(double)</signal>
+    <slot>setDrawPoints(bool)</slot>
+    <slot>setDrawCameras(bool)</slot>
+    <slot>setDrawPath(bool)</slot>
+    <slot>setPointSize(int)</slot>
+    <slot>setFogType(int)</slot>
+    <slot>setFogInverted(bool)</slot>
+    <slot>setFogDensity(double)</slot>
+    <slot>setColorProperty(int)</slot>
+    <slot>setColorMinimumValue(double)</slot>
+    <slot>setColorMaximumValue(double)</slot>
+    <slot>setAutoRecalculateColor(bool)</slot>
+    <slot>recalculateColor()</slot>
+    <slot>setColorType(int)</slot>
+    <slot>setColorMap(int)</slot>
+    <slot>setColorInverted(bool)</slot>
+   </slots>
   </customwidget>
  </customwidgets>
  <tabstops>
   <tabstop>checkDrawPoints</tabstop>
-  <tabstop>checkDrawCamera</tabstop>
+  <tabstop>checkDrawCameras</tabstop>
   <tabstop>checkDrawPath</tabstop>
-  <tabstop>comboBoxColorFromValue</tabstop>
+  <tabstop>comboBoxColorProperty</tabstop>
   <tabstop>doubleSpinBoxMinColorValue</tabstop>
   <tabstop>doubleSpinBoxMaxColorValue</tabstop>
   <tabstop>checkBoxAutoRecalcMinMax</tabstop>
@@ -440,5 +495,310 @@
   <tabstop>checkBoxInvertColors</tabstop>
  </tabstops>
  <resources/>
- <connections/>
+ <connections>
+  <connection>
+   <sender>checkDrawPoints</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>glWidget</receiver>
+   <slot>setDrawPoints(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>874</x>
+     <y>78</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>695</x>
+     <y>87</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>checkDrawCameras</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>glWidget</receiver>
+   <slot>setDrawCameras(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>853</x>
+     <y>113</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>722</x>
+     <y>121</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>checkDrawPath</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>glWidget</receiver>
+   <slot>setDrawPath(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>854</x>
+     <y>140</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>742</x>
+     <y>150</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>spinBoxPointSize</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>glWidget</receiver>
+   <slot>setPointSize(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>973</x>
+     <y>175</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>713</x>
+     <y>178</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>comboBoxFogType</sender>
+   <signal>currentIndexChanged(int)</signal>
+   <receiver>glWidget</receiver>
+   <slot>setFogType(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>928</x>
+     <y>252</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>743</x>
+     <y>257</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>checkBoxInvertFog</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>glWidget</receiver>
+   <slot>setFogInverted(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>941</x>
+     <y>291</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>740</x>
+     <y>291</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>doubleSpinBoxFogDensity</sender>
+   <signal>valueChanged(double)</signal>
+   <receiver>glWidget</receiver>
+   <slot>setFogDensity(double)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>908</x>
+     <y>324</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>742</x>
+     <y>328</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>checkBoxAutoRecalcMinMax</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>doubleSpinBoxMinColorValue</receiver>
+   <slot>setDisabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>884</x>
+     <y>548</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>964</x>
+     <y>476</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>checkBoxAutoRecalcMinMax</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>doubleSpinBoxMaxColorValue</receiver>
+   <slot>setDisabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>916</x>
+     <y>545</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>955</x>
+     <y>515</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>comboBoxColorProperty</sender>
+   <signal>currentIndexChanged(int)</signal>
+   <receiver>glWidget</receiver>
+   <slot>setColorProperty(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>982</x>
+     <y>436</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>767</x>
+     <y>436</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>doubleSpinBoxMinColorValue</sender>
+   <signal>valueChanged(double)</signal>
+   <receiver>glWidget</receiver>
+   <slot>setColorMinimumValue(double)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>963</x>
+     <y>473</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>773</x>
+     <y>476</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>doubleSpinBoxMaxColorValue</sender>
+   <signal>valueChanged(double)</signal>
+   <receiver>glWidget</receiver>
+   <slot>setColorMaximumValue(double)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>944</x>
+     <y>506</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>753</x>
+     <y>506</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>checkBoxAutoRecalcMinMax</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>glWidget</receiver>
+   <slot>setAutoRecalculateColor(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>891</x>
+     <y>542</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>742</x>
+     <y>542</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>pushButtonRecalcMinMax</sender>
+   <signal>clicked()</signal>
+   <receiver>glWidget</receiver>
+   <slot>recalculateColor()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>987</x>
+     <y>564</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>743</x>
+     <y>564</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>comboBoxColorType</sender>
+   <signal>currentIndexChanged(int)</signal>
+   <receiver>glWidget</receiver>
+   <slot>setColorType(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>950</x>
+     <y>600</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>747</x>
+     <y>606</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>comboBoxColorMap</sender>
+   <signal>currentIndexChanged(int)</signal>
+   <receiver>glWidget</receiver>
+   <slot>setColorMap(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>921</x>
+     <y>639</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>755</x>
+     <y>643</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>checkBoxInvertColors</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>glWidget</receiver>
+   <slot>setColorInverted(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>912</x>
+     <y>678</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>740</x>
+     <y>678</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>glWidget</sender>
+   <signal>colorMinimumValueChanged(double)</signal>
+   <receiver>doubleSpinBoxMinColorValue</receiver>
+   <slot>setValue(double)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>719</x>
+     <y>367</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>939</x>
+     <y>468</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>glWidget</sender>
+   <signal>colorMaximumValueChanged(double)</signal>
+   <receiver>doubleSpinBoxMaxColorValue</receiver>
+   <slot>setValue(double)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>746</x>
+     <y>398</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>959</x>
+     <y>509</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
 </ui>
