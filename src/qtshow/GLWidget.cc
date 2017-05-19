@@ -1,6 +1,9 @@
 #include <cmath>
-
-#include <GL/glu.h>
+#ifdef __APPLE__
+  #include <GLUT/glut.h>
+#else
+  #include <GL/glu.h>
+#endif
 
 #include "show/show_common.h"
 #include "show/show_gl.h"
