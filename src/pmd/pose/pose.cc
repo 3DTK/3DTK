@@ -26,6 +26,7 @@
 // GL: GLFW (window etc, ala glut) and FTGL (text rendering)
 #include <GLFW/glfw3.h>
 #include <ftgl.h>
+#include <GL/glu.h>
 
 // PMD-related stuff
 #include "pmdsdk2.h"
@@ -52,7 +53,7 @@ void usage(char* progName) {
 
 
 
-void render( History *history, CvPoint3D32f *camPts,  int trPtsCnt
+void render(GLFWwindow* window, History *history, CvPoint3D32f *camPts,  int trPtsCnt
            , CvMat *rot,  CvMat *trn
            , CvPoint3D32f **camPts3D, char **pts3DStatus
            , int reprojected, bool poseEstimated);
@@ -387,9 +388,11 @@ int main(int argc, char **argv) {
         cvNamedWindow("Cam", 0);
     }
    
+    GLFWwindow* window;
     if(gl) {
         glfwInit();
-        if(!glfwOpenWindow(640, 480, 8, 8, 8, 8, 24, 0, GLFW_WINDOW)) {
+        window = glfwCreateWindow(640, 480, "", NULL, NULL);
+        if(window == NULL) {
             glfwTerminate();
             fprintf(stderr, "ERROR: can't init glfw window!\n");
             return 1;
@@ -580,7 +583,7 @@ int main(int argc, char **argv) {
         bool pause = false;
         do {
              /***** ui and rendring *****/
-            if(gl) render( history, trackedPts, trPtsCnt
+            if(gl) render(window, history, trackedPts, trPtsCnt
                          , rot, trn, camPts3D, pts3DStatus
                          , reprojected, poseEstimated);
             if(ui) {
@@ -595,7 +598,7 @@ int main(int argc, char **argv) {
             int key = cvWaitKey(5);
             if(27 == key) return 0; // ESC pressed FIXME: release stuff
             if((int)' ' == key) pause = !pause;
-            if(gl) if(glfwGetKey(GLFW_KEY_ESC) == GLFW_PRESS) return 0; //in OpenGL window ;)
+            if(gl) if(glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) return 0; //in OpenGL window ;)
         } while(pause);
 
         CV_SWAP(imgCamPrv, pmdc->iCam, swapTemp);
@@ -659,31 +662,31 @@ void renderFrame(Frame *f) {
     } // if renderColorPts else
 }
 
-void render( History *history, CvPoint3D32f *camPts,  int trPtsCnt
+void render(GLFWwindow *window, History *history, CvPoint3D32f *camPts,  int trPtsCnt
            , CvMat *rot,  CvMat *trn
            , CvPoint3D32f **camPts3D, char **pts3DStatus
            , int reprojected, bool poseEstimated) {
 
-    if(glfwGetKey((int)'W') == GLFW_PRESS) roty += 10.0;
-    if(glfwGetKey((int)'S') == GLFW_PRESS) roty -= 10.0;
-    if(glfwGetKey((int)'A') == GLFW_PRESS) rotx -= 10.0;
-    if(glfwGetKey((int)'D') == GLFW_PRESS) rotx += 10.0;
-    if(glfwGetKey((int)'Q') == GLFW_PRESS) rotz -= 10.0;
-    if(glfwGetKey((int)'E') == GLFW_PRESS) rotz += 10.0;
-    if(glfwGetKey((int)'R') == GLFW_PRESS) scale -= 0.1;
-    if(glfwGetKey((int)'F') == GLFW_PRESS) scale += 0.1;
-    if(glfwGetKey((int)'1') == GLFW_PRESS) renderCoords = !renderCoords;
-    if(glfwGetKey((int)'2') == GLFW_PRESS) renderCams = !renderCams;
-    if(glfwGetKey((int)'3') == GLFW_PRESS) renderColorPts = !renderColorPts;
-    if(glfwGetKey((int)'4') == GLFW_PRESS) renderLines = !renderLines;
-    if(glfwGetKey((int)'5') == GLFW_PRESS) renderTracked = !renderTracked;
-    if(glfwGetKey((int)'6') == GLFW_PRESS) renderHistory = !renderHistory;
-    if(glfwGetKey((int)'C') == GLFW_PRESS) centerCloud = !centerCloud;
+    if(glfwGetKey(window, (int)'W') == GLFW_PRESS) roty += 10.0;
+    if(glfwGetKey(window, (int)'S') == GLFW_PRESS) roty -= 10.0;
+    if(glfwGetKey(window, (int)'A') == GLFW_PRESS) rotx -= 10.0;
+    if(glfwGetKey(window, (int)'D') == GLFW_PRESS) rotx += 10.0;
+    if(glfwGetKey(window, (int)'Q') == GLFW_PRESS) rotz -= 10.0;
+    if(glfwGetKey(window, (int)'E') == GLFW_PRESS) rotz += 10.0;
+    if(glfwGetKey(window, (int)'R') == GLFW_PRESS) scale -= 0.1;
+    if(glfwGetKey(window, (int)'F') == GLFW_PRESS) scale += 0.1;
+    if(glfwGetKey(window, (int)'1') == GLFW_PRESS) renderCoords = !renderCoords;
+    if(glfwGetKey(window, (int)'2') == GLFW_PRESS) renderCams = !renderCams;
+    if(glfwGetKey(window, (int)'3') == GLFW_PRESS) renderColorPts = !renderColorPts;
+    if(glfwGetKey(window, (int)'4') == GLFW_PRESS) renderLines = !renderLines;
+    if(glfwGetKey(window, (int)'5') == GLFW_PRESS) renderTracked = !renderTracked;
+    if(glfwGetKey(window, (int)'6') == GLFW_PRESS) renderHistory = !renderHistory;
+    if(glfwGetKey(window, (int)'C') == GLFW_PRESS) centerCloud = !centerCloud;
 
     int width, height;
     GLUquadric *quadric;
 
-    glfwGetWindowSize(&width, &height);
+    glfwGetWindowSize(window, &width, &height);
     height = height < 1 ? 1 : height;
 
     glViewport(0, 0, width, height);
@@ -864,6 +867,6 @@ void render( History *history, CvPoint3D32f *camPts,  int trPtsCnt
     glPopMatrix();
 
     gluDeleteQuadric(quadric);
-    glfwSwapBuffers();
+    glfwSwapBuffers(window);
 }
 
