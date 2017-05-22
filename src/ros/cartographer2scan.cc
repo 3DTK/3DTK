@@ -88,7 +88,7 @@ void writePointClouds(const string& outdir, double scale, const vector<PointClou
     ofstream scanFile(scanFilename);
     scanFile << fixed << setprecision(2);
 
-    for (int i = 0; i < pointClouds.size(); i++) {
+    for (size_t i = 0; i < pointClouds.size(); i++) {
         const PointCloudWithTransform& pointCloud = pointClouds.at(i);
 
         Eigen::Affine3d baseToLaser;
@@ -161,7 +161,7 @@ int main(int argc, char* argv[])
     double startTime;
     double endTime;
     double scale;
-    int combine;
+    size_t combine;
     string outdir;
 
     program_options::options_description desc("Allowed options");
@@ -173,7 +173,7 @@ int main(int argc, char* argv[])
             ("start-time", program_options::value<double>(&startTime)->default_value(946684800), "Start timestamp of export")
             ("end-time", program_options::value<double>(&endTime)->default_value(4102444800), "End timestamp of export")
             ("scale", program_options::value<double>(&scale)->default_value(0.01), "Scale of exported point cloud")
-            ("combine", program_options::value<int>(&combine)->default_value(1), "Combine n scans")
+            ("combine", program_options::value<size_t>(&combine)->default_value(1), "Combine n scans")
             ("output,o", program_options::value<string>(&outdir)->required(), "output folder")
             ;
 
