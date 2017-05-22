@@ -37,16 +37,7 @@ ostream& operator<<(ostream &os, const vector<string> &vec) {
 }
 }
 
-template <typename It>
-typename iterator_traits<It>::value_type median(It begin, It end)
-{
-    auto size = distance(begin, end);
-    nth_element(begin, begin + size / 2, end);
-    return *next(begin, size / 2);
-}
-
-void setTransform(double *transmat, double *mat, double x, double y, double z)
-{
+void setTransform(double *transmat, double *mat, double x, double y, double z) {
     transmat[0] = mat[4];
     transmat[1] = -mat[7];
     transmat[2] = -mat[1];
@@ -69,8 +60,7 @@ void setTransform(double *transmat, double *mat, double x, double y, double z)
     transmat[15] = 1;
 }
 
-void addStaticTransforms(tf::Transformer *l, ros::Time t)
-{
+void addStaticTransforms(tf::Transformer *l, ros::Time t) {
     tf::Quaternion q;
 
     q.setRPY(0, -0.1745, 3.1416);
@@ -80,12 +70,98 @@ void addStaticTransforms(tf::Transformer *l, ros::Time t)
     l->setTransform(tf::StampedTransform(tf::Transform(q, tf::Vector3(0.19, 0, 0.04)), t, "/base_link", "/vertical_vlp16_link"));
 }
 
+struct PointCloudWithTransform {
+    ros::Time timestamp;
+    tf::Transform pose;
+    tf::Transform calibration;
+    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud;
+};
+
+void writePointClouds(const string& outdir, double scale, const vector<PointCloudWithTransform>& pointClouds) {
+    if (pointClouds.size() < 1) return;
+
+    static long index = 0;
+
+    string scanFilename = outdir + "/scan" + to_string(index,3) + ".3d";
+    cout << "Writing " << scanFilename << endl;
+
+    ofstream scanFile(scanFilename);
+    scanFile << fixed << setprecision(2);
+
+    for (int i = 0; i < pointClouds.size(); i++) {
+        const PointCloudWithTransform& pointCloud = pointClouds.at(i);
+
+        Eigen::Affine3d baseToLaser;
+        tf::transformTFToEigen(pointCloud.calibration, baseToLaser);
+
+        Eigen::Affine3d firstPose;
+        tf::transformTFToEigen(pointClouds.at(0).pose, firstPose);
+
+        Eigen::Affine3d currentPose;
+        tf::transformTFToEigen(pointClouds.at(i).pose, currentPose);
+
+        for (pcl::PointXYZ p : *pointCloud.cloud) {
+
+            Eigen::Vector4d tmp(p.x, p.y, p.z, 1);
+            Eigen::Vector4d pcorr = (firstPose.inverse() * currentPose * baseToLaser).matrix() * tmp;
+
+            float xout = -pcorr(1);
+            float yout = pcorr(2);
+            float zout = pcorr(0);
+
+            scanFile << xout / scale << " " << yout / scale << " " << zout / scale << endl;
+        }
+    }
+
+    scanFile.close();
+
+    tf::Transform transform = pointClouds.at(0).pose;
+
+    double X = transform.getOrigin().getX()*100;
+    double Y = transform.getOrigin().getY()*100;
+    double Z = transform.getOrigin().getZ()*100;
+
+    double rotmat[9];
+
+    rotmat[0] = transform.getBasis().getRow(0).getX();
+    rotmat[1] = transform.getBasis().getRow(0).getY();
+    rotmat[2] = transform.getBasis().getRow(0).getZ();
+
+    rotmat[3] = transform.getBasis().getRow(1).getX();
+    rotmat[4] = transform.getBasis().getRow(1).getY();
+    rotmat[5] = transform.getBasis().getRow(1).getZ();
+
+    rotmat[6] = transform.getBasis().getRow(2).getX();
+    rotmat[7] = transform.getBasis().getRow(2).getY();
+    rotmat[8] = transform.getBasis().getRow(2).getZ();
+
+    double transmat[16];
+    setTransform(transmat, rotmat, X, Y, Z);
+
+    ofstream o;
+    string poseFileName = outdir + "/scan" + to_string(index,3) + ".pose";
+    double rP[3];
+    double rPT[3];
+    Matrix4ToEuler(transmat, rPT, rP);
+    o.open(poseFileName.c_str());
+    o << lexical_cast<string>(rP[0]) << " " << lexical_cast<string>(rP[1]) << " " << lexical_cast<string>(rP[2]) << endl;
+    o << lexical_cast<string>(deg(rPT[0])) << " " << lexical_cast<string>(deg(rPT[1])) << " " << lexical_cast<string>(deg(rPT[2])) << endl;
+    o << pointClouds.at(0).timestamp << endl;
+    o.flush();
+    o.close();
+
+    index++;
+}
+
 int main(int argc, char* argv[])
 {
     string bagfile;
     string trajectoryfile;
     vector<string> topicsScans;
+    double startTime;
+    double endTime;
     double scale;
+    int combine;
     string outdir;
 
     program_options::options_description desc("Allowed options");
@@ -94,7 +170,10 @@ int main(int argc, char* argv[])
             ("bag,b", program_options::value<string>(&bagfile)->required(), "input ros bag file")
             ("trajectory,t", program_options::value<string>(&trajectoryfile)->required(), "input trajectory file")
             ("topics", program_options::value<vector<string> >(&topicsScans)->multitoken()->default_value(vector<string> {"horizontal_laser_3d", "vertical_laser_3d"}), "Topics with PointCloud2 messages for export")
+            ("start-time", program_options::value<double>(&startTime)->default_value(946684800), "Start timestamp of export")
+            ("end-time", program_options::value<double>(&endTime)->default_value(4102444800), "End timestamp of export")
             ("scale", program_options::value<double>(&scale)->default_value(0.01), "Scale of exported point cloud")
+            ("combine", program_options::value<int>(&combine)->default_value(1), "Combine n scans")
             ("output,o", program_options::value<string>(&outdir)->required(), "output folder")
             ;
 
@@ -116,8 +195,7 @@ int main(int argc, char* argv[])
     tf::Transformer *l = new tf::Transformer(true, ros::Duration(3600));
 
     string line;
-    while(getline(data,line))
-    {
+    while(getline(data,line)) {
         trim(line);
 
         vector<string> words;
@@ -173,10 +251,15 @@ int main(int argc, char* argv[])
     rosbag::View viewScans(bag, rosbag::TopicQuery(topicsScans));
 
     tf::StampedTransform startTransform;
-    long index = 0;
+
+    vector<PointCloudWithTransform> pointClouds;
 
     for (rosbag::MessageInstance const m : viewScans) {
         sensor_msgs::PointCloud2ConstPtr message = m.instantiate<sensor_msgs::PointCloud2>();
+
+        if (m.getTime() < ros::Time(startTime) || m.getTime() > ros::Time(endTime)) {
+            continue;
+        }
 
         tf::StampedTransform baseTransform;
         tf::StampedTransform laserTransform;
@@ -188,71 +271,27 @@ int main(int argc, char* argv[])
             continue;
         }
 
-        Eigen::Affine3d baseToLaser;
-        tf::transformTFToEigen(laserTransform, baseToLaser);
-
         pcl::PCLPointCloud2 pcl_pc2;
         pcl_conversions::toPCL(*message,pcl_pc2);
         pcl::PointCloud<pcl::PointXYZ>::Ptr temp_cloud(new pcl::PointCloud<pcl::PointXYZ>);
         pcl::fromPCLPointCloud2(pcl_pc2,*temp_cloud);
 
-        string scanFilename = outdir + "/scan" + to_string(index,3) + ".3d";
-        cout << "Writing " << scanFilename << endl;
+        PointCloudWithTransform pointCloud;
+        pointCloud.timestamp = m.getTime();
+        pointCloud.pose = baseTransform;
+        pointCloud.calibration = laserTransform;
+        pointCloud.cloud = temp_cloud;
 
-        ofstream scanFile(scanFilename);
-        scanFile << fixed << setprecision(2);
+        pointClouds.push_back(pointCloud);
 
-        for (pcl::PointXYZ p : *temp_cloud) {
-
-            Eigen::Vector4d tmp(p.x, p.y, p.z, 1);
-            Eigen::Vector4d pcorr = baseToLaser.matrix() * tmp;
-
-            float xout = -pcorr(1);
-            float yout = pcorr(2);
-            float zout = pcorr(0);
-
-            scanFile << xout / scale << " " << yout / scale << " " << zout / scale << endl;
+        if (pointClouds.size() >= combine) {
+            writePointClouds(outdir, scale, pointClouds);
+            pointClouds.clear();
         }
-
-        scanFile.close();
-
-        tf::Transform transform = baseTransform;
-
-        double X = transform.getOrigin().getX()*100;
-        double Y = transform.getOrigin().getY()*100;
-        double Z = transform.getOrigin().getZ()*100;
-
-        double rotmat[9];
-
-        rotmat[0] = transform.getBasis().getRow(0).getX();
-        rotmat[1] = transform.getBasis().getRow(0).getY();
-        rotmat[2] = transform.getBasis().getRow(0).getZ();
-
-        rotmat[3] = transform.getBasis().getRow(1).getX();
-        rotmat[4] = transform.getBasis().getRow(1).getY();
-        rotmat[5] = transform.getBasis().getRow(1).getZ();
-
-        rotmat[6] = transform.getBasis().getRow(2).getX();
-        rotmat[7] = transform.getBasis().getRow(2).getY();
-        rotmat[8] = transform.getBasis().getRow(2).getZ();
-
-        double transmat[16];
-        setTransform(transmat, rotmat, X, Y, Z);
-
-        ofstream o;
-        string poseFileName = outdir + "/scan" + to_string(index,3) + ".pose";
-        double rP[3];
-        double rPT[3];
-        Matrix4ToEuler(transmat, rPT, rP);
-        o.open(poseFileName.c_str());
-        o << lexical_cast<string>(rP[0]) << " " << lexical_cast<string>(rP[1]) << " " << lexical_cast<string>(rP[2]) << endl;
-        o << lexical_cast<string>(deg(rPT[0])) << " " << lexical_cast<string>(deg(rPT[1])) << " " << lexical_cast<string>(deg(rPT[2])) << endl;
-        o << m.getTime() << endl;
-        o.flush();
-        o.close();
-
-        index++;
     }
+
+    writePointClouds(outdir, scale, pointClouds);
+    pointClouds.clear();
 
     return 0;
 }
