@@ -336,12 +336,12 @@ class ScanImporter
         bool _lines=false, bool _stopandgo=false, 
         unsigned int _pointtype = PointType::USE_NONE, 
         int start=-1, int end=-1) 
-      : timedImporter(_rxpfile, _tmap, _cal, _lines, _stopandgo, _pointtype, start, end) {
+      : timedImporter(_rxpfile, _tmap, _cal, _lines, _stopandgo, false, false, _pointtype, start, end) {
         scans = 0;
       }
 
     ScanImporter(const ScanImporter &si) 
-      : timedImporter(si.rxpfile, si.tmap, si.cal, si.lines, si.stopandgo, si.pointtype.toFlags(), si.start, si.end) {
+      : timedImporter(si.rxpfile, si.tmap, si.cal, si.lines, si.stopandgo, false, false, si.pointtype.toFlags(), si.start, si.end) {
       rxpfile = si.rxpfile;
       scans = si.scans;
       reducer = si.reducer;
