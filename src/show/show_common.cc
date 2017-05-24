@@ -605,6 +605,10 @@ int parseArgs(int argc,char **argv,
          << start << ")." << endl;
     return 1;
   }
+  if (vm.count("input-dir") < 1) {
+    cerr << "Error: input directory required" << endl;
+    return 1;
+  }
 
   // Additional logic
 
