@@ -743,12 +743,12 @@ bool find_path_archive(boost::filesystem::path data_path, std::function<bool (bo
  */
 bool open_path(boost::filesystem::path data_path, std::function<bool (std::istream &)> handler)
 {
+    bool ret;
     if (exists(data_path)) {
         boost::filesystem::ifstream data_file(data_path);
-        return handler(data_file);
-    }
-
-    return find_path_archive(data_path, [=,&handler](boost::filesystem::path archivepath, boost::filesystem::path remainder) -> bool {
+        ret = handler(data_file);
+    } else {
+        ret = find_path_archive(data_path, [=,&handler](boost::filesystem::path archivepath, boost::filesystem::path remainder) -> bool {
             /* open the archive for reading */
             int error;
             int flags = 0;
@@ -785,6 +785,11 @@ bool open_path(boost::filesystem::path data_path, std::function<bool (std::istre
             free(buf);
             return ret;
         });
+    }
+    if (!ret) {
+        std::cerr << "Path does neither exist nor is a zip archive: " << data_path << endl;
+    }
+    return ret;
 }
 
 bool open_path_writing(boost::filesystem::path data_path, std::function<bool (std::ostream &)> handler)
