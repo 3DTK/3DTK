@@ -682,14 +682,14 @@ size_t BasicScan::readFrames()
   ifstream file(filename.c_str());
   // clear frame vector here to allow reloading without (old) duplicates
   m_frames.clear();
-  double transformation[16];
-  unsigned int type;
   while(getline(file, line)) {
           // ignore empty lines
           if(line.length() == 0) continue;
 	  //ignore comment lines starting with #
 	  if(line[0]=='#') continue;
 	  std::istringstream line_stream(line);
+	  double transformation[16];
+	  unsigned int type;
 	  if (line_stream >> transformation >> type) {
 	    m_frames.push_back(Frame(transformation, type));
 	  } else {
