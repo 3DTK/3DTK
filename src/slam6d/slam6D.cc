@@ -958,11 +958,11 @@ int main(int argc, char **argv)
                               mni_lum, epsilonSLAM, mdml, mdmll, graphDist, eP,
                               type);
         delete my_icp;
-        if(loopSlam6DAlgo > 0) {
+        if(my_loopSlam6D) {
           delete my_loopSlam6D;
         }
       }
-      if(my_graphSlam6D > 0) {
+      if(my_graphSlam6D) {
         delete my_graphSlam6D;
       }
     }
