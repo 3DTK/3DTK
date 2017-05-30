@@ -216,7 +216,7 @@ public:
   inline SearchTree* getSearchTree();
   //  inline ANNkd_tree* getANNTree() const;
   
-  inline const int getBucketSize() const;
+  inline int getBucketSize() const;
   
   virtual const char* getIdentifier() const = 0;
   
