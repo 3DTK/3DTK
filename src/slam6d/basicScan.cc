@@ -685,6 +685,8 @@ size_t BasicScan::readFrames()
   double transformation[16];
   unsigned int type;
   while(getline(file, line)) {
+          // ignore empty lines
+          if(line.length() == 0) continue;
 	  //ignore comment lines starting with #
 	  if(line[0]=='#') continue;
 	  std::istringstream line_stream(line);
