@@ -690,8 +690,13 @@ size_t BasicScan::readFrames()
 	  //ignore comment lines starting with #
 	  if(line[0]=='#') continue;
 	  std::istringstream line_stream(line);
-	  line_stream >> transformation >> type;
-	  m_frames.push_back(Frame(transformation, type));
+	  if (line_stream >> transformation >> type) {
+	    m_frames.push_back(Frame(transformation, type));
+	  } else {
+	    std::string msg("Malformed line in ");
+		msg += filename + ": " + line;
+	    throw runtime_error(msg);
+	  }
   }
 
   return m_frames.size();
