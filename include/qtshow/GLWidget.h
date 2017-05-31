@@ -54,12 +54,15 @@ protected:
   void paintGL();
 
   void mousePressEvent(QMouseEvent *event);
+  void mouseReleaseEvent(QMouseEvent *event);
   void mouseMoveEvent(QMouseEvent *event);
+  void keyPressEvent(QKeyEvent *event);
+
   void updateFogType();
 
 
 protected:
-  QPoint lastMousePos;
+  QPoint initialMousePos;
 
   int fogType;
   bool fogInverted;
