@@ -1,13 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
+ <author>Johannes Barthelmes</author>
  <class>MainWindow</class>
  <widget class="QMainWindow" name="MainWindow">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1062</width>
-    <height>725</height>
+    <width>1331</width>
+    <height>840</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -25,13 +26,13 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1062</width>
+     <width>1331</width>
      <height>30</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
     <property name="title">
-     <string>&amp;File</string>
+     <string>F&amp;ile</string>
     </property>
     <addaction name="actionOpen"/>
     <addaction name="actionOpenRecent"/>
@@ -49,6 +50,12 @@
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <widget class="QDockWidget" name="dockObjects">
+   <property name="maximumSize">
+    <size>
+     <width>524287</width>
+     <height>174</height>
+    </size>
+   </property>
    <property name="windowTitle">
     <string>Ob&amp;jects</string>
    </property>
@@ -134,7 +141,7 @@
      <item row="0" column="0">
       <widget class="QLabel" name="labelFogType">
        <property name="text">
-        <string>Fog Type:</string>
+        <string>Fog T&amp;ype:</string>
        </property>
        <property name="buddy">
         <cstring>comboBoxFogType</cstring>
@@ -222,7 +229,7 @@
         <item row="0" column="0">
          <widget class="QLabel" name="labelColorProperty">
           <property name="text">
-           <string>Property:</string>
+           <string>&amp;Property:</string>
           </property>
           <property name="buddy">
            <cstring>comboBoxColorProperty</cstring>
@@ -361,7 +368,7 @@
         <item row="1" column="0">
          <widget class="QLabel" name="labelColorMap">
           <property name="text">
-           <string>Colormap:</string>
+           <string>Colorm&amp;ap:</string>
           </property>
           <property name="buddy">
            <cstring>comboBoxColorMap</cstring>
@@ -425,20 +432,415 @@
     </layout>
    </widget>
   </widget>
+  <widget class="QDockWidget" name="dockAnimation">
+   <property name="minimumSize">
+    <size>
+     <width>215</width>
+     <height>123</height>
+    </size>
+   </property>
+   <property name="floating">
+    <bool>false</bool>
+   </property>
+   <property name="windowTitle">
+    <string>A&amp;nimation</string>
+   </property>
+   <attribute name="dockWidgetArea">
+    <number>1</number>
+   </attribute>
+   <widget class="QWidget" name="dockWidgetContents">
+    <widget class="QPushButton" name="buttonAnimate">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>360</y>
+       <width>161</width>
+       <height>34</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Animate</string>
+     </property>
+    </widget>
+    <widget class="QDoubleSpinBox" name="doubleSpinBoxAnimationSpeed">
+     <property name="geometry">
+      <rect>
+       <x>140</x>
+       <y>320</y>
+       <width>61</width>
+       <height>32</height>
+      </rect>
+     </property>
+     <property name="minimum">
+      <double>0.010000000000000</double>
+     </property>
+     <property name="maximum">
+      <double>64.000000000000000</double>
+     </property>
+     <property name="singleStep">
+      <double>0.250000000000000</double>
+     </property>
+     <property name="value">
+      <double>1.000000000000000</double>
+     </property>
+    </widget>
+    <widget class="QLabel" name="labelAnimationSpeed">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>320</y>
+       <width>111</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Animation Speed:</string>
+     </property>
+     <property name="buddy">
+      <cstring>doubleSpinBoxAnimationSpeed</cstring>
+     </property>
+    </widget>
+    <widget class="QCheckBox" name="checkBoxAnimateMatching">
+     <property name="geometry">
+      <rect>
+       <x>30</x>
+       <y>290</y>
+       <width>141</width>
+       <height>22</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Animate Matching</string>
+     </property>
+    </widget>
+    <widget class="QGroupBox" name="groupBox">
+     <property name="geometry">
+      <rect>
+       <x>0</x>
+       <y>0</y>
+       <width>211</width>
+       <height>281</height>
+      </rect>
+     </property>
+     <property name="title">
+      <string>Animate Path</string>
+     </property>
+     <property name="flat">
+      <bool>false</bool>
+     </property>
+     <property name="checkable">
+      <bool>true</bool>
+     </property>
+     <property name="checked">
+      <bool>true</bool>
+     </property>
+     <widget class="QLineEdit" name="lineEditPathFile">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>50</y>
+        <width>151</width>
+        <height>32</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QLabel" name="labelPathFile">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>30</y>
+        <width>59</width>
+        <height>18</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Path File:</string>
+      </property>
+      <property name="buddy">
+       <cstring>lineEditPathFile</cstring>
+      </property>
+     </widget>
+     <widget class="QToolButton" name="buttonChoosePathFile">
+      <property name="geometry">
+       <rect>
+        <x>170</x>
+        <y>50</y>
+        <width>33</width>
+        <height>34</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Load Path</string>
+      </property>
+      <property name="icon">
+       <iconset theme="document-open">
+        <normaloff>../../../../.designer/backup</normaloff>../../../../.designer/backup</iconset>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="buttonSavePath">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>90</y>
+        <width>88</width>
+        <height>34</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Save Path</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="butonLoadPath">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>130</y>
+        <width>88</width>
+        <height>34</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Load Path</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="buttonLoadRobotPath">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>170</y>
+        <width>121</width>
+        <height>34</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Load Robot Path</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="labelInterpolationFactor">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>210</y>
+        <width>131</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Interpolation factor:</string>
+      </property>
+      <property name="buddy">
+       <cstring>doubleSpinBoxInterpolationFactor</cstring>
+      </property>
+     </widget>
+     <widget class="QDoubleSpinBox" name="doubleSpinBoxInterpolationFactor">
+      <property name="geometry">
+       <rect>
+        <x>140</x>
+        <y>210</y>
+        <width>61</width>
+        <height>32</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QCheckBox" name="checkBoxInterpolateByDistance">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>250</y>
+        <width>191</width>
+        <height>22</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Interpolate by distance</string>
+      </property>
+     </widget>
+    </widget>
+    <widget class="QToolButton" name="buttonSaveAnimation">
+     <property name="geometry">
+      <rect>
+       <x>170</x>
+       <y>360</y>
+       <width>33</width>
+       <height>34</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Save Animation</string>
+     </property>
+     <property name="icon">
+      <iconset theme="document-save">
+       <normaloff>../../../../.designer/backup</normaloff>../../../../.designer/backup</iconset>
+     </property>
+    </widget>
+   </widget>
+  </widget>
+  <widget class="QDockWidget" name="dockPosition">
+   <property name="windowTitle">
+    <string>Settings</string>
+   </property>
+   <attribute name="dockWidgetArea">
+    <number>1</number>
+   </attribute>
+   <widget class="QWidget" name="dockWidgetContents_5">
+    <widget class="QLabel" name="labelSettingsFile">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>10</y>
+       <width>81</width>
+       <height>18</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Settings File:</string>
+     </property>
+     <property name="buddy">
+      <cstring>lineEditSettingsFile</cstring>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="lineEditSettingsFile">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>30</y>
+       <width>151</width>
+       <height>32</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QToolButton" name="buttonChooseSettingsFile">
+     <property name="geometry">
+      <rect>
+       <x>170</x>
+       <y>30</y>
+       <width>33</width>
+       <height>34</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Load Path</string>
+     </property>
+     <property name="icon">
+      <iconset theme="document-open">
+       <normaloff>../../../../.designer/backup</normaloff>../../../../.designer/backup</iconset>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="buttonSaveSettings">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>70</y>
+       <width>91</width>
+       <height>34</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Save Settings</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="buttonLoadSettings">
+     <property name="geometry">
+      <rect>
+       <x>107</x>
+       <y>70</y>
+       <width>101</width>
+       <height>34</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Load Settings</string>
+     </property>
+    </widget>
+   </widget>
+  </widget>
+  <widget class="QDockWidget" name="dockSnapshot">
+   <property name="windowTitle">
+    <string>Snapshot</string>
+   </property>
+   <attribute name="dockWidgetArea">
+    <number>1</number>
+   </attribute>
+   <widget class="QWidget" name="dockWidgetContents_6">
+    <widget class="QLabel" name="labelSnapshotScale">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>0</y>
+       <width>59</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Scale:</string>
+     </property>
+     <property name="buddy">
+      <cstring>spinBoxSnapshotScale</cstring>
+     </property>
+    </widget>
+    <widget class="QSpinBox" name="spinBoxSnapshotScale">
+     <property name="geometry">
+      <rect>
+       <x>70</x>
+       <y>0</y>
+       <width>52</width>
+       <height>32</height>
+      </rect>
+     </property>
+     <property name="minimum">
+      <number>1</number>
+     </property>
+     <property name="maximum">
+      <number>64</number>
+     </property>
+     <property name="value">
+      <number>1</number>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="buttonSaveImage">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>40</y>
+       <width>111</width>
+       <height>34</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Save Image</string>
+     </property>
+    </widget>
+   </widget>
+  </widget>
   <action name="actionQuit">
+   <property name="icon">
+    <iconset theme="application-exit"/>
+   </property>
    <property name="text">
     <string>&amp;Quit</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Q</string>
    </property>
    <property name="menuRole">
     <enum>QAction::QuitRole</enum>
    </property>
   </action>
   <action name="actionOpen">
+   <property name="icon">
+    <iconset theme="document-open"/>
+   </property>
    <property name="text">
-    <string>&amp;Open...</string>
+    <string>&amp;Open Scan Directory...</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+O</string>
    </property>
   </action>
   <action name="actionOpenRecent">
+   <property name="icon">
+    <iconset theme="document-open-recent"/>
+   </property>
    <property name="text">
     <string>Open &amp;Recent</string>
    </property>
@@ -454,6 +856,15 @@
     <enum>QAction::AboutRole</enum>
    </property>
   </action>
+  <action name="actionOpenPathFile">
+   <property name="icon">
+    <iconset theme="document-open"/>
+   </property>
+   <property name="text">
+    <string>Open Path File...</string>
+   </property>
+  </action>
+  <zorder>dockSnapshot</zorder>
  </widget>
  <customwidgets>
   <customwidget>
@@ -463,6 +874,7 @@
    <slots>
     <signal>colorMinimumValueChanged(double)</signal>
     <signal>colorMaximumValueChanged(double)</signal>
+    <signal>animationPossible(bool)</signal>
     <slot>setDrawPoints(bool)</slot>
     <slot>setDrawCameras(bool)</slot>
     <slot>setDrawPath(bool)</slot>
@@ -478,6 +890,15 @@
     <slot>setColorType(int)</slot>
     <slot>setColorMap(int)</slot>
     <slot>setColorInverted(bool)</slot>
+    <slot>animate()</slot>
+    <slot>setAnimationSpeed(double)</slot>
+    <slot>setAnimatePath(bool)</slot>
+    <slot>setPathFileName(QString)</slot>
+    <slot>setInterpolationFactor(double)</slot>
+    <slot>setInterpolateByDistance(bool)</slot>
+    <slot>setAnimateMatching(bool)</slot>
+    <slot>setSnapshotScale(int)</slot>
+    <slot>saveSnapshot()</slot>
    </slots>
   </customwidget>
  </customwidgets>
@@ -497,62 +918,14 @@
  <resources/>
  <connections>
   <connection>
-   <sender>checkDrawPoints</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>glWidget</receiver>
-   <slot>setDrawPoints(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>874</x>
-     <y>78</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>695</x>
-     <y>87</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>checkDrawCameras</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>glWidget</receiver>
-   <slot>setDrawCameras(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>853</x>
-     <y>113</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>722</x>
-     <y>121</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>checkDrawPath</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>glWidget</receiver>
-   <slot>setDrawPath(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>854</x>
-     <y>140</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>742</x>
-     <y>150</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
    <sender>spinBoxPointSize</sender>
    <signal>valueChanged(int)</signal>
    <receiver>glWidget</receiver>
    <slot>setPointSize(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>973</x>
-     <y>175</y>
+     <x>1291</x>
+     <y>193</y>
     </hint>
     <hint type="destinationlabel">
      <x>713</x>
@@ -567,8 +940,8 @@
    <slot>setFogType(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>928</x>
-     <y>252</y>
+     <x>1258</x>
+     <y>272</y>
     </hint>
     <hint type="destinationlabel">
      <x>743</x>
@@ -583,8 +956,8 @@
    <slot>setFogInverted(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>941</x>
-     <y>291</y>
+     <x>1247</x>
+     <y>300</y>
     </hint>
     <hint type="destinationlabel">
      <x>740</x>
@@ -599,8 +972,8 @@
    <slot>setFogDensity(double)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>908</x>
-     <y>324</y>
+     <x>1252</x>
+     <y>338</y>
     </hint>
     <hint type="destinationlabel">
      <x>742</x>
@@ -615,12 +988,12 @@
    <slot>setDisabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>884</x>
-     <y>548</y>
+     <x>1196</x>
+     <y>589</y>
     </hint>
     <hint type="destinationlabel">
-     <x>964</x>
-     <y>476</y>
+     <x>1306</x>
+     <y>523</y>
     </hint>
    </hints>
   </connection>
@@ -631,12 +1004,12 @@
    <slot>setDisabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>916</x>
-     <y>545</y>
+     <x>1196</x>
+     <y>589</y>
     </hint>
     <hint type="destinationlabel">
-     <x>955</x>
-     <y>515</y>
+     <x>1306</x>
+     <y>561</y>
     </hint>
    </hints>
   </connection>
@@ -647,8 +1020,8 @@
    <slot>setColorProperty(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>982</x>
-     <y>436</y>
+     <x>1314</x>
+     <y>485</y>
     </hint>
     <hint type="destinationlabel">
      <x>767</x>
@@ -663,8 +1036,8 @@
    <slot>setColorMinimumValue(double)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>963</x>
-     <y>473</y>
+     <x>1306</x>
+     <y>523</y>
     </hint>
     <hint type="destinationlabel">
      <x>773</x>
@@ -679,8 +1052,8 @@
    <slot>setColorMaximumValue(double)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>944</x>
-     <y>506</y>
+     <x>1306</x>
+     <y>561</y>
     </hint>
     <hint type="destinationlabel">
      <x>753</x>
@@ -695,8 +1068,8 @@
    <slot>setAutoRecalculateColor(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>891</x>
-     <y>542</y>
+     <x>1196</x>
+     <y>589</y>
     </hint>
     <hint type="destinationlabel">
      <x>742</x>
@@ -711,8 +1084,8 @@
    <slot>recalculateColor()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>987</x>
-     <y>564</y>
+     <x>1288</x>
+     <y>601</y>
     </hint>
     <hint type="destinationlabel">
      <x>743</x>
@@ -727,8 +1100,8 @@
    <slot>setColorType(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>950</x>
-     <y>600</y>
+     <x>1291</x>
+     <y>653</y>
     </hint>
     <hint type="destinationlabel">
      <x>747</x>
@@ -743,8 +1116,8 @@
    <slot>setColorMap(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>921</x>
-     <y>639</y>
+     <x>1234</x>
+     <y>691</y>
     </hint>
     <hint type="destinationlabel">
      <x>755</x>
@@ -759,8 +1132,8 @@
    <slot>setColorInverted(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>912</x>
-     <y>678</y>
+     <x>1246</x>
+     <y>719</y>
     </hint>
     <hint type="destinationlabel">
      <x>740</x>
@@ -779,8 +1152,8 @@
      <y>367</y>
     </hint>
     <hint type="destinationlabel">
-     <x>939</x>
-     <y>468</y>
+     <x>1306</x>
+     <y>523</y>
     </hint>
    </hints>
   </connection>
@@ -795,10 +1168,238 @@
      <y>398</y>
     </hint>
     <hint type="destinationlabel">
-     <x>959</x>
-     <y>509</y>
+     <x>1306</x>
+     <y>561</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>checkDrawPoints</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>glWidget</receiver>
+   <slot>setDrawPoints(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>1209</x>
+     <y>93</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>695</x>
+     <y>87</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>checkDrawPath</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>glWidget</receiver>
+   <slot>setDrawPath(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>1209</x>
+     <y>149</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>742</x>
+     <y>150</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>checkDrawCameras</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>glWidget</receiver>
+   <slot>setDrawCameras(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>1209</x>
+     <y>121</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>722</x>
+     <y>121</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>buttonAnimate</sender>
+   <signal>clicked()</signal>
+   <receiver>glWidget</receiver>
+   <slot>animate()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>129</x>
+     <y>440</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>269</x>
+     <y>461</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>doubleSpinBoxAnimationSpeed</sender>
+   <signal>valueChanged(double)</signal>
+   <receiver>glWidget</receiver>
+   <slot>setAnimationSpeed(double)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>183</x>
+     <y>393</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>289</x>
+     <y>393</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>groupBox</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>glWidget</receiver>
+   <slot>setAnimatePath(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>137</x>
+     <y>70</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>294</x>
+     <y>55</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>lineEditPathFile</sender>
+   <signal>textChanged(QString)</signal>
+   <receiver>glWidget</receiver>
+   <slot>setPathFileName(QString)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>101</x>
+     <y>132</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>268</x>
+     <y>159</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>doubleSpinBoxInterpolationFactor</sender>
+   <signal>valueChanged(double)</signal>
+   <receiver>glWidget</receiver>
+   <slot>setInterpolationFactor(double)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>174</x>
+     <y>284</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>252</x>
+     <y>310</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>checkBoxInterpolateByDistance</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>glWidget</receiver>
+   <slot>setInterpolateByDistance(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>131</x>
+     <y>318</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>292</x>
+     <y>344</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>checkBoxAnimateMatching</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>glWidget</receiver>
+   <slot>setAnimateMatching(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>133</x>
+     <y>356</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>282</x>
+     <y>368</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>glWidget</sender>
+   <signal>animationPossible(bool)</signal>
+   <receiver>buttonAnimate</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>359</x>
+     <y>443</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>141</x>
+     <y>437</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>spinBoxSnapshotScale</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>glWidget</receiver>
+   <slot>setSnapshotScale(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>100</x>
+     <y>714</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>315</x>
+     <y>716</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>buttonSaveImage</sender>
+   <signal>clicked()</signal>
+   <receiver>glWidget</receiver>
+   <slot>saveSnapshot()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>100</x>
+     <y>755</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>303</x>
+     <y>767</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionOpen</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>pickScanDirectory()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>665</x>
+     <y>419</y>
     </hint>
    </hints>
   </connection>
  </connections>
+ <slots>
+  <slot>pickScanDirectory()</slot>
+  <slot>quit()</slot>
+ </slots>
 </ui>

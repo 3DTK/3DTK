@@ -167,3 +167,47 @@ void GLWidget::setColorInverted(bool colorInverted) {
   invert = !colorInverted;
   update();
 }
+
+void GLWidget::setAnimatePath(bool animatePath) {
+  if (animatePath != this->animatePath) {
+    this->animatePath = animatePath;
+    emit animationPossible(animateMatching || animatePath);
+  }
+}
+
+void GLWidget::setPathFileName(QString pathFileName) {
+  this->pathFileName = pathFileName;
+}
+
+void GLWidget::setInterpolationFactor(double interpolationFactor) {
+  path_interp_factor = interpolationFactor;
+}
+
+void GLWidget::setInterpolateByDistance(bool interpolateByDistance) {
+  inter_by_dist = interpolateByDistance;
+  updateCamera();
+}
+
+void GLWidget::setAnimateMatching(bool animateMatching) {
+  if (animateMatching != this->animateMatching) {
+    this->animateMatching = animateMatching;
+    emit animationPossible(animateMatching || animatePath);
+  }
+}
+
+void GLWidget::setAnimationSpeed(double animationSpeed) {
+  anim_delay = (int)(1000.0 / animationSpeed);
+}
+
+void GLWidget::animate() {
+  startAnimation(0);
+  // FIXME need to update() with every frame
+}
+
+void GLWidget::setSnapshotScale(int snapshotScale) {
+  factor = snapshotScale;
+}
+
+void GLWidget::saveSnapshot() {
+  saveImage(0);
+}
