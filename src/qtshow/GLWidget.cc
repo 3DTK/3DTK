@@ -1,9 +1,11 @@
 #include <cmath>
+
 #ifdef __APPLE__
   #include <GLUT/glut.h>
 #else
   #include <GL/glu.h>
 #endif
+#include <Qt>
 
 #include "show/show_common.h"
 #include "show/show_gl.h"
@@ -41,12 +43,22 @@ void GLWidget::paintGL() {
 }
 
 void GLWidget::mousePressEvent(QMouseEvent *event) {
-  lastMousePos = event->pos();
+  initialMousePos = mapToGlobal(event->pos());
+  QPoint center(width() / 2, height() / 2);
+  QCursor::setPos(mapToGlobal(center));
+  setCursor(Qt::BlankCursor);
+}
+
+void GLWidget::mouseReleaseEvent(QMouseEvent *event) {
+  if (event->buttons() == 0) {
+    QCursor::setPos(initialMousePos);
+    unsetCursor();
+  }
 }
 
 void GLWidget::mouseMoveEvent(QMouseEvent *event) {
-  float dx = event->x() - lastMousePos.x();
-  float dy = event->y() - lastMousePos.y();
+  float dx = event->x() - width()/2;
+  float dy = event->y() - height()/2;
 
   // TODO different speeds for topView
   if (event->buttons() & Qt::LeftButton) {
@@ -63,7 +75,73 @@ void GLWidget::mouseMoveEvent(QMouseEvent *event) {
 
   update();
 
-  lastMousePos = event->pos();
+  QPoint center(width() / 2, height() / 2);
+  QCursor::setPos(mapToGlobal(center));
+}
+
+void GLWidget::keyPressEvent(QKeyEvent *event) {
+  // TODO include the time delta
+  double stepsize = movementSpeed;
+
+  /* FIXME holding a modifier somehow hangs up the application
+  if (event->modifiers() & Qt::ControlModifier) stepsize *= 0.1;
+  if (event->modifiers() & Qt::ShiftModifier) stepsize *= 10;
+  if (event->modifiers() & Qt::AltModifier) stepsize *= 100;
+  */
+
+  double rotsize = 0.2 * stepsize;
+
+  switch (event->key()) {
+  case Qt::Key_W:
+   moveCamera(0,0,stepsize,0,0,0);
+   break;
+  case Qt::Key_A:
+    moveCamera(stepsize,0,0,0,0,0);
+    break;
+  case Qt::Key_S:
+    moveCamera(0,0,-stepsize,0,0,0);
+    break;
+  case Qt::Key_D:
+    moveCamera(-stepsize,0,0,0,0,0);
+    break;
+  case Qt::Key_C:
+    moveCamera(0,stepsize,0,0,0,0);
+    break;
+  case Qt::Key_Space:
+    moveCamera(0,-stepsize,0,0,0,0);
+    break;
+  case Qt::Key_Left:
+    moveCamera(0,0,0,0,rotsize,0);
+    break;
+  case Qt::Key_Up:
+    moveCamera(0,0,0,-rotsize,0,0);
+    break;
+  case Qt::Key_Right:
+    moveCamera(0,0,0,0,-rotsize,0);
+    break;
+  case Qt::Key_Down:
+    moveCamera(0,0,0,rotsize,0,0);
+    break;
+  case Qt::Key_Q:
+  case Qt::Key_PageUp:
+    moveCamera(0,0,0,0,0,rotsize);
+    break;
+  case Qt::Key_E:
+  case Qt::Key_PageDown:
+    moveCamera(0,0,0,0,0,-rotsize);
+    break;
+  case Qt::Key_F:
+    // TODO does not work
+    setWindowState(windowState() ^ Qt::WindowFullScreen);
+    break;
+  default:
+    // need to pass the event to parent class if we don't handle it
+    // according to Qt docs
+    GLWidget::keyPressEvent(event);
+    break;
+  }
+
+  update();
 }
 
 void GLWidget::setDrawPoints(bool drawPoints) {
