@@ -48,10 +48,20 @@ void GLWidget::mouseMoveEvent(QMouseEvent *event) {
   float dx = event->x() - lastMousePos.x();
   float dy = event->y() - lastMousePos.y();
 
+  // TODO different speeds for topView
   if (event->buttons() & Qt::LeftButton) {
-    moveCamera(0,0,0,dy,dx,0);
-    update();
+    moveCamera(0, 0, 0, dy, -dx, 0);
+  } else if (event->buttons() & Qt::MidButton) {
+    dx *= movementSpeed/10.0;
+    dy *= movementSpeed/10.0;
+    moveCamera(dx, 0, dy, 0, 0, 0);
+  } else if (event->buttons() & Qt::RightButton) {
+    dx *= movementSpeed/10.0;
+    dy *= movementSpeed/10.0;
+    moveCamera(dx, -dy, 0, 0, 0, 0);
   }
+
+  update();
 
   lastMousePos = event->pos();
 }
