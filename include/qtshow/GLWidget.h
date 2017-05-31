@@ -31,9 +31,22 @@ public slots:
   void setColorMap(int colorMap);
   void setColorInverted(bool colorInverted);
 
+  void setAnimatePath(bool animatePath);
+  void setPathFileName(QString pathFile);
+  void setInterpolationFactor(double interpolationFactor);
+  void setInterpolateByDistance(bool interpolateByDistance);
+  void setAnimateMatching(bool animateMatching);
+  void setAnimationSpeed(double animationSpeed);
+  void animate();
+
+  void setSnapshotScale(int snapshotScale);
+  void saveSnapshot();
+
 signals:
   void colorMinimumValueChanged(double);
   void colorMaximumValueChanged(double);
+
+  void animationPossible(bool);
 
 protected:
   void initializeGL();
@@ -52,6 +65,11 @@ protected:
   bool fogInverted;
 
   bool autoRecalculateColor;
+
+  bool animatePath;
+  bool animateMatching;
+
+  QString pathFileName;
 
 };
 

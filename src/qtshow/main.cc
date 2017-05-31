@@ -1,18 +1,11 @@
-#include <iostream>
-
-#include <QApplication>
-
-#include "qtshow/MainWindow.h"
-
-#include "show/show_common.h"
+#include "qtshow/QtShow.h"
 
 int main(int argc, char *argv[]){
-  QApplication app(argc, argv);
-  initShow(argc, argv);
-  MainWindow mainWindow;
-  mainWindow.show();
+  QtShow app(argc, argv);
   return app.exec();
 }
+
+// Legacy callbacks
 void updateCamControls() {}
 void resetRotationButton() {}
 void updateTopViewControls() {}
