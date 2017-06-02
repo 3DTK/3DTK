@@ -77,7 +77,7 @@ struct PointCloudWithTransform {
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud;
 };
 
-void writePointClouds(const string& outdir, double scale, const vector<PointCloudWithTransform>& pointClouds) {
+void writePointClouds(const string& outdir, double scale, double minDistance, double maxDistance, const vector<PointCloudWithTransform>& pointClouds) {
     if (pointClouds.size() < 1) return;
 
     static long index = 0;
@@ -101,6 +101,8 @@ void writePointClouds(const string& outdir, double scale, const vector<PointClou
         tf::transformTFToEigen(pointClouds.at(i).pose, currentPose);
 
         for (pcl::PointXYZ p : *pointCloud.cloud) {
+            double distance = Eigen::Vector3d(p.x, p.y, p.z).norm() / scale;
+            if (distance < minDistance || distance > maxDistance) continue;
 
             Eigen::Vector4d tmp(p.x, p.y, p.z, 1);
             Eigen::Vector4d pcorr = (firstPose.inverse() * currentPose * baseToLaser).matrix() * tmp;
@@ -161,6 +163,8 @@ int main(int argc, char* argv[])
     double startTime;
     double endTime;
     double scale;
+    double minDistance;
+    double maxDistance;
     size_t combine;
     string outdir;
 
@@ -173,6 +177,8 @@ int main(int argc, char* argv[])
             ("start-time", program_options::value<double>(&startTime)->default_value(946684800), "Start timestamp of export")
             ("end-time", program_options::value<double>(&endTime)->default_value(4102444800), "End timestamp of export")
             ("scale", program_options::value<double>(&scale)->default_value(0.01), "Scale of exported point cloud")
+            ("min,M", program_options::value<double>(&minDistance)->default_value(0.0), "Neglect all points closer than this to the origin")
+            ("max,m", program_options::value<double>(&maxDistance)->default_value(numeric_limits<double>::max()), "Neglect all points further than this from the origin")
             ("combine", program_options::value<size_t>(&combine)->default_value(1), "Combine n scans")
             ("output,o", program_options::value<string>(&outdir)->required(), "output folder")
             ;
@@ -285,12 +291,12 @@ int main(int argc, char* argv[])
         pointClouds.push_back(pointCloud);
 
         if (pointClouds.size() >= combine) {
-            writePointClouds(outdir, scale, pointClouds);
+            writePointClouds(outdir, scale, minDistance, maxDistance, pointClouds);
             pointClouds.clear();
         }
     }
 
-    writePointClouds(outdir, scale, pointClouds);
+    writePointClouds(outdir, scale, minDistance, maxDistance, pointClouds);
     pointClouds.clear();
 
     return 0;
