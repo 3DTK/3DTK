@@ -80,7 +80,7 @@ if(WITH_FBR)
 
   if(UNIX)
     target_link_libraries(graph_balancer scan ${Boost_GRAPH_LIBRARY} ${Boost_SERIALIZATION_LIBRARY} ${Boost_REGEX_LIBRARY} ${Boost_SYSTEM_LIBRARY})
-    target_link_libraries(exportPoints scan dl ${ANN_LIBRARIES} newmat ${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY})
+    target_link_libraries(exportPoints scan dl ${ANN_LIBRARIES} newmat ${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY} ${OpenCV_LIBS})
     target_link_libraries(transformFrames scan dl ${ANN_LIBRARIES} newmat ${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY})
     target_link_libraries(toGlobal scan)
     target_link_libraries(convergence ${Boost_LIBRARIES} ${Boost_SYSTEM_LIBRARY})
