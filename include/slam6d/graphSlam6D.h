@@ -16,7 +16,7 @@ using std::pair;*/
 #include "icp6D.h"
 #include "graph.h"
 #include "newmat/newmatio.h"
-#include "cs.h"
+#include "suitesparse/cs.h"
 
 typedef vector <PtPair> vPtPair;  ///< just a typedef: vPtPair = vector of type PtPair
 using namespace NEWMAT;
