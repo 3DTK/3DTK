@@ -309,23 +309,23 @@ void fill_colliding(std::vector<bool> &allcolliding, std::vector<size_t> const &
     }
 }
 
-size_t handle_pointcloud(std::vector<Point> &pointmodel, DataXYZ &environ,
+size_t handle_pointcloud(std::vector<Point> &pointmodel, DataXYZ &environment,
                        std::vector<Frame> const &trajectory,
                        std::vector<bool> &colliding,
                        double radius, collision_method cmethod, int jobs)
 {
     /* build a KDtree from this scan */
     std::cerr << "reading environment..." << std::endl;
-    double** pa = new double*[environ.size()];
-    for (size_t i = 0; i < environ.size(); ++i) {
+    double** pa = new double*[environment.size()];
+    for (size_t i = 0; i < environment.size(); ++i) {
         pa[i] = new double[3];
-        pa[i][0] = environ[i][0];
-        pa[i][1] = environ[i][1];
-        pa[i][2] = environ[i][2];
+        pa[i][0] = environment[i][0];
+        pa[i][1] = environment[i][1];
+        pa[i][2] = environment[i][2];
     }
-    std::cerr << "environment: " << environ.size() << std::endl;
+    std::cerr << "environment: " << environment.size() << std::endl;
     std::cerr << "building kd tree..." << std::endl;
-    KDtreeIndexed t(pa, environ.size());
+    KDtreeIndexed t(pa, environment.size());
     /* initialize variables */
     double sqRad2 = radius*radius;
     std::cerr << "computing collisions with r = " << radius << " and " << jobs << " threads" << std::endl;
@@ -417,7 +417,7 @@ size_t handle_pointcloud(std::vector<Point> &pointmodel, DataXYZ &environ,
     size_t num_colliding = 0;
     // the actual implementation of std::vector<bool> requires us to use the
     // proxy iterator pattern with &&...
-    for (size_t i = 0; i < environ.size(); ++i) {
+    for (size_t i = 0; i < environment.size(); ++i) {
         if (colliding[i]) {
             num_colliding++;
         }
@@ -425,7 +425,7 @@ size_t handle_pointcloud(std::vector<Point> &pointmodel, DataXYZ &environ,
     time_t after = time(NULL);
     std::cerr << "colliding: " << num_colliding << std::endl;
     std::cerr << "took: " << difftime(after, before) << " seconds" << std::endl;
-    for (size_t i = 0; i < environ.size(); ++i) {
+    for (size_t i = 0; i < environment.size(); ++i) {
         delete[] pa[i];
     }
     delete[] pa;
@@ -518,7 +518,7 @@ void multiplyMatrix(const double* m1, const double* m2, double* mProduct )
 	mProduct[15]=m1[3]*m2[12]+m1[7]*m2[13]+m1[11]*m2[14]+m1[15]*m2[15];     
 }
 
-size_t cuda_handle_pointcloud(int cuda_device, std::vector<Point> &pointmodel, DataXYZ &environ,
+size_t cuda_handle_pointcloud(int cuda_device, std::vector<Point> &pointmodel, DataXYZ &environment,
 		std::vector<Frame> const &trajectory,
 		std::vector<bool> &colliding,
 		double radius, collision_method cmethod)
@@ -535,18 +535,18 @@ size_t cuda_handle_pointcloud(int cuda_device, std::vector<Point> &pointmodel, D
 	CuGrid grid(cuda_device);
 	
 	
-	double *env_xyz=new double[environ.size()*3];
+	double *env_xyz=new double[environment.size()*3];
 	//Copy data
-	for(unsigned int i=0;i<environ.size();++i)
+	for(unsigned int i=0;i<environment.size();++i)
 	{
-		env_xyz[3*i+0]=-environ[i][1];
-		env_xyz[3*i+1]=environ[i][2];
-		env_xyz[3*i+2]=environ[i][0];
+		env_xyz[3*i+0]=-environment[i][1];
+		env_xyz[3*i+1]=environment[i][2];
+		env_xyz[3*i+2]=environment[i][0];
 	}
-	grid.SetD(env_xyz,environ.size());	//xyz swaped
+	grid.SetD(env_xyz,environment.size());	//xyz swaped
 	delete[] env_xyz;
 	
-	//grid.SetD((double*)environ.get_raw_pointer(),environ.size());
+	//grid.SetD((double*)environment.get_raw_pointer(),environment.size());
 	
 	double *tmp_xyz=new double[pointmodel.size()*3];
 	//Copy data
@@ -602,7 +602,7 @@ size_t cuda_handle_pointcloud(int cuda_device, std::vector<Point> &pointmodel, D
 	size_t num_colliding = 0;
 	// the actual implementation of std::vector<bool> requires us to use the
 	// proxy iterator pattern with &&...
-	for (unsigned int i = 0; i < environ.size(); ++i)
+	for (unsigned int i = 0; i < environment.size(); ++i)
 	{
 		if (colliding[i])
 		{
@@ -612,7 +612,7 @@ size_t cuda_handle_pointcloud(int cuda_device, std::vector<Point> &pointmodel, D
 	
 	
 	float time = float( clock () - begin_time ) /  CLOCKS_PER_SEC;
-	printf("colliding: %lu / %u\n",num_colliding,environ.size());
+	printf("colliding: %lu / %u\n",num_colliding,environment.size());
 	std::cerr << "took: " << time << " seconds" << std::endl;
 	
 	
@@ -634,27 +634,27 @@ size_t cuda_handle_pointcloud(int cuda_device, std::vector<Point> &pointmodel, D
 	return num_colliding;
 }
 #endif //WITH_CUDA
-void calculate_collidingdist(DataXYZ &environ,
+void calculate_collidingdist(DataXYZ &environment,
                              std::vector<bool> const &colliding,
                              size_t num_colliding,
                              std::vector<float> &dist_colliding, int jobs)
 {
     /* build a kdtree for the non-colliding points */
     std::cerr << "reading environment..." << std::endl;
-    size_t num_noncolliding = environ.size() - num_colliding;
+    size_t num_noncolliding = environment.size() - num_colliding;
     double** pa = new double*[num_noncolliding];
     size_t* idxmap = new size_t[num_noncolliding];
     size_t* colliding_idx = new size_t[num_colliding];
-    for (size_t i = 0, j = 0, k = 0; i < environ.size(); ++i) {
+    for (size_t i = 0, j = 0, k = 0; i < environment.size(); ++i) {
         if (colliding[i]) {
 			colliding_idx[k] = i;
 			k++;
             continue;
         }
         pa[j] = new double[3];
-        pa[j][0] = environ[i][0];
-        pa[j][1] = environ[i][1];
-        pa[j][2] = environ[i][2];
+        pa[j][0] = environment[i][0];
+        pa[j][1] = environment[i][1];
+        pa[j][2] = environment[i][2];
         idxmap[j] = i;
         j++;
     }
@@ -686,17 +686,17 @@ void calculate_collidingdist(DataXYZ &environ,
         std::cerr << (i*100.0)/num_colliding << " %\r";
         std::cerr.flush();
 		size_t idx = colliding_idx[i];
-        double point1[3] = {environ[idx][0], environ[idx][1], environ[idx][2]};
+        double point1[3] = {environment[idx][0], environment[idx][1], environment[idx][2]};
         // for this colliding point, find the closest non-colliding one
         size_t c = t.FindClosest(point1, 1000000, thread_num);
         /*if (colliding[c]) {
             std::cerr << "result cannot be part of colliding points" << std::endl;
-            std::cerr << environ[i][0] << " " << environ[i][1] << " " << environ[i][2] << std::endl;
-            std::cerr << environ[c][0] << " " << environ[c][1] << " " << environ[c][2] << std::endl;
+            std::cerr << environment[i][0] << " " << environment[i][1] << " " << environment[i][2] << std::endl;
+            std::cerr << environment[c][0] << " " << environment[c][1] << " " << environment[c][2] << std::endl;
             exit(1);
         }*/
         c = idxmap[c];
-        double point2[3] = {environ[c][0], environ[c][1], environ[c][2]};
+        double point2[3] = {environment[c][0], environment[c][1], environment[c][2]};
         dist_colliding[i] = sqrt(Dist2(point1, point2));
     }
 	// print an empty line to start new output not in the same line that
@@ -711,7 +711,7 @@ void calculate_collidingdist(DataXYZ &environ,
     delete[] idxmap;
 }
 
-void calculate_collidingdist2(std::vector<Point> &pointmodel, DataXYZ &environ,
+void calculate_collidingdist2(std::vector<Point> &pointmodel, DataXYZ &environment,
                              std::vector<Frame> const &trajectory,
                              std::vector<bool> const &colliding,
                              size_t num_colliding,
@@ -721,14 +721,14 @@ void calculate_collidingdist2(std::vector<Point> &pointmodel, DataXYZ &environ,
     /* build a kdtree for colliding points */
     std::cerr << "reading environment..." << std::endl;
     double** pa = new double*[num_colliding];
-    for (size_t i = 0, j = 0; i < environ.size(); ++i) {
+    for (size_t i = 0, j = 0; i < environment.size(); ++i) {
         if (!colliding[i]) {
             continue;
         }
         pa[j] = new double[3];
-        pa[j][0] = environ[i][0];
-        pa[j][1] = environ[i][1];
-        pa[j][2] = environ[i][2];
+        pa[j][0] = environment[i][0];
+        pa[j][1] = environment[i][1];
+        pa[j][2] = environment[i][2];
         j++;
     }
     std::cerr << "colliding: " << num_colliding << std::endl;
@@ -864,10 +864,10 @@ int main(int argc, char **argv)
 	}
 
     DataXYZ model(reduce ? it[0]->get("xyz reduced") : it[0]->get("xyz"));
-    DataXYZ environ(reduce ? it[1]->get("xyz reduced") : it[1]->get("xyz"));
+    DataXYZ environment(reduce ? it[1]->get("xyz reduced") : it[1]->get("xyz"));
     DataReflectance refl(reduce ? it[1]->get("reflectance reduced") : it[1]->get("reflectance"));
     std::vector<bool> colliding;
-    colliding.resize(environ.size(), false); // by default, nothing collides
+    colliding.resize(environment.size(), false); // by default, nothing collides
     std::cerr << "reading model..." << std::endl;
     vector<Point> pointmodel;
     for(unsigned int j = 0; j < model.size(); j++) {
@@ -891,7 +891,7 @@ int main(int argc, char **argv)
 		}
 		
 		std::cerr << "built with CUDA; use_cuda selected; will use CUDA\n";
-		num_colliding = cuda_handle_pointcloud(cuda_device,pointmodel, environ, trajectory, colliding, radius, cmethod);
+		num_colliding = cuda_handle_pointcloud(cuda_device,pointmodel, environment, trajectory, colliding, radius, cmethod);
 		// FIXME: when there is no CUDA devices use CPU version
 #else
 		std::cerr << "built without CUDA; use_cuda selected\n";
@@ -908,12 +908,12 @@ int main(int argc, char **argv)
 #endif
 	
 		if (cmethod == CTYPE3) {
-			num_colliding = environ.size();
-			for (unsigned int i = 0; i < environ.size(); ++i) {
+			num_colliding = environment.size();
+			for (unsigned int i = 0; i < environment.size(); ++i) {
 				colliding[i] = true;
 			}
 		} else {
-			num_colliding = handle_pointcloud(pointmodel, environ, trajectory, colliding, radius, cmethod, jobs);
+			num_colliding = handle_pointcloud(pointmodel, environment, trajectory, colliding, radius, cmethod, jobs);
 		}
 	}
     if (num_colliding == 0) {
@@ -926,12 +926,12 @@ int main(int argc, char **argv)
     if (calcdistances) {
         switch (pdmethod) {
             case PDTYPE1:
-                calculate_collidingdist(environ, colliding, num_colliding, dist_colliding, jobs);
+                calculate_collidingdist(environment, colliding, num_colliding, dist_colliding, jobs);
                 break;
             case PDTYPE2:
-                calculate_collidingdist2(pointmodel, environ, trajectory, colliding, num_colliding, dist_colliding, radius, jobs);
+                calculate_collidingdist2(pointmodel, environment, trajectory, colliding, num_colliding, dist_colliding, radius, jobs);
                 break;
         }
     }
-    write_xyzr(environ, refl, dir, colliding, dist_colliding, radius);
+    write_xyzr(environment, refl, dir, colliding, dist_colliding, radius);
 }
