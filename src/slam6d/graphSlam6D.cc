@@ -24,7 +24,7 @@
 #endif
 
 #include "slam6d/graphSlam6D.h"
-#include "cs.h"
+#include "suitesparse/cs.h"
 
 #include <cfloat>
 #include <fstream>

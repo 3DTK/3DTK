@@ -21,7 +21,7 @@
 #endif
 
 #include "slam6d/lum6Dquat.h"
-#include "cs.h"
+#include "suitesparse/cs.h"
 
 #include <cfloat>
 #include <fstream>

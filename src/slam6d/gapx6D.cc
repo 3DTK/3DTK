@@ -23,7 +23,7 @@
 
 #include "slam6d/gapx6D.h"
 #include "slam6d/icp6Dapx.h"
-#include "cs.h"
+#include "suitesparse/cs.h"
 
 #include <cfloat>
 #include <fstream>
