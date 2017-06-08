@@ -538,7 +538,12 @@ int parseArgs(int argc,char **argv,
   notify(vm);
 
   // Parse global config file in $XDG_CONFIG_HOME/3dtk/show.ini
+#ifndef _MSC_VER
   char *home_c = getenv("HOME");
+#else
+  char *home_c = getenv("USERPROFILE");
+#endif _MSC_VER
+  if (!home_c) home_c = "";
   char *config_home_c = getenv("XDG_CONFIG_HOME");
   string config_home;
   if (config_home_c && *config_home_c != '\0') {
