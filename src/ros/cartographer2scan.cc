@@ -305,7 +305,7 @@ int main(int argc, char* argv[])
                 l->lookupTransform ("/map", "/base_link", m.getTime(), baseTransform);
                 l->lookupTransform ("/base_link", message->header.frame_id, m.getTime(), laserTransform);
             } catch (...) {
-                cout << "failed lookup!" << endl;
+                cout << "Failed to look up transforms!" << endl;
                 continue;
             }
 
@@ -352,7 +352,7 @@ int main(int argc, char* argv[])
                 l->lookupTransform ("/map", "/base_link", m.getTime(), baseTransform);
                 l->lookupTransform ("/base_link", message->header.frame_id, m.getTime(), laserTransform);
             } catch (...) {
-                cout << "failed lookup!" << endl;
+                cout << "Failed to look up transforms!" << endl;
                 continue;
             }
 
@@ -409,7 +409,7 @@ int main(int argc, char* argv[])
                 l->lookupTransform ("/map", "/base_link", m.getTime(), baseTransform);
                 l->lookupTransform ("/base_link", message->header.frame_id, m.getTime(), laserTransform);
             } catch (...) {
-                cout << "failed lookup!" << endl;
+                cout << "Failed to look up transforms!" << endl;
                 continue;
             }
 
