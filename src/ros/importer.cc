@@ -31,6 +31,7 @@ void scanstruct::setTransform(double *mat, double x, double y, double z) {
 
 void timedImporter::on_echo_transformed(echo_type echo)
 {
+  scanlib::pointcloud::on_echo_transformed(echo);
   
   if(pointcloud::first == echo || pointcloud::interior == echo) return;
   /*
