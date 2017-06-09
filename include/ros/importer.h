@@ -42,6 +42,7 @@ using std::vector;
 #include <sstream>
 using std::stringstream;
 using std::string;
+using std::set;
 
 #include <ros/ros.h>
 
@@ -128,7 +129,11 @@ public:
     }
 
     void import() {
+#ifdef WITH_OLD_RIVLIB
+      std::tr1::shared_ptr<basic_rconnection> rc;
+#else
       std::shared_ptr<basic_rconnection> rc;
+#endif
 //      ROS_INFO("open file %s for reading scans...", rxpfile.c_str());
       rc = basic_rconnection::create( rxpfile );
       rc->open();
