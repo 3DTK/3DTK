@@ -21,6 +21,7 @@
 
 #include <sensor_msgs/PointCloud2.h>
 #include <pcl_conversions/pcl_conversions.h>
+#include <sensor_msgs/MultiEchoLaserScan.h>
 
 #include <string>
 #include <boost/lexical_cast.hpp>
@@ -68,6 +69,12 @@ void addStaticTransforms(tf::Transformer *l, ros::Time t) {
 
     q.setRPY(0, 1.3963, 0);
     l->setTransform(tf::StampedTransform(tf::Transform(q, tf::Vector3(0.19, 0, 0.04)), t, "/base_link", "/vertical_vlp16_link"));
+
+    q.setRPY(0, 0, 0);
+    l->setTransform(tf::StampedTransform(tf::Transform(q, tf::Vector3(0.1007, 0, 0.0558)), t, "/base_link", "/horizontal_laser_link"));
+
+    q.setRPY(0, -1.570796, 3.141593);
+    l->setTransform(tf::StampedTransform(tf::Transform(q, tf::Vector3(0.1007, 0, 0.1814)), t, "/base_link", "/vertical_laser_link"));
 }
 
 struct PointCloudWithTransform {
@@ -159,7 +166,9 @@ int main(int argc, char* argv[])
 {
     string bagfile;
     string trajectoryfile;
-    vector<string> topicsScans;
+    vector<string> topicsPointCloud2;
+    vector<string> topicsMultiEchoLaserScan;
+    vector<string> topicsLaserScan;
     double startTime;
     double endTime;
     double scale;
@@ -173,12 +182,14 @@ int main(int argc, char* argv[])
             ("help,h", "produce help message")
             ("bag,b", program_options::value<string>(&bagfile)->required(), "input ros bag file")
             ("trajectory,t", program_options::value<string>(&trajectoryfile)->required(), "input trajectory file")
-            ("topics", program_options::value<vector<string> >(&topicsScans)->multitoken()->default_value(vector<string> {"horizontal_laser_3d", "vertical_laser_3d"}), "Topics with PointCloud2 messages for export")
+            ("topics-PointCloud2", program_options::value<vector<string> >(&topicsPointCloud2)->multitoken()->default_value(vector<string> {"horizontal_laser_3d", "vertical_laser_3d"}), "Topics with PointCloud2 messages for export")
+            ("topics-MultiEchoLaserScan", program_options::value<vector<string> >(&topicsMultiEchoLaserScan)->multitoken()->default_value(vector<string> {"horizontal_laser_2d", "vertical_laser_2d"}), "Topics with MultiEchoLaserScan messages for export")
+            ("topics-LaserScan", program_options::value<vector<string> >(&topicsLaserScan)->multitoken()->default_value(vector<string>()), "Topics with LaserScan messages for export")
             ("start-time", program_options::value<double>(&startTime)->default_value(946684800), "Start timestamp of export")
             ("end-time", program_options::value<double>(&endTime)->default_value(4102444800), "End timestamp of export")
             ("scale", program_options::value<double>(&scale)->default_value(0.01), "Scale of exported point cloud")
             ("min,M", program_options::value<double>(&minDistance)->default_value(0.0), "Neglect all points closer than this to the origin")
-            ("max,m", program_options::value<double>(&maxDistance)->default_value(numeric_limits<double>::max()), "Neglect all points further than this from the origin")
+            ("max,m", program_options::value<double>(&maxDistance)->default_value(std::numeric_limits<double>::max()), "Neglect all points further than this from the origin")
             ("combine", program_options::value<size_t>(&combine)->default_value(1), "Combine n scans")
             ("output,o", program_options::value<string>(&outdir)->required(), "output folder")
             ;
@@ -253,51 +264,112 @@ int main(int argc, char* argv[])
     cout << "Done reading trajectory." << endl;
 
 
-    rosbag::Bag bag(bagfile);
-    rosbag::View viewScans(bag, rosbag::TopicQuery(topicsScans));
+    if (topicsPointCloud2.size() > 0) {
+        rosbag::Bag bag(bagfile);
+        rosbag::View viewScans(bag, rosbag::TopicQuery(topicsPointCloud2));
 
-    tf::StampedTransform startTransform;
+        tf::StampedTransform startTransform;
 
-    vector<PointCloudWithTransform> pointClouds;
+        vector<PointCloudWithTransform> pointClouds;
 
-    for (rosbag::MessageInstance const m : viewScans) {
-        sensor_msgs::PointCloud2ConstPtr message = m.instantiate<sensor_msgs::PointCloud2>();
+        for (rosbag::MessageInstance const m : viewScans) {
+            sensor_msgs::PointCloud2ConstPtr message = m.instantiate<sensor_msgs::PointCloud2>();
 
-        if (m.getTime() < ros::Time(startTime) || m.getTime() > ros::Time(endTime)) {
-            continue;
+            if (m.getTime() < ros::Time(startTime) || m.getTime() > ros::Time(endTime)) {
+                continue;
+            }
+
+            tf::StampedTransform baseTransform;
+            tf::StampedTransform laserTransform;
+            try {
+                l->lookupTransform ("/map", "/base_link", m.getTime(), baseTransform);
+                l->lookupTransform ("/base_link", message->header.frame_id, m.getTime(), laserTransform);
+            } catch (...) {
+                cout << "failed lookup!" << endl;
+                continue;
+            }
+
+            pcl::PCLPointCloud2 pcl_pc2;
+            pcl_conversions::toPCL(*message,pcl_pc2);
+            pcl::PointCloud<pcl::PointXYZ>::Ptr temp_cloud(new pcl::PointCloud<pcl::PointXYZ>);
+            pcl::fromPCLPointCloud2(pcl_pc2,*temp_cloud);
+
+            PointCloudWithTransform pointCloud;
+            pointCloud.timestamp = m.getTime();
+            pointCloud.pose = baseTransform;
+            pointCloud.calibration = laserTransform;
+            pointCloud.cloud = temp_cloud;
+
+            pointClouds.push_back(pointCloud);
+
+            if (pointClouds.size() >= combine) {
+                writePointClouds(outdir, scale, minDistance, maxDistance, pointClouds);
+                pointClouds.clear();
+            }
         }
 
-        tf::StampedTransform baseTransform;
-        tf::StampedTransform laserTransform;
-        try {
-            l->lookupTransform ("/map", "/base_link", m.getTime(), baseTransform);
-            l->lookupTransform ("/base_link", message->header.frame_id, m.getTime(), laserTransform);
-        } catch (...) {
-            cout << "failed lookup!" << endl;
-            continue;
-        }
-
-        pcl::PCLPointCloud2 pcl_pc2;
-        pcl_conversions::toPCL(*message,pcl_pc2);
-        pcl::PointCloud<pcl::PointXYZ>::Ptr temp_cloud(new pcl::PointCloud<pcl::PointXYZ>);
-        pcl::fromPCLPointCloud2(pcl_pc2,*temp_cloud);
-
-        PointCloudWithTransform pointCloud;
-        pointCloud.timestamp = m.getTime();
-        pointCloud.pose = baseTransform;
-        pointCloud.calibration = laserTransform;
-        pointCloud.cloud = temp_cloud;
-
-        pointClouds.push_back(pointCloud);
-
-        if (pointClouds.size() >= combine) {
-            writePointClouds(outdir, scale, minDistance, maxDistance, pointClouds);
-            pointClouds.clear();
-        }
+        writePointClouds(outdir, scale, minDistance, maxDistance, pointClouds);
+        pointClouds.clear();
     }
 
-    writePointClouds(outdir, scale, minDistance, maxDistance, pointClouds);
-    pointClouds.clear();
+
+    if (topicsMultiEchoLaserScan.size() > 0) {
+        rosbag::Bag bag(bagfile);
+        rosbag::View viewScans(bag, rosbag::TopicQuery(topicsMultiEchoLaserScan));
+
+        tf::StampedTransform startTransform;
+
+        vector<PointCloudWithTransform> pointClouds;
+
+        for (rosbag::MessageInstance const m : viewScans) {
+            sensor_msgs::MultiEchoLaserScanConstPtr message = m.instantiate<sensor_msgs::MultiEchoLaserScan>();
+
+            if (m.getTime() < ros::Time(startTime) || m.getTime() > ros::Time(endTime)) {
+                continue;
+            }
+
+            tf::StampedTransform baseTransform;
+            tf::StampedTransform laserTransform;
+            try {
+                l->lookupTransform ("/map", "/base_link", m.getTime(), baseTransform);
+                l->lookupTransform ("/base_link", message->header.frame_id, m.getTime(), laserTransform);
+            } catch (...) {
+                cout << "failed lookup!" << endl;
+                continue;
+            }
+
+            pcl::PointCloud<pcl::PointXYZ>::Ptr temp_cloud(new pcl::PointCloud<pcl::PointXYZ>);
+
+            for (int i = 0; i < message->ranges.size(); i++) {
+                double angle = message->angle_min + (double) i * message->angle_increment;
+                for (float echo : message->ranges.at(i).echoes) {
+                    if (std::isnan(echo) || echo < 0.1 || echo > 30.0) continue;
+
+                    float x = echo * cos(angle);
+                    float y = echo * sin(angle);
+                    float z = 0;
+
+                    temp_cloud->push_back(pcl::PointXYZ(x, y, z));
+                }
+            }
+
+            PointCloudWithTransform pointCloud;
+            pointCloud.timestamp = m.getTime();
+            pointCloud.pose = baseTransform;
+            pointCloud.calibration = laserTransform;
+            pointCloud.cloud = temp_cloud;
+
+            pointClouds.push_back(pointCloud);
+
+            if (pointClouds.size() >= combine) {
+                writePointClouds(outdir, scale, minDistance, maxDistance, pointClouds);
+                pointClouds.clear();
+            }
+        }
+
+        writePointClouds(outdir, scale, minDistance, maxDistance, pointClouds);
+        pointClouds.clear();
+    }
 
     return 0;
 }
