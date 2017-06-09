@@ -22,6 +22,7 @@
 #include <sensor_msgs/PointCloud2.h>
 #include <pcl_conversions/pcl_conversions.h>
 #include <sensor_msgs/MultiEchoLaserScan.h>
+#include <sensor_msgs/LaserScan.h>
 
 #include <string>
 #include <boost/lexical_cast.hpp>
@@ -181,7 +182,7 @@ int main(int argc, char* argv[])
     desc.add_options()
             ("help,h", "produce help message")
             ("bag,b", program_options::value<string>(&bagfile)->required(), "input ros bag file")
-            ("trajectory,t", program_options::value<string>(&trajectoryfile)->required(), "input trajectory file")
+            ("trajectory,t", program_options::value<string>(&trajectoryfile)->default_value(""), "input trajectory file")
             ("topics-PointCloud2", program_options::value<vector<string> >(&topicsPointCloud2)->multitoken()->default_value(vector<string> {"horizontal_laser_3d", "vertical_laser_3d"}), "Topics with PointCloud2 messages for export")
             ("topics-MultiEchoLaserScan", program_options::value<vector<string> >(&topicsMultiEchoLaserScan)->multitoken()->default_value(vector<string> {"horizontal_laser_2d", "vertical_laser_2d"}), "Topics with MultiEchoLaserScan messages for export")
             ("topics-LaserScan", program_options::value<vector<string> >(&topicsLaserScan)->multitoken()->default_value(vector<string>()), "Topics with LaserScan messages for export")
@@ -207,58 +208,79 @@ int main(int argc, char* argv[])
     filesystem::create_directory(outdir);
 
 
-    ifstream data(trajectoryfile);
+    tf::Transformer *l = NULL;
 
-    tf::Transformer *l = new tf::Transformer(true, ros::Duration(3600));
+    if (trajectoryfile.size() > 0) {
+        l = new tf::Transformer(true, ros::Duration(3600));
 
-    string line;
-    while(getline(data,line)) {
-        trim(line);
+        ifstream data(trajectoryfile);
 
-        vector<string> words;
-        split(words, line, is_any_of("\t "), token_compress_on);
+        string line;
+        while(getline(data,line)) {
+            trim(line);
 
-        if (words.at(0).find("\%") != string::npos) {
-            continue;
+            vector<string> words;
+            split(words, line, is_any_of("\t "), token_compress_on);
+
+            if (words.at(0).find("\%") != string::npos) {
+                continue;
+            }
+
+            if (words.size() != 8) {
+                cout << "ERROR: Read invalid line" << endl;
+                continue;
+            }
+
+            double time, x, y, z, qw, qx, qy, qz;
+
+            try {
+                time = stod(words.at(0));
+                x = stod(words.at(1));
+                y = stod(words.at(2));
+                z = stod(words.at(3));
+                qw = stod(words.at(4));
+                qx = stod(words.at(5));
+                qy = stod(words.at(6));
+                qz = stod(words.at(7));
+            } catch (...) {
+                cout << "ERROR: Read invalid line" << endl;
+                continue;
+            }
+
+            Eigen::Affine3d transform = Eigen::Affine3d::Identity();
+            transform.translate(Eigen::Vector3d(x, y, z));
+            transform.rotate(Eigen::Quaterniond(qw, qx, qy, qz));
+
+            Eigen::Matrix4d pose = transform.matrix();
+
+            tf::Transform rosTF;
+            tf::transformEigenToTF(Eigen::Affine3d(pose), rosTF);
+
+            tf::StampedTransform trans;
+            trans = tf::StampedTransform(rosTF, ros::Time(time), "/map", "/base_link" );
+
+            l->setTransform(trans);
+            addStaticTransforms(l, trans.stamp_);
+
+            cout << setprecision(20) << time << endl;
         }
+    } else {
+        rosbag::Bag bag(bagfile);
+        rosbag::View tfview(bag, rosbag::TopicQuery("/tf"));
 
-        if (words.size() != 8) {
-            cout << "ERROR: Read invalid line" << endl;
-            continue;
+        l = new tf::Transformer(true, tfview.getEndTime() - tfview.getBeginTime());
+
+        for (rosbag::MessageInstance const m : tfview) {
+            if (m.isType<tf::tfMessage>()) {
+                tf::tfMessageConstPtr tfm = m.instantiate<tf::tfMessage>();
+                for (unsigned int i = 0; i < tfm->transforms.size(); i++) {
+                    tf::StampedTransform trans;
+                    transformStampedMsgToTF(tfm->transforms[i], trans);
+
+                    l->setTransform(trans);
+                }
+            }
         }
-
-        double time, x, y, z, qw, qx, qy, qz;
-
-        try {
-            time = stod(words.at(0));
-            x = stod(words.at(1));
-            y = stod(words.at(2));
-            z = stod(words.at(3));
-            qw = stod(words.at(4));
-            qx = stod(words.at(5));
-            qy = stod(words.at(6));
-            qz = stod(words.at(7));
-        } catch (...) {
-            cout << "ERROR: Read invalid line" << endl;
-            continue;
-        }
-
-        Eigen::Affine3d transform = Eigen::Affine3d::Identity();
-        transform.translate(Eigen::Vector3d(x, y, z));
-        transform.rotate(Eigen::Quaterniond(qw, qx, qy, qz));
-
-        Eigen::Matrix4d pose = transform.matrix();
-
-        tf::Transform rosTF;
-        tf::transformEigenToTF(Eigen::Affine3d(pose), rosTF);
-
-        tf::StampedTransform trans;
-        trans = tf::StampedTransform(rosTF, ros::Time(time), "/map", "/base_link" );
-
-        l->setTransform(trans);
-        addStaticTransforms(l, trans.stamp_);
-
-        cout << setprecision(20) << time << endl;
     }
 
     cout << "Done reading trajectory." << endl;
@@ -267,8 +289,6 @@ int main(int argc, char* argv[])
     if (topicsPointCloud2.size() > 0) {
         rosbag::Bag bag(bagfile);
         rosbag::View viewScans(bag, rosbag::TopicQuery(topicsPointCloud2));
-
-        tf::StampedTransform startTransform;
 
         vector<PointCloudWithTransform> pointClouds;
 
@@ -317,8 +337,6 @@ int main(int argc, char* argv[])
         rosbag::Bag bag(bagfile);
         rosbag::View viewScans(bag, rosbag::TopicQuery(topicsMultiEchoLaserScan));
 
-        tf::StampedTransform startTransform;
-
         vector<PointCloudWithTransform> pointClouds;
 
         for (rosbag::MessageInstance const m : viewScans) {
@@ -340,7 +358,7 @@ int main(int argc, char* argv[])
 
             pcl::PointCloud<pcl::PointXYZ>::Ptr temp_cloud(new pcl::PointCloud<pcl::PointXYZ>);
 
-            for (int i = 0; i < message->ranges.size(); i++) {
+            for (size_t i = 0; i < message->ranges.size(); i++) {
                 double angle = message->angle_min + (double) i * message->angle_increment;
                 for (float echo : message->ranges.at(i).echoes) {
                     if (std::isnan(echo) || echo < 0.1 || echo > 30.0) continue;
@@ -351,6 +369,63 @@ int main(int argc, char* argv[])
 
                     temp_cloud->push_back(pcl::PointXYZ(x, y, z));
                 }
+            }
+
+            PointCloudWithTransform pointCloud;
+            pointCloud.timestamp = m.getTime();
+            pointCloud.pose = baseTransform;
+            pointCloud.calibration = laserTransform;
+            pointCloud.cloud = temp_cloud;
+
+            pointClouds.push_back(pointCloud);
+
+            if (pointClouds.size() >= combine) {
+                writePointClouds(outdir, scale, minDistance, maxDistance, pointClouds);
+                pointClouds.clear();
+            }
+        }
+
+        writePointClouds(outdir, scale, minDistance, maxDistance, pointClouds);
+        pointClouds.clear();
+    }
+
+
+    if (topicsLaserScan.size() > 0) {
+        rosbag::Bag bag(bagfile);
+        rosbag::View viewScans(bag, rosbag::TopicQuery(topicsLaserScan));
+
+        vector<PointCloudWithTransform> pointClouds;
+
+        for (rosbag::MessageInstance const m : viewScans) {
+            sensor_msgs::LaserScanConstPtr message = m.instantiate<sensor_msgs::LaserScan>();
+
+            if (m.getTime() < ros::Time(startTime) || m.getTime() > ros::Time(endTime)) {
+                continue;
+            }
+
+            tf::StampedTransform baseTransform;
+            tf::StampedTransform laserTransform;
+            try {
+                l->lookupTransform ("/map", "/base_link", m.getTime(), baseTransform);
+                l->lookupTransform ("/base_link", message->header.frame_id, m.getTime(), laserTransform);
+            } catch (...) {
+                cout << "failed lookup!" << endl;
+                continue;
+            }
+
+            pcl::PointCloud<pcl::PointXYZ>::Ptr temp_cloud(new pcl::PointCloud<pcl::PointXYZ>);
+
+            for (size_t i = 0; i < message->ranges.size(); i++) {
+                double angle = message->angle_min + (double) i * message->angle_increment;
+                float echo = message->ranges.at(i);
+
+                if (std::isnan(echo) || echo < 0.1 || echo > 30.0) continue;
+
+                float x = echo * cos(angle);
+                float y = echo * sin(angle);
+                float z = 0;
+
+                temp_cloud->push_back(pcl::PointXYZ(x, y, z));
             }
 
             PointCloudWithTransform pointCloud;
