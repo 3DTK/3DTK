@@ -53,9 +53,6 @@ if(WITH_TOOLS)
     # target_link_libraries(scan_diff2d scan dl ${ANN_LIBRARIES} XGetopt)
   endif()
 
-  add_executable(bps2txt bps2txt.cc)
-  target_link_libraries(bps2txt b3dfile)
-
   add_executable(frame_to_graph frame_to_graph.cc)
   add_executable(convergence convergence.cc)
   add_executable(graph_balancer graph_balancer.cc)

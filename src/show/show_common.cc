@@ -1024,10 +1024,6 @@ void initShow(int argc, char **argv){
   defaultZoom *= scale;
   voxelSize *= scale;
 
-  if (type == B3D ) {
-	  voxelSize = 0.2;
-  }
-
   ////////////////////////
   SDisplay::readDisplays(loadObj, displays);
   ////////////////////

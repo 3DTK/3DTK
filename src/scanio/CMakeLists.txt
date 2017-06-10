@@ -5,9 +5,12 @@ else()
 endif()
 
 set(SCANIO_LIBNAMES
-  
-  b3d faro_xyz_rgbr ks ks_rgb leica_xyzr ply pts ptsr pts_rgb pts_rgbr pts_rrgb riegl_rgb riegl_txt rts uos uosr uos_rgb uos_rgbr uos_rrgb uos_rrgbt velodyne xyz xyzr xyz_rgb xyz_rgba xyz_rgbr xyz_rrgb
+  faro_xyz_rgbr ks ks_rgb leica_xyzr ply pts ptsr pts_rgb pts_rgbr pts_rrgb riegl_rgb riegl_txt rts uos uosr uos_rgb uos_rgbr uos_rrgb uos_rrgbt velodyne xyz xyzr xyz_rgb xyz_rgba xyz_rgbr xyz_rrgb
 )
+
+if(WITH_B3D)
+  set(SCANIO_LIBNAMES ${SCANIO_LIBNAMES} b3d)
+endif()
 
 if(WITH_RIVLIB)
   set(SCANIO_LIBNAMES ${SCANIO_LIBNAMES} rxp)
@@ -34,7 +37,6 @@ else()
 endif()  
   target_link_libraries(scan_io_${libname} ${Boost_LIBRARIES} ${Boost_PROGRAM_OPTIONS_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY} scanio scan_io_helper pointfilter )
 endforeach()
-target_link_libraries(scan_io_b3d b3dfile)
 target_link_libraries(scan_io_ply rply)
 
 if(WITH_RIVLIB)
@@ -51,6 +53,10 @@ else()
   add_library(scanio SHARED scan_io.cc ../slam6d/io_types.cc)
 endif() 
 
+if(WITH_B3D)
+  target_link_libraries(scan_io_b3d b3dfile scanio)
+endif()
+  
 if(UNIX)
   target_link_libraries(scanio dl scan_io_helper ${Boost_SYSTEM_LIBRARY})
 else()
