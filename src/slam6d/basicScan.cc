@@ -209,7 +209,7 @@ BasicScan::BasicScan(const std::string& path,
   if (Scan::continue_processing) {
     sio->readPoseFromFrames(m_path.c_str(), m_identifier.c_str(), euler);    
   } else {
-    sio->readPose(m_path.c_str(), m_identifier.c_str(), euler);
+    sio->readPose(m_path.c_str(), m_identifier.c_str(), euler, &m_timestamp);
   }
   rPos[0] = euler[0];
   rPos[1] = euler[1];
