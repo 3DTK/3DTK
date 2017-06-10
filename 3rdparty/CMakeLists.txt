@@ -161,12 +161,14 @@ ENDIF(EXPORT_SHARED_LIBS)
 
 endif(WIN32)
 
-SET(B3DDIR ${PROJECT_SOURCE_DIR}/3rdparty/b3dfile/)
-add_library(b3dfile STATIC ${B3DDIR}b3dpsreader.cpp)
-set_target_properties(b3dfile PROPERTIES POSITION_INDEPENDENT_CODE ON)
-IF(EXPORT_SHARED_LIBS)
-  add_library(b3dfile_s SHARED ${B3DDIR}b3dpsreader.cpp)
-ENDIF(EXPORT_SHARED_LIBS)
+IF(WITH_B3D)
+  SET(B3DDIR ${PROJECT_SOURCE_DIR}/3rdparty/b3dfile/)
+  add_library(b3dfile STATIC ${B3DDIR}b3dpsreader.cpp)
+  set_target_properties(b3dfile PROPERTIES POSITION_INDEPENDENT_CODE ON)
+  IF(EXPORT_SHARED_LIBS)
+    add_library(b3dfile_s SHARED ${B3DDIR}b3dpsreader.cpp)
+  ENDIF(EXPORT_SHARED_LIBS)
+ENDIF(WITH_B3D)
 
 if(NOT ${NEWMAT_FOUND})
 # Compile newmat library
