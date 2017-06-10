@@ -219,7 +219,9 @@ public:
   inline int getBucketSize() const;
   
   virtual const char* getIdentifier() const = 0;
-  
+  virtual const std::string getPath() const { return ""; };
+  virtual const double getTimeStamp() const { return 0; };
+
   //! Determine the maximum number of reduced points in \a scans
   static size_t getMaxCountReduced(ScanVector& scans);
   

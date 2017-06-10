@@ -29,6 +29,8 @@ public:
   virtual void setScaleFilter(double scale);
 
   virtual const char* getIdentifier() const { return m_identifier.c_str(); }
+  virtual const std::string getPath() const { return m_path; }
+  virtual const double getTimeStamp() const { return m_timestamp; }
 
   virtual time_t getLastModified();
   virtual DataPointer get(const std::string& identifier);
@@ -65,7 +67,7 @@ private:
 
   IOType m_type;
 
-  double m_filter_max, m_filter_min, m_filter_top, m_filter_bottom, m_range_mutation, m_filter_scale;
+  double m_filter_max, m_filter_min, m_filter_top, m_filter_bottom, m_range_mutation, m_filter_scale, m_timestamp;
   bool m_filter_range_set, m_filter_height_set, m_filter_custom_set, m_range_mutation_set, m_filter_scale_set;
   std::string customFilterStr;
 

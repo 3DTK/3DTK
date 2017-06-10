@@ -46,7 +46,8 @@ public:
    * @param pose Pointer to an existing double[6] array where the pose is saved in
    */
   virtual void readPose(const char* dir_path, const char* identifier, double* pose) = 0;
-  
+  virtual void readPose(const char* dir_path, const char* identifier, double* pose, double* timestamp) { readPose(dir_path, identifier, pose); }
+
   /**
    * Reads the pose from a dedicated pose file or from the scan file.
    *
