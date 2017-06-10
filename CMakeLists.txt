@@ -343,6 +343,17 @@ else()
   message(STATUS "Do NOT compile a scan IO for RXP")
 endif()
 
+## B3D
+OPT_DEP(WITH_B3D "Whether the B3D file format is supported. ON/OFF" OFF "")
+
+if(WITH_B3D)
+  add_definitions(-DWITH_B3D)
+  include_directories(${PROJECT_SOURCE_DIR}/3rdparty/b3dfile)
+  message(STATUS "Compiling a scan IO for B3D files")
+else()
+  message(STATUS "Do NOT compile a scan IO for B3D files")
+endif()
+
 ## PMD
 OPT_DEP(WITH_PMD "Whether to build the PMD tools like grabVideoAnd3D calibrate etc. ON/OFF" OFF "")
 
@@ -466,7 +477,6 @@ endif()
 
 
 # 3rdparty
-include_directories(${PROJECT_SOURCE_DIR}/3rdparty/b3dfile)
 if(APPLE)
   include_directories(${PROJECT_SOURCE_DIR}/3rdparty/cxsparse-4.4.4)
 endif()
