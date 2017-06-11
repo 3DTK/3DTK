@@ -1,5 +1,9 @@
 #include <cmath>
 
+#ifdef _MSC_VER
+#include "windows.h"
+#endif
+
 #ifdef __APPLE__
   #include <GLUT/glut.h>
 #else
