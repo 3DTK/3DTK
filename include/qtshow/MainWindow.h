@@ -3,19 +3,18 @@
 
 #include <QMainWindow>
 
+#include "show/program_options.h"
+
 #include "ui_MainWindow.h"
 
-class MainWindow : public QMainWindow {
+class MainWindow : public QMainWindow, private Ui::MainWindow {
   Q_OBJECT
 
 public:
-  MainWindow(QWidget *parent = 0);
+  MainWindow(const window_settings& ws, QWidget *parent = 0);
 
 public slots:
   void pickScanDirectory();
-
-private:
-  Ui::MainWindow ui;
 };
 
 #endif
