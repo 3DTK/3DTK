@@ -17,6 +17,7 @@
  */
 
 #include "show/show_common.h"
+#include "show/program_options.h"
 
 #include <csignal>
 
@@ -62,7 +63,19 @@ int main(int argc, char **argv)
   signal(SIGINT,  signal_interrupt);
   signal(SIGTERM, signal_interrupt);
 
-  initShow(argc, argv);
+  glutInit(&argc, argv);
+
+  dataset_settings ds;
+  window_settings ws;
+
+  try {
+    parse_args(argc, argv, ds, ws);
+  } catch (std::exception e) {
+    std::cerr << "Error while parsing settings: " << e.what() << endl;
+    exit(1);
+  }
+
+  initShow(ds, ws);
   initScreenWindow();
 
   if (!nogui && !takescreenshot)
