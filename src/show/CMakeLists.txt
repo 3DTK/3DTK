@@ -16,7 +16,7 @@ else()
   message(STATUS "Not using opengl extensions")
 endif()
 
-add_library(show_objects OBJECT NurbsPath.cc  PathGraph.cc vertexarray.cc  viewcull.cc colormanager.cc compacttree.cc scancolormanager.cc display.cc show_common.cc show_menu.cc show_gl.cc show_animate.cc)
+add_library(show_objects OBJECT NurbsPath.cc  PathGraph.cc vertexarray.cc  viewcull.cc colormanager.cc compacttree.cc scancolormanager.cc display.cc show_common.cc show_menu.cc show_gl.cc show_animate.cc program_options.cc)
 
 # compile with -fPIC so that the result can be made into a shared library
 set_property(TARGET show_objects PROPERTY POSITION_INDEPENDENT_CODE 1)

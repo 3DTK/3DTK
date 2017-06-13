@@ -23,6 +23,7 @@
 #include "show/compacttree.h"
 #include "show/NurbsPath.h"
 #include "show/vertexarray.h"
+#include "show/program_options.h"
 #ifndef DYNAMIC_OBJECT_REMOVAL
 #include "slam6d/scan.h"
 #include "slam6d/managedScan.h"
@@ -35,8 +36,6 @@
 #include <stdexcept>
 #include <algorithm>
 #include <map>
-
-#include <boost/program_options.hpp>
 
 #ifdef _MSC_VER
 #define strcasecmp _stricmp
@@ -351,55 +350,9 @@ extern int current_frame;
 #include "show/show_animate.h"
 #include "show/show_gl.h"
 
-/**
- * Parses arguments to `show`. The arguments come from these sources:
- *  - user config file in ~/.config/3dtk/show.ini
- *  - a file named "config" in the input directory
- *  - command line arguments
- *
- * Config files have an "option=value" pair on each line with option names just
- * like the command line arguments.
- *
- * @param argc the number of arguments
- * @param argv the arguments
- * @param dir parsing result - the directory
- * @param start parsing result - starting at scan number 'start'
- * @param end parsing result - stopping at scan number 'end'
- * @param maxDist parsing result - maximal distance
- * @param minDist parsing result - minimal distance
- * @param red parsing result - reduce points with octtree
- * @param readInitial ignored
- * @param octtree parsing result - reduce points with randomized octtree
- * @param ptype parsing result - PointType of the input
- * @param fps parsing result - max. fps
- * @param loadObj parsing result
- * @param loadOct parsing result - load cached octtrees
- * @param saveOct parsing result - save octtree caches
- * @param autoOct parsing result - load, save, invalidate cached octtrees
- * @param origin parsing result - mode for setting the origin
- * @param originset parsing result - if origin was modified
- * @param scale parsing result - measurement scale
- * @param type parsing result - file format to be read
- * @param scanserver parsing result - use scanserver program
- * @param sphereMode parsing result - map input points onto sphere
- * @param customFilter parsing result
- * @param trajectoryFile parsing result
- * @param stepsize parsing result - skip input lines
- * @param identity parsing result
- * @return 0, if the parsing was successful, 1 otherwise
- */
-int parseArgs(int argc,char **argv,
-              string &dir, int& start, int& end, int& maxDist, int& minDist, 
-              double &red, bool &readInitial, unsigned int &octree,
-              PointType &ptype, float &fps, string &loadObj,
-              bool &loadOct, bool &saveOct, bool &autoOct, int &origin, bool &originset,
-              double &scale, IOType &type, bool& scanserver, 
-              double& sphereMode, string& customFilter, string& trajectoryFile,
-              int &stepsize, bool &identity);
-
 void setResetView(int origin);
 
-/*
+/**
  * A function that read the .frame files created by slam6D
  *
  * @param dir the directory
@@ -413,10 +366,12 @@ void generateFrames(int start, int end, bool identity);
 
 void cycleLOD();
 
-
 void reloadFrames();
 
-void initShow(int argc, char **argv);
+/**
+ * Read scan files and initialize OpenGL.
+ */
+void initShow(const dataset_settings& ds, const window_settings& ws);
 
 void deinitShow();
 
