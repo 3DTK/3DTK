@@ -10,7 +10,7 @@ public:
   QtShow(int &argc, char **argv);
 
 protected:
-  MainWindow mainWindow;
+  MainWindow *mainWindow;
 };
 
 #endif

@@ -18,5 +18,7 @@ QtShow::QtShow(int &argc, char **argv)
   }
 
   initShow(ds, ws);
-  mainWindow.show();
+
+  mainWindow = new MainWindow(ws);
+  mainWindow->show();
 }
