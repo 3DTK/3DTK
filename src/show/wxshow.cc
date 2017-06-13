@@ -8,6 +8,7 @@
  */
 
 #include "show/show_common.h"
+#include "show/program_options.h"
 #include "wx/wx.h"
 #include "wx/sizer.h"
 #include "wx/glcanvas.h"
@@ -476,7 +477,19 @@ bool wxShow::OnInit()
     new_argv[i] = new char[ strlen(cc) +1 ];
     strcpy(new_argv[i], cc);
   }
-  initShow(argc, new_argv);
+  glutInit(&argc, argv);
+
+  dataset_settings ds;
+  window_settings ws;
+
+  try {
+    parse_args(argc, new_argv, ds, ws);
+  } catch (std::exception e) {
+    std::cerr << "Error while parsing settings: " << e.what() << endl;
+    exit(1);
+  }
+
+  initShow(ds, ws);
   //glClearColor(0.0, 0.0, 0.0, 0.0);
 
   wxBoxSizer* sizer = new wxBoxSizer(wxHORIZONTAL);
