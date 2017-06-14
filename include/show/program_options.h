@@ -4,7 +4,11 @@
 #include <string>
 
 #include <boost/program_options.hpp>
-#include <GL/gl.h>
+#ifdef __APPLE__
+  #include <GL/glui.h>
+#else
+  #include <GL/gl.h>
+#endif
 
 #include "slam6d/io_types.h"
 #include "slam6d/point_type.h"
