@@ -4,6 +4,11 @@
 #include <string>
 
 #include <boost/program_options.hpp>
+
+#ifdef _MSC_VER
+#include "windows.h"
+#endif
+
 #ifdef __APPLE__
   #include <GL/glui.h>
 #else
