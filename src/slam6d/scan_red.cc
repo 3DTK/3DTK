@@ -257,7 +257,7 @@ void parse_options(int argc, char **argv, int &start, int &end,
      "projection method or panorama image. Following Methods can be used: EQUIRECTANGULAR|CONIC|CYLINDRICAL|MERCATOR|RECTILINEAR|PANNINI|STEREOGRAPHIC|EQUALAREACYLINDRICAL      *Not all Projections may work with RANGE-reduction")
 
     ("octree,O", po::value<int>(&octree),
-     "0 -> center\n1 -> random\nN>1 -> random N")
+     "0     -> center\n1     -> random\nN > 1 -> random N\n-1    -> average")
     ("width,w", po::value<int>(&width),
      "width of panorama")
     ("height,h", po::value<int>(&height),
@@ -270,11 +270,6 @@ void parse_options(int argc, char **argv, int &start, int &end,
      "number of horizontal images for some projections [pannini, rectilinear, stereographic]")
     ("pParam,p", po::value<double>(&pParam),
      "projection parameter for some projections [pannini, stereographic]");
-
-
-
-
-
 
   po::options_description output("Output options");
   output.add_options()

@@ -425,6 +425,7 @@ public:
   }
 
   void GetOctTreeCenter(vector<T*>&c) { GetOctTreeCenter(c, *root, center, size); }
+  void GetOctTreeAvg(vector<T*>&c) { GetOctTreeAvg(c, *root); }
   void GetOctTreeRandom(vector<T*>&c) { GetOctTreeRandom(c, *root); }
   void GetOctTreeRandom(vector<T*>&c, int ptspervoxel, bool mode) { GetOctTreeRandom(c, ptspervoxel, mode, *root); }
   void AllPoints(vector<T *> &vp) { AllPoints(*BOctTree<T>::root, vp); }
@@ -831,12 +832,11 @@ protected:
     buffer[1] = node.leaf;
     of.write(buffer, 2);
 
-
     // write children
     bitunion<T> *children;
     bitoct::getChildren(node, children);
     for (short i = 0; i < 8; i++) {
-      if (  ( 1 << i ) & node.valid ) {   // if ith node exists
+      if (  ( 1 << i ) & node.valid ) {    // if ith node exists
         if (  ( 1 << i ) & node.leaf ) {   // if ith node is leaf write points
           // absolute pointer
           //pointrep *points = children->points;
@@ -851,14 +851,14 @@ protected:
       }
     }
   }
-  
+
   void GetOctTreeCenter(vector<T*>&c, bitoct &node, T *center, T size) {
     T ccenter[3];
     bitunion<T> *children;
     bitoct::getChildren(node, children);
 
     for (unsigned char i = 0; i < 8; i++) {
-      if (  ( 1 << i ) & node.valid ) {   // if ith node exists
+      if (  ( 1 << i ) & node.valid ) {         // if ith node exists
         childcenter(center, ccenter, size, i);  // childrens center
         if (  ( 1 << i ) & node.leaf ) {   // if ith node is leaf get center
           T * cp = new T[POINTDIM];
@@ -875,6 +875,40 @@ protected:
     }
   }
 
+  void GetOctTreeAvg(vector<T*>&c, bitoct &node) {
+    bitunion<T> *children;
+    bitoct::getChildren(node, children);
+    
+    for (unsigned short i = 0; i < 8; i++) {
+      if (  ( 1 << i ) & node.valid ) {     // if ith node exists
+        if (  ( 1 << i ) & node.leaf ) {    // if ith node is leaf
+          pointrep* points = children->getPointreps();
+          unsigned int length = points[0].length;
+
+		T * avgp = new T[POINTDIM];
+		for (unsigned short k = 0; k < POINTDIM; k++) {
+		  avgp[k] += 0;
+		}
+		
+          for (unsigned int j = 0; j < length; j++) {
+		  T *point = &(points[POINTDIM*j+1].v);
+            for (unsigned short k = 0; k < POINTDIM; k++) {
+		    avgp[k] += point[k];
+		  }
+		}
+
+		for (unsigned short j = 0; j < POINTDIM; j++) {
+		  avgp[j] /= length;
+		}
+		c.push_back(avgp);
+        } else {    // recurse
+		GetOctTreeAvg(c, children->node);
+        }
+        ++children; // next child
+      }
+    } 
+  } 
+  
   void GetOctTreeRandom(vector<T*>&c, bitoct &node) {
     bitunion<T> *children;
     bitoct::getChildren(node, children);
