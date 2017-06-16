@@ -334,7 +334,6 @@ void Scan::calcReducedPoints()
   Timer t = ClientMetric::scan_load_time.start();
 #endif //WITH_METRICS
 
-
   // get xyz to start the scan load, separated here for time measurement
   DataXYZ xyz(get("xyz"));
   DataXYZ xyz_normals(DataPointer(0, 0));
@@ -443,12 +442,14 @@ void Scan::calcReducedPoints()
     vector<double*> center;
     center.clear();
     if (reduction_nrpts != 0) {
-      if (reduction_nrpts == 1) {
+      if (reduction_nrpts == -1) {
+	   oct->GetOctTreeAvg(center);
+      } else if (reduction_nrpts == 1) {
         oct->GetOctTreeRandom(center);
       } else {
-		// FIXME: add option to pass true to GetOctTreeRandom()
-		//        in the past this was done by letting reduction_nrpts be
-		//        negative but ultimately this should be an extra variable
+	   // FIXME: add option to pass true to GetOctTreeRandom()
+	   //        in the past this was done by letting reduction_nrpts be
+	   //        negative but ultimately this should be an extra variable
         oct->GetOctTreeRandom(center, reduction_nrpts, false);
       }
     } else {
