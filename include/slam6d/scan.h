@@ -397,7 +397,7 @@ protected:
   double reduction_voxelSize;
   
   //! Which point to take out of the reduction octtree, 0 for center
-  size_t reduction_nrpts;
+  int reduction_nrpts;
   
   //! Pointtype used for the reduction octtree
   PointType reduction_pointtype;
@@ -458,10 +458,6 @@ protected:
   //  the capability of the Scan
   virtual void calcNormalsOnDemandPrivate() = 0;
   
-  //! Creating normals
-  void calcNormals();
-  
-  //! Internal function of transform which alters the reduced points
   void transformReduced(const double alignxf[16]);
   
 
@@ -470,6 +466,10 @@ public:
   //! Creating reduced points
   void calcReducedPoints();
 
+  //! Creating normals
+  void calcNormals();
+  
+  //! Internal function of transform which alters the reduced points
   //! Internal function of transform which handles the matrices
   void transformMatrix(const double alignxf[16]);
 
