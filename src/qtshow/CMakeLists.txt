@@ -5,8 +5,9 @@ if(WITH_QTSHOW)
   set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
   qt5_wrap_cpp(QTSHOW_HEADERS_MOC
+    ${CMAKE_SOURCE_DIR}/include/qtshow/GLWidget.h
     ${CMAKE_SOURCE_DIR}/include/qtshow/MainWindow.h
-    ${CMAKE_SOURCE_DIR}/include/qtshow/GLWidget.h)
+    ${CMAKE_SOURCE_DIR}/include/qtshow/QtShow.h)
 
   qt5_wrap_ui(QTSHOW_FORMS_HEADERS MainWindow.ui)
 
