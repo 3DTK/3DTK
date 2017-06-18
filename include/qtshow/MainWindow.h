@@ -15,6 +15,9 @@ public:
 
 public slots:
   void pickScanDirectory();
+
+signals:
+  void scanDirectoryChanged(QString);
 };
 
 #endif

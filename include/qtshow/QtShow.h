@@ -6,11 +6,18 @@
 #include "qtshow/MainWindow.h"
 
 class QtShow : public QApplication {
+  Q_OBJECT
+
 public:
   QtShow(int &argc, char **argv);
 
+public slots:
+  void loadDifferentScans(QString dir);
+
 protected:
   MainWindow *mainWindow;
+  dataset_settings ds;
+  window_settings ws;
 };
 
 #endif

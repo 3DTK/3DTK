@@ -1,5 +1,6 @@
+#include <QFileDialog>
+
 #include "qtshow/MainWindow.h"
-#include "show/show_common.h"
 
 MainWindow::MainWindow(const window_settings& ws, QWidget *parent)
   : QMainWindow(parent)
@@ -15,5 +16,6 @@ MainWindow::MainWindow(const window_settings& ws, QWidget *parent)
 }
 
 void MainWindow::pickScanDirectory() {
-  
+  QString dir = QFileDialog::getExistingDirectory(this, "Pick Scan Directory", ".");
+  emit scanDirectoryChanged(dir);
 }
