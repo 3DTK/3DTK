@@ -11,13 +11,14 @@ class MainWindow : public QMainWindow, private Ui::MainWindow {
   Q_OBJECT
 
 public:
-  MainWindow(const window_settings& ws, QWidget *parent = 0);
-
-public slots:
-  void pickScanDirectory();
+  MainWindow(const window_settings& ws, QWidget *parent = Q_NULLPTR, Qt::WindowFlags flags = Qt::WindowFlags());
 
 signals:
-  void scanDirectoryChanged(QString);
+  void scanDirectoryOpened(QString dir, QString format, int start, int end);
+
+public slots:
+  void openScanDirectory();
+  void scanPicked(QString dir, QString format, int start, int end);
 };
 
 #endif

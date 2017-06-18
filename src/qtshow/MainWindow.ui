@@ -1393,7 +1393,7 @@
    <sender>actionOpen</sender>
    <signal>triggered()</signal>
    <receiver>MainWindow</receiver>
-   <slot>pickScanDirectory()</slot>
+   <slot>openScanDirectory()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>-1</x>
@@ -1407,7 +1407,7 @@
   </connection>
  </connections>
  <slots>
-  <slot>pickScanDirectory()</slot>
+  <slot>openScanDirectory()</slot>
   <slot>quit()</slot>
  </slots>
 </ui>
