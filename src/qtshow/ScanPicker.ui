@@ -1,0 +1,484 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>ScanPicker</class>
+ <widget class="QDialog" name="ScanPicker">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>287</width>
+    <height>228</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Open Scan Diretory…</string>
+  </property>
+  <widget class="QDialogButtonBox" name="buttonBox">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>190</y>
+     <width>271</width>
+     <height>32</height>
+    </rect>
+   </property>
+   <property name="orientation">
+    <enum>Qt::Horizontal</enum>
+   </property>
+   <property name="standardButtons">
+    <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="lineEditDirectory">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>30</y>
+     <width>171</width>
+     <height>32</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="buttonChooseDirectory">
+   <property name="geometry">
+    <rect>
+     <x>190</x>
+     <y>30</y>
+     <width>91</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Choose…</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>10</y>
+     <width>101</width>
+     <height>18</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Scan Direc&amp;tory:</string>
+   </property>
+   <property name="buddy">
+    <cstring>lineEditDirectory</cstring>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_2">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>70</y>
+     <width>59</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Format:</string>
+   </property>
+   <property name="buddy">
+    <cstring>comboBoxFormat</cstring>
+   </property>
+  </widget>
+  <widget class="QComboBox" name="comboBoxFormat">
+   <property name="geometry">
+    <rect>
+     <x>180</x>
+     <y>70</y>
+     <width>101</width>
+     <height>32</height>
+    </rect>
+   </property>
+   <property name="editable">
+    <bool>true</bool>
+   </property>
+   <item>
+    <property name="text">
+     <string>ais</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>asc</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>b3d</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>cad</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>faro_xyz_rgbr</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>front</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>iais</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>ifp</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>ks</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>ks_rgb</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>las</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>laz</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>leica</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>leica_xyzr</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>oct</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>old</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>pci</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>pcl</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>ply</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>pts</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>ptsr</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>pts_rgb</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>pts_rgbr</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>pts_rrgb</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>riegl_bin</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>riegl_txt</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>rts</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>rts_map</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>rxp</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>stl</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>txyzr</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>uos</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>uosr</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>uos_frames</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>uos_map</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>uos_map_frames</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>uos_rgb</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>uos_rgbr</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>uos_rrgb</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>uos_rrgbt</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>velodyne</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>velodyne_frames</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>wrl</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>x3d</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>xyz</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>xyzr</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>xyz_rgb</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>xyz_rgbr</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>xyz_rrgb</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>zahn</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>zuf</string>
+    </property>
+   </item>
+  </widget>
+  <widget class="QLabel" name="label_3">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>110</y>
+     <width>161</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Start with Scan:</string>
+   </property>
+   <property name="buddy">
+    <cstring>spinBoxStart</cstring>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_4">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>150</y>
+     <width>141</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>End at Scan:</string>
+   </property>
+   <property name="buddy">
+    <cstring>spinBoxEnd</cstring>
+   </property>
+  </widget>
+  <widget class="QSpinBox" name="spinBoxStart">
+   <property name="geometry">
+    <rect>
+     <x>230</x>
+     <y>110</y>
+     <width>52</width>
+     <height>32</height>
+    </rect>
+   </property>
+   <property name="maximum">
+    <number>999</number>
+   </property>
+  </widget>
+  <widget class="QSpinBox" name="spinBoxEnd">
+   <property name="geometry">
+    <rect>
+     <x>230</x>
+     <y>150</y>
+     <width>52</width>
+     <height>32</height>
+    </rect>
+   </property>
+   <property name="specialValueText">
+    <string>last</string>
+   </property>
+   <property name="minimum">
+    <number>-1</number>
+   </property>
+   <property name="maximum">
+    <number>999</number>
+   </property>
+   <property name="value">
+    <number>-1</number>
+   </property>
+  </widget>
+ </widget>
+ <tabstops>
+  <tabstop>lineEditDirectory</tabstop>
+  <tabstop>buttonChooseDirectory</tabstop>
+  <tabstop>comboBoxFormat</tabstop>
+  <tabstop>spinBoxStart</tabstop>
+  <tabstop>spinBoxEnd</tabstop>
+ </tabstops>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>accepted()</signal>
+   <receiver>ScanPicker</receiver>
+   <slot>accept()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>228</x>
+     <y>204</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>157</x>
+     <y>227</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>rejected()</signal>
+   <receiver>ScanPicker</receiver>
+   <slot>reject()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>280</x>
+     <y>210</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>286</x>
+     <y>227</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>buttonChooseDirectory</sender>
+   <signal>clicked()</signal>
+   <receiver>ScanPicker</receiver>
+   <slot>chooseScanDirectory()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>235</x>
+     <y>45</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>143</x>
+     <y>113</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+ <slots>
+  <slot>chooseScanDirectory()</slot>
+ </slots>
+</ui>
