@@ -12,7 +12,7 @@ public:
   QtShow(int &argc, char **argv);
 
 public slots:
-  void loadDifferentScans(QString dir);
+  void loadDifferentScan(QString dir, QString format, int start, int end);
 
 protected:
   MainWindow *mainWindow;
