@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>287</width>
-    <height>228</height>
+    <height>272</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -17,7 +17,7 @@
    <property name="geometry">
     <rect>
      <x>10</x>
-     <y>190</y>
+     <y>230</y>
      <width>271</width>
      <height>32</height>
     </rect>
@@ -78,7 +78,7 @@
     </rect>
    </property>
    <property name="text">
-    <string>Format:</string>
+    <string>F&amp;ormat:</string>
    </property>
    <property name="buddy">
     <cstring>comboBoxFormat</cstring>
@@ -95,6 +95,9 @@
    </property>
    <property name="editable">
     <bool>true</bool>
+   </property>
+   <property name="currentText">
+    <string>uos</string>
    </property>
    <item>
     <property name="text">
@@ -378,7 +381,7 @@
     </rect>
    </property>
    <property name="text">
-    <string>End at Scan:</string>
+    <string>End at S&amp;can:</string>
    </property>
    <property name="buddy">
     <cstring>spinBoxEnd</cstring>
@@ -417,6 +420,47 @@
    </property>
    <property name="value">
     <number>-1</number>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_5">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>190</y>
+     <width>59</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Scale:</string>
+   </property>
+  </widget>
+  <widget class="QDoubleSpinBox" name="spinBoxScale">
+   <property name="geometry">
+    <rect>
+     <x>200</x>
+     <y>190</y>
+     <width>81</width>
+     <height>32</height>
+    </rect>
+   </property>
+   <property name="suffix">
+    <string> m</string>
+   </property>
+   <property name="decimals">
+    <number>3</number>
+   </property>
+   <property name="minimum">
+    <double>0.001000000000000</double>
+   </property>
+   <property name="maximum">
+    <double>1.000000000000000</double>
+   </property>
+   <property name="singleStep">
+    <double>0.001000000000000</double>
+   </property>
+   <property name="value">
+    <double>0.010000000000000</double>
    </property>
   </widget>
  </widget>

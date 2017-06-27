@@ -15,7 +15,8 @@ void ScanPicker::accept() {
     lineEditDirectory->text(),
     comboBoxFormat->currentText(),
     spinBoxStart->value(),
-    spinBoxEnd->value()
+    spinBoxEnd->value(),
+    spinBoxScale->value()
   );
   QDialog::accept();
 }

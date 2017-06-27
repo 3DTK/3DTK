@@ -14,11 +14,11 @@ public:
   MainWindow(const window_settings& ws, QWidget *parent = Q_NULLPTR, Qt::WindowFlags flags = Qt::WindowFlags());
 
 signals:
-  void scanDirectoryOpened(QString dir, QString format, int start, int end);
+  void scanDirectoryOpened(QString dir, QString format, int start, int end, double scale);
 
 public slots:
   void openScanDirectory();
-  void scanPicked(QString dir, QString format, int start, int end);
+  void scanPicked(QString dir, QString format, int start, int end, double scale);
 };
 
 #endif
