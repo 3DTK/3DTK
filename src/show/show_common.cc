@@ -1,11 +1,5 @@
 #include "show/show_common.h"
 
-/**
- * This vector contains the pointer to a vertex array for
- * all colors (inner vector) and all scans (outer vector)
- */
-vector< vector<vertexArray*> > vvertexArrayList;
-
 vector< ::SDisplay*> displays;
 /**
  * the octrees that store the points for each scan

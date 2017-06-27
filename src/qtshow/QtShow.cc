@@ -32,10 +32,14 @@ void QtShow::loadDifferentScan(dataset_settings new_ds) {
   // TODO turn this into proper context handling logic for show
   // dirty hacks
   Scan::closeDirectory();
+  displays.clear();
   for (colordisplay* tree : octpts) {
     delete tree;
   }
   octpts.clear();
+  MetaMatrix.clear();
+  MetaAlgoType.clear();
+  trajectory.clear();
 
   // actual switching
   initShow(ds, ws);
