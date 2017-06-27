@@ -63,12 +63,10 @@ using std::ifstream;
 using std::exception;
 
 /**
- * This vector contains the pointer to a vertex array for
- * all colors (inner vector) and all scans (outer vector)
+ * Display objects from the loadObj parameter.
  */
-extern vector< vector<vertexArray*> > vvertexArrayList;
-
 extern vector< ::SDisplay*> displays;
+
 /**
  * the octrees that store the points for each scan
  */
