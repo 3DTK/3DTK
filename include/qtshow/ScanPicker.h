@@ -12,7 +12,7 @@ public:
   ScanPicker(const QString& current_directory, QWidget *parent = Q_NULLPTR, Qt::WindowFlags f = Qt::WindowFlags());
 
 signals:
-  void scanPicked(QString dir, QString format, int start, int end);
+  void scanPicked(QString dir, QString format, int start, int end, double scale);
 
 public slots:
   void accept();

@@ -635,15 +635,14 @@ void initShow(const dataset_settings& ds, const window_settings& ws){
                            trajectoryFile, stepsize, identity);
 
   // modify all scale dependant variables
-  scale = 1.0 / scale;
-  movementSpeed *= scale;
-  neardistance *= scale;
-  oldneardistance *= scale;
-  maxfardistance *= scale;
-  fardistance *= scale;
-  fogDensity /= scale;
-  defaultZoom *= scale;
-  voxelSize *= scale;
+  movementSpeed   = 0.1 / scale;
+  neardistance    = 0.1 / scale;
+  oldneardistance = 0.1 / scale;
+  maxfardistance  = 400 / scale;
+  fardistance     = 400 / scale;
+  fogDensity      = 0.1 * scale;
+  defaultZoom     =  20 / scale;
+  voxelSize       = 0.2 / scale;
 
   ////////////////////////
   SDisplay::readDisplays(loadObj, displays);
