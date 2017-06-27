@@ -3,8 +3,9 @@
 #include "qtshow/MainWindow.h"
 #include "qtshow/ScanPicker.h"
 
-MainWindow::MainWindow(const window_settings& ws, QWidget *parent, Qt::WindowFlags flags)
+MainWindow::MainWindow(const dataset_settings& ds, const window_settings& ws, QWidget *parent, Qt::WindowFlags flags)
   : QMainWindow(parent, flags)
+  , ds(ds)
 {
   if (!ws.nogui) {
     setupUi(this);
@@ -17,11 +18,7 @@ MainWindow::MainWindow(const window_settings& ws, QWidget *parent, Qt::WindowFla
 }
 
 void MainWindow::openScanDirectory() {
-  ScanPicker sp(".", this);
-  connect(&sp, &ScanPicker::scanPicked, this, &MainWindow::scanPicked);
-  sp.exec();
-}
-
-void MainWindow::scanPicked(QString dir, QString format, int start, int end, double scale) {
-  emit scanDirectoryOpened(dir, format, start, end, scale);
+  ScanPicker sp(ds, this);
+  if (sp.exec())
+    emit scanDirectoryOpened(ds);
 }

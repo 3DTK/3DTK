@@ -20,13 +20,15 @@ QtShow::QtShow(int &argc, char **argv)
     initShow(ds, ws);
   }
 
-  mainWindow = new MainWindow(ws);
+  mainWindow = new MainWindow(ds, ws);
   mainWindow->show();
 
   connect(mainWindow, &MainWindow::scanDirectoryOpened, this, &QtShow::loadDifferentScan);
 }
 
-void QtShow::loadDifferentScan(QString dir, QString format, int start, int end, double scale) {
+void QtShow::loadDifferentScan(dataset_settings new_ds) {
+  ds = new_ds;
+
   // TODO turn this into proper context handling logic for show
   // dirty hacks
   Scan::closeDirectory();
@@ -36,11 +38,5 @@ void QtShow::loadDifferentScan(QString dir, QString format, int start, int end, 
   octpts.clear();
 
   // actual switching
-  ds.input_directory = dir.toStdString();
-  // TODO gracefully alert the user if the chosen format does not exist
-  ds.format = formatname_to_io_type(format.toStdString().c_str());
-  ds.scan_numbers.min = start;
-  ds.scan_numbers.max = end;
-  ds.scale = scale;
   initShow(ds, ws);
 }
