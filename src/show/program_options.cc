@@ -4,22 +4,7 @@
 
 #include "show/program_options.h"
 
-/**
- * Parses arguments to `show`. The arguments come from these sources:
- *  - user config file in ~/.config/3dtk/show.ini
- *  - a file named "config.ini" in the input directory
- *  - command line arguments
- *
- * Config files have an "option=value" pair on each line with option names just
- * like the command line arguments.
- *
- * @param argc the number of arguments
- * @param argv the arguments
- * @param ds the dataset_settings to fill
- * @param ws the window_settings to fill
- * @return the parsed options
- */
-void parse_args(int argc, char **argv, dataset_settings& ds, window_settings& ws) {
+void parse_args(int argc, char **argv, dataset_settings& ds, window_settings& ws, bool *directory_present) {
   using namespace boost::program_options;
   using namespace std;
 
@@ -41,7 +26,7 @@ void parse_args(int argc, char **argv, dataset_settings& ds, window_settings& ws
 
   options_description display_options("Display options");
   display_options.add_options()
-    ("scale,C", value(&ds.scale)->default_value(0.01),
+    ("scale,C", value(&ds.scale)->default_value(0.01, "0.01"),
       "Scale factor to use. Influences movement speed etc. "
       "Use 1 when point coordinates are in meters, 0.01 when in centimeters "
       "and so forth.")
@@ -244,21 +229,25 @@ void parse_args(int argc, char **argv, dataset_settings& ds, window_settings& ws
   notify(vm);
 
   // Parse ./config.ini file in the input directory
-  ifstream local_config_file((ds.input_directory + "/config.ini").c_str());
-  if (local_config_file) {
-    store(parse_config_file(local_config_file, visible_options), vm);
 
-    // Command line options now overwrite ./config.ini file
-    store(
-      command_line_parser(argc, argv)
-        .options(cmdline_options)
-        .run()
-      , vm);
-    notify(vm);
+  if (vm.count("input-dir")) {
+    ifstream local_config_file((ds.input_directory + "/config.ini").c_str());
+    if (local_config_file) {
+      store(parse_config_file(local_config_file, visible_options), vm);
+
+      // Command line options now overwrite ./config.ini file
+      store(
+        command_line_parser(argc, argv)
+          .options(cmdline_options)
+          .run()
+        , vm);
+      notify(vm);
+    }
   }
 
   // Help text
-  if (argc == 1 || vm.count("help")) {
+  if (vm.count("help") ||
+      (directory_present == nullptr && vm.count("input-dir") == 0)) {
     cout << "Usage: " << argv[0] << " [options] <input-dir>" << endl;
     cout << visible_options << endl;
     exit(0);
@@ -336,10 +325,15 @@ void parse_args(int argc, char **argv, dataset_settings& ds, window_settings& ws
   '/';
 #endif
 
-  if (ds.input_directory.back() != separator) {
-    ds.input_directory += separator;
+  if (vm.count("input-dir")) {
+    if (ds.input_directory.back() != separator) {
+      ds.input_directory += separator;
+    }
   }
 
+  if (directory_present != nullptr) {
+    *directory_present = vm.count("input-dir") != 0;
+  }
 }
 
 void validate(boost::any& v, const std::vector<std::string>& values,
