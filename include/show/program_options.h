@@ -121,6 +121,22 @@ struct window_settings {
   bool take_screenshot;
 };
 
-void parse_args(int argc, char **argv, dataset_settings& ds, window_settings& ws);
+/**
+ * Parses arguments to `show`. The arguments come from these sources:
+ *  - user config file in ~/.config/3dtk/show.ini
+ *  - a file named "config.ini" in the input directory
+ *  - command line arguments
+ *
+ * Config files have an "option=value" pair on each line with option names just
+ * like the command line arguments.
+ *
+ * @param argc the number of arguments
+ * @param argv the arguments
+ * @param ds the dataset_settings to fill
+ * @param ws the window_settings to fill
+ * @param directory_present if this pointer is not null, allow input-dir to not be present and write that presence in the target bool
+ * @return the parsed options
+ */
+void parse_args(int argc, char **argv, dataset_settings& ds, window_settings& ws, bool *directory_present = nullptr);
 
 #endif

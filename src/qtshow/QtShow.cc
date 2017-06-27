@@ -8,14 +8,17 @@ QtShow::QtShow(int &argc, char **argv)
 {
   glutInit(&argc, argv);
 
+  bool has_initial_directory;
   try {
-    parse_args(argc, argv, ds, ws);
+    parse_args(argc, argv, ds, ws, &has_initial_directory);
   } catch (std::exception e) {
     std::cerr << "Error while parsing settings: " << e.what() << endl;
     exit(1);
   }
 
-  initShow(ds, ws);
+  if (has_initial_directory) {
+    initShow(ds, ws);
+  }
 
   mainWindow = new MainWindow(ws);
   mainWindow->show();
