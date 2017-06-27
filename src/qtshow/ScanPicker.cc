@@ -3,21 +3,22 @@
 #include "qtshow/ScanPicker.h"
 
 
-ScanPicker::ScanPicker(const QString& current_directory, QWidget *parent, Qt::WindowFlags f)
+ScanPicker::ScanPicker(dataset_settings& ds, QWidget *parent, Qt::WindowFlags f)
   : QDialog(parent, f)
+  , ds(ds)
 {
   setupUi(this);
-  lineEditDirectory->setText(current_directory);
+  lineEditDirectory->setText(QString::fromStdString(ds.input_directory));
 }
 
 void ScanPicker::accept() {
-  emit scanPicked(
-    lineEditDirectory->text(),
-    comboBoxFormat->currentText(),
-    spinBoxStart->value(),
-    spinBoxEnd->value(),
-    spinBoxScale->value()
-  );
+  ds.input_directory = lineEditDirectory->text().toStdString();
+  // TODO gracefully alert the user if the chosen format does not exist
+  ds.format = formatname_to_io_type(comboBoxFormat->currentText().toStdString().c_str());
+  ds.scan_numbers.min = spinBoxStart->value();
+  ds.scan_numbers.max = spinBoxEnd->value();
+  ds.scale = spinBoxScale->value();
+
   QDialog::accept();
 }
 
