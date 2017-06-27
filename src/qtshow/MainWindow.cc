@@ -22,6 +22,6 @@ void MainWindow::openScanDirectory() {
   sp.exec();
 }
 
-void MainWindow::scanPicked(QString dir, QString format, int start, int end) {
-  emit scanDirectoryOpened(dir, format, start, end);
+void MainWindow::scanPicked(QString dir, QString format, int start, int end, double scale) {
+  emit scanDirectoryOpened(dir, format, start, end, scale);
 }

@@ -26,7 +26,7 @@ QtShow::QtShow(int &argc, char **argv)
   connect(mainWindow, &MainWindow::scanDirectoryOpened, this, &QtShow::loadDifferentScan);
 }
 
-void QtShow::loadDifferentScan(QString dir, QString format, int start, int end) {
+void QtShow::loadDifferentScan(QString dir, QString format, int start, int end, double scale) {
   // TODO turn this into proper context handling logic for show
   // dirty hacks
   Scan::closeDirectory();
@@ -34,7 +34,6 @@ void QtShow::loadDifferentScan(QString dir, QString format, int start, int end) 
     delete tree;
   }
   octpts.clear();
-  ds.scale = 1.0;
 
   // actual switching
   ds.input_directory = dir.toStdString();
@@ -42,5 +41,6 @@ void QtShow::loadDifferentScan(QString dir, QString format, int start, int end) 
   ds.format = formatname_to_io_type(format.toStdString().c_str());
   ds.scan_numbers.min = start;
   ds.scan_numbers.max = end;
+  ds.scale = scale;
   initShow(ds, ws);
 }
