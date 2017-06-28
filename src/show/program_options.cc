@@ -18,7 +18,7 @@ void parse_args(int argc, char **argv, dataset_settings& ds, window_settings& ws
       "Turn off GUI")
     ("fps,F", value(&ws.max_fps)->default_value(60), "Maximum framerate")
     ("dimensions,x",
-       value(&ws.dimensions)->default_value(WindowDimensions(960, 576), "960x576"),
+       value(&ws.dimensions)->default_value(WindowDimensions(960, 540), "960x540"),
       "Window dimensions in WxH format.")
     ("advanced,2", bool_switch(&ws.advanced_controls),
       "Switch on advanced controls")
