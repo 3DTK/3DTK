@@ -1,4 +1,6 @@
 cmake_minimum_required (VERSION 2.8.2)
+#necessary to build with custom clang on macOS
+cmake_policy(SET CMP0025 NEW)
 project (3DTK)
 set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/3rdparty/CMakeModules" "${PROJECT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 
