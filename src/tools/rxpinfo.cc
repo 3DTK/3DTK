@@ -4,7 +4,7 @@
 using namespace std;
 using namespace scanlib;
 
-class Pointcloud : public scanlib::pointcloud
+class Pointcloud : public pointcloud
 {
 public:
     Pointcloud() : pointcloud(false) {}
@@ -18,20 +18,18 @@ protected:
 
 int main(int argc, char* argv[])
 {
-    if (argc != 2) return -1;
+    if (argc != 2) { return -1; }
 
     std::shared_ptr<basic_rconnection> rc;
     rc = basic_rconnection::create(argv[1]);
-    rc->open();
     decoder_rxpmarker dec(rc);
+    Pointcloud cloud;
     buffer buf;
 
-    Pointcloud pointcloud;
-
     rc->open();
 
-    for ( dec.get(buf); !dec.eoi() ; dec.get(buf) ) {
-        pointcloud.dispatch(buf.begin(), buf.end());
+    for (dec.get(buf); !dec.eoi(); dec.get(buf)) {
+        cloud.dispatch(buf.begin(), buf.end());
     }
 
     rc->close();
