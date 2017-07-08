@@ -36,6 +36,7 @@
 #include <stdexcept>
 #include <algorithm>
 #include <map>
+#include <functional>
 
 #ifdef _MSC_VER
 #define strcasecmp _stricmp
@@ -105,6 +106,8 @@ extern GLenum buffermode;
  * haveToUpdate == 7 force redisplay with all points
  */
 extern int haveToUpdate;
+
+extern std::function<void()> update_callback;
 
 /**
  * Flag for invert the scene
