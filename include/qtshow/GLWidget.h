@@ -4,6 +4,7 @@
 #include <QMouseEvent>
 #include <QOpenGLFunctions>
 #include <QOpenGLWidget>
+#include <QTimer>
 #include <QWidget>
 
 class GLWidget : public QOpenGLWidget, protected QOpenGLFunctions {
@@ -42,6 +43,8 @@ public slots:
   void setSnapshotScale(int snapshotScale);
   void saveSnapshot();
 
+  void idle();
+
 signals:
   void colorMinimumValueChanged(double);
   void colorMaximumValueChanged(double);
@@ -74,6 +77,7 @@ protected:
 
   QString pathFileName;
 
+  QTimer *idleTimer;
 };
 
 #endif

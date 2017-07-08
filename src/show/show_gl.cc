@@ -1046,14 +1046,14 @@ void CallBackIdleFunc(void)
 
   // case: display is invalid - update it
   if (haveToUpdate == 1) {
-    glutPostRedisplay();
+    update_callback();
     haveToUpdate = 0;
     return;
   }
   // case: display is invalid - update it with all points
   /*  if (haveToUpdate == 7) {
     showall = true;
-    glutPostRedisplay();
+    update_callback();
     haveToUpdate = 0;
     return;
   }*/
@@ -1064,7 +1064,7 @@ void CallBackIdleFunc(void)
     int viewport[4];
     glGetIntegerv(GL_VIEWPORT, viewport);
     CallBackReshapeFunc(viewport[2],viewport[3]);
-    glutPostRedisplay();
+    update_callback();
     haveToUpdate = 0;
     return;
   }
@@ -1077,7 +1077,7 @@ void CallBackIdleFunc(void)
       haveToUpdate = 4;
       return;
     }
-    glutPostRedisplay();
+    update_callback();
 
     if (save_animation) {
       string filename = scan_dir + "animframe" + to_string(frameNr,5) + ".ppm";
@@ -1144,7 +1144,7 @@ void CallBackIdleFunc(void)
 
       path_iterator += 1;
       // repaint the screen
-      glutPostRedisplay();
+      update_callback();
 
       // save the animation
       if(save_animation){
@@ -1205,7 +1205,7 @@ void CallBackIdleFunc(void)
 
       path_iterator += 1;
       // repaint the screen
-      glutPostRedisplay();
+      update_callback();
 
       // save the animation
       if(save_animation){
@@ -1485,7 +1485,7 @@ void selectPoints(int x, int y) {
     ProcessHitsFunc(hits, selectBuf);
   }
   glPopMatrix();
-  glutPostRedisplay();
+  update_callback();
 }
 
 void CallBackMouseFuncMoving(int button, int state, int x, int y)
