@@ -347,6 +347,9 @@ void deinitShow();
 
 extern int current_frame;
 
+extern std::function<void(const std::string&)> loading_status;
+extern std::function<void(int, int, int)> loading_progress;
+
 #include "show/show_menu.h"
 #include "show/show_animate.h"
 #include "show/show_gl.h"

@@ -15,6 +15,9 @@ MainWindow::MainWindow(const dataset_settings& ds, const window_settings& ws, QW
     setCentralWidget(glWidget);
     resize(ws.dimensions.w, ws.dimensions.h);
   }
+
+  progressbar = new QProgressBar(statusbar);
+  statusbar->addPermanentWidget(progressbar);
 }
 
 void MainWindow::openScanDirectory() {
