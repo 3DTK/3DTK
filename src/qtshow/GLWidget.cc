@@ -17,7 +17,12 @@
 
 GLWidget::GLWidget(QWidget *parent)
   : QOpenGLWidget(parent)
-{}
+{
+  // a timer with the default timeout of 0 runs whenever its thread's event loop is idle, which is pretty much when we want to call CallBackIdleFunc
+  idleTimer = new QTimer(this);
+  connect(idleTimer, &QTimer::timeout, this, &GLWidget::idle);
+  idleTimer->start();
+}
 
 void GLWidget::initializeGL() {
   initializeOpenGLFunctions();
@@ -288,12 +293,12 @@ void GLWidget::setAnimateMatching(bool animateMatching) {
 }
 
 void GLWidget::setAnimationSpeed(double animationSpeed) {
-  anim_delay = (int)(1000.0 / animationSpeed);
+  anim_delay = (int)(5.0 / animationSpeed);
 }
 
 void GLWidget::animate() {
+  // TODO actually call the different kinds of animation
   startAnimation(0);
-  // FIXME need to update() with every frame
 }
 
 void GLWidget::setSnapshotScale(int snapshotScale) {
@@ -302,4 +307,8 @@ void GLWidget::setSnapshotScale(int snapshotScale) {
 
 void GLWidget::saveSnapshot() {
   saveImage(0);
+}
+
+void GLWidget::idle() {
+  CallBackIdleFunc();
 }

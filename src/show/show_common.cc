@@ -37,8 +37,11 @@ GLenum buffermode = GL_BACK;
  * haveToUpdate == 4 stop animation scan matching
  * haveToUpdate == 6 path animation
  * haveToUpdate == 7 force redisplay with all points
+ * haveToUpdate == 8 path and matching animation
  */
 int haveToUpdate         = 0;
+
+std::function<void()> update_callback = glutPostRedisplay;
 
 /**
  * Flag for invert the scene

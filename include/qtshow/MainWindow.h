@@ -6,7 +6,7 @@
 #include "show/program_options.h"
 
 
-class MainWindow : public QMainWindow, private Ui::MainWindow {
+class MainWindow : public QMainWindow, protected Ui::MainWindow {
   Q_OBJECT
 
 public:
@@ -20,6 +20,8 @@ public slots:
 
 protected:
   dataset_settings ds;
+
+friend class QtShow;
 };
 
 #endif

@@ -21,9 +21,14 @@ QtShow::QtShow(int &argc, char **argv)
   }
 
   mainWindow = new MainWindow(ds, ws);
-  mainWindow->show();
+
+  update_callback = [&]() {
+    mainWindow->glWidget->update();
+  };
 
   connect(mainWindow, &MainWindow::scanDirectoryOpened, this, &QtShow::loadDifferentScan);
+
+  mainWindow->show();
 }
 
 void QtShow::loadDifferentScan(dataset_settings new_ds) {
