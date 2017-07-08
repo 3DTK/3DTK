@@ -281,6 +281,13 @@ void deinitShow();
 
 int current_frame = 0;
 
+// These only exist to be overwritten by QtShow right now
+// We can remove these once we have proper logging
+void noop1(const std::string&) {}
+void noop2(int, int, int) {}
+std::function<void(const std::string&)> loading_status = noop1;
+std::function<void(int, int, int)> loading_progress = noop2;
+
 void setResetView(int origin) {
     if (origin == 0) {
         // set origin to the center of mass of all scans
@@ -641,6 +648,8 @@ void initShow(const dataset_settings& ds, const window_settings& ws){
   defaultZoom     =  20 / scale;
   voxelSize       = 0.2 / scale;
 
+  loading_progress(0, 0, 0);
+  loading_status("Loading extra objects");
   ////////////////////////
   SDisplay::readDisplays(loadObj, displays);
   ////////////////////
@@ -664,7 +673,8 @@ void initShow(const dataset_settings& ds, const window_settings& ws){
   
   // Loading scans, reducing, loading frames and generation if neccessary
   
-  // load all available scans
+  loading_status("Loading scans");
+  // We would have to hook loading_progress into there really uglily
   Scan::openDirectory(scanserver, dir, type, start, end);
   
   if (Scan::allScans.size() == 0) {
@@ -715,6 +725,8 @@ void initShow(const dataset_settings& ds, const window_settings& ws){
     }
   }
   
+  loading_status("Applying filters and reduction");
+  loading_progress(0, 0, Scan::allScans.size());
   int scanNr = 0;
   vector<Scan*> valid_scans;
   for (ScanVector::iterator it = Scan::allScans.begin();
@@ -736,6 +748,8 @@ void initShow(const dataset_settings& ds, const window_settings& ws){
     scanNr++;
     if ((scanNr-1)%stepsize != 0) delete scan; 
     else valid_scans.push_back(scan);
+
+    loading_progress(scanNr, 0, Scan::allScans.size());
   }
   //Remove scans if some got invalid due to filtering
   if(Scan::allScans.size() > valid_scans.size()) Scan::allScans = valid_scans;
@@ -745,7 +759,9 @@ void initShow(const dataset_settings& ds, const window_settings& ws){
   } else {
     cm = new ScanColorManager(4096, pointtype, /* animation_color = */ true);
   }
-  
+
+  loading_status("Creating display octrees");
+
 #ifdef USE_COMPACT_TREE
   cout << "Creating compact display octrees.." << endl;
 #else
@@ -760,7 +776,8 @@ void initShow(const dataset_settings& ds, const window_settings& ws){
   std::size_t free_mem = 0;
   if(scanserver)
     free_mem = ManagedScan::getMemorySize();
-  
+
+  loading_progress(0, 0, Scan::allScans.size());
   for(unsigned int i = 0; i < Scan::allScans.size(); ++i) {
     Scan* scan = Scan::allScans[i];
   
@@ -866,6 +883,7 @@ void initShow(const dataset_settings& ds, const window_settings& ws){
     }
     cout << ")." << endl;
 #endif
+    loading_progress(i+1, 0, Scan::allScans.size());
   }
 
 /*
@@ -912,6 +930,7 @@ void initShow(const dataset_settings& ds, const window_settings& ws){
   
 #endif // !COMPACT_TREE
 
+  loading_status("Loading frames");
 
   // load frames now that we know how many scans we actually loaded
   unsigned int real_end = min((unsigned int)(end), 
@@ -972,6 +991,8 @@ void initShow(const dataset_settings& ds, const window_settings& ws){
       cout << "Couldn't open trajectory file for reading!" << endl;
     }
   }
+
+  loading_status("Done");
 }
 
 void deinitShow()
