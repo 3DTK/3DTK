@@ -3,6 +3,8 @@
 
 #include "ui_MainWindow.h"
 
+#include <QProgressBar>
+
 #include "show/program_options.h"
 
 
@@ -20,6 +22,7 @@ public slots:
 
 protected:
   dataset_settings ds;
+  QProgressBar *progressbar;
 
 friend class QtShow;
 };

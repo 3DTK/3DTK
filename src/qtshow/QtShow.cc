@@ -26,6 +26,16 @@ QtShow::QtShow(int &argc, char **argv)
     mainWindow->glWidget->update();
   };
 
+  loading_status = [&](const std::string& message) {
+    mainWindow->statusbar->showMessage(QString::fromStdString(message));
+  };
+
+  loading_progress = [&](int current, int min, int max) {
+    mainWindow->progressbar->setMinimum(min);
+    mainWindow->progressbar->setMaximum(max);
+    mainWindow->progressbar->setValue(current);
+  };
+
   connect(mainWindow, &MainWindow::scanDirectoryOpened, this, &QtShow::loadDifferentScan);
 
   mainWindow->show();
@@ -46,6 +56,6 @@ void QtShow::loadDifferentScan(dataset_settings new_ds) {
   MetaAlgoType.clear();
   trajectory.clear();
 
-  // actual switching
+  // actual switching, includes callbacks to the progress bar
   initShow(ds, ws);
 }
