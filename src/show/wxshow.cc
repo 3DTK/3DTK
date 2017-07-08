@@ -484,7 +484,7 @@ bool wxShow::OnInit()
 
   try {
     parse_args(argc, new_argv, ds, ws);
-  } catch (std::exception e) {
+  } catch (std::exception& e) {
     std::cerr << "Error while parsing settings: " << e.what() << endl;
     exit(1);
   }

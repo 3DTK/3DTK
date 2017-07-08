@@ -70,7 +70,7 @@ int main(int argc, char **argv)
 
   try {
     parse_args(argc, argv, ds, ws);
-  } catch (std::exception e) {
+  } catch (std::exception& e) {
     std::cerr << "Error while parsing settings: " << e.what() << endl;
     exit(1);
   }
