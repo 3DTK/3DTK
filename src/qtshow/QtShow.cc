@@ -11,7 +11,7 @@ QtShow::QtShow(int &argc, char **argv)
   bool has_initial_directory;
   try {
     parse_args(argc, argv, ds, ws, &has_initial_directory);
-  } catch (std::exception e) {
+  } catch (std::exception& e) {
     std::cerr << "Error while parsing settings: " << e.what() << endl;
     exit(1);
   }
