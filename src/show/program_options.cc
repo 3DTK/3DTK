@@ -339,18 +339,14 @@ void parse_args(int argc, char **argv, dataset_settings& ds, window_settings& ws
 void validate(boost::any& v, const std::vector<std::string>& values,
   WindowDimensions* target_type, int)
 {
-  using namespace boost;
-  static regex r("\\dx\\d");
-
   using namespace boost::program_options;
 
   validators::check_first_occurrence(v);
-  const std::string& s = validators::get_single_string(values);
+  const char *s = validators::get_single_string(values).c_str();
 
-  smatch match;
-  if (regex_match(s, match, r)) {
-    v = boost::any(WindowDimensions(lexical_cast<int>(match[1]),
-                                    lexical_cast<int>(match[2])));
+  int w, h;
+  if (sscanf(s, "%dx%d", &w, &h) == 2) {
+    v = boost::any(WindowDimensions(w, h));
   } else {
     throw validation_error(validation_error::invalid_option_value, "Window dimensions must be given in format WxH");
   }
@@ -359,19 +355,14 @@ void validate(boost::any& v, const std::vector<std::string>& values,
 void validate(boost::any& v, const std::vector<std::string>& values,
   Position* target_type, int)
 {
-  using namespace boost;
-  static regex r("\\d,\\d,\\d");
-
   using namespace boost::program_options;
 
   validators::check_first_occurrence(v);
-  const std::string& s = validators::get_single_string(values);
+  const char *s = validators::get_single_string(values).c_str();
 
-  smatch match;
-  if (regex_match(s, match, r)) {
-    v = boost::any(Position(lexical_cast<double>(match[1]),
-                            lexical_cast<double>(match[2]),
-                            lexical_cast<double>(match[3])));
+  int x, y, z;
+  if (sscanf(s, "%d,%d,%d", &x, &y, &z) == 3) {
+    v = boost::any(Position(x, y, z));
   } else {
     throw validation_error(validation_error::invalid_option_value, "Camera coordinates must be given as \"X,Y,Z\".");
   }
@@ -380,20 +371,14 @@ void validate(boost::any& v, const std::vector<std::string>& values,
 void validate(boost::any& v, const std::vector<std::string>& values,
   Quaternion* target_type, int)
 {
-  using namespace boost;
-  static regex r("\\d,\\d,\\d,\\d");
-
   using namespace boost::program_options;
 
   validators::check_first_occurrence(v);
-  const std::string& s = validators::get_single_string(values);
+  const char *s = validators::get_single_string(values).c_str();
 
-  smatch match;
-  if (regex_match(s, match, r)) {
-    v = boost::any(Quaternion(lexical_cast<double>(match[1]),
-                              lexical_cast<double>(match[2]),
-                              lexical_cast<double>(match[3]),
-                              lexical_cast<double>(match[4])));
+  int x, y, z, w;
+  if (sscanf(s, "%d,%d,%d,%d", &x, &y, &z, &w) == 4) {
+    v = boost::any(Quaternion(x, y, z, w));
   } else {
     throw validation_error(validation_error::invalid_option_value, "Camera rotation must be given as \"X,Y,Z,W\"");
   }
