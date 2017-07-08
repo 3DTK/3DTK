@@ -247,7 +247,7 @@ void parse_args(int argc, char **argv, dataset_settings& ds, window_settings& ws
 
   // Help text
   if (vm.count("help") ||
-      (directory_present == nullptr && vm.count("input-dir") == 0)) {
+      (directory_present == nullptr && vm.count("input-dir") != 1)) {
     cout << "Usage: " << argv[0] << " [options] <input-dir>" << endl;
     cout << visible_options << endl;
     exit(0);
