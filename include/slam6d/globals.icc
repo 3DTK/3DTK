@@ -369,6 +369,18 @@ inline double M3det( const T *M )
 }
 
 /**
+ * Sets a 3x3 matrix to the identity matrix
+ *
+ * @param M  input 3x3 matrix
+ */
+template <class T>
+static inline void M3identity( T *M )
+{
+  M[0] = M[4] = M[8] = 1.0;
+  M[1] = M[2] = M[3] = M[5] = M[6] = M[7] = 0.0;
+}
+
+/**
  * Inverts a 3x3 matrix
  *
  * @param Min   input 3x3 matrix
@@ -506,19 +518,6 @@ static inline void Matrix4ToEuler(const double *alignxf,
     rPos[1] = alignxf[13];
     rPos[2] = alignxf[14];
   }
-}
-
-
-/**
- * Sets a 3x3 matrix to the identity matrix
- *
- * @param M  input 3x3 matrix
- */
-template <class T>
-static inline void M3identity( T *M )
-{
-  M[0] = M[4] = M[8] = 1.0;
-  M[1] = M[2] = M[3] = M[5] = M[6] = M[7] = 0.0;
 }
 
 /**
