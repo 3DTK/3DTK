@@ -26,6 +26,16 @@ boost::python::tuple scan_get_rPos(Scan &s)
 	return boost::python::tuple(l);
 }
 
+boost::python::tuple scan_get_rPosTheta(Scan &s)
+{
+	const double *rPosTheta = s.get_rPosTheta();
+	boost::python::list l;
+	for (int i = 0; i < 3; ++i) {
+		l.append(rPosTheta[i]);
+	}
+	return boost::python::tuple(l);
+}
+
 boost::python::tuple scan_get_transMatOrg(Scan &s)
 {
 	const double *transMatOrg = s.get_transMatOrg();
@@ -101,6 +111,160 @@ boost::python::tuple pyM4identity()
 	l.append(0.0f);
 	l.append(0.0f);
 	l.append(1.0f);
+	return boost::python::tuple(l);
+}
+
+boost::python::tuple pytransform3(boost::python::tuple m, boost::python::tuple p)
+{
+	const double matrix[16] = {
+		boost::python::extract<double>(m[0])(),
+		boost::python::extract<double>(m[1])(),
+		boost::python::extract<double>(m[2])(),
+		boost::python::extract<double>(m[3])(),
+		boost::python::extract<double>(m[4])(),
+		boost::python::extract<double>(m[5])(),
+		boost::python::extract<double>(m[6])(),
+		boost::python::extract<double>(m[7])(),
+		boost::python::extract<double>(m[8])(),
+		boost::python::extract<double>(m[9])(),
+		boost::python::extract<double>(m[10])(),
+		boost::python::extract<double>(m[11])(),
+		boost::python::extract<double>(m[12])(),
+		boost::python::extract<double>(m[13])(),
+		boost::python::extract<double>(m[14])(),
+		boost::python::extract<double>(m[15])()
+	};
+	double point[3] = {
+		boost::python::extract<double>(p[0])(),
+		boost::python::extract<double>(p[1])(),
+		boost::python::extract<double>(p[2])(),
+	};
+	transform3(matrix, point);
+	boost::python::list l;
+	for (int i = 0; i < 3; ++i) {
+		l.append(point[i]);
+	}
+	return boost::python::tuple(l);
+}
+
+boost::python::tuple pytransform3normal(boost::python::tuple m, boost::python::tuple n)
+{
+	const double matrix[16] = {
+		boost::python::extract<double>(m[0])(),
+		boost::python::extract<double>(m[1])(),
+		boost::python::extract<double>(m[2])(),
+		boost::python::extract<double>(m[3])(),
+		boost::python::extract<double>(m[4])(),
+		boost::python::extract<double>(m[5])(),
+		boost::python::extract<double>(m[6])(),
+		boost::python::extract<double>(m[7])(),
+		boost::python::extract<double>(m[8])(),
+		boost::python::extract<double>(m[9])(),
+		boost::python::extract<double>(m[10])(),
+		boost::python::extract<double>(m[11])(),
+		boost::python::extract<double>(m[12])(),
+		boost::python::extract<double>(m[13])(),
+		boost::python::extract<double>(m[14])(),
+		boost::python::extract<double>(m[15])()
+	};
+	double normal[3] = {
+		boost::python::extract<double>(n[0])(),
+		boost::python::extract<double>(n[1])(),
+		boost::python::extract<double>(n[2])(),
+	};
+	transform3normal(matrix, normal);
+	boost::python::list l;
+	for (int i = 0; i < 3; ++i) {
+		l.append(normal[i]);
+	}
+	return boost::python::tuple(l);
+}
+
+boost::python::tuple pyEulerToMatrix3(boost::python::tuple t)
+{
+	const double rPosTheta[3] = {
+		boost::python::extract<double>(t[0])(),
+		boost::python::extract<double>(t[1])(),
+		boost::python::extract<double>(t[2])(),
+	};
+	double matrix[9];
+	EulerToMatrix3(rPosTheta, matrix);
+	boost::python::list l;
+	for (int i = 0; i < 9; ++i) {
+		l.append(matrix[i]);
+	}
+	return boost::python::tuple(l);
+}
+
+boost::python::tuple pyEulerToMatrix4(boost::python::tuple p, boost::python::tuple t)
+{
+	const double rPos[3] = {
+		boost::python::extract<double>(p[0])(),
+		boost::python::extract<double>(p[1])(),
+		boost::python::extract<double>(p[2])(),
+	};
+	const double rPosTheta[3] = {
+		boost::python::extract<double>(t[0])(),
+		boost::python::extract<double>(t[1])(),
+		boost::python::extract<double>(t[2])(),
+	};
+	double matrix[16];
+	EulerToMatrix4(rPos, rPosTheta, matrix);
+	boost::python::list l;
+	for (int i = 0; i < 16; ++i) {
+		l.append(matrix[i]);
+	}
+	return boost::python::tuple(l);
+}
+
+boost::python::tuple pyM3inv(boost::python::tuple m)
+{
+	const double Min[9] = {
+		boost::python::extract<double>(m[0])(),
+		boost::python::extract<double>(m[1])(),
+		boost::python::extract<double>(m[2])(),
+		boost::python::extract<double>(m[3])(),
+		boost::python::extract<double>(m[4])(),
+		boost::python::extract<double>(m[5])(),
+		boost::python::extract<double>(m[6])(),
+		boost::python::extract<double>(m[7])(),
+		boost::python::extract<double>(m[8])(),
+	};
+	double Mout[9];
+	M3inv(Min, Mout);
+	boost::python::list l;
+	for (int i = 0; i < 9; ++i) {
+		l.append(Mout[i]);
+	}
+	return boost::python::tuple(l);
+}
+
+boost::python::tuple pyM4inv(boost::python::tuple m)
+{
+	const double Min[16] = {
+		boost::python::extract<double>(m[0])(),
+		boost::python::extract<double>(m[1])(),
+		boost::python::extract<double>(m[2])(),
+		boost::python::extract<double>(m[3])(),
+		boost::python::extract<double>(m[4])(),
+		boost::python::extract<double>(m[5])(),
+		boost::python::extract<double>(m[6])(),
+		boost::python::extract<double>(m[7])(),
+		boost::python::extract<double>(m[8])(),
+		boost::python::extract<double>(m[9])(),
+		boost::python::extract<double>(m[10])(),
+		boost::python::extract<double>(m[11])(),
+		boost::python::extract<double>(m[12])(),
+		boost::python::extract<double>(m[13])(),
+		boost::python::extract<double>(m[14])(),
+		boost::python::extract<double>(m[15])()
+	};
+	double Mout[16];
+	M4inv(Min, Mout);
+	boost::python::list l;
+	for (int i = 0; i < 16; ++i) {
+		l.append(Mout[i]);
+	}
 	return boost::python::tuple(l);
 }
 
@@ -401,6 +565,12 @@ BOOST_PYTHON_MODULE(py3dtk)
 	def("openDirectory", Scan::openDirectory);
 
 	def("M4identity", pyM4identity);
+	def("transform3", pytransform3);
+	def("transform3normal", pytransform3normal);
+	def("EulerToMatrix3", pyEulerToMatrix3);
+	def("EulerToMatrix4", pyEulerToMatrix4);
+	def("M3inv", pyM3inv);
+	def("M4inv", pyM4inv);
 
 	def("formatname_to_io_type", formatname_to_io_type);
 	def("io_type_to_libname", io_type_to_libname);
@@ -420,6 +590,7 @@ BOOST_PYTHON_MODULE(py3dtk)
 		.def("get", scan_getByString)
 		.def("get", scan_getByType)
 		.def("get_rPos", scan_get_rPos)
+		.def("get_rPosTheta", scan_get_rPosTheta)
 		.def("get_transMatOrg", scan_get_transMatOrg)
 		.def("toGlobal", &Scan::toGlobal)
 		.def("setRangeFilter", &Scan::setRangeFilter)
