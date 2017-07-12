@@ -190,7 +190,7 @@ void writeScanFiles(string dir,
     int r,g,b;
     r = (int)(normals[i].x * (127.5) + 127.5);
     g = (int)(normals[i].y * (127.5) + 127.5);
-    b = (int)(fabs(normals[i].z) * (255.0));
+    b = (int)(normals[i].z * (127.5) + 127.5);
     normptsout << points[i].x << " "
                << points[i].y << " "
                << points[i].z << " "
