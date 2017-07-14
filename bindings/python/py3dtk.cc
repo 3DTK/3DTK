@@ -376,6 +376,23 @@ class KDtreeIndexedWrapper : public KDtreeIndexed
 			return l;
 		}
 
+		size_t segmentSearch_1NearestPoint(boost::python::tuple _p, boost::python::tuple _p0, double maxdist2)
+		{
+			double *_pv = new double[3];
+			_pv[0] = extract<double>(_p[0]);
+			_pv[1] = extract<double>(_p[1]);
+			_pv[2] = extract<double>(_p[2]);
+			double *_p0v = new double[3];
+			_p0v[0] = extract<double>(_p0[0]);
+			_p0v[1] = extract<double>(_p0[1]);
+			_p0v[2] = extract<double>(_p0[2]);
+			int threadNum = 0;
+			size_t res = KDtreeIndexed::segmentSearch_1NearestPoint(_pv, _p0v, maxdist2, threadNum);
+			delete[] _pv;
+			delete[] _p0v;
+			return res;
+		}
+
 		~KDtreeIndexedWrapper()
 		{
 			for (size_t i = 0; i < m_size; ++i) {
@@ -467,6 +484,30 @@ class KDtreeWrapper : public KDtree
 			}
 			delete[] _pv;
 			return l;
+		}
+
+		boost::python::object segmentSearch_1NearestPoint(boost::python::tuple _p, boost::python::tuple _p0, double maxdist2)
+		{
+			double *_pv = new double[3];
+			_pv[0] = extract<double>(_p[0]);
+			_pv[1] = extract<double>(_p[1]);
+			_pv[2] = extract<double>(_p[2]);
+			double *_p0v = new double[3];
+			_p0v[0] = extract<double>(_p0[0]);
+			_p0v[1] = extract<double>(_p0[1]);
+			_p0v[2] = extract<double>(_p0[2]);
+			int threadNum = 0;
+			double *closest = KDtree::segmentSearch_1NearestPoint(_pv, _p0v, maxdist2, threadNum);
+			delete[] _pv;
+			delete[] _p0v;
+			if (closest == 0) {
+				return boost::python::object(); // return None
+			}
+			boost::python::list l;
+			for (int i = 0; i < 3; i++) {
+				l.append(closest[i]);
+			}
+			return boost::python::tuple(l);
 		}
 
 		~KDtreeWrapper()
@@ -615,12 +656,14 @@ BOOST_PYTHON_MODULE(py3dtk)
 	class_<KDtreeIndexedWrapper>("KDtreeIndexed", boost::python::init<boost::python::list>())
 		.def("FindClosest", &KDtreeIndexedWrapper::FindClosest)
 		.def("fixedRangeSearch", &KDtreeIndexedWrapper::fixedRangeSearch)
-		.def("kNearestNeighbors", &KDtreeIndexedWrapper::kNearestNeighbors);
-		
+		.def("kNearestNeighbors", &KDtreeIndexedWrapper::kNearestNeighbors)
+		.def("segmentSearch_1NearestPoint", &KDtreeIndexedWrapper::segmentSearch_1NearestPoint);
+
 	class_<KDtreeWrapper>("KDtree", boost::python::init<boost::python::list>())
 		.def("FindClosest", &KDtreeWrapper::FindClosest)
 		.def("fixedRangeSearch", &KDtreeWrapper::fixedRangeSearch)
-		.def("kNearestNeighbors", &KDtreeWrapper::kNearestNeighbors);
+		.def("kNearestNeighbors", &KDtreeWrapper::kNearestNeighbors)
+		.def("segmentSearch_1NearestPoint", &KDtreeWrapper::segmentSearch_1NearestPoint);
 
 	def("calculateNormal", calculateNormalWrapper);
 }
