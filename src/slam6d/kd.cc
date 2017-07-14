@@ -218,3 +218,26 @@ vector<Point> KDtree::AABBSearch(double *_p,
 
     return result;
 }
+
+double *KDtree::segmentSearch_1NearestPoint(double *_p,
+          double* _p0, double maxdist2, int threadNum) const
+{
+  params[threadNum].closest = 0;
+  // the furthest a point can be away is the distance between the points
+  // making the line segment plus maxdist
+  params[threadNum].closest_d2 = sqr(sqrt(Dist2(_p,_p0))+sqrt(maxdist2));
+  params[threadNum].maxdist_d2 = maxdist2;
+  params[threadNum].maxdist_d = sqrt(maxdist2);
+  params[threadNum].p = _p;
+  params[threadNum].p0 = _p0;
+  double *dir = new double[3]{_p0[0] - _p[0], _p0[1] - _p[1], _p0[2] - _p[2] };
+  double len2 = Len2(dir);
+  double *n = new double[3]{dir[0]/len2,dir[1]/len2,dir[2]/len2};
+  params[threadNum].segment_dir = dir;
+  params[threadNum].segment_len2 = len2;
+  params[threadNum].segment_n = n;
+  _segmentSearch_1NearestPoint(Void(), threadNum);
+  delete[] dir;
+  delete[] n;
+  return params[threadNum].closest;
+}

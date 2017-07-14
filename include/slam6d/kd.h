@@ -79,6 +79,9 @@ public:
                                    double* _p0,
                                    int threadNum = 0) const;
 
+  virtual double *segmentSearch_1NearestPoint(double *_p,
+          double* _p0, double maxdist2, int threadNum) const;
+
 };
 
 
