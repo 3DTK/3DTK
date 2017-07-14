@@ -203,9 +203,11 @@ def main():
     parser.add_argument("--voxel-size", type=float, default=10, help="Voxel grid size")
     parser.add_argument("--diff", type=int, default=0, help="Number of scans before and after the current scan that are grouped together.")
     parser.add_argument("--no-subvoxel-accuracy", action='store_true', help="Do not calculate with subvoxel accuracy")
-    parser.add_argument("--no-compute-normals", action='store_true', help="Do not compute surface offsets by their normal vectors")
-    parser.add_argument("--no-global-normals", action='store_true', help="Compute normal vectors for each scan instead of from the global point cloud")
-    parser.add_argument("--normal-knearest", type=int, default=40, help="To compute the normal vector, use NUM closest points")
+    parser.add_argument(
+        "--maxrange-method", choices=["none", "normals", "1nearest"],
+        help="How to compute search range. Possible values: none, normals, 1nearest")
+    parser.add_argument("--no-global-normals", action='store_true', help="Compute normal vectors for each scan instead of from the global point cloud (for maxrange-method=normals)")
+    parser.add_argument("--normal-knearest", type=int, default=40, help="To compute the normal vector, use NUM closest points (for maxrange-method=normals)")
     parser.add_argument("directory")
     args = parser.parse_args()
 
@@ -246,7 +248,7 @@ def main():
         else:
             refl = [ 0.0 ] * len(xyz)
         points = list(zip(xyz,xyz_orig,refl))
-        if not args.no_compute_normals:
+        if args.maxrange_method == "normals":
             # sort points by their distance from the scanner for normal
             # computation later
             # Precompute the distances so that they are not computed multiple
@@ -282,7 +284,7 @@ def main():
         #maxranges.append([sq.length(p)-voxel_diagonal for (_,p,_) in points_by_slice[i]])
         maxranges.append([None]*len(points_by_slice[i]))
         normals.append([None]*len(points_by_slice[i]))
-    if not args.no_compute_normals:
+    if args.maxrange_method == "normals":
         if not args.no_global_normals:
             # We build one big kd-tree because normal computation becomes harder
             # the further away from the scanner it is done (less points per volume)
@@ -402,6 +404,19 @@ def main():
                     # FIXME: make sure that the maxrange for a point is not closer to it than voxel_diagonal
                     normals[i][k] = normal
                     maxranges[i][k] = d
+    elif args.maxrange_method == "1nearest":
+        # this method is exact for single scans (because no normals can be
+        # wrongly computed) but slower (kd-tree has to be searched for every
+        # single point) and it fails for multiple scans (bremen-city effect)
+        for i, (pos,theta,transmat) in enumerate(trajectory):
+            # we must not use global kd-trees because then the search would
+            # stop at any obstacle and would never see "through" anything
+            kdtree = py3dtk.KDtree([p for _,p,_ in points_by_slice[i]])
+            for j,(_,p,_) in enumerate(points_by_slice[i]):
+                maxranges[i][j] = sq.length(kdtree.segmentSearch_1NearestPoint((0,0,0), p, voxel_diagonal**2)) - voxel_diagonal
+
+    if args.maxrange_method in ["normals", "1nearest"]:
+        for i, (pos,theta,_) in enumerate(trajectory):
             with open("scan%03d.pose" % (i+2), "w") as f:
                 print("%f %f %f"%pos, file=f)
                 print("%f %f %f"%tuple([t*180/math.pi for t in theta]), file=f)
