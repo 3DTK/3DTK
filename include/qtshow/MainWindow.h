@@ -19,6 +19,7 @@ public:
 
 signals:
   void scanDirectoryOpened(dataset_settings);
+  void pathFilePicked(QString);
 
 public slots:
   void openScanDirectory();
