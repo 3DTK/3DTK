@@ -3,6 +3,9 @@
 
 #include "ui_MainWindow.h"
 
+#include <string>
+#include <vector>
+
 #include <QProgressBar>
 
 #include "show/program_options.h"
@@ -19,10 +22,18 @@ signals:
 
 public slots:
   void openScanDirectory();
+  void openRecentDirectory();
+  void clearRecentDirectories();
 
 protected:
+  std::vector<std::string> loadRecentDirectories();
+  void updateRecentDirectoriesMenu(std::vector<std::string> directories);
+
   dataset_settings ds;
   QProgressBar *progressbar;
+
+protected slots:
+  void addRecentDirectory();
 
 friend class QtShow;
 };
