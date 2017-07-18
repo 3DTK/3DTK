@@ -566,7 +566,7 @@ void copy_settings_to_globals(
   maxDist = ds.distance_filter.max;
   red = ds.octree_reduction_voxel;
   octree = ds.octree_reduction_randomized_bucket;
-  stepsize = ds.skip_points;
+  stepsize = ds.skip_files;
 
   origin = ds.origin_type;
   originset = ds.origin_type_set;
