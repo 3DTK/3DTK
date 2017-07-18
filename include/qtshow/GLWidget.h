@@ -33,7 +33,9 @@ public slots:
   void setColorInverted(bool colorInverted);
 
   void setAnimatePath(bool animatePath);
-  void setPathFileName(QString pathFile);
+  void saveCameraPath();
+  void loadCameraPath();
+  void drawPath();
   void setInterpolationFactor(double interpolationFactor);
   void setInterpolateByDistance(bool interpolateByDistance);
   void setAnimateMatching(bool animateMatching);
@@ -74,8 +76,6 @@ protected:
 
   bool animatePath;
   bool animateMatching;
-
-  QString pathFileName;
 
   QTimer *idleTimer;
 };

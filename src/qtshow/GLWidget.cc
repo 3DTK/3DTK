@@ -10,6 +10,7 @@
   #include <GL/glu.h>
 #endif
 #include <Qt>
+#include <QFileDialog>
 
 #include "show/show_common.h"
 #include "show/show_gl.h"
@@ -272,8 +273,26 @@ void GLWidget::setAnimatePath(bool animatePath) {
   }
 }
 
-void GLWidget::setPathFileName(QString pathFileName) {
-  this->pathFileName = pathFileName;
+void GLWidget::saveCameraPath() {
+  QWidget *mainWindow = parentWidget()->parentWidget();
+  QString pathFileName = QFileDialog::getSaveFileName(
+    mainWindow, "Save Camera Path", path_file_name,
+    "3DTK Path Files (*.path *.dat);;All Files (*)");
+  strncpy(path_file_name, pathFileName.toStdString().c_str(), 1024);
+  savePath(0);
+}
+
+void GLWidget::loadCameraPath() {
+  QWidget *mainWindow = parentWidget()->parentWidget();
+  QString pathFileName = QFileDialog::getOpenFileName(
+    mainWindow, "Load Camera Path", path_file_name,
+    "3DTK Path Files (*.path *.dat);;All Files (*)");
+  strncpy(path_file_name, pathFileName.toStdString().c_str(), 1024);
+  loadPath(0);
+}
+
+void GLWidget::drawPath() {
+  drawRobotPath(0);
 }
 
 void GLWidget::setInterpolationFactor(double interpolationFactor) {
@@ -297,8 +316,13 @@ void GLWidget::setAnimationSpeed(double animationSpeed) {
 }
 
 void GLWidget::animate() {
-  // TODO actually call the different kinds of animation
-  startAnimation(0);
+  if (animateMatching && animatePath) {
+    pathMatchingAnimate(0);
+  } else if (animateMatching) {
+    startAnimation(0);
+  } else if (animatePath) {
+    pathAnimate(0);
+  }
 }
 
 void GLWidget::setSnapshotScale(int snapshotScale) {
