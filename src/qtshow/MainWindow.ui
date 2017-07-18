@@ -38,8 +38,14 @@
     <property name="title">
      <string>F&amp;ile</string>
     </property>
+    <widget class="QMenu" name="menuOpenRecent">
+     <property name="title">
+      <string>Open &amp;Recent</string>
+     </property>
+     <addaction name="actionClearRecent"/>
+    </widget>
     <addaction name="actionOpen"/>
-    <addaction name="actionOpenRecent"/>
+    <addaction name="menuOpenRecent"/>
     <addaction name="separator"/>
     <addaction name="actionQuit"/>
    </widget>
@@ -833,26 +839,13 @@
   </action>
   <action name="actionOpen">
    <property name="icon">
-    <iconset theme="document-open">
-     <normaloff>.</normaloff>.</iconset>
+    <iconset theme="document-open"/>
    </property>
    <property name="text">
     <string>&amp;Open Scan Directory...</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+O</string>
-   </property>
-  </action>
-  <action name="actionOpenRecent">
-   <property name="icon">
-    <iconset theme="document-open-recent">
-     <normaloff>.</normaloff>.</iconset>
-   </property>
-   <property name="text">
-    <string>Open &amp;Recent</string>
-   </property>
-   <property name="shortcutContext">
-    <enum>Qt::WidgetWithChildrenShortcut</enum>
    </property>
   </action>
   <action name="actionAbout3DTK">
@@ -870,6 +863,14 @@
    </property>
    <property name="text">
     <string>Open Path File...</string>
+   </property>
+  </action>
+  <action name="actionClearRecent">
+   <property name="icon">
+    <iconset theme="edit-clear"/>
+   </property>
+   <property name="text">
+    <string>Clear List</string>
    </property>
   </action>
   <zorder>dockSnapshot</zorder>
@@ -1405,9 +1406,26 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>actionClearRecent</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>clearRecentDirectories()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>665</x>
+     <y>419</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>openScanDirectory()</slot>
   <slot>quit()</slot>
+  <slot>clearRecentDirectories()</slot>
  </slots>
 </ui>
