@@ -18,6 +18,9 @@ QtShow::QtShow(int &argc, char **argv)
 
   if (has_initial_directory) {
     initShow(ds, ws);
+  } else {
+    // doing DrawUrl without initShow hangs the program for ~10s
+    label = false;
   }
 
   mainWindow = new MainWindow(ds, ws);
