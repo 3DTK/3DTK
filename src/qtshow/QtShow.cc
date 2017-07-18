@@ -56,6 +56,12 @@ void QtShow::loadDifferentScan(dataset_settings new_ds) {
   MetaAlgoType.clear();
   trajectory.clear();
 
+  ds.distance_filter.min = 0;
+  ds.distance_filter.max = -1;
+  ds.octree_reduction_voxel = 0;
+  ds.octree_reduction_randomized_bucket = 1;
+  ds.skip_files = 1;
+
   // actual switching, includes callbacks to the progress bar
   initShow(ds, ws);
 }
