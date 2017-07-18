@@ -16,4 +16,6 @@ if(WITH_CALIBRATION)
 
     add_executable(lasercal lasercal.cc CalibrationPattern.cc PictureHandler.cc AprilTag.cc LaserTools.cc)
     target_link_libraries(lasercal apriltag ${OpenCV_LIBRARIES} ${Boost_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY})
+
+    configure_file(createAprilGrid.py ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/createAprilGrid COPYONLY)
 endif()
