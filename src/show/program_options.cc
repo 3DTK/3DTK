@@ -116,8 +116,8 @@ void parse_args(int argc, char **argv, dataset_settings& ds, window_settings& ws
     ("octree,O", value(&ds.octree_reduction_randomized_bucket)->implicit_value(1),
       "Enable randomized octree based point reduction with arg points per voxel. "
       "Requires --reduce (-r).") // TODO where is this enforced?
-    ("stepsize", value(&ds.skip_points)->default_value(1),
-      "Reduce point cloud by including only every arg-th point.")
+    ("stepsize", value(&ds.skip_files)->default_value(1),
+      "Reduce point cloud by including only every arg-th scan file.")
     ;
 
   options_description point_options("Point transformation");

@@ -89,7 +89,7 @@ struct dataset_settings {
   range<int> distance_filter;
   double octree_reduction_voxel;
   int octree_reduction_randomized_bucket {};
-  int skip_points;
+  int skip_files;
 
   // TODO make this an std::optional (C++17)
   int origin_type {};
