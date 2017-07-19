@@ -63,7 +63,7 @@ int main (int argc, char* argv[])
         Mat p2 = rotMatrix * Mat(Vec3d(0, 1, 0));
 
         Mat_<double> tvec(3,1);
-        for (int j = 0; j < 3; j++) { tvec.at<double>(j, 0) = extrinsics.at<double>(i, j); }
+        for (int j = 0; j < 3; j++) { tvec.at<double>(j, 0) = extrinsics.at<double>(i, 3 + j); }
 
         Mat normal = p1.cross(p2);
         double distance = -((normal.at<double>(0, 0) * tvec.at<double>(0, 0)) + (normal.at<double>(1, 0) * tvec.at<double>(1, 0)) + (normal.at<double>(2, 0) * tvec.at<double>(2, 0)));
