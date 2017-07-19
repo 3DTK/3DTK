@@ -5,7 +5,7 @@ import sys, os, re, argparse
 parser = argparse.ArgumentParser(prog="createAprilGrid", description="Tool to create AprilTag grids.")
 parser.add_argument("-x", "--board-x", help="Number of AprilTags in x direction", type=int, default=0)
 parser.add_argument("-y", "--board-y", help="Number of AprilTags in y direction", type=int, default=0)
-parser.add_argument("-s", "--pattern-size", help="Size of AprilTag (size of the tag including the white border)", type=float, default=0)
+parser.add_argument("-s", "--pattern-size", help="Size of AprilTag (including the white border)", type=float, default=0)
 parser.add_argument("-id", "--start-id", help="First ID of AprilTag grid", type=int, default=0)
 
 args = parser.parse_args()
