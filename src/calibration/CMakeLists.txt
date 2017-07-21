@@ -20,6 +20,9 @@ if(WITH_CALIBRATION)
     add_executable(planeFromExtrinsics planeFromExtrinsics.cc)
     target_link_libraries(planeFromExtrinsics ${OpenCV_LIBRARIES} ${Boost_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY})
 
+    add_executable(transformsFromExtrinsics transformsFromExtrinsics.cc)
+    target_link_libraries(transformsFromExtrinsics ${OpenCV_LIBRARIES} ${Boost_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY})
+
     add_executable(lasercal lasercal.cc CalibrationPattern.cc PictureHandler.cc AprilTag.cc LaserTools.cc)
     target_link_libraries(lasercal apriltag ${OpenCV_LIBRARIES} ${Boost_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY})
 
