@@ -31,8 +31,10 @@ void MainWindow::updateRecentDirectoriesMenu(std::vector<std::string> directorie
   menuOpenRecent->clear();
   for (auto directory : loadRecentDirectories()) {
     QAction *action = menuOpenRecent->addAction(
-      QString::fromStdString(directory),
-      this, &MainWindow::openRecentDirectory);
+      QString::fromStdString(directory), this,
+      "openRecentDirectory");
+      // TODO uncomment this when Andreas upgrades to Qt 5.6
+      // &MainWindow::openRecentDirectory);
     action->setData(QString::fromStdString(directory));
   }
   menuOpenRecent->addSeparator();
