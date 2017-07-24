@@ -19,6 +19,7 @@ using std::cerr;
 using std::endl;
 
 extern int nr_interpolations;
+extern int imageNr;
 
 void calcUpPath();
 
@@ -60,13 +61,19 @@ void loadPose(int dummy);
 void savePose(int dummy);
 
 /**
-  * This function saves the current view into a ppm-file with variable scale
-  * factor.
-  */
+ * Suggest a filename (for use with saveImageAt).
+ */
+std::string suggestImageFileName();
+
+/**
+ * This function saves the current view into a ppm-file with variable scale
+ * factor. Callback fora button in GLUIshow.
+ */
 void saveImage(int dummy);
 
 /**
  * Save the current view into the given PPM file with a scaled size from the global `factor`.
+ * Currently used by QtShow.
  */
 void saveImageAt(const std::string& imageFileName);
 

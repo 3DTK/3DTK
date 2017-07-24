@@ -1,6 +1,7 @@
 #include "show/show_animate.h"
 
 int nr_interpolations = 0;
+int imageNr = 0;
 
 void calcUpPath()
 {
@@ -329,19 +330,18 @@ void savePose(int dummy) {
   
 }
 
-/**
-  * This function saves the current view into a ppm-file with variable scale
-  * factor.
-  */
-void saveImage(int dummy)
-{
-  static int imageNr = 0;
-  saveImageAt("image" + to_string(imageNr, 3) + ".ppm");
-  imageNr++;
+std::string suggestImageFileName() {
+  return "image" + to_string(imageNr, 3) + ".ppm";
 }
 
-void saveImageAt(const string& imageFileName) {
+void saveImage(int dummy)
+{
+  saveImageAt(suggestImageFileName());
+}
+
+void saveImageAt(const std::string& imageFileName) {
   glWriteImagePPM(imageFileName.c_str(), factor, 0);
+  imageNr++;
 }
 
 /**
