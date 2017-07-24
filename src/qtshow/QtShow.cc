@@ -59,6 +59,15 @@ void QtShow::loadDifferentScan(dataset_settings new_ds) {
   MetaMatrix.clear();
   MetaAlgoType.clear();
   trajectory.clear();
+  cams.clear();
+  path_vectorX.clear();
+  path_vectorZ.clear();
+  lookats.clear();
+  lookat_vectorX.clear();
+  lookat_vectorZ.clear();
+  ups.clear();
+  ups_vectorX.clear();
+  ups_vectorZ.clear();
 
   ds.distance_filter.min = 0;
   ds.distance_filter.max = -1;
