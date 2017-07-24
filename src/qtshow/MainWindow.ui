@@ -774,15 +774,14 @@
       </rect>
      </property>
      <property name="text">
-      <string>Save Image</string>
+      <string>Save Image…</string>
      </property>
     </widget>
    </widget>
   </widget>
   <action name="actionQuit">
    <property name="icon">
-    <iconset theme="application-exit">
-     <normaloff>.</normaloff>.</iconset>
+    <iconset theme="application-exit"/>
    </property>
    <property name="text">
     <string>&amp;Quit</string>
@@ -827,7 +826,7 @@
     <iconset theme="edit-clear"/>
    </property>
    <property name="text">
-    <string>Clear List</string>
+    <string>&amp;Clear List</string>
    </property>
   </action>
   <zorder>dockSnapshot</zorder>
@@ -842,6 +841,7 @@
     <signal>colorMaximumValueChanged(double)</signal>
     <signal>animationPossible(bool)</signal>
     <signal>pathFileValid(bool)</signal>
+    <signal>status(QString,int)</signal>
     <slot>setDrawPoints(bool)</slot>
     <slot>setDrawCameras(bool)</slot>
     <slot>setDrawPath(bool)</slot>
@@ -1312,7 +1312,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>100</x>
-     <y>548</y>
+     <y>702</y>
     </hint>
     <hint type="destinationlabel">
      <x>315</x>
@@ -1328,7 +1328,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>100</x>
-     <y>590</y>
+     <y>744</y>
     </hint>
     <hint type="destinationlabel">
      <x>303</x>
@@ -1429,6 +1429,22 @@
     <hint type="destinationlabel">
      <x>244</x>
      <y>251</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>glWidget</sender>
+   <signal>status(QString,int)</signal>
+   <receiver>statusbar</receiver>
+   <slot>showMessage(QString,int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>585</x>
+     <y>460</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>80</x>
+     <y>832</y>
     </hint>
    </hints>
   </connection>

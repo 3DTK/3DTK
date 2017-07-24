@@ -66,6 +66,11 @@ void savePose(int dummy);
 void saveImage(int dummy);
 
 /**
+ * Save the current view into the given PPM file with a scaled size from the global `factor`.
+ */
+void saveImageAt(const std::string& imageFileName);
+
+/**
  * Saves the currently selected points
  *
  */

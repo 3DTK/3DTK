@@ -336,10 +336,12 @@ void savePose(int dummy) {
 void saveImage(int dummy)
 {
   static int imageNr = 0;
-  string imageFileName;
-  imageFileName = "image" + to_string(imageNr,3) + ".ppm";
-  glWriteImagePPM(imageFileName.c_str(),factor,0);
-  imageNr++; 
+  saveImageAt("image" + to_string(imageNr, 3) + ".ppm");
+  imageNr++;
+}
+
+void saveImageAt(const string& imageFileName) {
+  glWriteImagePPM(imageFileName.c_str(), factor, 0);
 }
 
 /**
