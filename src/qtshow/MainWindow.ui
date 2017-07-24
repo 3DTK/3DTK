@@ -184,6 +184,9 @@
      </item>
      <item row="1" column="1">
       <widget class="QCheckBox" name="checkBoxInvertFog">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
        <property name="text">
         <string>Inverted</string>
        </property>
@@ -624,6 +627,9 @@
      </widget>
     </widget>
     <widget class="QToolButton" name="buttonSaveAnimation">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
      <property name="geometry">
       <rect>
        <x>170</x>
@@ -643,6 +649,9 @@
    </widget>
   </widget>
   <widget class="QDockWidget" name="dockPosition">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="windowTitle">
     <string>Settings</string>
    </property>
@@ -781,7 +790,8 @@
   </widget>
   <action name="actionQuit">
    <property name="icon">
-    <iconset theme="application-exit"/>
+    <iconset theme="application-exit">
+     <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
     <string>&amp;Quit</string>
@@ -795,7 +805,8 @@
   </action>
   <action name="actionOpen">
    <property name="icon">
-    <iconset theme="document-open"/>
+    <iconset theme="document-open">
+     <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
     <string>&amp;Open Scan Directory...</string>
@@ -823,7 +834,8 @@
   </action>
   <action name="actionClearRecent">
    <property name="icon">
-    <iconset theme="edit-clear"/>
+    <iconset theme="edit-clear">
+     <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
     <string>&amp;Clear List</string>
