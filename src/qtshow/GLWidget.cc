@@ -330,7 +330,15 @@ void GLWidget::setSnapshotScale(int snapshotScale) {
 }
 
 void GLWidget::saveSnapshot() {
-  saveImage(0);
+  QWidget *mainWindow = parentWidget()->parentWidget();
+  QString imageFileName = QFileDialog::getSaveFileName(
+    mainWindow, "Save Snapshot", "image.ppm",
+    "PPM Files (*.ppm);;All Files (*)");
+
+  if (!imageFileName.isEmpty()) {
+    saveImageAt(imageFileName.toStdString());
+    emit status("Snapshot saved as \"" + imageFileName + "\"", 5000);
+  }
 }
 
 void GLWidget::idle() {
