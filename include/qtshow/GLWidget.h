@@ -53,6 +53,8 @@ signals:
 
   void animationPossible(bool);
 
+  void status(QString, int);
+
 protected:
   void initializeGL();
   void resizeGL(int w, int h);
