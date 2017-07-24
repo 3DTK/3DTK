@@ -83,8 +83,12 @@ void MainWindow::addRecentDirectory() {
 
   std::ofstream directories_file(recent_directory_path());
 
-  for (auto directory : directories) {
-    directories_file << directory << std::endl;
+  // Only remember 10 most recent directories
+  for (auto directoryIt = directories.begin();
+       directoryIt != directories.end()
+         && directoryIt != directories.begin() + 10;
+       directoryIt++) {
+    directories_file << *directoryIt << std::endl;
   }
 
   updateRecentDirectoriesMenu(directories);
