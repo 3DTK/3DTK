@@ -43,6 +43,11 @@ QtShow::QtShow(int &argc, char **argv)
   connect(mainWindow, &MainWindow::scanDirectoryOpened, this, &QtShow::loadDifferentScan);
 
   mainWindow->show();
+
+  // After 1 second (and next GLWidget::update()) we can have the watermark back on
+  QTimer::singleShot(1000, []() {
+    label = true;
+  });
 }
 
 void QtShow::loadDifferentScan(dataset_settings new_ds) {
