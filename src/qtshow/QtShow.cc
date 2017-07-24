@@ -31,13 +31,23 @@ QtShow::QtShow(int &argc, char **argv)
   };
 
   loading_status = [&](const std::string& message) {
-    mainWindow->statusbar->showMessage(QString::fromStdString(message));
+    if (!nogui) {
+      mainWindow->statusbar->showMessage(QString::fromStdString(message));
+    }
   };
 
   loading_progress = [&](int current, int min, int max) {
-    mainWindow->progressbar->setMinimum(min);
-    mainWindow->progressbar->setMaximum(max);
-    mainWindow->progressbar->setValue(current);
+    QProgressBar *pb = mainWindow->progressbar;
+    if (!nogui) {
+      if (min <= max) {
+        pb->show();
+        pb->setMinimum(min);
+        pb->setMaximum(max);
+        pb->setValue(current);
+      } else { // max > min is code for "done"
+        pb->hide();
+      }
+    }
   };
 
   connect(mainWindow, &MainWindow::scanDirectoryOpened, this, &QtShow::loadDifferentScan);
@@ -82,4 +92,5 @@ void QtShow::loadDifferentScan(dataset_settings new_ds) {
 
   // actual switching, includes callbacks to the progress bar
   initShow(ds, ws);
+  mainWindow->glWidget->update();
 }

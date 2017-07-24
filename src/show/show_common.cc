@@ -993,6 +993,7 @@ void initShow(const dataset_settings& ds, const window_settings& ws){
   }
 
   loading_status("Done");
+  loading_progress(0, 1, 0); // max < min means we're done
 }
 
 void deinitShow()

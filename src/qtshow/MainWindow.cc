@@ -14,6 +14,7 @@ MainWindow::MainWindow(const dataset_settings& ds, const window_settings& ws, QW
     setupUi(this);
 
     progressbar = new QProgressBar(statusbar);
+    progressbar->hide();
     statusbar->addPermanentWidget(progressbar);
 
     updateRecentDirectoriesMenu(loadRecentDirectories());
