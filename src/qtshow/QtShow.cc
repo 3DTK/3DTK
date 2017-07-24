@@ -16,14 +16,15 @@ QtShow::QtShow(int &argc, char **argv)
     exit(1);
   }
 
+  mainWindow = new MainWindow(ds, ws);
+
   if (has_initial_directory) {
     initShow(ds, ws);
+    mainWindow->addRecentDirectory();
   } else {
     // doing DrawUrl without initShow hangs the program for ~10s
     label = false;
   }
-
-  mainWindow = new MainWindow(ds, ws);
 
   update_callback = [&]() {
     mainWindow->glWidget->update();
