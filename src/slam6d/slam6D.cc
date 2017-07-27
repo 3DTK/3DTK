@@ -89,6 +89,8 @@ using std::endl;
 #include <fstream>
 using std::ifstream;
 
+#include <boost/filesystem.hpp>
+
 
 //  Handling Segmentation faults and CTRL-C
 void sigSEGVhandler (int v)
@@ -263,6 +265,9 @@ void usage(char* prog)
        << "           1 = cached k-d tree " << endl
        << "           2 = ANNTree " << endl
        << "           3 = BOCTree " << endl
+       << endl
+       << bold << "  --loopclosefile" << normal << " path" << endl
+       << "         Where to store the loop close file. Default: loopclose.pts" << endl
        << endl << endl;
 
   cout << bold << "EXAMPLES " << normal << endl
@@ -309,7 +314,8 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &rand,
               int &mni_lum, string &net, double &cldist, int &clpairs, int &loopsize,
               double &epsilonICP, double &epsilonSLAM,  int &nns_method, bool &exportPts, double &distLoop,
               int &iterLoop, double &graphDist, int &octree, IOType &type,
-              bool& scanserver, PairingMode& pairing_mode, bool &continue_processing, int &bucketSize)
+              bool& scanserver, PairingMode& pairing_mode, bool &continue_processing, int &bucketSize,
+              boost::filesystem::path &loopclosefile)
 {
   int  c;
   // from unistd.h:
@@ -359,6 +365,7 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &rand,
     { "scanserver",      no_argument,         0,  'S' },
     { "continue",        no_argument,         0,  '0' }, // use the long format
     { "bucketSize",      required_argument,   0,  'b' },
+    { "loopclosefile",   required_argument,   0,  0 }, // no short option
     { 0,  0,   0,   0}                                   // needed, cf. getopt.h
   };
   
@@ -367,6 +374,13 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &rand,
   cout << endl;
   while ((c = getopt_long(argc, argv, "O:f:A:G:L:a:t:r:R:d:D:i:l:I:c:C:n:s:e:m:M:b:uqQpS", longopts, &option_index)) != -1) {
     switch (c) {
+    case 0:
+        if (strcmp(longopts[option_index].name, "loopclosefile") == 0) {
+            loopclosefile = boost::filesystem::path(optarg);
+        } else {
+            abort ();
+        }
+        break;
     case '0':
       continue_processing = true;
       break;
@@ -777,13 +791,15 @@ int main(int argc, char **argv)
   PairingMode pairing_mode = CLOSEST_POINT;
   bool continue_processing = false;
   int bucketSize = 20;
+  boost::filesystem::path loopclose("loopclose.pts");
   
   parseArgs(argc, argv, dir, red, rand, mdm, mdml, mdmll, mni, start, end,
             maxDist, minDist, quiet, veryQuiet, eP, meta,
             algo, loopSlam6DAlgo, lum6DAlgo, anim,
             mni_lum, net, cldist, clpairs, loopsize, epsilonICP, epsilonSLAM,
             nns_method, exportPts, distLoop, iterLoop, graphDist, octree, type,
-            scanserver, pairing_mode, continue_processing, bucketSize);
+            scanserver, pairing_mode, continue_processing, bucketSize,
+            loopclose);
 
   cout << "slam6D will proceed with the following parameters:" << endl;
   //@@@ to do :-)
@@ -997,7 +1013,7 @@ int main(int argc, char **argv)
   }
 
   const double* p;
-  ofstream redptsout("loopclose.pts");
+  ofstream redptsout(loopclose.string());
   for(ScanVector::iterator it = Scan::allScans.begin(); 
       it != Scan::allScans.end(); 
       ++it)
