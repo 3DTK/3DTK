@@ -495,14 +495,14 @@ static inline void Matrix4ToEuler(const double *alignxf,
   }
 
   double  C    =  cos( rPosTheta[1] );
-  if ( fabs( C ) > 0.005 )  {                 // Gimball lock? 
+  if ( fabs( C ) > 0.005 )  {                 // Gimbal lock? 
     _trX      =  alignxf[10] / C;             // No, so get X-axis angle 
     _trY      =  -alignxf[9] / C;
     rPosTheta[0]  = atan2( _trY, _trX );
     _trX      =  alignxf[0] / C;              // Get Z-axis angle 
     _trY      = -alignxf[4] / C;
     rPosTheta[2]  = atan2( _trY, _trX );
-  } else {                                    // Gimball lock has occurred 
+  } else {                                    // Gimbal lock has occurred 
     rPosTheta[0] = 0.0;                       // Set X-axis angle to zero 
     _trX      =  alignxf[5];  //1                // And calculate Z-axis angle 
     _trY      =  alignxf[1];  //2
