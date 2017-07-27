@@ -196,31 +196,32 @@ def formatname_to_io_type(string):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("-s", "--start", type=int)
-    parser.add_argument("-e", "--end", type=int)
-    parser.add_argument("-f", "--format", type=formatname_to_io_type)
-    parser.add_argument("--fuzz", type=float, default=0, help="How fuzzy the data is. I.e. how far points on a perfect plane are allowed to lie away from it in the scan.")
-    parser.add_argument("--voxel-size", type=float, default=10, help="Voxel grid size")
-    parser.add_argument("--diff", type=int, default=0, help="Number of scans before and after the current scan that are grouped together.")
+    parser.add_argument("-s", "--start", type=int, default=0, metavar="NUM")
+    parser.add_argument("-e", "--end", type=int, default=-1, metavar="NUM")
+    parser.add_argument("-f", "--format", type=formatname_to_io_type, default=py3dtk.IOType.UOS)
+    parser.add_argument("--fuzz", type=float, default=0, help="How fuzzy the data is. I.e. how far points on a perfect plane are allowed to lie away from it in the scan (default: 0).")
+    parser.add_argument("--voxel-size", type=float, default=10, metavar="SIZE",
+        help="Voxel grid size (default: 10)")
+    parser.add_argument("--diff", type=int, default=0, metavar="NUM",
+        help="Number of scans before and after the current scan that are grouped together (default: 0).")
     parser.add_argument("--no-subvoxel-accuracy", action='store_true', help="Do not calculate with subvoxel accuracy")
     parser.add_argument(
         "--maxrange-method", choices=["none", "normals", "1nearest"],
         help="How to compute search range. Possible values: none, normals, 1nearest")
     parser.add_argument("--no-global-normals", action='store_true', help="Compute normal vectors for each scan instead of from the global point cloud (for maxrange-method=normals)")
-    parser.add_argument("--normal-knearest", type=int, default=40, help="To compute the normal vector, use NUM closest points (for maxrange-method=normals)")
+    parser.add_argument("--normal-knearest", type=int, default=40, metavar="K",
+        help="To compute the normal vector, use NUM closest points for --maxrange-method=normals (default: 40)")
+    parser.add_argument("--normal-method", choices=["knearest", "range", "angle"],
+        help="How to select points to compute the normal from. Possible values: knearest (choose k using --normal-knearest), range (range search of voxel radius), angle (all points seen under the angle that one voxel is seen from the perspective of the scanner)")
     parser.add_argument("directory")
     args = parser.parse_args()
 
     voxel_size = args.voxel_size
 
-    points_by_slice = list()
-    trajectory = list()
+    points_by_slice = dict()
+    trajectory = dict()
 
-    len_trajectory = args.end - args.start + 1
     print("directory: %s" % args.directory, file=sys.stderr)
-    print("start: %d" % args.start, file=sys.stderr)
-    print("end: %d" % args.end, file=sys.stderr)
-    print("length: %d" % len_trajectory, file=sys.stderr)
     print("voxel size: %f" % voxel_size, file=sys.stderr)
     print("reading data...", file=sys.stderr)
 
@@ -228,7 +229,14 @@ def main():
 
     scanserver = False
     py3dtk.openDirectory(scanserver, args.directory, args.format, args.start, args.end)
-    for i,s in enumerate(py3dtk.allScans, start=args.start):
+
+    len_trajectory = len(py3dtk.allScans)
+    print("length: %d" % len_trajectory, file=sys.stderr)
+    print("start: %d" % int(py3dtk.allScans[args.start].getIdentifier()), file=sys.stderr)
+    print("end: %d" % int(py3dtk.allScans[args.end].getIdentifier()), file=sys.stderr)
+
+    for s in py3dtk.allScans:
+        i = int(s.getIdentifier())
         print("%f" % ((((i-args.start)+1)*100)/len_trajectory), end="\r", file=sys.stderr)
         # ignore points that are closer than a voxel diagonal
         s.setRangeFilter(-1, voxel_diagonal)
@@ -237,7 +245,7 @@ def main():
         transmat = s.get_transMatOrg()
         s.transformAll(transmat)
         # add the current position to the trajectory
-        trajectory.append((s.get_rPos(),s.get_rPosTheta(),transmat))
+        trajectory[i] = (s.get_rPos(),s.get_rPosTheta(),transmat)
         # add all the points into their respective slices
         xyz = list(py3dtk.DataXYZ(s.get("xyz")))
         refl = py3dtk.DataReflectance(s.get("reflectance"))
@@ -255,14 +263,14 @@ def main():
             # times while sorting
             distances = { p:sq.length(p) for p in xyz_orig }
             points = sorted(points, key=cmp_to_key(lambda a,b: distances[a[1]] - distances[b[1]]))
-        points_by_slice.append(points)
+        points_by_slice[i] = points
         print("number of points in scan %d: %d" % (i, len(points)), file=sys.stderr)
 
     print("calculate voxel occupation", file=sys.stderr)
 
     voxel_occupied_by_slice = defaultdict(set)
 
-    for i, points in enumerate(points_by_slice):
+    for i, points in points_by_slice.items():
         print("%f" % (((i+1)*100)/len_trajectory), end="\r", file=sys.stderr)
         for (x,y,z),_,_ in points:
             voxel_occupied_by_slice[voxel_of_point((x,y,z), voxel_size)].add(i)
@@ -274,23 +282,21 @@ def main():
 
     print("occupied voxels: %d" % len(voxel_occupied_by_slice), file=sys.stderr)
 
-    print("find free voxels", file=sys.stderr)
+    print("compute maxranges", file=sys.stderr)
 
     free_voxels = set()
 
-    maxranges = []
-    normals = []
-    for i in range(len(trajectory)):
+    maxranges = dict()
+    for i in trajectory.keys():
         #maxranges.append([sq.length(p)-voxel_diagonal for (_,p,_) in points_by_slice[i]])
-        maxranges.append([None]*len(points_by_slice[i]))
-        normals.append([None]*len(points_by_slice[i]))
-    if args.maxrange_method == "normals":
+        maxranges[i] = [None]*len(points_by_slice[i])
+    if args.maxrange_method in "normals":
         if not args.no_global_normals:
             # We build one big kd-tree because normal computation becomes harder
             # the further away from the scanner it is done (less points per volume)
             print("building global k-d tree", file=sys.stderr)
-            kdtree = py3dtk.KDtree([p for points in points_by_slice for  p,_,_ in points])
-        for i, (pos,theta,transmat) in enumerate(trajectory):
+            kdtree = py3dtk.KDtree([p for points in points_by_slice.values() for  p,_,_ in points])
+        for i, (pos,theta,transmat) in trajectory.items():
             # create a transmat to inverse the normal vector
             # this transmat must only contain a rotation part which is why we
             # cannot take the transmat of this scan
@@ -318,16 +324,25 @@ def main():
                 #   - all points within angular radius of voxel diagonal as seen from the scanner
                 #   - only points closer to the scanner than the current point
                 if args.no_global_normals:
-                    #k_nearest = kdtree.kNearestNeighbors(p, args.normal_knearest)
-                    #k_nearest = kdtree.fixedRangeSearch(p, (voxel_diagonal/2)**2)
-                    p_norm = sq.norm(p)
-                    angle = 2*math.asin(voxel_diagonal/(sq.length(p)-voxel_diagonal))
-                    k_nearest = [points_by_slice[i][k][1] for k in qtree.search(p_norm, angle)]
-                    #k_nearest = [p_k for p_k in k_nearest if sq.length(p_k) < sq.length(p)]
+                    if args.normal_method == "knearest":
+                        k_nearest = kdtree.kNearestNeighbors(p, args.normal_knearest)
+                    elif args.normal_method == "range":
+                        k_nearest = kdtree.fixedRangeSearch(p, (voxel_diagonal/2)**2)
+                    elif args.normal_method == "angle":
+                        p_norm = sq.norm(p)
+                        angle = 2*math.asin(voxel_diagonal/(sq.length(p)-voxel_diagonal))
+                        k_nearest = [points_by_slice[i][k][1] for k in qtree.search(p_norm, angle)]
+                        #k_nearest = [p_k for p_k in k_nearest if sq.length(p_k) < sq.length(p)]
+                    else:
+                        raise NotImplementedError("normal method not implemented: %s"%args.normal_method)
                     normal, _ = py3dtk.calculateNormal(k_nearest)
                 else:
-                    k_nearest = kdtree.kNearestNeighbors(p_global, args.normal_knearest)
-                    #k_nearest = kdtree.fixedRangeSearch(p_global, (voxel_diagonal/2)**2)
+                    if args.normal_method == "knearest":
+                        k_nearest = kdtree.kNearestNeighbors(p_global, args.normal_knearest)
+                    elif args.normal_method == "range":
+                        k_nearest = kdtree.fixedRangeSearch(p_global, (voxel_diagonal/2)**2)
+                    else:
+                        raise NotImplementedError("normal method not implemented: %s"%args.normal_method)
                     # FIXME: instead of transforming the k_nearest points to
                     # the local coordinate system, figure out how to transform
                     # just the resulting normal vector
@@ -402,21 +417,22 @@ def main():
                         continue
                     # FIXME: make sure that the current point is more than voxel_diagonal away from the plane
                     # FIXME: make sure that the maxrange for a point is not closer to it than voxel_diagonal
-                    normals[i][k] = normal
                     maxranges[i][k] = d
     elif args.maxrange_method == "1nearest":
         # this method is exact for single scans (because no normals can be
         # wrongly computed) but slower (kd-tree has to be searched for every
         # single point) and it fails for multiple scans (bremen-city effect)
-        for i, (pos,theta,transmat) in enumerate(trajectory):
+        for i, (pos,theta,transmat) in trajectory.items():
             # we must not use global kd-trees because then the search would
             # stop at any obstacle and would never see "through" anything
             kdtree = py3dtk.KDtree([p for _,p,_ in points_by_slice[i]])
             for j,(_,p,_) in enumerate(points_by_slice[i]):
                 maxranges[i][j] = sq.length(kdtree.segmentSearch_1NearestPoint((0,0,0), p, voxel_diagonal**2)) - voxel_diagonal
 
+    print("write maxranges", file=sys.stderr)
+
     if args.maxrange_method in ["normals", "1nearest"]:
-        for i, (pos,theta,_) in enumerate(trajectory):
+        for i, (pos,theta,_) in trajectory.items():
             with open("scan%03d.pose" % (i+2), "w") as f:
                 print("%f %f %f"%pos, file=f)
                 print("%f %f %f"%tuple([t*180/math.pi for t in theta]), file=f)
@@ -453,7 +469,7 @@ def main():
                     print("%f %f %f 0" % d, file=f)
 
     print("walk voxels")
-    for i, (pos,_,transmat) in enumerate(trajectory):
+    for i, (pos,_,transmat) in trajectory.items():
         #print("%f" % (((i+1)*100)/len_trajectory), end="\r", file=sys.stderr)
         for j,(p,p_orig,_) in enumerate(points_by_slice[i]):
             #print("%f (%d)" % (((i+1)*100)/len_trajectory, j), end="\r", file=sys.stderr)
@@ -466,8 +482,6 @@ def main():
             free = set()
             walk_voxels(pos, p, voxel_size, visitor, free, voxel_occupied_by_slice, i, args.diff)
             free_voxels |= free
-        
-    print("", file=sys.stderr)
 
     print("number of freed voxels: %d (%f %% of occupied voxels)" % (len(free_voxels), 100*len(free_voxels)/len(voxel_occupied_by_slice)), file=sys.stderr)
 
@@ -494,9 +508,10 @@ def main():
         # make sure that no voxels are completely cleared
         #half_voxels = {v:i for v,i in half_voxels.items() if i != voxel_occupied_by_slice[v]}
 
-    print("write result", file=sys.stderr)
+    print("write partitioning", file=sys.stderr)
+
     with open("scan000.3d", "w") as f1, open("scan001.3d", "w") as f2:
-        for i, points in enumerate(points_by_slice):
+        for i, points in points_by_slice.items():
             print("%f" % (((i+1)*100)/len_trajectory), end="\r", file=sys.stderr)
             for (x,y,z),_,r in points:
                 voxel = voxel_of_point((x,y,z), voxel_size)
@@ -509,6 +524,22 @@ def main():
     for pose in ["scan000.pose", "scan001.pose"]:
         with open(pose, "w") as f:
             f.write("0 0 0\n0 0 0\n");
+
+    print("write masks", file=sys.stderr)
+
+    if not os.path.exists(os.path.join(args.directory, "pplremover")):
+        os.mkdir(os.path.join(args.directory, "pplremover"))
+    for i, points in points_by_slice.items():
+        with open(os.path.join(args.directory, "pplremover", "scan%03d.mask" % i), "w") as f:
+            print("%f" % (((i+1)*100)/len_trajectory), end="\r", file=sys.stderr)
+            for (x,y,z),_,_ in points:
+                voxel = voxel_of_point((x,y,z), voxel_size)
+                if voxel in free_voxels or i in half_voxels.get(voxel, set()):
+                    # this point is in a voxel marked as free or is a point
+                    # from a slice index that was freed in an adjacent voxel
+                    f.write("1\n")
+                else:
+                    f.write("0\n")
     #for frames in ["scan000.frames", "scan001.frames"]:
     #    with open(frames, "w") as f:
     #        f.write("1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 2\n");
