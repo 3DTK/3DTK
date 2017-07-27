@@ -15,6 +15,10 @@ int    pointmode      = -1;
 bool   smallfont      = true;
 bool   label          = true;
 
+#include "show/url.h"
+
+static GLuint urlTexture;
+
 /**
  * Displays all data (i.e., points) that are to be displayed
  * @param mode spezification for drawing to screen or in selection mode
@@ -764,11 +768,11 @@ void DisplayItFunc(GLenum mode, bool interruptable)
   }
   DrawObjects(mode);
   
-  if (label) DrawUrl();
-  
   // if show points is true the draw points
   if (show_points == 1) DrawPoints(mode, interruptable);
   
+  
+  if (label) DrawUrl();
   
   glPopMatrix();
 
@@ -782,7 +786,6 @@ void DisplayItFunc(GLenum mode, bool interruptable)
 }
 
 void DrawUrl() {
-  glMatrixMode(GL_MODELVIEW);
   glPushMatrix();
   glLoadIdentity();
   glMatrixMode(GL_PROJECTION);
@@ -793,35 +796,32 @@ void DrawUrl() {
   glLoadIdentity();
 
   // Set the projection (to 2D orthographic)
-  glOrtho(0.0,100.0,0.0,100.0,-1.5,1.5);
-  
-    glPolygonMode (GL_FRONT_AND_BACK, GL_FILL); 
-  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); // TODO
-  
-  glColor4d(0.0,0.0,0.0,0.7);
-  
-  int w = smallfont ? 22 : 25;
+  glOrtho(0,current_width,0,current_height,-1,1);
+
+  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+  glColor4d(1,1,1,0.8);
+
+  glEnable(GL_TEXTURE_2D);
+  glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+  glBindTexture(GL_TEXTURE_2D, urlTexture);
+
   glBegin(GL_QUADS);
-  glVertex3f(0,0,1.49);
-  glVertex3f(0,6,1.49);
-  glVertex3f(w,6,1.49);
-  glVertex3f(w,0,1.49);
+  glTexCoord2f(0.0, 0.0); glVertex3f(0,0,1);
+  glTexCoord2f(0.0, 1.0); glVertex3f(0,urlTextureHeight,1);
+  glTexCoord2f(1.0, 1.0); glVertex3f(urlTextureWidth,urlTextureHeight,1);
+  glTexCoord2f(1.0, 0.0); glVertex3f(urlTextureWidth,0,1);
   glEnd();
-  
+
   glBlendFunc(GL_ONE, GL_ZERO);
   glColor3f(1,1,1);
 
-  void *font = smallfont ? GLUT_BITMAP_8_BY_13 : GLUT_BITMAP_9_BY_15;
-  glRasterPos3f(1,3.5,1.5);
-  _glutBitmapString(font, "created with 3DTK");
-  glRasterPos3f(1,1,1.5);
-  _glutBitmapString(font, "http://threedtk.de");
-  
+  glDisable(GL_TEXTURE_2D);
+
   // Restore the original projection matrix
   glPopMatrix();
   glMatrixMode(GL_MODELVIEW);
   glPopMatrix();
-
 }
 
 /**
@@ -1706,6 +1706,19 @@ void initScreenWindow()
   update_view_rotate(0);
   glClearColor(0.0, 0.0, 0.0, 0.0);
   // glClearColor(1.0, 1.0, 1.0, 1.0);
+
+
+
+  glGenTextures(1, &urlTexture);
+  glBindTexture(GL_TEXTURE_2D, urlTexture);
+
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, urlTextureWidth,
+		  urlTextureHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE,
+		  urlTextureData);
 }
 
 
