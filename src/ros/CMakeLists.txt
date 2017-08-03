@@ -37,4 +37,21 @@ if(WITH_ROS)
 
   add_executable(cartographer2scan cartographer2scan.cc)
   target_link_libraries(cartographer2scan ${catkin_LIBRARIES} ${PCL_LIBRARIES})
+
+  add_library(tdtkroswrapper
+  	tdtkroswrapper.cc
+    #slam6Dwrapper.cc
+    icp6Dwrapper.cc
+  )
+  target_link_libraries(tdtkroswrapper scan ${catkin_LIBRARIES} ${PCL_LIBRARIES})
+
+  add_executable(scan2bag scan2bag.cc)
+  target_link_libraries(scan2bag ${catkin_LIBRARIES} ${PCL_LIBRARIES} scan tdtkroswrapper)
+
+  #add_executable(slam6D_node slam6D_node.cc)
+  #target_link_libraries(slam6D_node ${catkin_LIBRARIES} tdtkroswrapper)
+
+  add_executable(icp6D_node icp6D_node.cc)
+  target_link_libraries(icp6D_node ${catkin_LIBRARIES} tdtkroswrapper)
+
 endif()
