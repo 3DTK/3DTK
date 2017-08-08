@@ -20,7 +20,7 @@ int main(int argc, char* argv[])
 {
     if (argc != 2) { return -1; }
 
-    std::shared_ptr<basic_rconnection> rc;
+    shared_ptr<basic_rconnection> rc;
     rc = basic_rconnection::create(argv[1]);
     decoder_rxpmarker dec(rc);
     Pointcloud cloud;

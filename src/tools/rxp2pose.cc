@@ -4,71 +4,18 @@
 #include <boost/program_options.hpp>
 #include <Eigen/Eigen>
 #include "riegl/scanlib.hpp"
+#include "slam6d/globals.icc"
 
 using namespace std;
 using namespace scanlib;
 namespace po = boost::program_options;
 
-template <class T>
-inline std::string to_string(const T& t, int width)
-{
-    stringstream ss;
-    ss << std::setfill('0') << std::setw(width) << t;
-    return ss.str();
-}
-
 template <typename It>
-typename std::iterator_traits<It>::value_type median(It begin, It end)
+typename iterator_traits<It>::value_type median(It begin, It end)
 {
-    auto size = std::distance(begin, end);
-    std::nth_element(begin, begin + size / 2, end);
-    return *std::next(begin, size / 2);
-}
-
-template <class T>
-inline T deg(const T rad)
-{
-    return ( (rad * 360) / (2 * M_PI) );
-}
-
-static inline void Matrix4ToEuler(const double *alignxf,
-                                  double *rPosTheta,
-                                  double *rPos = 0)
-{
-
-    double _trX, _trY;
-
-    // Calculate Y-axis angle
-    if(alignxf[0] > 0.0) {
-        rPosTheta[1] = asin(alignxf[8]);
-    } else {
-        rPosTheta[1] = M_PI - asin(alignxf[8]);
-    }
-
-    double  C    =  cos( rPosTheta[1] );
-    if ( fabs( C ) > 0.005 )  {                 // Gimbal lock?
-        _trX      =  alignxf[10] / C;             // No, so get X-axis angle
-        _trY      =  -alignxf[9] / C;
-        rPosTheta[0]  = atan2( _trY, _trX );
-        _trX      =  alignxf[0] / C;              // Get Z-axis angle
-        _trY      = -alignxf[4] / C;
-        rPosTheta[2]  = atan2( _trY, _trX );
-    } else {                                    // Gimbal lock has occurred
-        rPosTheta[0] = 0.0;                       // Set X-axis angle to zero
-        _trX      =  alignxf[5];  //1                // And calculate Z-axis angle
-        _trY      =  alignxf[1];  //2
-        rPosTheta[2]  = atan2( _trY, _trX );
-    }
-
-    rPosTheta[0] = rPosTheta[0];
-    rPosTheta[1] = rPosTheta[1];
-    rPosTheta[2] = rPosTheta[2];
-
-    if (rPos != 0) {
-        rPos[0] = alignxf[12];
-        rPos[1] = alignxf[13];
-        rPos[2] = alignxf[14];
-    }
+    auto size = distance(begin, end);
+    nth_element(begin, begin + size / 2, end);
+    return *next(begin, size / 2);
 }
 
 void setTransform(double *transmat, double *mat, double x, double y, double z)
@@ -96,10 +43,18 @@ void setTransform(double *transmat, double *mat, double x, double y, double z)
 
 }
 
-class GPS : public scanlib::pointcloud
+class GPS : public pointcloud
 {
 public:
     struct GpsInfo {
+        GpsInfo() :
+            timestamp(0),
+            lat(0),
+            lon(0),
+            alt(0),
+            accuracy(numeric_limits<double>::max())
+        {}
+
         double timestamp; // gps time of week in sec
         double lat; // latitude in rad
         double lon; // longitude in rad
@@ -108,17 +63,22 @@ public:
     };
 
     struct InclInfo {
+        InclInfo() :
+            roll(0),
+            pitch(0)
+        {}
+
         double roll; // rad
         double pitch; // rad
     };
 
 public:
     GPS()
-        : scanlib::pointcloud(false)
+        : pointcloud(false)
     {}
 protected:
-    void on_hk_gps_hr(const scanlib::hk_gps_hr<iterator_type>& arg) {
-        scanlib::pointcloud::on_hk_gps_hr(arg);
+    void on_hk_gps_hr(const hk_gps_hr<iterator_type>& arg) {
+        pointcloud::on_hk_gps_hr(arg);
 
         GpsInfo info;
         info.timestamp = (double) arg.TOWms / 1000.0;
@@ -130,8 +90,8 @@ protected:
         _gpsInfo.push_back(info);
     }
 
-    void on_hk_incl(const scanlib::hk_incl<iterator_type>& arg) {
-        scanlib::pointcloud::on_hk_incl(arg);
+    void on_hk_incl(const hk_incl<iterator_type>& arg) {
+        pointcloud::on_hk_incl(arg);
 
         double roll = (double) arg.ROLL * 1e-3 * M_PI / 180;
         double pitch = (double) arg.PITCH * 1e-3 * M_PI / 180;
@@ -141,9 +101,9 @@ protected:
     }
 
 public:
-    std::vector<GpsInfo> _gpsInfo;
-    std::vector<double> _rollVector;
-    std::vector<double> _pitchVector;
+    vector<GpsInfo> _gpsInfo;
+    vector<double> _rollVector;
+    vector<double> _pitchVector;
 };
 
 int main(int argc, char* argv[])
@@ -186,7 +146,7 @@ int main(int argc, char* argv[])
     po::notify(vm);
 
     if (vm.count("help")) {
-        std::cout << cmdline_options;
+        cout << cmdline_options;
         return 0;
     }
 
@@ -198,7 +158,7 @@ int main(int argc, char* argv[])
 
         cout << "Reading " << filename << "..." << endl;
 
-        std::shared_ptr<basic_rconnection> rc;
+        shared_ptr<basic_rconnection> rc;
         rc = basic_rconnection::create(filename);
         rc->open();
         decoder_rxpmarker dec(rc);
@@ -220,7 +180,7 @@ int main(int argc, char* argv[])
         }
 
         GPS::GpsInfo bestGpsInfo;
-        double bestAccuracy = 1e50;
+        double bestAccuracy = numeric_limits<double>::max();
         for (GPS::GpsInfo gpsInfo : importer._gpsInfo) {
             if (gpsInfo.accuracy < bestAccuracy) {
                 bestAccuracy = gpsInfo.accuracy;
@@ -300,7 +260,7 @@ int main(int argc, char* argv[])
         double transmat[16];
         setTransform(transmat, rotmat, X, Y, Z);
 
-        std::ofstream o;
+        ofstream o;
         string poseFileName = inDir + "/scan" + to_string(index,3) + ".pose";
         cout << "Writing " << poseFileName << endl;
         double rP[3];
