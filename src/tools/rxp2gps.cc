@@ -13,17 +13,17 @@ using namespace std;
 using namespace scanlib;
 
 
-class GPS : public scanlib::pointcloud
+class GPS : public pointcloud
 {
 public:
     GPS()
-        : scanlib::pointcloud(true)
+        : pointcloud(true)
     {}
 protected:
-    void on_hk_gps_hr(const scanlib::hk_gps_hr<iterator_type>& arg) {
-        scanlib::pointcloud::on_hk_gps_hr(arg);
+    void on_hk_gps_hr(const hk_gps_hr<iterator_type>& arg) {
+        pointcloud::on_hk_gps_hr(arg);
 
-        cout.precision(std::numeric_limits<double>::max_digits10);
+        cout.precision(numeric_limits<double>::max_digits10);
         cout << (double) arg.TOWms * 1e-3 << "," << (double) arg.LAT * 1e-9 << "," << (double) arg.LONG * 1e-9 << "," << (double) arg.HGT_ELL * 1e-3 << endl;
     }
 };
@@ -33,7 +33,7 @@ int main(int argc, char* argv[])
     boost::program_options::options_description desc("Allowed options");
     desc.add_options()
             ("help,h", "produce help message")
-            ("input,i", boost::program_options::value<std::string>(), "input folder")
+            ("input,i", boost::program_options::value<string>(), "input folder")
             ;
 
     boost::program_options::variables_map vm;
@@ -41,20 +41,20 @@ int main(int argc, char* argv[])
     boost::program_options::notify(vm);
 
     if (vm.count("help")) {
-        std::cout << desc << std::endl;
+        cout << desc << endl;
         return EXIT_SUCCESS;
     }
 
-    boost::filesystem::path dir(vm["input"].as<std::string>());
+    boost::filesystem::path dir(vm["input"].as<string>());
 
     for (boost::filesystem::directory_iterator it(dir); it != boost::filesystem::directory_iterator(); it++) {
         if (it->path().extension() != ".rxp") { continue; }
 
-        std::string filename = it->path().string();
+        string filename = it->path().string();
 
         cout << filename << endl;
 
-        std::shared_ptr<basic_rconnection> rc;
+        shared_ptr<basic_rconnection> rc;
         rc = basic_rconnection::create(filename);
         rc->open();
         decoder_rxpmarker dec(rc);
