@@ -1,15 +1,15 @@
 #include "show/show_common.h"
 
-vector< ::SDisplay*> displays;
+std::vector< ::SDisplay*> displays;
 /**
  * the octrees that store the points for each scan
  */
 //Show_BOctTree **octpts;
-vector<colordisplay*> octpts;
+std::vector<colordisplay*> octpts;
 /**
  * Storing the base directory
  */
-string scan_dir;
+std::string scan_dir;
 
 /**
  * Storing the ID of the main windows
@@ -161,17 +161,17 @@ IOType scanIOtype;
 /**
  * Storing of all transformation (frames for animation) of all scans
  */
-vector < vector <double*> > MetaMatrix;
+std::vector < std::vector <double*> > MetaMatrix;
 
 /**
  * Storing of AlgoType for all frames
  */
-vector < vector <Scan::AlgoType> > MetaAlgoType;
+std::vector < std::vector <Scan::AlgoType> > MetaAlgoType;
 
 /**
  * Trajectory loaded from file for visualization
  */
-vector<double*> trajectory;
+std::vector<double*> trajectory;
 
 /**
  * Window position
@@ -228,12 +228,12 @@ int save_animation         = 0;
 int inter_by_dist          = 1;
 
 /** some variables for the camera path **/
-vector<PointXY> path_vectorX, path_vectorZ;
-vector<PointXY> lookat_vectorX, lookat_vectorZ;
-vector<PointXY> ups_vectorX, ups_vectorZ;
-vector<Point> cams;
-vector<Point> lookats;
-vector<Point> ups;
+std::vector<PointXY> path_vectorX, path_vectorZ;
+std::vector<PointXY> lookat_vectorX, lookat_vectorZ;
+std::vector<PointXY> ups_vectorX, ups_vectorZ;
+std::vector<Point> cams;
+std::vector<Point> lookats;
+std::vector<Point> ups;
 
 NurbsPath cam_nurbs_path;
 char *path_file_name;
@@ -262,7 +262,7 @@ PointType pointtype;
 /**
  * Contains the selected points for each scan
  */
-set<sfloat *> *selected_points;
+std::set<sfloat *> *selected_points;
 /**
  * Select single points?
  */
@@ -292,7 +292,7 @@ void setResetView(int origin) {
     if (origin == 0) {
         // set origin to the center of mass of all scans
         for (size_t i = 0; i < octpts.size(); ++i) {
-            vector <sfloat*> points;
+            std::vector <sfloat*> points;
 #ifndef USE_COMPACT_TREE
             BOctTree<sfloat>* cur_tree = ((Show_BOctTree<sfloat>*)octpts[i])->getTree();
             cur_tree->AllPoints( points );
@@ -362,7 +362,7 @@ void setResetView(int origin) {
  * @param end stopping at scan number 'end'
  * @param read a file containing a initial transformation matrix and apply it
  */
-int readFrames(string dir, int start, int end, bool readInitial, IOType &type)
+int readFrames(std::string dir, int start, int end, bool readInitial, IOType &type)
 {
 
   // convert to OpenGL coordinate system
@@ -372,15 +372,15 @@ int readFrames(string dir, int start, int end, bool readInitial, IOType &type)
   
   double initialTransform[16];
   if (readInitial) {
-    cout << "Initial Transform:" << endl;
-    string initialTransformFileName = dir + "initital.frame";
-    ifstream initial_in(initialTransformFileName.c_str());
+    std::cout << "Initial Transform:" << std::endl;
+    std::string initialTransformFileName = dir + "initital.frame";
+    std::ifstream initial_in(initialTransformFileName.c_str());
     if (!initial_in.good()) {
-      cout << "Error opening " << initialTransformFileName << endl;
+      std::cout << "Error opening " << initialTransformFileName << std::endl;
       exit(-1);
     }
     initial_in >> initialTransform;
-    cout << initialTransform << endl;
+    std::cout << initialTransform << std::endl;
     
     // update the mirror to apply the initial frame for all frames
     double tempxf[16];
@@ -395,8 +395,8 @@ int readFrames(string dir, int start, int end, bool readInitial, IOType &type)
     ScanNr++;
     const double* transformation;
     Scan::AlgoType algoType;
-    vector<double*> Matrices;
-    vector<Scan::AlgoType> algoTypes;
+    std::vector<double*> Matrices;
+    std::vector<Scan::AlgoType> algoTypes;
     
     // iterate over frames (stop if none were created) and
     // pull/convert the frames into local containers
@@ -431,10 +431,10 @@ int readFrames(string dir, int start, int end, bool readInitial, IOType &type)
   }
   
   if (MetaMatrix.size() == 0) {
-    cerr << "*****************************************" << endl;
-    cerr << "** ERROR: No .frames could be found!   **" << endl;
-    cerr << "*****************************************" << endl;
-    cerr << " ERROR: Missing or empty directory: " << dir << endl << endl;
+    std::cerr << "*****************************************" << std::endl;
+    std::cerr << "** ERROR: No .frames could be found!   **" << std::endl;
+    std::cerr << "*****************************************" << std::endl;
+    std::cerr << " ERROR: Missing or empty directory: " << dir << std::endl << std::endl;
     return -1;
   }
   return 0;
@@ -442,9 +442,9 @@ int readFrames(string dir, int start, int end, bool readInitial, IOType &type)
 
 void generateFrames(int start, int end, bool identity) {
   if (identity) {
-    cout << "using Identity for frames " << endl;
+    std::cout << "using Identity for frames " << std::endl;
   } else {
-    cout << "using pose information for frames " << endl;
+    std::cout << "using pose information for frames " << std::endl;
   }
   int  fileCounter = start;
   int index = 0;
@@ -452,8 +452,8 @@ void generateFrames(int start, int end, bool identity) {
     if (fileCounter > end) break; // 'nuf read
     fileCounter++;
 
-    vector <double*> Matrices;
-    vector <Scan::AlgoType> algoTypes;
+    std::vector <double*> Matrices;
+    std::vector <Scan::AlgoType> algoTypes;
 
     double mirror[16];
     M4identity(mirror);
@@ -493,7 +493,7 @@ void reloadFrames() {
   // reload all frame files for live changes
   // drop previously stored information
 
-  cout << "Reloading frame files..." << endl;
+  std::cout << "Reloading frame files..." << std::endl;
 
   MetaMatrix.clear();
   MetaAlgoType.clear();
@@ -509,12 +509,12 @@ void reloadFrames() {
  */
 void copy_settings_to_globals(
   const dataset_settings& ds, const window_settings& ws,
-  string &dir, int& start, int& end, int& maxDist, int& minDist,
+  std::string &dir, int& start, int& end, int& maxDist, int& minDist,
   double &red, bool &readInitial, unsigned int &octree,
-  PointType &ptype, float &fps, string &loadObj,
+  PointType &ptype, float &fps, std::string &loadObj,
   bool &loadOct, bool &saveOct, bool &autoOct, int &origin, bool &originset,
   double &scale, IOType &type, bool& scanserver,
-  double& sphereMode, string& customFilter, string& trajectoryFile,
+  double& sphereMode, std::string& customFilter, std::string& trajectoryFile,
   int &stepsize, bool &identity)
 {
   nogui = ws.nogui;
@@ -598,29 +598,29 @@ void copy_settings_to_globals(
 }
 
 void initShow(const dataset_settings& ds, const window_settings& ws){
-  cout << "(wx)show - A highly efficient 3D point cloud viewer" << endl
-       << "(c) University of Wuerzburg, Germany, since 2013" << endl
-       << "    Jacobs University Bremen gGmbH, Germany, 2009 - 2013" << endl
-       << "    University of Osnabrueck, Germany, 2006 - 2009" << endl << endl;
+  std::cout << "(wx)show - A highly efficient 3D point cloud viewer" << std::endl
+       << "(c) University of Wuerzburg, Germany, since 2013" << std::endl
+       << "    Jacobs University Bremen gGmbH, Germany, 2009 - 2013" << std::endl
+       << "    University of Osnabrueck, Germany, 2006 - 2009" << std::endl << std::endl;
 
   double red   = -1.0;
   int start = 0, end = -1, maxDist = -1, minDist = -1;
-  string dir;
+  std::string dir;
   bool readInitial = false;
   IOType type  = UOS;
   unsigned int octree = 0;
   bool loadOct = false;
   bool saveOct = false;
   bool autoOct = false;
-  string loadObj;
+  std::string loadObj;
   int origin = 0;
   bool originset = false;
   double scale = 0.01; // in m
   bool scanserver = false;
   double sphereMode = 0.0;
   bool customFilterActive = false;
-  string customFilter;
-  string trajectoryFile;
+  std::string customFilter;
+  std::string trajectoryFile;
   int stepsize = 1;
   bool identity = false;
 
@@ -660,15 +660,15 @@ void initShow(const dataset_settings& ds, const window_settings& ws){
 
   // if we want to load display file get pointtypes from the files first
   if (loadOct) {
-    string scanFileName = dir + "scan" + to_string(start,3) + ".oct";
-    cout << "Getting point information from " << scanFileName << endl;
-    cout << "Attention! All subsequent oct-files must be of the same type!"
-         << endl;
+    std::string scanFileName = dir + "scan" + to_string(start,3) + ".oct";
+    std::cout << "Getting point information from " << scanFileName << std::endl;
+    std::cout << "Attention! All subsequent oct-files must be of the same type!"
+         << std::endl;
   }
   scan_dir = dir;
 
   // init and create display
-  M4identity(view_rotate_button);
+  //M4identity(view_rotate_button);
   obj_pos_button[0] = obj_pos_button[1] = obj_pos_button[2] = 0.0;
   
   // Loading scans, reducing, loading frames and generation if neccessary
@@ -678,7 +678,7 @@ void initShow(const dataset_settings& ds, const window_settings& ws){
   Scan::openDirectory(scanserver, dir, type, start, end);
   
   if (Scan::allScans.size() == 0) {
-    cerr << "No scans found. Did you use the correct format?" << endl;
+    std::cerr << "No scans found. Did you use the correct format?" << std::endl;
     exit(-1);
   }
 
@@ -690,19 +690,19 @@ void initShow(const dataset_settings& ds, const window_settings& ws){
 
     // check if customFilter is specified in file
     if (customFilter.find("FILE;") == 0){
-      string selection_file_name = customFilter.substr(5, customFilter.length());
-      ifstream selectionfile;
+      std::string selection_file_name = customFilter.substr(5, customFilter.length());
+      std::ifstream selectionfile;
       // open the input file
-      selectionfile.open(selection_file_name, ios::in);
+      selectionfile.open(selection_file_name, std::ios::in);
 
       if (!selectionfile.good()){
-        cerr << "Error loading custom filter file " << selection_file_name << "!" << endl;
-        cerr << "Data will NOT be filtered.!" << endl;
+        std::cerr << "Error loading custom filter file " << selection_file_name << "!" << std::endl;
+        std::cerr << "Data will NOT be filtered.!" << std::endl;
         customFilterActive = false;
       }
       else {
-        string line;
-        string custFilt;
+        std::string line;
+        std::string custFilt;
         while (std::getline(selectionfile, line)){
           // allow comment or empty lines
           if (line.find("#") == 0) continue;
@@ -721,14 +721,14 @@ void initShow(const dataset_settings& ds, const window_settings& ws){
   else {
     // give a warning if custom filter has been inproperly specified
     if (customFilter.length() > 0){
-      cerr << "Custom filter: specifying string has not been set properly, data will NOT be filtered." << endl;
+      std::cerr << "Custom filter: specifying string has not been set properly, data will NOT be filtered." << std::endl;
     }
   }
   
   loading_status("Applying filters and reduction");
   loading_progress(0, 0, Scan::allScans.size());
   int scanNr = 0;
-  vector<Scan*> valid_scans;
+  std::vector<Scan*> valid_scans;
   for (ScanVector::iterator it = Scan::allScans.begin();
        it != Scan::allScans.end();
        ++it) {
@@ -763,14 +763,14 @@ void initShow(const dataset_settings& ds, const window_settings& ws){
   loading_status("Creating display octrees");
 
 #ifdef USE_COMPACT_TREE
-  cout << "Creating compact display octrees.." << endl;
+  std::cout << "Creating compact display octrees.." << std::endl;
 #else
-  cout << "Creating display octrees.." << endl;
+  std::cout << "Creating display octrees.." << std::endl;
 #endif
 
   if (loadOct)
-    cout << "Loading octtrees from file where possible instead of creating them from scans."
-         << endl;
+    std::cout << "Loading octtrees from file where possible instead of creating them from scans."
+         << std::endl;
   
   // for managed scans the input phase needs to know how much it can handle
   std::size_t free_mem = 0;
@@ -786,10 +786,10 @@ void initShow(const dataset_settings& ds, const window_settings& ws){
     compactTree* tree;
     try {
       if (loadOct) {
-        string sfName = dir + "scan" + to_string(i,3) + ".oct";
-        cout << "Load " << sfName;
+        std::string sfName = dir + "scan" + to_string(i,3) + ".oct";
+        std::cout << "Load " << sfName;
         tree = new compactTree(sfName, cm);
-        cout << " done." << endl;
+        std::cout << " done." << std::endl;
       } else {
         if (red > 0) { // with reduction, only xyz points
           DataXYZ xyz_r(scan->get("xyz reduced show"));
@@ -805,15 +805,15 @@ void initShow(const dataset_settings& ds, const window_settings& ws){
           for(unsigned int i = 0; i < nrpts; ++i) delete[] pts[i];
           delete[] pts;
           if (saveOct) {
-            string sfName = dir + "scan" + to_string(i,3) + ".oct";
+            std::string sfName = dir + "scan" + to_string(i,3) + ".oct";
             tree->serialize(sfName);
           }
         }
       }
     } catch(...) {
-      cout << "Scan " << i
+      std::cout << "Scan " << i
            << " could not be loaded into memory, stopping here."
-           << endl;
+           << std::endl;
       break;
     }
 #else // FIXME: remove the case above
@@ -822,11 +822,11 @@ void initShow(const dataset_settings& ds, const window_settings& ws){
     DataOcttree* data_oct;
     try {
       data_oct = new DataOcttree(scan->get("octtree"));
-    } catch(runtime_error& e) {
-      cout << "Scan " << i
+    } catch(std::runtime_error& e) {
+      std::cout << "Scan " << i
            << " could not be loaded into memory, stopping here. Reason: "
            << e.what()
-           << endl;
+           << std::endl;
       break;
     }
     BOctTree<float>* btree = &(data_oct->get());
@@ -836,8 +836,8 @@ void initShow(const dataset_settings& ds, const window_settings& ws){
       // check if the octtree would actually fit with all the others
       if(tree_size > free_mem) {
         delete data_oct;
-        cout << "Stopping at scan " << i
-             << ", no more octtrees could fit in memory." << endl;
+        std::cout << "Stopping at scan " << i
+             << ", no more octtrees could fit in memory." << std::endl;
         break;
       } else {
         // subtract available memory
@@ -864,24 +864,24 @@ void initShow(const dataset_settings& ds, const window_settings& ws){
     // print something
 #ifdef USE_COMPACT_TREE
     // TODO: change compact tree for memory footprint output, remove this case
-    cout << "Scan " << i << " octree finished." << endl;
+    std::cout << "Scan " << i << " octree finished." << std::endl;
 #else
-    cout << "Scan " << i << " octree finished (";
+    std::cout << "Scan " << i << " octree finished (";
     bool space = false;
     if (tree_size/1024/1024 > 0) {
-      cout << tree_size/1024/1024 << "M";
+      std::cout << tree_size/1024/1024 << "M";
       space = true;
     }      
     if ((tree_size/1024)%1024 > 0) {
-      if (space) cout << " ";
-      cout << (tree_size/1024)%1024 << "K";
+      if (space) std::cout << " ";
+      std::cout << (tree_size/1024)%1024 << "K";
       space = true;
     }
     if (tree_size%1024 > 0) {
-      if (space) cout << " ";
-      cout << tree_size%1024 << "B";
+      if (space) std::cout << " ";
+      std::cout << tree_size%1024 << "B";
     }
-    cout << ")." << endl;
+    std::cout << ")." << std::endl;
 #endif
     loading_progress(i+1, 0, Scan::allScans.size());
   }
@@ -897,13 +897,13 @@ void initShow(const dataset_settings& ds, const window_settings& ws){
 #if !defined USE_COMPACT_TREE
   if(scanserver) {
     // activate all octtrees until they don't fit anymore
-    cout << "Locking managed octtrees in memory " << flush;
+    std::cout << "Locking managed octtrees in memory " << std::flush;
     bool stop = false;
     unsigned int loaded = 0;
     unsigned int dots = (octpts.size() / 20);
     if(dots == 0) dots = 1;
-    vector<colordisplay*>::iterator it_remove_first = octpts.end();
-    for(vector<colordisplay*>::iterator it = octpts.begin();
+    std::vector<colordisplay*>::iterator it_remove_first = octpts.end();
+    for(std::vector<colordisplay*>::iterator it = octpts.begin();
         it != octpts.end();
         ++it) {
       if(!stop) {
@@ -912,8 +912,8 @@ void initShow(const dataset_settings& ds, const window_settings& ws){
           Show_BOctTree<sfloat>* stree = dynamic_cast<Show_BOctTree<sfloat>*>(*it);
           stree->lockCachedTree();
           loaded++;
-          if(loaded % dots == 0) cout << '.' << flush;
-        } catch(runtime_error& e) {
+          if(loaded % dots == 0) std::cout << '.' << std::flush;
+        } catch(std::runtime_error& e) {
           stop = true;
           it_remove_first = it;
         }
@@ -925,7 +925,7 @@ void initShow(const dataset_settings& ds, const window_settings& ws){
     }
     // now remove iterators for deleted octtrees
     if(stop) octpts.erase(it_remove_first, octpts.end());
-    cout << ' ' << loaded << " octtrees loaded." << endl;
+    std::cout << ' ' << loaded << " octtrees loaded." << std::endl;
   }
   
 #endif // !COMPACT_TREE
@@ -933,7 +933,7 @@ void initShow(const dataset_settings& ds, const window_settings& ws){
   loading_status("Loading frames");
 
   // load frames now that we know how many scans we actually loaded
-  unsigned int real_end = min((unsigned int)(end), 
+  unsigned int real_end = std::min((unsigned int)(end), 
                               (unsigned int)(start + octpts.size() - 1));
 
   // necessary to save these to allow filtering of scans from view and reloading frames; could also make those global..
@@ -944,21 +944,21 @@ void initShow(const dataset_settings& ds, const window_settings& ws){
   
   if(readFrames(dir, start, real_end, readInitial, type))
     generateFrames(start, real_end, identity /*use .pose or identity*/);
-  else cout << "Using existing frames..." << endl;
+  else std::cout << "Using existing frames..." << std::endl;
 
   cm->setCurrentType(PointType::USE_HEIGHT);
   //ColorMap cmap;
   //cm->setColorMap(cmap);
   resetMinMax(0);
 
-  selected_points = new set<sfloat*>[octpts.size()];
+  selected_points = new std::set<sfloat*>[octpts.size()];
 
   // sets (and computes if necessary) the pose that is used for the reset button
   if (originset) {
     setResetView(origin);
   }
   if (X != 0 || Y != 0 || Z != 0) {
-    cout << "View set to: " << X << ", " << Y << ", " << Z << endl;
+    std::cout << "View set to: " << X << ", " << Y << ", " << Z << std::endl;
   }
 
   for (unsigned int i = 0; i < 256; i++) {
@@ -967,13 +967,13 @@ void initShow(const dataset_settings& ds, const window_settings& ws){
   setScansColored(colorScanVal);
 
   if (trajectoryFile.size() > 0) {
-    ifstream file(trajectoryFile);
+    std::ifstream file(trajectoryFile);
 
     if (file.good()) {
       double tmp[3];
-      string line;
+      std::string line;
       while (getline(file, line)) {
-        istringstream iss(line);
+        std::istringstream iss(line);
         iss >> tmp;
 
         double* position = new double[3];
@@ -984,11 +984,11 @@ void initShow(const dataset_settings& ds, const window_settings& ws){
         trajectory.push_back(position);
       }
 
-      cout << "Loaded trajectory from file with " << trajectory.size() << " positions." << endl;
+      std::cout << "Loaded trajectory from file with " << trajectory.size() << " positions." << std::endl;
 
       file.close();
     } else {
-      cout << "Couldn't open trajectory file for reading!" << endl;
+      std::cout << "Couldn't open trajectory file for reading!" << std::endl;
     }
   }
 
@@ -1002,10 +1002,10 @@ void deinitShow()
   if(done) return;
   done = true;
   
-  cout << "Cleaning up octtrees and scans." << endl;
+  std::cout << "Cleaning up octtrees and scans." << std::endl;
   if(octpts.size()) {
     // delete octtrees to release the cache locks within
-    for(vector<colordisplay*>::iterator it = octpts.begin();
+    for(std::vector<colordisplay*>::iterator it = octpts.begin();
         it!= octpts.end();
         ++it) {
       delete *it;

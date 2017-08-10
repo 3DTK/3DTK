@@ -414,8 +414,8 @@ int main(int argc, char **argv) {
     int fpsCnt = 0;    
 
     //icp pairs
-    vector<PtPair> pairs;
-    vector<PtPair> motion;
+    std::vector<PtPair> pairs;
+    std::vector<PtPair> motion;
     float mean, var;
 
     /***** main loop *****/

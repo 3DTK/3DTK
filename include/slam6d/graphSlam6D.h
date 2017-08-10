@@ -7,9 +7,7 @@
 #define __GRAPHSLAM_6D_H__
 
 #include <vector>
-using std::vector;
 #include <map>
-using std::map;
 /*#include <pair>
 using std::pair;*/
 

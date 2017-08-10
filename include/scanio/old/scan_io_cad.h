@@ -8,9 +8,7 @@
 #define __SCAN_IO_CAD_H__
 
 #include <string>
-using std::string;
 #include <vector>
-using std::vector;
 #include <fstream>
 #include <limits>
 #include <algorithm>

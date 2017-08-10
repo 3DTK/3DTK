@@ -15,7 +15,6 @@
  */
 
 #include <stdexcept>
-using std::exception;
 
 #include "slam6d/scan.h"
 #include "slam6d/convergence.h"
@@ -23,7 +22,7 @@ using std::exception;
 /**
  * Storing the base directory
  */
-string filepath;
+std::string filepath;
 
 /**
  * Explains the usage of this program's command line parameters
@@ -32,21 +31,21 @@ string filepath;
 void usage(char* prog)
 {
 #ifndef _MSC_VER
-  const string bold("\033[1m");
-  const string normal("\033[m");
+  const std::string bold("\033[1m");
+  const std::string normal("\033[m");
 #else
-  const string bold("");
-  const string normal("");
+  const std::string bold("");
+  const std::string normal("");
 #endif
   
-  cout << endl
-	  << "Usage: " << prog << " [-s NR] filepath, [-z NR] convergence type" << endl << endl;
+  std::cout << std::endl
+	  << "Usage: " << prog << " [-s NR] filepath, [-z NR] convergence type" << std::endl << std::endl;
 
-  cout << "  -s NR   generate convergence-data for frame NR" << endl
-	  << endl;
+  std::cout << "  -s NR   generate convergence-data for frame NR" << std::endl
+	  << std::endl;
 
-  cout << "  -z NR   type of convergence (0 = global, 1 = local)" << endl
-	  << endl;
+  std::cout << "  -z NR   type of convergence (0 = global, 1 = local)" << std::endl
+	  << std::endl;
 
   exit(1);
 }
@@ -62,7 +61,7 @@ void usage(char* prog)
  * @param type parsing result - the type of convergence that should be stored (lokal, global)
  * @return 0, if the parsing was successful, 1 otherwise 
  */
-int parseArgs(int argc,char **argv, string &dir, int &frame, int &type)
+int parseArgs(int argc,char **argv, std::string &dir, int &frame, int &type)
 {
   frame   = 0;
   type = 0;
@@ -71,17 +70,17 @@ int parseArgs(int argc,char **argv, string &dir, int &frame, int &type)
   extern char *optarg;
   extern int optind;
 
-  cout << endl;
+  std::cout << std::endl;
   while ((c = getopt (argc, argv, "s:z:m:M:p:wt")) != -1)
     switch (c)
 	 {
 	 case 's':
 	   frame = atoi(optarg);
-	   if (frame < 0) { cerr << "Error: Cannot generate data of a negative frame number.\n"; exit(1); }
+	   if (frame < 0) { std::cerr << "Error: Cannot generate data of a negative frame number.\n"; exit(1); }
 	   break;
 	 case 'z':
 	   type = atoi(optarg);
-	   if (type > 2 || type < 0) { cerr << "Error: only global (0) or local (1) available.\n"; exit(1); }
+	   if (type > 2 || type < 0) { std::cerr << "Error: only global (0) or local (1) available.\n"; exit(1); }
 	   break;
 	 case '?':
 	   usage(argv[0]);
@@ -91,7 +90,7 @@ int parseArgs(int argc,char **argv, string &dir, int &frame, int &type)
       }
 
   if (optind != argc-1) {
-    cerr << "\n*** Directory missing ***" << endl;
+    std::cerr << "\n*** Directory missing ***" << std::endl;
     usage(argv[0]);
   }
   dir = argv[optind];
@@ -105,29 +104,29 @@ int parseArgs(int argc,char **argv, string &dir, int &frame, int &type)
 }
 
 
-void getLocalConvergence(ifstream *inputFile, ofstream *outputFile)
+void getLocalConvergence(std::ifstream *inputFile, std::ofstream *outputFile)
 {
   double transMat[16];
   int type;
   double rPos[3];
   double rPosTheta[3];
-  cout<<"starting local convergence"<<endl;
+  std::cout<<"starting local convergence"<<std::endl;
   while ((*inputFile).good()) {
     try {
       (*inputFile) >> transMat >> type;
       if(type == Scan::ICP)
       {
         Matrix4ToEuler(transMat, rPosTheta, rPos);
-        (*outputFile)<<rPos[0]<<" "<<rPos[1]<<" "<<rPos[2]<<endl;
+        (*outputFile)<<rPos[0]<<" "<<rPos[1]<<" "<<rPos[2]<<std::endl;
       }
     }
-    catch (const exception &e) {   
+    catch (const std::exception &e) {   
       break;
     }
   }
 }
 
-void getAllConvergence(ifstream *inputFile, ofstream *outputFile, int FrameNr)
+void getAllConvergence(std::ifstream *inputFile, std::ofstream *outputFile, int FrameNr)
 {
   double transMat[16];
   int type;
@@ -148,7 +147,7 @@ void getAllConvergence(ifstream *inputFile, ofstream *outputFile, int FrameNr)
   double rPosTheta[3];
   bool initial = true;
 
-  cout<<"starting all convergence"<<endl;
+  std::cout<<"starting all convergence"<<std::endl;
   while ((*inputFile).good()) {
     try {
       (*inputFile) >> transMat >> type;
@@ -156,24 +155,24 @@ void getAllConvergence(ifstream *inputFile, ofstream *outputFile, int FrameNr)
       Matrix4ToQuat(transMat, quat);
       if((initial || type != Scan::INVALID) && type != Scan::ICPINACTIVE) {
         initial = false;
-        (*outputFile) << sqrt(Dist2(rPosOrg, rPos))/100.0 << " " << quat_dist(quatOrg, quat) << " " << type << endl;
+        (*outputFile) << sqrt(Dist2(rPosOrg, rPos))/100.0 << " " << quat_dist(quatOrg, quat) << " " << type << std::endl;
       }
       //(*outputFile) << sqrt(Dist2(rPosOrg, rPos))/100.0 << " " << quat_dist(quatOrg, quat) << " " << type << endl;
     }
-    catch (const exception &e) {   
+    catch (const std::exception &e) {   
       break;
     }
   }
 }
 
-void getGlobalConvergence(ifstream *inputFile, ofstream *outputFile)
+void getGlobalConvergence(std::ifstream *inputFile, std::ofstream *outputFile)
 {
   double transMat[16];
   int type;
   bool lumYetFound = false;
   double rPos[3];
   double rPosTheta[3];
-  cout<<"starting global convergence"<<endl;
+  std::cout<<"starting global convergence"<<std::endl;
   while ((*inputFile).good()) {
     try {
       (*inputFile) >> transMat >> type;
@@ -181,18 +180,18 @@ void getGlobalConvergence(ifstream *inputFile, ofstream *outputFile)
       {
         lumYetFound = true;
         Matrix4ToEuler(transMat, rPosTheta, rPos);
-        (*outputFile)<<rPos[0]<<" "<<rPos[1]<<" "<<rPos[2]<<endl;
+        (*outputFile)<<rPos[0]<<" "<<rPos[1]<<" "<<rPos[2]<<std::endl;
       } else 
       {
         if(lumYetFound)             //we only want to write the last lum-correction into the file
         {
           lumYetFound = false;
           outputFile->close();
-          outputFile->open("xyz.con", ios::trunc);
+          outputFile->open("xyz.con", std::ios::trunc);
         }
       }
     }
-    catch (const exception &e) {   
+    catch (const std::exception &e) {   
       break;
     }
   }
@@ -205,18 +204,18 @@ void getGlobalConvergence(ifstream *inputFile, ofstream *outputFile)
  * @param dir the directory
  * @param frameNr frame number that should be read
  */
-void readFrames(string dir, int frameNr, int convType)
+void readFrames(std::string dir, int frameNr, int convType)
 {
-  ifstream frame_in;
-  ofstream xyz_out;
+  std::ifstream frame_in;
+  std::ofstream xyz_out;
   xyz_out.open("xyz.con");
-  string frameFileName;
+  std::string frameFileName;
   frameFileName = dir + "scan" + to_string(frameNr,3) + ".frames";
-    cout << "Reading Frame for convergence data " << frameFileName << "..."<<endl;
+    std::cout << "Reading Frame for convergence data " << frameFileName << "..."<<std::endl;
   frame_in.open(frameFileName.c_str());
 
   // read frame
-  if (!frame_in.good()) cout<<"could not open file!"<<endl; // no more files in the directory
+  if (!frame_in.good()) std::cout<<"could not open file!"<<std::endl; // no more files in the directory
   else
   {
       if(convType == CONV_LOCAL)
@@ -248,16 +247,16 @@ void readFrames(string dir, int frameNr, int convType)
 
 int main(int argc, char **argv){
   
-  cout << "(c) University of Osnabrueck, 2008" << endl << endl
-	  << "Restricted Usage" << endl
-	  << "Don't use without permission" << endl;
+  std::cout << "(c) University of Osnabrueck, 2008" << std::endl << std::endl
+	  << "Restricted Usage" << std::endl
+	  << "Don't use without permission" << std::endl;
 
   if(argc <= 1){
     usage(argv[0]);
   }
   int convT;
   int frameNumber = 0;
-  string dir;
+  std::string dir;
 
   parseArgs(argc, argv, dir, frameNumber, convT);
 //  scandir = dir;

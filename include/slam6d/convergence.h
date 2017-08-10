@@ -25,15 +25,8 @@
 #include <fstream>
 
 #include <iostream>
-using std::cout;
-using std::cerr;
-using std::endl;
-using std::ofstream;
-using std::ios;
-using std::ifstream;
 
 #include <string>
-using std::string;
 
 /** float value "nearly" zero? */
 #define DIV_EPSILON     0.001
@@ -49,12 +42,12 @@ using std::string;
 #include "slam6d/globals.icc"
 
 
-int parseArgs(int argc, char **argv, string &dir, int& frame);
+int parseArgs(int argc, char **argv, std::string &dir, int& frame);
 void usage(char * prog);
 
-void getGlobalConvergence(ifstream *inputFile, ofstream *outputFile);
-void getLocalConvergence(ifstream *inputFile, ofstream *outputFile);
-void getAllConvergence(ifstream *inputFile, ofstream *outputFile, int FrameNr);
+void getGlobalConvergence(std::ifstream *inputFile, std::ofstream *outputFile);
+void getLocalConvergence(std::ifstream *inputFile, std::ofstream *outputFile);
+void getAllConvergence(std::ifstream *inputFile, std::ofstream *outputFile, int FrameNr);
 
 
 

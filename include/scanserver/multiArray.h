@@ -9,9 +9,6 @@
 #define MULTI_ARRAY_H
 
 #include <iostream>
-using std::cout;
-using std::cerr;
-using std::endl;
 
 #include "scanserver/cache/cacheDataAccess.h"
 

@@ -31,13 +31,8 @@
 
 #define WANT_STREAM ///< define the WANT stream :)
 #include <string>
-using std::string;
 #include <iostream>
-using std::cout;
-using std::cerr;
-using std::endl;
 #include <fstream>
-using std::ofstream;
 #include <errno.h>
 
 #include "slam6d/metaScan.h"
@@ -91,7 +86,7 @@ void conflicting_options(const po::variables_map & vm,
 {
   if (vm.count(opt1) && !vm[opt1].defaulted()
       && vm.count(opt2) && !vm[opt2].defaulted())
-    throw std::logic_error(string("Conflicting options '")
+    throw std::logic_error(std::string("Conflicting options '")
                            + opt1 + "' and '" + opt2 + "'.");
 }
 
@@ -103,7 +98,7 @@ void option_dependency(const po::variables_map & vm,
   if (vm.count(for_what) && !vm[for_what].defaulted())
     if (vm.count(required_option) == 0
         || vm[required_option].defaulted())
-      throw std::logic_error(string("Option '") + for_what +
+      throw std::logic_error(std::string("Option '") + for_what +
                              "' requires option '" +
                              required_option + "'.");
 }
@@ -116,7 +111,7 @@ namespace fbr {
                 projection_method*, int) {
     if (values.size() == 0)
       throw std::runtime_error("Invalid model specification");
-    string arg = values.at(0);
+    std::string arg = values.at(0);
     if(strcasecmp(arg.c_str(), "EQUIRECTANGULAR") == 0) v = EQUIRECTANGULAR;
     else if(strcasecmp(arg.c_str(), "CYLINDRICAL") == 0) v = CYLINDRICAL;
     else if(strcasecmp(arg.c_str(), "MERCATOR") == 0) v = MERCATOR;
@@ -143,7 +138,7 @@ namespace fbr {
                 scanner_type*, int) {
     if (values.size() == 0)
       throw std::runtime_error("Invalid scanner type");
-    string arg = values.at(0);
+    std::string arg = values.at(0);
     if(strcasecmp(arg.c_str(), "NONE") == 0) v = NONE;
     else if(strcasecmp(arg.c_str(), "RIEGL") == 0) v = RIEGL;
     else if(strcasecmp(arg.c_str(), "FARO") == 0) v = FARO;
@@ -160,7 +155,7 @@ void validate(boost::any& v, const std::vector<std::string>& values,
               IOType*, int) {
   if (values.size() == 0)
     throw std::runtime_error("Invalid model specification");
-  string arg = values.at(0);
+  std::string arg = values.at(0);
   try {
     v = formatname_to_io_type(arg.c_str());
   } catch (...) { // runtime_error
@@ -175,7 +170,7 @@ void reduction_option_dependency(const po::variables_map & vm,
   if (vm.count("reduction") && vm["reduction"].as<reduction_method>() == stype)
     {
       if (!vm.count(option)) {
-        throw std::logic_error(string("this reduction option needs ")
+        throw std::logic_error(std::string("this reduction option needs ")
                                + option
                                + " to be set");
     }
@@ -187,7 +182,7 @@ void reduction_option_conflict(const po::variables_map & vm, reduction_method st
   if (vm.count("reduction") && vm["reduction"].as<reduction_method>() == stype) {
     if (vm.count(option)) {
       throw std::logic_error(
-          string("this reduction option is incompatible with ") +
+          std::string("this reduction option is incompatible with ") +
           option);
     }
   }
@@ -201,7 +196,7 @@ void validate(boost::any& v, const std::vector<std::string>& values,
               reduction_method*, int) {
   if (values.size() == 0)
     throw std::runtime_error("Invalid model specification");
-  string arg = values.at(0);
+  std::string arg = values.at(0);
   if(strcasecmp(arg.c_str(), "OCTREE") == 0) v = OCTREE;
   else if(strcasecmp(arg.c_str(), "RANGE") == 0) v = RANGE;
   else if(strcasecmp(arg.c_str(), "INTERPOLATE") == 0) v = INTERPOLATE;
@@ -212,7 +207,7 @@ void validate(boost::any& v, const std::vector<std::string>& values,
 
 void parse_options(int argc, char **argv, int &start, int &end,
                    bool &scanserver, int &width, int &height,
-                   fbr::projection_method &ptype, string &dir, IOType &iotype,
+                   fbr::projection_method &ptype, std::string &dir, IOType &iotype,
                    int &maxDist, int &minDist, reduction_method &rtype, double &scale,
                    double &voxel, int &octree, bool &use_reflectance,
 		   int &MIN_ANGLE, int &MAX_ANGLE, int &nImages, double &pParam,
@@ -280,7 +275,7 @@ void parse_options(int argc, char **argv, int &start, int &end,
 
   po::options_description hidden("Hidden options");
   hidden.add_options()
-    ("input-dir", po::value<string>(&dir), "input dir");
+    ("input-dir", po::value<std::string>(&dir), "input dir");
 
   // all options
   po::options_description all;
@@ -301,12 +296,12 @@ void parse_options(int argc, char **argv, int &start, int &end,
 
   // display help
   if (vm.count("help")) {
-    cout << cmdline_options;
-    cout << endl
-         << "Example usage:" << endl
-         << "\t./bin/scan_red -s 0 -e 0 -f uos --reduction OCTREE --voxel 10 --octree 0 dat" << endl
-         << "\t./bin/scan_red -s 0 -e 0 -f uos --reduction RANGE --scale 0.5 --projection EQUIRECTANGULAR --width 3600 --height 1000 dat" << endl
-         << "\t./bin/scan_red -s 0 -e 0 -f uos --reduction INTERPOLATE --scale 0.2 --projection EQUIRECTANGULAR --width 3600 --height 1000 dat" << endl;
+    std::cout << cmdline_options;
+    std::cout << std::endl
+         << "Example usage:" << std::endl
+         << "\t./bin/scan_red -s 0 -e 0 -f uos --reduction OCTREE --voxel 10 --octree 0 dat" << std::endl
+         << "\t./bin/scan_red -s 0 -e 0 -f uos --reduction RANGE --scale 0.5 --projection EQUIRECTANGULAR --width 3600 --height 1000 dat" << std::endl
+         << "\t./bin/scan_red -s 0 -e 0 -f uos --reduction INTERPOLATE --scale 0.2 --projection EQUIRECTANGULAR --width 3600 --height 1000 dat" << std::endl;
     exit(0);
   }
 
@@ -374,7 +369,7 @@ void scan2mat(Scan *source, cv::Mat &mat)
 
 }
 
-void reduce_octree(Scan *scan, vector<cv::Vec4f> &reduced_points, vector<cv::Vec3b> &color, 
+void reduce_octree(Scan *scan, std::vector<cv::Vec4f> &reduced_points, std::vector<cv::Vec3b> &color, 
                    int octree, double red, bool use_reflectance, bool use_color)
 {
   if (use_reflectance) {
@@ -387,8 +382,8 @@ void reduce_octree(Scan *scan, vector<cv::Vec4f> &reduced_points, vector<cv::Vec
     DataReflectance reflectance_reduced(scan->get("reflectance reduced"));
 
     if (xyz_reduced.size() != reflectance_reduced.size()) {
-      cerr << "xyz_reduced size different than reflectance_reduced size"
-           << endl;
+      std::cerr << "xyz_reduced size different than reflectance_reduced size"
+           << std::endl;
       return;
     }
     
@@ -407,11 +402,11 @@ void reduce_octree(Scan *scan, vector<cv::Vec4f> &reduced_points, vector<cv::Vec
     DataXYZ xyz_reduced(scan->get("xyz reduced"));
     DataRGB color_reduced(scan->get("color reduced"));
 
-    cout  << xyz_reduced.size() << " " << color_reduced.size() << endl;
+    std::cout  << xyz_reduced.size() << " " << color_reduced.size() << std::endl;
     
     if (xyz_reduced.size() != color_reduced.size()) {
-      cerr << "xyz_reduced size different than color_reduced size"
-           << endl;
+      std::cerr << "xyz_reduced size different than color_reduced size"
+           << std::endl;
       return;
     }
     
@@ -440,7 +435,7 @@ void reduce_octree(Scan *scan, vector<cv::Vec4f> &reduced_points, vector<cv::Vec
 }
 
 //void reduce_range(Scan *scan, vector<cv::Vec4f> &reduced_points, int width,
-void reduce_range(cv::Mat mat, vector<cv::Vec4f> &reduced_points, int width,
+void reduce_range(cv::Mat mat, std::vector<cv::Vec4f> &reduced_points, int width,
                   int height, fbr::projection_method ptype, double scale,
                   bool use_reflectance, 
 		  int MIN_ANGLE, int MAX_ANGLE, int nImages, double pParam,
@@ -477,7 +472,7 @@ void reduce_range(cv::Mat mat, vector<cv::Vec4f> &reduced_points, int width,
 
 //void reduce_interpolation(Scan *scan,
 void reduce_interpolation(cv::Mat mat,
-                          vector<cv::Vec4f> &reduced_points,
+                          std::vector<cv::Vec4f> &reduced_points,
                           int width,
                           int height,
                           fbr::projection_method ptype,
@@ -536,7 +531,7 @@ int main(int argc, char **argv)
   int width, height;
   int maxDist, minDist;
   fbr::projection_method ptype;
-  string dir;
+  std::string dir;
   IOType iotype;
   reduction_method rtype;
   double scale, voxel;
@@ -562,17 +557,17 @@ int main(int argc, char **argv)
 
   for (int iter = start; iter <= end; iter++) {
     
-    vector<cv::Vec4f> reduced_points;
-    vector<cv::Vec3b> color;
+    std::vector<cv::Vec4f> reduced_points;
+    std::vector<cv::Vec3b> color;
       
-    string reddir = dir + "reduced";
+    std::string reddir = dir + "reduced";
     createdirectory(reddir);
     
     if(rtype == OCTREE)
     {
       Scan::openDirectory(scanserver, dir, iotype, iter, iter);
       if(Scan::allScans.size() == 0) {
-        cerr << "No scans found. Did you use the correct format?" << endl;
+        std::cerr << "No scans found. Did you use the correct format?" << std::endl;
         exit(-1);
       }
 
@@ -656,7 +651,7 @@ int main(int argc, char **argv)
       }
       else
       {
-        cerr << "unknown method" << endl;
+        std::cerr << "unknown method" << std::endl;
       }
 
       if (use_reflectance)

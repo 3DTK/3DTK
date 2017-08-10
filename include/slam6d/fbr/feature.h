@@ -10,8 +10,6 @@
 
 #include "fbr_global.h"
 
-using namespace std;
-
 namespace fbr{
   /**
    * @class feature
@@ -25,7 +23,7 @@ namespace fbr{
     feature_detector_method fDetectorMethod;
     feature_descriptor_method fDescriptorMethod;
     feature_filtration_method fFiltrationMethod;
-    vector<cv::KeyPoint> keypoints;
+    std::vector<cv::KeyPoint> keypoints;
     cv::Mat descriptors;
     enum description_method{
       FEATURE_DESCRIPTION,
@@ -62,9 +60,9 @@ namespace fbr{
     feature_detector_method getDetectorMethod();
     feature_descriptor_method getDescriptorMethod();
     feature_filtration_method getFeatureFiltrationMethod();
-    vector<cv::KeyPoint> getFeatures();
+    std::vector<cv::KeyPoint> getFeatures();
     cv::Mat getDescriptors();
-    void setFeatures(vector<cv::KeyPoint> keypoint);
+    void setFeatures(std::vector<cv::KeyPoint> keypoint);
     void setDescriptors(cv::Mat descriptor);
     void getDescription(description_method method=ALL);
     unsigned int getNumberOfFeatures();

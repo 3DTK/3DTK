@@ -22,16 +22,10 @@
 #endif
 
 #include <fstream>
-using std::ifstream;
-using std::ofstream;
 
 #include <iostream>
-using std::cout;
-using std::cerr;
-using std::endl;
 
 #include <sstream>
-using std::stringstream;
 
 #include "veloslam/veloscan.h"
 
@@ -53,7 +47,6 @@ using std::stringstream;
 #endif
 
 #include <cstring>
-using std::flush;
 
 #include "slam6d/Boctree.h"
 #include "veloslam/veloscan.h"
@@ -79,7 +72,6 @@ using std::flush;
 #endif
 
 #include <cstring>
-using std::flush;
 
 #ifdef TARGET_OS_MAC
 #include <GL/glew.h>
@@ -180,8 +172,8 @@ int VeloScan::TransferToCellArray(int maxDist, int minDist)
 
     float inc=(M_PI*2)/columnSize;
 
-    vector<float> tanv;
-    vector<float>::iterator result;
+    std::vector<float> tanv;
+    std::vector<float>::iterator result;
 
     for(i=0; i<sectionSize; ++i)
     {
@@ -640,7 +632,7 @@ int VeloScan::FindAndCalcScanClusterFeature()
 	if(scanClusterFeatureArray.size()==0)
 		scanClusterFeatureArray.resize(clustersize);
 
-	cout<<"clusterSize:"<<clustersize<<endl;
+	std::cout<<"clusterSize:"<<clustersize<<std::endl;
 	for(i=0; i<clustersize; ++i)
 	{
 		CalcClusterFeature(scanClusterArray[i],scanClusterFeatureArray[i]);
@@ -698,7 +690,7 @@ void VeloScan::calcReducedPoints_byClassifi(double voxelSize, int nrpts, PointTy
 
     // if the scan hasn't been loaded we can't calculate anything
     if(xyz.size() == 0)
-       throw runtime_error("Could not calculate reduced points, XYZ data is empty");
+       throw std::runtime_error("Could not calculate reduced points, XYZ data is empty");
 
 	for (int i = 0;  i < xyz.size(); i++)
 	{
@@ -729,7 +721,7 @@ void VeloScan::calcReducedPoints_byClassifi(double voxelSize, int nrpts, PointTy
     BOctTree<double> *oct = new BOctTree<double>(PointerArray<double>(xyz_t).get(),
       xyz_t.size(), reduction_voxelSize, reduction_pointtype);
 
-    vector<double*> center;
+    std::vector<double*> center;
     center.clear();
 
     if (reduction_nrpts > 0) {

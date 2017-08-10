@@ -8,19 +8,15 @@
  */
 
 #include <fstream>
-using std::ofstream;
 
 #include "grid/viewpointinfo.h"
 #include <cstdlib>
 #include <iostream>
-using std::cerr;
-using std::endl;
-using std::make_pair;
 
 /**
  * CTor.
  */
-viewpointinfo::viewpointinfo(string path)
+viewpointinfo::viewpointinfo(std::string path)
 {
   this->path = path;
 }
@@ -33,7 +29,7 @@ viewpointinfo::viewpointinfo(string path)
  */
 void viewpointinfo::addGrid(const scanGrid *grid)
 {
-    this->viewpoints.push_back(make_pair(grid->getViewpointX(),
+    this->viewpoints.push_back(std::make_pair(grid->getViewpointX(),
 					 grid->getViewpointZ()));
 }
 
@@ -43,24 +39,24 @@ void viewpointinfo::addGrid(const scanGrid *grid)
  *
  * @param filename The path and name of the file
  */
-void viewpointinfo::write(string filename)
+void viewpointinfo::write(std::string filename)
 {
-    string tmp(this->path + "/" + filename);
+    std::string tmp(this->path + "/" + filename);
   
-    ofstream stream(tmp.c_str());
+    std::ofstream stream(tmp.c_str());
     if(!stream.good())
     {
-	cerr << " Unable to open file ! ("<< filename<<")"<< endl;
+	std::cerr << " Unable to open file ! ("<< filename<<")"<< std::endl;
 	exit(1);
     }
 
 
-    vector<viewpoint>::iterator it = this->viewpoints.begin();
-    vector<viewpoint>::iterator end = this->viewpoints.end();
+    std::vector<viewpoint>::iterator it = this->viewpoints.begin();
+    std::vector<viewpoint>::iterator end = this->viewpoints.end();
 
     while(it != end)
     {
-	stream << it->first << " " << it->second << endl;	
+	stream << it->first << " " << it->second << std::endl;	
 	++it;
     }
 }

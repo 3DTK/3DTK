@@ -6,7 +6,6 @@
 //using namespace NEWMAT;
 
 #include <vector>
-using std::vector;
 
 template <class T, class F>
 T planeDist(const T *p, F nx, F ny, F nz, F d) { 

@@ -26,7 +26,6 @@
 #include <vector>
 #include <float.h>
 #include "slam6d/point_type.h"
-using std::vector;
 
 //template <class T> class Show_BOctTree;
 
@@ -70,12 +69,12 @@ class ScanColorManager {
 
     unsigned int currentdim;
 
-    vector<colordisplay *> allScans;
-    vector<ColorManager *> allManager;
+    std::vector<colordisplay *> allScans;
+    std::vector<ColorManager *> allManager;
 
-    vector<ColorManager *> staticManager;
-    vector<ColorManager *> scanManager;
-    vector<CColorManager *> colorsManager;
+    std::vector<ColorManager *> staticManager;
+    std::vector<ColorManager *> scanManager;
+    std::vector<CColorManager *> colorsManager;
 
     unsigned int currenttype;
     

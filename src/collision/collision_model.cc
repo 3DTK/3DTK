@@ -250,9 +250,9 @@ void write_xyzr(DataXYZ &points, DataReflectance &refl, std::string &dir,
 	std::cout << "min pd: " << min_pd << std::endl;
 	std::cout << "max pd: " << max_pd << std::endl;
     std::cerr << "writing colliding points to " << dir << "scan002.xyz" << std::endl;
-    ofstream fcolliding((dir + "scan002.xyz").c_str());
+    std::ofstream fcolliding((dir + "scan002.xyz").c_str());
     std::cerr << "writing non-colliding points to " << dir << "scan003.xyz" << std::endl;
-    ofstream fnoncolliding((dir + "scan003.xyz").c_str());
+    std::ofstream fnoncolliding((dir + "scan003.xyz").c_str());
 	double r;
     for (size_t i = 0, j=0; i < points.size(); ++i) {
         if (colliding[i]) {
@@ -273,10 +273,10 @@ void write_xyzr(DataXYZ &points, DataReflectance &refl, std::string &dir,
     }
     fcolliding.close();
     fnoncolliding.close();
-    ofstream pcolliding((dir + "scan002.pose").c_str());
+    std::ofstream pcolliding((dir + "scan002.pose").c_str());
     pcolliding << "0 0 0" << std::endl << "0 0 0" << std::endl;
     pcolliding.close();
-    ofstream pnoncolliding((dir + "scan003.pose").c_str());
+    std::ofstream pnoncolliding((dir + "scan003.pose").c_str());
     pnoncolliding << "0 0 0" << std::endl << "0 0 0" << std::endl;
     pnoncolliding.close();
 }
@@ -360,7 +360,7 @@ size_t handle_pointcloud(std::vector<Point> &pointmodel, DataXYZ &environment,
                 for(const auto &it : pointmodel) {
                     double point1[3] = {it.x, it.y, it.z};
                     transform3(trajectory[j].transformation, point1);
-                    vector<size_t> collidingsphere = t.fixedRangeSearch(point1, sqRad2, thread_num);
+                    std::vector<size_t> collidingsphere = t.fixedRangeSearch(point1, sqRad2, thread_num);
                     fill_colliding(colliding, collidingsphere);
                 }
             }
@@ -400,7 +400,7 @@ size_t handle_pointcloud(std::vector<Point> &pointmodel, DataXYZ &environment,
                     point2[1] = pointmodel[j].y;
                     point2[2] = pointmodel[j].z;
                     transform3(it2->transformation, point2);
-                    vector<size_t> collidingsegment = t.segmentSearch_all(point1, point2, sqRad2, thread_num);
+                    std::vector<size_t> collidingsegment = t.segmentSearch_all(point1, point2, sqRad2, thread_num);
                     fill_colliding(colliding, collidingsegment);
                     point1[0] = point2[0];
                     point1[1] = point2[1];
@@ -584,7 +584,7 @@ size_t cuda_handle_pointcloud(int cuda_device, std::vector<Point> &pointmodel, D
 		grid.SetM(tmp_xyz,pointmodel.size());
 		grid.TransformM(mat);
 		
-		vector<int> output=grid.fixedRangeSearch();
+		std::vector<int> output=grid.fixedRangeSearch();
 		
 		//Fill colliding
 		for(unsigned int i=0;i<colliding.size() && i<output.size();++i)
@@ -775,7 +775,7 @@ void calculate_collidingdist2(std::vector<Point> &pointmodel, DataXYZ &environme
 			double dist2 = Dist2(point1, pa[c1]);
 			// now get all points around this closest point to mark them
 			// with the same penetration distance
-			vector<size_t> closestsphere = t.fixedRangeSearch(pa[c1], sqRad2, thread_num);
+			std::vector<size_t> closestsphere = t.fixedRangeSearch(pa[c1], sqRad2, thread_num);
 #pragma omp critical
 			for (const auto &it3 : closestsphere) {
 				if (dist2 < dist_colliding[it3]) {
@@ -818,7 +818,7 @@ int main(int argc, char **argv)
 	
     parse_options(argc, argv, iotype, dir, radius, calcdistances, cmethod, pdmethod, use_cuda, cuda_device, voxel, octree, reduce, jobs, transform);
 
-	vector<std::string> transmat_str;
+	std::vector<std::string> transmat_str;
 	boost::split(transmat_str, transform, boost::is_any_of(":"));
 	if (transmat_str.size() != 16) {
 		std::cerr << "invalid --transform string, must be of form X:X:X:X:X:X:X:X:X:X:X:X:X:X:X:X" << std::endl;
@@ -869,7 +869,7 @@ int main(int argc, char **argv)
     std::vector<bool> colliding;
     colliding.resize(environment.size(), false); // by default, nothing collides
     std::cerr << "reading model..." << std::endl;
-    vector<Point> pointmodel;
+    std::vector<Point> pointmodel;
     for(unsigned int j = 0; j < model.size(); j++) {
 		double point[3] = {model[j][0], model[j][1], model[j][2]};
 		// apply the given transformation to every point of the model

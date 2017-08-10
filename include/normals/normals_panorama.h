@@ -11,7 +11,6 @@
 #define __NORMALS_PANORAMA_H__
 
 #include <vector>
-using std::vector;
 #include <slam6d/scan.h>
 #include <slam6d/fbr/panorama.h>
 #if (CV_MAJOR_VERSION == 2) && (CV_MINOR_VERSION < 2)
@@ -21,21 +20,21 @@ using std::vector;
 #include <opencv2/opencv.hpp>
 #endif
 
-void calculateNormalsPANORAMA(vector<Point> &normals,
-                              vector<Point> &points,
-                              const vector< vector< vector< cv::Vec3f > > >
+void calculateNormalsPANORAMA(std::vector<Point> &normals,
+                              std::vector<Point> &points,
+                              const std::vector< std::vector< std::vector< cv::Vec3f > > >
                               extendedMap,
                               const double _rPos[3]);
 
 // see paper
 // Fast and Accurate Computation of Surface Normals from Range Images
 // by H. Badino, D. Huber, Y. Park and T. Kanade
-void calculateNormalsFAST(vector<Point> &normals,
-                          vector<Point> &points,
+void calculateNormalsFAST(std::vector<Point> &normals,
+                          std::vector<Point> &points,
                           const cv::Mat &img,
                           const float max,
 					 const double _rPos[3],
-                          const vector< vector< vector <cv::Vec3f> > >
+                          const std::vector< std::vector< std::vector <cv::Vec3f> > >
                           &extendedMap);
 
 // TODO should be exported to separate library

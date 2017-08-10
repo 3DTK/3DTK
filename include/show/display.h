@@ -20,8 +20,6 @@ using std::string;
 #ifndef __DISPLAY_H__
 #define __DISPLAY_H__
 
-using namespace std;
-
 class SDisplay {
   public:
   //inline void setColorManager(ColorManager *_cm) { cm = _cm; }
@@ -34,7 +32,7 @@ class SDisplay {
   
   virtual void displayObject() = 0;
 
-  static void readDisplays(string &filename, vector<SDisplay*> &displays); 
+  static void readDisplays(std::string &filename, std::vector<SDisplay*> &displays); 
   
 
   protected:
@@ -45,39 +43,39 @@ class SDisplay {
 class PointDisplay : public SDisplay { 
  
   public:
-  static SDisplay* readFromFile(string &filename);
+  static SDisplay* readFromFile(std::string &filename);
   virtual void displayObject();
 
   private:
 
-  PointDisplay(vector<float*> &p, vector<string> &l);
+  PointDisplay(std::vector<float*> &p, std::vector<std::string> &l);
 
-  vector<float *> points;
-  vector<string> labels;
+  std::vector<float *> points;
+  std::vector<std::string> labels;
 };
 
 class LineDisplay : public SDisplay { 
  
   public:
-  static SDisplay* readFromFile(string &filename);
+  static SDisplay* readFromFile(std::string &filename);
   virtual void displayObject();
 
   private:
 
-  LineDisplay(vector<float*> &l);
+  LineDisplay(std::vector<float*> &l);
 
-  vector<float *> lines;
+  std::vector<float *> lines;
 };
 
 class PlaneDisplay : public SDisplay {
   public: 
-  static SDisplay* readFromFile(string &filename, float* color);
+  static SDisplay* readFromFile(std::string &filename, float* color);
   virtual void displayObject();
 
 
-  PlaneDisplay(vector<float*> &p, float* c);
+  PlaneDisplay(std::vector<float*> &p, float* c);
   private:
-  vector<float *> points;
+  std::vector<float *> points;
   float * color;
 
 };
@@ -85,20 +83,20 @@ class PlaneDisplay : public SDisplay {
 
 class GroupPlaneDisplay : public SDisplay {
   public:
-  static SDisplay* readFromFile(string &filename);
+  static SDisplay* readFromFile(std::string &filename);
   virtual void displayObject();
-  vector<PlaneDisplay*> planes;
+  std::vector<PlaneDisplay*> planes;
 
 
-  GroupPlaneDisplay(vector<PlaneDisplay*> &p);
+  GroupPlaneDisplay(std::vector<PlaneDisplay*> &p);
 };
 
 class BoxDisplay : public GroupPlaneDisplay {
   public:
-  static SDisplay* readFromFile(string &filename);
+  static SDisplay* readFromFile(std::string &filename);
   virtual void displayObject();
   private:
-  BoxDisplay(vector<PlaneDisplay*> &p);
+  BoxDisplay(std::vector<PlaneDisplay*> &p);
 };
 
 #endif

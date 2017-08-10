@@ -3,7 +3,6 @@
 
 #include "cuda/gridparams.h"
 #include <vector>
-using std::vector;
 
 /**
  * @brief .....

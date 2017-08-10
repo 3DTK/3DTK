@@ -3,7 +3,6 @@
 #include <set>
 #include "shapes/ConfigFileHough.h"
 #include "slam6d/point.h"
-using std::multiset;
 #include "shapes/hsm3d.h"
 
 
@@ -82,7 +81,7 @@ class Accumulator {
      * Returns a sorted list of the all cells in the accumulator.
      * @return a sorted multiset containing the cells as (counter, rho_index, theta_index, phi_index)
      */
-    virtual multiset<int*, maxcompare>* getMax() = 0; 
+    virtual std::multiset<int*, maxcompare>* getMax() = 0; 
     /**
      * Cleans the accumulator using a very simple sliding window strategy. A
      * quadratic window is moved over the accumulator. In each step all the
@@ -110,7 +109,7 @@ class AccumulatorSimple : public Accumulator {
     double* getMax(double &rho, double &theta, double &phi);
     double* getMax(int* cell);
     void peakWindow(int size);
-    multiset<int*, maxcompare>* getMax(); 
+    std::multiset<int*, maxcompare>* getMax(); 
   private:
     int ***accumulator;
 };
@@ -133,7 +132,7 @@ class AccumulatorCube : public Accumulator {
     int* accumulateAPHT(Point p);
     double* getMax(double &rho, double &theta, double &phi);
     double* getMax(int* cell);
-    multiset<int*, maxcompare>* getMax(); 
+    std::multiset<int*, maxcompare>* getMax(); 
   private:
     int nrCells;
     int ****accumulator;
@@ -160,7 +159,7 @@ class AccumulatorBall : public Accumulator {
     int* accumulateAPHT(Point p);
     double* getMax(double &rho, double &theta, double &phi);
     double* getMax(int* cell);
-    multiset<int*, maxcompare>* getMax(); 
+    std::multiset<int*, maxcompare>* getMax(); 
     void peakWindow(int size);
   private:
     int ***accumulator;
@@ -186,7 +185,7 @@ class AccumulatorBallI : public Accumulator {
     int* accumulateAPHT(Point p);
     double* getMax(double &rho, double &theta, double &phi);
     double* getMax(int* cell);
-    multiset<int*, maxcompare>* getMax(); 
+    std::multiset<int*, maxcompare>* getMax(); 
     void peakWindow(int size);
   private:
     int ***accumulator;

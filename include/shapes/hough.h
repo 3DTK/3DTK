@@ -9,7 +9,6 @@
 #include "shapes/accumulator.h"
 #include "newmat/newmatio.h"
 #include <iostream>
-using std::ofstream;
 typedef vector <PtPair> vPtPair;  ///< just a typedef: vPtPair = vector of type PtPair
 
 struct valuecompare {

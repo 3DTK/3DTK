@@ -15,10 +15,6 @@
 
 
 
-using std::cout;
-using std::endl;
-
-
 class ScanImporter;
 
 class calibration {

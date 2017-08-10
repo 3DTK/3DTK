@@ -13,8 +13,6 @@
 #include "fbr_global.h"
 #include "slam6d/icp6Dquat.h"
 
-using namespace std;
-
 namespace fbr{
   /**
    * @class registration : registers two scnas
@@ -47,7 +45,7 @@ namespace fbr{
      * @param ct Point3f for returning the 3D coordinate of train scan
      * @return 1 on success 0 on failure
      */
-    int getCoord( vector<cv::KeyPoint> fKeypoints, vector<cv::KeyPoint> sKeypoints, vector<cv::DMatch> matches, cv::Mat fPMap, cv::Mat sPMap, int idx, cv::Point3f& cq, cv::Point3f& ct);
+    int getCoord( std::vector<cv::KeyPoint> fKeypoints, std::vector<cv::KeyPoint> sKeypoints, std::vector<cv::DMatch> matches, cv::Mat fPMap, cv::Mat sPMap, int idx, cv::Point3f& cq, cv::Point3f& ct);
     /**
      * pointToArray : convert 3D point3f to double array
      * @param c 3D point whith Point3f type
@@ -69,7 +67,7 @@ namespace fbr{
      * @param sKeypoints vector<KeyPoints> containing the features of second panorama image
      * @param matches vector<DMatches> containing the matched features of both images
      */
-    int findAlign(unsigned int i, unsigned int j, unsigned int k, cv::Mat fPMap, vector<cv::KeyPoint> fKeypoints, cv::Mat sPMap, vector<cv::KeyPoint> sKeypoints, vector<cv::DMatch> matches);
+    int findAlign(unsigned int i, unsigned int j, unsigned int k, cv::Mat fPMap, std::vector<cv::KeyPoint> fKeypoints, cv::Mat sPMap, std::vector<cv::KeyPoint> sKeypoints, std::vector<cv::DMatch> matches);
 
   public:
     registration();
@@ -82,7 +80,7 @@ namespace fbr{
      * @param sKeypoints keypoints from the second scan
      * @param matches matched keypoints from first to second scan
      */
-    void findRegistration(cv::Mat fPMap, vector<cv::KeyPoint> fKeypoints, cv::Mat sPMap, vector<cv::KeyPoint> sKeypoints, vector<cv::DMatch> matches);
+    void findRegistration(cv::Mat fPMap, std::vector<cv::KeyPoint> fKeypoints, cv::Mat sPMap, std::vector<cv::KeyPoint> sKeypoints, std::vector<cv::DMatch> matches);
     double getMinDistance();
     double getMinError();
     unsigned int getMinInlier();

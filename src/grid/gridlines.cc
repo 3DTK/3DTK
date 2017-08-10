@@ -11,11 +11,7 @@
 #include "grid/hough.h"
 
 #include <iostream>
-using std::cout;
-using std::cerr;
-using std::endl;
 #include <fstream>
-using std::ofstream;
 
 #define MINIMALLINELENGTH 2
 
@@ -43,8 +39,8 @@ void gridlines::createLines(grid* g, int max_distance)
 {
     // read the data out of the grid  
     double x, z;
-    vector <double> vx;
-    vector <double> vz;
+    std::vector <double> vx;
+    std::vector <double> vz;
 
     // initialize minimal and maximal x and z values
     double xmin = 8000.0, xmax = -8000.0, ymin = 8000.0, ymax = -8000.0;
@@ -117,7 +113,7 @@ void gridlines::createLines(grid* g, int max_distance)
 			ymin, 
 			1);
     
-    cout << "Found " << sht_nr_line_pts/2 << " lines!" << endl; 
+    std::cout << "Found " << sht_nr_line_pts/2 << " lines!" << std::endl; 
 
     // set results back -> norm
     for (int j = 0; j < sht_nr_line_pts; j++) {
@@ -153,7 +149,7 @@ void gridlines::createLines(grid* g, int max_distance)
  *
  * @returns the vector with the created lines
  */
-vector<line>* gridlines::getLines()
+std::vector<line>* gridlines::getLines()
 {
     return &this->lines;
 }
@@ -163,22 +159,22 @@ vector<line>* gridlines::getLines()
  *
  * @param file the file to write to
  */
-void gridlines::writeGnuPlot(string file)
+void gridlines::writeGnuPlot(std::string file)
 {
-    ofstream str;
+    std::ofstream str;
     str.open(file.c_str());
     if(!str.good())
     {
-	cerr << "ERROR: In gridlines::writeGnuPlot, unable to open the stream! " 
-	     << endl;
-	cerr << "(Filename: " << file << ")" << endl;
+	std::cerr << "ERROR: In gridlines::writeGnuPlot, unable to open the stream! " 
+	     << std::endl;
+	std::cerr << "(Filename: " << file << ")" << std::endl;
 	exit(1);
     }
 
     for(size_t i = 0; i < lines.size(); i++) {
-	str << lines.at(i).getStartX() << " " << lines.at(i).getStartZ() << endl;
-	str << lines.at(i).getEndX() << " " << lines.at(i).getEndZ() << endl;
-	str << endl;
+	str << lines.at(i).getStartX() << " " << lines.at(i).getStartZ() << std::endl;
+	str << lines.at(i).getEndX() << " " << lines.at(i).getEndZ() << std::endl;
+	str << std::endl;
     }
 
     str.close();
@@ -189,15 +185,15 @@ void gridlines::writeGnuPlot(string file)
  *
  * @param file the file to write to
  */
-void gridlines::writeLin(string file)
+void gridlines::writeLin(std::string file)
 {
-    ofstream str;
+    std::ofstream str;
     str.open(file.c_str());
     if(!str.good())
     {
-	cerr << "ERROR: In gridlines::writeLin, unable to open the stream! " 
-	     << endl;
-	cerr << "(Filename: " << file << ")" << endl;
+	std::cerr << "ERROR: In gridlines::writeLin, unable to open the stream! " 
+	     << std::endl;
+	std::cerr << "(Filename: " << file << ")" << std::endl;
 	exit(1);
     }
 
@@ -205,10 +201,10 @@ void gridlines::writeLin(string file)
 	if(lines.at(i).getLength() < MINIMALLINELENGTH)
 	    continue;
 
-	str << "BEGIN" << endl;
-	str << lines.at(i).getStartX() << " 0 " << lines.at(i).getStartZ() << endl;
-	str << lines.at(i).getEndX() << " 0 " << lines.at(i).getEndZ() << endl;
-	str << "END" << endl;
+	str << "BEGIN" << std::endl;
+	str << lines.at(i).getStartX() << " 0 " << lines.at(i).getStartZ() << std::endl;
+	str << lines.at(i).getEndX() << " 0 " << lines.at(i).getEndZ() << std::endl;
+	str << "END" << std::endl;
     }
 
     str.close();

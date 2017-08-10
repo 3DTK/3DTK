@@ -10,8 +10,6 @@
 #include "veloslam/gridcluster.h"
 
 
-using namespace std;
-
  struct PointID
 {
 	int cellIndex;
@@ -72,11 +70,11 @@ private :
 		   /**
 		   * all rectangle bounding box candidates 
 		   */
-		  vector <OrientedBoundingBox> allCandBox;
+		  std::vector <OrientedBoundingBox> allCandBox;
 
 		   /**
 		   * unregular minBounding box points 
 		   */
-		  vector <BesiegePoint> minBoundingBox;
+		  std::vector <BesiegePoint> minBoundingBox;
 
 };

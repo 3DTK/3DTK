@@ -2,7 +2,6 @@
 #define __SHAPE_H__
 
 #include <vector>
-using std::vector;
 #include "slam6d/globals.icc"
 #include "newmat/newmatio.h"
 #include "newmat/newmatap.h"

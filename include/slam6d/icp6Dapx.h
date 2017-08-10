@@ -25,7 +25,7 @@ public:
    */
   virtual ~icp6D_APX() {};                                  
 
-  double Align(const vector<PtPair>& Pairs,
+  double Align(const std::vector<PtPair>& Pairs,
 			double *alignxf,
 			const double centroid_m[3],
 			const double centroid_d[3]);  
@@ -34,7 +34,7 @@ public:
 				    const double sum[OPENMP_NUM_THREADS], 
 				    const double centroid_m[OPENMP_NUM_THREADS][3],
 				    const double centroid_d[OPENMP_NUM_THREADS][3], 
-				    const vector<PtPair> pairs[OPENMP_NUM_THREADS],
+				    const std::vector<PtPair> pairs[OPENMP_NUM_THREADS],
 				    double *alignxf);
   
   static void computeRt(const double *x, const double *dx, double *alignxf);

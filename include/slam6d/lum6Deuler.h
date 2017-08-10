@@ -11,7 +11,6 @@
 #define __LUM6D_EULER_H__
 
 #include <vector>
-using std::vector;
 
 #include "graphSlam6D.h"
 

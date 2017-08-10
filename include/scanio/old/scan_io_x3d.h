@@ -9,9 +9,7 @@
 #define __SCAN_IO_X3D_H__
 
 #include <string>
-using std::string;
 #include <vector>
-using std::vector;
 
 #include "scan_io.h"
 

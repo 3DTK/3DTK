@@ -6,7 +6,6 @@
 
 #include "grid/grid.h"
 #include <string>
-using std::string;
 
 /**
  * The class represents the baseclass for all writers.

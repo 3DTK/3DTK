@@ -21,8 +21,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-using namespace std;
-
 #define BIG 100000
 
 #if !defined TRUE

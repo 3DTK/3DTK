@@ -11,9 +11,7 @@
 
 #include "slam6d/point.h"
 #include <iostream>
-using std::endl;
 #include <fstream>
-using std::ofstream;
 
 /**
  * @brief Representing point pairs
@@ -31,7 +29,7 @@ public:
   
   inline PtPair();
 
-  inline friend ostream& operator<<(ostream& os, const PtPair& pair);
+  inline friend std::ostream& operator<<(std::ostream& os, const PtPair& pair);
 
   Point p1,  ///< The two points forming the pair
         p2;  ///< The two points forming the pair

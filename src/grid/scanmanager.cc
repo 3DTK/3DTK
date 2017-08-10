@@ -11,12 +11,8 @@
 #include <cstring>
 #include "slam6d/globals.icc"
 #include <stdexcept>
-using std::exception;
 #include <fstream>
-using std::ifstream;
 #include <iostream>
-using std::cerr;
-using std::endl;
 
 /**
  * Ctor.
@@ -69,15 +65,15 @@ void scanmanager::readFrames(std::string dir, int start, int end,
   
   double initialTransform[16];
   if (readInitial) {
-    cout << "Initial Transform:" << endl;
+    std::cout << "Initial Transform:" << std::endl;
 	std::string initialTransformFileName = dir + "initital.frame";
-    ifstream initial_in(initialTransformFileName.c_str());
+    std::ifstream initial_in(initialTransformFileName.c_str());
     if (!initial_in.good()) {
-      cout << "Error opening " << initialTransformFileName << endl;
+      std::cout << "Error opening " << initialTransformFileName << std::endl;
       exit(-1);
     }
     initial_in >> initialTransform;
-    cout << initialTransform << endl;
+    std::cout << initialTransform << std::endl;
     
     // update the mirror to apply the initial frame for all frames
     double tempxf[16];
@@ -109,10 +105,10 @@ void scanmanager::readFrames(std::string dir, int start, int end,
   }
   
   if (metaMatrix.size() == 0) {
-    cerr << "*****************************************" << endl;
-    cerr << "** ERROR: No .frames could be found!   **" << endl;
-    cerr << "*****************************************" << endl;
-    cerr << " ERROR: Missing or empty directory: " << dir << endl << endl;
+    std::cerr << "*****************************************" << std::endl;
+    std::cerr << "** ERROR: No .frames could be found!   **" << std::endl;
+    std::cerr << "*****************************************" << std::endl;
+    std::cerr << " ERROR: Missing or empty directory: " << dir << std::endl << std::endl;
     return;
   }
     
@@ -154,7 +150,7 @@ void scanmanager::startscan(std::string inputdir, std::string outputdir,
   Scan::openDirectory(scanserver, inputdir, scantype, start, end);
   
   if(Scan::allScans.size() == 0) {
-    cerr << "No scans found. Did you use the correct format?" << endl;
+    std::cerr << "No scans found. Did you use the correct format?" << std::endl;
     exit(-1);
 
   }

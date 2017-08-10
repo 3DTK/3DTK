@@ -10,13 +10,7 @@
 #include "show/show_common.h"
 
 #include <fstream>
-using std::fstream;
-using std::ofstream;
-using std::ios;
 #include <iostream>
-using std::cout;
-using std::cerr;
-using std::endl;
 
 extern int nr_interpolations;
 extern int imageNr;

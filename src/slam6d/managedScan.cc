@@ -18,7 +18,6 @@
 #endif // WITH_METRICS
 
 #include <sstream>
-using std::stringstream;
 
 #include <boost/filesystem/operations.hpp>
 using namespace boost::filesystem;
@@ -147,7 +146,7 @@ void ManagedScan::setReductionParameter(double voxelSize,
 {
   Scan::setReductionParameter(voxelSize, nrpts, pointtype);
   // set parameters to invalidate old cache data
-  stringstream s;
+  std::stringstream s;
   s << voxelSize << " " << nrpts << " " << transMatOrg;
   m_shared_scan->setReductionParameters(s.str().c_str());
 }
@@ -160,7 +159,7 @@ void ManagedScan::setShowReductionParameter(double voxelSize,
   show_reduction_nrpts = nrpts;
   show_reduction_pointtype = pointtype;
   // set parameters to invalidate old cache data
-  stringstream s;
+  std::stringstream s;
   s << voxelSize << " " << nrpts;
   m_shared_scan->setShowReductionParameters(s.str().c_str());
 }
@@ -180,7 +179,7 @@ void ManagedScan::setOcttreeParameter(double reduction_voxelSize,
                             autoOct);
   // set octtree parameters to invalidate cached ones with other
   // parameters (changing range/height is already handled)
-  stringstream s;
+  std::stringstream s;
   s << reduction_voxelSize << " "
     << octtree_voxelSize << " "
     << pointtype.toFlags();
@@ -244,7 +243,7 @@ DataPointer ManagedScan::get(const std::string& identifier)
                           return DataPointer(0,0);
                         } 
   {
-    throw runtime_error(std::string("Identifier '") + identifier
+    throw std::runtime_error(std::string("Identifier '") + identifier
                         + "' not compatible with ManagedScan::get. "
                         + "Upgrade SharedScan for this data field.");
   }
@@ -268,7 +267,7 @@ DataPointer ManagedScan::create(const std::string& identifier, size_t size)
       if(identifier == "reflectance") {
         return m_shared_scan->createReflectance(size / (1*sizeof(double)));
       } else {
-        throw runtime_error(std::string("Identifier '") + identifier
+        throw std::runtime_error(std::string("Identifier '") + identifier
                             + "' not compatible with ManagedScan::create. "
                             + "Upgrade SharedScan for this data field.");
         }
@@ -295,9 +294,9 @@ void ManagedScan::createSearchTreePrivate()
          10.0, PointType(), true);
       break;
     case -1:
-      throw runtime_error("Cannot create a SearchTree without setting a type.");
+      throw std::runtime_error("Cannot create a SearchTree without setting a type.");
     default:
-      throw runtime_error("SearchTree type not implemented for ManagedScan");
+      throw std::runtime_error("SearchTree type not implemented for ManagedScan");
     }
 
   // TODO: look into CUDA compability
@@ -332,7 +331,7 @@ void ManagedScan::calcReducedShow()
                                                xyz.size(),
                                                show_reduction_voxelSize);
 
-  vector<double*> center;
+  std::vector<double*> center;
   center.clear();
 
   if(show_reduction_nrpts > 0) {
@@ -403,7 +402,7 @@ void ManagedScan::createOcttree()
       = m_shared_scan->createOcttree(size).get_raw_pointer();
     new(mem_ptr) BOctTree<float>(*btree, mem_ptr, size);
     delete btree; btree = 0;
-  } catch(runtime_error& e) {
+  } catch(std::runtime_error& e) {
     // delete tree if copy to cache failed
     delete btree;
     throw e;

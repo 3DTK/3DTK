@@ -36,13 +36,8 @@
 #include <iostream>
 #include <fstream>
 #include <queue>
-using std::queue;
 #include <vector>
-using std::vector;
 #include <sstream>
-using std::stringstream;
-using std::string;
-using std::set;
 
 #include <ros/ros.h>
 
@@ -77,14 +72,14 @@ public:
 
   // sets this scans pose
   void setTransform(double *mat, double x, double y, double z);
-  void setPath(string _outputpath) { outputpath = _outputpath; };
+  void setPath(std::string _outputpath) { outputpath = _outputpath; };
 
   // these vectors contain the points, or if a buffer is used the pointclouds
-  vector<geometry_msgs::PointStamped*> points;
-  vector<sensor_msgs::PointCloud *> clouds;
+  std::vector<geometry_msgs::PointStamped*> points;
+  std::vector<sensor_msgs::PointCloud *> clouds;
 
   unsigned int index;
-  string outputpath;
+  std::string outputpath;
 
   double transmat[16];
 
@@ -105,7 +100,7 @@ public:
     inline timedImporter(std::string _rxpfile, timeMap *_tmap, calibration *_cal,
         bool _lines=false, bool _stopandgo=false, bool _rieglcoord=false,
         bool _norobot = false, unsigned int _pointtype = PointType::USE_NONE, 
-        int _start=-1, int _end=-1, string
+        int _start=-1, int _end=-1, std::string
      _mapstring = "/odom_combined", bool _linescans=false) 
       : pointcloud(false), linescans(_linescans), start(_start), end(_end),
       rxpfile(_rxpfile), tmap(_tmap), lines(_lines), stopandgo(_stopandgo),
@@ -203,7 +198,7 @@ protected:
 
     // a buffer for faster transforming the scans
 //    vector<geometry_msgs::PointStamped*> pbuffer;
-    vector<double*> pbuffer;
+    std::vector<double*> pbuffer;
 
     void on_echo_transformed(echo_type echo);
     void on_frame_stop(const frame_stop<iterator_type>& arg);
@@ -237,7 +232,7 @@ protected:
     bool stopandgo;
     bool rieglcoord;
     bool norobot;
-    string mapstring;
+    std::string mapstring;
 
     PointType pointtype;
     // contains the trajectory of the robot
@@ -256,10 +251,10 @@ class FileImporter
     : public timedImporter
 {
   public:
-    FileImporter(std::string _rxpfile, timeMap *_tmap, string _outputpath, calibration *_cal, 
+    FileImporter(std::string _rxpfile, timeMap *_tmap, std::string _outputpath, calibration *_cal, 
         bool _lines=false, bool _stopandgo=false, bool _rieglcoord=false, 
         bool _norobot=false,unsigned int _pointtype = PointType::USE_NONE, 
-        int start=-1, int end=-1, string _mapstring="/odom_combined") 
+        int start=-1, int end=-1, std::string _mapstring="/odom_combined") 
       : timedImporter(_rxpfile, _tmap, _cal, _lines, _stopandgo, _rieglcoord, _norobot, _pointtype, start, end, _mapstring) {
         outputpath = _outputpath;
 
@@ -284,7 +279,7 @@ class FileImporter
     static void writeScan(scanstruct *scan);
   private:
     // the path to write scans to
-    string outputpath;
+    std::string outputpath;
 
     // threadpool used for writing scans in parallel
     boost::shared_ptr<boost::asio::io_service> ioservice;
@@ -296,9 +291,9 @@ class LineScanImporter
     : public timedImporter
 {
   public:
-    LineScanImporter(std::string _rxpfile, timeMap *_tmap, string _outputpath, calibration *_cal, 
+    LineScanImporter(std::string _rxpfile, timeMap *_tmap, std::string _outputpath, calibration *_cal, 
         bool _lines=false, bool _stopandgo=false, unsigned int _pointtype = PointType::USE_NONE, 
-        int start=-1, int end=-1, string _mapstring="/odom_combined") 
+        int start=-1, int end=-1, std::string _mapstring="/odom_combined") 
       : timedImporter(_rxpfile, _tmap, _cal, _lines, _stopandgo, false, false,
       _pointtype, start, end, _mapstring, true) {
         outputpath = _outputpath;
@@ -324,7 +319,7 @@ class LineScanImporter
     static void writeLineScan(scanstruct *scan);
   private:
     // the path to write scans to
-    string outputpath;
+    std::string outputpath;
 
     // threadpool used for writing scans in parallel
     boost::shared_ptr<boost::asio::io_service> ioservice;
@@ -352,14 +347,14 @@ class ScanImporter
       reducer = si.reducer;
     }
    
-    void setScans(vector<Scan *> *_scans) {
+    void setScans(std::vector<Scan *> *_scans) {
       scans = _scans;
     }
 
   protected:
     void frameStop(scanstruct *scan);
 
-    vector<Scan *> *scans;
+    std::vector<Scan *> *scans;
 };
 
 class ScanReducer
@@ -395,7 +390,7 @@ class ScanReducer
     int currentID;
     void frameStop(scanstruct *scan);
 
-    set<int> reducedIDs;
+    std::set<int> reducedIDs;
 
 };
 

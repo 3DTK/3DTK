@@ -10,11 +10,7 @@
 #include "show/display.h"
 #include "slam6d/globals.icc"
 #include <fstream>
-using std::ifstream;
 #include <iostream>
-using std::cout;
-using std::cerr;
-using std::endl;
 
 #ifdef __APPLE__
 #include <GLUT/glut.h>
@@ -41,12 +37,12 @@ void SDisplay::displayAll() {
   glPopMatrix();
 }
 
-void SDisplay::readDisplays(string &filename, vector<SDisplay*> &displays) {
-  ifstream input;
+void SDisplay::readDisplays(std::string &filename, std::vector<SDisplay*> &displays) {
+  std::ifstream input;
   input.open(filename.c_str());
 
-  string type;
-  string objectfile;
+  std::string type;
+  std::string objectfile;
   while(input.good()) {
     input >> type;
     try {
@@ -66,33 +62,33 @@ void SDisplay::readDisplays(string &filename, vector<SDisplay*> &displays) {
       } else if(strcmp(type.c_str(), "Box") == 0) {
         displays.push_back(BoxDisplay::readFromFile(objectfile));
       } else {
-        cerr << "Unknown SDisplay Object" << endl;
+        std::cerr << "Unknown SDisplay Object" << std::endl;
       }
     } catch(...) {
-      cerr << "Wrong display type" << endl;
+      std::cerr << "Wrong display type" << std::endl;
     }
   }
   input.close();
   input.clear();
 }
 
-PointDisplay::PointDisplay(vector<float*> &p, vector<string> &l) {
+PointDisplay::PointDisplay(std::vector<float*> &p, std::vector<std::string> &l) {
   points = p;
   labels = l;
 }
 
-SDisplay * PointDisplay::readFromFile(string &filename) {
-  ifstream input;
+SDisplay * PointDisplay::readFromFile(std::string &filename) {
+  std::ifstream input;
   input.open(filename.c_str());
 
-  vector<float*> points;
-  vector<string> labels;
+  std::vector<float*> points;
+  std::vector<std::string> labels;
   while (input.good()) {
     try {
       float *p = new float[3];
       input >> p[0] >> p[1] >> p[2];
       points.push_back(p);
-      string l;
+      std::string l;
       input >> l;
       labels.push_back(l);
     } catch (...) {
@@ -132,15 +128,15 @@ void PointDisplay::displayObject() {
   
 }
 
-LineDisplay::LineDisplay(vector<float*> &l) {
+LineDisplay::LineDisplay(std::vector<float*> &l) {
   lines = l;
 }
 
-SDisplay * LineDisplay::readFromFile(string &filename) {
-  ifstream input;
+SDisplay * LineDisplay::readFromFile(std::string &filename) {
+  std::ifstream input;
   input.open(filename.c_str());
 
-  vector<float*> lines;
+  std::vector<float*> lines;
   while (input.good()) {
     try {
       float *p = new float[6];
@@ -188,19 +184,19 @@ void LineDisplay::displayObject() {
 }
 
 
-BoxDisplay::BoxDisplay(vector<PlaneDisplay*> &p) : GroupPlaneDisplay(p)  {
+BoxDisplay::BoxDisplay(std::vector<PlaneDisplay*> &p) : GroupPlaneDisplay(p)  {
   //planes = p;
 }
 
-SDisplay* BoxDisplay::readFromFile(string &filename) {
-  ifstream input;
+SDisplay* BoxDisplay::readFromFile(std::string &filename) {
+  std::ifstream input;
   input.open(filename.c_str());
-  vector<PlaneDisplay*> planes;
+  std::vector<PlaneDisplay*> planes;
   if(input.good()) {
     double minx, maxx, miny, maxy, minz, maxz;
     int end = filename.find_last_of('/');
-    string dir = filename.substr(0, end);
-    string tmp;
+    std::string dir = filename.substr(0, end);
+    std::string tmp;
     input >> minx;
     input >> maxx;
     input >> miny;
@@ -214,7 +210,7 @@ SDisplay* BoxDisplay::readFromFile(string &filename) {
         for(int i = 0; i < 3; i++) {
           color[i] = rand()/((double)RAND_MAX);
         }
-        vector<float*> points;
+        std::vector<float*> points;
         float *p1 = new float[3];
         float *p2 = new float[3];
         float *p3 = new float[3];
@@ -346,7 +342,7 @@ void BoxDisplay::displayObject() {
 }
 
 
-GroupPlaneDisplay::GroupPlaneDisplay(vector<PlaneDisplay*> &p) {
+GroupPlaneDisplay::GroupPlaneDisplay(std::vector<PlaneDisplay*> &p) {
   planes = p;
 }
 
@@ -356,14 +352,14 @@ void GroupPlaneDisplay::displayObject() {
   }
 }
 
-SDisplay* GroupPlaneDisplay::readFromFile(string &filename) {
-  ifstream input;
+SDisplay* GroupPlaneDisplay::readFromFile(std::string &filename) {
+  std::ifstream input;
   input.open(filename.c_str());
-  vector<PlaneDisplay*> planes;
+  std::vector<PlaneDisplay*> planes;
   if(input.good()) {
     int end = filename.find_last_of('/');
-    string dir = filename.substr(0, end);
-    string tmp;
+    std::string dir = filename.substr(0, end);
+    std::string tmp;
     input >> tmp;
     if(dir.length() != 0) dir = dir + "/"; 
     try {
@@ -371,7 +367,7 @@ SDisplay* GroupPlaneDisplay::readFromFile(string &filename) {
       while(input.good()) {
         int planeNr;
         input >> planeNr;
-        string planename = dir + "plane" + to_string(planeNr, 3) + ".3d";
+        std::string planename = dir + "plane" + to_string(planeNr, 3) + ".3d";
         float * color = new float[3];
         for(int i = 0; i < 3; i++) {
           input >> color[i];
@@ -382,7 +378,7 @@ SDisplay* GroupPlaneDisplay::readFromFile(string &filename) {
       while(input.good()) {
         int planeNr;
         input >> planeNr;
-        string planename = dir + "/plane" + to_string(planeNr, 3) + ".3d";
+        std::string planename = dir + "/plane" + to_string(planeNr, 3) + ".3d";
         float * color = new float[3];
         for(int i = 0; i < 3; i++) {
           color[i] = rand()/((double)RAND_MAX);
@@ -398,16 +394,16 @@ SDisplay* GroupPlaneDisplay::readFromFile(string &filename) {
   
 }
 
-PlaneDisplay::PlaneDisplay(vector<float*> &p, float* c) {
+PlaneDisplay::PlaneDisplay(std::vector<float*> &p, float* c) {
   points = p;
   color = c;
 }
 
-SDisplay * PlaneDisplay::readFromFile(string &filename, float* color) {
-  ifstream input;
+SDisplay * PlaneDisplay::readFromFile(std::string &filename, float* color) {
+  std::ifstream input;
   input.open(filename.c_str());
 
-  vector<float*> points;
+  std::vector<float*> points;
   while (input.good()) {
     try {
       float *p = new float[3];
@@ -431,7 +427,7 @@ void PlaneDisplay::displayObject() {
   glColor4d(color[0], color[1], color[2], 0.5);
   glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
   glBegin(GL_POLYGON);
-  for(vector<float*>::iterator point = (points).begin();
+  for(std::vector<float*>::iterator point = (points).begin();
     point != (points).end(); point++) {
     glVertex3f((*point)[0], (*point)[1], (*point)[2]);
   }

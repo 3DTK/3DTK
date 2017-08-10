@@ -93,8 +93,8 @@ public:
     
     for(size_t i = 1; i < n; i++) {
       for (int j = 0; j < 3; j++) {
-        mins[j] = min(mins[j], point(pts, indices[i])[j]);
-        maxs[j] = max(maxs[j], point(pts, indices[i])[j]);
+        mins[j] = std::min(mins[j], point(pts, indices[i])[j]);
+        maxs[j] = std::max(maxs[j], point(pts, indices[i])[j]);
         centroid[j] += point(pts, indices[i])[j];
       }
     }
@@ -142,7 +142,7 @@ public:
     }
 
     // Put points that were measured very closely together in the same bucket
-    if ( fabs(max(max(node.dx,node.dy),node.dz)) < 0.01 ) {
+    if ( fabs(std::max(std::max(node.dx,node.dy),node.dz)) < 0.01 ) {
       npts = n;
       leaf.p = new AccessorData[n];
       // fill leaf index array with indices
@@ -267,7 +267,7 @@ protected:
 
     // Quick check of whether to abort  
     double approx_dist_bbox =
-	 max(max(fabs(params[threadNum].p[0]-node.center[0])-node.dx,
+	 std::max(std::max(fabs(params[threadNum].p[0]-node.center[0])-node.dx,
 		    fabs(params[threadNum].p[1]-node.center[1])-node.dy),
 		fabs(params[threadNum].p[2]-node.center[2])-node.dz);
     if (approx_dist_bbox >= 0 &&
@@ -512,7 +512,7 @@ protected:
 
     // Quick check of whether to abort
     double approx_dist_bbox =
-	 max(max(fabs(params[threadNum].p[0]-node.center[0])-node.dx,
+	 std::max(std::max(fabs(params[threadNum].p[0]-node.center[0])-node.dx,
 		    fabs(params[threadNum].p[1]-node.center[1])-node.dy),
 		fabs(params[threadNum].p[2]-node.center[2])-node.dz);
     if (approx_dist_bbox >= 0 &&
@@ -567,7 +567,7 @@ protected:
     if (params[threadNum].closest_neighbors[kN] != 0) {
         // Quick check of whether to abort  
         double approx_dist_bbox
-		= max(max(fabs(params[threadNum].p[0]-node.center[0])-node.dx,
+		= std::max(std::max(fabs(params[threadNum].p[0]-node.center[0])-node.dx,
 				fabs(params[threadNum].p[1]-node.center[1])-node.dy),
 			 fabs(params[threadNum].p[2]-node.center[2])-node.dz);
         if (approx_dist_bbox >= 0 &&
@@ -620,7 +620,7 @@ protected:
     
     // Quick check of whether to abort
     double approx_dist_bbox =
-        max(max(fabs(params[threadNum].segment_center[0]-node.center[0])-node.dx,
+        std::max(std::max(fabs(params[threadNum].segment_center[0]-node.center[0])-node.dx,
                     fabs(params[threadNum].segment_center[1]-node.center[1])-node.dy),
                 fabs(params[threadNum].segment_center[2]-node.center[2])-node.dz);
     if (approx_dist_bbox >= 0 &&
@@ -707,7 +707,7 @@ protected:
     // Quick check of whether to abort (weeds out all nodes that are too far
     // away from the first point)
     double approx_dist_bbox =
-        max(max(fabs(params[threadNum].p[0]-node.center[0])-node.dx,
+        std::max(std::max(fabs(params[threadNum].p[0]-node.center[0])-node.dx,
                     fabs(params[threadNum].p[1]-node.center[1])-node.dy),
                 fabs(params[threadNum].p[2]-node.center[2])-node.dz);
     if (approx_dist_bbox >= 0 &&

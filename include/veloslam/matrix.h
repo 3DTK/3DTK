@@ -12,10 +12,8 @@
 
 #include <vector>
 
-using namespace std;
-
-typedef vector <double> VDOUBLE;
-typedef vector <VDOUBLE> TMatrix;
+typedef std::vector <double> VDOUBLE;
+typedef std::vector <VDOUBLE> TMatrix;
 
 
 class CMatrix  

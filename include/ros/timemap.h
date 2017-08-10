@@ -3,19 +3,12 @@
 
 #include <iomanip>
 #include <vector>
-using std::vector;
 #include <sstream>
 #include <iostream>
-using std::stringstream;
-using std::string;
-using std::cout;
-using std::cerr;
-using std::endl;
 
 #include <ros/ros.h>
 
 #include <map>
-using std::map;
 
 
 class timeMap {
@@ -47,7 +40,7 @@ class timeMapSimple : public timeMap {
     double offset;
 
   public:
-    timeMapSimple(vector<double> *timestamps) : timeMap(timestamps) {
+    timeMapSimple(std::vector<double> *timestamps) : timeMap(timestamps) {
       double riegltime = timestamps[0][0];
       double rost = timestamps[1][0];
 
@@ -71,7 +64,7 @@ class timeMapSimple : public timeMap {
 class timeMapLinear : public timeMapSimple {
   
   public:
-    timeMapLinear(vector<double> *timestamps ) : timeMapSimple(timestamps) {
+    timeMapLinear(std::vector<double> *timestamps ) : timeMapSimple(timestamps) {
 //      double rosstart = timestamps[1][0];
       
       int n = timestamps[0].size();
@@ -105,7 +98,7 @@ class timeMapLinear : public timeMapSimple {
 class timeMapLinearOlsen : public timeMapSimple {
   
   public:
-    timeMapLinearOlsen(vector<double> *timestamps) : timeMapSimple(timestamps) {
+    timeMapLinearOlsen(std::vector<double> *timestamps) : timeMapSimple(timestamps) {
       int n = timestamps[0].size();
 
       double max = timestamps[0][0] - timestamps[1][0];
@@ -132,9 +125,9 @@ class timeMapLinearOlsen : public timeMapSimple {
 class timeMapOlsen : public timeMap {
   double offset;
 
-  vector<double> P;    //riegl
-  vector<double> Q;    //ros
-  vector<double> A;    //offset
+  std::vector<double> P;    //riegl
+  std::vector<double> Q;    //ros
+  std::vector<double> A;    //offset
 
   double maxp, minp;
   double lastp;
@@ -165,7 +158,7 @@ class timeMapOlsen : public timeMap {
 
 
   public:
-    timeMapOlsen(vector<double> *timestamps, double alpha=0.000138888888) : timeMap(timestamps) {
+    timeMapOlsen(std::vector<double> *timestamps, double alpha=0.000138888888) : timeMap(timestamps) {
       offset = 0.0;
       alpha1 = alpha2 = alpha;
 

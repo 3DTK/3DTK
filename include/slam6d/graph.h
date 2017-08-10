@@ -11,11 +11,8 @@
 #define __GRAPH_H__
 
 #include <vector>
-using std::vector;
 #include <string>
-using std::string;
 #include <fstream>
-using std::ostream;
 
 #include <boost/graph/adjacency_list.hpp>
 
@@ -36,7 +33,7 @@ class Graph {
 public: 
 
   Graph();
-  Graph(const string &netfile);
+  Graph(const std::string &netfile);
   Graph(int nrScans, bool loop);
   Graph(double cldist, int loopsize);
   Graph(int nodes, double cldist2, int loopsize);
@@ -51,13 +48,13 @@ public:
   int getStart();
   int getEnd();
 
-  friend ostream& operator<<(ostream& os, Graph* gr);
+  friend std::ostream& operator<<(std::ostream& os, Graph* gr);
   
 private:
   /**
    * The basic network structure 
    */
-  vector <int> from, to;
+  std::vector <int> from, to;
 
   /**
    * The number of scans contained in this Graph

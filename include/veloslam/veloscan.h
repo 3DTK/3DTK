@@ -29,7 +29,7 @@ class Trajectory
   public:
      Trajectory();
   public:
-     vector <Point> path;
+     std::vector <Point> path;
 };
 
 
@@ -50,8 +50,8 @@ public:
   void ExchangePointCloud();
   void ClassifiAllofObject();
 
-  int DumpScan(string filename);
-  int DumpScanRedPoints(string filename);
+  int DumpScan(std::string filename);
+  int DumpScanRedPoints(std::string filename);
   int DeletePoints();
 
   int CalcRadAndTheta();

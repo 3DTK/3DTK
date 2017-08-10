@@ -13,8 +13,6 @@
 #include "fbr_global.h"
 #include "slam6d/icp6Dquat.h"
 
-using namespace std;
-
 namespace fbr{
   /**
    * @class geoRefrencing : geo refrence a scan with selected points.
@@ -32,7 +30,7 @@ namespace fbr{
      * @param localPoints vetor that contains the selected points of the scan with local coordinate
      * @param geoPoints vector that contains the selected points of the scan with world coordinate
      */
-    int findAlign(unsigned int i, unsigned int j, unsigned int k, vector< vector< float > > localPoints, vector< vector< float > > geoPoints);
+    int findAlign(unsigned int i, unsigned int j, unsigned int k, std::vector< std::vector< float > > localPoints, std::vector< std::vector< float > > geoPoints);
     
     
   public:
@@ -43,11 +41,11 @@ namespace fbr{
      * @param localPoints vetor that contains the selected points of the scan with local coordinate
      * @param geoPoints vector that contains the selected points of the scan with world coordinate
      */
-    void findRegistration(vector< vector< float > > localPoints, vector< vector< float > > geoPoints);
+    void findRegistration(std::vector< std::vector< float > > localPoints, std::vector< std::vector< float > > geoPoints);
     
 
     double * getBestAlign();
-    vector<double> getBestAlignVector();
+    std::vector<double> getBestAlignVector();
     unsigned int getMaxInlier();
     void getDescription();
   };

@@ -1,9 +1,7 @@
 #ifndef __PATHGRAPH_H__
 #define __PATHGRAPH_H__
 #include <map>
-using std::map;
 #include <list>
-using std::list;
 #include <climits>
 #include <cstddef>
 
@@ -18,7 +16,7 @@ typedef struct {float x; float y; float z; } PointXYZ;
 struct PGNode{
   PGNode():smallestCost(LONG_MAX){}; 
   PointXY       point;       ///< 2D coordinates of node
-  list<PGNode*> neighbours;  ///< List of neighbours of node
+  std::list<PGNode*> neighbours;  ///< List of neighbours of node
   double smallestCost;       ///< Smallest cost from start (used in AStar)
 };
 
@@ -59,17 +57,17 @@ class PathGraph {
 			*/
 		class Iter{
 			private:
-				map<PGEdge,bool> visitedEdges;         ///< keeps track of visited edges
-				list<PGNode*>::iterator aktNode;       ///< it. to node in nodelist
-				list<PGNode*>::iterator aktNeighbour;  ///< it. to node in aktNode's neighbour list
-				list<PGNode*>::iterator lastNode;      ///< last node in nodelist
-				list<PGNode*>::iterator lastNeighbour; ///< last node in aktNode's neighbour list
+				std::map<PGEdge,bool> visitedEdges;         ///< keeps track of visited edges
+				std::list<PGNode*>::iterator aktNode;       ///< it. to node in nodelist
+				std::list<PGNode*>::iterator aktNeighbour;  ///< it. to node in aktNode's neighbour list
+				std::list<PGNode*>::iterator lastNode;      ///< last node in nodelist
+				std::list<PGNode*>::iterator lastNeighbour; ///< last node in aktNode's neighbour list
 			public:
 				/**
 				 * @param f iterator of first in nodelist
 				 * @param l iterator of last  in nodelist
 				 */
-				Iter(list<PGNode*>::iterator f,list<PGNode*>::iterator l)
+				Iter(std::list<PGNode*>::iterator f,std::list<PGNode*>::iterator l)
 					:aktNode(f),lastNode(l){
 						if(f==l)
 							return;
@@ -192,7 +190,7 @@ class PathGraph {
     bool setEndNode(PointXY p);
     /// resets smallestCost in every node to zero.
 		inline void    clearNodeCosts(){
-			for(list<PGNode*>::iterator i=ivNodeList.begin();i!=ivNodeList.end();i++){
+			for(std::list<PGNode*>::iterator i=ivNodeList.begin();i!=ivNodeList.end();i++){
 				(*i)->smallestCost = LONG_MAX;
 			}
 		}
@@ -216,7 +214,7 @@ class PathGraph {
     /// return an iterator to the first edge
     Iter firstEdge();
   private:
-    list<PGNode*> ivNodeList;   ///< list of all nodes in graph
+    std::list<PGNode*> ivNodeList;   ///< list of all nodes in graph
     PGNode*       ivpStartNode; ///< start node
     PGNode*       ivpEndNode;   ///< end node
 
