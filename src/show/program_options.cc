@@ -80,7 +80,7 @@ void parse_args(int argc, char **argv, dataset_settings& ds, window_settings& ws
       "Use type values for coloring point clouds.")
     ("time,t", bool_switch()) // TODO description
     ("colormap",
-      value(&ds.coloring.colormap)->default_value(Colormap::solid, "solid"),
+      value(&ds.coloring.colormap)->default_value(ShowColormap::solid, "solid"),
       "With which colors to color the points, according to their color value "
       "in a spectrum. Available color maps are: solid, grey, hsv, jet, hot, "
       "rand, shsv, temp.")
@@ -385,22 +385,22 @@ void validate(boost::any& v, const std::vector<std::string>& values,
 }
 
 void validate(boost::any& v, const std::vector<std::string>& values,
-  Colormap* target_type, int)
+  ShowColormap* target_type, int)
 {
   using namespace boost::program_options;
 
   validators::check_first_occurrence(v);
   const std::string& s = validators::get_single_string(values);
 
-  std::map<std::string, Colormap> colormap_values({
-    {"solid", Colormap::solid},
-    {"grey", Colormap::grey},
-    {"hsv", Colormap::hsv},
-    {"jet", Colormap::jet},
-    {"hot", Colormap::hot},
-    {"rand", Colormap::rand},
-    {"shsv", Colormap::shsv},
-    {"temp", Colormap::temp}
+  std::map<std::string, ShowColormap> colormap_values({
+    {"solid", ShowColormap::solid},
+    {"grey", ShowColormap::grey},
+    {"hsv", ShowColormap::hsv},
+    {"jet", ShowColormap::jet},
+    {"hot", ShowColormap::hot},
+    {"rand", ShowColormap::rand},
+    {"shsv", ShowColormap::shsv},
+    {"temp", ShowColormap::temp}
   });
 
   try {
