@@ -18,7 +18,6 @@
 
 
 
-using namespace std;
 using namespace cv;
 using namespace AprilTag;
 

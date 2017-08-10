@@ -57,25 +57,25 @@ public:
 							   double maxdist2,
 							   int threadNum = 0) const;
   
-  virtual vector<Point> fixedRangeSearchAlongDir(double *_p,
+  virtual std::vector<Point> fixedRangeSearchAlongDir(double *_p,
                   double *_dir,
                   double maxdist2,
                   int threadNum = 0) const;
   
-  virtual vector<Point> fixedRangeSearchBetween2Points(double *_p,
+  virtual std::vector<Point> fixedRangeSearchBetween2Points(double *_p,
                   double *_dir,
                   double maxdist2,
                   int threadNum = 0) const;
 
-  virtual vector<Point> kNearestNeighbors(double *_p,
+  virtual std::vector<Point> kNearestNeighbors(double *_p,
 								  int k,
 								  int threadNum = 0) const;
   
-  virtual vector<Point> fixedRangeSearch(double *_p,
+  virtual std::vector<Point> fixedRangeSearch(double *_p,
 								 double sqRad2,
 								 int threadNum = 0) const;
 
-  virtual vector<Point> AABBSearch(double *_p,
+  virtual std::vector<Point> AABBSearch(double *_p,
                                    double* _p0,
                                    int threadNum = 0) const;
 

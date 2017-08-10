@@ -16,11 +16,11 @@
 namespace po = boost::program_options;
 
 
-void createA4File(string pfad){
+void createA4File(std::string pfad){
     //Tag: 33mm x 33 mm
     //Rand: 9mm
     // BxH: 7 x 5 Tags
-    vector<AprilTag3f> apriltags;
+    std::vector<AprilTag3f> apriltags;
     int id = 0;
     for (int i = 0; i < 5; i++) {
         for (int j = 0; j < 7; j++) {
@@ -30,20 +30,20 @@ void createA4File(string pfad){
         }
     }
 
-    fstream f;
-    f.open((pfad + "aprilA4.txt").c_str(), ios::out);
-    f << "#APRIL_2D" << endl;
+    std::fstream f;
+    f.open((pfad + "aprilA4.txt").c_str(), std::ios::out);
+    f << "#APRIL_2D" << std::endl;
     for (AprilTag3f tag : apriltags) {
         f << tag.toString();
     }
     f.close();
 }
 
-void createA3File(string pfad){
+void createA3File(std::string pfad){
     //Tag: 45mm x 45mm
     //Rand: 11mm
     // BxH: 7 x 5 Tags
-    vector<AprilTag3f> apriltags;
+    std::vector<AprilTag3f> apriltags;
     int id = 0;
     for (int i = 0; i < 5; i++) {
         for (int j = 0; j < 7; j++) {
@@ -52,9 +52,9 @@ void createA3File(string pfad){
             id++;
         }
     }
-    fstream f;
-    f.open((pfad + "aprilA3.txt").c_str(), ios::out);
-    f << "#APRIL_2D" << endl;
+    std::fstream f;
+    f.open((pfad + "aprilA3.txt").c_str(), std::ios::out);
+    f << "#APRIL_2D" << std::endl;
     for (AprilTag3f tag : apriltags) {
         f << tag.toString();
     }
@@ -70,7 +70,7 @@ int main(int argc, const char * argv[]) {
     tm *nun;
     Zeitstempel = time(0);
     nun = localtime(&Zeitstempel);
-    stringstream timestream;
+    std::stringstream timestream;
     timestream<< nun->tm_mday <<"_"<< nun->tm_mon+1 << "__" << nun->tm_hour << "_" << nun->tm_min;
 
     Settings settings;
@@ -79,10 +79,10 @@ int main(int argc, const char * argv[]) {
     settings.decimate =1;
     settings.debug = false;
     settings.patternPath = "";
-    string dirpath = "";
-    string dateiendung = "";
-    string xmlFileName = "";
-    string estMatFile = "";
+    std::string dirpath = "";
+    std::string dateiendung = "";
+    std::string xmlFileName = "";
+    std::string estMatFile = "";
     int picCount;
     bool onlydetect = false;
     bool extrinsic = false;
@@ -98,7 +98,7 @@ int main(int argc, const char * argv[]) {
         desc.add_options()
                 ("help,h", "produce help message")
 
-                ("patterntype", po::value<string>(),
+                ("patterntype", po::value<std::string>(),
                  "set Patterntype, default APRILTAG, allowed APRILTAG, CHESSBOARD, CIRCLES_GRID; use FROM_FILES to read point pairs (2d 3d) from file")
 
                 ("board-x", po::value<int>(&bx), "set board size x value")
@@ -125,33 +125,33 @@ int main(int argc, const char * argv[]) {
                 ("refine-pose", po::value<bool>(&settings.refine_pose)->default_value(true),
                  "set AprilTag refine-pose")
 
-                ("tagFamily", po::value<string>(&settings.tagFamily)->default_value("tag36h11"), "set AprilTag TagFamily")
+                ("tagFamily", po::value<std::string>(&settings.tagFamily)->default_value("tag36h11"), "set AprilTag TagFamily")
 
-                ("path-pictures,P", po::value<string>(&dirpath), "set path to pictures; if use FROM_FILES, path to this files")
+                ("path-pictures,P", po::value<std::string>(&dirpath), "set path to pictures; if use FROM_FILES, path to this files")
 
-                ("read-pictures-form-file,F", po::value<string>(&dirpath), "read pictures filename form .txt file")
+                ("read-pictures-form-file,F", po::value<std::string>(&dirpath), "read pictures filename form .txt file")
 
-                ("path-pattern,S", po::value<string>(&settings.patternPath), "set path to file with pattern coordinates")
+                ("path-pattern,S", po::value<std::string>(&settings.patternPath), "set path to file with pattern coordinates")
 
-                ("picturetype,T", po::value<string>(&dateiendung), "default read all files with png, jpeg, jpg, jpe, tif, tiff, ppm, pgm, bpm")
+                ("picturetype,T", po::value<std::string>(&dateiendung), "default read all files with png, jpeg, jpg, jpe, tif, tiff, ppm, pgm, bpm")
 
                 ("output-filename,O",
-                 po::value<string>(&xmlFileName)->default_value("calibration" + timestream.str() + ".xml"),
+                 po::value<std::string>(&xmlFileName)->default_value("calibration" + timestream.str() + ".xml"),
                  "set name for outputfile")
 
-                ("initial-camera-matrix,M", po::value<string>(&estMatFile), "xml-file with initial camera matrix")
+                ("initial-camera-matrix,M", po::value<std::string>(&estMatFile), "xml-file with initial camera matrix")
 
                 ("no-calibration", "only detect tags and create .detections file")
 
                 ("extrinsic,E","only estimate extrinsic")
 
-                ("visualize", po::value<string>(&settings.visualizePath), "output folder for additional debug images");
+                ("visualize", po::value<std::string>(&settings.visualizePath), "output folder for additional debug images");
 
         po::store(po::parse_command_line(argc, argv, desc), vm);
         po::notify(vm);
 
         if (vm.count("help")) {
-            cout << desc << "\n";
+            std::cout << desc << "\n";
             return 1;
         }
         if(vm.count("debug")){
@@ -166,16 +166,16 @@ int main(int argc, const char * argv[]) {
 
         // APRILTAG, CHESSBOARD, CIRCLES_GRID
         if (vm.count("patterntype")) {
-            if(vm["patterntype"].as<string>().compare("APRILTAG") == 0){
+            if(vm["patterntype"].as<std::string>().compare("APRILTAG") == 0){
                 settings.calibrationPattern = Settings::APRILTAG;
-            }else if(vm["patterntype"].as<string>().compare("CHESSBOARD") == 0){
+            }else if(vm["patterntype"].as<std::string>().compare("CHESSBOARD") == 0){
                 settings.calibrationPattern = Settings::CHESSBOARD;
-            }else if(vm["patterntype"].as<string>().compare("CIRCLES_GRID") == 0){
+            }else if(vm["patterntype"].as<std::string>().compare("CIRCLES_GRID") == 0){
                 settings.calibrationPattern = Settings::CIRCLES_GRID;
-            }else if(vm["patterntype"].as<string>().compare("FROM_FILES") == 0){
+            }else if(vm["patterntype"].as<std::string>().compare("FROM_FILES") == 0){
                 settings.calibrationPattern = Settings::FROM_FILES;
             }else{
-                cerr << "patterntype is invalid!, use --help for more information" << endl;
+                std::cerr << "patterntype is invalid!, use --help for more information" << std::endl;
                 return 1;
             }
         }
@@ -194,20 +194,20 @@ int main(int argc, const char * argv[]) {
 
     if(settings.calibrationPattern == Settings::CHESSBOARD){
         if((bx == 0 || by == 0) || settings.squareSize == 0){
-            cout << "for calibration with CHESSBOARD need boardSize != 0 and squareSize != 0 "<< endl;
+            std::cout << "for calibration with CHESSBOARD need boardSize != 0 and squareSize != 0 "<< std::endl;
             return 1;
         }
     }
     if(settings.calibrationPattern == Settings::CIRCLES_GRID){
-        cout << "not implemented" << endl;
+        std::cout << "not implemented" << std::endl;
         return 1;
     }
     if(settings.calibrationPattern == Settings::ASYMMETRIC_CIRCLES_GRID){
-        cout << "not implemented" << endl;
+        std::cout << "not implemented" << std::endl;
         return 1;
     }
     if(settings.calibrationPattern == Settings::APRILTAG && settings.patternPath.length() == 0 && (!onlydetect || extrinsic)){
-        cout << "for calibration with APRILTAGS need pattern file, use --help for more information" <<endl;
+        std::cout << "for calibration with APRILTAGS need pattern file, use --help for more information" <<std::endl;
         return 1;
     }
     if(settings.calibrationPattern != Settings::FROM_FILES) {
@@ -215,76 +215,76 @@ int main(int argc, const char * argv[]) {
         if(vm.count("path-pictures")) {
             dirpath = dirpath + "/";
             // read pictures from path
-            cout << "read pictures: " << endl;
+            std::cout << "read pictures: " << std::endl;
             DIR *dir;
             struct dirent *dirzeiger;
             if ((dir = opendir(dirpath.c_str())) != NULL) {
                 while ((dirzeiger = readdir(dir)) != NULL) {
-                    stringstream pic;
+                    std::stringstream pic;
                     pic << dirpath << (*dirzeiger).d_name;
-                    string picstring = pic.str();
-                    string defaultdendung = "";
+                    std::string picstring = pic.str();
+                    std::string defaultdendung = "";
                     std::transform(picstring.begin(), picstring.end(), picstring.begin(), ::tolower);
-                    size_t found = string::npos;
+                    size_t found = std::string::npos;
                     if (dateiendung.length() != 0) {
                         std::transform(dateiendung.begin(), dateiendung.end(), dateiendung.begin(), ::tolower);
                         found = picstring.find(dateiendung);
                     } else {
                         defaultdendung = ".jpg";
                         found = picstring.find(defaultdendung);
-                        if (found == string::npos) {
+                        if (found == std::string::npos) {
                             defaultdendung = ".jpeg";
                             found = picstring.find(defaultdendung);
                         }
-                        if (found == string::npos) {
+                        if (found == std::string::npos) {
                             defaultdendung = ".jpe";
                             found = picstring.find(defaultdendung);
                         }
-                        if (found == string::npos) {
+                        if (found == std::string::npos) {
                             defaultdendung = ".png";
                             found = picstring.find(defaultdendung);
                         }
-                        if (found == string::npos) {
+                        if (found == std::string::npos) {
                             defaultdendung = ".tiff";
                             found = picstring.find(defaultdendung);
                         }
-                        if (found == string::npos) {
+                        if (found == std::string::npos) {
                             defaultdendung = ".tif";
                             found = picstring.find(defaultdendung);
                         }
-                        if (found == string::npos) {
+                        if (found == std::string::npos) {
                             defaultdendung = ".ppm";
                             found = picstring.find(defaultdendung);
                         }
-                        if (found == string::npos) {
+                        if (found == std::string::npos) {
                             defaultdendung = ".pgm";
                             found = picstring.find(defaultdendung);
                         }
-                        if (found == string::npos) {
+                        if (found == std::string::npos) {
                             defaultdendung = ".bmp";
                             found = picstring.find(defaultdendung);
                         }
                     }
                     size_t endung = picstring.find("detections");
-                    if (found != string::npos && endung == string::npos) {
+                    if (found != std::string::npos && endung == std::string::npos) {
                         settings.picturePath.push_back(pic.str());
-                        cout << pic.str() << endl;
+                        std::cout << pic.str() << std::endl;
                         counter++;
                     }
                 }
-                cout << "\n" << counter << " pictures read" << endl;
+                std::cout << "\n" << counter << " pictures read" << std::endl;
             }
         }else if(vm.count("read-pictures-form-file")){
-            cout << "read pictures from file: " << dirpath << endl;
+            std::cout << "read pictures from file: " << dirpath << std::endl;
             //TODO read pics from file
-            ifstream file;
-            file.open(dirpath.c_str(), ios::in);
-            string line = "";
+            std::ifstream file;
+            file.open(dirpath.c_str(), std::ios::in);
+            std::string line = "";
             while (getline(file, line))
             {
                 //string line = "";
                 //getline(file, line);
-                cout << "picture " << line << endl;
+                std::cout << "picture " << line << std::endl;
                 settings.picturePath.push_back(line);
                 line ="";
                 counter ++;
@@ -292,39 +292,39 @@ int main(int argc, const char * argv[]) {
             file.close();
         }
         if (counter == 0) {
-            cout << "no pictures found! pleas check path, use --help for more information" << endl;
+            std::cout << "no pictures found! pleas check path, use --help for more information" << std::endl;
             return 1;
         }
     }else{
-        cout << "read files: " << endl;
+        std::cout << "read files: " << std::endl;
         DIR *dir;
         dirpath = dirpath + "/";
         struct dirent *dirzeiger;
         int counter = 0;
         if ((dir = opendir(dirpath.c_str())) != NULL) {
             while ((dirzeiger = readdir(dir)) != NULL) {
-                stringstream pic;
+                std::stringstream pic;
                 pic << dirpath << (*dirzeiger).d_name;
-                string picstring = pic.str();
-                string defaultdendung = ".correspondence";
+                std::string picstring = pic.str();
+                std::string defaultdendung = ".correspondence";
                 std::transform(picstring.begin(), picstring.end(), picstring.begin(), ::tolower);
-                size_t found = string::npos;
+                size_t found = std::string::npos;
                 found = picstring.find(defaultdendung);
-                if (found != string::npos) {
+                if (found != std::string::npos) {
                     settings.picturePath.push_back(pic.str());
-                    cout << pic.str() << endl;
+                    std::cout << pic.str() << std::endl;
                     counter++;
                 }
             }
-            cout << "\n" << counter << " files read" << endl;
+            std::cout << "\n" << counter << " files read" << std::endl;
         }
         if(counter == 0){
-            cout << "no files found! pleas check path, use --help for more information" << endl;
+            std::cout << "no files found! pleas check path, use --help for more information" << std::endl;
             return 1;
         }
     }
     if(extrinsic && estMatFile.length()== 0){
-        cout << "for parameter --extrinsic need also --initial-camera-matrix" << endl;
+        std::cout << "for parameter --extrinsic need also --initial-camera-matrix" << std::endl;
         return 1;
     }
     //if(settings.visualize && onlydetect && estMatFile.length()== 0){
@@ -345,13 +345,13 @@ int main(int argc, const char * argv[]) {
         settings.estFromInput = false;
     }
 
-    cout << "start detection" << endl;
+    std::cout << "start detection" << std::endl;
     CalibrationToolbox calTool = CalibrationToolbox(settings);
     if(extrinsic){
-        cout << "start extrinsic estimation" << endl;
+        std::cout << "start extrinsic estimation" << std::endl;
         calTool.computeExtrinsic();
     } else if(!onlydetect) {
-        cout << "start calibration" << endl;
+        std::cout << "start calibration" << std::endl;
         calTool.calibrate();
     }
     if(settings.visualize && (extrinsic || !onlydetect)){

@@ -55,20 +55,12 @@ inline int gettimeofday(struct timeval* tp, void* tzp)
 #endif // __CYGWIN__
 
 #include <algorithm>
-using std::min;
-using std::max;
 #include <cmath>
 #include <sstream>
-using std::stringstream;
 #include <fstream>
-using std::ostream;
-using std::istream;
 #include <iostream>
-using std::cout;
-using std::endl;
 #include <iomanip>
 #include <stdexcept>
-using std::runtime_error;
 
 /**
  * Set bits count
@@ -100,7 +92,7 @@ inline unsigned char _my_popcount_3(unsigned char x) {
 template <class T>
 inline std::string to_string(const T& t, int width)
 {
-  stringstream ss;
+  std::stringstream ss;
   ss << std::setfill('0') << std::setw(width) << t;
   return ss.str();
 }
@@ -115,7 +107,7 @@ inline std::string to_string(const T& t, int width)
 template <class T>
 inline std::string to_string(const T& t)
 {
-  stringstream ss;
+  std::stringstream ss;
   ss << t;
   return ss.str();
 }
@@ -128,11 +120,11 @@ inline std::string to_string(const T& t)
  * @param matrix  4x4 matrix sent to stream
  * @return stream
  */
-inline ostream& operator<<(ostream& os, const double matrix[16])
+inline std::ostream& operator<<(std::ostream& os, const double matrix[16])
 {
   for (int i = 0; i < 16; ++i) {
-    if (!os.good()) throw runtime_error("Cannot write to stream for <<(ostream&, double[16])");
-    if (std::isnan(matrix[i])) throw runtime_error("will not write out NAN value for <<(ostream&, double[16])");
+    if (!os.good()) throw std::runtime_error("Cannot write to stream for <<(std::ostream&, double[16])");
+    if (std::isnan(matrix[i])) throw std::runtime_error("will not write out NAN value for <<(std::ostream&, double[16])");
     os << matrix[i] << " ";
   }
   return os;
@@ -146,7 +138,7 @@ inline ostream& operator<<(ostream& os, const double matrix[16])
  * @param matrix  4x4 matrix sent to stream
  * @return stream
  */
-inline istream& operator>>(istream& is, double matrix[16])
+inline std::istream& operator>>(std::istream& is, double matrix[16])
 {
   // FIXME: do proper error handling
   //        Since we cannot return success or failure in this overloaded
@@ -628,7 +620,7 @@ inline void toPolar(const T *_cartesian, S *polar) {
       theta = 2*M_PI - theta0;
     } else {
       theta = 0;
-      cout << "Error converting cartesian coordinates into polarr" << endl;
+      std::cout << "Error converting cartesian coordinates into polarr" << std::endl;
     }
   }
   polar[0] = phi;
@@ -693,7 +685,7 @@ static inline int M4inv(const T *Min, T *Mout )
 {
   T  mdet = M4det( Min );
   if ( fabs( mdet ) < 0.00000000000005 ) {
-    cout << "Error matrix inverting! " << mdet << endl;
+    std::cout << "Error matrix inverting! " << mdet << std::endl;
     M4identity( Mout );
     return( 0 );
   }

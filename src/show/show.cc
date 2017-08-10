@@ -26,7 +26,7 @@ void signal_segv(int v)
   static bool segfault = false;
   if(!segfault) {
     segfault = true;
-    cout << endl << "Segmentation fault" << endl;
+    std::cout << std::endl << "Segmentation fault" << std::endl;
     deinitShow();
   }
   exit(-1);
@@ -37,7 +37,7 @@ void signal_interrupt(int v)
   static bool segfault = false;
   if(!segfault) {
     segfault = true;
-    cout << endl << "Exiting by interrupt" << endl;
+    std::cout << std::endl << "Exiting by interrupt" << std::endl;
     deinitShow();
   }
   exit(-1);
@@ -71,7 +71,7 @@ int main(int argc, char **argv)
   try {
     parse_args(argc, argv, ds, ws);
   } catch (std::exception& e) {
-    std::cerr << "Error while parsing settings: " << e.what() << endl;
+    std::cerr << "Error while parsing settings: " << e.what() << std::endl;
     exit(1);
   }
 

@@ -21,8 +21,6 @@
 #include "fbr_global.h"
 #include "slam6d/point_type.h"
 
-using namespace std;
-
 namespace fbr{
   /**
    * @class projection
@@ -81,7 +79,7 @@ namespace fbr{
      */
     void recoverPointCloud(const cv::Mat& rangeImage,
                            cv::Mat& reflectanceImage,
-                           vector<cv::Vec4f> &reducedPoints);
+                           std::vector<cv::Vec4f> &reducedPoints);
     /**
      * @breif caclculates the x and y and z of the 3D point from panorama projection
      * @param x - the x of point

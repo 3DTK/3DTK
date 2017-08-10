@@ -19,15 +19,9 @@
 
 #include "slam6d/globals.icc"
 #include <iomanip>
-using std::ios;
-using std::resetiosflags;
-using std::setiosflags;
 #include <cfloat>
 #include <cmath>
 #include <iostream>
-using std::cout;
-using std::cerr;
-using std::endl;
 
 /**
  * computes the rotation matrix consisting
@@ -40,7 +34,7 @@ using std::endl;
  * @param *alignfx The resulting transformation matrix
  * @return Error estimation of the matching (rms)
  */
-double icp6D_QUAT_SCALE::Align(const vector<PtPair>& pairs,
+double icp6D_QUAT_SCALE::Align(const std::vector<PtPair>& pairs,
                                double *alignfx,
                                const double centroid_m[3],
                                const double centroid_d[3])
@@ -88,14 +82,14 @@ double icp6D_QUAT_SCALE::Align(const vector<PtPair>& pairs,
 
   double error = sqrt(sum / n);
   if (!quiet) {
-    cout.setf(ios::basefield);
-    cout << "QUAT SCALE RMS point-to-point error = "
-         << resetiosflags(ios::adjustfield) << setiosflags(ios::internal)
-         << resetiosflags(ios::floatfield) << setiosflags(ios::fixed)
+    std::cout.setf(std::ios::basefield);
+    std::cout << "QUAT SCALE RMS point-to-point error = "
+         << resetiosflags(std::ios::adjustfield) << setiosflags(std::ios::internal)
+         << resetiosflags(std::ios::floatfield) << setiosflags(std::ios::fixed)
          << std::setw(10) << std::setprecision(7)
          << error
          << "  using " << std::setw(6) << (int)pairs.size() << " points"
-         << endl;
+         << std::endl;
   }
 
   double fact = 1 / double(n);

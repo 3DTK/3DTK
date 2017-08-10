@@ -60,23 +60,20 @@
 #include "slam6d/io_utils.h"
 #include "show/display.h"
 
-using std::ifstream;
-using std::exception;
-
 /**
  * Display objects from the loadObj parameter.
  */
-extern vector< ::SDisplay*> displays;
+extern std::vector< ::SDisplay*> displays;
 
 /**
  * the octrees that store the points for each scan
  */
 //Show_BOctTree **octpts;
-extern vector<colordisplay*> octpts;
+extern std::vector<colordisplay*> octpts;
 /**
  * Storing the base directory
  */
-extern string scan_dir;
+extern std::string scan_dir;
 
 /**
  * Storing the ID of the main windows
@@ -227,17 +224,17 @@ extern IOType scanIOtype;
 /**
  * Storing of all transformation (frames for animation) of all scans
  */
-extern vector < vector <double*> > MetaMatrix;
+extern std::vector < std::vector <double*> > MetaMatrix;
 
 /**
  * Storing of AlgoType for all frames
  */
-extern vector < vector <Scan::AlgoType> > MetaAlgoType;
+extern std::vector < std::vector <Scan::AlgoType> > MetaAlgoType;
 
 /**
  * Trajectory loaded from file for visualization
  */
-extern vector<double*> trajectory;
+extern std::vector<double*> trajectory;
 
 /**
  * Window position
@@ -294,12 +291,12 @@ extern int save_animation;
 extern int inter_by_dist;
 
 /** some variables for the camera path **/
-extern vector<PointXY> path_vectorX, path_vectorZ;
-extern vector<PointXY> lookat_vectorX, lookat_vectorZ;
-extern vector<PointXY> ups_vectorX, ups_vectorZ;
-extern vector<Point> cams;
-extern vector<Point> lookats;
-extern vector<Point> ups;
+extern std::vector<PointXY> path_vectorX, path_vectorZ;
+extern std::vector<PointXY> lookat_vectorX, lookat_vectorZ;
+extern std::vector<PointXY> ups_vectorX, ups_vectorZ;
+extern std::vector<Point> cams;
+extern std::vector<Point> lookats;
+extern std::vector<Point> ups;
 
 extern NurbsPath cam_nurbs_path;
 extern char *path_file_name;
@@ -328,7 +325,7 @@ extern PointType pointtype;
 /**
  * Contains the selected points for each scan
  */
-extern set<sfloat *> *selected_points;
+extern std::set<sfloat *> *selected_points;
 /**
  * Select single points?
  */
@@ -364,7 +361,7 @@ void setResetView(int origin);
  * @param end stopping at scan number 'end'
  * @param read a file containing a initial transformation matrix and apply it
  */
-int readFrames(string dir, int start, int end, bool readInitial, IOType &type);
+int readFrames(std::string dir, int start, int end, bool readInitial, IOType &type);
 
 void generateFrames(int start, int end, bool identity);
 

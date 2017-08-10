@@ -140,11 +140,11 @@ public:
   
   // virtual functions from colordisplay
 
-  void selectRayBrushSize(set<T *> &points, int brushsize) {
+  void selectRayBrushSize(std::set<T *> &points, int brushsize) {
     selectRayBS(points, m_tree->getRoot(), m_tree->getCenter(), m_tree->getSize(), brushsize);
   }
   
-  void selectRay(set<T *> &points, int depth = INT_MAX) {
+  void selectRay(std::set<T *> &points, int depth = INT_MAX) {
     selectRay(points, m_tree->getRoot(), m_tree->getCenter(), m_tree->getSize(), depth);
   }
   
@@ -176,7 +176,7 @@ public:
           GLfloat p[3] = {0.0, 0.0000, 0.0000005};
           glPointParameterfvARB(GL_POINT_DISTANCE_ATTENUATION_ARB, p);
           displayOctTreeCPAllCulled(m_tree->getRoot(), m_tree->getCenter(), m_tree->getSize(),
-							 m_tree->getSize() / pow(2, min( (int)(ratio * m_tree->getMaxDepth()), (int)(m_tree->getMaxDepth() - 3))));
+							 m_tree->getSize() / pow(2, std::min( (int)(ratio * m_tree->getMaxDepth()), (int)(m_tree->getMaxDepth() - 3))));
           p[0] = 1.0;
           p[2] = 0.0;
           glPointParameterfvARB(GL_POINT_DISTANCE_ATTENUATION_ARB, p);
@@ -313,7 +313,7 @@ protected:
           T *point = &(points[1].v);  // first point
 
           int l = LOD2(ccenter[0], ccenter[1], ccenter[2], size/2.0);  // only a single pixel on screen only paint one point
-          l = max((int)(l*l*ratio), 0);
+          l = std::max((int)(l*l*ratio), 0);
           if (l > 1) {
             if ((int)length > l ) {
               T each = (T)POINTDIM * (T)((T)length/(T)l);
@@ -341,7 +341,7 @@ protected:
           }
         } else { // recurse
             int l = LOD2(ccenter[0], ccenter[1], ccenter[2], size/2.0);  // only a single pixel on screen only paint one point
-            l = max((int)(l*l*ratio), 0);
+            l = std::max((int)(l*l*ratio), 0);
             if (l > 0) {
               displayOctTreeCulledLOD2(ratio, children->node, ccenter, size/2.0);
             }
@@ -376,7 +376,7 @@ protected:
             T *point = &(points[1].v);  // first point
 
             int l = LOD2(ccenter[0], ccenter[1], ccenter[2], size/2.0);  // only a single pixel on screen only paint one point
-            l = max((int)(l*l*ratio), 0);
+            l = std::max((int)(l*l*ratio), 0);
             if (l != 0) {
               if ((int)length > l ) {
                 T each = (T)POINTDIM * (T)((T)length/(T)l);
@@ -475,7 +475,7 @@ protected:
             T *point = &(points[1].v);  // first point
 
             int l = LOD2(ccenter[0], ccenter[1], ccenter[2], size/2.0);  // only a single pixel on screen only paint one point
-          if (targetpts <= 0 ) cout << l << " " << targetpts << endl;
+          if (targetpts <= 0 ) std::cout << l << " " << targetpts << std::endl;
             if ( l <= targetpts) {  // only a single pixel on screen only paint one point
               if(cm) cm->setColor(point);
               glVertex3f( point[0], point[1], point[2]);
@@ -614,7 +614,7 @@ protected:
   // this is because otherwise the following line is overriding selectRay from
   // the base class
   using colordisplay::selectRay;
-  void selectRay(set<T *> &selpoints, const bitoct &node, const T* center, T size, int max_depth, int depth = 0) {
+  void selectRay(std::set<T *> &selpoints, const bitoct &node, const T* center, T size, int max_depth, int depth = 0) {
     if (depth < max_depth &&  !HitBoundingBox(center, size ))return;
 
     T ccenter[3];
@@ -643,7 +643,7 @@ protected:
     }
   }
 
-  void selectRayBS(set<T *> &selpoints, const bitoct &node, const T* center, T size, int brushsize) {
+  void selectRayBS(std::set<T *> &selpoints, const bitoct &node, const T* center, T size, int brushsize) {
     T ccenter[3];
     bitunion<T> *children;
     bitoct::getChildren(node, children);

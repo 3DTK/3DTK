@@ -20,7 +20,6 @@
 #endif
 
 using namespace cv;
-using namespace std;
 
 class Settings
 {
@@ -76,17 +75,17 @@ public:
         goodInput = true;
         if (boardSize.width <= 0 || boardSize.height <= 0)
         {
-            cerr << "Invalid Board size: " << boardSize.width << " " << boardSize.height << endl;
+            std::cerr << "Invalid Board size: " << boardSize.width << " " << boardSize.height << std::endl;
             goodInput = false;
         }
         if (squareSize <= 10e-6)
         {
-            cerr << "Invalid square size " << squareSize << endl;
+            std::cerr << "Invalid square size " << squareSize << std::endl;
             goodInput = false;
         }
         if (nrFrames <= 0)
         {
-            cerr << "Invalid number of frames " << nrFrames << endl;
+            std::cerr << "Invalid number of frames " << nrFrames << std::endl;
             goodInput = false;
         }
 
@@ -96,7 +95,7 @@ public:
         {
             if (input[0] >= '0' && input[0] <= '9')
             {
-                stringstream ss(input);
+                std::stringstream ss(input);
                 ss >> cameraID;
                 inputType = CAMERA;
             }
@@ -119,7 +118,7 @@ public:
         }
         if (inputType == INVALID)
         {
-            cerr << " Inexistent input: " << input;
+            std::cerr << " Inexistent input: " << input;
             goodInput = false;
         }
 
@@ -135,7 +134,7 @@ public:
         if (!patternToUse.compare("ASYMMETRIC_CIRCLES_GRID")) calibrationPattern = ASYMMETRIC_CIRCLES_GRID;
         if (calibrationPattern == NOT_EXISTING)
         {
-            cerr << " Inexistent camera calibration mode: " << patternToUse << endl;
+            std::cerr << " Inexistent camera calibration mode: " << patternToUse << std::endl;
             goodInput = false;
         }
         atImageList = 0;
@@ -156,7 +155,7 @@ public:
         return result;
     }
 
-    static bool readStringList( const string& filename, vector<string>& l )
+    static bool readStringList( const std::string& filename, std::vector<std::string>& l )
     {
         l.clear();
         FileStorage fs(filename, FileStorage::READ);
@@ -167,7 +166,7 @@ public:
             return false;
         FileNodeIterator it = n.begin(), it_end = n.end();
         for( ; it != it_end; ++it )
-            l.push_back((string)*it);
+            l.push_back((std::string)*it);
         return true;
     }
 public:
@@ -182,14 +181,14 @@ public:
     bool calibZeroTangentDist; // Assume zero tangential distortion
     bool calibFixPrincipalPoint;// Fix the principal point at the center
     bool flipVertical;          // Flip the captured images around the horizontal axis
-    string outputFileName;      // The name of the file where to write
+    std::string outputFileName;      // The name of the file where to write
     bool showUndistorsed;       // Show undistorted images after calibration
-    string input;               // The input ->
+    std::string input;               // The input ->
 
 
 
     int cameraID;
-    vector<string> imageList;
+    std::vector<std::string> imageList;
     int atImageList;
     VideoCapture inputCapture;
     InputType inputType;
@@ -205,20 +204,20 @@ public:
     bool refine_edges;
     bool refine_decodes;
     bool refine_pose;
-    string tagFamily;
+    std::string tagFamily;
 
     //pattern.xml Path
-    string patternPath;
+    std::string patternPath;
     //picture path
-    vector<string> picturePath;
+    std::vector<std::string> picturePath;
     PatternType pattern;
     int picturesForDstimateInitial3DCameraMatrix;
-    string estimationXML;
+    std::string estimationXML;
 
     bool visualize;
     std::string visualizePath;
 
-    vector<int> estIDs;
+    std::vector<int> estIDs;
     cv::Mat estCameraMatrix;
     cv::Mat estDistCoeff;
     bool estFromInput;
@@ -226,7 +225,7 @@ public:
 
 
 private:
-    string patternToUse;
+    std::string patternToUse;
 
 
 };

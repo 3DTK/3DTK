@@ -9,8 +9,6 @@
 
 #include "shapes/convexplane.h"
 #include "slam6d/globals.icc"
-using std::string;
-using std::ofstream;
 
 /**
   * Checks the position of a point with respect to the line given by two points.
@@ -49,10 +47,10 @@ bool ConvexPlane::furtherleft(double * start, double * point, double * end) {
   * 3. Stop when all remaining points are to the right of the line from the last
   * point to the starting point.
   */
-void ConvexPlane::JarvisMarchConvexHull(list<double*> &points, vector<double*> &convex_hull) {
+void ConvexPlane::JarvisMarchConvexHull(std::list<double*> &points, std::vector<double*> &convex_hull) {
   //pointOnHull = leftmost point in S
-  list<double*>::iterator itr = points.begin();
-  list<double*>::iterator end = itr;
+  std::list<double*>::iterator itr = points.begin();
+  std::list<double*>::iterator end = itr;
   while(itr != points.end()) {
     if((*end)[0] > (*itr)[0]) {
       end = itr;
@@ -104,7 +102,7 @@ void ConvexPlane::JarvisMarchConvexHull(list<double*> &points, vector<double*> &
   * vector of points that form the convex hull of the plane.
   */
 ConvexPlane::ConvexPlane(double _n[3], double _rho, char _direction,
-vector<double*> _convex_hull) {
+std::vector<double*> _convex_hull) {
 
   for(int i = 0; i < 3; i++) {
     n[i] = _n[i];
@@ -141,7 +139,7 @@ ConvexPlane::ConvexPlane(double plane[4]) {
 /** 
   * Constructor of a convex plane given several partial planes
   */
-ConvexPlane::ConvexPlane(vector<ConvexPlane*> &partialplanes) {
+ConvexPlane::ConvexPlane(std::vector<ConvexPlane*> &partialplanes) {
   int size = partialplanes.size();
   for(int i = 0; i < size; i++) {
     for(int j = 0; j < 3; j++) {
@@ -159,7 +157,7 @@ ConvexPlane::ConvexPlane(vector<ConvexPlane*> &partialplanes) {
   * Constructor of a convex plane given the normal vector and distance of the
   * plane and a vector of points that lie on the plane.
   */
-ConvexPlane::ConvexPlane(double plane[4], vector<Point> &points ) {
+ConvexPlane::ConvexPlane(double plane[4], std::vector<Point> &points ) {
 
   for(int i = 0; i < 3; i++) {
     n[i] = plane[i];
@@ -179,9 +177,9 @@ ConvexPlane::ConvexPlane(double plane[4], vector<Point> &points ) {
     direction = 'z';
   }
 
-  list<double *> point_list;
+  std::list<double *> point_list;
 
-  for (vector<Point>::iterator it = points.begin(); it != points.end(); it++) {
+  for (std::vector<Point>::iterator it = points.begin(); it != points.end(); it++) {
     Point p = (*it);
     double * point = new double[2];
     switch(direction) {
@@ -194,7 +192,7 @@ ConvexPlane::ConvexPlane(double plane[4], vector<Point> &points ) {
       case 'z': point[0] = p.x;
                 point[1] = p.y;
                 break;
-      default: throw runtime_error("default branch taken");
+      default: throw std::runtime_error("default branch taken");
     }
     point_list.push_back(point);
   }
@@ -204,7 +202,7 @@ ConvexPlane::ConvexPlane(double plane[4], vector<Point> &points ) {
   }
 }
 ConvexPlane::~ConvexPlane() {
-  for(vector<double* >::iterator it = convex_hull.begin();
+  for(std::vector<double* >::iterator it = convex_hull.begin();
     it != convex_hull.end(); it++) {
     double* tmp = (*it);
     delete[] tmp;
@@ -216,15 +214,15 @@ ConvexPlane::~ConvexPlane() {
   * the three digit representation of the counter.
   * This function writes the center and the normal of the plane to the file.
   */
-void ConvexPlane::writeNormal(string path, int counter) {
-  ofstream out;
+void ConvexPlane::writeNormal(std::string path, int counter) {
+  std::ofstream out;
   out.open(path.c_str());
   double center[3];
   for(int i = 0; i < 3; i++) {
     center[i] = 0.0;
   }
   
-  for(vector<double*>::iterator it = convex_hull.begin();
+  for(std::vector<double*>::iterator it = convex_hull.begin();
       it != convex_hull.end();
       it++) {
 
@@ -245,7 +243,7 @@ void ConvexPlane::writeNormal(string path, int counter) {
         center[1] += (*it)[1];
         center[2] += (rho - (*it)[0] * n[0] - (*it)[1] * n[1]) / n[2];
         break;
-      default: throw runtime_error("default branch taken");
+      default: throw std::runtime_error("default branch taken");
     }
 
   }
@@ -255,8 +253,8 @@ void ConvexPlane::writeNormal(string path, int counter) {
   }
 
 
-  out << n[0] << " " << n[1] << " " << n[2] << endl;
-  out << center[0] << " " << center[1] << " " << center[2] << endl;
+  out << n[0] << " " << n[1] << " " << n[2] << std::endl;
+  out << center[0] << " " << center[1] << " " << center[2] << std::endl;
 
   out.close();
 
@@ -266,12 +264,12 @@ void ConvexPlane::writeNormal(string path, int counter) {
   * Writes the convex hull of the plane as planeXXX.3d to the directory given in the path.
   * XXX is the three digit representation of the counter. 
   */
-void ConvexPlane::writePlane(string path, int counter) {
+void ConvexPlane::writePlane(std::string path, int counter) {
 
-  ofstream out;
+  std::ofstream out;
   out.open(path.c_str());
   
-  for(vector<double*>::iterator it = convex_hull.begin();
+  for(std::vector<double*>::iterator it = convex_hull.begin();
       it != convex_hull.end();
       it++) {
 
@@ -279,19 +277,19 @@ void ConvexPlane::writePlane(string path, int counter) {
       case 'x': 
         out << (rho - (*it)[0] * n[1] - (*it)[1] * n[2]) / n[0] << " ";
         out << (*it)[0] << " ";
-        out << (*it)[1] << endl;
+        out << (*it)[1] << std::endl;
         break;
       case 'y':
         out << (*it)[0] << " ";
         out << (rho - (*it)[0] * n[0] - (*it)[1] * n[2]) / n[1] << " ";
-        out << (*it)[1] << endl;
+        out << (*it)[1] << std::endl;
         break;
       case 'z': 
         out << (*it)[0] << " ";
         out << (*it)[1] << " ";
-        out << (rho - (*it)[0] * n[0] - (*it)[1] * n[1]) / n[2] << endl;
+        out << (rho - (*it)[0] * n[0] - (*it)[1] * n[1]) / n[2] << std::endl;
         break;
-      default: throw runtime_error("default branch taken");
+      default: throw std::runtime_error("default branch taken");
     }
 
   }
@@ -299,10 +297,10 @@ void ConvexPlane::writePlane(string path, int counter) {
   out.close();
 }
 
-vector<double> ConvexPlane::getConvexHull() {
-    vector<double> hull;
+std::vector<double> ConvexPlane::getConvexHull() {
+    std::vector<double> hull;
 
-    for(vector<double*>::iterator it = convex_hull.begin();
+    for(std::vector<double*>::iterator it = convex_hull.begin();
         it != convex_hull.end();
         it++) {
 
@@ -325,7 +323,7 @@ vector<double> ConvexPlane::getConvexHull() {
           point[1] = (*it)[1];
           point[2] = (rho - (*it)[0] * n[0] - (*it)[1] * n[1]) / n[2];
           break;
-        default: throw runtime_error("default branch taken");
+        default: throw std::runtime_error("default branch taken");
       }
 
       hull.push_back(point[0]);
@@ -342,7 +340,7 @@ void ConvexPlane::getNormal(double* normal, double* origin) {
       center[i] = 0.0;
     }
 
-    for(vector<double*>::iterator it = convex_hull.begin();
+    for(std::vector<double*>::iterator it = convex_hull.begin();
         it != convex_hull.end();
         it++) {
 
@@ -362,7 +360,7 @@ void ConvexPlane::getNormal(double* normal, double* origin) {
           center[1] += (*it)[1];
           center[2] += (rho - (*it)[0] * n[0] - (*it)[1] * n[1]) / n[2];
           break;
-        default: throw runtime_error("default branch taken");
+        default: throw std::runtime_error("default branch taken");
       }
     }
 

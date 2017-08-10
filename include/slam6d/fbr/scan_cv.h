@@ -42,7 +42,7 @@ namespace fbr{
    * @param saveOct
    */
   class scan_cv{
-    string sDir;
+    std::string sDir;
     cv::Mat scan;
     cv::Mat scanColor;
     unsigned int sNumber;
@@ -69,17 +69,17 @@ namespace fbr{
      * @param loadOct
      * @param saveOct
      */
-    scan_cv (string dir, unsigned int number, IOType format, bool scanServer, scanner_type type, bool lOct, bool sOct, bool Reflectance, bool Color, int MaxDist, int MinDist, double _minReflectance, double _maxReflctance);
-    scan_cv (string dir, unsigned int number, IOType format, bool scanServer, scanner_type type, bool lOct, bool sOct, bool Reflectance, bool Color, int MaxDist, int MinDist);
-    scan_cv (string dir, unsigned int number, IOType format, bool scanServer, scanner_type type, bool lOct, bool sOct, bool Reflectance, bool Color);
-    scan_cv (string dir, unsigned int number, IOType format, bool scanServer);
-    scan_cv (string dir, unsigned int number, IOType format);
+    scan_cv (std::string dir, unsigned int number, IOType format, bool scanServer, scanner_type type, bool lOct, bool sOct, bool Reflectance, bool Color, int MaxDist, int MinDist, double _minReflectance, double _maxReflctance);
+    scan_cv (std::string dir, unsigned int number, IOType format, bool scanServer, scanner_type type, bool lOct, bool sOct, bool Reflectance, bool Color, int MaxDist, int MinDist);
+    scan_cv (std::string dir, unsigned int number, IOType format, bool scanServer, scanner_type type, bool lOct, bool sOct, bool Reflectance, bool Color);
+    scan_cv (std::string dir, unsigned int number, IOType format, bool scanServer);
+    scan_cv (std::string dir, unsigned int number, IOType format);
 
     /**
      * @brief read scan file and convert it to open cv Mat
      */
     void convertScanToMat();
-    string getScanDir();
+    std::string getScanDir();
     unsigned int getScanNumber();
     unsigned int getNumberOfPoints();
     double getZMin();

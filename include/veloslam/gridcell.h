@@ -10,9 +10,7 @@
 #include "slam6d/scan.h"
 #include <cstring>
 #include <string>
-using std::string;
 #include <vector>
-using std::vector;
 
 typedef std::vector<char> charv;
 typedef std::vector<charv> charvv;

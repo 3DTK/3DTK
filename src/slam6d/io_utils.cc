@@ -1,7 +1,6 @@
 #include "slam6d/io_utils.h"
 
 #include <fstream>
-using std::ifstream;
 
 /**
  * Parsing of a formats file in the scan directory for default type and scan
@@ -13,12 +12,12 @@ using std::ifstream;
  * @param start index for the first valid scan
  * @param end index for the last valid scan
  */
-void parseFormatFile(string& dir, WriteOnce<IOType>& type, WriteOnce<int>& start, WriteOnce<int>& end)
+void parseFormatFile(std::string& dir, WriteOnce<IOType>& type, WriteOnce<int>& start, WriteOnce<int>& end)
 {
-  ifstream file((dir+"format").c_str());
+  std::ifstream file((dir+"format").c_str());
   if(!file.good()) return;
   
-  string line, key, value, format;
+  std::string line, key, value, format;
   while(getline(file, line)) {
     size_t pos = line.find('=');
     key = trim(line.substr(0, pos - 0));
@@ -28,21 +27,21 @@ void parseFormatFile(string& dir, WriteOnce<IOType>& type, WriteOnce<int>& start
         format = value;
         type = formatname_to_io_type(format.c_str());
       } catch (...) { // runtime_error
-        cerr << "Error while parsing format file: Format '" << format << "' unknown." << endl;
+        std::cerr << "Error while parsing format file: Format '" << format << "' unknown." << std::endl;
         break;
       }
     } else if(key == "start") {
-      stringstream str(value.c_str());
+      std::stringstream str(value.c_str());
       int s;
       str >> s;
       start = s;
     } else if(key == "end") {
-      stringstream str(value.c_str());
+      std::stringstream str(value.c_str());
       int e;
       str >> e;
       end = e;
     } else {
-      cerr << "Error while parsing format file: Unknown key '" << key << "'" << endl;
+      std::cerr << "Error while parsing format file: Unknown key '" << key << "'" << std::endl;
       break;
     }
   }

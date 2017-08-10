@@ -13,13 +13,9 @@
 #include <float.h>
 
 #include <vector>
-using std::vector;
 #include <deque>
-using std::deque;
 #include <set>
-using std::set;
 #include <list>
-using std::list;
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -171,7 +167,7 @@ public:
   compactTree(P * const* pts, int n, double voxelSize, PointType _pointtype = PointType(), ScanColorManager *scm=0 ); 
 
   template <class P>
-  compactTree(vector<P *> &pts, double voxelSize, PointType _pointtype = PointType());
+  compactTree(std::vector<P *> &pts, double voxelSize, PointType _pointtype = PointType());
   
   compactTree(std::string filename, ScanColorManager *scm = 0) {
     alloc = new PackedChunkAllocator;
@@ -188,8 +184,8 @@ public:
 
   virtual ~compactTree();
 
-  inline void GetOctTreeCenter(vector<double*>&c);
-  inline void AllPoints(vector<double *> &vp);
+  inline void GetOctTreeCenter(std::vector<double*>&c);
+  inline void AllPoints(std::vector<double *> &vp);
 
   inline long countNodes();
   inline long countLeaves(); 
@@ -198,7 +194,7 @@ public:
   void draw();
   void displayOctTree(double minsize = FLT_MAX);
   template <class T>
-  void selectRay(vector<T *> &points);
+  void selectRay(std::vector<T *> &points);
   template <class T>
   void selectRay(T * &point);
 
@@ -225,9 +221,9 @@ protected:
   
   Allocator* alloc;
   
-  void AllPoints( cbitoct &node, vector<double*> &vp, double center[3], double size);
+  void AllPoints( cbitoct &node, std::vector<double*> &vp, double center[3], double size);
 
-  void GetOctTreeCenter(vector<double*>&c, cbitoct &node, double *center, double size);
+  void GetOctTreeCenter(std::vector<double*>&c, cbitoct &node, double *center, double size);
   
   long countNodes(cbitoct &node); 
 
@@ -236,10 +232,10 @@ protected:
   void deletetNodes(cbitoct &node);
 
   template <class P>
-  bool branch(union cbitunion<tshort> &node, vector<P*> &splitPoints, double _center[3], double _size);
+  bool branch(union cbitunion<tshort> &node, std::vector<P*> &splitPoints, double _center[3], double _size);
 
   template <class P>
-  inline void countPointsAndQueue(vector<P*> &i_points, double center[8][3], double size, cbitoct &parent, double *pcenter);
+  inline void countPointsAndQueue(std::vector<P*> &i_points, double center[8][3], double size, cbitoct &parent, double *pcenter);
 
   template <class P>
   inline void countPointsAndQueue(P * const* pts, int n,  double center[8][3], double size, cbitoct &parent, double *pcenter);
@@ -319,7 +315,7 @@ inline unsigned char childIndex(const double *center, const P *point);
 };
   
 template <class P>
-  compactTree::compactTree(vector<P *> &pts, double voxelSize, PointType _pointtype) {
+  compactTree::compactTree(std::vector<P *> &pts, double voxelSize, PointType _pointtype) {
     alloc = new PackedChunkAllocator;
     
     this->voxelSize = voxelSize;
@@ -337,15 +333,15 @@ template <class P>
 
     for (unsigned int i = 0; i < POINTDIM; i++) { 
       for (unsigned int j = 1; j < pts.size(); j++) {
-        mins[i] = min(mins[i], pts[j][i]);
-        maxs[i] = max(maxs[i], pts[j][i]);
+        mins[i] = std::min(mins[i], pts[j][i]);
+        maxs[i] = std::max(maxs[i], pts[j][i]);
       }
     }
 
     center[0] = 0.5 * (mins[0] + maxs[0]);
     center[1] = 0.5 * (mins[1] + maxs[1]);
     center[2] = 0.5 * (mins[2] + maxs[2]);
-    size = max(max(0.5 * (maxs[0] - mins[0]), 0.5 * (maxs[1] - mins[1])), 0.5 * (maxs[2] - mins[2]));
+    size = std::max(std::max(0.5 * (maxs[0] - mins[0]), 0.5 * (maxs[1] - mins[1])), 0.5 * (maxs[2] - mins[2]));
 
     // calculate new buckets
     double newcenter[8][3];
@@ -363,7 +359,7 @@ template <class P>
   }
 
 template <class P>
-  bool compactTree::branch( union cbitunion<tshort> &node, vector<P*> &splitPoints, double _center[3], double _size) {
+  bool compactTree::branch( union cbitunion<tshort> &node, std::vector<P*> &splitPoints, double _center[3], double _size) {
     // if bucket is too small stop building tree
     // -----------------------------------------
     if ((_size <= voxelSize)) {
@@ -372,7 +368,7 @@ template <class P>
       node.linkPoints(points, splitPoints.size());
       int i = 0;
       double distance;
-      for (typename vector<P *>::iterator itr = splitPoints.begin(); 
+      for (typename std::vector<P *>::iterator itr = splitPoints.begin(); 
           itr != splitPoints.end(); itr++) {
         for (unsigned int iterator = 0; iterator < 3; iterator++) {
           distance = (*itr)[iterator] - _center[iterator];
@@ -407,16 +403,16 @@ template <class P>
   }
   
 template <class P>
-  void compactTree::countPointsAndQueue(vector<P*> &i_points, double center[8][3], double size, cbitoct &parent, double *pcenter) {
-    vector<P*> points[8];
+  void compactTree::countPointsAndQueue(std::vector<P*> &i_points, double center[8][3], double size, cbitoct &parent, double *pcenter) {
+    std::vector<P*> points[8];
     int n_children = 0;
     
-    for (typename vector<P *>::iterator itr = i_points.begin(); itr != i_points.end(); itr++) {
+    for (typename std::vector<P *>::iterator itr = i_points.begin(); itr != i_points.end(); itr++) {
       points[childIndex<P>(pcenter, *itr)].push_back( *itr );
     }
 
     i_points.clear();
-    vector<P*>().swap(i_points);
+    std::vector<P*>().swap(i_points);
     for (int j = 0; j < 8; j++) {
       if (!points[j].empty()) {
         parent.valid = ( 1 << j ) | parent.valid;
@@ -434,7 +430,7 @@ template <class P>
           parent.leaf = ( 1 << j ) | parent.leaf;  // remember this is a leaf
         }
         points[j].clear();
-        vector<P*>().swap(points[j]);
+        std::vector<P*>().swap(points[j]);
         ++count;
       }
     }
@@ -442,7 +438,7 @@ template <class P>
 
   template <class P>
   void compactTree::countPointsAndQueue(P * const* pts, int n,  double center[8][3], double size, cbitoct &parent, double *pcenter) {
-    vector<const P*> points[8];
+    std::vector<const P*> points[8];
     int n_children = 0;
     
     for (int i = 0; i < n; i++) {
@@ -466,7 +462,7 @@ template <class P>
           parent.leaf = ( 1 << j ) | parent.leaf;  // remember this is a leaf
         }
         points[j].clear();
-        vector<const P*>().swap(points[j]);
+        std::vector<const P*>().swap(points[j]);
         ++count;
       }
     }
@@ -503,15 +499,15 @@ template <class P>
 
     for (unsigned int i = 0; i < POINTDIM; i++) { 
       for (int j = 1; j < n; j++) {
-        mins[i] = min(mins[i], (double)pts[j][i]);
-        maxs[i] = max(maxs[i], (double)pts[j][i]);
+        mins[i] = std::min(mins[i], (double)pts[j][i]);
+        maxs[i] = std::max(maxs[i], (double)pts[j][i]);
       }
     }
 
     center[0] = 0.5 * (mins[0] + maxs[0]);
     center[1] = 0.5 * (mins[1] + maxs[1]);
     center[2] = 0.5 * (mins[2] + maxs[2]);
-    size = max(max(0.5 * (maxs[0] - mins[0]), 0.5 * (maxs[1] - mins[1])), 0.5 * (maxs[2] - mins[2]));
+    size = std::max(std::max(0.5 * (maxs[0] - mins[0]), 0.5 * (maxs[1] - mins[1])), 0.5 * (maxs[2] - mins[2]));
 
     size += 1.0; // some buffer for numerical problems
 
@@ -524,8 +520,8 @@ template <class P>
     //precision = vs/ (1 << 15); //pow(2, 15);
     precision = vs / TSHORT_MAXP1;
     // vs is the real voxelsize
-    cout << "real voxelsize is " << vs << endl;
-    cout << "precision is now " << precision << endl;
+    std::cout << "real voxelsize is " << vs << std::endl;
+    std::cout << "precision is now " << precision << std::endl;
 
     // calculate new buckets
     double newcenter[8][3];

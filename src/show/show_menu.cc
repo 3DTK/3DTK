@@ -500,25 +500,25 @@ void clearSelection(int dummy) {
  */
 void loadSelection(int dummy){
     // input file stream
-    ifstream selectionfile;
+    std::ifstream selectionfile;
 
     // open the input file
-    selectionfile.open(selection_file_name, ios::in);
+    selectionfile.open(selection_file_name, std::ios::in);
 
     if (!selectionfile.good()){
-        cerr << "Error loading selection file" << selection_file_name << "!" << endl;
+        std::cerr << "Error loading selection file" << selection_file_name << "!" << std::endl;
         return;
     }
-    string line;
+    std::string line;
     unsigned int currScanNr;
 	bool scanIndexLoaded = false;
-    vector<sfloat*> allPtsOfScanInFile;
+    std::vector<sfloat*> allPtsOfScanInFile;
     while (std::getline(selectionfile, line)){
         // comment line? "(# points from scan nr i)"
         if (line.at(0) != '#'){
             // data line without previous comment line indicating scan index
             if (!scanIndexLoaded){
-                cerr << "Invalid format for selection file " << selection_file_name << "!" << endl;
+                std::cerr << "Invalid format for selection file " << selection_file_name << "!" << std::endl;
                 return;
             }
             std::istringstream iss(line);
@@ -535,11 +535,11 @@ void loadSelection(int dummy){
         else {
             if (scanIndexLoaded){ // points for scan index have been loaded
                 if (currScanNr >= octpts.size()){ // data for a scan index larger than amount of currently loaded scans has been loaded
-                    cerr << "Selection file" << selection_file_name << " does not correspond to currently loaded scans!" << endl;
+                    std::cerr << "Selection file" << selection_file_name << " does not correspond to currently loaded scans!" << std::endl;
                     return;
                 }
                 // at least one scan has already been parsed - search corresponding points in scan data now
-                vector<sfloat*> allPtsOfScan;
+                std::vector<sfloat*> allPtsOfScan;
                 unsigned int foundCorrespondences = 0;
                 dynamic_cast<Show_BOctTree<sfloat>*>(octpts[currScanNr])->getTree()->AllPoints(allPtsOfScan);
                 for (size_t i = 0; i < allPtsOfScan.size(); i++){
@@ -564,7 +564,7 @@ void loadSelection(int dummy){
                     }
                 } // end for
                 if (allPtsOfScanInFile.size() != foundCorrespondences){
-                    cout << "Not all parsed points had correspondences in loaded scans!" << endl;
+                    std::cout << "Not all parsed points had correspondences in loaded scans!" << std::endl;
                 }
 
                 // delete loaded points
@@ -575,7 +575,7 @@ void loadSelection(int dummy){
             }
 
             // update scan index indicated by comment line
-            string currScanIdxStr = line.substr(line.rfind(' ') + 1, line.size() - 1);
+            std::string currScanIdxStr = line.substr(line.rfind(' ') + 1, line.size() - 1);
             std::istringstream issNr(currScanIdxStr);
             issNr >> currScanNr;
 			scanIndexLoaded = true;
@@ -585,11 +585,11 @@ void loadSelection(int dummy){
     // search for corresponding points for last scan index as well
     if (scanIndexLoaded){ // points for scan index have been loaded
         if (currScanNr >= octpts.size()){ // data for a scan index larger than amount of currently loaded scans has been loaded
-            cerr << "Selection file" << selection_file_name << " does not correspond to currently loaded scans!" << endl;
+            std::cerr << "Selection file" << selection_file_name << " does not correspond to currently loaded scans!" << std::endl;
             return;
         }
         // at least one scan has already been parsed - search corresponding points in scan data now
-        vector<sfloat*> allPtsOfScan;
+        std::vector<sfloat*> allPtsOfScan;
         unsigned int foundCorrespondences = 0;
         dynamic_cast<Show_BOctTree<sfloat>*>(octpts[currScanNr])->getTree()->AllPoints(allPtsOfScan);
         for (size_t i = 0; i < allPtsOfScan.size(); i++){
@@ -614,7 +614,7 @@ void loadSelection(int dummy){
             }
         } // end for
         if (allPtsOfScanInFile.size() != foundCorrespondences){
-            cout << "Not all parsed points had correspondences in loaded scans!" << endl;
+            std::cout << "Not all parsed points had correspondences in loaded scans!" << std::endl;
         }
     }
 

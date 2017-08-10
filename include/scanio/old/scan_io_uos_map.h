@@ -9,9 +9,7 @@
 #define __SCAN_IO_UOS_MAP_H__
 
 #include <string>
-using std::string;
 #include <vector>
-using std::vector;
 
 #include "scan_io.h"
 

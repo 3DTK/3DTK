@@ -239,13 +239,13 @@ void drawRobotPath(int dummy);
   * Nurbs path. There will be an equal number of intermediate positions between
   * neighboring cameras.
   */
-void calcInterpolatedCameras(vector<PointXY> vec1, vector<PointXY> vec2);
+void calcInterpolatedCameras(std::vector<PointXY> vec1, std::vector<PointXY> vec2);
 
 /**
   * Calculates the number of interpolation points for the camera path based on
   * the length of the path
   */
-int calcNoOfPoints(vector<PointXY> vec1, vector<PointXY> vec2);
+int calcNoOfPoints(std::vector<PointXY> vec1, std::vector<PointXY> vec2);
 
 /**
  * This function handles the the keyboard input
@@ -270,6 +270,6 @@ void changePointMode(int dummy);
 
 void callCameraUpdate(int dummy);
 
-void calcPointSequence(vector<int> &sequence, int frameNr);
+void calcPointSequence(std::vector<int> &sequence, int frameNr);
 
 #endif

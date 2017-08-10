@@ -14,18 +14,11 @@
  */
 
 #include <string>
-using std::string;
 #include <iostream>
-using std::cout;
-using std::cerr;
-using std::endl;
 #include <fstream>
-using std::ifstream;
 #include <stdexcept>
-using std::exception;
 
 #include <vector>
-using std::vector;
 #include <map>
 
 #include "slam6d/point.h"
@@ -52,80 +45,80 @@ using std::vector;
 void usage(char* prog)
 {
 #ifndef _MSC_VER
-  const string bold("\033[1m");
-  const string normal("\033[m");
+  const std::string bold("\033[1m");
+  const std::string normal("\033[m");
 #else
-  const string bold("");
-  const string normal("");
+  const std::string bold("");
+  const std::string normal("");
 #endif
-  cout << endl
-	  << bold << "USAGE " << normal << endl
-	  << "   " << prog << " [options] directory" << endl << endl;
-  cout << bold << "OPTIONS" << normal << endl
-	  << endl
-	  << bold << "  -e" << normal << " NR, " << bold << "--end=" << normal << "NR" << endl
-	  << "         end after scan NR" << endl
-	  << endl
-	  << bold << "  -f" << normal << " F, " << bold << "--format=" << normal << "F" << endl
-	  << "         using shared library F for input" << endl
-	  << "         (chose F from {uos, uos_map, uos_rgb, uos_frames, uos_map_frames, old, rts, rts_map, ifp, riegl_txt, riegl_rgb, riegl_bin, zahn, ply})" << endl
-	  << endl
-	  << bold << "  -m" << normal << " NR, " << bold << "--max=" << normal << "NR" << endl
-	  << "         neglegt all data points with a distance larger than NR 'units'" << endl
-	  << endl
-	  << bold << "  -M" << normal << " NR, " << bold << "--min=" << normal << "NR" << endl
-	  << "         neglegt all data points with a distance smaller than NR 'units'" << endl
-	  << endl
-	  << bold << "  -O" << normal << " NR (optional), " << bold << "--octree=" << normal << "NR (optional)" << endl
-	  << "         use randomized octree based point reduction (pts per voxel=<NR>)" << endl
-	  << "         requires -r or --reduce" << endl
-	  << endl
-	  << bold << "  -p, --trustpose" << normal << endl
-	  << "         Trust the pose file, do not use the information stored in the .frames." << endl
-	  << "         (just for testing purposes.)" << endl
-	  << endl
-	  << endl
-	  << bold << "  -r" << normal << " NR, " << bold << "--reduce=" << normal << "NR" << endl
-	  << "         turns on octree based point reduction (voxel size=<NR>)" << endl
-	  << endl
+  std::cout << std::endl
+	  << bold << "USAGE " << normal << std::endl
+	  << "   " << prog << " [options] directory" << std::endl << std::endl;
+  std::cout << bold << "OPTIONS" << normal << std::endl
+	  << std::endl
+	  << bold << "  -e" << normal << " NR, " << bold << "--end=" << normal << "NR" << std::endl
+	  << "         end after scan NR" << std::endl
+	  << std::endl
+	  << bold << "  -f" << normal << " F, " << bold << "--format=" << normal << "F" << std::endl
+	  << "         using shared library F for input" << std::endl
+	  << "         (chose F from {uos, uos_map, uos_rgb, uos_frames, uos_map_frames, old, rts, rts_map, ifp, riegl_txt, riegl_rgb, riegl_bin, zahn, ply})" << std::endl
+	  << std::endl
+	  << bold << "  -m" << normal << " NR, " << bold << "--max=" << normal << "NR" << std::endl
+	  << "         neglegt all data points with a distance larger than NR 'units'" << std::endl
+	  << std::endl
+	  << bold << "  -M" << normal << " NR, " << bold << "--min=" << normal << "NR" << std::endl
+	  << "         neglegt all data points with a distance smaller than NR 'units'" << std::endl
+	  << std::endl
+	  << bold << "  -O" << normal << " NR (optional), " << bold << "--octree=" << normal << "NR (optional)" << std::endl
+	  << "         use randomized octree based point reduction (pts per voxel=<NR>)" << std::endl
+	  << "         requires -r or --reduce" << std::endl
+	  << std::endl
+	  << bold << "  -p, --trustpose" << normal << std::endl
+	  << "         Trust the pose file, do not use the information stored in the .frames." << std::endl
+	  << "         (just for testing purposes.)" << std::endl
+	  << std::endl
+	  << std::endl
+	  << bold << "  -r" << normal << " NR, " << bold << "--reduce=" << normal << "NR" << std::endl
+	  << "         turns on octree based point reduction (voxel size=<NR>)" << std::endl
+	  << std::endl
     /*
-	 << bold << "  -R" << normal << " NR, " << bold << "--random=" << normal << "NR" << endl
-      << "         turns on randomized reduction, using about every <NR>-th point only" << endl
-      << endl
+	 << bold << "  -R" << normal << " NR, " << bold << "--random=" << normal << "NR" << std::endl
+      << "         turns on randomized reduction, using about every <NR>-th point only" << std::endl
+      << std::endl
     */
-	  << bold << "  -s" << normal << " NR, " << bold << "--start=" << normal << "NR" << endl
-	  << "         start at scan NR (i.e., neglects the first NR scans)" << endl
-	  << "         [ATTENTION: counting naturally starts with 0]" << endl
-	  << endl
-	  << bold << "  -u" << normal << " STR, " << bold << "--customFilter=" << normal << "STR" << endl
-	  << "         apply custom filter, filter mode and data are specified as semicolon-seperated string:" << endl
-	  << "         STR: '{filterMode};{nrOfParams}[;param1][;param2][...]'" << endl
-	  << "         see filter implementation in pointfilter.cc for more detail." << endl
-	  << endl
-	  << bold << "  -c, --color" << endl << normal
-	  << "         export in color as RGB" << endl
-	  << endl
-	  << bold << "  -R, --reflectance, --reflectivity" << endl << normal
-	  << "         export in reflectance" << endl
-	  << endl
-	  << bold << "  -x, --xyz" << endl << normal
-	  << "         export in xyz format (right handed coordinate system in m)" << endl
-	  << endl
-	  << bold << "  -y" << normal << " NR, " << bold << "--scale=" << normal << "NR" << endl
-	  << "         scale factor for export in XYZ format (default value is 0.01, so output will be in [m])" << endl
-	  << bold << "  -H, --highprecision" << endl << normal
-	  << "         export points with full double precision" << endl
-	  << endl
-	  << bold << "  --hexfloat" << endl << normal
-	  << "         export points with hexadecimal digits" << endl
-	  << endl
-    << bold << "  -n" << normal << " NR, " << bold << "--frame=" << normal << "NR" << endl
-    << "         uses frame NR for export" << endl    
-	  << endl
-	  << endl << endl;
+	  << bold << "  -s" << normal << " NR, " << bold << "--start=" << normal << "NR" << std::endl
+	  << "         start at scan NR (i.e., neglects the first NR scans)" << std::endl
+	  << "         [ATTENTION: counting naturally starts with 0]" << std::endl
+	  << std::endl
+	  << bold << "  -u" << normal << " STR, " << bold << "--customFilter=" << normal << "STR" << std::endl
+	  << "         apply custom filter, filter mode and data are specified as semicolon-seperated string:" << std::endl
+	  << "         STR: '{filterMode};{nrOfParams}[;param1][;param2][...]'" << std::endl
+	  << "         see filter implementation in pointfilter.cc for more detail." << std::endl
+	  << std::endl
+	  << bold << "  -c, --color" << std::endl << normal
+	  << "         export in color as RGB" << std::endl
+	  << std::endl
+	  << bold << "  -R, --reflectance, --reflectivity" << std::endl << normal
+	  << "         export in reflectance" << std::endl
+	  << std::endl
+	  << bold << "  -x, --xyz" << std::endl << normal
+	  << "         export in xyz format (right handed coordinate system in m)" << std::endl
+	  << std::endl
+	  << bold << "  -y" << normal << " NR, " << bold << "--scale=" << normal << "NR" << std::endl
+	  << "         scale factor for export in XYZ format (default value is 0.01, so output will be in [m])" << std::endl
+	  << bold << "  -H, --highprecision" << std::endl << normal
+	  << "         export points with full double precision" << std::endl
+	  << std::endl
+	  << bold << "  --hexfloat" << std::endl << normal
+	  << "         export points with hexadecimal digits" << std::endl
+	  << std::endl
+    << bold << "  -n" << normal << " NR, " << bold << "--frame=" << normal << "NR" << std::endl
+    << "         uses frame NR for export" << std::endl    
+	  << std::endl
+	  << std::endl << std::endl;
   
-  cout << bold << "EXAMPLES " << normal << endl
-      << "   " << prog << " -s 2 -e 3 dat" << endl << endl;
+  std::cout << bold << "EXAMPLES " << normal << std::endl
+      << "   " << prog << " -s 2 -e 3 dat" << std::endl << std::endl;
   exit(1);
 }
 
@@ -158,9 +151,9 @@ void usage(char* prog)
  * @param loopsize defines the minimal loop size
  * @return 0, if the parsing was successful. 1 otherwise
  */
-int parseArgs(int argc, char **argv, string &dir, double &red, int &rand,
+int parseArgs(int argc, char **argv, std::string &dir, double &red, int &rand,
             int &start, int &end, int &maxDist, int &minDist, bool &use_pose,
-            bool &use_xyz, bool &use_reflectance, bool &use_color, int &octree, IOType &type, string& customFilter, double &scaleFac,
+            bool &use_xyz, bool &use_reflectance, bool &use_color, int &octree, IOType &type, std::string& customFilter, double &scaleFac,
 	    bool &hexfloat, bool &high_precision, int &frame)
 {
   int  c;
@@ -190,7 +183,7 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &rand,
     { 0,           0,   0,   0}                    // needed, cf. getopt.h
   };
 
-  cout << endl;
+  std::cout << std::endl;
   int option_index = 0;
   const char *name;
   while ((c = getopt_long(argc, argv, "f:s:e:r:O:Rm:y:M:u:n:pxchH", longopts, &option_index)) != -1)
@@ -201,7 +194,7 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &rand,
 		     if (strcmp(name, "hexfloat") == 0) {
 			     hexfloat = true;
 		     } else {
-			     cerr << "unknown longopt: " << name << endl;
+			     std::cerr << "unknown longopt: " << name << std::endl;
 			     usage(argv[0]);
 		     }
 		     break;
@@ -223,12 +216,12 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &rand,
 	  break;
      case 's':
        start = atoi(optarg);
-       if (start < 0) { cerr << "Error: Cannot start at a negative scan number.\n"; exit(1); }
+       if (start < 0) { std::cerr << "Error: Cannot start at a negative scan number.\n"; exit(1); }
        break;
      case 'e':
        end = atoi(optarg);
-       if (end < 0)     { cerr << "Error: Cannot end at a negative scan number.\n"; exit(1); }
-       if (end < start) { cerr << "Error: <end> cannot be smaller than <start>.\n"; exit(1); }
+       if (end < 0)     { std::cerr << "Error: Cannot end at a negative scan number.\n"; exit(1); }
+       if (end < start) { std::cerr << "Error: <end> cannot be smaller than <start>.\n"; exit(1); }
        break;
      case 'H':
        high_precision = true;
@@ -258,7 +251,7 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &rand,
     try {
       type = formatname_to_io_type(optarg);
     } catch (...) { // runtime_error
-      cerr << "Format " << optarg << " unknown." << endl;
+      std::cerr << "Format " << optarg << " unknown." << std::endl;
       abort();
     }
     break;
@@ -271,7 +264,7 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &rand,
       }
 
   if (optind != argc-1) {
-    cerr << "\n*** Directory missing ***" << endl;
+    std::cerr << "\n*** Directory missing ***" << std::endl;
     usage(argv[0]);
   }
   dir = argv[optind];
@@ -285,11 +278,11 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &rand,
   return 0;
 }
 
-void readFrames(string dir, int start, int end, int frame, bool use_pose=false)
+void readFrames(std::string dir, int start, int end, int frame, bool use_pose=false)
 {
-  ifstream frame_in;
+  std::ifstream frame_in;
   int  fileCounter = start;
-  string frameFileName;
+  std::string frameFileName;
   if((int)(start + Scan::allScans.size() - 1) > end) end = start + Scan::allScans.size() - 1;
   for (;;) {
     if (end > -1 && fileCounter > end) break; // 'nuf read
@@ -302,7 +295,7 @@ void readFrames(string dir, int start, int end, int frame, bool use_pose=false)
       // read 3D scan
       if (!frame_in.good()) break; // no more files in the directory
 
-      cout << "Reading Frames for 3D Scan " << frameFileName << "..." << endl;
+      std::cout << "Reading Frames for 3D Scan " << frameFileName << "..." << std::endl;
 
       double transMat[16];
       int algoTypeInt;
@@ -314,7 +307,7 @@ void readFrames(string dir, int start, int end, int frame, bool use_pose=false)
         try {
           frame_in >> transMat >> algoTypeInt;
         }
-        catch (const exception &e) {   
+        catch (const std::exception &e) {   
           break;
         }
       }
@@ -356,7 +349,7 @@ int main(int argc, char **argv)
 
   // parsing the command line parameters
   // init, default values if not specified
-  string dir;
+  std::string dir;
   double red   = -1.0;
   int    rand  = -1;
   int    start = 0,   end = -1;
@@ -370,7 +363,7 @@ int main(int argc, char **argv)
   IOType iotype    = UOS;
   bool rangeFilterActive = false;
   bool customFilterActive = false;
-  string customFilter;
+  std::string customFilter;
   double scaleFac = 0.01;
   bool hexfloat = false;
   bool high_precision = false;
@@ -391,19 +384,19 @@ int main(int argc, char **argv)
 
       // check if customFilter is specified in file
       if (customFilter.find("FILE;") == 0){
-          string selection_file_name = customFilter.substr(5, customFilter.length());
-          ifstream selectionfile;
+          std::string selection_file_name = customFilter.substr(5, customFilter.length());
+          std::ifstream selectionfile;
           // open the input file
-          selectionfile.open(selection_file_name, ios::in);
+          selectionfile.open(selection_file_name, std::ios::in);
 
           if (!selectionfile.good()){
-              cerr << "Error loading custom filter file " << selection_file_name << "!" << endl;
-              cerr << "Data will NOT be filtered!" << endl;
+              std::cerr << "Error loading custom filter file " << selection_file_name << "!" << std::endl;
+              std::cerr << "Data will NOT be filtered!" << std::endl;
               customFilterActive = false;
           }
           else {
-              string line;
-              string custFilt;
+              std::string line;
+              std::string custFilt;
               while (std::getline(selectionfile, line)){
                   if (line.find("#") == 0) continue;
                   custFilt = custFilt.append(line);
@@ -420,14 +413,14 @@ int main(int argc, char **argv)
   else {
       // give a warning if custom filter has been inproperly specified
       if (customFilter.length() > 0){
-          cerr << "Custom filter: specifying string has not been set properly, data will NOT be filtered." << endl;
+          std::cerr << "Custom filter: specifying string has not been set properly, data will NOT be filtered." << std::endl;
       }
   }
 
   // Get Scans
   Scan::openDirectory(false, dir, iotype, start, end);
   if(Scan::allScans.size() == 0) {
-    cerr << "No scans found. Did you use the correct format?" << endl;
+    std::cerr << "No scans found. Did you use the correct format?" << std::endl;
     exit(-1);
   }
   
@@ -482,27 +475,27 @@ int main(int argc, char **argv)
   for (int iterator = 0; iterator < end_reduction; iterator++) {
     if (red > 0) {
       PointType pointtype(types);
-      cout << "Reducing Scan No. " << iterator << endl;
+      std::cout << "Reducing Scan No. " << iterator << std::endl;
       Scan::allScans[iterator]->setReductionParameter(red, octree, pointtype);
       Scan::allScans[iterator]->calcReducedPoints();
     } else {
-      cout << "Copying Scan No. " << iterator << endl;
+      std::cout << "Copying Scan No. " << iterator << std::endl;
     }
     // reduction filter for current scan!
   }
 
   readFrames(dir, start, end, frame, uP);
   
- cout << "Export all 3D Points to file \"points.pts\"" << endl;
- cout << "Export all 6DoF poses to file \"positions.txt\"" << endl;
- cout << "Export all 6DoF matrices to file \"poses.txt\"" << endl;
+ std::cout << "Export all 3D Points to file \"points.pts\"" << std::endl;
+ std::cout << "Export all 6DoF poses to file \"positions.txt\"" << std::endl;
+ std::cout << "Export all 6DoF matrices to file \"poses.txt\"" << std::endl;
  FILE *redptsout = fopen("points.pts", "w");
- ofstream posesout("positions.txt");
- ofstream matricesout("poses.txt");
+ std::ofstream posesout("positions.txt");
+ std::ofstream matricesout("poses.txt");
   
   for(unsigned int i = 0; i < Scan::allScans.size(); i++) {
     Scan *source = Scan::allScans[i];
-    string red_string = red > 0 ? " reduced" : "";
+    std::string red_string = red > 0 ? " reduced" : "";
       
     DataXYZ xyz  = source->get("xyz" + red_string);
     
@@ -523,7 +516,7 @@ int main(int argc, char **argv)
       }
       
     } else if(use_color) {
-      string data_string = red > 0 ? "color reduced" : "rgb";
+      std::string data_string = red > 0 ? "color reduced" : "rgb";
       DataRGB xyz_color = 
           (((DataRGB)source->get(data_string)).size() == 0) ?
           source->create(data_string, sizeof(unsigned char)*3*xyz.size()) : 

@@ -11,11 +11,8 @@
 #include "slam6d/globals.icc"
 
 #include <string>
-using std::string;
 
 #include <iostream>
-using std::cout;
-using std::endl;
 
 #include <algorithm>
 
@@ -46,7 +43,7 @@ void conflicting_options(const po::variables_map & vm,
 {
     if (vm.count(opt1) && !vm[opt1].defaulted()
         && vm.count(opt2) && !vm[opt2].defaulted())
-        throw std::logic_error(string("Conflicting options '")
+        throw std::logic_error(std::string("Conflicting options '")
                                + opt1 + "' and '" + opt2 + "'.");
 }
 
@@ -58,7 +55,7 @@ void option_dependency(const po::variables_map & vm,
     if (vm.count(for_what) && !vm[for_what].defaulted())
         if (vm.count(required_option) == 0
             || vm[required_option].defaulted())
-            throw std::logic_error(string("Option '") + for_what +
+            throw std::logic_error(std::string("Option '") + for_what +
                                    "' requires option '" +
                                    required_option + "'.");
 }
@@ -71,7 +68,7 @@ namespace fbr {
                   projection_method*, int) {
         if (values.size() == 0)
             throw std::runtime_error("Invalid model specification");
-        string arg = values.at(0);
+        std::string arg = values.at(0);
         if(strcasecmp(arg.c_str(), "EQUIRECTANGULAR") == 0) v = EQUIRECTANGULAR;
         else if(strcasecmp(arg.c_str(), "CYLINDRICAL") == 0) v = CYLINDRICAL;
         else if(strcasecmp(arg.c_str(), "MERCATOR") == 0) v = MERCATOR;
@@ -91,7 +88,7 @@ void validate(boost::any& v, const std::vector<std::string>& values,
         segment_method*, int) {
     if (values.size() == 0)
         throw std::runtime_error("Invalid model specification");
-    string arg = values.at(0);
+    std::string arg = values.at(0);
     if(strcasecmp(arg.c_str(), "THRESHOLD") == 0) v = THRESHOLD;
     else if(strcasecmp(arg.c_str(), "ADAPTIVE_THRESHOLD") == 0) v = ADAPTIVE_THRESHOLD;
     else if(strcasecmp(arg.c_str(), "PYR_MEAN_SHIFT") == 0) v = PYR_MEAN_SHIFT;
@@ -107,7 +104,7 @@ void validate(boost::any& v, const std::vector<std::string>& values,
     IOType*, int) {
     if (values.size() == 0)
         throw std::runtime_error("Invalid model specification");
-    string arg = values.at(0);
+    std::string arg = values.at(0);
     try {
         v = formatname_to_io_type(arg.c_str());
     } catch (...) { // runtime_error
@@ -119,7 +116,7 @@ void segmentation_option_dependency(const po::variables_map & vm, segment_method
 {
     if (vm.count("segment") && vm["segment"].as<segment_method>() == stype) {
         if (!vm.count(option)) {
-            throw std::logic_error (string("this segmentation option needs ")+option+" to be set");
+            throw std::logic_error (std::string("this segmentation option needs ")+option+" to be set");
         }
     }
 }
@@ -128,7 +125,7 @@ void segmentation_option_conflict(const po::variables_map & vm, segment_method s
 {
     if (vm.count("segment") && vm["segment"].as<segment_method>() == stype) {
         if (vm.count(option)) {
-            throw std::logic_error (string("this segmentation option is incompatible with ")+option);
+            throw std::logic_error (std::string("this segmentation option is incompatible with ")+option);
         }
     }
 }
@@ -137,9 +134,9 @@ void segmentation_option_conflict(const po::variables_map & vm, segment_method s
  */
 void parse_options(int argc, char **argv, int &start, int &end,
         bool &scanserver, image_type &itype, int &width, int &height,
-        fbr::projection_method &ptype, string &dir, IOType &iotype,
+        fbr::projection_method &ptype, std::string &dir, IOType &iotype,
         int &maxDist, int &minDist, int &nImages, int &pParam, bool &logarithm,
-        float &cutoff, segment_method &stype, string &marker, bool &dump_pano,
+        float &cutoff, segment_method &stype, std::string &marker, bool &dump_pano,
         bool &dump_seg, double &thresh, int &maxlevel, int &radius,
         double &pyrlinks, double &pyrcluster, int &pyrlevels)
 {
@@ -197,7 +194,7 @@ void parse_options(int argc, char **argv, int &start, int &end,
         ("segment,g", po::value<segment_method>(&stype)->
          default_value(PYR_MEAN_SHIFT), "segmentation method (THRESHOLD, "
          "ADAPTIVE_THRESHOLD, PYR_MEAN_SHIFT, PYR_SEGMENTATION, WATERSHED)")
-        ("marker,K", po::value<string>(&marker),
+        ("marker,K", po::value<std::string>(&marker),
          "marker mask for watershed segmentation")
         ("thresh,T", po::value<double>(&thresh),
          "threshold for threshold segmentation")
@@ -217,7 +214,7 @@ void parse_options(int argc, char **argv, int &start, int &end,
 
     po::options_description hidden("Hidden options");
     hidden.add_options()
-        ("input-dir", po::value<string>(&dir), "input dir");
+        ("input-dir", po::value<std::string>(&dir), "input dir");
 
     // all options
     po::options_description all;
@@ -239,8 +236,8 @@ void parse_options(int argc, char **argv, int &start, int &end,
 
     // display help
     if (vm.count("help")) {
-        cout << cmdline_options;
-        cout << "\nExample usage:\n"
+        std::cout << cmdline_options;
+        std::cout << "\nExample usage:\n"
              << "bin/scan2segments -s 0 -e 0 -f riegl_txt --segment PYR_SEGMENTATION -l 50 -c 50 -E 4 -D -i ~/path/to/bremen_city\n" 
              << "bin/scan2segments -s 0 -e 0 -f riegl_txt --segment PYR_SEGMENTATION -l 255 -c 30 -E 2 -D -i ~/path/to/bremen_city\n";
         exit(0);
@@ -366,7 +363,7 @@ cv::Mat float2uchar(cv::Mat &source, bool logarithm, float cutoff)
     } else {
         // when a cutoff is specified, sort all the points by value and then
         // specify the max so that <cutoff> values are larger than it
-        vector<float> sorted(source.cols*source.rows);
+        std::vector<float> sorted(source.cols*source.rows);
         int i = 0;
         for (cv::MatIterator_<float> it = source.begin<float>();
                 it != source.end<float>(); ++it, ++i) {
@@ -374,7 +371,7 @@ cv::Mat float2uchar(cv::Mat &source, bool logarithm, float cutoff)
         }
         std::sort(sorted.begin(), sorted.end());
         max = sorted[(int)(source.cols*source.rows*(1.0-cutoff))];
-        cout << "A cutoff of " << cutoff << " resulted in a max value of " << max << endl;
+        std::cout << "A cutoff of " << cutoff << " resulted in a max value of " << max << std::endl;
     }
 
     cv::MatIterator_<float> src = source.begin<float>();
@@ -408,8 +405,8 @@ cv::Mat float2uchar(cv::Mat &source, bool logarithm, float cutoff)
 /*
  * from grayscale image, create a binary image using a fixed threshold
  */
-cv::Mat calculateThreshold(vector<vector<cv::Vec3f>> &segmented_points,
-        cv::Mat &img, vector<vector<vector<cv::Vec3f> > > extendedMap,
+cv::Mat calculateThreshold(std::vector<std::vector<cv::Vec3f>> &segmented_points,
+        cv::Mat &img, std::vector<std::vector<std::vector<cv::Vec3f> > > extendedMap,
         double thresh)
 {
     int i, j, idx;
@@ -434,8 +431,8 @@ cv::Mat calculateThreshold(vector<vector<cv::Vec3f>> &segmented_points,
 /*
  * calculate the pyramid mean shift segmentation of the image
  */
-cv::Mat calculatePyrMeanShift(vector<vector<cv::Vec3f>> &segmented_points,
-        cv::Mat &img, vector<vector<vector<cv::Vec3f> > > extendedMap,
+cv::Mat calculatePyrMeanShift(std::vector<std::vector<cv::Vec3f>> &segmented_points,
+        cv::Mat &img, std::vector<std::vector<std::vector<cv::Vec3f> > > extendedMap,
         int maxlevel, int radius)
 {
     int i, j, idx;
@@ -446,7 +443,7 @@ cv::Mat calculatePyrMeanShift(vector<vector<cv::Vec3f>> &segmented_points,
 
     // some colors will be empty
     // fill histogram first and then pick those entries that are not empty
-    vector<vector<cv::Vec3f>> histogram(256);
+    std::vector<std::vector<cv::Vec3f>> histogram(256);
 
     for (i = 0; i < res.rows; i++) {
         for (j = 0; j < res.cols; j++) {
@@ -467,8 +464,8 @@ cv::Mat calculatePyrMeanShift(vector<vector<cv::Vec3f>> &segmented_points,
 }
 
 ///TODO: need to pass *two* thresh params, see: http://bit.ly/WmFeub
-cv::Mat calculatePyrSegmentation(vector<vector<cv::Vec3f>> &segmented_points,
-        cv::Mat &img, vector<vector<vector<cv::Vec3f> > > extendedMap,
+cv::Mat calculatePyrSegmentation(std::vector<std::vector<cv::Vec3f>> &segmented_points,
+        cv::Mat &img, std::vector<std::vector<std::vector<cv::Vec3f> > > extendedMap,
         double thresh1, double thresh2, int pyrlevels)
 {
     int i, j, idx;
@@ -492,13 +489,13 @@ cv::Mat calculatePyrSegmentation(vector<vector<cv::Vec3f>> &segmented_points,
     cvPyrSegmentation(ipl_original, ipl_segmented, storage, &comp, pyrlevels, thresh1+1, thresh2+1); 
 	*/
     // mapping of color value to component id
-    map<int, int> mapping;
+    std::map<int, int> mapping;
     unsigned int segments = comp->total;
     for (unsigned int cur_seg = 0; cur_seg < segments; ++cur_seg) {
       CvConnectedComp* cc = (CvConnectedComp*) cvGetSeqElem(comp, cur_seg);
       // since images are single-channel grayscale, only the first value is
       // of interest
-      mapping.insert(pair<int, int>(cc->value.val[0], cur_seg));
+      mapping.insert(std::pair<int, int>(cc->value.val[0], cur_seg));
     }
 
     segmented_points.resize(segments);
@@ -528,8 +525,8 @@ cv::Mat calculatePyrSegmentation(vector<vector<cv::Vec3f>> &segmented_points,
 /*
  * calculate the adaptive threshold
  */
-cv::Mat calculateAdaptiveThreshold(vector<vector<cv::Vec3f>> &segmented_points,
-        cv::Mat &img, vector<vector<vector<cv::Vec3f> > > extendedMap)
+cv::Mat calculateAdaptiveThreshold(std::vector<std::vector<cv::Vec3f>> &segmented_points,
+        cv::Mat &img, std::vector<std::vector<std::vector<cv::Vec3f> > > extendedMap)
 {
     int i, j, idx;
     cv::Mat res;
@@ -555,13 +552,13 @@ cv::Mat calculateAdaptiveThreshold(vector<vector<cv::Vec3f>> &segmented_points,
  * a marker image can be created from the panorama retrieved by using the
  * --dump-pano option
  */
-cv::Mat calculateWatershed(vector<vector<cv::Vec3f>> &segmented_points,
-        string &marker, cv::Mat &img, vector<vector<vector<cv::Vec3f> > > extendedMap)
+cv::Mat calculateWatershed(std::vector<std::vector<cv::Vec3f>> &segmented_points,
+        std::string &marker, cv::Mat &img, std::vector<std::vector<std::vector<cv::Vec3f> > > extendedMap)
 {
     int i, j, idx;
     cv::Mat markerMask = cv::imread(marker, 0);
-    vector<vector<cv::Point> > contours;
-    vector<cv::Vec4i> hierarchy;
+    std::vector<std::vector<cv::Point> > contours;
+    std::vector<cv::Vec4i> hierarchy;
     cv::findContours(markerMask, contours, hierarchy, CV_RETR_CCOMP, CV_CHAIN_APPROX_SIMPLE);
     if (contours.empty())
         throw std::runtime_error("empty marker mask");
@@ -596,22 +593,22 @@ cv::Mat calculateWatershed(vector<vector<cv::Vec3f>> &segmented_points,
 /*
  * given a vector of segmented 3d points, write them out as uos files
  */
-void write3dfiles(vector<vector<cv::Vec3f>> &segmented_points, string &segdir)
+void write3dfiles(std::vector<std::vector<cv::Vec3f>> &segmented_points, std::string &segdir)
 {
     unsigned int i;
 
-    vector<ofstream*> outfiles(segmented_points.size());
+    std::vector<std::ofstream*> outfiles(segmented_points.size());
     for (i = 0; i < segmented_points.size(); i++) {
         std::stringstream outfilename;
         outfilename << segdir << "/scan" << std::setw(3) << std::setfill('0') << i << ".3d";
-        outfiles[i] = new ofstream(outfilename.str());
+        outfiles[i] = new std::ofstream(outfilename.str());
     }
 
     for (i = 0; i < segmented_points.size(); i++) {
-        for (vector<cv::Vec3f>::iterator it=segmented_points[i].begin() ;
+        for (std::vector<cv::Vec3f>::iterator it=segmented_points[i].begin() ;
 		   it < segmented_points[i].end();
 		   it++) {
-            (*(outfiles[i])) << (*it)[0] << " " << (*it)[1] << " " << (*it)[2] << endl;
+            (*(outfiles[i])) << (*it)[0] << " " << (*it)[1] << " " << (*it)[2] << std::endl;
         }
     }
 
@@ -622,27 +619,27 @@ void write3dfiles(vector<vector<cv::Vec3f>> &segmented_points, string &segdir)
 
 // write .pose files
 // .frames files can later be generated from them using ./bin/pose2frames
-void writeposefiles(int num, string &segdir, const double* rPos, const double* rPosTheta)
+void writeposefiles(int num, std::string &segdir, const double* rPos, const double* rPosTheta)
 {
     for (int i = 0; i < num; i++) {
         std::stringstream posefilename;
         posefilename << segdir << "/scan" << std::setw(3) << std::setfill('0') << i << ".pose";
-        ofstream posefile(posefilename.str());
-        posefile << rPos[0] << " " << rPos[1] << " " << rPos[2] << endl;
+        std::ofstream posefile(posefilename.str());
+        posefile << rPos[0] << " " << rPos[1] << " " << rPos[2] << std::endl;
         posefile << deg(rPosTheta[0]) << " "
 			  << deg(rPosTheta[1]) << " "
-			  << deg(rPosTheta[2]) << endl;
+			  << deg(rPosTheta[2]) << std::endl;
         posefile.close();
     }
 }
 
-void createdirectory(string segdir)
+void createdirectory(std::string segdir)
 {
 	int success = mkdir(segdir.c_str(), S_IRWXU|S_IRWXG|S_IRWXO);
     if (success == 0 || errno == EEXIST) {
-        cout << "Writing segmentations to " << segdir << endl;
+        std::cout << "Writing segmentations to " << segdir << std::endl;
     } else {
-        cerr << "Creating directory " << segdir << " failed" << endl;
+        std::cerr << "Creating directory " << segdir << " failed" << std::endl;
         exit(1);
     }
 }
@@ -659,10 +656,10 @@ int main(int argc, char **argv)
     fbr::projection_method ptype;
     bool logarithm;
     float cutoff;
-    string dir;
+    std::string dir;
     IOType iotype;
     segment_method stype;
-    string marker;
+    std::string marker;
     bool dump_pano, dump_seg;
     double thresh;
     int maxlevel, radius;
@@ -677,12 +674,12 @@ int main(int argc, char **argv)
     Scan::openDirectory(scanserver, dir, iotype, start, end);
 
     if(Scan::allScans.size() == 0) {
-      cerr << "No scans found. Did you use the correct format?" << endl;
+      std::cerr << "No scans found. Did you use the correct format?" << std::endl;
       exit(-1);
     }
 
     cv::Mat img, res;
-    string segdir;
+    std::string segdir;
 
     for(ScanVector::iterator it = Scan::allScans.begin(); it != Scan::allScans.end(); ++it) {
         Scan* scan = *it;
@@ -712,7 +709,7 @@ int main(int argc, char **argv)
             imwrite(segdir+"/panorama.png", img);
 
         // will store the result of the segmentation
-        vector<vector<cv::Vec3f>> segmented_points;
+        std::vector<std::vector<cv::Vec3f>> segmented_points;
 
         if (stype == THRESHOLD) {
             res = calculateThreshold(segmented_points, img, fPanorama.getExtendedMap(), thresh);

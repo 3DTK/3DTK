@@ -9,9 +9,7 @@
 #define __SCAN_IO_AIS_H__
 
 #include <string>
-using std::string;
 #include <vector>
-using std::vector;
 
 #include "slam6d/scan_io.h"
 

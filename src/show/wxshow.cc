@@ -485,7 +485,7 @@ bool wxShow::OnInit()
   try {
     parse_args(argc, new_argv, ds, ws);
   } catch (std::exception& e) {
-    std::cerr << "Error while parsing settings: " << e.what() << endl;
+    std::cerr << "Error while parsing settings: " << e.what() << std::endl;
     exit(1);
   }
 
@@ -572,7 +572,7 @@ void BasicGLPane::animate() {
     cameraNavMouseMode = 0;
   }
   for (path_iterator = 0; path_iterator < path_vectorX.size(); path_iterator++) {
-      cout << "Anim: " << path_iterator << " of " << path_vectorX.size() << endl;
+      std::cout << "Anim: " << path_iterator << " of " << path_vectorX.size() << std::endl;
 
       //call the path animation function
       //hide both the cameras and the path
@@ -585,9 +585,9 @@ void BasicGLPane::animate() {
 
       //save the animation
       if(save_animation){
-        string filename = scan_dir + "animframe" + to_string(path_iterator,5) + ".ppm";
-        string jpgname = scan_dir + "animframe" + to_string(path_iterator,5) + ".jpg";
-        cout << "written " << filename << " of " << path_vectorX.size() << " files" << endl;
+        std::string filename = scan_dir + "animframe" + to_string(path_iterator,5) + ".ppm";
+        std::string jpgname = scan_dir + "animframe" + to_string(path_iterator,5) + ".jpg";
+        std::cout << "written " << filename << " of " << path_vectorX.size() << " files" << std::endl;
         glWriteImagePPM(filename.c_str(), factor, 0);
         haveToUpdate = 6;
       }
@@ -662,8 +662,8 @@ void BasicGLPane::idle() {
     paint();
 
     if(save_animation){
-      string filename = scan_dir + "animframe" + to_string(frameNr,5) + ".ppm";
-      cout << "write " << filename << endl;
+      std::string filename = scan_dir + "animframe" + to_string(frameNr,5) + ".ppm";
+      std::cout << "write " << filename << std::endl;
       glDumpWindowPPM(filename.c_str(),0);
 
    }

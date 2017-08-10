@@ -4,7 +4,6 @@
 #include "show/colormanager.h"
 #include "limits.h"
 #include <set>
-using std::set;
 
 class colordisplay {
   public:
@@ -38,10 +37,10 @@ class colordisplay {
 
   virtual void selectRay(float * &point) {};
   virtual void selectRay(double * &point) {};
-  virtual void selectRay(set<float*> &points, int depth=INT_MAX) {};
-  virtual void selectRay(set<double*> &points, int depth=INT_MAX) {};
-  virtual void selectRayBrushSize(set<float*> &points, int brushsize) {};
-  virtual void selectRayBrushSize(set<double*> &points, int brushsize) {};
+  virtual void selectRay(std::set<float*> &points, int depth=INT_MAX) {};
+  virtual void selectRay(std::set<double*> &points, int depth=INT_MAX) {};
+  virtual void selectRayBrushSize(std::set<float*> &points, int brushsize) {};
+  virtual void selectRayBrushSize(std::set<double*> &points, int brushsize) {};
 
   virtual void cycleLOD() {};
 

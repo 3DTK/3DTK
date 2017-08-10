@@ -28,16 +28,10 @@
 #endif
 
 #include <fstream>
-using std::ifstream;
-using std::ofstream;
 
 #include <iostream>
-using std::cout;
-using std::cerr;
-using std::endl;
 
 #include <sstream>
-using std::stringstream;
 
 #include "slam6d/scan.h"
 #include "slam6d/Boctree.h"
@@ -69,7 +63,6 @@ extern  VeloScan* g_pfirstScan;
 #endif
 
 #include <cstring>
-using std::flush;
 
 #ifdef TARGET_OS_MAC
 #include <GL/glew.h>
@@ -343,7 +336,7 @@ void GetCurrecntdelteMat(Scan& CurrentScan ,  double *deltaMat)
     MMult(CurrentScan.get_transMat(), tempMat, deltaMat);
 }
 
-int DrawAll_ScanPoints_Number(vector <Scan *> allScans,  int psize, float r, float g, float b, int n)
+int DrawAll_ScanPoints_Number(std::vector <Scan *> allScans,  int psize, float r, float g, float b, int n)
 {
 	 int i,j,k,colorIdx;
 	 Point p;
@@ -387,7 +380,7 @@ void glDumpWindowPPM_debugView(const char *filename, GLenum mode)
   int i,j,k,l;                  // Counter variables
   GLubyte *buffer;              // The GL Frame Buffer
   unsigned char *ibuffer;       // The PPM Output Buffer
-  ofstream fp;                  // The PPM File
+  std::ofstream fp;                  // The PPM File
 
   GLint viewport[4];
   glGetIntegerv(GL_VIEWPORT, viewport);
@@ -408,11 +401,11 @@ void glDumpWindowPPM_debugView(const char *filename, GLenum mode)
 //                        GL_RGB, GL_UNSIGNED_BYTE, buffer);
 
   // Open the output file
-  fp.open(filename, ios::out);
+  fp.open(filename, std::ios::out);
 
   // Write a proper P6 PPM header
-  fp << "P6" << endl << "# CREATOR: 3D_Viewer by Andreas Nuechter, University of Osnabrueck"
-	<< endl << win_width  << " " << win_height << " " << UCHAR_MAX << endl;
+  fp << "P6" << std::endl << "# CREATOR: 3D_Viewer by Andreas Nuechter, University of Osnabrueck"
+	<< std::endl << win_width  << " " << win_height << " " << UCHAR_MAX << std::endl;
 
   // Loop through the frame buffer data, writing to the PPM file.  Be careful
   //   to account for the frame buffer having 4 bytes per pixel while the
@@ -487,7 +480,7 @@ static void MouseMove(int x, int y)
               x_rotate=x_rotate - 360;
             if (x_rotate < -360)
               x_rotate=x_rotate + 360;
-    		cout << "Ctrl Held" << endl;
+    		std::cout << "Ctrl Held" << std::endl;
             return;
 
     	case GLUT_ACTIVE_SHIFT :
@@ -497,14 +490,14 @@ static void MouseMove(int x, int y)
             if (y_rotate < -360)
               y_rotate=y_rotate + 360;
 
-    		cout << "Shift Held" << endl;
+    		std::cout << "Shift Held" << std::endl;
             return;
 
     	case GLUT_ACTIVE_ALT :
             float temp = (x - x_move_save)/100;
      		z_rotate += atanf(temp);
 
-    		cout << "Alt Held" << endl;
+    		std::cout << "Alt Held" << std::endl;
             return;
 
   }
@@ -527,8 +520,8 @@ static void MouseMove(int x, int y)
       m_zoom =m_zoom*(1+multiplay);
   }
 
-   cout << "mouse move " << buttonSaveLeft << buttonSaveMiddle <<buttonSaveRight << " "
-    << x  << "  "<< y <<endl;
+   std::cout << "mouse move " << buttonSaveLeft << buttonSaveMiddle <<buttonSaveRight << " "
+    << x  << "  "<< y <<std::endl;
 }
 
 static void PassiveMouseMove(int x, int y)
@@ -538,7 +531,7 @@ static void PassiveMouseMove(int x, int y)
 
 static void MouseRotate(int x, int y, int z)
 {
-    cout << "mouse Rotate "  << x  << "  "<< y << "  "<< z <<endl;
+    std::cout << "mouse Rotate "  << x  << "  "<< y << "  "<< z <<std::endl;
 
 }
 
@@ -711,10 +704,10 @@ static void Draw(void)
     double Pos[3];
     Matrix4ToEuler(deltaMat, PosTheta, Pos);
 
-    cout << "  pose of current "
+    std::cout << "  pose of current "
          << "  " <<  PosTheta [0]
          << "  " <<  PosTheta [1]
-         << "  " <<  PosTheta [2] <<endl;
+         << "  " <<  PosTheta [2] <<std::endl;
 
    // you need to find the direction of ego-vehicle.
 //    p1.x = -4000 * cos ( PosTheta [1]) ;  p1.y= 2000;  p1.z= 4000 * sin ( PosTheta [1]);
@@ -738,10 +731,10 @@ static void Draw(void)
 
     if(save_animation)
     {
-       string scandirectory =".\\video\\";
-       string filename = scandirectory + "animframe"
+       std::string scandirectory =".\\video\\";
+       std::string filename = scandirectory + "animframe"
                     + to_string(scanCount,5) + ".ppm";
-       cout << "write " << filename << endl;
+       std::cout << "write " << filename << std::endl;
        glDumpWindowPPM_debugView(filename.c_str(),0);
     }
 

@@ -35,15 +35,8 @@
 #include <iostream>
 #include <fstream>
 #include <queue>
-using std::queue;
 #include <vector>
-using std::vector;
 #include <sstream>
-using std::stringstream;
-using std::string;
-using std::cout;
-using std::endl;
-using std::ifstream;
 
 #include <pthread.h>
 #include "rosbag/bag.h"
@@ -60,51 +53,51 @@ using std::ifstream;
  */
 void usage(char* prog)
 {
-  const string bold("\033[1m");
-  const string normal("\033[m");
-  cout << endl
-    << bold << "USAGE " << normal << endl
-    << "   " << prog << " [options] directory" << endl << endl;
-  cout << bold << "OPTIONS" << normal << endl
-  << bold << "  -L" << normal << ", " << bold << "--linescans" << normal << "" << endl
-  << "         transform scan line by line AND writes a scan per line" << endl
-  << bold << "  -l" << normal << ", " << bold << "--lines" << normal << "" << endl
-  << "         transform scan line by line" << endl
-  << bold << "  -t" << normal << ", " << bold << "--trajectory" << normal << "" << endl
-  << "         writes computed trajectory to file trajectory.txt" << endl
-  << bold << "  -T" << normal << ", " << bold << "--trustTF" << normal << "" << endl
-  << "         do not recompute trajectory, but trust the logged tf history" << endl
-  << bold << "  -d NR" << normal << ", " << bold << "--diff NR" << normal << "" << endl
-  << "         adds <NR> seconds to riegl timestamps (default = -0.662)" << endl
-  << bold << "  -p" << normal << ", " << bold << "--rieglcoord" << normal << "" << endl
-  << "         write scans in the riegl coordinate system." << endl
-  << bold << "  -m" << normal << ", " << bold << "--mapping" << normal << "" << endl
-  << "         write pose with respect to the /map coordinate system." << endl
-  << bold << "  -n" << normal << ", " << bold << "--norobot" << normal << "" << endl
-  << "         if the scanner was used without the robot running" << endl
-  << bold << "  -c" << normal << ", " << bold << "--calibrate" << normal << "" << endl
-  << "         calibrates the system using the given log." << endl
+  const std::string bold("\033[1m");
+  const std::string normal("\033[m");
+  std::cout << std::endl
+    << bold << "USAGE " << normal << std::endl
+    << "   " << prog << " [options] directory" << std::endl << std::endl;
+  std::cout << bold << "OPTIONS" << normal << std::endl
+  << bold << "  -L" << normal << ", " << bold << "--linescans" << normal << "" << std::endl
+  << "         transform scan line by line AND writes a scan per line" << std::endl
+  << bold << "  -l" << normal << ", " << bold << "--lines" << normal << "" << std::endl
+  << "         transform scan line by line" << std::endl
+  << bold << "  -t" << normal << ", " << bold << "--trajectory" << normal << "" << std::endl
+  << "         writes computed trajectory to file trajectory.txt" << std::endl
+  << bold << "  -T" << normal << ", " << bold << "--trustTF" << normal << "" << std::endl
+  << "         do not recompute trajectory, but trust the logged tf history" << std::endl
+  << bold << "  -d NR" << normal << ", " << bold << "--diff NR" << normal << "" << std::endl
+  << "         adds <NR> seconds to riegl timestamps (default = -0.662)" << std::endl
+  << bold << "  -p" << normal << ", " << bold << "--rieglcoord" << normal << "" << std::endl
+  << "         write scans in the riegl coordinate system." << std::endl
+  << bold << "  -m" << normal << ", " << bold << "--mapping" << normal << "" << std::endl
+  << "         write pose with respect to the /map coordinate system." << std::endl
+  << bold << "  -n" << normal << ", " << bold << "--norobot" << normal << "" << std::endl
+  << "         if the scanner was used without the robot running" << std::endl
+  << bold << "  -c" << normal << ", " << bold << "--calibrate" << normal << "" << std::endl
+  << "         calibrates the system using the given log." << std::endl
 
-  << bold << "  -R, --reflectance, --reflectivity" << normal << endl
-  << "         write reflectivity values " << endl
-  << endl
-  << bold << "  -a, --amplitude" << endl << normal
-  << "         write amplitude values " << endl
-  << endl
-  << bold << "  -d, --deviation" << endl << normal
-  << "         write deviation values " << endl
-  << endl
+  << bold << "  -R, --reflectance, --reflectivity" << normal << std::endl
+  << "         write reflectivity values " << std::endl
+  << std::endl
+  << bold << "  -a, --amplitude" << std::endl << normal
+  << "         write amplitude values " << std::endl
+  << std::endl
+  << bold << "  -d, --deviation" << std::endl << normal
+  << "         write deviation values " << std::endl
+  << std::endl
 
-  << endl << endl;
+  << std::endl << std::endl;
 
   exit(1);
 }
 
 
-void parseArgs(int argc,char **argv, string &dir, bool &lines, bool &trajectory,
+void parseArgs(int argc,char **argv, std::string &dir, bool &lines, bool &trajectory,
 bool &trustTF, double &tdiff, bool &calibrate, int &start, int &end, bool
 &redoOdometry, bool &redoFilter, int &sickscans, bool &stopandgo, bool
-&rieglcoord, bool &norobot, bool &linescans, unsigned int &types, string
+&rieglcoord, bool &norobot, bool &linescans, unsigned int &types, std::string
 &mapstring) {
 
   int  c;
@@ -112,7 +105,7 @@ bool &trustTF, double &tdiff, bool &calibrate, int &start, int &end, bool
   extern char *optarg;
   extern int optind;
 
-  cout << endl;
+  std::cout << std::endl;
   static struct option longopts[] = {
     { "linescans",       no_argument,         0,  'L' },
     { "lines",           no_argument,         0,  'l' },
@@ -163,12 +156,12 @@ bool &trustTF, double &tdiff, bool &calibrate, int &start, int &end, bool
      break;
    case 's':
      start = atoi(optarg);
-     if (start < 0) { cerr << "Error: Cannot start at a negative scan number.\n"; exit(1); }
+     if (start < 0) { std::cerr << "Error: Cannot start at a negative scan number.\n"; exit(1); }
      break;
    case 'e':
      end = atoi(optarg);
-     if (end < 0)     { cerr << "Error: Cannot end at a negative scan number.\n"; exit(1); }
-     if (end < start) { cerr << "Error: <end> cannot be smaller than <start>.\n"; exit(1); }
+     if (end < 0)     { std::cerr << "Error: Cannot end at a negative scan number.\n"; exit(1); }
+     if (end < start) { std::cerr << "Error: <end> cannot be smaller than <start>.\n"; exit(1); }
      break;
    case 'o':
      redoOdometry = true;
@@ -212,7 +205,7 @@ bool &trustTF, double &tdiff, bool &calibrate, int &start, int &end, bool
   }
 
   if (optind != argc-1) {
-    cerr << "\n*** Directory missing ***" << endl;
+    std::cerr << "\n*** Directory missing ***" << std::endl;
     usage(argv[0]);
   }
   dir = argv[optind];
@@ -236,7 +229,7 @@ void writeTrajectory(rosbag::Bag &bag, tf::TransformListener *l) {
         tf::StampedTransform transform;
         l->lookupTransform("/odom_combined", "base_link", optr->header.stamp, transform);
         transform.getBasis().getRPY(rx,ry,rz);
-        o << transform.getOrigin().getX() << " " << transform.getOrigin().getY() << " " << rz << endl;
+        o << transform.getOrigin().getX() << " " << transform.getOrigin().getY() << " " << rz << std::endl;
       }
       catch (tf::TransformException ex){
         ROS_ERROR("Transform error in writeTrajectory: %s",ex.what());
@@ -336,7 +329,7 @@ tf::TransformListener *calculateTrajectory(rosbag::Bag &bag) {
 
 
 
-void readTSMapfromBag(rosbag::Bag &bag, vector<double> *timestamps) {
+void readTSMapfromBag(rosbag::Bag &bag, std::vector<double> *timestamps) {
   rosbag::View tfview(bag, rosbag::TopicQuery("/riegltime"));
 
   bool first = true;
@@ -372,7 +365,7 @@ int main(int argc, char** argv)
 
   
   // get configuration
-  string basedir, tsfile, bagfile, rxpfile, outputpath, sickoutputpath;
+  std::string basedir, tsfile, bagfile, rxpfile, outputpath, sickoutputpath;
   bool lines = true;        // TODO: add option to switch this off
   bool trajectory = false;
   int sickscans = 0;
@@ -388,7 +381,7 @@ int main(int argc, char** argv)
   bool rieglcoord = false; 
   bool norobot = false;
   bool linescans = false;
-  string mapstring = "/odom_combined";
+  std::string mapstring = "/odom_combined";
   unsigned int types = PointType::USE_NONE;
 
   parseArgs(argc, argv, basedir, lines, trajectory, trustTF, tdiff, calibrate,
@@ -426,7 +419,7 @@ int main(int argc, char** argv)
   else
     ROS_INFO("norobot = false");
 
-  vector<double> tm[2];
+  std::vector<double> tm[2];
   readTSMapfromBag(bag, tm );
 //  timeMap *tmap = new timeMapSimple(tm);
 //  timeMap *tmap = new timeMapLinear(tm);
@@ -472,7 +465,7 @@ int main(int argc, char** argv)
     //////////////////////
    PPevaluator eval(5.0, true);  // mdist parameter TODO
 //    PPevaluatorICP eval(10.0);  // mdist parameter TODO
-cout << "start eval with " << (end - start + 1) << " scans" << endl;
+std::cout << "start eval with " << (end - start + 1) << " scans" << std::endl;
 //   Planeevaluator eval(basedir, end-start + 1,  0,5); 
     ScanImporter si(rxpfile, tmap, &cal, lines, stopandgo, PointType::USE_NONE, start, end);
     si.setReducer(&sr);

@@ -49,7 +49,7 @@ void  DrawPointsRGB(Point p,    float r,     float g,    float b);
 void  DrawPoint(Point  p, int size , float r, float g, float b);
 void  DrawPoint(Point  p, int size , float r, float g, float b, double deltaMat[16]);
 
-int DrawAll_ScanPoints_Number(vector <Scan *> allScans,  int psize, float r, float g, float b, int n);
+int DrawAll_ScanPoints_Number(std::vector <Scan *> allScans,  int psize, float r, float g, float b, int n);
 
 
 void glDumpWindowPPM_debugView(const char *filename, GLenum mode);

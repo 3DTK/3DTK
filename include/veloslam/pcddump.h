@@ -5,5 +5,5 @@
 #include "veloslam/veloscan.h"
 #include "veloslam/tracker.h"
 
-void DumpPointtoFile(cluster &gluData1, string filename);
-void DumpFeaturetoFile(clusterFeature &glu, string filename);
+void DumpPointtoFile(cluster &gluData1, std::string filename);
+void DumpFeaturetoFile(clusterFeature &glu, std::string filename);

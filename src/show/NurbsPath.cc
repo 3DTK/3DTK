@@ -18,13 +18,13 @@
  * @param nump  number of points, which should be computed for the smoothed path
  * @return vector of PointXYs representing the smoothed path
  */
-vector<double> NurbsPath::camRatio = vector<double>();
+std::vector<double> NurbsPath::camRatio = std::vector<double>();
 
-vector<PointXY> 
-NurbsPath::getNurbsPath(vector<PointXY>& origP,  
+std::vector<PointXY> 
+NurbsPath::getNurbsPath(std::vector<PointXY>& origP,  
                         unsigned int nump, int inter_by_dist){
-  list<PGNode*> pgnl;
-  list<PGNode*> freepgnl;
+  std::list<PGNode*> pgnl;
+  std::list<PGNode*> freepgnl;
   for(unsigned int i=0; i<origP.size();i++){
     PGNode* p = new PGNode();
     p->point.x = origP[i].x;
@@ -33,9 +33,9 @@ NurbsPath::getNurbsPath(vector<PointXY>& origP,
     freepgnl.push_back(p);
   }
 
-  vector<PointXY> vec = getNurbsPath(pgnl,nump,inter_by_dist);
+  std::vector<PointXY> vec = getNurbsPath(pgnl,nump,inter_by_dist);
 
-  for(list<PGNode*>::iterator it = freepgnl.begin();it!=freepgnl.end();it++) {
+  for(std::list<PGNode*>::iterator it = freepgnl.begin();it!=freepgnl.end();it++) {
     PGNode *p = *it;
     delete p;
   }
@@ -52,18 +52,18 @@ NurbsPath::getNurbsPath(vector<PointXY>& origP,
  * @param nump  number of points, which should be computed for the smoothed path
  * @return vector of PointXYs representing the smoothed path
  */
-vector<PointXY> 
-NurbsPath::getNurbsPath(list<PGNode*>& origP,  
+std::vector<PointXY> 
+NurbsPath::getNurbsPath(std::list<PGNode*>& origP,  
                         unsigned int nump, int inter_by_dist){
   ivN = origP.size();
   if(ivN<=1){
-    vector<PointXY> pv;
+    std::vector<PointXY> pv;
     return pv;
   }
 
   //hack for short paths
   if(ivN==2){
-    list<PGNode*>::iterator it = origP.begin();
+    std::list<PGNode*>::iterator it = origP.begin();
     PGNode* tmpStart = *it;
     it++;
     origP.push_back(*it);
@@ -71,7 +71,7 @@ NurbsPath::getNurbsPath(list<PGNode*>& origP,
     ivN=4;
   }
   if(ivN==3){
-    list<PGNode*>::iterator it = origP.begin();
+    std::list<PGNode*>::iterator it = origP.begin();
     it++;
     origP.insert(it, (*it));
     ivN=4;
@@ -80,7 +80,7 @@ NurbsPath::getNurbsPath(list<PGNode*>& origP,
 
   float *origPX = new float[ivN];
   float *origPY = new float[ivN];
-  list<PGNode*>::iterator it;
+  std::list<PGNode*>::iterator it;
   unsigned int i=0;
   for(it=origP.begin();it!=origP.end();it++,i++){
     origPX[i] = (*it)->point.x;
@@ -108,7 +108,7 @@ NurbsPath::getNurbsPath(list<PGNode*>& origP,
   for(i=ivNumKnots-ivDegree;i<=ivNumKnots;i++)
     ivpKnots[i] = 1.f;
 
-  vector<PointXY> nurbsPath;
+  std::vector<PointXY> nurbsPath;
   nurbsPath.reserve(ivNumP);
   PointXY outPoint;
   float out[2]={0,0};

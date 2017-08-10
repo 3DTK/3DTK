@@ -10,11 +10,8 @@
 
 #include <cmath>
 #include <iostream>
-using std::ostream;
-using std::istream;
 
 #include <stdexcept>
-using std::runtime_error;
 
 /**
  * @brief Representation of a point in 3D space
@@ -68,8 +65,8 @@ public:
 
   inline void transform(const double alignxf[16]);
   inline double distance(const Point& p);
-  inline friend ostream& operator<<(ostream& os, const Point& p);
-  inline friend istream& operator>>(istream& is, Point& p);
+  inline friend std::ostream& operator<<(std::ostream& os, const Point& p);
+  inline friend std::istream& operator>>(std::istream& is, Point& p);
 
   // also public; set/get functions not necessary here
   /// x coordinate in 3D space

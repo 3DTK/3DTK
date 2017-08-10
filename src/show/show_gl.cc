@@ -91,7 +91,7 @@ void DrawPoints(GLenum mode, bool interruptable)
 
         glColor4f(1.0, 0.0, 0.0,1.0);
         glPointSize(pointsize + 2.0);
-        for ( set<sfloat*>::iterator it = selected_points[iterator].begin();
+        for ( std::set<sfloat*>::iterator it = selected_points[iterator].begin();
             it != selected_points[iterator].end(); it++) {
           glLoadName(name++);
           glBegin(GL_POINTS);
@@ -114,7 +114,7 @@ void DrawPoints(GLenum mode, bool interruptable)
       }
       glPointSize(pointsize);
 
-      vector<int> sequence;
+      std::vector<int> sequence;
       calcPointSequence(sequence, current_frame);
       for(unsigned int i = 0; i < sequence.size(); i++) {
         int iterator = sequence[i];
@@ -174,7 +174,7 @@ void DrawPoints(GLenum mode, bool interruptable)
           glColor4f(1.0, 0.0, 0.0, 1.0);
           glPointSize(pointsize + 2.0);
           glBegin(GL_POINTS);
-          for ( set<sfloat*>::iterator it = selected_points[iterator].begin();
+          for ( std::set<sfloat*>::iterator it = selected_points[iterator].begin();
               it != selected_points[iterator].end(); it++) {
             glVertex3d((*it)[0], (*it)[1], (*it)[2]);
           }
@@ -392,7 +392,7 @@ void DrawScala() {
 		sprintf(yticktext[i-1], "%.*lf", precision, tick);
 	}
 
-	int maxtext = max(strlen(ymaxtext), strlen(yhalftext));
+	int maxtext = std::max(strlen(ymaxtext), strlen(yhalftext));
 
 	int textoffset = 5;
 	int offset = textoffset + 8 * maxtext + 10;
@@ -648,11 +648,11 @@ void DisplayItFunc(GLenum mode, bool interruptable)
       // --> threshold at which the last color bit is gone due to fog
       if (show_fog==1) {
         fogMode = GL_EXP;
-        fardistance = min(5.54517744 / fogDensity, (double)maxfardistance);
+        fardistance = std::min(5.54517744 / fogDensity, (double)maxfardistance);
       }
       else if (show_fog==2) {
         fogMode = GL_EXP2;
-        fardistance = min(sqrt(5.54517744) / fogDensity,
+        fardistance = std::min(sqrt(5.54517744) / fogDensity,
                           (double)maxfardistance);
       }
       else if (show_fog==3) {
@@ -888,9 +888,9 @@ void callDeleteCamera(int dummy){
  
   // iterator for the position of camera
   // in the camera list
-  vector<Point>::iterator position;
-  vector<Point>::iterator positionL;
-  vector<Point>::iterator positionU;
+  std::vector<Point>::iterator position;
+  std::vector<Point>::iterator positionL;
+  std::vector<Point>::iterator positionU;
 
   // calculate the position of the camera. we are referring
   // to the selected camera
@@ -1071,8 +1071,8 @@ void CallBackIdleFunc(void)
     update_callback();
 
     if (save_animation) {
-      string filename = scan_dir + "animframe" + to_string(frameNr,5) + ".ppm";
-      cout << "write " << filename << endl;
+      std::string filename = scan_dir + "animframe" + to_string(frameNr,5) + ".ppm";
+      std::cout << "write " << filename << std::endl;
       int tmpUpdate = haveToUpdate;
       glWriteImagePPM(filename.c_str(), factor, 0);
       haveToUpdate = tmpUpdate;
@@ -1080,19 +1080,19 @@ void CallBackIdleFunc(void)
 	  // per default no conversion program available in Win
 #ifndef _WIN32
 	  if (anim_convert_jpg) {
-		  string jpgname = scan_dir + "animframe" + to_string(frameNr,5) + ".jpg";
-		  string systemcall = "convert -quality 100 -type TrueColor "
+		  std::string jpgname = scan_dir + "animframe" + to_string(frameNr,5) + ".jpg";
+		  std::string systemcall = "convert -quality 100 -type TrueColor "
 			  + filename + " " + jpgname;     
 		  // cout << systemcall << endl;
 		  int ret = system(systemcall.c_str());
 		  if (ret == -1) {
-			  cerr << "child process cannot be created (-1): " << systemcall << endl;
+			  std::cerr << "child process cannot be created (-1): " << systemcall << std::endl;
 		  } else if (ret == 0) {
 			  systemcall = "rm " + filename;
 			  system(systemcall.c_str()); // ignore if removing doesn't work
-			  cerr << "converted " << filename << " to " << jpgname << ".jpg" << endl;
+			  std::cerr << "converted " << filename << " to " << jpgname << ".jpg" << std::endl;
 		  } else {
-			  cerr << "unknown error " << ret << " when running: " << systemcall << endl;
+			  std::cerr << "unknown error " << ret << " when running: " << systemcall << std::endl;
 		  }
 	  }
 #endif
@@ -1124,7 +1124,7 @@ void CallBackIdleFunc(void)
       haveToUpdate = 4;
       return;
     }
-    cout << path_iterator << " " << ups.size() << endl;
+    std::cout << path_iterator << " " << ups.size() << std::endl;
     if((false && path_iterator < path_vectorX.size()) || (true && path_iterator < ups.size())){   // standard animation case
 
       // call the path animation function
@@ -1139,28 +1139,28 @@ void CallBackIdleFunc(void)
 
       // save the animation
       if(save_animation){
-        string filename = scan_dir + "animframe"
+        std::string filename = scan_dir + "animframe"
           + to_string(path_iterator,5) + ".ppm";
-        cout << "written " << filename << " of "
-             << path_vectorX.size() << " files" << endl;
+        std::cout << "written " << filename << " of "
+             << path_vectorX.size() << " files" << std::endl;
         glWriteImagePPM(filename.c_str(), factor, 0);
         haveToUpdate = 8;
 
 #ifndef _WIN32
 		if (anim_convert_jpg) {
-			string jpgname = scan_dir + "animframe"
+			std::string jpgname = scan_dir + "animframe"
 				+ to_string(path_iterator, 5) + ".jpg";
-			string systemcall = "convert -quality 100 "
+			std::string systemcall = "convert -quality 100 "
 				+ filename + " " + jpgname;
 			int ret = system(systemcall.c_str());
 			if (ret == -1) {
-				cerr << "child process cannot be created (-1): " << systemcall << endl;
+				std::cerr << "child process cannot be created (-1): " << systemcall << std::endl;
 			} else if (ret == 0) {
 				systemcall = "rm " + filename;
 				system(systemcall.c_str()); // ignore if removing doesn't work
-				cerr << "converted " << filename << " to " << jpgname << ".jpg" << endl;
+				std::cerr << "converted " << filename << " to " << jpgname << ".jpg" << std::endl;
 			} else {
-				cerr << "unknown error " << ret << " when running: " << systemcall << endl;
+				std::cerr << "unknown error " << ret << " when running: " << systemcall << std::endl;
 			}
 		}
 #endif
@@ -1200,28 +1200,28 @@ void CallBackIdleFunc(void)
 
       // save the animation
       if(save_animation){
-        string filename = scan_dir + "animframe"
+        std::string filename = scan_dir + "animframe"
           + to_string(path_iterator,5) + ".ppm";
 
-        cout << "written " << filename << " of "
-             << path_vectorX.size() << " files" << endl;
+        std::cout << "written " << filename << " of "
+             << path_vectorX.size() << " files" << std::endl;
         glWriteImagePPM(filename.c_str(), factor, 0);
 		// per default no conversion program available in Win, stick with PPM
 #ifndef _WIN32
 		if (anim_convert_jpg) {
-			string jpgname = scan_dir + "animframe"
+			std::string jpgname = scan_dir + "animframe"
 				+ to_string(path_iterator,5) + ".jpg";
-			string systemcall = "convert -quality 100 "
+			std::string systemcall = "convert -quality 100 "
 				+ filename + " " + jpgname;     
 			int ret = system(systemcall.c_str());
 			if (ret == -1) {
-				cerr << "child process cannot be created (-1): " << systemcall << endl;
+				std::cerr << "child process cannot be created (-1): " << systemcall << std::endl;
 			} else if (ret == 0) {
 				systemcall = "rm " + filename;
 				system(systemcall.c_str()); // ignore if removing doesn't work
-				cerr << "converted " << filename << " to " << jpgname << ".jpg" << endl;
+				std::cerr << "converted " << filename << " to " << jpgname << ".jpg" << std::endl;
 			} else {
-				cerr << "unknown error " << ret << " when running: " << systemcall << endl;
+				std::cerr << "unknown error " << ret << " when running: " << systemcall << std::endl;
 			}
 		}
 #endif
@@ -1421,15 +1421,15 @@ void selectPoints(int x, int y) {
         sfloat *sp = 0;
         octpts[iterator]->selectRay(sp);
         if (sp != 0) {
-          cout << "Selected point: "
-               << sp[0] << " " << sp[1] << " " << sp[2] << endl;
+          std::cout << "Selected point: "
+               << sp[0] << " " << sp[1] << " " << sp[2] << std::endl;
 
           if (sp2 != 0) {
-            cout << "Distance to last point: "
+            std::cout << "Distance to last point: "
                  << sqrt( sqr(sp2[0] - sp[0]) +
                           sqr(sp2[1] - sp[1]) +
                           sqr(sp2[2] - sp[2])  )
-                 << endl; 
+                 << std::endl; 
           }
           sp2 = sp;
 
@@ -1740,7 +1740,7 @@ void glDumpWindowPPM(const char *filename, GLenum mode)
   int i,j,k,l;                  // Counter variables
   GLubyte *buffer;              // The GL Frame Buffer
   unsigned char *ibuffer;       // The PPM Output Buffer
-  ofstream fp;                  // The PPM File
+  std::ofstream fp;                  // The PPM File
 
   GLint viewport[4];
   glGetIntegerv(GL_VIEWPORT, viewport);
@@ -1758,12 +1758,12 @@ void glDumpWindowPPM(const char *filename, GLenum mode)
                         GL_RGBA, GL_UNSIGNED_BYTE, buffer);
 
   // Open the output file
-  fp.open(filename, ios::out);
+  fp.open(filename, std::ios::out);
 
   // Write a proper P6 PPM header
-  fp << "P6" << endl
+  fp << "P6" << std::endl
      << "# CREATOR: 3D_Viewer by Andreas Nuechter, University of Osnabrueck"
-     << endl << win_width  << " " << win_height << " " << UCHAR_MAX << endl;
+     << std::endl << win_width  << " " << win_height << " " << UCHAR_MAX << std::endl;
 
   // Loop through the frame buffer data, writing to the PPM file.  Be careful
   //   to account for the frame buffer having 4 bytes per pixel while the
@@ -1832,7 +1832,7 @@ void glWriteImagePPM(const char *filename, int scale, GLenum mode)
     } else {
       part_height = (2*pzoom)/scale;
       part_width = (2*pzoom*aspect)/scale;
-      cout << part_width << " " << part_height << endl;
+      std::cout << part_width << " " << part_height << std::endl;
     }
     // Calculate part parameters
     GLint viewport[4];
@@ -1928,16 +1928,16 @@ void glWriteImagePPM(const char *filename, int scale, GLenum mode)
     haveToUpdate=2;
     DisplayItFunc(mode);
 
-    ofstream fp;                  // The PPM File
+    std::ofstream fp;                  // The PPM File
 
     // Open the output file - need to open in binary mode to avoid formatting of special characters! (for example '\n'-character as '0x0D 0x0A' in Windows!)
-    fp.open(filename, ios::out | ios::binary);
+    fp.open(filename, std::ios::out | std::ios::binary);
 
     // Write a proper P6 PPM header
-    fp << "P6" << endl
+    fp << "P6" << std::endl
        << "# CREATOR: 3D_Viewer by Dorit Borrmann, Jacobs University Bremen"
-       << endl
-       << image_width  << " " << image_height << " " << UCHAR_MAX << endl;
+       << std::endl
+       << image_width  << " " << image_height << " " << UCHAR_MAX << std::endl;
 
     // Write output buffer to the file 
     fp.write((const char*)ibuffer,
@@ -2016,8 +2016,8 @@ void ProcessHitsFunc(GLint hits, GLuint buffer[])
 {
   // cout << "SIZE " << selected_points[0].size() << endl;
   // cout << "processing " << endl;
-  set<int> names;
-  set<sfloat *> unsel_points;
+  std::set<int> names;
+  std::set<sfloat *> unsel_points;
 
   GLuint *ptr, nr_names;
 
@@ -2036,12 +2036,12 @@ void ProcessHitsFunc(GLint hits, GLuint buffer[])
   if (names.empty()) return;
 
   int index = 0;
-  set<int>::iterator nit = names.begin(); 
+  std::set<int>::iterator nit = names.begin(); 
   // find the respective name
 
   for(int iterator = (int)octpts.size()-1; iterator >= 0; iterator--) {
     // iterate over the selected points as in DrawPoints
-    for ( set<sfloat*>::iterator it = selected_points[iterator].begin();
+    for ( std::set<sfloat*>::iterator it = selected_points[iterator].begin();
         it != selected_points[iterator].end(); it++) {
       if (index == *nit) { // if the current index is the current name
         unsel_points.insert(*it);
@@ -2054,8 +2054,8 @@ void ProcessHitsFunc(GLint hits, GLuint buffer[])
 
   Done:
 
-  cout << "Erasing " << endl;
-  for (set<sfloat*>::iterator it = unsel_points.begin(); 
+  std::cout << "Erasing " << std::endl;
+  for (std::set<sfloat*>::iterator it = unsel_points.begin(); 
       it != unsel_points.end(); it++) {
     // iterate to the index as indicated by the name *ptr
     for(int iterator = (int)octpts.size()-1; iterator >= 0; iterator--) {
@@ -2064,7 +2064,7 @@ void ProcessHitsFunc(GLint hits, GLuint buffer[])
     }
   }
 
-  cout << "processing done" << endl;
+  std::cout << "processing done" << std::endl;
 }
 
 
@@ -2141,7 +2141,7 @@ void drawRobotPath(int dummy)
   * Nurbs path. There will be an equal number of intermediate positions between
   * neighboring cameras.
   */
-void calcInterpolatedCameras(vector<PointXY> vec1, vector<PointXY> vec2) {
+void calcInterpolatedCameras(std::vector<PointXY> vec1, std::vector<PointXY> vec2) {
 // TODO incorporate the scaling factor!
   NurbsPath::camRatio.clear();
   double distance = 0.0;
@@ -2177,7 +2177,7 @@ void calcInterpolatedCameras(vector<PointXY> vec1, vector<PointXY> vec2) {
   * Calculates the number of interpolation points for the camera path based on
   * the length of the path
   */
-int calcNoOfPoints(vector<PointXY> vec1, vector<PointXY> vec2)
+int calcNoOfPoints(std::vector<PointXY> vec1, std::vector<PointXY> vec2)
 {
   double distance = 0.0;
   double dx, dy, dz;
@@ -2359,10 +2359,10 @@ void callCameraUpdate(int dummy)
   updateCamera();
 }
 
-void calcPointSequence(vector<int> &sequence, int frameNr)
+void calcPointSequence(std::vector<int> &sequence, int frameNr)
 {
   sequence.clear();
-  vector<pair<double, int> > dists;
+  std::vector<std::pair<double, int> > dists;
   double x,y,z;
  
   for (unsigned int i = 0; i < octpts.size(); i++) {
@@ -2379,7 +2379,7 @@ void calcPointSequence(vector<int> &sequence, int frameNr)
     x = frame[12];
     y = frame[13];
     z = frame[14];
-    dists.push_back( pair<double, int>(sqr(X + x) + sqr(Y + y) + sqr(Z + z),
+    dists.push_back( std::pair<double, int>(sqr(X + x) + sqr(Y + y) + sqr(Z + z),
                                        i) );
   }
 

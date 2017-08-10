@@ -12,8 +12,6 @@
 #include "slam6d/globals.icc"
 
 #include <string>
-using std::string;
-using std::cerr;
 
 /**
  * Make type, start and end a write once only class for parseFormatFile because
@@ -31,6 +29,6 @@ private:
   bool written;
 };
 
-void parseFormatFile(string& dir, WriteOnce<IOType>& type, WriteOnce<int>& start, WriteOnce<int>& end);
+void parseFormatFile(std::string& dir, WriteOnce<IOType>& type, WriteOnce<int>& start, WriteOnce<int>& end);
 
 #endif

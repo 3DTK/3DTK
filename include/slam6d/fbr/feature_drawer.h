@@ -24,25 +24,25 @@ namespace fbr{
   class feature_drawer{
     
     void _DrawKeypoint( cv::Mat& img, const cv::KeyPoint& p, const cv::Scalar& color, int flags );
-    void _PrepareImgAndDrawKeypoints( const cv::Mat& img1, const vector<cv::KeyPoint>& keypoints1,
-				      const cv::Mat& img2, const vector<cv::KeyPoint>& keypoints2,
+    void _PrepareImgAndDrawKeypoints( const cv::Mat& img1, const std::vector<cv::KeyPoint>& keypoints1,
+				      const cv::Mat& img2, const std::vector<cv::KeyPoint>& keypoints2,
 				      cv::Mat& outImg, cv::Mat& outImg1, cv::Mat& outImg2,
 				      const cv::Scalar& singlePointColor, int flags );
     void _DrawMatch( cv::Mat& outImg, cv::Mat& outImg1, cv::Mat& outImg2 ,
 		     const cv::KeyPoint& kp1, const cv::KeyPoint& kp2, const cv::Scalar& matchColor, int flags );
   public:
-    void DrawKeypoints( const cv::Mat& image, const vector<cv::KeyPoint>& keypoints, cv::Mat& outImage,
+    void DrawKeypoints( const cv::Mat& image, const std::vector<cv::KeyPoint>& keypoints, cv::Mat& outImage,
 			const cv::Scalar& _color, int flags );
-    void DrawMatches( const cv::Mat& img1, const vector<cv::KeyPoint>& keypoints1,
-		      const cv::Mat& img2, const vector<cv::KeyPoint>& keypoints2,
-		      const vector<cv::DMatch>& matches1to2, cv::Mat& outImg,
+    void DrawMatches( const cv::Mat& img1, const std::vector<cv::KeyPoint>& keypoints1,
+		      const cv::Mat& img2, const std::vector<cv::KeyPoint>& keypoints2,
+		      const std::vector<cv::DMatch>& matches1to2, cv::Mat& outImg,
 		      const cv::Scalar& matchColor, const cv::Scalar& singlePointColor,
-		      const vector<char>& matchesMask, int flags );
-    void DrawMatches( const cv::Mat& img1, const vector<cv::KeyPoint>& keypoints1,
-		      const cv::Mat& img2, const vector<cv::KeyPoint>& keypoints2,
-		      const vector<vector<cv::DMatch> >& matches1to2, cv::Mat& outImg,
+		      const std::vector<char>& matchesMask, int flags );
+    void DrawMatches( const cv::Mat& img1, const std::vector<cv::KeyPoint>& keypoints1,
+		      const cv::Mat& img2, const std::vector<cv::KeyPoint>& keypoints2,
+		      const std::vector<std::vector<cv::DMatch> >& matches1to2, cv::Mat& outImg,
 		      const cv::Scalar& matchColor, const cv::Scalar& singlePointColor,
-		      const vector<vector<char> >& matchesMask, int flags );
+		      const std::vector<std::vector<char> >& matchesMask, int flags );
   };
 }
 #endif /*FEATURE_DRAWER_H*/

@@ -10,13 +10,9 @@
 #include <stdio.h>
 
 #include <vector>
-using std::vector;
 #include <deque>
-using std::deque;
 #include <set>
-using std::set;
 #include <list>
-using std::list;
 #include <iostream>
 #include <fstream>
 #include <string>

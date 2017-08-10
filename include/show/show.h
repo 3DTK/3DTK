@@ -25,9 +25,7 @@
 #endif
 
 #include <string>
-using std::string;
 #include <vector>
-using std::vector;
 
 #include "show/PathGraph.h"
 #include "show/colormanager.h"
@@ -59,7 +57,7 @@ void DrawUrl();
 void glDumpWindowPPM(const char *filename, GLenum mode);
 void glWriteImagePPM(const char *filename, int scale, GLenum mode);
 void ProcessHitsFunc(GLint hits, GLuint buffer[]);
-int parseArgs(int argc, char **argv, string &dir, int& start, int& end, int& maxDist, bool& wanim, bool &readInitial);
+int parseArgs(int argc, char **argv, std::string &dir, int& start, int& end, int& maxDist, bool& wanim, bool &readInitial);
 void usage(char * prog);
 void myNewMenu();
 void topView();
@@ -98,9 +96,9 @@ void InterfaceFunc(unsigned char key);
 void updateCamera();
 void drawRobotPath(int dummy);
 int calcFrameNo();
-int calcNoOfPoints(vector<PointXY>, vector<PointXY>);
-void calcInterpolatedCameras(vector<PointXY>, vector<PointXY>);
-void calcPointSequence(vector<int> &sequence, int frameNr);
+int calcNoOfPoints(std::vector<PointXY>, std::vector<PointXY>);
+void calcInterpolatedCameras(std::vector<PointXY>, std::vector<PointXY>);
+void calcPointSequence(std::vector<int> &sequence, int frameNr);
 
 void createDisplayLists(bool reduced=false);
 

@@ -214,7 +214,7 @@ inline bool Point::operator==(const Point &p) const
 /**
  *  Overridden "<<" operator for sending a point to a stream
  */
-inline ostream& operator<<(ostream& os, const Point& p) {
+inline std::ostream& operator<<(std::ostream& os, const Point& p) {
   os << p.x << " " << p.y << " " << p.z << " (";
   os << p.nx << " " << p.ny << " " << p.nz << " ";
   os << (int)p.rgb[0] << " " << (int)p.rgb[1] << " " << (int)p.rgb[2] << ")";
@@ -225,12 +225,12 @@ inline ostream& operator<<(ostream& os, const Point& p) {
  *  Overridden ">>" operator for reading a point from a stream.
  *  Throws a runtime error if not enough data in the stream.
  */
-inline istream& operator>>(istream& is, Point& p) {
-  if (!is.good()) throw runtime_error("Not enough elements to read for >>(istream&, Point).1");
+inline std::istream& operator>>(std::istream& is, Point& p) {
+  if (!is.good()) throw std::runtime_error("Not enough elements to read for >>(istream&, Point).1");
   is >> p.x;
-  if (!is.good()) throw runtime_error("Not enough elements to read for >>(istream&, Point).2");
+  if (!is.good()) throw std::runtime_error("Not enough elements to read for >>(istream&, Point).2");
   is >> p.y;
-  if (!is.good()) throw runtime_error("Not enough elements to read for >>(istream&, Point).3");
+  if (!is.good()) throw std::runtime_error("Not enough elements to read for >>(istream&, Point).3");
   is >> p.z;
   return is;
 }
