@@ -8,7 +8,6 @@
 #define __GHELIX_Q2_H__
 
 #include <vector>
-using std::vector;
 
 #include "graphSlam6D.h"
 #include "icp6D.h"

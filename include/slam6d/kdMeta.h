@@ -54,7 +54,7 @@ class KDtreeMetaManaged :
     private KDTreeImpl<const DataXYZ* const*, Index, IndexAccessor, double*, IndexAccessor>
 {
 public:
-  KDtreeMetaManaged(const vector<Scan*>& scans);
+  KDtreeMetaManaged(const std::vector<Scan*>& scans);
   virtual ~KDtreeMetaManaged();
   
   virtual void lock();
@@ -75,8 +75,8 @@ private:
 
   // constructor initializer list hacks
   Index* m_temp_indices;
-  Index* prepareTempIndices(const vector<Scan*>& scans);
-  unsigned int getPointsSize(const vector<Scan*>& scans);
+  Index* prepareTempIndices(const std::vector<Scan*>& scans);
+  unsigned int getPointsSize(const std::vector<Scan*>& scans);
 };
 
 #endif

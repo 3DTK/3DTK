@@ -18,7 +18,6 @@
 #endif
 
 #include <vector>
-using std::vector;
 
 #ifdef _OPENMP
 #include <omp.h>
@@ -27,9 +26,6 @@ using std::vector;
 #include "ptpair.h"
 
 #include <iostream>
-using std::cout;
-using std::cerr;
-using std::endl;
 #include <stdlib.h>
 
 class icp6Dminimizer {
@@ -54,7 +50,7 @@ public:
   // Scan Registration Problem, Journal Computer Vision and Image
   // Understanding (CVIU), Elsevier Science, Volume 114, Issue 8,
   // pp. 963-980, August 2010.
-  virtual double Align(const vector<PtPair>& Pairs,
+  virtual double Align(const std::vector<PtPair>& Pairs,
 				   double *alignxf,
 				   const double centroid_m[3],
 				   const double centroid_d[3]) = 0;
@@ -70,7 +66,7 @@ public:
 						  const double Si[OPENMP_NUM_THREADS][9], 
 						  double *alignxf)
   {
-    cout << "this function is not implemented!!!" << endl;
+    std::cout << "this function is not implemented!!!" << std::endl;
     exit(-1);
   }
   virtual double Align_Parallel(const int openmp_num_threads, 
@@ -78,10 +74,10 @@ public:
 						  const double sum[OPENMP_NUM_THREADS], 
 						  const double centroid_m[OPENMP_NUM_THREADS][3],
 						  const double centroid_d[OPENMP_NUM_THREADS][3], 
-						  const vector<PtPair> pairs[OPENMP_NUM_THREADS],
+						  const std::vector<PtPair> pairs[OPENMP_NUM_THREADS],
 						  double *alignxf)
   {
-    cout << "this function is not implemented!!!" << endl;
+    std::cout << "this function is not implemented!!!" << std::endl;
     exit(-1);
   }
 

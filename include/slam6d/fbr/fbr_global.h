@@ -34,7 +34,6 @@
 #else
 #include "XGetopt.h"
 #endif
-using namespace std;
 
 namespace fbr{
   
@@ -44,7 +43,7 @@ namespace fbr{
   //#define MAX_ANGLE 90.0
   //#define MIN_ANGLE -65.0
 
-  typedef tuple<double, double, double, unsigned int> Color_Value_Tuple;
+  typedef std::tuple<double, double, double, unsigned int> Color_Value_Tuple;
   
   /**
    * @enum scanner_type
@@ -169,35 +168,35 @@ namespace fbr{
   //Inlier influence                                                     
 #define iInfluence 0.5
 
-  string scanFormatToString(IOType format);
-  IOType stringToScanFormat(string format);
-  string scannerTypeToString(scanner_type type);
-  scanner_type stringToScannerType(string type);
-  string projectionMethodToString(projection_method method);
-  projection_method stringToProjectionMethod(string method);
-  string panoramaMapMethodToString(panorama_map_method method);
-  panorama_map_method stringToPanoramaMapMethod(string method);
-  string panoramaFormatToString(panorama_format format);
-  string panoramaFormatToFileFormatString(panorama_format format);
-  panorama_format stringToPanoramaFormat(string format);
-  string panoramaTypeToString(panorama_type type);
-  panorama_type stringToPanoramaType(string type);
-  string featureDetectorMethodToString(feature_detector_method method);
-  feature_detector_image_method stringToFeatureDetectorImageMethod(string method);
-  string featureDetectorImageMethodToString(feature_detector_image_method method);
-  feature_detector_method stringToFeatureDetectorMethod(string method);
-  string featureDescriptorMethodToString(feature_descriptor_method method);
-  feature_descriptor_method stringToFeatureDescriptorMethod(string method);
-  string matcherMethodToString(matcher_method method);
-  matcher_method stringToMatcherMethod(string method);
-  string registrationMethodToString(registration_method method);
-  registration_method stringToRegistrationMethod(string method);
-  string featureFiltrationMethodToString(feature_filtration_method method);
-  feature_filtration_method stringToFeatureFiltrationMethod(string method);
-  string matchingFiltrationMethodToString(matching_filtration_method method);
-  matching_filtration_method stringToMatchingFiltrationMethod(string method);
-  string recoveredRangeFilterationMethodToString(recovered_range_filteration_method method);
-  recovered_range_filteration_method stringToRecoveredRangeFilterationMethod(string method);
+  std::string scanFormatToString(IOType format);
+  IOType stringToScanFormat(std::string format);
+  std::string scannerTypeToString(scanner_type type);
+  scanner_type stringToScannerType(std::string type);
+  std::string projectionMethodToString(projection_method method);
+  projection_method stringToProjectionMethod(std::string method);
+  std::string panoramaMapMethodToString(panorama_map_method method);
+  panorama_map_method stringToPanoramaMapMethod(std::string method);
+  std::string panoramaFormatToString(panorama_format format);
+  std::string panoramaFormatToFileFormatString(panorama_format format);
+  panorama_format stringToPanoramaFormat(std::string format);
+  std::string panoramaTypeToString(panorama_type type);
+  panorama_type stringToPanoramaType(std::string type);
+  std::string featureDetectorMethodToString(feature_detector_method method);
+  feature_detector_image_method stringToFeatureDetectorImageMethod(std::string method);
+  std::string featureDetectorImageMethodToString(feature_detector_image_method method);
+  feature_detector_method stringToFeatureDetectorMethod(std::string method);
+  std::string featureDescriptorMethodToString(feature_descriptor_method method);
+  feature_descriptor_method stringToFeatureDescriptorMethod(std::string method);
+  std::string matcherMethodToString(matcher_method method);
+  matcher_method stringToMatcherMethod(std::string method);
+  std::string registrationMethodToString(registration_method method);
+  registration_method stringToRegistrationMethod(std::string method);
+  std::string featureFiltrationMethodToString(feature_filtration_method method);
+  feature_filtration_method stringToFeatureFiltrationMethod(std::string method);
+  std::string matchingFiltrationMethodToString(matching_filtration_method method);
+  matching_filtration_method stringToMatchingFiltrationMethod(std::string method);
+  std::string recoveredRangeFilterationMethodToString(recovered_range_filteration_method method);
+  recovered_range_filteration_method stringToRecoveredRangeFilterationMethod(std::string method);
   
   //reflecrtance normaliation
   float normalizeTheReflectance(float reflecrtance, scanner_type sType, double minReflectance, double maxReflectance);
@@ -205,14 +204,14 @@ namespace fbr{
   //color compare to sort color_value_Tuples in first three color order
   bool colorCompare (const Color_Value_Tuple &lTuple, const Color_Value_Tuple &rTuple);
   //get all rgb colors sorted based on hsv
-  vector<unsigned int> getAllRGBSortedByHSL(unsigned int size = 4096);
+  std::vector<unsigned int> getAllRGBSortedByHSL(unsigned int size = 4096);
   //get all rgb colors sorted based on hsl
-  vector<unsigned int> getAllRGBSortedByHSV(unsigned int size = 4096);
+  std::vector<unsigned int> getAllRGBSortedByHSV(unsigned int size = 4096);
   //get all rgb colors sorted based on rgb
-  vector<unsigned int> getAllRGBSortedByRGB(unsigned int size = 4096);
+  std::vector<unsigned int> getAllRGBSortedByRGB(unsigned int size = 4096);
 
   //get all rgb colors sorted based on RBGB
-  vector<unsigned int> getAllRGBSortedByRBGB();
+  std::vector<unsigned int> getAllRGBSortedByRBGB();
 
   //convert color value to rgb 1 bit by 1 bit
   void colorToRGB1BitBy1Bit(unsigned int color, unsigned int &R, unsigned int &G, unsigned int &B);

@@ -2,10 +2,8 @@
 #define __GRIDLINES_H_
 
 #include <vector>
-using std::vector;
 
 #include <string>
-using std::string;
 #include "grid/grid.h"
 #include "grid/line.h"
 
@@ -26,7 +24,7 @@ class gridlines
     double isSolidPoint;
 
     /** contains all lines of the grid */
-    vector<line> lines;
+    std::vector<line> lines;
 
  public:
     /** @brief CTOR */
@@ -38,13 +36,13 @@ class gridlines
     void createLines(grid* g, int max_distance);
 
     /** @brief Returns the vector with the lines */
-    vector<line>* getLines();
+    std::vector<line>* getLines();
 
     /** @brief Writes the lines to a gnuplot file */
-    void writeGnuPlot(string file);
+    void writeGnuPlot(std::string file);
 
     /** @brief Writes the lines to a lin file */
-    void writeLin(string file);
+    void writeLin(std::string file);
 };
 
 #endif

@@ -9,17 +9,11 @@
 
 #include <fstream>
 #include <iostream>
-using std::cout;
-using std::cerr;
-using std::endl;
-using std::ifstream;
-using std::ofstream;
 
 #include "slam6d/point.h"
 #include "slam6d/globals.icc"
 #include <string.h>
 #include <exception>
-using std::exception;
 
 #ifndef _MSC_VER
 #include <unistd.h>
@@ -45,30 +39,30 @@ int parseArgs(int argc,char **argv, char dir[255], int& start, int& end){
   extern char *optarg;
   extern int optind;
 
-  cout << endl;
+  std::cout << std::endl;
   while ((c = getopt (argc, argv, "s:e:h")) != -1)
     switch (c)
    {
    case 's':
      start = atoi(optarg);
-     if (start < 0) { cerr << "Error: Cannot start at a negative scan number.\n"; exit(1); }
+     if (start < 0) { std::cerr << "Error: Cannot start at a negative scan number.\n"; exit(1); }
      break;
    case 'e':
      end = atoi(optarg);
-     if (end < 0)     { cerr << "Error: Cannot end at a negative scan number.\n"; exit(1); }
-     if (end < start) { cerr << "Error: <end> cannot be smaller than <start>.\n"; exit(1); }
+     if (end < 0)     { std::cerr << "Error: Cannot end at a negative scan number.\n"; exit(1); }
+     if (end < start) { std::cerr << "Error: <end> cannot be smaller than <start>.\n"; exit(1); }
      break;
    case 'h':
-     cout << "Usage: " << argv[0] << " [-s START] [-e END] DIRECTORY" << endl;
-     cout << endl;
-     cout << "Converts scans in UOSR format from START to END in DIRECTORY to" << endl;
-     cout << "one single scan in XYZR format in the same directory under a" << endl;
-     cout << "filename of the format scan{START}.xyz" << endl;
+     std::cout << "Usage: " << argv[0] << " [-s START] [-e END] DIRECTORY" << std::endl;
+     std::cout << std::endl;
+     std::cout << "Converts scans in UOSR format from START to END in DIRECTORY to" << std::endl;
+     std::cout << "one single scan in XYZR format in the same directory under a" << std::endl;
+     std::cout << "filename of the format scan{START}.xyz" << std::endl;
      exit(0);
    }
 
   if (optind != argc-1) {
-    cerr << "\n*** Directory missing ***" << endl;
+    std::cerr << "\n*** Directory missing ***" << std::endl;
     exit(0);
   }
   strncpy(dir,argv[optind],255);
@@ -93,13 +87,13 @@ int main(int argc, char **argv)
   char scanFileName[255];
   char outFileName[255];
 
-  ifstream frame_in;
-  ifstream scan_in;
+  std::ifstream frame_in;
+  std::ifstream scan_in;
 
   snprintf(outFileName,255,"%sscan%.3d.xyz",dir,fileCounter);
-  cout << outFileName << endl;
-  ofstream redptsout(outFileName);
-  stringstream outdat;
+  std::cout << outFileName << std::endl;
+  std::ofstream redptsout(outFileName);
+  std::stringstream outdat;
   int pointcnt=0;
   for (;;) {
     if (end > -1 && fileCounter > end) break; // 'nuf read
@@ -113,7 +107,7 @@ int main(int argc, char **argv)
     // read 3D scan
     if (!frame_in.good()) break; // no more files in the directory
 
-    cerr << "Reading frame " << frameFileName << "..." << endl;
+    std::cerr << "Reading frame " << frameFileName << "..." << std::endl;
     int frameCounter = 0;
     double transMat[16];
     //double transMatOpenGL[16];
@@ -124,7 +118,7 @@ int main(int argc, char **argv)
        frame_in >> transMat;
        frame_in >> tmp; 
      
-     } catch (const exception &e) {
+     } catch (const std::exception &e) {
        break;
      }
     }
@@ -132,7 +126,7 @@ int main(int argc, char **argv)
     Point p;
 //    double range, theta, phi, reflectance;
     unsigned int rgb[3];
-    cout.precision(10);
+    std::cout.precision(10);
     while(scan_in.good()) {
   /*    scan_in >> p.z >> p.x >> p.y >> range >> theta >> phi >> reflectance;
    */ //scan_in >> p.z >> p.x >> p.y >> range >> theta >> phi >> reflectance;
@@ -148,7 +142,7 @@ int main(int argc, char **argv)
       //cout << p.y << " " << p.z << " " << -p.x << endl;
       //cout << p.x*0.01 << " " << p.z*0.01 << " " << p.y*0.01 << " " << p.reflectance << endl;
       //cout << (int)p.x << " " << (int)p.y << " " << (int)p.z << endl;// << " " << p.reflectance << endl;
-      outdat << std::setprecision(15) << p.z*0.01 << " " << -p.x*0.01 << " " << p.y*0.01 << " " << rgb[0] << " " << rgb[1] << " " << rgb[2] << endl;
+      outdat << std::setprecision(15) << p.z*0.01 << " " << -p.x*0.01 << " " << p.y*0.01 << " " << rgb[0] << " " << rgb[1] << " " << rgb[2] << std::endl;
       pointcnt++;
       if(pointcnt > 100) {
         redptsout.write(outdat.str().c_str(), outdat.str().size());
@@ -168,7 +162,7 @@ int main(int argc, char **argv)
     scan_in.clear();
     frame_in.close();
     frame_in.clear();
-    cerr << " done." << endl;
+    std::cerr << " done." << std::endl;
   }
   redptsout.close();
   redptsout.clear();

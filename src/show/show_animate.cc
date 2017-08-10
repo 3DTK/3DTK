@@ -9,7 +9,7 @@ void calcUpPath()
   // if camera list is empty then return
   if(cams.empty())	return;
   PointXY temp ;
-  vector<PointXY> ups_listXY, ups_listXZ;
+  std::vector<PointXY> ups_listXY, ups_listXZ;
 
   // to interpolate with the xy coordinate.
   for (unsigned int i = 0; i < ups.size(); i++) {
@@ -41,7 +41,7 @@ void calcLookAtPath()
   // if camera list is empty then return
   if(cams.empty())	return;
   PointXY temp ;
-  vector<PointXY> lookat_listXY, lookat_listXZ;
+  std::vector<PointXY> lookat_listXY, lookat_listXZ;
 
   // to interpolate with the xy coordinate.
   for (unsigned int i = 0; i < lookats.size(); i++) {
@@ -70,7 +70,7 @@ void calcPath()
 {
   if (cams.empty()) return;
   PointXY temp ;
-  vector<PointXY> path_listXY, path_listXZ;
+  std::vector<PointXY> path_listXY, path_listXZ;
 
   // if camera list is empty then return
   // to interpolate with the xy coordinate.
@@ -116,31 +116,31 @@ void updateCamera()
 void savePath(int dummy)
 {
   // output file stream
-  ofstream pathfile;
+  std::ofstream pathfile;
 
   // open the output file
-  pathfile.open(path_file_name, ios::out);
+  pathfile.open(path_file_name, std::ios::out);
    
   // if file not found then show error
   if(!pathfile){
-    cerr << "Error creating the path file." << endl;
+    std::cerr << "Error creating the path file." << std::endl;
     return;
   }
 
   // store all the relevant information about the
   // individual cameras in this file. however, start
   // with the total number of cameras in the first line
-  pathfile << cams.size() << endl;
+  pathfile << cams.size() << std::endl;
   for(unsigned int i =0; i< cams.size();i++) {
-    pathfile << cams[i].x << endl;
-    pathfile << cams[i].y << endl;
-    pathfile << cams[i].z << endl;
-    pathfile << lookats[i].x << endl;
-    pathfile << lookats[i].y << endl;
-    pathfile << lookats[i].z << endl;
-    pathfile << ups[i].x << endl;
-    pathfile << ups[i].y << endl;
-    pathfile << ups[i].z << endl;
+    pathfile << cams[i].x << std::endl;
+    pathfile << cams[i].y << std::endl;
+    pathfile << cams[i].z << std::endl;
+    pathfile << lookats[i].x << std::endl;
+    pathfile << lookats[i].y << std::endl;
+    pathfile << lookats[i].z << std::endl;
+    pathfile << ups[i].x << std::endl;
+    pathfile << ups[i].y << std::endl;
+    pathfile << ups[i].z << std::endl;
   }
 
   // close the file after writing
@@ -167,7 +167,7 @@ void loadPath(int dummy) {
   char buffer[2048];
 
   // file stream
-  fstream pathFile;
+  std::fstream pathFile;
 
   // check if other files are open or not
   if(pathFile.is_open()){
@@ -182,7 +182,7 @@ void loadPath(int dummy) {
   ups.clear();
 
   // open the path file
-  pathFile.open(path_file_name, ios::in);
+  pathFile.open(path_file_name, std::ios::in);
 
   // read the first line containing info
   // about no of cameras in the file
@@ -254,7 +254,7 @@ void loadPose(int dummy) {
   bool invert;
 
   // file stream
-  fstream poseFile;
+  std::fstream poseFile;
 
 
   // check if other files are open or not
@@ -267,9 +267,9 @@ void loadPose(int dummy) {
   }
 
   // open the path file
-  poseFile.open(pose_file_name, ios::in);
+  poseFile.open(pose_file_name, std::ios::in);
   if(!poseFile.good()) {
-    cerr << "Error loading file " << pose_file_name << endl;
+    std::cerr << "Error loading file " << pose_file_name << std::endl;
     return;
   }
  
@@ -296,33 +296,33 @@ void loadPose(int dummy) {
  */
 
 void savePose(int dummy) {
-  cout << "Save" << endl;
+  std::cout << "Save" << std::endl;
   // output file stream
-  ofstream posefile;
+  std::ofstream posefile;
 
   // open the output file
-  posefile.open(pose_file_name, ios::out);
+  posefile.open(pose_file_name, std::ios::out);
    
   // if file not found then show error
   if(!posefile){
-    cerr << "Error creating the pose file." << endl;
+    std::cerr << "Error creating the pose file." << std::endl;
     return;
   }
 
   // store all the relevant information about the
   // individual camera position in this file. 
    
-  posefile << X << " " << Y << " " << Z << endl;
+  posefile << X << " " << Y << " " << Z << std::endl;
   for(int i = 0; i < 4; i++) {
     posefile << quat[i] << " ";
   }
 	posefile << mouseRotX << " " <<  mouseRotY << " " << mouseRotZ << " "
-		    << cangle << endl;
+		    << cangle << std::endl;
 	posefile << showTopView << " " << cameraNavMouseMode << " "
-		    << pzoom << endl;
+		    << pzoom << std::endl;
 	posefile << show_points << " " << show_path << " "
-		    << show_cameras << " " << pointsize << endl;
-	posefile << show_fog << " " << fogDensity << " " << invert << endl;
+		    << show_cameras << " " << pointsize << std::endl;
+	posefile << show_fog << " " << fogDensity << " " << invert << std::endl;
 
   // close the file after writing
   posefile.clear();
@@ -350,29 +350,29 @@ void saveImageAt(const std::string& imageFileName) {
  */
 void saveSelection(int dummy) {
   // output file stream
-  ofstream selectionfile;
+  std::ofstream selectionfile;
 
   // open the output file
-  selectionfile.open(selection_file_name, ios::out);
+  selectionfile.open(selection_file_name, std::ios::out);
    
   // if file not found then show error
   if(!selectionfile){
-    cerr << "Error creating the selection file." << endl;
+    std::cerr << "Error creating the selection file." << std::endl;
     return;
   }
 
   // need higher precision to accurately reload points
   selectionfile.precision(8);
   for(unsigned int i = 0; i < octpts.size(); i++) {
-    selectionfile << "# points from scan nr " << i << endl; 
+    selectionfile << "# points from scan nr " << i << std::endl; 
     // for(int j = 0; j < selected_points[i].size(); j++) {
-    for ( set<sfloat*>::iterator it = selected_points[i].begin();
+    for ( std::set<sfloat*>::iterator it = selected_points[i].begin();
         it != selected_points[i].end(); it++) {
       for (unsigned int k = 0; k < pointtype.getPointDim(); k++) {
 	   //        selectionfile << selected_points[i][j][k] << " ";
         selectionfile << (*it)[k] << " ";
       }
-      selectionfile << endl;
+      selectionfile << std::endl;
     }
   }
 

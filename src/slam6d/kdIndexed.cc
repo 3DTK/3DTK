@@ -24,11 +24,7 @@
 #include "slam6d/globals.icc"
 
 #include <iostream>
-using std::cout;
-using std::cerr;
-using std::endl;
 #include <algorithm>
-using std::swap;
 #include <cmath>
 #include <cstring>
 #include <limits>
@@ -98,11 +94,11 @@ size_t KDtreeIndexed::FindClosestAlongDir(double *_p,
   return params[threadNum].closest;
 }
 
-vector<size_t> KDtreeIndexed::kNearestNeighbors(double *_p,
+std::vector<size_t> KDtreeIndexed::kNearestNeighbors(double *_p,
                                         int _k,
                                         int threadNum) const
 {
-  vector<size_t> result;    
+  std::vector<size_t> result;    
   params[threadNum].closest = 0;
   params[threadNum].p = _p;
   params[threadNum].k = _k;
@@ -130,11 +126,11 @@ vector<size_t> KDtreeIndexed::kNearestNeighbors(double *_p,
 }
 
 
-vector<size_t> KDtreeIndexed::fixedRangeSearchBetween2Points(double *_p,
+std::vector<size_t> KDtreeIndexed::fixedRangeSearchBetween2Points(double *_p,
                       double *_p0,
                       double maxdist2,
                       int threadNum) const {
-  vector<size_t> result;
+  std::vector<size_t> result;
   params[threadNum].p0 = _p0;
   params[threadNum].closest_d2 = maxdist2;
   params[threadNum].p = _p;
@@ -161,11 +157,11 @@ vector<size_t> KDtreeIndexed::fixedRangeSearchBetween2Points(double *_p,
 }
 
 
-vector<size_t> KDtreeIndexed::fixedRangeSearchAlongDir(double *_p,
+std::vector<size_t> KDtreeIndexed::fixedRangeSearchAlongDir(double *_p,
                       double *_dir,
                       double maxdist2,
                       int threadNum) const {
-  vector<size_t> result;
+  std::vector<size_t> result;
   params[threadNum].closest = 0;
   params[threadNum].closest_d2 = maxdist2;
   params[threadNum].p = _p;
@@ -181,11 +177,11 @@ vector<size_t> KDtreeIndexed::fixedRangeSearchAlongDir(double *_p,
   return result;
 }
 
-vector<size_t> KDtreeIndexed::fixedRangeSearch(double *_p,
+std::vector<size_t> KDtreeIndexed::fixedRangeSearch(double *_p,
                                        double sqRad2,
                                        int threadNum) const
 {
-  vector<size_t> result;
+  std::vector<size_t> result;
   params[threadNum].closest = 0;
   params[threadNum].closest_d2 = sqRad2;
   params[threadNum].p = _p;
@@ -199,13 +195,13 @@ vector<size_t> KDtreeIndexed::fixedRangeSearch(double *_p,
   return result;
 }
 
-vector<size_t> KDtreeIndexed::AABBSearch(double *_p,
+std::vector<size_t> KDtreeIndexed::AABBSearch(double *_p,
                                        double* _p0,
                                        int threadNum) const
 {
     if (_p[0] > _p0[0] || _p[1] > _p0[1] || _p[2] > _p0[2])
         throw std::logic_error("invalid bbox");
-  vector<size_t> result;
+  std::vector<size_t> result;
   params[threadNum].p = _p;
   params[threadNum].p0 = _p0;
   params[threadNum].range_neighbors.clear();
@@ -218,9 +214,9 @@ vector<size_t> KDtreeIndexed::AABBSearch(double *_p,
   return result;
 }
 
-vector<size_t> KDtreeIndexed::segmentSearch_all(double *_p, double* _p0, double maxdist2, int threadNum) const
+std::vector<size_t> KDtreeIndexed::segmentSearch_all(double *_p, double* _p0, double maxdist2, int threadNum) const
 {
-  vector<size_t> result;
+  std::vector<size_t> result;
   params[threadNum].maxdist_d2 = maxdist2;
   params[threadNum].maxdist_d = sqrt(maxdist2);
   params[threadNum].p = _p;

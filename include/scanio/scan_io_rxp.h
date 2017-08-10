@@ -12,7 +12,6 @@
 
 #include "riegl/scanlib.hpp"
 using namespace scanlib;
-using namespace std;
 
 class importer;
 

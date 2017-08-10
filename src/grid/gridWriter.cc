@@ -11,10 +11,7 @@
 #include <iterator>
 #include <cstdlib>
 #include <iostream>
-using std::cerr;
-using std::endl;
 #include <fstream>
-using std::ofstream;
 
 /**
  * CTor of gridWriter. Tries to the file
@@ -23,13 +20,13 @@ using std::ofstream;
  *
  * @param file The filename of the file
  */
-gridWriter::gridWriter(string file)
+gridWriter::gridWriter(std::string file)
 {   
     this->stream.open(file.c_str());
     if(!this->stream.good())
     {
-	cerr << "ERROR: In gridWriter::gridWriter, unable to open the stream for gridWriter! " << endl;
-	cerr << "(Filename: " << file << ")" << endl;
+	std::cerr << "ERROR: In gridWriter::gridWriter, unable to open the stream for gridWriter! " << std::endl;
+	std::cerr << "(Filename: " << file << ")" << std::endl;
 	exit(1);
     }  
 }
@@ -40,7 +37,7 @@ gridWriter::gridWriter(string file)
  *
  * @param stream A reference to the stream to be used
  */
-gridWriter::gridWriter(ofstream &stream)
+gridWriter::gridWriter(std::ofstream &stream)
 {
 }
 
@@ -58,7 +55,7 @@ gridWriter::~gridWriter()
  * See gridWriter::gridWriter(string) for more infos.
  * @param file The filename to be opend.
  */
-ppmWriter::ppmWriter(string file)
+ppmWriter::ppmWriter(std::string file)
     : gridWriter(file)
 {}
 
@@ -67,7 +64,7 @@ ppmWriter::ppmWriter(string file)
  * See gridWriter::gridWriter(stream) for more infos.
  * @param stream the Stream
  */
-ppmWriter::ppmWriter(ofstream &stream)
+ppmWriter::ppmWriter(std::ofstream &stream)
     : gridWriter(stream)
 {}
 
@@ -77,10 +74,10 @@ ppmWriter::ppmWriter(ofstream &stream)
  */
 void ppmWriter::write(const grid& grid)
 {
-    stream << "P2" << endl;
-    stream << "#Breite Hoehe" << endl;
-    stream << grid.getSizeX() << " " << grid.getSizeZ() << endl;
-    stream << "100" << endl;
+    stream << "P2" << std::endl;
+    stream << "#Breite Hoehe" << std::endl;
+    stream << grid.getSizeX() << " " << grid.getSizeZ() << std::endl;
+    stream << "100" << std::endl;
 
     for(long i=grid.getSizeZ()-1; i >=0 ; --i)
     {
@@ -91,7 +88,7 @@ void ppmWriter::write(const grid& grid)
 	    else
 		stream << 100 - (int)(grid.points[j][i]->getPercent() * 100) << " ";
 	}
-	stream << endl;
+	stream << std::endl;
     }
 }
 
@@ -100,7 +97,7 @@ void ppmWriter::write(const grid& grid)
  * See gridWriter::gridWriter(string) for more infos.
  * @param file The filename to be opend.
  */
-parcelWriter::parcelWriter(string file)
+parcelWriter::parcelWriter(std::string file)
     : gridWriter(file)
 {
 }
@@ -110,7 +107,7 @@ parcelWriter::parcelWriter(string file)
  * See gridWriter::gridWriter(stream) for more infos.
  * @param stream the Stream
  */
-parcelWriter::parcelWriter(ofstream &stream)
+parcelWriter::parcelWriter(std::ofstream &stream)
     : gridWriter(stream)
 {
 }
@@ -121,15 +118,15 @@ parcelWriter::parcelWriter(ofstream &stream)
  */
 void parcelWriter::write(const grid& grid)
 {
-    stream << grid.getSizeX() << " " << grid.getSizeZ() << endl;
-    stream << grid.getOffsetX() << " " << grid.getOffsetZ() << endl;
+    stream << grid.getSizeX() << " " << grid.getSizeZ() << std::endl;
+    stream << grid.getOffsetX() << " " << grid.getOffsetZ() << std::endl;
 
     for(long i = 0; i < grid.getSizeX(); ++i)
 	for(long j = 0; j < grid.getSizeZ(); j++)
 	    stream << grid.points[i][j]->getX() << " "
 		   << grid.points[i][j]->getZ() << " "
 		   << grid.points[i][j]->getCount() << " "
-		   << grid.points[i][j]->getOccupied() << endl;
+		   << grid.points[i][j]->getOccupied() << std::endl;
 }
       
 /**
@@ -137,7 +134,7 @@ void parcelWriter::write(const grid& grid)
  * See gridWriter::gridWriter(stream) for more infos.
  * @param stream the Stream
  */
-gnuplotWriter::gnuplotWriter(ofstream &stream)
+gnuplotWriter::gnuplotWriter(std::ofstream &stream)
     : gridWriter(stream)
 {
 }
@@ -147,7 +144,7 @@ gnuplotWriter::gnuplotWriter(ofstream &stream)
  * See gridWriter::gridWriter(string) for more infos
  * @param file The filename
  */
-gnuplotWriter::gnuplotWriter(string file)
+gnuplotWriter::gnuplotWriter(std::string file)
     : gridWriter(file)
 {
 }
@@ -162,7 +159,7 @@ void gnuplotWriter::write(const grid& grid)
 	for(long j=0; j < grid.getSizeZ(); ++j)
 	    stream << grid.points[i][j]->getX() << " "
 		   << grid.points[i][j]->getZ() << " "
-		   << grid.points[i][j]->getPercent() << endl;
+		   << grid.points[i][j]->getPercent() << std::endl;
 }
 
 /**
@@ -179,13 +176,13 @@ void gnuplotWriter::write(const grid& grid)
  * @param vpX the x coordinate of the viewpoint
  * @param vpZ the z coordinate of the viewpoint
  */
-worldWriter::worldWriter(string file, long minX, long maxX, long minZ, long maxZ, int resolution, long vpX, long vpZ)
+worldWriter::worldWriter(std::string file, long minX, long maxX, long minZ, long maxZ, int resolution, long vpX, long vpZ)
     : gridWriter(file)
 {  
-    stream << "1" << endl;
-    stream << resolution << endl;
-    stream << minX << " " << maxX << " " << minZ << " " << maxZ <<  endl;
-    stream << vpX << " " << vpZ << endl;
+    stream << "1" << std::endl;
+    stream << resolution << std::endl;
+    stream << minX << " " << maxX << " " << minZ << " " << maxZ <<  std::endl;
+    stream << vpX << " " << vpZ << std::endl;
 }
 
  /**
@@ -202,13 +199,13 @@ worldWriter::worldWriter(string file, long minX, long maxX, long minZ, long maxZ
  * @param vpX the x coordinate of the viewpoint
  * @param vpZ the z coordinate of the viewpoint
  */
-worldWriter::worldWriter(ofstream& stream, long minX, long maxX, long minZ, long maxZ, int resolution, long vpX, long vpZ)
+worldWriter::worldWriter(std::ofstream& stream, long minX, long maxX, long minZ, long maxZ, int resolution, long vpX, long vpZ)
     : gridWriter(stream)
 {
-    stream << "1" << endl;
-    stream << resolution << endl;
-    stream << minX << " " << maxX << " " << minZ << " " << maxZ <<  endl;    
-    stream << vpX << " " << vpZ << endl;
+    stream << "1" << std::endl;
+    stream << resolution << std::endl;
+    stream << minX << " " << maxX << " " << minZ << " " << maxZ <<  std::endl;    
+    stream << vpX << " " << vpZ << std::endl;
 }
 
 /**
@@ -223,7 +220,7 @@ void worldWriter::write(const grid& grid)
 	{
 	    stream << grid.points[i][j]->getX() << " " 
 		   << grid.points[i][j]->getZ() << " "
-		   << grid.points[i][j]->getPercent() << endl;
+		   << grid.points[i][j]->getPercent() << std::endl;
 	}
     }
 }

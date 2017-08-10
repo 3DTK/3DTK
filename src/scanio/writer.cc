@@ -25,13 +25,8 @@
 
 #define WANT_STREAM ///< define the WANT stream :)
 #include <string>
-using std::string;
 #include <iostream>
-using std::cout;
-using std::cerr;
-using std::endl;
 #include <fstream>
-using std::ofstream;
 #include <errno.h>
 
 #include "scanio/writer.h"
@@ -64,14 +59,14 @@ using std::ofstream;
 #include <dlfcn.h>
 #endif
 
-void createdirectory(string dir)
+void createdirectory(std::string dir)
 {
   int success = mkdir(dir.c_str(), S_IRWXU|S_IRWXG|S_IRWXO);
 
   if (success == 0 || errno == EEXIST) {
-    cout << "Writing to " << dir << endl;
+    std::cout << "Writing to " << dir << std::endl;
   } else {
-    cerr << "Creating directory " << dir << " failed" << endl;
+    std::cerr << "Creating directory " << dir << " failed" << std::endl;
     exit(1);
   }
 }
@@ -80,19 +75,19 @@ void createdirectory(string dir)
 /*
  * given a vector of 3d points, write them out as uos files
  */
-void write_uos(vector<cv::Vec4f> &points, string &dir, string id, bool high_precision)
+void write_uos(std::vector<cv::Vec4f> &points, std::string &dir, std::string id, bool high_precision)
 {
-  ofstream outfile((dir + "/scan" + id + ".3d").c_str());
+  std::ofstream outfile((dir + "/scan" + id + ".3d").c_str());
 
-  outfile << "# header is ignored" << endl;
+  outfile << "# header is ignored" << std::endl;
   if(high_precision) {
     outfile.precision(20);
   } else {
     outfile.precision(10);
   }
 
-  for (vector<cv::Vec4f>::iterator it=points.begin(); it < points.end(); it++) {
-    outfile << (*it)[0] << " " << (*it)[1] << " " << (*it)[2] << endl;
+  for (std::vector<cv::Vec4f>::iterator it=points.begin(); it < points.end(); it++) {
+    outfile << (*it)[0] << " " << (*it)[1] << " " << (*it)[2] << std::endl;
   }
   outfile.close();
 }
@@ -100,19 +95,19 @@ void write_uos(vector<cv::Vec4f> &points, string &dir, string id, bool high_prec
 /*
  * given a vector of 3d points, write them out as uosr files
  */
-void write_uosr(vector<cv::Vec4f> &points, string &dir, string id, bool high_precision)
+void write_uosr(std::vector<cv::Vec4f> &points, std::string &dir, std::string id, bool high_precision)
 {
-  ofstream outfile((dir + "/scan" + id + ".3d").c_str());
+  std::ofstream outfile((dir + "/scan" + id + ".3d").c_str());
   if(high_precision) {
     outfile.precision(20);
   } else {
     outfile.precision(10);
   }
-  outfile << "# header is ignored" << endl;
+  outfile << "# header is ignored" << std::endl;
 
-  for (vector<cv::Vec4f>::iterator it=points.begin(); it < points.end(); it++) {
+  for (std::vector<cv::Vec4f>::iterator it=points.begin(); it < points.end(); it++) {
     if((*it)[0]!=0 && (*it)[1]!=0 && (*it)[2]!=0)
-      outfile << (*it)[0] << " " << (*it)[1] << " " << (*it)[2] << " " << (*it)[3] << endl;
+      outfile << (*it)[0] << " " << (*it)[1] << " " << (*it)[2] << " " << (*it)[3] << std::endl;
   }
 
   outfile.close();
@@ -121,22 +116,22 @@ void write_uosr(vector<cv::Vec4f> &points, string &dir, string id, bool high_pre
 /*
  * given a vector of 3d points, write them out as uos_rgb files
  */
-void write_uos_rgb(vector<cv::Vec4f> &points, vector<cv::Vec3b> &color, string &dir, string id, bool high_precision)
+void write_uos_rgb(std::vector<cv::Vec4f> &points, std::vector<cv::Vec3b> &color, std::string &dir, std::string id, bool high_precision)
 {
-  ofstream outfile((dir + "/scan" + id + ".3d").c_str());
+  std::ofstream outfile((dir + "/scan" + id + ".3d").c_str());
   
   if(high_precision) {
     outfile.precision(20);
   } else {
     outfile.precision(10);
   }
-  outfile << "# header is ignored" << endl;
+  outfile << "# header is ignored" << std::endl;
 
-  vector<cv::Vec3b>::iterator cit=color.begin(); 
-  for (vector<cv::Vec4f>::iterator it=points.begin();  it < points.end(); it++) {
+  std::vector<cv::Vec3b>::iterator cit=color.begin(); 
+  for (std::vector<cv::Vec4f>::iterator it=points.begin();  it < points.end(); it++) {
     if((*it)[0]!=0 && (*it)[1]!=0 && (*it)[2]!=0)
       outfile << (*it)[0] << " " << (*it)[1] << " " << (*it)[2] << " " 
-      << (int)(*cit)[0] << " " << (int)(*cit)[1] << " " << (int)(*cit)[2] << endl;
+      << (int)(*cit)[0] << " " << (int)(*cit)[1] << " " << (int)(*cit)[2] << std::endl;
       cit++;
   }
 
@@ -364,17 +359,17 @@ void write_xyz_rgb(DataXYZ &xyz, DataRGB &rgb, FILE *file, double scaleFac, bool
 
 // write .pose files
 // .frames files can later be generated from them using ./bin/pose2frames
-void writeposefile(string &dir, const double* rPos, const double* rPosTheta, string id)
+void writeposefile(std::string &dir, const double* rPos, const double* rPosTheta, std::string id)
 {
-  ofstream posefile((dir + "/scan" + id + ".pose").c_str());
-  posefile << rPos[0] << " " << rPos[1] << " " << rPos[2] << endl;
+  std::ofstream posefile((dir + "/scan" + id + ".pose").c_str());
+  posefile << rPos[0] << " " << rPos[1] << " " << rPos[2] << std::endl;
   posefile << deg(rPosTheta[0]) << " "
            << deg(rPosTheta[1]) << " "
-           << deg(rPosTheta[2]) << endl;
+           << deg(rPosTheta[2]) << std::endl;
   posefile.close();
 }
 
-void writeTrajectoryXYZ(ofstream &posesout, const double * transMat, bool mat, double scaleFac)
+void writeTrajectoryXYZ(std::ofstream &posesout, const double * transMat, bool mat, double scaleFac)
 {
   if(mat)
   {
@@ -399,10 +394,10 @@ void writeTrajectoryXYZ(ofstream &posesout, const double * transMat, bool mat, d
     << scaleFac*-transMat[12] << " "
     << scaleFac*transMat[13] << " ";
   }
-  posesout << endl;
+  posesout << std::endl;
 }
 
-void writeTrajectoryUOS(ofstream &posesout, const double * transMat, bool mat)
+void writeTrajectoryUOS(std::ofstream &posesout, const double * transMat, bool mat)
 {
   if(mat) 
   {
@@ -425,5 +420,5 @@ void writeTrajectoryUOS(ofstream &posesout, const double * transMat, bool mat)
   if(mat) { 
     posesout << transMat[15] << " ";
   }
-  posesout << endl;
+  posesout << std::endl;
 }

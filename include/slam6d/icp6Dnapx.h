@@ -25,7 +25,7 @@ public:
    */
   virtual ~icp6D_NAPX() {};                                  
 
-  double Align(const vector<PtPair>& Pairs,
+  double Align(const std::vector<PtPair>& Pairs,
 			double *alignxf,
 			const double centroid_m[3],
 			const double centroid_d[3]);

@@ -10,7 +10,6 @@
 #include "slam6d/point.h"
 
 #include <vector>
-using std::vector;
 
 /**
  * @brief Contains the intermediate (static) values of a k-d tree 
@@ -60,7 +59,7 @@ public:
   /**
    * vector of all neighbors within a given radius
    */
-  vector<T> range_neighbors;
+  std::vector<T> range_neighbors;
  
   /**
    * pointer to k nearest neighbors

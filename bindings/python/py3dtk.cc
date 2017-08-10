@@ -522,7 +522,7 @@ class KDtreeWrapper : public KDtree
 
 boost::python::tuple calculateNormalWrapper(boost::python::list pts) {
 	size_t num_pts = extract<std::size_t>(pts.attr("__len__")());
-	vector<Point> points;
+	std::vector<Point> points;
 	points.reserve(num_pts);
 	for (size_t i = 0; i < num_pts; ++i) {
 		boost::python::tuple t = extract<boost::python::tuple>(pts[i]);

@@ -9,7 +9,6 @@
 #define __LOOPSLAM6D_H__
 
 #include <vector>
-using std::vector;
 
 #include "icp6D.h"
 #include "icp6Dminimizer.h"

@@ -10,7 +10,6 @@
 #include <sstream>
 #include <fstream>
 using namespace cv;
-using namespace std;
 
 //these constants were found to be good, but my be altered
 const float zoomIncrement = 1.25;   //!< defines how much zoom there is for pressing of the +/- buttons

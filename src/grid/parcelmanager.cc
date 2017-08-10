@@ -11,11 +11,7 @@
 #include "slam6d/globals.icc"
 #include "grid/gridWriter.h"
 #include <fstream>
-using std::ifstream;
-using std::ofstream;
 #include <iostream>
-using std::cerr;
-using std::endl;
 
 /**
  * Ctor.
@@ -33,7 +29,7 @@ using std::endl;
  * @param resume If true, last parcelinfofile will be loaded
  */
 parcelmanager::parcelmanager(long width, long height,
-			     string path, int resolution,
+			     std::string path, int resolution,
 			     bool resume)
 {
     this->parcelwidth = width;
@@ -91,7 +87,7 @@ void parcelmanager::freeMemory(bool all)
 	{	    
 	    // saving the parcel using the parcel format
             // (Must use parcelFormat, otherwise parcel cant be loaded again!)
-	    string filename = cur->first->getFilename();
+	    std::string filename = cur->first->getFilename();
 	    parcelWriter writer(filename);
 
 	    writer.write(*cur->second);
@@ -168,7 +164,7 @@ void parcelmanager::createParcel(long x, long z)
 
 
     // create parcelinfo and parcel
-    string filename = this->path + "parcel" + to_string(offsetX) + to_string(offsetZ) + ".pcl";
+    std::string filename = this->path + "parcel" + to_string(offsetX) + to_string(offsetZ) + ".pcl";
     
     parcelinfo *p = new parcelinfo(offsetX, offsetZ, filename);
     
@@ -281,15 +277,15 @@ void parcelmanager::addGrid(const grid* g, long vpX, long vpZ)
  * 
  * @param filename The file where the parcelinfos are stored to
  */
-void parcelmanager::saveParcelinfo(string filename)
+void parcelmanager::saveParcelinfo(std::string filename)
 {
-  ofstream outfile(filename.c_str());
+  std::ofstream outfile(filename.c_str());
   
   // Check if stream is open and valid
   if(!outfile.good())
   {
-    cerr << "[saveParcelinfo] Fehler, konnte Stream nicht oeffnen" << endl
-	 << "(Filename: " << filename << ")" << endl;
+    std::cerr << "[saveParcelinfo] Fehler, konnte Stream nicht oeffnen" << std::endl
+	 << "(Filename: " << filename << ")" << std::endl;
       exit(1);
   }
 
@@ -302,7 +298,7 @@ void parcelmanager::saveParcelinfo(string filename)
   {
        outfile << it->first->getOffsetX() << " " 
 	       << it->first->getOffsetZ() << " " 
-	       << it->first->getFilename() << endl; 
+	       << it->first->getFilename() << std::endl; 
 
         ++it;
   }
@@ -315,15 +311,15 @@ void parcelmanager::saveParcelinfo(string filename)
  * 
  * @param filename The file where the parcelinfos are stored
  */
-void parcelmanager::loadParcelinfo(string filename)
+void parcelmanager::loadParcelinfo(std::string filename)
 {
-  ifstream infile(filename.c_str());
+  std::ifstream infile(filename.c_str());
 
   // Stream ok?
   if(!infile.good())
   {
-    cerr << "[loadparcelinfo] Fehler, konnte Stream nicht oeffnen" << endl
-	 << "(filename: " << filename << ")" << endl;
+    std::cerr << "[loadparcelinfo] Fehler, konnte Stream nicht oeffnen" << std::endl
+	 << "(filename: " << filename << ")" << std::endl;
     return;
   }
 
@@ -332,7 +328,7 @@ void parcelmanager::loadParcelinfo(string filename)
 
   long offsetX;
   long offsetZ;
-  string file;
+  std::string file;
 
   // read all infos
   while(!infile.eof())
@@ -361,7 +357,7 @@ void parcelmanager::loadParcelinfo(string filename)
  * The specification of the format are listed in the documentation
  * @param file the filename of the world
  */
-void parcelmanager::writeWorld(string file)
+void parcelmanager::writeWorld(std::string file)
 {
     worldWriter writer(this->path + file,
 		       this->minX, this->maxX, this->minZ, this->maxZ,

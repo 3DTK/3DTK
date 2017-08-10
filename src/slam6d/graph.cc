@@ -22,11 +22,7 @@
 #include "slam6d/globals.icc"
 
 #include <fstream>
-using std::ifstream;
 #include <iostream>
-using std::cout;
-using std::cerr;
-using std::endl;
 
 /**
  * Constructor to create an empty graph
@@ -54,28 +50,28 @@ Graph::Graph()
  *
  * @param netfile Filename of the file to read
  */
-Graph::Graph(const string &netfile)
+Graph::Graph(const std::string &netfile)
 {
   nrScans = 0;
   start = 0;
   int local_nrScans, local_nrLinks;
-  cout << "Reading network " << netfile;
+  std::cout << "Reading network " << netfile;
   
-  ifstream file(netfile.c_str());
+  std::ifstream file(netfile.c_str());
   file >> local_nrScans
        >> local_nrLinks;
 
   int f, t;
   for(int j = 0; j < local_nrLinks; j++) {
     if (!file.good()) {
-      cerr << "Error while reading network structure" << endl;
+      std::cerr << "Error while reading network structure" << std::endl;
       exit(1);
     }
     file >> f >> t;
-    cout << f << " " << t << endl;
+    std::cout << f << " " << t << std::endl;
     addLink(f, t);
   } 
-  cout << " structure done." << endl;
+  std::cout << " structure done." << std::endl;
 }
 
 /** 
@@ -229,10 +225,10 @@ int Graph::getEnd()
  * @param gr which Graph to print
  * @return the resulting output stream
  */
-ostream& operator<<(ostream& os, Graph* gr)
+std::ostream& operator<<(std::ostream& os, Graph* gr)
 {
   for(int i = 0; i < (int)gr->from.size() ; i++){
-    os << "( " << gr->getLink(i,0) << " - " << gr->getLink(i,1) << " )" << endl;
+    os << "( " << gr->getLink(i,0) << " - " << gr->getLink(i,1) << " )" << std::endl;
   }
   return os;
 }

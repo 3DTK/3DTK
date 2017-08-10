@@ -19,9 +19,6 @@
 #include "slam6d/globals.icc"
 #include <iomanip>
 #include <cstring>
-using std::ios;
-using std::resetiosflags;
-using std::setiosflags;
 
 /**
  * computes the rotation matrix consisting
@@ -34,7 +31,7 @@ using std::setiosflags;
  * @param alignxf The resulting transformation matrix
  * @return Error estimation of the matching (rms)
  */
-double icp6D_NAPX::Align(const vector<PtPair>& Pairs,
+double icp6D_NAPX::Align(const std::vector<PtPair>& Pairs,
                          double *alignxf,
                          const double centroid_m[3],
                          const double centroid_d[3])
@@ -100,14 +97,14 @@ double icp6D_NAPX::Align(const vector<PtPair>& Pairs,
 
   double error = sqrt(sum / n);
   if (!quiet) {
-    cout.setf(ios::basefield);
-    cout << "APX RMS point-to-plane error = "
-         << resetiosflags(ios::adjustfield) << setiosflags(ios::internal)
-         << resetiosflags(ios::floatfield) << setiosflags(ios::fixed)
+    std::cout.setf(std::ios::basefield);
+    std::cout << "APX RMS point-to-plane error = "
+         << resetiosflags(std::ios::adjustfield) << setiosflags(std::ios::internal)
+         << resetiosflags(std::ios::floatfield) << setiosflags(std::ios::fixed)
          << std::setw(10) << std::setprecision(7)
          << error
          << "  using " << std::setw(6) << (int)Pairs.size()
-         << " points" << endl;
+         << " points" << std::endl;
   }
 
   // Solve eqns

@@ -21,13 +21,9 @@
 #include <stdio.h>
 
 #include <vector>
-using std::vector;
 #include <deque>
-using std::deque;
 #include <set>
-using std::set;
 #include <list>
-using std::list;
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -237,8 +233,8 @@ public:
 
     for (unsigned int i = 0; i < POINTDIM; i++) { 
       for (int j = 1; j < n; j++) {
-        mins[i] = min(mins[i], (T)pts[j][i]);
-        maxs[i] = max(maxs[i], (T)pts[j][i]);
+        mins[i] = std::min(mins[i], (T)pts[j][i]);
+        maxs[i] = std::max(maxs[i], (T)pts[j][i]);
       }
     }
 
@@ -246,7 +242,7 @@ public:
     center[1] = 0.5 * (mins[1] + maxs[1]);
     center[2] = 0.5 * (mins[2] + maxs[2]);
     
-    size = max(max(0.5 * (maxs[0] - mins[0]), 0.5 * (maxs[1] - mins[1])), 0.5 * (maxs[2] - mins[2]));
+    size = std::max(std::max(0.5 * (maxs[0] - mins[0]), 0.5 * (maxs[1] - mins[1])), 0.5 * (maxs[2] - mins[2]));
     //   cout << size << endl;
     size += 1.0; // for numerical reasons we increase size 
 
@@ -272,7 +268,7 @@ public:
   }
 
   template <class P>
-  BOctTree(vector<P *> &pts, T voxelSize, PointType _pointtype = PointType(), bool _earlystop = false) : earlystop(_earlystop)
+  BOctTree(std::vector<P *> &pts, T voxelSize, PointType _pointtype = PointType(), bool _earlystop = false) : earlystop(_earlystop)
   {
     alloc = new PackedChunkAllocator;
     
@@ -291,15 +287,15 @@ public:
 
     for (unsigned int i = 0; i < POINTDIM; i++) { 
       for (unsigned int j = 1; j < pts.size(); j++) {
-        mins[i] = min(mins[i], pts[j][i]);
-        maxs[i] = max(maxs[i], pts[j][i]);
+        mins[i] = std::min(mins[i], pts[j][i]);
+        maxs[i] = std::max(maxs[i], pts[j][i]);
       }
     }
 
     center[0] = 0.5 * (mins[0] + maxs[0]);
     center[1] = 0.5 * (mins[1] + maxs[1]);
     center[2] = 0.5 * (mins[2] + maxs[2]);
-    size = max(max(0.5 * (maxs[0] - mins[0]), 0.5 * (maxs[1] - mins[1])), 0.5 * (maxs[2] - mins[2]));
+    size = std::max(std::max(0.5 * (maxs[0] - mins[0]), 0.5 * (maxs[1] - mins[1])), 0.5 * (maxs[2] - mins[2]));
     
     size += 1.0; // for numerical reasons we increase size 
 
@@ -424,11 +420,11 @@ public:
     _center[2] = center[2];
   }
 
-  void GetOctTreeCenter(vector<T*>&c) { GetOctTreeCenter(c, *root, center, size); }
-  void GetOctTreeAvg(vector<T*>&c) { GetOctTreeAvg(c, *root); }
-  void GetOctTreeRandom(vector<T*>&c) { GetOctTreeRandom(c, *root); }
-  void GetOctTreeRandom(vector<T*>&c, int ptspervoxel, bool mode) { GetOctTreeRandom(c, ptspervoxel, mode, *root); }
-  void AllPoints(vector<T *> &vp) { AllPoints(*BOctTree<T>::root, vp); }
+  void GetOctTreeCenter(std::vector<T*>&c) { GetOctTreeCenter(c, *root, center, size); }
+  void GetOctTreeAvg(std::vector<T*>&c) { GetOctTreeAvg(c, *root); }
+  void GetOctTreeRandom(std::vector<T*>&c) { GetOctTreeRandom(c, *root); }
+  void GetOctTreeRandom(std::vector<T*>&c, int ptspervoxel, bool mode) { GetOctTreeRandom(c, ptspervoxel, mode, *root); }
+  void AllPoints(std::vector<T *> &vp) { AllPoints(*BOctTree<T>::root, vp); }
   template <class Visitor>
   void visit(Visitor &vClass) { visit(*BOctTree<T>::root, vClass); }
 
@@ -447,7 +443,7 @@ public:
     // read magic bits
     file.read(buffer, 2);
     if ( buffer[0] != 'X' || buffer[1] != 'T') {
-      std::cerr << "Not an octree file!!" << endl;
+      std::cerr << "Not an octree file!!" << std::endl;
       file.close();
       return;
     }
@@ -480,7 +476,7 @@ public:
     file.close();
   }
   
-  static void deserialize(std::string filename, vector<Point> &points ) {
+  static void deserialize(std::string filename, std::vector<Point> &points ) {
     char buffer[sizeof(T) * 20];
 
     std::ifstream file;
@@ -489,7 +485,7 @@ public:
     // read magic bits
     file.read(buffer, 2);
     if ( buffer[0] != 'X' || buffer[1] != 'T') {
-      std::cerr << "Not an octree file!!" << endl;
+      std::cerr << "Not an octree file!!" << std::endl;
       file.close();
       return;
     }
@@ -562,7 +558,7 @@ public:
     // read magic bits
     file.read(buffer, 2);
     if ( buffer[0] != 'X' || buffer[1] != 'T') {
-      std::cerr << "Not an octree file!!" << endl;
+      std::cerr << "Not an octree file!!" << std::endl;
       file.close();
       return PointType();
     }
@@ -696,7 +692,7 @@ public:
   
 protected:
   
-  void AllPoints( bitoct &node, vector<T*> &vp) {
+  void AllPoints( bitoct &node, std::vector<T*> &vp) {
     bitunion<T> *children;
     bitoct::getChildren(node, children);
 
@@ -766,7 +762,7 @@ protected:
     }
   }
   
-  static void deserialize(std::ifstream &f, vector<Point> &vpoints, PointType &pointtype) {
+  static void deserialize(std::ifstream &f, std::vector<Point> &vpoints, PointType &pointtype) {
     char buffer[2];
     pointrep *point = new pointrep[pointtype.getPointDim()];
     f.read(buffer, 2);
@@ -852,7 +848,7 @@ protected:
     }
   }
 
-  void GetOctTreeCenter(vector<T*>&c, bitoct &node, T *center, T size) {
+  void GetOctTreeCenter(std::vector<T*>&c, bitoct &node, T *center, T size) {
     T ccenter[3];
     bitunion<T> *children;
     bitoct::getChildren(node, children);
@@ -875,7 +871,7 @@ protected:
     }
   }
 
-  void GetOctTreeAvg(vector<T*>&c, bitoct &node) {
+  void GetOctTreeAvg(std::vector<T*>&c, bitoct &node) {
     bitunion<T> *children;
     bitoct::getChildren(node, children);
     
@@ -909,7 +905,7 @@ protected:
     } 
   } 
   
-  void GetOctTreeRandom(vector<T*>&c, bitoct &node) {
+  void GetOctTreeRandom(std::vector<T*>&c, bitoct &node) {
     bitunion<T> *children;
     bitoct::getChildren(node, children);
 
@@ -944,7 +940,7 @@ protected:
     }
   } 
   
-  void GetOctTreeRandom(vector<T*>&c, unsigned int ptspervoxel, bool mode, bitoct &node) {
+  void GetOctTreeRandom(std::vector<T*>&c, unsigned int ptspervoxel, bool mode, bitoct &node) {
     bitunion<T> *children;
     bitoct::getChildren(node, children);
     for (short i = 0; i < 8; i++) {
@@ -972,12 +968,12 @@ protected:
             ++children; // next child
             continue;
           }
-          set<int> indices;
+          std::set<int> indices;
           while(indices.size() < ptspervoxel) {
             int tmp = rand(length-1);
             indices.insert(tmp);
           }
-          for(set<int>::iterator it = indices.begin(); it != indices.end(); it++) 
+          for(std::set<int>::iterator it = indices.begin(); it != indices.end(); it++) 
             c.push_back(&(points[POINTDIM*(*it)+1].v));
 
         } else { // recurse
@@ -1122,7 +1118,7 @@ protected:
   }
 
   template <class P>
-  void* branch( bitoct &node, vector<P*> &splitPoints, T _center[3], T _size) {
+  void* branch( bitoct &node, std::vector<P*> &splitPoints, T _center[3], T _size) {
     // if bucket is too small stop building tree
     // -----------------------------------------
     if ((_size <= voxelSize) || (earlystop && splitPoints.size() <= 10) ) {
@@ -1130,7 +1126,7 @@ protected:
       pointrep *points = alloc->allocate<pointrep> (POINTDIM*splitPoints.size() + 1);
       points[0].length = splitPoints.size();
       int i = 1;
-      for (typename vector<P *>::iterator itr = splitPoints.begin(); 
+      for (typename std::vector<P *>::iterator itr = splitPoints.begin(); 
           itr != splitPoints.end(); itr++) {
         for (unsigned int iterator = 0; iterator < POINTDIM; iterator++) {
           points[i++].v = (*itr)[iterator];
@@ -1154,15 +1150,15 @@ protected:
   }
 
   template <class P>
-  void countPointsAndQueue(vector<P*> &i_points, T center[8][3], T size, bitoct &parent, T *pcenter) {
-    vector<P*> points[8];
+  void countPointsAndQueue(std::vector<P*> &i_points, T center[8][3], T size, bitoct &parent, T *pcenter) {
+    std::vector<P*> points[8];
     int n_children = 0;
-    for (typename vector<P *>::iterator itr = i_points.begin(); itr != i_points.end(); itr++) {
+    for (typename std::vector<P *>::iterator itr = i_points.begin(); itr != i_points.end(); itr++) {
       points[childIndex<P>(pcenter, *itr)].push_back( *itr );
     }
 
     i_points.clear();
-    vector<P*>().swap(i_points);
+    std::vector<P*>().swap(i_points);
     for (int j = 0; j < 8; j++) {
       if (!points[j].empty()) {
         parent.valid = ( 1 << j ) | parent.valid;
@@ -1185,7 +1181,7 @@ protected:
           parent.leaf = ( 1 << j ) | parent.leaf;  // remember this is a leaf
         }
         points[j].clear();
-        vector<P*>().swap(points[j]);
+        std::vector<P*>().swap(points[j]);
         ++count;
       }
     }
@@ -1329,15 +1325,15 @@ protected:
    
     // box within bounds in voxel coordinates
     int xmin, ymin, zmin, xmax, ymax, zmax;
-    xmin = max(params[threadNum].x-params[threadNum].closest_v, 0); 
-    ymin = max(params[threadNum].y-params[threadNum].closest_v, 0); 
-    zmin = max(params[threadNum].z-params[threadNum].closest_v, 0);
+    xmin = std::max(params[threadNum].x-params[threadNum].closest_v, 0); 
+    ymin = std::max(params[threadNum].y-params[threadNum].closest_v, 0); 
+    zmin = std::max(params[threadNum].z-params[threadNum].closest_v, 0);
 
 //    int largest_index = child_bit_depth[0] * 2 -1;
     
-    xmax = min(params[threadNum].x+params[threadNum].closest_v, largest_index);
-    ymax = min(params[threadNum].y+params[threadNum].closest_v, largest_index);
-    zmax = min(params[threadNum].z+params[threadNum].closest_v, largest_index);
+    xmax = std::min(params[threadNum].x+params[threadNum].closest_v, largest_index);
+    ymax = std::min(params[threadNum].y+params[threadNum].closest_v, largest_index);
+    zmax = std::min(params[threadNum].z+params[threadNum].closest_v, largest_index);
     
     unsigned char depth = 0;
     unsigned int child_bit;
@@ -1408,7 +1404,7 @@ protected:
       child_index = mmap[i]; // the area index of the node 
       if (  ( 1 << child_index ) & node.valid ) {   // if ith node exists
         childcenter(x,y,z, cx,cy,cz, child_index, size); 
-        if ( params[threadNum].closest_v == 0 ||  max(max(abs( cx - params[threadNum].x ), 
+        if ( params[threadNum].closest_v == 0 ||  std::max(std::max(abs( cx - params[threadNum].x ), 
                  abs( cy - params[threadNum].y )),
                  abs( cz - params[threadNum].z )) - size
         > params[threadNum].closest_v ) { 

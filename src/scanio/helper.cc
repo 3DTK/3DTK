@@ -121,7 +121,7 @@ std::list<std::string> readDirectoryHelper(const char *dir_path,
         }
         // stop if part of a scan is missing or end by absence is detected
         if (!found) {
-            std::cerr << "No data found for " << data_path_prefix << identifier << "!" << endl;
+            std::cerr << "No data found for " << data_path_prefix << identifier << "!" << std::endl;
             break;
         }
         identifiers.push_back(identifier);
@@ -183,21 +183,21 @@ bool strtoval(char *pos, unsigned int linenr, double* ret)
     setlocale(LC_NUMERIC, saved_locale);
 
     if (errno == ERANGE) {
-        std::cerr << "error in line " << linenr << endl;
+        std::cerr << "error in line " << linenr << std::endl;
         if (val == HUGE_VAL) {
-            std::cerr << "overflow" << endl;
+            std::cerr << "overflow" << std::endl;
         } else if (val == 0) {
-            std::cerr << "underflow" << endl;
+            std::cerr << "underflow" << std::endl;
         }
         perror("strod");
         return false;
     }
     if (pos == endptr) {
-        std::cerr << "no conversion performed in line " << linenr << endl;
+        std::cerr << "no conversion performed in line " << linenr << std::endl;
         return false;
     }
     if (*endptr != '\0') {
-        std::cerr << "found garbage in line " << linenr << endl;
+        std::cerr << "found garbage in line " << linenr << std::endl;
         return false;
     }
     *ret = val;
@@ -214,21 +214,21 @@ bool strtoval(char *pos, unsigned int linenr, float* ret)
     setlocale(LC_NUMERIC, saved_locale);
 
     if (errno == ERANGE) {
-        std::cerr << "error in line " << linenr << endl;
+        std::cerr << "error in line " << linenr << std::endl;
         if (val == HUGE_VALF) {
-            std::cerr << "overflow" << endl;
+            std::cerr << "overflow" << std::endl;
         } else if (val == 0) {
-            std::cerr << "underflow" << endl;
+            std::cerr << "underflow" << std::endl;
         }
         perror("strof");
         return false;
     }
     if (pos == endptr) {
-        std::cerr << "no conversion performed in line " << linenr << endl;
+        std::cerr << "no conversion performed in line " << linenr << std::endl;
         return false;
     }
     if (*endptr != '\0') {
-        std::cerr << "found garbage in line " << linenr << endl;
+        std::cerr << "found garbage in line " << linenr << std::endl;
         return false;
     }
     *ret = val;
@@ -245,24 +245,24 @@ bool strtoval(char *pos, unsigned int linenr, unsigned char* ret)
     setlocale(LC_NUMERIC, saved_locale);
 
     if (errno != 0 && val == 0) {
-        std::cerr << "error in line " << linenr << endl;
+        std::cerr << "error in line " << linenr << std::endl;
         perror("strol");
         return false;
     }
     if (errno == ERANGE) {
-        std::cerr << "error in line " << linenr << endl;
+        std::cerr << "error in line " << linenr << std::endl;
         if (val < 0)
-            std::cerr << "cannot be smaller than 0" << endl;
+            std::cerr << "cannot be smaller than 0" << std::endl;
         if (val > 255)
-            std::cerr << "cannot be greater than 255" << endl;
+            std::cerr << "cannot be greater than 255" << std::endl;
         return false;
     }
     if (pos == endptr) {
-        std::cerr << "no conversion performed in line " << linenr << endl;
+        std::cerr << "no conversion performed in line " << linenr << std::endl;
         return false;
     }
     if (*endptr != '\0') {
-        std::cerr << "found garbage in line " << linenr << endl;
+        std::cerr << "found garbage in line " << linenr << std::endl;
         return false;
     }
     *ret = val;
@@ -278,24 +278,24 @@ bool strtoval(char *pos, unsigned int linenr, int* ret)
     long val = strtol(pos, &endptr, 10);
     setlocale(LC_NUMERIC, saved_locale);
     if (errno != 0 && val == 0) {
-        std::cerr << "error in line " << linenr << endl;
+        std::cerr << "error in line " << linenr << std::endl;
         perror("strol");
         return false;
     }
     if (errno == ERANGE) {
-        std::cerr << "error in line " << linenr << endl;
+        std::cerr << "error in line " << linenr << std::endl;
         if (val < INT_MIN)
-            std::cerr << "cannot be smaller than " << INT_MIN << endl;
+            std::cerr << "cannot be smaller than " << INT_MIN << std::endl;
         if (val > INT_MAX)
-            std::cerr << "cannot be greater than " << INT_MAX << endl;
+            std::cerr << "cannot be greater than " << INT_MAX << std::endl;
         return false;
     }
     if (pos == endptr) {
-        std::cerr << "no conversion performed in line " << linenr << endl;
+        std::cerr << "no conversion performed in line " << linenr << std::endl;
         return false;
     }
     if (*endptr != '\0') {
-        std::cerr << "found garbage in line " << linenr << endl;
+        std::cerr << "found garbage in line " << linenr << std::endl;
         return false;
     }
     *ret = val;
@@ -322,10 +322,10 @@ bool storeval(char *pos, unsigned int linenr, IODataType currspec, double* xyz, 
         case DATA_DUMMY:
             return true;
         case DATA_TERMINATOR:
-            std::cerr << "too many values in line " << linenr << endl;
+            std::cerr << "too many values in line " << linenr << std::endl;
             return false;
         default:
-            std::cerr << "storeval failed at " << linenr << endl;
+            std::cerr << "storeval failed at " << linenr << std::endl;
             return false;
     }
 }
@@ -380,64 +380,64 @@ bool checkSpec(IODataType* spec, std::vector<double>* xyz, std::vector<unsigned 
         }
     }
     if (count == 0) {
-        std::cerr << "must supply more than zero specs" << endl;
+        std::cerr << "must supply more than zero specs" << std::endl;
         return false;
     }
     // check if the spec matches the supplied vectors
     if (xyz == 0 && xyzcount != 0) {
-        std::cerr << "you gave a xyz spec but no xyz vector" << endl;
+        std::cerr << "you gave a xyz spec but no xyz vector" << std::endl;
         return false;
     }
     if (xyz != 0 && xyzcount != 3) {
-        std::cerr << "you gave a xyz vector, so you must supply exactly three xyz specs" << endl;
+        std::cerr << "you gave a xyz vector, so you must supply exactly three xyz specs" << std::endl;
         return false;
     }
     if (rgb == 0 && rgbcount != 0) {
-        std::cerr << "you gave a rgb spec but no rgb vector" << endl;
+        std::cerr << "you gave a rgb spec but no rgb vector" << std::endl;
         return false;
     }
     if (rgb != 0 && rgbcount != 3) {
-        std::cerr << "you gave a rgb vector, so you must supply exactly three rgb specs" << endl;
+        std::cerr << "you gave a rgb vector, so you must supply exactly three rgb specs" << std::endl;
         return false;
     }
     if (refl == 0 && reflcount != 0) {
-        std::cerr << "you gave a reflection spec but no reflection vector" << endl;
+        std::cerr << "you gave a reflection spec but no reflection vector" << std::endl;
         return false;
     }
     if (refl != 0 && reflcount != 1) {
-        std::cerr << "you gave a reflection vector, so you must supply exactly one reflection spec" << endl;
+        std::cerr << "you gave a reflection vector, so you must supply exactly one reflection spec" << std::endl;
         return false;
     }
     if (temp == 0 && tempcount != 0) {
-        std::cerr << "you gave a temperature spec but no temperature vector" << endl;
+        std::cerr << "you gave a temperature spec but no temperature vector" << std::endl;
         return false;
     }
     if (temp != 0 && tempcount != 1) {
-        std::cerr << "you gave a temperature vector, so you must supply exactly one temperature spec" << endl;
+        std::cerr << "you gave a temperature vector, so you must supply exactly one temperature spec" << std::endl;
         return false;
     }
     if (ampl == 0 && amplcount != 0) {
-        std::cerr << "you gave an amplitude spec but no amplitude vector" << endl;
+        std::cerr << "you gave an amplitude spec but no amplitude vector" << std::endl;
         return false;
     }
     if (ampl != 0 && amplcount != 1) {
-        std::cerr << "you gave an amplitude vector, so you must supply exactly one amplitude spec" << endl;
+        std::cerr << "you gave an amplitude vector, so you must supply exactly one amplitude spec" << std::endl;
         return false;
     }
     if (type == 0 && typecount != 0) {
-        std::cerr << "you gave a type spec but no type vector" << endl;
+        std::cerr << "you gave a type spec but no type vector" << std::endl;
         return false;
     }
     if (type != 0 && typecount != 1) {
-        std::cerr << "you gave a type vector, so you must supply exactly one type spec" << endl;
+        std::cerr << "you gave a type vector, so you must supply exactly one type spec" << std::endl;
         return false;
     }
     if (devi == 0 && devicount != 0) {
-        std::cerr << "you gave a deviation spec but no deviation vector" << endl;
+        std::cerr << "you gave a deviation spec but no deviation vector" << std::endl;
         return false;
     }
     if (devi != 0 && devicount != 1) {
-        std::cerr << "you gave a deviation vector, so you must supply exactly one deviation spec" << endl;
+        std::cerr << "you gave a deviation vector, so you must supply exactly one deviation spec" << std::endl;
         return false;
     }
     return true;
@@ -521,16 +521,16 @@ ScanDataTransform& transform, PointFilter& filter, std::vector<double>* xyz, std
         currspec++;
     }
     if (*currspec != DATA_TERMINATOR) {
-        std::cerr << "less values than in spec in line " << linenr << endl;
+        std::cerr << "less values than in spec in line " << linenr << std::endl;
         return false;
     }
     // check if three values were read in for xyz and rgb 
     if (xyz != 0 && xyz_idx != 3) {
-        std::cerr << "can't understand " << xyz_idx << " coordinate values in line " << linenr << endl;
+        std::cerr << "can't understand " << xyz_idx << " coordinate values in line " << linenr << std::endl;
         return false;
     }
     if (rgb != 0 && rgb_idx != 3) {
-        std::cerr << "can't understand " << xyz_idx << " color values in line " << linenr << endl;
+        std::cerr << "can't understand " << xyz_idx << " color values in line " << linenr << std::endl;
         return false;
     }
     // apply transformations and filter data and append to vectors
@@ -647,7 +647,7 @@ bool readASCII(std::istream& infile, IODataType* spec, ScanDataTransform& transf
     // we then check whether the last character is a \r and remove it
 
     if (!checkSpec(spec, xyz, rgb, refl, temp, ampl, type, devi)) {
-        std::cerr << "problems with spec" << endl;
+        std::cerr << "problems with spec" << std::endl;
         goto fail;
     }
 
@@ -658,8 +658,8 @@ bool readASCII(std::istream& infile, IODataType* spec, ScanDataTransform& transf
             infile.getline(buffer, bufsize, '\n');
         } catch(std::ios_base::failure e) {
             if (!infile.eof()) {
-                std::cerr << "error reading a line in line " << linenr << endl;
-                std::cerr << e.what() << endl;
+                std::cerr << "error reading a line in line " << linenr << std::endl;
+                std::cerr << e.what() << std::endl;
                 goto fail;
             } else {
                 break;
@@ -669,7 +669,7 @@ bool readASCII(std::istream& infile, IODataType* spec, ScanDataTransform& transf
         // if failure but eof not reached, break
         if (infile.fail() && !infile.eof()) {
             std::cerr << "cannot find line ending within " << bufsize <<
-                " characters and eof is not reached in line " << linenr << endl;
+                " characters and eof is not reached in line " << linenr << std::endl;
             break;
         }
         // if eof was not reached, then a terminator was found
@@ -685,7 +685,7 @@ bool readASCII(std::istream& infile, IODataType* spec, ScanDataTransform& transf
         }
 
         if (!handle_line(buffer, linelen, linenr, spec, transform, filter, xyz, rgb, refl, temp, ampl, type, devi)) {
-            std::cerr << "unable to parse line " << linenr << endl;
+            std::cerr << "unable to parse line " << linenr << std::endl;
             // A line contained an error, so we decrement the header variable
             header -= 1;
             // If we decrement too much, we start quit with an error
@@ -787,7 +787,7 @@ bool open_path(boost::filesystem::path data_path, std::function<bool (std::istre
         });
     }
     if (!ret) {
-        std::cerr << "Path does neither exist nor is a zip archive: " << data_path << endl;
+        std::cerr << "Path does neither exist nor is a zip archive: " << data_path << std::endl;
     }
     return ret;
 }

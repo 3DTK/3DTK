@@ -24,7 +24,7 @@ namespace fbr{
    * @param nOfFilteredMatches number of matches after the filteration
    */
   class feature_matcher{
-    vector<cv::DMatch> matches;
+    std::vector<cv::DMatch> matches;
     matcher_method mMethod;
     unsigned int knn;
     double radius;
@@ -43,7 +43,7 @@ namespace fbr{
 
     void match(feature qFeature, feature tFeature);
 
-    vector<cv::DMatch> getMatches();
+    std::vector<cv::DMatch> getMatches();
     matcher_method getMatcherMethod();
     matching_filtration_method getMatchingFiltrationMethod();
     unsigned int getKnn();

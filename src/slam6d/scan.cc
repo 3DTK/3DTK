@@ -41,10 +41,7 @@
 #define _NO_PARALLEL_READ
 #endif
 
-using std::vector;
-
-
-vector<Scan*> Scan::allScans;
+std::vector<Scan*> Scan::allScans;
 bool Scan::scanserver = false;
 bool Scan::continue_processing = false;
 std::string Scan::processing_command;
@@ -246,7 +243,7 @@ void Scan::copyReducedToOriginal()
   // is around 4.2 billion which is too little for scans with more than 179
   // million points
   if (sizeof(size_t) == 4 && xyz_reduced.size() > ((size_t)(-1))/sizeof(double)/3) {
-      throw runtime_error("Insufficient size of size_t datatype");
+      throw std::runtime_error("Insufficient size of size_t datatype");
   }
   size_t size = xyz_reduced.size();
   DataXYZ xyz_reduced_orig(create("xyz reduced original",
@@ -273,7 +270,7 @@ void Scan::copyOriginalToReduced()
   // is around 4.2 billion which is too little for scans with more than 179
   // million points
   if (sizeof(size_t) == 4 && xyz_reduced_orig.size() > ((size_t)(-1))/sizeof(double)/3) {
-      throw runtime_error("Insufficient size of size_t datatype");
+      throw std::runtime_error("Insufficient size of size_t datatype");
   }
   size_t size = xyz_reduced_orig.size();
   DataXYZ xyz_reduced(create("xyz reduced", sizeof(double)*3*size));
@@ -294,21 +291,21 @@ void Scan::copyOriginalToReduced()
  */
 void Scan::calcNormals()
 {
-  cout << "calcNormals" << endl;
+  std::cout << "calcNormals" << std::endl;
   DataXYZ xyz(get("xyz"));
   // check if we can create a large enough array. The maximum size_t on 32 bit
   // is around 4.2 billion which is too little for scans with more than 179
   // million points
   if (sizeof(size_t) == 4 && xyz.size() > ((size_t)(-1))/sizeof(double)/3) {
-      throw runtime_error("Insufficient size of size_t datatype");
+      throw std::runtime_error("Insufficient size of size_t datatype");
   }
   DataNormal xyz_normals(create("normal", sizeof(double)*3*xyz.size()));
   if(xyz.size() == 0) throw
-      runtime_error("Could not calculate reduced points, XYZ data is empty");
+      std::runtime_error("Could not calculate reduced points, XYZ data is empty");
     
-  vector<Point> points;
+  std::vector<Point> points;
   points.reserve(xyz.size());
-  vector<Point> normals;
+  std::vector<Point> normals;
   normals.reserve(xyz.size());
   for(size_t j = 0; j < xyz.size(); j++) {
     points.push_back(Point(xyz[j][0], xyz[j][1], xyz[j][2]));
@@ -321,7 +318,7 @@ void Scan::calcNormals()
     xyz_normals[i][1] = normals[i].y;
     xyz_normals[i][2] = normals[i].z;
   }
-  cout << "calcNormals done" << endl;
+  std::cout << "calcNormals done" << std::endl;
 }
     
 /**
@@ -363,7 +360,7 @@ void Scan::calcReducedPoints()
     // is around 4.2 billion which is too little for scans with more than 179
     // million points
     if (sizeof(size_t) == 4 && xyz.size() > ((size_t)(-1))/sizeof(double)/3) {
-        throw runtime_error("Insufficient size of size_t datatype");
+        throw std::runtime_error("Insufficient size of size_t datatype");
     }
     DataXYZ xyz_reduced(create("xyz reduced", sizeof(double)*3*xyz.size()));
     for(size_t i = 0; i < xyz.size(); ++i) {
@@ -376,7 +373,7 @@ void Scan::calcReducedPoints()
       // is around 4.2 billion which is too little for scans with more than 1.07
       // billion points
       if (sizeof(size_t) == 4 && reflectance.size() > ((size_t)(-1))/sizeof(float)) {
-              throw runtime_error("Insufficient size of size_t datatype");
+              throw std::runtime_error("Insufficient size of size_t datatype");
       }
       DataReflectance reflectance_reduced(create("reflectance reduced",
                                         sizeof(float)*reflectance.size()));
@@ -389,7 +386,7 @@ void Scan::calcReducedPoints()
       // is around 4.2 billion which is too little for scans with more than 1.4
       // billion points
       if (sizeof(size_t) == 4 && xyz.size() > ((size_t)(-1))/sizeof(unsigned char)/3) {
-              throw runtime_error("Insufficient size of size_t datatype");
+              throw std::runtime_error("Insufficient size of size_t datatype");
       }
       DataRGB rgb_reduced(create("color reduced", sizeof(unsigned char)*3*xyz.size()));
       for(size_t i = 0; i < xyz.size(); ++i) {
@@ -403,7 +400,7 @@ void Scan::calcReducedPoints()
       // is around 4.2 billion which is too little for scans with more than 179
       // million points
       if (sizeof(size_t) == 4 && xyz.size() > ((size_t)(-1))/sizeof(double)/3) {
-          throw runtime_error("Insufficient size of size_t datatype");
+          throw std::runtime_error("Insufficient size of size_t datatype");
       }
       DataNormal normal_reduced(create("normal reduced",
                                        sizeof(double)*3*xyz.size()));      
@@ -439,7 +436,7 @@ void Scan::calcReducedPoints()
                                                  reduction_voxelSize,
                                                  reduction_pointtype);      
 
-    vector<double*> center;
+    std::vector<double*> center;
     center.clear();
     if (reduction_nrpts != 0) {
       if (reduction_nrpts == -1) {
@@ -461,7 +458,7 @@ void Scan::calcReducedPoints()
     // is around 4.2 billion which is too little for scans with more than 179
     // million points
     if (sizeof(size_t) == 4 && center.size() > ((size_t)(-1))/sizeof(double)/3) {
-        throw runtime_error("Insufficient size of size_t datatype");
+        throw std::runtime_error("Insufficient size of size_t datatype");
     }
     size_t size = center.size();
     DataXYZ xyz_reduced(create("xyz reduced", sizeof(double)*3*size));
@@ -473,7 +470,7 @@ void Scan::calcReducedPoints()
       // is around 4.2 billion which is too little for scans with more than 1.07
       // billion points
       if (sizeof(size_t) == 4 && size > ((size_t)(-1))/sizeof(float)) {
-              throw runtime_error("Insufficient size of size_t datatype");
+              throw std::runtime_error("Insufficient size of size_t datatype");
       }
       DataReflectance my_reflectance_reduced(create("reflectance reduced",
                                                     sizeof(float)*size));
@@ -484,7 +481,7 @@ void Scan::calcReducedPoints()
       // is around 4.2 billion which is too little for scans with more than 1.4
       // billion points
       if (sizeof(size_t) == 4 && size > ((size_t)(-1))/sizeof(unsigned char)/3) {
-              throw runtime_error("Insufficient size of size_t datatype");
+              throw std::runtime_error("Insufficient size of size_t datatype");
       }
       DataRGB my_rgb_reduced(create("color reduced",
                                           sizeof(unsigned char)*3*size));
@@ -495,7 +492,7 @@ void Scan::calcReducedPoints()
       // is around 4.2 billion which is too little for scans with more than 179
       // million points
       if (sizeof(size_t) == 4 && center.size() > ((size_t)(-1))/sizeof(double)/3) {
-          throw runtime_error("Insufficient size of size_t datatype");
+          throw std::runtime_error("Insufficient size of size_t datatype");
       }
       DataNormal my_normal_reduced(create("normal reduced",
                                           sizeof(double)*3*size));
@@ -601,10 +598,10 @@ void Scan::transformMatrix(const double alignxf[16])
   Matrix4ToQuat(transMat, rQuat);
 
 #ifdef DEBUG
-  cerr << "(" << rPos[0] << ", " << rPos[1] << ", " << rPos[2] << ", "
-       << rPosTheta[0] << ", " << rPosTheta[1] << ", " << rPosTheta[2] << ")" << endl;
+  std::cerr << "(" << rPos[0] << ", " << rPos[1] << ", " << rPos[2] << ", "
+       << rPosTheta[0] << ", " << rPosTheta[1] << ", " << rPosTheta[2] << ")" << std::endl;
 
-  cerr << transMat << endl;
+  std::cerr << transMat << std::endl;
 #endif
 
   // apply alignxf to dalignxf
@@ -645,8 +642,8 @@ void Scan::transform(const double alignxf[16], const AlgoType type, int islum)
 #endif //TRANSFORM_ALL_POINTS
 
 #ifdef DEBUG
-  cerr << alignxf << endl;
-  cerr << "(" << rPos[0] << ", " << rPos[1] << ", " << rPos[2] << ", "
+  std::cerr << alignxf << std::endl;
+  std::cerr << "(" << rPos[0] << ", " << rPos[1] << ", " << rPos[2] << ", "
        << rPosTheta[0] << ", " << rPosTheta[1] << ", " << rPosTheta[2]
        << ") ---> ";
 #endif
@@ -831,7 +828,7 @@ void Scan::transformToQuat(double rP[3],
  * @param max_dist_match2 maximal allowed distance for matching
  */
 
-void Scan::getNoPairsSimple(vector <double*> &diff,
+void Scan::getNoPairsSimple(std::vector <double*> &diff,
                             Scan* Source, Scan* Target,
                             int thread_num,
                             double max_dist_match2)
@@ -841,7 +838,7 @@ void Scan::getNoPairsSimple(vector <double*> &diff,
                  PointerArray<double>(Target->get("xyz reduced")).get(),
                  Target->size<DataXYZ>("xyz reduced"));
 
-  cout << "Max: " << max_dist_match2 << endl;
+  std::cout << "Max: " << max_dist_match2 << std::endl;
   for (size_t i = 0; i < xyz_reduced.size(); i++) {
 
     double p[3];
@@ -872,7 +869,7 @@ void Scan::getNoPairsSimple(vector <double*> &diff,
  * @param rnd randomized point selection
  * @param max_dist_match2 maximal allowed distance for matching
  */
-void Scan::getPtPairsSimple(vector <PtPair> *pairs,
+void Scan::getPtPairsSimple(std::vector <PtPair> *pairs,
                             Scan* Source, Scan* Target,
                             int thread_num,
                             int rnd, double max_dist_match2,
@@ -932,7 +929,7 @@ void Scan::getPtPairsSimple(vector <PtPair> *pairs,
  * @param max_dist_match2 maximal allowed distance for matching
  * @return a set of corresponding point pairs
  */
-void Scan::getPtPairs(vector <PtPair> *pairs,
+void Scan::getPtPairs(std::vector <PtPair> *pairs,
                       Scan* Source, Scan* Target,
                       int thread_num,
                       int rnd, double max_dist_match2, double &sum,
@@ -993,7 +990,7 @@ void Scan::getPtPairs(vector <PtPair> *pairs,
  *  by Langis / Greenspan / Godin, IEEE 3DIM 2001
  *
  */
-void Scan::getPtPairsParallel(vector <PtPair> *pairs,
+void Scan::getPtPairsParallel(std::vector <PtPair> *pairs,
                               Scan* Source, Scan* Target,
                               int thread_num, int step,
                               int rnd, double max_dist_match2,

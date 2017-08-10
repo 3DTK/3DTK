@@ -21,14 +21,6 @@
 #include <list>
 #include <utility>
 #include <fstream>
-using std::ifstream;
-using std::ofstream;
-using std::flush;
-using std::string;
-using std::map;
-using std::pair;
-using std::vector;
-using std::string;
 
 #include <boost/filesystem/operations.hpp>
 using namespace boost::filesystem;
@@ -151,7 +143,7 @@ BasicScan::BasicScan(double *_rPos,
 
 BasicScan::BasicScan(double *_rPos,
                      double *_rPosTheta,
-                     vector<double*> points)
+                     std::vector<double*> points)
 {
   init();
   for(int i = 0; i < 3; i++) {
@@ -184,7 +176,7 @@ BasicScan::BasicScan(double *_rPos,
   // is around 4.2 billion which is too little for scans with more than 179
   // million points
   if (sizeof(size_t) == 4 && points.size() > ((size_t)(-1))/sizeof(double)/3) {
-      throw runtime_error("Insufficient size of size_t datatype");
+      throw std::runtime_error("Insufficient size of size_t datatype");
   }
   double* data = reinterpret_cast<double*>(create("xyz", 
                      sizeof(double) * 3 * points.size()).get_raw_pointer());
@@ -232,7 +224,7 @@ BasicScan::BasicScan(const std::string& path,
 
 BasicScan::~BasicScan()
 {
-  for (map<string, pair<unsigned char*, 
+  for (std::map<std::string, std::pair<unsigned char*, 
          size_t>>::iterator it = m_data.begin(); 
        it != m_data.end(); 
        it++) {
@@ -270,7 +262,7 @@ void BasicScan::setHeightFilter(double top, double bottom)
   m_filter_height_set = true;
 }
 
-void BasicScan::setCustomFilter(string& cFiltStr)
+void BasicScan::setCustomFilter(std::string& cFiltStr)
 {
   customFilterStr = cFiltStr;	
   m_filter_custom_set = true;
@@ -302,13 +294,13 @@ void BasicScan::get(IODataType types)
 	  return;
   }
 
-  vector<double> xyz;
-  vector<unsigned char> rgb;
-  vector<float> reflectance;
-  vector<float> temperature;
-  vector<float> amplitude;
-  vector<int> type;
-  vector<float> deviation;
+  std::vector<double> xyz;
+  std::vector<unsigned char> rgb;
+  std::vector<float> reflectance;
+  std::vector<float> temperature;
+  std::vector<float> amplitude;
+  std::vector<int> type;
+  std::vector<float> deviation;
 
   PointFilter filter;
   if(m_filter_range_set)
@@ -340,7 +332,7 @@ void BasicScan::get(IODataType types)
     // is around 4.2 billion which is too little for scans with more than 537
     // million points
     if (sizeof(size_t) == 4 && xyz.size() > ((size_t)(-1))/sizeof(double)) {
-            throw runtime_error("Insufficient size of size_t datatype");
+            throw std::runtime_error("Insufficient size of size_t datatype");
     }
     double* data = reinterpret_cast<double*>(create("xyz",
                       sizeof(double) * xyz.size()).get_raw_pointer());
@@ -351,7 +343,7 @@ void BasicScan::get(IODataType types)
     // is around 4.2 billion which is too little for scans with more than 4.2
     // billion points
     if (sizeof(size_t) == 4 && rgb.size() > ((size_t)(-1))/sizeof(unsigned char)) {
-            throw runtime_error("Insufficient size of size_t datatype");
+            throw std::runtime_error("Insufficient size of size_t datatype");
     }
     unsigned char* data = reinterpret_cast<unsigned char*>(create("rgb",
                       sizeof(unsigned char) * rgb.size()).get_raw_pointer());
@@ -363,7 +355,7 @@ void BasicScan::get(IODataType types)
     // is around 4.2 billion which is too little for scans with more than 1.07
     // billion points
     if (sizeof(size_t) == 4 && reflectance.size() > ((size_t)(-1))/sizeof(float)) {
-            throw runtime_error("Insufficient size of size_t datatype");
+            throw std::runtime_error("Insufficient size of size_t datatype");
     }
     float* data = reinterpret_cast<float*>(create("reflectance",
                       sizeof(float) * reflectance.size()).get_raw_pointer());
@@ -375,7 +367,7 @@ void BasicScan::get(IODataType types)
     // is around 4.2 billion which is too little for scans with more than 1.07
     // billion points
     if (sizeof(size_t) == 4 && temperature.size() > ((size_t)(-1))/sizeof(float)) {
-            throw runtime_error("Insufficient size of size_t datatype");
+            throw std::runtime_error("Insufficient size of size_t datatype");
     }
     float* data = reinterpret_cast<float*>(create("temperature",
                       sizeof(float) * temperature.size()).get_raw_pointer());
@@ -387,7 +379,7 @@ void BasicScan::get(IODataType types)
     // is around 4.2 billion which is too little for scans with more than 1.07
     // billion points
     if (sizeof(size_t) == 4 && amplitude.size() > ((size_t)(-1))/sizeof(float)) {
-            throw runtime_error("Insufficient size of size_t datatype");
+            throw std::runtime_error("Insufficient size of size_t datatype");
     }
     float* data = reinterpret_cast<float*>(create("amplitude",
                       sizeof(float) * amplitude.size()).get_raw_pointer());
@@ -398,7 +390,7 @@ void BasicScan::get(IODataType types)
     // is around 4.2 billion which is too little for scans with more than 1.07
     // billion points
     if (sizeof(size_t) == 4 && type.size() > ((size_t)(-1))/sizeof(float)) {
-            throw runtime_error("Insufficient size of size_t datatype");
+            throw std::runtime_error("Insufficient size of size_t datatype");
     }
     int* data = reinterpret_cast<int*>(create("type",
                       sizeof(int) * type.size()).get_raw_pointer());
@@ -409,7 +401,7 @@ void BasicScan::get(IODataType types)
     // is around 4.2 billion which is too little for scans with more than 1.07
     // billion points
     if (sizeof(size_t) == 4 && deviation.size() > ((size_t)(-1))/sizeof(float)) {
-            throw runtime_error("Insufficient size of size_t datatype");
+            throw std::runtime_error("Insufficient size of size_t datatype");
     }
     float* data = reinterpret_cast<float*>(create("deviation",
                       sizeof(float) * deviation.size()).get_raw_pointer());
@@ -420,7 +412,7 @@ void BasicScan::get(IODataType types)
 DataPointer BasicScan::get(const std::string& identifier)
 {
   // try to get data
-  map<string, pair<unsigned char*, size_t>>::iterator
+  std::map<std::string, std::pair<unsigned char*, size_t>>::iterator
     it = m_data.find(identifier);
 
   // create data fields
@@ -479,7 +471,7 @@ DataPointer BasicScan::get(const std::string& identifier)
 DataPointer BasicScan::create(const std::string& identifier,
                               size_t size)
 {
-  map<string, pair<unsigned char*, size_t>>::iterator
+  std::map<std::string, std::pair<unsigned char*, size_t>>::iterator
     it = m_data.find(identifier);
   if(it != m_data.end()) {
     // try to reuse, otherwise reallocate
@@ -499,7 +491,7 @@ DataPointer BasicScan::create(const std::string& identifier,
 
 void BasicScan::clear(const std::string& identifier)
 {
-  map<string, pair<unsigned char*, size_t>>::iterator
+  std::map<std::string, std::pair<unsigned char*, size_t>>::iterator
     it = m_data.find(identifier);
   if(it != m_data.end()) {
     delete[] it->second.first;
@@ -527,9 +519,9 @@ void BasicScan::createSearchTreePrivate()
                                 PointType(), true);
       break;
     case -1:
-      throw runtime_error("Cannot create a SearchTree without setting a type.");
+      throw std::runtime_error("Cannot create a SearchTree without setting a type.");
     default:
-      throw runtime_error("SearchTree type not implemented");
+      throw std::runtime_error("SearchTree type not implemented");
     }
 }
 
@@ -578,7 +570,7 @@ void BasicScan::saveBOctTree(std::string & filename)
 
 void BasicScan::createOcttree()
 {
-  string scanFileName = m_path + "scan" + m_identifier + ".oct";
+  std::string scanFileName = m_path + "scan" + m_identifier + ".oct";
   BOctTree<float>* btree = 0;
   boost::filesystem::path octpath(scanFileName);
 
@@ -620,7 +612,7 @@ void BasicScan::createOcttree()
   if(octtree_saveOct &&
       (!octtree_autoOct || !boost::filesystem::exists(scanFileName) ||
         getLastModified() > boost::filesystem::last_write_time(octpath))) {
-    cout << "Saving octree " << scanFileName << endl;
+    std::cout << "Saving octree " << scanFileName << std::endl;
     btree->serialize(scanFileName);
   }
 
@@ -632,7 +624,7 @@ void BasicScan::createOcttree()
 
 BOctTree<float>* BasicScan::convertScanToShowOcttree()
 {
-  string scanFileName = m_path + "scan" + m_identifier + ".oct";
+  std::string scanFileName = m_path + "scan" + m_identifier + ".oct";
   BOctTree<float>* btree = 0;
   boost::filesystem::path octpath(scanFileName);
 
@@ -677,9 +669,9 @@ BOctTree<float>* BasicScan::convertScanToShowOcttree()
 
 size_t BasicScan::readFrames()
 {
-  string filename = m_path + "scan" + m_identifier + ".frames";
-  string line;
-  ifstream file(filename.c_str());
+  std::string filename = m_path + "scan" + m_identifier + ".frames";
+  std::string line;
+  std::ifstream file(filename.c_str());
   // clear frame vector here to allow reloading without (old) duplicates
   m_frames.clear();
   while(getline(file, line)) {
@@ -695,7 +687,7 @@ size_t BasicScan::readFrames()
 	  } else {
 	    std::string msg("Malformed line in ");
 		msg += filename + ": " + line;
-	    throw runtime_error(msg);
+	    throw std::runtime_error(msg);
 	  }
   }
 
@@ -704,18 +696,18 @@ size_t BasicScan::readFrames()
 
 void BasicScan::saveFrames(bool append)
 {
-  string filename = m_path + "scan" + m_identifier + ".frames";
+  std::string filename = m_path + "scan" + m_identifier + ".frames";
   std::ios_base::openmode open_mode;
 
   if(append) open_mode = std::ios_base::app;
   else open_mode = std::ios_base::out;
-  ofstream file(filename.c_str(), open_mode);
-  for(vector<Frame>::iterator it = m_frames.begin();
+  std::ofstream file(filename.c_str(), open_mode);
+  for(std::vector<Frame>::iterator it = m_frames.begin();
       it != m_frames.end();
       ++it) {
     file << it->transformation << it->type << '\n';
   }
-  file << flush;
+  file << std::flush;
   file.close();
 }
 

@@ -9,14 +9,11 @@
 #define __SCAN_IO_RXP_H__
 
 #include <string>
-using std::string;
 #include <vector>
-using std::vector;
 
 #include "scan_io.h"
 #include "riegl/scanlib.hpp"
 using namespace scanlib;
-using namespace std;
 using namespace std::tr1;
 
 class importer;

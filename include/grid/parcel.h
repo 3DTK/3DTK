@@ -3,7 +3,6 @@
 
 #include "grid/grid.h"
 #include <string>
-using std::string;
 
 /**
  * The class represents a section of the map and inherrits grid.

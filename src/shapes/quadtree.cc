@@ -91,8 +91,8 @@ bool QuadTree::close(double* p, double *p2) {
   return false;*/
 }
  
-bool QuadTree::close(double* p, set<double*> &cluster) {
-  for(set<double*>::iterator it = cluster.begin(); it != cluster.end(); it++) {
+bool QuadTree::close(double* p, std::set<double*> &cluster) {
+  for(std::set<double*>::iterator it = cluster.begin(); it != cluster.end(); it++) {
     if ( close(p, (*it)) ) {
       return true;
     }
@@ -111,7 +111,7 @@ bool QuadTree::close(double* p, set<double*> &cluster) {
   }
   return false;
 }*/
-int QuadTree::where(double *p1, vector<set<double*> >& clusters) {
+int QuadTree::where(double *p1, std::vector<std::set<double*> >& clusters) {
   for (unsigned int i = 0; i < clusters.size(); i++) {
     if (clusters[i].count(p1) > 0) return i;
   }
@@ -120,15 +120,15 @@ int QuadTree::where(double *p1, vector<set<double*> >& clusters) {
   return -1;
 }
 
-vector<set<double*> >& QuadTree::clusterCells(vector<set<double*> > &clusters1, set<double*> border1, 
-                           vector<set<double*> > &clusters2, set<double*> border2, vector< set<double*> > &clusters) {
+std::vector<std::set<double*> >& QuadTree::clusterCells(std::vector<std::set<double*> > &clusters1, std::set<double*> border1, 
+                           std::vector<std::set<double*> > &clusters2, std::set<double*> border2, std::vector< std::set<double*> > &clusters) {
   if (border1.size() <= 0 || border2.size() <= 0) {
     clusters.insert( clusters.end(), clusters1.begin(), clusters1.end());
     clusters.insert( clusters.end(), clusters2.begin(), clusters2.end());
     return clusters;
   }
   // some clusters might not have a border connection, remember those?
-  set<int> non_used_clusters;
+  std::set<int> non_used_clusters;
   for (unsigned int i = 0; i < clusters1.size(); i++) {
     non_used_clusters.insert( -1 -i);
   }
@@ -138,10 +138,10 @@ vector<set<double*> >& QuadTree::clusterCells(vector<set<double*> > &clusters1, 
 
   // contains the edges of the correspondence graph
   // indices of cluster 1 are stored negated
-  vector<int*> cgraph;
+  std::vector<int*> cgraph;
 //cout << "bordersizes: " << border1.size() << " " <<  border2.size() << endl;
-  for (set<double*>::iterator bit1 = border1.begin(); bit1 != border1.end(); bit1++) {
-    for (set<double*>::iterator bit2 = border2.begin(); bit2 != border2.end(); bit2++) {
+  for (std::set<double*>::iterator bit1 = border1.begin(); bit1 != border1.end(); bit1++) {
+    for (std::set<double*>::iterator bit2 = border2.begin(); bit2 != border2.end(); bit2++) {
       if (close( *bit1, *bit2) ) {
         int *edge = new int[3];
         int w1,w2; 
@@ -164,13 +164,13 @@ vector<set<double*> >& QuadTree::clusterCells(vector<set<double*> > &clusters1, 
     }
   }
   //cout << "borders connected" << endl;
-  vector< set<int> > index_clusters;
+  std::vector< std::set<int> > index_clusters;
   int nr_cluster = 0;
   for (unsigned int i = 0; i < cgraph.size(); i++) {
     if (cgraph[i][2] != -1) {continue;}
     // unlabeled edge
     cgraph[i][2] = nr_cluster;
-    set<int> index_cluster;
+    std::set<int> index_cluster;
     index_cluster.insert(cgraph[i][0]);
     index_cluster.insert(cgraph[i][1]);
         non_used_clusters.erase(cgraph[i][0]);
@@ -196,8 +196,8 @@ vector<set<double*> >& QuadTree::clusterCells(vector<set<double*> > &clusters1, 
   }
 //cout << "cluster connections resolved" << endl;
   for (unsigned int i = 0; i < index_clusters.size(); i++) {
-    set<double*> cluster;
-    for (set<int>::iterator it = index_clusters[i].begin(); 
+    std::set<double*> cluster;
+    for (std::set<int>::iterator it = index_clusters[i].begin(); 
          it != index_clusters[i].end(); it++) {
       if (*it < 0 ) {
         int index = -1 - (*it);
@@ -209,8 +209,8 @@ vector<set<double*> >& QuadTree::clusterCells(vector<set<double*> > &clusters1, 
     clusters.push_back(cluster);
   }
 //cout << "clusters joined. add remaining " << non_used_clusters.size() << endl;
-  for (set<int>::iterator it = non_used_clusters.begin(); it != non_used_clusters.end(); it++) {
-    set<double*> cluster;
+  for (std::set<int>::iterator it = non_used_clusters.begin(); it != non_used_clusters.end(); it++) {
+    std::set<double*> cluster;
     if (*it < 0 ) {
       int index = -1 - (*it);
       cluster.insert( clusters1[index].begin(), clusters1[index].end() );
@@ -230,13 +230,13 @@ vector<set<double*> >& QuadTree::clusterCells(vector<set<double*> > &clusters1, 
 //  return clusters1;
 }
 
-vector<set<double*> >& QuadTree::getClusters() {
+std::vector<std::set<double*> >& QuadTree::getClusters() {
   // if leaf node
   if (leaf == 1) {
     if (points.size() <= 0) return clusters;
 //    cout << "leaf clustering ";
 //    cout << center[0] << " " << center[1] << " " << points.size() << " " <<endl; 
-    clusters.push_back(set<double*> ());
+    clusters.push_back(std::set<double*> ());
     clusters[0].insert(points[0]);
 
     for (unsigned int j = 1; j < points.size(); j++) {
@@ -259,7 +259,7 @@ vector<set<double*> >& QuadTree::getClusters() {
         }
       }
       if (!found_cluster) { // havent found a cose enough cluster -> new cluster
-        set<double*> cluster;
+        std::set<double*> cluster;
         cluster.insert(points[j]);
         clusters.push_back(cluster);
       }
@@ -269,22 +269,22 @@ vector<set<double*> >& QuadTree::getClusters() {
   }
 
  //cout << "my leafs: "<< child[0] << " " << child[1] << " " << child[2] << " " << child[3] << endl;
-  vector< set<double *> > southclusters; 
+  std::vector< std::set<double *> > southclusters; 
             clusterCells(child[0]->getClusters(), child[0]->east,
                          child[1]->getClusters(), child[1]->west, southclusters);
 //  cout << "northern cluste: " << endl; 
-  vector< set<double *> > northclusters;
+  std::vector< std::set<double *> > northclusters;
             clusterCells(child[2]->getClusters(), child[2]->east,
                          child[3]->getClusters(), child[3]->west, northclusters);
 //  cout << "south: " << southclusters.size() << endl;
 //  cout << "north: " << northclusters.size() << endl;
 
   // join borders
-  set<double*> nborders01;
+  std::set<double*> nborders01;
   nborders01.insert(child[0]->north.begin(), child[0]->north.end());
   nborders01.insert(child[1]->north.begin(), child[1]->north.end());
   
-  set<double*> sborders23;
+  std::set<double*> sborders23;
   sborders23.insert(child[2]->south.begin(), child[2]->south.end());
   sborders23.insert(child[3]->south.begin(), child[3]->south.end());
 
@@ -304,10 +304,10 @@ QuadTree::QuadTree(double **pts, int n, double _qSize, double min_d){
   double xmin = pts[0][0], xmax = pts[0][0];
   double ymin = pts[0][1], ymax = pts[0][1];
   for (int i=1; i < n; i++) {
-    xmin = min(xmin, pts[i][0]);
-    xmax = max(xmax, pts[i][0]);
-    ymin = min(ymin, pts[i][1]);
-    ymax = max(ymax, pts[i][1]);
+    xmin = std::min(xmin, pts[i][0]);
+    xmax = std::max(xmax, pts[i][0]);
+    ymin = std::min(ymin, pts[i][1]);
+    ymax = std::max(ymax, pts[i][1]);
   }
   double eps = 0.00001;
   xmin -= eps;
@@ -317,7 +317,7 @@ QuadTree::QuadTree(double **pts, int n, double _qSize, double min_d){
   center[0] = 0.5 * (xmin+xmax);
   center[1] = 0.5 * (ymin+ymax);
 
-  double m = max(0.5 * (xmax-xmin), 0.5 * (ymax-ymin));
+  double m = std::max(0.5 * (xmax-xmin), 0.5 * (ymax-ymin));
   int count;
 
   //set up values
@@ -349,8 +349,8 @@ QuadTree::QuadTree(double **pts, int n, double _qSize, double min_d){
   // if bucket is _not_ approximately (nearly) empty don't build tree further
   // -----------------------------------------------------------------------
   for (int i = 0; i < 4; i++) {
-    vector<double*> splitPoints;
-    set<double *> no,e,s,w;
+    std::vector<double*> splitPoints;
+    std::set<double *> no,e,s,w;
     count = countPointsAndQueue(pts, n, splitPoints, 
                                 newcenter[i], x_sizeNew, y_sizeNew, 
                                 no, e, s, w);
@@ -361,9 +361,9 @@ QuadTree::QuadTree(double **pts, int n, double _qSize, double min_d){
   }
 }
 
-QuadTree::QuadTree(vector<double*> &splitPoints, double _center[2], 
-                 double _x_size, double _y_size, set<double*> &n,
-                 set<double*> &e, set<double*> &s, set<double*> &w) {
+QuadTree::QuadTree(std::vector<double*> &splitPoints, double _center[2], 
+                 double _x_size, double _y_size, std::set<double*> &n,
+                 std::set<double*> &e, std::set<double*> &s, std::set<double*> &w) {
   int count;
   /*
   this->north = n;
@@ -419,8 +419,8 @@ QuadTree::QuadTree(vector<double*> &splitPoints, double _center[2],
   // if bucket is _not_ approximately (nearly) empty don't build tree further
   // ------------------------------------------------------------------------
   for (int i = 0; i < 4; i++) {
-    vector<double*> new_splitPoints;
-    set<double *> n,e,s,w;
+    std::vector<double*> new_splitPoints;
+    std::set<double *> n,e,s,w;
     count = countPointsAndQueue(splitPoints, new_splitPoints, 
                                 newcenter[i], x_sizeNew, y_sizeNew,
                                 n, e, s, w);
@@ -432,14 +432,14 @@ QuadTree::QuadTree(vector<double*> &splitPoints, double _center[2],
   }
 }
 
-int QuadTree::countPointsAndQueue(const vector<double*> &i_points,
-                                 vector<double*> &points,
+int QuadTree::countPointsAndQueue(const std::vector<double*> &i_points,
+                                 std::vector<double*> &points,
                                  double center[2], 
                                  double x_size, double y_size,
-                                 set<double*> &n,
-                                 set<double*> &e,
-                                 set<double*> &s,
-                                 set<double*> &w)
+                                 std::set<double*> &n,
+                                 std::set<double*> &e,
+                                 std::set<double*> &s,
+                                 std::set<double*> &w)
 {
   int count = 0;
   for (unsigned int i = 0; i < i_points.size(); i++) {
@@ -469,13 +469,13 @@ int QuadTree::countPointsAndQueue(const vector<double*> &i_points,
 }
 
 int QuadTree::countPointsAndQueue(double **pts, int n, 
-                                 vector<double*> &points,
+                                 std::vector<double*> &points,
                                  double center[2], 
                                  double x_size,double y_size,
-                                 set<double*> &no,
-                                 set<double*> &e,
-                                 set<double*> &s,
-                                 set<double*> &w)
+                                 std::set<double*> &no,
+                                 std::set<double*> &e,
+                                 std::set<double*> &s,
+                                 std::set<double*> &w)
 {
 
   int count = 0;

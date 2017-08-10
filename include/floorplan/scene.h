@@ -55,7 +55,7 @@ private:
     /**
      * Computes a 3D boolean occupancy grid.
      */
-    vector<vector<vector<bool> > > compute3DOccGrid(const double& voxDimInCm,
+    std::vector<std::vector<std::vector<bool> > > compute3DOccGrid(const double& voxDimInCm,
             const double& minHeight = -std::numeric_limits<double>::max(),
             const double& maxHeight = +std::numeric_limits<double>::max());
 

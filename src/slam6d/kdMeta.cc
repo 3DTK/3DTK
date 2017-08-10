@@ -23,11 +23,7 @@
 #include "slam6d/scan.h"
 
 #include <iostream>
-using std::cout;
-using std::cerr;
-using std::endl;
 #include <algorithm>
-using std::swap;
 #include <cmath>
 #include <cstring>
 
@@ -35,7 +31,7 @@ using std::swap;
 template<class PointData, class AccessorData, class AccessorFunc, class PointType, class ParamFunc>
 KDParams<PointType> KDTreeImpl<PointData, AccessorData, AccessorFunc, PointType, ParamFunc>::params[MAX_OPENMP_NUM_THREADS];
 
-KDtreeMetaManaged::KDtreeMetaManaged(const vector<Scan*>& scans) :
+KDtreeMetaManaged::KDtreeMetaManaged(const std::vector<Scan*>& scans) :
   m_count_locking(0)
 {
   // create scan pointer and data pointer arrays
@@ -60,7 +56,7 @@ KDtreeMetaManaged::~KDtreeMetaManaged()
   delete[] m_data;
 }
 
-Index* KDtreeMetaManaged::prepareTempIndices(const vector<Scan*>& scans)
+Index* KDtreeMetaManaged::prepareTempIndices(const std::vector<Scan*>& scans)
 {
   unsigned int n = getPointsSize(scans);
 
@@ -80,10 +76,10 @@ Index* KDtreeMetaManaged::prepareTempIndices(const vector<Scan*>& scans)
   return m_temp_indices;
 }
 
-unsigned int KDtreeMetaManaged::getPointsSize(const vector<Scan*>& scans)
+unsigned int KDtreeMetaManaged::getPointsSize(const std::vector<Scan*>& scans)
 {
   unsigned int n = 0;
-  for(vector<Scan*>::const_iterator it = scans.begin(); it != scans.end(); ++it) {
+  for(std::vector<Scan*>::const_iterator it = scans.begin(); it != scans.end(); ++it) {
     n += (*it)->size<DataXYZ>("xyz reduced");
   }
   return n;

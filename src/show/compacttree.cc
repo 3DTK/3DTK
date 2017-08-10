@@ -18,13 +18,9 @@
 #include <stdio.h>
 
 #include <vector>
-using std::vector;
 #include <deque>
-using std::deque;
 #include <set>
-using std::set;
 #include <list>
-using std::list;
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -47,7 +43,7 @@ compactTree::~compactTree(){
 } 
 
 
-void compactTree::AllPoints( cbitoct &node, vector<double*> &vp, double center[3], double size) {
+void compactTree::AllPoints( cbitoct &node, std::vector<double*> &vp, double center[3], double size) {
   double ccenter[3];
   cbitunion<tshort> *children;
   cbitoct::getChildren(node, children);
@@ -79,7 +75,7 @@ void compactTree::AllPoints( cbitoct &node, vector<double*> &vp, double center[3
 
 
 
-void compactTree::GetOctTreeCenter(vector<double*>&c, cbitoct &node, double *center, double size) {
+void compactTree::GetOctTreeCenter(std::vector<double*>&c, cbitoct &node, double *center, double size) {
   double ccenter[3];
   cbitunion<tshort> *children;
   cbitoct::getChildren(node, children);
@@ -398,7 +394,7 @@ void compactTree::displayOctTreeCulledLOD2(float ratio, cbitoct &node, double *c
           lint length = children->getLength();
             
           int l = LOD2(ccenter[0], ccenter[1], ccenter[2], size/2.0);  // only a single pixel on screen only paint one point
-          l = max((int)(l*l*ratio), 0);
+          l = std::max((int)(l*l*ratio), 0);
           if (l != 0) {
             if ((int)length > l ) {
               double each = (double)POINTDIM * (double)((double)length/(double)l);
@@ -424,7 +420,7 @@ void compactTree::displayOctTreeCulledLOD2(float ratio, cbitoct &node, double *c
         }
       } else { // recurse
         int l = LOD2(ccenter[0], ccenter[1], ccenter[2], size/2.0);  // only a single pixel on screen only paint one point
-        l = max((int)(l*l*ratio), 0);
+        l = std::max((int)(l*l*ratio), 0);
         if (l > 0) {
           displayOctTreeCulledLOD2(ratio, children->node, ccenter, size/2.0);
         }
@@ -448,7 +444,7 @@ void compactTree::displayOctTreeLOD2(float ratio, cbitoct &node, double *center,
         lint length = children->getLength();
             
         int l = LOD2(ccenter[0], ccenter[1], ccenter[2], size/2.0);  // only a single pixel on screen only paint one point
-        l = max((int)(l*l*ratio), 0);
+        l = std::max((int)(l*l*ratio), 0);
         if (l > 1) {
           if ((int)length > l ) {
             double each = (double)POINTDIM * (double)((double)length/(double)l);
@@ -473,7 +469,7 @@ void compactTree::displayOctTreeLOD2(float ratio, cbitoct &node, double *center,
         }
       } else { // recurse
         int l = LOD2(ccenter[0], ccenter[1], ccenter[2], size/2.0);  // only a single pixel on screen only paint one point
-        l = max((int)(l*l*ratio), 0);
+        l = std::max((int)(l*l*ratio), 0);
         if (l > 0) {
           displayOctTreeLOD2(ratio, children->node, ccenter, size/2.0);
         }
@@ -579,7 +575,7 @@ void compactTree::showCube(double *center, double size) {
 
 
 template <class T>
-void compactTree::selectRay(vector<T *> &points) { 
+void compactTree::selectRay(std::vector<T *> &points) { 
   //selectRay(points, *root, center, size); 
 }
 
@@ -632,8 +628,8 @@ void compactTree::childcenter(double *pcenter, double *ccenter, double size, uns
 }
 
 
-void compactTree::GetOctTreeCenter(vector<double*>&c) { GetOctTreeCenter(c, *root, center, size); }
-void compactTree::AllPoints(vector<double *> &vp) { AllPoints(*compactTree::root, vp, center, size); }
+void compactTree::GetOctTreeCenter(std::vector<double*>&c) { GetOctTreeCenter(c, *root, center, size); }
+void compactTree::AllPoints(std::vector<double *> &vp) { AllPoints(*compactTree::root, vp, center, size); }
 
 long compactTree::countNodes() { return 1 + countNodes(*root); }
 long compactTree::countLeaves() { return 1 + countLeaves(*root); }
@@ -698,7 +694,7 @@ void compactTree::deserialize(std::string filename)
   // read magic bits
   file.read(buffer, 2);
   if ( buffer[0] != 'X' || buffer[1] != 'T') {
-    std::cerr << "Not an octree file!!" << endl;
+    std::cerr << "Not an octree file!!" << std::endl;
     file.close();
     return;
   }

@@ -58,7 +58,7 @@ int main(int argc, char **argv)
 
 		unsigned int current_group = point2group[i];
 
-		vector<size_t> neighbours = t.fixedRangeSearch(pa[i], 20, /* thread_num = */ 0);
+		std::vector<size_t> neighbours = t.fixedRangeSearch(pa[i], 20, /* thread_num = */ 0);
 
 		// check if any of the current point's neighbors has already been
 		// grouped before (its group index is smaller than i)

@@ -54,13 +54,13 @@ extern int current_sliding_window_pos;
 extern Trajectory VelodyneTrajectory;
 extern VeloScan * g_pfirstScan;
 
-int TrackerManager::DrawTrackersMovtion_Long_Number_All(vector <Scan *> allScans, int n)
+int TrackerManager::DrawTrackersMovtion_Long_Number_All(std::vector <Scan *> allScans, int n)
 {
 	int i,j,k,colorIdx;
     Point p1,p2,p1text,p2text;
  	char object_moving_distance[256];
 
-	list<Tracker>::iterator it;
+	std::list<Tracker>::iterator it;
 	for(it=tracks.begin();  it!=tracks.end();  it++)
 	{
 		    Tracker &tracker=*it;

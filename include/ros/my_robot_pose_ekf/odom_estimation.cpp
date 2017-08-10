@@ -39,7 +39,6 @@
 using namespace MatrixWrapper;
 using namespace BFL;
 using namespace tf;
-using namespace std;
 using namespace ros;
 
 

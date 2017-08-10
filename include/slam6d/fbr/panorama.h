@@ -22,8 +22,6 @@
 #include "slam6d/point_type.h"
 #include "slam6d/fbr/projection.h"
 
-using namespace std;
-
 namespace fbr{
   /**
    * @class panorama
@@ -173,7 +171,7 @@ namespace fbr{
      */
     void recoverPointCloud(const cv::Mat& rangeImage,
                            cv::Mat& reflectanceImage,
-                           vector<cv::Vec4f> &reducedPoints);
+                           std::vector<cv::Vec4f> &reducedPoints);
     
     //get params
     unsigned int getImageWidth();
@@ -203,7 +201,7 @@ namespace fbr{
     cv::Mat getColorImage();
     
     cv::Mat getMap();
-    vector<vector<vector<cv::Vec3f> > > getExtendedMap();
+    std::vector<std::vector<std::vector<cv::Vec3f> > > getExtendedMap();
 
     
   private:
@@ -228,7 +226,7 @@ namespace fbr{
     cv::Mat iColor_;
     float maxRange_;
     float minRange_;
-    vector<vector<vector<cv::Vec3f> > > extendedIMap_;
+    std::vector<std::vector<std::vector<cv::Vec3f> > > extendedIMap_;
     projection* projection_;
     panorama_map_method mapMethod_;
     //parameters for the creation of panoram from octree 

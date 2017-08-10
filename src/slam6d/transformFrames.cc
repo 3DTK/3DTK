@@ -20,13 +20,8 @@
 #define WANT_STREAM ///< define the WANT stream :)
 
 #include <string>
-using std::string;
 #include <iostream>
-using std::cout;
-using std::cerr;
-using std::endl;
 #include <fstream>
-using std::ifstream;
 
 #include "slam6d/icp6Dsvd.h"
 #include "slam6d/globals.icc"
@@ -59,50 +54,50 @@ using std::ifstream;
 void usage(char* prog)
 {
 #ifndef _MSC_VER
-    const string bold("\033[1m");
-    const string normal("\033[m");
+    const std::string bold("\033[1m");
+    const std::string normal("\033[m");
 #else
-    const string bold("");
-    const string normal("");
+    const std::string bold("");
+    const std::string normal("");
 #endif
-    cout << endl
-        << bold << "USAGE " << normal << endl
-        << "   " << prog << " [parameters] directory" << endl << endl;
-    cout << bold << "PARAMETERS" << normal << endl
+    std::cout << std::endl
+        << bold << "USAGE " << normal << std::endl
+        << "   " << prog << " [parameters] directory" << std::endl << std::endl;
+    std::cout << bold << "PARAMETERS" << normal << std::endl
 
-        << endl
-        << bold << "  -n" << normal << " NR, " << bold << "--pointNr=" << normal << "NR" << endl
-        << "         number of points (= lines from input file) to use for computing transformation" << endl
-        << endl
-        << bold << "  -i" << normal << " STR, " << bold << "--input=" << normal << "STR" << endl
-        << "         input file containing (at least 3) point pairs for computing transformation" << endl
-        << "         (input file line syntax (mapping between Points p1 and p2): p1x p1y p1z p2x p2y p2z\n)" << endl
-        << endl
-        << bold << "  -s" << normal << " NR, " << bold << "--start=" << normal << "NR" << endl
-        << "         start at frame NR (i.e., neglects the first NR frame files)" << endl
-        << "         [ATTENTION: counting naturally starts with 0]" << endl
-        << bold << "  -e" << normal << " NR, " << bold << "--end=" << normal << "NR" << endl
-        << "         end after frame file NR" << endl
-        << endl
-        << bold << "  -r" << normal << ", " << bold << "--reverse" << normal << "" << endl
-        << "         reverse order of input point pairs, that is, instead of transforming from pts2 to pts1," << endl
-        << "         transform from pts1 to pts2" << endl
-        << endl
-        << bold << "  -x" << normal << ", " << bold << "--xyz" << normal << "" << endl
-        << "         frame files are in xyz format (right handed coordinate system in m);" << endl
-        << "         with this flag, they will be converted to the 3DTK-coordinate system" << endl
-        << "         before applying the transformation, and additionaly, files with converted" << endl
-        << "         input coordinates will be created " << endl
-        << endl
+        << std::endl
+        << bold << "  -n" << normal << " NR, " << bold << "--pointNr=" << normal << "NR" << std::endl
+        << "         number of points (= lines from input file) to use for computing transformation" << std::endl
+        << std::endl
+        << bold << "  -i" << normal << " STR, " << bold << "--input=" << normal << "STR" << std::endl
+        << "         input file containing (at least 3) point pairs for computing transformation" << std::endl
+        << "         (input file line syntax (mapping between Points p1 and p2): p1x p1y p1z p2x p2y p2z\n)" << std::endl
+        << std::endl
+        << bold << "  -s" << normal << " NR, " << bold << "--start=" << normal << "NR" << std::endl
+        << "         start at frame NR (i.e., neglects the first NR frame files)" << std::endl
+        << "         [ATTENTION: counting naturally starts with 0]" << std::endl
+        << bold << "  -e" << normal << " NR, " << bold << "--end=" << normal << "NR" << std::endl
+        << "         end after frame file NR" << std::endl
+        << std::endl
+        << bold << "  -r" << normal << ", " << bold << "--reverse" << normal << "" << std::endl
+        << "         reverse order of input point pairs, that is, instead of transforming from pts2 to pts1," << std::endl
+        << "         transform from pts1 to pts2" << std::endl
+        << std::endl
+        << bold << "  -x" << normal << ", " << bold << "--xyz" << normal << "" << std::endl
+        << "         frame files are in xyz format (right handed coordinate system in m);" << std::endl
+        << "         with this flag, they will be converted to the 3DTK-coordinate system" << std::endl
+        << "         before applying the transformation, and additionaly, files with converted" << std::endl
+        << "         input coordinates will be created " << std::endl
+        << std::endl
 
-        << endl << endl;
+        << std::endl << std::endl;
 
-    cout << bold << "EXAMPLES " << normal << endl
-        << "   " << prog << " -n 4 -i ptPairs.txt -s 2 -e 3 -x dat/dirWithFrameFiles" << endl << endl;
+    std::cout << bold << "EXAMPLES " << normal << std::endl
+        << "   " << prog << " -n 4 -i ptPairs.txt -s 2 -e 3 -x dat/dirWithFrameFiles" << std::endl << std::endl;
     exit(1);
 }
 
-int parseArgs(int argc, char **argv, string &dir, int &nrOfPts, string &inputFile,
+int parseArgs(int argc, char **argv, std::string &dir, int &nrOfPts, std::string &inputFile,
     int &start, int &end, bool& inputInXYZ, bool& reverse)
 {
     int  c;
@@ -122,7 +117,7 @@ int parseArgs(int argc, char **argv, string &dir, int &nrOfPts, string &inputFil
         { 0, 0, 0, 0 }                    // needed, cf. getopt.h
     };
 
-    cout << endl;
+    std::cout << std::endl;
     while ((c = getopt_long(argc, argv, "n:i:s:e:xr", longopts, NULL)) != -1)
         switch (c)
     {
@@ -131,12 +126,12 @@ int parseArgs(int argc, char **argv, string &dir, int &nrOfPts, string &inputFil
             break;
         case 's':
             start = atoi(optarg);
-            if (start < 0) { cerr << "Error: Cannot start at a negative scan number.\n"; exit(1); }
+            if (start < 0) { std::cerr << "Error: Cannot start at a negative scan number.\n"; exit(1); }
             break;
         case 'e':
             end = atoi(optarg);
-            if (end < 0)     { cerr << "Error: Cannot end at a negative scan number.\n"; exit(1); }
-            if (end < start) { cerr << "Error: <end> cannot be smaller than <start>.\n"; exit(1); }
+            if (end < 0)     { std::cerr << "Error: Cannot end at a negative scan number.\n"; exit(1); }
+            if (end < start) { std::cerr << "Error: <end> cannot be smaller than <start>.\n"; exit(1); }
             break;
         case 'i':
             inputFile = optarg;
@@ -155,7 +150,7 @@ int parseArgs(int argc, char **argv, string &dir, int &nrOfPts, string &inputFil
     }
 
     if (optind != argc - 1) {
-        cerr << "\n*** Directory missing ***" << endl;
+        std::cerr << "\n*** Directory missing ***" << std::endl;
         usage(argv[0]);
     }
     dir = argv[optind];
@@ -177,17 +172,17 @@ void matMulVec(double* mat4, double* v4, double* res) {
 }
 
 void printMat_RowOrderStyle(double *mat){
-    cout << mat[0] << "  " << mat[1] << "  " << mat[2] << "  " << mat[3] << endl;
-    cout << mat[4] << "  " << mat[5] << "  " << mat[6] << "  " << mat[7] << endl;
-    cout << mat[8] << "  " << mat[9] << "  " << mat[10] << "  " << mat[11] << endl;
-    cout << mat[12] << "  " << mat[13] << "  " << mat[14] << "  " << mat[15] << endl << endl;
+    std::cout << mat[0] << "  " << mat[1] << "  " << mat[2] << "  " << mat[3] << std::endl;
+    std::cout << mat[4] << "  " << mat[5] << "  " << mat[6] << "  " << mat[7] << std::endl;
+    std::cout << mat[8] << "  " << mat[9] << "  " << mat[10] << "  " << mat[11] << std::endl;
+    std::cout << mat[12] << "  " << mat[13] << "  " << mat[14] << "  " << mat[15] << std::endl << std::endl;
 }
 
 void printMat_ColumnOrderStyle(double *mat){
-    cout << mat[0] << "  " << mat[4] << "  " << mat[8] << "  " << mat[12] << endl;
-    cout << mat[1] << "  " << mat[5] << "  " << mat[9] << "  " << mat[13] << endl;
-    cout << mat[2] << "  " << mat[6] << "  " << mat[10] << "  " << mat[14] << endl;
-    cout << mat[3] << "  " << mat[7] << "  " << mat[11] << "  " << mat[15] << endl << endl;
+    std::cout << mat[0] << "  " << mat[4] << "  " << mat[8] << "  " << mat[12] << std::endl;
+    std::cout << mat[1] << "  " << mat[5] << "  " << mat[9] << "  " << mat[13] << std::endl;
+    std::cout << mat[2] << "  " << mat[6] << "  " << mat[10] << "  " << mat[14] << std::endl;
+    std::cout << mat[3] << "  " << mat[7] << "  " << mat[11] << "  " << mat[15] << std::endl << std::endl;
 }
 
 inline void to3DTKMat(double *inMatrix, double *outMatrix) {
@@ -209,12 +204,12 @@ inline void to3DTKMat(double *inMatrix, double *outMatrix) {
     outMatrix[15] = inMatrix[15];
 }
 
-void computeTransformation(int nrOfPts, string &inputFile, string &dir, bool reverseOrder, double *resTrans){
-    ifstream file1(inputFile);
+void computeTransformation(int nrOfPts, std::string &inputFile, std::string &dir, bool reverseOrder, double *resTrans){
+    std::ifstream file1(inputFile);
     if (!file1.is_open()) {
-        cout << "Input file" << inputFile << " not found!" << endl;
+        std::cout << "Input file" << inputFile << " not found!" << std::endl;
     }
-    vector<PtPair> Pairs;
+    std::vector<PtPair> Pairs;
 
     double x1, x2, y1, y2, z1, z2, centroid_m[3], centroid_d[3];
     centroid_m[0] = centroid_m[1] = centroid_m[2] = centroid_d[0] = centroid_d[1] = centroid_d[2] = 0;
@@ -227,7 +222,7 @@ void computeTransformation(int nrOfPts, string &inputFile, string &dir, bool rev
         if (reverseOrder){
             PtPair p(p2, p1);
             Pairs.push_back(p);
-            cout << i << ": " << p << endl;
+            std::cout << i << ": " << p << std::endl;
             centroid_m[0] += 1.0 / nrOfPts*p2.x;
             centroid_m[1] += 1.0 / nrOfPts*p2.y;
             centroid_m[2] += 1.0 / nrOfPts*p2.z;
@@ -238,7 +233,7 @@ void computeTransformation(int nrOfPts, string &inputFile, string &dir, bool rev
         else {
             PtPair p(p1, p2);
             Pairs.push_back(p);
-            cout << i << ": " << p << endl;
+            std::cout << i << ": " << p << std::endl;
             centroid_m[0] += 1.0 / nrOfPts*p1.x;
             centroid_m[1] += 1.0 / nrOfPts*p1.y;
             centroid_m[2] += 1.0 / nrOfPts*p1.z;
@@ -257,7 +252,7 @@ void computeTransformation(int nrOfPts, string &inputFile, string &dir, bool rev
     // if Determinant < 0 --> computed matrix is a reflection
     if (M4det(alignxf)< 0) {
         // icp6D_SVD tries to compensate for reflection, if the output still is one, input data is most likely degenerate
-        cerr << "Computed a reflection matrix as solution for point transformation - results would be erroneous!" << endl << "Canceling operation..." << endl;
+        std::cerr << "Computed a reflection matrix as solution for point transformation - results would be erroneous!" << std::endl << "Canceling operation..." << std::endl;
         exit(1);
     }
     printMat_RowOrderStyle(alignxf);
@@ -267,14 +262,14 @@ void computeTransformation(int nrOfPts, string &inputFile, string &dir, bool rev
 
 }
 
-void modifyFrames(double* resTrans, string &dir, int start, int end, bool inputInXYZ){
+void modifyFrames(double* resTrans, std::string &dir, int start, int end, bool inputInXYZ){
     char inputFileName[MAX_PATH];
     char modFramesFileName[MAX_PATH];
     char modInputFileName[MAX_PATH];
 
-    ifstream input_in;
-    ofstream modFrames_out;
-    ofstream modFrames_out2;
+    std::ifstream input_in;
+    std::ofstream modFrames_out;
+    std::ofstream modFrames_out2;
 
     for (int i = start; i <= end; i++){
         snprintf(inputFileName, 255, "%sscan%.3zd.frames", dir.c_str(), i);
@@ -283,33 +278,33 @@ void modifyFrames(double* resTrans, string &dir, int start, int end, bool inputI
         if (inputInXYZ){
             snprintf(modInputFileName, 255, "%sMODIFIED_ORIG_scan%.3zd.frames", dir.c_str(), i);
         }
-        cout << "Processing Scan " << inputFileName << "..." << endl;
-        cout.flush();
+        std::cout << "Processing Scan " << inputFileName << "..." << std::endl;
+        std::cout.flush();
 
         input_in.open(inputFileName);
         if (!input_in.good()){
-            cerr << "Error reading input file " << inputFileName << "!" << endl;
+            std::cerr << "Error reading input file " << inputFileName << "!" << std::endl;
             return;
         }
         // store;
         modFrames_out.open(modFramesFileName);
         if (!modFrames_out.good()){
-            cerr << "Error writing output file " << modFramesFileName << "!" << endl;
+            std::cerr << "Error writing output file " << modFramesFileName << "!" << std::endl;
             return;
         }
 
         if (inputInXYZ){
             modFrames_out2.open(modInputFileName);
             if (!modFrames_out2.good()){
-                cerr << "Error writing output file " << modInputFileName << "!" << endl;
+                std::cerr << "Error writing output file " << modInputFileName << "!" << std::endl;
                 return;
             }
         }
 
-        string line;
+        std::string line;
         size_t lineCnt = 0;
         while (std::getline(input_in, line)){
-            cout << lineCnt++ << "...";
+            std::cout << lineCnt++ << "...";
             std::istringstream iss(line);
             double inputMat[16];
             double inputMat3DTK[16];
@@ -324,7 +319,7 @@ void modifyFrames(double* resTrans, string &dir, int start, int end, bool inputI
                 for (size_t j = 0; j < 16; j++) {
                     modFrames_out2 << inputMat3DTK[j] << " ";
                 }
-                modFrames_out2 << "3" << endl;
+                modFrames_out2 << "3" << std::endl;
             }
             else {
                 // just copy values
@@ -340,10 +335,10 @@ void modifyFrames(double* resTrans, string &dir, int start, int end, bool inputI
             for (size_t j = 0; j < 16; j++) {
                 modFrames_out << modMat[j] << " ";
             }
-            modFrames_out << "3" << endl;
+            modFrames_out << "3" << std::endl;
 
         }
-        cout << endl;
+        std::cout << std::endl;
 
         input_in.close();
         input_in.clear();
@@ -357,7 +352,7 @@ void modifyFrames(double* resTrans, string &dir, int start, int end, bool inputI
         }
     }
 
-    cout << "Done." << endl;
+    std::cout << "Done." << std::endl;
 }
 
 /**
@@ -374,9 +369,9 @@ int main(int argc, char **argv)
         usage(argv[0]);
     }
 
-    string dir;
+    std::string dir;
     int nrOfPts = 0;
-    string inputFile;
+    std::string inputFile;
     int    start = 0, end = -1;
     bool inputInXYZ = false;
     bool reverseOrder = false;

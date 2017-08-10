@@ -11,22 +11,21 @@
 #include <opencv2/calib3d/calib3d.hpp>
 
 using namespace cv;
-using namespace std;
 
 int main (int argc, char* argv[])
 {
     boost::program_options::options_description desc("Allowed options");
     desc.add_options()
             ("help,h", "produce help message")
-            ("calibration,c", boost::program_options::value<string>()->required(), "calibration file")
-            ("output,o", boost::program_options::value<string>()->required(), "output file with plane equations in the form ax + by + cz = 1")
+            ("calibration,c", boost::program_options::value<std::string>()->required(), "calibration file")
+            ("output,o", boost::program_options::value<std::string>()->required(), "output file with plane equations in the form ax + by + cz = 1")
             ;
 
     boost::program_options::variables_map vm;
     boost::program_options::store(boost::program_options::parse_command_line(argc, argv, desc), vm);
 
     if (vm.count("help")) {
-        cout << desc << endl;
+        std::cout << desc << std::endl;
         return EXIT_SUCCESS;
     }
 
@@ -36,22 +35,22 @@ int main (int argc, char* argv[])
     Mat distCoeffs;
     Mat extrinsics;
 
-    string calibrationFile(vm["calibration"].as<string>());
+    std::string calibrationFile(vm["calibration"].as<std::string>());
 
     FileStorage fs(calibrationFile, FileStorage::READ);
     fs["Camera_Matrix"] >> cameraMatrix;
     fs["Distortion_Coefficients"] >> distCoeffs;
     fs["Extrinsic_Parameters"] >> extrinsics;
 
-    cout << "camera matrix: " << endl << cameraMatrix << endl;
-    cout << "distortion coefficients: " << endl << distCoeffs << endl;
-    cout << endl;
+    std::cout << "camera matrix: " << std::endl << cameraMatrix << std::endl;
+    std::cout << "distortion coefficients: " << std::endl << distCoeffs << std::endl;
+    std::cout << std::endl;
 
-    string outputFile(vm["output"].as<string>());
+    std::string outputFile(vm["output"].as<std::string>());
 
-    cout << "writing output: " << outputFile << endl << endl;
+    std::cout << "writing output: " << outputFile << std::endl << std::endl;
 
-    ofstream out(outputFile);
+    std::ofstream out(outputFile);
 
     for (int i = 0; i < extrinsics.rows; i++) {
         Mat_<double> rvec(3,1);
@@ -68,15 +67,15 @@ int main (int argc, char* argv[])
         Mat normal = p1.cross(p2);
         double distance = -((normal.at<double>(0, 0) * tvec.at<double>(0, 0)) + (normal.at<double>(1, 0) * tvec.at<double>(1, 0)) + (normal.at<double>(2, 0) * tvec.at<double>(2, 0)));
 
-        cout << "extrinsic parameters nr. " << i << ":" << endl;
+        std::cout << "extrinsic parameters nr. " << i << ":" << std::endl;
 
-        cout << "normal: " << endl << normal << endl;
-        cout << "distance: " << distance << endl;
+        std::cout << "normal: " << std::endl << normal << std::endl;
+        std::cout << "distance: " << distance << std::endl;
 
         Mat planeEquation = -normal / distance;
-        cout << "ax + by + cz = 1: " << endl << planeEquation << endl << endl;
+        std::cout << "ax + by + cz = 1: " << std::endl << planeEquation << std::endl << std::endl;
 
-        out << planeEquation.at<double>(0, 0) << " " << planeEquation.at<double>(1, 0) << " " << planeEquation.at<double>(2, 0) << endl;
+        out << planeEquation.at<double>(0, 0) << " " << planeEquation.at<double>(1, 0) << " " << planeEquation.at<double>(2, 0) << std::endl;
     }
 
     out.close();

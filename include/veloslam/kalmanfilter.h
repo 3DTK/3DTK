@@ -4,8 +4,6 @@
 #include "veloslam/veloscan.h"
 #include "veloslam/matrix.h"
 
-using namespace std;
-
 typedef struct _X_state
 {
 	float x_position;

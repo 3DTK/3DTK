@@ -8,7 +8,6 @@
 #define __ICP6D_H__
 
 #include <vector>
-using std::vector;
 
 #include "newmat/newmat.h"
 //using namespace NEWMAT;

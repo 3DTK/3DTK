@@ -3,8 +3,6 @@
 #include "veloslam/kalmanfilter.h"
 #include <deque>
 
-using namespace std;
-
 struct MoveState
 {
 	ObjectState targetState;
@@ -21,8 +19,8 @@ public:
 	void TrackerReset();//added by yuanjun
 
     // for log all the cluster for tracking
-	deque<clusterFeature> statusList;
-	deque<cluster> dataList;
+	std::deque<clusterFeature> statusList;
+	std::deque<cluster> dataList;
  	// log the tracker is or not Matched.
 
 	//	bool Matched or not;
@@ -36,7 +34,7 @@ public:
 
 	int missedTime;//added by yuanjun
 	KalmanFilter kalmanFilter;//added by yuanjun
-	vector<MoveState> moveStateList;//added by yuanjun
+	std::vector<MoveState> moveStateList;//added by yuanjun
 
     //feature for movement
     float moving_distance;

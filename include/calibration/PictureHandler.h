@@ -16,7 +16,6 @@
 #include <apriltag.h>
 #include "calibration/AprilTag.h"
 
-using namespace std;
 using namespace cv;
 using namespace AprilTag;
 

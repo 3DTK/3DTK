@@ -32,12 +32,8 @@
 #include <iostream>
 #include <fstream>
 #include <queue>
-using std::queue;
 #include <vector>
-using std::vector;
 #include <sstream>
-using std::stringstream;
-using std::string;
 
 class sickImporter {
   std::string outputpath; 

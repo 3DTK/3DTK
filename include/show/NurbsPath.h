@@ -2,9 +2,7 @@
 #define __NURBSPATH_H__
 
 #include <list>
-using std::list;
 #include <vector>
-using std::vector;
 #include "show/PathGraph.h"
 //#include "../map_sim/EdgeList.h"
 
@@ -18,10 +16,10 @@ using std::vector;
 
 class NurbsPath{
   public:
-    static vector<double> camRatio;
+    static std::vector<double> camRatio;
     NurbsPath(){}
-    vector<PointXY> getNurbsPath(list<PGNode*>&, unsigned int, int);
-    vector<PointXY> getNurbsPath(vector<PointXY>&, unsigned int, int);
+    std::vector<PointXY> getNurbsPath(std::list<PGNode*>&, unsigned int, int);
+    std::vector<PointXY> getNurbsPath(std::vector<PointXY>&, unsigned int, int);
   private:
     float coxDeBoor(float u,int i,int k,const float* Knots);
     void getOutpoint(float t,float OutPoint[],float*opx,float*opy,const float*knots);

@@ -12,7 +12,7 @@ QtShow::QtShow(int &argc, char **argv)
   try {
     parse_args(argc, argv, ds, ws, &has_initial_directory);
   } catch (std::exception& e) {
-    std::cerr << "Error while parsing settings: " << e.what() << endl;
+    std::cerr << "Error while parsing settings: " << e.what() << std::endl;
     exit(1);
   }
 

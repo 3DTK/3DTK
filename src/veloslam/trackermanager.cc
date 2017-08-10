@@ -171,7 +171,7 @@ int TrackerManager::FilterObject(VeloScan& scanRef)
 		}
 	}
 
-	cout<<"scanID: "<<scanRef.scanid<<" clusters to be tracked: "<<scanRef.clusterNum<<endl;
+	std::cout<<"scanID: "<<scanRef.scanid<<" clusters to be tracked: "<<scanRef.clusterNum<<std::endl;
 	return 0;
 }
 
@@ -269,7 +269,7 @@ int TrackerManager::UpdateTrackers(VeloScan& scanRef)
 	int i,j;
 	int matchID;
 
-	list<Tracker>::iterator it;
+	std::list<Tracker>::iterator it;
 	int trackNO =0;
 	for(it=tracks.begin() ; it!=tracks.end();it++ )
 	{
@@ -378,17 +378,17 @@ int TrackerManager::AddTrackers(VeloScan& scanRef)
 
 int TrackerManager::ListTrackers()
 {
-    list<Tracker>::iterator it;
-    cout<<" tracker list : "<<endl;
+    std::list<Tracker>::iterator it;
+    std::cout<<" tracker list : "<<std::endl;
     for(it=tracks.begin() ; it!=tracks.end(); it++)
 	{
 		Tracker &tracker=*it;
-        cout<<" ID "<<tracker.trackerID
+        std::cout<<" ID "<<tracker.trackerID
             <<" matchClusterID "<<tracker.matchClusterID
             <<" missMatch "   <<tracker.missMatch
             <<" glusize "   <<tracker.statusList.size()
             <<" moving_distance "   <<tracker.moving_distance
-            <<endl;
+            <<std::endl;
     }
 	return 0;
 }
@@ -399,7 +399,7 @@ int TrackerManager::RemoveNoUsedTracker(VeloScan& scanRef)
 //	cout<<"RemoveNoUsedTracker is running!"<<endl;
 //	cout << " current_sliding_window_pos: " << current_sliding_window_pos << " current id " << scanRef.scanid<< endl;
 
-	list<Tracker>::iterator it;
+	std::list<Tracker>::iterator it;
 	int trackNO =0;
 	for(it=tracks.begin() ; it!=tracks.end();)
 	{
@@ -409,9 +409,9 @@ int TrackerManager::RemoveNoUsedTracker(VeloScan& scanRef)
 #ifndef NO_SLIDING_WINDOW
 		if (!tracker.statusList.empty())
 		{
-			deque<clusterFeature>::iterator Iter1;
-			deque<cluster>::iterator Iter2;
-			vector<MoveState>::iterator Iter3;
+			std::deque<clusterFeature>::iterator Iter1;
+			std::deque<cluster>::iterator Iter2;
+			std::vector<MoveState>::iterator Iter3;
 			Iter1=tracker.statusList.begin();
 			Iter2=tracker.dataList.begin();
 			Iter3=tracker.moveStateList.begin();
@@ -450,7 +450,7 @@ int TrackerManager::RemoveNoUsedTracker(VeloScan& scanRef)
 void TrackerManager::TrackerManagerReset()
 {
 	clusterStatus.clear();
-	list<Tracker>::iterator Iter;
+	std::list<Tracker>::iterator Iter;
 	for (Iter=tracks.begin();Iter!=tracks.end();Iter++)
 	{
 		Tracker temp=*Iter;
@@ -461,11 +461,11 @@ void TrackerManager::TrackerManagerReset()
 }
 
 
-int TrackerManager::CalculateTrackersFeature(vector <Scan *> allScans, int currentNO ,int windowsize)
+int TrackerManager::CalculateTrackersFeature(std::vector <Scan *> allScans, int currentNO ,int windowsize)
 {
     int i,j,k,colorIdx;
     float movement;
-    list<Tracker>::iterator it;
+    std::list<Tracker>::iterator it;
 
 	int n;
 
@@ -551,11 +551,11 @@ int TrackerManager::CalculateTrackersFeature(vector <Scan *> allScans, int curre
 	return 0;
 }
 
-int TrackerManager::MarkClassifiyTrackersResult(vector <Scan *> allScans, int currentNO ,int windowsize)
+int TrackerManager::MarkClassifiyTrackersResult(std::vector <Scan *> allScans, int currentNO ,int windowsize)
 {
 	int i,j,k,colorIdx;
     float movement;
-	list<Tracker>::iterator it;
+	std::list<Tracker>::iterator it;
 
     // mark all objets type such as moving or static
       for(it=tracks.begin();  it!=tracks.end();  it++)
@@ -633,7 +633,7 @@ int TrackerManager::MarkClassifiyTrackersResult(vector <Scan *> allScans, int cu
 }
 
 
-int TrackerManager::ClassifiyTrackersObjects(vector <Scan *> allScans, int currentNO ,int windowsize)
+int TrackerManager::ClassifiyTrackersObjects(std::vector <Scan *> allScans, int currentNO ,int windowsize)
 {
     CalculateTrackersFeature(allScans, currentNO, windowsize);
     MarkClassifiyTrackersResult(allScans, currentNO , windowsize);
@@ -644,7 +644,7 @@ int TrackerManager::UpdateClustersPoistioninTrackers()
 {
 	int i,j;
 
-	list<Tracker>::iterator it;
+	std::list<Tracker>::iterator it;
 	for(it=tracks.begin() ; it!=tracks.end();it++ )
 	{
 		Tracker &tracker=*it;
@@ -715,7 +715,7 @@ CMatrix TrackerManager::ConstructCostMatrix(VeloScan &scanRef,int *clusterIndex)
 	bool IsSmaller1,IsSmaller2;
 	float kg;
 
-	list<Tracker>::iterator it;
+	std::list<Tracker>::iterator it;
 	for(it=tracks.begin(); it!=tracks.end(); it++)
 	{
 		Tracker &tracker=*it;
@@ -869,7 +869,7 @@ int TrackerManager::MatchTracksWithClusters(VeloScan &scanRef)
 
 	int trackerIndex=-1;
 	int trackNO =0;
-	list<Tracker>::iterator it;
+	std::list<Tracker>::iterator it;
 	for(it=tracks.begin() ; it!=tracks.end();it++)
 	{
 		Tracker &tracker=*it;

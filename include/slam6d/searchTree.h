@@ -8,7 +8,6 @@
 #define __SEARCHTREE_H__
 
 #include <vector>
-using std::vector;
 
 #include "ptpair.h"
 #include "data_types.h"
@@ -86,7 +85,7 @@ public:
 							   double maxdist2,
 							   int threadNum) const;
 
-  virtual void getPtPairs(vector <PtPair> *pairs, 
+  virtual void getPtPairs(std::vector <PtPair> *pairs, 
 					 double *source_alignxf, 
 					 double * const *q_points,
 					 unsigned int startindex,
@@ -98,7 +97,7 @@ public:
 					 double *centroid_m,
 					 double *centroid_d);
     
-  virtual void getPtPairs(vector <PtPair> *pairs,
+  virtual void getPtPairs(std::vector <PtPair> *pairs,
 					 double *source_alignxf,
 					 const DataXYZ& xyz_r,
 					 const DataNormal& normal_r,

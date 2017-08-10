@@ -25,16 +25,10 @@
 #endif
 
 #include <fstream>
-using std::ifstream;
-using std::ofstream;
 
 #include <iostream>
-using std::cout;
-using std::cerr;
-using std::endl;
 
 #include <sstream>
-using std::stringstream;
 
 #include "veloslam/veloscan.h"
 #include "veloslam/pcddump.h"
@@ -57,12 +51,11 @@ using std::stringstream;
 #endif
 
 #include <cstring>
-using std::flush;
 
-void DumpPointtoFile(cluster &gluData1, string filename)
+void DumpPointtoFile(cluster &gluData1, std::string filename)
 {
 	cell* pCell;
-    ofstream redptsout(filename.c_str());
+    std::ofstream redptsout(filename.c_str());
 
 	for(int j=0; j<gluData1.size();++j)
 	{
@@ -71,18 +64,18 @@ void DumpPointtoFile(cluster &gluData1, string filename)
 		{
 			redptsout <<(*pCell)[k]->x << " "
 				           <<(*pCell)[k]->y<< " "
-						   <<(*pCell)[k]->z<< endl;
+						   <<(*pCell)[k]->z<< std::endl;
 		}
 	}
     redptsout.close();
     redptsout.clear();
 }
 
-void DumpFeaturetoFile(clusterFeature &glu, string filename)
+void DumpFeaturetoFile(clusterFeature &glu, std::string filename)
 {
-	ofstream redptsout(filename.c_str(), ios::app);
+	std::ofstream redptsout(filename.c_str(), std::ios::app);
     redptsout <<glu.size_x << " "<< glu.size_y << " "<< glu.size_z <<" "<<
-	            glu.speed<< " "<< glu.speed_x<< " "<< glu.speed_y<<" "<< glu.pointNumber <<endl;
+	            glu.speed<< " "<< glu.speed_x<< " "<< glu.speed_y<<" "<< glu.pointNumber <<std::endl;
 
     redptsout.close();
     redptsout.clear();

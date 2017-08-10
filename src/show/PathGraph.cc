@@ -19,7 +19,7 @@ PGNode* PathGraph::insertNode(PointXY p){
 }
 void PathGraph::insertNodeAndConnectToAll(PointXY p){
   PGNode* n = insertNode(p);
-  list<PGNode*>::iterator iter;
+  std::list<PGNode*>::iterator iter;
   for( iter = ivNodeList.begin(); iter != ivNodeList.end(); iter++ ) {
     if((*iter)!=n)
       insertEdge(n,*iter);
@@ -27,7 +27,7 @@ void PathGraph::insertNodeAndConnectToAll(PointXY p){
 }
 
 PGNode* PathGraph::insertUniqueNode(PointXY p){
-  list<PGNode*>::iterator iter;
+  std::list<PGNode*>::iterator iter;
   for( iter = ivNodeList.begin(); iter != ivNodeList.end(); iter++ ) {
     if((*iter)->point.x == p.x && (*iter)->point.y == p.y)
       return *iter;
@@ -36,8 +36,8 @@ PGNode* PathGraph::insertUniqueNode(PointXY p){
 }
 
 void PathGraph::deleteNode(PGNode* n){
-  list<PGNode*>::iterator i;
-  list<PGNode*>::iterator j;
+  std::list<PGNode*>::iterator i;
+  std::list<PGNode*>::iterator j;
   for(i=ivNodeList.begin();i!=ivNodeList.end();i++){
     if(*i == n){
 			while((j=(*i)->neighbours.begin()) != (*i)->neighbours.end())
@@ -55,7 +55,7 @@ bool PathGraph::setStartNode(PointXY p) {
     deleteNode(ivpStartNode);
   startOnGraph=false;
   PGNode* n=NULL;
-  list<PGNode*>::iterator iter;
+  std::list<PGNode*>::iterator iter;
   for( iter = ivNodeList.begin(); iter != ivNodeList.end() && !startOnGraph; iter++ ) {
     if((*iter)->point.x == p.x && (*iter)->point.y == p.y) {
       n=*iter;
@@ -74,7 +74,7 @@ bool PathGraph::setEndNode(PointXY p) {
     deleteNode(ivpEndNode);
   endOnGraph=false;
   PGNode* n=NULL;
-  list<PGNode*>::iterator iter;
+  std::list<PGNode*>::iterator iter;
   for( iter = ivNodeList.begin(); iter != ivNodeList.end() && !endOnGraph; iter++ ) {
     if((*iter)->point.x == p.x && (*iter)->point.y == p.y) {
       n=*iter;
@@ -125,9 +125,9 @@ void PathGraph::savePath(const char* fn){
     printf("# in PathGraph::savePath : Could not open output file %s!\n", fn);
     return;
   }
-  map<PGNode*,int> names;
+  std::map<PGNode*,int> names;
   int i=0;
-  list<PGNode*>::iterator it,it2;
+  std::list<PGNode*>::iterator it,it2;
   for(it=ivNodeList.begin();it!=ivNodeList.end();it++){
     names[*it] = i++;
   }
@@ -156,9 +156,9 @@ void PathGraph::saveGraph(const char* fn){
     printf("# in PathGraph::saveGraph : Could not open output file %s!\n", fn);
     return;
   }
-  map<PGNode*,int> names;
+  std::map<PGNode*,int> names;
   int i=0;
-  list<PGNode*>::iterator it,it2;
+  std::list<PGNode*>::iterator it,it2;
   for(it=ivNodeList.begin();it!=ivNodeList.end();it++){
     names[*it] = i++;
   }
@@ -186,7 +186,7 @@ void PathGraph::loadGraph(const char* fn){
     printf("# in PathGraph::loadGraph : Could not open input file %s!\n", fn);
     return;
   }
-  map<int,PGNode*> names;
+  std::map<int,PGNode*> names;
   int name;
   PointXY p;
   int res;
@@ -241,7 +241,7 @@ void PathGraph::deleteEdge(PGNode* a, PGNode* b){
 }
 
 PathGraph::~PathGraph(){
-  list<PGNode*>::iterator i;
+  std::list<PGNode*>::iterator i;
   for(i=ivNodeList.begin();i!=ivNodeList.end();i++)
     delete *i;
 }

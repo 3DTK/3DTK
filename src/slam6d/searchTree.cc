@@ -28,7 +28,7 @@ double *SearchTree::FindClosestAlongDir(double *_p,
   throw std::runtime_error("Method FindClosestAlongDir is not implemented");
 }
 
-void SearchTree::getPtPairs(vector <PtPair> *pairs, 
+void SearchTree::getPtPairs(std::vector <PtPair> *pairs, 
                             double *source_alignxf,      // source
                             double * const *q_points,
                             unsigned int startindex,
@@ -89,7 +89,7 @@ void SearchTree::getPtPairs(vector <PtPair> *pairs,
   return;
 }
 
-void SearchTree::getPtPairs(vector <PtPair> *pairs, 
+void SearchTree::getPtPairs(std::vector <PtPair> *pairs, 
                             double *source_alignxf,         // source
                             const DataXYZ& xyz_r,
                             const DataNormal& normal_r,

@@ -18,15 +18,15 @@
 
 namespace fbr{
   
-  string scanFormatToString(IOType format){
+  std::string scanFormatToString(IOType format){
     return io_type_to_libname(format);
   }
   
-  IOType stringToScanFormat(string format){
+  IOType stringToScanFormat(std::string format){
     return formatname_to_io_type(format.c_str());
   }  
-  string scannerTypeToString(scanner_type type){
-    string sType;
+  std::string scannerTypeToString(scanner_type type){
+    std::string sType;
     switch(type){
     case NONE:
       sType = "NONE";
@@ -45,15 +45,15 @@ namespace fbr{
     }
     return sType;
   }
-  scanner_type stringToScannerType(string type){
+  scanner_type stringToScannerType(std::string type){
     if(strcasecmp(type.c_str(), "NONE") == 0) return NONE;
     else if(strcasecmp(type.c_str(), "RIEGL") == 0) return RIEGL;
     else if(strcasecmp(type.c_str(), "FARO") == 0) return FARO;
     else if(strcasecmp(type.c_str(), "MANUAL") == 0) return MANUAL;
     else throw std::runtime_error(std::string("scanner type ") + type + std::string(" is unknown"));
   }
-  string projectionMethodToString(projection_method method){
-    string sMethod;
+  std::string projectionMethodToString(projection_method method){
+    std::string sMethod;
     switch(method){
     case EQUIRECTANGULAR:
       sMethod = "EQUIRECTANGULAR";
@@ -91,7 +91,7 @@ namespace fbr{
     return sMethod;
   }
   
-  projection_method stringToProjectionMethod(string method){
+  projection_method stringToProjectionMethod(std::string method){
     if(strcasecmp(method.c_str(), "EQUIRECTANGULAR") == 0) return EQUIRECTANGULAR;
     else if(strcasecmp(method.c_str(), "CYLINDRICAL") == 0) return CYLINDRICAL;
     else if(strcasecmp(method.c_str(), "MERCATOR") == 0) return MERCATOR;
@@ -105,8 +105,8 @@ namespace fbr{
     else throw std::runtime_error(std::string("projection method ") + method + std::string(" is unknown"));
   }
   
-  string panoramaMapMethodToString(panorama_map_method method){
-    string sMethod;
+  std::string panoramaMapMethodToString(panorama_map_method method){
+    std::string sMethod;
     switch(method){
     case FARTHEST:
       sMethod = "FARTHEST";
@@ -126,7 +126,7 @@ namespace fbr{
     return sMethod;
   }
   
-  panorama_map_method stringToPanoramaMapMethod(string method){
+  panorama_map_method stringToPanoramaMapMethod(std::string method){
     if(strcasecmp(method.c_str(), "FARTHEST") == 0) return FARTHEST;
     else if(strcasecmp(method.c_str(), "EXTENDED") == 0) return EXTENDED;
     else if(strcasecmp(method.c_str(), "FULL") == 0) return FULL;
@@ -134,8 +134,8 @@ namespace fbr{
     else throw std::runtime_error(std::string("panorama map method ") + method + std::string(" is unknown"));
   }
 
-  string panoramaFormatToString(panorama_format format){
-    string sFormat;
+  std::string panoramaFormatToString(panorama_format format){
+    std::string sFormat;
     switch(format){
     case PNG:
       sFormat = "PNG";
@@ -155,8 +155,8 @@ namespace fbr{
     return sFormat;
   }
 
-  string panoramaFormatToFileFormatString(panorama_format format){
-    string sFormat;
+  std::string panoramaFormatToFileFormatString(panorama_format format){
+    std::string sFormat;
     switch(format){
     case PNG:
       sFormat = "png";
@@ -176,7 +176,7 @@ namespace fbr{
     return sFormat;
   }
  
-  panorama_format stringToPanoramaFormat(string format){
+  panorama_format stringToPanoramaFormat(std::string format){
     if(strcasecmp(format.c_str(), "PNG") == 0) return PNG;
     else if(strcasecmp(format.c_str(), "JPEG") == 0) return JPEG;
     else if(strcasecmp(format.c_str(), "JPEG2000") == 0) return JPEG2000;
@@ -184,8 +184,8 @@ namespace fbr{
     else throw std::runtime_error(std::string("panorama format ") + format + std::string(" is unknown"));
   }
   
-  string panoramaTypeToString(panorama_type type){
-    string sType;
+  std::string panoramaTypeToString(panorama_type type){
+    std::string sType;
     switch(type){
     case ThreeChannel24BitRange:
       sType = "ThreeChannel24BitRange";
@@ -199,15 +199,15 @@ namespace fbr{
     return sType;
   }
  
-  panorama_type stringToPanoramaType(string type){
+  panorama_type stringToPanoramaType(std::string type){
     if(strcasecmp(type.c_str(), "ThreeChannel24BitRange") == 0) return ThreeChannel24BitRange;
     else if(strcasecmp(type.c_str(), "ThreeGrayscaleRange") == 0) return ThreeGrayscaleRange;
     else throw std::runtime_error(std::string("panorama type ") + type + std::string(" is unknown"));
   }
 
-  string featureDetectorImageMethodToString(feature_detector_image_method method)
+  std::string featureDetectorImageMethodToString(feature_detector_image_method method)
   {
-    string sMethod;
+    std::string sMethod;
     switch(method){
     case REFLECTANCE:
       sMethod = "REFLECTANCE";
@@ -222,14 +222,14 @@ namespace fbr{
     return sMethod;
   }
 
-  feature_detector_image_method stringToFeatureDetectorImageMethod(string method){
+  feature_detector_image_method stringToFeatureDetectorImageMethod(std::string method){
     if(strcasecmp(method.c_str(), "REFLECTANCE") == 0) return REFLECTANCE;
     else if(strcasecmp(method.c_str(), "COLOR") == 0) return COLOR;
     else throw std::runtime_error(std::string("feature detector image ") + method + std::string(" is unknown"));
   }
 
-  string featureDetectorMethodToString(feature_detector_method method){
-    string sMethod;
+  std::string featureDetectorMethodToString(feature_detector_method method){
+    std::string sMethod;
     switch(method){
 #ifdef WITH_OPENCV_NONFREE
     case SIFT_DET:
@@ -256,7 +256,7 @@ namespace fbr{
     return sMethod;
   }
   
-  feature_detector_method stringToFeatureDetectorMethod(string method){
+  feature_detector_method stringToFeatureDetectorMethod(std::string method){
 #ifdef WITH_OPENCV_NONFREE
     if(strcasecmp(method.c_str(), "SIFT") == 0) return SIFT_DET;
     else if(strcasecmp(method.c_str(), "SURF") == 0) return SURF_DET;
@@ -270,8 +270,8 @@ namespace fbr{
     else throw std::runtime_error(std::string("feature detector method ") + method + std::string(" is unknown"));
   }
   
-  string featureDescriptorMethodToString(feature_descriptor_method method){
-    string sMethod;
+  std::string featureDescriptorMethodToString(feature_descriptor_method method){
+    std::string sMethod;
     switch(method){
 #ifdef WITH_OPENCV_NONFREE
     case SIFT_DES:
@@ -290,7 +290,7 @@ namespace fbr{
     return sMethod;
   }
   
-  feature_descriptor_method stringToFeatureDescriptorMethod(string method){
+  feature_descriptor_method stringToFeatureDescriptorMethod(std::string method){
 #ifdef WITH_OPENCV_NONFREE
     if(strcasecmp(method.c_str(), "SIFT") == 0) return SIFT_DES;
     else if(strcasecmp(method.c_str(), "SURF") == 0) return SURF_DES;
@@ -300,8 +300,8 @@ namespace fbr{
     else throw std::runtime_error(std::string("feature descriptor method ") + method + std::string(" is unknown"));
   }
 
-  string matcherMethodToString(matcher_method method){
-    string sMethod;
+  std::string matcherMethodToString(matcher_method method){
+    std::string sMethod;
     switch(method){
     case BRUTEFORCE:
       sMethod = "BRUTEFORCE";
@@ -324,7 +324,7 @@ namespace fbr{
     return sMethod;
   }
   
-  matcher_method stringToMatcherMethod(string method){
+  matcher_method stringToMatcherMethod(std::string method){
     if(strcasecmp(method.c_str(), "BRUTEFORCE") == 0) return BRUTEFORCE;
     else if(strcasecmp(method.c_str(), "FLANN") == 0) return FLANN;
     else if(strcasecmp(method.c_str(), "KNN") == 0) return KNN;
@@ -333,8 +333,8 @@ namespace fbr{
     else throw std::runtime_error(std::string("matcher method ") + method + std::string(" is unknown"));
   }
   
-  string registrationMethodToString(registration_method method){
-    string sMethod;
+  std::string registrationMethodToString(registration_method method){
+    std::string sMethod;
     switch(method){
     case ALL:
       sMethod = "ALL";
@@ -351,15 +351,15 @@ namespace fbr{
     return sMethod;
   }
 
-  registration_method stringToRegistrationMethod(string method){
+  registration_method stringToRegistrationMethod(std::string method){
     if(strcasecmp(method.c_str(), "ALL") == 0) return ALL;
     else if(strcasecmp(method.c_str(), "RANSAC") == 0) return RANSAC;
     else if(strcasecmp(method.c_str(), "DISABLE") == 0) return DISABLE;
     else throw std::runtime_error(std::string("registration method ") + method + std::string(" is unknown"));
   }
 
-  string featureFiltrationMethodToString(feature_filtration_method method){
-    string fFiltrationMethod;
+  std::string featureFiltrationMethodToString(feature_filtration_method method){
+    std::string fFiltrationMethod;
     switch(method){
     case OCCLUSION:
       fFiltrationMethod = "OCCLUSION";
@@ -376,15 +376,15 @@ namespace fbr{
     return fFiltrationMethod;
   }
 
-  feature_filtration_method stringToFeatureFiltrationMethod(string method){
+  feature_filtration_method stringToFeatureFiltrationMethod(std::string method){
     if(strcasecmp(method.c_str(), "OCCLUSION") == 0) return OCCLUSION;
     else if(strcasecmp(method.c_str(), "STANDARD_DEVIATION") == 0) return STANDARD_DEVIATION;
     else if(strcasecmp(method.c_str(), "DISABLE_FILTER") == 0) return DISABLE_FILTER;
     else throw std::runtime_error(std::string("feature filtration method ") + method + std::string(" is unknown"));
   }
 
-  string matchingFiltrationMethodToString(matching_filtration_method method){
-    string mFiltrationMethod;
+  std::string matchingFiltrationMethodToString(matching_filtration_method method){
+    std::string mFiltrationMethod;
     switch(method){
     case FUNDEMENTAL_MATRIX:
       mFiltrationMethod = "FUNDEMENTAL_MATRIX";
@@ -398,15 +398,15 @@ namespace fbr{
     return mFiltrationMethod;
   }
 
-  matching_filtration_method stringToMatchingFiltrationMethod(string method){
+  matching_filtration_method stringToMatchingFiltrationMethod(std::string method){
     if(strcasecmp(method.c_str(), "FUNDEMENTAL_MATRIX") == 0) return FUNDEMENTAL_MATRIX;
     else if(strcasecmp(method.c_str(), "DISABLE_MATCHING_FILTER") == 0) return DISABLE_MATCHING_FILTER;
     else throw std::runtime_error(std::string("matching filtration method ") + method + std::string(" is unknown"));
   }
 
-  string recoveredRangeFilterationMethodToString(recovered_range_filteration_method method)
+  std::string recoveredRangeFilterationMethodToString(recovered_range_filteration_method method)
   {
-    string recoveredRangeFilterationMethod;
+    std::string recoveredRangeFilterationMethod;
     switch(method){
     case INTERQUARTILE:
       recoveredRangeFilterationMethod = "INTERQUARTILE";
@@ -423,7 +423,7 @@ namespace fbr{
     return recoveredRangeFilterationMethod;
   }
   
-  recovered_range_filteration_method stringToRecoveredRangeFilterationMethod(string method)
+  recovered_range_filteration_method stringToRecoveredRangeFilterationMethod(std::string method)
   {
     if(strcasecmp(method.c_str(), "INTERQUARTILE") == 0) return INTERQUARTILE;
     else if(strcasecmp(method.c_str(), "INTERQUARTILE_AVERAGEDIFF") == 0) return INTERQUARTILE_AVERAGEDIFF;
@@ -465,24 +465,24 @@ namespace fbr{
   bool colorCompare (const Color_Value_Tuple &lTuple, const Color_Value_Tuple &rTuple)
   {
     
-    if(get<0>(lTuple) == get<0>(rTuple))
+    if(std::get<0>(lTuple) == std::get<0>(rTuple))
       {
-	if(get<1>(lTuple) == get<1>(rTuple))
+	if(std::get<1>(lTuple) == std::get<1>(rTuple))
 	  {
-	    return get<2>(lTuple) < get<2>(rTuple);
+	    return std::get<2>(lTuple) < std::get<2>(rTuple);
 	  }
 	else
-	  return get<1>(lTuple) < get<1>(rTuple);
+	  return std::get<1>(lTuple) < std::get<1>(rTuple);
       }
     else
-      return get<0>(lTuple) < get<0>(rTuple);
+      return std::get<0>(lTuple) < std::get<0>(rTuple);
   }
   
   //get all rgb colors sorted based on hsv
-  vector<unsigned int> getAllRGBSortedByHSL(unsigned int size)
+  std::vector<unsigned int> getAllRGBSortedByHSL(unsigned int size)
   {
-    vector<unsigned int> colorMap;
-    vector<Color_Value_Tuple> colors;
+    std::vector<unsigned int> colorMap;
+    std::vector<Color_Value_Tuple> colors;
 
     for(unsigned int C = 0; C <size*size; C++)
       {
@@ -518,24 +518,24 @@ namespace fbr{
 	    
 	    H /= 6;
 	  }
-	colors.push_back(make_tuple(H, S, L, C));
+	colors.push_back(std::make_tuple(H, S, L, C));
       }
     
     sort(colors.begin(), colors.end(), colorCompare);
 
-    for(vector<Color_Value_Tuple>::iterator itr = colors.begin(); itr != colors.end(); itr++)
+    for(std::vector<Color_Value_Tuple>::iterator itr = colors.begin(); itr != colors.end(); itr++)
     {
-      unsigned int  colorVal = get<3>(*itr);
+      unsigned int  colorVal = std::get<3>(*itr);
       colorMap.push_back(colorVal);
     }
     return colorMap;
   }
 
   //get all rgb colors sorted based on hsl
-  vector<unsigned int> getAllRGBSortedByHSV(unsigned int size)
+  std::vector<unsigned int> getAllRGBSortedByHSV(unsigned int size)
   {
-    vector<unsigned int> colorMap;
-    vector<Color_Value_Tuple> colors;
+    std::vector<unsigned int> colorMap;
+    std::vector<Color_Value_Tuple> colors;
 
     for(unsigned int C = 0; C <size*size; C++)
       {
@@ -570,24 +570,24 @@ namespace fbr{
 	    
 	    H /= 6;
 	  }
-	colors.push_back(make_tuple(H, S, V, C));
+	colors.push_back(std::make_tuple(H, S, V, C));
       }
     
     sort(colors.begin(), colors.end(), colorCompare);
 
-    for(vector<Color_Value_Tuple>::iterator itr = colors.begin(); itr != colors.end(); itr++)
+    for(std::vector<Color_Value_Tuple>::iterator itr = colors.begin(); itr != colors.end(); itr++)
     {
-      unsigned int  colorVal = get<3>(*itr);
+      unsigned int  colorVal = std::get<3>(*itr);
       colorMap.push_back(colorVal);
     }
     return colorMap;
   }
   
   //get all rgb colors sorted based on rgb
-  vector<unsigned int> getAllRGBSortedByRGB(unsigned int size)
+  std::vector<unsigned int> getAllRGBSortedByRGB(unsigned int size)
   {
-    vector<unsigned int> colorMap;
-    vector<Color_Value_Tuple> colors;
+    std::vector<unsigned int> colorMap;
+    std::vector<Color_Value_Tuple> colors;
 
     for(unsigned int C = 0; C <size*size; C++)
       {
@@ -596,14 +596,14 @@ namespace fbr{
 	G = (C>>8) & 0xFF;
 	B = (C>>0) & 0xFF;
 
-	colors.push_back(make_tuple(R, G, B, C));
+	colors.push_back(std::make_tuple(R, G, B, C));
       }
     
     sort(colors.begin(), colors.end(), colorCompare);
 
-    for(vector<Color_Value_Tuple>::iterator itr = colors.begin(); itr != colors.end(); itr++)
+    for(std::vector<Color_Value_Tuple>::iterator itr = colors.begin(); itr != colors.end(); itr++)
     {
-      unsigned int  colorVal = get<3>(*itr);
+      unsigned int  colorVal = std::get<3>(*itr);
       colorMap.push_back(colorVal);
     }
     return colorMap;
@@ -611,9 +611,9 @@ namespace fbr{
 
 
   //get all rgb colors sorted based on rgb
-  vector<unsigned int> getAllRGBSortedByRBGB()
+  std::vector<unsigned int> getAllRGBSortedByRBGB()
   {
-    vector<unsigned int> colorMap;
+    std::vector<unsigned int> colorMap;
     
     for (int j = 0; j < 256; j++)//red //255=interesting quirk
       {

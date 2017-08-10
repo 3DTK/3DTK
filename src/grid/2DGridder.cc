@@ -26,9 +26,6 @@
 #include <vector>
 #include <dirent.h>
 
-using std::cerr;
-using std::flush;
-
 #ifdef _MSC_VER
   #define  _USE_MATH_DEFINES
   #include <windows.h>
@@ -56,55 +53,55 @@ using std::flush;
 void usage(char* prog)
 {
 #ifndef _MSC_VER
-  const string bold("\033[1m");
-  const string normal("\033[m");
+  const std::string bold("\033[1m");
+  const std::string normal("\033[m");
 #else
-  const string bold("");
-  const string normal("");
+  const std::string bold("");
+  const std::string normal("");
 #endif
   
-    cout << endl
-	 << "Usage: " << prog << endl
-	 << "       [-s NR] [-e NR] [-m NR] [-M NR] [-f F] [-o DIR] [-t] " << endl
-	 << "       [-h NR] [-H NR] [-r NR] [-w] [-p NR] [-P Nr] [-y] [-n] " <<endl
-	 << "       [-g] [-d] [-l] [-a NR] inputdirectory" << endl << endl;
+    std::cout << std::endl
+	 << "Usage: " << prog << std::endl
+	 << "       [-s NR] [-e NR] [-m NR] [-M NR] [-f F] [-o DIR] [-t] " << std::endl
+	 << "       [-h NR] [-H NR] [-r NR] [-w] [-p NR] [-P Nr] [-y] [-n] " <<std::endl
+	 << "       [-g] [-d] [-l] [-a NR] inputdirectory" << std::endl << std::endl;
     
-    cout << "  -s NR   start at scan NR (i.e., neglects the first NR scans)" << endl
-	 << "          [ATTENTION: counting starts with 0]" << endl
-	 << "  -e NR   end after scan NR" << "" << endl
-	 << "  -m NR   set the maximal range distance to NR 'units' (unit of scan data, e.g. cm)" << endl
-	 << "          (default 2500, unit of scan data, e.g. cm)" << endl
-	 << "  -M NR   set the minimal range distance to NR 'units' (unit of scan data, e.g. cm)" << endl
-	 << "  -f F    format = F" << endl
-	 << "          using shared library F for input" << endl
-	 << "          (chose F from {uos, uos_map, uos_frames, uos_map_frames, old, rts, rts_map, ifp, riegl_bin, riegl_txt, zahn, ply})" << endl
-	 << "  -o DIR  the output directory (if none is set use the input directory" << endl 
-	 << "  -t      read a file containing a initial transformation matrix" << endl
-	 << "  -H NR   set the maximal relevant height to NR 'units' (unit of scan data, e.g. cm)" << endl
-	 << "  -h NR   set the minimal relevant height to NR 'units' (unit of scan data, e.g. cm)" << endl
-	 << "  -r NR   the width of the gridunit (unit of scan data, e.g. cm per unit)" << endl
-	 << "  -w      default true, if set false " << endl
-	 << "          (if true free points between viewpoint and points will be created)" << endl
-	 << "  -p NR   set the parcel width (unit of scan data, e.g. cm)" << endl
-	 << "  -P NR   set the parcel height (unit of scan data, e.g. cm)" << endl
-	 << "  -y      default false, if set true " <<endl
-	 << "          (if true the transformationmatrix of the scans will be corrected (the value for Y)" << endl
-	 << "  -n      default true, if set false" << endl
-	 << "          (if true, neighbours will be weighted) " << endl
-	 << "  -a NR   the spot diameter of the laser per 3000 units of scan data, e.g. cm " << endl
-	 << "          (default 15 cm / 3000 cm) " << endl
-	 << "  -g      default false, if set true " << endl
-	 << "          (if true, the grids will be written) " << endl
-	 << "  -d      default true, if set false " << endl
-	 << "          (if true, the world will be written) " << endl
-	 << "  -l      default false, if set true " << endl
-	 << "          (if true, lines will be created and written) " << endl
-	 << "  -i      default false, if set true " << endl
-	 << "          (if true, a world ppm will be created) " << endl
-	 << "  -c      default 50. This is the numbers of scans which " << endl
-	 << "          will be process at a time" << endl
-	 << "  -R      default false, if set the programm will resume " << endl
-	 << endl << endl;
+    std::cout << "  -s NR   start at scan NR (i.e., neglects the first NR scans)" << std::endl
+	 << "          [ATTENTION: counting starts with 0]" << std::endl
+	 << "  -e NR   end after scan NR" << "" << std::endl
+	 << "  -m NR   set the maximal range distance to NR 'units' (unit of scan data, e.g. cm)" << std::endl
+	 << "          (default 2500, unit of scan data, e.g. cm)" << std::endl
+	 << "  -M NR   set the minimal range distance to NR 'units' (unit of scan data, e.g. cm)" << std::endl
+	 << "  -f F    format = F" << std::endl
+	 << "          using shared library F for input" << std::endl
+	 << "          (chose F from {uos, uos_map, uos_frames, uos_map_frames, old, rts, rts_map, ifp, riegl_bin, riegl_txt, zahn, ply})" << std::endl
+	 << "  -o DIR  the output directory (if none is set use the input directory" << std::endl 
+	 << "  -t      read a file containing a initial transformation matrix" << std::endl
+	 << "  -H NR   set the maximal relevant height to NR 'units' (unit of scan data, e.g. cm)" << std::endl
+	 << "  -h NR   set the minimal relevant height to NR 'units' (unit of scan data, e.g. cm)" << std::endl
+	 << "  -r NR   the width of the gridunit (unit of scan data, e.g. cm per unit)" << std::endl
+	 << "  -w      default true, if set false " << std::endl
+	 << "          (if true free points between viewpoint and points will be created)" << std::endl
+	 << "  -p NR   set the parcel width (unit of scan data, e.g. cm)" << std::endl
+	 << "  -P NR   set the parcel height (unit of scan data, e.g. cm)" << std::endl
+	 << "  -y      default false, if set true " <<std::endl
+	 << "          (if true the transformationmatrix of the scans will be corrected (the value for Y)" << std::endl
+	 << "  -n      default true, if set false" << std::endl
+	 << "          (if true, neighbours will be weighted) " << std::endl
+	 << "  -a NR   the spot diameter of the laser per 3000 units of scan data, e.g. cm " << std::endl
+	 << "          (default 15 cm / 3000 cm) " << std::endl
+	 << "  -g      default false, if set true " << std::endl
+	 << "          (if true, the grids will be written) " << std::endl
+	 << "  -d      default true, if set false " << std::endl
+	 << "          (if true, the world will be written) " << std::endl
+	 << "  -l      default false, if set true " << std::endl
+	 << "          (if true, lines will be created and written) " << std::endl
+	 << "  -i      default false, if set true " << std::endl
+	 << "          (if true, a world ppm will be created) " << std::endl
+	 << "  -c      default 50. This is the numbers of scans which " << std::endl
+	 << "          will be process at a time" << std::endl
+	 << "  -R      default false, if set the programm will resume " << std::endl
+	 << std::endl << std::endl;
 
     exit(1);
 }
@@ -114,7 +111,7 @@ void usage(char* prog)
  * @param path the directory to check
  * @return true if exists, else false
  */
-bool directoryExists(const string path )
+bool directoryExists(const std::string path )
 {
     DIR *pDir;
     bool bExists = false;
@@ -152,7 +149,7 @@ bool directoryExists(const string path )
  * @return 0, if the parsing was successful, 1 otherwise 
  */
 int parseArgs(int argc, char **argv,
-	      string &inputdir, string &outputdir,
+	      std::string &inputdir, std::string &outputdir,
 	      int& start, int& end, int& maxDist, int& minDist,
 	      bool &readInitial, IOType &type, bool& correctY,
 	      double &minHeight, double &maxHeight, long &resolution,
@@ -168,7 +165,7 @@ int parseArgs(int argc, char **argv,
     extern char *optarg;
     extern int optind;
     
-    cout << endl;
+    std::cout << std::endl;
     while ((c = getopt (argc, argv, "o:s:a:e:m:ncwgidlRM:h:H:f:r:p:P:yt")) != -1)
     {
       switch (c)
@@ -176,32 +173,32 @@ int parseArgs(int argc, char **argv,
         case 'o':
           outputdir = optarg;
           if (!directoryExists(outputdir)) {
-            cerr << "Error: Directory doesn't exist.\n";
+            std::cerr << "Error: Directory doesn't exist.\n";
             exit(1);
           }
           break;
         case 's':
           start = atoi(optarg);
           if (start < 0) { 
-            cerr << "Error: Cannot start at a negative scan number.\n"; 
+            std::cerr << "Error: Cannot start at a negative scan number.\n"; 
             exit(1); 
           }
           break;
         case 'e':
           end = atoi(optarg);
           if (end < 0) { 
-            cerr << "Error: Cannot end at a negative scan number.\n"; 
+            std::cerr << "Error: Cannot end at a negative scan number.\n"; 
             exit(1); 
           }
           if (end < start) { 
-            cerr << "Error: <end> cannot be smaller than <start>.\n"; 
+            std::cerr << "Error: <end> cannot be smaller than <start>.\n"; 
             exit(1); 
           }
           break;
         case 'c':
           count = atoi(optarg);
           if( count < 1){
-            cerr << "Error: <count> must be greater than 1.\n";
+            std::cerr << "Error: <count> must be greater than 1.\n";
             exit(1);
           }
           break;
@@ -221,7 +218,7 @@ int parseArgs(int argc, char **argv,
           try {
             type = formatname_to_io_type(optarg);
           } catch (...) { // runtime_error
-            cerr << "Format " << optarg << " unknown." << endl;
+            std::cerr << "Format " << optarg << " unknown." << std::endl;
             abort();
           }
           break;
@@ -237,7 +234,7 @@ int parseArgs(int argc, char **argv,
         case 'r':
           resolution = atol(optarg);
           if (resolution < 1) { 
-            cerr << "Error: <resolution> cannot be smaller than 1.\n"; 
+            std::cerr << "Error: <resolution> cannot be smaller than 1.\n"; 
             exit(1); 
           }
           break;	
@@ -250,14 +247,14 @@ int parseArgs(int argc, char **argv,
         case 'p':
           parcelWidth = atol(optarg);
           if (parcelWidth < 1) { 
-            cerr << "Error: <parcel_width> cannot be smaller than 1.\n"; 
+            std::cerr << "Error: <parcel_width> cannot be smaller than 1.\n"; 
             exit(1); 
           }
           break;
         case 'P':
           parcelHeight = atol(optarg);
           if (parcelHeight < 1) { 
-            cerr << "Error: <parcel_height> cannot be smaller than 1.\n"; 
+            std::cerr << "Error: <parcel_height> cannot be smaller than 1.\n"; 
             exit(1); 
           }
           break;
@@ -267,7 +264,7 @@ int parseArgs(int argc, char **argv,
         case 'a':
           spotradius = atoi(optarg);
           if (spotradius < 0) { 
-            cerr << "Error: <spotradius> cannot be smaller than 0.\n"; 
+            std::cerr << "Error: <spotradius> cannot be smaller than 0.\n"; 
             exit(1); 
           }
           break;
@@ -288,7 +285,7 @@ int parseArgs(int argc, char **argv,
       }}
     
     if (optind != argc-1) {
-	cerr << "\n*** Input directory missing ***" << endl;
+	std::cerr << "\n*** Input directory missing ***" << std::endl;
 	usage(argv[0]);
     }
     inputdir = argv[optind];
@@ -318,9 +315,9 @@ int parseArgs(int argc, char **argv,
  */
 int main(int argc, char **argv){
     // Start message
-    cout << "(c) University of Osnabrueck, 2006 - 2008" << endl << endl
-	 << "Restricted Usage" << endl
-	 << "Don't use without permission" << endl;
+    std::cout << "(c) University of Osnabrueck, 2006 - 2008" << std::endl << std::endl
+	 << "Restricted Usage" << std::endl
+	 << "Don't use without permission" << std::endl;
 
 
     // Usage
@@ -330,8 +327,8 @@ int main(int argc, char **argv){
 
     ///////////////////////////////////////
     // Defaultvalues
-    string scandir = "";
-    string outputdir = "./parcels/";
+    std::string scandir = "";
+    std::string outputdir = "./parcels/";
 
     int start = 0;
     int end = -1;
@@ -378,11 +375,11 @@ int main(int argc, char **argv){
     parcelHeight /= resolution;
 
     // create parcelmanager
-    cout << "Create parcelmanager ..." << endl;
+    std::cout << "Create parcelmanager ..." << std::endl;
     parcelmanager parcelman(parcelWidth, parcelHeight,
 			    outputdir, resolution, resume);
 
-    cout << "Create viewpointlist ... " << endl;
+    std::cout << "Create viewpointlist ... " << std::endl;
     viewpointinfo viewpoint(outputdir);
     
     for (int i = start; i <= end; i+=count)
@@ -390,16 +387,16 @@ int main(int argc, char **argv){
 	int endloop = i + count - 1 < end ? i + count - 1 : end;
 
 	// get Scans
-	cout << "Reading scans " << i << " to " << endloop << " ... ";
+	std::cout << "Reading scans " << i << " to " << endloop << " ... ";
 	scanmanager scanman;
 	scanman.startscan(scandir, outputdir, scantype, i, endloop,
 				   readInitial, maxDistance, minDistance,
 				   correctY);
 
-	cout << "Done."<< endl;
+	std::cout << "Done."<< std::endl;
 		
 	// create grid from scans
-	cout << "Creating grids " << i << " to " << endloop << " ... ";
+	std::cout << "Creating grids " << i << " to " << endloop << " ... ";
 	scanToGrid stg(resolution,
 		       minRelevantHeight,
 		       maxRelevantHeight,
@@ -408,100 +405,100 @@ int main(int argc, char **argv){
 		       createWaypoints,
 		       createNeighbours);
 
-	cout << "Done."<< endl;
+	std::cout << "Done."<< std::endl;
 	
 	// convert scans
-	cout << "Converting " << scanman.getScanCount() <<" scans ... ";
+	std::cout << "Converting " << scanman.getScanCount() <<" scans ... ";
 	
-	vector<scanGrid*> grids;
+	std::vector<scanGrid*> grids;
 	for(size_t j = 0; j < scanman.getScanCount(); j++)
 	{
-	    cout << "." << flush;
+	    std::cout << "." << std::flush;
 	    double* p = scanman.getMatrix(j).back();
 	    scanman.getScan(j).transformAll(p);
 	    grids.push_back(stg.convert(scanman.getScan(j), p));
 	}
-	cout << "Done." << endl;
+	std::cout << "Done." << std::endl;
 
 	// start writing
-	cout << "Processing from " << i << " to " << endloop << endl;	
+	std::cout << "Processing from " << i << " to " << endloop << std::endl;	
 	for(size_t j = 0; j < grids.size(); ++j)
 	{
-	    cout << "Adding scan " << i << " ... " << flush; 
+	    std::cout << "Adding scan " << i << " ... " << std::flush; 
 	    parcelman.addGrid(grids[j],
 			      grids[j]->getViewpointX(),
 			      grids[j]->getViewpointZ());
 	   
 	    viewpoint.addGrid(grids[j]);
-	    cout << "Done."<< endl;
+	    std::cout << "Done."<< std::endl;
 	}
 
 	// print grids for each scan if wished
 	if(writeGrids)
 	{
-	    cout << "Writing grids " << i
-		 << " to " << endloop << " ... " << endl;
+	    std::cout << "Writing grids " << i
+		 << " to " << endloop << " ... " << std::endl;
 
-	    string str;
-	    stringstream stream;
+	    std::string str;
+	    std::stringstream stream;
 	    for(size_t j = 0; j < grids.size(); ++j)
 	    {
-	      cout << "Writing grid " << i << " ... " << flush;
+	      std::cout << "Writing grid " << i << " ... " << std::flush;
 		stream.clear();
 		stream << outputdir << "grid" << j+i << ".ppm ";
 		stream >> str;
 		
 		ppmWriter writer(str);
 		writer.write(*grids[j]);
-		cout << "Done."<<endl;
+		std::cout << "Done."<<std::endl;
 	    }
 	}	
 
 
-	cout << "Freeing subdate ... "<< flush;
+	std::cout << "Freeing subdate ... "<< std::flush;
 	for(size_t j = 0; j < grids.size(); ++j)
 	    delete grids[j];
 	grids.clear();
-	cout << "Done."<< endl;
+	std::cout << "Done."<< std::endl;
     }
 	
     // write the world and the viewpoints
     if(writeWorld)
     {
 	// write world map
-	cout << "Writing world map ... " << flush;
+	std::cout << "Writing world map ... " << std::flush;
 	parcelman.writeWorld("world.2dm");
-	cout << "done." << endl;
+	std::cout << "done." << std::endl;
 
 	// write viewpoints
-	cout << "Writing viewpoints ... " << flush; 
+	std::cout << "Writing viewpoints ... " << std::flush; 
 	viewpoint.write("viewpoints.pts");
-	cout << "Done." << endl;
+	std::cout << "Done." << std::endl;
     }
         
     // write gridlines
     if(writeLines || writeWorldppm)
     {	
-	cout << "Creating world grid ... ";
+	std::cout << "Creating world grid ... ";
 	grid *g = parcelman.createWorldGrid();
-	cout << "Done." << endl;
+	std::cout << "Done." << std::endl;
 
 	if(writeLines) {
-	    cout << "Writing Lines ... ";
+	    std::cout << "Writing Lines ... ";
 	    gridlines glines(g, maxDistance, isSolidPoint);
 	    glines.writeLin(outputdir + "/lines.plot");
-	    cout << "Done." << endl;
+	    std::cout << "Done." << std::endl;
 	}
 
 	if(writeWorldppm) {
-	    cout << "Writing world ppm ... ";
+	    std::cout << "Writing world ppm ... ";
 	    ppmWriter writer(outputdir + "world.ppm");
 	    writer.write(*g);
-	    cout << "Done." << endl;
+	    std::cout << "Done." << std::endl;
 	}
 	
 	delete g;
     }
 
-    cout << "Freeing data ... " << endl;
+    std::cout << "Freeing data ... " << std::endl;
 } 

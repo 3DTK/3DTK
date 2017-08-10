@@ -4,8 +4,6 @@
 #include <vector>
 #include "slam6d/point.h"
 
-using std::vector;
-
 class Image {
  
 public:

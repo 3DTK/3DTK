@@ -24,11 +24,7 @@
 #include "slam6d/globals.icc"
 
 #include <iostream>
-using std::cout;
-using std::cerr;
-using std::endl;
 #include <algorithm>
-using std::swap;
 #include <cmath>
 #include <cstring>
 #include <limits>
@@ -87,11 +83,11 @@ double *KDtree::FindClosestAlongDir(double *_p,
   return params[threadNum].closest;
 }
 
-vector<Point> KDtree::kNearestNeighbors(double *_p,
+std::vector<Point> KDtree::kNearestNeighbors(double *_p,
                                         int _k,
                                         int threadNum) const
 {
-  vector<Point> result;    
+  std::vector<Point> result;    
   params[threadNum].closest = 0;
   params[threadNum].p = _p;
   params[threadNum].k = _k;
@@ -123,11 +119,11 @@ vector<Point> KDtree::kNearestNeighbors(double *_p,
 }
 
 
-vector<Point> KDtree::fixedRangeSearchBetween2Points(double *_p,
+std::vector<Point> KDtree::fixedRangeSearchBetween2Points(double *_p,
                       double *_p0,
                       double maxdist2,
                       int threadNum) const {
-  vector<Point> result;
+  std::vector<Point> result;
   params[threadNum].closest = _p0;
   params[threadNum].closest_d2 = maxdist2;
   params[threadNum].p = _p;
@@ -156,11 +152,11 @@ vector<Point> KDtree::fixedRangeSearchBetween2Points(double *_p,
 }
 
 
-vector<Point> KDtree::fixedRangeSearchAlongDir(double *_p,
+std::vector<Point> KDtree::fixedRangeSearchAlongDir(double *_p,
                       double *_dir,
                       double maxdist2,
                       int threadNum) const {
-  vector<Point> result;
+  std::vector<Point> result;
   params[threadNum].closest = NULL;
   params[threadNum].closest_d2 = maxdist2;
   params[threadNum].p = _p;
@@ -178,11 +174,11 @@ vector<Point> KDtree::fixedRangeSearchAlongDir(double *_p,
   return result;
 }
 
-vector<Point> KDtree::fixedRangeSearch(double *_p,
+std::vector<Point> KDtree::fixedRangeSearch(double *_p,
                                        double sqRad2,
                                        int threadNum) const
 {
-  vector<Point> result;
+  std::vector<Point> result;
   params[threadNum].closest = 0;
   params[threadNum].closest_d2 = sqRad2;
   params[threadNum].p = _p;
@@ -198,13 +194,13 @@ vector<Point> KDtree::fixedRangeSearch(double *_p,
   return result;
 }
 
-vector<Point> KDtree::AABBSearch(double *_p,
+std::vector<Point> KDtree::AABBSearch(double *_p,
                                  double* _p0,
                                  int threadNum) const
 {
     if (_p[0] > _p0[0] || _p[1] > _p0[1] || _p[2] > _p0[2])
         throw std::logic_error("invalid bbox");
-    vector<Point> result;
+    std::vector<Point> result;
     params[threadNum].p = _p;
     params[threadNum].p0 = _p0;
     params[threadNum].range_neighbors.clear();
