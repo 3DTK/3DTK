@@ -32,7 +32,20 @@ void scanstruct::setTransform(double *mat, double x, double y, double z) {
 void timedImporter::on_echo_transformed(echo_type echo)
 {
   scanlib::pointcloud::on_echo_transformed(echo);
-  
+
+  static bool firstEcho = true;
+  if (firstEcho) {
+      target& t(targets[target_count - 1]);
+
+    if (t.time != tmap->firstTimestamp) {
+      ROS_ERROR("Warning: Timestamps differ between RXP file and bagfile!");
+      ROS_ERROR("Timestamp of first echo in RXP file: %f", t.time);
+      ROS_ERROR("First timestamp of time map: %f", tmap->firstTimestamp);
+    }
+
+      firstEcho = false;
+  }
+
   if(pointcloud::first == echo || pointcloud::interior == echo) return;
   /*
   if ( pointcloud::first == echo ) {

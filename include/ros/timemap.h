@@ -20,9 +20,20 @@ using std::map;
 
 class timeMap {
   public:
+    timeMap(vector<double> *timestamps) : firstTimestamp(0), lastTimestamp(0) {
+        if (timestamps != NULL && timestamps[0].size() > 0) {
+            firstTimestamp = timestamps[0][0];
+            lastTimestamp = timestamps[0][timestamps[0].size() - 1];
+        }
+    }
 
+  public:
     virtual ros::Time toRos(double riegltime) = 0;
     virtual void setOffset(double tdiff) = 0;
+
+  public:
+    double firstTimestamp;
+    double lastTimestamp;
 };
 
 /**
@@ -36,7 +47,7 @@ class timeMapSimple : public timeMap {
     double offset;
 
   public:
-    timeMapSimple(vector<double> *timestamps) {
+    timeMapSimple(vector<double> *timestamps) : timeMap(timestamps) {
       double riegltime = timestamps[0][0];
       double rost = timestamps[1][0];
 
@@ -154,7 +165,7 @@ class timeMapOlsen : public timeMap {
 
 
   public:
-    timeMapOlsen(vector<double> *timestamps, double alpha=0.000138888888) {
+    timeMapOlsen(vector<double> *timestamps, double alpha=0.000138888888) : timeMap(timestamps) {
       offset = 0.0;
       alpha1 = alpha2 = alpha;
 
