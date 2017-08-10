@@ -8,7 +8,7 @@
 #include <iostream>
 #include <eigen3/Eigen/Core>
 #include <eigen3/Eigen/SVD>
-#include <opencv2/calib3d.hpp>
+#include <opencv2/calib3d/calib3d.hpp>
 
 using namespace cv;
 using namespace std;
