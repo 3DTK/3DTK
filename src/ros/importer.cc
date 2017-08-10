@@ -38,9 +38,9 @@ void timedImporter::on_echo_transformed(echo_type echo)
       target& t(targets[target_count - 1]);
 
     if (t.time != tmap->firstTimestamp) {
-      ROS_ERROR("Warning: Timestamps differ between RXP file and bagfile!");
-      ROS_ERROR("Timestamp of first echo in RXP file: %f", t.time);
-      ROS_ERROR("First timestamp of time map: %f", tmap->firstTimestamp);
+      ROS_WARN("Warning: Timestamps differ between RXP file and bagfile!");
+      ROS_WARN("Timestamp of first echo in RXP file: %f", t.time);
+      ROS_WARN("First timestamp of time map: %f", tmap->firstTimestamp);
     }
 
       firstEcho = false;
