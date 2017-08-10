@@ -36,7 +36,7 @@ struct Quaternion {
   Quaternion(double x, double y, double z, double w) : x(x), y(y), z(z), w(w) {};
 };
 
-enum class Colormap : int {
+enum class ShowColormap : int {
   solid = 0,
   grey = 1,
   hsv = 2,
@@ -67,7 +67,7 @@ struct range {
 
 struct color_settings {
   PointType ptype;
-  Colormap colormap;
+  ShowColormap colormap;
   range<float> colormap_values {};
 };
 
