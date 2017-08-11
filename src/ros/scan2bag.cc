@@ -42,9 +42,9 @@ int main(int argc, char** argv) {
 	double voxelsize= -1.0;
 	double octree	=  0;
 
-	string bagfile  =  "log.bag";
-	string topic	=  "/pointcloud";
-	string dir		=  "./";
+	std::string bagfile  =  "log.bag";
+	std::string topic	=  "/pointcloud";
+	std::string dir		=  "./";
 	bool useStamps	=  false;
 
 	bool noOdom     =  false;
@@ -55,7 +55,7 @@ int main(int argc, char** argv) {
     program_options::options_description desc("Allowed options");
     desc.add_options()
             ("help,h", "produce help message")
-            ("out-bag,b", program_options::value<string>(&bagfile)->default_value("log.bag"), "output ros bag file")
+            ("out-bag,b", program_options::value<std::string>(&bagfile)->default_value("log.bag"), "output ros bag file")
 			("start,s", program_options::value<int>(&start)->default_value(0), "start at scan NR")
 			("end,e", program_options::value<int>(&end)->default_value(-1), "end at scan NR")
 			/*("format,f",program_options::value(&type)->default_value(UOS, "uos"),
@@ -71,7 +71,7 @@ int main(int argc, char** argv) {
 			("octree,O", program_options::value(&octree)->implicit_value(1),
 			 "Enable randomized octree based point reduction with arg points per voxel. "
 			 "Requires --reduce (-r).") // TODO where is this enforced?
-			("topic", program_options::value<string>(&topic)->default_value("/pointcloud"), "topic in bagfile withcreated PointCloud2 messages")
+			("topic", program_options::value<std::string>(&topic)->default_value("/pointcloud"), "topic in bagfile withcreated PointCloud2 messages")
 			("timestamp",program_options::bool_switch(&useStamps),"use timestamps if they are available in pose files")
 			("noOdom",program_options::bool_switch(&noOdom),"do not write odometry messages")
 			("noTf",program_options::bool_switch(&noTf),"do not write tf messages")
@@ -82,7 +82,7 @@ int main(int argc, char** argv) {
 			
     program_options::options_description hidden("Hidden options");
     hidden.add_options()
-        ("input-dir", program_options::value<string>(&dir), "input dir");
+        ("input-dir", program_options::value<std::string>(&dir), "input dir");
 
     // all options
     program_options::options_description all;
@@ -103,7 +103,7 @@ int main(int argc, char** argv) {
     program_options::notify(vm);
 
     if (vm.count("help")) {
-        cout << desc << endl;
+        std::cout << desc << std::endl;
         return EXIT_SUCCESS;
     }
 
@@ -114,7 +114,7 @@ int main(int argc, char** argv) {
 	Scan::openDirectory(scanserver, dir, type, start, end);
 
 	if(Scan::allScans.size() == 0) {
-		cerr << "No scans found. Did you use the correct format?" << endl;
+		std::cerr << "No scans found. Did you use the correct format?" << std::endl;
 		exit(-1);
 	}
 

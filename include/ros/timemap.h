@@ -13,7 +13,7 @@
 
 class timeMap {
   public:
-    timeMap(vector<double> *timestamps) : firstTimestamp(0), lastTimestamp(0) {
+    timeMap(std::vector<double> *timestamps) : firstTimestamp(0), lastTimestamp(0) {
         if (timestamps != NULL && timestamps[0].size() > 0) {
             firstTimestamp = timestamps[0][0];
             lastTimestamp = timestamps[0][timestamps[0].size() - 1];
