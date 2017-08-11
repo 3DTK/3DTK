@@ -26,9 +26,9 @@ private:
     Mat matImage;
     apriltag_detector_t *aprilDetector;
     apriltag_family_t *tagFam;
-    vector<Point2f> point2fVec;
-    vector<AprilTag2f> pointMap;
-    vector<AprilTag3f> matMap;
+    std::vector<Point2f> point2fVec;
+    std::vector<AprilTag2f> pointMap;
+    std::vector<AprilTag3f> matMap;
     Size size;
     /**
      initialize the aprilTag detector
@@ -90,9 +90,9 @@ public:
      *
      *  @return map<int, Point3f> with <id, Point>
      */
-    vector<AprilTag2f> getPointList();
+    std::vector<AprilTag2f> getPointList();
 
-    void setPointList(vector<AprilTag2f> list);
+    void setPointList(std::vector<AprilTag2f> list);
 
     bool clearPointlist();
 
@@ -101,7 +101,7 @@ public:
      *
      *  @return map<int, matd_t> with id and 3x3 homography matrix describing the projection from an "ideal" tag (with corners at (-1,-1), (1,-1), (1,1), and (-1,1)) to pixels in the image
      */
-    vector<AprilTag3f> getMatMap();
+    std::vector<AprilTag3f> getMatMap();
 
     /**
      * getter for size of image
@@ -110,7 +110,7 @@ public:
      */
     Size getImageSize();
 
-    vector<Point2f> getPoint2fVec();
+    std::vector<Point2f> getPoint2fVec();
     
 };
 
