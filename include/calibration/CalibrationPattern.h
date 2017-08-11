@@ -24,7 +24,7 @@ using namespace AprilTag;
 class CalibrationPattern{
     
 private:
-    vector<AprilTag3f> patternPoints;
+    std::vector<AprilTag3f> patternPoints;
     
 public:
     
@@ -43,16 +43,16 @@ public:
      *
      *  @param path <#path description#>
      */
-    void readPattern(string path, Settings &s);
+    void readPattern(std::string path, Settings &s);
     
     /**
      *  get the Point map
      *
      *  @return map<int, Point3f> with the values <ID, Point>
      */
-    vector<AprilTag3f> getPoints();
+    std::vector<AprilTag3f> getPoints();
 
-    string patternPointsToString();
+    std::string patternPointsToString();
     
 };
 
