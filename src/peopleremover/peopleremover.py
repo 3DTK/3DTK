@@ -26,6 +26,19 @@ def visitor(voxel, *args, **kwargs):
     # nothing to do here because the voxel is empty to begin with
     if voxel not in voxel_occupied_by_slice:
         return True
+
+    # The following implements a sliding window within which voxels
+    # that also contain points with a similar index as the current
+    # slice are not marked as free. Instead, the search aborts
+    # early.
+    # If no points around the current slice are found in the voxel,
+    # then the points in it were seen from a very different scanner
+    # position and thus, these points are actually not there and
+    # the voxel must be marked as free.
+
+    # if the voxel has a point in it, only abort if the slice number
+    # is close to the current slice (use difference of 10 slices)
+
     if diff == 0:
         if current_slice not in voxel_occupied_by_slice[voxel]:
             empty_voxels.add(voxel)
@@ -208,11 +221,11 @@ def main():
     parser.add_argument(
         "--maxrange-method", choices=["none", "normals", "1nearest"],
         help="How to compute search range. Possible values: none, normals, 1nearest")
-    parser.add_argument("--no-global-normals", action='store_true', help="Compute normal vectors for each scan instead of from the global point cloud (for maxrange-method=normals)")
     parser.add_argument("--normal-knearest", type=int, default=40, metavar="K",
         help="To compute the normal vector, use NUM closest points for --maxrange-method=normals (default: 40)")
-    parser.add_argument("--normal-method", choices=["knearest", "range", "angle"],
-        help="How to select points to compute the normal from. Possible values: knearest (choose k using --normal-knearest), range (range search of voxel radius), angle (all points seen under the angle that one voxel is seen from the perspective of the scanner)")
+    parser.add_argument("--normal-method", choices=["knearest", "range", "angle", "knearest-global", "range-global"],
+        help="How to select points to compute the normal from. Possible values: knearest (choose k using --normal-knearest), range (range search of voxel radius), angle (all points seen under the angle that one voxel is seen from the perspective of the scanner), knearest-global (like knearest but from a global k-d tree), rangle-global (like range but from a global k-d tree)")
+    parser.add_argument("--maskdir", help="Directory to store .mask files. Default: ${directory}/pplremover")
     parser.add_argument("directory")
     args = parser.parse_args()
 
@@ -232,8 +245,8 @@ def main():
 
     len_trajectory = len(py3dtk.allScans)
     print("length: %d" % len_trajectory, file=sys.stderr)
-    print("start: %d" % int(py3dtk.allScans[args.start].getIdentifier()), file=sys.stderr)
-    print("end: %d" % int(py3dtk.allScans[args.end].getIdentifier()), file=sys.stderr)
+    print("start: %d" % int(py3dtk.allScans[0].getIdentifier()), file=sys.stderr)
+    print("end: %d" % int(py3dtk.allScans[-1].getIdentifier()), file=sys.stderr)
 
     for s in py3dtk.allScans:
         i = int(s.getIdentifier())
@@ -256,13 +269,6 @@ def main():
         else:
             refl = [ 0.0 ] * len(xyz)
         points = list(zip(xyz,xyz_orig,refl))
-        if args.maxrange_method == "normals":
-            # sort points by their distance from the scanner for normal
-            # computation later
-            # Precompute the distances so that they are not computed multiple
-            # times while sorting
-            distances = { p:sq.length(p) for p in xyz_orig }
-            points = sorted(points, key=cmp_to_key(lambda a,b: distances[a[1]] - distances[b[1]]))
         points_by_slice[i] = points
         print("number of points in scan %d: %d" % (i, len(points)), file=sys.stderr)
 
@@ -291,7 +297,7 @@ def main():
         #maxranges.append([sq.length(p)-voxel_diagonal for (_,p,_) in points_by_slice[i]])
         maxranges[i] = [None]*len(points_by_slice[i])
     if args.maxrange_method in "normals":
-        if not args.no_global_normals:
+        if args.normal_method in ["knearest-global", "range-global"]:
             # We build one big kd-tree because normal computation becomes harder
             # the further away from the scanner it is done (less points per volume)
             print("building global k-d tree", file=sys.stderr)
@@ -306,15 +312,24 @@ def main():
             # build a quad tree
             print("building spherical quad tree", file=sys.stderr)
             qtree = sq.QuadTree([p for _,p,_ in points_by_slice[i]])
-            if args.no_global_normals:
+            # no need to build a k-d tree for the "angle" method
+            if args.normal_method in ["knearest", "range"]:
                 print("building local k-d tree", file=sys.stderr)
                 kdtree = py3dtk.KDtree([p for _,p,_ in points_by_slice[i]])
             print("calculating ranges")
+            # Precompute the distances so that they are not computed multiple
+            # times while sorting
+            distances = { p:sq.length(p) for _,p,_ in points_by_slice[i] }
+            # sort points by their distance from the scanner but keep their
+            # original index to update the correct corresponding entry in
+            # maxranges
+            points = sorted(list(enumerate(points_by_slice[i])),
+                    key=cmp_to_key(lambda a,b: distances[a[1][1]] - distances[b[1][1]]))
             # for each point in this scan (starting from the point closest to
             # the scanner) use its normal to calculate until when the line of
             # sight up to the point should be searched and apply the same limit
             # to all the points in its "shadow"
-            for j,(p_global,p,_) in enumerate(points_by_slice[i]):
+            for j,(p_global,p,_) in points:
                 # point was already assigned a maximum range
                 if maxranges[i][j] is not None:
                     continue
@@ -323,26 +338,20 @@ def main():
                 #   - fixed voxel diagonal radius search
                 #   - all points within angular radius of voxel diagonal as seen from the scanner
                 #   - only points closer to the scanner than the current point
-                if args.no_global_normals:
-                    if args.normal_method == "knearest":
-                        k_nearest = kdtree.kNearestNeighbors(p, args.normal_knearest)
-                    elif args.normal_method == "range":
-                        k_nearest = kdtree.fixedRangeSearch(p, (voxel_diagonal/2)**2)
-                    elif args.normal_method == "angle":
-                        p_norm = sq.norm(p)
-                        angle = 2*math.asin(voxel_diagonal/(sq.length(p)-voxel_diagonal))
-                        k_nearest = [points_by_slice[i][k][1] for k in qtree.search(p_norm, angle)]
-                        #k_nearest = [p_k for p_k in k_nearest if sq.length(p_k) < sq.length(p)]
-                    else:
-                        raise NotImplementedError("normal method not implemented: %s"%args.normal_method)
-                    normal, _ = py3dtk.calculateNormal(k_nearest)
-                else:
-                    if args.normal_method == "knearest":
-                        k_nearest = kdtree.kNearestNeighbors(p_global, args.normal_knearest)
-                    elif args.normal_method == "range":
-                        k_nearest = kdtree.fixedRangeSearch(p_global, (voxel_diagonal/2)**2)
-                    else:
-                        raise NotImplementedError("normal method not implemented: %s"%args.normal_method)
+                if args.normal_method == "knearest":
+                    #k_nearest = [p_k for p_k in k_nearest if sq.length(p_k) < sq.length(p)]
+                    normal, _ = py3dtk.calculateNormal(
+                        kdtree.kNearestNeighbors(p, args.normal_knearest))
+                elif args.normal_method == "range":
+                    normal, _ = py3dtk.calculateNormal(
+                        kdtree.fixedRangeSearch(p, (voxel_diagonal/2)**2))
+                elif args.normal_method == "angle":
+                    p_norm = sq.norm(p)
+                    angle = 2*math.asin(voxel_diagonal/(sq.length(p)-voxel_diagonal))
+                    normal, _ = py3dtk.calculateNormal(
+                        [points_by_slice[i][k][1] for k in qtree.search(p_norm, angle)])
+                elif args.normal_method == "knearest-global":
+                    k_nearest = kdtree.kNearestNeighbors(p_global, args.normal_knearest)
                     # FIXME: instead of transforming the k_nearest points to
                     # the local coordinate system, figure out how to transform
                     # just the resulting normal vector
@@ -351,6 +360,12 @@ def main():
                     # coordinate system
                     #if not args.no_global_normals:
                     #    normal = py3dtk.transform3normal(transmat4inv, normal)
+                elif args.normal_method == "range-global":
+                    k_nearest = kdtree.fixedRangeSearch(p_global, (voxel_diagonal/2)**2)
+                    # FIXME: same as for "knearest-global"
+                    normal, _ = py3dtk.calculateNormal([py3dtk.transform3(transmat4inv, kn) for kn in k_nearest])
+                else:
+                    raise NotImplementedError("normal method not implemented: %s"%args.normal_method)
                 p_norm = sq.norm(p)
                 # make sure that the normal vector points *toward* the scanner
                 # we don't need to compute the acos to get the real angle
@@ -372,7 +387,11 @@ def main():
                 dividend = p_base[0]*normal[0]+p_base[1]*normal[1]+p_base[2]*normal[2]
                 # calculate the divisor for the current point
                 divisor = p_norm[0]*normal[0]+p_norm[1]*normal[1]+p_norm[2]*normal[2]
-                # FIXME: cater for divisor being zero
+                # normal vector is perpendicular to the line of sight up to the
+                # point
+                if divisor == 0:
+                    maxranges[i][j] = 0
+                    continue
                 if dividend/divisor > sq.length(p):
                     raise Exception("p got lengthened: ", dividend/divisor)
                 maxranges[i][j] = dividend/divisor
@@ -399,7 +418,10 @@ def main():
                     p_k = points_by_slice[i][k][1]
                     p_k_norm = sq.norm(p_k)
                     divisor = p_k_norm[0]*normal[0]+p_k_norm[1]*normal[1]+p_k_norm[2]*normal[2]
-                    # FIXME: cater for divisor being zero
+                    # normal vector is perpendicular to the line of sight up to
+                    # the point
+                    if divisor == 0:
+                        continue
                     d = dividend/divisor
                     # even though p_k is further away from the scanner than p
                     # and inside the shadow of p, it is still on top of or
@@ -527,10 +549,14 @@ def main():
 
     print("write masks", file=sys.stderr)
 
-    if not os.path.exists(os.path.join(args.directory, "pplremover")):
-        os.mkdir(os.path.join(args.directory, "pplremover"))
+    if args.maskdir is not None:
+        maskdir = args.maskdir
+    else:
+        maskdir = os.path.join(args.directory, "pplremover")
+    if not os.path.exists(maskdir):
+        os.mkdir(maskdir)
     for i, points in points_by_slice.items():
-        with open(os.path.join(args.directory, "pplremover", "scan%03d.mask" % i), "w") as f:
+        with open(os.path.join(maskdir, "scan%03d.mask" % i), "w") as f:
             print("%f" % (((i+1)*100)/len_trajectory), end="\r", file=sys.stderr)
             for (x,y,z),_,_ in points:
                 voxel = voxel_of_point((x,y,z), voxel_size)
