@@ -40,7 +40,7 @@ if(WITH_ROS)
   add_executable(cartographer2scan cartographer2scan.cc)
   target_link_libraries(cartographer2scan ${catkin_LIBRARIES} ${PCL_LIBRARIES})
 
-  add_library(tdtkroswrapper
+  add_library(tdtkroswrapper STATIC
   	tdtkroswrapper.cc
     #slam6Dwrapper.cc
     icp6Dwrapper.cc
