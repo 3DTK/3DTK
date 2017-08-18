@@ -41,6 +41,10 @@ public:
   //DataPointer& operator=(const DataPointer&) = delete;
   //DataPointer(const DataPointer&) = delete;
 
+ DataPointer() :
+  m_pointer(0), m_size(0), m_private_impl(0) {
+  }
+
   /**
    * Ctor for the initial creation
    *
@@ -114,6 +118,8 @@ private:
 template<typename T>
 class SingleArray : public DataPointer {
 public:
+  SingleArray() : DataPointer() {  }
+
   //! Cast return-by-value temporary DataPointer to this type of array
   SingleArray(DataPointer&& temp) :
     DataPointer(temp)
@@ -164,6 +170,8 @@ public:
 template<typename T>
 class TripleArray : public DataPointer {
 public:
+ TripleArray() : DataPointer() { }
+
   //! Cast return-by-value temporary DataPointer to this type of array
  TripleArray(DataPointer&& temp) :
   DataPointer(temp)
