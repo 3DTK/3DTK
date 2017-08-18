@@ -219,11 +219,11 @@ def main():
         help="Number of scans before and after the current scan that are grouped together (default: 0).")
     parser.add_argument("--no-subvoxel-accuracy", action='store_true', help="Do not calculate with subvoxel accuracy")
     parser.add_argument(
-        "--maxrange-method", choices=["none", "normals", "1nearest"],
+        "--maxrange-method", choices=["none", "normals", "1nearest"], default="none",
         help="How to compute search range. Possible values: none, normals, 1nearest")
     parser.add_argument("--normal-knearest", type=int, default=40, metavar="K",
         help="To compute the normal vector, use NUM closest points for --maxrange-method=normals (default: 40)")
-    parser.add_argument("--normal-method", choices=["knearest", "range", "angle", "knearest-global", "range-global"],
+    parser.add_argument("--normal-method", choices=["knearest", "range", "angle", "knearest-global", "range-global"], default="angle",
         help="How to select points to compute the normal from. Possible values: knearest (choose k using --normal-knearest), range (range search of voxel radius), angle (all points seen under the angle that one voxel is seen from the perspective of the scanner), knearest-global (like knearest but from a global k-d tree), rangle-global (like range but from a global k-d tree)")
     parser.add_argument("--maskdir", help="Directory to store .mask files. Default: ${directory}/pplremover")
     parser.add_argument("directory")
