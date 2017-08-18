@@ -7,6 +7,8 @@ import argparse
 from multiprocessing import Pool
 import os
 from functools import cmp_to_key
+import ctypes.util
+import ctypes
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..', 'lib'))
 try:
@@ -534,18 +536,28 @@ def main():
 
     print("write partitioning", file=sys.stderr)
 
-    with open("scan000.3d", "w") as f1, open("scan001.3d", "w") as f2:
+    with open("scan000.3d", "wb") as f1, open("scan001.3d", "wb") as f2:
+        libc = ctypes.CDLL(ctypes.util.find_library("c"))
         for i in scanorder:
             points = points_by_slice[i]
             print("%f" % (((i+1)*100)/len_trajectory), end="\r", file=sys.stderr)
             for (x,y,z),_,r in points:
                 voxel = voxel_of_point((x,y,z), voxel_size)
+                buflen = 100
+                buf = ctypes.create_string_buffer(buflen)
+                ret = libc.snprintf(buf, buflen, b"%a %a %a %a\n",
+                        ctypes.c_double(x),
+                        ctypes.c_double(y),
+                        ctypes.c_double(z),
+                        ctypes.c_double(r))
+                if ret < 0 or ret >= buflen:
+                    raise Exception("sprintf failed")
                 if voxel in free_voxels or i in half_voxels.get(voxel, set()):
                     # this point is in a voxel marked as free or is a point
                     # from a slice index that was freed in an adjacent voxel
-                    f2.write("%s %s %s %s\n" % (x.hex(),y.hex(),z.hex(),r.hex()))
+                    f2.write(buf.value)
                 else:
-                    f1.write("%s %s %s %s\n" % (x.hex(),y.hex(),z.hex(),r.hex()))
+                    f1.write(buf.value)
     for pose in ["scan000.pose", "scan001.pose"]:
         with open(pose, "w") as f:
             f.write("0 0 0\n0 0 0\n");
