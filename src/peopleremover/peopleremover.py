@@ -300,7 +300,7 @@ def main():
     for i in trajectory.keys():
         #maxranges.append([sq.length(p)-voxel_diagonal for (_,p,_) in points_by_slice[i]])
         maxranges[i] = [None]*len(points_by_slice[i])
-    if args.maxrange_method in "normals":
+    if args.maxrange_method == "normals":
         if args.normal_method in ["knearest-global", "range-global"]:
             # We build one big kd-tree because normal computation becomes harder
             # the further away from the scanner it is done (less points per volume)
