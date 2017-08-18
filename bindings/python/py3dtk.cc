@@ -3,6 +3,7 @@
 #include "slam6d/kdIndexed.h"
 #include "slam6d/kd.h"
 #include "slam6d/normals.h"
+#include "spherical_quadtree/spherical_quadtree.h"
 
 #include <boost/python.hpp>
 #include <boost/python/suite/indexing/vector_indexing_suite.hpp>
@@ -15,6 +16,21 @@ using namespace boost::python;
 
 DataPointer (Scan::*scan_getByString)(const std::string&) = &Scan::get;
 void (Scan::*scan_getByType)(IODataType) = &Scan::get;
+
+boost::python::list QuadTree_search(QuadTree &tree, boost::python::tuple _p, double r)
+{
+	double *_pv = new double[3];
+	_pv[0] = extract<double>(_p[0]);
+	_pv[1] = extract<double>(_p[1]);
+	_pv[2] = extract<double>(_p[2]);
+	std::vector<size_t> res = tree.search(_pv, r);
+	delete[] _pv;
+	boost::python::list l;
+	for (auto &it: res) {
+		l.append(it);
+	}
+	return l;
+}
 
 boost::python::tuple scan_get_rPos(Scan &s)
 {
@@ -666,4 +682,7 @@ BOOST_PYTHON_MODULE(py3dtk)
 		.def("segmentSearch_1NearestPoint", &KDtreeWrapper::segmentSearch_1NearestPoint);
 
 	def("calculateNormal", calculateNormalWrapper);
+
+	class_<QuadTree, boost::noncopyable>("QuadTree", boost::python::init<DataXYZ const&>())
+		.def("search", &QuadTree_search);
 }
