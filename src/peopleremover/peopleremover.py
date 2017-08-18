@@ -248,8 +248,10 @@ def main():
     print("start: %d" % int(py3dtk.allScans[0].getIdentifier()), file=sys.stderr)
     print("end: %d" % int(py3dtk.allScans[-1].getIdentifier()), file=sys.stderr)
 
+    scanorder = list()
     for s in py3dtk.allScans:
         i = int(s.getIdentifier())
+        scanorder.append(i)
         print("%f" % ((((i-args.start)+1)*100)/len_trajectory), end="\r", file=sys.stderr)
         # ignore points that are closer than a voxel diagonal
         s.setRangeFilter(-1, voxel_diagonal)
@@ -533,7 +535,8 @@ def main():
     print("write partitioning", file=sys.stderr)
 
     with open("scan000.3d", "w") as f1, open("scan001.3d", "w") as f2:
-        for i, points in points_by_slice.items():
+        for i in scanorder:
+            points = points_by_slice[i]
             print("%f" % (((i+1)*100)/len_trajectory), end="\r", file=sys.stderr)
             for (x,y,z),_,r in points:
                 voxel = voxel_of_point((x,y,z), voxel_size)
