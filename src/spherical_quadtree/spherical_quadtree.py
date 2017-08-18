@@ -310,7 +310,9 @@ def main():
     start = end = 0
     scanserver = False
     print("reading in scans...", file=sys.stderr)
-    py3dtk.openDirectory(scanserver, '../wü_city/3d', fmt, start, end)
+    #py3dtk.openDirectory(scanserver, '../wü_city/3d', fmt, start, end)
+    py3dtk.openDirectory(scanserver, '/home/josch/work/publications/isprs2017/data/underwood/sim/3d', fmt, start, end)
+    #py3dtk.openDirectory(scanserver, '/home/3dtk/slam6d/deleteme', fmt, start, end)
     if len(py3dtk.allScans) != 1:
         raise Exception("expected only one scan")
     # put all points at the surface of the unit sphere
@@ -319,7 +321,14 @@ def main():
     xyz = [ norm(v) for v in py3dtk.DataXYZ(py3dtk.allScans[0].get("xyz")) ]
     tp = [ cart2geo(v) for v in xyz ]
     random.seed(0)
+    before = time.time()
     qtree = QuadTree(py3dtk.DataXYZ(py3dtk.allScans[0].get("xyz")))
+    after = time.time()
+    print("building py QuadTree took", after-before, file=sys.stderr)
+    before = time.time()
+    ctree = py3dtk.QuadTree(py3dtk.DataXYZ(py3dtk.allScans[0].get("xyz")))
+    after = time.time()
+    print("building C++ QuadTree took", after-before, file=sys.stderr)
     success = True
     for i in range(1000):
         p = random.choice(xyz)
@@ -368,12 +377,23 @@ def main():
         before = time.time()
         res4 = [xyz[i] for i in qtree.search(p, radius)]
         after = time.time()
-        t_tree = after-before
+        t_qtree = after-before
+        # and the ctree
+        before = time.time()
+        res5 = [xyz[i] for i in ctree.search(p, radius)]
+        after = time.time()
+        t_ctree = after-before
         # to be able to compare the sets, we must convert the lists in
         # cartesian coordinates to geo coordinates. Converting the geo lists to
         # cartesian would involve some conversion errors
         res = [ cart2geo(v) for v in res ]
         res4 = [ cart2geo(v) for v in res4 ]
+        res5 = [ cart2geo(v) for v in res5 ]
+        if len(res) != len(res5):
+            print("lengths differ. %d vs. %d" % (len(res), len(res5)), file=sys.stderr)
+            print("points in one but not the other: %s" % str(set(res) ^ set(res5)), file=sys.stderr)
+            print("# ", end="")
+            success = False
         if len(res) != len(res4):
             print("lengths differ. %d vs. %d" % (len(res), len(res4)), file=sys.stderr)
             print("points in one but not the other: %s" % str(set(res) ^ set(res4)), file=sys.stderr)
@@ -387,6 +407,11 @@ def main():
         if len(res) != len(res3):
             print("lengths differ. %d vs. %d" % (len(res), len(res3)), file=sys.stderr)
             print("points in one but not the other: %s" % str(set(res) ^ set(res3)), file=sys.stderr)
+            print("# ", end="")
+            success = False
+        if sorted(res) != sorted(res5):
+            print("content differs", file=sys.stderr)
+            print("points in one but not the other: %s" % str(set(res) ^ set(res5)), file=sys.stderr)
             print("# ", end="")
             success = False
         if sorted(res) != sorted(res4):
@@ -404,7 +429,7 @@ def main():
             print("points in one but not the other: %s" % str(set(res) ^ set(res3)), file=sys.stderr)
             print("# ", end="")
             success = False
-        print("%d %f %f" % (i, t_bf, t_tree))
+        print("%d %f %f %f" % (i, t_bf, t_qtree, t_ctree))
     if success == False:
         exit(1)
     #with open("scan008.3d", "w") as f:
