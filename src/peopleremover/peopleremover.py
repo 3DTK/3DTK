@@ -337,6 +337,7 @@ def main():
                 # point was already assigned a maximum range
                 if maxranges[i][j] is not None:
                     continue
+                p_norm = sq.norm(p)
                 # FIXME: several ways to compute normal:
                 #   - knearest (which k?)
                 #   - fixed voxel diagonal radius search
@@ -350,7 +351,6 @@ def main():
                     normal, _ = py3dtk.calculateNormal(
                         kdtree.fixedRangeSearch(p, (voxel_diagonal/2)**2))
                 elif args.normal_method == "angle":
-                    p_norm = sq.norm(p)
                     angle = 2*math.asin(voxel_diagonal/(sq.length(p)-voxel_diagonal))
                     normal, _ = py3dtk.calculateNormal(
                         [points_by_slice[i][k][1] for k in qtree.search(p_norm, angle)])
@@ -370,7 +370,6 @@ def main():
                     normal, _ = py3dtk.calculateNormal([py3dtk.transform3(transmat4inv, kn) for kn in k_nearest])
                 else:
                     raise NotImplementedError("normal method not implemented: %s"%args.normal_method)
-                p_norm = sq.norm(p)
                 # make sure that the normal vector points *toward* the scanner
                 # we don't need to compute the acos to get the real angle
                 # between the point vector and the normal because values less
