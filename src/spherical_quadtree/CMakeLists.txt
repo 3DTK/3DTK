@@ -1,0 +1,6 @@
+if (WITH_PEOPLEREMOVER)
+	add_library(spherical_quadtree spherical_quadtree.cc)
+	if (EXPORT_SHARED_LIBS OR WITH_PYTHON)
+		add_library(spherical_quadtree_s SHARED spherical_quadtree.cc)
+	endif()
+endif()
