@@ -652,10 +652,6 @@ int main(int argc, char* argv[])
 					[&distances](const size_t a, const size_t b) -> bool {
 						return distances[a] < distances[b];
 					});
-			for (size_t j = 0; j < 10; ++j) {
-				std::cerr << sorted_point_indices[j] << ", ";
-			}
-			std::cerr << std::endl;
 			// for each point in this scan (starting from the point closest to
 			// the scanner) use its normal to calculate until when the line of
 			// sight up to the point should be searched and apply the same limit
@@ -733,7 +729,6 @@ int main(int argc, char* argv[])
 				// normal vector is perpendicular to the line of sight up to
 				// the point
 				if (divisor == 0) {
-					exit(6);
 					maxranges[i][j] = 0;
 					continue;
 				}
@@ -744,7 +739,6 @@ int main(int argc, char* argv[])
 				// the scanner itself is situated close to the plane that p is
 				// part of. Thus, shoot no ray to this point at all.
 				if (maxranges[i][j] < 0) {
-					exit(7);
 					maxranges[i][j] = 0;
 				}
 				// points must not be too close or otherwise they will shadow
