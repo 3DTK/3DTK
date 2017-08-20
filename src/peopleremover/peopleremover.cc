@@ -445,6 +445,7 @@ int main(int argc, char* argv[])
 	std::string maskdir;
 	std::string dir;
 	bool no_subvoxel_accuracy;
+	int jobs;
 
 	po::options_description general_options("General options");
 	general_options.add_options()
@@ -485,6 +486,10 @@ int main(int argc, char* argv[])
 		 "rangle-global (like range but from a global k-d tree)."
 		 "Default: angle")
 		("maskdir", po::value(&maskdir), "Directory to store .mask files. Default: ${directory}/pplremover")
+#ifdef _OPENMP
+		("jobs,j", po::value<int>(&jobs)->default_value(1),
+		 "number of threads to run in parallel. Default: 1")
+#endif
 		;
 
 	po::options_description hidden_options("Hidden options");
@@ -622,7 +627,12 @@ int main(int argc, char* argv[])
 		if (normal_method == KNEAREST_GLOBAL || normal_method == RANGE_GLOBAL) {
 			exit(1);
 		}
-		for (size_t i : scanorder) {
+#ifdef _OPENMP
+	omp_set_num_threads(jobs);
+#pragma omp parallel for schedule(dynamic)
+#endif
+		for (size_t idx = 0; idx < scanorder.size(); ++idx) {
+			size_t i = scanorder[idx];
 			/*
 			const double* pos = std::get<0>(pose.second);
 			const double* theta = std::get<1>(pose.second);
@@ -803,13 +813,13 @@ int main(int argc, char* argv[])
 	std::cerr << "walk voxels" << std::endl;
 	struct timespec before, after;
 	clock_gettime(CLOCK_MONOTONIC, &before);
-//#ifdef _OPENMP
-	omp_set_num_threads(OPENMP_NUM_THREADS);
-//#pragma omp parallel for schedule(dynamic)
-//#endif
-	for (std::pair<size_t, std::tuple<const double*, const double*, const double*>> pose : trajectory) {
+#ifdef _OPENMP
+	omp_set_num_threads(jobs);
+#pragma omp parallel for schedule(dynamic)
+#endif
+	for (size_t idx = 0; idx < scanorder.size(); ++idx) {
+		size_t i = scanorder[idx];
 		std::set<struct voxel> free;
-		size_t i = pose.first;
 		for (size_t j = 0; j < points_by_slice[i].size(); ++j) {
 			double p[3] = {points_by_slice[i][j][0], points_by_slice[i][j][1], points_by_slice[i][j][2]};
 			if (maxranges[i][j] != std::numeric_limits<double>::infinity()) {
@@ -819,7 +829,7 @@ int main(int argc, char* argv[])
 				p[0] = orig_points_by_slice[i][j][0]*factor;
 				p[1] = orig_points_by_slice[i][j][1]*factor;
 				p[2] = orig_points_by_slice[i][j][2]*factor;
-				transform3(std::get<2>(pose.second), p);
+				transform3(std::get<2>(trajectory[i]), p);
 			}
 			struct visitor_args data = {};
 			data.empty_voxels = &free;
@@ -827,16 +837,16 @@ int main(int argc, char* argv[])
 			data.current_slice = i;
 			data.diff = diff;
 			walk_voxels(
-					std::get<0>(pose.second),
+					std::get<0>(trajectory[i]),
 					p,
 					voxel_size,
 					visitor,
 					&data
 					);
 		}
-//#ifdef _OPENMP
-//#pragma omp critical
-//#endif
+#ifdef _OPENMP
+#pragma omp critical
+#endif
 		for (std::set<struct voxel>::iterator it = free.begin(); it != free.end(); ++it) {
 			free_voxels.insert(*it);
 		}
