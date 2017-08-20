@@ -220,6 +220,7 @@ def main():
     parser.add_argument("--diff", type=int, default=0, metavar="NUM",
         help="Number of scans before and after the current scan that are grouped together (default: 0).")
     parser.add_argument("--no-subvoxel-accuracy", action='store_true', help="Do not calculate with subvoxel accuracy")
+    parser.add_argument("--min-cluster-size", type=int, default=5, help="Minimum number of connected voxels that make a dynamic object (default: 5). Set to any value greater than one to turn on clustering.")
     parser.add_argument(
         "--maxrange-method", choices=["none", "normals", "1nearest"], default="none",
         help="How to compute search range. Possible values: none, normals, 1nearest")
@@ -509,6 +510,46 @@ def main():
             free_voxels |= free
 
     print("number of freed voxels: %d (%f %% of occupied voxels)" % (len(free_voxels), 100*len(free_voxels)/len(voxel_occupied_by_slice)), file=sys.stderr)
+
+    if args.min_cluster_size > 1:
+        print("clustering voxels")
+        voxel_to_cluster = dict()
+        cluster_to_voxel = dict()
+        for i,voxel in enumerate(free_voxels):
+            neighbor_clusters = set()
+            for ix in range(-1, 2):
+                for iy in range(-1, 2):
+                    for iz in range(-1, 2):
+                        neighbor_cluster = voxel_to_cluster.get((voxel[0]+ix, voxel[1]+iy, voxel[2]+iz))
+                        if neighbor_cluster is not None:
+                            neighbor_clusters.add(neighbor_cluster)
+            # voxel has no clustered neighbours yet: start a new cluster
+            if len(neighbor_clusters) == 0:
+                voxel_to_cluster[voxel] = i
+                cluster_to_voxel[i] = set([voxel])
+                continue
+            # just one neighboring cluster: add current voxel to it
+            if len(neighbor_clusters) == 1:
+                cluster = neighbor_clusters.pop()
+                voxel_to_cluster[voxel] = cluster
+                cluster_to_voxel[cluster].add(voxel)
+                continue
+            # more than one neighboring cluster: join clusters
+            mincluster = min(neighbor_clusters)
+            for cluster in neighbor_clusters:
+                if cluster == mincluster:
+                    continue
+                for voxel in cluster_to_voxel[cluster]:
+                    voxel_to_cluster[voxel] = mincluster
+                cluster_to_voxel[mincluster].update(cluster_to_voxel[cluster])
+                del cluster_to_voxel[cluster]
+            voxel_to_cluster[voxel] = mincluster
+            cluster_to_voxel[mincluster].add(voxel)
+        for voxels in cluster_to_voxel.values():
+            if len(voxels) < args.min_cluster_size:
+                for voxel in voxels:
+                    free_voxels.remove(voxel)
+        print("number of free voxels after clustering: %d" % len(free_voxels))
 
     half_voxels = defaultdict(set)
     if not args.no_subvoxel_accuracy:
