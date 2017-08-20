@@ -676,7 +676,7 @@ int main(int argc, char* argv[])
 						break;
 					case ANGLE:
 						{
-							double angle = 2*asin(voxel_diagonal/(Len(p)-voxel_diagonal));
+							double angle = 2*asin(voxel_diagonal/(distances[j]-voxel_diagonal));
 							std::vector<size_t> angular_indices = qtree.search(p_norm, angle);
 							std::vector<Point> angular_points;
 							for (size_t k = 0; k < angular_indices.size(); ++k) {
@@ -732,7 +732,7 @@ int main(int argc, char* argv[])
 					maxranges[i][j] = 0;
 					continue;
 				}
-				if (dividend/divisor > Len(p)) {
+				if (dividend/divisor > distances[j]) {
 					exit(1);
 				}
 				maxranges[i][j] = dividend/divisor;
@@ -758,7 +758,7 @@ int main(int argc, char* argv[])
 				 * the distance of the point minus its the radius of the
 				 * circumsphere.
 				 */
-				double angle = 2*asin(voxel_diagonal/(Len(p)-voxel_diagonal));
+				double angle = 2*asin(voxel_diagonal/(distances[j]-voxel_diagonal));
 				for (size_t k : qtree.search(p_norm, angle)) {
 					double *p_k = orig_points_by_slice[i][k];
 					double p_k_norm[3] = {p_k[0], p_k[1], p_k[2]};
@@ -778,7 +778,7 @@ int main(int argc, char* argv[])
 					 * later
 					 */
 					// FIXME: retrieve Len(p_k) from vector of distances
-					if (d > Len(p_k)) {
+					if (d > distances[k]) {
 						continue;
 					}
 					// the scanner itself is situated close to the plane that p
