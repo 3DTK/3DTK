@@ -362,16 +362,16 @@ namespace fbr
     //get the theta and phi based on the projection
 	switch(method_) {
 		case EQUIRECTANGULAR:
-			theta = (heightMax_ - row + 0.5) / yFactor_ + heightLow_;
-			phi = (col + 0.5 ) / xFactor_;
+			theta = (heightMax_ - row + 0.5) / yFactor_ + minVertAngle_;
+			phi = (col + 0.5 ) / xFactor_ + minHorizAngle_;
 			break;
 		case CYLINDRICAL:
-			theta = atan2(row + 0.5 + yFactor_ * tan(heightLow_), yFactor_);
-			phi = (col + 0.5) / xFactor_;
+			theta = atan2(heightMax_ - row + 0.5 + yFactor_ * tan(minVertAngle_), yFactor_);
+			phi = (col + 0.5) / xFactor_ + minHorizAngle_;
 			break;
 		case MERCATOR:
-			theta = 2 * atan2(exp((heightMax_ - row + 0.5) / yFactor_ + heightLow_), 1.) - M_PI_2;
-			phi = (col + 0.5) / xFactor_;
+			theta = 2 * atan2(exp((heightMax_ - row + 0.5) / yFactor_ + minVertAngle_), 1.) - M_PI_2;
+			phi = (col + 0.5) / xFactor_ + minHorizAngle_;
 			break;
 		case CONIC:
 			{
