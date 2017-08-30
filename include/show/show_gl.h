@@ -192,18 +192,18 @@ void glDumpWindowPPM(const char *filename, GLenum mode);
 
 /* +++++++++-------------++++++++++++
  * NAME
- *   glDumpWindowPPM
+ *   glWriteImagePNG
  * DESCRIPTION
- *   writes an ppm file of the window
+ *   writes a png file of the window
  *   content
  *   size is scale times the window size
  * PARAMETERS
  *   filename
  * RESULT
  *  writes the framebuffer content
- *  to a ppm file
+ *  to a png file
 +++++++++-------------++++++++++++ */
-void glWriteImagePPM(const char *filename, int scale, GLenum mode);
+void glWriteImagePNG(const char *filename, int scale, GLenum mode);
 
 /** Reshape Function
  * TODO: have to describe it.

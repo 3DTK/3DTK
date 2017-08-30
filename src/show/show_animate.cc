@@ -331,7 +331,7 @@ void savePose(int dummy) {
 }
 
 std::string suggestImageFileName() {
-  return "image" + to_string(imageNr, 3) + ".ppm";
+  return "image" + to_string(imageNr, 3) + ".png";
 }
 
 void saveImage(int dummy)
@@ -340,7 +340,7 @@ void saveImage(int dummy)
 }
 
 void saveImageAt(const std::string& imageFileName) {
-  glWriteImagePPM(imageFileName.c_str(), factor, 0);
+  glWriteImagePNG(imageFileName.c_str(), factor, 0);
   imageNr++;
 }
 
