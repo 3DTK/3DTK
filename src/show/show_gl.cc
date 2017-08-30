@@ -1,4 +1,5 @@
 #include "show/show_gl.h"
+#include "png.h"
 
 bool   fullydisplayed = true;       // true if all points have been drawn to
                                     // the screen
@@ -1071,31 +1072,11 @@ void CallBackIdleFunc(void)
     update_callback();
 
     if (save_animation) {
-      std::string filename = scan_dir + "animframe" + to_string(frameNr,5) + ".ppm";
+      std::string filename = scan_dir + "animframe" + to_string(frameNr,5) + ".png";
       std::cout << "write " << filename << std::endl;
       int tmpUpdate = haveToUpdate;
-      glWriteImagePPM(filename.c_str(), factor, 0);
+      glWriteImagePNG(filename.c_str(), factor, 0);
       haveToUpdate = tmpUpdate;
-
-	  // per default no conversion program available in Win
-#ifndef _WIN32
-	  if (anim_convert_jpg) {
-		  std::string jpgname = scan_dir + "animframe" + to_string(frameNr,5) + ".jpg";
-		  std::string systemcall = "convert -quality 100 -type TrueColor "
-			  + filename + " " + jpgname;     
-		  // cout << systemcall << endl;
-		  int ret = system(systemcall.c_str());
-		  if (ret == -1) {
-			  std::cerr << "child process cannot be created (-1): " << systemcall << std::endl;
-		  } else if (ret == 0) {
-			  systemcall = "rm " + filename;
-			  system(systemcall.c_str()); // ignore if removing doesn't work
-			  std::cerr << "converted " << filename << " to " << jpgname << ".jpg" << std::endl;
-		  } else {
-			  std::cerr << "unknown error " << ret << " when running: " << systemcall << std::endl;
-		  }
-	  }
-#endif
     }
   }
 
@@ -1140,30 +1121,11 @@ void CallBackIdleFunc(void)
       // save the animation
       if(save_animation){
         std::string filename = scan_dir + "animframe"
-          + to_string(path_iterator,5) + ".ppm";
+          + to_string(path_iterator,5) + ".png";
         std::cout << "written " << filename << " of "
              << path_vectorX.size() << " files" << std::endl;
-        glWriteImagePPM(filename.c_str(), factor, 0);
+        glWriteImagePNG(filename.c_str(), factor, 0);
         haveToUpdate = 8;
-
-#ifndef _WIN32
-		if (anim_convert_jpg) {
-			std::string jpgname = scan_dir + "animframe"
-				+ to_string(path_iterator, 5) + ".jpg";
-			std::string systemcall = "convert -quality 100 "
-				+ filename + " " + jpgname;
-			int ret = system(systemcall.c_str());
-			if (ret == -1) {
-				std::cerr << "child process cannot be created (-1): " << systemcall << std::endl;
-			} else if (ret == 0) {
-				systemcall = "rm " + filename;
-				system(systemcall.c_str()); // ignore if removing doesn't work
-				std::cerr << "converted " << filename << " to " << jpgname << ".jpg" << std::endl;
-			} else {
-				std::cerr << "unknown error " << ret << " when running: " << systemcall << std::endl;
-			}
-		}
-#endif
       }
     } else {                             // animation has just ended
       cameraNavMouseMode = oldcamNavMode;
@@ -1201,30 +1163,11 @@ void CallBackIdleFunc(void)
       // save the animation
       if(save_animation){
         std::string filename = scan_dir + "animframe"
-          + to_string(path_iterator,5) + ".ppm";
+          + to_string(path_iterator,5) + ".png";
 
         std::cout << "written " << filename << " of "
              << path_vectorX.size() << " files" << std::endl;
-        glWriteImagePPM(filename.c_str(), factor, 0);
-		// per default no conversion program available in Win, stick with PPM
-#ifndef _WIN32
-		if (anim_convert_jpg) {
-			std::string jpgname = scan_dir + "animframe"
-				+ to_string(path_iterator,5) + ".jpg";
-			std::string systemcall = "convert -quality 100 "
-				+ filename + " " + jpgname;     
-			int ret = system(systemcall.c_str());
-			if (ret == -1) {
-				std::cerr << "child process cannot be created (-1): " << systemcall << std::endl;
-			} else if (ret == 0) {
-				systemcall = "rm " + filename;
-				system(systemcall.c_str()); // ignore if removing doesn't work
-				std::cerr << "converted " << filename << " to " << jpgname << ".jpg" << std::endl;
-			} else {
-				std::cerr << "unknown error " << ret << " when running: " << systemcall << std::endl;
-			}
-		}
-#endif
+        glWriteImagePNG(filename.c_str(), factor, 0);
         haveToUpdate = 6;
       }
     } else {                             // animation has just ended
@@ -1792,18 +1735,18 @@ void glDumpWindowPPM(const char *filename, GLenum mode)
 
 /* +++++++++-------------++++++++++++
  * NAME
- *   glDumpWindowPPM
+ *   glWriteImagePNG
  * DESCRIPTION
- *   writes an ppm file of the window
+ *   writes a png file of the window
  *   content
  *   size is scale times the window size
  * PARAMETERS
  *   filename
  * RESULT
  *  writes the framebuffer content
- *  to a ppm file
+ *  to a png file
 +++++++++-------------++++++++++++ */
-void glWriteImagePPM(const char *filename, int scale, GLenum mode)
+void glWriteImagePNG(const char *filename, int scale, GLenum mode)
 {
   //if(!showTopView) {
     int m,o,k;                  // Counter variables
@@ -1844,7 +1787,7 @@ void glWriteImagePPM(const char *filename, int scale, GLenum mode)
 
     // Allocate memory for the the frame buffer and output buffer
     GLubyte *buffer;              // The GL Frame Buffer
-    unsigned char *ibuffer;       // The PPM Output Buffer
+    unsigned char *ibuffer;       // The PNG Output Buffer
     buffer = new GLubyte[win_width * win_height * RGBA_];
     ibuffer = new unsigned char[image_width * image_height * RGB_];
     
@@ -1895,7 +1838,7 @@ void glWriteImagePPM(const char *filename, int scale, GLenum mode)
                      GL_RGBA, GL_UNSIGNED_BYTE,
                      buffer);
        
-        // Loop through the frame buffer data, writing to the PPM file.
+        // Loop through the frame buffer data, writing to the PNG file.
         // Be careful
         // to account for the frame buffer having 4 bytes per pixel while the
         // output file has 3 bytes per pixel
@@ -1928,22 +1871,47 @@ void glWriteImagePPM(const char *filename, int scale, GLenum mode)
     haveToUpdate=2;
     DisplayItFunc(mode);
 
-    std::ofstream fp;                  // The PPM File
+    // write contents of ibuffer to a png file
+    png_structp png = png_create_write_struct(PNG_LIBPNG_VER_STRING, nullptr, nullptr, nullptr);
+    if (!png)
+        return;
 
-    // Open the output file - need to open in binary mode to avoid formatting of special characters! (for example '\n'-character as '0x0D 0x0A' in Windows!)
-    fp.open(filename, std::ios::out | std::ios::binary);
+    png_infop info = png_create_info_struct(png);
+    if (!info) {
+        png_destroy_write_struct(&png, &info);
+        return;
+    }
 
-    // Write a proper P6 PPM header
-    fp << "P6" << std::endl
-       << "# CREATOR: 3D_Viewer by Dorit Borrmann, Jacobs University Bremen"
-       << std::endl
-       << image_width  << " " << image_height << " " << UCHAR_MAX << std::endl;
+    FILE *fp = fopen(filename, "wb");
+    if (!fp) {
+        png_destroy_write_struct(&png, &info);
+        return;
+    }
 
-    // Write output buffer to the file 
-    fp.write((const char*)ibuffer,
-             sizeof(unsigned char) * (RGB_ * image_width * image_height));
-    fp.close();
-    fp.clear();
+    png_init_io(png, fp);
+    png_set_IHDR(png, info, image_width, image_height, 8 /* depth */, PNG_COLOR_TYPE_RGB, PNG_INTERLACE_NONE,
+        PNG_COMPRESSION_TYPE_BASE, PNG_FILTER_TYPE_BASE);
+    png_colorp palette = (png_colorp)png_malloc(png, PNG_MAX_PALETTE_LENGTH * sizeof(png_color));
+    if (!palette) {
+        fclose(fp);
+        png_destroy_write_struct(&png, &info);
+        return;
+    }
+    png_set_PLTE(png, info, palette, PNG_MAX_PALETTE_LENGTH);
+    png_write_info(png, info);
+    png_set_packing(png);
+
+    png_bytepp rows = (png_bytepp)png_malloc(png, image_height * sizeof(png_bytep));
+    for (int i = 0; i < image_height; ++i)
+        rows[i] = (png_bytep)(ibuffer + i * image_width * 3);
+
+    png_write_image(png, rows);
+    png_write_end(png, info);
+    png_free(png, palette);
+    png_destroy_write_struct(&png, &info);
+
+    fclose(fp);
+    delete[] rows;
     delete [] buffer;
     delete [] ibuffer;
 }

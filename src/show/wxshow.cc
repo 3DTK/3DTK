@@ -585,10 +585,9 @@ void BasicGLPane::animate() {
 
       //save the animation
       if(save_animation){
-        std::string filename = scan_dir + "animframe" + to_string(path_iterator,5) + ".ppm";
-        std::string jpgname = scan_dir + "animframe" + to_string(path_iterator,5) + ".jpg";
+        std::string filename = scan_dir + "animframe" + to_string(path_iterator,5) + ".png";
         std::cout << "written " << filename << " of " << path_vectorX.size() << " files" << std::endl;
-        glWriteImagePPM(filename.c_str(), factor, 0);
+        glWriteImagePNG(filename.c_str(), factor, 0);
         haveToUpdate = 6;
       }
     }
