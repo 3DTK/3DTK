@@ -55,7 +55,7 @@ void DisplayItFunc(GLenum mode, bool interruptable = false);
 void DrawPoints(GLenum mode, bool interruptable = false);
 void DrawUrl();
 void glDumpWindowPPM(const char *filename, GLenum mode);
-void glWriteImagePPM(const char *filename, int scale, GLenum mode);
+void glWriteImagePNG(const char *filename, int scale, GLenum mode);
 void ProcessHitsFunc(GLint hits, GLuint buffer[]);
 int parseArgs(int argc, char **argv, std::string &dir, int& start, int& end, int& maxDist, bool& wanim, bool &readInitial);
 void usage(char * prog);

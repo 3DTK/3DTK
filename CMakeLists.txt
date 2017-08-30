@@ -121,6 +121,7 @@ OPT_DEP(WITH_SHOW "Whether to build Show. This is the Visualization program of s
 
 if(WITH_SHOW)
   message(STATUS "With show")
+  find_package(PNG REQUIRED)
 else()
   #  set (WITH_OCTREE_DISPLAY "ON" CACHE INTERNAL "" FORCE)
   message(STATUS "Without show")
@@ -131,6 +132,7 @@ OPT_DEP(WITH_WXSHOW "Whether to build WXShow. This is the wxwidgets variant of S
 
 if(WITH_WXSHOW)
   find_package(wxWidgets COMPONENTS core base gl REQUIRED)
+  find_package(PNG REQUIRED)
   # set wxWidgets_wxrc_EXECUTABLE to be ignored in the configuration
   set (wxWidgets_wxrc_EXECUTABLE " " CACHE INTERNAL "" FORCE)
   # wxWidgets include (this will do all the magic to configure everything)
@@ -148,6 +150,7 @@ OPT_DEP(WITH_QTSHOW "Whether to build QtShow. This is the Qt variant of Show. ON
 if(WITH_FREEGLUT OR WITH_SHOW OR WITH_WXSHOW OR WITH_QTSHOW)
   find_package(OpenGL REQUIRED)
   find_package(GLUT REQUIRED)
+  find_package(PNG REQUIRED)
   include_directories(${GLUT_INCLUDE_DIR})
 endif()
 
