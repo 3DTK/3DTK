@@ -84,8 +84,8 @@ double icp6D_QUAT_SCALE::Align(const std::vector<PtPair>& pairs,
   if (!quiet) {
     std::cout.setf(std::ios::basefield);
     std::cout << "QUAT SCALE RMS point-to-point error = "
-         << resetiosflags(std::ios::adjustfield) << setiosflags(std::ios::internal)
-         << resetiosflags(std::ios::floatfield) << setiosflags(std::ios::fixed)
+         << std::resetiosflags(std::ios::adjustfield) << std::setiosflags(std::ios::internal)
+         << std::resetiosflags(std::ios::floatfield) << std::setiosflags(std::ios::fixed)
          << std::setw(10) << std::setprecision(7)
          << error
          << "  using " << std::setw(6) << (int)pairs.size() << " points"
