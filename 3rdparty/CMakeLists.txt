@@ -70,6 +70,7 @@ if (WIN32)
 endif(WIN32)
 IF(EXPORT_SHARED_LIBS)
 	add_library(glui_s SHARED ${GLUI_SRCS})
+	target_link_libraries(glui_s ${GLUT_LIBRARIES} ${OPENGL_LIBRARIES})
 ENDIF(EXPORT_SHARED_LIBS)
 
 IF(WITH_WXSHOW)
