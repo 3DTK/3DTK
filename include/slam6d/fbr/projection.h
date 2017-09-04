@@ -92,6 +92,7 @@ namespace fbr{
     void calcPointFromPanoramaPosition(double& x, double& y, double& z, int row, int col, double range);
     /**
      * @breif caclculates the x and y of the 3D point on panorama projection
+     * returns x or y as -1 if the point is out of image range
      * @param x - the x on panorama
      * @param y - the y on panorama
      * @param it - the point

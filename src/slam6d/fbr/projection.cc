@@ -407,14 +407,7 @@ namespace fbr
 	kart[1] = (*it)[0]/-100;
 	kart[2] = (*it)[1]/100;
 	//get the polar coordinte of x,y,z this is in rad
-	if(kart[0] != 0 && kart[1] != 0 && kart[2] != 0)
-	  toPolar(kart, polar);
-	else
-	  {
-	    x = 0;
-	    y = 0;
-	    return;
-	  }
+	toPolar(kart, polar);
 	  
 	//theta == polar[0] == scan [4]
 	//phi == polar[1] == scan [5]
@@ -436,12 +429,16 @@ namespace fbr
       {
 	/// minHorizAngle_ and minVertAngle_ are used to shift the data to start from min angles
 	x = (int) ( xFactor_ * (phi - minHorizAngle_));
-	if (x < 0) x = 0;
-	if (x > widthMax_) x = widthMax_;
+	//if (x < 0) x = 0;
+	if (x < 0) x = -1;
+	//if (x > widthMax_) x = widthMax_;
+	if (x > widthMax_) x = -1;
 	y = (int) ( yFactor_ * (theta - minVertAngle_) );
 	y = heightMax_ - y;
-	if (y < 0) y = 0;
-	if (y > heightMax_) y = heightMax_;	
+	//if (y < 0) y = 0;
+	if (y < 0) y = -1;
+	//if (y > heightMax_) y = heightMax_;
+	if (y > heightMax_) y = -1;
       }
 
     //CONIC projection
@@ -449,14 +446,18 @@ namespace fbr
       {
 	// add minimum x position as an offset
         x = (int) ( xFactor_ * (sqrt(c_ - 2 * n_ * sin( theta) ) / n_ * sin(n_ * (phi - long0_)) + fabs(xMin_) ) );
-        if (x < 0) x = 0;
-        if (x > widthMax_) x = widthMax_;
+        //if (x < 0) x = 0;
+	if (x < 0) x = -1;
+        //if (x > widthMax_) x = widthMax_;
+	if (x > widthMax_) x = -1;
         
         // add minimum y position as an offset
         y = (int) ( yFactor_ * (rho0_ - (1/n_ * sqrt(c_ - 2 * n_ * sin( theta) ) ) * cos(n_ * (phi - long0_)) + fabs( yMin_ ) ) );
         y = heightMax_ - y;
-        if (y < 0) y = 0;
-        if (y > heightMax_) y = heightMax_;
+        //if (y < 0) y = 0;
+	if (y < 0) y = -1;
+	//if (y > heightMax_) y = heightMax_;
+	if (y > heightMax_) y = -1;
       }
     
     //CYLINDRICAL projection
@@ -464,12 +465,16 @@ namespace fbr
       {
 	/// minHorizAngle_ and minVertAngle_ are used to shift the data to start from min angles
 	x = (int) ( xFactor_ * (phi - minHorizAngle_));
-	if (x < 0) x = 0;
-	if (x > widthMax_) x = widthMax_;
+	// (x < 0) x = 0;
+	if (x < 0) x = -1;
+	//if (x > widthMax_) x = widthMax_;
+	if (x > widthMax_) x = -1;
 	y = (int) ((double) yFactor_ * (tan(theta) - tan(minVertAngle_)));
 	y = heightMax_ - y;
-	if (y < 0) y = 0;
-	if (y > heightMax_) y = heightMax_;	
+	//if (y < 0) y = 0;
+	if (y < 0) y = -1;
+	//if (y > heightMax_) y = heightMax_;
+	if (y > heightMax_) y = -1;
       }
 
     //EQUALAREACYLINDRICAL projection
@@ -477,12 +482,16 @@ namespace fbr
       {
 	/// minHorizAngle_ and minVertAngle_ are used to shift the data to start from min angles
 	x = (int) ( xFactor_ * ((phi - minHorizAngle_) * cos(param_)));
-	if (x < 0) x = 0;
-	if (x > widthMax_) x = widthMax_;
+	//if (x < 0) x = 0;
+	if (x < 0) x = -1;
+	//if (x > widthMax_) x = widthMax_;
+	if (x > widthMax_) x = -1;
 	y = (int) ((double) yFactor_ * ((sin(theta) - sin(minVertAngle_)) / cos(param_)));
 	y = heightMax_ - y;
-	if (y < 0) y = 0;
-	if (y > heightMax_) y = heightMax_;
+	//if (y < 0) y = 0;
+	if (y < 0) y = -1;
+	//if (y > heightMax_) y = heightMax_;
+	if (y > heightMax_) y = -1;
       }
     
     //Mercator Projection
@@ -490,12 +499,16 @@ namespace fbr
       {
 	/// minHorizAngle_ and minVertAngle_ are used to shift the data to start from min angles
 	x = (int) ( xFactor_ * (phi - minHorizAngle_));
-	if (x < 0) x = 0;
-	if (x > widthMax_) x = widthMax_;
+	//if (x < 0) x = 0;
+	if (x < 0) x = -1;
+	//if (x > widthMax_) x = widthMax_;
+	if (x > widthMax_) x = -1;
 	y = (int) ( yFactor_ * ( (log(tan(theta) + (1/cos(theta)))) - (log(tan(minVertAngle_) + (1/cos(minVertAngle_)))) ) );
 	y = heightMax_ - y;
-	if (y < 0) y = 0;
-	if (y > heightMax_) y = heightMax_;	
+	//if (y < 0) y = 0;
+	if (y < 0) y = -1;
+	//if (y > heightMax_) y = heightMax_;
+	if (y > heightMax_) y = -1;
       }
     
     //RECTILINEAR projection
@@ -531,14 +544,18 @@ namespace fbr
 		coscRectilinear_ = sin(p1_) * sin(theta) + cos(p1_) * cos(theta) * cos(phi - l0_);
 		
 		x = (int)(xFactor_) * ((cos(theta) * sin(phi - l0_) / coscRectilinear_) - xlow);
-		if (x < 0) x = 0;
-		if (x > widthMax_) x = widthMax_;
+		//if (x < 0) x = 0;
+		if (x < 0) x = -1;
+		//if (x > widthMax_) x = widthMax_;
+		if (x > widthMax_) x = -1;
 		x = x + (j * width_ / numberOfImages_);
 
 		y = (int) (yFactor_) * (( (cos(p1_) * sin(theta) - sin(p1_) * cos(theta) * cos(phi - l0_)) / coscRectilinear_) - heightLow_);
 		y = heightMax_ - y;
-		if (y < 0) y = 0;
-		if (y > heightMax_) y = heightMax_;	
+		//if (y < 0) y = 0;
+		if (y < 0) y = -1;
+		//if (y > heightMax_) y = heightMax_;
+		if (y > heightMax_) y = -1;
 	      }
 	  }
       }
@@ -580,14 +597,18 @@ namespace fbr
 		sPannini_ = (param_ + 1) / (param_ + sin(p1_) * tan(theta) + cos(p1_) * cos(phi - l0_));
 		
 		x = (int)(xFactor_) * (sPannini_ * sin(phi - l0_) - xlow);
-		if (x < 0) x = 0;
-		if (x > widthMax_) x = widthMax_;
+		//if (x < 0) x = 0;
+		if (x < 0) x = -1;
+		//if (x > widthMax_) x = widthMax_;
+		if (x > widthMax_) x = -1;
 		x = x + (i * widthMax_);
 		
 		y = (int) (yFactor_) * ( (sPannini_ * tan(theta) * (cos(p1_) - sin(p1_) * (1/tan(theta)) * cos(phi - l0_) ) ) - heightLow_ );
 		y = heightMax_ - y;		
-		if (y < 0) y = 0;
-		if (y > heightMax_) y = heightMax_;
+		//if (y < 0) y = 0;
+		if (y < 0) y = -1;
+		//if (y > heightMax_) y = heightMax_;
+		if (y > heightMax_) y = -1;
 	      }
 	  }
       }
@@ -626,14 +647,18 @@ namespace fbr
 		k_ = (2 * param_) / (1 + sin(p1_) * sin(theta) + cos(p1_) * cos(theta) * cos(phi - l0_));
 
 		x = (int) (xFactor_) * (k_ * cos(theta) * sin(phi - l0_) - xlow);
-		if (x < 0) x = 0;
-		if (x > widthMax_) x = widthMax_;
+		//if (x < 0) x = 0;
+		if (x < 0) x = -1;
+		//if (x > widthMax_) x = widthMax_;
+		if (x > widthMax_) x = -1;
 		x = x + (j * width_ / numberOfImages_);
 		
 		y = (int) (yFactor_) * (k_ * ( cos(p1_) * sin(theta) - sin(p1_) * cos(theta) * cos(phi - l0_) ) - heightLow_);
 		y = heightMax_ - y;
-		if (y < 0) y = 0;
-		if (y > heightMax_) y = heightMax_;
+		//if (y < 0) y = 0;
+		if (y < 0) y = -1;
+		//if (y > heightMax_) y = heightMax_;
+		if (y > heightMax_) y = -1;
 	      }
 	  }
       }
@@ -642,14 +667,18 @@ namespace fbr
     if(method_ == ZAXIS)
       {
 	x = (int) ( xFactor_ * (phi - minHorizAngle_));
-	if (x < 0) x = 0;
-	if (x > widthMax_) x = widthMax_;
+	//if (x < 0) x = 0;
+	if (x < 0) x = -1;
+	//if (x > widthMax_) x = widthMax_;
+	if (x > widthMax_) x = -1;
 	
 	///////////////////check this
 	y = (int) ( yFactor_ * ((*it)[1] - minZ_) );
 	y = heightMax_ - y;
-	if (y < 0) y = 0;
-	if (y > heightMax_) y = heightMax_;
+	//if (y < 0) y = 0;
+	if (y < 0) y = -1;
+	//if (y > heightMax_) y = heightMax_;
+	if (y > heightMax_) y = -1;
       }
 
     //AZIMUTHAL projection
@@ -661,14 +690,18 @@ namespace fbr
 	// add minimum x position as an offset
 	x = (int) xFactor_*kPrime_*cos(theta)*sin(phi-long0_);
 	x = widthMax_/2 + x;
-	if (x < 0) x = 0;
-	if (x > widthMax_) x = widthMax_;
-        
+	//if (x < 0) x = 0;
+	if (x < 0) x = -1;
+	//if (x > widthMax_) x = widthMax_;
+	if (x > widthMax_) x = -1;
+	
 	// add minimum y position as an offset
 	y = (int) yFactor_*kPrime_*(cos(phi1_)*sin(theta)-sin(phi1_)*cos(theta)*cos(phi-long0_));
 	y = -y + heightMax_/2;
-	if (y < 0) y = 0;
-	if (y > heightMax_) y = heightMax_;
+	//if (y < 0) y = 0;
+	if (y < 0) y = -1;
+	//if (y > heightMax_) y = heightMax_;
+	if (y > heightMax_) y = -1;
       }
   }
 
