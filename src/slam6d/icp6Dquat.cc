@@ -75,8 +75,8 @@ double icp6D_QUAT::Align(const std::vector<PtPair>& pairs,
   if (!quiet) {
     std::cout.setf(std::ios::basefield);
     std::cout << "QUAT RMS point-to-point error = "
-         << resetiosflags(std::ios::adjustfield) << setiosflags(std::ios::internal)
-         << resetiosflags(std::ios::floatfield) << setiosflags(std::ios::fixed)
+         << std::resetiosflags(std::ios::adjustfield) << std::setiosflags(std::ios::internal)
+         << std::resetiosflags(std::ios::floatfield) << std::setiosflags(std::ios::fixed)
          << std::setw(10) << std::setprecision(7)
          << error
          << "  using " << std::setw(6) << (int)pairs.size() << " points"
@@ -551,8 +551,8 @@ double icp6D_QUAT::Align_Parallel(const int openmp_num_threads,
   if (!quiet) {
     std::cout.setf(std::ios::basefield);
     std::cout << "PQUAT RMS point-to-point error = "
-         << resetiosflags(std::ios::adjustfield) << setiosflags(std::ios::internal)
-         << resetiosflags(std::ios::floatfield) << setiosflags(std::ios::fixed)
+         << std::resetiosflags(std::ios::adjustfield) << std::setiosflags(std::ios::internal)
+         << std::resetiosflags(std::ios::floatfield) << std::setiosflags(std::ios::fixed)
          << std::setw(10) << std::setprecision(7)
          << ret
          << "  using " << std::setw(6) << pairs_size << " points" << std::endl;
