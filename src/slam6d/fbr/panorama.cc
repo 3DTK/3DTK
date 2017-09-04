@@ -136,8 +136,10 @@ namespace fbr
       {
 	int x, y;
 	double range;
+	// this function returns -1 for x and y if they are out of image range
 	projection_->calcPanoramaPositionForAPoint(x, y, it, range);
-
+	// check if x and y are not -1 then add them to the map
+	if(x != -1 && y != -1) {
 	//create the iReflectance iRange iolor and map
 	map(x, y, it, itColor, range);
 
@@ -145,7 +147,8 @@ namespace fbr
 	if(color.empty() == false)
 	  {
 	    ++itColor;
-	  }  
+	  }
+	}
       }
   }
   
@@ -209,10 +212,13 @@ namespace fbr
 	
 	int x, y;
 	double range;
+	// this function returns -1 for x and y if they are out of image range
 	projection_->calcPanoramaPositionForAPoint(x, y, it, range);
-	
-	//create the iReflectance iRange iColor and map
-	map(x, y, it, itColor,  range);
+	// check if x and y are not -1 then add them to the map
+	if(x != -1 && y != -1) {
+	  //create the iReflectance iRange iColor and map
+	  map(x, y, it, itColor,  range);
+	}
       }
     else
       {
