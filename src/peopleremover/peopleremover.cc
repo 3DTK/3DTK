@@ -563,6 +563,10 @@ int main(int argc, char* argv[])
 
 	std::cout << "dir: " << dir << std::endl;
 
+	double elapsed;
+	struct timespec before, after;
+	clock_gettime(CLOCK_MONOTONIC, &before);
+
 	Scan::openDirectory(false, dir, format, start, end);
 	if(Scan::allScans.size() == 0) {
 		std::cerr << "No scans found. Did you use the correct format?" << std::endl;
@@ -608,14 +612,26 @@ int main(int argc, char* argv[])
 			reflectances_by_slice[i] = refl;
 		}
 		points_by_slice[i] = xyz;
+		std::cerr << "number of points in scan " << i << ": " << xyz.size() << std::endl;
 	}
+	clock_gettime(CLOCK_MONOTONIC, &after);
+	elapsed = (after.tv_sec - before.tv_sec);
+	elapsed += (after.tv_nsec - before.tv_nsec) / 1000000000.0;
+	std::cerr << "took: " << elapsed << " seconds" << std::endl;
 
+	std::cerr << "calculate voxel occupation" << std::endl;
+
+	clock_gettime(CLOCK_MONOTONIC, &before);
 	std::unordered_map<struct voxel, std::set<size_t>> voxel_occupied_by_slice;
 	for (std::pair<size_t, DataXYZ> element : points_by_slice) {
 		for (size_t i = 0; i < element.second.size(); ++i) {
 			voxel_occupied_by_slice[voxel_of_point(element.second[i],voxel_size)].insert(element.first);
 		}
 	}
+	clock_gettime(CLOCK_MONOTONIC, &after);
+	elapsed = (after.tv_sec - before.tv_sec);
+	elapsed += (after.tv_nsec - before.tv_nsec) / 1000000000.0;
+	std::cerr << "took: " << elapsed << " seconds" << std::endl;
 
 	if (voxel_occupied_by_slice.size() == 0) {
 		std::cerr << "no voxel occupied" << std::endl;
@@ -624,7 +640,10 @@ int main(int argc, char* argv[])
 
 	std::cerr << "occupied voxels: " << voxel_occupied_by_slice.size() << std::endl;
 
-	std::cerr << "compute maxranges" << std::endl;
+	if (maxrange_method != NONE) {
+		std::cerr << "compute maxranges" << std::endl;
+		clock_gettime(CLOCK_MONOTONIC, &before);
+	}
 	std::unordered_map<size_t, std::vector<double>> maxranges;
 	// FIXME: this is just wasting memory
 	for (std::pair<size_t, std::tuple<const double*, const double*, const double*>> pose : trajectory) {
@@ -676,6 +695,7 @@ int main(int argc, char* argv[])
 			// the scanner) use its normal to calculate until when the line of
 			// sight up to the point should be searched and apply the same limit
 			// to all the points in its "shadow"
+			size_t shadowing_points = 0;
 			for (size_t j : sorted_point_indices) {
 				//double *p_global = points_by_slice[i][j];
 				// FIXME: Len(p) is called multiple times - precompute or take
@@ -684,6 +704,7 @@ int main(int argc, char* argv[])
 				if (maxranges[i][j] != std::numeric_limits<double>::infinity()) {
 					continue;
 				}
+				shadowing_points += 1;
 				double p_norm[3] = {p[0], p[1], p[2]};
 				Normalize3(p_norm);
 				double normal[3];
@@ -817,11 +838,18 @@ int main(int argc, char* argv[])
 					maxranges[i][k] = d;
 				}
 			}
+			std::cerr << "Computed normals for " << shadowing_points << " points (" << (shadowing_points*100.0f/orig_points_by_slice[i].size()) << "% of all points in scan)" << std::endl;
 		}
 	} else if (maxrange_method == ONENEAREST) {
 		exit(1);
 	}
 	// FIXME: fuzz also needs to be applied with maxrange_method == NONE
+	if (maxrange_method != NONE) {
+		clock_gettime(CLOCK_MONOTONIC, &after);
+		elapsed = (after.tv_sec - before.tv_sec);
+		elapsed += (after.tv_nsec - before.tv_nsec) / 1000000000.0;
+		std::cerr << "took: " << elapsed << " seconds" << std::endl;
+	}
 
 	if (write_maxranges) {
 		std::cerr << "write maxranges" << std::endl;
@@ -831,8 +859,9 @@ int main(int argc, char* argv[])
 	std::set<struct voxel> free_voxels;
 
 	std::cerr << "walk voxels" << std::endl;
-	struct timespec before, after;
 	clock_gettime(CLOCK_MONOTONIC, &before);
+	std::cerr << "0 %\r";
+	std::cerr.flush();
 #ifdef _OPENMP
 	omp_set_num_threads(jobs);
 #pragma omp parallel for schedule(dynamic)
@@ -870,13 +899,16 @@ int main(int argc, char* argv[])
 		for (std::set<struct voxel>::iterator it = free.begin(); it != free.end(); ++it) {
 			free_voxels.insert(*it);
 		}
+		std::cerr << ((idx+1)*100.0f/scanorder.size()) << " %\r";
+		std::cerr.flush();
 	}
+	std::cerr << std::endl;
 	clock_gettime(CLOCK_MONOTONIC, &after);
-	double elapsed = (after.tv_sec - before.tv_sec);
+	elapsed = (after.tv_sec - before.tv_sec);
 	elapsed += (after.tv_nsec - before.tv_nsec) / 1000000000.0;
 	std::cerr << "took: " << elapsed << " seconds" << std::endl;
 
-	std::cerr << "number of freed voxels: " << free_voxels.size() << " (" << (100*free_voxels.size()/voxel_occupied_by_slice.size()) << "% of occupied voxels)" << std::endl;
+	std::cerr << "number of freed voxels: " << free_voxels.size() << " (" << (free_voxels.size()*100.0f/voxel_occupied_by_slice.size()) << "% of occupied voxels)" << std::endl;
 
 	if (cluster_size > 1) {
 		std::cerr << "clustering voxels" << std::endl;
