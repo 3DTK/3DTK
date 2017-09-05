@@ -445,11 +445,13 @@ int main(int argc, char* argv[])
 	double fuzz;
 	double voxel_size;
 	size_t diff, normal_knearest;
+	size_t cluster_size;
 	normal_method_t normal_method;
 	maxrange_method_t maxrange_method;
 	std::string maskdir;
 	std::string dir;
 	bool no_subvoxel_accuracy;
+	bool write_maxranges;
 	int jobs;
 
 	po::options_description general_options("General options");
@@ -477,8 +479,10 @@ int main(int argc, char* argv[])
 		("voxel-size", po::value(&voxel_size)->default_value(10), "Voxel grid size (default: 10)")
 		("diff", po::value(&diff)->default_value(0), "Number of scans before and after the current scan that are grouped together (default: 0).")
 		("no-subvoxel-accuracy", po::bool_switch(&no_subvoxel_accuracy)->default_value(false), "Do not calculate with subvoxel accuracy")
+		("min-cluster-size", po::value(&cluster_size)->default_value(5), "Minimum number of connected voxels that make a dynamic object (default: 5). Set to any value greater than one to turn on clustering.")
 		("maxrange-method", po::value(&maxrange_method)->default_value(NONE),
 		 "How to compute search range. Possible values: none, normals, 1nearest")
+		("write-maxranges", po::bool_switch(&write_maxranges)->default_value(false), "Write computed maxranges to scan002.3d and onward for each input scan")
 		("normal-knearest", po::value(&normal_knearest)->default_value(40),
 		 "To compute the normal vector, use NUM closest points for --maxrange-method=normals (default: 40)")
 		("normal-method", po::value(&normal_method)->default_value(ANGLE),
@@ -819,6 +823,11 @@ int main(int argc, char* argv[])
 	}
 	// FIXME: fuzz also needs to be applied with maxrange_method == NONE
 
+	if (write_maxranges) {
+		std::cerr << "write maxranges" << std::endl;
+		exit(1);
+	}
+
 	std::set<struct voxel> free_voxels;
 
 	std::cerr << "walk voxels" << std::endl;
@@ -868,6 +877,11 @@ int main(int argc, char* argv[])
 	std::cerr << "took: " << elapsed << " seconds" << std::endl;
 
 	std::cerr << "number of freed voxels: " << free_voxels.size() << " (" << (100*free_voxels.size()/voxel_occupied_by_slice.size()) << "% of occupied voxels)" << std::endl;
+
+	if (cluster_size > 1) {
+		std::cerr << "clustering voxels" << std::endl;
+		exit(1);
+	}
 
 	if (!no_subvoxel_accuracy) {
 		std::cerr << "calculate half-free voxels" << std::endl;
