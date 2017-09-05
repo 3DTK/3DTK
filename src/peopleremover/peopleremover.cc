@@ -192,6 +192,8 @@ void walk_voxels(
 	direction[1] = end_pos[1] - start_pos[1];
 	direction[2] = end_pos[2] - start_pos[2];
 	if (direction[0] == 0 && direction[1] == 0 && direction[2] == 0) {
+		// FIXME: should we really abort here? Should we not at least call
+		// visitor() on the start_voxel?
 		return;
 	}
 	const struct voxel start_voxel = voxel_of_point(start_pos,voxel_size);
@@ -258,6 +260,8 @@ void walk_voxels(
 			maxMultZ -= 1;
 		}
 	}
+	// FIXME: don't call visitor() unconditionally but only if cur_voxel
+	// unequal start_voxel
 	visitor(cur_voxel, data);
 	if (cur_voxel.x == end_voxel.x && cur_voxel.y == end_voxel.y && cur_voxel.z == end_voxel.z) {
 		return;
@@ -345,6 +349,7 @@ void walk_voxels(
 					break;
 				}
 			}
+			// FIXME: only call visitor if add_voxel unequal cur_voxel
 			if (!visitor(add_voxel, data)) {
 				break;
 			}
@@ -617,6 +622,7 @@ int main(int argc, char* argv[])
 
 	std::cerr << "compute maxranges" << std::endl;
 	std::unordered_map<size_t, std::vector<double>> maxranges;
+	// FIXME: this is just wasting memory
 	for (std::pair<size_t, std::tuple<const double*, const double*, const double*>> pose : trajectory) {
 		size_t i = pose.first;
 		std::vector<double> mr(points_by_slice[i].size(), std::numeric_limits<double>::infinity());
@@ -753,6 +759,7 @@ int main(int argc, char* argv[])
 				}
 				// points must not be too close or otherwise they will shadow
 				// *all* the points
+				// FIXME: retrieve Len(p) from vector of distances
 				if (Len(p) < voxel_diagonal) {
 					exit(1);
 				}
@@ -768,8 +775,12 @@ int main(int argc, char* argv[])
 				 * the distance of the point minus its the radius of the
 				 * circumsphere.
 				 */
+				// FIXME: if normal_method was "angle" we could just re-use
+				// the points we already retrieved for normal computation
+				// earlier here as well
 				double angle = 2*asin(voxel_diagonal/(distances[j]-voxel_diagonal));
 				for (size_t k : qtree.search(p_norm, angle)) {
+					// FIXME: skip if j == k
 					double *p_k = orig_points_by_slice[i][k];
 					double p_k_norm[3] = {p_k[0], p_k[1], p_k[2]};
 					Normalize3(p_k_norm);
@@ -787,7 +798,6 @@ int main(int argc, char* argv[])
 					 * the plane that p is part of. Thus, we process this point
 					 * later
 					 */
-					// FIXME: retrieve Len(p_k) from vector of distances
 					if (d > distances[k]) {
 						continue;
 					}
@@ -807,6 +817,7 @@ int main(int argc, char* argv[])
 	} else if (maxrange_method == ONENEAREST) {
 		exit(1);
 	}
+	// FIXME: fuzz also needs to be applied with maxrange_method == NONE
 
 	std::set<struct voxel> free_voxels;
 
