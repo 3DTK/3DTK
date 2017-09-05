@@ -147,18 +147,31 @@ class QuadNode:
         indices4 = []
         for i in indices:
             p = self.pts[i]
-            # we must use >= or otherwise points exactly on the triangle
-            # borders will not be matched by any triangle.
-            if tripleproduct(w1,w4,p) >= 0 and tripleproduct(w4,w6,p) >= 0 and tripleproduct(w6,w1,p) >= 0:
+            # this version is nearly functionally identical to the more
+            # computationally expensive version below except that the rare
+            # situation that a point does not fit into any of the four
+            # triangles due to floating point inaccuracy cannot arise
+            # anymore.
+            if tripleproduct(w4,w6,p) >= 0:
                 indices1.append(i)
-            elif tripleproduct(w2,w5,p) >= 0 and tripleproduct(w5,w4,p) >= 0 and tripleproduct(w4,w2,p) >= 0:
+            elif tripleproduct(w5,w4,p) >= 0:
                 indices2.append(i)
-            elif tripleproduct(w3,w6,p) >= 0 and tripleproduct(w6,w5,p) >= 0 and tripleproduct(w5,w3,p) >= 0:
+            elif tripleproduct(w6,w5,p) >= 0:
                 indices3.append(i)
-            elif tripleproduct(w4,w5,p) >= 0 and tripleproduct(w5,w6,p) >= 0 and tripleproduct(w6,w4,p) >= 0:
-                indices4.append(i)
             else:
-                raise Exception("impossible for %f %f %f"%p)
+                indices4.append(i)
+            ## we must use >= or otherwise points exactly on the triangle
+            ## borders will not be matched by any triangle.
+            #if tripleproduct(w1,w4,p) >= 0 and tripleproduct(w4,w6,p) >= 0 and tripleproduct(w6,w1,p) >= 0:
+            #    indices1.append(i)
+            #elif tripleproduct(w2,w5,p) >= 0 and tripleproduct(w5,w4,p) >= 0 and tripleproduct(w4,w2,p) >= 0:
+            #    indices2.append(i)
+            #elif tripleproduct(w3,w6,p) >= 0 and tripleproduct(w6,w5,p) >= 0 and tripleproduct(w5,w3,p) >= 0:
+            #    indices3.append(i)
+            #elif tripleproduct(w4,w5,p) >= 0 and tripleproduct(w5,w6,p) >= 0 and tripleproduct(w6,w4,p) >= 0:
+            #    indices4.append(i)
+            #else:
+            #    raise Exception("impossible for %f %f %f"%p)
         self.t1 = QuadNode(v1,v4,v6,indices1, pts, vertices, middlemap)
         self.t2 = QuadNode(v2,v5,v4,indices2, pts, vertices, middlemap)
         self.t3 = QuadNode(v3,v6,v5,indices3, pts, vertices, middlemap)
