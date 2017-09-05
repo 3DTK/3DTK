@@ -898,12 +898,18 @@ int main(int argc, char* argv[])
 	FILE *out_static = fopen("scan000.3d", "w");
 	FILE *out_dynamic = fopen("scan001.3d", "w");
 	for (size_t i : scanorder) {
+		std::unordered_map<size_t, DataReflectance>::const_iterator refl_it =
+			reflectances_by_slice.find(i);
 		for (size_t j = 0; j < points_by_slice[i].size(); ++j) {
 			FILE *out;
 			if (free_voxels.find(voxel_of_point(points_by_slice[i][j],voxel_size)) == free_voxels.end()) {
 				out = out_static;
 			} else {
 				out = out_dynamic;
+			}
+			double refl = 0;
+			if (refl_it != reflectances_by_slice.end()) {
+				refl = refl_it->second[j];
 			}
 			// we print the mantissa with 13 hexadecimal digits because the
 			// mantissa for double precision is 52 bits long which is 6.5
@@ -917,8 +923,8 @@ int main(int argc, char* argv[])
 					points_by_slice[i][j][0],
 					points_by_slice[i][j][1],
 					points_by_slice[i][j][2],
-					0.0f
-					//reflectances_by_slice[i][j]
+					//0.0f
+					refl
 					);
 		}
 	}
