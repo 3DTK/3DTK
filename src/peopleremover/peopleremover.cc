@@ -942,11 +942,20 @@ int main(int argc, char* argv[])
 		std::ostringstream out;
 		out << maskdir << "/scan" << std::setw(3) << std::setfill('0') << element.first << ".mask";
 		FILE *out_mask = fopen(out.str().c_str(), "w");
+		if (out_mask == NULL) {
+			std::cerr << "cannot open" << out.str() << std::endl;
+			exit(1);
+		}
 		for (size_t i = 0; i < element.second.size(); ++i) {
+			int ret;
 			if (free_voxels.find(voxel_of_point(element.second[i],voxel_size)) == free_voxels.end()) {
-				fprintf(out_mask, "0\n");
+				ret = fprintf(out_mask, "0\n");
 			} else {
-				fprintf(out_mask, "1\n");
+				ret = fprintf(out_mask, "1\n");
+			}
+			if (ret < 0) {
+				std::cerr << "failed to write to " << out.str() << std::endl;
+				exit(1);
 			}
 		}
 		fclose(out_mask);
