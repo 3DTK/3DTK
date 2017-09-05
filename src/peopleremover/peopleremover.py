@@ -210,7 +210,7 @@ def formatname_to_io_type(string):
         return py3dtk.IOType.RXP
 
 def main():
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(description="Segment point cloud into static and dynamic points")
     parser.add_argument("-s", "--start", type=int, default=0, metavar="NUM")
     parser.add_argument("-e", "--end", type=int, default=-1, metavar="NUM")
     parser.add_argument("-f", "--format", type=formatname_to_io_type, default=py3dtk.IOType.UOS)
@@ -404,6 +404,7 @@ def main():
                 # the scanner itself is situated close to the plane that p
                 # is part of. Thus, shoot no ray to this point at all.
                 if maxranges[i][j] < 0:
+                    # FIXME: should we "continue" here?
                     maxranges[i][j] = 0
                 # points must not be too close or otherwise they will shadow
                 # *all* the points
@@ -446,6 +447,13 @@ def main():
                     # FIXME: make sure that the current point is more than voxel_diagonal away from the plane
                     # FIXME: make sure that the maxrange for a point is not closer to it than voxel_diagonal
                     maxranges[i][k] = d
+            del distances
+            del points
+            del qtree
+            if args.normal_method in ["knearest", "range"]:
+                del kdtree
+        if args.normal_method in ["knearest-global", "range-global"]:
+            del kdtree
     elif args.maxrange_method == "1nearest":
         # this method is exact for single scans (because no normals can be
         # wrongly computed) but slower (kd-tree has to be searched for every
@@ -456,6 +464,7 @@ def main():
             kdtree = py3dtk.KDtree([p for _,p,_ in points_by_slice[i]])
             for j,(_,p,_) in enumerate(points_by_slice[i]):
                 maxranges[i][j] = sq.length(kdtree.segmentSearch_1NearestPoint((0,0,0), p, voxel_diagonal**2)) - voxel_diagonal
+            del kdtree
 
     if args.write_maxranges and args.maxrange_method != "none":
         print("write maxranges", file=sys.stderr)
