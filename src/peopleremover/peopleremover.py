@@ -224,6 +224,8 @@ def main():
     parser.add_argument(
         "--maxrange-method", choices=["none", "normals", "1nearest"], default="none",
         help="How to compute search range. Possible values: none, normals, 1nearest")
+    parser.add_argument(
+        "--write-maxranges", action='store_true', help="Write computed maxranges to scan002.3d and onward for each input scan")
     parser.add_argument("--normal-knearest", type=int, default=40, metavar="K",
         help="To compute the normal vector, use NUM closest points for --maxrange-method=normals (default: 40)")
     parser.add_argument("--normal-method", choices=["knearest", "range", "angle", "knearest-global", "range-global"], default="angle",
@@ -455,9 +457,8 @@ def main():
             for j,(_,p,_) in enumerate(points_by_slice[i]):
                 maxranges[i][j] = sq.length(kdtree.segmentSearch_1NearestPoint((0,0,0), p, voxel_diagonal**2)) - voxel_diagonal
 
-    print("write maxranges", file=sys.stderr)
-
-    if args.maxrange_method in ["normals", "1nearest"]:
+    if args.write_maxranges and args.maxrange_method != "none":
+        print("write maxranges", file=sys.stderr)
         for i, (pos,theta,_) in trajectory.items():
             with open("scan%03d.pose" % (i+2), "w") as f:
                 print("%f %f %f"%pos, file=f)
