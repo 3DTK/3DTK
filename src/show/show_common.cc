@@ -1,3 +1,5 @@
+#include <cmath>
+
 #include "show/show_common.h"
 
 std::vector< ::SDisplay*> displays;
@@ -942,7 +944,14 @@ void initShow(const dataset_settings& ds, const window_settings& ws){
   cm->setCurrentType(PointType::USE_HEIGHT);
   //ColorMap cmap;
   //cm->setColorMap(cmap);
-  resetMinMax(0);
+
+  if (std::isnan(mincolor_value)) {
+    mincolor_value = cm->getMin();
+  }
+  if (std::isnan(maxcolor_value)) {
+    maxcolor_value = cm->getMax();
+  }
+  minmaxChanged(0);
 
   selected_points = new std::set<sfloat*>[octpts.size()];
 

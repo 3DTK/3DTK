@@ -1,6 +1,7 @@
 #ifndef __PROGRAM_OPTIONS_H__
 #define __PROGRAM_OPTIONS_H__
 
+#include <cmath>
 #include <string>
 
 #include <boost/program_options.hpp>
@@ -70,7 +71,7 @@ struct color_settings {
   int colorval = -1;
   bool explicit_coloring;
   ShowColormap colormap;
-  range<float> colormap_values {};
+  range<float> colormap_values {NAN, NAN};
 };
 
 struct dataset_settings {
