@@ -64,7 +64,7 @@ void parse_args(int argc, char **argv, dataset_settings& ds, window_settings& ws
 
   options_description color_options("Point coloring");
   color_options.add_options()
-    ("color,c", bool_switch(),
+    ("color,c", bool_switch(&ds.coloring.explicit_coloring),
       "Use included RGB values for coloring points.")
     ("reflectance,R", bool_switch(),
       "Use reflectance values for coloring point clouds.")
@@ -298,21 +298,32 @@ void parse_args(int argc, char **argv, dataset_settings& ds, window_settings& ws
       break;
   }
 
-  // Translate color bool_switches to a bitset
-  std::map<string, unsigned int> point_type_flags({
-    {"reflectance", PointType::USE_REFLECTANCE},
-    {"temperature", PointType::USE_TEMPERATURE},
+  // Coloring bool_switch names mapped to their PointType bit,
+  // in the order in which they should be the default coloring
+  std::vector<std::pair<string, unsigned int>> point_type_flags {
+    {"time",        PointType::USE_TIME},
     {"amplitude",   PointType::USE_AMPLITUDE},
     {"deviation",   PointType::USE_DEVIATION},
     {"height",      PointType::USE_HEIGHT},
+    {"reflectance", PointType::USE_REFLECTANCE},
+    {"temperature", PointType::USE_TEMPERATURE},
     {"type",        PointType::USE_TYPE},
-    {"color",       PointType::USE_COLOR},
-    {"time",        PointType::USE_TIME}
-  });
+    {"color",       PointType::USE_COLOR}
+  };
+
+  // These are the names for values of listboxColorVal
+  std::array<string, 6> colorval_names {"height", "reflectance", "temperature", "amplitude", "deviation", "type"};
 
   for (auto const &kv_pair : point_type_flags) {
     if (vm[kv_pair.first].as<bool>()) {
+      // Translate color bool_switches to a bitset
       types |= kv_pair.second;
+
+      // remember the most important one as default for listboxColorVal
+      auto colorval_it = std::find(colorval_names.begin(), colorval_names.end(), kv_pair.first);
+      if (colorval_it != colorval_names.end()) {
+        ds.coloring.colorval = colorval_it - colorval_names.begin();
+      }
     }
   }
 
