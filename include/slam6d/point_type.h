@@ -48,15 +48,15 @@ public:
 
   PointType(unsigned int _types);
 
-  bool hasReflectance();
-  bool hasNormal();
-  bool hasTemperature();
-  bool hasAmplitude();
-  bool hasDeviation();
-  bool hasType();
-  bool hasColor();
-  bool hasTime();
-  bool hasIndex();
+  bool hasReflectance() const;
+  bool hasNormal() const;
+  bool hasTemperature() const;
+  bool hasAmplitude() const;
+  bool hasDeviation() const;
+  bool hasType() const;
+  bool hasColor() const;
+  bool hasTime() const;
+  bool hasIndex() const;
 
   unsigned int getReflectance();
   unsigned int getTemperature();
@@ -116,7 +116,7 @@ private:
    **/
   int dimensionmap[10];
 
-  bool hasType(unsigned int type);
+  bool hasType(unsigned int type) const;
 
   unsigned int getScanSize(Scan* scan);
 

@@ -67,6 +67,8 @@ struct range {
 
 struct color_settings {
   PointType ptype;
+  int colorval = -1;
+  bool explicit_coloring;
   ShowColormap colormap;
   range<float> colormap_values {};
 };
