@@ -551,6 +551,7 @@ void copy_settings_to_globals(
   // TODO need to initialize view_rotate_button with QuaternionToMatrix4
 
   ptype = ds.coloring.ptype;
+  listboxColorVal = (ds.coloring.colorval != -1 ? ds.coloring.colorval : 0);
   listboxColorMapVal = static_cast<int>(ds.coloring.colormap);
   mincolor_value = ds.coloring.colormap_values.min;
   maxcolor_value = ds.coloring.colormap_values.max;
@@ -583,17 +584,9 @@ void copy_settings_to_globals(
   trajectoryFile = ds.trajectory_file_name;
   identity = ds.identity;
 
-  // RGB formats imply RGB mode
-  switch (ds.format) {
-    case UOS_RGB:
-    case UOS_RRGBT:
-    case RIEGL_RGB:
-    case XYZ_RGB:
-    case KS_RGB:
-      colorScanVal = 2;
-      break;
-    default:
-      break;
+  // Start in RGB mode if the user requests it or they request no other coloring
+  if (ds.coloring.explicit_coloring || (ds.coloring.colorval == -1 && ds.coloring.ptype.hasColor())) {
+    colorScanVal = 2;
   }
 }
 

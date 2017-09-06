@@ -62,32 +62,32 @@ PointType::PointType(unsigned int _types) : types(_types) {
   if (types & PointType::USE_INDEX)       dimensionmap[9] = pointdim++; 
 }
 
-bool PointType::hasReflectance() {
+bool PointType::hasReflectance() const {
   return hasType(USE_REFLECTANCE); 
 }
-bool PointType::hasNormal() {
+bool PointType::hasNormal() const {
   return hasType(USE_NORMAL); 
 }
-bool PointType::hasTemperature() {
+bool PointType::hasTemperature() const {
   return hasType(USE_TEMPERATURE); 
 }
-bool PointType::hasAmplitude() {
+bool PointType::hasAmplitude() const {
   return hasType(USE_AMPLITUDE); 
 }
-bool PointType::hasDeviation() {
+bool PointType::hasDeviation() const {
   return hasType(USE_DEVIATION); 
 }
-bool PointType::hasType() {
+bool PointType::hasType() const {
   return hasType(USE_TYPE); 
 }
-bool PointType::hasColor() {
+bool PointType::hasColor() const {
   return hasType(USE_COLOR); 
 }
-bool PointType::hasTime() {
+bool PointType::hasTime() const {
   return hasType(USE_TIME); 
 }
 
-bool PointType::hasIndex() {
+bool PointType::hasIndex() const {
   return hasType(USE_INDEX); 
 }
 
@@ -166,7 +166,7 @@ void PointType::serialize(std::ofstream &f) {
 
 unsigned int PointType::toFlags() const { return types; } 
 
-bool PointType::hasType(unsigned int type) {
+bool PointType::hasType(unsigned int type) const {
   return types & type;
 }
 
