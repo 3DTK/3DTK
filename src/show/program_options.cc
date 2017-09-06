@@ -246,11 +246,15 @@ void parse_args(int argc, char **argv, dataset_settings& ds, window_settings& ws
   }
 
   // Help text
-  if (vm.count("help") ||
-      (directory_present == nullptr && vm.count("input-dir") != 1)) {
+  if (vm.count("help")) {
     cout << "Usage: " << argv[0] << " [options] <input-dir>" << endl;
     cout << visible_options << endl;
     exit(0);
+  }
+
+  if (directory_present == nullptr && vm.count("input-dir") != 1) {
+    cerr << "Error: Please specify a directory. See --help for options." << endl;
+    exit(1);
   }
 
   // Scan number range
