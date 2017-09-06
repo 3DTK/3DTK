@@ -11,6 +11,8 @@ QtShow::QtShow(int &argc, char **argv)
   bool has_initial_directory;
   try {
     parse_args(argc, argv, ds, ws, &has_initial_directory);
+    // FIXME in advanced mode, only scan 1 is drawn
+    ws.advanced_controls = false;
   } catch (std::exception& e) {
     std::cerr << "Error while parsing settings: " << e.what() << std::endl;
     exit(1);
