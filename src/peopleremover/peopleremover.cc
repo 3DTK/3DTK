@@ -708,6 +708,18 @@ int main(int argc, char* argv[])
 				double p_norm[3] = {p[0], p[1], p[2]};
 				Normalize3(p_norm);
 				double normal[3];
+				/*
+				 * we pre-compute the angular neighbors here already. If the
+				 * normal_method equals ANGLE then this has to be done anyways
+				 * and we can re-use angular_indices again below
+				 *
+				 * If the normal_method was not ANGLE then we still need to
+				 * compute the angular neighbors in most cases because it's
+				 * highly unlikely that the algorithm runs into the "continue"
+				 * conditions
+				 */
+				double angle = 2*asin(voxel_diagonal/(distances[j]-voxel_diagonal));
+				std::vector<size_t> angular_indices = qtree.search(p_norm, angle);
 				switch (normal_method) {
 					case KNEAREST:
 						exit(1);
@@ -717,8 +729,6 @@ int main(int argc, char* argv[])
 						break;
 					case ANGLE:
 						{
-							double angle = 2*asin(voxel_diagonal/(distances[j]-voxel_diagonal));
-							std::vector<size_t> angular_indices = qtree.search(p_norm, angle);
 							std::vector<Point> angular_points;
 							for (size_t k = 0; k < angular_indices.size(); ++k) {
 								angular_points.push_back(Point(orig_points_by_slice[i][angular_indices[k]]));
@@ -800,11 +810,7 @@ int main(int argc, char* argv[])
 				 * the distance of the point minus its the radius of the
 				 * circumsphere.
 				 */
-				// FIXME: if normal_method was "angle" we could just re-use
-				// the points we already retrieved for normal computation
-				// earlier here as well
-				double angle = 2*asin(voxel_diagonal/(distances[j]-voxel_diagonal));
-				for (size_t k : qtree.search(p_norm, angle)) {
+				for (size_t k : angular_indices) {
 					// FIXME: skip if j == k
 					double *p_k = orig_points_by_slice[i][k];
 					double p_k_norm[3] = {p_k[0], p_k[1], p_k[2]};
