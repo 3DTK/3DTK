@@ -502,6 +502,26 @@ class KDtreeWrapper : public KDtree
 			return l;
 		}
 
+		boost::python::list kNearestRangeSearch(boost::python::tuple _p, size_t k, double sqRad2)
+		{
+			double *_pv = new double[3];
+			_pv[0] = extract<double>(_p[0]);
+			_pv[1] = extract<double>(_p[1]);
+			_pv[2] = extract<double>(_p[2]);
+			int threadNum = 0;
+			std::vector<Point> res = KDtree::kNearestRangeSearch(_pv, k, sqRad2, threadNum);
+			boost::python::list l;
+			for (auto &it: res) {
+				boost::python::list p;
+				p.append(it.x);
+				p.append(it.y);
+				p.append(it.z);
+				l.append(boost::python::tuple(p));
+			}
+			delete[] _pv;
+			return l;
+		}
+
 		boost::python::object segmentSearch_1NearestPoint(boost::python::tuple _p, boost::python::tuple _p0, double maxdist2)
 		{
 			double *_pv = new double[3];
@@ -679,6 +699,7 @@ BOOST_PYTHON_MODULE(py3dtk)
 		.def("FindClosest", &KDtreeWrapper::FindClosest)
 		.def("fixedRangeSearch", &KDtreeWrapper::fixedRangeSearch)
 		.def("kNearestNeighbors", &KDtreeWrapper::kNearestNeighbors)
+		.def("kNearestRangeSearch", &KDtreeWrapper::kNearestRangeSearch)
 		.def("segmentSearch_1NearestPoint", &KDtreeWrapper::segmentSearch_1NearestPoint);
 
 	def("calculateNormal", calculateNormalWrapper);

@@ -71,6 +71,11 @@ public:
 								  int k,
 								  int threadNum = 0) const;
   
+  virtual std::vector<Point> kNearestRangeSearch(double *_p,
+								 int k,
+								 double sqRad2,
+								 int threadNum = 0) const;
+
   virtual std::vector<Point> fixedRangeSearch(double *_p,
 								 double sqRad2,
 								 int threadNum = 0) const;
