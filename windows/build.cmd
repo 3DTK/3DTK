@@ -77,6 +77,7 @@ if not exist %outdir% (
 set opencvdir=%outdir%/3rdparty/opencv/
 set boostdir=%outdir%/3rdparty/boost/
 set cmakedir=%outdir%/3rdparty/cmake/
+set libpngdir=%outdir%/3rdparty/libpng/
 
 set cmakeexe=%outdir%/3rdparty/cmake/cmake-3.7.2-win64-x64/bin/cmake.exe
 set cmakezip=%outdir%/cmake-3.7.2-win64-x64.zip
@@ -90,6 +91,10 @@ set boosthash=e6-87-21-e0-da-79-18-df-0c-d7-86-e9-f2-25-98-39
 set opencvexe=%outdir%/opencv-3.2.0-vc14.exe
 set opencvurl=https://downloads.sourceforge.net/project/opencvlibrary/opencv-win/3.2.0/opencv-3.2.0-vc14.exe
 set opencvhash=76-31-e7-08-a9-ae-03-65-69-e4-00-ba-43-88-68-61
+
+set libpngexe=%outdir%/libpng-1.2.37-setup.exe
+set libpngurl=https://downloads.sourceforge.net/project/gnuwin32/libpng/1.2.37/libpng-1.2.37-setup.exe
+set libpnghash=f9-d1-c1-54-d4-94-a8-7e-7d-02-03-0d-f9-d6-e5-01
 
 if not exist %boostdir% (
 	if not exist %boostexe% (
@@ -148,6 +153,25 @@ if not exist %cmakedir% (
 	)
 )
 
+if not exist %libpngdir% (
+	if not exist %libpngexe% (
+		echo downloading %libpngexe%...
+		call:download %libpngurl% %libpngexe%
+	)
+	echo checking md5sum of %libpngexe%...
+	call:checkmd5 %libpngexe% %libpnghash%
+	if ERRORLEVEL 1 (
+		echo md5sum mismatch
+		exit /B 1
+	)
+	echo extracting %libpngexe% into %libpngdir%...
+    %libpngexe% /DIR="%libpngdir%" /VERYSILENT /SUPPRESSMSGBOXES /NORESTART /SP-
+	if %ERRORLEVEL% GEQ 1 (
+		echo cmake unzip failed
+		exit /B 1
+	)
+)
+
 :: use setlocal to make sure that the directory is only changed for this part
 :: of the script and not on the outside
 setlocal
@@ -161,6 +185,8 @@ cd /d %outdir%
 	-DBOOST_ROOT:PATH=%boostdir% ^
 	-DGLUT_glut_LIBRARY:FILEPATH=%sourcedir%/3rdparty/windows/freeglut/lib/x64/freeglut.lib ^
 	-DZLIB_INCLUDE_DIR:PATH=%sourcedir%/3rdparty/windows/zlib ^
+	-DPNG_PNG_INCLUDE_DIR:PATH=%libpngdir%/include ^
+	-DPNG_LIBRARY:FILEPATH=%libpngdir%/lib/libpng.lib ^
 	-DGLUT_INCLUDE_DIR:PATH=%sourcedir%/3rdparty/windows/freeglut/include ^
 	-DOpenCV_DIR:PATH=%opencvdir%/opencv/build ^
 	-DOUTPUT_DIRECTORY:PATH=%outdir% ^
