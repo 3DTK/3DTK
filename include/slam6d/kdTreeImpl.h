@@ -584,6 +584,69 @@ protected:
     }
   }
 
+  void _KNNRangeSearch(const PointData& pts, int threadNum) const {
+    AccessorFunc point;
+    ParamFunc pointparam;
+
+    // Leaf nodes
+    if (npts) {
+	 for (int i = 0; i < npts; i++) {
+	   double myd2 = Dist2(params[threadNum].p, point(pts, leaf.p[i]));
+	   if (myd2 >= params[threadNum].closest_d2) {
+		   continue;
+	   }
+
+        for (int j = 0; j < params[threadNum].k; j++)
+            if (params[threadNum].distances[j] < 0.0f) {
+                params[threadNum].closest_neighbors[j] = pointparam(pts, leaf.p[i]);
+                params[threadNum].distances[j] = myd2;
+                break;
+            } else if (params[threadNum].distances[j] > myd2) {
+                // move all other values one place up
+                for (int l = params[threadNum].k - 1; l > j; --l) {
+                    params[threadNum].closest_neighbors[l] = params[threadNum].closest_neighbors[l-1];
+                    params[threadNum].distances[l] = params[threadNum].distances[l-1];
+                }
+                params[threadNum].closest_neighbors[j] = pointparam(pts, leaf.p[i]);
+                params[threadNum].distances[j] = myd2;
+                break;
+            }
+      }
+      return;
+    }
+
+    int kN = params[threadNum].k-1;
+	// Quick check of whether to abort  
+	double approx_dist_bbox =
+		std::max(std::max(fabs(params[threadNum].p[0]-node.center[0])-node.dx,
+					fabs(params[threadNum].p[1]-node.center[1])-node.dy),
+				fabs(params[threadNum].p[2]-node.center[2])-node.dz);
+	// FIXME comparing with zero doesn't work for indexed kdtree, we should
+	// check the closest vector for the special negative values instead
+    if (params[threadNum].closest_neighbors[kN] == 0) {
+		if (approx_dist_bbox >= 0 &&
+				sqr(approx_dist_bbox) >= params[threadNum].closest_d2)
+			return;
+	} else {
+        if (approx_dist_bbox >= 0 &&
+		  sqr(approx_dist_bbox) >= params[threadNum].distances[kN])
+		return;
+    }
+    // Recursive case
+    double myd = node.splitval - params[threadNum].p[node.splitaxis];
+    if (myd >= 0.0) {
+	 node.child1->_KNNRangeSearch(pts, threadNum);
+	 if (sqr(myd) < params[threadNum].closest_d2) {
+	   node.child2->_KNNRangeSearch(pts, threadNum);
+	 }
+    } else {
+	 node.child2->_KNNRangeSearch(pts, threadNum);
+	 if (sqr(myd) < params[threadNum].closest_d2) {
+	   node.child1->_KNNRangeSearch(pts, threadNum);
+	 }
+    }
+  }
+
   void _segmentSearch_all(const PointData& pts, int threadNum) const {
     AccessorFunc point;
     ParamFunc pointparam;
