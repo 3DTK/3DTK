@@ -118,6 +118,42 @@ std::vector<Point> KDtree::kNearestNeighbors(double *_p,
   return result;
 }
 
+std::vector<Point> KDtree::kNearestRangeSearch(double *_p,
+                                       int _k,
+                                       double sqRad2,
+                                       int threadNum) const
+{
+  std::vector<Point> result;
+  params[threadNum].closest = 0;
+  params[threadNum].closest_d2 = sqRad2;
+  params[threadNum].p = _p;
+  params[threadNum].k = _k;
+  // todo fix this C/C++ mixture
+  params[threadNum].closest_neighbors = (double **)calloc(_k,
+                                                          sizeof(double *) );
+  params[threadNum].distances = (double *)calloc(_k,
+                                                 sizeof(double));
+  // initialize distances to an invalid value to indicate unset neighbors
+  for (int i = 0; i < _k; i++) {
+      params[threadNum].distances[i] = -1.0;
+  }
+  _KNNRangeSearch(Void(), threadNum);
+  
+  for (int i = 0; i < _k; i++) {
+      // only push valid points
+    if (params[threadNum].distances[i] >= 0.0f) {
+    result.push_back(Point(params[threadNum].closest_neighbors[i][0],
+                           params[threadNum].closest_neighbors[i][1],
+                           params[threadNum].closest_neighbors[i][2]));
+    }
+  }
+  
+  free (params[threadNum].closest_neighbors);
+  free (params[threadNum].distances);
+  
+  return result;
+}
+
 
 std::vector<Point> KDtree::fixedRangeSearchBetween2Points(double *_p,
                       double *_p0,
