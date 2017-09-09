@@ -28,10 +28,11 @@ http://kos.informatik.uni-osnabrueck.de/3Dscans/
 web site on Sourceforge, http://slam6d.sourceforge.net/)
 
 IMPORTANT;
-For detecting planes compile slam6D with the WITH_PLANE option.
+For detecting planes compile slam6D with the WITH_SHAPE_DETECTION option.
 Adapt the settings in bin/hough.cfg for your data set.
 
-Extremely large scans might need to be reduced before registration. 
+Extremely large scans or scans with large differences in point distribution
+might need to be reduced before registration. 
 Use the -r option to use an octree based reduction of the scan. 
 It is highly recommended to use the -O option as well for reduction to chose
 points randomly (instead of the center) from the octree voxels.
