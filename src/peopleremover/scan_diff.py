@@ -2,14 +2,13 @@
 
 import argparse
 import sys
-import ctypes.util
-import ctypes
 import os
 import textwrap
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..', 'lib'))
 try:
     import py3dtk
+    import py3dtk.utils
 except ImportError:
     print("Cannot find py3dtk module. Try recompiling 3dtk with WITH_PYTHON set to ON", file=sys.stderr)
     exit(1)
@@ -63,7 +62,8 @@ Clean scan of noise:
         exit(1)
 
     scan1 = py3dtk.allScans[0]
-    scan1.transformAll(scan1.get_transMatOrg())
+    if len(py3dtk.allScans) != 1:
+        scan1.transformAll(scan1.get_transMatOrg())
     points1 = list(py3dtk.DataXYZ(scan1.get("xyz")))
     if len(py3dtk.allScans) == 1:
         scan2 = scan1
@@ -74,22 +74,14 @@ Clean scan of noise:
         points2 = list(py3dtk.DataXYZ(scan2.get("xyz")))
     kdtree1 = py3dtk.KDtree(points1)
     dist2 = args.dist**2
-    libc = ctypes.CDLL(ctypes.util.find_library("c"))
-    buflen = 100
-    buf = ctypes.create_string_buffer(buflen)
-    def write_point(f, p):
-        ret = libc.snprintf(buf, buflen, b"%a %a %a\n",
-            ctypes.c_double(p[0]),
-            ctypes.c_double(p[1]),
-            ctypes.c_double(p[2]))
-        if ret < 0 or ret >= buflen:
-            raise Exception("sprintf failed")
-        f.write(buf.value)
     for i,p in enumerate(points2):
         print("%f"%((i+1)*100/len(points2)), end="\r", file=sys.stderr)
         pts = kdtree1.kNearestRangeSearch(p, args.maxnum+1, dist2)
         if args.invert != (len(pts) <= args.maxnum):
-            write_point(sys.stdout.buffer, p)
+            print("%s %s %s"%(
+                py3dtk.utils.float2hex(p[0]),
+                py3dtk.utils.float2hex(p[1]),
+                py3dtk.utils.float2hex(p[2])))
 
 if __name__ == "__main__":
     main()

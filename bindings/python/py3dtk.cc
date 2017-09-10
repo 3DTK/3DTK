@@ -581,9 +581,46 @@ bp::tuple calculateNormalWrapper(bp::list pts) {
 	return bp::tuple(p);
 }
 
+/*
+ * pythons float.hex() always prints full precision
+ *    (0.5).hex() => 0x1.0000000000000p-1
+ * printf("%a") only prints as much as necessary
+ *    printf("%a", 0.5) => 0x1p-1
+ * python doesn't have %a
+ */
+std::string float2hex(double val)
+{
+	// -0x1.MMMMMMMMMMMMMp+EEE
+	// 1 byte   optional sign
+	// 4 bytes  0x1. prefix
+	// 13 bytes mantissa
+	// 2 bytes  p+ infix
+	// 3 bytes  exponent
+	// 1 byte   NULL
+	// = 24 bytes maximum
+	int buflen = 24;
+	char buffer[buflen];
+	int ret = snprintf(buffer, buflen, "%a", val);
+	if (ret < 0 || ret >= buflen) {
+		PyErr_SetString(PyExc_RuntimeError, "snprintf failed");
+		bp::throw_error_already_set();
+	}
+	return std::string(buffer);
+}
+
+void export_utils()
+{
+	bp::object utilsModule(bp::handle<>(bp::borrowed(PyImport_AddModule("py3dtk.utils"))));
+	bp::scope().attr("utils") = utilsModule;
+	bp::scope utils_scope = utilsModule; // set the scope to the new module
+	bp::def("float2hex", float2hex);
+}
 
 BOOST_PYTHON_MODULE(py3dtk)
 {
+	bp::object package = bp::scope();
+	package.attr("__path__") = "py3dtk";
+
 	bp::enum_<IOType>("IOType")
 		.value("UOS", UOS)
 		.value("UOSR", UOSR)
@@ -706,4 +743,6 @@ BOOST_PYTHON_MODULE(py3dtk)
 
 	bp::class_<QuadTree, boost::noncopyable>("QuadTree", bp::init<DataXYZ const&>())
 		.def("search", &QuadTree_search);
+
+	export_utils();
 }
