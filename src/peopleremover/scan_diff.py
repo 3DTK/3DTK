@@ -51,8 +51,14 @@ Clean scan of noise:
     parser.add_argument("--dist", type=float, metavar="DIST", default=1.0)
     parser.add_argument("--maxnum", type=int, metavar="MAXNUM", default=0)
     parser.add_argument("--invert", action="store_true")
+    parser.add_argument("--write-mask", action="store_true")
+    parser.add_argument("--reflectance", action="store_true")
     parser.add_argument("directory")
     args = parser.parse_args()
+
+    if args.write_mask and args.reflectance:
+        print("--write-mask cannot be used together with --reflectance", file=sys.stderr)
+        exit(1)
 
     scanserver = False
     py3dtk.openDirectory(scanserver, args.directory, args.format, args.start, args.end)
@@ -68,20 +74,40 @@ Clean scan of noise:
     if len(py3dtk.allScans) == 1:
         scan2 = scan1
         points2 = points1
+        if args.reflectance:
+            reflectance = list(py3dtk.DataReflectance(scan1.get("reflectance")))
     else:
         scan2 = py3dtk.allScans[1]
         scan2.transformAll(scan2.get_transMatOrg())
         points2 = list(py3dtk.DataXYZ(scan2.get("xyz")))
+        if args.reflectance:
+            reflectance = list(py3dtk.DataReflectance(scan2.get("reflectance")))
     kdtree1 = py3dtk.KDtree(points1)
     dist2 = args.dist**2
+    dropped = 0
     for i,p in enumerate(points2):
         print("%f"%((i+1)*100/len(points2)), end="\r", file=sys.stderr)
         pts = kdtree1.kNearestRangeSearch(p, args.maxnum+1, dist2)
         if args.invert != (len(pts) <= args.maxnum):
-            print("%s %s %s"%(
-                py3dtk.utils.float2hex(p[0]),
-                py3dtk.utils.float2hex(p[1]),
-                py3dtk.utils.float2hex(p[2])))
+            if args.write_mask:
+                print("1")
+            else:
+                if args.reflectance:
+                    print("%s %s %s %s"%(
+                        py3dtk.utils.float2hex(p[0]),
+                        py3dtk.utils.float2hex(p[1]),
+                        py3dtk.utils.float2hex(p[2]),
+                        py3dtk.utils.float2hex(reflectance[i])))
+                else:
+                    print("%s %s %s"%(
+                        py3dtk.utils.float2hex(p[0]),
+                        py3dtk.utils.float2hex(p[1]),
+                        py3dtk.utils.float2hex(p[2])))
+        else:
+            if args.write_mask:
+                print("0")
+            dropped += 1
+    print("dropped %d out of %d points (%f %%)"%(dropped, len(points2), dropped*100/len(points2)), file=sys.stderr)
 
 if __name__ == "__main__":
     main()
