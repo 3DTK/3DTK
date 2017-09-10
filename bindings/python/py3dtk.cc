@@ -12,105 +12,105 @@
 	#error require python3
 #endif
 
-using namespace boost::python;
+namespace bp = boost::python;
 
 DataPointer (Scan::*scan_getByString)(const std::string&) = &Scan::get;
 void (Scan::*scan_getByType)(IODataType) = &Scan::get;
 
-boost::python::list QuadTree_search(QuadTree &tree, boost::python::tuple _p, double r)
+bp::list QuadTree_search(QuadTree &tree, bp::tuple _p, double r)
 {
 	double *_pv = new double[3];
-	_pv[0] = extract<double>(_p[0]);
-	_pv[1] = extract<double>(_p[1]);
-	_pv[2] = extract<double>(_p[2]);
+	_pv[0] = bp::extract<double>(_p[0]);
+	_pv[1] = bp::extract<double>(_p[1]);
+	_pv[2] = bp::extract<double>(_p[2]);
 	std::vector<size_t> res = tree.search(_pv, r);
 	delete[] _pv;
-	boost::python::list l;
+	bp::list l;
 	for (auto &it: res) {
 		l.append(it);
 	}
 	return l;
 }
 
-boost::python::tuple scan_get_rPos(Scan &s)
+bp::tuple scan_get_rPos(Scan &s)
 {
 	const double *rPos = s.get_rPos();
-	boost::python::list l;
+	bp::list l;
 	for (int i = 0; i < 3; ++i) {
 		l.append(rPos[i]);
 	}
-	return boost::python::tuple(l);
+	return bp::tuple(l);
 }
 
-boost::python::tuple scan_get_rPosTheta(Scan &s)
+bp::tuple scan_get_rPosTheta(Scan &s)
 {
 	const double *rPosTheta = s.get_rPosTheta();
-	boost::python::list l;
+	bp::list l;
 	for (int i = 0; i < 3; ++i) {
 		l.append(rPosTheta[i]);
 	}
-	return boost::python::tuple(l);
+	return bp::tuple(l);
 }
 
-boost::python::tuple scan_get_transMatOrg(Scan &s)
+bp::tuple scan_get_transMatOrg(Scan &s)
 {
 	const double *transMatOrg = s.get_transMatOrg();
-	boost::python::list l;
+	bp::list l;
 	for (int i = 0; i < 16; ++i) {
 		l.append(transMatOrg[i]);
 	}
-	return boost::python::tuple(l);
+	return bp::tuple(l);
 }
 
-void scan_transform(Scan &s, boost::python::tuple m, const Scan::AlgoType type, bool islum = 0)
+void scan_transform(Scan &s, bp::tuple m, const Scan::AlgoType type, bool islum = 0)
 {
 	const double matrix[16] = {
-		boost::python::extract<double>(m[0])(),
-		boost::python::extract<double>(m[1])(),
-		boost::python::extract<double>(m[2])(),
-		boost::python::extract<double>(m[3])(),
-		boost::python::extract<double>(m[4])(),
-		boost::python::extract<double>(m[5])(),
-		boost::python::extract<double>(m[6])(),
-		boost::python::extract<double>(m[7])(),
-		boost::python::extract<double>(m[8])(),
-		boost::python::extract<double>(m[9])(),
-		boost::python::extract<double>(m[10])(),
-		boost::python::extract<double>(m[11])(),
-		boost::python::extract<double>(m[12])(),
-		boost::python::extract<double>(m[13])(),
-		boost::python::extract<double>(m[14])(),
-		boost::python::extract<double>(m[15])()
+		bp::extract<double>(m[0])(),
+		bp::extract<double>(m[1])(),
+		bp::extract<double>(m[2])(),
+		bp::extract<double>(m[3])(),
+		bp::extract<double>(m[4])(),
+		bp::extract<double>(m[5])(),
+		bp::extract<double>(m[6])(),
+		bp::extract<double>(m[7])(),
+		bp::extract<double>(m[8])(),
+		bp::extract<double>(m[9])(),
+		bp::extract<double>(m[10])(),
+		bp::extract<double>(m[11])(),
+		bp::extract<double>(m[12])(),
+		bp::extract<double>(m[13])(),
+		bp::extract<double>(m[14])(),
+		bp::extract<double>(m[15])()
 	};
 	s.transform(matrix, type, islum);
 }
 
-void scan_transformAll(Scan &s, boost::python::tuple m)
+void scan_transformAll(Scan &s, bp::tuple m)
 {
 	const double matrix[16] = {
-		boost::python::extract<double>(m[0])(),
-		boost::python::extract<double>(m[1])(),
-		boost::python::extract<double>(m[2])(),
-		boost::python::extract<double>(m[3])(),
-		boost::python::extract<double>(m[4])(),
-		boost::python::extract<double>(m[5])(),
-		boost::python::extract<double>(m[6])(),
-		boost::python::extract<double>(m[7])(),
-		boost::python::extract<double>(m[8])(),
-		boost::python::extract<double>(m[9])(),
-		boost::python::extract<double>(m[10])(),
-		boost::python::extract<double>(m[11])(),
-		boost::python::extract<double>(m[12])(),
-		boost::python::extract<double>(m[13])(),
-		boost::python::extract<double>(m[14])(),
-		boost::python::extract<double>(m[15])()
+		bp::extract<double>(m[0])(),
+		bp::extract<double>(m[1])(),
+		bp::extract<double>(m[2])(),
+		bp::extract<double>(m[3])(),
+		bp::extract<double>(m[4])(),
+		bp::extract<double>(m[5])(),
+		bp::extract<double>(m[6])(),
+		bp::extract<double>(m[7])(),
+		bp::extract<double>(m[8])(),
+		bp::extract<double>(m[9])(),
+		bp::extract<double>(m[10])(),
+		bp::extract<double>(m[11])(),
+		bp::extract<double>(m[12])(),
+		bp::extract<double>(m[13])(),
+		bp::extract<double>(m[14])(),
+		bp::extract<double>(m[15])()
 	};
 	s.transformAll(matrix);
 }
 
-boost::python::tuple pyM4identity()
+bp::tuple pyM4identity()
 {
-	boost::python::list l;
+	bp::list l;
 	l.append(1.0f);
 	l.append(0.0f);
 	l.append(0.0f);
@@ -127,179 +127,179 @@ boost::python::tuple pyM4identity()
 	l.append(0.0f);
 	l.append(0.0f);
 	l.append(1.0f);
-	return boost::python::tuple(l);
+	return bp::tuple(l);
 }
 
-boost::python::tuple pytransform3(boost::python::tuple m, boost::python::tuple p)
+bp::tuple pytransform3(bp::tuple m, bp::tuple p)
 {
 	const double matrix[16] = {
-		boost::python::extract<double>(m[0])(),
-		boost::python::extract<double>(m[1])(),
-		boost::python::extract<double>(m[2])(),
-		boost::python::extract<double>(m[3])(),
-		boost::python::extract<double>(m[4])(),
-		boost::python::extract<double>(m[5])(),
-		boost::python::extract<double>(m[6])(),
-		boost::python::extract<double>(m[7])(),
-		boost::python::extract<double>(m[8])(),
-		boost::python::extract<double>(m[9])(),
-		boost::python::extract<double>(m[10])(),
-		boost::python::extract<double>(m[11])(),
-		boost::python::extract<double>(m[12])(),
-		boost::python::extract<double>(m[13])(),
-		boost::python::extract<double>(m[14])(),
-		boost::python::extract<double>(m[15])()
+		bp::extract<double>(m[0])(),
+		bp::extract<double>(m[1])(),
+		bp::extract<double>(m[2])(),
+		bp::extract<double>(m[3])(),
+		bp::extract<double>(m[4])(),
+		bp::extract<double>(m[5])(),
+		bp::extract<double>(m[6])(),
+		bp::extract<double>(m[7])(),
+		bp::extract<double>(m[8])(),
+		bp::extract<double>(m[9])(),
+		bp::extract<double>(m[10])(),
+		bp::extract<double>(m[11])(),
+		bp::extract<double>(m[12])(),
+		bp::extract<double>(m[13])(),
+		bp::extract<double>(m[14])(),
+		bp::extract<double>(m[15])()
 	};
 	double point[3] = {
-		boost::python::extract<double>(p[0])(),
-		boost::python::extract<double>(p[1])(),
-		boost::python::extract<double>(p[2])(),
+		bp::extract<double>(p[0])(),
+		bp::extract<double>(p[1])(),
+		bp::extract<double>(p[2])(),
 	};
 	transform3(matrix, point);
-	boost::python::list l;
+	bp::list l;
 	for (int i = 0; i < 3; ++i) {
 		l.append(point[i]);
 	}
-	return boost::python::tuple(l);
+	return bp::tuple(l);
 }
 
-boost::python::tuple pytransform3normal(boost::python::tuple m, boost::python::tuple n)
+bp::tuple pytransform3normal(bp::tuple m, bp::tuple n)
 {
 	const double matrix[16] = {
-		boost::python::extract<double>(m[0])(),
-		boost::python::extract<double>(m[1])(),
-		boost::python::extract<double>(m[2])(),
-		boost::python::extract<double>(m[3])(),
-		boost::python::extract<double>(m[4])(),
-		boost::python::extract<double>(m[5])(),
-		boost::python::extract<double>(m[6])(),
-		boost::python::extract<double>(m[7])(),
-		boost::python::extract<double>(m[8])(),
-		boost::python::extract<double>(m[9])(),
-		boost::python::extract<double>(m[10])(),
-		boost::python::extract<double>(m[11])(),
-		boost::python::extract<double>(m[12])(),
-		boost::python::extract<double>(m[13])(),
-		boost::python::extract<double>(m[14])(),
-		boost::python::extract<double>(m[15])()
+		bp::extract<double>(m[0])(),
+		bp::extract<double>(m[1])(),
+		bp::extract<double>(m[2])(),
+		bp::extract<double>(m[3])(),
+		bp::extract<double>(m[4])(),
+		bp::extract<double>(m[5])(),
+		bp::extract<double>(m[6])(),
+		bp::extract<double>(m[7])(),
+		bp::extract<double>(m[8])(),
+		bp::extract<double>(m[9])(),
+		bp::extract<double>(m[10])(),
+		bp::extract<double>(m[11])(),
+		bp::extract<double>(m[12])(),
+		bp::extract<double>(m[13])(),
+		bp::extract<double>(m[14])(),
+		bp::extract<double>(m[15])()
 	};
 	double normal[3] = {
-		boost::python::extract<double>(n[0])(),
-		boost::python::extract<double>(n[1])(),
-		boost::python::extract<double>(n[2])(),
+		bp::extract<double>(n[0])(),
+		bp::extract<double>(n[1])(),
+		bp::extract<double>(n[2])(),
 	};
 	transform3normal(matrix, normal);
-	boost::python::list l;
+	bp::list l;
 	for (int i = 0; i < 3; ++i) {
 		l.append(normal[i]);
 	}
-	return boost::python::tuple(l);
+	return bp::tuple(l);
 }
 
-boost::python::tuple pyEulerToMatrix3(boost::python::tuple t)
+bp::tuple pyEulerToMatrix3(bp::tuple t)
 {
 	const double rPosTheta[3] = {
-		boost::python::extract<double>(t[0])(),
-		boost::python::extract<double>(t[1])(),
-		boost::python::extract<double>(t[2])(),
+		bp::extract<double>(t[0])(),
+		bp::extract<double>(t[1])(),
+		bp::extract<double>(t[2])(),
 	};
 	double matrix[9];
 	EulerToMatrix3(rPosTheta, matrix);
-	boost::python::list l;
+	bp::list l;
 	for (int i = 0; i < 9; ++i) {
 		l.append(matrix[i]);
 	}
-	return boost::python::tuple(l);
+	return bp::tuple(l);
 }
 
-boost::python::tuple pyEulerToMatrix4(boost::python::tuple p, boost::python::tuple t)
+bp::tuple pyEulerToMatrix4(bp::tuple p, bp::tuple t)
 {
 	const double rPos[3] = {
-		boost::python::extract<double>(p[0])(),
-		boost::python::extract<double>(p[1])(),
-		boost::python::extract<double>(p[2])(),
+		bp::extract<double>(p[0])(),
+		bp::extract<double>(p[1])(),
+		bp::extract<double>(p[2])(),
 	};
 	const double rPosTheta[3] = {
-		boost::python::extract<double>(t[0])(),
-		boost::python::extract<double>(t[1])(),
-		boost::python::extract<double>(t[2])(),
+		bp::extract<double>(t[0])(),
+		bp::extract<double>(t[1])(),
+		bp::extract<double>(t[2])(),
 	};
 	double matrix[16];
 	EulerToMatrix4(rPos, rPosTheta, matrix);
-	boost::python::list l;
+	bp::list l;
 	for (int i = 0; i < 16; ++i) {
 		l.append(matrix[i]);
 	}
-	return boost::python::tuple(l);
+	return bp::tuple(l);
 }
 
-boost::python::tuple pyM3inv(boost::python::tuple m)
+bp::tuple pyM3inv(bp::tuple m)
 {
 	const double Min[9] = {
-		boost::python::extract<double>(m[0])(),
-		boost::python::extract<double>(m[1])(),
-		boost::python::extract<double>(m[2])(),
-		boost::python::extract<double>(m[3])(),
-		boost::python::extract<double>(m[4])(),
-		boost::python::extract<double>(m[5])(),
-		boost::python::extract<double>(m[6])(),
-		boost::python::extract<double>(m[7])(),
-		boost::python::extract<double>(m[8])(),
+		bp::extract<double>(m[0])(),
+		bp::extract<double>(m[1])(),
+		bp::extract<double>(m[2])(),
+		bp::extract<double>(m[3])(),
+		bp::extract<double>(m[4])(),
+		bp::extract<double>(m[5])(),
+		bp::extract<double>(m[6])(),
+		bp::extract<double>(m[7])(),
+		bp::extract<double>(m[8])(),
 	};
 	double Mout[9];
 	M3inv(Min, Mout);
-	boost::python::list l;
+	bp::list l;
 	for (int i = 0; i < 9; ++i) {
 		l.append(Mout[i]);
 	}
-	return boost::python::tuple(l);
+	return bp::tuple(l);
 }
 
-boost::python::tuple pyM4inv(boost::python::tuple m)
+bp::tuple pyM4inv(bp::tuple m)
 {
 	const double Min[16] = {
-		boost::python::extract<double>(m[0])(),
-		boost::python::extract<double>(m[1])(),
-		boost::python::extract<double>(m[2])(),
-		boost::python::extract<double>(m[3])(),
-		boost::python::extract<double>(m[4])(),
-		boost::python::extract<double>(m[5])(),
-		boost::python::extract<double>(m[6])(),
-		boost::python::extract<double>(m[7])(),
-		boost::python::extract<double>(m[8])(),
-		boost::python::extract<double>(m[9])(),
-		boost::python::extract<double>(m[10])(),
-		boost::python::extract<double>(m[11])(),
-		boost::python::extract<double>(m[12])(),
-		boost::python::extract<double>(m[13])(),
-		boost::python::extract<double>(m[14])(),
-		boost::python::extract<double>(m[15])()
+		bp::extract<double>(m[0])(),
+		bp::extract<double>(m[1])(),
+		bp::extract<double>(m[2])(),
+		bp::extract<double>(m[3])(),
+		bp::extract<double>(m[4])(),
+		bp::extract<double>(m[5])(),
+		bp::extract<double>(m[6])(),
+		bp::extract<double>(m[7])(),
+		bp::extract<double>(m[8])(),
+		bp::extract<double>(m[9])(),
+		bp::extract<double>(m[10])(),
+		bp::extract<double>(m[11])(),
+		bp::extract<double>(m[12])(),
+		bp::extract<double>(m[13])(),
+		bp::extract<double>(m[14])(),
+		bp::extract<double>(m[15])()
 	};
 	double Mout[16];
 	M4inv(Min, Mout);
-	boost::python::list l;
+	bp::list l;
 	for (int i = 0; i < 16; ++i) {
 		l.append(Mout[i]);
 	}
-	return boost::python::tuple(l);
+	return bp::tuple(l);
 }
 
 // given a DataXYZ and an index, assemble a Python tuple to return
 // that contains the xyz data
-boost::python::tuple DataXYZ_getitem(DataXYZ &s, size_t index)
+bp::tuple DataXYZ_getitem(DataXYZ &s, size_t index)
 {
 	if (index >= 0 && index < s.size()) {
-		boost::python::list l;
+		bp::list l;
 		for (int i = 0; i < 3; ++i) {
 			l.append(s[index][i]);
 		}
-		return boost::python::tuple(l);
+		return bp::tuple(l);
 	} else {
 		PyErr_SetString(PyExc_IndexError, "index out of range");
-		throw_error_already_set();
+		bp::throw_error_already_set();
 		// because of the thrown exception, this will never be reached
 		// we do this to make the compiler happy
-		return boost::python::tuple();
+		return bp::tuple();
 	}
 }
 
@@ -314,7 +314,7 @@ float DataReflectance_getitem(DataReflectance &s, size_t index)
 		return s[index];
 	} else {
 		PyErr_SetString(PyExc_IndexError, "index out of range");
-		throw_error_already_set();
+		bp::throw_error_already_set();
 		// because of the thrown exception, this will never be reached
 		// we do this to make the compiler happy
 		return 0.0f;
@@ -331,16 +331,16 @@ size_t DataReflectance_length(DataReflectance &s)
 class KDtreeIndexedWrapper : public KDtreeIndexed
 {
 	public:
-		KDtreeIndexedWrapper(boost::python::list l) : KDtreeIndexed()
+		KDtreeIndexedWrapper(bp::list l) : KDtreeIndexed()
 		{
-			size_t len = extract<std::size_t>(l.attr("__len__")());
+			size_t len = bp::extract<std::size_t>(l.attr("__len__")());
 			double** pa = new double*[len];
 			for (size_t i = 0; i < len; ++i) {
-				boost::python::tuple t = extract<boost::python::tuple>(l[i]);
+				bp::tuple t = bp::extract<bp::tuple>(l[i]);
 				pa[i] = new double[3];
-				pa[i][0] = extract<double>(t[0]);
-				pa[i][1] = extract<double>(t[1]);
-				pa[i][2] = extract<double>(t[2]);
+				pa[i][0] = bp::extract<double>(t[0]);
+				pa[i][1] = bp::extract<double>(t[1]);
+				pa[i][2] = bp::extract<double>(t[2]);
 			}
 			m_data = pa;
 			m_size = len;
@@ -348,27 +348,27 @@ class KDtreeIndexedWrapper : public KDtreeIndexed
 			delete[] m_temp_indices;
 		}
 
-		size_t FindClosest(boost::python::tuple _p, double sqRad2)
+		size_t FindClosest(bp::tuple _p, double sqRad2)
 		{
 			double *_pv = new double[3];
-			_pv[0] = extract<double>(_p[0]);
-			_pv[1] = extract<double>(_p[1]);
-			_pv[2] = extract<double>(_p[2]);
+			_pv[0] = bp::extract<double>(_p[0]);
+			_pv[1] = bp::extract<double>(_p[1]);
+			_pv[2] = bp::extract<double>(_p[2]);
 			int threadNum = 0;
 			size_t res = KDtreeIndexed::FindClosest(_pv, sqRad2, threadNum);
 			delete[] _pv;
 			return res;
 		}
 
-		boost::python::list fixedRangeSearch(boost::python::tuple _p, double sqRad2)
+		bp::list fixedRangeSearch(bp::tuple _p, double sqRad2)
 		{
 			double *_pv = new double[3];
-			_pv[0] = extract<double>(_p[0]);
-			_pv[1] = extract<double>(_p[1]);
-			_pv[2] = extract<double>(_p[2]);
+			_pv[0] = bp::extract<double>(_p[0]);
+			_pv[1] = bp::extract<double>(_p[1]);
+			_pv[2] = bp::extract<double>(_p[2]);
 			int threadNum = 0;
 			std::vector<size_t> res = KDtreeIndexed::fixedRangeSearch(_pv, sqRad2, threadNum);
-			boost::python::list l;
+			bp::list l;
 			for (auto &it: res) {
 				l.append(it);
 			}
@@ -376,15 +376,15 @@ class KDtreeIndexedWrapper : public KDtreeIndexed
 			return l;
 		}
 
-		boost::python::list kNearestNeighbors(boost::python::tuple _p, size_t k)
+		bp::list kNearestNeighbors(bp::tuple _p, size_t k)
 		{
 			double *_pv = new double[3];
-			_pv[0] = extract<double>(_p[0]);
-			_pv[1] = extract<double>(_p[1]);
-			_pv[2] = extract<double>(_p[2]);
+			_pv[0] = bp::extract<double>(_p[0]);
+			_pv[1] = bp::extract<double>(_p[1]);
+			_pv[2] = bp::extract<double>(_p[2]);
 			int threadNum = 0;
 			std::vector<size_t> res = KDtreeIndexed::kNearestNeighbors(_pv, k, threadNum);
-			boost::python::list l;
+			bp::list l;
 			for (auto &it: res) {
 				l.append(it);
 			}
@@ -392,16 +392,16 @@ class KDtreeIndexedWrapper : public KDtreeIndexed
 			return l;
 		}
 
-		size_t segmentSearch_1NearestPoint(boost::python::tuple _p, boost::python::tuple _p0, double maxdist2)
+		size_t segmentSearch_1NearestPoint(bp::tuple _p, bp::tuple _p0, double maxdist2)
 		{
 			double *_pv = new double[3];
-			_pv[0] = extract<double>(_p[0]);
-			_pv[1] = extract<double>(_p[1]);
-			_pv[2] = extract<double>(_p[2]);
+			_pv[0] = bp::extract<double>(_p[0]);
+			_pv[1] = bp::extract<double>(_p[1]);
+			_pv[2] = bp::extract<double>(_p[2]);
 			double *_p0v = new double[3];
-			_p0v[0] = extract<double>(_p0[0]);
-			_p0v[1] = extract<double>(_p0[1]);
-			_p0v[2] = extract<double>(_p0[2]);
+			_p0v[0] = bp::extract<double>(_p0[0]);
+			_p0v[1] = bp::extract<double>(_p0[1]);
+			_p0v[2] = bp::extract<double>(_p0[2]);
 			int threadNum = 0;
 			size_t res = KDtreeIndexed::segmentSearch_1NearestPoint(_pv, _p0v, maxdist2, threadNum);
 			delete[] _pv;
@@ -427,123 +427,123 @@ class KDtreeWrapper : public KDtree
 		size_t m_size;
 
 	public:
-		KDtreeWrapper(boost::python::list l) : KDtree()
+		KDtreeWrapper(bp::list l) : KDtree()
 		{
-			size_t len = extract<std::size_t>(l.attr("__len__")());
+			size_t len = bp::extract<std::size_t>(l.attr("__len__")());
 			double** pa = new double*[len];
 			for (size_t i = 0; i < len; ++i) {
-				boost::python::tuple t = extract<boost::python::tuple>(l[i]);
+				bp::tuple t = bp::extract<bp::tuple>(l[i]);
 				pa[i] = new double[3];
-				pa[i][0] = extract<double>(t[0]);
-				pa[i][1] = extract<double>(t[1]);
-				pa[i][2] = extract<double>(t[2]);
+				pa[i][0] = bp::extract<double>(t[0]);
+				pa[i][1] = bp::extract<double>(t[1]);
+				pa[i][2] = bp::extract<double>(t[2]);
 			}
 			m_data = pa;
 			m_size = len;
 			create(Void(), m_data, m_size);
 		}
 
-		boost::python::object FindClosest(boost::python::tuple _p, double sqRad2)
+		bp::object FindClosest(bp::tuple _p, double sqRad2)
 		{
 			double *_pv = new double[3];
-			_pv[0] = extract<double>(_p[0]);
-			_pv[1] = extract<double>(_p[1]);
-			_pv[2] = extract<double>(_p[2]);
+			_pv[0] = bp::extract<double>(_p[0]);
+			_pv[1] = bp::extract<double>(_p[1]);
+			_pv[2] = bp::extract<double>(_p[2]);
 			int threadNum = 0;
 			double *closest = KDtree::FindClosest(_pv, sqRad2, threadNum);
 			delete[] _pv;
 			if (closest == 0) {
-				return boost::python::object(); // return None
+				return bp::object(); // return None
 			}
-			boost::python::list l;
+			bp::list l;
 			for (int i = 0; i < 3; i++) {
 				l.append(closest[i]);
 			}
-			return boost::python::tuple(l);
+			return bp::tuple(l);
 		}
 
-		boost::python::list fixedRangeSearch(boost::python::tuple _p, double sqRad2)
+		bp::list fixedRangeSearch(bp::tuple _p, double sqRad2)
 		{
 			double *_pv = new double[3];
-			_pv[0] = extract<double>(_p[0]);
-			_pv[1] = extract<double>(_p[1]);
-			_pv[2] = extract<double>(_p[2]);
+			_pv[0] = bp::extract<double>(_p[0]);
+			_pv[1] = bp::extract<double>(_p[1]);
+			_pv[2] = bp::extract<double>(_p[2]);
 			int threadNum = 0;
 			std::vector<Point> res = KDtree::fixedRangeSearch(_pv, sqRad2, threadNum);
-			boost::python::list l;
+			bp::list l;
 			for (auto &it: res) {
-				boost::python::list p;
+				bp::list p;
 				p.append(it.x);
 				p.append(it.y);
 				p.append(it.z);
-				l.append(boost::python::tuple(p));
+				l.append(bp::tuple(p));
 			}
 			delete[] _pv;
 			return l;
 		}
 
-		boost::python::list kNearestNeighbors(boost::python::tuple _p, size_t k)
+		bp::list kNearestNeighbors(bp::tuple _p, size_t k)
 		{
 			double *_pv = new double[3];
-			_pv[0] = extract<double>(_p[0]);
-			_pv[1] = extract<double>(_p[1]);
-			_pv[2] = extract<double>(_p[2]);
+			_pv[0] = bp::extract<double>(_p[0]);
+			_pv[1] = bp::extract<double>(_p[1]);
+			_pv[2] = bp::extract<double>(_p[2]);
 			int threadNum = 0;
 			std::vector<Point> res = KDtree::kNearestNeighbors(_pv, k, threadNum);
-			boost::python::list l;
+			bp::list l;
 			for (auto &it: res) {
-				boost::python::list p;
+				bp::list p;
 				p.append(it.x);
 				p.append(it.y);
 				p.append(it.z);
-				l.append(boost::python::tuple(p));
+				l.append(bp::tuple(p));
 			}
 			delete[] _pv;
 			return l;
 		}
 
-		boost::python::list kNearestRangeSearch(boost::python::tuple _p, size_t k, double sqRad2)
+		bp::list kNearestRangeSearch(bp::tuple _p, size_t k, double sqRad2)
 		{
 			double *_pv = new double[3];
-			_pv[0] = extract<double>(_p[0]);
-			_pv[1] = extract<double>(_p[1]);
-			_pv[2] = extract<double>(_p[2]);
+			_pv[0] = bp::extract<double>(_p[0]);
+			_pv[1] = bp::extract<double>(_p[1]);
+			_pv[2] = bp::extract<double>(_p[2]);
 			int threadNum = 0;
 			std::vector<Point> res = KDtree::kNearestRangeSearch(_pv, k, sqRad2, threadNum);
-			boost::python::list l;
+			bp::list l;
 			for (auto &it: res) {
-				boost::python::list p;
+				bp::list p;
 				p.append(it.x);
 				p.append(it.y);
 				p.append(it.z);
-				l.append(boost::python::tuple(p));
+				l.append(bp::tuple(p));
 			}
 			delete[] _pv;
 			return l;
 		}
 
-		boost::python::object segmentSearch_1NearestPoint(boost::python::tuple _p, boost::python::tuple _p0, double maxdist2)
+		bp::object segmentSearch_1NearestPoint(bp::tuple _p, bp::tuple _p0, double maxdist2)
 		{
 			double *_pv = new double[3];
-			_pv[0] = extract<double>(_p[0]);
-			_pv[1] = extract<double>(_p[1]);
-			_pv[2] = extract<double>(_p[2]);
+			_pv[0] = bp::extract<double>(_p[0]);
+			_pv[1] = bp::extract<double>(_p[1]);
+			_pv[2] = bp::extract<double>(_p[2]);
 			double *_p0v = new double[3];
-			_p0v[0] = extract<double>(_p0[0]);
-			_p0v[1] = extract<double>(_p0[1]);
-			_p0v[2] = extract<double>(_p0[2]);
+			_p0v[0] = bp::extract<double>(_p0[0]);
+			_p0v[1] = bp::extract<double>(_p0[1]);
+			_p0v[2] = bp::extract<double>(_p0[2]);
 			int threadNum = 0;
 			double *closest = KDtree::segmentSearch_1NearestPoint(_pv, _p0v, maxdist2, threadNum);
 			delete[] _pv;
 			delete[] _p0v;
 			if (closest == 0) {
-				return boost::python::object(); // return None
+				return bp::object(); // return None
 			}
-			boost::python::list l;
+			bp::list l;
 			for (int i = 0; i < 3; i++) {
 				l.append(closest[i]);
 			}
-			return boost::python::tuple(l);
+			return bp::tuple(l);
 		}
 
 		~KDtreeWrapper()
@@ -556,35 +556,35 @@ class KDtreeWrapper : public KDtree
 };
 
 
-boost::python::tuple calculateNormalWrapper(boost::python::list pts) {
-	size_t num_pts = extract<std::size_t>(pts.attr("__len__")());
+bp::tuple calculateNormalWrapper(bp::list pts) {
+	size_t num_pts = bp::extract<std::size_t>(pts.attr("__len__")());
 	std::vector<Point> points;
 	points.reserve(num_pts);
 	for (size_t i = 0; i < num_pts; ++i) {
-		boost::python::tuple t = extract<boost::python::tuple>(pts[i]);
-		points.push_back(Point(extract<double>(t[0]), extract<double>(t[1]), extract<double>(t[2])));
+		bp::tuple t = bp::extract<bp::tuple>(pts[i]);
+		points.push_back(Point(bp::extract<double>(t[0]), bp::extract<double>(t[1]), bp::extract<double>(t[2])));
 	}
 	double norm[3];
 	double eigen[3];
 	calculateNormal(points, norm, eigen);
-	boost::python::list p1;
+	bp::list p1;
 	p1.append(norm[0]);
 	p1.append(norm[1]);
 	p1.append(norm[2]);
-	boost::python::list p2;
+	bp::list p2;
 	p2.append(eigen[0]);
 	p2.append(eigen[1]);
 	p2.append(eigen[2]);
-	boost::python::list p;
-	p.append(boost::python::tuple(p1));
-	p.append(boost::python::tuple(p2));
-	return boost::python::tuple(p);
+	bp::list p;
+	p.append(bp::tuple(p1));
+	p.append(bp::tuple(p2));
+	return bp::tuple(p);
 }
 
 
 BOOST_PYTHON_MODULE(py3dtk)
 {
-	enum_<IOType>("IOType")
+	bp::enum_<IOType>("IOType")
 		.value("UOS", UOS)
 		.value("UOSR", UOSR)
 		.value("UOS_MAP", UOS_MAP)
@@ -632,38 +632,38 @@ BOOST_PYTHON_MODULE(py3dtk)
 		.value("B3D", B3D)
         ;
 
-	enum_<Scan::AlgoType>("AlgoType")
+	bp::enum_<Scan::AlgoType>("AlgoType")
 		.value("INVALID", Scan::INVALID)
 		.value("ICP", Scan::ICP)
 		.value("ICPINACTIVE", Scan::ICPINACTIVE)
 		.value("LUM", Scan::LUM)
 		.value("ELCH", Scan::ELCH);
 
-	def("openDirectory", Scan::openDirectory);
+	bp::def("openDirectory", Scan::openDirectory);
 
-	def("M4identity", pyM4identity);
-	def("transform3", pytransform3);
-	def("transform3normal", pytransform3normal);
-	def("EulerToMatrix3", pyEulerToMatrix3);
-	def("EulerToMatrix4", pyEulerToMatrix4);
-	def("M3inv", pyM3inv);
-	def("M4inv", pyM4inv);
+	bp::def("M4identity", pyM4identity);
+	bp::def("transform3", pytransform3);
+	bp::def("transform3normal", pytransform3normal);
+	bp::def("EulerToMatrix3", pyEulerToMatrix3);
+	bp::def("EulerToMatrix4", pyEulerToMatrix4);
+	bp::def("M3inv", pyM3inv);
+	bp::def("M4inv", pyM4inv);
 
-	def("formatname_to_io_type", formatname_to_io_type);
-	def("io_type_to_libname", io_type_to_libname);
+	bp::def("formatname_to_io_type", formatname_to_io_type);
+	bp::def("io_type_to_libname", io_type_to_libname);
 
-	class_<DataPointer>("DataPointer", boost::python::no_init);
+	bp::class_<DataPointer>("DataPointer", bp::no_init);
 	// DataXYZ is a TripleArray<double>
-	class_<DataXYZ, boost::python::bases<DataPointer>>("DataXYZ", boost::python::init<DataPointer&>())
+	bp::class_<DataXYZ, bp::bases<DataPointer>>("DataXYZ", bp::init<DataPointer&>())
 		.def("__getitem__", &DataXYZ_getitem)
 		.def("__len__", &DataXYZ_length);
 
-	class_<DataReflectance, boost::python::bases<DataPointer>>("DataReflectance", boost::python::init<DataPointer&>())
+	bp::class_<DataReflectance, bp::bases<DataPointer>>("DataReflectance", bp::init<DataPointer&>())
 		.def("__getitem__", &DataReflectance_getitem)
 		.def("__len__", &DataReflectance_length);
 
 	// Scan is not copyable and has no init
-	class_<Scan, boost::noncopyable>("Scan", boost::python::no_init)
+	bp::class_<Scan, boost::noncopyable>("Scan", bp::no_init)
 		.def("get", scan_getByString)
 		.def("get", scan_getByType)
 		.def("get_rPos", scan_get_rPos)
@@ -675,35 +675,35 @@ BOOST_PYTHON_MODULE(py3dtk)
 		.def("transformAll", scan_transformAll)
 		.def("getIdentifier", &Scan::getIdentifier);
 	// BasicScan derives from Scan, is not copyable and has no init
-	class_<BasicScan, boost::noncopyable, boost::python::bases<Scan>>("BasicScan", boost::python::no_init);
+	bp::class_<BasicScan, boost::noncopyable, bp::bases<Scan>>("BasicScan", bp::no_init);
 
 	// allows Python to hold the Scan* pointer in a variable
-	register_ptr_to_python<Scan*>();
+	bp::register_ptr_to_python<Scan*>();
 
 	// create a type which wraps the std::vector<Scan*> in a class accessible
 	// as a Python list
-	class_<std::vector<Scan*>>("ScanVector")
-		.def(vector_indexing_suite<std::vector<Scan*>>() );
+	bp::class_<std::vector<Scan*>>("ScanVector")
+		.def(bp::vector_indexing_suite<std::vector<Scan*>>() );
 
 	// add a global attribute as a pointer so that changes to it can be picked
 	// up by Python
-	scope().attr("allScans") = object(ptr(&Scan::allScans));
+	bp::scope().attr("allScans") = bp::object(bp::ptr(&Scan::allScans));
 
-	class_<KDtreeIndexedWrapper>("KDtreeIndexed", boost::python::init<boost::python::list>())
+	bp::class_<KDtreeIndexedWrapper>("KDtreeIndexed", bp::init<bp::list>())
 		.def("FindClosest", &KDtreeIndexedWrapper::FindClosest)
 		.def("fixedRangeSearch", &KDtreeIndexedWrapper::fixedRangeSearch)
 		.def("kNearestNeighbors", &KDtreeIndexedWrapper::kNearestNeighbors)
 		.def("segmentSearch_1NearestPoint", &KDtreeIndexedWrapper::segmentSearch_1NearestPoint);
 
-	class_<KDtreeWrapper>("KDtree", boost::python::init<boost::python::list>())
+	bp::class_<KDtreeWrapper>("KDtree", bp::init<bp::list>())
 		.def("FindClosest", &KDtreeWrapper::FindClosest)
 		.def("fixedRangeSearch", &KDtreeWrapper::fixedRangeSearch)
 		.def("kNearestNeighbors", &KDtreeWrapper::kNearestNeighbors)
 		.def("kNearestRangeSearch", &KDtreeWrapper::kNearestRangeSearch)
 		.def("segmentSearch_1NearestPoint", &KDtreeWrapper::segmentSearch_1NearestPoint);
 
-	def("calculateNormal", calculateNormalWrapper);
+	bp::def("calculateNormal", calculateNormalWrapper);
 
-	class_<QuadTree, boost::noncopyable>("QuadTree", boost::python::init<DataXYZ const&>())
+	bp::class_<QuadTree, boost::noncopyable>("QuadTree", bp::init<DataXYZ const&>())
 		.def("search", &QuadTree_search);
 }
