@@ -175,6 +175,7 @@ void CallBackMouseMotionFunc(int x, int y);
 
 void initScreenWindow();
 
+void load_url_texture();
 
 /* +++++++++-------------++++++++++++
  * NAME

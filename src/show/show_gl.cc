@@ -1648,10 +1648,11 @@ void initScreenWindow()
 
   update_view_rotate(0);
   glClearColor(0.0, 0.0, 0.0, 0.0);
-  // glClearColor(1.0, 1.0, 1.0, 1.0);
 
+  load_url_texture();
+}
 
-
+void load_url_texture() {
   glGenTextures(1, &urlTexture);
   glBindTexture(GL_TEXTURE_2D, urlTexture);
 
@@ -1663,7 +1664,6 @@ void initScreenWindow()
 		  urlTextureHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE,
 		  urlTextureData);
 }
-
 
 /* +++++++++-------------++++++++++++
  * NAME
