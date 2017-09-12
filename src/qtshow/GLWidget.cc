@@ -27,6 +27,7 @@ GLWidget::GLWidget(QWidget *parent)
 
 void GLWidget::initializeGL() {
   initializeOpenGLFunctions();
+  load_url_texture();
   glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 }
 
