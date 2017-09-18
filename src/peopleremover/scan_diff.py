@@ -60,6 +60,7 @@ Clean scan of noise:
         print("--write-mask cannot be used together with --reflectance", file=sys.stderr)
         exit(1)
 
+    print("open directory...", file=sys.stderr)
     scanserver = False
     py3dtk.openDirectory(scanserver, args.directory, args.format, args.start, args.end)
 
@@ -69,22 +70,29 @@ Clean scan of noise:
 
     scan1 = py3dtk.allScans[0]
     if len(py3dtk.allScans) != 1:
+        print("transform...", file=sys.stderr)
         scan1.transformAll(scan1.get_transMatOrg())
+    print("read scan 1...", file=sys.stderr)
     points1 = list(py3dtk.DataXYZ(scan1.get("xyz")))
     if len(py3dtk.allScans) == 1:
         scan2 = scan1
         points2 = points1
         if args.reflectance:
+            print("read reflectance 1...", file=sys.stderr)
             reflectance = list(py3dtk.DataReflectance(scan1.get("reflectance")))
     else:
         scan2 = py3dtk.allScans[1]
         scan2.transformAll(scan2.get_transMatOrg())
+        print("read scan 2...", file=sys.stderr)
         points2 = list(py3dtk.DataXYZ(scan2.get("xyz")))
         if args.reflectance:
+            print("read reflectance 2...", file=sys.stderr)
             reflectance = list(py3dtk.DataReflectance(scan2.get("reflectance")))
+    print("build k-d tree...", file=sys.stderr)
     kdtree1 = py3dtk.KDtree(points1)
     dist2 = args.dist**2
     dropped = 0
+    print("find %d neighbors within a radius of %f..."%(args.maxnum, args.dist), file=sys.stderr)
     for i,p in enumerate(points2):
         print("%f"%((i+1)*100/len(points2)), end="\r", file=sys.stderr)
         pts = kdtree1.kNearestRangeSearch(p, args.maxnum+1, dist2)
