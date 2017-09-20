@@ -548,8 +548,8 @@ def main():
             for cluster in neighbor_clusters:
                 if cluster == mincluster:
                     continue
-                for voxel in cluster_to_voxel[cluster]:
-                    voxel_to_cluster[voxel] = mincluster
+                for v in cluster_to_voxel[cluster]:
+                    voxel_to_cluster[v] = mincluster
                 cluster_to_voxel[mincluster].update(cluster_to_voxel[cluster])
                 del cluster_to_voxel[cluster]
             voxel_to_cluster[voxel] = mincluster
