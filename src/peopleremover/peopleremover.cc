@@ -918,12 +918,101 @@ int main(int argc, char* argv[])
 
 	if (cluster_size > 1) {
 		std::cerr << "clustering voxels" << std::endl;
-		exit(1);
+		clock_gettime(CLOCK_MONOTONIC, &before);
+		std::unordered_map<struct voxel, size_t> voxel_to_cluster;
+		std::unordered_map<size_t, std::set<struct voxel>> cluster_to_voxel;
+		size_t i = 0;
+		for (const struct voxel v : free_voxels) {
+			std::set<size_t> neighbor_clusters;
+			int vradius = 1;
+			for (int i = 0-vradius; i <= vradius; ++i) {
+				for (int j = 0-vradius; j <= vradius; ++j) {
+					for (int k = 0-vradius; k <= vradius; ++k) {
+						if (i == 0 && j == 0 && k == 0) {
+							continue;
+						}
+						std::unordered_map<struct voxel, size_t>::iterator it2 = voxel_to_cluster.find(voxel(v.x+i, v.y+j, v.z+k));
+						if (it2 != voxel_to_cluster.end()) {
+							neighbor_clusters.insert(it2->second);
+						}
+					}
+				}
+			}
+			if (neighbor_clusters.size() == 0) {
+				voxel_to_cluster[v] = i;
+				cluster_to_voxel[i].insert(v);
+				i += 1;
+				continue;
+			}
+			if (neighbor_clusters.size() == 1) {
+				size_t cluster = *(neighbor_clusters.begin());
+				voxel_to_cluster[v] = cluster;
+				cluster_to_voxel[cluster].insert(v);
+				i += 1;
+				continue;
+			}
+			size_t mincluster = *(neighbor_clusters.begin());
+			for (size_t cluster : neighbor_clusters) {
+				if (cluster == mincluster) {
+					continue;
+				}
+				for (struct voxel v2 : cluster_to_voxel[cluster]) {
+					voxel_to_cluster[v2] = mincluster;
+					cluster_to_voxel[mincluster].insert(v2);
+				}
+				cluster_to_voxel.erase(cluster);
+			}
+			voxel_to_cluster[v] = mincluster;
+			cluster_to_voxel[mincluster].insert(v);
+			i += 1;
+		}
+		for (std::pair<size_t, std::set<struct voxel>> p : cluster_to_voxel) {
+			if (p.second.size() >= cluster_size) {
+				continue;
+			}
+			for (struct voxel voxel : p.second) {
+				free_voxels.erase(voxel);
+			}
+		}
+		std::cerr << "number of free voxels after clustering: " << free_voxels.size() << std::endl;
+		clock_gettime(CLOCK_MONOTONIC, &after);
+		elapsed = (after.tv_sec - before.tv_sec);
+		elapsed += (after.tv_nsec - before.tv_nsec) / 1000000000.0;
+		std::cerr << "took: " << elapsed << " seconds" << std::endl;
 	}
 
+	std::unordered_map<struct voxel, std::set<size_t>> half_voxels;
 	if (!no_subvoxel_accuracy) {
 		std::cerr << "calculate half-free voxels" << std::endl;
-		exit(1);
+		clock_gettime(CLOCK_MONOTONIC, &before);
+		for (struct voxel v : free_voxels) {
+			std::set<struct voxel> neighbor_voxels;
+			int vradius = 2;
+			for (int i = 0-vradius; i <= vradius; ++i) {
+				for (int j = 0-vradius; j <= vradius; ++j) {
+					for (int k = 0-vradius; k <= vradius; ++k) {
+						if (i == 0 && j == 0 && k == 0) {
+							continue;
+						}
+						struct voxel neighbor = voxel(v.x+i, v.y+j, v.z+k);
+						if (free_voxels.find(neighbor) != free_voxels.end()) {
+							continue;
+						}
+						if (voxel_occupied_by_slice.find(neighbor) == voxel_occupied_by_slice.end()) {
+							continue;
+						}
+						for (size_t num : voxel_occupied_by_slice[v]) {
+							half_voxels[neighbor].insert(num);
+						}
+					}
+				}
+			}
+		}
+		std::cerr << "number of half-free voxels: " << half_voxels.size() << std::endl;
+		clock_gettime(CLOCK_MONOTONIC, &after);
+		elapsed = (after.tv_sec - before.tv_sec);
+		elapsed += (after.tv_nsec - before.tv_nsec) / 1000000000.0;
+		std::cerr << "took: " << elapsed << " seconds" << std::endl;
 	}
 
 	std::cerr << "write partitioning" << std::endl;
@@ -940,10 +1029,12 @@ int main(int argc, char* argv[])
 			reflectances_by_slice.find(i);
 		for (size_t j = 0; j < points_by_slice[i].size(); ++j) {
 			FILE *out;
-			if (free_voxels.find(voxel_of_point(points_by_slice[i][j],voxel_size)) == free_voxels.end()) {
-				out = out_static;
-			} else {
+			struct voxel voxel = voxel_of_point(points_by_slice[i][j],voxel_size);
+			if (free_voxels.find(voxel) != free_voxels.end()
+					|| (half_voxels.find(voxel) != half_voxels.end() && half_voxels[voxel].find(i) != half_voxels[voxel].end())) {
 				out = out_dynamic;
+			} else {
+				out = out_static;
 			}
 			double refl = 0;
 			if (refl_it != reflectances_by_slice.end()) {
@@ -986,10 +1077,12 @@ int main(int argc, char* argv[])
 		}
 		for (size_t i = 0; i < element.second.size(); ++i) {
 			int ret;
-			if (free_voxels.find(voxel_of_point(element.second[i],voxel_size)) == free_voxels.end()) {
-				ret = fprintf(out_mask, "0\n");
-			} else {
+			struct voxel voxel = voxel_of_point(element.second[i],voxel_size);
+			if (free_voxels.find(voxel) != free_voxels.end()
+					|| (half_voxels.find(voxel) != half_voxels.end() && half_voxels[voxel].find(element.first) != half_voxels[voxel].end())) {
 				ret = fprintf(out_mask, "1\n");
+			} else {
+				ret = fprintf(out_mask, "0\n");
 			}
 			if (ret < 0) {
 				std::cerr << "failed to write to " << out.str() << std::endl;
