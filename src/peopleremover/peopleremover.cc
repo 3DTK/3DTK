@@ -1060,6 +1060,13 @@ int main(int argc, char* argv[])
 	fclose(out_static);
 	fclose(out_dynamic);
 
+	FILE *pose_static = fopen("scan000.pose", "w");
+	fprintf(pose_static, "0 0 0\n0 0 0\n");
+	fclose(pose_static);
+	FILE *pose_dynamic = fopen("scan001.pose", "w");
+	fprintf(pose_dynamic, "0 0 0\n0 0 0\n");
+	fclose(pose_dynamic);
+
 	std::cerr << "write masks" << std::endl;
 
 	if (maskdir == "") {
