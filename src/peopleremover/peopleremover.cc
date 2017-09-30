@@ -1016,6 +1016,7 @@ int main(int argc, char* argv[])
 	}
 
 	std::cerr << "write partitioning" << std::endl;
+	clock_gettime(CLOCK_MONOTONIC, &before);
 
 	/*
 	 * we use a FILE object instead of an ofstream to write the data because
@@ -1098,6 +1099,11 @@ int main(int argc, char* argv[])
 		}
 		fclose(out_mask);
 	}
+
+	clock_gettime(CLOCK_MONOTONIC, &after);
+	elapsed = (after.tv_sec - before.tv_sec);
+	elapsed += (after.tv_nsec - before.tv_nsec) / 1000000000.0;
+	std::cerr << "took: " << elapsed << " seconds" << std::endl;
 
 	std::cerr << "done" << std::endl;
 
