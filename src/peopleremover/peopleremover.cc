@@ -561,7 +561,7 @@ int main(int argc, char* argv[])
 
 	double voxel_diagonal = sqrt(3*voxel_size*voxel_size);
 
-	std::cout << "dir: " << dir << std::endl;
+	std::cerr << "dir: " << dir << std::endl;
 
 	double elapsed;
 	struct timespec before, after;
@@ -577,7 +577,7 @@ int main(int argc, char* argv[])
 	std::unordered_map<size_t, DataReflectance> reflectances_by_slice;
 	std::unordered_map<size_t, DataXYZ> orig_points_by_slice;
 	std::unordered_map<size_t, std::tuple<const double *, const double *, const double *>> trajectory;
-	std::cout << "size: " << Scan::allScans.size() << std::endl;
+	std::cerr << "size: " << Scan::allScans.size() << std::endl;
 	std::vector<size_t> scanorder;
 	for (size_t id = 0; id < Scan::allScans.size(); ++id) {
 		size_t i = id+start;
