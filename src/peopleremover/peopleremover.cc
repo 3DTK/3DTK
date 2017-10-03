@@ -449,6 +449,7 @@ int main(int argc, char* argv[])
 	normal_method_t normal_method;
 	maxrange_method_t maxrange_method;
 	std::string maskdir;
+	std::string staticdir;
 	std::string dir;
 	bool no_subvoxel_accuracy;
 	bool write_maxranges;
@@ -495,6 +496,7 @@ int main(int argc, char* argv[])
 		 "rangle-global (like range but from a global k-d tree)."
 		 "Default: angle")
 		("maskdir", po::value(&maskdir), "Directory to store .mask files. Default: ${directory}/pplremover")
+		("staticdir", po::value(&staticdir), "Directory to store cleaned scans. Default: ${directory}/static")
 #ifdef _OPENMP
 		("jobs,j", po::value<int>(&jobs)->default_value(1),
 		 "number of threads to run in parallel. Default: 1")
@@ -1067,6 +1069,64 @@ int main(int argc, char* argv[])
 	FILE *pose_dynamic = fopen("scan001.pose", "w");
 	fprintf(pose_dynamic, "0 0 0\n0 0 0\n");
 	fclose(pose_dynamic);
+
+	std::cerr << "write cleaned static scans" << std::endl;
+	if (staticdir == "") {
+		staticdir = dir + "/static";
+	}
+	// just mkdir it, ignore errors like EEXIST
+	mkdir(staticdir.c_str(), S_IRWXU|S_IRWXG|S_IRWXO);
+	for (std::pair<size_t, DataXYZ> element : points_by_slice) {
+		size_t i = element.first;
+		std::unordered_map<size_t, DataReflectance>::const_iterator refl_it =
+			reflectances_by_slice.find(i);
+		std::ostringstream out;
+		out << staticdir << "/scan" << std::setw(3) << std::setfill('0') << i << ".3d";
+		FILE *out_static = fopen(out.str().c_str(), "w");
+		if (out_static == NULL) {
+			std::cerr << "cannot open" << out.str() << std::endl;
+			exit(1);
+		}
+		for (size_t j = 0; j < element.second.size(); ++j) {
+			int ret;
+			double refl = 0;
+			if (refl_it != reflectances_by_slice.end()) {
+				refl = refl_it->second[j];
+			}
+			struct voxel voxel = voxel_of_point(element.second[j],voxel_size);
+			if (free_voxels.find(voxel) == free_voxels.end()
+					&& (half_voxels.find(voxel) == half_voxels.end() || half_voxels[voxel].find(i) == half_voxels[voxel].end())) {
+				ret = fprintf(out_static, "%a %a %a %a\n",
+						orig_points_by_slice[i][j][0],
+						orig_points_by_slice[i][j][1],
+						orig_points_by_slice[i][j][2],
+						//0.0f
+						refl
+						);
+			}
+			if (ret < 0) {
+				std::cerr << "failed to write to " << out.str() << std::endl;
+				exit(1);
+			}
+		}
+		fclose(out_static);
+		std::ostringstream out_pose;
+		out_pose << staticdir << "/scan" << std::setw(3) << std::setfill('0') << i << ".pose";
+		FILE *pose = fopen(out_pose.str().c_str(), "w");
+		int ret = fprintf(pose, "%.17f %.17f %.17f\n%.17f %.17f %.17f\n",
+				std::get<0>(trajectory[i])[0],
+				std::get<0>(trajectory[i])[1],
+				std::get<0>(trajectory[i])[2],
+				std::get<1>(trajectory[i])[0]*180/M_PI,
+				std::get<1>(trajectory[i])[1]*180/M_PI,
+				std::get<1>(trajectory[i])[2]*180/M_PI
+				);
+		if (ret < 0) {
+			std::cerr << "failed to write to " << out_pose.str() << std::endl;
+			exit(1);
+		}
+		fclose(pose);
+	}
 
 	std::cerr << "write masks" << std::endl;
 
