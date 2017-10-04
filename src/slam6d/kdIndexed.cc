@@ -103,6 +103,13 @@ std::vector<size_t> KDtreeIndexed::kNearestNeighbors(double *_p,
   params[threadNum].p = _p;
   params[threadNum].k = _k;
   // todo fix this C/C++ mixture
+  // FIXME: in kdTreeImpl.h elements of closest_neighbors are compared with
+  // NULL to find out whether they are set or not. This practice doesn't work
+  // for the indexed kd-tree!!
+  // A solution would be to default the members of closest_neighbors to
+  // std::numeric_limits<size_t>::max() and check against that in kdTreeImpl.h
+  // or by checking the special distance value of -1.0 in the distances
+  // vector.
   params[threadNum].closest_neighbors = (size_t*)calloc(_k,
                                                           sizeof(size_t) );
   params[threadNum].distances = (double *)calloc(_k,
