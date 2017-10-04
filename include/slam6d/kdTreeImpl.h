@@ -564,6 +564,8 @@ protected:
     }
 
     int kN = params[threadNum].k-1;
+	// FIXME comparing with zero doesn't work for indexed kdtree, we should
+	// check the closest vector for the special negative values instead
     if (params[threadNum].closest_neighbors[kN] != 0) {
         // Quick check of whether to abort  
         double approx_dist_bbox
