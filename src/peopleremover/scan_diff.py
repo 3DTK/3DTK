@@ -33,12 +33,18 @@ def main():
             description=textwrap.fill("Find additions of the second scan to the first by finding points in the second scan with at most MAXNUM neighbors within a radius of DIST in the first. By passing only a single scan, this can also be used to clean a pointcloud from random noise."),
             epilog="""Find additions:
 
-    $ %s -s 0 -e 1 --dist=10 --maxnum=10 > additions
+    $ %s -s 0 -e 1 --dist=10 --maxnum=10 DIR > additions
 
 Clean scan of noise:
 
-    $ %s -s 0 -e 0 --dist=10 --maxnum=10 --invert > clean
-"""%(sys.argv[0], sys.argv[0])
+    $ %s -s 0 -e 0 --dist=100 --maxnum=1 --invert DIR > clean
+
+Clean a directory DIR of Riegl scans:
+
+    $ for i in $(seq $start $end); do
+    >   %s -s $i -e $i -f rxp --dist=100 --maxnum=1 --invert --reflectance DIR > $(printf "scan%%03d.3d" $i)
+    > done
+"""%(sys.argv[0], sys.argv[0], sys.argv[0])
             )
     # FIXME: this application is a prime example of why it would be great if
     # scanio would support passing individual scan files instead of a directory
