@@ -7,6 +7,7 @@ import argparse
 from multiprocessing import Pool
 import os
 from functools import cmp_to_key
+import random
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..', 'lib'))
 try:
@@ -322,6 +323,9 @@ def main():
             if args.normal_method in ["knearest", "range"]:
                 print("building local k-d tree", file=sys.stderr)
                 kdtree = py3dtk.KDtree([p for _,p,_ in points_by_slice[i]])
+            # for debugging purposes we create a dictionary associating every
+            # point with the id of the one that it gets shadowed by
+            point_shadowed_by = dict()
             print("calculating ranges")
             # Precompute the distances so that they are not computed multiple
             # times while sorting
@@ -396,10 +400,12 @@ def main():
                 # point
                 if divisor == 0:
                     maxranges[i][j] = 0
+                    point_shadowed_by[j] = j
                     continue
                 if dividend/divisor > sq.length(p):
                     raise Exception("p got lengthened: ", dividend/divisor)
                 maxranges[i][j] = dividend/divisor
+                point_shadowed_by[j] = j
                 # the scanner itself is situated close to the plane that p
                 # is part of. Thus, shoot no ray to this point at all.
                 if maxranges[i][j] < 0:
@@ -446,9 +452,30 @@ def main():
                     # FIXME: make sure that the current point is more than voxel_diagonal away from the plane
                     # FIXME: make sure that the maxrange for a point is not closer to it than voxel_diagonal
                     maxranges[i][k] = d
+                    point_shadowed_by[k] = j
+            shadowdir = os.path.join(args.directory, "pointshadows")
+            if not os.path.exists(shadowdir):
+                os.mkdir(shadowdir)
+            (pos,theta,_) = trajectory[i]
+            with open(os.path.join(shadowdir, "scan%03d.pose" % i), "w") as f:
+                print("%f %f %f"%pos, file=f)
+                print("%f %f %f"%tuple([t*180/math.pi for t in theta]), file=f)
+            with open(os.path.join(shadowdir, "scan%03d.3d" % i), "w") as f:
+                for j,(_,(x,y,z),_) in points:
+                    random.seed(point_shadowed_by[j])
+                    r=random.randint(0,255)
+                    g=random.randint(0,255)
+                    b=random.randint(0,255)
+                    line = "%s %s %s %d %d %d\n"%(
+                        py3dtk.utils.float2hex(x),
+                        py3dtk.utils.float2hex(y),
+                        py3dtk.utils.float2hex(z),
+                        r, g, b)
+                    f.write(line)
             del distances
             del points
             del qtree
+            del point_shadowed_by
             if args.normal_method in ["knearest", "range"]:
                 del kdtree
         if args.normal_method in ["knearest-global", "range-global"]:
@@ -582,6 +609,7 @@ def main():
                 half_voxels[neighbor] |= freed_slices
         # make sure that no voxels are completely cleared
         #half_voxels = {v:i for v,i in half_voxels.items() if i != voxel_occupied_by_slice[v]}
+        print("number of half-free voxels: %d"%len(half_voxels))
 
     print("write partitioning", file=sys.stderr)
 
