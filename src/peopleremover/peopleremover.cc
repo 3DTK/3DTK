@@ -870,6 +870,11 @@ int main(int argc, char* argv[])
 	clock_gettime(CLOCK_MONOTONIC, &before);
 	std::cerr << "0 %\r";
 	std::cerr.flush();
+	/*
+	 *  we need a separate variable to keep track of how many scans were done
+	 *  because they are not done in order when execution happens in parallel
+	 */
+	size_t done = 0;
 #ifdef _OPENMP
 	omp_set_num_threads(jobs);
 #pragma omp parallel for schedule(dynamic)
@@ -904,11 +909,14 @@ int main(int argc, char* argv[])
 #ifdef _OPENMP
 #pragma omp critical
 #endif
-		for (std::set<struct voxel>::iterator it = free.begin(); it != free.end(); ++it) {
-			free_voxels.insert(*it);
+		{
+			for (struct voxel v : free) {
+				free_voxels.insert(v);
+			}
+			std::cerr << ((done+1)*100.0f/scanorder.size()) << " %\r";
+			std::cerr.flush();
+			done += 1;
 		}
-		std::cerr << ((idx+1)*100.0f/scanorder.size()) << " %\r";
-		std::cerr.flush();
 	}
 	std::cerr << std::endl;
 	clock_gettime(CLOCK_MONOTONIC, &after);
