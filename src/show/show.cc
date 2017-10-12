@@ -122,10 +122,8 @@ void checkForInterrupt() {
   interrupted = false;
 }
 bool isInterrupted() {
-#ifdef WITH_FREEGLUT
 #ifndef __APPLE__
   glutMainLoopEvent(); 
-#endif
 #endif
   glutSetWindow(window_id);
   return interrupted;

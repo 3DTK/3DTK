@@ -32,19 +32,15 @@ Depends:
  libnewmat10-dev,
  libann-dev,
  libsuitesparse-dev,
-# these are optional dependencies for certain features
-#    eigen3 for src/model
-#    cgal   for src/model
-#    imagemagick to convert from ppm
-#    libftgl-dev for PMD
-#    libxmlrpc-c++8-dev for PMD
-#    libconfig-dev for PMD
-#    libglfw3-dev for PMD
-Recommends:
- imagemagick,
- libeigen3-dev,
  libcgal-dev,
+ wx3.0-headers,
+ libopencv-calib3d-dev,
+ libglfw3-dev,
  libftgl-dev,
  libxmlrpc-c++8-dev,
  libconfig-dev,
- libglfw3-dev,
+ libeigen3-dev,
+# these are optional dependencies for certain features
+#    imagemagick to convert from ppm
+Recommends:
+ imagemagick,

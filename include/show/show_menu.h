@@ -10,7 +10,11 @@
 #ifndef __SHOW_MENU_H__
 #define __SHOW_MENU_H__
 
+#ifdef WITH_OPENGL
 #include <GL/glui.h>
+#else
+#include "show/dummygl.h"
+#endif
 
 /**
  * @file

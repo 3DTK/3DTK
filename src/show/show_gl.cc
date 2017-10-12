@@ -612,7 +612,7 @@ void DisplayItFunc(GLenum mode, bool interruptable)
     } else {
       double t[3] = {0,0,0};
       double mat[16];
-      QuatToMatrix4(quat, t, mat);
+      QuatToMatrix4((const double *)quat, t, mat);
       glMultMatrixd(mat);
 
       glGetFloatv(GL_MODELVIEW_MATRIX, view_rotate_button);
@@ -1332,7 +1332,7 @@ void selectPoints(int x, int y) {
   } else {
     double t[3] = {0,0,0};
     double mat[16];
-    QuatToMatrix4(quat, t, mat);
+    QuatToMatrix4((const double *)quat, t, mat);
     glMultMatrixd(mat);
 
     glGetFloatv(GL_MODELVIEW_MATRIX, view_rotate_button);

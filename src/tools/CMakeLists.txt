@@ -1,4 +1,4 @@
-if(WITH_TOOLS AND WITH_RIVLIB)
+if(WITH_RIVLIB)
   if(${RiVLib_FOUND})
     include_directories(${RiVLib_INCLUDE_DIRS})
 

@@ -14,11 +14,6 @@
 #ifdef __CYGWIN__
 #include <windef.h>
 #endif
-#ifdef __APPLE__
-#include <GLUT/glut.h>
-#else
-#include <GL/glut.h>
-#endif
 #include "stdio.h"
 #include "slam6d/globals.icc"
 #include "float.h"

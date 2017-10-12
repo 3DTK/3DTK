@@ -5,6 +5,7 @@
 #ifdef __CYGWIN__
 #include <windef.h>
 #endif
+#ifdef WITH_OPENGL
 #ifdef _MSC_VER
 #include <windows.h>
 #include <GL/glu.h>
@@ -17,6 +18,9 @@
 #include <GL/glut.h>
 #include <GL/glu.h>
 #include <stdbool.h>
+#endif
+#else
+#include "show/dummygl.h"
 #endif
 
 #ifndef __VIEWCULL_H__

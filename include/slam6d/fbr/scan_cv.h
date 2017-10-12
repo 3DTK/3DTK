@@ -20,7 +20,6 @@
 #include "show/scancolormanager.h"
 #include "show/show_Boctree.h"
 #include "slam6d/point_type.h"
-#include "show/show.h"
 #include "slam6d/data_types.h"
 #include "slam6d/Boctree.h"
 #include "slam6d/basicScan.h"

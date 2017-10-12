@@ -8,13 +8,20 @@
 #ifdef __CYGWIN__
 #include <windef.h>
 #endif
+#ifdef WITH_OPENGL
 #ifdef __APPLE__
 #include <GLUT/glut.h>
 #else
 #include <GL/glut.h>
 #endif
+#else
+#include "show/dummygl.h"
+#endif
 #include <string.h>
 #include <stdio.h>
+
+// This defines the floating point precision of the show program
+typedef float sfloat;
 
 class ColorMap {
   public:
@@ -287,7 +294,7 @@ class ColorManager {
 
   protected:
     
-    
+
     void convertToTexture1D() {
       unsigned char *imageData = new unsigned char[(buckets+1) * 3];
       for (unsigned int i = 0; i < buckets; i++) {

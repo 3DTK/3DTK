@@ -12,10 +12,14 @@
 #ifdef __CYGWIN__
 #include <windef.h>
 #endif
+#ifdef WITH_OPENGL
 #ifdef __APPLE__
 #include <GLUT/glut.h>
 #else
 #include <GL/glut.h>
+#endif
+#else
+#include "show/dummygl.h"
 #endif
 
 #include "slam6d/point.h"

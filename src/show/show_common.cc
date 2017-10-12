@@ -43,7 +43,11 @@ GLenum buffermode = GL_BACK;
  */
 int haveToUpdate         = 0;
 
+#ifdef WITH_OPENGL
 std::function<void()> update_callback = glutPostRedisplay;
+#else
+std::function<void()> update_callback = 0;
+#endif
 
 /**
  * Flag for invert the scene
@@ -345,7 +349,7 @@ void setResetView(int origin) {
         RVX = -transmat[12];
         RVY = -transmat[13];
         RVZ = -transmat[14];
-        Matrix4ToQuat(transmat, Rquat);
+        Matrix4ToQuat(transmat, (double *)Rquat);
         X = RVX;
         Y = RVY;
         Z = RVZ;

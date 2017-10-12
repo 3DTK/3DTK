@@ -3,7 +3,9 @@
 #include <climits>
 #include "scanio/helper.h"
 #include "slam6d/globals.icc"
+#ifdef WITH_LIBZIP
 #include <zip.h>
+#endif
 
 bool ScanDataTransform_identity::transform(double xyz[3], unsigned char rgb[3], float*  refl, float* temp, float* ampl, int* type, float* devi)
 {
@@ -743,10 +745,11 @@ bool find_path_archive(boost::filesystem::path data_path, std::function<bool (bo
  */
 bool open_path(boost::filesystem::path data_path, std::function<bool (std::istream &)> handler)
 {
-    bool ret;
+    bool ret = 0;
     if (exists(data_path)) {
         boost::filesystem::ifstream data_file(data_path);
         ret = handler(data_file);
+#ifdef WITH_LIBZIP
     } else {
         ret = find_path_archive(data_path, [=,&handler](boost::filesystem::path archivepath, boost::filesystem::path remainder) -> bool {
             /* open the archive for reading */
@@ -785,6 +788,7 @@ bool open_path(boost::filesystem::path data_path, std::function<bool (std::istre
             free(buf);
             return ret;
         });
+#endif
     }
     if (!ret) {
         std::cerr << "Path does neither exist nor is a zip archive: " << data_path << std::endl;
@@ -799,6 +803,7 @@ bool open_path_writing(boost::filesystem::path data_path, std::function<bool (st
         return handler(data_file);
     }
 
+#ifdef WITH_LIBZIP
     return find_path_archive(data_path, [=,&handler](boost::filesystem::path archivepath, boost::filesystem::path remainder) -> bool {
             /* open the archive for reading */
             int error;
@@ -843,8 +848,12 @@ bool open_path_writing(boost::filesystem::path data_path, std::function<bool (st
             zip_close(archive);
             return true;
         });
+#else
+    return 0;
+#endif
 }
 
+#ifdef WITH_LIBZIP
 bool write_multiple(std::map<std::string,std::string> contentmap)
 {
     std::map<std::string, struct zip *> archivehandles;
@@ -916,5 +925,6 @@ bool write_multiple(std::map<std::string,std::string> contentmap)
 
     return true;
 }
+#endif
 
 /* vim: set ts=4 sw=4 et: */
