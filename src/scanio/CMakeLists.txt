@@ -68,5 +68,5 @@ add_library(scanio_shared SHARED scan_io.cc ../slam6d/io_types.cc)
 set_target_properties(scanio_static PROPERTIES OUTPUT_NAME scanio CLEAN_DIRECT_OUTPUT 1)
 set_target_properties(scanio_shared PROPERTIES OUTPUT_NAME scanio CLEAN_DIRECT_OUTPUT 1)
 
-target_link_libraries(scanio_static scan_io_helper_static ${Boost_SYSTEM_LIBRARY})
-target_link_libraries(scanio_shared scan_io_helper_shared ${Boost_SYSTEM_LIBRARY})
+target_link_libraries(scanio_static scan_io_helper_static dl ${Boost_SYSTEM_LIBRARY})
+target_link_libraries(scanio_shared scan_io_helper_shared dl ${Boost_SYSTEM_LIBRARY})

@@ -40,6 +40,9 @@ Depends:
  libxmlrpc-c++8-dev,
  libconfig-dev,
  libeigen3-dev,
+ qtbase5-dev,
+ libqt5opengl5-dev,
+ libcgal-qt5-dev,
 # these are optional dependencies for certain features
 #    imagemagick to convert from ppm
 Recommends:
