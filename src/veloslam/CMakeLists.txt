@@ -26,11 +26,11 @@ if (WITH_OPENGL)
    trackermanager.cc drawtrackers.cc kalmanfilter.cc matrix.cc lap.cc)
 
   if(UNIX)
-    target_link_libraries(veloslam dl scan ${CXSPARSE_LIBRARIES_SHARED} ${ANN_LIBRARIES_SHARED} ${Boost_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} ${Boost_THREAD_LIBRARY} ${SHOW_LIBS_SHARED})
+    target_link_libraries(veloslam dl scan_shared ${CXSPARSE_LIBRARIES_SHARED} ${ANN_LIBRARIES_SHARED} ${Boost_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} ${Boost_THREAD_LIBRARY} ${SHOW_LIBS_SHARED})
   endif()
 
   if(WIN32)
-    target_link_libraries(veloslam scan ${CXSPARSE_LIBRARIES_SHARED} ${ANN_LIBRARIES_SHARED} XGetopt ${Boost_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} ${SHOW_LIBS_SHARED})
+    target_link_libraries(veloslam scan_shared ${CXSPARSE_LIBRARIES_SHARED} ${ANN_LIBRARIES_SHARED} XGetopt ${Boost_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} ${SHOW_LIBS_SHARED})
   endif()
 endif()
 
