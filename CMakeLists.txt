@@ -6,8 +6,6 @@ if(POLICY CMP0025)
 endif()
 set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/3rdparty/CMakeModules" "${PROJECT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 
-include(OptionalBuild3DTK)
-
 # cmake no longer defines WIN32 on cygwin
 set(CMAKE_LEGACY_CYGWIN_WIN32 0) # remove when cmake >= 2.8.4 is required
 
@@ -55,33 +53,37 @@ if(Boost_FOUND)
   add_definitions(${Boost_LIB_DIAGNOSTIC_DEFINITIONS})
 endif()
 
-if(NOT WIN32)
-  find_package(CXSparse REQUIRED)
-  link_directories(${CXSPARSE_LIBRARY_DIR})
-  include_directories(${CXSPARSE_INCLUDE_DIRS})
-
-  find_package(LibZip REQUIRED)
-  if(${LIBZIP_VERSION} VERSION_LESS 0.11.2)
-    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DLIBZIP_OLD")
-  endif()
-  if (NOT CYGWIN)
-    find_package(ANN REQUIRED)
-  endif()
-  if(APPLE)
-    include_directories("${LIBZIP_INCLUDE_DIR_ZIPCONF}")
-  endif()
+find_package(CXSparse QUIET)
+if (CXSparse_FOUND)
+  set(CXSPARSE_LIBRARIES_SHARED ${CXSPARSE_LIBRARIES})
+  set(CXSPARSE_LIBRARIES_STATIC ${CXSPARSE_LIBRARIES})
+else()
+  add_subdirectory("3rdparty/cxsparse")
+  set(CXSPARSE_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/3rdparty/cxsparse/cxsparse-4.4.4/suitesparse")
+  set(CXSPARSE_LIBRARIES_SHARED cxsparse_shared)
+  set(CXSPARSE_LIBRARIES_STATIC cxsparse_static)
 endif()
 
-if(WIN32 OR CYGWIN)
-  set(ANN_LIBRARIES ann)
+find_package(ANN)
+if (ANN_FOUND)
+  set(ANN_LIBRARIES_SHARED ${ANN_LIBRARIES})
+  set(ANN_LIBRARIES_STATIC ${ANN_LIBRARIES})
+else()
+  add_subdirectory("3rdparty/ann")
+  set(ANN_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/3rdparty/ann/ann_1.1.1_modified/include")
+  set(ANN_LIBRARIES_SHARED ann_shared)
+  set(ANN_LIBRARIES_STATIC ann_static)
 endif()
 
-# The newmat package is optional and will be compiled from 3rdparty if it
-# wasn't found. We don't use an operating system specific switch because
-# there are some Linux distributions (like Fedora) that do not ship newmat.
 find_package(Newmat)
-if(NOT ${NEWMAT_FOUND})
-  include_directories(${PROJECT_SOURCE_DIR}/3rdparty/newmat-10)
+if(NEWMAT_FOUND)
+  set(NEWMAT_LIBRARIES_SHARED ${NEWMAT_LIBRARIES})
+  set(NEWMAT_LIBRARIES_STATIC ${NEWMAT_LIBRARIES})
+else()
+  add_subdirectory("3rdparty/newmat")
+  set(NEWMAT_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/3rdparty/newmat/newmat-10")
+  set(NEWMAT_LIBRARIES_SHARED newmat_shared)
+  set(NEWMAT_LIBRARIES_STATIC newmat_static)
 endif()
 
 if(APPLE)
@@ -90,10 +92,8 @@ else()
   if(WIN32)
     set(OpenCV_STATIC ON)
   endif()
-  find_package(OpenCV REQUIRED)
 endif()
 
-include_directories(${OpenCV_INCLUDE_DIRS})
 if(EXISTS "${OpenCV_DIR}/OpenCVConfig.cmake")
   include("${OpenCV_DIR}/OpenCVConfig.cmake")
   set(ADDITIONAL_OPENCV_FLAGS
@@ -113,189 +113,33 @@ set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${ADDITIONAL_OPENCV_FLAGS}")
 # Declare Options and modify build accordingly ##
 #################################################
 
-## FreeGLUT
-OPT_DEP(WITH_FREEGLUT "Whether freeglut is available. This enables iterative drawing in show. ON/OFF" ON "")
-
-## Show
-OPT_DEP(WITH_SHOW "Whether to build Show. This is the Visualization program of slam6d. ON/OFF" ON "" )
-
-if(WITH_SHOW)
-  message(STATUS "With show")
-  find_package(PNG REQUIRED)
-else()
-  #  set (WITH_OCTREE_DISPLAY "ON" CACHE INTERNAL "" FORCE)
-  message(STATUS "Without show")
-endif()
-
-## WXShow
-OPT_DEP(WITH_WXSHOW "Whether to build WXShow. This is the wxwidgets variant of Show. ON/OFF" OFF "")
-
-if(WITH_WXSHOW)
-  find_package(wxWidgets COMPONENTS core base gl REQUIRED)
-  find_package(PNG REQUIRED)
-  # set wxWidgets_wxrc_EXECUTABLE to be ignored in the configuration
-  set (wxWidgets_wxrc_EXECUTABLE " " CACHE INTERNAL "" FORCE)
-  # wxWidgets include (this will do all the magic to configure everything)
-  include( ${wxWidgets_USE_FILE})
-  message(STATUS "With wxshow")
-else()
-  message(STATUS "Without wxshow")
-endif()
-
-## QtShow
-OPT_DEP(WITH_QTSHOW "Whether to build QtShow. This is the Qt variant of Show. ON/OFF" OFF "")
-
-## GLUT and OpenGL
-
-if(WITH_FREEGLUT OR WITH_SHOW OR WITH_WXSHOW OR WITH_QTSHOW)
-  find_package(OpenGL REQUIRED)
-  find_package(GLUT REQUIRED)
-  find_package(PNG REQUIRED)
-  include_directories(${GLUT_INCLUDE_DIR})
-endif()
-
-## Shapes
-OPT_DEP(WITH_SHAPE_DETECTION "Whether to build shapes and planes executable for detecting planes. ON/OFF" OFF "")
-if(WITH_SHAPE_DETECTION)
-  message(STATUS "With shape detection")
-else()
-  message(STATUS "Without shape detection")
-endif()
-
-OPT_DEP(WITH_FLOORPLAN "Whether to build floorplan generation from 3D scans.  ON/OFF" OFF "")
-if(WITH_FLOORPLAN)
-  message(STATUS "With floorplan generation")
-else()
-  message(STATUS "Without floorplan generation")
-endif()
-
-
-## Interior reconstruction
-OPT_DEP(WITH_MODEL "Whether to build model executable for modelling interior environments. ON/OFF" OFF "")
-
-if(WITH_MODEL)
-  message(STATUS "With interior reconstruction")
-else()
-  message(STATUS "Without interior reconstruction")
-endif()
-
-## Thermo
-OPT_DEP(WITH_THERMO "Whether to build executables for mutual calibration of laser scanner and camera. ON/OFF" OFF "WITH_SHAPE_DETECTION")
-if(WITH_THERMO)
+# cvblob is needed for thermo
+find_package(OpenCV QUIET)
+if (OpenCV_FOUND)
   add_subdirectory(3rdparty/cvblob)
-  include_directories(${PROJECT_SOURCE_DIR}/3rdparty/cvblob)
   link_directories(${PROJECT_SOURCE_DIR}/3rdparty/cvblob)
-  message(STATUS "With thermo")
 else()
-  message(STATUS "Without thermo")
+  message(STATUS "Not building cvblob because WITH_OPENCV is OFF")
 endif()
 
-## OpenCV non-free
-OPT_DEP(WITH_OPENCV_NONFREE "Whether to use non-free (patent encumbered) OpenCV functionalities ON/OFF" OFF "")
-
-## Octree
-OPT_DEP(WITH_COMPACT_OCTREE "Whether to use the compact octree display ON/OFF" OFF "")
-
-## Glee?
-OPT_DEP(WITH_GLEE "Whether to use OpenGL extensions, requires glee. ON/OFF" OFF "")
-
-## Gridder
-OPT_DEP(WITH_GRIDDER "Whether to build the 2DGridder binary ON/OFF" OFF "")
-
-if(WITH_GRIDDER)
-  find_package (Boost COMPONENTS system REQUIRED)
-  message(STATUS "With 2DGridder")
-else()
-  message(STATUS "Without 2DGridder")
-endif()
-
-## Dynamic VELOSLAM
-OPT_DEP(WITH_VELOSLAM "Whether to build the Velodyne data processing (veloslam/veloshow) ON/OFF" OFF "WITH_SHOW")
-
-if(WITH_VELOSLAM)
-  message(STATUS "With VELOSLAM")
-else()
-  message(STATUS "Without VELOSLAM")
-endif()
-
-## Home-made Laserscanner
-OPT_DEP(WITH_DAVID_3D_SCANNER "Whether to build the David scanner app for homemade laser scanners binary ON/OFF" OFF "")
-
-if(WITH_DAVID_3D_SCANNER)
-  message(STATUS "With David scanner")
-else()
-  message(STATUS "Without David scanner")
-endif()
-
-## Tools
-
-OPT_DEP(WITH_TOOLS "Whether to build additional tools like convergence frame_to_graph etc. ON/OFF" OFF "")
-
-if(WITH_TOOLS)
-  message(STATUS "With Tools")
-  # seems to override previous find_package command resulting in linker errors, either provide ALL necessary libs again or do not use
-  #find_package (Boost COMPONENTS serialization graph regex filesystem system thread chrono date_time program_options system REQUIRED)
-  #link_directories()
-else()
-  message(STATUS "Without Tools")
-endif()
-
-## Calibration
-
-OPT_DEP(WITH_CALIBRATION "Whether to build calibration tools. ON/OFF" OFF "")
-
-if(WITH_CALIBRATION)
-  message(STATUS "With calibration")
-else()
-  message(STATUS "Without calibration")
-endif()
-
-## Segmentation
-
-OPT_DEP(WITH_SEGMENTATION "Whether to build scan segmantion program ON/OFF" OFF "WITH_FBR")
-
-if(WITH_SEGMENTATION)
-  message(STATUS "With segmentation")
-  find_package (Boost COMPONENTS program_options REQUIRED)
-else()
-  message(STATUS "Without segmentation")
-endif()
-
-## LASlib
-
-OPT_DEP(WITH_LASLIB "Whether to build LASlib based scanio library" OFF WITH_LASLIB)
-
-if(WITH_LASLIB)
-  message(STATUS "With LASlib")
-else()
-  message(STATUS "Without LASlib")
-endif()
-
-## Collision detection
-
-OPT_DEP(WITH_COLLISION "Whether to build collision detection tools" OFF "WITH_COLLISION")
-
-if(WITH_COLLISION)
-  message(STATUS "With collision detection")
-  # as in WITH_TOOLS, seems to override previous find_package command resulting in linker errors, either provide ALL necessary libs again or do not use
-  # find_package (Boost COMPONENTS program_options REQUIRED)
-else()
-  message(STATUS "Without collision detection")
-endif()
-
-## People remover
-
-OPT_DEP(WITH_PEOPLEREMOVER "Whether to build people remover tools" OFF "WITH_PEOPLEREMOVER")
-
-if(WITH_PEOPLEREMOVER)
-  message(STATUS "With people remover")
-else()
-  message(STATUS "Without people remover")
-endif()
+option(WITH_CGAL "Compile with CGAL support" ON)
+option(WITH_LIBZIP "Compile with libzip support" ON)
+option(WITH_OPENGL "Compile with OpenGL support" ON)
+option(WITH_OPENCV "Compile with OpenCV support" ON)
+option(WITH_QT "Compile tools relying on QT (qtshow)" ON)
+option(WITH_GLFW "Compile with GLFW support" ON)
+option(WITH_FTGL "Compile with FTGL support" ON)
+option(WITH_XMLRPC "Compile with XMLRPC support" ON)
+option(WITH_EIGEN3 "Compile with eigen3 support" ON)
+option(WITH_LIBCONFIG "Compile with libconfig support" ON)
+option(WITH_WXWIDGETS "Compile with wxwidgets support" ON)
+option(WITH_OPENCV_NONFREE "Whether to use non-free (patent encumbered) OpenCV functionalities" OFF)
+option(WITH_COMPACT_OCTREE "Whether to use the compact octree display ON/OFF" OFF)
+option(WITH_GLEE "Whether to use OpenGL extensions, requires glee. ON/OFF" OFF)
+option(WITH_LASLIB "Whether to build LASlib based scanio library" ON)
 
 ## CUDA accelerated collision detection
-OPT_DEP(WITH_CUDA "Whether to build CUDA accelerated collision detection tools" OFF "WITH_CUDA")
-
+option(WITH_CUDA "Whether to build CUDA accelerated collision detection tools" OFF)
 if(WITH_CUDA)
   find_package(CUDA REQUIRED)
   include_directories(${FOUND_CUDA_NVCC_INCLUDE})
@@ -313,7 +157,7 @@ endif()
 
 
 ## RivLib
-OPT_DEP(WITH_RIVLIB "Whether the RIEGL rivlib is present ON/OFF" OFF "")
+option(WITH_RIVLIB "Whether the RIEGL rivlib is present ON/OFF" OFF)
 
 if(WITH_RIVLIB)
   message(STATUS "Compiling a scan IO for RXP files")
@@ -350,73 +194,14 @@ else()
   message(STATUS "Do NOT compile a scan IO for RXP")
 endif()
 
-## B3D
-OPT_DEP(WITH_B3D "Whether the B3D file format is supported. ON/OFF" OFF "")
-
-if(WITH_B3D)
-  add_definitions(-DWITH_B3D)
-  include_directories(${PROJECT_SOURCE_DIR}/3rdparty/b3dfile)
-  message(STATUS "Compiling a scan IO for B3D files")
-else()
-  message(STATUS "Do NOT compile a scan IO for B3D files")
+option(WITH_OPENMP "Whether to use parallel processing capabilities of OPENMP. ON/OFF" ON)
+if (WITH_OPENMP)
+  find_package(OpenMP REQUIRED)
 endif()
 
-## PMD
-OPT_DEP(WITH_PMD "Whether to build the PMD tools like grabVideoAnd3D calibrate etc. ON/OFF" OFF "")
+option(WITH_METRICS "Whether to use time metrics. ON/OFF" OFF)
 
-if(WITH_PMD)
-  find_package(OpenGL REQUIRED)
-  message(STATUS "With PMD")
-else()
-  message(STATUS "Without PMD")
-endif()
-
-## FBR
-OPT_DEP(WITH_FBR "Whether to compile feature based registration. ON/OFF" OFF "")
-
-if(WITH_FBR)
-  message(STATUS "With FBR ")
-else()
-  message(STATUS "Without FBR")
-endif()
-
-# OPEN
-find_package(OpenMP)
-if(OPENMP_FOUND)
-  message(STATUS "fount OpenMP")
-  OPT_DEP(WITH_OPENMP "Whether to use parallel processing capabilities of OPENMP. ON/OFF" ON "")
-else()
-  message(STATUS "can't found OpenMP")
-endif()
-
-
-OPT_DEP(EXPORT_SHARED_LIBS "Whether to build additional shared libraries for use in other projects. ON/OFF" OFF "WITH_SHOW;WITH_FBR")
-#OPT_DEP(EXPORT_SHARED_LIBS "Whether to build additional shared libraries for use in other projects. ON/OFF" OFF "WITH_SHOW")
-
-if(EXISTS "$ENV{ROS_ROOT}")
-  set(WITH_FBR ON)
-  set(EXPORT_SHARED_LIBS ON)
-endif()
-
-if(EXPORT_SHARED_LIBS)
-  ## Compile a single shared library containing all of 3DTK
-  add_library(slam SHARED src/slam6d/icp6D.cc)
-  if (WIN32)
-    target_link_libraries(slam scan_s ANN_s cxsparse_s newmat_s show_s fbr_s)
-  elseif(CYGWIN)
-    target_link_libraries(slam scan_s ANN_s cxsparse newmat_s show_s fbr_s)
-  else()
-    target_link_libraries(slam scan_s ${ANN_LIBRARIES} cxsparse newmat show_s fbr_s)
-  endif()
-  message(STATUS "exporting additional libraries")
-else()
-  message(STATUS "not exporting libraries")
-endif()
-
-
-OPT_DEP(WITH_METRICS "Whether to use time metrics. ON/OFF" OFF "")
-
-OPT_DEP(WITH_ADDONS "Whether to download and use addons to 3DTK. ON/OFF" OFF "")
+option(WITH_ADDONS "Whether to download and use addons to 3DTK. ON/OFF" OFF)
 if(WITH_ADDONS)
   message(STATUS "Compiling addons directory")
   #execute_process(COMMAND svn co https://robotik.informatik.uni-wuerzburg.de/slam6dprivate/trunk/addons addons
@@ -426,33 +211,6 @@ if(WITH_ADDONS)
   message(STATUS "With addons.")
 else()
   message(STATUS "Without addons.")
-endif()
-
-OPT_DEP(WITH_TESTING "Whether to build the test framework. ON/OFF" ON "")
-if(WITH_TESTING)
-  message(STATUS "With testing.")
-else()
-  message(STATUS "Without testing.")
-endif()
-
-## Language Bindings
-
-OPT_DEP(WITH_PYTHON "Whether to build python bindings" OFF "WITH_PYTHON")
-
-if(WITH_PYTHON)
-  message(STATUS "With python bindings")
-else()
-  message(STATUS "Without python bindings")
-endif()
-
-## ROS
-
-OPT_DEP(WITH_ROS "Whether or not to build ROS related components" OFF "WITH_ROS")
-
-if(WITH_ROS)
-  message(STATUS "With ROS support")
-else()
-  message(STATUS "Without ROS support")
 endif()
 
 #################################################
@@ -482,18 +240,10 @@ else()
   set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DMAX_OPENMP_NUM_THREADS=1 -DOPENMP_NUM_THREADS=1")
 endif()
 
-
 # 3rdparty
-if(APPLE)
-  include_directories(${PROJECT_SOURCE_DIR}/3rdparty/cxsparse-4.4.4)
-endif()
-
 if(WIN32)
-  include_directories(${PROJECT_SOURCE_DIR}/3rdparty/ann_1.1.1_modified/include)
-  include_directories(${PROJECT_SOURCE_DIR}/3rdparty/cxsparse-4.4.4)
   include_directories(${PROJECT_SOURCE_DIR}/3rdparty/windows/)
   include_directories(${PROJECT_SOURCE_DIR}/3rdparty/windows/zlib/)
-  include_directories(${PROJECT_SOURCE_DIR}/3rdparty/libzip-1.0.1/lib/)
   link_directories(${PROJECT_SOURCE_DIR}/3rdparty/windows)
   link_directories(${BOOST_LIBRARYDIR})
   if( CMAKE_SIZEOF_VOID_P EQUAL 8 )
@@ -505,14 +255,18 @@ if(WIN32)
   set(CMAKE_STATIC_LIBRARY_SUFFIX "32.lib")
   # to be able to use numeric_limits<int>::max() and friends on windows
   set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DNOMINMAX")
-elseif(CYGWIN)
-  include_directories(${PROJECT_SOURCE_DIR}/3rdparty/ann_1.1.1_modified/include)
 else()
-  # Add include path for OpenGL without GL/-prefix
-  # to avoid the include incompatibility between MACOS
-  # and linux
-  find_path(OPENGL_INC NAMES gl.h GL/gl.h PATHS /usr/include/GL)
-  include_directories(${OPENGL_INC})
+  if (WITH_OPENGL)
+    # Add include path for OpenGL without GL/-prefix
+    # to avoid the include incompatibility between MACOS
+    # and linux
+    find_path(OPENGL_INC NAMES gl.h GL/gl.h PATHS /usr/include/GL)
+    if (${OPENGL_INC})
+      include_directories(${OPENGL_INC})
+    else()
+      message(STATUS "gl.h not found")
+    endif()
+  endif()
 endif()
 
 if (${CMAKE_CXX_COMPILER_ID} STREQUAL Clang)
@@ -581,19 +335,19 @@ endif()
 
 # Set include and link dirs ...
 include_directories(${PROJECT_SOURCE_DIR}/include)
-include_directories(${PROJECT_SOURCE_DIR}/3rdparty/glui-2.36/include/)
-include_directories(${PROJECT_SOURCE_DIR}/3rdparty/wxthings/include/)
-include_directories(${PROJECT_SOURCE_DIR}/3rdparty/rply-1.1.4)
+#include_directories(${PROJECT_SOURCE_DIR}/3rdparty/wxthings/include/)
 link_directories(${PROJECT_SOURCE_DIR}/obj)
 link_directories(${PROJECT_SOURCE_DIR}/lib)
 
+# src/show must be added first because it defines the cache variables
+# SHOW_LIBS_* which are used by others
+add_subdirectory(src/show)
 add_subdirectory(src/slam6d)
 add_subdirectory(src/scanio)
 add_subdirectory(src/scanserver)
 add_subdirectory(src/segmentation)
 add_subdirectory(src/normals)
 add_subdirectory(src/veloslam)
-add_subdirectory(src/show)
 add_subdirectory(src/qtshow)
 add_subdirectory(src/grid)
 add_subdirectory(src/pmd)
@@ -616,12 +370,10 @@ if(WITH_ADDONS)
   message(STATUS "With 3dtk addons.")
   add_subdirectory(addons)
 endif()
-if(WITH_TESTING)
-  message(STATUS "With 3dtk testing.")
-  find_package(Boost COMPONENTS system filesystem unit_test_framework REQUIRED)
-  enable_testing()
-  add_subdirectory(testing)
-endif()
+
+find_package(Boost COMPONENTS system filesystem unit_test_framework REQUIRED)
+enable_testing()
+add_subdirectory(testing)
 
 # Dummy target with all header files
 # This is a hint for some IDEs, such as Qt Creator, to show all headers in the project tree

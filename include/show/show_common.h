@@ -31,7 +31,11 @@
 #include "veloslam/veloscan.h"
 #endif
 #include "show/show.h"
+#ifdef WITH_OPENGL
 #include "GL/glui.h"  /* Header File For The glui functions */
+#else
+#include "show/dummygl.h"
+#endif
 #include <fstream>
 #include <stdexcept>
 #include <algorithm>

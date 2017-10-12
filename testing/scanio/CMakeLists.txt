@@ -1,11 +1,13 @@
 add_executable(test_scanio_helper helper.cc)
-target_link_libraries(test_scanio_helper scan scan_io_helper scanio ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
+target_link_libraries(test_scanio_helper scan_shared scan_io_helper_shared scanio_shared ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
 
-add_executable(test_scanio_zipreader zipreader.cc)
-target_link_libraries(test_scanio_zipreader scan scan_io_helper scanio ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
+if (WITH_LIBZIP)
+  add_executable(test_scanio_zipreader zipreader.cc)
+  target_link_libraries(test_scanio_zipreader scan_shared scan_io_helper_shared scanio_shared ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
+endif()
 
 add_executable(test_scanio_readscans readscans.cc)
-target_link_libraries(test_scanio_readscans scan scan_io_helper scanio ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
+target_link_libraries(test_scanio_readscans scan_shared scan_io_helper_shared scanio_shared ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
 
 # The only way to add a dependency from a test to target building the binary
 # required for the test is by formulating the binary compilation as yet another
@@ -38,10 +40,9 @@ add_test(test_scanio_readscans_run ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/test_scanio
 add_test(test_scanio_readscans_build "${CMAKE_COMMAND}" --build ${CMAKE_BINARY_DIR} --target test_scanio_readscans)
 set_tests_properties(test_scanio_readscans_run PROPERTIES DEPENDS "test_scanio_readscans_build;test_libscan_io_uos_build;test_libscan_io_xyz_build test_icosphere")
 
-if(WITH_TOOLS AND WITH_FBR)
-add_test(test_icosphere_zip "${CMAKE_COMMAND}" --build ${CMAKE_BINARY_DIR} --target test_icosphere_zip)
-
-add_test(test_scanio_zipreader_run ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/test_scanio_zipreader)
-add_test(test_scanio_zipreader_build "${CMAKE_COMMAND}" --build ${CMAKE_BINARY_DIR} --target test_scanio_zipreader)
-set_tests_properties(test_scanio_zipreader_run PROPERTIES DEPENDS "test_scanio_zipreader_build;test_libscan_io_uos_rgb_build;test_icosphere_zip")
+if (WITH_LIBZIP)
+  add_test(test_icosphere_zip "${CMAKE_COMMAND}" --build ${CMAKE_BINARY_DIR} --target test_icosphere_zip)
+  add_test(test_scanio_zipreader_run ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/test_scanio_zipreader)
+  add_test(test_scanio_zipreader_build "${CMAKE_COMMAND}" --build ${CMAKE_BINARY_DIR} --target test_scanio_zipreader)
+  set_tests_properties(test_scanio_zipreader_run PROPERTIES DEPENDS "test_scanio_zipreader_build;test_libscan_io_uos_rgb_build;test_icosphere_zip")
 endif()

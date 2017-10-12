@@ -568,7 +568,6 @@ void compactTree::showCube(double *center, double size) {
 
 
   glEnd();
-
 }
 
 

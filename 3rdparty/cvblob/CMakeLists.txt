@@ -22,12 +22,10 @@ if(COMMAND cmake_policy)
   cmake_policy(SET CMP0003 NEW)
 endif(COMMAND cmake_policy)
 
-IF (WITH_THERMO)
-
 MESSAGE(STATUS "With cvblob")
 find_package(OpenCV REQUIRED)
 
-set(CVBLOB_SRCS 
+add_library(cvblob_objects OBJECT
   cvblob.cpp
   cvlabel.cpp
   cvaux.cpp
@@ -36,16 +34,14 @@ set(CVBLOB_SRCS
   cvcolor.cpp
 )
 
-set_source_files_properties(${cvBlob_SRCS}
-                            PROPERTIES
-                            COMPILE_FLAGS "-O3 ${ADDITIONAL_OPENCV_FLAGS}"
-)
+# compile with -fPIC so that the result can be made into a shared library
+set_property(TARGET cvblob_objects PROPERTY POSITION_INDEPENDENT_CODE 1)
 
-add_library(cvblob STATIC ${CVBLOB_SRCS})
+add_library(cvblob_static STATIC $<TARGET_OBJECTS:cvblob_objects>)
+add_library(cvblob_shared SHARED $<TARGET_OBJECTS:cvblob_objects>)
 
-IF(EXPORT_SHARED_LIBS)
-add_library(cvblob_s SHARED ${CVBLOB_SRCS})
-target_link_libraries(cvblob_s ${OpenCV_LIBS})
-ENDIF(EXPORT_SHARED_LIBS)
+set_target_properties(cvblob_static PROPERTIES OUTPUT_NAME cvblob CLEAN_DIRECT_OUTPUT 1)
+set_target_properties(cvblob_shared PROPERTIES OUTPUT_NAME cvblob CLEAN_DIRECT_OUTPUT 1)
 
-ENDIF (WITH_THERMO)
+target_link_libraries(cvblob_static ${OpenCV_LIBS})
+target_link_libraries(cvblob_shared ${OpenCV_LIBS})

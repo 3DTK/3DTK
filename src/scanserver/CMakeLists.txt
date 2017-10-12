@@ -14,13 +14,19 @@ else()
   message(STATUS "Without metrics.")
 endif()
 
-add_library(scanclient STATIC ${CLIENT_SRCS})
-### EXPORT SHARED LIBS
+add_library(scanclient_objects OBJECT ${CLIENT_SRCS})
 
-if(EXPORT_SHARED_LIBS OR WITH_PYTHON)
-add_library(scanclient_s SHARED ${CLIENT_SRCS})
-target_link_libraries(scanclient_s pointfilter ${Boost_LIBRARIES} ${Boost_FILESYSTEM_LIBRARY})
-endif()
+# compile with -fPIC so that the result can be made into a shared library
+set_property(TARGET scanclient_objects PROPERTY POSITION_INDEPENDENT_CODE 1)
+
+add_library(scanclient_static STATIC $<TARGET_OBJECTS:scanclient_objects>)
+add_library(scanclient_shared SHARED $<TARGET_OBJECTS:scanclient_objects>)
+
+set_target_properties(scanclient_static PROPERTIES OUTPUT_NAME scanclient CLEAN_DIRECT_OUTPUT 1)
+set_target_properties(scanclient_shared PROPERTIES OUTPUT_NAME scanclient CLEAN_DIRECT_OUTPUT 1)
+
+target_link_libraries(scanclient_static pointfilter ${Boost_LIBRARIES} ${Boost_FILESYSTEM_LIBRARY})
+target_link_libraries(scanclient_shared pointfilter ${Boost_LIBRARIES} ${Boost_FILESYSTEM_LIBRARY})
 
 # add libraries
 # boost::interprocess
@@ -31,7 +37,7 @@ if(UNIX AND NOT APPLE)
   set(CLIENT_LIBS ${CLIENT_LIBS} rt)
 endif()
 
-target_link_libraries(scanclient ${CLIENT_LIBS})
+target_link_libraries(scanclient_static ${CLIENT_LIBS})
 
 # SERVER EXECUTABLE
 
@@ -48,7 +54,7 @@ add_executable(scanserver ${SERVER_SRCS})
 # boost::interprocess/filesystem
 # scanclient basic functionality
 # scanio for ScanHandler input
-set(SERVER_LIBS ${Boost_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} scanclient scanio)
+set(SERVER_LIBS ${Boost_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} scanclient_shared scanio_shared)
 
 if(UNIX AND NOT APPLE)
   # boost::interprocess uses pthread, requiring librt

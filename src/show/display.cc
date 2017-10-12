@@ -12,15 +12,16 @@
 #include <fstream>
 #include <iostream>
 
+#ifdef WITH_OPENGL
+#include <GL/glui.h>
 #ifdef __APPLE__
 #include <GLUT/glut.h>
-#elif WITH_FREEGLUT
-#include <GL/freeglut.h>
 #else
-#include <GL/glut.h>
+#include <GL/freeglut.h>
 #endif
-
-#include <GL/glui.h>
+#else
+#include "show/dummygl.h"
+#endif
 
 
 double SDisplay::mirror[16] = {1,0,0,0,
