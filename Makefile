@@ -12,11 +12,11 @@ test: .configured
 	cd .build && CTEST_OUTPUT_ON_FAILURE=true $(MAKE) test
 
 config: .build
-	cd .build && cmake .. && ccmake ..
+	cd .build && ccmake ..
 	touch .configured
 
 .configured: .build
-	cd .build && cmake .. && cmake ..
+	cd .build && cmake ..
 	touch .configured
 
 .build:

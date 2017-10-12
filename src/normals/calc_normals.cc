@@ -27,7 +27,9 @@
 #include <scanserver/clientInterface.h>
 
 #include <slam6d/normals.h>
+#ifdef WITH_OPENCV
 #include <normals/normals_panorama.h>
+#endif
 
 #ifdef _MSC_VER
 #define strcasecmp _stricmp
@@ -43,7 +45,10 @@ using namespace std;
 
 enum normal_method {KNN, ADAPTIVE_KNN,
 				AKNN, ADAPTIVE_AKNN,
-				PANORAMA, PANORAMA_FAST};
+#ifdef WITH_OPENCV
+				PANORAMA, PANORAMA_FAST
+#endif
+};
 
 /*
  * validates normal calculation method specification
@@ -57,8 +62,10 @@ void validate(boost::any& v, const std::vector<std::string>& values,
   else if (strcasecmp(arg.c_str(), "ADAPTIVE_KNN") == 0) v = ADAPTIVE_KNN;
   else if (strcasecmp(arg.c_str(), "AKNN") == 0) v = AKNN;
   else if (strcasecmp(arg.c_str(), "ADAPTIVE_AKNN") == 0) v = ADAPTIVE_AKNN;
+#ifdef WITH_OPENCV
   else if (strcasecmp(arg.c_str(), "PANORAMA") == 0) v = PANORAMA;
   else if (strcasecmp(arg.c_str(), "PANORAMA_FAST") == 0) v = PANORAMA_FAST;
+#endif
   else throw std::runtime_error(std::string("normal calculation method ")
                                 + arg + std::string(" is unknown"));
 }
@@ -113,7 +120,11 @@ void parse_options(int argc, char **argv, int &start, int &end,
       ("normal,g",
        po::value<normal_method>(&ntype)->default_value(AKNN),
        "normal calculation method "
-       "(KNN, ADAPTIVE_KNN, AKNN, ADAPTIVE_AKNN, PANORAMA, PANORAMA_FAST)")
+       "(KNN, ADAPTIVE_KNN, AKNN, ADAPTIVE_AKNN"
+#ifdef WITH_OPENCV
+       ", PANORAMA, PANORAMA_FAST"
+#endif
+       ")")
       ("K1,k",
        po::value<int>(&k1)->default_value(20),
        "<arg> value of K value used in the nearest neighbor search of ANN or"
@@ -121,12 +132,14 @@ void parse_options(int argc, char **argv, int &start, int &end,
       ("K2,K",
        po::value<int>(&k2)->default_value(20),
        "<arg> value of Kmax for k-adaptation")
+#ifdef WITH_OPENCV
       ("width,w",
        po::value<int>(&width)->default_value(3600),
        "width of panorama image")
       ("height,h",
        po::value<int>(&height)->default_value(1000),
        "height of panorama image")
+#endif
       ;
 
   po::options_description hidden("Hidden options");
@@ -252,8 +265,6 @@ int main(int argc, char** argv)
     exit(-1);
   }
 
-  cv::Mat img;
-
   /// -----------------------------------------
   /// Initialize and perform normal calculation
   /// -----------------------------------------
@@ -290,6 +301,7 @@ int main(int argc, char** argv)
       calculateNormalsAdaptiveApxKNN(normals, points, k1, k2, rPos);
     else
     {
+#ifdef WITH_OPENCV
       // create panorama
       fbr::panorama fPanorama(width, height, fbr::EQUIRECTANGULAR,
                               1, 0, fbr::EXTENDED);
@@ -307,6 +319,7 @@ int main(int argc, char** argv)
                              fPanorama.getMaxRange(),
                              rPos,
                              fPanorama.getExtendedMap());
+#endif
     }
 
     // pose file (repeated for the number of segments

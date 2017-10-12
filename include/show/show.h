@@ -16,12 +16,14 @@
 #ifdef __CYGWIN__
 #include <windef.h>
 #endif
+#ifdef WITH_OPENGL
 #ifdef __APPLE__
 #include <GLUT/glut.h>
-#elif WITH_FREEGLUT
-#include <GL/freeglut.h>
 #else
-#include <GL/glut.h>
+#include <GL/freeglut.h>
+#endif
+#else
+#include "show/dummygl.h"
 #endif
 
 #include <string>
@@ -42,9 +44,6 @@
 
 #define BUFSIZE 1048576 ///< defining the buffer size
 #define BUFSIZE_WIN 65536 ///< default buffer size leads to stack overflow in MSVC
-
-// This defines the floating point precision of the show program
-typedef float sfloat;
 
 #include "show/show1.icc"
 #include "show/show.icc"

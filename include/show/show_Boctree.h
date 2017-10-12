@@ -611,6 +611,7 @@ protected:
       }
     }
   }
+
   // this is because otherwise the following line is overriding selectRay from
   // the base class
   using colordisplay::selectRay;

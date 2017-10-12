@@ -666,7 +666,6 @@ BOOST_PYTHON_MODULE(py3dtk)
 		.value("XYZ_RRGB", XYZ_RRGB)
 		.value("FARO_XYZ_RGBR", FARO_XYZ_RGBR)
 		.value("LEICA_XYZR", LEICA_XYZR)
-		.value("B3D", B3D)
         ;
 
 	bp::enum_<Scan::AlgoType>("AlgoType")

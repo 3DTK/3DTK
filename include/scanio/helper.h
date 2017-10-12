@@ -84,7 +84,10 @@ bool readASCII(std::istream& infile,
 
 bool open_path(boost::filesystem::path data_path, std::function<bool (std::istream &)>);
 bool open_path_writing(boost::filesystem::path data_path, std::function<bool (std::ostream &)> handler);
+
+#ifdef WITH_LIBZIP
 bool write_multiple(std::map<std::string,std::string> contentmap);
+#endif
 
 #endif
 

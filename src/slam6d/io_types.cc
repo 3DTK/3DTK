@@ -26,7 +26,6 @@ IOType formatname_to_io_type(const char * string)
 {
   if (strcasecmp(string, "ais") == 0) return AIS;
   else if (strcasecmp(string, "asc") == 0) return ASC;
-  else if (strcasecmp(string, "b3d") == 0) return B3D;
   else if (strcasecmp(string, "faro_xyz_rgbr") == 0) return FARO_XYZ_RGBR;
   else if (strcasecmp(string, "front") == 0) return FRONT;
   else if (strcasecmp(string, "iais") == 0) return IAIS;
@@ -87,8 +86,6 @@ const char * io_type_to_libname(IOType  type)
     return "scan_io_ais";
   case ASC:
     return "scan_io_asc";
-  case B3D:
-    return "scan_io_b3d";
   case FARO_XYZ_RGBR:
     return "scan_io_faro_xyz_rgbr";
   case FRONT:

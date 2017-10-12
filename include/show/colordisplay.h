@@ -10,7 +10,7 @@ class colordisplay {
   virtual ~colordisplay() {}
   inline void setColorManager(ColorManager *_cm) { cm = _cm; }
   
-  void displayLOD(float lod) { 
+  void displayLOD(float lod) {
     if (cm) cm->load();
     drawLOD(lod); 
     if (cm) cm->unload();
@@ -45,7 +45,7 @@ class colordisplay {
   virtual void cycleLOD() {};
 
   protected:
-  
+
   virtual void drawLOD(float lod) = 0; 
   virtual void draw() = 0; 
   

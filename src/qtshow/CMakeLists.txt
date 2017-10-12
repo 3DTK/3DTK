@@ -1,8 +1,10 @@
-if(WITH_QTSHOW)
+if (WITH_OPENGL AND WITH_QT)
   find_package(Qt5Widgets)
   find_package(Qt5OpenGL)
-  add_definitions(-DWITH_FREEGLUT)
   set(CMAKE_INCLUDE_CURRENT_DIR ON)
+
+  include_directories(${PROJECT_SOURCE_DIR}/3rdparty/glui-2.36/include/)
+  add_definitions(-DWITH_OPENGL)
 
   qt5_wrap_cpp(QTSHOW_HEADERS_MOC
     ${PROJECT_SOURCE_DIR}/include/qtshow/GLWidget.h
@@ -29,7 +31,7 @@ if(WITH_QTSHOW)
   add_library(glwidget STATIC GLWidget.cc ${GLWIDGET_HEADERS_MOC})
     
   qt5_use_modules(qtshow Widgets OpenGL)
-  target_link_libraries(qtshow showstatic ${SHOW_LIBS} ${QT_LIBRARIES})
+  target_link_libraries(qtshow show_shared ${SHOW_LIBS_SHARED} ${QT_LIBRARIES})
   qt5_use_modules(glwidget Widgets OpenGL)
-  target_link_libraries(glwidget showstatic ${SHOW_LIBS} ${QT_LIBRARIES})
+  target_link_libraries(glwidget show_shared ${SHOW_LIBS_SHARED} ${QT_LIBRARIES})
 endif()

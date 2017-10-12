@@ -203,8 +203,6 @@ cs_dl *cs_dl_load (FILE *f) ;
 void *cs_dl_calloc (cs_long_t n, size_t size) ;
 void *cs_dl_free (void *p) ;
 void *cs_dl_realloc (void *p, cs_long_t n, size_t size, cs_long_t *ok) ;
-cs_dl *cs_dl_spalloc (cs_long_t m, cs_long_t n, cs_long_t nzmax, cs_long_t values,
-    cs_long_t t) ;
 cs_dl *cs_dl_spfree (cs_dl *A) ;
 cs_long_t cs_dl_sprealloc (cs_dl *A, cs_long_t nzmax) ;
 void *cs_dl_malloc (cs_long_t n, size_t size) ;
@@ -344,7 +342,6 @@ cs_ci *cs_ci_load (FILE *f) ;
 void *cs_ci_calloc (int n, size_t size) ;
 void *cs_ci_free (void *p) ;
 void *cs_ci_realloc (void *p, int n, size_t size, int *ok) ;
-cs_ci *cs_ci_spalloc (int m, int n, int nzmax, int values, int t) ;
 cs_ci *cs_ci_spfree (cs_ci *A) ;
 int cs_ci_sprealloc (cs_ci *A, int nzmax) ;
 void *cs_ci_malloc (int n, size_t size) ;
@@ -480,8 +477,6 @@ cs_cl *cs_cl_load (FILE *f) ;
 void *cs_cl_calloc (cs_long_t n, size_t size) ;
 void *cs_cl_free (void *p) ;
 void *cs_cl_realloc (void *p, cs_long_t n, size_t size, cs_long_t *ok) ;
-cs_cl *cs_cl_spalloc (cs_long_t m, cs_long_t n, cs_long_t nzmax, cs_long_t values,
-    cs_long_t t) ;
 cs_cl *cs_cl_spfree (cs_cl *A) ;
 cs_long_t cs_cl_sprealloc (cs_cl *A, cs_long_t nzmax) ;
 void *cs_cl_malloc (cs_long_t n, size_t size) ;
@@ -724,13 +719,6 @@ cs_cld *cs_cl_ddone (cs_cld *D, cs_cl *C, void *w, cs_long_t ok) ;
 /* -------------------------------------------------------------------------- */
 /* Conversion routines */
 /* -------------------------------------------------------------------------- */
-
-#ifndef NCOMPLEX
-cs_di *cs_i_real (cs_ci *A, int real) ;
-cs_ci *cs_i_complex (cs_di *A, int real) ;
-cs_dl *cs_l_real (cs_cl *A, cs_long_t real) ;
-cs_cl *cs_l_complex (cs_dl *A, cs_long_t real) ;
-#endif
 
 #ifdef __cplusplus
 }

@@ -1,18 +1,5 @@
-set(SHOW_LIBS ${OPENGL_LIBRARIES} glui scan ann)
-if(WIN32)
-  set(SHOW_LIBS ${SHOW_LIBS} ${GLUT_LIBRARIES} XGetopt)
-endif()
-if (UNIX)
-  set(SHOW_LIBS newmat dl ${GLUT_LIBRARIES} ${SHOW_LIBS})
-endif()
-
-if(WITH_VELOSLAM)
-  if(WITH_FREEGLUT)
-    message(STATUS "With freeglut")
-    add_definitions(-DWITH_FREEGLUT)
-  else()
-    message(STATUS "Without freeglut")
-  endif()
+if (WITH_OPENGL)
+  include_directories(${CXSPARSE_INCLUDE_DIRS})
 
   if(WITH_COMPACT_OCTREE)
     message(STATUS "Using compact octrees")
@@ -39,11 +26,11 @@ if(WITH_VELOSLAM)
    trackermanager.cc drawtrackers.cc kalmanfilter.cc matrix.cc lap.cc)
 
   if(UNIX)
-    target_link_libraries(veloslam dl scan newmat cxsparse ${ANN_LIBRARIES} ${Boost_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} ${Boost_THREAD_LIBRARY} ${SHOW_LIBS})
+    target_link_libraries(veloslam dl scan ${CXSPARSE_LIBRARIES_SHARED} ${ANN_LIBRARIES_SHARED} ${Boost_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} ${Boost_THREAD_LIBRARY} ${SHOW_LIBS_SHARED})
   endif()
 
   if(WIN32)
-    target_link_libraries(veloslam scan newmat cxsparse ${ANN_LIBRARIES} XGetopt ${Boost_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} ${SHOW_LIBS})
+    target_link_libraries(veloslam scan ${CXSPARSE_LIBRARIES_SHARED} ${ANN_LIBRARIES_SHARED} XGetopt ${Boost_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} ${SHOW_LIBS_SHARED})
   endif()
 endif()
 
@@ -60,11 +47,11 @@ endif()
  #     intersection_detection.cc SegIter.model ${SHOW_SRCS})
 
 #if(UNIX)
-#  target_link_libraries(veloshow dl scan newmat sparse ${ANN_LIBRARIES}  ${SHOW_LIBS})
+#  target_link_libraries(veloshow dl scan newmat sparse ${ANN_LIBRARIES}  ${SHOW_LIBS_SHARED})
 #endif()
 
 #if(WIN32)
-#  target_link_libraries(veloshow scan newmat sparse ${ANN_LIBRARIES} XGetopt ${Boost_LIBRARIES}  ${SHOW_LIBS})
+#  target_link_libraries(veloshow scan newmat sparse ${ANN_LIBRARIES} XGetopt ${Boost_LIBRARIES}  ${SHOW_LIBS_SHARED})
 #endif()
 
 #endif()
