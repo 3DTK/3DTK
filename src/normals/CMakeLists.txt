@@ -8,8 +8,8 @@ if (WITH_OPENCV)
   set_target_properties(normals_panorama_static PROPERTIES OUTPUT_NAME normals_panorama CLEAN_DIRECT_OUTPUT 1)
   set_target_properties(normals_panorama_shared PROPERTIES OUTPUT_NAME normals_panorama CLEAN_DIRECT_OUTPUT 1)
 
-  target_link_libraries(normals_panorama_static ${NEWMAT_LIBRARIES_STATIC} scan fbr_cv_io_shared fbr_panorama_shared ${OpenCV_LIBS})
-  target_link_libraries(normals_panorama_shared ${NEWMAT_LIBRARIES_SHARED} scan fbr_shared ${OpenCV_LIBS} ${Boost_LIBRARIES})
+  target_link_libraries(normals_panorama_static ${NEWMAT_LIBRARIES_STATIC} scan_shared fbr_cv_io_shared fbr_panorama_shared ${OpenCV_LIBS})
+  target_link_libraries(normals_panorama_shared ${NEWMAT_LIBRARIES_SHARED} scan_shared fbr_shared ${OpenCV_LIBS} ${Boost_LIBRARIES})
 
   set(NORMALS_PANORAMA_LIBRARIES normals_panorama_shared)
 endif()

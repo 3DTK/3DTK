@@ -1,8 +1,8 @@
 if (WITH_OPENCV AND WITH_CGAL AND WITH_EIGEN3)
   # Module name
   set(MODULE "Floorplan")
-  set(UNIX_LIBS scan newmat dl ann)
-  set(WIN32_LIBS scan newmat XGetopt)
+  set(UNIX_LIBS scan_shared newmat dl ann)
+  set(WIN32_LIBS scan_shared newmat XGetopt)
 
   # Set CXX flags for CGAL
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -frounding-math")

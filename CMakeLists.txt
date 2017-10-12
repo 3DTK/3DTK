@@ -361,10 +361,12 @@ add_subdirectory(src/collision)
 add_subdirectory(src/peopleremover)
 add_subdirectory(src/spherical_quadtree)
 add_subdirectory(src/cuda)
-add_subdirectory(src/calibration)
 add_subdirectory(src/ros)
 add_subdirectory(src/tools)
+# 3rdparty must come before src/calibration because it sets
+# APRILTAG_INCLUDE_DIRS
 add_subdirectory(3rdparty)
+add_subdirectory(src/calibration)
 add_subdirectory(bindings)
 if(WITH_ADDONS)
   message(STATUS "With 3dtk addons.")
