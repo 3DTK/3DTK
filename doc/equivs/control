@@ -43,6 +43,17 @@ Depends:
  qtbase5-dev,
  libqt5opengl5-dev,
  libcgal-qt5-dev,
+ liborocos-bfl-dev,
+ libtf-conversions-dev,
+ libpcl-conversions-dev,
+ libboost-python-dev,
+ python3.5-dev,
+ libpcl-conversions-dev,
+ liblaser-geometry-dev,
+ libtf-dev,
+ librosbag-dev,
+ libroscpp-dev,
+ catkin,
 # these are optional dependencies for certain features
 #    imagemagick to convert from ppm
 Recommends:
