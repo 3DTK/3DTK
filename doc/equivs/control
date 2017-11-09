@@ -24,6 +24,7 @@ Depends:
  libpng-dev,
  freeglut3-dev,
  libxmu-dev,
+ libxi-dev,
  libgl1-mesa-dev,
  libwxgtk3.0-dev,
  libxml2-dev,
@@ -53,6 +54,8 @@ Depends:
  libtf-dev,
  librosbag-dev,
  libroscpp-dev,
+ libnav-msgs-dev,
+ libtf2-sensor-msgs-dev,
  catkin,
 # these are optional dependencies for certain features
 #    imagemagick to convert from ppm
