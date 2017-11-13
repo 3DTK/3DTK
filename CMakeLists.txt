@@ -116,6 +116,7 @@ set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${ADDITIONAL_OPENCV_FLAGS}")
 # cvblob is needed for thermo
 find_package(OpenCV QUIET)
 if (OpenCV_FOUND)
+  include_directories(${OpenCV_INCLUDE_DIRS})
   add_subdirectory(3rdparty/cvblob)
   link_directories(${PROJECT_SOURCE_DIR}/3rdparty/cvblob)
 else()
