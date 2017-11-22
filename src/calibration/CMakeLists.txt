@@ -1,4 +1,4 @@
-if (WITH_OPENCV)
+if (WITH_OPENCV AND WITH_EIGEN3)
   include_directories(${APRILTAG_INCLUDE_DIRS})
 
   set(CAMCAL_SOURCES
