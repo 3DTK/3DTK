@@ -1025,6 +1025,38 @@ int main(int argc, char* argv[])
 		std::cerr << "took: " << elapsed << " seconds" << std::endl;
 	}
 
+	/*
+	 * Output a graph where the nodes are the scan ids and edges connect nodes
+	 * of scans that share at least one voxel
+	 */
+	{
+		/*
+		 * go through all voxels and add all possible pairs of scan
+		 * identifiers from a lower id to a higher id to a set
+		 */
+		std::map<std::pair<size_t, size_t>, size_t> result;
+		for (std::pair<struct voxel, std::set<size_t>> el : voxel_occupied_by_slice) {
+			/*
+			 * the elements of std::set are sorted in ascending order, thus we
+			 * do not need to sort them ourselves
+			 */
+			std::vector<size_t> slices(el.second.begin(), el.second.end());
+			for (size_t i = 0; i < slices.size(); ++i) {
+				for (size_t j = i+1; j < slices.size(); ++j) {
+					result[std::make_pair(slices[i], slices[j])] += 1;
+				}
+			}
+		}
+		size_t num_edges_complete_graph = scanorder.size()*(scanorder.size()-1)/2.0;
+		std::cerr << "Scan pairs sharing the same voxel: " << result.size() << std::endl;
+		std::cerr << "number edges complete graph: " << num_edges_complete_graph << std::endl;
+		std::cerr << "graph G {" << std::endl;
+		for (std::pair<std::pair<size_t, size_t>, size_t> el : result) {
+			std::cout << "  " << el.first.first << " -- " << el.first.second << " [weight=" << el.second << "];" << std::endl;
+		}
+		std::cerr << "}" << std::endl;
+	}
+
 	std::cerr << "write partitioning" << std::endl;
 	clock_gettime(CLOCK_MONOTONIC, &before);
 
