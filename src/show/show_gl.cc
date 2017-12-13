@@ -1,5 +1,6 @@
 #include "show/show_gl.h"
 #include "png.h"
+#include <thread>
 
 bool   fullydisplayed = true;       // true if all points have been drawn to
                                     // the screen
@@ -1733,6 +1734,53 @@ void glDumpWindowPPM(const char *filename, GLenum mode)
   delete [] ibuffer;
 }
 
+void writePngInBackground(const char *filename, unsigned char *ibuffer, int image_width, int image_height)
+{
+    // write contents of ibuffer to a png file
+    png_structp png = png_create_write_struct(PNG_LIBPNG_VER_STRING, nullptr, nullptr, nullptr);
+    if (!png)
+        return;
+
+    png_infop info = png_create_info_struct(png);
+    if (!info) {
+        png_destroy_write_struct(&png, &info);
+        return;
+    }
+
+    FILE *fp = fopen(filename, "wb");
+    if (!fp) {
+        png_destroy_write_struct(&png, &info);
+        return;
+    }
+
+    png_init_io(png, fp);
+    png_set_IHDR(png, info, image_width, image_height, 8 /* depth */, PNG_COLOR_TYPE_RGB, PNG_INTERLACE_NONE,
+        PNG_COMPRESSION_TYPE_BASE, PNG_FILTER_TYPE_BASE);
+    png_colorp palette = (png_colorp)png_malloc(png, PNG_MAX_PALETTE_LENGTH * sizeof(png_color));
+    if (!palette) {
+        fclose(fp);
+        png_destroy_write_struct(&png, &info);
+        return;
+    }
+    png_set_PLTE(png, info, palette, PNG_MAX_PALETTE_LENGTH);
+    png_write_info(png, info);
+    png_set_packing(png);
+
+    png_bytepp rows = (png_bytepp)png_malloc(png, image_height * sizeof(png_bytep));
+    for (int i = 0; i < image_height; ++i)
+        rows[i] = (png_bytep)(ibuffer + i * image_width * 3);
+
+    png_write_image(png, rows);
+    png_write_end(png, info);
+    png_free(png, palette);
+    png_destroy_write_struct(&png, &info);
+
+    fclose(fp);
+    delete[] rows;
+    delete[] ibuffer;
+    delete[] filename;
+}
+
 /* +++++++++-------------++++++++++++
  * NAME
  *   glWriteImagePNG
@@ -1871,49 +1919,14 @@ void glWriteImagePNG(const char *filename, int scale, GLenum mode)
     haveToUpdate=2;
     DisplayItFunc(mode);
 
-    // write contents of ibuffer to a png file
-    png_structp png = png_create_write_struct(PNG_LIBPNG_VER_STRING, nullptr, nullptr, nullptr);
-    if (!png)
-        return;
-
-    png_infop info = png_create_info_struct(png);
-    if (!info) {
-        png_destroy_write_struct(&png, &info);
-        return;
-    }
-
-    FILE *fp = fopen(filename, "wb");
-    if (!fp) {
-        png_destroy_write_struct(&png, &info);
-        return;
-    }
-
-    png_init_io(png, fp);
-    png_set_IHDR(png, info, image_width, image_height, 8 /* depth */, PNG_COLOR_TYPE_RGB, PNG_INTERLACE_NONE,
-        PNG_COMPRESSION_TYPE_BASE, PNG_FILTER_TYPE_BASE);
-    png_colorp palette = (png_colorp)png_malloc(png, PNG_MAX_PALETTE_LENGTH * sizeof(png_color));
-    if (!palette) {
-        fclose(fp);
-        png_destroy_write_struct(&png, &info);
-        return;
-    }
-    png_set_PLTE(png, info, palette, PNG_MAX_PALETTE_LENGTH);
-    png_write_info(png, info);
-    png_set_packing(png);
-
-    png_bytepp rows = (png_bytepp)png_malloc(png, image_height * sizeof(png_bytep));
-    for (int i = 0; i < image_height; ++i)
-        rows[i] = (png_bytep)(ibuffer + i * image_width * 3);
-
-    png_write_image(png, rows);
-    png_write_end(png, info);
-    png_free(png, palette);
-    png_destroy_write_struct(&png, &info);
-
-    fclose(fp);
-    delete[] rows;
     delete [] buffer;
-    delete [] ibuffer;
+
+    // make a copy of filename or otherwise the memory behind it might be deleted by the parent
+    //
+    // FIXME: limit the maximum number of threads that are created this way
+    // FIXME: delay exiting show until the last of these threads finished
+    // FIXME: delay exiting show until the screenshot is written when using --screenshot
+    std::thread {writePngInBackground, strdup(filename), ibuffer, image_width, image_height}.detach();
 }
 
 /** Reshape Function
