@@ -1779,6 +1779,12 @@ void writePngInBackground(const char *filename, unsigned char *ibuffer, int imag
     delete[] rows;
     delete[] ibuffer;
     delete[] filename;
+
+	{
+		std::unique_lock<std::mutex> lock(png_workers_mutex);
+		png_workers -= 1;
+		png_workers_cv.notify_one();
+	}
 }
 
 /* +++++++++-------------++++++++++++
@@ -1921,11 +1927,13 @@ void glWriteImagePNG(const char *filename, int scale, GLenum mode)
 
     delete [] buffer;
 
+	{
+		std::unique_lock<std::mutex> lock(png_workers_mutex);
+		png_workers_cv.wait(lock, []{return png_workers <= png_workers_max;});
+		png_workers += 1;
+	}
+
     // make a copy of filename or otherwise the memory behind it might be deleted by the parent
-    //
-    // FIXME: limit the maximum number of threads that are created this way
-    // FIXME: delay exiting show until the last of these threads finished
-    // FIXME: delay exiting show until the screenshot is written when using --screenshot
     std::thread {writePngInBackground, strdup(filename), ibuffer, image_width, image_height}.detach();
 }
 

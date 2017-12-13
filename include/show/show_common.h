@@ -41,6 +41,8 @@
 #include <algorithm>
 #include <map>
 #include <functional>
+#include <mutex>
+#include <condition_variable>
 
 #ifdef _MSC_VER
 #define strcasecmp _stricmp
@@ -208,6 +210,18 @@ extern bool nogui;
  * take a screenshot and exit
  */
 extern bool takescreenshot;
+
+/**
+ * rendering a png is done in the background. If an animation is rendered,
+ * multiple threads can run at the same time. We need to make sure to not run
+ * too many threads at the same time and to wait for all threads to finish
+ * before closing show.
+ */
+
+extern int png_workers;
+extern int png_workers_max;
+extern std::mutex png_workers_mutex;
+extern std::condition_variable png_workers_cv;
 
 //@@@
 //int animate_both         = 0;             // Animate both scan matchin and path?
