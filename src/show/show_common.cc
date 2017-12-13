@@ -148,6 +148,19 @@ bool nogui = false;
  */
 bool takescreenshot = false;
 
+/**
+ * rendering a png is done in the background. If an animation is rendered,
+ * multiple threads can run at the same time. We need to make sure to not run
+ * too many threads at the same time and to wait for all threads to finish
+ * before closing show.
+ */
+
+
+int png_workers = 0;
+int png_workers_max = 4; // FIXME: make this configurable
+std::mutex png_workers_mutex;
+std::condition_variable png_workers_cv;
+
 //@@@
 //int animate_both         = 0;             // Animate both scan matchin and path?
 
@@ -1008,6 +1021,14 @@ void deinitShow()
   static volatile bool done = false;
   if(done) return;
   done = true;
+
+  // FIXME: this doesn't look right... I guess I need another condition
+  // variable here because the below probably doesn't work if more than one
+  // thread is currently locking the mutex
+  {
+	  std::unique_lock<std::mutex> lock(png_workers_mutex);
+	  png_workers_cv.wait(lock, []{return png_workers == 0;});
+  }
   
   std::cout << "Cleaning up octtrees and scans." << std::endl;
   if(octpts.size()) {
