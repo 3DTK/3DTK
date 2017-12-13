@@ -2,8 +2,7 @@
 # which you can then install to keep all the dependencies needed
 # to build 3dtk together. You can run the following commands:
 #  $ equivs-build doc/equivs/control
-#  $ sudo dpkg -i 3dtk-build-deps_1.0_all.deb
-#  $ sudo apt-get -f install
+#  $ sudo apt install ./3dtk-build-deps_1.0_all.deb
 Section: misc
 Priority: optional
 Standards-Version: 3.9.2
@@ -49,7 +48,6 @@ Depends:
  libpcl-conversions-dev,
  libboost-python-dev,
  python3.5-dev,
- libpcl-conversions-dev,
  liblaser-geometry-dev,
  libtf-dev,
  librosbag-dev,
@@ -57,7 +55,3 @@ Depends:
  libnav-msgs-dev,
  libtf2-sensor-msgs-dev,
  catkin,
-# these are optional dependencies for certain features
-#    imagemagick to convert from ppm
-Recommends:
- imagemagick,
