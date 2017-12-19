@@ -157,7 +157,7 @@ bool takescreenshot = false;
 
 
 int png_workers = 0;
-int png_workers_max = 4; // FIXME: make this configurable
+int png_workers_max = OPENMP_NUM_THREADS; // FIXME: make this configurable
 std::mutex png_workers_mutex;
 std::condition_variable png_workers_cv;
 
@@ -863,7 +863,7 @@ void initShow(const dataset_settings& ds, const window_settings& ws){
     // associate show octtree with the scan and
     // hand over octtree pointer ownership
 
-    Show_BOctTree<sfloat>* tree = new Show_BOctTree<sfloat>(scan, data_oct, cm);
+    Show_BOctTree<float>* tree = new Show_BOctTree<sfloat>(scan, data_oct, cm);
     
     // unlock cached octtree to enable creation
     // of more octtres without blocking the space for full scan points
