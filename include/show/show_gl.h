@@ -20,14 +20,14 @@
 using namespace show;
 extern bool   fullydisplayed;       // true if all points have been drawn to
                                     // the screen
-extern bool   mousemoving;      // true if a mouse button has been pressed
+extern bool   mousemoving;          // true if a mouse button has been pressed
                                     // inside a window,
                                     // but has not been released
-extern bool   keypressed;      // true if a key button has been pressed
+extern bool   keypressed;           // true if a key button has been pressed
                                     // inside a window,
                                     // but has not been released
 extern double ptstodisplay;  
-extern double lastfps;   // last frame rate    
+extern double lastfps;              // last frame rate    
 extern int    pointmode;
 
 extern bool   smallfont;
