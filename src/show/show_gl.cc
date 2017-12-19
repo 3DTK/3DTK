@@ -345,6 +345,8 @@ void DrawCameras(void)
 }
 
 void DrawScala() {
+  if (factor != 1) return;
+  
 	glDisable(GL_FOG);
 	if (!showTopView) return;
 	glMatrixMode(GL_MODELVIEW);

@@ -243,6 +243,16 @@ int icp6D::match(Scan* PreviousScan, Scan* CurrentScan,
    
 #endif
 
+//#define PLANAR 
+#ifdef  PLANAR    
+    double t_rPosTheta[3], t_rPos[3];
+    Matrix4ToEuler(alignxf, t_rPosTheta, t_rPos);
+    t_rPos[1] = 0.0;
+    t_rPosTheta[0] = 0.0;
+    t_rPosTheta[2] = 0.0;
+    EulerToMatrix4(t_rPos, t_rPosTheta, alignxf);
+#endif //PLANAR
+    
     if ((iter == 0 && anim != -2) || ((anim > 0) && (iter % anim == 0))) {
       // transform the current scan
       CurrentScan->transform(alignxf, Scan::ICP, 0);  
