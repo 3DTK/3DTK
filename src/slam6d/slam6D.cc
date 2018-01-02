@@ -231,11 +231,11 @@ void usage(char* prog)
        << endl
        << bold << "  -u" << normal << " NR, " << bold << "--min=" << normal << "NR" << endl
        << "      Apply a custom filter. Filter mode and data are specified as a "<<endl
-       << "      semicolon-seperated string:"<<endl
-       << "      {filterMode};{nrOfParams}[;param1][;param2][...]"<<endl
-       << "      Multiple filters can be specified in a file (syntax in file is same as"<<endl
-       << "      direct specification"<<endl
-       << "      FILE;{fileName}"<<endl
+       << "      semicolon-seperated string:" << endl
+       << "      {filterMode};{nrOfParams}[;param1][;param2][...]" << endl
+       << "      Multiple filters can be specified in a file (syntax in file is same as" < <endl
+       << "      direct specification" << endl
+       << "      FILE;{fileName}" << endl
        << "      See filter implementation in src/slam6d/pointfilter.cc for more detail."<<endl
        << bold << "  -n" << normal << " FILE, " << bold << "--net=" << normal << "FILE" << endl
        << "         specifies the file that includes the net structure for SLAM" << endl
@@ -317,7 +317,7 @@ void usage(char* prog)
  */
 int parseArgs(int argc, char **argv, string &dir, double &red, int &rand,
               double &mdm, double &mdml, double &mdmll,
-              int &mni, int &start, int &end, int &maxDist, int &minDist,string &customFilter, bool &quiet, bool &veryQuiet,
+              int &mni, int &start, int &end, int &maxDist, int &minDist, string &customFilter, bool &quiet, bool &veryQuiet,
               bool &extrapolate_pose, bool &meta, int &algo, int &loopSlam6DAlgo, int &lum6DAlgo, int &anim,
               int &mni_lum, string &net, double &cldist, int &clpairs, int &loopsize,
               double &epsilonICP, double &epsilonSLAM,  int &nns_method, bool &exportPts, double &distLoop,
@@ -483,7 +483,7 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &rand,
       minDist = atoi(optarg);
       break;
     case 'u':
-      customFilter=optarg;
+      customFilter = optarg;
       break;
     case 'q':
       quiet = true;
@@ -808,7 +808,7 @@ int main(int argc, char **argv)
   boost::filesystem::path loopclose("loopclose.pts");
   
   parseArgs(argc, argv, dir, red, rand, mdm, mdml, mdmll, mni, start, end,
-            maxDist, minDist,customFilter, quiet, veryQuiet, eP, meta,
+            maxDist, minDist, customFilter, quiet, veryQuiet, eP, meta,
             algo, loopSlam6DAlgo, lum6DAlgo, anim,
             mni_lum, net, cldist, clpairs, loopsize, epsilonICP, epsilonSLAM,
             nns_method, exportPts, distLoop, iterLoop, graphDist, octree, type,
@@ -830,17 +830,17 @@ int main(int argc, char **argv)
   // custom filter set? quick check, needs to contain at least one ';' 
   // (proper checking will be done case specific in pointfilter.cc)
   size_t pos = customFilter.find_first_of(";");
-  if (pos != std::string::npos){
+  if (pos != std::string::npos) {
     customFilterActive = true;
 
     // check if customFilter is specified in file
-    if (customFilter.find("FILE;") == 0){
+    if (customFilter.find("FILE;") == 0) {
       std::string selection_file_name = customFilter.substr(5, customFilter.length());
       std::ifstream selectionfile;
       // open the input file
       selectionfile.open(selection_file_name, std::ios::in);
 
-      if (!selectionfile.good()){
+      if (!selectionfile.good()) {
         std::cerr << "Error loading custom filter file " << selection_file_name << "!" << std::endl;
         std::cerr << "Data will NOT be filtered.!" << std::endl;
         customFilterActive = false;
@@ -848,7 +848,7 @@ int main(int argc, char **argv)
       else {
         std::string line;
         std::string custFilt;
-        while (std::getline(selectionfile, line)){
+        while (std::getline(selectionfile, line)) {
           // allow comment or empty lines
           if (line.find("#") == 0) continue;
           if (line.length() < 1) continue;
