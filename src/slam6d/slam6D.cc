@@ -233,7 +233,7 @@ void usage(char* prog)
        << "      Apply a custom filter. Filter mode and data are specified as a "<<endl
        << "      semicolon-seperated string:" << endl
        << "      {filterMode};{nrOfParams}[;param1][;param2][...]" << endl
-       << "      Multiple filters can be specified in a file (syntax in file is same as" < <endl
+       << "      Multiple filters can be specified in a file (syntax in file is same as" << endl
        << "      direct specification" << endl
        << "      FILE;{fileName}" << endl
        << "      See filter implementation in src/slam6d/pointfilter.cc for more detail."<<endl
