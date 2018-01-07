@@ -671,7 +671,7 @@ void DisplayItFunc(GLenum mode, bool interruptable)
     oldneardistance = neardistance;
     int viewport[4];
     glGetIntegerv(GL_VIEWPORT, viewport);
-    CallBackReshapeFunc(viewport[2],viewport[3]);
+    reshape(viewport[2], viewport[3]);
   }
  
   // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -1329,23 +1329,22 @@ void initScreenWindow()
   // create window and append callback functions
   window_id = glutCreateWindow("3D_Viewer");
 
-  glutDisplayFunc( CallBackDisplayFunc );
-  GLUI_Master.set_glutReshapeFunc( CallBackReshapeFunc );
-  
-  GLUI_Master.set_glutMouseFunc  ( CallBackMouseFunc );
-  GLUI_Master.set_glutKeyboardFunc ( CallBackKeyboardFunc);
-  glutKeyboardUpFunc ( CallBackKeyboardUpFunc);
-  glutMotionFunc ( CallBackMouseMotionFunc); 
-  GLUI_Master.set_glutSpecialFunc ( CallBackSpecialFunc);
+  glutDisplayFunc(display);
+  GLUI_Master.set_glutReshapeFunc(reshape);
+
+  GLUI_Master.set_glutMouseFunc(mouseButton);
+  GLUI_Master.set_glutKeyboardFunc(keyPressed);
+  glutKeyboardUpFunc(keyReleased);
+  glutMotionFunc(mouseMove);
 #ifdef __APPLE__
   glutWMCloseFunc(CallBackCloseFunc);
 #else
-  glutCloseFunc(CallBackCloseFunc);
+  glutCloseFunc(quit);
 #endif
 
   // glutEntryFunc ( CallBackEntryFunc);
-  GLUI_Master.set_glutReshapeFunc( CallBackReshapeFunc );
-  GLUI_Master.set_glutIdleFunc( CallBackIdleFunc );
+  GLUI_Master.set_glutReshapeFunc(reshape);
+  GLUI_Master.set_glutIdleFunc(idle);
 
   update_view_rotate(0);
   glClearColor(0.0, 0.0, 0.0, 0.0);

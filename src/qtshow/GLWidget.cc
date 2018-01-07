@@ -12,6 +12,7 @@
 #include <Qt>
 #include <QFileDialog>
 
+#include "show/callbacks_glut.h"
 #include "show/show_common.h"
 #include "show/show_gl.h"
 #include "qtshow/GLWidget.h"
@@ -32,7 +33,7 @@ void GLWidget::initializeGL() {
 }
 
 void GLWidget::resizeGL(int w, int h) {
-  CallBackReshapeFunc(w, h);
+  callbacks::glut::reshape(w, h);
 }
 
 void GLWidget::paintGL() {
@@ -43,7 +44,7 @@ void GLWidget::paintGL() {
     pzoom_old = pzoom;
     int viewport[4];
     glGetIntegerv(GL_VIEWPORT, viewport);
-    CallBackReshapeFunc(viewport[2],viewport[3]);
+    callbacks::glut::reshape(viewport[2],viewport[3]);
   }
 
   glDrawBuffer(buffermode);
@@ -343,5 +344,5 @@ void GLWidget::saveSnapshot() {
 }
 
 void GLWidget::idle() {
-  CallBackIdleFunc();
+  callbacks::glut::idle();
 }
