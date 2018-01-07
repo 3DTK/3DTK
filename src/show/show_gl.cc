@@ -592,17 +592,16 @@ void DisplayItFunc(GLenum mode, bool interruptable)
    */
   GLfloat fogColor[4];
 
-  if(!invert) {
-    glEnable(GL_COLOR_LOGIC_OP);
-    glLogicOp(GL_COPY_INVERTED);
-  }
-
   // set the clear color buffer in case of
   // both invert and non invert mode
-  if (invert)
-    glClearColor(0.0, 0.0, 0.0, 0.0);
-  else
+  if (invert) {
+    glClearColor(0.0, 0.0, 0.0, 1.0);
+  } else {
+    glEnable(GL_COLOR_LOGIC_OP);
+    glLogicOp(GL_COPY_INVERTED);
+
     glClearColor(1.0, 1.0, 1.0, 1.0);
+  }
 
   // clear the color and depth buffer bit
   if (!interruptable) { // single buffer mode, we need the depth buffer
@@ -617,8 +616,9 @@ void DisplayItFunc(GLenum mode, bool interruptable)
 
   setup_camera();
   
-  // process fog
   DrawScala();
+
+  // process fog
   if (show_fog > 0) {
     if (show_fog > 3) 
       fogColor[0] = fogColor[1] = fogColor[2] = fogColor[3] = 1.0;
