@@ -21,7 +21,6 @@ if (WITH_OPENGL AND WITH_QT)
 
   add_executable(qtshow
     main.cc
-    GLWidget.cc
     MainWindow.cc
     QtShow.cc
     ScanPicker.cc
@@ -29,9 +28,10 @@ if (WITH_OPENGL AND WITH_QT)
     ${QTSHOW_FORMS_HEADERS})
 
   add_library(glwidget STATIC GLWidget.cc ${GLWIDGET_HEADERS_MOC})
-    
-  qt5_use_modules(qtshow Widgets OpenGL)
-  target_link_libraries(qtshow show_shared ${SHOW_LIBS_SHARED} ${QT_LIBRARIES})
+
   qt5_use_modules(glwidget Widgets OpenGL)
   target_link_libraries(glwidget show_shared ${SHOW_LIBS_SHARED} ${QT_LIBRARIES})
+
+  qt5_use_modules(qtshow Widgets)
+  target_link_libraries(qtshow glwidget ${QT_LIBRARIES})
 endif()
