@@ -4,7 +4,7 @@
 namespace callbacks {
 namespace glut {
 
-void CallBackDisplayFunc() {
+void display() {
   if ((cangle_spinner != 0 && (fabs(cangle_old - cangle) > 0.5)) ||
       (pzoom_spinner != 0 && (fabs(pzoom_old - pzoom) > 0.5))) {
 
@@ -12,7 +12,7 @@ void CallBackDisplayFunc() {
     pzoom_old = pzoom;
     int viewport[4];
     glGetIntegerv(GL_VIEWPORT, viewport);
-    CallBackReshapeFunc(viewport[2], viewport[3]);
+    reshape(viewport[2], viewport[3]);
 #ifdef _MSC_VER
     Sleep(25);
 #else
@@ -31,7 +31,7 @@ void CallBackDisplayFunc() {
 
 }
 
-void CallBackIdleFunc(void) {
+void idle(void) {
 
 #ifdef _MSC_VER
   Sleep(1);
@@ -72,7 +72,7 @@ void CallBackIdleFunc(void) {
   if (haveToUpdate == 2) {
     int viewport[4];
     glGetIntegerv(GL_VIEWPORT, viewport);
-    CallBackReshapeFunc(viewport[2], viewport[3]);
+    reshape(viewport[2], viewport[3]);
     update_callback();
     haveToUpdate = 0;
     return;
@@ -206,7 +206,7 @@ void CallBackMouseFuncMoving(int button, int state, int x, int y) {
   }
 }
 
-void CallBackMouseFunc(int button, int state, int x, int y) {
+void mouseButton(int button, int state, int x, int y) {
   // Are we selecting points or moving the camera?
   if (cameraNavMouseMode != 1) { // selecting points
     if (state == GLUT_DOWN &&
@@ -228,12 +228,12 @@ void CallBackMouseFunc(int button, int state, int x, int y) {
   }
 }
 
-void CallBackCloseFunc() {
+void quit() {
   // this gets called when window is closed without using the "Quit" button - ensure regular shutdown to avoid crash
   deinitShow();
 }
 
-void CallBackMouseMotionFunc(int x, int y) {
+void mouseMove(int x, int y) {
   double deltaMouseX = x - mouseNavX;
   double deltaMouseY = mouseNavY - y;
   mouseNavX = x;
@@ -267,7 +267,7 @@ void CallBackMouseMotionFunc(int x, int y) {
   }
 }
 
-void CallBackReshapeFunc(int width, int height) {
+void reshape(int width, int height) {
   if (!fullscreen) {
     current_height = height;
     current_width = width;
@@ -323,18 +323,7 @@ void CallBackReshapeFunc(int width, int height) {
   glEnable(GL_POINT_SMOOTH);
 }
 
-void CallBackSpecialFunc(int key, int x, int y) {
-  // KeyboardFunc(key + 214, false, false, false);
-  // return;
-}
-
-void CallBackInterfaceFunc(unsigned char key, int x, int y) {
-  // call the interfacefunc. it deals with all our
-  // keyboard activities
-  InterfaceFunc(key);
-}
-
-void CallBackKeyboardUpFunc(unsigned char key, int x, int y) {
+void keyReleased(unsigned char key, int x, int y) {
   keymap[key] = false;
   if (key >= 'A' && key <= 'Z') {
     keymap[key + ('a' - 'A')] = false;
@@ -352,7 +341,7 @@ void CallBackKeyboardUpFunc(unsigned char key, int x, int y) {
   keypressed = false;
 }
 
-void CallBackKeyboardFunc(unsigned char key, int x, int y) {
+void keyPressed(unsigned char key, int x, int y) {
   keymap[key] = true;
   keypressed = true;
   bool cmd, alt, shift;
