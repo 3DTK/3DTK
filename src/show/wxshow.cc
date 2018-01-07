@@ -7,6 +7,7 @@
  *
  */
 
+#include "show/callbacks_glut.h"
 #include "show/show_common.h"
 #include "show/program_options.h"
 #include "wx/wx.h"
@@ -562,7 +563,7 @@ void BasicGLPane::mouseEvent(wxMouseEvent& event)
     } else {
       button = 0;
     }
-    CallBackMouseFunc(button, state, x, y);
+    callbacks::glut::mouseButton(button, state, x, y);
   }
 }
 
@@ -644,7 +645,7 @@ void BasicGLPane::idle() {
   if (haveToUpdate == 2) {
     int viewport[4];
     glGetIntegerv(GL_VIEWPORT, viewport);
-    CallBackReshapeFunc(viewport[2],viewport[3]);
+    callbacks::glut::reshape(viewport[2],viewport[3]);
     paint();
     haveToUpdate = 0;
     return;
@@ -741,7 +742,7 @@ void BasicGLPane::mouseMoved(wxMouseEvent& event)
   int x = event.GetX();
   int y = event.GetY();
 
-  CallBackMouseMotionFunc(x, y);
+  callbacks::glut::mouseMove(x, y);
   //idle();
 }
 void BasicGLPane::mouseDown(wxMouseEvent& event) {}
@@ -795,7 +796,7 @@ void BasicGLPane::resized(wxSizeEvent& evt)
 {
 //  wxGLCanvas::OnSize(evt);
     wxSize s = evt.GetSize();
-    CallBackReshapeFunc(s.GetWidth(), s.GetHeight());
+    callbacks::glut::reshape(s.GetWidth(), s.GetHeight());
   
     Refresh();
 }
