@@ -29,6 +29,12 @@ struct WindowDimensions {
   WindowDimensions(int w, int h) : w(w), h(h) {};
 };
 
+struct Color {
+  float r, g, b;
+  Color() : r(0), g(0), b(0) {};
+  Color(float r, float g, float b) : r(r), g(g), b(b) {};
+};
+
 struct Position {
   double x, y, z;
   Position() : x(0), y(0), z(0) {};
@@ -76,6 +82,7 @@ struct color_settings {
   bool explicit_coloring;
   ShowColormap colormap;
   range<float> colormap_values {NAN, NAN};
+  Color bgcolor;
 };
 
 struct dataset_settings {

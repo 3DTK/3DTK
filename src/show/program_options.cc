@@ -54,16 +54,18 @@ void parse_args(int argc, char **argv, dataset_settings& ds, window_settings& ws
       "Fog density. Useful values are between 0 and 1.")
     ("position",
       value(&ds.camera.position)->default_value(Position(0,0,0), "0,0,0"),
-      "Camera starting position, given as \"%lf,%lf,%lf\" for x, y, z.")
+      "Camera starting position, given as \"%lf,%lf,%lf\" for x, y and z.")
     ("rotation",
       value(&ds.camera.rotation)->default_value(Quaternion(0,0,0,1), "0,0,0,1"),
-      "Camera starting rotation, given as a quaternion \"%lf,%lf,%lf,%lf\".")
+      "Camera starting rotation, given as a quaternion \"%lf,%lf,%lf,%lf\" for x, y, z, and w.")
     ("pointsize", value(&ds.pointsize)->default_value(1),
       "Size of each point in pixels.")
     ;
 
   options_description color_options("Point coloring");
   color_options.add_options()
+    ("bgcolor", value(&ds.coloring.bgcolor)->default_value(Color(0,0,0), "0,0,0"),
+     "Drawing area background color, given as \"%f,%f,%f\" for red, green and blue.")
     ("color,c", bool_switch(&ds.coloring.explicit_coloring),
       "Use included RGB values for coloring points.")
     ("reflectance,R", bool_switch(),
@@ -380,6 +382,22 @@ void validate(boost::any& v, const std::vector<std::string>& values,
     v = boost::any(Position(x, y, z));
   } else {
     throw validation_error(validation_error::invalid_option_value, "Camera coordinates must be given as \"X,Y,Z\".");
+  }
+}
+
+void validate(boost::any& v, const std::vector<std::string>& values,
+  Color* target_type, int)
+{
+  using namespace boost::program_options;
+
+  validators::check_first_occurrence(v);
+  const char *s = validators::get_single_string(values).c_str();
+
+  float r, g, b;
+  if (sscanf(s, "%f,%f,%f", &r, &g, &b) == 3) {
+    v = boost::any(Color(r, g, b));
+  } else {
+    throw validation_error(validation_error::invalid_option_value, "Colors must be given as \"R,G,B\".");
   }
 }
 

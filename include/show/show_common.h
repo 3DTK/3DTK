@@ -328,6 +328,9 @@ extern int factor;
  * program tries to have this framerate
  */
 extern float idealfps;
+
+extern float bgcolor[3];
+
 /**
  * value of the listBox fo Color Value and Colormap
  */

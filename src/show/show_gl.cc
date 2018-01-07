@@ -638,12 +638,12 @@ void DisplayItFunc(GLenum mode, bool interruptable)
   // set the clear color buffer in case of
   // both invert and non invert mode
   if (invert) {
-    glClearColor(0.0, 0.0, 0.0, 1.0);
+    glClearColor(bgcolor[0], bgcolor[1], bgcolor[2], 1.0);
   } else {
     glEnable(GL_COLOR_LOGIC_OP);
     glLogicOp(GL_COPY_INVERTED);
 
-    glClearColor(1.0, 1.0, 1.0, 1.0);
+    glClearColor(1-bgcolor[0], 1-bgcolor[1], 1-bgcolor[2], 1.0);
   }
 
   // clear the color and depth buffer bit
