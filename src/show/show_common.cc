@@ -266,6 +266,9 @@ int factor = 1;
  * program tries to have this framerate
  */
 float idealfps = 20.0;
+
+float bgcolor[3];
+
 /**
  * value of the listBox fo Color Value and Colormap
  */
@@ -554,6 +557,10 @@ void copy_settings_to_globals(
   show_fog = ds.fog.type;
   fogDensity = ds.fog.density;
   pointsize = ds.pointsize;
+
+  bgcolor[0] = ds.coloring.bgcolor.r;
+  bgcolor[1] = ds.coloring.bgcolor.g;
+  bgcolor[2] = ds.coloring.bgcolor.b;
 
   RVX = ds.camera.position.x;
   RVY = ds.camera.position.y;
