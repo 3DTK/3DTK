@@ -582,16 +582,61 @@ void setup_camera() {
 #endif
 }
 
+void setup_fog() {
+  if (show_fog > 0) {
+    GLfloat fogColor[4];
+
+    if (show_fog > 3) // One of the "inverted fog" options
+      fogColor[0] = fogColor[1] = fogColor[2] = fogColor[3] = 1.0;
+    else 
+      fogColor[0] = fogColor[1] = fogColor[2] = fogColor[3] = 0.0;
+
+    glEnable(GL_FOG);
+    // ln(1/2^8) = -5.54517744
+    // is the threshold at which the last color bit is gone due to fog
+    // by setting the fardistance there we gain some performance
+    if (show_fog==1) {
+      fogMode = GL_EXP;
+      fardistance = std::min(5.54517744 / fogDensity, (double)maxfardistance);
+    }
+    else if (show_fog==2) {
+      fogMode = GL_EXP2;
+      fardistance = std::min(sqrt(5.54517744) / fogDensity,
+                        (double)maxfardistance);
+    }
+    else if (show_fog==3) {
+      fogMode = GL_LINEAR;
+      fardistance = 32000.0;
+    }
+    else if (show_fog==4) {
+      fogMode = GL_EXP;
+      fardistance = (double)maxfardistance;
+    }
+    else if (show_fog==5) {
+      fogMode = GL_EXP2;
+      fardistance = (double)maxfardistance;
+    }
+    else if (show_fog==6) {
+      fogMode = GL_LINEAR;
+      fardistance = (double)maxfardistance;
+    }
+    glFogi(GL_FOG_MODE, fogMode);
+    glFogfv(GL_FOG_COLOR, fogColor);
+    glFogf(GL_FOG_DENSITY, fogDensity);
+    glHint(GL_FOG_HINT, GL_FASTEST);
+    glFogf(GL_FOG_START, neardistance);
+    glFogf(GL_FOG_END, maxfardistance);
+  } else {
+    glDisable(GL_FOG);
+    fardistance = maxfardistance;
+  }
+}
+
 /**
  * Display function
  */
 void DisplayItFunc(GLenum mode, bool interruptable)
 {
-  /**
-   * Color of the fog
-   */
-  GLfloat fogColor[4];
-
   // set the clear color buffer in case of
   // both invert and non invert mode
   if (invert) {
@@ -619,51 +664,8 @@ void DisplayItFunc(GLenum mode, bool interruptable)
   DrawScala();
 
   // process fog
-  if (show_fog > 0) {
-    if (show_fog > 3) 
-      fogColor[0] = fogColor[1] = fogColor[2] = fogColor[3] = 1.0;
-    else 
-      fogColor[0] = fogColor[1] = fogColor[2] = fogColor[3] = 0.0;
-    glEnable(GL_FOG);
-    {
-      // ln(1/2^8) = -5.54517744
-      // --> threshold at which the last color bit is gone due to fog
-      if (show_fog==1) {
-        fogMode = GL_EXP;
-        fardistance = std::min(5.54517744 / fogDensity, (double)maxfardistance);
-      }
-      else if (show_fog==2) {
-        fogMode = GL_EXP2;
-        fardistance = std::min(sqrt(5.54517744) / fogDensity,
-                          (double)maxfardistance);
-      }
-      else if (show_fog==3) {
-        fogMode = GL_LINEAR;
-        fardistance = 32000.0;
-      }
-      else if (show_fog==4) {
-        fogMode = GL_EXP;
-        fardistance = (double)maxfardistance;
-      }
-      else if (show_fog==5) {
-        fogMode = GL_EXP2;
-        fardistance = (double)maxfardistance;
-      }
-      else if (show_fog==6) {
-        fogMode = GL_LINEAR;
-        fardistance = (double)maxfardistance;
-      }
-      glFogi(GL_FOG_MODE, fogMode);
-      glFogfv(GL_FOG_COLOR, fogColor);
-      glFogf(GL_FOG_DENSITY, fogDensity);
-      glHint(GL_FOG_HINT, GL_FASTEST);
-      glFogf(GL_FOG_START, neardistance);
-      glFogf(GL_FOG_END, maxfardistance);
-    }
-  } else {
-    glDisable(GL_FOG);
-    fardistance = maxfardistance;
-  }
+  setup_fog();
+
   if (fardistance > maxfardistance) fardistance = maxfardistance;
   if ( fabs(oldfardistance - fardistance) > 0.00001 ||
        fabs(oldneardistance - neardistance) > 0.00001 ) {
