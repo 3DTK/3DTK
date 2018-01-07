@@ -753,7 +753,7 @@ void BasicGLPane::mouseLeftWindow(wxMouseEvent& event) {}
 
 
 void BasicGLPane::keyPressed(wxKeyEvent& event) {
-  KeyboardFunc(event.GetKeyCode(), event.CmdDown(), event.AltDown(), event.ShiftDown());
+  callbacks::glut::keyHandler(event.GetKeyCode(), event.CmdDown(), event.AltDown(), event.ShiftDown());
 }
 
 
