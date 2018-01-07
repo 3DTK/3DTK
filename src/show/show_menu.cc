@@ -1,4 +1,7 @@
+#include "show/callbacks_glut.h"
 #include "show/show_menu.h"
+
+using namespace callbacks::glut;
 
 GLUI *glui1,  ///< pointer to the glui window(s)
      *glui2;  ///< pointer to the glui window(s)
