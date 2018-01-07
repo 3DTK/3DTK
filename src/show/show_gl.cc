@@ -502,31 +502,6 @@ void setup_camera() {
       } else if (haveToUpdate == 6 && path_iterator < path_vectorX.size()) {
     
     if(path3D) {
-      /* To make 3D videos:
-      1. animate path (store images in folder left)
-      2. in advanced mode set "Shift Path for 3D" and the "3D Shift" for baseline
-      3. animate path again (store images in folder right)
-      
-      // FOR YOUTUBE
-      4a. append left and right images into one, reducing width of original images to half
-      
-      for (( c=1; c < 1000; c++ ))
-      do
-        `printf "convert +append -resize 960x1080! left/animframe%05d.jpg right/animframe%05d.jpg long3D/animframe%05d.jpg" "$c" "$c" "$c"`
-      done
-      mencoder "mf://long3D/?*.jpg" -mf fps=25 -o test.avi -ovc lavc -lavcopts vcodec=mjpeg:vbitrate=8000
-      
-      5a. upload video to youtube, select in advanced options 3D Video, video is already in 3d format
-
-      // FOR mplayer
-      for (( c=1; c < 1000; c++ ))
-      do
-        `printf "composite -stereo +0 left/animframe%05d.jpg right/animframe%05d.jpg stereo3D/animframe%05d.jpg" "$c" "$c" "$c"`
-      done
-      mencoder "mf://stereo3D/?*.jpg" -mf fps=25 -o test.avi -ovc lavc -lavcopts vcodec=mjpeg:vbitrate=8000
-
-      */
-
       double * lc = new double[3];
       double * uc = new double[3];
       double * n = new double[3];
