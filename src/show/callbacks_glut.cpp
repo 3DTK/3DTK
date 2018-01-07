@@ -344,14 +344,82 @@ void keyReleased(unsigned char key, int x, int y) {
 void keyPressed(unsigned char key, int x, int y) {
   keymap[key] = true;
   keypressed = true;
-  bool cmd, alt, shift;
-  cmd = glutGetModifiers() & GLUT_ACTIVE_CTRL;
+  bool ctrl, alt, shift;
+  ctrl = glutGetModifiers() & GLUT_ACTIVE_CTRL;
   alt = glutGetModifiers() & GLUT_ACTIVE_ALT;
   shift = glutGetModifiers() & GLUT_ACTIVE_SHIFT;
-  if (cmd) {
+  if (ctrl) {
     key += 96;
   }
-  KeyboardFunc(key, cmd, alt, shift);
+  keyHandler(key, ctrl, alt, shift);
+}
+
+void keyHandler(int key, bool control, bool alt, bool shift) {
+  double stepsize = movementSpeed;
+  if (shift) stepsize *= 10.0;
+  if (control) stepsize *= 0.1;
+  if (alt) stepsize *= 100.0;
+
+  double rotsize = 0.2 * stepsize;
+
+  switch (key) {
+    case 'w':
+    case 'W':
+      moveCamera(0,0,stepsize,0,0,0);
+      break;
+    case 'a':
+    case 'A':
+      moveCamera(stepsize,0,0,0,0,0);
+      break;
+    case 's':
+    case 'S':
+      moveCamera(0,0,-stepsize,0,0,0);
+      break;
+    case 'd':
+    case 'D':
+      moveCamera(-stepsize,0,0,0,0,0);
+      break;
+    case 'c':
+    case 'C':
+      moveCamera(0,stepsize,0,0,0,0);
+      break;
+    case 32:  // WXK_SPACE
+      moveCamera(0,-stepsize,0,0,0,0);
+      break;
+    case 314: // WXK_LEFT
+      moveCamera(0,0,0,0,rotsize,0);
+      break;
+    case 315: // WXK_UP
+      moveCamera(0,0,0,rotsize,0,0);
+      break;
+    case 316: // WXK_RIGHT
+      moveCamera(0,0,0,0,-rotsize,0);
+      break;
+    case 317: // WXK_DOWN
+      moveCamera(0,0,0,-rotsize,0,0);
+      break;
+    case 'q':
+    case 'Q':
+    case 366: // WXK_PAGEUP
+      moveCamera(0,0,0,0,0,rotsize);
+      break;
+    case 'e':
+    case 'E':
+    case 367: // WXK_PAGEDOWN
+      moveCamera(0,0,0,0,0,-rotsize);
+      break;
+    case 'f':
+      if (!fullscreen) {
+        fullscreen = true;
+        glutFullScreen();
+      } else {
+        fullscreen = false;
+        glutReshapeWindow(current_width, current_height);
+      }
+      break;
+    default:
+      break;
+  }
 }
 
 }

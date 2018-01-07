@@ -146,9 +146,6 @@ void selectPoints(int x, int y);
 void moveCamera(double x, double y, double z,
                 double rotx, double roty, double rotz);
 
-void KeyboardFunc(int key, bool control, bool alt, bool shift);
-
-
 void initScreenWindow();
 
 void load_url_texture();
