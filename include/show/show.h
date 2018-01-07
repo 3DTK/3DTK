@@ -48,8 +48,6 @@
 #include "show/show1.icc"
 #include "show/show.icc"
 
-void CallBackReshapeFunc(int width, int height);
-void CallBackIdleFunc(void);
 void DisplayItFunc(GLenum mode, bool interruptable = false);
 void DrawPoints(GLenum mode, bool interruptable = false);
 void DrawUrl();
@@ -84,14 +82,6 @@ void loadPath(int dummy);
 void savePose(int dummy);
 void loadPose(int dummy);
 void saveImage(int dummy);
-void CallBackInterfaceFunc(unsigned char key, int x, int y);
-void CallBackKeyboardFunc(unsigned char key, int x, int y);
-void CallBackKeyboardUpFunc(unsigned char key, int x, int y);
-void CallBackMouseFunc(int button, int state, int x, int y);
-void CallBackMouseFuncMoving(int button, int state, int x, int y);
-void CallBackMouseMotionFunc(int x, int y);
-void CallBackSpecialFunc(int key, int x, int y);
-void InterfaceFunc(unsigned char key);
 void updateCamera();
 void drawRobotPath(int dummy);
 int calcFrameNo();

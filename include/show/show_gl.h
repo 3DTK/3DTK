@@ -10,12 +10,13 @@
 #ifndef __SHOW_GL_H__
 #define __SHOW_GL_H__
 
-#include "show/show_menu.h"
 
-#include <string.h>
-#include <stdlib.h>
-#include "show/viewcull.h"
+#include <cstring>
+#include <cstdlib>
+
 #include "show/scancolormanager.h"
+#include "show/show_menu.h"
+#include "show/viewcull.h"
 
 using namespace show;
 extern bool   fullydisplayed;       // true if all points have been drawn to
@@ -35,7 +36,7 @@ extern bool   label;
 
 /**
  * Displays all data (i.e., points) that are to be displayed
- * @param mode spezification for drawing to screen or in selection mode
+ * @param mode specification for drawing to screen or in selection mode
  */
 void DrawPoints(GLenum mode, bool interruptable);
 
@@ -96,19 +97,6 @@ void setView(double pos[3], double new_quat[4],
              bool sTV, bool cNMM, double pzoom_new, 
              bool s_points, bool s_path, bool s_cameras, double ps, int
              sf, double fD, bool inv);
-  
-
-/**
- * This function is called when the viewer is created. This
- * acts as the display function.
- */
-void CallBackDisplayFunc();
-
-/**
- * This function is called when there is nothing to be done
- * in the screen.
- */
-void CallBackIdleFunc(void);
 
 
 /**
@@ -154,23 +142,11 @@ void callAddCamera(int dummy);
 
 void selectPoints(int x, int y);
 
-void CallBackMouseFuncMoving(int button, int state, int x, int y);
-
-
-/**
- * This function is called after a mousebutton has been pressed.
- */
-void CallBackMouseFunc(int button, int state, int x, int y);
-
 
 void moveCamera(double x, double y, double z,
                 double rotx, double roty, double rotz);
 
 void KeyboardFunc(int key, bool control, bool alt, bool shift);
-
-void CallBackCloseFunc();
-
-void CallBackMouseMotionFunc(int x, int y);
 
 
 void initScreenWindow();
@@ -206,12 +182,6 @@ void glDumpWindowPPM(const char *filename, GLenum mode);
 +++++++++-------------++++++++++++ */
 void glWriteImagePNG(const char *filename, int scale, GLenum mode);
 
-/** Reshape Function
- * TODO: have to describe it.
- *
- */
-void CallBackReshapeFunc(int width, int height);
-
 /**
  *  Prints out which points were clicked on
  */
@@ -225,8 +195,6 @@ void ProcessHitsFunc(GLint hits, GLuint buffer[]);
 
 void InterfaceFunc(unsigned char key);
 
-
-void CallBackSpecialFunc(int key, int x, int y);
 
 /**
  * Function drawRobotPath
@@ -247,15 +215,6 @@ void calcInterpolatedCameras(std::vector<PointXY> vec1, std::vector<PointXY> vec
   * the length of the path
   */
 int calcNoOfPoints(std::vector<PointXY> vec1, std::vector<PointXY> vec2);
-
-/**
- * This function handles the the keyboard input
- */
-void CallBackInterfaceFunc(unsigned char key, int x, int y);
-
-void CallBackKeyboardUpFunc(unsigned char key, int x, int y);
-
-void CallBackKeyboardFunc(unsigned char key, int x, int y);
 
 void mapColorToValue(int dummy);
 
