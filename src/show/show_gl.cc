@@ -475,18 +475,13 @@ void DrawScala() {
 
 }
 
-
-//-----------------------------------------------------------------------------------
 void setup_camera() {
 
-  // set the matrix mode
+  // The camera projection is represented in OpenGL by the ModelView matrix
   glMatrixMode(GL_MODELVIEW);
 
-  // init modelview matrix
+  // Initialize ModelView with identity
   glLoadIdentity();
-
-  // set the polygon mode
-  glPolygonMode(GL_FRONT/*_AND_BACK*/, GL_LINE); 
 
   // do the model-transformation
   if (haveToUpdate == 8 && path_iterator < ups.size()) {
@@ -613,6 +608,10 @@ void DisplayItFunc(GLenum mode, bool interruptable)
   if (!interruptable) { // single buffer mode, we need the depth buffer
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   }
+
+  // set the polygon mode
+  // XXX please clarify why we need this and what GL_FRONT_AND_BACK would do
+  glPolygonMode(GL_FRONT/*_AND_BACK*/, GL_LINE);
 
   glPushMatrix();
 
