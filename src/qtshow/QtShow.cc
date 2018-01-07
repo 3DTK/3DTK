@@ -6,6 +6,11 @@
 QtShow::QtShow(int &argc, char **argv)
   : QApplication(argc, argv)
 {
+  // Qt wants to automatically set the locale for us (c.f. Qt bugs #15247 #10994).
+  // This is a problem for sscanf for comma-separated lists of numbers when e.g. LC_NUMERIC=de_DE
+  // We reset this behaviour to POSIX before we execute any of our own code:
+  setlocale(LC_NUMERIC, "POSIX");
+
   glutInit(&argc, argv);
 
   bool has_initial_directory;
