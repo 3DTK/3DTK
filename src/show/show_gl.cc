@@ -477,36 +477,7 @@ void DrawScala() {
 
 
 //-----------------------------------------------------------------------------------
-
-  
-/**
- * Display function
- */
-void DisplayItFunc(GLenum mode, bool interruptable)
-{
-  /**
-   * Color of the fog 
-   */
-  GLfloat fogColor[4];
-
-  if(!invert) {
-    glEnable(GL_COLOR_LOGIC_OP);
-    glLogicOp(GL_COPY_INVERTED);
-  }
-  
-  // set the clear color buffer in case of
-  // both invert and non invert mode
-  if (invert)
-    glClearColor(0.0, 0.0, 0.0, 0.0);
-  else
-    glClearColor(1.0, 1.0, 1.0, 1.0);
-
-  // clear the color and depth buffer bit
-  if (!interruptable) { // single buffer mode, we need the depth buffer
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-  }
-
-  glPushMatrix();
+void setup_camera() {
 
   // set the matrix mode
   glMatrixMode(GL_MODELVIEW);
@@ -633,11 +604,44 @@ void DisplayItFunc(GLenum mode, bool interruptable)
     glTranslated(X, Y, Z);       // move camera     
   }
 
-//   cout << "Position  :" << X << " " << Y << " " << Z << endl;
-//   cout << "Quaternion:" << quat[0] << " " << quat[1] << " " << quat[2] << " " << quat[3] << endl;
-//   cout << "Axis/Angle:" << axis[0] << " " << axis[1] << " " << axis[2] << " " << angle << endl;
-//   cout << "Apex angle:" << cangle << endl;
-//   cout << endl;
+#ifdef WITH_LOGGING
+  std::clog << "Position  :" << X << " " << Y << " " << Z << '\n'
+            << "Quaternion:" << quat[0] << " " << quat[1] << " " << quat[2] << " " << quat[3] << '\n'
+            << "Axis/Angle:" << axis[0] << " " << axis[1] << " " << axis[2] << " " << angle << '\n'
+            << "Apex angle:" << cangle << '\n' << std::endl;
+#endif
+}
+
+/**
+ * Display function
+ */
+void DisplayItFunc(GLenum mode, bool interruptable)
+{
+  /**
+   * Color of the fog
+   */
+  GLfloat fogColor[4];
+
+  if(!invert) {
+    glEnable(GL_COLOR_LOGIC_OP);
+    glLogicOp(GL_COPY_INVERTED);
+  }
+
+  // set the clear color buffer in case of
+  // both invert and non invert mode
+  if (invert)
+    glClearColor(0.0, 0.0, 0.0, 0.0);
+  else
+    glClearColor(1.0, 1.0, 1.0, 1.0);
+
+  // clear the color and depth buffer bit
+  if (!interruptable) { // single buffer mode, we need the depth buffer
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  }
+
+  glPushMatrix();
+
+  setup_camera();
   
   // process fog
   DrawScala();
