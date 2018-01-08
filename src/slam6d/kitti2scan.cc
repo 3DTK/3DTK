@@ -134,7 +134,7 @@ int main(int argc, char **argv)
    string str = inDir +to_string(sequence,2)+'/'+"velodyne/"+to_string(fileCounter,6) + ".bin" ;
    const char *pointFileName = str.c_str();
    // char *pointFileName = "/media/achim/D46CA2BB6CA2982E/dataset/KITTI/KITTI_data_set/00/velodyne/0000000000.bin";
-   string FileName3d = inDir +to_string(sequence,2)+'/'+to_string(fileCounter,3) + ".3d" ;
+   string FileName3d = inDir +to_string(sequence,2)+'/'+"scan"+to_string(fileCounter,3) + ".3d" ;
    
     FILE *stream;
     stream = fopen(pointFileName,"rb");
