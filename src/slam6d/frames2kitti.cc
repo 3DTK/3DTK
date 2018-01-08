@@ -27,16 +27,17 @@ using std::ios;
 #define snprintf sprintf_s
 #endif 
 
-int parseArgs(int argc,char **argv, char dir[255], int& start, int& end){
+int parseArgs(int argc,char **argv, char dir[255], int& start, int& end,int& sequence){
   start   = 0;
   end     = -1; // -1 indicates no limitation
+  sequence=0;
   int  c;
   // from unistd.h
   extern char *optarg;
   extern int optind;
 
   cout << endl;
-  while ((c = getopt (argc, argv, "s:e:")) != -1)
+  while ((c = getopt (argc, argv, "s:e:q:")) != -1)
     switch (c)
    {
    case 's':
@@ -47,6 +48,12 @@ int parseArgs(int argc,char **argv, char dir[255], int& start, int& end){
      end = atoi(optarg);
      if (end < 0)     { cerr << "Error: Cannot end at a negative scan number.\n"; exit(1); }
      if (end < start) { cerr << "Error: <end> cannot be smaller than <start>.\n"; exit(1); }
+     break;
+
+   case 'q':
+     sequence = atoi(optarg);
+     if (sequence < 0)     { cerr << "Error: Cannot end at a negative scan number.\n"; exit(1); }
+     if (sequence > 21) { cerr << "Error: There are only 21 point clouds sequences.\n"; exit(1); }
      break;
    }
 
@@ -76,15 +83,15 @@ int parseArgs(int argc,char **argv, char dir[255], int& start, int& end){
 int main(int argc, char **argv)
 {
   int start = 0, end =-1;
-
+  int sequence=0;
   char dir[255];
-  parseArgs(argc, argv, dir, start,end);
+  parseArgs(argc, argv, dir, start,end,sequence);
   int  fileCounter = start;
   char poseFileName[255];
   char frameFileName[255];
   ifstream pose_in;
   ofstream pose_out;
-  snprintf(poseFileName,255,"%s%.2d.txt",dir,0);
+  snprintf(poseFileName,255,"%s%.2d.txt",dir,sequence);
   pose_out.open(poseFileName);
   pose_out.close();
   double inMatrix[12];
@@ -93,7 +100,7 @@ int main(int argc, char **argv)
   for (;;) {
     if (end > -1 && fileCounter > end) break; // 'nuf read
     snprintf(frameFileName,255,"%sscan%.3d.frames",dir,fileCounter++);
-    snprintf(poseFileName,255,"%s%.2d.txt",dir,0);
+    snprintf(poseFileName,255,"%s%.2d.txt",dir,sequence);
    
     pose_in.open(frameFileName);
 
