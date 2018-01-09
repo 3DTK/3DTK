@@ -37,6 +37,7 @@ void GLWidget::resizeGL(int w, int h) {
 }
 
 void GLWidget::paintGL() {
+  // Copy-paste from callbacks::glut::display() TODO unify this
   if (fabs(cangle_old - cangle) > 0.5 ||
       fabs(pzoom_old - pzoom) > 0.5) {
 
@@ -48,7 +49,6 @@ void GLWidget::paintGL() {
   }
 
   glDrawBuffer(buffermode);
-  // delete framebuffer and z-buffer
 
   // Call the display function
   DisplayItFunc(GL_RENDER, false);
@@ -92,65 +92,41 @@ void GLWidget::mouseMoveEvent(QMouseEvent *event) {
 }
 
 void GLWidget::keyPressEvent(QKeyEvent *event) {
-  // TODO include the time delta
-  double stepsize = movementSpeed;
+  bool ctrl  = (event->modifiers() & Qt::ControlModifier) != 0,
+       alt   = (event->modifiers() & Qt::AltModifier)     != 0, // TODO turn off keyboard hints
+       shift = (event->modifiers() & Qt::ShiftModifier)   != 0;
 
-  /* FIXME holding a modifier somehow hangs up the application
-  if (event->modifiers() & Qt::ControlModifier) stepsize *= 0.1;
-  if (event->modifiers() & Qt::ShiftModifier) stepsize *= 10;
-  if (event->modifiers() & Qt::AltModifier) stepsize *= 100;
-  */
+  // Translate the Qt keycodes inside event->key() to the keycodes
+  // used by show with this map. It accepts a combination of ASCII
+  // and wxWidgets keycodes (c.f. callbacks::glut::keyHandler()).
+  std::map<int, int> qt_to_show_keycodes {
+    {Qt::Key_W,        'w'},
+    {Qt::Key_A,        'a'},
+    {Qt::Key_S,        's'},
+    {Qt::Key_D,        'd'},
+    {Qt::Key_C,        'c'},
+    {Qt::Key_Space,    ' '},
+    {Qt::Key_Left,     314},
+    {Qt::Key_Up,       315},
+    {Qt::Key_Right,    316},
+    {Qt::Key_Down,     317},
+    {Qt::Key_Q,        'q'},
+    {Qt::Key_PageUp,   'q'},
+    {Qt::Key_E,        'e'},
+    {Qt::Key_PageDown, 'e'}
+  };
 
-  double rotsize = 0.2 * stepsize;
-
-  switch (event->key()) {
-  case Qt::Key_W:
-   moveCamera(0,0,stepsize,0,0,0);
-   break;
-  case Qt::Key_A:
-    moveCamera(stepsize,0,0,0,0,0);
-    break;
-  case Qt::Key_S:
-    moveCamera(0,0,-stepsize,0,0,0);
-    break;
-  case Qt::Key_D:
-    moveCamera(-stepsize,0,0,0,0,0);
-    break;
-  case Qt::Key_C:
-    moveCamera(0,stepsize,0,0,0,0);
-    break;
-  case Qt::Key_Space:
-    moveCamera(0,-stepsize,0,0,0,0);
-    break;
-  case Qt::Key_Left:
-    moveCamera(0,0,0,0,rotsize,0);
-    break;
-  case Qt::Key_Up:
-    moveCamera(0,0,0,-rotsize,0,0);
-    break;
-  case Qt::Key_Right:
-    moveCamera(0,0,0,0,-rotsize,0);
-    break;
-  case Qt::Key_Down:
-    moveCamera(0,0,0,rotsize,0,0);
-    break;
-  case Qt::Key_Q:
-  case Qt::Key_PageUp:
-    moveCamera(0,0,0,0,0,rotsize);
-    break;
-  case Qt::Key_E:
-  case Qt::Key_PageDown:
-    moveCamera(0,0,0,0,0,-rotsize);
-    break;
-  case Qt::Key_F:
-    // TODO does not work
-    setWindowState(windowState() ^ Qt::WindowFullScreen);
-    break;
-  default:
-    // need to pass the event to parent class if we don't handle it
-    // according to Qt docs
-    GLWidget::keyPressEvent(event);
-    break;
+  auto kc_it = qt_to_show_keycodes.find(event->key());
+  if (event->key() == Qt::Key_F) {
+    // We do not want fullscreen handled by GLUT (wouldn't work anyway)
+    // TODO put widget into fullscreen
+  } else if (kc_it != qt_to_show_keycodes.end()) {
+    // Map has key: pass it to legacy key handler
+    callbacks::glut::keyHandler(kc_it->second, ctrl, alt, shift);
+  } else {
+    // Map lacks key: Need to pass the event to parent class if we
+    // don't handle it (according to Qt docs).
+    QOpenGLWidget::keyPressEvent(event);
   }
 
   update();
