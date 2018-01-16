@@ -13,6 +13,9 @@ if(WITH_ROS)
       pcl_conversions
       tf_conversions
       tf2_sensor_msgs
+      urdf
+      kdl_parser
+      robot_state_publisher
   )
   find_package(Eigen3 REQUIRED)
   find_package(PCL REQUIRED)

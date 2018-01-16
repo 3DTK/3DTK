@@ -6,6 +6,11 @@
 #include <tf/transform_listener.h>
 #include <tf/transform_datatypes.h>
 #include <tf_conversions/tf_eigen.h>
+#include <urdf/model.h>
+#include <kdl/tree.hpp>
+#include <kdl_parser/kdl_parser.hpp>
+#include <robot_state_publisher/robot_state_publisher.h>
+#include <tf2_kdl/tf2_kdl.h>
 
 #include <iostream>
 #include <fstream>
@@ -62,21 +67,68 @@ void setTransform(double *transmat, double *mat, double x, double y, double z) {
     transmat[15] = 1;
 }
 
-void addStaticTransforms(tf::Transformer *l, ros::Time t) {
-    tf::Quaternion q;
+class StaticTransformSetter
+{
+    class SegmentPair
+    {
+    public:
+        SegmentPair(const KDL::Segment& p_segment, const std::string& p_root, const std::string& p_tip):
+            segment(p_segment), root(p_root), tip(p_tip){}
 
-    q.setRPY(0, -0.1745, 3.1416);
-    l->setTransform(tf::StampedTransform(tf::Transform(q, tf::Vector3(0.01, 0, 0.19)), t, "/base_link", "/horizontal_vlp16_link"));
+        KDL::Segment segment;
+        std::string root, tip;
+    };
 
-    q.setRPY(0, 1.3963, 0);
-    l->setTransform(tf::StampedTransform(tf::Transform(q, tf::Vector3(0.19, 0, 0.04)), t, "/base_link", "/vertical_vlp16_link"));
+public:
+    StaticTransformSetter(const KDL::Tree& tree, const urdf::Model& model = urdf::Model()) : model_(model) {
+        addChildren(tree.getRootSegment());
+    }
 
-    q.setRPY(0, 0, 0);
-    l->setTransform(tf::StampedTransform(tf::Transform(q, tf::Vector3(0.1007, 0, 0.0558)), t, "/base_link", "/horizontal_laser_link"));
+public:
+    void setFixedTransforms(tf::Transformer *l, ros::Time t) {
+        std::vector<geometry_msgs::TransformStamped> tf_transforms;
+        geometry_msgs::TransformStamped tf_transform;
 
-    q.setRPY(0, -1.570796, 3.141593);
-    l->setTransform(tf::StampedTransform(tf::Transform(q, tf::Vector3(0.1007, 0, 0.1814)), t, "/base_link", "/vertical_laser_link"));
-}
+        for (map<string, SegmentPair>::const_iterator seg=segments_fixed_.begin(); seg != segments_fixed_.end(); seg++) {
+            geometry_msgs::TransformStamped tf_transform = tf2::kdlToTransform(seg->second.segment.pose(0));
+            const KDL::Frame k = seg->second.segment.pose(0);
+
+            double qx,qy,qz,qw;
+            k.M.GetQuaternion(qx, qy, qz, qw);
+            tf::Quaternion q(qx, qy, qz, qw);
+
+            l->setTransform(tf::StampedTransform(tf::Transform(q, tf::Vector3(k.p.x(), k.p.y(), k.p.z())), t, seg->second.root, seg->second.tip));
+        }
+    }
+
+protected:
+    void addChildren(const KDL::SegmentMap::const_iterator segment) {
+        const std::string& root = GetTreeElementSegment(segment->second).getName();
+
+        const std::vector<KDL::SegmentMap::const_iterator>& children = GetTreeElementChildren(segment->second);
+        for (unsigned int i=0; i<children.size(); i++) {
+            const KDL::Segment& child = GetTreeElementSegment(children[i]->second);
+            SegmentPair s(GetTreeElementSegment(children[i]->second), root, child.getName());
+            if (child.getJoint().getType() == KDL::Joint::None) {
+                if (model_.getJoint(child.getJoint().getName()) && model_.getJoint(child.getJoint().getName())->type == urdf::Joint::FLOATING) {
+                    ROS_INFO("Floating joint. Not adding segment from %s to %s. This TF can not be published based on joint_states info", root.c_str(), child.getName().c_str());
+                }
+                else {
+                    segments_fixed_.insert(make_pair(child.getJoint().getName(), s));
+                    ROS_DEBUG("Adding fixed segment from %s to %s", root.c_str(), child.getName().c_str());
+                }
+            }
+            else {
+                segments_.insert(make_pair(child.getJoint().getName(), s));
+                ROS_DEBUG("Adding moving segment from %s to %s", root.c_str(), child.getName().c_str());
+            }
+            addChildren(children[i]);
+        }
+    }
+
+    std::map<std::string, SegmentPair> segments_, segments_fixed_;
+    const urdf::Model& model_;
+};
 
 struct PointCloudWithTransform {
     ros::Time timestamp;
@@ -165,11 +217,15 @@ void writePointClouds(const string& outdir, double scale, double minDistance, do
 
 int main(int argc, char* argv[])
 {
-    string bagfile;
-    string trajectoryfile;
+    string bagFile;
+    vector<string> trajectoryFiles;
     vector<string> topicsPointCloud2;
     vector<string> topicsMultiEchoLaserScan;
     vector<string> topicsLaserScan;
+    vector<string> topicsTF;
+    string urdffile;
+    string mapFrame;
+    string baseFrame;
     double startTime;
     double endTime;
     double scale;
@@ -181,12 +237,17 @@ int main(int argc, char* argv[])
     program_options::options_description desc("Allowed options");
     desc.add_options()
             ("help,h", "produce help message")
-            ("bag,b", program_options::value<string>(&bagfile)->required(), "input ros bag file")
-            ("trajectory,t", program_options::value<string>(&trajectoryfile)->default_value(""), "input trajectory file")
+            ("bag,b", program_options::value<string>(&bagFile)->required(), "input ros bag file")
+            ("trajectory,t", program_options::value<vector<string> >(&trajectoryFiles)->multitoken()->default_value(vector<string>()), "input trajectory files")
             ("topics-PointCloud2", program_options::value<vector<string> >(&topicsPointCloud2)->multitoken()->default_value(vector<string> {"horizontal_laser_3d", "vertical_laser_3d"}), "Topics with PointCloud2 messages for export")
             ("topics-MultiEchoLaserScan", program_options::value<vector<string> >(&topicsMultiEchoLaserScan)->multitoken()->default_value(vector<string> {"horizontal_laser_2d", "vertical_laser_2d"}), "Topics with MultiEchoLaserScan messages for export")
             ("topics-LaserScan", program_options::value<vector<string> >(&topicsLaserScan)->multitoken()->default_value(vector<string>()), "Topics with LaserScan messages for export")
-            ("start-time", program_options::value<double>(&startTime)->default_value(946684800), "Start timestamp of export")
+            ("topics-TF", program_options::value<vector<string> >(&topicsTF)->multitoken()->default_value(vector<string> {"/tf"}), "Topics with TF information")
+            ("urdf", program_options::value<string>(&urdffile)->required(), "input URDF file")
+            ("frame-map", program_options::value<string>(&mapFrame)->required()->default_value("/map"), "frame id of the map")
+            ("frame-base", program_options::value<string>(&baseFrame)->required()->default_value("/base_link"), "frame id of the robot base link")
+
+            ("start-time", program_options::value<double>(&startTime)->default_value(0), "Start timestamp of export")
             ("end-time", program_options::value<double>(&endTime)->default_value(4102444800), "End timestamp of export")
             ("scale", program_options::value<double>(&scale)->default_value(0.01), "Scale of exported point cloud")
             ("min,M", program_options::value<double>(&minDistance)->default_value(0.0), "Neglect all points closer than this to the origin")
@@ -208,77 +269,108 @@ int main(int argc, char* argv[])
     filesystem::create_directory(outdir);
 
 
+    StaticTransformSetter* transformSetter = NULL;
+    if (urdffile.size() > 0) {
+        urdf::Model model;
+
+        if (!model.initFile(urdffile)) {
+            cerr << "Failed parsing URDF file." << endl;
+            return -1;
+        }
+
+        KDL::Tree tree;
+        if (!kdl_parser::treeFromUrdfModel(model, tree)) {
+            ROS_ERROR("Failed to extract kdl tree from xml robot description");
+            return -1;
+        }
+
+        transformSetter = new StaticTransformSetter(tree, model);
+    }
+
+
     tf::Transformer *l = NULL;
 
-    if (trajectoryfile.size() > 0) {
-        l = new tf::Transformer(true, ros::Duration(3600));
+    if (trajectoryFiles.size() < 1) {
+        trajectoryFiles.push_back(bagFile);
+    }
 
-        ifstream data(trajectoryfile);
+    for (string trajectoryFile : trajectoryFiles) {
+        cout << "Reading trajectory from " << trajectoryFile << "." << endl;
+        string extension = boost::filesystem::extension(trajectoryFile);
 
-        string line;
-        while(getline(data,line)) {
-            trim(line);
+        if (extension.compare(".bag") == 0) {
+            rosbag::Bag bag(trajectoryFile);
+            rosbag::View tfview(bag, rosbag::TopicQuery(topicsTF));
 
-            vector<string> words;
-            split(words, line, is_any_of("\t "), token_compress_on);
+            l = new tf::Transformer(true, ros::Duration(3600));//tfview.getEndTime() - tfview.getBeginTime());
 
-            if (words.at(0).find("\%") != string::npos) {
-                continue;
-            }
+            for (rosbag::MessageInstance const m : tfview) {
+                if (m.isType<tf::tfMessage>()) {
+                    tf::tfMessageConstPtr tfm = m.instantiate<tf::tfMessage>();
+                    for (unsigned int i = 0; i < tfm->transforms.size(); i++) {
+                        tf::StampedTransform trans;
+                        transformStampedMsgToTF(tfm->transforms[i], trans);
 
-            if (words.size() != 8) {
-                cout << "ERROR: Read invalid line" << endl;
-                continue;
-            }
+                        l->setTransform(trans);
 
-            double time, x, y, z, qw, qx, qy, qz;
-
-            try {
-                time = stod(words.at(0));
-                x = stod(words.at(1));
-                y = stod(words.at(2));
-                z = stod(words.at(3));
-                qw = stod(words.at(4));
-                qx = stod(words.at(5));
-                qy = stod(words.at(6));
-                qz = stod(words.at(7));
-            } catch (...) {
-                cout << "ERROR: Read invalid line" << endl;
-                continue;
-            }
-
-            Eigen::Affine3d transform = Eigen::Affine3d::Identity();
-            transform.translate(Eigen::Vector3d(x, y, z));
-            transform.rotate(Eigen::Quaterniond(qw, qx, qy, qz));
-
-            Eigen::Matrix4d pose = transform.matrix();
-
-            tf::Transform rosTF;
-            tf::transformEigenToTF(Eigen::Affine3d(pose), rosTF);
-
-            tf::StampedTransform trans;
-            trans = tf::StampedTransform(rosTF, ros::Time(time), "/map", "/base_link" );
-
-            l->setTransform(trans);
-            addStaticTransforms(l, trans.stamp_);
-
-            cout << setprecision(20) << time << endl;
-        }
-    } else {
-        rosbag::Bag bag(bagfile);
-        rosbag::View tfview(bag, rosbag::TopicQuery("/tf"));
-
-        l = new tf::Transformer(true, tfview.getEndTime() - tfview.getBeginTime());
-
-        for (rosbag::MessageInstance const m : tfview) {
-            if (m.isType<tf::tfMessage>()) {
-                tf::tfMessageConstPtr tfm = m.instantiate<tf::tfMessage>();
-                for (unsigned int i = 0; i < tfm->transforms.size(); i++) {
-                    tf::StampedTransform trans;
-                    transformStampedMsgToTF(tfm->transforms[i], trans);
-
-                    l->setTransform(trans);
+                        if (transformSetter) { transformSetter->setFixedTransforms(l, trans.stamp_);}
+                    }
                 }
+            }
+        } else {
+
+            l = new tf::Transformer(true, ros::Duration(3600));
+
+            ifstream data(trajectoryFile);
+
+            string line;
+            while(getline(data,line)) {
+                trim(line);
+
+                vector<string> words;
+                split(words, line, is_any_of("\t "), token_compress_on);
+
+                if (words.at(0).find("\%") != string::npos) {
+                    continue;
+                }
+
+                if (words.size() != 8) {
+                    cout << "ERROR: Read invalid line" << endl;
+                    continue;
+                }
+
+                double time, x, y, z, qw, qx, qy, qz;
+
+                try {
+                    time = stod(words.at(0));
+                    x = stod(words.at(1));
+                    y = stod(words.at(2));
+                    z = stod(words.at(3));
+                    qw = stod(words.at(4));
+                    qx = stod(words.at(5));
+                    qy = stod(words.at(6));
+                    qz = stod(words.at(7));
+                } catch (...) {
+                    cout << "ERROR: Read invalid line" << endl;
+                    continue;
+                }
+
+                Eigen::Affine3d transform = Eigen::Affine3d::Identity();
+                transform.translate(Eigen::Vector3d(x, y, z));
+                transform.rotate(Eigen::Quaterniond(qw, qx, qy, qz));
+
+                Eigen::Matrix4d pose = transform.matrix();
+
+                tf::Transform rosTF;
+                tf::transformEigenToTF(Eigen::Affine3d(pose), rosTF);
+
+                tf::StampedTransform trans;
+                trans = tf::StampedTransform(rosTF, ros::Time(time), mapFrame, baseFrame);
+
+                l->setTransform(trans);
+                if (transformSetter) { transformSetter->setFixedTransforms(l, trans.stamp_);}
+
+                cout << setprecision(20) << time << endl;
             }
         }
     }
@@ -287,7 +379,7 @@ int main(int argc, char* argv[])
 
 
     if (topicsPointCloud2.size() > 0) {
-        rosbag::Bag bag(bagfile);
+        rosbag::Bag bag(bagFile);
         rosbag::View viewScans(bag, rosbag::TopicQuery(topicsPointCloud2));
 
         vector<PointCloudWithTransform> pointClouds;
@@ -302,8 +394,8 @@ int main(int argc, char* argv[])
             tf::StampedTransform baseTransform;
             tf::StampedTransform laserTransform;
             try {
-                l->lookupTransform ("/map", "/base_link", m.getTime(), baseTransform);
-                l->lookupTransform ("/base_link", message->header.frame_id, m.getTime(), laserTransform);
+                l->lookupTransform (mapFrame, baseFrame, m.getTime(), baseTransform);
+                l->lookupTransform (baseFrame, message->header.frame_id, m.getTime(), laserTransform);
             } catch (...) {
                 cout << "Failed to look up transforms!" << endl;
                 continue;
@@ -334,7 +426,7 @@ int main(int argc, char* argv[])
 
 
     if (topicsMultiEchoLaserScan.size() > 0) {
-        rosbag::Bag bag(bagfile);
+        rosbag::Bag bag(bagFile);
         rosbag::View viewScans(bag, rosbag::TopicQuery(topicsMultiEchoLaserScan));
 
         vector<PointCloudWithTransform> pointClouds;
@@ -349,8 +441,8 @@ int main(int argc, char* argv[])
             tf::StampedTransform baseTransform;
             tf::StampedTransform laserTransform;
             try {
-                l->lookupTransform ("/map", "/base_link", m.getTime(), baseTransform);
-                l->lookupTransform ("/base_link", message->header.frame_id, m.getTime(), laserTransform);
+                l->lookupTransform (mapFrame, baseFrame, m.getTime(), baseTransform);
+                l->lookupTransform (baseFrame, message->header.frame_id, m.getTime(), laserTransform);
             } catch (...) {
                 cout << "Failed to look up transforms!" << endl;
                 continue;
@@ -391,7 +483,7 @@ int main(int argc, char* argv[])
 
 
     if (topicsLaserScan.size() > 0) {
-        rosbag::Bag bag(bagfile);
+        rosbag::Bag bag(bagFile);
         rosbag::View viewScans(bag, rosbag::TopicQuery(topicsLaserScan));
 
         vector<PointCloudWithTransform> pointClouds;
@@ -406,8 +498,8 @@ int main(int argc, char* argv[])
             tf::StampedTransform baseTransform;
             tf::StampedTransform laserTransform;
             try {
-                l->lookupTransform ("/map", "/base_link", m.getTime(), baseTransform);
-                l->lookupTransform ("/base_link", message->header.frame_id, m.getTime(), laserTransform);
+                l->lookupTransform (mapFrame, baseFrame, m.getTime(), baseTransform);
+                l->lookupTransform (baseFrame, message->header.frame_id, m.getTime(), laserTransform);
             } catch (...) {
                 cout << "Failed to look up transforms!" << endl;
                 continue;
