@@ -5,25 +5,25 @@ ifeq ($(MAKE),)
 endif
 
 all: .configured
-	cd .build && $(MAKE) --no-print-directory
+	$(MAKE) -C.build --no-print-directory
 
 .PHONY: test
 test: .configured
-	cd .build && CTEST_OUTPUT_ON_FAILURE=true $(MAKE) test
+	CTEST_OUTPUT_ON_FAILURE=true $(MAKE) -C.build test
 
 config: .build
-	cd .build && ccmake ..
+	ccmake -H. -B.build
 	touch .configured
 
 .configured: .build
-	cd .build && cmake ..
+	cmake -H. -B.build
 	touch .configured
 
 .build:
 	mkdir -p .build
 
 clean: .build
-	-cd .build && $(MAKE) clean --no-print-directory
+	$(MAKE) clean -C.build --no-print-directory
 	-rm -rf .build
 	rm -f .configured
 
