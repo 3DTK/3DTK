@@ -22,6 +22,10 @@
 #include <boost/thread/mutex.hpp>
 #include <boost/thread/locks.hpp>
 
+#ifdef WITH_MMAP_SCAN
+#include <boost/filesystem.hpp>
+#endif
+
 //! SearchTree types
 enum nns_type {
   simpleKD, ANNTree, BOCTree
@@ -151,7 +155,11 @@ public:
                             const std::string& path,
                             IOType type,
                             int start,
-                            int end = -1);
+                            int end = -1
+#ifdef WITH_MMAP_SCAN
+                            , boost::filesystem::path cache = boost::filesystem::path()
+#endif
+                            );
   
   /**
    * "Close" a directory by deleting all its scans and emptying the

@@ -22,6 +22,13 @@
 #include <utility>
 #include <fstream>
 
+#ifdef WITH_MMAP_SCAN
+#include <sys/mman.h>
+#include <fcntl.h>
+#include <cerrno>
+#include <cstring>
+#endif
+
 #include <boost/filesystem/operations.hpp>
 using namespace boost::filesystem;
 
@@ -30,7 +37,11 @@ using namespace boost::filesystem;
 void BasicScan::openDirectory(const std::string& path,
                               IOType type,
                               int start,
-                              int end)
+                              int end
+#ifdef WITH_MMAP_SCAN
+                              , boost::filesystem::path cache
+#endif
+                              )
 {
 #ifdef WITH_METRICS
   Timer t = ClientMetric::read_scan_time.start();
@@ -50,7 +61,11 @@ void BasicScan::openDirectory(const std::string& path,
   for(std::list<std::string>::iterator it = identifiers.begin();
       it != identifiers.end();
       ++it) {
-    Scan::allScans.push_back(new BasicScan(path, *it, type));
+    Scan::allScans.push_back(new BasicScan(path, *it, type
+#ifdef WITH_MMAP_SCAN
+                                           , cache
+#endif
+                                          ));
   }
 
 #ifdef WITH_METRICS
@@ -190,7 +205,11 @@ BasicScan::BasicScan(double *_rPos,
 
 BasicScan::BasicScan(const std::string& path, 
                      const std::string& identifier, 
-                     IOType type) :
+                     IOType type
+#ifdef WITH_MMAP_SCAN
+                     , boost::filesystem::path cache
+#endif
+                     ) :
   m_path(path), m_identifier(identifier), m_type(type)
 {
   init();
@@ -220,6 +239,10 @@ BasicScan::BasicScan(const std::string& path,
   // reset the delta align matrix to represent only the transformations
   // after local-to-global (transMatOrg) one
   M4identity(dalignxf);
+
+#ifdef WITH_MMAP_SCAN
+  m_mmap_cache = cache;
+#endif
 }
 
 BasicScan::~BasicScan()
@@ -228,7 +251,29 @@ BasicScan::~BasicScan()
          size_t>>::iterator it = m_data.begin(); 
        it != m_data.end(); 
        it++) {
-    delete [] it->second.first;
+#ifdef WITH_MMAP_SCAN
+    // depending on whether the data was backed by an mmap-ed file or by
+    // memory on the heap, delete the right thing
+    std::map<std::string, int>::iterator it2 = m_mmap_fds.find(it->first);
+    if (it2 != m_mmap_fds.end()) {
+      int ret;
+      ret = munmap(it->second.first, it->second.second);
+      if (ret != 0) {
+        throw std::runtime_error("cannot munmap");
+      }
+      // since we called unlink() before, this also deletes the file for good
+      ret = close(it2->second);
+      if (ret != 0) {
+        throw std::runtime_error("cannot close");
+      }
+      m_mmap_fds.erase(it2);
+    } else {
+#endif
+      // otherwise delete allocated memory
+      delete[] it->second.first;
+#ifdef WITH_MMAP_SCAN
+    }
+#endif
   }
 }
 
@@ -473,18 +518,70 @@ DataPointer BasicScan::create(const std::string& identifier,
 {
   std::map<std::string, std::pair<unsigned char*, size_t>>::iterator
     it = m_data.find(identifier);
-  if(it != m_data.end()) {
-    // try to reuse, otherwise reallocate
-    if(it->second.second != size) {
+
+  if(it != m_data.end() && it->second.second != size) {
+#ifdef WITH_MMAP_SCAN
+    // depending on whether the data was backed by an mmap-ed file or by
+    // memory on the heap, delete the right thing
+    std::map<std::string, int>::iterator it2 = m_mmap_fds.find(identifier);
+    if (it2 != m_mmap_fds.end()) {
+      int ret;
+      ret = munmap(it->second.first, it->second.second);
+      if (ret != 0) {
+        throw std::runtime_error("cannot munmap");
+      }
+      // since we called unlink() before, this also deletes the file for good
+      ret = close(it2->second);
+      if (ret != 0) {
+        throw std::runtime_error("cannot close");
+      }
+      m_mmap_fds.erase(it2);
+    } else {
+#endif
+      // otherwise delete allocated memory
       delete[] it->second.first;
-      it->second.first = new unsigned char[size];
-      it->second.second = size;
+#ifdef WITH_MMAP_SCAN
     }
-  } else {
-    // create a new block of data
+#endif
+  }
+
+  unsigned char *data;
+  if(it == m_data.end() || it->second.second != size) {
+    // depending on whether the cache path is empty or not, allocate memory
+    // as an mmap-ed file or on the heap
+#ifdef WITH_MMAP_SCAN
+    if (!m_mmap_cache.empty()) {
+      char filename[] = "ppl_XXXXXX";
+      int fd = mkstemp(filename);
+      if (fd == -1) {
+        throw std::runtime_error("cannot create temporary file");
+      }
+      // by unlinking the file now, we make sure that there are no leftover
+      // files even if the process is killed
+      unlink(filename);
+      int ret = fallocate(fd, 0, 0, size);
+      if (ret == -1) {
+        throw std::runtime_error("cannot fallocate");
+      }
+      data = (unsigned char *)mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+      if (data == MAP_FAILED) {
+        throw std::runtime_error(std::string("cannot mmap: ")+std::string(std::strerror(errno))+std::string(" ")+std::to_string(errno));
+      }
+      m_mmap_fds.insert(std::make_pair(identifier, fd));
+    } else {
+#endif
+      data = new unsigned char[size];
+#ifdef WITH_MMAP_SCAN
+    }
+#endif
+  }
+
+  if(it == m_data.end()) {
     it = m_data.insert(std::make_pair(identifier,
-                                      std::make_pair(new unsigned char[size],
-                                                     size))).first;
+                                      std::make_pair(data, size))).first;
+  } else if (it->second.second != size) {
+    it->second.first = data;
+    it->second.second = size;
   }
   return DataPointer(it->second.first, it->second.second);
 }
@@ -494,7 +591,28 @@ void BasicScan::clear(const std::string& identifier)
   std::map<std::string, std::pair<unsigned char*, size_t>>::iterator
     it = m_data.find(identifier);
   if(it != m_data.end()) {
-    delete[] it->second.first;
+#ifdef WITH_MMAP_SCAN
+    std::map<std::string, int>::iterator it2 = m_mmap_fds.find(identifier);
+    if (it2 != m_mmap_fds.end()) {
+      // if the data was backed by an mmap-ed file, close
+      int ret;
+      ret = munmap(it->second.first, it->second.second);
+      if (ret != 0) {
+        throw std::runtime_error("cannot munmap");
+      }
+      // since we called unlink() before, this also deletes the file for good
+      ret = close(it2->second);
+      if (ret != 0) {
+        throw std::runtime_error("cannot close");
+      }
+      m_mmap_fds.erase(it2);
+    } else {
+#endif
+      // otherwise delete allocated memory
+      delete[] it->second.first;
+#ifdef WITH_MMAP_SCAN
+    }
+#endif
     m_data.erase(it);
   }
 }
