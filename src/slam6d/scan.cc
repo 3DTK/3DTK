@@ -51,13 +51,21 @@ void Scan::openDirectory(bool scanserver,
                          const std::string& path,
                          IOType type,
                          int start,
-                         int end)
+                         int end
+#ifdef WITH_MMAP_SCAN
+                         , boost::filesystem::path cache
+#endif
+                         )
 {
   Scan::scanserver = scanserver;
   if (scanserver)
     ManagedScan::openDirectory(path, type, start, end);
   else
-    BasicScan::openDirectory(path, type, start, end);
+    BasicScan::openDirectory(path, type, start, end
+#ifdef WITH_MMAP_SCAN
+                             , cache
+#endif
+                            );
 }
 
 void Scan::closeDirectory()

@@ -9,11 +9,19 @@
 
 #include "slam6d/Boctree.h"
 
+#ifdef WITH_MMAP_SCAN
+#include "boost/filesystem.hpp"
+#endif
+
 class BasicScan : public Scan {
 public:
   BasicScan() {};
 
-  static void openDirectory(const std::string& path, IOType type, int start, int end);
+  static void openDirectory(const std::string& path, IOType type, int start, int end
+#ifdef WITH_MMAP_SCAN
+    , boost::filesystem::path cache = boost::filesystem::path()
+#endif
+  );
   static void closeDirectory();
 /*
   Scan(const double *euler, int maxDist = -1);
@@ -71,13 +79,25 @@ private:
   bool m_filter_range_set, m_filter_height_set, m_filter_custom_set, m_range_mutation_set, m_filter_scale_set;
   std::string customFilterStr;
 
+  // map from identifier (xyz, rgb, reflectance...) to a data pointer plus
+  // length
   std::map<std::string, std::pair<unsigned char*, size_t> > m_data;
+
+#ifdef WITH_MMAP_SCAN
+  std::map<std::string, int> m_mmap_fds;
+
+  boost::filesystem::path m_mmap_cache;
+#endif
 
   std::vector<Frame> m_frames;
 
 
   //! Constructor for openDirectory
-  BasicScan(const std::string& path, const std::string& identifier, IOType type);
+  BasicScan(const std::string& path, const std::string& identifier, IOType type
+#ifdef WITH_MMAP_SCAN
+    , boost::filesystem::path cache = boost::filesystem::path()
+#endif
+  );
 
   //! Initialization function
   void init();
