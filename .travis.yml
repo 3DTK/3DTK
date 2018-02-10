@@ -1,0 +1,13 @@
+sudo: required
+language: generic
+services:
+  - docker
+env:
+ - DERIV=debian DIST=sid
+ - DERIV=debian DIST=buster
+ - DERIV=debian DIST=stretch
+ - DERIV=debian DIST=jessie
+ - DERIV=ubuntu DIST=trusty
+ - DERIV=ubuntu DIST=xenial
+script:
+ - ./travisdockerbuild.sh $DERIV $DIST
