@@ -89,7 +89,7 @@ void idle(void) {
     update_callback();
 
     if (save_animation) {
-      std::__cxx11::string filename = scan_dir + "animframe" + to_string(frameNr, 5) + ".png";
+      std::string filename = scan_dir + "animframe" + to_string(frameNr, 5) + ".png";
       std::cout << "write " << filename << std::endl;
       int tmpUpdate = haveToUpdate;
       glWriteImagePNG(filename.c_str(), factor, 0);
@@ -138,7 +138,7 @@ void idle(void) {
 
       // save the animation
       if (save_animation) {
-        std::__cxx11::string filename = scan_dir + "animframe"
+        std::string filename = scan_dir + "animframe"
                                         + to_string(path_iterator, 5) + ".png";
         std::cout << "written " << filename << " of "
                   << path_vectorX.size() << " files" << std::endl;
@@ -180,7 +180,7 @@ void idle(void) {
 
       // save the animation
       if (save_animation) {
-        std::__cxx11::string filename = scan_dir + "animframe"
+        std::string filename = scan_dir + "animframe"
                                         + to_string(path_iterator, 5) + ".png";
 
         std::cout << "written " << filename << " of "
