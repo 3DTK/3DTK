@@ -26,7 +26,7 @@ case "$DERIV" in
 		exit 1
 esac
 
-CMAKEOPTS=
+CMAKEOPTS="-DCMAKE_VERBOSE_MAKEFILE=ON"
 
 case "$DIST" in
 	jessie)
