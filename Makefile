@@ -8,7 +8,8 @@ all: .configured
 	$(MAKE) -C.build --no-print-directory
 
 .PHONY: test
-test: .configured
+test:
+	cmake -H. -B.build
 	CTEST_OUTPUT_ON_FAILURE=true $(MAKE) -C.build test
 
 config: .build
