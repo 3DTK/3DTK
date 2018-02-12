@@ -60,25 +60,25 @@ double intersect_plane(
 int main()
 {
 	std::vector<std::tuple<Plane, double, double, double, double, double>> env = {
-		{ YZ, 10, 0, 10, 0, 10 },
-		{ YZ, 0, 0, 10, 0, 10 },
-		{ XZ, 10, 0, 10, 0, 10 },
-		{ XZ, 0, 0, 10, 0, 10 },
-		{ XY, 0, 0, 10, 0, 10 }
+		std::make_tuple( YZ, 10, 0, 10, 0, 10 ),
+		std::make_tuple( YZ, 0, 0, 10, 0, 10 ),
+		std::make_tuple( XZ, 10, 0, 10, 0, 10 ),
+		std::make_tuple( XZ, 0, 0, 10, 0, 10 ),
+		std::make_tuple( XY, 0, 0, 10, 0, 10 )
 	};
 	std::vector<std::tuple<Plane, double, double, double, double, double>> box = {
-		{ YZ, 6, 4, 6, 0, 2 },
-		{ YZ, 4, 4, 6, 0, 2 },
-		{ XZ, 6, 4, 6, 0, 2 },
-		{ XZ, 4, 4, 6, 0, 2 },
-		{ XY, 2, 4, 6, 4, 6 }
+		std::make_tuple( YZ, 6, 4, 6, 0, 2 ),
+		std::make_tuple( YZ, 4, 4, 6, 0, 2 ),
+		std::make_tuple( XZ, 6, 4, 6, 0, 2 ),
+		std::make_tuple( XZ, 4, 4, 6, 0, 2 ),
+		std::make_tuple( XY, 2, 4, 6, 4, 6 )
 	};
 	std::vector<std::tuple<double, double, double>> scanner_pos = {
-		{2,2,1},
-		{8,2,4},
-		{5,5,5},
-		{2,5,3},
-		{5,8,1},
+		std::make_tuple(2,2,1),
+		std::make_tuple(8,2,4),
+		std::make_tuple(5,5,5),
+		std::make_tuple(2,5,3),
+		std::make_tuple(5,8,1),
 	};
 	int scan_num = 0;
 	for (auto o: scanner_pos) {
