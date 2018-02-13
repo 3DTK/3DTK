@@ -1,5 +1,12 @@
 #include <peopleremover/common.h>
 
+#ifdef WITH_MMAP_SCAN
+#include <sys/mman.h>
+#include <fcntl.h>
+#include <cerrno>
+#include <cstring>
+#endif
+
 namespace po = boost::program_options;
 
 int main(int argc, char* argv[])
@@ -18,11 +25,18 @@ int main(int argc, char* argv[])
 	bool no_subvoxel_accuracy;
 	bool write_maxranges;
 	int jobs;
+#ifdef WITH_MMAP_SCAN
+	std::string cachedir;
+#endif
 
 	parse_cmdline(argc, argv, start, end, format, fuzz, voxel_size, diff,
 			normal_knearest, cluster_size, normal_method, maxrange_method,
 			maskdir, staticdir, dir, no_subvoxel_accuracy, write_maxranges,
-			jobs);
+			jobs
+#ifdef WITH_MMAP_SCAN
+			, cachedir
+#endif
+			);
 
 	double voxel_diagonal = sqrt(3*voxel_size*voxel_size);
 
@@ -32,7 +46,11 @@ int main(int argc, char* argv[])
 	struct timespec before, after;
 	clock_gettime(CLOCK_MONOTONIC, &before);
 
+#ifdef WITH_MMAP_SCAN
+	Scan::openDirectory(false, dir, format, start, end, cachedir);
+#else
 	Scan::openDirectory(false, dir, format, start, end);
+#endif
 	if(Scan::allScans.size() == 0) {
 		std::cerr << "No scans found. Did you use the correct format?" << std::endl;
 		exit(-1);
@@ -42,6 +60,9 @@ int main(int argc, char* argv[])
 	std::unordered_map<size_t, DataReflectance> reflectances_by_slice;
 	std::unordered_map<size_t, DataXYZ> orig_points_by_slice;
 	std::unordered_map<size_t, std::tuple<const double *, const double *, const double *>> trajectory;
+#ifdef WITH_MMAP_SCAN
+	std::unordered_map<size_t, int> mmap_fds;
+#endif
 	std::cerr << "size: " << Scan::allScans.size() << std::endl;
 	std::vector<size_t> scanorder;
 	for (size_t id = 0; id < Scan::allScans.size(); ++id) {
@@ -61,7 +82,32 @@ int main(int argc, char* argv[])
 		DataXYZ xyz_orig(scan->get("xyz"));
 		// copy points
 		size_t raw_orig_data_size = xyz_orig.size() * sizeof(double) * 3;
-		unsigned char* xyz_orig_data = new unsigned char[raw_orig_data_size];
+		unsigned char* xyz_orig_data;
+#ifdef WITH_MMAP_SCAN
+		if (!cachedir.empty()) {
+			char filename[] = "ppl_XXXXXX";
+			int fd = mkstemp(filename);
+			if (fd == -1) {
+				throw std::runtime_error("cannot create temporary file");
+			}
+			// by unlinking the file now, we make sure that there are no leftover
+			// files even if the process is killed
+			unlink(filename);
+			int ret = fallocate(fd, 0, 0, raw_orig_data_size);
+			if (ret == -1) {
+				throw std::runtime_error("cannot fallocate");
+			}
+			xyz_orig_data = (unsigned char *)mmap(NULL, raw_orig_data_size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+			if (xyz_orig_data == MAP_FAILED) {
+				throw std::runtime_error(std::string("cannot mmap: ")+std::string(std::strerror(errno))+std::string(" ")+std::to_string(errno));
+			}
+			mmap_fds[i] = fd;
+		} else {
+#endif
+			xyz_orig_data = new unsigned char[raw_orig_data_size];
+#ifdef WITH_MMAP_SCAN
+		}
+#endif
 		memcpy(xyz_orig_data, xyz_orig.get_raw_pointer(), raw_orig_data_size);
 		orig_points_by_slice[i] = DataPointer(xyz_orig_data, raw_orig_data_size);
 		// now that the original coordinates are saved, transform
@@ -471,6 +517,30 @@ int main(int argc, char* argv[])
 	std::cerr << "took: " << elapsed << " seconds" << std::endl;
 
 	std::cerr << "done" << std::endl;
+
+	for (size_t idx = 0; idx < scanorder.size(); ++idx) {
+		size_t i = scanorder[idx];
+#ifdef WITH_MMAP_SCAN
+		if (!cachedir.empty()) {
+			int ret;
+			ret = munmap(orig_points_by_slice[i].get_raw_pointer(), orig_points_by_slice[i].size());
+			if (ret != 0) {
+				throw std::runtime_error("cannot munmap");
+			}
+			// since we called unlink() before, this also deletes the file for good
+			ret = close(mmap_fds[i]);
+			if (ret != 0) {
+				throw std::runtime_error("cannot close");
+			}
+		} else {
+#endif
+			delete orig_points_by_slice[i].get_raw_pointer();
+#ifdef WITH_MMAP_SCAN
+		}
+#endif
+	}
+
+	Scan::closeDirectory();
 
 	return 0;
 }
