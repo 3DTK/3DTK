@@ -13,6 +13,15 @@ namespace std
 			boost::hash_combine(seed, t.z);
 			return seed;
 		}
+
+	std::size_t hash<std::set<size_t>>::operator()(std::set<size_t> const& t) const
+	{
+		std::size_t seed = 0;
+		for (size_t e : t) {
+			boost::hash_combine(seed, t);
+		}
+		return seed;
+	}
 };
 
 /*
@@ -57,14 +66,14 @@ struct voxel voxel_of_point(const double *p, double voxel_size)
 bool visitor(struct voxel voxel, void *data)
 {
 	struct visitor_args *args = (struct visitor_args *)data;
-	std::unordered_map<struct voxel, std::set<size_t>>::const_iterator scanslices_it =
+	std::unordered_map<struct voxel, std::set<size_t>*>::const_iterator scanslices_it =
 		args->voxel_occupied_by_slice->find(voxel);
 	// if voxel has no points at all, continue searching without marking
 	// the current voxel as free as it had no points to begin with
 	if (scanslices_it == args->voxel_occupied_by_slice->end()) {
 		return true;
 	}
-	std::set<size_t> scanslices = scanslices_it->second;
+	std::set<size_t> *scanslices = scanslices_it->second;
 	/*
 	 * The following implements a sliding window within which voxels
 	 * that also contain points with a similar index as the current
@@ -80,7 +89,7 @@ bool visitor(struct voxel voxel, void *data)
 	 */
 	if (args->diff == 0) {
 		// if the voxel contains the current slice, abort the search
-		if (scanslices.find(args->current_slice) != scanslices.end()) {
+		if (scanslices->find(args->current_slice) != scanslices->end()) {
 			return false;
 		}
 	} else {
@@ -91,10 +100,10 @@ bool visitor(struct voxel voxel, void *data)
 			window_start = 0;
 		}
 		// first element that is equivalent or goes after value
-		std::set<size_t>::iterator lower_bound = scanslices.lower_bound(window_start);
+		std::set<size_t>::iterator lower_bound = scanslices->lower_bound(window_start);
 		// if elements in the set are found around the neighborhood of the
 		// current slice, abort the search
-		if (lower_bound != scanslices.end() && *lower_bound <= args->current_slice + args->diff) {
+		if (lower_bound != scanslices->end() && *lower_bound <= args->current_slice + args->diff) {
 			return false;
 		}
 	}

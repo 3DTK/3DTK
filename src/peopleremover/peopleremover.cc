@@ -133,10 +133,28 @@ int main(int argc, char* argv[])
 	std::cerr << "calculate voxel occupation" << std::endl;
 
 	clock_gettime(CLOCK_MONOTONIC, &before);
-	std::unordered_map<struct voxel, std::set<size_t>> voxel_occupied_by_slice;
+	std::unordered_map<std::set<size_t>, std::pair<std::set<size_t>*, size_t>> slice_cache;
+	std::unordered_map<struct voxel, std::set<size_t>*> voxel_occupied_by_slice;
 	for (std::pair<size_t, DataXYZ> element : points_by_slice) {
 		for (size_t i = 0; i < element.second.size(); ++i) {
-			voxel_occupied_by_slice[voxel_of_point(element.second[i],voxel_size)].insert(element.first);
+			struct voxel v = voxel_of_point(element.second[i],voxel_size);
+			std::set<size_t> current;
+			auto current_it = voxel_occupied_by_slice.find(v);
+			if (current_it != voxel_occupied_by_slice.end()) {
+				current = std::set<size_t>(*(current_it->second));
+				slice_cache[current].second -= 1;
+			}
+			current.insert(element.first);
+			auto cache_it = slice_cache.find(current);
+			std::set<size_t> *new_set;
+			if (cache_it == slice_cache.end()) {
+				new_set = new std::set<size_t>(current);
+				slice_cache[current] = std::make_pair(new_set, 1);
+			} else {
+				new_set = cache_it->second.first;
+				cache_it->second.second += 1;
+			}
+			voxel_occupied_by_slice[v] = new_set;
 		}
 	}
 	clock_gettime(CLOCK_MONOTONIC, &after);
@@ -148,6 +166,18 @@ int main(int argc, char* argv[])
 		std::cerr << "no voxel occupied" << std::endl;
 		exit(1);
 	}
+
+	size_t sum = 0;
+	for (auto it = slice_cache.begin(); it != slice_cache.end();) {
+		if (it->second.second == 0) {
+			delete it->second.first;
+			it = slice_cache.erase(it);
+		} else {
+			++it;
+		}
+	}
+
+	std::cerr << "Number of unique voxel contents: " << slice_cache.size() << std::endl;
 
 	std::cerr << "occupied voxels: " << voxel_occupied_by_slice.size() << std::endl;
 
@@ -322,7 +352,7 @@ int main(int argc, char* argv[])
 						if (voxel_occupied_by_slice.find(neighbor) == voxel_occupied_by_slice.end()) {
 							continue;
 						}
-						for (size_t num : voxel_occupied_by_slice[v]) {
+						for (size_t num : *(voxel_occupied_by_slice[v])) {
 							half_voxels[neighbor].insert(num);
 						}
 					}
@@ -346,12 +376,12 @@ int main(int argc, char* argv[])
 		 * identifiers from a lower id to a higher id to a set
 		 */
 		std::map<std::pair<size_t, size_t>, size_t> result;
-		for (std::pair<struct voxel, std::set<size_t>> el : voxel_occupied_by_slice) {
+		for (std::pair<struct voxel, std::set<size_t>*> el : voxel_occupied_by_slice) {
 			/*
 			 * the elements of std::set are sorted in ascending order, thus we
 			 * do not need to sort them ourselves
 			 */
-			std::vector<size_t> slices(el.second.begin(), el.second.end());
+			std::vector<size_t> slices(el.second->begin(), el.second->end());
 			for (size_t i = 0; i < slices.size(); ++i) {
 				for (size_t j = i+1; j < slices.size(); ++j) {
 					result[std::make_pair(slices[i], slices[j])] += 1;
