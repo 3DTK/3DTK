@@ -132,19 +132,23 @@ int main(int argc, char* argv[])
 
 	std::cerr << "calculate voxel occupation" << std::endl;
 
+	std::cerr << "0 %\r";
+	std::cerr.flush();
+
 	clock_gettime(CLOCK_MONOTONIC, &before);
 	std::unordered_map<std::set<size_t>, std::pair<std::set<size_t>*, size_t>> slice_cache;
 	std::unordered_map<struct voxel, std::set<size_t>*> voxel_occupied_by_slice;
-	for (std::pair<size_t, DataXYZ> element : points_by_slice) {
-		for (size_t i = 0; i < element.second.size(); ++i) {
-			struct voxel v = voxel_of_point(element.second[i],voxel_size);
+	for (size_t idx = 0; idx < scanorder.size(); ++idx) {
+		size_t i = scanorder[idx];
+		for (size_t j = 0; j < points_by_slice[i].size(); ++j) {
+			struct voxel v = voxel_of_point(points_by_slice[i][j],voxel_size);
 			std::set<size_t> current;
 			auto current_it = voxel_occupied_by_slice.find(v);
 			if (current_it != voxel_occupied_by_slice.end()) {
 				current = std::set<size_t>(*(current_it->second));
 				slice_cache[current].second -= 1;
 			}
-			current.insert(element.first);
+			current.insert(i);
 			auto cache_it = slice_cache.find(current);
 			std::set<size_t> *new_set;
 			if (cache_it == slice_cache.end()) {
@@ -156,7 +160,10 @@ int main(int argc, char* argv[])
 			}
 			voxel_occupied_by_slice[v] = new_set;
 		}
+		std::cerr << ((idx+1)*100.0f/scanorder.size()) << " %\r";
+		std::cerr.flush();
 	}
+	std::cerr << std::endl;
 	clock_gettime(CLOCK_MONOTONIC, &after);
 	elapsed = (after.tv_sec - before.tv_sec);
 	elapsed += (after.tv_nsec - before.tv_nsec) / 1000000000.0;
@@ -167,7 +174,6 @@ int main(int argc, char* argv[])
 		exit(1);
 	}
 
-	size_t sum = 0;
 	for (auto it = slice_cache.begin(); it != slice_cache.end();) {
 		if (it->second.second == 0) {
 			delete it->second.first;
