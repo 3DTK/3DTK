@@ -369,7 +369,11 @@ void parse_cmdline(int argc, char* argv[], ssize_t &start, ssize_t &end, IOType 
 	size_t &cluster_size, normal_method_t &normal_method,
 	maxrange_method_t &maxrange_method, std::string &maskdir,
 	std::string &staticdir, std::string &dir, bool &no_subvoxel_accuracy,
-	bool &write_maxranges, int &jobs)
+	bool &write_maxranges, int &jobs
+#ifdef WITH_MMAP_SCAN
+	, std::string &cachedir
+#endif
+	)
 {
 	po::options_description general_options("General options");
 	general_options.add_options()
@@ -416,6 +420,9 @@ void parse_cmdline(int argc, char* argv[], ssize_t &start, ssize_t &end, IOType 
 #ifdef _OPENMP
 		("jobs,j", po::value<int>(&jobs)->default_value(1),
 		 "number of threads to run in parallel. Default: 1")
+#endif
+#ifdef WITH_MMAP_SCAN
+		("cachedir", po::value<std::string>(&cachedir), "location for mmap cache")
 #endif
 		;
 
