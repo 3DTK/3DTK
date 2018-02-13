@@ -70,6 +70,11 @@ namespace std
 	{
 		std::size_t operator()(struct voxel const& t) const;
 	};
+
+	template<> struct hash<set<size_t>>
+	{
+		std::size_t operator()(std::set<size_t> const& t) const;
+	};
 };
 
 ssize_t py_div(double a, double b);
@@ -83,7 +88,7 @@ struct voxel voxel_of_point(const double *p, double voxel_size);
 struct visitor_args
 {
 	std::set<struct voxel> *empty_voxels;
-	std::unordered_map<struct voxel, std::set<size_t>> *voxel_occupied_by_slice;
+	std::unordered_map<struct voxel, std::set<size_t>*> *voxel_occupied_by_slice;
 	size_t current_slice;
 	size_t diff;
 };
