@@ -134,11 +134,18 @@ int main(int argc, char* argv[])
 
 	clock_gettime(CLOCK_MONOTONIC, &before);
 	std::unordered_map<struct voxel, std::set<size_t>> voxel_occupied_by_slice;
+	std::cerr << "0 %\r";
+	std::cerr.flush();
+	size_t done = 0;
 	for (std::pair<size_t, DataXYZ> element : points_by_slice) {
 		for (size_t i = 0; i < element.second.size(); ++i) {
 			voxel_occupied_by_slice[voxel_of_point(element.second[i],voxel_size)].insert(element.first);
 		}
+		std::cerr << ((done+1)*100.0f/points_by_slice.size()) << " %\r";
+		std::cerr.flush();
+		done += 1;
 	}
+	std::cerr << std::endl;
 	clock_gettime(CLOCK_MONOTONIC, &after);
 	elapsed = (after.tv_sec - before.tv_sec);
 	elapsed += (after.tv_nsec - before.tv_nsec) / 1000000000.0;
@@ -167,7 +174,7 @@ int main(int argc, char* argv[])
 	 *  we need a separate variable to keep track of how many scans were done
 	 *  because they are not done in order when execution happens in parallel
 	 */
-	size_t done = 0;
+	done = 0;
 #ifdef _OPENMP
 	omp_set_num_threads(jobs);
 #pragma omp parallel for schedule(dynamic)
@@ -336,11 +343,15 @@ int main(int argc, char* argv[])
 		std::cerr << "took: " << elapsed << " seconds" << std::endl;
 	}
 
+	std::cerr << "computing connectivity graph..." << std::endl;
 	/*
 	 * Output a graph where the nodes are the scan ids and edges connect nodes
 	 * of scans that share at least one voxel
 	 */
 	{
+		done = 0;
+		std::cerr << "0 %\r";
+		std::cerr.flush();
 		/*
 		 * go through all voxels and add all possible pairs of scan
 		 * identifiers from a lower id to a higher id to a set
@@ -357,7 +368,11 @@ int main(int argc, char* argv[])
 					result[std::make_pair(slices[i], slices[j])] += 1;
 				}
 			}
+			std::cerr << ((done+1)*100.0f/voxel_occupied_by_slice.size()) << " %\r";
+			std::cerr.flush();
+			done += 1;
 		}
+		std::cerr << std::endl;
 		size_t num_edges_complete_graph = scanorder.size()*(scanorder.size()-1)/2.0;
 		std::cerr << "Scan pairs sharing the same voxel: " << result.size() << std::endl;
 		std::cerr << "number edges complete graph: " << num_edges_complete_graph << std::endl;
@@ -378,6 +393,9 @@ int main(int argc, char* argv[])
 	 */
 	FILE *out_static = fopen("scan000.3d", "w");
 	FILE *out_dynamic = fopen("scan001.3d", "w");
+	done = 0;
+	std::cerr << "0 %\r";
+	std::cerr.flush();
 	for (size_t i : scanorder) {
 		std::unordered_map<size_t, DataReflectance>::const_iterator refl_it =
 			reflectances_by_slice.find(i);
@@ -410,7 +428,11 @@ int main(int argc, char* argv[])
 					refl
 					);
 		}
+		std::cerr << ((done+1)*100.0f/scanorder.size()) << " %\r";
+		std::cerr.flush();
+		done += 1;
 	}
+	std::cerr << std::endl;
 	fclose(out_static);
 	fclose(out_dynamic);
 
@@ -422,6 +444,9 @@ int main(int argc, char* argv[])
 	fclose(pose_dynamic);
 
 	std::cerr << "write cleaned static scans" << std::endl;
+	done = 0;
+	std::cerr << "0 %\r";
+	std::cerr.flush();
 	if (staticdir == "") {
 		staticdir = dir + "/static";
 	}
@@ -477,9 +502,16 @@ int main(int argc, char* argv[])
 			exit(1);
 		}
 		fclose(pose);
+		std::cerr << ((done+1)*100.0f/points_by_slice.size()) << " %\r";
+		std::cerr.flush();
+		done += 1;
 	}
+	std::cerr << std::endl;
 
 	std::cerr << "write masks" << std::endl;
+	done = 0;
+	std::cerr << "0 %\r";
+	std::cerr.flush();
 
 	if (maskdir == "") {
 		maskdir = dir + "/pplremover";
@@ -509,7 +541,11 @@ int main(int argc, char* argv[])
 			}
 		}
 		fclose(out_mask);
+		std::cerr << ((done+1)*100.0f/points_by_slice.size()) << " %\r";
+		std::cerr.flush();
+		done += 1;
 	}
+	std::cerr << std::endl;
 
 	clock_gettime(CLOCK_MONOTONIC, &after);
 	elapsed = (after.tv_sec - before.tv_sec);
