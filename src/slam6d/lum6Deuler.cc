@@ -432,6 +432,12 @@ double lum6DEuler::doGraphSlam6D(Graph gr, vector <Scan *> allScans, int nrIt)
       double rPos[3];
       double rPosTheta[3];
 
+#ifdef PLANAR  // to enforce 3DoF
+	 result.element(1) = 0.0;
+	 result.element(3) = 0.0;
+	 result.element(5) = 0.0;
+#endif
+
       // calculate the updated Pose
       for (int k = 0; k < 3; k++) {
         rPos[k]      = allScans[i]->get_rPos()[k] - result.element(k);
