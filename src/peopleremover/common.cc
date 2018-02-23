@@ -453,8 +453,16 @@ void parse_cmdline(int argc, char* argv[], ssize_t &start, ssize_t &end, IOType 
 
 	// Help text
 	if (vm.count("help")) {
-		std::cout << "Usage2: " << argv[0] << " [options] <input-dir>" << std::endl;
+		std::cout << "Usage: " << argv[0] << " [options] <input-dir>" << std::endl;
 		std::cout << cmdline_options << std::endl;
+		std::cout << std::endl;
+		std::cout << "Example:" << std::endl;
+		std::cout << std::endl;
+		std::cout << argv[0] << " -j4 --voxel-size=10 --maxrange-method=normals --normal-method=angle -f uosr /path/to/scans" << std::endl;
+		std::cout << std::endl;
+		std::cout << "View results:" << std::endl;
+		std::cout << std::endl;
+		std::cout << "bin/show -s 0 -e 0 -f uosr --reflectance ." << std::endl;
 		exit(0);
 	}
 
