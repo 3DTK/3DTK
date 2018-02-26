@@ -93,6 +93,6 @@ MinPlaneSize        50
 PointDist           100.0
 ```
 ```
-/bin/planes -f riegl_txt -s 0 /YOUR/DOWNLOAD/DIRECTORY/bremen_city/ -r 50 -O 1 -m 5000
-/bin/show -s 0 -e 0 /YOUR/DOWNLOAD/DIRECTORY/bremen_city/ -f riegl_txt -l dat/planes/planes.list -r 10 -O 1 -m 5000
+bin/planes -f riegl_txt -s 0 /YOUR/DOWNLOAD/DIRECTORY/bremen_city/ -r 50 -O 1 -m 5000
+bin/show -s 0 -e 0 /YOUR/DOWNLOAD/DIRECTORY/bremen_city/ -f riegl_txt -l dat/planes/planes.list -r 10 -O 1 -m 5000
 ```
