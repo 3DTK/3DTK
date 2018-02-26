@@ -6,3 +6,5 @@
 /obj/
 /CMakeLists.txt.user
 /3rdparty/riegl
+/.idea/
+/cmake-build-debug/
