@@ -37,6 +37,7 @@ If you receive a bus_error, the size of your shared memory is too small and the 
 ```
   sudo mount -o remount,size=7000M /dev/shm   (for 8GB RAM)
 ```
+
 4. **Locking the memory to avoid swapping (Linux only)**
 If a great portion of the RAM is used for the cache data, swapping will usually occur after 50% of usage. To avoid this, the scanserver tries to lock the whole memory in place. This will fail without superuser rights, as well as on a full shared memory (see 3.) even with rights. To solve this problem, add these two additional lines to `/etc/security/limits.conf`:
 
