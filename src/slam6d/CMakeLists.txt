@@ -40,6 +40,8 @@ add_executable(transformFrames transformFrames.cc)
 #  add_executable(g23dtk g23dtk.cc)
 add_executable(toGlobal toGlobal.cc)
 add_executable(average6DoFposes average6DoFposes.cc)
+add_executable(align sICP.cc)
+target_link_libraries(align scan_shared ${ANN_LIBRARIES_SHARED} ${NEWMAT_LIBRARIES_SHARED} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY})
 
 if (WITH_OPENCV)
   add_executable(exportPoints exportPoints.cc ../scanio/writer.cc)
