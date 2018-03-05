@@ -7,8 +7,11 @@ if (WITH_GLFW AND WITH_OPENCV AND WITH_XMLRPC AND WITH_LIBCONFIG AND WITH_FTGL)
   include_directories(${PROJECT_SOURCE_DIR}/include/pmd/pose)
   include_directories(${PROJECT_SOURCE_DIR}/include/pmd)
 
-
-  find_library(LIBCONFIG_LIBRARY_DIR libconfig.so)
+  if(APPLE)
+    find_library(LIBCONFIG_LIBRARY_DIR libconfig.dylib)
+  else()
+    find_library(LIBCONFIG_LIBRARY_DIR libconfig.so)
+  endif()
   if (NOT LIBCONFIG_LIBRARY_DIR)
     message(FATAL_ERROR "libconfig not found")
   endif()
