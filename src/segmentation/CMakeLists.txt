@@ -1,4 +1,4 @@
-if (WITH_OPENCV)
+if (WITH_OPENCV AND WITH_OPENMP)
   find_package(OpenCV REQUIRED)
   if(OpenCV_VERSION VERSION_GREATER 2.1.0)
     add_executable(scan2segments scan2segments.cc ../slam6d/fbr/fbr_global.cc)
