@@ -27,8 +27,12 @@ for more information about Homebrew have a look at [Homebrew](http://brew.sh/ind
 After this the commands to install the dependencies are:
 ```
 $ brew update
-$ brew install cmake boost libzip homebrew/science/opencv3 homebrew/science/ann eigen freeglut suite-sparse
+$ brew tap brewsci/science
+$ brew update
+$ brew install cmake boost libzip opencv3 ann eigen freeglut suite-sparse glui
 ```
+switch `WITH_WXWIDGETS:BOOL=OFF`
+
 To compile _3DTK_ follow the instructions at the [README](README.md) file.
 
 ##Fedora 25
