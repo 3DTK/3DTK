@@ -1,3 +1,6 @@
+if(APPLE)
+    set(CMAKE_MACOSX_RPATH 1)
+endif()
 SET(NEWMAT_DIR ${PROJECT_SOURCE_DIR}/3rdparty/newmat/newmat-10/newmat/)
 add_library(newmat_objects OBJECT
   ${NEWMAT_DIR}newmat1.cpp
