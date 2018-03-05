@@ -8,3 +8,4 @@
 /3rdparty/riegl
 /.idea/
 /cmake-build-debug/
+/.DS_Store
