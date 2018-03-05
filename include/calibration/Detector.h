@@ -21,9 +21,9 @@ namespace calibration {
     private:
 
     public:
-        void detectChessboard(image_u8_t *image);
+        void detectChessboard(Mat &image, std::vector<cv::Point2f> &points, Size boardSize);
 
-        void detectAprilTag(image_u8_t *image, std::vector<AprilTag::AprilTag2f> *tags, float decimate = 1.,
+        void detectAprilTag(image_u8_t *image, std::vector<AprilTag::AprilTag2f> &tags, float decimate = 1,
                             float blur = 0.8,
                             int threads = 4, bool debug = false, bool refine_edges = true, bool refine_decodes = true,
                             bool refine_pose = true, std::string tagFamily = "tag36h11");
