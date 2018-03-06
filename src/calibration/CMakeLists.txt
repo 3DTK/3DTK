@@ -7,6 +7,7 @@ if (WITH_OPENCV AND WITH_EIGEN3)
       CalibrationToolbox.cc
       AprilTag.cc
       Chessboard.cc
+      Calibrator.cc
           Detector.cpp)
   add_executable(camcal camcal.cc ${CAMCAL_SOURCES})
   target_link_libraries(camcal apriltag ${OpenCV_LIBRARIES} ${Boost_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY})
