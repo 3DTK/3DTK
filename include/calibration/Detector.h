@@ -6,6 +6,7 @@
 #define INC_3DTK_DETECTOR_H
 
 #include "AprilTag2f.h"
+#include "Chessboard.h"
 #include <common/image_types.h>
 #include <apriltag.h>
 #include <tag36h10.h>
@@ -27,6 +28,14 @@ namespace calibration {
                             float blur = 0.8,
                             int threads = 4, bool debug = false, bool refine_edges = true, bool refine_decodes = true,
                             bool refine_pose = true, std::string tagFamily = "tag36h11");
+
+        void readApilTagDetectionsFromFile(std::string path, std::vector<AprilTag::AprilTag2f> &tags);
+
+        void readChessboardDetectionsFromFile(std::string path, std::vector<cv::Point2f> &tags);
+
+        void writeApilTagDetectionsFromFile(std::string path, std::vector<AprilTag::AprilTag2f> &tags);
+
+        void writeChessboardDetectionsFromFile(std::string path, std::vector<cv::Point2f> &tags);
     };
 }
 #endif //INC_3DTK_DETECTOR_H

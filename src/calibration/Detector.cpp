@@ -62,6 +62,7 @@ namespace calibration {
             zarray_destroy(detections);
         }
         apriltag_detector_destroy(apriltagDetector);
+        std::cout << tags.size() << " Tags detected." << std::endl;
     }
 
     void Detector::detectChessboard(Mat &image, std::vector<cv::Point2f> &points, Size boardSize) {
@@ -77,5 +78,39 @@ namespace calibration {
 
         gettimeofday(&end, 0);
         std::cout << "Time to detect chessboard: " << end.tv_sec - start.tv_sec << " sec" << std::endl;
+    }
+
+    void Detector::readApilTagDetectionsFromFile(std::string path, std::vector<AprilTag::AprilTag2f> &tags){
+        if(FILE * detectFile = fopen(path.c_str(), "r")){
+            fclose(detectFile);
+            tags = AprilTag::createAprilTag2fFromFile(path);
+            std::cout << "load points from file" << std::endl;
+        }
+    }
+
+    void Detector::writeApilTagDetectionsFromFile(std::string path, std::vector<AprilTag::AprilTag2f> &tags) {
+        std::fstream f;
+        f.open(path, std::ios::out);
+        f << "#APRIL_2D" << std::endl;
+        for(AprilTag::AprilTag2f tag : tags){
+            f << tag.toString();
+        }
+        f.close();
+    }
+
+    void Detector::readChessboardDetectionsFromFile(std::string path, std::vector<cv::Point2f> &tags) {
+        if(FILE * detectFile = fopen(path.c_str(), "r")){
+            fclose(detectFile);
+            tags = Chessboard::readPoint2fChessboardFromFile(path);
+            std::cout << "load points from file" << std::endl;
+        }
+    }
+
+    void Detector::writeChessboardDetectionsFromFile(std::string path, std::vector<cv::Point2f> &tags) {
+        std::fstream f;
+        f.open(path, std::ios::out);
+        f << "CHESSBOARD" << std::endl;
+        f << Chessboard::toString(tags);
+        f.close();
     }
 }
