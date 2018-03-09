@@ -54,6 +54,19 @@ class PointDisplay : public SDisplay {
   std::vector<std::string> labels;
 };
 
+class CoordDisplay : public SDisplay { 
+ 
+  public:
+  static SDisplay* readFromFile(std::string &filename);
+  virtual void displayObject();
+
+  private:
+
+  CoordDisplay(std::vector<float*> &c);
+
+  std::vector<float *> coords;
+};
+
 class LineDisplay : public SDisplay { 
  
   public:
