@@ -5,6 +5,7 @@
 #ifndef INC_3DTK_DETECTOR_H
 #define INC_3DTK_DETECTOR_H
 
+#include "AprilTag.h"
 #include "AprilTag2f.h"
 #include "Chessboard.h"
 #include <common/image_types.h>
@@ -22,20 +23,20 @@ namespace calibration {
     private:
 
     public:
-        void detectChessboard(Mat &image, std::vector<cv::Point2f> &points, Size boardSize);
+        void detectChessboard(Mat image, std::vector<cv::Point2f> points, Size boardSize);
 
-        void detectAprilTag(image_u8_t *image, std::vector<AprilTag::AprilTag2f> &tags, float decimate = 1,
+        void detectAprilTag(image_u8_t *image, std::vector<AprilTag::AprilTag2f> tags, float decimate = 1,
                             float blur = 0.8,
                             int threads = 4, bool debug = false, bool refine_edges = true, bool refine_decodes = true,
                             bool refine_pose = true, std::string tagFamily = "tag36h11");
 
-        void readApilTagDetectionsFromFile(std::string path, std::vector<AprilTag::AprilTag2f> &tags);
+        void readApilTagDetectionsFromFile(std::string path, std::vector<AprilTag::AprilTag2f> tags);
 
-        void readChessboardDetectionsFromFile(std::string path, std::vector<cv::Point2f> &tags);
+        void readChessboardDetectionsFromFile(std::string path, std::vector<cv::Point2f> tags);
 
-        void writeApilTagDetectionsToFile(std::string path, std::vector<AprilTag::AprilTag2f> &tags);
+        void writeApilTagDetectionsToFile(std::string path, std::vector<AprilTag::AprilTag2f> tags);
 
-        void writeChessboardDetectionsToFile(std::string path, std::vector<cv::Point2f> &tags);
+        void writeChessboardDetectionsToFile(std::string path, std::vector<cv::Point2f> tags);
     };
 }
 #endif //INC_3DTK_DETECTOR_H
