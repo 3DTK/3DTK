@@ -1,6 +1,6 @@
 # Installation
 
-## Ubuntu 14.04 and Debian Jessie
+## Ubuntu 16.04 
 
 The easiest way to make sure that you install the right dependencies for unpackaged software like _3DTK_ on Debian based distributions is to build a meta package using the equivs tool. For _3DTK_ we ship the control information of such a meta package in the svn repository so that you can use the equivs tool to build and install a meta package which will then in turn make sure that you have all the required dependencies on your system. The advantage compared to installing all dependencies manually is that removing the meta package `3dtk-build-deps` you created will also automatically remove all the dependencies that were installed with it and are:
 ```
@@ -16,6 +16,15 @@ $ make
 $ bin/slam6D dat
 $ bin/show dat
 ```
+
+## Debian Jessie
+
+Read and follow the instructions for Ubuntu 16.04 with the following adaptions:
+```
+$ equivs-build doc/equivs/control.debian.jessie
+```
+Before compiling ($make) disable (switch to OFF) the options:
+`WITH_GLFW`, `WITH_QT` 
 
 ## macOS 10.12 Sierra
 
