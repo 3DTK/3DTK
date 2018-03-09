@@ -6,15 +6,15 @@
 #define INC_3DTK_CALIBRATOR_H
 
 
-namespace Calibrator{
+namespace calibration{
     class Calibrator{
     private:
 
     public:
         void calibrateIntrinsic2D();
-        void calibtrateIntrinsic3D();
-        void calibtrateExtrinsic2D();
-        void calibtrateExtrinsic3D();
+        void calibrateIntrinsic3D();
+        void calibrateExtrinsic2D();
+        void calibrateExtrinsic3D();
     };
 }
 
