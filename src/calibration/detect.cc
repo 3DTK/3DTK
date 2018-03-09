@@ -17,6 +17,7 @@ int main(int argc, const char *argv[]) {
     int x = 0;
     int y = 0;
     int t = 4;
+    bool debug = false;
     int piccounter = 0;
     std::vector<std::string>pathlist=std::vector<std::string>();
 
@@ -42,7 +43,8 @@ int main(int argc, const char *argv[]) {
     apriltag.add_options()
             ("tagfamily,f", po::value<std::string>(&tagfam)->default_value("tag36h11"), "set AprilTag family, "
                     "default 'tag36h11'")
-            ("threads,t", po::value<int>(&t)->default_value(4), "set tread count for AprilTag detection");
+            ("threads,t", po::value<int>(&t)->default_value(4), "set tread count for AprilTag detection")
+            ("debug,d", po::value<bool>(&debug)->default_value(false), "set debug level for AprilTag detector");
     chessboard.add_options()
             ("board-x,x", po::value<int>(&x), "chessboard bord size x value")
             ("board-y,y", po::value<int>(&y), "chessboard bord size y value");
@@ -165,8 +167,8 @@ int main(int argc, const char *argv[]) {
                 filetype = ".bmp";
                 found = picstring.find(filetype);
             }
-            size_t endung = picstring.find("detections");
-            if (found != std::string::npos && endung == std::string::npos) {
+            size_t existingdetection = picstring.find("detections");
+            if (found != std::string::npos && existingdetection == std::string::npos) {
                 pathlist.push_back(pic.str());
                 std::cout << pic.str() << std::endl;
                 piccounter++;
@@ -182,5 +184,36 @@ int main(int argc, const char *argv[]) {
         std::cerr << "Given input path is unvalid!"<< std::endl;
         return 1;
     }
-    
+
+    //start detection
+    calibration::Detector detector = calibration::Detector();
+    for(std::string pic: pathlist){
+        //read picture
+        Mat imageCV = imread(pic, CV_LOAD_IMAGE_GRAYSCALE);
+        image_u8_t *image;
+        if (imageCV.rows > 0 && imageCV.cols > 0) {
+            image = image_u8_create(imageCV.cols, imageCV.rows);
+            for (int y = 0; y < imageCV.rows; y++) {
+                uchar* row = imageCV.ptr<uchar>(y);
+                for (int x = 0; x < imageCV.cols; x++) {
+                    image->buf[y * image->stride + x] = row[x];
+                }
+            }
+        }
+        if (image == NULL) {
+            std::cerr << "Can't read picture!\npath: " << pic << "\n"<< std::endl;
+            return 1;
+        }
+        //detect aprilTags
+        if(patternType.compare("apriltag")==0){
+            std::vector<AprilTag::AprilTag2f> points = std::vector<AprilTag::AprilTag2f>();
+            detector.detectAprilTag(image, points);
+            detector.writeApilTagDetectionsToFile((pic+".detections"), points);
+        //detect chessboard
+        }else if(patternType.compare("chessboard")==0){
+            std::vector<cv::Point2f> points = std::vector<cv::Point2f>();
+            detector.detectChessboard(imageCV, points, cv::Size(x,y));
+            detector.writeChessboardDetectionsToFile((pic+".detections"), points);
+        }
+    }
 }
