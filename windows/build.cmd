@@ -197,6 +197,15 @@ cd /d %outdir%
 	-DGLUT_INCLUDE_DIR:PATH=%sourcedir%/3rdparty/windows/freeglut/include ^
 	-DOpenCV_DIR:PATH=%opencvdir%/opencv/build ^
 	-DOUTPUT_DIRECTORY:PATH=%outdir% ^
+	-DWITH_WXWIDGETS=OFF ^
+	-DWITH_QT=OFF ^
+	-DWITH_GLFW=OFF ^
+	-DWITH_XMLRPC=OFF ^
+	-DWITH_LIBCONFIG=OFF ^
+	-DWITH_FTGL=OFF ^
+	-DWITH_EIGEN3=OFF ^
+	-DWITH_CGAL=OFF ^
+	-DWITH_PYTHON=OFF ^
 	%sourcedir%
 
 if %ERRORLEVEL% GEQ 1 (
