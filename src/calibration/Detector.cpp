@@ -6,11 +6,11 @@
 #include"calibration/Detector.h"
 
 namespace calibration {
-    void Detector::detectAprilTag(image_u8_t *image, std::vector<AprilTag::AprilTag2f> &tags, float decimate = 1,
-                                  float blur = 0.8,
-                                  int threads = 4, bool debug = false, bool refine_edges = true,
-                                  bool refine_decodes = true,
-                                  bool refine_pose = true, std::string tagFamily = "tag36h11") {
+    void Detector::detectAprilTag(image_u8_t *image, std::vector<AprilTag::AprilTag2f> tags, float decimate,
+                                  float blur,
+                                  int threads, bool debug, bool refine_edges,
+                                  bool refine_decodes,
+                                  bool refine_pose, std::string tagFamily) {
         apriltag_family_t *tagFam;
         //set tag family
         if (tagFamily.compare("tag36h11") == 0) {
@@ -30,6 +30,7 @@ namespace calibration {
         }
         //init AprilTag detector
         apriltag_detector_t *apriltagDetector;
+        apriltagDetector = apriltag_detector_create();
         apriltag_detector_add_family(apriltagDetector, tagFam);
         apriltagDetector->quad_decimate = decimate;
         apriltagDetector->quad_sigma = blur;
@@ -65,7 +66,7 @@ namespace calibration {
         std::cout << tags.size() << " Tags detected." << std::endl;
     }
 
-    void Detector::detectChessboard(Mat &image, std::vector<cv::Point2f> &points, Size boardSize) {
+    void Detector::detectChessboard(Mat image, std::vector<cv::Point2f> points, Size boardSize) {
         bool found = findChessboardCorners(image, boardSize, points,
                                            CV_CALIB_CB_ADAPTIVE_THRESH | CV_CALIB_CB_NORMALIZE_IMAGE |
                                            CV_CALIB_CB_FILTER_QUADS);
@@ -80,7 +81,7 @@ namespace calibration {
         std::cout << "Time to detect chessboard: " << end.tv_sec - start.tv_sec << " sec" << std::endl;
     }
 
-    void Detector::readApilTagDetectionsFromFile(std::string path, std::vector<AprilTag::AprilTag2f> &tags){
+    void Detector::readApilTagDetectionsFromFile(std::string path, std::vector<AprilTag::AprilTag2f> tags){
         if(FILE * detectFile = fopen(path.c_str(), "r")){
             fclose(detectFile);
             tags = AprilTag::createAprilTag2fFromFile(path);
@@ -88,7 +89,7 @@ namespace calibration {
         }
     }
 
-    void Detector::writeApilTagDetectionsToFile(std::string path, std::vector<AprilTag::AprilTag2f> &tags) {
+    void Detector::writeApilTagDetectionsToFile(std::string path, std::vector<AprilTag::AprilTag2f> tags) {
         std::fstream f;
         f.open(path, std::ios::out);
         f << "#APRIL_2D" << std::endl;
@@ -98,7 +99,7 @@ namespace calibration {
         f.close();
     }
 
-    void Detector::readChessboardDetectionsFromFile(std::string path, std::vector<cv::Point2f> &tags) {
+    void Detector::readChessboardDetectionsFromFile(std::string path, std::vector<cv::Point2f> tags) {
         if(FILE * detectFile = fopen(path.c_str(), "r")){
             fclose(detectFile);
             tags = Chessboard::readPoint2fChessboardFromFile(path);
@@ -106,7 +107,7 @@ namespace calibration {
         }
     }
 
-    void Detector::writeChessboardDetectionsToFile(std::string path, std::vector<cv::Point2f> &tags) {
+    void Detector::writeChessboardDetectionsToFile(std::string path, std::vector<cv::Point2f> tags) {
         std::fstream f;
         f.open(path, std::ios::out);
         f << "CHESSBOARD" << std::endl;
