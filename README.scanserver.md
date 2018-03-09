@@ -1,4 +1,4 @@
-#3DTK - Scanserver
+# 3DTK - Scanserver
 **This project is part of the [3D Toolkit (3DTK)](http://threedtk.de)**
 This file describes the scanserver functionality, the code changes and its behaviour.
 
@@ -10,7 +10,7 @@ If you have questions or problems (or both), contact Thomas Escher <tescher@uos.
 
 
 
-#Usage
+# Usage
 
 1. **General**
 Start the scanserver once (in another terminal, or in the same one as a background process):
@@ -52,7 +52,7 @@ The octtree serialization behaves slightly different than before. Since the scan
 ```
 If octtrees are not cached, they are deserialized if available, created otherwise and then saved for future calls.
 
-#Implematation Status
+# Implematation Status
 
 Currently only `slam6D` and `show` are working with the scanserver.
 Since the scanserver handles the disk IO now and the filtering has been optimized, not all ScanIOs are updated yet. Just copy and paste and change the minor parts about reading the input lines.
