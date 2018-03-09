@@ -62,6 +62,8 @@ void SDisplay::readDisplays(std::string &filename, std::vector<SDisplay*> &displ
         displays.push_back(GroupPlaneDisplay::readFromFile(objectfile));
       } else if(strcmp(type.c_str(), "Box") == 0) {
         displays.push_back(BoxDisplay::readFromFile(objectfile));
+      } else if(strcmp(type.c_str(), "Coord") == 0) {
+        displays.push_back(CoordDisplay::readFromFile(objectfile));
       } else {
         std::cerr << "Unknown SDisplay Object" << std::endl;
       }
@@ -128,6 +130,68 @@ void PointDisplay::displayObject() {
   glPopMatrix();
   
 }
+
+CoordDisplay::CoordDisplay(std::vector<float*> &c) {
+  coords = c;
+}
+
+SDisplay * CoordDisplay::readFromFile(std::string &filename) {
+  std::ifstream input;
+  input.open(filename.c_str());
+  float dummy;
+  std::vector<float*> coords;
+  while (input.good()) {
+    try {
+      float *p = new float[16];
+      double tmp[4];
+      for(unsigned int i = 0; i < 4; i++) {
+        for(unsigned int j = 0; j < 4; j++) {
+          input >> tmp[j];
+        }
+        if(i < 3) Normalize3(tmp);
+        for(unsigned int j = 0; j < 4; j++) {
+          p[i*4+j] = tmp[j];
+        }
+      }
+      input >> dummy;
+      coords.push_back(p);
+    } catch (...) {
+      break;
+    }
+  }
+ 
+  coords.pop_back();
+  input.close();
+  input.clear();
+
+  return new CoordDisplay(coords);
+    
+}
+
+void CoordDisplay::displayObject() {
+
+  glColor3f(1.0, 0.3, 0.3);
+  glLineWidth(5.0);
+  glBegin(GL_LINES);
+
+  for (unsigned int i = 0; i < coords.size(); i++) {
+    
+    float s = 10.0*coords[i][15];
+    glColor3f(1,0.0,0.0);
+    glVertex3f(coords[i][12], coords[i][13], coords[i][14]);
+    glVertex3f(coords[i][12] + s*coords[i][0], coords[i][13] + s*coords[i][1], coords[i][14] + s*coords[i][2]);
+    glColor3f(0.0,1.0,0.0);
+    glVertex3f(coords[i][12], coords[i][13], coords[i][14]);
+    glVertex3f(coords[i][12] + s*coords[i][4], coords[i][13] + s*coords[i][5], coords[i][14] + s*coords[i][6]);
+    glColor3f(0.0,0.0,1.0);
+    glVertex3f(coords[i][12], coords[i][13], coords[i][14]);
+    glVertex3f(coords[i][12] + s*coords[i][8], coords[i][13] + s*coords[i][9], coords[i][14] + s*coords[i][10]);
+  }
+
+  glEnd();
+
+}
+
 
 LineDisplay::LineDisplay(std::vector<float*> &l) {
   lines = l;
