@@ -187,7 +187,9 @@ int main(int argc, const char *argv[]) {
 
     //start detection
     calibration::Detector detector = calibration::Detector();
+    int i = 1;
     for(std::string pic: pathlist){
+        std::cout << "\nread picture: " << pic << " " << i << "/" << piccounter << std::endl;
         //read picture
         Mat imageCV = imread(pic, CV_LOAD_IMAGE_GRAYSCALE);
         image_u8_t *image;
