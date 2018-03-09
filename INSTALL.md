@@ -1,6 +1,6 @@
-#Installation
+# Installation
 
-##Ubuntu 14.04 and Debian Jessie
+## Ubuntu 14.04 and Debian Jessie
 
 The easiest way to make sure that you install the right dependencies for unpackaged software like _3DTK_ on Debian based distributions is to build a meta package using the equivs tool. For _3DTK_ we ship the control information of such a meta package in the svn repository so that you can use the equivs tool to build and install a meta package which will then in turn make sure that you have all the required dependencies on your system. The advantage compared to installing all dependencies manually is that removing the meta package `3dtk-build-deps` you created will also automatically remove all the dependencies that were installed with it and are:
 ```
@@ -17,7 +17,7 @@ $ bin/slam6D dat
 $ bin/show dat
 ```
 
-##macOS 10.12 Sierra
+## macOS 10.12 Sierra
 
 The easiest way to install all required dependencies is to use Homebrew. You can install Homebrew as follows:
 ```
@@ -35,7 +35,7 @@ switch `WITH_WXWIDGETS:BOOL=OFF`
 
 To compile _3DTK_ follow the instructions at the [README](README.md) file.
 
-##Fedora 25
+## Fedora 25
 ```
 $ dnf install make gcc gcc-c++ libzip-devel ann-devel boost-devel opencv-devel mesa-libGL-devel freeglut-devel libXmu-devel libXi-devel suitesparse-devel
 ```
