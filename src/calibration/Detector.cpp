@@ -88,7 +88,7 @@ namespace calibration {
         }
     }
 
-    void Detector::writeApilTagDetectionsFromFile(std::string path, std::vector<AprilTag::AprilTag2f> &tags) {
+    void Detector::writeApilTagDetectionsToFile(std::string path, std::vector<AprilTag::AprilTag2f> &tags) {
         std::fstream f;
         f.open(path, std::ios::out);
         f << "#APRIL_2D" << std::endl;
@@ -106,7 +106,7 @@ namespace calibration {
         }
     }
 
-    void Detector::writeChessboardDetectionsFromFile(std::string path, std::vector<cv::Point2f> &tags) {
+    void Detector::writeChessboardDetectionsToFile(std::string path, std::vector<cv::Point2f> &tags) {
         std::fstream f;
         f.open(path, std::ios::out);
         f << "CHESSBOARD" << std::endl;

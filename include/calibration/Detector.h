@@ -33,9 +33,9 @@ namespace calibration {
 
         void readChessboardDetectionsFromFile(std::string path, std::vector<cv::Point2f> &tags);
 
-        void writeApilTagDetectionsFromFile(std::string path, std::vector<AprilTag::AprilTag2f> &tags);
+        void writeApilTagDetectionsToFile(std::string path, std::vector<AprilTag::AprilTag2f> &tags);
 
-        void writeChessboardDetectionsFromFile(std::string path, std::vector<cv::Point2f> &tags);
+        void writeChessboardDetectionsToFile(std::string path, std::vector<cv::Point2f> &tags);
     };
 }
 #endif //INC_3DTK_DETECTOR_H
