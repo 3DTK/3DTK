@@ -3,7 +3,6 @@
  * @brief Transforms a series of frames according to a replacement for a
  * reference frame
  *
- * @author Florian Leutert
  * @author Dorit Borrmann
  */
 
