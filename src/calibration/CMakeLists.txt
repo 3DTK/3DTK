@@ -6,9 +6,7 @@ if (WITH_OPENCV AND WITH_EIGEN3)
       PictureHandler.cc
       CalibrationToolbox.cc
       AprilTag.cc
-      Chessboard.cc
-      Calibrator.cc
-      Detector.cpp)
+      Chessboard.cc)
 
   set(DETECT_SOURCES
           AprilTag.cc
