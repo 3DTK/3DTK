@@ -32,6 +32,21 @@ void main(int argc, const char * argv[]){
                 ("board-y,y", po::value<int>(&y), "chessboard bord size y value")
                 ("threads,t", po::value<int>(&t)->default_value(4), "set tread count for AprilTag detection")
                 ;
+        po::store(po::parse_command_line(argc, argv, desc), vm);
+        po::notify(vm);
+
+        if (vm.count("help")) {
+            std::cout << desc << "\n";
+            return 1;
+        }
+    }catch (const po::required_option &e){
+        if (vm.count("help")){
+            std::cout << desc << std::endl;
+            return 1;
+        }else{
+            std::cout << desc << std::endl;
+            throw e;
+        }
     }
 
 
