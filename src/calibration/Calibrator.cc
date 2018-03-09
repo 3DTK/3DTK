@@ -6,19 +6,11 @@
 
 
 namespace calibration{
-    void Calibrator::calibrateIntrinsic2D() {
+    void Calibrator::calibrateIntrinsic() {
 
     }
 
-    void Calibrator::calibrateExtrinsic2D() {
-
-    }
-
-    void Calibrator::calibrateIntrinsic3D() {
-
-    }
-
-    void Calibrator::calibrateExtrinsic3D() {
+    void Calibrator::calibrateExtrinsic() {
 
     }
 }
