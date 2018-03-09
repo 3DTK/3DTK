@@ -6,14 +6,21 @@
 :: environment using a call to
 :: C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\vcvarsall.bat
 
-:: you might want to configure the following variables before you run this
-:: script:
-
 :: the path where the 3dtk sources are
-set sourcedir=Z:/3dtk/
+set sourcedir=%~1
+
+if "%sourcedir%" == "" (
+	echo "Usage: %0 sourcedir outdir"
+	exit /B 1
+)
 
 :: the path where you want the resulting binaries
-set outdir=C:/slam6d/
+set outdir=%~2
+
+if "%outdir%" == "" (
+	echo "Usage: %0 sourcedir outdir"
+	exit /B 1
+)
 
 :: the build type (one of Debug, Release, RelWithDebInfo and MinSizeRel)
 set buildtype=Release
