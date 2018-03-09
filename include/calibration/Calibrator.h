@@ -11,10 +11,8 @@ namespace calibration{
     private:
 
     public:
-        void calibrateIntrinsic2D();
-        void calibrateIntrinsic3D();
-        void calibrateExtrinsic2D();
-        void calibrateExtrinsic3D();
+        void calibrateIntrinsic();
+        void calibrateExtrinsic();
     };
 }
 
