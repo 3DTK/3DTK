@@ -1,0 +1,19 @@
+
+build:
+ verbosity: detailed
+build_script:
+ - mkdir C:\slam6d
+ - mkdir C:\slam6d\3rdparty
+ - mkdir C:\slam6d\3rdparty\opencv
+ - appveyor DownloadFile https://downloads.sourceforge.net/project/opencvlibrary/opencv-win/3.2.0/opencv-3.2.0-vc14.exe -FileName C:\slam6d\opencv-3.2.0-vc14.exe
+ - C:\slam6d\opencv-3.2.0-vc14.exe -o"C:\slam6d\3rdparty\opencv" -y
+ - mkdir C:\slam6d\3rdparty\boost
+ - appveyor DownloadFile https://downloads.sourceforge.net/project/boost/boost-binaries/1.63.0/boost_1_63_0-msvc-14.0-64.exe -FileName C:\slam6d\boost_1_63_0-msvc-14.0-64.exe
+ - C:\slam6d\boost_1_63_0-msvc-14.0-64.exe /silent /nocancel /dir="C:\slam6d\3rdparty\boost"
+ - mkdir C:\slam6d\3rdparty\cmake
+ - appveyor DownloadFile https://cmake.org/files/v3.7/cmake-3.7.2-win64-x64.zip -FileName C:\slam6d\cmake-3.7.2-win64-x64.zip
+ - 7z x C:\slam6d\cmake-3.7.2-win64-x64.zip -oC:\slam6d\3rdparty\cmake
+ - mkdir C:\slam6d\3rdparty\libpng
+ - appveyor DownloadFile https://downloads.sourceforge.net/project/gnuwin32/libpng/1.2.37/libpng-1.2.37-setup.exe -FileName C:\slam6d\libpng-1.2.37-setup.exe
+ - C:\slam6d\libpng-1.2.37-setup.exe /DIR=C:\slam6d\3rdparty\libpng /VERYSILENT /SUPPRESSMSGBOXES /NORESTART /SP-
+ - call "C:\projects\3dtk\windows\build.cmd" "C:\projects\3dtk" "C:/slam6d/"
