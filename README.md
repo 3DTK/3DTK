@@ -1,9 +1,7 @@
 # 3DTK - The 3D Toolkit
 
-## CI Status
-
-Travis: [![Build Status](https://travis-ci.org/3DTK/3DTK.svg?branch=master)](https://travis-ci.org/3DTK/3DTK)
-Appveyor: [![Build status](https://ci.appveyor.com/api/projects/status/7f8n86ed859vw8j4/branch/master?svg=true)](https://ci.appveyor.com/project/josch/3dtk/branch/master)
+[![Build Status](https://travis-ci.org/3DTK/3DTK.svg?branch=master)](https://travis-ci.org/3DTK/3DTK)
+[![Build status](https://ci.appveyor.com/api/projects/status/7f8n86ed859vw8j4/branch/master?svg=true)](https://ci.appveyor.com/project/josch/3dtk/branch/master)
 
 ## About
 _The 3D Toolkit_ provides algorithms and methods to process 3D point clouds. It includes automatic high-accurate registration (6D simultaneous localization and mapping, 6D SLAM) and other tools, e.g., a fast 3D viewer, plane extraction software, etc. Several file formats for the point clouds are natively supported, new formats can be implemented easily. Check out our [website (threedtk.de)](http://threedtk.de) for more information.
