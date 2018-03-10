@@ -86,7 +86,7 @@ if (WIN32)
   target_link_libraries(toGlobal scan_shared XGetopt ${Boost_LIBRARIES})
 endif()
 
-target_link_libraries(average6DoFposes newmat)
+target_link_libraries(average6DoFposes ${NEWMAT_LIBRARIES_SHARED})
 
 ### SCANLIB
 
