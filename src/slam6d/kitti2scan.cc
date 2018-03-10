@@ -21,7 +21,6 @@ using std::ios;
 #include "slam6d/globals.icc"
 #include <string.h>
 #include <string>
-#include <bits/stringfwd.h>
 #ifndef _MSC_VER
 #include <unistd.h>
 #else
