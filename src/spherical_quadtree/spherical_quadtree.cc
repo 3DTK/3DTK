@@ -130,10 +130,10 @@ QuadNode::QuadNode(size_t v1, size_t v2, size_t v3, std::vector<size_t> const& _
 		}
 		*/
 	}
-	t1 = std::make_unique<QuadNode>(QuadNode(v1,v4,v6,indices1, _pts, vertices, middlemap));
-	t2 = std::make_unique<QuadNode>(QuadNode(v2,v5,v4,indices2, _pts, vertices, middlemap));
-	t3 = std::make_unique<QuadNode>(QuadNode(v3,v6,v5,indices3, _pts, vertices, middlemap));
-	t4 = std::make_unique<QuadNode>(QuadNode(v4,v5,v6,indices4, _pts, vertices, middlemap));
+	t1 = std::make_unique<QuadNode>(v1,v4,v6,indices1, _pts, vertices, middlemap);
+	t2 = std::make_unique<QuadNode>(v2,v5,v4,indices2, _pts, vertices, middlemap);
+	t3 = std::make_unique<QuadNode>(v3,v6,v5,indices3, _pts, vertices, middlemap);
+	t4 = std::make_unique<QuadNode>(v4,v5,v6,indices4, _pts, vertices, middlemap);
 }
 
 std::vector<size_t> QuadNode::search(double p[3], const double r)
@@ -237,14 +237,14 @@ QuadTree::QuadTree(DataXYZ const& _pts)
 		buckets[idx].push_back(i);
 	}
 	for (int i = 0; i < 8; ++i) {
-		trees[i] = std::make_unique<QuadNode>(QuadNode(
+		trees[i] = std::make_unique<QuadNode>(
 				mainvertices[i][0],
 				mainvertices[i][1],
 				mainvertices[i][2],
 				buckets[i],
 				pts,
 				vertices,
-				middlemap));
+				middlemap);
 	}
 }
 
