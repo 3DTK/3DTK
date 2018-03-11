@@ -38,6 +38,7 @@ if (WITH_OPENGL)
   )
   target_include_directories(glui_objects PUBLIC ${PROJECT_SOURCE_DIR}/3rdparty/glui-2.36/include/)
   target_include_directories(glui_objects PUBLIC ${GLUT_INCLUDE_DIR})
+  target_compile_definitions(glui_objects PUBLIC "-DGLUI_NO_LIB_PRAGMA")
 
   # compile with -fPIC so that the result can be made into a shared library
   set_property(TARGET glui_objects PROPERTY POSITION_INDEPENDENT_CODE 1)
