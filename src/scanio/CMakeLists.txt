@@ -60,5 +60,10 @@ add_library(scanio_shared SHARED scan_io.cc ../slam6d/io_types.cc helper.cc)
 set_target_properties(scanio_static PROPERTIES OUTPUT_NAME scanio CLEAN_DIRECT_OUTPUT 1)
 set_target_properties(scanio_shared PROPERTIES OUTPUT_NAME scanio CLEAN_DIRECT_OUTPUT 1)
 
-target_link_libraries(scanio_static dl ${LIBZIP_LIBRARY} ${Boost_LIBRARIES} ${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY} pointfilter)
-target_link_libraries(scanio_shared dl ${LIBZIP_LIBRARY} ${Boost_LIBRARIES} ${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY} pointfilter)
+set(SCANIO_LINK_LIBRARIES ${LIBZIP_LIBRARY} ${Boost_LIBRARIES} ${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY} pointfilter)
+if (UNIX)
+  list(APPEND SCANIO_LINK_LIBRARIES dl)
+endif()
+
+target_link_libraries(scanio_static ${SCANIO_LINK_LIBRARIES})
+target_link_libraries(scanio_shared ${SCANIO_LINK_LIBRARIES})
