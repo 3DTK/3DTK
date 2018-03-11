@@ -43,9 +43,7 @@ endif()
 
 #include_directories(OPENGL_INCLUDE_DIR)
 if(WIN32)
-  set(Boost_USE_STATIC_LIBS TRUE)
-else()
-  set(Boost_USE_STATIC_LIBS FALSE)
+  add_definitions(-DBOOST_ALL_NO_LIB)
 endif()
 
 set(Boost_ADDITIONAL_VERSIONS "1.42" "1.42.0" "1.44" "1.44.0" "1.45.0" "1.45" "1.46" "1.46.1" "1.47.0" "1.47" "1.48" "1.50" "1.52" "1.53" "1.55" "1.56")
