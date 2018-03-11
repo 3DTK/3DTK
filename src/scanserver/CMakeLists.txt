@@ -25,17 +25,17 @@ add_library(scanclient_shared SHARED $<TARGET_OBJECTS:scanclient_objects>)
 set_target_properties(scanclient_static PROPERTIES OUTPUT_NAME scanclient CLEAN_DIRECT_OUTPUT 1)
 set_target_properties(scanclient_shared PROPERTIES OUTPUT_NAME scanclient CLEAN_DIRECT_OUTPUT 1)
 
-target_link_libraries(scanclient_static pointfilter rt ${Boost_LIBRARIES} ${Boost_FILESYSTEM_LIBRARY})
-target_link_libraries(scanclient_shared pointfilter rt ${Boost_LIBRARIES} ${Boost_FILESYSTEM_LIBRARY})
-
 # add libraries
 # boost::interprocess
 set(CLIENT_LIBS ${Boost_LIBRARIES} pointfilter)
 
 if(UNIX AND NOT APPLE)
-  # boost::interprocess uses pthread, requiring librt                                                                                                                                                           
+  # boost::interprocess uses pthread, requiring librt
   set(CLIENT_LIBS ${CLIENT_LIBS} rt)
 endif()
+
+target_link_libraries(scanclient_static ${CLIENT_LIBS} ${Boost_FILESYSTEM_LIBRARY})
+target_link_libraries(scanclient_shared ${CLIENT_LIBS} ${Boost_FILESYSTEM_LIBRARY})
 
 target_link_libraries(scanclient_static ${CLIENT_LIBS})
 
