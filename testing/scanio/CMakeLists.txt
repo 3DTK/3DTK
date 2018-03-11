@@ -1,13 +1,13 @@
 add_executable(test_scanio_helper helper.cc)
-target_link_libraries(test_scanio_helper scan_shared scan_io_helper_shared scanio_shared ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
+target_link_libraries(test_scanio_helper scan_shared scanio_shared ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
 
 if (WITH_LIBZIP)
   add_executable(test_scanio_zipreader zipreader.cc)
-  target_link_libraries(test_scanio_zipreader scan_shared scan_io_helper_shared scanio_shared ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
+  target_link_libraries(test_scanio_zipreader scan_shared scanio_shared ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
 endif()
 
 add_executable(test_scanio_readscans readscans.cc)
-target_link_libraries(test_scanio_readscans scan_shared scan_io_helper_shared scanio_shared ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
+target_link_libraries(test_scanio_readscans scan_shared scanio_shared ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
 
 # The only way to add a dependency from a test to target building the binary
 # required for the test is by formulating the binary compilation as yet another
