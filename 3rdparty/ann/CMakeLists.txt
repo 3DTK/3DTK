@@ -19,15 +19,14 @@ add_library(ann_objects OBJECT
 
 # compile with -fPIC so that the result can be made into a shared library
 set_property(TARGET ann_objects PROPERTY POSITION_INDEPENDENT_CODE 1)
+# on windows systems the DLL_EXPORTS is required
+if (WIN32)
+  target_compile_definitions(ann_objects PUBLIC "-DDLL_EXPORTS")
+endif(WIN32)
 
 add_library(ann_static STATIC $<TARGET_OBJECTS:ann_objects>)
 add_library(ann_shared SHARED $<TARGET_OBJECTS:ann_objects>)
 
-# on windows systems the DLL_EXPORTS is required
-if (WIN32)
-  target_compile_definitions(ann_static PUBLIC "-DDLL_EXPORTS")
-  target_compile_definitions(ann_shared PUBLIC "-DDLL_EXPORTS")
-endif(WIN32)
 
 set_target_properties(ann_static PROPERTIES OUTPUT_NAME ann CLEAN_DIRECT_OUTPUT 1)
 set_target_properties(ann_shared PROPERTIES OUTPUT_NAME ann CLEAN_DIRECT_OUTPUT 1)
