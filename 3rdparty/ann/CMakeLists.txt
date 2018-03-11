@@ -25,8 +25,8 @@ add_library(ann_shared SHARED $<TARGET_OBJECTS:ann_objects>)
 
 # on windows systems the DLL_EXPORTS is required
 if (WIN32)
-  SET_TARGET_PROPERTIES(ann_static PROPERTIES COMPILE_FLAGS -DDLL_EXPORTS)
-  SET_TARGET_PROPERTIES(ann_shared PROPERTIES COMPILE_FLAGS -DDLL_EXPORTS)
+  target_compile_definitions(ann_static PUBLIC "-DDLL_EXPORTS")
+  target_compile_definitions(ann_shared PUBLIC "-DDLL_EXPORTS")
 endif(WIN32)
 
 set_target_properties(ann_static PROPERTIES OUTPUT_NAME ann CLEAN_DIRECT_OUTPUT 1)
