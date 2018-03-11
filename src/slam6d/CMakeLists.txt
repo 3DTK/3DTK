@@ -111,8 +111,8 @@ add_library(scan_shared SHARED $<TARGET_OBJECTS:scanlib_objects>)
 set_target_properties(scan_static PROPERTIES OUTPUT_NAME scan CLEAN_DIRECT_OUTPUT 1)
 set_target_properties(scan_shared PROPERTIES OUTPUT_NAME scan CLEAN_DIRECT_OUTPUT 1)
 
-target_link_libraries(scan_static scanclient_static scan_io_helper_static scanio_static ${ANN_LIBRARIES} ${NEWMAT_LIBRARIES_STATIC} ${CXSPARSE_LIBRARIES_STATIC})
-target_link_libraries(scan_shared scanclient_shared scan_io_helper_shared scanio_shared ${ANN_LIBRARIES_SHARED} ${NEWMAT_LIBRARIES_SHARED} ${CXSPARSE_LIBRARIES_SHARED})
+target_link_libraries(scan_static scanclient_static scanio_static ${ANN_LIBRARIES} ${NEWMAT_LIBRARIES_STATIC} ${CXSPARSE_LIBRARIES_STATIC})
+target_link_libraries(scan_shared scanclient_shared scanio_shared ${ANN_LIBRARIES_SHARED} ${NEWMAT_LIBRARIES_SHARED} ${CXSPARSE_LIBRARIES_SHARED})
 
 ### SLAM6D
 
