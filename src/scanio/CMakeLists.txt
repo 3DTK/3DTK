@@ -39,6 +39,20 @@ else()
   unset (LIBZIP_LIBRARY CACHE)
 endif()
 
+add_library(scanio_static STATIC scan_io.cc ../slam6d/io_types.cc helper.cc)
+add_library(scanio_shared SHARED scan_io.cc ../slam6d/io_types.cc helper.cc)
+
+set_target_properties(scanio_static PROPERTIES OUTPUT_NAME scanio CLEAN_DIRECT_OUTPUT 1)
+set_target_properties(scanio_shared PROPERTIES OUTPUT_NAME scanio CLEAN_DIRECT_OUTPUT 1)
+
+set(SCANIO_LINK_LIBRARIES ${LIBZIP_LIBRARY} ${Boost_LIBRARIES} ${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY} pointfilter)
+if (UNIX)
+  list(APPEND SCANIO_LINK_LIBRARIES dl)
+endif()
+
+target_link_libraries(scanio_static ${SCANIO_LINK_LIBRARIES})
+target_link_libraries(scanio_shared ${SCANIO_LINK_LIBRARIES})
+
 foreach(libname ${SCANIO_LIBNAMES})
   add_library(scan_io_${libname} SHARED scan_io_${libname}.cc)
   target_link_libraries(scan_io_${libname} ${Boost_LIBRARIES} ${Boost_PROGRAM_OPTIONS_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY} scanio_shared pointfilter )
@@ -53,17 +67,3 @@ endif()
 if(WITH_LASLIB)
 target_link_libraries(scan_io_laz laslib_shared)
 endif()
-
-add_library(scanio_static STATIC scan_io.cc ../slam6d/io_types.cc helper.cc)
-add_library(scanio_shared SHARED scan_io.cc ../slam6d/io_types.cc helper.cc)
-
-set_target_properties(scanio_static PROPERTIES OUTPUT_NAME scanio CLEAN_DIRECT_OUTPUT 1)
-set_target_properties(scanio_shared PROPERTIES OUTPUT_NAME scanio CLEAN_DIRECT_OUTPUT 1)
-
-set(SCANIO_LINK_LIBRARIES ${LIBZIP_LIBRARY} ${Boost_LIBRARIES} ${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY} pointfilter)
-if (UNIX)
-  list(APPEND SCANIO_LINK_LIBRARIES dl)
-endif()
-
-target_link_libraries(scanio_static ${SCANIO_LINK_LIBRARIES})
-target_link_libraries(scanio_shared ${SCANIO_LINK_LIBRARIES})
