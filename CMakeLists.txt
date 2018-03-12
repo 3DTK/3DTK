@@ -9,6 +9,10 @@ set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/3rdparty/CMakeModules" ${CMAKE_MODU
 # cmake no longer defines WIN32 on cygwin
 set(CMAKE_LEGACY_CYGWIN_WIN32 0) # remove when cmake >= 2.8.4 is required
 
+# On Windows, the symbols of a dynamic library have to be explicitly exported
+# using __declspec(dllexport) or otherwise the library will not even be built.
+# To avoid having to modify our headers, we just force the same behaviour as
+# under Unix
 if (MSVC)
   set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 endif()
