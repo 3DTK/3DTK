@@ -423,43 +423,10 @@ int main(int argc, char **argv)
     std::cerr << "No scans found. Did you use the correct format?" << std::endl;
     exit(-1);
   }
-  
+
   unsigned int types = PointType::USE_NONE;
-  //TODO check if all file formats are included
-  if(use_reflectance) {
-    switch (iotype) {
-      case UOSR:
-      case UOS_RRGBT:
-      case UOS_RRGB:
-      case RIEGL_TXT:
-      case RIEGL_PROJECT:
-      case RXP:
-      case TXYZR:
-      case XYZR:
-      case XYZ_RRGB:
-      case FARO_XYZ_RGBR:
-      case LEICA_XYZR:
-        types |= PointType::USE_REFLECTANCE;
-        break;
-      default:
-        break;
-    }
-  }
-  
-  if(use_color) {
-    switch (iotype) {
-      case UOS_RGB:
-      case UOS_RRGBT:
-      case RIEGL_RGB:
-      case XYZ_RGB:
-      case KS_RGB:
-      case PLY:
-        types |= PointType::USE_COLOR;
-        break;
-      default:
-         break;
-    }
-  }
+  if(supportsReflectance(iotype)) types |= PointType::USE_REFLECTANCE;
+  if(supportsColor(iotype)) types |= PointType::USE_COLOR;
 
   // if specified, filter scans
   for (size_t i = 0; i < Scan::allScans.size(); i++)  {

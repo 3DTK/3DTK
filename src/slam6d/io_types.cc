@@ -9,7 +9,6 @@
 
 
 #include "slam6d/io_types.h"
-
 #include "slam6d/globals.icc"
 
 #ifdef _MSC_VER
@@ -187,6 +186,45 @@ const char * io_type_to_libname(IOType  type)
   default:
     throw std::runtime_error(std::string("Io type ") + to_string(type) + std::string(" could not be matched to a library name"));
   }
+}
+
+//TODO check if all file formats are included
+bool supportsReflectance(const IOType iotype) {
+  switch (iotype) {
+    case UOSR:
+    case UOS_RRGBT:
+    case UOS_RRGB:
+    case RIEGL_TXT:
+    case RIEGL_PROJECT:
+    case RXP:
+    case TXYZR:
+    case XYZR:
+    case XYZ_RRGB:
+    case FARO_XYZ_RGBR:
+    case LEICA_XYZR:
+      return true; 
+      break;
+    default:
+      break;
+  }
+  return false;
+}
+
+//TODO check if all file formats are included
+bool supportsColor(const IOType iotype) {
+  switch (iotype) {
+    case UOS_RGB:
+    case UOS_RRGBT:
+    case RIEGL_RGB:
+    case XYZ_RGB:
+    case KS_RGB:
+    case PLY:
+      return true;
+      break;
+    default:
+       break;
+  }
+  return false;
 }
 
 IODataType operator|=(IODataType a, IODataType b)
