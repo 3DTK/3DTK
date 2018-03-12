@@ -374,6 +374,7 @@ add_subdirectory(src/spherical_quadtree)
 add_subdirectory(src/cuda)
 add_subdirectory(src/ros)
 add_subdirectory(src/tools)
+add_subdirectory(src/gps)
 # 3rdparty must come before src/calibration because it sets
 # APRILTAG_INCLUDE_DIRS
 add_subdirectory(3rdparty)
