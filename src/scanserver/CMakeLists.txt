@@ -19,10 +19,10 @@ add_library(scanclient_objects OBJECT ${CLIENT_SRCS})
 # compile with -fPIC so that the result can be made into a shared library
 set_property(TARGET scanclient_objects PROPERTY POSITION_INDEPENDENT_CODE 1)
 
-add_library(scanclient_static STATIC $<TARGET_OBJECTS:scanclient_objects>)
+#add_library(scanclient_static STATIC $<TARGET_OBJECTS:scanclient_objects>)
 add_library(scanclient_shared SHARED $<TARGET_OBJECTS:scanclient_objects>)
 
-set_target_properties(scanclient_static PROPERTIES OUTPUT_NAME scanclient CLEAN_DIRECT_OUTPUT 1)
+#set_target_properties(scanclient_static PROPERTIES OUTPUT_NAME scanclient CLEAN_DIRECT_OUTPUT 1)
 set_target_properties(scanclient_shared PROPERTIES OUTPUT_NAME scanclient CLEAN_DIRECT_OUTPUT 1)
 
 # add libraries
@@ -34,7 +34,7 @@ if(UNIX AND NOT APPLE)
   set(CLIENT_LIBS ${CLIENT_LIBS} rt)
 endif()
 
-target_link_libraries(scanclient_static ${CLIENT_LIBS} ${Boost_FILESYSTEM_LIBRARY})
+#target_link_libraries(scanclient_static ${CLIENT_LIBS} ${Boost_FILESYSTEM_LIBRARY})
 target_link_libraries(scanclient_shared ${CLIENT_LIBS} ${Boost_FILESYSTEM_LIBRARY})
 
 # SERVER EXECUTABLE
