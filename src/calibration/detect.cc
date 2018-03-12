@@ -209,7 +209,7 @@ int main(int argc, const char *argv[]) {
         //detect aprilTags
         if(patternType.compare("apriltag")==0){
             std::vector<AprilTag::AprilTag2f> points = std::vector<AprilTag::AprilTag2f>();
-            detector.detectAprilTag(image, points);
+            detector.detectAprilTag(image, &points);
             detector.writeApilTagDetectionsToFile((pic+".detections"), points);
         //detect chessboard
         }else if(patternType.compare("chessboard")==0){

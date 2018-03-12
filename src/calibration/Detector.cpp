@@ -6,7 +6,7 @@
 #include"calibration/Detector.h"
 
 namespace calibration {
-    void Detector::detectAprilTag(image_u8_t *image, std::vector<AprilTag::AprilTag2f> tags, float decimate,
+    void Detector::detectAprilTag(image_u8_t *image, std::vector<AprilTag::AprilTag2f> *tags, float decimate,
                                   float blur,
                                   int threads, bool debug, bool refine_edges,
                                   bool refine_decodes,
@@ -57,13 +57,13 @@ namespace calibration {
                 aprilTag2f.point3 = Point2f((float) ((det->p)[1][0]), (float) ((det->p)[1][1]));
                 aprilTag2f.point2 = Point2f((float) ((det->p)[2][0]), (float) ((det->p)[2][1]));
                 aprilTag2f.point1 = Point2f((float) ((det->p)[3][0]), (float) ((det->p)[3][1]));
-                tags.push_back(aprilTag2f);
+                tags->push_back(aprilTag2f);
                 apriltag_detection_destroy(det);
             }
             zarray_destroy(detections);
         }
         apriltag_detector_destroy(apriltagDetector);
-        std::cout << tags.size() << " Tags detected." << std::endl;
+        std::cout << tags->size() << " Tags detected." << std::endl;
     }
 
     void Detector::detectChessboard(Mat image, std::vector<cv::Point2f> points, Size boardSize) {
