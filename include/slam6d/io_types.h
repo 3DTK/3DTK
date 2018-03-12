@@ -33,4 +33,8 @@ IOType formatname_to_io_type(const char * string);
 
 const char * io_type_to_libname(IOType type);
 
+bool supportsColor(const IOType iotype);
+
+bool supportsReflectance(const IOType iotype);
+
 #endif //IO_TYPES_H
