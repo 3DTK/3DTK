@@ -37,8 +37,6 @@ endif()
 target_link_libraries(scanclient_static ${CLIENT_LIBS} ${Boost_FILESYSTEM_LIBRARY})
 target_link_libraries(scanclient_shared ${CLIENT_LIBS} ${Boost_FILESYSTEM_LIBRARY})
 
-target_link_libraries(scanclient_static ${CLIENT_LIBS})
-
 # SERVER EXECUTABLE
 
 # build by source
