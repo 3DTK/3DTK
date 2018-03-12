@@ -9,6 +9,10 @@ set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/3rdparty/CMakeModules" ${CMAKE_MODU
 # cmake no longer defines WIN32 on cygwin
 set(CMAKE_LEGACY_CYGWIN_WIN32 0) # remove when cmake >= 2.8.4 is required
 
+if (MSVC)
+  set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
+endif()
+
 # Hide CMake variables
 set (CMAKE_INSTALL_PREFIX "/usr/local" CACHE INTERNAL "" FORCE)
 set (CMAKE_BUILD_TYPE "" CACHE INTERNAL "" FORCE)
