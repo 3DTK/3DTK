@@ -26,7 +26,7 @@ $ equivs-build doc/equivs/control.debian.jessie
 Before compiling ($make) disable (switch to OFF) the options:
 `WITH_GLFW`, `WITH_QT` 
 
-## macOS 10.12 Sierra
+## macOS 10.13 High Sierra
 
 The easiest way to install all required dependencies is to use Homebrew. You can install Homebrew as follows:
 ```
