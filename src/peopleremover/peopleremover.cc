@@ -42,9 +42,11 @@ int main(int argc, char* argv[])
 
 	std::cerr << "dir: " << dir << std::endl;
 
+#ifndef _MSC_VER
 	double elapsed;
 	struct timespec before, after;
 	clock_gettime(CLOCK_MONOTONIC, &before);
+#endif
 
 #ifdef WITH_MMAP_SCAN
 	Scan::openDirectory(false, dir, format, start, end, cachedir);
@@ -125,14 +127,18 @@ int main(int argc, char* argv[])
 		points_by_slice[i] = xyz;
 		std::cerr << "number of points in scan " << i << ": " << xyz.size() << std::endl;
 	}
+#ifndef _MSC_VER
 	clock_gettime(CLOCK_MONOTONIC, &after);
 	elapsed = (after.tv_sec - before.tv_sec);
 	elapsed += (after.tv_nsec - before.tv_nsec) / 1000000000.0;
 	std::cerr << "took: " << elapsed << " seconds" << std::endl;
+#endif
 
 	std::cerr << "calculate voxel occupation" << std::endl;
 
+#ifndef _MSC_VER
 	clock_gettime(CLOCK_MONOTONIC, &before);
+#endif
 	std::unordered_map<struct voxel, std::set<size_t>> voxel_occupied_by_slice;
 	std::cerr << "0 %\r";
 	std::cerr.flush();
@@ -146,10 +152,12 @@ int main(int argc, char* argv[])
 		done += 1;
 	}
 	std::cerr << std::endl;
+#ifndef _MSC_VER
 	clock_gettime(CLOCK_MONOTONIC, &after);
 	elapsed = (after.tv_sec - before.tv_sec);
 	elapsed += (after.tv_nsec - before.tv_nsec) / 1000000000.0;
 	std::cerr << "took: " << elapsed << " seconds" << std::endl;
+#endif
 
 	if (voxel_occupied_by_slice.size() == 0) {
 		std::cerr << "no voxel occupied" << std::endl;
@@ -160,10 +168,14 @@ int main(int argc, char* argv[])
 
 	if (maxrange_method != NONE) {
 		std::cerr << "compute maxranges and walk voxels" << std::endl;
+#ifndef _MSC_VER
 		clock_gettime(CLOCK_MONOTONIC, &before);
+#endif
 	} else {
 		std::cerr << "walk voxels" << std::endl;
+#ifndef _MSC_VER
 		clock_gettime(CLOCK_MONOTONIC, &before);
+#endif
 	}
 	std::cerr << "0 %\r";
 	std::cerr.flush();
@@ -237,16 +249,20 @@ int main(int argc, char* argv[])
 		}
 	}
 	std::cerr << std::endl;
+#ifndef _MSC_VER
 	clock_gettime(CLOCK_MONOTONIC, &after);
 	elapsed = (after.tv_sec - before.tv_sec);
 	elapsed += (after.tv_nsec - before.tv_nsec) / 1000000000.0;
 	std::cerr << "took: " << elapsed << " seconds" << std::endl;
+#endif
 
 	std::cerr << "number of freed voxels: " << free_voxels.size() << " (" << (free_voxels.size()*100.0f/voxel_occupied_by_slice.size()) << "% of occupied voxels)" << std::endl;
 
 	if (cluster_size > 1) {
 		std::cerr << "clustering voxels" << std::endl;
+#ifndef _MSC_VER
 		clock_gettime(CLOCK_MONOTONIC, &before);
+#endif
 		std::unordered_map<struct voxel, size_t> voxel_to_cluster;
 		std::unordered_map<size_t, std::set<struct voxel>> cluster_to_voxel;
 		size_t i = 0;
@@ -303,16 +319,20 @@ int main(int argc, char* argv[])
 			}
 		}
 		std::cerr << "number of free voxels after clustering: " << free_voxels.size() << std::endl;
+#ifndef _MSC_VER
 		clock_gettime(CLOCK_MONOTONIC, &after);
 		elapsed = (after.tv_sec - before.tv_sec);
 		elapsed += (after.tv_nsec - before.tv_nsec) / 1000000000.0;
 		std::cerr << "took: " << elapsed << " seconds" << std::endl;
+#endif
 	}
 
 	std::unordered_map<struct voxel, std::set<size_t>> half_voxels;
 	if (!no_subvoxel_accuracy) {
 		std::cerr << "calculate half-free voxels" << std::endl;
+#ifndef _MSC_VER
 		clock_gettime(CLOCK_MONOTONIC, &before);
+#endif
 		for (struct voxel v : free_voxels) {
 			std::set<struct voxel> neighbor_voxels;
 			int vradius = 2;
@@ -337,10 +357,12 @@ int main(int argc, char* argv[])
 			}
 		}
 		std::cerr << "number of half-free voxels: " << half_voxels.size() << std::endl;
+#ifndef _MSC_VER
 		clock_gettime(CLOCK_MONOTONIC, &after);
 		elapsed = (after.tv_sec - before.tv_sec);
 		elapsed += (after.tv_nsec - before.tv_nsec) / 1000000000.0;
 		std::cerr << "took: " << elapsed << " seconds" << std::endl;
+#endif
 	}
 
 	std::cerr << "computing connectivity graph..." << std::endl;
@@ -384,7 +406,9 @@ int main(int argc, char* argv[])
 	}
 
 	std::cerr << "write partitioning" << std::endl;
+#ifndef _MSC_VER
 	clock_gettime(CLOCK_MONOTONIC, &before);
+#endif
 
 	/*
 	 * we use a FILE object instead of an ofstream to write the data because
@@ -547,10 +571,12 @@ int main(int argc, char* argv[])
 	}
 	std::cerr << std::endl;
 
+#ifndef _MSC_VER
 	clock_gettime(CLOCK_MONOTONIC, &after);
 	elapsed = (after.tv_sec - before.tv_sec);
 	elapsed += (after.tv_nsec - before.tv_nsec) / 1000000000.0;
 	std::cerr << "took: " << elapsed << " seconds" << std::endl;
+#endif
 
 	std::cerr << "done" << std::endl;
 
