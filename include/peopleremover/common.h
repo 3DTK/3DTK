@@ -22,6 +22,11 @@ namespace po = boost::program_options;
 #include <omp.h>
 #endif
 
+#ifdef _MSC_VER
+#include <BaseTsd.h>
+typedef SSIZE_T ssize_t;
+#endif
+
 #include <boost/iostreams/device/mapped_file.hpp>
 
 namespace io = boost::iostreams;
