@@ -9,8 +9,25 @@
 #ifndef __VELOSCAN_H__
 #define __VELOSCAN_H__
 
+#if defined(_MSC_VER) && _MSC_VER < 1900
+
+#define snprintf c99_snprintf
+
+__inline int c99_snprintf(char *outBuf, size_t size, const char *format, ...)
+{
+    int count;
+    va_list ap;
+
+    va_start(ap, format);
+    count = c99_vsnprintf(outBuf, size, format, ap);
+    va_end(ap);
+
+    return count;
+}
+
+#endif
+
 #ifdef _MSC_VER
-#define snprintf _snprintf
 #undef _STDIO_DEFINED
 #define  _USE_MATH_DEFINES
 #endif
