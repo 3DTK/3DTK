@@ -29,7 +29,6 @@
 #ifdef _MSC_VER
   #define  _USE_MATH_DEFINES
   #include <windows.h>
-  #include "GL/glut.h"    /* Header File For The glu toolkit */
   #include "XGetopt.h"
 #else
   #include <getopt.h>
