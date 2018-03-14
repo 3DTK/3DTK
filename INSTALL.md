@@ -40,7 +40,6 @@ $ brew tap brewsci/science
 $ brew update
 $ brew install cmake boost libzip opencv3 ann eigen freeglut suite-sparse glui
 ```
-switch `WITH_WXWIDGETS:BOOL=OFF`
 
 To compile _3DTK_ follow the instructions at the [README](README.md) file.
 

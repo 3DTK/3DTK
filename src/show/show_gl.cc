@@ -1268,7 +1268,7 @@ void initScreenWindow()
   glutKeyboardUpFunc(keyReleased);
   glutMotionFunc(mouseMove);
 #ifdef __APPLE__
-  glutWMCloseFunc(CallBackCloseFunc);
+  glutWMCloseFunc(quit);
 #else
   glutCloseFunc(quit);
 #endif
