@@ -1,4 +1,4 @@
-if (WITH_OPENGL)
+if (WITH_OPENGL AND NOT APPLE)
   # Compile glui library
   SET(GLUI_DIR ${PROJECT_SOURCE_DIR}/3rdparty/glui-2.36/)
   add_library(glui_objects OBJECT

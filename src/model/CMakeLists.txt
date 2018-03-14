@@ -1,11 +1,12 @@
 if (WITH_CGAL AND WITH_EIGEN3 AND WITH_OPENCV)
+  include_directories(${NEWMAT_INCLUDE_DIRS})
   find_package(CGAL REQUIRED)
   find_package(Eigen3 REQUIRED)
 
   # Module name
   set(MODULE "Model")
-  set(UNIX_LIBS shape scan_shared newmat dl ann)
-  set(WIN32_LIBS shape scan_shared newmat XGetopt)
+  set(UNIX_LIBS shape scan_shared ${NEWMAT_LIBRARIES_SHARED} dl ${ANN_LIBRARIES_SHARED})
+  set(WIN32_LIBS shape scan_shared ${NEWMAT_LIBRARIES_SHARED} XGetopt)
 
   # Set CXX flags for CGAL
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -frounding-math")

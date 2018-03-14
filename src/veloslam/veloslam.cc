@@ -941,7 +941,7 @@ int   FinalSLAM( double &red, int &rand,
 					delete my_loopSlam6D;
 				}
 			}
-			if(my_graphSlam6D > 0) {
+			if(my_graphSlam6D != nullptr) {
 				delete my_graphSlam6D;
 			}
 		}

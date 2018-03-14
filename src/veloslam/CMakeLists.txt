@@ -1,7 +1,6 @@
 if (WITH_OPENGL)
   include_directories(${CXSPARSE_INCLUDE_DIRS})
   include_directories(${NEWMAT_INCLUDE_DIRS})
-  include_directories(${GLUT_INCLUDE_DIR})
 
   if(WITH_COMPACT_OCTREE)
     message(STATUS "Using compact octrees")
@@ -28,7 +27,7 @@ if (WITH_OPENGL)
    trackermanager.cc drawtrackers.cc kalmanfilter.cc matrix.cc lap.cc)
 
   if(UNIX)
-    target_link_libraries(veloslam dl scan_shared ${CXSPARSE_LIBRARIES_SHARED} ${ANN_LIBRARIES_SHARED} ${Boost_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} ${Boost_THREAD_LIBRARY} ${SHOW_LIBS_SHARED})
+    target_link_libraries(veloslam dl scan_shared ${NEWMAT_LIBRARIES_STATIC} ${CXSPARSE_LIBRARIES_SHARED} ${ANN_LIBRARIES_SHARED} ${Boost_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} ${Boost_THREAD_LIBRARY} ${SHOW_LIBS_SHARED})
   endif()
 
   if(WIN32)

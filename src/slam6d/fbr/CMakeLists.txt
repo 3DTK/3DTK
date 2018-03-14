@@ -11,7 +11,7 @@ if (WITH_OPENCV)
   endif()
 
   ### Export Static Libs
-  set(FBR_IO_SRC scan_cv.cc)
+  set(FBR_IO_SRC fbr_global.cc scan_cv.cc)
   add_library(fbr_cv_io_shared SHARED ${FBR_IO_SRC})
   target_link_libraries(fbr_cv_io_shared ${FBR_LIBS})
   set_target_properties(fbr_cv_io_shared PROPERTIES OUTPUT_NAME fbr_cv_io CLEAN_DIRECT_OUTPUT 1)
@@ -25,17 +25,17 @@ if (WITH_OPENCV)
 
     set(FBR_FEATURE_SRC feature.cc)
     add_library(fbr_feature_shared SHARED ${FBR_FEATURE_SRC})
-    target_link_libraries(fbr_feature_shared ${FBR_LIBS})
+    target_link_libraries(fbr_feature_shared fbr_cv_io_shared ${FBR_LIBS})
     set_target_properties(fbr_feature_shared PROPERTIES OUTPUT_NAME fbr_feature CLEAN_DIRECT_OUTPUT 1)
 
-    set(FBR_FEATURE_MATCHER_SRC feature_matcher.cc)
+    set(FBR_FEATURE_MATCHER_SRC feature_matcher.cc feature.cc)
     add_library(fbr_feature_matcher_shared SHARED ${FBR_FEATURE_MATCHER_SRC})
-    target_link_libraries(fbr_feature_matcher_shared ${FBR_LIBS})
+    target_link_libraries(fbr_feature_matcher_shared fbr_cv_io_shared ${FBR_LIBS})
     set_target_properties(fbr_feature_matcher_shared PROPERTIES OUTPUT_NAME fbr_feature_matcher CLEAN_DIRECT_OUTPUT 1)
 
     set(FBR_REGISTRATION_SRC registration.cc)
     add_library(fbr_registration_shared SHARED ${FBR_REGISTRATION_SRC})
-    target_link_libraries(fbr_registration_shared ${FBR_LIBS})
+    target_link_libraries(fbr_registration_shared fbr_cv_io_shared ${FBR_LIBS})
     set_target_properties(fbr_registration_shared PROPERTIES OUTPUT_NAME fbr_registration CLEAN_DIRECT_OUTPUT 1)
 
     set(FBR_GEOREFRENCING_SRC geoRefrencing.cc)
@@ -67,7 +67,7 @@ if (WITH_OPENCV)
     endif()
 
     if(UNIX)
-	    target_link_libraries(featurebasedregistration fbr_shared ${NEWMAT_LIBRARIES_SHARED} show_shared ${SHOW_LIBS_SHARED} ${OPENGL_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY})
+	    target_link_libraries(featurebasedregistration fbr_shared ${FBR_LIBS} ${NEWMAT_LIBRARIES_SHARED} show_shared ${SHOW_LIBS_SHARED} ${OPENGL_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY})
     endif()
 
 
@@ -87,7 +87,7 @@ if (WITH_OPENCV)
     add_executable(scan_to_panorama scan_to_panorama.cc fbr_global.cc)
 
     if(UNIX)
-	    target_link_libraries(scan_to_panorama fbr_shared ${NEWMAT_LIBRARIES_SHARED} show_shared ${SHOW_LIBS_SHARED} ${OPENGL_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY})
+	    target_link_libraries(scan_to_panorama fbr_shared ${FBR_LIBS} ${NEWMAT_LIBRARIES_SHARED} show_shared ${SHOW_LIBS_SHARED} ${OPENGL_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY})
     endif()
 
     if (WIN32)
