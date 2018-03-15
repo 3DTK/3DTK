@@ -1,5 +1,7 @@
 #include <peopleremover/common.h>
 
+#include <boost/filesystem.hpp>
+
 #ifdef WITH_MMAP_SCAN
 #include <sys/mman.h>
 #include <fcntl.h>
@@ -474,8 +476,7 @@ int main(int argc, char* argv[])
 	if (staticdir == "") {
 		staticdir = dir + "/static";
 	}
-	// just mkdir it, ignore errors like EEXIST
-	mkdir(staticdir.c_str(), S_IRWXU|S_IRWXG|S_IRWXO);
+	boost::filesystem::create_directory(staticdir);
 	for (std::pair<size_t, DataXYZ> element : points_by_slice) {
 		size_t i = element.first;
 		std::unordered_map<size_t, DataReflectance>::const_iterator refl_it =
@@ -540,8 +541,7 @@ int main(int argc, char* argv[])
 	if (maskdir == "") {
 		maskdir = dir + "/pplremover";
 	}
-	// just mkdir it, ignore errors like EEXIST
-	mkdir(maskdir.c_str(), S_IRWXU|S_IRWXG|S_IRWXO);
+	boost::filesystem::create_directory(maskdir);
 	for (std::pair<size_t, DataXYZ> element : points_by_slice) {
 		std::ostringstream out;
 		out << maskdir << "/scan" << std::setw(3) << std::setfill('0') << element.first << ".mask";
