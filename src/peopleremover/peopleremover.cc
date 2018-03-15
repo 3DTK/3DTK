@@ -193,7 +193,15 @@ int main(int argc, char* argv[])
 	omp_set_num_threads(jobs);
 #pragma omp parallel for schedule(dynamic)
 #endif
-	for (size_t idx = 0; idx < scanorder.size(); ++idx) {
+	for (
+#if defined(_MSC_VER) and defined(_OPENMP)
+		// MSVC only supports OpenMP 2.5 where the counter must be signed
+		// There is also no ssize_t on non-POSIX platforms but sizeof(long) == sizeof(void*)
+		long
+#else
+		size_t
+#endif
+		idx = 0; idx < scanorder.size(); ++idx) {
 		size_t i = scanorder[idx];
 		// FIXME: this is just wasting memory
 		std::vector<double> maxranges(points_by_slice[i].size(), std::numeric_limits<double>::infinity());
