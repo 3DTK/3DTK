@@ -1,13 +1,48 @@
-sudo: required
 language: generic
-services:
-  - docker
-env:
- - DERIV=debian DIST=sid
- - DERIV=debian DIST=buster
- - DERIV=debian DIST=stretch
- - DERIV=debian DIST=jessie
- - DERIV=ubuntu DIST=trusty
- - DERIV=ubuntu DIST=xenial
+matrix:
+  include:
+    - os: osx
+    - os: linux
+      sudo: required
+      services:
+        - docker
+      env:
+        - DERIV=debian DIST=sid
+    - os: linux
+      sudo: required
+      services:
+        - docker
+      env:
+        - DERIV=debian DIST=buster
+    - os: linux
+      sudo: required
+      services:
+        - docker
+      env:
+        - DERIV=debian DIST=stretch
+    - os: linux
+      sudo: required
+      services:
+        - docker
+      env:
+        - DERIV=debian DIST=jessie
+    - os: linux
+      sudo: required
+      services:
+        - docker
+      env:
+        - DERIV=ubuntu DIST=trusty
+    - os: linux
+      sudo: required
+      services:
+        - docker
+      env:
+        - DERIV=ubuntu DIST=xenial
+before_install:
+  - if [ "$TRAVIS_OS_NAME" == "osx" ]; then /usr/bin/yes | pip2 uninstall numpy; fi
+install:
+  - if [ "$TRAVIS_OS_NAME" == "osx" ]; then brew update  ; fi 
+  - if [ "$TRAVIS_OS_NAME" == "osx" ]; then brew bundle  ; fi 
 script:
- - ./travisdockerbuild.sh $DERIV $DIST
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then ./travismacosbuild.sh  ; fi
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then ./travisdockerbuild.sh $DERIV $DIST  ; fi
