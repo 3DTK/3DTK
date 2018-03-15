@@ -214,7 +214,8 @@ int main(int argc, const char *argv[]) {
         //detect chessboard
         }else if(patternType.compare("chessboard")==0){
             std::vector<cv::Point2f> points = std::vector<cv::Point2f>();
-            detector.detectChessboard(imageCV, points, cv::Size(x,y));
+            detector.detectChessboard(imageCV, &points, cv::Size(x,y));
+            std::cout << "points.size(): " << points.size() << std::endl;
             detector.writeChessboardDetectionsToFile((pic+".detections"), points);
         }
     }
