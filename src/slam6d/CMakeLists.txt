@@ -21,7 +21,11 @@ endif()
 
 ### SCAN_DIFF
 add_executable(scan_diff scan_diff.cc)
-target_link_libraries(scan_diff scan_shared ${ANN_LIBRARIES_SHARED} ${NEWMAT_LIBRARIES_SHARED} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY})
+if (WIN32)
+  target_link_libraries(scan_diff XGetopt scan_shared ${ANN_LIBRARIES_SHARED} ${NEWMAT_LIBRARIES_SHARED} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY})
+else()
+  target_link_libraries(scan_diff scan_shared ${ANN_LIBRARIES_SHARED} ${NEWMAT_LIBRARIES_SHARED} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY})
+endif()
 
 add_executable(frame_to_graph frame_to_graph.cc)
 add_executable(convergence convergence.cc)
@@ -45,7 +49,11 @@ add_executable(align sICP.cc)
 
 if (WITH_OPENCV)
   add_executable(exportPoints exportPoints.cc ../scanio/writer.cc)
-  target_link_libraries(exportPoints scan_shared ${ANN_LIBRARIES_SHARED} ${NEWMAT_LIBRARIES_SHARED} ${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY} ${OpenCV_LIBS})
+  if (WIN32)
+    target_link_libraries(exportPoints XGetopt scan_shared ${ANN_LIBRARIES_SHARED} ${NEWMAT_LIBRARIES_SHARED} ${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY} ${OpenCV_LIBS})
+  else()
+    target_link_libraries(exportPoints scan_shared ${ANN_LIBRARIES_SHARED} ${NEWMAT_LIBRARIES_SHARED} ${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY} ${OpenCV_LIBS})
+  endif()
 endif()
 
 if(UNIX)
@@ -118,7 +126,11 @@ target_link_libraries(scan_shared scanclient_shared scanio_shared ${ANN_LIBRARIE
 
 add_executable(slam6D slam6D.cc)
 
-target_link_libraries(slam6D scan_shared ${NEWMAT_LIBRARIES_SHARED} ${CXSPARSE_LIBRARIES_SHARED} ${ANN_LIBRARIES_SHARED} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY})
+if (WIN32)
+  target_link_libraries(slam6D scan_shared XGetopt ${NEWMAT_LIBRARIES_SHARED} ${CXSPARSE_LIBRARIES_SHARED} ${ANN_LIBRARIES_SHARED} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY})
+else()
+  target_link_libraries(slam6D scan_shared ${NEWMAT_LIBRARIES_SHARED} ${CXSPARSE_LIBRARIES_SHARED} ${ANN_LIBRARIES_SHARED} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY})
+endif()
 
 #if(MSVC)
 #	install(TARGETS slam6D RUNTIME DESTINATION ${PROJECT_SOURCE_DIR}/windows)
