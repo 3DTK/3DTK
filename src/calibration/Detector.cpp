@@ -66,25 +66,26 @@ namespace calibration {
         std::cout << tags->size() << " Tags detected." << std::endl;
     }
 
-    void Detector::detectChessboard(Mat image, std::vector<cv::Point2f> points, Size boardSize) {
-        bool found = findChessboardCorners(image, boardSize, points,
+    void Detector::detectChessboard(Mat image, std::vector<cv::Point2f> *points, Size boardSize) {
+        bool found = findChessboardCorners(image, boardSize, points[0],
                                            CV_CALIB_CB_ADAPTIVE_THRESH | CV_CALIB_CB_NORMALIZE_IMAGE |
                                            CV_CALIB_CB_FILTER_QUADS);
         timeval start, end;
         if (found) {
             std::cout << "Performing subpixel refinement of chessboard corners." << std::endl;
-            cornerSubPix(image, points, cvSize(11, 11), cvSize(-1, -1),
+            cornerSubPix(image, points[0], cvSize(11, 11), cvSize(-1, -1),
                          cvTermCriteria(CV_TERMCRIT_EPS + CV_TERMCRIT_ITER, 30, 0.1));
         }
 
         gettimeofday(&end, 0);
         std::cout << "Time to detect chessboard: " << end.tv_sec - start.tv_sec << " sec" << std::endl;
+
     }
 
-    void Detector::readApilTagDetectionsFromFile(std::string path, std::vector<AprilTag::AprilTag2f> tags){
+    void Detector::readApilTagDetectionsFromFile(std::string path, std::vector<AprilTag::AprilTag2f> *tags){
         if(FILE * detectFile = fopen(path.c_str(), "r")){
             fclose(detectFile);
-            tags = AprilTag::createAprilTag2fFromFile(path);
+            *tags = AprilTag::createAprilTag2fFromFile(path);
             std::cout << "load points from file" << std::endl;
         }
     }
@@ -99,10 +100,10 @@ namespace calibration {
         f.close();
     }
 
-    void Detector::readChessboardDetectionsFromFile(std::string path, std::vector<cv::Point2f> tags) {
+    void Detector::readChessboardDetectionsFromFile(std::string path, std::vector<cv::Point2f> *tags) {
         if(FILE * detectFile = fopen(path.c_str(), "r")){
             fclose(detectFile);
-            tags = Chessboard::readPoint2fChessboardFromFile(path);
+            *tags = Chessboard::readPoint2fChessboardFromFile(path);
             std::cout << "load points from file" << std::endl;
         }
     }
@@ -110,7 +111,7 @@ namespace calibration {
     void Detector::writeChessboardDetectionsToFile(std::string path, std::vector<cv::Point2f> tags) {
         std::fstream f;
         f.open(path, std::ios::out);
-        f << "CHESSBOARD" << std::endl;
+        f << "#CHESSBOARD" << std::endl;
         f << Chessboard::toString(tags);
         f.close();
     }
