@@ -1,4 +1,10 @@
 language: generic
+notifications:
+  email:
+    recipients:
+      - slam6d-discuss@lists.sourceforge.net
+    on_success: change
+    on_failure: always
 matrix:
   include:
     - os: osx
