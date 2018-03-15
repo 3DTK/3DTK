@@ -33,15 +33,16 @@ The easiest way to install all required dependencies is to use Homebrew. You can
 $/usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
 ```
 for more information about Homebrew have a look at [Homebrew](http://brew.sh/index_de.html).
-After this the commands to install the dependencies are:
+After this, the commands to install the dependencies and build are:
 ```
 $ brew update
-$ brew tap brewsci/science
-$ brew update
-$ brew install cmake boost libzip opencv3 ann eigen freeglut suite-sparse glui
+$ brew bundle
+$ export PATH="/usr/local/opt/qt/bin:$PATH"
+$ mkdir .build
+$ cmake -H. -B.build -DWITH_PYTHON=OFF -DWITH_OPENMP=OFF -DWITH_FTGL=OFF
+$ make
 ```
 
-To compile _3DTK_ follow the instructions at the [README](README.md) file.
 
 ## Fedora 25
 ```
