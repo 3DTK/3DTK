@@ -64,10 +64,15 @@ esac
 
 TAG="3dtk.docker.$DERIV.$DIST"
 
+echo "travis_fold:start:docker_build"
+
 docker build --tag="$TAG" .
+
+echo "travis_fold:end:docker_build"
 
 docker run --interactive --rm "$TAG" sh - <<EOF
 set -exu
+echo "travis_fold:start:docker_setup"
 dpkg -l
 cat /etc/apt/sources.list
 apt-get update
@@ -76,6 +81,7 @@ apt-get install --yes --no-install-recommends -o Debug::pkgProblemResolver=yes e
 equivs-build doc/equivs/control.$DERIV.$DIST
 dpkg --install --force-depends ./3dtk-build-deps_1.0_all.deb
 apt-get install --yes --no-install-recommends --fix-broken -o Debug::pkgProblemResolver=yes
+echo "travis_fold:end:docker_setup"
 mkdir .build
 cmake -H. -B.build $CMAKEOPTS
 make
