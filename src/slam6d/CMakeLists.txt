@@ -105,7 +105,7 @@ add_library(scanlib_objects OBJECT
         icp6Dlumquat.cc   icp6Ddual.cc      lum6Deuler.cc     lum6Dquat.cc
         ghelix6DQ2.cc     gapx6D.cc         ann_kd.cc         elch6D.cc
         elch6Dquat.cc     elch6DunitQuat.cc elch6Dslerp.cc    elch6Deuler.cc
-        point_type.cc	icp6Dquatscale.cc searchTree.cc     Boctree.cc
+        point_type.cc     icp6Dquatscale.cc searchTree.cc     Boctree.cc
         scan.cc           basicScan.cc      managedScan.cc    metaScan.cc
         io_types.cc       io_utils.cc       pointfilter.cc    allocator.cc
         icp6Dnapx.cc      normals.cc        kdIndexed.cc
