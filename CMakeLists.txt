@@ -51,7 +51,16 @@ endif()
 
 #include_directories(OPENGL_INCLUDE_DIR)
 if(WIN32)
+  # Tells the config system not to automatically select  which libraries to
+  # link against. Normally if a compiler supports #pragma lib, then the
+  # correct library build variant will be automatically selected and linked
+  # against, simply by the act of including one of that library's headers.
+  # This macro turns that feature off.
   add_definitions(-DBOOST_ALL_NO_LIB)
+  # Forces all libraries that have separate source, to be linked as dll's
+  # rather than static libraries on Microsoft Windows (this macro is used to
+  # turn on __declspec(dllimport) modifiers, so that the compiler knows which
+  # symbols to look for in a dll rather than in a static library).
   add_definitions(-DBOOST_ALL_DYN_LINK)
 endif()
 
