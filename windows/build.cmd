@@ -39,8 +39,6 @@ set buildtype=Release
 :: that on windows, the script is not read into memory and executed by the
 :: interpreter but instead read on demand.
 
-@echo off
-
 if not exist %sourcedir% (
 	echo %sourcedir% does not exist. Make sure the sourcedir variable is set to the path of the 3DTK sources.
 	exit /B 1
@@ -51,6 +49,8 @@ if not exist %outdir% (
 	echo %outdir% does not exist. Make sure the outdir variable is set to an existing path.
 	exit /B 1
 )
+
+@echo on
 
 vcpkg install qt5:x64-windows
 vcpkg install libpng:x64-windows
