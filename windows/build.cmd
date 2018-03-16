@@ -57,7 +57,6 @@ vcpkg --triplet x64-windows install ^
 	libpng ^
 	boost ^
 	opencv ^
-	cmake ^
 	wxwidgets ^
 	eigen3 ^
 	cgal ^
@@ -71,7 +70,7 @@ setlocal
 :: need /d if %outdir% is a different drive letter than the current working
 :: directory
 cd /d %outdir%
-cmake.exe ^
+cmake ^
 	-G "Visual Studio 14 2015 Win64" ^
 	-DCMAKE_TOOLCHAIN_FILE=c:/tools/vcpkg/scripts/buildsystems/vcpkg.cmake ^
 	-DOUTPUT_DIRECTORY:PATH=%outdir% ^
@@ -86,7 +85,7 @@ if %ERRORLEVEL% GEQ 1 (
 	exit /B 1
 )
 
-cmake.exe --build . --config %buildtype% -- /m
+cmake --build . --config %buildtype% -- /m
 
 if %ERRORLEVEL% GEQ 1 (
 	echo cmake --build failed
