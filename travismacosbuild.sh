@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #build script for macOS on travis 
-travis_fold start "brew_install"
+echo "travis_fold:start:brew_install"
 	#uninstall python numpy because is not compatible with brew opencv
 	/usr/bin/yes | pip2 uninstall numpy
 	# update brew
@@ -10,19 +10,15 @@ travis_fold start "brew_install"
 	brew bundle
 	#export qt path, installed by brew
 	export PATH="/usr/local/opt/qt/bin:$PATH"
-travis_fold end "brew_install"
+echo "travis_fold:end:brew_install"
 
 #configure and make 3dtk
-travis_fold start "configure_3dtk"
-	travis_time_start
-		mkdir .build
-		cmake -H. -B.build -DWITH_PYTHON=OFF -DWITH_OPENMP=OFF -DWITH_FTGL=OFF
-	travis_time_finish
-travis_fold end "configure_3dtk"
+echo "travis_fold:start:configure_3dtk"
+	mkdir .build
+	cmake -H. -B.build -DWITH_PYTHON=OFF -DWITH_OPENMP=OFF -DWITH_FTGL=OFF
+echo "travis_fold:end:configure_3dtk"
 
 # build 3dtk
-travis_fold start "build_3dtk"
-	travis_time_start
-		make
-	travis_time_finish
-travis_fold end "build_3dtk"
+echo "travis_fold:start:build_3dtk"
+	make
+echo "travis_fold:end:build_3dtk"

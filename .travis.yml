@@ -44,11 +44,6 @@ matrix:
         - docker
       env:
         - DERIV=ubuntu DIST=xenial
-before_script:
-  - export -f travis_nanoseconds
-  - export -f travis_fold
-  - export -f travis_time_start
-  - export -f travis_time_finish
 script:
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then ./travismacosbuild.sh  ; fi
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then ./travisdockerbuild.sh $DERIV $DIST  ; fi
