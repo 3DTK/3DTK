@@ -53,7 +53,8 @@ Clean a directory DIR of Riegl scans:
     # allow programs to communicate point clouds via UNIX pipes
     parser.add_argument("-s", "--start", type=int, default=0, metavar="NUM")
     parser.add_argument("-e", "--end", type=int, default=-1, metavar="NUM")
-    parser.add_argument("-f", "--format", type=formatname_to_io_type, default=py3dtk.IOType.UOS)
+    parser.add_argument("-f", "--format", type=formatname_to_io_type,
+                        default=py3dtk.IOType.UOS)
     parser.add_argument("--dist", type=float, metavar="DIST", default=1.0)
     parser.add_argument("--maxnum", type=int, metavar="MAXNUM", default=0)
     parser.add_argument("--invert", action="store_true")
