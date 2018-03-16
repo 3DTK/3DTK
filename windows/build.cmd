@@ -64,6 +64,11 @@ vcpkg --triplet x64-windows install ^
 	zlib ^
 	freeglut
 
+if %ERRORLEVEL% GEQ 1 (
+	echo vcpkg install failed
+	exit /B 1
+)
+
 :: use setlocal to make sure that the directory is only changed for this part
 :: of the script and not on the outside
 setlocal
