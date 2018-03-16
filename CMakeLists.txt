@@ -272,14 +272,8 @@ endif()
 # 3rdparty
 if(WIN32)
   include_directories(${PROJECT_SOURCE_DIR}/3rdparty/windows/)
-  include_directories(${PROJECT_SOURCE_DIR}/3rdparty/windows/zlib/)
   link_directories(${PROJECT_SOURCE_DIR}/3rdparty/windows)
   link_directories(${BOOST_LIBRARYDIR})
-  if( CMAKE_SIZEOF_VOID_P EQUAL 8 )
-    link_directories(${PROJECT_SOURCE_DIR}/3rdparty/windows/freeglut/lib/x64/)
-  else ()
-    link_directories(${PROJECT_SOURCE_DIR}/3rdparty/windows/freeglut/lib/)
-  endif ()
   add_library(XGetopt STATIC ${PROJECT_SOURCE_DIR}/3rdparty/windows/XGetopt.cpp)
   set(CMAKE_STATIC_LIBRARY_SUFFIX "32.lib")
   # to be able to use numeric_limits<int>::max() and friends on windows
@@ -335,11 +329,6 @@ if(MSVC)
     install(DIRECTORY ${PROJECT_SOURCE_DIR}/3rdparty/windows/ CONFIGURATIONS Debug DESTINATION ${PROJECT_SOURCE_DIR}/windows FILES_MATCHING PATTERN "*.dll" PATTERN "*.exe")
   endif()
 
-  if( CMAKE_SIZEOF_VOID_P EQUAL 8 )
-    file(COPY ${PROJECT_SOURCE_DIR}/3rdparty/windows/freeglut/bin/x64/freeglut.dll DESTINATION ${OUTPUT_DIRECTORY}/bin)
-  else()
-    file(COPY ${PROJECT_SOURCE_DIR}/3rdparty/windows/freeglut/bin/freeglut.dll DESTINATION ${OUTPUT_DIRECTORY}/bin)
-  endif()
 endif()
 
 #################################################
