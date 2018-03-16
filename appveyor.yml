@@ -1,5 +1,9 @@
 build:
  verbosity: detailed
+environment:
+  APPVEYOR_SAVE_CACHE_ON_ERROR: "true"
+image: Visual Studio 2015
+platform: x64
 build_script:
  - mkdir C:\slam6d
  - call "C:\projects\3dtk\windows\build.cmd" "C:\projects\3dtk" "C:/slam6d/"
