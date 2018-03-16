@@ -52,17 +52,18 @@ if not exist %outdir% (
 
 @echo on
 
-vcpkg install qt5:x64-windows
-vcpkg install libpng:x64-windows
-vcpkg install boost:x64-windows
-vcpkg install opencv:x64-windows
-vcpkg install cmake:x64-windows
-vcpkg install wxwidgets:x64-windows
-vcpkg install eigen3:x64-windows
-vcpkg install cgal:x64-windows
-vcpkg install python3:x64-windows
-vcpkg install zlib:x64-windows
-vcpkg install freeglut:x64-windows
+vcpkg --triplet x64-windows install ^
+	qt5 ^
+	libpng ^
+	boost ^
+	opencv ^
+	cmake ^
+	wxwidgets ^
+	eigen3 ^
+	cgal ^
+	python3 ^
+	zlib ^
+	freeglut
 
 :: use setlocal to make sure that the directory is only changed for this part
 :: of the script and not on the outside
