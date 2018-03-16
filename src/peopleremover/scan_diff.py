@@ -64,7 +64,8 @@ Clean a directory DIR of Riegl scans:
     args = parser.parse_args()
 
     if args.write_mask and args.reflectance:
-        print("--write-mask cannot be used together with --reflectance", file=sys.stderr)
+        print("--write-mask cannot be used together with --reflectance",
+              file=sys.stderr)
         exit(1)
 
     print("open directory...", file=sys.stderr)
