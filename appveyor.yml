@@ -4,7 +4,9 @@ environment:
   APPVEYOR_SAVE_CACHE_ON_ERROR: "true"
 image: Visual Studio 2015
 platform: x64
+# run the build with our own timeout because the vcpkg cache is not saved if
+# we run into the appveyor timeout of one hour
 build_script:
  - mkdir C:\slam6d
- - call "C:\projects\3dtk\windows\build.cmd" "C:\projects\3dtk" "C:/slam6d/"
+ - call "C:\projects\3dtk\windows\timeout.bat" "C:\projects\3dtk\windows\build.cmd" "C:\projects\3dtk" "C:/slam6d/"
 cache: c:\tools\vcpkg\installed\
