@@ -52,6 +52,8 @@ if not exist %outdir% (
 
 @echo on
 
+:: FIXME: add cgal once appveyor installs a vcpkg version greater than 0.0.105
+:: with https://github.com/Microsoft/vcpkg/pull/2962
 vcpkg --triplet x64-windows install ^
 	qt5 ^
 	libpng ^
@@ -59,7 +61,6 @@ vcpkg --triplet x64-windows install ^
 	opencv ^
 	wxwidgets ^
 	eigen3 ^
-	cgal ^
 	python3 ^
 	zlib ^
 	freeglut
@@ -83,6 +84,7 @@ cmake ^
 	-DWITH_XMLRPC=OFF ^
 	-DWITH_LIBCONFIG=OFF ^
 	-DWITH_FTGL=OFF ^
+	-DWITH_CGAL=OFF ^
 	%sourcedir%
 
 if %ERRORLEVEL% GEQ 1 (
