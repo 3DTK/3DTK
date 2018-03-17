@@ -5,8 +5,9 @@ environment:
 image: Visual Studio 2015
 platform: x64
 # Run the build with our own timeout because the vcpkg cache is not saved if
-# we run into the appveyor timeout of one hour. Thus we abort after 55
-# minutes (3300 seconds). Five minutes are left for the initial git clone.
+# we run into the appveyor timeout of one hour. Thus we abort after 50
+# minutes (3000 seconds). Ten minutes are left for the initial git clone plus
+# downloading/extracting/zipping/uploading of the cache.
 #
 # We use python to implement the process timeout - have fun trying to find
 # how to do it using Windows tools like cmd.exe or the powershell.
@@ -19,5 +20,5 @@ platform: x64
 # end.
 build_script:
  - mkdir C:\slam6d
- - cmd: C:\Python36-x64\python.exe C:\projects\3dtk\windows\timeout.py 3300 C:\projects\3dtk\windows\build.cmd C:\projects\3dtk C:\slam6d
+ - cmd: C:\Python36-x64\python.exe C:\projects\3dtk\windows\timeout.py 3000 C:\projects\3dtk\windows\build.cmd C:\projects\3dtk C:\slam6d
 cache: c:\tools\vcpkg\installed\
