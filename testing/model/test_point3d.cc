@@ -4,6 +4,7 @@
 #include <boost/test/unit_test.hpp>
 #include <model/plane3d.h>
 #include <model/point3d.h>
+#include <cmath>
 
 using namespace std;
 using namespace model;
