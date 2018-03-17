@@ -63,7 +63,8 @@ vcpkg --triplet x64-windows install ^
 	eigen3 ^
 	python3 ^
 	zlib ^
-	freeglut
+	freeglut ^
+	suitesparse
 
 if %ERRORLEVEL% GEQ 1 (
 	echo vcpkg install failed
