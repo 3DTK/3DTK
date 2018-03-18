@@ -4,6 +4,10 @@ environment:
   APPVEYOR_SAVE_CACHE_ON_ERROR: "true"
 image: Visual Studio 2015
 platform: x64
+init:
+  - ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
+on_finish:
+  - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
 # Run the build with our own timeout because the vcpkg cache is not saved if
 # we run into the appveyor timeout of one hour. Thus we abort after 50
 # minutes (3000 seconds). Ten minutes are left for the initial git clone plus
