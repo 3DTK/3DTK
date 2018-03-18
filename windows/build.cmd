@@ -81,6 +81,8 @@ cmake ^
 	-G "Visual Studio 14 2015 Win64" ^
 	-DCMAKE_TOOLCHAIN_FILE=c:/tools/vcpkg/scripts/buildsystems/vcpkg.cmake ^
 	-DCXSPARSE_INCLUDE_DIR=c:/tools/vcpkg/installed/x64-windows/include/suitesparse ^
+	-DwxWidgets_LIB_DIR=c:/tools/vcpkg/installed/x64-windows/lib ^
+	-DwxWidgets_INCLUDE_DIRS=c:/tools/vcpkg/installed/x64-windows/include ^
 	-DOUTPUT_DIRECTORY:PATH=%outdir% ^
 	-DWITH_GLFW=OFF ^
 	-DWITH_XMLRPC=OFF ^
