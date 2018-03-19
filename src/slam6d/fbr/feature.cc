@@ -10,11 +10,7 @@
 #include "slam6d/fbr/feature.h"
 
 using namespace std;
-#if (CV_MAJOR_VERSION == 2) && (CV_MAJOR_VERSION > 1)
-using namespace cv::xfeatures2d;
-#else
 using namespace cv;
-#endif
 
 namespace fbr{
 
