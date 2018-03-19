@@ -10,7 +10,7 @@
 #define FEATURE_DRAWER_H_
 
 #include "fbr_global.h"
-#if ((CV_MAJOR_VERSION == 3))
+#if (CV_MAJOR_VERSION == 3 && WITH_OPENCV_NONFREE)
   #include "opencv2/xfeatures2d.hpp"
 #else
   #include "opencv2/features2d/features2d.hpp"
