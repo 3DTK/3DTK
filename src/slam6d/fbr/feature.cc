@@ -10,6 +10,11 @@
 #include "slam6d/fbr/feature.h"
 
 using namespace std;
+#if (CV_MAJOR_VERSION == 2) && (CV_MAJOR_VERSION > 1)
+using namespace cv::xfeatures2d;
+#else
+using namespace cv;
+#endif
 
 namespace fbr{
 
@@ -36,14 +41,24 @@ namespace fbr{
 #ifdef WITH_OPENCV_NONFREE
     case SURF_DET:{
       double minHessian = 400;
+#if (CV_MAJOR_VERSION >= 3) && (CV_MINOR_VERSION >= 0)
+      Ptr<xfeatures2d::SURF> detector = xfeatures2d::SURF::create(minHessian);
+      detector->compute(pImage, keypoints, descriptors);
+#else
       cv::SurfFeatureDetector detector(minHessian);
       detector.detect(pImage, keypoints);
+#endif
       break;
     }
       //Detect the keypoints using SIFT Detector
     case SIFT_DET:{
+#if (CV_MAJOR_VERSION >= 3) && (CV_MINOR_VERSION >= 0)
+      Ptr<xfeatures2d::SIFT> detector = xfeatures2d::SIFT::create();
+      detector->detect(pImage, keypoints, descriptors);
+#else
       cv::SiftFeatureDetector detector;
       detector.detect(pImage, keypoints);
+#endif
       break;
     }
 #endif
@@ -99,14 +114,25 @@ namespace fbr{
 #ifdef WITH_OPENCV_NONFREE
     case SURF_DES:{
       //Create descriptor using SURF
+
+#if (CV_MAJOR_VERSION >= 3) && (CV_MINOR_VERSION >= 0)
+      Ptr<xfeatures2d::SURF> extractor = xfeatures2d::SURF::create();
+      extractor->compute(pImage, keypoints, descriptors);
+#else
       cv::SurfDescriptorExtractor extractor;
       extractor.compute(pImage, keypoints, descriptors);
+#endif
       break;
     }
     case SIFT_DES:{
       //Create descriptor using SIFT
+#if (CV_MAJOR_VERSION >= 3) && (CV_MINOR_VERSION >= 0)
+      Ptr<xfeatures2d::SIFT> extractor = xfeatures2d::SIFT::create();
+      extractor->compute(pImage, keypoints, descriptors);
+#else
       cv::SiftDescriptorExtractor extractor;
       extractor.compute(pImage, keypoints, descriptors);
+#endif
       break;
     }
 #endif
