@@ -132,7 +132,7 @@ void write_uos_rgb(std::vector<cv::Vec4f> &points, std::vector<cv::Vec3b> &color
     if((*it)[0]!=0 && (*it)[1]!=0 && (*it)[2]!=0)
       outfile << (*it)[0] << " " << (*it)[1] << " " << (*it)[2] << " " 
       << (int)(*cit)[0] << " " << (int)(*cit)[1] << " " << (int)(*cit)[2] << std::endl;
-      cit++;
+    cit++;
   }
 
   outfile.close();

@@ -18,7 +18,11 @@
 #endif
 //for opencv 2.4
 #if (CV_MAJOR_VERSION >= 3 || ((CV_MAJOR_VERSION == 2) && (CV_MINOR_VERSION >= 4))) && WITH_OPENCV_NONFREE
+#if (CV_MAJOR_VERSION >= 3 && CV_MINOR_VERSION >= 0)
+#include <opencv2/xfeatures2d/nonfree.hpp>
+#else
 #include <opencv2/nonfree/nonfree.hpp>
+#endif
 #endif
 #include <math.h>
 #ifdef _MSC_VER
