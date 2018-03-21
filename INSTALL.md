@@ -2,29 +2,54 @@
 
 ## Ubuntu 16.04 
 
-The easiest way to make sure that you install the right dependencies for unpackaged software like _3DTK_ on Debian based distributions is to build a meta package using the equivs tool. For _3DTK_ we ship the control information of such a meta package in the svn repository so that you can use the equivs tool to build and install a meta package which will then in turn make sure that you have all the required dependencies on your system. The advantage compared to installing all dependencies manually is that removing the meta package `3dtk-build-deps` you created will also automatically remove all the dependencies that were installed with it and are:
+The easiest way to make sure that you install the right dependencies for
+unpackaged software like _3DTK_ on Debian based distributions is to build a
+meta package using the equivs tool. For _3DTK_ we ship the control information
+of such a meta package in this repository so that you can use the equivs tool
+to build and install a meta package which will then in turn make sure that you
+have all the required dependencies on your system. The advantage compared to
+installing all dependencies manually is that by removing the meta package
+`3dtk-build-deps` you created can also automatically remove all the
+dependencies that were installed with it and are not needed anymore.
+
+Run `apt-cache policy` to find out whether you have the universe and multiverse
+repositories enabled. If not, run:
+
 ```
-$ echo deb http://archive.ubuntu.com/ubuntu trusty main universe | sudo tee -a /etc/apt/sources.list > /dev/null
+$ echo deb http://archive.ubuntu.com/ubuntu trusty main universe multiverse | sudo tee -a /etc/apt/sources.list > /dev/null
 $ sudo apt-get update
+```
+
+To download 3DTK and install its dependencies, run:
+
+```
 $ sudo apt-get install --no-install-recommends equivs subversion
 $ svn checkout svn://svn.code.sf.net/p/slam6d/code/trunk slam6d-code
 $ cd slam6d-code
-$ equivs-build doc/equivs/control
+$ equivs-build doc/equivs/control.ubuntu.trusty
 $ sudo dpkg -i 3dtk-build-deps_1.0_all.deb
 $ sudo apt-get -f install --no-install-recommends
 $ make
+```
+
+You can now use 3DTK, for example by running these tools:
+
+```
 $ bin/slam6D dat
 $ bin/show dat
 ```
 
 ## Debian Jessie
 
-Read and follow the instructions for Ubuntu 16.04 with the following adaptions:
+Read and follow the instructions for Ubuntu 16.04, do *not* add the Ubuntu
+universe and multiverse repositories, and make the following adaptions:
+
 ```
 $ equivs-build doc/equivs/control.debian.jessie
 ```
+
 Before compiling ($make) disable (switch to OFF) the options:
-`WITH_GLFW`, `WITH_QT` 
+`WITH_GLFW`, `WITH_QT`
 
 ## macOS 10.13 High Sierra
 
