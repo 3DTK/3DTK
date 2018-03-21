@@ -16,7 +16,7 @@ Run `apt-cache policy` to find out whether you have the universe and multiverse
 repositories enabled. If not, run:
 
 ```
-$ echo deb http://archive.ubuntu.com/ubuntu trusty main universe multiverse | sudo tee -a /etc/apt/sources.list > /dev/null
+$ echo deb http://archive.ubuntu.com/ubuntu xenial main universe multiverse | sudo tee -a /etc/apt/sources.list > /dev/null
 $ sudo apt-get update
 ```
 
@@ -26,7 +26,7 @@ To download 3DTK and install its dependencies, run:
 $ sudo apt-get install --no-install-recommends equivs subversion
 $ svn checkout svn://svn.code.sf.net/p/slam6d/code/trunk slam6d-code
 $ cd slam6d-code
-$ equivs-build doc/equivs/control.ubuntu.trusty
+$ equivs-build doc/equivs/control.ubuntu.xenial
 $ sudo dpkg -i 3dtk-build-deps_1.0_all.deb
 $ sudo apt-get -f install --no-install-recommends
 $ make
