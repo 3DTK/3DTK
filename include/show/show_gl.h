@@ -55,6 +55,12 @@ void DrawPath();
  */
 void DrawCameras(void);
 
+/**
+ * Draw the coordinate system of each scan
+ *
+ */
+void DrawCoordinateSystems(void);
+
 void DrawScala();
 
 

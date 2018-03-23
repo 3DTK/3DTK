@@ -478,6 +478,36 @@ void DrawScala() {
 
 }
 
+void DrawCoordinateSystems() {
+  
+  for(int i = 0; (unsigned int)i < MetaMatrix.size(); i++){
+    //if valid show coordinate system of current frame
+    unsigned int j = frameNr;
+    if(j >= MetaMatrix[i].size()) j = MetaMatrix[i].size() - 1;
+    if(frameNr != 0 && MetaAlgoType[i][j] == Scan::INVALID) {
+      continue;
+    }
+
+    glColor3f(1.0, 0.3, 0.3);
+    glLineWidth(5.0);
+    glBegin(GL_LINES);
+    
+    float s = 10.0*MetaMatrix[i][j][15];
+    glColor3f(1,0.0,0.0);
+    glVertex3f(MetaMatrix[i][j][12], MetaMatrix[i][j][13], MetaMatrix[i][j][14]);
+    glVertex3f(MetaMatrix[i][j][12] + s*MetaMatrix[i][j][0], MetaMatrix[i][j][13] + s*MetaMatrix[i][j][1], MetaMatrix[i][j][14] + s*MetaMatrix[i][j][2]);
+    glColor3f(0.0,1.0,0.0);
+    glVertex3f(MetaMatrix[i][j][12], MetaMatrix[i][j][13], MetaMatrix[i][j][14]);
+    glVertex3f(MetaMatrix[i][j][12] + s*MetaMatrix[i][j][4], MetaMatrix[i][j][13] + s*MetaMatrix[i][j][5], MetaMatrix[i][j][14] + s*MetaMatrix[i][j][6]);
+    glColor3f(0.0,0.0,1.0);
+    glVertex3f(MetaMatrix[i][j][12], MetaMatrix[i][j][13], MetaMatrix[i][j][14]);
+    glVertex3f(MetaMatrix[i][j][12] + s*MetaMatrix[i][j][8], MetaMatrix[i][j][13] + s*MetaMatrix[i][j][9], MetaMatrix[i][j][14] + s*MetaMatrix[i][j][10]);
+
+    glEnd();
+  }
+  
+}
+
 void setup_camera() {
 
   // The camera projection is represented in OpenGL by the ModelView matrix
@@ -748,6 +778,10 @@ void DisplayItFunc(GLenum mode, bool interruptable)
   if (show_path == 1) {
     DrawPath();
   }
+  // if show poses is true then draw coordinate axes.
+  if (show_poses == 1) {
+    DrawCoordinateSystems();
+  }
   DrawObjects(mode);
   
   // if show points is true the draw points
@@ -928,7 +962,7 @@ void setView(double pos[3], double new_quat[4],
              double newMouseRotX, double newMouseRotY, double newMouseRotZ, 
              double newCangle,
              bool sTV, bool cNMM, double pzoom_new, 
-             bool s_points, bool s_path, bool s_cameras, double ps, int
+             bool s_points, bool s_path, bool s_cameras, bool s_poses, double ps, int
              sf, double fD, bool inv)
 {
   X = pos[0];
@@ -949,6 +983,7 @@ void setView(double pos[3], double new_quat[4],
   show_points = s_points;
   show_path = s_path;
   show_cameras = s_cameras;
+  show_poses = s_poses;
   pointsize = ps;
   show_fog = sf;
   fogDensity = fD;

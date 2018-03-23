@@ -213,6 +213,7 @@ void newMenu()
   glui1->add_checkbox("Draw Points", &show_points);
   glui1->add_checkbox("Draw Camera", &show_cameras);
   glui1->add_checkbox("Draw Path", &show_path);
+  glui1->add_checkbox("Draw Poses", &show_poses);
   ps_spinner = glui1->add_spinner("Point Size:", GLUI_SPINNER_FLOAT, &pointsize);
   ps_spinner->set_float_limits(0.0000001, 10.0);
   ps_spinner->set_speed(25.0);
