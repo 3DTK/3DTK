@@ -120,6 +120,11 @@ int show_cameras         = 1;             // Show the camera boxes in the viewer
 int show_path            = 1;             // Show the camera movement path ?
 
 /**
+ * Indicates if scan poses should be shown
+ */
+int show_poses           = 1;            // Show the coordinate axes of the poses ?
+
+/**
  * Camera navigation by mouse or by panel
  */
 int cameraNavMouseMode  = 1;

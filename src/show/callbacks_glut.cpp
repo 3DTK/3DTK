@@ -130,6 +130,7 @@ void idle(void) {
       // hide both the cameras and the path
       show_cameras = 0;
       show_path = 0;
+      show_poses = 0;
       // increase the iteration count
 
       path_iterator += 1;
@@ -149,6 +150,7 @@ void idle(void) {
       cameraNavMouseMode = oldcamNavMode;
       show_cameras = 1;
       show_path = 1;
+      show_poses = 1;
       haveToUpdate = 0;
     }
   }

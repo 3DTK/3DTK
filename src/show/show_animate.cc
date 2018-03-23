@@ -248,6 +248,7 @@ void loadPose(int dummy) {
   bool show_path;
   bool show_points;
   bool show_cameras;
+  bool show_poses;
   double pointsize;
   int show_fog;
   double fogDensity;
@@ -284,7 +285,7 @@ void loadPose(int dummy) {
   
   setView(euler, quat, mouseRotX, mouseRotY, mouseRotZ, cangle, showTopView,
           cameraNavMouseMode, pzoom, show_points, show_path, show_cameras,
-          pointsize, show_fog, fogDensity, invert);
+          show_poses, pointsize, show_fog, fogDensity, invert);
   
   poseFile.clear();
   poseFile.close();
