@@ -64,9 +64,9 @@ bool ScanDataTransform_xyz::transform(double xyz[3], unsigned char rgb[3], float
 {
     double tmp;
     tmp = xyz[2];
-    xyz[2] = xyz[0];
-    xyz[0] = -xyz[1];
-    xyz[1] = tmp;
+    xyz[2] = 100.0*xyz[0];
+    xyz[0] = -100.0*xyz[1];
+    xyz[1] = 100.0*tmp;
 
     return true;
 }

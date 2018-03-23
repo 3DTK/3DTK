@@ -159,8 +159,15 @@ int main(int argc, char **argv)
  
   //No reduction for now
   int red = 0;
-  
-  FILE *redptsout = fopen("points.utm", "w");
+ 
+  char filename[255];
+#ifndef _MSC_VER
+    snprintf(filename,255,"%spoints.utm",dir.c_str());
+# else
+    sprintf(filename,255,"%spoints.utm",dir.c_str());
+#endif
+
+  FILE *redptsout = fopen(filename, "w");
   
   for(unsigned int i = 0; i < Scan::allScans.size(); i++) {
     Scan *source = Scan::allScans[i];
@@ -169,7 +176,6 @@ int main(int argc, char **argv)
     DataXYZ xyz  = source->get("xyz" + red_string);
     
     ECEFtoUTM(xyz);
-    write_uos(xyz, redptsout, hexfloat, high_precision);
      
     if(use_reflectance) {
       DataReflectance xyz_reflectance = 

@@ -183,6 +183,11 @@ extern int show_cameras;             // Show the camera boxes in the viewer?
 extern int show_path;             // Show the camera movement path ?
 
 /**
+ * Indicates if scan poses should be shown
+ */
+extern int show_poses;            // Show the coordinate axes of the poses ?
+
+/**
  * Camera navigation by mouse or by panel
  */
 extern int cameraNavMouseMode;

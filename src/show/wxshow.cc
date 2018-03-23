@@ -60,6 +60,16 @@ class SelectionImpl : public Selection {
       haveToUpdate = 1;
       event.Skip(); 
     }
+		virtual void OnDrawPoses( wxCommandEvent& event )
+    {
+      if (event.IsChecked()) {
+        show_poses = true;
+      } else {
+        show_poses = false;
+      }
+      haveToUpdate = 1;
+      event.Skip(); 
+    }
 		virtual void OnPointSize( wxSpinEvent& event ) 
     { 
       pointsize = event.GetPosition();
