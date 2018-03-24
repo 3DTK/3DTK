@@ -1,10 +1,13 @@
 #define BOOST_TEST_DYN_LINK
 #define BOOST_TEST_MODULE scanio
 #include <boost/test/unit_test.hpp>
+#include <boost/test/floating_point_comparison.hpp>
 
 #include <slam6d/io_types.h>
 #include <slam6d/globals.icc>
 #include <slam6d/scan.h>
+
+#define TOLERANCE 0.0000000000001
 
 BOOST_AUTO_TEST_CASE(readscans) {
     auto argv = boost::unit_test::framework::master_test_suite().argv;
@@ -67,9 +70,11 @@ BOOST_AUTO_TEST_CASE(readscans_xyz) {
     BOOST_CHECK(xyz.size() == 20472);
     // check whether the values of the first point of each scan are the ones
     // they should be
-    BOOST_CHECK(xyz[0][0] == -0.850651);
-    BOOST_CHECK(xyz[0][1] == 0);
-    BOOST_CHECK(xyz[0][2] == -0.525731);
+    // the xyz scanio reader multiplies the input with 100 to convert from
+    // meter to cm. This introduces small floating point inaccuracies.
+    BOOST_CHECK_CLOSE(xyz[0][0], -0.850651, TOLERANCE);
+    BOOST_CHECK_CLOSE(xyz[0][1], 0, TOLERANCE);
+    BOOST_CHECK_CLOSE(xyz[0][2], -0.525731, TOLERANCE);
 
     Scan::closeDirectory();
 }
