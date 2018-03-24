@@ -82,7 +82,7 @@ int main(int argc, char* argv[])
 	std::ofstream out_xyz("scan000.xyz");
 	for (auto& p: points) {
 		out_uos << std::get<0>(p) << " " << std::get<1>(p) << " " << std::get<2>(p) << std::endl;
-		out_xyz << std::get<0>(p) << " " << std::get<1>(p) << " " << std::get<2>(p) << std::endl;
+		out_xyz << std::get<0>(p)/100.0 << " " << std::get<1>(p)/100.0 << " " << std::get<2>(p)/100.0 << std::endl;
 	}
 	out_xyz.close();
 	std::ofstream out_frames("scan000.frames");
