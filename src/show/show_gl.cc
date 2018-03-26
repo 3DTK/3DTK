@@ -479,21 +479,40 @@ void DrawScala() {
 }
 
 void DrawCoordinateSystems() {
-  
   for(int i = 0; (unsigned int)i < MetaMatrix.size(); i++){
-    //if valid show coordinate system of current frame
-    unsigned int j = frameNr;
-    if(j >= MetaMatrix[i].size()) j = MetaMatrix[i].size() - 1;
-    if(frameNr == 0) {
-      j = MetaMatrix[i].size() - 1;
-    } else if(MetaAlgoType[i][j] == Scan::INVALID) {
-      continue;
+    unsigned int j = MetaMatrix.size() - 1;
+    // also ignore scans outside the selected range - if in advanced mode
+    if (advanced_controls){
+      // pay attention to offset (startScanIdx)
+      if (i < startRangeScanIdx - startScanIdx) continue;
+      if (i > endRangeScanIdx - startScanIdx) continue;
     }
-
+    // set usable type
+    Scan::AlgoType type;
+    if((unsigned int)frameNr >= MetaMatrix[i].size()) {
+      type = MetaAlgoType[i].back();
+    } else {
+      type = MetaAlgoType[i][frameNr];
+    }
+    if(frameNr >= 1 && frameNr < (int)MetaMatrix[i].size()) {
+      if(type == Scan::INVALID) continue;
+      // avoid incomplete frames in a scan
+      if((unsigned int)frameNr >= MetaMatrix[i].size())
+        j = MetaMatrix.size() - 1;
+      else
+        j = frameNr;
+    } else {
+      // avoid incomplete frames in a scan
+      if((unsigned int)current_frame >= MetaMatrix[i].size()) {
+        j = MetaMatrix.size() - 1;
+      } else {
+        j = current_frame;
+      }
+    }
     glColor3f(1.0, 0.3, 0.3);
     glLineWidth(5.0);
     glBegin(GL_LINES);
-    
+
     float s = 10.0*MetaMatrix[i][j][15];
     glColor3f(1,0.0,0.0);
     glVertex3f(MetaMatrix[i][j][12], MetaMatrix[i][j][13], MetaMatrix[i][j][14]);
@@ -507,7 +526,6 @@ void DrawCoordinateSystems() {
 
     glEnd();
   }
-  
 }
 
 void setup_camera() {
