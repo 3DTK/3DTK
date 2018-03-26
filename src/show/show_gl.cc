@@ -484,7 +484,9 @@ void DrawCoordinateSystems() {
     //if valid show coordinate system of current frame
     unsigned int j = frameNr;
     if(j >= MetaMatrix[i].size()) j = MetaMatrix[i].size() - 1;
-    if(frameNr != 0 && MetaAlgoType[i][j] == Scan::INVALID) {
+    if(frameNr == 0) {
+      j = MetaMatrix[i].size() - 1;
+    } else if(MetaAlgoType[i][j] == Scan::INVALID) {
       continue;
     }
 
