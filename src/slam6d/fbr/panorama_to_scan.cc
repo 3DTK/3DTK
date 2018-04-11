@@ -458,7 +458,8 @@ int main(int argc, char** argv)
   ofstream os(info.outputDir + outputScanName + ".3d");
 
   //get the color map and add it to unordered map
-  vector<unsigned int> colorMapVector = getAllRGBSortedByHSL();
+  //vector<unsigned int> colorMapVector = getAllRGBSortedByHSL();
+  vector<unsigned int> colorMapVector = getAllRGBSortedByRGB();
   std::unordered_map<unsigned int, unsigned int> colorMap;
   for(unsigned int c = 0; c < colorMapVector.size(); c++)
     {
