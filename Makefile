@@ -11,7 +11,11 @@ config: .build
 	touch .configured
 
 .configured: .build
-	cmake -H. -B.build
+ifeq ($(CMAKE_GENERATOR),Ninja)
+	cmake -H. -B.build -G "Ninja"
+else
+	cmake -H. -B.build -G "Unix Makefiles"
+endif
 	touch .configured
 
 .build:
