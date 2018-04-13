@@ -1,16 +1,10 @@
-#MAKEFLAGS += -j
-
-ifeq ($(MAKE),)
-	MAKE=make
-endif
-
 all: .configured
-	$(MAKE) -C.build --no-print-directory
+	cmake --build .build
 
 .PHONY: test
 test:
 	cmake -H. -B.build
-	CTEST_OUTPUT_ON_FAILURE=true $(MAKE) -C.build test
+	CTEST_OUTPUT_ON_FAILURE=true cmake --build .build --target test
 
 config: .build
 	ccmake -H. -B.build
@@ -24,7 +18,7 @@ config: .build
 	mkdir -p .build
 
 clean: .build
-	$(MAKE) clean -C.build --no-print-directory
+	cmake --build .build --target clean
 	-rm -rf .build
 	rm -f .configured
 
