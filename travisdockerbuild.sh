@@ -84,6 +84,6 @@ apt-get install --yes --no-install-recommends --fix-broken -o Debug::pkgProblemR
 echo "travis_fold:end:docker_setup"
 mkdir .build
 cmake -H. -B.build $CMAKEOPTS -G "Ninja"
-make
-make test
+cmake --build .build
+CTEST_OUTPUT_ON_FAILURE=true cmake --build .build --target test
 EOF
