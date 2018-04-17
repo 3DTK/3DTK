@@ -10,7 +10,7 @@
 #include <iostream>
 //class Curves;
 #include <Eigen/Dense>
-#include <bits/stringfwd.h>
+//#include <bits/stringfwd.h>
 //#include <unsupported/Eigen/MatrixFunctions>
 using namespace std;
 using namespace Eigen;
