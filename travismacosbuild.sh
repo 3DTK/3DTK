@@ -15,10 +15,10 @@ echo "travis_fold:end:brew_install"
 #configure and make 3dtk
 echo "travis_fold:start:configure_3dtk"
 	mkdir .build
-	cmake -H. -B.build -DWITH_PYTHON=OFF -DWITH_OPENMP=OFF -DWITH_FTGL=OFF
+	cmake -H. -B.build -DWITH_PYTHON=OFF -DWITH_OPENMP=OFF -DWITH_FTGL=OFF $CMAKEOPTS -G "Ninja"
 echo "travis_fold:end:configure_3dtk"
 
 # build 3dtk
 echo "travis_fold:start:build_3dtk"
-	make
+	cmake --build .build
 echo "travis_fold:end:build_3dtk"

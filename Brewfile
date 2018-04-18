@@ -1,6 +1,7 @@
 tap "brewsci/science"
 cask "xquartz"
 brew "cmake"
+brew "ninja"
 brew "boost"
 brew "libzip"
 brew "opencv3"
