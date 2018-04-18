@@ -64,8 +64,8 @@ $ brew update
 $ brew bundle
 $ export PATH="/usr/local/opt/qt/bin:$PATH"
 $ mkdir .build
-$ cmake -H. -B.build -DWITH_PYTHON=OFF -DWITH_OPENMP=OFF -DWITH_FTGL=OFF
-$ make
+$ cmake -H. -B.build -DWITH_PYTHON=OFF -DWITH_OPENMP=OFF -DWITH_FTGL=OFF $CMAKEOPTS -G "Ninja"
+$ cmake --build .build
 ```
 
 
