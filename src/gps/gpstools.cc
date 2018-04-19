@@ -31,8 +31,8 @@ void LLAtoECEF(double latitude, double longitude, double altitude, double& cx, d
   */
 void ECEFtoLLA(double cx, double cy, double cz, double& latitude, double& longitude, double& altitude) {
   double x, y, z;
-  x = cz * 0.01;
-  y = cx * -0.01;
+  x = cz * -0.01;
+  y = cx * 0.01;
   z = cy * 0.01;
   
   //from ECEF to WGS84
