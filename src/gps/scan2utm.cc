@@ -16,14 +16,16 @@
 #include <iostream>
 #include <fstream>
 
-#include "slam6d/scan.h"
+
+
+
 #include "gps/gps.h"
 #include "scanio/writer.h"
+//#include "slam6d/io_utils.h"
+//#include "slam6d/scan.h"
 
 #ifndef _MSC_VER
 #include <getopt.h>
-#else
-#include "XGetopt.h"
 #endif
 
 #ifdef _MSC_VER
@@ -32,6 +34,12 @@
 #else
 #include <strings.h>
 #endif
+
+//#include <boost/regex.hpp>
+#include <boost/program_options.hpp>
+namespace po = boost::program_options;
+
+using namespace std;
 
 void usage(char* prog)
 {
@@ -50,65 +58,63 @@ void usage(char* prog)
   exit(1);
 }
 
-int parseArgs(int argc, char **argv, std::string &dir, IOType &type, int &start, int &end, bool &use_color, bool &use_reflectance) {
-  int  c;
-  // from unistd.h:
-  extern char *optarg;
-  extern int optind;
+int parse_options(int argc, char **argv, std::string &dir, IOType &iotype, int &start, int &end, bool &use_color, bool &use_reflectance) {
 
-  /* options descriptor */
-  // 0: no arguments, 1: required argument, 2: optional argument
-  static struct option longopts[] = {
-    { "format",          required_argument,   0,  'f' },  
-    { "start",           required_argument,   0,  's' },
-    { "end",             required_argument,   0,  'e' },
-    { "reflectance",     no_argument,         0,  'R' },
-    { "color",           no_argument,         0,  'c' },
-    { "reflectivity",    no_argument,         0,  'R' },
-    { "help",            no_argument,         0,  'h' },
-    { 0,           0,   0,   0}                    // needed, cf. getopt.h
-  };
+  po::options_description generic("Generic options");
+  generic.add_options()
+    ("help,h", "output this help message");
+
+  po::options_description input("Input options");
+
+  input.add_options()
+    ("start,s", po::value<int>(&start)->default_value(0),
+     "start at scan <arg> (i.e., neglects the first <arg> scans) "
+     "[ATTENTION: counting naturally starts with 0]")
+    ("end,e", po::value<int>(&end)->default_value(-1),
+     "end after scan <arg>")
+/*
+    ("format,f", po::value<IOType>(&iotype)->default_value(UOS, "uos"),
+     "using shared library <arg> for input. (chose F from {uos, uos_map, "
+     "uos_rgb, uos_frames, uos_map_frames, old, rts, rts_map, ifp, "
+     "riegl_txt, riegl_rgb, riegl_bin, zahn, ply, las})")
+*/
+    ("color,c", po::bool_switch(&use_color)->default_value(false),
+     "end after scan <arg>")
+    ("reflectance,R", po::bool_switch(&use_reflectance)->default_value(false),
+     "end after scan <arg>");
+
+  po::options_description hidden("Hidden options");
+  hidden.add_options()
+    ("input-dir", po::value<std::string>(&dir), "input dir");
+
   
-  int option_index = 0;
-  while ((c = getopt_long(argc, argv, "f:s:e:cRh", longopts, &option_index)) != -1)
-    switch (c)
-     {
-       case 'R':
-	    use_reflectance = true; 
-       break;
-	  case 'c':
-	    use_color = true;
-	    break;
-     case 's':
-       start = atoi(optarg);
-       if (start < 0) { std::cerr << "Error: Cannot start at a negative scan number.\n"; exit(1); }
-       break;
-     case 'e':
-       end = atoi(optarg);
-       if (end < 0)     { std::cerr << "Error: Cannot end at a negative scan number.\n"; exit(1); }
-       if (end < start) { std::cerr << "Error: <end> cannot be smaller than <start>.\n"; exit(1); }
-       break;
-     case 'f':
-    try {
-      type = formatname_to_io_type(optarg);
-    } catch (...) { // runtime_error
-      std::cerr << "Format " << optarg << " unknown." << std::endl;
-      abort();
-    }
-    break;
-      case 'h':
-      case '?':
-       usage(argv[0]);
-       return 1;
-      default:
-       abort ();
-      }
+    // all options
+  po::options_description all;
+  all.add(generic).add(input).add(hidden);
 
-  if (optind != argc-1) {
-    std::cerr << "\n*** Directory missing ***" << std::endl;
-    usage(argv[0]);
+  // options visible with --help
+  po::options_description cmdline_options;
+  cmdline_options.add(generic).add(input);
+
+  // positional argument
+  po::positional_options_description pd;
+  pd.add("input-dir", 1);
+
+  // process options
+  po::variables_map vm;
+  po::store(po::command_line_parser(argc, argv).
+            options(all).positional(pd).run(), vm);
+
+  // display help
+  if (vm.count("help")) {
+    std::cout << cmdline_options;
+    std::cout << std::endl
+         << "Example usage:" << std::endl
+         << "\t./bin/scan_red -s 0 -e 0 -f uos --reduction OCTREE --voxel 10 --octree 0 dat"
+         << std::endl;
+    exit(0);
   }
-  dir = argv[optind];
+  po::notify(vm);
 
 #ifndef _MSC_VER
   if (dir[dir.length()-1] != '/') dir = dir + "/";
@@ -144,7 +150,7 @@ int main(int argc, char **argv)
   bool high_precision = false;
   bool hexfloat = false;
 
-  parseArgs(argc, argv, dir, iotype, start, end, use_color, use_reflectance);
+  parse_options(argc, argv, dir, iotype, start, end, use_color, use_reflectance);
   
   Scan::openDirectory(false, dir, iotype, start, end);
   

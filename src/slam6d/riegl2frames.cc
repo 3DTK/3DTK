@@ -12,65 +12,74 @@
 using std::cout;
 using std::cerr;
 using std::endl;
+using std::string;
 using std::ifstream;
 using std::ofstream;
 
-//#include "scan.h"
+#include "slam6d/scan.h"
 #include "slam6d/globals.icc"
 #include <string.h>
 
 #ifndef _MSC_VER
 #include <unistd.h>
-#else
-#include "XGetopt.h"
 #endif
 
 #if WIN32
 #define snprintf sprintf_s
 #endif 
 
-int parseArgs(int argc,char **argv, char dir[255], int& start, int& end){
-  start   = 0;
-  end     = -1; // -1 indicates no limitation
+#include <boost/program_options.hpp>
+namespace po = boost::program_options;
 
-  int  c;
-  // from unistd.h
-  extern char *optarg;
-  extern int optind;
+int parse_options(int argc,char **argv, std::string &dir, int& start, int& end){
 
-  cout << endl;
-  while ((c = getopt (argc, argv, "s:e:")) != -1)
-    switch (c)
-   {
-   case 's':
-     start = atoi(optarg);
-     if (start < 0) { cerr << "Error: Cannot start at a negative scan number.\n"; exit(1); }
-     break;
-   case 'e':
-     end = atoi(optarg);
-     if (end < 0)     { cerr << "Error: Cannot end at a negative scan number.\n"; exit(1); }
-     if (end < start) { cerr << "Error: <end> cannot be smaller than <start>.\n"; exit(1); }
-     break;
-   }
+  po::options_description generic("Generic options");
+  generic.add_options()
+    ("help,h", "output this help message");
 
-  if (optind != argc-1) {
-    cerr << "\n*** Directory missing ***\n" << endl; 
-    cout << endl
-	  << "Usage: " << argv[0] << "  [-s NR] [-e NR] directory" << endl << endl;
+  po::options_description input("Input options");
+  input.add_options()
+    ("start,s", po::value<int>(&start)->default_value(0),
+     "start at scan <arg> (i.e., neglects the first <arg> scans) "
+     "[ATTENTION: counting naturally starts with 0]")
+    ("end,e", po::value<int>(&end)->default_value(-1),
+     "end after scan <arg>");
 
-    cout << "  -s NR   start at scan NR (i.e., neglects the first NR scans)" << endl
-       << "          [ATTENTION: counting starts with 0]" << endl
-	  << "  -e NR   end after scan NR" << "" << endl
-	  << endl;
-    cout << "Reads dat files (RIEGL pose files) from directory/scan???.dat and converts them to directory/scan???.frames and directory/scan???.pose in the slam6D standard file format." << endl;
-    abort();
+  po::options_description hidden("Hidden options");
+  hidden.add_options()
+    ("input-dir", po::value<std::string>(&dir), "input dir");
+
+  // all options
+  po::options_description all;
+  all.add(generic).add(input).add(hidden);
+
+  // options visible with --help
+  po::options_description cmdline_options;
+  cmdline_options.add(generic).add(input);
+
+  // positional argument
+  po::positional_options_description pd;
+  pd.add("input-dir", 1);
+
+  // process options
+  po::variables_map vm;
+  po::store(po::command_line_parser(argc, argv).
+            options(all).positional(pd).run(), vm);
+
+  // display help
+  if (vm.count("help")) {
+    std::cout << cmdline_options;
+    std::cout << std::endl
+         << "Example usage:" << std::endl
+         << "\t./bin/riegl2frames -s 0 -e 1 /Your/directory" << std::endl;
+    exit(0);
   }
-  strncpy(dir,argv[optind],255);
+  po::notify(vm);
 
 #ifndef _MSC_VER
-  if (dir[strlen(dir)-1] != '/') strcat(dir,"/");
+  if (dir[dir.length()-1] != '/') dir = dir + "/";
 #else
-  if (dir[strlen(dir)-1] != '\\') strcat(dir,"\\");
+  if (dir[dir.length()-1] != '\\') dir = dir + "\\";
 #endif
   return 0;
 }
@@ -79,10 +88,10 @@ int parseArgs(int argc,char **argv, char dir[255], int& start, int& end){
 int main(int argc, char **argv)
 {
   int start = 0, end = -1;
-  char dir[255];
-  parseArgs(argc, argv, dir, start, end);
+  string dir;
+  parse_options(argc, argv, dir, start, end);
+  
   int fileCounter = start; 
- 
   char rieglFileName[255];
   char poseFileName[255];
   char frameFileName[255];
@@ -93,16 +102,16 @@ int main(int argc, char **argv)
   
   for(;;) { 
     if (end > -1 && fileCounter > end) break; // 'nuf read
-  
-    snprintf(rieglFileName,255,"%sscan%.3d.dat",dir,fileCounter);
-    snprintf(frameFileName,255,"%sscan%.3d.frames",dir,fileCounter);
-    snprintf(poseFileName,255,"%sscan%.3d.pose",dir,fileCounter++);
+
+    snprintf(rieglFileName,255,"%sscan%.3d.dat",dir.c_str(),fileCounter);
+    snprintf(frameFileName,255,"%sscan%.3d.frames",dir.c_str(),fileCounter);
+    snprintf(poseFileName,255,"%sscan%.3d.pose",dir.c_str(),fileCounter++);
     
     riegl_in.open(rieglFileName);
     // read pose
 
     if (!riegl_in.good()) return -1; // no more files in the directory
-  
+
     cout << "Processing Scan " << rieglFileName;
     cout.flush();
   
@@ -129,7 +138,7 @@ int main(int argc, char **argv)
     tMatrix[13] = 100*inMatrix[11];
     tMatrix[14] = 100*inMatrix[3];
     tMatrix[15] = inMatrix[15];
-  
+ 
     Matrix4ToEuler(tMatrix, rPosTheta, rPos);
     
     double euler[6];
