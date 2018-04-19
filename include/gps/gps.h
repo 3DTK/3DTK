@@ -5,7 +5,11 @@
  */
 #ifndef GPS_H
 #define GPS_H
-#include "slam6d/scan.h"
+
+#include "slam6d/globals.icc"
+#include "slam6d/data_types.h"
+
+using std::sqrt;
 
 namespace gps {
   const double A = 6378137.0;

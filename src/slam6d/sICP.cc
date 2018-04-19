@@ -40,12 +40,6 @@ using std::ifstream;
 #include "slam6d/icp6D.h"
 #include "slam6d/globals.icc"
 
-#ifndef _MSC_VER
-#include <getopt.h>
-#else
-#include "XGetopt.h"
-#endif
-
 #include <csignal>
 
 #ifdef _MSC_VER
@@ -55,42 +49,56 @@ using std::ifstream;
 #include <strings.h>
 #endif
 
-int parseArgs(int argc,char **argv, char global[255], char local[255], char out[255], bool& scale, int& count){
-  int  c;
-  // from unistd.h
-  extern char *optarg;
-  extern int optind;
-  
-  static struct option longopts[] = {
-    { "global",          required_argument,   0,  'g' },  
-    { "local",           required_argument,   0,  'l' },
-    { "out",             required_argument,   0,  'o' },
-    { "scale",           no_argument,         0,  'S' },
-    { "nrpoints",        required_argument,   0,  'n' },
-    { 0,           0,   0,   0}                    // needed, cf. getopt.h
-  };
+#include <boost/program_options.hpp>
+namespace po = boost::program_options;
 
-  cout << endl;
-  while ((c = getopt (argc, argv, "gloSn:")) != -1)
-    switch (c) {
-      case 'n':
-        count = atoi(optarg);
-        if (count < 1) { cerr << "Error: Cannot have a negative number of correspondences.\n"; exit(1); }
-        break;
-      case 'S':
-        scale = true;
-        break;
-      case 'o':
-        strncpy(out,argv[optind],255);
-        break;
-      case 'g':
-        strncpy(global,argv[optind],255);
-        break;
-      case 'l':
-        strncpy(local,argv[optind],255);
-        break;
-    }
-  return 0;
+void parse_options(int argc,char **argv, string& global, string& local, string& out, bool& scale, int& count){
+
+  po::options_description generic("Generic options");
+  generic.add_options()
+    ("help,h", "output this help message");
+
+  po::options_description input("Input options");
+  input.add_options()
+    ("global,g", po::value<string>(&global)->default_value("global.dat"),
+    "global (target) points are given in 'FILE'")
+    ("local,l", po::value<string>(&local)->default_value("local.dat"),
+    "local (source) points are given in 'FILE'")
+    ("out,o", po::value<string>(&out)->default_value("out.dat"),
+    "store transformation in 'FILE'")
+    ("scale,S", po::bool_switch(&scale)->default_value(false),
+    "use ICP with scale'")
+    ("nrpoints,n", po::value<int>(&count)->default_value(0),
+    "use first NR correspondences'");
+
+  // all options
+  po::options_description all;
+  all.add(generic).add(input);
+
+  // options visible with --help
+  po::options_description cmdline_options;
+  cmdline_options.add(generic).add(input);
+
+  // positional argument
+  po::positional_options_description pd;
+  pd.add("input-dir", 1);
+
+  // process options
+  po::variables_map vm;
+  po::store(po::command_line_parser(argc, argv).
+            options(all).positional(pd).run(), vm);
+
+  // display help
+  if (vm.count("help")) {
+    std::cout << cmdline_options;
+    std::cout << std::endl
+         << "Example usage:" << std::endl
+         << "\t./bin/pose2frames -s 0 -e 1 /Your/directory" << std::endl;
+    exit(0);
+  }
+  po::notify(vm);
+
+
 }
       
 void usage(char* prog)
@@ -132,13 +140,13 @@ void usage(char* prog)
  */
 int main(int argc, char **argv)
 {
-  char global[255];
-  char local[255];
-  char out[255];
+  string global;
+  string local;
+  string out;
   bool scale = false;
   int nr_pts = 0;
 
-  parseArgs(argc, argv, global, local, out, scale, nr_pts);
+  parse_options(argc, argv, global, local, out, scale, nr_pts);
   
   if(nr_pts < 3) {
     cerr << "Cannot work with less than 3 correspondences!";
@@ -146,8 +154,8 @@ int main(int argc, char **argv)
     abort();
   }
 
-  ifstream fileg(global);
-  ifstream filel(local);
+  ifstream fileg(global.c_str());
+  ifstream filel(local.c_str());
   
   if(!fileg.is_open()) {
     cerr << global << " not found!" << endl;
@@ -202,7 +210,7 @@ int main(int argc, char **argv)
     
   fileg.close();
   filel.close();
-  ofstream output(out);
+  ofstream output(out.c_str());
   if(!output.is_open())
   {
     cout << out << " not found!" << endl;

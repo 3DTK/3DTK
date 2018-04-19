@@ -5,7 +5,7 @@
  */
 
 #include "gps/gps.h"
-#include "slam6d/globals.icc"
+
 #include <fstream>
 #include <iostream>
 
