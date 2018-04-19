@@ -16,13 +16,8 @@
 #include <iostream>
 #include <fstream>
 
-
-
-
 #include "gps/gps.h"
 #include "scanio/writer.h"
-//#include "slam6d/io_utils.h"
-//#include "slam6d/scan.h"
 
 #ifndef _MSC_VER
 #include <getopt.h>
@@ -35,7 +30,7 @@
 #include <strings.h>
 #endif
 
-//#include <boost/regex.hpp>
+
 #include <boost/program_options.hpp>
 namespace po = boost::program_options;
 
@@ -58,6 +53,21 @@ void usage(char* prog)
   exit(1);
 }
 
+/*
+ * validates input type specification
+ */
+void validate(boost::any& v, const std::vector<std::string>& values,
+              IOType*, int) {
+  if (values.size() == 0)
+    throw std::runtime_error("Invalid model specification");
+  std::string arg = values.at(0);
+  try {
+    v = formatname_to_io_type(arg.c_str());
+  } catch (...) { // runtime_error
+    throw std::runtime_error("Format " + arg + " unknown.");
+  }
+}
+
 int parse_options(int argc, char **argv, std::string &dir, IOType &iotype, int &start, int &end, bool &use_color, bool &use_reflectance) {
 
   po::options_description generic("Generic options");
@@ -72,12 +82,10 @@ int parse_options(int argc, char **argv, std::string &dir, IOType &iotype, int &
      "[ATTENTION: counting naturally starts with 0]")
     ("end,e", po::value<int>(&end)->default_value(-1),
      "end after scan <arg>")
-/*
     ("format,f", po::value<IOType>(&iotype)->default_value(UOS, "uos"),
      "using shared library <arg> for input. (chose F from {uos, uos_map, "
      "uos_rgb, uos_frames, uos_map_frames, old, rts, rts_map, ifp, "
      "riegl_txt, riegl_rgb, riegl_bin, zahn, ply, las})")
-*/
     ("color,c", po::bool_switch(&use_color)->default_value(false),
      "end after scan <arg>")
     ("reflectance,R", po::bool_switch(&use_reflectance)->default_value(false),
