@@ -99,6 +99,7 @@ void ECEFtoUTM(double cx, double cy, double cz, double& east, double& height, do
   LLAtoUTM(latitude, longitude, altitude, east, height, north);
 }
 
+
 /**
   * Conversion from left-handed ECEF in cm to
   * to UTM in m (East, Height, North)
