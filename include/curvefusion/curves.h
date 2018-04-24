@@ -12,7 +12,7 @@
 #include <Eigen/Dense>
 #include <Eigen/Core>
 #include <Eigen/SVD>
-#include <bits/stringfwd.h>
+//#include <bits/stringfwd.h> // !do not include directly!
 //#include <unsupported/Eigen/MatrixFunctions>
 using namespace std;
 using namespace Eigen;
