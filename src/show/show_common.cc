@@ -207,6 +207,7 @@ int START_HEIGHT         = 540;
 // Current aspect ratio
 GLdouble aspect          = (double)START_WIDTH/(double)START_HEIGHT;  
 bool advanced_controls = false;
+bool invertMouseX = false, invertMouseY = false;
 bool anim_convert_jpg  = true;
 
 bool fullscreen    = false;
@@ -552,6 +553,8 @@ void copy_settings_to_globals(
   current_width  = START_WIDTH;
   current_height = START_HEIGHT;
   advanced_controls = ws.advanced_controls;
+  invertMouseX = ws.invert_mouse_x;
+  invertMouseY = ws.invert_mouse_y;
 
   scale = ds.scale;
   cangle = ds.camera.fov;
