@@ -252,6 +252,9 @@ void mouseMove(int x, int y) {
 }
 
 void mouseMoveDelta(int deltaMouseX, int deltaMouseY) {
+  if (invertMouseX) deltaMouseX = -deltaMouseX;
+  if (invertMouseY) deltaMouseY = -deltaMouseY;
+
   if (mouseNavButton == GLUT_RIGHT_BUTTON) {
     if (showTopView) {
       deltaMouseX *= 5;
