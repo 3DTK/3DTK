@@ -61,6 +61,8 @@ protected:
   void resizeGL(int w, int h);
   void paintGL();
 
+  bool eventFilter(QObject *watched, QEvent *event);
+
   void mousePressEvent(QMouseEvent *event);
   void mouseReleaseEvent(QMouseEvent *event);
   void mouseMoveEvent(QMouseEvent *event);
