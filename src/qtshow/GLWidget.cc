@@ -9,6 +9,8 @@
 #else
   #include <GL/glu.h>
 #endif
+
+#include <QApplication>
 #include <Qt>
 #include <QFileDialog>
 
@@ -54,28 +56,41 @@ void GLWidget::paintGL() {
   DisplayItFunc(GL_RENDER, false);
 }
 
-void GLWidget::setFullscreen(bool fullscreenWanted) {
-  // TODO make only this widget fullscreen
-  QWidget *grandparent = parentWidget()->parentWidget();
-  if (fullscreenWanted) {
-    grandparent->showFullScreen();
-  } else {
-    grandparent->showNormal();
+bool GLWidget::eventFilter(QObject *watched, QEvent *event) {
+  if (watched != this && event->type() == QEvent::Shortcut) {
+    // This alleviates the problem. However, you can only use
+    // Alt+A, Alt+S right now.
+    // TODO make the GLWidget work with Alt+W, Alt+D
+    return true;
   }
-  fullscreen = grandparent->isFullScreen();
+  // Call parent class as is required
+  return QOpenGLWidget::eventFilter(watched, event);
 }
 
 void GLWidget::mousePressEvent(QMouseEvent *event) {
+  // Remember the cursor position, because we want to reset it every frame
   initialMousePos = mapToGlobal(event->pos());
   QPoint center(width() / 2, height() / 2);
   QCursor::setPos(mapToGlobal(center));
+
+  // Hide the cursor
   setCursor(Qt::BlankCursor);
+
+  // Take shortcuts away from the rest of the app.
+  // The main annoyance was Alt+W toggling "Draw Points".
+  qApp->installEventFilter(this);
 }
 
 void GLWidget::mouseReleaseEvent(QMouseEvent *event) {
   if (event->buttons() == 0) {
+    // Restore cursor position
     QCursor::setPos(initialMousePos);
+
+    // Show the cursor
     unsetCursor();
+
+    // Stop filtering events for the rest of the app
+    qApp->removeEventFilter(this);
   }
 }
 
@@ -104,7 +119,7 @@ void GLWidget::mouseMoveEvent(QMouseEvent *event) {
 
 void GLWidget::keyPressEvent(QKeyEvent *event) {
   bool ctrl  = (event->modifiers() & Qt::ControlModifier) != 0,
-       alt   = (event->modifiers() & Qt::AltModifier)     != 0, // TODO turn off keyboard hints
+       alt   = (event->modifiers() & Qt::AltModifier)     != 0,
        shift = (event->modifiers() & Qt::ShiftModifier)   != 0;
 
   // Translate the Qt keycodes inside event->key() to the keycodes
@@ -141,6 +156,17 @@ void GLWidget::keyPressEvent(QKeyEvent *event) {
   }
 
   update();
+}
+
+void GLWidget::setFullscreen(bool fullscreenWanted) {
+  // TODO make only this widget fullscreen
+  QWidget *grandparent = parentWidget()->parentWidget();
+  if (fullscreenWanted) {
+    grandparent->showFullScreen();
+  } else {
+    grandparent->showNormal();
+  }
+  fullscreen = grandparent->isFullScreen();
 }
 
 void GLWidget::setDrawPoints(bool drawPoints) {
