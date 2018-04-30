@@ -269,6 +269,7 @@ extern int START_HEIGHT;
 // Current aspect ratio
 extern GLdouble aspect;
 extern bool advanced_controls;
+extern bool invertMouseX, invertMouseY;
 extern bool anim_convert_jpg;
 
 extern bool fullscreen;

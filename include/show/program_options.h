@@ -132,6 +132,7 @@ struct window_settings {
   float max_fps;
   WindowDimensions dimensions;
   bool advanced_controls;
+  bool invert_mouse_x, invert_mouse_y;
   bool take_screenshot;
 };
 

@@ -22,6 +22,10 @@ void parse_args(int argc, char **argv, dataset_settings& ds, window_settings& ws
       "Window dimensions in WxH format.")
     ("advanced,2", bool_switch(&ws.advanced_controls),
       "Switch on advanced controls")
+    ("invertmousex", bool_switch(&ws.invert_mouse_x),
+      "Invert camera rotation for mouse x movement.")
+    ("invertmousey", bool_switch(&ws.invert_mouse_y),
+      "Invert camera rotation for mouse y movement.")
     ;
 
   options_description display_options("Display options");
