@@ -14,6 +14,7 @@ public:
   GLWidget(QWidget *parent = 0);
 
 public slots:
+  void setFullscreen(bool fullscreenWanted);
   void setDrawPoints(bool drawPoints);
   void setDrawCameras(bool drawCameras);
   void setDrawPath(bool drawPath);
@@ -70,6 +71,8 @@ protected:
 
 protected:
   QPoint initialMousePos;
+
+  bool fullscreen;
 
   int fogType;
   bool fogInverted;
