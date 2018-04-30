@@ -230,42 +230,49 @@ void mouseButton(int button, int state, int x, int y) {
   }
 }
 
+
 void quit() {
   // this gets called when window is closed without using the "Quit" button - ensure regular shutdown to avoid crash
   deinitShow();
 }
 
 void mouseMove(int x, int y) {
-  double deltaMouseX = x - mouseNavX;
-  double deltaMouseY = mouseNavY - y;
+  int deltaMouseX = mouseNavX - x,
+      deltaMouseY = mouseNavY - y;
+
+  // Save last position
   mouseNavX = x;
   mouseNavY = y;
 
   if (cameraNavMouseMode == 1) {
-    if (mouseNavButton == GLUT_RIGHT_BUTTON) {
-      if (showTopView) {
-        deltaMouseX *= 5;
-        deltaMouseY *= 5;
-      }
-      // moving 10 pixels is equivalent to one key stroke
-      deltaMouseX *= movementSpeed / 10.0;
-      deltaMouseY *= movementSpeed / 10.0;
-      moveCamera(deltaMouseX, deltaMouseY, 0, 0, 0, 0);
-    } else if (mouseNavButton == GLUT_MIDDLE_BUTTON) {
-      if (!showTopView) {
-        deltaMouseY *= -5;
-      }
-      // moving 10 pixels is equivalent to one key stroke
-      deltaMouseX *= movementSpeed / 10.0;
-      deltaMouseY *= movementSpeed / 10.0;
-      moveCamera(deltaMouseX, 0, deltaMouseY, 0, 0, 0);
-    } else if (mouseNavButton == GLUT_LEFT_BUTTON) {
-      moveCamera(0, 0, 0, deltaMouseY, deltaMouseX, 0);
-    } else {
-      return;
-    }
+    mouseMoveDelta(deltaMouseX, deltaMouseY);
   } else {
     selectPoints(x, y);
+  }
+}
+
+void mouseMoveDelta(int deltaMouseX, int deltaMouseY) {
+  if (mouseNavButton == GLUT_RIGHT_BUTTON) {
+    if (showTopView) {
+      deltaMouseX *= 5;
+      deltaMouseY *= 5;
+    }
+    // moving 10 pixels is equivalent to one key stroke
+    deltaMouseX *= movementSpeed / 10.0;
+    deltaMouseY *= movementSpeed / 10.0;
+    moveCamera(-deltaMouseX, deltaMouseY, 0, 0, 0, 0);
+  } else if (mouseNavButton == GLUT_MIDDLE_BUTTON) {
+    if (!showTopView) {
+      deltaMouseY *= -5;
+    }
+    // moving 10 pixels is equivalent to one key stroke
+    deltaMouseX *= movementSpeed / 10.0;
+    deltaMouseY *= movementSpeed / 10.0;
+    moveCamera(-deltaMouseX, 0, deltaMouseY, 0, 0, 0);
+  } else if (mouseNavButton == GLUT_LEFT_BUTTON) {
+    moveCamera(0, 0, 0, deltaMouseY, -deltaMouseX, 0);
+  } else {
+    return;
   }
 }
 
