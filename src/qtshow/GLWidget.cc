@@ -67,6 +67,23 @@ bool GLWidget::eventFilter(QObject *watched, QEvent *event) {
   return QOpenGLWidget::eventFilter(watched, event);
 }
 
+/** Processes a mouse event for the legacy parts of show. */
+void passMouseEvent(QMouseEvent *event, bool press) {
+  int button = -1;
+  // let's hope that GLUT never changes its button numbers
+  if (event->button() == Qt::LeftButton) {
+    button = 0; // GLUT_LEFT_BUTTON
+  } else if (event->button() == Qt::MiddleButton) {
+    button = 1; // GLUT_MIDDLE_BUTTON
+  } else if (event->button() == Qt::RightButton) {
+    button = 2; // GLUT_RIGHT_BUTTON
+  }
+
+  if (button != -1) {
+    callbacks::glut::mouseButton(button, press ? 0 : 1, event->x(), event->y());
+  }
+}
+
 void GLWidget::mousePressEvent(QMouseEvent *event) {
   // Remember the cursor position, because we want to reset it every frame
   initialMousePos = mapToGlobal(event->pos());
@@ -79,10 +96,12 @@ void GLWidget::mousePressEvent(QMouseEvent *event) {
   // Take shortcuts away from the rest of the app.
   // The main annoyance was Alt+W toggling "Draw Points".
   qApp->installEventFilter(this);
+
+  passMouseEvent(event, true);
 }
 
 void GLWidget::mouseReleaseEvent(QMouseEvent *event) {
-  if (event->buttons() == 0) {
+  if (event->buttons() == Qt::NoButton) {
     // Restore cursor position
     QCursor::setPos(initialMousePos);
 
@@ -92,24 +111,15 @@ void GLWidget::mouseReleaseEvent(QMouseEvent *event) {
     // Stop filtering events for the rest of the app
     qApp->removeEventFilter(this);
   }
+
+  passMouseEvent(event, false);
 }
 
 void GLWidget::mouseMoveEvent(QMouseEvent *event) {
-  float dx = event->x() - width()/2;
-  float dy = event->y() - height()/2;
+  int dx =  width()/2 - event->x(),
+      dy = height()/2 - event->y();
 
-  // TODO different speeds for topView
-  if (event->buttons() & Qt::LeftButton) {
-    moveCamera(0, 0, 0, dy, -dx, 0);
-  } else if (event->buttons() & Qt::MidButton) {
-    dx *= movementSpeed/10.0;
-    dy *= movementSpeed/10.0;
-    moveCamera(dx, 0, dy, 0, 0, 0);
-  } else if (event->buttons() & Qt::RightButton) {
-    dx *= movementSpeed/10.0;
-    dy *= movementSpeed/10.0;
-    moveCamera(dx, -dy, 0, 0, 0, 0);
-  }
+  callbacks::glut::mouseMoveDelta(dx, dy);
 
   update();
 
