@@ -54,6 +54,17 @@ void GLWidget::paintGL() {
   DisplayItFunc(GL_RENDER, false);
 }
 
+void GLWidget::setFullscreen(bool fullscreenWanted) {
+  // TODO make only this widget fullscreen
+  QWidget *grandparent = parentWidget()->parentWidget();
+  if (fullscreenWanted) {
+    grandparent->showFullScreen();
+  } else {
+    grandparent->showNormal();
+  }
+  fullscreen = grandparent->isFullScreen();
+}
+
 void GLWidget::mousePressEvent(QMouseEvent *event) {
   initialMousePos = mapToGlobal(event->pos());
   QPoint center(width() / 2, height() / 2);
@@ -119,7 +130,7 @@ void GLWidget::keyPressEvent(QKeyEvent *event) {
   auto kc_it = qt_to_show_keycodes.find(event->key());
   if (event->key() == Qt::Key_F) {
     // We do not want fullscreen handled by GLUT (wouldn't work anyway)
-    // TODO put widget into fullscreen
+    setFullscreen(!fullscreen);
   } else if (kc_it != qt_to_show_keycodes.end()) {
     // Map has key: pass it to legacy key handler
     callbacks::glut::keyHandler(kc_it->second, ctrl, alt, shift);
