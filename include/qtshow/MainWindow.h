@@ -26,6 +26,9 @@ public slots:
   void openRecentDirectory();
   void clearRecentDirectories();
 
+  void addCamCombobox(int index);
+  void deleteCamCombobox(int index);
+
 protected:
   std::vector<std::string> loadRecentDirectories();
   void updateRecentDirectoriesMenu(std::vector<std::string> directories);
