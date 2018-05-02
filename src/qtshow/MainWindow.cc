@@ -20,6 +20,8 @@ MainWindow::MainWindow(const dataset_settings& ds, const window_settings& ws, QW
     updateRecentDirectoriesMenu(loadRecentDirectories());
 
     connect(this, &MainWindow::scanDirectoryOpened, this, &MainWindow::addRecentDirectory);
+    connect(glWidget, &GLWidget::camsListAdded, this, &MainWindow::addCamCombobox);
+    connect(glWidget, &GLWidget::camsListDeleted, this, &MainWindow::deleteCamCombobox);
   } else {
     glWidget = new GLWidget(this);
     glWidget->setFocusPolicy(Qt::ClickFocus);
@@ -119,4 +121,15 @@ void MainWindow::clearRecentDirectories() {
   std::ofstream directories_file(recent_directory_path());
   directories_file.close();
   updateRecentDirectoriesMenu({});
+}
+
+void MainWindow::addCamCombobox(int index)
+{
+  QString s = QString("#%1").arg(index);
+  comboBoxCam->addItem(s);
+}
+
+void MainWindow::deleteCamCombobox(int index)
+{
+  comboBoxCam->removeItem(index);
 }

@@ -350,6 +350,27 @@ void GLWidget::animate() {
   }
 }
 
+void GLWidget::addCamera()
+{
+  callAddCamera(1);
+  cam_choice = cams.size();
+  camsListAdded(cam_choice);
+  update();
+}
+
+void GLWidget::deleteCamera()
+{
+  callDeleteCamera(0);
+  camsListDeleted(cam_choice - 1);
+  update();
+}
+
+void GLWidget::changeCamCombobox(int index)
+{
+  cam_choice = index + 1;
+  update();
+}
+
 void GLWidget::setSnapshotScale(int snapshotScale) {
   factor = snapshotScale;
 }
