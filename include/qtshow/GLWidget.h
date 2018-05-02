@@ -43,6 +43,10 @@ public slots:
   void setAnimationSpeed(double animationSpeed);
   void animate();
 
+  void addCamera();
+  void deleteCamera();
+  void changeCamCombobox(int index);
+
   void setSnapshotScale(int snapshotScale);
   void saveSnapshot();
 
@@ -55,6 +59,9 @@ signals:
   void animationPossible(bool);
 
   void status(QString, int);
+
+  void camsListAdded(int index);
+  void camsListDeleted(int index);
 
 protected:
   void initializeGL();
