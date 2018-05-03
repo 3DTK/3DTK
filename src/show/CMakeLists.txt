@@ -57,6 +57,8 @@ if (WITH_OPENGL)
 
   add_executable(show show.cc $<TARGET_OBJECTS:show_objects>)
   target_link_libraries(show ${SHOW_LIBS_SHARED})
+  add_executable(hello hello.cc)
+  target_link_libraries(hello ${SHOW_LIBS_SHARED})
 
   if(WITH_WXWIDGETS)
     find_package(wxWidgets REQUIRED core base gl)
