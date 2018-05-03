@@ -27,12 +27,6 @@ using std::string;
 #include "scanio/writer.h"
 #include "slam6d/globals.icc"
 
-#ifndef _MSC_VER
-#include <getopt.h>
-#else
-#include "XGetopt.h"
-#endif
-
 #ifdef _MSC_VER
 #define strcasecmp _stricmp
 #define strncasecmp _strnicmp
@@ -42,119 +36,6 @@ using std::string;
 
 #include <boost/program_options.hpp>
 namespace po = boost::program_options;
-
-/**
- * Explains the usage of this program's command line parameters
- */
-void usage(char* prog)
-{
-#ifndef _MSC_VER
-  const std::string bold("\033[1m");
-  const std::string normal("\033[m");
-#else
-  const std::string bold("");
-  const std::string normal("");
-#endif
-  std::cout << std::endl
-	  << bold << "USAGE " << normal << std::endl
-	  << "   " << prog << " [options] directory" << std::endl << std::endl;
-  std::cout << bold << "OPTIONS" << normal << std::endl
-	  << std::endl
-	  << bold << "  -e" << normal << " NR, " << bold << "--end=" << normal << "NR" << std::endl
-	  << "         end after scan NR" << std::endl
-	  << std::endl
-	  << bold << "  -f" << normal << " F, " << bold << "--format=" << normal << "F" << std::endl
-	  << "         using shared library F for input" << std::endl
-	  << "         (chose F from {uos, uos_map, uos_rgb, uos_frames, uos_map_frames, old, rts, rts_map, ifp, riegl_txt, riegl_rgb, riegl_bin, zahn, ply})" << std::endl
-	  << std::endl
-	  << bold << "  -m" << normal << " NR, " << bold << "--max=" << normal << "NR" << std::endl
-	  << "         neglegt all data points with a distance larger than NR 'units'" << std::endl
-	  << std::endl
-	  << bold << "  -M" << normal << " NR, " << bold << "--min=" << normal << "NR" << std::endl
-	  << "         neglegt all data points with a distance smaller than NR 'units'" << std::endl
-	  << std::endl
-	  << bold << "  -O" << normal << " NR (optional), " << bold << "--octree=" << normal << "NR (optional)" << std::endl
-	  << "         use randomized octree based point reduction (pts per voxel=<NR>)" << std::endl
-	  << "         requires -r or --reduce" << std::endl
-	  << std::endl
-	  << bold << "  -p, --trustpose" << normal << std::endl
-	  << "         Trust the pose file, do not use the information stored in the .frames." << std::endl
-	  << "         (just for testing purposes.)" << std::endl
-	  << std::endl
-	  << std::endl
-	  << bold << "  -r" << normal << " NR, " << bold << "--reduce=" << normal << "NR" << std::endl
-	  << "         turns on octree based point reduction (voxel size=<NR>)" << std::endl
-	  << std::endl
-    /*
-	 << bold << "  -R" << normal << " NR, " << bold << "--random=" << normal << "NR" << std::endl
-      << "         turns on randomized reduction, using about every <NR>-th point only" << std::endl
-      << std::endl
-    */
-	  << bold << "  -s" << normal << " NR, " << bold << "--start=" << normal << "NR" << std::endl
-	  << "         start at scan NR (i.e., neglects the first NR scans)" << std::endl
-	  << "         [ATTENTION: counting naturally starts with 0]" << std::endl
-	  << std::endl
-	  << bold << "  -u" << normal << " STR, " << bold << "--customFilter=" << normal << "STR" << std::endl
-	  << "         apply custom filter, filter mode and data are specified as semicolon-seperated string:" << std::endl
-	  << "         STR: '{filterMode};{nrOfParams}[;param1][;param2][...]'" << std::endl
-	  << "         see filter implementation in pointfilter.cc for more detail." << std::endl
-	  << std::endl
-	  << bold << "  -c, --color" << std::endl << normal
-	  << "         export in color as RGB" << std::endl
-	  << std::endl
-	  << bold << "  -R, --reflectance, --reflectivity" << std::endl << normal
-	  << "         export in reflectance" << std::endl
-	  << std::endl
-	  << bold << "  -x, --xyz" << std::endl << normal
-	  << "         export in xyz format (right handed coordinate system in m)" << std::endl
-	  << std::endl
-	  << bold << "  -y" << normal << " NR, " << bold << "--scale=" << normal << "NR" << std::endl
-	  << "         scale factor for export in XYZ format (default value is 0.01, so output will be in [m])" << std::endl
-	  << bold << "  -H, --highprecision" << std::endl << normal
-	  << "         export points with full double precision" << std::endl
-	  << std::endl
-	  << bold << "  --hexfloat" << std::endl << normal
-	  << "         export points with hexadecimal digits" << std::endl
-	  << std::endl
-    << bold << "  -n" << normal << " NR, " << bold << "--frame=" << normal << "NR" << std::endl
-    << "         uses frame NR for export" << std::endl    
-	  << std::endl
-	  << std::endl << std::endl;
-  
-  std::cout << bold << "EXAMPLES " << normal << std::endl
-      << "   " << prog << " -s 2 -e 3 dat" << std::endl << std::endl;
-  exit(1);
-}
-
-
-/** A function that parses the command-line arguments and sets the respective flags.
- * @param argc the number of arguments
- * @param argv the arguments
- * @param dir the directory
- * @param red using point reduction?
- * @param mdm maximal distance match
- * @param mdml maximal distance match for SLAM
- * @param mni maximal number of iterations
- * @param start starting at scan number 'start'
- * @param end stopping at scan number 'end'
- * @param maxDist - maximal distance of points being loaded
- * @param minDist - minimal distance of points being loaded
- * @param quiet switches on/off the quiet mode
- * @param veryQuiet switches on/off the 'very quiet' mode
- * @param use_pose - i.e., use the original pose information instead of using
- * the final transformation from the frames 
- * @param meta match against all scans (= meta scan), or against the last scan only???
- * @param anim selects the rotation representation for the matching algorithm
- * @param mni_lum sets the maximal number of iterations for SLAM
- * @param net specifies the file that includes the net structure for SLAM
- * @param cldist specifies the maximal distance for closed loops
- * @param epsilonICP stop ICP iteration if difference is smaller than this value
- * @param epsilonSLAM stop SLAM iteration if average difference is smaller than this value
- * @param algo specfies the used algorithm for rotation computation
- * @param lum6DAlgo specifies the used algorithm for global SLAM correction
- * @param loopsize defines the minimal loop size
- * @return 0, if the parsing was successful. 1 otherwise
- */
 
 
 void validate(boost::any& v, const std::vector<std::string>& values,
@@ -169,10 +50,7 @@ void validate(boost::any& v, const std::vector<std::string>& values,
   }
 }
 
-
-
-
-int parseArgs(int argc, char **argv, std::string &dir, double &red, int &rand,
+int parse_options(int argc, char **argv, std::string &dir, double &red, int &rand,
             int &start, int &end, int &maxDist, int &minDist, bool &use_pose,
             bool &use_xyz, bool &use_reflectance, bool &use_color, int &octree, IOType &type, std::string& customFilter, double &scaleFac,
 	    bool &hexfloat, bool &high_precision, int &frame)
@@ -192,7 +70,7 @@ po::options_description generic("Generic options");
      "[ATTENTION: counting naturally starts with 0]")
     ("end,e", po::value<int>(&end)->default_value(-1),
      "end after scan <arg>")
-    ("customFilter,u", po::value<string>(&customFilter)->default_value(" "),
+    ("customFilter,u", po::value<string>(&customFilter),
     "Apply a custom filter. Filter mode and data are specified as a "
     "semicolon-seperated string:"
     "{filterMode};{nrOfParams}[;param1][;param2][...]"
@@ -202,7 +80,7 @@ po::options_description generic("Generic options");
     "See filter implementation in src/slam6d/pointfilter.cc for more detail.")
     ("reduce,r", po::value<double>(&red)->default_value(-1.0),
     "turns on octree based point reduction (voxel size=<NR>)")
-    ("octree,O", po::value<int>(&octree)->default_value(0),
+    ("octree,O", po::value<int>(&octree)->default_value(1),
     "use randomized octree based point reduction (pts per voxel=<NR>)")
     ("scale,y", po::value<double>(&scaleFac)->default_value(0.01),
     "use ICP with scale'")
@@ -210,14 +88,14 @@ po::options_description generic("Generic options");
      "export in color as RGB")
     ("reflectance,R", po::bool_switch(&use_reflectance)->default_value(false),
      "end after scan <arg>")
-    ("trustpose,p", po::bool_switch(&use_pose)->default_value(true),
+    ("trustpose,p", po::bool_switch(&use_pose)->default_value(false),
     "Trust the pose file, do not extrapolate the last transformation."
     "(just for testing purposes, or gps input.)")
     ("xyz,x", po::bool_switch(&use_xyz)->default_value(false),
      "export in xyz format (right handed coordinate system in m)")
     ("hexfloat,0", po::bool_switch(&hexfloat)->default_value(false),
      "export points with hexadecimal digits")
-    ("highprecision,H", po::bool_switch(&high_precision)->default_value(true),
+    ("highprecision,H", po::bool_switch(&high_precision)->default_value(false),
      "export points with full double precision")
     ("frame,n", po::value<int>(&frame)->default_value(-1),
      "uses frame NR for export");
@@ -248,7 +126,7 @@ po::options_description generic("Generic options");
     std::cout << cmdline_options;
     std::cout << std::endl
          << "Example usage:" << std::endl
-         << "\t./bin/pose2frames -s 0 -e 1 /Your/directory" << std::endl;
+         << "\t./bin/exportPoints -s 0 -e 1 /Your/directory" << std::endl;
     exit(0);
   }
   po::notify(vm);
@@ -258,8 +136,6 @@ po::options_description generic("Generic options");
 #else
   if (dir[dir.length()-1] != '\\') dir = dir + "\\";
 #endif
-  
-  //parseFormatFile(dir, type, start, end);
 
   return 0;
 }
@@ -329,10 +205,6 @@ void readFrames(std::string dir, int start, int end, int frame, bool use_pose=fa
  */
 int main(int argc, char **argv)
 {
-  if (argc <= 1) {
-    usage(argv[0]);
-  }
-
   // parsing the command line parameters
   // init, default values if not specified
   std::string dir;
@@ -355,10 +227,14 @@ int main(int argc, char **argv)
   bool high_precision = false;
   int frame = -1;
 
-  parseArgs(argc, argv, dir, red, rand, start, end,
+  try {
+    parse_options(argc, argv, dir, red, rand, start, end,
       maxDist, minDist, uP, use_xyz, use_reflectance, use_color, octree, iotype, customFilter, scaleFac,
       hexfloat, high_precision, frame);
-
+  } catch (std::exception& e) {
+    std::cerr << "Error while parsing settings: " << e.what() << std::endl;
+    exit(1);
+  }
 
   rangeFilterActive = minDist > 0 || maxDist > 0;
 
