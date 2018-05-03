@@ -30,14 +30,7 @@ using std::endl;
 using std::ofstream;
 using std::ifstream;
 
-#include "slam6d/icp6Dsvd.h"
 #include "slam6d/globals.icc"
-
-#ifndef _MSC_VER
-#include <getopt.h>
-#else
-#include "XGetopt.h"
-#endif
 
 #ifdef _MSC_VER
 #define strcasecmp _stricmp
@@ -57,46 +50,6 @@ using std::ifstream;
 #include <boost/program_options.hpp>
 namespace po = boost::program_options;
 
-/**
- * Explains the usage of this program's command line parameters
- */
-void usage(char* prog)
-{
-#ifndef _MSC_VER
-    const string bold("\033[1m");
-    const string normal("\033[m");
-#else
-    const string bold("");
-    const string normal("");
-#endif
-    cout << endl
-        << bold << "USAGE " << normal << endl
-        << "   " << prog << " [parameters] directory" << endl << endl;
-    cout << bold << "PARAMETERS" << normal << endl
-
-        << bold << "  -s" << normal << " NR, " << bold << "--start=" << normal << "NR" << endl
-        << "         start at frame NR (i.e., neglects the first NR frame files)" << endl
-        << "         [ATTENTION: counting naturally starts with 0]" << endl
-        << bold << "  -e" << normal << " NR, " << bold << "--end=" << normal << "NR" << endl
-        << "         end after frame file NR" << endl
-        << endl
-        << bold << "  -o" << normal << " NR, " << bold << "--origin=" << normal << "NR" << endl
-        << "         use scan <NR> as origin for transformation" << endl
-        << endl
-        << bold << "  -i" << normal << " STR, " << bold << "--input=" << normal << "STR" << endl
-        << "         input frames file containing the transformation from origin to global" << endl
-        << endl
-        << bold << "  -f" << normal <<  " DIR, " << bold << "--outdir=" << normal << "DIR" << endl
-        << "         write new .frames files  to <DIR>" << endl
-        << endl
-        << bold << "  -t" << normal << ", " << bold << "--trustpose" << normal << "" << endl
-        << "         use .pose instead of .frames files" << endl
-        << endl
-        << endl << endl;
-
-    exit(1);
-}
-
 int parse_options(int argc, char **argv, string &dir, string &inputMatrix,
     string &outputDir, int &start, int &end, bool& readFromPose, int& anchor)
 {
@@ -111,13 +64,12 @@ int parse_options(int argc, char **argv, string &dir, string &inputMatrix,
      "[ATTENTION: counting naturally starts with 0]")
     ("end,e", po::value<int>(&end)->default_value(-1),
      "end after scan <arg>")
-    ("input,i", po::value<string>(&inputMatrix)->default_value("none"),
-     "end after scan <arg>")
-    ("trustpose,p",po::bool_switch(&readFromPose)->default_value(true),
-    "Trust the pose file, do not extrapolate the last transformation."
-    "(just for testing purposes, or gps input.)")
-    ("outdir,f", po::value<string>(&outputDir)->default_value("none"),
-     "end after scan <arg>")
+    ("input,i", po::value<string>(&inputMatrix),
+     "input frames file containing the transformation from origin to global")
+    ("trustpose,p",po::bool_switch(&readFromPose)->default_value(false),
+    "use .pose instead of .frames files")
+    ("outdir,f", po::value<string>(&outputDir),
+     "write new .frames files  to <DIR>")
     ("origin,o", po::value<int>(&anchor)->default_value(0),
      "use scan <NR> as origin for transformation");
 
@@ -147,7 +99,7 @@ int parse_options(int argc, char **argv, string &dir, string &inputMatrix,
     std::cout << cmdline_options;
     std::cout << std::endl
          << "Example usage:" << std::endl
-         << "\t./bin/pose2frames -s 0 -e 1 /Your/directory" << std::endl;
+         << "\t./bin/multFrames -s 0 -e 1 -o 0 -i <frames_file> -f <outdir> <dir>" << std::endl;
     exit(0);
   }
   po::notify(vm);
@@ -166,9 +118,13 @@ void printFrames(double * tMatrix) {
 }
 
 
-void readFramesFromFile(const char * filename, double * tMatrix) {
+bool readFramesFromFile(const char * filename, double * tMatrix) {
   ifstream infile;
   infile.open(filename);
+  if(!infile.good()) { 
+    cerr << "Could not read input " << filename << endl; 
+    return false;
+  }
   float dummy = -1;
   
   while(infile.peek() != EOF) {
@@ -178,14 +134,21 @@ void readFramesFromFile(const char * filename, double * tMatrix) {
 
   infile.close();
   infile.clear();
+
+  return true;
 }
 
-void readFrames(const char * dir, int index, double * tMatrix) {
+bool readFrames(const char * dir, int index, double * tMatrix) {
   ifstream infile;
   char filename[255];
   
   snprintf(filename,255,"%sscan%.3d.frames",dir,index);
+  cout << "Reading... " << filename << endl;
   infile.open(filename);
+  if(!infile.good()) {
+    cerr << "Could not read input " << filename << endl; 
+    return false;
+  }
   float dummy = -1;
   
   while(infile.peek() != EOF) {
@@ -196,13 +159,23 @@ void readFrames(const char * dir, int index, double * tMatrix) {
 
   infile.close();
   infile.clear();
+  
+  return true;
 }
 
-void readPose(const char * dir, int index, double * tMatrix) {
+bool readPose(const char * dir, int index, double * tMatrix) {
   ifstream infile;
   char filename[255];
   snprintf(filename,255,"%sscan%.3d.pose",dir,index);
+   
+  cout << "Reading... " << filename << endl;
   infile.open(filename);
+  
+  if(!infile.good()) { 
+    cerr << "Could not read input " << filename << endl; 
+    return false;
+  }
+  
  
   double rPos[3];
   double rPosTheta[3];
@@ -218,6 +191,8 @@ void readPose(const char * dir, int index, double * tMatrix) {
   //printFrames(tMatrix);
   infile.close();
   infile.clear();
+
+  return true;
 
 }
 
@@ -246,10 +221,6 @@ void writeFrames(const char * dir, int index, double * tMatrix) {
  */
 int main(int argc, char **argv)
 {
-    if (argc <= 1) {
-        usage(argv[0]);
-    }
-
     string inputdir;
     string outputdir;
     string inmatrix;
@@ -259,18 +230,28 @@ int main(int argc, char **argv)
 
     parse_options(argc, argv, inputdir, inmatrix, outputdir, start, end, readFromPose,anchor);
 
+    if(inputdir.empty() || outputdir.empty() || inmatrix.empty()) {
+      cout << "Please specify all input parameters." << endl;
+      exit(1);
+    }
+
     double * inverse = new double[16];
     double * mult = new double[16];
     double * resTrans = new double[16];
     double * in = new double[16];
-
+    bool no_fail = false;
     if(readFromPose) {
-      readPose(inputdir.c_str(),anchor,in);
+      no_fail = readPose(inputdir.c_str(),anchor,in);
     } else {
-      readFrames(inputdir.c_str(),anchor,in);
+      no_fail = readFrames(inputdir.c_str(),anchor,in);
+    }
+    if(!no_fail) {
+      exit(1);
     }
     M4inv(in,inverse);
-    readFramesFromFile(inmatrix.c_str(),in);
+    no_fail = readFramesFromFile(inmatrix.c_str(),in);
+    if(!no_fail) exit(1);
+    
     MMult(in,inverse,mult);
     printFrames(mult);
 

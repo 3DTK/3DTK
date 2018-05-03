@@ -117,175 +117,18 @@ void sigSEGVhandler (int v)
   exit(-1);
 }
 
-
-/**
- * Explains the usage of this program's command line parameters
- */
-void usage(char* prog)
-{
-#ifndef _MSC_VER
-  const string bold("\033[1m");
-  const string normal("\033[m");
-#else
-  const string bold("");
-  const string normal("");
-#endif
-  cout << endl
-       << bold << "USAGE " << normal << endl
-       << "   " << prog << " [options] directory" << endl << endl;
-  cout << bold << "OPTIONS" << normal << endl
-
-       << bold << "  -a" << normal << " NR, " << bold << "--algo=" << normal << "NR   [default: 1]" << endl
-       << "         selects the minimizazion method for the ICP matching algorithm" << endl
-       << "           1 = unit quaternion based method by Horn" << endl
-       << "           2 = singular value decomposition by Arun et al. " << endl
-       << "           3 = orthonormal matrices by Horn et al." << endl
-       << "           4 = dual quaternion method by Walker et al." << endl
-       << "           5 = helix approximation by Hofer & Potmann" << endl
-       << "           6 = small angle approximation" << endl
-       << "           7 = Lu & Milios style, i.e., uncertainty based, with Euler angles" << endl
-       << "           8 = Lu & Milios style, i.e., uncertainty based, with Quaternion" << endl
-       << "           9 = unit quaternion with scale method by Horn" << endl
-       << endl
-       << bold << "  -A" << normal << " NR, " << bold << "--anim=" << normal << "NR   [default: first and last frame only]" << endl
-       << "         if specified, use only every NR-th frame for animation" << endl
-       << endl
-       << bold << "  -b" << normal << " NR, " << bold << "--bucketSize=" << normal << "NR   [default: 20]" << endl
-       << "         specifies the bucket size for leafs of the k-d tree. During construction of the" << endl
-       << "         tree, any subtree of at most this size will be replaced by an array." << endl
-       << endl
-       << bold << "  -c" << normal << " NR, " << bold << "--cldist=" << normal << "NR   [default: 500]" << endl
-       << "         specifies the maximal distance for closed loops" << endl
-       << endl
-       << bold << "  -C" << normal << " NR, " << bold << "--clpairs=" << normal << "NR   [default: 6]" << endl
-       << "         specifies the minimal number of points for an overlap. If not specified" << endl
-       << "         cldist is used instead" << endl
-       << endl
-       << bold << "  --cache" << normal << endl
-       << "         turns on cached k-d tree search" << endl
-       << endl
-       << bold << "  --continue" << normal << endl
-       << "         continue using last frames entry as starting pose" << endl
-       << endl
-       << bold << "  -d" << normal << " NR, " << bold << "--dist=" << normal << "NR   [default: 25]" << endl
-       << "         sets the maximal point-to-point distance for matching with ICP to <NR> 'units'" << endl
-       << "         (unit of scan data, e.g. cm)" << endl
-       << endl
-       << bold << "  -D" << normal << " NR, " << bold << "--distSLAM="
-       << normal << "NR   [default: same value as -d option]" << endl
-       << "         sets the maximal point-to-point distance for matching with SLAM to <NR> 'units'" << endl
-       << "         (unit of scan data, e.g. cm)" << endl
-       << endl
-       << bold << "  --DlastSLAM" << normal << " NR  [default not set]" << endl
-       << "         sets the maximal point-to-point distance for the final SLAM correction," << endl
-       << "         if final SLAM is not required don't set it." << endl
-       << endl
-       << bold << "  -e" << normal << " NR, " << bold << "--end=" << normal << "NR" << endl
-       << "         end after scan NR" << endl
-       << endl
-       << bold << "  --exportAllPoints" << normal << endl
-       << "         writes all registered reduced points to the file points.pts before" << endl
-       << "         slam6D terminated" << endl
-       << endl
-       << bold << "  --epsICP=" << normal << "NR   [default: 0.00001]" << endl
-       << "         stop ICP iteration if difference is smaller than NR" << endl
-       << endl
-       << bold << "  --epsSLAM=" << normal << " NR   [default: 0.5]" << endl
-       << "         stop SLAM iteration if average difference is smaller than NR" << endl
-       << endl
-       << bold << "  -f" << normal << " F, " << bold << "--format=" << normal << "F" << endl
-       << "         using shared library F for input" << endl
-       << "         (chose F from {uos, uos_map, uos_rgb, uos_frames, uos_map_frames, old, rts, rts_map, ifp, riegl_txt, riegl_rgb, riegl_bin, zahn, ply, wrl, xyz, zuf, iais, front, x3d, rxp, ais })" << endl
-       << endl
-       << bold << "  -G" << normal << " NR, " << bold << "--graphSlam6DAlgo=" << normal << "NR   [default: 0]" << endl
-       << "         selects the minimizazion method for the SLAM matching algorithm" << endl
-       << "           0 = no global relaxation technique" << endl
-       << "           1 = Lu & Milios extension using euler angles due to Borrmann et al." << endl
-       << "           2 = Lu & Milios extension using using unit quaternions" << endl
-       << "           3 = HELIX approximation by Hofer and Pottmann" << endl
-       << "           4 = small angle approximation" << endl
-       << bold << "  -i" << normal << " NR, " << bold << "--iter=" << normal << "NR [default: 50]" << endl
-       << "         sets the maximal number of ICP iterations to <NR>" << endl
-       << endl
-       << bold << "  -I" << normal << " NR, " << bold << "--iterSLAM=" << normal << "NR [default: 0]" << endl
-       << "         sets the maximal number of iterations for SLAM to <NR>" << endl
-       << "         (if not set, graphSLAM is not executed)" << endl
-       << endl
-       << bold << "  -l" << normal << " NR, " << bold << "--loopsize=" << normal << "NR [default: 20]" << endl
-       << "         sets the size of a loop, i.e., a loop must exceed <NR> of scans" << endl
-       << endl
-       << bold << "  -L" << normal << " NR, " << bold << "--loop6DAlgo=" << normal << "NR   [default: 0]" << endl
-       << "         selects the method for closing the loop explicitly" << endl
-       << "           0 = no loop closing technique" << endl
-       << "           1 = euler angles" << endl
-       << "           2 = quaternions " << endl
-       << "           3 = unit quaternions" << endl
-       << "           4 = SLERP (recommended)" << endl
-       << endl
-       << bold << "  --metascan" << normal << endl
-       << "         Match current scan against a meta scan of all previous scans (default match against the last scan only)" << endl
-       << endl
-       << bold << "  -m" << normal << " NR, " << bold << "--max=" << normal << "NR" << endl
-       << "         neglegt all data points with a distance larger than NR 'units'" << endl
-       << endl
-       << bold << "  -M" << normal << " NR, " << bold << "--min=" << normal << "NR" << endl
-       << "         neglegt all data points with a distance smaller than NR 'units'" << endl
-       << endl
-       << bold << "  -u" << normal << " NR, " << bold << "--min=" << normal << "NR" << endl
-       << "      Apply a custom filter. Filter mode and data are specified as a "<<endl
-       << "      semicolon-seperated string:" << endl
-       << "      {filterMode};{nrOfParams}[;param1][;param2][...]" << endl
-       << "      Multiple filters can be specified in a file (syntax in file is same as" << endl
-       << "      direct specification" << endl
-       << "      FILE;{fileName}" << endl
-       << "      See filter implementation in src/slam6d/pointfilter.cc for more detail."<<endl
-       << bold << "  -n" << normal << " FILE, " << bold << "--net=" << normal << "FILE" << endl
-       << "         specifies the file that includes the net structure for SLAM" << endl
-       << endl
-       << bold << "  -O" << normal << "NR (optional), " << bold << "--octree=" << normal << "NR (optional)" << endl
-       << "         use randomized octree based point reduction (pts per voxel=<NR>)" << endl
-       << "         requires " << bold << "-r" << normal <<" or " << bold << "--reduce" << endl
-       << endl
-       << bold << "  -p, --trustpose" << normal << endl
-       << "         Trust the pose file, do not extrapolate the last transformation." << endl
-       << "         (just for testing purposes, or gps input.)" << endl
-       << endl
-       << bold << "  -q, --quiet" << normal << endl
-       << "         Quiet mode. Suppress (most) messages" << endl
-       << endl
-       << bold << "  -Q, --veryquiet" << normal << endl
-       << "         Very quiet mode. Suppress all messages, except in case of error." << endl
-       << endl
-       << bold << "  -r" << normal << " NR, " << bold << "--reduce=" << normal << "NR" << endl
-       << "         turns on octree based point reduction (voxel size=<NR>)" << endl
-       << endl
-       << bold << "  -R" << normal << " NR, " << bold << "--random=" << normal << "NR" << endl
-       << "         turns on randomized reduction, using about every <NR>-th point only" << endl
-       << endl
-       << bold << "  -s" << normal << " NR, " << bold << "--start=" << normal << "NR" << endl
-       << "         start at scan NR (i.e., neglects the first NR scans)" << endl
-       << "         [ATTENTION: counting naturally starts with 0]" << endl
-       << endl
-       << bold << "  -S, --scanserver" << normal << endl
-       << "         Use the scanserver as an input method and handling of scan data" << endl
-       << endl
-       << bold << "  -t" << normal << " NR, " << bold << "--nns_method=" << normal << "NR   [default: 1]" << endl
-       << "         selects the Nearest Neighbor Search Algorithm" << endl
-       << "           0 = simple k-d tree " << endl
-       << "           1 = cached k-d tree " << endl
-       << "           2 = ANNTree " << endl
-       << "           3 = BOCTree " << endl
-       << endl
-       << bold << "  --loopclosefile" << normal << " path" << endl
-       << "         Where to store the loop close file. Default: loopclose.pts" << endl
-       << endl << endl;
-
-  cout << bold << "EXAMPLES " << normal << endl
-       << "   " << prog << " dat" << endl
-       << "   " << prog << " --max=500 -r 10.2 -i 20 dat" << endl
-       << "   " << prog << " -s 2 -e 10 dat" << endl << endl;
-  exit(1);
+void validate(boost::any& v, const std::vector<std::string>& values,
+              IOType*, int) {
+  if (values.size() == 0)
+    throw std::runtime_error("Invalid model specification");
+  std::string arg = values.at(0);
+  try {
+    v = formatname_to_io_type(arg.c_str());
+  } catch (...) { // runtime_error
+    throw std::runtime_error("Format " + arg + " unknown.");
+  }
 }
+
 
 /** A function that parses the command-line arguments and sets the respective flags.
  * @param argc the number of arguments
@@ -318,20 +161,6 @@ void usage(char* prog)
  * @return 0, if the parsing was successful. 1 otherwise
  */
 
-void validate(boost::any& v, const std::vector<std::string>& values,
-              IOType*, int) {
-  if (values.size() == 0)
-    throw std::runtime_error("Invalid model specification");
-  std::string arg = values.at(0);
-  try {
-    v = formatname_to_io_type(arg.c_str());
-  } catch (...) { // runtime_error
-    throw std::runtime_error("Format " + arg + " unknown.");
-  }
-}
-
-
-
 int parse_options(int argc, char **argv, string &dir, double &red, int &rand,
               double &mdm, double &mdml, double &mdmll,
               int &mni, int &start, int &end, int &maxDist, int &minDist, string &customFilter, bool &quiet, bool &veryQuiet,
@@ -339,7 +168,7 @@ int parse_options(int argc, char **argv, string &dir, double &red, int &rand,
               int &mni_lum, string &net, double &cldist, int &clpairs, int &loopsize,
               double &epsilonICP, double &epsilonSLAM,  int &nns_method, bool &exportPts, double &distLoop,
               int &iterLoop, double &graphDist, int &octree, IOType &type,
-              bool& scanserver, PairingMode& pairing_mode, bool &continue_processing, int &bucketSize,
+              bool& scanserver, PairingMode &pairing_mode, bool &continue_processing, int &bucketSize,
               boost::filesystem::path &loopclosefile)
 {
 
@@ -347,6 +176,8 @@ po::options_description generic("Generic options");
   generic.add_options()
     ("help,h", "output this help message");
 
+  bool point_to_plane = false;
+  bool normal_shoot = false;
   po::options_description input("Input options");
   input.add_options()
     ("format,f", po::value<IOType>(&type)->default_value(UOS, "uos"),
@@ -358,7 +189,7 @@ po::options_description generic("Generic options");
      "[ATTENTION: counting naturally starts with 0]")
     ("end,e", po::value<int>(&end)->default_value(-1),
      "end after scan <arg>")
-    ("algo,a", po::value<int>(&algo)->default_value(0),
+    ("algo,a", po::value<int>(&algo)->default_value(1),
      "selects the minimizazion method for the ICP matching algorithm"
      " "
      "1 = unit quaternion based method by Horn"
@@ -372,7 +203,7 @@ po::options_description generic("Generic options");
      "8 = Lu & Milios style, i.e., uncertainty based, with Quaternion"
      " "
      "9 = unit quaternion with scale method by Horn")
-    ("nns_method,t", po::value<int>(&nns_method)->default_value(0),
+    ("nns_method,t", po::value<int>(&nns_method)->default_value(simpleKD),
     "selects the Nearest Neighbor Search Algorithm"
     "0 = simple k-d tree "
     "1 = cached k-d tree "
@@ -387,16 +218,16 @@ po::options_description generic("Generic options");
     "2 = Lu & Milios extension using using unit quaternions"
     "3 = HELIX approximation by Hofer and Pottmann"
     "4 = small angle approximation")
-    ("net,n", po::value<string>(&net)->default_value("none"),
+    ("net,n", po::value<string>(&net),
     "specifies the file that includes the net structure for SLAM")
     ("iter,i", po::value<int>(&mni)->default_value(50),
     "sets the maximal number of ICP iterations to <NR>")
     ("iterSLAM,I", po::value<int>(&mni_lum)->default_value(-1),
     "sets the maximal number of iterations for SLAM to <NR>"
     "(if not set, graphSLAM is not executed)")
-    ("max,m", po::value<int>(&maxDist)->default_value(0),
+    ("max,m", po::value<int>(&maxDist)->default_value(-1),
     "neglegt all data points with a distance larger than NR 'units'")
-    ("customFilter,u", po::value<string>(&customFilter)->default_value(" "),
+    ("customFilter,u", po::value<string>(&customFilter),
     "Apply a custom filter. Filter mode and data are specified as a "
     "semicolon-seperated string:"
     "{filterMode};{nrOfParams}[;param1][;param2][...]"
@@ -411,7 +242,7 @@ po::options_description generic("Generic options");
     ("clpairs,C", po::value<int>(&clpairs)->default_value(-1),
     "specifies the minimal number of points for an overlap. If not specified"
     "cldist is used instead")
-    ("min,M", po::value<int>(&minDist)->default_value(0),
+    ("min,M", po::value<int>(&minDist)->default_value(-1),
     "neglegt all data points with a distance smaller than NR 'units'")
     ("dist,d", po::value<double>(&mdm)->default_value(25.0),
     "sets the maximal point-to-point distance for matching with ICP to <NR> 'units'"
@@ -443,10 +274,10 @@ po::options_description generic("Generic options");
     "stop ICP iteration if difference is smaller than NR")
     ("epsSLAM,6", po::value<double>(&epsilonSLAM)->default_value(0.5),
     "stop SLAM iteration if average difference is smaller than NR")
-    //("normal_shoot-simple,7", po::value<int>(&pairing_mode)->default_value(0),
-    //"use first NR correspondences'")
-    //("point-to-plane-simple,z", po::value<int>(&pairing_mode)->default_value(0),
-    //"use first NR correspondences'")
+    ("normal_shoot-simple,7", po::bool_switch(&normal_shoot)->default_value(false),
+    "use closest point along normal for point correspondences'")
+    ("point-to-plane-simple,z", po::bool_switch(&point_to_plane)->default_value(false),
+    "use point to plane distance for correspondences'")
     ("exportAllPoints,8", po::bool_switch(&exportPts)->default_value(false),
     "writes all registered reduced points to the file points.pts before"
     "slam6D terminated")
@@ -454,7 +285,7 @@ po::options_description generic("Generic options");
     "use first NR correspondences'")
     ("iterLoop,1", po::value<int>(&iterLoop)->default_value(100),
     "use first NR correspondences'")
-    ("graphDist,3", po::value<double>(&graphDist)->default_value(0),
+    ("graphDist,3", po::value<double>(&graphDist)->default_value(500),
     "use first NR correspondences'")
     ("scanserver,S", po::bool_switch(&scanserver)->default_value(false),
     "Use the scanserver as an input method and handling of scan data")
@@ -492,7 +323,9 @@ po::options_description generic("Generic options");
     std::cout << cmdline_options;
     std::cout << std::endl
          << "Example usage:" << std::endl
-         << "\t./bin/pose2frames -s 0 -e 1 /Your/directory" << std::endl;
+         << "\t./bin/slam6d dat" << std::endl
+         << "\t./bin/slam6d --max=500 -r 10.2 -i 20 dat" << std::endl
+         << "\t./bin/slam6d -s 2 -e 10 dat" << std::endl;
     exit(0);
   }
   po::notify(vm);
@@ -503,8 +336,9 @@ po::options_description generic("Generic options");
   if (dir[dir.length()-1] != '\\') dir = dir + "\\";
 #endif
   
-  //parseFormatFile(dir, type, start, end);
-
+  if(point_to_plane) pairing_mode = CLOSEST_PLANE_SIMPLE;
+  if(normal_shoot) pairing_mode = CLOSEST_POINT_ALONG_NORMAL_SIMPLE;
+  
   return 0;
 }
 
@@ -702,10 +536,6 @@ int main(int argc, char **argv)
        << "    Jacobs University Bremen gGmbH, Germany, 2009 - 2013" << endl
        << "    University of Osnabrueck, Germany, 2006 - 2009" << endl << endl;
 
-  if (argc <= 1) {
-    usage(argv[0]);
-  }
-
   // parsing the command line parameters
   // init, default values if not specified
   string dir;
@@ -744,7 +574,7 @@ int main(int argc, char **argv)
   bool continue_processing = false;
   int bucketSize = 20;
   boost::filesystem::path loopclose("loopclose.pts");
-  
+
   parse_options(argc, argv, dir, red, rand, mdm, mdml, mdmll, mni, start, end,
             maxDist, minDist, customFilter, quiet, veryQuiet, eP, meta,
             algo, loopSlam6DAlgo, lum6DAlgo, anim,
@@ -824,7 +654,6 @@ int main(int argc, char **argv)
      scan->setReductionParameter(red, octree, PointType(types));
      scan->setSearchTreeParameter(nns_method, bucketSize);
   }
-  cout << "yes1" << endl;
   icp6Dminimizer *my_icp6Dminimizer = 0;
   switch (algo) {
   case 1 :
@@ -858,7 +687,6 @@ int main(int argc, char **argv)
     my_icp6Dminimizer = new icp6D_NAPX(quiet);
     break;
   }
-cout << "yes2" << endl;
   // match the scans and print the time used
   long starttime = GetCurrentTimeInMilliSec();
   
@@ -870,7 +698,6 @@ cout << "yes2" << endl;
     icp6D *my_icp = 0;
     my_icp = new icp6D(my_icp6Dminimizer, mdm, mni, quiet, meta, rand, eP,
                        anim, epsilonICP, nns_method);
-cout << "yes3" << endl;
     // check if CAD matching was selected as type
     if (type == UOS_CAD)
     {
@@ -881,7 +708,6 @@ cout << "yes3" << endl;
     delete my_icp;
   } else if (clpairs > -1) {
     //!!!!!!!!!!!!!!!!!!!!!!!!
-    cout << "yes4" << endl;
     icp6D *my_icp = 0;
     my_icp = new icp6D(my_icp6Dminimizer, mdm, mni, quiet, meta, rand, eP,
                        anim, epsilonICP, nns_method);
@@ -895,7 +721,6 @@ cout << "yes3" << endl;
    
     //!!!!!!!!!!!!!!!!!!!!!!!!            
   } else {
-  cout << "yes5" << endl;
     graphSlam6D *my_graphSlam6D = 0;
     switch (lum6DAlgo) {
     case 1 :
