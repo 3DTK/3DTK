@@ -20,6 +20,7 @@
 #define WANT_STREAM ///< define the WANT stream :)
 
 #include <string>
+using std::string;
 #include <iostream>
 #include <fstream>
 
@@ -47,6 +48,8 @@
 #endif 
 #endif 
 
+#include <boost/program_options.hpp>
+namespace po = boost::program_options;
 
 /**
  * Explains the usage of this program's command line parameters
@@ -97,71 +100,70 @@ void usage(char* prog)
     exit(1);
 }
 
-int parseArgs(int argc, char **argv, std::string &dir, int &nrOfPts, std::string &inputFile,
+int parse_options(int argc, char **argv, std::string &dir, int &nrOfPts, std::string &inputFile,
     int &start, int &end, bool& inputInXYZ, bool& reverse)
 {
-    int  c;
-    // from unistd.h:
-    extern char *optarg;
-    extern int optind;
+    po::options_description generic("Generic options");
+  generic.add_options()
+    ("help,h", "output this help message");
 
-    /* options descriptor */
-    // 0: no arguments, 1: required argument, 2: optional argument
-    static struct option longopts[] = {
-        { "pointNr",    required_argument, 0, 'n' },
-        { "input",      required_argument, 0, 'i' },
-        { "start",      required_argument, 0, 's' },
-        { "end",        required_argument, 0, 'e' },
-        { "xyz",        required_argument, 0, 'x' },
-        { "reverse",    required_argument, 0, 'r' },
-        { 0, 0, 0, 0 }                    // needed, cf. getopt.h
-    };
+  po::options_description input("Input options");
+  input.add_options()
+    ("start,s", po::value<int>(&start)->default_value(0),
+     "start at scan <arg> (i.e., neglects the first <arg> scans) " 
+     "[ATTENTION: counting naturally starts with 0]")
+    ("end,e", po::value<int>(&end)->default_value(-1),
+     "end after scan <arg>")
+    ("input,i", po::value<string>(&inputFile)->default_value("none"),
+     "number of points (= lines from input file) to use for computing" 
+     "transformation (input file line syntax (mapping between Points" 
+     "p1 and p2): p1x p1y p1z p2x p2y p2z\n)")
+    ("pointNr,n", po::value<int>(&nrOfPts)->default_value(0),
+     "number of points (= lines from input file) to use for computing"     	
+     "transformation")
+    ("xyx,x", po::bool_switch(&inputInXYZ)->default_value(true),
+     "frame files are in xyz format (right handed coordinate system in m);")
+    ("reverse,r", po::bool_switch(&reverse)->default_value(true),
+     "reverse order of input point pairs, that is, instead of transforming from pts2 to pts1,"
+     "transform from pts1 to pts2");
 
-    std::cout << std::endl;
-    while ((c = getopt_long(argc, argv, "n:i:s:e:xr", longopts, NULL)) != -1)
-        switch (c)
-    {
-        case 'n':
-            nrOfPts = atoi(optarg);
-            break;
-        case 's':
-            start = atoi(optarg);
-            if (start < 0) { std::cerr << "Error: Cannot start at a negative scan number.\n"; exit(1); }
-            break;
-        case 'e':
-            end = atoi(optarg);
-            if (end < 0)     { std::cerr << "Error: Cannot end at a negative scan number.\n"; exit(1); }
-            if (end < start) { std::cerr << "Error: <end> cannot be smaller than <start>.\n"; exit(1); }
-            break;
-        case 'i':
-            inputFile = optarg;
-            break;
-        case 'x':
-            inputInXYZ = true;
-            break;
-        case 'r':
-            reverse = true;
-            break;
-        case '?':
-            usage(argv[0]);
-            return 1;
-        default:
-            abort();
-    }
+  po::options_description hidden("Hidden options");
+  hidden.add_options()
+    ("input-dir", po::value<std::string>(&dir), "input dir");
 
-    if (optind != argc - 1) {
-        std::cerr << "\n*** Directory missing ***" << std::endl;
-        usage(argv[0]);
-    }
-    dir = argv[optind];
+  // all options
+  po::options_description all;
+  all.add(generic).add(input).add(hidden);
+
+  // options visible with --help
+  po::options_description cmdline_options;
+  cmdline_options.add(generic).add(input);
+
+  // positional argument
+  po::positional_options_description pd;
+  pd.add("input-dir", 1);
+
+  // process options
+  po::variables_map vm;
+  po::store(po::command_line_parser(argc, argv).
+            options(all).positional(pd).run(), vm);
+
+  // display help
+  if (vm.count("help")) {
+    std::cout << cmdline_options;
+    std::cout << std::endl
+         << "Example usage:" << std::endl
+         << "\t./bin/pose2frames -s 0 -e 1 /Your/directory" << std::endl;
+    exit(0);
+  }
+  po::notify(vm);
 
 #ifndef _MSC_VER
-    if (dir[dir.length() - 1] != '/') dir = dir + "/";
+  if (dir[dir.length()-1] != '/') dir = dir + "/";
 #else
-    if (dir[dir.length() - 1] != '\\') dir = dir + "\\";
+  if (dir[dir.length()-1] != '\\') dir = dir + "\\";
 #endif
-
-    return 0;
+  return 0;
 }
 
 void matMulVec(double* mat4, double* v4, double* res) {
@@ -376,7 +378,7 @@ int main(int argc, char **argv)
     bool inputInXYZ = false;
     bool reverseOrder = false;
 
-    parseArgs(argc, argv, dir, nrOfPts, inputFile, start, end, inputInXYZ, reverseOrder);
+    parse_options(argc, argv, dir, nrOfPts, inputFile, start, end, inputInXYZ, reverseOrder);
 
     double resTrans[16];
     computeTransformation(nrOfPts, inputFile, dir, reverseOrder, resTrans);

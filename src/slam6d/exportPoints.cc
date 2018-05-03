@@ -17,6 +17,7 @@
 #include <iostream>
 #include <fstream>
 #include <stdexcept>
+using std::string;
 
 #include <vector>
 #include <map>
@@ -38,6 +39,9 @@
 #else
 #include <strings.h>
 #endif
+
+#include <boost/program_options.hpp>
+namespace po = boost::program_options;
 
 /**
  * Explains the usage of this program's command line parameters
@@ -151,129 +155,111 @@ void usage(char* prog)
  * @param loopsize defines the minimal loop size
  * @return 0, if the parsing was successful. 1 otherwise
  */
+
+
+void validate(boost::any& v, const std::vector<std::string>& values,
+              IOType*, int) {
+  if (values.size() == 0)
+    throw std::runtime_error("Invalid model specification");
+  std::string arg = values.at(0);
+  try {
+    v = formatname_to_io_type(arg.c_str());
+  } catch (...) { // runtime_error
+    throw std::runtime_error("Format " + arg + " unknown.");
+  }
+}
+
+
+
+
 int parseArgs(int argc, char **argv, std::string &dir, double &red, int &rand,
             int &start, int &end, int &maxDist, int &minDist, bool &use_pose,
             bool &use_xyz, bool &use_reflectance, bool &use_color, int &octree, IOType &type, std::string& customFilter, double &scaleFac,
 	    bool &hexfloat, bool &high_precision, int &frame)
 {
-  int  c;
-  // from unistd.h:
-  extern char *optarg;
-  extern int optind;
+po::options_description generic("Generic options");
+  generic.add_options()
+    ("help,h", "output this help message");
 
-  /* options descriptor */
-  // 0: no arguments, 1: required argument, 2: optional argument
-  static struct option longopts[] = {
-    { "format",          required_argument,   0,  'f' },  
-    { "start",           required_argument,   0,  's' },
-    { "end",             required_argument,   0,  'e' },
-    { "reduce",          required_argument,   0,  'r' },
-    { "octree",          optional_argument,   0,  'O' },
-    { "trust_pose",      no_argument,         0,  'p' },
-    { "reflectance",     no_argument,         0,  'R' },
-    { "reflectivity",    no_argument,         0,  'R' },
-    { "color",           no_argument,         0,  'c' },
-    { "xyz",             no_argument,         0,  'x' },
-    { "scale",           required_argument,   0,  'y' },
-    { "customFilter",    required_argument,   0,  'u' },
-    { "hexfloat",        no_argument,         0,   0 },
-    { "highprecision",   no_argument,         0,  'H' },
-    { "frame",           required_argument,   0,  'n' },
-    { "help",            no_argument,         0,  'h' },
-    { 0,           0,   0,   0}                    // needed, cf. getopt.h
-  };
+  po::options_description input("Input options");
+  input.add_options()
+    ("format,f", po::value<IOType>(&type)->default_value(UOS, "uos"),
+     "using shared library <arg> for input. (chose F from {uos, uos_map, "
+     "uos_rgb, uos_frames, uos_map_frames, old, rts, rts_map, ifp, "
+     "riegl_txt, riegl_rgb, riegl_bin, zahn, ply, las})")
+    ("start,s", po::value<int>(&start)->default_value(0),
+     "start at scan <arg> (i.e., neglects the first <arg> scans) "
+     "[ATTENTION: counting naturally starts with 0]")
+    ("end,e", po::value<int>(&end)->default_value(-1),
+     "end after scan <arg>")
+    ("customFilter,u", po::value<string>(&customFilter)->default_value(" "),
+    "Apply a custom filter. Filter mode and data are specified as a "
+    "semicolon-seperated string:"
+    "{filterMode};{nrOfParams}[;param1][;param2][...]"
+    "Multiple filters can be specified in a file (syntax in file is same as"
+    "direct specification"
+    "FILE;{fileName}"
+    "See filter implementation in src/slam6d/pointfilter.cc for more detail.")
+    ("reduce,r", po::value<double>(&red)->default_value(-1.0),
+    "turns on octree based point reduction (voxel size=<NR>)")
+    ("octree,O", po::value<int>(&octree)->default_value(0),
+    "use randomized octree based point reduction (pts per voxel=<NR>)")
+    ("scale,y", po::value<double>(&scaleFac)->default_value(0.01),
+    "use ICP with scale'")
+    ("color,c", po::bool_switch(&use_color)->default_value(false),
+     "export in color as RGB")
+    ("reflectance,R", po::bool_switch(&use_reflectance)->default_value(false),
+     "end after scan <arg>")
+    ("trustpose,p", po::bool_switch(&use_pose)->default_value(true),
+    "Trust the pose file, do not extrapolate the last transformation."
+    "(just for testing purposes, or gps input.)")
+    ("xyz,x", po::bool_switch(&use_xyz)->default_value(false),
+     "export in xyz format (right handed coordinate system in m)")
+    ("hexfloat,0", po::bool_switch(&hexfloat)->default_value(false),
+     "export points with hexadecimal digits")
+    ("highprecision,H", po::bool_switch(&high_precision)->default_value(true),
+     "export points with full double precision")
+    ("frame,n", po::value<int>(&frame)->default_value(-1),
+     "uses frame NR for export");
 
-  std::cout << std::endl;
-  int option_index = 0;
-  const char *name;
-  while ((c = getopt_long(argc, argv, "f:s:e:r:O:Rm:y:M:u:n:pxchH", longopts, &option_index)) != -1)
-    switch (c)
-     {
-	     case 0:
-		     name = longopts[option_index].name;
-		     if (strcmp(name, "hexfloat") == 0) {
-			     hexfloat = true;
-		     } else {
-			     std::cerr << "unknown longopt: " << name << std::endl;
-			     usage(argv[0]);
-		     }
-		     break;
-     case 'r':
-       red = atof(optarg);
-       break;
-     case 'O':
-       if (optarg) {
-         octree = atoi(optarg);
-       } else {
-         octree = 1;
-       }
-       break;
-     case 'R':
-	  use_reflectance = true; 
-       break;
-	case 'c':
-	  use_color = true;
-	  break;
-     case 's':
-       start = atoi(optarg);
-       if (start < 0) { std::cerr << "Error: Cannot start at a negative scan number.\n"; exit(1); }
-       break;
-     case 'e':
-       end = atoi(optarg);
-       if (end < 0)     { std::cerr << "Error: Cannot end at a negative scan number.\n"; exit(1); }
-       if (end < start) { std::cerr << "Error: <end> cannot be smaller than <start>.\n"; exit(1); }
-       break;
-     case 'H':
-       high_precision = true;
-       break;
-     case 'm':
-       maxDist = atoi(optarg);
-       break;
-     case 'M':
-       minDist = atoi(optarg);
-       break;
-     case 'p':
-       use_pose = true;
-       break;
-     case 'x':
-       use_xyz = true;
-       break;
-     case 'y':
-       scaleFac = atof(optarg);
-       break;
-     case 'u':
-       customFilter = optarg;
-       break;
-     case 'n':
-       frame = atoi(optarg);
-       break;  
-     case 'f':
-    try {
-      type = formatname_to_io_type(optarg);
-    } catch (...) { // runtime_error
-      std::cerr << "Format " << optarg << " unknown." << std::endl;
-      abort();
-    }
-    break;
-      case 'h':
-      case '?':
-       usage(argv[0]);
-       return 1;
-      default:
-       abort ();
-      }
+  po::options_description hidden("Hidden options");
+  hidden.add_options()
+    ("input-dir", po::value<std::string>(&dir), "input dir");
 
-  if (optind != argc-1) {
-    std::cerr << "\n*** Directory missing ***" << std::endl;
-    usage(argv[0]);
+  // all options
+  po::options_description all;
+  all.add(generic).add(input).add(hidden);
+
+  // options visible with --help
+  po::options_description cmdline_options;
+  cmdline_options.add(generic).add(input);
+
+  // positional argument
+  po::positional_options_description pd;
+  pd.add("input-dir", 1);
+
+  // process options
+  po::variables_map vm;
+  po::store(po::command_line_parser(argc, argv).
+            options(all).positional(pd).run(), vm);
+
+  // display help
+  if (vm.count("help")) {
+    std::cout << cmdline_options;
+    std::cout << std::endl
+         << "Example usage:" << std::endl
+         << "\t./bin/pose2frames -s 0 -e 1 /Your/directory" << std::endl;
+    exit(0);
   }
-  dir = argv[optind];
+  po::notify(vm);
 
 #ifndef _MSC_VER
   if (dir[dir.length()-1] != '/') dir = dir + "/";
 #else
   if (dir[dir.length()-1] != '\\') dir = dir + "\\";
 #endif
+  
+  //parseFormatFile(dir, type, start, end);
 
   return 0;
 }
