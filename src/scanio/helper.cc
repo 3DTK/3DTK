@@ -304,6 +304,35 @@ bool strtoval(char *pos, unsigned int linenr, int* ret)
     return true;
 }
 
+unsigned int strtoarray(std::string opt_s, char **&opts_array)
+{
+    char * opts = (char *)malloc(opt_s.size() + 1);
+    memcpy(opts, opt_s.c_str(), opt_s.size() + 1);
+    char * tmp = (char *)malloc(opt_s.size() + 1);
+    memcpy(tmp, opt_s.c_str(), opt_s.size() + 1);
+    
+    char * pch;
+    pch = strtok (opts," ");
+
+    int count = 0;
+    while (pch != NULL)
+    {
+      count++;
+      pch = strtok (NULL, " ");
+    }
+    opts_array = new char*[count + 1];
+    pch = strtok (tmp," ");
+    int cnt = 0;
+    while (pch != NULL && cnt < count)
+    {
+      cnt++;
+      opts_array[cnt] = new char[strlen(pch) + 1];
+      memcpy(opts_array[cnt], pch, strlen(pch) + 1);
+      pch = strtok (NULL, " ");
+    }
+    return count; 
+}
+
 bool storeval(char *pos, unsigned int linenr, IODataType currspec, double* xyz, int* xyz_idx, unsigned char* rgb, int* rgb_idx, float* refl, float* temp, float* ampl, int* type, float* devi)
 {
     switch (currspec) {
