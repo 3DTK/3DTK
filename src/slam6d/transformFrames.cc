@@ -27,12 +27,6 @@ using std::string;
 #include "slam6d/icp6Dsvd.h"
 #include "slam6d/globals.icc"
 
-#ifndef _MSC_VER
-#include <getopt.h>
-#else
-#include "XGetopt.h"
-#endif
-
 #ifdef _MSC_VER
 #define strcasecmp _stricmp
 #define strncasecmp _strnicmp
@@ -51,55 +45,6 @@ using std::string;
 #include <boost/program_options.hpp>
 namespace po = boost::program_options;
 
-/**
- * Explains the usage of this program's command line parameters
- */
-void usage(char* prog)
-{
-#ifndef _MSC_VER
-    const std::string bold("\033[1m");
-    const std::string normal("\033[m");
-#else
-    const std::string bold("");
-    const std::string normal("");
-#endif
-    std::cout << std::endl
-        << bold << "USAGE " << normal << std::endl
-        << "   " << prog << " [parameters] directory" << std::endl << std::endl;
-    std::cout << bold << "PARAMETERS" << normal << std::endl
-
-        << std::endl
-        << bold << "  -n" << normal << " NR, " << bold << "--pointNr=" << normal << "NR" << std::endl
-        << "         number of points (= lines from input file) to use for computing transformation" << std::endl
-        << std::endl
-        << bold << "  -i" << normal << " STR, " << bold << "--input=" << normal << "STR" << std::endl
-        << "         input file containing (at least 3) point pairs for computing transformation" << std::endl
-        << "         (input file line syntax (mapping between Points p1 and p2): p1x p1y p1z p2x p2y p2z\n)" << std::endl
-        << std::endl
-        << bold << "  -s" << normal << " NR, " << bold << "--start=" << normal << "NR" << std::endl
-        << "         start at frame NR (i.e., neglects the first NR frame files)" << std::endl
-        << "         [ATTENTION: counting naturally starts with 0]" << std::endl
-        << bold << "  -e" << normal << " NR, " << bold << "--end=" << normal << "NR" << std::endl
-        << "         end after frame file NR" << std::endl
-        << std::endl
-        << bold << "  -r" << normal << ", " << bold << "--reverse" << normal << "" << std::endl
-        << "         reverse order of input point pairs, that is, instead of transforming from pts2 to pts1," << std::endl
-        << "         transform from pts1 to pts2" << std::endl
-        << std::endl
-        << bold << "  -x" << normal << ", " << bold << "--xyz" << normal << "" << std::endl
-        << "         frame files are in xyz format (right handed coordinate system in m);" << std::endl
-        << "         with this flag, they will be converted to the 3DTK-coordinate system" << std::endl
-        << "         before applying the transformation, and additionaly, files with converted" << std::endl
-        << "         input coordinates will be created " << std::endl
-        << std::endl
-
-        << std::endl << std::endl;
-
-    std::cout << bold << "EXAMPLES " << normal << std::endl
-        << "   " << prog << " -n 4 -i ptPairs.txt -s 2 -e 3 -x dat/dirWithFrameFiles" << std::endl << std::endl;
-    exit(1);
-}
-
 int parse_options(int argc, char **argv, std::string &dir, int &nrOfPts, std::string &inputFile,
     int &start, int &end, bool& inputInXYZ, bool& reverse)
 {
@@ -114,16 +59,19 @@ int parse_options(int argc, char **argv, std::string &dir, int &nrOfPts, std::st
      "[ATTENTION: counting naturally starts with 0]")
     ("end,e", po::value<int>(&end)->default_value(-1),
      "end after scan <arg>")
-    ("input,i", po::value<string>(&inputFile)->default_value("none"),
+    ("input,i", po::value<string>(&inputFile),
      "number of points (= lines from input file) to use for computing" 
      "transformation (input file line syntax (mapping between Points" 
      "p1 and p2): p1x p1y p1z p2x p2y p2z\n)")
     ("pointNr,n", po::value<int>(&nrOfPts)->default_value(0),
      "number of points (= lines from input file) to use for computing"     	
      "transformation")
-    ("xyx,x", po::bool_switch(&inputInXYZ)->default_value(true),
-     "frame files are in xyz format (right handed coordinate system in m);")
-    ("reverse,r", po::bool_switch(&reverse)->default_value(true),
+    ("xyx,x", po::bool_switch(&inputInXYZ)->default_value(false),
+     "frame files are in xyz format (right handed coordinate system in m);"
+     "with this flag, they will be converted to the 3DTK-coordinate system"
+     "before applying the transformation, and additionaly, files with converted"
+     "input coordinates will be created ")
+    ("reverse,r", po::bool_switch(&reverse)->default_value(false),
      "reverse order of input point pairs, that is, instead of transforming from pts2 to pts1,"
      "transform from pts1 to pts2");
 
@@ -153,7 +101,7 @@ int parse_options(int argc, char **argv, std::string &dir, int &nrOfPts, std::st
     std::cout << cmdline_options;
     std::cout << std::endl
          << "Example usage:" << std::endl
-         << "\t./bin/pose2frames -s 0 -e 1 /Your/directory" << std::endl;
+         << "\t./bin/transformFrames -n 4 -i ptPairs.txt -s 2 -e 3 -x dat/dirWithFrameFiles" << std::endl;
     exit(0);
   }
   po::notify(vm);
@@ -367,9 +315,6 @@ void modifyFrames(double* resTrans, std::string &dir, int start, int end, bool i
  */
 int main(int argc, char **argv)
 {
-    if (argc <= 1) {
-        usage(argv[0]);
-    }
 
     std::string dir;
     int nrOfPts = 0;
@@ -377,11 +322,17 @@ int main(int argc, char **argv)
     int    start = 0, end = -1;
     bool inputInXYZ = false;
     bool reverseOrder = false;
-
+  
     parse_options(argc, argv, dir, nrOfPts, inputFile, start, end, inputInXYZ, reverseOrder);
+
+    if(inputFile.empty()) {
+      std::cerr << "Please specify an input file" << std::endl;
+      exit(1);
+    }
 
     double resTrans[16];
     computeTransformation(nrOfPts, inputFile, dir, reverseOrder, resTrans);
-
+    
+    if(end < start) std::cerr << "No frames will be transformed!" << std::endl;
     modifyFrames(resTrans, dir, start, end, inputInXYZ);
 }
