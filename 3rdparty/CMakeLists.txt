@@ -91,6 +91,18 @@ add_library(laslib_shared SHARED $<TARGET_OBJECTS:laslib_objects>)
 set_target_properties(laslib_static PROPERTIES OUTPUT_NAME laslib CLEAN_DIRECT_OUTPUT 1)
 set_target_properties(laslib_shared PROPERTIES OUTPUT_NAME laslib CLEAN_DIRECT_OUTPUT 1)
 
+SET(LASSRC_DIR ${PROJECT_SOURCE_DIR}/3rdparty/lastools/src/)
+foreach(prog lasinfo lasindex las2txt lasdiff)
+  add_executable(${prog} "${LASSRC_DIR}/${prog}.cpp")
+  target_include_directories(${prog} PUBLIC ${PROJECT_SOURCE_DIR}/3rdparty/lastools/laslib/inc)
+  target_link_libraries(${prog} laslib_shared)
+endforeach()
+foreach(prog lasprecision txt2las las2las lasmerge laszip)
+  add_executable(${prog} "${LASSRC_DIR}/${prog}.cpp" "${LASSRC_DIR}/geoprojectionconverter.cpp")
+  target_include_directories(${prog} PUBLIC ${PROJECT_SOURCE_DIR}/3rdparty/lastools/laslib/inc)
+  target_link_libraries(${prog} laslib_shared)
+endforeach()
+
 endif(WITH_LASLIB)
 
 if (WITH_GLEE)
