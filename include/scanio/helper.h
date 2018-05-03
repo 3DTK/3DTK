@@ -82,6 +82,8 @@ bool readASCII(std::istream& infile,
         std::vector<float>* deviation = 0,
         std::streamsize bufsize = 128);
 
+unsigned int strtoarray(std:: string opts, char **&opts_array);
+
 bool open_path(boost::filesystem::path data_path, std::function<bool (std::istream &)>);
 bool open_path_writing(boost::filesystem::path data_path, std::function<bool (std::ostream &)> handler);
 
