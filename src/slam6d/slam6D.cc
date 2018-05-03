@@ -91,6 +91,8 @@ using std::ifstream;
 
 #include <boost/filesystem.hpp>
 
+#include <boost/program_options.hpp>
+namespace po = boost::program_options;
 
 //  Handling Segmentation faults and CTRL-C
 void sigSEGVhandler (int v)
@@ -315,7 +317,22 @@ void usage(char* prog)
  * @param bucketSize defines the k-d treeleaf bucket size
  * @return 0, if the parsing was successful. 1 otherwise
  */
-int parseArgs(int argc, char **argv, string &dir, double &red, int &rand,
+
+void validate(boost::any& v, const std::vector<std::string>& values,
+              IOType*, int) {
+  if (values.size() == 0)
+    throw std::runtime_error("Invalid model specification");
+  std::string arg = values.at(0);
+  try {
+    v = formatname_to_io_type(arg.c_str());
+  } catch (...) { // runtime_error
+    throw std::runtime_error("Format " + arg + " unknown.");
+  }
+}
+
+
+
+int parse_options(int argc, char **argv, string &dir, double &red, int &rand,
               double &mdm, double &mdml, double &mdmll,
               int &mni, int &start, int &end, int &maxDist, int &minDist, string &customFilter, bool &quiet, bool &veryQuiet,
               bool &extrapolate_pose, bool &meta, int &algo, int &loopSlam6DAlgo, int &lum6DAlgo, int &anim,
@@ -325,239 +342,160 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &rand,
               bool& scanserver, PairingMode& pairing_mode, bool &continue_processing, int &bucketSize,
               boost::filesystem::path &loopclosefile)
 {
-  int  c;
-  // from unistd.h:
-  extern char *optarg;
-  extern int optind;
-  
-  WriteOnce<IOType> w_type(type);
-  WriteOnce<int> w_start(start), w_end(end);
 
-  /* options descriptor */
-  /* TODO rework the last column (it does not need to be a char) */
-  static struct option longopts[] = {
-    { "format",          required_argument,   0,  'f' },  
-    { "algo",            required_argument,   0,  'a' },
-    { "nns_method",      required_argument,   0,  't' },
-    { "loop6DAlgo",      required_argument,   0,  'L' },
-    { "graphSlam6DAlgo", required_argument,   0,  'G' },
-    { "net",             required_argument,   0,  'n' },
-    { "iter",            required_argument,   0,  'i' },
-    { "iterSLAM",        required_argument,   0,  'I' },
-    { "max",             required_argument,   0,  'm' },
-    { "customFilter",    required_argument,   0,  'u' },
-    { "loopsize",        required_argument,   0,  'l' },
-    { "cldist",          required_argument,   0,  'c' },
-    { "clpairs",         required_argument,   0,  'C' },
-    { "min",             required_argument,   0,  'M' },
-    { "dist",            required_argument,   0,  'd' },
-    { "distSLAM",        required_argument,   0,  'D' },
-    { "start",           required_argument,   0,  's' },
-    { "end",             required_argument,   0,  'e' },
-    { "reduce",          required_argument,   0,  'r' },
-    { "octree",          optional_argument,   0,  'O' },
-    { "random",          required_argument,   0,  'R' },
-    { "quiet",           no_argument,         0,  'q' },
-    { "veryquiet",       no_argument,         0,  'Q' },
-    { "trustpose",       no_argument,         0,  'p' },
-    { "anim",            required_argument,   0,  'A' },
-    { "metascan",        no_argument,         0,  '2' }, // use the long format
-    { "DlastSLAM",       required_argument,   0,  '4' }, // use the long format
-    { "epsICP",          required_argument,   0,  '5' }, // use the long format
-    { "epsSLAM",         required_argument,   0,  '6' }, // use the long format
-    { "normalshoot-simple", no_argument,      0,  '7' }, // use the long format
-    { "point-to-plane-simple", no_argument,   0,  'z' }, // use the long format
-    { "exportAllPoints", no_argument,         0,  '8' },
-    { "distLoop",        required_argument,   0,  '9' }, // use the long format
-    { "iterLoop",        required_argument,   0,  '1' }, // use the long format
-    { "graphDist",       required_argument,   0,  '3' }, // use the long format
-    { "scanserver",      no_argument,         0,  'S' },
-    { "continue",        no_argument,         0,  '0' }, // use the long format
-    { "bucketSize",      required_argument,   0,  'b' },
-    { "loopclosefile",   required_argument,   0,  0 }, // no short option
-    { 0,  0,   0,   0}                                   // needed, cf. getopt.h
-  };
-  
-  int option_index = 0;
+po::options_description generic("Generic options");
+  generic.add_options()
+    ("help,h", "output this help message");
 
-  cout << endl;
-  while ((c = getopt_long(argc, argv, "O:f:A:G:L:a:t:r:R:d:D:i:l:I:c:C:n:s:e:m:M:u:b:uqQpS", longopts, &option_index)) != -1) {
-    switch (c) {
-    case 0:
-        if (strcmp(longopts[option_index].name, "loopclosefile") == 0) {
-            loopclosefile = boost::filesystem::path(optarg);
-        } else {
-            abort ();
-        }
-        break;
-    case '0':
-      continue_processing = true;
-      break;
-    case 'a':
-      algo = atoi(optarg);
-      if ((algo < 0) || (algo > 10)) {
-        cerr << "Error: ICP minimizer algorithm not available." << endl;
-        exit(1);
-      }
-      break;
-    case 't':
-      nns_method = atoi(optarg);
-      if ((nns_method < 0) || (nns_method > 3)) {
-        cerr << "Error: NNS Method not available." << endl;
-        exit(1);
-      }
-      break;
-    case 'L':
-      loopSlam6DAlgo = atoi(optarg);
-      if (loopSlam6DAlgo < 0 || loopSlam6DAlgo > 6) {
-        cerr << "Error: global loop closing algorithm not available." << endl;
-        exit(1);
-      }
-      break;
-    case 'G':
-      lum6DAlgo = atoi(optarg);
-      if ((lum6DAlgo < 0) || (lum6DAlgo > 6)) {
-        cerr << "Error: global relaxation algorithm not available." << endl;
-        exit(1);
-      }
-      break;
-    case 'c':
-      cldist = atof(optarg);
-      break;
-    case 'C':
-      clpairs = atoi(optarg);
-      break;
-    case 'l':
-      loopsize = atoi(optarg);
-      break;
-    case 'r':
-      red = atof(optarg);
-      break;
-    case 'O':
-      if (optarg) {
-        octree = atoi(optarg);
-      } else {
-        octree = 1;
-      }
-      break;
-    case 'R':
-      rand = atoi(optarg);
-      break;
-    case 'd':
-      mdm = atof(optarg);
-      break;
-    case 'D':
-      mdml = atof(optarg);
-      break;
-    case 'i':
-      mni = atoi(optarg);
-      break;
-    case 'I':
-      mni_lum = atoi(optarg);
-      break;
-    case 'n':
-      net = optarg;
-      break;
-    case 's':
-      w_start = atoi(optarg);
-      if (start < 0) { 
-     cerr << "Error: Cannot start at a negative scan number." << endl; 
-     exit(1); 
-      }
-      break;
-    case 'e':
-      w_end = atoi(optarg);
-      if (end < 0)     { 
-     cerr << "Error: Cannot end at a negative scan number." << endl; 
-     exit(1); 
-      }
-      if (end < start) { 
-     cerr << "Error: <end> cannot be smaller than <start>." << endl; 
-     exit(1); 
-      }
-      break;
-    case 'm':
-      maxDist = atoi(optarg);
-      break;
-    case 'M':
-      minDist = atoi(optarg);
-      break;
-    case 'u':
-      customFilter = optarg;
-      break;
-    case 'q':
-      quiet = true;
-      break;
-    case 'Q':
-      quiet = veryQuiet = true;
-      break;
-    case 'p':
-      extrapolate_pose = false;
-      break;
-    case 'A':
-      anim = atoi(optarg);
-      break;
-    case '2':  // = --metascan
-      meta = true;
-      break;
-    case '4':  // = --DlastSLAM
-      mdmll = atof(optarg);
-      break;
-    case '5':  // = --epsICP
-      epsilonICP = atof(optarg);
-      break;
-    case '6':  // = --epsSLAM
-      epsilonSLAM = atof(optarg);
-      break;
-    case '8':  // not used
-      exportPts = true;
-      break;
-    case '9':  // = --distLoop
-      distLoop = atof(optarg);
-      break;
-    case '1':  // = --iterLoop
-      iterLoop = atoi(optarg);
-      break;
-    case '3':  // = --graphDist
-      graphDist = atof(optarg);
-      break;
-    case '7': // = --normalshoot-simple
-      pairing_mode = CLOSEST_POINT_ALONG_NORMAL_SIMPLE;
-      break;
-    case 'z': // = --point-to-plane-simple
-      pairing_mode = CLOSEST_PLANE_SIMPLE;
-      break;
-    case 'f':
-      try {
-        w_type = formatname_to_io_type(optarg);
-      } catch (...) { // runtime_error
-        cerr << "Format " << optarg << " unknown." << endl;
-        abort();
-      }
-      break;
-    case 'S':
-      scanserver = true;
-      break;
-    case 'b':
-      bucketSize = atoi(optarg);
-      if (bucketSize < 1) {
-        cerr << "Error: <bucketSize> must be positive." << endl;
-        exit(1);
-      }
-      break;
-    case '?':
-      usage(argv[0]);
-      return 1;
-    default:
-      abort ();
-    }
+  po::options_description input("Input options");
+  input.add_options()
+    ("format,f", po::value<IOType>(&type)->default_value(UOS, "uos"),
+     "using shared library <arg> for input. (chose F from {uos, uos_map, "
+     "uos_rgb, uos_frames, uos_map_frames, old, rts, rts_map, ifp, "
+     "riegl_txt, riegl_rgb, riegl_bin, zahn, ply, las})")
+    ("start,s", po::value<int>(&start)->default_value(0),
+     "start at scan <arg> (i.e., neglects the first <arg> scans) "
+     "[ATTENTION: counting naturally starts with 0]")
+    ("end,e", po::value<int>(&end)->default_value(-1),
+     "end after scan <arg>")
+    ("algo,a", po::value<int>(&algo)->default_value(0),
+     "selects the minimizazion method for the ICP matching algorithm"
+     " "
+     "1 = unit quaternion based method by Horn"
+     "2 = singular value decomposition by Arun et al. "
+     "3 = orthonormal matrices by Horn et al."
+     "4 = dual quaternion method by Walker et al."
+     "5 = helix approximation by Hofer & Potmann"
+     "6 = small angle approximation"
+     "7 = Lu & Milios style, i.e., uncertainty based, with Euler angles"
+     " "
+     "8 = Lu & Milios style, i.e., uncertainty based, with Quaternion"
+     " "
+     "9 = unit quaternion with scale method by Horn")
+    ("nns_method,t", po::value<int>(&nns_method)->default_value(0),
+    "selects the Nearest Neighbor Search Algorithm"
+    "0 = simple k-d tree "
+    "1 = cached k-d tree "
+    "2 = ANNTree "
+    "3 = BOCTree ")
+    ("loop6DAlgo,L", po::value<int>(&loopSlam6DAlgo)->default_value(0),
+    "use first NR correspondences'")
+    ("graphSlam6DAlgo,G", po::value<int>(&lum6DAlgo)->default_value(0),
+    "selects the minimizazion method for the SLAM matching algorithm"
+    "0 = no global relaxation technique"
+    "1 = Lu & Milios extension using euler angles due to Borrmann et al."
+    "2 = Lu & Milios extension using using unit quaternions"
+    "3 = HELIX approximation by Hofer and Pottmann"
+    "4 = small angle approximation")
+    ("net,n", po::value<string>(&net)->default_value("none"),
+    "specifies the file that includes the net structure for SLAM")
+    ("iter,i", po::value<int>(&mni)->default_value(50),
+    "sets the maximal number of ICP iterations to <NR>")
+    ("iterSLAM,I", po::value<int>(&mni_lum)->default_value(-1),
+    "sets the maximal number of iterations for SLAM to <NR>"
+    "(if not set, graphSLAM is not executed)")
+    ("max,m", po::value<int>(&maxDist)->default_value(0),
+    "neglegt all data points with a distance larger than NR 'units'")
+    ("customFilter,u", po::value<string>(&customFilter)->default_value(" "),
+    "Apply a custom filter. Filter mode and data are specified as a "
+    "semicolon-seperated string:"
+    "{filterMode};{nrOfParams}[;param1][;param2][...]"
+    "Multiple filters can be specified in a file (syntax in file is same as"
+    "direct specification"
+    "FILE;{fileName}"
+    "See filter implementation in src/slam6d/pointfilter.cc for more detail.")
+    ("loopsize,l", po::value<int>(&loopsize)->default_value(20),
+    "use first NR correspondences'")
+    ("cldist,c", po::value<double>(&cldist)->default_value(500),
+    "specifies the maximal distance for closed loops")
+    ("clpairs,C", po::value<int>(&clpairs)->default_value(-1),
+    "specifies the minimal number of points for an overlap. If not specified"
+    "cldist is used instead")
+    ("min,M", po::value<int>(&minDist)->default_value(0),
+    "neglegt all data points with a distance smaller than NR 'units'")
+    ("dist,d", po::value<double>(&mdm)->default_value(25.0),
+    "sets the maximal point-to-point distance for matching with ICP to <NR> 'units'"
+    "(unit of scan data, e.g. cm)")
+    ("distSLAM,D", po::value<double>(&mdml)->default_value(25.0),
+    "sets the maximal point-to-point distance for matching with SLAM to <NR> 'units'"
+    "(unit of scan data, e.g. cm)")
+    ("reduce,r", po::value<double>(&red)->default_value(-1.0),
+    "turns on octree based point reduction (voxel size=<NR>)")
+    ("octree,O", po::value<int>(&octree)->default_value(0),
+    "use randomized octree based point reduction (pts per voxel=<NR>)")
+    ("random,R", po::value<int>(&rand)->default_value(-1),
+    "turns on randomized reduction, using about every <NR>-th point only")
+    ("quiet,q", po::bool_switch(&quiet)->default_value(false),
+    "Quiet mode. Suppress (most) messages")
+    ("veryquiet,Q", po::bool_switch(&veryQuiet)->default_value(false),
+    "Very quiet mode. Suppress all messages, except in case of error.")
+    ("trustpose,p", po::bool_switch(&extrapolate_pose)->default_value(true),
+    "Trust the pose file, do not extrapolate the last transformation."
+    "(just for testing purposes, or gps input.)")
+    ("anim,A", po::value<int>(&anim)->default_value(-1),
+    "if specified, use only every NR-th frame for animation")
+    ("metascan,2", po::bool_switch(&meta)->default_value(false),
+    "use first NR correspondences'")
+    ("DlastSLAM,4", po::value<double>(&mdmll)->default_value(-1.0),
+    "sets the maximal point-to-point distance for the final SLAM correction,"
+    "if final SLAM is not required don't set it.")
+    ("epsICP,5", po::value<double>(&epsilonICP)->default_value(0.00001),
+    "stop ICP iteration if difference is smaller than NR")
+    ("epsSLAM,6", po::value<double>(&epsilonSLAM)->default_value(0.5),
+    "stop SLAM iteration if average difference is smaller than NR")
+    //("normal_shoot-simple,7", po::value<int>(&pairing_mode)->default_value(0),
+    //"use first NR correspondences'")
+    //("point-to-plane-simple,z", po::value<int>(&pairing_mode)->default_value(0),
+    //"use first NR correspondences'")
+    ("exportAllPoints,8", po::bool_switch(&exportPts)->default_value(false),
+    "writes all registered reduced points to the file points.pts before"
+    "slam6D terminated")
+    ("distLoop,9", po::value<double>(&distLoop)->default_value(700),
+    "use first NR correspondences'")
+    ("iterLoop,1", po::value<int>(&iterLoop)->default_value(100),
+    "use first NR correspondences'")
+    ("graphDist,3", po::value<double>(&graphDist)->default_value(0),
+    "use first NR correspondences'")
+    ("scanserver,S", po::bool_switch(&scanserver)->default_value(false),
+    "Use the scanserver as an input method and handling of scan data")
+    ("continue,0", po::bool_switch(&continue_processing)->default_value(false),
+    "use first NR correspondences'")
+    ("bucketSize,b", po::value<int>(&bucketSize)->default_value(20),
+    "specifies the bucket size for leafs of the k-d tree. During construction of the"
+    "tree, any subtree of at most this size will be replaced by an array.")
+    ("loopclosefile,0", po::value<boost::filesystem::path>(&loopclosefile),
+    "use first NR correspondences'");
+
+  po::options_description hidden("Hidden options");
+  hidden.add_options()
+    ("input-dir", po::value<std::string>(&dir), "input dir");
+
+  // all options
+  po::options_description all;
+  all.add(generic).add(input).add(hidden);
+
+  // options visible with --help
+  po::options_description cmdline_options;
+  cmdline_options.add(generic).add(input);
+
+  // positional argument
+  po::positional_options_description pd;
+  pd.add("input-dir", 1);
+
+  // process options
+  po::variables_map vm;
+  po::store(po::command_line_parser(argc, argv).
+            options(all).positional(pd).run(), vm);
+
+  // display help
+  if (vm.count("help")) {
+    std::cout << cmdline_options;
+    std::cout << std::endl
+         << "Example usage:" << std::endl
+         << "\t./bin/pose2frames -s 0 -e 1 /Your/directory" << std::endl;
+    exit(0);
   }
-
-  if (optind != argc-1) {
-    cerr << "\n*** Directory missing ***" << endl;
-    usage(argv[0]);
-  }
-  dir = argv[optind];
+  po::notify(vm);
 
 #ifndef _MSC_VER
   if (dir[dir.length()-1] != '/') dir = dir + "/";
@@ -565,7 +503,7 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &rand,
   if (dir[dir.length()-1] != '\\') dir = dir + "\\";
 #endif
   
-  parseFormatFile(dir, w_type, w_start, w_end);
+  //parseFormatFile(dir, type, start, end);
 
   return 0;
 }
@@ -807,7 +745,7 @@ int main(int argc, char **argv)
   int bucketSize = 20;
   boost::filesystem::path loopclose("loopclose.pts");
   
-  parseArgs(argc, argv, dir, red, rand, mdm, mdml, mdmll, mni, start, end,
+  parse_options(argc, argv, dir, red, rand, mdm, mdml, mdmll, mni, start, end,
             maxDist, minDist, customFilter, quiet, veryQuiet, eP, meta,
             algo, loopSlam6DAlgo, lum6DAlgo, anim,
             mni_lum, net, cldist, clpairs, loopsize, epsilonICP, epsilonSLAM,
@@ -821,6 +759,7 @@ int main(int argc, char **argv)
   
   if (continue_processing) Scan::continueProcessing();
   Scan::setProcessingCommand(argc, argv);
+
   Scan::openDirectory(scanserver, dir, type, start, end);
 
   if(Scan::allScans.size() == 0) {
@@ -869,6 +808,8 @@ int main(int argc, char **argv)
       std::cerr << "Custom filter: specifying string has not been set properly, data will NOT be filtered." << std::endl;
     }
   }
+
+  cout << start << " " << end << " " << Scan::allScans.size() << endl;
   for(ScanVector::iterator it = Scan::allScans.begin();
       it != Scan::allScans.end();
       ++it) {
@@ -883,7 +824,7 @@ int main(int argc, char **argv)
      scan->setReductionParameter(red, octree, PointType(types));
      scan->setSearchTreeParameter(nns_method, bucketSize);
   }
-  
+  cout << "yes1" << endl;
   icp6Dminimizer *my_icp6Dminimizer = 0;
   switch (algo) {
   case 1 :
@@ -917,7 +858,7 @@ int main(int argc, char **argv)
     my_icp6Dminimizer = new icp6D_NAPX(quiet);
     break;
   }
-
+cout << "yes2" << endl;
   // match the scans and print the time used
   long starttime = GetCurrentTimeInMilliSec();
   
@@ -929,7 +870,7 @@ int main(int argc, char **argv)
     icp6D *my_icp = 0;
     my_icp = new icp6D(my_icp6Dminimizer, mdm, mni, quiet, meta, rand, eP,
                        anim, epsilonICP, nns_method);
-
+cout << "yes3" << endl;
     // check if CAD matching was selected as type
     if (type == UOS_CAD)
     {
@@ -940,6 +881,7 @@ int main(int argc, char **argv)
     delete my_icp;
   } else if (clpairs > -1) {
     //!!!!!!!!!!!!!!!!!!!!!!!!
+    cout << "yes4" << endl;
     icp6D *my_icp = 0;
     my_icp = new icp6D(my_icp6Dminimizer, mdm, mni, quiet, meta, rand, eP,
                        anim, epsilonICP, nns_method);
@@ -950,8 +892,10 @@ int main(int argc, char **argv)
                                                  nns_method, epsilonSLAM);
     my_graphSlam6D->matchGraph6Dautomatic(Scan::allScans, mni_lum,
                                           clpairs, loopsize);
+   
     //!!!!!!!!!!!!!!!!!!!!!!!!            
   } else {
+  cout << "yes5" << endl;
     graphSlam6D *my_graphSlam6D = 0;
     switch (lum6DAlgo) {
     case 1 :

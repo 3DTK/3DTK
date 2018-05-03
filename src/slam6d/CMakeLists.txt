@@ -67,6 +67,7 @@ if(UNIX)
   target_link_libraries(frames2pose ${Boost_LIBRARIES} ${Boost_SYSTEM_LIBRARY})
   target_link_libraries(frames2riegl ${Boost_LIBRARIES} ${Boost_SYSTEM_LIBRARY})
   target_link_libraries(riegl2frames ${Boost_LIBRARIES} ${Boost_SYSTEM_LIBRARY})
+  target_link_libraries(exportPoints ${Boost_LIBRARIES} ${Boost_SYSTEM_LIBRARY})
 endif()
 
 if(APPLE)
