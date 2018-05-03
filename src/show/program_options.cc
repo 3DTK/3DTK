@@ -135,7 +135,7 @@ void parse_args(int argc, char **argv, dataset_settings& ds, window_settings& ws
       "arg = 0             : the center of mass of all scans\n"
       "arg = [1,2,3,...]   : the center of scan 0,1,2,... (arg-1)\n"
       "arg = [-1,-2,-3,...]: the position of scan 0,1,2,... (-arg-1)\n")
-    ("sphere,b", value(&ds.sphere_mode),
+    ("sphere,b", value(&ds.sphere_radius)->default_value(0),
       "Map all measurements on a sphere of this radius.")
     ;
 

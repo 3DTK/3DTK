@@ -108,7 +108,7 @@ struct dataset_settings {
   // TODO make this an std::optional (C++17)
   int origin_type {};
   bool origin_type_set {};
-  bool sphere_mode {};
+  double sphere_radius;
 
   bool save_octree;
   bool load_octree;

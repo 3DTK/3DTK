@@ -18,7 +18,7 @@ double lastfps        = idealfps;   // last frame rate
 int    pointmode      = -1;
 
 bool   smallfont      = true;
-bool   label          = true;
+bool   label          = false;
 
 #include "show/url.h"
 

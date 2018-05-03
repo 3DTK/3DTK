@@ -605,7 +605,7 @@ void copy_settings_to_globals(
 
   origin = ds.origin_type;
   originset = ds.origin_type_set;
-  sphereMode = ds.sphere_mode;
+  sphereMode = ds.sphere_radius;
 
   saveOct = ds.save_octree;
   loadOct = ds.load_octree;
