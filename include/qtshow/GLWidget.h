@@ -53,6 +53,9 @@ public slots:
   void idle();
 
 signals:
+  void positionChanged(QString);
+  void quaternionChanged(QString);
+
   void colorMinimumValueChanged(double);
   void colorMaximumValueChanged(double);
 
@@ -69,6 +72,8 @@ protected:
   void paintGL();
 
   bool eventFilter(QObject *watched, QEvent *event);
+
+  void cameraChanged();
 
   void mousePressEvent(QMouseEvent *event);
   void mouseReleaseEvent(QMouseEvent *event);

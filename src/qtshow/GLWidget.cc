@@ -32,6 +32,7 @@ void GLWidget::initializeGL() {
   initializeOpenGLFunctions();
   load_url_texture();
   glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+  cameraChanged();
 }
 
 void GLWidget::resizeGL(int w, int h) {
@@ -115,6 +116,12 @@ void GLWidget::mouseReleaseEvent(QMouseEvent *event) {
   passMouseEvent(event, false);
 }
 
+/** Notify interested widgets of the camera position. */
+void GLWidget::cameraChanged() {
+  emit positionChanged(QString::asprintf("%.5g,%.5g,%.5g", X, Y, Z));
+  emit quaternionChanged(QString::asprintf("%.3g,%.3g,%.3g,%.3g", quat[0], quat[1], quat[2], quat[3]));
+}
+
 void GLWidget::mouseMoveEvent(QMouseEvent *event) {
   int dx =  width()/2 - event->x(),
       dy = height()/2 - event->y();
@@ -122,6 +129,7 @@ void GLWidget::mouseMoveEvent(QMouseEvent *event) {
   callbacks::glut::mouseMoveDelta(dx, dy);
 
   update();
+  cameraChanged();
 
   QPoint center(width() / 2, height() / 2);
   QCursor::setPos(mapToGlobal(center));
@@ -166,6 +174,7 @@ void GLWidget::keyPressEvent(QKeyEvent *event) {
   }
 
   update();
+  cameraChanged();
 }
 
 void GLWidget::setFullscreen(bool fullscreenWanted) {
