@@ -57,17 +57,6 @@ void GLWidget::paintGL() {
   DisplayItFunc(GL_RENDER, false);
 }
 
-bool GLWidget::eventFilter(QObject *watched, QEvent *event) {
-  if (watched != this && event->type() == QEvent::Shortcut) {
-    // This alleviates the problem. However, you can only use
-    // Alt+A, Alt+S right now.
-    // TODO make the GLWidget work with Alt+W, Alt+D
-    return true;
-  }
-  // Call parent class as is required
-  return QOpenGLWidget::eventFilter(watched, event);
-}
-
 /** Processes a mouse event for the legacy parts of show. */
 void passMouseEvent(QMouseEvent *event, bool press) {
   int button = -1;
