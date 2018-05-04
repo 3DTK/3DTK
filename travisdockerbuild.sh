@@ -79,8 +79,9 @@ apt-get update
 apt-get dist-upgrade --yes
 apt-get install --yes --no-install-recommends -o Debug::pkgProblemResolver=yes equivs ninja-build
 equivs-build doc/equivs/control.$DERIV.$DIST
+apt-get install --no-install-recommends -o Debug::pkgProblemResolver=yes ./3dtk-build-deps_1.0_all.deb || true
 dpkg --install --force-depends ./3dtk-build-deps_1.0_all.deb
-apt-get install --no-install-recommends ./3dtk-build-deps_1.0_all.deb || apt-get install --yes --no-install-recommends --fix-broken -o Debug::pkgProblemResolver=yes
+apt-get install --yes --no-install-recommends --fix-broken -o Debug::pkgProblemResolver=yes
 echo "travis_fold:end:docker_setup"
 mkdir .build
 cmake -H. -B.build $CMAKEOPTS -G "Ninja"
