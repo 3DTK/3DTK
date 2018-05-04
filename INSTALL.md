@@ -39,6 +39,21 @@ $ bin/slam6D dat
 $ bin/show dat
 ```
 
+### Building with Ninja
+
+Ninja builds 3DTK faster than GNU Make and will automatically build in
+parallel. Follow the steps above, but before running `make`, install Ninja:
+
+```
+$ sudo apt-get install ninja-build
+```
+
+Then tell our Makefile to use Ninja:
+
+```
+$ CMAKE_GENERATOR=Ninja make
+```
+
 ## Debian Jessie
 
 Read and follow the instructions for Ubuntu 16.04, do *not* add the Ubuntu
