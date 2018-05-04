@@ -71,8 +71,6 @@ protected:
   void resizeGL(int w, int h);
   void paintGL();
 
-  bool eventFilter(QObject *watched, QEvent *event);
-
   void cameraChanged();
 
   void mousePressEvent(QMouseEvent *event);
