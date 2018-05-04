@@ -695,9 +695,6 @@
    </widget>
   </widget>
   <widget class="QDockWidget" name="dockState">
-   <property name="enabled">
-    <bool>false</bool>
-   </property>
    <property name="windowTitle">
     <string>State</string>
    </property>
@@ -722,6 +719,9 @@
      </property>
     </widget>
     <widget class="QLineEdit" name="lineEditStateFile">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
      <property name="geometry">
       <rect>
        <x>10</x>
@@ -732,6 +732,9 @@
      </property>
     </widget>
     <widget class="QToolButton" name="buttonChooseStateFile">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
      <property name="geometry">
       <rect>
        <x>170</x>
@@ -749,6 +752,9 @@
      </property>
     </widget>
     <widget class="QPushButton" name="buttonSaveState">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
      <property name="geometry">
       <rect>
        <x>10</x>
@@ -762,6 +768,9 @@
      </property>
     </widget>
     <widget class="QPushButton" name="buttonLoadState">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
      <property name="geometry">
       <rect>
        <x>107</x>
