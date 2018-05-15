@@ -1,6 +1,7 @@
-project("fusion")
+if(WITH_ROS)
+  project("fusion")
 
-find_package(catkin REQUIRED COMPONENTS
+  find_package(catkin REQUIRED COMPONENTS
       roscpp
       rosbag
       tf
@@ -18,21 +19,22 @@ find_package(catkin REQUIRED COMPONENTS
       rospy
   )
 
-find_package(Eigen3 REQUIRED)
-find_package(PCL REQUIRED)
-find_package(PkgConfig)
+  find_package(Eigen3 REQUIRED)
+  find_package(PCL REQUIRED)
+  find_package(PkgConfig)
 
-include_directories(${CATKIN_DEVEL_PREFIX}/include)
-include_directories(${catkin_INCLUDE_DIRS})
+  include_directories(${CATKIN_DEVEL_PREFIX}/include)
+  include_directories(${catkin_INCLUDE_DIRS})
 
-#include_directories(${CMAKE_SOURCE_DIR}/include/curvefusion/)
-
-
-include_directories(${EIGEN3_INCLUDE_DIR})
-
-include_directories(${NEWMAT_INCLUDE_DIRS})
+  #include_directories(${CMAKE_SOURCE_DIR}/include/curvefusion/)
 
 
-add_executable(fusion fusion.cc curves.cc timestamps.cc tf_broadcaster.cc)
- target_link_libraries(fusion ${catkin_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} ${Boost_PROGRAM_OPTIONS_LIBRARY} ${NEWMAT_LIBRARIES_SHARED} ${OpenCV_LIBRARIES})
+  include_directories(${EIGEN3_INCLUDE_DIR})
+
+  include_directories(${NEWMAT_INCLUDE_DIRS})
+
+
+  add_executable(fusion fusion.cc curves.cc timestamps.cc tf_broadcaster.cc)
+  target_link_libraries(fusion ${catkin_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} ${Boost_PROGRAM_OPTIONS_LIBRARY} ${NEWMAT_LIBRARIES_SHARED} ${OpenCV_LIBRARIES})
+endif()
 
