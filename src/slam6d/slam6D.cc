@@ -190,35 +190,37 @@ po::options_description generic("Generic options");
     ("end,e", po::value<int>(&end)->default_value(-1),
      "end after scan <arg>")
     ("algo,a", po::value<int>(&algo)->default_value(1),
-     "selects the minimizazion method for the ICP matching algorithm"
-     " "
-     "1 = unit quaternion based method by Horn"
-     "2 = singular value decomposition by Arun et al. "
-     "3 = orthonormal matrices by Horn et al."
-     "4 = dual quaternion method by Walker et al."
-     "5 = helix approximation by Hofer & Potmann"
-     "6 = small angle approximation"
-     "7 = Lu & Milios style, i.e., uncertainty based, with Euler angles"
-     " "
-     "8 = Lu & Milios style, i.e., uncertainty based, with Quaternion"
-     " "
+     "selects the minimization method for the ICP matching algorithm\n"
+     "1 = unit quaternion based method by Horn\n"
+     "2 = singular value decomposition by Arun et al.\n"
+     "3 = orthonormal matrices by Horn et al.\n"
+     "4 = dual quaternion method by Walker et al.\n"
+     "5 = helix approximation by Hofer & Potmann\n"
+     "6 = small angle approximation\n"
+     "7 = Lu & Milios style, i.e., uncertainty based, with Euler angles\n"
+     "8 = Lu & Milios style, i.e., uncertainty based, with Quaternion\n"
      "9 = unit quaternion with scale method by Horn")
     ("nns_method,t", po::value<int>(&nns_method)->default_value(simpleKD),
-    "selects the Nearest Neighbor Search Algorithm"
-    "0 = simple k-d tree "
-    "1 = cached k-d tree "
-    "2 = ANNTree "
-    "3 = BOCTree ")
+    "selects the Nearest Neighbor Search Algorithm\n"
+    "0 = simple k-d tree\n"
+    "1 = cached k-d tree\n"
+    "2 = ANNTree\n"
+    "3 = BOCTree")
     ("loop6DAlgo,L", po::value<int>(&loopSlam6DAlgo)->default_value(0),
-    "use first NR correspondences'")
+     "selects the method for closing the loop explicitly\n"
+     "0 = no loop closing technique\n"
+     "1 = euler angles\n"
+     "2 = quaternions\n"
+     "3 = unit quaternions\n"
+     "4 = SLERP (recommended)")
     ("graphSlam6DAlgo,G", po::value<int>(&lum6DAlgo)->default_value(0),
-    "selects the minimizazion method for the SLAM matching algorithm"
-    "0 = no global relaxation technique"
-    "1 = Lu & Milios extension using euler angles due to Borrmann et al."
-    "2 = Lu & Milios extension using using unit quaternions"
-    "3 = HELIX approximation by Hofer and Pottmann"
+    "selects the minimizazion method for the SLAM matching algorithm\n"
+    "0 = no global relaxation technique\n"
+    "1 = Lu & Milios extension using euler angles due to Borrmann et al.\n"
+    "2 = Lu & Milios extension using using unit quaternions\n"
+    "3 = HELIX approximation by Hofer and Pottmann\n"
     "4 = small angle approximation")
-    ("net,n", po::value<string>(&net),
+    ("net,n", po::value<string>(&net)->default_value("none"),
     "specifies the file that includes the net structure for SLAM")
     ("iter,i", po::value<int>(&mni)->default_value(50),
     "sets the maximal number of ICP iterations to <NR>")
@@ -229,14 +231,14 @@ po::options_description generic("Generic options");
     "neglegt all data points with a distance larger than NR 'units'")
     ("customFilter,u", po::value<string>(&customFilter),
     "Apply a custom filter. Filter mode and data are specified as a "
-    "semicolon-seperated string:"
-    "{filterMode};{nrOfParams}[;param1][;param2][...]"
-    "Multiple filters can be specified in a file (syntax in file is same as"
-    "direct specification"
-    "FILE;{fileName}"
+    "semicolon-seperated string:\n"
+    "{filterMode};{nrOfParams}[;param1][;param2][...]\n"
+    "Multiple filters can be specified in a file (syntax in file is same as" 
+    "direct specification)\n"
+    "FILE;{fileName}\n"
     "See filter implementation in src/slam6d/pointfilter.cc for more detail.")
     ("loopsize,l", po::value<int>(&loopsize)->default_value(20),
-    "use first NR correspondences'")
+    "sets the size of a loop, i.e., a loop must exceed <NR> of scans")
     ("cldist,c", po::value<double>(&cldist)->default_value(500),
     "specifies the maximal distance for closed loops")
     ("clpairs,C", po::value<int>(&clpairs)->default_value(-1),
@@ -266,7 +268,7 @@ po::options_description generic("Generic options");
     ("anim,A", po::value<int>(&anim)->default_value(-1),
     "if specified, use only every NR-th frame for animation")
     ("metascan,2", po::bool_switch(&meta)->default_value(false),
-    "use first NR correspondences'")
+    "Match current scan against a meta scan of all previous scans (default match against the last scan only)")
     ("DlastSLAM,4", po::value<double>(&mdmll)->default_value(-1.0),
     "sets the maximal point-to-point distance for the final SLAM correction,"
     "if final SLAM is not required don't set it.")
@@ -282,20 +284,20 @@ po::options_description generic("Generic options");
     "writes all registered reduced points to the file points.pts before"
     "slam6D terminated")
     ("distLoop,9", po::value<double>(&distLoop)->default_value(700),
-    "use first NR correspondences'")
+    "sets the maximal point-to-point distance for the loop closing")
     ("iterLoop,1", po::value<int>(&iterLoop)->default_value(100),
-    "use first NR correspondences'")
+    "sets the maximal number of iterations for the loop closing")
     ("graphDist,3", po::value<double>(&graphDist)->default_value(500),
-    "use first NR correspondences'")
+    "specifies the maximal distance for closed loops for the final SLAM correction")
     ("scanserver,S", po::bool_switch(&scanserver)->default_value(false),
     "Use the scanserver as an input method and handling of scan data")
     ("continue,0", po::bool_switch(&continue_processing)->default_value(false),
-    "use first NR correspondences'")
+    "continue using last frames entry as starting pose")
     ("bucketSize,b", po::value<int>(&bucketSize)->default_value(20),
     "specifies the bucket size for leafs of the k-d tree. During construction of the"
     "tree, any subtree of at most this size will be replaced by an array.")
-    ("loopclosefile,0", po::value<boost::filesystem::path>(&loopclosefile),
-    "use first NR correspondences'");
+    ("loopclosefile", po::value<boost::filesystem::path>(&loopclosefile),
+    "filename to write scan poses");
 
   po::options_description hidden("Hidden options");
   hidden.add_options()
