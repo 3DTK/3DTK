@@ -10,10 +10,7 @@
  *  
  * POINT3D represents different dimension. (3D or 2D)
  *
- *
- *
  */
-
 
 //#define num_points    566
 //#define sample_points 283;
@@ -25,10 +22,11 @@
 #include <limits> 
 #include "getopt.h"
 #include "slam6d/globals.icc"
-
+#include "curvefusion/timestamps.h"
+#include "curvefusion/tf_broadcaster.h"
 //#define UNIFORM
 //#define CORRESPONDENCE
-
+#define SENDTF
 
 using namespace std;
 using namespace Eigen;
@@ -44,24 +42,26 @@ using std::ios;
 std::map<int,vector<Curves*> > Curvesnum;
 static std::vector<Vector3d> V_point1;
 static std::vector<Vector3d> V_point2;
-
+static std::vector<double> V_time;
 std::vector<Matrix2d> AbelianR;
+ 
 
 string pose_dir;
 string point_dir;
 
-int parseArgs(int argc,char **argv, string &dir,  int &num_points,  int &sample_points,int &type,int &steps){
+int parseArgs(int argc,char **argv, string &dir,  unsigned int &num_points,  unsigned int &sample_points,int &type,int & steps,int &pose_index){
   num_points   = 1;
   sample_points = 1; // -1 indicates no limitation
   type=1;
   steps=5;
+  pose_index=1;
   int  c;
   // from unistd.h
   extern char *optarg;
   extern int optind;
 
   std::cout << std::endl;
-  while ((c = getopt (argc, argv, "n:s:t:f:")) != -1)
+  while ((c = getopt (argc, argv, "n:s:t:p:i:")) != -1)
     switch (c)
    {
    case 'n':
@@ -71,27 +71,33 @@ int parseArgs(int argc,char **argv, string &dir,  int &num_points,  int &sample_
    case 's':
      sample_points = atoi(optarg);
      if (sample_points <=0)     { std::cerr << "Error: Cannot sample with a negative or zero point number.\n"; exit(1); }
-     if (sample_points > num_points) { std::cerr << "Error: <sample> cannot be bigger than <num_points>.\n"; exit(1); }
+     if (sample_points > num_points) { std::cerr << "Error: <sample> cannot be larger than <num_points>.\n"; exit(1); }
      break;
    case 't':
      type = atoi(optarg);
      //if ((type!=0)||(type!=1))     { std::cerr << "Error: type should be 1 or 0.\n"; exit(1); }  
     // break;
      if(type>1)        { std::cerr << "Error: type should be 1 or 0.\n"; exit(1); } 
-   case 'f':
-     steps = atoi(optarg);
+   case 'p':
+      steps = atoi(optarg);
      if (steps==0)     { std::cerr << "Error: steps cannot be 0.\n"; exit(1); }  
+     break;
+   case 'i':
+     pose_index = atoi(optarg);
+     if ((pose_index>(steps+1))||(pose_index<0))     { std::cerr << "Error: pose_index cannot exceed pose_num and be less than 0.\n"; exit(1); }  
      break;
    }
 
   if (optind != argc-1) {
     std::cerr << "\n*** Directory missing ***\n" << std::endl; 
     std::cout << std::endl
-              << "Usage: " << argv[0] << "  [-n NR] [-s NR] [-t NR] [-f NR] directory" << std::endl << std::endl;
-    std::cout << "  -n NR   the number of points"  << std::endl<< "  -s NR   the number of sample points" << "" << std::endl
-          << "  -t NR   the type of the curve. 0:open curve; 1: closed curve" << "" << std::endl
-	  << std::endl;
-    std::cout <<" -f NR the number of fusion steps"<< std::endl;
+              << "Usage: " << argv[0] << "  [-n NR] [-s NR] [-t NR] [-p NR] [-i NR] directory" << std::endl << std::endl;
+    std::cout << "  -n NR   the number of points"  << std::endl  
+              << "  -s NR   the number of sample points" << "" << std::endl
+              << "  -t NR   the type of the curve. 0:open curve; 1: closed curve" << "" << std::endl
+	      << std::endl;
+    std::cout <<" -p NR the number of fusion steps,and steps+1 represents the number of all fusion trajectories"<< std::endl;
+    std::cout <<" -i NR choose the optimal trajecotry index"<< std::endl;
     std::cout << "using Girum'method to fuse two trajectories.." << std::endl;
     abort();
   }
@@ -119,9 +125,12 @@ void inv_rep(curvesVector &Samplepoints,int fuse_flag)
 
   Curves* s_point = Samplepoints[0];
 
-  if(fuse_flag==1)
+  if(fuse_flag==1){
   s_point->Fuspoints=im;
+  for(int j=0;j<3;j++)
+  s_point->Fus_points(j)=s_point->Fuspoints(j);
 
+  }
   else {
   s_point->cr_points1=im;
   s_point->cr_points2=im;
@@ -271,7 +280,7 @@ void savedata(curvesVector &Samplepoints,string dir,string &pose_dir,string &poi
 }
 
 
-void geodesic_path(curvesVector &Samplepoints,int steps,string dir)
+void geodesic_path(curvesVector &Samplepoints,int steps,string dir,int pose_index)
 {
    double timestep=1/((double)steps);
    double step=0;
@@ -288,8 +297,8 @@ void geodesic_path(curvesVector &Samplepoints,int steps,string dir)
    
    MatrixXcd R5(DIMENSIONS, DIMENSIONS);
    MatrixXd R(DIMENSIONS, DIMENSIONS);
-   pose_dir  = dir + "/fuse_pose/";
-   point_dir  = dir + "/new_point/";
+   pose_dir  = dir + "fuse_pose/";
+   point_dir  = dir + "new_point/";
 
    // create output directories
    system(("mkdir " + pose_dir).c_str());
@@ -367,6 +376,23 @@ void geodesic_path(curvesVector &Samplepoints,int steps,string dir)
         savedata(Samplepoints,dir,pose_dir,point_dir,i,steps);
    }   
 
+//#ifdef SENDTF
+       if(i==pose_index) {
+         // tf_broadcaster broadcaster;
+          
+         // unsigned int s_num=Samplepoints.size();
+         for(unsigned int k = 0; k < Samplepoints.size(); k++)
+          {
+     
+            Curves* c_point = Samplepoints[k];
+            MatrixXd T=c_point->Fus_transfor;
+            time_s[k]=c_point->time_stamps;
+            matrix_new.push_back(T);
+            
+          } 
+            //broadcaster.readtf(posematrix);
+       }    
+//#endif      
   }
        
 }
@@ -607,12 +633,13 @@ void interpintv(Vector3d pt1,Vector3d pt2,double intv,Vector3d &newpt)
 }
 
 
-void curvspace(int s_num,curvesVector &points)
+void curvspace(unsigned int s_num,curvesVector &points)
 {
    Curves *curves_ini;
    curves_ini=points[0];
    Vector3d currentpt1=curves_ini->points1;
    Vector3d currentpt2=curves_ini->points2;
+   //double   current_time=curves_ini->time_stamps;
    Vector3d newpt1(0,0,0);
    unsigned int indfirst1=1;
    unsigned int indfirst2=1;
@@ -620,8 +647,10 @@ void curvspace(int s_num,curvesVector &points)
    Vector3d q2=currentpt2;
    V_point1.clear();
    V_point2.clear();
+   //V_time.clear();
    V_point1.push_back(q1);
    V_point2.push_back(q2);
+   //V_time.push_back(current_time);
    double distsum1;
    Vector3d ptnow1;
    int kk1;
@@ -671,6 +700,7 @@ void curvspace(int s_num,curvesVector &points)
       newpt1<<0,0,0;
       distsum1=0;
       ptnow1=currentpt1;
+      //pt_time=current_time;
       kk1=0;
       pttarget1=points[indfirst1]->points1;
       remainder1 = intv1;
@@ -687,7 +717,7 @@ void curvspace(int s_num,curvesVector &points)
        
        if (distsum1>=intv1){
          interpintv(ptnow1,pttarget1,remainder1,newpt1);
-        
+        // new_time=pt_time;
        }
        else {
          remainder1=remainder1 - disttmp1;
@@ -849,13 +879,29 @@ void general_align(curvesVector &points,int type)
 
 int main(int argc, char **argv)
 {
-  int num_points = 1, sample_points =1;
+  
+  ros::init(argc,argv, "curve");
+  ros::NodeHandle node;
+  ROS_INFO("Node created!\n");
+
+  unsigned int num_points=1,sample_points=1;
   int type=1;
   int steps=5;
+  int pose_index=0;
   int interval;
-  string dir; 
-   
-  parseArgs(argc, argv, dir, num_points,sample_points,type,steps);
+  string dir,bagfile; 
+  std::vector<double> point[7];
+
+  parseArgs(argc, argv, dir, num_points,sample_points,type,steps,pose_index);
+  node.param<std::string>("/log/bagfile",bagfile,"hector.bag");
+  bagfile=dir+bagfile;
+  
+  rosbag::Bag bag(bagfile);
+  timestamps stamps=timestamps(&bag);
+
+  stamps.extractTrajectory(point);
+  //message_filters
+  
   double n=double(num_points);
   double s=double(sample_points); 
   //reading sampled  points of trajectories
@@ -864,10 +910,10 @@ int main(int argc, char **argv)
 
   cout<<"the number of sample point is"<<" "<<ceil(n/interval)<<endl;
 
-  for(int i=0; i< num_points; i++)    
-   Curves::allpoints.push_back(new Curves(dir,type,i));
- 
-   cout<<"read data from file"<<endl;
+  for(unsigned int i=0; i< point[0].size()-1; i++)    
+  Curves::allpoints.push_back(new Curves(point,type,i));
+  //cout<<point[0].size()<<endl;
+  cout<<"read data from file"<<endl;
    
 
 #ifdef UNIFORM
@@ -921,12 +967,14 @@ int main(int argc, char **argv)
 #endif
 
      cout<<"sample data is finished"<<endl;
-
+     num=Curves::Samplepoints.size();
      curve_rep(Curves::Samplepoints,type);
 
-     geodesic_path(Curves::Samplepoints,steps,dir); 
+     geodesic_path(Curves::Samplepoints,steps,dir,pose_index); 
       
      cout<<"get fusion trajectory"<<endl;
+
+
 
      cout<<"start to save result"<<endl;
      // for all sequences do
@@ -964,8 +1012,24 @@ int main(int argc, char **argv)
       plotPathPlot(plot_point_dir,roi_point,i,steps);
     }
      
-     cout<<"the process is complete"<<endl;
-    return 0;
+     cout<<"the process is complete"<<endl<<endl<<endl;
+
+     
+    
+     cout<<"please input any key to continue next step! "<<endl<<endl<<endl;
+     
+     cin.get();
+     
+     //#ifdef PUBLISHTF
+     cout<<"plase open a new teminal to replay bag file"<<endl<<endl<<endl;
+     cout<<"start to broacaste /tf"<<endl<<endl<<endl;
+    
+     tf_broadcaster broadcaster(matrix_new); 
+     matrix_new.clear();
+        
+//#endif
+
+     return 0;
 }
 
 
