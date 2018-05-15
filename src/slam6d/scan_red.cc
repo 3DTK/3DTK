@@ -208,7 +208,7 @@ void validate(boost::any& v, const std::vector<std::string>& values,
 void parse_options(int argc, char **argv, int &start, int &end,
                    bool &scanserver, int &width, int &height,
                    fbr::projection_method &ptype, std::string &dir, IOType &iotype,
-                   int &maxDist, int &minDist, reduction_method &rtype, double &scale,
+                   int &maxDist, int &minDist, std::string &customFilter, reduction_method &rtype, double &scale,
                    double &voxel, int &octree, bool &use_reflectance,
 		   int &MIN_ANGLE, int &MAX_ANGLE, int &nImages, double &pParam,
 		   fbr::scanner_type &sType, bool &loadOct, bool &use_color)
@@ -236,6 +236,14 @@ void parse_options(int argc, char **argv, int &start, int &end,
      "Use the scanserver as an input method and handling of scan data")
     ("loadOct,l", po::bool_switch(&loadOct)->default_value(false),
      "Use Octree to load data if it is available")
+    ("customFilter,u", po::value<std::string>(&customFilter),
+    "Apply a custom filter. Filter mode and data are specified as a "
+    "semicolon-seperated string:\n"
+    "{filterMode};{nrOfParams}[;param1][;param2][...]\n"
+    "Multiple filters can be specified in a file (syntax in file is same as"
+    "direct specification\n"
+    "FILE;{fileName}\n"
+    "See filter implementation in src/slam6d/pointfilter.cc for more detail.")
     ("sType,t", po::value<fbr::scanner_type>(&sType),
      "Choose scanner type");
 
@@ -537,7 +545,10 @@ int main(int argc, char **argv)
   double scale, voxel;
   int octree;
   bool use_reflectance;
-  
+  std::string customFilter;
+  bool rangeFilterActive = false;
+  bool customFilterActive = false;
+
   //scan
   fbr::scanner_type sType;
   bool loadOct, saveOct = false, use_color;
@@ -551,9 +562,51 @@ int main(int argc, char **argv)
 
 
   parse_options(argc, argv, start, end, scanserver, width, height, ptype,
-                dir, iotype, maxDist, minDist, rtype, scale, voxel, octree,
+                dir, iotype, maxDist, minDist, customFilter, rtype, scale, voxel, octree,
                 use_reflectance, MIN_ANGLE, MAX_ANGLE, nImages, pParam,
 		sType, loadOct, use_color);
+  
+  rangeFilterActive = minDist > 0 || maxDist > 0;
+  // custom filter set? quick check, needs to contain at least one ';' 
+  // (proper chsecking will be done case specific in pointfilter.cc)
+  size_t pos = customFilter.find_first_of(";");
+  if (pos != std::string::npos){
+      customFilterActive = true;
+
+      // check if customFilter is specified in file
+      if (customFilter.find("FILE;") == 0){
+          std::string selection_file_name = customFilter.substr(5, customFilter.length());
+          std::ifstream selectionfile;
+          // open the input file
+          selectionfile.open(selection_file_name, std::ios::in);
+
+          if (!selectionfile.good()){
+              std::cerr << "Error loading custom filter file " << selection_file_name << "!" << std::endl;
+              std::cerr << "Data will NOT be filtered!" << std::endl;
+              customFilterActive = false;
+          }
+          else {
+              std::string line;
+              std::string custFilt;
+              while (std::getline(selectionfile, line)){
+                  if (line.find("#") == 0) continue;
+                  custFilt = custFilt.append(line);
+                  custFilt = custFilt.append("/");
+              }
+              if (custFilt.length() > 0) {
+                  // last '/'
+                  customFilter = custFilt.substr(0, custFilt.length() - 1);
+              }
+          }
+          selectionfile.close();
+      }
+  }
+  else {
+      // give a warning if custom filter has been inproperly specified
+      if (customFilter.length() > 0){
+          std::cerr << "Custom filter: specifying string has not been set properly, data will NOT be filtered." << std::endl;
+      }
+  }
 
   for (int iter = start; iter <= end; iter++) {
     
@@ -573,7 +626,8 @@ int main(int argc, char **argv)
 
       Scan* scan = *Scan::allScans.begin();
 
-      scan->setRangeFilter(maxDist, minDist);
+      if(rangeFilterActive) scan->setRangeFilter(maxDist, minDist);
+      if(customFilterActive) scan->setCustomFilter(customFilter);
 
       reduce_octree(scan,
           reduced_points,
