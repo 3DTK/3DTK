@@ -390,7 +390,6 @@ void ScanImporter::frameStop(scanstruct *scan) {
   double rP[3];
   double rPT[3];
   Matrix4ToEuler(scan->transmat, rPT, rP);
-cout<<"the function 4"<<endl;
   vector<double *> points;
   // write points using the buffer
 //  ROS_INFO("Creating Slam6D Scan %d ", scan->index);
