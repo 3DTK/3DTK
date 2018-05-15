@@ -1,12 +1,38 @@
+project("fusion")
 
-include_directories(${CMAKE_SOURCE_DIR}/include/curvefusion/)
+find_package(catkin REQUIRED COMPONENTS
+      roscpp
+      rosbag
+      tf
+      laser_geometry
+      pcl_conversions
+      tf_conversions
+      tf2_sensor_msgs
+      urdf
+      kdl_parser
+      robot_state_publisher
+      message_filters
+      geometry_msgs
+      sensor_msgs
+      std_msgs
+      rospy
+  )
 
 find_package(Eigen3 REQUIRED)
+find_package(PCL REQUIRED)
+find_package(PkgConfig)
+
+include_directories(${CATKIN_DEVEL_PREFIX}/include)
+include_directories(${catkin_INCLUDE_DIRS})
+
+#include_directories(${CMAKE_SOURCE_DIR}/include/curvefusion/)
+
+
 include_directories(${EIGEN3_INCLUDE_DIR})
 
 include_directories(${NEWMAT_INCLUDE_DIRS})
 
 
-add_executable(fusion fusion.cc curves.cc)
- target_link_libraries(fusion ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} ${Boost_PROGRAM_OPTIONS_LIBRARY} ${NEWMAT_LIBRARIES_SHARED} ${OpenCV_LIBRARIES})
+add_executable(fusion fusion.cc curves.cc timestamps.cc tf_broadcaster.cc)
+ target_link_libraries(fusion ${catkin_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} ${Boost_PROGRAM_OPTIONS_LIBRARY} ${NEWMAT_LIBRARIES_SHARED} ${OpenCV_LIBRARIES})
 
