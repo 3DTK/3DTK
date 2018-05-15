@@ -5,15 +5,12 @@
 #include <vector>
 #include <math.h>
 #include<map>
-//#include <boost/thread/mutex.hpp>
-//#include <boost/thread/locks.hpp>
 #include <iostream>
 //class Curves;
 #include <Eigen/Dense>
 #include <Eigen/Core>
 #include <Eigen/SVD>
-//#include <bits/stringfwd.h> // !do not include directly!
-//#include <unsupported/Eigen/MatrixFunctions>
+
 using namespace std;
 using namespace Eigen;
 using Eigen::MatrixXd;
@@ -43,23 +40,24 @@ public:
   static std::vector<Curves*> Samplepoints;
   static std::vector<Curves*> geodesicPoint;
   //typedef std::shared_ptr<Curves> Ptr;
-  Curves(const std::string& path ,int type,int identifier);
+  Curves(std::vector<double> *point ,int type,int identifier);
   void readTrajectory(const char* dir_path, double* pose,int identifiers);
   void Trans_Mat(Curves* CurrentPoint,Curves* NextPoint);
   //void Trans_Mat2(Curves* CurrentPoint,Curves* NextPoint);
   MatrixXd Opt_rot(VectorXd A,VectorXd B);
  
 public:
-    std::string m_path;
+    std::vector<double> *m_point;
     int  m_type;
     int  identifiers;
+    
     std::vector<double> cached_poses;
 
 
     Vector3d points1; 
     Vector3d points2;   //!< 3D position of trajectory1 and trajectory2
     Vector3d Fus_points;
-    
+    double   time_stamps;
 #ifdef POINT3D 
     Matrix3d rot1;
     Matrix3d rot2; 
