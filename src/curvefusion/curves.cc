@@ -2,7 +2,7 @@
 #include <list>
 #include <utility>
 #include <fstream>
-
+#include "curvefusion/timestamps.h"
 
 #include <iomanip>
 using std::ios;
@@ -12,20 +12,19 @@ std::vector<Curves*> Curves::allpoints;
 std::vector<Curves*> Curves::newpoints;
 std::vector<Curves*> Curves::Samplepoints;
 
-Curves::Curves(const std::string& path,int type, int identifier) :
-  m_path(path),m_type(type),identifiers(identifier)
+Curves::Curves(std::vector<double> *point ,int type, int identifier) :
+  m_point(point),m_type(type),identifiers(identifier)
 {
   
-  double point[6];
-  readTrajectory(m_path.c_str(), point,identifiers);
-
-  
-  points1(0) = point[0];
-  points1(1) = point[1];
-  points1(2) = point[2];
-  points2(0) = point[3];
-  points2(1) = point[4];
-  points2(2) = point[5]; 
+ // double point[6];
+ // readTrajectory(m_path.c_str(), point,identifiers);
+  time_stamps = m_point[0][identifiers];
+  points1(0) = m_point[1][identifiers];
+  points1(1) = m_point[2][identifiers];
+  points1(2) = m_point[3][identifiers];
+  points2(0) = m_point[4][identifiers];
+  points2(1) = m_point[5][identifiers];
+  points2(2) = m_point[6][identifiers]; 
 }
 
 

@@ -164,8 +164,8 @@ void calibration::extractTrajectory() {
       for (unsigned int i = 0; i < tfm->transforms.size(); i++) {
         tf::StampedTransform trans;
         transformStampedMsgToTF(tfm->transforms[i], trans);
-
         l->setTransform(trans);
+       // cout<<tfm->transforms[i].header.frame_id<<endl;
       }
     }
   }

@@ -24,7 +24,7 @@ void scanstruct::setTransform(double *mat, double x, double y, double z) {
   transmat[13] =  z;
   transmat[14] =  x;
   transmat[15] = 1;
-  
+
 }
 
 //ros::Time starttime;
@@ -124,7 +124,6 @@ void timedImporter::on_echo_transformed(echo_type echo)
     if (pointtype.hasDeviation()) 
       p[pointtype.getDeviation()] = t.deviation;
     p[pointtype.getTime()] = t.time;
-
     pbuffer.push_back(p);
   } else {
     geometry_msgs::PointStamped *p = new geometry_msgs::PointStamped();
@@ -141,9 +140,11 @@ void timedImporter::on_echo_transformed(echo_type echo)
         cal->getTrajectory()->transformPoint("/riegl", *p, *q);
       } else {
         cal->getTrajectory()->transformPoint("/base_link", *p, *q);
+	
       }
     } else {
       cal->getTrajectory()->transformPoint("/odom_combined", *p, *q);
+
     }
     current->points.push_back(q);
     delete p;
@@ -231,6 +232,7 @@ void timedImporter::transform_buffer() {
   } else {
       try{
     cal->getTrajectory()->transformPointCloud(mapstring, buffercloud, *transformedline);
+     //cout<<transformedline<<endl;
     //cal->getTrajectory()->transformPointCloud("/base_link", buffercloud, *transformedline);
       }
       catch (tf::ExtrapolationException) {ROS_INFO("There is no tranform between %s and /riegl", mapstring.c_str()); return;}
@@ -239,7 +241,7 @@ void timedImporter::transform_buffer() {
 /*  listener->transformPointCloud("/base_link", starttime, buffercloud, 
                                 "/odom_combined", *transformedline);*/
   current->clouds.push_back(transformedline);
-
+  
   if (linescans)
     newScan();
     remembertime = true;
@@ -250,7 +252,6 @@ void timedImporter::transform_buffer() {
 
 void FileImporter::frameStop(scanstruct *scan) {
   scan->setPath(outputpath);
-
   ioservice->post(boost::bind(&FileImporter::writeScan, scan));
 }
 
@@ -389,7 +390,7 @@ void ScanImporter::frameStop(scanstruct *scan) {
   double rP[3];
   double rPT[3];
   Matrix4ToEuler(scan->transmat, rPT, rP);
-
+cout<<"the function 4"<<endl;
   vector<double *> points;
   // write points using the buffer
 //  ROS_INFO("Creating Slam6D Scan %d ", scan->index);
@@ -452,7 +453,6 @@ void ScanImporter::frameStop(scanstruct *scan) {
 void ScanReducer::frameStop(scanstruct *scan) {
   double tinv[16];
   M4inv(scan->transmat, tinv);
-  
   // pose
   double rP[3];
   double rPT[3];
@@ -543,7 +543,6 @@ int cc = 0;
 
 void LineScanImporter::frameStop(scanstruct *scan) {
   scan->setPath(outputpath);
-
   ioservice->post(boost::bind(&LineScanImporter::writeLineScan, scan));
 }
 
