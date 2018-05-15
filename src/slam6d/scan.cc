@@ -356,6 +356,20 @@ void Scan::calcReducedPoints()
     DataRGB my_rgb(get("rgb"));
     rgb = my_rgb;
   }
+  //Return if empty 
+  if(xyz.size() < 1) {
+    DataXYZ xyz_reduced(create("xyz reduced", sizeof(double)*3*xyz.size()));
+    if (reduction_pointtype.hasNormal()) {
+      DataNormal normal_reduced(create("normal reduced", sizeof(double)*3*xyz.size()));      
+    }
+    if (reduction_pointtype.hasReflectance()) {
+      DataReflectance reflectance_reduced(create("reflectance reduced", sizeof(float)*reflectance.size()));
+    }
+    if (reduction_pointtype.hasColor()) {
+      DataRGB rgb_reduced(create("color reduced", sizeof(unsigned char)*3*xyz.size()));
+    }
+    return;
+  }
   
 #ifdef WITH_METRICS
     ClientMetric::scan_load_time.end(t);
