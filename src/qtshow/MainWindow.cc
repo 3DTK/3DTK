@@ -123,13 +123,11 @@ void MainWindow::clearRecentDirectories() {
   updateRecentDirectoriesMenu({});
 }
 
-void MainWindow::addCamCombobox(int index)
-{
+void MainWindow::addCamCombobox(int index) {
   QString s = QString("#%1").arg(index);
   comboBoxCam->addItem(s);
 }
 
-void MainWindow::deleteCamCombobox(int index)
-{
+void MainWindow::deleteCamCombobox(int index) {
   comboBoxCam->removeItem(index);
 }
