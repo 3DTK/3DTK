@@ -47,6 +47,10 @@ public slots:
   void deleteCamera();
   void changeCamCombobox(int index);
 
+  void setViewMode(int mode);
+  void setZoom(double zoom);
+  void resetPosition();
+
   void setSnapshotScale(int snapshotScale);
   void saveSnapshot();
 
@@ -65,6 +69,8 @@ signals:
 
   void camsListAdded(int index);
   void camsListDeleted(int index);
+
+  void zoomValueChanged(double);
 
 protected:
   void initializeGL();

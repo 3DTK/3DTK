@@ -33,6 +33,8 @@ void GLWidget::initializeGL() {
   load_url_texture();
   glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
   cameraChanged();
+
+  emit zoomValueChanged(cangle);
 }
 
 void GLWidget::resizeGL(int w, int h) {
@@ -348,29 +350,48 @@ void GLWidget::animate() {
   }
 }
 
-void GLWidget::addCamera()
-{
+void GLWidget::addCamera() {
   callAddCamera(1);
   cam_choice = cams.size();
   camsListAdded(cam_choice);
   update();
 }
 
-void GLWidget::deleteCamera()
-{
+void GLWidget::deleteCamera() {
   callDeleteCamera(0);
   camsListDeleted(cam_choice - 1);
   update();
 }
 
-void GLWidget::changeCamCombobox(int index)
-{
+void GLWidget::changeCamCombobox(int index) {
   cam_choice = index + 1;
   update();
 }
 
 void GLWidget::setSnapshotScale(int snapshotScale) {
   factor = snapshotScale;
+}
+
+void GLWidget::setViewMode(int mode) {
+  topView();
+  if(showTopView) {
+    emit zoomValueChanged(pzoom);
+  } else {
+    emit zoomValueChanged(cangle);
+  }
+}
+
+void GLWidget::setZoom(double zoom) {
+  if(showTopView) {
+    pzoom = zoom;
+  } else {
+    cangle = zoom;
+  }
+  update();
+}
+
+void GLWidget::resetPosition() {
+  resetView(0);
 }
 
 void GLWidget::saveSnapshot() {
