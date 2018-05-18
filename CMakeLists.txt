@@ -374,6 +374,7 @@ add_subdirectory(src/ros)
 add_subdirectory(src/tools)
 add_subdirectory(src/gps)
 add_subdirectory(src/curvefusion)
+add_subdirectory(src/mesh)
 # 3rdparty must come before src/calibration because it sets
 # APRILTAG_INCLUDE_DIRS
 add_subdirectory(3rdparty)
