@@ -16,6 +16,8 @@ GLUI_Spinner    *ps_spinner;
 GLUI_Spinner    *cangle_spinner;
 /** GLUI spinner for the current angle */
 GLUI_Spinner    *pzoom_spinner;
+/** GLUI spinner for the current angle */
+GLUI_Spinner    *rzoom_spinner;
 /** GLUI spinner for the factor for the image size */
 GLUI_Spinner    *image_spinner;
 /** GLUI_Spinner for the depth to select groups of points */
@@ -147,6 +149,13 @@ void newMenu()
   pzoom_spinner->set_alignment(GLUI_ALIGN_RIGHT);
   pzoom_spinner->disable();
 
+  rzoom_spinner = glui2->add_spinner_to_panel(settings_panel, "Rotate Zoom :", GLUI_SPINNER_FLOAT, &rzoom);
+  rzoom_spinner->set_float_limits(10.0, 50000.0);
+  rzoom_spinner->set_speed(5.0);
+  rzoom_spinner->set_float_val(1000.0);
+  rzoom_spinner->set_alignment(GLUI_ALIGN_RIGHT);
+  rzoom_spinner->disable();
+
   glui2->add_column(true);
 
   mode_panel = glui2->add_panel("Mode: ");
@@ -154,6 +163,8 @@ void newMenu()
   /****** Top view *****/
   glui2->add_button_to_panel(mode_panel, "Top view", 0, callTopView )->set_alignment(GLUI_ALIGN_CENTER);
 
+  /****** Rotate *****/
+  glui2->add_button_to_panel(mode_panel, "Rotate view", 0, callRotateView)->set_alignment(GLUI_ALIGN_CENTER);
   
   /****** Reset button *****/
   glui2->add_button_to_panel(mode_panel, "Reset position", 0, resetView )->set_alignment(GLUI_ALIGN_CENTER);
