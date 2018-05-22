@@ -123,6 +123,11 @@ extern bool invert;
 extern bool showTopView;
 
 /**
+ * Flag for indicating rotate view
+ */
+extern bool showRotateView;
+
+/**
  * Flag for idicating camera add mode
  */
 extern bool addCameraView;         //Is the view in add box mode?
@@ -156,6 +161,10 @@ extern GLdouble CoM[3];
 extern GLfloat pzoom;
 extern GLfloat pzoom_old;
 
+/**
+ * rotate zoom
+ */
+extern GLfloat rzoom;
 
 /**
  * Mode of the fog (exp, exp2, linear)
@@ -194,6 +203,10 @@ extern int cameraNavMouseMode;
 
 extern int mouseNavX, mouseNavY;
 extern int mouseNavButton;
+extern int mousePresX, mousePresY;
+
+extern double now_quat[4];     // Save current quaternion values for rotation mode
+extern double tmp_quat[4];     // Save temporary quaternion values while dragging
 
 extern double mouseRotX;
 extern double mouseRotY;

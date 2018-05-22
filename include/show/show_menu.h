@@ -39,6 +39,8 @@ extern GLUI_Spinner    *ps_spinner;
 extern GLUI_Spinner    *cangle_spinner;
 /** GLUI spinner for the current angle */
 extern GLUI_Spinner    *pzoom_spinner;
+/** GLUI spinner for the current angle */
+extern GLUI_Spinner    *rzoom_spinner;
 /** GLUI spinner for the factor for the image size */
 extern GLUI_Spinner    *image_spinner;
 /** GLUI_Spinner for the depth to select groups of points */

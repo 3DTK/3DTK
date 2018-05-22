@@ -60,6 +60,11 @@ bool invert              = true;
 bool showTopView         = false;
 
 /**
+ * Flag for indicating rotate view
+ */
+bool showRotateView      = false;
+
+/**
  * Flag for idicating camera add mode
  */
 bool addCameraView       = false;         //Is the view in add box mode?
@@ -93,6 +98,10 @@ GLdouble CoM[3] = { 0.0, 0.0, 0.0 };
 GLfloat pzoom = 2000.0;
 GLfloat pzoom_old = pzoom;
 
+/**
+ * rotate zoom
+ */
+GLfloat rzoom = 1000.0;
 
 /**
  * Mode of the fog (exp, exp2, linear)
@@ -131,6 +140,10 @@ int cameraNavMouseMode  = 1;
 
 int mouseNavX, mouseNavY;
 int mouseNavButton = -1;
+int mousePresX, mousePresY;
+
+double now_quat[4] = {1.0, 0.0, 0.0, 0.0};
+double tmp_quat[4];
 
 double mouseRotX = 0.0;
 double mouseRotY = 0.0;
