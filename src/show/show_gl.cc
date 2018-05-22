@@ -536,6 +536,32 @@ void setup_camera() {
   // Initialize ModelView with identity
   glLoadIdentity();
 
+  if(showRotateView) {
+    gluLookAt(0, 0, rzoom, 0, 0, 0, 0, 1, 0);
+    double dx = (double)(mouseNavX - mousePresX) / current_width;
+    double dy = (double)(mouseNavY - mousePresY) / current_height;
+    double a = sqrt(dx * dx + dy * dy);
+    static double rot_mat[16] = {
+      1, 0, 0, 0,
+      0, 1, 0, 0,
+      0, 0, 1, 0,
+      0, 0, 0, 1
+    };
+
+    if(a != 0.0) {
+      double ar = a * M_PI;
+      double as = sin(ar) / a;
+      double delta_quat[4] = {cos(ar), dy * as, dx * as, 0.0};
+
+      QMult(delta_quat, now_quat, tmp_quat);
+      QuatToMatrix4(tmp_quat, 0, rot_mat); 
+    }
+
+    glMultMatrixd(rot_mat);
+
+    return;
+  }
+
   // do the model-transformation
   if (haveToUpdate == 8 && path_iterator < ups.size()) {
           gluLookAt(cams.at(path_iterator).x,
@@ -915,6 +941,50 @@ void topView()
   }
 }
 
+/**
+ * Funcition rotateview. Set the screen for rotate view.
+ */
+void rotateView()
+{
+  static GLdouble save_qx, save_qy, save_qz, save_qangle;
+  static GLdouble save_X, save_Y, save_Z;
+  static GLdouble saveMouseRotX, saveMouseRotY, saveMouseRotZ;
+  
+  if(!showRotateView) {
+    showRotateView = true;
+
+    save_X      = X;
+    save_Y      = Y;
+    save_Z      = Z;
+    save_qx     = quat[0];
+    save_qy     = quat[1];
+    save_qz     = quat[2];
+    save_qangle = quat[3];
+    saveMouseRotX = mouseRotX;
+    saveMouseRotY = mouseRotY;
+    saveMouseRotZ = mouseRotZ;
+
+    haveToUpdate = 2;
+  } else {
+    showRotateView = false;
+
+    // restore old settings
+    X = save_X;
+    Y = save_Y;
+    Z = save_Z;
+    quat[0] = save_qx;
+    quat[1] = save_qy;
+    quat[2] = save_qz;
+    quat[3] = save_qangle;
+    mouseRotX = saveMouseRotX;
+    mouseRotY = saveMouseRotY;
+    mouseRotZ = saveMouseRotZ;
+
+    haveToUpdate = 2;
+  }
+}
+    
+
 //---------------------------------------------------------------------------
 /**
  * This function is called when the user wants to
@@ -1029,6 +1099,7 @@ void update_view_rotate(int t)
   // normalize the quartenion
   QuatNormalize(view_rotate_button_quat);
     
+  if(view_rotate_button_quat[0] == 1.0) return;
   // copy it to the global quartenion quat
   memcpy(quat, view_rotate_button_quat, sizeof(quat));
 }
@@ -1098,15 +1169,37 @@ void invertView(int dummy)
  */
 void callTopView(int dummy)
 { 
+  showRotateView = false;
   topView();
   if (showTopView) {
     rotButton->disable();
     cangle_spinner->disable();
     pzoom_spinner->enable();
+    rzoom_spinner->disable();
   } else {
     rotButton->enable();
     cangle_spinner->enable();
     pzoom_spinner->disable();
+    rzoom_spinner->disable();
+  }
+}
+
+/**
+ * calls the rotateView function
+ * @param dummy not needed necessary for glui
+ */
+void callRotateView(int dummy)
+{
+  showTopView = false;
+  rotateView();
+  if(showRotateView) {
+    cangle_spinner->disable();
+    pzoom_spinner->disable();
+    rzoom_spinner->enable();
+  } else {
+    cangle_spinner->enable();
+    pzoom_spinner->disable();
+    rzoom_spinner->disable();
   }
 }
 

@@ -228,6 +228,17 @@ void mouseButton(int button, int state, int x, int y) {
       mousemoving = false;
     }
   }
+
+  if(state == GLUT_DOWN) {
+    mousePresX = x;
+    mousePresY = y;
+  }
+  else if(state == GLUT_UP && showRotateView) {
+    for(int i = 0; i < 4; i++)
+      now_quat[i] = tmp_quat[i];
+    mouseNavX = mousePresX;
+    mouseNavY = mousePresY;
+  }
 }
 
 

@@ -141,6 +141,12 @@ void invertView(int dummy);
 void callTopView(int dummy);
 
 /**
+ * calls the rotateView function
+ * @param dummy not needed necessary for glui
+ */
+void callRotateView(int dummy);
+
+/**
  * calls the cameraView function 
  * @param dummy not needed necessary for glui 
  */
