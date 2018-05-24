@@ -19,6 +19,10 @@ MainWindow::MainWindow(const dataset_settings& ds, const window_settings& ws, QW
 
     updateRecentDirectoriesMenu(loadRecentDirectories());
 
+    buttonGroupViewMode->setId(radioButtonDefaultView, 0);
+    buttonGroupViewMode->setId(radioButtonTopView, 1);
+    buttonGroupViewMode->setId(radioButtonRotateView, 2);
+
     connect(this, &MainWindow::scanDirectoryOpened, this, &MainWindow::addRecentDirectory);
     connect(glWidget, &GLWidget::camsListAdded, this, &MainWindow::addCamCombobox);
     connect(glWidget, &GLWidget::camsListDeleted, this, &MainWindow::deleteCamCombobox);

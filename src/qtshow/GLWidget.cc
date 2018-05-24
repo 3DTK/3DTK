@@ -82,6 +82,9 @@ void GLWidget::mousePressEvent(QMouseEvent *event) {
   QPoint center(width() / 2, height() / 2);
   QCursor::setPos(mapToGlobal(center));
 
+  mousePresX = width() / 2;
+  mousePresY = height() / 2;
+
   // Hide the cursor
   setCursor(Qt::BlankCursor);
 
@@ -116,6 +119,8 @@ void GLWidget::cameraChanged() {
 void GLWidget::mouseMoveEvent(QMouseEvent *event) {
   int dx =  width()/2 - event->x(),
       dy = height()/2 - event->y();
+  mouseNavX += dx;
+  mouseNavY += dy;
 
   callbacks::glut::mouseMoveDelta(dx, dy);
 
@@ -373,18 +378,31 @@ void GLWidget::setSnapshotScale(int snapshotScale) {
 }
 
 void GLWidget::setViewMode(int mode) {
-  topView();
-  if(showTopView) {
-    emit zoomValueChanged(pzoom);
-  } else {
+  if(mode == 0) {
+    if(showTopView) topView();
+    else if(showRotateView) rotateView();
     emit zoomValueChanged(cangle);
+  }
+  else if(mode == 1) {
+    if(showRotateView) rotateView();
+    topView();
+    emit zoomValueChanged(pzoom);
+  }
+  else {
+    if(showTopView) topView();
+    rotateView();
+    emit zoomValueChanged(rzoom);
   }
 }
 
 void GLWidget::setZoom(double zoom) {
   if(showTopView) {
     pzoom = zoom;
-  } else {
+  }
+  else if(showRotateView) {
+    rzoom = zoom;
+  }
+  else {
     cangle = zoom;
   }
   update();

@@ -79,6 +79,11 @@ void DrawUrl();
  */
 void topView();
 
+/**
+ * Function rotateview. Set the screen for rotate view.
+ */
+void rotateView();
+
 //---------------------------------------------------------------------------
 /**
  * This function is called when the user wants to
