@@ -973,40 +973,50 @@
     <number>2</number>
    </attribute>
    <widget class="QWidget" name="dockWidgetContents_8">
-    <widget class="QRadioButton" name="radioButtonDefaultView">
+    <widget class="QWidget" name="horizontalLayoutWidget">
      <property name="geometry">
       <rect>
-       <x>40</x>
-       <y>14</y>
-       <width>111</width>
-       <height>20</height>
+       <x>30</x>
+       <y>10</y>
+       <width>231</width>
+       <height>21</height>
       </rect>
      </property>
-     <property name="text">
-      <string>Default view</string>
-     </property>
-     <property name="checked">
-      <bool>true</bool>
-     </property>
-     <attribute name="buttonGroup">
-      <string notr="true">buttonGroupViewMode</string>
-     </attribute>
-    </widget>
-    <widget class="QRadioButton" name="radioButtonTopView">
-     <property name="geometry">
-      <rect>
-       <x>170</x>
-       <y>14</y>
-       <width>91</width>
-       <height>20</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Top view</string>
-     </property>
-     <attribute name="buttonGroup">
-      <string notr="true">buttonGroupViewMode</string>
-     </attribute>
+     <layout class="QHBoxLayout" name="horizontalLayout">
+      <item>
+       <widget class="QRadioButton" name="radioButtonDefaultView">
+        <property name="text">
+         <string>Default</string>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+        <attribute name="buttonGroup">
+         <string notr="true">buttonGroupViewMode</string>
+        </attribute>
+       </widget>
+      </item>
+      <item>
+       <widget class="QRadioButton" name="radioButtonTopView">
+        <property name="text">
+         <string>Top</string>
+        </property>
+        <attribute name="buttonGroup">
+         <string notr="true">buttonGroupViewMode</string>
+        </attribute>
+       </widget>
+      </item>
+      <item>
+       <widget class="QRadioButton" name="radioButtonRotateView">
+        <property name="text">
+         <string>Rotate</string>
+        </property>
+        <attribute name="buttonGroup">
+         <string notr="true">buttonGroupViewMode</string>
+        </attribute>
+       </widget>
+      </item>
+     </layout>
     </widget>
     <widget class="QLabel" name="labelZoom">
      <property name="geometry">
@@ -1029,6 +1039,9 @@
        <width>171</width>
        <height>24</height>
       </rect>
+     </property>
+     <property name="maximum">
+      <double>9999.000000000000000</double>
      </property>
     </widget>
     <widget class="QPushButton" name="buttonResetPosition">
