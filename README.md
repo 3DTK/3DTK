@@ -21,8 +21,6 @@ Some Boost libraries (_graph, regex, serialization, filesystem, interprocess_) a
 ## Getting Started
 For a detailed explanation of the programm, its usage, etc., please refer to the [high level documentation](doc/documentation_HL.pdf) (esp. sections 4-6, for starters) and [here](doc/3d_video.md) for creating videos with _3DTK_. Further a reference manual can be found in `doc/html/index.html` after building the doxygen domcumentation (type in `make docu` to get the HTML files).
 
-The IO relevant parameters `-f(ormat)`, `-s(tart)`, `-e(nd)` can be omitted in `slam6D` and `show` if a `format` file exists in the directory, which contains `key=value` lines (spaces are trimmed automatically) for format, start, end with the same values as in the commandline. These format-file parameters will be overwritten by commandline parameters so that the format-file will provide the right IO type and full index range and the user can overwrite the index range as he sees fit.
-
 ##### Important:
 Take care to register scans first (`bin/slam6D`) before trying to display them (`bin/show`), and think about using the point reduction ([see section 6](doc/documentation_HL.pdf)) for a much faster scan matching result. Extremely large scans might need to be reduced (using `bin/scan_red`) before registration. This will write reduced scans in the `uos` format into a directory `reduced` in the data directory.
 
