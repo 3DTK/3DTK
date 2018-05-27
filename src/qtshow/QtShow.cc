@@ -59,6 +59,10 @@ QtShow::QtShow(int &argc, char **argv)
 
   connect(mainWindow, &MainWindow::scanDirectoryOpened, this, &QtShow::loadDifferentScan);
 
+  // Initialize some widgets from globals
+  mainWindow->doubleSpinBoxMinColorValue->setValue(mincolor_value);
+  mainWindow->doubleSpinBoxMaxColorValue->setValue(maxcolor_value);
+
   mainWindow->show();
 
   // After 1 second (and next GLWidget::update()) we can have the watermark back on
