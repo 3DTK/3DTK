@@ -98,3 +98,7 @@ PointDist           100.0
 bin/planes -f riegl_txt -s 0 /YOUR/DOWNLOAD/DIRECTORY/bremen_city/ -r 50 -O 1 -m 5000
 bin/show -s 0 -e 0 /YOUR/DOWNLOAD/DIRECTORY/bremen_city/ -f riegl_txt -l dat/planes/planes.list -r 10 -O 1 -m 5000
 ```
+
+## Frequent Use
+
+If you find yourself using 3DTK frequently, read about [Configuration Files](doc/Configuration Files.md) to find out how not to have to type as much on the command line.
