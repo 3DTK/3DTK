@@ -118,14 +118,12 @@ extern std::function<void()> update_callback;
 extern bool invert;
 
 /**
- * Flag for indicating brid eyes view
+ * Flag for indicating view mode
+ * 0: default view
+ * 1: top view
+ * 2: rotate view
  */
-extern bool showTopView;
-
-/**
- * Flag for indicating rotate view
- */
-extern bool showRotateView;
+extern int showViewMode;
 
 /**
  * Flag for idicating camera add mode

@@ -105,7 +105,7 @@ void resetView(int dummy);
 void setView(double pos[3], double new_quat[4], 
              double newMouseRotX, double newMouseRotY, double newMouseRotZ, 
              double newCangle,
-             bool sTV, bool cNMM, double pzoom_new, 
+             int sVM, bool cNMM, double pzoom_new, 
              bool s_points, bool s_path, bool s_cameras, double ps, int
              sf, double fD, bool inv);
 

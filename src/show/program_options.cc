@@ -37,7 +37,7 @@ void parse_args(int argc, char **argv, dataset_settings& ds, window_settings& ws
     ("fov", value(&ds.camera.fov)->default_value(60),
       "Horizontal field of view angle in degrees. "
       "The vertical angle depends on window size.")
-    ("topview", bool_switch(&ds.init_with_topview), // FIXME starts out with a view from the front, need to call topView()
+    ("viewmode", value(&ds.init_with_viewmode), // FIXME starts out with a view from the front, need to call topView()
       "Initialize the camera above the point cloud with parallel projection.")
     ("no-points", bool_switch(&no_points),
       "Initially, do not draw points.")

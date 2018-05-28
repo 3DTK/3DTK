@@ -351,7 +351,7 @@ void DrawScala() {
   if (factor != 1) return;
   
 	glDisable(GL_FOG);
-	if (!showTopView) return;
+	if (showViewMode != 1) return;
 	glMatrixMode(GL_MODELVIEW);
 	glPushMatrix();
 	glLoadIdentity();
@@ -536,7 +536,7 @@ void setup_camera() {
   // Initialize ModelView with identity
   glLoadIdentity();
 
-  if(showRotateView) {
+  if(showViewMode == 2) {
     gluLookAt(0, 0, rzoom, 0, 0, 0, 0, 1, 0);
     double dx = (double)(mouseNavX - mousePresX) / current_width;
     double dy = (double)(mouseNavY - mousePresY) / current_height;
@@ -558,6 +558,9 @@ void setup_camera() {
     }
 
     glMultMatrixd(rot_mat);
+
+    if (!nogui && !takescreenshot)
+      updateControls();
 
     return;
   }
@@ -793,7 +796,7 @@ void DisplayItFunc(GLenum mode, bool interruptable)
         else
           pose = MetaMatrix[i][current_frame];
       }
-      if(showTopView) {
+      if(showViewMode == 1) {
         glVertex3f(pose[12], 2000, pose[14]);
       } else {
         glVertex3f(pose[12], pose[13], pose[14]);
@@ -895,9 +898,9 @@ void topView()
   static GLdouble save_X, save_Y, save_Z;
   static GLdouble saveMouseRotX, saveMouseRotY, saveMouseRotZ;
   
-  if (!showTopView) // set to top view
+  if (showViewMode != 1) // set to top view
   {
-    showTopView = true;
+    showViewMode = 1;
     
     // save current pose
     save_X      = X;
@@ -923,7 +926,7 @@ void topView()
        
   } else {
     
-    showTopView = false;
+    showViewMode = 0;
     
     // restore old settings
     X = save_X;
@@ -950,8 +953,8 @@ void rotateView()
   static GLdouble save_X, save_Y, save_Z;
   static GLdouble saveMouseRotX, saveMouseRotY, saveMouseRotZ;
   
-  if(!showRotateView) {
-    showRotateView = true;
+  if(showViewMode != 2) {
+    showViewMode = 2;
 
     save_X      = X;
     save_Y      = Y;
@@ -966,7 +969,7 @@ void rotateView()
 
     haveToUpdate = 2;
   } else {
-    showRotateView = false;
+    showViewMode = 0;
 
     // restore old settings
     X = save_X;
@@ -1051,7 +1054,7 @@ void resetView(int dummy)
 void setView(double pos[3], double new_quat[4], 
              double newMouseRotX, double newMouseRotY, double newMouseRotZ, 
              double newCangle,
-             bool sTV, bool cNMM, double pzoom_new, 
+             int sVM, bool cNMM, double pzoom_new, 
              bool s_points, bool s_path, bool s_cameras, bool s_poses, double ps, int
              sf, double fD, bool inv)
 {
@@ -1065,10 +1068,10 @@ void setView(double pos[3], double new_quat[4],
   mouseRotX = newMouseRotX;
   mouseRotY = newMouseRotY;
   mouseRotZ = newMouseRotZ;
-  showTopView = sTV,
+  showViewMode = sVM,
   cameraNavMouseMode = cNMM;
   pzoom = pzoom_new;
-  updateTopViewControls();
+  updateViewModeControls();
 
   show_points = s_points;
   show_path = s_path;
@@ -1150,7 +1153,8 @@ void startAnimation(int dummy)
  */
 void callResetView(int dummy)
 {
-  if (showTopView) callTopView(dummy);
+  if (showViewMode == 1) callTopView(dummy);
+  else if(showViewMode == 2) callRotateView(dummy);
   resetView(0);
 }
 
@@ -1169,9 +1173,8 @@ void invertView(int dummy)
  */
 void callTopView(int dummy)
 { 
-  showRotateView = false;
   topView();
-  if (showTopView) {
+  if (showViewMode == 1) {
     rotButton->disable();
     cangle_spinner->disable();
     pzoom_spinner->enable();
@@ -1190,9 +1193,8 @@ void callTopView(int dummy)
  */
 void callRotateView(int dummy)
 {
-  showTopView = false;
   rotateView();
-  if(showRotateView) {
+  if(showViewMode == 2) {
     cangle_spinner->disable();
     pzoom_spinner->disable();
     rzoom_spinner->enable();
@@ -1601,7 +1603,7 @@ void glWriteImagePNG(const char *filename, int scale, GLenum mode)
     left = -right;
 
     double part_height, part_width;
-    if(!showTopView) {
+    if(showViewMode != 1) {
       part_width = (right - left)/(double)scale;
       part_height = (top - bottom)/(double)scale;
     } else {
@@ -1625,14 +1627,14 @@ void glWriteImagePNG(const char *filename, int scale, GLenum mode)
     
     smallfont = (scale==1);
     double height;
-    if(!showTopView) {
+    if(showViewMode != 1) {
       height = bottom;
     } else {
       height = -pzoom;
     }
     for(int i = 0; i < scale; i++) {
       double width;
-      if(!showTopView) {
+      if(showViewMode != 1) {
         width = left;
       } else {
         width = -pzoom*aspect;
@@ -1641,7 +1643,7 @@ void glWriteImagePNG(const char *filename, int scale, GLenum mode)
         glMatrixMode(GL_PROJECTION);
         glLoadIdentity();
         label = false;
-        if(!showTopView) {
+        if(showViewMode != 1) {
           glFrustum(neardistance*width, neardistance*(width + part_width),
                     neardistance*(height),
                     neardistance*(height + part_height),

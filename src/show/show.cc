@@ -96,13 +96,21 @@ void resetRotationButton() {
   rotButton->reset();
 }
 
-void updateTopViewControls() {
-  if(showTopView) {
-    pzoom_spinner->enable();
-    cangle_spinner->disable();
-  } else {
-    pzoom_spinner->disable();
+void updateViewModeControls() {
+  if(showViewMode == 0) {
     cangle_spinner->enable();
+    pzoom_spinner->disable();
+    rzoom_spinner->disable();
+  }
+  else if(showViewMode == 1) {
+    cangle_spinner->disable();
+    pzoom_spinner->enable();
+    rzoom_spinner->disable();
+  }
+  else {
+    cangle_spinner->disable();
+    pzoom_spinner->disable();
+    rzoom_spinner->enable();
   }
 }
 

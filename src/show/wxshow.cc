@@ -418,7 +418,7 @@ class ControlImpl : public Controls {
       double zoom = log(pzoom) / log(2.0);
       parallel_spinner->SetValue(zoom);
 
-      if(showTopView) {
+      if(showViewMode == 1) {
         apex_spinner->Disable();
         parallel_spinner->Enable();
       } else {
@@ -876,7 +876,7 @@ void updateControls() {
   globalGUI->updateControls();
 }
 void updatePointModeControls() {}
-void updateTopViewControls() {}
+void updateViewModeControls() {}
 void resetRotationButton() {}
 void updateCamControls() {}
 
