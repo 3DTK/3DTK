@@ -59,13 +59,6 @@ QtShow::QtShow(int &argc, char **argv)
 
   connect(mainWindow, &MainWindow::scanDirectoryOpened, this, &QtShow::loadDifferentScan);
 
-  // Initialize some widgets from globals
-  mainWindow->comboBoxFogType->setCurrentIndex(show_fog % 4); // modulo to deal with inverted fog options
-  mainWindow->checkBoxInvertFog->setChecked(show_fog >= 4);
-  mainWindow->doubleSpinBoxFogDensity->setValue(fogDensity);
-  mainWindow->doubleSpinBoxMinColorValue->setValue(mincolor_value);
-  mainWindow->doubleSpinBoxMaxColorValue->setValue(maxcolor_value);
-
   mainWindow->show();
 
   // After 1 second (and next GLWidget::update()) we can have the watermark back on
