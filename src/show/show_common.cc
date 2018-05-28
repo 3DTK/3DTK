@@ -55,14 +55,12 @@ std::function<void()> update_callback = 0;
 bool invert              = true;
 
 /**
- * Flag for indicating brid eyes view
+ * Flag for indicating view mode
+ * 0: default view
+ * 1: top view
+ * 2: rotate view
  */
-bool showTopView         = false;
-
-/**
- * Flag for indicating rotate view
- */
-bool showRotateView      = false;
+int showViewMode         = 0;
 
 /**
  * Flag for idicating camera add mode
@@ -571,7 +569,7 @@ void copy_settings_to_globals(
 
   scale = ds.scale;
   cangle = ds.camera.fov;
-  showTopView = ds.init_with_topview;
+  showViewMode = ds.init_with_viewmode;
   show_points = ds.draw_points;
   show_cameras = ds.draw_cameras;
   show_path = ds.draw_path;

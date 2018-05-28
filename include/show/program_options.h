@@ -93,7 +93,7 @@ struct dataset_settings {
 
   Camera camera;
   double scale;
-  bool init_with_topview;
+  int init_with_viewmode;
   int pointsize;
 
   fog_settings fog;
