@@ -91,15 +91,15 @@ protected:
   bool advancedMouseMode = false;
   QPoint initialMousePos;
 
-  bool fullscreen;
+  bool fullscreen = false;
 
   int fogType;
-  bool fogInverted;
+  bool fogInverted = false;
 
-  bool autoRecalculateColor;
+  bool autoRecalculateColor = false;
 
-  bool animatePath;
-  bool animateMatching;
+  bool animatePath = true;
+  bool animateMatching = false;
 
   QTimer *idleTimer;
 };
