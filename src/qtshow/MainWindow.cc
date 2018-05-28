@@ -14,17 +14,22 @@ MainWindow::MainWindow(const dataset_settings& ds, const window_settings& ws, QW
   if (!ws.nogui) {
     setupUi(this);
 
+    // Setup status bar
     progressbar = new QProgressBar(statusbar);
     progressbar->hide();
     statusbar->addPermanentWidget(progressbar);
 
+    // Setup recent directories menu
     updateRecentDirectoriesMenu(loadRecentDirectories());
+    connect(this, &MainWindow::scanDirectoryOpened, this, &MainWindow::addRecentDirectory);
 
+    // Setup view mode radio group
     buttonGroupViewMode->setId(radioButtonDefaultView, 0);
     buttonGroupViewMode->setId(radioButtonTopView, 1);
     buttonGroupViewMode->setId(radioButtonRotateView, 2);
 
-    connect(this, &MainWindow::scanDirectoryOpened, this, &MainWindow::addRecentDirectory);
+    // Setup camera list buttons
+    // XXX I think this can be moved to MainWindow.ui
     connect(glWidget, &GLWidget::camsListAdded, this, &MainWindow::addCamCombobox);
     connect(glWidget, &GLWidget::camsListDeleted, this, &MainWindow::deleteCamCombobox);
 
@@ -34,6 +39,8 @@ MainWindow::MainWindow(const dataset_settings& ds, const window_settings& ws, QW
     doubleSpinBoxFogDensity->setValue(ds.fog.density);
 
     // Initialize widgets from globals
+    // They can't be initialized from arguments
+    // because initShow sets them.
     doubleSpinBoxMinColorValue->setValue(mincolor_value);
     doubleSpinBoxMaxColorValue->setValue(maxcolor_value);
   } else {
