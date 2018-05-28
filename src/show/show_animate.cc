@@ -242,7 +242,7 @@ void loadPose(int dummy) {
   double mouseRotY;
   double mouseRotZ;
   double cangle;
-  bool showTopView;
+  bool showViewMode;
   bool cameraNavMouseMode;
   double pzoom;
   bool show_path;
@@ -279,11 +279,11 @@ void loadPose(int dummy) {
   // Orientation
   for (unsigned int i = 0; i < 4; poseFile >> quat[i++]);
   poseFile >> mouseRotX >> mouseRotY >> mouseRotZ >> cangle;
-  poseFile >> showTopView >> cameraNavMouseMode >> pzoom;
+  poseFile >> showViewMode >> cameraNavMouseMode >> pzoom;
   poseFile >> show_points >> show_path >> show_cameras >> pointsize;
   poseFile >> show_fog >> fogDensity >> invert;
   
-  setView(euler, quat, mouseRotX, mouseRotY, mouseRotZ, cangle, showTopView,
+  setView(euler, quat, mouseRotX, mouseRotY, mouseRotZ, cangle, showViewMode,
           cameraNavMouseMode, pzoom, show_points, show_path, show_cameras,
           show_poses, pointsize, show_fog, fogDensity, invert);
   
@@ -319,7 +319,7 @@ void savePose(int dummy) {
   }
 	posefile << mouseRotX << " " <<  mouseRotY << " " << mouseRotZ << " "
 		    << cangle << std::endl;
-	posefile << showTopView << " " << cameraNavMouseMode << " "
+	posefile << showViewMode << " " << cameraNavMouseMode << " "
 		    << pzoom << std::endl;
 	posefile << show_points << " " << show_path << " "
 		    << show_cameras << " " << pointsize << std::endl;

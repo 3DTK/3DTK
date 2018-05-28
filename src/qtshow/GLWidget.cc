@@ -382,27 +382,27 @@ void GLWidget::setSnapshotScale(int snapshotScale) {
 
 void GLWidget::setViewMode(int mode) {
   if(mode == 0) {
-    if(showTopView) topView();
-    else if(showRotateView) rotateView();
+    if(showViewMode == 1) topView();
+    else if(showViewMode == 2) rotateView();
     emit zoomValueChanged(cangle);
   }
   else if(mode == 1) {
-    if(showRotateView) rotateView();
+    if(showViewMode == 2) rotateView();
     topView();
     emit zoomValueChanged(pzoom);
   }
   else {
-    if(showTopView) topView();
+    if(showViewMode == 1) topView();
     rotateView();
     emit zoomValueChanged(rzoom);
   }
 }
 
 void GLWidget::setZoom(double zoom) {
-  if(showTopView) {
+  if(showViewMode == 1) {
     pzoom = zoom;
   }
-  else if(showRotateView) {
+  else if(showViewMode == 2) {
     rzoom = zoom;
   }
   else {

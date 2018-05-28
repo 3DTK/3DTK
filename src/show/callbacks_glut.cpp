@@ -233,7 +233,7 @@ void mouseButton(int button, int state, int x, int y) {
     mousePresX = x;
     mousePresY = y;
   }
-  else if(state == GLUT_UP && showRotateView) {
+  else if(state == GLUT_UP && showViewMode == 2) {
     for(int i = 0; i < 4; i++)
       now_quat[i] = tmp_quat[i];
     mouseNavX = mousePresX;
@@ -267,7 +267,7 @@ void mouseMoveDelta(int deltaMouseX, int deltaMouseY) {
   if (invertMouseY) deltaMouseY = -deltaMouseY;
 
   if (mouseNavButton == GLUT_RIGHT_BUTTON) {
-    if (showTopView) {
+    if (showViewMode == 1) {
       deltaMouseX *= 5;
       deltaMouseY *= 5;
     }
@@ -276,7 +276,7 @@ void mouseMoveDelta(int deltaMouseX, int deltaMouseY) {
     deltaMouseY *= movementSpeed / 10.0;
     moveCamera(-deltaMouseX, deltaMouseY, 0, 0, 0, 0);
   } else if (mouseNavButton == GLUT_MIDDLE_BUTTON) {
-    if (!showTopView) {
+    if (showViewMode != 1) {
       deltaMouseY *= -5;
     }
     // moving 10 pixels is equivalent to one key stroke
@@ -297,7 +297,7 @@ void reshape(int width, int height) {
   }
   aspect = (double) width / (double) height;
 
-  if (!showTopView) {
+  if (showViewMode != 1) {
     // usage of the vsize of a structiewport
     glViewport(0, 0, (GLint) width, (GLint) height);
 
