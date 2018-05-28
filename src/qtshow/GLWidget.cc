@@ -77,22 +77,27 @@ void passMouseEvent(QMouseEvent *event, bool press) {
 }
 
 void GLWidget::mousePressEvent(QMouseEvent *event) {
-  // Remember the cursor position, because we want to reset it every frame
-  initialMousePos = mapToGlobal(event->pos());
-  QPoint center(width() / 2, height() / 2);
-  QCursor::setPos(mapToGlobal(center));
+  if (advancedMouseMode) {
+    // Remember the cursor position
+    initialMousePos = mapToGlobal(event->pos());
 
-  mousePresX = width() / 2;
-  mousePresY = height() / 2;
+    // Reset cursor to center
+    QPoint center(width() / 2, height() / 2);
+    QCursor::setPos(mapToGlobal(center));
 
-  // Hide the cursor
-  setCursor(Qt::BlankCursor);
+    // Hide the cursor
+    setCursor(Qt::BlankCursor);
+
+    // Trick the legacy code
+    mousePresX = width() / 2;
+    mousePresY = height() / 2;
+  }
 
   passMouseEvent(event, true);
 }
 
 void GLWidget::mouseReleaseEvent(QMouseEvent *event) {
-  if (event->buttons() == Qt::NoButton) {
+  if (event->buttons() == Qt::NoButton && advancedMouseMode) {
     // Restore cursor position
     QCursor::setPos(initialMousePos);
 
@@ -110,18 +115,23 @@ void GLWidget::cameraChanged() {
 }
 
 void GLWidget::mouseMoveEvent(QMouseEvent *event) {
-  int dx =  width()/2 - event->x(),
-      dy = height()/2 - event->y();
-  mouseNavX += dx;
-  mouseNavY += dy;
+  if (advancedMouseMode) {
+    int dx =  width()/2 - event->x(),
+        dy = height()/2 - event->y();
 
-  callbacks::glut::mouseMoveDelta(dx, dy);
+    mouseNavX += dx;
+    mouseNavY += dy;
+
+    callbacks::glut::mouseMoveDelta(dx, dy);
+
+    QPoint center(width() / 2, height() / 2);
+    QCursor::setPos(mapToGlobal(center));
+  } else {
+    callbacks::glut::mouseMove(event->x(), event->y());
+  }
 
   update();
   cameraChanged();
-
-  QPoint center(width() / 2, height() / 2);
-  QCursor::setPos(mapToGlobal(center));
 }
 
 void GLWidget::keyPressEvent(QKeyEvent *event) {
