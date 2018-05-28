@@ -88,10 +88,6 @@ void GLWidget::mousePressEvent(QMouseEvent *event) {
   // Hide the cursor
   setCursor(Qt::BlankCursor);
 
-  // Take shortcuts away from the rest of the app.
-  // The main annoyance was Alt+W toggling "Draw Points".
-  qApp->installEventFilter(this);
-
   passMouseEvent(event, true);
 }
 
@@ -102,9 +98,6 @@ void GLWidget::mouseReleaseEvent(QMouseEvent *event) {
 
     // Show the cursor
     unsetCursor();
-
-    // Stop filtering events for the rest of the app
-    qApp->removeEventFilter(this);
   }
 
   passMouseEvent(event, false);
