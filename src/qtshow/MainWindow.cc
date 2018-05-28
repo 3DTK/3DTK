@@ -5,6 +5,7 @@
 
 #include "qtshow/MainWindow.h"
 #include "qtshow/ScanPicker.h"
+#include "show/show_common.h"
 
 MainWindow::MainWindow(const dataset_settings& ds, const window_settings& ws, QWidget *parent, Qt::WindowFlags flags)
   : QMainWindow(parent, flags)
@@ -26,6 +27,15 @@ MainWindow::MainWindow(const dataset_settings& ds, const window_settings& ws, QW
     connect(this, &MainWindow::scanDirectoryOpened, this, &MainWindow::addRecentDirectory);
     connect(glWidget, &GLWidget::camsListAdded, this, &MainWindow::addCamCombobox);
     connect(glWidget, &GLWidget::camsListDeleted, this, &MainWindow::deleteCamCombobox);
+
+    // Initialize widgets from arguments
+    comboBoxFogType->setCurrentIndex(ds.fog.type % 4); // modulo to deal with inverted fog options
+    checkBoxInvertFog->setChecked(ds.fog.type >= 4);
+    doubleSpinBoxFogDensity->setValue(ds.fog.density);
+
+    // Initialize widgets from globals
+    doubleSpinBoxMinColorValue->setValue(mincolor_value);
+    doubleSpinBoxMaxColorValue->setValue(maxcolor_value);
   } else {
     glWidget = new GLWidget(this);
     glWidget->setFocusPolicy(Qt::ClickFocus);
