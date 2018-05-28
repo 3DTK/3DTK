@@ -67,8 +67,6 @@ int main(int argc, char **argv)
 
   dataset_settings ds;
   window_settings ws;
-
-  std::cout << "hello" << std::endl;
   
   try {
     parse_args(argc, argv, ds, ws);
