@@ -88,6 +88,7 @@ protected:
 
 
 protected:
+  bool advancedMouseMode = false;
   QPoint initialMousePos;
 
   bool fullscreen;
