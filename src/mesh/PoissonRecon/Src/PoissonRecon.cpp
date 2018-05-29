@@ -63,6 +63,9 @@ void DumpOutput2( std::vector< char* >& comments , const char* format , ... );
 #endif // DEFAULT_FULL_DEPTH
 
 #include <stdarg.h>
+
+// #include "scanio/scan_io_xyz.h"
+
 char* outputFile=NULL;
 int echoStdout=0;
 void DumpOutput( const char* format , ... )
