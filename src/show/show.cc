@@ -59,10 +59,27 @@ void saveImageAndExit(int dummy)
  */
 int main(int argc, char **argv)
 {
-  signal(SIGSEGV, signal_segv);
-  signal(SIGINT,  signal_interrupt);
-  signal(SIGTERM, signal_interrupt);
+  struct sigaction actSigSegv;
+  struct sigaction actSigInt;
+  sigset_t sigset;
 
+  sigemptyset(&sigset);
+  sigaddset(&sigset, SIGSEGV);
+  sigaddset(&sigset, SIGINT);
+  sigaddset(&sigset, SIGTERM);
+
+  memset(&actSigSegv, 0, sizeof(actSigSegv));
+  memset(&actSigSegv, 0, sizeof(actSigInt));
+
+  actSigSegv.sa_handler = signal_segv;
+  actSigSegv.sa_mask = sigset;
+  sigaction(SIGSEGV, &actSigSegv, NULL);
+
+  actSigInt.sa_handler = signal_interrupt;
+  actSigInt.sa_mask = sigset;
+  sigaction(SIGINT, &actSigInt, NULL);
+  sigaction(SIGTERM, &actSigInt, NULL);
+  
   glutInit(&argc, argv);
 
   dataset_settings ds;
