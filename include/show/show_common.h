@@ -415,6 +415,13 @@ void initShow(const dataset_settings& ds, const window_settings& ws);
 void deinitShow();
 
 /**
+ * Signal handling functions
+ */
+void signal_segv(int v);
+void signal_interrupt(int v);
+void setSignalHandling();
+
+/**
  * Global program scope destructor workaround to clean up data regardless of
  * the way of program exit.
  */
