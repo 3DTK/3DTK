@@ -1,6 +1,9 @@
 #include "qtshow/QtShow.h"
+#include "show/show_common.h"
 
 int main(int argc, char *argv[]){
+  setSignalHandling();
+  
   QtShow app(argc, argv);
   return app.exec();
 }

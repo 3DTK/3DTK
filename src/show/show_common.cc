@@ -1,4 +1,5 @@
 #include <cmath>
+#include <csignal>
 
 #include "show/show_common.h"
 
@@ -1072,6 +1073,52 @@ void deinitShow()
     delete it;
   }
   trajectory.clear();
+}
+
+void signal_segv(int v)
+{
+  static bool segfault = false;
+  if(!segfault) {
+    segfault = true;
+    std::cout << std::endl << "Segmentation fault" << std::endl;
+    deinitShow();
+  }
+  exit(-1);
+}
+
+void signal_interrupt(int v)
+{
+  static bool segfault = false;
+  if(!segfault) {
+    segfault = true;
+    std::cout << std::endl << "Exiting by interrupt" << std::endl;
+    deinitShow();
+  }
+  exit(-1);
+}
+
+void setSignalHandling()
+{
+  struct sigaction actSigSegv;
+  struct sigaction actSigInt;
+  sigset_t sigset;
+
+  sigemptyset(&sigset);
+  sigaddset(&sigset, SIGSEGV);
+  sigaddset(&sigset, SIGINT);
+  sigaddset(&sigset, SIGTERM);
+
+  memset(&actSigSegv, 0, sizeof(actSigSegv));
+  memset(&actSigSegv, 0, sizeof(actSigInt));
+
+  actSigSegv.sa_handler = signal_segv;
+  actSigSegv.sa_mask = sigset;
+  sigaction(SIGSEGV, &actSigSegv, NULL);
+
+  actSigInt.sa_handler = signal_interrupt;
+  actSigInt.sa_mask = sigset;
+  sigaction(SIGINT, &actSigInt, NULL);
+  sigaction(SIGTERM, &actSigInt, NULL);
 }
 
 struct Deinit { ~Deinit() { deinitShow(); } } deinit;
