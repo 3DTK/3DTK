@@ -19,6 +19,7 @@ public:
   ~Poisson();
   int setVertices(vector<Point> v);
   int setNormals(vector<Point> n);
+  int setParams(PoissonParam &p);
   int getMesh(CoredVectorMeshData *m);
   int apply();
   int exportMesh(const char *modelPath);
