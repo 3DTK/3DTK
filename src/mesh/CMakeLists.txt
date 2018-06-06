@@ -17,8 +17,9 @@ SET_TARGET_PROPERTIES(testmesh PROPERTIES OUTPUT_NAME "testmesh")
 
 ## Poisson surface reconstruction
 ## based on KB's implementation, with scanio and normal calculation
-set(MESH_CFLAGS "-fpermissive -std=c++0x -msse3 -Wall -finline-functions -Wno-unused-but-set-variable -Wno-write-strings -Wno-char-subscripts -Wno-unused-result -g" CACHE STRING "Additional flags given to the compiler (-O3 -Wall -finline-functions -Wno-write-strings)" )
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${MESH_CFLAGS}")
+string(REPLACE "-O3" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+set(MESH_ADDITIONAL_CFLAGS "-fpermissive -g" CACHE STRING "Additional flags of MESH module given to the compiler" )
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${ADDITIONAL_CFLAGS} ${MESH_ADDITIONAL_CFLAGS}")
 include_directories(poisson vcglib)
 add_executable(poisson poisson/Factor.cpp poisson/Geometry.cpp poisson/MarchingCubes.cpp poisson/MultiGridOctest.cpp poisson.cc)
 TARGET_LINK_LIBRARIES(poisson scan_shared ${NORMALS_PANORAMA_LIBRARIES} ${Boost_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY})
