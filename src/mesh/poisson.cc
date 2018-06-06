@@ -29,15 +29,16 @@ enum normal_method {KNN, ADAPTIVE_KNN,
 };
 
 // Call to excute poisson
-int Execute2(PoissonParam &Par, vector<Point3D<float> > Pts, vector<Point3D<float> > Nor, 	CoredVectorMeshData &mesh, Point3D<float> &newCenter, float &newScale, vcg::CallBackPos *cb );
-// Parse commandline options
-void parse_options(int argc, char **argv, int &start, int &end, bool &scanserver, int &max_dist, int &min_dist, string &dir, string &odir, IOType &iotype, int &k1, int &k2, normal_method &ntype, int &width, int &height);
+int Execute2(PoissonParam &Par, vector<Point3D<float>> Pts, vector<Point3D<float>> Nor, CoredVectorMeshData &mesh, Point3D<float> &newCenter, float &newScale, vcg::CallBackPos *cb );
+// Parse commandline options and assign to parameters
+void parse_options(int argc, char **argv, int &start, int &end, bool &scanserver, int &max_dist, int &min_dist, string &dir, string &odir, IOType &iotype, int &k1, int &k2, normal_method &ntype, int &width, int &height, int &depth, int &solverDivide, float &samplesPerNode, float &offset);
 // validate normmal_method type (important for boost program_option)
 void validate(boost::any& v, const std::vector<std::string>& values, normal_method*, int);
 // validate IO types (important for boost program_option)
 void validate(boost::any& v, const std::vector<std::string>& values, IOType*, int);
 
 int main(int argc, char **argv) {
+  // parameters for normal calculation
   int start, end;
   bool scanserver;
   int max_dist, min_dist;
@@ -47,12 +48,19 @@ int main(int argc, char **argv) {
   normal_method ntype;
   int width, height;
 
+  // parameters for poisson
+  int depth;
+	int solverDivide;
+	float samplesPerNode;
+  float offset;
+
   vector<Point> points;
   vector<Point> normals;
   
   // parse input arguments
   parse_options(argc, argv, start, end, scanserver, max_dist, min_dist,
-                dir, odir, iotype, k1, k2, ntype, width, height);
+    dir, odir, iotype, k1, k2, ntype, width, height,
+    depth, solverDivide, samplesPerNode, offset);
 
   if (scanserver) {
     try {
@@ -135,8 +143,14 @@ int main(int argc, char **argv) {
   Scan::closeDirectory();
 
   Poisson poisson;
+  PoissonParam pp;
+  pp.Depth = depth;
+  pp.SolverDivide = solverDivide;
+  pp.Depth = depth;
+  pp.Offset = offset;
   poisson.setVertices(points);
   poisson.setNormals(normals);
+  poisson.setParams(pp);
   poisson.apply();
   // CoredVectorMeshData m;
   // poisson.getMesh(&m);
@@ -148,7 +162,7 @@ int main(int argc, char **argv) {
 
 // validate normmal_method type (important for boost program_option)
 void validate(boost::any& v, const std::vector<std::string>& values,
-              normal_method*, int) {
+  normal_method*, int) {
   if (values.size() == 0)
     throw std::runtime_error("Invalid model specification");
   string arg = values.at(0);
@@ -166,7 +180,7 @@ void validate(boost::any& v, const std::vector<std::string>& values,
 
 // validate IO types (important for boost program_option)
 void validate(boost::any& v, const std::vector<std::string>& values,
-              IOType*, int) {
+  IOType*, int) {
   if (values.size() == 0)
     throw std::runtime_error("Invalid model specification");
   string arg = values.at(0);
@@ -179,14 +193,15 @@ void validate(boost::any& v, const std::vector<std::string>& values,
 
 // Parse commandline options
 void parse_options(int argc, char **argv, int &start, int &end,
-			    bool &scanserver, int &max_dist, int &min_dist, string &dir, string &odir,
-                   IOType &iotype, int &k1, int &k2,
-			    normal_method &ntype, int &width, int &height)
+	bool &scanserver, int &max_dist, int &min_dist, string &dir, string &odir,
+  IOType &iotype, int &k1, int &k2,
+	normal_method &ntype, int &width, int &height,
+  int &depth, int &solverDivide, float &samplesPerNode, float &offset)
 {
-  po::options_description cmd_options("Usage: calculateNormals <options> "
-                                      "where options are (default values "
-                                      "in brackets)");
+  po::options_description cmd_options("Poisson Surface Reconstruction <options> \n"
+                                      "Options list:");
   cmd_options.add_options()
+      // IO parameters
       ("help,?", "Display this help message")
       ("start,s",
        po::value<int>(&start)->default_value(0),
@@ -202,6 +217,7 @@ void parse_options(int argc, char **argv, int &start, int &end,
        "using shared library <arg> for input. (chose format from "
        "[uos|uosr|uos_map|uos_rgb|uos_frames|uos_map_frames|old|rts|rts_map"
        "|ifp|riegl_txt|riegl_rgb|riegl_bin|zahn|ply])")
+      // Normal parameters 
       ("max,M",
        po::value<int>(&max_dist)->default_value(-1),
        "neglegt all data points with a distance larger than <arg> 'units")
@@ -231,7 +247,19 @@ void parse_options(int argc, char **argv, int &start, int &end,
        po::value<int>(&height)->default_value(1000),
        "height of panorama image")
 #endif
-      ;
+      // Poisson parameters
+      ("depth,d",
+      po::value<int>(&depth)->default_value(8),
+      "value of poisson octree depth")
+      ("divide,D",
+      po::value<int>(&solverDivide)->default_value(8),
+      "value of poisson solver divider")
+      ("samples,p",
+      po::value<float>(&samplesPerNode)->default_value(1.0f),
+      "value of poisson samples per node")
+      ("offset,o",
+      po::value<float>(&offset)->default_value(1.0f),
+      "value of poisson offset");
 
   // input scan dir and output obj dir are hidden and mandatory
   po::options_description hidden("Hidden options");
@@ -253,8 +281,8 @@ void parse_options(int argc, char **argv, int &start, int &end,
 
   if (vmap.count("help")) {
     cout << cmd_options << endl << endl;
-    cout << "SAMPLE COMMAND FOR CALCULATING NORMALS" << endl;
-    cout << " bin/normals -s 0 -e 0 -f UOS -g AKNN -k 20 dat/ dat/test/output.obj" << endl;
+    cout << "Sample command for reconstructing surface:" << endl;
+    cout << " bin/poisson -s 0 -e 0 -f UOS -g AKNN -k 20 -d 10 dat/ dat/test/output.obj" << endl;
     cout << endl;
     exit(-1);
   }
@@ -301,6 +329,11 @@ int Poisson::setNormals(vector<Point> n) {
     normals[i].coords[1] = n[i].y; 
     normals[i].coords[2] = n[i].z;
   }
+  return 1;
+}
+
+int Poisson::setParams(PoissonParam &p) {
+  params = p;
   return 1;
 }
 
