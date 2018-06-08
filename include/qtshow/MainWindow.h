@@ -29,12 +29,17 @@ public slots:
   void addCamCombobox(int index);
   void deleteCamCombobox(int index);
 
+  void hideDockWidgets();
+  void showDockWidgets();
+
 protected:
   std::vector<std::string> loadRecentDirectories();
   void updateRecentDirectoriesMenu(std::vector<std::string> directories);
 
   dataset_settings ds;
   QProgressBar *progressbar;
+
+  QMargins defaultMargins;
 
 protected slots:
   void addRecentDirectory();
