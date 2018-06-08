@@ -72,6 +72,9 @@ signals:
 
   void zoomValueChanged(double);
 
+  void dockWidgetsHidden();
+  void dockWidgetsShown();
+
 protected:
   void initializeGL();
   void resizeGL(int w, int h);

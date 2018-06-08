@@ -181,8 +181,10 @@ void GLWidget::setFullscreen(bool fullscreenWanted) {
   QWidget *grandparent = parentWidget()->parentWidget();
   if (fullscreenWanted) {
     grandparent->showFullScreen();
+    emit dockWidgetsHidden();
   } else {
     grandparent->showNormal();
+    emit dockWidgetsShown();
   }
   fullscreen = grandparent->isFullScreen();
 }
