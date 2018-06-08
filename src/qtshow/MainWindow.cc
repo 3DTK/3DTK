@@ -152,3 +152,32 @@ void MainWindow::addCamCombobox(int index) {
 void MainWindow::deleteCamCombobox(int index) {
   comboBoxCam->removeItem(index);
 }
+
+void MainWindow::hideDockWidgets()
+{
+  defaultMargins = centralwidget->layout()->contentsMargins();
+  dockAnimation->hide();
+  dockCamera->hide();
+  dockState->hide();
+  dockSnapshot->hide();
+  dockObjects->hide();
+  dockFog->hide();
+  dockColor->hide();
+  dockMode->hide();
+  statusbar->hide();
+  centralwidget->layout()->setContentsMargins(0, 0, 0, 0);
+}
+
+void MainWindow::showDockWidgets()
+{
+  dockAnimation->show();
+  dockCamera->show();
+  dockState->show();
+  dockSnapshot->show();
+  dockObjects->show();
+  dockFog->show();
+  dockColor->show();
+  dockMode->show();
+  statusbar->show();
+  centralwidget->layout()->setContentsMargins(defaultMargins);
+}

@@ -654,7 +654,7 @@
     </widget>
    </widget>
   </widget>
-  <widget class="QDockWidget" name="dockWidget">
+  <widget class="QDockWidget" name="dockCamera">
    <property name="minimumSize">
     <size>
      <width>215</width>
@@ -1128,6 +1128,8 @@
     <signal>status(QString,int)</signal>
     <signal>positionChanged(QString)</signal>
     <signal>quaternionChanged(QString)</signal>
+    <signal>dockWidgetsHidden()</signal>
+    <signal>dockWidgetsShown()</signal>
     <slot>setDrawPoints(bool)</slot>
     <slot>setDrawCameras(bool)</slot>
     <slot>setDrawPath(bool)</slot>
@@ -1894,11 +1896,45 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>glWidget</sender>
+   <signal>dockWidgetsHidden()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>hideDockWidgets()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>628</x>
+     <y>420</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>665</x>
+     <y>419</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>glWidget</sender>
+   <signal>dockWidgetsShown()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>showDockWidgets()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>628</x>
+     <y>420</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>665</x>
+     <y>419</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>openScanDirectory()</slot>
   <slot>quit()</slot>
   <slot>clearRecentDirectories()</slot>
+  <slot>hideDockWidgets()</slot>
+  <slot>showDockWidgets()</slot>
  </slots>
  <buttongroups>
   <buttongroup name="buttonGroupViewMode"/>
