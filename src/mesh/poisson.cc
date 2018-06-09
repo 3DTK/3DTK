@@ -81,7 +81,7 @@ int main(int argc, char **argv) {
 
   std::vector<Scan*>::iterator it = Scan::allScans.begin();
   int scanNumber = start;
-
+  
   for( ; it != Scan::allScans.end(); ++it) {
     Scan* scan = *it;
 
@@ -130,32 +130,36 @@ int main(int argc, char **argv) {
                              fPanorama.getExtendedMap());
 #endif
     }
+
+    cout << "Normal calculation end" << endl;
+    cout << "Poisson reconstruction started" << endl;
+
+    // reconstruction for current scan
+    Poisson poisson;
+    PoissonParam pp;
+    pp.Depth = depth;
+    pp.SolverDivide = solverDivide;
+    pp.Depth = depth;
+    pp.Offset = offset;
+    poisson.setVertices(points);
+    poisson.setNormals(normals);
+    poisson.setParams(pp);
+    poisson.apply();
+    // CoredVectorMeshData m;
+    // poisson.getMesh(&m);
+    poisson.exportMesh((odir + to_string(scanNumber) + ".obj").c_str());
+    cout << "Poisson reconstruction end, model generated at: " +  odir + to_string(scanNumber) + ".obj" << endl;
+
+    // clear points and normal of previous scan
+    points.clear();
+    normals.clear();
     scanNumber++;
   }
-
-  cout << "Normal calculation end" << endl;
-  cout << "Poisson reconstruction started" << endl;
-
   // shutdown everything
   if (scanserver)
     ClientInterface::destroy();
 
   Scan::closeDirectory();
-
-  Poisson poisson;
-  PoissonParam pp;
-  pp.Depth = depth;
-  pp.SolverDivide = solverDivide;
-  pp.Depth = depth;
-  pp.Offset = offset;
-  poisson.setVertices(points);
-  poisson.setNormals(normals);
-  poisson.setParams(pp);
-  poisson.apply();
-  // CoredVectorMeshData m;
-  // poisson.getMesh(&m);
-  poisson.exportMesh(odir.c_str());
-  cout << "Poisson reconstruction end" << endl;
 
   return 0;
 }
