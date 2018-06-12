@@ -83,7 +83,7 @@ po::options_description generic("Generic options");
     ("octree,O", po::value<int>(&octree)->default_value(1),
     "use randomized octree based point reduction (pts per voxel=<NR>)")
     ("scale,y", po::value<double>(&scaleFac)->default_value(0.01),
-    "use ICP with scale'")
+    "scale factor for point cloud in m (be aware of the different units for uos (cm) and xyz (m), default: 0.01 means that input and output remain the same)'")
     ("color,c", po::bool_switch(&use_color)->default_value(false),
      "export in color as RGB")
     ("reflectance,R", po::bool_switch(&use_reflectance)->default_value(false),
@@ -341,7 +341,7 @@ int main(int argc, char **argv)
       if(use_xyz) {
         write_xyzr(xyz, xyz_reflectance, redptsout, scaleFac, hexfloat, high_precision);
       } else {
-        write_uosr(xyz, xyz_reflectance, redptsout, hexfloat, high_precision);
+        write_uosr(xyz, xyz_reflectance, redptsout, scaleFac*100.0 , hexfloat, high_precision);
       }
       
     } else if(use_color) {
@@ -360,14 +360,14 @@ int main(int argc, char **argv)
       if(use_xyz) {
         write_xyz_rgb(xyz, xyz_color, redptsout, scaleFac, hexfloat, high_precision);
       } else {
-        write_uos_rgb(xyz, xyz_color, redptsout, hexfloat, high_precision);
+        write_uos_rgb(xyz, xyz_color, redptsout, scaleFac*100.0, hexfloat, high_precision);
       }
 
     } else {
       if(use_xyz) {
         write_xyz(xyz, redptsout, scaleFac, hexfloat, high_precision);
       } else {
-        write_uos(xyz, redptsout, hexfloat, high_precision);
+        write_uos(xyz, redptsout, scaleFac*100.0, hexfloat, high_precision);
       }
     
     }
@@ -375,8 +375,8 @@ int main(int argc, char **argv)
       writeTrajectoryXYZ(posesout, source->get_transMat(), false, scaleFac);
       writeTrajectoryXYZ(matricesout, source->get_transMat(), true, scaleFac);
     } else {
-      writeTrajectoryUOS(posesout, source->get_transMat(), false);
-      writeTrajectoryUOS(matricesout, source->get_transMat(), true);
+      writeTrajectoryUOS(posesout, source->get_transMat(), false, scaleFac*100.0);
+      writeTrajectoryUOS(matricesout, source->get_transMat(), true, scaleFac*100.0);
     }
 
   }
