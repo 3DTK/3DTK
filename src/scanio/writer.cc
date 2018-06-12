@@ -138,7 +138,7 @@ void write_uos_rgb(std::vector<cv::Vec4f> &points, std::vector<cv::Vec3b> &color
   outfile.close();
 }
 
-void write_uos(DataXYZ &xyz, FILE *file, bool hexfloat, bool high_precision)
+void write_uos(DataXYZ &xyz, FILE *file, double scaleFac, bool hexfloat, bool high_precision)
 {
   if (hexfloat) {
 		for(unsigned int j = 0; j < xyz.size(); j++) {
@@ -146,7 +146,7 @@ void write_uos(DataXYZ &xyz, FILE *file, bool hexfloat, bool high_precision)
 			// mantissa for double precision is 52 bits long which is 6.5
 			// bytes and thus 13 hexadecimal digits
 			fprintf(file, "%.013a %.013a %.013a\n",
-					xyz[j][0], xyz[j][1], xyz[j][2]);
+					scaleFac*xyz[j][0], scaleFac*xyz[j][1], scaleFac*xyz[j][2]);
 		}
 	} else {
 		for(unsigned int j = 0; j < xyz.size(); j++) {
@@ -161,16 +161,16 @@ void write_uos(DataXYZ &xyz, FILE *file, bool hexfloat, bool high_precision)
 			// after the radix character).
 			if(high_precision) {
         fprintf(file, "%.016e %.016e %.016e\n",
-					  xyz[j][0], xyz[j][1], xyz[j][2]);
+					  scaleFac*xyz[j][0], scaleFac*xyz[j][1], scaleFac*xyz[j][2]);
       } else {
         fprintf(file, "%lf %lf %lf\n",
-					  xyz[j][0], xyz[j][1], xyz[j][2]);
+					  scaleFac*xyz[j][0], scaleFac*xyz[j][1], scaleFac*xyz[j][2]);
       }
 		}
 	}
 }
 
-void write_uosr(DataXYZ &xyz, DataReflectance &xyz_reflectance, FILE *file, bool hexfloat, bool high_precision)
+void write_uosr(DataXYZ &xyz, DataReflectance &xyz_reflectance, FILE *file, double scaleFac, bool hexfloat, bool high_precision)
 {
 	if(xyz.size() != xyz_reflectance.size()) {
 		throw std::runtime_error("xyz and reflectance vector are of different length");
@@ -181,7 +181,7 @@ void write_uosr(DataXYZ &xyz, DataReflectance &xyz_reflectance, FILE *file, bool
 			// mantissa for double precision is 52 bits long which is 6.5
 			// bytes and thus 13 hexadecimal digits
 			fprintf(file, "%.013a %.013a %.013a %.013a\n",
-					xyz[j][0], xyz[j][1], xyz[j][2], xyz_reflectance[j]);
+					scaleFac*xyz[j][0], scaleFac*xyz[j][1], scaleFac*xyz[j][2], xyz_reflectance[j]);
 		}
 	} else {
 		for(unsigned int j = 0; j < xyz.size(); j++) {
@@ -196,16 +196,16 @@ void write_uosr(DataXYZ &xyz, DataReflectance &xyz_reflectance, FILE *file, bool
 			// after the radix character).
 			if(high_precision) {
 			  fprintf(file, "%.016e %.016e %.016e %.016e\n",
-					xyz[j][0], xyz[j][1], xyz[j][2], xyz_reflectance[j]);
+					scaleFac*xyz[j][0], scaleFac*xyz[j][1], scaleFac*xyz[j][2], xyz_reflectance[j]);
       } else {
         fprintf(file, "%lf %lf %lf %lf\n",
-					xyz[j][0], xyz[j][1], xyz[j][2], xyz_reflectance[j]);
+					scaleFac*xyz[j][0], scaleFac*xyz[j][1], scaleFac*xyz[j][2], xyz_reflectance[j]);
       }
 		}
 	} 
 }
 
-void write_uos_rgb(DataXYZ &xyz, DataRGB &rgb, FILE *file, bool hexfloat, bool high_precision)
+void write_uos_rgb(DataXYZ &xyz, DataRGB &rgb, FILE *file, double scaleFac, bool hexfloat, bool high_precision)
 {
 	if(xyz.size() != rgb.size()) {
 		throw std::runtime_error("xyz and rgb vector are of different length");
@@ -216,7 +216,7 @@ void write_uos_rgb(DataXYZ &xyz, DataRGB &rgb, FILE *file, bool hexfloat, bool h
 			// mantissa for double precision is 52 bits long which is 6.5
 			// bytes and thus 13 hexadecimal digits
 			fprintf(file, "%.013a %.013a %.013a %d %d %d\n",
-					xyz[j][0], xyz[j][1], xyz[j][2],
+					scaleFac*xyz[j][0], scaleFac*xyz[j][1], scaleFac*xyz[j][2],
 					(int)rgb[j][0], (int)rgb[j][1], (int)rgb[j][2]);
 		}
 	} else {
@@ -232,11 +232,11 @@ void write_uos_rgb(DataXYZ &xyz, DataRGB &rgb, FILE *file, bool hexfloat, bool h
 			// after the radix character).
 			if(high_precision) {
 			  fprintf(file, "%.016e %.016e %.016e %d %d %d\n",
-					xyz[j][0], xyz[j][1], xyz[j][2], 
+					scaleFac*xyz[j][0], scaleFac*xyz[j][1], scaleFac*xyz[j][2], 
 					(int)rgb[j][0], (int)rgb[j][1], (int)rgb[j][2]);
       } else {
         fprintf(file, "%lf %lf %lf %d %d %d\n",
-					xyz[j][0], xyz[j][1], xyz[j][2], 
+					scaleFac*xyz[j][0], scaleFac*xyz[j][1], scaleFac*xyz[j][2], 
 					(int)rgb[j][0], (int)rgb[j][1], (int)rgb[j][2]);
       }
 		}
@@ -397,7 +397,7 @@ void writeTrajectoryXYZ(std::ofstream &posesout, const double * transMat, bool m
   posesout << std::endl;
 }
 
-void writeTrajectoryUOS(std::ofstream &posesout, const double * transMat, bool mat)
+void writeTrajectoryUOS(std::ofstream &posesout, const double * transMat, bool mat, double scaleFac)
 {
   if(mat) 
   {
@@ -414,9 +414,9 @@ void writeTrajectoryUOS(std::ofstream &posesout, const double * transMat, bool m
      << transMat[10] << " "
      << transMat[11] << " ";
   }
-  posesout << transMat[12] << " "
-   << transMat[13] << " "
-   << transMat[14] << " ";
+  posesout << scaleFac*transMat[12] << " "
+   << scaleFac*transMat[13] << " "
+   << scaleFac*transMat[14] << " ";
   if(mat) { 
     posesout << transMat[15] << " ";
   }
