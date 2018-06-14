@@ -10,7 +10,8 @@ if (WITH_OPENGL AND WITH_QT)
     ${PROJECT_SOURCE_DIR}/include/qtshow/GLWidget.h
     ${PROJECT_SOURCE_DIR}/include/qtshow/MainWindow.h
     ${PROJECT_SOURCE_DIR}/include/qtshow/QtShow.h
-    ${PROJECT_SOURCE_DIR}/include/qtshow/ScanPicker.h)
+    ${PROJECT_SOURCE_DIR}/include/qtshow/ScanPicker.h
+    ${PROJECT_SOURCE_DIR}/include/qtshow/NavPushButton.h)
 
   qt5_wrap_cpp(GLWIDGET_HEADERS_MOC
     ${PROJECT_SOURCE_DIR}/include/qtshow/GLWidget.h)
@@ -24,6 +25,7 @@ if (WITH_OPENGL AND WITH_QT)
     MainWindow.cc
     QtShow.cc
     ScanPicker.cc
+    NavPushButton.cc
     ${QTSHOW_HEADERS_MOC}
     ${QTSHOW_FORMS_HEADERS})
 

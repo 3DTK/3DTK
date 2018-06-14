@@ -43,6 +43,14 @@ MainWindow::MainWindow(const dataset_settings& ds, const window_settings& ws, QW
     // because initShow sets them.
     doubleSpinBoxMinColorValue->setValue(mincolor_value);
     doubleSpinBoxMaxColorValue->setValue(maxcolor_value);
+
+    // Create tabbed dock
+    tabifyDockWidget(dockMode, dockNavigation);
+
+    // Setup navigation mode cursor and direction of movement
+    moveXPushButton->setType(0);
+    moveYPushButton->setType(1);
+    moveZPushButton->setType(2);
   } else {
     glWidget = new GLWidget(this);
     glWidget->setFocusPolicy(Qt::ClickFocus);
@@ -164,6 +172,7 @@ void MainWindow::hideDockWidgets()
   dockFog->hide();
   dockColor->hide();
   dockMode->hide();
+  dockNavigation->hide();
   statusbar->hide();
   centralwidget->layout()->setContentsMargins(0, 0, 0, 0);
 }
@@ -178,6 +187,7 @@ void MainWindow::showDockWidgets()
   dockFog->show();
   dockColor->show();
   dockMode->show();
+  dockNavigation->show();
   statusbar->show();
   centralwidget->layout()->setContentsMargins(defaultMargins);
 }
