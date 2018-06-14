@@ -43,6 +43,8 @@ void validate(boost::any& v, const std::vector<std::string>& values, normal_meth
 void validate(boost::any& v, const std::vector<std::string>& values, IOType*, int);
 // read frams used by join scans
 void readFrames(std::string dir, int start, int end, int frame, bool use_pose=false);
+// calculate normals
+void calcNormals(vector<Point> &points, vector<Point> &normals, normal_method ntype, int k1, int k2, int width, int height, const double* rPos, const double* rPosTheta);
 
 int main(int argc, char **argv) {
   // parameters for io
@@ -53,21 +55,21 @@ int main(int argc, char **argv) {
   IOType iotype;
 
   // parameters for join scans
-  bool join = false;
-  double red = -1.0;
-  int rand = -1;
-  bool uP = false;  // should we use the pose information instead of the frames?? 
-  bool use_xyz = false;
-  bool use_color = false;
-  bool use_reflectance = false;
-  int octree = 0;  // employ randomized octree reduction?
-  bool rangeFilterActive = false;
+  bool join;
+  double red;
+  int rand;
+  bool uP;  // should we use the pose information instead of the frames?? 
+  bool use_xyz;
+  bool use_color;
+  bool use_reflectance;
+  int octree;  // employ randomized octree reduction?
+  bool rangeFilterActive;
   bool customFilterActive = false;
   std::string customFilter;
-  double scaleFac = 0.01;
-  bool hexfloat = false;
-  bool high_precision = false;
-  int frame = -1;
+  double scaleFac;
+  bool hexfloat;
+  bool high_precision;
+  int frame;
 
   // parameters for normal calculation
   int k1, k2;
@@ -97,6 +99,49 @@ int main(int argc, char **argv) {
       cerr << "Start the scanserver first." << endl;
       exit(-1);
     }
+  }
+
+  rangeFilterActive = min_dist > 0 || max_dist > 0;
+
+  // custom filter set? quick check, needs to contain at least one ';' 
+  // (proper chsecking will be done case specific in pointfilter.cc)
+  size_t pos = customFilter.find_first_of(";");
+  if (pos != std::string::npos){
+      customFilterActive = true;
+
+      // check if customFilter is specified in file
+      if (customFilter.find("FILE;") == 0){
+          std::string selection_file_name = customFilter.substr(5, customFilter.length());
+          std::ifstream selectionfile;
+          // open the input file
+          selectionfile.open(selection_file_name, std::ios::in);
+
+          if (!selectionfile.good()){
+              std::cerr << "Error loading custom filter file " << selection_file_name << "!" << std::endl;
+              std::cerr << "Data will NOT be filtered!" << std::endl;
+              customFilterActive = false;
+          }
+          else {
+              std::string line;
+              std::string custFilt;
+              while (std::getline(selectionfile, line)){
+                  if (line.find("#") == 0) continue;
+                  custFilt = custFilt.append(line);
+                  custFilt = custFilt.append("/");
+              }
+              if (custFilt.length() > 0) {
+                  // last '/'
+                  customFilter = custFilt.substr(0, custFilt.length() - 1);
+              }
+          }
+          selectionfile.close();
+      }
+  }
+  else {
+      // give a warning if custom filter has been inproperly specified
+      if (customFilter.length() > 0){
+          std::cerr << "Custom filter: specifying string has not been set properly, data will NOT be filtered." << std::endl;
+      }
   }
 
   // Read the scans
@@ -154,96 +199,17 @@ int main(int argc, char **argv) {
 
       DataXYZ xyz  = source->get("xyz");
       // record UOS format data
+      scaleFac = 1.0;
       for(unsigned int j = 0; j < xyz.size(); j++) {
-        // points.push_back(Point(scaleFac * xyz[j][0], scaleFac * xyz[j][1], scaleFac * xyz[j][2]));
         pts.push_back(Point(scaleFac * xyz[j][0], scaleFac * xyz[j][1], scaleFac * xyz[j][2]));
       }
-
-      if (ntype == KNN)
-        calculateNormalsKNN(norms, pts, k1, rPos);
-      else if (ntype == ADAPTIVE_KNN)
-        calculateNormalsAdaptiveKNN(norms, pts, k1, k2, rPos);
-      else if (ntype == AKNN)
-        calculateNormalsApxKNN(norms, pts, k1, rPos);
-      else if (ntype == ADAPTIVE_AKNN)
-        calculateNormalsAdaptiveApxKNN(norms, pts, k1, k2, rPos);
-      else
-      {
-  #ifdef WITH_OPENCV
-        // create panorama
-        fbr::panorama fPanorama(width, height, fbr::EQUIRECTANGULAR,
-                                1, 0, fbr::EXTENDED);
-        fPanorama.createPanorama(scan2mat(scan));
-
-        if(ntype == PANORAMA)
-          calculateNormalsPANORAMA(norms,
-                                  pts,
-                                  fPanorama.getExtendedMap(),
-                                  rPos);
-        else if(ntype == PANORAMA_FAST)
-          calculateNormalsFAST(norms,
-                              pts,
-                              fPanorama.getRangeImage(),
-                              fPanorama.getMaxRange(),
-                              rPos,
-                              fPanorama.getExtendedMap());
-  #endif
-      }
-      cout << "Normal calculation end" << endl;
+      
+      // calculate normals for current scan, then merge them
+      calcNormals(pts, norms, ntype, k1, k2, width, height, rPos, rPosTheta);
       points.insert(points.end(), pts.begin(), pts.end());
       normals.insert(normals.end(), norms.begin(), norms.end());
-
-      //// temp removed: write points to files
-      // if(use_reflectance) {
-      //   DataReflectance xyz_reflectance = 
-      //       (((DataReflectance)source->get("reflectance" + red_string)).size() == 0) ?
-  
-      //       source->create("reflectance" + red_string, sizeof(float)*xyz.size()) : 
-      //       source->get("reflectance" + red_string); 
-  
-      //   if (!(types & PointType::USE_REFLECTANCE)) {
-      //     for(unsigned int i = 0; i < xyz.size(); i++) xyz_reflectance[i] = 255;
-      //   }
-      //   if(use_xyz) {
-      //     write_xyzr(xyz, xyz_reflectance, redptsout, scaleFac, hexfloat, high_precision);
-      //   } else {
-      //     write_uosr(xyz, xyz_reflectance, redptsout, scaleFac*100.0 , hexfloat, high_precision);
-      //   }
-        
-      // } else if(use_color) {
-      //   std::string data_string = red > 0 ? "color reduced" : "rgb";
-      //   DataRGB xyz_color = 
-      //       (((DataRGB)source->get(data_string)).size() == 0) ?
-      //       source->create(data_string, sizeof(unsigned char)*3*xyz.size()) : 
-      //       source->get(data_string); 
-      //   if (!(types & PointType::USE_COLOR)) {
-      //       for(unsigned int i = 0; i < xyz.size(); i++) {
-      //         xyz_color[i][0] = 0;
-      //         xyz_color[i][1] = 0;
-      //         xyz_color[i][2] = 0;
-      //     }
-      //   }
-      //   if(use_xyz) {
-      //     write_xyz_rgb(xyz, xyz_color, redptsout, scaleFac, hexfloat, high_precision);
-      //   } else {
-      //     write_uos_rgb(xyz, xyz_color, redptsout, scaleFac*100.0, hexfloat, high_precision);
-      //   }
-
-      // } else {
-      //   if(use_xyz) {
-      //     write_xyz(xyz, redptsout, scaleFac, hexfloat, high_precision);
-      //   } else {
-      //     write_uos(xyz, redptsout, scaleFac*100.0, hexfloat, high_precision);
-      //   }
-      
-      // }
-      // if(use_xyz) {
-      //   writeTrajectoryXYZ(posesout, source->get_transMat(), false, scaleFac);
-      //   writeTrajectoryXYZ(matricesout, source->get_transMat(), true, scaleFac);
-      // } else {
-      //   writeTrajectoryUOS(posesout, source->get_transMat(), false, scaleFac*100.0);
-      //   writeTrajectoryUOS(matricesout, source->get_transMat(), true, scaleFac*100.0);
-      // }
+      pts.clear();
+      norms.clear();
     }
     cout << "Poisson reconstruction started" << endl;
 
@@ -260,8 +226,8 @@ int main(int argc, char **argv) {
     poisson.apply();
     // CoredVectorMeshData m;
     // poisson.getMesh(&m);
-    poisson.exportMesh((odir + to_string(scanNumber) + ".obj").c_str());
-    cout << "Poisson reconstruction end, model generated at: " +  odir + to_string(scanNumber) + ".obj" << endl;
+    poisson.exportMesh((odir + "all.obj").c_str());
+    cout << "Poisson reconstruction end, model generated at: " +  odir + "all.obj" << endl;
   }
   // apply surface reconstruction to each scan individually
   // ---
@@ -284,36 +250,8 @@ int main(int argc, char **argv) {
         points.push_back(Point(xyz[j][0], xyz[j][1], xyz[j][2]));
       }
 
-      if (ntype == KNN)
-        calculateNormalsKNN(normals, points, k1, rPos);
-      else if (ntype == ADAPTIVE_KNN)
-        calculateNormalsAdaptiveKNN(normals, points, k1, k2, rPos);
-      else if (ntype == AKNN)
-        calculateNormalsApxKNN(normals, points, k1, rPos);
-      else if (ntype == ADAPTIVE_AKNN)
-        calculateNormalsAdaptiveApxKNN(normals, points, k1, k2, rPos);
-      else
-      {
-  #ifdef WITH_OPENCV
-        // create panorama
-        fbr::panorama fPanorama(width, height, fbr::EQUIRECTANGULAR,
-                                1, 0, fbr::EXTENDED);
-        fPanorama.createPanorama(scan2mat(scan));
-
-        if(ntype == PANORAMA)
-          calculateNormalsPANORAMA(normals,
-                                  points,
-                                  fPanorama.getExtendedMap(),
-                                  rPos);
-        else if(ntype == PANORAMA_FAST)
-          calculateNormalsFAST(normals,
-                              points,
-                              fPanorama.getRangeImage(),
-                              fPanorama.getMaxRange(),
-                              rPos,
-                              fPanorama.getExtendedMap());
-  #endif
-      }
+      // calculate normals
+      calcNormals(points, normals, ntype, k1, k2, width, height, rPos, rPosTheta);
 
       cout << "Normal calculation end" << endl;
       cout << "Poisson reconstruction started" << endl;
@@ -413,8 +351,7 @@ void parse_options(int argc, char **argv, int &start, int &end, bool &scanserver
        po::value<int>(&min_dist)->default_value(-1),
        "neglegt all data points with a distance smaller than <arg> 'units")
       // Join scans parameters
-      ("join,j",
-      po::value<bool>(&join)->default_value(false),
+      ("join,j", po::value<bool>(&join)->default_value(false),
       "whether to join scans together for surface reconstruction")
       ("customFilter,u", po::value<string>(&customFilter),
       "Apply a custom filter. Filter mode and data are specified as a "
@@ -430,18 +367,20 @@ void parse_options(int argc, char **argv, int &start, int &end, bool &scanserver
       "use randomized octree based point reduction (pts per voxel=<NR>)")
       ("scale,y", po::value<double>(&scaleFac)->default_value(0.01),
       "scale factor for point cloud in m (be aware of the different units for uos (cm) and xyz (m), default: 0.01 means that input and output remain the same)'")
-      ("color,c", po::bool_switch(&use_color)->default_value(false),
+      // FIXME: for bool values, I cannot use po::bool_switch here, use po::value<bool> as a workaround
+      // xiasun 
+      ("color,c", po::value<bool>(&use_color)->default_value(false),
       "export in color as RGB")
-      ("reflectance,R", po::bool_switch(&use_reflectance)->default_value(false),
+      ("reflectance,R", po::value<bool>(&use_reflectance)->default_value(false),
       "end after scan <arg>")
-      ("trustpose,p", po::bool_switch(&use_pose)->default_value(false),
+      ("trustpose,t", po::value<bool>(&use_pose)->default_value(false),
       "Trust the pose file, do not extrapolate the last transformation."
       "(just for testing purposes, or gps input.)")
-      ("xyz,x", po::bool_switch(&use_xyz)->default_value(false),
+      ("xyz,x", po::value<bool>(&use_xyz)->default_value(false),
       "export in xyz format (right handed coordinate system in m)")
-      ("hexfloat,0", po::bool_switch(&hexfloat)->default_value(false),
+      ("hexfloat,0", po::value<bool>(&hexfloat)->default_value(false),
       "export points with hexadecimal digits")
-      ("highprecision,H", po::bool_switch(&high_precision)->default_value(false),
+      ("highprecision,H", po::value<bool>(&high_precision)->default_value(false),
       "export points with full double precision")
       ("frame,n", po::value<int>(&frame)->default_value(-1),
       "uses frame NR for export")
@@ -490,8 +429,7 @@ void parse_options(int argc, char **argv, int &start, int &end, bool &scanserver
       ("output-dir", po::value<string>(&odir), "output dir");
 
   po::positional_options_description pd;
-  pd.add("input-dir", 1);
-  pd.add("output-dir", 2);
+  pd.add("input-dir", 1).add("output-dir", 1);
 
   po::options_description all;
   all.add(cmd_options).add(hidden);
@@ -504,7 +442,8 @@ void parse_options(int argc, char **argv, int &start, int &end, bool &scanserver
   if (vmap.count("help")) {
     cout << cmd_options << endl << endl;
     cout << "Sample command for reconstructing surface:" << endl;
-    cout << " bin/poisson -s 0 -e 0 -f UOS -g AKNN -k 20 -d 10 dat/ dat/test/output.obj" << endl;
+    cout << "- e.g. Join scans and trust pose with octree depth 12:" << endl;
+    cout << "  bin/poisson dat dat/test/join_output -j true -t true -d 12" << endl;
     cout << endl;
     exit(-1);
   }
@@ -570,6 +509,40 @@ void readFrames(std::string dir, int start, int end, int frame, bool use_pose=fa
     frame_in.clear();
   }
 }
+
+void calcNormals(vector<Point> &points, vector<Point> &normals, normal_method ntype, int k1, int k2, int width, int height, const double* rPos, const double* rPosTheta) {
+  if (ntype == KNN)
+    calculateNormalsKNN(normals, points, k1, rPos);
+  else if (ntype == ADAPTIVE_KNN)
+    calculateNormalsAdaptiveKNN(normals, points, k1, k2, rPos);
+  else if (ntype == AKNN)
+    calculateNormalsApxKNN(normals, points, k1, rPos);
+  else if (ntype == ADAPTIVE_AKNN)
+    calculateNormalsAdaptiveApxKNN(normals, points, k1, k2, rPos);
+  else
+  {
+#ifdef WITH_OPENCV
+    // create panorama
+    fbr::panorama fPanorama(width, height, fbr::EQUIRECTANGULAR,
+                            1, 0, fbr::EXTENDED);
+    fPanorama.createPanorama(scan2mat(scan));
+
+    if(ntype == PANORAMA)
+      calculateNormalsPANORAMA(normals,
+                              points,
+                              fPanorama.getExtendedMap(),
+                              rPos);
+    else if(ntype == PANORAMA_FAST)
+      calculateNormalsFAST(normals,
+                          points,
+                          fPanorama.getRangeImage(),
+                          fPanorama.getMaxRange(),
+                          rPos,
+                          fPanorama.getExtendedMap());
+#endif
+  }
+}
+
 
 Poisson::Poisson() {
   initialize();
