@@ -649,19 +649,18 @@ int Poisson::exportMesh(const char* modelPath) {
   // get and write correct ordered faces indexes
   for (int i = 0; i < numFaces; ++i) {
     mesh.nextTriangle(tIndex, inCoreFlag);
-    int x, y, z;
     if (!(inCoreFlag & CoredMeshData::IN_CORE_FLAG[0])) {
-      x = tIndex.idx[0] + int(mesh.inCorePoints.size());
+      tIndex.idx[0]+=int(mesh.inCorePoints.size());
     }
     if (!(inCoreFlag & CoredMeshData::IN_CORE_FLAG[1])) {
-      y = tIndex.idx[1] + int(mesh.inCorePoints.size());
+      tIndex.idx[1]+=int(mesh.inCorePoints.size());
     }
     if (!(inCoreFlag & CoredMeshData::IN_CORE_FLAG[2])) {
-      z = tIndex.idx[2] + int(mesh.inCorePoints.size());
+      tIndex.idx[2]+=int(mesh.inCorePoints.size());
     }
-    fs << "f " << x + 1 << " " 
-      << y + 1 << " " 
-      << z + 1 << " " << endl;
+    fs << "f " << tIndex.idx[0] + 1 << " " 
+      << tIndex.idx[1] + 1 << " " 
+      << tIndex.idx[2] + 1 << " " << endl;
   }
 
   fs.close();
@@ -697,18 +696,17 @@ int Poisson::testVcgFilter() {
 
   // get and write correct ordered faces indexes
   for (int i = 0; i < numFaces; ++i) {
-    int x, y, z;
     mesh.nextTriangle(tIndex, inCoreFlag);
     if (!(inCoreFlag & CoredMeshData::IN_CORE_FLAG[0])) {
-      x = tIndex.idx[0] + int(mesh.inCorePoints.size());
+      tIndex.idx[0] += int(mesh.inCorePoints.size());
     }
     if (!(inCoreFlag & CoredMeshData::IN_CORE_FLAG[1])) {
-      y = tIndex.idx[1] + int(mesh.inCorePoints.size());
+      tIndex.idx[1] += int(mesh.inCorePoints.size());
     }
     if (!(inCoreFlag & CoredMeshData::IN_CORE_FLAG[2])) {
-      z = tIndex.idx[2] + int(mesh.inCorePoints.size());
+      tIndex.idx[2] += int(mesh.inCorePoints.size());
     }
-    vcg::tri::Allocator<MyMesh>::AddFace(m, x, y, z); // vertice index start from 0 here
+    vcg::tri::Allocator<MyMesh>::AddFace(m, tIndex.idx[0], tIndex.idx[1], tIndex.idx[2]); // vertice index start from 0 here
   }
   
   tri::UpdateTopology<MyMesh>::VertexFace(m);
@@ -718,7 +716,7 @@ int Poisson::testVcgFilter() {
     tri::UpdateNormal<MyMesh>::PerFaceNormalized(m);
     tri::Smooth<MyMesh>::VertexCoordPasoDoble(m, 1, 0, 50, false);
   }
-  // tri::io::ExporterPLY<MyMesh>::Save(m, "out_s.ply");
+  tri::io::ExporterPLY<MyMesh>::Save(m, "out_s.ply");
 
   return 1;
 }
