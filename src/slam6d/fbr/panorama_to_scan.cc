@@ -532,9 +532,9 @@ int main(int argc, char** argv)
 		}
 	      if(iColor.empty() == false)
 		{
-		  r =  iColor.at<cv::Vec3f>(h,w)[0];
-		  g =  iColor.at<cv::Vec3f>(h,w)[1];
-		  b =  iColor.at<cv::Vec3f>(h,w)[2];
+		  b =  iColor.at<cv::Vec3b>(h,w)[0];
+		  g =  iColor.at<cv::Vec3b>(h,w)[1];
+		  r =  iColor.at<cv::Vec3b>(h,w)[2];
 		}
 	      
 	      if( fabs(x) > 1e-5 && fabs(y) > 1e-5 && fabs(z) > 1e-5) 
