@@ -32,6 +32,8 @@ public slots:
   void hideDockWidgets();
   void showDockWidgets();
 
+  void saveStates();
+
 protected:
   std::vector<std::string> loadRecentDirectories();
   void updateRecentDirectoriesMenu(std::vector<std::string> directories);
