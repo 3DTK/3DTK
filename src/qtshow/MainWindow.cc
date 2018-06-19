@@ -2,6 +2,7 @@
 #include <fstream>
 
 #include <QFileDialog>
+#include <QTextStream>
 
 #include "qtshow/MainWindow.h"
 #include "qtshow/ScanPicker.h"
@@ -51,6 +52,10 @@ MainWindow::MainWindow(const dataset_settings& ds, const window_settings& ws, QW
     moveXPushButton->setType(0);
     moveYPushButton->setType(1);
     moveZPushButton->setType(2);
+
+    // Set initial state file path
+    QDir curDir(QDir::current());
+    lineEditStateFile->setText(curDir.canonicalPath() + "/" + QString::fromStdString(ds.input_directory));
   } else {
     glWidget = new GLWidget(this);
     glWidget->setFocusPolicy(Qt::ClickFocus);
@@ -190,4 +195,28 @@ void MainWindow::showDockWidgets()
   dockNavigation->show();
   statusbar->show();
   centralwidget->layout()->setContentsMargins(defaultMargins);
+}
+
+void MainWindow::saveStates()
+{
+  QFile file(lineEditStateFile->text() + "/config.ini");
+  if(!file.open(QIODevice::WriteOnly)) {
+    return;
+  }
+
+  QTextStream out(&file);
+  out << "advanced=true" << endl;
+  out << "fov=" << doubleSpinBoxZoom->text().toUtf8().constData() << endl;
+  out << "viewmode=" << buttonGroupViewMode->checkedId() << endl;
+  out << "no-points=" << (checkDrawPoints->checkState() != Qt::Checked ? "true" : "false") << endl;
+  out << "no-cameras=" << (checkDrawCameras->checkState() != Qt::Checked ? "true" : "false") << endl;
+  out << "no-path=" << (checkDrawPath->checkState() != Qt::Checked ? "true" : "false") << endl;
+  out << "fog-type=" << comboBoxFogType->currentIndex() << endl;
+  out << "fog-density=" << doubleSpinBoxFogDensity->text().toUtf8().constData() << endl;
+  out << "position=" << labelCameraPosition->text().toUtf8().constData() << endl;
+  out << "rotation=" << labelCameraQuaternion->text().toUtf8().constData() << endl;
+  out << "pointsize=" << spinBoxPointSize->cleanText().toUtf8().constData() << endl;
+  out << "colormap=" << comboBoxColorMap->currentText().toLower().toUtf8().constData() << endl;
+  out << "max=" << ds.distance_filter.max << endl;
+  out << "min=" << ds.distance_filter.min << endl;
 }
