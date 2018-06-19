@@ -418,7 +418,7 @@ namespace fbr
       }
     if(color_ == true)
       {
-	iColor_.create(height, width, CV_32FC(3));
+	iColor_.create(height, width, CV_8UC(3));
 	iColor_ = cv::Scalar::all(0);
       }
   }
@@ -442,9 +442,9 @@ namespace fbr
 	// rgb
 	if(color_ == true)
 	  {
-	    iColor_.at<cv::Vec3f>(y,x)[0] = (*itColor)[0];//r
-	    iColor_.at<cv::Vec3f>(y,x)[1] = (*itColor)[1];//g
-	    iColor_.at<cv::Vec3f>(y,x)[2] = (*itColor)[2];//b
+	    iColor_.at<cv::Vec3b>(y,x)[0] = (*itColor)[0];//r
+	    iColor_.at<cv::Vec3b>(y,x)[1] = (*itColor)[1];//g
+	    iColor_.at<cv::Vec3b>(y,x)[2] = (*itColor)[2];//b
 	  }
       }
 
