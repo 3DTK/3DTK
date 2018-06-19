@@ -381,12 +381,22 @@ namespace fbr
 				phi = long0_ + (1./n_) * ::atan2(X, (float)rho0_ - Y);
 				break;
 			}
+		case AZIMUTHAL:
+			{
+				float X = (col - widthMax_/2) / xFactor_;
+				float Y = (row - heightMax_/2) / yFactor_;
+				float ro = pow(X*X+Y*Y,0.5);
+				float Ce = 2.*asin(0.5*ro);
+				theta = -asin(cos(Ce)*sin(phi1_)+Y/ro*sin(Ce)*cos(phi1_));
+				phi = long0_ + atan2(X*sin(Ce),(ro*cos(phi1_)*cos(Ce)-Y*sin(phi1_)*sin(Ce)));
+				break;
+			}
 		default:
 			throw std::runtime_error("unknown method");
 	}
     //other projections
     
-    phi = (2 * M_PI) - phi;
+    //phi = (2 * M_PI) - phi;
     theta *= -1;
     theta += M_PI/2.0;
     
@@ -403,9 +413,9 @@ namespace fbr
   {
 	double kart[3], polar[3], phi, theta;
 	//get the x,y,z in right handed coordinate system in meters
-	kart[0] = (*it)[2]/100;
-	kart[1] = (*it)[0]/-100;
-	kart[2] = (*it)[1]/100;
+	kart[0] = (*it)[2]/100.0;
+	kart[1] = (*it)[0]/-100.0;
+	kart[2] = (*it)[1]/100.0;
 	//get the polar coordinte of x,y,z this is in rad
 	toPolar(kart, polar);
 	  
@@ -418,7 +428,7 @@ namespace fbr
 	//horizantal angle of view of [0:360][minHorzAngle_:maxHorzAngle_] and vertical of [-40:60][minVertAngle_:maxVertAngle]
         //phi == longitude == horizantal angle of view of [0:360] 
 	//shift it to clockwise instead of counter clockwise 
-	phi = (2 * M_PI) - phi;
+	//phi = (2 * M_PI) - phi;
 	//theta == latitude == vertical angle of view of [-40:60]
 	//shift the vertical angle instead of -90:90 to 0:180 from north to south pole
 	theta -= M_PI/2.0;
