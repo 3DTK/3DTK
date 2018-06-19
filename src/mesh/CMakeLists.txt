@@ -6,6 +6,10 @@ INCLUDE_DIRECTORIES(${OPENGL_INCLUDE_DIR})
 FIND_PACKAGE(GLUT REQUIRED)
 INCLUDE_DIRECTORIES(${GLUT_INCLUDE_DIR})
 
+## Eigen
+find_package(Eigen3 REQUIRED)
+include_directories(${EIGEN3_INCLUDE_DIR})
+
 ## testmesh - simple mesh I/O
 add_executable(testmesh testmesh.cc mesh.cc)
 TARGET_LINK_LIBRARIES(testmesh ${OPENGL_LIBRARIES} ${GLUT_LIBRARIES})
