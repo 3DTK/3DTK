@@ -421,6 +421,8 @@ void signal_segv(int v);
 void signal_interrupt(int v);
 void setSignalHandling();
 
+extern std::function<void(int)> exitFunc;
+
 /**
  * Global program scope destructor workaround to clean up data regardless of
  * the way of program exit.
