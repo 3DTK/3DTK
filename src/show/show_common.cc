@@ -328,6 +328,8 @@ void noop2(int, int, int) {}
 std::function<void(const std::string&)> loading_status = noop1;
 std::function<void(int, int, int)> loading_progress = noop2;
 
+std::function<void(int)> exitFunc = exit;
+
 void setResetView(int origin) {
     if (origin == 0) {
         // set origin to the center of mass of all scans
@@ -1083,7 +1085,7 @@ void signal_segv(int v)
     std::cout << std::endl << "Segmentation fault" << std::endl;
     deinitShow();
   }
-  exit(-1);
+  exitFunc(-1);
 }
 
 void signal_interrupt(int v)
@@ -1094,7 +1096,7 @@ void signal_interrupt(int v)
     std::cout << std::endl << "Exiting by interrupt" << std::endl;
     deinitShow();
   }
-  exit(-1);
+  exitFunc(-1);
 }
 
 void setSignalHandling()
