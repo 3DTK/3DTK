@@ -2,6 +2,7 @@
 #include "show/show_common.h"
 
 int main(int argc, char *argv[]){
+  exitFunc = QtShow::exit;
   setSignalHandling();
   
   QtShow app(argc, argv);
