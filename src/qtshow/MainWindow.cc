@@ -197,6 +197,14 @@ void MainWindow::showDockWidgets()
   centralwidget->layout()->setContentsMargins(defaultMargins);
 }
 
+void MainWindow::setStateFilePath()
+{
+  QString stateFilePath = QFileDialog::getExistingDirectory();
+  if(!stateFilePath.isEmpty()) {
+    lineEditStateFile->setText(stateFilePath);
+  }
+}
+
 void MainWindow::saveStates()
 {
   QFile file(lineEditStateFile->text() + "/config.ini");

@@ -32,6 +32,7 @@ public slots:
   void hideDockWidgets();
   void showDockWidgets();
 
+  void setStateFilePath();
   void saveStates();
 
 protected:

@@ -757,7 +757,7 @@
     </widget>
     <widget class="QToolButton" name="buttonChooseStateFile">
      <property name="enabled">
-      <bool>false</bool>
+      <bool>true</bool>
      </property>
      <property name="geometry">
       <rect>
@@ -2049,6 +2049,22 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>buttonChooseStateFile</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>setStateFilePath()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>186</x>
+     <y>565</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>665</x>
+     <y>459</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>openScanDirectory()</slot>
@@ -2057,6 +2073,7 @@
   <slot>hideDockWidgets()</slot>
   <slot>showDockWidgets()</slot>
   <slot>saveStates()</slot>
+  <slot>setStateFilePath()</slot>
  </slots>
  <buttongroups>
   <buttongroup name="buttonGroupViewMode"/>
