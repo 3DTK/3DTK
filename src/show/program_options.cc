@@ -60,7 +60,7 @@ void parse_args(int argc, char **argv, dataset_settings& ds, window_settings& ws
       value(&ds.camera.position)->default_value(Position(0,0,0), "0,0,0"),
       "Camera starting position, given as \"%lf,%lf,%lf\" for x, y and z.")
     ("rotation",
-      value(&ds.camera.rotation)->default_value(Quaternion(0,0,0,1), "0,0,0,1"),
+      value(&ds.camera.rotation)->default_value(Quaternion(1,0,0,0), "1,0,0,0"),
       "Camera starting rotation, given as a quaternion \"%lf,%lf,%lf,%lf\" for x, y, z, and w.")
     ("pointsize", value(&ds.pointsize)->default_value(1),
       "Size of each point in pixels.")
