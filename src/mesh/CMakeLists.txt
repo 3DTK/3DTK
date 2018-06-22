@@ -11,9 +11,9 @@ find_package(Eigen3 REQUIRED)
 include_directories(${EIGEN3_INCLUDE_DIR})
 
 ## testmesh - simple mesh I/O
-add_executable(testmesh testmesh.cc mesh.cc)
-TARGET_LINK_LIBRARIES(testmesh ${OPENGL_LIBRARIES} ${GLUT_LIBRARIES})
-SET_TARGET_PROPERTIES(testmesh PROPERTIES OUTPUT_NAME "testmesh")
+# add_executable(testmesh testmesh.cc mesh.cc)
+# TARGET_LINK_LIBRARIES(testmesh ${OPENGL_LIBRARIES} ${GLUT_LIBRARIES})
+# SET_TARGET_PROPERTIES(testmesh PROPERTIES OUTPUT_NAME "testmesh")
 
 ## PoissonRecon - KB's implementation
 # include_directories(./PoissonRecon/Src)
@@ -25,5 +25,5 @@ string(REPLACE "-O3" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
 set(MESH_ADDITIONAL_CFLAGS "-fpermissive -g" CACHE STRING "Additional flags of MESH module given to the compiler" )
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${ADDITIONAL_CFLAGS} ${MESH_ADDITIONAL_CFLAGS}")
 include_directories(poisson vcglib)
-add_executable(poisson poisson/Factor.cpp poisson/Geometry.cpp poisson/MarchingCubes.cpp poisson/MultiGridOctest.cpp poisson.cc vcglib/wrap/ply/plylib.cpp)
-TARGET_LINK_LIBRARIES(poisson scan_shared ${NORMALS_PANORAMA_LIBRARIES} ${Boost_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY})
+add_executable(recon recon.cc poisson.cc poisson/Factor.cpp poisson/Geometry.cpp poisson/MarchingCubes.cpp poisson/MultiGridOctest.cpp vcglib/wrap/ply/plylib.cpp)
+TARGET_LINK_LIBRARIES(recon scan_shared normals_panorama_shared ${NORMALS_PANORAMA_LIBRARIES} ${Boost_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY})

@@ -5,9 +5,15 @@
 #ifndef __MESH_H__
 #define __MESH_H__
 
+#ifndef WITH_OPENCV
+#define WITH_OPENCV
 
-#include "slam6d/scan.h"
-#include "slam6d/normals.h"
+#include <slam6d/scan.h>
+#include <slam6d/normals.h>
+
+#ifdef WITH_OPENCV
+#include <normals/normals_panorama.h>
+#endif
 
 class Poisson {
 public:
@@ -31,7 +37,7 @@ private:
   PoissonParam params;
   vector<Point3D<float>> vertices;
   vector<Point3D<float>> normals;
-  CoredVectorMeshData mesh;
+  CoredVectorMeshData *mesh;
   Point3D<float> center;
   float scale;
   vcg::CallBackPos *cb;
@@ -41,4 +47,5 @@ private:
   int ready();
 };
 
+#endif
 #endif
