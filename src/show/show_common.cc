@@ -596,7 +596,14 @@ void copy_settings_to_globals(
   Rquat[2] = ds.camera.rotation.z;
   Rquat[3] = ds.camera.rotation.w;
   for (char i = 0; i <= 3; i++) quat[i] = Rquat[i];
-  // TODO need to initialize view_rotate_button with QuaternionToMatrix4
+  double t[3] = {};
+  QuatToMatrix4((const double *)quat, t, (double *)view_rotate_button);
+  glMultMatrixd((const double *)view_rotate_button);
+  double rot[3];
+  Matrix4ToEuler((const double *)view_rotate_button, rot);
+  mouseRotX = deg(rot[0]);
+  mouseRotY = deg(rot[1]);
+  mouseRotZ = deg(rot[2]);
 
   ptype = ds.coloring.ptype;
   listboxColorVal = (ds.coloring.colorval != -1 ? ds.coloring.colorval : 0);
