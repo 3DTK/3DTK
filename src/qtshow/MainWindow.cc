@@ -8,6 +8,8 @@
 #include "qtshow/ScanPicker.h"
 #include "show/show_common.h"
 
+#include "show/program_options.h"
+
 MainWindow::MainWindow(const dataset_settings& ds, const window_settings& ws, QWidget *parent, Qt::WindowFlags flags)
   : QMainWindow(parent, flags)
   , ds(ds)
@@ -227,4 +229,79 @@ void MainWindow::saveStates()
   out << "colormap=" << comboBoxColorMap->currentText().toLower().toUtf8().constData() << endl;
   out << "max=" << ds.distance_filter.max << endl;
   out << "min=" << ds.distance_filter.min << endl;
+}
+
+void MainWindow::loadStates()
+{
+  using namespace boost::program_options;
+  
+  bool advanced, noPoints, noCameras, noPath, noFog;
+  float fov, fogDensity;
+  int viewmode, fogType, pointsize;
+  ShowColormap colormap;
+  Position position;
+  Quaternion rotation;
+
+  bool nogui, invertMouseX, invertMouseY, color, noAnimColor;
+  float fps, colormin, colormax;
+  double scale, reduce;
+  int distMin, distMax, octree, stepsize;
+  Color bgcolor;
+  WindowDimensions dimensions;
+
+  options_description gui_options("GUI options");
+  setGUIOptions(nogui, fps, dimensions, advanced,
+		invertMouseX, invertMouseY, gui_options);
+
+  options_description display_options("Display options");
+  setDisplayOptions(scale, fov, viewmode, noPoints, noCameras, noPath,
+		    noFog, fogType, fogDensity, position, rotation,
+		    pointsize, display_options);
+
+  options_description color_options("Point coloring");
+  setColorOptions(bgcolor, color, colormap, colormin, colormax,
+		  noAnimColor, color_options);
+
+  options_description reduction_options("Point reduction");
+  setReductionOptions(distMin, distMax, reduce, octree, stepsize,
+		      reduction_options);
+
+  variables_map vm;
+  options_description visible_options("");
+  visible_options
+    .add(gui_options)
+    .add(display_options)
+    .add(color_options)
+    .add(reduction_options)
+    ;
+  QString filePath = lineEditStateFile->text() + "/config.ini";
+  std::ifstream config_file(filePath.toLatin1().data());
+  if(config_file) {
+    store(parse_config_file(config_file, visible_options), vm);
+  }
+  notify(vm);
+  
+  doubleSpinBoxZoom->setValue(fov);
+  
+  buttonGroupViewMode->buttonClicked(viewmode);
+  buttonGroupViewMode->button(viewmode)->setChecked(true);
+  
+  checkDrawPoints->setChecked(!noPoints);
+  checkDrawCameras->setChecked(!noCameras);
+  checkDrawPath->setChecked(!noPath);
+  
+  comboBoxFogType->setCurrentIndex(fogType);
+  
+  doubleSpinBoxFogDensity->setValue(fogDensity);
+  
+  X = position.x; Y = position.y; Z = position.z;
+  
+  QuatToMouseRot(rotation, mouseRotX, mouseRotY, mouseRotZ);
+  glWidget->cameraChanged();
+  
+  spinBoxPointSize->setValue(pointsize);
+  
+  comboBoxColorMap->setCurrentIndex(static_cast<int>(colormap));
+  
+  glWidget->update();
 }

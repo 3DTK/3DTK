@@ -424,6 +424,11 @@ void setSignalHandling();
 extern std::function<void(int)> exitFunc;
 
 /**
+ * Convert quaternion into mouse rotation
+ */
+void QuatToMouseRot(Quaternion q, double& x, double& y, double& z);
+
+/**
  * Global program scope destructor workaround to clean up data regardless of
  * the way of program exit.
  */

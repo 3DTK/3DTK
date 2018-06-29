@@ -4,8 +4,9 @@
 
 #include "show/program_options.h"
 
+using namespace boost::program_options;
+
 void parse_args(int argc, char **argv, dataset_settings& ds, window_settings& ws, bool *directory_present) {
-  using namespace boost::program_options;
   using namespace std;
 
   // Temporary parsing variables
@@ -13,169 +14,45 @@ void parse_args(int argc, char **argv, dataset_settings& ds, window_settings& ws
 
   // TODO make all defaults declared here the initial values for the settings structs, then use that initial value as the default here
   options_description gui_options("GUI options");
-  gui_options.add_options()
-    ("nogui,G", bool_switch(&ws.nogui),
-      "Turn off GUI")
-    ("fps,F", value(&ws.max_fps)->default_value(60), "Maximum framerate")
-    ("dimensions,x",
-       value(&ws.dimensions)->default_value(WindowDimensions(960, 540), "960x540"),
-      "Window dimensions in WxH format.")
-    ("advanced,2", bool_switch(&ws.advanced_controls),
-      "Switch on advanced controls")
-    ("invertmousex", bool_switch(&ws.invert_mouse_x),
-      "Invert camera rotation for mouse x movement.")
-    ("invertmousey", bool_switch(&ws.invert_mouse_y),
-      "Invert camera rotation for mouse y movement.")
-    ;
+  setGUIOptions(ws.nogui, ws.max_fps, ws.dimensions, ws.advanced_controls,
+		ws.invert_mouse_x, ws.invert_mouse_y, gui_options);
 
   options_description display_options("Display options");
-  display_options.add_options()
-    ("scale,C", value(&ds.scale)->default_value(0.01, "0.01"),
-      "Scale factor to use. Influences movement speed etc. "
-      "Use 1 when point coordinates are in meters, 0.01 when in centimeters "
-      "and so forth.")
-    ("fov", value(&ds.camera.fov)->default_value(60),
-      "Horizontal field of view angle in degrees. "
-      "The vertical angle depends on window size.")
-    ("viewmode", value(&ds.init_with_viewmode), // FIXME starts out with a view from the front, need to call topView()
-      "Initialize the camera above the point cloud with parallel projection.")
-    ("no-points", bool_switch(&no_points),
-      "Initially, do not draw points.")
-    ("no-cameras", bool_switch(&no_cameras),
-      "Initially, do not draw cameras.")
-    ("no-path", bool_switch(&no_path),
-      "Initially, do not draw camera path.")
-    ("no-fog", bool_switch(&no_fog),
-      "Initially turn off fog.")
-    ("fog-type", value(&ds.fog.type)->default_value(1),
-      "How fog dims points with distance:\n"
-      "0   = no fog\n"
-      "1   = exponential\n"
-      "2   = exponential squared\n"
-      "3   = linear\n"
-      "4-6 = inverted options 1-3 (further is brighter)") // FIXME? during testing, these did not do anything
-    ("fog-density", value(&ds.fog.density)->default_value(0.1),
-      "Fog density. Useful values are between 0 and 1.")
-    ("position",
-      value(&ds.camera.position)->default_value(Position(0,0,0), "0,0,0"),
-      "Camera starting position, given as \"%lf,%lf,%lf\" for x, y and z.")
-    ("rotation",
-      value(&ds.camera.rotation)->default_value(Quaternion(1,0,0,0), "1,0,0,0"),
-      "Camera starting rotation, given as a quaternion \"%lf,%lf,%lf,%lf\" for x, y, z, and w.")
-    ("pointsize", value(&ds.pointsize)->default_value(1),
-      "Size of each point in pixels.")
-    ;
+  setDisplayOptions(ds.scale, ds.camera.fov, ds.init_with_viewmode,
+		    no_points, no_cameras, no_path,
+		    no_fog, ds.fog.type, ds.fog.density,
+		    ds.camera.position, ds.camera.rotation, ds.pointsize,
+		    display_options);
 
   options_description color_options("Point coloring");
-  color_options.add_options()
-    ("bgcolor", value(&ds.coloring.bgcolor)->default_value(Color(0,0,0), "0,0,0"),
-     "Drawing area background color, given as \"%f,%f,%f\" for red, green and blue.")
-    ("color,c", bool_switch(&ds.coloring.explicit_coloring),
-      "Use included RGB values for coloring points.")
-    ("reflectance,R", bool_switch(),
-      "Use reflectance values for coloring point clouds.")
-    ("temperature,D", bool_switch(),
-      "Use temperature values for coloring point clouds.")
-    ("amplitude,a", bool_switch(),
-      "Use amplitude values for coloring point clouds.")
-    ("deviation,d", bool_switch(),
-      "Use deviation values for coloring point clouds.")
-    ("height,h", bool_switch(),
-      "Use y-height values for coloring point clouds.")
-    ("type,T", bool_switch(),
-      "Use type values for coloring point clouds.")
-    ("time,t", bool_switch()) // TODO description
-    ("colormap",
-      value(&ds.coloring.colormap)->default_value(ShowColormap::solid, "solid"),
-      "With which colors to color the points, according to their color value "
-      "in a spectrum. Available color maps are: solid, grey, hsv, jet, hot, "
-      "rand, shsv, temp.")
-    ("colormin", value(&ds.coloring.colormap_values.min),
-      "Minimum value for mapping the color spectrum.")
-    ("colormax", value(&ds.coloring.colormap_values.max),
-      "Maximum value for mapping the color spectrum.")
-    ("noanimcolor,A", bool_switch(&no_animcolor),
-      "Do not switch to different color settings when displaying animation")
-    ;
+  setColorOptions(ds.coloring.bgcolor, ds.coloring.explicit_coloring,
+  		  ds.coloring.colormap, ds.coloring.colormap_values.min,
+  		  ds.coloring.colormap_values.max, no_animcolor,
+  		  color_options);
 
   options_description scan_options("Scan selection");
-  scan_options.add_options()
-    ("scanserver,S", bool_switch(&ds.use_scanserver),
-      "Use the scanserver as an input method and for handling scan data.")
-    ("start,s", value(&ds.scan_numbers.min)->default_value(0), "Start at this scan number (0-based)")
-    ("end,e", value(&ds.scan_numbers.max)->default_value(-1), "Stop at this scan number (0-based, with -1 meaning don't stop)")
-    ("format,f", value(&ds.format)->default_value(UOS, "uos"),
-      "The input files are read with this shared library.\n"
-      "Available values: uos, uos_map, uos_rgb, uos_frames, uos_map_frames, "
-      "old, rts, rts_map, ifp, riegl_txt, riegl_rgb, riegl_bin, zahn, ply, "
-      "wrl, xyz, zuf, iais, front, x3d, rxp, ais.")
-    ;
+  setScanOptions(ds.use_scanserver, ds.scan_numbers.min,
+		 ds.scan_numbers.max, ds.format, scan_options);
 
   options_description reduction_options("Point reduction");
-  reduction_options.add_options()
-    ("min,M", value(&ds.distance_filter.min)->default_value(0),
-      "Neglect all points closer than this to the origin")
-    ("max,m", value(&ds.distance_filter.max)->default_value(-1),
-      "Neglect all points further than this from the origin (with -1 meaning not to)")
-    ("reduce,r", value(&ds.octree_reduction_voxel)->default_value(0),
-      "Turn on octree based point reduction with voxels  of size arg^3.")
-    ("octree,O", value(&ds.octree_reduction_randomized_bucket)->implicit_value(1),
-      "Enable randomized octree based point reduction with arg points per voxel. "
-      "Requires --reduce (-r).") // TODO where is this enforced?
-    ("stepsize", value(&ds.skip_files)->default_value(1),
-      "Reduce point cloud by including only every arg-th scan file.")
-    ;
+  setReductionOptions(ds.distance_filter.min, ds.distance_filter.max,
+		      ds.octree_reduction_voxel,
+		      ds.octree_reduction_randomized_bucket,
+		      ds.skip_files, reduction_options);
 
   options_description point_options("Point transformation");
-  point_options.add_options()
-    ("origin,o", value(&ds.origin_type),
-      "Set the starting and reset position according to n. By default, the "
-      "starting and reset position are at the origin of the "
-      "coordinate system. Also try --position.\n"
-      "arg = 0             : the center of mass of all scans\n"
-      "arg = [1,2,3,...]   : the center of scan 0,1,2,... (arg-1)\n"
-      "arg = [-1,-2,-3,...]: the position of scan 0,1,2,... (-arg-1)\n")
-    ("sphere,b", value(&ds.sphere_radius)->default_value(0),
-      "Map all measurements on a sphere of this radius.")
-    ;
+  setPointOptions(ds.origin_type, ds.sphere_radius, point_options);
 
   options_description file_options("Octree caching");
-  file_options.add_options()
-    ("saveOct", bool_switch(&ds.save_octree),
-      "Store all used scans as octrees in the input directory. "
-      "All reflectivity/amplitude/deviation/type settings are stored as well. "
-      "Only works when using octree display.")
-    ("loadOct", bool_switch(&ds.load_octree),
-      "Only reads octrees from the given directory. "
-      "All reflectivity/amplitude/deviation/type settings are read from file. "
-      "--reflectance/--amplitude and similar parameters are therefore ignored. "
-      "Only works when using octree display.")
-    ("autoOct", bool_switch(&ds.cache_octree),
-      "Like --loadOct and --saveOct used together except that it only loads "
-      "the octrees if they are newer than the underlying data and only stores "
-      "octrees if they either didn't exist yet or are older than the "
-      "underlying data.")
-    ;
+  setFileOptions(ds.save_octree, ds.load_octree, ds.cache_octree,
+		 file_options);
 
   options_description other_options("Other options");
-  other_options.add_options()
-    ("help,?", "Display this help text")
-    ("screenshot", bool_switch(&ws.take_screenshot), "Take screenshot and exit")
-    ("loadObj,l", value(&ds.objects_file_name),
-      "Load objects specified in this file")
-    ("customFilter,u", value(&ds.custom_filter),
-      "Apply a custom filter. Filter mode and data are specified as a "
-      "semicolon-seperated string:\n"
-      "\"{filterMode};{nrOfParams}[;param1][;param2][...]\"\n"
-      "Multiple filters can be specified in a file (syntax in file is same as "
-      "direct specification)\n"
-      "\"FILE;{fileName}\"\n"
-      "See filter implementation in src/slam6d/pointfilter.cc for more detail.")
-    ("no-anim-convert-jpg,J", bool_switch(&no_anim_convert_jpg)) // TODO description
-    ("trajectory-file", value(&ds.trajectory_file_name)) // TODO description
-    ("identity,i", bool_switch(&ds.identity)) //TODO description
-    ;
-
+  setOtherOptions(ws.take_screenshot, ds.objects_file_name,
+		  ds.custom_filter, no_anim_convert_jpg,
+		  ds.trajectory_file_name, ds.identity,
+		  other_options);
+  
   // These options will be displayed in the help text
   options_description visible_options("");
   visible_options
@@ -357,11 +234,205 @@ void parse_args(int argc, char **argv, dataset_settings& ds, window_settings& ws
   }
 }
 
+void setGUIOptions(bool& nogui, float& fps,
+		   WindowDimensions& dimensions, bool& advanced,
+		   bool& invertMouseX, bool& invertMouseY,
+		   options_description& gui_options)
+{
+  gui_options.add_options()
+    ("nogui,G", bool_switch(&nogui), "Turn off GUI")
+    ("fps,F", value(&fps)->default_value(60), "Maximum framerate")
+    ("dimensions,x",
+     value(&dimensions)->default_value(WindowDimensions(960, 540), "960x540"), "Window dimensions in WxH format.")
+    ("advanced,2", bool_switch(&advanced),
+     "Switch on advanced controls")
+    ("invertmousex", bool_switch(&invertMouseX),
+     "Invert camera rotation for mouse x movement.")
+    ("invertmousey", bool_switch(&invertMouseY),
+     "Invert camera rotation for mouse y movement.")
+    ;
+}
+
+void setDisplayOptions(double& scale, GLfloat& fov, int& viewmode,
+		       bool& noPoints, bool& noCameras, bool& noPath,
+		       bool& noFog, int& fogType, GLfloat& fogDensity,
+		       Position& position, Quaternion& rotation,
+		       int& pointsize,
+		       options_description& display_options)
+{
+  display_options.add_options()
+    ("scale,C", value(&scale)->default_value(0.01, "0.01"),
+     "Scale factor to use. Influences movement speed etc. "
+     "Use 1 when point coordinates are in meters, 0.01 when in centimeters "
+     "and so forth.")
+    ("fov", value(&fov)->default_value(60),
+     "Horizontal field of view angle in degrees. "
+     "The vertical angle depends on window size.")
+    ("viewmode", value(&viewmode)->default_value(0), // FIXME starts out with a view from the front, need to call topView()
+     "Initialize the camera above the point cloud with parallel projection.")
+    ("no-points", bool_switch(&noPoints),
+     "Initially, do not draw points.")
+    ("no-cameras", bool_switch(&noCameras),
+     "Initially, do not draw cameras.")
+    ("no-path", bool_switch(&noPath),
+     "Initially, do not draw camera path.")
+    ("no-fog", bool_switch(&noFog),
+     "Initially turn off fog.")
+    ("fog-type", value(&fogType)->default_value(1),
+     "How fog dims points with distance:\n"
+     "0   = no fog\n"
+     "1   = exponential\n"
+     "2   = exponential squared\n"
+     "3   = linear\n"
+     "4-6 = inverted options 1-3 (further is brighter)") // FIXME? during testing, these did not do anything
+    ("fog-density", value(&fogDensity)->default_value(0.1),
+     "Fog density. Useful values are between 0 and 1.")
+    ("position",
+     value(&position)->default_value(Position(0,0,0), "0,0,0"),
+     "Camera starting position, given as \"%lf,%lf,%lf\" for x, y and z.")
+    ("rotation",
+     value(&rotation)->default_value(Quaternion(1,0,0,0), "1,0,0,0"),
+     "Camera starting rotation, given as a quaternion \"%lf,%lf,%lf,%lf\" for x, y, z, and w.")
+    ("pointsize", value(&pointsize)->default_value(1),
+     "Size of each point in pixels.")
+    ;
+}
+
+void setColorOptions(Color& bgcolor, bool& color, ShowColormap& colormap,
+		     float& colormin, float& colormax, bool& noAnimColor,
+		     options_description& color_options)
+{
+  color_options.add_options()
+    ("bgcolor", value(&bgcolor)->default_value(Color(0,0,0), "0,0,0"),
+     "Drawing area background color, given as \"%f,%f,%f\" for red, green and blue.")
+    ("color,c", bool_switch(&color),
+     "Use included RGB values for coloring points.")
+    ("reflectance,R", bool_switch(),
+     "Use reflectance values for coloring point clouds.")
+    ("temperature,D", bool_switch(),
+     "Use temperature values for coloring point clouds.")
+    ("amplitude,a", bool_switch(),
+     "Use amplitude values for coloring point clouds.")
+    ("deviation,d", bool_switch(),
+     "Use deviation values for coloring point clouds.")
+    ("height,h", bool_switch(),
+     "Use y-height values for coloring point clouds.")
+    ("type,T", bool_switch(),
+     "Use type values for coloring point clouds.")
+    ("time,t", bool_switch()) // TODO description
+    ("colormap",
+     value(&colormap)->default_value(ShowColormap::solid, "solid"),
+     "With which colors to color the points, according to their color value "
+     "in a spectrum. Available color maps are: solid, grey, hsv, jet, hot, "
+     "rand, shsv, temp.")
+    ("colormin", value(&colormin),
+     "Minimum value for mapping the color spectrum.")
+    ("colormax", value(&colormax),
+     "Maximum value for mapping the color spectrum.")
+    ("noanimcolor,A", bool_switch(&noAnimColor),
+     "Do not switch to different color settings when displaying animation")
+    ;
+}
+
+void setScanOptions(bool& scanserver, int& start, int& end,
+		    IOType& format, options_description& scan_options)
+{
+  scan_options.add_options()
+    ("scanserver,S", bool_switch(&scanserver),
+     "Use the scanserver as an input method and for handling scan data.")
+    ("start,s", value(&start)->default_value(0), "Start at this scan number (0-based)")
+    ("end,e", value(&end)->default_value(-1), "Stop at this scan number (0-based, with -1 meaning don't stop)")
+    ("format,f", value(&format)->default_value(UOS, "uos"),
+     "The input files are read with this shared library.\n"
+     "Available values: uos, uos_map, uos_rgb, uos_frames, uos_map_frames, "
+     "old, rts, rts_map, ifp, riegl_txt, riegl_rgb, riegl_bin, zahn, ply, "
+     "wrl, xyz, zuf, iais, front, x3d, rxp, ais.")
+    ;
+}
+
+void setReductionOptions(int& distMin, int& distMax, double& reduce,
+			 int& octree, int& stepsize,
+			 options_description& reduction_options)
+{
+  reduction_options.add_options()
+    ("min,M", value(&distMin)->default_value(0),
+     "Neglect all points closer than this to the origin")
+    ("max,m", value(&distMax)->default_value(-1),
+     "Neglect all points further than this from the origin (with -1 meaning not to)")
+    ("reduce,r", value(&reduce)->default_value(0),
+     "Turn on octree based point reduction with voxels  of size arg^3.")
+    ("octree,O", value(&octree)->implicit_value(1),
+     "Enable randomized octree based point reduction with arg points per voxel. "
+     "Requires --reduce (-r).") // TODO where is this enforced?
+    ("stepsize", value(&stepsize)->default_value(1),
+     "Reduce point cloud by including only every arg-th scan file.")
+    ;
+}
+
+void setPointOptions(int& originType, double& sphereRadius,
+		     options_description& point_options)
+{
+  point_options.add_options()
+    ("origin,o", value(&originType),
+      "Set the starting and reset position according to n. By default, the "
+      "starting and reset position are at the origin of the "
+      "coordinate system. Also try --position.\n"
+      "arg = 0             : the center of mass of all scans\n"
+      "arg = [1,2,3,...]   : the center of scan 0,1,2,... (arg-1)\n"
+      "arg = [-1,-2,-3,...]: the position of scan 0,1,2,... (-arg-1)\n")
+    ("sphere,b", value(&sphereRadius)->default_value(0),
+      "Map all measurements on a sphere of this radius.")
+    ;
+}
+
+void setFileOptions(bool& saveOct, bool& loadOct, bool& autoOct,
+		    options_description& file_options)
+{
+  file_options.add_options()
+    ("saveOct", bool_switch(&saveOct),
+      "Store all used scans as octrees in the input directory. "
+      "All reflectivity/amplitude/deviation/type settings are stored as well. "
+      "Only works when using octree display.")
+    ("loadOct", bool_switch(&loadOct),
+      "Only reads octrees from the given directory. "
+      "All reflectivity/amplitude/deviation/type settings are read from file. "
+      "--reflectance/--amplitude and similar parameters are therefore ignored. "
+      "Only works when using octree display.")
+    ("autoOct", bool_switch(&autoOct),
+      "Like --loadOct and --saveOct used together except that it only loads "
+      "the octrees if they are newer than the underlying data and only stores "
+      "octrees if they either didn't exist yet or are older than the "
+      "underlying data.")
+    ;
+}
+
+void setOtherOptions(bool& screenshot, std::string& objFileName,
+		     std::string& customFilter,	bool& noAnimConvertJPG,
+		     std::string& trajectoryFileName, bool& identity,
+		     options_description& other_options)
+{
+  other_options.add_options()
+    ("help,?", "Display this help text")
+    ("screenshot", bool_switch(&screenshot), "Take screenshot and exit")
+    ("loadObj,l", value(&objFileName),
+      "Load objects specified in this file")
+    ("customFilter,u", value(&customFilter),
+      "Apply a custom filter. Filter mode and data are specified as a "
+      "semicolon-seperated string:\n"
+      "\"{filterMode};{nrOfParams}[;param1][;param2][...]\"\n"
+      "Multiple filters can be specified in a file (syntax in file is same as "
+      "direct specification)\n"
+      "\"FILE;{fileName}\"\n"
+      "See filter implementation in src/slam6d/pointfilter.cc for more detail.")
+    ("no-anim-convert-jpg,J", bool_switch(&noAnimConvertJPG)) // TODO description
+    ("trajectory-file", value(&trajectoryFileName)) // TODO description
+    ("identity,i", bool_switch(&identity)) //TODO description
+    ;
+}
+
 void validate(boost::any& v, const std::vector<std::string>& values,
   WindowDimensions* target_type, int)
 {
-  using namespace boost::program_options;
-
   validators::check_first_occurrence(v);
   const char *s = validators::get_single_string(values).c_str();
 
@@ -376,8 +447,6 @@ void validate(boost::any& v, const std::vector<std::string>& values,
 void validate(boost::any& v, const std::vector<std::string>& values,
   Position* target_type, int)
 {
-  using namespace boost::program_options;
-
   validators::check_first_occurrence(v);
   const char *s = validators::get_single_string(values).c_str();
 
@@ -392,8 +461,6 @@ void validate(boost::any& v, const std::vector<std::string>& values,
 void validate(boost::any& v, const std::vector<std::string>& values,
   Color* target_type, int)
 {
-  using namespace boost::program_options;
-
   validators::check_first_occurrence(v);
   const char *s = validators::get_single_string(values).c_str();
 
@@ -408,8 +475,6 @@ void validate(boost::any& v, const std::vector<std::string>& values,
 void validate(boost::any& v, const std::vector<std::string>& values,
   Quaternion* target_type, int)
 {
-  using namespace boost::program_options;
-
   validators::check_first_occurrence(v);
   const char *s = validators::get_single_string(values).c_str();
 
@@ -424,8 +489,6 @@ void validate(boost::any& v, const std::vector<std::string>& values,
 void validate(boost::any& v, const std::vector<std::string>& values,
   ShowColormap* target_type, int)
 {
-  using namespace boost::program_options;
-
   validators::check_first_occurrence(v);
   const std::string& s = validators::get_single_string(values);
 
@@ -451,8 +514,6 @@ void validate(boost::any& v, const std::vector<std::string>& values,
 void validate(boost::any& v, const std::vector<std::string>& values,
   IOType* target_type, int)
 {
-  using namespace boost::program_options;
-
   validators::check_first_occurrence(v);
   const std::string& s = validators::get_single_string(values);
 

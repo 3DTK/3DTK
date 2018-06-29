@@ -793,7 +793,7 @@
     </widget>
     <widget class="QPushButton" name="buttonLoadState">
      <property name="enabled">
-      <bool>false</bool>
+      <bool>true</bool>
      </property>
      <property name="geometry">
       <rect>
@@ -2065,6 +2065,22 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>buttonLoadState</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>loadStates()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>157</x>
+     <y>605</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>665</x>
+     <y>459</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>openScanDirectory()</slot>
@@ -2074,6 +2090,7 @@
   <slot>showDockWidgets()</slot>
   <slot>saveStates()</slot>
   <slot>setStateFilePath()</slot>
+  <slot>loadStates()</slot>
  </slots>
  <buttongroups>
   <buttongroup name="buttonGroupViewMode"/>
