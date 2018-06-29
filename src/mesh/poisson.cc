@@ -15,10 +15,13 @@ using namespace vcg;
 #include <vcg/complex/complex.h>
 #include <vcg/complex/algorithms/update/topology.h>
 #include <vcg/complex/algorithms/update/normal.h>
+#include <vcg/complex/algorithms/pointcloud_normal.h>
 #include <vcg/complex/algorithms/clean.h>
 #include <vcg/complex/algorithms/smooth.h>
 #include <wrap/io_trimesh/import.h>
 #include <wrap/io_trimesh/export_ply.h>
+#include <wrap/io_trimesh/export_obj.h>
+
 class MyFace;
 class MyVertex;
 struct MyUsedTypes : public UsedTypes<	Use<MyVertex>::AsVertexType, Use<MyFace>::AsFaceType>{};
@@ -166,6 +169,7 @@ int Poisson::testVcgFilter() {
         vertex.coords[2] * scale + center.coords[2]));
   }
 
+  // return 1; // testing purpose
   // get and write correct ordered faces indexes
   for (int i = 0; i < numFaces; ++i) {
     mesh->nextTriangle(tIndex, inCoreFlag);
@@ -189,6 +193,29 @@ int Poisson::testVcgFilter() {
     tri::Smooth<MyMesh>::VertexCoordPasoDoble(m, 1, 0, 50, false);
   }
   tri::io::ExporterPLY<MyMesh>::Save(m, "out_s.ply");
+
+  return 1;
+}
+
+int Poisson::calcNormalVcg() {
+  MyMesh m;
+  MyMesh::VertexIterator vi = vcg::tri::Allocator<MyMesh>::AddVertices(m,3);
+
+  int mask = vcg::tri::io::Mask::IOM_VERTNORMAL;
+  tri::io::ImporterOBJ<MyMesh>::Open(m, "dat/test/pointsn.obj", mask);
+
+  // tri::UpdateNormal<MyMesh>::PerVertex(m);
+  tri::PointCloudNormal<MyMesh>::Param p;
+  p.smoothingIterNum = 2;
+  p.useViewPoint = true;
+  tri::PointCloudNormal<MyMesh>::Compute(m, p);
+  for (vi = m.vert.begin(); vi != m.vert.end(); ++vi) {
+    auto v = *vi;
+    auto n = v.N();
+    n[0]; n[1]; n[2];
+  }
+
+  tri::io::ExporterOBJ<MyMesh>::Save(m, "dat/test/points_out.obj", mask);
 
   return 1;
 }

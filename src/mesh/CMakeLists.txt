@@ -6,9 +6,13 @@ INCLUDE_DIRECTORIES(${OPENGL_INCLUDE_DIR})
 FIND_PACKAGE(GLUT REQUIRED)
 INCLUDE_DIRECTORIES(${GLUT_INCLUDE_DIR})
 
+## CGAL (CGAL has to be put forehead)
+find_package(CGAL QUIET COMPONENTS Core)
+include(${CGAL_USE_FILE})
+
 ## Eigen
-find_package(Eigen3 REQUIRED)
-include_directories(${EIGEN3_INCLUDE_DIR})
+find_package(Eigen3)
+include(${EIGEN3_USE_FILE})
 
 ## testmesh - simple mesh I/O
 # add_executable(testmesh testmesh.cc mesh.cc)
@@ -26,4 +30,4 @@ set(MESH_ADDITIONAL_CFLAGS "-fpermissive -g" CACHE STRING "Additional flags of M
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${ADDITIONAL_CFLAGS} ${MESH_ADDITIONAL_CFLAGS}")
 include_directories(poisson vcglib)
 add_executable(recon recon.cc poisson.cc poisson/Factor.cpp poisson/Geometry.cpp poisson/MarchingCubes.cpp poisson/MultiGridOctest.cpp vcglib/wrap/ply/plylib.cpp)
-TARGET_LINK_LIBRARIES(recon scan_shared normals_panorama_shared ${NORMALS_PANORAMA_LIBRARIES} ${Boost_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY})
+TARGET_LINK_LIBRARIES(recon scan_shared normals_panorama_shared dl ${NORMALS_PANORAMA_LIBRARIES} ${Boost_LIBS} ${Boost_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} ${LIB_CGAL})
