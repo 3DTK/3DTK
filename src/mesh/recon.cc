@@ -19,17 +19,17 @@
 #include "mesh/poisson.h"
 
 // --- CGAL related below ---
-#include <CGAL/Scale_space_surface_reconstruction_3.h>
-#include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
-#include <CGAL/IO/read_off_points.h>
-#include <CGAL/Timer.h>
+// #include <CGAL/Scale_space_surface_reconstruction_3.h>
+// #include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
+// #include <CGAL/IO/read_off_points.h>
+// #include <CGAL/Timer.h>
 
-typedef CGAL::Exact_predicates_inexact_constructions_kernel     Kernel;
-typedef CGAL::Scale_space_surface_reconstruction_3< Kernel >    Reconstruction;
-typedef Reconstruction::Point                                   Point3;
-typedef std::vector< Point3 >                                   Point_collection;
-typedef Reconstruction::Triple_const_iterator                   Triple_iterator;
-typedef CGAL::Timer Timer;
+// typedef CGAL::Exact_predicates_inexact_constructions_kernel     Kernel;
+// typedef CGAL::Scale_space_surface_reconstruction_3< Kernel >    Reconstruction;
+// typedef Reconstruction::Point                                   Point3;
+// typedef std::vector< Point3 >                                   Point_collection;
+// typedef Reconstruction::Triple_const_iterator                   Triple_iterator;
+// typedef CGAL::Timer Timer;
 // --- CGAL related above---
 
 using namespace std;
@@ -548,21 +548,21 @@ void readFrames(std::string dir, int start, int end, int frame, bool use_pose=fa
 }
 
 void reconScaleSpaceSurface(vector<Point> &points) {
-  Point_collection pts;
-  for (int i = 0; i < points.size(); ++i) {
-    pts.push_back(Point3(points[i].x, points[i].y, points[i].z));
-  }
-  Reconstruction reconstruct( 100, 2000 );
-  reconstruct.reconstruct_surface(pts.begin(), pts.end(), 4);
-  std::ofstream out ("dat/test/cgal_recon1.off");
-    // Write the reconstruction.
-    std::cerr << "Neighborhood radius^2 = " << reconstruct.neighborhood_squared_radius() << std::endl;
-    for( std::size_t shell = 0; shell < reconstruct.number_of_shells(); ++shell ) {
-      std::cerr << "Shell " << shell << std::endl;
-      for( Triple_iterator it = reconstruct.shell_begin( shell ); it != reconstruct.shell_end( shell ); ++it )
-        out << "3 "<< *it << '\n'; // We write a '3' in front so that it can be assembled into an OFF file
-    }
-  std::cerr << "Done." << std::endl;
+  // Point_collection pts;
+  // for (int i = 0; i < points.size(); ++i) {
+  //   pts.push_back(Point3(points[i].x, points[i].y, points[i].z));
+  // }
+  // Reconstruction reconstruct( 100, 2000 );
+  // reconstruct.reconstruct_surface(pts.begin(), pts.end(), 4);
+  // std::ofstream out ("dat/test/cgal_recon1.off");
+  //   // Write the reconstruction.
+  //   std::cerr << "Neighborhood radius^2 = " << reconstruct.neighborhood_squared_radius() << std::endl;
+  //   for( std::size_t shell = 0; shell < reconstruct.number_of_shells(); ++shell ) {
+  //     std::cerr << "Shell " << shell << std::endl;
+  //     for( Triple_iterator it = reconstruct.shell_begin( shell ); it != reconstruct.shell_end( shell ); ++it )
+  //       out << "3 "<< *it << '\n'; // We write a '3' in front so that it can be assembled into an OFF file
+  //   }
+  // std::cerr << "Done." << std::endl;
 }
 
 void reconAdvanceFrontSurfce(vector<Point> &points) {
