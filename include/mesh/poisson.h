@@ -28,7 +28,8 @@ public:
   int setParams(PoissonParam &p);
   int getMesh(CoredVectorMeshData *m);
   int apply();
-  int testVcgFilter(); // test mesh processing with vcglib, not 
+  int testVcgFilter(); // test mesh processing with vcglib
+  int calcNormalVcg();
   int exportMesh(const char *modelPath);
 
 private:
