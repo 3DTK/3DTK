@@ -56,6 +56,8 @@ public slots:
 
   void idle();
 
+  void cameraChanged();
+
 signals:
   void positionChanged(QString);
   void quaternionChanged(QString);
@@ -79,8 +81,6 @@ protected:
   void initializeGL();
   void resizeGL(int w, int h);
   void paintGL();
-
-  void cameraChanged();
 
   void mousePressEvent(QMouseEvent *event);
   void mouseReleaseEvent(QMouseEvent *event);
