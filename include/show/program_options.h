@@ -153,5 +153,28 @@ struct window_settings {
  * @return the parsed options
  */
 void parse_args(int argc, char **argv, dataset_settings& ds, window_settings& ws, bool *directory_present = nullptr);
+void setGUIOptions(bool& nogui, float& fps,
+		   WindowDimensions& dimensions, bool& advanced,
+		   bool& invertMouseX, bool& invertMouseY,
+		   boost::program_options::options_description& gui_options);
+void setDisplayOptions(double& scale, GLfloat& fov, int& viewmode,
+		       bool& noPoints, bool& noCameras, bool& noPath,
+		       bool& noFog, int& fogType, GLfloat& fogDensity,
+		       Position& position, Quaternion& rotation,
+		       int& pointsize, boost::program_options::options_description& display_options);
+void setColorOptions(Color& bgcolor, bool& color, ShowColormap& colormap,
+		     float& colormin, float& colormax, bool& noAnimColor,
+		     boost::program_options::options_description& color_options);
+void setScanOptions(bool& scanserver, int& start, int& end,
+		    IOType& format, boost::program_options::options_description& scan_options);
+void setReductionOptions(int& distMin, int& distMax, double& reduce,
+			 int& octree, int& stepsize,
+			 boost::program_options::options_description& reduction_options);
+void setPointOptions(int& originType, double& sphereRadius, boost::program_options::options_description& point_options);
+void setFileOptions(bool& saveOct, bool& loadOct, bool& autoOct, boost::program_options::options_description& file_options);
+void setOtherOptions(bool& screenshot, std::string& objFileName,
+		     std::string& customFilter,	bool& noAnimConvertJPG,
+		     std::string& trajectoryFileName, bool& identity,
+		     boost::program_options::options_description& other_options);
 
 #endif

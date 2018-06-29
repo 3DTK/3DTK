@@ -34,6 +34,7 @@ public slots:
 
   void setStateFilePath();
   void saveStates();
+  void loadStates();
 
 protected:
   std::vector<std::string> loadRecentDirectories();
