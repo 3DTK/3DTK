@@ -2,6 +2,7 @@
 #include <string>
 #include <vector>
 #include <fstream>
+#include <algorithm>
 
 #include <boost/program_options.hpp>
 
@@ -17,6 +18,20 @@
 #include "wrap/callback.h"
 #include "mesh/poisson.h"
 
+// --- CGAL related below ---
+#include <CGAL/Scale_space_surface_reconstruction_3.h>
+#include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
+#include <CGAL/IO/read_off_points.h>
+#include <CGAL/Timer.h>
+
+typedef CGAL::Exact_predicates_inexact_constructions_kernel     Kernel;
+typedef CGAL::Scale_space_surface_reconstruction_3< Kernel >    Reconstruction;
+typedef Reconstruction::Point                                   Point3;
+typedef std::vector< Point3 >                                   Point_collection;
+typedef Reconstruction::Triple_const_iterator                   Triple_iterator;
+typedef CGAL::Timer Timer;
+// --- CGAL related above---
+
 using namespace std;
 using namespace vcg;
 
@@ -28,6 +43,8 @@ enum normal_method {KNN, ADAPTIVE_KNN,
 				PANORAMA, PANORAMA_FAST
 #endif
 };
+
+
 
 // Call to excute poisson
 int Execute2(PoissonParam &Par, vector<Point3D<float>> Pts, vector<Point3D<float>> Nor, CoredVectorMeshData &mesh, Point3D<float> &newCenter, float &newScale, vcg::CallBackPos *cb );
@@ -44,8 +61,14 @@ void validate(boost::any& v, const std::vector<std::string>& values, IOType*, in
 void readFrames(std::string dir, int start, int end, int frame, bool use_pose=false);
 // calculate normals
 void calcNormals(vector<Point> &points, vector<Point> &normals, normal_method ntype, int k1, int k2, int width, int height, const double* rPos, const double* rPosTheta, Scan *scan);
+// test other reconstruction methods with cgal
+// including Scale-Space Surface Reconstruction, Advancing Front Surface Reconstruction
+void reconScaleSpaceSurface(vector<Point> &points);
+void reconAdvanceFrontSurfce(vector<Point> &points);
 
 int main(int argc, char **argv) {
+  // Poisson ptest;
+  // ptest.calcNormalVcg();
   // parameters for io
   int start, end;
   bool scanserver;
@@ -212,6 +235,14 @@ int main(int argc, char **argv) {
       pts.clear();
       norms.clear();
     }
+    // fstream fsn("dat/test/testnewnormal.xyz", fstream::out);
+    // for (int i = 0; i < points.size(); ++i) {
+    //   fsn << points[i].x << " "<< points[i].y << " " << points[i].z << " " 
+    //     << normals[i].x << " "<< normals[i].y << " " << normals[i].z << endl;
+    // }
+    // fsn.close();
+    reconScaleSpaceSurface(points);
+    return 0; // testing purpose
     cout << "Poisson reconstruction started" << endl;
 
     // reconstruction for current scan
@@ -514,6 +545,28 @@ void readFrames(std::string dir, int start, int end, int frame, bool use_pose=fa
     frame_in.close();
     frame_in.clear();
   }
+}
+
+void reconScaleSpaceSurface(vector<Point> &points) {
+  Point_collection pts;
+  for (int i = 0; i < points.size(); ++i) {
+    pts.push_back(Point3(points[i].x, points[i].y, points[i].z));
+  }
+  Reconstruction reconstruct( 100, 2000 );
+  reconstruct.reconstruct_surface(pts.begin(), pts.end(), 4);
+  std::ofstream out ("dat/test/cgal_recon1.off");
+    // Write the reconstruction.
+    std::cerr << "Neighborhood radius^2 = " << reconstruct.neighborhood_squared_radius() << std::endl;
+    for( std::size_t shell = 0; shell < reconstruct.number_of_shells(); ++shell ) {
+      std::cerr << "Shell " << shell << std::endl;
+      for( Triple_iterator it = reconstruct.shell_begin( shell ); it != reconstruct.shell_end( shell ); ++it )
+        out << "3 "<< *it << '\n'; // We write a '3' in front so that it can be assembled into an OFF file
+    }
+  std::cerr << "Done." << std::endl;
+}
+
+void reconAdvanceFrontSurfce(vector<Point> &points) {
+  ;
 }
 
 void calcNormals(vector<Point> &points, vector<Point> &normals, normal_method ntype, int k1, int k2, int width, int height, const double* rPos, const double* rPosTheta, Scan *scan) {
