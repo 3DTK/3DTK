@@ -341,7 +341,21 @@ void reshape(int width, int height) {
   // glBlendFunc(GL_SRC_COLOR, GL_DST_COLOR);
   glHint(GL_POINT_SMOOTH_HINT, GL_NICEST);
   // TODO glDepthFunc(GL_LEQUAL);
-  glDepthFunc(GL_LESS); //TODO
+  glDepthFunc(GL_LEQUAL); //TODO
+  // Change GL_LESS to GL_LEQUAL for qtshow
+  // It was confirmed that outputs were the same between GL_LESS and
+  // GL_LEQUAL by taking the following steps
+  // 1. Take snapshots of the initial output of dat
+  //    in GL_LESS and GL_LEQUAL, respectively
+  // 2. Generate a diff image between GL_LESS and GL_LEQUAL 
+  //    Verify all colors are black in the image
+  //    ex. $ composite -compose GL_LESS.png GL_LEQUAL.png diff.png
+  //        $ convert diff.png diff.txt
+  //        $ A=`tail -n +2 diff.txt | wc -l`
+  //        $ B=`grep -c "#000000" diff.txt`
+  //        $ if [[ A -eq B ]]; then echo "equal"; else echo "not equal"; fi
+
+  glClear(GL_DEPTH_BUFFER_BIT);
   glEnable(GL_DEPTH_TEST);
   glEnable(GL_POINT_SMOOTH);
 }
