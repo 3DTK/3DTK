@@ -53,15 +53,15 @@ void Poisson::initialize() {
   return;
 }
 
-int Poisson::setVertices(vector<Point> v) {
-  vertices.clear();
+int Poisson::setPoints(vector<Point> v) {
+  points.clear();
   initialize();
   // reconstructed = 0;
-  vertices.resize(v.size());
-  for (int i = 0; i < vertices.size(); ++i) {
-    vertices[i].coords[0] = v[i].x; 
-    vertices[i].coords[1] = v[i].y; 
-    vertices[i].coords[2] = v[i].z;
+  points.resize(v.size());
+  for (int i = 0; i < points.size(); ++i) {
+    points[i].coords[0] = v[i].x; 
+    points[i].coords[1] = v[i].y; 
+    points[i].coords[2] = v[i].z;
   }
   return 1;
 }
@@ -94,7 +94,7 @@ int Poisson::getMesh(CoredVectorMeshData *m) {
 
 int Poisson::exportMesh(const char* modelPath) {
   fstream fs(modelPath, fstream::out);
-  // // write unscaled out of core vertices
+  // // write unscaled out of core points
   // for (int i = 0; i < mesh->oocPoints.size(); ++i) {
   //   fs << "v " << mesh->oocPoints[i].coords[0] << " " << mesh->oocPoints[i].coords[1] << " " << mesh->oocPoints[i].coords[2] << endl;
   // }
@@ -103,39 +103,25 @@ int Poisson::exportMesh(const char* modelPath) {
   Point3D<float> vertex;
   TriangleIndex tIndex;
   int inCoreFlag;
-  int numVerticesInCore = mesh->inCorePoints.size(),
-    numVerticesOutCore = mesh->oocPoints.size(),
+  int numPointsInCore = mesh->inCorePoints.size(),
+    numPointsOutCore = mesh->oocPoints.size(),
     numFaces=mesh->triangleCount();
 
-  // get and write correct scaled vertices coordinates
-  for (int i = 0; i < numVerticesInCore; ++i) {
-    vertex = mesh->inCorePoints[i];
-    fs << "v " << vertex.coords[0] * scale + center.coords[0] << " " 
-      << vertex.coords[1] * scale + center.coords[1] << " " 
-      << vertex.coords[2] * scale + center.coords[2] << " " << endl;
-  }
-  for (int i = 0; i < numVerticesOutCore; ++i) {
-    vertex = mesh->oocPoints[i];
-    fs << "v " << vertex.coords[0] * scale + center.coords[0] << " " 
-      << vertex.coords[1] * scale + center.coords[1] << " " 
-      << vertex.coords[2] * scale + center.coords[2] << " " << endl;
+  // get and write correct scaled points coordinates
+  for (int i = 0; i < vertices.size(); ++i) {
+    fs << "v " << get<0>(vertices[i]) << " " 
+      << get<1>(vertices[i]) << " " 
+      << get<2>(vertices[i]) << " " << endl;
   }
 
   // get and write correct ordered faces indexes
-  for (int i = 0; i < numFaces; ++i) {
-    mesh->nextTriangle(tIndex, inCoreFlag);
-    if (!(inCoreFlag & CoredMeshData::IN_CORE_FLAG[0])) {
-      tIndex.idx[0]+=int(mesh->inCorePoints.size());
+  for (int i = 0; i < faces.size(); ++i) {
+    if (removedFaces[i]) {
+      continue;
     }
-    if (!(inCoreFlag & CoredMeshData::IN_CORE_FLAG[1])) {
-      tIndex.idx[1]+=int(mesh->inCorePoints.size());
-    }
-    if (!(inCoreFlag & CoredMeshData::IN_CORE_FLAG[2])) {
-      tIndex.idx[2]+=int(mesh->inCorePoints.size());
-    }
-    fs << "f " << tIndex.idx[0] + 1 << " " 
-      << tIndex.idx[1] + 1 << " " 
-      << tIndex.idx[2] + 1 << " " << endl;
+    fs << "f " << get<0>(faces[i]) + 1 << " " 
+      << get<1>(faces[i]) + 1 << " " 
+      << get<2>(faces[i]) + 1 << " " << endl;
   }
 
   fs.close();
@@ -149,40 +135,25 @@ int Poisson::testVcgFilter() {
   Point3D<float> vertex;
   TriangleIndex tIndex;
   int inCoreFlag;
-  int numVerticesInCore = mesh->inCorePoints.size(),
-    numVerticesOutCore = mesh->oocPoints.size(),
+  int numPointsInCore = mesh->inCorePoints.size(),
+    numPointsOutCore = mesh->oocPoints.size(),
     numFaces=mesh->triangleCount();
 
-  // get and write correct scaled vertices coordinates
-  for (int i = 0; i < numVerticesInCore; ++i) {
+  // set vcg model vertices with correct scaled points coordinates
+  for (int i = 0; i < vertices.size(); ++i) {
     vertex = mesh->inCorePoints[i];
     vcg::tri::Allocator<MyMesh>::AddVertex(m,MyMesh::CoordType(
-        vertex.coords[0] * scale + center.coords[0], 
-        vertex.coords[1] * scale + center.coords[1], 
-        vertex.coords[2] * scale + center.coords[2]));
-  }
-  for (int i = 0; i < numVerticesOutCore; ++i) {
-    vertex = mesh->oocPoints[i];
-    vcg::tri::Allocator<MyMesh>::AddVertex(m,MyMesh::CoordType(
-        vertex.coords[0] * scale + center.coords[0], 
-        vertex.coords[1] * scale + center.coords[1], 
-        vertex.coords[2] * scale + center.coords[2]));
+        get<0>(vertices[i]), 
+        get<1>(vertices[i]), 
+        get<2>(vertices[i])
+    ));
   }
 
   // return 1; // testing purpose
-  // get and write correct ordered faces indexes
-  for (int i = 0; i < numFaces; ++i) {
+  // set vcg model faces with correct faces indexes
+  for (int i = 0; i < faces.size(); ++i) {
     mesh->nextTriangle(tIndex, inCoreFlag);
-    if (!(inCoreFlag & CoredMeshData::IN_CORE_FLAG[0])) {
-      tIndex.idx[0] += int(mesh->inCorePoints.size());
-    }
-    if (!(inCoreFlag & CoredMeshData::IN_CORE_FLAG[1])) {
-      tIndex.idx[1] += int(mesh->inCorePoints.size());
-    }
-    if (!(inCoreFlag & CoredMeshData::IN_CORE_FLAG[2])) {
-      tIndex.idx[2] += int(mesh->inCorePoints.size());
-    }
-    vcg::tri::Allocator<MyMesh>::AddFace(m, tIndex.idx[0], tIndex.idx[1], tIndex.idx[2]); // vertice index start from 0 here
+    vcg::tri::Allocator<MyMesh>::AddFace(m, get<0>(faces[i]), get<1>(faces[i]), get<2>(faces[i]));
   }
   
   tri::UpdateTopology<MyMesh>::VertexFace(m);
@@ -194,6 +165,77 @@ int Poisson::testVcgFilter() {
   }
   tri::io::ExporterPLY<MyMesh>::Save(m, "out_s.ply");
 
+  return 1;
+}
+
+int Poisson::updateModel() {
+  mesh->resetIterator(); // reset iterator
+  Point3D<float> vertex;
+  TriangleIndex tIndex;
+  int inCoreFlag;
+  int numPointsInCore = mesh->inCorePoints.size(),
+    numPointsOutCore = mesh->oocPoints.size(),
+    numFaces=mesh->triangleCount();
+
+  // update `vertices`
+  for (int i = 0; i < numPointsInCore; ++i) {
+    vertex = mesh->inCorePoints[i];
+    vertices.push_back(make_tuple(
+      vertex.coords[0] * scale + center.coords[0],
+      vertex.coords[1] * scale + center.coords[1],
+      vertex.coords[2] * scale + center.coords[2]
+    ));
+  }
+  for (int i = 0; i < numPointsOutCore; ++i) {
+    vertex = mesh->oocPoints[i];
+    vertices.push_back(make_tuple(
+      vertex.coords[0] * scale + center.coords[0],
+      vertex.coords[1] * scale + center.coords[1],
+      vertex.coords[2] * scale + center.coords[2]
+    ));
+  }
+
+  // update faces
+  for (int i = 0; i < numFaces; ++i) {
+    mesh->nextTriangle(tIndex, inCoreFlag);
+    if (!(inCoreFlag & CoredMeshData::IN_CORE_FLAG[0])) {
+      tIndex.idx[0]+=int(mesh->inCorePoints.size());
+    }
+    if (!(inCoreFlag & CoredMeshData::IN_CORE_FLAG[1])) {
+      tIndex.idx[1]+=int(mesh->inCorePoints.size());
+    }
+    if (!(inCoreFlag & CoredMeshData::IN_CORE_FLAG[2])) {
+      tIndex.idx[2]+=int(mesh->inCorePoints.size());
+    }
+    faces.push_back(make_tuple(
+      tIndex.idx[0], tIndex.idx[1], tIndex.idx[2]
+    ));
+  }
+
+  return 1;
+}
+
+// for each face, find the nearest points to its center, 
+// remove this face if the distance is larger than a certain `maxDist`
+int Poisson::distFilter(float maxDist) {
+  // int record = -1;
+  removedFaces.resize(faces.size());
+  for (int i = 0; i < faces.size(); ++i) {
+    // cx, cy, cz: center of face
+    float cx = (get<0>(vertices[get<0>(faces[i])]) + get<0>(vertices[get<1>(faces[i])]) + get<0>(vertices[get<2>(faces[i])])) / 3, 
+      cy = (get<1>(vertices[get<0>(faces[i])]) + get<1>(vertices[get<1>(faces[i])]) + get<1>(vertices[get<2>(faces[i])])) / 3, 
+      cz = (get<2>(vertices[get<0>(faces[i])]) + get<2>(vertices[get<1>(faces[i])]) + get<2>(vertices[get<2>(faces[i])])) / 3;
+    float dist = numeric_limits<float>::max();
+    for (int j = 0; j < points.size(); ++j) {
+      float px = points[j].coords[0],
+        py = points[j].coords[1],
+        pz = points[j].coords[2];
+      float d = sqrt(pow(px - cx, 2) + pow(py - cy, 2) + pow(pz - cz, 2));
+      dist = d < dist ? d : dist;
+    }
+    // record = dist > record ? dist : record;
+    removedFaces[i] = dist > maxDist ? 1 : 0;
+  }
   return 1;
 }
 
@@ -221,10 +263,13 @@ int Poisson::calcNormalVcg() {
 }
 
 int Poisson::ready() {
-  return vertices.size() > 0 && normals.size() > 0 && vertices.size() == normals.size() && reconstructed;
+  return points.size() > 0 && normals.size() > 0 && points.size() == normals.size() && reconstructed;
 }
 
 int Poisson::apply() {
-  reconstructed = Execute2(params, vertices, normals, *mesh, center, scale, cb);
+  reconstructed = Execute2(params, points, normals, *mesh, center, scale, cb);
+  if (reconstructed) {
+    updateModel();
+  }
   return reconstructed;
 }
