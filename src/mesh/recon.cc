@@ -241,8 +241,8 @@ int main(int argc, char **argv) {
     //     << normals[i].x << " "<< normals[i].y << " " << normals[i].z << endl;
     // }
     // fsn.close();
-    reconScaleSpaceSurface(points);
-    return 0; // testing purpose
+    // reconScaleSpaceSurface(points);
+    // return 0; // testing purpose
     cout << "Poisson reconstruction started" << endl;
 
     // reconstruction for current scan
@@ -250,12 +250,13 @@ int main(int argc, char **argv) {
     pp.SolverDivide = solverDivide;
     pp.Depth = depth;
     pp.Offset = offset;
-    poisson.setVertices(points);
+    poisson.setPoints(points);
     poisson.setNormals(normals);
     poisson.setParams(pp);
     poisson.apply();
     // CoredVectorMeshData m;
     // poisson.getMesh(&m);
+    poisson.distFilter(100);
     poisson.exportMesh((odir + "all.obj").c_str());
     cout << "Poisson reconstruction end, model generated at: " +  odir + "all.obj" << endl;
   }
@@ -291,7 +292,7 @@ int main(int argc, char **argv) {
       pp.SolverDivide = solverDivide;
       pp.Depth = depth;
       pp.Offset = offset;
-      poisson.setVertices(points);
+      poisson.setPoints(points);
       poisson.setNormals(normals);
       poisson.setParams(pp);
       poisson.apply();
@@ -566,7 +567,7 @@ void reconScaleSpaceSurface(vector<Point> &points) {
 }
 
 void reconAdvanceFrontSurfce(vector<Point> &points) {
-  ;
+  // ;
 }
 
 void calcNormals(vector<Point> &points, vector<Point> &normals, normal_method ntype, int k1, int k2, int width, int height, const double* rPos, const double* rPosTheta, Scan *scan) {
