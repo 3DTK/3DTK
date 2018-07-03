@@ -23,11 +23,12 @@ public:
   // public methods
   Poisson();
   ~Poisson();
-  int setVertices(vector<Point> v);
-  int setNormals(vector<Point> n);
+  int setPoints(std::vector<Point> v);
+  int setNormals(std::vector<Point> n);
   int setParams(PoissonParam &p);
   int getMesh(CoredVectorMeshData *m);
   int apply();
+  int distFilter(float maxDist); // filter reconstructed model
   int testVcgFilter(); // test mesh processing with vcglib
   int calcNormalVcg();
   int exportMesh(const char *modelPath);
@@ -36,8 +37,11 @@ private:
   // private attributes
   int reconstructed;
   PoissonParam params;
-  vector<Point3D<float>> vertices;
-  vector<Point3D<float>> normals;
+  std::vector<std::tuple<float, float, float>> vertices; // model vertices
+  std::vector<std::tuple<int, int, int>> faces; // model faces
+  std::vector<int> removedFaces;
+  std::vector<Point3D<float>> points; // pointset
+  std::vector<Point3D<float>> normals; // pointset normals
   CoredVectorMeshData *mesh;
   Point3D<float> center;
   float scale;
@@ -46,6 +50,7 @@ private:
   // private methods
   void initialize();
   int ready();
+  int updateModel(); // update poisson vertices and faces data structure to stl based ones
 };
 
 #endif
