@@ -414,6 +414,7 @@ void GLWidget::setZoom(double zoom) {
 }
 
 void GLWidget::resetPosition() {
+  makeCurrent();
   resetView(0);
 }
 
@@ -424,11 +425,13 @@ void GLWidget::saveSnapshot() {
     "PPM Files (*.ppm);;All Files (*)");
 
   if (!imageFileName.isEmpty()) {
+    makeCurrent();
     saveImageAt(imageFileName.toStdString());
     emit status("Snapshot saved as \"" + imageFileName + "\"", 5000);
   }
 }
 
 void GLWidget::idle() {
+  makeCurrent();
   callbacks::glut::idle();
 }
