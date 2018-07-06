@@ -31,9 +31,9 @@ if (WITH_OPENGL AND WITH_QT)
 
   add_library(glwidget STATIC GLWidget.cc ${GLWIDGET_HEADERS_MOC})
 
-  qt5_use_modules(glwidget Widgets OpenGL)
+  target_link_libraries(glwidget Qt5::Widgets Qt5::OpenGL)
   target_link_libraries(glwidget show_shared ${SHOW_LIBS_SHARED} ${QT_LIBRARIES})
 
-  qt5_use_modules(qtshow Widgets)
+  target_link_libraries(qtshow Qt5::Widgets)
   target_link_libraries(qtshow glwidget ${QT_LIBRARIES})
 endif()
