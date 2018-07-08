@@ -31,13 +31,13 @@ DAMAGE.
 //////////////////////
 #include <math.h>
 #include "Factor.h"
-int Factor(double a1,double a0,double roots[1][2],const double& EPS){
+int Factor(double a1,double a0,double roots[1][2],double EPS){
 	if(fabs(a1)<=EPS){return 0;}
 	roots[0][0]=-a0/a1;
 	roots[0][1]=0;
 	return 1;
 }
-int Factor(double a2,double a1,double a0,double roots[2][2],const double& EPS){
+int Factor(double a2,double a1,double a0,double roots[2][2],double EPS){
 	double d;
 	if(fabs(a2)<=EPS){return Factor(a1,a0,roots,EPS);}
 
@@ -59,7 +59,7 @@ int Factor(double a2,double a1,double a0,double roots[2][2],const double& EPS){
 }
 // Solution taken from: http://mathworld.wolfram.com/CubicFormula.html
 // and http://www.csit.fsu.edu/~burkardt/f_src/subpak/subpak.f90
-int Factor(double a3,double a2,double a1,double a0,double roots[3][2],const double& EPS){
+int Factor(double a3,double a2,double a1,double a0,double roots[3][2],double EPS){
 	double q,r,r2,q3;
 
 	if(fabs(a3)<=EPS){return Factor(a2,a1,a0,roots,EPS);}
@@ -104,7 +104,7 @@ int Factor(double a3,double a2,double a1,double a0,double roots[3][2],const doub
 	roots[2][0]-=a2/3;
 	return 3;
 }
-double ArcTan2(const double& y,const double& x){
+double ArcTan2(double y,double x){
 	/* This first case should never happen */
 	if(y==0 && x==0){return 0;}
 	if(x==0){
@@ -148,7 +148,7 @@ void Divide(const double in1[2],const double in2[2],double out[2]){
 }
 // Solution taken from: http://mathworld.wolfram.com/QuarticEquation.html
 // and http://www.csit.fsu.edu/~burkardt/f_src/subpak/subpak.f90
-int Factor(double a4,double a3,double a2,double a1,double a0,double roots[4][2],const double& EPS){
+int Factor(double a4,double a3,double a2,double a1,double a0,double roots[4][2],double EPS){
 	double R[2],D[2],E[2],R2[2];
 
 	if(fabs(a4)<EPS){return Factor(a3,a2,a1,a0,roots,EPS);}
@@ -207,7 +207,7 @@ int Factor(double a4,double a3,double a2,double a1,double a0,double roots[4][2],
 	return 4;
 }
 
-int Solve(const double* eqns,const double* values,double* solutions,const int& dim){
+int Solve(const double* eqns,const double* values,double* solutions,int dim){
 	int i,j,eIndex;
 	double v,m;
 	int *index=new int[dim];

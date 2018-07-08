@@ -1,9 +1,9 @@
 #ifndef HASH_INCLUDED
 #define HASH_INCLUDED
-#ifdef _MSC_VER
+#ifdef WIN32
 #include <hash_map>
 using stdext::hash_map;
-#else // GCC surely not msdev
+#else // !WIN32
 #include <ext/hash_map>
 using namespace __gnu_cxx;
 

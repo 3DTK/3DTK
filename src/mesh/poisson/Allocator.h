@@ -123,7 +123,7 @@ public:
 
 	/** This method initiallizes the constructor and the blockSize variable specifies the
 	  * the number of objects that should be pre-allocated at a time. */
-	void set(const int& blockSize){
+	void set( int blockSize){
 		reset();
 		this->blockSize=blockSize;
 		index=-1;
@@ -135,7 +135,7 @@ public:
 	  * more memory. Note that if the number of objects requested is larger than the value blockSize with which
 	  * the allocator was initialized, the request for memory will fail.
 	  */
-	T* newElements(const int& elements=1){
+	T* newElements( int elements=1){
 		T* mem;
 		if(!elements){return NULL;}
 		if(elements>blockSize){

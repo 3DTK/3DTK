@@ -13,9 +13,6 @@
 #include <slam6d/point.h>
 #include <slam6d/globals.icc>
 
-#include "poisson/Geometry.h"
-#include "poisson/PoissonParam.h"
-#include "wrap/callback.h"
 #include "mesh/poisson.h"
 
 // --- CGAL related below ---
@@ -33,7 +30,6 @@
 // --- CGAL related above---
 
 using namespace std;
-using namespace vcg;
 
 namespace po = boost::program_options;
 
@@ -44,10 +40,6 @@ enum normal_method {KNN, ADAPTIVE_KNN,
 #endif
 };
 
-
-
-// Call to excute poisson
-int Execute2(PoissonParam &Par, vector<Point3D<float>> Pts, vector<Point3D<float>> Nor, CoredVectorMeshData &mesh, Point3D<float> &newCenter, float &newScale, vcg::CallBackPos *cb );
 // Parse commandline options and assign to parameters
 void parse_options(int argc, char **argv, int &start, int &end, bool &scanserver, int &max_dist, int &min_dist, string &dir, string &odir, IOType &iotype, 
   bool &join, double &red, int &rand, bool &uP, bool &use_xyz, bool &use_color, bool &use_reflectance, int &octree, bool &rangeFilterActive, bool &customFilterActive, string &customFilter, double &scaleFac, bool &hexfloat, bool &high_precision, int &frame,
@@ -247,16 +239,16 @@ int main(int argc, char **argv) {
 
     // reconstruction for current scan
     pp.Depth = depth;
-    pp.SolverDivide = solverDivide;
-    pp.Depth = depth;
-    pp.Offset = offset;
+    // pp.SolverDivide = solverDivide;
+    // pp.Depth = depth;
+    // pp.Offset = offset;
     poisson.setPoints(points);
     poisson.setNormals(normals);
     poisson.setParams(pp);
     poisson.apply();
     // CoredVectorMeshData m;
     // poisson.getMesh(&m);
-    poisson.distFilter(100);
+    poisson.distFilter(50);
     poisson.exportMesh((odir + "all.obj").c_str());
     cout << "Poisson reconstruction end, model generated at: " +  odir + "all.obj" << endl;
   }
@@ -289,9 +281,9 @@ int main(int argc, char **argv) {
 
       // reconstruction for current scan
       pp.Depth = depth;
-      pp.SolverDivide = solverDivide;
-      pp.Depth = depth;
-      pp.Offset = offset;
+      // pp.SolverDivide = solverDivide;
+      // pp.Depth = depth;
+      // pp.Offset = offset;
       poisson.setPoints(points);
       poisson.setNormals(normals);
       poisson.setParams(pp);
