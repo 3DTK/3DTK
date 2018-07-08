@@ -281,13 +281,14 @@ void TriangleCollapse(const Real& edgeRatio,std::vector<TriangleIndex>& triangle
 // Triangulation //
 ///////////////////
 template<class Real>
-long long Triangulation<Real>::EdgeIndex(const int& p1,const int& p2){
+long long Triangulation<Real>::EdgeIndex( int p1 , int p2 )
+{
 	if(p1>p2)	{return ((long long)(p1)<<32) | ((long long)(p2));}
 	else		{return ((long long)(p2)<<32) | ((long long)(p1));}
 }
 
 template<class Real>
-int Triangulation<Real>::factor(const int& tIndex,int& p1,int& p2,int & p3){
+int Triangulation<Real>::factor(int tIndex,int& p1,int& p2,int & p3){
 	if(triangles[tIndex].eIndex[0]<0 || triangles[tIndex].eIndex[1]<0 || triangles[tIndex].eIndex[2]<0){return 0;}
 	if(edges[triangles[tIndex].eIndex[0]].tIndex[0]==tIndex){p1=edges[triangles[tIndex].eIndex[0]].pIndex[0];}
 	else													{p1=edges[triangles[tIndex].eIndex[0]].pIndex[1];}
@@ -298,7 +299,7 @@ int Triangulation<Real>::factor(const int& tIndex,int& p1,int& p2,int & p3){
 	return 1;
 }
 template<class Real>
-double Triangulation<Real>::area(const int& p1,const int& p2,const int& p3){
+double Triangulation<Real>::area(int p1,int p2,int p3){
 	Point3D<Real> q1,q2,q;
 	for(int i=0;i<3;i++){
 		q1.coords[i]=points[p2].coords[i]-points[p1].coords[i];
@@ -308,7 +309,7 @@ double Triangulation<Real>::area(const int& p1,const int& p2,const int& p3){
 	return Length(q);
 }
 template<class Real>
-double Triangulation<Real>::area(const int& tIndex){
+double Triangulation<Real>::area(int tIndex){
 	int p1,p2,p3;
 	factor(tIndex,p1,p2,p3);
 	return area(p1,p2,p3);
@@ -320,7 +321,7 @@ double Triangulation<Real>::area(void){
 	return a;
 }
 template<class Real>
-int Triangulation<Real>::addTriangle(const int& p1,const int& p2,const int& p3){
+int Triangulation<Real>::addTriangle(int p1,int p2,int p3){
 	hash_map<long long,int>::iterator iter;
 	int tIdx,eIdx,p[3];
 	p[0]=p1;
@@ -360,7 +361,7 @@ int Triangulation<Real>::addTriangle(const int& p1,const int& p2,const int& p3){
 	return tIdx;
 }
 template<class Real>
-int Triangulation<Real>::flipMinimize(const int& eIndex){
+int Triangulation<Real>::flipMinimize(int eIndex){
 	double oldArea,newArea;
 	int oldP[3],oldQ[3],newP[3],newQ[3];
 	TriangulationEdge newEdge;
@@ -419,3 +420,128 @@ int Triangulation<Real>::flipMinimize(const int& eIndex){
 	}
 	return 1;
 }
+/////////////////////////
+// CoredVectorMeshData //
+/////////////////////////
+template< class Vertex >
+CoredVectorMeshData< Vertex >::CoredVectorMeshData( void ) { oocPointIndex = polygonIndex = 0; }
+template< class Vertex >
+void CoredVectorMeshData< Vertex >::resetIterator ( void ) { oocPointIndex = polygonIndex = 0; }
+template< class Vertex >
+int CoredVectorMeshData< Vertex >::addOutOfCorePoint( const Vertex& p )
+{
+	oocPoints.push_back(p);
+	return int(oocPoints.size())-1;
+}
+template< class Vertex >
+int CoredVectorMeshData< Vertex >::addPolygon( const std::vector< CoredVertexIndex >& vertices )
+{
+	std::vector< int > polygon( vertices.size() );
+	for( int i=0 ; i<int(vertices.size()) ; i++ ) 
+		if( vertices[i].inCore ) polygon[i] =  vertices[i].idx;
+		else                     polygon[i] = -vertices[i].idx-1;
+	polygons.push_back( polygon );
+	return int( polygons.size() )-1;
+}
+template< class Vertex >
+int CoredVectorMeshData< Vertex >::nextOutOfCorePoint( Vertex& p )
+{
+	if( oocPointIndex<int(oocPoints.size()) )
+	{
+		p=oocPoints[oocPointIndex++];
+		return 1;
+	}
+	else{return 0;}
+}
+template< class Vertex >
+int CoredVectorMeshData< Vertex >::nextPolygon( std::vector< CoredVertexIndex >& vertices )
+{
+	if( polygonIndex<int( polygons.size() ) )
+	{
+		std::vector< int >& polygon = polygons[ polygonIndex++ ];
+		vertices.resize( polygon.size() );
+		for( int i=0 ; i<int(polygon.size()) ; i++ )
+			if( polygon[i]<0 ) vertices[i].idx = -polygon[i]-1 , vertices[i].inCore = false;
+			else               vertices[i].idx =  polygon[i]   , vertices[i].inCore = true;
+		return 1;
+	}
+	else return 0;
+}
+template< class Vertex >
+int CoredVectorMeshData< Vertex >::outOfCorePointCount(void){return int(oocPoints.size());}
+template< class Vertex >
+int CoredVectorMeshData< Vertex >::polygonCount( void ) { return int( polygons.size() ); }
+
+///////////////////////
+// CoredFileMeshData //
+///////////////////////
+template< class Vertex >
+CoredFileMeshData< Vertex >::CoredFileMeshData( void )
+{
+	oocPoints = polygons = 0;
+	
+	oocPointFile = new BufferedReadWriteFile();
+	polygonFile = new BufferedReadWriteFile();
+}
+template< class Vertex >
+CoredFileMeshData< Vertex >::~CoredFileMeshData( void )
+{
+	delete oocPointFile;
+	delete polygonFile;
+}
+template< class Vertex >
+void CoredFileMeshData< Vertex >::resetIterator ( void )
+{
+	oocPointFile->reset();
+	polygonFile->reset();
+}
+template< class Vertex >
+int CoredFileMeshData< Vertex >::addOutOfCorePoint( const Vertex& p )
+{
+	oocPointFile->write( &p , sizeof( Vertex ) );
+	oocPoints++;
+	return oocPoints-1;
+}
+template< class Vertex >
+int CoredFileMeshData< Vertex >::addPolygon( const std::vector< CoredVertexIndex >& vertices )
+{
+	int pSize = int( vertices.size() );
+	std::vector< int > polygon( pSize );
+	for( int i=0 ; i<pSize ; i++ ) 
+		if( vertices[i].inCore ) polygon[i] =  vertices[i].idx;
+		else                     polygon[i] = -vertices[i].idx-1;
+
+	polygonFile->write( &pSize , sizeof(int) );
+	polygonFile->write( &polygon[0] , sizeof(int)*pSize );
+	polygons++;
+	return polygons-1;
+}
+template< class Vertex >
+int CoredFileMeshData< Vertex >::nextOutOfCorePoint( Vertex& p )
+{
+	if( oocPointFile->read( &p , sizeof( Vertex ) ) ) return 1;
+	else return 0;
+}
+template< class Vertex >
+int CoredFileMeshData< Vertex >::nextPolygon( std::vector< CoredVertexIndex >& vertices )
+{
+	int pSize;
+	if( polygonFile->read( &pSize , sizeof(int) ) )
+	{
+		std::vector< int > polygon( pSize );
+		if( polygonFile->read( &polygon[0] , sizeof(int)*pSize ) )
+		{
+			vertices.resize( pSize );
+			for( int i=0 ; i<int(polygon.size()) ; i++ )
+				if( polygon[i]<0 ) vertices[i].idx = -polygon[i]-1 , vertices[i].inCore = false;
+				else               vertices[i].idx =  polygon[i]   , vertices[i].inCore = true;
+			return 1;
+		}
+		return 0;
+	}
+	else return 0;
+}
+template< class Vertex >
+int CoredFileMeshData< Vertex >::outOfCorePointCount( void ){ return oocPoints; }
+template< class Vertex >
+int CoredFileMeshData< Vertex >::polygonCount( void ) { return polygons; }

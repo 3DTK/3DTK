@@ -12,7 +12,7 @@ in the documentation and/or other materials provided with the distribution.
 
 Neither the name of the Johns Hopkins University nor the names of its contributors
 may be used to endorse or promote products derived from this software without specific
-prior written permission. 
+prior writften permission. 
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
 EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO THE IMPLIED WARRANTIES 
@@ -26,25 +26,58 @@ ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF S
 DAMAGE.
 */
 
-#ifndef FACTOR_INCLUDED
-#define FACTOR_INCLUDED
+#ifndef POINT_STREAM_INCLUDED
+#define POINT_STREAM_INCLUDED
 
-#define PI 3.1415926535897932384
-#define SQRT_3 1.7320508075688772935
+template< class Real >
+class PointStream
+{
+public:
+	virtual ~PointStream( void ){}
+	virtual void reset( void ) = 0;
+	virtual bool nextPoint( Point3D< Real >& p , Point3D< Real >& n ) = 0;
+};
 
-double ArcTan2(double y,double x);
-double Angle(const double in[2]);
-void Sqrt(const double in[2],double out[2]);
-void Add(const double in1[2],const double in2[2],double out[2]);
-void Subtract(const double in1[2],const double in2[2],double out[2]);
-void Multiply(const double in1[2],const double in2[2],double out[2]);
-void Divide(const double in1[2],const double in2[2],double out[2]);
+template< class Real >
+class ASCIIPointStream : public PointStream< Real >
+{
+	FILE* _fp;
+public:
+	ASCIIPointStream( const char* fileName );
+	~ASCIIPointStream( void );
+	void reset( void );
+	bool nextPoint( Point3D< Real >& p , Point3D< Real >& n );
+};
 
-int Factor(double a1,double a0,double roots[1][2],double EPS);
-int Factor(double a2,double a1,double a0,double roots[2][2],double EPS);
-int Factor(double a3,double a2,double a1,double a0,double roots[3][2],double EPS);
-int Factor(double a4,double a3,double a2,double a1,double a0,double roots[4][2],double EPS);
+template< class Real >
+class BinaryPointStream : public PointStream< Real >
+{
+	FILE* _fp;
+	static const int POINT_BUFFER_SIZE=1024;
+	Real _pointBuffer[ POINT_BUFFER_SIZE * 2 * 3 ];
+	int _pointsInBuffer , _currentPointIndex;
+public:
+	BinaryPointStream( const char* filename );
+	~BinaryPointStream( void );
+	void reset( void );
+	bool nextPoint( Point3D< Real >& p , Point3D< Real >& n );
+};
 
-int Solve(const double* eqns,const double* values,double* solutions, int dim);
+template< class Real >
+class PLYPointStream : public PointStream< Real >
+{
+	char* _fileName;
+	PlyFile* _ply;
+	int _nr_elems;
+	char **_elist;
 
-#endif // FACTOR_INCLUDED
+	int _pCount , _pIdx;
+	void _free( void );
+public:
+	PLYPointStream( const char* fileName );
+	~PLYPointStream( void );
+	void reset( void );
+	bool nextPoint( Point3D< Real >& p , Point3D< Real >& n );
+};
+#include "PointStream.inl"
+#endif // POINT_STREAM_INCLUDED
