@@ -25,7 +25,6 @@ class Poisson {
 public:
   // public attributes
   
-  
   // public methods
   Poisson();
   ~Poisson();
