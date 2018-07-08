@@ -30,43 +30,38 @@ DAMAGE.
 #define __SPARSEMATRIX_HPP
 
 #include "Vector.h"
-#include "Allocator.h"
+#include "Array.h"
 
 template <class T>
 struct MatrixEntry
 {
-	MatrixEntry( void )		{ N =-1; Value = 0; }
-	MatrixEntry( int i )	{ N = i; Value = 0; }
+	MatrixEntry( void )		    { N =-1; Value = 0; }
+	MatrixEntry( int i )	    { N = i; Value = 0; }
+	MatrixEntry( int i , T v )	{ N = i; Value = v; }
 	int N;
 	T Value;
-};
-template <class T,int Dim>
-struct NMatrixEntry
-{
-	NMatrixEntry( void )		{ N =-1; memset(Value,0,sizeof(T)*Dim); }
-	NMatrixEntry( int i )	{ N = i; memset(Value,0,sizeof(T)*Dim); }
-	int N;
-	T Value[Dim];
 };
 
 template<class T> class SparseMatrix
 {
 private:
-	static int UseAlloc;
+	bool _contiguous;
+	int _maxEntriesPerRow;
+	void _init( void );
 public:
-	static Allocator<MatrixEntry<T> > Allocator;
-	static int UseAllocator(void);
-	static void SetAllocator(const int& blockSize);
-
 	int rows;
-	int* rowSizes;
-	MatrixEntry<T>** m_ppElements;
+	Pointer( int ) rowSizes;
+	Pointer( Pointer( MatrixEntry< T > ) ) m_ppElements;
+	Pointer( MatrixEntry< T > ) operator[] ( int idx ) { return m_ppElements[idx]; }
+	ConstPointer( MatrixEntry< T > ) operator[] ( int idx ) const { return m_ppElements[idx]; }
 
-	SparseMatrix();
+	SparseMatrix( void );
 	SparseMatrix( int rows );
+	SparseMatrix( int rows , int maxEntriesPerRow );
 	void Resize( int rows );
+	void Resize( int rows , int maxEntriesPerRow );
 	void SetRowSize( int row , int count );
-	int Entries(void);
+	int Entries( void ) const;
 
 	SparseMatrix( const SparseMatrix& M );
 	~SparseMatrix();
@@ -89,68 +84,86 @@ public:
 	template<class T2>
 	Vector<T2> Multiply( const Vector<T2>& V ) const;
 	template<class T2>
-	void Multiply( const Vector<T2>& In, Vector<T2>& Out ) const;
+	void Multiply( const Vector<T2>& In , Vector<T2>& Out , int threads=1 ) const;
 
 
 	SparseMatrix<T> Transpose() const;
 
-	static int Solve			(const SparseMatrix<T>& M,const Vector<T>& b,const int& iters,Vector<T>& solution,const T eps=1e-8);
+	static int Solve			(const SparseMatrix<T>& M,const Vector<T>& b, int iters,Vector<T>& solution,const T eps=1e-8);
 
 	template<class T2>
-	static int SolveSymmetric	(const SparseMatrix<T>& M,const Vector<T2>& b,const int& iters,Vector<T2>& solution,const T2 eps=1e-8,const int& reset=1);
+	static int SolveSymmetric( const SparseMatrix<T>& M , const Vector<T2>& b , int iters , Vector<T2>& solution , const T2 eps=1e-8 , int reset=1 , int threads=1 );
 
+	bool write( FILE* fp ) const;
+	bool write( const char* fileName ) const;
+	bool read( FILE* fp );
+	bool read( const char* fileName );
 };
-template<class T,int Dim> class SparseNMatrix
+
+
+template< class T2 >
+struct MapReduceVector
 {
 private:
-	static int UseAlloc;
+	int _dim;
 public:
-	static Allocator<NMatrixEntry<T,Dim> > Allocator;
-	static int UseAllocator(void);
-	static void SetAllocator(const int& blockSize);
+	std::vector< T2* > out;
+	MapReduceVector( void ) { _dim = 0; }
+	~MapReduceVector( void )
+	{
+		if( _dim ) for( int t=0 ; t<int(out.size()) ; t++ ) delete[] out[t];
+		out.resize( 0 );
+	}
+	T2* operator[]( int t ) { return out[t]; }
+	const T2* operator[]( int t ) const { return out[t]; }
+	int threads( void ) const { return int( out.size() ); }
+	void resize( int threads , int dim )
+	{
+		if( threads!=out.size() || _dim<dim )
+		{
+			for( int t=0 ; t<int(out.size()) ; t++ ) delete[] out[t];
+			out.resize( threads );
+			for( int t=0 ; t<int(out.size()) ; t++ ) out[t] = new T2[dim];
+			_dim = dim;
+		}
+	}
 
-	int rows;
-	int* rowSizes;
-	NMatrixEntry<T,Dim>** m_ppElements;
-
-	SparseNMatrix();
-	SparseNMatrix( int rows );
-	void Resize( int rows );
-	void SetRowSize( int row , int count );
-	int Entries(void);
-
-	SparseNMatrix( const SparseNMatrix& M );
-	~SparseNMatrix();
-
-	SparseNMatrix& operator = (const SparseNMatrix& M);
-
-	SparseNMatrix  operator *  (const T& V) const;
-	SparseNMatrix& operator *= (const T& V);
-
-	template<class T2>
-	NVector<T2,Dim> operator * (const Vector<T2>& V) const;
-	template<class T2>
-	Vector<T2> operator * (const NVector<T2,Dim>& V) const;
 };
 
-
-
-template <class T>
-class SparseSymmetricMatrix : public SparseMatrix<T>{
+template< class T >
+class SparseSymmetricMatrix : public SparseMatrix< T >
+{
 public:
 
-  template<class T2>
-	Vector<T2> operator * (const Vector<T2>& V) const;
-	template<class T2>
-	Vector<T2> Multiply( const Vector<T2>& V ) const;
-	template<class T2>
-	void Multiply( const Vector<T2>& In, Vector<T2>& Out ) const;
+	template< class T2 >
+	Vector< T2 > operator * ( const Vector<T2>& V ) const;
 
-	template<class T2>
-	static int Solve(const SparseSymmetricMatrix<T>& M,const Vector<T2>& b,const int& iters,Vector<T2>& solution,const T2 eps=1e-8,const int& reset=1);
+	template< class T2 >
+	Vector< T2 > Multiply( const Vector<T2>& V ) const;
 
+	template< class T2 >
+	void Multiply( const Vector<T2>& In, Vector<T2>& Out , bool addDCTerm=false ) const;
+
+	template< class T2 >
+	void Multiply( const Vector<T2>& In, Vector<T2>& Out , MapReduceVector< T2 >& OutScratch , bool addDCTerm=false ) const;
+
+	template< class T2 >
+	void Multiply( const Vector<T2>& In, Vector<T2>& Out , std::vector< T2* >& OutScratch , const std::vector< int >& bounds ) const;
+
+	template< class T2 >
+	static int Solve( const SparseSymmetricMatrix<T>& M , const Vector<T2>& b , int iters , Vector<T2>& solution , T2 eps=1e-8 , int reset=1 , int threads=0  , bool addDCTerm=false , bool solveNormal=false );
+
+	template< class T2 >
+	static int Solve( const SparseSymmetricMatrix<T>& M , const Vector<T2>& b , int iters , Vector<T2>& solution , MapReduceVector<T2>& scratch , T2 eps=1e-8 , int reset=1 , bool addDCTerm=false , bool solveNormal=false );
+#ifdef WIN32
+	template< class T2 >
+	static int SolveAtomic( const SparseSymmetricMatrix<T>& M , const Vector<T2>& b , int iters , Vector<T2>& solution , T2 eps=1e-8 , int reset=1 , int threads=0  , bool solveNormal=false );
+#endif // WIN32
 	template<class T2>
-	static int Solve(const SparseSymmetricMatrix<T>& M,const Vector<T>& diagonal,const Vector<T2>& b,const int& iters,Vector<T2>& solution,const T2 eps=1e-8,const int& reset=1);
+	static int Solve( const SparseSymmetricMatrix<T>& M , const Vector<T2>& diagonal , const Vector<T2>& b , int iters , Vector<T2>& solution , int reset=1 );
+
+	template< class T2 >
+	void getDiagonal( Vector< T2 >& diagonal ) const;
 };
 
 #include "SparseMatrix.inl"
