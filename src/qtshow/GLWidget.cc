@@ -204,6 +204,11 @@ void GLWidget::setDrawPath(bool drawPath) {
   update();
 }
 
+void GLWidget::setDrawPoses(bool drawPoses) {
+  show_poses = drawPoses;
+  update();
+}
+
 void GLWidget::setPointSize(int pointSize) {
   pointsize = pointSize;
   update();
