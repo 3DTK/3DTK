@@ -18,6 +18,7 @@ public slots:
   void setDrawPoints(bool drawPoints);
   void setDrawCameras(bool drawCameras);
   void setDrawPath(bool drawPath);
+  void setDrawPoses(bool drawPoses);
   void setPointSize(int pointSize);
 
   void setFogType(int fogType);

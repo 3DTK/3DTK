@@ -110,6 +110,16 @@
           </property>
          </widget>
         </item>
+        <item>
+         <widget class="QCheckBox" name="checkDrawPoses">
+          <property name="text">
+           <string>Draw Poses</string>
+          </property>
+          <property name="checked">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
        </layout>
       </widget>
      </item>
@@ -1230,6 +1240,7 @@
     <slot>setDrawPoints(bool)</slot>
     <slot>setDrawCameras(bool)</slot>
     <slot>setDrawPath(bool)</slot>
+    <slot>setDrawPoses(bool)</slot>
     <slot>setPointSize(int)</slot>
     <slot>setFogType(int)</slot>
     <slot>setFogInverted(bool)</slot>
@@ -2075,6 +2086,22 @@
     <hint type="destinationlabel">
      <x>665</x>
      <y>459</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>checkDrawPoses</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>glWidget</receiver>
+   <slot>setDrawPoses(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>1120</x>
+     <y>132</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>628</x>
+     <y>460</y>
     </hint>
    </hints>
   </connection>
