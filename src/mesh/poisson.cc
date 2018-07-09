@@ -6,6 +6,7 @@
 #include "mesh/poisson.h"
 #include "poisson/Ply.h"
 #include "poisson/PoissonRecon.h"
+#include "poisson/SurfaceTrimmer.h"
 
 using namespace std;
 
@@ -37,6 +38,22 @@ Poisson::Poisson() {
 
 Poisson::~Poisson() {
   initialize();
+  for (int i = 0; i < points.size(); ++i) {
+    delete [] points[i];
+    delete [] normals[i];
+  }
+  for (int i = 0; i < vertices.size(); ++i) {
+    delete [] vertices[i];
+  }
+  for (int i = 0; i < faces.size(); ++i) {
+    delete [] faces[i];
+  }
+  for (int i = 0; i < tVertices.size(); ++i) {
+    delete [] tVertices[i];
+  }
+  for (int i = 0; i < tFaces.size(); ++i) {
+    delete [] tFaces[i];
+  }
 }
 
 void Poisson::initialize() {
@@ -101,9 +118,9 @@ int Poisson::exportMesh(const char* modelPath) {
 
   // get and write correct scaled points coordinates
   for (int i = 0; i < vertices.size(); ++i) {
-    fs << "v " << get<0>(vertices[i]) << " " 
-      << get<1>(vertices[i]) << " " 
-      << get<2>(vertices[i]) << " " << endl;
+    fs << "v " << vertices[i][0] << " " 
+      << vertices[i][1] << " " 
+      << vertices[i][2] << " " << endl;
   }
 
   // get and write correct ordered faces indexes
@@ -111,15 +128,44 @@ int Poisson::exportMesh(const char* modelPath) {
     // if (removedFaces[i]) {
     //   continue;
     // }
-    fs << "f " << get<0>(faces[i]) + 1 << " " 
-      << get<1>(faces[i]) + 1 << " " 
-      << get<2>(faces[i]) + 1 << " " << endl;
+    fs << "f " << faces[i][0] + 1 << " " 
+      << faces[i][1] + 1 << " " 
+      << faces[i][2] + 1 << " " << endl;
   }
 
   fs.close();
   return 0;
 }
 
+int Poisson::exportTrimmedMesh(const char* modelPath) {
+  fstream fs(modelPath, fstream::out);
+  // // write unscaled out of core points
+  // for (int i = 0; i < mesh->oocPoints.size(); ++i) {
+  //   fs << "v " << mesh->oocPoints[i].coords[0] << " " << mesh->oocPoints[i].coords[1] << " " << mesh->oocPoints[i].coords[2] << endl;
+  // }
+
+  // get and write correct scaled points coordinates
+  for (int i = 0; i < tVertices.size(); ++i) {
+    fs << "v " << tVertices[i][0] << " " 
+      << tVertices[i][1] << " " 
+      << tVertices[i][2] << " " << endl;
+  }
+
+  // get and write correct ordered faces indexes
+  for (int i = 0; i < tFaces.size(); ++i) {
+    // if (removedFaces[i]) {
+    //   continue;
+    // }
+    fs << "f " << tFaces[i][0] + 1 << " " 
+      << tFaces[i][1] + 1 << " " 
+      << tFaces[i][2] + 1 << " " << endl;
+  }
+
+  fs.close();
+  return 0;
+}
+
+// temp removed
 int Poisson::testVcgFilter() {
   // MyMesh m;
   
@@ -160,6 +206,7 @@ int Poisson::testVcgFilter() {
   // return 1;
 }
 
+// temp moved to apply
 int Poisson::updateModel() {
   // mesh.resetIterator();
   // // get vertices
@@ -226,6 +273,14 @@ int Poisson::distFilter(float maxDist) {
   // return 1;
 }
 
+// filter mesh with density value
+// implementation in SurfaceTrimmer.h
+int Poisson::surfaceTrimmer(float dstVal) {
+  CallSurfaceTrimmer(dstVal, vertices, faces, tVertices, tFaces);
+  return 1;
+}
+
+// not used now, temp removed
 int Poisson::calcNormalVcg() {
   // MyMesh m;
   // MyMesh::VertexIterator vi = vcg::tri::Allocator<MyMesh>::AddVertices(m,3);
@@ -261,26 +316,36 @@ int Poisson::apply() {
     mesh.resetIterator();
     // get vertices
     for (int i = 0; i < mesh.inCorePoints.size(); ++i) {
-      // v[3] = mesh.inCorePoints[i].value; // density value
-      vertices.push_back(make_tuple(
-        mesh.inCorePoints[i].point.coords[0], 
-        mesh.inCorePoints[i].point.coords[1], 
-        mesh.inCorePoints[i].point.coords[2]
-      ));
+      float *v = new float[4];
+      v[0] = mesh.inCorePoints[i].point.coords[0];
+      v[1] = mesh.inCorePoints[i].point.coords[1];
+      v[2] = mesh.inCorePoints[i].point.coords[2];
+      v[3] = mesh.inCorePoints[i].value;
+      vertices.push_back(v);
+      // vertices.push_back(make_tuple(
+      //   mesh.inCorePoints[i].point.coords[0], 
+      //   mesh.inCorePoints[i].point.coords[1], 
+      //   mesh.inCorePoints[i].point.coords[2]
+      // ));
     }
     for (int i = 0; i < mesh.outOfCorePointCount(); ++i) {
       PlyValueVertex< Real > vt;
       mesh.nextOutOfCorePoint(vt);
-      // v[3] = vt.value; // density value
-      vertices.push_back(make_tuple(
-        vt.point.coords[0], 
-        vt.point.coords[1], 
-        vt.point.coords[2]
-      ));
+      float *v = new float[4];
+      v[0] = vt.point.coords[0];
+      v[1] = vt.point.coords[1];
+      v[2] = vt.point.coords[2];
+      v[3] = vt.value;
+      vertices.push_back(v);
+      // vertices.push_back(make_tuple(
+      //   vt.point.coords[0], 
+      //   vt.point.coords[1], 
+      //   vt.point.coords[2]
+      // ));
     }
     // get faces
     for (int i = 0; i < mesh.polygonCount(); ++i) {
-      int f[3];
+      int *f = new int[3];
       vector<CoredVertexIndex> face;
       mesh.nextPolygon(face);
       for (int j = 0; j < face.size(); ++j) {
@@ -291,9 +356,7 @@ int Poisson::apply() {
           f[j] = face[j].idx + (int)(mesh.inCorePoints.size());
         }
       }
-      faces.push_back(make_tuple(
-        f[0], f[1], f[2]
-      ));
+      faces.push_back(f);
     }
   }
   return reconstructed;
