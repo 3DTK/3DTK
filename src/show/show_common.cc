@@ -1126,10 +1126,11 @@ void QuatToMouseRot(Quaternion q, double& x, double& y, double& z)
   Rquat[3] = q.w;
   for (char i = 0; i <= 3; i++) quat[i] = Rquat[i];
   double t[3] = {};
-  QuatToMatrix4((const double *)quat, t, (double *)view_rotate_button);
-  glMultMatrixd((const double *)view_rotate_button);
+  double mat[16];
+  QuatToMatrix4((const double *)quat, t, (double *)mat);
+  glMultMatrixd((const double *)mat);
   double rot[3];
-  Matrix4ToEuler((const double *)view_rotate_button, rot);
+  Matrix4ToEuler((const double *)mat, rot);
   x = deg(rot[0]);
   y = deg(rot[1]);
   z = deg(rot[2]);
