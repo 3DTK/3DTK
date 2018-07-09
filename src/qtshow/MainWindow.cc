@@ -39,7 +39,7 @@ MainWindow::MainWindow(const dataset_settings& ds, const window_settings& ws, QW
     // Initialize widgets from arguments
     comboBoxFogType->setCurrentIndex(ds.fog.type % 4); // modulo to deal with inverted fog options
     checkBoxInvertFog->setChecked(ds.fog.type >= 4);
-    doubleSpinBoxFogDensity->setValue(ds.fog.density);
+    doubleSpinBoxFogDensity->setValue(ds.fog.density * scale);
 
     // Initialize widgets from globals
     // They can't be initialized from arguments
