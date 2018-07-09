@@ -44,7 +44,7 @@ enum normal_method {KNN, ADAPTIVE_KNN,
 void parse_options(int argc, char **argv, int &start, int &end, bool &scanserver, int &max_dist, int &min_dist, string &dir, string &odir, IOType &iotype, 
   bool &join, double &red, int &rand, bool &uP, bool &use_xyz, bool &use_color, bool &use_reflectance, int &octree, bool &rangeFilterActive, bool &customFilterActive, string &customFilter, double &scaleFac, bool &hexfloat, bool &high_precision, int &frame,
   int &k1, int &k2, normal_method &ntype, int &width, int &height, 
-  int &depth, int &solverDivide, float &samplesPerNode, float &offset);
+  int &depth, int &solverDivide, float &samplesPerNode, float &offset, float &trimVal);
 // validate normmal_method type (important for boost program_option)
 void validate(boost::any& v, const std::vector<std::string>& values, normal_method*, int);
 // validate IO types (important for boost program_option)
@@ -97,6 +97,7 @@ int main(int argc, char **argv) {
   float offset;
   Poisson poisson;
   PoissonParam pp;
+  float trimVal = 0.0;
 
   vector<Point> points;
   vector<Point> normals;
@@ -105,7 +106,7 @@ int main(int argc, char **argv) {
   parse_options(argc, argv, start, end, scanserver, max_dist, min_dist,dir, odir, iotype, 
     join, red, rand, uP, use_xyz, use_color, use_reflectance, octree, rangeFilterActive, customFilterActive, customFilter, scaleFac, hexfloat, high_precision, frame,
     k1, k2, ntype, width, height,
-    depth, solverDivide, samplesPerNode, offset);
+    depth, solverDivide, samplesPerNode, offset, trimVal);
 
   if (scanserver) {
     try {
@@ -248,9 +249,11 @@ int main(int argc, char **argv) {
     poisson.apply();
     // CoredVectorMeshData m;
     // poisson.getMesh(&m);
-    poisson.distFilter(50);
-    poisson.exportMesh((odir + "all.obj").c_str());
-    cout << "Poisson reconstruction end, model generated at: " +  odir + "all.obj" << endl;
+    // poisson.distFilter(50);
+    poisson.surfaceTrimmer(trimVal);
+    poisson.exportMesh((odir + "_all.obj").c_str());
+    poisson.exportTrimmedMesh((odir + "_all_trimmed.obj").c_str());
+    cout << "Poisson reconstruction end, model generated at: " +  odir + "_all & all_trimmed.obj" << endl;
   }
   // apply surface reconstruction to each scan individually
   // ---
@@ -290,8 +293,10 @@ int main(int argc, char **argv) {
       poisson.apply();
       // CoredVectorMeshData m;
       // poisson.getMesh(&m);
+      poisson.surfaceTrimmer(trimVal);
       poisson.exportMesh((odir + to_string(scanNumber) + ".obj").c_str());
-      cout << "Poisson reconstruction end, model generated at: " +  odir + to_string(scanNumber) + ".obj" << endl;
+      poisson.exportTrimmedMesh((odir + to_string(scanNumber) + "_trimmed.obj").c_str());
+      cout << "Poisson reconstruction end, model generated at: " +  odir + to_string(scanNumber) + " & _trimmed.obj" << endl;
 
       // clear points and normal of previous scan
       points.clear();
@@ -353,7 +358,7 @@ void validate(boost::any& v, const std::vector<std::string>& values,
 void parse_options(int argc, char **argv, int &start, int &end, bool &scanserver, int &max_dist, int &min_dist, string &dir, string &odir, IOType &iotype, 
   bool &join, double &red, int &rand, bool &use_pose, bool &use_xyz, bool &use_color, bool &use_reflectance, int &octree, bool &rangeFilterActive, bool &customFilterActive, string &customFilter, double &scaleFac, bool &hexfloat, bool &high_precision, int &frame,
   int &k1, int &k2, normal_method &ntype, int &width, int &height,
-  int &depth, int &solverDivide, float &samplesPerNode, float &offset)
+  int &depth, int &solverDivide, float &samplesPerNode, float &offset, float &trimVal)
 {
   po::options_description cmd_options("Poisson Surface Reconstruction <options> \n"
                                       "Options list:");
@@ -450,7 +455,10 @@ void parse_options(int argc, char **argv, int &start, int &end, bool &scanserver
       "value of poisson samples per node")
       ("offset,o",
       po::value<float>(&offset)->default_value(1.0f),
-      "value of poisson offset");
+      "value of poisson offset")
+      ("trim,T",
+      po::value<float>(&trimVal)->default_value(0.0f),
+      "value of trimming threshold value");
 
   // input scan dir and output obj dir are hidden and mandatory
   po::options_description hidden("Hidden options");
@@ -472,8 +480,8 @@ void parse_options(int argc, char **argv, int &start, int &end, bool &scanserver
   if (vmap.count("help")) {
     cout << cmd_options << endl << endl;
     cout << "Sample command for reconstructing surface:" << endl;
-    cout << "- e.g. Join scans and trust pose with octree depth 12:" << endl;
-    cout << "  bin/poisson dat dat/test/join_output -j true -t true -d 12" << endl;
+    cout << "- e.g. Join scans and trust pose with octree depth 10 and trimming threshold 7.0:" << endl;
+    cout << "  bin/recon dat dat/test/test -j true -t true -d 10 -T 7.0" << endl;
     cout << endl;
     exit(-1);
   }
