@@ -31,11 +31,6 @@ MainWindow::MainWindow(const dataset_settings& ds, const window_settings& ws, QW
     buttonGroupViewMode->setId(radioButtonTopView, 1);
     buttonGroupViewMode->setId(radioButtonRotateView, 2);
 
-    // Setup camera list buttons
-    // XXX I think this can be moved to MainWindow.ui
-    connect(glWidget, &GLWidget::camsListAdded, this, &MainWindow::addCamCombobox);
-    connect(glWidget, &GLWidget::camsListDeleted, this, &MainWindow::deleteCamCombobox);
-
     // Initialize widgets from arguments
     comboBoxFogType->setCurrentIndex(ds.fog.type % 4); // modulo to deal with inverted fog options
     checkBoxInvertFog->setChecked(ds.fog.type >= 4);
