@@ -162,6 +162,7 @@ void MainWindow::clearRecentDirectories() {
 void MainWindow::addCamCombobox(int index) {
   QString s = QString("#%1").arg(index);
   comboBoxCam->addItem(s);
+  comboBoxCam->setCurrentIndex(index - 1);
 }
 
 void MainWindow::deleteCamCombobox(int index) {
