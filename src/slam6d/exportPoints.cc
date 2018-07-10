@@ -71,26 +71,23 @@ po::options_description generic("Generic options");
     ("end,e", po::value<int>(&end)->default_value(-1),
      "end after scan <arg>")
     ("customFilter,u", po::value<string>(&customFilter),
-    "Apply a custom filter. Filter mode and data are specified as a "
-    "semicolon-seperated string:"
-    "{filterMode};{nrOfParams}[;param1][;param2][...]"
-    "Multiple filters can be specified in a file (syntax in file is same as"
-    "direct specification"
-    "FILE;{fileName}"
+    "Apply a custom filter. Filter mode and data are specified as a semicolon-seperated string:"
+    "{filterMode};{nrOfParams}[;param1][;param2][...]\n"
+    "Multiple filters can be specified in a file (syntax in file is same as direct specification\n"
+    "FILE;{fileName}\n"
     "See filter implementation in src/slam6d/pointfilter.cc for more detail.")
     ("reduce,r", po::value<double>(&red)->default_value(-1.0),
     "turns on octree based point reduction (voxel size=<NR>)")
     ("octree,O", po::value<int>(&octree)->default_value(1),
     "use randomized octree based point reduction (pts per voxel=<NR>)")
     ("scale,y", po::value<double>(&scaleFac)->default_value(0.01),
-    "scale factor for point cloud in m (be aware of the different units for uos (cm) and xyz (m), default: 0.01 means that input and output remain the same)'")
+    "scale factor for point cloud in m (be aware of the different units for uos (cm) and xyz (m), (default: 0.01 means that input and output remain the same)")
     ("color,c", po::bool_switch(&use_color)->default_value(false),
      "export in color as RGB")
     ("reflectance,R", po::bool_switch(&use_reflectance)->default_value(false),
      "end after scan <arg>")
     ("trustpose,p", po::bool_switch(&use_pose)->default_value(false),
-    "Trust the pose file, do not extrapolate the last transformation."
-    "(just for testing purposes, or gps input.)")
+    "Trust the pose file, do not use the transformation from the .frames files.")
     ("xyz,x", po::bool_switch(&use_xyz)->default_value(false),
      "export in xyz format (right handed coordinate system in m)")
     ("hexfloat,0", po::bool_switch(&hexfloat)->default_value(false),
