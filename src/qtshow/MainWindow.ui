@@ -1237,6 +1237,8 @@
     <signal>quaternionChanged(QString)</signal>
     <signal>dockWidgetsHidden()</signal>
     <signal>dockWidgetsShown()</signal>
+    <signal>camsListAdded(int)</signal>
+    <signal>camsListDeleted(int)</signal>
     <slot>setDrawPoints(bool)</slot>
     <slot>setDrawCameras(bool)</slot>
     <slot>setDrawPath(bool)</slot>
@@ -2105,6 +2107,38 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>glWidget</sender>
+   <signal>camsListAdded(int)</signal>
+   <receiver>MainWindow</receiver>
+   <slot>addCamCombobox(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>628</x>
+     <y>467</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>665</x>
+     <y>467</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>glWidget</sender>
+   <signal>camsListDeleted(int)</signal>
+   <receiver>MainWindow</receiver>
+   <slot>deleteCamCombobox(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>628</x>
+     <y>467</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>665</x>
+     <y>467</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>openScanDirectory()</slot>
@@ -2115,6 +2149,8 @@
   <slot>saveStates()</slot>
   <slot>setStateFilePath()</slot>
   <slot>loadStates()</slot>
+  <slot>addCamCombobox(int)</slot>
+  <slot>deleteCamCombobox(int)</slot>
  </slots>
  <buttongroups>
   <buttongroup name="buttonGroupViewMode"/>
