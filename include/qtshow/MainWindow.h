@@ -8,6 +8,7 @@
 
 #include <QProgressBar>
 
+#include "qtshow/SettingsDialog.h"
 #include "show/program_options.h"
 
 
@@ -26,6 +27,8 @@ public slots:
   void openRecentDirectory();
   void clearRecentDirectories();
 
+  void showSettingsDialog();
+
   void addCamCombobox(int index);
   void deleteCamCombobox(int index);
 
@@ -40,6 +43,8 @@ protected:
   std::vector<std::string> loadRecentDirectories();
   void updateRecentDirectoriesMenu(std::vector<std::string> directories);
 
+  SettingsDialog *settingsDialog = Q_NULLPTR;
+
   dataset_settings ds;
   QProgressBar *progressbar;
 
@@ -47,6 +52,8 @@ protected:
 
 protected slots:
   void addRecentDirectory();
+
+  void applySettings();
 
 friend class QtShow;
 };
