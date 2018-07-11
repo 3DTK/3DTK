@@ -9,23 +9,26 @@ if (WITH_OPENGL AND WITH_QT)
   qt5_wrap_cpp(QTSHOW_HEADERS_MOC
     ${PROJECT_SOURCE_DIR}/include/qtshow/GLWidget.h
     ${PROJECT_SOURCE_DIR}/include/qtshow/MainWindow.h
+    ${PROJECT_SOURCE_DIR}/include/qtshow/NavPushButton.h
     ${PROJECT_SOURCE_DIR}/include/qtshow/QtShow.h
     ${PROJECT_SOURCE_DIR}/include/qtshow/ScanPicker.h
-    ${PROJECT_SOURCE_DIR}/include/qtshow/NavPushButton.h)
+    ${PROJECT_SOURCE_DIR}/include/qtshow/SettingsDialog.h)
 
   qt5_wrap_cpp(GLWIDGET_HEADERS_MOC
     ${PROJECT_SOURCE_DIR}/include/qtshow/GLWidget.h)
 
   qt5_wrap_ui(QTSHOW_FORMS_HEADERS
     MainWindow.ui
-    ScanPicker.ui)
+    ScanPicker.ui
+    SettingsDialog.ui)
 
   add_executable(qtshow
     main.cc
     MainWindow.cc
+    NavPushButton.cc
     QtShow.cc
     ScanPicker.cc
-    NavPushButton.cc
+    SettingsDialog.cc
     ${QTSHOW_HEADERS_MOC}
     ${QTSHOW_FORMS_HEADERS})
 
