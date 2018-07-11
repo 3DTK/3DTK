@@ -30,6 +30,8 @@ CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING 
 ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH
 DAMAGE.
 */
+#ifndef __SURFACE_TRIMMER_INCLUDED__
+#define __SURFACE_TRIMMER_INCLUDED__
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -418,3 +420,5 @@ int CallSurfaceTrimmer(float trimVal, std::vector<float*> &vts, std::vector<int*
 
 	return 1;
 }
+
+#endif // __SURFACE_TRIMMER_INCLUDED__
