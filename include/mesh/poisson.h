@@ -2,20 +2,8 @@
 ** Poisson object (prototype)
 ** Author: Xia Sun
 --------------------*/
-#ifndef __MESH_H__
-#define __MESH_H__
-
-#ifndef WITH_OPENCV
-#define WITH_TEST
-
-#include <slam6d/scan.h>
-#include <slam6d/normals.h>
-
-#ifdef WITH_OPENCV
-#include <normals/normals_panorama.h>
-#endif
-
-// #include "../../src/mesh/poisson/PoissonRecon.h"
+#ifndef __POISSON_H__
+#define __POISSON_H__
 
 struct PoissonParam {
   int Depth;
@@ -28,38 +16,33 @@ public:
   // public methods
   Poisson();
   ~Poisson();
-  int setPoints(std::vector<Point> v);
-  int setNormals(std::vector<Point> n);
+  int setPoints(std::vector<std::vector<float>> &v); // for IO, use v of v instead of v of float* to reach convinience of other developers
+  int setNormals(std::vector<std::vector<float>> &n);
+  int getVertices(std::vector<std::vector<float>> &v);
+  int getFaces(std::vector<std::vector<int>> &f);
   int setParams(PoissonParam &p);
-  // int getMesh(CoredFileMeshData<PlyValueVertex<float>> *m);
   int apply();
-  int distFilter(float maxDist); // filter reconstructed model
   int surfaceTrimmer(float dstVal);
-  int testVcgFilter(); // test mesh processing with vcglib
-  int calcNormalVcg();
   int exportMesh(const char *modelPath);
   int exportTrimmedMesh(const char *modelPath);
 
 private:
   // private attributes
   int reconstructed;
+  int updated;
+  int trimmed;
   PoissonParam params;
-  std::vector<float*> vertices; // model vertices
-  std::vector<int*> faces; // model faces
-  std::vector<float*> tVertices; // trimmed model vertices
-  std::vector<int*> tFaces; // trimmed model faces
-  // std::vector<int> removedFaces;
-  std::vector<float*> points; // pointset
-  std::vector<float*> normals; // pointset normals
-  // CoredFileMeshData<PlyValueVertex<float>> mesh;
+  std::vector<float*> vertices;     // model vertices (length4, with density value)
+  std::vector<int*> faces;          // model faces
+  std::vector<float*> tVertices;    // trimmed model vertices
+  std::vector<int*> tFaces;         // trimmed model faces
+  std::vector<float*> points;       // input pointset
+  std::vector<float*> normals;      // input pointset normals
   float* center;
   float scale;
 
   // private methods
-  void initialize();
-  int ready();
-  int updateModel(); // update poisson vertices and faces data structure to stl based ones
+  void reset();
 };
 
-#endif
-#endif
+#endif // __POISSON_H__
