@@ -77,7 +77,7 @@ void passMouseEvent(QMouseEvent *event, bool press) {
 }
 
 void GLWidget::mousePressEvent(QMouseEvent *event) {
-  if (advancedMouseMode) {
+  if (captureMouseCursor) {
     // Remember the cursor position
     initialMousePos = mapToGlobal(event->pos());
 
@@ -97,7 +97,7 @@ void GLWidget::mousePressEvent(QMouseEvent *event) {
 }
 
 void GLWidget::mouseReleaseEvent(QMouseEvent *event) {
-  if (event->buttons() == Qt::NoButton && advancedMouseMode) {
+  if (event->buttons() == Qt::NoButton && captureMouseCursor) {
     // Restore cursor position
     QCursor::setPos(initialMousePos);
 
@@ -115,7 +115,7 @@ void GLWidget::cameraChanged() {
 }
 
 void GLWidget::mouseMoveEvent(QMouseEvent *event) {
-  if (advancedMouseMode) {
+  if (captureMouseCursor) {
     int dx =  width()/2 - event->x(),
         dy = height()/2 - event->y();
 
