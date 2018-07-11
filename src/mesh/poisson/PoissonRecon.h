@@ -31,6 +31,9 @@ ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF S
 DAMAGE.
 */
 
+#ifndef __POISSON_RECON_INCLUDED__
+#define __POISSON_RECON_INCLUDED__
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -335,3 +338,5 @@ inline double to_seconds( const FILETIME& ft )
 	return ft.dwLowDateTime*low_to_sec+ft.dwHighDateTime*high_to_sec;
 }
 #endif // _WIN32
+
+#endif // __POISSON_RECON_INCLUDED__

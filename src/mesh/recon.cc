@@ -12,6 +12,10 @@
 #include <scanserver/clientInterface.h>
 #include <slam6d/point.h>
 #include <slam6d/globals.icc>
+#include <slam6d/normals.h>
+#ifdef WITH_OPENCV
+#include <normals/normals_panorama.h>
+#endif
 
 #include "mesh/poisson.h"
 
@@ -53,6 +57,8 @@ void validate(boost::any& v, const std::vector<std::string>& values, IOType*, in
 void readFrames(std::string dir, int start, int end, int frame, bool use_pose=false);
 // calculate normals
 void calcNormals(vector<Point> &points, vector<Point> &normals, normal_method ntype, int k1, int k2, int width, int height, const double* rPos, const double* rPosTheta, Scan *scan);
+// convert vector of Points to vector of vector 
+void convert(vector<Point> &src, vector<vector<float>> &dst);
 // test other reconstruction methods with cgal
 // including Scale-Space Surface Reconstruction, Advancing Front Surface Reconstruction
 void reconScaleSpaceSurface(vector<Point> &points);
@@ -228,28 +234,20 @@ int main(int argc, char **argv) {
       pts.clear();
       norms.clear();
     }
-    // fstream fsn("dat/test/testnewnormal.xyz", fstream::out);
-    // for (int i = 0; i < points.size(); ++i) {
-    //   fsn << points[i].x << " "<< points[i].y << " " << points[i].z << " " 
-    //     << normals[i].x << " "<< normals[i].y << " " << normals[i].z << endl;
-    // }
-    // fsn.close();
-    // reconScaleSpaceSurface(points);
-    // return 0; // testing purpose
-    cout << "Poisson reconstruction started" << endl;
 
-    // reconstruction for current scan
+    // data conversion
+    vector<vector<float>> vPoints;
+    vector<vector<float>> vNormals;
+    convert(points, vPoints);
+    convert(normals, vNormals);
+
+    cout << "Poisson reconstruction started" << endl;
+    // reconstruction for joined scan
     pp.Depth = depth;
-    // pp.SolverDivide = solverDivide;
-    // pp.Depth = depth;
-    // pp.Offset = offset;
-    poisson.setPoints(points);
-    poisson.setNormals(normals);
+    poisson.setPoints(vPoints);
+    poisson.setNormals(vNormals);
     poisson.setParams(pp);
     poisson.apply();
-    // CoredVectorMeshData m;
-    // poisson.getMesh(&m);
-    // poisson.distFilter(50);
     poisson.surfaceTrimmer(trimVal);
     poisson.exportMesh((odir + "_all.obj").c_str());
     poisson.exportTrimmedMesh((odir + "_all_trimmed.obj").c_str());
@@ -278,21 +276,21 @@ int main(int argc, char **argv) {
 
       // calculate normals
       calcNormals(points, normals, ntype, k1, k2, width, height, rPos, rPosTheta, scan);
-
       cout << "Normal calculation end" << endl;
-      cout << "Poisson reconstruction started" << endl;
 
+      // data conversion
+      vector<vector<float>> vPoints;
+      vector<vector<float>> vNormals;
+      convert(points, vPoints);
+      convert(normals, vNormals);
+
+      cout << "Poisson reconstruction started" << endl;
       // reconstruction for current scan
       pp.Depth = depth;
-      // pp.SolverDivide = solverDivide;
-      // pp.Depth = depth;
-      // pp.Offset = offset;
-      poisson.setPoints(points);
-      poisson.setNormals(normals);
+      poisson.setPoints(vPoints);
+      poisson.setNormals(vNormals);
       poisson.setParams(pp);
       poisson.apply();
-      // CoredVectorMeshData m;
-      // poisson.getMesh(&m);
       poisson.surfaceTrimmer(trimVal);
       poisson.exportMesh((odir + to_string(scanNumber) + ".obj").c_str());
       poisson.exportTrimmedMesh((odir + to_string(scanNumber) + "_trimmed.obj").c_str());
@@ -310,9 +308,6 @@ int main(int argc, char **argv) {
     ClientInterface::destroy();
 
   Scan::closeDirectory();
-
-  // post-processing of reconstructed surface
-  poisson.testVcgFilter();
 
   return 0;
 }
@@ -600,5 +595,15 @@ void calcNormals(vector<Point> &points, vector<Point> &normals, normal_method nt
                           rPos,
                           fPanorama.getExtendedMap());
 #endif
+  }
+}
+
+void convert(vector<Point> &src, vector<vector<float>> &dst) {
+  dst.resize(src.size());
+  for (int i = 0; i < src.size(); ++i) {
+    dst[i].resize(3);
+    dst[i][0] = src[i].x;
+    dst[i][1] = src[i].y;
+    dst[i][2] = src[i].z;
   }
 }
