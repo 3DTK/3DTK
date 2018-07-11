@@ -203,6 +203,7 @@ void MainWindow::hideDockWidgets()
   dockMode->hide();
   dockNavigation->hide();
   statusbar->hide();
+  menubar->hide();
   centralwidget->layout()->setContentsMargins(0, 0, 0, 0);
 }
 
@@ -218,6 +219,7 @@ void MainWindow::showDockWidgets()
   dockMode->show();
   dockNavigation->show();
   statusbar->show();
+   menubar->show();
   centralwidget->layout()->setContentsMargins(defaultMargins);
 }
 
