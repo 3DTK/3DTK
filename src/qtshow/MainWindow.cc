@@ -154,6 +154,32 @@ void MainWindow::clearRecentDirectories() {
   updateRecentDirectoriesMenu({});
 }
 
+void MainWindow::showSettingsDialog() {
+  // Create new window if it doesn't exist yet
+  if (!settingsDialog) {
+    settingsDialog = new SettingsDialog(this);
+    connect(settingsDialog, &SettingsDialog::accepted, this, &MainWindow::applySettings);
+  }
+
+  // Read settings from UI state
+  settingsDialog->cbCaptureCursor->setChecked(glWidget->captureMouseCursor);
+  settingsDialog->cbInvertMouseX->setChecked(invertMouseX);
+  settingsDialog->cbInvertMouseY->setChecked(invertMouseY);
+  settingsDialog->cbHideOthersInFullscreen->setChecked(true);
+
+  // Show dialog
+  settingsDialog->show();
+}
+
+void MainWindow::applySettings() {
+  glWidget->captureMouseCursor = settingsDialog->cbCaptureCursor->isChecked();
+  invertMouseX = settingsDialog->cbInvertMouseX->isChecked();
+  invertMouseY = settingsDialog->cbInvertMouseY->isChecked();
+  // TODO implement "Hide all other widgets in fullscreen" option
+
+  // TODO write settings to $XDG_CONFIG_HOME/3dtk/qtshow.ini
+}
+
 void MainWindow::addCamCombobox(int index) {
   QString s = QString("#%1").arg(index);
   comboBoxCam->addItem(s);
