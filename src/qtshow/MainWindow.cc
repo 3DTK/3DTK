@@ -165,7 +165,7 @@ void MainWindow::showSettingsDialog() {
   settingsDialog->cbCaptureCursor->setChecked(glWidget->captureMouseCursor);
   settingsDialog->cbInvertMouseX->setChecked(invertMouseX);
   settingsDialog->cbInvertMouseY->setChecked(invertMouseY);
-  settingsDialog->cbHideOthersInFullscreen->setChecked(true);
+  settingsDialog->cbHideWidgetsInFullscreen->setChecked(hideWidgetsInFullscreen);
 
   // Show dialog
   settingsDialog->show();
@@ -175,7 +175,7 @@ void MainWindow::applySettings() {
   glWidget->captureMouseCursor = settingsDialog->cbCaptureCursor->isChecked();
   invertMouseX = settingsDialog->cbInvertMouseX->isChecked();
   invertMouseY = settingsDialog->cbInvertMouseY->isChecked();
-  // TODO implement "Hide all other widgets in fullscreen" option
+  hideWidgetsInFullscreen = settingsDialog->cbHideWidgetsInFullscreen->isChecked();
 
   // TODO write settings to $XDG_CONFIG_HOME/3dtk/qtshow.ini
 }
@@ -192,35 +192,39 @@ void MainWindow::deleteCamCombobox(int index) {
 
 void MainWindow::hideDockWidgets()
 {
-  defaultMargins = centralwidget->layout()->contentsMargins();
-  dockAnimation->hide();
-  dockCamera->hide();
-  dockState->hide();
-  dockSnapshot->hide();
-  dockObjects->hide();
-  dockFog->hide();
-  dockColor->hide();
-  dockMode->hide();
-  dockNavigation->hide();
-  statusbar->hide();
-  menubar->hide();
-  centralwidget->layout()->setContentsMargins(0, 0, 0, 0);
+  if (hideWidgetsInFullscreen) {
+    defaultMargins = centralwidget->layout()->contentsMargins();
+    dockAnimation->hide();
+    dockCamera->hide();
+    dockState->hide();
+    dockSnapshot->hide();
+    dockObjects->hide();
+    dockFog->hide();
+    dockColor->hide();
+    dockMode->hide();
+    dockNavigation->hide();
+    statusbar->hide();
+    menubar->hide();
+    centralwidget->layout()->setContentsMargins(0, 0, 0, 0);
+  }
 }
 
 void MainWindow::showDockWidgets()
 {
-  dockAnimation->show();
-  dockCamera->show();
-  dockState->show();
-  dockSnapshot->show();
-  dockObjects->show();
-  dockFog->show();
-  dockColor->show();
-  dockMode->show();
-  dockNavigation->show();
-  statusbar->show();
-   menubar->show();
-  centralwidget->layout()->setContentsMargins(defaultMargins);
+  if (hideWidgetsInFullscreen) {
+    dockAnimation->show();
+    dockCamera->show();
+    dockState->show();
+    dockSnapshot->show();
+    dockObjects->show();
+    dockFog->show();
+    dockColor->show();
+    dockMode->show();
+    dockNavigation->show();
+    statusbar->show();
+    menubar->show();
+    centralwidget->layout()->setContentsMargins(defaultMargins);
+  }
 }
 
 void MainWindow::setStateFilePath()

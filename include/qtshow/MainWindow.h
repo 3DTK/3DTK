@@ -44,6 +44,7 @@ protected:
   void updateRecentDirectoriesMenu(std::vector<std::string> directories);
 
   SettingsDialog *settingsDialog = Q_NULLPTR;
+  bool hideWidgetsInFullscreen = true;
 
   dataset_settings ds;
   QProgressBar *progressbar;
