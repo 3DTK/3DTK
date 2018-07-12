@@ -40,15 +40,9 @@
     </layout>
    </item>
    <item>
-    <widget class="QCheckBox" name="cbHideOthersInFullscreen">
-     <property name="enabled">
-      <bool>false</bool>
-     </property>
+    <widget class="QCheckBox" name="cbHideWidgetsInFullscreen">
      <property name="text">
       <string>Hide all other widgets in fullscreen</string>
-     </property>
-     <property name="checkable">
-      <bool>true</bool>
      </property>
      <property name="checked">
       <bool>true</bool>
