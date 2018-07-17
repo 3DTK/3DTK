@@ -1172,6 +1172,169 @@
     </layout>
    </widget>
   </widget>
+  <widget class="QDockWidget" name="dockSelection">
+   <property name="minimumSize">
+    <size>
+     <width>62</width>
+     <height>242</height>
+    </size>
+   </property>
+   <property name="windowTitle">
+    <string>Selection</string>
+   </property>
+   <attribute name="dockWidgetArea">
+    <number>1</number>
+   </attribute>
+   <widget class="QWidget" name="dockWidgetContents_10">
+    <widget class="QLabel" name="labelSelectionFile">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>10</y>
+       <width>101</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Selection File:</string>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="lineEditSelectionFile">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>30</y>
+       <width>151</width>
+       <height>32</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QToolButton" name="buttonChooseSelectionFile">
+     <property name="geometry">
+      <rect>
+       <x>170</x>
+       <y>30</y>
+       <width>33</width>
+       <height>34</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Load Path</string>
+     </property>
+     <property name="icon">
+      <iconset theme="document-open">
+       <normaloff>../../../../.designer/backup</normaloff>../../../../.designer/backup</iconset>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="buttonSaveSelection">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>70</y>
+       <width>61</width>
+       <height>32</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Save</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="buttonLoadSelection">
+     <property name="geometry">
+      <rect>
+       <x>80</x>
+       <y>70</y>
+       <width>61</width>
+       <height>32</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Load</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="buttonClearSelection">
+     <property name="geometry">
+      <rect>
+       <x>150</x>
+       <y>70</y>
+       <width>61</width>
+       <height>32</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Clear</string>
+     </property>
+    </widget>
+    <widget class="QWidget" name="layoutWidget">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>140</y>
+       <width>191</width>
+       <height>26</height>
+      </rect>
+     </property>
+     <layout class="QHBoxLayout" name="horizontalLayout_3">
+      <item>
+       <widget class="QLabel" name="labelSelectionDepth">
+        <property name="text">
+         <string>Depth:</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QSpinBox" name="spinBoxSelectionDepth">
+        <property name="minimum">
+         <number>1</number>
+        </property>
+        <property name="maximum">
+         <number>100</number>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+    <widget class="QWidget" name="layoutWidget">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>180</y>
+       <width>191</width>
+       <height>26</height>
+      </rect>
+     </property>
+     <layout class="QHBoxLayout" name="horizontalLayout_4">
+      <item>
+       <widget class="QLabel" name="labelSelectionBrushsize">
+        <property name="text">
+         <string>Brushsize:</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QSpinBox" name="spinBoxSelectionBrushsize">
+        <property name="maximum">
+         <number>100</number>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+    <widget class="QCheckBox" name="checkBoxSelectVoxels">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>110</y>
+       <width>121</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Select Voxels</string>
+     </property>
+    </widget>
+   </widget>
+  </widget>
   <action name="actionQuit">
    <property name="icon">
     <iconset theme="application-exit">
@@ -1233,6 +1396,7 @@
   <zorder>dockSnapshot</zorder>
   <zorder>dockMode</zorder>
   <zorder>dockNavigation</zorder>
+  <zorder>dockSelection</zorder>
  </widget>
  <customwidgets>
   <customwidget>
@@ -1280,6 +1444,8 @@
     <slot>loadCameraPath()</slot>
     <slot>drawPath()</slot>
     <slot>pickPathFile()</slot>
+    <slot>resetSelection()</slot>
+    <slot>setSelectVoxels()</slot>
    </slots>
   </customwidget>
   <customwidget>
@@ -2167,6 +2333,118 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>buttonClearSelection</sender>
+   <signal>clicked()</signal>
+   <receiver>glWidget</receiver>
+   <slot>resetSelection()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>180</x>
+     <y>906</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>628</x>
+     <y>531</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>checkBoxSelectVoxels</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>glWidget</receiver>
+   <slot>setSelectVoxels()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>70</x>
+     <y>940</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>628</x>
+     <y>531</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>buttonSaveSelection</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>saveSelectedPoints()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>40</x>
+     <y>906</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>665</x>
+     <y>530</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>buttonLoadSelection</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>loadSelectedPoints()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>110</x>
+     <y>906</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>665</x>
+     <y>530</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>buttonChooseSelectionFile</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>setSelectionFilePath()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>186</x>
+     <y>867</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>665</x>
+     <y>530</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>spinBoxSelectionDepth</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>MainWindow</receiver>
+   <slot>setSelectionDepth(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>154</x>
+     <y>973</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>665</x>
+     <y>530</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>spinBoxSelectionBrushsize</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>MainWindow</receiver>
+   <slot>setSelectionBrushSize(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>154</x>
+     <y>1013</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>665</x>
+     <y>530</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>openScanDirectory()</slot>
@@ -2180,6 +2458,11 @@
   <slot>addCamCombobox(int)</slot>
   <slot>deleteCamCombobox(int)</slot>
   <slot>showSettingsDialog()</slot>
+  <slot>saveSelectedPoints()</slot>
+  <slot>loadSelectedPoints()</slot>
+  <slot>setSelectionFilePath()</slot>
+  <slot>setSelectionDepth(int)</slot>
+  <slot>setSelectionBrushSize(int)</slot>
  </slots>
  <buttongroups>
   <buttongroup name="buttonGroupViewMode"/>

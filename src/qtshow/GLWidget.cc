@@ -62,12 +62,15 @@ void GLWidget::paintGL() {
 /** Processes a mouse event for the legacy parts of show. */
 void passMouseEvent(QMouseEvent *event, bool press) {
   int button = -1;
+  selectOrunselect = true;
   // let's hope that GLUT never changes its button numbers
   if (event->button() == Qt::LeftButton) {
     button = 0; // GLUT_LEFT_BUTTON
   } else if (event->button() == Qt::MiddleButton) {
     button = 1; // GLUT_MIDDLE_BUTTON
   } else if (event->button() == Qt::RightButton) {
+    if (!cameraNavMouseMode)
+      selectOrunselect = false;
     button = 2; // GLUT_RIGHT_BUTTON
   }
 
@@ -139,6 +142,8 @@ void GLWidget::keyPressEvent(QKeyEvent *event) {
        alt   = (event->modifiers() & Qt::AltModifier)     != 0,
        shift = (event->modifiers() & Qt::ShiftModifier)   != 0;
 
+  cameraNavMouseMode = !shift;
+
   // Translate the Qt keycodes inside event->key() to the keycodes
   // used by show with this map. It accepts a combination of ASCII
   // and wxWidgets keycodes (c.f. callbacks::glut::keyHandler()).
@@ -174,6 +179,12 @@ void GLWidget::keyPressEvent(QKeyEvent *event) {
 
   update();
   cameraChanged();
+}
+
+void GLWidget::keyReleaseEvent(QKeyEvent *event) {
+  if(event->isAutoRepeat()) return;
+
+  cameraNavMouseMode = (event->modifiers() & Qt::ShiftModifier) == 0;
 }
 
 void GLWidget::setFullscreen(bool fullscreenWanted) {
@@ -434,6 +445,15 @@ void GLWidget::saveSnapshot() {
     saveImageAt(imageFileName.toStdString());
     emit status("Snapshot saved as \"" + imageFileName + "\"", 5000);
   }
+}
+
+void GLWidget::resetSelection() {
+  clearSelection(0);
+  update();
+}
+
+void GLWidget::setSelectVoxels() {
+  select_voxels = !select_voxels;
 }
 
 void GLWidget::idle() {

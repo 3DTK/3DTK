@@ -39,6 +39,12 @@ public slots:
   void saveStates();
   void loadStates();
 
+  void setSelectionFilePath();
+  void saveSelectedPoints();
+  void loadSelectedPoints();
+  void setSelectionDepth(int value);
+  void setSelectionBrushSize(int value);
+
 protected:
   std::vector<std::string> loadRecentDirectories();
   void updateRecentDirectoriesMenu(std::vector<std::string> directories);
