@@ -56,6 +56,9 @@ public slots:
   void setSnapshotScale(int snapshotScale);
   void saveSnapshot();
 
+  void resetSelection();
+  void setSelectVoxels();
+
   void idle();
 
   void cameraChanged();
@@ -88,6 +91,7 @@ protected:
   void mouseReleaseEvent(QMouseEvent *event);
   void mouseMoveEvent(QMouseEvent *event);
   void keyPressEvent(QKeyEvent *event);
+  void keyReleaseEvent(QKeyEvent *event);
 
   void updateFogType();
 

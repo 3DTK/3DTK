@@ -44,6 +44,7 @@ MainWindow::MainWindow(const dataset_settings& ds, const window_settings& ws, QW
 
     // Create tabbed dock
     tabifyDockWidget(dockMode, dockNavigation);
+    tabifyDockWidget(dockState, dockSelection);
 
     // Setup navigation mode cursor and direction of movement
     moveXPushButton->setType(0);
@@ -53,6 +54,7 @@ MainWindow::MainWindow(const dataset_settings& ds, const window_settings& ws, QW
     // Set initial state file path
     QDir curDir(QDir::current());
     lineEditStateFile->setText(curDir.canonicalPath() + "/" + QString::fromStdString(ds.input_directory));
+    lineEditSelectionFile->setText(curDir.canonicalPath() + "/selected.3d");
   } else {
     glWidget = new GLWidget(this);
     glWidget->setFocusPolicy(Qt::ClickFocus);
@@ -332,4 +334,39 @@ void MainWindow::loadStates()
   comboBoxColorMap->setCurrentIndex(static_cast<int>(colormap));
   
   glWidget->update();
+}
+
+void MainWindow::setSelectionFilePath()
+{
+  QString selectionFilePath = QFileDialog::getOpenFileName();
+  if(!selectionFilePath.isEmpty()) {
+    lineEditSelectionFile->setText(selectionFilePath);
+  }
+}
+
+void MainWindow::saveSelectedPoints()
+{
+  QString fileName = lineEditSelectionFile->text();
+  selection_file_name = fileName.toLatin1().data();
+  
+  saveSelection(0);
+}
+
+void MainWindow::loadSelectedPoints()
+{
+  QString fileName = lineEditSelectionFile->text();
+  selection_file_name = fileName.toLatin1().data();
+
+  loadSelection(0);
+  update();
+}
+
+void MainWindow::setSelectionDepth(int value)
+{
+  selection_depth = value;
+}
+
+void MainWindow::setSelectionBrushSize(int value)
+{
+  brush_size = value;
 }
