@@ -8,7 +8,7 @@ echo "travis_fold:start:brew_install"
 	/usr/bin/yes | pip2 uninstall numpy
 	# update brew
 	brew update
-	brew upgrade
+	#brew upgrade
 	# install packageds with brew
 	brew bundle
 	#export qt path, installed by brew
