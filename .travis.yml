@@ -45,5 +45,5 @@ matrix:
       env:
         - DERIV=ubuntu DIST=xenial
 script:
-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then ./travismacosbuild.sh; fi
-  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then ./travisdockerbuild.sh $DERIV $DIST; fi
+  - if [[ $TRAVIS_OS_NAME == 'osx' ]]; then ./travismacosbuild.sh; fi
+  - if [[ $TRAVIS_OS_NAME == 'linux' ]]; then ./travisdockerbuild.sh $DERIV $DIST; fi
