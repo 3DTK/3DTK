@@ -1,11 +1,14 @@
 #!/bin/sh
 
 #build script for macOS on travis 
+set -eu
+
 echo "travis_fold:start:brew_install"
 	#uninstall python numpy because is not compatible with brew opencv
 	/usr/bin/yes | pip2 uninstall numpy
 	# update brew
 	brew update
+	brew upgrade
 	# install packageds with brew
 	brew bundle
 	#export qt path, installed by brew
