@@ -9,6 +9,7 @@
 #include <QProgressBar>
 
 #include "qtshow/SettingsDialog.h"
+#include "qtshow/ShortcutsDialog.h"
 #include "show/program_options.h"
 
 
@@ -28,6 +29,7 @@ public slots:
   void clearRecentDirectories();
 
   void showSettingsDialog();
+  void showShortcutsDialog();
 
   void addCamCombobox(int index);
   void deleteCamCombobox(int index);
@@ -51,6 +53,8 @@ protected:
 
   SettingsDialog *settingsDialog = Q_NULLPTR;
   bool hideWidgetsInFullscreen = true;
+
+  ShortcutsDialog *shortcutsDialog = Q_NULLPTR;
 
   dataset_settings ds;
   QProgressBar *progressbar;

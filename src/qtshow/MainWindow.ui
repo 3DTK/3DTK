@@ -53,6 +53,7 @@
     <property name="title">
      <string>Help</string>
     </property>
+    <addaction name="actionShowShortcuts"/>
     <addaction name="actionAbout3DTK"/>
    </widget>
    <widget class="QMenu" name="menuTools">
@@ -1393,6 +1394,11 @@
     <string>Settings...</string>
    </property>
   </action>
+  <action name="actionShowShortcuts">
+   <property name="text">
+    <string>Show Shortcuts</string>
+   </property>
+  </action>
   <zorder>dockSnapshot</zorder>
   <zorder>dockMode</zorder>
   <zorder>dockNavigation</zorder>
@@ -2445,6 +2451,22 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>actionShowShortcuts</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>showShortcutsDialog()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>665</x>
+     <y>530</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>openScanDirectory()</slot>
@@ -2463,6 +2485,7 @@
   <slot>setSelectionFilePath()</slot>
   <slot>setSelectionDepth(int)</slot>
   <slot>setSelectionBrushSize(int)</slot>
+  <slot>showShortcutsDialog()</slot>
  </slots>
  <buttongroups>
   <buttongroup name="buttonGroupViewMode"/>
