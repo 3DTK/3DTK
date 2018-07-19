@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>ShortcutsDialog</class>
+ <widget class="QDialog" name="ShortcutsDialog">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>350</width>
+    <height>300</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Shortcuts</string>
+  </property>
+  <layout class="QFormLayout" name="formLayout">
+   <item row="0" column="0">
+    <widget class="QLabel" name="labelRotate">
+     <property name="text">
+      <string>Rotate:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="1">
+    <widget class="QLabel" name="labelAsgmtRotate">
+     <property name="text">
+      <string>Left Mouse Drag &amp; Drop</string>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="0">
+    <widget class="QLabel" name="labelTranslateX">
+     <property name="text">
+      <string>Translate X:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="1">
+    <widget class="QLabel" name="labelAsgmtTranslateX">
+     <property name="text">
+      <string>a, d</string>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="0">
+    <widget class="QLabel" name="labelTranslateY">
+     <property name="text">
+      <string>Translate Y:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="1">
+    <widget class="QLabel" name="labelAsgmntTranslateY">
+     <property name="text">
+      <string>c, Space</string>
+     </property>
+    </widget>
+   </item>
+   <item row="3" column="0">
+    <widget class="QLabel" name="labelTranslateZ">
+     <property name="text">
+      <string>Translate Z:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="3" column="1">
+    <widget class="QLabel" name="labelAsgmntTranslateZ">
+     <property name="text">
+      <string>w, s</string>
+     </property>
+    </widget>
+   </item>
+   <item row="4" column="0">
+    <widget class="QLabel" name="labelTranslateXY">
+     <property name="text">
+      <string>Translate XY:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="4" column="1">
+    <widget class="QLabel" name="labelAsgmntTranslateXY">
+     <property name="text">
+      <string>Right Mouse Drag &amp; Drop</string>
+     </property>
+    </widget>
+   </item>
+   <item row="5" column="0">
+    <widget class="QLabel" name="labelTranslateStep">
+     <property name="text">
+      <string>Translate Step:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="5" column="1">
+    <widget class="QLabel" name="labelAsgmntTranslateStep1">
+     <property name="text">
+      <string>Ctrl + [a, d, c, Space, w, s]</string>
+     </property>
+    </widget>
+   </item>
+   <item row="6" column="1">
+    <widget class="QLabel" name="labelAsgmntTranslateStep2">
+     <property name="text">
+      <string>Shift + [a, d, c, Space, w, s]</string>
+     </property>
+    </widget>
+   </item>
+   <item row="7" column="1">
+    <widget class="QLabel" name="labelAsgmntTranslateStep3">
+     <property name="text">
+      <string>Alt + [a, d, c, Space, w, s]</string>
+     </property>
+    </widget>
+   </item>
+   <item row="8" column="1">
+    <widget class="QLabel" name="labelAsgmntTranslateStep4">
+     <property name="text">
+      <string>Shift + Alt + [a, d, c, Space, w, s]</string>
+     </property>
+    </widget>
+   </item>
+   <item row="9" column="0">
+    <widget class="QLabel" name="labelSelectPoints">
+     <property name="text">
+      <string>Select Points:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="9" column="1">
+    <widget class="QLabel" name="labelAsgmntSelectPoints">
+     <property name="text">
+      <string>Shift + Left Mouse Click</string>
+     </property>
+    </widget>
+   </item>
+   <item row="10" column="0">
+    <widget class="QLabel" name="labelUnselectPoints">
+     <property name="text">
+      <string>Unselect Points:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="10" column="1">
+    <widget class="QLabel" name="labelAsgmntUnselectPoints">
+     <property name="text">
+      <string>Shift + Right Mouse Click</string>
+     </property>
+    </widget>
+   </item>
+   <item row="11" column="1">
+    <widget class="QDialogButtonBox" name="buttonBox">
+     <property name="standardButtons">
+      <set>QDialogButtonBox::Ok</set>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>accepted()</signal>
+   <receiver>ShortcutsDialog</receiver>
+   <slot>accept()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>218</x>
+     <y>305</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>165</x>
+     <y>162</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>
