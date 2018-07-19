@@ -87,7 +87,7 @@ void validate(boost::any& v, const std::vector<std::string>& values,
 void parse_options(int argc, char **argv, int &start, int &end,
 			    bool &scanserver, int &max_dist, int &min_dist, string &dir,
                    IOType &iotype, int &k1, int &k2,
-			    normal_method &ntype, int &width, int &height)
+			    normal_method &ntype, int &width, int &height, bool &inward)
 {
   /// ----------------------------------
   /// set up program commandline options
@@ -139,6 +139,9 @@ void parse_options(int argc, char **argv, int &start, int &end,
       ("height,h",
        po::value<int>(&height)->default_value(1000),
        "height of panorama image")
+       ("inward,i",
+       po::value<bool>(&inward)->default_value(false),
+       "normal direction inward? default false")
 #endif
       ;
 
@@ -213,6 +216,26 @@ void writeScanFiles(string dir,
   normptsout.close();
 }
 
+/// write scan files with XYZ format all segments
+void writeScanFilesXYZ(string dir,
+                    vector<Point> &points, vector<Point> &normals,
+                    int scanNumber)
+{
+  string ofilename = dir + "/scan" + to_string(scanNumber, 3) + ".xyz";
+  ofstream normptsout(ofilename.c_str());
+
+  for (size_t i=0; i<points.size(); ++i) {
+    normptsout << points[i].x << " "
+               << points[i].y << " "
+               << points[i].z << " "
+               << normals[i].x << " " 
+               << normals[i].y << " " 
+               << normals[i].z << " " << endl;
+  }
+  normptsout.clear();
+  normptsout.close();
+}
+
 /// =============================================
 /// Main
 /// =============================================
@@ -226,9 +249,10 @@ int main(int argc, char** argv)
   int k1, k2;
   normal_method ntype;
   int width, height;
+  bool inward;
 
   parse_options(argc, argv, start, end, scanserver, max_dist, min_dist,
-                dir, iotype, k1, k2, ntype, width, height);
+                dir, iotype, k1, k2, ntype, width, height, inward);
 
   /// ----------------------------------
   /// Prepare and read scans
@@ -322,10 +346,16 @@ int main(int argc, char** argv)
 #endif
     }
 
+    // convert normal from outward to inward
+    if (inward) {
+      flipNormals(normals);
+    }
+    
     // pose file (repeated for the number of segments
     writePoseFiles(normdir, rPos, rPosTheta, scanNumber);
     // scan files for all segments
     writeScanFiles(normdir, points,normals,scanNumber);
+    writeScanFilesXYZ(normdir, points,normals,scanNumber);
 
     scanNumber++;
   }

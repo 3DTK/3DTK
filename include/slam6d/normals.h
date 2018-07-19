@@ -35,9 +35,11 @@ void calculateNormalsKNN(std::vector<Point> &normals,
 void calculateNormalsAdaptiveKNN(std::vector<Point> &normals,
                                  const std::vector<Point> &points,
                                  const int kmin,
-						   const int kmax,
+						                     const int kmax,
                                  const double _rPos[3]);
 
 void calculateNormal(std::vector<Point> temp, double *norm, double *eigen);
+
+void flipNormals(std::vector<Point> &normals);
 
 #endif // __NORMALS_H__
