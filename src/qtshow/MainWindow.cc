@@ -173,6 +173,14 @@ void MainWindow::showSettingsDialog() {
   settingsDialog->show();
 }
 
+void MainWindow::showShortcutsDialog() {
+  if (!shortcutsDialog) {
+    shortcutsDialog = new ShortcutsDialog(this);
+  }
+
+  shortcutsDialog->show();
+}
+
 void MainWindow::applySettings() {
   glWidget->captureMouseCursor = settingsDialog->cbCaptureCursor->isChecked();
   invertMouseX = settingsDialog->cbInvertMouseX->isChecked();
