@@ -47,7 +47,7 @@ enum normal_method {KNN, ADAPTIVE_KNN,
 // Parse commandline options and assign to parameters
 void parse_options(int argc, char **argv, int &start, int &end, bool &scanserver, int &max_dist, int &min_dist, string &dir, string &odir, IOType &iotype, 
   bool &join, double &red, int &rand, bool &uP, bool &use_xyz, bool &use_color, bool &use_reflectance, int &octree, bool &rangeFilterActive, bool &customFilterActive, string &customFilter, double &scaleFac, bool &hexfloat, bool &high_precision, int &frame,
-  int &k1, int &k2, normal_method &ntype, int &width, int &height, 
+  int &k1, int &k2, normal_method &ntype, int &width, int &height, bool &inward, 
   int &depth, int &solverDivide, float &samplesPerNode, float &offset, float &trimVal);
 // validate normmal_method type (important for boost program_option)
 void validate(boost::any& v, const std::vector<std::string>& values, normal_method*, int);
@@ -95,6 +95,7 @@ int main(int argc, char **argv) {
   int k1, k2;
   normal_method ntype;
   int width, height;
+  bool inward;
 
   // parameters for poisson
   int depth;
@@ -111,7 +112,7 @@ int main(int argc, char **argv) {
   // parse input arguments
   parse_options(argc, argv, start, end, scanserver, max_dist, min_dist,dir, odir, iotype, 
     join, red, rand, uP, use_xyz, use_color, use_reflectance, octree, rangeFilterActive, customFilterActive, customFilter, scaleFac, hexfloat, high_precision, frame,
-    k1, k2, ntype, width, height,
+    k1, k2, ntype, width, height, inward, 
     depth, solverDivide, samplesPerNode, offset, trimVal);
 
   if (scanserver) {
@@ -229,6 +230,9 @@ int main(int argc, char **argv) {
       
       // calculate normals for current scan, then merge them
       calcNormals(pts, norms, ntype, k1, k2, width, height, rPos, rPosTheta, source);
+      if (inward) {
+        flipNormals(norms);
+      }
       points.insert(points.end(), pts.begin(), pts.end());
       normals.insert(normals.end(), norms.begin(), norms.end());
       pts.clear();
@@ -276,6 +280,9 @@ int main(int argc, char **argv) {
 
       // calculate normals
       calcNormals(points, normals, ntype, k1, k2, width, height, rPos, rPosTheta, scan);
+      if (inward) {
+        flipNormals(normals);
+      }
       cout << "Normal calculation end" << endl;
 
       // data conversion
@@ -352,7 +359,7 @@ void validate(boost::any& v, const std::vector<std::string>& values,
 // Parse commandline options
 void parse_options(int argc, char **argv, int &start, int &end, bool &scanserver, int &max_dist, int &min_dist, string &dir, string &odir, IOType &iotype, 
   bool &join, double &red, int &rand, bool &use_pose, bool &use_xyz, bool &use_color, bool &use_reflectance, int &octree, bool &rangeFilterActive, bool &customFilterActive, string &customFilter, double &scaleFac, bool &hexfloat, bool &high_precision, int &frame,
-  int &k1, int &k2, normal_method &ntype, int &width, int &height,
+  int &k1, int &k2, normal_method &ntype, int &width, int &height, bool &inward, 
   int &depth, int &solverDivide, float &samplesPerNode, float &offset, float &trimVal)
 {
   po::options_description cmd_options("Poisson Surface Reconstruction <options> \n"
@@ -438,6 +445,9 @@ void parse_options(int argc, char **argv, int &start, int &end, bool &scanserver
        po::value<int>(&height)->default_value(1000),
        "height of panorama image")
 #endif
+      ("inward,i",
+       po::value<bool>(&inward)->default_value(true),
+       "normal direction inward? default true")
       // Poisson parameters
       ("depth,d",
       po::value<int>(&depth)->default_value(8),
@@ -476,7 +486,7 @@ void parse_options(int argc, char **argv, int &start, int &end, bool &scanserver
     cout << cmd_options << endl << endl;
     cout << "Sample command for reconstructing surface:" << endl;
     cout << "- e.g. Join scans and trust pose with octree depth 10 and trimming threshold 7.0:" << endl;
-    cout << "  bin/recon dat dat/test/test -j true -t true -d 10 -T 7.0" << endl;
+    cout << "  bin/recon dat dat/test/test -j true -t true -d 10 -T 7.0 -i true" << endl;
     cout << endl;
     exit(-1);
   }

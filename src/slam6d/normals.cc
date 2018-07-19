@@ -452,3 +452,15 @@ void calculateNormalsAdaptiveKNN(vector<Point> &normals,
   delete[] pa;
 
 }
+
+///////////////////////////////////////////////////////
+/////////////CHANGE NORMAL ORIENTATION ////////////////
+///////////////////////////////////////////////////////
+void flipNormals(vector<Point> &normals)
+{
+  for (size_t i = 0; i < normals.size(); ++i) {
+    normals[i].x *= -1.0;
+    normals[i].y *= -1.0;
+    normals[i].z *= -1.0;
+  }
+}
