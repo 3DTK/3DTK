@@ -207,6 +207,7 @@ void MainWindow::hideDockWidgets()
     dockAnimation->hide();
     dockCamera->hide();
     dockState->hide();
+    dockSelection->hide();
     dockSnapshot->hide();
     dockObjects->hide();
     dockFog->hide();
@@ -225,6 +226,7 @@ void MainWindow::showDockWidgets()
     dockAnimation->show();
     dockCamera->show();
     dockState->show();
+    dockSelection->show();
     dockSnapshot->show();
     dockObjects->show();
     dockFog->show();
