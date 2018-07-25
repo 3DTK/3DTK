@@ -1336,6 +1336,167 @@
     </widget>
    </widget>
   </widget>
+  <widget class="QDockWidget" name="dockAdvanced">
+   <property name="windowTitle">
+    <string>Advanced</string>
+   </property>
+   <attribute name="dockWidgetArea">
+    <number>2</number>
+   </attribute>
+   <widget class="QWidget" name="dockWidgetContents_11">
+    <layout class="QGridLayout" name="gridLayout_3">
+     <item row="2" column="1" colspan="2">
+      <widget class="QDoubleSpinBox" name="doubleSpinBoxFarPlane">
+       <property name="maximum">
+        <double>1000000.000000000000000</double>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="0">
+      <widget class="QLabel" name="labelNearPlane">
+       <property name="text">
+        <string>nearplane:</string>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="0">
+      <widget class="QLabel" name="labelFarPlane">
+       <property name="text">
+        <string>farplane:</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="0">
+      <widget class="QLabel" name="labelFPS">
+       <property name="text">
+        <string>FPS:</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="1" colspan="2">
+      <widget class="QSpinBox" name="spinBoxFrame"/>
+     </item>
+     <item row="9" column="0" colspan="2">
+      <widget class="QLabel" name="labelScanRangeSelection">
+       <property name="text">
+        <string>Scan range selection:</string>
+       </property>
+      </widget>
+     </item>
+     <item row="11" column="0">
+      <widget class="QLabel" name="labelEndIndex">
+       <property name="text">
+        <string>End Index:</string>
+       </property>
+      </widget>
+     </item>
+     <item row="10" column="0">
+      <widget class="QLabel" name="labelStartIndex">
+       <property name="text">
+        <string>Start Index:</string>
+       </property>
+      </widget>
+     </item>
+     <item row="11" column="1" colspan="2">
+      <widget class="QSpinBox" name="spinBoxEndIndex"/>
+     </item>
+     <item row="7" column="0">
+      <widget class="QLabel" name="label3dShift">
+       <property name="text">
+        <string>3D Shift:</string>
+       </property>
+      </widget>
+     </item>
+     <item row="4" column="1">
+      <widget class="QPushButton" name="buttonCycleLOD">
+       <property name="text">
+        <string>Cycle LOD</string>
+       </property>
+      </widget>
+     </item>
+     <item row="5" column="1" colspan="2">
+      <widget class="QDoubleSpinBox" name="doubleSpinBoxLodSpeed">
+       <property name="maximum">
+        <double>3.000000000000000</double>
+       </property>
+      </widget>
+     </item>
+     <item row="8" column="0" colspan="3">
+      <widget class="Line" name="line">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="1" colspan="2">
+      <widget class="QDoubleSpinBox" name="doubleSpinBoxNearPlane">
+       <property name="maximum">
+        <double>1000000.000000000000000</double>
+       </property>
+      </widget>
+     </item>
+     <item row="6" column="1">
+      <widget class="QCheckBox" name="checkShiftPathFor3d">
+       <property name="text">
+        <string>Shift Path for 3D</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="1" colspan="2">
+      <widget class="QDoubleSpinBox" name="doubleSpinBoxFps">
+       <property name="maximum">
+        <double>100.000000000000000</double>
+       </property>
+      </widget>
+     </item>
+     <item row="13" column="1">
+      <widget class="QPushButton" name="buttonStepDown">
+       <property name="text">
+        <string>Step down</string>
+       </property>
+      </widget>
+     </item>
+     <item row="5" column="0">
+      <widget class="QLabel" name="labelLodSpeed">
+       <property name="text">
+        <string>lod speed:</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="0">
+      <widget class="QLabel" name="labelFrame">
+       <property name="text">
+        <string>Frame #:</string>
+       </property>
+      </widget>
+     </item>
+     <item row="7" column="1" colspan="2">
+      <widget class="QDoubleSpinBox" name="doubleSpinBox3dShift">
+       <property name="maximum">
+        <double>50.000000000000000</double>
+       </property>
+      </widget>
+     </item>
+     <item row="14" column="1">
+      <widget class="QPushButton" name="buttonReloadFrames">
+       <property name="text">
+        <string>Reload frames</string>
+       </property>
+      </widget>
+     </item>
+     <item row="10" column="1" colspan="2">
+      <widget class="QSpinBox" name="spinBoxStartIndex"/>
+     </item>
+     <item row="12" column="1">
+      <widget class="QPushButton" name="buttonStepUp">
+       <property name="text">
+        <string>Step up</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </widget>
+  </widget>
   <action name="actionQuit">
    <property name="icon">
     <iconset theme="application-exit">
@@ -1403,6 +1564,7 @@
   <zorder>dockMode</zorder>
   <zorder>dockNavigation</zorder>
   <zorder>dockSelection</zorder>
+  <zorder>dockAdvanced</zorder>
  </widget>
  <customwidgets>
   <customwidget>
@@ -2467,6 +2629,214 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>spinBoxFrame</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>MainWindow</receiver>
+   <slot>setCurrentFrame(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>1228</x>
+     <y>960</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>665</x>
+     <y>723</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>doubleSpinBoxFps</sender>
+   <signal>valueChanged(double)</signal>
+   <receiver>MainWindow</receiver>
+   <slot>setFps(double)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>1228</x>
+     <y>994</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>665</x>
+     <y>723</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>doubleSpinBoxFarPlane</sender>
+   <signal>valueChanged(double)</signal>
+   <receiver>MainWindow</receiver>
+   <slot>setFarDistance(double)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>1228</x>
+     <y>1028</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>665</x>
+     <y>723</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>doubleSpinBoxNearPlane</sender>
+   <signal>valueChanged(double)</signal>
+   <receiver>MainWindow</receiver>
+   <slot>setNearDistance(double)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>1228</x>
+     <y>1062</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>665</x>
+     <y>723</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>buttonCycleLOD</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>callCycleLOD()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>1196</x>
+     <y>1100</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>665</x>
+     <y>723</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>doubleSpinBoxLodSpeed</sender>
+   <signal>valueChanged(double)</signal>
+   <receiver>MainWindow</receiver>
+   <slot>setLodSpeed(double)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>1228</x>
+     <y>1134</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>665</x>
+     <y>723</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>checkShiftPathFor3d</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>MainWindow</receiver>
+   <slot>setPath3d(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>1199</x>
+     <y>1163</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>665</x>
+     <y>723</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>doubleSpinBox3dShift</sender>
+   <signal>valueChanged(double)</signal>
+   <receiver>MainWindow</receiver>
+   <slot>set3dShift(double)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>1228</x>
+     <y>1191</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>665</x>
+     <y>723</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>spinBoxStartIndex</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>MainWindow</receiver>
+   <slot>setStartScanIndex(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>1228</x>
+     <y>1266</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>665</x>
+     <y>723</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>spinBoxEndIndex</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>MainWindow</receiver>
+   <slot>setEndScanIndex(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>1228</x>
+     <y>1300</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>665</x>
+     <y>723</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>buttonStepUp</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>callStepScansUp()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>1196</x>
+     <y>1338</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>665</x>
+     <y>723</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>buttonStepDown</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>callStepScansDown()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>1196</x>
+     <y>1372</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>665</x>
+     <y>723</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>buttonReloadFrames</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>callReloadFrames()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>1196</x>
+     <y>1406</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>665</x>
+     <y>723</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>openScanDirectory()</slot>
@@ -2486,6 +2856,19 @@
   <slot>setSelectionDepth(int)</slot>
   <slot>setSelectionBrushSize(int)</slot>
   <slot>showShortcutsDialog()</slot>
+  <slot>setCurrentFrame(int)</slot>
+  <slot>setFps(double)</slot>
+  <slot>setFarDistance(double)</slot>
+  <slot>setNearDistance(double)</slot>
+  <slot>callCycleLOD()</slot>
+  <slot>setLodSpeed(double)</slot>
+  <slot>setPath3d(bool)</slot>
+  <slot>set3dShift(double)</slot>
+  <slot>setStartScanIndex(int)</slot>
+  <slot>setEndScanIndex(int)</slot>
+  <slot>callStepScansUp()</slot>
+  <slot>callStepScansDown()</slot>
+  <slot>callReloadFrames()</slot>
  </slots>
  <buttongroups>
   <buttongroup name="buttonGroupViewMode"/>
