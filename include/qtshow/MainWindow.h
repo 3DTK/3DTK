@@ -47,6 +47,20 @@ public slots:
   void setSelectionDepth(int value);
   void setSelectionBrushSize(int value);
 
+  void setCurrentFrame(int value);
+  void setFps(double value);
+  void setFarDistance(double value);
+  void setNearDistance(double value);
+  void callCycleLOD();
+  void setLodSpeed(double value);
+  void setPath3d(bool checked);
+  void set3dShift(double value);
+  void setStartScanIndex(int value);
+  void setEndScanIndex(int value);
+  void callStepScansUp();
+  void callStepScansDown();
+  void callReloadFrames();
+
 protected:
   std::vector<std::string> loadRecentDirectories();
   void updateRecentDirectoriesMenu(std::vector<std::string> directories);

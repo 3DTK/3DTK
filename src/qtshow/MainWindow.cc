@@ -214,6 +214,8 @@ void MainWindow::hideDockWidgets()
     dockColor->hide();
     dockMode->hide();
     dockNavigation->hide();
+    if(advanced_controls)
+      dockAdvanced->hide();
     statusbar->hide();
     menubar->hide();
     centralwidget->layout()->setContentsMargins(0, 0, 0, 0);
@@ -233,6 +235,8 @@ void MainWindow::showDockWidgets()
     dockColor->show();
     dockMode->show();
     dockNavigation->show();
+    if(advanced_controls)
+      dockAdvanced->show();
     statusbar->show();
     menubar->show();
     centralwidget->layout()->setContentsMargins(defaultMargins);
@@ -379,4 +383,82 @@ void MainWindow::setSelectionDepth(int value)
 void MainWindow::setSelectionBrushSize(int value)
 {
   brush_size = value;
+}
+
+void MainWindow::setCurrentFrame(int value)
+{
+  current_frame = value;
+  update();
+}
+
+void MainWindow::setFps(double value)
+{
+  idealfps = value;
+}
+
+void MainWindow::setFarDistance(double value)
+{
+  maxfardistance = value;
+  update();
+}
+
+void MainWindow::setNearDistance(double value)
+{
+  neardistance = value;
+  update();
+}
+
+void MainWindow::callCycleLOD()
+{
+  cycleLOD();
+}
+
+void MainWindow::setLodSpeed(double value)
+{
+  adaption_rate = value;
+}
+
+void MainWindow::setPath3d(bool checked)
+{
+  path3D = checked;
+}
+
+void MainWindow::set3dShift(double value)
+{
+  shifted = value;
+}
+
+void MainWindow::setStartScanIndex(int value)
+{
+  startRangeScanIdx = value;
+  update();
+}
+
+void MainWindow::setEndScanIndex(int value)
+{
+  endRangeScanIdx = value;
+  update();
+}
+
+void MainWindow::callStepScansUp()
+{
+  stepScansUp(0);
+  spinBoxStartIndex->setValue(startRangeScanIdx);
+  spinBoxEndIndex->setValue(endRangeScanIdx);
+  startRangeScanIdx = spinBoxStartIndex->value();
+  endRangeScanIdx = spinBoxEndIndex->value();
+}
+
+void MainWindow::callStepScansDown()
+{
+  stepScansDown(0);
+  spinBoxStartIndex->setValue(startRangeScanIdx);
+  spinBoxEndIndex->setValue(endRangeScanIdx);
+  startRangeScanIdx = spinBoxStartIndex->value();
+  endRangeScanIdx = spinBoxEndIndex->value();
+}
+
+void MainWindow::callReloadFrames()
+{
+  reloadFrames();
 }
