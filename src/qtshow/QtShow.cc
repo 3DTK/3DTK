@@ -16,8 +16,6 @@ QtShow::QtShow(int &argc, char **argv)
   bool has_initial_directory;
   try {
     parse_args(argc, argv, ds, ws, &has_initial_directory);
-    // FIXME in advanced mode, only scan 1 is drawn
-    ws.advanced_controls = false;
   } catch (std::exception& e) {
     std::cerr << "Error while parsing settings: " << e.what() << std::endl;
     exit(1);
@@ -32,6 +30,26 @@ QtShow::QtShow(int &argc, char **argv)
     // doing DrawUrl without initShow hangs the program for ~10s
     label = false;
   }
+
+  // Set spin box values for advanced mode
+  mainWindow->spinBoxFrame->setValue(current_frame);
+  mainWindow->spinBoxFrame->setMaximum(current_frame);
+  mainWindow->doubleSpinBoxFps->setValue(idealfps);
+  mainWindow->doubleSpinBoxFarPlane->setValue(fardistance);
+  mainWindow->doubleSpinBoxNearPlane->setValue(neardistance);
+  mainWindow->doubleSpinBoxLodSpeed->setValue(adaption_rate);
+  mainWindow->doubleSpinBox3dShift->setValue(shifted);
+  mainWindow->spinBoxStartIndex->setValue(startScanIdx);
+  mainWindow->spinBoxStartIndex->setMinimum(startScanIdx);
+  mainWindow->spinBoxStartIndex->setMaximum(endScanIdx);
+  mainWindow->spinBoxEndIndex->setValue(endScanIdx);
+  mainWindow->spinBoxEndIndex->setMinimum(startScanIdx);
+  mainWindow->spinBoxEndIndex->setMaximum(endScanIdx);
+
+  if(advanced_controls)
+    mainWindow->dockAdvanced->setFloating(true);
+  else
+    mainWindow->dockAdvanced->hide();
 
   update_callback = [&]() {
     mainWindow->glWidget->update();
