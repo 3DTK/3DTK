@@ -4,9 +4,8 @@
 #include <fstream>
 
 #include "mesh/poisson.h"
-#include "poisson/Ply.h"
 #include "poisson/PoissonRecon.h"
-#include "poisson/SurfaceTrimmer.h"
+// #include "poisson/SurfaceTrimmer.h"
 
 using namespace std;
 
@@ -131,8 +130,9 @@ int Poisson::exportTrimmedMesh(const char* modelPath) {
 // filter mesh with density value
 // implementation in SurfaceTrimmer.h
 int Poisson::surfaceTrimmer(float dstVal) {
-  trimmed = CallSurfaceTrimmer(dstVal, vertices, faces, tVertices, tFaces);
-  return trimmed;
+  // trimmed = CallSurfaceTrimmer(dstVal, vertices, faces, tVertices, tFaces);
+  // return trimmed;
+  return 0;
 }
 
 int Poisson::apply() {
@@ -140,45 +140,47 @@ int Poisson::apply() {
     cout << "Fail to call poisson with wrong points and normals" << endl;
     return 0;
   }
-  CoredFileMeshData<PlyValueVertex<float>> mesh;
-  reconstructed = Execute< 2 , PlyValueVertex< Real > , true  >( points, normals, mesh );
-  if (reconstructed) {
-    mesh.resetIterator();
-    // get vertices
-    for (int i = 0; i < mesh.inCorePoints.size(); ++i) {
-      float *v = new float[4];
-      v[0] = mesh.inCorePoints[i].point.coords[0];
-      v[1] = mesh.inCorePoints[i].point.coords[1];
-      v[2] = mesh.inCorePoints[i].point.coords[2];
-      v[3] = mesh.inCorePoints[i].value;
-      vertices.push_back(v);
-    }
-    for (int i = 0; i < mesh.outOfCorePointCount(); ++i) {
-      PlyValueVertex< Real > vt;
-      mesh.nextOutOfCorePoint(vt);
-      float *v = new float[4];
-      v[0] = vt.point.coords[0];
-      v[1] = vt.point.coords[1];
-      v[2] = vt.point.coords[2];
-      v[3] = vt.value;
-      vertices.push_back(v);
-    }
-    // get faces
-    for (int i = 0; i < mesh.polygonCount(); ++i) {
-      int *f = new int[3];
-      vector<CoredVertexIndex> face;
-      mesh.nextPolygon(face);
-      for (int j = 0; j < face.size(); ++j) {
-        if (face[j].inCore) {
-          f[j] = face[j].idx;
-        }
-        else {
-          f[j] = face[j].idx + (int)(mesh.inCorePoints.size());
-        }
-      }
-      faces.push_back(f);
-    }
-    updated = 1;
-  }
-  return reconstructed && updated;
+  Execute< float, PointStreamColor< float > >(points, normals, colors, IsotropicUIntPack< 3 , FEMDegreeAndBType< 1 , BOUNDARY_NEUMANN >::Signature >());
+  // CoredFileMeshData<PlyValueVertex<float>> mesh;
+  // reconstructed = Execute< 2 , PlyValueVertex< Real > , true  >( points, normals, mesh );
+  // if (reconstructed) {
+  //   mesh.resetIterator();
+  //   // get vertices
+  //   for (int i = 0; i < mesh.inCorePoints.size(); ++i) {
+  //     float *v = new float[4];
+  //     v[0] = mesh.inCorePoints[i].point.coords[0];
+  //     v[1] = mesh.inCorePoints[i].point.coords[1];
+  //     v[2] = mesh.inCorePoints[i].point.coords[2];
+  //     v[3] = mesh.inCorePoints[i].value;
+  //     vertices.push_back(v);
+  //   }
+  //   for (int i = 0; i < mesh.outOfCorePointCount(); ++i) {
+  //     PlyValueVertex< Real > vt;
+  //     mesh.nextOutOfCorePoint(vt);
+  //     float *v = new float[4];
+  //     v[0] = vt.point.coords[0];
+  //     v[1] = vt.point.coords[1];
+  //     v[2] = vt.point.coords[2];
+  //     v[3] = vt.value;
+  //     vertices.push_back(v);
+  //   }
+  //   // get faces
+  //   for (int i = 0; i < mesh.polygonCount(); ++i) {
+  //     int *f = new int[3];
+  //     vector<CoredVertexIndex> face;
+  //     mesh.nextPolygon(face);
+  //     for (int j = 0; j < face.size(); ++j) {
+  //       if (face[j].inCore) {
+  //         f[j] = face[j].idx;
+  //       }
+  //       else {
+  //         f[j] = face[j].idx + (int)(mesh.inCorePoints.size());
+  //       }
+  //     }
+  //     faces.push_back(f);
+  //   }
+  //   updated = 1;
+  // }
+  // return reconstructed && updated;
+  return 0;
 }

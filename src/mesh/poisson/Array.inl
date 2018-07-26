@@ -27,6 +27,7 @@ DAMAGE.
 */
 #define FULL_ARRAY_DEBUG    0	// Note that this is not thread-safe
 
+#include <string.h>
 #include <stdio.h>
 #include <emmintrin.h>
 #include <vector>
@@ -66,6 +67,7 @@ static std::vector< DebugMemoryInfo > memoryInfo;
 template< class C >
 class Array
 {
+	template< class D > friend class Array;
 	void _assertBounds( long long idx ) const
 	{
 		if( idx<min || idx>=max )
@@ -115,7 +117,9 @@ public:
 		Array a;
 		a._data = a.data = new C[size];
 		a.min = 0;
+#ifdef SHOW_WARNINGS
 #pragma message( "[WARNING] Casting unsigned to signed" )
+#endif // SHOW_WARNINGS
 		a.max = ( long long ) size;
 #if FULL_ARRAY_DEBUG
 		_AddMemoryInfo( a._data , name );
@@ -129,7 +133,9 @@ public:
 		if( clear ) memset( a.data ,  0 , size * sizeof( C ) );
 //		else        memset( a.data , -1 , size * sizeof( C ) );
 		a.min = 0;
+#ifdef SHOW_WARNINGS
 #pragma message( "[WARNING] Casting unsigned to signed" )
+#endif // SHOW_WARNINGS
 		a.max = ( long long ) size;
 #if FULL_ARRAY_DEBUG
 		_AddMemoryInfo( a._data , name );
@@ -144,7 +150,9 @@ public:
 		if( clear ) memset( a.data ,  0 , size * sizeof( C ) );
 //		else        memset( a.data , -1 , size * sizeof( C ) );
 		a.min = 0;
+#ifdef SHOW_WARNINGS
 #pragma message( "[WARNING] Casting unsigned to signed" )
+#endif // SHOW_WARNINGS
 		a.max = ( long long ) size;
 #if FULL_ARRAY_DEBUG
 		_AddMemoryInfo( a._data , name );
@@ -161,7 +169,9 @@ public:
 #endif // FULL_ARRAY_DEBUG
 		a._data = NULL;
 		_a.min = 0;
+#ifdef SHOW_WARNINGS
 #pragma message( "[WARNING] Casting unsigned to signed" )
+#endif // SHOW_WARNINGS
 		_a.max = ( long long ) size;
 #if FULL_ARRAY_DEBUG
 		_AddMemoryInfo( _a._data , name );
@@ -188,7 +198,7 @@ public:
 			// [WARNING] Chaning szC and szD to size_t causes some really strange behavior.
 			long long szC = sizeof( C );
 			long long szD = sizeof( D );
-			data = (C*)&a[0];
+			data = (C*)a.data;
 			min = ( a.minimum() * szD ) / szC;
 			max = ( a.maximum() * szD ) / szC;
 			if( min*szC!=a.minimum()*szD || max*szC!=a.maximum()*szD )
@@ -306,6 +316,7 @@ public:
 		return (*this);
 	}
 	inline Array& operator ++ ( void  ) { return (*this) += 1; }
+	inline Array operator++( int ){ Array< C > temp = (*this) ; (*this) +=1 ; return temp; }
 	Array  operator -  ( int idx ) const { return (*this) +  (-idx); }
 	Array  operator -  ( long long idx ) const { return (*this) +  (-idx); }
 	Array  operator -  ( unsigned int idx ) const { return (*this) +  (-idx); }
@@ -315,6 +326,7 @@ public:
 	Array& operator -= ( unsigned int idx )    { return (*this) += (-idx); }
 	Array& operator -= ( unsigned long long idx )    { return (*this) += (-idx); }
 	Array& operator -- ( void ) { return (*this) -= 1; }
+	inline Array operator--( int ){ Array< C > temp = (*this) ; (*this) -=1 ; return temp; }
 	long long operator - ( const Array& a ) const { return ( long long )( data - a.data ); }
 
 	void Free( void )
@@ -348,6 +360,7 @@ public:
 template< class C >
 class ConstArray
 {
+	template< class D > friend class ConstArray;
 	void _assertBounds( long long idx ) const
 	{
 		if( idx<min || idx>=max )
@@ -501,6 +514,7 @@ public:
 		return (*this);
 	}
 	inline ConstArray& operator ++ ( void ) { return (*this) += 1; }
+	inline ConstArray operator++( int ){ ConstArray< C > temp = (*this) ; (*this) +=1 ; return temp; }
 	ConstArray  operator -  ( int idx ) const { return (*this) +  (-idx); }
 	ConstArray  operator -  ( long long idx ) const { return (*this) +  (-idx); }
 	ConstArray  operator -  ( unsigned int idx ) const { return (*this) +  (-idx); }
@@ -510,6 +524,7 @@ public:
 	ConstArray& operator -= ( unsigned int idx )    { return (*this) += (-idx); }
 	ConstArray& operator -= ( unsigned long long idx )    { return (*this) += (-idx); }
 	ConstArray& operator -- ( void ) { return (*this) -= 1; }
+	inline ConstArray operator--( int ){ ConstArray< C > temp = (*this) ; (*this) -=1 ; return temp; }
 	long long operator - ( const ConstArray& a ) const { return ( long long )( data - a.data ); }
 	long long operator - ( const Array< C >& a ) const { return ( long long )( data - a.pointer() ); }
 

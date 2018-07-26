@@ -38,6 +38,7 @@ private:
   std::vector<int*> tFaces;         // trimmed model faces
   std::vector<float*> points;       // input pointset
   std::vector<float*> normals;      // input pointset normals
+  std::vector<float*> colors;       // input pointset colors
   float* center;
   float scale;
 
