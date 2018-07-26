@@ -168,6 +168,7 @@ void MainWindow::showSettingsDialog() {
   settingsDialog->cbInvertMouseX->setChecked(invertMouseX);
   settingsDialog->cbInvertMouseY->setChecked(invertMouseY);
   settingsDialog->cbHideWidgetsInFullscreen->setChecked(hideWidgetsInFullscreen);
+  settingsDialog->cbEnableAdvancedMode->setChecked(advanced_controls);
 
   // Show dialog
   settingsDialog->show();
@@ -186,6 +187,13 @@ void MainWindow::applySettings() {
   invertMouseX = settingsDialog->cbInvertMouseX->isChecked();
   invertMouseY = settingsDialog->cbInvertMouseY->isChecked();
   hideWidgetsInFullscreen = settingsDialog->cbHideWidgetsInFullscreen->isChecked();
+  advanced_controls = settingsDialog->cbEnableAdvancedMode->isChecked();
+  if(advanced_controls) {
+    dockAdvanced->setFloating(true);
+    dockAdvanced->show();
+  } else {
+    dockAdvanced->hide();
+  }
 
   // TODO write settings to $XDG_CONFIG_HOME/3dtk/qtshow.ini
 }

@@ -50,6 +50,13 @@
     </widget>
    </item>
    <item>
+    <widget class="QCheckBox" name="cbEnableAdvancedMode">
+     <property name="text">
+      <string>Enable advanced mode</string>
+     </property>
+    </widget>
+   </item>
+   <item>
     <widget class="QDialogButtonBox" name="buttonBox">
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
