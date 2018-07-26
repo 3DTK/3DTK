@@ -30,10 +30,7 @@ DAMAGE.
 #define ALLOCATOR_INCLUDED
 #include <vector>
 
-class AllocatorState{
-public:
-	int index,remains;
-};
+struct AllocatorState{ int index , remains; };
 /** This templated class assists in memory allocation and is well suited for instances
   * when it is known that the sequence of memory allocations is performed in a stack-based
   * manner, so that memory allocated last is released first. It also preallocates memory
@@ -42,28 +39,27 @@ public:
   * The allocator is templated off of the class of objects that we would like it to allocate,
   * ensuring that appropriate constructors and destructors are called as necessary.
   */
-template<class T>
-class Allocator{
+template< class T >
+class SingleThreadedAllocator
+{
 	int blockSize;
-	int index,remains;
-	std::vector<T*> memory;
+	int index , remains;
+	std::vector< T* > memory;
 public:
-	Allocator(void){
-		blockSize=index=remains=0;
-	}
-	~Allocator(void){
-		reset();
-	}
+	SingleThreadedAllocator( void ){ blockSize = index = remains = 0; }
+	~SingleThreadedAllocator( void ){ reset(); }
 
 	/** This method is the allocators destructor. It frees up any of the memory that
 	  * it has allocated. */
-	void reset(void){
-		for(size_t i=0;i<memory.size();i++){delete[] memory[i];}
+	void reset( void )
+	{
+		for( size_t i=0;i<memory.size();i++ ) delete[] memory[i];
 		memory.clear();
 		blockSize=index=remains=0;
 	}
 	/** This method returns the memory state of the allocator. */
-	AllocatorState getState(void) const{
+	AllocatorState getState( void ) const
+	{
 		AllocatorState s;
 		s.index=index;
 		s.remains=remains;
@@ -75,10 +71,14 @@ public:
 	  * allocated available for re-allocation. Note that it does it not call the constructor
 	  * again, so after this method has been called, assumptions about the state of the values
 	  * in memory are no longer valid. */
-	void rollBack(void){
-		if(memory.size()){
-			for(size_t i=0;i<memory.size();i++){
-				for(int j=0;j<blockSize;j++){
+	void rollBack(void)
+	{
+		if( memory.size() )
+		{
+			for( size_t i=0 ; i<memory.size() ; i++ )
+			{
+				for( int j=0 ; j<blockSize ; j++ )
+				{
 					memory[i][j].~T();
 					new(&memory[i][j]) T();
 				}
@@ -112,7 +112,7 @@ public:
 				remains=state.remains;
 			}
 			else{
-				for(int j=0;j<state.remains;j<remains){
+				for(int j=0;j<state.remains;j++){
 					memory[index][j].~T();
 					new(&memory[index][j]) T();
 				}
@@ -123,9 +123,10 @@ public:
 
 	/** This method initiallizes the constructor and the blockSize variable specifies the
 	  * the number of objects that should be pre-allocated at a time. */
-	void set( int blockSize){
+	void set( int blockSize )
+	{
 		reset();
-		this->blockSize=blockSize;
+		this->blockSize = blockSize;
 		index=-1;
 		remains=0;
 	}
@@ -135,25 +136,42 @@ public:
 	  * more memory. Note that if the number of objects requested is larger than the value blockSize with which
 	  * the allocator was initialized, the request for memory will fail.
 	  */
-	T* newElements( int elements=1){
+	T* newElements( int elements=1 )
+	{
 		T* mem;
-		if(!elements){return NULL;}
-		if(elements>blockSize){
-			fprintf(stderr,"Allocator Error, elements bigger than block-size: %d>%d\n",elements,blockSize);
-			return NULL;
-		}
-		if(remains<elements){
-			if(index==memory.size()-1){
-				mem=new T[blockSize];
-				if(!mem){fprintf(stderr,"Failed to allocate memory\n");exit(0);}
-				memory.push_back(mem);
+		if( !elements ) return NULL;
+		if( elements>blockSize ) fprintf( stderr , "[ERROR] Allocator: elements bigger than block-size: %d>%d\n" , elements , blockSize ) , exit( 0 );
+		if( remains<elements )
+		{
+			if( index==memory.size()-1 )
+			{
+				mem = new T[blockSize];
+				if( !mem ) fprintf( stderr , "[ERROR] Failed to allocate memory\n" ) , exit(0);
+				memory.push_back( mem );
 			}
 			index++;
 			remains=blockSize;
 		}
-		mem=&(memory[index][blockSize-remains]);
-		remains-=elements;
+		mem = &(memory[index][blockSize-remains]);
+		remains -= elements;
 		return mem;
 	}
 };
+template< class T >
+class Allocator
+{
+	SingleThreadedAllocator< T >* _allocators;
+	int _maxThreads;
+public:
+	Allocator( void )
+	{
+		_maxThreads = omp_get_max_threads();
+		_allocators = new SingleThreadedAllocator< T >[_maxThreads];
+	}
+	~Allocator( void ){ delete[] _allocators; }
+
+	void set( int blockSize ){ for( int t=0 ; t<_maxThreads ; t++ ) _allocators[t].set( blockSize ); }
+	T* newElements( int elements=1 ){ return _allocators[ omp_get_thread_num() ].newElements( elements ); }
+};
+
 #endif // ALLOCATOR_INCLUDE

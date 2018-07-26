@@ -30,9 +30,9 @@
 		 
 */
 
-#ifndef PLY_FILE_INCLUDED
-#define PLY_FILE_INCLUDED
 
+#ifndef __PLY_FILE_H__
+#define __PLY_FILE_H__
 
 #ifndef WIN32
 #define _strdup strdup
@@ -81,9 +81,8 @@ extern "C" {
 #define  PLY_LIST    1
 	
 #define PLY_STRIP_COMMENT_HEADER 0
-	
+
 typedef struct PlyProperty {    /* description of a property */
-	
 	char *name;                           /* property name */
 	int external_type;                    /* file's data type */
 	int internal_type;                    /* program's data type */
@@ -93,8 +92,8 @@ typedef struct PlyProperty {    /* description of a property */
 	int count_external;                   /* file's count type */
 	int count_internal;                   /* program's count type */
 	int count_offset;                     /* offset byte for list count */
-	
-} PlyProperty;
+}
+PlyProperty;
 
 typedef struct PlyElement {     /* description of an element */
 	char *name;                   /* element name */
@@ -186,21 +185,21 @@ extern char *my_alloc();
 
 /*** delcaration of routines ***/
 
-extern PlyFile *ply_write(FILE *, int, char **, int);
-extern PlyFile *ply_open_for_writing(char *, int, char **, int, float *);
+extern PlyFile *ply_write(FILE *, int, const char **, int);
+extern PlyFile *ply_open_for_writing( const char *, int, const char **, int, float *);
 extern void ply_describe_element(PlyFile *, char *, int, int, PlyProperty *);
-extern void ply_describe_property(PlyFile *, char *, PlyProperty *);
-extern void ply_element_count(PlyFile *, char *, int);
+extern void ply_describe_property(PlyFile *, const char *, const PlyProperty *);
+extern void ply_element_count(PlyFile *, const char *, int);
 extern void ply_header_complete(PlyFile *);
-extern void ply_put_element_setup(PlyFile *, char *);
+extern void ply_put_element_setup(PlyFile *, const char *);
 extern void ply_put_element(PlyFile *, void *);
 extern void ply_put_comment(PlyFile *, char *);
 extern void ply_put_obj_info(PlyFile *, char *);
 extern PlyFile *ply_read(FILE *, int *, char ***);
-extern PlyFile *ply_open_for_reading( char *, int *, char ***, int *, float *);
+extern PlyFile *ply_open_for_reading( const char *, int *, char ***, int *, float *);
 extern PlyProperty **ply_get_element_description(PlyFile *, char *, int*, int*);
 extern void ply_get_element_setup( PlyFile *, char *, int, PlyProperty *);
-extern int ply_get_property(PlyFile *, char *, PlyProperty *);
+extern int ply_get_property(PlyFile *, char *, const PlyProperty *);
 extern PlyOtherProp *ply_get_other_properties(PlyFile *, char *, int);
 extern void ply_get_element(PlyFile *, void *);
 extern char **ply_get_comments(PlyFile *, int *);
@@ -213,9 +212,9 @@ extern void ply_put_other_elements (PlyFile *);
 extern void ply_free_other_elements (PlyOtherElems *);
 extern void ply_describe_other_properties(PlyFile *, PlyOtherProp *, int);
 
-extern int equal_strings(char *, char *);
+extern int equal_strings(const char *, const char *);
 
 #ifdef __cplusplus
 }
 #endif
-#endif // PLY_FILE_INCLUDED
+#endif /* !__PLY_FILE_H__ */
