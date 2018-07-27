@@ -22,16 +22,20 @@ void Poisson::reset() {
   reconstructed = 0;
   updated = 0;
   trimmed = 0;
-  // reset points and normals only when they are not setted yet
-  if (points.size() != 0 && normals.size() != 0) {
+  // reset points, normals and colors only when they are not setted yet
+  if (points.size() != 0 && normals.size() != 0 && colors.size() != 0) {
     for (int i = 0; i < points.size(); ++i) {
       delete [] points[i];
     }
     for (int i = 0; i < normals.size(); ++i) {
       delete [] normals[i];
     }
+    for (int i = 0; i < colors.size(); ++i) {
+      delete [] colors[i];
+    }
     points.clear();
     normals.clear();
+    colors.clear();
   }
   for (int i = 0; i < vertices.size(); ++i) {
     delete [] vertices[i];
@@ -76,8 +80,24 @@ int Poisson::setNormals(vector<vector<float>> &n) {
   return 1;
 }
 
+int Poisson::setColors(std::vector<std::vector<float>> &c) {
+  reset();
+  colors.resize(c.size());
+  for (int i = 0; i < colors.size(); ++i) {
+    colors[i] = new float[3];
+    colors[i][0] = c[i][0]; 
+    colors[i][1] = c[i][1]; 
+    colors[i][2] = c[i][2];
+  }
+  return 1;
+}
+
 int Poisson::setParams(PoissonParam &p) {
   Depth.set = true; Depth.value = p.Depth;
+  Density.set = true;
+  Colors.set = true;
+  Normals.set = true;
+  Out.set = true;
   return 1;
 }
 
@@ -92,7 +112,16 @@ int Poisson::exportMesh(const char* modelPath) {
   for (int i = 0; i < vertices.size(); ++i) {
     fs << "v " << vertices[i][0] << " " 
       << vertices[i][1] << " " 
-      << vertices[i][2] << " " << endl;
+      << vertices[i][2] << " "
+      << vertices[i][7] << " "
+      << vertices[i][8] << " "
+      << vertices[i][9] << " " << endl;
+  }
+  // get and write vertices normals
+  for (int i = 0; i < vertices.size(); ++i) {
+    fs << "vn " << vertices[i][4] << " " 
+      << vertices[i][5] << " " 
+      << vertices[i][6] << " " << endl;
   }
   // get and write correct ordered faces indexes
   for (int i = 0; i < faces.size(); ++i) {
@@ -140,47 +169,88 @@ int Poisson::apply() {
     cout << "Fail to call poisson with wrong points and normals" << endl;
     return 0;
   }
-  Execute< float, PointStreamColor< float > >(points, normals, colors, IsotropicUIntPack< 3 , FEMDegreeAndBType< 1 , BOUNDARY_NEUMANN >::Signature >());
-  // CoredFileMeshData<PlyValueVertex<float>> mesh;
-  // reconstructed = Execute< 2 , PlyValueVertex< Real > , true  >( points, normals, mesh );
-  // if (reconstructed) {
-  //   mesh.resetIterator();
-  //   // get vertices
-  //   for (int i = 0; i < mesh.inCorePoints.size(); ++i) {
-  //     float *v = new float[4];
-  //     v[0] = mesh.inCorePoints[i].point.coords[0];
-  //     v[1] = mesh.inCorePoints[i].point.coords[1];
-  //     v[2] = mesh.inCorePoints[i].point.coords[2];
-  //     v[3] = mesh.inCorePoints[i].value;
-  //     vertices.push_back(v);
-  //   }
-  //   for (int i = 0; i < mesh.outOfCorePointCount(); ++i) {
-  //     PlyValueVertex< Real > vt;
-  //     mesh.nextOutOfCorePoint(vt);
-  //     float *v = new float[4];
-  //     v[0] = vt.point.coords[0];
-  //     v[1] = vt.point.coords[1];
-  //     v[2] = vt.point.coords[2];
-  //     v[3] = vt.value;
-  //     vertices.push_back(v);
-  //   }
-  //   // get faces
-  //   for (int i = 0; i < mesh.polygonCount(); ++i) {
-  //     int *f = new int[3];
-  //     vector<CoredVertexIndex> face;
-  //     mesh.nextPolygon(face);
-  //     for (int j = 0; j < face.size(); ++j) {
-  //       if (face[j].inCore) {
-  //         f[j] = face[j].idx;
-  //       }
-  //       else {
-  //         f[j] = face[j].idx + (int)(mesh.inCorePoints.size());
-  //       }
-  //     }
-  //     faces.push_back(f);
-  //   }
-  //   updated = 1;
-  // }
-  // return reconstructed && updated;
-  return 0;
+  typedef MultiPointStreamData< float , PointStreamColor< float > > AdditionalPointSampleData;
+  typedef PlyVertexWithData< float , 3 , MultiPointStreamData< float , PointStreamNormal< float , 3 > , PointStreamValue< float > , AdditionalPointSampleData > > Vertex;
+  
+  XForm< float , 4 > xForm;
+  CoredFileMeshData< Vertex > mesh( " " );
+
+  Execute< float, CoredFileMeshData< Vertex >, PointStreamColor< float > >(mesh, xForm, points, normals, colors, IsotropicUIntPack< 3 , FEMDegreeAndBType< 1 , BOUNDARY_NEUMANN >::Signature >());
+  // update vertices
+  {
+    int i = 0;
+    int nr_vertices=int(mesh.outOfCorePointCount()+mesh.inCorePoints.size());
+    int nr_faces=mesh.polygonCount();
+
+    mesh.resetIterator();
+    typename Vertex::Transform _xForm( xForm );
+
+    // update vertices info including position, density, color and normal
+    for( i=0 ; i<int( mesh.inCorePoints.size() ) ; i++ )
+    {
+      Vertex vertex = _xForm( mesh.inCorePoints[i] );
+      auto vert = vertex.point;
+      auto norm = std::get<0>(vertex.data.data).data;
+      auto density = std::get<1>(vertex.data.data).data;
+      auto color = std::get<0>(std::get<2>(vertex.data.data).data).data;
+      float *v = new float[10];
+      v[0] = vert.coords[0]; // xyz
+      v[1] = vert.coords[1];
+      v[2] = vert.coords[2];
+      v[3] = std::get<1>(vertex.data.data).data; // density
+      v[4] = norm.coords[0]; // nx ny nz
+      v[5] = norm.coords[1];
+      v[6] = norm.coords[2];
+      v[7] = color.coords[0]; // rgb
+      v[8] = color.coords[1];
+      v[9] = color.coords[2];
+      vertices.push_back(v);
+    }
+    for( i=0; i<mesh.outOfCorePointCount() ; i++ )
+    {
+      Vertex vertex;
+      mesh.nextOutOfCorePoint( vertex );
+      // vertex = _xForm( vertex );
+      auto vert = vertex.point;
+      auto norm = std::get<0>(vertex.data.data).data;
+      auto density = std::get<1>(vertex.data.data).data;
+      auto color = std::get<0>(std::get<2>(vertex.data.data).data).data;
+      float *v = new float[10];
+      v[0] = vert.coords[0]; // xyz
+      v[1] = vert.coords[1];
+      v[2] = vert.coords[2];
+      v[3] = std::get<1>(vertex.data.data).data; // density
+      v[4] = norm.coords[0]; // nx ny nz
+      v[5] = norm.coords[1];
+      v[6] = norm.coords[2];
+      v[7] = color.coords[0]; // rgb
+      v[8] = color.coords[1];
+      v[9] = color.coords[2];
+      vertices.push_back(v);
+    }
+
+    // update faces info
+    std::vector< CoredVertexIndex > polygon;
+    for( i=0 ; i<nr_faces ; i++ )
+    {
+      //
+      // create and fill a struct that the ply code can handle
+      //
+      PlyFace ply_face;
+      mesh.nextPolygon( polygon );
+      ply_face.nr_vertices = int( polygon.size() );
+      ply_face.vertices = new int[ polygon.size() ];
+      int *f = new int[3];
+      for( int i=0 ; i<int(polygon.size()) ; i++ ) {
+        if( polygon[i].inCore ) ply_face.vertices[i] = polygon[i].idx;
+        else                    ply_face.vertices[i] = polygon[i].idx + int( mesh.inCorePoints.size() );
+        f[i] = ply_face.vertices[i];
+      }
+      faces.push_back(f);
+      delete[] ply_face.vertices;
+    }
+
+    updated = 1;
+  }
+  return reconstructed && updated;
 }
