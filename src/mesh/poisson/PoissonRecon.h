@@ -386,8 +386,8 @@ void ExtractMesh( CoredFileMeshData< Vertex > &mesh, UIntPack< FEMSigs ... > , s
 	// else                 PlyWritePolygons< Vertex , Real , Dim >( Out.value , &mesh , ASCII.set ? PLY_ASCII : PLY_BINARY_NATIVE , &comments[0] , (int)comments.size() , iXForm );
 }
 
-template< class Real , typename ... SampleData , unsigned int ... FEMSigs >
-int Execute( std::vector<float*> &pts, std::vector<float*> &norms, std::vector<float*> &cols, UIntPack< FEMSigs ... > )
+template< class Real , class Mesh, typename ... SampleData , unsigned int ... FEMSigs >
+int Execute( Mesh &mesh, XForm< float , 4 > &xForm, std::vector<float*> &pts, std::vector<float*> &norms, std::vector<float*> &cols, UIntPack< FEMSigs ... > )
 {
 	static const int Dim = sizeof ... ( FEMSigs );
 	typedef UIntPack< FEMSigs ... > Sigs;
@@ -408,7 +408,7 @@ int Execute( std::vector<float*> &pts, std::vector<float*> &norms, std::vector<f
 	messageWriter( comments , "*************************************************************\n" );
 	messageWriter( comments , "*************************************************************\n" );
 
-	XForm< Real , Dim+1 > xForm , iXForm;
+	XForm< Real , Dim+1 > iXForm;
 	xForm = XForm< Real , Dim+1 >::Identity();
 
 	char str[1024];
@@ -445,12 +445,8 @@ int Execute( std::vector<float*> &pts, std::vector<float*> &norms, std::vector<f
 	{
 		profiler.start();
 		InputPointStream* pointStream;
-		char* ext = GetFileExtension( In.value );
 		sampleData = new std::vector< TotalPointSampleData >();
-		if     ( !strcasecmp( ext , "bnpts" ) ) pointStream = new BinaryInputPointStreamWithData< Real , Dim , TotalPointSampleData >( In.value , TotalPointSampleData::ReadBinary );
-		else if( !strcasecmp( ext , "ply"   ) ) pointStream = new    PLYInputPointStreamWithData< Real , Dim , TotalPointSampleData >( In.value , TotalPointSampleData::PlyReadProperties() , TotalPointSampleData::PlyReadNum , TotalPointSampleData::ValidPlyReadProperties );
-		else                                    pointStream = new VectorInputPointStreamWithData< Real , Dim , TotalPointSampleData >( pts , norms, cols, TotalPointSampleData::ReadASCII );
-		delete[] ext;
+		pointStream = new VectorInputPointStreamWithData< Real , Dim , TotalPointSampleData >( pts , norms, cols, TotalPointSampleData::ReadASCII );
 		typename TotalPointSampleData::Transform _xForm( xForm );
 		XInputPointStream _pointStream( [&]( Point< Real , Dim >& p , TotalPointSampleData& d ){ p = xForm*p , d = _xForm(d); } , *pointStream );
 		// // xForm by default
@@ -636,59 +632,59 @@ int Execute( std::vector<float*> &pts, std::vector<float*> &norms, std::vector<f
 			{
 				typedef PlyVertexWithData< Real , Dim , MultiPointStreamData< Real , PointStreamNormal< Real , Dim > , PointStreamValue< Real > , AdditionalPointSampleData > > Vertex;
 				std::function< void ( Vertex& , Point< Real , Dim > , Real , TotalPointSampleData ) > SetVertex = []( Vertex& v , Point< Real , Dim > p , Real w , TotalPointSampleData d ){ v.point = p , std::get< 0 >( v.data.data ) = std::get< 0 >( d.data ) , std::get< 1 >( v.data.data ).data = w , std::get< 2 >( v.data.data ) = std::get< 1 >( d.data ); };
-				CoredFileMeshData< Vertex > mesh( " " );
+				// CoredFileMeshData< Vertex > mesh( " " );
 				ExtractMesh< Vertex >( mesh, UIntPack< FEMSigs ... >() , std::tuple< SampleData ... >() , tree , solution , isoValue , samples , sampleData , density , SetVertex , comments , iXForm );
-				// write operations
-				{
-					std::fstream fs("Data/test.obj", std::fstream::out);
-					int i = 0;
-					int nr_vertices=int(mesh.outOfCorePointCount()+mesh.inCorePoints.size());
-					int nr_faces=mesh.polygonCount();
+				// // write operations
+				// {
+				// 	std::fstream fs("dat/testcolor.obj", std::fstream::out);
+				// 	int i = 0;
+				// 	int nr_vertices=int(mesh.outOfCorePointCount()+mesh.inCorePoints.size());
+				// 	int nr_faces=mesh.polygonCount();
 
-					mesh.resetIterator();
-					typename Vertex::Transform _xForm( xForm );
+				// 	mesh.resetIterator();
+				// 	typename Vertex::Transform _xForm( xForm );
 
-					// update vertices info including position, density, color and normal
-					for( i=0 ; i<int( mesh.inCorePoints.size() ) ; i++ )
-					{
-						Vertex vertex = _xForm( mesh.inCorePoints[i] );
-					}
-					for( i=0; i<mesh.outOfCorePointCount() ; i++ )
-					{
-						Vertex vertex;
-						mesh.nextOutOfCorePoint( vertex );
-						auto vert = vertex.point;
-						auto norm = std::get<0>(vertex.data.data).data;
-						auto density = std::get<1>(vertex.data.data).data;
-						auto color = std::get<0>(std::get<2>(vertex.data.data).data).data;
-						fs << "v " << vert.coords[0] << " " << vert.coords[1] << " " << vert.coords[2] 
-							<< " " << color.coords[0] << " " << color.coords[1] << " " << color.coords[2] << std::endl;
-						fs << "vn " << norm.coords[0] << " " << norm.coords[1] << " " << norm.coords[2] << std::endl;
-						vertex = _xForm( vertex );
-					}
+				// 	// update vertices info including position, density, color and normal
+				// 	for( i=0 ; i<int( mesh.inCorePoints.size() ) ; i++ )
+				// 	{
+				// 		Vertex vertex = _xForm( mesh.inCorePoints[i] );
+				// 	}
+				// 	for( i=0; i<mesh.outOfCorePointCount() ; i++ )
+				// 	{
+				// 		Vertex vertex;
+				// 		mesh.nextOutOfCorePoint( vertex );
+				// 		auto vert = vertex.point;
+				// 		auto norm = std::get<0>(vertex.data.data).data;
+				// 		auto density = std::get<1>(vertex.data.data).data;
+				// 		auto color = std::get<0>(std::get<2>(vertex.data.data).data).data;
+				// 		fs << "v " << vert.coords[0] << " " << vert.coords[1] << " " << vert.coords[2] 
+				// 			<< " " << color.coords[0] << " " << color.coords[1] << " " << color.coords[2] << std::endl;
+				// 		fs << "vn " << norm.coords[0] << " " << norm.coords[1] << " " << norm.coords[2] << std::endl;
+				// 		vertex = _xForm( vertex );
+				// 	}
 
-					// update faces info
-					std::vector< CoredVertexIndex > polygon;
-					for( i=0 ; i<nr_faces ; i++ )
-					{
-						//
-						// create and fill a struct that the ply code can handle
-						//
-						PlyFace ply_face;
-						mesh.nextPolygon( polygon );
-						ply_face.nr_vertices = int( polygon.size() );
-						ply_face.vertices = new int[ polygon.size() ];
-						fs << "f";
-						for( int i=0 ; i<int(polygon.size()) ; i++ ) {
-							if( polygon[i].inCore ) ply_face.vertices[i] = polygon[i].idx;
-							else                    ply_face.vertices[i] = polygon[i].idx + int( mesh.inCorePoints.size() );
-							fs << " " << ply_face.vertices[i] - 1;
-						}
-						fs << std::endl;
-						delete[] ply_face.vertices;
-					}
-					fs.close();
-				}
+				// 	// update faces info
+				// 	std::vector< CoredVertexIndex > polygon;
+				// 	for( i=0 ; i<nr_faces ; i++ )
+				// 	{
+				// 		//
+				// 		// create and fill a struct that the ply code can handle
+				// 		//
+				// 		PlyFace ply_face;
+				// 		mesh.nextPolygon( polygon );
+				// 		ply_face.nr_vertices = int( polygon.size() );
+				// 		ply_face.vertices = new int[ polygon.size() ];
+				// 		fs << "f";
+				// 		for( int i=0 ; i<int(polygon.size()) ; i++ ) {
+				// 			if( polygon[i].inCore ) ply_face.vertices[i] = polygon[i].idx;
+				// 			else                    ply_face.vertices[i] = polygon[i].idx + int( mesh.inCorePoints.size() );
+				// 			fs << " " << ply_face.vertices[i] + 1;
+				// 		}
+				// 		fs << std::endl;
+				// 		delete[] ply_face.vertices;
+				// 	}
+				// 	fs.close();
+				// }
 			}
 			else
 			{
