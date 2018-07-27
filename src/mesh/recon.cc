@@ -253,12 +253,13 @@ int __attribute__((optimize(0))) main(int argc, char **argv)
     cout << "Poisson reconstruction started" << endl;
     // reconstruction for joined scan
     pp.Depth = depth;
+    pp.Trim = trimVal;
     poisson.setPoints(vPoints);
     poisson.setNormals(vNormals);
     poisson.setColors(colors);
     poisson.setParams(pp);
     poisson.apply();
-    poisson.surfaceTrimmer(trimVal);
+    // poisson.surfaceTrimmer(trimVal);
     poisson.exportMesh((odir + "_all.obj").c_str());
     poisson.exportTrimmedMesh((odir + "_all_trimmed.obj").c_str());
     cout << "Poisson reconstruction end, model generated at: " +  odir + "_all & all_trimmed.obj" << endl;
@@ -304,12 +305,13 @@ int __attribute__((optimize(0))) main(int argc, char **argv)
       cout << "Poisson reconstruction started" << endl;
       // reconstruction for current scan
       pp.Depth = depth;
+      pp.Trim = trimVal;
       poisson.setPoints(vPoints);
       poisson.setNormals(vNormals);
       poisson.setColors(colors);
       poisson.setParams(pp);
       poisson.apply();
-      poisson.surfaceTrimmer(trimVal);
+      // poisson.surfaceTrimmer(trimVal);
       poisson.exportMesh((odir + to_string(scanNumber) + ".obj").c_str());
       poisson.exportTrimmedMesh((odir + to_string(scanNumber) + "_trimmed.obj").c_str());
       cout << "Poisson reconstruction end, model generated at: " +  odir + to_string(scanNumber) + " & _trimmed.obj" << endl;

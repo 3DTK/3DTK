@@ -6,7 +6,8 @@
 #define __POISSON_H__
 
 struct PoissonParam {
-  int Depth;
+  int Depth = 8;
+  float Trim = 0.0;
 };
 
 class Poisson {
