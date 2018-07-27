@@ -18,6 +18,7 @@ public:
   ~Poisson();
   int setPoints(std::vector<std::vector<float>> &v); // for IO, use v of v instead of v of float* to reach convinience of other developers
   int setNormals(std::vector<std::vector<float>> &n);
+  int setColors(std::vector<std::vector<float>> &c);
   int getVertices(std::vector<std::vector<float>> &v);
   int getFaces(std::vector<std::vector<int>> &f);
   int setParams(PoissonParam &p);
@@ -32,7 +33,7 @@ private:
   int updated;
   int trimmed;
   PoissonParam params;
-  std::vector<float*> vertices;     // model vertices (length4, with density value)
+  std::vector<float*> vertices;     // model vertices (length 10, x y z density nx ny nz r g b)
   std::vector<int*> faces;          // model faces
   std::vector<float*> tVertices;    // trimmed model vertices
   std::vector<int*> tFaces;         // trimmed model faces

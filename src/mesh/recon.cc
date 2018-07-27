@@ -64,7 +64,8 @@ void convert(vector<Point> &src, vector<vector<float>> &dst);
 void reconScaleSpaceSurface(vector<Point> &points);
 void reconAdvanceFrontSurfce(vector<Point> &points);
 
-int main(int argc, char **argv) {
+int __attribute__((optimize(0))) main(int argc, char **argv) 
+{
   // Poisson ptest;
   // ptest.calcNormalVcg();
   // parameters for io
@@ -108,6 +109,7 @@ int main(int argc, char **argv) {
 
   vector<Point> points;
   vector<Point> normals;
+  vector<vector<float>> colors;
   
   // parse input arguments
   parse_options(argc, argv, start, end, scanserver, max_dist, min_dist,dir, odir, iotype, 
@@ -221,11 +223,14 @@ int main(int argc, char **argv) {
       const double* rPos = source->get_rPos();
       const double* rPosTheta = source->get_rPosTheta();
 
-      DataXYZ xyz  = source->get("xyz");
+      DataXYZ xyz = source->get("xyz");
+      DataRGB rgb = source->get("rgb");
       // record UOS format data
       scaleFac = 1.0;
       for(unsigned int j = 0; j < xyz.size(); j++) {
         pts.push_back(Point(scaleFac * xyz[j][0], scaleFac * xyz[j][1], scaleFac * xyz[j][2]));
+        vector<float> c = {(float)rgb[j][0], (float)rgb[j][1], (float)rgb[j][2]};
+        colors.push_back(c);
       }
       
       // calculate normals for current scan, then merge them
@@ -250,6 +255,7 @@ int main(int argc, char **argv) {
     pp.Depth = depth;
     poisson.setPoints(vPoints);
     poisson.setNormals(vNormals);
+    poisson.setColors(colors);
     poisson.setParams(pp);
     poisson.apply();
     poisson.surfaceTrimmer(trimVal);
@@ -271,11 +277,15 @@ int main(int argc, char **argv) {
 
       // read scan into points
       DataXYZ xyz(scan->get("xyz"));
+      DataRGB rgb = scan->get("rgb");
       points.reserve(xyz.size());
       normals.reserve(xyz.size());
+      colors.reserve(xyz.size());
 
       for(unsigned int j = 0; j < xyz.size(); j++) {
         points.push_back(Point(xyz[j][0], xyz[j][1], xyz[j][2]));
+        vector<float> c = {(float)rgb[j][0], (float)rgb[j][1], (float)rgb[j][2]};
+        colors.push_back(c);
       }
 
       // calculate normals
@@ -296,6 +306,7 @@ int main(int argc, char **argv) {
       pp.Depth = depth;
       poisson.setPoints(vPoints);
       poisson.setNormals(vNormals);
+      poisson.setColors(colors);
       poisson.setParams(pp);
       poisson.apply();
       poisson.surfaceTrimmer(trimVal);
