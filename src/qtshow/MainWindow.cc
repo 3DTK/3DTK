@@ -53,7 +53,7 @@ MainWindow::MainWindow(const dataset_settings& ds, const window_settings& ws, QW
 
     // Set initial state file path
     QDir curDir(QDir::current());
-    lineEditStateFile->setText(curDir.canonicalPath() + "/" + QString::fromStdString(ds.input_directory));
+    lineEditStateFile->setText(curDir.canonicalPath() + "/" + QString::fromStdString(ds.input_directory) + "config.ini");
     lineEditSelectionFile->setText(curDir.canonicalPath() + "/selected.3d");
   } else {
     glWidget = new GLWidget(this);
@@ -253,7 +253,7 @@ void MainWindow::showDockWidgets()
 
 void MainWindow::setStateFilePath()
 {
-  QString stateFilePath = QFileDialog::getExistingDirectory();
+  QString stateFilePath = QFileDialog::getOpenFileName();
   if(!stateFilePath.isEmpty()) {
     lineEditStateFile->setText(stateFilePath);
   }
@@ -261,8 +261,9 @@ void MainWindow::setStateFilePath()
 
 void MainWindow::saveStates()
 {
-  QFile file(lineEditStateFile->text() + "/config.ini");
-  if(!file.open(QIODevice::WriteOnly)) {
+  QFile file(lineEditStateFile->text());
+  QFileInfo checkFile(file);
+  if(!file.open(QIODevice::WriteOnly) || (checkFile.exists() && !checkFile.isFile())) {
     return;
   }
 
@@ -326,7 +327,10 @@ void MainWindow::loadStates()
     .add(color_options)
     .add(reduction_options)
     ;
-  QString filePath = lineEditStateFile->text() + "/config.ini";
+  QString filePath = lineEditStateFile->text();
+  QFileInfo checkFile(filePath);
+  if(checkFile.exists() && !checkFile.isFile()) return;
+  
   std::ifstream config_file(filePath.toLatin1().data());
   if(config_file) {
     store(parse_config_file(config_file, visible_options), vm);
