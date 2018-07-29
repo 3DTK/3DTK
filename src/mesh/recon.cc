@@ -45,7 +45,7 @@ enum normal_method {KNN, ADAPTIVE_KNN,
 };
 
 // Parse commandline options and assign to parameters
-void parse_options(int argc, char **argv, int &start, int &end, bool &scanserver, int &max_dist, int &min_dist, string &dir, string &odir, IOType &iotype, 
+void parse_options(int argc, char **argv, int &start, int &end, bool &scanserver, int &max_dist, int &min_dist, string &dir, string &odir, IOType &iotype, bool &in_color, bool &out_normal,
   bool &join, double &red, int &rand, bool &uP, bool &use_xyz, bool &use_color, bool &use_reflectance, int &octree, bool &rangeFilterActive, bool &customFilterActive, string &customFilter, double &scaleFac, bool &hexfloat, bool &high_precision, int &frame,
   int &k1, int &k2, normal_method &ntype, int &width, int &height, bool &inward, 
   int &depth, int &solverDivide, float &samplesPerNode, float &offset, float &trimVal);
@@ -66,14 +66,14 @@ void reconAdvanceFrontSurfce(vector<Point> &points);
 
 int __attribute__((optimize(0))) main(int argc, char **argv) 
 {
-  // Poisson ptest;
-  // ptest.calcNormalVcg();
   // parameters for io
   int start, end;
   bool scanserver;
   int max_dist, min_dist;
   string dir, odir; // directory of input scan and output model
   IOType iotype;
+  bool in_color; // input points with color
+  bool out_normal; // output points with normal
 
   // parameters for join scans
   bool join;
@@ -112,7 +112,7 @@ int __attribute__((optimize(0))) main(int argc, char **argv)
   vector<vector<float>> colors;
   
   // parse input arguments
-  parse_options(argc, argv, start, end, scanserver, max_dist, min_dist,dir, odir, iotype, 
+  parse_options(argc, argv, start, end, scanserver, max_dist, min_dist,dir, odir, iotype, in_color, out_normal,
     join, red, rand, uP, use_xyz, use_color, use_reflectance, octree, rangeFilterActive, customFilterActive, customFilter, scaleFac, hexfloat, high_precision, frame,
     k1, k2, ntype, width, height, inward, 
     depth, solverDivide, samplesPerNode, offset, trimVal);
@@ -229,7 +229,13 @@ int __attribute__((optimize(0))) main(int argc, char **argv)
       scaleFac = 1.0;
       for(unsigned int j = 0; j < xyz.size(); j++) {
         pts.push_back(Point(scaleFac * xyz[j][0], scaleFac * xyz[j][1], scaleFac * xyz[j][2]));
-        vector<float> c = {(float)rgb[j][0], (float)rgb[j][1], (float)rgb[j][2]};
+        vector<float> c;
+        if (in_color) {
+          c = {(float)rgb[j][0], (float)rgb[j][1], (float)rgb[j][2]};
+        }
+        else {
+          c = {255.0, 255.0, 255.0};
+        }
         colors.push_back(c);
       }
       
@@ -254,6 +260,8 @@ int __attribute__((optimize(0))) main(int argc, char **argv)
     // reconstruction for joined scan
     pp.Depth = depth;
     pp.Trim = trimVal;
+    pp.UseColor = in_color;
+    pp.ExportNormal = out_normal;
     poisson.setPoints(vPoints);
     poisson.setNormals(vNormals);
     poisson.setColors(colors);
@@ -285,7 +293,13 @@ int __attribute__((optimize(0))) main(int argc, char **argv)
 
       for(unsigned int j = 0; j < xyz.size(); j++) {
         points.push_back(Point(xyz[j][0], xyz[j][1], xyz[j][2]));
-        vector<float> c = {(float)rgb[j][0], (float)rgb[j][1], (float)rgb[j][2]};
+        vector<float> c;
+        if (in_color) {
+          c = {(float)rgb[j][0], (float)rgb[j][1], (float)rgb[j][2]};
+        }
+        else {
+          c = {255.0, 255.0, 255.0};
+        }
         colors.push_back(c);
       }
 
@@ -306,6 +320,8 @@ int __attribute__((optimize(0))) main(int argc, char **argv)
       // reconstruction for current scan
       pp.Depth = depth;
       pp.Trim = trimVal;
+      pp.UseColor = in_color;
+      pp.ExportNormal = out_normal;
       poisson.setPoints(vPoints);
       poisson.setNormals(vNormals);
       poisson.setColors(colors);
@@ -370,7 +386,7 @@ void validate(boost::any& v, const std::vector<std::string>& values,
 }
 
 // Parse commandline options
-void parse_options(int argc, char **argv, int &start, int &end, bool &scanserver, int &max_dist, int &min_dist, string &dir, string &odir, IOType &iotype, 
+void parse_options(int argc, char **argv, int &start, int &end, bool &scanserver, int &max_dist, int &min_dist, string &dir, string &odir, IOType &iotype, bool &in_color, bool &out_normal,
   bool &join, double &red, int &rand, bool &use_pose, bool &use_xyz, bool &use_color, bool &use_reflectance, int &octree, bool &rangeFilterActive, bool &customFilterActive, string &customFilter, double &scaleFac, bool &hexfloat, bool &high_precision, int &frame,
   int &k1, int &k2, normal_method &ntype, int &width, int &height, bool &inward, 
   int &depth, int &solverDivide, float &samplesPerNode, float &offset, float &trimVal)
@@ -400,6 +416,12 @@ void parse_options(int argc, char **argv, int &start, int &end, bool &scanserver
       ("min,m",
        po::value<int>(&min_dist)->default_value(-1),
        "neglegt all data points with a distance smaller than <arg> 'units")
+      ("incolor,C",
+       po::value<bool>(&in_color)->default_value(false),
+       "pointset contains color info")
+      ("outnormal,N",
+       po::value<bool>(&out_normal)->default_value(true),
+       "export mesh with normal data")
       // Join scans parameters
       ("join,j", po::value<bool>(&join)->default_value(false),
       "whether to join scans together for surface reconstruction")
