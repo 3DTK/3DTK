@@ -119,7 +119,7 @@ int Poisson::exportMesh(const char* modelPath) {
       << vertices[i][9] << " " << endl;
   }
   // get and write vertices normals
-  for (int i = 0; i < vertices.size(); ++i) {
+  for (int i = 0; i < vertices.size() && params.ExportNormal; ++i) {
     fs << "vn " << vertices[i][4] << " " 
       << vertices[i][5] << " " 
       << vertices[i][6] << " " << endl;
@@ -151,7 +151,7 @@ int Poisson::exportTrimmedMesh(const char* modelPath) {
       << tVertices[i][9] << " " << endl;
   }
   // get and write vertices normals
-  for (int i = 0; i < tVertices.size(); ++i) {
+  for (int i = 0; i < tVertices.size() && params.ExportNormal; ++i) {
     fs << "vn " << tVertices[i][4] << " " 
       << tVertices[i][5] << " " 
       << tVertices[i][6] << " " << endl;
