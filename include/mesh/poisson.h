@@ -8,6 +8,8 @@
 struct PoissonParam {
   int Depth = 8;
   float Trim = 0.0;
+  bool UseColor = false;
+  bool ExportNormal = true;
 };
 
 class Poisson {
