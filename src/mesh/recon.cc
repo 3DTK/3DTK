@@ -179,36 +179,37 @@ int __attribute__((optimize(0))) main(int argc, char **argv)
 
   std::vector<Scan*>::iterator it = Scan::allScans.begin();
   int scanNumber = start;
+
+  // octree based reduction
+  unsigned int types = PointType::USE_NONE;
+  if(supportsReflectance(iotype)) types |= PointType::USE_REFLECTANCE;
+  if(supportsColor(iotype)) types |= PointType::USE_COLOR;
+
+  // if specified, filter scans
+  for (size_t i = 0; i < Scan::allScans.size(); i++)  {
+    if(rangeFilterActive) Scan::allScans[i]->setRangeFilter(max_dist, min_dist);
+    if(customFilterActive) Scan::allScans[i]->setCustomFilter(customFilter);
+  }
+  
+  int end_reduction = (int)Scan::allScans.size();
+  #ifdef _OPENMP
+  #pragma omp parallel for schedule(dynamic)
+  #endif
+  for (int iterator = 0; iterator < end_reduction; iterator++) {
+    if (red > 0) {
+      PointType pointtype(types);
+      std::cout << "Reducing Scan No. " << iterator << std::endl;
+      Scan::allScans[iterator]->setReductionParameter(red, octree, pointtype);
+      Scan::allScans[iterator]->calcReducedPoints();
+    } else {
+      std::cout << "Copying Scan No. " << iterator << std::endl;
+    }
+    // reduction filter for current scan!
+  }
   
   // join all scans then call surface reconstrucion
   // ---
   if (join) {
-    unsigned int types = PointType::USE_NONE;
-    if(supportsReflectance(iotype)) types |= PointType::USE_REFLECTANCE;
-    if(supportsColor(iotype)) types |= PointType::USE_COLOR;
-
-    // if specified, filter scans
-    for (size_t i = 0; i < Scan::allScans.size(); i++)  {
-      if(rangeFilterActive) Scan::allScans[i]->setRangeFilter(max_dist, min_dist);
-      if(customFilterActive) Scan::allScans[i]->setCustomFilter(customFilter);
-    }
-    
-    int end_reduction = (int)Scan::allScans.size();
-    #ifdef _OPENMP
-    #pragma omp parallel for schedule(dynamic)
-    #endif
-    for (int iterator = 0; iterator < end_reduction; iterator++) {
-      if (red > 0) {
-        PointType pointtype(types);
-        std::cout << "Reducing Scan No. " << iterator << std::endl;
-        Scan::allScans[iterator]->setReductionParameter(red, octree, pointtype);
-        Scan::allScans[iterator]->calcReducedPoints();
-      } else {
-        std::cout << "Copying Scan No. " << iterator << std::endl;
-      }
-      // reduction filter for current scan!
-    }
-
     readFrames(dir, start, end, frame, uP);
 
     vector<Point> pts;
@@ -223,8 +224,8 @@ int __attribute__((optimize(0))) main(int argc, char **argv)
       const double* rPos = source->get_rPos();
       const double* rPosTheta = source->get_rPosTheta();
 
-      DataXYZ xyz = source->get("xyz");
-      DataRGB rgb = source->get("rgb");
+      DataXYZ xyz = source->get("xyz reduced");
+      DataRGB rgb = source->get("color reduced");
       // record UOS format data
       scaleFac = 1.0;
       for(unsigned int j = 0; j < xyz.size(); j++) {
@@ -285,8 +286,8 @@ int __attribute__((optimize(0))) main(int argc, char **argv)
       const double* rPosTheta = scan->get_rPosTheta();
 
       // read scan into points
-      DataXYZ xyz(scan->get("xyz"));
-      DataRGB rgb = scan->get("rgb");
+      DataXYZ xyz(scan->get("xyz reduced"));
+      DataRGB rgb = scan->get("color reduced");
       points.reserve(xyz.size());
       normals.reserve(xyz.size());
       colors.reserve(xyz.size());
@@ -422,6 +423,11 @@ void parse_options(int argc, char **argv, int &start, int &end, bool &scanserver
       ("outnormal,N",
        po::value<bool>(&out_normal)->default_value(true),
        "export mesh with normal data")
+      // reduction parameters
+      ("reduce,r", po::value<double>(&red)->default_value(-1.0),
+      "turns on octree based point reduction (voxel size=<NR>)")
+      ("octree,O", po::value<int>(&octree)->default_value(1),
+      "use randomized octree based point reduction (pts per voxel=<NR>)")
       // Join scans parameters
       ("join,j", po::value<bool>(&join)->default_value(false),
       "whether to join scans together for surface reconstruction")
@@ -433,10 +439,6 @@ void parse_options(int argc, char **argv, int &start, int &end, bool &scanserver
       "direct specification"
       "FILE;{fileName}"
       "See filter implementation in src/slam6d/pointfilter.cc for more detail.")
-      ("reduce,r", po::value<double>(&red)->default_value(-1.0),
-      "turns on octree based point reduction (voxel size=<NR>)")
-      ("octree,O", po::value<int>(&octree)->default_value(1),
-      "use randomized octree based point reduction (pts per voxel=<NR>)")
       ("scale,y", po::value<double>(&scaleFac)->default_value(0.01),
       "scale factor for point cloud in m (be aware of the different units for uos (cm) and xyz (m), default: 0.01 means that input and output remain the same)'")
       // FIXME: for bool values, I cannot use po::bool_switch here, use po::value<bool> as a workaround
