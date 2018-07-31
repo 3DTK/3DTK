@@ -134,7 +134,11 @@ struct window_settings {
   bool advanced_controls;
   bool invert_mouse_x, invert_mouse_y;
   bool take_screenshot;
+  bool capture_mouse;
+  bool hide_widgets;
 };
+
+std::string getConfigHome();
 
 /**
  * Parses arguments to `show`. The arguments come from these sources:
@@ -156,6 +160,7 @@ void parse_args(int argc, char **argv, dataset_settings& ds, window_settings& ws
 void setGUIOptions(bool& nogui, float& fps,
 		   WindowDimensions& dimensions, bool& advanced,
 		   bool& invertMouseX, bool& invertMouseY,
+		   bool& capturedMouse, bool& hideWidgetsInFullscreen,
 		   boost::program_options::options_description& gui_options);
 void setDisplayOptions(double& scale, GLfloat& fov, int& viewmode,
 		       bool& noPoints, bool& noCameras, bool& noPath,

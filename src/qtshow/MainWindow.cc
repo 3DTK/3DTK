@@ -164,7 +164,7 @@ void MainWindow::showSettingsDialog() {
   }
 
   // Read settings from UI state
-  settingsDialog->cbCaptureCursor->setChecked(glWidget->captureMouseCursor);
+  settingsDialog->cbCaptureCursor->setChecked(captureMouseCursor);
   settingsDialog->cbInvertMouseX->setChecked(invertMouseX);
   settingsDialog->cbInvertMouseY->setChecked(invertMouseY);
   settingsDialog->cbHideWidgetsInFullscreen->setChecked(hideWidgetsInFullscreen);
@@ -183,7 +183,7 @@ void MainWindow::showShortcutsDialog() {
 }
 
 void MainWindow::applySettings() {
-  glWidget->captureMouseCursor = settingsDialog->cbCaptureCursor->isChecked();
+  captureMouseCursor = settingsDialog->cbCaptureCursor->isChecked();
   invertMouseX = settingsDialog->cbInvertMouseX->isChecked();
   invertMouseY = settingsDialog->cbInvertMouseY->isChecked();
   hideWidgetsInFullscreen = settingsDialog->cbHideWidgetsInFullscreen->isChecked();
@@ -195,7 +195,19 @@ void MainWindow::applySettings() {
     dockAdvanced->hide();
   }
 
-  // TODO write settings to $XDG_CONFIG_HOME/3dtk/qtshow.ini
+  std::string configHome = getConfigHome();
+  QFile file(QString::fromStdString(configHome + "/3dtk/show.ini"));
+  if(!file.open(QIODevice::WriteOnly)) {
+    return;
+  }
+
+  QTextStream out(&file);
+
+  out << "advanced=" << (advanced_controls ? "true" : "false") << endl;
+  out << "invertmousex=" << (invertMouseX ? "true" : "false") << endl;
+  out << "invertmousey=" << (invertMouseY ? "true" : "false") << endl;
+  out << "capturemouse=" << (captureMouseCursor ? "true" : "false") << endl;
+  out << "hidewidgets=" << (hideWidgetsInFullscreen ? "true" : "false") << endl;
 }
 
 void MainWindow::addCamCombobox(int index) {
@@ -295,7 +307,7 @@ void MainWindow::loadStates()
   Position position;
   Quaternion rotation;
 
-  bool nogui, invertMouseX, invertMouseY, color, noAnimColor;
+  bool nogui, invertMouseX, invertMouseY, color, noAnimColor, captureMouse, hideWidgets;
   float fps, colormin, colormax;
   double scale, reduce;
   int distMin, distMax, octree, stepsize;
@@ -304,7 +316,8 @@ void MainWindow::loadStates()
 
   options_description gui_options("GUI options");
   setGUIOptions(nogui, fps, dimensions, advanced,
-		invertMouseX, invertMouseY, gui_options);
+		invertMouseX, invertMouseY,
+		captureMouse, hideWidgets, gui_options);
 
   options_description display_options("Display options");
   setDisplayOptions(scale, fov, viewmode, noPoints, noCameras, noPath,

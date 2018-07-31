@@ -15,7 +15,8 @@ void parse_args(int argc, char **argv, dataset_settings& ds, window_settings& ws
   // TODO make all defaults declared here the initial values for the settings structs, then use that initial value as the default here
   options_description gui_options("GUI options");
   setGUIOptions(ws.nogui, ws.max_fps, ws.dimensions, ws.advanced_controls,
-		ws.invert_mouse_x, ws.invert_mouse_y, gui_options);
+		ws.invert_mouse_x, ws.invert_mouse_y,
+		ws.capture_mouse, ws.hide_widgets, gui_options);
 
   options_description display_options("Display options");
   setDisplayOptions(ds.scale, ds.camera.fov, ds.init_with_viewmode,
@@ -88,20 +89,7 @@ void parse_args(int argc, char **argv, dataset_settings& ds, window_settings& ws
 
   // Parse user config file
 
-  string config_home;
-#ifndef _MSC_VER
-  // in $XDG_CONFIG_HOME/3dtk/show.ini
-  char *home_c = getenv("HOME");
-  char *config_home_c = getenv("XDG_CONFIG_HOME");
-  if (config_home_c && *config_home_c != '\0') {
-    config_home = config_home_c;
-  } else {
-    config_home = string(home_c) + "/.config";
-  }
-#else
-  // in %APPDATA%/3dtk/show.ini
-  config_home = string(getenv("APPDATA"));
-#endif
+  string config_home = getConfigHome();
 
   ifstream user_config_file((config_home + "/3dtk/show.ini").c_str());
   if (user_config_file) {
@@ -234,9 +222,30 @@ void parse_args(int argc, char **argv, dataset_settings& ds, window_settings& ws
   }
 }
 
+std::string getConfigHome()
+{
+  std::string config_home;
+#ifndef _MSC_VER
+  // in $XDG_CONFIG_HOME/3dtk/show.ini
+  char *home_c = getenv("HOME");
+  char *config_home_c = getenv("XDG_CONFIG_HOME");
+  if (config_home_c && *config_home_c != '\0') {
+    config_home = config_home_c;
+  } else {
+    config_home = std::string(home_c) + "/.config";
+  }
+#else
+  // in %APPDATA%/3dtk/show.ini
+  config_home = string(getenv("APPDATA"));
+#endif
+
+  return config_home;
+}
+
 void setGUIOptions(bool& nogui, float& fps,
 		   WindowDimensions& dimensions, bool& advanced,
 		   bool& invertMouseX, bool& invertMouseY,
+		   bool& captureMouse, bool &hideWidgets,
 		   options_description& gui_options)
 {
   gui_options.add_options()
@@ -250,6 +259,10 @@ void setGUIOptions(bool& nogui, float& fps,
      "Invert camera rotation for mouse x movement.")
     ("invertmousey", bool_switch(&invertMouseY),
      "Invert camera rotation for mouse y movement.")
+    ("capturemouse", bool_switch(&captureMouse),
+     "Capture mouse cursor")
+    ("hidewidgets", bool_switch(&hideWidgets)->default_value(true),
+     "Hide widgets in fullscreen")
     ;
 }
 

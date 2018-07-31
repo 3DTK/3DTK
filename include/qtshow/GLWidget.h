@@ -12,7 +12,6 @@ class GLWidget : public QOpenGLWidget, protected QOpenGLFunctions {
 
 public:
   GLWidget(QWidget *parent = 0);
-  bool captureMouseCursor = false;
 
 public slots:
   void setFullscreen(bool fullscreenWanted);
