@@ -221,6 +221,8 @@ GLdouble aspect          = (double)START_WIDTH/(double)START_HEIGHT;
 bool advanced_controls = false;
 bool invertMouseX = false, invertMouseY = false;
 bool anim_convert_jpg  = true;
+bool captureMouseCursor = false;
+bool hideWidgetsInFullscreen = true;
 
 bool fullscreen    = false;
 int current_width  = START_WIDTH;
@@ -569,6 +571,8 @@ void copy_settings_to_globals(
   advanced_controls = ws.advanced_controls;
   invertMouseX = ws.invert_mouse_x;
   invertMouseY = ws.invert_mouse_y;
+  captureMouseCursor = ws.capture_mouse;
+  hideWidgetsInFullscreen = ws.hide_widgets;
 
   scale = ds.scale;
   cangle = ds.camera.fov;
