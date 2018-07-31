@@ -282,6 +282,8 @@ extern GLdouble aspect;
 extern bool advanced_controls;
 extern bool invertMouseX, invertMouseY;
 extern bool anim_convert_jpg;
+extern bool captureMouseCursor;
+extern bool hideWidgetsInFullscreen;
 
 extern bool fullscreen;
 extern int current_width;

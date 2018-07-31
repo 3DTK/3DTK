@@ -66,7 +66,6 @@ protected:
   void updateRecentDirectoriesMenu(std::vector<std::string> directories);
 
   SettingsDialog *settingsDialog = Q_NULLPTR;
-  bool hideWidgetsInFullscreen = true;
 
   ShortcutsDialog *shortcutsDialog = Q_NULLPTR;
 
