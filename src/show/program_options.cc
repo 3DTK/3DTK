@@ -28,7 +28,8 @@ void parse_args(int argc, char **argv, dataset_settings& ds, window_settings& ws
   options_description color_options("Point coloring");
   setColorOptions(ds.coloring.bgcolor, ds.coloring.explicit_coloring,
   		  ds.coloring.colormap, ds.coloring.colormap_values.min,
-  		  ds.coloring.colormap_values.max, no_animcolor,
+  		  ds.coloring.colormap_values.max,
+		  ds.coloring.scans_colored, no_animcolor,
   		  color_options);
 
   options_description scan_options("Scan selection");
@@ -312,7 +313,8 @@ void setDisplayOptions(double& scale, GLfloat& fov, int& viewmode,
 }
 
 void setColorOptions(Color& bgcolor, bool& color, ShowColormap& colormap,
-		     float& colormin, float& colormax, bool& noAnimColor,
+		     float& colormin, float& colormax,
+		     int& scansColored, bool& noAnimColor,
 		     options_description& color_options)
 {
   color_options.add_options()
@@ -342,6 +344,8 @@ void setColorOptions(Color& bgcolor, bool& color, ShowColormap& colormap,
      "Minimum value for mapping the color spectrum.")
     ("colormax", value(&colormax),
      "Maximum value for mapping the color spectrum.")
+    ("scanscolored", value(&scansColored),
+     "Scans colored")
     ("noanimcolor,A", bool_switch(&noAnimColor),
      "Do not switch to different color settings when displaying animation")
     ;
