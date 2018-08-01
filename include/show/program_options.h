@@ -83,6 +83,7 @@ struct color_settings {
   ShowColormap colormap;
   range<float> colormap_values {NAN, NAN};
   Color bgcolor;
+  int scans_colored;
 };
 
 struct dataset_settings {
@@ -168,7 +169,8 @@ void setDisplayOptions(double& scale, GLfloat& fov, int& viewmode,
 		       Position& position, Quaternion& rotation,
 		       int& pointsize, boost::program_options::options_description& display_options);
 void setColorOptions(Color& bgcolor, bool& color, ShowColormap& colormap,
-		     float& colormin, float& colormax, bool& noAnimColor,
+		     float& colormin, float& colormax,
+		     int& scansColored, bool& noAnimColor,
 		     boost::program_options::options_description& color_options);
 void setScanOptions(bool& scanserver, int& start, int& end,
 		    IOType& format, boost::program_options::options_description& scan_options);

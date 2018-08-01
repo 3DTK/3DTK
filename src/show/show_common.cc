@@ -602,6 +602,7 @@ void copy_settings_to_globals(
   listboxColorMapVal = static_cast<int>(ds.coloring.colormap);
   mincolor_value = ds.coloring.colormap_values.min;
   maxcolor_value = ds.coloring.colormap_values.max;
+  colorScanVal = ds.coloring.scans_colored;
   coloranim = ds.color_animation;
 
   dir = ds.input_directory;
