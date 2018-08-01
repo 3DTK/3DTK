@@ -292,6 +292,7 @@ void MainWindow::saveStates()
   out << "rotation=" << labelCameraQuaternion->text().toUtf8().constData() << endl;
   out << "pointsize=" << spinBoxPointSize->cleanText().toUtf8().constData() << endl;
   out << "colormap=" << comboBoxColorMap->currentText().toLower().toUtf8().constData() << endl;
+  out << "scanscolored=" << comboBoxColorType->currentIndex() << endl;
   out << "max=" << ds.distance_filter.max << endl;
   out << "min=" << ds.distance_filter.min << endl;
 }
@@ -304,6 +305,7 @@ void MainWindow::loadStates()
   float fov, fogDensity;
   int viewmode, fogType, pointsize;
   ShowColormap colormap;
+  int scansColored;
   Position position;
   Quaternion rotation;
 
@@ -326,7 +328,7 @@ void MainWindow::loadStates()
 
   options_description color_options("Point coloring");
   setColorOptions(bgcolor, color, colormap, colormin, colormax,
-		  noAnimColor, color_options);
+		  scansColored, noAnimColor, color_options);
 
   options_description reduction_options("Point reduction");
   setReductionOptions(distMin, distMax, reduce, octree, stepsize,
@@ -371,6 +373,7 @@ void MainWindow::loadStates()
   spinBoxPointSize->setValue(pointsize);
   
   comboBoxColorMap->setCurrentIndex(static_cast<int>(colormap));
+  comboBoxColorType->setCurrentIndex(scansColored);
   
   glWidget->update();
 }
