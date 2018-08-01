@@ -18,6 +18,7 @@
 #endif
 
 #include "mesh/poisson.h"
+#include "mesh/auto_scan_red.h"
 
 // --- CGAL related below ---
 // #include <CGAL/Scale_space_surface_reconstruction_3.h>
@@ -110,6 +111,8 @@ int __attribute__((optimize(0))) main(int argc, char **argv)
   vector<Point> points;
   vector<Point> normals;
   vector<vector<float>> colors;
+
+  std::string red_string = red > 0 ? " reduced" : "";
   
   // parse input arguments
   parse_options(argc, argv, start, end, scanserver, max_dist, min_dist,dir, odir, iotype, in_color, out_normal,
@@ -179,53 +182,59 @@ int __attribute__((optimize(0))) main(int argc, char **argv)
 
   std::vector<Scan*>::iterator it = Scan::allScans.begin();
   int scanNumber = start;
-
-  // octree based reduction
-  unsigned int types = PointType::USE_NONE;
-  if(supportsReflectance(iotype)) types |= PointType::USE_REFLECTANCE;
-  if(supportsColor(iotype)) types |= PointType::USE_COLOR;
-
-  // if specified, filter scans
-  for (size_t i = 0; i < Scan::allScans.size(); i++)  {
-    if(rangeFilterActive) Scan::allScans[i]->setRangeFilter(max_dist, min_dist);
-    if(customFilterActive) Scan::allScans[i]->setCustomFilter(customFilter);
-  }
-  
-  int end_reduction = (int)Scan::allScans.size();
-  #ifdef _OPENMP
-  #pragma omp parallel for schedule(dynamic)
-  #endif
-  for (int iterator = 0; iterator < end_reduction; iterator++) {
-    if (red > 0) {
-      PointType pointtype(types);
-      std::cout << "Reducing Scan No. " << iterator << std::endl;
-      Scan::allScans[iterator]->setReductionParameter(red, octree, pointtype);
-      Scan::allScans[iterator]->calcReducedPoints();
-    } else {
-      std::cout << "Copying Scan No. " << iterator << std::endl;
-    }
-    // reduction filter for current scan!
-  }
   
   // join all scans then call surface reconstrucion
   // ---
   if (join) {
     readFrames(dir, start, end, frame, uP);
 
+    // calculate appropriate reduction parameters
+    RedParam rp; 
+    getRedParam(rp);
+    red = rp.voxelSize;
+    octree = rp.ptsPerVerxel;
+
+    // octree based reduction
+    unsigned int types = PointType::USE_NONE;
+    if(supportsReflectance(iotype)) types |= PointType::USE_REFLECTANCE;
+    if(supportsColor(iotype)) types |= PointType::USE_COLOR;
+
+    // if specified, filter scans
+    for (size_t i = 0; i < Scan::allScans.size(); i++) {
+      if(rangeFilterActive) Scan::allScans[i]->setRangeFilter(max_dist, min_dist);
+      if(customFilterActive) Scan::allScans[i]->setCustomFilter(customFilter);
+    }
+    
+    int end_reduction = (int)Scan::allScans.size();
+    #ifdef _OPENMP
+    #pragma omp parallel for schedule(dynamic)
+    #endif
+    for (int iterator = 0; iterator < end_reduction; iterator++) {
+      if (red > 0) {
+        PointType pointtype(types);
+        std::cout << "Reducing Scan No. " << iterator << std::endl;
+        Scan::allScans[iterator]->setReductionParameter(red, octree, pointtype);
+        Scan::allScans[iterator]->calcReducedPoints();
+      } else {
+        std::cout << "Copying Scan No. " << iterator << std::endl;
+      }
+      // reduction filter for current scan!
+    }
+
     vector<Point> pts;
     vector<Point> norms;
     for(unsigned int i = 0; i < Scan::allScans.size(); i++) {
-      Scan *source = Scan::allScans[i];
-      std::string red_string = red > 0 ? " reduced" : "";
+      Scan *scan = Scan::allScans[i];
 
       // apply optional filtering
-      source->setRangeFilter(max_dist, min_dist);
+      if(rangeFilterActive) scan->setRangeFilter(max_dist, min_dist);
+      if(customFilterActive) scan->setCustomFilter(customFilter);
 
-      const double* rPos = source->get_rPos();
-      const double* rPosTheta = source->get_rPosTheta();
+      const double* rPos = scan->get_rPos();
+      const double* rPosTheta = scan->get_rPosTheta();
 
-      DataXYZ xyz = source->get("xyz reduced");
-      DataRGB rgb = source->get("color reduced");
+      DataXYZ xyz = scan->get("xyz" + red_string);
+      DataRGB rgb = scan->get(red_string.size() == 0 ? "rgb" : "color" + red_string);
       // record UOS format data
       scaleFac = 1.0;
       for(unsigned int j = 0; j < xyz.size(); j++) {
@@ -241,7 +250,7 @@ int __attribute__((optimize(0))) main(int argc, char **argv)
       }
       
       // calculate normals for current scan, then merge them
-      calcNormals(pts, norms, ntype, k1, k2, width, height, rPos, rPosTheta, source);
+      calcNormals(pts, norms, ntype, k1, k2, width, height, rPos, rPosTheta, scan);
       if (inward) {
         flipNormals(norms);
       }
@@ -256,6 +265,11 @@ int __attribute__((optimize(0))) main(int argc, char **argv)
     vector<vector<float>> vNormals;
     convert(points, vPoints);
     convert(normals, vNormals);
+
+    int size1 = sizeof(vPoints),
+      size2 = sizeof(vNormals),
+      size3 = sizeof(points),
+      size4 = sizeof(normals);
 
     cout << "Poisson reconstruction started" << endl;
     // reconstruction for joined scan
@@ -276,18 +290,38 @@ int __attribute__((optimize(0))) main(int argc, char **argv)
   // apply surface reconstruction to each scan individually
   // ---
   else {
-    for( ; it != Scan::allScans.end(); ++it) {
-      Scan* scan = *it;
+    for(unsigned int i = 0; i < Scan::allScans.size(); ++i) {
+      Scan* scan = Scan::allScans[i];
+
+      // get reduction parameters
+      RedParam rp;
+      getRedParam(rp, scan);
+      red = rp.voxelSize;
+      octree = rp.ptsPerVerxel;
+
+      // octree based reduction
+      unsigned int types = PointType::USE_NONE;
+      if(supportsReflectance(iotype)) types |= PointType::USE_REFLECTANCE;
+      if(supportsColor(iotype)) types |= PointType::USE_COLOR;
+      if (red > 0) {
+        PointType pointtype(types);
+        std::cout << "Reducing Scan No. " << i << std::endl;
+        scan->setReductionParameter(red, octree, pointtype);
+        scan->calcReducedPoints();
+      } else {
+        std::cout << "Copying Scan No. " << i << std::endl;
+      }
 
       // apply optional filtering
-      scan->setRangeFilter(max_dist, min_dist);
+      if(rangeFilterActive) scan->setRangeFilter(max_dist, min_dist);
+      if(customFilterActive) scan->setCustomFilter(customFilter);
 
       const double* rPos = scan->get_rPos();
       const double* rPosTheta = scan->get_rPosTheta();
 
       // read scan into points
-      DataXYZ xyz(scan->get("xyz reduced"));
-      DataRGB rgb = scan->get("color reduced");
+      DataXYZ xyz(scan->get("xyz" + red_string));
+      DataRGB rgb = scan->get(red_string.size() == 0 ? "rgb" : "color" + red_string);
       points.reserve(xyz.size());
       normals.reserve(xyz.size());
       colors.reserve(xyz.size());
