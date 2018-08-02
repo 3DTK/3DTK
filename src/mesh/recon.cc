@@ -567,7 +567,7 @@ void parse_options(int argc, char **argv, int &start, int &end, bool &scanserver
 
 }
 
-void readFrames(std::string dir, int start, int end, int frame, bool use_pose=false)
+void readFrames(std::string dir, int start, int end, int frame, bool use_pose)
 {
   std::ifstream frame_in;
   int  fileCounter = start;
