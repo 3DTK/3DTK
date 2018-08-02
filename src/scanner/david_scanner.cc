@@ -375,7 +375,7 @@ int main(int argc, char** argv){
 			pts[0]=points;
 			int npts[1];
 			npts[0]=4;
-			cvPolyLine(color_dst, pts, npts,1,1, CV_RGB(0,0,0), 20, 8 );//removing the group
+			cvPolyLine(color_dst, pts, npts,1,1, cv::Scalar(0,0,0), 20, 8 );//removing the group
 
 			x1 = line2[0].x;
 			x2 = line2[1].x;
@@ -402,25 +402,25 @@ int main(int argc, char** argv){
 
 			pts[0]=points;
 
-			cvPolyLine(color_dst, pts, npts,1,1, CV_RGB(0,0,0), 20, 8 );//removing the group
-			cvLine(color_dst, point3, point4,CV_RGB(0,255,0),3, 8 ); //draw the second line!
-			cvLine(color_dst, point1, point2,CV_RGB(0,255,0),3, 8 ); //draw the first line!
+			cvPolyLine(color_dst, pts, npts,1,1, cv::Scalar(0,0,0), 20, 8 );//removing the group
+			cvLine(color_dst, point3, point4,cv::Scalar(0,255,0),3, 8 ); //draw the second line!
+			cvLine(color_dst, point1, point2,cv::Scalar(0,255,0),3, 8 ); //draw the first line!
 
 			//removing everything to the left of the left line and to the right of the right line
 			if (point4.x > point2.x){
 				if (color_dst->width > point4.x){
-					cvRectangle(color_dst,cvPoint(point4.x,0),cvPoint(color_dst->width,color_dst->height),CV_RGB(0,0,0),CV_FILLED);
+					cvRectangle(color_dst,cvPoint(point4.x,0),cvPoint(color_dst->width,color_dst->height),cv::Scalar(0,0,0),CV_FILLED);
 				}
 				if (point1.x > 0){
-					cvRectangle(color_dst,cvPoint(point1.x,0),cvPoint(0,color_dst->height),CV_RGB(0,0,0),CV_FILLED);
+					cvRectangle(color_dst,cvPoint(point1.x,0),cvPoint(0,color_dst->height),cv::Scalar(0,0,0),CV_FILLED);
 				}
 			}
 			if (point4.x < point2.x){
 				if (color_dst->width > point2.x){
-					cvRectangle(color_dst,cvPoint(point2.x,0),cvPoint(color_dst->width,color_dst->height),CV_RGB(0,0,0),CV_FILLED);
+					cvRectangle(color_dst,cvPoint(point2.x,0),cvPoint(color_dst->width,color_dst->height),cv::Scalar(0,0,0),CV_FILLED);
 				}
 				if (point3.x > 0){
-					cvRectangle(color_dst,cvPoint(point3.x,0),cvPoint(0,color_dst->height),CV_RGB(0,0,0),CV_FILLED);
+					cvRectangle(color_dst,cvPoint(point3.x,0),cvPoint(0,color_dst->height),cv::Scalar(0,0,0),CV_FILLED);
 				}
 			}
 			//at this point we have to lines which we drew in green...which means all the red pixels that remain on the image
