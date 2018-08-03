@@ -286,6 +286,7 @@ void MainWindow::saveStates()
   out << "no-points=" << (checkDrawPoints->checkState() != Qt::Checked ? "true" : "false") << endl;
   out << "no-cameras=" << (checkDrawCameras->checkState() != Qt::Checked ? "true" : "false") << endl;
   out << "no-path=" << (checkDrawPath->checkState() != Qt::Checked ? "true" : "false") << endl;
+  out << "no-poses=" << (checkDrawPoses->checkState() != Qt::Checked ? "true" : "false") << endl;
   out << "fog-type=" << comboBoxFogType->currentIndex() << endl;
   out << "fog-density=" << doubleSpinBoxFogDensity->text().toUtf8().constData() << endl;
   out << "position=" << labelCameraPosition->text().toUtf8().constData() << endl;
@@ -301,7 +302,7 @@ void MainWindow::loadStates()
 {
   using namespace boost::program_options;
   
-  bool advanced, noPoints, noCameras, noPath, noFog;
+  bool advanced, noPoints, noCameras, noPath, noPoses, noFog;
   float fov, fogDensity;
   int viewmode, fogType, pointsize;
   ShowColormap colormap;
@@ -322,7 +323,7 @@ void MainWindow::loadStates()
 		captureMouse, hideWidgets, gui_options);
 
   options_description display_options("Display options");
-  setDisplayOptions(scale, fov, viewmode, noPoints, noCameras, noPath,
+  setDisplayOptions(scale, fov, viewmode, noPoints, noCameras, noPath, noPoses,
 		    noFog, fogType, fogDensity, position, rotation,
 		    pointsize, display_options);
 
@@ -360,6 +361,7 @@ void MainWindow::loadStates()
   checkDrawPoints->setChecked(!noPoints);
   checkDrawCameras->setChecked(!noCameras);
   checkDrawPath->setChecked(!noPath);
+  checkDrawPoses->setChecked(!noPoses);
   
   comboBoxFogType->setCurrentIndex(fogType);
   

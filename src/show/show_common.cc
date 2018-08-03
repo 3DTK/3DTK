@@ -580,6 +580,7 @@ void copy_settings_to_globals(
   show_points = ds.draw_points;
   show_cameras = ds.draw_cameras;
   show_path = ds.draw_path;
+  show_poses = ds.draw_poses;
   show_fog = ds.fog.type;
   fogDensity = ds.fog.density;
   pointsize = ds.pointsize;
