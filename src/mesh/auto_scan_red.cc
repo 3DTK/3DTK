@@ -18,7 +18,7 @@ int __attribute__((optimize(0))) getRedParam(RedParam &params) {
     numPts += xyz.size();
   }
 
-  params.voxelSize = numPts / 5E7;
+  params.voxelSize = 10 * numPts / 1E7;
 
 
   // #ifdef __linux__
@@ -44,7 +44,7 @@ int __attribute__((optimize(0))) getRedParam(RedParam &rp, Scan* scan) {
   // retrieve all scans data for a rough memory estimation
   DataXYZ xyz = scan->get("xyz");
   numPts= xyz.size();
-  rp.voxelSize = numPts / 5E7;
+  rp.voxelSize = 10 * numPts / 1E7;
   // #ifdef __linux__
   // memAfter = getFreeMem();
   // #endif
