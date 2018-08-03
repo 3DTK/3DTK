@@ -47,7 +47,7 @@ enum normal_method {KNN, ADAPTIVE_KNN,
 
 // Parse commandline options and assign to parameters
 void parse_options(int argc, char **argv, int &start, int &end, bool &scanserver, int &max_dist, int &min_dist, string &dir, string &odir, IOType &iotype, bool &in_color, bool &out_normal,
-  bool &join, double &red, int &rand, bool &uP, bool &use_xyz, bool &use_color, bool &use_reflectance, int &octree, bool &rangeFilterActive, bool &customFilterActive, string &customFilter, double &scaleFac, bool &hexfloat, bool &high_precision, int &frame,
+  bool &join, double &red, int &rand, bool &uP, bool &use_xyz, bool &use_color, bool &use_reflectance, int &octree, bool &rangeFilterActive, bool &customFilterActive, string &customFilter, double &scaleFac, bool &hexfloat, bool &high_precision, int &frame, bool &autoRed,
   int &k1, int &k2, normal_method &ntype, int &width, int &height, bool &inward, 
   int &depth, int &solverDivide, float &samplesPerNode, float &offset, float &trimVal);
 // validate normmal_method type (important for boost program_option)
@@ -76,15 +76,13 @@ int __attribute__((optimize(0))) main(int argc, char **argv)
   bool in_color; // input points with color
   bool out_normal; // output points with normal
 
-  // parameters for join scans
+  // parameters for transfromation and filtering
   bool join;
-  double red;
   int rand;
   bool uP;  // should we use the pose information instead of the frames?? 
   bool use_xyz;
   bool use_color;
   bool use_reflectance;
-  int octree;  // employ randomized octree reduction?
   bool rangeFilterActive;
   bool customFilterActive = false;
   std::string customFilter;
@@ -92,6 +90,11 @@ int __attribute__((optimize(0))) main(int argc, char **argv)
   bool hexfloat;
   bool high_precision;
   int frame;
+
+  // parameters for reduction
+  bool autoRed;
+  double red;
+  int octree;  // employ randomized octree reduction?
 
   // parameters for normal calculation
   int k1, k2;
@@ -116,7 +119,7 @@ int __attribute__((optimize(0))) main(int argc, char **argv)
   
   // parse input arguments
   parse_options(argc, argv, start, end, scanserver, max_dist, min_dist,dir, odir, iotype, in_color, out_normal,
-    join, red, rand, uP, use_xyz, use_color, use_reflectance, octree, rangeFilterActive, customFilterActive, customFilter, scaleFac, hexfloat, high_precision, frame,
+    join, red, rand, uP, use_xyz, use_color, use_reflectance, octree, rangeFilterActive, customFilterActive, customFilter, scaleFac, hexfloat, high_precision, frame, autoRed,
     k1, k2, ntype, width, height, inward, 
     depth, solverDivide, samplesPerNode, offset, trimVal);
 
@@ -179,6 +182,8 @@ int __attribute__((optimize(0))) main(int argc, char **argv)
     cerr << "No scans found. Did you use the correct format?" << endl;
     exit(-1);
   }
+  // Apply transformation of scans
+  readFrames(dir, start, end, frame, uP);
 
   std::vector<Scan*>::iterator it = Scan::allScans.begin();
   int scanNumber = start;
@@ -186,14 +191,14 @@ int __attribute__((optimize(0))) main(int argc, char **argv)
   // join all scans then call surface reconstrucion
   // ---
   if (join) {
-    readFrames(dir, start, end, frame, uP);
-
     // calculate appropriate reduction parameters
-    RedParam rp; 
-    getRedParam(rp);
-    red = rp.voxelSize;
-    octree = rp.ptsPerVerxel;
-
+    if (red < 0 && autoRed) {
+      RedParam rp; 
+      getRedParam(rp);
+      red = rp.voxelSize;
+      octree = rp.ptsPerVerxel;
+    }
+    
     // octree based reduction
     unsigned int types = PointType::USE_NONE;
     if(supportsReflectance(iotype)) types |= PointType::USE_REFLECTANCE;
@@ -263,13 +268,8 @@ int __attribute__((optimize(0))) main(int argc, char **argv)
     // data conversion
     vector<vector<float>> vPoints;
     vector<vector<float>> vNormals;
-    convert(points, vPoints);
-    convert(normals, vNormals);
-
-    int size1 = sizeof(vPoints),
-      size2 = sizeof(vNormals),
-      size3 = sizeof(points),
-      size4 = sizeof(normals);
+    convert(points, vPoints);   vector<Point>().swap(points);
+    convert(normals, vNormals); vector<Point>().swap(normals);
 
     cout << "Poisson reconstruction started" << endl;
     // reconstruction for joined scan
@@ -277,8 +277,9 @@ int __attribute__((optimize(0))) main(int argc, char **argv)
     pp.Trim = trimVal;
     pp.UseColor = in_color;
     pp.ExportNormal = out_normal;
-    poisson.setPoints(vPoints);
-    poisson.setNormals(vNormals);
+    poisson.setPoints(vPoints);   vector<vector<float>>().swap(vPoints); 
+    poisson.setNormals(vNormals); vector<vector<float>>().swap(vNormals); 
+    vNormals.clear();
     poisson.setColors(colors);
     poisson.setParams(pp);
     poisson.apply();
@@ -294,10 +295,12 @@ int __attribute__((optimize(0))) main(int argc, char **argv)
       Scan* scan = Scan::allScans[i];
 
       // get reduction parameters
-      RedParam rp;
-      getRedParam(rp, scan);
-      red = rp.voxelSize;
-      octree = rp.ptsPerVerxel;
+      if (red && autoRed) {
+        RedParam rp;
+        getRedParam(rp, scan);
+        red = rp.voxelSize;
+        octree = rp.ptsPerVerxel;
+      }
 
       // octree based reduction
       unsigned int types = PointType::USE_NONE;
@@ -348,8 +351,8 @@ int __attribute__((optimize(0))) main(int argc, char **argv)
       // data conversion
       vector<vector<float>> vPoints;
       vector<vector<float>> vNormals;
-      convert(points, vPoints);
-      convert(normals, vNormals);
+      convert(points, vPoints);   vector<Point>().swap(points);
+      convert(normals, vNormals); vector<Point>().swap(normals);
 
       cout << "Poisson reconstruction started" << endl;
       // reconstruction for current scan
@@ -357,8 +360,8 @@ int __attribute__((optimize(0))) main(int argc, char **argv)
       pp.Trim = trimVal;
       pp.UseColor = in_color;
       pp.ExportNormal = out_normal;
-      poisson.setPoints(vPoints);
-      poisson.setNormals(vNormals);
+      poisson.setPoints(vPoints);   vector<vector<float>>().swap(vPoints); 
+      poisson.setNormals(vNormals); vector<vector<float>>().swap(vNormals); 
       poisson.setColors(colors);
       poisson.setParams(pp);
       poisson.apply();
@@ -422,7 +425,7 @@ void validate(boost::any& v, const std::vector<std::string>& values,
 
 // Parse commandline options
 void parse_options(int argc, char **argv, int &start, int &end, bool &scanserver, int &max_dist, int &min_dist, string &dir, string &odir, IOType &iotype, bool &in_color, bool &out_normal,
-  bool &join, double &red, int &rand, bool &use_pose, bool &use_xyz, bool &use_color, bool &use_reflectance, int &octree, bool &rangeFilterActive, bool &customFilterActive, string &customFilter, double &scaleFac, bool &hexfloat, bool &high_precision, int &frame,
+  bool &join, double &red, int &rand, bool &use_pose, bool &use_xyz, bool &use_color, bool &use_reflectance, int &octree, bool &rangeFilterActive, bool &customFilterActive, string &customFilter, double &scaleFac, bool &hexfloat, bool &high_precision, int &frame, bool &autoRed,
   int &k1, int &k2, normal_method &ntype, int &width, int &height, bool &inward, 
   int &depth, int &solverDivide, float &samplesPerNode, float &offset, float &trimVal)
 {
@@ -458,6 +461,8 @@ void parse_options(int argc, char **argv, int &start, int &end, bool &scanserver
        po::value<bool>(&out_normal)->default_value(true),
        "export mesh with normal data")
       // reduction parameters
+      ("autored,a", po::value<bool>(&autoRed)->default_value(false),
+       "automatically reduce scans if necessary")
       ("reduce,r", po::value<double>(&red)->default_value(-1.0),
       "turns on octree based point reduction (voxel size=<NR>)")
       ("octree,O", po::value<int>(&octree)->default_value(1),
@@ -619,6 +624,7 @@ void readFrames(std::string dir, int start, int end, int frame, bool use_pose)
       const double * transMatOrig = Scan::allScans[fileCounter - start - 1]->get_transMatOrg();
       Scan::allScans[fileCounter - start - 1]->transformAll(transMatOrig);
     }
+    cout << "Scan " << fileCounter - start - 1 << " transformed!" << endl;
     frame_in.close();
     frame_in.clear();
   }
