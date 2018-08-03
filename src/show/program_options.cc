@@ -10,7 +10,7 @@ void parse_args(int argc, char **argv, dataset_settings& ds, window_settings& ws
   using namespace std;
 
   // Temporary parsing variables
-  bool no_points, no_cameras, no_path, no_fog, no_animcolor, no_anim_convert_jpg;
+  bool no_points, no_cameras, no_path, no_poses, no_fog, no_animcolor, no_anim_convert_jpg;
 
   // TODO make all defaults declared here the initial values for the settings structs, then use that initial value as the default here
   options_description gui_options("GUI options");
@@ -20,7 +20,7 @@ void parse_args(int argc, char **argv, dataset_settings& ds, window_settings& ws
 
   options_description display_options("Display options");
   setDisplayOptions(ds.scale, ds.camera.fov, ds.init_with_viewmode,
-		    no_points, no_cameras, no_path,
+		    no_points, no_cameras, no_path, no_poses,
 		    no_fog, ds.fog.type, ds.fog.density,
 		    ds.camera.position, ds.camera.rotation, ds.pointsize,
 		    display_options);
@@ -150,6 +150,7 @@ void parse_args(int argc, char **argv, dataset_settings& ds, window_settings& ws
   ds.draw_points      = !no_points;
   ds.draw_cameras     = !no_cameras;
   ds.draw_path        = !no_path;
+  ds.draw_poses       = !no_poses;
   ds.color_animation  = !no_animcolor;
   ds.anim_convert_jpg = !no_anim_convert_jpg;
   if (no_fog) ds.fog.type = 0;
@@ -268,7 +269,7 @@ void setGUIOptions(bool& nogui, float& fps,
 }
 
 void setDisplayOptions(double& scale, GLfloat& fov, int& viewmode,
-		       bool& noPoints, bool& noCameras, bool& noPath,
+		       bool& noPoints, bool& noCameras, bool& noPath, bool& noPoses,
 		       bool& noFog, int& fogType, GLfloat& fogDensity,
 		       Position& position, Quaternion& rotation,
 		       int& pointsize,
@@ -290,6 +291,8 @@ void setDisplayOptions(double& scale, GLfloat& fov, int& viewmode,
      "Initially, do not draw cameras.")
     ("no-path", bool_switch(&noPath),
      "Initially, do not draw camera path.")
+    ("no-poses", bool_switch(&noPoses),
+     "Initially, do not draw poses.")
     ("no-fog", bool_switch(&noFog),
      "Initially turn off fog.")
     ("fog-type", value(&fogType)->default_value(1),

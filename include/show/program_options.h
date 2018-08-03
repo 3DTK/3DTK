@@ -123,6 +123,7 @@ struct dataset_settings {
   bool draw_points;
   bool draw_cameras;
   bool draw_path;
+  bool draw_poses;
 
   bool color_animation;
   bool anim_convert_jpg;
@@ -164,7 +165,7 @@ void setGUIOptions(bool& nogui, float& fps,
 		   bool& capturedMouse, bool& hideWidgetsInFullscreen,
 		   boost::program_options::options_description& gui_options);
 void setDisplayOptions(double& scale, GLfloat& fov, int& viewmode,
-		       bool& noPoints, bool& noCameras, bool& noPath,
+		       bool& noPoints, bool& noCameras, bool& noPath, bool& noPoses,
 		       bool& noFog, int& fogType, GLfloat& fogDensity,
 		       Position& position, Quaternion& rotation,
 		       int& pointsize, boost::program_options::options_description& display_options);
