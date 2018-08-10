@@ -172,7 +172,12 @@ CumulativeDerivativeValues< V , Dim , _PointD > FEMTree< Dim , Real >::_getValue
 		{
 			LocalDepth d ; LocalOffset off ; _localDepthAndOffset( nodes[i] , d , off );
 			CumulativeDerivativeValues< Real , Dim , _PointD > _values = state.template dValues< Real , CumulativeDerivatives< Dim , _PointD > >( off );
-			for( int d=0 ; d<CumulativeDerivatives< Dim , _PointD >::Size ; d++ ) values[d] += coefficients[ nodes[i]->nodeData.nodeIndex ] * _values[d];
+			for( int d=0 ; d<CumulativeDerivatives< Dim , _PointD >::Size ; d++ ) {
+				auto nd = nodes[i]->nodeData.nodeIndex;
+				auto co = coefficients[ nodes[i]->nodeData.nodeIndex ];
+				values[d] += coefficients[ nodes[i]->nodeData.nodeIndex ] * _values[d];
+			}
+			// for( int d=0 ; d<CumulativeDerivatives< Dim , _PointD >::Size ; d++ ) values[d] += coefficients[ nodes[i]->nodeData.nodeIndex ] * _values[d];
 		}
 	};
 
