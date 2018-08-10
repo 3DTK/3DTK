@@ -216,14 +216,14 @@ struct FEMTreeProfiler
 	void dumpOutput( const char* header ) const
 	{
 		FEMTree< Dim , Real >::MemoryUsage();
-		if( header ) messageWriter( "%s %9.1f (s), %9.1f (MB) / %9.1f (MB) / %9.1f (MB)\n" , header , Time()-t , FEMTree< Dim , Real >::LocalMemoryUsage() , FEMTree< Dim , Real >::MaxMemoryUsage() , MemoryInfo::PeakMemoryUsageMB() );
-		else         messageWriter(    "%9.1f (s), %9.1f (MB) / %9.1f (MB) / %9.1f (MB)\n" ,          Time()-t , FEMTree< Dim , Real >::LocalMemoryUsage() , FEMTree< Dim , Real >::MaxMemoryUsage() , MemoryInfo::PeakMemoryUsageMB() );
+		// if( header ) messageWriter( "%s %9.1f (s), %9.1f (MB) / %9.1f (MB) / %9.1f (MB)\n" , header , Time()-t , FEMTree< Dim , Real >::LocalMemoryUsage() , FEMTree< Dim , Real >::MaxMemoryUsage() , MemoryInfo::PeakMemoryUsageMB() );
+		// else         messageWriter(    "%9.1f (s), %9.1f (MB) / %9.1f (MB) / %9.1f (MB)\n" ,          Time()-t , FEMTree< Dim , Real >::LocalMemoryUsage() , FEMTree< Dim , Real >::MaxMemoryUsage() , MemoryInfo::PeakMemoryUsageMB() );
 	}
 	void dumpOutput2( std::vector< char* >& comments , const char* header ) const
 	{
 		FEMTree< Dim , Real >::MemoryUsage();
-		if( header ) messageWriter( comments , "%s %9.1f (s), %9.1f (MB) / %9.1f (MB) / %9.1f (MB)\n" , header , Time()-t , FEMTree< Dim , Real >::LocalMemoryUsage() , FEMTree< Dim , Real >::MaxMemoryUsage() , MemoryInfo::PeakMemoryUsageMB() );
-		else         messageWriter( comments ,    "%9.1f (s), %9.1f (MB) / %9.1f (MB) / %9.1f (MB)\n" ,          Time()-t , FEMTree< Dim , Real >::LocalMemoryUsage() , FEMTree< Dim , Real >::MaxMemoryUsage() , MemoryInfo::PeakMemoryUsageMB() );
+		// if( header ) messageWriter( comments , "%s %9.1f (s), %9.1f (MB) / %9.1f (MB) / %9.1f (MB)\n" , header , Time()-t , FEMTree< Dim , Real >::LocalMemoryUsage() , FEMTree< Dim , Real >::MaxMemoryUsage() , MemoryInfo::PeakMemoryUsageMB() );
+		// else         messageWriter( comments ,    "%9.1f (s), %9.1f (MB) / %9.1f (MB) / %9.1f (MB)\n" ,          Time()-t , FEMTree< Dim , Real >::LocalMemoryUsage() , FEMTree< Dim , Real >::MaxMemoryUsage() , MemoryInfo::PeakMemoryUsageMB() );
 	}
 };
 
@@ -377,13 +377,10 @@ void ExtractMesh( CoredFileMeshData< Vertex > &mesh, UIntPack< FEMSigs ... > , s
 		isoStats = IsoSurfaceExtractor< Dim , Real , Vertex >::template Extract< TotalPointSampleData >( Sigs() , UIntPack< WEIGHT_DEGREE >() , UIntPack< DataSig >() , tree , density , &_sampleData , solution , isoValue , mesh , SetVertex , !LinearFit.set , !NonManifold.set , PolygonMesh.set , false );
 	}
 	else isoStats = IsoSurfaceExtractor< Dim , Real , Vertex >::template Extract< TotalPointSampleData >( Sigs() , UIntPack< WEIGHT_DEGREE >() , UIntPack< DataSig >() , tree , density , NULL , solution , isoValue , mesh , SetVertex , !LinearFit.set , !NonManifold.set , PolygonMesh.set , false );
-	messageWriter( "Vertices / Polygons: %d / %d\n" , mesh.outOfCorePointCount()+mesh.inCorePoints.size() , mesh.polygonCount() );
-	messageWriter( "Corners / Vertices / Edges / Surface / Set Table / Copy Finer: %.1f / %.1f / %.1f / %.1f / %.1f / %.1f (s)\n" , isoStats.cornersTime , isoStats.verticesTime , isoStats.edgesTime , isoStats.surfaceTime , isoStats.setTableTime , isoStats.copyFinerTime );
+	// messageWriter( "Vertices / Polygons: %d / %d\n" , mesh.outOfCorePointCount()+mesh.inCorePoints.size() , mesh.polygonCount() );
+	// messageWriter( "Corners / Vertices / Edges / Surface / Set Table / Copy Finer: %.1f / %.1f / %.1f / %.1f / %.1f / %.1f (s)\n" , isoStats.cornersTime , isoStats.verticesTime , isoStats.edgesTime , isoStats.surfaceTime , isoStats.setTableTime , isoStats.copyFinerTime );
 	if( PolygonMesh.set ) profiler.dumpOutput2( comments , "#         Got polygons:" );
 	else                  profiler.dumpOutput2( comments , "#        Got triangles:" );
-
-	// if( NoComments.set ) PlyWritePolygons< Vertex , Real , Dim >( Out.value , &mesh , ASCII.set ? PLY_ASCII : PLY_BINARY_NATIVE , NULL         , 0                    , iXForm );
-	// else                 PlyWritePolygons< Vertex , Real , Dim >( Out.value , &mesh , ASCII.set ? PLY_ASCII : PLY_BINARY_NATIVE , &comments[0] , (int)comments.size() , iXForm );
 }
 
 template< class Real , class Mesh, typename ... SampleData , unsigned int ... FEMSigs >
@@ -402,11 +399,11 @@ int Execute( Mesh &mesh, XForm< float , 4 > &xForm, std::vector<float*> &pts, st
 	typedef InputPointStreamWithData< Real , Dim , TotalPointSampleData > InputPointStream;
 	typedef TransformedInputPointStreamWithData< Real , Dim , TotalPointSampleData > XInputPointStream;
 	std::vector< char* > comments;
-	messageWriter( comments , "*************************************************************\n" );
-	messageWriter( comments , "*************************************************************\n" );
-	messageWriter( comments , "** Running Screened Poisson Reconstruction (Version %s) **\n" , VERSION );
-	messageWriter( comments , "*************************************************************\n" );
-	messageWriter( comments , "*************************************************************\n" );
+	// messageWriter( comments , "*************************************************************\n" );
+	// messageWriter( comments , "*************************************************************\n" );
+	// messageWriter( comments , "** Running Screened Poisson Reconstruction (Version %s) **\n" , VERSION );
+	// messageWriter( comments , "*************************************************************\n" );
+	// messageWriter( comments , "*************************************************************\n" );
 
 	XForm< Real , Dim+1 > iXForm;
 	xForm = XForm< Real , Dim+1 >::Identity();
@@ -416,8 +413,8 @@ int Execute( Mesh &mesh, XForm< float , 4 > &xForm, std::vector<float*> &pts, st
 		if( params[i]->set )
 		{
 			params[i]->writeValue( str );
-			if( strlen( str ) ) messageWriter( comments , "\t--%s %s\n" , params[i]->name , str );
-			else                messageWriter( comments , "\t--%s\n" , params[i]->name );
+			// if( strlen( str ) ) messageWriter( comments , "\t--%s %s\n" , params[i]->name , str );
+			// else                messageWriter( comments , "\t--%s\n" , params[i]->name );
 		}
 
 	double startTime = Time();
@@ -475,7 +472,7 @@ int Execute( Mesh &mesh, XForm< float , 4 > &xForm, std::vector<float*> &pts, st
 		iXForm = xForm.inverse();
 		delete pointStream;
 
-		messageWriter( "Input Points / Samples: %d / %d\n" , pointCount , samples->size() );
+		// messageWriter( "Input Points / Samples: %d / %d\n" , pointCount , samples->size() );
 		profiler.dumpOutput2( comments , "# Read input into tree:" );
 	}
 
@@ -510,7 +507,7 @@ int Execute( Mesh &mesh, XForm< float , 4 > &xForm, std::vector<float*> &pts, st
 #pragma omp parallel for
 			for( int i=0 ; i<normalInfo->size() ; i++ ) (*normalInfo)[i] *= (Real)-1.;
 			profiler.dumpOutput2( comments , "#     Got normal field:" );
-			messageWriter( "Point weight / Estimated Area: %g / %g\n" , pointWeightSum , pointCount*pointWeightSum );
+			// messageWriter( "Point weight / Estimated Area: %g / %g\n" , pointWeightSum , pointCount*pointWeightSum );
 		}
 
 		if( !Density.set ) delete density , density = NULL;
@@ -555,8 +552,8 @@ int Execute( Mesh &mesh, XForm< float , 4 > &xForm, std::vector<float*> &pts, st
 			profiler.dumpOutput2( comments , "#Set point constraints:" );
 		}
 
-		messageWriter( "Leaf Nodes / Active Nodes / Ghost Nodes: %d / %d / %d\n" , (int)tree.leaves() , (int)tree.nodes() , (int)tree.ghostNodes() );
-		messageWriter( "Memory Usage: %.3f MB\n" , float( MemoryInfo::Usage())/(1<<20) );
+		// messageWriter( "Leaf Nodes / Active Nodes / Ghost Nodes: %d / %d / %d\n" , (int)tree.leaves() , (int)tree.nodes() , (int)tree.ghostNodes() );
+		// messageWriter( "Memory Usage: %.3f MB\n" , float( MemoryInfo::Usage())/(1<<20) );
 		
 		// Solve the linear system
 		{
@@ -575,17 +572,21 @@ int Execute( Mesh &mesh, XForm< float , 4 > &xForm, std::vector<float*> &pts, st
 		profiler.start();
 		double valueSum = 0 , weightSum = 0;
 		typename FEMTree< Dim , Real >::template MultiThreadedEvaluator< Sigs , 0 > evaluator( &tree , solution );
-#pragma omp parallel for reduction( + : valueSum , weightSum )
+// #pragma omp parallel for reduction( + : valueSum , weightSum )
 		for( int j=0 ; j<samples->size() ; j++ )
 		{
 			ProjectiveData< Point< Real , Dim > , Real >& sample = (*samples)[j].sample;
 			Real w = sample.weight;
-			if( w>0 ) weightSum += w , valueSum += evaluator.values( sample.data / sample.weight , omp_get_thread_num() , (*samples)[j].node )[0] * w;
+			if( w>0 ) {
+				weightSum += w;
+				auto val = evaluator.values( sample.data / sample.weight , omp_get_thread_num() , (*samples)[j].node );
+				valueSum += val[0] * w;
+			}
 		}
 		isoValue = (Real)( valueSum / weightSum );
 		if( DataX.value<=0 || ( !Colors.set && !Normals.set ) ) delete samples , samples = NULL;
 		profiler.dumpOutput( "Got average:" );
-		messageWriter( "Iso-Value: %e = %g / %g\n" , isoValue , valueSum , weightSum );
+		// messageWriter( "Iso-Value: %e = %g / %g\n" , isoValue , valueSum , weightSum );
 	}
 	if( Tree.set )
 	{
@@ -634,57 +635,6 @@ int Execute( Mesh &mesh, XForm< float , 4 > &xForm, std::vector<float*> &pts, st
 				std::function< void ( Vertex& , Point< Real , Dim > , Real , TotalPointSampleData ) > SetVertex = []( Vertex& v , Point< Real , Dim > p , Real w , TotalPointSampleData d ){ v.point = p , std::get< 0 >( v.data.data ) = std::get< 0 >( d.data ) , std::get< 1 >( v.data.data ).data = w , std::get< 2 >( v.data.data ) = std::get< 1 >( d.data ); };
 				// CoredFileMeshData< Vertex > mesh( " " );
 				ExtractMesh< Vertex >( mesh, UIntPack< FEMSigs ... >() , std::tuple< SampleData ... >() , tree , solution , isoValue , samples , sampleData , density , SetVertex , comments , iXForm );
-				// // write operations
-				// {
-				// 	std::fstream fs("dat/testcolor.obj", std::fstream::out);
-				// 	int i = 0;
-				// 	int nr_vertices=int(mesh.outOfCorePointCount()+mesh.inCorePoints.size());
-				// 	int nr_faces=mesh.polygonCount();
-
-				// 	mesh.resetIterator();
-				// 	typename Vertex::Transform _xForm( xForm );
-
-				// 	// update vertices info including position, density, color and normal
-				// 	for( i=0 ; i<int( mesh.inCorePoints.size() ) ; i++ )
-				// 	{
-				// 		Vertex vertex = _xForm( mesh.inCorePoints[i] );
-				// 	}
-				// 	for( i=0; i<mesh.outOfCorePointCount() ; i++ )
-				// 	{
-				// 		Vertex vertex;
-				// 		mesh.nextOutOfCorePoint( vertex );
-				// 		auto vert = vertex.point;
-				// 		auto norm = std::get<0>(vertex.data.data).data;
-				// 		auto density = std::get<1>(vertex.data.data).data;
-				// 		auto color = std::get<0>(std::get<2>(vertex.data.data).data).data;
-				// 		fs << "v " << vert.coords[0] << " " << vert.coords[1] << " " << vert.coords[2] 
-				// 			<< " " << color.coords[0] << " " << color.coords[1] << " " << color.coords[2] << std::endl;
-				// 		fs << "vn " << norm.coords[0] << " " << norm.coords[1] << " " << norm.coords[2] << std::endl;
-				// 		vertex = _xForm( vertex );
-				// 	}
-
-				// 	// update faces info
-				// 	std::vector< CoredVertexIndex > polygon;
-				// 	for( i=0 ; i<nr_faces ; i++ )
-				// 	{
-				// 		//
-				// 		// create and fill a struct that the ply code can handle
-				// 		//
-				// 		PlyFace ply_face;
-				// 		mesh.nextPolygon( polygon );
-				// 		ply_face.nr_vertices = int( polygon.size() );
-				// 		ply_face.vertices = new int[ polygon.size() ];
-				// 		fs << "f";
-				// 		for( int i=0 ; i<int(polygon.size()) ; i++ ) {
-				// 			if( polygon[i].inCore ) ply_face.vertices[i] = polygon[i].idx;
-				// 			else                    ply_face.vertices[i] = polygon[i].idx + int( mesh.inCorePoints.size() );
-				// 			fs << " " << ply_face.vertices[i] + 1;
-				// 		}
-				// 		fs << std::endl;
-				// 		delete[] ply_face.vertices;
-				// 	}
-				// 	fs.close();
-				// }
 			}
 			else
 			{
@@ -711,7 +661,7 @@ int Execute( Mesh &mesh, XForm< float , 4 > &xForm, std::vector<float*> &pts, st
 		if( sampleData ){ delete sampleData ; sampleData = NULL; }
 	}
 	if( density ) delete density , density = NULL;
-	messageWriter( comments , "#          Total Solve: %9.1f (s), %9.1f (MB)\n" , Time()-startTime , FEMTree< Dim , Real >::MaxMemoryUsage() );
+	// messageWriter( comments , "#          Total Solve: %9.1f (s), %9.1f (MB)\n" , Time()-startTime , FEMTree< Dim , Real >::MaxMemoryUsage() );
 
 	return 1;
 }

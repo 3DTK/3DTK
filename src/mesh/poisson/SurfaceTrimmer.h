@@ -274,18 +274,18 @@ int Execute( std::vector< PlyVertexWithData< float , 3 , MultiPointStreamData< f
 	std::vector< std::vector< int > > ltPolygons , gtPolygons;
 	std::vector< bool > ltFlags , gtFlags;
 
-	messageWriter( comments , "*********************************************\n" );
-	messageWriter( comments , "*********************************************\n" );
-	messageWriter( comments , "** Running Surface Trimmer (Version %s) **\n" , VERSION );
-	messageWriter( comments , "*********************************************\n" );
-	messageWriter( comments , "*********************************************\n" );
+	// messageWriter( comments , "*********************************************\n" );
+	// messageWriter( comments , "*********************************************\n" );
+	// messageWriter( comments , "** Running Surface Trimmer (Version %s) **\n" , VERSION );
+	// messageWriter( comments , "*********************************************\n" );
+	// messageWriter( comments , "*********************************************\n" );
 	char str[1024];
 	for( int i=0 ; params[i] ; i++ )
 		if( params[i]->set )
 		{
 			params[i]->writeValue( str );
-			if( strlen( str ) ) messageWriter( comments , "\t--%s %s\n" , params[i]->name , str );
-			else                messageWriter( comments , "\t--%s\n" , params[i]->name );
+			// if( strlen( str ) ) messageWriter( comments , "\t--%s %s\n" , params[i]->name , str );
+			// else                messageWriter( comments , "\t--%s\n" , params[i]->name );
 		}
 
 	double t=Time();
@@ -342,7 +342,7 @@ int Execute( std::vector< PlyVertexWithData< float , 3 , MultiPointStreamData< f
 	}
 
 	RemoveHangingVertices( vertices , gtPolygons );
-	sprintf( comments[commentNum++] , "#Trimmed In: %9.1f (s)" , Time()-t );
+	// sprintf( comments[commentNum++] , "#Trimmed In: %9.1f (s)" , Time()-t );
 	// PlyWritePolygons< Vertex >( "dat/testoutput.ply" , vertices , gtPolygons , Vertex::PlyWriteProperties() , Vertex::PlyWriteNum , ft , &comments[0] , (int)comments.size() );
 	tPolygons = gtPolygons;
 	return EXIT_SUCCESS;
