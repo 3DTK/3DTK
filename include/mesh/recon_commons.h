@@ -7,11 +7,10 @@
 #include <fstream>
 #include <algorithm>
 
-#include <slam6d/io_types.h>
-#include <slam6d/globals.icc>
-#include <slam6d/scan.h>
-#include <scanserver/clientInterface.h>
 #include <slam6d/point.h>
+#include <slam6d/scan.h>
+#include <slam6d/io_types.h>
+#include <scanserver/clientInterface.h>
 #include <slam6d/globals.icc>
 
 #include "mesh/calc_normals.h"

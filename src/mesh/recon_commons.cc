@@ -2,7 +2,7 @@
 
 using namespace std;
 
-void readFrames(std::string dir, int start, int end, int frame, bool use_pose)
+void __attribute__((optimize(0))) readFrames(std::string dir, int start, int end, int frame, bool use_pose)
 {
   std::ifstream frame_in;
   int  fileCounter = start;
@@ -54,7 +54,6 @@ void readFrames(std::string dir, int start, int end, int frame, bool use_pose)
       const double * transMatOrig = Scan::allScans[fileCounter - start - 1]->get_transMatOrg();
       Scan::allScans[fileCounter - start - 1]->transformAll(transMatOrig);
     }
-    cout << "Scan " << fileCounter - start - 1 << " transformed!" << endl;
     frame_in.close();
     frame_in.clear();
   }
