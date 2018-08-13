@@ -8,11 +8,11 @@ void parse_options(
   int argc, char **argv, int &start, int &end, 
   bool &scanserver, int &max_dist, int &min_dist, 
   string &dir, string &odir, IOType &iotype, 
-  bool &in_color, bool &out_normal, bool &join, 
-  double &red, int &rand, bool &use_pose, bool &use_xyz, bool &use_color, bool &use_reflectance, 
+  bool &in_color, bool &no_normal, bool &join, 
+  double &red, int &rand, bool &use_pose,
   int &octree, bool &rangeFilterActive, bool &customFilterActive, string &customFilter, 
-  double &scaleFac, bool &hexfloat, bool &high_precision, int &frame, bool &autoRed,
-  int &k1, int &k2, normal_method &ntype, int &width, int &height, bool &inward, 
+  double &scaleFac, int &frame, bool &autoRed,
+  int &k1, int &k2, normal_method &ntype, int &width, int &height, bool &outward, 
   int &depth, int &solverDivide, float &samplesPerNode, float &offset, float &trimVal
 )
 {
@@ -28,7 +28,7 @@ void parse_options(
        po::value<int>(&end)->default_value(-1),
        "Stop at scan number <arg>")
       ("scanserver,S",
-       po::value<bool>(&scanserver)->default_value(false),
+       po::bool_switch(&scanserver)->default_value(false),
        "Use the scanserver as an input method")
       ("format,f",
        po::value<IOType>(&iotype)->default_value(UOS),
@@ -42,21 +42,18 @@ void parse_options(
        po::value<int>(&min_dist)->default_value(-1),
        "neglegt all data points with a distance smaller than <arg> 'units")
       ("incolor,C",
-       po::value<bool>(&in_color)->default_value(false),
+       po::bool_switch(&in_color)->default_value(false),
        "pointset contains color info")
-      ("outnormal,N",
-       po::value<bool>(&out_normal)->default_value(true),
+      ("nonormal,N",
+       po::bool_switch(&no_normal)->default_value(false),
        "export mesh with normal data")
-      // reduction parameters
-      ("autored,a", po::value<bool>(&autoRed)->default_value(false),
+      // reduction and filter parameters
+      ("autored,a", po::bool_switch(&autoRed)->default_value(false),
        "automatically reduce scans if necessary")
       ("reduce,r", po::value<double>(&red)->default_value(-1.0),
       "turns on octree based point reduction (voxel size=<NR>)")
       ("octree,O", po::value<int>(&octree)->default_value(1),
       "use randomized octree based point reduction (pts per voxel=<NR>)")
-      // Join scans parameters
-      ("join,j", po::value<bool>(&join)->default_value(false),
-      "whether to join scans together for surface reconstruction")
       ("customFilter,u", po::value<string>(&customFilter),
       "Apply a custom filter. Filter mode and data are specified as a "
       "semicolon-seperated string:"
@@ -65,23 +62,14 @@ void parse_options(
       "direct specification"
       "FILE;{fileName}"
       "See filter implementation in src/slam6d/pointfilter.cc for more detail.")
-      ("scale,y", po::value<double>(&scaleFac)->default_value(0.01),
+      // Join scans parameters
+      ("join,j", po::bool_switch(&join)->default_value(false),
+      "whether to join scans together for surface reconstruction")
+      ("scale,y", po::value<double>(&scaleFac)->default_value(1.0),
       "scale factor for point cloud in m (be aware of the different units for uos (cm) and xyz (m), default: 0.01 means that input and output remain the same)'")
-      // FIXME: for bool values, I cannot use po::bool_switch here, use po::value<bool> as a workaround
-      // xiasun 
-      ("color,c", po::value<bool>(&use_color)->default_value(false),
-      "export in color as RGB")
-      ("reflectance,R", po::value<bool>(&use_reflectance)->default_value(false),
-      "end after scan <arg>")
-      ("trustpose,t", po::value<bool>(&use_pose)->default_value(false),
+      ("trustpose,t", po::bool_switch(&use_pose)->default_value(false),
       "Trust the pose file, do not extrapolate the last transformation."
       "(just for testing purposes, or gps input.)")
-      ("xyz,x", po::value<bool>(&use_xyz)->default_value(false),
-      "export in xyz format (right handed coordinate system in m)")
-      ("hexfloat,0", po::value<bool>(&hexfloat)->default_value(false),
-      "export points with hexadecimal digits")
-      ("highprecision,H", po::value<bool>(&high_precision)->default_value(false),
-      "export points with full double precision")
       ("frame,n", po::value<int>(&frame)->default_value(-1),
       "uses frame NR for export")
       // Normal parameters 
@@ -108,9 +96,9 @@ void parse_options(
        po::value<int>(&height)->default_value(1000),
        "height of panorama image")
 #endif
-      ("inward,i",
-       po::value<bool>(&inward)->default_value(true),
-       "normal direction inward? default true")
+      ("outward,I",
+       po::bool_switch(&outward)->default_value(false),
+       "normal direction outward? default false")
       // Poisson parameters
       ("depth,d",
       po::value<int>(&depth)->default_value(8),
