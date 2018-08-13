@@ -13,21 +13,16 @@ int __attribute__((optimize(0))) main(int argc, char **argv)
   string dir, odir; // directory of input scan and output model
   IOType iotype;
   bool in_color; // input points with color
-  bool out_normal; // output points with normal
+  bool no_normal; // do not output vertices normals
 
   // parameters for transfromation and filtering
   bool join;
   int rand;
   bool use_pose;  // should we use the pose information instead of the frames?? 
-  bool use_xyz;
-  bool use_color;
-  bool use_reflectance;
   bool rangeFilterActive;
   bool customFilterActive = false;
   std::string customFilter;
   double scaleFac;
-  bool hexfloat;
-  bool high_precision;
   int frame;
 
   // parameters for reduction
@@ -39,7 +34,7 @@ int __attribute__((optimize(0))) main(int argc, char **argv)
   int k1, k2;
   normal_method ntype;
   int width, height;
-  bool inward;
+  bool outward;
 
   // parameters for poisson
   int depth;
@@ -60,11 +55,11 @@ int __attribute__((optimize(0))) main(int argc, char **argv)
   parse_options(argc, argv, start, end, 
     scanserver, max_dist, min_dist,
     dir, odir, iotype, 
-    in_color, out_normal, join, 
-    red, rand, use_pose, use_xyz, use_color, use_reflectance, 
+    in_color, no_normal, join, 
+    red, rand, use_pose,
     octree, rangeFilterActive, customFilterActive, customFilter, 
-    scaleFac, hexfloat, high_precision, frame, autoRed,
-    k1, k2, ntype, width, height, inward, 
+    scaleFac, frame, autoRed,
+    k1, k2, ntype, width, height, outward, 
     depth, solverDivide, samplesPerNode, offset, trimVal);
 
   if (scanserver) {
@@ -166,7 +161,7 @@ int __attribute__((optimize(0))) main(int argc, char **argv)
   
   // join all scans then call surface reconstrucion
   // ---
-  red_string = red > 0 ? "reduced" : "";
+  red_string = red > 0 ? " reduced" : "";
   if (join) {
     vector<Point> pts;
     vector<Point> norms;
@@ -201,7 +196,7 @@ int __attribute__((optimize(0))) main(int argc, char **argv)
       
       // calculate normals for current scan, then merge them
       calcNormals(pts, norms, ntype, k1, k2, width, height, rPos, rPosTheta, scan);
-      if (inward) {
+      if (!outward) {
         flipNormals(norms);
       }
       points.insert(points.end(), pts.begin(), pts.end());
@@ -227,7 +222,7 @@ int __attribute__((optimize(0))) main(int argc, char **argv)
     pp.Depth = depth;
     pp.Trim = trimVal;
     pp.UseColor = in_color;
-    pp.ExportNormal = out_normal;
+    pp.ExportNormal = !no_normal;
     poisson.setPoints(vPoints);   vector<vector<float>>().swap(vPoints); 
     poisson.setNormals(vNormals); vector<vector<float>>().swap(vNormals); 
     poisson.setColors(colors);
@@ -267,7 +262,7 @@ int __attribute__((optimize(0))) main(int argc, char **argv)
 
       // calculate normals
       calcNormals(points, normals, ntype, k1, k2, width, height, rPos, rPosTheta, scan);
-      if (inward) {
+      if (!outward) {
         flipNormals(normals);
       }
       cout << "Normal calculation end" << endl;
@@ -283,7 +278,7 @@ int __attribute__((optimize(0))) main(int argc, char **argv)
       pp.Depth = depth;
       pp.Trim = trimVal;
       pp.UseColor = in_color;
-      pp.ExportNormal = out_normal;
+      pp.ExportNormal = !no_normal;
       poisson.setPoints(vPoints);   vector<vector<float>>().swap(vPoints); 
       poisson.setNormals(vNormals); vector<vector<float>>().swap(vNormals); 
       poisson.setColors(colors);
