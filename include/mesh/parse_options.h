@@ -13,10 +13,10 @@ void parse_options(
   int argc, char **argv, int &start, int &end, 
   bool &scanserver, int &max_dist, int &min_dist, 
   std::string &dir, std::string &odir, IOType &iotype, 
-  bool &in_color, bool &out_normal, bool &join, 
-  double &red, int &rand, bool &uP, bool &use_xyz, bool &use_color, bool &use_reflectance, 
+  bool &in_color, bool &no_normal, bool &join, 
+  double &red, int &rand, bool &uP,
   int &octree, bool &rangeFilterActive, bool &customFilterActive, std::string &customFilter, 
-  double &scaleFac, bool &hexfloat, bool &high_precision, int &frame, bool &autoRed,
+  double &scaleFac, int &frame, bool &autoRed,
   int &k1, int &k2, normal_method &ntype, int &width, int &height, bool &inward, 
   int &depth, int &solverDivide, float &samplesPerNode, float &offset, float &trimVal
 );
