@@ -157,6 +157,7 @@ option(WITH_OPENCV_NONFREE "Whether to use non-free (patent encumbered) OpenCV f
 option(WITH_COMPACT_OCTREE "Whether to use the compact octree display ON/OFF" OFF)
 option(WITH_GLEE "Whether to use OpenGL extensions, requires glee. ON/OFF" OFF)
 option(WITH_LASLIB "Whether to build LASlib based scanio library" ON)
+option(WITH_MESH "Whether to build mesh module that contains surface reconstruction" ON)
 
 ## CUDA accelerated collision detection
 option(WITH_CUDA "Whether to build CUDA accelerated collision detection tools" OFF)
@@ -374,7 +375,12 @@ add_subdirectory(src/ros)
 add_subdirectory(src/tools)
 add_subdirectory(src/gps)
 add_subdirectory(src/curvefusion)
-add_subdirectory(src/mesh)
+if(WITH_MESH)
+  message("Build with mesh module")
+  add_subdirectory(src/mesh)
+else()
+  message("Build without mesh module")
+endif()
 # 3rdparty must come before src/calibration because it sets
 # APRILTAG_INCLUDE_DIRS
 add_subdirectory(3rdparty)
