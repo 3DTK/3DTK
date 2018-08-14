@@ -99,6 +99,7 @@ int Poisson::setParams(PoissonParam &p) {
   Normals.set = true;
   Out.set = true;
   Trim.set = true; Trim.value = p.Trim;
+  SamplesPerNode.set = true; SamplesPerNode.value = p.samplesPerNode;
   if( !PointWeight.set ) PointWeight.value = DefaultPointWeightMultiplier*Degree.value;
   return 1;
 }

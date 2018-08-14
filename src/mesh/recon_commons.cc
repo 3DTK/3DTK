@@ -2,7 +2,7 @@
 
 using namespace std;
 
-void __attribute__((optimize(0))) readFrames(std::string dir, int start, int end, int frame, bool use_pose)
+void readFrames(std::string dir, int start, int end, int frame, bool use_pose)
 {
   std::ifstream frame_in;
   int  fileCounter = start;
