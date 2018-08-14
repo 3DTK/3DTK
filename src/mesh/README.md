@@ -9,7 +9,7 @@ Poisson surface reconstruction was introduced by [Michael Kazhdan](http://www.cs
 
 The general workflow of this tool is illustrated below. The programs start with users input options, it parses these options and set specified values or default values for all variables. Then it read scans, if user set range filter or reduction parameters, the program will do filter and reduction to get a smaller data size and range. After this, all scans will be registered based on frames or pose info. Then, normal calculation will be performed on each scan, if user chooses to join scans, all scans will be merged into a big dataset as the input of poisson reconstruction, if no join is set, each scan will be used as input of poisson reconstruction individually. After reconstruction, a surface trimming will be applied on the reconstructed models, and models will be written to a specific path in the end.
 
-![workflow chart](mesh/imgs/workflow.png)
+![workflow chart](https://xiasun.github.io/gsoc2018/imgs/workflow.png)
 
 
 ---
@@ -23,31 +23,31 @@ Please know that this tool is not compatible with Ubuntu 14.04 (Trusty) due to a
 ```shell
 bin/recon dat dat/test/model -d 12 -T 7.0 -j
 ```
-![dat](mesh/imgs/model_all_trimmed.png)
+![dat](https://xiasun.github.io/gsoc2018/imgs/model_all_trimmed.png)
 
 2. Use a common points data, for example the [Stanford Bunny](http://graphics.stanford.edu/data/3Dscanrep/#bunny). A recommended way is convert the original model file into .xyz file that only contains the xyz coordinates, rename it as `scan000.3d` and put it into a directory for example `dat/bunny/`, new a file called `scan000.pose` and put it under the same directory, and then use commands below. Unlike most scan data 3DTK is dealing with, the bunny surface is water-tight (closed), so we set the normal to be outward by adding a `-I` tag. For most scans data we use the default normal that are towards the scanner which we called inward.
 ```shell
 bin/recon dat/bunny dat/bunny/model -I
 ```
-![bunny](mesh/imgs/bunny.png)
+![bunny](https://xiasun.github.io/gsoc2018/imgs/bunny.png)
 
 3. Use [Thermobremen](http://kos.informatik.uni-osnabrueck.de/3Dscans/) data (No.22 on this page), a typical city scan data. This dataset is with file format uosr, we set it with `-f` tag. Since it is relatively large, we set an auto reduction with `-a` tag. We also set scans joining , poisson octree depth 12 and trimming value 9.0.
 ```shell
 bin/recon dat/testdata/thermobremen dat/testdata/thermobremen/result -f uosr -a -j -d 12 -T 9
 ```
-![thermobremen](mesh/imgs/thermobremen.png)
+![thermobremen](https://xiasun.github.io/gsoc2018/imgs/thermobremen.png)
 
 4. Use [Thermocolorlab](http://kos.informatik.uni-osnabrueck.de/3Dscans/) data (No.20 on this page), a typical indoor colored scan data. This dataset is with file format uos_rrgbt, so we set it with `-f` first. This scan range is extremly large, we are only going to reconstruct surface within one room here, so we filter part of it with `-u` tag, the filter range is -500 to 500 on x,y and z directions. We set scan number start from 0 and end with 12 with tag `-s` and `-e`, because other scans are not within the room we are going to show, so we just skip them for better speed and lower memory usages. We also set scan joing, octree depth and trimming value. To generate surface with color info, we have to use `-C` tag.
 ```shell
 bin/recon dat/testdata/thermocolorlab/ dat/testdata/thermocolorlab/model -j -f uos_rrgbt -d 12 -T 8 -s 0 -e 12 -u "11;6;-500;500;-500;500;-500;500" -C
 ```
-![thermocolorlab](mesh/imgs/thermocolorlab.png)
+![thermocolorlab](https://xiasun.github.io/gsoc2018/imgs/thermocolorlab.png)
 
 5. Use [Ostia]() data, another indoor colored scan data. Very similar to the Thermocolorlab data, this sample demonstrate that you could use only part of the scan by removing extra scans files. We first set file format to uos_rgb and use color as input data. Then set poisson octree depth 12 and trimming value 9.0.
 ```shell
 bin/recon dat/testdata/ostia dat/testdata/ostia -j -f uos_rgb -d 12 -T 9 -C
 ```
-![ostia](mesh/imgs/ostia.png)
+![ostia](https://xiasun.github.io/gsoc2018/imgs/ostia.png)
 
 6. Use [Randersacker](http://kos.informatik.uni-osnabrueck.de/3Dscans/) data (No.26 on this page), a typical natrual open scene data. For this kind of large dataset, certain kinds of reduction and filtering is needed before reconstruction. You can either use `--a` option like Thermobremen data above, or to manually set reduction parameters with `-r` option and `-O` options. To set a range filter, you can use `-u` tag. <br>
 But sometimes for large dataset, reduction process will take a large number of time, finding an appropriate reduction parameters may take more time, so it is recommended that you use `bin/scan_red` program to reduce and filter scans first, then use the new files as data source for reconstruction. <br> 
@@ -57,7 +57,7 @@ Scan data of objects like tree leaves are not exactly 'surface' but more like a 
 bin/scan_red -s 0 -e 3 -f uosr --reduction OCTREE --voxel 20 --octree 10 dat/testdata/randersacker/
 bin/recon dat/testdata/randersacker/reduced dat/testdata/randersacker/reduced/model -j -d 12 -T 9 -u "11;6;-1000;1000;-2000;2000;-1000;1000"
 ```
-![randersacker](mesh/imgs/randersacker.png)
+![randersacker](https://xiasun.github.io/gsoc2018/imgs/randersacker.png)
 
 ---
 ### Options list
@@ -127,6 +127,9 @@ e.g. `-T 7.0`
 ---
 ### Commits
 Commits can be viewed on Source Forge [commits list](https://sourceforge.net/p/slam6d/code/commit_browser). Most of my source codes and changes are within [include/mesh](https://sourceforge.net/p/slam6d/code/HEAD/tree/trunk/include/mesh/) and [src/mesh](https://sourceforge.net/p/slam6d/code/HEAD/tree/trunk/src/mesh/) directories.
+- [[r1893]](https://sourceforge.net/p/slam6d/code/1893) mesh: minor bug fixing and add README.md
+- [[r1892]](https://sourceforge.net/p/slam6d/code/1892) Disable build of mesh with Ubuntu trusty
+- [[r1891]](https://sourceforge.net/p/slam6d/code/1891) mesh: fix bool_switch issue in parse_options
 - [[r1890]](https://sourceforge.net/p/slam6d/code/1890) mesh: fix bugs for color reading and transformation
 - [[r1889]](https://sourceforge.net/p/slam6d/code/1889) mesh: reorganize source code file structures, fix bug for default PointWeight unset
 - [[r1886]](https://sourceforge.net/p/slam6d/code/1886) mesh: improve auto reduce option and memory usages
