@@ -2,9 +2,7 @@
 
 using namespace std;
 
-// comment `__attribute__((optimize(0)))` to allow compiling optimization
-// e.g. int /*__attribute__((optimize(0)))*/ main(int argc, char **argv) 
-int __attribute__((optimize(0))) main(int argc, char **argv) 
+int main(int argc, char **argv) 
 {
   // parameters for io
   int start, end;
@@ -23,7 +21,6 @@ int __attribute__((optimize(0))) main(int argc, char **argv)
   bool customFilterActive = false;
   std::string customFilter;
   double scaleFac;
-  int frame;
 
   // parameters for reduction
   bool autoRed;
@@ -38,12 +35,10 @@ int __attribute__((optimize(0))) main(int argc, char **argv)
 
   // parameters for poisson
   int depth;
-	int solverDivide;
 	float samplesPerNode;
-  float offset;
+  float trimVal;
   Poisson poisson;
   PoissonParam pp;
-  float trimVal = 0.0;
 
   vector<Point> points;
   vector<Point> normals;
@@ -57,10 +52,10 @@ int __attribute__((optimize(0))) main(int argc, char **argv)
     dir, odir, iotype, 
     in_color, no_normal, join, 
     red, rand, use_pose,
-    octree, rangeFilterActive, customFilterActive, customFilter, 
-    scaleFac, frame, autoRed,
-    k1, k2, ntype, width, height, outward, 
-    depth, solverDivide, samplesPerNode, offset, trimVal);
+    octree, rangeFilterActive, customFilterActive, 
+    customFilter, scaleFac, autoRed,
+    k1, k2, ntype, width, height, 
+    outward, depth, samplesPerNode, trimVal);
 
   if (scanserver) {
     try {
@@ -157,7 +152,7 @@ int __attribute__((optimize(0))) main(int argc, char **argv)
   }
 
   // Apply transformation of scans, with frames or with poses
-  readFrames(dir, start, end, frame, use_pose);
+  readFrames(dir, start, end, -1, use_pose);
   
   // join all scans then call surface reconstrucion
   // ---
@@ -165,10 +160,6 @@ int __attribute__((optimize(0))) main(int argc, char **argv)
   if (join) {
     vector<Point> pts;
     vector<Point> norms;
-
-    // 
-    fstream ofs("points_r.xyz", fstream::out);
-    // 
 
     for(unsigned int i = 0; i < Scan::allScans.size(); i++) {
       Scan *scan = Scan::allScans[i];
@@ -180,9 +171,6 @@ int __attribute__((optimize(0))) main(int argc, char **argv)
       DataRGB rgb = scan->get(red > 0 ? "color reduced" : "rgb");
       // record UOS format data
       for(unsigned int j = 0; j < xyz.size(); j++) {
-        // 
-        ofs << scaleFac * xyz[j][0] << " " << scaleFac * xyz[j][1] << " " << scaleFac * xyz[j][2] << endl;
-        // 
         pts.push_back(Point(scaleFac * xyz[j][0], scaleFac * xyz[j][1], scaleFac * xyz[j][2]));
         vector<float> c;
         if (in_color) {
@@ -204,12 +192,6 @@ int __attribute__((optimize(0))) main(int argc, char **argv)
       pts.clear();
       norms.clear();
     }
-
-    // 
-    ofs.close();
-    cout << "done" << endl;
-    // return 0;
-    //
 
     // data conversion
     vector<vector<float>> vPoints;

@@ -10,10 +10,10 @@ void parse_options(
   string &dir, string &odir, IOType &iotype, 
   bool &in_color, bool &no_normal, bool &join, 
   double &red, int &rand, bool &use_pose,
-  int &octree, bool &rangeFilterActive, bool &customFilterActive, string &customFilter, 
-  double &scaleFac, int &frame, bool &autoRed,
-  int &k1, int &k2, normal_method &ntype, int &width, int &height, bool &outward, 
-  int &depth, int &solverDivide, float &samplesPerNode, float &offset, float &trimVal
+  int &octree, bool &rangeFilterActive, bool &customFilterActive, 
+  string &customFilter, double &scaleFac, bool &autoRed,
+  int &k1, int &k2, normal_method &ntype, int &width, int &height, 
+  bool &outward, int &depth, float &samplesPerNode, float &trimVal
 )
 {
   po::options_description cmd_options("Poisson Surface Reconstruction <options> \n"
@@ -70,8 +70,6 @@ void parse_options(
       ("trustpose,t", po::bool_switch(&use_pose)->default_value(false),
       "Trust the pose file, do not extrapolate the last transformation."
       "(just for testing purposes, or gps input.)")
-      ("frame,n", po::value<int>(&frame)->default_value(-1),
-      "uses frame NR for export")
       // Normal parameters 
       ("normal,g",
        po::value<normal_method>(&ntype)->default_value(AKNN),
@@ -96,22 +94,16 @@ void parse_options(
        po::value<int>(&height)->default_value(1000),
        "height of panorama image")
 #endif
+      // Poisson parameters
       ("outward,I",
        po::bool_switch(&outward)->default_value(false),
        "normal direction outward? default false")
-      // Poisson parameters
       ("depth,d",
       po::value<int>(&depth)->default_value(8),
       "value of poisson octree depth")
-      ("divide,D",
-      po::value<int>(&solverDivide)->default_value(8),
-      "value of poisson solver divider")
       ("samples,P",
       po::value<float>(&samplesPerNode)->default_value(1.0f),
       "value of poisson samples per node")
-      ("offset,o",
-      po::value<float>(&offset)->default_value(1.0f),
-      "value of poisson offset")
       ("trim,T",
       po::value<float>(&trimVal)->default_value(0.0f),
       "value of trimming threshold value");
