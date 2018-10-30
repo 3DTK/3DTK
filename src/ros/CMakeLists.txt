@@ -16,6 +16,7 @@ if(WITH_ROS)
       urdf
       kdl_parser
       robot_state_publisher
+      nav_msgs
   )
   find_package(Eigen3 REQUIRED)
   find_package(PCL REQUIRED)
