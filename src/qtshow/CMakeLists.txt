@@ -1,4 +1,4 @@
-if (WITH_OPENGL AND WITH_QT)
+if (NOT MSVC AND WITH_OPENGL AND WITH_QT)
   find_package(Qt5Widgets)
   find_package(Qt5OpenGL)
   set(CMAKE_INCLUDE_CURRENT_DIR ON)

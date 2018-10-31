@@ -44,6 +44,10 @@
 #include <opencv2/opencv.hpp>
 #endif
 
+#if CV_MAJOR_VERSION >= 3
+#include <opencv2/imgproc.hpp>
+#endif
+
 #ifndef __CV_BEGIN__
 #define __CV_BEGIN__ __BEGIN__
 #endif

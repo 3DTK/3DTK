@@ -33,7 +33,7 @@ if(UNIX)
 endif()
 
 if (WIN32)
-  target_link_libraries(planes scan_shared XGetopt shape_shared ${NEWMAT_LIBRARIES_SHARED} ${ANN_LIBRARIES_SHARED})
+  target_link_libraries(planes scan_static XGetopt shape_shared ${NEWMAT_LIBRARIES_SHARED} ${ANN_LIBRARIES_STATIC})
 #    target_link_libraries(image scan newmat sparse ${ANN_LIBRARIES} XGetopt)
 endif()
 

@@ -36,13 +36,14 @@ add_library(show_objects OBJECT NurbsPath.cc PathGraph.cc scancolormanager.cc co
 set_property(TARGET show_objects PROPERTY POSITION_INDEPENDENT_CODE 1)
 
 add_library(show_static STATIC show.cc $<TARGET_OBJECTS:show_objects>)
-add_library(show_shared SHARED show.cc $<TARGET_OBJECTS:show_objects>)
-
 set_target_properties(show_static PROPERTIES OUTPUT_NAME show CLEAN_DIRECT_OUTPUT 1)
-set_target_properties(show_shared PROPERTIES OUTPUT_NAME show CLEAN_DIRECT_OUTPUT 1)
-
 target_link_libraries(show_static ${SHOW_LIBS_STATIC})
-target_link_libraries(show_shared ${SHOW_LIBS_SHARED})
+
+if (NOT MSVC)
+  add_library(show_shared SHARED show.cc $<TARGET_OBJECTS:show_objects>)
+  set_target_properties(show_shared PROPERTIES OUTPUT_NAME show CLEAN_DIRECT_OUTPUT 1)
+  target_link_libraries(show_shared ${SHOW_LIBS_SHARED})
+endif()
 
 # FIXME: is opengl necessary for everything including the libs?
 if (WITH_OPENGL)
@@ -56,8 +57,12 @@ if (WITH_OPENGL)
   endif()
 
   add_executable(show show.cc $<TARGET_OBJECTS:show_objects>)
-  target_link_libraries(show ${SHOW_LIBS_SHARED})
-
+  if (MSVC)
+    target_link_libraries(show ${SHOW_LIBS_STATIC})
+  else()
+    target_link_libraries(show ${SHOW_LIBS_SHARED})
+  endif()
+  
   if(WITH_WXWIDGETS)
     find_package(wxWidgets REQUIRED core base gl)
     # set wxWidgets_wxrc_EXECUTABLE to be ignored in the configuration

@@ -238,7 +238,7 @@ std::string getConfigHome()
   }
 #else
   // in %APPDATA%/3dtk/show.ini
-  config_home = string(getenv("APPDATA"));
+  config_home = std::string(getenv("APPDATA"));
 #endif
 
   return config_home;
