@@ -77,7 +77,7 @@ using namespace fbr;
 #include <boost/program_options.hpp>
 namespace po = boost::program_options;
 
-enum reduction_method {OCTREE, RANGE, INTERPOLATE};
+enum reduction_method {OCTREE, RANGE, INTERPOLATE, NO_REDUCTION};
 
 /* Function used to check that 'opt1' and 'opt2' are not specified
    at the same time. */
@@ -139,7 +139,7 @@ namespace fbr {
     if (values.size() == 0)
       throw std::runtime_error("Invalid scanner type");
     std::string arg = values.at(0);
-    if(strcasecmp(arg.c_str(), "NONE") == 0) v = NONE;
+    if(strcasecmp(arg.c_str(), "NONE") == 0) v = NO_REDUCTION;
     else if(strcasecmp(arg.c_str(), "RIEGL") == 0) v = RIEGL;
     else if(strcasecmp(arg.c_str(), "FARO") == 0) v = FARO;
     else throw std::runtime_error(std::string("scanner type ")
@@ -200,6 +200,7 @@ void validate(boost::any& v, const std::vector<std::string>& values,
   if(strcasecmp(arg.c_str(), "OCTREE") == 0) v = OCTREE;
   else if(strcasecmp(arg.c_str(), "RANGE") == 0) v = RANGE;
   else if(strcasecmp(arg.c_str(), "INTERPOLATE") == 0) v = INTERPOLATE;
+  else if(strcasecmp(arg.c_str(), "NONE") == 0) v = NO_REDUCTION;
   else throw std::runtime_error(std::string("reduction method ")
                                 + arg
                                 + std::string(" is unknown"));
@@ -251,7 +252,7 @@ void parse_options(int argc, char **argv, int &start, int &end,
   po::options_description reduction("Reduction options");
   reduction.add_options()
     ("reduction,r", po::value<reduction_method>(&rtype)->required(),
-     "choose reduction method (OCTREE, RANGE, INTERPOLATE)")
+     "choose reduction method (OCTREE, RANGE, INTERPOLATE, NONE)")
     ("scale,S", po::value<double>(&scale),
      "scaling factor")
     ("voxel,v", po::value<double>(&voxel),
@@ -616,7 +617,68 @@ int main(int argc, char **argv)
     std::string reddir = dir + "reduced";
     createdirectory(reddir);
     
-    if(rtype == OCTREE)
+    if(rtype == NO_REDUCTION) {
+      Scan::openDirectory(scanserver, dir, iotype, iter, iter);
+      if(Scan::allScans.size() == 0) {
+        std::cerr << "No scans found. Did you use the correct format?" << std::endl;
+        exit(-1);
+      }
+
+      Scan* scan = *Scan::allScans.begin();
+
+      if(rangeFilterActive) scan->setRangeFilter(maxDist, minDist);
+      if(customFilterActive) scan->setCustomFilter(customFilter);
+
+      if (use_reflectance) {
+        DataXYZ xyz(scan->get("xyz"));
+        DataReflectance reflectance(scan->get("reflectance"));
+
+        for(unsigned int j = 0; j < xyz.size(); j++) {
+          reduced_points.push_back(cv::Vec4f(xyz[j][0],
+                                             xyz[j][1],
+                                             xyz[j][2],
+                                             reflectance[j]));
+        }
+        write_uosr(reduced_points,
+            reddir,
+            scan->getIdentifier());
+      } else if(use_color) {
+        DataXYZ xyz(scan->get("xyz"));
+        DataRGB _color(scan->get("color"));
+
+        for(unsigned int j = 0; j < xyz.size(); j++) {
+          reduced_points.push_back(cv::Vec4f(xyz[j][0],
+                                             xyz[j][1],
+                                             xyz[j][2],
+                                             0.0));
+
+          color.push_back(cv::Vec3b(_color[j][0],
+                                    _color[j][1],
+                                    _color[j][2]));
+        }
+        write_uos_rgb(reduced_points,
+            color,
+            reddir,
+            scan->getIdentifier());
+      } else {
+        DataXYZ xyz(scan->get("xyz"));
+        for(unsigned int j = 0; j < xyz.size(); j++) {
+          reduced_points.push_back(cv::Vec4f(xyz[j][0],
+                                             xyz[j][1],
+                                             xyz[j][2],
+                                             0.0));
+        }
+        write_uos(reduced_points,
+            reddir,		  
+            scan->getIdentifier());
+      }
+
+
+      writeposefile(reddir,
+          scan->get_rPos(),
+          scan->get_rPosTheta(),
+          scan->getIdentifier());
+    } else if(rtype == OCTREE)
     {
       Scan::openDirectory(scanserver, dir, iotype, iter, iter);
       if(Scan::allScans.size() == 0) {
