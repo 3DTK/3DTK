@@ -7,8 +7,6 @@
 #include <slam6d/fbr/projection.h>
 #include <slam6d/fbr/fbr_global.h>
 
-#include <opencv2/core/core.hpp>
-
 #include <newmat/newmatap.h>
 
 #include <boost/math/distributions/normal.hpp>
