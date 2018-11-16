@@ -6,7 +6,7 @@
 
 #include <slam6d/fbr/scan_cv.h>
 
-#include <opencv2/core/matx.hpp>
+#include <opencv2/core/core.hpp>
 
 #include <vector>
 
