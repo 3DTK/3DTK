@@ -124,6 +124,74 @@ double calc_plane(const std::vector<const cv::Vec3f*>& points, double plane[4])
     return sum;
 }
 
+void write_segments_to_scans(const std::vector<segment>& segments, const std::string& path, size_t start_index)
+{
+    mkdir(path.c_str(), S_IRWXU|S_IRWXG|S_IRWXO);
+    for(const segment& s : segments) {
+        std::ofstream file;
+        char numstr[6];
+        std::sprintf(numstr, "%03lu", start_index);
+        file.open(path + "/scan" + numstr + ".3d");
+        file << std::fixed << std::setprecision(4);
+        file << '#' << "n:" << cvVecnT_string(s.normal) << " d:" << s.distance << '\n';
+        std::ofstream pose_file(path + "/scan" + numstr + ".pose");
+        pose_file << "0 0 0\n0 0 0";
+        for(const auto& point : s.points) {
+            file << point[0] << ' ' << point[1] << ' ' << point[2] << '\n';
+        }
+        file.close();
+        ++start_index;
+    }
+}
+
+void write_segments_to_rgb_scan(const std::vector<segment>& segments, const std::string& path, size_t scan_num)
+{
+    mkdir(path.c_str(), S_IRWXU|S_IRWXG|S_IRWXO);
+    char numstr[6];
+    std::sprintf(numstr, "%03lu", scan_num);
+    std::FILE* scan_file = std::fopen((path+"/scan" + numstr + ".3d").c_str(), "w");
+    std::ofstream pose_file(path + "/scan" + numstr + ".pose");
+    pose_file << "0 0 0\n0 0 0";
+    int counter = 0;
+    for(const segment& s : segments) {
+        std::array<unsigned char, 3> color = get_color(counter);
+        for(const auto& point : s.points) {
+            std::fprintf(scan_file, "%.4f %.4f %.4f %d %d %d\n", point[0], point[1], point[2], color[0], color[1], color[2]);
+        }
+        ++counter;
+    }
+    std::fclose(scan_file);
+}
+
+void write_components_to_scans(const cv::Mat& range_image, const std::vector<david_graph::grid_graph<double>>& components,
+                               const std::string& path, size_t minimum_points)
+{
+    mkdir(path.c_str(), S_IRWXU|S_IRWXG|S_IRWXO);
+    std::ofstream(path + "/scan000.3d");
+    std::ofstream(path + "/scan000.pose");
+    size_t comp_num = 1;
+    for(const auto& component : components) {
+        size_t num_vertices = component.vertices().size();
+        std::ofstream file;
+        if(num_vertices < minimum_points) {
+            file.open(path + "/scan000.3d", std::ofstream::app);
+        }
+        else {
+            char numstr[6];
+            std::sprintf(numstr, "%03lu", comp_num);
+            file.open(path + "/scan" + numstr + ".3d");
+            std::ofstream pose_file(path + "/scan" + numstr + ".pose");
+            pose_file << "0 0 0\n0 0 0";
+            ++comp_num;
+        }
+        file << std::fixed << std::setprecision(4);
+        for(const std::pair<int, int>& index : component.vertices()) {
+            const auto& point = range_image.at<cv::Vec3f>(index.first, index.second);
+            file << point[0] << ' ' << point[1] << ' ' << point[2] << '\n';
+        }
+        file.close();
+    }
+}
 std::array<unsigned char, 3> get_color(int index)
 {
     constexpr int colors[] = {

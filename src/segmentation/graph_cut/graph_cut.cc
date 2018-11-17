@@ -132,11 +132,10 @@ int main(int argc, char** argv)
     }
     std::cout << "Writing segments to " << out_path << std::endl;
     if(!vm["single"].as<bool>()){
-         write_scan(segments, out_path, 0,[](const segment& s){return "n:"+cvVecnT_string(s.normal)+" d:"+std::to_string(s.distance);},
-               identity(), [](const segment& s){return s.points;});
+         write_segments_to_scans(segments, out_path, 0);
     } else {
         segments.erase(segments.begin());
-        write_single_color_scan(segments, out_path, 0, identity(), [](const segment& s){return s.points;});
+        write_segments_to_rgb_scan(segments, out_path, 0);
     }
     return 0;
 }
@@ -462,9 +461,7 @@ std::vector<plane_candidate> cut_graph(david_graph::grid_graph<double>& graph, c
     mkdir(path.c_str(), S_IRWXU|S_IRWXG|S_IRWXO);
     std::cout << path.substr(16, path.size()) << '\n';
     std::cout << "Found " << components.size() << " components\n";
-    write_components(components, path+"/before", minimum_points,
-               [&](const std::pair<int, int>& v){return range_image.at<cv::Vec3f>(v.first, v.second);},
-               [&](const david_graph::grid_graph<double>& component){return component.vertices();});
+    write_components_to_scans(range_image, components, path+"/before", minimum_points);
     std::ofstream weight_file(path+"/weights.txt");
     for(const double w : weights) weight_file << w << '\n';
     weight_file.close();
@@ -509,9 +506,23 @@ std::vector<plane_candidate> cut_graph(david_graph::grid_graph<double>& graph, c
     }
 #ifndef NDEBUG
         std::cout << candidates.size() - 1 << " candidates remaining\n\n";
-        write_scan(candidates, path+"/after", 0,
-            [](const plane_candidate& p){return "n:"+cvVecnT_string(p.normal)+" d:"+std::to_string(p.distance)+ " sigma:"+std::to_string(p.std_error);},
-            [](const cv::Vec3f* p){return *p;}, [](const plane_candidate& p){return p.points;});
+        mkdir((path+"/after").c_str(), S_IRWXU|S_IRWXG|S_IRWXO);
+        size_t scan_num = 0;
+        for(const plane_candidate& pc : candidates) {
+            std::ofstream file;
+            char numstr[6];
+            std::sprintf(numstr, "%03lu", scan_num);
+            file.open(path + "/scan" + numstr + ".3d");
+            file << std::fixed << std::setprecision(4);
+            file << '#' << "n:" << cvVecnT_string(pc.normal) << " d:" << pc.distance << " sigma:" << pc.std_error << '\n';
+            std::ofstream pose_file(path + "/scan" + numstr + ".pose");
+            pose_file << "0 0 0\n0 0 0";
+            for(const auto& point : pc.points) {
+                file << point[0] << ' ' << point[1] << ' ' << point[2] << '\n';
+            }
+            file.close();
+            ++scan_num;
+    }
 #endif
 
 #ifndef NDEBUG
@@ -574,11 +585,9 @@ std::vector<segment> post_process(std::vector<plane_candidate>& planes, double c
         std::vector<segment> plane_segments = segment_plane(*it, cell_size);
 #ifndef NDEBUG
         std::cout << " - found " << plane_segments.size() << " segments" << std::endl;
-        write_scan(plane_segments, "debug/post_processing/plane"+std::to_string(it-planes.begin()), 0,
-            [](const segment& s){return "n:"+cvVecnT_string(s.normal)+" d:"+std::to_string(s.distance);}, identity(),
-            [](const segment& s){return s.points;});
+        write_segments_to_scans(plane_segments, "debug/post_processing/plane"+std::to_string(it-planes.begin()), 0);
 #endif
-        segments.insert(segments.cend(), plane_segments.begin(), plane_segments.end());
+        segments.insert(segments.end(), plane_segments.begin(), plane_segments.end());
     }
     return segments;
 }
