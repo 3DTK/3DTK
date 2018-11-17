@@ -14,7 +14,7 @@ if (WITH_OPENCV AND WITH_OPENMP)
   target_link_libraries(fhsegmentation scan_shared ${ANN_LIBRARIES_SHARED} ${Boost_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} ${OpenCV_LIBS})
   
   add_executable(graph_cut_segmentation graph_cut/graph_cut.cc graph_cut/util.cc graph_cut/blob_color.cc)
-  target_link_libraries(graph_cut_segmentation scan fbr_panorama_shared fbr_cv_io_shared newmat ${OpenCV_LIBS} ${FBR_LIBS} ${SHOW_LIBS_SHARED} ${Boost_LIBRARIES})
+  target_link_libraries(graph_cut_segmentation scan_shared fbr_panorama_shared fbr_cv_io_shared newmat ${OpenCV_LIBS} ${FBR_LIBS} ${SHOW_LIBS_SHARED} ${Boost_LIBRARIES})
   option(GCS_DEBUG "graph cut segmentation debug output")
   if(NOT GCS_DEBUG)
     target_compile_definitions(graph_cut_segmentation PUBLIC NDEBUG)
