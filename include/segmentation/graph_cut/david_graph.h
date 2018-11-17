@@ -54,6 +54,7 @@ grid_graph<W> make_grid_graph(int rows, int cols, bool wrap = false, W def = W{}
 }
 
 
+//specialisation for std::tuple<> at the end of the file as it needs the complete class
 template <typename W>
 void print_grid_graph(const grid_graph<W>& g)
 {
@@ -67,11 +68,6 @@ void print_grid_graph(const grid_graph<W>& g)
     }
     std::cout << "}\n";
 }
-
-template <>
-void print_grid_graph(const grid_graph<std::tuple<>>& g);
-
-//overload for std::tuple<> below
 
 //undirected graph class
 template <typename V, typename W, typename Comp>
@@ -219,7 +215,7 @@ private:
 };
 
 template <>
-void print_grid_graph(const grid_graph<std::tuple<>>& g)
+inline void print_grid_graph(const grid_graph<std::tuple<>>& g)
 {
     std::cout << "strict graph {\n";
     for(auto v: g.adj_list ) {
