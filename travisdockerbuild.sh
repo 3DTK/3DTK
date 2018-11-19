@@ -77,22 +77,29 @@ GENERATOR=Ninja
 if [ "$DIST" = "trusty" ]; then
 	GENERATOR="Unix Makefiles"
 fi
+APT="apt-get install --yes --no-install-recommends -o Debug::pkgProblemResolver=yes"
 
-docker run --interactive --rm "$TAG" sh - <<EOF
-set -exu
-echo "travis_fold:start:docker_setup"
-dpkg -l
-cat /etc/apt/sources.list
-apt-get update
-apt-get dist-upgrade --yes
-apt-get install --yes --no-install-recommends -o Debug::pkgProblemResolver=yes equivs ninja-build
-equivs-build doc/equivs/control.$DERIV.$DIST
-apt-get install --no-install-recommends -o Debug::pkgProblemResolver=yes ././././3dtk-build-deps_1.0_all.deb || true
-dpkg --install --force-depends ./3dtk-build-deps_1.0_all.deb
-apt-get install --yes --no-install-recommends --fix-broken -o Debug::pkgProblemResolver=yes
-echo "travis_fold:end:docker_setup"
-mkdir .build
-cmake -H. -B.build $CMAKEOPTS -G "$GENERATOR"
-cmake --build .build
-CTEST_OUTPUT_ON_FAILURE=true cmake --build .build --target test
-EOF
+{
+	echo "set -exu";
+	echo "echo travis_fold:start:docker_setup";
+	echo "dpkg -l";
+	echo "cat /etc/apt/sources.list";
+	echo "apt-get update";
+	echo "apt-get dist-upgrade --yes";
+	echo "$APT equivs";
+	if [ "$DIST" != "trusty" ]; then
+		echo "$APT ninja-build";
+	fi
+	echo "equivs-build doc/equivs/control.$DERIV.$DIST";
+	if [ "$DIST" = "trusty" ]; then
+		echo "dpkg --install --force-depends ./3dtk-build-deps_1.0_all.deb";
+		echo "$APT --fix-broken";
+	else
+		echo "$APT ./3dtk-build-deps_1.0_all.deb";
+	fi
+	echo "echo travis_fold:end:docker_setup";
+	echo "mkdir .build";
+	echo "cmake -H. -B.build $CMAKEOPTS -G \"$GENERATOR\"";
+	echo "cmake --build .build";
+	echo "CTEST_OUTPUT_ON_FAILURE=true cmake --build .build --target test";
+} | docker run --interactive --rm "$TAG" sh -
