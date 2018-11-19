@@ -29,14 +29,14 @@ struct weight{
     {
         //estimate normal distribution of distances
         double mean = sum / count;
-        double sigma;
-        if(count > 1) {
+        double sigma = 0;
+        degenerated = true;
+        if (count > 1) {
             sigma = std::sqrt((squared_sum - 2 * mean * sum + count * mean * mean) / (count - 1));
+        }
+        if (sigma != 0) {
             m_distribution = normal_dist(mean, sigma);
             degenerated = false;
-
-        } else {
-            degenerated = true;
         }
         
     }
