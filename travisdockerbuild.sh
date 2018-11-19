@@ -93,12 +93,15 @@ APT="apt-get install --yes --no-install-recommends -o Debug::pkgProblemResolver=
 		echo "$APT ninja-build";
 	fi
 	echo "equivs-build doc/equivs/control.$DERIV.$DIST";
-	if [ "$DIST" = "trusty" ]; then
-		echo "dpkg --install --force-depends ./3dtk-build-deps_1.0_all.deb";
-		echo "$APT --fix-broken";
-	else
-		echo "$APT ./3dtk-build-deps_1.0_all.deb";
-	fi
+	case "$DIST" in
+		trusty|jessie)
+			echo "dpkg --install --force-depends ./3dtk-build-deps_1.0_all.deb";
+			echo "$APT --fix-broken";
+			;;
+		*)
+			echo "$APT ./3dtk-build-deps_1.0_all.deb";
+			;;
+	esac
 	echo "echo travis_fold:end:docker_setup";
 	echo "mkdir .build";
 	echo "cmake -H. -B.build $CMAKEOPTS -G \"$GENERATOR\"";
