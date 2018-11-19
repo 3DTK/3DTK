@@ -5,6 +5,7 @@ notifications:
       - slam6d-discuss@lists.sourceforge.net
     on_success: change
     on_failure: always
+env: # needed for allow_failures
 matrix:
   allow_failures:
     - os: osx
