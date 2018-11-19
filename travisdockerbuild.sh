@@ -73,6 +73,11 @@ docker build --tag="$TAG" .
 
 echo "travis_fold:end:docker_build"
 
+GENERATOR=Ninja
+if [ "$DIST" = "trusty" ]; then
+	GENERATOR="Unix Makefiles"
+fi
+
 docker run --interactive --rm "$TAG" sh - <<EOF
 set -exu
 echo "travis_fold:start:docker_setup"
@@ -87,7 +92,7 @@ dpkg --install --force-depends ./3dtk-build-deps_1.0_all.deb
 apt-get install --yes --no-install-recommends --fix-broken -o Debug::pkgProblemResolver=yes
 echo "travis_fold:end:docker_setup"
 mkdir .build
-cmake -H. -B.build $CMAKEOPTS -G "Ninja"
+cmake -H. -B.build $CMAKEOPTS -G $GENERATOR
 cmake --build .build
 CTEST_OUTPUT_ON_FAILURE=true cmake --build .build --target test
 EOF
