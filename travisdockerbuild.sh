@@ -57,7 +57,7 @@ RUN echo "deb $MIRROR $DIST-updates $COMP" >> /etc/apt/sources.list
 RUN echo "deb $SECMIRROR $DIST/updates $COMP" >> /etc/apt/sources.list
 EOF
 		;;
-	precise|trusty|xenial)
+	trusty|xenial|bionic)
 		cat >> Dockerfile <<EOF
 RUN echo "deb $MIRROR $DIST-updates $COMP" >> /etc/apt/sources.list
 RUN echo "deb $SECMIRROR $DIST-security $COMP" >> /etc/apt/sources.list
