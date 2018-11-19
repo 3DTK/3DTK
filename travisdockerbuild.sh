@@ -81,6 +81,8 @@ APT="apt-get install --yes --no-install-recommends -o Debug::pkgProblemResolver=
 
 {
 	echo "set -exu";
+	echo "export DEBIAN_FRONTEND=noninteractive";
+	echo "export DEBCONF_NONINTERACTIVE_SEEN=true";
 	echo "echo travis_fold:start:docker_setup";
 	echo "dpkg -l";
 	echo "cat /etc/apt/sources.list";
