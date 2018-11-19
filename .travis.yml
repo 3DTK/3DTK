@@ -6,8 +6,9 @@ notifications:
     on_success: change
     on_failure: always
 matrix:
-  include:
+  allow_failures:
     - os: osx
+  include:
     - os: linux
       sudo: required
       services:
