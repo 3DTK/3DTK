@@ -1,3 +1,10 @@
+ /*
+ * Copyright (C) David Redondo
+ * 
+ * Released under the GPL version 3.
+ *
+ */
+
 #ifndef __GRAPH_CUT_UTIL_H__
 #define __GRAPH_CUT_UTIL_H__
 
