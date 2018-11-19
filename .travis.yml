@@ -9,7 +9,14 @@ env: # needed for allow_failures
 matrix:
   allow_failures:
     - os: osx
+    - os: linux
+      sudo: required
+      services:
+        - docker
+      env:
+        - DERIV=debian DIST=sid
   include:
+    - os: osx
     - os: linux
       sudo: required
       services:
