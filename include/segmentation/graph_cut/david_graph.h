@@ -1,3 +1,10 @@
+ /*
+ * Copyright (C) David Redondo
+ * 
+ * Released under the GPL version 3.
+ *
+ */
+
 //simple Graph class that only does stuff that is needed by me
 #ifndef __DAVID_GRAPH_H__
 #define __DAVID_GRAPH_H__

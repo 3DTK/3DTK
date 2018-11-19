@@ -1,3 +1,9 @@
+ /*
+ * Copyright (C) David Redondo
+ * 
+ * Released under the GPL version 3.
+ *
+ */
 
 #include "segmentation/graph_cut/blob_color.h"
 
@@ -106,36 +112,26 @@ std::vector<segment> segment_plane(const plane_candidate& plane, double cell_siz
         segments[indices[region]].points.emplace_back(*plane.points[i]);
         
     }
-#ifndef NDEBUG
-    static int i=1;
-    grid.write_to_ppm("debug/grids/grid"+std::to_string(i)+".ppm");
-   /** std::ofstream r_pic("debug/gids/regions"+std::to_string(i)+".ppm");
-    r_pic << "P1\n" << (grid.max_col-grid.min_col)+1 << " " << (grid.max_row-grid.min_row)+1 << '\n';
-    for(int row = grid.min_row; row <= grid.max_row; ++row) {
-        for(int col = grid.min_col; col <= grid.max_col; ++col) {
-            int color = (region_map[{row, col}] ? 1 : 0);
-            r_pic << color  << " ";
-        }
-        r_pic << '\n';
-    }
-    r_pic.close();*/
-    std::ofstream picture("debug/grids/grid"+std::to_string(i)+"_labels.ppm", std::ios::binary);
-    picture << "P6\n" << (grid.max_col-grid.min_col)+1 << " " << (grid.max_row-grid.min_row)+1 << "\n255\n";
-    for(int row = grid.min_row; row <= grid.max_row; ++row) {
-        for(int col = grid.min_col; col <= grid.max_col; ++col) {
-            unsigned char c = 0xFF; std::array<unsigned char, 3> color{{c, c, c}};
-            if(grid.get(row, col)){
-                int region = regions[region_map[{row, col}]];
-                color =  get_color(indices[region]);
+    if (gcs_debug) {
+        static int i=1;
+        grid.write_to_ppm("debug/grids/grid"+std::to_string(i)+".ppm");
+        std::ofstream picture("debug/grids/grid"+std::to_string(i)+"_labels.ppm", std::ios::binary);
+        picture << "P6\n" << (grid.max_col-grid.min_col)+1 << " " << (grid.max_row-grid.min_row)+1 << "\n255\n";
+        for(int row = grid.min_row; row <= grid.max_row; ++row) {
+            for(int col = grid.min_col; col <= grid.max_col; ++col) {
+                unsigned char c = 0xFF; std::array<unsigned char, 3> color{{c, c, c}};
+                if(grid.get(row, col)){
+                    int region = regions[region_map[{row, col}]];
+                    color =  get_color(indices[region]);
+                }
+                picture.write((char*)(&color[0]),3);
+                picture.flush();
+                
             }
-            picture.write((char*)(&color[0]),3);
-            picture.flush();
-            
         }
+        picture.close();
+        ++i;
     }
-    picture.close();
-    ++i;
-#endif
     return segments;
 }
 

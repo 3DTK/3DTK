@@ -1,3 +1,10 @@
+ /*
+ * Copyright (C) David Redondo
+ * 
+ * Released under the GPL version 3.
+ *
+ */
+
 #include "segmentation/graph_cut/util.h"
 
 #include <newmat/newmatap.h> 
