@@ -13,6 +13,9 @@ if (WITH_EIGEN3)
   include_directories(${EIGEN3_INCLUDE_DIR})
 endif()
 
+if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.9)
+	message(WARNING "Not compiling mesh component in gcc versions less than 4.9 because of ICE")
+else()
 ## recon program
 string(REPLACE "-O3" "-O0" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
 set(MESH_ADDITIONAL_CFLAGS "-fpermissive -g" CACHE STRING "Additional flags of MESH module given to the compiler" )
@@ -21,3 +24,4 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${ADDITIONAL_CFLAGS} ${MESH_ADDITIONAL_C
 include_directories(poisson vcglib)
 add_executable(recon recon.cc poisson.cc auto_scan_red.cc parse_options.cc calc_normals.cc recon_commons.cc poisson/PlyFile.cpp)
 TARGET_LINK_LIBRARIES(recon scan_shared normals_panorama_shared dl ${NORMALS_PANORAMA_LIBRARIES} ${Boost_LIBS} ${Boost_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY})
+endif()

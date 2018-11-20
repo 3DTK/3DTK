@@ -18,8 +18,6 @@ Alternatively on **Windows**, execute the batch script `build.cmd` either from t
 
 Some Boost libraries (_graph, regex, serialization, filesystem, interprocess_) are needed to compile the slam6D program. **_3DTK_ is not compatible with boost version 1.49.** Please make sure to use a different version.
 
-Please note that the surface reconstruction tool in mesh module (`src/mesh`) is not compatible with Ubuntu 14.04 due to a GCC compiler bug so far. If you are using Ubuntu 14.04, please set `WITH_MESH` to `OFF` in order to build the project. For detail info about the mesh module, please refer to `src/mesh/README.md`.
-
 ## Getting Started
 For a detailed explanation of the programm, its usage, etc., please refer to the [high level documentation](doc/documentation_HL.pdf) (esp. sections 4-6, for starters) and [here](doc/3d_video.md) for creating videos with _3DTK_. Further a reference manual can be found in `doc/html/index.html` after building the doxygen domcumentation (type in `make docu` to get the HTML files).
 
