@@ -8,7 +8,6 @@ notifications:
 env: # needed for allow_failures
 matrix:
   allow_failures:
-    - os: osx
     - os: linux
       sudo: required
       services:
