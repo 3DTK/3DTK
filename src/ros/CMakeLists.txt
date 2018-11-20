@@ -30,7 +30,7 @@ if(WITH_ROS)
 
   # only necessary until this catkin fix propagated into Debian Buster:
   # https://salsa.debian.org/science-team/ros-catkin/commit/68154962414a4c7dfcedce0cd183135cd71a33c8
-  include_directories(${EIGEN3_INCLUDE_DIR})
+  include_directories(${EIGEN3_INCLUDE_DIR} ${PCL_INCLUDE_DIRS})
 
   pkg_check_modules(OROCOS_BFL REQUIRED orocos-bfl)
   include_directories(${OROCOS_BFL_INCLUDE_DIRS})
