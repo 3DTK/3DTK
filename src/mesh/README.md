@@ -17,7 +17,7 @@ The general workflow of this tool is illustrated below. The programs start with 
 
 To use surface reconstruction tool in 3DTK, you can first download [code](https://sourceforge.net/p/slam6d/code/HEAD/tree/) with `svn checkout https://svn.code.sf.net/p/slam6d/code/trunk slam6d-code` and build the entire project with instruction in [INSTALL.md](https://sourceforge.net/p/slam6d/code/HEAD/tree/trunk/INSTALL.md).
 
-Please know that this tool is not compatible with Ubuntu 14.04 (Trusty) due to a GCC compiler bug. If you are using Ubuntu 14.04, you may set CMake option `WITH_MESH` to `OFF` and try other functions of 3DTK.
+Please know that this tool is not compatible with Ubuntu 14.04 (Trusty) due to a GCC compiler bug.
 
 1. Use the default sample data under `dat/` directory. This sample data is composed of three scans, we join them first with `-j` tag, since it is relatively sparse and non-closed, we set a trimming value 7 with `-T` tag to trim extra part away. You can compare the model_all.obj and model_all_trimmed.obj to view the effects of trimming.
 ```shell
