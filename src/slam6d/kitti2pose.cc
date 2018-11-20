@@ -29,7 +29,9 @@ using std::ofstream;
 #define snprintf sprintf_s
 #endif 
 
-#  define M_PI       3.14159265358979323846  
+#ifndef M_PI
+#define M_PI       3.14159265358979323846
+#endif
 double deg(const double rad)
 {
   return ( (rad * 360.0) / (2.0 * M_PI) ); 
