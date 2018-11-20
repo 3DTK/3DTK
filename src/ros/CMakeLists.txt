@@ -28,6 +28,10 @@ if(WITH_ROS)
   include_directories(${CATKIN_DEVEL_PREFIX}/include)
   include_directories(${catkin_INCLUDE_DIRS})
 
+  # only necessary until this catkin fix propagated into Debian Buster:
+  # https://salsa.debian.org/science-team/ros-catkin/commit/68154962414a4c7dfcedce0cd183135cd71a33c8
+  include_directories(${EIGEN3_INCLUDE_DIR})
+
   pkg_check_modules(OROCOS_BFL REQUIRED orocos-bfl)
   include_directories(${OROCOS_BFL_INCLUDE_DIRS})
   link_directories(${OROCOS_BFL_LIBRARY_DIRS})
