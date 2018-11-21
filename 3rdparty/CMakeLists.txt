@@ -133,3 +133,7 @@ ENDIF()
 add_subdirectory(apriltag-2016-12-01)
 
 add_subdirectory(rply-1.1.4)
+
+IF(WITH_E57)
+  add_subdirectory(e57-3d-imgfmt)
+ENDIF()

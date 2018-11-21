@@ -1,0 +1,12 @@
+REGEDIT
+; This .REG file may be used by your SETUP program.
+;   If a SETUP program is not available, the entries below will be
+;   registered in your InitInstance automatically with a call to
+;   CWinApp::RegisterShellFileTypes and COleObjectFactory::UpdateRegistryAll.
+
+HKEY_CLASSES_ROOT\.e57 = e57file
+    ; note: the application is optional
+    ;  (it defaults to the app name in "command")
+HKEY_CLASSES_ROOT\e57file = E57 Lidar File
+HKEY_CLASSES_ROOT\e57file\DefaultIcon = c:\e57.ico
+
