@@ -1,3 +1,14 @@
+## e57 to scan tool
+if(WITH_E57)
+  message(STATUS "With e57 Support.")
+  add_definitions(-DWITH_E57)
+  include_directories(${LIBE57_INCLUDE_DIRS})
+  add_executable(e572scan e572scan.cpp)
+  target_link_libraries(e572scan E57RefImpl ${Boost_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY})
+else()
+  message(STATUS "Whitout e57 Support.")
+endif()
+
 if(WITH_METRICS)
   message(STATUS "With metrics in slam6d.")
   add_definitions(-DWITH_METRICS)

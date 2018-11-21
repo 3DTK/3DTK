@@ -157,6 +157,7 @@ option(WITH_OPENCV_NONFREE "Whether to use non-free (patent encumbered) OpenCV f
 option(WITH_COMPACT_OCTREE "Whether to use the compact octree display ON/OFF" OFF)
 option(WITH_GLEE "Whether to use OpenGL extensions, requires glee. ON/OFF" OFF)
 option(WITH_LASLIB "Whether to build LASlib based scanio library" ON)
+option(WITH_E57 "Build library for e57 file format support." OFF)
 
 ## CUDA accelerated collision detection
 option(WITH_CUDA "Whether to build CUDA accelerated collision detection tools" OFF)
