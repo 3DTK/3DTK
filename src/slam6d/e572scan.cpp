@@ -12,7 +12,7 @@
 
 namespace po = boost::program_options;
 
-void readPoints(const std::string inputPath);
+void readPoints(const std::string inputPath, double scale);
 
 int main(int argc, char *argv[]){
     std::string extension = ".e57";
@@ -89,7 +89,7 @@ int main(int argc, char *argv[]){
         std::cerr << "Error while parsing settings: " << e.what() << std::endl;
         exit(1);
     }
-    readPoints(inputPath);
+    readPoints(inputPath, scale);
     return 0;
 };
 
@@ -109,7 +109,7 @@ bool writePose(double *translation, double *rotation, int scanid){
     return true;
 }
 
-void readPoints(const std::string inputPath){
+void readPoints(const std::string inputPath, double scale){
     try {
         /// Read file from disk
         e57::ImageFile imf(inputPath, "r");
@@ -162,10 +162,10 @@ void readPoints(const std::string inputPath){
                 e57::FloatNode tx (translation.get("x"));
                 e57::FloatNode ty (translation.get("y"));
                 e57::FloatNode tz (translation.get("z"));
-                tr[0] = tx.value();
-                tr[1] = ty.value();
-                tr[2] = tz.value();
-                std::cout << "translation x:" << tx.value() << " y:" << ty.value() << " z:" << tz.value() << std::endl;
+                tr[0] = tx.value()*scale;
+                tr[1] = ty.value()*scale;
+                tr[2] = tz.value()*scale;
+                std::cout << "translation x:" << tr[0] << " y:" << tr[1] << " z:" << tr[2] << std::endl;
             } else{
                 tr[0] = 0;
                 tr[1] = 0;
@@ -249,7 +249,7 @@ void readPoints(const std::string inputPath){
                     double cartesian [3];
                     double polar[3];
                     double rgb[3];
-                    polar[0] = range[i];
+                    polar[0] = range[i]*scale;
                     polar[1] = azimuth[i];
                     polar[2] = eleavtion[i];
                     //TODO convert to cartesian (use toCartesian()) and write down to scan file. Also export RGB.
