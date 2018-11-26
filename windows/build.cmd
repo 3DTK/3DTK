@@ -1,14 +1,23 @@
 @echo off
-:: this script is to build 3dtk on 64bit windows with visual studio 2013
+:: this script is to build 3dtk on 64bit windows with visual studio 2017
 :: if you require support for 32bit windows, please send patches
 :: this was tested on Windos 7 64bit
+::
+:: The following components are required:
+::    - VC++ 2017 version 15 v141 tools
+::    - Windows 10 SDK
+::    - Visual C++ ATL
+::    - Visual C»++ MFC
+
+:: In windows batch, all variables inside an if block or a for loop are
+:: expanded *before* the block is run. This means %variables% cannot be
+:: updated within an if block or for loop. The following allows to use
+:: the !variable! syntax which will expand variables later.
+setlocal ENABLEDELAYEDEXPANSION
 
 :: To run CL.exe manually from a terminal, you must first setup your
 :: environment using a call to
 :: C:/Program Files (x86)/Microsoft Visual Studio 12.0/VC/vcvarsall.bat
-
-:: Also make sure that you've installed vcpkg under C:\tools\vcpkg.
-:: If you haven't, you can just move it there.
 
 :: the path where the 3dtk sources are
 set sourcedir=%~1
@@ -70,6 +79,62 @@ if not exist %outdir% (
 	exit /B 1
 )
 
+set vcpkgcommit=eccae2adaa20c64a44034a6115c6c5f90be201be
+set vcpkgurl=https://github.com/Microsoft/vcpkg/archive/!vcpkgcommit!.zip
+set vcpkghash=f9-91-c3-6b-54-d1-c5-79-69-7a-25-79-1b-f3-fa-d6
+set vcpkgzip=%outdir%/vcpkg.zip
+set vcpkgdir=%outdir%/3rdparty/vcpkg/
+where vcpkg
+:: there is no AND or OR logical operator in windows batch
+if %ERRORLEVEL% NEQ 0 (
+	if not exist %vcpkgdir% (
+	call:reset_error
+	if not exist !vcpkgzip! (
+		echo downloading !vcpkgzip!...
+		call:download !vcpkgurl! !vcpkgzip!
+	)
+	echo checking md5sum of !vcpkgzip!...
+	call:checkmd5 !vcpkgzip! !vcpkghash!
+	if !ERRORLEVEL! GEQ 1 (
+		echo md5sum mismatch
+		exit /B 1
+	)
+	echo extracting !vcpkgzip! into !vcpkgdir!...
+	call:unzip !vcpkgzip! !vcpkgdir!
+	if !ERRORLEVEL! GEQ 1 (
+		echo vcpkg unzip failed
+		exit /B 1
+	)
+	:: windows does not like long paths
+	:: including the git commit hash in the path makes building qt fail
+	move !vcpkgdir! "!vcpkgdir!.tmp"
+	if !ERRORLEVEL! GEQ 1 (
+		echo moving !vcpkgdir! to "!vcpkgdir!.tmp" failed
+		exit /B 1
+	)
+	move "!vcpkgdir!.tmp/vcpkg-!vcpkgcommit!" !vcpkgdir!
+	if !ERRORLEVEL! GEQ 1 (
+		echo moving "!vcpkgdir!.tmp/vcpkg-!vcpkgcommit!" to !vcpkgdir! failed
+		exit /B 1
+	)
+	rmdir "!vcpkgdir!.tmp"
+	:: have to use call or otherwise bootstrap-vcpkg.bat will exit everything
+	call !vcpkgdir!/bootstrap-vcpkg.bat
+	if !ERRORLEVEL! GEQ 1 (
+		echo bootstrap-vcpkg.bat failed
+		exit /B 1
+	)
+)) else (
+	:: FIXME: we should assign the output of "where vcpkg" here but
+	:: assigning the output of a command to a variable seems to be horrible
+	:: in windows batch, so hardcoding this for now...
+	set vcpkgdir=C:/tools/vcpkg/
+)
+set vcpkgexe=%vcpkgdir%/vcpkg.exe
+
+echo vcpkgexe: %vcpkgexe%
+echo vcpkgdir: %vcpkgdir%
+
 set cmakedir=%outdir%/3rdparty/cmake/
 
 set cmakeexe=%outdir%/3rdparty/cmake/cmake-3.12.4-win64-x64/bin/cmake.exe
@@ -96,9 +161,14 @@ if not exist %cmakedir% (
 	)
 )
 
+%vcpkgexe% update
+if %ERRORLEVEL% GEQ 1 (
+	echo vcpkg update failed
+	exit /B 1
+)
 :: FIXME: add cgal once appveyor installs a vcpkg version greater than 0.0.105
 :: with https://github.com/Microsoft/vcpkg/pull/2962
-vcpkg --triplet x64-windows install ^
+%vcpkgexe% --triplet x64-windows install ^
 	qt5 ^
 	libpng ^
 	boost ^
@@ -109,6 +179,42 @@ vcpkg --triplet x64-windows install ^
 	zlib ^
 	freeglut ^
 	suitesparse
+if %ERRORLEVEL% GEQ 1 (
+	echo vcpkg install failed
+	exit /B 1
+)
+
+:: The package zlib is compatible with built-in CMake targets:
+:: 
+::     find_package(ZLIB REQUIRED)
+::     target_link_libraries(main PRIVATE ZLIB::ZLIB)
+:: 
+:: The package libpng is compatible with built-in CMake targets:
+:: 
+::     find_package(PNG REQUIRED)
+::     target_link_libraries(main PRIVATE PNG::PNG)
+:: 
+:: The package eigen3:x64-windows provides CMake targets:
+:: 
+::     find_package(Eigen3 CONFIG REQUIRED)
+::     target_link_libraries(main PRIVATE Eigen3::Eigen)
+:: 
+:: The package opencv provides CMake integration:
+:: 
+::     find_package(OpenCV REQUIRED)
+::     target_include_directories(main PRIVATE ${OpenCV_INCLUDE_DIRS})
+::     target_link_libraries(main PRIVATE ${OpenCV_LIBS})
+:: 
+:: The package freeglut is compatible with built-in CMake targets:
+:: 
+::     find_package(GLUT REQUIRED)
+::     target_link_libraries(main PRIVATE GLUT::GLUT)
+:: 
+:: The package suitesparse:x64-windows provides CMake targets:
+:: 
+::     find_package(suitesparse-5.1.2 CONFIG REQUIRED)
+::     # Note: 8 target(s) were omitted.
+::     target_link_libraries(main PRIVATE SuiteSparse::amd SuiteSparse::btf SuiteSparse::klu SuiteSparse::ldl)
 
 :: use setlocal to make sure that the directory is only changed for this part
 :: of the script and not on the outside
@@ -116,11 +222,12 @@ setlocal
 :: need /d if %outdir% is a different drive letter than the current working
 :: directory
 cd /d %outdir%
+echo "cmake: %cmakeexe%"
 "%cmakeexe%" ^
 	-G "Visual Studio 15 2017 Win64" ^
-	-D CMAKE_TOOLCHAIN_FILE=C:/3dtk/3rdparty/vcpkg/scripts/buildsystems/vcpkg.cmake ^
-	-D CXSPARSE_INCLUDE_DIRS=C:/3dtk/3rdparty/vcpkg/packages/suitesparse_x64-windows/include/suitesparse ^
-	-D CXSPARSE_LIBRARIES=C:/3dtk/3rdparty/vcpkg/packages/suitesparse_x64-windows/lib/libcxsparse.lib ^
+	-D CMAKE_TOOLCHAIN_FILE=%vcpkgdir%/scripts/buildsystems/vcpkg.cmake ^
+	-D CXSPARSE_INCLUDE_DIRS=%vcpkgdir%/packages/suitesparse_x64-windows/include/suitesparse ^
+	-D CXSPARSE_LIBRARIES=%vcpkgdir%/packages/suitesparse_x64-windows/lib/libcxsparse.lib ^
 	-D OUTPUT_DIRECTORY:PATH=%outdir% ^
 	-D WITH_LIBCONFIG=OFF ^
 	-D WITH_CGAL=OFF ^
@@ -178,9 +285,11 @@ goto:eof
 
 :unzip
 	powershell -command ^
-		"Expand-Archive """"%~1"""" -DestinationPath """"%~2"""""
+		"Expand-Archive """"%~1"""" -Force -DestinationPath """"%~2"""""
 	if %ERRORLEVEL% GEQ 1 (
 		exit /B 1
 	)
 	exit /B 0
 
+:reset_error
+	exit /b 0
