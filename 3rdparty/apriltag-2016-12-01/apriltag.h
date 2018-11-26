@@ -44,7 +44,11 @@ extern "C" {
 #include "common/zarray.h"
 #include "common/workerpool.h"
 #include "common/timeprofile.h"
+#ifdef _MSC_VER
+#include <windows.h>
+#else
 #include <pthread.h>
+#endif
 
 #define APRILTAG_TASKS_PER_THREAD_TARGET 10
 
@@ -196,8 +200,12 @@ struct apriltag_detector
     // Used to manage multi-threading.
     workerpool_t *wp;
 
+#ifdef _MSC_VER
+    CRITICAL_SECTION mutex;
+#else
     // Used for thread safety.
     pthread_mutex_t mutex;
+#endif
 };
 
 // Represents the detection of a tag. These are returned to the user

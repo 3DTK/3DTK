@@ -111,7 +111,7 @@ void image_f32_gaussian_blur(image_f32_t *im, double sigma, int ksz)
     assert((ksz & 1) == 1); // ksz must be odd.
 
     // build the kernel.
-    float k[ksz];
+    float *k = (float *)malloc(sizeof(float)*ksz);
 
     // for kernel of length 5:
     // dk[0] = f(-2), dk[1] = f(-1), dk[2] = f(0), dk[3] = f(1), dk[4] = f(2)
@@ -130,23 +130,28 @@ void image_f32_gaussian_blur(image_f32_t *im, double sigma, int ksz)
         k[i] /= acc;
 
     for (int y = 0; y < im->height; y++) {
-        float x[im->stride];
+        float *x = (float *)malloc(sizeof(float)*im->stride);
         memcpy(x, &im->buf[y*im->stride], im->stride * sizeof(float));
         convolve(x, &im->buf[y*im->stride], im->width, k, ksz);
+        free(x);
     }
 
     for (int x = 0; x < im->width; x++) {
-        float xb[im->height];
-        float yb[im->height];
+        float *xb = (float *)malloc(sizeof(float)*im->height);
+        float *yb = (float *)malloc(sizeof(float)*im->height);
 
         for (int y = 0; y < im->height; y++)
             xb[y] = im->buf[y*im->stride + x];
 
         convolve(xb, yb, im->height, k, ksz);
+        free(xb);
 
         for (int y = 0; y < im->height; y++)
             im->buf[y*im->stride + x] = yb[y];
+        free(yb);
     }
+
+    free(k);
 }
 
 // remap all values to [0, 1]
@@ -197,7 +202,7 @@ int image_f32_write_pnm(const image_f32_t *im, const char *path)
     fprintf(f, "P5\n%d %d\n255\n", im->width, im->height);
 
     for (int y = 0; y < im->height; y++) {
-        uint8_t line[im->width];
+        uint8_t *line = (uint8_t *)malloc(sizeof(uint8_t)*im->width);
         for (int x = 0; x < im->width; x++) {
             float v = im->buf[y*im->stride + x];
             if (v < 0)
@@ -209,8 +214,10 @@ int image_f32_write_pnm(const image_f32_t *im, const char *path)
 
         if (im->width != fwrite(line, 1, im->width, f)) {
             res = -2;
+            free(line);
             goto finish;
         }
+        free(line);
     }
 
 finish:

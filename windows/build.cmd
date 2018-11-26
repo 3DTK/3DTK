@@ -178,6 +178,7 @@ if %ERRORLEVEL% GEQ 1 (
 	python3 ^
 	zlib ^
 	freeglut ^
+	pthreads ^
 	suitesparse
 if %ERRORLEVEL% GEQ 1 (
 	echo vcpkg install failed
@@ -233,7 +234,6 @@ echo "cmake: %cmakeexe%"
 	-D WITH_CGAL=OFF ^
 	-D WITH_LIBZIP=OFF ^
 	-D WITH_PYTHON=OFF ^
-	-D WITH_APRILTAG=OFF ^
 	-D WITH_LASLIB=OFF ^
 	-D WITH_WXWIDGETS=OFF ^
 	%sourcedir%

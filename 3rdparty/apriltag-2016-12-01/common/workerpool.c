@@ -206,6 +206,9 @@ void workerpool_run(workerpool_t *wp)
 
 int workerpool_get_nprocs()
 {
+#ifdef _WIN32
+    return 1;
+#else
     FILE * f = fopen("/proc/cpuinfo", "r");
     size_t n = 0;
     char * buf = NULL;
@@ -227,4 +230,5 @@ int workerpool_get_nprocs()
     free(buf);
 
     return nproc;
+#endif
 }

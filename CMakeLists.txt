@@ -383,9 +383,7 @@ add_subdirectory(src/mesh)
 # 3rdparty must come before src/calibration because it sets
 # APRILTAG_INCLUDE_DIRS
 add_subdirectory(3rdparty)
-if (WITH_APRILTAG)
-  add_subdirectory(src/calibration)
-endif()
+add_subdirectory(src/calibration)
 add_subdirectory(bindings)
 if(WITH_ADDONS)
   message(STATUS "With 3dtk addons.")
