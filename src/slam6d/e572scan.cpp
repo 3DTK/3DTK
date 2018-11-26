@@ -12,12 +12,14 @@
 
 namespace po = boost::program_options;
 
-void readPoints(const std::string inputPath, double scale);
+void readPoints(const std::string inputPath, double scale, int start, int end);
 
 int main(int argc, char *argv[]){
     std::string extension = ".e57";
     std::string inputPath = "";
     std::string outputPath ="";
+    int start = 0;
+    int end = -1;
     double scale = 1.0;
     int xDirection = 1;
 
@@ -28,21 +30,26 @@ int main(int argc, char *argv[]){
 
         po::options_description output("Output options");
         output.add_options()
-                ("scale,s", po::value<double>(&scale)->default_value(1.0), "scale the point cloud")
+                ("scale,m", po::value<double>(&scale)->default_value(1.0), "scale the point cloud")
                 ("invertX,x", "invert x-axes to convert from right to left handed system")
                 ("output,o", po::value<std::string>(&outputPath), "output directory");
+        po::options_description input("Input options");
+        output.add_options()
+                ("start,s", po::value<int>(&start)->default_value(1), "start scan")
+                ("end,e", po::value<int>(&end)->default_value(-1), "end scan");
 
         po::options_description hidden("Hidden options");
         hidden.add_options()
                 ("input", po::value(&inputPath), "input .e57 file");
+        //TODO -s -e start, end scans
 
         // all options
         po::options_description all;
-        all.add(generic).add(output).add(hidden);
+        all.add(generic).add(output).add(hidden).add(input);
 
         // options visible with --help
         po::options_description cmdline_options;
-        cmdline_options.add(generic).add(output);
+        cmdline_options.add(generic).add(output).add(input);
 
         // positional argument
         po::positional_options_description pd;
@@ -89,7 +96,7 @@ int main(int argc, char *argv[]){
         std::cerr << "Error while parsing settings: " << e.what() << std::endl;
         exit(1);
     }
-    readPoints(inputPath, scale);
+    readPoints(inputPath, scale, start, end);
     return 0;
 };
 
@@ -109,7 +116,7 @@ bool writePose(double *translation, double *rotation, int scanid){
     return true;
 }
 
-void readPoints(const std::string inputPath, double scale){
+void readPoints(const std::string inputPath, double scale, int start, int end){
     try {
         /// Read file from disk
         e57::ImageFile imf(inputPath, "r");
@@ -136,7 +143,12 @@ void readPoints(const std::string inputPath, double scale){
         std::cout << "Number of scans in file:" << scanCount << std::endl;
 
         /// For each scan, print out first 4 points in either Cartesian or Spherical coordinates.
-        for (int scanIndex = 0; scanIndex < scanCount; scanIndex++) {
+        if(start >= scanCount) exit(1);
+        if(end >= scanCount) end = scanCount-1;
+        if(end > 0 && end < start) exit(1);
+        if(start < 0) start = 0;
+
+        for (int scanIndex = start; scanIndex < scanCount; scanIndex++) {
             /// Get scan from "/data3D", assume its a Structure (else get exception)
             e57::StructureNode scan(data3D.get(scanIndex));
             std::cout << "got:" << scan.pathName() << std::endl;
@@ -218,20 +230,20 @@ void readPoints(const std::string inputPath, double scale){
                     std::cout << "  " << i << ". columnIndex=" << columnIndex[i] << std::endl;
             }else if (proto.isDefined("sphericalRange")) {
 
-                std::cout << "??? not implemented yet" << std::endl;
+                //std::cout << "??? not implemented yet" << std::endl;
                 /// Make a list of buffers to receive the xyz values.
-                //TODO get all points
-                const int N = 200000 ;
+                const int N = points.childCount();
                 std::vector<e57::SourceDestBuffer> destBuffers;
-                double range[N];
-                double eleavtion[N];
-                double azimuth[N];
-                int r[N];
-                int g[N];
-                int b[N];
+
+                double * range = (double *) malloc(sizeof(double)*N);
+                double * elevation = (double *) malloc(sizeof(double)*N);
+                double * azimuth = (double *) malloc(sizeof(double)*N);;
+                int * r = (int *) malloc(sizeof(int)*N);
+                int * g = (int *) malloc(sizeof(int)*N);
+                int * b = (int *) malloc(sizeof(int)*N);
                 destBuffers.push_back(e57::SourceDestBuffer(imf, "sphericalRange", range, N, true));
                 destBuffers.push_back(e57::SourceDestBuffer(imf, "sphericalAzimuth", azimuth, N, true));
-                destBuffers.push_back(e57::SourceDestBuffer(imf, "sphericalElevation", eleavtion, N, true));
+                destBuffers.push_back(e57::SourceDestBuffer(imf, "sphericalElevation", elevation, N, true));
                 destBuffers.push_back(e57::SourceDestBuffer(imf, "colorRed", r, N, true));
                 destBuffers.push_back(e57::SourceDestBuffer(imf, "colorGreen", g, N, true));
                 destBuffers.push_back(e57::SourceDestBuffer(imf, "colorBlue", b, N, true));
@@ -240,30 +252,40 @@ void readPoints(const std::string inputPath, double scale){
                 /// Each call to reader.read() will fill the xyz buffers until the points are exhausted.
                 e57::CompressedVectorReader reader = points.reader(destBuffers);
                 unsigned gotCount = reader.read();
-                std::cout << "  got first " << gotCount << " points" << std::endl;
+                //std::cout << "  got first " << gotCount << " points" << std::endl;
+                std::cout << "write scan" << std::endl;
 
                 /// Print the coordinates we got
                 for (unsigned i=0; i < gotCount; i++) {
-//                    std::cout << "  " << i << ". range=" << range[i] << " eleavtion=" << eleavtion[i] << " azimuth="
+//                    std::cout << "  " << i << ". range=" << range[i] << " elevation=" << elevation[i] << " azimuth="
 //                              << azimuth[i] << " r=" << r[i] << " g=" << g[i] << " b=" << b[i] << std::endl;
                     double cartesian [3];
                     double polar[3];
                     double rgb[3];
-                    polar[0] = range[i]*scale;
+                    polar[2] = range[i]*scale;
                     polar[1] = azimuth[i];
-                    polar[2] = eleavtion[i];
-                    //TODO convert to cartesian (use toCartesian()) and write down to scan file. Also export RGB.
-                    toCartesian(polar, cartesian);
+                    polar[0] = elevation[i];
+                    // cartesian[elevation, azimuth, range]
+                    toCartesian2(polar, cartesian);
                     rgb[0] = r[i];
                     rgb[1] = g[i];
                     rgb[2] = b[i];
 //                    std::cout << "\t" << cartesian[0] << " " << cartesian[1] << " " << cartesian[2] << std::endl;
-                    file << cartesian[0] << " " << cartesian[1] << " " << cartesian[2] << " " << rgb[0] << " " << rgb[1] << " " << rgb[2] << "\n";
+                    //TODO convert to left hand
+//                    file << cartesian[0] << " " << cartesian[1] << " " << cartesian[2] << " " << rgb[0] << " " << rgb[1] << " " << rgb[2] << "\n";
+                    file << (cartesian[1]*(-1)) << " " << cartesian[2] << " " << cartesian[0] << " " << rgb[0] << " " << rgb[1] << " " << rgb[2] << "\n";
                 }
+                free(range);
+                free(elevation);
+                free(azimuth);
+                free(r);
+                free(g);
+                free(b);
             } else
                 std::cout << "Error: couldn't find either Cartesian or spherical points in scan" << std::endl;
             std::cout << std::endl;
             file.close();
+            if(end >= 0 && scanIndex == end) break;
         }
 
         imf.close();

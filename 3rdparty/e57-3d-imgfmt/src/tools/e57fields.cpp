@@ -450,9 +450,15 @@ struct CVElementInfo {
     /// Only one is used, depending on the type of the E57 element.
     /// One of these three should be resized to BUFFER_ELEMENT_COUNT.
     /// These are smart pointers to avoid the copying (and the moving) when put on the cvElements list.
+#if defined(_MSC_VER) || defined(__APPLE__)
     shared_ptr<vector<int64_t> > iBuffer;
     shared_ptr<vector<double> >  dBuffer;
     shared_ptr<vector<string> >  sBuffer;
+#else
+    std::tr1::shared_ptr<vector<int64_t> > iBuffer;
+    std::tr1::shared_ptr<vector<double> >  dBuffer;
+    std::tr1::shared_ptr<vector<string> >  sBuffer;
+#endif
 
     /// The precalculated parts of the element path name.
     /// The only part that is missing is the record number which goes in between.

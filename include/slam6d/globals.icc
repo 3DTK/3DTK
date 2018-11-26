@@ -568,13 +568,26 @@ inline double polardist(double* p, double *p2) {
 
 /**
  * Transforms a point from polar coordinates into cartesian
- * coordinates 
+ * coordinates
+ * polar[elevation, azimuth, range]
  */
 template <class T, class S>
 inline void toCartesian(const T *polar, S *cartesian) {
   cartesian[0] = polar[2] * cos( polar[1] ) * sin( polar[0] );
   cartesian[1] = polar[2] * sin( polar[1] ) * sin( polar[0] );
   cartesian[2] = polar[2] * cos( polar[0] );
+}
+
+/**
+ * Transforms a point from polar coordinates into cartesian
+ * coordinates https://en.wikipedia.org/wiki/Spherical_coordinate_system
+ * polar[elevation, azimuth, range]
+ */
+template <class T, class S>
+inline void toCartesian2(const T *polar, S *cartesian) {
+    cartesian[0] = polar[2] * cos( polar[1] ) * sin( (M_PI/2)-polar[0] );
+    cartesian[1] = polar[2] * sin( polar[1] ) * sin( (M_PI/2)-polar[0] );
+    cartesian[2] = polar[2] * cos( (M_PI/2)-polar[0] );
 }
 
 /**
