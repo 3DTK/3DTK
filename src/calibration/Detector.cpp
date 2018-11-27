@@ -4,6 +4,7 @@
 
 
 #include"calibration/Detector.h"
+using namespace cv;
 
 namespace calibration {
     void Detector::detectAprilTag(image_u8_t *image, std::vector<AprilTag::AprilTag2f> *tags, float decimate,

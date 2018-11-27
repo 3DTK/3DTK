@@ -30,17 +30,17 @@ private:
     /**
      * vector of vector Point3d for detected tag points in picture
      */
-    std::vector<std::vector<Point2f>> vecImagePoints;
+    std::vector<std::vector<cv::Point2f>> vecImagePoints;
 
     /**
      * vector of pattern tag points
      */
-    std::vector<std::vector<Point3f>> vecPatternPoints;
+    std::vector<std::vector<cv::Point3f>> vecPatternPoints;
 
-    std::vector<std::vector<Point2f>> estimateImagePoints;
-    std::vector<std::vector<Point3f>> estimatePatternPoints;
+    std::vector<std::vector<cv::Point2f>> estimateImagePoints;
+    std::vector<std::vector<cv::Point3f>> estimatePatternPoints;
 
-    std::vector<Point3f> chessboardCorners;
+    std::vector<cv::Point3f> chessboardCorners;
 
     /**
      * Pattern handler
@@ -62,11 +62,11 @@ private:
      */
     Settings settings;
 
-    Mat camMatrix;
+    cv::Mat camMatrix;
 
-    std::vector<Mat> rvector;
-    std::vector<Mat> tvector;
-    Mat distorCoeff;
+    std::vector<cv::Mat> rvector;
+    std::vector<cv::Mat> tvector;
+    cv::Mat distorCoeff;
 
     /**
      * match the detected tags form image and pattern
@@ -76,31 +76,31 @@ private:
     /**
      *
      */
-    void saveCameraParams( Settings& s, Size& imageSize, Mat& cameraMatrix, Mat& distCoeffs,
-                                               const std::vector<Mat>& rvecs, const std::vector<Mat>& tvecs,
-                                               const std::vector<float>& reprojErrs, const std::vector<std::vector<Point2f> >& imagePoints,
+    void saveCameraParams( Settings& s, cv::Size& imageSize, cv::Mat& cameraMatrix, cv::Mat& distCoeffs,
+                                               const std::vector<cv::Mat>& rvecs, const std::vector<cv::Mat>& tvecs,
+                                               const std::vector<float>& reprojErrs, const std::vector<std::vector<cv::Point2f> >& imagePoints,
                                                double totalAvgErr, bool estimation );
 
     /**
      *
      */
-    bool runCalibration( Settings& s, Size& imageSize, Mat& cameraMatrix, Mat& distCoeffs,
-                                             std::vector<std::vector<Point2f> > imagePoints, std::vector<Mat>& rvecs, std::vector<Mat>& tvecs,
+    bool runCalibration( Settings& s, cv::Size& imageSize, cv::Mat& cameraMatrix, cv::Mat& distCoeffs,
+                                             std::vector<std::vector<cv::Point2f> > imagePoints, std::vector<cv::Mat>& rvecs, std::vector<cv::Mat>& tvecs,
                                              std::vector<float>& reprojErrs,  double& totalAvgErr);
 
     void calcBoardCornerPositions(Settings::Pattern patternType);
 
-    double computeReprojectionErrors( const std::vector<std::vector<Point3f> >& objectPoints,
-                                                          const std::vector<std::vector<Point2f> >& imagePoints,
-                                                          const std::vector<Mat>& rvecs, const std::vector<Mat>& tvecs,
-                                                          const Mat& cameraMatrix , const Mat& distCoeffs,
+    double computeReprojectionErrors( const std::vector<std::vector<cv::Point3f> >& objectPoints,
+                                                          const std::vector<std::vector<cv::Point2f> >& imagePoints,
+                                                          const std::vector<cv::Mat>& rvecs, const std::vector<cv::Mat>& tvecs,
+                                                          const cv::Mat& cameraMatrix , const cv::Mat& distCoeffs,
                                                           std::vector<float>& perViewErrors);
 
-    bool runCalibrationAndSave(Settings& s, Size imageSize, Mat&  cameraMatrix, Mat& distCoeffs,std::vector<std::vector<Point2f> > imagePoints );
+    bool runCalibrationAndSave(Settings& s, cv::Size imageSize, cv::Mat&  cameraMatrix, cv::Mat& distCoeffs,std::vector<std::vector<cv::Point2f> > imagePoints );
 
     void initImage(std::string path);
 
-    void estimateInitial3DCameraMatrix(Settings& s, std::vector<std::vector<Point2f>> imagePoints,std::vector<std::vector<Point3f>> patternPoints, Mat& cameraMatrix, Size& imageSize );
+    void estimateInitial3DCameraMatrix(Settings& s, std::vector<std::vector<cv::Point2f>> imagePoints,std::vector<std::vector<cv::Point3f>> patternPoints, cv::Mat& cameraMatrix, cv::Size& imageSize );
 
 public:
 
