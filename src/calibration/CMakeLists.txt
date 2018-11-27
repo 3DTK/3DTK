@@ -18,6 +18,9 @@ if (WITH_OPENCV AND WITH_EIGEN3)
           Calibrator.cc)
 
   add_executable(camcal camcal.cc ${CAMCAL_SOURCES})
+  if (WIN32)
+    target_link_libraries(camcal winmm)
+  endif()
   target_link_libraries(camcal apriltag ${OpenCV_LIBRARIES} ${Boost_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY})
 
   add_executable(undistortImage undistortImage.cc)
@@ -33,6 +36,9 @@ if (WITH_OPENCV AND WITH_EIGEN3)
   target_link_libraries(transformsFromExtrinsics ${OpenCV_LIBRARIES} ${Boost_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY})
 
   add_executable(detect detect.cc ${DETECT_SOURCES})
+  if (WIN32)
+    target_link_libraries(detect winmm)
+  endif()
   target_link_libraries(detect apriltag ${OpenCV_LIBRARIES} ${Boost_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY})
 
   add_executable(calibrate calibrate.cc ${CALIBRATE_SOURCES})
