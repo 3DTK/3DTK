@@ -1217,11 +1217,11 @@ void callAddCamera(int dummy)
   Point lookat;
   Point up(0, 0, 0);
   double tmat[16];
-  for (int i =0;i<16;i++) tmat[i] = view_rotate_button[i];
+  for (int i = 0; i < 16; i++) tmat[i] = view_rotate_button[i];
   
-  lookat.x = -50*tmat[2] -X;
-  lookat.y = -50*tmat[6] -Y;
-  lookat.z = -50*tmat[10] -Z;
+  lookat.x = -50*tmat[2]  - X;
+  lookat.y = -50*tmat[6]  - Y;
+  lookat.z = -50*tmat[10] - Z;
 
   up.x = 50*tmat[1] -X; 
   up.y = 50*tmat[5] -Y; 

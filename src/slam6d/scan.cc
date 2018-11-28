@@ -42,6 +42,7 @@
 #endif
 
 std::vector<Scan*> Scan::allScans;
+unsigned int Scan::maxScanNr = 0;
 bool Scan::scanserver = false;
 bool Scan::continue_processing = false;
 std::string Scan::processing_command;
@@ -93,6 +94,9 @@ void Scan::setProcessingCommand(int argc, char** argv)
 
 Scan::Scan()
 {
+  scanNr = maxScanNr;
+  maxScanNr++;
+  
   // pose and transformations
   for(size_t i = 0; i < 3; ++i) rPos[i] = 0;
   for(size_t i = 0; i < 3; ++i) rPosTheta[i] = 0;
