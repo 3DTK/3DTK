@@ -79,9 +79,7 @@ if(Boost_FOUND)
   add_definitions(${Boost_LIB_DIAGNOSTIC_DEFINITIONS})
 endif()
 
-if (NOT WIN32)
-find_package(CXSparse REQUIRED)
-endif()
+find_package(SuiteSparse REQUIRED)
 
 find_package(ANN)
 if (ANN_FOUND)
@@ -266,7 +264,7 @@ endif()
 
 # 3rdparty
 if(WIN32)
-  include_directories(${PROJECT_SOURCE_DIR}/3rdparty/cxsparse-4.4.4/suitesparse/)
+  #include_directories(${PROJECT_SOURCE_DIR}/3rdparty/cxsparse-4.4.4/suitesparse/)
   include_directories(${PROJECT_SOURCE_DIR}/3rdparty/windows/)
   link_directories(${PROJECT_SOURCE_DIR}/3rdparty/windows)
   link_directories(${BOOST_LIBRARYDIR})
