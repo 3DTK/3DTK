@@ -24,7 +24,7 @@ include_directories(${ANN_INCLUDE_DIRS})
 
 ### SCAN_RED
 
-if (NOT MSVC AND WITH_OPENCV)
+if (WITH_OPENCV)
   add_executable(scan_red scan_red.cc ../scanio/writer.cc fbr/fbr_global.cc fbr/panorama.cc fbr/scan_cv.cc)
 
   target_link_libraries(scan_red scan show ${ANN_LIBRARIES} fbr_cv_io fbr_panorama ${OpenCV_LIBS} ${Boost_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} ${SHOW_LIBS})
@@ -33,6 +33,9 @@ endif()
 ### SCAN_DIFF
 add_executable(scan_diff scan_diff.cc)
 target_link_libraries(scan_diff scan ${ANN_LIBRARIES} ${NEWMAT_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY})
+if (WIN32)
+  target_link_libraries(scan_diff XGetopt)
+endif()
 
 add_executable(frame_to_graph frame_to_graph.cc)
 add_executable(convergence convergence.cc)
@@ -120,6 +123,7 @@ add_library(scan
         io_types.cc       io_utils.cc       pointfilter.cc    allocator.cc
         icp6Dnapx.cc      normals.cc        kdIndexed.cc
         )
+set_property(TARGET scan PROPERTY POSITION_INDEPENDENT_CODE 1)
 target_link_libraries(scan scanclient scanio ${ANN_LIBRARIES} ${NEWMAT_LIBRARIES} ${SUITESPARSE_LIBRARIES})
 
 ### SLAM6D

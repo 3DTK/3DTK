@@ -1,4 +1,4 @@
-if (NOT MSVC AND WITH_OPENGL)
+if (WITH_OPENGL)
   include_directories(${SUITESPARSE_INCLUDE_DIRS})
   include_directories(${NEWMAT_INCLUDE_DIRS})
   include_directories(${GLUT_INCLUDE_DIR})
@@ -27,12 +27,13 @@ if (NOT MSVC AND WITH_OPENGL)
   add_executable(veloslam veloslam.cc veloscan.cc debugview.cc pcddump.cc tracker.cc
    trackermanager.cc drawtrackers.cc kalmanfilter.cc matrix.cc lap.cc)
 
+  target_link_libraries(veloslam scan ${NEWMAT_LIBRARIES} ${SUITESPARSE_LIBRARIES} ${ANN_LIBRARIES} ${Boost_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} ${Boost_THREAD_LIBRARY} ${SHOW_LIBS})
   if(UNIX)
-    target_link_libraries(veloslam dl scan_shared ${NEWMAT_LIBRARIES_STATIC} ${SUITESPARSE_LIBRARIES_SHARED} ${ANN_LIBRARIES_SHARED} ${Boost_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} ${Boost_THREAD_LIBRARY} ${SHOW_LIBS_SHARED})
+    target_link_libraries(veloslam dl)
   endif()
 
   if(WIN32)
-    target_link_libraries(veloslam scan_static ${SUITESPARSE_LIBRARIES_STATIC} ${ANN_LIBRARIES_SHARED} XGetopt ${Boost_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} ${SHOW_LIBS_SHARED})
+    target_link_libraries(veloslam XGetopt)
   endif()
 endif()
 

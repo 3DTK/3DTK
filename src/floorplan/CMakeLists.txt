@@ -1,8 +1,6 @@
 if (WITH_OPENCV AND WITH_CGAL AND WITH_EIGEN3)
   # Module name
   set(MODULE "Floorplan")
-  set(UNIX_LIBS scan_shared dl ${ANN_LIBRARIES_STATIC} ${NEWMAT_LIBRARIES_STATIC})
-  set(WIN32_LIBS scan_shared newmat XGetopt)
 
   # Set CXX flags for CGAL
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -frounding-math")
@@ -21,11 +19,5 @@ if (WITH_OPENCV AND WITH_CGAL AND WITH_EIGEN3)
 
   find_package(Eigen3 REQUIRED)
 
-  if(UNIX)
-      target_link_libraries(floorplan scan_shared ${UNIX_LIBS} ${LIB_CGAL} ${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY} ${Boost_LIBS} ${LIB_GMP} ${OpenCV_LIBS})
-  endif()
-
-  if (WIN32)
-      target_link_libraries(floorplan ${UNIX_LIBS} ${LIB_CGAL} ${Boost_LIBS} ${LIB_GMP} ${OpenCV_LIBS})
-  endif()
+  target_link_libraries(floorplan scan dl ${ANN_LIBRARIES} ${NEWMAT_LIBRARIES} ${LIB_CGAL} ${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY} ${Boost_LIBS} ${LIB_GMP} ${OpenCV_LIBS})
 endif()

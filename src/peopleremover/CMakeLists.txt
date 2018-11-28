@@ -1,6 +1,2 @@
 add_executable(peopleremover peopleremover.cc common.cc)
-if(MSVC)
-  target_link_libraries(peopleremover scan_static spherical_quadtree_shared ${Boost_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY})
-else()
-  target_link_libraries(peopleremover scan_shared spherical_quadtree_shared ${Boost_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY})
-endif()
+target_link_libraries(peopleremover scan spherical_quadtree ${Boost_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY})
