@@ -166,8 +166,6 @@ if %ERRORLEVEL% GEQ 1 (
 	echo vcpkg update failed
 	exit /B 1
 )
-:: FIXME: add cgal once appveyor installs a vcpkg version greater than 0.0.105
-:: with https://github.com/Microsoft/vcpkg/pull/2962
 %vcpkgexe% --triplet x64-windows install ^
 	qt5 ^
 	libpng ^
@@ -179,6 +177,7 @@ if %ERRORLEVEL% GEQ 1 (
 	zlib ^
 	freeglut ^
 	pthreads ^
+        cgal ^
 	suitesparse
 if %ERRORLEVEL% GEQ 1 (
 	echo vcpkg install failed
@@ -231,7 +230,6 @@ echo "cmake: %cmakeexe%"
 	-D CXSPARSE_LIBRARIES=%vcpkgdir%/packages/suitesparse_x64-windows/lib/libcxsparse.lib ^
 	-D OUTPUT_DIRECTORY:PATH=%outdir% ^
 	-D WITH_LIBCONFIG=OFF ^
-	-D WITH_CGAL=OFF ^
 	-D WITH_LIBZIP=OFF ^
 	-D WITH_PYTHON=OFF ^
 	-D WITH_LASLIB=OFF ^
