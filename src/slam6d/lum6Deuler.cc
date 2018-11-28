@@ -129,7 +129,8 @@ void lum6DEuler::covarianceEuler(Scan *first, Scan *second,
   double dummy_sum;
 
   Scan::getPtPairs(&uk, first, second, thread_num,
-                   rnd, max_dist_match2, dummy_sum, dummy_centroid_m, dummy_centroid_d);
+                   rnd, max_dist_match2,
+			    dummy_sum, dummy_centroid_m, dummy_centroid_d);
 
   m = uk.size();
 
@@ -242,8 +243,10 @@ void lum6DEuler::covarianceEuler(Scan *first, Scan *second,
     *C = 0;
     if(CD)
       *CD = 0;
-    cerr << "Error calculating covariance matrix" << endl; 
-
+    cerr << "Error calculating covariance matrix" << endl
+	    << first->scanNr << "  " << second->scanNr
+	    << endl;
+  
   }
 }
 

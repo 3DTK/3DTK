@@ -134,6 +134,9 @@ public:
   //! Holder of all scans
   //  also used in transform for adding frames for each scan at the same time
   static std::vector<Scan*> allScans;
+
+  static unsigned int maxScanNr;
+  unsigned int scanNr;
   
   // continue processing from last frames entry
   static bool continue_processing;
