@@ -18,9 +18,10 @@ if (WITH_CGAL AND WITH_EIGEN3 AND WITH_OPENCV AND WITH_GMP)
   if (WITH_OPENCV)
     # Find libraries
     find_library(LIB_GMP gmp)
+    find_package(CGAL REQUIRED)
     find_package(Boost REQUIRED)
     find_package(OpenCV REQUIRED)
 
-    target_link_libraries(model scan shape ${NEWMAT_LIBRARIES} dl ${ANN_LIBRARIES} ${CGAL_LIBRARIES} ${Boost_LIBS} ${LIB_GMP} ${OpenCV_LIBS} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY})
+    target_link_libraries(model scan shape ${NEWMAT_LIBRARIES} dl ${ANN_LIBRARIES} ${CGAL_LIBRARY} ${Boost_LIBS} ${LIB_GMP} ${OpenCV_LIBS} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY})
   endif()
 endif()
