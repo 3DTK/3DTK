@@ -7,4 +7,6 @@ try:
 except subprocess.TimeoutExpired as e:
     # there is no psutil module installed on appveyor
     subprocess.call(['taskkill', '/F', '/T', '/PID', str(p.pid)])
-    exit(1)
+    # appveyor seems to throw the cache away if the build exits with a non-zero
+    # exit code even if APPVEYOR_SAVE_CACHE_ON_ERROR is set to "true"
+    exit(0)
