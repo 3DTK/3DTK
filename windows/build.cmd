@@ -174,10 +174,14 @@ if %ERRORLEVEL% GEQ 1 (
 	wxwidgets ^
 	eigen3 ^
 	python3 ^
+	boost-python ^
 	zlib ^
 	freeglut ^
 	pthreads ^
-        cgal ^
+	cgal ^
+	glfw3 ^
+	libconfig ^
+	libzip ^
 	suitesparse
 if %ERRORLEVEL% GEQ 1 (
 	echo vcpkg install failed
@@ -227,11 +231,11 @@ echo "cmake: %cmakeexe%"
 	-G "Visual Studio 15 2017 Win64" ^
 	-D CMAKE_TOOLCHAIN_FILE=%vcpkgdir%/scripts/buildsystems/vcpkg.cmake ^
 	-D OUTPUT_DIRECTORY:PATH=%outdir% ^
-	-D WITH_LIBCONFIG=OFF ^
-	-D WITH_LIBZIP=OFF ^
-	-D WITH_PYTHON=OFF ^
 	-D WITH_LASLIB=OFF ^
+	-D WITH_PYTHON=OFF ^
+	-D WITH_XMLRPC=OFF ^
 	-D WITH_WXWIDGETS=OFF ^
+	-D WITH_GMP=OFF ^
 	%sourcedir%
 
 if %ERRORLEVEL% GEQ 1 (

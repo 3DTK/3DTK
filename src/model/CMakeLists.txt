@@ -1,4 +1,4 @@
-if (WITH_CGAL AND WITH_EIGEN3 AND WITH_OPENCV)
+if (WITH_CGAL AND WITH_EIGEN3 AND WITH_OPENCV AND WITH_GMP)
   include_directories(${NEWMAT_INCLUDE_DIRS})
   find_package(CGAL REQUIRED)
   find_package(Eigen3 REQUIRED)
@@ -21,6 +21,6 @@ if (WITH_CGAL AND WITH_EIGEN3 AND WITH_OPENCV)
     find_package(Boost REQUIRED)
     find_package(OpenCV REQUIRED)
 
-    target_link_libraries(model scan shape ${NEWMAT_LIBRARIES} dl ${ANN_LIBRARIES} ${LIB_CGAL} ${Boost_LIBS} ${LIB_GMP} ${OpenCV_LIBS} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY})
+    target_link_libraries(model scan shape ${NEWMAT_LIBRARIES} dl ${ANN_LIBRARIES} ${CGAL_LIBRARIES} ${Boost_LIBS} ${LIB_GMP} ${OpenCV_LIBS} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY})
   endif()
 endif()
