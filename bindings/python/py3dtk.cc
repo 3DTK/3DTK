@@ -598,7 +598,7 @@ std::string float2hex(double val)
 	// 3 bytes  exponent
 	// 1 byte   NULL
 	// = 24 bytes maximum
-	int buflen = 24;
+	const int buflen = 24;
 	char buffer[buflen];
 	int ret = snprintf(buffer, buflen, "%a", val);
 	if (ret < 0 || ret >= buflen) {
