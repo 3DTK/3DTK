@@ -166,6 +166,11 @@ if %ERRORLEVEL% GEQ 1 (
 	echo vcpkg update failed
 	exit /B 1
 )
+%vcpkgexe% upgrade --no-dry-run
+if %ERRORLEVEL% GEQ 1 (
+	echo vcpkg upgrade failed
+	exit /B 1
+)
 %vcpkgexe% --triplet x64-windows install ^
 	qt5 ^
 	libpng ^
@@ -185,6 +190,11 @@ if %ERRORLEVEL% GEQ 1 (
 	suitesparse
 if %ERRORLEVEL% GEQ 1 (
 	echo vcpkg install failed
+	exit /B 1
+)
+%vcpkgexe% remove --outdated
+if %ERRORLEVEL% GEQ 1 (
+	echo vcpkg remove --outdated failed
 	exit /B 1
 )
 
