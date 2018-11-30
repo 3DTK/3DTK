@@ -1,3 +1,6 @@
+# ICE on MSVC:
+# c:\projects\3dtk\src\mesh\poisson\marchingcubes.h(532): fatal error C1001: An internal error has occurred in the compiler.
+if(NOT MSVC)
 ## OpenGL
 if (WITH_OPENGL)
   FIND_PACKAGE(OpenGL REQUIRED)
@@ -26,5 +29,6 @@ add_executable(recon recon.cc poisson.cc auto_scan_red.cc parse_options.cc calc_
 TARGET_LINK_LIBRARIES(recon scan normals_panorama ${NORMALS_PANORAMA_LIBRARIES} ${Boost_LIBS} ${Boost_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY})
 if (UNIX)
   target_link_libraries(recon dl)
+endif()
 endif()
 endif()
