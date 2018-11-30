@@ -187,6 +187,7 @@ if %ERRORLEVEL% GEQ 1 (
 	glfw3 ^
 	libconfig ^
 	libzip ^
+	mpir ^
 	suitesparse
 if %ERRORLEVEL% GEQ 1 (
 	echo vcpkg install failed
@@ -245,7 +246,6 @@ echo "cmake: %cmakeexe%"
 	-D WITH_PYTHON=OFF ^
 	-D WITH_XMLRPC=OFF ^
 	-D WITH_WXWIDGETS=OFF ^
-	-D WITH_GMP=OFF ^
 	%sourcedir%
 
 if %ERRORLEVEL% GEQ 1 (

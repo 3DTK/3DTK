@@ -20,7 +20,7 @@ namespace model {
 
 class CandidateOpening : public Plane3d {
 public:
-    static const unsigned int NR_FEATURES;   //!< The number of features required for the SVM.
+    static const unsigned int NR_FEATURES = 14;   //!< The number of features required for the SVM.
 
 public:
     std::vector<double> features;   //!< The 14 features required for the SVM.

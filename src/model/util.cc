@@ -12,7 +12,14 @@
 #include "model/util.h"
 
 #include <sys/stat.h>       // stat()
+#ifdef _MSC_VER
+#include "dirent.h"
+#include <direct.h>
+#define mkdir(path,mode) _mkdir (path)
+#define  _USE_MATH_DEFINES
+#else
 #include <unistd.h>
+#endif
 #include <math.h>
 
 #include <stdexcept>
