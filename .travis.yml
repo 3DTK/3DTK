@@ -16,6 +16,11 @@ matrix:
         - DERIV=debian DIST=sid
   include:
     - os: osx
+      before_cache:
+        - brew cleanup
+      cache:
+        directories:
+        - $HOME/Library/Caches/Homebrew
     - os: linux
       sudo: required
       services:
