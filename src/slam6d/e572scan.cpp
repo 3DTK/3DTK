@@ -12,7 +12,7 @@
 
 namespace po = boost::program_options;
 
-void readPoints(const std::string inputPath, double scale, int start, int end);
+void readPoints(const std::string inputPath, const std::string outputPath, double scale, int start, int end, double minDist, double maxDist);
 
 int main(int argc, char *argv[]){
     std::string extension = ".e57";
@@ -21,6 +21,8 @@ int main(int argc, char *argv[]){
     int start = 0;
     int end = -1;
     double scale = 1.0;
+    double minDist = 0.0;
+    double maxDist = -1.0;
 
     try {
         po::options_description generic("Generic options");
@@ -29,10 +31,12 @@ int main(int argc, char *argv[]){
 
         po::options_description output("Output options");
         output.add_options()
-                ("scale,m", po::value<double>(&scale)->default_value(1.0), "scale the point cloud")
-                ("output,o", po::value<std::string>(&outputPath), "output directory");
+                ("min, m",po::value<double>(&minDist)->default_value(0.0), "min distance")
+                ("max, M",po::value<double>(&maxDist)->default_value(-1.0), "max distance")
+                ("scale", po::value<double>(&scale)->default_value(1.0), "scale the point cloud")
+                ("output,o", po::value<std::string>(&outputPath)->default_value("."), "output directory");
         po::options_description input("Input options");
-        output.add_options()
+        input.add_options()
                 ("start,s", po::value<int>(&start)->default_value(0), "start scan")
                 ("end,e", po::value<int>(&end)->default_value(-1), "end scan");
 
@@ -89,7 +93,7 @@ int main(int argc, char *argv[]){
         std::cerr << "Error while parsing settings: " << e.what() << std::endl;
         exit(1);
     }
-    readPoints(inputPath, scale, start, end);
+    readPoints(inputPath, outputPath, scale, start, end, minDist, maxDist);
     return 0;
 };
 
@@ -140,7 +144,7 @@ void QuatToMatrix4RightHand(const double * qaut, const double * t, double * mat)
 
 }
 
-bool writePose(double *translation, double *rotation, int scanid){
+bool writePose(double *translation, double *rotation, int scanid, std::string path){
     double inMatrix [16];
     //TODO selbst bauen QuatToMatrix4( rotation, translation, inMatrix);
     double t [3];
@@ -164,7 +168,7 @@ bool writePose(double *translation, double *rotation, int scanid){
 
     std::stringstream ss;
     ss << std::setw(3) << std::setfill('0') << scanid;
-    std::string filename = "scan" + ss.str() + ".pose";
+    std::string filename = path + "/scan" + ss.str() + ".pose";
     boost::filesystem::ofstream file (filename);
     file << t[0] << " " << t[1] << " " << t[2] << "\n" << deg(r[0]) << " " << deg(r[1]) << " " << deg(r[2]) << " ";
 //    file << translation[0] << " " << translation[1] << " " << translation[2] << "\n" << deg(r[0]) << " " << deg(r[1]) << " " << deg(r[2]) << " ";
@@ -172,7 +176,7 @@ bool writePose(double *translation, double *rotation, int scanid){
     return true;
 }
 
-void readPoints(const std::string inputPath, double scale, int start, int end){
+void readPoints(const std::string inputPath, const std::string outputPath, double scale, int start, int end, double minDist, double maxDist){
     try {
         //TODO check if RGB is available
         /// Read file from disk
@@ -219,7 +223,7 @@ void readPoints(const std::string inputPath, double scale, int start, int end){
 
             std::stringstream ss;
             ss << std::setw(3) << std::setfill('0') << scanIndex;
-            std::string filename = "scan" + ss.str() + ".3d";
+            std::string filename = outputPath + "/scan" + ss.str() + ".3d";
             boost::filesystem::ofstream file (filename);
 
             double tr[3];
@@ -268,7 +272,7 @@ void readPoints(const std::string inputPath, double scale, int start, int end){
                 rq[3] = 0;
             }
 
-            if(writePose(tr, rq, scanIndex)){
+            if(writePose(tr, rq, scanIndex, outputPath)){
                 std::cout << "write pose..." << std::endl;
             }
 
@@ -323,19 +327,21 @@ void readPoints(const std::string inputPath, double scale, int start, int end){
 
                 /// convert the coordinates to cartesian and write to file
                 for (unsigned i=0; i < gotCount; i++) {
-                    double cartesian [3];
-                    double polar[3];
-                    double rgb[3];
-                    polar[2] = range[i]*scale;
-                    polar[1] = azimuth[i];
-                    polar[0] = elevation[i];
-                    toCartesianWithElevation(polar, cartesian);
-                    rgb[0] = r[i];
-                    rgb[1] = g[i];
-                    rgb[2] = b[i];
+                    if(minDist <= range[i]*scale && (maxDist < 0 || range[i]*scale <= maxDist)){
+                        double cartesian [3];
+                        double polar[3];
+                        double rgb[3];
+                        polar[2] = range[i]*scale;
+                        polar[1] = azimuth[i];
+                        polar[0] = elevation[i];
+                        toCartesianWithElevation(polar, cartesian);
+                        rgb[0] = r[i];
+                        rgb[1] = g[i];
+                        rgb[2] = b[i];
 //                    file << cartesian[0] << " " << cartesian[1] << " " << cartesian[2] << " " << rgb[0] << " " << rgb[1] << " " << rgb[2] << "\n";
-                    /// convert to 3DTK coordinate system
-                    file << (cartesian[1]*(-1)) << " " << cartesian[2] << " " << cartesian[0] << " " << rgb[0] << " " << rgb[1] << " " << rgb[2] << "\n";
+                        /// convert to 3DTK coordinate system
+                        file << (cartesian[1]*(-1)) << " " << cartesian[2] << " " << cartesian[0] << " " << rgb[0] << " " << rgb[1] << " " << rgb[2] << "\n";
+                    }
                     std::cout << "write scan..." << ((i+1)*100.0f/gotCount) << " % \r";
                     std::cout.flush();
                 }
