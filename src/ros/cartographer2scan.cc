@@ -148,14 +148,14 @@ void writePointClouds(const string& outdir, double scale, double minDistance, do
     ofstream scanFile(scanFilename);
     scanFile << fixed << setprecision(2);
 
+    Eigen::Affine3d firstPose;
+    tf::transformTFToEigen(pointClouds.at(0).pose, firstPose);
+
     for (size_t i = 0; i < pointClouds.size(); i++) {
         const PointCloudWithTransform& pointCloud = pointClouds.at(i);
 
         Eigen::Affine3d baseToLaser;
         tf::transformTFToEigen(pointCloud.calibration, baseToLaser);
-
-        Eigen::Affine3d firstPose;
-        tf::transformTFToEigen(pointClouds.at(0).pose, firstPose);
 
         Eigen::Affine3d currentPose;
         tf::transformTFToEigen(pointClouds.at(i).pose, currentPose);
@@ -387,17 +387,17 @@ int main(int argc, char* argv[])
         for (rosbag::MessageInstance const m : viewScans) {
             sensor_msgs::PointCloud2ConstPtr message = m.instantiate<sensor_msgs::PointCloud2>();
 
-            if (m.getTime() < ros::Time(startTime) || m.getTime() > ros::Time(endTime)) {
+            if (message->header.stamp < ros::Time(startTime) || message->header.stamp > ros::Time(endTime)) {
                 continue;
             }
 
             tf::StampedTransform baseTransform;
             tf::StampedTransform laserTransform;
             try {
-                l->lookupTransform (mapFrame, baseFrame, m.getTime(), baseTransform);
-                l->lookupTransform (baseFrame, message->header.frame_id, m.getTime(), laserTransform);
-            } catch (...) {
-                cout << "Failed to look up transforms!" << endl;
+                l->lookupTransform (mapFrame, baseFrame, message->header.stamp, baseTransform);
+                l->lookupTransform (baseFrame, message->header.frame_id, message->header.stamp, laserTransform);
+            } catch (tf::TransformException e) {
+                cout << "Failed to look up transforms! " << e.what() << endl;
                 continue;
             }
 
@@ -407,7 +407,7 @@ int main(int argc, char* argv[])
             pcl::fromPCLPointCloud2(pcl_pc2,*temp_cloud);
 
             PointCloudWithTransform pointCloud;
-            pointCloud.timestamp = m.getTime();
+            pointCloud.timestamp = message->header.stamp;
             pointCloud.pose = baseTransform;
             pointCloud.calibration = laserTransform;
             pointCloud.cloud = temp_cloud;
@@ -434,15 +434,15 @@ int main(int argc, char* argv[])
         for (rosbag::MessageInstance const m : viewScans) {
             sensor_msgs::MultiEchoLaserScanConstPtr message = m.instantiate<sensor_msgs::MultiEchoLaserScan>();
 
-            if (m.getTime() < ros::Time(startTime) || m.getTime() > ros::Time(endTime)) {
+            if (message->header.stamp < ros::Time(startTime) || message->header.stamp > ros::Time(endTime)) {
                 continue;
             }
 
             tf::StampedTransform baseTransform;
             tf::StampedTransform laserTransform;
             try {
-                l->lookupTransform (mapFrame, baseFrame, m.getTime(), baseTransform);
-                l->lookupTransform (baseFrame, message->header.frame_id, m.getTime(), laserTransform);
+                l->lookupTransform (mapFrame, baseFrame, message->header.stamp, baseTransform);
+                l->lookupTransform (baseFrame, message->header.frame_id, message->header.stamp, laserTransform);
             } catch (...) {
                 cout << "Failed to look up transforms!" << endl;
                 continue;
@@ -464,7 +464,7 @@ int main(int argc, char* argv[])
             }
 
             PointCloudWithTransform pointCloud;
-            pointCloud.timestamp = m.getTime();
+            pointCloud.timestamp = message->header.stamp;
             pointCloud.pose = baseTransform;
             pointCloud.calibration = laserTransform;
             pointCloud.cloud = temp_cloud;
@@ -491,15 +491,15 @@ int main(int argc, char* argv[])
         for (rosbag::MessageInstance const m : viewScans) {
             sensor_msgs::LaserScanConstPtr message = m.instantiate<sensor_msgs::LaserScan>();
 
-            if (m.getTime() < ros::Time(startTime) || m.getTime() > ros::Time(endTime)) {
+            if (message->header.stamp < ros::Time(startTime) || message->header.stamp > ros::Time(endTime)) {
                 continue;
             }
 
             tf::StampedTransform baseTransform;
             tf::StampedTransform laserTransform;
             try {
-                l->lookupTransform (mapFrame, baseFrame, m.getTime(), baseTransform);
-                l->lookupTransform (baseFrame, message->header.frame_id, m.getTime(), laserTransform);
+                l->lookupTransform (mapFrame, baseFrame, message->header.stamp, baseTransform);
+                l->lookupTransform (baseFrame, message->header.frame_id, message->header.stamp, laserTransform);
             } catch (...) {
                 cout << "Failed to look up transforms!" << endl;
                 continue;
@@ -521,7 +521,7 @@ int main(int argc, char* argv[])
             }
 
             PointCloudWithTransform pointCloud;
-            pointCloud.timestamp = m.getTime();
+            pointCloud.timestamp = message->header.stamp;
             pointCloud.pose = baseTransform;
             pointCloud.calibration = laserTransform;
             pointCloud.cloud = temp_cloud;
