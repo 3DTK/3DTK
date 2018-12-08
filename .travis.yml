@@ -14,6 +14,12 @@ matrix:
         - docker
       env:
         - DERIV=debian DIST=sid
+    - os: linux
+      sudo: required
+      services:
+        - docker
+      env:
+        - DERIV=debian DIST=sid CC=clang
   include:
     - os: osx
       before_cache:
@@ -27,6 +33,12 @@ matrix:
         - docker
       env:
         - DERIV=debian DIST=sid
+    - os: linux
+      sudo: required
+      services:
+        - docker
+      env:
+        - DERIV=debian DIST=sid CC=clang
     - os: linux
       sudo: required
       services:
@@ -65,4 +77,4 @@ matrix:
         - DERIV=ubuntu DIST=bionic
 script:
   - if [[ $TRAVIS_OS_NAME == 'osx' ]]; then ./travismacosbuild.sh; fi
-  - if [[ $TRAVIS_OS_NAME == 'linux' ]]; then ./travisdockerbuild.sh $DERIV $DIST; fi
+  - if [[ $TRAVIS_OS_NAME == 'linux' ]]; then ./travisdockerbuild.sh $DERIV $DIST $CC; fi
