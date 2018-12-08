@@ -2,13 +2,17 @@
 
 set -eu
 
-if [ "$#" -ne 2 ]; then
-	echo "usage: $0 derivative distribution" >&2
+if [ "$#" -ne 2 ] && [ "$#" -ne 3 ]; then
+	echo "usage: $0 derivative distribution [compiler]" >&2
 	exit 1
 fi
 
 DERIV=$1
 DIST=$2
+CC=
+if [ "$#" -gt 2 ]; then
+	CC=$3
+fi
 
 case "$DERIV" in
 	debian)
@@ -92,7 +96,11 @@ APT="apt-get install --yes --no-install-recommends -o Debug::pkgProblemResolver=
 	if [ "$DIST" != "trusty" ]; then
 		echo "$APT ninja-build";
 	fi
-	echo "equivs-build doc/equivs/control.$DERIV.$DIST";
+	if [ -z "$CC" ]; then
+		echo "equivs-build doc/equivs/control.$DERIV.$DIST";
+	else
+		echo "equivs-build doc/equivs/control.$DERIV.$DIST.$CC";
+	fi
 	case "$DIST" in
 		trusty|jessie)
 			echo "dpkg --install --force-depends ./3dtk-build-deps_1.0_all.deb";
