@@ -137,28 +137,34 @@ echo vcpkgdir: %vcpkgdir%
 
 set cmakedir=%outdir%/3rdparty/cmake/
 
-set cmakeexe=%outdir%/3rdparty/cmake/cmake-3.12.4-win64-x64/bin/cmake.exe
 set cmakezip=%outdir%/cmake-3.12.4-win64-x64.zip
 set cmakeurl=https://cmake.org/files/v3.12/cmake-3.12.4-win64-x64.zip
 set cmakehash=f4-e8-13-07-8f-51-80-aa-ee-a4-5a-5b-87-5b-16-97
 
-if not exist %cmakedir% (
-	if not exist %cmakezip% (
-		echo downloading %cmakezip%...
-		call:download %cmakeurl% %cmakezip%
+where cmake
+:: there is no AND or OR logical operator in windows batch
+if %ERRORLEVEL% NEQ 0 (
+	if not exist %cmakedir% (
+	call:reset_error
+	if not exist !cmakezip! (
+		echo downloading !cmakezip!...
+		call:download !cmakeurl! !cmakezip!
 	)
-	echo checking md5sum of %cmakezip%...
-	call:checkmd5 %cmakezip% %cmakehash%
+	echo checking md5sum of !cmakezip!...
+	call:checkmd5 !cmakezip! !cmakehash!
 	if ERRORLEVEL 1 (
 		echo md5sum mismatch
 		exit /B 1
 	)
-	echo extracting %cmakezip% into %cmakedir%...
-	call:unzip %cmakezip% %cmakedir%
-	if %ERRORLEVEL% GEQ 1 (
+	echo extracting !cmakezip! into !cmakedir!...
+	call:unzip !cmakezip! !cmakedir!
+	if !ERRORLEVEL! GEQ 1 (
 		echo cmake unzip failed
 		exit /B 1
 	)
+	set cmakeexe=!cmakedir!/cmake-3.12.4-win64-x64/bin/cmake.exe
+)) else (
+	set cmakeexe=cmake
 )
 
 %vcpkgexe% update
