@@ -1,4 +1,3 @@
-if (NOT MSVC)
 ## OpenGL
 if (WITH_OPENGL)
   FIND_PACKAGE(OpenGL REQUIRED)
@@ -24,6 +23,5 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${ADDITIONAL_CFLAGS} ${MESH_ADDITIONAL_C
 
 include_directories(poisson vcglib)
 add_executable(recon recon.cc poisson.cc auto_scan_red.cc parse_options.cc calc_normals.cc recon_commons.cc poisson/PlyFile.cpp)
-TARGET_LINK_LIBRARIES(recon scan_shared normals_panorama_shared dl ${NORMALS_PANORAMA_LIBRARIES} ${Boost_LIBS} ${Boost_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY})
-endif()
+TARGET_LINK_LIBRARIES(recon scan normals_panorama dl ${NORMALS_PANORAMA_LIBRARIES} ${Boost_LIBS} ${Boost_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY})
 endif()

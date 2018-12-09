@@ -1,8 +1,4 @@
-if(WIN32)
-  add_library(pointfilter STATIC ../slam6d/pointfilter.cc)
-else()
-  add_library(pointfilter SHARED ../slam6d/pointfilter.cc)
-endif()
+add_library(pointfilter SHARED ../slam6d/pointfilter.cc)
 
 set(SCANIO_LIBNAMES
   faro_xyz_rgbr ks ks_rgb leica_xyzr ply pts ptsr pts_rgb pts_rgbr pts_rrgb riegl_rgb riegl_txt rts uos uosr uos_rgb uos_rgbr uos_rrgb uos_rrgbt velodyne xyz xyzr xyz_rgb xyz_rgba xyz_rgbr xyz_rrgb
@@ -39,23 +35,19 @@ else()
   unset (LIBZIP_LIBRARY CACHE)
 endif()
 
-add_library(scanio_static STATIC scan_io.cc ../slam6d/io_types.cc helper.cc)
-add_library(scanio_shared SHARED scan_io.cc ../slam6d/io_types.cc helper.cc)
-
-set_target_properties(scanio_static PROPERTIES OUTPUT_NAME scanio CLEAN_DIRECT_OUTPUT 1)
-set_target_properties(scanio_shared PROPERTIES OUTPUT_NAME scanio CLEAN_DIRECT_OUTPUT 1)
+add_library(scanio scan_io.cc ../slam6d/io_types.cc helper.cc)
+set_property(TARGET scanio PROPERTY POSITION_INDEPENDENT_CODE 1)
 
 set(SCANIO_LINK_LIBRARIES ${LIBZIP_LIBRARY} ${Boost_LIBRARIES} ${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY} pointfilter)
 if (UNIX)
   list(APPEND SCANIO_LINK_LIBRARIES dl)
 endif()
 
-target_link_libraries(scanio_static ${SCANIO_LINK_LIBRARIES})
-target_link_libraries(scanio_shared ${SCANIO_LINK_LIBRARIES})
+target_link_libraries(scanio ${SCANIO_LINK_LIBRARIES})
 
 foreach(libname ${SCANIO_LIBNAMES})
   add_library(scan_io_${libname} SHARED scan_io_${libname}.cc)
-  target_link_libraries(scan_io_${libname} ${Boost_LIBRARIES} ${Boost_PROGRAM_OPTIONS_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY} scanio_shared pointfilter )
+  target_link_libraries(scan_io_${libname} ${Boost_LIBRARIES} ${Boost_PROGRAM_OPTIONS_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY} scanio pointfilter )
 endforeach()
 target_include_directories(scan_io_ply PUBLIC ${PROJECT_SOURCE_DIR}/3rdparty/rply-1.1.4)
 target_link_libraries(scan_io_ply rply)
@@ -65,5 +57,5 @@ if(WITH_RIVLIB)
 endif()
 
 if(WITH_LASLIB)
-target_link_libraries(scan_io_laz laslib_shared)
+target_link_libraries(scan_io_laz laslib)
 endif()

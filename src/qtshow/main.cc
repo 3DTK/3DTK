@@ -18,3 +18,4 @@ void interruptDrawing() {}
 void checkForInterrupt() {}
 bool isInterrupted() {return false;}
 void updatePointModeControls() {}
+void updateViewModeControls() {}
