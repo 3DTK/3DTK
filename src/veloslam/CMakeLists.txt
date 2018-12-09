@@ -1,4 +1,4 @@
-if (WITH_OPENGL)
+if (NOT MSVC AND WITH_OPENGL)
   include_directories(${CXSPARSE_INCLUDE_DIRS})
   include_directories(${NEWMAT_INCLUDE_DIRS})
   include_directories(${GLUT_INCLUDE_DIR})
@@ -32,7 +32,7 @@ if (WITH_OPENGL)
   endif()
 
   if(WIN32)
-    target_link_libraries(veloslam scan_shared ${CXSPARSE_LIBRARIES_SHARED} ${ANN_LIBRARIES_SHARED} XGetopt ${Boost_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} ${SHOW_LIBS_SHARED})
+    target_link_libraries(veloslam scan_static ${CXSPARSE_LIBRARIES_STATIC} ${ANN_LIBRARIES_SHARED} XGetopt ${Boost_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} ${SHOW_LIBS_SHARED})
   endif()
 endif()
 

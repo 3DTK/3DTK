@@ -5,7 +5,11 @@ if (WITH_CGAL AND WITH_EIGEN3 AND WITH_OPENCV)
 
   # Module name
   set(MODULE "Model")
-  set(UNIX_LIBS shape scan_shared ${NEWMAT_LIBRARIES_SHARED} dl ${ANN_LIBRARIES_SHARED})
+  if(MSVC)
+    set(UNIX_LIBS shape scan_static ${NEWMAT_LIBRARIES_SHARED} dl ${ANN_LIBRARIES_STATIC})
+  else()
+    set(UNIX_LIBS shape scan_shared ${NEWMAT_LIBRARIES_SHARED} dl ${ANN_LIBRARIES_SHARED})
+  endif()
   set(WIN32_LIBS shape scan_shared ${NEWMAT_LIBRARIES_SHARED} XGetopt)
 
   # Set CXX flags for CGAL

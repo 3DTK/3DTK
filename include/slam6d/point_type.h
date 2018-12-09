@@ -32,17 +32,17 @@ class Scan;
 class PointType {
 public:
 
-  static const unsigned int USE_NONE;
-  static const unsigned int USE_REFLECTANCE;
-  static const unsigned int USE_NORMAL;
-  static const unsigned int USE_TEMPERATURE;
-  static const unsigned int USE_AMPLITUDE;
-  static const unsigned int USE_DEVIATION;
-  static const unsigned int USE_HEIGHT;
-  static const unsigned int USE_TYPE;
-  static const unsigned int USE_COLOR;
-  static const unsigned int USE_TIME;
-  static const unsigned int USE_INDEX;
+  static const unsigned int USE_NONE = 0;
+  static const unsigned int USE_REFLECTANCE = 1;
+  static const unsigned int USE_NORMAL = 2;
+  static const unsigned int USE_TEMPERATURE = 4;
+  static const unsigned int USE_AMPLITUDE = 8;
+  static const unsigned int USE_DEVIATION = 16;
+  static const unsigned int USE_HEIGHT = 32;
+  static const unsigned int USE_TYPE = 64;
+  static const unsigned int USE_COLOR = 128;
+  static const unsigned int USE_TIME = 256;
+  static const unsigned int USE_INDEX = 512;
 
   PointType();
 

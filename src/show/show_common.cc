@@ -1102,6 +1102,7 @@ void signal_interrupt(int v)
 
 void setSignalHandling()
 {
+#ifndef WIN32
   struct sigaction actSigSegv;
   struct sigaction actSigInt;
   sigset_t sigset;
@@ -1122,7 +1123,9 @@ void setSignalHandling()
   actSigInt.sa_mask = sigset;
   sigaction(SIGINT, &actSigInt, NULL);
   sigaction(SIGTERM, &actSigInt, NULL);
+#endif
 }
+
 
 void QuatToMouseRot(Quaternion q, double& x, double& y, double& z)
 {

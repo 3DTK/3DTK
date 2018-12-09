@@ -1,3 +1,4 @@
+if (NOT MSVC)
 if (WITH_OPENCV)
   add_definitions(-DWITH_OPENCV)
   include_directories(${NEWMAT_INCLUDE_DIRS})
@@ -16,3 +17,4 @@ endif()
 
 add_executable(calc_normals calc_normals.cc)
 target_link_libraries(calc_normals scan_shared ${NORMALS_PANORAMA_LIBRARIES} ${Boost_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} ${SHOW_LIBS_SHARED})
+endif()
