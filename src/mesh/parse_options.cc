@@ -1,5 +1,10 @@
 #include "mesh/parse_options.h"
 
+#ifdef _MSC_VER
+#define strcasecmp _stricmp
+#define strncasecmp _strnicmp
+#endif
+
 using namespace std;
 namespace po = boost::program_options;
 
