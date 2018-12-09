@@ -35,6 +35,6 @@ if(WITH_ROS)
 
 
   add_executable(fusion fusion.cc curves.cc timestamps.cc tf_broadcaster.cc)
-  target_link_libraries(fusion ${catkin_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} ${Boost_PROGRAM_OPTIONS_LIBRARY} ${NEWMAT_LIBRARIES_SHARED} ${OpenCV_LIBRARIES})
+  target_link_libraries(fusion ${catkin_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} ${Boost_PROGRAM_OPTIONS_LIBRARY} ${NEWMAT_LIBRARIES} ${OpenCV_LIBRARIES})
 endif()
 

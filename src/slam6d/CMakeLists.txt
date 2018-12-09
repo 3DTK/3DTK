@@ -24,22 +24,17 @@ include_directories(${ANN_INCLUDE_DIRS})
 
 ### SCAN_RED
 
-if (NOT MSVC AND WITH_OPENCV)
+if (WITH_OPENCV)
   add_executable(scan_red scan_red.cc ../scanio/writer.cc fbr/fbr_global.cc fbr/panorama.cc fbr/scan_cv.cc)
 
-  if(MSVC)
-    target_link_libraries(scan_red scan_shared show_shared ${ANN_LIBRARIES_STATIC} fbr_cv_io_shared fbr_panorama_shared ${OpenCV_LIBS} ${Boost_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} ${SHOW_LIBS_SHARED})
-  else()
-    target_link_libraries(scan_red scan_shared show_shared ${ANN_LIBRARIES_SHARED} fbr_cv_io_shared fbr_panorama_shared ${OpenCV_LIBS} ${Boost_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} ${SHOW_LIBS_SHARED})
-  endif()
+  target_link_libraries(scan_red scan show ${ANN_LIBRARIES} fbr_cv_io fbr_panorama ${OpenCV_LIBS} ${Boost_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} ${SHOW_LIBS})
 endif()
 
 ### SCAN_DIFF
 add_executable(scan_diff scan_diff.cc)
+target_link_libraries(scan_diff scan ${ANN_LIBRARIES} ${NEWMAT_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY})
 if (WIN32)
-  target_link_libraries(scan_diff XGetopt scan_static ${ANN_LIBRARIES_STATIC} ${NEWMAT_LIBRARIES_SHARED} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY})
-else()
-  target_link_libraries(scan_diff scan_shared ${ANN_LIBRARIES_SHARED} ${NEWMAT_LIBRARIES_SHARED} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY})
+  target_link_libraries(scan_diff XGetopt)
 endif()
 
 add_executable(frame_to_graph frame_to_graph.cc)
@@ -64,19 +59,15 @@ add_executable(align sICP.cc)
 
 if (WITH_OPENCV)
   add_executable(exportPoints exportPoints.cc ../scanio/writer.cc)
-  if (WIN32)
-    target_link_libraries(exportPoints scan_static ${ANN_LIBRARIES_STATIC} ${NEWMAT_LIBRARIES_SHARED} ${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY} ${OpenCV_LIBS})
-  else()
-    target_link_libraries(exportPoints scan_shared ${ANN_LIBRARIES_SHARED} ${NEWMAT_LIBRARIES_SHARED} ${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY} ${OpenCV_LIBS})
-  endif()
+  target_link_libraries(exportPoints scan ${ANN_LIBRARIES} ${NEWMAT_LIBRARIES} ${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY} ${OpenCV_LIBS})
 endif()
 
 if(UNIX)
-  target_link_libraries(graph_balancer scan_shared ${Boost_GRAPH_LIBRARY} ${Boost_SERIALIZATION_LIBRARY} ${Boost_REGEX_LIBRARY} ${Boost_SYSTEM_LIBRARY})
-  target_link_libraries(align scan_shared ${ANN_LIBRARIES_SHARED} ${NEWMAT_LIBRARIES_SHARED} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY})
-  target_link_libraries(transformFrames scan_shared ${ANN_LIBRARIES} newmat ${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY})
-  target_link_libraries(multFrames scan_shared ${ANN_LIBRARIES} newmat ${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY})
-  target_link_libraries(toGlobal scan_shared)
+  target_link_libraries(graph_balancer scan ${Boost_GRAPH_LIBRARY} ${Boost_SERIALIZATION_LIBRARY} ${Boost_REGEX_LIBRARY} ${Boost_SYSTEM_LIBRARY})
+  target_link_libraries(align scan ${ANN_LIBRARIES} ${NEWMAT_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY})
+  target_link_libraries(transformFrames scan ${ANN_LIBRARIES} newmat ${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY})
+  target_link_libraries(multFrames scan ${ANN_LIBRARIES} newmat ${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY})
+  target_link_libraries(toGlobal scan)
   target_link_libraries(convergence ${Boost_LIBRARIES} ${Boost_SYSTEM_LIBRARY})
   target_link_libraries(pose2frames ${Boost_LIBRARIES} ${Boost_SYSTEM_LIBRARY})
   target_link_libraries(frames2pose ${Boost_LIBRARIES} ${Boost_SYSTEM_LIBRARY})
@@ -86,10 +77,10 @@ if(UNIX)
 endif()
 
 if(APPLE)
-  target_link_libraries(graph_balancer scan_shared ${Boost_GRAPH_LIBRARY} ${Boost_SERIALIZATION_LIBRARY} ${Boost_REGEX_LIBRARY} ${Boost_SYSTEM_LIBRARY})
-  target_link_libraries(align scan_shared dl ${ANN_LIBRARIES} newmat ${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY})
-  target_link_libraries(transformFrames scan_shared dl ${ANN_LIBRARIES} newmat ${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY})
-  target_link_libraries(multFrames scan_shared dl ${ANN_LIBRARIES} newmat ${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY})
+  target_link_libraries(graph_balancer scan ${Boost_GRAPH_LIBRARY} ${Boost_SERIALIZATION_LIBRARY} ${Boost_REGEX_LIBRARY} ${Boost_SYSTEM_LIBRARY})
+  target_link_libraries(align scan dl ${ANN_LIBRARIES} newmat ${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY})
+  target_link_libraries(transformFrames scan dl ${ANN_LIBRARIES} newmat ${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY})
+  target_link_libraries(multFrames scan dl ${ANN_LIBRARIES} newmat ${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY})
   target_link_libraries(toGlobal scan)
   target_link_libraries(convergence ${Boost_LIBRARIES} ${Boost_SYSTEM_LIBRARY})
   target_link_libraries(pose2frames ${Boost_LIBRARIES} ${Boost_SYSTEM_LIBRARY})
@@ -101,10 +92,10 @@ endif()
 if (WIN32)
   target_link_libraries(frame_to_graph XGetopt ${Boost_LIBRARIES})
   target_link_libraries(convergence XGetopt ${Boost_LIBRARIES})
-  target_link_libraries(graph_balancer scan_static XGetopt ${Boost_GRAPH_LIBRARY} ${Boost_SERIALIZATION_LIBRARY} ${Boost_REGEX_LIBRARY} ${Boost_LIBRARIES})
-  target_link_libraries(align scan_static ${ANN_LIBRARIES_STATIC} ${Boost_LIBRARIES} ${NEWMAT_LIBRARIES_SHARED})
-  target_link_libraries(transformFrames scan_static ${ANN_LIBRARIES_STATIC} ${Boost_LIBRARIES} ${NEWMAT_LIBRARIES_SHARED})
-  target_link_libraries(multFrames scan_static ${ANN_LIBRARIES_STATIC} ${Boost_LIBRARIES} ${NEWMAT_LIBRARIES_SHARED})
+  target_link_libraries(graph_balancer scan XGetopt ${Boost_GRAPH_LIBRARY} ${Boost_SERIALIZATION_LIBRARY} ${Boost_REGEX_LIBRARY} ${Boost_LIBRARIES})
+  target_link_libraries(align scan ${ANN_LIBRARIES} ${Boost_LIBRARIES} ${NEWMAT_LIBRARIES})
+  target_link_libraries(transformFrames scan ${ANN_LIBRARIES} ${Boost_LIBRARIES} ${NEWMAT_LIBRARIES})
+  target_link_libraries(multFrames scan ${ANN_LIBRARIES} ${Boost_LIBRARIES} ${NEWMAT_LIBRARIES})
   target_link_libraries(frames2pose ${Boost_LIBRARIES})
   target_link_libraries(kitti2scan XGetopt ${Boost_LIBRARIES})
   target_link_libraries(kitti2pose XGetopt ${Boost_LIBRARIES})
@@ -113,14 +104,14 @@ if (WIN32)
   target_link_libraries(pose2frames ${Boost_LIBRARIES})
   target_link_libraries(frames2riegl  ${Boost_LIBRARIES})
   target_link_libraries(riegl2frames ${Boost_LIBRARIES})
-  target_link_libraries(toGlobal scan_static XGetopt ${Boost_LIBRARIES})
+  target_link_libraries(toGlobal scan XGetopt ${Boost_LIBRARIES})
 endif()
 
-target_link_libraries(average6DoFposes ${NEWMAT_LIBRARIES_SHARED})
+target_link_libraries(average6DoFposes ${NEWMAT_LIBRARIES})
 
 ### SCANLIB
 
-add_library(scanlib_objects OBJECT
+add_library(scan
         kd.cc             kdManaged.cc      kdMeta.cc         graphSlam6D.cc
         graph.cc          icp6D.cc          icp6Dapx.cc       icp6Dsvd.cc
         icp6Dortho.cc     icp6Dquat.cc      icp6Dhelix.cc     icp6Dlumeuler.cc
@@ -132,31 +123,14 @@ add_library(scanlib_objects OBJECT
         io_types.cc       io_utils.cc       pointfilter.cc    allocator.cc
         icp6Dnapx.cc      normals.cc        kdIndexed.cc
         )
-# compile with -fPIC so that the result can be made into a shared library
-set_property(TARGET scanlib_objects PROPERTY POSITION_INDEPENDENT_CODE 1)
-
-add_library(scan_static STATIC $<TARGET_OBJECTS:scanlib_objects>)
-add_library(scan_shared SHARED $<TARGET_OBJECTS:scanlib_objects>)
-
-set_target_properties(scan_static PROPERTIES OUTPUT_NAME scan CLEAN_DIRECT_OUTPUT 1)
-set_target_properties(scan_shared PROPERTIES OUTPUT_NAME scan CLEAN_DIRECT_OUTPUT 1)
-
-if(MSVC)
-  target_link_libraries(scan_static scanclient_static scanio_static ${ANN_LIBRARIES_STATIC} ${NEWMAT_LIBRARIES_STATIC} ${SUITESPARSE_LIBRARIES})
-else()
-  target_link_libraries(scan_static scanclient_static scanio_static ${ANN_LIBRARIES} ${NEWMAT_LIBRARIES_STATIC} ${SUITESPARSE_LIBRARIES})
-endif()
-target_link_libraries(scan_shared scanclient_shared scanio_shared ${ANN_LIBRARIES_SHARED} ${NEWMAT_LIBRARIES_SHARED} ${SUITESPARSE_LIBRARIES})
+set_property(TARGET scan PROPERTY POSITION_INDEPENDENT_CODE 1)
+target_link_libraries(scan scanclient scanio ${ANN_LIBRARIES} ${NEWMAT_LIBRARIES} ${SUITESPARSE_LIBRARIES})
 
 ### SLAM6D
 
 add_executable(slam6D slam6D.cc)
 
-if (WIN32)
-  target_link_libraries(slam6D scan_static ${NEWMAT_LIBRARIES_SHARED} ${SUITESPARSE_LIBRARIES} ${ANN_LIBRARIES_STATIC} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY})
-else()
-  target_link_libraries(slam6D scan_shared ${NEWMAT_LIBRARIES_SHARED} ${SUITESPARSE_LIBRARIES} ${ANN_LIBRARIES_SHARED} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY})
-endif()
+target_link_libraries(slam6D scan ${NEWMAT_LIBRARIES} ${SUITESPARSE_LIBRARIES} ${ANN_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY})
 
 #if(MSVC)
 #	install(TARGETS slam6D RUNTIME DESTINATION ${PROJECT_SOURCE_DIR}/windows)

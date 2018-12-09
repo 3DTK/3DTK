@@ -26,30 +26,13 @@ add_executable(planes plane.cc)
 #  add_executable(image toImage.cc image.cc hough.cc convexplane.cc accumulator.cc hsm3d.cc ConfigFileHough.cc parascan.cc quadtree.cc geom_math.cc )
 #  add_executable(matchMarker matchMarker.cc)
 
-if(UNIX)
-  target_link_libraries(planes scan_shared shape_shared ${NEWMAT_LIBRARIES_SHARED} ${ANN_LIBRARIES_SHARED} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY})
-#    target_link_libraries(image scan newmat sparse dl ${ANN_LIBRARIES} )
-#    target_link_libraries(matchMarker scan newmat sparse dl ${ANN_LIBRARIES} )
-endif()
-
+target_link_libraries(planes scan shape ${NEWMAT_LIBRARIES} ${ANN_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY})
 if (WIN32)
-  target_link_libraries(planes scan_static XGetopt shape_shared ${NEWMAT_LIBRARIES_SHARED} ${ANN_LIBRARIES_STATIC})
-#    target_link_libraries(image scan newmat sparse ${ANN_LIBRARIES} XGetopt)
+  target_link_libraries(planes XGetopt)
 endif()
 
 set(SHAPELIB_SRCS
   hough.cc convexplane.cc accumulator.cc hsm3d.cc ConfigFileHough.cc parascan.cc quadtree.cc geom_math.cc )
 
-add_library(shape_objects OBJECT ${SHAPELIB_SRCS})
-
-# compile with -fPIC so that the result can be made into a shared library
-set_property(TARGET shape_objects PROPERTY POSITION_INDEPENDENT_CODE 1)
-
-add_library(shape_static STATIC $<TARGET_OBJECTS:shape_objects>)
-add_library(shape_shared SHARED $<TARGET_OBJECTS:shape_objects>)
-
-set_target_properties(shape_static PROPERTIES OUTPUT_NAME shape CLEAN_DIRECT_OUTPUT 1)
-set_target_properties(shape_shared PROPERTIES OUTPUT_NAME shape CLEAN_DIRECT_OUTPUT 1)
-
-target_link_libraries(shape_shared ${Boost_LIBRARIES} ${NEWMAT_LIBRARIES_SHARED})
-target_link_libraries(shape_shared ${Boost_LIBRARIES} ${NEWMAT_LIBRARIES_STATIC})
+add_library(shape ${SHAPELIB_SRCS})
+target_link_libraries(shape ${Boost_LIBRARIES} ${NEWMAT_LIBRARIES})

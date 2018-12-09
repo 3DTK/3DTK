@@ -2,7 +2,7 @@ if(APPLE)
     set(CMAKE_MACOSX_RPATH 1)
 endif()
 SET(NEWMAT_DIR ${PROJECT_SOURCE_DIR}/3rdparty/newmat/newmat-10/newmat/)
-add_library(newmat_objects OBJECT
+add_library(newmat
   ${NEWMAT_DIR}newmat1.cpp
   ${NEWMAT_DIR}newmat2.cpp
   ${NEWMAT_DIR}newmat3.cpp
@@ -25,12 +25,3 @@ add_library(newmat_objects OBJECT
   ${NEWMAT_DIR}svd.cpp
   ${NEWMAT_DIR}newmatrm.cpp
   ${NEWMAT_DIR}newmat9.cpp)
-
-# compile with -fPIC so that the result can be made into a shared library
-set_property(TARGET newmat_objects PROPERTY POSITION_INDEPENDENT_CODE 1)
-
-add_library(newmat_static STATIC $<TARGET_OBJECTS:newmat_objects>)
-add_library(newmat_shared SHARED $<TARGET_OBJECTS:newmat_objects>)
-
-set_target_properties(newmat_static PROPERTIES OUTPUT_NAME newmat CLEAN_DIRECT_OUTPUT 1)
-set_target_properties(newmat_shared PROPERTIES OUTPUT_NAME newmat CLEAN_DIRECT_OUTPUT 1)

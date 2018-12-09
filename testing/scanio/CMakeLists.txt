@@ -1,25 +1,13 @@
 add_executable(test_scanio_helper helper.cc)
-if(MSVC)
-  target_link_libraries(test_scanio_helper scan_static scanio_shared ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
-else()
-  target_link_libraries(test_scanio_helper scan_shared scanio_shared ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
-endif()
+target_link_libraries(test_scanio_helper scan scanio ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
 
 if (WITH_LIBZIP)
   add_executable(test_scanio_zipreader zipreader.cc)
-  if(MSVC)
-    target_link_libraries(test_scanio_zipreader scan_static scanio_shared ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
-  else()
-    target_link_libraries(test_scanio_zipreader scan_shared scanio_shared ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
-  endif()
+  target_link_libraries(test_scanio_zipreader scan scanio ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
 endif()
 
 add_executable(test_scanio_readscans readscans.cc)
-if(MSVC)
-  target_link_libraries(test_scanio_readscans scan_static scanio_shared ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
-else()
-  target_link_libraries(test_scanio_readscans scan_shared scanio_shared ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
-endif()
+target_link_libraries(test_scanio_readscans scan scanio ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
 
 # The only way to add a dependency from a test to target building the binary
 # required for the test is by formulating the binary compilation as yet another
