@@ -6,7 +6,8 @@ image: Visual Studio 2017
 platform: x64
 # connect via rdp using:
 #    $ xfreerdp /d:domain /u:appveyor /p:'password' /cert-ignore /v:ipaddr:port
-#init:
+init:
+   - echo.set(VCPKG_BUILD_TYPE release)>> C:\Tools\vcpkg\triplets\x64-windows.cmake
 #  - ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
 #on_finish:
 #  - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
