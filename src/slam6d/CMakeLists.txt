@@ -16,7 +16,7 @@ else()
   message(STATUS "Without metrics in slam6d.")
 endif()
 
-include_directories(${CXSPARSE_INCLUDE_DIRS})
+include_directories(${SUITESPARSE_INCLUDE_DIRS})
 include_directories(${NEWMAT_INCLUDE_DIRS})
 include_directories(${ANN_INCLUDE_DIRS})
 
@@ -142,20 +142,20 @@ set_target_properties(scan_static PROPERTIES OUTPUT_NAME scan CLEAN_DIRECT_OUTPU
 set_target_properties(scan_shared PROPERTIES OUTPUT_NAME scan CLEAN_DIRECT_OUTPUT 1)
 
 if(MSVC)
-  target_link_libraries(scan_static scanclient_static scanio_static ${ANN_LIBRARIES_STATIC} ${NEWMAT_LIBRARIES_STATIC} ${CXSPARSE_LIBRARIES})
+  target_link_libraries(scan_static scanclient_static scanio_static ${ANN_LIBRARIES_STATIC} ${NEWMAT_LIBRARIES_STATIC} ${SUITESPARSE_LIBRARIES})
 else()
-  target_link_libraries(scan_static scanclient_static scanio_static ${ANN_LIBRARIES} ${NEWMAT_LIBRARIES_STATIC} ${CXSPARSE_LIBRARIES})
+  target_link_libraries(scan_static scanclient_static scanio_static ${ANN_LIBRARIES} ${NEWMAT_LIBRARIES_STATIC} ${SUITESPARSE_LIBRARIES})
 endif()
-target_link_libraries(scan_shared scanclient_shared scanio_shared ${ANN_LIBRARIES_SHARED} ${NEWMAT_LIBRARIES_SHARED} ${CXSPARSE_LIBRARIES})
+target_link_libraries(scan_shared scanclient_shared scanio_shared ${ANN_LIBRARIES_SHARED} ${NEWMAT_LIBRARIES_SHARED} ${SUITESPARSE_LIBRARIES})
 
 ### SLAM6D
 
 add_executable(slam6D slam6D.cc)
 
 if (WIN32)
-  target_link_libraries(slam6D scan_static ${NEWMAT_LIBRARIES_SHARED} ${CXSPARSE_LIBRARIES} ${ANN_LIBRARIES_STATIC} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY})
+  target_link_libraries(slam6D scan_static ${NEWMAT_LIBRARIES_SHARED} ${SUITESPARSE_LIBRARIES} ${ANN_LIBRARIES_STATIC} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY})
 else()
-  target_link_libraries(slam6D scan_shared ${NEWMAT_LIBRARIES_SHARED} ${CXSPARSE_LIBRARIES} ${ANN_LIBRARIES_SHARED} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY})
+  target_link_libraries(slam6D scan_shared ${NEWMAT_LIBRARIES_SHARED} ${SUITESPARSE_LIBRARIES} ${ANN_LIBRARIES_SHARED} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY})
 endif()
 
 #if(MSVC)

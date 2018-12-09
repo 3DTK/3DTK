@@ -226,8 +226,6 @@ echo "cmake: %cmakeexe%"
 "%cmakeexe%" ^
 	-G "Visual Studio 15 2017 Win64" ^
 	-D CMAKE_TOOLCHAIN_FILE=%vcpkgdir%/scripts/buildsystems/vcpkg.cmake ^
-	-D CXSPARSE_INCLUDE_DIRS=%vcpkgdir%/packages/suitesparse_x64-windows/include/suitesparse ^
-	-D CXSPARSE_LIBRARIES=%vcpkgdir%/packages/suitesparse_x64-windows/lib/libcxsparse.lib ^
 	-D OUTPUT_DIRECTORY:PATH=%outdir% ^
 	-D WITH_LIBCONFIG=OFF ^
 	-D WITH_CGAL=OFF ^
