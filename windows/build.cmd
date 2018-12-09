@@ -88,49 +88,50 @@ where vcpkg
 :: there is no AND or OR logical operator in windows batch
 if %ERRORLEVEL% NEQ 0 (
 	if not exist %vcpkgdir% (
-	call:reset_error
-	if not exist !vcpkgzip! (
-		echo downloading !vcpkgzip!...
-		call:download !vcpkgurl! !vcpkgzip!
+		call:reset_error
+		if not exist !vcpkgzip! (
+			echo downloading !vcpkgzip!...
+			call:download !vcpkgurl! !vcpkgzip!
+		)
+		echo checking md5sum of !vcpkgzip!...
+		call:checkmd5 !vcpkgzip! !vcpkghash!
+		if !ERRORLEVEL! GEQ 1 (
+			echo md5sum mismatch
+			exit /B 1
+		)
+		echo extracting !vcpkgzip! into !vcpkgdir!...
+		call:unzip !vcpkgzip! !vcpkgdir!
+		if !ERRORLEVEL! GEQ 1 (
+			echo vcpkg unzip failed
+			exit /B 1
+		)
+		:: windows does not like long paths
+		:: including the git commit hash in the path makes building qt fail
+		move !vcpkgdir! "!vcpkgdir!.tmp"
+		if !ERRORLEVEL! GEQ 1 (
+			echo moving !vcpkgdir! to "!vcpkgdir!.tmp" failed
+			exit /B 1
+		)
+		move "!vcpkgdir!.tmp/vcpkg-!vcpkgcommit!" !vcpkgdir!
+		if !ERRORLEVEL! GEQ 1 (
+			echo moving "!vcpkgdir!.tmp/vcpkg-!vcpkgcommit!" to !vcpkgdir! failed
+			exit /B 1
+		)
+		rmdir "!vcpkgdir!.tmp"
+		:: have to use call or otherwise bootstrap-vcpkg.bat will exit everything
+		call !vcpkgdir!/bootstrap-vcpkg.bat
+		if !ERRORLEVEL! GEQ 1 (
+			echo bootstrap-vcpkg.bat failed
+			exit /B 1
+		)
 	)
-	echo checking md5sum of !vcpkgzip!...
-	call:checkmd5 !vcpkgzip! !vcpkghash!
-	if !ERRORLEVEL! GEQ 1 (
-		echo md5sum mismatch
-		exit /B 1
-	)
-	echo extracting !vcpkgzip! into !vcpkgdir!...
-	call:unzip !vcpkgzip! !vcpkgdir!
-	if !ERRORLEVEL! GEQ 1 (
-		echo vcpkg unzip failed
-		exit /B 1
-	)
-	:: windows does not like long paths
-	:: including the git commit hash in the path makes building qt fail
-	move !vcpkgdir! "!vcpkgdir!.tmp"
-	if !ERRORLEVEL! GEQ 1 (
-		echo moving !vcpkgdir! to "!vcpkgdir!.tmp" failed
-		exit /B 1
-	)
-	move "!vcpkgdir!.tmp/vcpkg-!vcpkgcommit!" !vcpkgdir!
-	if !ERRORLEVEL! GEQ 1 (
-		echo moving "!vcpkgdir!.tmp/vcpkg-!vcpkgcommit!" to !vcpkgdir! failed
-		exit /B 1
-	)
-	rmdir "!vcpkgdir!.tmp"
-	:: have to use call or otherwise bootstrap-vcpkg.bat will exit everything
-	call !vcpkgdir!/bootstrap-vcpkg.bat
-	if !ERRORLEVEL! GEQ 1 (
-		echo bootstrap-vcpkg.bat failed
-		exit /B 1
-	)
-)) else (
-	:: FIXME: we should assign the output of "where vcpkg" here but
-	:: assigning the output of a command to a variable seems to be horrible
-	:: in windows batch, so hardcoding this for now...
-	set vcpkgdir=C:/tools/vcpkg/
+	set vcpkgexe=!vcpkgdir!/vcpkg.exe
+) else (
+	:: equivalent of vcpkgexe=$(where vcpkg)
+	for /f %%i in ('where vcpkg') do set vcpkgexe=%%i
+	:: equivalent of vcpkgdir=$(dirname vcpkgexe)
+	for %%F in ("!vcpkgexe!") do set vcpkgdir=%%~dpF
 )
-set vcpkgexe=%vcpkgdir%/vcpkg.exe
 
 echo vcpkgexe: %vcpkgexe%
 echo vcpkgdir: %vcpkgdir%
