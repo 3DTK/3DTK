@@ -173,6 +173,13 @@ if %ERRORLEVEL% GEQ 1 (
 	echo vcpkg update failed
 	exit /B 1
 )
+
+%vcpkgexe% upgrade --no-dry-run
+if %ERRORLEVEL% GEQ 1 (
+	echo vcpkg upgrade failed
+	exit /B 1
+)
+
 :: FIXME: add cgal once appveyor installs a vcpkg version greater than 0.0.105
 :: with https://github.com/Microsoft/vcpkg/pull/2962
 %vcpkgexe% --triplet x64-windows install ^
@@ -188,6 +195,11 @@ if %ERRORLEVEL% GEQ 1 (
 	suitesparse
 if %ERRORLEVEL% GEQ 1 (
 	echo vcpkg install failed
+	exit /B 1
+)
+%vcpkgexe% remove --outdated
+if %ERRORLEVEL% GEQ 1 (
+	echo vcpkg remove --outdated failed
 	exit /B 1
 )
 
