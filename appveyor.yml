@@ -2,7 +2,7 @@ build:
  verbosity: detailed
 environment:
   APPVEYOR_SAVE_CACHE_ON_ERROR: "true"
-image: Visual Studio 2015
+image: Visual Studio 2017
 platform: x64
 init:
   - ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
