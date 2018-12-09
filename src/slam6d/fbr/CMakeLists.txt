@@ -1,4 +1,4 @@
-if (WITH_OPENCV)
+if (NOT MSVC AND WITH_OPENCV)
   find_package(OpenCV REQUIRED)
 
   set(FBR_LIBS scan_shared show_shared ${OpenCV_LIBS})
@@ -55,7 +55,11 @@ if (WITH_OPENCV)
     set_target_properties(fbr_shared PROPERTIES OUTPUT_NAME fbr CLEAN_DIRECT_OUTPUT 1)
 
     target_link_libraries(fbr_static ${FBR_LIBS})
-    target_link_libraries(fbr_shared scan_shared ${ANN_LIBRARIES} ${OpenCV_LIBS} show_shared)
+    if(MSVC)
+      target_link_libraries(fbr_shared scan_static ${ANN_LIBRARIES_STATIC} ${OpenCV_LIBS} show_shared)
+    else()
+      target_link_libraries(fbr_shared scan_shared ${ANN_LIBRARIES} ${OpenCV_LIBS} show_shared)
+    endif()
 
 
     ###feature based registration

@@ -178,7 +178,7 @@ int main(int argc, char **argv)
 #ifndef _MSC_VER
     snprintf(filename,255,"%spoints.utm",dir.c_str());
 # else
-    sprintf(filename,255,"%spoints.utm",dir.c_str());
+    sprintf_s(filename,255,"%spoints.utm",dir.c_str());
 #endif
 
   FILE *redptsout = fopen(filename, "w");

@@ -170,20 +170,6 @@ bool PointType::hasType(unsigned int type) const {
   return types & type;
 }
 
-
-const unsigned int PointType::USE_NONE = 0;
-const unsigned int PointType::USE_REFLECTANCE = 1;
-const unsigned int PointType::USE_NORMAL = 2;
-const unsigned int PointType::USE_TEMPERATURE = 4;
-const unsigned int PointType::USE_AMPLITUDE = 8;
-const unsigned int PointType::USE_DEVIATION = 16;
-const unsigned int PointType::USE_HEIGHT = 32;
-const unsigned int PointType::USE_TYPE = 64;
-const unsigned int PointType::USE_COLOR = 128;
-const unsigned int PointType::USE_TIME = 256;
-const unsigned int PointType::USE_INDEX = 512;
-
-
 void PointType::useScan(Scan* scan)
 {
   // clear pointers first

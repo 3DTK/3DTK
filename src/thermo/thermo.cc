@@ -1935,7 +1935,7 @@ void ProjectAndMap(int start, int end, bool optical, bool quiet, string dir,
     CvMat* undistort_2Dcloud = cvCreateMat(nr_points, 2, CV_32FC1);
     
     cout << "Number of points read: " << nr_points << endl;
-    delete Scan::allScans[0];
+    delete Scan::allScans.at(0);
     Scan::allScans.clear();
 
     // write colored data  

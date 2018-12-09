@@ -5,5 +5,5 @@ if (UNIX)
 endif()
 
 if (WIN32)
-  target_link_libraries(2DGridder scan_shared ${ANN_LIBRARIES} XGetopt)
+  target_link_libraries(2DGridder scan_static ${ANN_LIBRARIES_STATIC} XGetopt)
 endif()
