@@ -16,7 +16,6 @@ if(WITH_ROS)
       geometry_msgs
       sensor_msgs
       std_msgs
-      rospy
   )
 
   find_package(Eigen3 REQUIRED)
