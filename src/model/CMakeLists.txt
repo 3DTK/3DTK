@@ -5,12 +5,6 @@ if (WITH_CGAL AND WITH_EIGEN3 AND WITH_OPENCV)
 
   # Module name
   set(MODULE "Model")
-  if(MSVC)
-    set(UNIX_LIBS shape scan_static ${NEWMAT_LIBRARIES_SHARED} dl ${ANN_LIBRARIES_STATIC})
-  else()
-    set(UNIX_LIBS shape scan_shared ${NEWMAT_LIBRARIES_SHARED} dl ${ANN_LIBRARIES_SHARED})
-  endif()
-  set(WIN32_LIBS shape scan_shared ${NEWMAT_LIBRARIES_SHARED} XGetopt)
 
   # Set CXX flags for CGAL
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -frounding-math")
@@ -27,12 +21,6 @@ if (WITH_CGAL AND WITH_EIGEN3 AND WITH_OPENCV)
     find_package(Boost REQUIRED)
     find_package(OpenCV REQUIRED)
 
-    if(UNIX)
-        target_link_libraries(model scan_shared ${UNIX_LIBS} ${LIB_CGAL} ${Boost_LIBS} ${LIB_GMP} ${OpenCV_LIBS} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY})
-    endif()
-
-    if (WIN32)
-        target_link_libraries(model ${UNIX_LIBS} ${LIB_CGAL} ${Boost_LIBS} ${LIB_GMP} ${OpenCV_LIBS} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY})
-    endif()
+    target_link_libraries(model scan shape ${NEWMAT_LIBRARIES} dl ${ANN_LIBRARIES} ${LIB_CGAL} ${Boost_LIBS} ${LIB_GMP} ${OpenCV_LIBS} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY})
   endif()
 endif()

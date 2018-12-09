@@ -2,7 +2,7 @@ if (WITH_OPENGL AND NOT APPLE)
   find_package(GLUT REQUIRED)
   # Compile glui library
   SET(GLUI_DIR ${PROJECT_SOURCE_DIR}/3rdparty/glui-2.36/)
-  add_library(glui_objects OBJECT
+  add_library(glui
    ${GLUI_DIR}algebra3.cpp
    ${GLUI_DIR}arcball.cpp
    ${GLUI_DIR}glui_add_controls.cpp
@@ -37,23 +37,11 @@ if (WITH_OPENGL AND NOT APPLE)
    ${GLUI_DIR}quaternion.cpp
    ${GLUI_DIR}viewmodel.cpp
   )
-  target_include_directories(glui_objects PUBLIC ${PROJECT_SOURCE_DIR}/3rdparty/glui-2.36/include/)
-  target_include_directories(glui_objects PUBLIC ${GLUT_INCLUDE_DIR})
-  target_compile_definitions(glui_objects PUBLIC "-DGLUI_NO_LIB_PRAGMA")
+  target_include_directories(glui PUBLIC ${PROJECT_SOURCE_DIR}/3rdparty/glui-2.36/include/)
+  target_include_directories(glui PUBLIC ${GLUT_INCLUDE_DIR})
+  target_compile_definitions(glui PUBLIC "-DGLUI_NO_LIB_PRAGMA")
 
-  # compile with -fPIC so that the result can be made into a shared library
-  set_property(TARGET glui_objects PROPERTY POSITION_INDEPENDENT_CODE 1)
-
-  add_library(glui_static STATIC $<TARGET_OBJECTS:glui_objects>)
-  
-  if (NOT MSVC)
-    add_library(glui_shared SHARED $<TARGET_OBJECTS:glui_objects>)
-    set_target_properties(glui_shared PROPERTIES OUTPUT_NAME glui CLEAN_DIRECT_OUTPUT 1)
-  else()
-    target_link_libraries(glui_static ${GLUT_LIBRARIES} ${OPENGL_LIBRARIES})
-  endif()
-  
-  set_target_properties(glui_static PROPERTIES OUTPUT_NAME glui CLEAN_DIRECT_OUTPUT 1)
+  target_link_libraries(glui ${GLUT_LIBRARIES} ${OPENGL_LIBRARIES})
 endif()
 
 # Compile wxthings library
@@ -83,28 +71,19 @@ if (WITH_LASLIB)
 set(CMAKE_CXX_FLAGS "-DNDEBUG -DUNORDERED -std=c++0x -fPIC" )
 SET(LASLIB_DIR ${PROJECT_SOURCE_DIR}/3rdparty/lastools/laslib/src/)
 FILE(GLOB LASLIB_SRCS "${LASLIB_DIR}/*.cpp" "${LASLIB_DIR}/*.hpp")
-add_library(laslib_objects OBJECT ${LASLIB_SRCS})
-target_include_directories(laslib_objects PUBLIC ${PROJECT_SOURCE_DIR}/3rdparty/lastools/laslib/inc)
-
-# compile with -fPIC so that the result can be made into a shared library
-set_property(TARGET laslib_objects PROPERTY POSITION_INDEPENDENT_CODE 1)
-
-add_library(laslib_static STATIC $<TARGET_OBJECTS:laslib_objects>)
-add_library(laslib_shared SHARED $<TARGET_OBJECTS:laslib_objects>)
-
-set_target_properties(laslib_static PROPERTIES OUTPUT_NAME laslib CLEAN_DIRECT_OUTPUT 1)
-set_target_properties(laslib_shared PROPERTIES OUTPUT_NAME laslib CLEAN_DIRECT_OUTPUT 1)
+add_library(laslib ${LASLIB_SRCS})
+target_include_directories(laslib PUBLIC ${PROJECT_SOURCE_DIR}/3rdparty/lastools/laslib/inc)
 
 SET(LASSRC_DIR ${PROJECT_SOURCE_DIR}/3rdparty/lastools/src/)
 foreach(prog lasinfo lasindex las2txt lasdiff)
   add_executable(${prog} "${LASSRC_DIR}/${prog}.cpp")
   target_include_directories(${prog} PUBLIC ${PROJECT_SOURCE_DIR}/3rdparty/lastools/laslib/inc)
-  target_link_libraries(${prog} laslib_shared)
+  target_link_libraries(${prog} laslib)
 endforeach()
 foreach(prog lasprecision txt2las las2las lasmerge laszip)
   add_executable(${prog} "${LASSRC_DIR}/${prog}.cpp" "${LASSRC_DIR}/geoprojectionconverter.cpp")
   target_include_directories(${prog} PUBLIC ${PROJECT_SOURCE_DIR}/3rdparty/lastools/laslib/inc)
-  target_link_libraries(${prog} laslib_shared)
+  target_link_libraries(${prog} laslib)
 endforeach()
 
 endif(WITH_LASLIB)
@@ -117,16 +96,12 @@ ENDIF (APPLE)
 
 SET(GLEE_DIR ${PROJECT_SOURCE_DIR}/3rdparty/glee/)
 
-add_library(glee_static STATIC ${GLEE_DIR}GLee.c)
-add_library(glee_shared SHARED ${GLEE_DIR}GLee.c)
+add_library(glee ${GLEE_DIR}GLee.c)
 
 IF(APPLE)
-  target_link_libraries(glee_static ${COREFOUNDATION_LIBRARY} ${OPENGL_LIBRARIES})
-  target_link_libraries(glee_shared ${COREFOUNDATION_LIBRARY} ${OPENGL_LIBRARIES})
+  target_link_libraries(glee ${COREFOUNDATION_LIBRARY} ${OPENGL_LIBRARIES})
 ENDIF(APPLE)
 
-set_target_properties(glee_static PROPERTIES OUTPUT_NAME glee CLEAN_DIRECT_OUTPUT 1)
-set_target_properties(glee_shared PROPERTIES OUTPUT_NAME glee CLEAN_DIRECT_OUTPUT 1)
 endif()
 
 IF(WIN32)

@@ -1,4 +1,4 @@
-if (NOT MSVC AND WITH_OPENGL AND WITH_QT)
+if (WITH_OPENGL AND WITH_QT)
   find_package(Qt5Widgets)
   find_package(Qt5OpenGL)
   set(CMAKE_INCLUDE_CURRENT_DIR ON)
@@ -35,10 +35,10 @@ if (NOT MSVC AND WITH_OPENGL AND WITH_QT)
     ${QTSHOW_HEADERS_MOC}
     ${QTSHOW_FORMS_HEADERS})
 
-  add_library(glwidget STATIC GLWidget.cc ${GLWIDGET_HEADERS_MOC})
+  add_library(glwidget GLWidget.cc ${GLWIDGET_HEADERS_MOC} $<TARGET_OBJECTS:show_objects>)
 
   target_link_libraries(glwidget Qt5::Widgets Qt5::OpenGL)
-  target_link_libraries(glwidget show_shared ${SHOW_LIBS_SHARED} ${QT_LIBRARIES})
+  target_link_libraries(glwidget ${SHOW_LIBS} ${QT_LIBRARIES})
 
   target_link_libraries(qtshow Qt5::Widgets)
   target_link_libraries(qtshow glwidget ${QT_LIBRARIES})
