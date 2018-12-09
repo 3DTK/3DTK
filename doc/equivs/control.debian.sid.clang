@@ -59,7 +59,6 @@ Depends:
  libxmlrpc-c++8-dev,
  libxmu-dev,
  libzip-dev,
- python-rospy,
  python3-dev,
  qtbase5-dev,
  ros-std-msgs,
