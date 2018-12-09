@@ -79,7 +79,9 @@ if(Boost_FOUND)
   add_definitions(${Boost_LIB_DIAGNOSTIC_DEFINITIONS})
 endif()
 
+if (NOT WIN32)
 find_package(CXSparse REQUIRED)
+endif()
 
 find_package(ANN)
 if (ANN_FOUND)
@@ -158,6 +160,7 @@ option(WITH_COMPACT_OCTREE "Whether to use the compact octree display ON/OFF" OF
 option(WITH_GLEE "Whether to use OpenGL extensions, requires glee. ON/OFF" OFF)
 option(WITH_LASLIB "Whether to build LASlib based scanio library" ON)
 option(WITH_E57 "Build library for e57 file format support." OFF)
+option(WITH_APRILTAG "Compile with apriltag" ON)
 
 ## CUDA accelerated collision detection
 option(WITH_CUDA "Whether to build CUDA accelerated collision detection tools" OFF)
@@ -263,6 +266,7 @@ endif()
 
 # 3rdparty
 if(WIN32)
+  include_directories(${PROJECT_SOURCE_DIR}/3rdparty/cxsparse-4.4.4/suitesparse/)
   include_directories(${PROJECT_SOURCE_DIR}/3rdparty/windows/)
   link_directories(${PROJECT_SOURCE_DIR}/3rdparty/windows)
   link_directories(${BOOST_LIBRARYDIR})
@@ -379,7 +383,9 @@ add_subdirectory(src/mesh)
 # 3rdparty must come before src/calibration because it sets
 # APRILTAG_INCLUDE_DIRS
 add_subdirectory(3rdparty)
-add_subdirectory(src/calibration)
+if (WITH_APRILTAG)
+  add_subdirectory(src/calibration)
+endif()
 add_subdirectory(bindings)
 if(WITH_ADDONS)
   message(STATUS "With 3dtk addons.")

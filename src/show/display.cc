@@ -17,6 +17,11 @@
 #ifdef __APPLE__
 #include <GLUT/glut.h>
 #else
+#ifdef WIN32
+#define FREEGLUT_STATIC
+#define _LIB
+#define FREEGLUT_LIB_PRAGMAS 0
+#endif
 #include <GL/freeglut.h>
 #endif
 #else

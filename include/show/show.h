@@ -12,6 +12,9 @@
 #ifdef _MSC_VER
 #define  _USE_MATH_DEFINES
 #include <windows.h>
+#define FREEGLUT_STATIC
+#define _LIB
+#define FREEGLUT_LIB_PRAGMAS 0
 #endif
 #ifdef __CYGWIN__
 #include <windef.h>
