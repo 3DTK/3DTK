@@ -5,7 +5,11 @@
 #include "mesh/auto_scan_red.h"
 
 // estimate reduction factors for joined scans
-int __attribute__((optimize(0))) getRedParam(RedParam &params) {
+int
+#ifndef _MSC_VER
+__attribute__((optimize(0)))
+#endif
+getRedParam(RedParam &params) {
   unsigned long memBefore = 0, memAfter = 0, numPts = 0;
 
   // #ifdef __linux__
@@ -34,7 +38,11 @@ int __attribute__((optimize(0))) getRedParam(RedParam &params) {
 }
 
 // estimate reduction factors for indivisual scan
-int __attribute__((optimize(0))) getRedParam(RedParam &rp, Scan* scan) {
+int
+#ifndef _MSC_VER
+__attribute__((optimize(0)))
+#endif
+getRedParam(RedParam &rp, Scan* scan) {
   unsigned long memBefore = 0, memAfter = 0, numPts = 0;
 
   // #ifdef __linux__
