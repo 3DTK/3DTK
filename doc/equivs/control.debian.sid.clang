@@ -13,6 +13,7 @@ Depends:
  clang,
  libomp-dev,
  libc6-dev,
+ catkin,
  make,
  cmake,
  cmake-curses-gui,
