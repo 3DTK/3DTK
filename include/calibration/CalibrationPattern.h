@@ -18,7 +18,6 @@
 
 
 
-using namespace cv;
 using namespace AprilTag;
 
 class CalibrationPattern{
