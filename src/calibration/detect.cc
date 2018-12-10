@@ -7,6 +7,7 @@
 #include <dirent.h>
 
 namespace po = boost::program_options;
+using namespace cv;
 
 int main(int argc, const char *argv[]) {
 
