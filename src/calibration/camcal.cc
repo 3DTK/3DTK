@@ -14,6 +14,7 @@
 #include <random>
 
 namespace po = boost::program_options;
+using namespace cv;
 
 
 void createA4File(std::string pfad){

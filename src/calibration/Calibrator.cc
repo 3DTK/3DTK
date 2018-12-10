@@ -4,6 +4,7 @@
 
 #include "calibration/Calibrator.h"
 
+using namespace cv;
 
 namespace calibration {
 

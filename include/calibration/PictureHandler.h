@@ -16,20 +16,19 @@
 #include <apriltag.h>
 #include "calibration/AprilTag.h"
 
-using namespace cv;
 using namespace AprilTag;
 
 
 class PictureHandler {
 private:
     image_u8_t *image;
-    Mat matImage;
+    cv::Mat matImage;
     apriltag_detector_t *aprilDetector;
     apriltag_family_t *tagFam;
-    std::vector<Point2f> point2fVec;
+    std::vector<cv::Point2f> point2fVec;
     std::vector<AprilTag2f> pointMap;
     std::vector<AprilTag3f> matMap;
-    Size size;
+    cv::Size size;
     /**
      initialize the aprilTag detector
      */
@@ -108,9 +107,9 @@ public:
      *
      * @return int imagesize
      */
-    Size getImageSize();
+    cv::Size getImageSize();
 
-    std::vector<Point2f> getPoint2fVec();
+    std::vector<cv::Point2f> getPoint2fVec();
     
 };
 
