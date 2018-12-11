@@ -1,4 +1,7 @@
 language: generic
+branches:
+  except:
+   - appveyor
 notifications:
   email:
     recipients:
