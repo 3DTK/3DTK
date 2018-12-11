@@ -4,6 +4,9 @@ environment:
   APPVEYOR_SAVE_CACHE_ON_ERROR: "true"
 image: Visual Studio 2017
 platform: x64
+branches:
+  except:
+   - travis
 # connect via rdp using:
 #    $ xfreerdp /d:domain /u:appveyor /p:'password' /cert-ignore /v:ipaddr:port
 # Cannot use this until qt supports it or otherwise the qt debug builds will
