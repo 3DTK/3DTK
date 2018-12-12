@@ -150,6 +150,7 @@ void writePointClouds(const string& outdir, double scale, double minDistance, do
 
     Eigen::Affine3d firstPose;
     tf::transformTFToEigen(pointClouds.at(0).pose, firstPose);
+    Eigen::Affine3d firstPoseInverse = firstPose.inverse();
 
     for (size_t i = 0; i < pointClouds.size(); i++) {
         const PointCloudWithTransform& pointCloud = pointClouds.at(i);
@@ -160,12 +161,14 @@ void writePointClouds(const string& outdir, double scale, double minDistance, do
         Eigen::Affine3d currentPose;
         tf::transformTFToEigen(pointClouds.at(i).pose, currentPose);
 
+        Eigen::MatrixXd mapToLaser = (firstPoseInverse * currentPose * baseToLaser).matrix();
+
         for (pcl::PointXYZ p : *pointCloud.cloud) {
             double distance = Eigen::Vector3d(p.x, p.y, p.z).norm() / scale;
             if (distance < minDistance || distance > maxDistance) continue;
 
             Eigen::Vector4d tmp(p.x, p.y, p.z, 1);
-            Eigen::Vector4d pcorr = (firstPose.inverse() * currentPose * baseToLaser).matrix() * tmp;
+            Eigen::Vector4d pcorr = mapToLaser * tmp;
 
             float xout = -pcorr(1);
             float yout = pcorr(2);
