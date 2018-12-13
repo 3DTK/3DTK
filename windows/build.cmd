@@ -190,6 +190,7 @@ if %ERRORLEVEL% GEQ 1 (
 	wxwidgets ^
 	eigen3 ^
 	python3 ^
+	boost-python ^
 	zlib ^
 	freeglut ^
 	suitesparse
