@@ -193,7 +193,9 @@ if %ERRORLEVEL% GEQ 1 (
 	boost-python ^
 	zlib ^
 	freeglut ^
+	glfw3 ^
 	libconfig ^
+	opengl ^
 	suitesparse
 if %ERRORLEVEL% GEQ 1 (
 	echo vcpkg install failed
