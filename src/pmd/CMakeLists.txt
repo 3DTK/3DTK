@@ -9,6 +9,8 @@ if (WITH_GLFW AND WITH_OPENCV AND WITH_XMLRPC AND WITH_LIBCONFIG AND WITH_FTGL)
 
   if(APPLE)
     find_library(LIBCONFIG_LIBRARY_DIR libconfig.dylib)
+  elseif(WIN32)
+    find_library(LIBCONFIG_LIBRARY_DIR libconfig.lib)
   else()
     find_library(LIBCONFIG_LIBRARY_DIR libconfig.so)
   endif()
