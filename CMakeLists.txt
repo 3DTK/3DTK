@@ -121,6 +121,7 @@ set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${ADDITIONAL_OPENCV_FLAGS}")
 #################################################
 
 option(WITH_CGAL "Compile with CGAL support" ON)
+option(WITH_GMP "Compile with GMP support" ON) # on Windows GMP is provided by MPIR
 option(WITH_LIBZIP "Compile with libzip support" ON)
 option(WITH_OPENGL "Compile with OpenGL support" ON)
 option(WITH_OPENCV "Compile with OpenCV support" ON)

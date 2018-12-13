@@ -12,11 +12,6 @@
 #include "model/candidateOpening.h"
 
 //==============================================================================
-//  Static member initializations
-//==============================================================================
-const unsigned int model::CandidateOpening::NR_FEATURES = 14;
-
-//==============================================================================
 //  Class implementation
 //==============================================================================
 model::CandidateOpening::CandidateOpening() {

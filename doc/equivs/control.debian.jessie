@@ -23,7 +23,6 @@ Depends:
  libboost-regex-dev,
  libboost-system-dev,
  libboost-thread-dev,
- libcgal-dev,
  libconfig-dev,
  libeigen3-dev,
  libftgl-dev,
