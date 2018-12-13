@@ -1,7 +1,5 @@
 build:
  verbosity: detailed
-environment:
-  APPVEYOR_SAVE_CACHE_ON_ERROR: "true"
 image: Visual Studio 2017
 platform: x64
 branches:
