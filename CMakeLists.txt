@@ -316,7 +316,7 @@ endif()
 # Robot Operating System (ROS) Integration     ##
 #################################################
 
-if( catkin_FOUND )
+if(WITH_ROS)
   catkin_package(
     INCLUDE_DIRS include addons/include
   )
