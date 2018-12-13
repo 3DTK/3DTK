@@ -12,6 +12,9 @@
 #include "model/labeledPlane3d.h"
 #include "model/util.h"
 
+#ifdef _MSC_VER
+#define  _USE_MATH_DEFINES
+#endif
 #include <math.h>
 
 #include <set>
