@@ -193,6 +193,7 @@ if %ERRORLEVEL% GEQ 1 (
 	boost-python ^
 	zlib ^
 	freeglut ^
+	libconfig ^
 	suitesparse
 if %ERRORLEVEL% GEQ 1 (
 	echo vcpkg install failed
@@ -247,7 +248,6 @@ echo "cmake: %cmakeexe%"
 	-G "Visual Studio 15 2017 Win64" ^
 	-D CMAKE_TOOLCHAIN_FILE=%vcpkgdir%/scripts/buildsystems/vcpkg.cmake ^
 	-D OUTPUT_DIRECTORY:PATH=%outdir% ^
-	-D WITH_LIBCONFIG=OFF ^
 	-D WITH_CGAL=OFF ^
 	-D WITH_LIBZIP=OFF ^
 	-D WITH_PYTHON=OFF ^
