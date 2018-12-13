@@ -33,3 +33,9 @@ build_script:
  - cmd: C:\Python36-x64\python.exe C:\projects\3dtk\windows\timeout.py 4800 C:\projects\3dtk\windows\build.cmd C:\projects\3dtk C:\slam6d
 cache: c:\tools\vcpkg\installed\
 #cache: c:\tools\vcpkg\installed\ -> appveyor.yml, windows/build.cmd
+notifications:
+  - provider: email
+    to:
+     - slam6d-commits@lists.sourceforge.net
+    on_build_failure: true
+    on_build_status_changed: true
