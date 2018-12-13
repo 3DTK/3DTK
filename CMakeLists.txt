@@ -316,8 +316,9 @@ endif()
 # Robot Operating System (ROS) Integration     ##
 #################################################
 
-if(WITH_ROS)
-  find_package(catkin REQUIRED)
+# Export include directories if 3DTK is built within a catkin workspace.
+# In that case, find_package(catkin) was already run and catkin_FOUND is true.
+if( catkin_FOUND )
   catkin_package(
     INCLUDE_DIRS include addons/include
   )
