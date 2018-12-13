@@ -73,11 +73,9 @@ else()
   find_package( Boost COMPONENTS serialization graph regex filesystem system thread date_time program_options system REQUIRED)
 endif()
 
-if(Boost_FOUND)
-  link_directories(${BOOST_LIBRARY_DIRS})
-  include_directories(${Boost_INCLUDE_DIRS})
-  add_definitions(${Boost_LIB_DIAGNOSTIC_DEFINITIONS})
-endif()
+link_directories(${BOOST_LIBRARY_DIRS})
+include_directories(${Boost_INCLUDE_DIRS})
+add_definitions(${Boost_LIB_DIAGNOSTIC_DEFINITIONS})
 
 find_package(SuiteSparse REQUIRED)
 
