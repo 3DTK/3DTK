@@ -34,7 +34,7 @@ build_script:
 cache: c:\tools\vcpkg\installed\
 #cache: c:\tools\vcpkg\installed\ -> appveyor.yml, windows/build.cmd
 notifications:
-  - provider: email
+  - provider: Email
     to:
      - slam6d-commits@lists.sourceforge.net
     on_build_failure: true
