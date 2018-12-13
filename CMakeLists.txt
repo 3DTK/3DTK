@@ -120,16 +120,6 @@ set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${ADDITIONAL_OPENCV_FLAGS}")
 # Declare Options and modify build accordingly ##
 #################################################
 
-# cvblob is needed for thermo
-find_package(OpenCV QUIET)
-if (OpenCV_FOUND)
-  include_directories(${OpenCV_INCLUDE_DIRS})
-  add_subdirectory(3rdparty/cvblob)
-  link_directories(${PROJECT_SOURCE_DIR}/3rdparty/cvblob)
-else()
-  message(STATUS "Not building cvblob because WITH_OPENCV is OFF")
-endif()
-
 option(WITH_CGAL "Compile with CGAL support" ON)
 option(WITH_LIBZIP "Compile with libzip support" ON)
 option(WITH_OPENGL "Compile with OpenGL support" ON)
@@ -149,6 +139,14 @@ option(WITH_GLEE "Whether to use OpenGL extensions, requires glee. ON/OFF" OFF)
 option(WITH_LASLIB "Whether to build LASlib based scanio library" ON)
 option(WITH_E57 "Build library for e57 file format support." OFF)
 option(WITH_APRILTAG "Compile with apriltag" ON)
+
+# cvblob is needed for thermo
+if (WITH_OPENCV)
+  find_package(OpenCV REQUIRED)
+  include_directories(${OpenCV_INCLUDE_DIRS})
+  add_subdirectory(3rdparty/cvblob)
+  link_directories(${PROJECT_SOURCE_DIR}/3rdparty/cvblob)
+endif()
 
 ## CUDA accelerated collision detection
 option(WITH_CUDA "Whether to build CUDA accelerated collision detection tools" OFF)
