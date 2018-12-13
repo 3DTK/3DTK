@@ -17,8 +17,8 @@ init:
 #on_finish:
 #  - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
 # Run the build with our own timeout because the vcpkg cache is not saved if
-# we run into the appveyor timeout of one hour. Thus we abort after 50
-# minutes (3000 seconds). Ten minutes are left for the initial git clone plus
+# we run into the appveyor timeout of one hour. Thus we abort after 80
+# minutes (4800 seconds). Ten minutes are left for the initial git clone plus
 # downloading/extracting/zipping/uploading of the cache.
 #
 # We use python to implement the process timeout - have fun trying to find
@@ -32,6 +32,6 @@ init:
 # end.
 build_script:
  - mkdir C:\slam6d
- - cmd: C:\Python36-x64\python.exe C:\projects\3dtk\windows\timeout.py 3000 C:\projects\3dtk\windows\build.cmd C:\projects\3dtk C:\slam6d
+ - cmd: C:\Python36-x64\python.exe C:\projects\3dtk\windows\timeout.py 4800 C:\projects\3dtk\windows\build.cmd C:\projects\3dtk C:\slam6d
 cache: c:\tools\vcpkg\installed\
 #cache: c:\tools\vcpkg\installed\ -> appveyor.yml, windows/build.cmd
