@@ -9,6 +9,11 @@
 //==============================================================================
 //  Includes
 //==============================================================================
+
+#ifdef _MSC_VER
+#define  _USE_MATH_DEFINES
+#endif
+
 #include "model/scene.h"
 
 #include "model/graphicsAlg.h"
@@ -29,6 +34,12 @@
 #include <iomanip>
 #include <fstream>
 #include <sstream>
+
+#ifdef _MSC_VER
+#include <direct.h>
+#define mkdir(path,mode) _mkdir (path)
+#endif
+
 using namespace std;
 
 //==============================================================================
@@ -962,7 +973,7 @@ void model::Scene::clusterOpenings(const LabeledPlane3d& surf, const vector<Cand
 
     // generate colors for each cluster
     int r, g, b;
-    cv::Scalar colors[nrClusters];
+    cv::Scalar *colors = new cv::Scalar[nrClusters];
     for (int i = 0; i < nrClusters; ++i) {
         randomColor(MAX_IMG_VAL, r, g, b);
         colors[i] = (cv::Scalar(b, g, r));
@@ -1043,6 +1054,8 @@ void model::Scene::clusterOpenings(const LabeledPlane3d& surf, const vector<Cand
             cv::circle(finalImg, cv::Point(x, y), 2, colors[i], CV_FILLED);
         }
     }
+
+    delete[] colors;
 
     cv::imwrite("./img/depthClusters.png", clusterImg);
     cv::imwrite("./img/depthOpenings.png", finalImg);
