@@ -5,7 +5,7 @@ branches:
 notifications:
   email:
     recipients:
-      - slam6d-discuss@lists.sourceforge.net
+      - slam6d-commits@lists.sourceforge.net
     on_success: change
     on_failure: always
 env: # needed for allow_failures
