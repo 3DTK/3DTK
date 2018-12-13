@@ -253,7 +253,10 @@ echo "cmake: %cmakeexe%"
 	-D WITH_PYTHON=OFF ^
 	-D WITH_APRILTAG=OFF ^
 	-D WITH_LASLIB=OFF ^
+	-D WITH_XMLRPC=OFF ^
 	-D WITH_WXWIDGETS=OFF ^
+	-D WITH_FTGL=OFF ^
+	-D WITH_ROS=OFF ^
 	%sourcedir%
 
 if %ERRORLEVEL% GEQ 1 (
