@@ -317,6 +317,7 @@ endif()
 #################################################
 
 if(WITH_ROS)
+  find_package(catkin REQUIRED)
   catkin_package(
     INCLUDE_DIRS include addons/include
   )
