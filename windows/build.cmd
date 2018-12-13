@@ -180,8 +180,6 @@ if %ERRORLEVEL% GEQ 1 (
 	exit /B 1
 )
 
-:: FIXME: add cgal once appveyor installs a vcpkg version greater than 0.0.105
-:: with https://github.com/Microsoft/vcpkg/pull/2962
 %vcpkgexe% --triplet x64-windows install ^
 	qt5 ^
 	libpng ^
@@ -193,9 +191,12 @@ if %ERRORLEVEL% GEQ 1 (
 	boost-python ^
 	zlib ^
 	freeglut ^
+	cgal ^
 	glfw3 ^
 	libconfig ^
+	libzip ^
 	opengl ^
+	mpir ^
 	suitesparse
 if %ERRORLEVEL% GEQ 1 (
 	echo vcpkg install failed
@@ -250,8 +251,6 @@ echo "cmake: %cmakeexe%"
 	-G "Visual Studio 15 2017 Win64" ^
 	-D CMAKE_TOOLCHAIN_FILE=%vcpkgdir%/scripts/buildsystems/vcpkg.cmake ^
 	-D OUTPUT_DIRECTORY:PATH=%outdir% ^
-	-D WITH_CGAL=OFF ^
-	-D WITH_LIBZIP=OFF ^
 	-D WITH_PYTHON=OFF ^
 	-D WITH_APRILTAG=OFF ^
 	-D WITH_LASLIB=OFF ^
