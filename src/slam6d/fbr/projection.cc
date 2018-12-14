@@ -347,7 +347,7 @@ namespace fbr
 	    
 	    calcPointFromPanoramaPosition(x, y, z, row, col, range);
 	    
-	    if( x < 1e-5 && y < 1e-5 && z < 1e-5) 
+	    if( fabs(x) < 1e-5 && fabs(y) < 1e-5 && fabs(z) < 1e-5) 
 	      {
 		continue;
 	      }
