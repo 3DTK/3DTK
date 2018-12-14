@@ -139,7 +139,6 @@ option(WITH_COMPACT_OCTREE "Whether to use the compact octree display ON/OFF" OF
 option(WITH_GLEE "Whether to use OpenGL extensions, requires glee. ON/OFF" OFF)
 option(WITH_LASLIB "Whether to build LASlib based scanio library" ON)
 option(WITH_E57 "Build library for e57 file format support." OFF)
-option(WITH_APRILTAG "Compile with apriltag" ON)
 
 # cvblob is needed for thermo
 if (WITH_OPENCV)
@@ -371,9 +370,7 @@ add_subdirectory(src/mesh)
 # 3rdparty must come before src/calibration because it sets
 # APRILTAG_INCLUDE_DIRS
 add_subdirectory(3rdparty)
-if (WITH_APRILTAG)
-  add_subdirectory(src/calibration)
-endif()
+add_subdirectory(src/calibration)
 add_subdirectory(bindings)
 if(WITH_ADDONS)
   message(STATUS "With 3dtk addons.")

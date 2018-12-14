@@ -887,8 +887,20 @@ double p[][2] =  { { 0, 0},
 
          for (int j = 0; j < 100; j++) {
              double q[2];
-             q[0] = 10.0f * random() / RAND_MAX - 2;
-             q[1] = 10.0f * random() / RAND_MAX - 2;
+             q[0] = 10.0f *
+#ifdef _MSC_VER
+                 rand()
+#else
+                 random()
+#endif
+                 / RAND_MAX - 2;
+             q[1] = 10.0f *
+#ifdef _MSC_VER
+                 rand()
+#else
+                 random()
+#endif
+                 / RAND_MAX - 2;
 
              zarray_add(points, q);
          }

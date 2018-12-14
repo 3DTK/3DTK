@@ -70,10 +70,11 @@ static inline void swap_default(zmaxheap_t *heap, int a, int b)
     heap->values[a] = heap->values[b];
     heap->values[b] = t;
 
-    char tmp[heap->el_sz];
+    char *tmp = (char *)malloc(sizeof(char)*heap->el_sz);
     memcpy(tmp, &heap->data[a*heap->el_sz], heap->el_sz);
     memcpy(&heap->data[a*heap->el_sz], &heap->data[b*heap->el_sz], heap->el_sz);
     memcpy(&heap->data[b*heap->el_sz], tmp, heap->el_sz);
+    free(tmp);
 }
 
 static inline void swap_pointer(zmaxheap_t *heap, int a, int b)
@@ -368,9 +369,9 @@ void zmaxheap_test()
     for (int iter = 0; iter < 5000000; iter++) {
         assert(sz == heap->size);
 
-        if ((random() & 1) == 0 && sz < cap) {
+        if ((rand() & 1) == 0 && sz < cap) {
             // add a value
-            int32_t v = (int32_t) (random() / 1000);
+            int32_t v = (int32_t) (rand() / 1000);
             float fv = v;
             assert(v == fv);
 
