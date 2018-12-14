@@ -197,6 +197,7 @@ if %ERRORLEVEL% GEQ 1 (
 	libzip ^
 	opengl ^
 	mpir ^
+	pthreads ^
 	suitesparse
 if %ERRORLEVEL% GEQ 1 (
 	echo vcpkg install failed
@@ -252,7 +253,6 @@ echo "cmake: %cmakeexe%"
 	-D CMAKE_TOOLCHAIN_FILE=%vcpkgdir%/scripts/buildsystems/vcpkg.cmake ^
 	-D OUTPUT_DIRECTORY:PATH=%outdir% ^
 	-D WITH_PYTHON=OFF ^
-	-D WITH_APRILTAG=OFF ^
 	-D WITH_LASLIB=OFF ^
 	-D WITH_XMLRPC=OFF ^
 	-D WITH_WXWIDGETS=OFF ^

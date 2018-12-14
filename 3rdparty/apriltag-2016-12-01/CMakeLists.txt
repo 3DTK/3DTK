@@ -31,7 +31,12 @@ set(SOURCES
 )
 
 add_library(apriltag ${SOURCES})
+if(WIN32)
+find_library(PTHREAD_LIBRARIES NAMES pthreads)
+target_link_libraries(apriltag ${PTHREAD_LIBRARIES})
+else()
 target_link_libraries(apriltag pthread)
+endif()
 set_target_properties(apriltag PROPERTIES EXCLUDE_FROM_ALL true)
 
 set(APRILTAG_INCLUDE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}" CACHE INTERNAL "AprilTag include directories" FORCE)
