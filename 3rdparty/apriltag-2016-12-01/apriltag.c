@@ -38,7 +38,6 @@ either expressed or implied, of the Regents of The University of Michigan.
 #include <string.h>
 #include <stdio.h>
 #include <inttypes.h>
-#include <sys/time.h>
 
 #include "common/image_u8.h"
 #include "common/image_u8x3.h"
@@ -1198,14 +1197,24 @@ zarray_t *apriltag_detector_detect(apriltag_detector_t *td, image_u8_t *im_orig)
         image_u8_darken(im_quads);
         image_u8_darken(im_quads);
 
+#ifdef _MSC_VER
+        srand(0);
+#else
         srandom(0);
+#endif
 
         for (int i = 0; i < zarray_size(quads); i++) {
             struct quad *quad;
             zarray_get_volatile(quads, i, &quad);
 
             const int bias = 100;
-            int color = bias + (random() % (255-bias));
+            int color = bias + (
+#ifdef _MSC_VER
+                rand()
+#else
+                random()
+#endif
+                % (255-bias));
 
             image_u8_draw_line(im_quads, quad->p[0][0], quad->p[0][1], quad->p[1][0], quad->p[1][1], color, 1);
             image_u8_draw_line(im_quads, quad->p[1][0], quad->p[1][1], quad->p[2][0], quad->p[2][1], color, 1);
@@ -1224,7 +1233,7 @@ zarray_t *apriltag_detector_detect(apriltag_detector_t *td, image_u8_t *im_orig)
 
         int chunksize = 1 + zarray_size(quads) / (APRILTAG_TASKS_PER_THREAD_TARGET * td->nthreads);
 
-        struct quad_decode_task tasks[zarray_size(quads) / chunksize + 1];
+        struct quad_decode_task *tasks = (struct quad_decode_task *)malloc(sizeof(struct quad_decode_task)*(zarray_size(quads) / chunksize + 1));
 
         int ntasks = 0;
         for (int i = 0; i < zarray_size(quads); i+= chunksize) {
@@ -1241,6 +1250,8 @@ zarray_t *apriltag_detector_detect(apriltag_detector_t *td, image_u8_t *im_orig)
             ntasks++;
         }
 
+        free(tasks);
+
         workerpool_run(td->wp);
 
         if (im_samples != NULL) {
@@ -1254,14 +1265,24 @@ zarray_t *apriltag_detector_detect(apriltag_detector_t *td, image_u8_t *im_orig)
         image_u8_darken(im_quads);
         image_u8_darken(im_quads);
 
+#ifdef _MSC_VER
+        srand(0);
+#else
         srandom(0);
+#endif
 
         for (int i = 0; i < zarray_size(quads); i++) {
             struct quad *quad;
             zarray_get_volatile(quads, i, &quad);
 
             const int bias = 100;
-            int color = bias + (random() % (255-bias));
+            int color = bias + (
+#ifdef _MSC_VER
+                rand()
+#else
+                random()
+#endif
+                % (255-bias));
 
             image_u8_draw_line(im_quads, quad->p[0][0], quad->p[0][1], quad->p[1][0], quad->p[1][1], color, 1);
             image_u8_draw_line(im_quads, quad->p[1][0], quad->p[1][1], quad->p[2][0], quad->p[2][1], color, 1);
@@ -1377,7 +1398,13 @@ zarray_t *apriltag_detector_detect(apriltag_detector_t *td, image_u8_t *im_orig)
             int bias = 100;
 
             for (int i = 0; i < 3; i++)
-                rgb[i] = bias + (random() % (255-bias));
+                rgb[i] = bias + (
+#ifdef _MSC_VER
+                    rand()
+#else
+                    random()
+#endif
+                    % (255-bias));
 
             fprintf(f, "%f %f %f setrgbcolor\n", rgb[0]/255.0f, rgb[1]/255.0f, rgb[2]/255.0f);
             fprintf(f, "%f %f moveto %f %f lineto %f %f lineto %f %f lineto %f %f lineto stroke\n",
@@ -1414,7 +1441,13 @@ zarray_t *apriltag_detector_detect(apriltag_detector_t *td, image_u8_t *im_orig)
             int bias = 100;
 
             for (int i = 0; i < 3; i++)
-                rgb[i] = bias + (random() % (255-bias));
+                rgb[i] = bias + (
+#ifdef _MSC_VER
+                    rand()
+#else
+                    random()
+#endif
+                    % (255-bias));
 
             for (int j = 0; j < 4; j++) {
                 int k = (j + 1) & 3;
@@ -1456,7 +1489,13 @@ zarray_t *apriltag_detector_detect(apriltag_detector_t *td, image_u8_t *im_orig)
             int bias = 100;
 
             for (int i = 0; i < 3; i++)
-                rgb[i] = bias + (random() % (255-bias));
+                rgb[i] = bias + (
+#ifdef _MSC_VER
+                    rand()
+#else
+                    random()
+#endif
+                    % (255-bias));
 
             fprintf(f, "%f %f %f setrgbcolor\n", rgb[0]/255.0f, rgb[1]/255.0f, rgb[2]/255.0f);
             fprintf(f, "%f %f moveto %f %f lineto %f %f lineto %f %f lineto %f %f lineto stroke\n",
