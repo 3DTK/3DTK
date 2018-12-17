@@ -183,7 +183,9 @@ int main(int argc, char **argv)
       }
       
       // calculate normals for current scan, then merge them
-      calcNormals(pts, norms, ntype, k1, k2, width, height, rPos, rPosTheta, scan);
+      //calcNormals(pts, norms, ntype, k1, k2, width, height, rPos, rPosTheta, scan);
+      calculateNormalsAdaptiveKNN(norms, pts, k1, k2, rPos);
+      
       if (!outward) {
         flipNormals(norms);
       }
@@ -243,7 +245,9 @@ int main(int argc, char **argv)
       }
 
       // calculate normals
-      calcNormals(points, normals, ntype, k1, k2, width, height, rPos, rPosTheta, scan);
+      calculateNormalsAdaptiveKNN(normals, points, k1, k2, rPos);
+      //calcNormals(points, normals, ntype, k1, k2, width, height, rPos, rPosTheta, scan);
+      
       if (!outward) {
         flipNormals(normals);
       }
@@ -268,7 +272,7 @@ int main(int argc, char **argv)
       poisson.apply();
       poisson.exportMesh((odir + to_string(scanNumber) + ".obj").c_str());
       poisson.exportTrimmedMesh((odir + to_string(scanNumber) + "_trimmed.obj").c_str());
-      cout << "Poisson reconstruction end, model generated at: " +  odir + to_string(scanNumber) + " & _trimmed.obj" << endl;
+      cout << "Poisson reconstruction end, model generated at: " +  odir + to_string(scanNumber) + " & _trimmed.obj !" << endl;
 
       // clear points and normal of previous scan
       points.clear();
