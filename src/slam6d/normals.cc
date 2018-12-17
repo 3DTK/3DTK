@@ -464,3 +464,14 @@ void flipNormals(vector<Point> &normals)
     normals[i].z *= -1.0;
   }
 }
+
+void flipNormalsUp(vector<Point> &normals)
+{
+  for (size_t i = 0; i < normals.size(); ++i) {
+    if(normals[i].y < 0.0) {
+      normals[i].x *= -1.0;
+      normals[i].y *= -1.0;
+      normals[i].z *= -1.0;
+    }
+  }
+}

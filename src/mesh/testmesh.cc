@@ -13,11 +13,11 @@ int main(int argc, char **argv) {
     mesh.load(argv[1]);
   }
   else {
-    mesh.load("//home//summer//Porjects//slam6d-code//dat//test//sphere.obj");
+    mesh.load("dat//test//sphere.obj");
   }
 
   // save mesh
-  mesh.save("//home//summer//Porjects//slam6d-code//dat//test//sphere_save.obj");
+  mesh.save("dat//test//sphere_save.obj");
 
   // glut related calls
   glutInit(&argc, argv);
