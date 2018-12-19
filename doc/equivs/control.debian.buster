@@ -10,6 +10,7 @@ Standards-Version: 3.9.2
 Package: 3dtk-build-deps
 Depends:
  build-essential,
+ catkin,
  cmake,
  cmake-curses-gui,
  freeglut3-dev,
