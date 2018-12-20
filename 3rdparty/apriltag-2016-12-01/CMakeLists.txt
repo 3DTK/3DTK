@@ -31,7 +31,7 @@ set(SOURCES
 )
 
 add_library(apriltag ${SOURCES})
-if(WIN32)
+if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
 find_library(PTHREAD_LIBRARIES NAMES pthreads)
 target_link_libraries(apriltag ${PTHREAD_LIBRARIES})
 else()
