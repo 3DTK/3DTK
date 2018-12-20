@@ -39,7 +39,6 @@ for:
    # miss their dependencies: https://github.com/Microsoft/vcpkg/issues/4866
    #  - echo.set(VCPKG_BUILD_TYPE release)>> C:\Tools\vcpkg\triplets\x64-windows.cmake
    build_script:
-    - mkdir C:\slam6d
     - cmd: C:\Python36-x64\python.exe %APPVEYOR_BUILD_FOLDER%\windows\timeout.py 4800 %APPVEYOR_BUILD_FOLDER%\windows\build.cmd %APPVEYOR_BUILD_FOLDER% C:\slam6d
    cache:
     - c:\tools\vcpkg\installed\
