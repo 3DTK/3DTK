@@ -1,5 +1,6 @@
 if (WITH_OPENGL AND NOT APPLE)
   find_package(GLUT REQUIRED)
+  find_package(OpenGL REQUIRED)
   # Compile glui library
   SET(GLUI_DIR ${PROJECT_SOURCE_DIR}/3rdparty/glui-2.36/)
   add_library(glui
