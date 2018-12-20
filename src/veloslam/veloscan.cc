@@ -49,29 +49,9 @@
 #include <cstring>
 
 #include "slam6d/Boctree.h"
-#include "veloslam/veloscan.h"
 #include "veloslam/pcddump.h"
 #include "veloslam/trackermanager.h"
 #include "veloslam/clusterboundingbox.h"
-
-#ifdef _OPENMP
-#include <omp.h>
-#endif
-
-#ifdef _MSC_VER
-#include <windows.h>
-#else
-#include <dlfcn.h>
-#endif
-
-#ifdef _MSC_VER
-#define strcasecmp _stricmp
-#define strncasecmp _strnicmp
-#else
-#include <strings.h>
-#endif
-
-#include <cstring>
 
 #ifdef __APPLE__
 #include <GL/glew.h>
