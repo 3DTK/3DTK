@@ -5,33 +5,44 @@ platform: x64
 branches:
   except:
    - travis
+environment:
+  matrix:
+   - PLATFORM: msvc
+#     # APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+#   - PLATFORM: cygwin
+#   - PLATFORM: mingw
 # connect via rdp using:
 #    $ xfreerdp /d:domain /u:appveyor /p:'password' /cert-ignore /v:ipaddr:port
-# Cannot use this until qt supports it or otherwise the qt debug builds will
-# miss their dependencies: https://github.com/Microsoft/vcpkg/issues/4866
-#  - echo.set(VCPKG_BUILD_TYPE release)>> C:\Tools\vcpkg\triplets\x64-windows.cmake
-init:
-#  - ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
+#init:
+# - ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
 #on_finish:
-#  - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
-# Run the build with our own timeout because the vcpkg cache is not saved if
-# we run into the appveyor timeout of one hour. Thus we abort after 80
-# minutes (4800 seconds). Ten minutes are left for the initial git clone plus
-# downloading/extracting/zipping/uploading of the cache.
-#
-# We use python to implement the process timeout - have fun trying to find
-# how to do it using Windows tools like cmd.exe or the powershell.
-#
-# With cmd.exe, the script is executed inside the same process and thus you
-# cannot kill it after a timeout.
-#
-# With powershell, Start-Job does not start the script in a way that directly
-# redirects its output to standard output but only allows to collect it in the
-# end.
-build_script:
- - mkdir C:\slam6d
- - cmd: C:\Python36-x64\python.exe C:\projects\3dtk\windows\timeout.py 4800 C:\projects\3dtk\windows\build.cmd C:\projects\3dtk C:\slam6d
-cache: c:\tools\vcpkg\installed\
+# - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
+for:
+ - matrix:
+     only:
+      - PLATFORM: cygwin
+   build_script:
+    - cmd: "%APPVEYOR_BUILD_FOLDER%\\windows\\cygwin.cmd"
+ - matrix:
+     only:
+      - PLATFORM: mingw
+   build_script:
+    - cmd: "%APPVEYOR_BUILD_FOLDER%\\windows\\mingw.cmd"
+   # pacman cache would exceed 1,048,576,000 bytes
+   #cache:
+   # - C:\msys64\var\cache\pacman\pkg\
+ - matrix:
+     only:
+      - PLATFORM: msvc
+   # init:
+   # Cannot use this until qt supports it or otherwise the qt debug builds will
+   # miss their dependencies: https://github.com/Microsoft/vcpkg/issues/4866
+   #  - echo.set(VCPKG_BUILD_TYPE release)>> C:\Tools\vcpkg\triplets\x64-windows.cmake
+   build_script:
+    - mkdir C:\slam6d
+    - cmd: C:\Python36-x64\python.exe %APPVEYOR_BUILD_FOLDER%\windows\timeout.py 4800 %APPVEYOR_BUILD_FOLDER%\windows\build.cmd %APPVEYOR_BUILD_FOLDER% C:\slam6d
+   cache:
+    - c:\tools\vcpkg\installed\
 #cache: c:\tools\vcpkg\installed\ -> appveyor.yml, windows/build.cmd
 notifications:
   - provider: Email
