@@ -25,10 +25,14 @@ set(MESH_ADDITIONAL_CFLAGS "-fpermissive -g" CACHE STRING "Additional flags of M
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${ADDITIONAL_CFLAGS} ${MESH_ADDITIONAL_CFLAGS}")
 
 include_directories(poisson vcglib)
+
+# needs opencv because of normals_panorama
+if (WITH_OPENCV)
 add_executable(recon recon.cc poisson.cc auto_scan_red.cc parse_options.cc calc_normals.cc recon_commons.cc poisson/PlyFile.cpp)
 TARGET_LINK_LIBRARIES(recon scan normals_panorama ${NORMALS_PANORAMA_LIBRARIES} ${Boost_LIBS} ${Boost_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY})
 if (UNIX)
   target_link_libraries(recon dl)
+endif()
 endif()
 endif()
 endif()
