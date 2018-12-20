@@ -74,10 +74,7 @@ if not exist %sourcedir% (
 	exit /B 1
 )
 
-if not exist %outdir% (
-	echo %outdir% does not exist. Make sure the outdir variable is set to an existing path.
-	exit /B 1
-)
+if not exist "%outdir%" mkdir "%outdir"
 
 set vcpkgcommit=eccae2adaa20c64a44034a6115c6c5f90be201be
 set vcpkgurl=https://github.com/Microsoft/vcpkg/archive/!vcpkgcommit!.zip
