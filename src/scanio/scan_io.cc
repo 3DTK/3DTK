@@ -38,9 +38,9 @@ ScanIO * ScanIO::getScanIO(IOType iotype)
   string libname(io_type_to_libname(iotype));
 #ifdef WIN32
   libname += ".dll";
-#elif __APPLE__
+#elif defined(__APPLE__)
   libname = "lib" + libname + ".dylib";
-#elif __CYGWIN__
+#elif defined(__CYGWIN__)
   libname = "cyg" + libname + ".dll";
 #else
   libname = "lib" + libname + ".so";
@@ -97,9 +97,9 @@ void ScanIO::clearScanIOs()
       string libname(io_type_to_libname(it->first));
 #ifdef WIN32
       libname += ".dll";
-#elif __APPLE__
+#elif defined(__APPLE__)
       libname = "lib" + libname + ".dylib";
-#elif __CYGWIN__
+#elif defined(__CYGWIN__)
       libname = "cyg" + libname + ".dll";
 #else
       libname = "lib" + libname + ".so";
