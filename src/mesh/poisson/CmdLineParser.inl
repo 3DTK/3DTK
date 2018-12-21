@@ -29,9 +29,9 @@ DAMAGE.
 #include <cassert>
 #include <string.h>
 
-#if defined( WIN32 ) || defined( _WIN64 )
+#ifdef _MSC_VER
 inline int strcasecmp( const char* c1 , const char* c2 ){ return _stricmp( c1 , c2 ); }
-#endif // WIN32 || _WIN64
+#endif // _MSC_VER
 
 template< > void cmdLineCleanUp< int    >( int*    t ){ }
 template< > void cmdLineCleanUp< float  >( float*  t ){ }

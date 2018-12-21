@@ -34,13 +34,12 @@ using std::string;
 #include <strings.h>
 #endif
 
-#if WIN32
+#ifdef _WIN32
 #define snprintf sprintf_s
-#else
+#endif
 #ifndef MAX_PATH
 #define MAX_PATH 255
-#endif 
-#endif 
+#endif
 
 #include <boost/program_options.hpp>
 namespace po = boost::program_options;

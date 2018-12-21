@@ -13,6 +13,9 @@
 #include "slam6d/data_types.h"
 #include "slam6d/pointfilter.h"
 
+#if defined(_WINDEF_) && defined(__CYGWIN__)
+#error boost-interprocess is incompatible with windef.h on cygwin
+#endif
 #include <boost/interprocess/managed_shared_memory.hpp>
 #include <boost/interprocess/smart_ptr/shared_ptr.hpp>
 #include <boost/interprocess/containers/string.hpp>

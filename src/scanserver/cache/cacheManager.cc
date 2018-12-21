@@ -24,7 +24,7 @@ using std::cout;
 using std::cerr;
 using std::endl;
 
-#ifdef _MSC_VER
+#ifdef _WIN32
 #include <windows.h>
 #else
 #include <sys/mman.h> // mlock for avoiding swaps
@@ -40,7 +40,7 @@ CacheManager::CacheManager(SegmentManager* sm, const char* shm_name, std::size_t
   
   try {
     m_msm = new managed_shared_memory(create_only, m_shm_name.c_str(), cache_size);
-#ifndef WIN32
+#ifndef _WIN32
     cout << "  Locking cache memory... " << std::flush;
     int ret = mlock(m_msm->get_address(), m_msm->get_size());
     if(ret == 0)

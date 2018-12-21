@@ -33,7 +33,7 @@
 #include <omp.h>
 #endif
 
-#ifdef _MSC_VER
+#ifdef _WIN32
 #include <windows.h>
 #else
 #include <dlfcn.h>

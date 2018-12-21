@@ -324,7 +324,7 @@ void matchMarker(int start, int end) { // BOF
  */
 void usage(char* prog)
 {
-#ifndef _MSC_VER
+#ifndef _WIN32
   const string bold("\033[1m");
   const string normal("\033[m");
 #else
@@ -428,7 +428,7 @@ int parseArgs(int argc, char **argv, string &dir,
   }
   dir = argv[optind];
 
-#ifndef _MSC_VER
+#ifndef _WIN32
   if (dir[dir.length()-1] != '/') dir = dir + "/";
 #else
   if (dir[dir.length()-1] != '\\') dir = dir + "\\";

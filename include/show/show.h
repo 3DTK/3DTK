@@ -9,15 +9,12 @@
 #define __SHOW_H__
 
 
-#ifdef _MSC_VER
+#ifdef _WIN32
 #define  _USE_MATH_DEFINES
 #include <windows.h>
 #define FREEGLUT_STATIC
 #define _LIB
 #define FREEGLUT_LIB_PRAGMAS 0
-#endif
-#ifdef __CYGWIN__
-#include <windef.h>
 #endif
 #ifdef WITH_OPENGL
 #ifdef __APPLE__
