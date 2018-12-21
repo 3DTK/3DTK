@@ -21,4 +21,6 @@ add_custom_target(test_peopleremover_generate_md5 COMMAND "${CMAKE_COMMAND}" -E 
 add_test(test_peopleremover_generate_md5 "${CMAKE_COMMAND}" --build "${CMAKE_BINARY_DIR}" --target test_peopleremover_generate_md5)
 set_tests_properties(test_peopleremover_generate_md5 PROPERTIES DEPENDS test_peopleremover_run)
 
+# to regenerate hashes.txt in case the input changed, use:
+# ( cd ./.build/testing/peopleremover/; md5sum scan000.3d scan000.pose scan001.3d scan001.pose; for i in $(seq 0 9); do md5sum "$(printf "../data/change_detection/pplremover/scan%03d.mask" $i)" "$(printf "../data/change_detection/static/scan%03d.3d" $i)" "$(printf "../data/change_detection/static/scan%03d.pose" $i)"; done; ) > testing/peopleremover/hashes.txt
 add_test(test_peopleremover_compare_md5 "${CMAKE_COMMAND}" -E compare_files hashes.txt "${PROJECT_SOURCE_DIR}/testing/peopleremover/hashes.txt")
