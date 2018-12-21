@@ -27,7 +27,7 @@
 #include <omp.h>
 #endif
 
-#ifdef _MSC_VER
+#ifdef _WIN32
 #include <windows.h>
 #else
 #include <dlfcn.h>
@@ -95,7 +95,7 @@
 #endif
 #endif
 
-#ifndef _MSC_VER
+#ifndef _WIN32
 #include <time.h>
 void Sleep(unsigned int mseconds)
 {
@@ -169,7 +169,7 @@ void sigSEGVhandler (int v)
  */
 void usage(char* prog)
 {
-#ifndef _MSC_VER
+#ifndef _WIN32
   const string bold("\033[1m");
   const string normal("\033[m");
 #else
@@ -629,7 +629,7 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &rand,
   }
   dir = argv[optind];
 
-#ifndef _MSC_VER
+#ifndef _WIN32
   if (dir[dir.length()-1] != '/') dir = dir + "/";
 #else
   if (dir[dir.length()-1] != '\\') dir = dir + "\\";

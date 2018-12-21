@@ -29,7 +29,7 @@ using std::cerr;
 using std::endl;
 #include <errno.h>
 
-#ifdef _MSC_VER
+#ifdef _WIN32
 #define strcasecmp _stricmp
 #define strncasecmp _strnicmp
 #include <float.h>

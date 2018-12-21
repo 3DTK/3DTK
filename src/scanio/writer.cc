@@ -47,7 +47,7 @@
 #define mkdir(path,mode) _mkdir (path)
 #endif
 
-#ifdef _MSC_VER
+#ifdef _WIN32
 #define strcasecmp _stricmp
 #define strncasecmp _strnicmp
 #include <windows.h>

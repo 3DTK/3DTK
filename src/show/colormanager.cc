@@ -7,12 +7,9 @@
  *
  */
 
-#ifdef _MSC_VER
+#ifdef _WIN32
 #define  _USE_MATH_DEFINES
 #include <windows.h>
-#endif
-#ifdef __CYGWIN__
-#include <windef.h>
 #endif
 #include "stdio.h"
 #include "slam6d/globals.icc"

@@ -198,11 +198,11 @@ template< class T , class const_iterator >
 template< class T2 >
 void SparseMatrixInterface< T , const_iterator >::gsIteration( const std::vector< std::vector< int > >& multiColorIndices , ConstPointer( T ) diagonal , ConstPointer( T2 ) b , Pointer( T2 ) x , bool forward , bool dReciprocal ) const
 {
-#ifdef _WIN32
+#ifdef _MSC_VER
 #define SetOMPParallel __pragma( omp parallel for )
-#else // !_WIN32
+#else // !_MSC_VER
 #define SetOMPParallel _Pragma( "omp parallel for" )
-#endif // _WIN32
+#endif // _MSC_VER
 
 	if( dReciprocal )
 	{

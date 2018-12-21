@@ -39,7 +39,7 @@ using std::ofstream;
 #include "XGetopt.h"
 #endif
 
-#ifdef _MSC_VER
+#ifdef _WIN32
 #define strcasecmp _stricmp
 #define strncasecmp _strnicmp
 #include <windows.h>

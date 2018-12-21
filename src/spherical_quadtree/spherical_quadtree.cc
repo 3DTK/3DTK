@@ -1,7 +1,7 @@
 #include "slam6d/globals.icc"
 #include "spherical_quadtree/spherical_quadtree.h"
 
-#ifndef WIN32
+#ifndef _MSC_VER
 // needed until we compile with C++14
 #if __cplusplus >= 201402L
 #error remove definition of make_unique

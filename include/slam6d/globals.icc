@@ -42,7 +42,7 @@ inline int gettimeofday(struct timeval* tp, void* tzp)
 #define  _USE_MATH_DEFINES
 #include <math.h>
 
-#if defined(__CYGWIN__)
+#if defined(__CYGWIN__) || defined(__MINGW32__)
 # ifndef M_PI
 #  define M_PI       3.14159265358979323846
 #  define M_PI_2     1.57079632679489661923

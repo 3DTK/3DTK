@@ -5,12 +5,9 @@
 #include "glee/GLee.h"
 #endif
 
-#ifdef _MSC_VER
+#ifdef _WIN32
 #define  _USE_MATH_DEFINES
 #include <windows.h>
-#endif
-#ifdef __CYGWIN__
-#include <windef.h>
 #endif
 #ifdef WITH_OPENGL
 #ifdef __APPLE__

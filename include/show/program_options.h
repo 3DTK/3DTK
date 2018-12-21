@@ -6,7 +6,7 @@
 
 #include <boost/program_options.hpp>
 
-#ifdef _MSC_VER
+#ifdef _WIN32
 #include "windows.h"
 #endif
 

@@ -1,6 +1,8 @@
 # ICE on MSVC:
 # c:\projects\3dtk\src\mesh\poisson\marchingcubes.h(532): fatal error C1001: An internal error has occurred in the compiler.
-if(NOT MSVC)
+# Compile error on cygwin:
+# src/mesh/poisson/FEMTree.System.inl:649:20: error: expected unqualified-id before numeric constant
+if(NOT MSVC AND NOT CYGWIN)
 ## OpenGL
 if (WITH_OPENGL)
   FIND_PACKAGE(OpenGL REQUIRED)

@@ -7,7 +7,7 @@
 #ifndef __VERTEXARRAY_H__
 #define __VERTEXARRAY_H__
 
-#ifdef _MSC_VER
+#ifdef _WIN32
 #include <windows.h>
 #endif
 
