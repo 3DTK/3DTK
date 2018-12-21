@@ -146,9 +146,12 @@ int main()
 				 * on the glibc implementation of the trigonometric functions,
 				 * the last digit might be rounded differently. Compare for
 				 * example 2.27 with 2.28.
+				 *
+				 * We remove another digit because cygwin suffers from yet
+				 * another sort of imprecision...
 				 */
 				if (mindist != std::numeric_limits<double>::infinity()) {
-					std::fprintf(fnobox, "%.12f %.12f %.12f 0\n", -miny+o_y, minz-o_z, minx-o_x);
+					std::fprintf(fnobox, "%.11f %.11f %.11f 0\n", -miny+o_y, minz-o_z, minx-o_x);
 				}
 				for (auto p: box) {
 					double x, y, z;
@@ -161,7 +164,7 @@ int main()
 					}
 				}
 				if (mindist != std::numeric_limits<double>::infinity()) {
-					std::fprintf(fbox, "%.12f %.12f %.12f 0\n", -miny+o_y, minz-o_z, minx-o_x);
+					std::fprintf(fbox, "%.11f %.11f %.11f 0\n", -miny+o_y, minz-o_z, minx-o_x);
 				}
 			}
 		}
