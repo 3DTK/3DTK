@@ -270,8 +270,7 @@ if %ERRORLEVEL% GEQ 1 (
 
 if %ERRORLEVEL% GEQ 1 (
 	echo cmake --build --target RUN_TESTS failed
-	echo we tolerate this for now...
-	exit /B 0
+	exit /B 1
 )
 
 echo "build successful!"
