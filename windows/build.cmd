@@ -258,11 +258,19 @@ if %ERRORLEVEL% GEQ 1 (
 	exit /B 1
 )
 
-"%cmakeexe%" --build . --config %buildtype% -- /m
+"%cmakeexe%" --build "%outdir%" --config %buildtype% -- /m
 
 if %ERRORLEVEL% GEQ 1 (
 	echo cmake --build failed
 	exit /B 1
+)
+
+"%cmakeexe%" --build "%outdir%" --config %buildtype% --target RUN_TESTS
+
+if %ERRORLEVEL% GEQ 1 (
+	echo cmake --build --target RUN_TESTS failed
+	echo we tolerate this for now...
+	exit /B 0
 )
 
 echo "build successful!"
