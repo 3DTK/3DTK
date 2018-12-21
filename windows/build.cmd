@@ -240,9 +240,8 @@ if %ERRORLEVEL% GEQ 1 (
 
 echo "cmake: %cmakeexe%"
 "%cmakeexe%" ^
-	-H"%sourcedir%" ^
-	-B"%outdir%" ^
-	-G "Visual Studio 15 2017 Win64" ^
+	-S "%sourcedir%" ^
+	-B "%outdir%" ^
 	-D CMAKE_TOOLCHAIN_FILE=%vcpkgdir%/scripts/buildsystems/vcpkg.cmake ^
 	-D OUTPUT_DIRECTORY:PATH=%outdir% ^
 	-D WITH_PYTHON=OFF ^
@@ -251,7 +250,7 @@ echo "cmake: %cmakeexe%"
 	-D WITH_WXWIDGETS=OFF ^
 	-D WITH_FTGL=OFF ^
 	-D WITH_ROS=OFF ^
-	%sourcedir%
+	-G "Visual Studio 15 2017 Win64"
 
 if %ERRORLEVEL% GEQ 1 (
 	echo cmake config failed
