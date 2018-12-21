@@ -315,7 +315,7 @@ int main(int argc, char **argv)
  std::cout << "Export all 3D Points to file \"points.pts\"" << std::endl;
  std::cout << "Export all 6DoF poses to file \"positions.txt\"" << std::endl;
  std::cout << "Export all 6DoF matrices to file \"poses.txt\"" << std::endl;
- FILE *redptsout = fopen("points.pts", "w");
+ FILE *redptsout = fopen("points.pts", "wb");
  std::ofstream posesout("positions.txt");
  std::ofstream matricesout("poses.txt");
   

@@ -425,8 +425,8 @@ int main(int argc, char* argv[])
 	 * it gives better performance (probably because it's buffered) and
 	 * because of the availability of fprintf
 	 */
-	FILE *out_static = fopen("scan000.3d", "w");
-	FILE *out_dynamic = fopen("scan001.3d", "w");
+	FILE *out_static = fopen("scan000.3d", "wb");
+	FILE *out_dynamic = fopen("scan001.3d", "wb");
 	done = 0;
 	std::cerr << "0 %\r";
 	std::cerr.flush();
@@ -470,10 +470,10 @@ int main(int argc, char* argv[])
 	fclose(out_static);
 	fclose(out_dynamic);
 
-	FILE *pose_static = fopen("scan000.pose", "w");
+	FILE *pose_static = fopen("scan000.pose", "wb");
 	fprintf(pose_static, "0 0 0\n0 0 0\n");
 	fclose(pose_static);
-	FILE *pose_dynamic = fopen("scan001.pose", "w");
+	FILE *pose_dynamic = fopen("scan001.pose", "wb");
 	fprintf(pose_dynamic, "0 0 0\n0 0 0\n");
 	fclose(pose_dynamic);
 
@@ -491,7 +491,7 @@ int main(int argc, char* argv[])
 			reflectances_by_slice.find(i);
 		std::ostringstream out;
 		out << staticdir << "/scan" << std::setw(3) << std::setfill('0') << i << ".3d";
-		FILE *out_static = fopen(out.str().c_str(), "w");
+		FILE *out_static = fopen(out.str().c_str(), "wb");
 		if (out_static == NULL) {
 			std::cerr << "cannot open" << out.str() << std::endl;
 			exit(1);
@@ -521,7 +521,7 @@ int main(int argc, char* argv[])
 		fclose(out_static);
 		std::ostringstream out_pose;
 		out_pose << staticdir << "/scan" << std::setw(3) << std::setfill('0') << i << ".pose";
-		FILE *pose = fopen(out_pose.str().c_str(), "w");
+		FILE *pose = fopen(out_pose.str().c_str(), "wb");
 		int ret = fprintf(pose, "%.17f %.17f %.17f\n%.17f %.17f %.17f\n",
 				std::get<0>(trajectory[i])[0],
 				std::get<0>(trajectory[i])[1],
@@ -553,7 +553,7 @@ int main(int argc, char* argv[])
 	for (std::pair<size_t, DataXYZ> element : points_by_slice) {
 		std::ostringstream out;
 		out << maskdir << "/scan" << std::setw(3) << std::setfill('0') << element.first << ".mask";
-		FILE *out_mask = fopen(out.str().c_str(), "w");
+		FILE *out_mask = fopen(out.str().c_str(), "wb");
 		if (out_mask == NULL) {
 			std::cerr << "cannot open" << out.str() << std::endl;
 			exit(1);
