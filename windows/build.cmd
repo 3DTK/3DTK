@@ -239,18 +239,20 @@ if %ERRORLEVEL% GEQ 1 (
 ::     target_link_libraries(main PRIVATE SuiteSparse::amd SuiteSparse::btf SuiteSparse::klu SuiteSparse::ldl)
 
 echo "cmake: %cmakeexe%"
+:: FIXME: starting with CMake 3.13 we can use the (finally documented) -S
+:: option instead of the (long undocumented but still working) -H option
 "%cmakeexe%" ^
-	-S "%sourcedir%" ^
-	-B "%outdir%" ^
-	-D CMAKE_TOOLCHAIN_FILE=%vcpkgdir%/scripts/buildsystems/vcpkg.cmake ^
-	-D OUTPUT_DIRECTORY:PATH=%outdir% ^
-	-D WITH_PYTHON=OFF ^
-	-D WITH_LASLIB=OFF ^
-	-D WITH_XMLRPC=OFF ^
-	-D WITH_WXWIDGETS=OFF ^
-	-D WITH_FTGL=OFF ^
-	-D WITH_ROS=OFF ^
-	-G "Visual Studio 15 2017 Win64"
+	-H"%sourcedir%" ^
+	-B"%outdir%" ^
+	-DCMAKE_TOOLCHAIN_FILE=%vcpkgdir%/scripts/buildsystems/vcpkg.cmake ^
+	-DOUTPUT_DIRECTORY:PATH=%outdir% ^
+	-DWITH_PYTHON=OFF ^
+	-DWITH_LASLIB=OFF ^
+	-DWITH_XMLRPC=OFF ^
+	-DWITH_WXWIDGETS=OFF ^
+	-DWITH_FTGL=OFF ^
+	-DWITH_ROS=OFF ^
+	-G"Visual Studio 15 2017 Win64"
 
 if %ERRORLEVEL% GEQ 1 (
 	echo cmake config failed
