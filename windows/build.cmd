@@ -238,14 +238,10 @@ if %ERRORLEVEL% GEQ 1 (
 ::     # Note: 8 target(s) were omitted.
 ::     target_link_libraries(main PRIVATE SuiteSparse::amd SuiteSparse::btf SuiteSparse::klu SuiteSparse::ldl)
 
-:: use setlocal to make sure that the directory is only changed for this part
-:: of the script and not on the outside
-setlocal
-:: need /d if %outdir% is a different drive letter than the current working
-:: directory
-cd /d %outdir%
 echo "cmake: %cmakeexe%"
 "%cmakeexe%" ^
+	-H"%sourcedir%" ^
+	-B"%outdir%" ^
 	-G "Visual Studio 15 2017 Win64" ^
 	-D CMAKE_TOOLCHAIN_FILE=%vcpkgdir%/scripts/buildsystems/vcpkg.cmake ^
 	-D OUTPUT_DIRECTORY:PATH=%outdir% ^
@@ -268,7 +264,6 @@ if %ERRORLEVEL% GEQ 1 (
 	echo cmake --build failed
 	exit /B 1
 )
-endlocal
 
 echo "build successful!"
 
