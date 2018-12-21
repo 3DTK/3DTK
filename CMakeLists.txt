@@ -273,18 +273,6 @@ else()
   endif()
 endif()
 
-# Specifying the C++ standard (-std=c++0x, -std=gnu++14, ...) by using the
-# CMAKE_CXX_FLAGS is not good cmake style (see Daniel Pfeifer in
-# https://youtu.be/bsXLMQ6WgIk).
-# By using CMAKE_CXX_STANDARD we also avoid having to implement compiler
-# specific command line arguments.
-set(CMAKE_CXX_STANDARD 11)
-# do not fall back to a previous standard
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-# enable compiler extensions like -std=gnu++11 on gcc
-# gnu extensions are needed for strdup, ftruncate, fseeko, ftello...
-set(CMAKE_CXX_EXTENSIONS ON)
-
 if (${CMAKE_CXX_COMPILER_ID} STREQUAL Clang)
   # using Clang
   set(ADDITIONAL_CFLAGS "-O3 -msse3 -Wall -Wno-write-strings -Wno-char-subscripts -Wno-unused-result" CACHE STRING "Additional flags given to the compiler (-O3 -Wall -Wno-write-strings)" )
@@ -296,6 +284,30 @@ elseif (${CMAKE_CXX_COMPILER_ID} STREQUAL Intel)
 elseif (${CMAKE_CXX_COMPILER_ID} STREQUAL MSVC)
   # using Visual Studio C++
   set(ADDITIONAL_CFLAGS "-O2" CACHE STRING "Additional flags given to the compiler ( -O2)" )
+endif()
+
+# Remove this conditional when CMake >= 3.1.0 is required.
+# Older CMake is used in Debian Jessie (3.0.2) and Ubuntu Trusty (2.8.12.2).
+if(${CMAKE_VERSION} VERSION_LESS "3.1.0")
+	if (${CMAKE_CXX_COMPILER_ID} STREQUAL Clang)
+		# using Clang
+		set(ADDITIONAL_CFLAGS "${ADDITIONAL_CFLAGS} -std=c++0x")
+	elseif (${CMAKE_CXX_COMPILER_ID} STREQUAL GNU)
+		# using GCC
+		set(ADDITIONAL_CFLAGS "${ADDITIONAL_CFLAGS} -std=c++0x")
+	endif()
+else()
+	# Specifying the C++ standard (-std=c++0x, -std=gnu++14, ...) by using
+	# the CMAKE_CXX_FLAGS is not good cmake style (see Daniel Pfeifer in
+	# https://youtu.be/bsXLMQ6WgIk).
+	# By using CMAKE_CXX_STANDARD we also avoid having to implement
+	# compiler specific command line arguments.
+	set(CMAKE_CXX_STANDARD 11)
+	# do not fall back to a previous standard
+	set(CMAKE_CXX_STANDARD_REQUIRED ON)
+	# enable compiler extensions like -std=gnu++11 on gcc
+	# gnu extensions are needed for strdup, ftruncate, fseeko, ftello...
+	set(CMAKE_CXX_EXTENSIONS ON)
 endif()
 
 # Add OpenGL includes for MACOS if needed
