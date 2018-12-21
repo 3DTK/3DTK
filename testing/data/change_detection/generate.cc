@@ -90,21 +90,21 @@ int main()
 		std::tie (o_x, o_y, o_z) = o;
 		std::stringstream ss;
 		ss << "scan" << std::setfill('0') << std::setw(3) << scan_num << ".pose";
-		FILE* fnobox_pose = std::fopen(ss.str().c_str(), "w");
+		FILE* fnobox_pose = std::fopen(ss.str().c_str(), "wb");
 		std::fprintf(fnobox_pose, "%f %f %f\n0 0 0\n", -o_y, o_z, o_x);
 		std::fclose(fnobox_pose);
 		ss.str("");
 		ss << "scan" << std::setfill('0') << std::setw(3) << scan_num << ".3d";
-		FILE* fnobox = std::fopen(ss.str().c_str(), "w");
+		FILE* fnobox = std::fopen(ss.str().c_str(), "wb");
 		scan_num += 1;
 		ss.str("");
 		ss << "scan" << std::setfill('0') << std::setw(3) << scan_num << ".pose";
-		FILE* fbox_pose = std::fopen(ss.str().c_str(), "w");
+		FILE* fbox_pose = std::fopen(ss.str().c_str(), "wb");
 		std::fprintf(fbox_pose, "%f %f %f\n0 0 0\n", -o_y, o_z, o_x);
 		std::fclose(fbox_pose);
 		ss.str("");
 		ss << "scan" << std::setfill('0') << std::setw(3) << scan_num << ".3d";
-		FILE* fbox = std::fopen(ss.str().c_str(), "w");
+		FILE* fbox = std::fopen(ss.str().c_str(), "wb");
 		scan_num += 1;
 		for (int incl = 1; incl < 180; ++incl) {
 			double theta = incl/180.0*M_PI;
