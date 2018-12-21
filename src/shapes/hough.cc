@@ -18,7 +18,7 @@ using namespace NEWMAT;
 #include <errno.h>
 #include <iterator>
 
-#ifdef _MSC_VER
+#ifdef _WIN32
 #include <windows.h>
 #include <direct.h>
 #else
@@ -1074,7 +1074,7 @@ int Hough::writePlanes(int startCount) {
   int counter = startCount;
   string blub = "";
   blub = blub + myConfigFileHough.Get_PlaneDir();
-#ifdef _MSC_VER
+#ifdef _WIN32
   int success = mkdir(blub.c_str());
 #else
   int success = mkdir(blub.c_str(), S_IRWXU|S_IRWXG|S_IRWXO);
@@ -1157,7 +1157,7 @@ void Hough::writeAllPoints(int index, vector<Point> points) {
 
   string blub = "";
   blub = blub + myConfigFileHough.Get_PlaneDir() + "/scans";
-#ifdef _MSC_VER
+#ifdef _WIN32
   int success = mkdir(blub.c_str());
 #else
   int success = mkdir(blub.c_str(), S_IRWXU|S_IRWXG|S_IRWXO);

@@ -31,7 +31,7 @@
 #include <normals/normals_panorama.h>
 #endif
 
-#ifdef _MSC_VER
+#ifdef _WIN32
 #define strcasecmp _stricmp
 #define strncasecmp _strnicmp
 #include <direct.h>

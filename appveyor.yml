@@ -9,8 +9,8 @@ environment:
   matrix:
    - PLATFORM: msvc
 #     # APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
-#   - PLATFORM: cygwin
-#   - PLATFORM: mingw
+   - PLATFORM: cygwin
+   - PLATFORM: mingw
 # connect via rdp using:
 #    $ xfreerdp /d:domain /u:appveyor /p:'password' /cert-ignore /v:ipaddr:port
 #init:

@@ -26,7 +26,7 @@ using namespace boost::interprocess;
 #include "scanserver/serverScan.h"
 #include "scanio/scan_io.h"
 
-#ifndef _MSC_VER
+#ifndef _WIN32
 #include <sys/mman.h> // mlock for avoiding swaps
 #endif
 
@@ -172,7 +172,7 @@ ServerInterface* ServerInterface::create(std::size_t data_size, std::size_t cach
     throw std::runtime_error("Could not create ServerInterface because shared memory already exists");
   try {
     m_msm = new managed_shared_memory(create_only, SHM_NAME_DATA, data_size);
-#ifndef WIN32
+#ifndef _WIN32
     cout << "  Locking data memory... " << std::flush;
     int ret = mlock(m_msm->get_address(), m_msm->get_size());
     if(ret == 0)

@@ -38,10 +38,6 @@
 // that come from old GLUT headers.
 #include <cstdlib>
 
-#ifdef __CYGWIN__
-  #include <windef.h>
-#endif
-
 #if defined(GLUI_FREEGLUT)
 
   // FreeGLUT does not yet work perfectly with GLUI

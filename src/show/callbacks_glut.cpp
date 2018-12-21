@@ -13,7 +13,7 @@ void display() {
     int viewport[4];
     glGetIntegerv(GL_VIEWPORT, viewport);
     reshape(viewport[2], viewport[3]);
-#ifdef _MSC_VER
+#ifdef _WIN32
     Sleep(25);
 #else
     usleep(250000);
@@ -33,7 +33,7 @@ void display() {
 
 void idle(void) {
 
-#ifdef _MSC_VER
+#ifdef _WIN32
   Sleep(1);
 #else
   usleep(1000);
@@ -97,7 +97,7 @@ void idle(void) {
     }
   }
 
-#ifdef _MSC_VER
+#ifdef _WIN32
   // Extra Sleep is NOT necessary!
   //Sleep(300);
   Sleep(anim_delay);

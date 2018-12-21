@@ -2,11 +2,8 @@
 #include <stdio.h>
 #include <math.h>
 
-#ifdef __CYGWIN__
-#include <windef.h>
-#endif
 #ifdef WITH_OPENGL
-#ifdef _MSC_VER
+#ifdef _WIN32
 #include <windows.h>
 #include <GL/glu.h>
 #include <GL/glut.h>

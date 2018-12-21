@@ -29,7 +29,7 @@ using std::cerr;
 using std::endl;
 #include <errno.h>
 
-#ifdef _MSC_VER
+#ifdef _WIN32
 #define strcasecmp _stricmp
 #define strncasecmp _strnicmp
 #include <windows.h>
@@ -52,7 +52,7 @@ enum plane_alg {
 float cube_size;
 
 void usage(char* prog) {
-#ifndef _MSC_VER
+#ifndef _WIN32
   const string bold("\033[1m");
   const string normal("\033[m");
 #else
@@ -200,7 +200,7 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &start, int
   }
   dir = argv[optind];
 
-#ifndef _MSC_VER
+#ifndef _WIN32
   if (dir[dir.length()-1] != '/') dir = dir + "/";
 #else
   if (dir[dir.length()-1] != '\\') dir = dir + "\\";
@@ -241,7 +241,7 @@ int main(int argc, char **argv)
   int fileNr = start;
   string planedir = dir + "planes"; 
 
-#ifdef _MSC_VER
+#ifdef _WIN32
   int success = mkdir(planedir.c_str());
 #else
   int success = mkdir(planedir.c_str(), S_IRWXU|S_IRWXG|S_IRWXO);

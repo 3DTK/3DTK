@@ -11,6 +11,9 @@
 #include <vector>
 #include <string>
 
+#if defined(_WINDEF_) && defined(__CYGWIN__)
+#error boost-interprocess is incompatible with windef.h on cygwin
+#endif
 // segment manager, allocators, pointers, ...
 #include <boost/interprocess/managed_shared_memory.hpp>
 #include <boost/interprocess/allocators/allocator.hpp>

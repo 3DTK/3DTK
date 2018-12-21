@@ -19,7 +19,7 @@ using std::cout;
 using std::cerr;
 using std::endl;
 
-#ifdef _MSC_VER
+#ifdef _WIN32
 #include <windows.h>
 #else
 #include <dlfcn.h>
@@ -36,7 +36,9 @@ ScanIO * ScanIO::getScanIO(IOType iotype)
   
   // figure out the full and correct library name
   string libname(io_type_to_libname(iotype));
-#ifdef WIN32
+#if defined(__MINGW32__)
+  libname = "lib" + libname + ".dll";
+#elif defined(_WIN32)
   libname += ".dll";
 #elif defined(__APPLE__)
   libname = "lib" + libname + ".dylib";
@@ -49,7 +51,7 @@ ScanIO * ScanIO::getScanIO(IOType iotype)
   //cout << "Loading shared library " << libname << " ... " << std::flush;
   
   // load the library and symbols
-#ifdef _MSC_VER
+#ifdef _WIN32
   HINSTANCE hinstLib = LoadLibrary(libname.c_str());
   if (!hinstLib)
     throw runtime_error(string("Cannot load library ") + libname);
@@ -95,7 +97,9 @@ void ScanIO::clearScanIOs()
     for (map<IOType, ScanIO*>::iterator it = m_scanIOs.begin(); it != m_scanIOs.end(); ++it) {
       // figure out the full and correct library name
       string libname(io_type_to_libname(it->first));
-#ifdef WIN32
+#if defined(__MINGW32__)
+      libname = "lib" + libname + ".dll";
+#elif defined(_WIN32)
       libname += ".dll";
 #elif defined(__APPLE__)
       libname = "lib" + libname + ".dylib";
@@ -106,7 +110,7 @@ void ScanIO::clearScanIOs()
 #endif
     
       // load library, destroy the allocated ScanIO and then remove it
-#ifdef _MSC_VER
+#ifdef _WIN32
       HINSTANCE hinstLib = LoadLibrary(libname.c_str());
     
       destroy_sio* destroy_ScanIO = (destroy_sio*)GetProcAddress(hinstLib, "destroy");

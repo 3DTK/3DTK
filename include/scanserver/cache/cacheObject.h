@@ -7,6 +7,9 @@
 #ifndef CACHE_OBJECT_H
 #define CACHE_OBJECT_H
 
+#if defined(_WINDEF_) && defined(__CYGWIN__)
+#error boost-interprocess is incompatible with windef.h on cygwin
+#endif
 #include <boost/interprocess/sync/interprocess_upgradable_mutex.hpp>
 #include <boost/interprocess/sync/sharable_lock.hpp>
 #include <boost/interprocess/sync/scoped_lock.hpp>

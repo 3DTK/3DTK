@@ -21,7 +21,7 @@
 #endif
 #endif
 
-#ifdef _MSC_VER
+#ifdef _WIN32
 #include <windows.h>
 #else
 #include <dlfcn.h>
@@ -785,7 +785,7 @@ int Show(int frameno)
 
     while(ICPFinished ==false)
     {
-#ifdef _MSC_VER
+#ifdef _WIN32
         Sleep(1);
 #else
     usleep(10000);
