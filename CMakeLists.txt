@@ -273,12 +273,24 @@ else()
   endif()
 endif()
 
+# Specifying the C++ standard (-std=c++0x, -std=gnu++14, ...) by using the
+# CMAKE_CXX_FLAGS is not good cmake style (see Daniel Pfeifer in
+# https://youtu.be/bsXLMQ6WgIk).
+# By using CMAKE_CXX_STANDARD we also avoid having to implement compiler
+# specific command line arguments.
+set(CMAKE_CXX_STANDARD 11)
+# do not fall back to a previous standard
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+# enable compiler extensions like -std=gnu++11 on gcc
+# gnu extensions are needed for strdup, ftruncate, fseeko, ftello...
+set(CMAKE_CXX_EXTENSIONS ON)
+
 if (${CMAKE_CXX_COMPILER_ID} STREQUAL Clang)
   # using Clang
-  set(ADDITIONAL_CFLAGS "-O3 -std=c++0x -msse3 -Wall -Wno-write-strings -Wno-char-subscripts -Wno-unused-result" CACHE STRING "Additional flags given to the compiler (-O3 -Wall -Wno-write-strings)" )
+  set(ADDITIONAL_CFLAGS "-O3 -msse3 -Wall -Wno-write-strings -Wno-char-subscripts -Wno-unused-result" CACHE STRING "Additional flags given to the compiler (-O3 -Wall -Wno-write-strings)" )
 elseif (${CMAKE_CXX_COMPILER_ID} STREQUAL GNU)
   # using GCC
-  set(ADDITIONAL_CFLAGS "-O3 -std=c++0x -msse3 -Wall -finline-functions -Wno-unused-but-set-variable -Wno-write-strings -Wno-char-subscripts -Wno-unused-result" CACHE STRING "Additional flags given to the compiler (-O3 -Wall -finline-functions -Wno-write-strings)" )
+  set(ADDITIONAL_CFLAGS "-O3 -msse3 -Wall -finline-functions -Wno-unused-but-set-variable -Wno-write-strings -Wno-char-subscripts -Wno-unused-result" CACHE STRING "Additional flags given to the compiler (-O3 -Wall -finline-functions -Wno-write-strings)" )
 elseif (${CMAKE_CXX_COMPILER_ID} STREQUAL Intel)
   # using Intel C++
 elseif (${CMAKE_CXX_COMPILER_ID} STREQUAL MSVC)
