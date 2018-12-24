@@ -92,7 +92,11 @@ class bitoct{
    */
   template <class T>
   static inline void link(bitoct &parent, bitunion<T> *child) {
+#ifdef _MSC_VER
+    parent.child_pointer = (__int64)((char*)child - (char*)&parent);
+#else
     parent.child_pointer = (long)((char*)child - (char*)&parent);
+#endif
   }
 
   /**
@@ -141,7 +145,11 @@ template <class T> union bitunion {
   //! Leaf node: links a pointrep array [length+values] to this union, saved as an offset pointer
   static inline void link(bitunion<T>* leaf, pointrep* points) {
     // use node child_pointer as offset_ptr, not pointrep
+#ifdef _MSC_VER
+    leaf->node.child_pointer = (__int64)((char*)points - (char*)leaf);
+#else
     leaf->node.child_pointer = (long)((char*)points - (char*)leaf);
+#endif
   }
   
   //! Leaf node: points in the array
@@ -227,14 +235,14 @@ public:
 
     // initialising
     for (unsigned int i = 0; i < POINTDIM; i++) { 
-      mins[i] = pts[0][i]; 
-      maxs[i] = pts[0][i];
-    }
-
-    for (unsigned int i = 0; i < POINTDIM; i++) { 
-      for (int j = 1; j < n; j++) {
-        mins[i] = std::min(mins[i], (T)pts[j][i]);
-        maxs[i] = std::max(maxs[i], (T)pts[j][i]);
+      if (n == 0)
+        mins[i] = maxs[i] = 0;
+      else {
+        mins[i] = maxs[i] = pts[0][i];
+        for (int j = 1; j < n; j++) {
+          mins[i] = (std::min)(mins[i], (T)pts[j][i]);
+          maxs[i] = (std::max)(maxs[i], (T)pts[j][i]);
+        }
       }
     }
 
@@ -242,7 +250,7 @@ public:
     center[1] = 0.5 * (mins[1] + maxs[1]);
     center[2] = 0.5 * (mins[2] + maxs[2]);
     
-    size = std::max(std::max(0.5 * (maxs[0] - mins[0]), 0.5 * (maxs[1] - mins[1])), 0.5 * (maxs[2] - mins[2]));
+    size = (std::max)((std::max)(0.5 * (maxs[0] - mins[0]), 0.5 * (maxs[1] - mins[1])), 0.5 * (maxs[2] - mins[2]));
     //   cout << size << endl;
     size += 1.0; // for numerical reasons we increase size 
 
@@ -280,22 +288,22 @@ public:
     maxs = alloc->allocate<T>(POINTDIM);
 
     // initialising
-    for (unsigned int i = 0; i < POINTDIM; i++) { 
-      mins[i] = pts[0][i]; 
-      maxs[i] = pts[0][i];
-    }
-
-    for (unsigned int i = 0; i < POINTDIM; i++) { 
-      for (unsigned int j = 1; j < pts.size(); j++) {
-        mins[i] = std::min(mins[i], pts[j][i]);
-        maxs[i] = std::max(maxs[i], pts[j][i]);
+    for (unsigned int i = 0; i < POINTDIM; i++) {
+      if (pts.empty())
+        mins[i] = maxs[i] = 0;
+      else {
+        mins[i] = maxs[i] = pts[0][i];
+        for (int j = 1; j < pts.size(); j++) {
+          mins[i] = (std::min)(mins[i], pts[j][i]);
+          maxs[i] = (std::max)(maxs[i], pts[j][i]);
+        }
       }
     }
 
     center[0] = 0.5 * (mins[0] + maxs[0]);
     center[1] = 0.5 * (mins[1] + maxs[1]);
     center[2] = 0.5 * (mins[2] + maxs[2]);
-    size = std::max(std::max(0.5 * (maxs[0] - mins[0]), 0.5 * (maxs[1] - mins[1])), 0.5 * (maxs[2] - mins[2]));
+    size = (std::max)((std::max)(0.5 * (maxs[0] - mins[0]), 0.5 * (maxs[1] - mins[1])), 0.5 * (maxs[2] - mins[2]));
     
     size += 1.0; // for numerical reasons we increase size 
 
@@ -1325,15 +1333,15 @@ protected:
    
     // box within bounds in voxel coordinates
     int xmin, ymin, zmin, xmax, ymax, zmax;
-    xmin = std::max(params[threadNum].x-params[threadNum].closest_v, 0); 
-    ymin = std::max(params[threadNum].y-params[threadNum].closest_v, 0); 
-    zmin = std::max(params[threadNum].z-params[threadNum].closest_v, 0);
+    xmin = (std::max)(params[threadNum].x-params[threadNum].closest_v, 0); 
+    ymin = (std::max)(params[threadNum].y-params[threadNum].closest_v, 0); 
+    zmin = (std::max)(params[threadNum].z-params[threadNum].closest_v, 0);
 
 //    int largest_index = child_bit_depth[0] * 2 -1;
     
-    xmax = std::min(params[threadNum].x+params[threadNum].closest_v, largest_index);
-    ymax = std::min(params[threadNum].y+params[threadNum].closest_v, largest_index);
-    zmax = std::min(params[threadNum].z+params[threadNum].closest_v, largest_index);
+    xmax = (std::min)(params[threadNum].x+params[threadNum].closest_v, largest_index);
+    ymax = (std::min)(params[threadNum].y+params[threadNum].closest_v, largest_index);
+    zmax = (std::min)(params[threadNum].z+params[threadNum].closest_v, largest_index);
     
     unsigned char depth = 0;
     unsigned int child_bit;
@@ -1404,7 +1412,7 @@ protected:
       child_index = mmap[i]; // the area index of the node 
       if (  ( 1 << child_index ) & node.valid ) {   // if ith node exists
         childcenter(x,y,z, cx,cy,cz, child_index, size); 
-        if ( params[threadNum].closest_v == 0 ||  std::max(std::max(abs( cx - params[threadNum].x ), 
+        if ( params[threadNum].closest_v == 0 ||  (std::max)((std::max)(abs( cx - params[threadNum].x ), 
                  abs( cy - params[threadNum].y )),
                  abs( cz - params[threadNum].z )) - size
         > params[threadNum].closest_v ) { 
