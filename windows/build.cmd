@@ -7,7 +7,8 @@
 ::    - VC++ 2017 version 15 v141 tools
 ::    - Windows 10 SDK
 ::    - Visual C++ ATL
-::    - Visual C»++ MFC
+::    - Visual C++ MFC
+::    - Visual Studio English Language Pack
 
 :: In windows batch, all variables inside an if block or a for loop are
 :: expanded *before* the block is run. This means %variables% cannot be
@@ -17,7 +18,7 @@ setlocal ENABLEDELAYEDEXPANSION
 
 :: To run CL.exe manually from a terminal, you must first setup your
 :: environment using a call to
-:: C:/Program Files (x86)/Microsoft Visual Studio 12.0/VC/vcvarsall.bat
+:: C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\vcvarsall.bat
 
 :: the path where the 3dtk sources are
 set sourcedir=%~1
@@ -33,7 +34,7 @@ set outdir=%~2
 if "%outdir%" == "" (
 	echo "Usage: %0 sourcedir outdir"
 	exit /B 1
-)
+) else ( echo outdir: %outdir% )
 
 :: the build type (one of Debug, Release, RelWithDebInfo and MinSizeRel)
 set buildtype=Release
@@ -72,15 +73,15 @@ set buildtype=Release
 if not exist %sourcedir% (
 	echo %sourcedir% does not exist. Make sure the sourcedir variable is set to the path of the 3DTK sources.
 	exit /B 1
-)
+) else ( echo sourcedir: %sourcedir% )
 
-if not exist "%outdir%" mkdir "%outdir"
+if not exist "%outdir%" mkdir "%outdir%"
 
 set vcpkgcommit=eccae2adaa20c64a44034a6115c6c5f90be201be
 set vcpkgurl=https://github.com/Microsoft/vcpkg/archive/!vcpkgcommit!.zip
 set vcpkghash=f9-91-c3-6b-54-d1-c5-79-69-7a-25-79-1b-f3-fa-d6
-set vcpkgzip=%outdir%/vcpkg.zip
-set vcpkgdir=%outdir%/3rdparty/vcpkg/
+set vcpkgzip=%outdir%\vcpkg.zip
+set vcpkgdir=%outdir%\3rdparty\vcpkg
 where vcpkg
 :: there is no AND or OR logical operator in windows batch
 if %ERRORLEVEL% NEQ 0 (
@@ -109,20 +110,20 @@ if %ERRORLEVEL% NEQ 0 (
 			echo moving !vcpkgdir! to "!vcpkgdir!.tmp" failed
 			exit /B 1
 		)
-		move "!vcpkgdir!.tmp/vcpkg-!vcpkgcommit!" !vcpkgdir!
+		move "!vcpkgdir!.tmp\vcpkg-!vcpkgcommit!" !vcpkgdir!
 		if !ERRORLEVEL! GEQ 1 (
-			echo moving "!vcpkgdir!.tmp/vcpkg-!vcpkgcommit!" to !vcpkgdir! failed
+			echo moving "!vcpkgdir!.tmp\vcpkg-!vcpkgcommit!" to !vcpkgdir! failed
 			exit /B 1
 		)
 		rmdir "!vcpkgdir!.tmp"
 		:: have to use call or otherwise bootstrap-vcpkg.bat will exit everything
-		call !vcpkgdir!/bootstrap-vcpkg.bat
+		call !vcpkgdir!\bootstrap-vcpkg.bat
 		if !ERRORLEVEL! GEQ 1 (
 			echo bootstrap-vcpkg.bat failed
 			exit /B 1
 		)
 	)
-	set vcpkgexe=!vcpkgdir!/vcpkg.exe
+	set vcpkgexe=!vcpkgdir!\vcpkg.exe
 ) else (
 	:: equivalent of vcpkgexe=$(where vcpkg)
 	for /f %%i in ('where vcpkg') do set vcpkgexe=%%i
@@ -133,9 +134,9 @@ if %ERRORLEVEL% NEQ 0 (
 echo vcpkgexe: %vcpkgexe%
 echo vcpkgdir: %vcpkgdir%
 
-set cmakedir=%outdir%/3rdparty/cmake/
+set cmakedir=%outdir%\3rdparty\cmake
 
-set cmakezip=%outdir%/cmake-3.12.4-win64-x64.zip
+set cmakezip=%outdir%\cmake-3.12.4-win64-x64.zip
 set cmakeurl=https://cmake.org/files/v3.12/cmake-3.12.4-win64-x64.zip
 set cmakehash=f4-e8-13-07-8f-51-80-aa-ee-a4-5a-5b-87-5b-16-97
 
@@ -143,39 +144,44 @@ where cmake
 :: there is no AND or OR logical operator in windows batch
 if %ERRORLEVEL% NEQ 0 (
 	if not exist %cmakedir% (
-	call:reset_error
-	if not exist !cmakezip! (
-		echo downloading !cmakezip!...
-		call:download !cmakeurl! !cmakezip!
+		echo Could not find cmake. Trying to build it from download...
+		call:reset_error
+		if not exist !cmakezip! (
+			echo downloading !cmakezip!...
+			call:download !cmakeurl! !cmakezip!
+		)
+		echo checking md5sum of !cmakezip!...
+		call:checkmd5 !cmakezip! !cmakehash!
+		if !ERRORLEVEL! GEQ 1 (
+			echo md5sum mismatch
+			exit /B 1
+		)
+		echo extracting !cmakezip! into !cmakedir!...
+		call:unzip !cmakezip! !cmakedir!
+		if !ERRORLEVEL! GEQ 1 (
+			echo cmake unzip failed
+			exit /B 1
+		)
 	)
-	echo checking md5sum of !cmakezip!...
-	call:checkmd5 !cmakezip! !cmakehash!
-	if ERRORLEVEL 1 (
-		echo md5sum mismatch
-		exit /B 1
-	)
-	echo extracting !cmakezip! into !cmakedir!...
-	call:unzip !cmakezip! !cmakedir!
-	if !ERRORLEVEL! GEQ 1 (
-		echo cmake unzip failed
-		exit /B 1
-	)
-	set cmakeexe=!cmakedir!/cmake-3.12.4-win64-x64/bin/cmake.exe
-)) else (
+	set cmakeexe=!cmakedir!\cmake-3.12.4-win64-x64\bin\cmake.exe
+) else (
 	set cmakeexe=cmake
 )
 
+echo cmakeexe: %cmakeexe%
+
 %vcpkgexe% update
+
 if %ERRORLEVEL% GEQ 1 (
 	echo vcpkg update failed
 	exit /B 1
-)
+) else ( echo vcpkg update succeeded )
 
 %vcpkgexe% upgrade --no-dry-run
 if %ERRORLEVEL% GEQ 1 (
 	echo vcpkg upgrade failed
 	exit /B 1
-)
+) else ( echo vcpkg upgrade succeeded )
 
 %vcpkgexe% --triplet x64-windows install ^
 	qt5 ^
@@ -199,12 +205,13 @@ if %ERRORLEVEL% GEQ 1 (
 if %ERRORLEVEL% GEQ 1 (
 	echo vcpkg install failed
 	exit /B 1
-)
+) else ( echo installed all dependencies managed by vcpkg )
+
 %vcpkgexe% remove --outdated
 if %ERRORLEVEL% GEQ 1 (
 	echo vcpkg remove --outdated failed
 	exit /B 1
-)
+) else ( echo vcpkg remove --outdated succeeded )
 
 :: The package zlib is compatible with built-in CMake targets:
 :: 
@@ -241,10 +248,11 @@ if %ERRORLEVEL% GEQ 1 (
 echo "cmake: %cmakeexe%"
 :: FIXME: starting with CMake 3.13 we can use the (finally documented) -S
 :: option instead of the (long undocumented but still working) -H option
+:: FIXME: Does currently not work with sourcedir/outdir given by relative paths
 "%cmakeexe%" ^
 	-H"%sourcedir%" ^
 	-B"%outdir%" ^
-	-DCMAKE_TOOLCHAIN_FILE=%vcpkgdir%/scripts/buildsystems/vcpkg.cmake ^
+	-DCMAKE_TOOLCHAIN_FILE=%vcpkgdir%\scripts\buildsystems\vcpkg.cmake ^
 	-DOUTPUT_DIRECTORY:PATH=%outdir% ^
 	-DWITH_PYTHON=OFF ^
 	-DWITH_LASLIB=OFF ^
@@ -257,14 +265,14 @@ echo "cmake: %cmakeexe%"
 if %ERRORLEVEL% GEQ 1 (
 	echo cmake config failed
 	exit /B 1
-)
+) else ( echo cmake config done )
 
 "%cmakeexe%" --build "%outdir%" --config %buildtype% -- /m
 
 if %ERRORLEVEL% GEQ 1 (
 	echo cmake --build failed
 	exit /B 1
-)
+) else ( echo cmake --build succeeded )
 
 "%cmakeexe%" --build "%outdir%" --config %buildtype% --target RUN_TESTS
 
