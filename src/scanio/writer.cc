@@ -75,7 +75,7 @@ void createdirectory(std::string dir)
 /*
  * given a vector of 3d points, write them out as uos files
  */
-void write_uos(std::vector<cv::Vec4f> &points, std::string &dir, std::string id, bool high_precision)
+void write_uos(std::vector<cv::Vec4f> &points, std::string &dir, std::string id, bool high_precision, volatile bool *abort_flag)
 {
   std::ofstream outfile((dir + "/scan" + id + ".3d").c_str());
 
@@ -87,6 +87,7 @@ void write_uos(std::vector<cv::Vec4f> &points, std::string &dir, std::string id,
   }
 
   for (std::vector<cv::Vec4f>::iterator it=points.begin(); it < points.end(); it++) {
+    if (abort_flag != nullptr && *abort_flag) break;
     outfile << (*it)[0] << " " << (*it)[1] << " " << (*it)[2] << std::endl;
   }
   outfile.close();
@@ -95,7 +96,7 @@ void write_uos(std::vector<cv::Vec4f> &points, std::string &dir, std::string id,
 /*
  * given a vector of 3d points, write them out as uosr files
  */
-void write_uosr(std::vector<cv::Vec4f> &points, std::string &dir, std::string id, bool high_precision)
+void write_uosr(std::vector<cv::Vec4f> &points, std::string &dir, std::string id, bool high_precision, volatile bool *abort_flag)
 {
   std::ofstream outfile((dir + "/scan" + id + ".3d").c_str());
   if(high_precision) {
@@ -106,6 +107,7 @@ void write_uosr(std::vector<cv::Vec4f> &points, std::string &dir, std::string id
   outfile << "# header is ignored" << std::endl;
 
   for (std::vector<cv::Vec4f>::iterator it=points.begin(); it < points.end(); it++) {
+    if (abort_flag != nullptr && *abort_flag) break;
     if((*it)[0]!=0 && (*it)[1]!=0 && (*it)[2]!=0)
       outfile << (*it)[0] << " " << (*it)[1] << " " << (*it)[2] << " " << (*it)[3] << std::endl;
   }
@@ -116,7 +118,7 @@ void write_uosr(std::vector<cv::Vec4f> &points, std::string &dir, std::string id
 /*
  * given a vector of 3d points, write them out as uos_rgb files
  */
-void write_uos_rgb(std::vector<cv::Vec4f> &points, std::vector<cv::Vec3b> &color, std::string &dir, std::string id, bool high_precision)
+void write_uos_rgb(std::vector<cv::Vec4f> &points, std::vector<cv::Vec3b> &color, std::string &dir, std::string id, bool high_precision, volatile bool *abort_flag)
 {
   std::ofstream outfile((dir + "/scan" + id + ".3d").c_str());
   
@@ -129,6 +131,7 @@ void write_uos_rgb(std::vector<cv::Vec4f> &points, std::vector<cv::Vec3b> &color
 
   std::vector<cv::Vec3b>::iterator cit=color.begin(); 
   for (std::vector<cv::Vec4f>::iterator it=points.begin();  it < points.end(); it++) {
+    if (abort_flag != nullptr && *abort_flag) break;
     if((*it)[0]!=0 && (*it)[1]!=0 && (*it)[2]!=0)
       outfile << (*it)[0] << " " << (*it)[1] << " " << (*it)[2] << " " 
       << (int)(*cit)[0] << " " << (int)(*cit)[1] << " " << (int)(*cit)[2] << std::endl;
@@ -138,10 +141,11 @@ void write_uos_rgb(std::vector<cv::Vec4f> &points, std::vector<cv::Vec3b> &color
   outfile.close();
 }
 
-void write_uos(DataXYZ &xyz, FILE *file, double scaleFac, bool hexfloat, bool high_precision)
+void write_uos(DataXYZ &xyz, FILE *file, double scaleFac, bool hexfloat, bool high_precision, volatile bool *abort_flag)
 {
   if (hexfloat) {
 		for(unsigned int j = 0; j < xyz.size(); j++) {
+			if (abort_flag != nullptr && *abort_flag) break;
 			// we print the mantissa with 13 hexadecimal digits because the
 			// mantissa for double precision is 52 bits long which is 6.5
 			// bytes and thus 13 hexadecimal digits
@@ -150,6 +154,7 @@ void write_uos(DataXYZ &xyz, FILE *file, double scaleFac, bool hexfloat, bool hi
 		}
 	} else {
 		for(unsigned int j = 0; j < xyz.size(); j++) {
+			if (abort_flag != nullptr && *abort_flag) break;
 			// 17 significant digits are required to encode a double
 			// precision IEEE754 floating point number. Proof: the
 			// number of significant digits of the epsilon between 1.0
@@ -170,13 +175,14 @@ void write_uos(DataXYZ &xyz, FILE *file, double scaleFac, bool hexfloat, bool hi
 	}
 }
 
-void write_uosr(DataXYZ &xyz, DataReflectance &xyz_reflectance, FILE *file, double scaleFac, bool hexfloat, bool high_precision)
+void write_uosr(DataXYZ &xyz, DataReflectance &xyz_reflectance, FILE *file, double scaleFac, bool hexfloat, bool high_precision, volatile bool *abort_flag)
 {
 	if(xyz.size() != xyz_reflectance.size()) {
 		throw std::runtime_error("xyz and reflectance vector are of different length");
 	}
 	if (hexfloat) {
 		for(unsigned int j = 0; j < xyz.size(); j++) {
+			if (abort_flag != nullptr && *abort_flag) break;
 			// we print the mantissa with 13 hexadecimal digits because the
 			// mantissa for double precision is 52 bits long which is 6.5
 			// bytes and thus 13 hexadecimal digits
@@ -185,6 +191,7 @@ void write_uosr(DataXYZ &xyz, DataReflectance &xyz_reflectance, FILE *file, doub
 		}
 	} else {
 		for(unsigned int j = 0; j < xyz.size(); j++) {
+			if (abort_flag != nullptr && *abort_flag) break;
 			// 17 significant digits are required to encode a double
 			// precision IEEE754 floating point number. Proof: the
 			// number of significant digits of the epsilon between 1.0
@@ -205,13 +212,14 @@ void write_uosr(DataXYZ &xyz, DataReflectance &xyz_reflectance, FILE *file, doub
 	} 
 }
 
-void write_uos_rgb(DataXYZ &xyz, DataRGB &rgb, FILE *file, double scaleFac, bool hexfloat, bool high_precision)
+void write_uos_rgb(DataXYZ &xyz, DataRGB &rgb, FILE *file, double scaleFac, bool hexfloat, bool high_precision, volatile bool *abort_flag)
 {
 	if(xyz.size() != rgb.size()) {
 		throw std::runtime_error("xyz and rgb vector are of different length");
 	}
 	if (hexfloat) {
 		for(unsigned int j = 0; j < xyz.size(); j++) {
+			if (abort_flag != nullptr && *abort_flag) break;
 			// we print the mantissa with 13 hexadecimal digits because the
 			// mantissa for double precision is 52 bits long which is 6.5
 			// bytes and thus 13 hexadecimal digits
@@ -221,6 +229,7 @@ void write_uos_rgb(DataXYZ &xyz, DataRGB &rgb, FILE *file, double scaleFac, bool
 		}
 	} else {
 		for(unsigned int j = 0; j < xyz.size(); j++) {
+			if (abort_flag != nullptr && *abort_flag) break;
 			// 17 significant digits are required to encode a double
 			// precision IEEE754 floating point number. Proof: the
 			// number of significant digits of the epsilon between 1.0
@@ -243,10 +252,11 @@ void write_uos_rgb(DataXYZ &xyz, DataRGB &rgb, FILE *file, double scaleFac, bool
 	}
 }
 
-void write_xyz(DataXYZ &xyz, FILE *file, double scaleFac, bool hexfloat, bool high_precision)
+void write_xyz(DataXYZ &xyz, FILE *file, double scaleFac, bool hexfloat, bool high_precision, volatile bool *abort_flag)
 {
 	if (hexfloat) {
 		for(unsigned int j = 0; j < xyz.size(); j++) {
+			if (abort_flag != nullptr && *abort_flag) break;
 			// we print the mantissa with 13 hexadecimal digits because the
 			// mantissa for double precision is 52 bits long which is 6.5
 			// bytes and thus 13 hexadecimal digits
@@ -255,6 +265,7 @@ void write_xyz(DataXYZ &xyz, FILE *file, double scaleFac, bool hexfloat, bool hi
 		}
 	} else {
 		for(unsigned int j = 0; j < xyz.size(); j++) {
+			if (abort_flag != nullptr && *abort_flag) break;
 			// 17 significant digits are required to encode a double
 			// precision IEEE754 floating point number. Proof: the
 			// number of significant digits of the epsilon between 1.0
@@ -275,13 +286,14 @@ void write_xyz(DataXYZ &xyz, FILE *file, double scaleFac, bool hexfloat, bool hi
 	}
 }
 
-void write_xyzr(DataXYZ &xyz, DataReflectance &xyz_reflectance, FILE *file, double scaleFac, bool hexfloat, bool high_precision)
+void write_xyzr(DataXYZ &xyz, DataReflectance &xyz_reflectance, FILE *file, double scaleFac, bool hexfloat, bool high_precision, volatile bool *abort_flag)
 {
 	if(xyz.size() != xyz_reflectance.size()) {
 		throw std::runtime_error("xyz and reflectance vector are of different length");
 	}
 	if (hexfloat) {
 		for(unsigned int j = 0; j < xyz.size(); j++) {
+			if (abort_flag != nullptr && *abort_flag) break;
 			// we print the mantissa with 13 hexadecimal digits because the
 			// mantissa for double precision is 52 bits long which is 6.5
 			// bytes and thus 13 hexadecimal digits
@@ -293,6 +305,7 @@ void write_xyzr(DataXYZ &xyz, DataReflectance &xyz_reflectance, FILE *file, doub
 		}
 	} else {
 		for(unsigned int j = 0; j < xyz.size(); j++) {
+			if (abort_flag != nullptr && *abort_flag) break;
 			// 17 significant digits are required to encode a double
 			// precision IEEE754 floating point number. Proof: the
 			// number of significant digits of the epsilon between 1.0
@@ -319,13 +332,14 @@ void write_xyzr(DataXYZ &xyz, DataReflectance &xyz_reflectance, FILE *file, doub
 	}
 }
 
-void write_xyz_rgb(DataXYZ &xyz, DataRGB &rgb, FILE *file, double scaleFac, bool hexfloat, bool high_precision)
+void write_xyz_rgb(DataXYZ &xyz, DataRGB &rgb, FILE *file, double scaleFac, bool hexfloat, bool high_precision, volatile bool *abort_flag)
 {
 	if(xyz.size() != rgb.size()) {
 		throw std::runtime_error("xyz and rgb vector are of different length");
 	}
 	if (hexfloat) {
 		for(unsigned int j = 0; j < xyz.size(); j++) {
+			if (abort_flag != nullptr && *abort_flag) break;
 			// we print the mantissa with 13 hexadecimal digits because the
 			// mantissa for double precision is 52 bits long which is 6.5
 			// bytes and thus 13 hexadecimal digits
@@ -335,6 +349,7 @@ void write_xyz_rgb(DataXYZ &xyz, DataRGB &rgb, FILE *file, double scaleFac, bool
 		}
 	} else {
 		for(unsigned int j = 0; j < xyz.size(); j++) {
+			if (abort_flag != nullptr && *abort_flag) break;
 			// 17 significant digits are required to encode a double
 			// precision IEEE754 floating point number. Proof: the
 			// number of significant digits of the epsilon between 1.0
