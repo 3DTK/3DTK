@@ -7,9 +7,9 @@
 #include "slam6d/fbr/scan_cv.h"
 
 void createdirectory(std::string dir);
-void write_uos(std::vector<cv::Vec4f> &points, std::string &dir, std::string id, bool high_precision=false);
-void write_uosr(std::vector<cv::Vec4f> &points, std::string &dir, std::string id, bool high_precision=false);
-void write_uos_rgb(std::vector<cv::Vec4f> &points, std::vector<cv::Vec3b> &color, std::string &dir, std::string id, bool high_precision=false);
+void write_uos(std::vector<cv::Vec4f> &points, std::string &dir, std::string id, bool high_precision=false, volatile bool *abort_flag = nullptr);
+void write_uosr(std::vector<cv::Vec4f> &points, std::string &dir, std::string id, bool high_precision=false, volatile bool *abort_flag = nullptr);
+void write_uos_rgb(std::vector<cv::Vec4f> &points, std::vector<cv::Vec3b> &color, std::string &dir, std::string id, bool high_precision=false, volatile bool *abort_flag = nullptr);
 
 void write_uos(DataXYZ &xyz, FILE *file, double scaleFac = 1.0, bool hexfloat = false, bool high_precision=false, volatile bool *abort_flag = nullptr);
 void write_uosr(DataXYZ &xyz, DataReflectance &xyz_reflectance, FILE *file, double scaleFac = 1.0, bool hexfloat = false,bool high_precision=false, volatile bool *abort_flag = nullptr);
