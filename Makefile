@@ -7,7 +7,11 @@ test:
 	CTEST_OUTPUT_ON_FAILURE=true cmake --build .build --target test
 
 config: .build
-	ccmake -H. -B.build
+ifeq ($(CMAKE_GENERATOR),Ninja)
+	ccmake -H. -B.build -G "Ninja"
+else
+	ccmake -H. -B.build -G "Unix Makefiles"
+endif
 	touch .configured
 
 .configured: .build
