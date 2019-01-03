@@ -1,5 +1,5 @@
 all: .configured
-	cmake --build .build
+	cmake --build .build -- $(filter -j%,$(MAKEFLAGS))
 
 .PHONY: test
 test:
