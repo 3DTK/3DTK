@@ -152,7 +152,7 @@ int main(int argc, char **argv)
   }
 
   // Apply transformation of scans, with frames or with poses
-  readFrames(dir, start, end, -1, use_pose, red > 0);
+  readFramesAndTransform(dir, start, end, -1, use_pose, red > 0);
   
   // join all scans then call surface reconstrucion
   // ---

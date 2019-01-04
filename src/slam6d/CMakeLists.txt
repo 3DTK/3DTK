@@ -58,7 +58,7 @@ add_executable(average6DoFposes average6DoFposes.cc)
 add_executable(align sICP.cc)
 
 if (WITH_OPENCV)
-  add_executable(exportPoints exportPoints.cc ../scanio/writer.cc)
+  add_executable(exportPoints exportPoints.cc ../scanio/writer.cc ../scanio/framesreader.cc)
   target_link_libraries(exportPoints scan ${ANN_LIBRARIES} ${NEWMAT_LIBRARIES} ${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY} ${OpenCV_LIBS})
 endif()
 
