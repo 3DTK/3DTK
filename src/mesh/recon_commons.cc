@@ -2,7 +2,7 @@
 
 using namespace std;
 
-void readFrames(std::string dir, int start, int end, int frame, bool use_pose)
+void readFrames(std::string dir, int start, int end, int frame, bool use_pose, bool reduced) 
 {
   std::ifstream frame_in;
   int  fileCounter = start;
@@ -12,6 +12,11 @@ void readFrames(std::string dir, int start, int end, int frame, bool use_pose)
     if (end > -1 && fileCounter > end) break; // 'nuf read
     
     frameFileName = dir + "scan" + to_string(fileCounter++,3) + ".frames";
+    
+    const double * transMatOrig = Scan::allScans[fileCounter - start - 1]->get_transMatOrg();
+    double tinv[16];
+    M4inv(transMatOrig, tinv);
+
     if(!use_pose) {
 
       frame_in.open(frameFileName.c_str());
@@ -37,22 +42,26 @@ void readFrames(std::string dir, int start, int end, int frame, bool use_pose)
       }
 
       // calculate RELATIVE transformation
-      const double * transMatOrig = Scan::allScans[fileCounter - start - 1]->get_transMatOrg();
-      double tinv[16];
-      M4inv(transMatOrig, tinv);
-
       double tfin[16];
       MMult(transMat, tinv, tfin);
       //Scan::allScans[fileCounter - start - 1]->transformMatrix(tfin);
       //Scan::allScans[fileCounter - start - 1]->transformMatrix(tinv);
       // save final pose in scan
-      Scan::allScans[fileCounter - start - 1]->transformMatrix(tfin);
       
-      Scan::allScans[fileCounter - start - 1]->transformAll(transMat);
-    
+      if(reduced) {
+        Scan::allScans[fileCounter - start - 1]->transformMatrix(tinv);
+        Scan::allScans[fileCounter - start - 1]->transform(transMat,-1);
+      } else {
+        Scan::allScans[fileCounter - start - 1]->transformMatrix(tfin);
+        Scan::allScans[fileCounter - start - 1]->transformAll(transMat);
+      }
     } else {
-      const double * transMatOrig = Scan::allScans[fileCounter - start - 1]->get_transMatOrg();
-      Scan::allScans[fileCounter - start - 1]->transformAll(transMatOrig);
+      if(reduced) {
+        Scan::allScans[fileCounter - start - 1]->transformMatrix(tinv);
+        Scan::allScans[fileCounter - start - 1]->transform(transMatOrig,-1);
+      } else {
+        Scan::allScans[fileCounter - start - 1]->transformAll(transMatOrig);
+      }
     }
     frame_in.close();
     frame_in.clear();
