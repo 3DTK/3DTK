@@ -19,7 +19,7 @@
 #include "mesh/auto_scan_red.h"
 
 // read frames used by join scans
-void readFrames(std::string dir, int start, int end, int frame, bool use_pose=false);
+void readFrames(std::string dir, int start, int end, int frame, bool use_pose=false, bool reduced=false);
 
 // convert vector of Points to vector of vector of float
 void convert(std::vector<Point> &src, std::vector<std::vector<float>> &dst);
