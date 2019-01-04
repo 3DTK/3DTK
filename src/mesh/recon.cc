@@ -152,7 +152,7 @@ int main(int argc, char **argv)
   }
 
   // Apply transformation of scans, with frames or with poses
-  readFrames(dir, start, end, -1, use_pose);
+  readFrames(dir, start, end, -1, use_pose, red > 0);
   
   // join all scans then call surface reconstrucion
   // ---
@@ -223,8 +223,6 @@ int main(int argc, char **argv)
       Scan* scan = Scan::allScans[i];
 
       const double* rPos = scan->get_rPos();
-      const double* rPosTheta = scan->get_rPosTheta();
-
       // read scan into points
       DataXYZ xyz(scan->get("xyz" + red_string));
       DataRGB rgb = scan->get(red > 0 ? "color reduced" : "rgb");
@@ -243,7 +241,7 @@ int main(int argc, char **argv)
         }
         colors.push_back(c);
       }
-
+      
       // calculate normals
       calculateNormalsAdaptiveKNN(normals, points, k1, k2, rPos);
       //calcNormals(points, normals, ntype, k1, k2, width, height, rPos, rPosTheta, scan);
