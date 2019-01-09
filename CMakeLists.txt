@@ -353,6 +353,7 @@ endif()
 #################################################
 
 set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${ADDITIONAL_CFLAGS}")
+set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${ADDITIONAL_CFLAGS}")
 
 if(APPLE)
   set(CMAKE_MACOSX_RPATH 1)
