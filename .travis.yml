@@ -26,6 +26,7 @@ matrix:
   include:
     - os: osx
       before_cache:
+        - brew update
         - brew cleanup
       cache:
         directories:
