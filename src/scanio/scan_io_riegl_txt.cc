@@ -134,7 +134,12 @@ std::function<bool (std::istream &data_file)> read_data(PointFilter& filter,
         }
 
         // reserve enough space for faster reading
-        xyz->reserve(3*count);
+        try {
+            xyz->reserve(3*count);
+        } catch(...) {
+            std::cerr << "failed allocating space for " << count << " points" << std::endl;
+            throw;
+        }
         if (reflectance != nullptr) {
             reflectance->reserve(count);
         }
