@@ -109,7 +109,7 @@ int main(int argc, const char * argv[]) {
                 ("threads,t", po::value<int>(&settings.threads)->default_value(4),
                  "set threads count for AprilTag detection")
 
-                ("blur", po::value<float>(&settings.blur)->default_value((float) 0.8), "set blur level for AprilTag")
+                ("blur", po::value<float>(&settings.blur)->default_value((float) 0.0), "set blur level for AprilTag")
 
                 ("pictures-for-estimation,e",
                  po::value<int>(&settings.picturesForDstimateInitial3DCameraMatrix)->default_value(40),
