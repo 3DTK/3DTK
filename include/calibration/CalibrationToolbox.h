@@ -37,6 +37,11 @@ private:
      */
     std::vector<std::vector<cv::Point3f>> vecPatternPoints;
 
+    /**
+     * vector of paths of valid calibration images
+     */
+    std::vector<std::string> vecCalibImagePaths;
+
     std::vector<std::vector<cv::Point2f>> estimateImagePoints;
     std::vector<std::vector<cv::Point3f>> estimatePatternPoints;
 
@@ -71,7 +76,7 @@ private:
     /**
      * match the detected tags form image and pattern
      */
-    void matchTags();
+    bool matchTags();
 
     /**
      *
