@@ -64,7 +64,7 @@ CalibrationToolbox::CalibrationToolbox(Settings &s) :
 
 }
 
-void CalibrationToolbox::matchTags() {
+bool CalibrationToolbox::matchTags() {
     vector<AprilTag2f> imagePoints = this->pictureHandler.getPointList();
     vector<AprilTag3f> patternPoints = this->pattern.getPoints();
 
@@ -111,7 +111,11 @@ void CalibrationToolbox::matchTags() {
             this->estimateImagePoints.push_back(imgEstPoints);
             this->estimatePatternPoints.push_back(patEstPoints);
         }
+
+        return true;
     }
+
+    return false;
 }
 
 CalibrationToolbox::~CalibrationToolbox() {
@@ -148,12 +152,15 @@ void CalibrationToolbox::initImage(string path) {
             cout << "count of detected Points: " << this->pictureHandler.getPointList().size() << endl;
         }
 
-        this->matchTags();
+        if (this->matchTags()) {
+            this->vecCalibImagePaths.push_back(path);
+        }
     } else if(settings.calibrationPattern == Settings::CHESSBOARD){
         if (FILE *detecFile = fopen((path + ".detections").c_str(), "r")) {
             fclose(detecFile);
             this->vecImagePoints.push_back(Chessboard::readPoint2fChessboardFromFile(path + ".detections"));
             this->vecPatternPoints.push_back(this->chessboardCorners);
+            this->vecCalibImagePaths.push_back(path);
             cout << "points load from file" << endl;
         } else {
             this->pictureHandler.loadImage(path);
@@ -161,6 +168,7 @@ void CalibrationToolbox::initImage(string path) {
             if (found) {
                 this->vecImagePoints.push_back(this->pictureHandler.getPoint2fVec());
                 this->vecPatternPoints.push_back(this->chessboardCorners);
+                this->vecCalibImagePaths.push_back(path);
                 fstream f;
                 f.open((path + ".detections").c_str(), ios::out);
                 f << "#CHESSBOARD" << endl;
@@ -178,6 +186,7 @@ void CalibrationToolbox::initImage(string path) {
         if (found) {
             this->vecImagePoints.push_back(this->pictureHandler.getPoint2fVec());
             this->vecPatternPoints.push_back(this->chessboardCorners);
+            this->vecCalibImagePaths.push_back(path);
         }
 
     }else if(settings.calibrationPattern == Settings::ASYMMETRIC_CIRCLES_GRID){
@@ -186,6 +195,7 @@ void CalibrationToolbox::initImage(string path) {
         if (found) {
             this->vecImagePoints.push_back(this->pictureHandler.getPoint2fVec());
             this->vecPatternPoints.push_back(this->chessboardCorners);
+            this->vecCalibImagePaths.push_back(path);
         }
     }
 }
@@ -445,12 +455,11 @@ void CalibrationToolbox::visualize(bool readCameraParamFromFile){
         this->camMatrix = settings.estCameraMatrix;
         this->distorCoeff = settings.estDistCoeff;
     }
-    static int i = 0;
     Mat pointsImage = Mat_<cv::Vec3b>::zeros(settings.imageSize.height, settings.imageSize.width);
-    for(string path : this->imagePath) {
-        boost::filesystem::path filename(path);
+    for(int i = 0; i < this->vecCalibImagePaths.size(); i++) {
+        boost::filesystem::path filename(this->vecCalibImagePaths[i]);
         //gefunden Punkte bgr
-        Mat image = imread(path);
+        Mat image = imread(this->vecCalibImagePaths[i]);
         vector<Point2f> imagePoints2;
         cvtColor(image, image, CV_BGR2GRAY);
         cvtColor(image, image, CV_GRAY2BGR);
@@ -482,7 +491,6 @@ void CalibrationToolbox::visualize(bool readCameraParamFromFile){
             circle(image, p, 1, Scalar(0, 255, 0), 2);
         }
         cv::imwrite(ss.str(), image);
-        i++;
     }
     cv::imwrite(settings.visualizePath + "/points.png", pointsImage);
 }
