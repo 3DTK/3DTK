@@ -455,6 +455,9 @@ void CalibrationToolbox::visualize(bool readCameraParamFromFile){
         this->camMatrix = settings.estCameraMatrix;
         this->distorCoeff = settings.estDistCoeff;
     }
+
+    boost::filesystem::create_directories(settings.visualizePath);
+
     Mat pointsImage = Mat_<cv::Vec3b>::zeros(settings.imageSize.height, settings.imageSize.width);
     for(int i = 0; i < this->vecCalibImagePaths.size(); i++) {
         boost::filesystem::path filename(this->vecCalibImagePaths[i]);
