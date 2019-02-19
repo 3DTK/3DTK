@@ -13,7 +13,8 @@ void parse_options(
   int argc, char **argv, int &start, int &end, 
   bool &scanserver, int &max_dist, int &min_dist, 
   string &dir, string &odir, IOType &iotype, 
-  bool &in_color, bool &no_normal, bool &join, 
+  bool &in_color, bool &reflectance, double &min_refl, double &max_refl, 
+  bool &no_normal, bool &join, 
   double &red, int &rand, bool &use_pose,
   int &octree, bool &rangeFilterActive, bool &customFilterActive, 
   string &customFilter, double &scaleFac, bool &autoRed,
@@ -49,6 +50,15 @@ void parse_options(
       ("incolor,C",
        po::bool_switch(&in_color)->default_value(false),
        "pointset contains color info")
+      ("reflectance,R",
+       po::bool_switch(&reflectance)->default_value(false),
+       "transform reflectance information to gray scale")
+      ("minR",
+       po::value<double>(&min_refl)->default_value(-15.0),
+       "lower threshold for reflectance grayscale")
+      ("maxR",
+       po::value<double>(&max_refl)->default_value(-15.0),
+       "upper threshold for reflectance grayscale")
       ("nonormal,N",
        po::bool_switch(&no_normal)->default_value(false),
        "export mesh with normal data")
