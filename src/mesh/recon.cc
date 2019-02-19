@@ -11,6 +11,8 @@ int main(int argc, char **argv)
   string dir, odir; // directory of input scan and output model
   IOType iotype;
   bool in_color; // input points with color
+  bool in_reflectance; // transform reflectance to grayscale
+  double min_refl, max_refl;
   bool no_normal; // do not output vertices normals
 
   // parameters for transfromation and filtering
@@ -50,8 +52,8 @@ int main(int argc, char **argv)
   parse_options(argc, argv, start, end, 
     scanserver, max_dist, min_dist,
     dir, odir, iotype, 
-    in_color, no_normal, join, 
-    red, rand, use_pose,
+    in_color, in_reflectance, min_refl, max_refl, 
+    no_normal, join, red, rand, use_pose,
     octree, rangeFilterActive, customFilterActive, 
     customFilter, scaleFac, autoRed,
     k1, k2, ntype, width, height, 
@@ -169,6 +171,7 @@ int main(int argc, char **argv)
 
       DataXYZ xyz = scan->get("xyz" + red_string);
       DataRGB rgb = scan->get(red > 0 ? "color reduced" : "rgb");
+      DataReflectance reflectance = scan->get(red > 0 ? "reflectance reduced" : "reflectance");
       // record UOS format data
       for(unsigned int j = 0; j < xyz.size(); j++) {
         pts.push_back(Point(scaleFac * xyz[j][0], scaleFac * xyz[j][1], scaleFac * xyz[j][2]));
@@ -176,7 +179,13 @@ int main(int argc, char **argv)
         if (in_color) {
           c = {(float)rgb[j][0], (float)rgb[j][1], (float)rgb[j][2]};
         }
-        else {
+        else if (in_reflectance) {
+	  float tmp = reflectance[j];
+	  tmp = ((tmp - min_refl) / (max_refl - min_refl)) * 255.0;
+	  if (tmp < 0.0) tmp = 0;
+	  if (tmp > 255.0) tmp = 255.0;
+	  c = {tmp, tmp, tmp};
+	} else {
           c = {255.0, 255.0, 255.0};
         }
         colors.push_back(c);
