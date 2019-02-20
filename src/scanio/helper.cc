@@ -304,7 +304,7 @@ bool strtoval(char *pos, unsigned int linenr, int* ret)
     return true;
 }
 
-unsigned int strtoarray(std::string opt_s, char **&opts_array)
+unsigned int strtoarray(std::string opt_s, char **&opts_array,const char * separator)
 {
     char * opts = (char *)malloc(opt_s.size() + 1);
     memcpy(opts, opt_s.c_str(), opt_s.size() + 1);
@@ -312,23 +312,23 @@ unsigned int strtoarray(std::string opt_s, char **&opts_array)
     memcpy(tmp, opt_s.c_str(), opt_s.size() + 1);
     
     char * pch;
-    pch = strtok (opts," ");
+    pch = strtok (opts,separator);
 
     int count = 0;
     while (pch != NULL)
     {
       count++;
-      pch = strtok (NULL, " ");
+      pch = strtok (NULL, separator);
     }
     opts_array = new char*[count + 1];
-    pch = strtok (tmp," ");
+    pch = strtok (tmp,separator);
     int cnt = 0;
     while (pch != NULL && cnt < count)
     {
       cnt++;
       opts_array[cnt] = new char[strlen(pch) + 1];
       memcpy(opts_array[cnt], pch, strlen(pch) + 1);
-      pch = strtok (NULL, " ");
+      pch = strtok (NULL, separator);
     }
     return count; 
 }
