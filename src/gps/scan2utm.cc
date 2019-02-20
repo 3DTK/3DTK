@@ -201,8 +201,8 @@ int main(int argc, char **argv)
       if (!(types & PointType::USE_REFLECTANCE)) {
         for(unsigned int i = 0; i < xyz.size(); i++) xyz_reflectance[i] = 255;
       }
-      write_uosr(xyz, xyz_reflectance, redptsout, hexfloat, high_precision);
-      
+      write_uosr(xyz, xyz_reflectance, redptsout, 1.0, hexfloat, high_precision);
+
     } else if(use_color) {
       std::string data_string = red > 0 ? "color reduced" : "rgb";
       DataRGB xyz_color = 
