@@ -10,6 +10,70 @@
 #include <iostream>
 
 /**
+  * Convert from the standard right handed ECEF coordinate system to ENU
+  * coordinates
+  */
+void ECEF_rtoENU(double lat, double lon, double alt, double cx, double cy, double cz, double &east, double &north, double &up) {
+  alt *= 100;
+  east = sin(rad(lon))*cx + cos(rad(lon))*cy;
+  north = -sin(rad(lat))*cos(rad(lon))*cx - sin(rad(lat))*cos(rad(lon))*cy + cos(rad(lat))*cz;
+  up = cos(rad(lat))*cos(rad(lon))*cx + cos(rad(lat))*sin(rad(lon))*cy + sin(rad(lat))*cz;
+}
+
+/**
+  * Calculate the matrix for conversion into ENU coordinates based on latitude,
+  * longitude, altitude (=WGS84/ellipsoidal, in m) 
+  */
+void calcECEF_rtoENUMat9(double lat, double lon, double alt, double* mat) {
+  alt *= 100;
+  mat[0] = sin(rad(lon));
+  mat[1] = cos(rad(lon));
+  mat[2] = 0;
+  mat[3] = -sin(rad(lat))*cos(rad(lon));
+  mat[4] = -sin(rad(lat))*cos(rad(lon));
+  mat[5] = cos(rad(lat));
+  mat[6] = cos(rad(lat))*cos(rad(lon));
+  mat[7] = cos(rad(lat))*sin(rad(lon));
+  mat[8] = sin(rad(lat));
+}
+
+/**
+  * Calculate ENU coordinates with x = cx - fx, y = cy - fy, z = cz - fz, where
+  * (cx, cy, cz) is the point used to calculate mat.
+  */
+void getENU(double* mat, double x, double y, double z, double& east, double& north, double&
+up) {
+  east = mat[0] * x + mat[1] * y + mat[2] * z;
+  north = mat[3] * x + mat[4] * y + mat[5] * z;
+  up = mat[6] * x + mat[7] * y + mat[8] * z;
+}
+ 
+/**
+  * Transform ENU coordinates into a left-handed coordinate system.
+  */
+void ENUto3DTK(double east, double north, double up, double& x, double &y, double& z) {
+  x = east;
+  y = up;
+  z = north;
+}
+
+/**
+  * Conversion from latitude, longitude, altitude (=WGS84/ellipsoidal, in m) to 
+  * right-handed ECEF in cm
+  */
+void LLAtoECEF_r(double latitude, double longitude, double altitude, double& cx, double& cy, double& cz) {
+  double phi = rad(latitude);
+  double lambda = rad(longitude);
+  double h = altitude; 
+
+  double n = (gps::A/(sqrt(1-(gps::E2*(sin(phi)*sin(phi))))));
+  
+  cx = (n+h)*cos(phi)*cos(lambda) * 100;  // ECEF X 
+  cy = (n+h)*cos(phi)*sin(lambda) * 100; // ECEF Y
+  cz= ((n*(1-gps::E2))+h)*sin(phi) * 100; // ECEF Z // !!
+}
+
+/**
   * Conversion from latitude, longitude, altitude (=WGS84/ellipsoidal, in m) to 
   * left-handed ECEF in cm
   */
@@ -113,4 +177,78 @@ void ECEFtoUTM(DataXYZ &xyz)
     xyz[j][1] = north;
     xyz[j][2] = height;
   }
+}
+
+/**
+  * Reading LLA from Emlid Reach RTK
+  *
+  */
+void readRTKPos(char* filename, std::vector<double *> &lla_vec) {
+//index,name,longitude,latitude,elevation,collection start,collection end,solution status,lateral rms,sample count,antenna height
+  std::ifstream infile;
+  unsigned int bufsize = 255;
+  char *buffer = (char *)malloc(bufsize);
+  unsigned int linenr = 0;
+  double latitude, longitude, altitude;
+  
+
+  infile.open(filename);
+  for (;;++linenr) {
+    if (infile.eof()) break;
+    try {
+      infile.getline(buffer, bufsize, '\n');
+    } catch(std::ios_base::failure e) {
+      if (!infile.eof()) {
+        std::cerr << "error reading a line in line " << linenr << std::endl;
+        std::cerr << e.what() << std::endl;
+        break;
+      }
+    }
+    if(linenr == 0) continue;
+    char **rtk_array; 
+    unsigned int count = strtoarray(buffer, rtk_array,",");
+    /*
+    std::cout << "B" << std::endl;
+    std::cout << count << std::endl;
+    std::cout << rtk_array[0] << std::endl;
+    std::cout << rtk_array[1] << std::endl;
+    std::cout << rtk_array[2] << std::endl;
+    std::cout << rtk_array[3] << std::endl;
+    std::cout << rtk_array[4] << std::endl;
+    std::cout << rtk_array[5] << std::endl;
+    
+    for(unsigned int jl = 0; jl < count; jl++) {
+      std::cout << rtk_array[jl] << std::endl;
+    }
+    */
+    
+    
+    if(count != 11) {
+      //std::cerr << count << " error reading RTK pose format in line " << linenr << std::endl;
+      break;
+    }
+    /*
+    std::cout << rtk_array[3] << std::endl;
+    std::cout << rtk_array[4] << std::endl;
+    std::cout << rtk_array[5] << std::endl;
+    */
+    latitude = atof(rtk_array[4]);
+    longitude = atof(rtk_array[3]);
+    //TODO need antenna height??
+    altitude = atof(rtk_array[5]);
+    double *lla = new double[3];
+    lla[0] = latitude;
+    lla[1] = longitude;
+    lla[2] = altitude;
+    lla_vec.push_back(lla);
+   
+    for(unsigned int i = 0; i < count; i++) { 
+      delete[] rtk_array[i]; 
+    } 
+    delete[] rtk_array;
+
+  }
+  free(buffer);
+  infile.close();
+  infile.clear();
 }

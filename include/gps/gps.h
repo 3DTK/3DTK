@@ -8,6 +8,8 @@
 
 #include "slam6d/globals.icc"
 #include "slam6d/data_types.h"
+#include "scanio/helper.h"
+#include <vector>
 
 using std::sqrt;
 
@@ -26,10 +28,16 @@ void calcAlignmentMatrix(double * n0, double * mat);
 void computeOrientation(double x, double y, double z, double *rPosTheta);
 void computeOrientation(double x, double y, double z, double ax, double ay, double az, double *rPosTheta);
 */
+void ECEF_rtoENU(double lat, double lon, double alt, double cx, double cy, double cz, double &east, double &north, double &up) ;
+void ENUto3DTK(double east, double north, double up, double& x, double &y, double& z) ;
+void LLAtoECEF_r(double latitude, double longitude, double altitude, double& cx, double& cy, double& cz);
 void LLAtoECEF(double latitude, double longitude, double altitude, double& cx, double& cy, double& cz);
 void ECEFtoLLA(double cx, double cy, double cz, double& latitude, double& longitude, double& altitude);
 void LLAtoUTM(double latitude, double longitude, double altitude, double& cx, double& cy, double& cz);
 
 void ECEFtoUTM(double cx, double cy, double cz, double& east, double& altitude, double& north); 
 void ECEFtoUTM(DataXYZ &xyz);
+void calcECEF_rtoENUMat9(double lat, double lon, double alt, double* mat);
+void getENU(double* mat, double x, double y, double z, double& east, double& north, double& up);
+void readRTKPos(char* filename, std::vector<double *> &lla_vec);
 #endif
