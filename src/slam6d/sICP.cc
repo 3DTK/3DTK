@@ -1,10 +1,9 @@
-/**
+/*
  * @file
  * @brief Main programm for matching 3D scans (6D SLAM) with given * correspondences.
  * 
  * @author Dorit Borrmann
  */
-
 #ifdef _MSC_VER
 #ifdef OPENMP
 #define _OPENMP
