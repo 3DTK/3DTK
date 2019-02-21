@@ -17,9 +17,9 @@
 using namespace std;
 using namespace Eigen;
 
-extern double time_s[5000];
+extern double time_s[60000];
 extern std::vector<MatrixXd> matrix_new;
-extern unsigned int num;
+//extern unsigned int num;
 
 using namespace std;
 using namespace Eigen;
@@ -32,8 +32,8 @@ class tf_broadcaster {
   
   
   public:
-  tf_broadcaster(std::vector<MatrixXd> &poses_result);
- 
+ // tf_broadcaster(std::vector<MatrixXd> &poses_result);
+  int broadcaster_tf();
   //void readtf(std::vector<MatrixXd> &poses_result);
   
 };

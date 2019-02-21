@@ -13,7 +13,9 @@
  *  @author Andreas Nuechter. Inst. of CS, University of Osnabrueck, Germany.
  */
 
+
 #include "slam6d/icp6Dsvd.h"
+
 
 #include "slam6d/globals.icc"
 #include <iomanip>

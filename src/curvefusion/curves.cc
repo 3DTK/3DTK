@@ -2,33 +2,48 @@
 #include <list>
 #include <utility>
 #include <fstream>
-#include "curvefusion/timestamps.h"
+#include "curvefusion/extractTrajectory.h"
 
 #include <iomanip>
 using std::ios;
 
+//std::vector<Curves*> Curves::Interpoints;
 std::vector<Curves*> Curves::Oripoints;
 std::vector<Curves*> Curves::allpoints;
 std::vector<Curves*> Curves::newpoints;
 std::vector<Curves*> Curves::Samplepoints;
-
-Curves::Curves(std::vector<double> *point ,int type, int identifier) :
+std::vector<Curves*> Curves::gpspoints;
+std::vector<Curves*> Curves::laserpoints;
+Curves::Curves(std::vector<double> *point ,int type, unsigned int identifier) :
   m_point(point),m_type(type),identifiers(identifier)
 {
   
  // double point[6];
  // readTrajectory(m_path.c_str(), point,identifiers);
   time_stamps = m_point[0][identifiers];
-  points1(0) = m_point[1][identifiers];
-  points1(1) = m_point[2][identifiers];
-  points1(2) = m_point[3][identifiers];
-  points2(0) = m_point[4][identifiers];
-  points2(1) = m_point[5][identifiers];
-  points2(2) = m_point[6][identifiers]; 
+  points1(0) = m_point[4][identifiers];
+  points1(1) = m_point[5][identifiers];
+  points1(2) = m_point[6][identifiers];    //hector laser x y z
+  points2(0) = m_point[1][identifiers];    //GPS x y z
+  points2(1) = m_point[2][identifiers];
+  points2(2) = m_point[3][identifiers]; 
+}
+
+Curves::Curves(Vector3d point3d ,int type, unsigned int identifier,string t) :
+  points(point3d),m_type(type),identifiers(identifier),str(t)
+{
+  
+ // double point[6];
+ // readTrajectory(m_path.c_str(), point,identifiers);
+  if(str=="gps")
+   points1=points;
+
+  else if(str=="laser")
+   points2=points;
 }
 
 
-void Curves::readTrajectory(const char* dir_path, double* pose, int identifiers)
+void Curves::readTrajectory(const char* dir_path, double* pose, unsigned int identifiers)
 
 {
   
@@ -95,11 +110,11 @@ void Curves::Trans_Mat(Curves* CurrentPoint,Curves* NextPoint)
    }
 
   //caculate mean of currentpoint and nextpoint
-   traj_mean1(0,0)=(traj_point1(0,0)+traj_point1(1,0))/2;
-   traj_mean1(0,1)=(traj_point1(0,1)+traj_point1(1,1))/2;
+   traj_mean1(0,0)=(traj_point1(0,0)+traj_point1(1,0))*0.5;
+   traj_mean1(0,1)=(traj_point1(0,1)+traj_point1(1,1))*0.5;
 
 #ifdef POINT3D
-   traj_mean1(0,2)=(traj_point1(0,2)+traj_point1(1,2))/2;
+   traj_mean1(0,2)=(traj_point1(0,2)+traj_point1(1,2))*0.5;
 #endif
  
    //traj_mean1(1,3)=(traj_point1(1,3)+traj_point1(2,3))/2;
@@ -175,11 +190,11 @@ void Curves::Trans_Mat(Curves* CurrentPoint,Curves* NextPoint)
    }
 
   //caculate mean of currentpoint and nextpoint
-   traj_mean2(0,0)=(traj_point2(0,0)+traj_point2(1,0))/2;
-   traj_mean2(0,1)=(traj_point2(0,1)+traj_point2(1,1))/2;
+   traj_mean2(0,0)=(traj_point2(0,0)+traj_point2(1,0))*0.5;
+   traj_mean2(0,1)=(traj_point2(0,1)+traj_point2(1,1))*0.5;
 
 #ifdef POINT3D
-   traj_mean2(0,2)=(traj_point2(0,2)+traj_point2(1,2))/2;
+   traj_mean2(0,2)=(traj_point2(0,2)+traj_point2(1,2))*0.5;
 #endif
    
    for(int i=0;i<DIMENSIONS;i++)
