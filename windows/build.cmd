@@ -177,6 +177,12 @@ if %ERRORLEVEL% GEQ 1 (
 	exit /B 1
 ) else ( echo vcpkg update succeeded )
 
+%vcpkgexe% remove --outdated --recurse
+if %ERRORLEVEL% GEQ 1 (
+	echo vcpkg remove --outdated failed
+	exit /B 1
+) else ( echo vcpkg remove --outdated succeeded )
+
 %vcpkgexe% upgrade --no-dry-run
 if %ERRORLEVEL% GEQ 1 (
 	echo vcpkg upgrade failed
