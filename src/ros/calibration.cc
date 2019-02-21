@@ -210,7 +210,6 @@ void calibration::calculateTrajectory() {
       l->setTransform(trans);
 
       addStaticTransforms(l, odom.header.stamp);
-       cout<<89<<endl;
     }
   }
 
@@ -244,7 +243,6 @@ void calibration::calculateTrajectoryFromOdom() {
       l->setTransform(trans);
 
       addStaticTransforms(l, optr->header.stamp);
-cout<<89<<endl;
     }
   }
 
@@ -340,7 +338,6 @@ void calibration::addStaticTransforms(tf::TransformListener *l, ros::Time t) {
   // XSENS
   q.setRPY(xsens_euler[2], xsens_euler[1], xsens_euler[0]);
   l->setTransform( tf::StampedTransform(tf::Transform(q, tf::Vector3( xsens_pos[0], xsens_pos[1], xsens_pos[2])), t, "/base_link", "/xsens" ) );
-cout<<88<<endl;
 }
   
 
@@ -386,7 +383,6 @@ void calibration::calibrate(timeMap &tm, evaluator &ev, ScanImporter &si) {
 
   // set starting estimate
   toX(startestimate);
-  cout<<5<<endl;
   float ftol = 0.001;
 
   float best_val;
@@ -418,7 +414,6 @@ float calibration::function(float *X) {
   // set calibration parameters according to X
   fromX(X);
 
-  cout<<6<<endl;
   // alternatively change odom parameters as well (recomputing the odometry guess)
   
   // set up the tf history (the path of the robot)

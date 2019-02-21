@@ -259,7 +259,6 @@ void addStaticTransforms(tf::TransformListener *l, ros::Time t) {
   q.setRPY(3.14159265, 0, 0);
   l->setTransform( tf::StampedTransform(tf::Transform(q, tf::Vector3(-0.17, 0, 0.18)), t, "/base_link", "/xsens" ) );
 
-  cout<<66<<endl;
 }
 
 /**

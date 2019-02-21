@@ -74,10 +74,10 @@ class calibration {
     n.param("/odometry/ticks_per_cm", ticks_per_cm, -461.817);
     n.param("/timing/offset", time_offset, 0.0);
     
-    const double sick_position[] = {0, 0, 0};
+    const double sick_position[] = {0.12, 0, 0.24};
     const double sick_orientation[] = {0,0,0};
-    const double riegl_position[] = {-0.2, 0, 0.2};
-    const double riegl_orientation[] = {3.1415926, 0.0, 0.0};
+    const double riegl_position[] = {-0.135, 0, 0.4325};
+    const double riegl_orientation[] = {2.0943951, 0.0, 0.0};
     const double xsens_position[] = {-0.44, -0.14, 0.16};
     const double xsens_orientation[] = {3.14159265, 0, 0};
     getParamList(sick_pos, 3, "sick/position",        (const double *)sick_position );
