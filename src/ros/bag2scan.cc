@@ -255,10 +255,11 @@ void addStaticTransforms(tf::TransformListener *l, ros::Time t) {
   // yaw, pitch, roll in configuration files
   q.setRPY(0, 0, 2.0943951);
   l->setTransform( tf::StampedTransform(tf::Transform(q, tf::Vector3(-0.135, 0, 0.4325)), t, "/base_link", "/riegl" ) );
-
   // XSENS
   q.setRPY(3.14159265, 0, 0);
   l->setTransform( tf::StampedTransform(tf::Transform(q, tf::Vector3(-0.17, 0, 0.18)), t, "/base_link", "/xsens" ) );
+
+  cout<<66<<endl;
 }
 
 /**
@@ -289,7 +290,6 @@ tf::TransformListener *calculateTrajectoryFromOdom(rosbag::Bag &bag) {
       l->setTransform(trans);
 
       addStaticTransforms(l, optr->header.stamp);
-    
     }
   }
 
@@ -350,6 +350,7 @@ void readTSMapfromBag(rosbag::Bag &bag, std::vector<double> *timestamps) {
       timestamps[0].push_back( rtptr->time );
       timestamps[1].push_back( rtptr->header.stamp.toSec()); 
     }
+     
   }
 
 

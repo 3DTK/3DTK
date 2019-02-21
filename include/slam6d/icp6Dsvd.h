@@ -37,8 +37,8 @@ public:
 				    const double centroid_d[OPENMP_NUM_THREADS][3], 
 				    const double Si[OPENMP_NUM_THREADS][9],
 				    double *alignxf);
-  
   inline int getAlgorithmID() { return 2; }; 
+ 
 };
 
 #endif
