@@ -165,6 +165,7 @@ void calibration::extractTrajectory() {
         tf::StampedTransform trans;
         transformStampedMsgToTF(tfm->transforms[i], trans);
         l->setTransform(trans);
+       // cout<<tfm->transforms[i].header.frame_id<<endl;
       }
     }
   }
@@ -210,6 +211,7 @@ void calibration::calculateTrajectory() {
       l->setTransform(trans);
 
       addStaticTransforms(l, odom.header.stamp);
+
     }
   }
 
@@ -243,6 +245,7 @@ void calibration::calculateTrajectoryFromOdom() {
       l->setTransform(trans);
 
       addStaticTransforms(l, optr->header.stamp);
+
     }
   }
 
@@ -383,6 +386,7 @@ void calibration::calibrate(timeMap &tm, evaluator &ev, ScanImporter &si) {
 
   // set starting estimate
   toX(startestimate);
+
   float ftol = 0.001;
 
   float best_val;
@@ -413,6 +417,7 @@ float calibration::function(float *X) {
 
   // set calibration parameters according to X
   fromX(X);
+
 
   // alternatively change odom parameters as well (recomputing the odometry guess)
   
