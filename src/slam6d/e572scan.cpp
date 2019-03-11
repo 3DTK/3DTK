@@ -285,6 +285,8 @@ void readPoints(const std::string inputPath, const std::string outputPath, doubl
 
             /// The prototype should have a field named either "cartesianX" or "sphericalRange".
             if (proto.isDefined("cartesianX") && proto.isDefined("cartesianY") && proto.isDefined("cartesianZ")) {
+
+
                 //TODO not working
                 /// Make a list of buffers to receive the xyz values.
                 std::vector<e57::SourceDestBuffer> destBuffers;
@@ -300,6 +302,9 @@ void readPoints(const std::string inputPath, const std::string outputPath, doubl
                 /// Print the coordinates we got
                 for (unsigned i=0; i < gotCount; i++)
                     std::cout << "  " << i << ". columnIndex=" << columnIndex[i] << std::endl;
+
+
+
             }else if (proto.isDefined("sphericalRange")) {
                 bool color = false;
                 bool reflectance = false;
