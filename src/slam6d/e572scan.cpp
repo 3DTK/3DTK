@@ -301,6 +301,12 @@ void readPoints(const std::string inputPath, const std::string outputPath, doubl
                 for (unsigned i=0; i < gotCount; i++)
                     std::cout << "  " << i << ". columnIndex=" << columnIndex[i] << std::endl;
             }else if (proto.isDefined("sphericalRange")) {
+                bool color = false;
+                bool reflectance = false;
+                if(proto.isDefined("colorRed")){
+                    color = true;
+                }
+
                 /// Make a list of buffers to receive the xyz values.
                 const int N = points.childCount();
                 std::vector<e57::SourceDestBuffer> destBuffers;
@@ -308,15 +314,18 @@ void readPoints(const std::string inputPath, const std::string outputPath, doubl
                 double * range = (double *) malloc(sizeof(double)*N);
                 double * elevation = (double *) malloc(sizeof(double)*N);
                 double * azimuth = (double *) malloc(sizeof(double)*N);;
-                int * r = (int *) malloc(sizeof(int)*N);
-                int * g = (int *) malloc(sizeof(int)*N);
-                int * b = (int *) malloc(sizeof(int)*N);
                 destBuffers.push_back(e57::SourceDestBuffer(imf, "sphericalRange", range, N, true));
                 destBuffers.push_back(e57::SourceDestBuffer(imf, "sphericalAzimuth", azimuth, N, true));
                 destBuffers.push_back(e57::SourceDestBuffer(imf, "sphericalElevation", elevation, N, true));
-                destBuffers.push_back(e57::SourceDestBuffer(imf, "colorRed", r, N, true));
-                destBuffers.push_back(e57::SourceDestBuffer(imf, "colorGreen", g, N, true));
-                destBuffers.push_back(e57::SourceDestBuffer(imf, "colorBlue", b, N, true));
+
+                int * r = (int *) malloc(sizeof(int)*N);
+                int * g = (int *) malloc(sizeof(int)*N);
+                int * b = (int *) malloc(sizeof(int)*N);
+                if(color){
+                    destBuffers.push_back(e57::SourceDestBuffer(imf, "colorRed", r, N, true));
+                    destBuffers.push_back(e57::SourceDestBuffer(imf, "colorGreen", g, N, true));
+                    destBuffers.push_back(e57::SourceDestBuffer(imf, "colorBlue", b, N, true));
+                }
 
                 /// Create a reader of the points CompressedVector, try to read first block of N points
                 /// Each call to reader.read() will fill the xyz buffers until the points are exhausted.
@@ -330,17 +339,18 @@ void readPoints(const std::string inputPath, const std::string outputPath, doubl
                     if(minDist <= range[i]*scale && (maxDist < 0 || range[i]*scale <= maxDist)){
                         double cartesian [3];
                         double polar[3];
-                        double rgb[3];
                         polar[2] = range[i]*scale;
                         polar[1] = azimuth[i];
                         polar[0] = elevation[i];
                         toCartesianWithElevation(polar, cartesian);
-                        rgb[0] = r[i];
-                        rgb[1] = g[i];
-                        rgb[2] = b[i];
+
 //                    file << cartesian[0] << " " << cartesian[1] << " " << cartesian[2] << " " << rgb[0] << " " << rgb[1] << " " << rgb[2] << "\n";
                         /// convert to 3DTK coordinate system
-                        file << (cartesian[1]*(-1)) << " " << cartesian[2] << " " << cartesian[0] << " " << rgb[0] << " " << rgb[1] << " " << rgb[2] << "\n";
+                        file << (cartesian[1]*(-1)) << " " << cartesian[2] << " " << cartesian[0];
+                        if(color){
+                            file << " " << r[i] << " " << g[i] << " " << b[i];
+                        }
+                        file << "\n";
                     }
                     std::cout << "write scan..." << ((i+1)*100.0f/gotCount) << " % \r";
                     std::cout.flush();
@@ -348,9 +358,11 @@ void readPoints(const std::string inputPath, const std::string outputPath, doubl
                 free(range);
                 free(elevation);
                 free(azimuth);
-                free(r);
-                free(g);
-                free(b);
+                if(color) {
+                    free(r);
+                    free(g);
+                    free(b);
+                }
             } else
                 std::cout << "Error: couldn't find either Cartesian or spherical points in scan! Other formats not implemented." << std::endl;
             std::cout << std::endl << std::endl;
