@@ -12,7 +12,7 @@
 
 namespace po = boost::program_options;
 
-void readPoints(const std::string inputPath, const std::string outputPath, double scale, int start, int end, double minDist, double maxDist);
+void readPoints(const std::string inputPath, const std::string outputPath, double scale, int start, int end, double minDist, double maxDist, bool withColor, bool withReflectance);
 
 int main(int argc, char *argv[]){
     std::string extension = ".e57";
@@ -23,6 +23,8 @@ int main(int argc, char *argv[]){
     double scale = 1.0;
     double minDist = 0.0;
     double maxDist = -1.0;
+    bool withColor = false;
+    bool withReflectance = false;
 
     try {
         po::options_description generic("Generic options");
@@ -34,6 +36,8 @@ int main(int argc, char *argv[]){
                 ("min, m",po::value<double>(&minDist)->default_value(0.0), "min distance")
                 ("max, M",po::value<double>(&maxDist)->default_value(-1.0), "max distance")
                 ("scale", po::value<double>(&scale)->default_value(1.0), "scale the point cloud")
+                ("color,c", po::value<bool>(&withColor)->default_value(false), "save RGB data")
+                ("reflectance,r", po::value<bool>(&withReflectance)->default_value(false), "save reflectance data")
                 ("output,o", po::value<std::string>(&outputPath)->default_value("."), "output directory");
         po::options_description input("Input options");
         input.add_options()
@@ -93,7 +97,7 @@ int main(int argc, char *argv[]){
         std::cerr << "Error while parsing settings: " << e.what() << std::endl;
         exit(1);
     }
-    readPoints(inputPath, outputPath, scale, start, end, minDist, maxDist);
+    readPoints(inputPath, outputPath, scale, start, end, minDist, maxDist, withColor, withReflectance);
     return 0;
 };
 
@@ -176,9 +180,8 @@ bool writePose(double *translation, double *rotation, int scanid, std::string pa
     return true;
 }
 
-void readPoints(const std::string inputPath, const std::string outputPath, double scale, int start, int end, double minDist, double maxDist){
+void readPoints(const std::string inputPath, const std::string outputPath, double scale, int start, int end, double minDist, double maxDist, bool withColor, bool withReflectance){
     try {
-        //TODO check if RGB is available
         /// Read file from disk
         e57::ImageFile imf(inputPath, "r");
         e57::StructureNode root = imf.root();
@@ -213,10 +216,17 @@ void readPoints(const std::string inputPath, const std::string outputPath, doubl
             /// Get scan from "/data3D", assume its a Structure (else get exception)
             e57::StructureNode scan(data3D.get(scanIndex));
             std::cout << "got:" << scan.pathName() << std::endl;
-            e57::StringNode name (scan.get("name"));
-            std::cout << "name: " << name.value() << std::endl;
-            e57::StringNode desc (scan.get("description"));
-            std::cout << "description: " << desc.value() <<std::endl;
+
+            if(scan.isDefined ("name")){
+                e57::StringNode name (scan.get("name"));
+                std::cout << "name: " << name.value() << std::endl;
+            }
+
+            if(scan.isDefined ("description"))
+              {
+                e57::StringNode desc (scan.get ("description"));
+                std::cout << "description: " << desc.value () << std::endl;
+              }
             /// Get "points" field in scan.  Should be a CompressedVectorNode.
             e57::CompressedVectorNode points(scan.get("points"));
             std::cout << "point count: " <<points.childCount() << std::endl;
@@ -285,23 +295,79 @@ void readPoints(const std::string inputPath, const std::string outputPath, doubl
 
             /// The prototype should have a field named either "cartesianX" or "sphericalRange".
             if (proto.isDefined("cartesianX") && proto.isDefined("cartesianY") && proto.isDefined("cartesianZ")) {
+                bool color = false;
+                bool reflectance = false;
+                if(withColor && proto.isDefined("colorRed")){
+                    color = true;
+                    reflectance = false;
+                  }
 
+                if(withReflectance && proto.isDefined("intensity")){
+                    reflectance = true;
+                    color = false;
+                  }
 
-                //TODO not working
                 /// Make a list of buffers to receive the xyz values.
+                const int N = points.childCount();
                 std::vector<e57::SourceDestBuffer> destBuffers;
-                int64_t columnIndex[10];
-                destBuffers.push_back(e57::SourceDestBuffer(imf, "columnIndex", columnIndex, 10, true));
 
-                /// Create a reader of the points CompressedVector, try to read first block of 4 columnIndex
+                double * x = (double *) malloc(sizeof(double)*N);
+                double * y = (double *) malloc(sizeof(double)*N);
+                double * z = (double *) malloc(sizeof(double)*N);;
+                destBuffers.push_back(e57::SourceDestBuffer(imf, "cartesianX", x, N, true));
+                destBuffers.push_back(e57::SourceDestBuffer(imf, "cartesianY", y, N, true));
+                destBuffers.push_back(e57::SourceDestBuffer(imf, "cartesianZ", z, N, true));
+
+                int * r = (int *) malloc(sizeof(int)*N);
+                int * refl = (int *) malloc(sizeof(int)*N);
+                int * g = (int *) malloc(sizeof(int)*N);
+                int * b = (int *) malloc(sizeof(int)*N);
+                if(color){
+                    destBuffers.push_back(e57::SourceDestBuffer(imf, "colorRed", r, N, true));
+                    destBuffers.push_back(e57::SourceDestBuffer(imf, "colorGreen", g, N, true));
+                    destBuffers.push_back(e57::SourceDestBuffer(imf, "colorBlue", b, N, true));
+                  }
+                if(reflectance){
+                    destBuffers.push_back(e57::SourceDestBuffer(imf, "intensity", refl, N, true));
+                  }
+
+                /// Create a reader of the points CompressedVector, try to read first block of N points
                 /// Each call to reader.read() will fill the xyz buffers until the points are exhausted.
                 e57::CompressedVectorReader reader = points.reader(destBuffers);
                 unsigned gotCount = reader.read();
-                std::cout << "  got first " << gotCount << " points" << std::endl;
+                std::cout << "write scan...0 % \r";
+                std::cout.flush();
 
-                /// Print the coordinates we got
-                for (unsigned i=0; i < gotCount; i++)
-                    std::cout << "  " << i << ". columnIndex=" << columnIndex[i] << std::endl;
+                /// convert the coordinates to cartesian and write to file
+                for (unsigned i=0; i < gotCount; i++) {
+                  double range = 0;
+                  range = sqr (x[i]*x[i] + y[i]*y[i] +z[i]*z[i]);
+                    if(minDist <= range*scale && (maxDist < 0 || range*scale <= maxDist)){
+                        /// convert to 3DTK coordinate system
+                        //file << (z[i]*scale) << " " << (x[i]*scale*(-1)) << " " << (y[i]*scale);
+                        file << (y[i]*scale*(-1)) << " " << (z[i]*scale) << " " << (x[i]*scale);
+                        if(color){
+                            file << " " << r[i] << " " << g[i] << " " << b[i];
+                          }
+                        if(reflectance){
+                            file << " " << refl[i];
+                          }
+                        file << "\n";
+                      }
+                    std::cout << "write scan..." << ((i+1)*100.0f/gotCount) << " % \r";
+                    std::cout.flush();
+                  }
+                free(x);
+                free(y);
+                free(z);
+                if(color) {
+                    free(r);
+                    free(g);
+                    free(b);
+                  }
+                if(reflectance){
+                    free(refl);
+                  }
 
 
 
@@ -311,6 +377,10 @@ void readPoints(const std::string inputPath, const std::string outputPath, doubl
                 if(proto.isDefined("colorRed")){
                     color = true;
                 }
+
+                if(proto.isDefined("intensity")){
+                    reflectance = true;
+                  }
 
                 /// Make a list of buffers to receive the xyz values.
                 const int N = points.childCount();
@@ -330,6 +400,9 @@ void readPoints(const std::string inputPath, const std::string outputPath, doubl
                     destBuffers.push_back(e57::SourceDestBuffer(imf, "colorRed", r, N, true));
                     destBuffers.push_back(e57::SourceDestBuffer(imf, "colorGreen", g, N, true));
                     destBuffers.push_back(e57::SourceDestBuffer(imf, "colorBlue", b, N, true));
+                }
+                if(reflectance){
+                    destBuffers.push_back(e57::SourceDestBuffer(imf, "intensity", r, N, true));
                 }
 
                 /// Create a reader of the points CompressedVector, try to read first block of N points
@@ -355,6 +428,9 @@ void readPoints(const std::string inputPath, const std::string outputPath, doubl
                         if(color){
                             file << " " << r[i] << " " << g[i] << " " << b[i];
                         }
+                        if(reflectance){
+                            file << " " << r[i];
+                        }
                         file << "\n";
                     }
                     std::cout << "write scan..." << ((i+1)*100.0f/gotCount) << " % \r";
@@ -368,10 +444,14 @@ void readPoints(const std::string inputPath, const std::string outputPath, doubl
                     free(g);
                     free(b);
                 }
+                if(reflectance){
+                    free(r);
+                }
             } else
                 std::cout << "Error: couldn't find either Cartesian or spherical points in scan! Other formats not implemented." << std::endl;
             std::cout << std::endl << std::endl;
             file.close();
+            //TODO implement Cylindrical Coodrinates
             if(end >= 0 && scanIndex == end) break;
         }
 
