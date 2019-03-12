@@ -65,7 +65,8 @@ bool ScanIO_uosr::supports(IODataType type)
   return !!(type & ( DATA_REFLECTANCE | DATA_XYZ ));
 }
 
-void ScanIO_uosr::readScan(const char* dir_path, const char* identifier, PointFilter& filter, std::vector<double>* xyz, std::vector<unsigned char>* rgb, std::vector<float>* reflectance, std::vector<float>* temperature, std::vector<float>* amplitude, std::vector<int>* type, std::vector<float>* deviation)
+void ScanIO_uosr::readScan(const char* dir_path, const char* identifier, PointFilter& filter, std::vector<double>* xyz, std::vector<unsigned char>* rgb, std::vector<float>* reflectance, std::vector<float>* temperature, std::vector<float>* amplitude, std::vector<int>* type, std::vector<float>* deviation,
+               std::vector<double>* normal)
 {
     if(xyz == 0 || reflectance == 0)
         return;
@@ -76,7 +77,7 @@ void ScanIO_uosr::readScan(const char* dir_path, const char* identifier, PointFi
     // error handling
     path data_path(dir_path);
     data_path /= path(std::string(DATA_PATH_PREFIX) + identifier + DATA_PATH_SUFFIX);
-    if (!open_path(data_path, open_uos_file(spec, transform, filter, xyz, 0, reflectance, 0, 0, 0, 0)))
+    if (!open_path(data_path, open_uos_file(spec, transform, filter, xyz, 0, reflectance, 0, 0, 0, 0, 0)))
         throw std::runtime_error(std::string("There is no scan file for [") + identifier + "] in [" + dir_path + "]");
 }
 

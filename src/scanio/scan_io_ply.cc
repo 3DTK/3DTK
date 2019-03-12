@@ -104,7 +104,8 @@ void ScanIO_ply::readScan(const char* dir_path,
 					 std::vector<float>* temperature,
 					 std::vector<float>* amplitude,
 					 std::vector<int>* type,
-					 std::vector<float>* deviation)
+           std::vector<float>* deviation,
+           std::vector<double>* normal)
 {
   // error handling
   path data_path(dir_path);

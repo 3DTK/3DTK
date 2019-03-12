@@ -252,6 +252,46 @@ void write_uos_rgb(DataXYZ &xyz, DataRGB &rgb, FILE *file, double scaleFac, bool
 	}
 }
 
+void write_uos_normal(DataXYZ &xyz, DataNormal &normals, FILE *file, double scaleFac, bool hexfloat, bool high_precision, volatile bool *abort_flag)
+{
+  if(xyz.size() != normals.size()) {
+		throw std::runtime_error("xyz and normal vector are of different length");
+	}
+  if (hexfloat) {
+		for(unsigned int j = 0; j < xyz.size(); j++) {
+			if (abort_flag != nullptr && *abort_flag) break;
+			// we print the mantissa with 13 hexadecimal digits because the
+			// mantissa for double precision is 52 bits long which is 6.5
+			// bytes and thus 13 hexadecimal digits
+			fprintf(file, "%.013a %.013a %.013a %.013a %.013a %.013a\n",
+					scaleFac*xyz[j][0], scaleFac*xyz[j][1], scaleFac*xyz[j][2],
+          normals[j][0], normals[j][1], normals[j][2]);
+		}
+	} else {
+		for(unsigned int j = 0; j < xyz.size(); j++) {
+			if (abort_flag != nullptr && *abort_flag) break;
+			// 17 significant digits are required to encode a double
+			// precision IEEE754 floating point number. Proof: the
+			// number of significant digits of the epsilon between 1.0
+			// and the next representable value has 16 significant digits.
+			// Adding that epsilon to 1.0 leads to a number with 17
+			// significant digits.
+			// We use %e because it's the only format that allows to set
+			// the overall significant digits (and not just the digits
+			// after the radix character).
+			if(high_precision) {
+        fprintf(file, "%.016e %.016e %.016e %.016e %.016e %.016e\n",
+					  scaleFac*xyz[j][0], scaleFac*xyz[j][1], scaleFac*xyz[j][2],
+          normals[j][0], normals[j][1], normals[j][2]);
+      } else {
+        fprintf(file, "%lf %lf %lf %lf %lf %lf\n",
+					  scaleFac*xyz[j][0], scaleFac*xyz[j][1], scaleFac*xyz[j][2],
+            normals[j][0], normals[j][1], normals[j][2]);
+      }
+		}
+	}
+}
+
 void write_xyz(DataXYZ &xyz, FILE *file, double scaleFac, bool hexfloat, bool high_precision, volatile bool *abort_flag)
 {
 	if (hexfloat) {
@@ -367,6 +407,46 @@ void write_xyz_rgb(DataXYZ &xyz, DataRGB &rgb, FILE *file, double scaleFac, bool
         fprintf(file, "%lf %lf %lf %d %d %d\n",
 					  scaleFac*xyz[j][2], -scaleFac*xyz[j][0], scaleFac*xyz[j][1],
 					  (int)rgb[j][0], (int)rgb[j][1], (int)rgb[j][2]);
+      }
+    }
+	}
+}
+
+void write_xyz_normal(DataXYZ &xyz, DataNormal &normals, FILE *file, double scaleFac, bool hexfloat, bool high_precision, volatile bool *abort_flag)
+{
+	if(xyz.size() != normals.size()) {
+		throw std::runtime_error("xyz and normal vector are of different length");
+	}
+	if (hexfloat) {
+		for(unsigned int j = 0; j < xyz.size(); j++) {
+			if (abort_flag != nullptr && *abort_flag) break;
+			// we print the mantissa with 13 hexadecimal digits because the
+			// mantissa for double precision is 52 bits long which is 6.5
+			// bytes and thus 13 hexadecimal digits
+			fprintf(file, "%.013a %.013a %.013a %.013a %.013a %.013a\n",
+					scaleFac*xyz[j][2], -scaleFac*xyz[j][0], scaleFac*xyz[j][1],
+					normals[j][2], -normals[j][0], normals[j][1]);
+		}
+	} else {
+		for(unsigned int j = 0; j < xyz.size(); j++) {
+			if (abort_flag != nullptr && *abort_flag) break;
+			// 17 significant digits are required to encode a double
+			// precision IEEE754 floating point number. Proof: the
+			// number of significant digits of the epsilon between 1.0
+			// and the next representable value has 16 significant digits.
+			// Adding that epsilon to 1.0 leads to a number with 17
+			// significant digits.
+			// We use %e because it's the only format that allows to set
+			// the overall significant digits (and not just the digits
+			// after the radix character).
+			if(high_precision) {
+        fprintf(file, "%.016e %.016e %.016e %.016e %.016e %.016e\n",
+					  scaleFac*xyz[j][2], -scaleFac*xyz[j][0], scaleFac*xyz[j][1],
+					  normals[j][2], -normals[j][0], normals[j][1]);
+		  } else {
+        fprintf(file, "%lf %lf %lf %lf %lf %lf\n",
+					  scaleFac*xyz[j][2], -scaleFac*xyz[j][0], scaleFac*xyz[j][1],
+					  normals[j][2], -normals[j][0], normals[j][1]);
       }
     }
 	}
