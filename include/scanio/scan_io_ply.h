@@ -33,7 +33,8 @@ public:
 				    std::vector<float>* temperature,
 				    std::vector<float>* amplitude,
 				    std::vector<int>* type,
-				    std::vector<float>* deviation);
+            std::vector<float>* deviation,
+            std::vector<double>* normal);
   virtual bool supports(IODataType type);
 };
 

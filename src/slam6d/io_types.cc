@@ -75,6 +75,7 @@ IOType formatname_to_io_type(const char * string)
   else if (strcasecmp(string, "xyz_rrgb") == 0) return XYZ_RRGB;
   else if (strcasecmp(string, "zahn") == 0) return ZAHN;   
   else if (strcasecmp(string, "zuf") == 0) return ZUF;
+  else if (strcasecmp(string, "uos_normal") == 0) return UOS_NORMAL;
   else throw std::runtime_error(std::string("Io type ") + string + std::string(" is unknown"));
 }
 
@@ -183,6 +184,8 @@ const char * io_type_to_libname(IOType  type)
     return "scan_io_zahn";
   case ZUF:
     return "scan_io_zuf";
+  case UOS_NORMAL:
+    return "scan_io_uos_normal";
   default:
     throw std::runtime_error(std::string("Io type ") + to_string(type) + std::string(" could not be matched to a library name"));
   }
@@ -223,6 +226,17 @@ bool supportsColor(const IOType iotype) {
       break;
     default:
        break;
+  }
+  return false;
+}
+
+bool supportsNormals(const IOType iotype) {
+  switch(iotype) {
+    case UOS_NORMAL:
+      return true;
+      break;
+    default:
+      break;
   }
   return false;
 }

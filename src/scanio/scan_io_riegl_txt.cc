@@ -163,7 +163,8 @@ void ScanIO_riegl_txt::readScan(const char* dir_path,
                                 std::vector<float>* temperature,
                                 std::vector<float>* amplitude,
                                 std::vector<int>* type,
-                                std::vector<float>* deviation)
+                                std::vector<float>* deviation,
+                                std::vector<double>* normal)
 {
     if(xyz == 0 && reflectance == 0)
         return;

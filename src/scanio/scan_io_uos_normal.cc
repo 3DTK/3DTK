@@ -1,7 +1,7 @@
 /*
- * scan_io_uos_rrgb implementation
+ * scan_io_uosr implementation
  *
- * Copyright (C) Dorit Borrmann, Thomas Escher, Kai Lingemann, Andreas Nuechter
+ * Copyright (C) Billy Okal
  *
  * Released under the GPL version 3.
  *
@@ -9,15 +9,13 @@
 
 
 /**
- * @file
- * @brief Implementation of reading 3D scans
- * @author Dorit Borrmann. School of Engineering and Science, Jacobs University * Bremen, Germany.
- * @author Kai Lingemann. Institute of Computer Science, University of Osnabrueck, Germany.
- * @author Andreas Nuechter. Institute of Computer Science, University of Osnabrueck, Germany.
- * @author Thomas Escher. Institute of Computer Science, University of Osnabrueck, Germany.
+ * @file scan_io_uosr.cc
+ * @brief IO of a 3D scan in uos file format plus a
+ *        reflectance/intensity/temperature value
+ * @author Billy Okal. Jacobs University Bremen, Germany.
  */
 
-#include "scanio/scan_io_uos_rrgb.h"
+#include "scanio/scan_io_uos_normal.h"
 #include "scanio/helper.h"
 
 #include <iostream>
@@ -45,42 +43,43 @@ using namespace boost::filesystem;
 
 
 
-std::list<std::string> ScanIO_uos_rrgb::readDirectory(const char* dir_path, unsigned int start, unsigned int end)
+std::list<std::string> ScanIO_uos_normal::readDirectory(const char* dir_path, unsigned int start, unsigned int end)
 {
     const char* data_path_suffixes[2] = {DATA_PATH_SUFFIX, NULL};
     return readDirectoryHelper(dir_path, start, end, data_path_suffixes);
 }
 
-void ScanIO_uos_rrgb::readPose(const char* dir_path, const char* identifier, double* pose)
+void ScanIO_uos_normal::readPose(const char* dir_path, const char* identifier, double* pose)
 {
     readPoseHelper(dir_path, identifier, pose);
 }
 
-time_t ScanIO_uos_rrgb::lastModified(const char* dir_path, const char* identifier)
+time_t ScanIO_uos_normal::lastModified(const char* dir_path, const char* identifier)
 {
   const char* suffixes[2] = { DATA_PATH_SUFFIX, NULL };
   return lastModifiedHelper(dir_path, identifier, suffixes);
 }
 
-bool ScanIO_uos_rrgb::supports(IODataType type)
+bool ScanIO_uos_normal::supports(IODataType type)
 {
-  return !!(type & (DATA_XYZ | DATA_REFLECTANCE | DATA_RGB));
+  return !!(type & ( DATA_XYZ | DATA_NORMAL ));
 }
 
-void ScanIO_uos_rrgb::readScan(const char* dir_path, const char* identifier, PointFilter& filter, std::vector<double>* xyz, std::vector<unsigned char>* rgb, std::vector<float>* reflectance, std::vector<float>* temperature, std::vector<float>* amplitude, std::vector<int>* type, std::vector<float>* deviation,
-               std::vector<double>* normal)
+
+
+void ScanIO_uos_normal::readScan(const char* dir_path, const char* identifier, PointFilter& filter, std::vector<double>* xyz, std::vector<unsigned char>* rgb, std::vector<float>* reflectance, std::vector<float>* temperature, std::vector<float>* amplitude, std::vector<int>* type, std::vector<float>* deviation, std::vector<double>* normal)
 {
-    if(xyz == 0 || rgb == 0 || reflectance == 0)
+    if(xyz == 0 || normal == 0)
         return;
 
-    IODataType spec[8] = { DATA_XYZ, DATA_XYZ, DATA_XYZ,
-        DATA_REFLECTANCE, DATA_RGB, DATA_RGB, DATA_RGB, DATA_TERMINATOR };
+    IODataType spec[7] = { DATA_XYZ, DATA_XYZ, DATA_XYZ, DATA_NORMAL, DATA_NORMAL, DATA_NORMAL, DATA_TERMINATOR };
+    //DATA_XYZ, DATA_XYZ, DATA_XYZ, DATA_TERMINATOR };
     ScanDataTransform_identity transform;
 
     // error handling
     path data_path(dir_path);
     data_path /= path(std::string(DATA_PATH_PREFIX) + identifier + DATA_PATH_SUFFIX);
-    if (!open_path(data_path, open_uos_file(spec, transform, filter, xyz, rgb, reflectance, 0, 0, 0, 0, 0)))
+    if (!open_path(data_path, open_uos_file(spec, transform, filter, xyz, 0, 0, 0, 0, 0, 0,normal)))
         throw std::runtime_error(std::string("There is no scan file for [") + identifier + "] in [" + dir_path + "]");
 }
 
@@ -97,7 +96,7 @@ extern "C" __declspec(dllexport) ScanIO* create()
 extern "C" ScanIO* create()
 #endif
 {
-  return new ScanIO_uos_rrgb;
+  return new ScanIO_uos_normal;
 }
 
 
@@ -118,7 +117,7 @@ extern "C" void destroy(ScanIO *sio)
 #ifdef _MSC_VER
 BOOL APIENTRY DllMain(HANDLE hModule, DWORD dwReason, LPVOID lpReserved)
 {
-	return TRUE;
+    return TRUE;
 }
 #endif
 

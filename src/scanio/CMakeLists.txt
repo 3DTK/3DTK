@@ -2,6 +2,7 @@ add_library(pointfilter SHARED ../slam6d/pointfilter.cc)
 
 set(SCANIO_LIBNAMES
   faro_xyz_rgbr ks ks_rgb leica_xyzr ply pts ptsr pts_rgb pts_rgbr pts_rrgb riegl_rgb riegl_txt rts uos uosr uos_rgb uos_rgbr uos_rrgb uos_rrgbt velodyne xyz xyzr xyz_rgb xyz_rgba xyz_rgbr xyz_rrgb
+  uos_normal
 )
 
 if(WITH_B3D)

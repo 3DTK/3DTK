@@ -54,7 +54,7 @@ void validate(boost::any& v, const std::vector<std::string>& values,
 int parse_options(int argc, char **argv, std::string &dir, double &red, int &rand,
             int &start, int &end, int &maxDist, int &minDist, bool &use_pose,
             bool &use_xyz, bool &use_reflectance, bool &use_color, int &octree, IOType &type, std::string& customFilter, double &scaleFac,
-	    bool &hexfloat, bool &high_precision, int &frame)
+	    bool &hexfloat, bool &high_precision, int &frame, bool &use_normals)
 {
 po::options_description generic("Generic options");
   generic.add_options()
@@ -86,7 +86,9 @@ po::options_description generic("Generic options");
     ("color,c", po::bool_switch(&use_color)->default_value(false),
      "export in color as RGB")
     ("reflectance,R", po::bool_switch(&use_reflectance)->default_value(false),
-     "end after scan <arg>")
+     "export reflectance values")
+    ("normals,N", po::bool_switch(&use_normals)->default_value(false),
+     "export point normals")
     ("trustpose,p", po::bool_switch(&use_pose)->default_value(false),
     "Trust the pose file, do not use the transformation from the .frames files.")
     ("xyz,x", po::bool_switch(&use_xyz)->default_value(false),
@@ -158,6 +160,7 @@ int main(int argc, char **argv)
   bool   use_xyz = false;
   bool   use_color = false;
   bool   use_reflectance = false;
+  bool   use_normals = false;
   int octree       = 0;  // employ randomized octree reduction?
   IOType iotype    = UOS;
   bool rangeFilterActive = false;
@@ -171,10 +174,15 @@ int main(int argc, char **argv)
   try {
     parse_options(argc, argv, dir, red, rand, start, end,
       maxDist, minDist, uP, use_xyz, use_reflectance, use_color, octree, iotype, customFilter, scaleFac,
-      hexfloat, high_precision, frame);
+      hexfloat, high_precision, frame, use_normals);
   } catch (std::exception& e) {
     std::cerr << "Error while parsing settings: " << e.what() << std::endl;
     exit(1);
+  }
+
+  if(!supportsNormals(iotype) && use_normals) {
+    std::cerr << "WARNING File format does not support normals. Normals are not exported" << std::endl;
+    use_normals = false;
   }
 
   rangeFilterActive = minDist > 0 || maxDist > 0;
@@ -302,6 +310,18 @@ int main(int argc, char **argv)
         write_xyz_rgb(xyz, xyz_color, redptsout, scaleFac, hexfloat, high_precision);
       } else {
         write_uos_rgb(xyz, xyz_color, redptsout, scaleFac*100.0, hexfloat, high_precision);
+      }
+
+    } else if(use_normals) {
+      std::string data_string = red > 0 ? "normal reduced" : "normal";
+      DataNormal normals = 
+          (((DataNormal)source->get(data_string)).size() == 0) ?
+          source->create(data_string, sizeof(double)*3*xyz.size()) : 
+          source->get(data_string);
+      if(use_xyz) {
+        write_xyz_normal(xyz, normals, redptsout, scaleFac, hexfloat, high_precision);
+      } else {
+        write_uos_normal(xyz, normals, redptsout, scaleFac*100.0, hexfloat, high_precision);
       }
 
     } else {
