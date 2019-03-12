@@ -10,7 +10,7 @@
 
 //! IO types for file formats, distinguishing the use of ScanIOs
 enum IOType {
-  AIS, ASC, FARO_XYZ_RGBR, FRONT, IAIS, IFP, KS, KS_RGB, LAZ, LEICA, LEICA_XYZR, OCT, OLD, PCI, PCL, PLY, PTS, PTSR, PTS_RGB, PTS_RGBR, PTS_RRGB, RIEGL_BIN, RIEGL_PROJECT, RIEGL_RGB, RIEGL_TXT, RTS, RTS_MAP, RXP, STL, TXYZR, UOS, UOSR, UOS_CAD, UOS_FRAMES, UOS_MAP, UOS_MAP_FRAMES, UOS_RGB, UOS_RGBR, UOS_RRGB, UOS_RRGBT, VELODYNE, VELODYNE_FRAMES, WRL, X3D, XYZ, XYZR, XYZ_RGB, XYZ_RGBR, XYZ_RRGB, ZAHN, ZUF};
+  AIS, ASC, FARO_XYZ_RGBR, FRONT, IAIS, IFP, KS, KS_RGB, LAZ, LEICA, LEICA_XYZR, OCT, OLD, PCI, PCL, PLY, PTS, PTSR, PTS_RGB, PTS_RGBR, PTS_RRGB, RIEGL_BIN, RIEGL_PROJECT, RIEGL_RGB, RIEGL_TXT, RTS, RTS_MAP, RXP, STL, TXYZR, UOS, UOSR, UOS_CAD, UOS_FRAMES, UOS_MAP, UOS_MAP_FRAMES, UOS_RGB, UOS_RGBR, UOS_RRGB, UOS_RRGBT, VELODYNE, VELODYNE_FRAMES, WRL, X3D, XYZ, XYZR, XYZ_RGB, XYZ_RGBR, XYZ_RRGB, ZAHN, ZUF, UOS_NORMAL};
 
 //! Data channels in the scans
 enum IODataType : unsigned int {
@@ -22,7 +22,8 @@ enum IODataType : unsigned int {
   DATA_TEMPERATURE = 1<<4,
   DATA_AMPLITUDE = 1<<5,
   DATA_TYPE = 1<<6,
-  DATA_DEVIATION = 1<<7
+  DATA_DEVIATION = 1<<7,
+  DATA_NORMAL = 1<<8
 };
 
 IODataType operator|=(IODataType a, IODataType b);
@@ -36,5 +37,7 @@ const char * io_type_to_libname(IOType type);
 bool supportsColor(const IOType iotype);
 
 bool supportsReflectance(const IOType iotype);
+
+bool supportsNormals(const IOType iotype);
 
 #endif //IO_TYPES_H

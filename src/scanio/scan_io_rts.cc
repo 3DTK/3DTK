@@ -133,7 +133,8 @@ std::function<bool (std::istream &data_file)> read_data(PointFilter& filter,
     };
 }
 
-void ScanIO_rts::readScan(const char* dir_path, const char* identifier, PointFilter& filter, std::vector<double>* xyz, std::vector<unsigned char>* rgb, std::vector<float>* reflectance, std::vector<float>* temperature, std::vector<float>* amplitude, std::vector<int>* type, std::vector<float>* deviation)
+void ScanIO_rts::readScan(const char* dir_path, const char* identifier, PointFilter& filter, std::vector<double>* xyz, std::vector<unsigned char>* rgb, std::vector<float>* reflectance, std::vector<float>* temperature, std::vector<float>* amplitude, std::vector<int>* type, std::vector<float>* deviation,
+        std::vector<double>* normal)
 {
     if(xyz == 0)
         return;

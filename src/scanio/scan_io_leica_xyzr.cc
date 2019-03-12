@@ -119,7 +119,8 @@ void ScanIO_leica_xyzr::readScan(const char* dir_path,
 			   std::vector<float>* temperature, 
 			   std::vector<float>* amplitude, 
 			   std::vector<int>* type, 
-			   std::vector<float>* deviation)
+         std::vector<float>* deviation,
+         std::vector<double>* normal)
 {
   unsigned int i;
 

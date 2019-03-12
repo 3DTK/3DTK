@@ -346,6 +346,7 @@ void BasicScan::get(IODataType types)
   std::vector<float> amplitude;
   std::vector<int> type;
   std::vector<float> deviation;
+  std::vector<double> normal;
 
   PointFilter filter;
   if(m_filter_range_set)
@@ -368,7 +369,8 @@ void BasicScan::get(IODataType types)
                 &temperature,
                 &amplitude,
                 &type,
-                &deviation);
+                &deviation,
+                &normal);
 
   // for each requested and filled data vector,
   // allocate and write contents to their new data fields
@@ -452,6 +454,19 @@ void BasicScan::get(IODataType types)
                       sizeof(float) * deviation.size()).get_raw_pointer());
     for(size_t i = 0; i < deviation.size(); ++i) data[i] = deviation[i];
   }
+  if(types & DATA_NORMAL && !normal.empty()) {
+    // check if we can create a large enough array. The maximum size_t on 32 bit
+    // is around 4.2 billion which is too little for scans with more than 537
+    // million points
+    if (sizeof(size_t) == 4 && normal.size() > ((size_t)(-1))/sizeof(double)) {
+            throw std::runtime_error("Insufficient size of size_t datatype");
+    }
+    double* data = reinterpret_cast<double*>(create("normal",
+                      sizeof(double) * normal.size()).get_raw_pointer());
+    for(size_t i = 0; i < normal.size(); ++i) data[i] = normal[i];
+  }
+
+
 }
 
 DataPointer BasicScan::get(const std::string& identifier)
@@ -484,9 +499,13 @@ DataPointer BasicScan::get(const std::string& identifier)
                 get(DATA_DEVIATION);
               else
                 // normals on demand
-                if (identifier == "normal")
-                  calcNormalsOnDemand();
-                else
+                if (identifier == "normal") {
+                  if(supportsNormals(m_type)) {
+                    get(DATA_NORMAL);
+                  } else {
+                    calcNormalsOnDemand();
+                  }
+                } else
                   // reduce on demand
                   if (identifier == "xyz reduced")
                     calcReducedOnDemand();

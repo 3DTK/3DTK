@@ -10,37 +10,37 @@
 
 class ScanDataTransform {
     public:
-        virtual bool transform(double xyz[3], unsigned char rgb[3], float*  refl, float* temp, float* ampl, int* type, float* devi) = 0;
+        virtual bool transform(double xyz[3], unsigned char rgb[3], float*  refl, float* temp, float* ampl, int* type, float* devi, double n[3]) = 0;
 };
 
 class ScanDataTransform_identity : public ScanDataTransform {
     public:
-        bool transform(double xyz[3], unsigned char rgb[3], float*  refl, float* temp, float* ampl, int* type, float* devi);
+        bool transform(double xyz[3], unsigned char rgb[3], float*  refl, float* temp, float* ampl, int* type, float* devi, double n[3]);
 };
 
 class ScanDataTransform_ks : public ScanDataTransform {
     public:
-        bool transform(double xyz[3], unsigned char rgb[3], float*  refl, float* temp, float* ampl, int* type, float* devi);
+        bool transform(double xyz[3], unsigned char rgb[3], float*  refl, float* temp, float* ampl, int* type, float* devi, double n[3]);
 };
 
 class ScanDataTransform_riegl : public ScanDataTransform {
     public:
-        bool transform(double xyz[3], unsigned char rgb[3], float*  refl, float* temp, float* ampl, int* type, float* devi);
+        bool transform(double xyz[3], unsigned char rgb[3], float*  refl, float* temp, float* ampl, int* type, float* devi, double n[3]);
 };
 
 class ScanDataTransform_rts : public ScanDataTransform {
     public:
-        bool transform(double xyz[3], unsigned char rgb[3], float*  refl, float* temp, float* ampl, int* type, float* devi);
+        bool transform(double xyz[3], unsigned char rgb[3], float*  refl, float* temp, float* ampl, int* type, float* devi, double n[3]);
 };
 
 class ScanDataTransform_xyz : public ScanDataTransform {
     public:
-        bool transform(double xyz[3], unsigned char rgb[3], float*  refl, float* temp, float* ampl, int* type, float* devi);
+        bool transform(double xyz[3], unsigned char rgb[3], float*  refl, float* temp, float* ampl, int* type, float* devi, double n[3]);
 };
 
 class ScanDataTransform_pts : public ScanDataTransform {
     public:
-        bool transform(double xyz[3], unsigned char rgb[3], float*  refl, float* temp, float* ampl, int* type, float* devi);
+        bool transform(double xyz[3], unsigned char rgb[3], float*  refl, float* temp, float* ampl, int* type, float* devi, double n[3]);
 };
 
 time_t lastModifiedHelper(
@@ -68,7 +68,8 @@ std::function<bool (std::istream &data_file)> open_uos_file(
         std::vector<double>* xyz, std::vector<unsigned char>* rgb,
         std::vector<float>* reflectance, std::vector<float>* temperature,
         std::vector<float>* amplitude, std::vector<int>* type,
-        std::vector<float>* deviation);
+        std::vector<float>* deviation,
+        std::vector<double>* normal);
 bool readASCII(std::istream& infile,
         IODataType* spec,
         ScanDataTransform& transform,
@@ -80,6 +81,7 @@ bool readASCII(std::istream& infile,
         std::vector<float>* amplitude = 0,
         std::vector<int>* type = 0,
         std::vector<float>* deviation = 0,
+        std::vector<double>* normal = 0,
         std::streamsize bufsize = 128);
 
 unsigned int strtoarray(std:: string opts, char **&opts_array, const char * deliminator=" ");

@@ -528,7 +528,8 @@ void ScanIO_velodyne::readScan(
     std::vector<float>* temperature,
     std::vector<float>* amplitude,
     std::vector<int>* type,
-    std::vector<float>* deviation)
+    std::vector<float>* deviation,
+    std::vector<double>* normal)
 {
     FILE *scan_in;
 
