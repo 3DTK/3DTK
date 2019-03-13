@@ -204,6 +204,27 @@ else()
   message(STATUS "Do NOT compile a scan IO for RXP")
 endif()
 
+## Micro-Epsilon libraries
+option(WITH_MICROEPSILONLIB "Whether the Micro-Epsilon libraries are present ON/OFF" OFF)
+
+if(WITH_MICROEPSILONLIB)
+  message(STATUS "Setting variables for Micro-Epsilon libraries")
+  set(MICROEPSILON_PATH ${PROJECT_SOURCE_DIR}/3rdparty/microepsilon/)
+
+  if (EXISTS "${MICROEPSILON_PATH}/libllt.so.0")
+    if (EXISTS "${MICROEPSILON_PATH}/libmescan.so.0")
+      set(MICROEPSILON_LIBRARY ${MICROEPSILON_PATH}libllt.so.0 ${MICROEPSILON_PATH}libmescan.so.0)
+message(STATUS "TESTESTEST" ${MICROEPSILON_LIBRARY})
+    else()
+      message(STATUS "Cannot find Micro-Epsilon libraries. Provide libraries or disable WITH_MICROEPSILONLIB.")
+    endif()
+  else()
+    message(STATUS "Cannot find Micro-Epsilon libraries. Provide libraries or disable WITH_MICROEPSILONLIB.")
+  endif()
+else()
+  message(STATUS "Do NOT compile a scan IO for RXP")
+endif()
+
 option(WITH_OPENMP "Whether to use parallel processing capabilities of OPENMP. ON/OFF" ON)
 if (WITH_OPENMP)
   find_package(OpenMP REQUIRED)
