@@ -198,6 +198,7 @@ int main(int argc, char **argv)
       if (!outward) {
         flipNormals(norms);
       }
+      if(i == (Scan::allScans.size()-1)) flipNormalsUp(norms);
       points.insert(points.end(), pts.begin(), pts.end());
       normals.insert(normals.end(), norms.begin(), norms.end());
       pts.clear();
