@@ -343,7 +343,7 @@ bool storeval(char *pos, unsigned int linenr, IODataType currspec, double* xyz, 
         case DATA_REFLECTANCE:
             return strtoval(pos, linenr, refl);
         case DATA_TEMPERATURE:
-            return strtoval(pos, linenr, devi);
+            return strtoval(pos, linenr, temp);
         case DATA_AMPLITUDE:
             return strtoval(pos, linenr, ampl);
         case DATA_TYPE:
