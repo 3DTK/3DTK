@@ -137,7 +137,7 @@ int icp6D::match(Scan* PreviousScan, Scan* CurrentScan,
     omp_set_num_threads(OPENMP_NUM_THREADS);
 
     int max = (int)CurrentScan->size<DataXYZ>("xyz reduced");
-    int step = max / OPENMP_NUM_THREADS;
+    int step = ceil(max / (double)OPENMP_NUM_THREADS);
 
     vector<PtPair> pairs[OPENMP_NUM_THREADS];
     double sum[OPENMP_NUM_THREADS];
@@ -302,7 +302,7 @@ double icp6D::Point_Point_Error(Scan* PreviousScan,
   omp_set_num_threads(OPENMP_NUM_THREADS);
 
   int max = (int)CurrentScan->size<DataXYZ>("xyz reduced");
-  int step = max / OPENMP_NUM_THREADS;
+  int step = ceil(max / (double)OPENMP_NUM_THREADS);
 
   vector<PtPair> pairs[OPENMP_NUM_THREADS];
   double sum[OPENMP_NUM_THREADS];
