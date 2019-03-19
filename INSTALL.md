@@ -64,7 +64,7 @@ $ equivs-build doc/equivs/control.debian.jessie
 ```
 
 Before compiling ($make) disable (switch to OFF) the options:
-`WITH_GLFW`, `WITH_QT`
+`WITH_GLFW`, `WITH_QT`, `WITH_CGAL`
 
 ## macOS 10.13 High Sierra
 
