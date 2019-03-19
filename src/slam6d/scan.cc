@@ -1043,11 +1043,12 @@ void Scan::getPtPairsParallel(std::vector <PtPair> *pairs,
       DataXYZ xyz_reduced(meta->getScan(i)->get("xyz reduced"));
       DataNormal normal_reduced(Target->get("normal reduced"));
       size_t max = xyz_reduced.size();
-      size_t step = max / OPENMP_NUM_THREADS;
+      size_t step = ceil(max / (double)OPENMP_NUM_THREADS);
+      size_t endindex = thread_num == (OPENMP_NUM_THREADS - 1) ? max : step * thread_num + step;
       // call ptpairs for each scan and accumulate ptpairs, centroids and sum
       search->getPtPairs(&pairs[thread_num], Source->dalignxf,
                          xyz_reduced, normal_reduced,
-                         step * thread_num, step * thread_num + step,
+                         step * thread_num, endindex,
                          thread_num,
                          rnd, max_dist_match2, sum[thread_num],
                          centroid_m[thread_num], centroid_d[thread_num],
@@ -1056,9 +1057,10 @@ void Scan::getPtPairsParallel(std::vector <PtPair> *pairs,
   } else {
     DataXYZ xyz_reduced(Target->get("xyz reduced"));
     DataNormal normal_reduced(Target->get("normal reduced"));
+    size_t endindex = thread_num == (OPENMP_NUM_THREADS - 1) ?  xyz_reduced.size() : step * thread_num + step;
     search->getPtPairs(&pairs[thread_num], Source->dalignxf,
                        xyz_reduced, normal_reduced,
-                       thread_num * step, thread_num * step + step,
+                       thread_num * step, endindex,
                        thread_num,
                        rnd, max_dist_match2, sum[thread_num],
                        centroid_m[thread_num], centroid_d[thread_num],
