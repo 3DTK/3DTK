@@ -144,9 +144,9 @@ void CuGrid::SetD(double *d_xyz, int numpoints)
 
 
 
-vector<int> CuGrid::fixedRangeSearch()
+std::vector<int> CuGrid::fixedRangeSearch()
 {
-	vector<int> output;
+	std::vector<int> output;
 	
 	if(!msize)
 	{
