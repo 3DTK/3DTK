@@ -25,8 +25,8 @@ Curves::Curves(std::vector<double> *point ,int type, unsigned int identifier) :
   points1(1) = m_point[5][identifiers];
   points1(2) = m_point[6][identifiers];    //hector laser x y z
   points2(0) = m_point[1][identifiers];    //GPS x y z
-  points2(1) = m_point[2][identifiers];
-  points2(2) = m_point[3][identifiers]; 
+  points2(1) = m_point[2][identifiers];    //for kitti points1 refer to odometry
+  points2(2) = m_point[3][identifiers];    // points2 indicates ground truth
 }
 
 Curves::Curves(Vector3d point3d ,int type, unsigned int identifier,string t) :

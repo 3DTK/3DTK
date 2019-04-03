@@ -15,12 +15,14 @@ using namespace std;
 using namespace Eigen;
 using Eigen::MatrixXd;
 
-//#define POINT3D
+#define POINT3D
+//#define PUBLISHTF
 //#define UNIFORM
 //#define CORRESPONDENCE
 //#define SEPERATE_ROSCORE
 //#define OPTIMAL_CORRESPODENCE
-//#define GPS_HECTOR
+#define GPS_HECTOR
+//#define READBAG 
 //#define READFILE
 #ifdef  POINT3D
 #define DIMENSIONS   3
