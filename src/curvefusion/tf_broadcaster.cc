@@ -30,7 +30,7 @@ void LaserCallback(const geometry_msgs::PoseStamped& slamout) {
        ros::Time current_time=slamout.header.stamp;
        geometry_msgs::TransformStamped msg1;
        tf::StampedTransform trans;
-       trans.stamp_          = current_time;
+       trans.stamp_          = ros::Time::now();
        trans.frame_id_       = "map";
        trans.child_frame_id_ = "base_link";
        tf::Vector3 translation;
@@ -53,7 +53,7 @@ void LaserCallback(const geometry_msgs::PoseStamped& slamout) {
        br.sendTransform(trans);
 
        geometry_msgs::TransformStamped lmstrans;
-       lmstrans.header.stamp          = current_time;
+       lmstrans.header.stamp          = ros::Time::now();
        lmstrans.header.frame_id       = "base_link";
        lmstrans.child_frame_id = "front_laser";
      
@@ -70,7 +70,7 @@ void LaserCallback(const geometry_msgs::PoseStamped& slamout) {
 
 
        geometry_msgs::TransformStamped riegltrans;
-       riegltrans.header.stamp          = current_time;
+       riegltrans.header.stamp          = ros::Time::now();
        riegltrans.header.frame_id       = "base_link";
        riegltrans.child_frame_id = "riegl";
      

@@ -14,6 +14,126 @@ std::vector<Matrix2d> AbelianR;
 unsigned int seq_interval[60000]; 
 static std::vector<Curves*> Interpoints;
 double inf = std::numeric_limits<double>::infinity();
+
+
+void readkitti(std::vector<double> *hector_matrix,std::vector<double> *point_corr,std::string dir) {
+
+  string FileName1 = dir +"od"+ ".txt";
+  string FileName2 = dir +"gr"+ ".txt";
+
+  std::vector<double> point1_curve[12];
+  std::vector<double> point2_curve[12];
+  cout<< FileName1<<endl;
+  ifstream poseg_in;
+  poseg_in.open(FileName1);
+  double point_curve[12];
+  double inMatrix[12], tMatrix[12];
+  unsigned int a=0;
+  geometry_msgs::PoseStamped pose1;
+  geometry_msgs::PoseStamped pose2;
+
+  while (poseg_in.good()){
+   
+   for (int i = 0; i < 12; i++) //{    converting KITTI coordinate system into ROS coordinate system
+    poseg_in >> inMatrix[i];           //KITTI  x right, y down, z forward
+                                       //ROS    x forward y left z upward
+   // point1_curve[i].push_back(point_curve[i]);
+  // }
+    
+     tMatrix[0] =  inMatrix[10];
+     tMatrix[1] = -inMatrix[8];
+     tMatrix[2] = -inMatrix[9];
+     tMatrix[3] =  inMatrix[11];
+     tMatrix[4] = -inMatrix[2];
+     tMatrix[5] =  inMatrix[0];
+     tMatrix[6] =  inMatrix[1];
+     tMatrix[7] = -inMatrix[3];
+     tMatrix[8] = -inMatrix[6];
+     tMatrix[9] =  inMatrix[4];
+     tMatrix[10] = inMatrix[5];
+     tMatrix[11] = -inMatrix[7];
+     //tMatrix[12] = 0.0;
+     //tMatrix[13] = 0.0;
+     //tMatrix[14] = 0.0;
+     //tMatrix[15] = 1.0;
+     
+    for(int j=0;j<=11;j++)
+     point1_curve[j].push_back( tMatrix[j]);
+ }
+   
+   poseg_in.close();
+   
+  ifstream poseo_in;
+  poseo_in.open(FileName2);
+  
+   while (poseo_in.good()){
+   
+   for (int i = 0; i < 12; i++) 
+     poseo_in >> inMatrix[i];
+  
+     tMatrix[0] =  inMatrix[10];
+     tMatrix[1] = -inMatrix[8];
+     tMatrix[2] = -inMatrix[9];
+     tMatrix[3] =  inMatrix[11];
+     tMatrix[4] = -inMatrix[2];
+     tMatrix[5] =  inMatrix[0];
+     tMatrix[6] =  inMatrix[1];
+     tMatrix[7] = -inMatrix[3];
+     tMatrix[8] = -inMatrix[6];
+     tMatrix[9] =  inMatrix[4];
+     tMatrix[10] = inMatrix[5];
+     tMatrix[11] = -inMatrix[7];
+     //tMatrix[12] = 0.0;
+     //tMatrix[13] = 0.0;
+     //tMatrix[14] = 0.0;
+     //tMatrix[15] = 1.0;
+     
+    for(int j=0;j<=11;j++)
+     point2_curve[j].push_back(tMatrix[j]);
+ }
+   poseo_in.close();
+
+  unsigned int sample_points = point1_curve[0].size();
+  MatrixXd R_g(3,3); 
+  cout<<sample_points<<endl;
+  double qm[4];
+  for(unsigned int i=0;i<= sample_points-2;i++) { 
+     point_corr[0].push_back(i) ;
+     point_corr[1].push_back(point1_curve[3][i]) ;  //x forward
+     point_corr[2].push_back(point1_curve[7][i]) ;  //y left  //ground truth
+     point_corr[3].push_back(point1_curve[11][i]) ; //z upward
+
+     point_corr[4].push_back(point2_curve[3][i]) ;  //x forward
+     point_corr[5].push_back(point2_curve[7][i]) ;  //y left  //odometry
+     point_corr[6].push_back(point2_curve[11][i]) ; //z upward
+
+     R_g(0,0)=point1_curve[0][i];
+     R_g(0,1)=point1_curve[1][i];
+     R_g(0,2)=point1_curve[2][i];
+   
+     R_g(1,0)=point1_curve[4][i];
+     R_g(1,1)=point1_curve[5][i];
+     R_g(1,2)=point1_curve[6][i];
+
+     R_g(2,0)=point1_curve[8][i];
+     R_g(2,1)=point1_curve[9][i];
+     R_g(2,2)=point1_curve[10][i];
+   
+     Matrix3ToQuat(R_g,qm);
+     hector_matrix[4].push_back(qm[0]);
+     hector_matrix[0].push_back(i);
+     hector_matrix[1].push_back(qm[1]);
+     hector_matrix[2].push_back(qm[2]);
+     hector_matrix[3].push_back(qm[3]);
+     hector_matrix[5].push_back(point1_curve[3][i]);
+     hector_matrix[6].push_back(point1_curve[7][i]);
+     hector_matrix[7].push_back(point1_curve[11][i]);
+
+   // cout<<point1_curve[11][i]<<endl;
+  }
+}
+
+
 void curvspace(unsigned int s_num,curvesVector &points)
 {
    Curves *curves_ini;
@@ -156,66 +276,39 @@ void curvspace(unsigned int s_num,curvesVector &points)
 void curve_rep(curvesVector &points,int type)
 {
   
- // if(type==1){
+  if(type==1){
   
   for(curvesVector::iterator it = points.begin();
       it != points.end();
       ++it) {
     
        Curves *CurrentPoint = *it;
-    
 
        if(it==(points.end()-1)){
        Curves *NextPoint = points.front();
        CurrentPoint->Trans_Mat(CurrentPoint,NextPoint);
-        if(type==0) {
-
-         Curves *lasttPoint =*(it-1);
-         //CurrentPoint=lasttPoint;
-          CurrentPoint-> transformation1=lasttPoint-> transformation1;
-         CurrentPoint-> transformation2=lasttPoint-> transformation2;
-         CurrentPoint-> rot1=lasttPoint-> rot1;
-         CurrentPoint-> rot2=lasttPoint-> rot2;
-         CurrentPoint-> trans1=lasttPoint-> trans1;
-         CurrentPoint-> trans2=lasttPoint-> trans2;
-        }
        }     
        else{
        Curves *NextPoint = *(it+1);
        CurrentPoint->Trans_Mat(CurrentPoint,NextPoint);
        }     
-    
-    // if()
-     
-         
+             
    }
- // }
+  }
 
- /* else{
-
+  else{
     for(curvesVector::iterator it = points.begin();
-      it != (points.end());
+      it != (points.end()-1);
       ++it) {
         
        Curves *CurrentPoint = *it;
        Curves *NextPoint = *(it+1);
        CurrentPoint->Trans_Mat(CurrentPoint,NextPoint);
-
-     //  Curves *CurrentPoint = *it;
-
-       if(it==(points.end()-1)){
-      
-         Curves *lasttPoint =*(it-1);
-         CurrentPoint-> transformation1=lasttPoint-> transformation1;
-         CurrentPoint-> transformation2=lasttPoint-> transformation2;
-       }     
-   
-     }    
-
-
+    }
+       
   }
-*/      
-}       
+      
+}      
 
 /*void correspondence(curvesVector &points,int type)
 {
@@ -475,7 +568,7 @@ void inv_rep(curvesVector &Samplepoints,int fuse_flag)
 
      c_point->cr_points1=(p_point->transformation1)*(p_point->cr_points1);
      c_point->cr_points2=(p_point->transformation2)*(p_point->cr_points2);
-
+     cout<<55555<<endl;
      for(int j=0;j<3;j++){
 
      c_point->points1(j)=c_point->cr_points1(j);
@@ -509,7 +602,7 @@ void QuatToMatrix3(const double *quat,
    mat(0,2) = 2.0*(q13+q02);
 
    mat(1,0) = 2.0*(q12+q03);
-   mat(1,2) = 2.0*(q23+q01);
+   mat(1,2) = 2.0*(q23-q01);
  
    mat(2,0) = 2.0*(q13-q02);
    mat(2,1) = 2.0*(q23+q01);
@@ -531,8 +624,8 @@ void Matrix3ToQuat( MatrixXd &mat,
   } else if ( mat(0,0) > mat(1,1) && mat(0,0) > mat(2,2) )  { // Column 0: 
     S  = sqrt( 1.0 + mat(0,0) - mat(1,1) - mat(2,2) ) * 2;
     X = 0.25 * S;
-    Y = (mat(0,2) + mat(2,0) ) / S;                   //in 3DTk,Y and Z values are swapped
-    Z = (mat(0,1) + mat(1,0) ) / S;
+    Y = (mat(1,0) + mat(0,1) ) / S;                   //in 3DTk,Y and Z values are swapped
+    Z = (mat(0,2) + mat(2,0) ) / S;
     W = (mat(2,1) - mat(1,2) ) / S;
     cout<<"出现2"<<endl;
   } else if ( mat(1,1) > mat(2,2) ) {                    // Column 1: 
@@ -545,7 +638,7 @@ void Matrix3ToQuat( MatrixXd &mat,
   } else {                                            // Column 2:
     S  = sqrt( 1.0 + mat(2,2) - mat(0,0) - mat(1,1) ) * 2;
     X = (mat(0,2) + mat(2,0) ) / S;
-    Y = (mat(1,2) - mat(2,1) ) / S;
+    Y = (mat(1,2) + mat(2,1) ) / S;
     Z = 0.25 * S;
     W = (mat(1,0) - mat(0,1) ) / S;
     cout<<"出现4"<<endl;
@@ -557,6 +650,50 @@ void Matrix3ToQuat( MatrixXd &mat,
   
   Normalize4(quat);
   
+}
+
+double deg(const double rad)
+{
+  return ( (rad * 360.0) / (2.0 * M_PI) ); 
+}
+ void Matrix4ToEuler( double *alignxf,
+                                  double *rPosTheta,
+                                  double *rPos)
+{
+  
+  double _trX, _trY;
+
+  // Calculate Y-axis angle 
+  if(alignxf[0] > 0.0) {
+    rPosTheta[1] = asin(alignxf[8]);
+  } else {
+    rPosTheta[1] = M_PI  - asin(alignxf[8]);
+  }
+
+  double  C    =  cos( rPosTheta[1] );
+  if ( fabs( C ) > 0.005 )  {                 // Gimbal lock? 
+    _trX      =  alignxf[10] / C;             // No, so get X-axis angle 
+    _trY      =  -alignxf[9] / C;
+    rPosTheta[0]  = atan2( _trY, _trX );
+    _trX      =  alignxf[0] / C;              // Get Z-axis angle 
+    _trY      = -alignxf[4] / C;
+    rPosTheta[2]  = atan2( _trY, _trX );
+  } else {                                    // Gimbal lock has occurred 
+    rPosTheta[0] = 0.0;                       // Set X-axis angle to zero 
+    _trX      =  alignxf[5];  //1                // And calculate Z-axis angle 
+    _trY      =  alignxf[1];  //2
+    rPosTheta[2]  = atan2( _trY, _trX );
+  }
+  
+  rPosTheta[0] = deg(rPosTheta[0]);
+  rPosTheta[1] = deg(rPosTheta[1]);
+  rPosTheta[2] = deg(rPosTheta[2]);
+ if (rPos != 0) {
+    rPos[0] = alignxf[12];
+    rPos[1] = alignxf[13];
+    rPos[2] = alignxf[14];
+      
+  }
 }
 
 void save_final_result(vector<MatrixXd> poses_result_final,vector<VectorXd> point_result_final,string &pose_dir_final,string &point_dir_final,int count,int steps) {
@@ -576,7 +713,7 @@ void save_final_result(vector<MatrixXd> poses_result_final,vector<VectorXd> poin
       {
      
   
-
+       cout<<i<<endl;
        MatrixXd posematrix(3,3);
        posematrix=poses_result_final[i];
        VectorXd point=point_result_final[i];
@@ -598,15 +735,130 @@ void save_final_result(vector<MatrixXd> poses_result_final,vector<VectorXd> poin
 
 }
 
+void save_fusion_pose(vector<MatrixXd> poses_result_fusion,string dir,int count) {
 
-void matrix_tf_final(vector<MatrixXd> poses_result_final,vector<VectorXd> point_result_final,int count,int steps,std::vector<double> *h_matrix,vector<MatrixXd> poses_result_final_h) {
+     
+    string  pose_dir_fusion        = dir + "fuse_result_final/";
+   
+   // create output directories
+     system(("mkdir " +  pose_dir_fusion).c_str());
+
+     string PoseFileName =pose_dir_fusion +to_string(count,2)+ ".txt";
+     //string PointFileName = point_dir_final +to_string(count,2)+ ".txt";
+     
+     // open file  
+     FILE *fp1 = fopen(PoseFileName.c_str(),"w");
+    // FILE *fp2 = fopen(PointFileName.c_str(),"w");
+ 
+          
+     
+
+        //cout<<fuse_curve.size()<<endl;
+     for(unsigned int i = 0; i <= poses_result_fusion.size()-1; i++)
+      {
+     
+  
+       MatrixXd posematrix(3,3);
+       posematrix=poses_result_fusion[i];
+        
+   
+
+       fprintf(fp1,"%lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf\n",
+                                posematrix(0,0),posematrix(0,1),posematrix(0,2),posematrix(0,3),
+                                posematrix(1,0),posematrix(1,1),posematrix(1,2),posematrix(1,3),
+                                posematrix(2,0),posematrix(2,1),posematrix(2,2),posematrix(2,3));
+      }
+
+     
+
+}
+
+
+void ros2frames(vector<MatrixXd> poses_result_fusion,string dir,int count) {
+
+     
+    string  frames_dir_fusion        = dir + "fuse_frames/"+to_string(count,2)+"/";
+   
+   // create output directories
+     system(("mkdir " +  frames_dir_fusion).c_str());
+    double tMatrix[16];
+    double rPos[3], rPosTheta[16];
+    char poseFileName[255];
+    char frameFileName[255];
+
+    ofstream pose_out;
+    ofstream frames_out;
+
+    for (unsigned int i = 0; i <= poses_result_fusion.size()-1; i++) {
+   
+       MatrixXd fusionmatrix(3,3);
+       fusionmatrix=poses_result_fusion[i];
+       snprintf(poseFileName,255,"%sscan%.3d.pose",frames_dir_fusion.c_str(),i);
+       snprintf(frameFileName,255,"%sscan%.3d.frames",frames_dir_fusion.c_str(),i);
+      //// cout << "Reading fusion pose " << frames_dir_fusion << "..." << endl;
+   
+  
+       tMatrix[ 0] = fusionmatrix(1,1);
+       tMatrix[ 1] =-fusionmatrix(2,1);
+       tMatrix[ 2] = -fusionmatrix(0,1);
+       tMatrix[ 3] = -0;
+       tMatrix[ 4] = -fusionmatrix(1,2);
+       tMatrix[ 5] = fusionmatrix(2,2);
+       tMatrix[ 6] = fusionmatrix(0,2);
+       tMatrix[ 7] = 0;
+       tMatrix[8] = -fusionmatrix(1,0);
+       tMatrix[ 9] = fusionmatrix(2,0);
+       tMatrix[10] = fusionmatrix(0,0);
+       tMatrix[11] = 0;
+       tMatrix[12] = -fusionmatrix(1,3)*100;
+       tMatrix[13] = fusionmatrix(2,3)*100;
+       tMatrix[14] = fusionmatrix(0,3)*100;
+       tMatrix[15] = 1.0;
+
+       Matrix4ToEuler(tMatrix, rPosTheta, rPos);
+    
+       pose_out.open(poseFileName);
+       frames_out.open(frameFileName);
+     ////  cout << "Writing pose file... " << poseFileName << endl;
+    
+       for(int i = 0; i < 3; i++) {
+        pose_out << rPos[i] << " ";
+       }
+        pose_out << endl; 
+
+       for(int i = 0; i < 3; i++) {
+        pose_out <<rPosTheta[i]<< " ";
+        }
+
+     ////  cout << "Writing frames... " << poseFileName << endl;
+  
+       for(int j = 0; j < 2; j++) {
+        for (int i=0; i < 16; i++) {
+         frames_out << tMatrix[i] << " ";
+       }
+       frames_out << "2" << endl;
+       }
+    
+      pose_out.close();
+      pose_out.clear();
+
+      frames_out.close();
+      frames_out.clear();
+
+    
+     //// cout << " done." << endl;
+  }
+
+}
+
+void matrix_tf_final(vector<MatrixXd> poses_result_final,vector<VectorXd> point_result_final,int count,int steps,std::vector<double> *h_matrix,vector<MatrixXd> poses_result_final_h, string dir) {
 
          // tf_broadcaster broadcaster;
 
          Matrix3d R_current,R_increment,R_h;
          Matrix4d T;
          Matrix3d  base_point,tangent_rotation;
-         
+         vector<MatrixXd> final_trans_ma;
 
          vector<MatrixXd> poses_result_hector;
          vector<VectorXd> point_result_hector;
@@ -660,38 +912,55 @@ void matrix_tf_final(vector<MatrixXd> poses_result_final,vector<VectorXd> point_
             
              T(3,3)=1.0;
              matrix_new.push_back(T);
- 
+             final_trans_ma.push_back(T);
             time_s[i]=h_matrix[0][i];
            // cout<<i<<endl;
           }
-
+          
+          save_fusion_pose(final_trans_ma, dir,count);
+          ros2frames(final_trans_ma,dir,count);
       }
 
    else {
-
+        //poses_result_final.size()
    
         for(unsigned int i = 0; i <= poses_result_final.size()-1; i++) {
 
+           if(i==0) {
+            
+            R_increment(0,0)=1;
+            R_increment(0,1)=0;
+            R_increment(0,2)=0;
+            R_increment(1,0)=0;
+            R_increment(1,1)=1;
+            R_increment(1,2)=0;
+            R_increment(2,0)=0;
+            R_increment(2,1)=0;
+            R_increment(2,2)=1; 
+            R_h=R_increment;
+           }
+
+           else {
+           
            for(int h=0;h<3;h++) {
              for(int l=0;l<3;l++) {
-              R_increment(h,l)=poses_result_final[i](h,l);
-              R_h(h,l)=poses_result_final_h[i](h,l);
+              R_increment(h,l)=poses_result_final[i-1](h,l);
+              R_h(h,l)=poses_result_final_h[i-1](h,l);
              }
             }
-
+           }
            // for(unsigned int c=0; c<= h_matrix[0].size()-1; c++) {
 
           //  if(time_s[i]==(h_matrix[0][c])) {
             
-            // base_point = (R_increment*(R_h.transpose())); 
-           //  tangent_rotation=base_point*(((R_h.transpose())*poses_result_hector[i]).log());
-           //  R_current = R_increment*(tangent_rotation.exp());
+            //// base_point = (R_increment*(R_h.transpose())); 
+            //// tangent_rotation=base_point*(((R_h.transpose())*poses_result_hector[i]).log());
+            //// R_current = R_increment*(tangent_rotation.exp());
 
              //R_current=R_increment*poses_result_hector[i];
            // if(i==0)
-               R_current=(R_increment*R_h.inverse())*poses_result_hector[i];
-          //  else
-             //  R_current=R_increment*poses_result_hector[i-1];
+              /// R_current=(R_increment*R_h.inverse())*poses_result_hector[i];
+            R_current=poses_result_hector[i];
             for(int h=0;h<3;h++) {
             for(int l=0;l<3;l++) { 
               T(h,l)=R_current(h,l);
@@ -705,10 +974,14 @@ void matrix_tf_final(vector<MatrixXd> poses_result_final,vector<VectorXd> point_
             
             T(3,3)=1.0;
             matrix_new.push_back(T);
+            final_trans_ma.push_back(T);
             time_s[i]=h_matrix[0][i];
             //cout<<i<<endl;
           
        } 
+
+       save_fusion_pose(final_trans_ma, dir,count);
+       ros2frames(final_trans_ma,dir,count);
     }
 }
 
@@ -812,10 +1085,10 @@ void interpolation(curvesVector &Samplepoints,string dir,string &pose_dir_final,
       // timestamp.push_back(c_point->time_stamps);
    }
      
-      save_final_result(poses_result_final,point_result_final,pose_dir_final,point_dir_final,count,steps);
+     //// save_final_result(poses_result_final,point_result_final,pose_dir_final,point_dir_final,count,steps);
 
-      if(pose_index==count)
-      matrix_tf_final(poses_result_final,point_result_final,count,steps,h_matrix,poses_result_final_h);
+      /////if(pose_index==count)
+      matrix_tf_final(poses_result_final,point_result_final,count,steps,h_matrix,poses_result_final_h,dir);
    }
 
       
@@ -918,9 +1191,9 @@ void interpolation(curvesVector &Samplepoints,string dir,string &pose_dir_final,
        //poses_result_final_h.push_back(posematrix_h);
       // timestamp.push_back(c_point->time_stamps);
     }
-       save_final_result(poses_result_final,point_result_final,pose_dir_final,point_dir_final,count,steps);
-       if(pose_index==count)
-       matrix_tf_final(poses_result_final,point_result_final,count,steps,h_matrix,poses_result_final_h);
+     ////  save_final_result(poses_result_final,point_result_final,pose_dir_final,point_dir_final,count,steps);
+       /////if(pose_index==count)
+       matrix_tf_final(poses_result_final,point_result_final,count,steps,h_matrix,poses_result_final_h,dir);
      
    }
 }
@@ -1057,7 +1330,6 @@ void geodesic_path(curvesVector &Samplepoints,int steps,string dir,int pose_inde
    double timestep=1/((double)steps);
    double step=0;
    unsigned int num_sample=Curves::Samplepoints.size();
-  
    //Matrix2d R_c;
    
    MatrixXcd Rc(DIMENSIONS, DIMENSIONS);
@@ -1092,14 +1364,14 @@ void geodesic_path(curvesVector &Samplepoints,int steps,string dir,int pose_inde
    curves=Curves::Samplepoints[j];
    Curves::Oripoints.push_back(curves);
   }
-
+   
   for(int i=0;i<=steps;i++){
 
       if(i==0) {
         savedata(Curves::Oripoints,dir,pose_dir,point_dir,i,steps);
 
         interpolation(Curves::Oripoints,dir,pose_dir_final,point_dir_final,i,steps,pose_index,h_matrix,h_seq);
-       
+        
       }
 
       else if(i==steps) {
@@ -1131,19 +1403,18 @@ void geodesic_path(curvesVector &Samplepoints,int steps,string dir,int pose_inde
 
             QuatToMatrix3(qm,mat_h);
           
-         
             poses_result_final.push_back(mat_h);
             point_result_final.push_back(t_h);
             poses_result_final_h.push_back(mat_h);
-         // timestamp.push_back(h_matrix[0][l]);
+           // timestamp.push_back(h_matrix[0][l]);
 
          // }
         //}
       }
-          save_final_result(poses_result_final,point_result_final,pose_dir_final,point_dir_final,i,steps);
+         // save_final_result(poses_result_final,point_result_final,pose_dir_final,point_dir_final,i,steps);
 
-          if(pose_index==steps)
-          matrix_tf_final(poses_result_final,point_result_final,i,steps,h_matrix,poses_result_final_h);
+          ////if(pose_index==steps)
+          matrix_tf_final(poses_result_final,point_result_final,i,steps,h_matrix,poses_result_final_h,dir);
       }
 
       else{
@@ -1197,6 +1468,7 @@ void geodesic_path(curvesVector &Samplepoints,int steps,string dir,int pose_inde
         inv_rep(Curves::Samplepoints,1);
         
         savedata(Samplepoints,dir,pose_dir,point_dir,i,steps);
+        
         interpolation(Samplepoints,dir,pose_dir_final,point_dir_final,i,steps,pose_index,h_matrix,h_seq);
    }   
     
@@ -1217,7 +1489,7 @@ vector<int32_t> computeRoi1 (vector<MatrixXd> &poses_result){
 #ifdef POINT3D  
    Matrix4d P=poses_result[i];
    double x = P(0,3);
-   double y = P(2,3);// the y represents z in 3D.
+   double y = P(1,3);// 
 #else
    Matrix3d P=poses_result[i];
    double x = P(0,2);
@@ -1253,7 +1525,7 @@ vector<int32_t> computeRoi2 (vector<VectorXd> &point_result){
 #ifdef POINT3D  
    Vector3d P=point_result[i];
    double x = P(0);
-   double y = P(2);
+   double y = P(1);
 #else
    Vector2d P=point_result[i];
    double x = P(0);
@@ -1290,7 +1562,7 @@ void savePathPlot (vector<MatrixXd> &poses_result,vector<VectorXd> &point_result
   for (unsigned int i=0; i<poses_result.size(); i+=step_size)
 
 #ifdef POINT3D
-  fprintf(fp1,"%f %f %f\n",(poses_result[i])(0,3),(poses_result[i])(1,3),(poses_result[i])(2,3));
+  fprintf(fp1,"%f %f\n",(poses_result[i])(0,3),(poses_result[i])(1,3));
 #else
   fprintf(fp1,"%f %f\n",(poses_result[i])(0,2),(poses_result[i])(1,2));
 #endif
@@ -1303,7 +1575,7 @@ void savePathPlot (vector<MatrixXd> &poses_result,vector<VectorXd> &point_result
   fprintf(fp2,"%f %f\n",(point_result[j])(0),(point_result[j])(1));
   // close file
 #else
-  fprintf(fp2,"%f %f %f\n",(point_result[j])(0),(point_result[j])(1),(point_result[j])(2));
+  fprintf(fp2,"%f %f\n",(point_result[j])(0),(point_result[j])(1));
 #endif  
   fclose(fp2);
 }
@@ -1331,13 +1603,26 @@ void plotPathPlot(string dir,vector<int32_t> &roi,int idx,int steps)
       fprintf(fp,"set output \"%02d.eps\"\n",idx);
     }
 
+    fprintf(fp,"set size square\n");
+    ////fprintf(fp,"set xrange [%d:%d]\n",-30,60);
+    ////fprintf(fp,"set yrange [%d:%d]\n",-20,90);
+    
+    ////fprintf(fp,"set xlabel \"x [m]\" font ',22'\n");
+    ////fprintf(fp,"set ylabel \"y [m]\" font ',22'\n");
+    ////fprintf(fp,"set xtics font ',22'\n");
+    ////fprintf(fp,"set ytics font ',22'\n");
+    ////fprintf(fp,"set key  font ',22'\n");
+    ////fprintf(fp,"plot \"%02d.txt\" using 1:2 lc rgb \"#FF0000\" title '' w lines,",idx);
+    ////fprintf(fp,"\"< head -1 %02d.txt\" using 1:2 lc rgb \"#000000\" pt 4 ps 2 lw 3 title  'Sequence Start' w points\n",idx);
+    
+
     fprintf(fp,"set size ratio -1\n");
     fprintf(fp,"set xrange [%d:%d]\n",roi[0],roi[1]);
     fprintf(fp,"set yrange [%d:%d]\n",roi[2],roi[3]);
     fprintf(fp,"set xlabel \"x [m]\"\n");
     fprintf(fp,"set ylabel \"y [m]\"\n");
-    
-    fprintf(fp,"plot \"%02d.txt\" using 1:2 lc rgb \"#FF0000\" title '' w lines,",idx);
+    fprintf(fp,"plot \"%02d.txt\" using 1:2 lc rgb \"#FF0000\" title 'trajectory ' w lines,",idx);
+    fprintf(fp,"\"%02d.txt\" using 3:4 lc rgb \"#0000FF\" title 'Visual Odometry' w lines,",idx);
     fprintf(fp,"\"< head -1 %02d.txt\" using 1:2 lc rgb \"#000000\" pt 4 ps 1 lw 2 title 'Sequence Start' w points\n",idx);
     
     // close file
@@ -1466,7 +1751,7 @@ void timestamp_correspondence(std::vector<double> *point_curve1,std::vector<doub
 // now pose and pose_min are a corresponding pair
 // and you can write the poses to a file
 // stamp gps.x gps.y gps.z hector.x ...
-      if(i==0) {
+   /*****   if(i==0) {
       time_s[i]=(point_curve2[0][0]);
       point_corr[0].push_back(point_curve2[0][0]) ;
      // point_corr[0].push_back(point_curve1[0][0]) ; 
@@ -1477,7 +1762,7 @@ void timestamp_correspondence(std::vector<double> *point_curve1,std::vector<doub
       index[i]=0;
       }
 
-      else {      
+      else {********/      
       time_s[i]=(point_curve2[0][index[i]]);
        //time_s[i]=(point_curve1[0][i]);
       point_corr[0].push_back(point_curve2[0][index[i]]) ; 
@@ -1485,7 +1770,7 @@ void timestamp_correspondence(std::vector<double> *point_curve1,std::vector<doub
       point_corr[1].push_back(point_curve2[1][index[i]]) ;
       point_corr[2].push_back(point_curve2[2][index[i]]) ;
       point_corr[3].push_back(point_curve2[3][index[i]]) ;
-     }
+    //////////////}
   
       point_corr[4].push_back(point_curve1[1][i]) ;
       point_corr[5].push_back(point_curve1[2][i]) ;
@@ -1507,15 +1792,27 @@ void closest_correspondence(std::vector<double> *point_curve1,std::vector<double
 // since the gps topic seems to have a lower frequency than the hector topic,
 // look for them in the hector timetable 
   unsigned int sample_points = point_curve1[0].size(); 
+  unsigned int num = point_curve2[0].size();
   unsigned int index[sample_points];
+  index[0]=0;
   for(unsigned int i=0;i<= sample_points-1;i++) {            
        
     double dt_min = 1000.0;
     double x=point_curve1[1][i]; 
     double y=point_curve1[2][i];
     double z=point_curve1[3][i];
+   if(i>0) {
 // for each gps pose look for the closest hecotr pose wrt time
-   for(unsigned int j=0;j<= point_curve2[0].size()-1;j++){
+    //int start=index[i-1]+1;
+    //int end=index[i-1]+2;
+    //if(start>num)
+   // start=num;
+   // if(end>num)
+   // end=num;
+ int p=2*i;
+       int start=MAX(2,p);
+       int las = MIN(num,p);
+   for(unsigned int j=start;j<= las;j++){
      //int b=0;
      //for(int a=1;a<i;a++){
     // if(j==index[a])
@@ -1535,8 +1832,8 @@ void closest_correspondence(std::vector<double> *point_curve1,std::vector<double
        dt_min = dis;  
        }
      }
-       
-                 
+    }
+      cout<<index[i]<<endl;           
 // now pose and pose_min are a corresponding pair
 // and you can write the poses to a file
 // stamp gps.x gps.y gps.z hector.x ...
@@ -1872,17 +2169,17 @@ void dp_optimal_point_sampling_Single(std::vector<double> *point_curve1,std::vec
     VectorXd temp2(c);
     VectorXd temp3(c);
    
-    unsigned int sliding_rate = floor(c_i/r_i);
-    unsigned int uni=floor(c_i/sliding_rate);
+    int sliding_rate = floor(c_i/r_i);
+    int uni=floor(c_i/sliding_rate);
     
-     //int sliding_rate = ceil(c_i/r_i);
+    // int sliding_rate = ceil(c_i/r_i);
     //int uni=ceil(c_i/sliding_rate);
     
     if(type==0)
     uni=uni-1;
     double uni_rate[uni];
     //MatrixXd cost3=MatrixXd::Constant(c,r,inf);
-    cout<<uni<<endl;
+   // cout<<uni<<endl;
     Vector3d gps_point;
     Vector3d laser_point;
     string t="gps";
