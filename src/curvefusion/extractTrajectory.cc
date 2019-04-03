@@ -6,9 +6,9 @@
  */
 #include "curvefusion/common.h"
 using namespace std;  
-
+int firstIndex=0;
 //std::map<double, geometry_msgs::PoseStamped> gps_timetable;
-extract2hector_gps::extract2hector_gps(rosbag::Bag *_bag):extractTrajectory(_bag) {
+extract2hector_gps::extract2hector_gps(rosbag::Bag *_bag1):extractTrajectory(_bag1,_bag1) {
 
    rosbag::View view_hector(*bag1, rosbag::TopicQuery(curve1_topic));
    BOOST_FOREACH(rosbag::MessageInstance const m, view_hector) {
@@ -22,20 +22,20 @@ extract2hector_gps::extract2hector_gps(rosbag::Bag *_bag):extractTrajectory(_bag
       hector_timetable.insert(std::pair<double, geometry_msgs::PoseStamped>(pose.header.stamp.toSec(),pose));
     }
   }
- 
+  int gps_flag=1;
   rosbag::View view_gps(*bag1, rosbag::TopicQuery(curve2_topic));
   BOOST_FOREACH(rosbag::MessageInstance const m,view_gps) {
 		
     if(m.isType<sensor_msgs::NavSatFix>() ) {
       sensor_msgs::NavSatFixConstPtr fixptr = m.instantiate<sensor_msgs::NavSatFix>();
-      callback_gps(fixptr);
+      callback_gps(fixptr,gps_flag);
      }
   }
 
 
 } 
   
-extract2hector_gps::extract2hector_gps(rosbag::Bag *_bag1,rosbag::Bag *_bag2):extractTrajectory(_bag1),bag2(_bag2){
+extract2hector_gps::extract2hector_gps(rosbag::Bag *_bag1,rosbag::Bag *_bagod):extractTrajectory(_bag1,_bag1),bagod(_bagod){
 
    rosbag::View view_hector(*bag1, rosbag::TopicQuery(curve1_topic));
    BOOST_FOREACH(rosbag::MessageInstance const m, view_hector) {
@@ -49,13 +49,13 @@ extract2hector_gps::extract2hector_gps(rosbag::Bag *_bag1,rosbag::Bag *_bag2):ex
       hector_timetable.insert(std::pair<double, geometry_msgs::PoseStamped>(pose.header.stamp.toSec(),pose));
     }
   }
- 
-  rosbag::View view_gps(*bag2, rosbag::TopicQuery(curve2_topic));
+   int gps_flag=1;
+  rosbag::View view_gps(*bagod, rosbag::TopicQuery(curve2_topic));
   BOOST_FOREACH(rosbag::MessageInstance const m,view_gps) {
 		
     if(m.isType<sensor_msgs::NavSatFix>() ) {
       sensor_msgs::NavSatFixConstPtr fixptr = m.instantiate<sensor_msgs::NavSatFix>();
-      callback_gps(fixptr);
+      callback_gps(fixptr,gps_flag);
      }
   }
 
@@ -124,10 +124,10 @@ void extract2hector_gps::aligncurve(std::vector<double> *point_curve1,std::vecto
        point_curve2[3].push_back(pose.pose.position.z) ;  
       // hector+=5;
       //hector++;
+       //hector++;
       // hector++;
-      // hector++;
-      // hector++;
-    //  std::advance (hector,1);
+       //hector++;
+      //std::advance (hector,12);
        
    }
 
@@ -140,21 +140,22 @@ void extract2hector_gps::aligncurve(std::vector<double> *point_curve1,std::vecto
 }
 
 
-extract2curve1_curve2::extract2curve1_curve2(rosbag::Bag *_bag,std::string &_rieglfile):extractTrajectory(_bag),filename(_rieglfile) {
+
+extract2curve1_curve2::extract2curve1_curve2(rosbag::Bag *_bag1,std::string &_rieglfile):extractTrajectory(_bag1,_bag1),filename(_rieglfile) {
    
      rosbag::View view_gps(*bag1, rosbag::TopicQuery(curve2_topic));
      BOOST_FOREACH(rosbag::MessageInstance const m,view_gps) {
-		
+     int gps_flag=1;
      if(m.isType<sensor_msgs::NavSatFix>() ) {
       sensor_msgs::NavSatFixConstPtr fixptr = m.instantiate<sensor_msgs::NavSatFix>();
-      callback_gps(fixptr);
+      callback_gps(fixptr,gps_flag);
       }
      }
+   
 
      // string filename = rieglfile ;
 
       cout << "Reading " << filename << "..." << endl;
-
       shared_ptr<basic_rconnection> rc;
       rc = basic_rconnection::create(filename);
       rc->open();
@@ -208,7 +209,7 @@ extract2curve1_curve2::extract2curve1_curve2(rosbag::Bag *_bag,std::string &_rie
         // Transform NED frame to ROS frame (x front, y left, z up)
         Eigen::Affine3d ned2nwu = Eigen::Affine3d(Eigen::AngleAxisd(-M_PI, Eigen::Vector3d(1, 0, 0)));
         // When the robot start to run,if x-axis point south direction,use the following Line of code
-        Eigen::Affine3d nwu2ros = Eigen::Affine3d(Eigen::AngleAxisd(0, Eigen::Vector3d(0, 0, 1)));
+        Eigen::Affine3d nwu2ros = Eigen::Affine3d(Eigen::AngleAxisd(-135*M_PI/180, Eigen::Vector3d(0, 0, 1)));
         // When the robot start to run,if x-axis point east direction,use the following Line of code
        // Eigen::Affine3d nwu2ros = Eigen::Affine3d(Eigen::AngleAxisd(0.2* M_PI, Eigen::Vector3d(0, 0, 1)));
         // Local rotation from inclination sensors
@@ -250,26 +251,31 @@ extract2curve1_curve2::extract2curve1_curve2(rosbag::Bag *_bag,std::string &_rie
 
 
         } 
-
 } 
   
 
 void extract2curve1_curve2::aligncurve(std::vector<double> *point_curve1,std::vector<double> *point_curve2,std::string dir) {
 
   
-    std::map<double, geometry_msgs::PoseStamped>::iterator curv1_index;
-  
+    std::map<double, geometry_msgs::PoseStamped>::iterator curv1_index;  
+       
+    std::map<double, geometry_msgs::PoseStamped>::iterator iter_begin =  curve1_timetable.begin();
+    std::map<double, geometry_msgs::PoseStamped>::iterator iter_end =  curve1_timetable.end();
+
+    int   index =   distance(iter_begin,iter_end);
+    cout<<index<<endl;
+
     for(curv1_index=curve1_timetable.begin();curv1_index!=curve1_timetable.end();curv1_index++){
      
      // double stamp = hector->first;
- 
+     
       geometry_msgs::PoseStamped pose = curv1_index->second;
       point_curve1[0].push_back(curv1_index->first) ;
       point_curve1[1].push_back(pose.pose.position.x) ;
       point_curve1[2].push_back(pose.pose.position.y) ;
       point_curve1[3].push_back(pose.pose.position.z) ;   
       
-      //std::advance (curv1_index,2);
+      std::advance (curv1_index,3);
      
    }
 
@@ -300,7 +306,7 @@ void extract2curve1_curve2::aligncurve(std::vector<double> *point_curve1,std::ve
      point_curve2[2].push_back(pose.pose.position.y) ;
      point_curve2[3].push_back(pose.pose.position.z) ;
  
-     std::advance ( curv2_index,1);
+    //// std::advance ( curv2_index,1);
      //curv2_index++;
      //curv2_index++;
     // curv2_index++;
@@ -323,7 +329,7 @@ void extract2curve1_curve2::aligncurve(std::vector<double> *point_curve1,std::ve
      
 }
 
-extract2curve1_curve2::extract2curve1_curve2(rosbag::Bag *_bag,std::string &_dir,int _flag):extractTrajectory(_bag),filename(_dir),flag(_flag) {
+extract2curve1_curve2::extract2curve1_curve2(rosbag::Bag *_bag1,std::string &_dir,int _flag):extractTrajectory(_bag1,_bag1),filename(_dir),flag(_flag) {
  
   string FileName = filename +"trajectory"+ ".data";
   cout<< FileName<<endl;
@@ -362,4 +368,24 @@ extract2curve1_curve2::extract2curve1_curve2(rosbag::Bag *_bag,std::string &_dir
    
 }
 
-
+extract2curve1_curve2::extract2curve1_curve2(rosbag::Bag *_bag1,rosbag::Bag *_bag2):extractTrajectory(_bag1,_bag2) {
+    
+     int gps_flag=1;
+     rosbag::View view_gps(*bag1, rosbag::TopicQuery(curve2_topic));
+     BOOST_FOREACH(rosbag::MessageInstance const m1,view_gps) {	
+     if(m1.isType<sensor_msgs::NavSatFix>() ) {
+      sensor_msgs::NavSatFixConstPtr fixptr1 = m1.instantiate<sensor_msgs::NavSatFix>();
+      callback_gps(fixptr1,gps_flag);
+      }
+     }
+     gps_flag=2;
+     firstIndex=0;
+     rosbag::View view_gps2(*bag2, rosbag::TopicQuery(curve2_topic));
+     BOOST_FOREACH(rosbag::MessageInstance const m2,view_gps2) {
+     	
+     if(m2.isType<sensor_msgs::NavSatFix>() ) {
+      sensor_msgs::NavSatFixConstPtr fixptr2 = m2.instantiate<sensor_msgs::NavSatFix>();
+      callback_gps(fixptr2,gps_flag);
+      }
+     }
+}

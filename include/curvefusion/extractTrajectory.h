@@ -23,28 +23,28 @@
 #define M_PI       3.14159265358979323846
 
 using namespace scanlib;
-
+extern int firstIndex;
 class extractTrajectory {
 
   public:
   rosbag::Bag *bag1;
+  rosbag::Bag *bag2;
   std::string curve1_topic;
   std::string curve2_topic;
  // unsigned int seq_h;
  // unsigned int seq_g;
   std::map<double, geometry_msgs::PoseStamped> curve1_timetable;
- 
-  int startIndex;
+  std::map<double, geometry_msgs::PoseStamped> curve2_timetable;
   Eigen::Affine3d startTransform ;
-
+  int startIndex;
   public:
-  extractTrajectory(rosbag::Bag *_bag) {
-
+  extractTrajectory(rosbag::Bag *_bag1,rosbag::Bag *_bag2) {
+    startIndex=0;
     ros::NodeHandle node;
-    bag1=_bag;
+    bag1=_bag1;
+    bag2=_bag2;
     curve1_topic        = "/slam_out_pose";
     curve2_topic	= "/fix";
-    startIndex=0;
     startTransform = Eigen::Affine3d::Identity();
    // ros::NodeHandle priv_node("~");
    // string dir_bag,dir_timestamp;
@@ -56,7 +56,7 @@ class extractTrajectory {
   }
   
 
-  void callback_gps(const sensor_msgs::NavSatFixConstPtr &fix) {
+  void callback_gps(const sensor_msgs::NavSatFixConstPtr &fix,int gps_flag) {
 
 
      if (fix->status.status == sensor_msgs::NavSatStatus::STATUS_NO_FIX) {
@@ -67,6 +67,8 @@ class extractTrajectory {
        if (fix->header.stamp == ros::Time(0)) {
         return;
         }
+       //if (fix->header.stamp.toSec()<1553017625)
+       // return;
         geometry_msgs::PoseStamped pose;
         pose.header = fix->header;
 
@@ -113,9 +115,9 @@ class extractTrajectory {
        Eigen::Affine3d transform = ((translation * ecef2ned) *ned2nwu*nwu2ros) * rotation;
         //  Eigen::Affine3d transform = ((translation * ecef2ned) ); 
         // Use relative pose to ROS frame of pose at startIndex
-        if (startIndex<1) {
+        if (firstIndex<1) {
             startTransform = ((translation * ecef2ned)*ned2nwu*nwu2ros);
-            startIndex++;
+            firstIndex++;
         }
 
         Eigen::Affine3d posee = startTransform.inverse() * transform;
@@ -131,15 +133,18 @@ class extractTrajectory {
         pose.pose.orientation.y = 0;
         pose.pose.orientation.z = 0;
         pose.pose.orientation.w = 1;
-
-        curve1_timetable.insert(std::pair<double, geometry_msgs::PoseStamped>(pose.header.stamp.toSec(),pose));
         
-
+        if(gps_flag==1){
+        curve1_timetable.insert(std::pair<double, geometry_msgs::PoseStamped>(pose.header.stamp.toSec(),pose));
+        }
+        else if(gps_flag==2)
+        curve2_timetable.insert(std::pair<double, geometry_msgs::PoseStamped>(pose.header.stamp.toSec(),pose));
   } 
 
  // virtual void aligncurve(std::vector<double> *point_g,std::vector<double> *hector_matrix ,unsigned int *seq_interval,std::string dir);
   //virtual void callback_gps(const sensor_msgs::NavSatFixConstPtr &fix);
  // virtual void callback_curve2(const geometry_msgs::PoseStampedConstPtr &hectorpose);
+       
 };
 
 class extract2hector_gps : public extractTrajectory {
@@ -147,9 +152,11 @@ class extract2hector_gps : public extractTrajectory {
   public:
    extract2hector_gps(rosbag::Bag *_bag1);
    extract2hector_gps(rosbag::Bag *_bag1,rosbag::Bag *_bag2); 
+  // extract2hector_gps();
    void aligncurve(std::vector<double> *point_curve1,std::vector<double> *point_curve2,std::vector<double> *hector_matrix,std::string dir);
+  // void aligncurve(std::vector<double> *hector_matrix,std::vector<double> *point_corr,std::string dir);
   public:
-   rosbag::Bag *bag2;
+   rosbag::Bag *bagod;
    std::map<double, geometry_msgs::PoseStamped> hector_timetable;
 
 };
@@ -225,10 +232,10 @@ class extract2curve1_curve2 : public extractTrajectory {
    public:
    extract2curve1_curve2(rosbag::Bag *_bag,std::string &_rieglfile);
    extract2curve1_curve2(rosbag::Bag *_bag,std::string &_filename,int _flag); 
+   extract2curve1_curve2(rosbag::Bag *_bag1,rosbag::Bag *_bag2);
    void aligncurve(std::vector<double> *point_g_ros,std::vector<double> *point_g_riegl,std::string dir);
   public:
-   std::map<double, geometry_msgs::PoseStamped> curve2_timetable;
-   //string rieglfile;
+   //std::map<double, geometry_msgs::PoseStamped> curve2_timetable;
    string filename;
    int flag;
 };

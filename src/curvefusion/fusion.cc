@@ -132,7 +132,7 @@ int main(int argc, char **argv)
   //int interval;
   double beta=0.1;
   int window_size=50;
-  string dir,bagfile_ros,bagfile_odroid,rieglfile;
+  string dir,bagfile_ros1,bagfile_ros2,rieglfile;
   string plot_pose_dir;
   string plot_point_dir;
   std::vector<double> point_curve1[4];
@@ -140,14 +140,17 @@ int main(int argc, char **argv)
   std::vector<double> hector_matrix[8];
   std::vector<double> point_corr[7];
   parseArgs(argc, argv, dir, num_points,sample_points,type,steps,pose_index,beta,window_size);
-  node.param<std::string>("/log/bagfile1",bagfile_ros,"ros.bag");
-  node.param<std::string>("/log/bagfile2",bagfile_odroid,"odroid.bag");
+  ///////node.param<std::string>("/log/bagfile1",bagfile_ros,"ros.bag");
+  node.param<std::string>("/log/bagfile1",bagfile_ros1,"ros1.bag");
+  //node.param<std::string>("/log/bagfile2",bagfile_odroid,"odroid.bag");
+  node.param<std::string>("/log/bagfile2",bagfile_ros2,"ros2.bag");
   node.param<std::string>("/log/rieglfile",rieglfile,"raw.rxp");
-  bagfile_ros=dir+bagfile_ros;
-  bagfile_odroid=dir+bagfile_odroid;
+ 
+  bagfile_ros1=dir+bagfile_ros1;
+  bagfile_ros2=dir+bagfile_ros2;
   rieglfile=dir+rieglfile;
-  rosbag::Bag bag1(bagfile_ros);
-  
+  ////rosbag::Bag bag1(bagfile_ros1);
+ //// rosbag::Bag bag2(bagfile_ros2);
   string str1="/slam_out_pose";
   string str2="/fix";
   // extract two curves from .bag file.
@@ -155,41 +158,50 @@ int main(int argc, char **argv)
 
 
 #ifdef GPS_HECTOR
-
-#ifndef SEPERATE_ROSCORE   
-  extract2hector_gps *trajectory=new extract2hector_gps(&bag1);
-#else
-  rosbag::Bag bag2(bagfile_odroid);
+#ifdef READBAG 
+  
+#ifdef SEPERATE_ROSCORE   
+  rosbag::Bag bag2(bagfile_ros2);
   extract2hector_gps *trajectory=new extract2hector_gps(&bag1,&bag2);
- 
+#else
+  extract2hector_gps *trajectory=new extract2hector_gps(&bag1);
+#endif
+  trajectory->aligncurve(point_curve1,point_curve2,hector_matrix,dir);
+#else
+   //extract2hector_gps *trajectory=new extract2hector_gps(&bag1);
+   readkitti(hector_matrix,point_corr,dir);
 #endif
   //the coordinate system of gps and laser data are not in the same coordinate system. 
   //so,we use aligncurve function to align these two coordiante systems.
-  trajectory->aligncurve(point_curve1,point_curve2,hector_matrix,dir);
-  
+  //trajectory->aligncurve(point_curve1,point_curve2,hector_matrix,dir);
 #else
  // #define OPTIMAL_CORRESPODENCE
 #ifdef READFILE
   extract2curve1_curve2 *trajectory=new extract2curve1_curve2(&bag1,dir,1);
 #else
-  extract2curve1_curve2 *trajectory=new extract2curve1_curve2(&bag1,rieglfile);
+  //extract2curve1_curve2 *trajectory=new extract2curve1_curve2(&bag1,rieglfile);
+  //extract2curve1_curve2 *trajectory=new extract2curve1_curve2(&bag1,rieglfile);
+   extract2curve1_curve2 *trajectory=new extract2curve1_curve2(&bag1,&bag2);
 #endif
   trajectory->aligncurve(point_curve1,point_curve2,dir);
 #endif
 
-  unsigned int h_seq[point_curve1[0].size()-1];
-#ifndef OPTIMAL_CORRESPODENCE
+ unsigned int h_seq[point_corr[0].size()-1];
 
-  cout<<"use the timestamp to find the point correspondence"<<endl;
-  //timestamp_correspondence(point_curve1,point_curve2,point_corr,h_seq,dir);
-  closest_correspondence(point_curve2,point_curve1,point_corr,h_seq,dir);  
-#else
-
+#ifdef OPTIMAL_CORRESPODENCE
+  
   cout<<"use the optimal method to find the point correspondence"<<endl;
   
-  Optimal_correspondence(point_curve2,point_curve1,point_corr,h_seq,dir,type,beta, window_size);
+  Optimal_correspondence(point_curve1,point_curve2,point_corr,h_seq,dir,type,beta, window_size);
+#endif 
+  //closest_correspondence(point_curve2,point_curve1,point_corr,h_seq,dir);  
+#ifdef TIMESTAMPS_CORRESPONDENCE
 
+   cout<<"use the timestamp to find the point correspondence"<<endl;
+   timestamp_correspondence(point_curve1,point_curve2,point_corr,h_seq,dir);
 #endif
+   for(unsigned int i=0; i<=(point_corr[0].size()-1);i++)
+   h_seq[i]=1;
   //message_filters
 
 
@@ -211,7 +223,7 @@ int main(int argc, char **argv)
   for(unsigned int i=0; i<= point_corr[0].size()-1; i++)    
   Curves::allpoints.push_back(new Curves(point_corr,type,i));
 
-  
+  cout<< "read data complete"<<endl;
 #ifdef UNIFORM
    curvspace(num_points,Curves::allpoints);
    
@@ -226,7 +238,6 @@ int main(int argc, char **argv)
 #endif
     
     curve_rep(Curves::allpoints,type);
-  
 
 #ifndef UNIFORM_CORRESPODENCE
    
@@ -260,10 +271,9 @@ int main(int argc, char **argv)
     Curves::Samplepoints.push_back(curves);
    } 
 #endif
-     
+     //cout<<Curves::allpoints.size()-1<<endl;
 
      curve_rep(Curves::Samplepoints,type);
-    
      geodesic_path(Curves::Samplepoints,steps,dir,pose_index,hector_matrix,h_seq); 
       
      cout<<"get fusion trajectory"<<endl;
@@ -320,13 +330,13 @@ int main(int argc, char **argv)
      
     // cin.get();
      
-     //#ifdef PUBLISHTF
+#ifdef PUBLISHTF
      cout<<"plase open a new teminal to replay bag file"<<endl<<endl<<endl;
      cout<<"start to broacaste /tf"<<endl<<endl<<endl;
      system("gnome-terminal -e /home/du/Documents/xinde/record.sh");
      tf_broadcaster broadcaster;
      broadcaster.broadcaster_tf();
-     	
+#endif    	
     // matrix_new.clear();
       
 #endif
