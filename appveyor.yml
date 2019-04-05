@@ -1,5 +1,7 @@
 build:
  verbosity: detailed
+# we can only support a single visual studio version because the cache is too
+# small to fit multiple vcpkg caches
 image: Visual Studio 2017
 platform: x64
 branches:
