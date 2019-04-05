@@ -33,9 +33,6 @@ esac
 CMAKEOPTS="-DCMAKE_VERBOSE_MAKEFILE=ON"
 
 case "$DIST" in
-	trusty)
-		CMAKEOPTS="$CMAKEOPTS -DWITH_CGAL=OFF -DWITH_GLFW=OFF -DWITH_QT=OFF -DWITH_PYTHON=OFF -DWITH_LIBZIP=OFF"
-		;;
 	buster|sid)
 		CMAKEOPTS="$CMAKEOPTS -DWITH_ROS=ON"
 		;;
@@ -58,7 +55,7 @@ RUN echo "deb $MIRROR $DIST-updates $COMP" >> /etc/apt/sources.list
 RUN echo "deb $SECMIRROR $DIST/updates $COMP" >> /etc/apt/sources.list
 EOF
 		;;
-	trusty|xenial|bionic)
+	xenial|bionic)
 		cat >> Dockerfile <<EOF
 RUN echo "deb $MIRROR $DIST-updates $COMP" >> /etc/apt/sources.list
 RUN echo "deb $SECMIRROR $DIST-security $COMP" >> /etc/apt/sources.list
@@ -75,9 +72,6 @@ docker build --tag="$TAG" .
 echo "travis_fold:end:docker_build"
 
 GENERATOR=Ninja
-if [ "$DIST" = "trusty" ]; then
-	GENERATOR="Unix Makefiles"
-fi
 APT="apt-get install --yes --no-install-recommends -o Debug::pkgProblemResolver=yes"
 
 {
@@ -89,24 +83,13 @@ APT="apt-get install --yes --no-install-recommends -o Debug::pkgProblemResolver=
 	echo "cat /etc/apt/sources.list";
 	echo "apt-get update";
 	echo "apt-get dist-upgrade --yes";
-	echo "$APT equivs";
-	if [ "$DIST" != "trusty" ]; then
-		echo "$APT ninja-build";
-	fi
+	echo "$APT equivs ninja-build";
 	if [ -z "$CC" ]; then
 		echo "equivs-build doc/equivs/control.$DERIV.$DIST";
 	else
 		echo "equivs-build doc/equivs/control.$DERIV.$DIST.$CC";
 	fi
-	case "$DIST" in
-		trusty)
-			echo "dpkg --install --force-depends ./3dtk-build-deps_1.0_all.deb";
-			echo "$APT --fix-broken";
-			;;
-		*)
-			echo "$APT ./3dtk-build-deps_1.0_all.deb";
-			;;
-	esac
+	echo "$APT ./3dtk-build-deps_1.0_all.deb";
 	echo "echo travis_fold:end:docker_setup";
 	echo "mkdir .build";
 	echo "cmake -H. -B.build $CMAKEOPTS -G \"$GENERATOR\"";
