@@ -33,9 +33,6 @@ esac
 CMAKEOPTS="-DCMAKE_VERBOSE_MAKEFILE=ON"
 
 case "$DIST" in
-	jessie)
-		CMAKEOPTS="$CMAKEOPTS -DWITH_CGAL=OFF -DWITH_GLFW=OFF -DWITH_QT=OFF"
-		;;
 	trusty)
 		CMAKEOPTS="$CMAKEOPTS -DWITH_CGAL=OFF -DWITH_GLFW=OFF -DWITH_QT=OFF -DWITH_PYTHON=OFF -DWITH_LIBZIP=OFF"
 		;;
@@ -55,7 +52,7 @@ RUN echo 'Acquire::EnableSrvRecords "false";' > /etc/apt/apt.conf.d/90srvrecords
 EOF
 
 case "$DIST" in
-	jessie|stretch|buster)
+	stretch|buster)
 		cat >> Dockerfile <<EOF
 RUN echo "deb $MIRROR $DIST-updates $COMP" >> /etc/apt/sources.list
 RUN echo "deb $SECMIRROR $DIST/updates $COMP" >> /etc/apt/sources.list
@@ -102,7 +99,7 @@ APT="apt-get install --yes --no-install-recommends -o Debug::pkgProblemResolver=
 		echo "equivs-build doc/equivs/control.$DERIV.$DIST.$CC";
 	fi
 	case "$DIST" in
-		trusty|jessie)
+		trusty)
 			echo "dpkg --install --force-depends ./3dtk-build-deps_1.0_all.deb";
 			echo "$APT --fix-broken";
 			;;
