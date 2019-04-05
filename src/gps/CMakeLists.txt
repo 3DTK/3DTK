@@ -10,4 +10,7 @@ add_executable(rtk2pose ../scanio/writer.cc gpstools.cc rtk2pose.cc)
 
 target_link_libraries(scan2utm scan ${Boost_LIBRARIES} ${ANN_LIBRARIES} ${OpenCV_LIBS})
 target_link_libraries(rtk2pose scan ${Boost_LIBRARIES} ${ANN_LIBRARIES_SHARED} ${OpenCV_LIBS})
+if (WIN32)
+  target_link_libraries(rtk2pose XGetopt)
+endif()
 endif()
