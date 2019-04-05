@@ -59,12 +59,6 @@ matrix:
       services:
         - docker
       env:
-        - DERIV=ubuntu DIST=trusty
-    - os: linux
-      sudo: required
-      services:
-        - docker
-      env:
         - DERIV=ubuntu DIST=xenial
     - os: linux
       sudo: required
