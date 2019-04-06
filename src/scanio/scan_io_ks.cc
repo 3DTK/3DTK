@@ -16,16 +16,37 @@
  */
 
 #include "scanio/scan_io_ks.h"
+#include "scanio/helper.h"
+
+#include <iostream>
+using std::cout;
+using std::cerr;
+using std::endl;
+#include <vector>
+
+#ifdef _MSC_VER
+#include <windows.h>
+#endif
 
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/fstream.hpp>
 using namespace boost::filesystem;
 
-const char* ScanIO_ks::data_prefix = "ScanPos";
-const char* ScanIO_ks::data_suffix = " - Scan001.txt";
-IODataType ScanIO_ks::spec[] = { DATA_XYZ, DATA_XYZ, DATA_XYZ, DATA_TERMINATOR };
-ScanDataTransform_ks tf; 
-ScanDataTransform& ScanIO_ks::transform2uos = tf;
+#include "slam6d/globals.icc"
+
+
+
+#define DATA_PATH_PREFIX "ScanPos"
+#define DATA_PATH_SUFFIX " - Scan001.txt"
+
+
+std::list<std::string> ScanIO_ks::readDirectory(const char* dir_path, unsigned int start, unsigned int end)
+{
+    const char* suffixes[2] = { DATA_PATH_SUFFIX, NULL };
+    return readDirectoryHelper(dir_path, start, end, suffixes, DATA_PATH_PREFIX);
+}
+
+
 
 void ScanIO_ks::readPose(const char* dir_path, const char* identifier, double* pose)
 {
@@ -39,6 +60,16 @@ void ScanIO_ks::readPose(const char* dir_path, const char* identifier, double* p
     for(unsigned int i = 0; i < 3; ++i) pose[i] *= 100.0;
 }
 
+time_t ScanIO_ks::lastModified(const char* dir_path, const char* identifier)
+{
+  const char* suffixes[2] = { DATA_PATH_SUFFIX, NULL };
+  return lastModifiedHelper(dir_path, identifier, suffixes, DATA_PATH_PREFIX);
+}
+
+bool ScanIO_ks::supports(IODataType type)
+{
+  return !!(type & (DATA_XYZ));
+}
 
 std::function<bool (std::istream &data_file)> read_data(PointFilter& filter,
         std::vector<double>* xyz, std::vector<unsigned char>* rgb,
@@ -55,7 +86,6 @@ std::function<bool (std::istream &data_file)> read_data(PointFilter& filter,
 
         IODataType spec[4] = { DATA_XYZ, DATA_XYZ, DATA_XYZ, DATA_TERMINATOR };
         ScanDataTransform_ks transform;
-
         readASCII(data_file, spec, transform, filter, xyz);
 
         return true;
@@ -71,7 +101,7 @@ void ScanIO_ks::readScan(const char* dir_path, const char* identifier, PointFilt
 
     // error handling
     path data_path(dir_path);
-    data_path /= path(std::string(dataPrefix()) + identifier + dataSuffix());
+    data_path /= path(std::string(DATA_PATH_PREFIX) + identifier + DATA_PATH_SUFFIX);
     if (!open_path(data_path, read_data(filter, xyz, rgb, reflectance, temperature, amplitude, type, deviation)))
         throw std::runtime_error(std::string("There is no scan file for [") + identifier + "] in [" + dir_path + "]");
 }
