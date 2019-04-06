@@ -15,100 +15,11 @@
  */
 
 #include "scanio/scan_io_xyzr.h"
-#include "scanio/helper.h"
 
-#include <iostream>
-using std::cout;
-using std::cerr;
-using std::endl;
-#include <vector>
-
-#ifdef _MSC_VER
-#include <windows.h>
-#endif
-
-#include <boost/filesystem/operations.hpp>
-#include <boost/filesystem/fstream.hpp>
-using namespace boost::filesystem;
-
-#include "slam6d/globals.icc"
-
-#define DATA_PATH_PREFIX "scan"
-#define DATA_PATH_SUFFIX ".xyz"
-#define POSE_PATH_PREFIX "scan"
-#define POSE_PATH_SUFFIX ".pose"
-
-std::list<std::string> ScanIO_xyzr::readDirectory(const char* dir_path, 
-						  unsigned int start, 
-						  unsigned int end)
-{
-    const char* suffixes[2] = { DATA_PATH_SUFFIX, NULL };
-    return readDirectoryHelper(dir_path, start, end, suffixes);
-}
-
-void ScanIO_xyzr::readPose(const char* dir_path, 
-			   const char* identifier, 
-			   double* pose)
-{
-    readPoseHelper(dir_path, identifier, pose);
-}
-
-time_t ScanIO_xyzr::lastModified(const char* dir_path, const char* identifier)
-{
-  const char* suffixes[2] = { DATA_PATH_SUFFIX, NULL };
-  return lastModifiedHelper(dir_path, identifier, suffixes);
-}
-
-bool ScanIO_xyzr::supports(IODataType type)
-{
-  return !!(type & ( DATA_REFLECTANCE | DATA_XYZ ));
-}
-
-void ScanIO_xyzr::readScan(const char* dir_path, 
-			   const char* identifier, 
-			   PointFilter& filter, 
-			   std::vector<double>* xyz, 
-			   std::vector<unsigned char>* rgb, 
-			   std::vector<float>* reflectance, 
-			   std::vector<float>* temperature, 
-			   std::vector<float>* amplitude, 
-			   std::vector<int>* type, 
-			   std::vector<float>* deviation,
-               std::vector<double>* normal)
-{
-    if(xyz == 0 || reflectance == 0)
-        return;
-
-    IODataType spec[5] = { DATA_XYZ, DATA_XYZ, DATA_XYZ,
+const char* ScanIO_xyzr::data_suffix = ".xyz";
+IODataType ScanIO_xyzr::spec[] = { DATA_XYZ, DATA_XYZ, DATA_XYZ,
         DATA_REFLECTANCE, DATA_TERMINATOR };
-    ScanDataTransform_xyz transform;
-
-    // error handling
-    path data_path(dir_path);
-    data_path /= path(std::string(DATA_PATH_PREFIX) 
-            + identifier 
-            + DATA_PATH_SUFFIX);
-    if (!open_path(data_path, open_uos_file(spec, transform, filter, xyz, 0, reflectance, 0, 0, 0, 0,0)))
-        throw std::runtime_error(std::string("There is no scan file for [") 
-                + identifier + "] in [" 
-                + dir_path + "]");
-}
-
-
-
-/**
- * class factory for object construction
- *
- * @return Pointer to new object
- */
-#ifdef _MSC_VER
-extern "C" __declspec(dllexport) ScanIO* create()
-#else
-extern "C" ScanIO* create()
-#endif
-{
-  return new ScanIO_xyzr;
-}
+ScanDataTransform& ScanIO_xyzr::transform2uos = ScanDataTransform_xyz();
 
 
 /**
