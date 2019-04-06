@@ -16,6 +16,13 @@
  */
 
 #include "scanio/scan_io_riegl_txt.h"
+#include "scanio/helper.h"
+
+#include <iostream>
+using std::cout;
+using std::cerr;
+using std::endl;
+#include <vector>
 
 #ifdef _MSC_VER
 #include <windows.h>
@@ -28,13 +35,19 @@ using namespace boost::filesystem;
 #include "slam6d/globals.icc"
 
 
-const char* ScanIO_riegl_txt::data_suffix = ".txt";
-const char* ScanIO_riegl_txt::pose_suffix = ".dat";
-IODataType ScanIO_riegl_txt::spec[] = { DATA_XYZ, DATA_XYZ, DATA_XYZ,
-            DATA_DUMMY, DATA_DUMMY, DATA_DUMMY, DATA_REFLECTANCE,
-            DATA_TERMINATOR };
-ScanDataTransform& ScanIO_riegl_txt::transform2uos = ScanDataTransform_riegl();
+#define DATA_PATH_PREFIX "scan"
+#define DATA_PATH_SUFFIX ".txt"
+#define POSE_PATH_PREFIX "scan"
+#define POSE_PATH_SUFFIX ".dat"
 
+
+std::list<std::string> ScanIO_riegl_txt::readDirectory(const char* dir_path,
+                                                       unsigned int start,
+                                                       unsigned int end)
+{
+    const char* suffixes[2] = { DATA_PATH_SUFFIX, NULL };
+    return readDirectoryHelper(dir_path, start, end, suffixes);
+}
 
 void ScanIO_riegl_txt::readPose(const char* dir_path,
                                 const char* identifier,
@@ -43,9 +56,9 @@ void ScanIO_riegl_txt::readPose(const char* dir_path,
   unsigned int i;
   
   path pose_path(dir_path);
-  pose_path /= path(std::string(posePrefix())
+  pose_path /= path(std::string(POSE_PATH_PREFIX)
                     + identifier
-                    + poseSuffix());
+                    + POSE_PATH_SUFFIX);
   if(!exists(pose_path))
     throw std::runtime_error(std::string("There is no pose file for [")
                              + identifier + "] in [" + dir_path + "]");
@@ -95,6 +108,17 @@ void ScanIO_riegl_txt::readPose(const char* dir_path,
     pose[3] = rPosTheta[0];
     pose[4] = rPosTheta[1];
     pose[5] = rPosTheta[2];
+}
+
+time_t ScanIO_riegl_txt::lastModified(const char* dir_path, const char* identifier)
+{
+  const char* suffixes[2] = { DATA_PATH_SUFFIX, NULL };
+  return lastModifiedHelper(dir_path, identifier, suffixes);
+}
+
+bool ScanIO_riegl_txt::supports(IODataType type)
+{
+  return !!(type & (DATA_XYZ | DATA_REFLECTANCE));
 }
 
 std::function<bool (std::istream &data_file)> read_data(PointFilter& filter,
@@ -147,9 +171,9 @@ void ScanIO_riegl_txt::readScan(const char* dir_path,
 
     // error handling
     path data_path(dir_path);
-    data_path /= path(std::string(dataPrefix())
+    data_path /= path(std::string(DATA_PATH_PREFIX)
             + identifier
-            + dataSuffix());
+            + DATA_PATH_SUFFIX);
     if (!open_path(data_path, read_data(filter, xyz, rgb, reflectance, temperature, amplitude, type, deviation)))
         throw std::runtime_error(std::string("There is no scan file for [")
                 + identifier + "] in [" + dir_path + "]");

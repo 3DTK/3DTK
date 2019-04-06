@@ -16,6 +16,13 @@
  */
 
 #include "scanio/scan_io_riegl_rgb.h"
+#include "scanio/helper.h"
+
+#include <iostream>
+using std::cout;
+using std::cerr;
+using std::endl;
+#include <vector>
 
 #ifdef _MSC_VER
 #include <windows.h>
@@ -27,21 +34,27 @@ using namespace boost::filesystem;
 
 #include "slam6d/globals.icc"
 
-const char* ScanIO_riegl_rgb::data_suffix = ".rgb";
-const char* ScanIO_riegl_rgb::pose_suffix = ".dat";
-IODataType ScanIO_riegl_rgb::spec[] = { DATA_XYZ, DATA_XYZ, DATA_XYZ,
-            DATA_DUMMY, DATA_DUMMY, DATA_DUMMY,
-            DATA_RGB, DATA_RGB, DATA_RGB, DATA_REFLECTANCE,
-            DATA_TERMINATOR };
-ScanDataTransform& ScanIO_riegl_rgb::transform2uos = ScanDataTransform_riegl();
 
+
+#define DATA_PATH_PREFIX "scan"
+#define DATA_PATH_SUFFIX ".rgb"
+#define POSE_PATH_PREFIX "scan"
+#define POSE_PATH_SUFFIX ".dat"
+
+
+
+std::list<std::string> ScanIO_riegl_rgb::readDirectory(const char* dir_path, unsigned int start, unsigned int end)
+{
+    const char* suffixes[2] = { DATA_PATH_SUFFIX, NULL };
+    return readDirectoryHelper(dir_path, start, end, suffixes);
+}
 
 void ScanIO_riegl_rgb::readPose(const char* dir_path, const char* identifier, double* pose)
 {
   unsigned int i;
   
   path pose_path(dir_path);
-  pose_path /= path(std::string(posePrefix()) + identifier + poseSuffix());
+  pose_path /= path(std::string(POSE_PATH_PREFIX) + identifier + POSE_PATH_SUFFIX);
   if(!exists(pose_path))
     throw std::runtime_error(std::string("There is no pose file for [") + identifier + "] in [" + dir_path + "]");
 
@@ -88,6 +101,17 @@ void ScanIO_riegl_rgb::readPose(const char* dir_path, const char* identifier, do
   }
 }
 
+time_t ScanIO_riegl_rgb::lastModified(const char* dir_path, const char* identifier)
+{
+  const char* suffixes[2] = { DATA_PATH_SUFFIX, NULL };
+  return lastModifiedHelper(dir_path, identifier, suffixes);
+}
+
+bool ScanIO_riegl_rgb::supports(IODataType type)
+{
+  return !!(type & (DATA_XYZ | DATA_RGB | DATA_REFLECTANCE));
+}
+
 std::function<bool (std::istream &data_file)> read_data(PointFilter& filter,
         std::vector<double>* xyz, std::vector<unsigned char>* rgb,
         std::vector<float>* reflectance, std::vector<float>* temperature,
@@ -127,7 +151,7 @@ void ScanIO_riegl_rgb::readScan(const char* dir_path, const char* identifier, Po
 
     // error handling
     path data_path(dir_path);
-    data_path /= path(std::string(dataPrefix()) + identifier + dataSuffix());
+    data_path /= path(std::string(DATA_PATH_PREFIX) + identifier + DATA_PATH_SUFFIX);
     if (!open_path(data_path, read_data(filter, xyz, rgb, reflectance, temperature, amplitude, type, deviation)))
         throw std::runtime_error(std::string("There is no scan file for [") + identifier + "] in [" + dir_path + "]");
 }

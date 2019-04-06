@@ -44,7 +44,10 @@ using namespace std;
 #include <boost/filesystem/fstream.hpp>
 using namespace boost::filesystem;
 
-const char* ScanIO_velodyne::data_suffix = ".bin";
+#define DATA_PATH_PREFIX "scan"
+#define DATA_PATH_SUFFIX ".bin"
+#define POSE_PATH_PREFIX "scan"
+#define POSE_PATH_SUFFIX ".pose"
 
 #define BLOCK_OFFSET 42+16
 
@@ -481,10 +484,10 @@ std::list<std::string> ScanIO_velodyne::readDirectory(const char* dir_path, unsi
 	   std::string identifier(to_string(i,3));
 
 	   path data(dir_path);
-	   data /= path(std::string(dataPrefix()) + dataSuffix());
+	   data /= path(std::string(DATA_PATH_PREFIX) + DATA_PATH_SUFFIX);
 
 	   path pose(dir_path);
-	   pose /= path(std::string(posePrefix()) + identifier + poseSuffix());
+	   pose /= path(std::string(POSE_PATH_PREFIX) + identifier + POSE_PATH_SUFFIX);
 
 	   if(!exists(data))
 		   break;
@@ -501,6 +504,17 @@ void ScanIO_velodyne::readPose(const char* dir_path, const char* identifier, dou
   for(i = 0; i < 6; ++i)  pose[i] = 0.0;
   for(i = 3; i < 6; ++i)  pose[i] = 0.0;
    return;
+}
+
+time_t ScanIO_velodyne::lastModified(const char* dir_path, const char* identifier)
+{
+  const char* suffixes[2] = { DATA_PATH_SUFFIX, NULL };
+  return lastModifiedHelper(dir_path, identifier, suffixes);
+}
+
+bool ScanIO_velodyne::supports(IODataType type)
+{
+  return !!(type & (DATA_XYZ));
 }
 
 
@@ -520,12 +534,12 @@ void ScanIO_velodyne::readScan(
     FILE *scan_in;
 
     path data_path(dir_path);
-    data_path /= path(std::string(dataPrefix()) + dataSuffix());
+    data_path /= path(std::string(DATA_PATH_PREFIX) +  DATA_PATH_SUFFIX);
     if(!exists(data_path))
         throw std::runtime_error(std::string("There is no scan file for [") + identifier + "] in [" + dir_path + "]");
 
 	char filename[256];
-	sprintf(filename, "%s%s%s",dir_path , dataPrefix(), dataSuffix());
+	sprintf(filename, "%s%s%s",dir_path ,DATA_PATH_PREFIX,  DATA_PATH_SUFFIX );
 
 #ifdef _MSC_VER 
     scan_in = fopen(filename,"rb");
