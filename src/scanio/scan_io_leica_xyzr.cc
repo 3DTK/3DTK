@@ -15,16 +15,100 @@
  */
 
 #include "scanio/scan_io_leica_xyzr.h"
+#include "scanio/helper.h"
+
+#include <iostream>
+using std::cout;
+using std::cerr;
+using std::endl;
+#include <vector>
+
+#ifdef _MSC_VER
+#include <windows.h>
+#endif
 
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/fstream.hpp>
 using namespace boost::filesystem;
 
-const char* ScanIO_leica_xyzr::data_suffix = ".xyz";
-IODataType ScanIO_leica_xyzr::spec[] = { DATA_XYZ, DATA_XYZ, DATA_XYZ,
-          DATA_RGB, DATA_RGB, DATA_REFLECTANCE, DATA_TERMINATOR };
-ScanDataTransform& ScanIO_leica_xyzr::transform2uos = ScanDataTransform_xyz();
+#include "slam6d/globals.icc"
 
+#define DATA_PATH_PREFIX "scan"
+#define DATA_PATH_SUFFIX ".xyz"
+#define POSE_PATH_PREFIX "scan"
+#define POSE_PATH_SUFFIX ".pose"
+
+std::list<std::string> ScanIO_leica_xyzr::readDirectory(const char* dir_path, 
+						  unsigned int start, 
+						  unsigned int end)
+{
+  std::list<std::string> identifiers;
+  for(unsigned int i = start; i <= end; ++i) {
+    // identifier is /d/d/d (000-999)
+    std::string identifier(to_string(i,3));
+    // scan consists of data (.3d) and pose (.pose) files
+    path data(dir_path);
+    data /= path(std::string(DATA_PATH_PREFIX) + identifier + DATA_PATH_SUFFIX);
+    path pose(dir_path);
+    pose /= path(std::string(POSE_PATH_PREFIX) + identifier + POSE_PATH_SUFFIX);
+    cout << data << endl;
+    // stop if part of a scan is missing or end by absence is detected
+    cout << i << endl;
+    if(!exists(data)) {
+      cerr << "No data found!" << endl;
+      break;
+    }
+    if(!exists(pose)) {
+      cerr << "No pose files found!" << endl; 
+      break;
+    }
+    identifiers.push_back(identifier);
+  }
+  return identifiers;
+}
+
+void ScanIO_leica_xyzr::readPose(const char* dir_path, 
+			   const char* identifier, 
+			   double* pose)
+{
+  unsigned int i;
+
+  path pose_path(dir_path);
+  pose_path /= path(std::string(POSE_PATH_PREFIX) 
+		    + identifier + 
+		    POSE_PATH_SUFFIX);
+  if(!exists(pose_path))
+    throw std::runtime_error(std::string("There is no pose file for [") 
+			     + identifier + "] in [" + dir_path + "]");
+
+  // open pose file
+  ifstream pose_file(pose_path);
+
+  // if the file is open, read contents
+  if(pose_file.good()) {
+    // read 6 plain doubles
+    for(i = 0; i < 6; ++i) pose_file >> pose[i];
+    pose_file.close();
+
+    // convert angles from deg to rad
+    for(i = 3; i < 6; ++i) pose[i] = rad(pose[i]);
+  } else {
+    throw std::runtime_error(std::string("Pose file could not be opened for [")
+			     + identifier + "] in [" 
+			     + dir_path + "]");
+  }
+}
+
+time_t ScanIO_leica_xyzr::lastModified(const char* dir_path, const char* identifier)
+{
+  const char* suffixes[2] = { DATA_PATH_SUFFIX, NULL };
+  return lastModifiedHelper(dir_path, identifier, suffixes);
+}
+
+bool ScanIO_leica_xyzr::supports(IODataType type)
+{
+  return !!(type & ( DATA_REFLECTANCE | DATA_XYZ ));
+}
 
 void ScanIO_leica_xyzr::readScan(const char* dir_path, 
 			   const char* identifier, 
@@ -42,9 +126,9 @@ void ScanIO_leica_xyzr::readScan(const char* dir_path,
 
   // error handling
   path data_path(dir_path);
-  data_path /= path(std::string(dataPrefix()) 
+  data_path /= path(std::string(DATA_PATH_PREFIX) 
 		    + identifier 
-		    + dataSuffix());
+		    + DATA_PATH_SUFFIX);
   if(!exists(data_path))
     throw std::runtime_error(std::string("There is no scan file for [") 
 			     + identifier + "] in [" 
