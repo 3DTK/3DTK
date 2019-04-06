@@ -20,6 +20,13 @@
  */
 class ScanIO_leica_xyzr : public ScanIO {
 public:
+  virtual std::list<std::string> readDirectory(const char* dir_path, 
+					       unsigned int start, 
+					       unsigned int end);
+  virtual void readPose(const char* dir_path, 
+			const char* identifier, 
+			double* pose);
+  virtual time_t lastModified(const char* dir_path, const char* identifier);
   virtual void readScan(const char* dir_path, 
 			const char* identifier, 
 			PointFilter& filter, 
@@ -31,15 +38,7 @@ public:
 			std::vector<int>* type, 
 			std::vector<float>* deviation,
       std::vector<double>* normal);
-
-protected:
-  static const char* data_suffix;
-  static IODataType spec[];
-  static ScanDataTransform& transform2uos;
-
-  virtual const char* dataSuffix() { return data_suffix; }
-  virtual IODataType* getSpec() { return spec; }
-  virtual ScanDataTransform& getTransform() { return transform2uos; }
+  virtual bool supports(IODataType type);
 };
 
 #endif
