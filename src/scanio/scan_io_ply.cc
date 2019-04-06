@@ -18,7 +18,6 @@
  */
 
 #include "scanio/scan_io_ply.h"
-#include "scanio/helper.h"
 #include "slam6d/point.h"
 #include "rply.h"
 
@@ -40,33 +39,14 @@ using namespace boost::filesystem;
 
 #include "slam6d/globals.icc"
 
-#define DATA_PATH_PREFIX "scan"
-#define DATA_PATH_SUFFIX ".ply"
-
-std::list<std::string> ScanIO_ply::readDirectory(const char* dir_path,
-									    unsigned int start,
-									    unsigned int end)
-{
-    const char* suffixes[2] = { DATA_PATH_SUFFIX, NULL };
-    return readDirectoryHelper(dir_path, start, end, suffixes);
-}
+const char* ScanIO_ply::data_suffix = ".ply";
+IODataType ScanIO_ply::spec[] = { DATA_XYZ, DATA_XYZ, DATA_XYZ, DATA_RGB, DATA_RGB, DATA_RGB, DATA_TERMINATOR };
 
 void ScanIO_ply::readPose(const char* dir_path,
 					 const char* identifier,
 					 double* pose)
 {
   for (unsigned int i = 0; i < 6; ++i) pose[i] = 0.0;
-}
-
-time_t ScanIO_ply::lastModified(const char* dir_path, const char* identifier)
-{
-  const char* suffixes[2] = { DATA_PATH_SUFFIX, NULL };
-  return lastModifiedHelper(dir_path, identifier, suffixes);
-}
-
-bool ScanIO_ply::supports(IODataType type)
-{
-  return !!(type & (DATA_XYZ | DATA_REFLECTANCE | DATA_RGB));
 }
 
 int vertex_cb(p_ply_argument argument) {
@@ -109,8 +89,8 @@ void ScanIO_ply::readScan(const char* dir_path,
 {
   // error handling
   path data_path(dir_path);
-  data_path /= path(std::string(DATA_PATH_PREFIX) +
-				identifier + DATA_PATH_SUFFIX);
+  data_path /= path(std::string(dataPrefix()) +
+				identifier + dataSuffix());
   if(!exists(data_path))
     throw std::runtime_error(std::string("There is no scan file for [")
 					    + identifier + "] in [" + dir_path + "]");
