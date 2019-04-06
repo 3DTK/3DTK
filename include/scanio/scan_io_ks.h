@@ -9,8 +9,6 @@
 
 #include "scan_io.h"
 
-
-
 /**
  * @brief 3D scan loader for KS scans
  *
@@ -18,12 +16,17 @@
  */
 class ScanIO_ks : public ScanIO {
 public:
-  virtual std::list<std::string> readDirectory(const char* dir_path, unsigned int start, unsigned int end);
   virtual void readPose(const char* dir_path, const char* identifier, double* pose);
-  virtual time_t lastModified(const char* dir_path, const char* identifier);
-  virtual void readScan(const char* dir_path, const char* identifier, PointFilter& filter, std::vector<double>* xyz, std::vector<unsigned char>* rgb, std::vector<float>* reflectance, std::vector<float>* temperature, std::vector<float>* amplitude, std::vector<int>* type, std::vector<float>* deviation,
-      std::vector<double>* normal);
-  virtual bool supports(IODataType type);
+  virtual void readScan(const char* dir_path, const char* identifier, PointFilter& filter, std::vector<double>* xyz = 0, std::vector<unsigned char>* rgb = 0, std::vector<float>* reflectance = 0, std::vector<float>* temperature = 0, std::vector<float>* amplitude = 0, std::vector<int>* type = 0, std::vector<float>* deviation = 0, std::vector<double>* normal = 0);
+
+protected:
+  static const char* data_prefix;
+  static const char* data_suffix;
+  static IODataType spec[];
+
+  virtual const char* dataPrefix() { return data_prefix; }
+  virtual const char* dataSuffix() { return data_suffix; }
+  virtual IODataType* getSpec() { return spec; }
 };
 
 #endif

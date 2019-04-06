@@ -17,71 +17,16 @@
  */
 
 #include "scanio/scan_io_uos.h"
-#include "scanio/helper.h"
 
-#include <iostream>
-using std::cout;
-using std::cerr;
-using std::endl;
-#include <vector>
+/*
+const char* ScanIO_uos::data_prefix = "scan";
+const char* ScanIO_uos::data_suffix = ".3d";
+const char* ScanIO_uos::pose_prefix = "scan";
+const char* ScanIO_uos::pose_suffix = ".pose";
 
-#ifdef _MSC_VER
-#include <windows.h>
-#endif
-
-#include <boost/filesystem/operations.hpp>
-#include <boost/filesystem/fstream.hpp>
-using namespace boost::filesystem;
-
-#include "slam6d/globals.icc"
-
-
-
-#define DATA_PATH_PREFIX "scan"
-#define DATA_PATH_SUFFIX ".3d"
-#define POSE_PATH_PREFIX "scan"
-#define POSE_PATH_SUFFIX ".pose"
-
-
-
-std::list<std::string> ScanIO_uos::readDirectory(const char* dir_path, unsigned int start, unsigned int end)
-{
-    const char* data_path_suffixes[2] = {DATA_PATH_SUFFIX, NULL};
-    return readDirectoryHelper(dir_path, start, end, data_path_suffixes);
-}
-
-void ScanIO_uos::readPose(const char* dir_path, const char* identifier, double* pose)
-{
-    readPoseHelper(dir_path, identifier, pose);
-}
-
-time_t ScanIO_uos::lastModified(const char* dir_path, const char* identifier)
-{
-  const char* suffixes[2] = { DATA_PATH_SUFFIX, NULL };
-  return lastModifiedHelper(dir_path, identifier, suffixes);
-}
-
-bool ScanIO_uos::supports(IODataType type)
-{
-  return !!(type & (DATA_XYZ));
-}
-
-void ScanIO_uos::readScan(const char* dir_path, const char* identifier, PointFilter& filter, std::vector<double>* xyz, std::vector<unsigned char>* rgb, std::vector<float>* reflectance, std::vector<float>* temperature, std::vector<float>* amplitude, std::vector<int>* type, std::vector<float>* deviation,
-               std::vector<double>* normal)
-{
-    if(xyz == 0)
-        return;
-
-    IODataType spec[4] = { DATA_XYZ, DATA_XYZ, DATA_XYZ, DATA_TERMINATOR };
-    ScanDataTransform_identity transform;
-
-    // error handling
-    path data_path(dir_path);
-    data_path /= path(std::string(DATA_PATH_PREFIX) + identifier + DATA_PATH_SUFFIX);
-    if (!open_path(data_path, open_uos_file(spec, transform, filter, xyz, 0, 0, 0, 0, 0, 0, 0)))
-        throw std::runtime_error(std::string("There is no scan file for [") + identifier + "] in [" + dir_path + "]");
-}
-
+IODataType ScanIO_uos::spec[] = { DATA_XYZ, DATA_XYZ, DATA_XYZ, DATA_TERMINATOR };
+ScanDataTransform& ScanIO_uos::transform2uos[] = ScanDataTransform_identity;
+*/
 
 
 /**
