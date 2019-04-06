@@ -34,16 +34,22 @@ using namespace boost::filesystem;
 
 #include "slam6d/globals.icc"
 
-const char* ScanIO_ks_rgb::data_prefix = "Color_ScanPos";
-const char* ScanIO_ks_rgb::data_suffix = " - Scan001.txt";
-IODataType ScanIO_ks_rgb::spec[] = { DATA_XYZ, DATA_XYZ, DATA_XYZ,
-            DATA_RGB, DATA_RGB, DATA_RGB,
-            DATA_AMPLITUDE, DATA_REFLECTANCE, DATA_TERMINATOR };
-ScanDataTransform_ks tf;
-ScanDataTransform& ScanIO_ks_rgb::transform2uos = tf;
 
+
+#define DATA_PATH_PREFIX "Color_ScanPos"
+#define DATA_PATH_SUFFIX " - Scan001.txt"
+
+std::list<std::string> ScanIO_ks_rgb::readDirectory(const char* dir_path, unsigned int start, unsigned int end)
+{
+    const char* suffixes[2] = { DATA_PATH_SUFFIX, NULL };
+    return readDirectoryHelper(dir_path, start, end, suffixes, DATA_PATH_PREFIX);
+}
+
+void ScanIO_ks_rgb::readPose(const char* dir_path, const char* identifier, double* pose)
+{
+    readPoseHelper(dir_path, identifier, pose);
 /*
-Don't use readPose with this part of io_ks because the original io_ks_rgb didn't
+Don't use this part of io_ks because the original io_ks_rgb didn't
 have it either, reasoning was "we never got ks_rgb scans with pose", so
 the pose files created were already corrected in terms of offset and
 scaling
@@ -55,6 +61,18 @@ scaling
     // convert coordinate to cm
     for(unsigned int i = 0; i < 3; ++i) pose[i] *= 100.0;
 */
+}
+
+time_t ScanIO_ks_rgb::lastModified(const char* dir_path, const char* identifier)
+{
+  const char* suffixes[2] = { DATA_PATH_SUFFIX, NULL };
+  return lastModifiedHelper(dir_path, identifier, suffixes);
+}
+
+bool ScanIO_ks_rgb::supports(IODataType type)
+{
+  return !!(type & (DATA_XYZ | DATA_RGB | DATA_REFLECTANCE | DATA_AMPLITUDE));
+}
 
 std::function<bool (std::istream &data_file)> read_data(PointFilter& filter,
         std::vector<double>* xyz, std::vector<unsigned char>* rgb,
@@ -89,7 +107,7 @@ void ScanIO_ks_rgb::readScan(const char* dir_path, const char* identifier, Point
 
     // error handling
     path data_path(dir_path);
-    data_path /= path(std::string(dataPrefix()) + identifier + dataSuffix());
+    data_path /= path(std::string(DATA_PATH_PREFIX) + identifier + DATA_PATH_SUFFIX);
     if (!open_path(data_path, read_data(filter, xyz, rgb, reflectance, temperature, amplitude, type, deviation)))
         throw std::runtime_error(std::string("There is no scan file for [") + identifier + "] in [" + dir_path + "]");
 }

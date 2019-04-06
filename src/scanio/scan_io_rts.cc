@@ -16,8 +16,20 @@
  */
 
 #include "scanio/scan_io_rts.h"
+#include "scanio/helper.h"
+
+#include <iostream>
+using std::cout;
+using std::cerr;
+using std::endl;
+#include <vector>
+using std::vector;
 #include <sstream>
 using std::stringstream;
+
+#ifdef _MSC_VER
+#include <windows.h>
+#endif
 
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/fstream.hpp>
@@ -25,21 +37,21 @@ using namespace boost::filesystem;
 
 #include "slam6d/globals.icc"
 
-#define POSE_PATH_FILE "odometry_0_sync_interpol.dat"
 
-const char* ScanIO_rts::data_prefix = "scan3d_0_";
-IODataType ScanIO_rts::spec[] = { DATA_XYZ, DATA_XYZ, DATA_XYZ, DATA_TYPE,
-    DATA_DUMMY, DATA_DUMMY, DATA_TERMINATOR };
-ScanDataTransform_rts tf;
-ScanDataTransform& ScanIO_rts::transform2uos = tf;
+
+#define DATA_PATH_PREFIX "scan3d_0_"
+#define DATA_PATH_SUFFIX ".3d"
+#define POSE_PATH_FILE "odometry_0_sync_interpol.dat"
 
 //! RTS type flag for invalid points
 #define TYPE_INVALID 0x10
 
+
+
 std::list<std::string> ScanIO_rts::readDirectory(const char* dir_path, unsigned int start, unsigned int end)
 {
-    const char* suffixes[2] = { dataPrefix(), NULL };
-    return readDirectoryHelper(dir_path, start, end, suffixes, dataPrefix(), 0);
+    const char* suffixes[2] = { DATA_PATH_SUFFIX, NULL };
+    return readDirectoryHelper(dir_path, start, end, suffixes, DATA_PATH_PREFIX, 0);
 }
 
 void ScanIO_rts::readPose(const char* dir_path, const char* identifier, double* pose)
@@ -56,7 +68,7 @@ void ScanIO_rts::readPose(const char* dir_path, const char* identifier, double* 
 
     // open pose file once and read all poses
     ifstream pose_file(pose_path);
-    std::vector<double> poses;
+    vector<double> poses;
     double p[6], timestamp;
     while(pose_file.good()) {
       try {
@@ -90,6 +102,51 @@ void ScanIO_rts::readPose(const char* dir_path, const char* identifier, double* 
     pose[i] = cached_poses[scan_index*6 + i];
   return;
 }
+
+time_t ScanIO_rts::lastModified(const char* dir_path, const char* identifier)
+{
+  const char* suffixes[2] = { DATA_PATH_SUFFIX, NULL };
+  return lastModifiedHelper(dir_path, identifier, suffixes);
+}
+
+bool ScanIO_rts::supports(IODataType type)
+{
+  return !!(type & (DATA_XYZ));
+}
+
+std::function<bool (std::istream &data_file)> read_data(PointFilter& filter,
+        std::vector<double>* xyz, std::vector<unsigned char>* rgb,
+        std::vector<float>* reflectance, std::vector<float>* temperature,
+        std::vector<float>* amplitude, std::vector<int>* type,
+        std::vector<float>* deviation)
+{
+    return [=,&filter](std::istream &data_file) -> bool {
+        // open data file
+        // read points
+        // z x y type ? ?
+        IODataType spec[7] = { DATA_XYZ, DATA_XYZ, DATA_XYZ, DATA_TYPE,
+            DATA_DUMMY, DATA_DUMMY, DATA_TERMINATOR };
+        ScanDataTransform_rts transform;
+        readASCII(data_file, spec, transform, filter, xyz, 0, 0, 0, 0, type);
+
+        return true;
+    };
+}
+
+void ScanIO_rts::readScan(const char* dir_path, const char* identifier, PointFilter& filter, std::vector<double>* xyz, std::vector<unsigned char>* rgb, std::vector<float>* reflectance, std::vector<float>* temperature, std::vector<float>* amplitude, std::vector<int>* type, std::vector<float>* deviation,
+        std::vector<double>* normal)
+{
+    if(xyz == 0)
+        return;
+    // TODO: Type and other columns?
+
+    // error handling
+    path data_path(dir_path);
+    data_path /= path(std::string(DATA_PATH_PREFIX) + identifier + DATA_PATH_SUFFIX);
+    if (!open_path(data_path, read_data(filter, xyz, rgb, reflectance, temperature, amplitude, type, deviation)))
+        throw std::runtime_error(std::string("There is no scan file for [") + identifier + "] in [" + dir_path + "]");
+}
+
 
 
 /**
