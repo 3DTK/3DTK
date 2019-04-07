@@ -38,12 +38,9 @@ using namespace boost::filesystem;
 using namespace scanlib;
 using namespace std;
 
+const char* ScanIO_rxp::data_suffix = ".rxp";
+IODataType ScanIO_rxp::spec[] = { DATA_XYZ | DATA_REFLECTANCE | DATA_AMPLITUDE | DATA_DEVIATION | DATA_TYPE, DATA_TERMINATOR };
 
-
-#define DATA_PATH_PREFIX "scan"
-#define DATA_PATH_SUFFIX ".rxp"
-#define POSE_PATH_PREFIX "scan"
-#define POSE_PATH_SUFFIX ".pose"
 
 /*
 TODO: this file is still work in progress for change to the new scanserver workflow
@@ -51,12 +48,6 @@ this ScanIO has to distinguish a multi scan file and a directory of single scan 
 */
 
 
-
-std::list<std::string> ScanIO_rxp::readDirectory(const char* dir_path, unsigned int start, unsigned int end)
-{
-    const char* suffixes[2] = { DATA_PATH_SUFFIX, NULL };
-    return readDirectoryHelper(dir_path, start, end, suffixes);
-}
 
 void ScanIO_rxp::readPose(const char* dir_path, const char* identifier, double* pose)
 {
@@ -73,16 +64,6 @@ void ScanIO_rxp::readPose(const char* dir_path, const char* identifier, double* 
   readPoseHelper(dir_path, identifier, pose);
 }
 
-time_t ScanIO_rxp::lastModified(const char* dir_path, const char* identifier)
-{
-  const char* suffixes[2] = { DATA_PATH_SUFFIX, NULL };
-  return lastModifiedHelper(dir_path, identifier, suffixes);
-}
-
-bool ScanIO_rxp::supports(IODataType type)
-{
-  return !!(type & (DATA_XYZ | DATA_REFLECTANCE | DATA_AMPLITUDE | DATA_DEVIATION | DATA_TYPE));
-}
 
 void ScanIO_rxp::readScan(const char* dir_path, const char* identifier, PointFilter& filter, std::vector<double>* xyz, std::vector<unsigned char>* rgb, std::vector<float>* reflectance, std::vector<float>* temperature, std::vector<float>* amplitude, std::vector<int>* type, std::vector<float>* deviation,
                std::vector<double>* normal)
@@ -145,7 +126,7 @@ void ScanIO_rxp::readScan(const char* dir_path, const char* identifier, PointFil
   }
   
   // error handling
-  data_path /= path(std::string(DATA_PATH_PREFIX) + identifier + DATA_PATH_SUFFIX);
+  data_path /= path(std::string(dataPrefix()) + identifier + dataSuffix());
   if(!exists(data_path))
     throw std::runtime_error(std::string("There is no scan file for [") + identifier + "] in [" + dir_path + "]");
   
