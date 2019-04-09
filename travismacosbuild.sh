@@ -28,3 +28,8 @@ echo "travis_fold:end:configure_3dtk"
 echo "travis_fold:start:build_3dtk"
 	cmake --build .build
 echo "travis_fold:end:build_3dtk"
+
+# test 3dtk
+echo "travis_fold:start:test_3dtk"
+	CTEST_OUTPUT_ON_FAILURE=true cmake --build .build --target test
+echo "travis_fold:end:test_3dtk"
