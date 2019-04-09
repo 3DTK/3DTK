@@ -1,17 +1,17 @@
 #include "slam6d/globals.icc"
 #include "spherical_quadtree/spherical_quadtree.h"
 
-#if !defined(_MSC_VER) && !defined(__APPLE__)
-    // needed until we compile with C++14
-    #if __cplusplus >= 201402L
-        #error remove definition of make_unique
-    #endif
-    namespace std {
-        template<typename T, typename... Args>
-            std::unique_ptr<T> make_unique(Args&&... args) {
-                return std::unique_ptr<T>(new T(std::forward<Args>(args)...));
-            }
-    }
+#ifndef _MSC_VER
+// needed until we compile with C++14
+#if __cplusplus >= 201402L
+#error remove definition of make_unique
+#endif
+namespace std {
+	template<typename T, typename... Args>
+		std::unique_ptr<T> make_unique(Args&&... args) {
+			return std::unique_ptr<T>(new T(std::forward<Args>(args)...));
+		}
+}
 #endif
 
 static void circumcircle(const double* v1, const double* v2, const double* v3, double *p, double* theta)
