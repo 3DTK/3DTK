@@ -1,9 +1,5 @@
-cmake_minimum_required (VERSION 2.8.2)
+cmake_minimum_required (VERSION 3.5)
 project (3DTK)
-if(POLICY CMP0025)
-  #necessary to build with custom clang on macOS
-  cmake_policy(SET CMP0025 NEW)
-endif()
 set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/3rdparty/CMakeModules" ${CMAKE_MODULE_PATH})
 
 # cmake no longer defines WIN32 on cygwin
