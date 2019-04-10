@@ -280,6 +280,7 @@ if %ERRORLEVEL% GEQ 1 (
 	exit /B 1
 ) else ( echo cmake --build succeeded )
 
+set CTEST_OUTPUT_ON_FAILURE=true
 "%cmakeexe%" --build "%outdir%" --config %buildtype% --target RUN_TESTS
 
 if %ERRORLEVEL% GEQ 1 (
