@@ -49,8 +49,8 @@ int main(int argc, char **argv)
     exit(1);
   }
 
-  initShow(ds, ws);
   initScreenWindow();
+  initShow(ds, ws);
 
   if (!nogui && !takescreenshot)
     newMenu();
