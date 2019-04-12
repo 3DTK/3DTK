@@ -38,6 +38,14 @@ private:
   decoder_rxpmarker *dec;
   importer *imp;
   std::string old_path;
+
+
+protected:
+  static const char* data_suffix;
+  static IODataType spec[];
+
+  virtual const char* dataSuffix() { return data_suffix; }
+  virtual IODataType* getSpec() { return spec; }
 };
 
 /**
@@ -80,11 +88,6 @@ protected:
     currentscan++;
   }
 
-  static const char* data_suffix;
-  static IODataType spec[];
-
-  virtual const char* dataSuffix() { return data_suffix; }
-  virtual IODataType* getSpec() { return spec; }
 };
 
 #endif
