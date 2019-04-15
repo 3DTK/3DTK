@@ -7,7 +7,6 @@
 //
 
 #include "calibration/PictureHandler.h"
-#include <tag36h10.h>
 #include <tag36h11.h>
 #include <tag25h9.h>
 #include <iostream>
@@ -25,13 +24,13 @@ using namespace cv;
     }
 
     PictureHandler::PictureHandler(float decimate, float blur, int threads, bool debug, bool refine_edges,
-                                   bool refine_decodes, bool refine_pose, string tagFamily) :
+                                   string tagFamily) :
         image(NULL),
         aprilDetector(NULL),
         tagFam(NULL)
     {
         setTagFamily(tagFamily);
-        initDetector(decimate, blur, threads, debug, refine_edges, refine_decodes, refine_pose);
+        initDetector(decimate, blur, threads, debug, refine_edges);
     }
 
 
@@ -82,8 +81,7 @@ using namespace cv;
     }
 
 
-    void PictureHandler::initDetector(float decimate, float blur, int threads, bool debug, bool refine_edges,
-                                      bool refine_decodes, bool refine_pose) {
+    void PictureHandler::initDetector(float decimate, float blur, int threads, bool debug, bool refine_edges) {
         aprilDetector = apriltag_detector_create();
         if (tagFam == nullptr) {
             //TODO: Tag Familie nicht initialisiert
@@ -95,16 +93,12 @@ using namespace cv;
         aprilDetector->nthreads = threads;
         aprilDetector->debug = debug;
         aprilDetector->refine_edges = refine_edges;
-        aprilDetector->refine_decode = refine_decodes;
-        aprilDetector->refine_pose = refine_pose;
     }
 
 
     void PictureHandler::setTagFamily(string family) {
         if (family.compare("tag36h11") == 0) {
             tagFam = tag36h11_create();
-        } else if (family.compare("tag36h10") == 0) {
-            tagFam = tag36h10_create();
         } else if (family.compare("tag25h9") == 0) {
             tagFam = tag25h9_create();
         } else {
