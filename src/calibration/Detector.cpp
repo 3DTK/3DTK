@@ -9,19 +9,13 @@ using namespace cv;
 namespace calibration {
     void Detector::detectAprilTag(image_u8_t *image, std::vector<AprilTag::AprilTag2f> *tags, float decimate,
                                   float blur,
-                                  int threads, bool debug, bool refine_edges,
-                                  bool refine_decodes,
-                                  bool refine_pose, std::string tagFamily) {
+                                  int threads, bool debug, bool refine_edges, std::string tagFamily) {
         apriltag_family_t *tagFam;
         //set tag family
         if (tagFamily.compare("tag36h11") == 0) {
             tagFam = tag36h11_create();
-        } else if (tagFamily.compare("tag36h10") == 0) {
-            tagFam = tag36h10_create();
         } else if (tagFamily.compare("tag25h9") == 0) {
             tagFam = tag25h9_create();
-        } else if (tagFamily.compare("tag25h7") == 0) {
-            tagFam = tag25h7_create();
         } else if (tagFamily.compare("tag16h5") == 0) {
             tagFam = tag16h5_create();
         } else {
@@ -38,8 +32,6 @@ namespace calibration {
         apriltagDetector->nthreads = threads;
         apriltagDetector->debug = debug;
         apriltagDetector->refine_edges = refine_edges;
-        apriltagDetector->refine_decode = refine_decodes;
-        apriltagDetector->refine_pose = refine_pose;
         //stop time for detect tags
         timeval start, end;
         gettimeofday(&start, 0);

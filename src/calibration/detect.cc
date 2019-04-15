@@ -82,12 +82,8 @@ int main(int argc, const char *argv[]) {
             if (vm.count("tagfamily")) {
                 if (vm["tagfamily"].as<std::string>().compare("tag36h11")) {
                     tagfam = "tag36h11";
-                } else if (vm["tagfamily"].as<std::string>().compare("tag36h10")) {
-                    tagfam = "tag36h10";
                 } else if (vm["tagfamily"].as<std::string>().compare("tag25h9")) {
                     tagfam = "tag25h9";
-                } else if (vm["tagfamily"].as<std::string>().compare("tag25h7")) {
-                    tagfam = "tag25h7";
                 } else if (vm["tagfamily"].as<std::string>().compare("tag16h5")) {
                     tagfam = "tag16h5";
                 } else {

@@ -10,10 +10,8 @@
 #include "Chessboard.h"
 #include <common/image_types.h>
 #include <apriltag.h>
-#include <tag36h10.h>
 #include <tag36h11.h>
 #include <tag25h9.h>
-#include <tag25h7.h>
 #include <tag16h5.h>
 #include <string>
 #include <iostream>
@@ -27,8 +25,7 @@ namespace calibration {
 
         void detectAprilTag(image_u8_t *image, std::vector<AprilTag::AprilTag2f> *tags, float decimate = 1,
                             float blur = 0.8,
-                            int threads = 4, bool debug = false, bool refine_edges = true, bool refine_decodes = true,
-                            bool refine_pose = true, std::string tagFamily = "tag36h11");
+                            int threads = 4, bool debug = false, bool refine_edges = true, std::string tagFamily = "tag36h11");
 
         void readApilTagDetectionsFromFile(std::string path, std::vector<AprilTag::AprilTag2f> *tags);
 

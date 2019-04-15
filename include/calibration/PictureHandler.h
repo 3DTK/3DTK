@@ -32,7 +32,7 @@ private:
     /**
      initialize the aprilTag detector
      */
-    void initDetector(float decimate, float blur, int threads, bool debug, bool refine_edges, bool refine_decodes, bool refine_pose);
+    void initDetector(float decimate, float blur, int threads, bool debug, bool refine_edges);
     
     /**
      *  create a map<int, matd_t> with detected id's and 3x3 homography matrix describing the projection from an "ideal" tag (with corners at (-1,-1), (1,-1), (1,1), and (-1,1)) to pixels in the image
@@ -57,7 +57,7 @@ public:
      *  @param bool refine_edges
      *  @param bool refine_decodes
      */
-    PictureHandler(float decimate, float blur, int threads, bool debug, bool refine_edges, bool refine_decodes, bool refine_pose, std::string tagFamily);
+    PictureHandler(float decimate, float blur, int threads, bool debug, bool refine_edges, std::string tagFamily);
     /**
      *  Destructor
      */

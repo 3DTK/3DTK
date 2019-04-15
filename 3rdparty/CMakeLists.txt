@@ -112,7 +112,7 @@ IF(WIN32)
 ENDIF()
 
 # Compile AprilTags library if required
-add_subdirectory(apriltag-2016-12-01)
+add_subdirectory(apriltag-3.0)
 
 add_subdirectory(rply-1.1.4)
 
