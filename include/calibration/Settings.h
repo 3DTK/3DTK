@@ -200,8 +200,6 @@ public:
     int threads;
     bool debug;
     bool refine_edges;
-    bool refine_decodes;
-    bool refine_pose;
     std::string tagFamily;
 
     //pattern.xml Path

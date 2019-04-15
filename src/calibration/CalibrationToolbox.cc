@@ -14,8 +14,7 @@ CalibrationToolbox::CalibrationToolbox(Settings &s) :
         settings(s),
         pattern(),
         imagePath(s.picturePath),
-        pictureHandler(s.decimate, s.blur, s.threads, s.debug, s.refine_edges, s.refine_decodes, s.refine_pose,
-                       s.tagFamily) {
+        pictureHandler(s.decimate, s.blur, s.threads, s.debug, s.refine_edges, s.tagFamily) {
     if(s.calibrationPattern != Settings::FROM_FILES) {
         calcBoardCornerPositions(settings.calibrationPattern);
         int count = 1;

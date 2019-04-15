@@ -120,12 +120,6 @@ int main(int argc, const char * argv[]) {
                 ("refine-edges", po::value<bool>(&settings.refine_edges)->default_value(true),
                  "set AprilTag refine-edges")
 
-                ("refine-decodes", po::value<bool>(&settings.refine_decodes)->default_value(true),
-                 "set AprilTag refine-decodes")
-
-                ("refine-pose", po::value<bool>(&settings.refine_pose)->default_value(true),
-                 "set AprilTag refine-pose")
-
                 ("tagFamily", po::value<std::string>(&settings.tagFamily)->default_value("tag36h11"), "set AprilTag TagFamily")
 
                 ("path-pictures,P", po::value<std::string>(&dirpath), "set path to pictures; if use FROM_FILES, path to this files")
