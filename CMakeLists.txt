@@ -60,6 +60,11 @@ if(WIN32)
   add_definitions(-DBOOST_ALL_DYN_LINK)
 endif()
 
+if(MINGW)
+  # https://github.com/msys2/MINGW-packages/issues/5233
+  set(Boost_NO_BOOST_CMAKE ON)
+endif()
+
 set(Boost_ADDITIONAL_VERSIONS "1.42" "1.42.0" "1.44" "1.44.0" "1.45.0" "1.45" "1.46" "1.46.1" "1.47.0" "1.47" "1.48" "1.50" "1.52" "1.53" "1.55" "1.56")
 if(WIN32)
   # for some unknown reason no one variant works on all windows platforms
