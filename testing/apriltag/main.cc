@@ -59,11 +59,12 @@ int main(int argc, char *argv[])
 	td->debug = 1;
 	td->refine_edges = 1;
 
-	// Make an image_u8_t header for the Mat data
-	image_u8_t im = { .width = frame_persp.cols,
-		.height = frame_persp.rows,
-		.stride = frame_persp.cols,
-		.buf = frame_persp.data
+	// designated initializers only get introduced in c++20
+	image_u8_t im = {
+		frame_persp.cols,
+		frame_persp.rows,
+		frame_persp.cols,
+		frame_persp.data
 	};
 
 	zarray_t *detections = apriltag_detector_detect(td, &im);
@@ -73,29 +74,18 @@ int main(int argc, char *argv[])
 	apriltag_detection_t *det;
 	zarray_get(detections, 0, &det);
 
-	double c0, c1, p00, p01, p10, p11, p20, p21, p30, p31;
-	assert(sscanf("0x1.1148430dfb11cP+7 "
-				"0x1.fffe212d100ebp+6 "
-				"0x1.49a81c0000003p+6 "
-				"0x1.7714d40000001p+7 "
-				"0x1.70698p+7 "
-				"0x1.685085fffffffp+7 "
-				"0x1.70129cp+7 "
-				"0x1.2fd411ffffffep+6 "
-				"0x1.49a81cp+6 "
-				"0x1.12225c0000001p+6", "%la %la %la %la %la %la %la %la %la %la",
-				&c0, &c1, &p00, &p01, &p10, &p11, &p20, &p21, &p30, &p31)==10);
+	float eps = 0.001;
 	assert(0==det->id);
-	assert(c0==det->c[0]);
-	assert(c1==det->c[1]);
-	assert(p00==det->p[0][0]);
-	assert(p01==det->p[0][1]);
-	assert(p10==det->p[1][0]);
-	assert(p11==det->p[1][1]);
-	assert(p20==det->p[2][0]);
-	assert(p21==det->p[2][1]);
-	assert(p30==det->p[3][0]);
-	assert(p31==det->p[3][1]);
+	assert(fabs(136.641-det->c[0]) <= eps);
+	assert(fabs(127.998-det->c[1]) <= eps);
+	assert(fabs(82.4142-det->p[0][0]) <= eps);
+	assert(fabs(187.541-det->p[0][1]) <= eps);
+	assert(fabs(184.206-det->p[1][0]) <= eps);
+	assert(fabs(180.157-det->p[1][1]) <= eps);
+	assert(fabs(184.036-det->p[2][0]) <= eps);
+	assert(fabs(75.9571-det->p[2][1]) <= eps);
+	assert(fabs(82.4142-det->p[3][0]) <= eps);
+	assert(fabs(68.5336-det->p[3][1]) <= eps);
 
 	zarray_destroy(detections);
 
