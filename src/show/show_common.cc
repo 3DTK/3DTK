@@ -137,7 +137,7 @@ int show_poses           = 1;            // Show the coordinate axes of the pose
  */
 int cameraNavMouseMode  = 1;
 
-int mouseNavX, mouseNavY;
+double mouseNavX, mouseNavY;
 int mouseNavButton = -1;
 int mousePresX, mousePresY;
 
