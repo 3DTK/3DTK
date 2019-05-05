@@ -25,7 +25,7 @@ void quit();
 
 void mouseMove(int x, int y);
 
-void mouseMoveDelta(int deltaMouseX, int deltaMouseY);
+void mouseMoveDelta(double deltaMouseX, double deltaMouseY);
 
 /** Reshape Function
  * TODO: have to describe it.

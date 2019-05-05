@@ -199,7 +199,7 @@ extern int show_poses;            // Show the coordinate axes of the poses ?
  */
 extern int cameraNavMouseMode;
 
-extern int mouseNavX, mouseNavY;
+extern double mouseNavX, mouseNavY;
 extern int mouseNavButton;
 extern int mousePresX, mousePresY;
 
