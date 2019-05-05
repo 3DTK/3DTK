@@ -248,7 +248,7 @@ void quit() {
 }
 
 void mouseMove(int x, int y) {
-  int deltaMouseX = mouseNavX - x,
+  int deltaMouseX = x - mouseNavX,
       deltaMouseY = mouseNavY - y;
 
   // Save last position
@@ -274,7 +274,7 @@ void mouseMoveDelta(int deltaMouseX, int deltaMouseY) {
     // moving 10 pixels is equivalent to one key stroke
     deltaMouseX *= movementSpeed / 10.0;
     deltaMouseY *= movementSpeed / 10.0;
-    moveCamera(-deltaMouseX, deltaMouseY, 0, 0, 0, 0);
+    moveCamera(deltaMouseX, deltaMouseY, 0, 0, 0, 0);
   } else if (mouseNavButton == GLUT_MIDDLE_BUTTON) {
     if (showViewMode != 1) {
       deltaMouseY *= -5;
@@ -282,9 +282,9 @@ void mouseMoveDelta(int deltaMouseX, int deltaMouseY) {
     // moving 10 pixels is equivalent to one key stroke
     deltaMouseX *= movementSpeed / 10.0;
     deltaMouseY *= movementSpeed / 10.0;
-    moveCamera(-deltaMouseX, 0, deltaMouseY, 0, 0, 0);
+    moveCamera(deltaMouseX, 0, deltaMouseY, 0, 0, 0);
   } else if (mouseNavButton == GLUT_LEFT_BUTTON) {
-    moveCamera(0, 0, 0, deltaMouseY, -deltaMouseX, 0);
+    moveCamera(0, 0, 0, deltaMouseY, deltaMouseX, 0);
   } else {
     return;
   }
