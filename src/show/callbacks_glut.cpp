@@ -248,8 +248,8 @@ void quit() {
 }
 
 void mouseMove(int x, int y) {
-  int deltaMouseX = x - mouseNavX,
-      deltaMouseY = mouseNavY - y;
+  double deltaMouseX = x - mouseNavX;
+  double deltaMouseY = mouseNavY - y;
 
   // Save last position
   mouseNavX = x;
@@ -262,7 +262,7 @@ void mouseMove(int x, int y) {
   }
 }
 
-void mouseMoveDelta(int deltaMouseX, int deltaMouseY) {
+void mouseMoveDelta(double deltaMouseX, double deltaMouseY) {
   if (invertMouseX) deltaMouseX = -deltaMouseX;
   if (invertMouseY) deltaMouseY = -deltaMouseY;
 
