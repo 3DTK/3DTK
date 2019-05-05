@@ -140,7 +140,7 @@ void ScanIO_ply::readScan(const char* dir_path,
   }
 
   ply_set_read_cb(ply, "vertex", "x", vertex_cb, xyz, 0);
-  ply_set_read_cb(ply, "vertex", "y", vertex_cb_i, xyz, 0);
+  ply_set_read_cb(ply, "vertex", "y", vertex_cb, xyz, 0);
   ply_set_read_cb(ply, "vertex", "z", vertex_cb, xyz, 0);
 
   // We somehow want to extract color information from the PLY file, so we are
