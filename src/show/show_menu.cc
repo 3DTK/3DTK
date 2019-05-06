@@ -143,7 +143,7 @@ void newMenu()
   cangle_spinner->set_alignment(GLUI_ALIGN_RIGHT);
 
   pzoom_spinner = glui2->add_spinner_to_panel(settings_panel, "Parallel Zoom :", GLUI_SPINNER_FLOAT, &pzoom);
-  pzoom_spinner->set_float_limits(1.0, 100000.0);
+  pzoom_spinner->set_float_limits(0.001, 100000.0);
   pzoom_spinner->set_speed(5.0);
   pzoom_spinner->set_float_val(2000.0);
   pzoom_spinner->set_alignment(GLUI_ALIGN_RIGHT);
@@ -409,7 +409,7 @@ GLUI_SPINNER_INT, &factor);
     
     nearplane_spinner = glui1->add_spinner_to_panel(advanced_panel, "nearplane :   ",
         GLUI_SPINNER_FLOAT, &neardistance);
-    nearplane_spinner->set_int_limits(1, 1000000);
+    nearplane_spinner->set_int_limits(0.01, 1000000);
     nearplane_spinner->set_speed(1);
     nearplane_spinner->set_alignment(GLUI_ALIGN_RIGHT);
 
