@@ -557,7 +557,7 @@ void copy_settings_to_globals(
   double &red, bool &readInitial, unsigned int &octree,
   PointType &ptype, float &fps, std::string &loadObj,
   bool &loadOct, bool &saveOct, bool &autoOct, int &origin, bool &originset,
-  double &scale, IOType &type, bool& scanserver,
+  IOType &type, bool& scanserver,
   double& sphereMode, std::string& customFilter, std::string& trajectoryFile,
   int &stepsize, bool &identity)
 {
@@ -657,7 +657,6 @@ void initShow(const dataset_settings& ds, const window_settings& ws){
   std::string loadObj;
   int origin = 0;
   bool originset = false;
-  double scale = 0.01; // in m
   bool scanserver = false;
   double sphereMode = 0.0;
   bool customFilterActive = false;
@@ -677,7 +676,7 @@ void initShow(const dataset_settings& ds, const window_settings& ws){
   copy_settings_to_globals(ds, ws, dir, start, end, maxDist, minDist, red,
                            readInitial, octree, pointtype, idealfps, loadObj,
                            loadOct, saveOct, autoOct, origin, originset,
-                           scale, type, scanserver, sphereMode, customFilter,
+                           type, scanserver, sphereMode, customFilter,
                            trajectoryFile, stepsize, identity);
 
   // modify all scale dependant variables
