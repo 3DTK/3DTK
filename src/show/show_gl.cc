@@ -513,7 +513,7 @@ void DrawCoordinateSystems() {
     glLineWidth(5.0);
     glBegin(GL_LINES);
 
-    float s = 10.0*MetaMatrix[i][j][15];
+    float s = 10.0*MetaMatrix[i][j][15]*0.01/scale;
     glColor3f(1,0.0,0.0);
     glVertex3f(MetaMatrix[i][j][12], MetaMatrix[i][j][13], MetaMatrix[i][j][14]);
     glVertex3f(MetaMatrix[i][j][12] + s*MetaMatrix[i][j][0], MetaMatrix[i][j][13] + s*MetaMatrix[i][j][1], MetaMatrix[i][j][14] + s*MetaMatrix[i][j][2]);
