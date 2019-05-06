@@ -411,6 +411,7 @@ GLUI_SPINNER_INT, &factor);
         GLUI_SPINNER_FLOAT, &neardistance);
     nearplane_spinner->set_int_limits(0.01, 1000000);
     nearplane_spinner->set_speed(1);
+    nearplane_spinner->set_float_val(neardistance);
     nearplane_spinner->set_alignment(GLUI_ALIGN_RIGHT);
 
     glui1->add_button_to_panel(advanced_panel, "Cycle LOD", 0, (GLUI_Update_CB)cycleLOD)->set_alignment(GLUI_ALIGN_CENTER);
