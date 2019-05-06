@@ -160,11 +160,6 @@ extern GLfloat pzoom;
 extern GLfloat pzoom_old;
 
 /**
- * rotate zoom
- */
-extern GLfloat rzoom;
-
-/**
  * Mode of the fog (exp, exp2, linear)
  */
 extern GLint fogMode;
@@ -301,6 +296,8 @@ extern double movementSpeed;
 extern double defaultZoom;
 extern GLfloat fogDensity;
 extern double voxelSize;
+extern GLfloat rzoom;
+
 
 extern float adaption_rate;
 extern float LevelOfDetail;

@@ -98,11 +98,6 @@ GLfloat pzoom = 2000.0;
 GLfloat pzoom_old = pzoom;
 
 /**
- * rotate zoom
- */
-GLfloat rzoom = 1000.0;
-
-/**
  * Mode of the fog (exp, exp2, linear)
  */
 GLint fogMode            = GL_EXP;
@@ -240,6 +235,8 @@ double movementSpeed   = 0.1;
 double defaultZoom     = 20.0;
 GLfloat fogDensity     = 0.1;
 double voxelSize       = 0.20;
+GLfloat rzoom          = 100.0;
+
 
 float adaption_rate = 1.0;
 float LevelOfDetail = 0.0001;
@@ -688,6 +685,7 @@ void initShow(const dataset_settings& ds, const window_settings& ws){
   fogDensity      = 0.1 * scale;
   defaultZoom     =  20 / scale;
   voxelSize       = 0.2 / scale;
+  rzoom           = 1.0 / scale;
 
   loading_progress(0, 0, 0);
   loading_status("Loading extra objects");
