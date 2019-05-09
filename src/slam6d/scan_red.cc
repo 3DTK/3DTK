@@ -644,7 +644,7 @@ int main(int argc, char **argv)
             scan->getIdentifier());
       } else if(use_color) {
         DataXYZ xyz(scan->get("xyz"));
-        DataRGB _color(scan->get("color"));
+        DataRGB _color(scan->get("rgb"));
 
         for(unsigned int j = 0; j < xyz.size(); j++) {
           reduced_points.push_back(cv::Vec4f(xyz[j][0],
