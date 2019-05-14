@@ -2,7 +2,7 @@
 #define __SCANCOLORMANAGER_H__
 
 #ifdef WITH_GLEE
-#include "glee/GLee.h"
+#include "GLee.h"
 #endif
 
 #ifdef _WIN32
