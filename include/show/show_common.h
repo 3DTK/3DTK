@@ -16,7 +16,7 @@
 #endif
 
 #ifdef WITH_GLEE
-#include "glee/GLee.h"
+#include "GLee.h"
 #endif
 
 #include "show/show_Boctree.h"

@@ -10,6 +10,8 @@
 #ifndef __SHOW_MENU_H__
 #define __SHOW_MENU_H__
 
+#include "show/show_common.h"
+
 #ifdef WITH_OPENGL
 #include <GL/glui.h>
 #else
@@ -142,8 +144,6 @@ extern GLUI_Checkbox *always_box;
 extern GLUI_Checkbox *never_box;
 /** Checkbox for changing interpolation mode **/
 extern GLUI_Checkbox *interpol_box;
-
-#include "show/show_common.h"
 
 /**
  * Generate the menu for the application.
