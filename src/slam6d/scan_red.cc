@@ -209,7 +209,7 @@ void validate(boost::any& v, const std::vector<std::string>& values,
 void parse_options(int argc, char **argv, int &start, int &end,
                    bool &scanserver, int &width, int &height,
                    fbr::projection_method &ptype, std::string &dir, IOType &iotype,
-                   int &maxDist, int &minDist, std::string &customFilter, reduction_method &rtype, double &scale,
+                   int &maxDist, int &minDist, std::string &customFilter, reduction_method &rtype, IOType &out_format, double &scale,
                    double &voxel, int &octree, bool &use_reflectance,
 		   int &MIN_ANGLE, int &MAX_ANGLE, int &nImages, double &pParam,
 		   fbr::scanner_type &sType, bool &loadOct, bool &use_color)
@@ -279,6 +279,8 @@ void parse_options(int argc, char **argv, int &start, int &end,
   output.add_options()
     ("reflectance,R", po::bool_switch(&use_reflectance),
      "Use reflectance when reducing points and save scan files in UOSR format")
+    ("outformat", po::value<IOType>(&out_format)->default_value(UOS),
+     "Output format. Chose from uos, xyz or ply" )
     ("color,C", po::bool_switch(&use_color)->default_value(false),
      "Use color when reducing points and save scan files with color");
 
@@ -543,6 +545,7 @@ int main(int argc, char **argv)
   std::string dir;
   IOType iotype;
   reduction_method rtype;
+  IOType out_format;
   double scale, voxel;
   int octree;
   bool use_reflectance;
@@ -563,7 +566,7 @@ int main(int argc, char **argv)
 
 
   parse_options(argc, argv, start, end, scanserver, width, height, ptype,
-                dir, iotype, maxDist, minDist, customFilter, rtype, scale, voxel, octree,
+                dir, iotype, maxDist, minDist, customFilter, rtype, out_format, scale, voxel, octree,
                 use_reflectance, MIN_ANGLE, MAX_ANGLE, nImages, pParam,
 		sType, loadOct, use_color);
   
@@ -656,10 +659,30 @@ int main(int argc, char **argv)
                                     _color[j][1],
                                     _color[j][2]));
         }
-        write_uos_rgb(reduced_points,
-            color,
-            reddir,
-            scan->getIdentifier());
+		switch(out_format) {
+			case UOS:
+				write_uos_rgb(reduced_points,
+						color,
+						reddir,
+						scan->getIdentifier());
+				break;
+			case XYZ:
+				/*
+				write_xyz_rgb(reduced_points,
+						color,
+						reddir,
+						scan->getIdentifier());
+						*/
+				break;
+			case PLY:
+				write_ply_rgb(reduced_points,
+						color,
+						reddir,
+						scan->getIdentifier());
+				break;
+			default:
+				throw std::runtime_error("unknown output format");
+		}
       } else {
         DataXYZ xyz(scan->get("xyz"));
         for(unsigned int j = 0; j < xyz.size(); j++) {
