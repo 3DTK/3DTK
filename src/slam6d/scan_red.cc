@@ -727,10 +727,30 @@ int main(int argc, char **argv)
             reddir,
             scan->getIdentifier());
       else if(use_color)
-        write_uos_rgb(reduced_points,
-            color,
-            reddir,
-            scan->getIdentifier());
+		switch(out_format) {
+			case UOS:
+				write_uos_rgb(reduced_points,
+						color,
+						reddir,
+						scan->getIdentifier());
+				break;
+			case XYZ:
+				/*
+				write_xyz_rgb(reduced_points,
+						color,
+						reddir,
+						scan->getIdentifier());
+						*/
+				break;
+			case PLY:
+				write_ply_rgb(reduced_points,
+						color,
+						reddir,
+						scan->getIdentifier());
+				break;
+			default:
+				throw std::runtime_error("unknown output format");
+		}
       else
         write_uos(reduced_points,
             reddir,		  
