@@ -26,8 +26,8 @@ include_directories(${ANN_INCLUDE_DIRS})
 
 if (WITH_OPENCV)
   add_executable(scan_red scan_red.cc ../scanio/writer.cc fbr/fbr_global.cc fbr/panorama.cc fbr/scan_cv.cc)
-
-  target_link_libraries(scan_red scan show ${ANN_LIBRARIES} fbr_cv_io fbr_panorama ${OpenCV_LIBS} ${Boost_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} ${SHOW_LIBS})
+  target_include_directories(scan_red PUBLIC ${PROJECT_SOURCE_DIR}/3rdparty/rply-1.1.4)
+  target_link_libraries(scan_red scan show ${ANN_LIBRARIES} fbr_cv_io fbr_panorama ${OpenCV_LIBS} ${Boost_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} ${SHOW_LIBS} rply)
 endif()
 
 ### SCAN_DIFF
@@ -59,7 +59,8 @@ add_executable(align sICP.cc)
 
 if (WITH_OPENCV)
   add_executable(exportPoints exportPoints.cc ../scanio/writer.cc ../scanio/framesreader.cc)
-  target_link_libraries(exportPoints scan ${ANN_LIBRARIES} ${NEWMAT_LIBRARIES} ${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY} ${OpenCV_LIBS})
+  target_include_directories(exportPoints PUBLIC ${PROJECT_SOURCE_DIR}/3rdparty/rply-1.1.4)
+  target_link_libraries(exportPoints scan ${ANN_LIBRARIES} ${NEWMAT_LIBRARIES} ${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY} ${OpenCV_LIBS} rply)
 endif()
 
 target_link_libraries(graph_balancer scan ${Boost_GRAPH_LIBRARY} ${Boost_SERIALIZATION_LIBRARY} ${Boost_REGEX_LIBRARY} ${Boost_SYSTEM_LIBRARY})

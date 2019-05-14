@@ -59,6 +59,8 @@
 #include <dlfcn.h>
 #endif
 
+#include "rply.h"
+
 void createdirectory(std::string dir)
 {
   int success = mkdir(dir.c_str(), S_IRWXU|S_IRWXG|S_IRWXO);
@@ -449,6 +451,56 @@ void write_xyz_normal(DataXYZ &xyz, DataNormal &normals, FILE *file, double scal
 					  normals[j][2], -normals[j][0], normals[j][1]);
       }
     }
+	}
+}
+
+void write_ply_rgb(std::vector<cv::Vec4f> &points, std::vector<cv::Vec3b> &color, std::string &dir, std::string id)
+{
+	p_ply ply = ply_create((dir + "/scan" + id + ".ply").c_str(), PLY_LITTLE_ENDIAN, NULL, 0, NULL);
+	if (!ply) {
+		throw std::runtime_error("ply_open failed");
+	}
+
+	if (!ply_add_element(ply, "vertex", points.size())) {
+		throw std::runtime_error("ply_add_element failed");
+	}
+	
+	if (!ply_add_property(ply, "x", PLY_FLOAT, (e_ply_type)0, (e_ply_type)0)) {
+		throw std::runtime_error("ply_add_property failed");
+	}
+	if (!ply_add_property(ply, "y", PLY_FLOAT, (e_ply_type)0, (e_ply_type)0)) {
+		throw std::runtime_error("ply_add_property failed");
+	}
+	if (!ply_add_property(ply, "z", PLY_FLOAT, (e_ply_type)0, (e_ply_type)0)) {
+		throw std::runtime_error("ply_add_property failed");
+	}
+	if (!ply_add_property(ply, "red", PLY_UCHAR, (e_ply_type)0, (e_ply_type)0)) {
+		throw std::runtime_error("ply_add_property failed");
+	}
+	if (!ply_add_property(ply, "green", PLY_UCHAR, (e_ply_type)0, (e_ply_type)0)) {
+		throw std::runtime_error("ply_add_property failed");
+	}
+	if (!ply_add_property(ply, "blue", PLY_UCHAR, (e_ply_type)0, (e_ply_type)0)) {
+		throw std::runtime_error("ply_add_property failed");
+	}
+
+	if (!ply_write_header(ply)) {
+		throw std::runtime_error("ply_write_header failed");
+	}
+
+	std::vector<cv::Vec3b>::iterator cit=color.begin();
+	for (std::vector<cv::Vec4f>::iterator it=points.begin(); it < points.end(); it++) {
+		ply_write(ply, (*it)[0]);
+		ply_write(ply, (*it)[1]);
+		ply_write(ply, (*it)[2]);
+		ply_write(ply, (*cit)[0]);
+		ply_write(ply, (*cit)[1]);
+		ply_write(ply, (*cit)[2]);
+		cit++;
+	}
+
+	if (!ply_close(ply)) {
+		throw std::runtime_error("ply_close failed");
 	}
 }
 
