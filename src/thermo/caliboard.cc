@@ -244,9 +244,9 @@ bool matchPlaneToBoard(vector<double *> &points, double *alignxf, int pattern, s
   ofstream caliout(output.c_str());
   
   if(nr_matches < nr_points) {
-    caliout << "failed" << endl;
+    caliout << "#failed" << endl;
   } else {
-    caliout << "Calibration" << endl; 
+    caliout << "#Calibration" << endl; 
   }
  
   /**
@@ -382,7 +382,7 @@ bool matchPlaneToBoard(vector<double *> &points, double *alignxf, int pattern, s
 
 int parseArgs(int argc, char **argv, string &dir, double &red, int &start, int
 &end, int &pattern, int &maxDist, int &minDist, double &top, double &bottom, int
-&octree, IOType &type, bool &quiet) {
+&octree, IOType &type, string &customFilter, bool &quiet) {
 
   bool reduced = false;
   int  c;
@@ -403,6 +403,7 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &start, int
     { "end",             required_argument,   0,  'e' },
     { "top",             required_argument,   0,  't' },
     { "bottom",          required_argument,   0,  'b' },
+    { "customFilter",    required_argument,   0,  'u' },
     { 0,           0,   0,   0}                    // needed, cf. getopt.h
   };
 
@@ -457,6 +458,9 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &start, int
 	 case 'M':
 	   minDist = atoi(optarg);
 	   break;
+   case 'u':
+     customFilter = argv[optind];
+     break;
    case '?':
 	   usage(argv[0]);
 	   return 1;
@@ -507,11 +511,54 @@ int main(int argc, char **argv)
   double bottom = -5;
   double top = 170;
   IOType type    = UOS;
+  string customFilter;
+  bool customFilterActive = false;
 
   cout << "Parse args" << endl;
-  parseArgs(argc, argv, dir, red, start, end, pattern, maxDist, minDist, top, bottom, octree, type, quiet);
+  parseArgs(argc, argv, dir, red, start, end, pattern, maxDist, minDist, top, bottom, octree, type, customFilter, quiet);
   int fileNr = start;
   string calidir = dir + "/cali";
+  
+  // custom filter set? quick check, needs to contain at least one ';' 
+  // (proper chsecking will be done case specific in pointfilter.cc)
+  size_t pos = customFilter.find_first_of(";");
+  if (pos != std::string::npos){
+      customFilterActive = true;
+
+      // check if customFilter is specified in file
+      if (customFilter.find("FILE;") == 0){
+          std::string selection_file_name = customFilter.substr(5, customFilter.length());
+          std::ifstream selectionfile;
+          // open the input file
+          selectionfile.open(selection_file_name, std::ios::in);
+
+          if (!selectionfile.good()){
+              std::cerr << "Error loading custom filter file " << selection_file_name << "!" << std::endl;
+              std::cerr << "Data will NOT be filtered!" << std::endl;
+              customFilterActive = false;
+          }
+          else {
+              std::string line;
+              std::string custFilt;
+              while (std::getline(selectionfile, line)){
+                  if (line.find("#") == 0) continue;
+                  custFilt = custFilt.append(line);
+                  custFilt = custFilt.append("/");
+              }
+              if (custFilt.length() > 0) {
+                  // last '/'
+                  customFilter = custFilt.substr(0, custFilt.length() - 1);
+              }
+          }
+          selectionfile.close();
+      }
+  }
+  else {
+      // give a warning if custom filter has been inproperly specified
+      if (customFilter.length() > 0){
+          std::cerr << "Custom filter: specifying string has not been set properly, data will NOT be filtered." << std::endl;
+      }
+  }
   
 #ifdef WITH_SCANSERVER
   try {
@@ -550,6 +597,7 @@ int main(int argc, char **argv)
     Scan::openDirectory(false, dir, type, fileNr, fileNr);
     Scan::allScans[0]->setRangeFilter(maxDist, minDist);
     Scan::allScans[0]->setHeightFilter(top, bottom);
+    if(customFilterActive) Scan::allScans[0]->setCustomFilter(customFilter);
     Scan::allScans[0]->setSearchTreeParameter(simpleKD);
 
     string output = calidir + "/scan" + to_string(fileNr,3) + ".3d";
