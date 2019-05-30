@@ -396,7 +396,7 @@ namespace fbr
 	}
     //other projections
     
-    //phi = (2 * M_PI) - phi;
+    phi = (2 * M_PI) - phi;
     theta *= -1;
     theta += M_PI/2.0;
     
