@@ -162,7 +162,7 @@ void calculateNormalsFAST(vector<Point> &normals,
     rPos(i+1) = _rPos[i];
   
   //!!!!!!!!!!
-
+#if 0
   int height = extendedMap.size();
   int width  = extendedMap[0].size();
   
@@ -178,7 +178,7 @@ void calculateNormalsFAST(vector<Point> &normals,
     human_pgm << endl;
   }
   human_pgm.close();
-
+#endif
   //!!!!!!!!!!!!!
   
   points.clear();
