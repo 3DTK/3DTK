@@ -183,6 +183,7 @@ void calculateNormalsFAST(vector<Point> &normals,
   
   points.clear();
   int nr_points = 0;
+
   for (size_t i = 0; i < extendedMap.size(); i++) {
     for (size_t j = 0; j < extendedMap[0].size(); j++) {
       double theta, phi, rho;
@@ -288,9 +289,11 @@ void calculateNormalsFAST(vector<Point> &normals,
           norm_vector *= -1.0;
         }
         norm_vector = norm_vector / norm_vector.NormFrobenius();
-        
-        points.push_back(Point(p_cart[0], p_cart[1], p_cart[2]));
-	   normals.push_back(Point(norm_vector(1),norm_vector(2),norm_vector(3)));
+#pragma omp critical
+	   {        
+		points.push_back(Point(p_cart[0], p_cart[1], p_cart[2]));
+		normals.push_back(Point(norm_vector(1),norm_vector(2),norm_vector(3)));
+	   }
       }
     }
   }

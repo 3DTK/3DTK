@@ -355,7 +355,7 @@ int main(int argc, char** argv)
     writePoseFiles(normdir, rPos, rPosTheta, scanNumber);
     // scan files for all segments
     writeScanFiles(normdir, points,normals,scanNumber);
-    writeScanFilesXYZ(normdir, points,normals,scanNumber);
+    //    writeScanFilesXYZ(normdir, points, normals, scanNumber);
 
     scanNumber++;
   }
