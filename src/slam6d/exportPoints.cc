@@ -83,6 +83,10 @@ po::options_description generic("Generic options");
     "use randomized octree based point reduction (pts per voxel=<NR>)")
     ("scale,y", po::value<double>(&scaleFac)->default_value(0.01),
     "scale factor for point cloud in m (be aware of the different units for uos (cm) and xyz (m), (default: 0.01 means that input and output remain the same)")
+    ("min,M", po::value<int>(&minDist)->default_value(-1),
+    "neglegt all data points with a distance smaller than NR 'units'")
+    ("max,m", po::value<int>(&maxDist)->default_value(-1),
+    "neglegt all data points with a distance larger than NR 'units'")
     ("color,c", po::bool_switch(&use_color)->default_value(false),
      "export in color as RGB")
     ("reflectance,R", po::bool_switch(&use_reflectance)->default_value(false),
