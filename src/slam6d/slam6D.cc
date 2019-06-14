@@ -262,7 +262,7 @@ po::options_description generic("Generic options");
     "Quiet mode. Suppress (most) messages")
     ("veryquiet,Q", po::bool_switch(&veryQuiet)->default_value(false),
     "Very quiet mode. Suppress all messages, except in case of error.")
-    ("trustpose,p", po::bool_switch(&extrapolate_pose)->default_value(true),
+    ("trustpose,p", po::bool_switch(&extrapolate_pose)->default_value(false),
     "Trust the pose file, do not extrapolate the last transformation."
     "(just for testing purposes, or gps input.)")
     ("anim,A", po::value<int>(&anim)->default_value(-1),
@@ -337,6 +337,8 @@ po::options_description generic("Generic options");
 #else
   if (dir[dir.length()-1] != '\\') dir = dir + "\\";
 #endif
+
+  extrapolate_pose = !extrapolate_pose;
   
   if(point_to_plane) pairing_mode = CLOSEST_PLANE_SIMPLE;
   if(normal_shoot) pairing_mode = CLOSEST_POINT_ALONG_NORMAL_SIMPLE;
@@ -588,7 +590,7 @@ int main(int argc, char **argv)
   cout << "slam6D will proceed with the following parameters:" << endl;
   //@@@ to do :-)
   // TODO: writer a proper TODO ^
-  
+
   if (continue_processing) Scan::continueProcessing();
   Scan::setProcessingCommand(argc, argv);
 
