@@ -48,12 +48,6 @@
 #include "slam6d/graph.h"
 #include "slam6d/globals.icc"
 
-#ifndef _MSC_VER
-#include <getopt.h>
-#else
-#include "XGetopt.h"
-#endif
-
 #include <csignal>
 
 #ifdef _MSC_VER
