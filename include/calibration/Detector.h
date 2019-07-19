@@ -1,39 +1,32 @@
-//
-// Created by Joschka van der Lucht on 28.02.18.
-//
+#ifndef CALIBRATION_DETECTOR_H
+#define CALIBRATION_DETECTOR_H
 
-#ifndef INC_3DTK_DETECTOR_H
-#define INC_3DTK_DETECTOR_H
+#include <opencv2/opencv.hpp>
 
-#include "AprilTag.h"
-#include "AprilTag2f.h"
-#include "Chessboard.h"
-#include <common/image_types.h>
-#include <apriltag.h>
-#include <tag36h11.h>
-#include <tag25h9.h>
-#include <tag16h5.h>
-#include <string>
-#include <iostream>
+namespace calibration
+{
 
-namespace calibration {
-    class Detector {
-    private:
+class Detector
+{
+public:
+    virtual ~Detector() {};
 
-    public:
-        void detectChessboard(cv::Mat image, std::vector<cv::Point2f> *points, cv::Size boardSize);
+public:
+    virtual bool detect(const cv::Mat& image) = 0;
+    virtual void writeDetectionsToFile(const std::string& path) = 0;
+    virtual void readDetectionsFromFile(const std::string& path) = 0;
 
-        void detectAprilTag(image_u8_t *image, std::vector<AprilTag::AprilTag2f> *tags, float decimate = 1,
-                            float blur = 0.8,
-                            int threads = 4, bool debug = false, bool refine_edges = true, std::string tagFamily = "tag36h11");
+public:
+    std::vector<cv::Point2f> getImagePoints() { return _imagePoints; };
+    std::vector<cv::Point3f> getObjectPoints() { return _objectPoints; };
+    long getDetectionTimeMilliSec() { return _detectionTime; };
 
-        void readApilTagDetectionsFromFile(std::string path, std::vector<AprilTag::AprilTag2f> *tags);
+protected:
+    std::vector<cv::Point2f> _imagePoints;
+    std::vector<cv::Point3f> _objectPoints;
+    long _detectionTime;
+};
 
-        void readChessboardDetectionsFromFile(std::string path, std::vector<cv::Point2f> *tags);
+} // namespace calibration
 
-        void writeApilTagDetectionsToFile(std::string path, std::vector<AprilTag::AprilTag2f> tags);
-
-        void writeChessboardDetectionsToFile(std::string path, std::vector<cv::Point2f> tags);
-    };
-}
-#endif //INC_3DTK_DETECTOR_H
+#endif // CALIBRATION_DETECTOR_H
