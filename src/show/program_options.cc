@@ -90,10 +90,11 @@ void parse_args(int argc, char **argv, dataset_settings& ds, window_settings& ws
 
   // Parse user config file
 
-  string config_home = getConfigHome();
+  string config_home = getConfigHome() + "/3dtk/show.ini";
 
-  ifstream user_config_file((config_home + "/3dtk/show.ini").c_str());
+  ifstream user_config_file(config_home.c_str());
   if (user_config_file) {
+    cout << "Parsing configuration file " << config_home << "..." << endl;
     store(parse_config_file(user_config_file, visible_options), vm);
   }
 
@@ -103,8 +104,10 @@ void parse_args(int argc, char **argv, dataset_settings& ds, window_settings& ws
   // Parse ./config.ini file in the input directory
 
   if (vm.count("input-dir")) {
-    ifstream local_config_file((ds.input_directory + "/config.ini").c_str());
+    string config_ini = ds.input_directory + "/config.ini";
+    ifstream local_config_file(config_ini.c_str());
     if (local_config_file) {
+      cout << "Parsing configuration file " << config_ini << "..." << endl;
       store(parse_config_file(local_config_file, visible_options), vm);
 
       // Command line options now overwrite ./config.ini file
