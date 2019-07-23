@@ -370,14 +370,14 @@ void setScanOptions(bool& scanserver, int& start, int& end,
     ;
 }
 
-void setReductionOptions(int& distMin, int& distMax, double& reduce,
+void setReductionOptions(double& distMin, double& distMax, double& reduce,
 			 int& octree, int& stepsize,
 			 options_description& reduction_options)
 {
   reduction_options.add_options()
-    ("min,M", value(&distMin)->default_value(0),
+    ("min,M", value<double>(&distMin)->default_value(0.0),
      "Neglect all points closer than this to the origin")
-    ("max,m", value(&distMax)->default_value(-1),
+    ("max,m", value<double>(&distMax)->default_value(-1.0),
      "Neglect all points further than this from the origin (with -1 meaning not to)")
     ("reduce,r", value(&reduce)->default_value(0),
      "Turn on octree based point reduction with voxels  of size arg^3.")

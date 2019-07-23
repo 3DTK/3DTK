@@ -550,7 +550,7 @@ void reloadFrames() {
  */
 void copy_settings_to_globals(
   const dataset_settings& ds, const window_settings& ws,
-  std::string &dir, int& start, int& end, int& maxDist, int& minDist,
+  std::string &dir, int& start, int& end, double& maxDist, double& minDist,
   double &red, bool &readInitial, unsigned int &octree,
   PointType &ptype, float &fps, std::string &loadObj,
   bool &loadOct, bool &saveOct, bool &autoOct, int &origin, bool &originset,
@@ -643,7 +643,8 @@ void initShow(const dataset_settings& ds, const window_settings& ws){
        << "    University of Osnabrueck, Germany, 2006 - 2009" << std::endl << std::endl;
 
   double red   = -1.0;
-  int start = 0, end = -1, maxDist = -1, minDist = -1;
+  int start = 0, end = -1;
+  double maxDist = -1, minDist = 0;
   std::string dir;
   bool readInitial = false;
   IOType type  = UOS;
