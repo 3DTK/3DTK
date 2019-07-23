@@ -101,7 +101,7 @@ struct dataset_settings {
 
   color_settings coloring;
 
-  range<int> distance_filter;
+  range<double> distance_filter;
   double octree_reduction_voxel;
   int octree_reduction_randomized_bucket {};
   int skip_files;
@@ -175,7 +175,7 @@ void setColorOptions(Color& bgcolor, bool& color, ShowColormap& colormap,
 		     boost::program_options::options_description& color_options);
 void setScanOptions(bool& scanserver, int& start, int& end,
 		    IOType& format, boost::program_options::options_description& scan_options);
-void setReductionOptions(int& distMin, int& distMax, double& reduce,
+void setReductionOptions(double& distMin, double& distMax, double& reduce,
 			 int& octree, int& stepsize,
 			 boost::program_options::options_description& reduction_options);
 void setPointOptions(int& originType, double& sphereRadius, boost::program_options::options_description& point_options);
