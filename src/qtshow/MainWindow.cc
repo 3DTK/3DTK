@@ -313,7 +313,8 @@ void MainWindow::loadStates()
   bool nogui, invertMouseX, invertMouseY, color, noAnimColor, captureMouse, hideWidgets;
   float fps, colormin, colormax;
   double scale, reduce;
-  int distMin, distMax, octree, stepsize;
+  double distMin, distMax;
+  int octree, stepsize;
   Color bgcolor;
   WindowDimensions dimensions;
 
