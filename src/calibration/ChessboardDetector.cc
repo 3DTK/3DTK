@@ -1,6 +1,6 @@
 #include "calibration/ChessboardDetector.h"
 #include <chrono>
-#include <iostream>
+#include <fstream>
 #include <boost/filesystem.hpp>
 #include "calibration/Chessboard.h"
 
@@ -52,7 +52,7 @@ bool ChessboardDetector::detect(const cv::Mat& image)
 
 void ChessboardDetector::writeDetectionsToFile(const std::string& path)
 {
-    std::fstream f;
+    std::ofstream f;
     f.open(path, std::ios::out);
     f << "#CHESSBOARD" << std::endl;
     f << Chessboard::toString(_imagePoints);
