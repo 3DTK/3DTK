@@ -9,14 +9,10 @@ aux_source_directory(. APRILTAG_SRCS)
 
 # Library
 add_library(${PROJECT_NAME} SHARED ${APRILTAG_SRCS} ${COMMON_SRC})
-if (MSVC)
-    # FindThreads will not find pthread.h with MSVC
-    # winmm is necessary for __imp_timeGetTime
-    find_library(PTHREAD_LIBRARIES NAMES pthreads)
-    target_link_libraries(${PROJECT_NAME} ${PTHREAD_LIBRARIES} winmm)
-else()
-    find_package(Threads REQUIRED)
-    target_link_libraries(${PROJECT_NAME} Threads::Threads m)
+find_package(Threads REQUIRED)
+target_link_libraries(${PROJECT_NAME} Threads::Threads)
+if (NOT MSVC)
+    target_link_libraries(${PROJECT_NAME} m)
 endif()
 
 set_target_properties(${PROJECT_NAME} PROPERTIES SOVERSION 3 VERSION 3.0.0)
