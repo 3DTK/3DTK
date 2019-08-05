@@ -1,7 +1,6 @@
 #include "calibration/PinholeModel.h"
 #include <chrono>
 #include <iostream>
-#include <opencv2/calib3d.hpp>
 #include <boost/filesystem.hpp>
 
 namespace calibration {
