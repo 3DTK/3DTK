@@ -9,10 +9,13 @@ aux_source_directory(. APRILTAG_SRCS)
 
 # Library
 add_library(${PROJECT_NAME} SHARED ${APRILTAG_SRCS} ${COMMON_SRC})
-find_package(Threads REQUIRED)
-target_link_libraries(${PROJECT_NAME} Threads::Threads)
-if (NOT MSVC)
-    target_link_libraries(${PROJECT_NAME} m)
+if (MSVC)
+    find_package(pthreads REQUIRED)
+    target_include_directories(${PROJECT_NAME} PUBLIC ${PThreads4W_INCLUDE_DIR})
+    target_link_libraries(${PROJECT_NAME} PThreads4W::PThreads4W winmm)
+else()
+    find_package(Threads REQUIRED)
+    target_link_libraries(${PROJECT_NAME} Threads::Threads m)
 endif()
 
 set_target_properties(${PROJECT_NAME} PROPERTIES SOVERSION 3 VERSION 3.0.0)
