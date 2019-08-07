@@ -107,10 +107,6 @@ ENDIF(APPLE)
 
 endif()
 
-IF(WIN32)
-  add_subdirectory(libzip-1.0.1)
-ENDIF()
-
 # Compile AprilTags library if required
 add_subdirectory(apriltag-3.0)
 
