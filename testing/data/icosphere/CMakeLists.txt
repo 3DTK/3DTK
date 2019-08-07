@@ -2,11 +2,7 @@ add_executable(test_create_icosphere create_icosphere.cc)
 target_link_libraries(test_create_icosphere)
 
 if (WITH_LIBZIP)
-  find_package(LibZip)
-  if (NOT ${LibZip_FOUND})
-    include_directories(${PROJECT_SOURCE_DIR}/3rdparty/libzip-1.0.1/lib/)
-    set (LIBZIP_LIBRARY zip)
-  endif()
+  find_package(LibZip REQUIRED)
 endif()
 
 if (WITH_LIBZIP)
