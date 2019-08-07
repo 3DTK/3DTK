@@ -61,11 +61,12 @@ bool AprilTagDetector::detect(const cv::Mat& image)
     }
 
     // Make an image_u8_t header for the Mat data
-    image_u8_t im = { .width = gray.cols,
-                      .height = gray.rows,
-                      .stride = gray.cols,
-                      .buf = gray.data
-                    };
+    image_u8_t im = {
+        gray.cols, // width
+        gray.rows, // height
+        gray.cols, // stride
+        gray.data // buf
+    };
 
     auto start = std::chrono::high_resolution_clock::now();
     zarray_t *detections = apriltag_detector_detect(_apriltagDetector, &im);
