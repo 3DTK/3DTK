@@ -62,6 +62,7 @@ int main(int argc, char* argv[])
 
 	std::unordered_map<size_t, DataXYZ> points_by_slice;
 	std::unordered_map<size_t, DataReflectance> reflectances_by_slice;
+	std::unordered_map<size_t, DataRGB> rgb_by_slice;
 	std::unordered_map<size_t, DataXYZ> orig_points_by_slice;
 	std::unordered_map<size_t, std::tuple<const double *, const double *, const double *>> trajectory;
 #ifdef WITH_MMAP_SCAN
@@ -125,6 +126,14 @@ int main(int argc, char* argv[])
 				exit(1);
 			}
 			reflectances_by_slice[i] = refl;
+		}
+		DataRGB rgb(scan->get("rgb"));
+		if (rgb.size() != 0) {
+			if (xyz.size() != rgb.size() || xyz_orig.size() != rgb.size()) {
+				std::cerr << "rgb mismatch: " << xyz.size() << " vs. " << rgb.size() << std::endl;
+				exit(1);
+			}
+			rgb_by_slice[i] = rgb;
 		}
 		points_by_slice[i] = xyz;
 		std::cerr << "number of points in scan " << i << ": " << xyz.size() << std::endl;
@@ -433,6 +442,8 @@ int main(int argc, char* argv[])
 	for (size_t i : scanorder) {
 		std::unordered_map<size_t, DataReflectance>::const_iterator refl_it =
 			reflectances_by_slice.find(i);
+		std::unordered_map<size_t, DataRGB>::const_iterator rgb_it =
+			rgb_by_slice.find(i);
 		for (size_t j = 0; j < points_by_slice[i].size(); ++j) {
 			FILE *out;
 			struct voxel voxel = voxel_of_point(points_by_slice[i][j],voxel_size);
@@ -442,10 +453,6 @@ int main(int argc, char* argv[])
 			} else {
 				out = out_static;
 			}
-			double refl = 0;
-			if (refl_it != reflectances_by_slice.end()) {
-				refl = refl_it->second[j];
-			}
 			// we print the mantissa with 13 hexadecimal digits because the
 			// mantissa for double precision is 52 bits long which is 6.5
 			// bytes and thus 13 hexadecimal digits
@@ -454,13 +461,17 @@ int main(int argc, char* argv[])
 			// http://pubs.opengroup.org/onlinepubs/000095399/functions/printf.html
 			// the %a conversion specifier automatically picks the right
 			// precision to represent the value exactly.
-			fprintf(out, "%a %a %a %a\n",
+			fprintf(out, "%a %a %a",
 					points_by_slice[i][j][0],
 					points_by_slice[i][j][1],
-					points_by_slice[i][j][2],
-					//0.0f
-					refl
-					);
+					points_by_slice[i][j][2]);
+			if (refl_it != reflectances_by_slice.end()) {
+				fprintf(out, " %a", refl_it->second[j]);
+			}
+			if (rgb_it != rgb_by_slice.end()) {
+				fprintf(out, " %a", rgb_it->second[j]);
+			}
+			fprintf(out, "\n");
 		}
 		std::cerr << ((done+1)*100.0f/scanorder.size()) << " %\r";
 		std::cerr.flush();
