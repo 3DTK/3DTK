@@ -253,7 +253,7 @@ void parse_options(int argc, char **argv, int &start, int &end,
   reduction.add_options()
     ("reduction,r", po::value<reduction_method>(&rtype)->required(),
      "choose reduction method (OCTREE, RANGE, INTERPOLATE, NONE)")
-    ("scale,S", po::value<double>(&scale),
+    ("scale,y", po::value<double>(&scale),
      "scaling factor")
     ("voxel,v", po::value<double>(&voxel),
      "voxel size")
