@@ -22,6 +22,19 @@ IODataType ScanIO_xyzr::spec[] = { DATA_XYZ, DATA_XYZ, DATA_XYZ,
 ScanDataTransform_xyz scanio_xyzr_tf;
 ScanDataTransform& ScanIO_xyzr::transform2uos = scanio_xyzr_tf;
 
+/**
+ * class factory for object construction
+ *
+ * @return Pointer to new object
+ */
+#ifdef _MSC_VER
+extern "C" __declspec(dllexport) ScanIO* create()
+#else
+extern "C" ScanIO* create()
+#endif
+{
+  return new ScanIO_xyzr;
+}
 
 /**
  * class factory for object construction
