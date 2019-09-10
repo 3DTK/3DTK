@@ -279,7 +279,7 @@ void setDisplayOptions(double& scale, GLfloat& fov, int& viewmode,
 		       options_description& display_options)
 {
   display_options.add_options()
-    ("scale,C", value(&scale)->default_value(0.01, "0.01"),
+    ("scale,y", value(&scale)->default_value(0.01, "0.01"),
      "Scale factor to use. Influences movement speed etc. "
      "Use 1 when point coordinates are in meters, 0.01 when in centimeters "
      "and so forth.")
