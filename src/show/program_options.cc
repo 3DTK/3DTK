@@ -10,7 +10,7 @@ void parse_args(int argc, char **argv, dataset_settings& ds, window_settings& ws
   using namespace std;
 
   // Temporary parsing variables
-  bool no_points, no_cameras, no_path, no_poses, no_fog, no_animcolor, no_anim_convert_jpg;
+  bool no_points, no_cameras, no_path, no_poses, no_fog, no_animcolor, no_anim_convert_jpg, no_config;
 
   // TODO make all defaults declared here the initial values for the settings structs, then use that initial value as the default here
   options_description gui_options("GUI options");
@@ -52,7 +52,7 @@ void parse_args(int argc, char **argv, dataset_settings& ds, window_settings& ws
   options_description other_options("Other options");
   setOtherOptions(ws.take_screenshot, ds.objects_file_name,
 		  ds.custom_filter, no_anim_convert_jpg,
-		  ds.trajectory_file_name, ds.identity,
+		  ds.trajectory_file_name, ds.identity, no_config,
 		  other_options);
   
   // These options will be displayed in the help text
@@ -87,13 +87,14 @@ void parse_args(int argc, char **argv, dataset_settings& ds, window_settings& ws
       .options(cmdline_options)
       .run()
     , vm);
+  notify(vm);
 
   // Parse user config file
 
   string config_home = getConfigHome() + "/3dtk/show.ini";
 
   ifstream user_config_file(config_home.c_str());
-  if (user_config_file) {
+  if (!no_config && user_config_file) {
     cout << "Parsing configuration file " << config_home << "..." << endl;
     store(parse_config_file(user_config_file, visible_options), vm);
   }
@@ -103,7 +104,7 @@ void parse_args(int argc, char **argv, dataset_settings& ds, window_settings& ws
 
   // Parse ./config.ini file in the input directory
 
-  if (vm.count("input-dir")) {
+  if (!no_config && vm.count("input-dir")) {
     string config_ini = ds.input_directory + "/config.ini";
     ifstream local_config_file(config_ini.c_str());
     if (local_config_file) {
@@ -431,7 +432,7 @@ void setFileOptions(bool& saveOct, bool& loadOct, bool& autoOct,
 
 void setOtherOptions(bool& screenshot, std::string& objFileName,
 		     std::string& customFilter,	bool& noAnimConvertJPG,
-		     std::string& trajectoryFileName, bool& identity,
+		     std::string& trajectoryFileName, bool& identity, bool& no_config,
 		     options_description& other_options)
 {
   other_options.add_options()
@@ -447,6 +448,7 @@ void setOtherOptions(bool& screenshot, std::string& objFileName,
       "direct specification)\n"
       "\"FILE;{fileName}\"\n"
       "See filter implementation in src/slam6d/pointfilter.cc for more detail.")
+    ("no-config", bool_switch(&no_config), "Disable config file parsing")
     ("no-anim-convert-jpg,J", bool_switch(&noAnimConvertJPG)) // TODO description
     ("trajectory-file", value(&trajectoryFileName)) // TODO description
     ("identity,i", bool_switch(&identity)) //TODO description
