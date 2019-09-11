@@ -44,7 +44,7 @@ BOOST_AUTO_TEST_CASE(readscans) {
 }
 
 BOOST_AUTO_TEST_CASE(readscans_uos) {
-    Scan::openDirectory(false, "../data/icosphere/", UOS, 0, -1);
+    Scan::openDirectory(false, "../data/icosphere/uos/", UOS, 0, -1);
     // make sure that there are exactly one scan
     BOOST_CHECK(Scan::allScans.size() == 1);
     // make sure all scans have the correct number of points
@@ -61,7 +61,7 @@ BOOST_AUTO_TEST_CASE(readscans_uos) {
 }
 
 BOOST_AUTO_TEST_CASE(readscans_xyz) {
-    Scan::openDirectory(false, "../data/icosphere/", XYZ, 0, -1);
+    Scan::openDirectory(false, "../data/icosphere/xyz/", XYZ, 0, -1);
     // make sure that there are exactly one scan
     BOOST_CHECK(Scan::allScans.size() == 1);
     // make sure all scans have the correct number of points

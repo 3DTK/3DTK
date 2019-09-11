@@ -3,6 +3,15 @@
 #include <tuple>
 #include <vector>
 #include <fstream>
+#include <string>
+
+#ifdef _MSC_VER
+#include <direct.h>
+#define mkdir(path,mode) _mkdir (path)
+#else
+#include <sys/stat.h>
+#include <sys/types.h>
+#endif
 
 std::tuple<double, double, double> normalize(double x, double y, double z)
 {
@@ -78,21 +87,26 @@ int main(int argc, char* argv[])
 		faces = tmpfaces;
 	}
 
-	std::ofstream out_uos("scan000.3d");
-	std::ofstream out_xyz("scan000.xyz");
+	for(const std::string & path : {"uos", "xyz"}) {
+		mkdir(path.c_str(), S_IRWXU|S_IRWXG|S_IRWXO);
+		std::ofstream out_frames(path+"/scan000.frames");
+		out_frames << "1 0 0 0 0 1 0 0 0 0 1 0 -0 0 0 1 2" << std::endl;
+		out_frames.close();
+		
+		std::ofstream out_pose(path+"/scan000.pose");
+		out_pose << "0 0 0" << std::endl;
+		out_pose << "0 0 0" << std::endl;
+		out_pose.close();
+	}
+
+	std::ofstream out_uos("uos/scan000.3d");
+	std::ofstream out_xyz("xyz/scan000.xyz");
 	for (auto& p: points) {
 		out_uos << std::get<0>(p) << " " << std::get<1>(p) << " " << std::get<2>(p) << std::endl;
 		out_xyz << std::get<0>(p)/100.0 << " " << std::get<1>(p)/100.0 << " " << std::get<2>(p)/100.0 << std::endl;
 	}
 	out_xyz.close();
-	std::ofstream out_frames("scan000.frames");
-	out_frames << "1 0 0 0 0 1 0 0 0 0 1 0 -0 0 0 1 2" << std::endl;
-	out_frames.close();
-	
-	std::ofstream out_pose("scan000.pose");
-	out_pose << "0 0 0" << std::endl;
-	out_pose << "0 0 0" << std::endl;
-	out_pose.close();
+	out_uos.close();
 
 	return 0;
 }

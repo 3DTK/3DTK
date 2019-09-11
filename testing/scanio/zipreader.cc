@@ -17,7 +17,7 @@ BOOST_AUTO_TEST_CASE(zipreader) {
 
 	// read first directory
 	ScanIO* sio1 = ScanIO::getScanIO(UOS_RGB);
-	char *path1 = "../../testing/data/icosphere/normals";
+	char *path1 = "../../testing/data/icosphere/uos/normals";
 	std::list<std::string> identifiers1 = sio1->readDirectory(path1, 0, 0);
 	BOOST_CHECK_EQUAL_COLLECTIONS(identifiers1.begin(), identifiers1.end(), identifiers0.begin(), identifiers0.end());
 	std::vector<double> xyz1;
@@ -26,7 +26,7 @@ BOOST_AUTO_TEST_CASE(zipreader) {
 
 	// then read zip file
 	ScanIO* sio2 = ScanIO::getScanIO(UOS_RGB);
-	char *path2 = "../../testing/data/icosphere/normals.zip/normals";
+	char *path2 = "../../testing/data/icosphere/uos/normals.zip/normals";
 	std::list<std::string> identifiers2 = sio2->readDirectory(path2, 0, 0);
 	BOOST_CHECK_EQUAL_COLLECTIONS(identifiers2.begin(), identifiers2.end(), identifiers0.begin(), identifiers0.end());
 	std::vector<double> xyz2;
