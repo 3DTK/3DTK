@@ -27,7 +27,7 @@ namespace po = boost::program_options;
 #include <sys/stat.h>
 #include <sys/types.h>
 
-#ifdef _MSC_VER
+#ifdef _WIN32
 #include <direct.h>
 #define mkdir(path,mode) _mkdir (path)
 #endif
