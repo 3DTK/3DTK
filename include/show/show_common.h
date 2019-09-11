@@ -217,6 +217,8 @@ extern bool coloranim;
  */
 extern bool nogui;
 
+extern bool hide_label;
+
 /**
  * take a screenshot and exit
  */
