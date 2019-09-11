@@ -28,7 +28,7 @@
 #include <slam6d/normals.h>
 #include <math.h>
 
-#ifdef _MSC_VER
+#ifdef _WIN32
 #define strcasecmp _stricmp
 #define strncasecmp _strnicmp
 #include <direct.h>

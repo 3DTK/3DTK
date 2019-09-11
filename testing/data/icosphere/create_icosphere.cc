@@ -5,7 +5,7 @@
 #include <fstream>
 #include <string>
 
-#ifdef _MSC_VER
+#ifdef _WIN32
 #include <direct.h>
 #define mkdir(path,mode) _mkdir (path)
 #else
