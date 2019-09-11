@@ -23,7 +23,11 @@ void saveImageAndExit(int dummy)
 {
 	// set pointmode to 1 to enforce rendering of all visible points
 	pointmode = 1;
-	saveImage(0);
+	if (screenshot_filename.empty()) {
+		saveImage(0);
+	} else {
+		saveImageAt(screenshot_filename);
+	}
 	exit(0);
 }
 
