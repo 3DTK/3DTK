@@ -182,7 +182,7 @@ void setPointOptions(int& originType, double& sphereRadius, boost::program_optio
 void setFileOptions(bool& saveOct, bool& loadOct, bool& autoOct, boost::program_options::options_description& file_options);
 void setOtherOptions(bool& screenshot, std::string& objFileName,
 		     std::string& customFilter,	bool& noAnimConvertJPG,
-		     std::string& trajectoryFileName, bool& identity,
+		     std::string& trajectoryFileName, bool& identity, bool& no_config,
 		     boost::program_options::options_description& other_options);
 
 #endif
