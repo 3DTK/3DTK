@@ -12,7 +12,7 @@
 #include "model/util.h"
 
 #include <sys/stat.h>       // stat()
-#ifdef _MSC_VER
+#ifdef _WIN32
 #include "dirent.h"
 #include <direct.h>
 #define mkdir(path,mode) _mkdir (path)

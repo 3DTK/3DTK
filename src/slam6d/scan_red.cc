@@ -54,7 +54,9 @@
 
 #ifndef _MSC_VER
 #include <getopt.h>
-#else
+#endif
+
+#ifdef _WIN32
 #include "XGetopt.h"
 #include <direct.h>
 #define mkdir(path,mode) _mkdir (path)
