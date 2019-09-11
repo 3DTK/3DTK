@@ -38,6 +38,7 @@ libwx_baseu3.0-devel,^
 libwx_gtk3u3.0-devel,^
 libzip-devel,^
 python3-devel,^
+xorg-server-extra,^
 zlib-devel
 if %ERRORLEVEL% GEQ 1 (
 	echo setup.exe failed

@@ -90,6 +90,7 @@ APT="apt-get install --yes --no-install-recommends -o Debug::pkgProblemResolver=
 		echo "equivs-build doc/equivs/control.$DERIV.$DIST.$CC";
 	fi
 	echo "$APT ./3dtk-build-deps_1.0_all.deb";
+	echo "$APT xvfb xauth libgl1-mesa-dri";
 	echo "echo travis_fold:end:docker_setup";
 	echo "mkdir .build";
 	echo "cmake -H. -B.build $CMAKEOPTS -G \"$GENERATOR\"";
