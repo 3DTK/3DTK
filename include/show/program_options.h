@@ -127,6 +127,8 @@ struct dataset_settings {
 
   bool color_animation;
   bool anim_convert_jpg;
+
+  bool hide_label;
 };
 
 struct window_settings {

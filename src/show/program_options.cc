@@ -71,6 +71,7 @@ void parse_args(int argc, char **argv, dataset_settings& ds, window_settings& ws
   options_description cmdline_options("");
   cmdline_options.add(visible_options);
   cmdline_options.add_options()
+    ("hide-label", bool_switch(&ds.hide_label))
     ("input-dir", value(&ds.input_directory), "Scan directory")
     ;
 

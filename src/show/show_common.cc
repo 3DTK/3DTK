@@ -155,6 +155,8 @@ bool coloranim = true;
  */
 bool nogui = false;
 
+bool hide_label = false;
+
 /**
  * take a screenshot and exit
  */
@@ -629,6 +631,8 @@ void copy_settings_to_globals(
   anim_convert_jpg = ds.anim_convert_jpg;
   trajectoryFile = ds.trajectory_file_name;
   identity = ds.identity;
+
+  hide_label = ds.hide_label;
 
   // Start in RGB mode if the user requests it or they request no other coloring
   if (ds.coloring.explicit_coloring || (ds.coloring.colorval == -1 && ds.coloring.ptype.hasColor())) {

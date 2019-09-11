@@ -18,7 +18,7 @@ double lastfps        = idealfps;   // last frame rate
 int    pointmode      = -1;
 
 bool   smallfont      = true;
-bool   label          = false;
+bool   label          = !hide_label;
 
 #include "show/url.h"
 
@@ -1650,7 +1650,7 @@ void glWriteImagePNG(const char *filename, int scale, GLenum mode)
                     neardistance, fardistance);
           glMatrixMode(GL_MODELVIEW);
           if(i==0 && j==0) {
-            label = true; 
+            label = !hide_label;
           }
           DisplayItFunc(mode); 
         } else {
@@ -1659,7 +1659,7 @@ void glWriteImagePNG(const char *filename, int scale, GLenum mode)
                    1.0, 32000.0 );
           glMatrixMode(GL_MODELVIEW);
           if(i==0 && j==0) {
-            label = true;
+            label = !hide_label;
           }
           DisplayItFunc(mode);
         }
@@ -1700,7 +1700,7 @@ void glWriteImagePNG(const char *filename, int scale, GLenum mode)
     glMatrixMode(GL_MODELVIEW);
     glLoadMatrixd(savedModel);
     // show the rednered scene
-    label = true;
+    label = !hide_label;
     smallfont = true;
     haveToUpdate=2;
     DisplayItFunc(mode);
