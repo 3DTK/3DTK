@@ -161,6 +161,7 @@ bool hide_label = false;
  * take a screenshot and exit
  */
 bool takescreenshot = false;
+std::string screenshot_filename;
 
 /**
  * rendering a png is done in the background. If an animation is rendered,
@@ -626,6 +627,7 @@ void copy_settings_to_globals(
   autoOct = ds.cache_octree;
 
   takescreenshot = ws.take_screenshot;
+  screenshot_filename = ws.screenshot_filename;
   loadObj = ds.objects_file_name;
   customFilter = ds.custom_filter;
   anim_convert_jpg = ds.anim_convert_jpg;

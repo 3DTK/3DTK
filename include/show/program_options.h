@@ -138,6 +138,7 @@ struct window_settings {
   bool advanced_controls;
   bool invert_mouse_x, invert_mouse_y;
   bool take_screenshot;
+  std::string screenshot_filename;
   bool capture_mouse;
   bool hide_widgets;
 };
@@ -182,7 +183,7 @@ void setReductionOptions(double& distMin, double& distMax, double& reduce,
 			 boost::program_options::options_description& reduction_options);
 void setPointOptions(int& originType, double& sphereRadius, boost::program_options::options_description& point_options);
 void setFileOptions(bool& saveOct, bool& loadOct, bool& autoOct, boost::program_options::options_description& file_options);
-void setOtherOptions(bool& screenshot, std::string& objFileName,
+void setOtherOptions(bool& screenshot, std::string& screenshot_filename, std::string& objFileName,
 		     std::string& customFilter,	bool& noAnimConvertJPG,
 		     std::string& trajectoryFileName, bool& identity, bool& no_config,
 		     boost::program_options::options_description& other_options);

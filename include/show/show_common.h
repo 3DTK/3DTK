@@ -223,6 +223,7 @@ extern bool hide_label;
  * take a screenshot and exit
  */
 extern bool takescreenshot;
+extern std::string screenshot_filename;
 
 /**
  * rendering a png is done in the background. If an animation is rendered,

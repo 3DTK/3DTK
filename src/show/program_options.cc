@@ -50,7 +50,7 @@ void parse_args(int argc, char **argv, dataset_settings& ds, window_settings& ws
 		 file_options);
 
   options_description other_options("Other options");
-  setOtherOptions(ws.take_screenshot, ds.objects_file_name,
+  setOtherOptions(ws.take_screenshot, ws.screenshot_filename, ds.objects_file_name,
 		  ds.custom_filter, no_anim_convert_jpg,
 		  ds.trajectory_file_name, ds.identity, no_config,
 		  other_options);
@@ -431,7 +431,7 @@ void setFileOptions(bool& saveOct, bool& loadOct, bool& autoOct,
     ;
 }
 
-void setOtherOptions(bool& screenshot, std::string& objFileName,
+void setOtherOptions(bool& screenshot, std::string& screenshot_filename, std::string& objFileName,
 		     std::string& customFilter,	bool& noAnimConvertJPG,
 		     std::string& trajectoryFileName, bool& identity, bool& no_config,
 		     options_description& other_options)
@@ -439,6 +439,7 @@ void setOtherOptions(bool& screenshot, std::string& objFileName,
   other_options.add_options()
     ("help,?", "Display this help text")
     ("screenshot", bool_switch(&screenshot), "Take screenshot and exit")
+    ("screenshot-filename", value(&screenshot_filename), "Output filename for --screenshot")
     ("loadObj,l", value(&objFileName),
       "Load objects specified in this file")
     ("customFilter,u", value(&customFilter),
