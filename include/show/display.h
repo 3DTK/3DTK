@@ -73,9 +73,8 @@ class LineDisplay : public SDisplay {
   static SDisplay* readFromFile(std::string &filename);
   virtual void displayObject();
 
-  private:
-
   LineDisplay(std::vector<float*> &l);
+  private:
 
   std::vector<float *> lines;
 };
@@ -110,6 +109,16 @@ class BoxDisplay : public GroupPlaneDisplay {
   virtual void displayObject();
   private:
   BoxDisplay(std::vector<PlaneDisplay*> &p);
+};
+
+class BoundingBoxDisplay : public SDisplay {
+  public:
+  static SDisplay* readFromFile(std::string &filename);
+  virtual void displayObject();
+
+  private:
+  BoundingBoxDisplay(std::vector<float*> &l);
+  std::vector<float*> lines;
 };
 
 #endif
