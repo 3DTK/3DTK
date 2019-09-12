@@ -20,6 +20,7 @@ public slots:
   void setDrawPath(bool drawPath);
   void setDrawPoses(bool drawPoses);
   void setPointSize(int pointSize);
+  void setDrawAllPoints(int allPoints);
 
   void setFogType(int fogType);
   void setFogInverted(bool fogInverted);
