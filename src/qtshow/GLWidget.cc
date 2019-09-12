@@ -205,6 +205,21 @@ void GLWidget::setDrawPoints(bool drawPoints) {
   update();
 }
 
+void GLWidget::setDrawAllPoints(int allPoints) {
+  switch(allPoints) {
+    case 0:
+      pointmode = -1;
+      break;
+    case 1:
+      pointmode =  0;
+      break;
+    case 2:
+      pointmode =  1;
+      break;
+  }
+  update();
+}
+
 void GLWidget::setDrawCameras(bool drawCameras) {
   show_cameras = drawCameras;
   update();
