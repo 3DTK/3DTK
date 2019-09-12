@@ -12,11 +12,19 @@ endif()
 
 add_custom_target(test_icosphere DEPENDS
 	"uos/scan000.3d" "uos/scan000.frames" "uos/scan000.pose"
+	"uosr/scan000.3d" "uosr/scan000.frames" "uosr/scan000.pose"
+	"uos_rgb/scan000.3d" "uos_rgb/scan000.frames" "uos_rgb/scan000.pose"
 	"xyz/scan000.xyz" "xyz/scan000.frames" "xyz/scan000.pose"
+	"xyzr/scan000.xyz" "xyzr/scan000.frames" "xyzr/scan000.pose"
+	"xyz_rgb/scan000.xyz" "xyz_rgb/scan000.frames" "xyz_rgb/scan000.pose"
 	)
 add_custom_command(OUTPUT
 	"uos/scan000.3d" "uos/scan000.frames" "uos/scan000.pose"
+	"uosr/scan000.3d" "uosr/scan000.frames" "uosr/scan000.pose"
+	"uos_rgb/scan000.3d" "uos_rgb/scan000.frames" "uos_rgb/scan000.pose"
 	"xyz/scan000.xyz" "xyz/scan000.frames" "xyz/scan000.pose"
+	"xyzr/scan000.xyz" "xyzr/scan000.frames" "xyzr/scan000.pose"
+	"xyz_rgb/scan000.xyz" "xyz_rgb/scan000.frames" "xyz_rgb/scan000.pose"
 	COMMAND test_create_icosphere)
 
 if (WITH_LIBZIP)

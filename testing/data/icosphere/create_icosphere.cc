@@ -87,7 +87,7 @@ int main(int argc, char* argv[])
 		faces = tmpfaces;
 	}
 
-	for(const std::string & path : {"uos", "xyz"}) {
+	for(const std::string & path : {"uos", "uosr", "uos_rgb", "xyz", "xyzr", "xyz_rgb"}) {
 		mkdir(path.c_str(), S_IRWXU|S_IRWXG|S_IRWXO);
 		std::ofstream out_frames(path+"/scan000.frames");
 		out_frames << "1 0 0 0 0 1 0 0 0 0 1 0 -0 0 0 1 2" << std::endl;
@@ -100,13 +100,37 @@ int main(int argc, char* argv[])
 	}
 
 	std::ofstream out_uos("uos/scan000.3d");
+	std::ofstream out_uosr("uosr/scan000.3d");
+	std::ofstream out_uos_rgb("uos_rgb/scan000.3d");
 	std::ofstream out_xyz("xyz/scan000.xyz");
+	std::ofstream out_xyzr("xyzr/scan000.xyz");
+	std::ofstream out_xyz_rgb("xyz_rgb/scan000.xyz");
 	for (auto& p: points) {
 		out_uos << std::get<0>(p) << " " << std::get<1>(p) << " " << std::get<2>(p) << std::endl;
+		out_uosr << std::get<0>(p) << " " << std::get<1>(p) << " " << std::get<2>(p)
+			<< " " << (long)(((std::get<0>(p)+1)+(std::get<1>(p)+1)+(std::get<2>(p)+1))/6.0*255)
+			<< std::endl;
+		out_uos_rgb << std::get<0>(p) << " " << std::get<1>(p) << " " << std::get<2>(p)
+			<< " " << (long)round((std::get<0>(p)+1)/2.0*255)
+			<< " " << (long)round((std::get<1>(p)+1)/2.0*255)
+			<< " " << (long)round((std::get<2>(p)+1)/2.0*255)
+			<< std::endl;
 		out_xyz << std::get<0>(p)/100.0 << " " << std::get<1>(p)/100.0 << " " << std::get<2>(p)/100.0 << std::endl;
+		out_xyzr << std::get<0>(p)/100.0 << " " << std::get<1>(p)/100.0 << " " << std::get<2>(p)/100.0
+			<< " " << (long)(((std::get<0>(p)+1)+(std::get<1>(p)+1)+(std::get<2>(p)+1))/6.0*255)
+			<< std::endl;
+		out_xyz_rgb << std::get<0>(p)/100.0 << " " << std::get<1>(p)/100.0 << " " << std::get<2>(p)/100.0
+			<< " " << (long)round((std::get<0>(p)+1)/2.0*255)
+			<< " " << (long)round((std::get<1>(p)+1)/2.0*255)
+			<< " " << (long)round((std::get<2>(p)+1)/2.0*255)
+			<< std::endl;
 	}
-	out_xyz.close();
 	out_uos.close();
+	out_uosr.close();
+	out_uos_rgb.close();
+	out_xyz.close();
+	out_xyzr.close();
+	out_xyz_rgb.close();
 
 	return 0;
 }
