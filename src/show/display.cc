@@ -9,6 +9,7 @@
 
 #include "show/display.h"
 #include "slam6d/globals.icc"
+#include "show/show_common.h"
 #include <fstream>
 #include <iostream>
 
@@ -27,7 +28,6 @@
 #else
 #include "show/dummygl.h"
 #endif
-
 
 double SDisplay::mirror[16] = {1,0,0,0,
   0,1,0,0,
@@ -69,6 +69,8 @@ void SDisplay::readDisplays(std::string &filename, std::vector<SDisplay*> &displ
         displays.push_back(BoxDisplay::readFromFile(objectfile));
       } else if(strcmp(type.c_str(), "Coord") == 0) {
         displays.push_back(CoordDisplay::readFromFile(objectfile));
+      } else if(strcmp(type.c_str(), "BoundingBox") == 0) {
+        displays.push_back(BoundingBoxDisplay::readFromFile(objectfile));
       } else {
         std::cerr << "Unknown SDisplay Object" << std::endl;
       }
@@ -504,3 +506,177 @@ void PlaneDisplay::displayObject() {
   glEnd();
   glBlendFunc(GL_ONE, GL_ZERO); // TODO
 }
+
+BoundingBoxDisplay::BoundingBoxDisplay(std::vector<float*> &l) {
+  lines = l;
+}
+
+SDisplay * BoundingBoxDisplay::readFromFile(std::string &filename) {
+  std::ifstream input;
+  input.open(filename.c_str());
+
+  std::vector<float*> lines;
+  if (input.good()) {
+    std::string currentLine;
+    while (std::getline(input, currentLine)) {
+      std::istringstream iss(currentLine);
+      double minx, maxx, miny, maxy, minz, maxz;
+      if (!(iss >> minx >> maxx >> miny >> maxy >> minz >> maxz)) break;
+ 
+      //along x-axis
+      float* p5 = new float[6];
+      p5[0] = minx;
+      p5[1] = miny;
+      p5[2] = maxz;
+      p5[3] = maxx;
+      p5[4] = miny;
+      p5[5] = maxz;
+      lines.push_back(p5);
+      float* p3 = new float[6];
+      p3[0] = minx;
+      p3[1] = miny;
+      p3[2] = minz;
+      p3[3] = maxx;
+      p3[4] = miny;
+      p3[5] = minz;
+      lines.push_back(p3);
+      float* p10 = new float[6];
+      p10[0] = minx;
+      p10[1] = maxy;
+      p10[2] = maxz;
+      p10[3] = maxx;
+      p10[4] = maxy;
+      p10[5] = maxz;
+      lines.push_back(p10);
+      float* p12 = new float[6];
+      p12[0] = maxx;
+      p12[1] = maxy;
+      p12[2] = minz;
+      p12[3] = minx;
+      p12[4] = maxy;
+      p12[5] = minz;
+      lines.push_back(p12);
+ 
+      //along y-axis
+      float* p2 = new float[6];
+      p2[0] = minx;
+      p2[1] = miny;
+      p2[2] = minz;
+      p2[3] = minx;
+      p2[4] = maxy;
+      p2[5] = minz;
+      lines.push_back(p2);
+      float* p4 = new float[6];
+      p4[0] = minx;
+      p4[1] = miny;
+      p4[2] = maxz;
+      p4[3] = minx;
+      p4[4] = maxy;
+      p4[5] = maxz;
+      lines.push_back(p4);
+      float* p7 = new float[6];
+      p7[0] = maxx;
+      p7[1] = miny;
+      p7[2] = maxz;
+      p7[3] = maxx;
+      p7[4] = maxy;
+      p7[5] = maxz;
+      lines.push_back(p7);
+      float* p8 = new float[6];
+      p8[0] = maxx;
+      p8[1] = miny;
+      p8[2] = minz;
+      p8[3] = maxx;
+      p8[4] = maxy;
+      p8[5] = minz;
+      lines.push_back(p8);
+ 
+      //along z-axis
+      float* p1 = new float[6];
+      p1[0] = minx;
+      p1[1] = miny;
+      p1[2] = minz;
+      p1[3] = minx;
+      p1[4] = miny;
+      p1[5] = maxz;
+      lines.push_back(p1);
+      float* p6 = new float[6];
+      p6[0] = maxx;
+      p6[1] = miny;
+      p6[2] = maxz;
+      p6[3] = maxx;
+      p6[4] = miny;
+      p6[5] = minz;
+      lines.push_back(p6);
+      float* p9 = new float[6];
+      p9[0] = minx;
+      p9[1] = maxy;
+      p9[2] = minz;
+      p9[3] = minx;
+      p9[4] = maxy;
+      p9[5] = maxz;
+      lines.push_back(p9);
+      float* p11 = new float[6];
+      p11[0] = maxx;
+      p11[1] = maxy;
+      p11[2] = maxz;
+      p11[3] = maxx;
+      p11[4] = maxy;
+      p11[5] = minz;
+      lines.push_back(p11);
+    }
+ }
+  input.close();
+  input.clear();
+
+  return new BoundingBoxDisplay(lines);
+    
+}
+
+void BoundingBoxDisplay::displayObject() {
+
+  glLineWidth(4*pointsize);
+  glBegin(GL_LINES);
+
+  for (unsigned int i = 0; i < lines.size(); i++) {
+    int boxReset = i%12;
+    if (boxReset < 4) {
+      glColor3f(1.0, 0.0, 0.0);
+      glVertex3f(lines[i][0], lines[i][1], lines[i][2]);
+      glColor3f(1.0, 0.0, 0.0);
+      glVertex3f(lines[i][3], lines[i][4], lines[i][5]);
+    } if (boxReset >= 4 && boxReset < 8) {
+      glColor3f(0.0, 1.0, 0.0);
+      glVertex3f(lines[i][0], lines[i][1], lines[i][2]);
+      glColor3f(0.0, 1.0, 0.0);
+      glVertex3f(lines[i][3], lines[i][4], lines[i][5]);
+    } if (boxReset >= 8 && boxReset < 12) {
+      glColor3f(0.0, 0.0, 1.0);
+      glVertex3f(lines[i][0], lines[i][1], lines[i][2]);
+      glColor3f(0.0, 0.0, 1.0);
+      glVertex3f(lines[i][3], lines[i][4], lines[i][5]);
+    }    
+
+  }
+
+  glEnd();
+
+  for (unsigned int i = 0; i < lines.size(); i++) {
+    glColor3f(1.0, 0.0, 1.0);
+    glVertex3f(lines[i][0], lines[i][1], lines[i][2]);
+    glColor3f(1.0, 0.0, 1.0);
+    glVertex3f(lines[i][3], lines[i][4], lines[i][5]);
+  }
+  glEnd();
+
+
+}
+/*
+void BoundingBoxDisplay::displayObject() {
+
+  for(unsigned int i = 0; i < lines.size(); i++) {
+    lines[i]->displayObject();
+  }
+
+}
+*/
