@@ -67,5 +67,12 @@ matrix:
       env:
         - DERIV=ubuntu DIST=bionic
 script:
-  - if [[ $TRAVIS_OS_NAME == 'osx' ]]; then ./travismacosbuild.sh; fi
-  - if [[ $TRAVIS_OS_NAME == 'linux' ]]; then ./travisdockerbuild.sh $DERIV $DIST $CC; fi
+  - |
+    case "$TRAVIS_OS_NAME" in
+        osx) ./travismacosbuild.sh;;
+        linux) if [ "$CC" = "clang" ]; then
+                   # clang takes very long to compile apriltags
+                   travis_wait 60 ./travisdockerbuild.sh $DERIV $DIST $CC
+               else ./travisdockerbuild.sh $DERIV $DIST $CC; fi;;
+        *) exit 1;;
+    esac
