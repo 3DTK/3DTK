@@ -232,18 +232,21 @@ void parse_args(int argc, char **argv, dataset_settings& ds, window_settings& ws
 std::string getConfigHome()
 {
   std::string config_home;
-#ifndef _MSC_VER
+#ifdef _MSC_VER
+  // in %APPDATA%/3dtk/show.ini
+  char *appdata = getenv("APPDATA");
+  if (appdata != NULL) {
+    config_home = std::string(appdata);
+  }
+#else
   // in $XDG_CONFIG_HOME/3dtk/show.ini
   char *home_c = getenv("HOME");
   char *config_home_c = getenv("XDG_CONFIG_HOME");
-  if (config_home_c && *config_home_c != '\0') {
+  if (config_home_c != NULL && *config_home_c != '\0') {
     config_home = config_home_c;
-  } else {
+  } else if (home_c != NULL) {
     config_home = std::string(home_c) + "/.config";
   }
-#else
-  // in %APPDATA%/3dtk/show.ini
-  config_home = std::string(getenv("APPDATA"));
 #endif
 
   return config_home;
