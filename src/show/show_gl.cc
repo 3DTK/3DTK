@@ -1536,13 +1536,6 @@ void writePngInBackground(const char *filename, unsigned char *ibuffer, int imag
     png_init_io(png, fp);
     png_set_IHDR(png, info, image_width, image_height, 8 /* depth */, PNG_COLOR_TYPE_RGB, PNG_INTERLACE_NONE,
         PNG_COMPRESSION_TYPE_BASE, PNG_FILTER_TYPE_BASE);
-    png_colorp palette = (png_colorp)png_malloc(png, PNG_MAX_PALETTE_LENGTH * sizeof(png_color));
-    if (!palette) {
-        fclose(fp);
-        png_destroy_write_struct(&png, &info);
-        return;
-    }
-    png_set_PLTE(png, info, palette, PNG_MAX_PALETTE_LENGTH);
     png_write_info(png, info);
     png_set_packing(png);
 
@@ -1552,7 +1545,6 @@ void writePngInBackground(const char *filename, unsigned char *ibuffer, int imag
 
     png_write_image(png, rows);
     png_write_end(png, info);
-    png_free(png, palette);
     png_destroy_write_struct(&png, &info);
 
     fclose(fp);
