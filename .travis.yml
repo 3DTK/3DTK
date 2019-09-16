@@ -2,6 +2,9 @@ language: generic
 branches:
   except:
    - appveyor
+   - msvc
+   - cygwin
+   - mingw
 notifications:
   email:
     recipients:
@@ -30,42 +33,49 @@ matrix:
       cache:
         directories:
         - $HOME/Library/Caches/Homebrew
+      if: branch NOT IN (ubuntu, debian, linux)
     - os: linux
       sudo: required
       services:
         - docker
       env:
         - DERIV=debian DIST=sid
+      if: branch NOT IN (macos, osx, apple, ubuntu)
     - os: linux
       sudo: required
       services:
         - docker
       env:
         - DERIV=debian DIST=sid CC=clang
+      if: branch NOT IN (macos, osx, apple, ubuntu)
     - os: linux
       sudo: required
       services:
         - docker
       env:
         - DERIV=debian DIST=buster
+      if: branch NOT IN (macos, osx, apple, ubuntu)
     - os: linux
       sudo: required
       services:
         - docker
       env:
         - DERIV=debian DIST=stretch
+      if: branch NOT IN (macos, osx, apple, ubuntu)
     - os: linux
       sudo: required
       services:
         - docker
       env:
         - DERIV=ubuntu DIST=xenial
+      if: branch NOT IN (macos, osx, apple, debian)
     - os: linux
       sudo: required
       services:
         - docker
       env:
         - DERIV=ubuntu DIST=bionic
+      if: branch NOT IN (macos, osx, apple, debian)
 script:
   - |
     case "$TRAVIS_OS_NAME" in
