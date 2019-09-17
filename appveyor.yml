@@ -7,6 +7,12 @@ platform: x64
 branches:
   except:
    - travis
+   - ubuntu
+   - linux
+   - debian
+   - macos
+   - osx
+   - apple
 environment:
   matrix:
    - PLATFORM: msvc
