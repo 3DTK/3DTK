@@ -71,7 +71,7 @@ script:
     case "$TRAVIS_OS_NAME" in
         osx) ./travismacosbuild.sh;;
         linux) if [ "$CC" = "clang" ]; then
-                   # clang takes very long to compile apriltags
+                   # clang 8 takes very long to compile apriltags (clang 7 works fine)
                    travis_wait 60 ./travisdockerbuild.sh $DERIV $DIST $CC
                else ./travisdockerbuild.sh $DERIV $DIST $CC; fi;;
         *) exit 1;;
