@@ -18,7 +18,7 @@ if (APPLE)
 	#set(MACOSTIMEOUT gtimeout --preserve-status 20)
 	#set(MACOSTIMEOUT sh -c "\"$@\" & sleep 20; kill $!" --)
 	#set(MACOSTIMEOUT sh -c "echo blub; \"$@\"; echo foobar;" --)
-	set(MACOSTIMEOUT sh -c "\"$$@\" &; pid=$$!; sleep 10; kill -9 $$! || true; exit 0;" --)
+	set(MACOSTIMEOUT sh -c "\"$@\" &; pid=$!; sleep 10; kill -9 $! || true; exit 0;" --)
 	#set(MACOSTIMEOUT "${PROJECT_SOURCE_DIR}/testing/show/timeout.sh")
 endif()
 
