@@ -3,6 +3,7 @@
 
 #include <cmath>
 #include <string>
+#include <vector>
 
 #include <boost/program_options.hpp>
 
@@ -22,17 +23,12 @@
 
 #include "slam6d/io_types.h"
 #include "slam6d/point_type.h"
+#include "slam6d/scan_settings.h"
 
 struct WindowDimensions {
   int w, h;
   WindowDimensions() : w(0), h(0) {};
   WindowDimensions(int w, int h) : w(w), h(h) {};
-};
-
-struct Color {
-  float r, g, b;
-  Color() : r(0), g(0), b(0) {};
-  Color(float r, float g, float b) : r(r), g(g), b(b) {};
 };
 
 struct Position {
@@ -47,17 +43,6 @@ struct Quaternion {
   Quaternion(double x, double y, double z, double w) : x(x), y(y), z(z), w(w) {};
 };
 
-enum class ShowColormap : int {
-  solid = 0,
-  grey = 1,
-  hsv = 2,
-  jet = 3,
-  hot = 4,
-  rand = 5,
-  shsv = 6,
-  temp = 7
-};
-
 struct Camera {
   Position position;
   Quaternion rotation;
@@ -69,56 +54,12 @@ struct fog_settings {
   GLfloat density;
 };
 
-template<class T>
-struct range {
-  T min, max;
-};
-
-// The members initialized with {} can not have a sensible default in parse_args
-
-struct color_settings {
-  PointType ptype;
-  int colorval = -1;
-  bool explicit_coloring;
-  ShowColormap colormap;
-  range<float> colormap_values {NAN, NAN};
-  Color bgcolor;
-  int scans_colored;
-};
-
-struct dataset_settings {
-  std::string input_directory;
-  IOType format;
-  bool use_scanserver;
-  range<int> scan_numbers;
-
+struct display_settings {
   Camera camera;
-  double scale;
   int init_with_viewmode;
   int pointsize;
 
   fog_settings fog;
-
-  color_settings coloring;
-
-  range<double> distance_filter;
-  double octree_reduction_voxel;
-  int octree_reduction_randomized_bucket {};
-  int skip_files;
-
-  // TODO make this an std::optional (C++17)
-  int origin_type {};
-  bool origin_type_set {};
-  double sphere_radius;
-
-  bool save_octree;
-  bool load_octree;
-  bool cache_octree;
-
-  std::string objects_file_name {};
-  std::string custom_filter {};
-  std::string trajectory_file_name {};
-  bool identity;
 
   bool draw_points;
   bool draw_cameras;
@@ -161,7 +102,7 @@ std::string getConfigHome();
  * @param directory_present if this pointer is not null, allow input-dir to not be present and write that presence in the target bool
  * @return the parsed options
  */
-void parse_args(int argc, char **argv, dataset_settings& ds, window_settings& ws, bool *directory_present = nullptr);
+void parse_args(int argc, char **argv, dataset_settings& dss, window_settings& ws, display_settings& ds, bool *directory_present = nullptr);
 void setGUIOptions(bool& nogui, float& fps,
 		   WindowDimensions& dimensions, bool& advanced,
 		   bool& invertMouseX, bool& invertMouseY,

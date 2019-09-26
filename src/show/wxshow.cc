@@ -490,17 +490,18 @@ bool wxShow::OnInit()
   }
   glutInit(&argc, argv);
 
-  dataset_settings ds;
+  dataset_settings dss;
+  display_settings ds;
   window_settings ws;
 
   try {
-    parse_args(argc, new_argv, ds, ws);
+    parse_args(argc, new_argv, dss, ws, ds);
   } catch (std::exception& e) {
     std::cerr << "Error while parsing settings: " << e.what() << std::endl;
     exit(1);
   }
 
-  initShow(ds, ws);
+  initShow(dss, ws, ds);
   //glClearColor(0.0, 0.0, 0.0, 0.0);
 
   wxBoxSizer* sizer = new wxBoxSizer(wxHORIZONTAL);

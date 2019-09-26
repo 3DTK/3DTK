@@ -80,6 +80,18 @@ bool ScanDataTransform_pts::transform(double xyz[3], unsigned char rgb[3], float
     return true;
 }
 
+bool ScanDataTransform_combined::transform(double xyz[3], unsigned char rgb[3], float*  refl, float* temp, float* ampl, int* type, float* devi, double n[3])
+{
+  return m_sdt_1.transform(xyz, rgb, refl, temp, ampl, type, devi, n)
+    && m_sdt_2.transform(xyz, rgb, refl, temp, ampl, type, devi, n);
+}
+
+bool ScanDataTransform_matrix::transform(double xyz[3], unsigned char rgb[3], float*  refl, float* temp, float* ampl, int* type, float* devi, double n[3])
+{
+  transform3(m_matrix, xyz);
+  return true;
+}
+
 time_t lastModifiedHelper(const char *dir_path,
         const char *identifier,
         const char **data_path_suffixes,
@@ -98,37 +110,83 @@ time_t lastModifiedHelper(const char *dir_path,
 }
 
 std::list<std::string> readDirectoryHelper(const char *dir_path,
-        unsigned int start,
-        unsigned int end,
-        const char **data_path_suffixes,
-        const char *data_path_prefix,
-        unsigned int id_len)
+  unsigned int start,
+  unsigned int end,
+  const char **data_path_suffixes,
+  const char *data_path_prefix,
+  unsigned int id_len)
 {
-    std::list<std::string> identifiers;
-    for (unsigned int i = start; i <= end; ++i) {
-        // identifier is /d/d/d (000-999)
-        std::string identifier(to_string(i, id_len));
-        // scan consists of data and pose files
-        bool found = false;
-        for (const char **s = data_path_suffixes; *s != 0; s++) {
-            boost::filesystem::path data(dir_path);
-            data /= boost::filesystem::path(std::string(data_path_prefix) + identifier + *s);
-            PointFilter filter;
-            /* pass the identity function because we don't want to read data
-             * from the file but just find out whether it exists or not */
-            if (open_path(data, [](std::istream &data_file) -> bool { return true; })) {
-                found = true;
-                break;
-            }
-        }
-        // stop if part of a scan is missing or end by absence is detected
-        if (!found) {
-            std::cerr << "No data found for " << data_path_prefix << identifier << "!" << std::endl;
-            break;
-        }
-        identifiers.push_back(identifier);
+  std::list<std::string> identifiers;
+  for (unsigned int i = start; i <= end; ++i) {
+    // identifier is /d/d/d (000-999)
+    std::string identifier(to_string(i, id_len));
+    // scan consists of data and pose files
+    bool found = false;
+    for (const char **s = data_path_suffixes; *s != 0; s++) {
+      boost::filesystem::path data(dir_path);
+      data /= boost::filesystem::path(std::string(data_path_prefix) + identifier + *s);
+      PointFilter filter;
+      /* pass the identity function because we don't want to read data
+       * from the file but just find out whether it exists or not */
+      if (open_path(data, [](std::istream &data_file) -> bool { return true; })) {
+        found = true;
+        break;
+      }
     }
-    return identifiers;
+    // stop if part of a scan is missing or end by absence is detected
+    if (!found) {
+      std::cerr << "No data found for " << data_path_prefix << identifier << "!" << std::endl;
+      break;
+    }
+    identifiers.push_back(identifier);
+  }
+  return identifiers;
+}
+
+std::list<std::string> readDirectoryHelper(dataset_settings& dss,
+  const char **data_path_suffixes,
+  const char *data_path_prefix,
+  unsigned int id_len)
+{
+  //return readDirectoryHelper(dss.data_source.c_str(), dss.scan_numbers.min, dss.scan_numbers.max, data_path_suffixes, data_path_prefix);
+  std::list<std::string> identifiers;
+  multi_range_set::iterator it = dss.scan_ranges.begin();
+  bool found = false;
+  int last_id = *it;
+  do {
+    for (; !it.clusterDone(); ++it) {
+      std::string identifier(to_string(*it, id_len));
+      // scan consists of data and pose files
+      found = false;
+      for (const char **s = data_path_suffixes; *s != 0; s++) {
+        boost::filesystem::path data(dss.data_source);
+        data /= boost::filesystem::path(std::string(data_path_prefix) + identifier + *s);
+        PointFilter filter;
+        /* pass the identity function because we don't want to read data
+         * from the file but just find out whether it exists or not */
+        if (open_path(data, [](std::istream &data_file) -> bool { return true; })) {
+          found = true;
+          break;
+        }
+      }
+      // stop if part of a scan is missing or end by absence is detected
+      if (!found) {
+        std::cerr << "No data found for " << data_path_prefix << identifier << "!" << std::endl;
+        it.reference()->setMaxLimit(last_id);
+        break;
+      }
+      else {
+        last_id = *it;
+      }
+    }
+    multi_range_set cluster = it.cluster();
+    if (cluster.isValid())
+    {
+      identifiers.push_back(cluster.toString(id_len));
+    }
+    it.nextCluster();
+  } while (!it.done());
+  return identifiers;
 }
 
 void readPoseHelper(const char *dir_path,
@@ -137,8 +195,14 @@ void readPoseHelper(const char *dir_path,
         const char *pose_path_suffix,
         const char *pose_path_prefix)
 {
+    std::string id_str(identifier);
+    multi_range<range<int> > mr;
+    mr.set(id_str);
+    mr.merged = true;
+    id_str = to_string(*(mr.begin()), 3).c_str();
+
     boost::filesystem::path pose_path(dir_path);
-    pose_path /= boost::filesystem::path(std::string(pose_path_prefix) + identifier +
+    pose_path /= boost::filesystem::path(std::string(pose_path_prefix) + id_str +
             pose_path_suffix);
 
 
