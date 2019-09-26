@@ -9,14 +9,14 @@ class ScanPicker : public QDialog, private Ui::ScanPicker {
   Q_OBJECT
 
 public:
-  ScanPicker(dataset_settings& ds, QWidget *parent = Q_NULLPTR, Qt::WindowFlags f = Qt::WindowFlags());
+  ScanPicker(dataset_settings& dss, QWidget *parent = Q_NULLPTR, Qt::WindowFlags f = Qt::WindowFlags());
 
 public slots:
   void accept();
   void chooseScanDirectory();
 
 protected:
-  dataset_settings& ds;
+  dataset_settings& dss;
 };
 
 #endif

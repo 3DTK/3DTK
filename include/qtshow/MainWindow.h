@@ -17,7 +17,7 @@ class MainWindow : public QMainWindow, protected Ui::MainWindow {
   Q_OBJECT
 
 public:
-  MainWindow(const dataset_settings& ds, const window_settings& ws, QWidget *parent = Q_NULLPTR, Qt::WindowFlags flags = Qt::WindowFlags());
+  MainWindow(const dataset_settings& dss, const window_settings& ws, const display_settings& ds, QWidget *parent = Q_NULLPTR, Qt::WindowFlags flags = Qt::WindowFlags());
 
 signals:
   void scanDirectoryOpened(dataset_settings);
@@ -69,7 +69,8 @@ protected:
 
   ShortcutsDialog *shortcutsDialog = Q_NULLPTR;
 
-  dataset_settings ds;
+  dataset_settings dss;
+  display_settings ds;
   QProgressBar *progressbar;
 
   QMargins defaultMargins;
