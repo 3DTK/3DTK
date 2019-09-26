@@ -3,58 +3,61 @@
 #include <boost/regex.hpp>
 
 #include "show/program_options.h"
+#include "parsers/range_set_parser.h"
+//#include "../../src/parsers/range_set_parser.cc"
 
 using namespace boost::program_options;
 
-void parse_args(int argc, char **argv, dataset_settings& ds, window_settings& ws, bool *directory_present) {
+void parse_args(int argc, char **argv, dataset_settings& dss, window_settings& ws, display_settings& ds, bool *directory_present) {
   using namespace std;
 
   // Temporary parsing variables
   bool no_points, no_cameras, no_path, no_poses, no_fog, no_animcolor, no_anim_convert_jpg, no_config;
+  std::vector<std::string> data_sources;
 
   // TODO make all defaults declared here the initial values for the settings structs, then use that initial value as the default here
   options_description gui_options("GUI options");
   setGUIOptions(ws.nogui, ws.max_fps, ws.dimensions, ws.advanced_controls,
-		ws.invert_mouse_x, ws.invert_mouse_y,
-		ws.capture_mouse, ws.hide_widgets, gui_options);
+    ws.invert_mouse_x, ws.invert_mouse_y,
+    ws.capture_mouse, ws.hide_widgets, gui_options);
 
   options_description display_options("Display options");
-  setDisplayOptions(ds.scale, ds.camera.fov, ds.init_with_viewmode,
-		    no_points, no_cameras, no_path, no_poses,
-		    no_fog, ds.fog.type, ds.fog.density,
-		    ds.camera.position, ds.camera.rotation, ds.pointsize,
-		    display_options);
+  setDisplayOptions(dss.scale, ds.camera.fov, ds.init_with_viewmode,
+    no_points, no_cameras, no_path, no_poses,
+    no_fog, ds.fog.type, ds.fog.density,
+    ds.camera.position, ds.camera.rotation, ds.pointsize,
+    display_options);
 
   options_description color_options("Point coloring");
-  setColorOptions(ds.coloring.bgcolor, ds.coloring.explicit_coloring,
-  		  ds.coloring.colormap, ds.coloring.colormap_values.min,
-  		  ds.coloring.colormap_values.max,
-		  ds.coloring.scans_colored, no_animcolor,
-  		  color_options);
+  setColorOptions(dss.coloring.bgcolor, dss.coloring.explicit_coloring,
+    dss.coloring.colormap, dss.coloring.colormap_values.min,
+    dss.coloring.colormap_values.max,
+    dss.coloring.scans_colored, no_animcolor,
+    color_options);
 
   options_description scan_options("Scan selection");
-  setScanOptions(ds.use_scanserver, ds.scan_numbers.min,
-		 ds.scan_numbers.max, ds.format, scan_options);
+  setScanOptions(dss.use_scanserver, dss.scan_numbers.min,
+    dss.scan_numbers.max, dss.format, scan_options);
 
   options_description reduction_options("Point reduction");
-  setReductionOptions(ds.distance_filter.min, ds.distance_filter.max,
-		      ds.octree_reduction_voxel,
-		      ds.octree_reduction_randomized_bucket,
-		      ds.skip_files, reduction_options);
+  setReductionOptions(dss.distance_filter.min, dss.distance_filter.max,
+    dss.octree_reduction_voxel,
+    dss.octree_reduction_randomized_bucket,
+    dss.skip_files, reduction_options);
 
   options_description point_options("Point transformation");
-  setPointOptions(ds.origin_type, ds.sphere_radius, point_options);
+  setPointOptions(dss.origin_type, dss.sphere_radius, point_options);
 
   options_description file_options("Octree caching");
-  setFileOptions(ds.save_octree, ds.load_octree, ds.cache_octree,
-		 file_options);
+  setFileOptions(dss.save_octree, dss.load_octree, dss.cache_octree,
+    file_options);
 
   options_description other_options("Other options");
-  setOtherOptions(ws.take_screenshot, ws.screenshot_filename, ds.objects_file_name,
-		  ds.custom_filter, no_anim_convert_jpg,
-		  ds.trajectory_file_name, ds.identity, no_config,
-		  other_options);
-  
+  setOtherOptions(ws.take_screenshot, ws.screenshot_filename, dss.objects_file_name,
+    dss.custom_filter, no_anim_convert_jpg,
+    dss.trajectory_file_name, dss.identity, no_config,
+    other_options);
+
   // These options will be displayed in the help text
   options_description visible_options("");
   visible_options
@@ -72,11 +75,11 @@ void parse_args(int argc, char **argv, dataset_settings& ds, window_settings& ws
   cmdline_options.add(visible_options);
   cmdline_options.add_options()
     ("hide-label", bool_switch(&ds.hide_label))
-    ("input-dir", value(&ds.input_directory), "Scan directory")
+    ("input-dir,data-sources", value<std::vector<std::string> >(&data_sources), "Scan directory or data-sources definition")
     ;
 
   positional_options_description pd;
-  pd.add("input-dir", 1);
+  pd.add("input-dir", -1);
 
   // Parse the options into this map
   variables_map vm;
@@ -105,8 +108,11 @@ void parse_args(int argc, char **argv, dataset_settings& ds, window_settings& ws
 
   // Parse ./config.ini file in the input directory
 
-  if (!no_config && vm.count("input-dir")) {
-    string config_ini = ds.input_directory + "/config.ini";
+  if (!no_config && vm.count("input-dir") && data_sources.size() == 1) {
+    //dss.set(data_sources[0]);
+    dss.data_type = dataset_settings::SINGLE_SRC;
+    parse_dataset(data_sources[0], dss);
+    std::string config_ini = dss.data_source + "/config.ini";
     ifstream local_config_file(config_ini.c_str());
     if (local_config_file) {
       cout << "Parsing configuration file " << config_ini << "..." << endl;
@@ -129,26 +135,26 @@ void parse_args(int argc, char **argv, dataset_settings& ds, window_settings& ws
     exit(0);
   }
 
-  if (directory_present == nullptr && vm.count("input-dir") != 1) {
+  if (directory_present == nullptr && vm.count("input-dir") == 0) {
     cerr << "Error: Please specify a directory. See --help for options." << endl;
     exit(1);
   }
 
   // Scan number range
-  if (ds.scan_numbers.min < 0) {
+  if (dss.scan_numbers.min < 0) {
     throw logic_error("Cannot start at a negative scan number.");
   }
-  if (ds.scan_numbers.max < -1) {
+  if (dss.scan_numbers.max < -1) {
     throw logic_error("Cannot end at a negative scan number.");
   }
-  if (0 < ds.scan_numbers.max && ds.scan_numbers.max < ds.scan_numbers.min) {
-    throw logic_error("<end> (" + to_string(ds.scan_numbers.max) + ") cannot be smaller than <start> (" + to_string(ds.scan_numbers.min) + ").");
+  if (0 < dss.scan_numbers.max && dss.scan_numbers.max < dss.scan_numbers.min) {
+    throw logic_error("<end> (" + to_string(dss.scan_numbers.max) + ") cannot be smaller than <start> (" + to_string(dss.scan_numbers.min) + ").");
   }
 
   // cache_octree implies load_octree and save_octree
-  if (ds.cache_octree) {
-    ds.load_octree = true;
-    ds.save_octree = true;
+  if (dss.cache_octree) {
+    dss.load_octree = true;
+    dss.save_octree = true;
   }
 
   // Set drawing options from flags
@@ -164,7 +170,7 @@ void parse_args(int argc, char **argv, dataset_settings& ds, window_settings& ws
   unsigned int types = PointType::USE_NONE;
 
   // RGB formats imply colored points
-  switch (ds.format) {
+  switch (dss.format) {
     case UOS_RGB:
     case UOS_RRGBT:
     case RIEGL_RGB:
@@ -200,15 +206,15 @@ void parse_args(int argc, char **argv, dataset_settings& ds, window_settings& ws
       // remember the most important one as default for listboxColorVal
       auto colorval_it = std::find(colorval_names.begin(), colorval_names.end(), kv_pair.first);
       if (colorval_it != colorval_names.end()) {
-        ds.coloring.colorval = colorval_it - colorval_names.begin();
+        dss.coloring.colorval = colorval_it - colorval_names.begin();
       }
     }
   }
 
-  ds.coloring.ptype = PointType(types);
+  dss.coloring.ptype = PointType(types);
 
   if (vm.count("origin")) {
-    ds.origin_type_set = true;
+    dss.origin_type_set = true;
   }
 
   const char separator =
@@ -218,9 +224,23 @@ void parse_args(int argc, char **argv, dataset_settings& ds, window_settings& ws
   '/';
 #endif
 
-  if (vm.count("input-dir")) {
-    if (ds.input_directory.back() != separator) {
-      ds.input_directory += separator;
+  if (vm.count("input-dir") == 1) {
+    if (data_sources.size() > 1) {
+      //dss.set(data_sources);
+      dss.data_type = dataset_settings::MULTI_SRCS;
+      for (auto dss_def : data_sources) {
+        dataset_settings *child_set = new dataset_settings(&dss);
+        parse_dataset(dss_def, *child_set);
+        child_set->scan_ranges.setLimits(dss.scan_numbers.min, dss.scan_numbers.max);
+        child_set->data_type = dataset_settings::SINGLE_SRC;
+        if (child_set->data_source.back() != separator) child_set->data_source += separator;
+      }
+    }
+    else {
+      //parse again to overwrite global parameters
+      parse_dataset(data_sources[0], dss);
+      dss.scan_ranges.setLimits(dss.scan_numbers.min, dss.scan_numbers.max);
+      if (dss.data_source.back() != separator) dss.data_source += separator;
     }
   }
 
@@ -371,11 +391,10 @@ void setScanOptions(bool& scanserver, int& start, int& end,
     ("start,s", value(&start)->default_value(0), "Start at this scan number (0-based)")
     ("end,e", value(&end)->default_value(-1), "Stop at this scan number (0-based, with -1 meaning don't stop)")
     ("format,f", value(&format)->default_value(UOS, "uos"),
-     "The input files are read with this shared library.\n"
-     "Available values: uos, uos_map, uos_rgb, uos_frames, uos_map_frames, "
-     "old, rts, rts_map, ifp, riegl_txt, riegl_rgb, riegl_bin, zahn, ply, "
-     "wrl, xyz, zuf, iais, front, x3d, rxp, ais.")
-    ;
+      "The input files are read with this shared library.\n"
+      "Available values: uos, uos_map, uos_rgb, uos_frames, uos_map_frames, "
+      "old, rts, rts_map, ifp, riegl_txt, riegl_rgb, riegl_bin, zahn, ply, "
+      "wrl, xyz, zuf, iais, front, x3d, rxp, ais.");
 }
 
 void setReductionOptions(double& distMin, double& distMax, double& reduce,

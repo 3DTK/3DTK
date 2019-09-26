@@ -43,18 +43,19 @@ int main(int argc, char **argv)
   
   glutInit(&argc, argv);
 
-  dataset_settings ds;
+  dataset_settings dss;
   window_settings ws;
+  display_settings ds;
   
   try {
-    parse_args(argc, argv, ds, ws);
+    parse_args(argc, argv, dss, ws, ds);
   } catch (std::exception& e) {
     std::cerr << "Error while parsing settings: " << e.what() << std::endl;
     exit(1);
   }
 
   initScreenWindow();
-  initShow(ds, ws);
+  initShow(dss, ws, ds);
 
   if (!nogui && !takescreenshot)
     newMenu();
