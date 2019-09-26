@@ -120,7 +120,7 @@ using std::ifstream;
 #include <boost/thread/mutex.hpp>
 #include <boost/thread/condition.hpp>
 
-using namespace boost;
+//using namespace boost;
 extern boost::mutex keymutex;
 extern boost::condition keycond;
 
