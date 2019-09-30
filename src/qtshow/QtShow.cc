@@ -15,16 +15,16 @@ QtShow::QtShow(int &argc, char **argv)
 
   bool has_initial_directory;
   try {
-    parse_args(argc, argv, dss, ws, ds, &has_initial_directory);
+    parse_args(argc, argv, ds, ws, &has_initial_directory);
   } catch (std::exception& e) {
     std::cerr << "Error while parsing settings: " << e.what() << std::endl;
     exit(1);
   }
 
-  mainWindow = new MainWindow(dss, ws, ds);
+  mainWindow = new MainWindow(ds, ws);
 
   if (has_initial_directory) {
-    initShow(dss, ws, ds);
+    initShow(ds, ws);
     mainWindow->addRecentDirectory();
   } else {
     // doing DrawUrl without initShow hangs the program for ~10s
@@ -85,8 +85,8 @@ QtShow::QtShow(int &argc, char **argv)
   });
 }
 
-void QtShow::loadDifferentScan(dataset_settings new_dss) {
-  dss = new_dss;
+void QtShow::loadDifferentScan(dataset_settings new_ds) {
+  ds = new_ds;
 
   // TODO turn this into proper context handling logic for show
   // dirty hacks
@@ -109,13 +109,13 @@ void QtShow::loadDifferentScan(dataset_settings new_dss) {
   ups_vectorX.clear();
   ups_vectorZ.clear();
 
-  dss.distance_filter.min = 0;
-  dss.distance_filter.max = -1;
-  dss.octree_reduction_voxel = 0;
-  dss.octree_reduction_randomized_bucket = 1;
-  dss.skip_files = 1;
+  ds.distance_filter.min = 0;
+  ds.distance_filter.max = -1;
+  ds.octree_reduction_voxel = 0;
+  ds.octree_reduction_randomized_bucket = 1;
+  ds.skip_files = 1;
 
   // actual switching, includes callbacks to the progress bar
-  initShow(dss, ws, ds);
+  initShow(ds, ws);
   mainWindow->glWidget->update();
 }

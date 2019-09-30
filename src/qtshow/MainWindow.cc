@@ -10,9 +10,9 @@
 
 #include "show/program_options.h"
 
-MainWindow::MainWindow(const dataset_settings& dss, const window_settings& ws, const display_settings& ds, QWidget *parent, Qt::WindowFlags flags)
+MainWindow::MainWindow(const dataset_settings& ds, const window_settings& ws, QWidget *parent, Qt::WindowFlags flags)
   : QMainWindow(parent, flags)
-  , dss(dss), ds(ds)
+  , ds(ds)
 {
   if (!ws.nogui) {
     setupUi(this);
@@ -53,7 +53,7 @@ MainWindow::MainWindow(const dataset_settings& dss, const window_settings& ws, c
 
     // Set initial state file path
     QDir curDir(QDir::current());
-    lineEditStateFile->setText(curDir.canonicalPath() + "/" + QString::fromStdString(dss.data_source) + "config.ini");
+    lineEditStateFile->setText(curDir.canonicalPath() + "/" + QString::fromStdString(ds.input_directory) + "config.ini");
     lineEditSelectionFile->setText(curDir.canonicalPath() + "/selected.3d");
   } else {
     glWidget = new GLWidget(this);
@@ -78,16 +78,16 @@ void MainWindow::updateRecentDirectoriesMenu(std::vector<std::string> directorie
 }
 
 void MainWindow::openScanDirectory() {
-  ScanPicker sp(dss, this);
+  ScanPicker sp(ds, this);
   if (sp.exec())
-    emit scanDirectoryOpened(dss);
+    emit scanDirectoryOpened(ds);
 }
 
 void MainWindow::openRecentDirectory() {
   QAction *action = qobject_cast<QAction *>(sender());
   if (action) {
-    dss.data_source = action->data().toString().toStdString();
-    emit scanDirectoryOpened(dss);
+    ds.input_directory = action->data().toString().toStdString();
+    emit scanDirectoryOpened(ds);
   }
 }
 
@@ -113,11 +113,11 @@ std::string recent_directory_path() {
 void MainWindow::addRecentDirectory() {
   std::vector<std::string> directories = loadRecentDirectories();
 
-  auto duplicate = std::find(directories.begin(), directories.end(), dss.data_source);
+  auto duplicate = std::find(directories.begin(), directories.end(), ds.input_directory);
   if (duplicate != directories.end()) {
     directories.erase(duplicate);
   }
-  directories.insert(directories.begin(), dss.data_source);
+  directories.insert(directories.begin(), ds.input_directory);
 
   std::ofstream directories_file(recent_directory_path());
 
@@ -294,8 +294,8 @@ void MainWindow::saveStates()
   out << "pointsize=" << spinBoxPointSize->cleanText().toUtf8().constData() << endl;
   out << "colormap=" << comboBoxColorMap->currentText().toLower().toUtf8().constData() << endl;
   out << "scanscolored=" << comboBoxColorType->currentIndex() << endl;
-  out << "max=" << dss.distance_filter.max << endl;
-  out << "min=" << dss.distance_filter.min << endl;
+  out << "max=" << ds.distance_filter.max << endl;
+  out << "min=" << ds.distance_filter.min << endl;
 }
 
 void MainWindow::loadStates()

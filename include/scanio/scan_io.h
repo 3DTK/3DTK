@@ -11,7 +11,6 @@
 
 #include "slam6d/io_types.h"
 #include "slam6d/pointfilter.h"
-#include "slam6d/scan_settings.h"
 #include "scanio/helper.h"
 
 #include <string>
@@ -38,7 +37,6 @@ public:
    * @return List of IO-specific identifiers of scans, matching the search
    */
   virtual std::list<std::string> readDirectory(const char* dir_path, unsigned int start, unsigned int end);
-  virtual std::list<std::string> readDirectory(dataset_settings& ss);
 
   /**
    * Reads the pose from a dedicated pose file or from the scan file.
