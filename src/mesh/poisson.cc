@@ -4,8 +4,8 @@
 #include <fstream>
 
 #include "mesh/poisson.h"
-#include "poisson/PoissonRecon.h"
-#include "poisson/SurfaceTrimmer.h"
+#include "PoissonRecon.h"
+#include "SurfaceTrimmer.h"
 
 using namespace std;
 
