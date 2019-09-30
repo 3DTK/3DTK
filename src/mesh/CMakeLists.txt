@@ -30,8 +30,9 @@ include_directories(poisson vcglib)
 
 # needs opencv because of normals_panorama
 if (WITH_OPENCV)
-add_executable(recon recon.cc poisson.cc auto_scan_red.cc parse_options.cc calc_normals.cc recon_commons.cc poisson/PlyFile.cpp ../scanio/framesreader.cc)
+add_executable(recon recon.cc poisson.cc auto_scan_red.cc parse_options.cc calc_normals.cc recon_commons.cc ../../3rdparty/poisson/PlyFile.cpp ../scanio/framesreader.cc)
 TARGET_LINK_LIBRARIES(recon scan normals_panorama ${NORMALS_PANORAMA_LIBRARIES} ${Boost_LIBS} ${Boost_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY})
+target_include_directories(recon PRIVATE ${PROJECT_SOURCE_DIR}/3rdparty/poisson)
 if (UNIX)
   target_link_libraries(recon dl)
 endif()
