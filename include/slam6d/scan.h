@@ -10,7 +10,6 @@
 #ifndef __SCAN_H__
 #define __SCAN_H__
 
-#include "slam6d/scan_settings.h"
 #include "io_types.h"
 #include "data_types.h"
 #include "point_type.h"
@@ -121,11 +120,11 @@ class ANNkd_tree;
 class Scan {
 public:
   enum AlgoType { INVALID, ICP, ICPINACTIVE, LUM, ELCH };
-
+  
   // delete copy-ctor and assignment, scans shouldn't be copied by basic class
   Scan(const Scan& other) = delete;
   Scan& operator=(const Scan& other) = delete;
-
+  
   virtual ~Scan();
 
   //! Holder of all scans
@@ -134,17 +133,17 @@ public:
 
   static unsigned int maxScanNr;
   unsigned int scanNr;
-
+  
   // continue processing from last frames entry
   static bool continue_processing;
-
+  
   // current processing command
   static std::string processing_command;
-
+  
   /**
     * Attempt to read a directory under \a path and return its read scans.
     * No scans are loaded at this point, only checked if all exist.
-    *
+    * 
     * @param scanserver whether to use managed scans in the scanserver or not
     * @param path to the directory containing the scans
     * @param type determining which ScanIO to use
@@ -152,26 +151,15 @@ public:
     * @param end last scan to use, -1 means from start to last available
     */
   static void openDirectory(bool scanserver,
-    const std::string& path,
-    IOType type,
-    int start,
-    int end = -1
+                            const std::string& path,
+                            IOType type,
+                            int start,
+                            int end = -1
 #ifdef WITH_MMAP_SCAN
-    , boost::filesystem::path cache = boost::filesystem::path()
+                            , boost::filesystem::path cache = boost::filesystem::path()
 #endif
-  );
-
-  /**
-    * scan_settings version of openDirectory.
-    *
-    * @param scan_settings settings object defining scan attributes
-    */
-  static void openDirectory(dataset_settings& ss
-#ifdef WITH_MMAP_SCAN
-    , boost::filesystem::path cache = boost::filesystem::path()
-#endif
-  );
-
+                            );
+  
   /**
    * "Close" a directory by deleting all its scans and emptying the
    * Scan::allScans vector.

@@ -6,7 +6,6 @@
 #include <slam6d/io_types.h>
 #include <slam6d/globals.icc>
 #include <slam6d/scan.h>
-#include <slam6d/scan_settings.h>
 
 #define TOLERANCE 0.0000000000001
 

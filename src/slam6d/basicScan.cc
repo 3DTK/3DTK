@@ -35,13 +35,13 @@ using namespace boost::filesystem;
 
 
 void BasicScan::openDirectory(const std::string& path,
-  IOType type,
-  int start,
-  int end
+                              IOType type,
+                              int start,
+                              int end
 #ifdef WITH_MMAP_SCAN
-  , boost::filesystem::path cache
+                              , boost::filesystem::path cache
 #endif
-)
+                              )
 {
 #ifdef WITH_METRICS
   Timer t = ClientMetric::read_scan_time.start();
@@ -52,68 +52,22 @@ void BasicScan::openDirectory(const std::string& path,
 
   // query available scans in the directory from the ScanIO
   std::list<std::string> identifiers(sio->readDirectory(path.c_str(),
-    start,
-    end));
+                                                        start,
+                                                        end));
 
   Scan::allScans.reserve(identifiers.size());
 
   // for each identifier, create a scan
-  for (std::list<std::string>::iterator it = identifiers.begin();
-    it != identifiers.end();
-    ++it) {
+  for(std::list<std::string>::iterator it = identifiers.begin();
+      it != identifiers.end();
+      ++it) {
     Scan::allScans.push_back(new BasicScan(path, *it, type
 #ifdef WITH_MMAP_SCAN
-      , cache
+                                           , cache
 #endif
-    ));
+                                          ));
   }
 
-#ifdef WITH_METRICS
-  ClientMetric::read_scan_time.end(t);
-#endif //WITH_METRICS
-}
-
-void BasicScan::openDirectory(dataset_settings& dss
-#ifdef WITH_MMAP_SCAN
-  , boost::filesystem::path cache
-#endif
-)
-{
-#ifdef WITH_METRICS
-  Timer t = ClientMetric::read_scan_time.start();
-#endif //WITH_METRICS
-
-  if (dss.data_type == dataset_settings::MULTI_SRCS) {
-    std::cout << "Getting data from multiple sources..." << std::endl;
-    //int start = dss.scan_numbers.min;
-    //int end = dss.scan_numbers.max;
-    //if (end == -1) end = dss.subsets.size() - 1;
-    //for (int i = start; i <= end; ++i) {
-    for (int i = 0; i < dss.subsets.size(); ++i) {
-        BasicScan::openDirectory(*(dss.subsets[i]));
-    }
-  }
-  else {
-    // create an instance of ScanIO
-    ScanIO* sio = ScanIO::getScanIO(dss.format);
-
-    // query available scans in the directory from the ScanIO
-    std::list<std::string> identifiers(sio->readDirectory(dss));
-
-    Scan::allScans.reserve(Scan::allScans.size() + identifiers.size());
-
-    // for each identifier, create a scan
-    for (std::list<std::string>::iterator it = identifiers.begin();
-      it != identifiers.end();
-      ++it)
-    {
-      Scan::allScans.push_back(new BasicScan(dss, *it
-#ifdef WITH_MMAP_SCAN
-        , cache
-#endif
-      ));
-    }
-  }
 #ifdef WITH_METRICS
   ClientMetric::read_scan_time.end(t);
 #endif //WITH_METRICS
@@ -124,12 +78,12 @@ void BasicScan::closeDirectory()
   // clean up the scan vector
 
   // avoiding "Expression: vector iterators incompatible" on empty allScans-vector
-  if (Scan::allScans.size()) {
-    for (ScanVector::iterator it = Scan::allScans.begin();
-      it != Scan::allScans.end();
+  if (Scan::allScans.size()){
+    for(ScanVector::iterator it = Scan::allScans.begin(); 
+      it != Scan::allScans.end(); 
       ++it) {
-      delete *it;
-      *it = 0;
+        delete *it; 
+        *it = 0;
     }
     Scan::allScans.clear();
   }
@@ -249,28 +203,24 @@ BasicScan::BasicScan(double *_rPos,
   }
 }
 
-BasicScan::BasicScan(const std::string& path,
-  const std::string& identifier,
-  IOType type
+BasicScan::BasicScan(const std::string& path, 
+                     const std::string& identifier, 
+                     IOType type
 #ifdef WITH_MMAP_SCAN
-  , boost::filesystem::path cache
+                     , boost::filesystem::path cache
 #endif
-) :
+                     ) :
   m_path(path), m_identifier(identifier), m_type(type)
 {
   init();
-
-  int pos = identifier.find_first_of(':');
-  std::string first_line_identifier = identifier.substr(0, pos);
 
   // request pose from file
   double euler[6];
   ScanIO* sio = ScanIO::getScanIO(m_type);
   if (Scan::continue_processing) {
-    sio->readPoseFromFrames(m_path.c_str(), first_line_identifier.c_str(), euler);
-  }
-  else {
-    sio->readPose(m_path.c_str(), first_line_identifier.c_str(), euler, &m_timestamp);
+    sio->readPoseFromFrames(m_path.c_str(), m_identifier.c_str(), euler);    
+  } else {
+    sio->readPose(m_path.c_str(), m_identifier.c_str(), euler, &m_timestamp);
   }
   rPos[0] = euler[0];
   rPos[1] = euler[1];
@@ -410,25 +360,17 @@ void BasicScan::get(IODataType types)
   if(m_filter_scale_set)
     filter.setScale(m_filter_scale);
 
-  std::string identifiers = m_identifier;
-  std::string current_identifier;
-  size_t pos = identifiers.find_first_of(';');
-  do {
-    current_identifier = identifiers.substr(0, pos);
-    if (pos != std::string::npos) identifiers = identifiers.substr(pos + 1);
-    else identifiers = "";
-    sio->readScan(m_path.c_str(),
-      current_identifier.c_str(),
-      filter,
-      &xyz,
-      &rgb,
-      &reflectance,
-      &temperature,
-      &amplitude,
-      &type,
-      &deviation,
-      &normal);
-  } while ((pos = identifiers.find_first_of(';')) != std::string::npos || !identifiers.empty() );
+  sio->readScan(m_path.c_str(),
+                m_identifier.c_str(),
+                filter,
+                &xyz,
+                &rgb,
+                &reflectance,
+                &temperature,
+                &amplitude,
+                &type,
+                &deviation,
+                &normal);
 
   // for each requested and filled data vector,
   // allocate and write contents to their new data fields
@@ -864,10 +806,7 @@ BOctTree<float>* BasicScan::convertScanToShowOcttree()
 
 size_t BasicScan::readFrames()
 {
-  int pos = m_identifier.find_first_of(':');
-  std::string first_line_identifier = m_identifier.substr(0, pos);
-
-  std::string filename = m_path + "scan" + first_line_identifier + ".frames";
+  std::string filename = m_path + "scan" + m_identifier + ".frames";
   std::string line;
   std::ifstream file(filename.c_str());
   // clear frame vector here to allow reloading without (old) duplicates
