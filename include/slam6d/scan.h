@@ -10,6 +10,7 @@
 #ifndef __SCAN_H__
 #define __SCAN_H__
 
+#include "slam6d/scan_settings.h"
 #include "io_types.h"
 #include "data_types.h"
 #include "point_type.h"
@@ -160,6 +161,17 @@ public:
 #endif
                             );
   
+  /**
+    * scan_settings version of openDirectory.
+    *
+    * @param scan_settings settings object defining scan attributes
+    */
+  static void openDirectory(dataset_settings& ss
+#ifdef WITH_MMAP_SCAN
+    , boost::filesystem::path cache = boost::filesystem::path()
+#endif
+  );
+
   /**
    * "Close" a directory by deleting all its scans and emptying the
    * Scan::allScans vector.
