@@ -7,10 +7,13 @@
 #include <sstream>
 #include "slam6d/pointfilter.h"
 #include "slam6d/io_types.h"
+#include "slam6d/scan_settings.h"
 
 class ScanDataTransform {
     public:
-        virtual bool transform(double xyz[3], unsigned char rgb[3], float*  refl, float* temp, float* ampl, int* type, float* devi, double n[3]) = 0;
+      virtual bool transform(double xyz[3], unsigned char rgb[3], float*  refl, float* temp, float* ampl, int* type, float* devi, double n[3]) {
+        return true;
+      }
 };
 
 class ScanDataTransform_identity : public ScanDataTransform {
@@ -43,6 +46,27 @@ class ScanDataTransform_pts : public ScanDataTransform {
         bool transform(double xyz[3], unsigned char rgb[3], float*  refl, float* temp, float* ampl, int* type, float* devi, double n[3]);
 };
 
+class ScanDataTransform_combined : public ScanDataTransform {
+public:
+  ScanDataTransform_combined(ScanDataTransform sdt1, ScanDataTransform sdt2) : m_sdt_1(sdt1), m_sdt_2(sdt2) {}
+  bool transform(double xyz[3], unsigned char rgb[3], float*  refl, float* temp, float* ampl, int* type, float* devi, double n[3]);
+
+private:
+  ScanDataTransform m_sdt_1;
+  ScanDataTransform m_sdt_2;
+};
+
+class ScanDataTransform_matrix : public ScanDataTransform {
+public:
+  ScanDataTransform_matrix(double P[16]) {
+    memcpy(m_matrix, P, sizeof(m_matrix));
+  }
+  bool transform(double xyz[3], unsigned char rgb[3], float*  refl, float* temp, float* ampl, int* type, float* devi, double n[3]);
+
+private:
+  double m_matrix[16];
+};
+
 time_t lastModifiedHelper(
         const char *dir_path,
         const char *identifier,
@@ -54,6 +78,11 @@ std::list<std::string> readDirectoryHelper(
         const char* dir_path,
         unsigned int start,
         unsigned int end,
+        const char** data_path_suffix,
+        const char* data_path_prefix = "scan",
+        unsigned int id_len = 3);
+std::list<std::string> readDirectoryHelper(
+        dataset_settings& dss,
         const char** data_path_suffix,
         const char* data_path_prefix = "scan",
         unsigned int id_len = 3);
