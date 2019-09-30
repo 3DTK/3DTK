@@ -412,7 +412,7 @@ void reloadFrames();
 /**
  * Read scan files and initialize OpenGL.
  */
-void initShow(dataset_settings& dss, const window_settings& ws, const display_settings& ds);
+void initShow(const dataset_settings& ds, const window_settings& ws);
 
 void deinitShow();
 

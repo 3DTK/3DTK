@@ -99,8 +99,8 @@ add_library(scan
         point_type.cc     icp6Dquatscale.cc searchTree.cc     Boctree.cc
         scan.cc           basicScan.cc      managedScan.cc    metaScan.cc
         io_types.cc       io_utils.cc       pointfilter.cc    allocator.cc
-        icp6Dnapx.cc      normals.cc        kdIndexed.cc      ../parsers/range_set_parser.cc
-		)
+        icp6Dnapx.cc      normals.cc        kdIndexed.cc
+        )
 set_property(TARGET scan PROPERTY POSITION_INDEPENDENT_CODE 1)
 target_link_libraries(scan scanclient scanio ${ANN_LIBRARIES} ${NEWMAT_LIBRARIES} ${SUITESPARSE_LIBRARIES})
 

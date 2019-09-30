@@ -152,13 +152,6 @@ std::list<std::string> ScanIO::readDirectory(const char* dir_path, unsigned int 
   return readDirectoryHelper(dir_path, start, end, data_path_suffixes, dataPrefix());
 }
 
-std::list<std::string> ScanIO::readDirectory(dataset_settings& dss)
-{
-  //return readDirectory(dss.data_source.c_str(), dss.scan_numbers.min, dss.scan_numbers.max);
-  const char* data_path_suffixes[2] = { dataSuffix(), NULL };
-  return readDirectoryHelper(dss, data_path_suffixes, dataPrefix());
-}
-
 void ScanIO::readPose(const char* dir_path, const char* identifier, double* pose)
 {
   readPoseHelper(dir_path, identifier, pose, poseSuffix(), posePrefix());
@@ -176,45 +169,13 @@ void ScanIO::readScan(const char* dir_path, const char* identifier, PointFilter&
   if (supports(DATA_DEVIATION)) { if (deviation == 0) return; } else deviation = 0;
   if (supports(DATA_NORMAL)) { if (normal == 0) return; } else normal = 0;
 
-  ScanDataTransform transform;
+  ScanDataTransform_identity transform;
 
-  std::string subscan_id(identifier);
-  bool is_single_scan = subscan_id.find_first_of(':') == std::string::npos;
-
-  if (!is_single_scan) {
-    multi_range<range<int> > mr;
-    mr.set(identifier);
-    mr.merged = true;
-    double pose[6], first_pose[6];
-    double P[16], FPinv[16], Pdiff[16];
-    auto it = mr.begin();
-    readPose(dir_path, to_string(*it, 3).c_str(), first_pose);
-    EulerToMatrix4(first_pose, first_pose + 3, P);
-    M4inv(P, FPinv);
-
-    for (; !it.done(); ++it) {
-      path data_path(dir_path);
-      subscan_id = to_string(*it, 3);
-      if (it != mr.begin()) {
-        readPose(dir_path, subscan_id.c_str(), pose);
-        EulerToMatrix4(pose, pose + 3, P);
-        MMult(FPinv, P, Pdiff);
-        transform = ScanDataTransform_combined(getTransform(), ScanDataTransform_matrix(Pdiff));
-      }
-      else {
-        transform = getTransform();
-      }
-      data_path /= path(std::string(dataPrefix()) + subscan_id + dataSuffix());
-      if (!open_path(data_path, open_uos_file(getSpec(), transform, filter, xyz, rgb, reflectance, temperature, amplitude, type, deviation, normal)))
-        throw std::runtime_error(std::string("There is no scan file for [") + identifier + "] in [" + dir_path + "]");
-    }
-  }
-  else {
-    path data_path(dir_path);
-    data_path /= path(std::string(dataPrefix()) + subscan_id + dataSuffix());
-    if (!open_path(data_path, open_uos_file(getSpec(), getTransform(), filter, xyz, rgb, reflectance, temperature, amplitude, type, deviation, normal)))
-      throw std::runtime_error(std::string("There is no scan file for [") + identifier + "] in [" + dir_path + "]");
-  }
+  // error handling
+  path data_path(dir_path);
+  data_path /= path(std::string(dataPrefix()) + identifier + dataSuffix());
+  if (!open_path(data_path, open_uos_file(getSpec(), getTransform(), filter, xyz, rgb, reflectance, temperature, amplitude, type, deviation, normal)))
+    throw std::runtime_error(std::string("There is no scan file for [") + identifier + "] in [" + dir_path + "]");
 }
 
 bool ScanIO::supports(IODataType type)

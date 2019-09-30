@@ -1,5 +1,4 @@
 add_library(pointfilter SHARED ../slam6d/pointfilter.cc)
-add_library(range_set_parser SHARED ../parsers/range_set_parser.cc)
 
 set(SCANIO_LIBNAMES
   faro_xyz_rgbr ks ks_rgb leica_xyzr ply pts ptsr pts_rgb pts_rgbr pts_rrgb riegl_rgb riegl_txt rts uos uosr uos_rgb uos_rgbr uos_rrgb uos_rrgbt velodyne xyz xyzr xyz_rgb xyz_rgba xyz_rgbr xyz_rrgb
@@ -35,7 +34,7 @@ endif()
 add_library(scanio scan_io.cc ../slam6d/io_types.cc helper.cc)
 set_property(TARGET scanio PROPERTY POSITION_INDEPENDENT_CODE 1)
 
-set(SCANIO_LINK_LIBRARIES ${LIBZIP_LIBRARY} ${Boost_LIBRARIES} ${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY} pointfilter range_set_parser)
+set(SCANIO_LINK_LIBRARIES ${LIBZIP_LIBRARY} ${Boost_LIBRARIES} ${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY} pointfilter)
 if (UNIX)
   list(APPEND SCANIO_LINK_LIBRARIES dl)
 endif()
@@ -44,7 +43,7 @@ target_link_libraries(scanio ${SCANIO_LINK_LIBRARIES})
 
 foreach(libname ${SCANIO_LIBNAMES})
   add_library(scan_io_${libname} SHARED scan_io_${libname}.cc)
-  target_link_libraries(scan_io_${libname} ${Boost_LIBRARIES} ${Boost_PROGRAM_OPTIONS_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY} scanio pointfilter range_set_parser)
+  target_link_libraries(scan_io_${libname} ${Boost_LIBRARIES} ${Boost_PROGRAM_OPTIONS_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY} scanio pointfilter )
 endforeach()
 target_include_directories(scan_io_ply PUBLIC ${PROJECT_SOURCE_DIR}/3rdparty/rply-1.1.4)
 target_link_libraries(scan_io_ply rply)

@@ -12,13 +12,12 @@ public:
   QtShow(int &argc, char **argv);
 
 public slots:
-  void loadDifferentScan(dataset_settings dss);
+  void loadDifferentScan(dataset_settings ds);
 
 protected:
   MainWindow *mainWindow;
-  dataset_settings dss;
+  dataset_settings ds;
   window_settings ws;
-  display_settings ds;
 };
 
 #endif
