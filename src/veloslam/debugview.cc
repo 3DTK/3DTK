@@ -44,7 +44,6 @@
 #include <boost/thread/mutex.hpp>
 #include <boost/thread/condition.hpp>
 
-using namespace boost;
 using boost::thread;
 boost::mutex draw_mutex;
 
