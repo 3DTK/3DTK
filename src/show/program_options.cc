@@ -7,33 +7,73 @@
 
 using namespace boost::program_options;
 
-void parse_args(int argc, char **argv, dataset_settings& dss, window_settings& ws, display_settings& ds, bool *directory_present) {
+void setDatasetColorOptions(bool& color, ShowColormap& colormap,
+		     float& colormin, float& colormax,
+		     int& scansColored,
+		     options_description& color_options)
+{
+  color_options.add_options()
+    ("color,c", bool_switch(&color),
+     "Use included RGB values for coloring points.")
+    ("reflectance,R", bool_switch(),
+     "Use reflectance values for coloring point clouds.")
+    ("temperature,D", bool_switch(),
+     "Use temperature values for coloring point clouds.")
+    ("amplitude,a", bool_switch(),
+     "Use amplitude values for coloring point clouds.")
+    ("deviation,d", bool_switch(),
+     "Use deviation values for coloring point clouds.")
+    ("height,h", bool_switch(),
+     "Use y-height values for coloring point clouds.")
+    ("type,T", bool_switch(),
+     "Use type values for coloring point clouds.")
+    ("time,t", bool_switch()) // TODO description
+    ("colormap",
+     value(&colormap)->default_value(ShowColormap::solid, "solid"),
+     "With which colors to color the points, according to their color value "
+     "in a spectrum. Available color maps are: solid, grey, hsv, jet, hot, "
+     "rand, shsv, temp.")
+    ("colormin", value(&colormin),
+     "Minimum value for mapping the color spectrum.")
+    ("colormax", value(&colormax),
+     "Maximum value for mapping the color spectrum.")
+    ("scanscolored", value(&scansColored),
+     "Scans colored")
+    ;
+}
+
+void setOtherDatasetOptions(std::string& objFileName,
+  std::string& customFilter,
+  std::string& trajectoryFileName, bool& identity, bool& no_config,
+  options_description& other_options)
+{
+  other_options.add_options()
+    ("loadObj,l", value(&objFileName),
+      "Load objects specified in this file")
+    ("customFilter,u", value(&customFilter),
+      "Apply a custom filter. Filter mode and data are specified as a "
+      "semicolon-seperated string:\n"
+      "\"{filterMode};{nrOfParams}[;param1][;param2][...]\"\n"
+      "Multiple filters can be specified in a file (syntax in file is same as "
+      "direct specification)\n"
+      "\"FILE;{fileName}\"\n"
+      "See filter implementation in src/slam6d/pointfilter.cc for more detail.")
+    ("no-config", bool_switch(&no_config), "Disable config file parsing")
+    ("trajectory-file", value(&trajectoryFileName)) // TODO description
+    ("identity,i", bool_switch(&identity)) //TODO description
+    ;
+}
+
+parsed_options parse_scan_args(int argc, char **argv, dataset_settings& dss, bool* directory_present)
+{
   using namespace std;
 
+  bool no_config;
+
   // Temporary parsing variables
-  bool no_points, no_cameras, no_path, no_poses, no_fog, no_animcolor, no_anim_convert_jpg, no_config;
   std::vector<std::string> data_sources;
 
   // TODO make all defaults declared here the initial values for the settings structs, then use that initial value as the default here
-  options_description gui_options("GUI options");
-  setGUIOptions(ws.nogui, ws.max_fps, ws.dimensions, ws.advanced_controls,
-		ws.invert_mouse_x, ws.invert_mouse_y,
-		ws.capture_mouse, ws.hide_widgets, gui_options);
-
-  options_description display_options("Display options");
-  setDisplayOptions(dss.scale, ds.camera.fov, ds.init_with_viewmode,
-		    no_points, no_cameras, no_path, no_poses,
-		    no_fog, ds.fog.type, ds.fog.density,
-		    ds.camera.position, ds.camera.rotation, ds.pointsize,
-		    display_options);
-
-  options_description color_options("Point coloring");
-  setColorOptions(dss.coloring.bgcolor, dss.coloring.explicit_coloring,
-    dss.coloring.colormap, dss.coloring.colormap_values.min,
-    dss.coloring.colormap_values.max,
-    dss.coloring.scans_colored, no_animcolor,
-  		  color_options);
-
   options_description scan_options("Scan selection");
   setScanOptions(dss.use_scanserver, dss.scan_numbers.min,
     dss.scan_numbers.max, dss.format, scan_options);
@@ -44,6 +84,13 @@ void parse_args(int argc, char **argv, dataset_settings& dss, window_settings& w
     dss.octree_reduction_randomized_bucket,
     dss.skip_files, reduction_options);
 
+  options_description color_options("Point coloring");
+  setDatasetColorOptions(dss.coloring.explicit_coloring,
+    dss.coloring.colormap, dss.coloring.colormap_values.min,
+    dss.coloring.colormap_values.max,
+    dss.coloring.scans_colored,
+    color_options);
+
   options_description point_options("Point transformation");
   setPointOptions(dss.origin_type, dss.sphere_radius, point_options);
 
@@ -52,16 +99,14 @@ void parse_args(int argc, char **argv, dataset_settings& dss, window_settings& w
 		 file_options);
 
   options_description other_options("Other options");
-  setOtherOptions(ws.take_screenshot, ws.screenshot_filename, dss.objects_file_name,
-    dss.custom_filter, no_anim_convert_jpg,
+  setOtherDatasetOptions(dss.objects_file_name,
+    dss.custom_filter,
     dss.trajectory_file_name, dss.identity, no_config,
 		  other_options);
 
   // These options will be displayed in the help text
   options_description visible_options("");
   visible_options
-    .add(gui_options)
-    .add(display_options)
     .add(color_options)
     .add(scan_options)
     .add(reduction_options)
@@ -73,7 +118,6 @@ void parse_args(int argc, char **argv, dataset_settings& dss, window_settings& w
   options_description cmdline_options("");
   cmdline_options.add(visible_options);
   cmdline_options.add_options()
-    ("hide-label", bool_switch(&ds.hide_label))
     ("input-dir,data-sources", value<std::vector<std::string> >(&data_sources), "Scan directory or data-sources definition")
     ;
 
@@ -84,45 +128,27 @@ void parse_args(int argc, char **argv, dataset_settings& dss, window_settings& w
   variables_map vm;
 
   // First parse, but we are only interested in the input directory
-  store(
-    command_line_parser(argc, argv)
-      .positional(pd)
-      .options(cmdline_options)
-      .run()
-    , vm);
-  notify(vm);
+  parsed_options& parsed = command_line_parser(argc, argv)
+    .positional(pd)
+    .options(cmdline_options)
+    .allow_unregistered()
+    .run();
 
-  // Parse user config file
-
-  string config_home = getConfigHome() + "/3dtk/show.ini";
-
-  ifstream user_config_file(config_home.c_str());
-  if (!no_config && user_config_file) {
-    cout << "Parsing configuration file " << config_home << "..." << endl;
-    store(parse_config_file(user_config_file, visible_options), vm);
-  }
-
-  // Now we need may need the passed directory
+  store(parsed, vm);
   notify(vm);
 
   // Parse ./config.ini file in the input directory
-
   if (!no_config && vm.count("input-dir") && data_sources.size() == 1) {
-    //dss.set(data_sources[0]);
     dss.data_type = dataset_settings::SINGLE_SRC;
     parse_dataset(data_sources[0], dss);
     std::string config_ini = dss.data_source + "/config.ini";
     ifstream local_config_file(config_ini.c_str());
     if (local_config_file) {
       cout << "Parsing configuration file " << config_ini << "..." << endl;
-      store(parse_config_file(local_config_file, visible_options), vm);
+      store(parse_config_file(local_config_file, visible_options, true), vm);
 
       // Command line options now overwrite ./config.ini file
-      store(
-        command_line_parser(argc, argv)
-          .options(cmdline_options)
-          .run()
-        , vm);
+      //store(parsed, vm);
       notify(vm);
     }
   }
@@ -155,15 +181,6 @@ void parse_args(int argc, char **argv, dataset_settings& dss, window_settings& w
     dss.load_octree = true;
     dss.save_octree = true;
   }
-
-  // Set drawing options from flags
-  ds.draw_points      = !no_points;
-  ds.draw_cameras     = !no_cameras;
-  ds.draw_path        = !no_path;
-  ds.draw_poses       = !no_poses;
-  ds.color_animation  = !no_animcolor;
-  ds.anim_convert_jpg = !no_anim_convert_jpg;
-  if (no_fog) ds.fog.type = 0;
 
   // Bitset for initializing PointTypes
   unsigned int types = PointType::USE_NONE;
@@ -246,6 +263,145 @@ void parse_args(int argc, char **argv, dataset_settings& dss, window_settings& w
   if (directory_present != nullptr) {
     *directory_present = vm.count("input-dir") != 0;
   }
+
+  return parsed;
+}
+
+void parse_show_args(int argc, char **argv, dataset_settings& dss, window_settings& ws, display_settings& ds, bool *directory_present) {
+  using namespace std;
+
+  parsed_options parsed = parse_scan_args(argc, argv, dss, directory_present);
+  std::vector<std::string> unrecognized = collect_unrecognized(parsed.options, exclude_positional);
+
+  // Temporary parsing variables
+  bool no_points, no_cameras, no_path, no_poses, no_fog, no_animcolor, no_anim_convert_jpg, no_config;
+
+  double double_dummy;
+  int int_dummy;
+  bool bool_dummy;
+  ShowColormap colormap_dummy;
+  float float_dummy;
+
+  // TODO make all defaults declared here the initial values for the settings structs, then use that initial value as the default here
+  options_description gui_options("GUI options");
+  setGUIOptions(ws.nogui, ws.max_fps, ws.dimensions, ws.advanced_controls,
+    ws.invert_mouse_x, ws.invert_mouse_y,
+    ws.capture_mouse, ws.hide_widgets, gui_options);
+
+  options_description display_options("Display options");
+  setDisplayOptions(dss.scale, ds.camera.fov, ds.init_with_viewmode,
+    no_points, no_cameras, no_path, no_poses,
+    no_fog, ds.fog.type, ds.fog.density,
+    ds.camera.position, ds.camera.rotation, ds.pointsize,
+    display_options);
+
+  options_description color_options("Point coloring");
+  setColorOptions(dss.coloring.bgcolor, bool_dummy,
+    colormap_dummy, float_dummy, float_dummy,
+    int_dummy, no_animcolor,
+    color_options);
+
+  options_description scan_options("Scan selection");
+  IOType format_dummy;
+  setScanOptions(bool_dummy, int_dummy,
+    int_dummy, format_dummy, scan_options);
+
+  options_description reduction_options("Point reduction");
+  setReductionOptions(double_dummy, double_dummy, double_dummy,
+    int_dummy, int_dummy, reduction_options);
+
+  options_description point_options("Point transformation");
+  setPointOptions(int_dummy, double_dummy, point_options);
+
+  options_description file_options("Octree caching");
+  setFileOptions(bool_dummy, bool_dummy, bool_dummy,
+    file_options);
+
+  options_description other_options("Other options");
+  std::string string_dummy;
+  setOtherOptions(ws.take_screenshot, ws.screenshot_filename, string_dummy,
+    string_dummy, no_anim_convert_jpg,
+    string_dummy, bool_dummy, no_config,
+    other_options);
+
+  // These options will be displayed in the help text
+  options_description visible_options("");
+  visible_options
+    .add(gui_options)
+    .add(display_options)
+    .add(color_options)
+    .add(scan_options)
+    .add(reduction_options)
+    .add(point_options)
+    .add(file_options)
+    .add(other_options)
+    ;
+
+  options_description cmdline_options("");
+  cmdline_options.add(visible_options);
+  cmdline_options.add_options()
+    ("hide-label", bool_switch(&ds.hide_label))
+    ;
+
+  // Parse the options into this map
+  variables_map vm;
+
+  // First parse, but we are only interested in the input directory
+  store(
+    command_line_parser(unrecognized)
+      .options(cmdline_options)
+      .run()
+    , vm);
+  notify(vm);
+
+  // Parse user config file
+
+  string config_home = getConfigHome() + "/3dtk/show.ini";
+
+  ifstream user_config_file(config_home.c_str());
+  if (!no_config && user_config_file) {
+    cout << "Parsing configuration file " << config_home << "..." << endl;
+    store(parse_config_file(user_config_file, visible_options), vm);
+  }
+
+  // Now we need may need the passed directory
+  notify(vm);
+
+  // Parse ./config.ini file in the input directory
+
+  if (!no_config && dss.data_type == dataset_settings::SINGLE_SRC) {
+    //dss.set(data_sources[0]);
+    std::string config_ini = dss.data_source + "config.ini";
+    ifstream local_config_file(config_ini.c_str());
+    if (local_config_file) {
+      cout << "Parsing configuration file " << config_ini << "..." << endl;
+      store(parse_config_file(local_config_file, visible_options), vm);
+
+      // Command line options now overwrite ./config.ini file
+      store(
+        command_line_parser(argc, argv)//unrecognized)
+          .options(cmdline_options)
+          .run()
+        , vm);
+      notify(vm);
+    }
+  }
+
+  // Help text
+  if (vm.count("help")) {
+    cout << "Usage: " << argv[0] << " [options] <input-dir>" << endl;
+    cout << visible_options << endl;
+    exit(0);
+  }
+
+  // Set drawing options from flags
+  ds.draw_points      = !no_points;
+  ds.draw_cameras     = !no_cameras;
+  ds.draw_path        = !no_path;
+  ds.draw_poses       = !no_poses;
+  ds.color_animation  = !no_animcolor;
+  ds.anim_convert_jpg = !no_anim_convert_jpg;
+  if (no_fog) ds.fog.type = 0;
 }
 
 std::string getConfigHome()
@@ -349,33 +505,9 @@ void setColorOptions(Color& bgcolor, bool& color, ShowColormap& colormap,
 {
   color_options.add_options()
     ("bgcolor", value(&bgcolor)->default_value(Color(0,0,0), "0,0,0"),
-     "Drawing area background color, given as \"%f,%f,%f\" for red, green and blue.")
-    ("color,c", bool_switch(&color),
-     "Use included RGB values for coloring points.")
-    ("reflectance,R", bool_switch(),
-     "Use reflectance values for coloring point clouds.")
-    ("temperature,D", bool_switch(),
-     "Use temperature values for coloring point clouds.")
-    ("amplitude,a", bool_switch(),
-     "Use amplitude values for coloring point clouds.")
-    ("deviation,d", bool_switch(),
-     "Use deviation values for coloring point clouds.")
-    ("height,h", bool_switch(),
-     "Use y-height values for coloring point clouds.")
-    ("type,T", bool_switch(),
-     "Use type values for coloring point clouds.")
-    ("time,t", bool_switch()) // TODO description
-    ("colormap",
-     value(&colormap)->default_value(ShowColormap::solid, "solid"),
-     "With which colors to color the points, according to their color value "
-     "in a spectrum. Available color maps are: solid, grey, hsv, jet, hot, "
-     "rand, shsv, temp.")
-    ("colormin", value(&colormin),
-     "Minimum value for mapping the color spectrum.")
-    ("colormax", value(&colormax),
-     "Maximum value for mapping the color spectrum.")
-    ("scanscolored", value(&scansColored),
-     "Scans colored")
+     "Drawing area background color, given as \"%f,%f,%f\" for red, green and blue.");
+  setDatasetColorOptions(color, colormap, colormin, colormax, scansColored, color_options);
+  color_options.add_options()
     ("noanimcolor,A", bool_switch(&noAnimColor),
      "Do not switch to different color settings when displaying animation")
     ;
@@ -459,23 +591,16 @@ void setOtherOptions(bool& screenshot, std::string& screenshot_filename, std::st
 		     options_description& other_options)
 {
   other_options.add_options()
-    ("help,?", "Display this help text")
+    ("help,?", "Display this help text");
+
+  setOtherDatasetOptions(objFileName,
+    customFilter, trajectoryFileName, identity, no_config,
+    other_options);
+
+  other_options.add_options()
     ("screenshot", bool_switch(&screenshot), "Take screenshot and exit")
     ("screenshot-filename", value(&screenshot_filename), "Output filename for --screenshot")
-    ("loadObj,l", value(&objFileName),
-      "Load objects specified in this file")
-    ("customFilter,u", value(&customFilter),
-      "Apply a custom filter. Filter mode and data are specified as a "
-      "semicolon-seperated string:\n"
-      "\"{filterMode};{nrOfParams}[;param1][;param2][...]\"\n"
-      "Multiple filters can be specified in a file (syntax in file is same as "
-      "direct specification)\n"
-      "\"FILE;{fileName}\"\n"
-      "See filter implementation in src/slam6d/pointfilter.cc for more detail.")
-    ("no-config", bool_switch(&no_config), "Disable config file parsing")
     ("no-anim-convert-jpg,J", bool_switch(&noAnimConvertJPG)) // TODO description
-    ("trajectory-file", value(&trajectoryFileName)) // TODO description
-    ("identity,i", bool_switch(&identity)) //TODO description
     ;
 }
 

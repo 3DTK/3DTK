@@ -101,7 +101,8 @@ std::string getConfigHome();
  * @param directory_present if this pointer is not null, allow input-dir to not be present and write that presence in the target bool
  * @return the parsed options
  */
-void parse_args(int argc, char **argv, dataset_settings& dss, window_settings& ws, display_settings& ds, bool *directory_present = nullptr);
+boost::program_options::parsed_options parse_scan_args(int argc, char **argv, dataset_settings& dss, bool* directory_present);
+void parse_show_args(int argc, char **argv, dataset_settings& dss, window_settings& ws, display_settings& ds, bool *directory_present = nullptr);
 void setGUIOptions(bool& nogui, float& fps,
 		   WindowDimensions& dimensions, bool& advanced,
 		   bool& invertMouseX, bool& invertMouseY,

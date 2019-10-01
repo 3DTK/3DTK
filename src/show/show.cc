@@ -48,7 +48,7 @@ int main(int argc, char **argv)
   display_settings ds;
 
   try {
-    parse_args(argc, argv, dss, ws, ds);
+    parse_show_args(argc, argv, dss, ws, ds);
   } catch (std::exception& e) {
     std::cerr << "Error while parsing settings: " << e.what() << std::endl;
     exit(1);
