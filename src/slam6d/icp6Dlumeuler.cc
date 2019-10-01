@@ -8,7 +8,7 @@
  */
 
 
-/** @file 
+/** @file
  *  @brief Implementation of the ICP error function minimization via
  *  linearization using euler angles
  *

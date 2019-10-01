@@ -26,12 +26,12 @@ using std::ofstream;
 
 #if WIN32
 #define snprintf sprintf_s
-#endif 
+#endif
 
 void usage(int argc, char** argv)
 {
   cout << "Usage: " << argv[0] << "  [-a filename] [-b filename] [-c filename]" << endl << endl;
-  
+
   cout << "  -a filename  The name of the first .frames file of the first scan (to be retained)" << endl
        << "  -b filename  The name of the second .frames file of the first scan (to be ignored)" << endl
        << "  -c filename  The name of the .frames file of the second scan (to be replaced)" << endl
@@ -43,12 +43,12 @@ void usage(int argc, char** argv)
   cout << "frame that can be used in conjunction with .frames file (a)." << endl;
   exit(1);
 }
-void parseArgs(int argc,char **argv, char fframe1[255], char fframe2[255], char sframe[255]) { 
+void parseArgs(int argc,char **argv, char fframe1[255], char fframe2[255], char sframe[255]) {
   int  c;
   // from unistd.h
   extern char *optarg;
   int optionCount = 0;
-  
+
   while ((c = getopt (argc, argv, "a:b:c:")) != -1)
     switch (c)
       {
@@ -80,7 +80,7 @@ void parseArgs(int argc,char **argv, char fframe1[255], char fframe2[255], char 
 void readFrame(char *filename, double *transmat) {
   ifstream file_in;
   double junk;
-  
+
   file_in.open(filename);
 
   if (!file_in.good()) {

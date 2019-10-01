@@ -42,7 +42,7 @@ void viewpointinfo::addGrid(const scanGrid *grid)
 void viewpointinfo::write(std::string filename)
 {
     std::string tmp(this->path + "/" + filename);
-  
+
     std::ofstream stream(tmp.c_str());
     if(!stream.good())
     {
@@ -56,7 +56,7 @@ void viewpointinfo::write(std::string filename)
 
     while(it != end)
     {
-	stream << it->first << " " << it->second << std::endl;	
+	stream << it->first << " " << it->second << std::endl;
 	++it;
     }
 }

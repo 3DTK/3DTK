@@ -60,7 +60,7 @@ void refine(int source, int target, match &tmp) {
   my_icp = new icp6D(my_icp6Dminimizer, mdm, mni, quiet, false, -1, false, 1, 0.0000, false, false);
 
   my_icp->match(Scan::allScans[source], Scan::allScans[target]);
- 
+
   ////cout << "Point pairs: "<< tmp.n_o_m << endl;
   const double * transMat = Scan::allScans[target]->get_transMat();
   for(int i = 0; i < 16; i++) {
@@ -77,13 +77,13 @@ void evaluate(int source, int target, match &tmp) {
   //cout << "T2 " << tmp.t_b[0] << " " << tmp.t_b[1] << " " << tmp.t_b[2] << endl;
   //cout << "S3 " << tmp.s_c[0] << " " << tmp.s_c[1] << " " << tmp.s_c[2] << endl;
   //cout << "T3 " << tmp.t_c[0] << " " << tmp.t_c[1] << " " << tmp.t_c[2] << endl;
-  
+
   // Point pairs
   vector<PtPair> pairs_in;
   pairs_in.push_back(PtPair(tmp.s_a, tmp.t_a));
   pairs_in.push_back(PtPair(tmp.s_b, tmp.t_b));
   pairs_in.push_back(PtPair(tmp.s_c, tmp.t_c));
-  
+
   // Calculate centroids
   double centroid_s[3];
   double centroid_t[3];
@@ -93,7 +93,7 @@ void evaluate(int source, int target, match &tmp) {
   centroid_t[0] = ((tmp.t_a[0] + tmp.t_b[0] + tmp.t_c[0])/3.0);
   centroid_t[1] = ((tmp.t_a[1] + tmp.t_b[1] + tmp.t_c[1])/3.0);
   centroid_t[2] = ((tmp.t_a[2] + tmp.t_b[2] + tmp.t_c[2])/3.0);
-  
+
   // transform scan according to matching triple
   icp6Dminimizer *my_icp6Dminimizer = 0;
   my_icp6Dminimizer = new icp6D_SVD(true);
@@ -102,25 +102,25 @@ void evaluate(int source, int target, match &tmp) {
 
   vector<PtPair> pairs_out;
   // search for point pairs
-  Scan::getPtPairs(&pairs_out, Scan::allScans[source], Scan::allScans[target], 1, 0, 25.0, centroid_s, centroid_t);  
- 
+  Scan::getPtPairs(&pairs_out, Scan::allScans[source], Scan::allScans[target], 1, 0, 25.0, centroid_s, centroid_t);
+
   tmp.n_o_m = pairs_out.size();
   //cout << tmp.n_o_m << endl;
-  
+
   if(tmp.n_o_m > Scan::allScans[target]->get_points_red_size()) {
     //cout << "Point pairs: "<< tmp.n_o_m << endl;
-    
+
     /*
     for(int i = 0; i < 16; i++) {
       cout << tmp.alignxf[i] << " ";
     }
     for(int i = 0; i < pairs_out.size(); i++) {
       cout << pairs_out[i].p1.x << " " << pairs_out[i].p1.y << " " << pairs_out[i].p1.z <<
-      " " << pairs_out[i].p2.x << " " << pairs_out[i].p2.y << " " << pairs_out[i].p2.z << endl; 
+      " " << pairs_out[i].p2.x << " " << pairs_out[i].p2.y << " " << pairs_out[i].p2.z << endl;
     }
     */
   }
-  
+
   //cout << "S1 " << tmp.s_a[0] << " " << tmp.s_a[1] << " " << tmp.s_a[2] << endl;
   //cout << "T1 " << tmp.t_a[0] << " " << tmp.t_a[1] << " " << tmp.t_a[2] << endl;
   //cout << "S2 " << tmp.s_b[0] << " " << tmp.s_b[1] << " " << tmp.s_b[2] << endl;
@@ -149,7 +149,7 @@ void matchBruteForce(int start, int end) { // BOF
       double dist = sqrt(Dist2(source[i], source[j]));
       dist_s[i][j] = dist;
       dist_s[j][i] = dist;
-      //cout << dist << " "; 
+      //cout << dist << " ";
     }
     //cout << endl;
   }
@@ -159,7 +159,7 @@ void matchBruteForce(int start, int end) { // BOF
       double dist = sqrt(Dist2(target[i], target[j]));
       dist_t[i][j] = dist;
       dist_t[j][i] = dist;
-      //cout << dist << " "; 
+      //cout << dist << " ";
     }
     //cout << endl;
   }
@@ -178,7 +178,7 @@ void matchBruteForce(int start, int end) { // BOF
               double dist_3_j = dist_s[j][m];
               for(int n = 0; n < nr_m_t; n++) {   // 7
                 if(fabs(dist_t[k][n] - dist_3_i) < eps) { // 8
-                  if(fabs(dist_t[l][n] - dist_3_j) < eps) { // 9 
+                  if(fabs(dist_t[l][n] - dist_3_j) < eps) { // 9
                     //match found calculate error function
                     match tmp;
                     tmp.s_a = source[i];
@@ -241,7 +241,7 @@ void matchMarker(int start, int end) { // BOF
       double dist = sqrt(Dist2(source[i], source[j]));
       dist_s[i][j] = dist;
       dist_s[j][i] = dist;
-      //cout << dist << " "; 
+      //cout << dist << " ";
     }
     //cout << endl;
   }
@@ -251,7 +251,7 @@ void matchMarker(int start, int end) { // BOF
       double dist = sqrt(Dist2(target[i], target[j]));
       dist_t[i][j] = dist;
       dist_t[j][i] = dist;
-      //cout << dist << " "; 
+      //cout << dist << " ";
     }
     //cout << endl;
   }
@@ -264,16 +264,16 @@ void matchMarker(int start, int end) { // BOF
     double dist_a = dist_s[i][j];
     double dist_3_i = dist_s[i][m];
     double dist_3_j = dist_s[j][m];
-  
-  
+
+
   // do matching
     for(int k = 0; k < nr_m_t; k++) {           // 3
       for(int l = 0; l < nr_m_t; l++) {         // 4
         if(fabs(dist_t[k][l] - dist_a) < eps) { // 5
-       
+
           for(int n = 0; n < nr_m_t; n++) {   // 7
             if(fabs(dist_t[k][n] - dist_3_i) < eps) { // 8
-              if(fabs(dist_t[l][n] - dist_3_j) < eps) { // 9 
+              if(fabs(dist_t[l][n] - dist_3_j) < eps) { // 9
                 //match found calculate error function
                 match tmp;
                 tmp.s_a = source[i];
@@ -350,7 +350,7 @@ void usage(char* prog)
 	  << bold << "  -d" << normal << " NR, " << bold << "--dist=" << normal << "NR" << endl
 	  << "         write all points that have no corresponding point closer than NR 'units'" << endl
     << endl << endl;
-  
+
   cout << bold << "EXAMPLES " << normal << endl
 	  << "   " << prog << " -m 500 -d 5 dat" << endl
 	  << "   " << prog << " --max=5000 -d 10.2 dat" << endl
@@ -369,8 +369,8 @@ void usage(char* prog)
  * @param desc true if start is greater than end
  * @return 0, if the parsing was successful. 1 otherwise
  */
-int parseArgs(int argc, char **argv, string &dir, 
-		    int &start, int &end, double &dist, 
+int parseArgs(int argc, char **argv, string &dir,
+		    int &start, int &end, double &dist,
 		    IOType &type, bool &desc)
 {
   int  c;
@@ -381,7 +381,7 @@ int parseArgs(int argc, char **argv, string &dir,
   /* options descriptor */
   // 0: no arguments, 1: required argument, 2: optional argument
   static struct option longopts[] = {
-    { "format",          required_argument,   0,  'f' },  
+    { "format",          required_argument,   0,  'f' },
     { "start",           required_argument,   0,  's' },
     { "end",             required_argument,   0,  'e' },
     { "dist",            required_argument,   0,  'd' },
@@ -435,10 +435,10 @@ int parseArgs(int argc, char **argv, string &dir,
 #endif
   if(start > end) {
     double tmp = start;
-    start = end; 
+    start = end;
     end = tmp;
     desc = true;
-  } 
+  }
 
   return 0;
 }
@@ -447,17 +447,17 @@ int parseArgs(int argc, char **argv, string &dir,
 /**
  * Main program for calculating the difference of two scans.
  * Usage: bin/scan_diff -d <NR> -s <NR> -e <NR> 'dir',
- * Use -s and -e for the two scans, 
- * -d 
+ * Use -s and -e for the two scans,
+ * -d
  * and 'dir' the directory of a set of scans
  * Difference scans will be written to 'dir/diff/scan[00]s.3d'
- * 
+ *
  */
 int main(int argc, char **argv)
 {
 
   cout << "(c) Jacobs University Bremen, gGmbH, 2010" << endl << endl;
-  
+
   if (argc <= 1) {
     usage(argv[0]);
   }
@@ -470,26 +470,26 @@ int main(int argc, char **argv)
   int    maxDist    = -1;
   int    minDist    = -1;
   IOType type    = UOS;
-  bool desc = false;  
+  bool desc = false;
 
   parseArgs(argc, argv, dir, start, end, dist, type, desc);
-  
+
   Scan::readScansRedSearch(type, start, end, dir, maxDist, minDist, -1, 1, false, false, false);
-  cout << "Start match marker ..." << endl; 
+  cout << "Start match marker ..." << endl;
   srand(time(0));
   srand(0);
-  long starttime = GetCurrentTimeInMilliSec(); 
+  long starttime = GetCurrentTimeInMilliSec();
  // matchBruteForce(start, end-start);
   matchMarker(0, end - start);
   starttime = (GetCurrentTimeInMilliSec() - starttime);
-  cout << " done in " << starttime << " ms" << endl; 
-  
+  cout << " done in " << starttime << " ms" << endl;
+
   vector <Scan*>::iterator Iter = Scan::allScans.begin();
   for( ; Iter != Scan::allScans.end(); ) {
     Iter = Scan::allScans.begin();
     delete (*Iter);
     cout << ".";
-    cout.flush(); 
+    cout.flush();
   }
   Scan::allScans.clear();
 

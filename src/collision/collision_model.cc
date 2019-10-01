@@ -460,7 +460,7 @@ void rotationMatrix(float angle, float x, float y, float z, double mMatrix[16])
     x /=vecLength;
     y /=vecLength;
     z /=vecLength;
-        
+
     sinSave=(float)sin(angle);
     cosSave=(float)cos(angle);
     oneMinusCos=1.0f-cosSave;
@@ -515,7 +515,7 @@ void multiplyMatrix(const double* m1, const double* m2, double* mProduct )
 	mProduct[3]=m1[3]*m2[0]+m1[7]*m2[1]+m1[11]*m2[2]+m1[15]*m2[3];
 	mProduct[7]=m1[3]*m2[4]+m1[7]*m2[5]+m1[11]*m2[6]+m1[15]*m2[7];
 	mProduct[11]=m1[3]*m2[8]+m1[7]*m2[9]+m1[11]*m2[10]+m1[15]*m2[11];
-	mProduct[15]=m1[3]*m2[12]+m1[7]*m2[13]+m1[11]*m2[14]+m1[15]*m2[15];     
+	mProduct[15]=m1[3]*m2[12]+m1[7]*m2[13]+m1[11]*m2[14]+m1[15]*m2[15];
 }
 
 size_t cuda_handle_pointcloud(int cuda_device, std::vector<Point> &pointmodel, DataXYZ &environment,
@@ -524,17 +524,17 @@ size_t cuda_handle_pointcloud(int cuda_device, std::vector<Point> &pointmodel, D
 		double radius, collision_method cmethod)
 {
 	const clock_t begin_time = clock();
-	
+
 	//colliding
 	for(unsigned int i=0;i<colliding.size();++i)
 	{
 		colliding[i]=false;
 	}
-	
-	
+
+
 	CuGrid grid(cuda_device);
-	
-	
+
+
 	double *env_xyz=new double[environment.size()*3];
 	//Copy data
 	for(unsigned int i=0;i<environment.size();++i)
@@ -545,9 +545,9 @@ size_t cuda_handle_pointcloud(int cuda_device, std::vector<Point> &pointmodel, D
 	}
 	grid.SetD(env_xyz,environment.size());	//xyz swaped
 	delete[] env_xyz;
-	
+
 	//grid.SetD((double*)environment.get_raw_pointer(),environment.size());
-	
+
 	double *tmp_xyz=new double[pointmodel.size()*3];
 	//Copy data
 	for(unsigned int i=0;i<pointmodel.size();++i)
@@ -561,44 +561,44 @@ size_t cuda_handle_pointcloud(int cuda_device, std::vector<Point> &pointmodel, D
 		tmp_xyz[3*i+2]=pointmodel[i].z;*/
 	}
 	grid.SetM(tmp_xyz,pointmodel.size());
-	
-	
+
+
 	grid.SetRadius(radius);
-	
+
 	for(unsigned int i=0;i<trajectory.size();++i)
 	{
 		printf("Trajectory: %d / %lu\n",i,trajectory.size());
-	
+
 		//Create scale matrix
 		double mat_scale[16];
 		double mat[16];
-		
+
 		for(int i=0;i<16;++i)
 		{
 			mat_scale[i]=0;
 		}
 		mat_scale[0]=mat_scale[5]=mat_scale[10]=mat_scale[15]=grid.params.scale;
-		
+
 		multiplyMatrix(trajectory[i].transformation,mat_scale,mat);
-		
+
 		grid.SetM(tmp_xyz,pointmodel.size());
 		grid.TransformM(mat);
-		
+
 		std::vector<int> output=grid.fixedRangeSearch();
-		
+
 		//Fill colliding
 		for(unsigned int i=0;i<colliding.size() && i<output.size();++i)
 		{
 			if(output[i] != -1)
 				colliding[i]=true;
 		}
-		
+
 	}
-	
-	
+
+
 	delete[] tmp_xyz;
-	
-	
+
+
 	size_t num_colliding = 0;
 	// the actual implementation of std::vector<bool> requires us to use the
 	// proxy iterator pattern with &&...
@@ -609,13 +609,13 @@ size_t cuda_handle_pointcloud(int cuda_device, std::vector<Point> &pointmodel, D
 			num_colliding++;
 		}
 	}
-	
-	
+
+
 	float time = float( clock () - begin_time ) /  CLOCKS_PER_SEC;
 	printf("colliding: %lu / %u\n",num_colliding,environment.size());
 	std::cerr << "took: " << time << " seconds" << std::endl;
-	
-	
+
+
 	/*
 	FILE *f=fopen("output-red20-coll.asc","w");
 	if(f)
@@ -630,7 +630,7 @@ size_t cuda_handle_pointcloud(int cuda_device, std::vector<Point> &pointmodel, D
 		}
 		fclose(f);
 	}*/
-	
+
 	return num_colliding;
 }
 #endif //WITH_CUDA
@@ -815,7 +815,7 @@ int main(int argc, char **argv)
 	bool reduce;
 	int jobs=1;
 	std::string transform;
-	
+
     parse_options(argc, argv, iotype, dir, radius, calcdistances, cmethod, pdmethod, use_cuda, cuda_device, voxel, octree, reduce, jobs, transform);
 
 	std::vector<std::string> transmat_str;
@@ -877,19 +877,19 @@ int main(int argc, char **argv)
         pointmodel.push_back(Point(point[0], point[1], point[2]));
     }
     std::cerr << "model: " << pointmodel.size() << std::endl;
-	
+
     size_t num_colliding = 0;
 	if(use_cuda)
 	{
 #ifdef WITH_CUDA
-		
+
 		if(!ValidCUDADevice(cuda_device))
 		{
 			std::cerr << "No such CUDA device: " << cuda_device << std::endl;
 			PrintCudaInfo();
 			exit(-1);
 		}
-		
+
 		std::cerr << "built with CUDA; use_cuda selected; will use CUDA\n";
 		num_colliding = cuda_handle_pointcloud(cuda_device,pointmodel, environment, trajectory, colliding, radius, cmethod);
 		// FIXME: when there is no CUDA devices use CPU version
@@ -906,7 +906,7 @@ int main(int argc, char **argv)
 #else
 		std::cerr << "built without CUDA; will NOT use CUDA\n";
 #endif
-	
+
 		if (cmethod == CTYPE3) {
 			num_colliding = environment.size();
 			for (unsigned int i = 0; i < environment.size(); ++i) {

@@ -20,7 +20,7 @@ class Checker;
 
 /**
  * Flexible filtering class for parsing a set of points.
- * 
+ *
  * This class is configurable with parameters for range and height and can be transferred via the use of a parameter string.
  * Use on a point set via repeated use of the check function, which creates the internal Checker structures once for each change to the parameters. The amount of tests is held as minimal as possible.
  */

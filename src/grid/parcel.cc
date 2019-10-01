@@ -31,23 +31,23 @@ parcel::parcel(long offSetX, long offSetZ, long sizeX, long sizeZ)
  * Adds a grid to the parcel.
  * Adds just the points belonging to the parcel and
  * ignoring the rest.
- * 
+ *
  * @param grid the grid to be added to the parcel
  */
 void parcel::addGrid(const grid* g)
 {
     // Calculate the startvalue of x
     long startX = g->getOffsetX() < getOffsetX() ? getOffsetX() : g->getOffsetX();
-    
+
     // calculate z-startvalue
     long startZ = g->getOffsetZ() < getOffsetZ() ? getOffsetZ() : g->getOffsetZ();
-    
+
     // calculate x-endvalue
-    long endX = g->getOffsetX() + g->getSizeX() < getOffsetX() + getSizeX() ? g->getOffsetX() + g->getSizeX() 
+    long endX = g->getOffsetX() + g->getSizeX() < getOffsetX() + getSizeX() ? g->getOffsetX() + g->getSizeX()
 	: getOffsetX() + getSizeX();
 
     // calculate z-endvalue
-    long endZ = g->getOffsetZ() + g->getSizeZ() < getOffsetZ() + getSizeZ() ? g->getOffsetZ() + g->getSizeZ() 
+    long endZ = g->getOffsetZ() + g->getSizeZ() < getOffsetZ() + getSizeZ() ? g->getOffsetZ() + g->getSizeZ()
 	: getOffsetZ() + getSizeZ();
 
     // add every point
@@ -58,7 +58,7 @@ void parcel::addGrid(const grid* g)
 	    this->addPoint(*g->getAbsolutePoint(i, j));
 	}
     }
-} 
+}
 
 /**
  * The static method reads the file and creates a new parcel.
@@ -71,19 +71,19 @@ void parcel::addGrid(const grid* g)
 parcel* parcel::readParcel(std::string filename)
 {
     std::ifstream infile(filename.c_str());
-    
+
     // Stream ok?
     if(!infile.good())
     {
 	std::cerr << "ERROR: In parcel::readparcel, couldn't open stream!" << std::endl;
 	exit(1);
     }
-    
+
     // Read sizes
     long sizeX;
     long sizeZ;
     infile >> sizeX >> sizeZ;
-    
+
     // Read offsets
     long offsetX;
     long offsetZ;
@@ -91,16 +91,16 @@ parcel* parcel::readParcel(std::string filename)
 
     // Create parcel
     parcel* p = new parcel(offsetX, offsetZ, sizeX, sizeX);
-    
+
     // Read all information
     long x, z, count, occupied;
     while(!infile.eof())
     {
 	infile >> x >> z >> count >> occupied;
-	p->setPoint(x, z, count, occupied);      	
+	p->setPoint(x, z, count, occupied);
     }
-    
+
     infile.close();
-    
+
     return p;
 }

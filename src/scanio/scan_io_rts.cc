@@ -45,7 +45,7 @@ std::list<std::string> ScanIO_rts::readDirectory(const char* dir_path, unsigned 
 void ScanIO_rts::readPose(const char* dir_path, const char* identifier, double* pose)
 {
   unsigned int i;
-  
+
   // if directory doesn't match the cached one, rebuild pose cache
   if(cached_dir != dir_path) {
     // check for pose file
@@ -66,10 +66,10 @@ void ScanIO_rts::readPose(const char* dir_path, const char* identifier, double* 
       } catch(std::ios_base::failure& e) {
         break;
       }
-      
+
       // convert
       for(i = 0; i < 3; ++i) p[i] *= 0.1;
-      
+
       // add in poses
       for(i = 0; i < 6; ++i) poses.push_back(p[i]);
     }
@@ -78,14 +78,14 @@ void ScanIO_rts::readPose(const char* dir_path, const char* identifier, double* 
     cached_poses.swap(poses);
     cached_dir = dir_path;
   }
-  
+
   // get index from the identifier and pick the pose
   stringstream str(identifier);
   unsigned int scan_index;
   str >> scan_index;
   if(cached_poses.size() < scan_index*6 + 6)
     throw std::runtime_error(std::string("There is no pose entry for scan [") + identifier + "]");
-  
+
   for(i = 0; i < 6; ++i)
     pose[i] = cached_poses[scan_index*6 + i];
   return;

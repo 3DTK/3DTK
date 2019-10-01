@@ -2,7 +2,7 @@
 
 using namespace std;
 
-int main(int argc, char **argv) 
+int main(int argc, char **argv)
 {
   // parameters for io
   int start, end;
@@ -18,7 +18,7 @@ int main(int argc, char **argv)
   // parameters for transfromation and filtering
   bool join;
   int rand;
-  bool use_pose;  // should we use the pose information instead of the frames?? 
+  bool use_pose;  // should we use the pose information instead of the frames??
   bool rangeFilterActive;
   bool customFilterActive = false;
   std::string customFilter;
@@ -47,16 +47,16 @@ int main(int argc, char **argv)
   vector<vector<float>> colors;
 
   std::string red_string = "";
-  
+
   // parse input arguments
-  parse_options(argc, argv, start, end, 
+  parse_options(argc, argv, start, end,
     scanserver, max_dist, min_dist,
-    dir, odir, iotype, 
-    in_color, in_reflectance, min_refl, max_refl, 
+    dir, odir, iotype,
+    in_color, in_reflectance, min_refl, max_refl,
     no_normal, join, red, rand, use_pose,
-    octree, rangeFilterActive, customFilterActive, 
+    octree, rangeFilterActive, customFilterActive,
     customFilter, scaleFac, autoRed,
-    k1, k2, ntype, width, height, 
+    k1, k2, ntype, width, height,
     outward, depth, samplesPerNode, trimVal);
 
   if (scanserver) {
@@ -71,7 +71,7 @@ int main(int argc, char **argv)
 
   rangeFilterActive = min_dist > 0 || max_dist > 0;
 
-  // custom filter set? quick check, needs to contain at least one ';' 
+  // custom filter set? quick check, needs to contain at least one ';'
   // (proper chsecking will be done case specific in pointfilter.cc)
   size_t pos = customFilter.find_first_of(";");
   if (pos != std::string::npos) {
@@ -121,12 +121,12 @@ int main(int argc, char **argv)
 
   // calculate appropriate reduction parameters
   if (red < 0 && autoRed) {
-    RedParam rp; 
+    RedParam rp;
     getRedParam(rp);
     red = rp.voxelSize;
     octree = rp.ptsPerVerxel;
   }
-  
+
   unsigned int types = PointType::USE_NONE;
   if(supportsReflectance(iotype)) types |= PointType::USE_REFLECTANCE;
   if(supportsColor(iotype)) types |= PointType::USE_COLOR;
@@ -155,7 +155,7 @@ int main(int argc, char **argv)
 
   // Apply transformation of scans, with frames or with poses
   readFramesAndTransform(dir, start, end, -1, use_pose, red > 0);
-  
+
   // join all scans then call surface reconstrucion
   // ---
   red_string = red > 0 ? " reduced" : "";
@@ -190,11 +190,11 @@ int main(int argc, char **argv)
         }
         colors.push_back(c);
       }
-      
+
       // calculate normals for current scan, then merge them
       //calcNormals(pts, norms, ntype, k1, k2, width, height, rPos, rPosTheta, scan);
       calculateNormalsAdaptiveKNN(norms, pts, k1, k2, rPos);
-      
+
       if (!outward) {
         flipNormals(norms);
       }
@@ -216,8 +216,8 @@ int main(int argc, char **argv)
     pp.Trim = trimVal;
     pp.UseColor = in_color;
     pp.ExportNormal = !no_normal;
-    poisson.setPoints(vPoints);   vector<vector<float>>().swap(vPoints); 
-    poisson.setNormals(vNormals); vector<vector<float>>().swap(vNormals); 
+    poisson.setPoints(vPoints);   vector<vector<float>>().swap(vPoints);
+    poisson.setNormals(vNormals); vector<vector<float>>().swap(vNormals);
     poisson.setColors(colors);
     poisson.setParams(pp);
     poisson.apply();
@@ -250,11 +250,11 @@ int main(int argc, char **argv)
         }
         colors.push_back(c);
       }
-      
+
       // calculate normals
       calculateNormalsAdaptiveKNN(normals, points, k1, k2, rPos);
       //calcNormals(points, normals, ntype, k1, k2, width, height, rPos, rPosTheta, scan);
-      
+
       if (!outward) {
         flipNormals(normals);
       }
@@ -272,8 +272,8 @@ int main(int argc, char **argv)
       pp.Trim = trimVal;
       pp.UseColor = in_color;
       pp.ExportNormal = !no_normal;
-      poisson.setPoints(vPoints);   vector<vector<float>>().swap(vPoints); 
-      poisson.setNormals(vNormals); vector<vector<float>>().swap(vNormals); 
+      poisson.setPoints(vPoints);   vector<vector<float>>().swap(vPoints);
+      poisson.setNormals(vNormals); vector<vector<float>>().swap(vNormals);
       poisson.setColors(colors);
       poisson.setParams(pp);
       poisson.apply();
@@ -287,7 +287,7 @@ int main(int argc, char **argv)
       scanNumber++;
     }
   }
-  
+
   // shutdown everything
   if (scanserver)
     ClientInterface::destroy();

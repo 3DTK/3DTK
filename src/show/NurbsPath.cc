@@ -20,8 +20,8 @@
  */
 std::vector<double> NurbsPath::camRatio = std::vector<double>();
 
-std::vector<PointXY> 
-NurbsPath::getNurbsPath(std::vector<PointXY>& origP,  
+std::vector<PointXY>
+NurbsPath::getNurbsPath(std::vector<PointXY>& origP,
                         unsigned int nump, int inter_by_dist){
   std::list<PGNode*> pgnl;
   std::list<PGNode*> freepgnl;
@@ -41,7 +41,7 @@ NurbsPath::getNurbsPath(std::vector<PointXY>& origP,
   }
   pgnl.clear();
   freepgnl.clear();
-  
+
   return vec;
 }
 
@@ -52,8 +52,8 @@ NurbsPath::getNurbsPath(std::vector<PointXY>& origP,
  * @param nump  number of points, which should be computed for the smoothed path
  * @return vector of PointXYs representing the smoothed path
  */
-std::vector<PointXY> 
-NurbsPath::getNurbsPath(std::list<PGNode*>& origP,  
+std::vector<PointXY>
+NurbsPath::getNurbsPath(std::list<PGNode*>& origP,
                         unsigned int nump, int inter_by_dist){
   ivN = origP.size();
   if(ivN<=1){
@@ -115,7 +115,7 @@ NurbsPath::getNurbsPath(std::list<PGNode*>& origP,
 
   for(i=0;i<=ivNumP; i++){
     out[0] = 0;
-    out[1] = 0; 
+    out[1] = 0;
     if(i!=ivNumP)
       if(inter_by_dist) {
         getOutpoint((float)i/ivNumP,out,origPX,origPY,ivpKnots);
@@ -147,7 +147,7 @@ NurbsPath::getNurbsPath(std::list<PGNode*>& origP,
  * @param k order (degree of the B-Splines plus 1)
  * @param Knots array of knots needed to compute the B-Spline
  */
-float 
+float
 NurbsPath::coxDeBoor(float u,int i,int k,const float* Knots) {
 	if(k==1)
 	{
@@ -173,12 +173,12 @@ NurbsPath::coxDeBoor(float u,int i,int k,const float* Knots) {
  *  @param[in] t which point on the spline you want to compute (betwenn 0 for the start point and 1-epsilon for the end point of the smoothed path)
  *  @param[out] OutPoint[] array of two floats, will be overwritten with the x and y coordinate of the point
  */
-void 
+void
 NurbsPath::getOutpoint(float t,float OutPoint[],float*opx,float*opy,const float*knots) {
 
-	// sum the effect of all CV's on the curve at this point to 
+	// sum the effect of all CV's on the curve at this point to
 	// get the evaluated curve point
-	// 
+	//
 	for(unsigned int i=0;i!=ivN;++i) {
 
 		// calculate the effect of this point on the curve

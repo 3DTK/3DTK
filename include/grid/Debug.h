@@ -12,7 +12,7 @@
 
 #define DEBUGPRINT(msg) std::cout <<"[Debug] "<< msg << std::endl;
 #else
-#define DEBUGPRINT(msg) 
+#define DEBUGPRINT(msg)
 #endif
 
 #endif

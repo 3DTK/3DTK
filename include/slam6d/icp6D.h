@@ -1,4 +1,4 @@
-/** @file 
+/** @file
  *  @brief Representation of 3D scan matching with ICP
  *  @author Kai Lingemann. Inst. of CS, University of Osnabrueck, Germany.
  *  @author Andreas Nuechter. Inst. of CS, University of Osnabrueck, Germany.
@@ -18,9 +18,9 @@
 
 /**
  * @brief Representation of 3D scan matching with ICP.
- *  
+ *
  * Manages the matching of 3D scans.
- * Important values, such as maximal matching distance, 
+ * Important values, such as maximal matching distance,
  * maximal number of iterations, etc.
  * are specified in the constructor.
  */
@@ -39,12 +39,12 @@ public:
 	   int nns_method = simpleKD,
 	   bool cuda_enabled = false,
 	   bool cad_matching = false);
-  
+
   /**
    * Destructor (empty, but needed, because virtual)
    */
   virtual ~icp6D() {};
-  
+
   void doICP(vector <Scan *> allScans,
 		   PairingMode pairing_mode = CLOSEST_POINT);
   virtual int match(Scan* PreviousScan,
@@ -70,7 +70,7 @@ public:
   inline bool get_cad_matching (void);
   inline void set_meta(bool meta);
   inline int get_nr_pointPair();
-  
+
 protected:
 
   /**
@@ -94,7 +94,7 @@ protected:
   bool   meta;
 
   /**
-   * specifies which NNS method should be used 
+   * specifies which NNS method should be used
    */
   int nns_method;
 
@@ -102,7 +102,7 @@ protected:
    * specifies if the ANN trees have to be built
    */
   bool cuda_enabled;
-  
+
   /**
    * the maximal distance (^2 !!!) for matching
    */

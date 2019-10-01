@@ -70,7 +70,7 @@ bool PathGraph::setStartNode(PointXY p) {
 }
 
 bool PathGraph::setEndNode(PointXY p) {
-  if (!endOnGraph) 
+  if (!endOnGraph)
     deleteNode(ivpEndNode);
   endOnGraph=false;
   PGNode* n=NULL;
@@ -96,7 +96,7 @@ void PathGraph::printGraphMap(const char* fn){
     printf("# in PathGraph::printGraph : Could not open output file %s!\n", fn);
     return;
   }
-#if 0 
+#if 0
   list<PGNode*>::iterator i,j;
   for(i=ivNodeList.begin();i!=ivNodeList.end();i++){
     for(j=(*i)->neighbours.begin();j!=(*i)->neighbours.end();j++){
@@ -106,7 +106,7 @@ void PathGraph::printGraphMap(const char* fn){
                                   (*j)->point.y);
     }
   }
-#else 
+#else
   PGEdge e;
   for(PathGraph::Iter i = this->firstEdge();!i.isLast();i++){
     e = *i;
@@ -118,7 +118,7 @@ void PathGraph::printGraphMap(const char* fn){
 #endif
   fclose(file);
 }
- 
+
 void PathGraph::savePath(const char* fn){
   FILE *file;
   if((file = fopen(fn, "w"))==NULL){
@@ -145,11 +145,11 @@ void PathGraph::savePath(const char* fn){
   }
   fprintf(file,"x\n");
   //fprintf(file,"%i %i",names[ivpStartNode],names[ivpEndNode]);
-  
+
   fclose(file);
   // printf("Printed graph to %s\n",fn);
 }
- 
+
 void PathGraph::saveGraph(const char* fn){
   FILE *file;
   if((file = fopen(fn, "w"))==NULL){
@@ -176,7 +176,7 @@ void PathGraph::saveGraph(const char* fn){
   }
   fprintf(file,"x\n");
   //fprintf(file,"%i %i",names[ivpStartNode],names[ivpEndNode]);
-  
+
   fclose(file);
   // printf("Printed graph to %s\n",fn);
 }

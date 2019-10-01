@@ -6,7 +6,7 @@ bool PointFilter::check(double* point)
     // mark as unchanged to avoid recreation on further calls
     m_changed = false;
   }
-  
+
   // apply all tests to the point
   Checker* checker = m_checker;
   while(checker) {

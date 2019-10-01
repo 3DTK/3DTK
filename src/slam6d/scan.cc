@@ -10,10 +10,10 @@
 /**
  * @file scan.cc
  * @brief the implementation for all scans (basic/managed)
- * @author Andreas Nuechter. Jacobs University Bremen gGmbH, Germany. 
+ * @author Andreas Nuechter. Jacobs University Bremen gGmbH, Germany.
  * @author Kai Lingemann. Inst. of CS. University of Osnabrueck, Germany.
- * @author Dorit Borrmann. Jacobs University Bremen gGmbH, Germany. 
- * @author Jan Elseberg. Jacobs University Bremen gGmbH, Germany. 
+ * @author Dorit Borrmann. Jacobs University Bremen gGmbH, Germany.
+ * @author Jan Elseberg. Jacobs University Bremen gGmbH, Germany.
  * @author Thomas Escher. Inst. of CS. University of Osnabrueck, Germany.
  */
 
@@ -75,7 +75,7 @@ void Scan::openDirectory(dataset_settings& dss
 #endif
  )
 {
-  // custom filter set? quick check, needs to contain at least one ';' 
+  // custom filter set? quick check, needs to contain at least one ';'
 // (proper checking will be done case specific in pointfilter.cc)
   size_t pos = dss.custom_filter.find_first_of(";");
   bool customFilterActive = false;
@@ -122,7 +122,7 @@ void Scan::openDirectory(dataset_settings& dss
 
   std::vector<Scan*> valid_scans = Scan::allScans;
   int scan_nr = Scan::allScans.size();
-  
+
   if (dss.use_scanserver)
     ManagedScan::openDirectory(dss.data_source, dss.format, dss.scan_numbers.min, dss.scan_numbers.max);
   else {
@@ -183,7 +183,7 @@ Scan::Scan()
 {
   scanNr = maxScanNr;
   maxScanNr++;
-  
+
   // pose and transformations
   for(size_t i = 0; i < 3; ++i) rPos[i] = 0;
   for(size_t i = 0; i < 3; ++i) rPosTheta[i] = 0;
@@ -293,7 +293,7 @@ void Scan::createSearchTree()
 #endif //WITH_METRICS
 
   createSearchTreePrivate();
-  
+
 #ifdef WITH_METRICS
   ClientMetric::create_tree_time.end(tc);
 #endif //WITH_METRICS
@@ -401,7 +401,7 @@ void Scan::calcNormals()
   DataNormal xyz_normals(create("normal", sizeof(double)*3*xyz.size()));
   if(xyz.size() == 0) throw
       std::runtime_error("Could not calculate reduced points, XYZ data is empty");
-    
+
   std::vector<Point> points;
   points.reserve(xyz.size());
   std::vector<Point> normals;
@@ -419,7 +419,7 @@ void Scan::calcNormals()
   }
   std::cout << "calcNormals done" << std::endl;
 }
-    
+
 /**
  * Computes an octtree of the current scan, then getting the
  * reduced points as the centers of the octree voxels.
@@ -447,11 +447,11 @@ void Scan::calcReducedPoints()
     DataRGB my_rgb(get("rgb"));
     rgb = my_rgb;
   }
-  //Return if empty 
+  //Return if empty
   if(xyz.size() < 1) {
     DataXYZ xyz_reduced(create("xyz reduced", sizeof(double)*3*xyz.size()));
     if (reduction_pointtype.hasNormal()) {
-      DataNormal normal_reduced(create("normal reduced", sizeof(double)*3*xyz.size()));      
+      DataNormal normal_reduced(create("normal reduced", sizeof(double)*3*xyz.size()));
     }
     if (reduction_pointtype.hasReflectance()) {
       DataReflectance reflectance_reduced(create("reflectance reduced", sizeof(float)*reflectance.size()));
@@ -461,12 +461,12 @@ void Scan::calcReducedPoints()
     }
     return;
   }
-  
+
 #ifdef WITH_METRICS
     ClientMetric::scan_load_time.end(t);
     Timer tl = ClientMetric::calc_reduced_points_time.start();
 #endif //WITH_METRICS
-  
+
   if(reduction_voxelSize <= 0.0) {
     // copy the points
     // check if we can create a large enough array. The maximum size_t on 32 bit
@@ -516,7 +516,7 @@ void Scan::calcReducedPoints()
           throw std::runtime_error("Insufficient size of size_t datatype");
       }
       DataNormal normal_reduced(create("normal reduced",
-                                       sizeof(double)*3*xyz.size()));      
+                                       sizeof(double)*3*xyz.size()));
         for(size_t i = 0; i < xyz.size(); ++i) {
           for(size_t j = 0; j < 3; ++j) {
             normal_reduced[i][j] = xyz_normals[i][j];
@@ -530,14 +530,14 @@ void Scan::calcReducedPoints()
     for (size_t i = 0; i < xyz.size(); ++i) {
       xyz_in[i] = new double[reduction_pointtype.getPointDim()];
       size_t j = 0;
-      for (; j < 3; ++j) 
+      for (; j < 3; ++j)
         xyz_in[i][j] = xyz[i][j];
       if (reduction_pointtype.hasReflectance())
         xyz_in[i][j++] = reflectance[i];
       if (reduction_pointtype.hasColor())
         memcpy(&xyz_in[i][j++], &rgb[i][0], 3);
       if (reduction_pointtype.hasNormal())
-        for (size_t l = 0; l < 3; ++l) 
+        for (size_t l = 0; l < 3; ++l)
           xyz_in[i][j++] = xyz_normals[i][l];
     }
 
@@ -547,7 +547,7 @@ void Scan::calcReducedPoints()
     BOctTree<double> *oct = new BOctTree<double>(xyz_in,
                                                  xyz.size(),
                                                  reduction_voxelSize,
-                                                 reduction_pointtype);      
+                                                 reduction_pointtype);
 
     std::vector<double*> center;
     center.clear();
@@ -565,7 +565,7 @@ void Scan::calcReducedPoints()
     } else {
         oct->GetOctTreeCenter(center);
     }
-    
+
     // storing it as reduced scan
     // check if we can create a large enough array. The maximum size_t on 32 bit
     // is around 4.2 billion which is too little for scans with more than 179
@@ -577,7 +577,7 @@ void Scan::calcReducedPoints()
     DataXYZ xyz_reduced(create("xyz reduced", sizeof(double)*3*size));
     DataReflectance reflectance_reduced(DataPointer(0, 0));
     DataRGB rgb_reduced(DataPointer(0, 0));
-    DataNormal normal_reduced(DataPointer(0, 0)); 
+    DataNormal normal_reduced(DataPointer(0, 0));
     if (reduction_pointtype.hasReflectance()) {
       // check if we can create a large enough array. The maximum size_t on 32 bit
       // is around 4.2 billion which is too little for scans with more than 1.07
@@ -598,7 +598,7 @@ void Scan::calcReducedPoints()
       }
       DataRGB my_rgb_reduced(create("color reduced",
                                           sizeof(unsigned char)*3*size));
-      rgb_reduced = my_rgb_reduced; 
+      rgb_reduced = my_rgb_reduced;
     }
     if (reduction_pointtype.hasNormal()) {
       // check if we can create a large enough array. The maximum size_t on 32 bit
@@ -609,18 +609,18 @@ void Scan::calcReducedPoints()
       }
       DataNormal my_normal_reduced(create("normal reduced",
                                           sizeof(double)*3*size));
-      normal_reduced = my_normal_reduced; 
+      normal_reduced = my_normal_reduced;
     }
     for(size_t i = 0; i < size; ++i) {
       size_t j = 0;
-      for (; j < 3; ++j) 
+      for (; j < 3; ++j)
         xyz_reduced[i][j] = center[i][j];
       if (reduction_pointtype.hasReflectance())
         reflectance_reduced[i] = center[i][j++];
       if (reduction_pointtype.hasColor())
         memcpy(&rgb_reduced[i][0], &center[i][j++], 3);
       if (reduction_pointtype.hasNormal())
-        for (size_t l = 0; l < 3; ++l) 
+        for (size_t l = 0; l < 3; ++l)
           normal_reduced[i][l] = center[i][j++];
     }
     delete oct;
@@ -632,7 +632,7 @@ void Scan::calcReducedPoints()
 
 #ifdef WITH_METRICS
     ClientMetric::calc_reduced_points_time.end(tl);
-#endif //WITH_METRICS  
+#endif //WITH_METRICS
 }
 
 
@@ -656,7 +656,7 @@ void Scan::mergeCoordinatesWithRoboterPosition(Scan* prevScan)
   M4inv(prevScan->get_transMatOrg(), tempMat);
   MMult(prevScan->get_transMat(), tempMat, deltaMat);
   // apply delta transformation of the previous scan
-  transform(deltaMat, INVALID); 
+  transform(deltaMat, INVALID);
 }
 
 /**
@@ -743,7 +743,7 @@ void Scan::transformMatrix(const double alignxf[16])
 void Scan::transform(const double alignxf[16], const AlgoType type, int islum)
 {
   MetaScan* meta = dynamic_cast<MetaScan*>(this);
-  
+
   if(meta) {
     for(size_t i = 0; i < meta->size(); ++i) {
       meta->getScan(i)->transform(alignxf, type, -1);
@@ -995,7 +995,7 @@ void Scan::getPtPairsSimple(std::vector <PtPair> *pairs,
 
   for (size_t i = 0; i < xyz_reduced.size(); i++) {
     // take about 1/rnd-th of the numbers only
-    if (rnd > 1 && rand(rnd) != 0) continue;  
+    if (rnd > 1 && rand(rnd) != 0) continue;
 
     double p[3];
     p[0] = xyz_reduced[i][0];

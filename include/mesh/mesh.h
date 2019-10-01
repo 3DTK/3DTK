@@ -21,7 +21,7 @@ public:
   int numVertices;
   int numFaces;
   int numNormals;
-  
+
   // public methods
   Mesh();
   ~Mesh();

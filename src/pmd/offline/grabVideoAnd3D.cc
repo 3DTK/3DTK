@@ -37,7 +37,7 @@ int main(int argc, char **argv)
 
 
     PMD *pmd = initPMD("../o3d.L32.pcp", "192.168.0.69");
-    
+
     CvCapture *capture = cvCaptureFromCAM(1); //FIXME: should be passed via argc
 
     CvSize pmdSz = pmdGetSize(pmd);
@@ -60,12 +60,12 @@ int main(int argc, char **argv)
 
 
 //    FILE *vPMDA = fopen("./s001.arv", "wb"); // ala dot Amplitudes Raw Video NOTE: i'm not sure it is amplitude :P
-//    FILE *vPMDAf = fopen("./s001.farv", "wb"); // same but Floating 
+//    FILE *vPMDAf = fopen("./s001.farv", "wb"); // same but Floating
     FILE *vPMDI = fopen("./s001.irv", "wb"); // same but Intensities
     FILE *vPMDIf = fopen("./s001.firv", "wb");
     FILE *headers = fopen("./s001.head", "wb");
     CvVideoWriter *vCam = cvCreateVideoWriter( "./s001.avi"
-                                             , CV_FOURCC('D', 'I', 'V', 'X') 
+                                             , CV_FOURCC('D', 'I', 'V', 'X')
                                              , 25, cvGetSize(imgCam), 1);
 
     FILE *pmdPtsFile = fopen("./s001.3dp", "w");
@@ -81,10 +81,10 @@ int main(int argc, char **argv)
     while(1) {
         frames++;
         if(0 == frames % 100) printf("%i frames grabbed...\n", frames);
-        // Image retriving 
+        // Image retriving
         pmdUpdate(pmd->hnd);
         imgCamColor = cvQueryFrame(capture);
-       
+
         pmdQueryImageAsync(pmd, imgPMD);
         fwrite(pmdDataPtr(pmd), sizeof(float), pmdSz.width*pmdSz.height, vPMDIf);
 
@@ -97,14 +97,14 @@ int main(int argc, char **argv)
 
         ImageHeaderInformation *header = retriveHeader();
 
-        
+
         if(ui) {
             cvShowImage("Cam", imgCamColor);
             cvShowImage("PMD", imgPMD);
         }
 
         //FIXME: order col/str
-        for(int i = 0; i < pmdSz.height; i++) 
+        for(int i = 0; i < pmdSz.height; i++)
             fwrite(pmdPts[i], sizeof(CvPoint3D32f), pmdSz.width, pmdPtsFile);
 
         fwrite(imgPMD->imageData, sizeof(char), pmdSz.width*pmdSz.height, vPMDI);

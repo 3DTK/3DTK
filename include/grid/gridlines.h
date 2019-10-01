@@ -30,8 +30,8 @@ class gridlines
     /** @brief CTOR */
     gridlines(grid* g, int max_distance, double isSolidPoint);
 
-    /** 
-     * @brief Creates the lines for the grid g and stores them in the vector "lines" 
+    /**
+     * @brief Creates the lines for the grid g and stores them in the vector "lines"
      */
     void createLines(grid* g, int max_distance);
 

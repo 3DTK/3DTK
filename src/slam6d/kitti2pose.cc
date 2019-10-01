@@ -27,23 +27,23 @@ using std::ofstream;
 
 #if WIN32
 #define snprintf sprintf_s
-#endif 
+#endif
 
 #ifndef M_PI
 #define M_PI       3.14159265358979323846
 #endif
 double deg(const double rad)
 {
-  return ( (rad * 360.0) / (2.0 * M_PI) ); 
+  return ( (rad * 360.0) / (2.0 * M_PI) );
 }
  void Matrix4ToEuler( double *alignxf,
                                   double *rPosTheta,
                                   double *rPos = 0)
 {
-  
+
   double _trX, _trY;
 
-  // Calculate Y-axis angle 
+  // Calculate Y-axis angle
   if(alignxf[0] > 0.0) {
     rPosTheta[1] = asin(alignxf[8]);
   } else {
@@ -51,20 +51,20 @@ double deg(const double rad)
   }
 
   double  C    =  cos( rPosTheta[1] );
-  if ( fabs( C ) > 0.005 )  {                 // Gimbal lock? 
-    _trX      =  alignxf[10] / C;             // No, so get X-axis angle 
+  if ( fabs( C ) > 0.005 )  {                 // Gimbal lock?
+    _trX      =  alignxf[10] / C;             // No, so get X-axis angle
     _trY      =  -alignxf[9] / C;
     rPosTheta[0]  = atan2( _trY, _trX );
-    _trX      =  alignxf[0] / C;              // Get Z-axis angle 
+    _trX      =  alignxf[0] / C;              // Get Z-axis angle
     _trY      = -alignxf[4] / C;
     rPosTheta[2]  = atan2( _trY, _trX );
-  } else {                                    // Gimbal lock has occurred 
-    rPosTheta[0] = 0.0;                       // Set X-axis angle to zero 
-    _trX      =  alignxf[5];  //1                // And calculate Z-axis angle 
+  } else {                                    // Gimbal lock has occurred
+    rPosTheta[0] = 0.0;                       // Set X-axis angle to zero
+    _trX      =  alignxf[5];  //1                // And calculate Z-axis angle
     _trY      =  alignxf[1];  //2
     rPosTheta[2]  = atan2( _trY, _trX );
   }
-  
+
   rPosTheta[0] = deg(rPosTheta[0]);
   rPosTheta[1] = deg(rPosTheta[1]);
   rPosTheta[2] = deg(rPosTheta[2]);
@@ -72,7 +72,7 @@ double deg(const double rad)
     rPos[0] = alignxf[12];
     rPos[1] = alignxf[13];
     rPos[2] = alignxf[14];
-      
+
   }
 }
 
@@ -106,7 +106,7 @@ int parseArgs(int argc,char **argv, char dir[255], int& start, int& end,int& pos
    }
 
   if (optind != argc-1) {
-    cerr << "\n*** Directory missing ***\n" << endl; 
+    cerr << "\n*** Directory missing ***\n" << endl;
     cout << endl
 	  << "Usage: " << argv[0] << "  [-s NR] [-e NR] directory" << endl << endl;
 
@@ -149,13 +149,13 @@ int main(int argc, char **argv)
 
   for (;;) {
     if (end > -1 && fileCounter > end) break; // 'nuf read
-    
+
     snprintf(poseFileName,255,"%sscan%.3d.pose",dir,fileCounter++);
 
     cout << "Reading frame " << truthFileName << "..." << endl;
-    
-    for (int j = 0; j < 12; ++j) 
-    { 
+
+    for (int j = 0; j < 12; ++j)
+    {
 
       pose_in >> inMatrix[j];
       inMatrix[12]=0.0;
@@ -164,7 +164,7 @@ int main(int argc, char **argv)
       inMatrix[15]=1.0;
     }
 
-  
+
      tMatrix[ 0] = inMatrix[0];
      tMatrix[ 4] =-inMatrix[1];
      tMatrix[ 8] = inMatrix[2];
@@ -183,25 +183,25 @@ int main(int argc, char **argv)
      tMatrix[15] =inMatrix[15];
 
      Matrix4ToEuler(tMatrix, rPosTheta, rPos);
-    
+
     pose_out.open(poseFileName);
 
     cout << "Writing pose file... " << poseFileName << endl;
-    
+
     for(int i = 0; i < 3; i++) {
       pose_out << rPos[i]*100.0 << " ";
     }
-    pose_out << endl; 
+    pose_out << endl;
 
     for(int i = 0; i < 3; i++) {
       pose_out <<rPosTheta[i]<< " ";
     }
-    pose_out << endl; 
+    pose_out << endl;
 
     pose_out.close();
     pose_out.clear();
 
-    
+
     cout << " done." << endl;
   }
      pose_in.close();

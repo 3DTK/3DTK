@@ -241,7 +241,7 @@ DataPointer ManagedScan::get(const std::string& identifier)
                           std::cout << "FIXME Upgrade SharedScan for the normal reduced data field!"
                                << std::endl;
                           return DataPointer(0,0);
-                        } 
+                        }
   {
     throw std::runtime_error(std::string("Identifier '") + identifier
                         + "' not compatible with ManagedScan::get. "

@@ -8,7 +8,7 @@
  */
 
 /**
- * @file 
+ * @file
  * @brief The implementation of a graph
  * @author Dorit Borrman. Inst. of CS, University of Osnabrueck, Germany.
  * @author Jan Elseberg. Inst. of CS, University of Osnabrueck, Germany.
@@ -56,7 +56,7 @@ Graph::Graph(const std::string &netfile)
   start = 0;
   int local_nrScans, local_nrLinks;
   std::cout << "Reading network " << netfile;
-  
+
   std::ifstream file(netfile.c_str());
   file >> local_nrScans
        >> local_nrLinks;
@@ -70,15 +70,15 @@ Graph::Graph(const std::string &netfile)
     file >> f >> t;
     std::cout << f << " " << t << std::endl;
     addLink(f, t);
-  } 
+  }
   std::cout << " structure done." << std::endl;
 }
 
-/** 
+/**
  * Constructor builds a minimally connected Graph with a given number of scans.
  * The loop can optionally be closed,
  * so that the first will be connected to the last scan.
- * 
+ *
  * @param nScans The number of Scans
  * @param loop Specifies whether the first and last scan should be linked
  */
@@ -87,13 +87,13 @@ Graph::Graph(int nScans, bool loop)
   int nrLinks = 0;
   start = 0;
   nrScans = nScans;
-  
+
   if (loop) {
     nrLinks = nScans;
-  } else {    
+  } else {
     nrLinks = nScans - 1;
   }
-  
+
   for(int i = 0 ;i < nrLinks; i++){
     from.push_back(i);
     if (loop) {
@@ -111,13 +111,13 @@ Graph::Graph(int nodes, double cldist2, int loopsize)
   start = 0;
   nrScans = nodes;
   int nrLinks = nodes - 1;
-  
+
   for(int i = 0; i < nrLinks; i++){
     from.push_back(i);
     to.push_back(i + 1);
   }
 
-  // nodes 
+  // nodes
   for (int j = 0; j < nodes; j++) {
     for (int k = j + 1; k < nodes; k++) {
       if ((abs(k-j) > loopsize) &&
@@ -131,9 +131,9 @@ Graph::Graph(int nodes, double cldist2, int loopsize)
 
 
 
-/** 
+/**
  * Returns the specified link
- * 
+ *
  * @param i The i-th link
  * @param fromTo 0 is the outgoing node and 1 the ingoing
  * @return An integer for the node
@@ -148,9 +148,9 @@ int Graph::getLink(int i, int fromTo)
 }
 
 
-/** 
+/**
  * adds a link to a graph
- * 
+ *
  * @param i from node
  * @param j to node
  */
@@ -168,7 +168,7 @@ void Graph::addLink(int i, int j)
     if (to[iterator] == j) present++;
   }
   if (present == 0) nrScans++;
-  
+
   from.push_back(i);
   to.push_back(j);
 }
@@ -220,7 +220,7 @@ int Graph::getEnd()
 }
 
 /**
- * Prints out the Graph nicely formatted 
+ * Prints out the Graph nicely formatted
  * @param os the stream to print to
  * @param gr which Graph to print
  * @return the resulting output stream

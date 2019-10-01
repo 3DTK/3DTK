@@ -1,7 +1,7 @@
 /**
  * @file
  * @brief Main programm for matching 3D scans (6D SLAM) with given * correspondences.
- * 
+ *
  * @author Dorit Borrmann
  */
 
@@ -100,7 +100,7 @@ void parse_options(int argc,char **argv, string& global, string& local, string& 
 
 
 }
-      
+
 void usage(char* prog)
 {
 #ifndef _MSC_VER
@@ -134,7 +134,7 @@ void usage(char* prog)
 
 /**
  * Main program for 6D SLAM.
- * Usage: bin/sICP 
+ * Usage: bin/sICP
  * with 'dir' the directory of a set of scans
  * ...
  */
@@ -147,7 +147,7 @@ int main(int argc, char **argv)
   int nr_pts = 0;
 
   parse_options(argc, argv, global, local, out, scale, nr_pts);
-  
+
   if(nr_pts < 3) {
     cerr << "Cannot work with less than 3 correspondences!";
     usage(argv[0]);
@@ -156,7 +156,7 @@ int main(int argc, char **argv)
 
   ifstream fileg(global.c_str());
   ifstream filel(local.c_str());
-  
+
   if(!fileg.is_open()) {
     cerr << global << " not found!" << endl;
     usage(argv[0]);
@@ -171,7 +171,7 @@ int main(int argc, char **argv)
 
   double x1,x2,y1,y2,z1,z2, centroid_m[3], centroid_d[3];
   centroid_m[0]=centroid_m[1] = centroid_m[2] = centroid_d[0] = centroid_d[1] = centroid_d[2] = 0;
-  
+
   double alignxf[16];
   for(int i = 0; i < nr_pts; i++){
     fileg >> x1 >> y1 >> z1; //gps
@@ -179,8 +179,8 @@ int main(int argc, char **argv)
     Point pg(x1,y1,z1);
     Point pl(x2,y2,z2);
 
-    PtPair p(pg,pl); 
-    
+    PtPair p(pg,pl);
+
     Pairs.push_back(p);
     cout << p << endl << i << endl;
     centroid_m[0] += 1.0/nr_pts*pg.x;
@@ -193,21 +193,21 @@ int main(int argc, char **argv)
 
   if(scale) {
     icp6D_QUAT_SCALE q;
-    q.Align(Pairs, alignxf, centroid_m, centroid_d);  
+    q.Align(Pairs, alignxf, centroid_m, centroid_d);
   } else {
     icp6Dminimizer *my_icp6Dminimizer = 0;
     my_icp6Dminimizer = new icp6D_SVD(false);   //2
     //my_icp6Dminimizer = new icp6D_QUAT(false);  //3
-    //my_icp6Dminimizer = new icp6D_APX(false);   //4  
-    //my_icp6Dminimizer = new icp6D_ORTHO(false); //5  
-    //my_icp6Dminimizer = new icp6D_HELIX(false); //6  
-    //my_icp6Dminimizer = new icp6D_DUAL(false);   //7  
-    //my_icp6Dminimizer = new icp6D_LUMEULER(false);   //8  
-    //my_icp6Dminimizer = new icp6D_LUMQUAT(false);   //9  
-    //my_icp6Dminimizer = new icp6D_QUAT_SCALE(false);   //10  
+    //my_icp6Dminimizer = new icp6D_APX(false);   //4
+    //my_icp6Dminimizer = new icp6D_ORTHO(false); //5
+    //my_icp6Dminimizer = new icp6D_HELIX(false); //6
+    //my_icp6Dminimizer = new icp6D_DUAL(false);   //7
+    //my_icp6Dminimizer = new icp6D_LUMEULER(false);   //8
+    //my_icp6Dminimizer = new icp6D_LUMQUAT(false);   //9
+    //my_icp6Dminimizer = new icp6D_QUAT_SCALE(false);   //10
     my_icp6Dminimizer->Align(Pairs, alignxf, centroid_m, centroid_d);
   }
-    
+
   fileg.close();
   filel.close();
   ofstream output(out.c_str());
@@ -215,7 +215,7 @@ int main(int argc, char **argv)
   {
     cout << out << " not found!" << endl;
   }
-  
+
   for(int j = 0; j < 3; j++) {
     for(int i = 0; i < 16; i++){
       cout <<std::setprecision(15) << alignxf[i] << " ";
@@ -224,6 +224,6 @@ int main(int argc, char **argv)
     output << "2" << endl;
     cout << endl;
   }
-  output.close(); 
+  output.close();
 
 }

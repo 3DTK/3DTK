@@ -28,8 +28,8 @@ void TdtkRosWrapper::ros2frames(const tf::StampedTransform &transform, double* t
 	// translation
 	transmat[12] = -transform.getOrigin().getY()*100;
 	transmat[13] =  transform.getOrigin().getZ()*100;
-	transmat[14] =  transform.getOrigin().getX()*100;  
-	transmat[15] = 1; 
+	transmat[14] =  transform.getOrigin().getX()*100;
+	transmat[15] = 1;
 
 };
 
@@ -40,7 +40,7 @@ void TdtkRosWrapper::ros2pose(const tf::StampedTransform &transform, double* rPo
 };
 
 void TdtkRosWrapper::frames2ros(const double* transmat, tf::StampedTransform &transform){
-	transform.getBasis().setValue( transmat[10], -transmat[2], transmat[6], 
+	transform.getBasis().setValue( transmat[10], -transmat[2], transmat[6],
 			-transmat[8], transmat[0], -transmat[4],
 			transmat[9], -transmat[1], transmat[5] );
 

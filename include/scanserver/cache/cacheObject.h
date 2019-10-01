@@ -61,7 +61,7 @@ public:
     // TODO: Access Data
     return CacheDataAccess(m_mutex_in_use, m_size, reinterpret_cast<unsigned char*>(m_msm->get_address_from_handle(m_handle)));
   }
-  
+
   /**
    * Allocate space to write into.
    * Repeated calls will always create new space without saving the old one, no CacheHandler calls will be made for this CacheObject.
@@ -76,7 +76,7 @@ public:
     // TODO: Access Data
     return CacheDataAccess(m_mutex_in_use, m_size, reinterpret_cast<unsigned char*>(m_msm->get_address_from_handle(m_handle)));
   }
-  
+
   /**
    * Let the CacheManager invalidate this CacheObject and its handler
    */
@@ -89,13 +89,13 @@ public:
     F(this);
     // TODO: Access Data
   }
-  
+
   /**
    * Set a cache handler for loading and saving data on cache misses or flushes.
    * This may only be assigned once and load/save calls have to be process local.
    */
   void setCacheHandler(CacheHandler* handler);
-  
+
   /**
    * Open the shared memory on client side so CacheObjects can access their data from there.
    * Call once on client initialization.
@@ -104,19 +104,19 @@ public:
 private:
   //! Size in bytes of contained data
   unsigned int m_size;
-  
+
   //! Handle to contained data in CacheObject exclusive shared memory, used to obtain process-local pointers
   ip::managed_shared_memory::handle_t m_handle;
-  
+
   //! Will be share-locked by every reading entity, exclusive-locked by manipulating entity, the CacheManager
   ip::interprocess_upgradable_mutex m_mutex_in_use;
-  
+
   //! Execute-once protection for a read request on a cache miss
   ip::interprocess_mutex m_cache_miss;
-  
+
   //! IO handling object for load and saves, to be called within the creating process
   CacheHandler* m_handler;
-  
+
   //! Singleton shared memory for data access
   static ip::managed_shared_memory* m_msm;
 };

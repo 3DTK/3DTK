@@ -36,9 +36,9 @@
 #include <sstream>
 
 class sickImporter {
-  std::string outputpath; 
+  std::string outputpath;
   calibration *cal;
-  rosbag::Bag *bag; 
+  rosbag::Bag *bag;
   int skip;
 
 public:
@@ -50,7 +50,7 @@ public:
   void getTransform(double *t, double *ti, double *rP, double *rPT, ros::Time time) {
     tf::StampedTransform transform;
     cal->getTrajectory()->lookupTransform ("/odom_combined", "/base_link", time, transform);
-    
+
     double mat[9];
     double x = transform.getOrigin().getX()*100;
     double y = transform.getOrigin().getY()*100;
@@ -64,22 +64,22 @@ public:
     mat[5] = transform.getBasis().getRow(1).getZ();
 
     mat[6] = transform.getBasis().getRow(2).getX();
-    mat[7] = transform.getBasis().getRow(2).getY(); 
+    mat[7] = transform.getBasis().getRow(2).getY();
     mat[8] = transform.getBasis().getRow(2).getZ();
 
-    t[0] = mat[4];                                                                                         
-    t[1] = -mat[7]; 
-    t[2] = -mat[1];                                                                                        
+    t[0] = mat[4];
+    t[1] = -mat[7];
+    t[2] = -mat[1];
     t[3] = 0.0;
 
-    t[4] = -mat[5];                                                                                        
-    t[5] = mat[8];                                                                                        
+    t[4] = -mat[5];
+    t[5] = mat[8];
     t[6] = mat[2];
     t[7] = 0.0;
 
-    t[8] = -mat[3];                                                                                        
+    t[8] = -mat[3];
     t[9] = mat[6];
-    t[10] = mat[0];                                                                                        
+    t[10] = mat[0];
     t[11] = 0.0;
 
     // translation
@@ -121,10 +121,10 @@ public:
           ROS_ERROR("Transform error in sickImporter::import() : %s",ex.what());
           continue;
         }
-        
+
         getTransform(transform, tinv, rP, rPT, ls->header.stamp);
 
-  
+
         // write to file
         string scanFileName = outputpath + "scan"+ to_string(counter,3) + ".3d";
         string poseFileName = outputpath + "scan"+ to_string(counter,3) + ".pose";
@@ -132,13 +132,13 @@ public:
         counter++;
 
         // scan
-        o.open(scanFileName.c_str()); 
+        o.open(scanFileName.c_str());
         o << std::setprecision(10);
         for (unsigned int j = 0; j < cloud_out.points.size(); j++) {
           geometry_msgs::Point32 p = cloud_out.points[j];
 
           double x_neu, y_neu, z_neu, x,y,z;
-          x = -100.0 * p.y; 
+          x = -100.0 * p.y;
           y = 100.0 * p.z;
           z = 100.0 * p.x;
         //  o << x << " " << y << " " << z << endl;
@@ -153,14 +153,14 @@ public:
         }
         o.close();
         // pose
-        o.open(poseFileName.c_str()); 
+        o.open(poseFileName.c_str());
         o << rP[0] << " " << rP[1] << " " << rP[2] << endl;
         o << deg(rPT[0]) << " " << deg(rPT[1]) << " " << deg(rPT[2]) << endl;
         o.flush();
         o.close();
 
         // frames
-        o.open(framesFileName.c_str()); 
+        o.open(framesFileName.c_str());
         for (int k = 0; k < 3; k++) {
           for (unsigned int i = 0; i < 16; i++) {
             o << transform[i] << " ";

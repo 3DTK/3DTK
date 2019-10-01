@@ -12,7 +12,7 @@
 using namespace std;
 
 namespace fbr{
-  
+
   void feature_matcher::init(matcher_method method, int k, double r, matching_filtration_method filtration){
     mMethod = method;
     knn = k;
@@ -81,7 +81,7 @@ namespace fbr{
 	cv::FlannBasedMatcher matcher;
 	matcher.knnMatch(qFeature.getDescriptors(), tFeature.getDescriptors(), qtInitialMatchesVector, 2);
       }
-      if(mMethod == BRUTEFORCE){	
+      if(mMethod == BRUTEFORCE){
 	//opencv 2.4
 #if CV_MAJOR_VERSION >= 3 || ((CV_MAJOR_VERSION == 2) && (CV_MINOR_VERSION >= 4))
 	cv::BFMatcher matcher (cv::NORM_L2);
@@ -152,7 +152,7 @@ namespace fbr{
       }
     }
   }
-  
+
   void feature_matcher::match(feature qFeature, feature tFeature){
     vector< cv::DMatch > gMatches;
     findMatches(qFeature, tFeature);
@@ -168,7 +168,7 @@ namespace fbr{
       //calculating the fundemental matrix
       cv::Mat fStatus;
       cv::Mat fundementalMatrix = findFundamentalMat( points_1, points_2, cv::FM_RANSAC, 3, 0.99, fStatus);
-      cv::MatIterator_<uchar> it, end; 
+      cv::MatIterator_<uchar> it, end;
       int counter = 0;
       //get the inliers from fundemental matrix
       for( it = fStatus.begin<uchar>(), end = fStatus.end<uchar>(); it != end; ++it){
@@ -181,18 +181,18 @@ namespace fbr{
       nOfFilteredMatches = matches.size();
     }else{
       nOfMatches = matches.size();
-      nOfFilteredMatches = matches.size(); 
+      nOfFilteredMatches = matches.size();
     }
   }
-  
+
   vector<cv::DMatch> feature_matcher::getMatches(){
     return matches;
   }
-  
+
   matcher_method feature_matcher::getMatcherMethod(){
     return mMethod;
   }
-  
+
   matching_filtration_method feature_matcher::getMatchingFiltrationMethod(){
     return mFiltrationMethod;
   }
@@ -204,15 +204,15 @@ namespace fbr{
   double feature_matcher::getRadius(){
     return radius;
   }
-  
+
   unsigned int feature_matcher::getNumberOfMatches(){
     return nOfMatches;
   }
-  
+
   unsigned int feature_matcher::getNumberOfFilteredMatches(){
     return nOfFilteredMatches;
   }
-  
+
   void feature_matcher::getDescription(){
     cout<<"number of Matches: "<<nOfMatches<<", number of Matches after filteration: "<<nOfFilteredMatches<<", matching method: "<<matcherMethodToString(mMethod)<<", matching filtration method: "<<matchingFiltrationMethodToString(mFiltrationMethod)<<", knn: "<<knn<<", radius: "<<radius<<"."<<endl;
     cout<<endl;

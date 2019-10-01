@@ -6,7 +6,7 @@
 
 /**
  * @brief .....
- * 
+ *
  * ....
  **/
 class CuGrid
@@ -24,18 +24,18 @@ public:
 	std::vector<int> fixedRangeSearch();
 
 	GridParams params;
-	
+
 	void TransformM(double *mat);
-  
+
 private:
 	double *d_m_xyz;
 	double *d_d_xyz;
-	
+
 	int msize;
 	int dsize;
-	
+
 	int device;
-	
+
 };
 
 #endif

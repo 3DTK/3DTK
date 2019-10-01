@@ -152,7 +152,7 @@ void sigSEGVhandler (int v)
       << "  Segmentation fault or Ctrl-C" << endl
       << "# **************************** #" << endl
       << endl;
-    
+
       // save frames and close scans
       for(ScanVector::iterator it = Scan::allScans.begin(); it != Scan::allScans.end(); ++it) {
         (*it)->saveFrames();
@@ -249,7 +249,7 @@ void usage(char* prog)
     << endl
     << bold << "  -I" << normal << " NR, " << bold << "--iterSLAM=" << normal << "NR [default: 0]" << endl
     << "         sets the maximal number of iterations for SLAM to <NR>" << endl
-    << "         (if not set, graphSLAM is not executed)" << endl 
+    << "         (if not set, graphSLAM is not executed)" << endl
     << endl
     << bold << "  -l" << normal << " NR, " << bold << "--loopsize=" << normal << "NR [default: 20]" << endl
     << "         sets the size of a loop, i.e., a loop must exceed <NR> of scans" << endl
@@ -336,7 +336,7 @@ private:
  * Parsing of a formats file in the scan directory for default type and scan
  * index ranges without overwriting user set parameters. Does nothing if
  * file doesn't exist.
- * 
+ *
  * @param dir directory the scans and format file are contained in
  * @param type which ScanIO to use for the scans in that directory
  * @param start index for the first valid scan
@@ -346,7 +346,7 @@ void parseFormatFile(string& dir, WriteOnce<IOType>& type, WriteOnce<int>& start
 {
   ifstream file((dir+"format").c_str());
   if(!file.good()) return;
-  
+
   string line, key, value, format;
   while(getline(file, line)) {
     size_t pos = line.find('=');
@@ -420,7 +420,7 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &rand,
   // from unistd.h:
   extern char *optarg;
   extern int optind;
-  
+
   WriteOnce<IOType> w_type(type);
   WriteOnce<int> w_start(start), w_end(end);
 
@@ -634,7 +634,7 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &rand,
 #else
   if (dir[dir.length()-1] != '\\') dir = dir + "\\";
 #endif
-  
+
   parseFormatFile(dir, w_type, w_start, w_end);
 
   return 0;
@@ -659,7 +659,7 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &rand,
  * @param mdmll maximal distance match for global SLAM after all scans ar matched
  */
 void matchGraph6Dautomatic(double cldist, int loopsize, vector <Scan *> allScans, icp6D *my_icp6D,
-					  bool meta_icp, int nns_method, 
+					  bool meta_icp, int nns_method,
 					  loopSlam6D *my_loopSlam6D, graphSlam6D *my_graphSlam6D, int nrIt,
 					  double epsilonSLAM, double mdml, double mdmll, double graphDist,
 					  bool &eP, IOType type)
@@ -859,7 +859,7 @@ int   FinalSLAM( double &red, int &rand,
 		icp6D *my_icp = 0;
 		my_icp = new icp6D(my_icp6Dminimizer, mdm, mni, quiet, meta, rand, eP,
 					    anim, epsilonICP, nns_method);
-			
+
 		if (my_icp) my_icp->doICP(Scan::allScans);
 		delete my_icp;
 	} else if (clpairs > -1) {
@@ -912,7 +912,7 @@ int   FinalSLAM( double &red, int &rand,
 			if(algo > 0) {
 			  my_icp = new icp6D(my_icp6Dminimizer, mdm, mni, quiet, meta, rand, eP,
 							 anim, epsilonICP, nns_method);
-			  
+
 			  loopSlam6D *my_loopSlam6D = 0;
 			  switch(loopSlam6DAlgo) {
 				case 1:
@@ -1031,7 +1031,7 @@ int main(int argc, char **argv)
       mni_lum, net, cldist, clpairs, loopsize, trackingAlgo,epsilonICP, epsilonSLAM,
       nns_method, exportPts, distLoop, iterLoop, graphDist, octree, type,
       scanserver);
-	  
+
 
   cout << "VeloSLAM will proceed with the following parameters:" << endl;
 
@@ -1049,12 +1049,12 @@ int main(int argc, char **argv)
 	}
 
   Scan::openDirectory(scanserver, dir, type, start, end);
-  
+
   if(VeloScan::allScans.size() == 0) {
     cerr << "No scans found. Did you use the correct format?" << endl;
     exit(-1);
   }
-  
+
     double eu[6] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
     vector <Point> ptss;
 	veryQuiet =true;
@@ -1065,8 +1065,8 @@ int main(int argc, char **argv)
 
     //Main Loop for ICP with Moving Object Detection and Tracking
     for(ScanVector::iterator it = Scan::allScans.begin();
-        it != Scan::allScans.end(); 
-		++it) 
+        it != Scan::allScans.end();
+		++it)
     {
   		 while(DebugDrawFinished ==false && !veryQuiet)
 		 {
@@ -1077,7 +1077,7 @@ int main(int argc, char **argv)
 	    currentScan->setReductionParameter(red, octree);
 	    currentScan->setSearchTreeParameter(nns_method);
 		currentScan->isTrackerHandled=false;
-        currentScan->scanid = scanCount; ///		
+        currentScan->scanid = scanCount; ///
 
          ICPFinished =false;
          if(tracking ==1 )
@@ -1157,14 +1157,14 @@ int main(int argc, char **argv)
  //    iterLoop,  graphDist,  octree,  type
 	//);
 
-   if (exportPts) 
+   if (exportPts)
    {
 		cout << "Export all 3D Points to file \"points.pts\"" << endl;
 		ofstream redptsout("points.pts");
-		for(unsigned int i = 0; i < Scan::allScans.size(); i++) 
+		for(unsigned int i = 0; i < Scan::allScans.size(); i++)
 		{
 		  DataXYZ xyz_r(Scan::allScans[i]->get("xyz reduced"));
-		  for(unsigned int i = 0; i < xyz_r.size(); ++i) 
+		  for(unsigned int i = 0; i < xyz_r.size(); ++i)
 			redptsout << xyz_r[i][0] << ' ' << xyz_r[i][1] << ' ' << xyz_r[i][2] << '\n';
 		  redptsout << std::flush;
 		}
@@ -1175,7 +1175,7 @@ int main(int argc, char **argv)
 	    Scan* scan = *it;
 	    scan->saveFrames();
 	}
-  
+
     Scan::closeDirectory();
 
 	delete my_icp6Dminimizer;

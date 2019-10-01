@@ -29,7 +29,7 @@ struct History {
     History *prev;
 };
 
-History *createHistory(); 
+History *createHistory();
 History *addFrame(History *h, Frame *f);
 void releaseTail(History *h);
 void checkHistoryLen(History *h, int maxLen);

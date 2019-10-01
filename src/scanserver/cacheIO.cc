@@ -32,7 +32,7 @@ void CacheIO::createTemporaryDirectory(std::string& path)
   CacheIO::path = path;
   if(path.rfind('/') != path.size() - 1)
     CacheIO::path += '/';
-  
+
   // check and create
   if(!exists(CacheIO::path))
     create_directory(CacheIO::path);

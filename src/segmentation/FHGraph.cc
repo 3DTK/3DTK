@@ -122,7 +122,7 @@ void FHGraph::compute_neighbors(double weight(Point, Point), double eps)
                 nret = nr_neighbors;
             }
 		  */
-		  
+
             for (int j=0; j<nret; ++j)
             {
                 if ( n[j] == (int)i ) continue;

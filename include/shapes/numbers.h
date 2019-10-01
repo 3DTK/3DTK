@@ -1,17 +1,17 @@
 // =====================================================================================
-// 
+//
 //       Filename:  numbers.h
-// 
-//    Description:  
-// 
+//
+//    Description:
+//
 //        Version:  1.0
 //        Created:  09/24/2010 02:03:48 PM
 //       Revision:  none
 //       Compiler:  g++
-// 
+//
 //         Author:  Jan Elseberg (), jelseber@uos.de
 //        Company:  Universitaet Osnabrueck
-// 
+//
 // =====================================================================================
 
 #ifndef __NUMBERS_H_
@@ -21,15 +21,15 @@ class numberState {
 public:
   numberState() : number(0), char_p(0), board_p(0) {
     for (int i = 0; i < 3; i++) {
-      position[i] = 0.0; 
+      position[i] = 0.0;
     }
   };
   numberState(int _number) : number(_number), char_p(0), board_p(0) {
     for (int i = 0; i < 3; i++) {
-      position[i] = 0.0; 
+      position[i] = 0.0;
     }
   };
-  numberState(int _number, double _char_p, double _board_p, double _position[3]) 
+  numberState(int _number, double _char_p, double _board_p, double _position[3])
     : number(_number), char_p(_char_p), board_p(_board_p)
   {
     for (int i = 0; i < 3; i++) {
@@ -39,7 +39,7 @@ public:
       plane[i] = 0;
     }
   }
-  numberState(int _number, double _char_p, double _board_p, double _position[3], double _plane[4]) 
+  numberState(int _number, double _char_p, double _board_p, double _position[3], double _plane[4])
     : number(_number), char_p(_char_p), board_p(_board_p)
   {
     for (int i = 0; i < 3; i++) {
@@ -57,7 +57,7 @@ public:
 
     return sqrt( x*x + y*y +z*z );
   }
-  
+
   int number;
   double char_p;
   double board_p;
@@ -87,15 +87,15 @@ public:
     sum_char_probability = 0.0;
     consensus = numberState(number);
   }
-  
+
   void addObservation(int number, double cp, double bp, double pos[3], double plane[4]) {
     addObservation( numberState(number, cp, bp, pos, plane) );
   }
-  
+
   bool isClose(double pos[3]) {
     return isClose( numberState(0, 0, 0, pos) );
   }
-  
+
   bool isClose(numberState ns) {
     for (unsigned int i = 0; i < clusters.size(); i++)  {
       if (ccenters[i].dist(ns) < 100.0 ) {   // should be good enough
@@ -107,7 +107,7 @@ public:
 
   void addObservation(numberState ns) {
     if (ns.number != consensus.number) return;
-    
+
 //    observations.push_back(ns);
     sum_board_probability += ns.board_p;
     sum_char_probability += ns.char_p;
@@ -121,7 +121,7 @@ public:
       updateConsensus(0);
       return;
     }
-    
+
     for (unsigned int i = 0; i < clusters.size(); i++)  {
       if (ccenters[i].dist(ns) < 100.0 ) {   // should be good enough
         cout << "new point is close to previous cluster..." << endl;
@@ -162,7 +162,7 @@ public:
         ccenters[0].char_p = clusters[0][0].char_p;
         ccenters[0].board_p = clusters[0][0].board_p;
         consensus = ccenters[0];
-        return;      
+        return;
       }
     }
 
@@ -182,7 +182,7 @@ public:
     consensus = ccenters[0];
     for (unsigned int i = 1; i < ccenters.size(); i++) {
       if (consensus.char_p * consensus.board_p < ccenters[i].char_p * ccenters[i].board_p) {
-        consensus = ccenters[i]; 
+        consensus = ccenters[i];
       }
     }
 
@@ -193,11 +193,11 @@ public:
     double plane[4];
     double bp = 0.0;
     double cp = 0.0;
-    
+
     for (unsigned int i = 0; i < observations.size(); i++) {
       for (int j = 0; j < 3; j++)
         pos[j] += observations[i].board_p * observations[i].position[j];
-      
+
       cp += observations[i].char_p;
       bp += observations[i].board_p;
     }

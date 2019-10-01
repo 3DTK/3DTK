@@ -1,4 +1,4 @@
-/** @file 
+/** @file
  *  @brief Implementation of the virtual functor for a loop closing algorithm
  *  @author Jochen Sprickerhof
  *  @author Kai Lingemann. Institute of Computer Science, University of Osnabrueck, Germany.
@@ -18,8 +18,8 @@
 class loopSlam6D {
 
 public:
-  /** 
-   * Constructor 
+  /**
+   * Constructor
    * @param _quiet suppress informative output
    * @param my_icp6Dminimizer the used ICP algorithm
    * @param mdm maximal distance match for ICP
@@ -37,8 +37,8 @@ public:
                     quiet, false, rnd, eP, anim, epsilonICP, nns_method);
   };
 
-  /** 
-   * Destructor 
+  /**
+   * Destructor
    */
   virtual ~loopSlam6D() {
     delete my_icp6D;
@@ -63,4 +63,4 @@ protected:
 
 };
 
-#endif 
+#endif

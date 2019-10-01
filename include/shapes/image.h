@@ -5,7 +5,7 @@
 #include "slam6d/point.h"
 
 class Image {
- 
+
 public:
   Image(float _minw, float _maxw, float _minh, float _maxh, float _resolution,
   const vector<Point> *points = 0);
@@ -22,7 +22,7 @@ public:
   int blobColor(float dist, int ** regdat);
   int cluster(float dist, int** dat, int ** regdat);
   void writeCenters(int regions, int** clusters, const vector<Point> *points);
-  void printScans(int ** regdat, double * const* points, int size); 
+  void printScans(int ** regdat, double * const* points, int size);
   void printImage(const char* filename, bool color, int** img, int height, int width, int min, int max);
   void printImage(const char *filename, bool color);
   ~Image();

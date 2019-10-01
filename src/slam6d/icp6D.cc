@@ -9,7 +9,7 @@
 
 
 /**
- * @file 
+ * @file
  * @brief Implementation of 3D scan matching with ICP
  * @author Kai Lingemann. Inst. of CS, University of Osnabrueck, Germany.
  * @author Andreas Nuechter. Inst. of CS, University of Osnabrueck, Germany.
@@ -26,7 +26,7 @@ using std::cerr;
 #include <string.h>
 
 #ifdef _MSC_VER
-#if !defined _OPENMP && defined OPENMP 
+#if !defined _OPENMP && defined OPENMP
 #define _OPENMP
 #endif
 #endif
@@ -35,7 +35,7 @@ using std::cerr;
 #include <omp.h>
 #endif
 /**
- * Constructor 
+ * Constructor
  *
  * @param my_icp6Dminimizer Pointer to the ICP-minimizer
  * @param max_dist_match Maximum distance to which point pairs are collected
@@ -46,7 +46,7 @@ using std::cerr;
  * @param eP Extrapolate odometry?
  * @param anim Animate which frames?
  * @param epsilonICP Termination criterion
- * @param nns_method Selects NNS method to be used  
+ * @param nns_method Selects NNS method to be used
  */
 icp6D::icp6D(icp6Dminimizer *my_icp6Dminimizer, double max_dist_match,
 	     int max_num_iterations, bool quiet, bool meta, int rnd, bool eP,
@@ -57,12 +57,12 @@ icp6D::icp6D(icp6Dminimizer *my_icp6Dminimizer, double max_dist_match,
   this->anim              = anim;
   this->cuda_enabled      = cuda_enabled;
   this->nns_method        = nns_method;
-  
+
   if (!quiet) {
     cout << "Maximal distance match      : " << max_dist_match << endl
 	 << "Maximal number of iterations: " << max_num_iterations << endl << endl;
   }
-  
+
   // checks
   if (max_dist_match < 0.0) {
     cerr << "ERROR [ICP6D]: first parameter (max_dist_match) "
@@ -76,7 +76,7 @@ icp6D::icp6D(icp6Dminimizer *my_icp6Dminimizer, double max_dist_match,
 	 << endl;
     exit(1);
   }
-  
+
   this->max_dist_match2    = sqr(max_dist_match);
   this->max_num_iterations = max_num_iterations;
   this->quiet              = quiet;
@@ -84,7 +84,7 @@ icp6D::icp6D(icp6Dminimizer *my_icp6Dminimizer, double max_dist_match,
   this->rnd                = rnd;
   this->eP                 = eP;
   this->epsilonICP         = epsilonICP;
-  
+
   // Set initial seed (for "real" random numbers)
   //  srand( (unsigned)time( NULL ) );
   this->cad_matching = cad_matching;
@@ -116,7 +116,7 @@ int icp6D::match(Scan* PreviousScan, Scan* CurrentScan,
   int iter = 0;
   double alignxf[16];
   long time = GetCurrentTimeInMilliSec();
-  
+
   for (iter = 0; iter < max_num_iterations; iter++) {
 
     prev_prev_ret = prev_ret;
@@ -125,7 +125,7 @@ int icp6D::match(Scan* PreviousScan, Scan* CurrentScan,
     if (iter == 1) time = GetCurrentTimeInMilliSec();
 
 #ifdef _OPENMP
-    // Implementation according to the paper 
+    // Implementation according to the paper
     // "The Parallel Iterative Closest Point Algorithm"
     // by Langis / Greenspan / Godin, IEEE 3DIM 2001
     //
@@ -154,7 +154,7 @@ int icp6D::match(Scan* PreviousScan, Scan* CurrentScan,
       n[i] = 0;
     }
 
-#pragma omp parallel 
+#pragma omp parallel
     {
       int thread_num = omp_get_thread_num();
 
@@ -188,7 +188,7 @@ int icp6D::match(Scan* PreviousScan, Scan* CurrentScan,
         }
       }
     } // end parallel
-    
+
     // do we have enough point pairs?
     unsigned int pairssize = 0;
     for (int i = 0; i < OPENMP_NUM_THREADS; i++) {
@@ -196,7 +196,7 @@ int icp6D::match(Scan* PreviousScan, Scan* CurrentScan,
     }
     //add the number of point pair
     nr_pointPair = pairssize;
-    
+
     if (pairssize > 3) {
       if ((my_icp6Dminimizer->getAlgorithmID() == 1) ||
           (my_icp6Dminimizer->getAlgorithmID() == 2) ) {
@@ -207,7 +207,7 @@ int icp6D::match(Scan* PreviousScan, Scan* CurrentScan,
       } else if (my_icp6Dminimizer->getAlgorithmID() == 6) {
         ret = my_icp6Dminimizer->Align_Parallel(OPENMP_NUM_THREADS,
 						n, sum,
-						centroid_m, centroid_d, 
+						centroid_m, centroid_d,
 						pairs,
 						alignxf);
       } else {
@@ -223,13 +223,13 @@ int icp6D::match(Scan* PreviousScan, Scan* CurrentScan,
     double centroid_m[3] = {0.0, 0.0, 0.0};
     double centroid_d[3] = {0.0, 0.0, 0.0};
     vector<PtPair> pairs;
-   
+
     Scan::getPtPairs(&pairs, PreviousScan, CurrentScan, 0, rnd,
 		     max_dist_match2, ret, centroid_m, centroid_d, pairing_mode);
 
     //set the number of point paira
     nr_pointPair = pairs.size();
-    
+
     // do we have enough point pairs?
     if (pairs.size() > 3) {
       if (my_icp6Dminimizer->getAlgorithmID() == 3 ||
@@ -240,11 +240,11 @@ int icp6D::match(Scan* PreviousScan, Scan* CurrentScan,
     } else {
       break;
     }
-   
+
 #endif
 
-//#define PLANAR 
-#ifdef  PLANAR    
+//#define PLANAR
+#ifdef  PLANAR
     double t_rPosTheta[3], t_rPos[3];
     Matrix4ToEuler(alignxf, t_rPosTheta, t_rPos);
     t_rPos[1] = 0.0;
@@ -252,15 +252,15 @@ int icp6D::match(Scan* PreviousScan, Scan* CurrentScan,
     t_rPosTheta[2] = 0.0;
     EulerToMatrix4(t_rPos, t_rPosTheta, alignxf);
 #endif //PLANAR
-    
+
     if ((iter == 0 && anim != -2) || ((anim > 0) && (iter % anim == 0))) {
       // transform the current scan
-      CurrentScan->transform(alignxf, Scan::ICP, 0);  
+      CurrentScan->transform(alignxf, Scan::ICP, 0);
     } else {
       // transform the current scan
-      CurrentScan->transform(alignxf, Scan::ICP, -1);  
+      CurrentScan->transform(alignxf, Scan::ICP, -1);
     }
-    
+
     if (((fabs(ret - prev_ret) < epsilonICP) &&
 	 (fabs(ret - prev_prev_ret) < epsilonICP)) ||
          (iter == max_num_iterations - 1) ) {
@@ -268,15 +268,15 @@ int icp6D::match(Scan* PreviousScan, Scan* CurrentScan,
       M4identity(id);
       if(anim == -2) {
 	// write end pose
-        CurrentScan->transform(id, Scan::ICP, -1);  
+        CurrentScan->transform(id, Scan::ICP, -1);
       } else {
 	// write end pose
-        CurrentScan->transform(id, Scan::ICP, 0);  
+        CurrentScan->transform(id, Scan::ICP, 0);
       }
       break;
     }
   }
-  
+
   long endtime = GetCurrentTimeInMilliSec() - time;
   cout << "TIME  " << endtime << "   ITER " << iter <<  endl;
   return iter;
@@ -284,8 +284,8 @@ int icp6D::match(Scan* PreviousScan, Scan* CurrentScan,
 
 
 /**
- * Computes the point to point error between two scans 
- * 
+ * Computes the point to point error between two scans
+ *
  *
  */
 double icp6D::Point_Point_Error(Scan* PreviousScan,
@@ -314,7 +314,7 @@ double icp6D::Point_Point_Error(Scan* PreviousScan,
     centroid_d[i][0] = centroid_d[i][1] = centroid_d[i][2] = 0.0;
   }
 
-#pragma omp parallel 
+#pragma omp parallel
   {
     int thread_num = omp_get_thread_num();
     Scan::getPtPairsParallel(pairs, PreviousScan, CurrentScan,
@@ -322,7 +322,7 @@ double icp6D::Point_Point_Error(Scan* PreviousScan,
 			     rnd, sqr(max_dist_match),
 			     sum, centroid_m, centroid_d, CLOSEST_POINT);
 
-  } 
+  }
 
   for (unsigned int thread_num = 0;
        thread_num < OPENMP_NUM_THREADS;
@@ -366,24 +366,24 @@ double icp6D::Point_Point_Error(Scan* PreviousScan,
 
 /**
  * This function matches the scans only with ICP
- * 
+ *
  * @param allScans Contains all necessary scans.
  */
 void icp6D::doICP(vector <Scan *> allScans, PairingMode pairing_mode)
 {
   double id[16];
   M4identity(id);
-  
+
   vector < Scan* > meta_scans;
   Scan* my_MetaScan = 0;
 
-  
+
   for(unsigned int i = 0; i < allScans.size(); i++) {
     cout << i << "*" << endl;
 
     Scan *CurrentScan = allScans[i];
     Scan *PreviousScan = 0;
-    
+
     if (i > 0) {
       PreviousScan = allScans[i-1];
       if (eP) {                             // extrapolate odometry

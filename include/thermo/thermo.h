@@ -13,8 +13,8 @@
 //typedef vector<vector<float> > Float2D[1200][1600];
 typedef std::vector<std::vector<float> > Float2D[2592][3888];
 
-void calcBoard(std::vector<std::vector<double> > &point_array, int board_n, double &x, double &y, double &cx, double &cy, bool pc); 
-void sortBlobs(std::vector<std::vector<double> > &point_array, int board_n, int board_h, int board_w, bool quiet); 
+void calcBoard(std::vector<std::vector<double> > &point_array, int board_n, double &x, double &y, double &cx, double &cy, bool pc);
+void sortBlobs(std::vector<std::vector<double> > &point_array, int board_n, int board_h, int board_w, bool quiet);
 IplImage* detectBlobs(IplImage *org_image, int &corner_exp, int board_h, int board_w, bool quiet, std::vector<std::vector<double> > &point_array2);
 void drawLines(std::vector<std::vector<double> > &point_array2, int corner_exp, IplImage *image, bool color=false);
 IplImage* resizeImage(IplImage *source, int scale);
@@ -29,7 +29,7 @@ IOType type, int scale, double rot_angle, double minDist, double maxDist,
 bool correction, int neighborhood, int method=0);
 
 bool readPoints(std::string filename, CvPoint3D32f *corners, int size) ;
-void sortElementByElement(CvMat * vectors, int nr_elems, int nr_vectors); 
+void sortElementByElement(CvMat * vectors, int nr_elems, int nr_vectors);
 void calculateExtrinsicsWithReprojectionCheck(CvMat * points2D, CvMat *
 points3D, CvMat * rotation_vectors_temp, CvMat * translation_vectors_temp, CvMat
 * distortions, CvMat * instrinsics, int corners, int successes, std::string dir, bool quiet=true, std::string substring = "") ;

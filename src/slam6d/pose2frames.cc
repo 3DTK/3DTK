@@ -95,7 +95,7 @@ int main(int argc, char **argv)
   ofstream pose_out;
 
   double rPos[3],rPosTheta[3];
-  
+
 
   for (;;) {
     if (end > -1 && fileCounter > end) break; // 'nuf read
@@ -112,10 +112,10 @@ cout <<poseFileName<< endl;
     if (!pose_in.good()) break; // no more files in the directory
 
     cout << "Reading pose " << poseFileName << "..." << endl;
-    
+
     for (unsigned int i = 0; i < 3; pose_in >> rPos[i++]);
     for (unsigned int i = 0; i < 3; pose_in >> rPosTheta[i++]);
-    
+
     // convert angles from deg to rad
     for (unsigned int i=0; i < 3; i++) rPosTheta[i] = rad(rPosTheta[i]);
 
@@ -126,7 +126,7 @@ cout <<poseFileName<< endl;
 
     cout << rPos[0] << " "<< rPos[1] << " "<< rPos[2] << endl;
     cout << rPosTheta[0] << " "<< rPosTheta[1] << " "<< rPosTheta[2] << endl;
-     
+
     double tempR[16];
     EulerToMatrix4(rPos, rPosTheta, tempR); // convert previous rPosTheta
 
@@ -144,7 +144,7 @@ cout <<poseFileName<< endl;
     pose_out.close();
     pose_out.clear();
 
-    
+
     cout << " done." << endl;
   }
 

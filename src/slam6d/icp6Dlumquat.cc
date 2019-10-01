@@ -8,7 +8,7 @@
  */
 
 
-/** @file 
+/** @file
  *  @brief Implementation of the ICP error function minimization via
  *  via linearization with quaternions
  *
@@ -75,7 +75,7 @@ double icp6D_LUMQUAT::Align(const vector<PtPair>& pairs,
   /// MZ = M^T * Z
   ColumnVector MZ(7); MZ = 0.0;
   /// MM = M^T * M
-  Matrix MM(7, 7); MM = 0.0; 
+  Matrix MM(7, 7); MM = 0.0;
   double x = 0.0, y = 0.0, z = 0.0,
     dx = 0.0, dy = 0.0, dz = 0.0,
     sx = 0.0, sy = 0.0, sz = 0.0,
@@ -143,7 +143,7 @@ double icp6D_LUMQUAT::Align(const vector<PtPair>& pairs,
   /// construct the auxiliary matrices U and T needed to build up H
   double p = quat[0], q = quat[1], r = quat[2], s = quat[3];
   x = t[0], y = t[1], z = t[2];
-  Matrix U(4, 4); 
+  Matrix U(4, 4);
   U << p << q << r << s
     << q <<-p << s <<-r
     << r <<-s <<-p << q

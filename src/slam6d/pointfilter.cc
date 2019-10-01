@@ -210,9 +210,9 @@ bool CheckerHeightBottom::test(double* point) {
 }
 
 CustomFilterContainer::CustomFilterContainer(const std::string& value) {
-  custParamsSet = false; 
+  custParamsSet = false;
     try{
-      // every custom filter description is defined as 
+      // every custom filter description is defined as
       // {filterMode};{nrOfParams}[;param1][;param2][...]
       std::string str(value);
       size_t pos = str.find_first_of(";");
@@ -270,7 +270,7 @@ CustomFilterContainer::~CustomFilterContainer(){
 CheckerCustom::CheckerCustom(const std::string& value) {
     // make sure to create and parse filters only once, otherwise every scan will have a vector, double[] etc... --> static class variable
 
-    // custom filter string consists of (possibly multiple) filter strings, and is defined as 
+    // custom filter string consists of (possibly multiple) filter strings, and is defined as
     // {filterModeA};{nrOfParamsA}[;paramA1][;paramA2][...]/{filterModeB};{nrOfParamsB}[;paramB1][;paramB2][...]
     if (!CheckerCustom::filtersInitialized){
         CheckerCustom::filtersInitialized = true;
@@ -320,7 +320,7 @@ bool CheckerCustom::test(double* point) {
                 break;
             case 2:
                 // As Custom Filter 1: asymetrical axis-parallel cuboid, with additional max range limitation
-                // parameters: xFilterRangeLow xFilterRangeHigh yFilterRangeLow yFilterRangeHigh zFilterRangeLow zFilterRangeHigh maxRange 
+                // parameters: xFilterRangeLow xFilterRangeHigh yFilterRangeLow yFilterRangeHigh zFilterRangeLow zFilterRangeHigh maxRange
                 if (point[0] < cfc.custFiltParams[0] || point[0] > cfc.custFiltParams[1]
                     || point[1] < cfc.custFiltParams[2] || point[1] > cfc.custFiltParams[3]
                     || point[2] < cfc.custFiltParams[4] || point[2] > cfc.custFiltParams[5]){

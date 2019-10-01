@@ -8,7 +8,7 @@
  */
 
 /**
- * @file 
+ * @file
  * @brief Implementation of panorama image projections
  * @author Hamidreza Houshiar, Jacobs University Bremen, Germany
  * @author Andreas Nuechter. University of Wuerzburg, Germany.
@@ -51,12 +51,12 @@ namespace fbr
     param_ = param;
 
     //scanner==projection max and min angle
-    //change the max, min of horizontal and vertical from degree to rad    
+    //change the max, min of horizontal and vertical from degree to rad
     maxHorizAngle_ = maxHorizAngle / 360.0 * 2.0 * M_PI;
     minHorizAngle_ = minHorizAngle / 360.0 * 2.0 * M_PI;
     maxVertAngle_ = maxVertAngle / 360.0 * 2.0 * M_PI;
     minVertAngle_ = minVertAngle / 360.0 * 2.0 * M_PI;
-    
+
     //based on projection method init the projection
     //EQUIRECTANGULAR projection
     if(method_ == EQUIRECTANGULAR)
@@ -69,14 +69,14 @@ namespace fbr
 
 	xFactor_ = (double) width_ / xSize_;
 	widthMax_ = width_ - 1;
-	yFactor_ = (double) height_ / ySize_;      
-	//shift all the valuse to positive points on image 
-	heightMax_ = height_ - 1;	
+	yFactor_ = (double) height_ / ySize_;
+	//shift all the valuse to positive points on image
+	heightMax_ = height_ - 1;
       }
-    
+
     //CONIC projection
     if(method_ == CONIC)
-      {	
+      {
 	// set up initial parameters according to MathWorld: http://mathworld.wolfram.com/AlbersEqual-AreaConicProjection.html
 	lat0_ = (minVertAngle_ + maxVertAngle_) / 2;
 	long0_ = (minHorizAngle_ + maxHorizAngle_) / 2;
@@ -95,25 +95,25 @@ namespace fbr
 	yMax_ = rho0_ - (1./n_ * sqrt(c_ - 2*n_*sin(maxVertAngle_)) ) * cos(n_ * (maxHorizAngle_ - long0_ ));
 	yMin_ = rho0_ - (1./n_ * sqrt(c_ - 2*n_*sin(minVertAngle_)) ) * cos(n_ * ((minHorizAngle_ + maxHorizAngle_)/2 - long0_ ));
 	ySize_ =  ( yMax_ - yMin_ );
-	
+
 	setImageRatio();
-	
+
 	xFactor_ = (double) width_ / xSize_;
 	widthMax_ = width_ - 1;
 	yFactor_ = (double) height_ / ySize_;
-	//shift all the values to positive points on image 
-	heightMax_ = height_ - 1;	
+	//shift all the values to positive points on image
+	heightMax_ = height_ - 1;
       }
-    
+
     //CYLINDRICAL projection
     if(method_ == CYLINDRICAL)
       {
 	//adding the longitude to x and tan(latitude) to y
 	xSize_ = maxHorizAngle_ - minHorizAngle_;
 	ySize_ = tan(maxVertAngle_) - tan(minVertAngle_);
-      
-	setImageRatio();	
-	
+
+	setImageRatio();
+
 	//find the x and y range
 	xFactor_ = (double) width_ / xSize_;
 	widthMax_ = width_ - 1;
@@ -128,9 +128,9 @@ namespace fbr
 	param_ = param_ / 360.0 * 2 * M_PI;
 	xSize_ =  (maxHorizAngle_ - minHorizAngle_) * cos(param_);
 	ySize_ =  ((sin(maxVertAngle_) - sin(minVertAngle_)) / cos(param_));
-      
+
 	setImageRatio();
-      
+
 	//find the x and y range
 	xFactor_ = (double) width_ / xSize_;
 	widthMax_ = width_ - 1;
@@ -144,9 +144,9 @@ namespace fbr
 	//find the x and y range
 	xSize_ = maxHorizAngle_ - minHorizAngle_;
 	ySize_ =  ( log( tan( maxVertAngle_) + ( 1 / cos( maxVertAngle_) ) ) - log ( tan( minVertAngle_) + (1 / cos(minVertAngle_) ) ) );
-      
+
 	setImageRatio();
-      
+
 	xFactor_ = (double) width_ / xSize_;
 	widthMax_ = width_ - 1;
 	yFactor_ = (double) height_ / ySize_;
@@ -158,7 +158,7 @@ namespace fbr
       {
 	// this gets the min number of images based on the horizontal angle of the data
 	// and the 2/3*M_PI angle as the max for pannini
-	int minNumberOfImages = ceil((maxHorizAngle_ - minHorizAngle_)/(2.0/3.0*M_PI)); 
+	int minNumberOfImages = ceil((maxHorizAngle_ - minHorizAngle_)/(2.0/3.0*M_PI));
 	if(numberOfImages_ < minNumberOfImages) numberOfImages_ = minNumberOfImages;
 	cout<<"Number of images per scan is: "<<numberOfImages_<<endl;
 	interval_ = (maxHorizAngle_ - minHorizAngle_) / numberOfImages_;
@@ -196,7 +196,7 @@ namespace fbr
 	if(param_ == 0) param_ = 1;
 	// this gets the min number of images based on the horizontal angle of the data
 	// and the M_PI angle as the max for pannini
-	int minNumberOfImages = ceil((maxHorizAngle_ - minHorizAngle_)/M_PI); 
+	int minNumberOfImages = ceil((maxHorizAngle_ - minHorizAngle_)/M_PI);
 	if(numberOfImages_ < minNumberOfImages) numberOfImages_ = minNumberOfImages;
 	cout << "Parameter d is: " << param_ <<", Horizontal Number of images per scan is: " << numberOfImages_ << endl;
 	interval_ = (maxHorizAngle_ - minHorizAngle_) / numberOfImages_;
@@ -204,12 +204,12 @@ namespace fbr
 	iMaxY_ = maxVertAngle_;
 	//latitude of projection center
 	p1_ = 0;
-            
+
 	iMinX_ = minHorizAngle_ + (0 * interval_);
 	iMaxX_ = minHorizAngle_ + ((0 + 1) * interval_);
 	//the longitude of projection center
 	l0_ = iMinX_ + interval_ / 2;
-      
+
 	//use the S variable of pannini projection mentioned in the thesis
 	//finding the min and max of the x direction
 	sPannini_ = (param_ + 1) / (param_ + sin(p1_) * tan(iMaxY_) + cos(p1_) * cos(iMaxX_ - l0_));
@@ -223,7 +223,7 @@ namespace fbr
 	sPannini_ = (param_ + 1) / (param_ + sin(p1_) * tan(iMinY_) + cos(p1_) * cos(iMinX_ - l0_));
 	min_ = sPannini_ * (tan(iMinY_) * (cos(p1_) - sin(p1_) * 1/tan(iMinY_) * cos(iMinX_ - l0_)));
 	ySize_ = max_ - min_;
-      
+
 	setImageRatio();
       }
 
@@ -234,7 +234,7 @@ namespace fbr
 	if(param_ == 0) param_ = 2;
 	// this gets the min number of images based on the horizontal angle of the data
 	// and the M_PI angle as the max for pannini
-	int minNumberOfImages = ceil((maxHorizAngle_ - minHorizAngle_)/M_PI); 
+	int minNumberOfImages = ceil((maxHorizAngle_ - minHorizAngle_)/M_PI);
 	if(numberOfImages_ < minNumberOfImages) numberOfImages_ = minNumberOfImages;
 	cout << "Paremeter R is: " << param_ << ", Number of images per scan is: " << numberOfImages_ << endl;
 	// l0_ and p1_ are the center of projection iminx, imaxx, iminy, imaxy are the bounderis of interval_s
@@ -243,7 +243,7 @@ namespace fbr
 	iMaxY_ = maxVertAngle_;
 	//latitude of projection center
 	p1_ = 0;
-      
+
 	iMinX_ = minHorizAngle_ + (0 * interval_);
 	iMaxX_ = minHorizAngle_ + ((0 + 1) * interval_);
 	//longitude of projection center
@@ -280,10 +280,10 @@ namespace fbr
 	widthMax_ = width_ - 1;
 	cout << "ZMAX= " << maxZ_ << " ZMIN= "<< minZ_ << endl;
 	yFactor_ = (double) height_ / ySize_;
-	//shift all the valuse to positive points on image 
+	//shift all the valuse to positive points on image
 	heightMax_ = height_ - 1;
       }
-    
+
     //AZIMUTHAL projection
     if(method_ == AZIMUTHAL)
       {
@@ -300,22 +300,22 @@ namespace fbr
 	yMin_ = xMin_;     // the thing is supposed to be circular, isn't it?
 	yMax_ = xMax_;
 	ySize_ =  ( yMax_ - yMin_ );
-      
+
 	setImageRatio();
 
 	xSize_=1/2.;
 	ySize_=1/2.;
-	
+
 	xFactor_ = (double) width_ / 2*xSize_;
 	widthMax_ = width_ - 1;
 	yFactor_ = (double) height_ / 2*ySize_;
-	//shift all the values to positive points on image 
+	//shift all the values to positive points on image
 	heightMax_ = height_ - 1;
       }
   }
 
   void projection::recoverPointCloud(const cv::Mat& rangeImage,
-				   cv::Mat& reflectanceImage, vector<cv::Vec4f> &reducedPoints) 
+				   cv::Mat& reflectanceImage, vector<cv::Vec4f> &reducedPoints)
   {
     assert (rangeImage.dims == 2);
     assert (rangeImage.cols > 0);
@@ -330,24 +330,24 @@ namespace fbr
       }
 
     if (rangeImage.cols != reflectanceImage.cols
-	|| rangeImage.rows != reflectanceImage.rows) 
+	|| rangeImage.rows != reflectanceImage.rows)
       {
 	cerr << "range image and reflectance image have different geometries - using empty reflectance image" << endl;
 	reflectanceImage.create(rangeImage.size(), CV_8U);
 	reflectanceImage = cv::Scalar::all(0);
       }
 
-    for (int row = 0; row < rangeImage.size().height; ++row) 
+    for (int row = 0; row < rangeImage.size().height; ++row)
       {
-	for (int col = 0; col < rangeImage.size().width; ++col) 
+	for (int col = 0; col < rangeImage.size().width; ++col)
 	  {
 	    double range,reflectance, x, y, z;
 	    range = rangeImage.at<float>(row, col);
 	    reflectance = reflectanceImage.at<uchar>(row,col)/255.0;
-	    
+
 	    calcPointFromPanoramaPosition(x, y, z, row, col, range);
-	    
-	    if( fabs(x) < 1e-5 && fabs(y) < 1e-5 && fabs(z) < 1e-5) 
+
+	    if( fabs(x) < 1e-5 && fabs(y) < 1e-5 && fabs(z) < 1e-5)
 	      {
 		continue;
 	      }
@@ -395,20 +395,20 @@ namespace fbr
 			throw std::runtime_error("unknown method");
 	}
     //other projections
-    
+
     phi = (2 * M_PI) - phi;
     theta *= -1;
     theta += M_PI/2.0;
-    
-    
-    double polar[3] = { theta, phi, range }, cartesian[3] = {0., 0., 0.}; 
+
+
+    double polar[3] = { theta, phi, range }, cartesian[3] = {0., 0., 0.};
     toCartesian(polar, cartesian);
 
     x = -100.0 * cartesian[1];
     y = 100.0 * cartesian[2];
     z = 100.0 * cartesian[0];
   }
-  
+
   void projection::calcPanoramaPositionForAPoint(int &x, int &y, cv::MatIterator_<cv::Vec4f> it, double &range)
   {
 	double kart[3], polar[3], phi, theta;
@@ -418,7 +418,7 @@ namespace fbr
 	kart[2] = (*it)[1]/100.0;
 	//get the polar coordinte of x,y,z this is in rad
 	toPolar(kart, polar);
-	  
+
 	//theta == polar[0] == scan [4]
 	//phi == polar[1] == scan [5]
 	//range == polar[2] == scan [3]
@@ -426,14 +426,14 @@ namespace fbr
 	phi = polar[1];
 	range = polar[2];
 	//horizantal angle of view of [0:360][minHorzAngle_:maxHorzAngle_] and vertical of [-40:60][minVertAngle_:maxVertAngle]
-        //phi == longitude == horizantal angle of view of [0:360] 
-	//shift it to clockwise instead of counter clockwise 
+        //phi == longitude == horizantal angle of view of [0:360]
+	//shift it to clockwise instead of counter clockwise
 	//phi = (2 * M_PI) - phi;
 	//theta == latitude == vertical angle of view of [-40:60]
 	//shift the vertical angle instead of -90:90 to 0:180 from north to south pole
 	theta -= M_PI/2.0;
 	theta *= -1;
-    
+
     //EQUIRECTANGULAR projection
     if(method_ == EQUIRECTANGULAR)
       {
@@ -460,7 +460,7 @@ namespace fbr
 	if (x < 0) x = -1;
         //if (x > widthMax_) x = widthMax_;
 	if (x > widthMax_) x = -1;
-        
+
         // add minimum y position as an offset
         y = (int) ( yFactor_ * (rho0_ - (1/n_ * sqrt(c_ - 2 * n_ * sin( theta) ) ) * cos(n_ * (phi - long0_)) + fabs( yMin_ ) ) );
         y = heightMax_ - y;
@@ -469,7 +469,7 @@ namespace fbr
 	//if (y > heightMax_) y = heightMax_;
 	if (y > heightMax_) y = -1;
       }
-    
+
     //CYLINDRICAL projection
     if(method_ == CYLINDRICAL)
       {
@@ -503,7 +503,7 @@ namespace fbr
 	//if (y > heightMax_) y = heightMax_;
 	if (y > heightMax_) y = -1;
       }
-    
+
     //Mercator Projection
     if( method_ == MERCATOR)
       {
@@ -520,7 +520,7 @@ namespace fbr
 	//if (y > heightMax_) y = heightMax_;
 	if (y > heightMax_) y = -1;
       }
-    
+
     //RECTILINEAR projection
     if(method_ == RECTILINEAR)
       {
@@ -531,7 +531,7 @@ namespace fbr
 	    //check for point in interval_
 	    if(phi <= iMaxX_ && phi >= iMinX_)
 	      {
-		
+
 		//the longitude of projection center
 		l0_ = iMinX_ + interval_ / 2;
 		//finding the min and max of the x direction
@@ -552,7 +552,7 @@ namespace fbr
 		heightMax_ = height_ - 1;
 		//project the points and add them to image
 		coscRectilinear_ = sin(p1_) * sin(theta) + cos(p1_) * cos(theta) * cos(phi - l0_);
-		
+
 		x = (int)(xFactor_) * ((cos(theta) * sin(phi - l0_) / coscRectilinear_) - xlow);
 		//if (x < 0) x = 0;
 		if (x < 0) x = -1;
@@ -569,7 +569,7 @@ namespace fbr
 	      }
 	  }
       }
-    
+
     //PANNINI projection
     if(method_ == PANNINI)
       {
@@ -582,10 +582,10 @@ namespace fbr
 	      {
 		//the longitude of projection center
 		l0_ = iMinX_ + interval_ / 2;
-		
+
 		//latitude of projection center
 		p1_ = 0;
-		
+
 		//use the S variable of pannini projection mentioned in the thesis
 		//finding the min and max of the x direction
 		sPannini_ = (param_ + 1) / (param_ + sin(p1_) * tan(iMaxY_) + cos(p1_) * cos(iMaxX_ - l0_));
@@ -605,16 +605,16 @@ namespace fbr
 		heightMax_ = height_ - 1;
 		//project the points and add them to image
 		sPannini_ = (param_ + 1) / (param_ + sin(p1_) * tan(theta) + cos(p1_) * cos(phi - l0_));
-		
+
 		x = (int)(xFactor_) * (sPannini_ * sin(phi - l0_) - xlow);
 		//if (x < 0) x = 0;
 		if (x < 0) x = -1;
 		//if (x > widthMax_) x = widthMax_;
 		if (x > widthMax_) x = -1;
 		x = x + (i * widthMax_);
-		
+
 		y = (int) (yFactor_) * ( (sPannini_ * tan(theta) * (cos(p1_) - sin(p1_) * (1/tan(theta)) * cos(phi - l0_) ) ) - heightLow_ );
-		y = heightMax_ - y;		
+		y = heightMax_ - y;
 		//if (y < 0) y = 0;
 		if (y < 0) y = -1;
 		//if (y > heightMax_) y = heightMax_;
@@ -622,7 +622,7 @@ namespace fbr
 	      }
 	  }
       }
-    
+
     //STEREOGRAPHIC projection
     if(method_ == STEREOGRAPHIC)
       {
@@ -633,7 +633,7 @@ namespace fbr
 	    //check for point in interval_s
 	    if(phi <= (iMaxX_) && phi >= (iMinX_))
 	      {
-		
+
 		//longitude of projection center
 		l0_ = iMinX_ + interval_ / 2;
 		//use the R variable of stereographic projection mentioned in the thesis
@@ -662,7 +662,7 @@ namespace fbr
 		//if (x > widthMax_) x = widthMax_;
 		if (x > widthMax_) x = -1;
 		x = x + (j * width_ / numberOfImages_);
-		
+
 		y = (int) (yFactor_) * (k_ * ( cos(p1_) * sin(theta) - sin(p1_) * cos(theta) * cos(phi - l0_) ) - heightLow_);
 		y = heightMax_ - y;
 		//if (y < 0) y = 0;
@@ -672,7 +672,7 @@ namespace fbr
 	      }
 	  }
       }
-    
+
     //ZAXIS projection
     if(method_ == ZAXIS)
       {
@@ -681,7 +681,7 @@ namespace fbr
 	if (x < 0) x = -1;
 	//if (x > widthMax_) x = widthMax_;
 	if (x > widthMax_) x = -1;
-	
+
 	///////////////////check this
 	y = (int) ( yFactor_ * ((*it)[1] - minZ_) );
 	y = heightMax_ - y;
@@ -696,7 +696,7 @@ namespace fbr
       {
 	//calculate kPrime_ according to Mathworld article
 	kPrime_ = sqrt(2/(1+sin(phi1_)*sin(theta)+cos(phi1_)*cos(theta)*cos(phi-long0_)));
-	
+
 	// add minimum x position as an offset
 	x = (int) xFactor_*kPrime_*cos(theta)*sin(phi-long0_);
 	x = widthMax_/2 + x;
@@ -704,7 +704,7 @@ namespace fbr
 	if (x < 0) x = -1;
 	//if (x > widthMax_) x = widthMax_;
 	if (x > widthMax_) x = -1;
-	
+
 	// add minimum y position as an offset
 	y = (int) yFactor_*kPrime_*(cos(phi1_)*sin(theta)-sin(phi1_)*cos(theta)*cos(phi-long0_));
 	y = -y + heightMax_/2;
@@ -734,14 +734,14 @@ namespace fbr
   {
     return numberOfImages_;
   }
-  
+
   double projection::getProjectionParam()
   {
     return param_;
   }
 
   //private functions
-  
+
   void projection::setImageRatio()
   {
     if((xSize_/ySize_) != ((double)width_/height_))
@@ -781,16 +781,16 @@ namespace fbr
 		  {
 		    //width_ stays the same
 		    if((double)(width_/tHeight) <= 1)
-		      height_ = tHeight;		
+		      height_ = tHeight;
 		    //height_ stays the same
 		    else if((double)(tWidth/height_) <= 1)
-		      width_ = tWidth;		
+		      width_ = tWidth;
 		  }
 	      }
 	    cout<<"New Panorama Size is: "<<width_<<"X"<<height_<<endl;
 	    cout<<endl;
 	  }
-      } 
+      }
   }
-  
+
 }

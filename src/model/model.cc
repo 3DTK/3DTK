@@ -86,7 +86,7 @@ void printUsage(const string& programName) {
 	    << bold << "\t -e" << normal << " NR, " << bold << "--end=" << normal << "NR" << endl
 	    << "\t\t end at scan NR (i.e., neglects the scans following NR)" << endl
 	    << endl;
-    
+
     exit(EXIT_SUCCESS);
 }
 
@@ -103,7 +103,7 @@ void parseArgs(int argc, char* argv[],
     // from unistd.h:
     extern char *optarg;
     extern int optind;
-  
+
     WriteOnce<IOType> w_type(type);
     WriteOnce<int> w_start(start), w_end(end);
 
@@ -174,7 +174,7 @@ void parseArgs(int argc, char* argv[],
 #else
     if (dir[dir.length()-1] != '\\') dir = dir + "\\";
 #endif
-  
+
     parseFormatFile(dir, w_type, w_start, w_end);
 
 }

@@ -26,7 +26,7 @@ using std::map;
  * @param minimalWeighting The minimal weighting for the waypoints
  * @param createWaypoints If set waypoints will be created
  * @param neighbours If set neighbours will be created
- */ 
+ */
 scanToGrid::scanToGrid(double resolution,
 		       double minRelevantHeight, double maxRelevantHeight,
 		       int maxDistance, int spotRadius,
@@ -64,7 +64,7 @@ bool scanToGrid::isPointRelevant(const Point &p) const
 }
 
 /**
- * The method scales the absolute coordinate of the scanpoint 
+ * The method scales the absolute coordinate of the scanpoint
  * to the matching coordinate of the gridpoint
  *
  * @param point the absolute coordinate of the scanpoint
@@ -97,7 +97,7 @@ void scanToGrid::calculateNormvector(long x, long z,
     {
 	if(z == 0)
 	    return;
-	   
+
 	xnorm = (double)x / (double)abs(z);
 	znorm = z / abs(z); // now znorm is 1 or -1
     }
@@ -107,15 +107,15 @@ void scanToGrid::calculateNormvector(long x, long z,
 	    return;
 
 	xnorm = x / abs(x); // now xnorm is 1 or -1
-	znorm = (double)z / (double)abs(x); 
+	znorm = (double)z / (double)abs(x);
     }
 }
 
 /**
- * The method creates a new grid. It determines the size and offset 
+ * The method creates a new grid. It determines the size and offset
  * of the new grid and calculates the viewpoint of the roboter during
  * the scan.
- * The new scangrid is allocated using new, but the pointer is not stored, 
+ * The new scangrid is allocated using new, but the pointer is not stored,
  * so it must be freed by the calling method.
  *
  * The scan has to be transformed to absolute values before this method is
@@ -127,7 +127,7 @@ void scanToGrid::calculateNormvector(long x, long z,
  *
  * @return pointer to the created grid.
  *         (Just gets allocated, does not get freed)
- */ 
+ */
 scanGrid* scanToGrid::createGrid(Scan& scan,
 						   const double* transformation)
 {
@@ -136,9 +136,9 @@ scanGrid* scanToGrid::createGrid(Scan& scan,
     double rPosTheta[3];
 
     Matrix4ToEuler(transformation, rPosTheta, rPos);
- 
+
     long vpX = scaleToGrid(rPos[0]);
-    long vpZ = scaleToGrid(rPos[2]); 
+    long vpZ = scaleToGrid(rPos[2]);
 
     // calculate maximal and minimal coordiantes
     double maxX = 0;
@@ -151,10 +151,10 @@ scanGrid* scanToGrid::createGrid(Scan& scan,
     for(size_t i = 0; i < xyz.size(); ++i)
     {
 	 Point it = xyz[i];
-	
+
         // If the scan is not relevant, skip it
 	if(!isPointRelevant(it))
-	    continue;	
+	    continue;
 
 	if(it.x < minX) minX = it.x;
 	if(it.x > maxX) maxX = it.x;
@@ -162,8 +162,8 @@ scanGrid* scanToGrid::createGrid(Scan& scan,
 	if(it.z > maxZ) maxZ = it.z;
 
     }
-    
-    // get offsets and sizes 
+
+    // get offsets and sizes
     long offsetX = scaleToGrid(minX);
     long offsetZ = scaleToGrid(minZ);
     long sizeX = scaleToGrid(maxX) - offsetX + 1;
@@ -176,15 +176,15 @@ scanGrid* scanToGrid::createGrid(Scan& scan,
 }
 
 /**
- * 
- * !NOTE! Experimental. Currently this is not used! !NOTE! 
+ *
+ * !NOTE! Experimental. Currently this is not used! !NOTE!
  *
  * The method iterates through the grid and checks for each point
  * if it has a specified amount of neighbours. If not enough neighbours
  * are found, the point is deleted.
- * 
+ *
  * @param grid The grid to check
- * @param distance 
+ * @param distance
  * @param neighbours The amount of neighbours needed for not getting deleted
  */
 void scanToGrid::killAlonePoints(scanGrid* grid,
@@ -192,13 +192,13 @@ void scanToGrid::killAlonePoints(scanGrid* grid,
 {
     std::vector< gridPoint* > exPoints;
 
-    
+
     for(int i=0; i < grid->getSizeX(); ++i)
     {
 	for(int j=0; j < grid->getSizeZ(); ++j)
 	{
 	    int found = 0;
-	    
+
 	    for(int a=i - distance; a < i + distance; ++a)
 	    {
 		for(int b=i - distance; b < i + distance; ++b)
@@ -211,19 +211,19 @@ void scanToGrid::killAlonePoints(scanGrid* grid,
 			    ++found;
 			}
 		    }
-		    
+
 		}
 	    }
-	    
+
 	    // not enough neigbours found
 	    if(found < neighbours)
 	    {
 		exPoints.push_back(grid->points[i][j]);
 	    }
-	    
+
 	}
     }
-    
+
     vector<gridPoint*>::iterator it = exPoints.begin();
     vector<gridPoint*>::iterator end = exPoints.end();
 
@@ -238,29 +238,29 @@ void scanToGrid::killAlonePoints(scanGrid* grid,
 /**
  * The method adds additional information about the neighbours of
  * the given point based on some sort of probabilityfunction.
- * Given the degree of the scanner, the function calculates the insecure 
- * points and weights them 
+ * Given the degree of the scanner, the function calculates the insecure
+ * points and weights them
  *
  * @param grid The grid to add the information to
  * @param x The absolute x coordinate
  * @param z The absolute z coordinate
  * @param weighting The weighting of the point
  */
-void scanToGrid::createNeighbours(scanGrid *grid, long x, long z, float weighting) 
+void scanToGrid::createNeighbours(scanGrid *grid, long x, long z, float weighting)
 {
     // Calculate direction of the neighbours
     long dx = - (grid->getViewpointZ() - z);
     long dz = grid->getViewpointX() - x;
-    
+
     // calculating the normvector of them
     double xnorm, znorm;
     calculateNormvector(dx, dz, xnorm, znorm);
 
-    // calculating number of neighbours to weight    
+    // calculating number of neighbours to weight
     int r = (int) (sqrt((double)(dx*dx + dz*dz)) * this->spot);
 
     for(int i = -r; i <= r; ++i)
-    { 
+    {
 	// Skip 0 (0 is the actual point on the vector)
 	if(i == 0)
 	    continue;
@@ -279,11 +279,11 @@ void scanToGrid::createNeighbours(scanGrid *grid, long x, long z, float weightin
 	grid->addPoint(px, pz, SOLIDWEIGHT, SOLIDWEIGHT);
 
 	if(this->waypoints)
-	    createWaypoints(grid, px, pz, weight);	
+	    createWaypoints(grid, px, pz, weight);
     }
 }
-   
-  
+
+
 /**
  * The method calculates the free waypoints between the robot and
  * the occupied point and adds them to the grid.
@@ -321,7 +321,7 @@ void scanToGrid::createWaypoints(scanGrid *grid, long x, long z, float weighting
 	if(grid->contains(px, pz))
 	  //grid->addPoint(px, pz, (int)(WAYPOINTWEIGHT * weighting), 0);
 	  grid->addPoint(px, pz, WAYPOINTWEIGHT, 0);
-    }  
+    }
 }
 
 /**
@@ -335,7 +335,7 @@ void scanToGrid::createWaypoints(scanGrid *grid, long x, long z, float weighting
  */
 void scanToGrid::createPoint(scanGrid *grid, long x, long z, float weighting)
 {
-  //    grid->addPoint(x, z, SOLIDWEIGHT, (int)(SOLIDWEIGHT * weighting));    
+  //    grid->addPoint(x, z, SOLIDWEIGHT, (int)(SOLIDWEIGHT * weighting));
   grid->addPoint(x, z, SOLIDWEIGHT, SOLIDWEIGHT);
 }
 
@@ -347,17 +347,17 @@ void scanToGrid::createPoint(scanGrid *grid, long x, long z, float weighting)
  *
  * If waypoints is true, it will also create waypoints from the origin of
  * the scan to the found point and mark the space in between as free.
- * If Neighbours should be created, it will also weight the surrounding 
+ * If Neighbours should be created, it will also weight the surrounding
  * spaces of the found point.
  *
  * @param scan The scan to be converted
  * @param transformation The transformationmatrix
  * @return pointer to the grid
- */ 
+ */
 scanGrid* scanToGrid::convert(Scan& scan, const double* transformation)
 {
     scanGrid* grid = createGrid(scan, transformation);
- 
+
     DataXYZ xyz(scan.get("xyz"));
 
     // go through all points and create the grid
@@ -374,13 +374,13 @@ scanGrid* scanToGrid::convert(Scan& scan, const double* transformation)
 	     float weighting = calculateWeighting(x - grid->getViewpointX(),
 						  z - grid->getViewpointZ());
 	     createPoint(grid, x, z, weighting);
-	     
+
 	     if(this->waypoints)
 		 createWaypoints(grid, x, z, weighting);
 
 	     if(this->neighbours)
 		 createNeighbours(grid, x, z, weighting);
-	     
+
 	}
     }
 
@@ -392,9 +392,9 @@ scanGrid* scanToGrid::convert(Scan& scan, const double* transformation)
 	for(int j = 0; j < grid->getSizeZ(); ++j)
 	{
 	    gridPoint *p = grid->points[i][j];
-	    
+
 	    float weighting = calculateWeighting(p->getX() - grid->getViewpointX(), p->getZ() - grid->getViewpointZ());
-	    
+
 	     if(this->waypoints)
 		createWaypoints(grid, p->getX(), p->getZ(), weighting);
 

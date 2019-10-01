@@ -59,7 +59,7 @@ unsigned char* ChunkAllocator::allocate(unsigned int size)
     chunk = chunk + index;
   }
   index += size;
-  return chunk;                 
+  return chunk;
 }
 
 
@@ -77,7 +77,7 @@ PackedChunkAllocator::~PackedChunkAllocator()
 void PackedChunkAllocator::printSize() const
 {
   cout << "Alloc'd  " << memsize/(1024*1024.0) << " Mb " << endl;
-  
+
   unsigned long int wastedspace = 0;
   for(unsigned int i = 0; i < index.size(); i++) {
     if(index[i] < chunksize) {
@@ -96,7 +96,7 @@ unsigned char* PackedChunkAllocator::allocate(unsigned int size)
       chunk = mem[i];
       chunk = chunk + index[i];          // pointer to free byte
       index[i] += size;                  // increment index
-      return chunk;                 
+      return chunk;
     }
   }
   // no chunk is large enough... make new one

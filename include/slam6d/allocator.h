@@ -1,7 +1,7 @@
 /**
- * @file 
+ * @file
  * @brief allocator object that gets chunks of memory and then hands parts of them to a user
- * @author Jan Elsberg. Automation Group, Jacobs University Bremen gGmbH, Germany. 
+ * @author Jan Elsberg. Automation Group, Jacobs University Bremen gGmbH, Germany.
  * @author Thomas Escher
  */
 #ifndef ALLOCATOR_H
@@ -15,7 +15,7 @@ public:
 
   template<typename T>
   T* allocate(unsigned int nr = 1) { return reinterpret_cast<T*>(allocate(nr*sizeof(T))); }
-  
+
   virtual void printSize() const = 0;
 
 protected:

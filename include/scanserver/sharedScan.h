@@ -114,7 +114,7 @@ public:
 
   //! Equality operator based on identifier, directory and type
   bool operator==(const SharedScan& r) const;
-  
+
   //! Filter parameters for range checks when loading from file, invalidate cache for scan CacheObject if it differs
   void setRangeParameters(double max_dist, double min_dist);
 
@@ -141,19 +141,19 @@ public:
 
   //! Add a new frame with the current transformation and given type
   void addFrame(double* transformation, unsigned int type);
-  
+
   //! Save frames into a file for later use
   void saveFrames(bool append = false);
 
   //! Clear existing frames
   void clearFrames();
-  
+
   //! Get contained frames
   const FrameVector& getFrames();
-  
+
   //! Get pose from pose file
   double* getPose();
-  
+
   //! Get specific cached data
   DataXYZ getXYZ();
   DataRGB getRGB();
@@ -162,45 +162,45 @@ public:
   DataAmplitude getAmplitude();
   DataType getType();
   DataDeviation getDeviation();
-  
+
   //! Reduced transformed points
   DataXYZ getXYZReduced();
-  
+
   //! Create a new set of reduced points
   DataXYZ createXYZReduced(unsigned int size);
 
 
   //! Create a new set of reflectance
   DataReflectance createReflectance(unsigned int size);
-  
+
 
   //! Reduced untransformed points
   DataXYZ getXYZReducedOriginal();
-  
+
   //! Create a new set of reduced points originals
   DataXYZ createXYZReducedOriginal(unsigned int size);
-  
+
   //! Individual reduced points to use in show if requested
   TripleArray<float> getXYZReducedShow();
-  
+
   //! Create a new set of reduced points for use in show
   TripleArray<float> createXYZReducedShow(unsigned int size);
-  
+
   //! Cached tree structure for show
   DataPointer getOcttree();
-  
+
   //! Create a cached tree structure for show
   DataPointer createOcttree(unsigned int size);
-  
+
   //! ScanHandler related prefetching values to combine loading of separate cache objects
   void prefetch(unsigned int type) { m_prefetch |= type; }
-  
+
   //! Return prefetch values
   unsigned int getPrefetch() const { return m_prefetch; }
-  
+
   //! Clear prefetch values
   void clearPrefetch() { m_prefetch = 0; }
-  
+
   // IO-specific getters
   inline const char* getDirPath() const { return m_dir_path_ptr->c_str(); }
   inline const char* getIdentifier() const { return m_io_identifier.c_str(); }
@@ -211,7 +211,7 @@ public:
   inline double getScale() const { return m_scale; }
   inline double getHeightTop() const { return m_height_top; }
   inline double getHeightBottom() const { return m_height_bottom; }
-  
+
   //! Assembles an PointFilter with range/height parameters (if set) to use process-locally
   PointFilter getPointFilter() const;
 

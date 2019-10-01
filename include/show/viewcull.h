@@ -70,7 +70,7 @@ template <class T> bool HitBoundingBox(const T center[3], T size )
   float candidatePlane[NUMDIM];
 
   // Find candidate planes; this loop can be avoided if
-  //  rays cast all from the eye(assume perspective view) 
+  //  rays cast all from the eye(assume perspective view)
   for (i=0; i<NUMDIM; i++)
     if(origin[i] < minB[i]) {
       quadrant[i] = LEFT;
@@ -85,7 +85,7 @@ template <class T> bool HitBoundingBox(const T center[3], T size )
       quadrant[i] = MIDDLE;
     }
 
-  // Ray origin inside bounding box 
+  // Ray origin inside bounding box
   if(inside)  {
     return (true);
   }
@@ -98,13 +98,13 @@ template <class T> bool HitBoundingBox(const T center[3], T size )
     else
       maxT[i] = -1.;
 
-  // Get largest of the maxT's for final choice of intersection 
+  // Get largest of the maxT's for final choice of intersection
   whichPlane = 0;
   for (i = 1; i < NUMDIM; i++)
     if (maxT[whichPlane] < maxT[i])
       whichPlane = i;
 
-  // Check final candidate actually inside box 
+  // Check final candidate actually inside box
   if (maxT[whichPlane] < 0.) return (false);
   for (i = 0; i < NUMDIM; i++)
     if (whichPlane != i) {
@@ -115,18 +115,18 @@ template <class T> bool HitBoundingBox(const T center[3], T size )
       coord[i] = candidatePlane[i];
     }
   return (true);        // ray hits box
-} 
+}
 
-void calcRay(int x, int y, double znear, double zfar);  
+void calcRay(int x, int y, double znear, double zfar);
 
 #include <float.h>
-template <class T> 
+template <class T>
 float RayDist(T *point)
 {
   return point[0] * dir[0] + point[1] * dir[1] + point[2] * dir[2] - dist;
 }
 
-template <class T> 
+template <class T>
 short ScreenDist(T *point) {
   float pn[3];
   // x coordinate on screen, not normalized
@@ -142,14 +142,14 @@ short ScreenDist(T *point) {
   // true x coordinate in viewport coordinate system
   //Xi = pn[0]*VP[0] + VP[1];
   //fTempo[4]*0.5+0.5)*viewport[2]+viewport[0];
-  
+
   float XX = ( (pn[0])*rayVP[0] + rayVP[1]);
   float YY = ( (pn[1])*rayVP[2] + rayVP[3]);
 
   short dx, dy;
   if (XX > rayX) dx = XX-rayX;
   else dx = rayX-XX;
-  
+
   if (YY > rayY) dy = YY-rayY;
   else dy = rayY-YY;
 

@@ -1,14 +1,14 @@
 /* Program:
  * This program is written for finding correspondence point by timestamps from different sensors.
  * History:
- * 3/05/2018	
+ * 3/05/2018
  * Copyright (C) Shitong Du
  */
 
 #include "curvefusion/timestamps.h"
 #include <boost/foreach.hpp>
 
-using namespace std;  
+using namespace std;
 std::map<double, geometry_msgs::PoseStamped> hector_timetable;
 std::map<double, geometry_msgs::PoseStamped> gps_timetable;
 
@@ -62,12 +62,12 @@ void timestamps::callback_gps(const sensor_msgs::NavSatFixConstPtr &fix) {
 				ecef2ned=affine3d(lat,lon)
 				ned2ros =affine3d...
 				rotation = affine3d...
-			
+
 			transform=translation*ecef2ned*ned2rosi
-				
-				
+
+
 		*/
-		
+
 
         // Transform NED frame to ROS frame (x front, y left, z up)
         Eigen::Affine3d ned2ros = Eigen::Affine3d(Eigen::AngleAxisd(-M_PI, Eigen::Vector3d(1, 0, 0)));
@@ -77,7 +77,7 @@ void timestamps::callback_gps(const sensor_msgs::NavSatFixConstPtr &fix) {
           //      Eigen::Affine3d(Eigen::AngleAxisd(0, Eigen::Vector3d(0, 1, 0))) *
           //      Eigen::Affine3d(Eigen::AngleAxisd(1.04, Eigen::Vector3d(0, 0, 1)));
 
-        
+
 
         // Use relative pose to ROS frame of pose at startIndex
         if (startIndex<1) {
@@ -96,7 +96,7 @@ void timestamps::callback_gps(const sensor_msgs::NavSatFixConstPtr &fix) {
            Rota[8]=-sin(lat);
             ecef2nedfirst[0]=Rota[0]*xe+Rota[1]*ye+Rota[2]*ze;
             ecef2nedfirst[1]=Rota[3]*xe+Rota[4]*ye;
-            ecef2nedfirst[2]=Rota[6]*xe+Rota[7]*ye-Rota[8]*ze; 
+            ecef2nedfirst[2]=Rota[6]*xe+Rota[7]*ye-Rota[8]*ze;
             //startTransform = ((ecef2ned1));
 
             startIndex++;
@@ -104,9 +104,9 @@ void timestamps::callback_gps(const sensor_msgs::NavSatFixConstPtr &fix) {
 
         ecef2ned1[0]=Rota[0]*xe+Rota[1]*ye+Rota[2]*ze;
         ecef2ned1[1]=Rota[3]*xe+Rota[4]*ye;
-        ecef2ned1[2]=Rota[6]*xe+Rota[7]*ye-Rota[8]*ze; 
+        ecef2ned1[2]=Rota[6]*xe+Rota[7]*ye-Rota[8]*ze;
         //Eigen::Affine3d transform = ((translation * ecef2ned));
-        
+
         pos_ned[0]=ecef2ned1[0]-ecef2nedfirst[0];
         pos_ned[1]=ecef2ned1[1]-ecef2nedfirst[1];
         pos_ned[2]=ecef2ned1[2]-ecef2nedfirst[2];
@@ -118,7 +118,7 @@ void timestamps::callback_gps(const sensor_msgs::NavSatFixConstPtr &fix) {
         Rotainti[4]=cos(yaw);
         Rotainti[5]=0;
         Rotainti[6]=0;
-        Rotainti[7]=0; 
+        Rotainti[7]=0;
         Rotainti[7]=1.0; */
        // Eigen::Affine3d poseg = startTransform.inverse() * transform;
         // TODO: place your coordinate conversion here
@@ -132,14 +132,14 @@ void timestamps::callback_gps(const sensor_msgs::NavSatFixConstPtr &fix) {
         pose.pose.position.x = -pos_ned[0];
         pose.pose.position.y = pos_ned[1];
         pose.pose.position.z = -pos_ned[2];
-    
+
         pose.pose.orientation.x = 0;
         pose.pose.orientation.y = 0;
         pose.pose.orientation.z = 0;
         pose.pose.orientation.w = 1;
 
         gps_timetable.insert(std::pair<double, geometry_msgs::PoseStamped>(pose.header.stamp.toSec(),pose));
-				
+
 }
 
 void timestamps::callback_hector(const geometry_msgs::PoseStampedConstPtr &hectorpose) {
@@ -149,23 +149,23 @@ void timestamps::callback_hector(const geometry_msgs::PoseStampedConstPtr &hecto
 	pose.pose	= hectorpose->pose;
 
 	hector_timetable.insert(std::pair<double, geometry_msgs::PoseStamped>(pose.header.stamp.toSec(),pose));
-				
+
 }
 
 
 void timestamps::extractTrajectory(std::vector<double> *point_s) {
   rosbag::View view_hector(*bag, rosbag::TopicQuery(hector_topic));
   BOOST_FOREACH(rosbag::MessageInstance const m, view_hector) {
-   
+
     if(m.isType<geometry_msgs::PoseStamped>() ) {
       geometry_msgs::PoseStampedConstPtr poseptr = m.instantiate<geometry_msgs::PoseStamped>();
       callback_hector(poseptr);
     }
   }
-   
+
   rosbag::View view_gps(*bag, rosbag::TopicQuery(gps_topic));
   BOOST_FOREACH(rosbag::MessageInstance const m,view_gps) {
-		
+
     if(m.isType<sensor_msgs::NavSatFix>() ) {
       sensor_msgs::NavSatFixConstPtr fixptr = m.instantiate<sensor_msgs::NavSatFix>();
       callback_gps(fixptr);
@@ -178,15 +178,15 @@ void timestamps::extractTrajectory(std::vector<double> *point_s) {
 
    std::map<double, geometry_msgs::PoseStamped>::iterator gps;
    //std::map<double, geometry_msgs::PoseStamped>::iterator gps0;
-   int i=0;             
+   int i=0;
    for(gps=gps_timetable.begin();gps!=gps_timetable.end();++gps){
 	//for(auto&gps : gps_timetable) {
-     
+
      double stamp = gps->first;
-     geometry_msgs::PoseStamped pose = gps->second;       
+     geometry_msgs::PoseStamped pose = gps->second;
      double dt_min = 1000.0;
      geometry_msgs::PoseStamped pose_min;
-                
+
 // for each gps pose look for the closest hecotr pose wrt time
 //for(auto &hector : hector_timetable) {
      std::map<double, geometry_msgs::PoseStamped>::iterator hector;
@@ -198,24 +198,24 @@ void timestamps::extractTrajectory(std::vector<double> *point_s) {
 	 dt_min = dt;
        }
      }
-            
-              
+
+
 // now pose and pose_min are a corresponding pair
 // and you can write the poses to a file
 // stamp gps.x gps.y gps.z hector.x ...
 
        //pose_out << pose.header.stamp << " ";
-       
+
        point_s[0].push_back(pose_min.header.stamp.toSec()) ;
        point_s[1].push_back(pose.pose.position.x) ;
        point_s[2].push_back(pose.pose.position.y) ;
        point_s[3].push_back(pose.pose.position.z) ;
- 
+
        point_s[4].push_back(pose_min.pose.position.x) ;
        point_s[5].push_back(pose_min.pose.position.y) ;
        point_s[6].push_back(pose_min.pose.position.z) ;
-       //point[0] << endl; 
-       i++;         
+       //point[0] << endl;
+       i++;
    }
 
 

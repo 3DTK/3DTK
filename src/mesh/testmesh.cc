@@ -37,8 +37,8 @@ void display() {
   float *bbox = mesh.getBBox();
 
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-  float centerX = (bbox[0] + bbox[1]) / 2, 
-    centerY = (bbox[2] + bbox[3]) / 2, 
+  float centerX = (bbox[0] + bbox[1]) / 2,
+    centerY = (bbox[2] + bbox[3]) / 2,
     centerZ = (bbox[4] + bbox[5]) / 2;
 
 	glLoadIdentity();

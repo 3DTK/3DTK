@@ -9,7 +9,7 @@
 
 
 /**
- *  @file 
+ *  @file
  *  @brief Implementation of the ICP error function minimization via
            small angle approximation
  *  @author Andreas Nuechter. Jacobs University Bremen gGmbH, Germany
@@ -133,14 +133,14 @@ double icp6D_APX::Align(const std::vector<PtPair>& Pairs,
 }
 
 
-double icp6D_APX::Align_Parallel(const int openmp_num_threads, 
+double icp6D_APX::Align_Parallel(const int openmp_num_threads,
                                  const unsigned int n[OPENMP_NUM_THREADS],
-                                 const double sum[OPENMP_NUM_THREADS], 
+                                 const double sum[OPENMP_NUM_THREADS],
                                  const double centroid_m[OPENMP_NUM_THREADS][3],
                                  const double centroid_d[OPENMP_NUM_THREADS][3],
                                  const std::vector<PtPair> pairs[OPENMP_NUM_THREADS],
                                  double *alignxf)
-                         
+
 {
 
 #ifdef _OPENMP
@@ -158,7 +158,7 @@ double icp6D_APX::Align_Parallel(const int openmp_num_threads,
   double B[3];
   memset(&A[0][0], 0, 9 * sizeof(double));
   memset(&B[0], 0, 3 * sizeof(double));
-                     
+
   double s = 0.0;
   double error;
   unsigned int pairs_size = 0;
@@ -171,7 +171,7 @@ double icp6D_APX::Align_Parallel(const int openmp_num_threads,
   for (int i = 0; i < openmp_num_threads; i++) {
     s += sum[i];
     pairs_size += n[i];
-      
+
     // compute centroids for all the pairs
     cm[0] += n[i] * centroid_m[i][0];
     cm[1] += n[i] * centroid_m[i][1];
@@ -179,7 +179,7 @@ double icp6D_APX::Align_Parallel(const int openmp_num_threads,
     cd[0] += n[i] * centroid_d[i][0];
     cd[1] += n[i] * centroid_d[i][1];
     cd[2] += n[i] * centroid_d[i][2];
-    
+
     cms[0] += centroid_m[i][0];
     cms[1] += centroid_m[i][1];
     cms[2] += centroid_m[i][2];
@@ -187,14 +187,14 @@ double icp6D_APX::Align_Parallel(const int openmp_num_threads,
     cds[1] += centroid_d[i][1];
     cds[2] += centroid_d[i][2];
   }
-  
+
   cm[0] /= pairs_size;
   cm[1] /= pairs_size;
   cm[2] /= pairs_size;
   cd[0] /= pairs_size;
   cd[1] /= pairs_size;
   cd[2] /= pairs_size;
-  
+
   error = sqrt(s / (double)pairs_size);
 
 #pragma omp parallel
@@ -226,12 +226,12 @@ double icp6D_APX::Align_Parallel(const int openmp_num_threads,
           (pairs[thread_num][i].p2.x - cd[0]) +
           (pairs[thread_num][i].p2.y - cd[1]) *
           (pairs[thread_num][i].p2.y - cd[1]);
-      
+
         Bt[thread_num][0] +=
           (pairs[thread_num][i].p1.z - pairs[thread_num][i].p2.z) *
           (pairs[thread_num][i].p2.y - cd[1]) -
           (pairs[thread_num][i].p1.y - pairs[thread_num][i].p2.y) *
-          (pairs[thread_num][i].p2.z - cd[2]);      
+          (pairs[thread_num][i].p2.z - cd[2]);
         Bt[thread_num][1] +=
           (pairs[thread_num][i].p1.x - pairs[thread_num][i].p2.x) *
           (pairs[thread_num][i].p2.z - cd[2]) -
@@ -253,7 +253,7 @@ double icp6D_APX::Align_Parallel(const int openmp_num_threads,
     }
 
   // continue with linear solution
-  
+
   if (!quiet) {
     std::cout.setf(std::ios::basefield);
     std::cout << "PAPX RMS point-to-point error = "
@@ -263,7 +263,7 @@ double icp6D_APX::Align_Parallel(const int openmp_num_threads,
          << error
          << "  using " << std::setw(6) << pairs_size << " points" << std::endl;
   }
-   
+
   // Solve eqns
   double diag[3];
   if (!choldc(A, diag)) {
@@ -303,8 +303,8 @@ double icp6D_APX::Align_Parallel(const int openmp_num_threads,
   std::cout << "Point_Point_Align_Parallel:"<< std::endl
        << "Please compile with OpenMP support to use this function" << std::endl;
   exit(-1);
-#endif  
-} 
+#endif
+}
 
 
 void icp6D_APX::computeRt(const double *x, const double *dx, double *alignxf)
@@ -315,7 +315,7 @@ void icp6D_APX::computeRt(const double *x, const double *dx, double *alignxf)
   double cy = sqrt(1.0 - sy*sy);
   double sz = x[2];
   double cz = sqrt(1.0 - sz*sz);
-  
+
   alignxf[0]  = cy*cz;
   alignxf[1]  = sx*sy*cz + cx*sz;
   alignxf[2]  = -cx*sy*cz + sx*sz;

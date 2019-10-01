@@ -19,17 +19,17 @@
 
 
 
-void ColorMap::convert_hsv_to_rgb(float hue, float s, float v,  
+void ColorMap::convert_hsv_to_rgb(float hue, float s, float v,
     float &r, float &g, float &b) {
   float p1, p2, p3, i, f;
   float xh;
 
   if (hue == 360.0)
-    hue = 0.0;           
+    hue = 0.0;
 
-  xh = hue / 60.;                  // convert hue to be in 0,6     
-  i = (float)floor((double)xh);    // i is greatest integer smaller than h  
-  f = xh - i;                      // f is the fractional part of h 
+  xh = hue / 60.;                  // convert hue to be in 0,6
+  i = (float)floor((double)xh);    // i is greatest integer smaller than h
+  f = xh - i;                      // f is the fractional part of h
   p1 = v * (1 - s);
   p2 = v * (1 - (s * f));
   p3 = v * (1 - (s * (1 - f)));

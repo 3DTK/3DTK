@@ -27,7 +27,7 @@ enum Picture{
 };
 
 /**
- 
+
  */
 enum Image{
 

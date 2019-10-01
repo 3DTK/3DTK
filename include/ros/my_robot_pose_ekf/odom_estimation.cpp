@@ -1,13 +1,13 @@
 /*********************************************************************
 * Software License Agreement (BSD License)
-* 
+*
 *  Copyright (c) 2008, Willow Garage, Inc.
 *  All rights reserved.
-* 
+*
 *  Redistribution and use in source and binary forms, with or without
 *  modification, are permitted provided that the following conditions
 *  are met:
-* 
+*
 *   * Redistributions of source code must retain the above copyright
 *     notice, this list of conditions and the following disclaimer.
 *   * Redistributions in binary form must reproduce the above
@@ -17,7 +17,7 @@
 *   * Neither the name of the Willow Garage nor the names of its
 *     contributors may be used to endorse or promote products derived
 *     from this software without specific prior written permission.
-* 
+*
 *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 *  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 *  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
@@ -109,13 +109,13 @@ namespace estimation
   };
 
 
-  // initialize prior density of filter 
+  // initialize prior density of filter
   void OdomEstimation::initialize(const Transform& prior, const Time& time)
   {
     // set prior of filter
-    ColumnVector prior_Mu(6); 
+    ColumnVector prior_Mu(6);
     decomposeTransform(prior, prior_Mu(1), prior_Mu(2), prior_Mu(3), prior_Mu(4), prior_Mu(5), prior_Mu(6));
-    SymmetricMatrix prior_Cov(6); 
+    SymmetricMatrix prior_Cov(6);
     for (unsigned int i=1; i<=6; i++) {
       for (unsigned int j=1; j<=6; j++){
 	if (i==j)  prior_Cov(i,j) = pow(0.001,2);
@@ -164,7 +164,7 @@ namespace estimation
     ColumnVector vel_desi(2); vel_desi = 0;
     filter_->Update(sys_model_, vel_desi);
 
-    
+
     // process odom measurement
     // ------------------------
     ROS_DEBUG("Process odom meas");
@@ -176,15 +176,15 @@ namespace estimation
       transformer_.lookupTransform("wheelodom", "base_link", filter_time, odom_meas_);
       if (odom_initialized_){
 	// convert absolute odom measurements to relative odom measurements in horizontal plane
-	Transform odom_rel_frame =  Transform(tf::createQuaternionFromYaw(filter_estimate_old_vec_(6)), 
+	Transform odom_rel_frame =  Transform(tf::createQuaternionFromYaw(filter_estimate_old_vec_(6)),
 					      filter_estimate_old_.getOrigin()) * odom_meas_old_.inverse() * odom_meas_;
-	ColumnVector odom_rel(6); 
+	ColumnVector odom_rel(6);
 	decomposeTransform(odom_rel_frame, odom_rel(1), odom_rel(2), odom_rel(3), odom_rel(4), odom_rel(5), odom_rel(6));
 	angleOverflowCorrect(odom_rel(6), filter_estimate_old_vec_(6));
 	// update filter
 	odom_meas_pdf_->AdditiveNoiseSigmaSet(odom_covariance_ * pow(dt,2));
 
-        ROS_DEBUG("Update filter with odom measurement %f %f %f %f %f %f", 
+        ROS_DEBUG("Update filter with odom measurement %f %f %f %f %f %f",
                   odom_rel(1), odom_rel(2), odom_rel(3), odom_rel(4), odom_rel(5), odom_rel(6));
 	filter_->Update(odom_meas_model_, odom_rel);
 	diagnostics_odom_rot_rel_ = odom_rel(6);
@@ -198,7 +198,7 @@ namespace estimation
     // sensor not active
     else odom_initialized_ = false;
 
-    
+
     // process imu measurement
     // -----------------------
     if (imu_active){
@@ -208,7 +208,7 @@ namespace estimation
       }
       transformer_.lookupTransform("imu", "base_link", filter_time, imu_meas_);
       if (imu_initialized_){
-	// convert absolute imu yaw measurement to relative imu yaw measurement 
+	// convert absolute imu yaw measurement to relative imu yaw measurement
 	Transform imu_rel_frame =  filter_estimate_old_ * imu_meas_old_.inverse() * imu_meas_;
 	ColumnVector imu_rel(3); double tmp;
 	decomposeTransform(imu_rel_frame, tmp, tmp, tmp, tmp, tmp, imu_rel(3));
@@ -223,13 +223,13 @@ namespace estimation
 	imu_initialized_ = true;
 	diagnostics_imu_rot_rel_ = 0;
       }
-      imu_meas_old_ = imu_meas_; 
+      imu_meas_old_ = imu_meas_;
     }
     // sensor not active
     else imu_initialized_ = false;
-    
-    
-    
+
+
+
     // process vo measurement
     // ----------------------
     if (vo_active){
@@ -253,8 +253,8 @@ namespace estimation
     }
     // sensor not active
     else vo_initialized_ = false;
-    
-    
+
+
     // remember last estimate
     filter_estimate_old_vec_ = filter_->PostGet()->ExpectedValueGet();
     tf::Quaternion q;
@@ -282,7 +282,7 @@ namespace estimation
     ROS_DEBUG("AddMeasurement from %s to %s:  (%f, %f, %f)  (%f, %f, %f, %f)",
               meas.frame_id_.c_str(), meas.child_frame_id_.c_str(),
               meas.getOrigin().x(), meas.getOrigin().y(), meas.getOrigin().z(),
-              meas.getRotation().x(),  meas.getRotation().y(), 
+              meas.getRotation().x(),  meas.getRotation().y(),
               meas.getRotation().z(), meas.getRotation().w());
     transformer_.setTransform( meas );
   }
@@ -364,20 +364,20 @@ namespace estimation
   };
 
   // decompose Transform into x,y,z,Rx,Ry,Rz
-  void OdomEstimation::decomposeTransform(const StampedTransform& trans, 
+  void OdomEstimation::decomposeTransform(const StampedTransform& trans,
 					   double& x, double& y, double&z, double&Rx, double& Ry, double& Rz){
-    x = trans.getOrigin().x();   
-    y = trans.getOrigin().y(); 
-    z = trans.getOrigin().z(); 
+    x = trans.getOrigin().x();
+    y = trans.getOrigin().y();
+    z = trans.getOrigin().z();
     trans.getBasis().getEulerYPR(Rz, Ry, Rx);
   };
 
   // decompose Transform into x,y,z,Rx,Ry,Rz
-  void OdomEstimation::decomposeTransform(const Transform& trans, 
+  void OdomEstimation::decomposeTransform(const Transform& trans,
 					   double& x, double& y, double&z, double&Rx, double& Ry, double& Rz){
-    x = trans.getOrigin().x();   
-    y = trans.getOrigin().y(); 
-    z = trans.getOrigin().z(); 
+    x = trans.getOrigin().x();
+    y = trans.getOrigin().y();
+    z = trans.getOrigin().z();
     trans.getBasis().getEulerYPR(Rz, Ry, Rx);
   };
 

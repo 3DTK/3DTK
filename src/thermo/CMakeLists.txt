@@ -6,8 +6,8 @@ if (WITH_OPENCV)
   include_directories(/usr/include/)
   include_directories(/usr/include/opencv)
 
-  add_executable(caliboard caliboard.cc) 
-  add_executable(thermo thermo.cc) 
+  add_executable(caliboard caliboard.cc)
+  add_executable(thermo thermo.cc)
 
   target_link_libraries(caliboard scan shape ${NEWMAT_LIBRARIES} ${ANN_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY})
   target_link_libraries(thermo scan shape ${NEWMAT_LIBRARIES} ${ANN_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} cvblob ${OpenCV_LIBS})

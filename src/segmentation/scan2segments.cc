@@ -238,7 +238,7 @@ void parse_options(int argc, char **argv, int &start, int &end,
     if (vm.count("help")) {
         std::cout << cmdline_options;
         std::cout << "\nExample usage:\n"
-             << "bin/scan2segments -s 0 -e 0 -f riegl_txt --segment PYR_SEGMENTATION -l 50 -c 50 -E 4 -D -i ~/path/to/bremen_city\n" 
+             << "bin/scan2segments -s 0 -e 0 -f riegl_txt --segment PYR_SEGMENTATION -l 50 -c 50 -E 4 -D -i ~/path/to/bremen_city\n"
              << "bin/scan2segments -s 0 -e 0 -f riegl_txt --segment PYR_SEGMENTATION -l 255 -c 30 -E 2 -D -i ~/path/to/bremen_city\n";
         exit(0);
     }
@@ -486,7 +486,7 @@ cv::Mat calculatePyrSegmentation(std::vector<std::vector<cv::Vec3f>> &segmented_
 
     // apply the pyramid segmentation algorithm
 	/*
-    cvPyrSegmentation(ipl_original, ipl_segmented, storage, &comp, pyrlevels, thresh1+1, thresh2+1); 
+    cvPyrSegmentation(ipl_original, ipl_segmented, storage, &comp, pyrlevels, thresh1+1, thresh2+1);
 	*/
     // mapping of color value to component id
     std::map<int, int> mapping;

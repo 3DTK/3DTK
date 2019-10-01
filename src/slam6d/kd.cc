@@ -7,7 +7,7 @@
  *
  */
 
-/** @file 
+/** @file
  *  @brief An optimized k-d tree implementation
  *  @author Remus Dumitru. Jacobs University Bremen, Germany
  *  @author Corneliu-Claudiu Prodescu. Jacobs University Bremen, Germany
@@ -87,7 +87,7 @@ std::vector<Point> KDtree::kNearestNeighbors(double *_p,
                                         int _k,
                                         int threadNum) const
 {
-  std::vector<Point> result;    
+  std::vector<Point> result;
   params[threadNum].closest = 0;
   params[threadNum].p = _p;
   params[threadNum].k = _k;
@@ -102,7 +102,7 @@ std::vector<Point> KDtree::kNearestNeighbors(double *_p,
   }
 
   _KNNSearch(Void(), threadNum);
-  
+
   for (int i = 0; i < _k; i++) {
       // only push valid points
     if (params[threadNum].distances[i] >= 0.0f) {
@@ -111,7 +111,7 @@ std::vector<Point> KDtree::kNearestNeighbors(double *_p,
                            params[threadNum].closest_neighbors[i][2]));
     }
   }
-  
+
   free (params[threadNum].closest_neighbors);
   free (params[threadNum].distances);
 
@@ -138,7 +138,7 @@ std::vector<Point> KDtree::kNearestRangeSearch(double *_p,
       params[threadNum].distances[i] = -1.0;
   }
   _KNNRangeSearch(Void(), threadNum);
-  
+
   for (int i = 0; i < _k; i++) {
       // only push valid points
     if (params[threadNum].distances[i] >= 0.0f) {
@@ -147,10 +147,10 @@ std::vector<Point> KDtree::kNearestRangeSearch(double *_p,
                            params[threadNum].closest_neighbors[i][2]));
     }
   }
-  
+
   free (params[threadNum].closest_neighbors);
   free (params[threadNum].distances);
-  
+
   return result;
 }
 
@@ -171,18 +171,18 @@ std::vector<Point> KDtree::fixedRangeSearchBetween2Points(double *_p,
   }
 
   Normalize3(_dir);
-  
+
   params[threadNum].dir = _dir;
   params[threadNum].range_neighbors.clear();
 
   _fixedRangeSearchBetween2Points(Void(), threadNum);
-  
+
   for (size_t i = 0; i < params[threadNum].range_neighbors.size(); i++) {
     result.push_back(Point(params[threadNum].range_neighbors[i][0],
                            params[threadNum].range_neighbors[i][1],
                            params[threadNum].range_neighbors[i][2]));
   }
-  
+
   delete[] _dir;
   return result;
 }
@@ -200,13 +200,13 @@ std::vector<Point> KDtree::fixedRangeSearchAlongDir(double *_p,
   params[threadNum].range_neighbors.clear();
 
   _fixedRangeSearchAlongDir(Void(), threadNum);
-  
+
   for (size_t i = 0; i < params[threadNum].range_neighbors.size(); i++) {
     result.push_back(Point(params[threadNum].range_neighbors[i][0],
                            params[threadNum].range_neighbors[i][1],
                            params[threadNum].range_neighbors[i][2]));
   }
-  
+
   return result;
 }
 
@@ -220,13 +220,13 @@ std::vector<Point> KDtree::fixedRangeSearch(double *_p,
   params[threadNum].p = _p;
   params[threadNum].range_neighbors.clear();
   _FixedRangeSearch(Void(), threadNum);
-  
+
   for (size_t i = 0; i < params[threadNum].range_neighbors.size(); i++) {
     result.push_back(Point(params[threadNum].range_neighbors[i][0],
                            params[threadNum].range_neighbors[i][1],
                            params[threadNum].range_neighbors[i][2]));
   }
-  
+
   return result;
 }
 

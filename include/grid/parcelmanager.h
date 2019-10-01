@@ -12,13 +12,13 @@
 #define PARCELINFOFILE "parcelinfo.conf"
 
 /**
- * The parcelmanager manages all views of the map 
+ * The parcelmanager manages all views of the map
  * (Views are represented as parcels)
  * It provides methods for adding scangrids and creating the entire map.
- * It contains an internal memorymanagment for managing the parcels 
+ * It contains an internal memorymanagment for managing the parcels
  * during runtime.
- * 
- * 
+ *
+ *
  * @author Uwe Hebbelmann, Sebastian Stock, Andre Schemschat
  * @date 15.02.08
  */
@@ -27,7 +27,7 @@ class parcelmanager
  private:
     /** Typedef for the map */
     typedef std::map<parcelinfo*, parcel*> parcelmap;
-    
+
     /** The map for all parcelinfos and parcels */
     parcelmap parcels;
 
@@ -48,17 +48,17 @@ class parcelmanager
     long minX;
     /** The maximal found x value */
     long maxX;
-    
+
     /** The minimal found z value */
     long minZ;
     /** The maximal found z value */
     long maxZ;
 
-    
+
     /** The path where all infos should be stored */
     std::string path;
 
-    /** @brief The method frees each (not used) parcel */ 
+    /** @brief The method frees each (not used) parcel */
     void freeMemory(bool all);
 
     /** @brief The method clears all internal data */

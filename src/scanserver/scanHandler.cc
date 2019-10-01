@@ -59,16 +59,16 @@ public:
     m_scan(scan), m_prefetches(&prefetches), m_vector(0)
   {
   }
-  
+
   ~PrefetchVector()
   {
     // remove vectors that are still here (RAII/exceptions)
     if(m_vector)
       delete m_vector;
   }
-  
+
   inline vector<T>* get() const { return m_vector; }
-  
+
   //! If a prefetch is found, take ownership and signal true for a successful prefetch
   virtual bool prefetch()
   {
@@ -82,19 +82,19 @@ public:
     }
     return false;
   }
-  
+
   //! Create an empty vector
   virtual void create() {
     if(m_vector == 0) {
       m_vector = new vector<T>;
     }
   }
-  
+
   //! Size of vector contents in bytes
   virtual unsigned int size() const {
     return m_vector->size()*sizeof(T);
   }
-  
+
   //! Write vector contents into the cache object via \a data_ptr and clean up the vector
   virtual void write(void* data_ptr) {
     // write vector contents
@@ -105,7 +105,7 @@ public:
     delete m_vector;
     m_vector = 0;
   }
-  
+
   //! Save vector for prefetching
   void save() {
     if(m_vector != 0 && m_vector->size() != 0) {
@@ -133,17 +133,17 @@ ScanHandler::ScanHandler(CacheObject* obj, CacheManager* cm, SharedScan* scan, I
 bool ScanHandler::load()
 {
   ScanIO* sio = ScanIO::getScanIO(m_scan->getIOType());
-  
+
   // avoid loading of a non-supported type
   if(!sio->supports(m_data)) return false;
-  
+
 #ifdef WITH_METRICS
   Timer t = ServerMetric::scan_loading.start();
 #endif //WITH_METRICS
-  
+
   // INFO
   //cout << "[" << m_scan->getIdentifier() << "][" << m_data << "] ScanHandler::load" << endl;
-  
+
   // if binary scan caching is enabled try to read it via TemporaryHandler first, if written-flag wasn't set or file didn't exist, parse scan
   if(binary_caching) {
     if(TemporaryHandler::load()) {
@@ -155,7 +155,7 @@ bool ScanHandler::load()
       return true;
     }
   }
-  
+
   PrefetchVector<double> xyz(m_scan, m_prefetch_xyz);
   PrefetchVector<unsigned char> rgb(m_scan, m_prefetch_rgb);
   PrefetchVector<float> reflectance(m_scan, m_prefetch_reflectance);
@@ -163,7 +163,7 @@ bool ScanHandler::load()
   PrefetchVector<float> amplitude(m_scan, m_prefetch_amplitude);
   PrefetchVector<int> type(m_scan, m_prefetch_type);
   PrefetchVector<float> deviation(m_scan, m_prefetch_deviation);
-  
+
   // assign vector for this particular ScanHandler
   PrefetchVectorBase* vec = 0;
   if(m_data == DATA_XYZ) vec = &xyz;
@@ -173,7 +173,7 @@ bool ScanHandler::load()
   else if(m_data == DATA_AMPLITUDE) vec = &amplitude;
   else if(m_data == DATA_TYPE) vec = &type;
   else if(m_data == DATA_DEVIATION) vec = &deviation;
-  
+
   unsigned int prefetch = m_scan->getPrefetch();
   // try to prefetch only the requested type from its handler
   if(vec->prefetch())
@@ -185,7 +185,7 @@ bool ScanHandler::load()
     // create vector and exclude it from prefetch handling
     vec->create();
     prefetch &= ~m_data;
-    
+
     // create vectors which are to be prefetched
     if(prefetch & DATA_XYZ) xyz.create();
     if(prefetch & DATA_RGB) rgb.create();
@@ -194,7 +194,7 @@ bool ScanHandler::load()
     if(prefetch & DATA_AMPLITUDE) amplitude.create();
     if(prefetch & DATA_TYPE) type.create();
     if(prefetch & DATA_DEVIATION) deviation.create();
-    
+
     // request data from the ScanIO
     try {
       PointFilter filter(m_scan->getPointFilter());
@@ -213,7 +213,7 @@ bool ScanHandler::load()
       throw e;
     }
   }
-  
+
   // after successful loading, allocate enough cache space
   unsigned int size = vec->size();
   void* data_ptr;
@@ -225,10 +225,10 @@ bool ScanHandler::load()
     // rethrow
     throw e;
   }
-  
+
   // write data into the cache object and clean up the vector
   vec->write(data_ptr);
-  
+
   // save all vectors that still hold their data for prefetching
   xyz.save();
   rgb.save();
@@ -237,10 +237,10 @@ bool ScanHandler::load()
   amplitude.save();
   type.save();
   deviation.save();
-  
+
   // INFO
   //cout << "[" << m_scan->getIdentifier() << "][" << m_data << "] ScanHandler::load successful" << endl << endl;
-  
+
 #ifdef WITH_METRICS
   ServerMetric::scan_loading.end(t);
 #endif //WITH_METRICS
@@ -251,7 +251,7 @@ void ScanHandler::save(unsigned char* data, unsigned int size)
 {
   // INFO
   //cout << "[" << m_scan->getIdentifier() << "][" << m_data << "] ScanHandler::save" << endl;
-  
+
   // if global binary scan caching is enabled, save to file for later faster reloading
   if(binary_caching) {
     // duplicate writes of static data are handled in TemporaryHandler already

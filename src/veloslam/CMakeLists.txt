@@ -46,7 +46,7 @@ endif()
  #     debugview.cc  pcddump.cc cluster_classification.cc
  #     tracker.cc  trackermanager.cc drawtrackers.cc
  #     svm.cc  clusterboundingbox.cc multiscan_random_field.cc
- #     kalmanfilter.cc matrix.cc lap.cc 
+ #     kalmanfilter.cc matrix.cc lap.cc
  #     intersection_detection.cc SegIter.model ${SHOW_SRCS})
 
 #if(UNIX)

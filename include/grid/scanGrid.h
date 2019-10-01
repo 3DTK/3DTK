@@ -12,7 +12,7 @@
  * @date 14.02.2008
  */
 class scanGrid : public grid
-{   
+{
     /** The position of the robot (X) */
     long viewpointX;
 
@@ -26,9 +26,9 @@ class scanGrid : public grid
 
     /** @brief DTor */
     virtual ~scanGrid();
-   
+
     /**
-     * Getter for the x position of the robot when the scan was made 
+     * Getter for the x position of the robot when the scan was made
      * @return x position
      */
     inline long getViewpointX() const {

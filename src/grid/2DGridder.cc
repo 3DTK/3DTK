@@ -58,13 +58,13 @@ void usage(char* prog)
   const std::string bold("");
   const std::string normal("");
 #endif
-  
+
     std::cout << std::endl
 	 << "Usage: " << prog << std::endl
 	 << "       [-s NR] [-e NR] [-m NR] [-M NR] [-f F] [-o DIR] [-t] " << std::endl
 	 << "       [-h NR] [-H NR] [-r NR] [-w] [-p NR] [-P Nr] [-y] [-n] " <<std::endl
 	 << "       [-g] [-d] [-l] [-a NR] inputdirectory" << std::endl << std::endl;
-    
+
     std::cout << "  -s NR   start at scan NR (i.e., neglects the first NR scans)" << std::endl
 	 << "          [ATTENTION: counting starts with 0]" << std::endl
 	 << "  -e NR   end after scan NR" << "" << std::endl
@@ -74,7 +74,7 @@ void usage(char* prog)
 	 << "  -f F    format = F" << std::endl
 	 << "          using shared library F for input" << std::endl
 	 << "          (chose F from {uos, uos_map, uos_frames, uos_map_frames, old, rts, rts_map, ifp, riegl_bin, riegl_txt, zahn, ply})" << std::endl
-	 << "  -o DIR  the output directory (if none is set use the input directory" << std::endl 
+	 << "  -o DIR  the output directory (if none is set use the input directory" << std::endl
 	 << "  -t      read a file containing a initial transformation matrix" << std::endl
 	 << "  -H NR   set the maximal relevant height to NR 'units' (unit of scan data, e.g. cm)" << std::endl
 	 << "  -h NR   set the minimal relevant height to NR 'units' (unit of scan data, e.g. cm)" << std::endl
@@ -114,14 +114,14 @@ bool directoryExists(const std::string path )
 {
     DIR *pDir;
     bool bExists = false;
- 
+
     pDir = opendir(path.c_str());
 
     if (pDir != NULL){
 	bExists = true;
 	closedir (pDir);
     }
- 
+
     return bExists;
 }
 
@@ -145,7 +145,7 @@ bool directoryExists(const std::string path )
  * @param parcel_width the width of the parcel
  * @param parcel_height the height of the parcel
  * @param correctY default true, if set false (if true the transformationmatrix of the scans will be corrected (the value for Y)
- * @return 0, if the parsing was successful, 1 otherwise 
+ * @return 0, if the parsing was successful, 1 otherwise
  */
 int parseArgs(int argc, char **argv,
 	      std::string &inputdir, std::string &outputdir,
@@ -159,11 +159,11 @@ int parseArgs(int argc, char **argv,
 	      bool &resume)
 {
     int  c;
-    
+
     // from unistd.h
     extern char *optarg;
     extern int optind;
-    
+
     std::cout << std::endl;
     while ((c = getopt (argc, argv, "o:s:a:e:m:ncwgidlRM:h:H:f:r:p:P:yt")) != -1)
     {
@@ -178,20 +178,20 @@ int parseArgs(int argc, char **argv,
           break;
         case 's':
           start = atoi(optarg);
-          if (start < 0) { 
-            std::cerr << "Error: Cannot start at a negative scan number.\n"; 
-            exit(1); 
+          if (start < 0) {
+            std::cerr << "Error: Cannot start at a negative scan number.\n";
+            exit(1);
           }
           break;
         case 'e':
           end = atoi(optarg);
-          if (end < 0) { 
-            std::cerr << "Error: Cannot end at a negative scan number.\n"; 
-            exit(1); 
+          if (end < 0) {
+            std::cerr << "Error: Cannot end at a negative scan number.\n";
+            exit(1);
           }
-          if (end < start) { 
-            std::cerr << "Error: <end> cannot be smaller than <start>.\n"; 
-            exit(1); 
+          if (end < start) {
+            std::cerr << "Error: <end> cannot be smaller than <start>.\n";
+            exit(1);
           }
           break;
         case 'c':
@@ -207,7 +207,7 @@ int parseArgs(int argc, char **argv,
         case 'm':
           maxDist = atoi(optarg);
           break;
-        case 'M':           
+        case 'M':
           minDist = atoi(optarg);
           break;
         case 't':
@@ -229,14 +229,14 @@ int parseArgs(int argc, char **argv,
           break;
         case 'g':
           writeGrids = true;
-          break;	  
+          break;
         case 'r':
           resolution = atol(optarg);
-          if (resolution < 1) { 
-            std::cerr << "Error: <resolution> cannot be smaller than 1.\n"; 
-            exit(1); 
+          if (resolution < 1) {
+            std::cerr << "Error: <resolution> cannot be smaller than 1.\n";
+            exit(1);
           }
-          break;	
+          break;
         case 'w':
           waypoints = false;
           break;
@@ -245,16 +245,16 @@ int parseArgs(int argc, char **argv,
           break;
         case 'p':
           parcelWidth = atol(optarg);
-          if (parcelWidth < 1) { 
-            std::cerr << "Error: <parcel_width> cannot be smaller than 1.\n"; 
-            exit(1); 
+          if (parcelWidth < 1) {
+            std::cerr << "Error: <parcel_width> cannot be smaller than 1.\n";
+            exit(1);
           }
           break;
         case 'P':
           parcelHeight = atol(optarg);
-          if (parcelHeight < 1) { 
-            std::cerr << "Error: <parcel_height> cannot be smaller than 1.\n"; 
-            exit(1); 
+          if (parcelHeight < 1) {
+            std::cerr << "Error: <parcel_height> cannot be smaller than 1.\n";
+            exit(1);
           }
           break;
         case 'y':
@@ -262,9 +262,9 @@ int parseArgs(int argc, char **argv,
           break;
         case 'a':
           spotradius = atoi(optarg);
-          if (spotradius < 0) { 
-            std::cerr << "Error: <spotradius> cannot be smaller than 0.\n"; 
-            exit(1); 
+          if (spotradius < 0) {
+            std::cerr << "Error: <spotradius> cannot be smaller than 0.\n";
+            exit(1);
           }
           break;
         case 'd':
@@ -282,15 +282,15 @@ int parseArgs(int argc, char **argv,
         default:
           abort();
       }}
-    
+
     if (optind != argc-1) {
 	std::cerr << "\n*** Input directory missing ***" << std::endl;
 	usage(argv[0]);
     }
     inputdir = argv[optind];
-  
+
     //If no output directory is set, set it to the input directory
-    if (outputdir == "") outputdir = inputdir;  
+    if (outputdir == "") outputdir = inputdir;
 
 #ifndef _MSC_VER
   if (inputdir[inputdir.length()-1] != '/') inputdir = inputdir + "/";
@@ -302,13 +302,13 @@ int parseArgs(int argc, char **argv,
 
     return 0;
 }
-  
+
 /**
  * Main function.
  * Reads the scan (scan000.3d, ...) and frames files (scan000.frames, ...) from the data directory.
  * The frames are used for animation of the matching process. Converts the 3D scan data to a 2D grid map
  * and stores it
- * 
+ *
  * @param argc count of the command-line arguments
  * @param argv command-line arguments
  */
@@ -380,7 +380,7 @@ int main(int argc, char **argv){
 
     std::cout << "Create viewpointlist ... " << std::endl;
     viewpointinfo viewpoint(outputdir);
-    
+
     for (int i = start; i <= end; i+=count)
     {
 	int endloop = i + count - 1 < end ? i + count - 1 : end;
@@ -393,7 +393,7 @@ int main(int argc, char **argv){
 				   correctY);
 
 	std::cout << "Done."<< std::endl;
-		
+
 	// create grid from scans
 	std::cout << "Creating grids " << i << " to " << endloop << " ... ";
 	scanToGrid stg(resolution,
@@ -405,10 +405,10 @@ int main(int argc, char **argv){
 		       createNeighbours);
 
 	std::cout << "Done."<< std::endl;
-	
+
 	// convert scans
 	std::cout << "Converting " << scanman.getScanCount() <<" scans ... ";
-	
+
 	std::vector<scanGrid*> grids;
 	for(size_t j = 0; j < scanman.getScanCount(); j++)
 	{
@@ -420,14 +420,14 @@ int main(int argc, char **argv){
 	std::cout << "Done." << std::endl;
 
 	// start writing
-	std::cout << "Processing from " << i << " to " << endloop << std::endl;	
+	std::cout << "Processing from " << i << " to " << endloop << std::endl;
 	for(size_t j = 0; j < grids.size(); ++j)
 	{
-	    std::cout << "Adding scan " << i << " ... " << std::flush; 
+	    std::cout << "Adding scan " << i << " ... " << std::flush;
 	    parcelman.addGrid(grids[j],
 			      grids[j]->getViewpointX(),
 			      grids[j]->getViewpointZ());
-	   
+
 	    viewpoint.addGrid(grids[j]);
 	    std::cout << "Done."<< std::endl;
 	}
@@ -446,12 +446,12 @@ int main(int argc, char **argv){
 		stream.clear();
 		stream << outputdir << "grid" << j+i << ".ppm ";
 		stream >> str;
-		
+
 		ppmWriter writer(str);
 		writer.write(*grids[j]);
 		std::cout << "Done."<<std::endl;
 	    }
-	}	
+	}
 
 
 	std::cout << "Freeing subdate ... "<< std::flush;
@@ -460,7 +460,7 @@ int main(int argc, char **argv){
 	grids.clear();
 	std::cout << "Done."<< std::endl;
     }
-	
+
     // write the world and the viewpoints
     if(writeWorld)
     {
@@ -470,14 +470,14 @@ int main(int argc, char **argv){
 	std::cout << "done." << std::endl;
 
 	// write viewpoints
-	std::cout << "Writing viewpoints ... " << std::flush; 
+	std::cout << "Writing viewpoints ... " << std::flush;
 	viewpoint.write("viewpoints.pts");
 	std::cout << "Done." << std::endl;
     }
-        
+
     // write gridlines
     if(writeLines || writeWorldppm)
-    {	
+    {
 	std::cout << "Creating world grid ... ";
 	grid *g = parcelman.createWorldGrid();
 	std::cout << "Done." << std::endl;
@@ -495,9 +495,9 @@ int main(int argc, char **argv){
 	    writer.write(*g);
 	    std::cout << "Done." << std::endl;
 	}
-	
+
 	delete g;
     }
 
     std::cout << "Freeing data ... " << std::endl;
-} 
+}

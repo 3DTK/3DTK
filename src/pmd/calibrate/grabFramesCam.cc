@@ -41,9 +41,9 @@ int main(int argc, char **argv)
         exit(1);
     }
     CvCapture *capture = cvCaptureFromCAM(atoi(argv[3]));
-    
-    IplImage *imgColor = cvQueryFrame(capture); 
-    IplImage *img = cvCreateImage(cvGetSize(imgColor), 8, 1); 
+
+    IplImage *imgColor = cvQueryFrame(capture);
+    IplImage *img = cvCreateImage(cvGetSize(imgColor), 8, 1);
 
     int patx = atoi(argv[1]);
     int paty = atoi(argv[2]);
@@ -66,15 +66,15 @@ int main(int argc, char **argv)
        cvCvtColor(imgColor, img, CV_BGR2GRAY);
 
        if(grabFrame) {
-            /* ----- Chessboard detection ----- 
+            /* ----- Chessboard detection -----
               -------------------------------- */
             int cornersCount; // should be the same for wcam and pmd and equal totalCorners
-        
-            int found = cvFindChessboardCorners(img, patternSize, corners, 
+
+            int found = cvFindChessboardCorners(img, patternSize, corners,
                           &cornersCount, CV_CALIB_CB_ADAPTIVE_THRESH | CV_CALIB_CB_FILTER_QUADS);
-            cvFindCornerSubPix(img, corners, cornersCount, cvSize(11,11), cvSize(-1,-1), 
+            cvFindCornerSubPix(img, corners, cornersCount, cvSize(11,11), cvSize(-1,-1),
                            cvTermCriteria(CV_TERMCRIT_EPS | CV_TERMCRIT_ITER, 30, 0.1));
- 
+
             if(found && (cornersCount == cornersTotal)) {
                 cvDrawChessboardCorners(imgColor, patternSize, corners, cornersCount, found);
                 cvShowImage("Camera", imgColor);

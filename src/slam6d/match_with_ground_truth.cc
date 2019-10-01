@@ -9,7 +9,7 @@
 
 /**
  * @file
- * @brief Main programm for matching registered 3D scans against a 
+ * @brief Main programm for matching registered 3D scans against a
  * ground_truth_path
  *
  * @author Kai Lingemann. Institute of Computer Science, University of Osnabrueck, Germany.
@@ -51,7 +51,7 @@ void usage(char* prog)
   const string normal("\033[m");
 
   cout << "to do" << endl;
-  
+
   exit(1);
 }
 
@@ -109,7 +109,7 @@ int parseArgs(int argc, char **argv, string &dir, int &mni,
     usage(argv[0]);
   }
   dir = argv[optind];
- 
+
 }
 
 int main(int argc, char **argv)
@@ -135,22 +135,22 @@ int main(int argc, char **argv)
   }
 
   vector<PtPair> pairs;
-  
+
   for (int i = 0; i < end; i++) {
     // read position from ground truth file
     double gtruthPos[3];
     double dummy;
-    gtruth_in >> dummy >> gtruthPos[2] >> gtruthPos[0] >> gtruthPos[1] 
+    gtruth_in >> dummy >> gtruthPos[2] >> gtruthPos[0] >> gtruthPos[1]
 		    >> dummy >> dummy >> dummy;
 
     if (i < start) continue;
 
     for (unsigned int j = 0; j < 3; j++) gtruthPos[j] *= 0.1;
-    
+
     string frameFileName = dir + "scan" + to_string(i,3) + ".frames";
 
     cout << "Processing File " << frameFileName << endl;
-    
+
     ifstream frame_in(frameFileName.c_str());
     if (!frame_in.good()) {
 	 cerr << "Cannot open " << frameFileName << endl;
@@ -161,7 +161,7 @@ int main(int argc, char **argv)
     while (frame_in.good()) {
 	 try {
 	   frame_in >> transMat >> type;
-	 } catch (const exception &e) {   
+	 } catch (const exception &e) {
 	   break;
 	 }
     }
@@ -172,7 +172,7 @@ int main(int argc, char **argv)
     PtPair myPair(gtruthPos, rPos);
     pairs.push_back(myPair);
   }
-  
+
   cout << "Nr poses used for registration: " << pairs.size() << endl
 	  << algo << endl;
 

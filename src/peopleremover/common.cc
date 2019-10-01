@@ -384,7 +384,7 @@ void parse_cmdline(int argc, char* argv[], ssize_t &start, ssize_t &end, IOType 
 	input_options.add_options()
 		("start,s", po::value(&start)->default_value(0), "Start at this scan number (0-based)")
 		("end,e", po::value(&end)->default_value(-1), "Stop at this scan number (0-based, with -1 meaning don't stop)")
-		("format,f", po::value(&format)->default_value(UOS, "uos"), 
+		("format,f", po::value(&format)->default_value(UOS, "uos"),
 		 "The input files are read with this shared library.\n"
 		 "Available values: uos, uos_map, uos_rgb, uos_frames, uos_map_frames, "
 		 "old, rts, rts_map, ifp, riegl_txt, riegl_rgb, riegl_bin, zahn, ply, "
@@ -393,7 +393,7 @@ void parse_cmdline(int argc, char* argv[], ssize_t &start, ssize_t &end, IOType 
 
 	po::options_description program_options("Program specific options");
 	program_options.add_options()
-		("fuzz", po::value(&fuzz)->default_value(0), 
+		("fuzz", po::value(&fuzz)->default_value(0),
 		 "How fuzzy the data is. I.e. how far points on a"
 		 "perfect plane are allowed to lie away from it in the"
 		 "scan (default: 0).")

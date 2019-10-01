@@ -10,8 +10,8 @@
 /**
  * @file
  * @brief Frustrum culling routines
- * 
- * @author Jan Elseberg. Automation Group, Jacobs University Bremen gGmbH, Germany. 
+ *
+ * @author Jan Elseberg. Automation Group, Jacobs University Bremen gGmbH, Germany.
  */
 #include "show/viewcull.h"
 #include <stdlib.h>
@@ -362,7 +362,7 @@ int LOD2(float x, float y, float z, float size)
 
   short X1;
   short X2;
- 
+
   // onscreen position of the leftmost point
   myProject(x - size*right[0], y - size*right[1], z - size*right[2], X1);
   // onscreen position of the rightmost point
@@ -381,7 +381,7 @@ bool LOD(float x, float y, float z, float size)
 
   short X1;
   short X2;
- 
+
   // onscreen position of the leftmost point
   myProject(x - size*right[0], y - size*right[1], z - size*right[2], X1);
   // onscreen position of the rightmost point
@@ -431,7 +431,7 @@ int CubeInFrustum2( float x, float y, float z, float size )
 
       if( Fxp + Fyp + Fzm + frustum[p][3] > 0 )
          continue;
-      
+
       Fzp = frustum[p][2] * zp;
       if( Fxm + Fym + Fzp + frustum[p][3] > 0 )
          continue;
@@ -454,11 +454,11 @@ int CubeInFrustum2( float x, float y, float z, float size )
       Fzm = frustum[p][2] * zm;
       if( Fxm + Fym + Fzm + frustum[p][3] < 0 )
          return 1;
-      
+
       Fxp = frustum[p][0] * xp;
       if( Fxp + Fym + Fzm + frustum[p][3] < 0 )
          return 1;
-      
+
       Fyp = frustum[p][1] * yp;
       if( Fxm + Fyp + Fzm + frustum[p][3] < 0 )
          return 1;
@@ -469,7 +469,7 @@ int CubeInFrustum2( float x, float y, float z, float size )
       Fzp = frustum[p][2] * zp;
       if( Fxm + Fym + Fzp + frustum[p][3] < 0 )
          return 1;
-      
+
       if( Fxp + Fym + Fzp + frustum[p][3] < 0 )
          return 1;
       if( Fxm + Fyp + Fzp + frustum[p][3] < 0 )
@@ -518,7 +518,7 @@ char PlaneAABB( float x, float y, float z, float size, float *plane )
       dppm = Fxp + Fyp + Fzm + dist;
       if( dppm > 0 )
          goto intersects;
-      
+
       Fzp = plane[2] * zp;
       dmmp = Fxm + Fym + Fzp + dist;
       if( dmmp > 0 )
@@ -827,7 +827,7 @@ bool CubeInFrustum( float x, float y, float z, float size )
 
       if( Fxp + Fyp + Fzm + frustum[p][3] > 0 )
          continue;
-      
+
       Fzp = frustum[p][2] * zp;
       if( Fxm + Fym + Fzp + frustum[p][3] > 0 )
          continue;

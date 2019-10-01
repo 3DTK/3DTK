@@ -1,7 +1,7 @@
 /**
- * @file 
+ * @file
  * @brief Efficient representation of an octree
- * @author Jan Elsberg. Automation Group, Jacobs University Bremen gGmbH, Germany. 
+ * @author Jan Elsberg. Automation Group, Jacobs University Bremen gGmbH, Germany.
  * @author Kai Lingemann. Institute of Computer Science, University of Osnabrueck, Germany.
  * @author Andreas Nuechter. Institute of Computer Science, University of Osnabrueck, Germany.
  */
@@ -35,14 +35,14 @@
 //#define WITH_8BIT_POINTS
 #ifdef WITH_8BIT_POINTS
 typedef signed char tshort;
-#define TSHORT_MAXP1 (1 << 7); 
-#define TSHORT_MAX ((1 << 7) - 1); 
-typedef signed char shortpointrep; 
+#define TSHORT_MAXP1 (1 << 7);
+#define TSHORT_MAX ((1 << 7) - 1);
+typedef signed char shortpointrep;
 #else
 typedef short int tshort;
-#define TSHORT_MAXP1 (1 << 15); 
-#define TSHORT_MAX ((1 << 15) - 1); 
-typedef short int shortpointrep; 
+#define TSHORT_MAXP1 (1 << 15);
+#define TSHORT_MAX ((1 << 15) - 1);
+typedef short int shortpointrep;
 #endif
 
 
@@ -64,7 +64,7 @@ template <class T> union cbitunion;
  *
  * leaf is a bitmask describing wether the correpsonding bucket is a leaf node.
  *
- * The representation of the bitmask is somewhat inefficient. We use 16 bits for only 
+ * The representation of the bitmask is somewhat inefficient. We use 16 bits for only
  * 3^8 possible states, so in essence we could save 3 bits by compression.
  *
  */
@@ -81,7 +81,7 @@ class cbitoct{
   unsigned leaf               :  8;
 #endif
   /**
-   * sets the child pointer of parent so it points to child 
+   * sets the child pointer of parent so it points to child
    */
   template <class T>
   static inline void link(cbitoct &parent, cbitunion<T> *child) {
@@ -95,7 +95,7 @@ class cbitoct{
   static inline void getChildren(cbitoct &parent, cbitunion<T>* &children) {
     children = (cbitunion<T>*)((char*)&parent + parent.child_pointer);
   }
- 
+
 
 };
 
@@ -110,7 +110,7 @@ class cbitp{
   unsigned int length                   : 24;
 #endif
 };
-  
+
 
 /**
  * This union combines an octree node with a pointer to a set of points. This allows
@@ -132,7 +132,7 @@ template <class T> union cbitunion {
     node.valid = 0;
     node.leaf = 0;
   };           // needed for new []
-  
+
   inline shortpointrep* getPoints() {
     return (shortpointrep*)((char*)this + this->points.pointer);
   }
@@ -140,7 +140,7 @@ template <class T> union cbitunion {
     return this->points.length;
   }
   /**
-   * sets the child pointer of parent so it points to child 
+   * sets the child pointer of parent so it points to child
    */
   inline void linkPoints(shortpointrep *child, unsigned int l) {
     this->points.length  = l;  // do this first in case of overflow
@@ -151,7 +151,7 @@ template <class T> union cbitunion {
 
 /**
  * @brief Octree
- * 
+ *
  * A cubic bounding box is calculated
  * from the given 3D points. Then it
  * is recusivly subdivided into smaller
@@ -164,14 +164,14 @@ class compactTree : public colordisplay {
 public:
 
   template <class P>
-  compactTree(P * const* pts, int n, double voxelSize, PointType _pointtype = PointType(), ScanColorManager *scm=0 ); 
+  compactTree(P * const* pts, int n, double voxelSize, PointType _pointtype = PointType(), ScanColorManager *scm=0 );
 
   template <class P>
   compactTree(std::vector<P *> &pts, double voxelSize, PointType _pointtype = PointType());
-  
+
   compactTree(std::string filename, ScanColorManager *scm = 0) {
     alloc = new PackedChunkAllocator;
-    deserialize(filename); 
+    deserialize(filename);
     if (scm) {
       scm->registerTree(this);
       scm->updateRanges(mins);
@@ -188,7 +188,7 @@ public:
   inline void AllPoints(std::vector<double *> &vp);
 
   inline long countNodes();
-  inline long countLeaves(); 
+  inline long countLeaves();
   void setColorManager(ColorManager *_cm);
   void drawLOD(float lod);
   void draw();
@@ -201,13 +201,13 @@ public:
   inline void getCenter(double center[3]) const;
 
   void serialize(std::string filename);
- 
+
   // FIX to compile compact octree again
   // TODO: check if this does what it's supposed to do
-  // these are needed on windows so that show can be used as a library 
+  // these are needed on windows so that show can be used as a library
   // we need to call the ExtractFrustum in a same process as the draw function on windows
   void extractFrustumAndDrawLOD(float ratio, short detail)
-  { 
+  {
 	  show::ExtractFrustum(detail);
 	  drawLOD(ratio);
   }
@@ -218,16 +218,16 @@ public:
   }
 
 protected:
-  
+
   Allocator* alloc;
-  
+
   void AllPoints( cbitoct &node, std::vector<double*> &vp, double center[3], double size);
 
   void GetOctTreeCenter(std::vector<double*>&c, cbitoct &node, double *center, double size);
-  
-  long countNodes(cbitoct &node); 
 
-  long countLeaves(cbitoct &node); 
+  long countNodes(cbitoct &node);
+
+  long countLeaves(cbitoct &node);
 
   void deletetNodes(cbitoct &node);
 
@@ -241,33 +241,33 @@ protected:
   inline void countPointsAndQueue(P * const* pts, int n,  double center[8][3], double size, cbitoct &parent, double *pcenter);
 
 
-  void childcenter(double *pcenter, double *ccenter, double size, unsigned char i); 
+  void childcenter(double *pcenter, double *ccenter, double size, unsigned char i);
 
   template <class P>
 inline unsigned char childIndex(const double *center, const P *point);
-  
-  
+
+
   unsigned long maxTargetPoints( cbitoct &node );
- 
-  void displayOctTreeAll( cbitoct &node, double *center, double size); 
+
+  void displayOctTreeAll( cbitoct &node, double *center, double size);
 
   void displayOctTreeAllCulled( cbitoct &node, double *center, double size );
 
-  void displayOctTreeCulledLOD(long targetpts, cbitoct &node, double *center, double size ); 
-  void displayOctTreeLOD(long targetpts, cbitoct &node, double *center, double size ); 
+  void displayOctTreeCulledLOD(long targetpts, cbitoct &node, double *center, double size );
+  void displayOctTreeLOD(long targetpts, cbitoct &node, double *center, double size );
 
-  void displayOctTreeCulledLOD2(float lod, cbitoct &node, double *center, double size ); 
-  void displayOctTreeLOD2(float lod, cbitoct &node, double *center, double size ); 
-  
-  
-  void displayOctTreeCAllCulled( cbitoct &node, double *center, double size, double minsize ); 
-  
-  void displayOctTreeCAll( cbitoct &node, double *center, double size, double minsize ); 
+  void displayOctTreeCulledLOD2(float lod, cbitoct &node, double *center, double size );
+  void displayOctTreeLOD2(float lod, cbitoct &node, double *center, double size );
 
-  void showCube(double *center, double size); 
+
+  void displayOctTreeCAllCulled( cbitoct &node, double *center, double size, double minsize );
+
+  void displayOctTreeCAll( cbitoct &node, double *center, double size, double minsize );
+
+  void showCube(double *center, double size);
 
   /**
-   * the root of the octree 
+   * the root of the octree
    */
   cbitoct* root;
 
@@ -304,20 +304,20 @@ inline unsigned char childIndex(const double *center, const P *point);
   void deserialize(std::string filename );
   void deserialize(std::ifstream &f, cbitoct &node);
   void serialize(std::ofstream &of, cbitoct &node);
-  
-  
+
+
   unsigned long maxtargetpoints;
   unsigned int current_lod_mode;
-  
+
   void cycleLOD() {
     current_lod_mode = (current_lod_mode+1)%3;
   }
 };
-  
+
 template <class P>
   compactTree::compactTree(std::vector<P *> &pts, double voxelSize, PointType _pointtype) {
     alloc = new PackedChunkAllocator;
-    
+
     this->voxelSize = voxelSize;
 
     this->POINTDIM = pointtype.getPointDim();
@@ -326,12 +326,12 @@ template <class P>
     maxs = new double[POINTDIM];
 
     // initialising
-    for (unsigned int i = 0; i < POINTDIM; i++) { 
-      mins[i] = pts[0][i]; 
+    for (unsigned int i = 0; i < POINTDIM; i++) {
+      mins[i] = pts[0][i];
       maxs[i] = pts[0][i];
     }
 
-    for (unsigned int i = 0; i < POINTDIM; i++) { 
+    for (unsigned int i = 0; i < POINTDIM; i++) {
       for (unsigned int j = 1; j < pts.size(); j++) {
         mins[i] = std::min(mins[i], pts[j][i]);
         maxs[i] = std::max(maxs[i], pts[j][i]);
@@ -351,7 +351,7 @@ template <class P>
       childcenter(center, newcenter[i], size, i);
     }
     // set up values
-    root = alloc->allocate<cbitoct>();    
+    root = alloc->allocate<cbitoct>();
 
     countPointsAndQueue(pts, newcenter, sizeNew, *root, center);
     maxtargetpoints =  maxTargetPoints(*root);
@@ -364,18 +364,18 @@ template <class P>
     // -----------------------------------------
     if ((_size <= voxelSize)) {
       // copy points
-      shortpointrep *points = createPoints(splitPoints.size()); 
+      shortpointrep *points = createPoints(splitPoints.size());
       node.linkPoints(points, splitPoints.size());
       int i = 0;
       double distance;
-      for (typename std::vector<P *>::iterator itr = splitPoints.begin(); 
+      for (typename std::vector<P *>::iterator itr = splitPoints.begin();
           itr != splitPoints.end(); itr++) {
         for (unsigned int iterator = 0; iterator < 3; iterator++) {
           distance = (*itr)[iterator] - _center[iterator];
-          
+
           if (distance >= _size) {
 //            points[i++] = (1 << 15) -1;
-            points[i++] = TSHORT_MAX; 
+            points[i++] = TSHORT_MAX;
           } else {
 //            points[i++] = (distance/_size ) * (1 << 15);//* pow(2,15) ;
             points[i++] = (distance/_size ) * TSHORT_MAXP1;
@@ -386,7 +386,7 @@ template <class P>
         }
       }
       return true;
-    }  
+    }
 
     // calculate new buckets
     double newcenter[8][3];
@@ -401,12 +401,12 @@ template <class P>
     countPointsAndQueue(splitPoints, newcenter, sizeNew, node.node, _center);
     return false;
   }
-  
+
 template <class P>
   void compactTree::countPointsAndQueue(std::vector<P*> &i_points, double center[8][3], double size, cbitoct &parent, double *pcenter) {
     std::vector<P*> points[8];
     int n_children = 0;
-    
+
     for (typename std::vector<P *>::iterator itr = i_points.begin(); itr != i_points.end(); itr++) {
       points[childIndex<P>(pcenter, *itr)].push_back( *itr );
     }
@@ -420,7 +420,7 @@ template <class P>
       }
     }
     // create children
-    cbitunion<tshort> *children = alloc->allocate<cbitunion<tshort> >(n_children);    
+    cbitunion<tshort> *children = alloc->allocate<cbitunion<tshort> >(n_children);
     cbitoct::link(parent, children);
 
     int count = 0;
@@ -440,7 +440,7 @@ template <class P>
   void compactTree::countPointsAndQueue(P * const* pts, int n,  double center[8][3], double size, cbitoct &parent, double *pcenter) {
     std::vector<const P*> points[8];
     int n_children = 0;
-    
+
     for (int i = 0; i < n; i++) {
       points[childIndex<P>(pcenter, pts[i])].push_back( pts[i] );
     }
@@ -453,7 +453,7 @@ template <class P>
     }
 
     // create children
-    cbitunion<tshort> *children = alloc->allocate<cbitunion<tshort> >(n_children);    
+    cbitunion<tshort> *children = alloc->allocate<cbitunion<tshort> >(n_children);
     cbitoct::link(parent, children);
     int count = 0;
     for (int j = 0; j < 8; j++) {
@@ -467,16 +467,16 @@ template <class P>
       }
     }
   }
-  
+
 
   template <class T>
-  void compactTree::selectRay(T * &point) { 
-    //selectRay(point, *root, center, size, FLT_MAX); 
+  void compactTree::selectRay(T * &point) {
+    //selectRay(point, *root, center, size, FLT_MAX);
   }
 template <class P>
     compactTree::compactTree(P * const* pts, int n, double voxelSize, PointType _pointtype , ScanColorManager *scm ) : pointtype(_pointtype) {
     alloc = new PackedChunkAllocator;
-    
+
     cm = 0;
     if (scm) {
       scm->registerTree(this);
@@ -492,12 +492,12 @@ template <class P>
     maxs = new double[POINTDIM];
 
     // initialising
-    for (unsigned int i = 0; i < POINTDIM; i++) { 
-      mins[i] = pts[0][i]; 
+    for (unsigned int i = 0; i < POINTDIM; i++) {
+      mins[i] = pts[0][i];
       maxs[i] = pts[0][i];
     }
 
-    for (unsigned int i = 0; i < POINTDIM; i++) { 
+    for (unsigned int i = 0; i < POINTDIM; i++) {
       for (int j = 1; j < n; j++) {
         mins[i] = std::min(mins[i], (double)pts[j][i]);
         maxs[i] = std::max(maxs[i], (double)pts[j][i]);
@@ -531,18 +531,18 @@ template <class P>
       childcenter(center, newcenter[i], size, i);
     }
     // set up values
-    root = alloc->allocate<cbitoct>();    
+    root = alloc->allocate<cbitoct>();
 
     countPointsAndQueue(pts, n, newcenter, sizeNew, *root, center);
     maxtargetpoints =  maxTargetPoints(*root);
     current_lod_mode = 0;
-  } 
+  }
 
 template <class P>
 inline unsigned char compactTree::childIndex(const double *center, const P *point) {
   return  (point[0] >= center[0] ) | ((point[1] >= center[1] ) << 1) | ((point[2] >= center[2] ) << 2) ;
 }
-  
+
   void compactTree::getCenter(double _center[3]) const {
     _center[0] = center[0];
     _center[1] = center[1];

@@ -10,7 +10,7 @@
 /**
  * @file
  * @brief Representation of a 3D point type
- * @author Jan Elsberg. Jacobs University Bremen gGmbH, Germany. 
+ * @author Jan Elsberg. Jacobs University Bremen gGmbH, Germany.
  */
 
 #include "slam6d/point_type.h"
@@ -33,62 +33,62 @@ using std::runtime_error;
 PointType::PointType() {
   types = USE_NONE;
   pointdim = 3;
-  // choose height per default  
+  // choose height per default
   dimensionmap[1] = dimensionmap[2] = dimensionmap[3] = 1;
-  dimensionmap[4] = dimensionmap[5] = dimensionmap[6] = 1; 
+  dimensionmap[4] = dimensionmap[5] = dimensionmap[6] = 1;
   dimensionmap[7] = dimensionmap[8] = dimensionmap[0] = 1;
-  dimensionmap[9] = 1;  // height  
+  dimensionmap[9] = 1;  // height
 }
 
 PointType::PointType(unsigned int _types) : types(_types) {
-  // choose height per default  
+  // choose height per default
   dimensionmap[1] = dimensionmap[2] = dimensionmap[3] = 1;
-  dimensionmap[4] = dimensionmap[5] = dimensionmap[6] = 1; 
-  dimensionmap[7] = dimensionmap[8] = dimensionmap[0] = 1; 
-  dimensionmap[9] = 1;  // height 
+  dimensionmap[4] = dimensionmap[5] = dimensionmap[6] = 1;
+  dimensionmap[7] = dimensionmap[8] = dimensionmap[0] = 1;
+  dimensionmap[9] = 1;  // height
 
   pointdim = 3;
-  if (types & PointType::USE_REFLECTANCE) dimensionmap[1] = pointdim++;  
+  if (types & PointType::USE_REFLECTANCE) dimensionmap[1] = pointdim++;
   if (types & PointType::USE_NORMAL) {
     pointdim += 3;
     dimensionmap[2] = pointdim;
   }
-  if (types & PointType::USE_TEMPERATURE) dimensionmap[3] = pointdim++;  
-  if (types & PointType::USE_AMPLITUDE)   dimensionmap[4] = pointdim++;  
-  if (types & PointType::USE_DEVIATION)   dimensionmap[5] = pointdim++;  
-  if (types & PointType::USE_TYPE)        dimensionmap[6] = pointdim++; 
-  if (types & PointType::USE_COLOR)       dimensionmap[7] = pointdim++; 
-  if (types & PointType::USE_TIME)        dimensionmap[8] = pointdim++; 
-  if (types & PointType::USE_INDEX)       dimensionmap[9] = pointdim++; 
+  if (types & PointType::USE_TEMPERATURE) dimensionmap[3] = pointdim++;
+  if (types & PointType::USE_AMPLITUDE)   dimensionmap[4] = pointdim++;
+  if (types & PointType::USE_DEVIATION)   dimensionmap[5] = pointdim++;
+  if (types & PointType::USE_TYPE)        dimensionmap[6] = pointdim++;
+  if (types & PointType::USE_COLOR)       dimensionmap[7] = pointdim++;
+  if (types & PointType::USE_TIME)        dimensionmap[8] = pointdim++;
+  if (types & PointType::USE_INDEX)       dimensionmap[9] = pointdim++;
 }
 
 bool PointType::hasReflectance() const {
-  return hasType(USE_REFLECTANCE); 
+  return hasType(USE_REFLECTANCE);
 }
 bool PointType::hasNormal() const {
-  return hasType(USE_NORMAL); 
+  return hasType(USE_NORMAL);
 }
 bool PointType::hasTemperature() const {
-  return hasType(USE_TEMPERATURE); 
+  return hasType(USE_TEMPERATURE);
 }
 bool PointType::hasAmplitude() const {
-  return hasType(USE_AMPLITUDE); 
+  return hasType(USE_AMPLITUDE);
 }
 bool PointType::hasDeviation() const {
-  return hasType(USE_DEVIATION); 
+  return hasType(USE_DEVIATION);
 }
 bool PointType::hasType() const {
-  return hasType(USE_TYPE); 
+  return hasType(USE_TYPE);
 }
 bool PointType::hasColor() const {
-  return hasType(USE_COLOR); 
+  return hasType(USE_COLOR);
 }
 bool PointType::hasTime() const {
-  return hasType(USE_TIME); 
+  return hasType(USE_TIME);
 }
 
 bool PointType::hasIndex() const {
-  return hasType(USE_INDEX); 
+  return hasType(USE_INDEX);
 }
 
 unsigned int PointType::getReflectance() {
@@ -164,7 +164,7 @@ void PointType::serialize(std::ofstream &f) {
   f.write(reinterpret_cast<char*>(&types), sizeof(unsigned int));
 }
 
-unsigned int PointType::toFlags() const { return types; } 
+unsigned int PointType::toFlags() const { return types; }
 
 bool PointType::hasType(unsigned int type) const {
   return types & type;
@@ -186,7 +186,7 @@ void PointType::useScan(Scan* scan)
 {
   // clear pointers first
   m_xyz = 0; m_rgb = 0; m_reflectance = 0; m_temperature = 0; m_amplitude = 0; m_type = 0; m_deviation = 0;
-  
+
   // collectively load data to avoid unneccessary loading times due
   // to split get("") calls
   IODataType types = DATA_XYZ;
@@ -197,7 +197,7 @@ void PointType::useScan(Scan* scan)
   if(hasType()) types |= DATA_TYPE;
   if(hasDeviation()) types |= DATA_DEVIATION;
   scan->get(types);
-  
+
   // access data
   try {
     m_xyz = new DataXYZ(scan->get("xyz"));
@@ -209,7 +209,7 @@ void PointType::useScan(Scan* scan)
     if(hasAmplitude()) m_amplitude = new DataAmplitude(scan->get("amplitude"));
     if(hasType()) m_type = new DataType(scan->get("type"));
     if(hasDeviation()) m_deviation = new DataDeviation(scan->get("deviation"));
-    
+
     // check if data is available, otherwise reset pointer
     // to indicate that the scan doesn't prove this value
     if (m_rgb && !m_rgb->valid()) {
@@ -247,7 +247,7 @@ void PointType::clearScan()
   if (hasAmplitude() && m_amplitude) delete m_amplitude;
   if (hasType() && m_type) delete m_type;
   if (hasDeviation() && m_deviation) delete m_deviation;
-  
+
   // TODO: scan->clear() on all of these types
 }
 
