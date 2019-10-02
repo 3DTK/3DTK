@@ -6,12 +6,21 @@
 #include <vector>
 
 std::vector<std::string> whitelist = {
+#ifdef _WIN32
+	".*\\\\include\\\\riegl\\\\.*\\.a",
+	".*\\\\include\\\\riegl\\\\.*\\.so",
+	".*\\\\include\\\\show\\\\url\\.png",
+	".*\\\\src\\\\pmd\\\\o3d.L32\\.pcp",
+	".*\\\\src\\\\pmd\\\\pose\\\\djvm\\.ttf",
+	".*\\\\src\\\\spherical_quadtree\\\\.*\\.pyc",
+#else
 	".*/include/riegl/.*\\.a",
 	".*/include/riegl/.*\\.so",
 	".*/include/show/url\\.png",
 	".*/src/pmd/o3d.L32\\.pcp",
 	".*/src/pmd/pose/djvm\\.ttf",
 	".*/src/spherical_quadtree/.*\\.pyc",
+#endif
 };
 
 int main(int argc, char* argv[])
@@ -40,7 +49,7 @@ int main(int argc, char* argv[])
 			if (is_whitelisted) {
 				continue;
 			}
-			std::ifstream ifs(path.c_str(), std::ios::binary);
+			std::ifstream ifs(path.string(), std::ios::binary);
 			std::string str((std::istreambuf_iterator<char>(ifs)), std::istreambuf_iterator<char>());
 			ifs.close();
 

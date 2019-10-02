@@ -6,6 +6,26 @@
 #include <vector>
 
 std::vector<std::string> whitelist = {
+#ifdef _WIN32
+	".*\\\\include\\\\riegl\\\\.*\\.a",
+	".*\\\\include\\\\riegl\\\\.*\\.hpp",
+	".*\\\\include\\\\riegl\\\\.*\\.so",
+	".*\\\\include\\\\show\\\\url\\.png",
+	".*\\\\src\\\\cuda\\\\grid_kernel.cu",
+	".*\\\\src\\\\grid\\\\docu.tex",
+	".*\\\\src\\\\mesh\\\\README.md",
+	".*\\\\src\\\\pmd\\\\README",
+	".*\\\\src\\\\pmd\\\\o3d.L32\\.pcp",
+	".*\\\\src\\\\pmd\\\\offline\\\\pmdc.conf",
+	".*\\\\src\\\\pmd\\\\offline\\\\rename",
+	".*\\\\src\\\\pmd\\\\pmdc.conf",
+	".*\\\\src\\\\pmd\\\\pose\\\\dat\\\\commas2dots",
+	".*\\\\src\\\\pmd\\\\pose\\\\djvm\\.ttf",
+	".*\\\\src\\\\pmd\\\\pose\\\\pmdc.conf",
+	".*\\\\src\\\\slam6d\\\\testICPortho.m",
+	".*\\\\src\\\\spherical_quadtree\\\\.*\\.pyc",
+	".*\\\\src\\\\veloslam\\\\SegIter.model",
+#else
 	".*/include/riegl/.*\\.a",
 	".*/include/riegl/.*\\.hpp",
 	".*/include/riegl/.*\\.so",
@@ -24,6 +44,7 @@ std::vector<std::string> whitelist = {
 	".*/src/slam6d/testICPortho.m",
 	".*/src/spherical_quadtree/.*\\.pyc",
 	".*/src/veloslam/SegIter.model",
+#endif
 };
 
 int main(int argc, char* argv[])
@@ -55,14 +76,14 @@ int main(int argc, char* argv[])
 				continue;
 			}
 
-			std::ifstream ifs(path.c_str());
+			std::ifstream ifs(path.string());
 			std::string line;
 
 			int i = 1;
 			bool found_trailing = false;
 			while (std::getline(ifs, line)) {
 				if (boost::regex_match(line, trailing_whitespace)) {
-					std::cerr << path.c_str() << ":" << i << " trailing whitespace" << std::endl;
+					std::cerr << path.string() << ":" << i << " trailing whitespace" << std::endl;
 					found_trailing = true;
 				}
 				++i;
