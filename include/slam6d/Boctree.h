@@ -1,7 +1,7 @@
 /**
- * @file 
+ * @file
  * @brief Efficient representation of an octree
- * @author Jan Elsberg. Automation Group, Jacobs University Bremen gGmbH, Germany. 
+ * @author Jan Elsberg. Automation Group, Jacobs University Bremen gGmbH, Germany.
  * @author Kai Lingemann. Institute of Computer Science, University of Osnabrueck, Germany.
  * @author Andreas Nuechter. Institute of Computer Science, University of Osnabrueck, Germany.
  */
@@ -42,8 +42,8 @@ namespace { namespace ip = boost::interprocess; }
 template <class T> union bitunion;
 
 /**
- * This is our preferred representation for the leaf nodes (as it is the most compact). 
- * BOctTree makes an array of this, the first containing the number of points (not the 
+ * This is our preferred representation for the leaf nodes (as it is the most compact).
+ * BOctTree makes an array of this, the first containing the number of points (not the
  * number of coordinates) stored.
  */
 template <class T> union dunion {
@@ -71,7 +71,7 @@ template <class T> union dunion {
  *
  * leaf is a bitmask describing whether the correpsonding bucket is a leaf node.
  *
- * The representation of the bitmask is somewhat inefficient. We use 16 bits for only 
+ * The representation of the bitmask is somewhat inefficient. We use 16 bits for only
  * 3^8 possible states, so in essence we could save 3 bits by compression.
  *
  */
@@ -88,7 +88,7 @@ class bitoct{
   unsigned leaf               :  8;
 #endif
   /**
-   * sets the child pointer of parent so it points to child 
+   * sets the child pointer of parent so it points to child
    */
   template <class T>
   static inline void link(bitoct &parent, bitunion<T> *child) {
@@ -118,7 +118,7 @@ class bitoct{
     return children;
   }
 };
-  
+
 
 /**
  * This union combines an octree node with a pointer to a set of points. This allows
@@ -141,7 +141,7 @@ template <class T> union bitunion {
     node.valid = 0;
     node.leaf = 0;
   };           // needed for new []
-  
+
   //! Leaf node: links a pointrep array [length+values] to this union, saved as an offset pointer
   static inline void link(bitunion<T>* leaf, pointrep* points) {
     // use node child_pointer as offset_ptr, not pointrep
@@ -151,7 +151,7 @@ template <class T> union bitunion {
     leaf->node.child_pointer = (long)((char*)points - (char*)leaf);
 #endif
   }
-  
+
   //! Leaf node: points in the array
   inline T* getPoints() const {
     // absolute pointer
@@ -161,7 +161,7 @@ template <class T> union bitunion {
       reinterpret_cast<pointrep*>((char*)this + node.child_pointer) + 1
     );
   }
-  
+
   //! Leaf node: length in the array
   inline unsigned int getLength() const {
     // absolute pointer
@@ -169,12 +169,12 @@ template <class T> union bitunion {
     // offset pointer
     return (reinterpret_cast<pointrep*>((char*)this + node.child_pointer))[0].length;
   }
-  
+
   //! Leaf node: all points
   inline pointrep* getPointreps() const {
     return reinterpret_cast<pointrep*>((char*)this + node.child_pointer);
   }
-  
+
   inline bitunion<T>* getChild(unsigned char index) const {
     bitunion<T> *children = (bitunion<T>*)((char*)this + this->node.child_pointer);
     for (unsigned char i = 0; i < index; i++) {
@@ -184,16 +184,16 @@ template <class T> union bitunion {
     }
     return children;
   }
-  
+
   inline bool isValid(unsigned char index) {
     return  (  ( 1 << index ) & node.valid );
   }
  /*
   inline pointrep* getChild(unsigned char index) {
     bitunion<T> *children = (bitunion<T>*)((char*)this + this->node.child_pointer);
-    return children[index].points; 
+    return children[index].points;
   }*/
-  
+
   inline bool childIsLeaf(unsigned char index) {
     return (  ( 1 << index ) & node.leaf ); // if ith node is leaf get center
   }
@@ -209,7 +209,7 @@ extern char sequence2ci[8][256][8];  // maps preference to index in children arr
 
 /**
  * @brief Octree
- * 
+ *
  * A cubic bounding box is calculated
  * from the given 3D points. Then it
  * is recusivly subdivided into smaller
@@ -225,7 +225,7 @@ public:
   BOctTree(P * const* pts, int n, T voxelSize, PointType _pointtype = PointType(), bool _earlystop = false ) : pointtype(_pointtype), earlystop(_earlystop)
   {
     alloc = new PackedChunkAllocator;
-    
+
     this->voxelSize = voxelSize;
 
     this->POINTDIM = pointtype.getPointDim();
@@ -234,7 +234,7 @@ public:
     maxs = alloc->allocate<T>(POINTDIM);
 
     // initialising
-    for (unsigned int i = 0; i < POINTDIM; i++) { 
+    for (unsigned int i = 0; i < POINTDIM; i++) {
       if (n == 0)
         mins[i] = maxs[i] = 0;
       else {
@@ -249,10 +249,10 @@ public:
     center[0] = 0.5 * (mins[0] + maxs[0]);
     center[1] = 0.5 * (mins[1] + maxs[1]);
     center[2] = 0.5 * (mins[2] + maxs[2]);
-    
+
     size = (std::max)((std::max)(0.5 * (maxs[0] - mins[0]), 0.5 * (maxs[1] - mins[1])), 0.5 * (maxs[2] - mins[2]));
     //   cout << size << endl;
-    size += 1.0; // for numerical reasons we increase size 
+    size += 1.0; // for numerical reasons we increase size
 
     // calculate new buckets
     T newcenter[8][3];
@@ -262,7 +262,7 @@ public:
       childcenter(center, newcenter[i], size, i);
     }
     // set up values
-    uroot = alloc->allocate<bitunion<T> >();    
+    uroot = alloc->allocate<bitunion<T> >();
     root = &uroot->node;
 
     countPointsAndQueueFast(pts, n, newcenter, sizeNew, *root, center);
@@ -271,7 +271,7 @@ public:
 
   BOctTree(std::string filename) {
     alloc = new PackedChunkAllocator;
-    deserialize(filename); 
+    deserialize(filename);
     init();
   }
 
@@ -279,7 +279,7 @@ public:
   BOctTree(std::vector<P *> &pts, T voxelSize, PointType _pointtype = PointType(), bool _earlystop = false) : earlystop(_earlystop)
   {
     alloc = new PackedChunkAllocator;
-    
+
     this->voxelSize = voxelSize;
 
     this->POINTDIM = pointtype.getPointDim();
@@ -304,8 +304,8 @@ public:
     center[1] = 0.5 * (mins[1] + maxs[1]);
     center[2] = 0.5 * (mins[2] + maxs[2]);
     size = (std::max)((std::max)(0.5 * (maxs[0] - mins[0]), 0.5 * (maxs[1] - mins[1])), 0.5 * (maxs[2] - mins[2]));
-    
-    size += 1.0; // for numerical reasons we increase size 
+
+    size += 1.0; // for numerical reasons we increase size
 
     // calculate new buckets
     T newcenter[8][3];
@@ -315,7 +315,7 @@ public:
       childcenter(center, newcenter[i], size, i);
     }
     // set up values
-    uroot = alloc->allocate<bitunion<T> >();    
+    uroot = alloc->allocate<bitunion<T> >();
     root = &uroot->node;
 
     countPointsAndQueue(pts, newcenter, sizeNew, *root, center);
@@ -326,7 +326,7 @@ public:
     if(alloc) {
       delete alloc;
     }
-  } 
+  }
 
   void init() {
     // compute maximal depth as well as the size of the smalles leaf
@@ -336,7 +336,7 @@ public:
       real_voxelSize = real_voxelSize/2.0;
       max_depth++;
     }
-    
+
     child_bit_depth = alloc->allocate<unsigned int>(max_depth);
     child_bit_depth_inv = alloc->allocate<unsigned int>(max_depth);
 
@@ -344,17 +344,17 @@ public:
       child_bit_depth[d] = 1 << (max_depth - d - 1);
       child_bit_depth_inv[d] = ~child_bit_depth[d];
     }
-    
+
     mult = 1.0/real_voxelSize;
     add[0] = -center[0] + size;
     add[1] = -center[1] + size;
     add[2] = -center[2] + size;
-    
+
     largest_index = child_bit_depth[0] * 2 -1;
   }
-  
+
 protected:
-  
+
   /**
    * Serialization critical variables
    */
@@ -387,7 +387,7 @@ protected:
 
   //! Details of point attributes
   PointType pointtype;
-  
+
   //! ?
   unsigned char max_depth;
   ip::offset_ptr<unsigned int> child_bit_depth;
@@ -397,10 +397,10 @@ protected:
   /**
    * Serialization uncritical, runtime relevant variables
    */
-  
+
   //! Threadlocal storage of parameters used in SearchTree operations
   static NNParams params[100];
-  
+
   /**
    * Serialization uncritical, runtime irrelevant variables (constructor-stuff)
    */
@@ -410,9 +410,9 @@ protected:
 
   //! Allocator used for creating nodes in the constructor
   Allocator* alloc;
-  
+
 public:
-  
+
   inline const T* getMins() const { return &(*mins); }
   inline const T* getMaxs() const { return &(*maxs); }
   inline const T* getCenter() const { return center; }
@@ -421,7 +421,7 @@ public:
   inline const bitoct& getRoot() const { return *root; }
   inline unsigned int getMaxDepth() const { return max_depth; }
   inline T getRealVoxelSize() const { return real_voxelSize; }
-  
+
   inline void getCenter(double _center[3]) const {
     _center[0] = center[0];
     _center[1] = center[1];
@@ -440,7 +440,7 @@ public:
   long countLeaves() { return countLeaves(*root); }   // computes number of leaves + points
   long countOctLeaves() { return countOctLeaves(*root); } // computes number of leaves
   long countPoints() { return countPoints(*root); } // computes number of points
-    
+
   void deserialize(std::string filename ) {
     char buffer[sizeof(T) * 20];
     T *p = reinterpret_cast<T*>(buffer);
@@ -477,13 +477,13 @@ public:
     file.read(reinterpret_cast<char*>(&(*maxs)), POINTDIM * sizeof(T));
 
     // read root node
-    uroot = alloc->allocate<bitunion<T> >();    
+    uroot = alloc->allocate<bitunion<T> >();
     root = &uroot->node;
-    
+
     deserialize(file, *root);
     file.close();
   }
-  
+
   static void deserialize(std::string filename, std::vector<Point> &points ) {
     char buffer[sizeof(T) * 20];
 
@@ -531,8 +531,8 @@ public:
     pointtype.serialize(file);
 
     p[0] = voxelSize;
-    p[1] = center[0]; 
-    p[2] = center[1]; 
+    p[1] = center[0];
+    p[2] = center[1];
     p[3] = center[2];
     p[4] = size;
 
@@ -578,7 +578,7 @@ public:
 
     return pointtype;
   }
-  
+
 
   /**
    * Picks the first point in depth first order starting from the given node
@@ -602,7 +602,7 @@ public:
       }
     }
     return 0;
-  } 
+  }
 
   static void childcenter(const T *pcenter, T *ccenter, T size, unsigned char i) {
     switch (i) {
@@ -650,7 +650,7 @@ public:
         break;
     }
   }
-  
+
   static void childcenter(int x, int y, int z, int &cx, int &cy, int &cz, char i, int size) {
     switch (i) {
       case 0:  // 000
@@ -697,9 +697,9 @@ public:
         break;
     }
   }
-  
+
 protected:
-  
+
   void AllPoints( bitoct &node, std::vector<T*> &vp) {
     bitunion<T> *children;
     bitoct::getChildren(node, children);
@@ -769,7 +769,7 @@ protected:
       }
     }
   }
-  
+
   static void deserialize(std::ifstream &f, std::vector<Point> &vpoints, PointType &pointtype) {
     char buffer[2];
     pointrep *point = new pointrep[pointtype.getPointDim()];
@@ -780,7 +780,7 @@ protected:
 
     for (short i = 0; i < 8; i++) {
       if (  ( 1 << i ) & node.valid ) {   // if ith node exists
-        if (  ( 1 << i ) & node.leaf ) {   // if ith node is leaf read points 
+        if (  ( 1 << i ) & node.leaf ) {   // if ith node is leaf read points
           pointrep first;
           f.read(reinterpret_cast<char*>(&first), sizeof(pointrep));
           unsigned int length = first.length;  // read first element, which is the length
@@ -788,7 +788,7 @@ protected:
             f.read(reinterpret_cast<char*>(point), sizeof(pointrep) * pointtype.getPointDim()); // read the points
             vpoints.push_back( pointtype.createPoint( &(point->v ) ) );
           }
-        } else {  // write child 
+        } else {  // write child
           deserialize(f, vpoints, pointtype);
         }
       }
@@ -805,12 +805,12 @@ protected:
     unsigned short n_children = POPCOUNT(node.valid);
 
     // create children
-    bitunion<T> *children = alloc->allocate<bitunion<T> >(n_children);    
+    bitunion<T> *children = alloc->allocate<bitunion<T> >(n_children);
     bitoct::link(node, children);
 
     for (short i = 0; i < 8; i++) {
       if (  ( 1 << i ) & node.valid ) {   // if ith node exists
-        if (  ( 1 << i ) & node.leaf ) {   // if ith node is leaf read points 
+        if (  ( 1 << i ) & node.leaf ) {   // if ith node is leaf read points
           pointrep first;
           f.read(reinterpret_cast<char*>(&first), sizeof(pointrep));
           unsigned int length = first.length;  // read first element, which is the length
@@ -822,7 +822,7 @@ protected:
           points[0] = first;
           points++;
           f.read(reinterpret_cast<char*>(points), sizeof(pointrep) * length * POINTDIM); // read the points
-        } else {  // write child 
+        } else {  // write child
           deserialize(f, children->node);
         }
         ++children; // next child
@@ -848,7 +848,7 @@ protected:
           pointrep* points = children->getPointreps();
           unsigned int length = points[0].length;
           of.write(reinterpret_cast<char*>(points), sizeof(pointrep) * (length * POINTDIM  +1));
-        } else {  // write child 
+        } else {  // write child
           serialize(of, children->node);
         }
         ++children; // next child
@@ -882,7 +882,7 @@ protected:
   void GetOctTreeAvg(std::vector<T*>&c, bitoct &node) {
     bitunion<T> *children;
     bitoct::getChildren(node, children);
-    
+
     for (unsigned short i = 0; i < 8; i++) {
       if (  ( 1 << i ) & node.valid ) {     // if ith node exists
         if (  ( 1 << i ) & node.leaf ) {    // if ith node is leaf
@@ -893,7 +893,7 @@ protected:
 		for (unsigned short k = 0; k < POINTDIM; k++) {
 		  avgp[k] += 0;
 		}
-		
+
           for (unsigned int j = 0; j < length; j++) {
 		  T *point = &(points[POINTDIM*j+1].v);
             for (unsigned short k = 0; k < POINTDIM; k++) {
@@ -910,9 +910,9 @@ protected:
         }
         ++children; // next child
       }
-    } 
-  } 
-  
+    }
+  }
+
   void GetOctTreeRandom(std::vector<T*>&c, bitoct &node) {
     bitunion<T> *children;
     bitoct::getChildren(node, children);
@@ -925,20 +925,20 @@ protected:
           // offset pointer
           pointrep* points = children->getPointreps();
           // new version to ignore leaves with less than 3 points
-          /* 
-          if(points[0].length > 2) { 
+          /*
+          if(points[0].length > 2) {
             for(int tmp = 0; tmp < points[0].length; tmp++) {
               T *point = &(points[POINTDIM*tmp+1].v);
               c.push_back(point);
             }
           }
-          */  
+          */
           //old version
-          
+
           int tmp = rand(points[0].length);
           T *point = &(points[POINTDIM*tmp+1].v);
           c.push_back(point);
-          
+
 
         } else { // recurse
           GetOctTreeRandom(c, children->node);
@@ -946,8 +946,8 @@ protected:
         ++children; // next child
       }
     }
-  } 
-  
+  }
+
   void GetOctTreeRandom(std::vector<T*>&c, unsigned int ptspervoxel, bool mode, bitoct &node) {
     bitunion<T> *children;
     bitoct::getChildren(node, children);
@@ -962,7 +962,7 @@ protected:
           // ignore points from voxels with less than -ptspervoxel points
           if(mode) {
             if(length > ptspervoxel) {
-              for (unsigned int j = 0; j < length; j++) 
+              for (unsigned int j = 0; j < length; j++)
                 c.push_back(&(points[POINTDIM*j+1].v));
 
               ++children; // next child
@@ -970,7 +970,7 @@ protected:
             }
             continue;
           } else if (ptspervoxel >= length) {
-            for (unsigned int j = 0; j < length; j++) 
+            for (unsigned int j = 0; j < length; j++)
               c.push_back(&(points[POINTDIM*j+1].v));
 
             ++children; // next child
@@ -981,7 +981,7 @@ protected:
             int tmp = rand(length-1);
             indices.insert(tmp);
           }
-          for(std::set<int>::iterator it = indices.begin(); it != indices.end(); it++) 
+          for(std::set<int>::iterator it = indices.begin(); it != indices.end(); it++)
             c.push_back(&(points[POINTDIM*(*it)+1].v));
 
         } else { // recurse
@@ -1028,7 +1028,7 @@ protected:
     }
     return result;
   }
-  
+
   long countOctLeaves(bitoct &node) {
     long result = 0;
     bitunion<T> *children;
@@ -1091,7 +1091,7 @@ protected:
       bitoct::getChildren(node, children);
     }
   }
-  
+
   template <class P>
   void* branch( bitoct &node, P * const * splitPoints, int n,  T _center[3], T _size) {
     // if bucket is too small stop building tree
@@ -1108,8 +1108,8 @@ protected:
           points[i++].v = splitPoints[j][iterator];
         }
       }
-      return points; 
-    }  
+      return points;
+    }
 
     // calculate new buckets
     T newcenter[8][3];
@@ -1134,14 +1134,14 @@ protected:
       pointrep *points = alloc->allocate<pointrep> (POINTDIM*splitPoints.size() + 1);
       points[0].length = splitPoints.size();
       int i = 1;
-      for (typename std::vector<P *>::iterator itr = splitPoints.begin(); 
+      for (typename std::vector<P *>::iterator itr = splitPoints.begin();
           itr != splitPoints.end(); itr++) {
         for (unsigned int iterator = 0; iterator < POINTDIM; iterator++) {
           points[i++].v = (*itr)[iterator];
         }
       }
-      return points; 
-    }  
+      return points;
+    }
 
     // calculate new buckets
     T newcenter[8][3];
@@ -1194,7 +1194,7 @@ protected:
       }
     }
   }
-  
+
   template <class P>
   void countPointsAndQueueFast(P * const* points, int n,  T center[8][3], T size, bitoct &parent, T pcenter[3]) {
     P * const *blocks[9];
@@ -1203,7 +1203,7 @@ protected:
     fullsort(points, n, pcenter, blocks+1);
 
     int n_children = 0;
-    
+
     for (int j = 0; j < 8; j++) {
       // if non-empty set valid flag for this child
       if (blocks[j+1] - blocks[j] > 0) {
@@ -1237,8 +1237,8 @@ protected:
     x = (point[0] + add[0]) * mult;
     y = (point[1] + add[1]) * mult;
     z = (point[2] + add[2]) * mult;
-    
-    bitunion<T> *node = &(*uroot); 
+
+    bitunion<T> *node = &(*uroot);
     unsigned char child_index;
     unsigned int child_bit;
     unsigned int depth = 0;
@@ -1295,7 +1295,7 @@ protected:
     T* points = node->getPoints();
     unsigned int length = node->getLength();
     for(unsigned int iterator = 0; iterator < length; iterator++ ) {
-      double myd2 = Dist2(params[threadNum].p, points); 
+      double myd2 = Dist2(params[threadNum].p, points);
       if (myd2 < params[threadNum].closest_d2) {
         params[threadNum].closest_d2 = myd2;
         params[threadNum].closest = points;
@@ -1308,10 +1308,10 @@ protected:
       points+=BOctTree<T>::POINTDIM;
     }
   }
-  
 
 
-/** 
+
+/**
  * This function finds the closest point in the octree given a specified
  * radius. This implementation is quit complex, although it is already
  * simplified. The simplification incurs a significant loss in speed, as
@@ -1330,19 +1330,19 @@ protected:
     params[threadNum].count = 0;
     params[threadNum].max_count = 10000; // stop looking after this many buckets
 
-   
+
     // box within bounds in voxel coordinates
     int xmin, ymin, zmin, xmax, ymax, zmax;
-    xmin = (std::max)(params[threadNum].x-params[threadNum].closest_v, 0); 
-    ymin = (std::max)(params[threadNum].y-params[threadNum].closest_v, 0); 
+    xmin = (std::max)(params[threadNum].x-params[threadNum].closest_v, 0);
+    ymin = (std::max)(params[threadNum].y-params[threadNum].closest_v, 0);
     zmin = (std::max)(params[threadNum].z-params[threadNum].closest_v, 0);
 
 //    int largest_index = child_bit_depth[0] * 2 -1;
-    
+
     xmax = (std::min)(params[threadNum].x+params[threadNum].closest_v, largest_index);
     ymax = (std::min)(params[threadNum].y+params[threadNum].closest_v, largest_index);
     zmax = (std::min)(params[threadNum].z+params[threadNum].closest_v, largest_index);
-    
+
     unsigned char depth = 0;
     unsigned int child_bit;
     unsigned int child_index_min;
@@ -1351,7 +1351,7 @@ protected:
     bitunion<T> *node = &(*uroot);
 
     int cx, cy, cz;
-    
+
     child_bit = child_bit_depth[depth];
     cx = child_bit_depth[depth];
     cy = child_bit_depth[depth];
@@ -1369,7 +1369,7 @@ protected:
           return static_cast<double*>(params[threadNum].closest);
         } else {
           if (node->isValid(child_index_min) ) { // only descend when there is a child
-            childcenter(cx,cy,cz, cx,cy,cz, child_index_min, child_bit/2 ); 
+            childcenter(cx,cy,cz, cx,cy,cz, child_index_min, child_bit/2 );
             node = node->getChild(child_index_min);
             child_bit /= 2;
           } else {  // there is no child containing the bounding box => no point is close enough
@@ -1381,44 +1381,44 @@ protected:
         break;
       }
     }
-    
+
     // node contains all box-within-bounds cells, now begin best bin first search
     _FindClosest(threadNum, node->node, child_bit/2, cx, cy, cz);
     return static_cast<double*>(params[threadNum].closest);
   }
-  
+
   /**
    * This is the heavy duty search function doing most of the (theoretically unneccesary) work. The tree is recursively searched.
    * Depending on which of the 8 child-voxels is closer to the query point, the children are examined in a special order.
-   * This order is defined in map, imap is its inverse and sequence2ci is a speedup structure for faster access to the child indices. 
+   * This order is defined in map, imap is its inverse and sequence2ci is a speedup structure for faster access to the child indices.
    */
   void _FindClosest(int threadNum, bitoct &node, int size, int x, int y, int z) const
   {
     // Recursive case
-   
+
     // compute which child is closest to the query point
-    unsigned char child_index =  ((params[threadNum].x - x) >= 0) | 
-                                (((params[threadNum].y - y) >= 0) << 1) | 
+    unsigned char child_index =  ((params[threadNum].x - x) >= 0) |
+                                (((params[threadNum].y - y) >= 0) << 1) |
                                 (((params[threadNum].z - z) >= 0) << 2);
-    
+
     char *seq2ci = sequence2ci[child_index][node.valid];  // maps preference to index in children array
-    char *mmap = amap[child_index];  // maps preference to area index 
+    char *mmap = amap[child_index];  // maps preference to area index
 
     bitunion<T> *children;
     bitoct::getChildren(node, children);
     int cx, cy, cz;
     cx = cy = cz = 0; // just to shut up the compiler warnings
     for (unsigned char i = 0; i < 8; i++) { // in order of preference
-      child_index = mmap[i]; // the area index of the node 
+      child_index = mmap[i]; // the area index of the node
       if (  ( 1 << child_index ) & node.valid ) {   // if ith node exists
-        childcenter(x,y,z, cx,cy,cz, child_index, size); 
-        if ( params[threadNum].closest_v == 0 ||  (std::max)((std::max)(abs( cx - params[threadNum].x ), 
+        childcenter(x,y,z, cx,cy,cz, child_index, size);
+        if ( params[threadNum].closest_v == 0 ||  (std::max)((std::max)(abs( cx - params[threadNum].x ),
                  abs( cy - params[threadNum].y )),
                  abs( cz - params[threadNum].z )) - size
-        > params[threadNum].closest_v ) { 
+        > params[threadNum].closest_v ) {
           continue;
         }
-        // find the closest point in leaf seq2ci[i] 
+        // find the closest point in leaf seq2ci[i]
         if (  ( 1 << child_index ) & node.leaf ) {   // if ith node is leaf
           findClosestInLeaf( &children[seq2ci[i]], threadNum);
         } else { // recurse
@@ -1429,7 +1429,7 @@ protected:
   }
 
 
-  /** 
+  /**
    * This function shows the possible speedup that can be gained by using the
    * octree for nearest neighbour search, if a more sophisticated
    * implementation were given. Here, only the bucket in which the query point
@@ -1447,7 +1447,7 @@ protected:
     T * points;
     unsigned int length;
 
-    bitunion<T> *node = uroot; 
+    bitunion<T> *node = uroot;
     unsigned char child_index;
 
     unsigned int  child_bit = child_bit_depth[0];
@@ -1458,9 +1458,9 @@ protected:
         node = node->getChild(child_index);
         points = node->getPoints();
         length = node->getLength();
-        
+
         for(unsigned int iterator = 0; iterator < length; iterator++ ) {
-          double myd2 = Dist2(params[threadNum].p, points); 
+          double myd2 = Dist2(params[threadNum].p, points);
           if (myd2 < params[threadNum].closest_d2) {
             params[threadNum].closest_d2 = myd2;
             params[threadNum].closest = points;
@@ -1479,7 +1479,7 @@ protected:
     }
     return static_cast<double*>(params[threadNum].closest);
   }
-  
+
 
 template <class P>
   void fullsort(P * const * points, int n, T splitval[3], P * const * blocks[9]) {
@@ -1490,39 +1490,39 @@ template <class P>
 
     // sort along Z
     L0 = sort(points, n, splitval[2], 2);
-      
+
       n0L = L0 - points;
       // sort along Y (left of Z)   points -- L0
       L1 = sort(points, n0L, splitval[1], 1);
 
-        n1L = L1 - points; 
+        n1L = L1 - points;
         // sort along X (left of Y)  points -- L1
         L2 = sort(points, n1L, splitval[0], 0);
-        
+
           blocks[0] = L2;
-        
+
         n1R = n0L - n1L;
         // sort along X (right of Y) // L1 -- L0
         L2 = sort(L1, n1R, splitval[0], 0);
-        
+
           blocks[1] = L1;
           blocks[2] = L2;
 
       n0R = n - n0L;
       // sort along Y (right of Z)  L0 -- end
       L1 = sort(L0, n0R, splitval[1], 1);
-      
-        n1L = L1 - L0; 
+
+        n1L = L1 - L0;
         // sort along X (left of Y)  points -- L1
         L2 = sort(L0, n1L, splitval[0], 0);
-        
+
           blocks[3] = L0;
           blocks[4] = L2;
-        
+
         n1R = n0R - n1L;
         // sort along X (right of Y) // L1 -- L0
         L2 = sort(L1, n1R, splitval[0], 0);
-        
+
           blocks[5] = L1;
           blocks[6] = L2;
   }
@@ -1531,7 +1531,7 @@ template <class P>
   template <class P>
   P* const * sort(P* const * points, unsigned int n, T splitval, unsigned char index) {
     if (n==0) return points;
-    
+
     if (n==1) {
       if (points[0][index] < splitval)
         return points+1;
@@ -1541,10 +1541,10 @@ template <class P>
 
     P **left = const_cast<P**>(points);
     P **right = const_cast<P**>(points + n - 1);
-    
-    
+
+
       while (1) {
-      while ((*left)[index] < splitval) 
+      while ((*left)[index] < splitval)
       {
         left++;
         if (right < left)
@@ -1571,10 +1571,10 @@ public:
   BOctTree(const BOctTree& other, unsigned char* mem_ptr, unsigned int mem_max)
   {
     alloc = new SequentialAllocator(mem_ptr, mem_max);
-    
+
     // "allocate" space for *this
     alloc->allocate<BOctTree<T> >();
-    
+
     // take members
     unsigned int i;
     for(i = 0; i < 3; ++i)
@@ -1601,15 +1601,15 @@ public:
       child_bit_depth_inv[i] = other.child_bit_depth_inv[i];
     }
     largest_index = other.largest_index;
-    
+
     // take node structure
-    uroot = alloc->allocate<bitunion<T> >();  
+    uroot = alloc->allocate<bitunion<T> >();
     root = &uroot->node;
     copy_children(*other.root, *root);
-    
+
     // test if allocator has used up his space
     //alloc->printSize();
-    
+
     // discard allocator, space is managed by the cache manager
     delete alloc; alloc = 0;
   }
@@ -1619,16 +1619,16 @@ private:
     // copy node attributes
     my.valid = other.valid;
     my.leaf = other.leaf;
-    
+
     // other children
     bitunion<T>* other_children;
     bitoct::getChildren(other, other_children);
-    
+
     // create own children
     unsigned int n_children = POPCOUNT(other.valid);
-    bitunion<T>* my_children = alloc->allocate<bitunion<T> >(n_children);    
+    bitunion<T>* my_children = alloc->allocate<bitunion<T> >(n_children);
     bitoct::link(my, my_children);
-    
+
     // iterate over all (valid) children and copy them
     for(unsigned int i = 0; i < 8; ++i) {
       if((1<<i) & other.valid) {
@@ -1661,18 +1661,18 @@ public:
       + sizeof(bitunion<T>) // uroot
       + sizeChildren(*root); // all nodes
   }
-  
+
 private:
   //! Recursive size of a node's children
   unsigned int sizeChildren(const bitoct& node) {
     unsigned int s = 0;
     bitunion<T>* children;
     bitoct::getChildren(node, children);
-    
+
     // size of children allocation
     unsigned int n_children = POPCOUNT(node.valid);
     s += sizeof(bitunion<T>)*n_children;
-    
+
     // iterate over all (valid) children and sum them up
     for(unsigned int i = 0; i < 8; ++i) {
       if((1<<i) & node.valid) {

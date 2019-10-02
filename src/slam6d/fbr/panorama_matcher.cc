@@ -107,7 +107,7 @@ int main(int argc, char** argv){
 
   cout<<info.start<<endl;
   cout<<info.end<<endl;
-  
+
   cv::Mat panorama1, panorama2;
   panorama1.create(3600,1000,CV_8U);
   panorama2.create(3600,1000,CV_8U);
@@ -118,7 +118,7 @@ int main(int argc, char** argv){
   panorama2 = cv::imread(info.dir+"scan"+to_string(info.end, 3)+".png", CV_LOAD_IMAGE_GRAYSCALE );
 
   feature feature1, feature2;
-  
+
   feature1.featureDetection(panorama1, info.fMethod);
   feature2.featureDetection(panorama2, info.fMethod);
 

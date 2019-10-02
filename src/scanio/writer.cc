@@ -2,7 +2,7 @@
  * writer implementation
  *
  * Copyright (C) by the 3DTK contributors
- * Copyright (C) Dorit Borrmann, Razvan-George Mihalyi, Remus Dumitru 
+ * Copyright (C) Dorit Borrmann, Razvan-George Mihalyi, Remus Dumitru
  *
  * Released under the GPL version 3.
  *
@@ -18,7 +18,7 @@
  * @author Remus Dumitru. Jacobs University Bremen gGmbH, Germany.
  */
 #ifdef _MSC_VER
-#if !defined _OPENMP && defined OPENMP 
+#if !defined _OPENMP && defined OPENMP
 #define _OPENMP
 #endif
 #endif
@@ -125,7 +125,7 @@ void write_uosr(std::vector<cv::Vec4f> &points, std::string &dir, std::string id
 void write_uos_rgb(std::vector<cv::Vec4f> &points, std::vector<cv::Vec3b> &color, std::string &dir, std::string id, bool high_precision, volatile bool *abort_flag)
 {
   std::ofstream outfile((dir + "/scan" + id + ".3d").c_str());
-  
+
   if(high_precision) {
     outfile.precision(20);
   } else {
@@ -133,11 +133,11 @@ void write_uos_rgb(std::vector<cv::Vec4f> &points, std::vector<cv::Vec3b> &color
   }
   outfile << "# header is ignored" << std::endl;
 
-  std::vector<cv::Vec3b>::iterator cit=color.begin(); 
+  std::vector<cv::Vec3b>::iterator cit=color.begin();
   for (std::vector<cv::Vec4f>::iterator it=points.begin();  it < points.end(); it++) {
     if (abort_flag != nullptr && *abort_flag) break;
     if((*it)[0]!=0 && (*it)[1]!=0 && (*it)[2]!=0)
-      outfile << (*it)[0] << " " << (*it)[1] << " " << (*it)[2] << " " 
+      outfile << (*it)[0] << " " << (*it)[1] << " " << (*it)[2] << " "
       << (int)(*cit)[0] << " " << (int)(*cit)[1] << " " << (int)(*cit)[2] << std::endl;
     cit++;
   }
@@ -213,7 +213,7 @@ void write_uosr(DataXYZ &xyz, DataReflectance &xyz_reflectance, FILE *file, doub
 					scaleFac*xyz[j][0], scaleFac*xyz[j][1], scaleFac*xyz[j][2], xyz_reflectance[j]);
       }
 		}
-	} 
+	}
 }
 
 void write_uos_rgb(DataXYZ &xyz, DataRGB &rgb, FILE *file, double scaleFac, bool hexfloat, bool high_precision, volatile bool *abort_flag)
@@ -245,11 +245,11 @@ void write_uos_rgb(DataXYZ &xyz, DataRGB &rgb, FILE *file, double scaleFac, bool
 			// after the radix character).
 			if(high_precision) {
 			  fprintf(file, "%.016e %.016e %.016e %d %d %d\n",
-					scaleFac*xyz[j][0], scaleFac*xyz[j][1], scaleFac*xyz[j][2], 
+					scaleFac*xyz[j][0], scaleFac*xyz[j][1], scaleFac*xyz[j][2],
 					(int)rgb[j][0], (int)rgb[j][1], (int)rgb[j][2]);
       } else {
         fprintf(file, "%lf %lf %lf %d %d %d\n",
-					scaleFac*xyz[j][0], scaleFac*xyz[j][1], scaleFac*xyz[j][2], 
+					scaleFac*xyz[j][0], scaleFac*xyz[j][1], scaleFac*xyz[j][2],
 					(int)rgb[j][0], (int)rgb[j][1], (int)rgb[j][2]);
       }
 		}
@@ -466,7 +466,7 @@ void write_ply_rgb(std::vector<cv::Vec4f> &points, std::vector<cv::Vec3b> &color
 	if (!ply_add_element(ply, "vertex", points.size())) {
 		throw std::runtime_error("ply_add_element failed");
 	}
-	
+
 	if (!ply_add_property(ply, "x", PLY_FLOAT, (e_ply_type)0, (e_ply_type)0)) {
 		throw std::runtime_error("ply_add_property failed");
 	}
@@ -548,7 +548,7 @@ void writeTrajectoryXYZ(std::ofstream &posesout, const double * transMat, bool m
 
 void writeTrajectoryUOS(std::ofstream &posesout, const double * transMat, bool mat, double scaleFac)
 {
-  if(mat) 
+  if(mat)
   {
     posesout << transMat[ 0] << " "
      << transMat[ 1] << " "
@@ -566,7 +566,7 @@ void writeTrajectoryUOS(std::ofstream &posesout, const double * transMat, bool m
   posesout << scaleFac*transMat[12] << " "
    << scaleFac*transMat[13] << " "
    << scaleFac*transMat[14] << " ";
-  if(mat) { 
+  if(mat) {
     posesout << transMat[15] << " ";
   }
   posesout << std::endl;

@@ -8,7 +8,7 @@
  */
 
 /**
- * @file 
+ * @file
  * @brief The implementation of globally consistent scan matching algorithm
  *
  * @author Dorit Borrman. Inst. of CS, University of Osnabrueck, Germany.
@@ -27,7 +27,7 @@
  */
 
 #ifdef _MSC_VER
-#if !defined _OPENMP && defined OPENMP 
+#if !defined _OPENMP && defined OPENMP
 #define _OPENMP
 #endif
 #endif
@@ -60,7 +60,7 @@ using namespace NEWMAT;
  * @param epsilonLUM Termination criterion for LUM
  */
 lum6DEuler::lum6DEuler(icp6Dminimizer *my_icp6Dminimizer,
-                       double mdm, double max_dist_match, 
+                       double mdm, double max_dist_match,
                        int max_num_iterations, bool quiet, bool meta, int rnd,
                        bool eP, int anim, double epsilonICP, int nns_method, double epsilonLUM)
   : graphSlam6D(my_icp6Dminimizer,
@@ -82,7 +82,7 @@ lum6DEuler::~lum6DEuler()
 /**
  * This function calculates the inverse covariances Cij and the Vector
  * Cij*Dij for two scans by finding pointpairs.
- * 
+ *
  * @param first pointer to the first scan of the link
  * @param second pointer to the second scan of the link
  * @param nns_method Specifies which NNS method to use
@@ -91,16 +91,16 @@ lum6DEuler::~lum6DEuler()
  * @param C pointer to the inverse of the covariance matrix Cij
  * @param CD pointer to the vector Cij*Dij
  */
-void lum6DEuler::covarianceEuler(Scan *first, Scan *second, 
-                                 int nns_method, int rnd, double max_dist_match2, 
-                                 Matrix *C, ColumnVector *CD) 
+void lum6DEuler::covarianceEuler(Scan *first, Scan *second,
+                                 int nns_method, int rnd, double max_dist_match2,
+                                 Matrix *C, ColumnVector *CD)
 {
   // x,y,z       denote the coordinates of uk (Here averaged over ak and bk)
   // sx,sy,sz    are the sums of their respective coordinates of uk over
   //             each paint pair
   // xpy,xpz,ypz are the sums over x*x + y*y ,x*x + z*z and y*y + z*z
   //             respectively over each point pair
-  // xy,yz,xz    are the sums over each respective multiplication 
+  // xy,yz,xz    are the sums over each respective multiplication
   // dx,dy,dz    are the deltas in each coordinate of a point pair
   // ss          is the estimation of the covariance of sensing error
   double x, y, z, sx, sy, sz, xy, yz, xz, ypz, xpz, xpy, dx, dy, dz, ss;
@@ -178,14 +178,14 @@ void lum6DEuler::covarianceEuler(Scan *first, Scan *second,
     MM(4,4) = ypz;
     MM(5,5) = xpy;
     MM(6,6) = xpz;
-    
+
     MM(1,5) = MM(5,1) = -sy;
     MM(1,6) = MM(6,1) = sz;
     MM(2,4) = MM(4,2) = -sz;
     MM(2,5) = MM(5,2) = sx;
     MM(3,4) = MM(4,3) = sy;
     MM(3,6) = MM(6,3) = -sx;
-    
+
     MM(4,5) = MM(5,4) = -xz;
     MM(4,6) = MM(6,4) = -xy;
     MM(5,6) = MM(6,5) = -yz;
@@ -199,11 +199,11 @@ void lum6DEuler::covarianceEuler(Scan *first, Scan *second,
     for(int j = 0; j < m; j++){
       ak = uk[j].p1;
       bk = uk[j].p2;
-   
+
       x = (ak.x + bk.x) / 2.0;
       y = (ak.y + bk.y) / 2.0;
       z = (ak.z + bk.z) / 2.0;
-      
+
       ss += sqr(ak.x - bk.x - (D(1) - y * D(5) + z * D(6)))
         + sqr(ak.y - bk.y - (D(2) - z * D(4) + x * D(5)))
         + sqr(ak.z - bk.z - (D(3) + y * D(4) - x * D(6)));
@@ -246,7 +246,7 @@ void lum6DEuler::covarianceEuler(Scan *first, Scan *second,
     cerr << "Error calculating covariance matrix" << endl
 	    << first->scanNr << "  " << second->scanNr
 	    << endl;
-  
+
   }
 }
 
@@ -260,7 +260,7 @@ void lum6DEuler::covarianceEuler(Scan *first, Scan *second,
  * @param C A vector containing all covariances C of the pose
  *          difference estimations D
  * @param G The matrix G specifying the linear equation
- * @param B The vector B 
+ * @param B The vector B
  */
 void lum6DEuler::FillGB3D(Graph *gr,
                           GraphMatrix* G,
@@ -275,12 +275,12 @@ void lum6DEuler::FillGB3D(Graph *gr,
     int b = gr->getLink(i,1) - 1;
     Scan *FirstScan  = allScans[gr->getLink(i,0)];
     Scan *SecondScan = allScans[gr->getLink(i,1)];
-  
+
     Matrix Cab(6,6);
     ColumnVector CDab(6);
     covarianceEuler(FirstScan, SecondScan,
-                    nns_method, (int)my_icp->get_rnd(), 
-                    max_dist_match2_LUM, &Cab, &CDab); 
+                    nns_method, (int)my_icp->get_rnd(),
+                    max_dist_match2_LUM, &Cab, &CDab);
 
 #pragma omp critical
     {
@@ -292,7 +292,7 @@ void lum6DEuler::FillGB3D(Graph *gr,
         B->Rows(b*6+1,b*6+6) -= CDab;
         G->add(b, b, Cab);
       }
-      if(a >= 0 && b >= 0) { 
+      if(a >= 0 && b >= 0) {
         G->subtract(a, b, Cab);
         G->subtract(b, a, Cab);
       }
@@ -316,32 +316,32 @@ double lum6DEuler::doGraphSlam6D(Graph gr, vector <Scan *> allScans, int nrIt)
     if (gr.getNrScans() <= 0) {
         throw runtime_error("Zero scans in graph");
     }
-    
+
 #ifdef WRITE_GRAPH_NET
   // for debug only:
   static int d = 0;
   cout << "writing graph.dat ....................................." << endl;
   d++;
-  string gfilename = "graph_" + to_string(d, 3) + ".net"; 
-  ofstream out(gfilename.c_str());  
+  string gfilename = "graph_" + to_string(d, 3) + ".net";
+  ofstream out(gfilename.c_str());
   for (int i=0; i < gr.getNrLinks(); i++) {
     int from = gr.getLink(i,0);
     int to = gr.getLink(i,1);
     // shouldn't be necessary, just in case a (out of date)
     // graph file is loaded:
     if (from < (int)allScans.size() && to < (int)allScans.size()) {
-      out << allScans[from]->get_rPos()[0] << " " 
-          << allScans[from]->get_rPos()[1] << " " 
+      out << allScans[from]->get_rPos()[0] << " "
+          << allScans[from]->get_rPos()[1] << " "
           << allScans[from]->get_rPos()[2] << endl
-          << allScans[to  ]->get_rPos()[0] << " " 
-          << allScans[to  ]->get_rPos()[1] << " " 
+          << allScans[to  ]->get_rPos()[0] << " "
+          << allScans[to  ]->get_rPos()[1] << " "
           << allScans[to  ]->get_rPos()[2] << endl << endl;
     }
   }
   out.close();
   out.clear();
 #endif
-  
+
   // the IdentityMatrix to transform some Scans with
   double id[16];
   M4identity(id);
@@ -369,17 +369,17 @@ double lum6DEuler::doGraphSlam6D(Graph gr, vector <Scan *> allScans, int nrIt)
     delete G;
 
     double sum_position_diff = 0.0;
-    
+
     // Start with second Scan
     int loop_end = gr.getNrScans();
 #ifdef _OPENMP
 #pragma omp parallel for reduction(+:sum_position_diff)
 #endif
     for(int i = 1; i < loop_end; i++){
-      
+
       // Now update the Poses
       Matrix Ha = IdentityMatrix(6);
-      
+
       double xa = allScans[i]->get_rPos()[0];
       double ya = allScans[i]->get_rPos()[1];
       double za = allScans[i]->get_rPos()[2];
@@ -393,12 +393,12 @@ double lum6DEuler::doGraphSlam6D(Graph gr, vector <Scan *> allScans, int nrIt)
       double sty = sin(ty);
 
       // Fill Ha
-      Ha.element(0,4) = -za*ctx+ya*stx; 
+      Ha.element(0,4) = -za*ctx+ya*stx;
       Ha.element(0,5) = ya*cty*ctx+za*stx*cty;
 
-      Ha.element(1,3) = za; 
+      Ha.element(1,3) = za;
       Ha.element(1,4) = -xa*stx;
-      Ha.element(1,5) = -xa*ctx*cty+za*sty; 
+      Ha.element(1,5) = -xa*ctx*cty+za*sty;
 
 
       Ha.element(2,3) = -ya;
@@ -446,7 +446,7 @@ double lum6DEuler::doGraphSlam6D(Graph gr, vector <Scan *> allScans, int nrIt)
         rPos[k]      = allScans[i]->get_rPos()[k] - result.element(k);
         rPosTheta[k] = allScans[i]->get_rPosTheta()[k] - result.element(k+3);
       }
-      
+
       // Update the Pose
       if (i != gr.getNrScans() - 1) {
         allScans[i]->transformToEuler(rPos, rPosTheta, Scan::LUM, 1);
@@ -472,7 +472,7 @@ double lum6DEuler::doGraphSlam6D(Graph gr, vector <Scan *> allScans, int nrIt)
     cout << "Sum of Position differences = " << sum_position_diff << endl;
     ret = (sum_position_diff / (double)gr.getNrScans());
   }
-  
+
   return ret;
 }
 

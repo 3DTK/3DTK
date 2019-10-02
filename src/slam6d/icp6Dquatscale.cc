@@ -7,7 +7,7 @@
  *
  */
 
-/** @file 
+/** @file
  *  @brief Implementation of the ICP error function minimization via
  *         quaternions and scale factor
  *  @author Flavia Grosan, Jacobs University Bremen gGmbH, Germany.
@@ -43,7 +43,7 @@ double icp6D_QUAT_SCALE::Align(const std::vector<PtPair>& pairs,
 
   double sum = 0.0;
   double sums[2]; sums[0] = sums[1] = 0.0;
- 
+
   // the quaternion
   double q[7];
 
@@ -64,11 +64,11 @@ double icp6D_QUAT_SCALE::Align(const std::vector<PtPair>& pairs,
     sums[0] += sqr(pairs[i].p1.x - centroid_m[0]) +
       sqr(pairs[i].p1.y - centroid_m[1]) +
       sqr(pairs[i].p1.z - centroid_m[2]);
-          
+
     sums[1] += sqr(pairs[i].p2.x - centroid_d[0]) +
       sqr(pairs[i].p2.y - centroid_d[1]) +
       sqr(pairs[i].p2.z - centroid_d[2]);
-                                   
+
     S[0][0] += pairs[i].p2.x * pairs[i].p1.x;
     S[0][1] += pairs[i].p2.x * pairs[i].p1.y;
     S[0][2] += pairs[i].p2.x * pairs[i].p1.z;
@@ -105,7 +105,7 @@ double icp6D_QUAT_SCALE::Align(const std::vector<PtPair>& pairs,
   S[2][0] -= centroid_d[2] * centroid_m[0];
   S[2][1] -= centroid_d[2] * centroid_m[1];
   S[2][2] -= centroid_d[2] * centroid_m[2];
-  
+
   // calculate the 4x4 symmetric matrix Q
   double trace = S[0][0] + S[1][1] + S[2][2];
   double A23 = S[1][2] - S[2][1];
@@ -119,7 +119,7 @@ double icp6D_QUAT_SCALE::Align(const std::vector<PtPair>& pairs,
   for (i = 0; i < 3; i++)
     for (j = 0; j < 3; j++)
       Q[i+1][j+1] = S[i][j] + S[j][i] - ( i==j ? trace : 0);
-  
+
   maxEigenVector(Q, q);
 
   // calculate the rotation matrix
@@ -142,12 +142,12 @@ double icp6D_QUAT_SCALE::Align(const std::vector<PtPair>& pairs,
   alignfx[9] = m[1][2] * scale_s;
   alignfx[10] = m[2][2] * scale_s;
   alignfx[11] = 0.0;
-  
-  // calculate the translation vector, 
+
+  // calculate the translation vector,
   alignfx[12] = centroid_m[0]
     - m[0][0]*centroid_d[0]*scale_s
     - m[0][1]*scale_s*centroid_d[1]
-    - m[0][2]*centroid_d[2]*scale_s; 
+    - m[0][2]*centroid_d[2]*scale_s;
   alignfx[13] = centroid_m[1]
     - m[1][0]*centroid_d[0]*scale_s
     - m[1][1]*scale_s*centroid_d[1]

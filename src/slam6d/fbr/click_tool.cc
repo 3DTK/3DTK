@@ -85,16 +85,16 @@ void usage(int argc, char** argv){
     printf("\n");
     printf("\t\t-O outDir \t\t\t output directory if not stated same as input\n");
     printf("\t\t-r rotatePhoto \t\t\t rotates photo by 90 degrees counter clockwise\n");
-    
+
     printf("\t\t-l loadOct \t\t\t load the Octtree\n");
     printf("\t\t-o saveOct \t\t\t save the Octtree\n");
     printf("\n");
-    
+
     exit(1);
 }
 
 void parssArgs(int argc, char** argv, information& info){
-    
+
     //default values
     info.scanFormat = RIEGL_TXT;
     info.photoFormat = JPEG;
@@ -121,7 +121,7 @@ void parssArgs(int argc, char** argv, information& info){
     info.rotatePhoto = false;
     info.photosPerScan = 1;
     info.photosPerPosition = 3;
-    
+
     int c;
     opterr = 0;
     //reade the command line and get the options
@@ -209,7 +209,7 @@ void parssArgs(int argc, char** argv, information& info){
             default:
                 usage(argc, argv);
         }
-    
+
     if(info.projectionMethod == PANNINI && info.projectionParam == 0){
         info.projectionParam = 1;
         if(info.numberOfImages < 2) info.numberOfImages = 2;
@@ -220,13 +220,13 @@ void parssArgs(int argc, char** argv, information& info){
     }
     if(info.projectionMethod == RECTILINEAR && info.numberOfImages < 3)
         info.numberOfImages = 3;
-    
+
     if (optind > argc - 1)
     {
         cout<<"Too few input arguments. At least scanInDir, start and stop are required."<<endl;
         usage(argc, argv);
     }
-    
+
     info.scanInDir = argv[optind];
     if(info.photoInDir.empty()) info.photoInDir = info.scanInDir;
     if(info.outDir.empty()) info.outDir = info.scanInDir;
@@ -261,8 +261,8 @@ void printInfo(information info){
     cout<<"Panorama Size Optimization= "<<info.panoramaSizeOptimization<<endl;
     cout<<"Save Oct= "<<info.saveOct<<endl;
     cout<<"Load Oct= "<<info.loadOct<<endl;
-    
-    
+
+
     printf("\n\n\n");
     printf("Controls:\n\n");
     printf("+/-\t\tzoom\n");
@@ -274,7 +274,7 @@ void printInfo(information info){
     printf("up/down\t\tchange ppr file\n");
     printf("w/a/s/d\t\tup/left/down/right - naviagation\n");
     printf("f\t\tsee all point pairs\n");
-    
+
     cout<<"\n-------------------------------"<<endl<<endl;
 }
 
@@ -305,77 +305,77 @@ bool pprChanged;                    //!< holds true if a ppr was saved after all
 
 /**
  Rotates a point if the image was rotated before so that its on the same place
- 
+
  @param _point   point that is to be rotated
  @param _picture the picture the point is from
- 
+
  @return the rotated point
  */
 Point2i getRotatedPoint(Point2i _point, Picture _picture);
 
 /**
  Rotates an already rotated point back.
- 
+
  @param _point   point that is to be unrotated
  @param _picture picture the point is from
- 
+
  @return the unrotated point
  */
 Point2i getUnrotatedPoint(Point2i _point, Picture _picture);
 
 /**
  Toggles the enum between SCAN and PHOTO
- 
+
  @param _picture the value that is to be toggled
- 
+
  @return SCAN if _picture was PHOTO an vise versa
  */
 Picture togglePicture(Picture _picture);
 
 /**
  Calculates the factor by which the image _picture is scaled
- 
+
  @param _picture the picture of which the scalefactor is of interest
- 
+
  @return he factor by which the image _picture is scaled
  */
 float scaleFactor(Picture _picture);
 
 /**
  Generates a color by inserting random numbers
- 
+
  @return a randomly generated color
  */
 Scalar randomColor();
 
 /**
  Gives the enum as string
- 
+
  @param _picture the enum of which the string is needed
- 
+
  @return the corresponding string
  */
 string enum2String(Picture _picture);
 
 /**
  Fetches the 3D coordinates of a image pixel and transforms it into a coordinate in the right handed coordinate system
- 
+
  @param _point the pixe of ehich the 3D coordinate is of interest
- 
+
  @return the 3D coordinates in right handed coordinate system
  */
 Point3f getCoordinates(Point2i _point);
 
 /**
  Draws and displays the image with the specified scale and zoom and draws all selected points into them
- 
+
  @param _picture defines which image is to be painted
  */
 void paint(Picture _picture);
 
 /**
  Registers a selected point
- 
+
  @param _point   the pixel that was selected
  @param _picture specifies in which image the point was selected
  */
@@ -383,7 +383,7 @@ void addPoint(Point2i _point, Picture _picture);
 
 /**
  Unregisters a selected point
- 
+
  @param _point   the pixel that is to be deleted
  @param _picture specifies the image the pixel is in
  */
@@ -391,7 +391,7 @@ void deletePoint(Point2i _point, Picture _picture);
 
 /**
  Handles all actions of the mouse
- 
+
  @param event    the exact action the mouse took
  @param x        the x coordinate of that action
  @param y        the y coordinate of that action
@@ -412,7 +412,7 @@ void zoomOut();
 
 /**
  Handles changes of the trackbars
- 
+
  @param int      the value at which the indicator of the trackbar is located
  @param _picture defines the image that the trackbar corresponds to
  */
@@ -425,26 +425,26 @@ void toggleImage();
 
 /**
  Rotates image by 90 degrees counter clock wise if specified by user
- 
+
  @param _input the image that is to be rotated
- 
+
  @return the rotated image
  */
 Mat rotateImage(Mat _input);
 
 /**
  Reads the point pairs from a ppr file
- 
+
  @param _scanNumber  the scan the ppr file corresponds to
  @param _photoNumber the photo the ppr file corresponds to
- 
+
  @return a vector of all pointpairs in that file
  */
 vector<PointPair> readPPRfile(int _scanNumber, int _photoNumber, int _pprFileIndex);
 
 /**
  Writes the vector of pointpairs to a file using right handed coordinate system only
- 
+
  @param _pointPairs  the point pairs that are to be saved
  @param _scanNumber  the scan the point pairs correspond to
  @param _photoNumber the photo the pointpairs correspond to
@@ -453,10 +453,10 @@ void writePPRfile(vector<PointPair> _pointPairs, int _scanNumber, int _photoNumb
 
 /**
  Reads a photo from file
- 
+
  @param _scanNumber  the scan the photo corresponds to
  @param _photoNumber the index of the photo within the scan
- 
+
  @return the image read from file
  */
 Mat readPhoto(int _scanNumber, int _photoNumber);
@@ -494,7 +494,7 @@ bool nextPattern(vector<PointPair> _pointPairs, int _scanNumber, int _photoNumbe
 
  @param _pointPairs  the selceted point pairs of the current display
  @param _scanNumber   the index of the current scan
- @param _currentPhoto the index of the current position 
+ @param _currentPhoto the index of the current position
  */
 void lastPattern(vector<PointPair> _pointPairs, int _scanNumber, int _photoNumber);
 
@@ -507,7 +507,7 @@ vector<PointPair> getAllPointPairs();
 
 /**
  Reads a scan from file
- 
+
  @param s          the index of the scan
  @param scanserver the scanserver
  */
@@ -516,148 +516,148 @@ void readScan(int s, bool & scanserver);
 
 
 Point2i getRotatedPoint(Point2i _point, Picture _picture){
-    
+
     if(_picture == PHOTO && info.rotatePhoto){
         return Point2i(_point.y, inputs[PHOTO].rows - _point.x);
     }
-    
+
     return _point;
 }
 
 Point2i getUnrotatedPoint(Point2i _point, Picture _picture){
-    
+
     if(_picture == PHOTO && info.rotatePhoto){
         return Point2i(inputs[PHOTO].rows - _point.y, _point.x);
     }
-    
+
     return _point;
 }
 
 Picture togglePicture(Picture _picture){
-    
+
     if (_picture == PHOTO) {
         return SCAN;
     } else {
         return PHOTO;
     }
-    
-    
+
+
 }
 
 float scaleFactor(Picture _picture){
-    
+
     return ((float)windowHeight[_picture]/(float)inputs[_picture].rows)/zoom[_picture];
-    
+
 }
 
 
 Scalar randomColor(){
-    
+
     int r = rand() % 255;
     int g = rand() % 255;
     int b = rand() % 255;
-    
+
     return Scalar(r,g,b);
-    
+
 }
 
 
 string enum2String(Picture _picture){
-    
-    
+
+
     switch (_picture) {
         case SCAN:
             return "SCAN";
             break;
-            
+
         case PHOTO:
             return "PHOTO";
             break;
-            
+
         default:
             return "no title";
             break;
     }
-    
-    
+
+
 }
 
 Point3f getCoordinates(Point2i _point){
     Vec3f coordinates = coordinateMap.at<Vec3f>(_point);
-    
-    
+
+
     // coordinate map is in uos format z,-x,y (left handed coordinate system)
     Point3f pnt;
     pnt.x = coordinates[2];
     pnt.y = - coordinates[0];
     pnt.z = coordinates[1];
-    
+
     return pnt;
-    
+
 }
 
 void paint(Picture _picture){
-    
+
     Mat output;
-    
+
     float scale = scaleFactor(_picture);
-    
-    
+
+
     // resize the image with respect to scale due to window format and zoom
     resize(inputs[_picture], output,Size(0,0),scale,scale);
-    
-    
+
+
     // find sector of image that is to be displayed
     int height = windowHeight[_picture];
     int width = (inputs[_picture].cols * windowHeight[_picture]) / inputs[_picture].rows;
     int x = (float)zoomCenter[_picture].x*scale - (float)width/2.0;
     int y = (float)zoomCenter[_picture].y*scale - (float)height/2.0;
-    
-    
+
+
     // sector borders are out of image bounds then push sector back into image
     if (x+width >= output.cols){
         x = output.cols - width - 1;
     }
-    
+
     if (y+height >= output.rows){
         y = output.rows - height - 1;
     }
-    
+
     if (x < 0){
         x = 0;
     }
-    
+
     if (y<0){
         y = 0;
     }
-    
+
     // cropp image
     output = output(Rect(x,y,width,height));
-    
-    
+
+
     // update current offset to image origin
     offset[_picture].x = x/scale;
     offset[_picture].y = y/scale;
-    
-    
+
+
     // update center of zoom
     if(zoomCenter[_picture].x > inputs[_picture].cols - width/2/scale){
         zoomCenter[_picture].x = inputs[_picture].cols - width/2/scale;
     }
-    
+
     if(zoomCenter[_picture].y > inputs[_picture].rows - height/2/scale){
         zoomCenter[_picture].y = inputs[_picture].rows - height/2/scale;
     }
-    
+
     if(zoomCenter[_picture].x < width/2/scale){
         zoomCenter[_picture].x = width/2/scale;
     }
-    
+
     if(zoomCenter[_picture].y < height/2/scale){
         zoomCenter[_picture].y = height/2/scale;
     }
-    
-    
+
+
     vector<PointPair> myPointPairs;
 
 
@@ -666,56 +666,56 @@ void paint(Picture _picture){
     myPointPairs = getAllPointPairs();
 
 	}
-    
+
 
     myPointPairs.insert(myPointPairs.begin(),pointPairs.begin(),pointPairs.end());
 
-    
+
 
     // draw all pointpairs
     for (unsigned int i = 0; i < myPointPairs.size(); i++) {
-        
+
         Point2i point = (myPointPairs[i].points[_picture]-offset[_picture])*scale;
-        
+
         circle(output,  point, 2, myPointPairs[i].color,2);
-        
+
     }
-    
+
     if (pointFound[_picture]){
-        
+
         Point2i point = (extraPoint[_picture]-offset[_picture])*scale;
-        
+
         circle(output, point, 2, currentColor,2);
     }
-    
+
     imshow(enum2String(_picture), output);
 }
 
 void addPoint(Point2i _point, Picture _picture){
-    
+
     //scale point back to image scale
     Point2i point = offset[_picture] +_point*(1.0/scaleFactor(_picture));
-    
+
     // if a point already exists in the neighbourhood that do not add this point
     for (unsigned int i = 0; i < pointPairs.size(); i++) {
         Point2i dif = point - pointPairs[i].points[_picture];
-        
+
         if ((dif.x*dif.x + dif.y*dif.y) <= 50.0){
-            
+
             return;
-            
+
         }
-        
+
     }
-    
-    
+
+
     if(_picture == SCAN){
-        
-        
+
+
         // all pixels of the coordinateMap have a correspondence to a coordinate. if this is one of them then look in the close neighbourhood if there pixels with coordinate correspondence an take the closest
         Vec3f coordinates = coordinateMap.at<Vec3f>(point);
         if(coordinates[0] == 0 && coordinates[1] == 0 && coordinates[2] == 0){
-            
+
             vector<Point2i> points;
 
             for (int x = point.x-3; x < point.x+3; ++x)
@@ -728,17 +728,17 @@ void addPoint(Point2i _point, Picture _picture){
                     	x < coordinateMap.cols)
                     {
                     coordinates = coordinateMap.at<Vec3f>(Point2i(x,y));
-                    
+
                     if(coordinates[0] != 0 || coordinates[1] != 0 || coordinates[2] != 0){
-                        
+
                         points.push_back(Point2i(x,y));
-                        
-                        
+
+
                     }
                     }
                 }
             }
-            
+
             Point2i nearest;
             float distance = std::numeric_limits<float>::max();
             for (unsigned int i = 0; i < points.size(); ++i)
@@ -749,45 +749,45 @@ void addPoint(Point2i _point, Picture _picture){
                     distance = diff.x*diff.x + diff.y*diff.y;
                 }
             }
-            
+
             if(points.size() > 0){
-                
+
                 cout << "alternative point " << nearest << " instead of "<<point <<" chosen!"<<endl;
                 point = nearest;
-                
+
             }else{
                 cout << "no coordinate found at "<<point<<endl;
                 return;
             }
         }
     }
-    
+
     extraPoint[_picture] = point;
     pointFound[_picture] = true;
-    
+
     // if this is the partner to an already selected point then save the point pair
     if(!pointFound[togglePicture(_picture)]){
         currentColor = randomColor();
     }else{
-        
+
         PointPair pp;
-        
+
         pp.points[PHOTO] = extraPoint[PHOTO];
         pp.points[SCAN] = extraPoint[SCAN];
         pp.coordinates = getCoordinates(extraPoint[SCAN]);
         pp.color = currentColor;
-        
+
         lastCreatedIndex = pointPairs.size();
-        
+
         pointPairs.push_back(pp);
         pointFound[PHOTO] = false;
         pointFound[SCAN] = false;
-        
-        
+
+
     }
-    
+
     paint(_picture);
-    
+
 }
 
 void deletePoint(Point2i _point, Picture _picture){
@@ -796,20 +796,20 @@ void deletePoint(Point2i _point, Picture _picture){
     float smallestValue = std::numeric_limits<float>::max();
     // the selcetion with the cursor is not precise enaugh to select the exact pixel that is to be deleted, so search for a point in the neighbourhood and delete that
     for (int i = 0; i < (int) pointPairs.size(); i++) {
-        
+
         Point2i dif = offset[_picture] + _point*(1.0/scaleFactor(_picture)) - pointPairs[i].points[_picture];
-        
+
         if ((dif.x*dif.x + dif.y*dif.y) <= 100.0){
-        	
+
         	if ((dif.x*dif.x + dif.y*dif.y) < smallestValue){
         		smallestValue = (dif.x*dif.x + dif.y*dif.y);
         		smallestIndex = i;
         	}
-            
+
         }
-        
+
     }
-    
+
     if(smallestIndex != -1){
 
     Point2i dif1 = offset[_picture]+_point*(1.0/scaleFactor(_picture)) - extraPoint[_picture];
@@ -824,29 +824,29 @@ void deletePoint(Point2i _point, Picture _picture){
     }else{
 
     if( smallestIndex == (int) pointPairs.size() -1 && !pointFound[SCAN] && !pointFound[PHOTO] && lastCreatedIndex == smallestIndex){
-                
+
                 PointPair current = pointPairs[smallestIndex];
                 pointPairs.erase(pointPairs.begin()+smallestIndex);
-                
+
                 pointFound[_picture] = false;
-                
+
                 extraPoint[togglePicture(_picture)] = pointPairs[smallestIndex].points[togglePicture(_picture)];
                 pointFound[togglePicture(_picture)] = true;
                 currentColor = current.color;
-                
+
             }else{
-                
+
                 pointPairs.erase(pointPairs.begin()+smallestIndex);
-                
+
             }
-            
+
             paint(SCAN);
             paint(PHOTO);
         }
     }else{
 
     	Point2i dif = offset[_picture]+_point*(1.0/scaleFactor(_picture)) - extraPoint[_picture];
-    
+
     float dist =(dif.x*dif.x + dif.y*dif.y);
 
 
@@ -863,90 +863,90 @@ void deletePoint(Point2i _point, Picture _picture){
 void mouseCallBack(int event, int x, int y, int flags, void* _picture)
 {
     Picture * picture = (Picture *) _picture;
-    
+
     Point2i point= Point2i(x,y);
-    
+
     if  ( event == EVENT_LBUTTONDOWN )
     {
         addPoint(point,*picture);
-        
-        
+
+
     }
     else if  ( event == EVENT_RBUTTONDOWN )
     {
-        
+
         deletePoint(point,*picture);
-        
+
     }else if(event == EVENT_MOUSEMOVE  ){
         lastMousePosition.position =  offset[*picture] + point*(1.0/scaleFactor(*picture));
         lastMousePosition.picture = *picture;
     }
-    
+
 }
 
 
 void zoomIn(){
-    
+
     zoom[lastMousePosition.picture] /= zoomIncrement;
     zoomCenter[lastMousePosition.picture] = lastMousePosition.position;
     paint(lastMousePosition.picture);
-    
+
 }
 void zoomOut(){
-    
-    
-    
+
+
+
     zoom[lastMousePosition.picture] *= zoomIncrement;
     if (zoom[lastMousePosition.picture] > 1.0) {
-        
+
         zoom[lastMousePosition.picture] = 1.0;
-        
+
     }
     paint(lastMousePosition.picture);
-    
-    
-    
+
+
+
 }
 
 
 void trackBarCallback(int,void* _picture){
-    
+
     Picture * picture = (Picture *) _picture;
-    
+
     if ((windowHeight[*picture]*inputs[*picture].cols)/inputs[*picture].rows < minWindowWidth) {
         windowHeight[*picture] = (minWindowWidth*inputs[*picture].rows)/inputs[*picture].cols;
     }
     paint(*picture);
-    
+
 }
 
 void toggleImage(){
-    
+
     int imageInt = (int) currentImage + 1;
-    
+
     if(imageInt > 1){
         imageInt = 0;
     }
     currentImage = (Image) imageInt;
-    
+
     switch(currentImage){
-            
+
         case Image::RANGE:
             inputs[SCAN] = rangeImage;
             break;
-            
+
         case Image::REFLECTANCE:
             inputs[SCAN] = reflectanceImage;
             break;
-            
-            
+
+
     }
     paint(SCAN);
-    
+
 }
 
 Mat rotateImage(Mat _input){
-    
+
     // counter clock wise
     Mat output = _input.clone();
     if(info.rotatePhoto){
@@ -954,7 +954,7 @@ Mat rotateImage(Mat _input){
         flip(output, output,0);
     }
     return output;
-    
+
 }
 
 vector<PointPair> getAllPointPairs(){
@@ -969,7 +969,7 @@ vector<PointPair> output;
 	vector<string> extensions;
     extensions.push_back(".ppr");
     extensions.push_back(".PPR");
-    
+
 
 	 boost::filesystem::directory_iterator end_itr;
 	        for (boost::filesystem::directory_iterator itr(info.outDir); itr != end_itr; ++itr)
@@ -982,49 +982,49 @@ vector<PointPair> output;
 	                        break;
 	                    }
 	                }
-	                
+
 	            }
 	        }
-	    
+
 
 
 	    for (unsigned int i = 0; i < paths.size(); ++i)
 	    {
 	    	if(boost::filesystem::exists(paths[i])){
-        
+
         ifstream inputFile;
         inputFile.open(paths[i]);
         string buffer;
-        
+
         while (getline(inputFile, buffer)) {
-            
+
             stringstream sstm;
             sstm << buffer;
             string number;
-            
+
             PointPair ppr;
             Point3f scanPoint;
             Point2i photoPoint;
-            
+
             getline(sstm, number, ' ');
             photoPoint.x = stoi(number);
             getline(sstm, number, ' ');
             photoPoint.y = stoi(number);
-            
+
             getline(sstm, number, ' ');
             scanPoint.x = stof(number);
-            
+
             getline(sstm, number, ' ');
             scanPoint.y = stof(number);
-            
+
             getline(sstm, number, ' ');
             scanPoint.z = stof(number);
-            
+
             ppr.points[PHOTO] = getRotatedPoint(photoPoint, PHOTO);
             ppr.color = randomColor();
-            
+
             //ppr files dont include the oixel value of the 3D coordinate in the panorama image, so search vor the 3D coordinate in the image and get the corresponding pixel
-            
+
             Point2i nearest;
 	    float distance = std::numeric_limits<float>::max();
             for(int y = 0; y < coordinateMap.rows; y++){
@@ -1043,7 +1043,7 @@ vector<PointPair> output;
                 output.push_back(ppr);
         }
     }
-	    	
+
 	    }
 
 	    allPointPairs = output;
@@ -1064,46 +1064,46 @@ return output;
 
 
 vector<PointPair> readPPRfile(int _scanNumber, int _photoNumber, int _pprFileIndex){
-    
+
     vector<PointPair> output;
-    
+
     string filename = info.outDir+"photo"+to_string(_scanNumber*info.photosPerScan+_photoNumber, 3)+"_"+to_string(_pprFileIndex)+".ppr";
     cout << "reading " << filename;
     if(boost::filesystem::exists(filename)){
-        
+
         ifstream inputFile;
         inputFile.open(filename);
         string buffer;
-        
+
         while (getline(inputFile, buffer)) {
-            
+
             stringstream sstm;
             sstm << buffer;
             string number;
-            
+
             PointPair ppr;
             Point3f scanPoint;
             Point2i photoPoint;
-            
+
             getline(sstm, number, ' ');
             photoPoint.x = stoi(number);
             getline(sstm, number, ' ');
             photoPoint.y = stoi(number);
-            
+
             getline(sstm, number, ' ');
             scanPoint.x = stof(number);
-            
+
             getline(sstm, number, ' ');
             scanPoint.y = stof(number);
-            
+
             getline(sstm, number, ' ');
             scanPoint.z = stof(number);
-            
+
             ppr.points[PHOTO] = getRotatedPoint(photoPoint, PHOTO);
             ppr.color = randomColor();
-            
+
             //ppr files dont include the pixel value of the 3D coordinate in the panorama image, so search vor the 3D coordinate in the image and get the corresponding pixel
-            
+
             Point2i nearest;
 	    float distance = std::numeric_limits<float>::max();
             for(int y = 0; y < coordinateMap.rows; y++){
@@ -1125,30 +1125,30 @@ vector<PointPair> readPPRfile(int _scanNumber, int _photoNumber, int _pprFileInd
         cout << " ... it does not exist!";
     }
     cout << endl;
-    
+
     return output;
-    
+
 }
 
 
 void writePPRfile(vector<PointPair> _pointPairs, int _scanNumber, int _photoNumber){
-    
-    
+
+
     ofstream output;
-    
+
     string filename = info.outDir+"photo"+to_string(_scanNumber*info.photosPerScan+_photoNumber, 3)+"_"+to_string(currentPPRFileIndex)+".ppr";
     cout<<"writing "<< filename;
-    
+
     if(boost::filesystem::exists(filename)){
-        
+
         cout<< " ... it exists and will be replaced!";
-        
+
     }
     cout<<endl;
-    
+
     output.open (filename);
-    
-    
+
+
     for (unsigned int i = 0; i < _pointPairs.size(); i++) {
         Point2i photoPoint = getUnrotatedPoint(_pointPairs[i].points[PHOTO], PHOTO);
 
@@ -1159,19 +1159,19 @@ void writePPRfile(vector<PointPair> _pointPairs, int _scanNumber, int _photoNumb
                     << _pointPairs[i].coordinates.y << " "
                     << _pointPairs[i].coordinates.z << " "<<endl;
     }
-    
+
     output.close();
 
     pprChanged = true;
-    
+
 }
 
 
 Mat readPhoto(int _scanNumber, int _photoNumber){
-    
+
     string filename = info.photoInDir+"photo"+to_string(_scanNumber*info.photosPerScan+_photoNumber, 3)+"_"+to_string(currentHDRIndex)+"."+panoramaFormatToFileFormatString(info.photoFormat);
     cout << "reading " << filename;
-    
+
     Mat output;
     if(boost::filesystem::exists(filename)){
         output = rotateImage(imread(filename));
@@ -1179,12 +1179,12 @@ Mat readPhoto(int _scanNumber, int _photoNumber){
         cout << " ... it does not exist!";
     }
     cout << endl;
-    
+
     return output;
 }
 
 void nextHDRPhoto(int _scanNumber, int & _currentPhoto){
-    
+
     currentHDRIndex++;
     if(currentHDRIndex >= info.photosPerPosition){
         currentHDRIndex = 0;
@@ -1192,19 +1192,19 @@ void nextHDRPhoto(int _scanNumber, int & _currentPhoto){
 
     inputs[PHOTO]= readPhoto(_scanNumber, _currentPhoto);
     paint(PHOTO);
-    
+
 }
 void lastHDRPhoto(int _scanNumber, int & _currentPhoto){
-    
+
     currentHDRIndex--;
     if(currentHDRIndex < 0){
         currentHDRIndex = info.photosPerPosition-1;
     }
 
-    
+
     inputs[PHOTO]= readPhoto(_scanNumber, _currentPhoto);
     paint(PHOTO);
-    
+
 }
 
 bool nextPattern(vector<PointPair> _pointPairs, int _scanNumber, int _photoNumber){
@@ -1244,43 +1244,43 @@ void lastPattern(vector<PointPair> _pointPairs, int _scanNumber, int _photoNumbe
   }
 
 void readScan(int s, bool & scanserver){
-    
-    
+
+
     scan_cv scan(info.scanInDir, s, info.scanFormat, scanserver, info.scannerType, info.loadOct, info.saveOct, true, true, -1, -1, info.minReflectance, info.maxReflectance);
-    
+
     scan.convertScanToMat();
-    
-    
+
+
     //init the panorama
     fbr::panorama pImage;
     info.panoramaSizeOptimization = true;
     pImage.init(info.panoramaWidth, info.panoramaHeight, info.projectionMethod, info.numberOfImages, info.projectionParam, fbr::FARTHEST, scan.getZMin(), scan.getZMax(), info.minHorizAngle, info.maxHorizAngle, info.minVertAngle, info.maxVertAngle, info.panoramaSizeOptimization, true, true, true);
-    
+
     //create panorama
     pImage.createPanorama(scan.getMatScan(), scan.getMatScanColor());
     //get the new panorama image size incase of optimized panorama size
     info.panoramaWidth = pImage.getImageWidth();
     info.panoramaHeight = pImage.getImageHeight();
-    
-    
+
+
     coordinateMap = pImage.getMap();
     rangeImage = pImage.getRangeImage();
     reflectanceImage = pImage.getReflectanceImage();
-    
-    
+
+
     //normalize range image
-    
+
     float rangeMin = std::numeric_limits<float>::max();
     float rangeMax = std::numeric_limits<float>::min();
-    
-    
+
+
     for(int y = 0; y < rangeImage.rows; y++){
         for(int x = 0; x < rangeImage.cols; x++){
-            
+
             float currentRange = rangeImage.at<float>(y,x);
-            
+
             if(currentRange >= info.minRange && currentRange <= info.maxRange && fabs(currentRange) > 0.000001){
-                
+
                 if(currentRange < rangeMin){
                     rangeMin = currentRange;
                 }
@@ -1288,24 +1288,24 @@ void readScan(int s, bool & scanserver){
                     rangeMax = currentRange;
                 }
             }
-            
+
         }
     }
-    
+
     cv::Mat rangeTemp;
     rangeTemp.create(rangeImage.rows,rangeImage.cols,CV_8UC3);
     cv::Mat reflectanceTemp;
     reflectanceTemp.create(reflectanceImage.rows,reflectanceImage.cols,CV_8UC3);
     Vec3b zeros3b = Vec3b(0,0,0);
     //noramlize reflectance
-    
+
     for(int y = 0; y < rangeTemp.rows; y++){
         for(int x = 0; x < rangeTemp.cols; x++){
-            
+
             float currentRange = rangeImage.at<float>(y,x);
             unsigned char currentReflectance = reflectanceImage.at<unsigned char>(y,x);
             reflectanceTemp.at<Vec3b>(y,x) = Vec3b(currentReflectance,currentReflectance,currentReflectance);
-            
+
             if( fabs(currentRange) > 0.000001 ){
                 int value = (int)(255.0*((currentRange-rangeMin)/(rangeMax)));
                 if(value > 255) value = 255;
@@ -1315,10 +1315,10 @@ void readScan(int s, bool & scanserver){
             }else{
                 rangeTemp.at<Vec3b>(y,x) = zeros3b;
             }
-            
+
         }
     }
-    
+
     rangeImage = rangeTemp;
     reflectanceImage = reflectanceTemp;
 }
@@ -1329,26 +1329,26 @@ int main(int argc, char** argv){
     if(strcmp(CV_VERSION, "2.4.9") != 0) {
         cout << "Please notice that this code was written for Opencv 2.4.9." << endl;
     }
-    
+
     cout << "using boost " << BOOST_VERSION / 100000 << "." << BOOST_VERSION / 100 % 1000 << "." << BOOST_VERSION % 100 <<endl;
     if(BOOST_VERSION != 105500)cout << "Please notice that this code was written for boost 1.55.0."<<endl;
-   
+
     Mat loading;
     loading = Mat::zeros(300,600,CV_8UC3);
     currentHDRIndex = 0;
     putText(loading,"loading ...", Point2i(100,150),CV_FONT_HERSHEY_SIMPLEX,2.0,Scalar(50,50,255),5);
-    
+
     parssArgs(argc, argv, info);
     printInfo(info);
-    
+
     bool scanserver = false;
     int currentPhoto;
     for(int s = info.start; s <= info.end; s++){
-        
 
-        
+
+
         readScan(s,scanserver);
-    
+
         pointFound[PHOTO] = false;
         pointFound[SCAN] = false;
         zoom[SCAN] = 1.0;
@@ -1366,34 +1366,34 @@ int main(int argc, char** argv){
         currentPPRFileIndex = 0;
         seeAll = true;
         pprChanged = true;
-        
+
         namedWindow(enum2String(SCAN),WINDOW_AUTOSIZE);
         namedWindow(enum2String(PHOTO),WINDOW_AUTOSIZE);
-        
-        
-        
+
+
+
         setMouseCallback(enum2String(SCAN), mouseCallBack, (void*)&scanEnum);
         setMouseCallback(enum2String(PHOTO), mouseCallBack, (void*)&photoEnum);
-        
+
         namedWindow("CONTROLS",WINDOW_NORMAL);
         resizeWindow("CONTROLS", 600, 40);
-        
-        
+
+
         createTrackbar("ScanSize", "CONTROLS", &windowHeight[SCAN], maxWindowHeight, &trackBarCallback,(void*)&scanEnum);
         createTrackbar("PhotoSize", "CONTROLS", &windowHeight[PHOTO], maxWindowHeight,&trackBarCallback,(void*)&photoEnum);
-        
+
         inputs[SCAN] = rangeImage;
         currentImage = RANGE;
-        
+
         inputs[PHOTO] = readPhoto(s,currentPhoto);
         pointPairs = readPPRfile(s,currentPhoto, currentPPRFileIndex);
-        
+
 
         paint(SCAN);
         paint(PHOTO);
-        
 
-        
+
+
         int key = 0;
         char cKey =0;
         while(key != 1048603 && key != 27){
@@ -1409,9 +1409,9 @@ int main(int argc, char** argv){
             if(key == 1048692 || cKey == 't'){
                 toggleImage();
             }
-            
+
             if(cKey == 'w' || key == 1048695){
-                
+
                 zoomCenter[lastMousePosition.picture].y -= (int) (0.01*(float)inputs[lastMousePosition.picture].rows/scaleFactor(lastMousePosition.picture));
                 paint(lastMousePosition.picture);
             }
@@ -1427,11 +1427,11 @@ int main(int argc, char** argv){
                 zoomCenter[lastMousePosition.picture].x += (int) (0.01*(float)inputs[lastMousePosition.picture].cols/scaleFactor(lastMousePosition.picture));
                 paint(lastMousePosition.picture);
             }
-            
+
             if(key == 1113939 || key == 65363){
                 nextHDRPhoto(s, currentPhoto);
-                
-    
+
+
             }
             if(key == 1113937 || key == 65361){
                 lastHDRPhoto(s, currentPhoto);
@@ -1453,14 +1453,14 @@ int main(int argc, char** argv){
                 paint(PHOTO);
                 paint(SCAN);
             }
-            
+
         }
-        
+
         writePPRfile(pointPairs,s,currentPhoto);
-        
+
         imshow(enum2String(SCAN),loading);
         imshow(enum2String(PHOTO),loading);
         waitKey(100);
     }
-    
+
 }

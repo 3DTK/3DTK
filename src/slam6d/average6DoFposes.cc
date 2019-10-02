@@ -67,7 +67,7 @@ void usage(char* prog)
 	  << "  a file containg in every line a 4x4 matrix is read and an" << endl
 	  << "  average 6DoF pose is computed" << endl << endl;
 }
-    
+
 
 int main(int argc, char **argv)
 {
@@ -77,7 +77,7 @@ int main(int argc, char **argv)
   char FileName[255];
 
   if (argc != 2) usage(argv[0]);
-  
+
   snprintf(FileName,255,"%s",argv[1]);
   pose_in.open(FileName);
   if (!pose_in.good()) {
@@ -116,10 +116,10 @@ int main(int argc, char **argv)
   M(3,3) = avgMatrix[10];
 
   cout << " det= " << M.Determinant() << endl;
- 
+
   SymmetricMatrix HHs(3);
   HHs << M.t() * M;
-  
+
   /// get the eigenvalues of HH
   DiagonalMatrix eigenvalues(3);
   Matrix eigenvectorsMatrix(3, 3);
@@ -154,7 +154,7 @@ int main(int argc, char **argv)
 
   cout << " det= " << R.Determinant() << endl << endl;
 
-  
+
   return 0;
 }
 

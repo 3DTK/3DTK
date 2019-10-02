@@ -15,7 +15,7 @@
 
 namespace fbr{
   /**
-   * @class feature_mathcer : match features that has same descriptor method. 
+   * @class feature_mathcer : match features that has same descriptor method.
    * @param matches set of matched features
    * @param mMethod matcher_method
    * @param knn incase of knn search indecate the number of nearest neighbors
@@ -31,10 +31,10 @@ namespace fbr{
     unsigned int nOfMatches;
     unsigned int nOfFilteredMatches;
     matching_filtration_method mFiltrationMethod;
-    
+
     void init(matcher_method method, int k, double r, matching_filtration_method filtration);
     void findMatches(feature qFeature, feature tFeature);
-    
+
   public:
     feature_matcher();
     feature_matcher(matcher_method method);

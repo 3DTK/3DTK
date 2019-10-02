@@ -1,14 +1,14 @@
 /*
  * ann_kd implementation
  *
- * Copyright (C) Andreas Nuechter, Ulugbek Makhmudov 
+ * Copyright (C) Andreas Nuechter, Ulugbek Makhmudov
  *
  * Released under the GPL version 3.
  *
  */
 
-/** @file 
- *  @brief Encapsules the implementation of ANN k-d trees. 
+/** @file
+ *  @brief Encapsules the implementation of ANN k-d trees.
  *  @author Ulugbek Makhmudov, Jacobs University Bremen, Bremen, Germany.
  *  @author Andreas Nuechter, Jacobs University Bremen, Bremen, Germany.
  */
@@ -18,7 +18,7 @@
 #endif
 
 #include "slam6d/ann_kd.h"
-#include "slam6d/globals.icc"          
+#include "slam6d/globals.icc"
 
 #include <iostream>
 using std::cout;
@@ -51,10 +51,10 @@ ANNtree::ANNtree(PointerArray<double>&_pts, int n)
   }
 
   // links to the constructor of ANNkd_tree
-  annkd = new ANNkd_tree(pts, n, 3, 1, ANN_KD_SUGGEST); 
+  annkd = new ANNkd_tree(pts, n, 3, 1, ANN_KD_SUGGEST);
   cout << "ANNkd_tree was generated with " << n << " points" << endl;
   nn = new ANNdist[1];
-  nn_idx = new ANNidx[1];    
+  nn_idx = new ANNidx[1];
 }
 
 /**
@@ -69,7 +69,7 @@ ANNtree::~ANNtree()
   delete annkd; //links to the destructor of ANNkd_tree
   delete [] nn;
   delete [] nn_idx;
-  delete [] pts[0]; 
+  delete [] pts[0];
   delete [] pts;
 }
 
@@ -81,7 +81,7 @@ ANNtree::~ANNtree()
  * @param maxdist2 maximal search distance.
  * @param threadNum Thread number, for parallelization
  * @return Pointer to the closest point
- */  
+ */
 double *ANNtree::FindClosest(double *_p, double maxdist2, int threadNum) const
 {
 
@@ -89,9 +89,9 @@ double *ANNtree::FindClosest(double *_p, double maxdist2, int threadNum) const
   annkd->annkSearch(_p, 1, nn_idx, nn, 0.0);
 
   int idx = nn_idx[0];
- 
+
   if (Dist2(_p, pts[idx]) > maxdist2) return 0;
 
   return pts[idx];
-}  
+}
 

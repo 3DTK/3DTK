@@ -90,7 +90,7 @@ void Mesh::save(std::string modelPath) {
   string line;
   for (float *v : vertices) {
     line = "v " + to_string(v[0]) + " " + to_string(v[1]) + " " + to_string(v[2]);
-    ofs << line << endl; 
+    ofs << line << endl;
   }
   for (int *f : faces) {
     line = "f " + to_string(f[0]) + " " + to_string(f[1]) + " " + to_string(f[2]);
@@ -98,7 +98,7 @@ void Mesh::save(std::string modelPath) {
   }
   for (float *n : normals) {
     line = "n " + to_string(n[0]) + " " + to_string(n[1]) + " " + to_string(n[2]);
-    ofs << line << endl; 
+    ofs << line << endl;
   }
   ofs.close();
 }

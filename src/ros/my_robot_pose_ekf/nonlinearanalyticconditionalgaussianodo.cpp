@@ -58,7 +58,7 @@ namespace BFL
 	double vel_trans = ConditionalArgumentGet(1)(1);
 	double yaw = ConditionalArgumentGet(0)(6);
 
-	df(1,3)=-vel_trans*sin(yaw); 
+	df(1,3)=-vel_trans*sin(yaw);
 	df(2,3)= vel_trans*cos(yaw);
 
 	return df;

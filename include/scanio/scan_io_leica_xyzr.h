@@ -20,15 +20,15 @@
  */
 class ScanIO_leica_xyzr : public ScanIO {
 public:
-  virtual void readScan(const char* dir_path, 
-			const char* identifier, 
-			PointFilter& filter, 
-			std::vector<double>* xyz, 
-			std::vector<unsigned char>* rgb, 
-			std::vector<float>* reflectance, 
-			std::vector<float>* temperature, 
-			std::vector<float>* amplitude, 
-			std::vector<int>* type, 
+  virtual void readScan(const char* dir_path,
+			const char* identifier,
+			PointFilter& filter,
+			std::vector<double>* xyz,
+			std::vector<unsigned char>* rgb,
+			std::vector<float>* reflectance,
+			std::vector<float>* temperature,
+			std::vector<float>* amplitude,
+			std::vector<int>* type,
 			std::vector<float>* deviation,
       std::vector<double>* normal);
 

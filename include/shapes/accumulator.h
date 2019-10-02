@@ -11,13 +11,13 @@ double* polar2normal(double theta, double phi);
 /**
   * Accumulator for the Hough Transform. For a detailed explanation of the
   * different accumulator types please see:
-  * Dorit Borrmann, Jan Elseberg, Kai Lingemann, and Andreas Nüchter. 
-  * A Data Structure for the 3D Hough Transform for Plane Detection. 
-  * In Proceedings of the 7th IFAC Symposium on Intelligent Autonomous Vehicles (IAV '10), 
-  * Lecce, Italy, September 2010. 
+  * Dorit Borrmann, Jan Elseberg, Kai Lingemann, and Andreas Nüchter.
+  * A Data Structure for the 3D Hough Transform for Plane Detection.
+  * In Proceedings of the 7th IFAC Symposium on Intelligent Autonomous Vehicles (IAV '10),
+  * Lecce, Italy, September 2010.
   */
 class Accumulator {
-  
+
   public:
     /** Contains the configuration for the accumulator */
     ConfigFileHough myConfigFileHough;
@@ -47,7 +47,7 @@ class Accumulator {
     virtual void accumulate(Point p) = 0;
     /** Accumulates all the cells that correspond to planes that go through p.
      * @param p the point that is transformed into Hough Space
-     * @return the plane whose counter has exceeded the 
+     * @return the plane whose counter has exceeded the
      * ConfigFileHough.GetAccumulatorMax , or {-1,_,_}
      */
     virtual double* accumulateRet(Point p) = 0;
@@ -57,7 +57,7 @@ class Accumulator {
      * Hough Transform of p
      */
     virtual int* accumulateAPHT(Point p) = 0;
-    /** 
+    /**
      * Given the representation (rho, theta, phi) of a plane, the function
      * calculates the center of the cell that this plane belongs to.
      * A plane is represented by:
@@ -81,7 +81,7 @@ class Accumulator {
      * Returns a sorted list of the all cells in the accumulator.
      * @return a sorted multiset containing the cells as (counter, rho_index, theta_index, phi_index)
      */
-    virtual std::multiset<int*, maxcompare>* getMax() = 0; 
+    virtual std::multiset<int*, maxcompare>* getMax() = 0;
     /**
      * Cleans the accumulator using a very simple sliding window strategy. A
      * quadratic window is moved over the accumulator. In each step all the
@@ -109,7 +109,7 @@ class AccumulatorSimple : public Accumulator {
     double* getMax(double &rho, double &theta, double &phi);
     double* getMax(int* cell);
     void peakWindow(int size);
-    std::multiset<int*, maxcompare>* getMax(); 
+    std::multiset<int*, maxcompare>* getMax();
   private:
     int ***accumulator;
 };
@@ -132,7 +132,7 @@ class AccumulatorCube : public Accumulator {
     int* accumulateAPHT(Point p);
     double* getMax(double &rho, double &theta, double &phi);
     double* getMax(int* cell);
-    std::multiset<int*, maxcompare>* getMax(); 
+    std::multiset<int*, maxcompare>* getMax();
   private:
     int nrCells;
     int ****accumulator;
@@ -159,7 +159,7 @@ class AccumulatorBall : public Accumulator {
     int* accumulateAPHT(Point p);
     double* getMax(double &rho, double &theta, double &phi);
     double* getMax(int* cell);
-    std::multiset<int*, maxcompare>* getMax(); 
+    std::multiset<int*, maxcompare>* getMax();
     void peakWindow(int size);
   private:
     int ***accumulator;
@@ -185,7 +185,7 @@ class AccumulatorBallI : public Accumulator {
     int* accumulateAPHT(Point p);
     double* getMax(double &rho, double &theta, double &phi);
     double* getMax(int* cell);
-    std::multiset<int*, maxcompare>* getMax(); 
+    std::multiset<int*, maxcompare>* getMax();
     void peakWindow(int size);
   private:
     int ***accumulator;

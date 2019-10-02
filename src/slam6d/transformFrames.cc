@@ -54,16 +54,16 @@ int parse_options(int argc, char **argv, std::string &dir, int &nrOfPts, std::st
   po::options_description input("Input options");
   input.add_options()
     ("start,s", po::value<int>(&start)->default_value(0),
-     "start at scan <arg> (i.e., neglects the first <arg> scans) " 
+     "start at scan <arg> (i.e., neglects the first <arg> scans) "
      "[ATTENTION: counting naturally starts with 0]")
     ("end,e", po::value<int>(&end)->default_value(-1),
      "end after scan <arg>")
     ("input,i", po::value<string>(&inputFile),
-     "number of points (= lines from input file) to use for computing" 
-     "transformation (input file line syntax (mapping between Points" 
+     "number of points (= lines from input file) to use for computing"
+     "transformation (input file line syntax (mapping between Points"
      "p1 and p2): p1x p1y p1z p2x p2y p2z\n)")
     ("pointNr,n", po::value<int>(&nrOfPts)->default_value(0),
-     "number of points (= lines from input file) to use for computing"     	
+     "number of points (= lines from input file) to use for computing"
      "transformation")
     ("xyx,x", po::bool_switch(&inputInXYZ)->default_value(false),
      "frame files are in xyz format (right handed coordinate system in m);"
@@ -321,7 +321,7 @@ int main(int argc, char **argv)
     int    start = 0, end = -1;
     bool inputInXYZ = false;
     bool reverseOrder = false;
-  
+
     parse_options(argc, argv, dir, nrOfPts, inputFile, start, end, inputInXYZ, reverseOrder);
 
     if(inputFile.empty()) {
@@ -331,7 +331,7 @@ int main(int argc, char **argv)
 
     double resTrans[16];
     computeTransformation(nrOfPts, inputFile, dir, reverseOrder, resTrans);
-    
+
     if(end < start) std::cerr << "No frames will be transformed!" << std::endl;
     modifyFrames(resTrans, dir, start, end, inputInXYZ);
 }

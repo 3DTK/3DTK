@@ -219,7 +219,7 @@ void writeTrajectory(rosbag::Bag &bag, tf::TransformListener *l) {
   o.open("trajectory.txt");
   double rx,ry,rz;
 
-  
+
   BOOST_FOREACH(rosbag::MessageInstance const m, tfview)
   {
     if ( m.isType<nav_msgs::Odometry>() ) {
@@ -266,9 +266,9 @@ void addStaticTransforms(tf::TransformListener *l, ros::Time t) {
  */
 tf::TransformListener *calculateTrajectoryFromOdom(rosbag::Bag &bag) {
   rosbag::View tfview(bag, rosbag::TopicQuery("/odom"));
-  
+
   tf::TransformListener *l = new tf::TransformListener( tfview.getEndTime() - tfview.getBeginTime(), false);
-  
+
   BOOST_FOREACH(rosbag::MessageInstance const m, tfview)
   {
     if ( m.isType<nav_msgs::Odometry>() ) {
@@ -303,12 +303,12 @@ tf::TransformListener *calculateTrajectoryFromOdom(rosbag::Bag &bag) {
  *
  */
 tf::TransformListener *calculateTrajectory(rosbag::Bag &bag) {
-  ROS_INFO("before tfview"); 
+  ROS_INFO("before tfview");
   rosbag::View tfview(bag, rosbag::TopicQuery("/tf"));
-  
-  ROS_INFO("before TransformListener"); 
+
+  ROS_INFO("before TransformListener");
   tf::TransformListener *l = new tf::TransformListener( tfview.getEndTime() - tfview.getBeginTime(), false);
-  ROS_INFO("TransformListener"); 
+  ROS_INFO("TransformListener");
   BOOST_FOREACH(rosbag::MessageInstance const m, tfview)
   {
     if ( m.isType<tf::tfMessage>() ) {
@@ -336,7 +336,7 @@ void readTSMapfromBag(rosbag::Bag &bag, std::vector<double> *timestamps) {
   double friegltime;
   ros::Time rostime, frostime;
   ros::Duration d;
-  
+
   BOOST_FOREACH(rosbag::MessageInstance const m, tfview)
   {
     if ( m.isType<riegl::RieglTime>() ) {
@@ -348,8 +348,8 @@ void readTSMapfromBag(rosbag::Bag &bag, std::vector<double> *timestamps) {
       }
 
       timestamps[0].push_back( rtptr->time );
-      timestamps[1].push_back( rtptr->header.stamp.toSec()); 
-    }     
+      timestamps[1].push_back( rtptr->header.stamp.toSec());
+    }
   }
 
 
@@ -363,7 +363,7 @@ int main(int argc, char** argv)
   ros::NodeHandle n;
   ROS_INFO("Node created!\n");
 
-  
+
   // get configuration
   std::string basedir, tsfile, bagfile, rxpfile, outputpath, sickoutputpath;
   bool lines = true;        // TODO: add option to switch this off
@@ -378,7 +378,7 @@ int main(int argc, char** argv)
   bool redoOdometry = false;
   bool redoFilter = false;
   bool stopandgo = false;
-  bool rieglcoord = false; 
+  bool rieglcoord = false;
   bool norobot = false;
   bool linescans = false;
   std::string mapstring = "/odom_combined";
@@ -394,9 +394,9 @@ int main(int argc, char** argv)
   n.param<std::string>("/log/scandir", outputpath, "scan3d/");
   n.param<std::string>("/log/lms100", sickoutputpath, "lms/");
   n.param<std::string>("/log/rxp", rxpfile, "raw.rxp");
-  outputpath = basedir + outputpath; 
+  outputpath = basedir + outputpath;
   sickoutputpath = basedir + sickoutputpath;
-  bagfile =  basedir + bagfile; 
+  bagfile =  basedir + bagfile;
   tsfile =   basedir + tsfile;
   rxpfile =  boost::filesystem::canonical(basedir + rxpfile).string();
   // create directory if it does not yet exist
@@ -425,10 +425,10 @@ int main(int argc, char** argv)
 //  timeMap *tmap = new timeMapLinear(tm);
 //  timeMap *tmap = new timeMapLinearOlsen(tm);
   timeMap *tmap = new timeMapOlsen(tm);
-  calibration cal = calibration(&bag, 
-      calibration::USE_ODOM_WHEEL_BASE | calibration::USE_ODOM_TICKS | 
+  calibration cal = calibration(&bag,
+      calibration::USE_ODOM_WHEEL_BASE | calibration::USE_ODOM_TICKS |
       calibration::USE_RIEGL_X | calibration::USE_RIEGL_Y
-      | calibration::USE_RIEGL_RX | calibration::USE_RIEGL_RY | calibration::USE_RIEGL_RZ 
+      | calibration::USE_RIEGL_RX | calibration::USE_RIEGL_RY | calibration::USE_RIEGL_RZ
 //      | calibration::USE_XSENS_RX | calibration::USE_XSENS_RY | calibration::USE_XSENS_RZ
 //       |  calibration::USE_TIME_OFFSET
       );
@@ -441,7 +441,7 @@ int main(int argc, char** argv)
     if (trajectory) writeTrajectory(bag, cal.getTrajectory());
     if (sickscans) {
       sickImporter si(sickoutputpath, &cal, &bag, sickscans);
-      si.import();      
+      si.import();
     }
 
 
@@ -461,12 +461,12 @@ int main(int argc, char** argv)
         lines, stopandgo, PointType::USE_NONE, start, end);
     sr.import();
 
-    
+
     //////////////////////
    PPevaluator eval(5.0, true);  // mdist parameter TODO
 //    PPevaluatorICP eval(10.0);  // mdist parameter TODO
 std::cout << "start eval with " << (end - start + 1) << " scans" << std::endl;
-//   Planeevaluator eval(basedir, end-start + 1,  0,5); 
+//   Planeevaluator eval(basedir, end-start + 1,  0,5);
     ScanImporter si(rxpfile, tmap, &cal, lines, stopandgo, PointType::USE_NONE, start, end);
     si.setReducer(&sr);
     cal.calibrate(*tmap, eval, si);

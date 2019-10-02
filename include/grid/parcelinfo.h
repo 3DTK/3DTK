@@ -19,16 +19,16 @@ class parcelinfo
 
     /** The z-offset of parcel (absolute coordiante) */
     long offsetZ;
-    
+
     /** The filename of the parcel */
     std::string filename;
-    
+
     /** sets whether the parcel was needed for the last scan or not */
     bool used;
-    
+
     /** The width of the parcel */
     static long parcelwidth;
-    
+
     /** The height of the parcel */
     static long parcelheight;
 
@@ -44,29 +44,29 @@ class parcelinfo
 
     /** @brief == operator */
     bool operator== (const parcelinfo &parcel) const;
-      
+
     /** @brief Checks if the parcel contains a given point*/
     bool contains(long x, long z) const;
 
     /** @brief Sets the used flag (true) */
     void setUsed();
-    
+
     /** @brief Resets the used flag (false) */
     void resetUsed();
-    
+
     /** @brief Returns whether the parcel was needed */
     int wasUsed() const;
 
-    /** 
-     * Returns the x-offset 
+    /**
+     * Returns the x-offset
      * @return the x-offset of the parcel
      */
     inline int getOffsetX() const {
     	return this->offsetX;
     }
 
-    /** 
-     * Returns the z-offset 
+    /**
+     * Returns the z-offset
      * @return the z-offset of the parcel
      */
     inline int getOffsetZ() const {
@@ -74,7 +74,7 @@ class parcelinfo
     }
 
     /**
-     * Getter for the filename 
+     * Getter for the filename
      * @return the filename of the parcel
      */
     inline const std::string& getFilename() const {

@@ -62,7 +62,7 @@ void *dummy(void *nd) {
 ///////////////// constants for RANSAC and number recognition
 void NumberDetector::printNumbers() {
   for (int i = 0; i < 10; i++)
-    cout << detectedNumbers[i].getConsensus() << endl; 
+    cout << detectedNumbers[i].getConsensus() << endl;
   cout << endl;
 }
 
@@ -127,11 +127,11 @@ bool NumberDetector::FindNumber(vector<double *> &points, double plane[4]) {
   for (unsigned int i = 0; i < points.size(); i++) {
     double *p = points[i];
     npoints[i] = new double[4];
-    
+
     npoints[i][0] = -(p[0] * alignxf[0] + p[1] * alignxf[4] + p[2] * alignxf[8]);
     npoints[i][1] = p[0] * alignxf[1] + p[1] * alignxf[5] + p[2] * alignxf[9]; // this should be redundant
     npoints[i][2] = p[0] * alignxf[2] + p[1] * alignxf[6] + p[2] * alignxf[10];
-    
+
     npoints[i][3] = (p[3] - MINREFL ) / (MAXREFL - MINREFL) ;      // scale between 0 and 1
     if (npoints[i][3] > 1.0) npoints[i][3] = 1.0;                  // 0 and 1 _are_ min and max
     if (npoints[i][3] < 0.0) npoints[i][3] = 0.0;
@@ -144,8 +144,8 @@ bool NumberDetector::FindNumber(vector<double *> &points, double plane[4]) {
 
 
   // create a binary image which is used to find a rectangular shape using integral images
-  double lx = maxx - minx; 
-  double lz = maxz - minz; 
+  double lx = maxx - minx;
+  double lz = maxz - minz;
   int maxppm = 0;
   if (lx > 50.0 && lz > 70.0) {  // only if point cloud has the necessary extent  TODO change magic numbers
     int px = lx / IMG_RES +1;
@@ -156,7 +156,7 @@ bool NumberDetector::FindNumber(vector<double *> &points, double plane[4]) {
       image[i] = new int[pz];
     }
 
-    for (int i = 0; i < px; i++) {    
+    for (int i = 0; i < px; i++) {
       for (int j = 0; j < pz; j++) {
         image[i][j] = 0;
       }
@@ -178,7 +178,7 @@ bool NumberDetector::FindNumber(vector<double *> &points, double plane[4]) {
     if (SCORE > MIN_SCORE) {
     #ifndef BINARY_IMG
       maxppm = 4096;     // greyscale
-    #else 
+    #else
       maxppm = 1;        // binary
     #endif
       // create number part of the image with reflectance values...
@@ -189,7 +189,7 @@ bool NumberDetector::FindNumber(vector<double *> &points, double plane[4]) {
             image[i][j] = -1;          // remember pixel where no points were
         }
       }
-      
+
       int NRPTS = 0;
       double center[3]; center[0] = center[1] = center[2] = 0.0;
 
@@ -212,31 +212,31 @@ bool NumberDetector::FindNumber(vector<double *> &points, double plane[4]) {
 
         // points not on the board need not to be used
         if (xi < XX || zi < ZZ || xi > maxx || zi > maxz) continue;
-        
-        // count number of points for normalizing 
-        NRPTS++; 
+
+        // count number of points for normalizing
+        NRPTS++;
         center[0] += points[i][0];
         center[1] += points[i][1];
         center[2] += points[i][2];
 
         // Use smooth binning with 4096 gray values
         if ( (int)xi < px && (int)zi < pz  ) {
-          image[(int)xi][(int)zi] += ( (1.5 - x) * (1.5 - z) * p[3]) * 4096; 
+          image[(int)xi][(int)zi] += ( (1.5 - x) * (1.5 - z) * p[3]) * 4096;
           if (image[(int)xi][(int)zi] > maxppm) maxppm = image[(int)xi][(int)zi];
         }
 
         if ( (int)xi + 1 < px && (int)zi < pz ) {
-          image[(int)xi + 1][(int)zi] += ((x - 0.5) * (1.5 - z) * p[3]) * 4096; 
+          image[(int)xi + 1][(int)zi] += ((x - 0.5) * (1.5 - z) * p[3]) * 4096;
           if (image[(int)xi + 1][(int)zi] > maxppm) maxppm = image[(int)xi+1][(int)zi];
         }
 
         if ( (int)xi < px && (int)zi + 1 < pz  ) {
-          image[(int)xi][(int)zi + 1] += ((1.5 - x) * (z - 0.5) * p[3]) * 4096; 
+          image[(int)xi][(int)zi + 1] += ((1.5 - x) * (z - 0.5) * p[3]) * 4096;
           if (image[(int)xi][(int)zi + 1] > maxppm) maxppm = image[(int)xi][(int)zi+1];
         }
 
         if ( (int)xi + 1 < px && (int)zi + 1 < pz  ) {
-          image[(int)xi + 1][(int)zi + 1] += ((x - 0.5) * (z - 0.5) * p[3]) * 4096; 
+          image[(int)xi + 1][(int)zi + 1] += ((x - 0.5) * (z - 0.5) * p[3]) * 4096;
           if (image[(int)xi + 1][(int)zi + 1] > maxppm) maxppm = image[(int)xi+1][(int)zi+1];
         }
       }
@@ -249,8 +249,8 @@ bool NumberDetector::FindNumber(vector<double *> &points, double plane[4]) {
       // color pixels on the border of the image white ( to remove the black border on the board and the inevitable part where no points are)
       for (int i = XX; i < maxx ; i++) {
         for (int j = ZZ; j < maxz; j++) {
-//          if ( (j < ZZ + WHITE_BORDER - 1 || j > maxz - WHITE_BORDER - 2 ) || ( i < XX + WHITE_BORDER + 1 || i > maxx - WHITE_BORDER  ) ) { 
-          if ( (j < ZZ + WHITE_BORDER  || j > maxz - WHITE_BORDER ) || ( i < XX + WHITE_BORDER  || i > maxx - WHITE_BORDER  ) ) { 
+//          if ( (j < ZZ + WHITE_BORDER - 1 || j > maxz - WHITE_BORDER - 2 ) || ( i < XX + WHITE_BORDER + 1 || i > maxx - WHITE_BORDER  ) ) {
+          if ( (j < ZZ + WHITE_BORDER  || j > maxz - WHITE_BORDER ) || ( i < XX + WHITE_BORDER  || i > maxx - WHITE_BORDER  ) ) {
             image[i][j] = maxppm;
           }
 #ifndef BINARY_IMG
@@ -283,15 +283,15 @@ bool NumberDetector::FindNumber(vector<double *> &points, double plane[4]) {
           } else {
             of << (int)(factor*image[i][j]) << " ";
           }
-#else 
+#else
           if (image[i][j] == -1) {
             ibuffer[l++] = (unsigned char)0;
           } else {
             //val = ((double)image[i][j]-MIN)/((double)(MAX-MIN));
             val = ((double)image[i][j])/((double)(NRPTS));
             if (val > REFL_THRESHOLD) {
-            //if (image[i][j] > 0.25*maxppm) 
-            //if (image[i][j] > 4000) 
+            //if (image[i][j] > 0.25*maxppm)
+            //if (image[i][j] > 4000)
               ibuffer[l++] = (unsigned char)1;
             } else {
               ibuffer[l++] = (unsigned char)0;
@@ -331,8 +331,8 @@ bool NumberDetector::FindNumber(vector<double *> &points, double plane[4]) {
         } else {      // usual case
           detectedNumbers[number].addObservation(number, probability, SCORE, center, plane);
         }
-        
-        res = true; 
+
+        res = true;
       }
     }
 
@@ -354,12 +354,12 @@ bool NumberDetector::FindNumber(vector<double *> &points, double plane[4]) {
 
 
 void NumberDetector::RANSAC(vector<const double *> &scan_points) {
-  // stores 3 sample points    
+  // stores 3 sample points
   vector<double *> ps;
   double a[3], b[3], c[3], plane[4];
   // create octree from the points
   NumberRecOctTree<double> *oct = new NumberRecOctTree<double>(scan_points, 50.0, PointType<double>::USE_REFLECTANCE );
- 
+
   scan_points.clear();
   while(true) {
     ps.clear();
@@ -376,7 +376,7 @@ void NumberDetector::RANSAC(vector<const double *> &scan_points) {
       if (fabs(Len2(plane)) < 0.0001 ) continue;       // points are collinear
       Normalize3(plane);
       if (fabs(plane[1]) > 0.8) continue;              // plane is floor or ceiling
-      
+
       plane[3] = -1.0 * planeDist(c, plane[0], plane[1], plane[2], 0);    // compute distance from origin
       if (plane[3] < 0.0) {                            // flip normal if necessary
         for (int j = 0; j < 4;j++) {
@@ -385,7 +385,7 @@ void NumberDetector::RANSAC(vector<const double *> &scan_points) {
       }
       // count number of points on the plane
       int r =  oct->PointsOnNumber(plane, MAX_DIST_TO_PLANE, c, 105.0);
-      
+
       if (r > MIN_NR_PTS) {
         vector<double * > points;
         oct->PointsOnNumber(plane, MAX_DIST_TO_PLANE, c, 105.0, points);

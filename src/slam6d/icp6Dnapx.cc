@@ -8,7 +8,7 @@
  */
 
 /**
- *  @file 
+ *  @file
  *  @brief Implementation of the ICP error function minimization via
  *         approximation using information from point normals
  *  @author Andreas Nuechter. Jacobs University Bremen gGmbH, Germany
@@ -124,7 +124,7 @@ double icp6D_NAPX::Align(const std::vector<PtPair>& Pairs,
   double cy = sqrt(1.0 - sy*sy);
   double sz = x[2];
   double cz = sqrt(1.0 - sz*sz);
-  
+
   alignxf[0]  = cy*cz;
   alignxf[1]  = sx*sy*cz + cx*sz;
   alignxf[2]  = -cx*sy*cz + sx*sz;
@@ -144,7 +144,7 @@ double icp6D_NAPX::Align(const std::vector<PtPair>& Pairs,
   alignxf[14] = x[5] + centroid_d[2] - alignxf[2]*centroid_d[0] -
     alignxf[6]*centroid_d[1] - alignxf[10]*centroid_d[2];
   alignxf[15] = 1;
-  
+
   return error;
 }
 
@@ -158,7 +158,7 @@ void icp6D_NAPX::computeRt(const double *x, const double *dx, double *alignxf)
   double cy = sqrt(1.0 - sy*sy);
   double sz = x[2];
   double cz = sqrt(1.0 - sz*sz);
-  
+
   alignxf[0]  = cy*cz;
   alignxf[1]  = sx*sy*cz + cx*sz;
   alignxf[2]  = -cx*sy*cz + sx*sz;

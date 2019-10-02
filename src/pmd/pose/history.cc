@@ -42,7 +42,7 @@ void fillFrame(Frame *f, IplImage *img, CvSize pmdSz, CvPoint3D32f **pts, CvPoin
 
     if(f->img) cvCopy(img, f->img, NULL);
     else f->img = cvCloneImage(img);
-    f->alignError = alignError;        
+    f->alignError = alignError;
 
     for(int j = 0; j < pmdSz.width; j++)
       for(int i = 0; i < pmdSz.height; i++) {
@@ -60,7 +60,7 @@ void releaseFrame(Frame **f) {
     cvReleaseMat(&t->rot);
     cvReleaseMat(&t->trn);
     for(int i = 0; i < t->sz.height; i++) {
-        cvFree(&t->pts[i]); 
+        cvFree(&t->pts[i]);
         cvFree(&t->status[i]);
     }
     cvFree(&t->pts);
@@ -90,11 +90,11 @@ History *addFrame(History *h, Frame *f) {
 }
 
 void releaseTail(History *h) {
-    History *tmp = h->prev;    
+    History *tmp = h->prev;
     History *prev = 0;
     h->prev = 0;
     while(tmp) {
-       prev = tmp->prev;       
+       prev = tmp->prev;
        releaseFrame(&tmp->frame);
        cvFree(&tmp);
        tmp = prev;
@@ -103,7 +103,7 @@ void releaseTail(History *h) {
 
 void checkHistoryLen(History *h, int maxLen) {
     History *histI = h;
-    for(int i = 0; histI->prev; i++) 
+    for(int i = 0; histI->prev; i++)
         if(i > maxLen-2) // -2 because I release *prev* elemnents
             releaseTail(histI);
         else histI = histI->prev;

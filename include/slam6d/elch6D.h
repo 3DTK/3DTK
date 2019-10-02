@@ -1,4 +1,4 @@
-/** 
+/**
  * @file graph balancer implementation and utility functions
  * @author Jochen Sprickerhof. Institute of Computer Science, University of Osnabrueck, Germany.
  */

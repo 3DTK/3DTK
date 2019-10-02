@@ -12,7 +12,7 @@
 using namespace std;
 
 namespace fbr{
-  
+
   geoRefrencing::geoRefrencing(float _minError)
   {
     minError = _minError;
@@ -22,7 +22,7 @@ namespace fbr{
 	bestAlign[i] = 0;
       }
   }
-  
+
   void geoRefrencing::findRegistration(vector< vector< float > > localPoints, vector < vector< float > > geoPoints)
   {
     for(unsigned int i = 0; i < localPoints.size(); i++)
@@ -41,7 +41,7 @@ namespace fbr{
   {
     if(i == j || i == k || j == k)
       return 0;
-    
+
     //calculate the centroids
     double centroidl[3], centroidg[3];
     for(unsigned int l = 0; l < 3; l++)
@@ -77,7 +77,7 @@ namespace fbr{
       {
 	if(p == i || p == j || p == k)
 	  continue;
-      
+
 	//get a new point
 	double geoPoint[3], localPoint[3];
 	for(unsigned int l = 0; l < 3; l++)
@@ -96,18 +96,18 @@ namespace fbr{
 	testPoint.x = local_geoPoint[0] - geoPoint[0];
 	testPoint.y = local_geoPoint[1] - geoPoint[1];
 	testPoint.z = local_geoPoint[2] - geoPoint[2];
-      
+
 	if(norm(testPoint) < minError)
 	  {
 	    eIdx++;
 	  }
       }
-    
+
     //check for maxnlier and find the best align
     if(eIdx >= maxInlier)
-      { 
+      {
 	maxInlier = eIdx;
-      	for(int a = 0; a < 16; a++) 
+      	for(int a = 0; a < 16; a++)
 	  bestAlign[a] = align[a];
       }
     return 1;
@@ -127,7 +127,7 @@ namespace fbr{
       }
     return align;
   }
-  
+
   unsigned int geoRefrencing::getMaxInlier()
   {
     return maxInlier;
@@ -140,7 +140,7 @@ namespace fbr{
     cout<<bestAlign[1]<<"  "<<bestAlign[5]<<"  "<<bestAlign[9]<<"  "<<bestAlign[13]<<endl;
     cout<<bestAlign[2]<<"  "<<bestAlign[6]<<"  "<<bestAlign[10]<<"  "<<bestAlign[14]<<endl;
     cout<<bestAlign[3]<<"  "<<bestAlign[7]<<"  "<<bestAlign[11]<<"  "<<bestAlign[15]<<endl;
-    cout<<endl; 
+    cout<<endl;
   }
 
 }

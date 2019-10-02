@@ -17,7 +17,7 @@ enum normal_method {KNN, ADAPTIVE_KNN,
 
 // calculate normals
 void calcNormals(
-  std::vector<Point> &points, std::vector<Point> &normals, normal_method ntype, 
+  std::vector<Point> &points, std::vector<Point> &normals, normal_method ntype,
   int k1, int k2, int width, int height, const double* rPos, const double* rPosTheta, Scan *scan);
 
 #endif

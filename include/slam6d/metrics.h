@@ -42,15 +42,15 @@ public:
     else
       return (T)0;
   }
-  
+
   std::size_t size() const {
     return m_values.size();
   }
-  
+
   void reset() {
     m_values.clear();
   }
-  
+
   //! If functions will be called in a multithread context, these will enable safety
   void set_threadsafety(bool multithreaded) {
     boost::lock_guard<boost::mutex> lock(m_mutex_commit);

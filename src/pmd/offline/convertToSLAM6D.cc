@@ -15,7 +15,7 @@ int main() {
     int frames = 0;
     unsigned int latestTime = 0;
 
-    while(1) {     
+    while(1) {
 
         if(grabData(pmdc)) break;
 
@@ -39,7 +39,7 @@ int main() {
         fprintf(scan, "%i x %i\n", pmdSz.width, pmdSz.height);
 
         for(int j = 0; j < pmdSz.width; j++)
-          for(int i = 0; i < pmdSz.height; i++) 
+          for(int i = 0; i < pmdSz.height; i++)
              fprintf(scan, "%f %f %f\n", pmdc->pts[i][j].x*100.0, pmdc->pts[i][j].y*100.0, pmdc->pts[i][j].z*100.0);
 
         fprintf(pose, "%f %f %f\n%f %f %f\n", 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
@@ -50,7 +50,7 @@ int main() {
         fflush(pose);
         fclose(scan);
         fclose(pose);
-        
+
         frames++;
     }
     return 0;

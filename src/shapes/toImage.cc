@@ -8,7 +8,7 @@
  */
 
 /**
- * @file 
+ * @file
  * @author Dorit Borrmann. Institute of Computer Science, University of Osnabrueck, Germany.
 */
 #include <cfloat>
@@ -91,7 +91,7 @@ void usage(char* prog) {
 	  << "         [ATTENTION: counting naturally starts with 0]" << endl
 	  << endl
     	  << endl << endl;
-  
+
   cout << bold << "EXAMPLES " << normal << endl
 	  << "   " << prog << " -m 500 -r 5 dat" << endl
 	  << "   " << prog << " --max=5000 -r 10.2 dat" << endl
@@ -112,7 +112,7 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &start, int
   /* options descriptor */
   // 0: no arguments, 1: required argument, 2: optional argument
   static struct option longopts[] = {
-    { "format",          required_argument,   0,  'f' },  
+    { "format",          required_argument,   0,  'f' },
     { "max",             required_argument,   0,  'm' },
     { "min",             required_argument,   0,  'M' },
     { "start",           required_argument,   0,  's' },
@@ -123,7 +123,7 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &start, int
   };
 
   cout << endl;
-  while ((c = getopt_long(argc, argv, "f:r:s:e:m:M:p:Oq", longopts, NULL)) != -1) 
+  while ((c = getopt_long(argc, argv, "f:r:s:e:m:M:p:Oq", longopts, NULL)) != -1)
   switch (c)
 	 {
 	 case 'r':
@@ -181,37 +181,37 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &start, int
 }
 
 void getPPairs(vector<ConvexPlane*> &allPlanes, PPair **ppairs) {
-  for (unsigned int i = 0; i < allPlanes.size(); i++) { 
-    for (unsigned int j = i+1; j < allPlanes.size(); j++) { 
-      PPair pair(allPlanes[i], allPlanes[j]); 
-      // parallel or equal planes 
-      if (deg(pair.angle) < MAX_PARALLEL_ANGLE) { 
-        // planes are equal 
-        if (pair.plane_distance < MAX_EQUAL_DIST) { 
-          pair.type = PPair::EQUAL; 
-        // planes are parallel 
-        } else {//if (pair.plane_distance > MIN_PARALLEL_DIST) { 
-          pair.type = PPair::PARALLEL; 
-        // planes are nothing 
-        }  
-        // plane is perpendicular 
-      } else if (deg(pair.angle) > MIN_RIGHT_ANGLE) { 
-        pair.type = PPair::PERPENDICULAR; 
-        // planes are nothing in particular 
-      } 
-      ppairs[i][j] = pair; 
-      ppairs[j][i] = pair; 
+  for (unsigned int i = 0; i < allPlanes.size(); i++) {
+    for (unsigned int j = i+1; j < allPlanes.size(); j++) {
+      PPair pair(allPlanes[i], allPlanes[j]);
+      // parallel or equal planes
+      if (deg(pair.angle) < MAX_PARALLEL_ANGLE) {
+        // planes are equal
+        if (pair.plane_distance < MAX_EQUAL_DIST) {
+          pair.type = PPair::EQUAL;
+        // planes are parallel
+        } else {//if (pair.plane_distance > MIN_PARALLEL_DIST) {
+          pair.type = PPair::PARALLEL;
+        // planes are nothing
+        }
+        // plane is perpendicular
+      } else if (deg(pair.angle) > MIN_RIGHT_ANGLE) {
+        pair.type = PPair::PERPENDICULAR;
+        // planes are nothing in particular
+      }
+      ppairs[i][j] = pair;
+      ppairs[j][i] = pair;
 
-      } 
-    } 
-  
+      }
+    }
+
 }
 void getZHK(unsigned int length, bool **graph, vector<set<int> > &zhks ) {
   set<int > unused;
 
   for (unsigned int i = 0; i < length; i++) unused.insert(i);
 
-  // as long as we have nodes cluster 
+  // as long as we have nodes cluster
   while(!unused.empty()) {
     // start new cluster
     int index = *unused.begin();
@@ -219,7 +219,7 @@ void getZHK(unsigned int length, bool **graph, vector<set<int> > &zhks ) {
     set<int> zhk;
     zhk.insert(index);
 
-    // now look for all connected nodes 
+    // now look for all connected nodes
     vector<int> unvisited;
     unvisited.push_back(index);
 
@@ -252,9 +252,9 @@ void flip( const double *normal , double *n  ) {
   toPolar(k, n);
 }
 bool parallel(set<double*> &p1, set<double*> &p2, double min_angle) {
-  for (set<double *>::iterator it = p1.begin(); 
+  for (set<double *>::iterator it = p1.begin();
       it != p1.end(); it++) {
-    for (set<double *>::iterator jt = p2.begin(); 
+    for (set<double *>::iterator jt = p2.begin();
         jt != p2.end(); jt++) {
       double *a = *it;
       double *b = *jt;
@@ -294,23 +294,23 @@ ColumnVector calcRotRhos(vector<ConvexPlane*> &planes) {
       xbar[1] = normal[2] * p.x - normal[0]*p.z;
       xbar[2] = normal[0] * p.y - normal[1]*p.x;
       nx = normal[0]*p.x + normal[1]*p.y + normal[2]*p.z;
-      
+
       A(1) += nx * xbar[0];
       A(2) += nx * xbar[1];
       A(3) += nx * xbar[2];
       A(i+1 + 3) -= nx;
-  
+
       // upper left 3x3 matrix of B
       B(1, 1) += xbar[0]*xbar[0];
       B(2, 2) += xbar[1]*xbar[1];
       B(3, 3) += xbar[2]*xbar[2];
-      
+
       B(1,2) += xbar[0]*xbar[1];
       B(2,1) += xbar[0]*xbar[1];
-      
+
       B(1,3) += xbar[0]*xbar[2];
       B(3,1) += xbar[0]*xbar[2];
-      
+
       B(2,3) += xbar[1]*xbar[2];
       B(3,2) += xbar[1]*xbar[2];
 
@@ -319,7 +319,7 @@ ColumnVector calcRotRhos(vector<ConvexPlane*> &planes) {
 
       B(2, i+1 +3) -= xbar[1];
       B(i+1 +3, 2) -= xbar[1];
-      
+
       B(3, i+1 +3) -= xbar[2];
       B(i+1 +3, 3) -= xbar[2];
     }
@@ -358,9 +358,9 @@ void join(vector<set<double*> > &cps, double min_angle, vector<set<double*> > &n
       }
     }
   }
-  vector<set<int> > zhks; 
+  vector<set<int> > zhks;
   getZHK(cps.size(), par, zhks);
- 
+
   for (unsigned int i = 0; i < zhks.size(); i++) {
     set<double*> zhk;
     n_cps.push_back(zhk);
@@ -384,8 +384,8 @@ void getModel(vector<ConvexPlane*> &model, vector<ConvexPlane*> &allPlanes) {
   // polar coordinates of plane
   vector<double *> norms;
   for (unsigned int i = 0; i < allPlanes.size(); i ++) {;
-    double *norm = new double[5]; 
-    toPolar(allPlanes[i]->n, norm);     // 0: phi, 1:theta 
+    double *norm = new double[5];
+    toPolar(allPlanes[i]->n, norm);     // 0: phi, 1:theta
     norm[2] = allPlanes[i]->pointsize;  // number of points
     norm[3] = i;                        // index
     norm[4] = allPlanes[i]->rho;        // rho
@@ -402,15 +402,15 @@ void getModel(vector<ConvexPlane*> &model, vector<ConvexPlane*> &allPlanes) {
   QuadTree tree(normals, planes , 0.40, min_angle);
 	vector<set<double *> > cpsold;
   cpsold = tree.getClusters();
-	
+
   //join similar normals
   vector<set<double *> > cps;
   join(cpsold, min_angle, cps);
-  
+
   // Filtering
   for (unsigned int i = 0; i < cps.size(); i++) {
 cout << "Cluster " << i << ": " << cps[i].size();
-    set<double *>::iterator it = cps[i].begin(); 
+    set<double *>::iterator it = cps[i].begin();
     double *rep = *it;
     // for each normal in this cluster
     while ( it != cps[i].end()) {
@@ -426,11 +426,11 @@ cout << "   " << normal[3] << " normal: " << normal[0] << " " << normal[1] << en
       it++;
     }
   }
-  
+
   double **cnorms = new double*[cps.size()];
   bool **cnrels = new bool*[cps.size()];
   int *normpts = new int[cps.size()];
-  
+
 cout << "Center normals.." << endl;
   // Calculate the centerd normals
   for (unsigned int i = 0; i < cps.size(); i++) {
@@ -440,9 +440,9 @@ cout << "Cluster " << i << ":" << endl;
     cnorms[i][0] = 0;
     cnorms[i][1] = 0;
     cnorms[i][2] = 0;
-    
+
     int sumpoints = 0;
-    for (set<double *>::iterator it = cps[i].begin(); 
+    for (set<double *>::iterator it = cps[i].begin();
         it != cps[i].end(); it++) {
       double *normal = (*it);
       double k[3], n[3];
@@ -467,14 +467,14 @@ cout << "Cluster " << i << ":" << endl;
 
     cout << "   cnormal: " << cnorms[i][0] << " " << cnorms[i][1] << endl;
   }
-  
+
   // Calculate relations between clusters
   for (unsigned int i = 0; i < cps.size(); i++) {
     cnrels[i][i] = false;
     for (unsigned int j = i+1; j < cps.size(); j++) {
       double angle = polardist(cnorms[i], cnorms[j]);
       cnrels[i][j] = angle > perp_angle && angle < (rad(180.0) - perp_angle);
-      cnrels[j][i] = cnrels[i][j]; 
+      cnrels[j][i] = cnrels[i][j];
     }
   }
 
@@ -556,7 +556,7 @@ cout << "hmm " << endl;
     plane->n[2] = p2.n[2];
     */
     model.push_back(plane);
-    
+
     cout << "for cj = " << cj << " plane index " << idx << " ap index " << index << endl;
     idxTotype[idx++] = cj;
   }
@@ -570,11 +570,11 @@ cout << "hmm " << endl;
     plane->n[2] = p3.n[2];
     */
     model.push_back(plane);
-    
+
     cout << "for ck = " << ck << " plane index " << idx << " ap index " << index << endl;
     idxTotype[idx++] = ck;
   }
-  
+
   /*
   int MAX_IT = 100;
 //  int MAX_IT = 10000;
@@ -599,7 +599,7 @@ cout << "hmm " << endl;
     double alignxf[16];
     EulerToMatrix4(rPos, rPosTheta, alignxf);
 //    cout << alignxf << endl;
-    
+
     for(unsigned int j = 0; j < numerical_planes.size(); j++) {
       Point normal;
       normal.x = numerical_planes[j]->n[0];
@@ -619,21 +619,21 @@ cout << "hmm " << endl;
 //  cout << "ERRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR" << endl;
   // apply rho's to planes
   for(unsigned int j = 0; j < numerical_planes.size(); j++) {
-//    cout << j << " s rho is " << numerical_planes[j]->rho << endl; 
+//    cout << j << " s rho is " << numerical_planes[j]->rho << endl;
     numerical_planes[j]->rho = -X(j+1 +3);
-//    cout << j << " s rho is " << numerical_planes[j]->rho << endl; 
+//    cout << j << " s rho is " << numerical_planes[j]->rho << endl;
   }
-  
+
   bool **graph = new bool*[numerical_planes.size()];
   for (unsigned int i = 0; i < numerical_planes.size(); i++) {
     graph[i] = new bool[numerical_planes.size()];
   }
-  
+
 
   for (unsigned int i = 0; i < numerical_planes.size(); i++) {
     graph[i][i] = false;
     for (unsigned int j = i+1; j < numerical_planes.size(); j++) {
-      if( fabs(numerical_planes[i]->rho - numerical_planes[j]->rho) < MAX_EQUAL_DIST 
+      if( fabs(numerical_planes[i]->rho - numerical_planes[j]->rho) < MAX_EQUAL_DIST
           && idxTotype[i] == idxTotype[j] ) { // check wether planes belong to the same type
         graph[i][j] = true;
         graph[j][i] = true;
@@ -643,7 +643,7 @@ cout << "hmm " << endl;
       }
     }
   }
-   
+
   vector<set<int> > zhks;
   getZHK(numerical_planes.size(), graph, zhks);
 
@@ -651,7 +651,7 @@ cout << "hmm " << endl;
     vector<ConvexPlane*> pplane;
     for (set<int>::iterator it = zhks[i].begin(); it != zhks[i].end(); it++) {
       pplane.push_back(numerical_planes[*it]);
-      cout << "zhk " << i << " p " << (*it) << endl; 
+      cout << "zhk " << i << " p " << (*it) << endl;
     }
     ConvexPlane *plane = new ConvexPlane(pplane);
     model.push_back(plane);
@@ -667,11 +667,11 @@ cout << "hmm " << endl;
  * argument.
  *
  */
-int main(int argc, char **argv) 
+int main(int argc, char **argv)
 {
 
   cout << "(c) Jacobs University Bremen, gGmbH, 2011" << endl << endl;
-  
+
   if (argc <= 1) {
     usage(argv[0]);
   }
@@ -685,24 +685,24 @@ int main(int argc, char **argv)
   int    octree     = 0;
   bool   quiet = false;
   IOType type    = UOS;
-  
+
   cout << "Parse args" << endl;
   parseArgs(argc, argv, dir, red, start, maxDist, minDist, octree, type, quiet);
   Scan::dir = dir;
   int fileNr = start;
-  string planedir = dir + "planes"; 
+  string planedir = dir + "planes";
 
 #ifdef _WIN32
   int success = mkdir(planedir.c_str());
 #else
   int success = mkdir(planedir.c_str(), S_IRWXU|S_IRWXG|S_IRWXO);
 #endif
-  if(success == 0) { 
+  if(success == 0) {
     if(!quiet) {
       cout << "Writing planes to " << planedir << endl;
     }
   } else if(errno == EEXIST) {
-    cout << "Directory " << planedir << " exists already.  CONTINUE" << endl; 
+    cout << "Directory " << planedir << " exists already.  CONTINUE" << endl;
   } else {
     cerr << "Creating directory " << planedir << " failed" << endl;
     exit(1);
@@ -711,7 +711,7 @@ int main(int argc, char **argv)
   // reduction filter for current scan!
   //Scan::allScans[0]->calcReducedPoints(red, octree);
   Scan::allScans[0]->toGlobal(red, octree);
-  
+
   double id[16];
   M4identity(id);
   for(int i = 0; i < 10; i++) {
@@ -725,7 +725,7 @@ int main(int argc, char **argv)
   //vector<ConvexPlane*> * allPlanes = &hough.planes;
   /*
   PPair **p_graph;
-  
+
   p_graph = new PPair*[allPlanes->size()];
   for (unsigned int i = 0; i < allPlanes->size(); i++) {
     p_graph[i] = new PPair[allPlanes->size()];
@@ -736,35 +736,35 @@ int main(int argc, char **argv)
   //vector<ConvexPlane*> model;
   //getModel(model, *allPlanes);
   //cout << "GetModel done" << endl;
-  
+
   //Hough houghdelete(Scan::allScans[0], quiet);
   cout << "start range image calculation" << endl;
-  long starttime = GetCurrentTimeInMilliSec(); 
+  long starttime = GetCurrentTimeInMilliSec();
   int size;
-  //double * const* points_red = houghdelete.deletePoints(*allPlanes, size); 
-  //double * const* points_red = hough.getPoints(size); 
+  //double * const* points_red = houghdelete.deletePoints(*allPlanes, size);
+  //double * const* points_red = hough.getPoints(size);
   cout << "Size " << size << endl;
-  
-  
+
+
   double * const* points_red = Scan::allScans[0]->get_points_reduced();
  // Image myImage(0.0, 360.0, 0.0, 180.0, 0.04, points_red, Scan::allScans[0]->get_points_red_size());
 
   Image myImage(0.0, 360.0, 0.0, 180.0, 0.08, Scan::allScans[0]->get_points());
-  
+
   //Image myImage(90.0, 270.0, 40.0, 90.0, 1.0, points_red, size);
-  
+
   starttime = (GetCurrentTimeInMilliSec() - starttime);
   cout << "Time for Constructor call: " << starttime << endl;
 
-  starttime = GetCurrentTimeInMilliSec(); 
-  
+  starttime = GetCurrentTimeInMilliSec();
+
   int** regdat;
   int width = myImage.getWidth();
   regdat = new int*[width];
   for(int i = 0; i < width; i++) {
     regdat[i] = new int[myImage.getHeight()];
   }
-  
+
   int** regdat2;
   regdat2 = new int*[width];
   for(int i = 0; i < width; i++) {

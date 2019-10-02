@@ -1,7 +1,7 @@
 /**
   * Exporting points to UTM coordinates
   *
-  * Copyright (C) Dorit Borrmann 
+  * Copyright (C) Dorit Borrmann
   *
   * Released under the GPL version 3.
   *
@@ -95,7 +95,7 @@ int parse_options(int argc, char **argv, std::string &dir, IOType &iotype, int &
   hidden.add_options()
     ("input-dir", po::value<std::string>(&dir), "input dir");
 
-  
+
     // all options
   po::options_description all;
   all.add(generic).add(input).add(hidden);
@@ -140,7 +140,7 @@ int parse_options(int argc, char **argv, std::string &dir, IOType &iotype, int &
  * system. The origin corresponds to the center of mass of the earth. The z-axis
  * goes through the geodetic north pole. The x-axis goes through the
  * intersection between the equator (0° latitude) and the prime meridian (0°
- * longitude). 
+ * longitude).
  * In the internal left-handed 3DTK coordinate system the y-axis goes through
  * the geodetic north pole and the z-axis intersects (0°, 0°).
  * Output will be: EAST NORTH HEIGHT ...
@@ -159,21 +159,21 @@ int main(int argc, char **argv)
   bool hexfloat = false;
 
   parse_options(argc, argv, dir, iotype, start, end, use_color, use_reflectance);
-  
+
   Scan::openDirectory(false, dir, iotype, start, end);
-  
+
   if(Scan::allScans.size() == 0) {
     std::cerr << "No scans found. Did you use the correct format?" << std::endl;
     exit(-1);
   }
-  
+
   unsigned int types = PointType::USE_NONE;
   if(supportsReflectance(iotype)) types |= PointType::USE_REFLECTANCE;
   if(supportsColor(iotype)) types |= PointType::USE_COLOR;
- 
+
   //No reduction for now
   int red = 0;
- 
+
   char filename[255];
 #ifndef _MSC_VER
     snprintf(filename,255,"%spoints.utm",dir.c_str());
@@ -182,22 +182,22 @@ int main(int argc, char **argv)
 #endif
 
   FILE *redptsout = fopen(filename, "w");
-  
+
   for(unsigned int i = 0; i < Scan::allScans.size(); i++) {
     Scan *source = Scan::allScans[i];
     std::string red_string = red > 0 ? " reduced" : "";
-      
+
     DataXYZ xyz  = source->get("xyz" + red_string);
-    
+
     ECEFtoUTM(xyz);
-     
+
     if(use_reflectance) {
-      DataReflectance xyz_reflectance = 
+      DataReflectance xyz_reflectance =
           (((DataReflectance)source->get("reflectance" + red_string)).size() == 0) ?
- 
-          source->create("reflectance" + red_string, sizeof(float)*xyz.size()) : 
-          source->get("reflectance" + red_string); 
- 
+
+          source->create("reflectance" + red_string, sizeof(float)*xyz.size()) :
+          source->get("reflectance" + red_string);
+
       if (!(types & PointType::USE_REFLECTANCE)) {
         for(unsigned int i = 0; i < xyz.size(); i++) xyz_reflectance[i] = 255;
       }
@@ -205,10 +205,10 @@ int main(int argc, char **argv)
 
     } else if(use_color) {
       std::string data_string = red > 0 ? "color reduced" : "rgb";
-      DataRGB xyz_color = 
+      DataRGB xyz_color =
           (((DataRGB)source->get(data_string)).size() == 0) ?
-          source->create(data_string, sizeof(unsigned char)*3*xyz.size()) : 
-          source->get(data_string); 
+          source->create(data_string, sizeof(unsigned char)*3*xyz.size()) :
+          source->get(data_string);
       if (!(types & PointType::USE_COLOR)) {
           for(unsigned int i = 0; i < xyz.size(); i++) {
             xyz_color[i][0] = 0;
@@ -220,11 +220,11 @@ int main(int argc, char **argv)
 
     } else {
     write_uos(xyz, redptsout, hexfloat, high_precision);
-    
+
     }
-    
+
 
   }
-   
+
   fclose(redptsout);
 }

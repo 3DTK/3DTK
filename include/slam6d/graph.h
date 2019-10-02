@@ -1,4 +1,4 @@
-/** @file 
+/** @file
  *  @brief The 6D Lu Milios style SLAM in 6D
  *
  *  @author Dorit Borrman. Institute of Computer Science, University of Osnabrueck, Germany.
@@ -25,34 +25,34 @@ typedef boost::adjacency_list <
   graph_t;
 
 /**
- * @brief This class represent a directed network. 
+ * @brief This class represent a directed network.
  *        Each node corresponds to a laser scan.
  */
 class Graph {
 
-public: 
+public:
 
   Graph();
   Graph(const std::string &netfile);
   Graph(int nrScans, bool loop);
   Graph(double cldist, int loopsize);
   Graph(int nodes, double cldist2, int loopsize);
-  
+
   int getLink(int i, int fromTo);
   void addLink(int i, int j);
-  
+
   void setNrScans(int _nrScans);
   int getNrScans();
   int getNrLinks();
-  
+
   int getStart();
   int getEnd();
 
   friend std::ostream& operator<<(std::ostream& os, Graph* gr);
-  
+
 private:
   /**
-   * The basic network structure 
+   * The basic network structure
    */
   std::vector <int> from, to;
 

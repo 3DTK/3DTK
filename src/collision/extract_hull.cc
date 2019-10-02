@@ -354,7 +354,7 @@ void surfacewalker(std::vector<double*> const &vertices,
         tocheck.pop_back();
         // go through all edges (counterclockwise) and for each edge add the
         // face with the lowest angle to the current face
-        
+
         size_t v0 = faces[currentface][0];
         size_t v1 = faces[currentface][1];
         size_t v2 = faces[currentface][2];

@@ -79,8 +79,8 @@ CvSize pmdGetSize(const PMD *p);
  * @param *img destination IplImage (defaul: 0, new one will be created if null passed)
  * @return image in OpenCV format (IplImage)
  */
-IplImage *pmdQueryImage(PMD *p, IplImage *img); 
-IplImage *pmdQueryImageAsync(PMD *p, IplImage *img); 
+IplImage *pmdQueryImage(PMD *p, IplImage *img);
+IplImage *pmdQueryImageAsync(PMD *p, IplImage *img);
 
 /**
  * Store PMD distances (inside p->data)

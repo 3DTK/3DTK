@@ -64,16 +64,16 @@ private:
 
   //! Relayed to FrameIO
   void saveFramesFile(SharedScan* scan, bool append = false);
- 
+
   //! Empties this SharedScan's FrameVector
   void clearFrames(SharedScan* scan);
-  
+
   //! Call from client
   std::size_t getCacheSize();
 
   //! Prints out caching related metrics
   void printMetrics();
-  
+
   //! Find a scan by matching its identifier, path and io type to avoid placing the same scan multiple times into the scan vector
   SharedScan* findScan(const SharedStringSharedPtr& dir_path, const char* identifier, IOType type) const;
 
@@ -89,10 +89,10 @@ public:
 
   //! Create the shared memory in the system and put all neccessary structures in it
   static ServerInterface* create(std::size_t data_size, std::size_t cache_size);
-  
+
   //! remove the shared memory from the system
   static void destroy();
-  
+
   //! Main server loop for message handling and function dispatching
   void run();
 

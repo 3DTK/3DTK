@@ -132,70 +132,70 @@ void ClientMetric::print(bool scanserver)
   if(scanserver) {
     cout << "Time for all ClientInterface messages:" << endl;
     printTime(clientinterface_time);
-    
+
     cout << "  [" << endl;
-    
+
     cout << "    Time for cache misses:" << endl;
     printTime(cache_miss_time, 3);
-    
+
     cout << "    Time for cache allocations:" << endl;
     printTime(allocate_time, 3);
-    
+
     // TODO: invalidations too?
-    
+
     cout << "    Time for frame calls:" << endl;
     printTime(frames_time, 3);
-    
+
     cout << "  ]" << endl;
-    
+
     cout << endl;
   }
-  
+
   // Scan: Loading, reducing and SearchTree related ones
   // barebone preparation and parameter setting
   if(read_scan_time.size()) {
     cout << "Time for loading directory:" << endl;
     printTime(read_scan_time);
   }
-  
+
   // getXYZ in calcReducedPoints
   if(scan_load_time.size()) {
     cout << "Time for loading scans:" << endl;
     printTime(scan_load_time);
   }
-  
+
   if(calc_reduced_points_time.size()) {
     cout << "Time for reducing scans:" << endl;
     printTime(calc_reduced_points_time);
   }
-  
+
   // copying of reduced to original or other way around
   if(copy_original_time.size()) {
     cout << "Time for copying reduced points:" << endl;
     printTime(copy_original_time);
   }
-  
+
   if(create_tree_time.size()) {
     cout << "Time for creating SearchTree:" << endl;
     printTime(create_tree_time);
   }
-  
+
   // part of create_tree_time which is spent for meta trees in specific
   if(create_metatree_time.size()) {
     cout << "Time for creating meta-SearchTree:" << endl;
     printTime(create_metatree_time);
   }
-  
+
   if(on_demand_reduction_time.size()) {
     cout << "Time in on-demand reduction [reduction+transform+copy / copy]:" << endl;
     printTime(on_demand_reduction_time);
   }
-  
+
   if(transform_time.size()) {
     cout << "Time for transform:" << endl;
     printTime(transform_time);
   }
-  
+
   // SLAM
   if(matching_time.size()) {
     cout << endl;
@@ -211,6 +211,6 @@ void ClientMetric::print(bool scanserver)
       - create_tree_time.sum()
       << "s" << endl;
   }
-  
+
   cout << endl;
 }

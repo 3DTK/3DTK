@@ -14,7 +14,7 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
-#include <netdb.h> 
+#include <netdb.h>
 #include <strings.h>
 #include <string.h>
 #include <stdio.h>
@@ -40,7 +40,7 @@ int pmdOpen(PMDHandle *hnd, const char *rplugin, const char *rparam, const char 
     char url[128];
     strcpy(url, rparam);
     strcat(url, ":8080");
-    xmlrpc_c::clientSimple myClient;    
+    xmlrpc_c::clientSimple myClient;
     xmlrpc_c::value result;
     xmlrpc_c::paramList ipAndHeart;
     ipAndHeart.add(xmlrpc_c::value_string("192.168.0.1"));
@@ -69,13 +69,13 @@ int pmdOpen(PMDHandle *hnd, const char *rplugin, const char *rparam, const char 
     server = gethostbyname(rparam);
     serv_addr.sin_family = AF_INET;
 
-    bcopy((char *)server->h_addr, 
+    bcopy((char *)server->h_addr,
          (char *)&serv_addr.sin_addr.s_addr,
          server->h_length);
     serv_addr.sin_port = htons(50002);
     if (connect( sockfd
                , (struct sockaddr *)&serv_addr
-               , sizeof(serv_addr)) 
+               , sizeof(serv_addr))
             == -1) {
         perror("Error connecting!\n");
         return 1;
@@ -88,12 +88,12 @@ int pmdOpen(PMDHandle *hnd, const char *rplugin, const char *rparam, const char 
 
 int pmdClose (PMDHandle hnd) {
 
-    xmlrpc_c::clientSimple myClient;    
+    xmlrpc_c::clientSimple myClient;
     xmlrpc_c::value result;
     xmlrpc_c::paramList ip;
     ip.add(xmlrpc_c::value_string("192.168.0.1"));
     myClient.call( "192.168.0.69:8080" //FIXME: hardcoded ip
-                 , "MDAXMLDisconnectCP"                  
+                 , "MDAXMLDisconnectCP"
                  , ip, &result);
 
     return 0;
@@ -104,7 +104,7 @@ int pmdGetLastperror (PMDHandle hnd, char *perror, size_t maxLen) {
 }
 
 int pmdUpdate(PMDHandle hnd) {
-    xmlrpc_c::clientSimple myClient;    
+    xmlrpc_c::clientSimple myClient;
     xmlrpc_c::value result;
     xmlrpc_c::paramList noArgs;
     //FIXME: There is no HearBeat XML function!!!
@@ -117,7 +117,7 @@ int pmdUpdate(PMDHandle hnd) {
 // Currently will work for one image only (i.e. "d" or "i" but not for "id")
 int pmdGetData(const char *code, PMDHandle hnd, float *data, size_t maxLen) {
     int n = write(sockfd, code, strlen(code));
-    if (n < 0) 
+    if (n < 0)
          perror("Error writing to socket\n");
 
     // reading image header
@@ -129,7 +129,7 @@ int pmdGetData(const char *code, PMDHandle hnd, float *data, size_t maxLen) {
              perror("Error reading from socket\n");
         bytesRead += n;
 
-    }    
+    }
     for(int i = 0; i < 412/4; i++)
         ((uint32_t*)&header)[i] = ntohl(headerBuf[i]);
 
@@ -138,12 +138,12 @@ int pmdGetData(const char *code, PMDHandle hnd, float *data, size_t maxLen) {
     bytesRead = 0;
     while(bytesRead < maxLen) {
         n = read(sockfd, &((char*)imgBuf)[bytesRead], maxLen - bytesRead);
-        if (n < 0) 
+        if (n < 0)
           perror("Error reading from socket\n");
         bytesRead += n;
     }
 
-    for(int i = 0; i < maxLen/4; i++) 
+    for(int i = 0; i < maxLen/4; i++)
         ((uint32_t*)data)[i] = ntohl(imgBuf[i]);
 
     return 0;

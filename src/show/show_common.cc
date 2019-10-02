@@ -215,7 +215,7 @@ int START_Y              = 0;
 int START_WIDTH          = 960;
 int START_HEIGHT         = 540;
 // Current aspect ratio
-GLdouble aspect          = (double)START_WIDTH/(double)START_HEIGHT;  
+GLdouble aspect          = (double)START_WIDTH/(double)START_HEIGHT;
 bool advanced_controls = false;
 bool invertMouseX = false, invertMouseY = false;
 bool anim_convert_jpg  = true;
@@ -413,7 +413,7 @@ int readFrames(std::string dir, int start, int end, bool readInitial, IOType &ty
   double mirror[16];
   M4identity(mirror);
   mirror[10] = -1.0;
-  
+
   double initialTransform[16];
   if (readInitial) {
     std::cout << "Initial Transform:" << std::endl;
@@ -425,7 +425,7 @@ int readFrames(std::string dir, int start, int end, bool readInitial, IOType &ty
     }
     initial_in >> initialTransform;
     std::cout << initialTransform << std::endl;
-    
+
     // update the mirror to apply the initial frame for all frames
     double tempxf[16];
     MMult(mirror, initialTransform, tempxf);
@@ -441,7 +441,7 @@ int readFrames(std::string dir, int start, int end, bool readInitial, IOType &ty
     Scan::AlgoType algoType;
     std::vector<double*> Matrices;
     std::vector<Scan::AlgoType> algoTypes;
-    
+
     // iterate over frames (stop if none were created) and
     // pull/convert the frames into local containers
     unsigned int frame_count;
@@ -454,7 +454,7 @@ int readFrames(std::string dir, int start, int end, bool readInitial, IOType &ty
     for(unsigned int i = 0; i < frame_count; ++i) {
       (*it)->getFrame(i, transformation, algoType);
       double* transMatOpenGL = new double[16];
-      
+
       // apply mirror to convert (and initial frame if requested)
       // the frame and save in opengl
       MMult(mirror, transformation, transMatOpenGL);
@@ -462,10 +462,10 @@ int readFrames(std::string dir, int start, int end, bool readInitial, IOType &ty
       Matrices.push_back(transMatOpenGL);
       algoTypes.push_back(algoType);
     }
-    
+
     MetaAlgoType.push_back(algoTypes);
     MetaMatrix.push_back(Matrices);
-    
+
     if((type == UOS_MAP || type == UOS_MAP_FRAMES || type == RTS_MAP)
        && it == Scan::allScans.begin()) {
       MetaAlgoType.push_back(algoTypes);
@@ -473,7 +473,7 @@ int readFrames(std::string dir, int start, int end, bool readInitial, IOType &ty
     }
     current_frame = MetaMatrix.back().size() - 1;
   }
-  
+
   if (MetaMatrix.size() == 0) {
     std::cerr << "*****************************************" << std::endl;
     std::cerr << "** ERROR: No .frames could be found!   **" << std::endl;
@@ -716,13 +716,13 @@ void initShow(dataset_settings& dss, const window_settings& ws, const display_se
   // init and create display
   //M4identity(view_rotate_button);
   obj_pos_button[0] = obj_pos_button[1] = obj_pos_button[2] = 0.0;
-  
+
   // Loading scans, reducing, loading frames and generation if neccessary
-  
+
   loading_status("Loading scans");
   // We would have to hook loading_progress into there really uglily
   Scan::openDirectory(dss);
-  
+
   if (Scan::allScans.size() == 0) {
     std::cerr << "No scans found. Did you use the correct format?" << std::endl;
     exit(-1);
@@ -745,7 +745,7 @@ void initShow(dataset_settings& dss, const window_settings& ws, const display_se
   if (loadOct)
     std::cout << "Loading octtrees from file where possible instead of creating them from scans."
          << std::endl;
-  
+
   // for managed scans the input phase needs to know how much it can handle
   std::size_t free_mem = 0;
   if(scanserver)
@@ -754,7 +754,7 @@ void initShow(dataset_settings& dss, const window_settings& ws, const display_se
   loading_progress(0, 0, Scan::allScans.size());
   for(unsigned int i = 0; i < Scan::allScans.size(); ++i) {
     Scan* scan = Scan::allScans[i];
-  
+
   // create data structures
 #ifdef USE_COMPACT_TREE // FIXME: change compact tree, then this case can be removed
     compactTree* tree;
@@ -792,7 +792,7 @@ void initShow(dataset_settings& dss, const window_settings& ws, const display_se
     }
 #else // FIXME: remove the case above
     scan->setOcttreeParameter(red, voxelSize, pointtype, loadOct, saveOct, autoOct);
-    
+
     DataOcttree* data_oct;
     try {
       data_oct = new DataOcttree(scan->get("octtree"));
@@ -805,7 +805,7 @@ void initShow(dataset_settings& dss, const window_settings& ws, const display_se
     }
     BOctTree<float>* btree = &(data_oct->get());
     unsigned int tree_size = btree->getMemorySize();
-    
+
     if(scanserver) {
       // check if the octtree would actually fit with all the others
       if(tree_size > free_mem) {
@@ -819,14 +819,14 @@ void initShow(dataset_settings& dss, const window_settings& ws, const display_se
       }
     }
 #endif //FIXME: COMPACT_TREE
-    
+
 #if !defined USE_COMPACT_TREE
     // show structures
     // associate show octtree with the scan and
     // hand over octtree pointer ownership
 
     Show_BOctTree<sfloat>* tree = new Show_BOctTree<sfloat>(scan, data_oct, cm);
-    
+
     // unlock cached octtree to enable creation
     // of more octtres without blocking the space for full scan points
     tree->unlockCachedTree();
@@ -834,7 +834,7 @@ void initShow(dataset_settings& dss, const window_settings& ws, const display_se
 
     // octtrees have been created successfully
     octpts.push_back(tree);
-    
+
     // print something
 #ifdef USE_COMPACT_TREE
     // TODO: change compact tree for memory footprint output, remove this case
@@ -845,7 +845,7 @@ void initShow(dataset_settings& dss, const window_settings& ws, const display_se
     if (tree_size/1024/1024 > 0) {
       std::cout << tree_size/1024/1024 << "M";
       space = true;
-    }      
+    }
     if ((tree_size/1024)%1024 > 0) {
       if (space) std::cout << " ";
       std::cout << (tree_size/1024)%1024 << "K";
@@ -901,13 +901,13 @@ void initShow(dataset_settings& dss, const window_settings& ws, const display_se
     if(stop) octpts.erase(it_remove_first, octpts.end());
     std::cout << ' ' << loaded << " octtrees loaded." << std::endl;
   }
-  
+
 #endif // !COMPACT_TREE
 
   loading_status("Loading frames");
 
   // load frames now that we know how many scans we actually loaded
-  unsigned int real_end = std::min((unsigned int)(end), 
+  unsigned int real_end = std::min((unsigned int)(end),
                               (unsigned int)(start + octpts.size() - 1));
 
   // necessary to save these to allow filtering of scans from view and reloading frames; could also make those global..
@@ -915,7 +915,7 @@ void initShow(dataset_settings& dss, const window_settings& ws, const display_se
   endScanIdx = real_end;
   readIni = readInitial;
   scanIOtype = type;
-  
+
   if(readFrames(dir, start, real_end, readInitial, type) != 0)
     generateFrames(start, real_end, identity /*use .pose or identity*/);
   else std::cout << "Using existing frames..." << std::endl;
@@ -991,7 +991,7 @@ void deinitShow()
 	  std::unique_lock<std::mutex> lock(png_workers_mutex);
 	  png_workers_cv.wait(lock, []{return png_workers == 0;});
   }
-  
+
   std::cout << "Cleaning up octtrees and scans." << std::endl;
   if(octpts.size()) {
     // delete octtrees to release the cache locks within
@@ -1001,7 +1001,7 @@ void deinitShow()
       delete *it;
     }
   }
-  
+
   Scan::closeDirectory();
 
   for (double* it : trajectory) {

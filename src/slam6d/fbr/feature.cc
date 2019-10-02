@@ -91,18 +91,18 @@ namespace fbr{
     }
     featureFiltration(pImage, rImage);
   }
-  
+
   void feature::featureDetection(cv::Mat pImage, feature_detector_method method){
     cv::Mat rImage;
     featureDetection(pImage, method, rImage, fFiltrationMethod);
   }
-  
+
   void feature::featureDetection(cv::Mat pImage){
     featureDetection(pImage, fDetectorMethod);
   }
 
   void feature::featureDescription(cv::Mat pImage, feature_descriptor_method method){
-    
+
     fDescriptorMethod = method;
     if(keypoints.size() == 0)
       featureDetection(pImage);
@@ -143,17 +143,17 @@ namespace fbr{
 #endif
       break;
     }
-    } 
-  }   
+    }
+  }
 
   void feature::featureDescription(cv::Mat pImage){
     featureDescription(pImage, fDescriptorMethod);
   }
-  
+
   feature_detector_method feature::getDetectorMethod(){
     return fDetectorMethod;
   }
-  
+
   feature_descriptor_method feature::getDescriptorMethod(){
     return fDescriptorMethod;
   }
@@ -166,21 +166,21 @@ namespace fbr{
   vector<cv::KeyPoint> feature::getFeatures(){
     return keypoints;
   }
-  
+
   //check for the descriptor Mat not to be empty
   cv::Mat feature::getDescriptors(){
     return descriptors;
   }
-  
+
   void feature::setFeatures(vector<cv::KeyPoint> keypoint){
     keypoints = keypoint;
   }
-  
+
   void feature::setDescriptors(cv::Mat descriptor){
     descriptors = descriptor;
   }
 
-  void feature::getDescription(description_method method){   
+  void feature::getDescription(description_method method){
     if(method == FEATURE_DESCRIPTION)
       cout<<"fDetectorMethod: "<<featureDetectorMethodToString(fDetectorMethod)<<", number of detected features: "<<keypoints.size()<<", feature filtration method: "<<featureFiltrationMethodToString(fFiltrationMethod)<<"."<<endl;
     else if(method == DESCRIPTOR_DESCRIPTION)
@@ -188,12 +188,12 @@ namespace fbr{
     else
       cout<<"fDetectorMethod: "<<featureDetectorMethodToString(fDetectorMethod)<<", number of detected features: "<<keypoints.size()<<", feature filtration method: "<<featureFiltrationMethodToString(fFiltrationMethod)<<", fDescriptorMethod: "<<featureDescriptorMethodToString(fDescriptorMethod)<<"."<<endl;
     cout<<endl;
-  } 
+  }
 
   unsigned int feature::getNumberOfFeatures(){
     return keypoints.size();
   }
-  
+
   void feature::featureFiltration(cv::Mat pImage, cv::Mat rImage){
     vector<cv::KeyPoint> filteredKeypoints;
     if(fFiltrationMethod == OCCLUSION){

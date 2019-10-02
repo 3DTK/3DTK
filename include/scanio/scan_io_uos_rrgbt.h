@@ -2,7 +2,7 @@
  * @file
  * @brief IO of a 3D scan in uos file format with reflectance, color and
  * temperature information
- * @author Dorit Borrmann 
+ * @author Dorit Borrmann
  */
 
 #ifndef __SCAN_IO_UOS_RRGBT_H__

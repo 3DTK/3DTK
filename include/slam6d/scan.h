@@ -64,10 +64,10 @@ class ANNkd_tree;
   DataXYZ xyz = scan->get("xyz");
   DataXYZ reduced = scan->get("xyz reduced");
   DataRGB rgb = scan->get("rgb");
-  
+
   xyz[i][0..2]
   reflectance[i]
-  
+
   size_t size = scan->size("xyz reduced");
 
   To use the prefetching of all requested data field in the scanserver,
@@ -82,7 +82,7 @@ class ANNkd_tree;
 
   DataRGB rgb = scan->get("rgb");
   if (rgb.valid()) { ok, do something }
-  
+
   If backward-compability to pointer arrays is needed, the PointerArray
   class can adapt
 
@@ -92,7 +92,7 @@ class ANNkd_tree;
 
   scan->clear("xyz");
   scan->clear(DATA_XYZ | DATA_RGB | ...);
-  
+
   Creating data fields with the correct byte size
 
   scan->create("xyz somethingelse", sizeof(double)*3*N);
@@ -100,7 +100,7 @@ class ANNkd_tree;
   Reading frames in show:
 
   size_t size = scan->readFrames();
-  
+
   const double* pose;
   AlgoType type;
   scan->getFrame(i, pose, type);
@@ -121,11 +121,11 @@ class ANNkd_tree;
 class Scan {
 public:
   enum AlgoType { INVALID, ICP, ICPINACTIVE, LUM, ELCH };
-  
+
   // delete copy-ctor and assignment, scans shouldn't be copied by basic class
   Scan(const Scan& other) = delete;
   Scan& operator=(const Scan& other) = delete;
-  
+
   virtual ~Scan();
 
   //! Holder of all scans
@@ -134,17 +134,17 @@ public:
 
   static unsigned int maxScanNr;
   unsigned int scanNr;
-  
+
   // continue processing from last frames entry
   static bool continue_processing;
-  
+
   // current processing command
   static std::string processing_command;
-  
+
   /**
     * Attempt to read a directory under \a path and return its read scans.
     * No scans are loaded at this point, only checked if all exist.
-    * 
+    *
     * @param scanserver whether to use managed scans in the scanserver or not
     * @param path to the directory containing the scans
     * @param type determining which ScanIO to use
@@ -160,7 +160,7 @@ public:
                             , boost::filesystem::path cache = boost::filesystem::path()
 #endif
                             );
-  
+
   /**
     * scan_settings version of openDirectory.
     *
@@ -177,18 +177,18 @@ public:
    * Scan::allScans vector.
    */
   static void closeDirectory();
-  
-  
+
+
   /* Input filtering and parameter functions */
   // continue processing using existing .frames files
-  static void continueProcessing(bool continue_processing = true); 
+  static void continueProcessing(bool continue_processing = true);
 
   // set string of current processing command
-  static void setProcessingCommand(int argc, char** argv); 
+  static void setProcessingCommand(int argc, char** argv);
 
   //! Input filtering for all points based on their euclidean length
   virtual void setRangeFilter(double max, double min) = 0;
-  
+
   //! Input filtering for all points based on their height
   virtual void setHeightFilter(double top, double bottom) = 0;
 
@@ -204,10 +204,10 @@ public:
   //! Set reduction parameters, but don't reduce yet
   virtual void setReductionParameter(double voxelSize, int nrpts = 0,
     PointType pointtype = PointType());
-  
+
   //! Set SearchTree type, but don't create it yet
   void setSearchTreeParameter(int nns_method, int bucketSize = 20);
-  
+
   /**
    * Set octtree parameters for show
    * @param loadOct will load the serialized octtree from disk regardless
@@ -229,23 +229,23 @@ public:
   inline const double* get_transMat() const;
   //! Original pose matrix after initial transform
   inline const double* get_transMatOrg() const;
-  //! Accumulated delta transformation matrix 
+  //! Accumulated delta transformation matrix
   inline const double* getDAlign() const;
-  
+
   inline SearchTree* getSearchTree();
   //  inline ANNkd_tree* getANNTree() const;
-  
+
   inline int getBucketSize() const;
-  
+
   virtual const char* getIdentifier() const = 0;
   virtual const std::string getPath() const { return ""; };
   virtual const double getTimeStamp() const { return 0; };
 
   //! Determine the maximum number of reduced points in \a scans
   static size_t getMaxCountReduced(ScanVector& scans);
-  
+
   /* Functions for altering data fields, implementation specific */
-  
+
   /**
    * Get the data field \a identifier, calculate it on demand if neccessary.
    *
@@ -261,13 +261,13 @@ public:
    * one by one with each get("...") access.
    */
   virtual void get(IODataType types) = 0;
-  
+
   /**
    * Creates a data field \a identifier with \a size bytes.
    */
   virtual DataPointer create(const std::string& identifier,
                              size_t size) = 0;
-  
+
   /**
    * Clear the data field \a identifier, removing its allocated memory if
    * possible or marking it for prioritized removal.
@@ -277,7 +277,7 @@ public:
   //! Extension to clear for more than one identifier, e.g.
   //  clear(DATA_XYZ | DATA_RGB);
   void clear(IODataType types);
-  
+
   /**
    * Get the size of \a identifier as if it were requested and size() called
    * upon its type specialized DataPointer class.
@@ -296,34 +296,34 @@ public:
    * @return count of frames if file has been read, zero otherwise
    */
   virtual size_t readFrames() = 0;
-  
+
   /**
    * Write the accumulated frames into a .frames-file.
    */
   virtual void saveFrames(bool append = false) = 0;
-  
+
   //! Count of frames
   virtual size_t getFrameCount() = 0;
-  
+
   //! Get contents of a frame, pass matrix pointer and type by reference
   virtual void getFrame(size_t i,
                         const double*& pose_matrix,
                         AlgoType& type) = 0;
-  
+
 protected:
   /**
    * Called from transform, this will add its current transMat pose with
    * the given type as a frame into the list of frames
    */
   virtual void addFrame(AlgoType type) = 0;
-  
+
 public:
-  
+
   /* Direct creation of reduced points and search tree */
-  
+
   //! Apply reduction and initial transMatOrg transformation
   void toGlobal();
-  
+
   //! Copy reduced points to original and create search tree on it
   void createSearchTree();
 
@@ -332,26 +332,26 @@ public:
   void transformAll(const double alignxf[16]);
   void transformAll(const double alignQuat[4],
                     const double alignt[3]);
-  
+
   void transform(const double alignxf[16],
-                 const AlgoType type, 
+                 const AlgoType type,
                  int islum = 0);
   void transform(const double alignQuat[4],
-                 const double alignt[3], 
-                 const AlgoType type, 
+                 const double alignt[3],
+                 const AlgoType type,
                  int islum = 0);
   void transformToMatrix(double alignxf[16],
-                         const AlgoType type, 
+                         const AlgoType type,
                          int islum = 0);
-  void transformToEuler(double rP[3], 
+  void transformToEuler(double rP[3],
                         double rPT[3],
-                        const AlgoType type, 
+                        const AlgoType type,
                         int islum = 0);
-  void transformToQuat(double rP[3], 
+  void transformToQuat(double rP[3],
                        double rPQ[4],
-                       const AlgoType type, 
+                       const AlgoType type,
                        int islum = 0);
-  
+
   // Scan matching functions
   static void getPtPairs(std::vector<PtPair> *pairs,
                          Scan* Source,
@@ -394,7 +394,7 @@ protected:
    *       always represent the same pose!!!
    */
   double rPos[3],    //!< 3D position
-    rPosTheta[3],    //!< 3D rotation in Euler representation 
+    rPosTheta[3],    //!< 3D rotation in Euler representation
     rQuat[4],        //!< 3D rotation in Quaternion representation
     transMat[16],    //!< (4x4) transformation matrix
     transMatOrg[16]; //!< The original pose of the scan, e.g., from odometry
@@ -408,49 +408,49 @@ protected:
 
   //! Defines the method used for nearest neighbor search and which tree to use
   int nns_method;
-  
+
   //! SearchTree for point pair matching, works on the search points
   SearchTree* kd;
-  
+
   //! Voxelsize of the octtree used for reduction
   double reduction_voxelSize;
-  
+
   //! Which point to take out of the reduction octtree, 0 for center
   int reduction_nrpts;
-  
+
   //! Pointtype used for the reduction octtree
   PointType reduction_pointtype;
-  
+
   //! Type of the searchtree to be created
   int searchtree_nnstype;
-  
+
   //! Leaf node size of a k-d tree
   int searchtree_bucketsize;
-  
+
   //! Flag whether "xyz reduced" has been initialized for this Scan yet
   bool m_has_reduced;
 
   //! Flag whether "normals" has been initialized for this Scan yet
   bool m_has_normals;
-  
+
   //! Reduction value used for octtree input
   double octtree_reduction_voxelSize;
-  
+
   //! Voxelsize used in the octtree itself
   double octtree_voxelSize;
-  
+
   //! Pointtype for the Octtree
   PointType octtree_pointtype;
-  
+
   //! Flags to load or save the octtrees from/to storage
   bool octtree_loadOct, octtree_saveOct, octtree_autoOct;
-  
+
   /**
    * Basic initializing constructor calling the initalization function.
    * Can only be called from deriving classes.
    */
   Scan();
-  
+
   /**
    * This function handles the reduction of points. It builds a lock for
    * multithread-safety and calls calcReducedOnDemandPrivate.
@@ -465,10 +465,10 @@ protected:
    * multithread-safety and calls caldNormalsOnDemandPrivate.
    */
   void calcNormalsOnDemand();
-  
+
   //! Create specific SearchTree variants matching the capability of the Scan
   virtual void createSearchTreePrivate() = 0;
-  
+
   //! Create reduced points in a multithread-safe environment matching
   //  the capability of the Scan
   virtual void calcReducedOnDemandPrivate() = 0;
@@ -476,26 +476,26 @@ protected:
   //! Create normals in a multithread-safe environment matching
   //  the capability of the Scan
   virtual void calcNormalsOnDemandPrivate() = 0;
-  
+
   void transformReduced(const double alignxf[16]);
-  
+
 
   //@FIXME
-public:  
+public:
   //! Creating reduced points
   void calcReducedPoints();
 
   //! Creating normals
   void calcNormals();
-  
+
   //! Internal function of transform which alters the reduced points
   //! Internal function of transform which handles the matrices
   void transformMatrix(const double alignxf[16]);
 
-protected:  
+protected:
   //! Copies reduced points to original points without any transformation.
   void copyReducedToOriginal();
-  
+
   //! Inverse functionality of copyReducedToOriginal.
   void copyOriginalToReduced();
 

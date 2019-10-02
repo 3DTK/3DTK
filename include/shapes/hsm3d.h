@@ -1,24 +1,24 @@
 /**
   * @file Representation of the Accumulator Cube.
-  * 
+  *
   * This file contains the functions necessary to perform the transformations
   * between normal vectors and cube coordinates. The representation is taken
-  * from 
+  * from
   * A. Censi and S. Carpin,
   * HSM3D: Feature-Less Global 6DOF Scan-Matching in the Hough/Radon Domain,
-  * In Proceedings of the IEEE International Conference on Robotics and 
+  * In Proceedings of the IEEE International Conference on Robotics and
   * Automation, 2009.
   *
   * The code in this file is a modified version of the code given by the authors
   * on http://purl.org/censi/2008/hsm3d
-  * 
+  *
   * We gratefully appreciate the work of the authors and thank them for making
   * the code publically available.
   *
   * @author Dorit Borrmann. Institute of Computer Science, University of Osnabrueck, Germany.
   */
 
-/* 
+/*
 
   AUTORIGHTS
    Copyright (c) 2008 The Regents of the University of California.
@@ -70,7 +70,7 @@ struct cube_point {
   double v;
 };
 
-/*! 
+/*!
   \brief Buffer representing a discretization of cube_point elements
   as patches on faces
 
@@ -87,6 +87,6 @@ struct buffer_point {
   unsigned int j;
 };
 
-bool real_compare(double x, double y); 
+bool real_compare(double x, double y);
 
 #endif

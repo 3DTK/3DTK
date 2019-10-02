@@ -27,7 +27,7 @@ class vertexArray
 public:
   vertexArray(int _numPointsToRender);
   ~vertexArray();
-  
+
   GLfloat* array;
   GLint    numPointsToRender;
   GLuint   name;

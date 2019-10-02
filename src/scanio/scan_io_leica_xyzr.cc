@@ -27,15 +27,15 @@ ScanDataTransform_xyz scanio_leica_xyzr_tf;
 ScanDataTransform& ScanIO_leica_xyzr::transform2uos = scanio_leica_xyzr_tf;
 
 
-void ScanIO_leica_xyzr::readScan(const char* dir_path, 
-			   const char* identifier, 
-			   PointFilter& filter, 
-			   std::vector<double>* xyz, 
-			   std::vector<unsigned char>* rgb, 
-			   std::vector<float>* reflectance, 
-			   std::vector<float>* temperature, 
-			   std::vector<float>* amplitude, 
-			   std::vector<int>* type, 
+void ScanIO_leica_xyzr::readScan(const char* dir_path,
+			   const char* identifier,
+			   PointFilter& filter,
+			   std::vector<double>* xyz,
+			   std::vector<unsigned char>* rgb,
+			   std::vector<float>* reflectance,
+			   std::vector<float>* temperature,
+			   std::vector<float>* amplitude,
+			   std::vector<int>* type,
          std::vector<float>* deviation,
          std::vector<double>* normal)
 {
@@ -43,12 +43,12 @@ void ScanIO_leica_xyzr::readScan(const char* dir_path,
 
   // error handling
   path data_path(dir_path);
-  data_path /= path(std::string(dataPrefix()) 
-		    + identifier 
+  data_path /= path(std::string(dataPrefix())
+		    + identifier
 		    + dataSuffix());
   if(!exists(data_path))
-    throw std::runtime_error(std::string("There is no scan file for [") 
-			     + identifier + "] in [" 
+    throw std::runtime_error(std::string("There is no scan file for [")
+			     + identifier + "] in ["
 			     + dir_path + "]");
 
   if(xyz != 0) {

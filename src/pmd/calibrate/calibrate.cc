@@ -67,7 +67,7 @@ int main(int argc, char **argv)
         usage(argv[0]);
         exit(1);
     }
- 
+
     int patx = atoi(argv[1]);
     int paty = atoi(argv[2]);
     CvSize boardSz = cvSize(patx, paty);
@@ -80,10 +80,10 @@ int main(int argc, char **argv)
     CvMat *intrinsic = cvCreateMat(3, 3, CV_32F);
     CvMat *distortion = cvCreateMat(1, 4, CV_32F);
 
-    
+
     IplImage *img = cvLoadImage(images[0], CV_LOAD_IMAGE_GRAYSCALE);
     IplImage *imgColor = cvCreateImage(cvGetSize(img), 8, 3);
-    
+
     int subpixel;
     if(cvGetSize(img).width < 300) {
         subpixel = 4;
@@ -105,11 +105,11 @@ int main(int argc, char **argv)
 
         cvCvtColor(img, imgColor, CV_GRAY2BGR);
 
-        int cornersCount;         
-        
-        int found = cvFindChessboardCorners(img, boardSz, corners[imagesWithBoard], 
+        int cornersCount;
+
+        int found = cvFindChessboardCorners(img, boardSz, corners[imagesWithBoard],
                 &cornersCount, CV_CALIB_CB_ADAPTIVE_THRESH | CV_CALIB_CB_FILTER_QUADS);
-        if(found) cvFindCornerSubPix(img, corners[imagesWithBoard], cornersCount, cvSize(subpixel, subpixel), cvSize(-1,-1), 
+        if(found) cvFindCornerSubPix(img, corners[imagesWithBoard], cornersCount, cvSize(subpixel, subpixel), cvSize(-1,-1),
                            cvTermCriteria(CV_TERMCRIT_EPS | CV_TERMCRIT_ITER, 30, 0.1));
 
         if(found && (cornersCount == cornersTotal)) {
@@ -126,9 +126,9 @@ int main(int argc, char **argv)
 
     printf("calibrating...\n");
     fflush(stdout);
-    
+
     //TODO: can be started in parallel to watch calibration on image undistortion :)
-    calibrate(intrinsic, distortion, cvGetSize(img), boardSz, boardSide, corners, imagesWithBoard); 
+    calibrate(intrinsic, distortion, cvGetSize(img), boardSz, boardSide, corners, imagesWithBoard);
 
     // save to xml files
     cvSave("./intrinsic.xml", intrinsic);

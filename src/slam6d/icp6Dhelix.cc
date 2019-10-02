@@ -8,7 +8,7 @@
  */
 
 
-/** @file 
+/** @file
  *  @brief Implementation of the ICP error function minimization via
  *         helix-translation
  *  @author Peter Schneider. Inst. CS, Univ. of Koblenz and Landau, Germany.
@@ -31,9 +31,9 @@ using namespace NEWMAT;
 /**
  * computes a rotation matrix that rotates the points around an axis
  * and a translation vector, that translates the points along a vector
- * that is parallel to the rotation axis. Thus the result is a helical 
+ * that is parallel to the rotation axis. Thus the result is a helical
  * translation of the points that can be resolved thru a vector field
- * v(x) = cs + c cross x, where cs and c can be build out of an error 
+ * v(x) = cs + c cross x, where cs and c can be build out of an error
  * minimization function.
  *
  * See:
@@ -103,7 +103,7 @@ double icp6D_HELIX::Align(const vector<PtPair>& Pairs,
   matB(1,5) = matB(5,1) = B[4][0];
   matB(2,4) = matB(4,2) = B[3][1];
   matB(1,6) = matB(6,1) = B[5][0];
-  matB(3,4) = matB(4,3) = B[3][2]; 
+  matB(3,4) = matB(4,3) = B[3][2];
   matB(3,5) = matB(5,3) = B[4][2];
   matB(2,6) = matB(6,2) = B[5][1];
   matB(1,2) = matB(2,1) = B[1][0];
@@ -135,7 +135,7 @@ double icp6D_HELIX::Align(const vector<PtPair>& Pairs,
   ccs = matB.i() * bdVec;
 
   int vectorOffset = 0;
-  computeRt( &ccs, vectorOffset, alignxf);    
+  computeRt( &ccs, vectorOffset, alignxf);
 
   return error;
 }
@@ -150,14 +150,14 @@ void icp6D_HELIX::computeRt(const ColumnVector* ccs,
   c(2) = -(*ccs)(vectorOffset + 2);
   c(3) = -(*ccs)(vectorOffset + 3);
   cs(1) = -(*ccs)(vectorOffset + 4);
-  cs(2) = -(*ccs)(vectorOffset + 5);       
-  cs(3) = -(*ccs)(vectorOffset + 6); 
+  cs(2) = -(*ccs)(vectorOffset + 5);
+  cs(3) = -(*ccs)(vectorOffset + 6);
 
   double CLength = sqrt(c.SumSquare());
   double rotationCheck = c(1)*cs(1) + c(2)*cs(2) + c(3)*cs(3);  //c.t() * cs;
   Matrix R (3,3);
   double angle = atan(CLength);               // bemerkung: hier minus gesetzt
-   
+
   ColumnVector g = c / CLength;
   double b0, b1, b2, b3;
   double sinAngle = sin(-angle/2);
@@ -169,7 +169,7 @@ void icp6D_HELIX::computeRt(const ColumnVector* ccs,
   R(1,1) = b0*b0 + b1*b1 - b2*b2 - b3*b3;
   R(1,2) = 2*(b1*b2 + b0*b3);
   R(1,3) = 2*(b1*b3 - b0*b2);
-  R(2,1) = 2*(b1*b2 - b0*b3);                
+  R(2,1) = 2*(b1*b2 - b0*b3);
   R(2,2) = b0*b0 - b1*b1 + b2*b2 - b3*b3;
   R(2,3) = 2*(b2*b3 + b0*b1);
   R(3,1) = 2*(b1*b3 + b0*b2);
@@ -178,12 +178,12 @@ void icp6D_HELIX::computeRt(const ColumnVector* ccs,
   R = R / (b0*b0 + b1*b1 + b2*b2 + b3*b3);
 
   double skewValue = rotationCheck / (CLength*CLength);
-  ColumnVector gs = (cs - (c * skewValue)) / CLength;    
+  ColumnVector gs = (cs - (c * skewValue)) / CLength;
   ColumnVector pTemp(3);
   pTemp(1) = g(2)*gs(3) - g(3)*gs(2);
   pTemp(2) = g(3)*gs(1) - g(1)*gs(3);
   pTemp(3) = g(1)*gs(2) - g(2)*gs(1);
-  ColumnVector t = R * -pTemp + g*(skewValue * angle) + pTemp;  
+  ColumnVector t = R * -pTemp + g*(skewValue * angle) + pTemp;
 
   alignxf[0]  = R(1,1);
   alignxf[1]  = R(2,1);

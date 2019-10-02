@@ -40,7 +40,7 @@
 #endif
 
 namespace fbr{
-  
+
   //Vertical angle of view of scanner
   //#define MAX_ANGLE 60.0
   //#define MIN_ANGLE -40.0
@@ -48,7 +48,7 @@ namespace fbr{
   //#define MIN_ANGLE -65.0
 
   typedef std::tuple<double, double, double, unsigned int> Color_Value_Tuple;
-  
+
   /**
    * @enum scanner_type
    */
@@ -167,9 +167,9 @@ namespace fbr{
     INTERQUARTILE_AVERAGEDIFF,
     DISABLE_RECOVERED_RANGE_FILTERATION,
   };
-  //RANSAC iteration       
+  //RANSAC iteration
 #define RANSACITR 20000
-  //Inlier influence                                                     
+  //Inlier influence
 #define iInfluence 0.5
 
   std::string scanFormatToString(IOType format);
@@ -201,7 +201,7 @@ namespace fbr{
   matching_filtration_method stringToMatchingFiltrationMethod(std::string method);
   std::string recoveredRangeFilterationMethodToString(recovered_range_filteration_method method);
   recovered_range_filteration_method stringToRecoveredRangeFilterationMethod(std::string method);
-  
+
   //reflecrtance normaliation
   float normalizeTheReflectance(float reflecrtance, scanner_type sType, double minReflectance, double maxReflectance);
 
@@ -225,6 +225,6 @@ namespace fbr{
   void colorToRGB4BitBy4Bit(unsigned int color, unsigned int &R, unsigned int &G, unsigned int &B);
   //convert color value to rgb 8 bit by 8 bit
   void colorToRGB8BitBy8Bit(unsigned int color, unsigned int &R, unsigned int &G, unsigned int &B);
-  
+
 }
 #endif /* FBR_GLOBAL_H_ */

@@ -1,4 +1,4 @@
-/** @file 
+/** @file
  *  @brief Representation of the optimized k-d tree.
  *  @author Remus Dumitru. Jacobs University Bremen, Germany
  *  @author Corneliu-Claudiu Prodescu. Jacobs University Bremen, Germany
@@ -15,7 +15,7 @@
 #include "globals.icc"
 
 #ifdef _MSC_VER
-#if !defined _OPENMP && defined OPENMP 
+#if !defined _OPENMP && defined OPENMP
 #define _OPENMP
 #endif
 #endif
@@ -36,18 +36,18 @@ public:
 };
 
 /**
- * @brief The optimized k-d tree. 
- * 
+ * @brief The optimized k-d tree.
+ *
  * A kD tree for points, with limited
  * capabilities (find nearest point to
  * a given point, or to a ray).
- * 
+ *
  * You can hand over a whole scan of points and limit the operations on them by
  * specifying the indices of only a few of them. These indices are not necessarily
  * numeric though; they could also be the points themselves. This varies between the
  * supplied implementations (e.g. KDtree, KDtreeIndexed) and is a result of the
  * definition of these template parameters:
- * 
+ *
  * PointData    the type of the input point data
  * AccessorData the type of indices
  * AccessorFunc retrieves data of type double[3], given an index of type
@@ -60,7 +60,7 @@ template<class PointData, class AccessorData, class AccessorFunc, class PointTyp
 class KDTreeImpl {
 public:
   inline KDTreeImpl() { }
-  
+
   virtual inline ~KDTreeImpl() {
     if (!npts) {
 #ifdef WITH_OPENMP_KD
@@ -79,18 +79,18 @@ public:
   virtual void create(PointData pts, AccessorData *indices, size_t n,
                       unsigned int bucketSize = 20) {
     AccessorFunc point;
-    
+
     // Find bbox and centroid
     double mins[3], maxs[3];
     double centroid[3];
-    
+
     for (int i = 0; i < 3; i++) {
       // Initialize with first point
       mins[i] = point(pts, indices[0])[i];
       maxs[i] = point(pts, indices[0])[i];
       centroid[i] = point(pts, indices[0])[i];
     }
-    
+
     for(size_t i = 1; i < n; i++) {
       for (int j = 0; j < 3; j++) {
         mins[j] = std::min(mins[j], point(pts, indices[i])[j]);
@@ -98,7 +98,7 @@ public:
         centroid[j] += point(pts, indices[i])[j];
       }
     }
-    
+
     for (int i = 0; i < 3; i++) {
       centroid[i] /= n;
     }
@@ -120,7 +120,7 @@ public:
     for (int i = 0; i < 3; i++) {
       node.center[i] = 0.5 * (mins[i]+maxs[i]);
     }
-    
+
     node.dx = 0.5 * (maxs[0]-mins[0]);
     node.dy = 0.5 * (maxs[1]-mins[1]);
     node.dz = 0.5 * (maxs[2]-mins[2]);
@@ -153,13 +153,13 @@ public:
     }
 
     // Partition
-    
+
     // Old method, splitting at the center of the bbox
     // double splitval = node.center[node.splitaxis];
 
     // Now we split at the centroid (average of all points)
     node.splitval = centroid[node.splitaxis];
-    
+
     AccessorData* left = indices,
                 * right = indices + n - 1;
     while(true) {
@@ -177,7 +177,7 @@ public:
 #ifdef WITH_OPENMP_KD                   // does anybody know the reason why this is slower ?? --Andreas
     omp_set_num_threads(OPENMP_NUM_THREADS);
     // we probably need to use a different OMP construct here (like "task") --Johannes B.
-#pragma omp parallel for schedule(dynamic) 
+#pragma omp parallel for schedule(dynamic)
 #endif
     for (i = 0; i < 2; i++) {
       if (i == 0) {
@@ -207,21 +207,21 @@ protected:
 #endif //__INTEL_COMPILER
 #else
   static KDParams<PointType> params[MAX_OPENMP_NUM_THREADS];
-#endif	
+#endif
 
   /**
    * number of points. If this is 0: intermediate node. If nonzero: leaf.
    */
   int npts;
-  
+
   /**
    * Cue the standard rant about anon unions but not structs in C++
    */
   union {
-    /** 
-     * in case of internal node... 
+    /**
+     * in case of internal node...
      */
-    struct {	 
+    struct {
       double center[3]; ///< storing the center of the voxel (R^3)
       double dx,  ///< defining the voxel itself
 	        dy,  ///< defining the voxel itself
@@ -232,11 +232,11 @@ protected:
       KDTreeImpl *child1;  ///< pointers to the childs
       KDTreeImpl *child2;  ///< pointers to the childs
     } node;
-    /** 
-     * in case of leaf node ... 
+    /**
+     * in case of leaf node ...
      */
     struct {
-      /** 
+      /**
        * store the value itself
        * Here we store just a pointer to the data
        */
@@ -265,7 +265,7 @@ protected:
       return;
     }
 
-    // Quick check of whether to abort  
+    // Quick check of whether to abort
     double approx_dist_bbox =
 	 std::max(std::max(fabs(params[threadNum].p[0]-node.center[0])-node.dx,
 		    fabs(params[threadNum].p[1]-node.center[1])-node.dy),
@@ -341,7 +341,7 @@ protected:
   void _fixedRangeSearchBetween2Points(const PointData& pts, int threadNum) const {
     AccessorFunc point;
     ParamFunc pointparam;
-    
+
     // Leaf nodes
     if (npts) {
 	    for (int i = 0; i < npts; i++) {
@@ -356,31 +356,31 @@ protected:
 	    }
 	    return;
     }
-    
+
     // Quick check of whether to abort
     double c2c[] = { params[threadNum].p[0] - node.center[0],
                      params[threadNum].p[1] - node.center[1],
                      params[threadNum].p[2] - node.center[2] };
-    
+
     double my_dist_2 = Len2(c2c); // Distance^2 camera node center
     double myd2center = my_dist_2 - sqr(Dot(c2c, params[threadNum].dir));
     //if (myd2center > (node.r2 + params[threadNum].closest_d2 + 2.0f * max(node.r2, params[threadNum].closest_d2)))
-    
+
     if (myd2center > sqr(node.r + sqrt(params[threadNum].closest_d2)))
       return;
     //if (myd2center > (node.r2 + params[threadNum].closest_d2 + 2.0f * sqrt(node.r2) * sqrt(params[threadNum].closest_d2))) return;
 
     // check if not between points
-    
+
     double p2c[] = { params[threadNum].p0[0] - node.center[0],
                      params[threadNum].p0[1] - node.center[1],
                      params[threadNum].p0[2] - node.center[2] };
 
     double distXP2 = Len2(p2c);
     if(params[threadNum].dist > distXP2 + node.r) return;
-    
+
     if(params[threadNum].dist > sqrt(my_dist_2) + node.r) return;
-    
+
     // Recursive case
     if (params[threadNum].p[node.splitaxis] < node.splitval) {
       node.child1->_fixedRangeSearchAlongDir(pts, threadNum);
@@ -389,10 +389,10 @@ protected:
       node.child2->_fixedRangeSearchAlongDir(pts, threadNum);
       node.child1->_fixedRangeSearchAlongDir(pts, threadNum);
     }
-  
+
   }
 
-  
+
   /*
    * TODO: benchmark what is faster:
    *   - squaring the distance in the check whether to abort every time?
@@ -401,7 +401,7 @@ protected:
   void _fixedRangeSearchAlongDir(const PointData& pts, int threadNum) const {
     AccessorFunc point;
     ParamFunc pointparam;
-    
+
     // Leaf nodes
     if (npts) {
 	    for (int i = 0; i < npts; i++) {
@@ -413,7 +413,7 @@ protected:
         Cross(p2pb, params[threadNum].dir, blub);
         double myd2b = Len2(blub) / Len2(params[threadNum].dir);
 	      */
-        
+
         double p2p[] =  { params[threadNum].p[0] - point(pts, leaf.p[i])[0],
                           params[threadNum].p[1] - point(pts, leaf.p[i])[1],
                           params[threadNum].p[2] - point(pts, leaf.p[i])[2] };
@@ -425,7 +425,7 @@ protected:
 	    }
 	    return;
     }
-    
+
     // Quick check of whether to abort
     double p2c[] = { params[threadNum].p[0] - node.center[0],
                      params[threadNum].p[1] - node.center[1],
@@ -443,7 +443,7 @@ protected:
       node.child2->_fixedRangeSearchAlongDir(pts, threadNum);
       node.child1->_fixedRangeSearchAlongDir(pts, threadNum);
     }
-  
+
   }
 
   /*
@@ -504,7 +504,7 @@ protected:
 	   if (myd2 < params[threadNum].closest_d2) {
 
 		params[threadNum].range_neighbors.push_back(pointparam(pts, leaf.p[i]));
-		
+
 	   }
 	 }
 	 return;
@@ -567,7 +567,7 @@ protected:
 	// FIXME comparing with zero doesn't work for indexed kdtree, we should
 	// check the closest vector for the special negative values instead
     if (params[threadNum].closest_neighbors[kN] != 0) {
-        // Quick check of whether to abort  
+        // Quick check of whether to abort
         double approx_dist_bbox
 		= std::max(std::max(fabs(params[threadNum].p[0]-node.center[0])-node.dx,
 				fabs(params[threadNum].p[1]-node.center[1])-node.dy),
@@ -618,7 +618,7 @@ protected:
     }
 
     int kN = params[threadNum].k-1;
-	// Quick check of whether to abort  
+	// Quick check of whether to abort
 	double approx_dist_bbox =
 		std::max(std::max(fabs(params[threadNum].p[0]-node.center[0])-node.dx,
 					fabs(params[threadNum].p[1]-node.center[1])-node.dy),
@@ -652,7 +652,7 @@ protected:
   void _segmentSearch_all(const PointData& pts, int threadNum) const {
     AccessorFunc point;
     ParamFunc pointparam;
-    
+
     double p2p[3], proj[3];
     double t, *comp;
     // Leaf nodes
@@ -682,7 +682,7 @@ protected:
         }
         return;
     }
-    
+
     // Quick check of whether to abort
     double approx_dist_bbox =
         std::max(std::max(fabs(params[threadNum].segment_center[0]-node.center[0])-node.dx,
@@ -721,7 +721,7 @@ protected:
       node.child2->_segmentSearch_all(pts, threadNum);
       node.child1->_segmentSearch_all(pts, threadNum);
     }
-  
+
   }
 
   /*

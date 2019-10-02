@@ -23,7 +23,7 @@
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/ml/ml.hpp>
-#include "opencv2/photo/photo.hpp" 
+#include "opencv2/photo/photo.hpp"
 
 #include <boost/algorithm/string.hpp>
 
@@ -85,11 +85,11 @@ model::Scene::Scene(const IOType& type,
 	 cerr << "No scans found. Did you use the correct format?" << endl;
 	 exit(-1);
     }
-    
+
     int nrPlanes = 0 , currScan = start;
     //    for(vector <Scan*>::iterator scan = Scan::allScans.begin(); scan != Scan::allScans.end(); ++scan) {
     for(ScanVector::iterator scan = Scan::allScans.begin(); scan != Scan::allScans.end(); ++scan) {
-     
+
         // prepare for plane detection
 	   (*scan)->setRangeFilter(maxDist, minDist);
 	   (*scan)->setReductionParameter(red, octree);

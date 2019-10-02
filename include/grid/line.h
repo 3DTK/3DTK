@@ -3,10 +3,10 @@
 
 #include "grid/gridPoint.h"
 
-/** 
+/**
  * Class represents a line object starting at the gridPoint "start"
  * and ending at the gridPoint "end"
- *  
+ *
  * @author Sebastian Stock, Uwe Hebbelmann, Andre Schemschat
  * @date 25.02.2008
  */
@@ -22,27 +22,27 @@ class line
  public:
     /** @brief CTor */
     line(gridPoint* start, gridPoint* end);
-    
+
     /** @brief Returns the length of the line */
     double getLength();
 
-    /** 
-     * Getter for the start x-coordinate 
+    /**
+     * Getter for the start x-coordinate
      * @return the start x-coordinate
      */
     inline long getStartX() const{
 	return start->getX();
     }
 
-    /** 
-     * Getter for the start z-coordinate 
+    /**
+     * Getter for the start z-coordinate
      * @return the start z-coordinate
      */
     inline long getStartZ() const{
 	return start->getZ();
     }
 
-    /** 
+    /**
      * Getter for the end x-coordinate
      * @return the end x-coordinate
      */
@@ -50,7 +50,7 @@ class line
 	return end->getX();
     }
 
-    /** 
+    /**
      * Getter for the end z-coordinate
      * @return the end z-coordinate
      */

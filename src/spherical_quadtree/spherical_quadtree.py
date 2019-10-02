@@ -113,7 +113,7 @@ def cart2geo(v):
 # "Rendering and managing spherical data with sphere quadtrees" by György Fekete
 # "Comparing Geometrical Properties of Global Grids" by A. Jon Kimerling, Kevin Sahr, Denis White, and Lian Song
 # "Geodesic Discrete Global Grid Systems" by Kevin Sahr, Denis White, and A. Jon Kimerling
-# 
+#
 class QuadNode:
     def __init__(self, v1, v2, v3, indices, pts, vertices, middlemap):
         self.pts = pts

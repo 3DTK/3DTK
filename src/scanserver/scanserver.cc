@@ -46,10 +46,10 @@ void signal_segv(int v)
     signal_once = true;
     cout << endl
          << "# Scanserver closed due to segmentation fault #" << endl;
-    
+
     // remove server and memory
     ServerInterface::destroy();
-  
+
     // clean up temporary files
     if(!keep_temp_files)
       CacheIO::removeTemporaryDirectory();
@@ -64,10 +64,10 @@ void signal_interrupt(int v)
     signal_once = true;
     cout << endl
          << "# Scanserver closed #" << endl;
-    
+
     // remove server and memory
     ServerInterface::destroy();
-  
+
     // clean up temporary files
     if(!keep_temp_files)
       CacheIO::removeTemporaryDirectory();
@@ -109,7 +109,7 @@ void parseArgs(int argc, char** argv, std::size_t& cache_size, std::size_t& data
 {
   int  c;
   extern char *optarg;
-  
+
   static struct option longopts[] = {
     {"cachesize", required_argument, 0, 'c'},
     {"datasize", required_argument, 0, 'd'},
@@ -118,7 +118,7 @@ void parseArgs(int argc, char** argv, std::size_t& cache_size, std::size_t& data
     {"binary_scan_cache", required_argument, 0, 'b'},
     {"help", no_argument, 0, '?'}
   };
-  
+
   while((c = getopt_long(argc, argv, "c:d:t:b:k?", longopts, 0)) != -1) {
     switch(c) {
       case 'c':
@@ -151,7 +151,7 @@ int main(int argc, char** argv)
 {
   // check for singleton process
   // TODO
-  
+
   // default parameters
   std::size_t cache_size = 750;
   std::size_t data_size = 75;
@@ -159,34 +159,34 @@ int main(int argc, char** argv)
 //  std::size_t data_size = 15;
   string temporary_path = "temp";
   bool binary_scan_cache = true;
-  
+
   // parse arguments
   parseArgs(argc, argv, cache_size, data_size, temporary_path, keep_temp_files, binary_scan_cache);
-  
+
   // create temporary directory and configure ScanHandler if so desired
   CacheIO::createTemporaryDirectory(temporary_path);
   if(binary_scan_cache)
     ScanHandler::setBinaryCaching();
-  
+
   // create the server instance
   cout << "Starting scanserver." << endl
     << "  Cache size: " << cache_size << "MB, Data Size: " << data_size << "MB." << endl
     << "  Binary scan caching: " << (binary_scan_cache? "yes": "no") << endl;
   ServerInterface* server = ServerInterface::create(data_size*1024*1024, cache_size*1024*1024);
   cout << endl;
-  
+
   // prepare signal handlers after server is created
   signal(SIGSEGV, signal_segv);
   signal(SIGINT,  signal_interrupt);
   signal(SIGTERM, signal_interrupt);
-  
+
   // run forrest, run
   server->run();
-  
+
   // end of line!
   cout << "Stopping scanserver." << endl;
   ServerInterface::destroy();
-  
+
   // clean up temporary files
   if(!keep_temp_files)
     CacheIO::removeTemporaryDirectory();

@@ -7,7 +7,7 @@
  *
  */
 
-/** @file 
+/** @file
  *  @brief Implementation of the ICP error function minimization via SVD
  *  @author Kai Lingemann. Inst. of CS, University of Osnabrueck, Germany.
  *  @author Andreas Nuechter. Inst. of CS, University of Osnabrueck, Germany.
@@ -42,7 +42,7 @@ double icp6D_SVD::Align(const vector<PtPair>& pairs,
 {
   double error = 0;
   double sum = 0.0;
-     
+
   // Get centered PtPairs
   double** m = new double*[pairs.size()];
   double** d = new double*[pairs.size()];
@@ -79,10 +79,10 @@ double icp6D_SVD::Align(const vector<PtPair>& pairs,
   Matrix H(3,3), R(3,3);
   for(int j = 0; j < 3; j++){
     for(int k = 0; k < 3; k++){
-      H(j+1, k+1) = 0.0;     
+      H(j+1, k+1) = 0.0;
     }
   }
-  
+
   for(unsigned int i = 0; i < pairs.size(); i++){
     for(int j = 0; j < 3; j++){
       for(int k = 0; k < 3; k++){
@@ -90,7 +90,7 @@ double icp6D_SVD::Align(const vector<PtPair>& pairs,
       }
     }
   }
-    
+
   Matrix U(3,3);
   DiagonalMatrix Lamda(3);
   Matrix V(3,3);
@@ -167,11 +167,11 @@ double icp6D_SVD::Align(const vector<PtPair>& pairs,
  * @param *alignfx The resulting transformation matrix
  * @return Error estimation of the matching (rms)
 */
-double icp6D_SVD::Align_Parallel(const int openmp_num_threads, 
+double icp6D_SVD::Align_Parallel(const int openmp_num_threads,
                                 const unsigned int n[OPENMP_NUM_THREADS],
-                                const double sum[OPENMP_NUM_THREADS], 
+                                const double sum[OPENMP_NUM_THREADS],
                                 const double centroid_m[OPENMP_NUM_THREADS][3],
-                                const double centroid_d[OPENMP_NUM_THREADS][3], 
+                                const double centroid_d[OPENMP_NUM_THREADS][3],
                                 const double Si[OPENMP_NUM_THREADS][9],
                                 double *alignxf)
 {
@@ -181,7 +181,7 @@ double icp6D_SVD::Align_Parallel(const int openmp_num_threads,
   double cm[3] = {0.0, 0.0, 0.0};  // centroid m
   double cd[3] = {0.0, 0.0, 0.0};  // centroid d
 
-  // Implementation according to the paper 
+  // Implementation according to the paper
   // "The Parallel Iterative Closest Point Algorithm"
   // by Langis / Greenspan / Godin, IEEE 3DIM 2001
   // formula (4)
@@ -193,7 +193,7 @@ double icp6D_SVD::Align_Parallel(const int openmp_num_threads,
   // Freiburg, Germany, September 2007
   for (int i = 0; i < openmp_num_threads; i++) {
     s += sum[i];
-    pairs_size += n[i]; 
+    pairs_size += n[i];
     cm[0] += n[i] * centroid_m[i][0];
     cm[1] += n[i] * centroid_m[i][1];
     cm[2] += n[i] * centroid_m[i][2];
@@ -222,7 +222,7 @@ double icp6D_SVD::Align_Parallel(const int openmp_num_threads,
   Matrix H(3,3), R(3,3);
   for(int j = 0; j < 3; j++){
     for(int k = 0; k < 3; k++){
-      H(j+1, k+1) = 0.0;     
+      H(j+1, k+1) = 0.0;
     }
   }
   // formula (5)

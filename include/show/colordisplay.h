@@ -9,10 +9,10 @@ class colordisplay {
   public:
   virtual ~colordisplay() {}
   inline void setColorManager(ColorManager *_cm) { cm = _cm; }
-  
+
   void displayLOD(float lod) {
     if (cm) cm->load();
-    drawLOD(lod); 
+    drawLOD(lod);
     if (cm) cm->unload();
   };
 
@@ -22,7 +22,7 @@ class colordisplay {
     if (cm) cm->unload();
   }
 
-  // these are needed on windows so that show can be used as a library 
+  // these are needed on windows so that show can be used as a library
   // we need to call the ExtractFrustum in a same process as the draw function on windows
   void extractFrustumAndDisplayLOD(float lod, short detail) {
 	  if (cm) cm->load();
@@ -46,14 +46,14 @@ class colordisplay {
 
   protected:
 
-  virtual void drawLOD(float lod) = 0; 
-  virtual void draw() = 0; 
-  
-  // these are needed on windows so that show can be used as a library 
+  virtual void drawLOD(float lod) = 0;
+  virtual void draw() = 0;
+
+  // these are needed on windows so that show can be used as a library
   // we need to call the ExtractFrustum in a same process as the draw function on windows
   virtual void extractFrustumAndDrawLOD(float lod, short detail) = 0;
   virtual void extractFrustumAndDraw(short detail) = 0;
-  
+
   ColorManager *cm;
 };
 

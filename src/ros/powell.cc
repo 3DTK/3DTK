@@ -30,7 +30,7 @@ float *pcom,*xicom;
 calibration *nrcal;
 
 void powell(float p[], float **xi, int n, float ftol, int *iter, float *fret,
-    calibration *cal) 
+    calibration *cal)
 //    float (calibration::*func)(float []))
  /*
  Minimization of a function func of n variables. Input consists of an initial starting point
@@ -98,7 +98,7 @@ void powell(float p[], float **xi, int n, float ftol, int *iter, float *fret,
         //                                              Move to the minimum of the new
 //        linmin(p,xit,n,fret,func);
         linmin(p,xit,n,fret,cal);
-        //                                                   direction, and save the new di-   
+        //                                                   direction, and save the new di-
         for (j=1;j<=n;j++) {
           //                                                   rection.
           xi[j][ibig]=xi[j][n];
@@ -106,12 +106,12 @@ void powell(float p[], float **xi, int n, float ftol, int *iter, float *fret,
         }
       }
     }
-    //                                              Back for another iteration. 
+    //                                              Back for another iteration.
   }
 }
 
 
-void linmin(float p[], float xi[], int n, float *fret, 
+void linmin(float p[], float xi[], int n, float *fret,
     calibration *cal)
 //    float (calibration::*func) (float []))
 // Given an n-dimensional point p[1..n] and an n-dimensional direction xi[1..n], moves and

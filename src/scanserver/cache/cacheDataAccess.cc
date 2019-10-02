@@ -39,6 +39,6 @@ CacheDataAccess::CacheDataAccess(const CacheDataAccess& other) :
 CacheDataAccess::operator bool() const
 {
   // if size is non-zero we should have a valid pointer to cache shared memory, don't know what happens to a zero-handle after you put it into a segment manager get address function
-  return m_size != 0;  
+  return m_size != 0;
 }
 */

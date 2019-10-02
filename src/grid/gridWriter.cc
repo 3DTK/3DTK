@@ -15,20 +15,20 @@
 
 /**
  * CTor of gridWriter. Tries to the file
- * specified by file and saves the stream if 
+ * specified by file and saves the stream if
  * successfull
  *
  * @param file The filename of the file
  */
 gridWriter::gridWriter(std::string file)
-{   
+{
     this->stream.open(file.c_str());
     if(!this->stream.good())
     {
 	std::cerr << "ERROR: In gridWriter::gridWriter, unable to open the stream for gridWriter! " << std::endl;
 	std::cerr << "(Filename: " << file << ")" << std::endl;
 	exit(1);
-    }  
+    }
 }
 
 /**
@@ -128,7 +128,7 @@ void parcelWriter::write(const grid& grid)
 		   << grid.points[i][j]->getCount() << " "
 		   << grid.points[i][j]->getOccupied() << std::endl;
 }
-      
+
 /**
  * CTor. Just calls gridWriter ctor
  * See gridWriter::gridWriter(stream) for more infos.
@@ -178,7 +178,7 @@ void gnuplotWriter::write(const grid& grid)
  */
 worldWriter::worldWriter(std::string file, long minX, long maxX, long minZ, long maxZ, int resolution, long vpX, long vpZ)
     : gridWriter(file)
-{  
+{
     stream << "1" << std::endl;
     stream << resolution << std::endl;
     stream << minX << " " << maxX << " " << minZ << " " << maxZ <<  std::endl;
@@ -204,7 +204,7 @@ worldWriter::worldWriter(std::ofstream& stream, long minX, long maxX, long minZ,
 {
     stream << "1" << std::endl;
     stream << resolution << std::endl;
-    stream << minX << " " << maxX << " " << minZ << " " << maxZ <<  std::endl;    
+    stream << minX << " " << maxX << " " << minZ << " " << maxZ <<  std::endl;
     stream << vpX << " " << vpZ << std::endl;
 }
 
@@ -218,7 +218,7 @@ void worldWriter::write(const grid& grid)
     {
 	for(int j=0; j < grid.getSizeZ(); ++j)
 	{
-	    stream << grid.points[i][j]->getX() << " " 
+	    stream << grid.points[i][j]->getX() << " "
 		   << grid.points[i][j]->getZ() << " "
 		   << grid.points[i][j]->getPercent() << std::endl;
 	}

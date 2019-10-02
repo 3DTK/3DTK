@@ -1,6 +1,6 @@
  /*
  * Copyright (C) David Redondo
- * 
+ *
  * Released under the GPL version 3.
  *
  */
@@ -45,7 +45,7 @@ struct weight{
             m_distribution = normal_dist(mean, sigma);
             degenerated = false;
         }
-        
+
     }
     double operator()(double distance) const{
         return !degenerated ? 1 - boost::math::cdf(m_distribution, distance) : 1;
@@ -68,7 +68,7 @@ int main(int argc, char** argv)
 {   /*TODO
     * maybe projection_method
     */
-    
+
     namespace po = boost::program_options;
     po::options_description options("Options");
     options.add_options()
@@ -77,7 +77,7 @@ int main(int argc, char** argv)
         ("single,s", po::bool_switch()->default_value(false), "write segments in a single file using different colors")
         ("verbose,v", po::bool_switch()->default_value(false), "verbose output")
         ("debug", po::bool_switch()->default_value(false), "write files of intermediate steps to debug/\nWarning: May write many files");
-    
+
     po::options_description parameters("Parameters");
     parameters.add_options()
         ("window,m", po::value<size_t>()->default_value(5), "moving window size")
@@ -87,18 +87,18 @@ int main(int argc, char** argv)
     panorama_options.add_options()
         ("width,w",po::value<size_t>()->required(), "maximum internal panorma width")
         ("height,h",po::value<size_t>()->required(), "maximum internal panorma height");
-        
+
     po::positional_options_description input_dir;
     input_dir.add("input-dir", 1);
     po::options_description dummy("Hidden");
     dummy.add_options()("input-dir",po::value<std::string>()->required(), "input_directory");
-    
+
     po::options_description pp_options("Post processing options") ;
     pp_options.add_options()("cellsize,c",po::value<double>()->default_value(10.0), "Bin size for blob coloring during post processing");
     dummy.add_options()("disable-pp", po::bool_switch()->default_value(false)); //Leave this undocumented
-    
+
     parameters.add(panorama_options).add(pp_options);
-    
+
     po::options_description visible;
     visible.add(options).add(parameters);
     po::options_description all;
@@ -122,11 +122,11 @@ int main(int argc, char** argv)
         std::cout << e.what() << '\n' << visible;
         return 1;
     }
-    
+
     gcs_verbose = vm["verbose"].as<bool>();
     gcs_debug = vm["debug"].as<bool>();
     if (gcs_verbose) {
-        std::cout  << "Verbose output enabled (--verbose)\n" 
+        std::cout  << "Verbose output enabled (--verbose)\n"
             << "in-dir=" << vm["input-dir"].as<std::string>() << '\n'
             << "out-dir=" << vm["out-dir"].as<std::string>() << '\n'
             <<"m=" << vm["window"].as<size_t>() << '\n'
@@ -142,7 +142,7 @@ int main(int argc, char** argv)
     if (gcs_verbose && vm["single"].as<bool>()) {
             std::cout << "Writing output into a single file (--single)" << std::endl;
     }
-    
+
     scan_cv scan{vm["input-dir"].as<string>(), 0, UOS};
     scan.convertScanToMat();
     auto segments  = segment_scan(scan, vm["width"].as<size_t>(), vm["height"].as<size_t>(), vm["window"].as<size_t>(),
@@ -150,7 +150,7 @@ int main(int argc, char** argv)
 
     std::string out_path = vm["out-dir"].as<std::string>();
     if (vm["out-dir"].defaulted()) {
-        int i = 1; 
+        int i = 1;
         std::string out_path_base = out_path;
         std::cout << "No output directory specified. Trying to write to " << out_path << '\n';
         while(mkdir(out_path.c_str(), S_IRWXU|S_IRWXG|S_IRWXO) == -1) {
@@ -210,7 +210,7 @@ void similarity_measure(const cv::Mat& range_image, int window_size, std::vector
                         squared_sum += distance * distance;
                         ++neighbors;
                 }
-            } 
+            }
             origin = origin * (1 /(float)neighbors);
             if(sum == 0) continue;
             //calculate covariance
@@ -230,7 +230,7 @@ void similarity_measure(const cv::Mat& range_image, int window_size, std::vector
                     sum_of_weights += w;
                 }
             }
-            
+
             covariance *= 1 / sum_of_weights;
             //Opencv SVD only calculates left eigenvectors
             NEWMAT::Matrix A(3, 3); A << (double*)(cv::Mat(covariance).data);
@@ -252,7 +252,7 @@ void similarity_measure(const cv::Mat& range_image, int window_size, std::vector
             if(gcs_debug) {
                 normals_debug << n << '\n';
             }
-        } 
+        }
     }
     if(gcs_debug) {
         normals_debug.close();
@@ -320,7 +320,7 @@ std::vector<const cv::Vec3f*> relabel_points(std::vector<plane_candidate>& plane
             p[0] = 1;
             match = -1;
         }
-        for(size_t i = 0; i < planes.size(); ++i) {  
+        for(size_t i = 0; i < planes.size(); ++i) {
             double distance = std::fabs(plane_point_distance(*point, planes[i].normal, planes[i].distance));
             if(distance < min) {
                 min = distance;
@@ -328,7 +328,7 @@ std::vector<const cv::Vec3f*> relabel_points(std::vector<plane_candidate>& plane
             } else if(distance == min) {
                 match = sizes[i] >sizes[match] ? i : match;
             }
-                
+
         }
         if(min <= std::min(tau, 3 * planes[match].std_error)) {
             planes[match].points.emplace_back(point);
@@ -339,7 +339,7 @@ std::vector<const cv::Vec3f*> relabel_points(std::vector<plane_candidate>& plane
     return non_planar;
 }
 
-bool refit_planes(std::vector<plane_candidate>& planes) 
+bool refit_planes(std::vector<plane_candidate>& planes)
 {
     bool changed = false;
     for(auto& plane : planes) {
@@ -354,7 +354,7 @@ bool refit_planes(std::vector<plane_candidate>& planes)
         plane.normal = cv::Vec3d{new_plane[0], new_plane[1], new_plane[2]};
         plane.distance = new_plane[3];
         plane.std_error = standard_error(plane);
-        
+
     }
     return changed;
 }
@@ -368,7 +368,7 @@ void join_planes(std::vector<plane_candidate>& planes, double tau)
         for(auto second = first+1; second < end; ++second) {
             if(fabs(first->distance - second->distance) < tau   && acos(first->normal.dot(second->normal)) < M_PI/180) {
                 if (gcs_verbose) {
-                    std::cout << "joining (" << first->normal << ',' << first->distance << ") and (" 
+                    std::cout << "joining (" << first->normal << ',' << first->distance << ") and ("
                     << second->normal << ',' << second->distance << ")\n";
                 }
                 first->distance = (first->distance + second->distance) / 2;
@@ -380,7 +380,7 @@ void join_planes(std::vector<plane_candidate>& planes, double tau)
                 std::swap(*second, *end);
                 if (gcs_verbose) {
                     std::cout << "First " << first-planes.begin() << " Second " << second-planes.begin()
-                        << "End now " << end-planes.begin() << '\n'; 
+                        << "End now " << end-planes.begin() << '\n';
                 }
             }
         }
@@ -389,7 +389,7 @@ void join_planes(std::vector<plane_candidate>& planes, double tau)
 }
 
 std::vector<const cv::Vec3f*> k_means(std::vector<plane_candidate>& candidates, const std::set<std::pair<int, int>>& points,
-             const cv::Mat& range_image, double tau, size_t minimum_points) 
+             const cv::Mat& range_image, double tau, size_t minimum_points)
 {
     size_t old_size;
     std::vector<const cv::Vec3f*> non_planar;
@@ -402,10 +402,10 @@ std::vector<const cv::Vec3f*> k_means(std::vector<plane_candidate>& candidates, 
             [=](plane_candidate& c){return c.points.size() < minimum_points;}),  candidates.end());//delete (almost) empty planes
         /*No dilation and joining as described in the paper but with custom joining above*/
     } while (refit_planes(candidates) || old_size != candidates.size()); //refit
-  
+
     return non_planar;
 }
-        
+
 /* Return plane candidates with non planar points being in the first element */
 std::vector<plane_candidate> cut_graph(david_graph::grid_graph<double>& graph, const cv::Mat& range_image, size_t minimum_points, double tau)
 {
@@ -420,7 +420,7 @@ std::vector<plane_candidate> cut_graph(david_graph::grid_graph<double>& graph, c
         mkdir(path.c_str(), S_IRWXU|S_IRWXG|S_IRWXO);
         dist_file.open(path+"/distances.txt");
     }
-    
+
     /* Calculate threshold used for deleting edges*/
     double sum = 0, squared_sum = 0;
     int num_edges = 0;
@@ -461,19 +461,19 @@ std::vector<plane_candidate> cut_graph(david_graph::grid_graph<double>& graph, c
             } else {
                 mean_low += d;
                 ++low;
-            }            
+            }
         }
         mean_low /= low;
         mean_high /= high;
         threshold = (mean_low + mean_high)/2;
     } while(std::fabs(old_threshold - threshold) > epsilon);
-    
+
     /* remove edges less than thresholdfor_each <=> retain equal or greater*/
     graph.remove_edges([=](std::pair<int, int> , std::pair<int, int> , double distance){
         return my_weight(distance) < threshold;
     });
-    
-    
+
+
     if(gcs_verbose || gcs_debug){
         std::ofstream after;
         if(gcs_debug) {
@@ -490,13 +490,13 @@ std::vector<plane_candidate> cut_graph(david_graph::grid_graph<double>& graph, c
                 double distance =  edge.second;
                 sum_filtered += distance;
                 if(gcs_debug) after << my_weight(distance) << '\n';
-                ++num_filtered; 
+                ++num_filtered;
             }
         }
        if (gcs_verbose) std::cout << "After thresholding(" << threshold << "):\n" << num_filtered << " edges, mean distance " << sum_filtered/num_filtered << '\n';
     }
 
-    
+
     /* Main part, recursively fit planes to the remaining components and employ Kmeans clustering*/
     auto components = graph.connected_components();
 
@@ -508,7 +508,7 @@ std::vector<plane_candidate> cut_graph(david_graph::grid_graph<double>& graph, c
         write_components_to_scans(range_image, components, path+"/before", minimum_points);
     }
     i = 0;
-    
+
     /*delete non candidates*/
     components.erase(std::remove_if(components.begin(), components.end(),
         [=](david_graph::grid_graph<double>& component){return component.vertices().size() < minimum_points;}), components.end());
@@ -524,7 +524,7 @@ std::vector<plane_candidate> cut_graph(david_graph::grid_graph<double>& graph, c
         if(std_err < tau) {
             /*candidate is planar, no need to insert points, since they would be cleared in the first relabeling step*/
             candidates.push_back({normal, plane[3], std_err, std::vector<const cv::Vec3f*>()});
-        } 
+        }
         else {
             //recurse
             auto sub_planes = cut_graph(candidate, range_image, minimum_points, tau);
@@ -534,7 +534,7 @@ std::vector<plane_candidate> cut_graph(david_graph::grid_graph<double>& graph, c
     }
     if(candidates.size() != 0) {
         if (gcs_verbose) {
-            std::cout << path.substr(16, path.size()) << " kmeans" << " (" << graph.vertices().size() << " points, " 
+            std::cout << path.substr(16, path.size()) << " kmeans" << " (" << graph.vertices().size() << " points, "
                 <<  candidates.size() << " planes)\n";
         }
         auto non_planar_points = k_means(candidates, graph.vertices(), range_image, tau, minimum_points);
@@ -546,7 +546,7 @@ std::vector<plane_candidate> cut_graph(david_graph::grid_graph<double>& graph, c
         candidates.emplace_back(p);
     }
 
-    
+
     if (gcs_verbose) std::cout << candidates.size() - 1 << " candidates remaining\n\n";
     if(gcs_debug) {
         mkdir((path+"/after").c_str(), S_IRWXU|S_IRWXG|S_IRWXO);
@@ -565,7 +565,7 @@ std::vector<plane_candidate> cut_graph(david_graph::grid_graph<double>& graph, c
             }
             file.close();
             ++scan_num;
-        }   
+        }
     }
     i = old_i + 1;
     path = old_path;
@@ -641,7 +641,7 @@ std::vector<segment> segment_scan(scan_cv& scan, size_t panorama_width, size_t p
         mkdir("debug/grids",  S_IRWXU|S_IRWXG|S_IRWXO);
         mkdir("debug/post_processing",  S_IRWXU|S_IRWXG|S_IRWXO);
     }
-    
+
     std::cout << "Projecting scan" << std::endl;
     using fbr::panorama;
     //panorama image;
@@ -650,22 +650,22 @@ std::vector<segment> segment_scan(scan_cv& scan, size_t panorama_width, size_t p
     if(gcs_debug) {
         cv::imwrite("debug/panorama.png",image.getNormalizedRangeImage());
     }
-    
+
     cv::Mat map = image.getMap();
     std::cout << "Calculating distance measure" << std::endl;
     std::vector<std::vector<segment>> phis(map.rows, std::vector<segment>(map.cols));
     similarity_measure(map, window_size, phis);
-    
+
     std::cout << "Building Graph" << std::endl;
     using namespace david_graph;
     grid_graph<double> graph = make_grid_graph<double>(map.rows, map.cols, 0.0);
     /*remove zero vertices*/
     graph.remove_vertices([&](const std::pair<int, int>& v){return map.at<cv::Vec3f>(v.first, v.second) == cv::Vec3f{0,0,0};});
     edge_distances(image.getMap(), phis, graph);
-    
+
     std::cout << "Cutting graph" << std::endl;
     std::vector<plane_candidate> planes = cut_graph(graph, map, minimum_points, tau);
-    
+
     if(gcs_debug) {
         std::ofstream plane_list("debug/planes.txt");
         for(size_t i = 0; i < planes.size(); ++i) {
@@ -673,12 +673,12 @@ std::vector<segment> segment_scan(scan_cv& scan, size_t panorama_width, size_t p
         }
         plane_list.close();
     }
-    
+
     /** DONT RETURN POINTERS TO THE POINTS (E.G. POINTERS IN PLANE_CANDIDATES) FROM THIS FUNCTION SINCE THEY POINT INTO
      * THE PANORAMA*/
     /*BEcause we cluster planes and not segments, post_processing cuts the planes into segments again*/
     if(!disable_post_processing) {
-        std::cout << "Found " << planes.size() - 1 << " planes\nPost processing" << std::endl; 
+        std::cout << "Found " << planes.size() - 1 << " planes\nPost processing" << std::endl;
         std::vector<segment> segments =  post_process(planes, cell_size);
         std::cout << "Found " << segments.size() - 1 << " segments\n" << std::endl;
         return segments;

@@ -1,6 +1,6 @@
 /**
  * @file
- * @brief 
+ * @brief
  *
  * @author Thomas Escher
  */
@@ -10,11 +10,11 @@
 
 /**
  * @brief Derivable class to store access informations in.
- * 
+ *
  * Obviously a TODO
  */
 class AccessData {
-  
+
 };
 
 #endif //ACCESS_DATA_H

@@ -56,13 +56,13 @@ inline void Matrix4ToQuaternion(const T *mat, double *quat)
     quat[1] = -1.0 * ( mat[2] - mat[8] ) / S;       // q_y
     quat[2] = -1.0 * ( mat[4] - mat[1] ) / S;       // q_z
     quat[3] = 0.25 * S;                             // q_0
-  } else if ( mat[0] > mat[5] && mat[0] > mat[10] )  {	// Column 0: 
+  } else if ( mat[0] > mat[5] && mat[0] > mat[10] )  {	// Column 0:
     S  = sqrt( 1.0 + mat[0] - mat[5] - mat[10] ) * 2;
     quat[0] = -1.0 * 0.25 * S;
     quat[1] = -1.0 * (mat[4] + mat[1] ) / S;
     quat[2] = -1.0 * (mat[2] + mat[8] ) / S;
-    quat[3] = (mat[9] - mat[6] ) / S; 
-  } else if ( mat[5] > mat[10] ) {		          	// Column 1: 
+    quat[3] = (mat[9] - mat[6] ) / S;
+  } else if ( mat[5] > mat[10] ) {		          	// Column 1:
     S  = sqrt( 1.0 + mat[5] - mat[0] - mat[10] ) * 2;
     quat[0] = -1.0 * (mat[4] + mat[1] ) / S;
     quat[1] = -1.0 * 0.25 * S;

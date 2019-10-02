@@ -34,13 +34,13 @@ scanmanager::~scanmanager()
 	    delete[] metaMatrix.at(i).at(j);
 	}
     }
-       
+
     // Deleting the stored scans and reset the vector
     for(size_t i=0; i < Scan::allScans.size(); ++i)
-    {	
+    {
 	delete Scan::allScans[i];
     }
-    
+
     Scan::allScans.clear();
 }
 
@@ -62,7 +62,7 @@ void scanmanager::readFrames(std::string dir, int start, int end,
   double mirror[16];
   M4identity(mirror);
   mirror[10] = -1.0;
-  
+
   double initialTransform[16];
   if (readInitial) {
     std::cout << "Initial Transform:" << std::endl;
@@ -74,7 +74,7 @@ void scanmanager::readFrames(std::string dir, int start, int end,
     }
     initial_in >> initialTransform;
     std::cout << initialTransform << std::endl;
-    
+
     // update the mirror to apply the initial frame for all frames
     double tempxf[16];
     MMult(mirror, initialTransform, tempxf);
@@ -85,25 +85,25 @@ void scanmanager::readFrames(std::string dir, int start, int end,
     const double* transformation;
     Scan::AlgoType algoType;
     std::vector<double*> Matrices;
-    
+
     // iterate over frames (stop if none were created) and pull/convert the frames into local containers
     unsigned int frame_count = (*it)->readFrames();
     if(frame_count == 0) break;
     for(unsigned int i = 0; i < frame_count; ++i) {
       (*it)->getFrame(i, transformation, algoType);
       double* transMatOpenGL = new double[16];
-      
+
       // apply mirror to convert (and initial frame if requested) the frame and save in opengl
       MMult(mirror, transformation, transMatOpenGL);
 
       Matrices.push_back(transMatOpenGL);
     }
-    
+
     metaMatrix.push_back(Matrices);
-    
+
     //    current_frame = MetaMatrix.back().size() - 1;
   }
-  
+
   if (metaMatrix.size() == 0) {
     std::cerr << "*****************************************" << std::endl;
     std::cerr << "** ERROR: No .frames could be found!   **" << std::endl;
@@ -111,7 +111,7 @@ void scanmanager::readFrames(std::string dir, int start, int end,
     std::cerr << " ERROR: Missing or empty directory: " << dir << std::endl << std::endl;
     return;
   }
-    
+
   // if set, value 14 of the transformationmatrix will be set to 0
   if(correctYAxis)
     {
@@ -127,7 +127,7 @@ void scanmanager::readFrames(std::string dir, int start, int end,
 
 /**
  * Reads all scans, frames and the transformationmatrix
- * 
+ *
  * @param inputDir the input directory
  * @param outputdir the output directory
  * @param scantype the scantype
@@ -148,13 +148,13 @@ void scanmanager::startscan(std::string inputdir, std::string outputdir,
   // load all available scans
   bool scanserver = false;
   Scan::openDirectory(scanserver, inputdir, scantype, start, end);
-  
+
   if(Scan::allScans.size() == 0) {
     std::cerr << "No scans found. Did you use the correct format?" << std::endl;
     exit(-1);
 
   }
-  
+
   // Read frames
   readFrames(inputdir, start, end, readInitial, correctYAxis);
 }
@@ -164,7 +164,7 @@ void scanmanager::startscan(std::string inputdir, std::string outputdir,
  *
  * @return the number of scans
  */
-size_t scanmanager::getScanCount() const 
+size_t scanmanager::getScanCount() const
 {
     return Scan::allScans.size();
 }
@@ -183,14 +183,14 @@ Scan& scanmanager::getScan(int i)
 /**
  * Returns the transformationmatrix with number i.
  *
- * The original readFrames method always read one matrix more 
- * than needed, but it complicated freeing memory and wasnt used in 
+ * The original readFrames method always read one matrix more
+ * than needed, but it complicated freeing memory and wasnt used in
  * this programm, so it was commented out.
  *
  * @param i the number of the transformationmatrix
  * @return transformationmatrix with number i
  */
-const std::vector <double*>& scanmanager::getMatrix(int i) 
+const std::vector <double*>& scanmanager::getMatrix(int i)
 {
     return this->metaMatrix.at(i);
 }

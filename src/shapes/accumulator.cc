@@ -24,7 +24,7 @@ double* polar2normal(double theta, double phi) {
 }
 
 AccumulatorSimple::AccumulatorSimple(ConfigFileHough myCfg) {
- 
+
   count = 0;
   myConfigFileHough = myCfg;
   accumulator = new int**[myConfigFileHough.Get_RhoNum()];
@@ -47,14 +47,14 @@ AccumulatorSimple::~AccumulatorSimple() {
       delete[] accumulator[i][j];
     }
     delete[] accumulator[i];
-    
+
   }
   delete[] accumulator;
-  
-}  
+
+}
 
 void AccumulatorSimple::printAccumulator() {
-  
+
   for(unsigned int i = 0; i < myConfigFileHough.Get_PhiNum(); i++) {
     for(unsigned int j = 0; j < myConfigFileHough.Get_ThetaNum(); j++) {
       double phi1 = i * M_PI / (myConfigFileHough.Get_PhiNum()*0.99999999);
@@ -78,7 +78,7 @@ void AccumulatorSimple::printAccumulator() {
 
     cout << endl;
   }
-  
+
   /*
   for(unsigned int i = 0; i < myConfigFileHough.Get_PhiNum(); i++) {
     for(unsigned int j = 0; j < myConfigFileHough.Get_ThetaNum(); j++) {
@@ -106,15 +106,15 @@ bool AccumulatorSimple::accumulate(double theta, double phi, double rho) {
   count++;
   //cout << phi << " " << theta << " " << rho << " ";
   int rhoindex = myConfigFileHough.Get_RhoNum() - 1;
-  
+
   if(rho < myConfigFileHough.Get_RhoMax()) {
-    rhoindex = (int)((rho*(double)myConfigFileHough.Get_RhoNum()/(double)myConfigFileHough.Get_RhoMax()));   
+    rhoindex = (int)((rho*(double)myConfigFileHough.Get_RhoNum()/(double)myConfigFileHough.Get_RhoMax()));
   }
   //cout << (rhoindex + 0.5) * myConfigFileHough.Get_RhoMax()/myConfigFileHough.Get_RhoNum() << endl;
-  
+
   int phiindex = (int)(phi*((myConfigFileHough.Get_PhiNum()*0.99999999)/(M_PI)));
   int thetaindex = (int)(theta*((myConfigFileHough.Get_ThetaNum()*0.9999999)/(2*M_PI)));
-  
+
   //thetaindex = thetaindex % ballNr[phiindex];
   accumulator[rhoindex][phiindex][thetaindex]++;
   return ((unsigned int)accumulator[rhoindex][phiindex][thetaindex] >= myConfigFileHough.Get_AccumulatorMax());
@@ -126,7 +126,7 @@ void AccumulatorSimple::accumulate(Point p) {
   for(unsigned int i = 0; i < myConfigFileHough.Get_PhiNum(); i++) {
     //TODO 0.99 vielleicht nicht gut
     double phi = (i+0.5) * M_PI / (myConfigFileHough.Get_PhiNum()*0.99999999999);
-  
+
     for(unsigned int j = 0; j < myConfigFileHough.Get_ThetaNum(); j++) {
       double theta = (j+0.5) * 2*M_PI / myConfigFileHough.Get_ThetaNum();
       if(theta > 2*M_PI) theta = 2*M_PI;
@@ -139,7 +139,7 @@ void AccumulatorSimple::accumulate(Point p) {
         n[2] = cos(phi);
         Normalize3(n);
       for(unsigned int k = 0; k < myConfigFileHough.Get_RhoNum(); k++) {
-        double rho = (k + 0.5) * myConfigFileHough.Get_RhoMax() / myConfigFileHough.Get_RhoNum(); 
+        double rho = (k + 0.5) * myConfigFileHough.Get_RhoMax() / myConfigFileHough.Get_RhoNum();
         double distance = p.x * n[0] + p.y * n[1] + p.z * n[2];
         if(fabs(distance-rho) < myConfigFileHough.Get_MaxPointPlaneDist()) {
           accumulator[k][i][j]++;
@@ -150,16 +150,16 @@ void AccumulatorSimple::accumulate(Point p) {
   }
 
 //  cout << "fertig" << endl;
-  
+
 }
 
 double* AccumulatorSimple::accumulateRet(Point p) {
   count++;
   // rho theta phi
-  double* angles = new double[3]; 
+  double* angles = new double[3];
   for(unsigned int i = 0; i < myConfigFileHough.Get_PhiNum(); i++) {
     double phi = (i+0.5) * M_PI / (myConfigFileHough.Get_PhiNum()*0.9999999);
-  
+
     for(unsigned int j = 0; j < myConfigFileHough.Get_ThetaNum(); j++) {
       double theta = (j+0.5) * 2*M_PI / myConfigFileHough.Get_ThetaNum();
       if(theta > 2*M_PI) theta = 2*M_PI;
@@ -172,12 +172,12 @@ double* AccumulatorSimple::accumulateRet(Point p) {
         n[2] = cos(phi);
         Normalize3(n);
       for(unsigned int k = 0; k < myConfigFileHough.Get_RhoNum(); k++) {
-        double rho = (k + 0.5) * myConfigFileHough.Get_RhoMax() / myConfigFileHough.Get_RhoNum(); 
+        double rho = (k + 0.5) * myConfigFileHough.Get_RhoMax() / myConfigFileHough.Get_RhoNum();
         double distance = p.x * n[0] + p.y * n[1] + p.z * n[2];
         if(fabs(distance-rho) < myConfigFileHough.Get_MaxPointPlaneDist()) {
           accumulator[k][i][j]++;
           if(((unsigned int)accumulator[k][i][j] > myConfigFileHough.Get_AccumulatorMax() && (unsigned int)accumulator[k][i][j] > count*myConfigFileHough.Get_PlaneRatio())
-          || (unsigned int)accumulator[k][i][j] > myConfigFileHough.Get_AccumulatorMax()) { 
+          || (unsigned int)accumulator[k][i][j] > myConfigFileHough.Get_AccumulatorMax()) {
             angles[0] = rho;
             angles[1] = theta;
             angles[2] = phi;
@@ -191,17 +191,17 @@ double* AccumulatorSimple::accumulateRet(Point p) {
 
   angles[0] = -1;
   return angles;
-  
+
 }
 
 int* AccumulatorSimple::accumulateAPHT(Point p) {
 
   int tmpInt = 0;
   // rho theta phi
-  int* angles = new int[3]; 
+  int* angles = new int[3];
   for(unsigned int i = 0; i < myConfigFileHough.Get_PhiNum(); i++) {
     double phi = (i+0.5) * M_PI / (myConfigFileHough.Get_PhiNum()*0.99999999);
-  
+
     for(unsigned int j = 0; j < myConfigFileHough.Get_ThetaNum(); j++) {
       double theta = (j+0.5) * 2*M_PI / myConfigFileHough.Get_ThetaNum();
       if(theta > 2*M_PI) theta = 2*M_PI;
@@ -214,7 +214,7 @@ int* AccumulatorSimple::accumulateAPHT(Point p) {
         n[2] = cos(phi);
         Normalize3(n);
       for(unsigned int k = 0; k < myConfigFileHough.Get_RhoNum(); k++) {
-        double rho = (k + 0.5) * myConfigFileHough.Get_RhoMax() / myConfigFileHough.Get_RhoNum(); 
+        double rho = (k + 0.5) * myConfigFileHough.Get_RhoMax() / myConfigFileHough.Get_RhoNum();
         double distance = p.x * n[0] + p.y * n[1] + p.z * n[2];
         if(fabs(distance-rho) < myConfigFileHough.Get_MaxPointPlaneDist()) {
           accumulator[k][i][j]++;
@@ -231,17 +231,17 @@ int* AccumulatorSimple::accumulateAPHT(Point p) {
   }
 
   return angles;
-  
+
 }
 
 
 double* AccumulatorSimple::getMax(double &rho, double &theta, double &phi) {
   int rhoindex = myConfigFileHough.Get_RhoNum() - 1;
-  
+
   if(rho < myConfigFileHough.Get_RhoMax()) {
-    rhoindex = (int)(rho*((double)myConfigFileHough.Get_RhoNum()/(double)myConfigFileHough.Get_RhoMax()));   
+    rhoindex = (int)(rho*((double)myConfigFileHough.Get_RhoNum()/(double)myConfigFileHough.Get_RhoMax()));
   }
-  
+
   int phiindex = (int)(phi*((double)(myConfigFileHough.Get_PhiNum())/(M_PI)));
   int thetaindex = (int)(theta*(((double)myConfigFileHough.Get_ThetaNum())/(2*M_PI)));
   thetaindex = thetaindex % myConfigFileHough.Get_ThetaNum();
@@ -319,7 +319,7 @@ AccumulatorBall::AccumulatorBall(ConfigFileHough myCfg) {
   ballNr = new int[myConfigFileHough.Get_PhiNum()];
   double step = 180.0/myConfigFileHough.Get_PhiNum();
 
-  //double MAX_A = M_PI * (2 * fabs(0 - cos(rad(90- step))) + sin(rad(90 - step)) * sin(rad(90 - step)) + 1 * 1); 
+  //double MAX_A = M_PI * (2 * fabs(0 - cos(rad(90- step))) + sin(rad(90 - step)) * sin(rad(90 - step)) + 1 * 1);
 
   double MAX_A = 2 * M_PI * 1.0;
 
@@ -327,11 +327,11 @@ AccumulatorBall::AccumulatorBall(ConfigFileHough myCfg) {
   double z = cos(rad(0.0));
   double r_next = 0.0;
   double z_next = 0.0;
-  
+
   for(double phi = 0; phi < 180.0; phi+=step) {
     r_next = sin(rad(phi+step));
     z_next = cos(rad(phi+step));
-  // Flaecheninhalt der aktuellen Kreisscheibe 
+  // Flaecheninhalt der aktuellen Kreisscheibe
     //double a = (M_PI * (2.0 * 1.0 * fabs(z - z_next) + r*r + r_next*r_next));
     // Umfang des aktuellen Kreises
     double a = 2 * M_PI * (r + r_next)/2.0;
@@ -346,14 +346,14 @@ AccumulatorBall::AccumulatorBall(ConfigFileHough myCfg) {
     //} else {
     //  ballNr[counter] = myConfigFileHough.Get_ThetaNum();
     //}
-   
+
     //cout << counter << endl;
     r = r_next;
     z = z_next;
     counter++;
   }
 
-  
+
   accumulator = new int**[myConfigFileHough.Get_RhoNum()];
 
   for(unsigned int i = 0; i < myConfigFileHough.Get_RhoNum(); i++) {
@@ -370,18 +370,18 @@ AccumulatorBall::AccumulatorBall(ConfigFileHough myCfg) {
 }
 
 AccumulatorBall::~AccumulatorBall() {
-  
+
   for(unsigned int i = 0; i < myConfigFileHough.Get_RhoNum(); i++) {
     for(unsigned int j = 0; j < myConfigFileHough.Get_PhiNum(); j++) {
       delete[] accumulator[i][j];
     }
     delete[] accumulator[i];
-    
+
   }
   delete[] accumulator;
   delete[] ballNr;
-  
-}  
+
+}
 
 void AccumulatorBall::printAccumulator() {
   int sum = 0;
@@ -432,11 +432,11 @@ void AccumulatorBall::resetAccumulator() {
 bool AccumulatorBall::accumulate(double theta, double phi, double rho) {
   count++;
   int rhoindex = myConfigFileHough.Get_RhoNum() - 1;
-  
+
   if(rho < myConfigFileHough.Get_RhoMax()) {
-    rhoindex = (int)((rho*(double)myConfigFileHough.Get_RhoNum()/(double)myConfigFileHough.Get_RhoMax()));   
-  } 
-  
+    rhoindex = (int)((rho*(double)myConfigFileHough.Get_RhoNum()/(double)myConfigFileHough.Get_RhoMax()));
+  }
+
   int phiindex = (int)(phi*(((double)myConfigFileHough.Get_PhiNum()*0.9999999)/(M_PI)));
   int bNr = ballNr[phiindex];
   int thetaindex = (int)(theta*((bNr*0.9999999999)/(2*M_PI)));
@@ -463,7 +463,7 @@ void AccumulatorBall::accumulate(Point p) {
       n[2] = cos(phi);
       Normalize3(n);
       for(unsigned int k = 0; k < myConfigFileHough.Get_RhoNum(); k++) {
-        double rho = (k + 0.5) * myConfigFileHough.Get_RhoMax() / myConfigFileHough.Get_RhoNum(); 
+        double rho = (k + 0.5) * myConfigFileHough.Get_RhoMax() / myConfigFileHough.Get_RhoNum();
         double distance = p.x * n[0] + p.y * n[1] + p.z * n[2];
         if(fabs(distance-rho) < myConfigFileHough.Get_MaxPointPlaneDist()) {
           accumulator[k][i][j]++;
@@ -477,7 +477,7 @@ void AccumulatorBall::accumulate(Point p) {
 double* AccumulatorBall::accumulateRet(Point p) {
   count++;
   // rho theta phi
-  double* angles = new double[3]; 
+  double* angles = new double[3];
   for(unsigned int i = 0; i < myConfigFileHough.Get_PhiNum(); i++) {
     double phi = (i+0.5) * M_PI / (myConfigFileHough.Get_PhiNum()*0.99999999);
     for(int j = 0; j < ballNr[i]; j++) {
@@ -492,13 +492,13 @@ double* AccumulatorBall::accumulateRet(Point p) {
       n[2] = cos(phi);
       Normalize3(n);
       for(unsigned int k = 0; k < myConfigFileHough.Get_RhoNum(); k++) {
-        double rho = (k + 0.5) * myConfigFileHough.Get_RhoMax() / myConfigFileHough.Get_RhoNum(); 
+        double rho = (k + 0.5) * myConfigFileHough.Get_RhoMax() / myConfigFileHough.Get_RhoNum();
         double distance = p.x * n[0] + p.y * n[1] + p.z * n[2];
         if(fabs(distance-rho) < myConfigFileHough.Get_MaxPointPlaneDist()) {
           accumulator[k][i][j]++;
           if(
-          ((unsigned int)accumulator[k][i][j] > myConfigFileHough.Get_AccumulatorMax() && 
-          (unsigned int)accumulator[k][i][j] > count*myConfigFileHough.Get_PlaneRatio()) || 
+          ((unsigned int)accumulator[k][i][j] > myConfigFileHough.Get_AccumulatorMax() &&
+          (unsigned int)accumulator[k][i][j] > count*myConfigFileHough.Get_PlaneRatio()) ||
           (unsigned int)accumulator[k][i][j] > 10*myConfigFileHough.Get_AccumulatorMax()) {
             angles[0] = rho;
             angles[0] = rho;
@@ -519,7 +519,7 @@ int* AccumulatorBall::accumulateAPHT(Point p) {
 
   // rho theta phi
   int tmpMax = 0;
-  int* angles = new int[4]; 
+  int* angles = new int[4];
   for(unsigned int i = 0; i < myConfigFileHough.Get_PhiNum(); i++) {
     double phi = (i+0.5) * M_PI / (myConfigFileHough.Get_PhiNum()*0.9999999999);
     for(int j = 0; j < ballNr[i]; j++) {
@@ -534,7 +534,7 @@ int* AccumulatorBall::accumulateAPHT(Point p) {
       n[2] = cos(phi);
       Normalize3(n);
       for(unsigned int k = 0; k < myConfigFileHough.Get_RhoNum(); k++) {
-        double rho = (k + 0.5) * myConfigFileHough.Get_RhoMax() / myConfigFileHough.Get_RhoNum(); 
+        double rho = (k + 0.5) * myConfigFileHough.Get_RhoMax() / myConfigFileHough.Get_RhoNum();
         double distance = p.x * n[0] + p.y * n[1] + p.z * n[2];
         if(fabs(distance-rho) < myConfigFileHough.Get_MaxPointPlaneDist()) {
           accumulator[k][i][j]++;
@@ -554,12 +554,12 @@ int* AccumulatorBall::accumulateAPHT(Point p) {
 
 double* AccumulatorBall::getMax(double &rho, double &theta, double &phi) {
   int rhoindex = myConfigFileHough.Get_RhoNum() - 1;
-  
+
   double tmprho = rho;
   if(rho < myConfigFileHough.Get_RhoMax()) {
-    rhoindex = (int)(rho*0.99999999*((double)myConfigFileHough.Get_RhoNum()/(double)myConfigFileHough.Get_RhoMax()));   
+    rhoindex = (int)(rho*0.99999999*((double)myConfigFileHough.Get_RhoNum()/(double)myConfigFileHough.Get_RhoMax()));
   }
-  
+
   int phiindex = (int)(phi*0.99999999*(((double)myConfigFileHough.Get_PhiNum())/(M_PI)));
   int bNr = ballNr[phiindex];
   int thetaindex = (int)(theta*((bNr + 1)/(2*M_PI)));
@@ -611,7 +611,7 @@ void AccumulatorBall::peakWindow(int size) {
   for(unsigned int i = 0; i < myConfigFileHough.Get_PhiNum() - size; i++) {
     //cout << "Peak " << i << endl;
     for(int j = 0; j < ballNr[i] - size; j++) {
-      
+
       for(unsigned int k = 0; k < myConfigFileHough.Get_RhoNum() - size; k++) {
         int max = 0;
         for(unsigned int ii = i; (ii < (i + size)) && (ii < myConfigFileHough.Get_PhiNum()); ii++) {
@@ -665,7 +665,7 @@ AccumulatorCube::AccumulatorCube(ConfigFileHough myCfg) {
 
 AccumulatorCube::~AccumulatorCube() {
   nrCells = myConfigFileHough.Get_ThetaNum()/4;
-  
+
   for(unsigned int i = 0; i < 6; i++) {
     for(int j = 0; j < nrCells; j++) {
       for(int k = 0; k < nrCells; k++) {
@@ -674,26 +674,26 @@ AccumulatorCube::~AccumulatorCube() {
       delete[] accumulator[i][j];
     }
     delete[] accumulator[i];
-    
+
   }
   delete[] accumulator;
-  
+
 }
 
 void AccumulatorCube::printAccumulator2() {
-  
+
   double **result;
   result = new double*[4];
-  result[0] = new double[3]; 
-  result[1] = new double[3]; 
-  result[2] = new double[3]; 
-  result[3] = new double[3]; 
-  
+  result[0] = new double[3];
+  result[1] = new double[3];
+  result[2] = new double[3];
+  result[3] = new double[3];
+
   int j;
   int k;
-  
+
   for(int i = 0; i < 6; i+=1) {
-    
+
     for(j = 1, k = 1; j <= nrCells; j++) {
 
       buffer_point bptmp;
@@ -708,7 +708,7 @@ void AccumulatorCube::printAccumulator2() {
       double polar3[3];
       double polar4[3];
       //toPolar(tmp, polar1);
-   
+
       Normalize3(result[0]);
       Normalize3(result[1]);
       Normalize3(result[2]);
@@ -745,7 +745,7 @@ void AccumulatorCube::printAccumulator2() {
       double polar3[3];
       double polar4[3];
       //toPolar(tmp, polar1);
-   
+
       Normalize3(result[0]);
       Normalize3(result[1]);
       Normalize3(result[2]);
@@ -782,7 +782,7 @@ void AccumulatorCube::printAccumulator2() {
       double polar3[3];
       double polar4[3];
       //toPolar(tmp, polar1);
-   
+
       Normalize3(result[0]);
       Normalize3(result[1]);
       Normalize3(result[2]);
@@ -819,7 +819,7 @@ void AccumulatorCube::printAccumulator2() {
       double polar3[3];
       double polar4[3];
       //toPolar(tmp, polar1);
-   
+
       Normalize3(result[0]);
       Normalize3(result[1]);
       Normalize3(result[2]);
@@ -849,18 +849,18 @@ void AccumulatorCube::printAccumulator2() {
 }
 
 void AccumulatorCube::printAccumulator() {
- 
+
   //double norm[3];
   //double polar[3];
 //  double *result;
-  
+
   double **result;
   result = new double*[4];
-  result[0] = new double[3]; 
-  result[1] = new double[3]; 
-  result[2] = new double[3]; 
-  result[3] = new double[3]; 
-  
+  result[0] = new double[3];
+  result[1] = new double[3];
+  result[2] = new double[3];
+  result[3] = new double[3];
+
   //buffer_point bp;
 
   /*
@@ -870,23 +870,23 @@ void AccumulatorCube::printAccumulator() {
       norm[1] = p;
       norm[0] = 1.0;
       toPolar(norm, polar);
-      
+
       bp = coords_s2_to_cell(norm, nrCells);
       result = coords_cube_to_s2(bp, nrCells);
       toPolar(result, polar);
-      
+
       cout << polar[0] << " " << polar[1] << " " << 40 << endl;
-      //if(fabs(polar[1]) < 0.0001) 
+      //if(fabs(polar[1]) < 0.0001)
       //  cout << "STOP" << "-1.0 " << p << " " << o << endl;
       delete[] result;
     }
   }
   */
 
- /* 
-  norm[0] = 1.0;  
-  norm[1] = 0.0;  
-  norm[2] = 0.0; 
+ /*
+  norm[0] = 1.0;
+  norm[1] = 0.0;
+  norm[2] = 0.0;
   toPolar(norm, polar);
   cout << polar[0] << " " << polar[1] << endl;
   bp = coords_s2_to_cell(norm, nrCells);
@@ -895,8 +895,8 @@ void AccumulatorCube::printAccumulator() {
   cout << polar[0] << " " << polar[1] << endl << endl << endl;
   delete[] result;
 
-  norm[0] = -1.0;  
-  norm[1] = 0.0;  
+  norm[0] = -1.0;
+  norm[1] = 0.0;
   norm[2] = 0.0;
 
   toPolar(norm, polar);
@@ -908,9 +908,9 @@ void AccumulatorCube::printAccumulator() {
   cout << endl << endl;
   delete[] result;
 
-  norm[0] = 0.0;  
-  norm[1] = 1.0;  
-  norm[2] = 0.0; 
+  norm[0] = 0.0;
+  norm[1] = 1.0;
+  norm[2] = 0.0;
   toPolar(norm, polar);
   cout << polar[0] << " " << polar[1] << endl;
   bp = coords_s2_to_cell(norm, nrCells);
@@ -920,9 +920,9 @@ void AccumulatorCube::printAccumulator() {
   cout << endl << endl;
   delete[] result;
 
-  norm[0] = 0.0;  
-  norm[1] = -1.0;  
-  norm[2] = 0.0; 
+  norm[0] = 0.0;
+  norm[1] = -1.0;
+  norm[2] = 0.0;
   toPolar(norm, polar);
   cout << polar[0] << " " << polar[1] << endl;
   bp = coords_s2_to_cell(norm, nrCells);
@@ -932,9 +932,9 @@ void AccumulatorCube::printAccumulator() {
   cout << endl << endl;
   delete[] result;
 
-  norm[0] = 0.0;  
-  norm[1] = 0.0;  
-  norm[2] = 1.0; 
+  norm[0] = 0.0;
+  norm[1] = 0.0;
+  norm[2] = 1.0;
   toPolar(norm, polar);
   cout << polar[0] << " " << polar[1] << endl;
   bp = coords_s2_to_cell(norm, nrCells);
@@ -944,9 +944,9 @@ void AccumulatorCube::printAccumulator() {
   cout << endl << endl;
   delete[] result;
 
-  norm[0] = 0.0;  
-  norm[1] = 0.0;  
-  norm[2] = -1.0; 
+  norm[0] = 0.0;
+  norm[1] = 0.0;
+  norm[2] = -1.0;
   toPolar(norm, polar);
   cout << polar[0] << " " << polar[1] << endl;
   bp = coords_s2_to_cell(norm, nrCells);
@@ -956,13 +956,13 @@ void AccumulatorCube::printAccumulator() {
   cout << endl << endl;
   delete[] result;
 *//*
-  norm[0] = 0.0;  
-  norm[1] = 0.0;  
-  norm[2] = -1.0; 
+  norm[0] = 0.0;
+  norm[1] = 0.0;
+  norm[2] = -1.0;
   toPolar(norm, polar);
   cout << polar[0] << " " << polar[1] << endl;
   bp = coords_s2_to_cell(norm, nrCells);
-  
+
   int i = bp.face - 1;
   int j = bp.i;
   int k = bp.j;
@@ -991,18 +991,18 @@ void AccumulatorCube::printAccumulator() {
         double polar3[3];
         double polar4[3];
         //toPolar(tmp, polar1);
-       
+
         Normalize3(result[0]);
         Normalize3(result[1]);
         Normalize3(result[2]);
         Normalize3(result[3]);
-  /*     
+  /*
         cout << result[0][0] << " " << result[0][1] << " " << result[0][2] << endl;
         cout << result[1][0] << " " << result[1][1] << " " << result[1][2] << endl;
         cout << result[2][0] << " " << result[2][1] << " " << result[2][2] << endl;
         cout << result[3][0] << " " << result[3][1] << " " << result[3][2] << endl;
         cout << result[0][0] << " " << result[0][1] << " " << result[0][2] << endl;
-    */   
+    */
         toPolar(result[0], polar1);
         toPolar(result[1], polar2);
         toPolar(result[2], polar3);
@@ -1029,24 +1029,24 @@ void AccumulatorCube::printAccumulator() {
         cout << (j+i*nrCells) << " " << k << " " << rhosum << endl;
         cout << (j+i*nrCells) << " " << k+1 << " " << rhosum << endl;
         */
-       /* 
+       /*
         cout << phi1 << " " << theta2 << " " << rhosum << " 40" << endl;
         cout << phi1 << " " << theta1 << " " << rhosum << " 40" << endl;
         cout << phi2 << " " << theta1 << " " << rhosum << " 40" << endl;
         cout << phi2 << " " << theta2 << " " << rhosum << " 40" << endl;
         cout << phi1 << " " << theta2 << " " << rhosum << " 40" << endl;
        */
-       
-      if(phi1 < M_PI/nrCells && fabs(phi1-phi2) < 0.001 && fabs(phi1-phi3) < 0.001 && fabs(phi1 - phi4) < 0.001) { 
+
+      if(phi1 < M_PI/nrCells && fabs(phi1-phi2) < 0.001 && fabs(phi1-phi3) < 0.001 && fabs(phi1 - phi4) < 0.001) {
       //if(phi1 < M_PI/nrCells && phi2 < M_PI/nrCells && phi3 < M_PI/nrCells && phi4 < M_PI/nrCells) {
         cout << phi1 << " " << 2*M_PI << " " << rhosum << " 40" << endl;
         cout << 0.0 << " " << 2*M_PI << " " << rhosum << " 40" << endl;
         cout << 0.0 << " " << 0.0 << " " << rhosum << " 40" << endl;
         cout << phi1 << " " << 0.0 << " " << rhosum << " 40" << endl;
         //cout << phi1 << " " << 2*M_PI << " " << rhosum << " 40" << endl;
-         
+
         cout << endl;
-        //cout << endl; 
+        //cout << endl;
 
       } //else if(M_PI - phi1 < M_PI/nrCells && M_PI - phi2 < M_PI/nrCells && M_PI - phi3 < M_PI/nrCells && M_PI - phi4 < M_PI/nrCells){
         else if(M_PI - phi1 < M_PI/nrCells && fabs(phi1-phi2) < 0.001 && fabs(phi1-phi3) < 0.001 && fabs(phi1 - phi4) < 0.001) {
@@ -1056,9 +1056,9 @@ void AccumulatorCube::printAccumulator() {
         cout << M_PI << " " << 0.0 << " " << rhosum << " 40" << endl;
         //cout << phi1 << " " << 0.0 << " " << rhosum << " 40" << endl;
         cout << endl;
-        //<< endl; 
-         
-        
+        //<< endl;
+
+
       } else if(fabs(phi1 - phi2) < 2.0 && fabs(theta2 - theta3) < 3.0 && fabs(theta4 - theta3) < 3.0) {
         cout << phi1 << " " << theta1 << " " << rhosum << " 40" << endl;
         cout << phi2 << " " << theta2 << " " << rhosum << " 40" << endl;
@@ -1079,7 +1079,7 @@ void AccumulatorCube::printAccumulator() {
 
           //  cout << endl;
             cout << endl;
-        
+
             cout << phi1 << " " << theta1 << " " << rhosum << " 40" << endl;
             cout << phi2 << " " << 2*M_PI << " " << rhosum << " 40" << endl;
             cout << phi3 << " " << 2*M_PI << " " << rhosum << " 40" << endl;
@@ -1097,7 +1097,7 @@ void AccumulatorCube::printAccumulator() {
 
            // cout << endl;
             cout << endl;
-        
+
             cout << phi1 << " " << theta1 << " " << rhosum << " 40" << endl;
             cout << phi2 << " " << 0.0 << " " << rhosum << " 40" << endl;
             cout << phi3 << " " << 0.0 << " " << rhosum << " 40" << endl;
@@ -1117,7 +1117,7 @@ void AccumulatorCube::printAccumulator() {
 
            // cout << endl;
             cout << endl;
-        
+
             cout << phi1 << " " << theta1 << " " << rhosum << " 40" << endl;
             cout << phi2 << " " << theta2 << " " << rhosum << " 40" << endl;
             cout << phi3 << " " << 2*M_PI << " " << rhosum << " 40" << endl;
@@ -1135,7 +1135,7 @@ void AccumulatorCube::printAccumulator() {
 
            // cout << endl;
             cout << endl;
-        
+
             cout << phi1 << " " << theta1 << " " << rhosum << " 40" << endl;
             cout << phi2 << " " << theta2 << " " << rhosum << " 40" << endl;
             cout << phi3 << " " << 0.0 << " " << rhosum << " 40" << endl;
@@ -1185,7 +1185,7 @@ void AccumulatorCube::printAccumulator() {
        // cout << endl;
         cout << endl;
       }
-       
+
        // cout << endl;
        // cout << endl;
         //delete[] tmp;
@@ -1194,7 +1194,7 @@ void AccumulatorCube::printAccumulator() {
     }
     cout << endl;
   }
-  
+
   for(int i = 0; i < 3; i++) {
     delete[] result[i];
   }
@@ -1223,29 +1223,29 @@ bool AccumulatorCube::accumulate(double theta, double phi, double rho) {
   n[2] = cos(phi);
 
   buffer_point bp = coords_s2_to_cell(n, nrCells);
-  
+
   int rhoindex = myConfigFileHough.Get_RhoNum() - 1;
-  
+
   if(rho < myConfigFileHough.Get_RhoMax()) {
-    rhoindex = (int)(rho*((double)myConfigFileHough.Get_RhoNum()/(double)myConfigFileHough.Get_RhoMax()));   
+    rhoindex = (int)(rho*((double)myConfigFileHough.Get_RhoNum()/(double)myConfigFileHough.Get_RhoMax()));
   }
 
   accumulator[bp.face - 1][bp.i - 1][bp.j - 1][rhoindex]++;
   lastbp = bp;
 
-  return accumulator[bp.face - 1][bp.i - 1][bp.j - 1][rhoindex] > (int)myConfigFileHough.Get_AccumulatorMax(); 
+  return accumulator[bp.face - 1][bp.i - 1][bp.j - 1][rhoindex] > (int)myConfigFileHough.Get_AccumulatorMax();
 }
 
 double* AccumulatorCube::getMax(double &rho, double &theta, double &phi) {
   int rhoindex = myConfigFileHough.Get_RhoNum() - 1;
-  
+
   if(rho < myConfigFileHough.Get_RhoMax()) {
-    rhoindex = (int)(rho*((double)myConfigFileHough.Get_RhoNum()/(double)myConfigFileHough.Get_RhoMax()));   
+    rhoindex = (int)(rho*((double)myConfigFileHough.Get_RhoNum()/(double)myConfigFileHough.Get_RhoMax()));
   }
- 
+
   double* result;
-  result = coords_cube_to_s2(lastbp, nrCells); 
-  //cout << "N: " << result[0] << " " << result[1] << " " << result[2] << endl; 
+  result = coords_cube_to_s2(lastbp, nrCells);
+  //cout << "N: " << result[0] << " " << result[1] << " " << result[2] << endl;
   return result;
 }
 
@@ -1261,7 +1261,7 @@ void AccumulatorCube::accumulate(Point p) {
         double* n = coords_cube_to_s2(bptmp, nrCells);
         Normalize3(n);
         for(unsigned int l = 0; l < myConfigFileHough.Get_RhoNum(); l++) {
-          double rho = (l + 0.5) * myConfigFileHough.Get_RhoMax() / myConfigFileHough.Get_RhoNum(); 
+          double rho = (l + 0.5) * myConfigFileHough.Get_RhoMax() / myConfigFileHough.Get_RhoNum();
           double distance = p.x * n[0] + p.y * n[1] + p.z * n[2];
           if(fabs(distance-rho) < myConfigFileHough.Get_MaxPointPlaneDist()) {
             accumulator[i][j-1][k-1][l]++;
@@ -1289,14 +1289,14 @@ double* AccumulatorCube::accumulateRet(Point p) {
         double* n = coords_cube_to_s2(bptmp, nrCells);
         Normalize3(n);
         for(unsigned int l = 0; l < myConfigFileHough.Get_RhoNum(); l++) {
-          double rho = (l + 0.5) * myConfigFileHough.Get_RhoMax() / myConfigFileHough.Get_RhoNum(); 
+          double rho = (l + 0.5) * myConfigFileHough.Get_RhoMax() / myConfigFileHough.Get_RhoNum();
           double distance = p.x * n[0] + p.y * n[1] + p.z * n[2];
           if(fabs(distance-rho) < myConfigFileHough.Get_MaxPointPlaneDist()) {
             accumulator[i][j-1][k-1][l]++;
-            if(((unsigned int)accumulator[i][j-1][k-1][l] > myConfigFileHough.Get_AccumulatorMax() 
+            if(((unsigned int)accumulator[i][j-1][k-1][l] > myConfigFileHough.Get_AccumulatorMax()
             && (unsigned int)accumulator[i][j-1][k-1][l] >
             count*myConfigFileHough.Get_PlaneRatio()) ||
-          (unsigned int)accumulator[i][j-1][k-1][l] > 10*myConfigFileHough.Get_AccumulatorMax() 
+          (unsigned int)accumulator[i][j-1][k-1][l] > 10*myConfigFileHough.Get_AccumulatorMax()
             ) {
               double polar[3];
               toPolar(n, polar);
@@ -1331,7 +1331,7 @@ int* AccumulatorCube::accumulateAPHT(Point p) {
         double* n = coords_cube_to_s2(bptmp, nrCells);
         Normalize3(n);
         for(unsigned int l = 0; l < myConfigFileHough.Get_RhoNum(); l++) {
-          double rho = (l + 0.5) * myConfigFileHough.Get_RhoMax() / myConfigFileHough.Get_RhoNum(); 
+          double rho = (l + 0.5) * myConfigFileHough.Get_RhoMax() / myConfigFileHough.Get_RhoNum();
           double distance = p.x * n[0] + p.y * n[1] + p.z * n[2];
           if(fabs(distance-rho) < myConfigFileHough.Get_MaxPointPlaneDist()) {
             accumulator[i][j-1][k-1][l]++;
@@ -1360,7 +1360,7 @@ double* AccumulatorCube::getMax(int* cell) {
 
   double rho = (cell[0] + 0.5) *
   (double)myConfigFileHough.Get_RhoMax()/(double)myConfigFileHough.Get_RhoNum();
-  double* polar = coords_cube_to_s2(bp, nrCells); 
+  double* polar = coords_cube_to_s2(bp, nrCells);
   double* polar2 = new double[4];
   for(int i = 0; i < 3; i++) {
     polar2[i] = polar[i];
@@ -1433,7 +1433,7 @@ AccumulatorBallI::AccumulatorBallI(ConfigFileHough myCfg) {
   ballNr = new int[myConfigFileHough.Get_PhiNum()];
   step = 180.0/myConfigFileHough.Get_PhiNum();
 
-  //double MAX_A = M_PI * (2 * fabs(0 - cos(rad(90- step))) + sin(rad(90 - step)) * sin(rad(90 - step)) + 1 * 1); 
+  //double MAX_A = M_PI * (2 * fabs(0 - cos(rad(90- step))) + sin(rad(90 - step)) * sin(rad(90 - step)) + 1 * 1);
 
   double h_0 = cos(rad(90 - step));
   double MAX_A = (2.0 * M_PI * h_0) / myConfigFileHough.Get_ThetaNum();
@@ -1460,7 +1460,7 @@ AccumulatorBallI::AccumulatorBallI(ConfigFileHough myCfg) {
   for(int i = 0; i < myConfigFileHough.Get_PhiNum(); i++) {
     cout << i << ": " << ballNr[i] << endl;
   }
-  cout << "BallNR erzeugt" << endl; 
+  cout << "BallNR erzeugt" << endl;
   */
 
   accumulator = new int**[myConfigFileHough.Get_RhoNum()];
@@ -1479,18 +1479,18 @@ AccumulatorBallI::AccumulatorBallI(ConfigFileHough myCfg) {
 }
 
 AccumulatorBallI::~AccumulatorBallI() {
-  
+
   for(unsigned int i = 0; i < myConfigFileHough.Get_RhoNum(); i++) {
     for(unsigned int j = 0; j < myConfigFileHough.Get_PhiNum(); j++) {
       delete[] accumulator[i][j];
     }
     delete[] accumulator[i];
-    
+
   }
   delete[] accumulator;
   delete[] ballNr;
-  
-}  
+
+}
 
 void AccumulatorBallI::printAccumulator() {
 //TODO
@@ -1545,11 +1545,11 @@ bool AccumulatorBallI::accumulate(double theta, double phi, double rho) {
 //TODO
   count++;
   int rhoindex = myConfigFileHough.Get_RhoNum() - 1;
-  
+
   if(rho < myConfigFileHough.Get_RhoMax()) {
-    rhoindex = (int)((rho*(double)myConfigFileHough.Get_RhoNum()/(double)myConfigFileHough.Get_RhoMax()));   
+    rhoindex = (int)((rho*(double)myConfigFileHough.Get_RhoNum()/(double)myConfigFileHough.Get_RhoMax()));
   }
-  
+
   int phiindex = (int)(phi*(((double)myConfigFileHough.Get_PhiNum()*0.9999999999)/(M_PI)));
   int bNr = ballNr[phiindex];
   int thetaindex = (int)(theta*((bNr*0.9999999999)/(2*M_PI)));
@@ -1586,7 +1586,7 @@ void AccumulatorBallI::accumulate(Point p) {
         Normalize3(n);
       }
       for(unsigned int k = 0; k < myConfigFileHough.Get_RhoNum(); k++) {
-        double rho = (k + 0.5) * (double)myConfigFileHough.Get_RhoMax() / (double)myConfigFileHough.Get_RhoNum(); 
+        double rho = (k + 0.5) * (double)myConfigFileHough.Get_RhoMax() / (double)myConfigFileHough.Get_RhoNum();
         double distance = p.x * n[0] + p.y * n[1] + p.z * n[2];
         if(fabs(distance-rho) < myConfigFileHough.Get_MaxPointPlaneDist()) {
           accumulator[k][i][j]++;
@@ -1601,7 +1601,7 @@ double* AccumulatorBallI::accumulateRet(Point p) {
   count++;
 //TODO
   // rho theta phi
-  double* angles = new double[3]; 
+  double* angles = new double[3];
   for(unsigned int i = 0; i < myConfigFileHough.Get_PhiNum(); i++) {
     double phi = (i+0.5) * M_PI / (myConfigFileHough.Get_PhiNum()*0.999999999);
     for(int j = 0; j < ballNr[i]; j++) {
@@ -1616,14 +1616,14 @@ double* AccumulatorBallI::accumulateRet(Point p) {
       n[2] = cos(phi);
       Normalize3(n);
       for(unsigned int k = 0; k < myConfigFileHough.Get_RhoNum(); k++) {
-        double rho = (k + 0.5) * myConfigFileHough.Get_RhoMax() / myConfigFileHough.Get_RhoNum(); 
+        double rho = (k + 0.5) * myConfigFileHough.Get_RhoMax() / myConfigFileHough.Get_RhoNum();
         double distance = p.x * n[0] + p.y * n[1] + p.z * n[2];
         if(fabs(distance-rho) < myConfigFileHough.Get_MaxPointPlaneDist()) {
           accumulator[k][i][j]++;
           if(((unsigned int)accumulator[k][i][j] >
           myConfigFileHough.Get_AccumulatorMax() && (unsigned
-          int)accumulator[k][i][j] > count*myConfigFileHough.Get_PlaneRatio())  
-          || (unsigned int)accumulator[k][i][j] > 10*myConfigFileHough.Get_AccumulatorMax() ) { 
+          int)accumulator[k][i][j] > count*myConfigFileHough.Get_PlaneRatio())
+          || (unsigned int)accumulator[k][i][j] > 10*myConfigFileHough.Get_AccumulatorMax() ) {
             angles[0] = rho;
             angles[1] = theta;
             angles[2] = phi;
@@ -1643,7 +1643,7 @@ int* AccumulatorBallI::accumulateAPHT(Point p) {
 //TODO
   // rho theta phi
   int tmpMax = 0;
-  int* angles = new int[4]; 
+  int* angles = new int[4];
   for(unsigned int i = 0; i < myConfigFileHough.Get_PhiNum(); i++) {
     double phi = (i+0.5) * M_PI / (myConfigFileHough.Get_PhiNum()*0.9999999);
     for(int j = 0; j < ballNr[i]; j++) {
@@ -1658,7 +1658,7 @@ int* AccumulatorBallI::accumulateAPHT(Point p) {
       n[2] = cos(phi);
       Normalize3(n);
       for(unsigned int k = 0; k < myConfigFileHough.Get_RhoNum(); k++) {
-        double rho = (k + 0.5) * myConfigFileHough.Get_RhoMax() / myConfigFileHough.Get_RhoNum(); 
+        double rho = (k + 0.5) * myConfigFileHough.Get_RhoMax() / myConfigFileHough.Get_RhoNum();
         double distance = p.x * n[0] + p.y * n[1] + p.z * n[2];
         if(fabs(distance-rho) < myConfigFileHough.Get_MaxPointPlaneDist()) {
           accumulator[k][i][j]++;
@@ -1678,14 +1678,14 @@ int* AccumulatorBallI::accumulateAPHT(Point p) {
 
 double* AccumulatorBallI::getMax(double &rho, double &theta, double &phi) {
 //TODO was??
-  
+
   unsigned int rhoindex = myConfigFileHough.Get_RhoNum() - 1;
-  
+
   if(rho < myConfigFileHough.Get_RhoMax()) {
     rhoindex =
-    (int)(rho*((double)myConfigFileHough.Get_RhoNum()/(double)myConfigFileHough.Get_RhoMax()));   
+    (int)(rho*((double)myConfigFileHough.Get_RhoNum()/(double)myConfigFileHough.Get_RhoMax()));
   }
-  
+
   unsigned int phiindex = (int)(phi*(((double)myConfigFileHough.Get_PhiNum())/(M_PI)));
   if(phiindex == myConfigFileHough.Get_PhiNum()) phiindex--;
   int bNr = ballNr[phiindex];
@@ -1699,7 +1699,7 @@ double* AccumulatorBallI::getMax(double &rho, double &theta, double &phi) {
 }
 double* AccumulatorBallI::getMax(int* cell) {
   double * polar;
-  if(cell[3] == 0) {  
+  if(cell[3] == 0) {
             polar = new double[4];
             polar[0] = 0.0;
             polar[1] = 0.0;
@@ -1715,7 +1715,7 @@ double* AccumulatorBallI::getMax(int* cell) {
             double theta = (0.5 + cell[2]) * (double)(2.0 * M_PI / bNr);
             polar = polar2normal(theta, phi);
   }
-  
+
   double rho = (cell[1] + 0.5) *
   (double)myConfigFileHough.Get_RhoMax()/(double)myConfigFileHough.Get_RhoNum();
   if(std::isnan(polar[0])) {
@@ -1743,7 +1743,7 @@ multiset<int*, maxcompare>* AccumulatorBallI::getMax() {
         double * polar;
         double phi;
         double theta = 0.0;
-        if(tmp[3] == 0) {  
+        if(tmp[3] == 0) {
             polar = new double[4];
             polar[0] = 0.0;
             polar[1] = 0.0;
@@ -1773,7 +1773,7 @@ void AccumulatorBallI::peakWindow(int size) {
   for(unsigned int i = 0; i < myConfigFileHough.Get_PhiNum() - size; i++) {
     //cout << "Peak " << i << endl;
     for(int j = 0; j < ballNr[i] - size; j++) {
-      
+
       for(unsigned int k = 0; k < myConfigFileHough.Get_RhoNum() - size; k++) {
         int max = 0;
         for(unsigned int ii = i; (ii < (i + size)) && (ii < myConfigFileHough.Get_PhiNum()); ii++) {

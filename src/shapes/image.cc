@@ -64,7 +64,7 @@ _resolution, const vector <Point> *points) {
       } else if(h_i >= height) {
         h_i = height - 1;
       }
-      
+
       if((fabs(data[w_i][h_i]) < 0.000001) || (data[w_i][h_i] < p.reflectance)) {
         data[w_i][h_i] = (float)reflectance;
         //cout << data[w_i][h_i] << " " << endl;
@@ -79,7 +79,7 @@ _resolution, const vector <Point> *points) {
     delete[] tmpp;
     delete[] polar;
   }
-  
+
 }
 
 Image::Image(float _minw, float _maxw, float _minh, float _maxh, float _resolution, double * const* points, int size) {
@@ -89,7 +89,7 @@ Image::Image(float _minw, float _maxw, float _minh, float _maxh, float _resoluti
   maxw = _maxw;
   width = (maxw - minw)/_resolution + 1;
   height = (maxh - minh)/_resolution + 1;
-  
+
   data = new float*[width];
   for(int i = 0; i < width; i++) {
     data[i] = new float[height];
@@ -121,7 +121,7 @@ Image::Image(float _minw, float _maxw, float _minh, float _maxh, float _resoluti
       } else if(h_i >= height) {
         h_i = height - 1;
       }
-      
+
       if((fabs(data[w_i][h_i]) < 0.000001) || (data[w_i][h_i] > polar[2])) {
         data[w_i][h_i] = (float)polar[2];
         //cout << data[w_i][h_i] << " " << endl;
@@ -130,7 +130,7 @@ Image::Image(float _minw, float _maxw, float _minh, float _maxh, float _resoluti
     delete[] tmpp;
     delete[] polar;
   }
-  
+
 }
 
 Image::Image(float _minw, float _maxw, float _minh, float _maxh, float _resolution, const vector<double*> *points) {
@@ -141,7 +141,7 @@ Image::Image(float _minw, float _maxw, float _minh, float _maxh, float _resoluti
   maxw = _maxw;
   width = (maxw - minw)/_resolution + 1;
   height = (maxh - minh)/_resolution + 1;
-  
+
   data = new float*[width];
   for(int i = 0; i < width; i++) {
     data[i] = new float[height];
@@ -175,7 +175,7 @@ Image::Image(float _minw, float _maxw, float _minh, float _maxh, float _resoluti
       } else if(h_i >= height) {
         h_i = height - 1;
       }
-      
+
       if((fabs(data[w_i][h_i] - 0.0) < 0.000100) || (data[w_i][h_i] > polar[2])) {
         data[w_i][h_i] = (float)polar[2];
       }
@@ -187,7 +187,7 @@ Image::Image(float _minw, float _maxw, float _minh, float _maxh, float _resoluti
     }
     cout << endl;
   }
-  
+
 }
 
 Image::~Image() {
@@ -198,7 +198,7 @@ Image::~Image() {
 }
 
 int Image::getWidth() {
-  return width; 
+  return width;
 }
 
 int Image::getHeight() {
@@ -211,7 +211,7 @@ float Image::getValueAt(int width, int height) {
 
 float Image::getMin() {
   float min = std::numeric_limits<float>::max();
-  
+
   for(int i = 0; i < width; i++) {
     for(int j = 0; j < height; j++) {
       min = std::min(min, data[i][j]);
@@ -293,7 +293,7 @@ int Image::cluster(float dist, int ** dat, int ** regdat) {
   for(int y = 0; y < height; y++) {
     for(int x = 0; x < width; x++) {
       float value = dat[x][y];
-      
+
       if(value != 0) {
         // left border
         if(x==0) {
@@ -307,7 +307,7 @@ int Image::cluster(float dist, int ** dat, int ** regdat) {
         } else {
           up = dat[x][y-1];
         }
-      
+
         if (fabs(left - value) > dist) {
           if (fabs(up - value) > dist) {
             regdat[x][y] = ++region;                           // new region
@@ -339,14 +339,14 @@ int Image::cluster(float dist, int ** dat, int ** regdat) {
           set<int> *joined = new set<int>;
           joined->insert(up);
           joined->insert(left);
-          
+
           for(vector<set<int> >::iterator itr = linked.begin(); itr != linked.end(); ) {
             current = (*itr);
             if(current.find(up) != current.end() || current.find(left) != current.end()) {
               set<int> *newjoined = new set<int>();
               insert_iterator<set<int> > res_ins(*newjoined, newjoined->begin());
 
-              set_union(joined->begin(), joined->end(), current.begin(), current.end(), res_ins); 
+              set_union(joined->begin(), joined->end(), current.begin(), current.end(), res_ins);
               joined->clear();
               delete joined;
               joined = newjoined;
@@ -369,15 +369,15 @@ int Image::cluster(float dist, int ** dat, int ** regdat) {
   int link = 0;
   for(vector<set<int> >::iterator itr = linked.begin(); itr != linked.end(); itr++) {
     current = (*itr);
-    for(set<int>::iterator sitr = current.begin(); 
-        sitr != current.end(); 
+    for(set<int>::iterator sitr = current.begin();
+        sitr != current.end();
         sitr++) {
       linkedindex[*sitr] = link;
     }
     link++;
   }
 
-  
+
   cout << "Regions "  << linked.size() << endl;
   /*
   for(int i = 0; i <= region; i++) {
@@ -389,9 +389,9 @@ int Image::cluster(float dist, int ** dat, int ** regdat) {
       regdat[x][y] = linkedindex[regdat[x][y]];
     }
   }
-  
+
   printImage("cluster.ppm", false, regdat, height, width, 0, linked.size());
- 
+
   return linked.size();
 
 }
@@ -401,15 +401,15 @@ void Image::writeCenters(int regions, int** cluster, const vector<Point> *points
 
   vector<Point> clusters[regions];
   /*
-  vector<vector<Point> > clusters; 
-  
-  
+  vector<vector<Point> > clusters;
+
+
   for(int i = 0; i < regions; i++) {
     vector<Point> tmp = new vector<Point>();
     clusters.push_back(tmp);
   }
-  
-  
+
+
   cout << "Regions: " << regions << " " << clusters.size() << endl;;
   for(int i = 0; i < regions; i++) {
     cout << i << " " << clusters[i]->size() << endl;
@@ -481,12 +481,12 @@ void Image::writeCenters(int regions, int** cluster, const vector<Point> *points
     cout << point[0] << " " << point[1] << " " << point[2] << " TP" << to_string(markercounter, 4) << endl;
     markercounter++;
   }
-  
+
 }
 
 int Image::blobColor(float dist, int ** regdat) {
   // segment picture
-  int region = 0; // start at 12 to incresae visibility 
+  int region = 0; // start at 12 to incresae visibility
   float up, left;
 
   for(int y = 0; y < height; y++) {
@@ -556,7 +556,7 @@ void normalizedCuts(float dist, int ** regdat) {
 }
 
 void lineMerge() {
-  
+
 }
 
 void Image::printScans(int ** regdat, double * const* points, int size) {
@@ -569,7 +569,7 @@ void Image::printScans(int ** regdat, double * const* points, int size) {
   cout << "size " << size << endl;
   cout << "max_i is " << max_i << endl;
   vector<double*> clusters[max_i + 1];
-  
+
   if(points != 0) {
     cout << "points" << endl;
     double *tmpp = new double[3];
@@ -595,19 +595,19 @@ void Image::printScans(int ** regdat, double * const* points, int size) {
       } else if(h_i >= height) {
         h_i = height - 1;
       }
-      //cout << i << " " << regdat[w_i][h_i] <<  endl; 
+      //cout << i << " " << regdat[w_i][h_i] <<  endl;
       clusters[regdat[w_i][h_i]].push_back(points[i]);
     }
     delete[] tmpp;
     delete[] polar;
-    
+
     cout << "clustering done " << endl;
 
     string clusteroutname = "";
     int index = 0;
     for(int i = 0; i < max_i; i++) {
       if(clusters[i].size() > 0) {
-        clusteroutname = "clusters/scan" + to_string(index, 3) + ".3d";  
+        clusteroutname = "clusters/scan" + to_string(index, 3) + ".3d";
         index++;
         ofstream clusterout(clusteroutname.c_str());
         clusterout << i << endl;
@@ -621,7 +621,7 @@ void Image::printScans(int ** regdat, double * const* points, int size) {
     }
   }
 }
-      
+
 
 void Image::printImage(const char* filename, bool color, int** img, int height, int width, int min, int max) {
   double Fact = 255.0 /(max - min);
@@ -635,7 +635,7 @@ void Image::printImage(const char* filename, bool color, int** img, int height, 
 
     for(int j = 0; j < height; j++) {
       for(int i = 0; i < width; i++) {
-        short gray = std::min(std::max((int)(Fact * (img[i][j] - min)), 0), 255); 
+        short gray = std::min(std::max((int)(Fact * (img[i][j] - min)), 0), 255);
         if(!color) {
           outfile << gray << " ";
         } else {
@@ -688,7 +688,7 @@ void Image::printImage(const char* filename, bool color, int** img, int height, 
             default:
               break;
           }
-          outfile << (int)(r*255.0) << " " << (int)(g*255.0) << " " << (int)(b*255.0) << " "; 
+          outfile << (int)(r*255.0) << " " << (int)(g*255.0) << " " << (int)(b*255.0) << " ";
         }
       }
       outfile << std::endl;
@@ -713,7 +713,7 @@ void Image::printImage(const char *filename, bool color) {
 
     for(int j = 0; j < height; j++) {
       for(int i = 0; i < width; i++) {
-        short gray = std::min(std::max((int)(Fact * (data[i][j] - min)), 0), 255); 
+        short gray = std::min(std::max((int)(Fact * (data[i][j] - min)), 0), 255);
         if(!color) {
           outfile << gray << " ";
         } else {
@@ -766,7 +766,7 @@ void Image::printImage(const char *filename, bool color) {
             default:
               break;
           }
-          outfile << (int)(r*255.0) << " " << (int)(g*255.0) << " " << (int)(b*255.0) << " "; 
+          outfile << (int)(r*255.0) << " " << (int)(g*255.0) << " " << (int)(b*255.0) << " ";
         }
       }
       outfile << std::endl;

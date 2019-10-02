@@ -62,18 +62,18 @@ class calibration {
 
   static const unsigned int USE_ODOM_WHEEL_BASE;
   static const unsigned int USE_ODOM_TICKS;
-   
+
   static const unsigned int USE_TIME_OFFSET;
-    
+
 
   calibration(rosbag::Bag *_bag, unsigned int parameters = USE_NONE) {
     ROS_INFO("Calibration ctr");
     ros::NodeHandle n;
-    
+
     n.param("/odometry/wheel_base", wheel_base, 44.4);
     n.param("/odometry/ticks_per_cm", ticks_per_cm, -461.817);
     n.param("/timing/offset", time_offset, 0.0);
-    
+
     const double sick_position[] = {0.12, 0, 0.24};
     const double sick_orientation[] = {0,0,0};
     const double riegl_position[] = {-0.135, 0, 0.4325};
@@ -95,11 +95,11 @@ class calibration {
 
     counter = 0;
   }
-  
+
   void getParamList(double *list, int n, const char*name, const double *def=0);
 
   tf::TransformListener *getTrajectory() { return listener; }
-  void setTrajectory(tf::TransformListener *l) { 
+  void setTrajectory(tf::TransformListener *l) {
     if (listener) {
       delete listener;
     }
@@ -109,8 +109,8 @@ class calibration {
   /**
    * Calculates Trajectory from the saved TF data
    */
-  void extractTrajectory(); 
-  
+  void extractTrajectory();
+
   /**
    * Calculates Trajectory from the Odometry only, disregarding the runtime tf history
    */
@@ -123,16 +123,16 @@ class calibration {
   void calculateTrajectory(bool, bool);
 
   void calibrate(timeMap &tm, evaluator &eval, ScanImporter &si);
-  
+
   float function(float *X);
 
-  private: 
+  private:
 
   int counter;
   void toX(float *X);
   void fromX(float *X);
   void count(unsigned int flag, unsigned int &n);
-  
+
   void printHeaderToFile(const char *filename);
 
   void printToFile(float *X, double res, const char *filename) {
@@ -154,24 +154,24 @@ class calibration {
     of << "odometry/ticks_per_cm:    " << ticks_per_cm << endl;
     of << endl;
     of << "sick/position:           [" << sick_pos[0] << ", "
-                                       << sick_pos[1] << ", " 
+                                       << sick_pos[1] << ", "
                                        << sick_pos[2] << "]" << endl;
-    of << "sick/orientation:        [" << sick_euler[0] << ", " 
-                                       << sick_euler[1] << ", " 
+    of << "sick/orientation:        [" << sick_euler[0] << ", "
+                                       << sick_euler[1] << ", "
                                        << sick_euler[2] << "]" << endl;
     of << endl;
     of << "riegl/position:          [" << riegl_pos[0] << ", "
-                                       << riegl_pos[1] << ", " 
+                                       << riegl_pos[1] << ", "
                                        << riegl_pos[2] << "]" << endl;
-    of << "riegl/orientation:       [" << riegl_euler[0] << ", " 
-                                       << riegl_euler[1] << ", " 
+    of << "riegl/orientation:       [" << riegl_euler[0] << ", "
+                                       << riegl_euler[1] << ", "
                                        << riegl_euler[2] << "]" << endl;
     of << endl;
     of << "xsens/position:          [" << xsens_pos[0] << ", "
-                                       << xsens_pos[1] << ", " 
+                                       << xsens_pos[1] << ", "
                                        << xsens_pos[2] << "]" << endl;
-    of << "xsens/orientation:       [" << xsens_euler[0] << ", " 
-                                       << xsens_euler[1] << ", " 
+    of << "xsens/orientation:       [" << xsens_euler[0] << ", "
+                                       << xsens_euler[1] << ", "
                                        << xsens_euler[2] << "]" << endl;
     of << endl;
     of << "timing/offset:            " << time_offset << endl;
@@ -201,14 +201,14 @@ class calibration {
   int contains(float *X) {
     for (unsigned int i = 0; i < cache.size(); i++) {
       for (unsigned int j = 1; j < nr_params; j++) {  // start at 1 due to num rec
-        if ( fabs(X[j] - cache[i][j]) > NUM_LIMIT) 
+        if ( fabs(X[j] - cache[i][j]) > NUM_LIMIT)
           goto too_large;
       }
       // all checks failed, numbers are close enough
       return i;
 
       too_large:;  // numbers are different
-      
+
     }
     return -1; // value is not cached
   }

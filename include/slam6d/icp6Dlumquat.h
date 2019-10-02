@@ -1,4 +1,4 @@
-/** @file 
+/** @file
  *  @brief Definition of the ICP error function minimization
  *  @author Andreas Nuechter. Jacobs University Bremen gGmbH, Germany
  */
@@ -15,22 +15,22 @@
 class icp6D_LUMQUAT : public icp6Dminimizer
 {
 public:
-  /** 
-   * Constructor 
+  /**
+   * Constructor
    */
   icp6D_LUMQUAT(bool quiet = false) : icp6Dminimizer(quiet) {};
 
-  /** 
-   * Destructor 
+  /**
+   * Destructor
    */
-  virtual ~icp6D_LUMQUAT() {};                                
+  virtual ~icp6D_LUMQUAT() {};
 
   double Align(const std::vector<PtPair>& Pairs,
 			double *alignxf,
 			const double centroid_m[3],
-			const double centroid_d[3]);  
+			const double centroid_d[3]);
 
-  inline int getAlgorithmID() { return 8; }; 
+  inline int getAlgorithmID() { return 8; };
 };
 
 #endif

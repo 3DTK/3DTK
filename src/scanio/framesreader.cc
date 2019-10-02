@@ -2,7 +2,7 @@
 #include "slam6d/scan.h"
 #include "slam6d/globals.icc"
 
-void readFramesAndTransform(std::string dir, int start, int end, int frame, bool use_pose, bool reduced) 
+void readFramesAndTransform(std::string dir, int start, int end, int frame, bool use_pose, bool reduced)
 {
   std::ifstream frame_in;
   int  fileCounter = start;
@@ -36,7 +36,7 @@ void readFramesAndTransform(std::string dir, int start, int end, int frame, bool
         try {
           frame_in >> transMat >> algoTypeInt;
         }
-        catch (const std::exception &e) {   
+        catch (const std::exception &e) {
           break;
         }
       }

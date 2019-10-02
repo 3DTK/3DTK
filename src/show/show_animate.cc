@@ -75,7 +75,7 @@ void calcPath()
   // if camera list is empty then return
   // to interpolate with the xy coordinate.
   for(unsigned int i = 0;i < cams.size(); i++) {
-    temp.x = cams[i].x; 
+    temp.x = cams[i].x;
     temp.y = cams[i].y;
     path_listXY.push_back(temp);
   }
@@ -120,7 +120,7 @@ void savePath(int dummy)
 
   // open the output file
   pathfile.open(path_file_name, std::ios::out);
-   
+
   // if file not found then show error
   if(!pathfile){
     std::cerr << "Error creating the path file." << std::endl;
@@ -148,7 +148,7 @@ void savePath(int dummy)
   pathfile.close();
 }
 
- 
+
 //----------------------------------------------------------------------------
 
 /**
@@ -198,21 +198,21 @@ void loadPath(int dummy) {
     y = atof(buffer);
     pathFile.getline(buffer,2048);
     z = atof(buffer);
-        
+
     pathFile.getline(buffer,2048);
     lx = atof(buffer);
     pathFile.getline(buffer,2048);
     ly = atof(buffer);
     pathFile.getline(buffer,2048);
     lz = atof(buffer);
-    
+
     pathFile.getline(buffer,2048);
     ux = atof(buffer);
     pathFile.getline(buffer,2048);
     uy = atof(buffer);
     pathFile.getline(buffer,2048);
     uz = atof(buffer);
-    
+
     // feed the information to create a new
     // camera with those values
     Point p(x,y,z);
@@ -264,7 +264,7 @@ void loadPose(int dummy) {
     // if open then close the file
     poseFile.clear();
     poseFile.close();
-       
+
   }
 
   // open the path file
@@ -273,8 +273,8 @@ void loadPose(int dummy) {
     std::cerr << "Error loading file " << pose_file_name << std::endl;
     return;
   }
- 
-  // Position 
+
+  // Position
   for (unsigned int i = 0; i < 3; poseFile >> euler[i++]);
   // Orientation
   for (unsigned int i = 0; i < 4; poseFile >> quat[i++]);
@@ -282,15 +282,15 @@ void loadPose(int dummy) {
   poseFile >> showViewMode >> cameraNavMouseMode >> pzoom;
   poseFile >> show_points >> show_path >> show_cameras >> pointsize;
   poseFile >> show_fog >> fogDensity >> invert;
-  
+
   setView(euler, quat, mouseRotX, mouseRotY, mouseRotZ, cangle, showViewMode,
           cameraNavMouseMode, pzoom, show_points, show_path, show_cameras,
           show_poses, pointsize, show_fog, fogDensity, invert);
-  
+
   poseFile.clear();
   poseFile.close();
 
-} 
+}
 
 /**
  * This function saves the current camera pose to a file.
@@ -303,7 +303,7 @@ void savePose(int dummy) {
 
   // open the output file
   posefile.open(pose_file_name, std::ios::out);
-   
+
   // if file not found then show error
   if(!posefile){
     std::cerr << "Error creating the pose file." << std::endl;
@@ -311,8 +311,8 @@ void savePose(int dummy) {
   }
 
   // store all the relevant information about the
-  // individual camera position in this file. 
-   
+  // individual camera position in this file.
+
   posefile << X << " " << Y << " " << Z << std::endl;
   for(int i = 0; i < 4; i++) {
     posefile << quat[i] << " ";
@@ -328,7 +328,7 @@ void savePose(int dummy) {
   // close the file after writing
   posefile.clear();
   posefile.close();
-  
+
 }
 
 std::string suggestImageFileName() {
@@ -355,7 +355,7 @@ void saveSelection(int dummy) {
 
   // open the output file
   selectionfile.open(selection_file_name, std::ios::out);
-   
+
   // if file not found then show error
   if(!selectionfile){
     std::cerr << "Error creating the selection file." << std::endl;
@@ -365,7 +365,7 @@ void saveSelection(int dummy) {
   // need higher precision to accurately reload points
   selectionfile.precision(8);
   for(unsigned int i = 0; i < octpts.size(); i++) {
-    selectionfile << "# points from scan nr " << i << std::endl; 
+    selectionfile << "# points from scan nr " << i << std::endl;
     // for(int j = 0; j < selected_points[i].size(); j++) {
     for ( std::set<sfloat*>::iterator it = selected_points[i].begin();
         it != selected_points[i].end(); it++) {

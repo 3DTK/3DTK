@@ -40,25 +40,25 @@ SharedScanVector* ServerInterface::readDirectory(const char * dir_path, IOType t
 {
   // INFO
   cout << "[Scanserver] Reading directory '" << dir_path << "' ... ";
-  
+
   // create an instance of ScanIO
   ScanIO* sio = ScanIO::getScanIO(type);
-  
+
   // query available scans in the directory from the ScanIO
   std::list<std::string> identifiers(sio->readDirectory(dir_path, start, end));
-  
+
   // create a vector for returning
   SharedScanVector* scans = segment_manager->construct<SharedScanVector>(anonymous_instance)(allocator);
   scans->reserve(identifiers.size());
-  
+
   // INFO
   cout << identifiers.size() << " scans found." << endl;
-  
+
   // share the directory path string between all scans because it's the same
   // BUG: before boost-1.47, gcc -O2 and higher caused several boost::ipc:string instances having errors with garbage characters in between and/or more at the end, this is to avoid that problem
   SharedStringSharedPtr dir_path_ptr = my_make_managed_shared_ptr(
     segment_manager->construct<SharedString>(anonymous_instance)(dir_path, allocator), *segment_manager);
-  
+
   // for each identifier, create a scan
   for(std::list<std::string>::iterator it = identifiers.begin(); it != identifiers.end(); ++it) {
     // first try to get the scan by matching in the global scan vector
@@ -75,7 +75,7 @@ SharedScanVector* ServerInterface::readDirectory(const char * dir_path, IOType t
     // insert scan into return scan vector
     scans->push_back(offset_ptr<SharedScan>(scan));
   }
-  
+
   return scans;
 }
 
@@ -83,7 +83,7 @@ bool ServerInterface::loadCacheObject(CacheObject* obj)
 {
   // INFO
   //cout << "ServerInterface::loadCacheObject..." << endl;
-  
+
   // cache manager handles all the io and allocation issues by calling the cache handler
   return m_manager.loadCacheObject(obj);
 }
@@ -94,7 +94,7 @@ void ServerInterface::allocateCacheObject(CacheObject* obj, unsigned int size)
   //cout << "ServerInterface::allocateCacheObject (" << size << ")" << endl;
   // allocate enough space for a cache object
   m_manager.allocateCacheObject(obj, size);
-  
+
   // INFO
   //cout << endl;
 }
@@ -108,14 +108,14 @@ void ServerInterface::getPose(SharedScan* scan)
 {
   // INFO
   //cout << "[" << scan->getIdentifier() << "] getPose()";
-  
+
   // TODO: catch exceptions
   double* pose = segment_manager->construct<double>(anonymous_instance)[6]();
   ScanIO* sio = ScanIO::getScanIO(scan->getIOType());
   // TODO: catch more exceptions
   sio->readPose(scan->getDirPath(), scan->getIdentifier(), pose);
   static_cast<ServerScan*>(scan)->setPose(pose);
-  
+
   // INFO
   //cout << endl;
 }
@@ -242,16 +242,16 @@ void ServerInterface::run()
 {
  // take ownership of the server mutex as long as the server is busy
   scoped_lock<interprocess_mutex> lock(m_mutex_server);
-  
+
   // run the shop
   bool running = true;
   while(running) {
     // wait for input notification
     m_condition_server.wait(lock);
-    
+
     // clear the error message because the client isn't responsible for it
     m_error_message.clear();
-    
+
     // process the input
     // TEST: simple int pod for message type
     try {
@@ -305,7 +305,7 @@ void ServerInterface::run()
     }
     // clear message
     m_message = MESSAGE_NONE;
-    
+
     // notify client about completion
     if(running)
       m_condition_client.notify_one();

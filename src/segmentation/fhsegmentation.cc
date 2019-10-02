@@ -141,7 +141,7 @@ double weight2(Point a, Point b)
 {
   //return 0;
   return (1 -(a.nx * b.nx + a.ny * b.ny + a.nz * b.nz));
- 
+
   return a.distance(b) * .5 + fabs(a.reflectance-b.reflectance) * .5;
 }
 
@@ -152,7 +152,7 @@ void writePoseFile(string dir,
 {
   string poseFileName = dir + "segments/scan" + to_string(num, 3) + ".pose";
   ofstream posout(poseFileName.c_str());
-  
+
   posout << rPos[0] << " "
 	    << rPos[1] << " "
 	    << rPos[2] << endl
@@ -176,7 +176,7 @@ int writeScanFiles(string dir, int outnum, int min_size,
 	   vector<Point>* segment = cloud[j];
 	   string scanFileName = dir + "segments/scan" + to_string(i,3) + ".3d";
 	   ofstream scanout(scanFileName.c_str());
-	   
+
 	   for (int k = 0; k < (int)segment->size(); k++) {
 		Point p = segment->at(k);
 		scanout << p.x << " " << p.y << " " << p.z << endl;
@@ -257,7 +257,7 @@ int main(int argc, char** argv)
     /// read scan into points
     DataXYZ xyz(scan->get("xyz"));
     DataNormal norm(scan->get("normal"));
-   
+
     vector<Point> points;
     points.reserve(xyz.size());
 
@@ -273,8 +273,8 @@ int main(int argc, char** argv)
 
     cout << "segmenting graph" << endl;
     edge* sedges = sgraph.getGraph();
-    universe* segmented = segment_graph(sgraph.getNumPoints(), 
-                                        sgraph.getNumEdges(), 
+    universe* segmented = segment_graph(sgraph.getNumPoints(),
+                                        sgraph.getNumEdges(),
                                         sedges,
                                         k);
 
@@ -301,7 +301,7 @@ int main(int argc, char** argv)
         }
       clouds[components2cloud[component]]->push_back(sgraph[i]);
     }
-    
+
     // scan files for all segments
     int written = writeScanFiles(dir, outscan, min_size,
 						   rPos, rPosTheta,

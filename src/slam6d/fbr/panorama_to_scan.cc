@@ -89,7 +89,7 @@ void parssArgs(int argc, char** argv, information& info)
   while ((c = getopt (argc, argv, "A:C:D:F:I:m:n:N:O:p:R:t:w:x:")) != -1)
     switch (c)
       {
-      case 'A':	
+      case 'A':
 	info.inputRangeImage = optarg;
 	break;
       case 'C':
@@ -205,10 +205,10 @@ bool filterRecoveredRange(information info, int height, int width, cv::Mat iThre
 {
   bool interquartileStatus = true;
   bool averageDiffStatus= true;
-  
+
   //filtering only if the filteration method is != DISABLE_RECOVERED_RANGE_FILTERATION
   if(info.recoveredRangeFilterationMethod != DISABLE_RECOVERED_RANGE_FILTERATION)
-    { 
+    {
       vector<float> rangeNeighbours;
       float range = 0.0;
       for(int i = -info.numberOfNeighbours; i <= info.numberOfNeighbours; i++)
@@ -246,10 +246,10 @@ bool filterRecoveredRange(information info, int height, int width, cv::Mat iThre
 		}
 	    }
 	}
-      
+
       //sort the data in ranges
       sort(rangeNeighbours.begin(), rangeNeighbours.end());
-      
+
       //find the outliers
       double q1 = 0, q2 = 0, q3 = 0;
       int size = rangeNeighbours.size();
@@ -270,7 +270,7 @@ bool filterRecoveredRange(information info, int height, int width, cv::Mat iThre
 	      q3 = rangeNeighbours[3*(int)(size/4)];
 	    }
 	}
-      
+
       double interQuartile = q3 - q1;
       double innerFence = interQuartile * info.interquartileScaleFactor;
       double minInnerBound = q1 - innerFence;
@@ -278,10 +278,10 @@ bool filterRecoveredRange(information info, int height, int width, cv::Mat iThre
       //double outerFence = interQuartile * 3;
       //double minOuterBound = q1 - outerFence;
       //double maxOuterBound = q3 + outerFence;
-      
+
       //startus of interquartile filteration
       interquartileStatus = (range > minInnerBound && range < maxInnerBound);
-      
+
       if(info.recoveredRangeFilterationMethod == INTERQUARTILE_AVERAGEDIFF)
 	{
 	  double average = 0.0;
@@ -289,10 +289,10 @@ bool filterRecoveredRange(information info, int height, int width, cv::Mat iThre
 	    {
 	      for(unsigned int r = 0; r < rangeNeighbours.size(); r++)
 		average += rangeNeighbours[r];
-	      
+
 	      average /= rangeNeighbours.size();
 	      double diff = fabs(range - average);
-	      
+
 	      //status of average diff filteration
 	      averageDiffStatus = diff < info.averageDiff;
 	    }
@@ -325,7 +325,7 @@ int main(int argc, char** argv)
 	    cout<<"The Three Channel 24 Bit Range has a wrong type."<<endl;
 	    return 0;
 	  }
-	
+
 	info.imageHeight = iThreeChannel24BitRange.rows;
 	info.imageWidth = iThreeChannel24BitRange.cols;
       }
@@ -374,7 +374,7 @@ int main(int argc, char** argv)
     return 0;
     break;
   }
-  
+
   //TODO: check for type and channels as well
   if(info.inputRangeImage.empty() == false)
     {
@@ -429,7 +429,7 @@ int main(int argc, char** argv)
 
   //get the projection object
   projection proj(info.imageWidth, info.imageHeight, info.projectionMethod, -1, -1, -1, -1, info.minHorizAngle, info.maxHorizAngle, info.minVertAngle, info.maxVertAngle, false);
-    
+
   //read the panorama and write it to a file
   //get the name of outputscan from the input ThreeChannel24BitRange image
   //images are usualy in the scanXXX-info-image type.file format
@@ -465,7 +465,7 @@ int main(int argc, char** argv)
     {
       colorMap.insert({colorMapVector[c], c});
     }
-  
+
   //calculate the range
   for(int h = 0; h < info.imageHeight; h++)
     {
@@ -510,13 +510,13 @@ int main(int argc, char** argv)
 	    }
 	  else
 	    {
-	      
+
 	      range = (unsigned int)mapPair->second;
 	      range/= 10000;
 	      //std::cout << myPair->first << " is " << myPair->second;
 	    }
 
-	  
+
 	  //get filteration status for pixel [h, w]
 	  //if no filteration it returns true
 	  bool filterationStatus = filterRecoveredRange(info, h, w, iThreeChannel24BitRange, iThreeGrayscaleRange1, iThreeGrayscaleRange2, iThreeGrayscaleRange3);
@@ -536,10 +536,10 @@ int main(int argc, char** argv)
 		  g =  iColor.at<cv::Vec3b>(h,w)[1];
 		  r =  iColor.at<cv::Vec3b>(h,w)[2];
 		}
-	      
-	      if( fabs(x) > 1e-5 && fabs(y) > 1e-5 && fabs(z) > 1e-5) 
+
+	      if( fabs(x) > 1e-5 && fabs(y) > 1e-5 && fabs(z) > 1e-5)
 		{
-		  
+
 		  if(iReflectance.empty() == false && iColor.empty() == false)
 		    {
 		      os << x <<" "<< y <<" "<< z <<" "<< reflectance <<" "<< r <<" "<< g <<" "<< b <<"\n";

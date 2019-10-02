@@ -7,7 +7,7 @@
  *
  */
 
-/** @file 
+/** @file
  *  @brief An optimized k-d tree implementation
  *  @author Andreas Nuechter. Inst. of CS, University of Osnabrueck, Germany.
  *  @author Kai Lingemann. Inst. of CS, University of Osnabrueck, Germany.

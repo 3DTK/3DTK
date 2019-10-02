@@ -15,16 +15,16 @@
   * @param start starting point of the line
   * @param end end point of the line
   * @param point point to be checked
-  * @return true if the point is left of the line or on the line and further away 
+  * @return true if the point is left of the line or on the line and further away
   * from the start point.
   */
 
 bool ConvexPlane::furtherleft(double * start, double * point, double * end) {
-  double tmp = (end[0] - start[0])*(point[1] - start[1]) - (point[0] - start[0])*(end[1] - start[1]); 
+  double tmp = (end[0] - start[0])*(point[1] - start[1]) - (point[0] - start[0])*(end[1] - start[1]);
   if(fabs(tmp) < 0.0000000001) {
-    double l1 = (point[0] - start[0])*(point[0] - start[0]) 
+    double l1 = (point[0] - start[0])*(point[0] - start[0])
               + (point[1] - start[1])*(point[1] - start[1]);
-    double l2 = (end[0] - start[0])*(end[0] - start[0]) 
+    double l2 = (end[0] - start[0])*(end[0] - start[0])
               + (end[1] - start[1])*(end[1] - start[1]);
     return (l1 > l2);
   } else if(tmp < 0) {
@@ -39,7 +39,7 @@ bool ConvexPlane::furtherleft(double * start, double * point, double * end) {
 /**
   * Calculates the convex hull of a 2d point set using the Jarvis March
   * algorithm.
-  * 
+  *
   * 1. Find the point that is furthest left in the point set.
   * 2. Continue to select points such that the remaining point cloud always
   * stays on the right sight of that line spanned by the last point and the new
@@ -60,7 +60,7 @@ void ConvexPlane::JarvisMarchConvexHull(std::list<double*> &points, std::vector<
   double * anchor = (*end);
   convex_hull.push_back(anchor);
   itr = points.begin();
-  double * start = convex_hull[0]; 
+  double * start = convex_hull[0];
   double * current = (*points.begin());
   bool closed = true;
   do {
@@ -83,7 +83,7 @@ void ConvexPlane::JarvisMarchConvexHull(std::list<double*> &points, std::vector<
     current = anchor;
   } while(start != anchor);
   // convex_hull.pop_back();
-  
+
   itr = points.begin();
   while(itr != points.end()) {
     if((*itr) == anchor) {
@@ -128,7 +128,7 @@ ConvexPlane::ConvexPlane(double plane[4]) {
       direction = 'z';
     } else {
       direction = 'y';
-    } 
+    }
   } else if (fabs(n[2]) < fabs(n[0])){
     direction = 'x';
   } else {
@@ -136,7 +136,7 @@ ConvexPlane::ConvexPlane(double plane[4]) {
   }
 }
 
-/** 
+/**
   * Constructor of a convex plane given several partial planes
   */
 ConvexPlane::ConvexPlane(std::vector<ConvexPlane*> &partialplanes) {
@@ -170,7 +170,7 @@ ConvexPlane::ConvexPlane(double plane[4], std::vector<Point> &points ) {
       direction = 'z';
     } else {
       direction = 'y';
-    } 
+    }
   } else if (fabs(n[2]) < fabs(n[0])){
     direction = 'x';
   } else {
@@ -184,8 +184,8 @@ ConvexPlane::ConvexPlane(double plane[4], std::vector<Point> &points ) {
     double * point = new double[2];
     switch(direction) {
       case 'x': point[0] = p.y;
-                point[1] = p.z; 
-                break; 
+                point[1] = p.z;
+                break;
       case 'y': point[0] = p.x;
                 point[1] = p.z;
                 break;
@@ -221,14 +221,14 @@ void ConvexPlane::writeNormal(std::string path, int counter) {
   for(int i = 0; i < 3; i++) {
     center[i] = 0.0;
   }
-  
+
   for(std::vector<double*>::iterator it = convex_hull.begin();
       it != convex_hull.end();
       it++) {
 
-    
+
     switch(direction) {
-      case 'x': 
+      case 'x':
         center[0] += (rho - (*it)[0] * n[1] - (*it)[1] * n[2]) / n[0];
         center[1] += (*it)[0];
         center[2] += (*it)[1];
@@ -238,7 +238,7 @@ void ConvexPlane::writeNormal(std::string path, int counter) {
         center[1] += (rho - (*it)[0] * n[0] - (*it)[1] * n[2]) / n[1];
         center[2] += (*it)[1];
         break;
-      case 'z': 
+      case 'z':
         center[0] += (*it)[0];
         center[1] += (*it)[1];
         center[2] += (rho - (*it)[0] * n[0] - (*it)[1] * n[1]) / n[2];
@@ -247,7 +247,7 @@ void ConvexPlane::writeNormal(std::string path, int counter) {
     }
 
   }
-  
+
   for(int i = 0; i < 3; i++) {
     center[i] /= convex_hull.size();
   }
@@ -262,19 +262,19 @@ void ConvexPlane::writeNormal(std::string path, int counter) {
 
 /**
   * Writes the convex hull of the plane as planeXXX.3d to the directory given in the path.
-  * XXX is the three digit representation of the counter. 
+  * XXX is the three digit representation of the counter.
   */
 void ConvexPlane::writePlane(std::string path, int counter) {
 
   std::ofstream out;
   out.open(path.c_str());
-  
+
   for(std::vector<double*>::iterator it = convex_hull.begin();
       it != convex_hull.end();
       it++) {
 
     switch(direction) {
-      case 'x': 
+      case 'x':
         out << (rho - (*it)[0] * n[1] - (*it)[1] * n[2]) / n[0] << " ";
         out << (*it)[0] << " ";
         out << (*it)[1] << std::endl;
@@ -284,7 +284,7 @@ void ConvexPlane::writePlane(std::string path, int counter) {
         out << (rho - (*it)[0] * n[0] - (*it)[1] * n[2]) / n[1] << " ";
         out << (*it)[1] << std::endl;
         break;
-      case 'z': 
+      case 'z':
         out << (*it)[0] << " ";
         out << (*it)[1] << " ";
         out << (rho - (*it)[0] * n[0] - (*it)[1] * n[1]) / n[2] << std::endl;
@@ -379,7 +379,7 @@ void ConvexPlane::getNormal(double* normal, double* origin) {
 
 void ConvexPlane::project(const double *p, double *p1) {
   double dist = n[0] * p[0] + n[1] * p[1] + n[2] * p[2] - rho;
-  
+
   p1[0] = p[0] - n[0] * dist;
   p1[1] = p[1] - n[1] * dist;
   p1[2] = p[2] - n[2] * dist;

@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Matrix.h : 
+// Matrix.h :
 //		Interface of the class CMatrix
 // Author : freeia
 // Modified Date : 3/11/2003
@@ -16,8 +16,8 @@ typedef std::vector <double> VDOUBLE;
 typedef std::vector <VDOUBLE> TMatrix;
 
 
-class CMatrix  
-{	
+class CMatrix
+{
 
 	/************************************************************************
 	*				the interface function of the class CMatrix 			*
@@ -25,14 +25,14 @@ class CMatrix
 public:
 
 	/////////////////////////////////////////////////////////////////////////
-	// Construction and Destruction	
+	// Construction and Destruction
 	CMatrix();
 
 	CMatrix(CMatrix& cMatrixB);
 
 	 ~CMatrix();
 
-	TMatrix	m_pTMatrix;				
+	TMatrix	m_pTMatrix;
 
 	/////////////////////////////////////////////////////////////////////////
 	// According to the parameters nRow & nCol to construct a matrix
@@ -43,40 +43,40 @@ public:
 	// This function initialize the matrix :
 	//		the matrix which has been initialized has 0 row & 0 column, and
 	// all elements in it is zeros.
-	// 
+	//
 	void Initialize();
 
 	/////////////////////////////////////////////////////////////////////////
 	// This function initialize the matrix :
 	// all elements in it is zeros.
-	// 
+	//
 	void InitializeZero();
 
 	/////////////////////////////////////////////////////////////////////////
-	// To make random in the elements of the matrix and the elements of the 
+	// To make random in the elements of the matrix and the elements of the
 	// matrix has been randomized between -1 and 1.These elements must be
 	// decimal fractions.
-	// 
+	//
 	void RandomInitialize();
 
 	/////////////////////////////////////////////////////////////////////////
 	// Overload Operations
 
 	// 'CMatrix + CMatrix'
-	CMatrix operator + (CMatrix& cMatrixB);	
+	CMatrix operator + (CMatrix& cMatrixB);
 	// 'CMatrix - CMatrix'
-	CMatrix operator - (CMatrix& cMatrixB);	
+	CMatrix operator - (CMatrix& cMatrixB);
 	// 'CMatrix * CMatrix'
-	CMatrix operator * (CMatrix& cMatrixB);	
+	CMatrix operator * (CMatrix& cMatrixB);
 	// 'CMatrix * double'
-	CMatrix operator * (double nValue);	
+	CMatrix operator * (double nValue);
 	// 'CMatrix = CMatrix'
-	CMatrix& operator = (CMatrix& cMatrixB);	
+	CMatrix& operator = (CMatrix& cMatrixB);
 	CMatrix& operator = (const CMatrix& cMatrixB);
 	// 'CMatrix += CMatrix'
-	CMatrix& operator += (CMatrix& cMatrixB);	
+	CMatrix& operator += (CMatrix& cMatrixB);
 	// 'CMatrix .* CMatrix'
-	CMatrix operator / (CMatrix& cMatrixB);	
+	CMatrix operator / (CMatrix& cMatrixB);
 
 	CMatrix Transpose();
 
@@ -110,7 +110,7 @@ public:
 
 	CMatrix SigmoidDerivative();
 
-	CMatrix tanh(); 
+	CMatrix tanh();
 
 	CMatrix tanhDerivative();
 
@@ -143,7 +143,7 @@ public:
 
 	void nncpyi(CMatrix &cMatrix, unsigned int nTimes);
 
-						
+
 	void nncpyd(CMatrix &cMatrix);
 
 
@@ -153,8 +153,8 @@ public:
 
 public:
 
-	unsigned int m_nRow;			
-	unsigned int m_nCol;			
+	unsigned int m_nRow;
+	unsigned int m_nCol;
 
 
 	void SetMatrixRowNumber(unsigned int nRow);

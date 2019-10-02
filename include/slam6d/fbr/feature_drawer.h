@@ -19,14 +19,14 @@
 #include "opencv2/imgproc/imgproc_c.h"
 
 namespace fbr{
-  
+
   const int draw_shift_bits = 4;
   const int draw_multiplier = 1 << draw_shift_bits;
   /**
    * @class feature_drawer : draws keypoints on panorama images and also matches between two panorama image
    */
   class feature_drawer{
-    
+
     void _DrawKeypoint( cv::Mat& img, const cv::KeyPoint& p, const cv::Scalar& color, int flags );
     void _PrepareImgAndDrawKeypoints( const cv::Mat& img1, const std::vector<cv::KeyPoint>& keypoints1,
 				      const cv::Mat& img2, const std::vector<cv::KeyPoint>& keypoints2,
