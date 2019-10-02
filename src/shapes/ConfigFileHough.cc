@@ -71,8 +71,8 @@ unsigned int ConfigFileHough::LoadCfg(const char* CfgFile) {
     printf("Could not open configuration file '%s'\n", CfgFile);
     return 0;
   }
- 
-  
+
+
   MaxDist           = paramtr_scan_double(Cfg, "MaxDist", DEF_MaxDist);
   MinDist           = paramtr_scan_double(Cfg, "MinDist", DEF_MinDist);
   AccumulatorMax    = paramtr_scan_int(Cfg, "AccumulatorMax", DEF_AccumulatorMax);
@@ -90,7 +90,7 @@ unsigned int ConfigFileHough::LoadCfg(const char* CfgFile) {
   WindowSize        = paramtr_scan_int(Cfg, "WindowSize", DEF_WindowSize);
   TrashMax          = paramtr_scan_int(Cfg, "TrashMax", DEF_TrashMax);
   PointDist         = paramtr_scan_double(Cfg, "PointDist", DEF_PointDist);
-  
+
   AccumulatorType   = paramtr_scan_int(Cfg, "AccumulatorType", DEF_AccumulatorType);
   paramtr_scan_str(Cfg, "PlaneDir", PlaneDir);
 

@@ -30,10 +30,10 @@ gridPoint::gridPoint(long x, long z)
  * If only count should be increased, occupied must be 0;
  *
  * @param count weighting of the information
- * @param occupied Weighting of occupied info 
+ * @param occupied Weighting of occupied info
  */
 void gridPoint::addCount(unsigned int count, unsigned int occupied)
-{   
+{
     if(count < 0 || occupied < 0)
     {
 	std::cerr << "ERROR: Invalid values in gridPoint::addCount " << std::endl;
@@ -67,8 +67,8 @@ void gridPoint::setFixed(unsigned int count, unsigned int occupied)
  */
 float gridPoint::getPercent() const
 {
-    if(this->count == 0) 
+    if(this->count == 0)
 	return -1.0;
-	
+
     return (float)this->occupied / (float)this->count;
 }

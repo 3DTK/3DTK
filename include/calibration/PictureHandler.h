@@ -33,20 +33,20 @@ private:
      initialize the aprilTag detector
      */
     void initDetector(float decimate, float blur, int threads, bool debug, bool refine_edges);
-    
+
     /**
      *  create a map<int, matd_t> with detected id's and 3x3 homography matrix describing the projection from an "ideal" tag (with corners at (-1,-1), (1,-1), (1,1), and (-1,1)) to pixels in the image
      */
     void getmatMapFromZarray(zarray_t *detections);
-    
-    
-    
-public: 
+
+
+
+public:
     /**
      *  Constructor
      */
     PictureHandler();
-    
+
     /**
      *  Constructor with parameters for detection
      *
@@ -62,28 +62,28 @@ public:
      *  Destructor
      */
     ~PictureHandler();
-    
+
     /**
      *  set the used aprilTag family
      *
      *  @param string family expected 'tag36h11', 'tag36h10', 'tag25h9', 'tag25h7'
      */
     void setTagFamily(std::string family);
-    
+
     /**
      *  load the image from an given filepath
      *
      *  @param path filepath to the image
      */
     void loadImage(std::string path);
-    
+
     /**
      *  start the detection of aprilTags
      *
      *  @return zarray_t with contains the results of the detection
      */
     int detectTags(Settings::Pattern pattern, Settings &s);
-    
+
     /**
      *  getter for pointMap
      *
@@ -110,7 +110,7 @@ public:
     cv::Size getImageSize();
 
     std::vector<cv::Point2f> getPoint2fVec();
-    
+
 };
 
 

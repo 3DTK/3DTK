@@ -9,7 +9,7 @@
 
 /**
  * @file
- * @brief 
+ * @brief
  *
  * @author Andreas Nuechter. Jacobs University Bremen, Germany
  * @author YuanJun, Wuhan University, China

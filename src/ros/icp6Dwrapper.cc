@@ -51,7 +51,7 @@ Icp6DWrapper::Icp6DWrapper() {
   nh_.param<std::string>("map_frame",map_frame,"map");
   nns_method = BOCTree;
 
-  nh_.param<double>("reduction_voxelsize", red, 10.0);     
+  nh_.param<double>("reduction_voxelsize", red, 10.0);
   nh_.param<int>("reduction_points_per_voxel", ppvoxel, 1);
   int algo = 1;
   nh_.param<int>("algorithm_icp", algo, 1);
@@ -103,7 +103,7 @@ Icp6DWrapper::Icp6DWrapper() {
 
 void Icp6DWrapper::callbackPointCloud(const sensor_msgs::PointCloud2ConstPtr& msg) {
   ROS_INFO("====================================");
-  ROS_INFO("RECEIVING scan %d",msg->header.seq); 
+  ROS_INFO("RECEIVING scan %d",msg->header.seq);
   tf::StampedTransform transform;
   ros::Time rostime = msg->header.stamp;
   try {
@@ -115,8 +115,8 @@ void Icp6DWrapper::callbackPointCloud(const sensor_msgs::PointCloud2ConstPtr& ms
   }
 
   double x,y,z;
-  transform.getBasis().getEulerYPR(x,y,z); 
-  ROS_INFO("SCAN IN POSE: %lf %lf %lf, %lf %lf %lf", 
+  transform.getBasis().getEulerYPR(x,y,z);
+  ROS_INFO("SCAN IN POSE: %lf %lf %lf, %lf %lf %lf",
   		  transform.getOrigin().getX(), transform.getOrigin().getY(),
 		  transform.getOrigin().getZ(),x*180/M_PI,y*180/M_PI,z*180/M_PI);
 
@@ -124,7 +124,7 @@ void Icp6DWrapper::callbackPointCloud(const sensor_msgs::PointCloud2ConstPtr& ms
   ros2frames(transform, transMat);
   double rPos[3], rPosTheta[4];
   Matrix4ToEuler(transMat, rPosTheta, rPos);
-  
+
   vector<double*> data;
   pointcloud2scan(msg,data);
   Scan *scan = new BasicScan(rPos, rPosTheta, data);
@@ -134,7 +134,7 @@ void Icp6DWrapper::callbackPointCloud(const sensor_msgs::PointCloud2ConstPtr& ms
   scan->createSearchTree();
 
   // FIXME throw old data away, nicer
-  if (scans.size() > 1) { 
+  if (scans.size() > 1) {
     delete scans[0];
     scans.erase(scans.begin());
   }
@@ -158,10 +158,10 @@ void Icp6DWrapper::callbackPointCloud(const sensor_msgs::PointCloud2ConstPtr& ms
     tf::Transform scan_to_map = transform.inverse();
     //tf::Transform scannew_to_map = transformnew.inverse();
 
-    tf::StampedTransform map_odom = tf::StampedTransform( 
+    tf::StampedTransform map_odom = tf::StampedTransform(
 		transformnew * scan_to_map,
-		transform.stamp_, 
-		map_frame, odom_frame); 
+		transform.stamp_,
+		map_frame, odom_frame);
 
 //	ROS_INFO_STREAM("T_maptoodom: "  << transformToString(map_odom));
 
@@ -169,7 +169,7 @@ void Icp6DWrapper::callbackPointCloud(const sensor_msgs::PointCloud2ConstPtr& ms
 	odom_corr.header.stamp = msg->header.stamp;
 	odom_corr.header.seq   = msg->header.seq;
 	odom_corr.header.frame_id = "map";
-	odom_corr.child_frame_id  = "odom";	
+	odom_corr.child_frame_id  = "odom";
 	tf::poseTFToMsg(map_odom,odom_corr.pose.pose);*/
 
     b.sendTransform(map_odom);
@@ -179,7 +179,7 @@ void Icp6DWrapper::callbackPointCloud(const sensor_msgs::PointCloud2ConstPtr& ms
 	map_odom.setIdentity();
 	map_odom.stamp_ = msg->header.stamp;
 	map_odom.frame_id_ = map_frame;
-	map_odom.child_frame_id_ = odom_frame; 
+	map_odom.child_frame_id_ = odom_frame;
 	b.sendTransform(map_odom);
   }
 

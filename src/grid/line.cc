@@ -11,8 +11,8 @@
 #include <cmath>
 
 /**
- * CTOR. 
- * 
+ * CTOR.
+ *
  * @param start the startpoint of the line
  * @param end the endpoint of the line
  */
@@ -22,10 +22,10 @@ line::line(gridPoint* start, gridPoint* end)
     this->end = end;
 }
 
-/** 
+/**
  * Returns the length of the line
- * 
- * @return the length of the line 
+ *
+ * @return the length of the line
  */
 double line::getLength()
 {

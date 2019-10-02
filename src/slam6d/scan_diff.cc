@@ -11,20 +11,20 @@
 /**
  * @file
  * @brief Main program calculating difference of 3D scans.
- * 
- * Program for calculating the difference between scans after matching with slam6d 
+ *
+ * Program for calculating the difference between scans after matching with slam6d
  * Usage: bin/scan_diff -s <START> -e <END> -d <NR> 'dir',
  * Use -s for the first scan, -e for the second scan
  *  'dir' the directory of a set of scans
  * The result is a scan in the UOS format (.3d) that contains all points from
- * the first scan that do NOT have a corresponding point in the second scan 
+ * the first scan that do NOT have a corresponding point in the second scan
  * within a distance of less than NR units.
  * Difference scans will be written to 'dir/diff'
  * ATTENTION: All scans between START and END will be loaded!
- * @author Dorit Borrmann. Automation Group, Jacobs University Bremen gGmbH, Germany. 
+ * @author Dorit Borrmann. Automation Group, Jacobs University Bremen gGmbH, Germany.
  */
 #ifdef _MSC_VER
-#if !defined _OPENMP && defined OPENMP 
+#if !defined _OPENMP && defined OPENMP
 #define _OPENMP
 #endif
 #endif
@@ -110,7 +110,7 @@ void usage(char* prog)
 	  << bold << "  -S, --scanserver" << normal << endl
 	  << "         Use the scanserver as an input method and handling of scan data" << endl
     << endl << endl;
-  
+
   cout << bold << "EXAMPLES " << normal << endl
 	  << "   " << prog << " -m 500 -d 5 dat" << endl
 	  << "   " << prog << " --max=5000 -d 10.2 dat" << endl
@@ -131,8 +131,8 @@ void usage(char* prog)
  * @param desc true if start is greater than end
  * @return 0, if the parsing was successful. 1 otherwise
  */
-int parseArgs(int argc, char **argv, string &dir, 
-		    int &start, int &end, int &maxDist, int &minDist, double &dist, 
+int parseArgs(int argc, char **argv, string &dir,
+		    int &start, int &end, int &maxDist, int &minDist, double &dist,
 		    IOType &type, bool &desc, bool scanserver)
 {
   int  c;
@@ -146,7 +146,7 @@ int parseArgs(int argc, char **argv, string &dir,
   /* options descriptor */
   // 0: no arguments, 1: required argument, 2: optional argument
   static struct option longopts[] = {
-    { "format",          required_argument,   0,  'f' },  
+    { "format",          required_argument,   0,  'f' },
     { "max",             required_argument,   0,  'm' },
     { "min",             required_argument,   0,  'M' },
     { "start",           required_argument,   0,  's' },
@@ -171,7 +171,7 @@ int parseArgs(int argc, char **argv, string &dir,
 	   w_end = atoi(optarg);
 	   if (end < 0)     { cerr << "Error: Cannot end at a negative scan number.\n"; exit(1); }
 	   break;
-	 case 'f': 
+	 case 'f':
     try {
       type = formatname_to_io_type(optarg);
     } catch (...) { // runtime_error
@@ -212,10 +212,10 @@ int parseArgs(int argc, char **argv, string &dir,
 #endif
   if(start > end) {
     double tmp = start;
-    start = end; 
+    start = end;
     end = tmp;
     desc = true;
-  } 
+  }
 
   parseFormatFile(dir, w_type, w_start, w_end);
 
@@ -226,17 +226,17 @@ int parseArgs(int argc, char **argv, string &dir,
 /**
  * Main program for calculating the difference of two scans.
  * Usage: bin/scan_diff -d <NR> -s <NR> -e <NR> 'dir',
- * Use -s and -e for the two scans, 
- * -d 
+ * Use -s and -e for the two scans,
+ * -d
  * and 'dir' the directory of a set of scans
  * Difference scans will be written to 'dir/diff/scan[00]s.3d'
- * 
+ *
  */
 int main(int argc, char **argv)
 {
 
   cout << "(c) Jacobs University Bremen, gGmbH, 2012" << endl << endl;
-  
+
   if (argc <= 1) {
     usage(argv[0]);
   }
@@ -249,7 +249,7 @@ int main(int argc, char **argv)
   int    maxDist    = -1;
   int    minDist    = -1;
   IOType type    = RIEGL_TXT;
-  bool desc = false;  
+  bool desc = false;
   bool scanserver = false;
 
   parseArgs(argc, argv, dir, start, end, maxDist, minDist, dist, type, desc, scanserver);
@@ -264,17 +264,17 @@ int main(int argc, char **argv)
     }
   }
 
-  string diffdir = dir + "diff"; 
- 
+  string diffdir = dir + "diff";
+
 #ifdef _WIN32
   int success = mkdir(diffdir.c_str());
 #else
   int success = mkdir(diffdir.c_str(), S_IRWXU|S_IRWXG|S_IRWXO);
 #endif
-  if(success == 0) { 
+  if(success == 0) {
     cout << "Writing scans to " << diffdir << endl;
   } else if(errno == EEXIST) {
-    cout << "Directory " << diffdir << " exists already.  CONTINUE" << endl; 
+    cout << "Directory " << diffdir << " exists already.  CONTINUE" << endl;
   } else {
     cerr << "Creating directory " << diffdir << " failed" << endl;
     exit(1);
@@ -284,29 +284,29 @@ int main(int argc, char **argv)
   ifstream frames_in;
   double inMatrix0[17];
   double inMatrix1[17];
-  
+
   cout << "Reading Scan No. " << start << endl;
   framesFileName = dir  + "scan" + to_string(start,3) + ".frames";
   frames_in.open(framesFileName.c_str());
-  
+
   if(!frames_in.good()) {
     cerr << "Couldn't read frames " << end << endl;
     exit(1);
   }
   while(frames_in.good()) {
     for (unsigned int i = 0; i < 17; frames_in >> inMatrix0[i++]);
-  } 
+  }
   frames_in.close();
   frames_in.clear();
   for(int i = 0; i < 16; i++) {
     cout << inMatrix0[i] << " ";
   }
-  cout << endl; 
-  
+  cout << endl;
+
   cout << "Reading Scan No. " << end << endl;
   framesFileName = dir  + "scan" + to_string(end,3) + ".frames";
   frames_in.open(framesFileName.c_str());
-  
+
   if(!frames_in.good()) {
     cerr << "Couldn't read frames " << end << endl;
     exit(1);
@@ -326,7 +326,7 @@ int main(int argc, char **argv)
   if(Scan::allScans.size() == 0) {
     cerr << "No scans found. Did you use the correct format?" << endl;
     exit(-1);
-  }  
+  }
 
   Scan* scan_first = *(Scan::allScans.begin());
   Scan* scan_second = *(Scan::allScans.end()-1);
@@ -336,14 +336,14 @@ int main(int argc, char **argv)
 
   DataXYZ xyz_first(scan_first->get("xyz"));
   DataXYZ xyz_second(scan_second->get("xyz"));
-  
+
   cout << "Scan " << scan_first->getIdentifier() << " with " << xyz_first.size() << " points" << endl;
   cout << "Scan " << scan_second->getIdentifier() << " with " << xyz_second.size() << " points" << endl;
 
   int thread_num = 0;
   std::vector<double*> diff;
   double transMat[16];
-  
+
   if(desc) {
     Scan::getNoPairsSimple(diff, scan_second, scan_first, thread_num, dist);
     M4inv(inMatrix1, transMat);
@@ -354,24 +354,24 @@ int main(int argc, char **argv)
     scanFileName = dir + "diff/scan" + to_string(start,3) + ".3d";
   }
 
-  cout << endl; 
+  cout << endl;
   for(int i = 0; i < 16; i++) {
     cout << transMat[i] << " ";
   }
-  cout << endl; 
+  cout << endl;
   for(int i = 0; i < 16; i++) {
     cout << inMatrix0[i] << " ";
   }
-  cout << endl; 
- 
+  cout << endl;
+
   ofstream ptsout(scanFileName.c_str());
 
   for(unsigned int i = 0; i < diff.size(); i++) {
     Point p(diff[i]);
-    p.transform(transMat); 
-    ptsout << p.x << " " << p.y << " " << p.z << " " << endl;    
+    p.transform(transMat);
+    ptsout << p.x << " " << p.y << " " << p.z << " " << endl;
   }
- 
+
   ptsout.close();
   ptsout.clear();
 

@@ -59,10 +59,10 @@ void usage(char * prog);
 void myNewMenu();
 void topView();
 void resetView(int dummy);
-void setView(double pos[3], double new_quat[4], 
+void setView(double pos[3], double new_quat[4],
              double newMouseRotX, double newMouseRotY, double newMouseRotZ,
              double newCangle,
-             int sVM, bool cNMM, double pzoom_new, 
+             int sVM, bool cNMM, double pzoom_new,
              bool s_points, bool s_path, bool s_cameras, bool s_poses, double ps, int
              sf, double fD, bool invert);
 void update_view_rotate(int);

@@ -1,4 +1,4 @@
-/** @file 
+/** @file
  *  @brief Implementation of the virtual functor
  *         for ICP error function minimization
  *  @author Andreas Nuechter. Jacobs University Bremen gGmbH, Germany
@@ -8,7 +8,7 @@
 #define __ICP6DMINIMIZER__
 
 #ifdef _MSC_VER
-#if !defined _OPENMP && defined OPENMP 
+#if !defined _OPENMP && defined OPENMP
 #define _OPENMP
 #endif
 #endif
@@ -31,14 +31,14 @@
 class icp6Dminimizer {
 
 public:
-  /** 
-   * Constructor 
+  /**
+   * Constructor
    */
   icp6Dminimizer(bool quiet = false) { this->quiet = quiet; };
-  /** 
-   * Destructor 
+  /**
+   * Destructor
    */
-  virtual ~icp6Dminimizer() {};                                
+  virtual ~icp6Dminimizer() {};
 
   /**
    * aligning the point pairs
@@ -54,26 +54,26 @@ public:
 				   double *alignxf,
 				   const double centroid_m[3],
 				   const double centroid_d[3]) = 0;
-  
+
   /**
    * aligning the point pairs parallel algorithms
    */
-  virtual double Align_Parallel(const int openmp_num_threads, 
+  virtual double Align_Parallel(const int openmp_num_threads,
 						  const unsigned int n[OPENMP_NUM_THREADS],
-						  const double sum[OPENMP_NUM_THREADS], 
+						  const double sum[OPENMP_NUM_THREADS],
 						  const double centroid_m[OPENMP_NUM_THREADS][3],
-						  const double centroid_d[OPENMP_NUM_THREADS][3], 
-						  const double Si[OPENMP_NUM_THREADS][9], 
+						  const double centroid_d[OPENMP_NUM_THREADS][3],
+						  const double Si[OPENMP_NUM_THREADS][9],
 						  double *alignxf)
   {
     std::cout << "this function is not implemented!!!" << std::endl;
     exit(-1);
   }
-  virtual double Align_Parallel(const int openmp_num_threads, 
+  virtual double Align_Parallel(const int openmp_num_threads,
 						  const unsigned int n[OPENMP_NUM_THREADS],
-						  const double sum[OPENMP_NUM_THREADS], 
+						  const double sum[OPENMP_NUM_THREADS],
 						  const double centroid_m[OPENMP_NUM_THREADS][3],
-						  const double centroid_d[OPENMP_NUM_THREADS][3], 
+						  const double centroid_d[OPENMP_NUM_THREADS][3],
 						  const std::vector<PtPair> pairs[OPENMP_NUM_THREADS],
 						  double *alignxf)
   {
@@ -81,10 +81,10 @@ public:
     exit(-1);
   }
 
-  virtual int getAlgorithmID() = 0; 
+  virtual int getAlgorithmID() = 0;
 
 protected:
   bool quiet; ///< determines the verbosity
 };
 
-#endif 
+#endif

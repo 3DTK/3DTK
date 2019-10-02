@@ -11,7 +11,7 @@ void powell(float p[], float **xi, int n, float ftol, int *iter, float *fret,
 //    float (calibration::*func)(float []));
 
 //void linmin(float p[], float xi[], int n, float *fret, float (calibration::*func)(float []));
-void linmin(float p[], float xi[], int n, float *fret, calibration *cal); 
+void linmin(float p[], float xi[], int n, float *fret, calibration *cal);
 float f1dim(float x);
 
 

@@ -40,13 +40,13 @@ void saveImageAndExit(int dummy)
 int main(int argc, char **argv)
 {
   setSignalHandling();
-  
+
   glutInit(&argc, argv);
 
   dataset_settings dss;
   window_settings ws;
   display_settings ds;
-  
+
   try {
     parse_args(argc, argv, dss, ws, ds);
   } catch (std::exception& e) {
@@ -93,7 +93,7 @@ void updateViewModeControls() {
   }
 }
 
-  
+
 void updateControls() {
   glui1->sync_live();
   glui1->show();
@@ -110,7 +110,7 @@ void checkForInterrupt() {
 }
 bool isInterrupted() {
 #ifndef __APPLE__
-  glutMainLoopEvent(); 
+  glutMainLoopEvent();
 #endif
   glutSetWindow(window_id);
   return interrupted;

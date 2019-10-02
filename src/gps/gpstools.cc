@@ -1,7 +1,7 @@
 /**
- * @file 
- * @brief Collection of functions to deal with GPS measurements 
- * @author Dorit Borrmann. 
+ * @file
+ * @brief Collection of functions to deal with GPS measurements
+ * @author Dorit Borrmann.
  */
 
 #include "gps/gps.h"
@@ -22,7 +22,7 @@ void ECEF_rtoENU(double lat, double lon, double alt, double cx, double cy, doubl
 
 /**
   * Calculate the matrix for conversion into ENU coordinates based on latitude,
-  * longitude, altitude (=WGS84/ellipsoidal, in m) 
+  * longitude, altitude (=WGS84/ellipsoidal, in m)
   */
 void calcECEF_rtoENUMat9(double lat, double lon, double alt, double* mat) {
   alt *= 100;
@@ -47,7 +47,7 @@ up) {
   north = mat[3] * x + mat[4] * y + mat[5] * z;
   up = mat[6] * x + mat[7] * y + mat[8] * z;
 }
- 
+
 /**
   * Transform ENU coordinates into a left-handed coordinate system.
   */
@@ -58,47 +58,47 @@ void ENUto3DTK(double east, double north, double up, double& x, double &y, doubl
 }
 
 /**
-  * Conversion from latitude, longitude, altitude (=WGS84/ellipsoidal, in m) to 
+  * Conversion from latitude, longitude, altitude (=WGS84/ellipsoidal, in m) to
   * right-handed ECEF in cm
   */
 void LLAtoECEF_r(double latitude, double longitude, double altitude, double& cx, double& cy, double& cz) {
   double phi = rad(latitude);
   double lambda = rad(longitude);
-  double h = altitude; 
+  double h = altitude;
 
   double n = (gps::A/(sqrt(1-(gps::E2*(sin(phi)*sin(phi))))));
-  
-  cx = (n+h)*cos(phi)*cos(lambda) * 100;  // ECEF X 
+
+  cx = (n+h)*cos(phi)*cos(lambda) * 100;  // ECEF X
   cy = (n+h)*cos(phi)*sin(lambda) * 100; // ECEF Y
   cz= ((n*(1-gps::E2))+h)*sin(phi) * 100; // ECEF Z // !!
 }
 
 /**
-  * Conversion from latitude, longitude, altitude (=WGS84/ellipsoidal, in m) to 
+  * Conversion from latitude, longitude, altitude (=WGS84/ellipsoidal, in m) to
   * left-handed ECEF in cm
   */
 void LLAtoECEF(double latitude, double longitude, double altitude, double& cx, double& cy, double& cz) {
   double phi = rad(latitude);
   double lambda = rad(longitude);
-  double h = altitude; 
+  double h = altitude;
 
   double n = (gps::A/(sqrt(1-(gps::E2*(sin(phi)*sin(phi))))));
-  
-  cz = (n+h)*cos(phi)*cos(lambda) * 100;  // ECEF X 
+
+  cz = (n+h)*cos(phi)*cos(lambda) * 100;  // ECEF X
   cx = (n+h)*cos(phi)*sin(lambda) * -100; // ECEF -Y
   cy= ((n*(1-gps::E2))+h)*sin(phi) * 100; // ECEF Z // !!
 }
 
 /**
   * Conversion from left-handed ECEF in cm to
-  latitude, longitude, altitude (=WGS84/ellipsoidal, in m) 
+  latitude, longitude, altitude (=WGS84/ellipsoidal, in m)
   */
 void ECEFtoLLA(double cx, double cy, double cz, double& latitude, double& longitude, double& altitude) {
   double x, y, z;
   x = cz * -0.01;
   y = cx * 0.01;
   z = cy * 0.01;
-  
+
   //from ECEF to WGS84
 
   double lambda = atan2(y,x);
@@ -122,22 +122,22 @@ void LLAtoUTM(double latitude, double longitude, double altitude, double& east, 
   double lambda_0 = (((int)((longitude + 180)/6)*6)-177);
   double phi = rad(latitude);
   double lambda = cos(phi) * rad(longitude - lambda_0);
-  
+
   double n = (gps::A/(sqrt(1-(gps::E2*(sin(phi)*sin(phi))))));
   double t = tan(phi);
   double n2 = gps::E2/(1.0-gps::E2)*(cos(phi)*cos(phi));
-  
+
   double x_0 = 500000; // False Easting
-  
+
   // help variables
   double tmpA = 1.0 + 3.0/4.0*gps::E2 + 45.0/64.0*pow(gps::E2,2) + 175.0/256.0*pow(gps::E2,3) + 11025/16384*pow(gps::E2,4);
   double tmpB = 3.0/8.0*gps::E2 + 15.0/32.0*pow(gps::E2,2) + 525.0/1024.0*pow(gps::E2,3) + 2205.0/4096.0*pow(gps::E2,4);
-  double tmpC = 15.0/256.0*pow(gps::E2,2) + 105.0/1024.0*pow(gps::E2,3) + 2205.0/16384.0*pow(gps::E2,4); 
+  double tmpC = 15.0/256.0*pow(gps::E2,2) + 105.0/1024.0*pow(gps::E2,3) + 2205.0/16384.0*pow(gps::E2,4);
   double tmpD = 35.0/3072.0*pow(gps::E2,3) + 105.0/4096.0*pow(gps::E2,4);
 
   // Meridian arc
   double y = gps::A*(1.0-gps::E2)*(tmpA*phi - tmpB*sin(2.0*phi) + tmpC*sin(4.0*phi) - tmpD*sin(6.0*phi));
-  
+
   // help variables
   double p = 1.0/12.0*(5.0 - pow(t,2) + 9.0*n2 + 4.0*pow(n2,2));
   double q = 1.0/360.0*(61.0 - 58.0*pow(t,2) + pow(t,4) + 270.0*n2 - 330.0*pow(t,2)*n2);
@@ -150,7 +150,7 @@ void LLAtoUTM(double latitude, double longitude, double altitude, double& east, 
   // Northing and Easting
   north = gps::K*(y+dy);
   east = gps::K*x + x_0;
-   
+
 }
 
 /**
@@ -190,7 +190,7 @@ void readRTKPos(char* filename, std::vector<double *> &lla_vec) {
   char *buffer = (char *)malloc(bufsize);
   unsigned int linenr = 0;
   double latitude, longitude, altitude;
-  
+
 
   infile.open(filename);
   for (;;++linenr) {
@@ -205,7 +205,7 @@ void readRTKPos(char* filename, std::vector<double *> &lla_vec) {
       }
     }
     if(linenr == 0) continue;
-    char **rtk_array; 
+    char **rtk_array;
     unsigned int count = strtoarray(buffer, rtk_array,",");
     /*
     std::cout << "B" << std::endl;
@@ -216,13 +216,13 @@ void readRTKPos(char* filename, std::vector<double *> &lla_vec) {
     std::cout << rtk_array[3] << std::endl;
     std::cout << rtk_array[4] << std::endl;
     std::cout << rtk_array[5] << std::endl;
-    
+
     for(unsigned int jl = 0; jl < count; jl++) {
       std::cout << rtk_array[jl] << std::endl;
     }
     */
-    
-    
+
+
     if(count != 11) {
       //std::cerr << count << " error reading RTK pose format in line " << linenr << std::endl;
       break;
@@ -241,10 +241,10 @@ void readRTKPos(char* filename, std::vector<double *> &lla_vec) {
     lla[1] = longitude;
     lla[2] = altitude;
     lla_vec.push_back(lla);
-   
-    for(unsigned int i = 0; i < count; i++) { 
-      delete[] rtk_array[i]; 
-    } 
+
+    for(unsigned int i = 0; i < count; i++) {
+      delete[] rtk_array[i];
+    }
     delete[] rtk_array;
 
   }

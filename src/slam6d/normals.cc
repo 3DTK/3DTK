@@ -204,7 +204,7 @@ void calculateNormalsAdaptiveApxKNN(vector<Point> &normals,
     n = n / n.NormFrobenius();
     normals.push_back(Point(n(1), n(2), n(3)));
   }
-  
+
   annDeallocPts(pa);
 }
 
@@ -223,7 +223,7 @@ void calculateNormalsKNN(vector<Point> &normals,
   ColumnVector rPos(3);
   for (int i = 0; i < 3; ++i)
     rPos(i+1) = _rPos[i];
-  
+
   double** pa = new double*[points.size()];
   for (size_t i = 0; i < points.size(); ++i) {
     pa[i] = new double[3];
@@ -255,9 +255,9 @@ void calculateNormalsKNN(vector<Point> &normals,
 #else
      int thread_num = 0;
 #endif
-	 
+
 	 double p[3] = { points[i].x, points[i].y, points[i].z };
-	 
+
 	 vector<Point> temp = t.kNearestNeighbors(p,
 									  nr_neighbors,
 									  thread_num);
@@ -269,7 +269,7 @@ void calculateNormalsKNN(vector<Point> &normals,
 	 n(1) = norm[0];
 	 n(2) = norm[1];
 	 n(3) = norm[2];
-    
+
 	 ColumnVector point_vector(3);
 	 point_vector(1) = p[0] - rPos(1);
 	 point_vector(2) = p[1] - rPos(2);
@@ -281,9 +281,9 @@ void calculateNormalsKNN(vector<Point> &normals,
 	 }
 	 n = n / n.NormFrobenius();
 #pragma omp critical
-	 normals.push_back(Point(n(1), n(2), n(3)));       
+	 normals.push_back(Point(n(1), n(2), n(3)));
     }
-    
+
   for (size_t i = 0; i < points.size(); ++i) {
     delete[] pa[i];
   }
@@ -299,7 +299,7 @@ void calculateNormal(vector<Point> temp, double *norm, double *eigen) {
 	 Matrix U(3,3);
 	 DiagonalMatrix D(3);
 
-	 // calculate mean for all the points              
+	 // calculate mean for all the points
 	 for (int j = 0; j < nr_neighbors; ++j) {
 	   mean.x += temp[j].x;
 	   mean.y += temp[j].y;
@@ -317,10 +317,10 @@ void calculateNormal(vector<Point> temp, double *norm, double *eigen) {
 	 }
 
 	 A << 1.0/nr_neighbors * X.t() * X;
-    
+
 	 EigenValues(A, D, U);
 
-	 // normal = eigenvector corresponding to lowest 
+	 // normal = eigenvector corresponding to lowest
 	 // eigen value that is the 1st column of matrix U
 	 norm[0] = U(1,1);
 	 norm[1] = U(2,1);
@@ -344,7 +344,7 @@ void calculateNormalsAdaptiveKNN(vector<Point> &normals,
   ColumnVector rPos(3);
   for (int i = 0; i < 3; ++i)
     rPos(i+1) = _rPos[i];
-  
+
   double** pa = new double*[points.size()];
   for (size_t i = 0; i < points.size(); ++i) {
     pa[i] = new double[3];
@@ -381,17 +381,17 @@ void calculateNormalsAdaptiveKNN(vector<Point> &normals,
 	 Matrix U(3,3);
 	 Point mean(0.0,0.0,0.0);
 	 int nr_neighbors;
-	 
+
 	 for(int kidx = kmin; kidx < kmax; kidx++) {
 	   nr_neighbors = kidx + 1;
 	   vector<Point> temp = t.kNearestNeighbors(p,
 									    nr_neighbors,
 									    thread_num);
-	   
+
 	   nr_neighbors = temp.size();
-	   	   
+
 	   mean.x = mean.y = mean.z = 0.0;
-	   // calculate mean for all the points              
+	   // calculate mean for all the points
 	   for (int j = 0; j < nr_neighbors; j++) {
 		mean.x += temp[j].x;
 		mean.y += temp[j].y;
@@ -400,33 +400,33 @@ void calculateNormalsAdaptiveKNN(vector<Point> &normals,
 	   mean.x /= nr_neighbors;
 	   mean.y /= nr_neighbors;
 	   mean.z /= nr_neighbors;
-	   	   
-	   double e1, e2, e3;     
+
+	   double e1, e2, e3;
 	   Matrix X(nr_neighbors,3);
 	   SymmetricMatrix A(3);
 	   DiagonalMatrix D(3);
-	   
+
 	   // calculate covariance = A for all the points
 	   for (int j = 0; j < nr_neighbors; ++j) {
 		X(j+1, 1) = temp[j].x - mean.x;
 		X(j+1, 2) = temp[j].y - mean.y;
 		X(j+1, 3) = temp[j].z - mean.z;
 	   }
-	   
+
 	   A << 1.0/nr_neighbors * X.t() * X;
 	   EigenValues(A, D, U);
-	   
+
 	   e1 = D(1);
 	   e2 = D(2);
 	   e3 = D(3);
-          
-	   // We take the particular k if the second maximum eigen value 
+
+	   // We take the particular k if the second maximum eigen value
 	   // is at least 25 percent of the maximum eigen value
-	   if ((e1 > 0.25 * e2) && (fabs(1.0 - (double)e2/(double)e3) < 0.25)) 
+	   if ((e1 > 0.25 * e2) && (fabs(1.0 - (double)e2/(double)e3) < 0.25))
 		break;
 	 }
-      
-	 // normal = eigenvector corresponding to lowest 
+
+	 // normal = eigenvector corresponding to lowest
 	 // eigen value that is the 1rd column of matrix U
 	 ColumnVector n(3);
 	 n(1) = U(1,1);
@@ -442,10 +442,10 @@ void calculateNormalsAdaptiveKNN(vector<Point> &normals,
 	   n *= -1.0;
 	 }
 	 n = n / n.NormFrobenius();
-#pragma omp critical	 
-	 normals.push_back(Point(n(1), n(2), n(3)));  
+#pragma omp critical
+	 normals.push_back(Point(n(1), n(2), n(3)));
     }
-  
+
   for (size_t i = 0; i < points.size(); ++i) {
     delete[] pa[i];
   }

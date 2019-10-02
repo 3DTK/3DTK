@@ -25,7 +25,7 @@ using std::ofstream;
 
 #if WIN32
 #define snprintf sprintf_s
-#endif 
+#endif
 
 #include <boost/program_options.hpp>
 namespace po = boost::program_options;
@@ -111,32 +111,32 @@ int main(int argc, char **argv)
     // read 3D scan
 
     cout << "Reading frame " << frameFileName << "..." << endl;
-    
+
     while(pose_in.good()) {
       for (unsigned int i = 0; i < 17; pose_in >> tMatrix[i++]);
     }
-    
+
     inMatrix[5] = tMatrix[0];
     inMatrix[9] = -tMatrix[1];
-    inMatrix[1] = -tMatrix[2]; 
-    inMatrix[13] = -tMatrix[3]; 
-    inMatrix[6] = -tMatrix[4]; 
+    inMatrix[1] = -tMatrix[2];
+    inMatrix[13] = -tMatrix[3];
+    inMatrix[6] = -tMatrix[4];
     inMatrix[10] = tMatrix[5];
-    inMatrix[2] = tMatrix[6]; 
+    inMatrix[2] = tMatrix[6];
     inMatrix[14] = tMatrix[7];
-    inMatrix[4] = -tMatrix[8]; 
-    inMatrix[8] = tMatrix[9]; 
-    inMatrix[0] = tMatrix[10]; 
-    inMatrix[12] = tMatrix[11]; 
-    inMatrix[7] = -tMatrix[12]; 
-    inMatrix[11] = tMatrix[13]; 
-    inMatrix[3] = tMatrix[14]; 
+    inMatrix[4] = -tMatrix[8];
+    inMatrix[8] = tMatrix[9];
+    inMatrix[0] = tMatrix[10];
+    inMatrix[12] = tMatrix[11];
+    inMatrix[7] = -tMatrix[12];
+    inMatrix[11] = tMatrix[13];
+    inMatrix[3] = tMatrix[14];
     inMatrix[15] = tMatrix[15];
 
     inMatrix[3] /= 100;
     inMatrix[7] /= 100;
     inMatrix[11] /= 100;
-    
+
     pose_in.close();
     pose_in.clear();
 
@@ -148,12 +148,12 @@ int main(int argc, char **argv)
       pose_out << inMatrix[i] << " ";
       if((i % 4) == 3) pose_out << endl;
     }
-    
+
 
     pose_out.close();
     pose_out.clear();
 
-    
+
     cout << " done." << endl;
   }
 

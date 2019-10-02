@@ -27,7 +27,7 @@
 
 #if WIN32
 #define snprintf sprintf_s
-#endif 
+#endif
 
 
 int parseArgs(int argc,char **argv, char dir[255], int& start, int& end){
@@ -116,8 +116,8 @@ int main(int argc, char **argv)
      frameCounter++;
      try {
        frame_in >> transMat;
-       frame_in >> tmp; 
-     
+       frame_in >> tmp;
+
      } catch (const std::exception &e) {
        break;
      }
@@ -151,7 +151,7 @@ int main(int argc, char **argv)
         outdat.str("");
       }
 
-    } 
+    }
     redptsout.write(outdat.str().c_str(), outdat.str().size());
     pointcnt = 0;
     outdat.clear();

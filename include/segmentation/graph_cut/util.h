@@ -1,6 +1,6 @@
  /*
  * Copyright (C) David Redondo
- * 
+ *
  * Released under the GPL version 3.
  *
  */

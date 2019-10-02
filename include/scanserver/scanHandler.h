@@ -1,6 +1,6 @@
 /**
  * @file
- * @brief 
+ * @brief
  *
  * @author Thomas Escher
  * @author Dorit Borrmann
@@ -24,7 +24,7 @@ class ScanHandler : public TemporaryHandler
 {
 public:
   ScanHandler(CacheObject* obj, CacheManager* cm, SharedScan* scan, IODataType data);
-  
+
   /**
    * Reads specific scan data from a file, located by SharedScan's identifiers via ScanIO.
    * If binary caching is enabled it will try to read from this resource first to speed up the process.
@@ -32,17 +32,17 @@ public:
    * @throw if both the binary cache and the scan resource were unavailable
    */
   virtual bool load();
-  
+
   /**
    * Does nothing unless binary caching is enabled, which will save the contents via CacheIO.
    */
   virtual void save(unsigned char* data, unsigned int size);
-  
+
   //! Enable binary caching of scan data
   static void setBinaryCaching();
 private:
   IODataType m_data;
-  
+
   static bool binary_caching;
 
   //! Cached vectors for prefetching

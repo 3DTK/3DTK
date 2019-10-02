@@ -11,7 +11,7 @@
 #include <stdio.h>
 #include <assert.h>
 #include <string.h>
-#ifdef HAVE_GETTIMEOFDAY 
+#ifdef HAVE_GETTIMEOFDAY
 #include <sys/time.h>
 #endif
 #ifdef HAVE_UNISTD_H
@@ -24,7 +24,7 @@ extern "C" {
 #include "pgm2asc.h"
 
 #include "pcx.h"
-#include "ocr0.h" 
+#include "ocr0.h"
 #include "progress.h"
 #include "version.h"
 #include "config.h"
@@ -41,12 +41,12 @@ char filter[] = "0-9";
     job_init(&job);
 
     job.cfg.out_format=XML;
-    job.cfg.cfilter = filter; 
+    job.cfg.cfilter = filter;
     job.src.fname = "patch00000.pgm";   // TODO
 
     multipnm=readpgm(job.src.fname, &job.src.p, job.cfg.verbose);
- 
-    if (multipnm<0) break; 
+
+    if (multipnm<0) break;
 
     pgm2asc(&job);
 
@@ -87,7 +87,7 @@ bool gocr_recognizeNumber(string &filename, int &number, double &probability) {
     job_init(&job);
 
     job.cfg.out_format = XML;
-    job.cfg.cfilter = filter; 
+    job.cfg.cfilter = filter;
 
     //job.src.fname = filename.c_str();
     char fname[1024];
@@ -95,8 +95,8 @@ bool gocr_recognizeNumber(string &filename, int &number, double &probability) {
     job.src.fname = fname;
 
     multipnm = readpgm(job.src.fname, &job.src.p, job.cfg.verbose);
- 
-    if (multipnm<0) break; 
+
+    if (multipnm<0) break;
 
     pgm2asc(&job);  // recognize numbers
 
@@ -120,10 +120,10 @@ bool gocr_recognizeNumber(string &filename, int &number, double &probability) {
         sscanf(line, "%d %d %c %d %d", &width, &height, &num, &nr_alt_c, &iprob);
       }
 
-      
+
       // check if this if a number, and if it is wether it is large enough
 //      if ( (fabs(width) < MIN_NR_WIDTH || fabs(height) < MIN_NR_HEIGHT || num < '0' || num > '9')
-      if (  num < '0' || num > '9') {  
+      if (  num < '0' || num > '9') {
         line = getTextLine(linecounter++);
         continue;
       }
@@ -132,7 +132,7 @@ bool gocr_recognizeNumber(string &filename, int &number, double &probability) {
         line = getTextLine(linecounter++);
         continue;
       }
-      if (num != '1' && (fabs(width) < MIN_NR_WIDTH || fabs(height) < MIN_NR_HEIGHT ||               // other numbers should be bigger 
+      if (num != '1' && (fabs(width) < MIN_NR_WIDTH || fabs(height) < MIN_NR_HEIGHT ||               // other numbers should be bigger
                           fabs(width) > MAX_NR_WIDTH || fabs(height) > MAX_NR_HEIGHT) ) {
         line = getTextLine(linecounter++);
         continue;
@@ -154,6 +154,6 @@ bool gocr_recognizeNumber(string &filename, int &number, double &probability) {
 
   if (probability > 0.0) {
     return true;
-  } 
+  }
   return false;
 }

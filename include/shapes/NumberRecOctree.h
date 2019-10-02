@@ -10,20 +10,20 @@
 template <class T=double>
 class NumberRecOctTree : public RansacOctTree<T> {
 
-  public: 
+  public:
 //  NumberRecOctTree(vector<T *> &pts, T voxelSize, PointType<T> _pointtype = PointType<T>() ) : RansacOctTree<T>(pts, voxelSize, _pointtype) {}
   NumberRecOctTree(vector<const T *> &pts, T voxelSize, PointType _pointtype = PointType() ) : RansacOctTree<T>(pts, voxelSize, _pointtype) {}
 
-  long PointsOnNumber(double plane[4], double maxdist, double _center[3], double radius) { 
+  long PointsOnNumber(double plane[4], double maxdist, double _center[3], double radius) {
     setNumber(plane, _center, radius, maxdist);
     return PointsOnNumber(*BOctTree<T>::root, BOctTree<T>::center, BOctTree<T>::size);
   }
 
-  void PointsOnNumber(double plane[4], double maxdist, double _center[3], double radius, vector<T *> &n) { 
+  void PointsOnNumber(double plane[4], double maxdist, double _center[3], double radius, vector<T *> &n) {
     setNumber(plane, _center, radius, maxdist);
     PointsOnNumber(*BOctTree<T>::root, BOctTree<T>::center, BOctTree<T>::size, n);
   }
- 
+
 
   protected:
   long PointsOnNumber(bitoct &node, T *center, T size) {
@@ -47,7 +47,7 @@ class NumberRecOctTree : public RansacOctTree<T> {
             unsigned int length = points[0].length;
             T *point = &(points[1].v);  // first point
             for(unsigned int iterator = 0; iterator < length; iterator++ ) {
-              if( closeToPlane(point) ) 
+              if( closeToPlane(point) )
                 result++;
               point += BOctTree<T>::POINTDIM;
             }
@@ -81,7 +81,7 @@ class NumberRecOctTree : public RansacOctTree<T> {
             unsigned int length = points[0].length;
             T *point = &(points[1].v);  // first point
             for(unsigned int iterator = 0; iterator < length; iterator++ ) {
-              if( closeToPlane(point) ) 
+              if( closeToPlane(point) )
                 n.push_back(point);
               point+=BOctTree<T>::POINTDIM;
             }

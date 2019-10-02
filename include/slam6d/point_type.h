@@ -10,8 +10,8 @@
 /**
  *  @file
  *  @brief Representation of a 3D point type
- *  @author Jan Elsberg. Jacobs University Bremen gGmbH, Germany. 
- *  @author Andreas Nuechter. Jacobs University Bremen gGmbH, Germany. 
+ *  @author Jan Elsberg. Jacobs University Bremen gGmbH, Germany.
+ *  @author Andreas Nuechter. Jacobs University Bremen gGmbH, Germany.
  */
 
 #ifndef __POINT_TYPE_H__
@@ -61,36 +61,36 @@ public:
   unsigned int getReflectance();
   unsigned int getTemperature();
   unsigned int getAmplitude();
-  unsigned int getDeviation(); 
+  unsigned int getDeviation();
   unsigned int getTime();
   unsigned int getIndex();
   unsigned int getType();
   unsigned int getColor();
   unsigned int getType(unsigned int type);
-   
+
   unsigned int getPointDim();
 
   static PointType deserialize(std::ifstream &f);
-  
+
   void serialize(std::ofstream &f);
   unsigned int toFlags() const;
-  
+
   template <class T>
   T *createPoint(const Point &P, unsigned int index = 0);
 
   template <class T>
   Point createPoint(T *p);
-  
+
   //! Aquire DataPointer objects from \a scan, determined by its types
   void useScan(Scan* scan);
-  
+
   //! Release the DataPointer objects
   void clearScan();
-  
+
   //! Create a point with attributes via the DataPointers from the scan
   template<typename T>
   T* createPoint(unsigned int i, unsigned int index = 0);
-  
+
   //! Create an array with coordinate+attribute array per point with
   //  transfer of ownership
   template<typename T>
@@ -98,15 +98,15 @@ public:
 
 private:
   /**
-   * collection of flags 
+   * collection of flags
    */
   unsigned int types;
   /**
    * Derived from types: 3 spatial dimensions + 1 for each flag set
    **/
   unsigned int pointdim;
-  
-  /** 
+
+  /**
    * Stores the size of each point in bytes
    **/
   unsigned int pointbytes;

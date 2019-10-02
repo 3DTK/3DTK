@@ -26,7 +26,7 @@ void FrameIO::loadFile(const char* dir, const char* identifier, FrameVector& fra
   path frames_path(dir);
   frames_path /= (std::string(FRAMES_PATH_PREFIX) + identifier + FRAMES_PATH_SUFFIX);
   if(!exists(frames_path)) return;
-  
+
   // read the file
   ifstream frames_file(frames_path);
   std::string line;
@@ -36,7 +36,7 @@ void FrameIO::loadFile(const char* dir, const char* identifier, FrameVector& fra
   std::vector<unsigned int> types;
   while(std::getline(frames_file, line) ) {
     unsigned int i;
-    //ignore comment lines starting with # 
+    //ignore comment lines starting with #
     if (line[0] == '#') continue;
     std::istringstream line_stream(line);
     for(i = 0; i < 16 && line_stream.good(); ++i) {
@@ -49,7 +49,7 @@ void FrameIO::loadFile(const char* dir, const char* identifier, FrameVector& fra
     types.push_back(uivalue);
   }
   frames_file.close();
-  
+
   // allocate shared memory for the frames and move the values in there
   unsigned int s = types.size();
   frames.resize(s);
@@ -62,7 +62,7 @@ void FrameIO::saveFile(const char* dir, const char* identifier, const FrameVecto
   // assemble path
   path frames_path(dir);
   frames_path /= (std::string(FRAMES_PATH_PREFIX) + identifier + FRAMES_PATH_SUFFIX);
-  
+
   // write into the file
   std::ios_base::openmode open_mode = append ? std::ios_base::app : std::ios_base::out;
   ofstream frames_file(frames_path, open_mode);

@@ -1,4 +1,4 @@
-/*------------------- 
+/*-------------------
 ** Poisson object (prototype)
 ** Author: Xia Sun
 --------------------*/
@@ -16,7 +16,7 @@ struct PoissonParam {
 class Poisson {
 public:
   // public attributes
-  
+
   // public methods
   Poisson();
   ~Poisson();

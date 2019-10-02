@@ -1,7 +1,7 @@
 /*
  * scan_io_pts implementation
  *
- * Copyright (C) Andreas Nuechter, Dorit Borrmann 
+ * Copyright (C) Andreas Nuechter, Dorit Borrmann
  *
  * Released under the GPL version 3.
  *

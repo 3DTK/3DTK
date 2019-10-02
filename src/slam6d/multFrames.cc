@@ -44,8 +44,8 @@ using std::ifstream;
 #else
 #ifndef MAX_PATH
 #define MAX_PATH 255
-#endif 
-#endif 
+#endif
+#endif
 
 #include <boost/program_options.hpp>
 namespace po = boost::program_options;
@@ -82,7 +82,7 @@ int parse_options(int argc, char **argv, string &dir, string &inputMatrix,
   all.add(generic).add(input).add(hidden);
 
   // options visible with --help
-  po::options_description cmdline_options; 
+  po::options_description cmdline_options;
   cmdline_options.add(generic).add(input);
 
   // positional argument
@@ -121,12 +121,12 @@ void printFrames(double * tMatrix) {
 bool readFramesFromFile(const char * filename, double * tMatrix) {
   ifstream infile;
   infile.open(filename);
-  if(!infile.good()) { 
-    cerr << "Could not read input " << filename << endl; 
+  if(!infile.good()) {
+    cerr << "Could not read input " << filename << endl;
     return false;
   }
   float dummy = -1;
-  
+
   while(infile.peek() != EOF) {
     for (unsigned int i = 0; i < 16; infile >> tMatrix[i++]);
     infile >> dummy;
@@ -141,16 +141,16 @@ bool readFramesFromFile(const char * filename, double * tMatrix) {
 bool readFrames(const char * dir, int index, double * tMatrix) {
   ifstream infile;
   char filename[255];
-  
+
   snprintf(filename,255,"%sscan%.3d.frames",dir,index);
   cout << "Reading... " << filename << endl;
   infile.open(filename);
   if(!infile.good()) {
-    cerr << "Could not read input " << filename << endl; 
+    cerr << "Could not read input " << filename << endl;
     return false;
   }
   float dummy = -1;
-  
+
   while(infile.peek() != EOF) {
     for (unsigned int i = 0; i < 16; infile >> tMatrix[i++]);
     infile >> dummy;
@@ -159,7 +159,7 @@ bool readFrames(const char * dir, int index, double * tMatrix) {
 
   infile.close();
   infile.clear();
-  
+
   return true;
 }
 
@@ -167,16 +167,16 @@ bool readPose(const char * dir, int index, double * tMatrix) {
   ifstream infile;
   char filename[255];
   snprintf(filename,255,"%sscan%.3d.pose",dir,index);
-   
+
   cout << "Reading... " << filename << endl;
   infile.open(filename);
-  
-  if(!infile.good()) { 
-    cerr << "Could not read input " << filename << endl; 
+
+  if(!infile.good()) {
+    cerr << "Could not read input " << filename << endl;
     return false;
   }
-  
- 
+
+
   double rPos[3];
   double rPosTheta[3];
 
@@ -251,7 +251,7 @@ int main(int argc, char **argv)
     M4inv(in,inverse);
     no_fail = readFramesFromFile(inmatrix.c_str(),in);
     if(!no_fail) exit(1);
-    
+
     MMult(in,inverse,mult);
     printFrames(mult);
 

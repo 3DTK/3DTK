@@ -1,4 +1,4 @@
-/** @file 
+/** @file
  *  @brief Definition of the ICP error function minimization
  *  @author Peter Schneider. Inst. of CS, Univ. of Koblenz and Landau, Germany.
  *  @author Andreas Nuechter. Jacobs University Bremen gGmbH, Germany
@@ -18,26 +18,26 @@ using namespace NEWMAT;
 class icp6D_HELIX : public icp6Dminimizer
 {
 public:
-  /** 
-   * Constructor 
+  /**
+   * Constructor
    */
   icp6D_HELIX(bool quiet = false) : icp6Dminimizer(quiet) {};
-  /** 
-   * Destructor 
+  /**
+   * Destructor
    */
-  virtual ~icp6D_HELIX() {};                                  
+  virtual ~icp6D_HELIX() {};
 
   double Align(const vector<PtPair>& Pairs,
 			double *alignxf,
 			const double centroid_m[3],
-			const double centroid_d[3]);  
+			const double centroid_d[3]);
 
   static void computeRt(const ColumnVector* ccs,
 				    const int vectorOffset,
 				    double *alignxf);
 
-  inline int getAlgorithmID() { return 5; }; 
-  
+  inline int getAlgorithmID() { return 5; };
+
 };
 
 #endif

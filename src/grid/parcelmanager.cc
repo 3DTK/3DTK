@@ -20,8 +20,8 @@
  * If the file was read successfully, it contains the parcels created
  * during the last run of the programm. (See the resumeflag in the
  * documentation for more infos)
- * 
- * 
+ *
+ *
  * @param width The width of each parcel
  * @param height The height of each parcel
  * @param path The path of the files
@@ -38,12 +38,12 @@ parcelmanager::parcelmanager(long width, long height,
     this->viewpointZ = 0;
     this->path = path;
     this->resolution = resolution;
-    
+
     this->minX = 0;
     this->maxX = 0;
     this->minZ = 0;
     this->maxZ = 0;
-    
+
     parcelinfo::setParcelsize(width, height);
 
     // loadParcelinfo if programm should resume
@@ -53,14 +53,14 @@ parcelmanager::parcelmanager(long width, long height,
 
 /**
  * Dtor.
- * Calls saveParcelinfo for saving infos about 
+ * Calls saveParcelinfo for saving infos about
  * already created parcel.
  * It also clears the internal structur (calls clear())
  */
 parcelmanager::~parcelmanager()
 {
     saveParcelinfo(this->path + PARCELINFOFILE);
-  
+
     clear();
 }
 
@@ -77,30 +77,30 @@ void parcelmanager::freeMemory(bool all)
 {
     parcelmap::iterator cur = this->parcels.begin();
     parcelmap::iterator end = this->parcels.end();
-    
+
     // iterate through each parcel
     while(cur != end)
     {
 	// if parcel is loaded and wasnt used (or all free)
 	if(cur->second != NULL &&
 	   (!cur->first->wasUsed() || all))
-	{	    
+	{
 	    // saving the parcel using the parcel format
             // (Must use parcelFormat, otherwise parcel cant be loaded again!)
 	    std::string filename = cur->first->getFilename();
 	    parcelWriter writer(filename);
 
 	    writer.write(*cur->second);
-	    
+
 	    delete cur->second;
 	    cur->second = NULL;
-	    
+
 	}
-	
+
 	// reset used-flag of parcelinfo
 	parcelinfo *p = cur->first;
 	p->resetUsed();
-	
+
 	++cur;
     }
 }
@@ -108,17 +108,17 @@ void parcelmanager::freeMemory(bool all)
 /**
  * The method frees all created parcelinfos and clears the map.
  * First it calls freeMemory(true) to save all parcels in memory
- */ 
+ */
 void parcelmanager::clear()
 {
   freeMemory(true);
-  
+
   parcelmap::iterator it = this->parcels.begin();
   parcelmap::iterator end = this->parcels.end();
 
   while(it != end)
   {
-      delete it->first;      
+      delete it->first;
       ++it;
   }
 
@@ -127,18 +127,18 @@ void parcelmanager::clear()
 
 /**
  * The methods loads the parcel specified by info
- * into memory. The method does check, if the 
+ * into memory. The method does check, if the
  * parcel is already loaded, so calling this method
  * on an already loaded parcel does nothing.
  *
- * @param *info A pointer to the parcelinfo 
+ * @param *info A pointer to the parcelinfo
  */
 void parcelmanager::loadParcel(parcelinfo* info)
 {
     if(this->parcels[info] == NULL)
     	this->parcels[info] = parcel::readParcel(info->getFilename());
 
-    updateOuterPoints(this->parcels[info]);    
+    updateOuterPoints(this->parcels[info]);
 }
 
 
@@ -155,7 +155,7 @@ void parcelmanager::createParcel(long x, long z)
 {
     // calculate offset
     long offsetX = (long) (x / this->parcelwidth) * this->parcelwidth;
-    if (x < 0) 
+    if (x < 0)
 	offsetX = offsetX - this->parcelwidth;
 
     long offsetZ = (long) (z/ this->parcelheight) * this->parcelheight;
@@ -165,16 +165,16 @@ void parcelmanager::createParcel(long x, long z)
 
     // create parcelinfo and parcel
     std::string filename = this->path + "parcel" + to_string(offsetX) + to_string(offsetZ) + ".pcl";
-    
+
     parcelinfo *p = new parcelinfo(offsetX, offsetZ, filename);
-    
+
     this->parcels[p] = new parcel(offsetX,
 				  offsetZ,
 				  this->parcelwidth,
-				  this->parcelheight);  
+				  this->parcelheight);
 
     // update the new borders
-    updateOuterPoints(this->parcels[p]);    
+    updateOuterPoints(this->parcels[p]);
 }
 
 /**
@@ -187,7 +187,7 @@ void parcelmanager::updateOuterPoints(const grid *g)
 	minX = g->getOffsetX();
     if(g->getOffsetZ() < minZ)
 	minZ = g->getOffsetZ();
-    
+
     if(g->getOffsetX() + g->getSizeX() > maxX)
 	maxX = g->getOffsetX() + g->getSizeX();
     if(g->getOffsetZ() + g->getSizeZ() > maxZ)
@@ -209,10 +209,10 @@ void parcelmanager::updateOuterPoints(const grid *g)
 void parcelmanager::addGrid(const grid* g, long vpX, long vpZ)
 {
   bool parcelFound;
- 
+
   this->viewpointX = vpX;
   this->viewpointZ = vpZ;
-  
+
   long iSize = g->getOffsetX() + g->getSizeX();
   long jSize = g->getOffsetZ() + g->getSizeZ();
 
@@ -223,7 +223,7 @@ void parcelmanager::addGrid(const grid* g, long vpX, long vpZ)
       {
 	  parcelmap::iterator it = this->parcels.begin();
 	  parcelmap::iterator end = this->parcels.end();
-      
+
 	  parcelFound = false;
 
 	  // for each point, iterate through the existing parcels
@@ -235,15 +235,15 @@ void parcelmanager::addGrid(const grid* g, long vpX, long vpZ)
 		  // load Parcel if not in memory
 		  if(it->second == NULL)
 		      loadParcel(it->first);
-		  
+
 		  // reset the counter
 		  it->first->setUsed();
 		  parcelFound = true;
-	      }	
+	      }
 
 	      ++it;
 	  }
-	  
+
 	  // if parcel was not found, create new
 	  if(parcelFound == false)
 	      createParcel(i, j);
@@ -251,15 +251,15 @@ void parcelmanager::addGrid(const grid* g, long vpX, long vpZ)
   }
 
   // remove all parcels not needed for the scan
-  freeMemory(false); 
+  freeMemory(false);
 
-  
+
   // Call addGrid for each parcel in memory
   // The parcel only integrates the points which are
-  // relevant to it 
+  // relevant to it
   parcelmap::iterator it = this->parcels.begin();
   parcelmap::iterator end = this->parcels.end();
-  
+
   while(it != end)
   {
       if(it->second != NULL)
@@ -274,13 +274,13 @@ void parcelmanager::addGrid(const grid* g, long vpX, long vpZ)
  * The method saves the internal parcelinfo map to file,
  * so it can be restored for later use (e.g. for additional scans
  * based on the same scene)
- * 
+ *
  * @param filename The file where the parcelinfos are stored to
  */
 void parcelmanager::saveParcelinfo(std::string filename)
 {
   std::ofstream outfile(filename.c_str());
-  
+
   // Check if stream is open and valid
   if(!outfile.good())
   {
@@ -289,16 +289,16 @@ void parcelmanager::saveParcelinfo(std::string filename)
       exit(1);
   }
 
- 
+
   // iterate all entries and write them
   parcelmap::iterator it = this->parcels.begin();
   parcelmap::iterator end = this->parcels.end();
-  
+
   while(it != end)
   {
-       outfile << it->first->getOffsetX() << " " 
-	       << it->first->getOffsetZ() << " " 
-	       << it->first->getFilename() << std::endl; 
+       outfile << it->first->getOffsetX() << " "
+	       << it->first->getOffsetZ() << " "
+	       << it->first->getFilename() << std::endl;
 
         ++it;
   }
@@ -308,7 +308,7 @@ void parcelmanager::saveParcelinfo(std::string filename)
 
 /**
  * The method restores the parcelinfos written by saveParcelinfo.
- * 
+ *
  * @param filename The file where the parcelinfos are stored
  */
 void parcelmanager::loadParcelinfo(std::string filename)
@@ -363,18 +363,18 @@ void parcelmanager::writeWorld(std::string file)
 		       this->minX, this->maxX, this->minZ, this->maxZ,
 		       this->resolution,
 		       this->viewpointX, this->viewpointZ);
-  
+
 
     parcelmap::iterator it = parcels.begin();
     parcelmap::iterator end = parcels.end();
-    
+
     while(it != end)
     {
 	if(it->second == NULL)
 	    loadParcel(it->first);
 
 	writer.write(*it->second);
-	
+
 	++it;
     }
 }
@@ -392,7 +392,7 @@ grid* parcelmanager::createWorldGrid()
 
     parcelmap::iterator it = parcels.begin();
     parcelmap::iterator end = parcels.end();
-    
+
     // Go through all parcels
     while(it != end)
     {
@@ -406,7 +406,7 @@ grid* parcelmanager::createWorldGrid()
 		g->addPoint(*(it->second->points[i][j]));
 	    }
 	}
-	
+
 	++it;
     }
     return g;

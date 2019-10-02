@@ -24,7 +24,7 @@
 /**
  * @brief IO of a 3D scan
  *
- * This class needs to be instantiated by a class loading 
+ * This class needs to be instantiated by a class loading
  * 3D scans from different file formats.
  */
 class ScanIO {

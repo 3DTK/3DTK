@@ -32,12 +32,12 @@ public:
 	 */
 	void pointcloud2scan(const sensor_msgs::PointCloud2ConstPtr &cloud, std::vector<double*> &pts);
 
-	/** 
+	/**
 	 * create a matrix representation of a Transform for debug output
 	 */
 	std::string transformToString(const tf::Transform &t);
 
-	
+
 };
 
 #endif

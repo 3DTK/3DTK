@@ -4,7 +4,7 @@
 #include <cmath>
 /**
  *  @file
- *  @brief Implementation of a 3D point.      
+ *  @brief Implementation of a 3D point.
  *
  *  Representation of a 3D point.
  *  Only inline functions are used, therefore no .cc file.
@@ -165,7 +165,7 @@ inline Point Point::operator-(const Point &p) const
   return res;
 };
 
-inline Point& Point::operator-=(const Point &p) 
+inline Point& Point::operator-=(const Point &p)
 {
   x -= p.x;
   y -= p.y;

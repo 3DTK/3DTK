@@ -26,47 +26,47 @@
 ///////////////////////////////////////////////////////////////////////////////
 /// Class Selection
 ///////////////////////////////////////////////////////////////////////////////
-class Selection : public wxFrame 
+class Selection : public wxFrame
 {
 	private:
-	
+
 	protected:
 		wxCheckBox* m_checkBox1;
 		wxCheckBox* m_checkBox2;
 		wxCheckBox* m_checkBox3;
 		wxPanel* m_panel2;
 		wxStaticText* m_staticText2;
-		
+
 		wxSpinCtrl* pointsize_spinner;
 		wxPanel* m_panel21;
 		wxStaticText* m_staticText21;
-		
+
 		wxChoice* m_choice1;
 		wxPanel* m_panel3;
 		wxStaticText* m_staticText4;
-		
+
 //		wxSpinCtrl* fogdens_spinner;
 		wxSpinCtrlDbl* fogdens_spinner;
 		wxPanel* m_panel211;
 		wxStaticText* m_staticText211;
-		
+
 		wxChoice* m_choice11;
 		wxPanel* m_panel212;
 		wxStaticText* m_staticText212;
-		
+
 		wxChoice* m_choice12;
 		wxPanel* m_panel213;
 		wxStaticText* m_staticText213;
-		
+
 		wxChoice* m_choice13;
 		wxPanel* m_panel411;
 		wxStaticText* m_staticText411;
-		
+
 //		wxSpinCtrl* m_spinCtrl61;
 		wxSpinCtrlDbl* m_spinCtrl61;
 		wxPanel* m_panel41;
 		wxStaticText* m_staticText41;
-		
+
 		wxSpinCtrlDbl* m_spinCtrl6;
 		wxButton* m_button4;
 		wxStaticLine* m_staticline1;
@@ -92,7 +92,7 @@ class Selection : public wxFrame
 		wxButton* m_button61;
 		wxPanel* m_panel4131;
 		wxStaticText* m_staticText4131;
-		
+
 		wxSpinCtrl* m_spinCtrl621;
 		wxButton* m_button71;
 		wxStaticLine* m_staticline3;
@@ -105,35 +105,35 @@ class Selection : public wxFrame
 		wxCheckBox* m_checkBox6;
 		wxPanel* m_panel41311;
 		wxStaticText* m_staticText41311;
-		
+
 		wxSpinCtrl* m_spinCtrl6211;
 		wxPanel* m_panel413111;
 		wxStaticText* m_staticText413111;
-		
+
 		wxSpinCtrl* m_spinCtrl62111;
 		wxPanel* m_panel413112;
 		wxStaticText* m_staticText413112;
-		
+
 //		wxSpinCtrl* frame_spin;
 		wxPanel* m_panel4131111;
 		wxStaticText* m_staticText4131111;
-		
+
 		wxSpinCtrl* m_spinCtrl621111;
 		wxPanel* farplane_panel;
 		wxStaticText* farplane_text;
-		
+
 		wxSpinCtrl* farplane_spinner;
 		wxPanel* nearplane_panel;
 		wxStaticText* nearplane_text;
-		
+
 		wxSpinCtrl* nearplane_spinner;
 		wxPanel* lod_panel;
 		wxStaticText* lod_text;
-		
+
 		wxSpinCtrlDbl* lod_spinner;
 		wxButton* cycleLOD;
 		wxButton* m_button31;
-		
+
 		// Virtual event handlers, overide them in your derived class
 		virtual void OnClose( wxCloseEvent& event ) { exit(0); event.Skip(); }
 		virtual void OnDrawPoints( wxCommandEvent& event ) { event.Skip(); }
@@ -175,40 +175,40 @@ class Selection : public wxFrame
 		virtual void OnNearplaneSpinner( wxSpinEvent& event ) { event.Skip(); }
 		virtual void OnLODAdaption( wxSpinEvent& event ) { event.Skip(); }
 		virtual void OnCycleLOD( wxCommandEvent& event ) { event.Skip(); }
-		
-	
+
+
 	public:
 		wxBoxSizer* bSizer1;
-		
+
 		Selection( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Selection"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( -1,-1 ), long style = wxDEFAULT_FRAME_STYLE|wxTAB_TRAVERSAL, bool advanced_controls = false );
 		~Selection();
-	
+
 };
 
 ///////////////////////////////////////////////////////////////////////////////
 /// Class Controls
 ///////////////////////////////////////////////////////////////////////////////
-class Controls : public wxFrame 
+class Controls : public wxFrame
 {
 	private:
-	
+
 	protected:
 		wxStaticText* m_staticText21;
-		
+
 		wxSpinCtrlDbl* apex_spinner;
 		wxStaticText* m_staticText211;
 		wxSpinCtrlDbl* parallel_spinner;
 		wxButton* m_button15;
 		wxButton* m_button16;
 		wxStaticText* m_staticText212;
-		
+
 		wxSpinCtrl* camera_spinner;
 		wxButton* m_button19;
 		wxButton* m_button20;
 		wxCheckBox* m_checkBox7;
 		wxCheckBox* always_box;
 		wxCheckBox* alwaysred_box;
-		
+
 		// Virtual event handlers, overide them in your derived class
 		virtual void OnClose( wxCloseEvent& event ) { exit(0); event.Skip(); }
 		virtual void OnApexAngle( wxSpinEvent& event ) { event.Skip(); }
@@ -221,13 +221,13 @@ class Controls : public wxFrame
 		virtual void OnMouseNav( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnAlwaysAllPoints( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnAlwaysReducePoints( wxCommandEvent& event ) { event.Skip(); }
-		
-	
+
+
 	public:
-		
+
 		Controls( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Controls"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( -1,-1 ), long style = wxDEFAULT_FRAME_STYLE|wxTAB_TRAVERSAL );
 		~Controls();
-	
+
 };
 
 #endif

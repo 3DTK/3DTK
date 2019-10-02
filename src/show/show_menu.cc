@@ -136,7 +136,7 @@ void newMenu()
   glui2->set_main_gfx_window( window_id );
 
   settings_panel = glui2->add_panel("Settings: ");
-  
+
   cangle_spinner = glui2->add_spinner_to_panel(settings_panel, "Field of View :   ", GLUI_SPINNER_FLOAT, &cangle);
   cangle_spinner->set_float_limits(1.0, 180.0);
   cangle_spinner->set_speed(20.0);
@@ -159,29 +159,29 @@ void newMenu()
   glui2->add_column(true);
 
   mode_panel = glui2->add_panel("Mode: ");
-  
+
   /****** Top view *****/
   glui2->add_button_to_panel(mode_panel, "Top view", 0, callTopView )->set_alignment(GLUI_ALIGN_CENTER);
 
   /****** Rotate *****/
   glui2->add_button_to_panel(mode_panel, "Rotate view", 0, callRotateView)->set_alignment(GLUI_ALIGN_CENTER);
-  
+
   /****** Reset button *****/
   glui2->add_button_to_panel(mode_panel, "Reset position", 0, resetView )->set_alignment(GLUI_ALIGN_CENTER);
   glui2->add_column(true);
 
   /****** Add Camera View *****/
 
- 
+
   camera_panel = glui2->add_panel("Camera: ");
   cam_spinner = glui2->add_spinner_to_panel(camera_panel, "Choose Camera", GLUI_SPINNER_INT, &cam_choice);
   cam_spinner->set_int_limits(0, 0);
   cam_spinner->set_speed(1);
   cam_spinner->set_alignment(GLUI_ALIGN_LEFT);
-  
+
   glui2->add_button_to_panel(camera_panel, "Add Camera", 1, callAddCamera )->set_alignment(GLUI_ALIGN_CENTER);
   glui2->add_button_to_panel(camera_panel, "Delete Camera", 0, callDeleteCamera )->set_alignment(GLUI_ALIGN_CENTER);
-  
+
   /******* Other navigation controls**********/
   glui2->add_column(true);
 
@@ -206,13 +206,13 @@ void newMenu()
 
   glui2->add_column_to_panel(nav_panel, false);
   glui2->add_checkbox_to_panel(nav_panel, "MouseNav", &cameraNavMouseMode);
-  
+
   static int dummy4;
   always_box = glui2->add_checkbox_to_panel(nav_panel, "Always all Points", &dummy4, 0, &changePointMode);
   //glui2->set_glutMouseFunc(CallBackMouseFuncMoving);
   static int dummy5 = 1;
   never_box =  glui2->add_checkbox_to_panel(nav_panel, "Always reduce Points", &dummy5, 1, &changePointMode );
-  
+
   /*** Create the right subwindow ***/
   glui1 = GLUI_Master.create_glui("3D_Viewer - Selection");
   window_id_menu1 = glui1->get_glut_window_id();
@@ -233,7 +233,7 @@ void newMenu()
 
 
   /**** Fog Panel *****/
-  
+
   GLUI_Panel *fogt_panel = glui1->add_rollout("Fog :", false);
   fogt_panel->set_alignment(GLUI_ALIGN_LEFT);
   GLUI_RadioGroup *fogt = glui1->add_radiogroup_to_panel(fogt_panel, &show_fog);
@@ -245,9 +245,9 @@ void newMenu()
   glui1->add_radiobutton_to_group(fogt, "inverted Fog Exp2");
   glui1->add_radiobutton_to_group(fogt, "inverted Fog Linear");
 
-  
-  
-  
+
+
+
   fog_spinner = glui1->add_spinner("Fog Density:", GLUI_SPINNER_FLOAT, &fogDensity);
   fog_spinner->set_float_limits(0.0, 1.0);
   fog_spinner->set_speed(0.5);
@@ -268,10 +268,10 @@ void newMenu()
   GLUI_RadioButton *rbampl = glui1->add_radiobutton_to_group(color_rog, "amplitude");
   GLUI_RadioButton *rbdevi = glui1->add_radiobutton_to_group(color_rog, "deviation");
   GLUI_RadioButton *rbtype = glui1->add_radiobutton_to_group(color_rog, "type");
-  //if (!(types & PointType::USE_REFLECTANCE)) rbrefl->disable(); 
+  //if (!(types & PointType::USE_REFLECTANCE)) rbrefl->disable();
   //if (!(types & PointType::USE_AMPLITUDE)) rbampl->disable();
-  //if (!(types & PointType::USE_DEVIATION)) rbdevi->disable(); 
-  //if (!(types & PointType::USE_TYPE)) rbtype->disable(); 
+  //if (!(types & PointType::USE_DEVIATION)) rbdevi->disable();
+  //if (!(types & PointType::USE_TYPE)) rbtype->disable();
   if (!(pointtype.hasReflectance())) rbrefl->disable();
   if (!(pointtype.hasTemperature())) rbtemp->disable();
   if (!(pointtype.hasAmplitude())) rbampl->disable();
@@ -306,7 +306,7 @@ void newMenu()
   glui1->add_button_to_panel(color_panel, "Reset Min/Max", 0, &resetMinMax)->set_alignment(GLUI_ALIGN_CENTER);
 
   glui1->add_separator();
- 
+
   /****** Invert button *****/
   glui1->add_button("Invert", 0, invertView)->set_alignment(GLUI_ALIGN_CENTER);
   /****** Animate button *****/
@@ -341,7 +341,7 @@ void newMenu()
   glui1->add_button_to_panel(path_panel, "Animate Path and Matching", 0, pathMatchingAnimate)->set_alignment(GLUI_ALIGN_CENTER);
 
   /**** Position panel *******/
-  
+
   pose_panel = glui1->add_rollout("Position :", false);
   pose_panel->set_alignment(GLUI_ALIGN_LEFT);
   pose_filename_edit = glui1->add_edittext_to_panel(pose_panel, "File: ", GLUI_EDITTEXT_TEXT, pose_file_name);
@@ -380,8 +380,8 @@ GLUI_SPINNER_INT, &factor);
   brushsize_spinner->set_int_limits(0, 100);
   brushsize_spinner->set_speed(1);
   brushsize_spinner->set_alignment(GLUI_ALIGN_RIGHT);
-  
- 
+
+
   glui1->add_separator();
   /**** Advanced panel ******/
   if (advanced_controls) {
@@ -406,7 +406,7 @@ GLUI_SPINNER_INT, &factor);
     farplane_spinner->set_float_limits(1, 1000000);
     farplane_spinner->set_speed(1);
     farplane_spinner->set_alignment(GLUI_ALIGN_RIGHT);
-    
+
     nearplane_spinner = glui1->add_spinner_to_panel(advanced_panel, "nearplane :   ",
         GLUI_SPINNER_FLOAT, &neardistance);
     nearplane_spinner->set_int_limits(0.01, 1000000);
@@ -474,24 +474,24 @@ GLUI_SPINNER_INT, &factor);
 void stepScansUp(int dummy) {
   startRangeScanIdx++;
   endRangeScanIdx++;
-  haveToUpdate=1; 
+  haveToUpdate=1;
 }
 
 void stepScansDown(int dummy) {
   startRangeScanIdx--;
   endRangeScanIdx--;
-  haveToUpdate=1; 
+  haveToUpdate=1;
 }
 
 /**
  * This function is called when a user starts to animate the generated path
  */
 void pathAnimate(int dummy) {
-  
+
   //signal that the screen needs to be repainted for animation
   haveToUpdate = 6;
   path_iterator = 0;
- 
+
 }
 
 void pathMatchingAnimate(int dummy) {

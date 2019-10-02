@@ -10,15 +10,15 @@ namespace po = boost::program_options;
 
 // Parse commandline options
 void parse_options(
-  int argc, char **argv, int &start, int &end, 
-  bool &scanserver, int &max_dist, int &min_dist, 
-  string &dir, string &odir, IOType &iotype, 
-  bool &in_color, bool &reflectance, double &min_refl, double &max_refl, 
-  bool &no_normal, bool &join, 
+  int argc, char **argv, int &start, int &end,
+  bool &scanserver, int &max_dist, int &min_dist,
+  string &dir, string &odir, IOType &iotype,
+  bool &in_color, bool &reflectance, double &min_refl, double &max_refl,
+  bool &no_normal, bool &join,
   double &red, int &rand, bool &use_pose,
-  int &octree, bool &rangeFilterActive, bool &customFilterActive, 
+  int &octree, bool &rangeFilterActive, bool &customFilterActive,
   string &customFilter, double &scaleFac, bool &autoRed,
-  int &k1, int &k2, normal_method &ntype, int &width, int &height, 
+  int &k1, int &k2, normal_method &ntype, int &width, int &height,
   bool &outward, int &depth, float &samplesPerNode, float &trimVal
 )
 {
@@ -85,7 +85,7 @@ void parse_options(
       ("trustpose,t", po::bool_switch(&use_pose)->default_value(false),
       "Trust the pose file, do not extrapolate the last transformation."
       "(just for testing purposes, or gps input.)")
-      // Normal parameters 
+      // Normal parameters
       ("normal,g",
        po::value<normal_method>(&ntype)->default_value(AKNN),
        "normal calculation method "
@@ -159,18 +159,18 @@ void validate(boost::any& v, const std::vector<std::string>& values,
   if (values.size() == 0)
     throw std::runtime_error("Invalid model specification");
   string arg = values.at(0);
-  if (strcasecmp(arg.c_str(), "KNN") == 0) 
+  if (strcasecmp(arg.c_str(), "KNN") == 0)
     v = KNN;
-  else if (strcasecmp(arg.c_str(), "ADAPTIVE_KNN") == 0) 
+  else if (strcasecmp(arg.c_str(), "ADAPTIVE_KNN") == 0)
     v = ADAPTIVE_KNN;
-  else if (strcasecmp(arg.c_str(), "AKNN") == 0) 
+  else if (strcasecmp(arg.c_str(), "AKNN") == 0)
     v = AKNN;
-  else if (strcasecmp(arg.c_str(), "ADAPTIVE_AKNN") == 0) 
+  else if (strcasecmp(arg.c_str(), "ADAPTIVE_AKNN") == 0)
     v = ADAPTIVE_AKNN;
 #ifdef WITH_OPENCV
-  else if (strcasecmp(arg.c_str(), "PANORAMA") == 0) 
+  else if (strcasecmp(arg.c_str(), "PANORAMA") == 0)
     v = PANORAMA;
-  else if (strcasecmp(arg.c_str(), "PANORAMA_FAST") == 0) 
+  else if (strcasecmp(arg.c_str(), "PANORAMA_FAST") == 0)
     v = PANORAMA_FAST;
 #endif
   else throw std::runtime_error(std::string("normal calculation method ")

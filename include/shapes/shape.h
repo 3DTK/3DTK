@@ -27,7 +27,7 @@ class CollisionShape {
    *         if unsure err on the side of caution, i.e. return true
    */
   virtual bool isInCube(T cx, T cy, T cz, T size) = 0;
-  
+
   virtual void refine(vector<T *> *points) = 0;
 
   virtual bool containsPoint(T* p) = 0;
@@ -116,7 +116,7 @@ class CollisionPlane : public CollisionShape<T> {
   }
 
   virtual void refine(vector<T *> *points) {
-    cout << nx << " " << ny << " " << nz << " " << d << endl; 
+    cout << nx << " " << ny << " " << nz << " " << d << endl;
     T plane[4] = {0,0,0,0};
     T centroid[3];
     fitPlane((*points), plane, centroid);
@@ -124,9 +124,9 @@ class CollisionPlane : public CollisionShape<T> {
     ny = plane[1];
     nz = plane[2];
     d = plane[3];
-    cout << nx << " " << ny << " " << nz << " " << d << endl; 
+    cout << nx << " " << ny << " " << nz << " " << d << endl;
   }
-  
+
   virtual bool hypothesize(vector<T *> &points) {
     if (points.size() < getNrPoints()) return false;
     T a[3], b[3], f[3], plane[4];
@@ -160,12 +160,12 @@ class CollisionPlane : public CollisionShape<T> {
   virtual unsigned char getNrPoints() {
     return 3;
   }
-  
+
   virtual CollisionShape<T>* copy() {
-    return new CollisionPlane<T>(maxDist, nx, ny, nz, d); 
+    return new CollisionPlane<T>(maxDist, nx, ny, nz, d);
   }
-  
-  
+
+
   virtual CollisionPlane<T>& operator=(const CollisionShape<T> &_other) {
     CollisionPlane<T> &other = (CollisionPlane<T> &)_other;
     if (this != &other) {
@@ -190,7 +190,7 @@ class CollisionPlane : public CollisionShape<T> {
 
   protected:
     T maxDist;
-    T nx, ny, nz, d;  // plane equation TODO make nicer 
+    T nx, ny, nz, d;  // plane equation TODO make nicer
 
 };
 
@@ -204,7 +204,7 @@ class LightBulbPlane : public CollisionPlane<T> {
     c[1] = 0;
     c[2] = 0;
   }
-  
+
   LightBulbPlane (T _maxDist, T _maxSize, T x, T y, T z, T _d, T* center) : CollisionPlane<T>(_maxDist) {
     maxSize = _maxSize;
     CollisionPlane<T>::nx = x;
@@ -216,32 +216,32 @@ class LightBulbPlane : public CollisionPlane<T> {
     }
 
   }
-  
+
   void refine(vector<T *> *points) {
-    cout << "LightBulbPlane" << endl; 
-    cout << this->nx << " " << this->ny << " " << this->nz << " " << this->d << endl; 
+    cout << "LightBulbPlane" << endl;
+    cout << this->nx << " " << this->ny << " " << this->nz << " " << this->d << endl;
     T plane[4];
     fitPlane((*points), plane, c);
     this->nx = plane[0];
     this->ny = plane[1];
     this->nz = plane[2];
     this->d = plane[3];
-    cout << this->nx << " " << this->ny << " " << this->nz << " " << this->d << endl; 
+    cout << this->nx << " " << this->ny << " " << this->nz << " " << this->d << endl;
   }
- 
+
   bool isInCube(T cx, T cy, T cz, T size) {
     double radius = sqrt(3*size*size);
     T c_dist = (cx - c[0])*(cx - c[0]) + (cy - c[1])*(cy - c[1]) + (cz - c[2])*(cz - c[2]);
-    return c_dist <= ((radius + maxSize)*(radius + maxSize)); 
+    return c_dist <= ((radius + maxSize)*(radius + maxSize));
   }
 
   virtual bool containsPoint(T* p) {
     if(fabs(p[0]*CollisionPlane<T>::nx + p[1]*CollisionPlane<T>::ny + p[2]*CollisionPlane<T>::nz + CollisionPlane<T>::d) < CollisionPlane<T>::maxDist) {
-      return (Dist2(p, c) < (maxSize*maxSize));  
+      return (Dist2(p, c) < (maxSize*maxSize));
     }
     return false;
   }
-  
+
   virtual bool hypothesize(vector<T *> &points) {
     if(!CollisionPlane<T>::hypothesize(points)) return false;
     double maxSize2 = maxSize*maxSize;
@@ -252,16 +252,16 @@ class LightBulbPlane : public CollisionPlane<T> {
     }
     for (int j = 0; j < 3;j++) {                     // compute plane
       c[j] = points[0][j] + points[1][j] + points[2][j];
-      
+
       c[j] /= 3.0;
     }
     return true;
   }
-  
+
   virtual CollisionShape<T> * copy() {
     return new LightBulbPlane<T>(CollisionPlane<T>::maxDist, maxSize, CollisionPlane<T>::nx, CollisionPlane<T>::ny, CollisionPlane<T>::nz, CollisionPlane<T>::d, c);
   }
-  
+
   virtual LightBulbPlane<T>& operator=(const CollisionShape<T> &_other) {
     LightBulbPlane<T> &other = (LightBulbPlane<T> &)_other;
     if (this != &other) {
@@ -294,22 +294,22 @@ class LightBulbPlane : public CollisionPlane<T> {
       }
     }
     double t[3];
-    double alignxf[16]; 
-    double aa[4]; 
-    aa[0] = -1.0 * acos(this.ny); 
-    aa[1] = this.nz / sqrt( this.nz*this.nz + this.nx*this.nx ); 
-    aa[2] = 0; 
+    double alignxf[16];
+    double aa[4];
+    aa[0] = -1.0 * acos(this.ny);
+    aa[1] = this.nz / sqrt( this.nz*this.nz + this.nx*this.nx );
+    aa[2] = 0;
     aa[3] = -this.nx / sqrt( this.nx*this.nz + this.nx*this.nx );
 
     AAToMatrix(aa, t, alignxf);
 
     // compute 2d projection of the points, and scale reflectivity
     for (unsigned int i = 0; i < points.size(); i++) {
-      double *p = points[i];                                                                                  
-      
+      double *p = points[i];
+
       npoints[i] = new double[4];
-      wykobi::point2d<double> point; 
-      
+      wykobi::point2d<double> point;
+
       double x, y;
 
       x = -(p[0] * alignxf[0] + p[1] * alignxf[4] + p[2] * alignxf[8]);
@@ -318,17 +318,17 @@ class LightBulbPlane : public CollisionPlane<T> {
       if (x > maxx) maxx = x;
       if (x < minx) minx = y;
       if (y > maxz) maxz = y;
-      
+
       point = wykobi::make_point(x, y);
       point_list.push_back(point);
     }
-   
+
     vector< wykobi::point2d<double> > point_list;
-    
+
     wykobi::polygon<double,2> convex_hull;
     wykobi::algorithm::convex_hull_jarvis_march< wykobi::point2d<double> >(point_list.begin(),point_list.end(),std::back_inserter(convex_hull));
 
-    
+
 
     return true;
   }

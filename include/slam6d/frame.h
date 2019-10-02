@@ -8,7 +8,7 @@ class Frame {
 public:
   double transformation[16];
   unsigned int type;
-  
+
   Frame() {}
   Frame(double* transformation, unsigned int type) { set(transformation, type); }
   void set(double* transformation, unsigned int type) {

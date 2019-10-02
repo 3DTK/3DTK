@@ -8,7 +8,7 @@
 #include <string>
 
 /**
- * The class manages a list of viewpoints from which the 
+ * The class manages a list of viewpoints from which the
  * roboter has taken the scans.
  * It provides methods for adding a new viewpoint, saving and loading the
  * list.
@@ -21,7 +21,7 @@ class viewpointinfo
  private:
     /** Typedef for a viewpoint */
     typedef std::pair<long, long> viewpoint;
-    
+
     /** Internal vector for storing the viewpoints */
     std::vector<viewpoint> viewpoints;
 
@@ -34,7 +34,7 @@ class viewpointinfo
 
     /** @brief Adds the viewpoint information of a scanGrid */
     void addGrid(const scanGrid *grid);
-    
+
     /** @brief Writes the internal list to file */
     void write(std::string filename);
 };

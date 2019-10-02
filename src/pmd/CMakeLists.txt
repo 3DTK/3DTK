@@ -38,7 +38,7 @@ if (WITH_GLFW AND WITH_OPENCV AND WITH_XMLRPC AND WITH_LIBCONFIG AND WITH_FTGL)
 
   # freetype is already required by opencv, so we don't specifically check for it anymore
   find_path(freetype_INCLUDE_DIRS
-    NAMES freetype/config/ftheader.h 
+    NAMES freetype/config/ftheader.h
     PATHS /usr/local/include
     /usr/include/freetype2
     NO_DEFAULT_PATH)
@@ -59,24 +59,24 @@ if (WITH_GLFW AND WITH_OPENCV AND WITH_XMLRPC AND WITH_LIBCONFIG AND WITH_FTGL)
   set(PMD_LIBS pmdaccess2 config GL GLU ftgl xmlrpc_util glfw xmlrpc_client xmlrpc xmlrpc++ xmlrpc_client++ xmlrpc_xmltok xmlrpc_xmlparse ${OpenCV_LIBS} )
 
 
-  add_executable(grabVideoAnd3D  ${OFFLINE_DIR}grabVideoAnd3D.cc cvpmd.cc pmdWrap.cc ) 
+  add_executable(grabVideoAnd3D  ${OFFLINE_DIR}grabVideoAnd3D.cc cvpmd.cc pmdWrap.cc )
   target_link_libraries(grabVideoAnd3D scan dl newmat ${PMD_LIBS})
 
-  add_executable(convertToSLAM6D  ${OFFLINE_DIR}convertToSLAM6D.cc cvpmd.cc pmdWrap.cc ) 
+  add_executable(convertToSLAM6D  ${OFFLINE_DIR}convertToSLAM6D.cc cvpmd.cc pmdWrap.cc )
   target_link_libraries(convertToSLAM6D scan dl newmat ${PMD_LIBS})
 
-  add_executable(calibratePMD  ${CALIBRATE_DIR}calibrate.cc ) 
+  add_executable(calibratePMD  ${CALIBRATE_DIR}calibrate.cc )
   target_link_libraries(calibratePMD ${PMD_LIBS})
 
-  add_executable(grabFramesCam  ${CALIBRATE_DIR}grabFramesCam.cc ) 
+  add_executable(grabFramesCam  ${CALIBRATE_DIR}grabFramesCam.cc )
   target_link_libraries(grabFramesCam ${PMD_LIBS})
 
-  add_executable(grabFramesPMD  ${CALIBRATE_DIR}grabFramesPMD.cc cvpmd.cc pmdWrap.cc) 
+  add_executable(grabFramesPMD  ${CALIBRATE_DIR}grabFramesPMD.cc cvpmd.cc pmdWrap.cc)
   target_link_libraries(grabFramesPMD scan newmat ${PMD_LIBS})
 
-  add_executable(extrinsicPMD  ${CALIBRATE_DIR}extrinsic.cc ) 
+  add_executable(extrinsicPMD  ${CALIBRATE_DIR}extrinsic.cc )
   target_link_libraries(extrinsicPMD ${PMD_LIBS})
 
-  add_executable(pose  ${POSE_DIR}pose.cc ${POSE_DIR}history.cc cvpmd.cc pmdWrap.cc) 
+  add_executable(pose  ${POSE_DIR}pose.cc ${POSE_DIR}history.cc cvpmd.cc pmdWrap.cc)
   target_link_libraries(pose scan newmat ${PMD_LIBS})
 endif()

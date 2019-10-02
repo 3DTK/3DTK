@@ -2,7 +2,7 @@
  * scan_red implxementation
  *
  * Copyright (C) by the 3DTK contributors
- * Copyright (C) Dorit Borrmann, Razvan-George Mihalyi, Remus Dumitru 
+ * Copyright (C) Dorit Borrmann, Razvan-George Mihalyi, Remus Dumitru
  *
  * Released under the GPL version 3.
  *
@@ -12,8 +12,8 @@
 /**
  * @file
  * @brief Main program for reducing 3D scans.
- * 
- * Program to reduce scans for use with slam6d 
+ *
+ * Program to reduce scans for use with slam6d
  * Usage: bin/scan_red -r <NR> 'dir',
  * Use -r for octree based reduction  (voxel size=<NR>)
  * and 'dir' the directory of a set of scans
@@ -24,7 +24,7 @@
  * @author Remus Dumitru. Jacobs University Bremen gGmbH, Germany.
  */
 #ifdef _MSC_VER
-#if !defined _OPENMP && defined OPENMP 
+#if !defined _OPENMP && defined OPENMP
 #define _OPENMP
 #endif
 #endif
@@ -354,7 +354,7 @@ void scan2mat(Scan *source, cv::Mat &mat)
   DataReflectance xyz_reflectance
     = (((DataReflectance)source->get("reflectance")).size() == 0) ?
       source->create("reflectance", sizeof(float)*xyz.size())
-    : source->get("reflectance"); 
+    : source->get("reflectance");
   if (((DataReflectance)source->get("reflectance")).size() == 0) {
     for(unsigned int i = 0; i < xyz.size(); i++)
       xyz_reflectance[i] = 255;
@@ -382,7 +382,7 @@ void scan2mat(Scan *source, cv::Mat &mat)
 
 }
 
-void reduce_octree(Scan *scan, std::vector<cv::Vec4f> &reduced_points, std::vector<cv::Vec3b> &color, 
+void reduce_octree(Scan *scan, std::vector<cv::Vec4f> &reduced_points, std::vector<cv::Vec3b> &color,
                    int octree, double red, bool use_reflectance, bool use_color)
 {
   if (use_reflectance) {
@@ -399,7 +399,7 @@ void reduce_octree(Scan *scan, std::vector<cv::Vec4f> &reduced_points, std::vect
            << std::endl;
       return;
     }
-    
+
     for(unsigned int j = 0; j < xyz_reduced.size(); j++) {
       reduced_points.push_back(cv::Vec4f(xyz_reduced[j][0],
                                          xyz_reduced[j][1],
@@ -416,13 +416,13 @@ void reduce_octree(Scan *scan, std::vector<cv::Vec4f> &reduced_points, std::vect
     DataRGB color_reduced(scan->get("color reduced"));
 
     std::cout  << xyz_reduced.size() << " " << color_reduced.size() << std::endl;
-    
+
     if (xyz_reduced.size() != color_reduced.size()) {
       std::cerr << "xyz_reduced size different than color_reduced size"
            << std::endl;
       return;
     }
-    
+
     for(unsigned int j = 0; j < xyz_reduced.size(); j++) {
       reduced_points.push_back(cv::Vec4f(xyz_reduced[j][0],
                                          xyz_reduced[j][1],
@@ -450,7 +450,7 @@ void reduce_octree(Scan *scan, std::vector<cv::Vec4f> &reduced_points, std::vect
 //void reduce_range(Scan *scan, vector<cv::Vec4f> &reduced_points, int width,
 void reduce_range(cv::Mat mat, std::vector<cv::Vec4f> &reduced_points, int width,
                   int height, fbr::projection_method ptype, double scale,
-                  bool use_reflectance, 
+                  bool use_reflectance,
 		  int MIN_ANGLE, int MAX_ANGLE, int nImages, double pParam,
 		  fbr::panorama_map_method mMethod, float zMin, float zMax,
 		  bool imageOptimization)
@@ -477,7 +477,7 @@ void reduce_range(cv::Mat mat, std::vector<cv::Vec4f> &reduced_points, int width
     reflectance_image_resized.create(range_image_resized.size(), CV_8U);
     reflectance_image_resized = cv::Scalar::all(0);
   }
-  
+
   image.recoverPointCloud(range_image_resized,
                           reflectance_image_resized,
                           reduced_points);
@@ -514,7 +514,7 @@ void reduce_interpolation(cv::Mat mat,
 	   cv::Size(), scale, scale, cv::INTER_NEAREST);
 	   //cv::Size(), scale, scale, cv::INTER_LINEAR);
   }
-  
+
   for(int i = 0; i < range_image_resized.rows; i++) {
     for(int j = 0; j < range_image_resized.cols; j++) {
       cv::Vec3f vec = range_image_resized.at<cv::Vec3f>(i, j);
@@ -535,7 +535,7 @@ void reduce_interpolation(cv::Mat mat,
  * Use -r for octree based reduction  (voxel size=<NR>)
  * and 'dir' the directory of a set of scans
  * Reduced scans will be written to 'dir/reduced'
- * 
+ *
  */
 int main(int argc, char **argv)
 {
@@ -571,9 +571,9 @@ int main(int argc, char **argv)
                 dir, iotype, maxDist, minDist, customFilter, rtype, out_format, scale, voxel, octree,
                 use_reflectance, MIN_ANGLE, MAX_ANGLE, nImages, pParam,
 		sType, loadOct, use_color);
-  
+
   rangeFilterActive = minDist > 0 || maxDist > 0;
-  // custom filter set? quick check, needs to contain at least one ';' 
+  // custom filter set? quick check, needs to contain at least one ';'
   // (proper chsecking will be done case specific in pointfilter.cc)
   size_t pos = customFilter.find_first_of(";");
   if (pos != std::string::npos){
@@ -615,13 +615,13 @@ int main(int argc, char **argv)
   }
 
   for (int iter = start; iter <= end; iter++) {
-    
+
     std::vector<cv::Vec4f> reduced_points;
     std::vector<cv::Vec3b> color;
-      
+
     std::string reddir = dir + "reduced";
     createdirectory(reddir);
-    
+
     if(rtype == NO_REDUCTION) {
       Scan::openDirectory(scanserver, dir, iotype, iter, iter);
       if(Scan::allScans.size() == 0) {
@@ -694,7 +694,7 @@ int main(int argc, char **argv)
                                              0.0));
         }
         write_uos(reduced_points,
-            reddir,		  
+            reddir,
             scan->getIdentifier());
       }
 
@@ -755,7 +755,7 @@ int main(int argc, char **argv)
 		}
       else
         write_uos(reduced_points,
-            reddir,		  
+            reddir,
             scan->getIdentifier());
 
 
@@ -827,7 +827,7 @@ int main(int argc, char **argv)
             */
       else
         write_uos(reduced_points,
-            reddir,		  
+            reddir,
             to_string(iter,3));
 
     }

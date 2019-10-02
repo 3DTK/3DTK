@@ -23,25 +23,25 @@ using std::string;
 class SDisplay {
   public:
   //inline void setColorManager(ColorManager *_cm) { cm = _cm; }
-  
- 
+
+
   //virtual SDisplay* readFromFile(string &filename) = 0;
   virtual const char *getName() { return "Unnamed display"; }
-  virtual void display(double detail) { displayAll(); } 
+  virtual void display(double detail) { displayAll(); }
   virtual void displayAll();
-  
+
   virtual void displayObject() = 0;
 
-  static void readDisplays(std::string &filename, std::vector<SDisplay*> &displays); 
-  
+  static void readDisplays(std::string &filename, std::vector<SDisplay*> &displays);
+
 
   protected:
   static double mirror[16];
   //ColorManager *cm;
 };
 
-class PointDisplay : public SDisplay { 
- 
+class PointDisplay : public SDisplay {
+
   public:
   static SDisplay* readFromFile(std::string &filename);
   virtual void displayObject();
@@ -54,8 +54,8 @@ class PointDisplay : public SDisplay {
   std::vector<std::string> labels;
 };
 
-class CoordDisplay : public SDisplay { 
- 
+class CoordDisplay : public SDisplay {
+
   public:
   static SDisplay* readFromFile(std::string &filename);
   virtual void displayObject();
@@ -67,8 +67,8 @@ class CoordDisplay : public SDisplay {
   std::vector<float *> coords;
 };
 
-class LineDisplay : public SDisplay { 
- 
+class LineDisplay : public SDisplay {
+
   public:
   static SDisplay* readFromFile(std::string &filename);
   virtual void displayObject();
@@ -80,7 +80,7 @@ class LineDisplay : public SDisplay {
 };
 
 class PlaneDisplay : public SDisplay {
-  public: 
+  public:
   static SDisplay* readFromFile(std::string &filename, float* color);
   virtual void displayObject();
 

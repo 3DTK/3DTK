@@ -75,7 +75,7 @@ unsigned long getTotalMem() {
       if(file >> mem) {
         return mem;
       } else {
-        return 0;       
+        return 0;
       }
     }
     // ignore rest of the line
@@ -96,7 +96,7 @@ unsigned long getFreeMem() {
       if(file >> mem) {
         return mem;
       } else {
-        return 0;       
+        return 0;
       }
     }
     // ignore rest of the line

@@ -1,4 +1,4 @@
-/** @file 
+/** @file
  *  @brief Definition of the ICP error function minimization
  *  @author Andreas Nuechter. Jacobs University Bremen gGmbH, Germany
  *  @author Kai Lingemann. Inst. of CS, University of Osnabrueck, Germany.
@@ -16,30 +16,30 @@
 class icp6D_APX : public icp6Dminimizer
 {
 public:
-  /** 
-   * Constructor 
+  /**
+   * Constructor
    */
   icp6D_APX(bool quiet = false) : icp6Dminimizer(quiet) {};
-  /** 
-   * Destructor 
+  /**
+   * Destructor
    */
-  virtual ~icp6D_APX() {};                                  
+  virtual ~icp6D_APX() {};
 
   double Align(const std::vector<PtPair>& Pairs,
 			double *alignxf,
 			const double centroid_m[3],
-			const double centroid_d[3]);  
-  double Align_Parallel(const int openmp_num_threads, 
+			const double centroid_d[3]);
+  double Align_Parallel(const int openmp_num_threads,
 				    const unsigned int n[OPENMP_NUM_THREADS],
-				    const double sum[OPENMP_NUM_THREADS], 
+				    const double sum[OPENMP_NUM_THREADS],
 				    const double centroid_m[OPENMP_NUM_THREADS][3],
-				    const double centroid_d[OPENMP_NUM_THREADS][3], 
+				    const double centroid_d[OPENMP_NUM_THREADS][3],
 				    const std::vector<PtPair> pairs[OPENMP_NUM_THREADS],
 				    double *alignxf);
-  
+
   static void computeRt(const double *x, const double *dx, double *alignxf);
 
-  inline int getAlgorithmID() { return 6; }; 
+  inline int getAlgorithmID() { return 6; };
 };
 
 #endif

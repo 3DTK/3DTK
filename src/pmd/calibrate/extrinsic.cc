@@ -60,17 +60,17 @@ int main(int argc, char **argv) {
     cvUndistort2(imgCam, imgCamU, intrinsicsCam, distortionCam);
 
     int cornersCountCam, cornersCountPMD;
-    int foundPMD = cvFindChessboardCorners(imgPMDU, boardSz, cornersPMD, 
+    int foundPMD = cvFindChessboardCorners(imgPMDU, boardSz, cornersPMD,
                 &cornersCountPMD, CV_CALIB_CB_ADAPTIVE_THRESH | CV_CALIB_CB_FILTER_QUADS);
     if(foundPMD) {
-        cvFindCornerSubPix(imgPMDU, cornersPMD, cornersCountPMD, cvSize(2, 2), cvSize(-1,-1), 
+        cvFindCornerSubPix(imgPMDU, cornersPMD, cornersCountPMD, cvSize(2, 2), cvSize(-1,-1),
                            cvTermCriteria(CV_TERMCRIT_EPS | CV_TERMCRIT_ITER, 30, 0.1));
         printf("foundPMD\n");
     }
-    int foundCam = cvFindChessboardCorners(imgCamU, boardSz, cornersCam, 
+    int foundCam = cvFindChessboardCorners(imgCamU, boardSz, cornersCam,
                 &cornersCountCam, CV_CALIB_CB_ADAPTIVE_THRESH | CV_CALIB_CB_FILTER_QUADS);
     if(foundPMD) {
-        cvFindCornerSubPix(imgCamU, cornersCam, cornersCountCam, cvSize(11, 11), cvSize(-1,-1), 
+        cvFindCornerSubPix(imgCamU, cornersCam, cornersCountCam, cvSize(11, 11), cvSize(-1,-1),
                            cvTermCriteria(CV_TERMCRIT_EPS | CV_TERMCRIT_ITER, 30, 0.1));
         printf("foundCam\n");
     }

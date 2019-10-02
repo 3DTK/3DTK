@@ -124,7 +124,7 @@ void elch6DunitQuat::close_loop(const vector <Scan *> &allScans,
 
   delete start;
   delete end;
-  
+
   delta[0] = allScans[last]->get_rPos()[0] - delta[0];
   delta[1] = allScans[last]->get_rPos()[1] - delta[1];
   delta[2] = allScans[last]->get_rPos()[2] - delta[2];

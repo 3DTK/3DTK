@@ -1,5 +1,5 @@
-/** 
- * @file 
+/**
+ * @file
  * @brief Representation of the parameter of a k-d tree
  * @author Andreas Nuechter. jacobs University Bremen, Germany.
  */
@@ -12,8 +12,8 @@
 #include <vector>
 
 /**
- * @brief Contains the intermediate (static) values of a k-d tree 
- * 
+ * @brief Contains the intermediate (static) values of a k-d tree
+ *
  * A parameter class for the latter k-d tree.
  * Includes the padding for parallelizetion
  * to avoid cache conflicts.
@@ -22,12 +22,12 @@ template<class T>
 class KDParams
 {
 public:
-  /** 
+  /**
    * the closest point
    */
   T closest;
 
-  /** 
+  /**
    * distance to the closest point
    */
   double closest_d2;
@@ -39,7 +39,7 @@ public:
   double maxdist_d2;
   double maxdist_d;
 
-  /** 
+  /**
    * the point coordinate
    */
   double *p;
@@ -60,7 +60,7 @@ public:
    * vector of all neighbors within a given radius
    */
   std::vector<T> range_neighbors;
- 
+
   /**
    * pointer to k nearest neighbors
    */
@@ -70,7 +70,7 @@ public:
    * distances to k closest neighbors
    */
   double *distances;
-  
+
   /**
    * k - the number of neighbors we want to find
    */

@@ -9,7 +9,7 @@ void CheckCudaError()
 	if(error)
 	{
 		printf("CUDA error: %d (%s) in %s line %d\n",error,cudaGetErrorString(error),__FILE__,__LINE__);
-		
+
 		//TODO: remove this and put throw or return value instead.
 		exit(-1);
 	}
@@ -17,7 +17,7 @@ void CheckCudaError()
 
 /*	Sets current device
  *	If device does not exist tries device 0
- *	
+ *
  *	Returns device ID or -1 if there are no devices
  */
 int SetCudaDevice(int cuda_device)
@@ -26,28 +26,28 @@ int SetCudaDevice(int cuda_device)
 	cudaGetDeviceCount(&deviceCount);
 
 	CheckCudaError();
-	
+
 	// This function call returns 0 if there are no CUDA capable devices.
     if(deviceCount == 0)
     {
         printf("There are no available device(s) that support CUDA\n");
 		return -1;
     }
-	
+
 	if(deviceCount<=cuda_device)
 	{
 		printf("No such device. Device 0 used!\n");
 		cuda_device=0;
 	}
-	
+
 	cudaSetDevice(cuda_device);
 	CheckCudaError();
-	
+
 	cudaDeviceProp deviceProp;
 	cudaGetDeviceProperties(&deviceProp, cuda_device);
 
 	//printf("\nUsing CUDA device %d: \"%s\"\n", cuda_device, deviceProp.name);
-	
+
 	return cuda_device;
 }
 

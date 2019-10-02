@@ -1,5 +1,5 @@
-/** @file 
- *  @brief Representation of the optimized k-d tree. 
+/** @file
+ *  @brief Representation of the optimized k-d tree.
  *  @author Andreas Nuechter. Inst. of CS, University of Osnabrueck, Germany.
  *  @author Kai Lingemann. Inst. of CS, University of Osnabrueck, Germany.
  *  @author Thomas Escher
@@ -13,7 +13,7 @@
 #include "slam6d/kdTreeImpl.h"
 
 #ifdef _MSC_VER
-#if !defined _OPENMP && defined OPENMP 
+#if !defined _OPENMP && defined OPENMP
 #define _OPENMP
 #endif
 #endif
@@ -39,8 +39,8 @@ struct ParamAccessor {
 };
 
 /**
- * @brief The optimized k-d tree. 
- * 
+ * @brief The optimized k-d tree.
+ *
  * A kD tree for points, with limited
  * capabilities (find nearest point to
  * a given point, or to a ray).
@@ -53,7 +53,7 @@ protected:
 public:
 
   KDtreeIndexed(double **pts, size_t n, int bucketSize = 20);
-  
+
   virtual ~KDtreeIndexed();
 
   virtual size_t FindClosest(double *_p,
@@ -64,12 +64,12 @@ public:
 							   double *_dir,
 							   double maxdist2,
 							   int threadNum = 0) const;
-  
+
   virtual std::vector<size_t> fixedRangeSearchAlongDir(double *_p,
                   double *_dir,
                   double maxdist2,
                   int threadNum = 0) const;
-  
+
   virtual std::vector<size_t> fixedRangeSearchBetween2Points(double *_p,
                   double *_dir,
                   double maxdist2,
@@ -78,7 +78,7 @@ public:
   virtual std::vector<size_t> kNearestNeighbors(double *_p,
 								  int k,
 								  int threadNum = 0) const;
-  
+
   virtual std::vector<size_t> fixedRangeSearch(double *_p,
 								 double sqRad2,
 								 int threadNum = 0) const;
@@ -99,7 +99,7 @@ protected:
 
   // constructor initializer list hacks
   size_t* m_temp_indices;
-  size_t* prepareTempIndices(size_t n);  
+  size_t* prepareTempIndices(size_t n);
 };
 
 #endif

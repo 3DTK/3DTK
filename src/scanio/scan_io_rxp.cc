@@ -52,9 +52,9 @@ this ScanIO has to distinguish a multi scan file and a directory of single scan 
 void ScanIO_rxp::readPose(const char* dir_path, const char* identifier, double* pose)
 {
   unsigned int i;
-  
+
   path pose_path(dir_path);
-  
+
   // if the directory actually marks a (multi scan) file, return zero pose
   // TODO: test if pose_path gets constructed correctly, see removal of trailing / in the old code
   if(is_regular_file(pose_path.string())) {
@@ -70,7 +70,7 @@ void ScanIO_rxp::readScan(const char* dir_path, const char* identifier, PointFil
 {
   // RiVLib requires the absolute path to scan files
   path data_path(canonical(dir_path));
-  
+
   // distinguish file and directory
   if(is_regular_file(data_path)) {
     stringstream str(identifier);
@@ -89,11 +89,11 @@ void ScanIO_rxp::readScan(const char* dir_path, const char* identifier, PointFil
     if (!dec) {
       // remember path
       old_path = dir_path;
-      
+
       // create new connection
       rc = basic_rconnection::create(data_path.string());
       rc->open();
-      
+
       // decoder splits the binary file into readable chunks
       dec = new decoder_rxpmarker(rc);
       // importer interprets the chunks
@@ -101,7 +101,7 @@ void ScanIO_rxp::readScan(const char* dir_path, const char* identifier, PointFil
       // probably set new filter and xyz in the importer
       imp = new importer(filter, scan_index, xyz, reflectance, amplitude, type, deviation);
     }
-    
+
     // set new filter and vectors
     imp->set(filter, xyz, reflectance, amplitude, type, deviation);
 
@@ -121,15 +121,15 @@ void ScanIO_rxp::readScan(const char* dir_path, const char* identifier, PointFil
       imp->dispatch(buf.begin(), buf.end());
       if(imp->getCurrentScan() != cscan) break;
     }
-    
+
     return;
   }
-  
+
   // error handling
   data_path /= path(std::string(dataPrefix()) + identifier + dataSuffix());
   if(!exists(data_path))
     throw std::runtime_error(std::string("There is no scan file for [") + identifier + "] in [" + dir_path + "]");
-  
+
   if(xyz != 0) {
     string data_path_str;
     data_path_str = "file://" + data_path.string();
@@ -157,7 +157,7 @@ void importer::on_echo_transformed(echo_type echo)
 {
   // for multi scan files, ignore those before start
   if (currentscan < start) return;
-  
+
   // targets is a member std::vector that contains all
   // echoes seen so far, i.e. the current echo is always
   // indexed by target_count-1.
@@ -167,7 +167,7 @@ void importer::on_echo_transformed(echo_type echo)
   point[0] = t.vertex[1]*-100.0;
   point[1] = t.vertex[2]*100.0;
   point[2] = t.vertex[0]*100.0;
-  
+
   //if(t.deviation < 10.0 && filter->check(point)) {
   if(filter->check(point)) {
     if(xyz) {

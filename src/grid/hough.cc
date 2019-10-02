@@ -17,7 +17,7 @@
  *  DESCRIPTION
  *  Implements some basic hough functions to detect lines in laserscans
  *  It writes a GnuPlot file in the debug case.
- *  NOTE : This is only a test program, it is'nt intended to be the 
+ *  NOTE : This is only a test program, it is'nt intended to be the
  *         definitive evaluation tool.
  ***************************************************************************
  *  SYNTAX          : hough [depth level]
@@ -51,7 +51,7 @@ int ScanAZ     = 721;
 //#define DIST             6.9 // ab diesem Wert haben wir eine Luecke
 #define MIN(a,b)         ((a)<(b)?(a):(b))
 #define MAX(a,b)         ((a)>(b)?(a):(b))
-#define SQR(a)           ((a)*(a))          
+#define SQR(a)           ((a)*(a))
 
 
 /*********************** HOUGH TRANSFORMATION***************************/
@@ -80,14 +80,14 @@ int   MAX_DISTANCE =  750; // war vorher define jetzt von aussen manipulierbar
  *-------------------------------------------------------------------------*
  * NAME        : AddNumberToFileName
  * DESCRIPTION
- *   Add a number to a filename. The number will be inserted at the end of 
+ *   Add a number to a filename. The number will be inserted at the end of
  * the name an before the last extension or '.'
  * PARAMETERS
  *  'src'      : The original file name.
  *  'dest'     : The resulting file name.
  *  'number'   : The number to add.
  * RESULT
- *  A pointer to the buffer in which is stored the resulting file name. 
+ *  A pointer to the buffer in which is stored the resulting file name.
  * Always equal to 'dest'
  *-------------------------------------------------------------------------
  */
@@ -113,7 +113,7 @@ char *AddNumberToFileName(char *src, char *dest, long number)
 }
 
 #else //STANDALONE
-extern char *AddNumberToFileName(char *src, char *dest, long number); 
+extern char *AddNumberToFileName(char *src, char *dest, long number);
 //extern unsigned long GetCurrentTimeInMilliSec(void);
 //extern __inline__ unsigned long long int rdtsc();
 #endif
@@ -192,7 +192,7 @@ int SHT_get_max_distance(void)
  */
 int **SHT_alloc_histogram(int x_max, int y_max)
 {
-  int x; 
+  int x;
   int **histogram;
 
   histogram = (int **)calloc(x_max, sizeof(int *));
@@ -208,23 +208,23 @@ int **SHT_alloc_histogram(int x_max, int y_max)
     }
   }
   return(histogram);
-} 
+}
 /**
  *sin_theta and cos_theta must be global
  */
 int sht_init(int sht_resolution)
 {
   int i;
-  
+
   if (max_trigo_size < sht_resolution) {
     sin_theta = (double *) realloc(sin_theta,sizeof(double)*sht_resolution);
     cos_theta = (double *) realloc(cos_theta,sizeof(double)*sht_resolution);
     max_trigo_size = sht_resolution;
   }
-  
+
   calc_sin_theta(sht_resolution, sin_theta);
   calc_cos_theta(sht_resolution, cos_theta);
-  
+
   k_index = (int **)malloc(sizeof(int *)*DATA_RANGE);
   for (i = 0; i < DATA_RANGE; i++) {
     k_index[i] = (int *)malloc(sizeof(int)*sht_resolution);
@@ -242,7 +242,7 @@ void SHT_init_histogram(int **histogram, int x_max, int y_max)
       histogram[x][y] = 0;
     }
   }
-} 
+}
 /**
  *
  */
@@ -257,7 +257,7 @@ void SHT_free_histogram(int **histogram, int x_max)
   for (i = 0; i < DATA_RANGE; i++) {
     free(k_index[i]);
   }
-}  
+}
 /**
  * nr_pts are the number of scan points to be used (black points)
  * resolution is the resolution used over
@@ -277,22 +277,22 @@ int SHT_hough_transform(int nr_pts, double *x, double *y,
   double mult_factor = resolution/(2.0*max_rho_d);
   /* Find Hough transform of points. */
   for (i=0; i < nr_pts; i++) {
-    if ((fabs(x[i]+xmin) < MAX_DISTANCE) && (fabs(y[i]+ymin) < MAX_DISTANCE)){ 
+    if ((fabs(x[i]+xmin) < MAX_DISTANCE) && (fabs(y[i]+ymin) < MAX_DISTANCE)){
       for (j=0; j < resolution; j++) {
 	   rho = cos_theta[j]*(double )x[i] + sin_theta[j]*(double )y[i];
         k = (int)(rho * mult_factor) + res_half;
-	   if ((k < 0) || (k >= resolution))  
+	   if ((k < 0) || (k >= resolution))
 		printf("ERROR: %d %f %f %d %f %d %f %f %f\n",
 			  i,x[i],y[i],j,rho,k,max_rho_d,xmin,ymin);
 	   else {
           histogram[j][k]++;
           k_index[i][j] = k;
-	   }  
+	   }
       }
     }
   }
   return 0;
-}   
+}
 /**
  * Find average value of histogram (only consider
  * non-zero entries in histogram).
@@ -306,7 +306,7 @@ unsigned long SHT_Find_average_value_of_historgram(int resolution, int **histogr
 {
   unsigned long sum = 0, average = 0, count = 0;
   int i,j;
-  
+
   for (i=0; i < resolution; i++) {
     for (j=0; j < resolution; j++) {
       if (histogram[i][j] > 0) {
@@ -316,7 +316,7 @@ unsigned long SHT_Find_average_value_of_historgram(int resolution, int **histogr
     }
   }
   if (count != 0) average = sum / count;
-  return average;			    
+  return average;
 }
 /**
  * Find max of histogram
@@ -327,7 +327,7 @@ unsigned long SHT_Find_max_value_of_historgram(int resolution, int **histogram,
   register int maximum = 0;
   register int *startptr;
   register int i,j;
-  
+
   *imax=0; *jmax = 0;
   for (i=0; i < resolution; i++)
     for (j=0, startptr = histogram[i];j < resolution; startptr++,j++) {
@@ -336,7 +336,7 @@ unsigned long SHT_Find_max_value_of_historgram(int resolution, int **histogram,
 	   *imax = i; *jmax = j;
       }
     }
-  return maximum;			    
+  return maximum;
 }
 /**
  *
@@ -353,7 +353,7 @@ int SHT_Print_histogram(FILE *fpr, int resolution, int **histogram, int average)
     fprintf(fpr,"\n");
   }
   return 0;
-  
+
 }
 /**
  * The line is in the form:
@@ -390,7 +390,7 @@ int SHT_show_line(int resolution, double max_rho_d, int **histogram,
 {
   double m, b;
   int    go_over_x = 0;
-  
+
   go_over_x = SHT_calc_line(resolution, max_rho_d, histogram, i, j, &m, &b);
 
   if (!go_over_x) {
@@ -413,7 +413,7 @@ double SHT_find_line(int nr_pts, double *x, double *y,
 		     int resolution, double max_rho_d, int **histogram,
 		     int ipkt, int jpkt, int *marker,
 		     double length_of_a_line,
-		     int *nr_line_pts, 
+		     int *nr_line_pts,
                      double *x_line_pts, double *y_line_pts,
 		     double xmin, double ymin)
 {
@@ -428,11 +428,11 @@ double SHT_find_line(int nr_pts, double *x, double *y,
   double maxlinedist = 0.0, linedist = 0.0;
   int    go_over_x = 0;
   int    i, j;
-  
+
   go_over_x  = SHT_calc_line(resolution, max_rho_d, histogram, ipkt, jpkt, &m, &b);
   /* Find Hough transform of points. */
   for (i=0; i < nr_pts; i++) {
-    if ((fabs(x[i]+xmin) < MAX_DISTANCE) && (fabs(y[i]+ymin) < MAX_DISTANCE)){ 
+    if ((fabs(x[i]+xmin) < MAX_DISTANCE) && (fabs(y[i]+ymin) < MAX_DISTANCE)){
       x0 =  (m*y[i]+b+0.5); // +0.5 because int truncate
       y0 =  (m*x[i]+b+0.5); // +0.5 because int truncate
       if ( ((marker[i] == 4) || (marker[i] == 0)) && (((!go_over_x) && (fabs(y[i] -y0)< EPSILON)) ||
@@ -498,7 +498,7 @@ double SHT_find_line(int nr_pts, double *x, double *y,
   delete[] lx;
   delete[] ly;
   delete[] index;
-  delete[] dist;  
+  delete[] dist;
 
   return maxlinedist;
 }
@@ -511,7 +511,7 @@ double SHT_find_unsorted_line(int nr_pts, double *x, double *y,
 						int resolution, double max_rho_d, int **histogram,
 						int ipkt, int jpkt, int *marker,
 						double length_of_a_line,
-						int *nr_line_pts, 
+						int *nr_line_pts,
 						double *x_line_pts, double *y_line_pts,
 						double xmin, double ymin)
 {
@@ -528,7 +528,7 @@ double SHT_find_unsorted_line(int nr_pts, double *x, double *y,
   /* Find Hough transform of points. */
   // first calc maximal len of all possible lines
   for (i=0; i < nr_pts; i++) {
-    if ((fabs(x[i]+xmin) < MAX_DISTANCE) && (fabs(y[i]+ymin) < MAX_DISTANCE)){ 
+    if ((fabs(x[i]+xmin) < MAX_DISTANCE) && (fabs(y[i]+ymin) < MAX_DISTANCE)){
       x0 =  (m*y[i]+b+0.5); // +0.5 because int truncate
       y0 =  (m*x[i]+b+0.5); // +0.5 because int truncate
       if ( ((marker[i] == 4) || (marker[i] == 0)) && (((!go_over_x) && (fabs(y[i] -y0)< EPSILON)) ||
@@ -587,7 +587,7 @@ double SHT_find_unsorted_line(int nr_pts, double *x, double *y,
 	   } // else loop
 	   count++;
 	 } // on the point
-    } // in distance 
+    } // in distance
   } // loop
   maxlinedist = distance_func(x[maxlen_index], x[minlen_index],
 						y[maxlen_index], y[minlen_index]);
@@ -595,7 +595,7 @@ double SHT_find_unsorted_line(int nr_pts, double *x, double *y,
   li = (int *) calloc((int)(2.0*maxlinedist+200),sizeof(int));
   // now calc historgramm of the line
   for (i=0; i < nr_pts; i++) {
-    if ((fabs(x[i]+xmin) < MAX_DISTANCE) && (fabs(y[i]+ymin) < MAX_DISTANCE)){ 
+    if ((fabs(x[i]+xmin) < MAX_DISTANCE) && (fabs(y[i]+ymin) < MAX_DISTANCE)){
       x0 =  (m*y[i]+b+0.5); // +0.5 because int truncate
       y0 =  (m*x[i]+b+0.5); // +0.5 because int truncate
       if ( ((marker[i] == 4) || (marker[i] == 0)) && (((!go_over_x) && (fabs(y[i] -y0)< EPSILON)) ||
@@ -605,7 +605,7 @@ double SHT_find_unsorted_line(int nr_pts, double *x, double *y,
 	   if (len > (maxlinedist+0.5)) {
 		printf("PROBLEM %d (%f,%f) %f %f\n",i,x[i],y[i],len,maxlinedist);
 		maxlinedist = len;
-	   }	   line_pts[(int)(len)]++; 
+	   }	   line_pts[(int)(len)]++;
 	   li[(int)(len)] = i; // index fuer den Punkt
 	   marker[i] = 1; // nur einfache pkt
 	 }
@@ -647,7 +647,7 @@ double SHT_find_unsorted_line(int nr_pts, double *x, double *y,
   }
   free(line_pts);
   free(li);
-  /* 
+  /*
   printf("%d points are on the line, %d lines found\n",count,*nr_line_pts/2);
   fflush(stdout);
   */
@@ -662,11 +662,11 @@ int SHT_remove_line(int nr_pts, double *x, double *y,
 {
   int    i,j;//, k;
   int nr_removed_points = 0;
-  
+
   for (i=0; i < nr_pts; i++) {
     if ((marker[i] == 1) || (marker[i] == 3)) {
-      marker[i] += 1; // from 1 to 2 or from 3 to 4 
-      if ((fabs(x[i]+xmin) < MAX_DISTANCE)&&(fabs(y[i]+ymin) < MAX_DISTANCE)){ 
+      marker[i] += 1; // from 1 to 2 or from 3 to 4
+      if ((fabs(x[i]+xmin) < MAX_DISTANCE)&&(fabs(y[i]+ymin) < MAX_DISTANCE)){
         nr_removed_points++;
 	   for (j = 0; j < resolution; j++) {
 		histogram[j][k_index[i][j]]--;
@@ -690,7 +690,7 @@ int SHT_remove_line(int nr_pts, double *x, double *y,
 int SHT_get_hough_lines(int nr_pts, double *x, double *y,
 			int sht_resolution, double max_rho_d,
 			int **sht_histogram, int depth,
-			int *nr_line_pts, 
+			int *nr_line_pts,
                         double *x_line_pts, double *y_line_pts,
 			double xmin, double ymin, int unsorted)
 {
@@ -699,13 +699,13 @@ int SHT_get_hough_lines(int nr_pts, double *x, double *y,
   char   filename[256], auxfilename[256];
   unsigned long prev_clock;
   FILE   *sht_fpr_histogramm;
-  
+
   strcpy(filename,"plane.dat");
   //prev_clock = GetCurrentTimeInMilliSec();
   unsigned long sht_average;
   sht_average = SHT_Find_average_value_of_historgram(sht_resolution, sht_histogram);
 #endif
-  
+
   // sht
   unsigned long sht_maximum;
   int           sht_imax, sht_jmax;
@@ -713,18 +713,18 @@ int SHT_get_hough_lines(int nr_pts, double *x, double *y,
   double        sht_length_of_a_line;
   int           i = 0;
   double        m,b;
-  
+
   // init marker
   for (i = 0; i < nr_pts; i++) sht_marker[i] = 0;
   *nr_line_pts = 0;
-  
+
   // hough
   SHT_hough_transform(nr_pts, x, y, sht_resolution, max_rho_d, sht_histogram,xmin,ymin);
   sht_maximum = SHT_Find_max_value_of_historgram(sht_resolution, sht_histogram,
 						 &sht_imax, &sht_jmax);
   i = 0;
   while ((sht_maximum > 0) && (i < depth)) {
-    sht_length_of_a_line = -0.1; 
+    sht_length_of_a_line = -0.1;
 
 #ifdef STANDALONE
     printf("\n====================================================%d %f\n",i,sht_length_of_a_line);
@@ -733,7 +733,7 @@ int SHT_get_hough_lines(int nr_pts, double *x, double *y,
     	 sht_average, sht_maximum, sht_imax,sht_jmax);
     fflush(stdout);
     // debug Kontroll output of the planes
-    AddNumberToFileName(filename, auxfilename, i);  
+    AddNumberToFileName(filename, auxfilename, i);
     sht_fpr_histogramm = fopen(auxfilename,"w");
     SHT_Print_histogram(sht_fpr_histogramm, sht_resolution, sht_histogram, sht_average);
     fclose(sht_fpr_histogramm);
@@ -766,7 +766,7 @@ int print_hough_lines(int sht_nr_line_pts, int *sht_x_line_pts, int *sht_y_line_
   int i;
   double dist;
   static FILE *fpr = NULL;
-  
+
   if (fpr == NULL)
     fpr = fopen("hough-lines.dat","w");
   printf("# found %d lines\n",(int)(sht_nr_line_pts*0.5));
@@ -819,7 +819,7 @@ int main(int argc, char ** argv)
   if (argc == 2)
     sht_nr = atoi(argv[1]);
   else sht_nr = 100;
-  
+
   // READ input files
   fpr = fopen("test20.dat","r");
   // erste zeile ueberlesen
@@ -852,18 +852,18 @@ int main(int argc, char ** argv)
   max_rho_d = sqrt(SQR(xmax-xmin) + SQR(ymax-ymin));
   printf("New Maxima:\n%d %d %d %d %f\n",xmin,xmax,ymin,ymax,max_rho_d);
   for (i = 0; i < NrPts - 2*SKIP; i++) {
-    x[i] -= xmin; 
+    x[i] -= xmin;
     y[i] -= ymin;
   }
   // START with the hough
   // init block
   /* Andreas 29.9.2000
-  if (max_rho_d > 500) sht_resolution = (int)(max_rho_d * 0.5); 
+  if (max_rho_d > 500) sht_resolution = (int)(max_rho_d * 0.5);
   else sht_resolution = (int)(max_rho_d * 0.75);
   */
 
   sht_resolution = (int)(max_rho_d * 0.75);
-  
+
   printf("Hough Transformation berechnen mit Aufloesung %d\n",sht_resolution);fflush(stdout);
   sht_init(sht_resolution);
   sht_histogram = SHT_alloc_histogram(sht_resolution, sht_resolution);
@@ -874,12 +874,12 @@ int main(int argc, char ** argv)
 		      &sht_nr_line_pts, sht_x_line_pts, sht_y_line_pts, xmin, ymin);
 
   for (i = 0; i < sht_nr_line_pts; i++) {
-    sht_x_line_pts[i] = (sht_x_line_pts[i] + xmin) / scale_val; 
+    sht_x_line_pts[i] = (sht_x_line_pts[i] + xmin) / scale_val;
     sht_y_line_pts[i] = (sht_y_line_pts[i] + ymin) / scale_val;
   }
 
 
-  
+
   // Kontroll Ausgabe
   print_hough_lines(sht_nr_line_pts, sht_x_line_pts, sht_y_line_pts);
   printf("end\n");fflush(stdout);
@@ -888,11 +888,11 @@ int main(int argc, char ** argv)
   // exit block
   SHT_free_histogram(sht_histogram, sht_resolution);
   // end exit block
-  
+
   return 0;
 
 }
- 
+
 #endif
 
 #ifdef STANDALONE
@@ -931,7 +931,7 @@ int main(int argc, char ** argv)
     if (array_x[i] < xmin) xmin =  array_x[i];
     if (array_y[i] > ymax) ymax =  array_y[i];
     if (array_y[i] < ymin) ymin =  array_x[i];
-    
+
     i++;
   }
   fclose(fpr);
@@ -943,7 +943,7 @@ int main(int argc, char ** argv)
 
 
   for (int j = 0; j < i; j++) {
-    array_x[j] -= xmin; 
+    array_x[j] -= xmin;
     array_y[j] -= ymin;
   }
 
@@ -952,17 +952,17 @@ int main(int argc, char ** argv)
   sht_init(sht_resolution);
   sht_histogram = SHT_alloc_histogram(sht_resolution, sht_resolution);
 
-  result = SHT_get_hough_lines(i, 
-		      array_x, 
+  result = SHT_get_hough_lines(i,
+		      array_x,
 		      array_y,
 		      sht_resolution,
 		      max_rho_d,
-		      sht_histogram, 
+		      sht_histogram,
 		      sht_nr,
-		      &sht_nr_line_pts, 
-		      sht_x_line_pts, 
-		      sht_y_line_pts, 
-		      xmin, 
+		      &sht_nr_line_pts,
+		      sht_x_line_pts,
+		      sht_y_line_pts,
+		      xmin,
 		      ymin);
 
   printf("SHT_get_hough_lines: %d (%d)",result, sht_nr_line_pts);
@@ -971,12 +971,12 @@ int main(int argc, char ** argv)
   fpr = fopen("lines.dat","w");
 
   for (int j = 0; j < sht_nr_line_pts; j+=2) {
-    sht_x_line_pts[j]   += xmin; 
+    sht_x_line_pts[j]   += xmin;
     sht_y_line_pts[j]   += ymin;
-    sht_x_line_pts[j+1] += xmin; 
+    sht_x_line_pts[j+1] += xmin;
     sht_y_line_pts[j+1] += ymin;
 
-    if (SQR(sht_x_line_pts[j] - sht_x_line_pts[j+1]) + 
+    if (SQR(sht_x_line_pts[j] - sht_x_line_pts[j+1]) +
         SQR(sht_y_line_pts[j] - sht_y_line_pts[j+1]) > 225)
 	 {
 	   fprintf(fpr,"%g %g \n",sht_x_line_pts[j], sht_y_line_pts[j]);
@@ -988,4 +988,4 @@ int main(int argc, char ** argv)
 
 #endif
 
- 
+

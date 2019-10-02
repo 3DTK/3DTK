@@ -42,7 +42,7 @@ void Odometry::convertTicks2Odom(const ticksConstPtr& cticks)
     return;
   }
 
-  ros::Time current = cticks->header.stamp; 
+  ros::Time current = cticks->header.stamp;
 
 //  int left = cticks->left - oldticks.left;
 //  int right = cticks->right - oldticks.right;
@@ -53,7 +53,7 @@ void Odometry::convertTicks2Odom(const ticksConstPtr& cticks)
   int right = cticks->right - oldrticks;
   oldlticks = cticks->left;
   oldrticks = cticks->right;
-  
+
   ros::Duration dt = current - old;
   old  = current;
 
@@ -69,7 +69,7 @@ void Odometry::convertTicks2Odom(const ticksConstPtr& cticks)
 
   double vth = (M*right - M*left) / B;                  // delta theta in radian
   double vx  = ((M*right + M*left)/2.0)/100.0;                // delta x in m
-  
+
   theta += vth;
 
   x += ((M*right + M*left)/2.0) * cos(theta);
@@ -77,7 +77,7 @@ void Odometry::convertTicks2Odom(const ticksConstPtr& cticks)
 
   //since all odometry is 6DOF we'll need a quaternion created from yaw
   odom_quat = tf::createQuaternionMsgFromYaw(-theta);
-  
+
   //next, we'll publish the odometry message over ROS
   //odom.header.stamp = cticks->timestamp;
   odom.header.stamp= current;// no timestamp data TODO
@@ -94,7 +94,7 @@ void Odometry::convertTicks2Odom(const ticksConstPtr& cticks)
   //double ath = (lastvth-(vth/ddt))/ddt;  // acceleration in rad/s^2
   ax *= 0.01;   // m/s^2
   //set the velocity only if reasonably accurate
-  
+
   if (ddt > 0 && fabs(ax) < 5.0) {
 //  fprintf(file, "%f %f %f   %f %d %d  %f %f\n", current.toSec(), vl*-0.01, vr*-0.01,  ddt, cticks->left, cticks->right, (lastvx-(vx/ddt))/ddt, (lastvth-(vth/ddt))/ddt );
 //    fprintf(file, "%f %f %f   %f %f\n", current.toSec(), cticks->vx, cticks->vth, vx/ddt, -vth/ddt );
@@ -107,7 +107,7 @@ void Odometry::convertTicks2Odom(const ticksConstPtr& cticks)
       odom.twist.covariance[i] = covariance[i];
   } else {    /// velocities cant be computed, use old values
     for (int i = 0; i < 36; i++)
-      odom.twist.covariance[i] = 99999.9; 
+      odom.twist.covariance[i] = 99999.9;
   }
 
   // send odometry message
@@ -131,11 +131,11 @@ Odometry::Odometry() {
   publisher = n.advertise<nav_msgs::Odometry>("odom", 100);
   subscriber = n.subscribe("VMC", 20, &Odometry::convertTicks2Odom, this);
   firstticks = true;
-  
+
   // message frames
   odom.header.frame_id = "/odom";
   odom.child_frame_id = "/base_link";
-  
+
   odom_quat = tf::createQuaternionMsgFromYaw(0.0);
 
   odom.pose.pose.position.x = 0.0;

@@ -25,7 +25,7 @@ using std::ios;
 
 #if WIN32
 #define snprintf sprintf_s
-#endif 
+#endif
 
 int parseArgs(int argc,char **argv, char dir[255], int& start, int& end,int& sequence){
   start   = 0;
@@ -58,7 +58,7 @@ int parseArgs(int argc,char **argv, char dir[255], int& start, int& end,int& seq
    }
 
   if (optind != argc-1) {
-    cerr << "\n*** Directory missing ***\n" << endl; 
+    cerr << "\n*** Directory missing ***\n" << endl;
     cout << endl
 	  << "Usage: " << argv[0] << "  [-s NR] [-e NR] directory" << endl << endl;
 
@@ -96,23 +96,23 @@ int main(int argc, char **argv)
   pose_out.close();
   double inMatrix[12];
   double tMatrix[17];
-  
+
   for (;;) {
     if (end > -1 && fileCounter > end) break; // 'nuf read
     snprintf(frameFileName,255,"%sscan%.3d.frames",dir,fileCounter++);
     snprintf(poseFileName,255,"%s%.2d.txt",dir,sequence);
-   
+
     pose_in.open(frameFileName);
 
     if (!pose_in.good()) break; // no more files in the directory
     // read 3D scan
 
     cout << "Reading frame " << frameFileName << "..." << endl;
-    
+
     while(pose_in.good()) {
       for (unsigned int i = 0; i < 17; pose_in >> tMatrix[i++]);
     }
-    
+
   inMatrix[ 0] =tMatrix[0];
   inMatrix[ 1] =-tMatrix[4];
   inMatrix[ 2] =tMatrix[8];
@@ -133,7 +133,7 @@ int main(int argc, char **argv)
     inMatrix[3] /= 100;
     inMatrix[7] /= 100;
     inMatrix[11] /= 100;
-    
+
     pose_in.close();
     pose_in.clear();
     pose_out.open(poseFileName,ios::out | ios::app);
@@ -144,13 +144,13 @@ int main(int argc, char **argv)
       pose_out << inMatrix[i] << " ";
      // if((i % 4) == 3) pose_out << endl;
     }
-    
+
     pose_out << endl;
     pose_out.close();
     pose_out.clear();
 
-    
-    
+
+
   }
     cout << " done." << endl;
 

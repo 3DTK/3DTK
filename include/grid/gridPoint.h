@@ -4,9 +4,9 @@
 /**
  * The class represents a point in the grid. It contains its
  * absolute coordinates (x, z), a counter how often the point
- * has been found within a scan and a counter how often it has 
- * been found occupied. 
- * 
+ * has been found within a scan and a counter how often it has
+ * been found occupied.
+ *
  * @author Sebastian Stock, Uwe Hebbelmann, Andre Schemschat
  * @date 11.02.2008
  */
@@ -28,7 +28,7 @@ class gridPoint
  public:
     /** @brief CTor */
     gridPoint(long x, long z);
-    
+
     /** @brief Adds amount to the internal counter */
     void addCount(unsigned int count, unsigned int occupied);
 
@@ -56,7 +56,7 @@ class gridPoint
     inline unsigned int getOccupied() const{
 	return this->occupied;
     }
-    
+
     /**
      * Getter for the absolute x coordinate
      * @return the absolute x coordinate

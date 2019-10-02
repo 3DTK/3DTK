@@ -9,7 +9,7 @@ class GridParams
 public:
 	double scale;
 	double max_dist;
-	
+
 	GridParams()
 	{
 		num_buckets=128;
@@ -29,10 +29,10 @@ public:
 		}
 		num_buckets=num;
 	}
-	
+
 private:
 	int num_buckets;
-	
+
 };
 
 #endif

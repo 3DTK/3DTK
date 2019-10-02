@@ -8,12 +8,12 @@
 #define WAYPOINTWEIGHT 10
 #define SOLIDWEIGHT 5000
 
-/** 
+/**
  * The class provides methods to create a 2D scanGrid from a given scan.
  * It sorts out points not relevant for the grid and tries to
  * reduce noise within the data.
  * It also marks free spaces between found obstacles.
- * 
+ *
  * @author Sebastian Stock, Uwe Hebbelmann, Andre Schemschat
  * @date 11.02.2008
  */
@@ -31,9 +31,9 @@ class scanToGrid
 
     /** The maximal distance */
     int maxDistance;
-    
+
     /** The distance weighting  */
-    double minimalWeighting; 
+    double minimalWeighting;
 
     /** the spot-value of the laser */
     float spot;
@@ -47,14 +47,14 @@ class scanToGrid
     /**
      * The method calculates the weighting of a Point
      * based on its distance and an internal formula.
-     * 
+     *
      * @param distance The distance of the point to the robots position
      * @return The calculated weighting for the point
-     */    
+     */
     inline float calculateWeighting(long x, long z)
     {
 	double distance = sqrt(pow((double)x, 2) + pow((double)z, 2));
-	return this->minimalWeighting * distance + 1; 
+	return this->minimalWeighting * distance + 1;
     }
 
     /** @brief Calculates the normvector for the vector (x|z) */
@@ -74,16 +74,16 @@ class scanToGrid
 
     /** @brief Method checks the grid for values which stand alone and deletes them */
     void killAlonePoints(scanGrid* grid, int distance, int neighbours);
- 
+
     /** @brief Checks if the points lies within the relevant area */
     bool isPointRelevant(const Point& p) const;
 
     /** @brief Converts the coordinate of a scanpoint to the grid raster */
     long scaleToGrid(double point);
-        
+
  public:
     /** @brief Ctor*/
-    scanToGrid(double resolution, double minRelevantHeight, 
+    scanToGrid(double resolution, double minRelevantHeight,
 	       double maxRelevantHeight, int maxDistance ,
 	       int spotRadius, bool createWays,
 	       bool neighbours);

@@ -66,7 +66,7 @@ void render(GLFWwindow* window, History *history, CvPoint3D32f *camPts,  int trP
 int projectImageToPMD( CvMat *rot,  CvMat *trn,  CvMat *intrinsic
                      , CvPoint3D32f **pmdPts,  CvSize pmdSz
                      , CvSize camSz, CvPoint **pmd2imgIdxs
-                     , CvPoint2D32f *trackedPts 
+                     , CvPoint2D32f *trackedPts
                      , int *trPtsCnt, CvPoint3D32f *trackedPts3D, char *pts3DStatus
                      , CvPoint *tr2pmdIdxs) {
     /* TODO:
@@ -77,28 +77,28 @@ int projectImageToPMD( CvMat *rot,  CvMat *trn,  CvMat *intrinsic
     // point in cam coorinate system
     CvMat *reprojPt = cvCreateMat(3, 1, CV_32FC1);
     // points on cam screen
-    CvMat *camPt3 = cvCreateMat(3, 1, CV_32FC1); 
-    CvMat *camPt  = cvCreateMat(2, 1, CV_32FC1); 
+    CvMat *camPt3 = cvCreateMat(3, 1, CV_32FC1);
+    CvMat *camPt  = cvCreateMat(2, 1, CV_32FC1);
     // rotation matrix
     CvMat *rotMat = cvCreateMat(3, 3, CV_32FC1);
     cvRodrigues2(rot, rotMat, NULL);
 
     // clear previous found tracked pts
     for(int k = 0; k < *trPtsCnt; k++) pts3DStatus[k] = 0;
-    
+
     //int l = 0; // count corresponding points
     int reprojected = 0;
 
     for(int j = 0; j < pmdSz.width; j++)
       for(int i = 0; i < pmdSz.height; i++) {
           if( fabs(pmdPts[i][j].x) > 20.0
-           || fabs(pmdPts[i][j].y) > 20.0 
+           || fabs(pmdPts[i][j].y) > 20.0
            || fabs(pmdPts[i][j].z) > 20.0) continue; //FIXME: more realistic limit, status = false
-          // convert to mat 
+          // convert to mat
           CV_MAT_ELEM(*pt, float, 0, 0) = (float)pmdPts[i][j].x;
           CV_MAT_ELEM(*pt, float, 1, 0) = (float)pmdPts[i][j].y;
           CV_MAT_ELEM(*pt, float, 2, 0) = (float)pmdPts[i][j].z;
-          
+
           // reproject to the camera coordinate system
           cvMatMulAdd(rotMat, pt, trn, reprojPt);
           // project to the image
@@ -124,9 +124,9 @@ int projectImageToPMD( CvMat *rot,  CvMat *trn,  CvMat *intrinsic
           }
 
           //find tracked 3d points (fused here, can be dispached)
-          for(int k = 0; k < *trPtsCnt; k++) 
+          for(int k = 0; k < *trPtsCnt; k++)
               if(pts3DStatus[k]) continue; // kill to accumulate (*)
-              else 
+              else
                 if( (abs((trackedPts[k].x - (float)x)) < 3)   //TODO: distance SHOULD be chousen depending on depth!!!
                  && (abs((trackedPts[k].y - (float)y)) < 3)) { //FIXME: hardcoded distance
                     //TODO: we can accumulate points here to get more presise results (*)
@@ -140,7 +140,7 @@ int projectImageToPMD( CvMat *rot,  CvMat *trn,  CvMat *intrinsic
                   break; // kill to accumulate (*)
               }
       }
- 
+
     cvReleaseMat(&pt);
     cvReleaseMat(&reprojPt);
     cvReleaseMat(&camPt);
@@ -157,7 +157,7 @@ static inline float cvPoint3D32fNorm(CvPoint3D32f pt) {
 
 float dpthS( IplImage *img
            , CvPoint ptI, CvPoint dp
-           , CvPoint3D32f **pts 
+           , CvPoint3D32f **pts
            , CvPoint ptD, CvSize pmdSz
            , float sD, float sC) {
     CvSize imgSz = cvGetSize(img);
@@ -173,7 +173,7 @@ float dpthS( IplImage *img
     float db = (float)pI[0] - (float)pJ[0];
     float wij = exp(-(sqrt(dr*dr + dg*dg + db*db))/sC);
     float dpI = cvPoint3D32fNorm(pts[ptD.x][ptD.y]);
-    float dpJ = cvPoint3D32fNorm(pts[ptD.x + dp.x][ptD.y + dp.y]); 
+    float dpJ = cvPoint3D32fNorm(pts[ptD.x + dp.x][ptD.y + dp.y]);
     float s = exp(-wij*(dpI - dpJ)*(dpI - dpJ)/sD);
     return s;
 }
@@ -191,31 +191,31 @@ void outliersDepthAndColor( CvPoint3D32f **pmdPts, IplImage *img, CvSize pmdSz
                           , char *pts3DStatus // this actually return parameter
                           , float sigmaDepth, float threshold, float sigmaColor
                           ) {
-   if(threshold < 0.0) return;   
+   if(threshold < 0.0) return;
    // depth score outliers removal, see pmdc.conf comments
    for(int k = 0; k < trPtsCnt; k++) {
        //FIXME: check array bounds
        CvPoint pmdIdx = tr2pmdIdxs[k];
        CvPoint idx = cvPointFrom32f(trackedPts[k]);
        float s00, s01, s02;
-       s00 = DPTHS(-1, -1); 
+       s00 = DPTHS(-1, -1);
        s01 = DPTHS( 0, -1);
        s02 = DPTHS( 1, -1);
-       float s10 = DPTHS(-1,  0); 
+       float s10 = DPTHS(-1,  0);
        float s12 = DPTHS( 1,  0);
-       float s20 = DPTHS(-1,  1); 
+       float s20 = DPTHS(-1,  1);
        float s21 = DPTHS( 0,  1);
        float s22 = DPTHS( 1,  1);
-       float score = s00 + s01 + s02 
+       float score = s00 + s01 + s02
                    + s10 + 0.0 + s12
                    + s20 + s21 + s22;
        printf("score = %f\n", score);
        if(score < threshold) pts3DStatus[k] = 0;
-   }                  
+   }
 
 }
 
-int motionMeanAndVariance(CvPoint3D32f **camPts3D, char **pts3DStatus, int trPtsCnt, float *mean, float *var) {    
+int motionMeanAndVariance(CvPoint3D32f **camPts3D, char **pts3DStatus, int trPtsCnt, float *mean, float *var) {
 
 //    float *mean = meanAndVariance;
 //    float *var = &(meanAndVariance[3]);
@@ -225,16 +225,16 @@ int motionMeanAndVariance(CvPoint3D32f **camPts3D, char **pts3DStatus, int trPts
     float motionSum = 0; //[3] = {0.0, 0.0, 0.0};
     float motionSqrSum = 0; //[3] = {0.0, 0.0, 0.0};
 
-    int sz = 0; // pairs count    
-    for(int i = 0; i < trPtsCnt; i++) 
-        if(pts3DStatus[1][i] && pts3DStatus[0][i]) { 
+    int sz = 0; // pairs count
+    for(int i = 0; i < trPtsCnt; i++)
+        if(pts3DStatus[1][i] && pts3DStatus[0][i]) {
             sz++;
 
             dx = camPts3D[1][i].x - camPts3D[0][i].x;
             dy = camPts3D[1][i].y - camPts3D[0][i].y;
             dz = camPts3D[1][i].z - camPts3D[0][i].z;
 
-            magSq = dx*dx + dy*dy + dz*dz; 
+            magSq = dx*dx + dy*dy + dz*dz;
 
             motionSum += sqrt(magSq); //FIXME: optimisation, we can use it without sqrt
 
@@ -255,16 +255,16 @@ int motionMeanAndVariance(CvPoint3D32f **camPts3D, char **pts3DStatus, int trPts
 /*  mean[0] = motionSum[0] / (float)sz;
     mean[1] = motionSum[1] / (float)sz;
     mean[2] = motionSum[2] / (float)sz;*/
-        
+
     // variance
 
-    for(int i = 0; i < trPtsCnt; i++) 
-        if(pts3DStatus[1][i] && pts3DStatus[0][i]) {                   
+    for(int i = 0; i < trPtsCnt; i++)
+        if(pts3DStatus[1][i] && pts3DStatus[0][i]) {
             dx = camPts3D[1][i].x - camPts3D[0][i].x;
             dy = camPts3D[1][i].y - camPts3D[0][i].y;
             dz = camPts3D[1][i].z - camPts3D[0][i].z;
 
-            magSq = dx*dx + dy*dy + dz*dz; 
+            magSq = dx*dx + dy*dy + dz*dz;
 
             *var += (magSq - *mean)*(magSq - *mean);
         }
@@ -283,14 +283,14 @@ void outliersSpeedSigma(CvPoint3D32f **camPts3D, char **pts3DStatus, int trPtsCn
         float dx, dy, dz;
         float mag;
         float sigma = sqrt(var);
-        for(int i = 0; i < trPtsCnt; i++) 
-           if(pts3DStatus[1][i] && pts3DStatus[0][i]) { 
+        for(int i = 0; i < trPtsCnt; i++)
+           if(pts3DStatus[1][i] && pts3DStatus[0][i]) {
                dx = camPts3D[1][i].x - camPts3D[0][i].x;
                dy = camPts3D[1][i].y - camPts3D[0][i].y;
                dz = camPts3D[1][i].z - camPts3D[0][i].z;
 
-               mag = sqrt(dx*dx + dy*dy + dz*dz); 
-                                                                                              
+               mag = sqrt(dx*dx + dy*dy + dz*dz);
+
                if(fabs(mag - mean) > sigma) {
                  pts3DStatus[0][i] = 0;
                }
@@ -312,7 +312,7 @@ int main(int argc, char **argv) {
         else if (!strcmp(argv[i], "--fps"))          fps = true;
         else if (!strcmp(argv[i], "--cfg"))          config = argv[++i];
         //TODO: config
-        else if (!strcmp(argv[i], "--help") 
+        else if (!strcmp(argv[i], "--help")
              || !strcmp(argv[i], "-h")) {
                 usage(argv[0]);
                 return 1;
@@ -323,8 +323,8 @@ int main(int argc, char **argv) {
     }
     // pose guess
     CvMat *rotMatGuess = cvCreateMat(3,3, CV_32FC1);
-    CvMat *rotGuess = cvCreateMat(3, 1, CV_32FC1); 
-    CvMat *trnGuess = cvCreateMat(3, 1, CV_32FC1); 
+    CvMat *rotGuess = cvCreateMat(3, 1, CV_32FC1);
+    CvMat *trnGuess = cvCreateMat(3, 1, CV_32FC1);
 
 
     /***** init device and allocate images *****/
@@ -333,7 +333,7 @@ int main(int argc, char **argv) {
     CvSize camSz = cvGetSize(pmdc->iCam);
     printf("pose: pmd init done\n");
 
-    /***** essential matrix *****/    
+    /***** essential matrix *****/
 
     CvMat *rot = (CvMat*)cvLoad("../essential-rot.xml"); //FIXME: load path from cfg
     CvMat *trn = (CvMat*)cvLoad("../essential-trn.xml");
@@ -345,7 +345,7 @@ int main(int argc, char **argv) {
     int trPtsCnt = 0; // counts found points
 
     // eigenvalues for GFTT
-    IplImage* eig = cvCreateImage(camSz, 32, 1); 
+    IplImage* eig = cvCreateImage(camSz, 32, 1);
     IplImage* tmp = cvCreateImage(camSz, 32, 1);
     IplImage* mask = cvCreateImage(camSz, IPL_DEPTH_8U, 1);
 
@@ -374,9 +374,9 @@ int main(int argc, char **argv) {
     // 3d rays where points points :P
     CvPoint3D32f *trackedPts = (CvPoint3D32f*) cvAlloc(featuresMax * sizeof(CvPoint3D32f));
 
-    // contains (row,col) of pmd 3D pts 
+    // contains (row,col) of pmd 3D pts
     CvPoint **pmd2imgIdxs = (CvPoint**) cvAlloc(pmdSz.height * sizeof(CvPoint*));
-    for(int i = 0; i < pmdSz.height; i++) 
+    for(int i = 0; i < pmdSz.height; i++)
         pmd2imgIdxs[i] = (CvPoint*) cvAlloc(pmdSz.width * sizeof(CvPoint));
 
     // pmd history
@@ -387,7 +387,7 @@ int main(int argc, char **argv) {
         cvNamedWindow("PMD", 0);
         cvNamedWindow("Cam", 0);
     }
-   
+
     GLFWwindow* window;
     if(gl) {
         glfwInit();
@@ -396,7 +396,7 @@ int main(int argc, char **argv) {
             glfwTerminate();
             fprintf(stderr, "ERROR: can't init glfw window!\n");
             return 1;
-        } 
+        }
     }
     //FIXME: put this in if(gl)
     font = new FTGLPixmapFont("./djvm.ttf");
@@ -411,7 +411,7 @@ int main(int argc, char **argv) {
     time_t tic=time(0);
     time_t tac;
 
-    int fpsCnt = 0;    
+    int fpsCnt = 0;
 
     //icp pairs
     std::vector<PtPair> pairs;
@@ -435,7 +435,7 @@ int main(int argc, char **argv) {
             fpsCnt++;
         }
         if(grabData(pmdc)) break; // end of seq?
-    
+
 
         /***** tracking *****/
         //if(trPtsCnt)
@@ -446,17 +446,17 @@ int main(int argc, char **argv) {
                               , pmdc->_track.trackingFlags);
         pmdc->_track.trackingFlags |= CV_LKFLOW_PYR_A_READY;
 
-        // filter out not tracked points        
-        int k = 0; 
-        for(int i = 0; i < trPtsCnt; i++) 
+        // filter out not tracked points
+        int k = 0;
+        for(int i = 0; i < trPtsCnt; i++)
             if(camPtsStatus[i]) {
                 camPts3D[0][k] = camPts3D[0][i];
                 pts3DStatus[0][k] = pts3DStatus[0][i];
                 camPts[1][k++] = camPts[1][i];
             }
 
-        trPtsCnt = k;            
-        
+        trPtsCnt = k;
+
         /***** 3d (re)projection *****/
         cvProjectArrayToCartesian(pmdc->intrinsicCam, camPts[1], trPtsCnt, trackedPts);
 
@@ -468,7 +468,7 @@ int main(int argc, char **argv) {
 
             if(motionMeanAndVariance(camPts3D, pts3DStatus, trPtsCnt, &mean, &var))
                     // TODO: can be fused with centroid computation
-                    outliersSpeedSigma(camPts3D, pts3DStatus, trPtsCnt, mean, var);           
+                    outliersSpeedSigma(camPts3D, pts3DStatus, trPtsCnt, mean, var);
 
             outliersDepthAndColor( pmdc->pts, pmdc->iCamColor, pmdSz, camPts[1], trPtsCnt
                                  , tr2pmdIdxs, pts3DStatus[1], pmdc->sigmaDepth
@@ -481,8 +481,8 @@ int main(int argc, char **argv) {
             double pt1[3];
             double pt2[3];
 
-            for(int i = 0; i < trPtsCnt; i++) 
-                if(pts3DStatus[1][i] && pts3DStatus[0][i]) {                   
+            for(int i = 0; i < trPtsCnt; i++)
+                if(pts3DStatus[1][i] && pts3DStatus[0][i]) {
                     pt1[0] = camPts3D[0][i].x;
                     pt1[1] = camPts3D[0][i].y;
                     pt1[2] = camPts3D[0][i].z;
@@ -505,37 +505,37 @@ int main(int argc, char **argv) {
             reprojected = pairs.size();
 
             if(reprojected >= pmdc->minPts4Pose) { // enough corresponding points
-            centroidM[0] /= reprojected; 
-            centroidM[1] /= reprojected; 
-            centroidM[2] /= reprojected; 
-            centroidD[0] /= reprojected; 
-            centroidD[1] /= reprojected; 
-            centroidD[2] /= reprojected; 
+            centroidM[0] /= reprojected;
+            centroidM[1] /= reprojected;
+            centroidM[2] /= reprojected;
+            centroidD[0] /= reprojected;
+            centroidD[1] /= reprojected;
+            centroidD[2] /= reprojected;
 
             double transformMat[16];
             try { alignError = pmdc->icp->Align(pairs, transformMat, centroidM, centroidD); }
             catch(...) { fprintf(stderr, "ERROR: matrix is singular!\n"); }
 
             if(!gl) printf( "%i: align error: %f, 3d pts count: %i, 2d pts count: %i\n"
-                          , frames, alignError, reprojected, trPtsCnt);          
+                          , frames, alignError, reprojected, trPtsCnt);
 
-            for(int i = 1; i < 16; i++) 
+            for(int i = 1; i < 16; i++)
                 if (i%4 > 2) continue; // bottom row
                 else if(i/4 > 2) CV_MAT_ELEM(*trnGuess, float, i%4, 0) = transformMat[i];
                      else CV_MAT_ELEM(*rotMatGuess, float, i/4, i%4) = transformMat[i]; // right col
 
             cvRodrigues2(rotMatGuess, rotGuess, NULL);
 
-            if(alignError < pmdc->maxError) 
+            if(alignError < pmdc->maxError)
                     poseEstimated = true;
             }
-        } 
+        }
 
 
         /**** Print pose to file ****/
         //TODO: config option
-        if(pmdc->savePoses) { 
-            char filename[] = "./dat/scan0000.pose";       
+        if(pmdc->savePoses) {
+            char filename[] = "./dat/scan0000.pose";
             sprintf(filename, "./dat/scan%04d.pose", frames);
             FILE *pose = fopen(filename, "wb");
 	        if(!pose) fprintf(stderr, "cant create file %s!\n", filename);
@@ -548,12 +548,12 @@ int main(int argc, char **argv) {
                        , 100.0*CV_MAT_ELEM(*trnGuess, float, 0, 0)
                        , 100.0*CV_MAT_ELEM(*trnGuess, float, 1, 0)
                        , 100.0*CV_MAT_ELEM(*trnGuess, float, 2, 0));
-                goodFrames++;            
+                goodFrames++;
             } else {
                 fprintf( stderr, "ERROR: %i points found, align error: %f\n"
                        , reprojected, alignError);
                 fprintf(pose, "%f %f %f\n%f %f %f\n", 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
-            }       
+            }
 
             fflush(pose);
             fclose(pose);
@@ -565,7 +565,7 @@ int main(int argc, char **argv) {
         if(trPtsCnt < pmdc->_track.minFeatures) {
                 int trPtsCntFound = featuresMax - trPtsCnt;
                 cvSet(mask, cvScalarAll(255));
-                for(int i = 0; i < trPtsCnt; i++) 
+                for(int i = 0; i < trPtsCnt; i++)
                     cvCircle(mask, cvPointFrom32f(camPts[1][i]), 20, CV_RGB(0,0,0), -1, 8, 0);
                 cvGoodFeaturesToTrack( pmdc->iCam, eig, tmp, camPts[1] + trPtsCnt, &trPtsCntFound
                                      , pmdc->_track.quality, pmdc->_track.minDist, mask, 3, 0, 0.04);
@@ -640,7 +640,7 @@ void renderFrame(Frame *f) {
     glBegin(GL_POINTS);
     if(!renderColorPts) {
     //FIXME: mess with the indices (i,j)
-        for(int j = 0; j < f->sz.width; j++) 
+        for(int j = 0; j < f->sz.width; j++)
          for(int i = 0; i < f->sz.height; i++)
           glVertex3f(f->pts[i][j].x, f->pts[i][j].y, f->pts[i][j].z);
     glEnd();
@@ -691,7 +691,7 @@ void render(GLFWwindow *window, History *history, CvPoint3D32f *camPts,  int trP
 
     glViewport(0, 0, width, height);
 
-    glEnable(GL_BLEND); 
+    glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -705,7 +705,7 @@ void render(GLFWwindow *window, History *history, CvPoint3D32f *camPts,  int trP
     int cj = history->frame->sz.width / 2;
     int ci = history->frame->sz.height / 2;
     CvPoint3D32f **pts = history->frame->pts;
-    //   gluLookAt(scale, scale, scale, 
+    //   gluLookAt(scale, scale, scale,
        //     pts[ci][cj].x, pts[ci][cj].y, -pts[ci][cj].z, 0.0, 1.0, 0.0);
     gluLookAt(scale, scale, scale, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
 
@@ -765,7 +765,7 @@ void render(GLFWwindow *window, History *history, CvPoint3D32f *camPts,  int trP
                 glColor3f(1.0, 0.0, 0.0);//, (100.0-i)/100);
                 assert(histI);
 
-                //if(histI->frame->alignError < 0.03) { //FIXME_ hardcoded thrs 
+                //if(histI->frame->alignError < 0.03) { //FIXME_ hardcoded thrs
                     glRotatef(-CV_MAT_ELEM(*histI->frame->rot, float, 0, 0), 1.0f, 0.0f, 0.0f);
                     glRotatef(-CV_MAT_ELEM(*histI->frame->rot, float, 1, 0), 0.0f, 1.0f, 0.0f);
                     glRotatef(-CV_MAT_ELEM(*histI->frame->rot, float, 2, 0), 0.0f, 0.0f, 1.0f);
@@ -778,7 +778,7 @@ void render(GLFWwindow *window, History *history, CvPoint3D32f *camPts,  int trP
             }
         glPopMatrix();
     }
-   
+
     quadric = gluNewQuadric();
 
 
@@ -814,7 +814,7 @@ void render(GLFWwindow *window, History *history, CvPoint3D32f *camPts,  int trP
      glEnd();
     }
     glBegin(GL_LINES);
-     for(int i = 0; i < trPtsCnt; i++) 
+     for(int i = 0; i < trPtsCnt; i++)
        if(pts3DStatus[1][i] &&
           pts3DStatus[0][i]) {
                glColor3f(1.0, 0.0, 0.0);
@@ -844,7 +844,7 @@ void render(GLFWwindow *window, History *history, CvPoint3D32f *camPts,  int trP
             glBegin(GL_LINES);
              for(int i = 0; i < trPtsCnt; i++) {
               glVertex3f(0.0f, 0.0f, 0.0f);
-              glVertex3f(-camPts[i].x, camPts[i].y, camPts[i].z); //FIXME: revise coordinates! why -camPts?! 
+              glVertex3f(-camPts[i].x, camPts[i].y, camPts[i].z); //FIXME: revise coordinates! why -camPts?!
              }
             glEnd();
         }

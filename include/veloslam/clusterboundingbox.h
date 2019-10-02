@@ -1,7 +1,7 @@
 /**
  * @file
  * @brief calculate  rectangle bounding box and minimal unregular bounding box for cluster
-          the rectangle bounding box can be inclined therefore it can better represent cluster 
+          the rectangle bounding box can be inclined therefore it can better represent cluster
 		  and vehicle direction,the result is stored as a clusterfeature in clusterFeatureArray
  *
  * @author Quanwen Zhu, Wuhan University, China
@@ -21,12 +21,12 @@
 	double x;
 	double y;
 	double angle;
-	PointID pointID; 
+	PointID pointID;
 };
 
  struct OrientedBoundingBox
 {
-	
+
 	double angle;
 	double length;
 	double width;
@@ -34,10 +34,10 @@
 	double area;
 	double newMaxXPointX;
 	double newMaxXPointY;
-	
+
 	double newMaxYPointX;
 	double newMaxYPointY;
-	
+
 	double newMinXPointX;
 	double newMinXPointY;
 
@@ -49,7 +49,7 @@
 
 class BoundingBox
 {
-public: 
+public:
 		BoundingBox(void);
 		~BoundingBox(void);
 		void Initial(void);
@@ -63,17 +63,17 @@ public:
 
 		void CalMinBoundingBox(cluster &gluClusterData,clusterFeature &glu);
 
-private : 
+private :
 		  bool calCandidateBox;
 
 
 		   /**
-		   * all rectangle bounding box candidates 
+		   * all rectangle bounding box candidates
 		   */
 		  std::vector <OrientedBoundingBox> allCandBox;
 
 		   /**
-		   * unregular minBounding box points 
+		   * unregular minBounding box points
 		   */
 		  std::vector <BesiegePoint> minBoundingBox;
 

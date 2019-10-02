@@ -29,13 +29,13 @@ class tf_broadcaster {
   rosbag::Bag bag;
   tf::TransformBroadcaster br;
   geometry_msgs::TransformStamped trans;
-  
-  
+
+
   public:
  // tf_broadcaster(std::vector<MatrixXd> &poses_result);
   int broadcaster_tf();
   //void readtf(std::vector<MatrixXd> &poses_result);
-  
+
 };
 
 #endif

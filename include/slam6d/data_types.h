@@ -19,10 +19,10 @@
 
 /**
  * Representation of a pointer to a data field with no access methods.
- * 
+ *
  * Type-specialized access is gained by deriving from this class and
  * implementing access functions like operator[] and size().
- * 
+ *
  * The PrivateImplementation feature enables RAII-type locking mechanisms
  * used in the scanserver for holding CacheObject-locks. It is protected so
  * that scanserver-unaware code can only construct this class with a pointer
@@ -55,7 +55,7 @@ public:
 	     PrivateImplementation* private_impl = 0) :
   m_pointer(pointer), m_size(size), m_private_impl(private_impl) {
   }
-  
+
   /**
    * Copy-Ctor for passing along via return by value
    *
@@ -70,7 +70,7 @@ public:
     // take ownership of this value, other is a temporary and will deconstruct
     m_private_impl = other.m_private_impl;
   };
-  
+
   /**
    * Same as DataPointer(DataPointer&), except this is for functions returning
    * DataPointer instead of derived classes, so the temporary-ctor is used.
@@ -82,20 +82,20 @@ public:
     m_private_impl = other.m_private_impl;
     other.m_private_impl = 0;
   }
-  
+
   //! Delete the private implementation with its derived dtor
   ~DataPointer() {
     if(m_private_impl != 0)
       delete m_private_impl;
   }
-  
+
   //! Indicator for nullpointer / no data contained if false
   inline bool valid() {
     return m_size != 0;
   }
-  
+
   inline unsigned char* get_raw_pointer() const { return m_pointer; }
-  
+
 protected:
   unsigned char* m_pointer;
   size_t m_size;
@@ -125,7 +125,7 @@ public:
     DataPointer(temp)
   {
   }
-  
+
   SingleArray(SingleArray&& temp) :
     DataPointer(temp)
   {
@@ -135,7 +135,7 @@ public:
     DataPointer(temp)
   {
   }
-  
+
   SingleArray(const SingleArray& temp) :
     DataPointer(temp)
   {
@@ -152,13 +152,13 @@ public:
 	  }
         return *this;
       }
-    
+
   //! Represent the pointer as an array of T
   inline T& operator[](size_t i) const
   {
     return *(reinterpret_cast<T*>(m_pointer) + i);
   }
-  
+
   //! The number of T instances in this array
   size_t size() {
     return m_size / sizeof(T);
@@ -177,7 +177,7 @@ public:
   DataPointer(temp)
   {
   }
-  
+
  TripleArray(TripleArray&& temp) :
   DataPointer(temp)
   {
@@ -187,14 +187,14 @@ public:
   DataPointer(temp)
   {
   }
-  
+
  TripleArray(const TripleArray& temp) :
   DataPointer(temp)
   {
   }
 
 
-    //copy assignment operator moves the object 
+    //copy assignment operator moves the object
         inline TripleArray& operator=(const TripleArray & other)
       {
         if(&other!=this)
@@ -211,7 +211,7 @@ public:
   {
     return reinterpret_cast<T*>(m_pointer) + (i*3);
   }
-  
+
   //! The number of T[3] instances in this array
   size_t size() const {
     return m_size / (3 * sizeof(T));
@@ -228,18 +228,18 @@ public:
     DataPointer(temp)
   {
   }
-  
+
   SingleObject(SingleObject&& temp) :
     DataPointer(temp)
   {
   }
-  
+
   //! Type-cast
   inline T& get() const
   {
     return *reinterpret_cast<T*>(m_pointer);
   }
-  
+
   //! There is only one object in here
   size_t size() const {
     return 1;
@@ -262,18 +262,18 @@ public:
     for(size_t i = 0; i < size; ++i)
       m_array[i] = data[i];
   }
-  
+
   //! Removes the temporary array on destruction (RAII)
   ~PointerArray() {
     delete[] m_array;
   }
-  
+
   //! Conversion operator to interface the TripleArray to a T** array
   inline T** get() const { return m_array; }
 private:
   T** m_array;
 };
-  
+
 // TODO: naming, see scan.h
 typedef TripleArray<double> DataXYZ;
 typedef TripleArray<float> DataXYZFloat;

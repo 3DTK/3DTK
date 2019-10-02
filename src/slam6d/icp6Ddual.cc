@@ -7,7 +7,7 @@
  *
  */
 
-/** @file 
+/** @file
  *  @brief Implementation of the ICP error function minimization
  *  via dual quaternions
  *

@@ -18,7 +18,7 @@ namespace fbr{
   {
     CV_Assert( !img.empty() );
     cv::Point center( cvRound(p.pt.x * draw_multiplier), cvRound(p.pt.y * draw_multiplier) );
-    
+
     if( flags & cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS )
       {
         int radius = cvRound(p.size/2 * draw_multiplier); // KeyPoint::size is a diameter
@@ -143,7 +143,7 @@ namespace fbr{
     cv::Point2f dpt2 = cv::Point2f( pt2.x, min(pt2.y+outImg1.rows, float(outImg.rows-1)) );
     //dpt2 = Point2f( std::min(pt2.x+outImg1.cols, float(outImg.cols-1)), pt2.y );
 
-    line( outImg, 
+    line( outImg,
 	  cv::Point(cvRound(pt1.x*draw_multiplier), cvRound(pt1.y*draw_multiplier)),
 	  cv::Point(cvRound(dpt2.x*draw_multiplier), cvRound(dpt2.y*draw_multiplier)),
           color, 4, CV_AA, draw_shift_bits );

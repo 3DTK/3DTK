@@ -57,7 +57,7 @@ public:
 
   virtual size_t getFrameCount();
   virtual void getFrame(size_t i, const double*& pose_matrix, AlgoType& type);
-  
+
   //! Constructor for creation of Scans without openDirectory
   BasicScan(double * rPos, double * rPosTheta, std::vector<double*> points);
   //! Constructor for creation of Scans without openDirectory,

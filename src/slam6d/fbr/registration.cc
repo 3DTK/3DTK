@@ -23,7 +23,7 @@ namespace fbr{
     for(int i = 0; i < 16; i++)
       bestAlign[i] = 0;
   }
-  
+
   registration::registration(){
     minDistance = 50;
     minError = 50;
@@ -34,7 +34,7 @@ namespace fbr{
     for(int i = 0; i < 16; i++)
       bestAlign[i] = 0;
   }
-  
+
   int registration::getCoord(vector<cv::KeyPoint> fKeypoints, vector<cv::KeyPoint> sKeypoints, vector<cv::DMatch> matches, cv::Mat fPMap, cv::Mat sPMap, int idx, cv::Point3f& cq, cv::Point3f& ct){
     int x, y;
     y = fKeypoints[matches[idx].queryIdx].pt.x;
@@ -49,11 +49,11 @@ namespace fbr{
     if(sqr != 0){
       cq.x = _fPMap(x,y)[0];
       cq.y = _fPMap(x,y)[1];
-      cq.z = _fPMap(x,y)[2]; 
+      cq.z = _fPMap(x,y)[2];
     }
     else
       return 0;
-   
+
     y = sKeypoints[matches[idx].trainIdx].pt.x;
     x = sKeypoints[matches[idx].trainIdx].pt.y;
     if(sKeypoints[matches[idx].trainIdx].pt.x - x > 0.5)
@@ -69,7 +69,7 @@ namespace fbr{
     }
     else
       return 0;
-  
+
     return 1;
   }
 
@@ -148,18 +148,18 @@ namespace fbr{
       }
     }
     //check for mininlier and find the best align
-    if(eIdx > minInlier){ 
+    if(eIdx > minInlier){
       double aError = iError / eIdx;
       if(aError - iInfluence*eIdx < bestError - iInfluence*bestErrorIndex){
 	bestError = aError;
 	bestErrorIndex = eIdx;
-	for(int a = 0; a < 16; a++) 
+	for(int a = 0; a < 16; a++)
 	  bestAlign[a] = align[a];
       }
     }
     return 1;
   }
-  
+
   void registration::findRegistration(cv::Mat fPMap, vector<cv::KeyPoint> fKeypoints, cv::Mat sPMap, vector<cv::KeyPoint> sKeypoints, vector<cv::DMatch> matches){
     //go through all matches
     if(rMethod == ALL){
@@ -209,7 +209,7 @@ namespace fbr{
   unsigned int registration::getBestErrorIndex(){
     return bestErrorIndex;
   }
-  
+
   void registration::getDescription(){
     cout<<"Registration minDistance: "<<minDistance<<", minError: "<<minError<<", minInlier: "<<minInlier<<", registrationMethod: "<<registrationMethodToString(rMethod)<<"."<<endl;
     cout<<"Registration finished with besterror of: "<<bestError<<" and best error index of: "<<bestErrorIndex<<"."<<endl;
@@ -220,6 +220,6 @@ namespace fbr{
       cout<<bestAlign[2]<<"  "<<bestAlign[6]<<"  "<<bestAlign[10]<<"  "<<bestAlign[14]<<endl;
       cout<<bestAlign[3]<<"  "<<bestAlign[7]<<"  "<<bestAlign[11]<<"  "<<bestAlign[15]<<endl;
     }
-    cout<<endl; 
+    cout<<endl;
   }
 }

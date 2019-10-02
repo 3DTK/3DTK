@@ -9,10 +9,10 @@
  * The grids will be added to the parcel
  * The parcel can be stored and read so that it must not permanant be
  * in the memory.
- * 
+ *
  * @author Andre Schemschatt, Uwe Hebbelmann, Sebastian Stock
  * @date 17.2.08
- */ 
+ */
 class parcel : public grid
 {
  public:

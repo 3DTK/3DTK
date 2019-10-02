@@ -12,7 +12,7 @@
 static inline CvMat *mat3D() { return cvCreateMat(3,1,CV_32FC1); }
 
 static CvMat *matFromP3D(CvPoint3D32f p) {
-    CvMat *m = mat3D(); 
+    CvMat *m = mat3D();
     CV_MAT_ELEM(*m, float, 0, 0) = p.x;
     CV_MAT_ELEM(*m, float, 1, 0) = p.y;
     CV_MAT_ELEM(*m, float, 2, 0) = p.z;
@@ -53,16 +53,16 @@ static void fillM(CvMat *m, CvMat *x, CvMat *y, CvMat *z) {
     CV_MAT_ELEM(*m, float, 0, 2) = CV_MAT_ELEM(*z, float, 0, 0);
     CV_MAT_ELEM(*m, float, 1, 2) = CV_MAT_ELEM(*z, float, 1, 0);
     CV_MAT_ELEM(*m, float, 2, 2) = CV_MAT_ELEM(*z, float, 2, 0);
-} 
+}
 
 
 // Horn's fast method
 void estimatePose3D(CvPoint3D32f *prev, CvPoint3D32f *curr, CvMat *rot, CvMat *trn) {
     CvMat *x1 = mat3D();
-    CvMat *y1 = mat3D(); 
+    CvMat *y1 = mat3D();
     CvMat *z1 = mat3D();
     CvMat *x2 = mat3D();
-    CvMat *y2 = mat3D(); 
+    CvMat *y2 = mat3D();
     CvMat *z2 = mat3D();
     CvMat *p1 = matFromP3D(prev[0]);
     CvMat *p2 = matFromP3D(prev[1]);
@@ -80,11 +80,11 @@ void estimatePose3D(CvPoint3D32f *prev, CvPoint3D32f *curr, CvMat *rot, CvMat *t
     CvMat *rotM = cvCreateMat(3, 3, CV_32FC1);
     cvGEMM(m1, m2, 1.0, NULL, 1.0, rotM, CV_GEMM_B_T);
 
-    CvMat *rp1 = mat3D(); 
+    CvMat *rp1 = mat3D();
     cvGEMM(rotM, p1, 1.0, NULL, 1.0, rp1, 0);
-    CvMat *rp2 = mat3D(); 
+    CvMat *rp2 = mat3D();
     cvGEMM(rotM, p2, 1.0, NULL, 1.0, rp2, 0);
-    CvMat *rp3 = mat3D(); 
+    CvMat *rp3 = mat3D();
     cvGEMM(rotM, p3, 1.0, NULL, 1.0, rp3, 0);
     CvMat *rp12 = mat3D();
     cvAdd(rp1, rp2, rp12, NULL);

@@ -8,7 +8,7 @@
  */
 
 /**
- * @file 
+ * @file
  * @author Dorit Borrmann. Institute of Computer Science, University of Osnabrueck, Germany.
 */
 
@@ -45,7 +45,7 @@ using std::endl;
 #include "shapes/shape.h"
 #include "shapes/ransac.h"
 
-enum plane_alg { 
+enum plane_alg {
   RHT, SHT, PHT, PPHT, APHT, RANSAC
 };
 
@@ -96,7 +96,7 @@ void usage(char* prog) {
       << "         Use cubesize to change the size of the smallest cube in the octtree" << endl
       << endl
     	  << endl << endl;
-  
+
   cout << bold << "EXAMPLES " << normal << endl
 	  << "   " << prog << " -m 500 -r 5 dat" << endl
 	  << "   " << prog << " --max=5000 -r 10.2 dat" << endl
@@ -123,7 +123,7 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &start, int
   /* options descriptor */
   // 0: no arguments, 1: required argument, 2: optional argument
   static struct option longopts[] = {
-    { "format",          required_argument,   0,  'f' },  
+    { "format",          required_argument,   0,  'f' },
     { "max",             required_argument,   0,  'm' },
     { "min",             required_argument,   0,  'M' },
     { "start",           required_argument,   0,  's' },
@@ -137,7 +137,7 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &start, int
   };
 
   cout << endl;
-  while ((c = getopt_long(argc, argv, "f:r:s:e:m:M:p:O:q", longopts, NULL)) != -1) 
+  while ((c = getopt_long(argc, argv, "f:r:s:e:m:M:p:O:q", longopts, NULL)) != -1)
     switch (c)
 	 {
 	 case 'r':
@@ -156,7 +156,7 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &start, int
        abort();
      }
      break;
-   case 'p': 
+   case 'p':
       if(strcasecmp(optarg, "rht") == 0) alg = RHT;
       else if(strcasecmp(optarg, "sht") == 0) alg = SHT;
       else if(strcasecmp(optarg, "pht") == 0) alg = PHT;
@@ -214,11 +214,11 @@ int parseArgs(int argc, char **argv, string &dir, double &red, int &start, int
  * argument.
  *
  */
-int main(int argc, char **argv) 
+int main(int argc, char **argv)
 {
 
   cout << "(c) Jacobs University Bremen, gGmbH, 2010" << endl << endl;
-  
+
   if (argc <= 1) {
     usage(argv[0]);
   }
@@ -235,23 +235,23 @@ int main(int argc, char **argv)
   plane_alg alg    = RHT;
   bool   scanserver = false;
   float cube_size = 50.0;
-  
+
   cout << "Parse args" << endl;
   parseArgs(argc, argv, dir, red, start, maxDist, minDist, octree, type, alg, quiet, scanserver, cube_size);
   int fileNr = start;
-  string planedir = dir + "planes"; 
+  string planedir = dir + "planes";
 
 #ifdef _WIN32
   int success = mkdir(planedir.c_str());
 #else
   int success = mkdir(planedir.c_str(), S_IRWXU|S_IRWXG|S_IRWXO);
 #endif
-  if(success == 0) { 
+  if(success == 0) {
     if(!quiet) {
       cout << "Writing planes to " << planedir << endl;
     }
   } else if(errno == EEXIST) {
-    cout << "Directory " << planedir << " exists already.  CONTINUE" << endl; 
+    cout << "Directory " << planedir << " exists already.  CONTINUE" << endl;
   } else {
     cerr << "Creating directory " << planedir << " failed" << endl;
     exit(1);
@@ -271,7 +271,7 @@ int main(int argc, char **argv)
   }
 
   if (!quiet) cout << "start plane detection" << endl;
-  long starttime = GetCurrentTimeInMilliSec(); 
+  long starttime = GetCurrentTimeInMilliSec();
   if(alg >= RANSAC) {
       Hough hough(Scan::allScans[0], quiet);
 
@@ -324,7 +324,7 @@ int main(int argc, char **argv)
     starttime = (GetCurrentTimeInMilliSec() - starttime);
     cout << "Time for Constructor call: " << starttime << endl;
 
-    starttime = GetCurrentTimeInMilliSec(); 
+    starttime = GetCurrentTimeInMilliSec();
     if (!quiet) cout << "algorithm: " << alg << endl;
     // choose Hough method here
     switch(alg) {

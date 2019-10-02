@@ -132,25 +132,25 @@ void ClientMetric::print()
 #ifdef WITH_SCANSERVER
   cout << "Time for all ClientInterface messages:" << endl;
   printTime(clientinterface_time);
-  
+
   cout << "  [" << endl;
-  
+
   cout << "    Time for cache misses:" << endl;
   printTime(cache_miss_time, 3);
-  
+
   cout << "    Time for cache allocations:" << endl;
   printTime(allocate_time, 3);
-  
+
   // TODO: invalidations too?
-  
+
   cout << "    Time for frame calls:" << endl;
   printTime(frames_time, 3);
-  
+
   cout << "  ]" << endl;
-  
+
   cout << endl;
 #endif //WITH_SCANSERVER
-  
+
   // Scan: Loading, reducing and SearchTree related ones
 #ifdef WITH_SCANSERVER
   // barebone preparation and parameter setting
@@ -158,13 +158,13 @@ void ClientMetric::print()
     cout << "Time for loading directory:" << endl;
     printTime(read_scan_time);
   }
-  
+
   // getXYZ in calcReducedPoints
   if(scan_load_time.size()) {
     cout << "Time for loading scans:" << endl;
     printTime(scan_load_time);
   }
-  
+
 #else //WITH_SCANSERVER
   // load all scans
   if(read_scan_time.size()) {
@@ -172,42 +172,42 @@ void ClientMetric::print()
     printTime(read_scan_time);
   }
 #endif //WITH_SCANSERVER
-  
+
   if(calc_reduced_points_time.size()) {
     cout << "Time for reducing scans:" << endl;
     printTime(calc_reduced_points_time);
   }
-  
+
   // old: red_lum for SearchTree, duplicating all contained reduced points and copying them into red_lum again for MetaScans
   // new: caching reduced points for saving time
   if(copy_original_time.size()) {
     cout << "Time for copying reduced points:" << endl;
     printTime(copy_original_time);
   }
-  
+
   if(create_tree_time.size()) {
     cout << "Time for creating SearchTree:" << endl;
     printTime(create_tree_time);
   }
-  
+
 #ifdef WITH_SCANSERVER
   // only for new, replaces copying reduced points from old
   if(create_metatree_time.size()) {
     cout << "Time for creating meta-SearchTree:" << endl;
     printTime(create_metatree_time);
   }
-  
+
   if(on_demand_reduction_time.size()) {
     cout << "Time in on-demand reduction [reduction+transform+copy / copy]:" << endl;
     printTime(on_demand_reduction_time);
   }
 #endif //WITH_SCANSERVER
-  
+
   if(transform_time.size()) {
     cout << "Time for transform:" << endl;
     printTime(transform_time);
   }
-  
+
   // SLAM
   if(matching_time.size()) {
     cout << endl;
@@ -225,6 +225,6 @@ void ClientMetric::print()
       << "s" << endl;
 #endif //WITH_SCANSERVER
   }
-  
+
   cout << endl;
 }

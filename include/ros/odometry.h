@@ -12,7 +12,7 @@ namespace volksbotRT {
   class Odometry {
     private:
 
-      ros::NodeHandle n; 
+      ros::NodeHandle n;
       ros::Publisher publisher;
       tf::TransformBroadcaster odom_broadcaster;
       ros::Subscriber subscriber;
@@ -31,10 +31,10 @@ namespace volksbotRT {
       double B;
 
       static const double covariance[36];
-      
+
 
       nav_msgs::Odometry odom;
-      
+
       geometry_msgs::Quaternion odom_quat; //quaternion rotation
 
     public:

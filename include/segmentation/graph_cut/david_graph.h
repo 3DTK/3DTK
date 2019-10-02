@@ -1,6 +1,6 @@
  /*
  * Copyright (C) David Redondo
- * 
+ *
  * Released under the GPL version 3.
  *
  */
@@ -27,7 +27,7 @@ struct edge{
     V v;
     W w;
 };
- 
+
 
 
 template <typename V, typename W = std::tuple<>, typename Comp=std::less<V>>
@@ -69,7 +69,7 @@ void print_grid_graph(const grid_graph<W>& g)
     for(auto v: g.adj_list) {
         std::cout << "\"(" << v.first.first << ',' << v.first.second << ")\"\n";
         for(auto e: v.second){
-            std::cout << "\"(" << v.first.first << ',' << v.first.second << ")\" -- \"(" << e.first.first << ',' 
+            std::cout << "\"(" << v.first.first << ',' << v.first.second << ")\" -- \"(" << e.first.first << ','
                 << e.first.second << ")\"[label=" << e.second << "]\n";
         }
     }
@@ -78,7 +78,7 @@ void print_grid_graph(const grid_graph<W>& g)
 
 //undirected graph class
 template <typename V, typename W, typename Comp>
-class graph 
+class graph
 {
 friend void print_grid_graph<>(const graph<V, W, Comp>&);
 //friend graph<V, W> make_grid_graph<W>(int, int, bool);
@@ -95,7 +95,7 @@ public:
     {
         add_edge(e.u, e.v, e.w);
     }
-    void add_edge(const V& u, const V& v, const W& w) 
+    void add_edge(const V& u, const V& v, const W& w)
     {
         _vertices.emplace(u);
         _vertices.emplace(v);
@@ -103,7 +103,7 @@ public:
         adj_list[v].emplace_back(u, w);
 
     }
-    
+
     template <typename Pred>
     void remove_vertices(Pred&& pred)
     {
@@ -117,31 +117,31 @@ public:
             }
         }
     }
-    
+
     void remove_vertex(const V& v)
     {
         remove_edges(v);
         _vertices.erase(v);
     }
-    
+
     void remove_edge(const V& u, const V& v)
     {
         auto edges = find_edge(u, v);
         adj_list[u].erase(edges.first);
         adj_list[v].erase(edges.second);
     }
-    
-    
+
+
     template <typename Pred>
     void remove_edges(Pred&& pred)
     {
         for(const V& vertex : _vertices) {
             auto& edges = adj_list[vertex];
             edges.erase(std::remove_if(edges.begin(), edges.end(),
-                [&](std::pair<V, W> e){return pred(vertex, e.first, e.second);}), edges.end()); 
+                [&](std::pair<V, W> e){return pred(vertex, e.first, e.second);}), edges.end());
         }
     }
-    
+
     void set_weight(const Edge& e)
     {
         set_weight(e.u, e.v, e.w);
@@ -150,7 +150,7 @@ public:
     {
         auto edges = find_edge(u, v);
         edges.second->second = edges.first->second = w;
-        
+
     }
 
      std::vector<graph<V, W, Comp>> connected_components() const
@@ -166,12 +166,12 @@ public:
         }
         return components;
     }
-    
+
     const std::set<V>&  vertices() const
     {
         return _vertices;
     }
-    
+
     const std::vector<std::pair<V, W>>& edges(const V& v) const
     {
         return adj_list.at(v);
@@ -207,7 +207,7 @@ private:
             }
         }
     }
-    
+
     void remove_edges(const V& v)
     {
         auto edges = adj_list[v];

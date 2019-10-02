@@ -23,12 +23,12 @@ public:
    *	Default constructor
    */
   inline Point();
-  
+
   /**
    *	Copy constructor
    */
   inline Point(const Point& p);
-  
+
   /**
    *	Constructor with an array, i.e., vecctor of coordinates
    */
@@ -55,7 +55,7 @@ public:
    */
   inline Point(const double _x,  const double _y,  const double _z,
 			const double _nx, const double _ny, const double _nz);
- 
+
   inline Point operator+(const Point &p) const;
   inline Point operator-(const Point &p) const;
   inline Point& operator-=(const Point &p);
@@ -109,13 +109,13 @@ public:
     res.z = X.x * Y.y - X.y * Y.x;
     return res;
   };
-  
+
   static inline Point norm(const Point &p) {
     double l = sqrt(p.x*p.x + p.y*p.y + p.z*p.z);
     Point res(p.x/l, p.y/l, p.z/l);
     return res;
   };
-  
+
 };
 
 inline Point operator*(const double &v, const Point &p) {

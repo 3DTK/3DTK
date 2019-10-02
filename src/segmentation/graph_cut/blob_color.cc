@@ -1,6 +1,6 @@
  /*
  * Copyright (C) David Redondo
- * 
+ *
  * Released under the GPL version 3.
  *
  */
@@ -30,8 +30,8 @@ void my_grid::write_to_ppm(const std::string& path)
         picture << '\n';
     }
     picture.close();
-    
-    
+
+
 }
 
 inline std::pair<int, int> grid_coordinates(const cv::Vec3d& p, const cv::Vec3d& pv1, const cv::Vec3d& pv2)
@@ -45,8 +45,8 @@ inline std::pair<int, int> grid_coordinates(const cv::Vec3d& p, const cv::Vec3d&
 
 
 std::vector<segment> segment_plane(const plane_candidate& plane, double cell_size)
-{   
-    
+{
+
     std::vector<cv::Vec3d> projected_points(plane.points.size());
     /*Projects points onto the plane*/
     auto project = [&](const cv::Vec3f* p){return cv::Vec3d{*p}- plane.normal*plane_point_distance(*p, plane.normal, plane.distance);};
@@ -98,7 +98,7 @@ std::vector<segment> segment_plane(const plane_candidate& plane, double cell_siz
             }
         }
     }
-    
+
     std::map<int, int> indices;
     int next_index = 0;
     std::vector<segment> segments(num_regions, {{}, plane.normal, plane.distance});
@@ -110,7 +110,7 @@ std::vector<segment> segment_plane(const plane_candidate& plane, double cell_siz
             indices[region] = next_index++;
         }
         segments[indices[region]].points.emplace_back(*plane.points[i]);
-        
+
     }
     if (gcs_debug) {
         static int i=1;
@@ -126,7 +126,7 @@ std::vector<segment> segment_plane(const plane_candidate& plane, double cell_siz
                 }
                 picture.write((char*)(&color[0]),3);
                 picture.flush();
-                
+
             }
         }
         picture.close();

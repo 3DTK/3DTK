@@ -18,7 +18,7 @@ void ekffilter::addOdom(const nav_msgs::Odometry& odom) {
   tf::quaternionMsgToTF(odom.pose.pose.orientation, q);
   odom_meas_  = tf::Transform(q, tf::Vector3(odom.pose.pose.position.x, odom.pose.pose.position.y, 0));
   for (unsigned int i=0; i<6; i++)
-    for (unsigned int j=0; j<6; j++) 
+    for (unsigned int j=0; j<6; j++)
       odom_covariance_(i+1, j+1) = odom.pose.covariance[6*i+j];
 
   my_filter_.addMeasurement(tf::StampedTransform(odom_meas_.inverse(), odom_stamp_, "base_link", "wheelodom"), odom_covariance_);
@@ -31,7 +31,7 @@ void ekffilter::addOdom(const nav_msgs::Odometry& odom) {
   }
   updateHistory();
 }
-  
+
 
 void ekffilter::addImu(const sensor_msgs::Imu& imu) {
   imu_stamp_ = imu.header.stamp;
@@ -58,7 +58,7 @@ void ekffilter::addImu(const sensor_msgs::Imu& imu) {
 
   updateHistory();
 }
-  
+
 
 
 
@@ -91,5 +91,5 @@ void ekffilter::updateHistory() {
       ROS_WARN("Robot pose ekf diagnostics discovered a potential problem");
   }
 
-  
+
 }

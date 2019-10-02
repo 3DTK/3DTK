@@ -36,13 +36,13 @@ PMD *initPMD(const char* plugin, const char *ip) {
         exit(1);
     }
 
-    //pmdUpdate(io->hnd); 
+    //pmdUpdate(io->hnd);
     //pmdGetSourceDataDescription(io->hnd, &io->dd);
     io->dd.std.numColumns = 64;
     io->dd.std.numRows = 50; //FIXME!
 
     io->data = (float*)malloc(io->dd.std.numColumns * io->dd.std.numRows * sizeof(float));
- 
+
     return io;
 }
 
@@ -58,7 +58,7 @@ void releasePMD(PMD **pmd) {
 }
 
 
-static float max(const PMD *p) {    
+static float max(const PMD *p) {
     float max = 0.0f;
     for(unsigned int k = 0; k < p->dd.std.numRows*p->dd.std.numColumns; k++) {
         if(p->data[k] > max) max = p->data[k];
@@ -78,7 +78,7 @@ CvSize pmdGetSize(const PMD *p) {
 IplImage *toIplImage(const PMD *p, IplImage *img = 0) {
     int cols = p->dd.std.numColumns;
     int rows = p->dd.std.numRows;
-    
+
     IplImage *imgp;
     if(!img) imgp = cvCreateImage(pmdGetSize(p), 8, 1);
     else imgp = img;
@@ -99,7 +99,7 @@ IplImage *toIplImage(const PMD *p, IplImage *img = 0) {
     //TODO: not defined yet
     // with this function pmdProjectToCartesian would look like:
     // pmdProjectToCartesian pt depth mat = depth * unionVec pt mat
-     
+
     return cvPoint3D32f(0,0,0);
 }*/
 
@@ -110,7 +110,7 @@ static inline CvPoint3D32f pmdProjectToCartesian(const CvMat *intrinsicMatrix, c
   float cx = cvmGet(intrinsicMatrix, 0, 2);
   float fy = cvmGet(intrinsicMatrix, 1, 1);
   float cy = cvmGet(intrinsicMatrix, 1, 2);
-  
+
   float u = uv.x;
   float v = uv.y;
   float r = dist;
@@ -121,7 +121,7 @@ static inline CvPoint3D32f pmdProjectToCartesian(const CvMat *intrinsicMatrix, c
   float cy2 = cy*cy;
   float fx2 = fx*fx;
   float fy2 = fy*fy;
-  
+
   // Reverse Projection
   float squareroot = sqrt(
 					 cy2 * fx2 +
@@ -132,7 +132,7 @@ static inline CvPoint3D32f pmdProjectToCartesian(const CvMat *intrinsicMatrix, c
 					 2 * cy * fx2 * v +
 					 fx2 * v2
 					 );
-   
+
   return cvPoint3D32f((fy * r * (cx - u)) / squareroot,
 	                  (fx * r * (cy - v)) / squareroot,
 	                  (fx * fy * r) / squareroot);

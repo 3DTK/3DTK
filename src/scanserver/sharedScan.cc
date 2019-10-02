@@ -170,7 +170,7 @@ PointFilter SharedScan::getPointFilter() const
     r.setRangeMutator(m_range_mutator_param);
   if(m_scale_param_set)
     r.setScale(m_scale);
-  
+
   return r;
 }
 

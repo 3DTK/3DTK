@@ -160,17 +160,17 @@ void calculateNormalsFAST(vector<Point> &normals,
   ColumnVector rPos(3);
   for (int i = 0; i < 3; ++i)
     rPos(i+1) = _rPos[i];
-  
+
   //!!!!!!!!!!
 #if 0
   int height = extendedMap.size();
   int width  = extendedMap[0].size();
-  
+
   ofstream human_pgm("image.range1", ios::out);
 
   human_pgm << "P2\n" << width << " " << height
             << "\n" << (int)(max*100) << "\n";
-  
+
   for (int i = 0; i < height; i++) {
     for (int j = width-1; j >= 0; j--) {
       human_pgm << (float)(img.at<float>(i,j)*100) << " ";
@@ -180,7 +180,7 @@ void calculateNormalsFAST(vector<Point> &normals,
   human_pgm.close();
 #endif
   //!!!!!!!!!!!!!
-  
+
   points.clear();
   int nr_points = 0;
 
@@ -191,13 +191,13 @@ void calculateNormalsFAST(vector<Point> &normals,
       double n[3]; //, m;
       nr_points = extendedMap[i][j].size();
       if (nr_points == 0 ) continue;
-      
+
       for (int k = 0; k < nr_points; k++) {
         cv::Vec3f p = extendedMap[i][j][k];
 
         swap(p[1],p[2]);
         p[1]*=-1;
-        
+
         double p_cart[3];//, p_polar[3];
         p_cart[0] = (double)(p[0]);
         p_cart[1] = (double)(p[1]);
@@ -207,7 +207,7 @@ void calculateNormalsFAST(vector<Point> &normals,
         rho = sqrt(sqr(p_cart[0]) + sqr(p_cart[1]) + sqr(p_cart[2]));
         phi = acos(p_cart[2]/rho) - 30.0 * deg2rad;
         theta = atan2(p_cart[1], p_cart[0]) + 180.0 * deg2rad;
-                
+
         /*
           toPolar(p_cart, p_polar);
 
@@ -218,7 +218,7 @@ void calculateNormalsFAST(vector<Point> &normals,
      phi = 360.0 - phi;
      //@
      phi += 90; if (phi > 360) phi -= 360;
-     //@ 
+     //@
      phi = phi * 2.0 * M_PI / 360.0;
      theta -= 90;
      theta *= -1;
@@ -228,10 +228,10 @@ void calculateNormalsFAST(vector<Point> &normals,
      //        phi -= rad(30.0);
 
      */
-     
+
         // Sobel Filter for the derivative
         dRdTheta = dRdPhi = 0.0;
-        
+
         if (i == 0 || i == extendedMap.size()-1 ||
             j == 0 || j == extendedMap[0].size()-1) {
           points.push_back(Point(p_cart[0], p_cart[1], p_cart[2]));
@@ -248,7 +248,7 @@ void calculateNormalsFAST(vector<Point> &normals,
         dRdPhi -= 100 * 10*img.at<float>(x+1,y);
         dRdPhi -= 100 * 3 *img.at<float>(x+1,y-1);
         dRdPhi -= 100 * 3 *img.at<float>(x+1,y+1);
-        
+
         dRdTheta += 100 * 10*img.at<float>(x,y-1);
         dRdTheta += 100 * 3 *img.at<float>(x-1,y-1);
         dRdTheta += 100 * 3 *img.at<float>(x+1,y-1);
@@ -261,17 +261,17 @@ void calculateNormalsFAST(vector<Point> &normals,
         dRdPhi *= 20;
 
 	   phi += rad(30.0);
-        
+
         n[0] = cos(theta) * sin(phi) - sin(theta) * dRdTheta / rho / sin(phi) +
           cos(theta) * cos(phi) * dRdPhi / rho;
-        
+
         n[1] = sin(theta) * sin(phi) + cos(theta) * dRdTheta / rho / sin(phi) +
           sin(theta) * cos(phi) * dRdPhi / rho;
-        
+
         n[2] =  cos(phi) - sin(phi) * dRdPhi / rho;
 
         n[2] = -n[2];
-        
+
         p_cart[1]*=-1;
         swap(p_cart[1],p_cart[2]);
 
@@ -290,7 +290,7 @@ void calculateNormalsFAST(vector<Point> &normals,
         }
         norm_vector = norm_vector / norm_vector.NormFrobenius();
 #pragma omp critical
-	   {        
+	   {
 		points.push_back(Point(p_cart[0], p_cart[1], p_cart[2]));
 		normals.push_back(Point(norm_vector(1),norm_vector(2),norm_vector(3)));
 	   }

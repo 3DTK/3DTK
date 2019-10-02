@@ -18,7 +18,7 @@ namespace fbr{
     sDir = dir;
     sNumber = number;
     sFormat = format;
-    zMax = numeric_limits<double>::min(); 
+    zMax = numeric_limits<double>::min();
     zMin = numeric_limits<double>::max();
     nPoints = 0;
     sType = type;
@@ -42,7 +42,7 @@ namespace fbr{
     sDir = dir;
     sNumber = number;
     sFormat = format;
-    zMax = numeric_limits<double>::min(); 
+    zMax = numeric_limits<double>::min();
     zMin = numeric_limits<double>::max();
     nPoints = 0;
     sType = type;
@@ -65,7 +65,7 @@ namespace fbr{
     sDir = dir;
     sNumber = number;
     sFormat = format;
-    zMax = numeric_limits<double>::min(); 
+    zMax = numeric_limits<double>::min();
     zMin = numeric_limits<double>::max();
     nPoints = 0;
     sType = type;
@@ -89,7 +89,7 @@ namespace fbr{
     sDir = dir;
     sNumber = number;
     sFormat = format;
-    zMax = numeric_limits<double>::min(); 
+    zMax = numeric_limits<double>::min();
     zMin = numeric_limits<double>::max();
     nPoints = 0;
     sType = stringToScannerType("RIEGL");
@@ -110,7 +110,7 @@ namespace fbr{
     sDir = dir;
     sNumber = number;
     sFormat = format;
-    zMax = numeric_limits<double>::min(); 
+    zMax = numeric_limits<double>::min();
     zMin = numeric_limits<double>::max();
     nPoints = 0;
     sType = stringToScannerType("RIEGL");
@@ -140,7 +140,7 @@ namespace fbr{
     DataXYZ xyz = source->get("xyz");
     DataReflectance xyz_reflectance = (((DataReflectance)source->get("reflectance")).size() == 0) ?
       source->create("reflectance", sizeof(float)*xyz.size())
-      : source->get("reflectance"); 
+      : source->get("reflectance");
     if(((DataReflectance)source->get("reflectance")).size() == 0){
       for(unsigned int i = 0; i < xyz.size(); i++)
 	xyz_reflectance[i] = 255;
@@ -150,13 +150,13 @@ namespace fbr{
     nPoints = xyz.size();
     cv::MatIterator_<cv::Vec4f> it;
     scan.create(nPoints,1,CV_32FC(4));
-    scan = cv::Scalar::all(0); 
+    scan = cv::Scalar::all(0);
     it = scan.begin<cv::Vec4f>();
-    
+
     cv::MatIterator_<cv::Vec3f> itColor;
     if(xyz_rgb.size() != 0){
       scanColor.create(nPoints,1,CV_32FC(3));
-      scanColor = cv::Scalar::all(0); 
+      scanColor = cv::Scalar::all(0);
       itColor = scanColor.begin<cv::Vec3f>();
     }
 
@@ -166,18 +166,18 @@ namespace fbr{
       y = xyz[i][1];
       z = xyz[i][2];
       reflectance = xyz_reflectance[i];
-           
-      //normalize the reflectance                                     
+
+      //normalize the reflectance
       reflectance += 32;
       reflectance /= 64;
       reflectance -= 0.2;
       reflectance /= 0.3;
       //reflectance -= 1300;
       //reflectance /= 300;
-      
+
       if (reflectance < 0) reflectance = 0;
       if (reflectance > 1) reflectance = 1;
-      
+
       (*it)[0] = x;
       (*it)[1] = y;
       (*it)[2] = z;
@@ -189,10 +189,10 @@ namespace fbr{
 	++itColor;
       }
 
-      //finding min and max of z                                      
+      //finding min and max of z
       if (z  > zMax) zMax = z;
       if (z  < zMin) zMin = z;
-      
+
       ++it;
     */
 
@@ -202,7 +202,7 @@ namespace fbr{
       string scanFileName = sDir + "scan" + to_string(sNumber,3) + ".oct";
       pointtype = BOctTree<sfloat>::readType(scanFileName);
     }
-    ScanColorManager *scm = new ScanColorManager(4096, pointtype);  
+    ScanColorManager *scm = new ScanColorManager(4096, pointtype);
 
     Scan * source =  Scan::allScans[0];
 
@@ -216,30 +216,30 @@ namespace fbr{
     ///
     //set the parameters for the oct
     source->setOcttreeParameter(red, voxelSize, pointtype, loadOct, saveOct);
-    
+
     //loading oct
     BOctTree<float>* btree = ((BasicScan*)source)->convertScanToShowOcttree();
-    
+
     // show structures
     // associate show octtree with the scan and hand over octtree pointer ownership
     Show_BOctTree<sfloat>* tree = new Show_BOctTree<sfloat>(btree, scm);
-    
+
     //get points from octtree and create panorama images
     vector<float*> points;
     tree->getTree()->AllPoints(points);
 
     Scan::closeDirectory();
-    
+
     nPoints = points.size();
     cv::MatIterator_<cv::Vec4f> it;
     scan.create(nPoints,1,CV_32FC(4));
-    scan = cv::Scalar::all(0); 
+    scan = cv::Scalar::all(0);
     it = scan.begin<cv::Vec4f>();
 
     cv::MatIterator_<cv::Vec3f> itColor;
     if(pointtype.hasColor()){
       scanColor.create(nPoints,1,CV_32FC(3));
-      scanColor = cv::Scalar::all(0); 
+      scanColor = cv::Scalar::all(0);
       itColor = scanColor.begin<cv::Vec3f>();
     }
 
@@ -255,8 +255,8 @@ namespace fbr{
       }
       else
 	reflectance = 255;
-      
-      //normalize the reflectance                                           
+
+      //normalize the reflectance
       reflectance = fbr::normalizeTheReflectance(reflectance, sType, minReflectance, maxReflectance);
       /*
       if(sType == RIEGL){
@@ -272,7 +272,7 @@ namespace fbr{
       if(sType == MANUAL){
 	reflectance = (reflectance - (minReflectance))/(maxReflectance-minReflectance);
       }
-      
+
       if(sType != NONE){
 	if (reflectance < 0) reflectance = 0;
 	if (reflectance > 1) reflectance = 1;
@@ -283,7 +283,7 @@ namespace fbr{
       (*it)[1] = y;
       (*it)[2] = z;
       (*it)[3] = reflectance;
-      
+
       if(pointtype.hasColor()){
 	int idx = pointtype.getColor();
 	(*itColor)[2] = ((unsigned char*) &(points[i][idx]))[0];
@@ -292,10 +292,10 @@ namespace fbr{
 	++itColor;
       }
 
-      //finding min and max of z                                      
+      //finding min and max of z
       if (z  > zMax) zMax = z;
       if (z  < zMin) zMin = z;
-      
+
       ++it;
     }
   }
@@ -303,11 +303,11 @@ namespace fbr{
   string scan_cv::getScanDir(){
     return sDir;
   }
-  
+
   unsigned int scan_cv::getScanNumber(){
     return sNumber;
   }
-  
+
   unsigned int scan_cv::getNumberOfPoints(){
     return nPoints;
   }
@@ -323,7 +323,7 @@ namespace fbr{
   IOType scan_cv::getScanFormat(){
     return sFormat;
   }
-  
+
   cv::Mat scan_cv::getMatScan()
   {
     return scan;
@@ -333,11 +333,11 @@ namespace fbr{
   {
     return scanColor;
   }
-  
+
   void scan_cv::getDescription(){
     cout<<"load "<<sDir<<", with scan number: " <<sNumber<<", with "<<nPoints<<" points, sFormat: "<<scanFormatToString(sFormat)<<" with scanner type: "<<scannerTypeToString(sType)<<"."<<endl;
     cout<<"additional info: "<<endl;
     cout<<" scanserver= "<<scanserver<<", loadOct= "<<loadOct<<", saveOct= "<<saveOct<<", reflectance = "<<reflectance<<", color= "<<color<<", voxelsize= "<<voxelSize<<", reduction= "<<red<<", scale= "<<scale<<"."<<endl;
     cout<<endl;
-  }  
+  }
 }

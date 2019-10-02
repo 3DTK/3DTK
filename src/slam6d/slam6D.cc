@@ -15,7 +15,7 @@
  * consistent matching approach.
  * Use -i from the command line to match with ICP,
  * and -I to match 3D Scans using the global algorithm.
- * 
+ *
  * @author Andreas Nuechter. Jacobs University Bremen gGmbH, Germany
  * @author Kai Lingemann. Inst. of CS, University of Osnabrueck, Germany.
  * @author Jochen Sprickerhof. Inst. of CS, University of Osnabrueck, Germany.
@@ -63,7 +63,7 @@
 
 
 #ifdef _MSC_VER
-#if !defined _OPENMP && defined OPENMP 
+#if !defined _OPENMP && defined OPENMP
 #define _OPENMP
 #endif
 #endif
@@ -100,8 +100,8 @@ void sigSEGVhandler (int v)
          << "# **************************** #" << endl
          << endl;
     // save frames and close scans
-    for(ScanVector::iterator it = Scan::allScans.begin(); 
-     it != Scan::allScans.end(); 
+    for(ScanVector::iterator it = Scan::allScans.begin();
+     it != Scan::allScans.end();
      ++it) {
       (*it)->saveFrames(Scan::continue_processing);
     }
@@ -227,7 +227,7 @@ po::options_description generic("Generic options");
     "Apply a custom filter. Filter mode and data are specified as a "
     "semicolon-seperated string:\n"
     "{filterMode};{nrOfParams}[;param1][;param2][...]\n"
-    "Multiple filters can be specified in a file (syntax in file is same as" 
+    "Multiple filters can be specified in a file (syntax in file is same as"
     "direct specification)\n"
     "FILE;{fileName}\n"
     "See filter implementation in src/slam6d/pointfilter.cc for more detail.")
@@ -333,10 +333,10 @@ po::options_description generic("Generic options");
 #endif
 
   extrapolate_pose = !extrapolate_pose;
-  
+
   if(point_to_plane) pairing_mode = CLOSEST_PLANE_SIMPLE;
   if(normal_shoot) pairing_mode = CLOSEST_POINT_ALONG_NORMAL_SIMPLE;
-  
+
   return 0;
 }
 
@@ -594,7 +594,7 @@ int main(int argc, char **argv)
     cerr << "No scans found. Did you use the correct format?" << endl;
     exit(-1);
   }
-  // custom filter set? quick check, needs to contain at least one ';' 
+  // custom filter set? quick check, needs to contain at least one ';'
   // (proper checking will be done case specific in pointfilter.cc)
   size_t pos = customFilter.find_first_of(";");
   if (pos != std::string::npos) {
@@ -687,11 +687,11 @@ int main(int argc, char **argv)
   }
   // match the scans and print the time used
   long starttime = GetCurrentTimeInMilliSec();
-  
+
 #ifdef WITH_METRICS
   Timer t = ClientMetric::matching_time.start();
 #endif //WITH_METRICS
-  
+
   if (mni_lum == -1 && loopSlam6DAlgo == 0) {
     icp6D *my_icp = 0;
     my_icp = new icp6D(my_icp6Dminimizer, mdm, mni, quiet, meta, rand, eP,
@@ -716,8 +716,8 @@ int main(int argc, char **argv)
                                                  nns_method, epsilonSLAM);
     my_graphSlam6D->matchGraph6Dautomatic(Scan::allScans, mni_lum,
                                           clpairs, loopsize);
-   
-    //!!!!!!!!!!!!!!!!!!!!!!!!            
+
+    //!!!!!!!!!!!!!!!!!!!!!!!!
   } else {
     graphSlam6D *my_graphSlam6D = 0;
     switch (lum6DAlgo) {
@@ -806,7 +806,7 @@ int main(int argc, char **argv)
       }
     }
   }
-  
+
 #ifdef WITH_METRICS
   ClientMetric::matching_time.end(t);
 #endif //WITH_METRICS
@@ -826,7 +826,7 @@ int main(int argc, char **argv)
         // g = (int)(normal_r[i][1] * (127.5) + 127.5);
         // b = (int)(fabs(normal_r[i][2]) * (255.0));
         redptsout << xyz_r[i][0] << ' ' << xyz_r[i][1] << ' ' << xyz_r[i][2]
-        // << ' ' << r << ' ' << g << ' ' << b 
+        // << ' ' << r << ' ' << g << ' ' << b
             << endl;
       }
       redptsout << std::flush;
@@ -837,8 +837,8 @@ int main(int argc, char **argv)
 
   const double* p;
   ofstream redptsout(loopclose.string());
-  for(ScanVector::iterator it = Scan::allScans.begin(); 
-      it != Scan::allScans.end(); 
+  for(ScanVector::iterator it = Scan::allScans.begin();
+      it != Scan::allScans.end();
       ++it)
   {
     Scan* scan = *it;
@@ -848,7 +848,7 @@ int main(int argc, char **argv)
     scan->saveFrames(continue_processing);
   }
   redptsout.close();
-  
+
   Scan::closeDirectory();
   delete my_icp6Dminimizer;
 
@@ -857,7 +857,7 @@ int main(int argc, char **argv)
        << (red < 0 && rand < 0 ? "(-> HINT: For a significant speedup, please use the '-r' or '-R' parameter <-)\n"
                                : "")
        << endl;
-  
+
   // print metric information
 #ifdef WITH_METRICS
   ClientMetric::print(scanserver);

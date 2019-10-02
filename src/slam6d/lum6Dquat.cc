@@ -8,14 +8,14 @@
  */
 
 /**
- * @file 
+ * @file
  * @brief The implementation of globally consistent scan matching algorithm
  * @author Jan Elseberg. Inst. of CS, University of Osnabrueck, Germany.
  * @author Andreas Nuechter. Inst. of CS, University of Osnabrueck, Germany.
  */
 
 #ifdef _MSC_VER
-#if !defined _OPENMP && defined OPENMP 
+#if !defined _OPENMP && defined OPENMP
 #define _OPENMP
 #endif
 #endif
@@ -48,12 +48,12 @@ using namespace NEWMAT;
  * @param epsilonLUM Termination criterion for LUM
  */
 lum6DQuat::lum6DQuat(icp6Dminimizer *my_icp6Dminimizer,
-                     double mdm, double max_dist_match, 
+                     double mdm, double max_dist_match,
                      int max_num_iterations, bool quiet, bool meta, int rnd,
                      bool eP, int anim, double epsilonICP, int nns_method,
                      double epsilonLUM)
   : graphSlam6D(my_icp6Dminimizer,
-                mdm, max_dist_match, 
+                mdm, max_dist_match,
                 max_num_iterations, quiet, meta, rnd,
                 eP, anim, epsilonICP, nns_method, epsilonLUM)
 { }
@@ -71,7 +71,7 @@ lum6DQuat::~lum6DQuat()
 /**
  * This function calculates the inverse covariances Cij and
  * the Vector Cij*Dij for two scans by finding pointpairs.
- * 
+ *
  * @param first pointer to the first scan of the link
  * @param second pointer to the second scan of the link
  * @param nns_method Specifies which NNS method is used
@@ -80,16 +80,16 @@ lum6DQuat::~lum6DQuat()
  * @param C pointer to the inverse of the covariance matrix Cij
  * @param CD pointer to the vector Cij*Dij
  */
-void lum6DQuat::covarianceQuat(Scan *first, Scan *second, 
-                               int nns_method, int rnd, double max_dist_match2, 
-                               Matrix *C, ColumnVector *CD) 
+void lum6DQuat::covarianceQuat(Scan *first, Scan *second,
+                               int nns_method, int rnd, double max_dist_match2,
+                               Matrix *C, ColumnVector *CD)
 {
   // x,y,z       denote the coordinates of uk (Here averaged over ak and bk)
   // sx,sy,sz    are the sums of their respective coordinates of uk over
   //             each paint pair
   // xpy,xpz,ypz are the sums over x*x + y*y ,x*x + z*z and y*y + z*z
   //             respectively over each point pair
-  // xy,yz,xz    are the sums over each respective multiplication 
+  // xy,yz,xz    are the sums over each respective multiplication
   // dx,dy,dz    are the deltas in each coordinate of a point pair
   // ss          is the estimation of the covariance of sensing error
   double x, y, z, sx, sy, sz, xy, yz, xz, ypz, xpz, xpy, dx, dy, dz, ss, xpypz;
@@ -118,8 +118,8 @@ void lum6DQuat::covarianceQuat(Scan *first, Scan *second,
   double dummy_sum;
 
   Scan::getPtPairs(&uk, first, second, thread_num,
-                   rnd, max_dist_match2, dummy_sum, dummy_centroid_m, dummy_centroid_d);  
-  
+                   rnd, max_dist_match2, dummy_sum, dummy_centroid_m, dummy_centroid_d);
+
   m = uk.size();
 
   MZ = 0.0;
@@ -165,28 +165,28 @@ void lum6DQuat::covarianceQuat(Scan *first, Scan *second,
     }
     // Now construct the symmetrical matrix MM
     MM(1,1) = MM(2,2) = MM(3,3) = m;
-   
+
     MM(4,4) = xpypz;
     MM(5,5) = ypz;
     MM(6,6) = xpz;
     MM(7,7) = xpy;
-    
+
     MM(1,4) = MM(4,1) = sx;
     MM(1,6) = MM(6,1) = -sz;
     MM(1,7) = MM(7,1) = sy;
-             
+
     MM(2,4) = MM(4,2) = sy;
     MM(2,5) = MM(5,2) = sz;
     MM(2,7) = MM(7,2) = -sx;
-             
+
     MM(3,4) = MM(4,3) = sz;
     MM(3,5) = MM(5,3) = -sy;
     MM(3,6) = MM(6,3) = sx;
-   
+
     MM(5,6) = MM(6,5) = -xy;
     MM(5,7) = MM(7,5) = -xz;
     MM(6,7) = MM(7,6) = -yz;
-   
+
     // Calculate the pose difference estimation
     D = MM.i() * MZ ;
 
@@ -196,11 +196,11 @@ void lum6DQuat::covarianceQuat(Scan *first, Scan *second,
     for(int j = 0; j < m; j++){
       ak = uk[j].p1;
       bk = uk[j].p2;
-   
+
       x = (ak.x + bk.x) / 2.0;
       y = (ak.y + bk.y) / 2.0;
       z = (ak.z + bk.z) / 2.0;
-      
+
       ss += sqr(ak.x - bk.x - (D(1) + x * D(4) - z * D(6) + y * D(7)))
         + sqr(ak.y - bk.y - (D(2) + y * D(4) + z * D(5) - x * D(7)))
         + sqr(ak.z - bk.z - (D(3) + z * D(4) - y * D(5) + x * D(6)));
@@ -241,7 +241,7 @@ void lum6DQuat::covarianceQuat(Scan *first, Scan *second,
  * @param C A vector containing all covariances C of the pose
  *          difference estimations D
  * @param G The matrix G specifying the linear equation
- * @param B The vector B 
+ * @param B The vector B
  */
 void lum6DQuat::FillGB3D(Graph *gr,Matrix* G,
                          ColumnVector* B, vector<Scan *> allScans)
@@ -254,11 +254,11 @@ void lum6DQuat::FillGB3D(Graph *gr,Matrix* G,
     int b = gr->getLink(i,1) - 1;
     Scan *FirstScan  = allScans[gr->getLink(i,0)];
     Scan *SecondScan = allScans[gr->getLink(i,1)];
-  
+
     Matrix Cab;
     ColumnVector CDab;
-    covarianceQuat(FirstScan, SecondScan, nns_method, (int)my_icp->get_rnd(), 
-                   max_dist_match2_LUM, &Cab, &CDab); 
+    covarianceQuat(FirstScan, SecondScan, nns_method, (int)my_icp->get_rnd(),
+                   max_dist_match2_LUM, &Cab, &CDab);
 
     if(a >= 0){
       B->Rows(a*7+1,a*7+7) += CDab;
@@ -268,7 +268,7 @@ void lum6DQuat::FillGB3D(Graph *gr,Matrix* G,
       B->Rows(b*7+1,b*7+7) -= CDab;
       G->SubMatrix(b*7+1,b*7+7,b*7+1,b*7+7) += Cab;
     }
-    if(a >= 0 && b >= 0) { 
+    if(a >= 0 && b >= 0) {
       G->SubMatrix(a*7+1,a*7+7,b*7+1,b*7+7) = -Cab;
       G->SubMatrix(b*7+1,b*7+7,a*7+1,a*7+7) = -Cab;
     }
@@ -291,26 +291,26 @@ double lum6DQuat::doGraphSlam6D(Graph gr, vector <Scan *> allScans, int nrIt)
   static int d = 0;
   cout << "writing graph.dat ....................................." << endl;
   d++;
-  string gfilename = "graph_" + to_string(d, 3) + ".net"; 
-  ofstream out(gfilename.c_str());  
+  string gfilename = "graph_" + to_string(d, 3) + ".net";
+  ofstream out(gfilename.c_str());
   for (int i=0; i < gr.getNrLinks(); i++) {
     int from = gr.getLink(i,0);
     int to = gr.getLink(i,1);
     // shouldn't be necessary, just in case a (out of date)
     // graph file is loaded:
     if (from < (int)allScans.size() && to < (int)allScans.size()) {
-      out << allScans[from]->get_rPos()[0] << " " 
-          << allScans[from]->get_rPos()[1] << " " 
+      out << allScans[from]->get_rPos()[0] << " "
+          << allScans[from]->get_rPos()[1] << " "
           << allScans[from]->get_rPos()[2] << endl
-          << allScans[to  ]->get_rPos()[0] << " " 
-          << allScans[to  ]->get_rPos()[1] << " " 
+          << allScans[to  ]->get_rPos()[0] << " "
+          << allScans[to  ]->get_rPos()[1] << " "
           << allScans[to  ]->get_rPos()[2] << endl << endl;
     }
   }
   out.close();
   out.clear();
 #endif
-  
+
   // the IdentityMatrix to transform some Scans with
   double id[16];
   M4identity(id);
@@ -322,11 +322,11 @@ double lum6DQuat::doGraphSlam6D(Graph gr, vector <Scan *> allScans, int nrIt)
       iteration++) {
 
     if (nrIt > 1) cout << "Iteration " << iteration << endl;
-    
+
 
     // * Calculate X and CX from all Dij and Cij
     int n = (gr.getNrScans() - 1);
-    
+
     // Construct the linear equation system..
     Matrix G(7*n,7*n);
     ColumnVector B(7*n);
@@ -340,67 +340,67 @@ double lum6DQuat::doGraphSlam6D(Graph gr, vector <Scan *> allScans, int nrIt)
     //cout << "X done!" << endl;
 
     double sum_position_diff = 0.0;
-    
+
     // Start with second Scan
     int loop_end = gr.getNrScans();
 #ifdef _OPENMP
 #pragma omp parallel for reduction(+:sum_position_diff)
 #endif
     for(int i = 1; i < loop_end; i++){
-      
+
       // Now update the Poses
       Matrix Ha = IdentityMatrix(7);
-      
+
       double xa = allScans[i]->get_rPos()[0];
       double ya = allScans[i]->get_rPos()[1];
       double za = allScans[i]->get_rPos()[2];
 
       double p = allScans[i]->get_rPosQuat()[0];
-      double q = allScans[i]->get_rPosQuat()[1]; 
+      double q = allScans[i]->get_rPosQuat()[1];
       double r = allScans[i]->get_rPosQuat()[2];
-      double s = allScans[i]->get_rPosQuat()[3]; 
-     
+      double s = allScans[i]->get_rPosQuat()[3];
+
       double px = p * xa;
       double py = p * ya;
       double pz = p * za;
-      
+
       double qx = q * xa;
       double qy = q * ya;
       double qz = q * za;
-      
+
       double rx = r * xa;
       double ry = r * ya;
       double rz = r * za;
-      
+
       double sx = s * xa;
       double sy = s * ya;
       double sz = s * za;
-      
+
       // Fill Ha
-      Ha.element(3,3) = 2 * p; 
-      Ha.element(4,3) = 2 * q; 
-      Ha.element(5,3) = 2 * r; 
-      Ha.element(6,3) = 2 * s; 
+      Ha.element(3,3) = 2 * p;
+      Ha.element(4,3) = 2 * q;
+      Ha.element(5,3) = 2 * r;
+      Ha.element(6,3) = 2 * s;
 
-      Ha.element(3,4) = 2 * q; 
-      Ha.element(4,4) = -2 * p; 
-      Ha.element(5,4) = -2 * s; 
-      Ha.element(6,4) = 2 * r; 
+      Ha.element(3,4) = 2 * q;
+      Ha.element(4,4) = -2 * p;
+      Ha.element(5,4) = -2 * s;
+      Ha.element(6,4) = 2 * r;
 
-      Ha.element(3,5) = 2 * r; 
-      Ha.element(4,5) = 2 * s; 
-      Ha.element(5,5) = -2 * p; 
-      Ha.element(6,5) = -2 * q; 
-     
-      Ha.element(3,6) = 2 * s; 
-      Ha.element(4,6) = -2 * r; 
-      Ha.element(5,6) = 2 * q; 
-      Ha.element(6,6) = -2 * p; 
-      
-      Ha.element(0,3) = -2 * (px + sy - rz);  
+      Ha.element(3,5) = 2 * r;
+      Ha.element(4,5) = 2 * s;
+      Ha.element(5,5) = -2 * p;
+      Ha.element(6,5) = -2 * q;
+
+      Ha.element(3,6) = 2 * s;
+      Ha.element(4,6) = -2 * r;
+      Ha.element(5,6) = 2 * q;
+      Ha.element(6,6) = -2 * p;
+
+      Ha.element(0,3) = -2 * (px + sy - rz);
       Ha.element(1,3) = -2 * (-sx + py + qz);
       Ha.element(2,3) = -2 * (rx - qy + pz);
-      
+
       Ha.element(0,4) = -2 * (qx + ry + sz);
       Ha.element(1,4) = -2 * (-rx + qy - pz);
       Ha.element(2,4) = -2 * (-sx + py + qz);
@@ -408,7 +408,7 @@ double lum6DQuat::doGraphSlam6D(Graph gr, vector <Scan *> allScans, int nrIt)
       Ha.element(0,5) = -2 * (rx - qy + pz);
       Ha.element(1,5) = -2 * (qx + ry + sz);
       Ha.element(2,5) = -2 * (-px - sy + rz);
-      
+
       Ha.element(0,6) = -2 * (sx - py - qz);
       Ha.element(1,6) = -2 * (px + sy - rz);
       Ha.element(2,6) = -2 * (qx + ry + sz);
@@ -451,9 +451,9 @@ double lum6DQuat::doGraphSlam6D(Graph gr, vector <Scan *> allScans, int nrIt)
       for (int k = 0; k < 4; k++) {
         rPosQuat[k] = allScans[i]->get_rPosQuat()[k] - qtmp[k];
       }
-      
+
       Normalize4(rPosQuat);
-      
+
       // Update the Pose
       if (i != gr.getNrScans() - 1) {
         allScans[i]->transformToQuat(rPos, rPosQuat, Scan::LUM, 1);
@@ -481,7 +481,7 @@ double lum6DQuat::doGraphSlam6D(Graph gr, vector <Scan *> allScans, int nrIt)
     cout << "Sum of Position differences = " << sum_position_diff << endl;
     ret = (sum_position_diff / (double)gr.getNrScans());
   }
-  
+
   return ret;
 }
 

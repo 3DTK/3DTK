@@ -1,13 +1,13 @@
  /*
  * Copyright (C) David Redondo
- * 
+ *
  * Released under the GPL version 3.
  *
  */
 
 #include "segmentation/graph_cut/util.h"
 
-#include <newmat/newmatap.h> 
+#include <newmat/newmatap.h>
 
 double calc_plane(const std::set<std::pair<int, int>>& indizes, const cv::Mat& mat, double plane[4])
 {
@@ -31,7 +31,7 @@ double calc_plane(const std::set<std::pair<int, int>>& indizes, const cv::Mat& m
     cx /= n;
     cy /= n;
     cz /= n;
-        
+
    for (const auto& index : indizes) {
         const cv::Vec3f& p = mat.at<cv::Vec3f>(index.first, index.second);
         A(1, 1) += (p[0] - cx)*(p[0] - cx);
@@ -57,7 +57,7 @@ double calc_plane(const std::set<std::pair<int, int>>& indizes, const cv::Mat& m
         */
     int index;
     D.MinimumAbsoluteValue1(index);
-        
+
     plane[0] = V(1,index);
     plane[1] = V(2,index);
     plane[2] = V(3,index);
@@ -92,7 +92,7 @@ double calc_plane(const std::vector<const cv::Vec3f*>& points, double plane[4])
     cx /= n;
     cy /= n;
     cz /= n;
-        
+
    for (const cv::Vec3f* p : points) {
         A(1, 1) += ((*p)[0] - cx)*((*p)[0] - cx);
         A(2, 2) += ((*p)[1] - cy)*((*p)[1] - cy);
@@ -117,7 +117,7 @@ double calc_plane(const std::vector<const cv::Vec3f*>& points, double plane[4])
         */
     int index;
     D.MinimumAbsoluteValue1(index);
-        
+
     plane[0] = V(1,index);
     plane[1] = V(2,index);
     plane[2] = V(3,index);
@@ -219,7 +219,7 @@ std::array<unsigned char, 3> get_color(int index)
         0xBF5650, 0xE83000, 0x66796D, 0xDA007C, 0xFF1A59, 0x8ADBB4, 0x1E0200, 0x5B4E51,
         0xC895C5, 0x320033, 0xFF6832, 0x66E1D3, 0xCFCDAC, 0xD0AC94, 0x7ED379, 0x012C58};
         const int color = colors[index % 127];
-        
+
         return {{(unsigned char)(color>>16),  (unsigned char)(color>>8),  (unsigned char)(color)}};
 }
 

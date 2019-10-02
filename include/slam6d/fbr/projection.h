@@ -38,7 +38,7 @@ namespace fbr{
    * @param maxVertAngle_, minVertAngle_, maxHorizAngle_, minHorizAngle_ max and min vertical and horizontalangle of scan
    * @param imageSizeOprimization_ flag for image size optimization method
    * @param xSize_, ySize_, xFactor_, yFactor_, withMax_, heightMax_, heightLow_ Panormam projection parameters
-   * @param  lat0_, long0_, phi1_, phi2_, n_, c_, rho0_, 
+   * @param  lat0_, long0_, phi1_, phi2_, n_, c_, rho0_,
             xMax_, xMin_, yMin_, yMax_ Coninc projection params
    * @param coscRectilinear_ rectilinear projection param
    * @param sPannini_ pannini projection param
@@ -122,7 +122,7 @@ namespace fbr{
     float minZ_, maxZ_;
     double minVertAngle_, maxVertAngle_, minHorizAngle_, maxHorizAngle_;
     bool imageSizeOptimization_;
-    
+
     //panorama projeciton params
     double xSize_, ySize_;
     double xFactor_, yFactor_;

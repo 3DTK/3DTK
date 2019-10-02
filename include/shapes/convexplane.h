@@ -13,7 +13,7 @@
 class ConvexPlane {
 protected:
   ConvexPlane() {};
-  
+
 public:
   static bool furtherleft(double * point, double * start, double * end);
   static void JarvisMarchConvexHull(std::list<double*> &points, std::vector<double*> &convex_hull);

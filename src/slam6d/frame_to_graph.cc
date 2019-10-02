@@ -125,7 +125,7 @@ int main(int argc, char *argv[])
   }
 
   string dir = argv[optind];
-  
+
 #ifndef _MSC_VER
   if (dir[dir.length()-1] != '/') dir = dir + "/";
 #else

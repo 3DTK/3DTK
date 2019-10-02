@@ -1,6 +1,6 @@
 /**
  * @file
- * @brief 
+ * @brief
  *
  * @author Thomas Escher
  */
@@ -20,13 +20,13 @@
 class CacheIO {
 public:
   typedef std::string IDType;
-  
+
   //! Create a directory for temporary cache objects to save in
   static void createTemporaryDirectory(std::string& path);
 
   //! Clean up temporary files
   static void removeTemporaryDirectory();
-  
+
   //! Creates a unique Id to use for these functions
   static IDType getId();
 

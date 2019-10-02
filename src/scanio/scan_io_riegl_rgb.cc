@@ -40,7 +40,7 @@ ScanDataTransform& ScanIO_riegl_rgb::transform2uos = scanio_riegl_rgb_tf;
 void ScanIO_riegl_rgb::readPose(const char* dir_path, const char* identifier, double* pose)
 {
   unsigned int i;
-  
+
   path pose_path(dir_path);
   pose_path /= path(std::string(posePrefix()) + identifier + poseSuffix());
   if(!exists(pose_path))
@@ -48,16 +48,16 @@ void ScanIO_riegl_rgb::readPose(const char* dir_path, const char* identifier, do
 
   // open pose file
   ifstream pose_file(pose_path);
-  
+
   // if the file is open, read contents
   if(pose_file.good()) {
     double rPos[3], rPosTheta[16];
     double inMatrix[16], tMatrix[16];
-    
+
     for (i = 0; i < 16; ++i)
       pose_file >> inMatrix[i];
     pose_file.close();
-    
+
     // transform input pose
     tMatrix[0] = inMatrix[5];
     tMatrix[1] = -inMatrix[9];
@@ -75,9 +75,9 @@ void ScanIO_riegl_rgb::readPose(const char* dir_path, const char* identifier, do
     tMatrix[13] = inMatrix[11];
     tMatrix[14] = inMatrix[3];
     tMatrix[15] = inMatrix[15];
-    
+
     Matrix4ToEuler(tMatrix, rPosTheta, rPos);
-    
+
     pose[0] = 100*rPos[0];
     pose[1] = 100*rPos[1];
     pose[2] = 100*rPos[2];

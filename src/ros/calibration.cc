@@ -37,7 +37,7 @@ const unsigned int calibration::USE_TIME_OFFSET     = 1048576;
 
 void calibration::count(unsigned int flag, unsigned int &n) {
   n = 1; // start with 1 due to numerical recipies
-  
+
   if (flag & USE_ODOM_WHEEL_BASE) n++;
   if (flag & USE_ODOM_TICKS) n++;
   if (flag & USE_TIME_OFFSET) n++;
@@ -54,7 +54,7 @@ void calibration::count(unsigned int flag, unsigned int &n) {
   if (flag & USE_XSENS_RX ) n++;
   if (flag & USE_XSENS_RY ) n++;
   if (flag & USE_XSENS_RZ ) n++;
-  
+
   if (flag & USE_RIEGL_X  ) n++;
   if (flag & USE_RIEGL_Y  ) n++;
   if (flag & USE_RIEGL_Z  ) n++;
@@ -68,7 +68,7 @@ void calibration::toX(float *X) {
   if (params & USE_ODOM_WHEEL_BASE) X[n++] = wheel_base;
   if (params & USE_ODOM_TICKS) X[n++] = ticks_per_cm;
   if (params & USE_TIME_OFFSET) X[n++] = time_offset;
-  
+
   if (params & USE_SICK_X   ) X[n++] = sick_pos[0];
   if (params & USE_SICK_Y   ) X[n++] = sick_pos[1];
   if (params & USE_SICK_Z   ) X[n++] = sick_pos[2];
@@ -81,7 +81,7 @@ void calibration::toX(float *X) {
   if (params & USE_XSENS_RX ) X[n++] = xsens_euler[0];
   if (params & USE_XSENS_RY ) X[n++] = xsens_euler[1];
   if (params & USE_XSENS_RZ ) X[n++] = xsens_euler[2];
-  
+
   if (params & USE_RIEGL_X  ) X[n++] = riegl_pos[0];
   if (params & USE_RIEGL_Y  ) X[n++] = riegl_pos[1];
   if (params & USE_RIEGL_Z  ) X[n++] = riegl_pos[2];
@@ -92,7 +92,7 @@ void calibration::toX(float *X) {
 
 void calibration::printHeaderToFile(const char *filename) {
   ofstream of(filename, ios_base::app);
-  of << "# Using:"; 
+  of << "# Using:";
   if (params & USE_ODOM_WHEEL_BASE) of << " ODOM_WHEEL_BASE";
   if (params & USE_ODOM_TICKS)      of << " ODOM_TICKS";
   if (params & USE_TIME_OFFSET)     of << " TIME_OFFSET";
@@ -109,28 +109,28 @@ void calibration::printHeaderToFile(const char *filename) {
   if (params & USE_XSENS_RX ) of << " XSENS_RX";
   if (params & USE_XSENS_RY ) of << " XSENS_RY";
   if (params & USE_XSENS_RZ ) of << " XSENS_RZ";
-  
+
   if (params & USE_RIEGL_X  ) of << " RIEGL_X";
   if (params & USE_RIEGL_Y  ) of << " RIEGL_Y";
   if (params & USE_RIEGL_Z  ) of << " RIEGL_Z";
   if (params & USE_RIEGL_RX ) of << " RIEGL_RX";
   if (params & USE_RIEGL_RY ) of << " RIEGL_RY";
   if (params & USE_RIEGL_RZ ) of << " RIEGL_RZ";
-  
+
 
   of << endl;
-    
+
   of.flush();
   of.close();
 }
 
 void calibration::fromX(float *X) {
   unsigned int n = 1;
-  
+
   if (params & USE_ODOM_WHEEL_BASE) wheel_base = X[n++] ;
   if (params & USE_ODOM_TICKS) ticks_per_cm = X[n++] ;
   if (params & USE_TIME_OFFSET) time_offset = X[n++] ;
- 
+
   if (params & USE_SICK_X   ) sick_pos[0] = X[n++] ;
   if (params & USE_SICK_Y   ) sick_pos[1] = X[n++] ;
   if (params & USE_SICK_Z   ) sick_pos[2] = X[n++] ;
@@ -143,7 +143,7 @@ void calibration::fromX(float *X) {
   if (params & USE_XSENS_RX ) xsens_euler[0] = X[n++] ;
   if (params & USE_XSENS_RY ) xsens_euler[1] = X[n++] ;
   if (params & USE_XSENS_RZ ) xsens_euler[2] = X[n++] ;
-  
+
   if (params & USE_RIEGL_X  ) riegl_pos[0] = X[n++] ;
   if (params & USE_RIEGL_Y  ) riegl_pos[1] = X[n++] ;
   if (params & USE_RIEGL_Z  ) riegl_pos[2] = X[n++] ;
@@ -193,11 +193,11 @@ void calibration::calculateTrajectory() {
       volksbotRT::ticksConstPtr tptr = m.instantiate<volksbotRT::ticks>();
 
       odo.convertTicks2Odom(tptr);
-      const nav_msgs::Odometry& odom = odo.getCurrentOdom(); 
+      const nav_msgs::Odometry& odom = odo.getCurrentOdom();
 
       geometry_msgs::TransformStamped odom_trans;
       // copy contents of odometry message to tfstamped
-      odom_trans.header.stamp = tptr->header.stamp; 
+      odom_trans.header.stamp = tptr->header.stamp;
       odom_trans.header.frame_id = "/odom_combined"; // frame the scan is transformed to
       odom_trans.child_frame_id = "base_link";
       odom_trans.transform.translation.x = odom.pose.pose.position.x;
@@ -260,7 +260,7 @@ void calibration::calculateTrajectory(bool recreateOdom, bool redoFiltering) {
   if (redoFiltering) {
     view.addQuery(*bag, rosbag::TopicQuery("/imu_data") );
   }
-  
+
   ros::Duration d = view.getEndTime() - view.getBeginTime();
   d += ros::Duration(3.0); // add a small buffer
 
@@ -286,18 +286,18 @@ void calibration::calculateTrajectory(bool recreateOdom, bool redoFiltering) {
         continue;
       }
 
-      o =  odo.getCurrentOdom(); 
+      o =  odo.getCurrentOdom();
       if (redoFiltering)
         ekf.addOdom(o);
-      addStaticTransforms(l,o.header.stamp); 
+      addStaticTransforms(l,o.header.stamp);
     } else if (!recreateOdom && m.isType<nav_msgs::Odometry>() ) {
       o = *(m.instantiate<nav_msgs::Odometry>());
-      addStaticTransforms(l,o.header.stamp); 
+      addStaticTransforms(l,o.header.stamp);
       if (redoFiltering)
         ekf.addOdom(o);
     } else if (redoFiltering && m.isType<sensor_msgs::Imu>()) {
       i = *(m.instantiate<sensor_msgs::Imu>());
-      addStaticTransforms(l,i.header.stamp); 
+      addStaticTransforms(l,i.header.stamp);
       ekf.addImu(i);
     }
 
@@ -342,17 +342,17 @@ void calibration::addStaticTransforms(tf::TransformListener *l, ros::Time t) {
   q.setRPY(xsens_euler[2], xsens_euler[1], xsens_euler[0]);
   l->setTransform( tf::StampedTransform(tf::Transform(q, tf::Vector3( xsens_pos[0], xsens_pos[1], xsens_pos[2])), t, "/base_link", "/xsens" ) );
 }
-  
+
 
 void calibration::getParamList(double *list, int nr, const char*name, const double *def) {
     ros::NodeHandle n;
     XmlRpc::XmlRpcValue my_list;
     n.getParam(name, my_list);
 
-    for (int32_t i = 0; i < nr; ++i) 
+    for (int32_t i = 0; i < nr; ++i)
     {
       if (my_list[i].getType() == XmlRpc::XmlRpcValue::TypeDouble) {
-        list[i] = my_list[i]; 
+        list[i] = my_list[i];
       } else if (my_list[i].getType() == XmlRpc::XmlRpcValue::TypeInt) {
         int tmp = my_list[i];
         list[i] = tmp;
@@ -404,7 +404,7 @@ void calibration::calibrate(timeMap &tm, evaluator &ev, ScanImporter &si) {
   cout << "with val = " << best_val << endl;
 
 }
-  
+
 float calibration::function(float *X) {
   counter++;
 
@@ -420,14 +420,14 @@ float calibration::function(float *X) {
 
 
   // alternatively change odom parameters as well (recomputing the odometry guess)
-  
+
   // set up the tf history (the path of the robot)
   // 4 possibilities exist:
   //  1. only use odometry as is, discarding the imu (false, false)
   //  2. recompute odometry, discard imu (true, false)
   //  3. use odometry as is, refilter with imu (false, true)
   //  4. recompute odometry and refilter (true, true)
-  
+
   bool redoOdo = (params & (USE_ODOM_WHEEL_BASE | USE_ODOM_TICKS ));
   bool redoFilter = (params & (USE_XSENS_RX | USE_XSENS_RY | USE_XSENS_RZ ));
 
@@ -442,9 +442,9 @@ float calibration::function(float *X) {
   ScanImporter simp(*imp);
   simp.setScans(&scans);
   simp.import();
-  
+
   double value = eval->evaluate(scans);
- 
+
   // cache values for speedup
   float *copy = new float[nr_params];
   for (unsigned int i = 1; i < nr_params; i++)

@@ -93,7 +93,7 @@ bool PlaneInCube( float x, float y, float z, float size, float nx, float ny, flo
      return true;
 
    return false;
-} 
+}
 
 
 bool PlaneInCube( float x, float y, float z, float size)
@@ -137,7 +137,7 @@ bool PlaneInCube( float x, float y, float z, float size)
      return true;
 
    return false;
-} 
+}
 
 bool closeToPlane(double *p) {
   return ( fabs(planeDist(p, Nx, Ny, Nz, Nd)) < maxDist );

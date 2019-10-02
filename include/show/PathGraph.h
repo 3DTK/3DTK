@@ -10,11 +10,11 @@ typedef struct {float x; float y; } PointXY;
 typedef struct {float x; float y; float z; } PointXYZ;
 
 
-/** @class PGNode 
+/** @class PGNode
   * A 2D-node in a PathGraph.
  */
 struct PGNode{
-  PGNode():smallestCost(LONG_MAX){}; 
+  PGNode():smallestCost(LONG_MAX){};
   PointXY       point;       ///< 2D coordinates of node
   std::list<PGNode*> neighbours;  ///< List of neighbours of node
   double smallestCost;       ///< Smallest cost from start (used in AStar)
@@ -140,7 +140,7 @@ class PathGraph {
 					if(aktNode == lastNode)
 						if(i.aktNode == lastNode)
 							return true;
-					return (aktNode == i.aktNode) 
+					return (aktNode == i.aktNode)
 						&& (aktNeighbour == i.aktNeighbour);
 				}
 				/// @return true if no more edges in graph
