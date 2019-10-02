@@ -1,4 +1,4 @@
-/** @file 
+/** @file
  *  @brief The global correction based upon APX transform
  *
  *  @author Andreas Nuechter. Institute of Computer Science, University of Osnabrueck, Germany.
@@ -44,18 +44,18 @@ public:
 	    double epsilonLUM = 0.5);
 
   virtual ~gapx6D();
-  
+
   double doGraphSlam6D(Graph gr, vector <Scan*> MetaScan, int nrIt);
 
   static double LUM[4];
-  
+
 private:
   double genBArotForLinkedPair(int firstScanNum, int secondScanNum, vPtPair *ptpairs,
 						 double *centroids_m, double *centroids_d, NEWMAT::Matrix *B, NEWMAT::ColumnVector *A);
   double genBAtransForLinkedPair(int firstScanNum, int secondScanNum,
 						   double *centroids_m, double *centroids_d,
 						   NEWMAT::SymmetricMatrix *B, NEWMAT::ColumnVector *A, NEWMAT::ColumnVector &X);
-    
+
 };
 
 #endif

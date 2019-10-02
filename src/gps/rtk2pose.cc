@@ -32,7 +32,7 @@ using std::vector;
 
 #if WIN32
 #define snprintf sprintf_s
-#endif 
+#endif
 
 
 int parseArgs(int argc,char **argv, char dir[255], char filename[255], int& start, int& end, bool& singleFile, bool& nmea, bool& kml){
@@ -56,7 +56,7 @@ int parseArgs(int argc,char **argv, char dir[255], char filename[255], int& star
       if (end < 0)     { cerr << "Error: Cannot end at a negative scan number.\n"; exit(1); }
       if (end < start) { cerr << "Error: <end> cannot be smaller than <start>.\n"; exit(1); }
       break;
-    case 'f': 
+    case 'f':
       strncpy(filename,optarg,255);
       break;
     case 'S':
@@ -71,7 +71,7 @@ int parseArgs(int argc,char **argv, char dir[255], char filename[255], int& star
     }
 
   if (optind != argc-1) {
-    cerr << "\n*** Directory missing ***\n" << endl; 
+    cerr << "\n*** Directory missing ***\n" << endl;
     cout << endl
 	  << "Usage: " << argv[0] << "  [-s NR] [-e NR] directory" << endl << endl;
 
@@ -129,11 +129,11 @@ int main(int argc, char **argv)
   vector<double *> positions;
   vector<double *> orientations;
 
-  std::vector<double *> lla_vec; 
+  std::vector<double *> lla_vec;
   if(singleFile) {
     cerr << "Reading gps " << filename << "..." << endl;
     readRTKPos(filename, lla_vec);
-  } 
+  }
 
   if(kml) {
     cout << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n <kml xmlns=\"http://www.opengis.net/kml/2.2\">\n <Document>\n <Folder>\n";
@@ -144,19 +144,19 @@ int main(int argc, char **argv)
       snprintf(gpsFileName,255,"%sgps%.3d.txt",dir,0);
       gps_in.open(gpsFileName);
       if (!gps_in.good()) {
-        cout << "No more files in directory " << dir << endl; 
+        cout << "No more files in directory " << dir << endl;
       }
     }
     if(kml) {
       cout << "<Placemark>\n<name>S1P" << fileCounter+1 <<
       //"</name>\n<Point>\n<altitudeMode>absolute</altitudeMode>\n<coordinates>";
       "</name>\n<Point>\n<altitudeMode>clampToGround</altitudeMode>\n<coordinates>";
-      cout << std::setprecision(15) << lla_vec[fileCounter][1] << "," << lla_vec[fileCounter][0]; 
+      cout << std::setprecision(15) << lla_vec[fileCounter][1] << "," << lla_vec[fileCounter][0];
       cout << "</coordinates>\n</Point>\n</Placemark>" << endl;
     }
-    
+
     snprintf(poseFileName,255,"%sscan%.3d.pose",dir,fileCounter);
-    double east, north, up; 
+    double east, north, up;
     double x,y,z;
     LLAtoECEF_r(lla_vec[fileCounter][0], lla_vec[fileCounter][1], lla_vec[fileCounter][2],cx,cy,cz);
     //LLAtoECEF(lla_vec[fileCounter][0], lla_vec[fileCounter][1], lla_vec[fileCounter][2],cx,cy,cz);
@@ -166,9 +166,9 @@ int main(int argc, char **argv)
       fx = cx;
       fy = cy;
       fz = cz;
-      calcECEF_rtoENUMat9(lla_vec[0][0], lla_vec[0][1], lla_vec[0][2],ecefmat);  
+      calcECEF_rtoENUMat9(lla_vec[0][0], lla_vec[0][1], lla_vec[0][2],ecefmat);
     }
-    
+
     getENU(ecefmat, cx-fx,cy-fy,cz-fz, east, north, up);
     //ECEF_rtoENU(lla_vec[0][0], lla_vec[0][1], lla_vec[0][2],cx-fx,cy-fy,cz-fz,east,north,up);
     ENUto3DTK(east, north, up, x, y, z);
@@ -179,13 +179,13 @@ int main(int argc, char **argv)
     //pose_out << std::setprecision(15) << (x - fx) << " " << (y - fy) << " " << (z - fz) << endl;
     pose_out << std::setprecision(15) << (x) << " " << (y) << " " << (z) << endl;
     pose_out << "0 0 0" << endl;
-    
+
     pose_out.close();
     pose_out.clear();
     if(!singleFile) {
       gps_in.close();
     }
-    
+
   }
   if(kml) {
     cout << "</Folder>\n</Document>\n</kml>" << endl;

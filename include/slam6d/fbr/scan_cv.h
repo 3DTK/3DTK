@@ -36,7 +36,7 @@ namespace fbr{
    * @param zmax max value in z direction
    * @param zmin min value in z direction
    * @param sFormat input scan file format in IOType
-   * @param scanserver 
+   * @param scanserver
    * @param loadOct
    * @param saveOct
    */
@@ -64,7 +64,7 @@ namespace fbr{
      * @param dir directory of the input scan file
      * @param number input scan number
      * @param format input scan file format
-     * @param scanServer 
+     * @param scanServer
      * @param loadOct
      * @param saveOct
      */

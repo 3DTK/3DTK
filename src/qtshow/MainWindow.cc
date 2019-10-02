@@ -301,7 +301,7 @@ void MainWindow::saveStates()
 void MainWindow::loadStates()
 {
   using namespace boost::program_options;
-  
+
   bool advanced, noPoints, noCameras, noPath, noPoses, noFog;
   float fov, fogDensity;
   int viewmode, fogType, pointsize;
@@ -347,37 +347,37 @@ void MainWindow::loadStates()
   QString filePath = lineEditStateFile->text();
   QFileInfo checkFile(filePath);
   if(checkFile.exists() && !checkFile.isFile()) return;
-  
+
   std::ifstream config_file(filePath.toLatin1().data());
   if(config_file) {
     store(parse_config_file(config_file, visible_options), vm);
   }
   notify(vm);
-  
+
   doubleSpinBoxZoom->setValue(fov);
-  
+
   buttonGroupViewMode->buttonClicked(viewmode);
   buttonGroupViewMode->button(viewmode)->setChecked(true);
-  
+
   checkDrawPoints->setChecked(!noPoints);
   checkDrawCameras->setChecked(!noCameras);
   checkDrawPath->setChecked(!noPath);
   checkDrawPoses->setChecked(!noPoses);
-  
+
   comboBoxFogType->setCurrentIndex(fogType);
-  
+
   doubleSpinBoxFogDensity->setValue(fogDensity);
-  
+
   X = position.x; Y = position.y; Z = position.z;
-  
+
   QuatToMouseRot(rotation, mouseRotX, mouseRotY, mouseRotZ);
   glWidget->cameraChanged();
-  
+
   spinBoxPointSize->setValue(pointsize);
-  
+
   comboBoxColorMap->setCurrentIndex(static_cast<int>(colormap));
   comboBoxColorType->setCurrentIndex(scansColored);
-  
+
   glWidget->update();
 }
 
@@ -393,7 +393,7 @@ void MainWindow::saveSelectedPoints()
 {
   QString fileName = lineEditSelectionFile->text();
   selection_file_name = fileName.toLatin1().data();
-  
+
   saveSelection(0);
 }
 

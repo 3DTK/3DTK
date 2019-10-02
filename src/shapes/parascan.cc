@@ -29,7 +29,7 @@ int  paramtr_scan_int(FILE *stream, const char *search,int defaultval)
 double  paramtr_scan_double(FILE *stream, const char *search,double defaultval)
 {
   char target[256];
-   
+
     if(paramtr_scan_str(stream, search, target))
       return(atof(target));
     else

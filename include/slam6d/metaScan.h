@@ -31,8 +31,8 @@ public:
   virtual void setScaleFilter(double scale) {}
 
   virtual const char* getIdentifier() const { return "metascan"; }
-  
-  virtual DataPointer get(const std::string& identifier) 
+
+  virtual DataPointer get(const std::string& identifier)
   { return DataPointer(0, 0); }
 
   virtual void get(IODataType types) {}
@@ -51,7 +51,7 @@ public:
   virtual void getFrame(size_t i,
                         const double*& pose_matrix,
                         AlgoType& type) {}
-  
+
 protected:
   virtual void createSearchTreePrivate();
   virtual void calcReducedOnDemandPrivate() {}

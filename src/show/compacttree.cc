@@ -8,9 +8,9 @@
  */
 
 /**
- * @file 
+ * @file
  * @brief Efficient representation of an octree
- * @author Jan Elsberg. Automation Group, Jacobs University Bremen gGmbH, Germany. 
+ * @author Jan Elsberg. Automation Group, Jacobs University Bremen gGmbH, Germany.
  * @author Kai Lingemann. Institute of Computer Science, University of Osnabrueck, Germany.
  * @author Andreas Nuechter. Institute of Computer Science, University of Osnabrueck, Germany.
  */
@@ -40,7 +40,7 @@ compactTree::~compactTree(){
 
   delete[] mins;
   delete[] maxs;
-} 
+}
 
 
 void compactTree::AllPoints( cbitoct &node, std::vector<double*> &vp, double center[3], double size) {
@@ -57,7 +57,7 @@ void compactTree::AllPoints( cbitoct &node, std::vector<double*> &vp, double cen
 
         for(unsigned int iterator = 0; iterator < length; iterator++ ) {
           double *p = new double[3];
-          //cout << point[0] << " " << point[1] << " " << point[2] << endl; 
+          //cout << point[0] << " " << point[1] << " " << point[2] << endl;
           for (unsigned int k = 0; k < 3; k++){
             p[k] = point[k] * precision + ccenter[k];
           }
@@ -392,7 +392,7 @@ void compactTree::displayOctTreeCulledLOD2(float ratio, cbitoct &node, double *c
         if ( CubeInFrustum(ccenter[0], ccenter[1], ccenter[2], size/2.0) ) {
           tshort *point = children->getPoints();
           lint length = children->getLength();
-            
+
           int l = LOD2(ccenter[0], ccenter[1], ccenter[2], size/2.0);  // only a single pixel on screen only paint one point
           l = std::max((int)(l*l*ratio), 0);
           if (l != 0) {
@@ -406,7 +406,7 @@ void compactTree::displayOctTreeCulledLOD2(float ratio, cbitoct &node, double *c
                 if(cm) cm->setColor(p);
                 glVertex3f( p[0] * precision + ccenter[0], p[1] * precision + ccenter[1], p[2] * precision + ccenter[2]);
               }
-            } else if ((int)length <= l) { 
+            } else if ((int)length <= l) {
               for(unsigned int iterator = 0; iterator < length; iterator++ ) {
                 if(cm) cm->setColor(point);
                 glVertex3f( point[0] * precision + ccenter[0], point[1] * precision + ccenter[1], point[2] * precision + ccenter[2]);
@@ -442,7 +442,7 @@ void compactTree::displayOctTreeLOD2(float ratio, cbitoct &node, double *center,
       if (  ( 1 << i ) & node.leaf ) {   // if ith node is leaf get center
         tshort *point = children->getPoints();
         lint length = children->getLength();
-            
+
         int l = LOD2(ccenter[0], ccenter[1], ccenter[2], size/2.0);  // only a single pixel on screen only paint one point
         l = std::max((int)(l*l*ratio), 0);
         if (l > 1) {
@@ -456,7 +456,7 @@ void compactTree::displayOctTreeLOD2(float ratio, cbitoct &node, double *center,
               if(cm) cm->setColor(p);
               glVertex3f( p[0] * precision + ccenter[0], p[1] * precision + ccenter[1], p[2] * precision + ccenter[2]);
             }
-          } else if ((int)length <= l) { 
+          } else if ((int)length <= l) {
             for(unsigned int iterator = 0; iterator < length; iterator++ ) {
               if(cm) cm->setColor(point);
               glVertex3f( point[0] * precision + ccenter[0], point[1] * precision + ccenter[1], point[2] * precision + ccenter[2]);
@@ -537,31 +537,31 @@ void compactTree::showCube(double *center, double size) {
   glVertex3f(center[0] + size, center[1] + size, center[2] + size);
   glColor3f(1.0f,0.5f,0.0f);      // Set The Color To Orange
 
-  glVertex3f(center[0] + size, center[1] - size, center[2] + size); 
+  glVertex3f(center[0] + size, center[1] - size, center[2] + size);
   glVertex3f(center[0] - size, center[1] - size, center[2] + size);
   glVertex3f(center[0] - size, center[1] - size, center[2] - size);
   glVertex3f(center[0] + size, center[1] - size, center[2] - size);
 
   glColor3f(1.0f,0.0f,0.0f);      // Set The Color To Red
-  glVertex3f(center[0] + size, center[1] + size, center[2] + size); 
+  glVertex3f(center[0] + size, center[1] + size, center[2] + size);
   glVertex3f(center[0] - size, center[1] + size, center[2] + size);
   glVertex3f(center[0] - size, center[1] - size, center[2] + size);
   glVertex3f(center[0] + size, center[1] - size, center[2] + size);
 
   glColor3f(1.0f,1.0f,0.0f);      // Set The Color To Yellow
-  glVertex3f(center[0] + size, center[1] - size, center[2] - size); 
+  glVertex3f(center[0] + size, center[1] - size, center[2] - size);
   glVertex3f(center[0] - size, center[1] - size, center[2] - size);
   glVertex3f(center[0] - size, center[1] + size, center[2] - size);
   glVertex3f(center[0] + size, center[1] + size, center[2] - size);
 
   glColor3f(0.0f,0.0f,1.0f);      // Set The Color To Blue
-  glVertex3f(center[0] - size, center[1] + size, center[2] + size); 
+  glVertex3f(center[0] - size, center[1] + size, center[2] + size);
   glVertex3f(center[0] - size, center[1] + size, center[2] - size);
   glVertex3f(center[0] - size, center[1] - size, center[2] - size);
   glVertex3f(center[0] - size, center[1] - size, center[2] + size);
 
   glColor3f(1.0f,0.0f,1.0f);      // Set The Color To Violet
-  glVertex3f(center[0] + size, center[1] + size, center[2] - size); 
+  glVertex3f(center[0] + size, center[1] + size, center[2] - size);
   glVertex3f(center[0] + size, center[1] + size, center[2] + size);
   glVertex3f(center[0] + size, center[1] - size, center[2] + size);
   glVertex3f(center[0] + size, center[1] - size, center[2] - size);
@@ -574,8 +574,8 @@ void compactTree::showCube(double *center, double size) {
 
 
 template <class T>
-void compactTree::selectRay(std::vector<T *> &points) { 
-  //selectRay(points, *root, center, size); 
+void compactTree::selectRay(std::vector<T *> &points) {
+  //selectRay(points, *root, center, size);
 }
 
 
@@ -635,7 +635,7 @@ long compactTree::countLeaves() { return 1 + countLeaves(*root); }
 
 void compactTree::setColorManager(ColorManager *_cm) { cm = _cm; }
 
-void compactTree::drawLOD(float ratio) { 
+void compactTree::drawLOD(float ratio) {
     switch (current_lod_mode) {
       case 1:
         glBegin(GL_POINTS);
@@ -650,7 +650,7 @@ void compactTree::drawLOD(float ratio) {
           glPointParameterfARB(GL_POINT_SIZE_MAX_ARB, 100000.0);
           GLfloat p[3] = {0.0, 0.0000, 0.0000005};
           glPointParameterfvARB(GL_POINT_DISTANCE_ATTENUATION_ARB, p);
-          displayOctTreeCPAllCulled(*BOctTree<T>::root, BOctTree<T>::center, BOctTree<T>::size,  BOctTree<T>::size/  pow(2, min( (int)(ratio * BOctTree<T>::max_depth ), BOctTree<T>::max_depth - 3) ) ); 
+          displayOctTreeCPAllCulled(*BOctTree<T>::root, BOctTree<T>::center, BOctTree<T>::size,  BOctTree<T>::size/  pow(2, min( (int)(ratio * BOctTree<T>::max_depth ), BOctTree<T>::max_depth - 3) ) );
           p[0] = 1.0;
           p[2] = 0.0;
           glPointParameterfvARB(GL_POINT_DISTANCE_ATTENUATION_ARB, p);
@@ -660,7 +660,7 @@ void compactTree::drawLOD(float ratio) {
       //break;
       case 0:
         glBegin(GL_POINTS);
-        displayOctTreeCulledLOD(maxtargetpoints * ratio, *root, center, size); 
+        displayOctTreeCulledLOD(maxtargetpoints * ratio, *root, center, size);
         glEnd();
         break;
       default:
@@ -668,12 +668,12 @@ void compactTree::drawLOD(float ratio) {
     }
 }
 
-void compactTree::draw() { 
-  displayOctTreeAllCulled(*root, center, size); 
+void compactTree::draw() {
+  displayOctTreeAllCulled(*root, center, size);
 }
 
-void compactTree::displayOctTree(double minsize ) { 
-  displayOctTreeCAllCulled(*root, center, size, minsize); 
+void compactTree::displayOctTree(double minsize ) {
+  displayOctTreeCAllCulled(*root, center, size, minsize);
 }
 
 shortpointrep* compactTree::createPoints(lint length) {
@@ -735,7 +735,7 @@ void compactTree::deserialize(std::string filename)
 
   // read root node
   //root = new cbitoct();
-  root = alloc->allocate<cbitoct>();    
+  root = alloc->allocate<cbitoct>();
   deserialize(file, *root );
   file.close();
 }
@@ -753,19 +753,19 @@ void compactTree::deserialize(std::ifstream &f, cbitoct &node) {
 
   // create children
   //cbitunion<tshort> *children = new cbitunion<tshort>[n_children];
-  cbitunion<tshort> *children = alloc->allocate<cbitunion<tshort> >(n_children);    
+  cbitunion<tshort> *children = alloc->allocate<cbitunion<tshort> >(n_children);
   cbitoct::link(node, children);
 
   for (short i = 0; i < 8; i++) {
     if (  ( 1 << i ) & node.valid ) {   // if ith node exists
-      if (  ( 1 << i ) & node.leaf ) {   // if ith node is leaf read points 
+      if (  ( 1 << i ) & node.leaf ) {   // if ith node is leaf read points
         lint length;
         f.read(reinterpret_cast<char*>(&length), sizeof(lint));
-        shortpointrep *points = createPoints(length); 
+        shortpointrep *points = createPoints(length);
 
         f.read(reinterpret_cast<char*>(points), sizeof(shortpointrep) * length * POINTDIM); // read the points
-        children->linkPoints(points, length); 
-      } else {  // write child 
+        children->linkPoints(points, length);
+      } else {  // write child
         deserialize(f, children->node);
       }
       ++children; // next child
@@ -791,8 +791,8 @@ void compactTree::serialize(std::string filename) {
   pointtype.serialize(file);
 
   p[0] = voxelSize;
-  p[1] = center[0]; 
-  p[2] = center[1]; 
+  p[1] = center[0];
+  p[2] = center[1];
   p[3] = center[2];
   p[4] = size;
 
@@ -829,7 +829,7 @@ void compactTree::serialize(std::ofstream &of, cbitoct &node) {
   cbitoct::getChildren(node, children);
   for (short i = 0; i < 8; i++) {
     if (  ( 1 << i ) & node.valid ) {   // if ith node exists
-      if (  ( 1 << i ) & node.leaf ) {   // if ith node is leaf write points 
+      if (  ( 1 << i ) & node.leaf ) {   // if ith node is leaf write points
         tshort *points = children->getPoints();
         lint length = children->getLength();
 
@@ -837,7 +837,7 @@ void compactTree::serialize(std::ofstream &of, cbitoct &node) {
 
         of.write(reinterpret_cast<char*>(points), POINTDIM*length*sizeof(tshort) );
 
-      } else {  // write child 
+      } else {  // write child
         serialize(of, children->node);
       }
       ++children; // next child

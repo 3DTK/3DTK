@@ -2,7 +2,7 @@
  * @file
  * @brief Definition of plane pairs
  *
- *  @author 
+ *  @author
  *  @author Jan Elseberg. Institute of Computer Science, University of Osnabrueck, Germany.
  *  @author Dorit Borrmann. School of Engineering and Science, Jacobs University Bremen gGmbH, Germany.
  */
@@ -16,7 +16,7 @@
 class PPair {
 public:
   enum TYPE {UNDEFINED, EQUAL, PARALLEL, PERPENDICULAR};
-  
+
   inline PPair(ConvexPlane *p1, ConvexPlane *p2);
   inline PPair() : p1(0), p2(0) {};
 
@@ -31,7 +31,7 @@ public:
   TYPE type;
 
 };
-  
+
 inline PPair::PPair(ConvexPlane *_p1, ConvexPlane *_p2) {
   type = UNDEFINED;
   p1 = _p1;
@@ -59,7 +59,7 @@ inline PPair::PPair(ConvexPlane *_p1, ConvexPlane *_p2) {
   double z = 0.0;
 
   istart = Point(x,y,z);
-  
+
   double nn[3];
   Cross(p1->n, p2->n, nn);
 

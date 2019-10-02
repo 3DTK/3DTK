@@ -1,5 +1,5 @@
-/** @file 
- *  @brief Representation of the optimized k-d tree. 
+/** @file
+ *  @brief Representation of the optimized k-d tree.
  *  @author Andreas Nuechter. Institute of Computer Science, University of Osnabrueck, Germany.
  *  @author Kai Lingemann. Institute of Computer Science, University of Osnabrueck, Germany.
  *  @author Thomas Escher
@@ -14,7 +14,7 @@
 #include "slam6d/kdTreeImpl.h"
 
 #ifdef _MSC_VER
-#if !defined _OPENMP && defined OPENMP 
+#if !defined _OPENMP && defined OPENMP
 #define _OPENMP
 #endif
 #endif
@@ -35,8 +35,8 @@ struct ArrayAccessor {
 };
 
 /**
- * @brief The optimized k-d tree. 
- * 
+ * @brief The optimized k-d tree.
+ *
  * A kD tree for points, with limited
  * capabilities (find nearest point to
  * a given point, or to a ray).
@@ -49,7 +49,7 @@ class KDtreeManaged :
 public:
   KDtreeManaged(Scan* scan);
   virtual ~KDtreeManaged() {}
-  
+
   virtual void lock();
   virtual void unlock();
 

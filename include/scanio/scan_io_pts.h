@@ -11,7 +11,7 @@
 #include "scan_io.h"
 
 /**
- * @brief IO of a 3D scan in pts file format 
+ * @brief IO of a 3D scan in pts file format
  *
  * The compiled class is available as shared object file
  */

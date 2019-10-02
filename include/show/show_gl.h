@@ -27,8 +27,8 @@ extern bool   mousemoving;          // true if a mouse button has been pressed
 extern bool   keypressed;           // true if a key button has been pressed
                                     // inside a window,
                                     // but has not been released
-extern double ptstodisplay;  
-extern double lastfps;              // last frame rate    
+extern double ptstodisplay;
+extern double lastfps;              // last frame rate
 extern int    pointmode;
 
 extern bool   smallfont;
@@ -66,7 +66,7 @@ void DrawScala();
 
 //-----------------------------------------------------------------------------------
 
-  
+
 /**
  * Display function
  */
@@ -102,10 +102,10 @@ void resetView(int dummy);
 /**
  * Function to set the viewer window back to a previously saved state.
  */
-void setView(double pos[3], double new_quat[4], 
-             double newMouseRotX, double newMouseRotY, double newMouseRotZ, 
+void setView(double pos[3], double new_quat[4],
+             double newMouseRotX, double newMouseRotY, double newMouseRotZ,
              double newCangle,
-             int sVM, bool cNMM, double pzoom_new, 
+             int sVM, bool cNMM, double pzoom_new,
              bool s_points, bool s_path, bool s_cameras, double ps, int
              sf, double fD, bool inv);
 
@@ -123,25 +123,25 @@ void update_view_translation(int t);
 
 /**
  * handles the animation button
- * @param dummy not needed necessary for glui 
+ * @param dummy not needed necessary for glui
  */
 void startAnimation(int dummy);
 
 /**
- * calls the resetView function 
- * @param dummy not needed necessary for glui 
+ * calls the resetView function
+ * @param dummy not needed necessary for glui
  */
 void callResetView(int dummy);
 
 /**
- * calls the resetView function 
- * @param dummy not needed necessary for glui 
+ * calls the resetView function
+ * @param dummy not needed necessary for glui
  */
 void invertView(int dummy);
 
 /**
- * calls the topView function 
- * @param dummy not needed necessary for glui 
+ * calls the topView function
+ * @param dummy not needed necessary for glui
  */
 void callTopView(int dummy);
 
@@ -152,8 +152,8 @@ void callTopView(int dummy);
 void callRotateView(int dummy);
 
 /**
- * calls the cameraView function 
- * @param dummy not needed necessary for glui 
+ * calls the cameraView function
+ * @param dummy not needed necessary for glui
  */
 void callAddCamera(int dummy);
 

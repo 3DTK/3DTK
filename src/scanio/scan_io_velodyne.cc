@@ -81,7 +81,7 @@ double velodyne_calibrated[VELODYNE_NUM_LASERS][6];
  */
 int backup()
 {
-	double velodyne_calibrated1[64][6] = 
+	double velodyne_calibrated1[64][6] =
 	{
 		{	-7.1581192,	-4.5,	102,	21.560343,	-2.5999999, 1},
 		{	-6.8178215,	-3.4000001,	125,	21.516994,	2.5999999, 1},
@@ -259,7 +259,7 @@ int calibrate(string filename)
 	string line;
 	std::ifstream myfile (filename.c_str());
 	if (myfile.is_open())
-	{	
+	{
 		cout << "Using Calibration File"<<endl;
 		string data[6];
 		getline (myfile,line);
@@ -288,7 +288,7 @@ int calibrate(string filename)
 			j++;
 		}
 		while(!myfile.eof());
-		
+
 		myfile.close();
 
 		if (linecount < 60)
@@ -358,15 +358,15 @@ int read_one_packet (
 
 	for ( c = 0 ; c < CIRCLELENGTH; c++ )
 	{
-#ifdef _MSC_VER 
+#ifdef _MSC_VER
 		fseek(fp , BLOCK_OFFSET, SEEK_CUR);
 #else
 #ifdef __CYGWIN__
 		fseek(fp , BLOCK_OFFSET, SEEK_CUR);
-#else		
+#else
 		fseeko(fp , BLOCK_OFFSET, SEEK_CUR);
 #endif
-#endif		
+#endif
 		size=fread ( buf, 1, BLOCK_SIZE, fp );
 
 		if(size<BLOCK_SIZE)
@@ -527,12 +527,12 @@ void ScanIO_velodyne::readScan(
 	char filename[256];
 	sprintf(filename, "%s%s%s",dir_path , dataPrefix(), dataSuffix());
 
-#ifdef _MSC_VER 
+#ifdef _MSC_VER
     scan_in = fopen(filename,"rb");
 #else
 #ifdef __CYGWIN__
     scan_in = fopen(filename,"rb");
-#else    
+#else
     scan_in = fopen64(filename,"rb");
 #endif
 #endif
@@ -552,17 +552,17 @@ void ScanIO_velodyne::readScan(
 
 	fileCounter=  atoi(identifier);
 
-#ifdef _MSC_VER 
+#ifdef _MSC_VER
     fseek(scan_in, 24, SEEK_SET);
     fseek(scan_in, (BLOCK_SIZE+BLOCK_OFFSET)*CIRCLELENGTH*fileCounter, SEEK_CUR);
 #else
-#ifdef __CYGWIN__     
+#ifdef __CYGWIN__
     fseek(scan_in, 24, SEEK_SET);
     fseek(scan_in, (BLOCK_SIZE+BLOCK_OFFSET)*CIRCLELENGTH*fileCounter, SEEK_CUR);
 #else
     fseeko(scan_in, 24, SEEK_SET);
     fseeko(scan_in, (BLOCK_SIZE+BLOCK_OFFSET)*CIRCLELENGTH*fileCounter, SEEK_CUR);
-#endif    
+#endif
 #endif
 
     read_one_packet(

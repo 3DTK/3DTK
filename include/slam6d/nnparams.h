@@ -2,13 +2,13 @@
 #define __NNPARAMS_H__
 
 struct NNParams {
-/** 
-   * pointer to the closest point.  size = 4 bytes of 32 bit machines 
+/**
+   * pointer to the closest point.  size = 4 bytes of 32 bit machines
    */
   void *closest;
 
-  /** 
-   * distance to the closest point. size = 8 bytes 
+  /**
+   * distance to the closest point. size = 8 bytes
    */
   double closest_d2;
 
@@ -20,12 +20,12 @@ struct NNParams {
   int y;
   int z;
 
-  /** 
-   * pointer to the point, size = 4 bytes of 32 bit machines 
+  /**
+   * pointer to the point, size = 4 bytes of 32 bit machines
    */
   double *p;
 
-  /** 
+  /**
    * expand to 128 bytes to avoid false-sharing, 16 bytes from above + 28*4 bytes = 128 bytes
    */
 //  int padding[24];

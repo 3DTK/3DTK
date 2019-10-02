@@ -7,7 +7,7 @@
 #include "geometry_msgs/PoseStamped.h"
 #include "geometry_msgs/PoseWithCovarianceStamped.h"
 
-#include <tf/tf.h>    
+#include <tf/tf.h>
 #include <tf/transform_listener.h>
 
 class ekffilter {
@@ -22,7 +22,7 @@ class ekffilter {
 
   /// callback function for odo data
   void addOdom(const nav_msgs::Odometry& odom);
-  
+
   /// callback function for imu data
   void addImu(const sensor_msgs::Imu& imu);
 

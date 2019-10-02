@@ -56,7 +56,7 @@ void parse_args(int argc, char **argv, dataset_settings& dss, window_settings& w
     dss.custom_filter, no_anim_convert_jpg,
     dss.trajectory_file_name, dss.identity, no_config,
 		  other_options);
-  
+
   // These options will be displayed in the help text
   options_description visible_options("");
   visible_options

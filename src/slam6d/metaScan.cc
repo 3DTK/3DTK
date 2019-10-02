@@ -33,8 +33,8 @@ MetaScan::MetaScan(std::vector<Scan*> scans, int nns_method) : m_scans(scans)
 MetaScan::~MetaScan()
 {
   // remove this from the global vector for addFrame reasons
-  for(ScanVector::iterator it = Scan::allScans.begin(); 
-      it != Scan::allScans.end(); 
+  for(ScanVector::iterator it = Scan::allScans.begin();
+      it != Scan::allScans.end();
       ++it) {
     if(*it == this) {
       Scan::allScans.erase(it);
@@ -48,12 +48,12 @@ void MetaScan::createSearchTreePrivate()
 #ifdef WITH_METRICS
   Timer tc = ClientMetric::create_metatree_time.start();
 #endif //WITH_METRICS
-  
-  // TODO: there is no nns_type switch option for this one 
-  // because no reduced points are copied, this could be 
+
+  // TODO: there is no nns_type switch option for this one
+  // because no reduced points are copied, this could be
   // implemented if e.g. cuda is required on metascans
   kd = new KDtreeMetaManaged(m_scans);
-  
+
 #ifdef WITH_METRICS
   ClientMetric::create_metatree_time.end(tc);
 #endif //WITH_METRICS

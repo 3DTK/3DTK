@@ -44,7 +44,7 @@ int main(int argc, char **argv) {
         exit(1);
     }
 
-    
+
     PMD *pmd = initPMD("../o3d.L32.pcp", "192.168.0.69");
     IplImage *img = cvCreateImage(pmdGetSize(pmd), 8, 1);
     pmdUpdate(pmd->hnd);
@@ -72,20 +72,20 @@ int main(int argc, char **argv) {
        pmdQueryImage(pmd, img);
 
        cvFlip(img, 0, 1); // flips image around the x-axes
-       
+
 
 
 
        if(grabFrame) {
-            /* ----- Chessboard detection ----- 
+            /* ----- Chessboard detection -----
               -------------------------------- */
             int cornersCount; // should be the same for wcam and pmd and equal totalCorners
-        
-            int found = cvFindChessboardCorners(img, patternSize, corners, 
+
+            int found = cvFindChessboardCorners(img, patternSize, corners,
                           &cornersCount, CV_CALIB_CB_ADAPTIVE_THRESH | CV_CALIB_CB_FILTER_QUADS);
-            cvFindCornerSubPix(img, corners, cornersCount, cvSize(4,4), cvSize(-1,-1), 
+            cvFindCornerSubPix(img, corners, cornersCount, cvSize(4,4), cvSize(-1,-1),
                            cvTermCriteria(CV_TERMCRIT_EPS | CV_TERMCRIT_ITER, 30, 0.1));
- 
+
             if(found && (cornersCount == cornersTotal)) {
                 cvCvtColor(img, imgColor, CV_GRAY2BGR);
                 cvDrawChessboardCorners(imgColor, patternSize, corners, cornersCount, found);

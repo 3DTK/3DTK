@@ -10,7 +10,7 @@
 /**
  *  @file
  *  @brief Representation of a 3D point type
- *  @author Andreas Nuechter. Jacobs University Bremen gGmbH, Germany. 
+ *  @author Andreas Nuechter. Jacobs University Bremen gGmbH, Germany.
  */
 
 #ifndef __POINT_TYPE_ICC__
@@ -39,21 +39,21 @@ T *PointType::createPoint(const Point &P, unsigned int index )
   if (types & USE_AMPLITUDE) {
     p[counter++] = P.amplitude;
   }
-  if (types & USE_DEVIATION) {  
+  if (types & USE_DEVIATION) {
     p[counter++] = P.deviation;
   }
-  if (types & USE_TYPE) {  
+  if (types & USE_TYPE) {
     p[counter++] = P.type;
   }
-  if (types & USE_COLOR) {  
+  if (types & USE_COLOR) {
     memcpy(&p[counter], P.rgb, 3);
     counter++;
   }
-  if (types & USE_TIME) {  
+  if (types & USE_TIME) {
 //    p[counter++] = P.timestamp;
   }
-  if (types & USE_INDEX) {  
-    p[counter++] = index; 
+  if (types & USE_INDEX) {
+    p[counter++] = index;
   }
 
   return p;
@@ -82,17 +82,17 @@ Point PointType::createPoint(T *p)
   if (types & USE_AMPLITUDE) {
     P.amplitude = p[counter++];
   }
-  if (types & USE_DEVIATION) {  
+  if (types & USE_DEVIATION) {
     P.deviation = p[counter++];
   }
-  if (types & USE_TYPE) {  
+  if (types & USE_TYPE) {
     P.type = p[counter++];
   }
-  if (types & USE_COLOR) {  
+  if (types & USE_COLOR) {
     memcpy(P.rgb, &p[counter], 3);
     counter++;
   }
-  if (types & USE_TIME) {  
+  if (types & USE_TIME) {
 //    P.timestamp = p[counter++];
   }
 
@@ -169,17 +169,17 @@ T** PointType::createPointArray(Scan* scan)
 {
   // access data with prefetching
   useScan(scan);
-  
+
   // create a float array with requested attributes by pointtype via createPoint
   unsigned int nrpts = getScanSize(scan);
   T** pts = new T*[nrpts];
   for(unsigned int i = 0; i < nrpts; i++) {
     pts[i] = createPoint<T>(i);
   }
-  
+
   // unlock access to data, remove unneccessary data fields
   clearScan();
-  
+
   return pts;
 }
 

@@ -33,7 +33,7 @@ double SDisplay::mirror[16] = {1,0,0,0,
   0,1,0,0,
   0,0,-1,0,
   0,0,0,1};
-  
+
 void SDisplay::displayAll() {
   // TODO ensure all settings are set to default
   //
@@ -105,37 +105,37 @@ SDisplay * PointDisplay::readFromFile(std::string &filename) {
       break;
     }
   }
- 
+
   points.pop_back();
   labels.pop_back();
   input.close();
   input.clear();
 
   return new PointDisplay(points, labels);
-    
+
 }
 
 void PointDisplay::displayObject() {
 
   glColor3f(1.0, 0.3, 0.3);
-  
+
   glPointSize(5);
   glBegin(GL_POINTS);
   for (unsigned int i = 0; i < points.size(); i++) {
     glVertex3f(points[i][0], points[i][1], points[i][2]);
   }
   glEnd();
-  
+
   glPushMatrix();
   for(unsigned int i = 0; i < points.size(); i++) {
-    
+
     glRasterPos3f(points[i][0], points[i][1], points[i][2]);
     _glutBitmapString(GLUT_BITMAP_HELVETICA_10, labels[i].c_str());
     //_glutBitmapString(GLUT_BITMAP_9_BY_15, "http://threedtk.de");
-   
+
   }
   glPopMatrix();
-  
+
 }
 
 CoordDisplay::CoordDisplay(std::vector<float*> &c) {
@@ -166,13 +166,13 @@ SDisplay * CoordDisplay::readFromFile(std::string &filename) {
       break;
     }
   }
- 
+
   coords.pop_back();
   input.close();
   input.clear();
 
   return new CoordDisplay(coords);
-    
+
 }
 
 void CoordDisplay::displayObject() {
@@ -182,7 +182,7 @@ void CoordDisplay::displayObject() {
   glBegin(GL_LINES);
 
   for (unsigned int i = 0; i < coords.size(); i++) {
-    
+
     float s = 10.0*coords[i][15];
     glColor3f(1,0.0,0.0);
     glVertex3f(coords[i][12], coords[i][13], coords[i][14]);
@@ -219,13 +219,13 @@ SDisplay * LineDisplay::readFromFile(std::string &filename) {
       break;
     }
   }
- 
+
   lines.pop_back();
   input.close();
   input.clear();
 
   return new LineDisplay(lines);
-    
+
 }
 
 void LineDisplay::displayObject() {
@@ -288,7 +288,7 @@ SDisplay* BoxDisplay::readFromFile(std::string &filename) {
         float *p3 = new float[3];
         float *p4 = new float[3];
         switch(i) {
-          case 0: 
+          case 0:
             p1[0] = minx;
             p1[1] = miny;
             p1[2] = minz;
@@ -324,7 +324,7 @@ SDisplay* BoxDisplay::readFromFile(std::string &filename) {
             p4[2] = maxz;
             points.push_back(p4);
             break;
-          case 2: 
+          case 2:
             p1[2] = minz;
             p1[1] = miny;
             p1[0] = minx;
@@ -360,7 +360,7 @@ SDisplay* BoxDisplay::readFromFile(std::string &filename) {
             p4[0] = maxx;
             points.push_back(p4);
             break;
-          case 4: 
+          case 4:
             p1[0] = minx;
             p1[2] = minz;
             p1[1] = miny;
@@ -433,7 +433,7 @@ SDisplay* GroupPlaneDisplay::readFromFile(std::string &filename) {
     std::string dir = filename.substr(0, end);
     std::string tmp;
     input >> tmp;
-    if(dir.length() != 0) dir = dir + "/"; 
+    if(dir.length() != 0) dir = dir + "/";
     try {
     if(strcmp(tmp.c_str(), "randomcolor") != 0) {
       while(input.good()) {
@@ -463,7 +463,7 @@ SDisplay* GroupPlaneDisplay::readFromFile(std::string &filename) {
   input.close();
   input.clear();
   return new GroupPlaneDisplay(planes);
-  
+
 }
 
 PlaneDisplay::PlaneDisplay(std::vector<float*> &p, float* c) {
@@ -486,7 +486,7 @@ SDisplay * PlaneDisplay::readFromFile(std::string &filename, float* color) {
     }
   }
   points.pop_back();
-  
+
   input.close();
   input.clear();
 
@@ -495,7 +495,7 @@ SDisplay * PlaneDisplay::readFromFile(std::string &filename, float* color) {
 
 void PlaneDisplay::displayObject() {
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); // TODO
-  
+
   glColor4d(color[0], color[1], color[2], 0.5);
   glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
   glBegin(GL_POLYGON);
@@ -522,7 +522,7 @@ SDisplay * BoundingBoxDisplay::readFromFile(std::string &filename) {
       std::istringstream iss(currentLine);
       double minx, maxx, miny, maxy, minz, maxz;
       if (!(iss >> minx >> maxx >> miny >> maxy >> minz >> maxz)) break;
- 
+
       //along x-axis
       float* p5 = new float[6];
       p5[0] = minx;
@@ -556,7 +556,7 @@ SDisplay * BoundingBoxDisplay::readFromFile(std::string &filename) {
       p12[4] = maxy;
       p12[5] = minz;
       lines.push_back(p12);
- 
+
       //along y-axis
       float* p2 = new float[6];
       p2[0] = minx;
@@ -590,7 +590,7 @@ SDisplay * BoundingBoxDisplay::readFromFile(std::string &filename) {
       p8[4] = maxy;
       p8[5] = minz;
       lines.push_back(p8);
- 
+
       //along z-axis
       float* p1 = new float[6];
       p1[0] = minx;
@@ -630,7 +630,7 @@ SDisplay * BoundingBoxDisplay::readFromFile(std::string &filename) {
   input.clear();
 
   return new BoundingBoxDisplay(lines);
-    
+
 }
 
 void BoundingBoxDisplay::displayObject() {
@@ -655,7 +655,7 @@ void BoundingBoxDisplay::displayObject() {
       glVertex3f(lines[i][0], lines[i][1], lines[i][2]);
       glColor3f(0.0, 0.0, 1.0);
       glVertex3f(lines[i][3], lines[i][4], lines[i][5]);
-    }    
+    }
 
   }
 

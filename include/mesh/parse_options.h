@@ -10,14 +10,14 @@
 
 // Parse commandline options and assign to parameters
 void parse_options(
-  int argc, char **argv, int &start, int &end, 
-  bool &scanserver, int &max_dist, int &min_dist, 
-  std::string &dir, std::string &odir, IOType &iotype, 
-  bool &in_color,  bool &reflectance, double &min_refl, double &max_refl, 
+  int argc, char **argv, int &start, int &end,
+  bool &scanserver, int &max_dist, int &min_dist,
+  std::string &dir, std::string &odir, IOType &iotype,
+  bool &in_color,  bool &reflectance, double &min_refl, double &max_refl,
   bool &no_normal, bool &join, double &red, int &rand, bool &use_pose,
-  int &octree, bool &rangeFilterActive, bool &customFilterActive, 
+  int &octree, bool &rangeFilterActive, bool &customFilterActive,
   std::string &customFilter, double &scaleFac, bool &autoRed,
-  int &k1, int &k2, normal_method &ntype, int &width, int &height, 
+  int &k1, int &k2, normal_method &ntype, int &width, int &height,
   bool &inward, int &depth, float &samplesPerNode, float &trimVal
 );
 // validate function is needed to parse user defined types

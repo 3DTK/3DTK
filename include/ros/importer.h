@@ -99,26 +99,26 @@ class timedImporter
 public:
     inline timedImporter(std::string _rxpfile, timeMap *_tmap, calibration *_cal,
         bool _lines=false, bool _stopandgo=false, bool _rieglcoord=false,
-        bool _norobot = false, unsigned int _pointtype = PointType::USE_NONE, 
+        bool _norobot = false, unsigned int _pointtype = PointType::USE_NONE,
         int _start=-1, int _end=-1, std::string
-     _mapstring = "/odom_combined", bool _linescans=false) 
+     _mapstring = "/odom_combined", bool _linescans=false)
       : pointcloud(false), linescans(_linescans), start(_start), end(_end),
       rxpfile(_rxpfile), tmap(_tmap), lines(_lines), stopandgo(_stopandgo),
       rieglcoord(_rieglcoord), norobot(_norobot), mapstring(_mapstring)
     {
       remembertime = true;
       if (lines) {
-        pbuffer.reserve(500);      
+        pbuffer.reserve(500);
         use_buffer = true;
       }
       counter = 0;
       pcounter = 0;
       current = new scanstruct(counter++, !stopandgo );
       cal = _cal;
-    
+
       rxpfile = "file://" + rxpfile;
 
-      pointtype = PointType(PointType::USE_TIME | _pointtype); 
+      pointtype = PointType(PointType::USE_TIME | _pointtype);
 
       reducer = 0;
     }
@@ -190,7 +190,7 @@ protected:
     }
 
     std::string rxpfile;
-    // for using next pose as scans pose 
+    // for using next pose as scans pose
     bool remembertime ;
 
     // current scan
@@ -202,16 +202,16 @@ protected:
 
     void on_echo_transformed(echo_type echo);
     void on_frame_stop(const frame_stop<iterator_type>& arg);
-    void on_frame_start_dn(const frame_start_dn<iterator_type>& arg) { 
-      basic_packets::on_frame_start_dn(arg);                                                                        
-      remembertime = true; // remember time again to make sure the pose is from the very first point                
+    void on_frame_start_dn(const frame_start_dn<iterator_type>& arg) {
+      basic_packets::on_frame_start_dn(arg);
+      remembertime = true; // remember time again to make sure the pose is from the very first point
       newScan();
-    } 
+    }
     void on_frame_start_up(const frame_start_up<iterator_type>& arg) {
-      basic_packets::on_frame_start_up(arg);                                                                        
-      remembertime = true; // remember time again to make sure the pose is from the very first point                
+      basic_packets::on_frame_start_up(arg);
+      remembertime = true; // remember time again to make sure the pose is from the very first point
       newScan();
-    } 
+    }
     void on_line_start_up(const line_start_up<iterator_type>& arg) {
       basic_packets::on_line_start_up(arg);
       if (lines) {
@@ -240,7 +240,7 @@ protected:
 
     // counts the current number of scans we are at
     unsigned int counter;
-    
+
     // counts the current number of points we are at
     int pcounter;
 
@@ -251,10 +251,10 @@ class FileImporter
     : public timedImporter
 {
   public:
-    FileImporter(std::string _rxpfile, timeMap *_tmap, std::string _outputpath, calibration *_cal, 
-        bool _lines=false, bool _stopandgo=false, bool _rieglcoord=false, 
-        bool _norobot=false,unsigned int _pointtype = PointType::USE_NONE, 
-        int start=-1, int end=-1, std::string _mapstring="/odom_combined") 
+    FileImporter(std::string _rxpfile, timeMap *_tmap, std::string _outputpath, calibration *_cal,
+        bool _lines=false, bool _stopandgo=false, bool _rieglcoord=false,
+        bool _norobot=false,unsigned int _pointtype = PointType::USE_NONE,
+        int start=-1, int end=-1, std::string _mapstring="/odom_combined")
       : timedImporter(_rxpfile, _tmap, _cal, _lines, _stopandgo, _rieglcoord, _norobot, _pointtype, start, end, _mapstring) {
         outputpath = _outputpath;
 
@@ -291,9 +291,9 @@ class LineScanImporter
     : public timedImporter
 {
   public:
-    LineScanImporter(std::string _rxpfile, timeMap *_tmap, std::string _outputpath, calibration *_cal, 
-        bool _lines=false, bool _stopandgo=false, unsigned int _pointtype = PointType::USE_NONE, 
-        int start=-1, int end=-1, std::string _mapstring="/odom_combined") 
+    LineScanImporter(std::string _rxpfile, timeMap *_tmap, std::string _outputpath, calibration *_cal,
+        bool _lines=false, bool _stopandgo=false, unsigned int _pointtype = PointType::USE_NONE,
+        int start=-1, int end=-1, std::string _mapstring="/odom_combined")
       : timedImporter(_rxpfile, _tmap, _cal, _lines, _stopandgo, false, false,
       _pointtype, start, end, _mapstring, true) {
         outputpath = _outputpath;
@@ -332,21 +332,21 @@ class ScanImporter
     : public timedImporter
 {
   public:
-    ScanImporter(std::string _rxpfile, timeMap *_tmap, calibration *_cal, 
-        bool _lines=false, bool _stopandgo=false, 
-        unsigned int _pointtype = PointType::USE_NONE, 
-        int start=-1, int end=-1) 
+    ScanImporter(std::string _rxpfile, timeMap *_tmap, calibration *_cal,
+        bool _lines=false, bool _stopandgo=false,
+        unsigned int _pointtype = PointType::USE_NONE,
+        int start=-1, int end=-1)
       : timedImporter(_rxpfile, _tmap, _cal, _lines, _stopandgo, false, false, _pointtype, start, end) {
         scans = 0;
       }
 
-    ScanImporter(const ScanImporter &si) 
+    ScanImporter(const ScanImporter &si)
       : timedImporter(si.rxpfile, si.tmap, si.cal, si.lines, si.stopandgo, false, false, si.pointtype.toFlags(), si.start, si.end) {
       rxpfile = si.rxpfile;
       scans = si.scans;
       reducer = si.reducer;
     }
-   
+
     void setScans(std::vector<Scan *> *_scans) {
       scans = _scans;
     }
@@ -361,11 +361,11 @@ class ScanReducer
     : public ScanImporter
 {
   public:
-    ScanReducer(std::string _rxpfile, timeMap *_tmap, calibration *_cal, double vs, int nrp, 
-        bool _lines=false, bool _stopandgo=false, 
-        unsigned int _pointtype = PointType::USE_NONE, 
-        int start=-1, int end=-1) 
-      : ScanImporter(_rxpfile, _tmap, _cal, _lines, _stopandgo, 
+    ScanReducer(std::string _rxpfile, timeMap *_tmap, calibration *_cal, double vs, int nrp,
+        bool _lines=false, bool _stopandgo=false,
+        unsigned int _pointtype = PointType::USE_NONE,
+        int start=-1, int end=-1)
+      : ScanImporter(_rxpfile, _tmap, _cal, _lines, _stopandgo,
           _pointtype, start, end) {
         scans = 0;
         currentID = 0;

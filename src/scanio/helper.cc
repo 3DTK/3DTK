@@ -242,7 +242,7 @@ void readPoseHelper(const char *dir_path,
 bool strtoval(char *pos, unsigned int linenr, double* ret)
 {
     char *endptr;
-    errno = 0;   
+    errno = 0;
     char *saved_locale;
     saved_locale = setlocale(LC_NUMERIC, "C");
     double val = strtod(pos, &endptr);
@@ -374,7 +374,7 @@ unsigned int strtoarray(std::string opt_s, char **&opts_array,const char * separ
     memcpy(opts, opt_s.c_str(), opt_s.size() + 1);
     char * tmp = (char *)malloc(opt_s.size() + 1);
     memcpy(tmp, opt_s.c_str(), opt_s.size() + 1);
-    
+
     char * pch;
     pch = strtok (opts,separator);
 
@@ -394,7 +394,7 @@ unsigned int strtoarray(std::string opt_s, char **&opts_array,const char * separ
       memcpy(opts_array[cnt], pch, strlen(pch) + 1);
       pch = strtok (NULL, separator);
     }
-    return count; 
+    return count;
 }
 
 bool storeval(char *pos, unsigned int linenr, IODataType currspec, double* xyz, int* xyz_idx, unsigned char* rgb, int* rgb_idx, float* refl, float* temp, float* ampl, int* type, float* devi, double* n, int* n_idx)
@@ -439,7 +439,7 @@ bool checkSpec(IODataType* spec, std::vector<double>* xyz, std::vector<unsigned 
     int devicount = 0;
     int normalcount = 0;
     IODataType *currspec;
-    // go through the spec array and count the occurrence of each spec 
+    // go through the spec array and count the occurrence of each spec
     for (currspec = spec; *currspec != DATA_TERMINATOR; ++currspec) {
         switch (*currspec) {
             case DATA_XYZ:
@@ -635,7 +635,7 @@ ScanDataTransform& transform, PointFilter& filter, std::vector<double>* xyz, std
         std::cerr << "less values than in spec in line " << linenr << std::endl;
         return false;
     }
-    // check if three values were read in for xyz and rgb 
+    // check if three values were read in for xyz and rgb
     if (xyz != 0 && xyz_idx != 3) {
         std::cerr << "can't understand " << xyz_idx << " coordinate values in line " << linenr << std::endl;
         return false;

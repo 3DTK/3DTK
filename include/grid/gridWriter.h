@@ -9,10 +9,10 @@
 
 /**
  * The class represents the baseclass for all writers.
- * Writers are used by the grid-class for writing the 
- * internal gridPoint-array to a file. 
+ * Writers are used by the grid-class for writing the
+ * internal gridPoint-array to a file.
  * Writers for a specific format must inherit this class.
- * 
+ *
  * Furthermore it provides static methods for creating writers
  * for each format.
  *
@@ -24,7 +24,7 @@ class gridWriter
  protected:
     /** The referenz to the used stream */
     std::ofstream stream;
-    
+
     /** The filename of the file to be opened*/
     std::string filename;
  public:
@@ -36,7 +36,7 @@ class gridWriter
 
     /** @brief DTor */
     virtual ~gridWriter();
-    
+
     /** @brief Method to write the grid */
     virtual void write(const grid& grid) = 0;
 };
@@ -53,7 +53,7 @@ class ppmWriter : public gridWriter
  public:
     /** @brief CTor */
     ppmWriter(std::string file);
-    
+
     /** @brief CTor */
     ppmWriter(std::ofstream &stream);
 
@@ -73,10 +73,10 @@ class parcelWriter : public gridWriter
  public:
     /** @brief CTor */
     parcelWriter(std::string file);
-    
+
     /** @brief CTor */
     parcelWriter(std::ofstream &stream);
-    
+
     /** @brief Method to write the grid */
     virtual void write(const grid& grid);
 };
@@ -92,7 +92,7 @@ class gnuplotWriter : public gridWriter
  public:
     /** @brief CTor */
     gnuplotWriter(std::string file);
-    
+
     /** @brief CTor */
     gnuplotWriter(std::ofstream &stream);
 
@@ -112,7 +112,7 @@ class worldWriter : public gridWriter
     worldWriter(std::string file, long minX, long maxX,
 		long minZ, long maxZ, int resolution,
 		long vpX, long vpZ);
-    
+
     /** @brief CTor */
     worldWriter(std::ofstream &stream, long minX, long maxX,
 		long minZ, long maxZ, int resolution,

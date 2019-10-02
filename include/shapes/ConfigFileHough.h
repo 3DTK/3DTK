@@ -33,7 +33,7 @@ struct maxcompare {
 class ConfigFileHough {
 
 public:
-  
+
   ConfigFileHough();
 
   unsigned int LoadCfg(const char *CfgFile);
@@ -42,25 +42,25 @@ public:
   inline char* Get_CfgFileName();
 
   inline double Get_MaxDist();
-  inline double Get_MinDist();             
-  inline unsigned int Get_AccumulatorMax();   
-  inline unsigned int Get_MinSizeAllPoints();    
-  inline unsigned int Get_RhoNum();              
-  inline unsigned int Get_ThetaNum();           
-  inline unsigned int Get_PhiNum();         
-  inline unsigned int Get_RhoMax();           
-  inline double Get_MaxPointPlaneDist();   
-  inline unsigned int Get_MaxPlanes();           
-  inline unsigned int Get_MinPlaneSize(); 
+  inline double Get_MinDist();
+  inline unsigned int Get_AccumulatorMax();
+  inline unsigned int Get_MinSizeAllPoints();
+  inline unsigned int Get_RhoNum();
+  inline unsigned int Get_ThetaNum();
+  inline unsigned int Get_PhiNum();
+  inline unsigned int Get_RhoMax();
+  inline double Get_MaxPointPlaneDist();
+  inline unsigned int Get_MaxPlanes();
+  inline unsigned int Get_MinPlaneSize();
   inline double Get_MinPlanarity();
   inline double Get_PlaneRatio();
-  inline double Get_PointDist();           
-  inline bool Get_PeakWindow(); 
+  inline double Get_PointDist();
+  inline bool Get_PeakWindow();
   inline unsigned int Get_WindowSize();
   inline unsigned int Get_TrashMax();
-                    
-  inline unsigned int Get_AccumulatorType();     
-  inline char* Get_PlaneDir();  
+
+  inline unsigned int Get_AccumulatorType();
+  inline char* Get_PlaneDir();
 
 //private: // Parameters are public to avoid having to create mutator functions
 

@@ -10,14 +10,14 @@
 /**
  * @file
  * @brief Main program calculating difference of 3D scans.
- * 
- * Program for calculating the 2d-difference between scans after matching with slam6d 
+ *
+ * Program for calculating the 2d-difference between scans after matching with slam6d
  * Usage: bin/scan_diff2d -s <START> -e <END> -d <NR> 'dir',
  * Use -s for the first scan, -e for the second scan
  *  'dir' the directory of a set of scans
  * The result is an image showing the color coded difference of the two scans
  * ATTENTION: All scans between START and END will be loaded!
- * @author Dorit Borrmann. Automation Group, Jacobs University Bremen gGmbH, Germany. 
+ * @author Dorit Borrmann. Automation Group, Jacobs University Bremen gGmbH, Germany.
  */
 #ifdef _MSC_VER
 #ifdef OPENMP
@@ -114,8 +114,8 @@ void writeRI(const char *filename, double max, double shift)
   for (int i = 0; i < HEIGHT; i++) {     // For each row
     for (int jj = 0; jj < WIDTH; jj++) {    // For each column
       int j = (jj + (int)(WIDTH*shift))%WIDTH;
-      if(!stencilImage[j][i]) { 
-        ibuffer[l++] = UCHAR_MAX; 
+      if(!stencilImage[j][i]) {
+        ibuffer[l++] = UCHAR_MAX;
         ibuffer[l++] = UCHAR_MAX;
         ibuffer[l++] = UCHAR_MAX;
       } else {
@@ -143,7 +143,7 @@ void toRI(double _x, double _y, double _z,  int &X, int &Y, double &range) {
   double phi = 0.0;
   double theta = 0.0;
   range = std::sqrt(x*x + y*y + z*z);
-  
+
   if (range > 0.00000001) {
     phi = atan2(y,x);
     phi = ((phi<0.0)?(phi+2.0*M_PI):phi);
@@ -162,7 +162,7 @@ void toRI(double _x, double _y, double _z,  int &X, int &Y, double &range) {
 
 void toPoint(int X, int Y, double range, double &x, double &y, double &z) {
   x = y = z = 0.0;
-  
+
   if (range > 0.000000001) {
     double _z = cos(((double)Y/(double)HEIGHT * (double)(MAXTHETA - MINTHETA))   + MINTHETA) * range;
     double _y = sin((double)X/(double)WIDTH * (double)(MAXPHI - MINPHI)) * range;
@@ -210,7 +210,7 @@ void usage(char* prog)
 	  << bold << "  -d" << normal << " NR, " << bold << "--dist=" << normal << "NR" << endl
 	  << "         write all points that have no corresponding point closer than NR 'units'" << endl
     << endl << endl;
-  
+
   cout << bold << "EXAMPLES " << normal << endl
 	  << "   " << prog << " -m 500 -d 5 dat" << endl
 	  << "   " << prog << " --max=5000 -d 10.2 dat" << endl
@@ -231,8 +231,8 @@ void usage(char* prog)
  * @param desc true if start is greater than end
  * @return 0, if the parsing was successful. 1 otherwise
  */
-int parseArgs(int argc, char **argv, string &dir, 
-		    int &start, int &end, int &maxDist, int &minDist, double &dist, 
+int parseArgs(int argc, char **argv, string &dir,
+		    int &start, int &end, int &maxDist, int &minDist, double &dist,
 		    IOType &type, bool &desc, double &res, double &shift, int &mode)
 {
   int  c;
@@ -243,7 +243,7 @@ int parseArgs(int argc, char **argv, string &dir,
   /* options descriptor */
   // 0: no arguments, 1: required argument, 2: optional argument
   static struct option longopts[] = {
-    { "format",          required_argument,   0,  'f' },  
+    { "format",          required_argument,   0,  'f' },
     { "max",             required_argument,   0,  'm' },
     { "min",             required_argument,   0,  'M' },
     { "start",           required_argument,   0,  's' },
@@ -317,10 +317,10 @@ int parseArgs(int argc, char **argv, string &dir,
 #endif
   if(start > end) {
     double tmp = start;
-    start = end; 
+    start = end;
     end = tmp;
     desc = true;
-  } 
+  }
 
   return 0;
 }
@@ -329,17 +329,17 @@ int parseArgs(int argc, char **argv, string &dir,
 /**
  * Main program for calculating the difference of two scans.
  * Usage: bin/scan_diff -d <NR> -s <NR> -e <NR> 'dir',
- * Use -s and -e for the two scans, 
- * -d 
+ * Use -s and -e for the two scans,
+ * -d
  * and 'dir' the directory of a set of scans
  * Difference scans will be written to 'dir/diff/scan[00]s.3d'
- * 
+ *
  */
 int main(int argc, char **argv)
 {
 
   cout << "(c) Jacobs University Bremen, gGmbH, 2010" << endl << endl;
-  
+
   if (argc <= 1) {
     usage(argv[0]);
   }
@@ -352,7 +352,7 @@ int main(int argc, char **argv)
   int    maxDist    = -1;
   int    minDist    = -1;
   IOType type    = RIEGL_TXT;
-  bool desc = false; 
+  bool desc = false;
   double resolution = 0.25;
   double shift = 0.5;
   int mode = 0;
@@ -363,40 +363,40 @@ int main(int argc, char **argv)
 
   // Get Scans (all scans between start and end)
   Scan::dir = dir;
- 
+
   string scanFileName;
   string framesFileName;
   ifstream frames_in;
   double inMatrix0[17];
   double inMatrix1[17];
-  
+
   cout << "Reading Scan No. " << start;
   framesFileName = dir  + "scan" + to_string(start,3) + ".frames";
   frames_in.open(framesFileName.c_str());
-  
+
   if(!frames_in.good()) {
     cerr << "Couldn't read frames " << end << endl;
     exit(1);
   }
   while(frames_in.good()) {
     for (unsigned int i = 0; i < 17; frames_in >> inMatrix0[i++]);
-  } 
+  }
   frames_in.close();
   frames_in.clear();
   cout << "Reading Scan No. " << end;
   framesFileName = dir  + "scan" + to_string(end,3) + ".frames";
   frames_in.open(framesFileName.c_str());
-  
+
   if(!frames_in.good()) {
     cerr << "Couldn't read frames " << end << endl;
     exit(1);
   }
   while(frames_in.good()) {
     for (unsigned int i = 0; i < 17; frames_in >> inMatrix1[i++]);
-  } 
+  }
   frames_in.close();
   frames_in.clear();
-  
+
   Scan::readScans(type, start, end, dir, maxDist, minDist, 0);
   int endIndex = Scan::allScans.size() - 1;
 
@@ -408,13 +408,13 @@ int main(int argc, char **argv)
   double tmat[16];
   MMult(tinv, inMatrix1, tmat);
 
-  Scan::allScans[endIndex]->transform(tmat, Scan::INVALID);   
- 
+  Scan::allScans[endIndex]->transform(tmat, Scan::INVALID);
+
   string name;
   int thread_num = 0;
   vector<double*> diff;
   double transMat[16];
- 
+
 
   cout << "set up range image" << endl;
   double x,y,z,r;
@@ -441,7 +441,7 @@ int main(int argc, char **argv)
   WIDTH = (MAXPHI - MINPHI)/resolution;
 
   switch (mode) {
-    case 0: 
+    case 0:
       {
         cout << "creating data structures " << WIDTH << " " << HEIGHT << endl;
         stencilImage = new bool*[WIDTH+1];
@@ -469,7 +469,7 @@ int main(int argc, char **argv)
               rangeImage[X][Y] = r;
               pointImage[X][Y] = p;
             }
-          } 
+          }
         }
 
 
@@ -539,7 +539,7 @@ int main(int argc, char **argv)
               stencilImage1[X][Y] = true;
               rangeImage[X][Y] = fabs(r);
             }
-          } 
+          }
         }
 
         for (unsigned int i = 0; i < Scan::allScans[endIndex]->get_points_red_size(); i++) {
@@ -556,7 +556,7 @@ int main(int argc, char **argv)
               stencilImage[X][Y] = true;
               rangeImage2[X][Y] = fabs(r);
             }
-          } 
+          }
         }
 
         cout << "done setting up range image" << endl;
@@ -574,10 +574,10 @@ int main(int argc, char **argv)
     break;
   }
 
-  
+
   name = dir + "diff_" + to_string(start, 3) + "_" + to_string(end,3) +  ".ppm";
   writeRI(name.c_str(), dist, shift);
-      
+
   delete Scan::allScans[0];
   Scan::allScans.clear();
 

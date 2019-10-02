@@ -125,10 +125,10 @@ void BasicScan::closeDirectory()
 
   // avoiding "Expression: vector iterators incompatible" on empty allScans-vector
   if (Scan::allScans.size()){
-    for(ScanVector::iterator it = Scan::allScans.begin(); 
-      it != Scan::allScans.end(); 
+    for(ScanVector::iterator it = Scan::allScans.begin();
+      it != Scan::allScans.end();
       ++it) {
-        delete *it; 
+        delete *it;
         *it = 0;
     }
     Scan::allScans.clear();
@@ -181,11 +181,11 @@ BasicScan::BasicScan(double *_rPos,
   // write original pose matrix
   EulerToMatrix4(rPos, rPosTheta, transMatOrg);
 
-  // initialize transform matrices from the original one, 
+  // initialize transform matrices from the original one,
   // could just copy transMatOrg to transMat instead
   transformMatrix(transMatOrg);
 
-  // reset the delta align matrix to represent only the transformations 
+  // reset the delta align matrix to represent only the transformations
   // after local-to-global (transMatOrg) one
   M4identity(dalignxf);
   PointFilter filter;
@@ -214,11 +214,11 @@ BasicScan::BasicScan(double *_rPos,
   // write original pose matrix
   EulerToMatrix4(rPos, rPosTheta, transMatOrg);
 
-  // initialize transform matrices from the original one, 
+  // initialize transform matrices from the original one,
   // could just copy transMatOrg to transMat instead
   transformMatrix(transMatOrg);
 
-  // reset the delta align matrix to represent only the transformations 
+  // reset the delta align matrix to represent only the transformations
   // after local-to-global (transMatOrg) one
   M4identity(dalignxf);
   PointFilter filter;
@@ -232,14 +232,14 @@ BasicScan::BasicScan(double *_rPos,
     filter.setRangeMutator(m_range_mutation);
   if(m_filter_scale_set)
     filter.setScale(m_filter_scale);
-  
+
   // check if we can create a large enough array. The maximum size_t on 32 bit
   // is around 4.2 billion which is too little for scans with more than 179
   // million points
   if (sizeof(size_t) == 4 && points.size() > ((size_t)(-1))/sizeof(double)/3) {
       throw std::runtime_error("Insufficient size of size_t datatype");
   }
-  double* data = reinterpret_cast<double*>(create("xyz", 
+  double* data = reinterpret_cast<double*>(create("xyz",
                      sizeof(double) * 3 * points.size()).get_raw_pointer());
   int tmp = 0;
   for(size_t i = 0; i < points.size(); ++i) {
@@ -249,8 +249,8 @@ BasicScan::BasicScan(double *_rPos,
   }
 }
 
-BasicScan::BasicScan(const std::string& path, 
-                     const std::string& identifier, 
+BasicScan::BasicScan(const std::string& path,
+                     const std::string& identifier,
                      IOType type
 #ifdef WITH_MMAP_SCAN
                      , boost::filesystem::path cache
@@ -282,7 +282,7 @@ BasicScan::BasicScan(const std::string& path,
   // write original pose matrix
   EulerToMatrix4(euler, &euler[3], transMatOrg);
 
-  // initialize transform matrices from the original one, 
+  // initialize transform matrices from the original one,
   // could just copy transMatOrg to transMat instead
   transformMatrix(transMatOrg);
 
@@ -297,9 +297,9 @@ BasicScan::BasicScan(const std::string& path,
 
 BasicScan::~BasicScan()
 {
-  for (std::map<std::string, std::pair<unsigned char*, 
-         size_t>>::iterator it = m_data.begin(); 
-       it != m_data.end(); 
+  for (std::map<std::string, std::pair<unsigned char*,
+         size_t>>::iterator it = m_data.begin();
+       it != m_data.end();
        it++) {
 #ifdef WITH_MMAP_SCAN
     // depending on whether the data was backed by an mmap-ed file or by
@@ -359,7 +359,7 @@ void BasicScan::setHeightFilter(double top, double bottom)
 
 void BasicScan::setCustomFilter(std::string& cFiltStr)
 {
-  customFilterStr = cFiltStr;	
+  customFilterStr = cFiltStr;
   m_filter_custom_set = true;
 }
 

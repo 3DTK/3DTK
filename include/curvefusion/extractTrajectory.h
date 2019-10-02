@@ -49,12 +49,12 @@ class extractTrajectory {
    // ros::NodeHandle priv_node("~");
    // string dir_bag,dir_timestamp;
    // char *FileName;
- 
+
     //priv_node.param<std::string>("dir_bag", dir_bag, "/home/du/Documents/datafusion/hectorgps212.bag");
     //priv_node.param<std::string>("dir_timestamp", dir_timestamp, "/home/du/Documents/datafusion/trajectory/");
 
   }
-  
+
 
   void callback_gps(const sensor_msgs::NavSatFixConstPtr &fix,int gps_flag) {
 
@@ -89,13 +89,13 @@ class extractTrajectory {
 
         Eigen::Affine3d translation(Eigen::Translation3d(Eigen::Vector3d(xe, ye, ze)));
 
-	 
+
         // Transform ECEF frame to NED frame
         Eigen::Affine3d ecef2ned = Eigen::Affine3d(Eigen::AngleAxisd(-0.5 * M_PI, Eigen::Vector3d(0, 1, 0))) *
                 Eigen::Affine3d(Eigen::AngleAxisd(lon, Eigen::Vector3d(1, 0, 0))) *
                 Eigen::Affine3d(Eigen::AngleAxisd(-lat, Eigen::Vector3d(0, 1, 0)));
-        
-    
+
+
 //
         // Transform NED frame to ROS frame (x front, y left, z up)
         Eigen::Affine3d ned2nwu = Eigen::Affine3d(Eigen::AngleAxisd(-M_PI, Eigen::Vector3d(1, 0, 0)));
@@ -113,7 +113,7 @@ class extractTrajectory {
                 Eigen::Affine3d(Eigen::AngleAxisd(0, Eigen::Vector3d(0, 0, 1)));
 
        Eigen::Affine3d transform = ((translation * ecef2ned) *ned2nwu*nwu2ros) * rotation;
-        //  Eigen::Affine3d transform = ((translation * ecef2ned) ); 
+        //  Eigen::Affine3d transform = ((translation * ecef2ned) );
         // Use relative pose to ROS frame of pose at startIndex
         if (firstIndex<1) {
             startTransform = ((translation * ecef2ned)*ned2nwu*nwu2ros);
@@ -123,35 +123,35 @@ class extractTrajectory {
         Eigen::Affine3d posee = startTransform.inverse() * transform;
 
         // Write pose file
-               
+
         pose.pose.position.x = (posee.translation()(0));
         pose.pose.position.y = (posee.translation()(1));
         pose.pose.position.z = (posee.translation()(2));
-  
+
 
         pose.pose.orientation.x = 0;
         pose.pose.orientation.y = 0;
         pose.pose.orientation.z = 0;
         pose.pose.orientation.w = 1;
-        
+
         if(gps_flag==1){
         curve1_timetable.insert(std::pair<double, geometry_msgs::PoseStamped>(pose.header.stamp.toSec(),pose));
         }
         else if(gps_flag==2)
         curve2_timetable.insert(std::pair<double, geometry_msgs::PoseStamped>(pose.header.stamp.toSec(),pose));
-  } 
+  }
 
  // virtual void aligncurve(std::vector<double> *point_g,std::vector<double> *hector_matrix ,unsigned int *seq_interval,std::string dir);
   //virtual void callback_gps(const sensor_msgs::NavSatFixConstPtr &fix);
  // virtual void callback_curve2(const geometry_msgs::PoseStampedConstPtr &hectorpose);
-       
+
 };
 
 class extract2hector_gps : public extractTrajectory {
-  
+
   public:
    extract2hector_gps(rosbag::Bag *_bag1);
-   extract2hector_gps(rosbag::Bag *_bag1,rosbag::Bag *_bag2); 
+   extract2hector_gps(rosbag::Bag *_bag1,rosbag::Bag *_bag2);
   // extract2hector_gps();
    void aligncurve(std::vector<double> *point_curve1,std::vector<double> *point_curve2,std::vector<double> *hector_matrix,std::string dir);
   // void aligncurve(std::vector<double> *hector_matrix,std::vector<double> *point_corr,std::string dir);
@@ -231,7 +231,7 @@ class extract2curve1_curve2 : public extractTrajectory {
 
    public:
    extract2curve1_curve2(rosbag::Bag *_bag,std::string &_rieglfile);
-   extract2curve1_curve2(rosbag::Bag *_bag,std::string &_filename,int _flag); 
+   extract2curve1_curve2(rosbag::Bag *_bag,std::string &_filename,int _flag);
    extract2curve1_curve2(rosbag::Bag *_bag1,rosbag::Bag *_bag2);
    void aligncurve(std::vector<double> *point_g_ros,std::vector<double> *point_g_riegl,std::string dir);
   public:

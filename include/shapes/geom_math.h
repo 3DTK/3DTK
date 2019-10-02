@@ -8,7 +8,7 @@
 #include <vector>
 
 template <class T, class F>
-T planeDist(const T *p, F nx, F ny, F nz, F d) { 
+T planeDist(const T *p, F nx, F ny, F nz, F d) {
     return p[0]*nx + p[1]*ny + p[2]*nz + d;
 }
 bool SphereInAABB( float x, float y, float z, float size ) ;
@@ -16,7 +16,7 @@ void setNumber(double *plane, double *center, double _radius, double _maxDist) ;
 bool PlaneInCube( float x, float y, float z, float size, float nx, float ny, float nz, float d);
 bool PlaneInCube( float x, float y, float z, float size);
 bool closeToPlane(double *p);
-  
+
 // given a set of points this will calculate the best fit plane
 template <class T>
 static T fitPlane(vector<T *> &ppoints, T plane[4], T centroid[3]) {
@@ -38,7 +38,7 @@ static T fitPlane(vector<T *> &ppoints, T plane[4], T centroid[3]) {
   cx /= n;
   cy /= n;
   cz /= n;
-        
+
   centroid[0] = cx;
   centroid[1] = cy;
   centroid[2] = cz;
@@ -68,13 +68,13 @@ static T fitPlane(vector<T *> &ppoints, T plane[4], T centroid[3]) {
      */
   int index;
   D.MinimumAbsoluteValue1(index);
-     
+
   plane[0] = V(1,index);
   plane[1] = V(2,index);
   plane[2] = V(3,index);
   plane[3] = -planeDist(plane, cx, cy, cz, 0.0);
   //plane[3] = -(plane[0]*cx + plane[1]*cy + plane[2]*cz);
-  
+
   double sum = 0.0;
   for(int i = 1; i < 4; i++) {
     sum += D(i);

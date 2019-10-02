@@ -9,7 +9,7 @@
 
 
 /**
- * @file 
+ * @file
  * @brief The implementation of globally consistent scan matching algorithm
  * @author Dorit Borrman. Inst. of CS, University of Osnabrueck, Germany.
  * @author Jan Elseberg. Inst. of CS, University of Osnabrueck, Germany.
@@ -18,7 +18,7 @@
  */
 
 #ifdef _MSC_VER
-#if !defined _OPENMP && defined OPENMP 
+#if !defined _OPENMP && defined OPENMP
 #define _OPENMP
 #endif
 #endif
@@ -50,7 +50,7 @@ using namespace NEWMAT;
  * @param epsilonLUM Termination criterion for LUM
  */
 graphSlam6D::graphSlam6D(icp6Dminimizer *my_icp6Dminimizer,
-                         double mdm, double max_dist_match, 
+                         double mdm, double max_dist_match,
                          int max_num_iterations, bool quiet, bool meta, int rnd,
                          bool eP, int anim, double epsilonICP, int nns_method, double epsilonLUM)
 {
@@ -122,8 +122,8 @@ void graphSlam6D::matchGraph6Dautomatic(vector <Scan *> allScans,
 #ifdef _OPENMP
 #pragma omp critical
 #endif
-          gr->addLink(j, k);  
-        } 
+          gr->addLink(j, k);
+        }
       }
     }
     cout << "done" << endl;
@@ -134,7 +134,7 @@ void graphSlam6D::matchGraph6Dautomatic(vector <Scan *> allScans,
 
 
 Graph *graphSlam6D::computeGraph6Dautomatic(vector <Scan *> allScans,
-                                            int clpairs) 
+                                            int clpairs)
 {
   // the IdentityMatrix to transform some Scans with
   double id[16];
@@ -171,8 +171,8 @@ Graph *graphSlam6D::computeGraph6Dautomatic(vector <Scan *> allScans,
 #ifdef _OPENMP
 #pragma omp critical
 #endif
-        gr->addLink(j, k);  
-      } 
+        gr->addLink(j, k);
+      }
     }
   }
   cout << "done" << endl;
@@ -206,7 +206,7 @@ void graphSlam6D::writeMatrixPGM(const Matrix &G)
     }
     matrixout << endl;
   }
-  // matrixout << G << endl; 
+  // matrixout << G << endl;
   matrixout.close();
   matrixout.clear();
   matrixnum++;
@@ -223,7 +223,7 @@ void graphSlam6D::writeMatrixPGM(const Matrix &G)
  */
 ColumnVector graphSlam6D::solve(const Matrix &G, const ColumnVector &B)
 {
-  
+
 #ifdef WRITE_MATRIX_PGM
   writeMatrixPGM(G);
 #endif
@@ -244,7 +244,7 @@ ColumnVector graphSlam6D::solve(const Matrix &G, const ColumnVector &B)
  */
 ColumnVector graphSlam6D::solveCholesky(const Matrix &G, const ColumnVector &B)
 {
-  
+
 #ifdef WRITE_MATRIX_PGM
   writeMatrixPGM(G);
 #endif
@@ -272,7 +272,7 @@ ColumnVector graphSlam6D::solveCholesky(const Matrix &G, const ColumnVector &B)
   // make cholesky dekomposition with numerical recipes
   // --------------------------------------------------
   if (!choldc(n, A, diag)) {
-    cout << "cannot perfom cholesky decomposition" << endl;     
+    cout << "cannot perfom cholesky decomposition" << endl;
   }
   // solve A x = C
   cholsl(n, A, diag, C, x);
@@ -286,7 +286,7 @@ ColumnVector graphSlam6D::solveCholesky(const Matrix &G, const ColumnVector &B)
   }
   delete [] x;
   delete [] diag;
-  delete [] C;  
+  delete [] C;
   delete [] A;
 
   return X;
@@ -304,13 +304,13 @@ ColumnVector graphSlam6D::solveSparseCholesky(const Matrix &G,
 {
 
   long starttime = GetCurrentTimeInMilliSec();
-    
+
 #ifdef WRITE_MATRIX_PGM
   writeMatrixPGM(G);
 #endif
 
   int n = G.Ncols();
-  
+
   // ------------------------------
   // Sparse Cholsekey decomposition
   // ------------------------------
@@ -328,7 +328,7 @@ ColumnVector graphSlam6D::solveSparseCholesky(const Matrix &G,
   A = cs_compress (T);
   cs_dropzeros (A) ;               // drop zero entries
   cs_cholsol (1, A, x) ;
-  // copy values back  
+  // copy values back
   for (int i = 0; i < n; i++) {
     X.element(i) = x[i];
   }
@@ -350,7 +350,7 @@ ColumnVector graphSlam6D::solveSparseCholesky(GraphMatrix *G,
 
   int n = B.Nrows();
   ColumnVector X(n);
-  
+
   // ------------------------------
   // Sparse Cholsekey decomposition
   // ------------------------------
@@ -364,7 +364,7 @@ ColumnVector graphSlam6D::solveSparseCholesky(GraphMatrix *G,
   cs_dropzeros (A) ;               // drop zero entries
 //  cs_print(T, 0);
   cs_cholsol (1, A, x) ;
-  // copy values back  
+  // copy values back
   for (int i = 0; i < n; i++) {
     X.element(i) = x[i];
   }
@@ -388,7 +388,7 @@ ColumnVector graphSlam6D::solveSparseCholesky(GraphMatrix *G,
 ColumnVector graphSlam6D::solveSparseQR(const Matrix &G,
                                         const ColumnVector &B)
 {
-  
+
 #ifdef WRITE_MATRIX_PGM
   writeMatrixPGM(G);
 #endif
@@ -410,7 +410,7 @@ ColumnVector graphSlam6D::solveSparseQR(const Matrix &G,
   cs_dropzeros (A) ;               // drop zero entries
   int order = 3;                   // for qr-ordering
   cs_qrsol (order, A, x) ;
-  // copy values back  
+  // copy values back
   for (int i = 0; i < n; i++) {
     X.element(i) = x[i];
   }

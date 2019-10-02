@@ -26,7 +26,7 @@ parcelinfo::parcelinfo(long offsetX, long offsetZ, std::string filename)
     this->used = true;
 }
 
-/** 
+/**
  * Sets the parcelsize
  * @param with the width of the parcel
  * @param height the height of the parcel
@@ -56,7 +56,7 @@ void parcelinfo::resetUsed()
 
 /**
  * Returns whether the parcel was needed
- * @return True if it was needed 
+ * @return True if it was needed
  */
 int parcelinfo::wasUsed() const
 {
@@ -101,7 +101,7 @@ bool parcelinfo::operator== (const parcelinfo &parcel) const
 }
 
 /**
- * The methods checks if the coordinates given lie in 
+ * The methods checks if the coordinates given lie in
  * the parcel represented by the parcelinfo
  *
  * @param x The absolute x coordinate
@@ -112,10 +112,10 @@ bool parcelinfo::contains(long x, long z) const
 {
     bool xIn = (x >= getOffsetX() &&
 		x <= getOffsetX() + parcelinfo::parcelwidth);
-    
+
     bool zIn = (z >= getOffsetZ() &&
 		z <= getOffsetZ() + parcelinfo::parcelheight);
-   
+
     return xIn && zIn;
 }
 

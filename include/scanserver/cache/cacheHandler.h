@@ -1,6 +1,6 @@
 /**
  * @file
- * @brief 
+ * @brief
  *
  * @author Thomas Escher
  */
@@ -30,7 +30,7 @@ public:
    * @throw possibly IO/stream/conversion errors in overloaded classes
    */
   virtual bool load() = 0;
-  
+
   /**
    * Called by the CacheManager when a CacheObject has to be saved before removal
    * The data to be saved it given in the arguments and will be removed by the CacheManager after this function returns.

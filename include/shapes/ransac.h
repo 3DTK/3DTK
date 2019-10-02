@@ -11,7 +11,7 @@ void Ransac(CollisionShape<T> &shape, Scan *scan, vector<T*> *best_points = 0) {
   int best_score = 0;
   CollisionShape<T> *best = shape.copy();
 
-  // stores 3 sample points    
+  // stores 3 sample points
   vector<T *> ps;
   // create octree from the points
   DataXYZ xyz(scan->get("xyz reduced"));

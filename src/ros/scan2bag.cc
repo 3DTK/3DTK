@@ -17,7 +17,7 @@
 #include <pcl_conversions/pcl_conversions.h>
 
 #ifdef _MSC_VER
-#if !defined _OPENMP && defined OPENMP 
+#if !defined _OPENMP && defined OPENMP
 #define _OPENMP
 #endif
 #endif
@@ -27,7 +27,7 @@
 #endif
 
 using namespace boost;
-	
+
 int main(int argc, char** argv) {
 
 	// parse args
@@ -78,8 +78,8 @@ int main(int argc, char** argv) {
 			("freq",program_options::value<double>(&frequency)->default_value(-1.0), "frequency of scanning device")
 			;
 
-	
-			
+
+
     program_options::options_description hidden("Hidden options");
     hidden.add_options()
         ("input-dir", program_options::value<std::string>(&dir), "input dir");
@@ -143,7 +143,7 @@ int main(int argc, char** argv) {
 		const double *rPos = scan->get_rPos();
 		const double *rPosTheta = scan->get_rPosTheta();
 
-		/* 
+		/*
 			Transform all point with inverse transmat, to get a point cloud in
 			sensor coordinate system. Maybe there is a better way to get the raw
 			points? scan->get("xyz") returns transformed Points (using original pose)
@@ -153,7 +153,7 @@ int main(int argc, char** argv) {
 		scan->transformAll(transmat_inv);
 
 		DataXYZ xyz(scan->get("xyz reduced"));
-	
+
 		// copy data to pointcloud2 via pcl::pointcloud
 		pcl::PointCloud<pcl::PointXYZ> cloud;
 		cloud.width  = xyz.size();
@@ -170,7 +170,7 @@ int main(int argc, char** argv) {
 		cloud_out.header.stamp = stamp;
 		cloud_out.header.frame_id = "base_link";
 		cloud_out.header.seq = atoi(scan->getIdentifier());//cloud_seq++;
-		
+
 		// TODO: how to handle other datatypes, like reflection, color, temperature, etc?
 
 		// for the moment publish Odometry in /odom topic, TODO: use tf instead
@@ -182,7 +182,7 @@ int main(int argc, char** argv) {
 		odom.header.frame_id = "odom"; //"odom";
 		odom.child_frame_id  = "base_link";	// "laser" ?
 		tf::poseTFToMsg(transform,odom.pose.pose);
-		
+
 		/* additionally store tf-stack in bag. for simplicity assume sensor is
 		   located in base_link */
 		tf::tfMessage tfmsg;

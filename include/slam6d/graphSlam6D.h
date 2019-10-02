@@ -1,4 +1,4 @@
-/** @file 
+/** @file
  *  @brief Implementation of the virtual functor for graphslam
  *  @author Andreas Nuechter. Institute of Computer Science, University of Osnabrueck, Germany.
  */
@@ -40,26 +40,26 @@ class GraphMatrix {
 class graphSlam6D {
 
 public:
-  /** 
-   * Constructor 
+  /**
+   * Constructor
    */
   graphSlam6D() { };
 
   graphSlam6D(icp6Dminimizer *my_icp6Dminimizer,
-		    double mdm, double max_dist_match, 
+		    double mdm, double max_dist_match,
 		    int max_num_iterations, bool quiet, bool meta, int rnd,
 		    bool eP, int anim, double epsilonICP, int nns_method, double epsilonLUM);
 
-  /** 
-   * Destructor 
+  /**
+   * Destructor
    */
   virtual ~graphSlam6D();
 
   virtual double doGraphSlam6D(Graph gr, vector <Scan*> MetaScan, int nrIt) = 0;
-  
+
   void matchGraph6Dautomatic(vector <Scan*> MetaScan, int nrIt, double cldist, int loopsize);
   void matchGraph6Dautomatic(vector <Scan*> MetaScan, int nrIt, int clpairs, int loopsize);
-  Graph *computeGraph6Dautomatic(vector <Scan *> allScans, int clpairs); 
+  Graph *computeGraph6Dautomatic(vector <Scan *> allScans, int clpairs);
 
   NEWMAT::ColumnVector solveSparseCholesky(GraphMatrix *G, const NEWMAT::ColumnVector &B);
   NEWMAT::ColumnVector solveSparseCholesky(const NEWMAT::Matrix &G, const NEWMAT::ColumnVector &B);
@@ -70,7 +70,7 @@ public:
   void writeMatrixPGM(const NEWMAT::Matrix &G);
   void set_mdmll(double mdmll);
   inline void set_quiet(bool _quiet) { quiet = _quiet;};
-  
+
 protected:
   /**
    * pointer to the ICP framework
@@ -81,7 +81,7 @@ protected:
    * the epsilon for LUM
    */
   double epsilonLUM;
-  
+
   /**
    * the maximal distance (^2 !!!) for matching in LUM
    */
@@ -101,4 +101,4 @@ protected:
   long ctime;
 };
 
-#endif 
+#endif

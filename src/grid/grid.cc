@@ -29,7 +29,7 @@ grid::grid(long offsetX, long offsetZ, long sizeX, long sizeZ)
 	std::cerr << "ERROR: Invalid array size in grid::grid! "<< std::endl;
 	exit(1);
     }
- 
+
     points = NULL;
 
     // Allocate array
@@ -40,10 +40,10 @@ grid::grid(long offsetX, long offsetZ, long sizeX, long sizeZ)
         this->points[i] = new gridPoint*[sizeZ];
         for(int j=0; j < sizeZ; ++j)
         {
-            this->points[i][j] = new gridPoint(offsetX + i, offsetZ + j);       
+            this->points[i][j] = new gridPoint(offsetX + i, offsetZ + j);
         }
     }
-    
+
     this->offsetX = offsetX;
     this->offsetZ = offsetZ;
     this->sizeX = sizeX;
@@ -71,9 +71,9 @@ void grid::clear()
     {
         for(int j=0; j < getSizeZ(); ++j)
         {
-            delete this->points[i][j];      
+            delete this->points[i][j];
         }
-        
+
         delete[] this->points[i];
     }
 
@@ -98,16 +98,16 @@ void grid::addPoint(long x, long z, unsigned int count, unsigned int occupied)
 	exit(1);
     }
 
-    // get the absolute gridPoint 
+    // get the absolute gridPoint
     gridPoint *p = getAbsolutePoint(x, z);
 
-    // increase counters 
+    // increase counters
     p->addCount(count, occupied);
 }
 
 /**
  * Adds new point into the grid or updates the point with new
- * point information 
+ * point information
  * @param point a reference to the point (new information)
  */
 void grid::addPoint(const gridPoint& point)
@@ -144,16 +144,16 @@ gridPoint* grid::getAbsolutePoint(long x, long z) const
     // Transform to relative coordinates
     x -= getOffsetX();
     z -= getOffsetZ();
-   
+
     if( x < 0 || x >= getSizeX() || z < 0 || z >= getSizeZ())
     {
-	std::cerr << "ERROR: In grid::getAbsolutePoint (" 
+	std::cerr << "ERROR: In grid::getAbsolutePoint ("
 		  << x << "|" << z <<") not in the grid!" << std::endl;
 	exit(1);
     }
-    
+
     return this->points[x][z];
 }
 
 
- 
+

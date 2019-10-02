@@ -1,7 +1,7 @@
 /**
- * @file 
+ * @file
  * @brief Efficient representation of an octree for ransac
- * @author Jan Elsberg. Automation Group, Jacobs University Bremen gGmbH, Germany. 
+ * @author Jan Elsberg. Automation Group, Jacobs University Bremen gGmbH, Germany.
  */
 
 #ifndef RANSAC_OCTREE_H
@@ -25,7 +25,7 @@
 
 /**
  * @brief Octree
- * 
+ *
  * A cubic bounding box is calculated
  * from the given 3D points. Then it
  * is recusivly subdivided into smaller
@@ -35,7 +35,7 @@ template <class T>
 class RansacOctTree : public BOctTree<T> {
 
 public:
-  
+
   template <class P>
   RansacOctTree(P* const* pts, int n, T _voxelSize, PointType _pointtype = PointType() ) : BOctTree<T>(pts, n, _voxelSize, _pointtype) {}
 
@@ -46,7 +46,7 @@ public:
   void DrawPoints(vector<T *> &p, unsigned char nrp) {
     DrawPoints(p, *BOctTree<T>::root, nrp);
   }
- 
+
 
   unsigned long PointsOnShape(CollisionShape<T> &shape) {
     return PointsOnShape(*BOctTree<T>::root, BOctTree<T>::center, BOctTree<T>::size, shape);
@@ -86,8 +86,8 @@ void showbits(char a)
     T ccenter[3];
     bitunion<T> *children;
     bitoct::getChildren(node, children);
-    
-  /*  
+
+  /*
     printf("parent %p   children: %p \n", &node, children);
     cout << "  ";
     showbits(node.valid);
@@ -128,7 +128,7 @@ void showbits(char a)
 
     return result;
   }
-  
+
   void PointsOnShape(bitoct &node, T *center, T size, CollisionShape<T> &shape, vector<T*> &vpoints) {
     if (! shape.isInCube(center[0], center[1], center[2], size)) {
       return;
@@ -230,7 +230,7 @@ void showbits(char a)
           cout << "ci == r" << endl;
           if (  ( 1 << i ) & node.leaf ) {   // if ith node exists
             cout << "leaf" << endl;
-            leaf = true; 
+            leaf = true;
           }
           cout << "no leaf" << endl;
           break;
@@ -243,7 +243,7 @@ void showbits(char a)
       if (  ( 1 << i ) & node.valid ) {   // if ith node exists
         if (child_index == r) {
           if (  ( 1 << i ) & node.leaf ) {   // if ith node exists
-            leaf = true; 
+            leaf = true;
           }
           break;
         }
@@ -257,7 +257,7 @@ void showbits(char a)
     if (leaf) {
 /*      cout << "STOPPED" << endl;
         return;*/
-     
+
       pointrep *points = children[r].getPointreps();
       unsigned int length = points[0].length;
       if (length < nrp) return;

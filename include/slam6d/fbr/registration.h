@@ -16,7 +16,7 @@
 namespace fbr{
   /**
    * @class registration : registers two scnas
-   * @param minDistance threshold for min distance between the each three points for registration process 
+   * @param minDistance threshold for min distance between the each three points for registration process
    * @param minError threshold for min error after transformation of a point from second coordinate to first to determin the inliers
    * @param minInlier threshold fir min inlier to consider the align as positive
    * @param rMethod registration Method
@@ -32,7 +32,7 @@ namespace fbr{
     double bestAlign[16];
     double bestError;
     unsigned int bestErrorIndex;
-    
+
     /**
      * getCoord : get 3D coordinate of query scan and train scan for each match
      * @param fKeypoints vector of KeyPoints from query (first) scan

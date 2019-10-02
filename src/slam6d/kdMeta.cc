@@ -7,7 +7,7 @@
  *
  */
 
-/** @file 
+/** @file
  *  @brief An optimized k-d tree implementation. MetaScan variant.
  *  @author Andreas Nuechter. Inst. of CS, University of Osnabrueck, Germany.
  *  @author Kai Lingemann. Inst. of CS, University of Osnabrueck, Germany.
@@ -40,12 +40,12 @@ KDtreeMetaManaged::KDtreeMetaManaged(const std::vector<Scan*>& scans) :
   for(unsigned int i = 0; i < m_size; ++i)
     m_scans[i] = scans[i];
   m_data = new DataXYZ*[m_size];
-  
+
   lock();
   create(m_data, prepareTempIndices(scans), getPointsSize(scans),
          scans[0]->getBucketSize());
   unlock();
-  
+
   // allocate in prepareTempIndices, deleted here
   delete[] m_temp_indices;
 }

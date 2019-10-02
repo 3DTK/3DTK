@@ -25,12 +25,12 @@
 namespace fbr{
   /**
    * @class panorama
-   * create panorama images with use of projection class [different 
-   * projection methods] from input scan files(Mat from scan_cv class) 
-   * in opencv Mat format or Octtree files 
-   * @param iReflectance_ panorama image from reflectance data             
-   * @param iRange_ panorama image from range data             
-   * @param iColor_ panorama image from color data             
+   * create panorama images with use of projection class [different
+   * projection methods] from input scan files(Mat from scan_cv class)
+   * in opencv Mat format or Octtree files
+   * @param iReflectance_ panorama image from reflectance data
+   * @param iRange_ panorama image from range data
+   * @param iColor_ panorama image from color data
    * @param iMap_ panorama map of 3D cartesian coordinate of input scan
             (same points as iRange and iReflectance and iColor)
    * @param extendedIMap_ 3D vector as panorama map with all the points
@@ -39,7 +39,7 @@ namespace fbr{
    * @param projection_ pointer to projectionClass Handler
    */
   class panorama {
-    
+
   public:
     /**
      * constructor of class panorama
@@ -110,7 +110,7 @@ namespace fbr{
 	      bool reflectance,
 	      bool range,
 	      bool color);
-    
+
     panorama (unsigned int width,
 	      unsigned int height,
 	      projection_method method,
@@ -127,14 +127,14 @@ namespace fbr{
 	      bool reflectance,
 	      bool range,
 	      bool color);
-    
+
     void init(unsigned int width,
               unsigned int height,
               projection_method method,
               unsigned int numberOfImages,
               double param,
               panorama_map_method mapMethod,
-	      float minZ = 0, 
+	      float minZ = 0,
 	      float maxZ = 0,
 	      double MINHORIZANGLE = 0,
 	      double MAXHORIZANGLE = 360,
@@ -144,7 +144,7 @@ namespace fbr{
 	      bool reflectance = false,
 	      bool range = true,
 	      bool color = false);
-    
+
     void clear();
 
     /**
@@ -153,7 +153,7 @@ namespace fbr{
     //create panorama from cv::Mat
     void createPanorama(cv::Mat scan);
     void createPanorama(cv::Mat scan, cv::Mat color);
-    
+
     //create panorama point by point from octree
     void createPanoramaFromOctree(PointType pointtype, scanner_type sType, double minReflectacne, double maxReflectance);
     //accept points from octree
@@ -172,7 +172,7 @@ namespace fbr{
     void recoverPointCloud(const cv::Mat& rangeImage,
                            cv::Mat& reflectanceImage,
                            std::vector<cv::Vec4f> &reducedPoints);
-    
+
     //get params
     unsigned int getImageWidth();
     unsigned int getImageHeight();
@@ -187,9 +187,9 @@ namespace fbr{
     cv::Mat getReflectanceImage();
     cv::Mat getRangeImage();
     /**
-     * Brief this function will normalize the range image to (0-1) 
+     * Brief this function will normalize the range image to (0-1)
      */
-    cv::Mat getNormalizedRangeImage(); 
+    cv::Mat getNormalizedRangeImage();
     /**
      * Brief this function will put the float range in to 24 bit rgb (3*8) type mat
      */
@@ -199,11 +199,11 @@ namespace fbr{
      */
     void getThreeGrayscaleRangeImages(cv::Mat& range1, cv::Mat& range2, cv::Mat& range3);
     cv::Mat getColorImage();
-    
+
     cv::Mat getMap();
     std::vector<std::vector<std::vector<cv::Vec3f> > > getExtendedMap();
 
-    
+
   private:
     /**
      * Brief initializes the containers for map and range, reflectance and color images
@@ -214,7 +214,7 @@ namespace fbr{
              cv::MatIterator_<cv::Vec4f> it,
 	     cv::MatIterator_<cv::Vec3f> itColor,
              double range);
- 
+
     //flags for panorrama images
     bool reflectance_;
     bool range_;
@@ -229,7 +229,7 @@ namespace fbr{
     std::vector<std::vector<std::vector<cv::Vec3f> > > extendedIMap_;
     projection* projection_;
     panorama_map_method mapMethod_;
-    //parameters for the creation of panoram from octree 
+    //parameters for the creation of panoram from octree
     PointType pointtype_;
     scanner_type sType_;
     double minReflectance_, maxReflectance_;

@@ -1,9 +1,9 @@
-/* 
+/*
  * PMDSDK 2
  *
  * File: pmdsdk2.h
  * Author: Martin Profittlich
- * Version: 1.0 
+ * Version: 1.0
  *
  * General header file for applications using the PMDSDK 2.0.
  * Contains all necessary definitions and prototypes.
@@ -118,7 +118,7 @@ DLLSPEC int pmdSetIntegrationTime (PMDHandle hnd, unsigned idx, unsigned t);
 /// Get the integration time of the camera
 /// \param hnd Handle of the connection.
 /// \param idx Index of the integration time.
-/// \param t Pointer to a variable to contain the 
+/// \param t Pointer to a variable to contain the
 /// integration time in microseconds.
 /// \return PMD_OK on success, errorcode otherwise
 ///
@@ -130,7 +130,7 @@ DLLSPEC int pmdGetIntegrationTime (PMDHandle hnd, unsigned * t, unsigned idx);
 /// \param t The desired integration time
 /// \param w Where to look for a valid integration time in respect to the desired
 /// integration time (CloseTo, AtLeast or AtMost)
-/// \param responsible Pointer to a variable to contain the 
+/// \param responsible Pointer to a variable to contain the
 /// integration time in microseconds.
 /// \return PMD_OK on success, errorcode otherwise
 ///
@@ -147,7 +147,7 @@ DLLSPEC int pmdSetModulationFrequency (PMDHandle hnd, unsigned idx, unsigned f);
 /// Get the modulation frequency of the camera
 /// \param hnd Handle of the connection.
 /// \param idx Index of the modulation frequency.
-/// \param t Pointer to a variable to contain the 
+/// \param t Pointer to a variable to contain the
 /// modulation frequency in Hz.
 /// \return PMD_OK on success, errorcode otherwise
 ///
@@ -159,7 +159,7 @@ DLLSPEC int pmdGetModulationFrequency (PMDHandle hnd, unsigned * f, unsigned idx
 /// \param f The desired modulation frequency
 /// \param w Where to look for a valid modulation frequency in respect to the desired
 /// modulation frequency (CloseTo, AtLeast or AtMost)
-/// \param result Pointer to a variable to contain the 
+/// \param result Pointer to a variable to contain the
 /// modulation frequency in Hz.
 /// \return PMD_OK on success, errorcode otherwise
 ///
@@ -228,7 +228,7 @@ DLLSPEC int pmdProcessingCommand (PMDHandle hnd, char * result, size_t maxLen, c
 
 DLLSPEC int pmdOpenProcessingPlugin (PMDHandle * hnd, const char * pplugin, const char * pparam);
 
-DLLSPEC int pmdProcess (PMDHandle hnd, 
+DLLSPEC int pmdProcess (PMDHandle hnd,
         unsigned numOut, struct PMDDataDescription * ddOut, void ** output,
         unsigned numIn, struct PMDDataDescription * ddIn, void ** input);
 

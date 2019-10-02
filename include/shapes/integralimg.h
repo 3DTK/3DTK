@@ -1,17 +1,17 @@
 // =====================================================================================
-// 
+//
 //       Filename:  integralimg.cc
-// 
-//    Description:  
-// 
+//
+//    Description:
+//
 //        Version:  1.0
 //        Created:  09/20/2010 06:58:34 PM
 //       Revision:  none
 //       Compiler:  g++
-// 
+//
 //         Author:  Jan Elseberg (), jelseber@uos.de
 //        Company:  Universitaet Osnabrueck
-// 
+//
 // =====================================================================================
 //
 #include <iostream>
@@ -22,9 +22,9 @@
 
 #define TBB 5
 #define SBB 7
-#define HEIGHT 26 
-//#define HEIGHT 40 
-#define WIDTH 30 
+#define HEIGHT 26
+//#define HEIGHT 40
+#define WIDTH 30
 const int black[4][2] = { {0,0}, {WIDTH+2*SBB,0}, {WIDTH+2*SBB,HEIGHT+TBB}, {0,HEIGHT+TBB}};
 const int white[4][2] = { {SBB,TBB}, {WIDTH+SBB,TBB}, {WIDTH+SBB,HEIGHT+TBB}, {SBB,HEIGHT+TBB}};
 /*const int black[4][2] = { {0,0}, {30+2*SBB,0}, {30+2*SBB,40+TBB}, {0,40+TBB}};
@@ -54,7 +54,7 @@ public:
 
   int At(int x, int y) {
     if (x < 0 || y < 0) {
-      return 0;      
+      return 0;
     }
     if (x >= X) x = X - 1;
     if (y >= Y) y = Y - 1;
@@ -81,7 +81,7 @@ public:
       }
     }
     x = maxx + SBB;
-    y = maxy + TBB;  
+    y = maxy + TBB;
     return (double)maxscore/(double)(HEIGHT*WIDTH);
   }
 
@@ -89,7 +89,7 @@ public:
     return At(x + white[0][0], y + white[0][1]) + At(x + white[2][0], y + white[2][1]) -
            At(x + white[1][0], y + white[1][1]) - At(x + white[3][0], y + white[3][1]);
   }
-  
+
   inline int getBlack(int x, int y) {
     return At(x + black[0][0], y + black[0][1]) + At(x + black[2][0], y + black[2][1]) -
            At(x + black[1][0], y + black[1][1]) - At(x + black[3][0], y + black[3][1]);

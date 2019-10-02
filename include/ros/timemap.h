@@ -59,14 +59,14 @@ class timeMapSimple : public timeMap {
 };
 
 /**
- * simple model with linear drift 
+ * simple model with linear drift
  */
 class timeMapLinear : public timeMapSimple {
-  
+
   public:
     timeMapLinear(std::vector<double> *timestamps ) : timeMapSimple(timestamps) {
 //      double rosstart = timestamps[1][0];
-      
+
       int n = timestamps[0].size();
 
       double sum1, sum2, xy, xx;
@@ -93,10 +93,10 @@ class timeMapLinear : public timeMapSimple {
 };
 
 /**
- * simple driftless model as estimated by Olsen 
+ * simple driftless model as estimated by Olsen
  */
 class timeMapLinearOlsen : public timeMapSimple {
-  
+
   public:
     timeMapLinearOlsen(std::vector<double> *timestamps) : timeMapSimple(timestamps) {
       int n = timestamps[0].size();
@@ -133,7 +133,7 @@ class timeMapOlsen : public timeMap {
   double lastp;
   int lasti;
   double maxdiff;
-  
+
   double alpha1;
   double alpha2;
 
@@ -187,9 +187,9 @@ class timeMapOlsen : public timeMap {
 
       }
 //      maxdiff = 2* (maxp-minp)/P.size();
-  
-      double p = P[0]; 
-      double q = Q[0]; 
+
+      double p = P[0];
+      double q = Q[0];
 
       for (unsigned int i = 0; i < n; i++) {
 
@@ -197,7 +197,7 @@ class timeMapOlsen : public timeMap {
           p = P[i]; q = Q[i];
           A[i] = P[i] - Q[i] - maxdrift(0);
         } else {
-          A[i] = (p - q - maxdrift(P[i]-p)); 
+          A[i] = (p - q - maxdrift(P[i]-p));
         }
       }
 
@@ -209,7 +209,7 @@ class timeMapOlsen : public timeMap {
           }
         } else {
           if ( A[i] < (p - q - maxdrift(P[i]-p)) ) {
-            A[i] = (p - q - maxdrift(P[i]-p)); 
+            A[i] = (p - q - maxdrift(P[i]-p));
           }
         }
       }
@@ -231,7 +231,7 @@ class timeMapOlsen : public timeMap {
 
       if (P[lasti] > riegltime) {  // search backwards
         while (true) {
-          if (lasti == 0) return ros::Time( A[lasti]  + offset ); 
+          if (lasti == 0) return ros::Time( A[lasti]  + offset );
 
           if (P[lasti] <= riegltime) break;
 
@@ -239,7 +239,7 @@ class timeMapOlsen : public timeMap {
         }
       } else {                  // default case
         while (true) {
-          if (lasti == (int)(P.size()-1)) return ros::Time( A[lasti]  + offset ); 
+          if (lasti == (int)(P.size()-1)) return ros::Time( A[lasti]  + offset );
 
           if (P[lasti +1] > riegltime) break;
 

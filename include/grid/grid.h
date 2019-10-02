@@ -5,7 +5,7 @@
 
 /**
  * The class represents the base class for all 2D views.
- * It contains a two dimensional array of gridPoints, 
+ * It contains a two dimensional array of gridPoints,
  * the offset (in absolute coordinates) of the grid and
  * the size of the grid.
  * The size of the grid must be set during the instanciation of
@@ -37,8 +37,8 @@ class grid
     long sizeX;
 
     /** Height of the array */
-    long sizeZ;      
-    
+    long sizeZ;
+
     /** @brief The method frees the internal array */
     void clear();
 
@@ -60,7 +60,7 @@ class grid
 
     /** @brief Sets the fixed values for a points */
     virtual void setPoint(long x, long z, unsigned int count, unsigned int occupied);
-    
+
     /** @brief Returns the point of the absolute coordinates */
     gridPoint* getAbsolutePoint(long x, long z) const;
 
@@ -76,7 +76,7 @@ class grid
 	if( x < 0 || z < 0 || x >= getSizeX() || z >= getSizeZ())
 	    return false;
 	else
-	    return true;	    
+	    return true;
     }
 
     /**
@@ -87,7 +87,7 @@ class grid
 	return this->offsetX;
     }
 
-    /** 
+    /**
      * Getter for offsetZ
      * @return offsetZ
      */

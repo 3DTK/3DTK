@@ -61,8 +61,8 @@ int Poisson::setPoints(vector<vector<float>> &v) {
   points.resize(v.size());
   for (int i = 0; i < points.size(); ++i) {
     points[i] = new float[3];
-    points[i][0] = v[i][0]; 
-    points[i][1] = v[i][1]; 
+    points[i][0] = v[i][0];
+    points[i][1] = v[i][1];
     points[i][2] = v[i][2];
   }
   return 1;
@@ -73,8 +73,8 @@ int Poisson::setNormals(vector<vector<float>> &n) {
   normals.resize(n.size());
   for (int i = 0; i < normals.size(); ++i) {
     normals[i] = new float[3];
-    normals[i][0] = n[i][0]; 
-    normals[i][1] = n[i][1]; 
+    normals[i][0] = n[i][0];
+    normals[i][1] = n[i][1];
     normals[i][2] = n[i][2];
   }
   return 1;
@@ -85,8 +85,8 @@ int Poisson::setColors(std::vector<std::vector<float>> &c) {
   colors.resize(c.size());
   for (int i = 0; i < colors.size(); ++i) {
     colors[i] = new float[3];
-    colors[i][0] = c[i][0]; 
-    colors[i][1] = c[i][1]; 
+    colors[i][0] = c[i][0];
+    colors[i][1] = c[i][1];
     colors[i][2] = c[i][2];
   }
   return 1;
@@ -113,8 +113,8 @@ int Poisson::exportMesh(const char* modelPath) {
   fstream fs(modelPath, fstream::out);
   // get and write correct scaled points coordinates
   for (int i = 0; i < vertices.size(); ++i) {
-    fs << "v " << vertices[i][0] << " " 
-      << vertices[i][1] << " " 
+    fs << "v " << vertices[i][0] << " "
+      << vertices[i][1] << " "
       << vertices[i][2] << " "
       << vertices[i][7] << " "
       << vertices[i][8] << " "
@@ -122,14 +122,14 @@ int Poisson::exportMesh(const char* modelPath) {
   }
   // get and write vertices normals
   for (int i = 0; i < vertices.size() && params.ExportNormal; ++i) {
-    fs << "vn " << vertices[i][4] << " " 
-      << vertices[i][5] << " " 
+    fs << "vn " << vertices[i][4] << " "
+      << vertices[i][5] << " "
       << vertices[i][6] << " " << endl;
   }
   // get and write correct ordered faces indexes
   for (int i = 0; i < faces.size(); ++i) {
-    fs << "f " << faces[i][0] + 1 << " " 
-      << faces[i][1] + 1 << " " 
+    fs << "f " << faces[i][0] + 1 << " "
+      << faces[i][1] + 1 << " "
       << faces[i][2] + 1 << " " << endl;
   }
   fs.close();
@@ -145,8 +145,8 @@ int Poisson::exportTrimmedMesh(const char* modelPath) {
   fstream fs(modelPath, fstream::out);
   // get and write correct scaled points coordinates
   for (int i = 0; i < tVertices.size(); ++i) {
-    fs << "v " << tVertices[i][0] << " " 
-      << tVertices[i][1] << " " 
+    fs << "v " << tVertices[i][0] << " "
+      << tVertices[i][1] << " "
       << tVertices[i][2] << " "
       << tVertices[i][7] << " "
       << tVertices[i][8] << " "
@@ -154,14 +154,14 @@ int Poisson::exportTrimmedMesh(const char* modelPath) {
   }
   // get and write vertices normals
   for (int i = 0; i < tVertices.size() && params.ExportNormal; ++i) {
-    fs << "vn " << tVertices[i][4] << " " 
-      << tVertices[i][5] << " " 
+    fs << "vn " << tVertices[i][4] << " "
+      << tVertices[i][5] << " "
       << tVertices[i][6] << " " << endl;
   }
   // get and write correct ordered faces indexes
   for (int i = 0; i < tFaces.size(); ++i) {
-    fs << "f " << tFaces[i][0] + 1 << " " 
-      << tFaces[i][1] + 1 << " " 
+    fs << "f " << tFaces[i][0] + 1 << " "
+      << tFaces[i][1] + 1 << " "
       << tFaces[i][2] + 1 << " " << endl;
   }
   fs.close();

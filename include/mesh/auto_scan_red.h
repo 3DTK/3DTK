@@ -1,7 +1,7 @@
 /*
  * get appropriate scan reduce parameter to reduce scan
  * for better performance in poisson surface reconstruction
- * 
+ *
  */
 #ifndef __AUTO_SCAN_RED_H__
 #define __AUTO_SCAN_RED_H__

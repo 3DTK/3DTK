@@ -8,7 +8,7 @@
  */
 
 /**
- * @file 
+ * @file
  * @brief Implementation of panorama image generation
  * @author Hamidreza Houshiar, Jacobs University Bremen, Germany
  * @author Andreas Nuechter. University of Wuerzburg, Germany.
@@ -30,7 +30,7 @@ namespace fbr
   }
 
   panorama::panorama(unsigned int width, unsigned int height, projection_method method)
-  { 
+  {
     double param = 0;
     unsigned int numberOfImages = 1;
     if(method == RECTILINEAR)
@@ -39,7 +39,7 @@ namespace fbr
       {
 	numberOfImages = 3;
 	param = 1;
-      } 
+      }
     else if (method == STEREOGRAPHIC)
       {
 	numberOfImages = 3;
@@ -56,44 +56,44 @@ namespace fbr
       param = 1;
     else if (method == STEREOGRAPHIC)
       param = 2;
-   
+
     init(width, height, method, numberOfImages, param, FARTHEST);
-  }  
-  
+  }
+
   panorama::panorama(unsigned int width, unsigned int height, projection_method method, unsigned int numberOfImages, double param)
-  { 
+  {
     init(width, height, method, numberOfImages, param, FARTHEST);
   }
 
   panorama::panorama(unsigned int width, unsigned int height, projection_method method, unsigned int numberOfImages, double param, panorama_map_method mMethod)
-  { 
+  {
     init(width, height, method, numberOfImages, param, mMethod);
   }
 
   panorama::panorama(unsigned int width, unsigned int height, projection_method method, unsigned int numberOfImages, double param, panorama_map_method mMethod, float minZ, float maxZ, double minVertAngle, double maxVertAngle)
-  { 
+  {
     init(width, height, method, numberOfImages, param, mMethod, minZ, maxZ, 0, 360, minVertAngle, maxVertAngle);
   }
 
   panorama::panorama(unsigned int width, unsigned int height, projection_method method, unsigned int numberOfImages, double param, panorama_map_method mMethod, float minZ, float maxZ, double minVertAngle, double maxVertAngle, bool imageSizeOptimization)
-  { 
+  {
     init(width, height, method, numberOfImages, param, mMethod, minZ, maxZ, 0, 360, minVertAngle, maxVertAngle, imageSizeOptimization);
   }
-  
+
   panorama::panorama(unsigned int width, unsigned int height, projection_method method, unsigned int numberOfImages, double param, panorama_map_method mMethod, float minZ, float maxZ, double minVertAngle, double maxVertAngle, bool imageSizeOptimization, bool reflectance, bool range, bool color)
-  { 
+  {
     init(width, height, method, numberOfImages, param, mMethod, minZ, maxZ, 0, 360, minVertAngle, maxVertAngle, imageSizeOptimization, reflectance, range, color);
   }
 
   panorama::panorama(unsigned int width, unsigned int height, projection_method method, unsigned int numberOfImages, double param, panorama_map_method mMethod, float minZ, float maxZ, double minHorizAngle, double maxHorizAngle, double minVertAngle, double maxVertAngle, bool imageSizeOptimization, bool reflectance, bool range, bool color)
-  { 
+  {
     init(width, height, method, numberOfImages, param, mMethod, minZ, maxZ, minHorizAngle, maxHorizAngle, minVertAngle, maxVertAngle, imageSizeOptimization, reflectance, range, color);
   }
 
   void panorama::init(unsigned int width, unsigned int height, projection_method method, unsigned int numberOfImages, double param, panorama_map_method mMethod, float minZ, float maxZ, double minHorizAngle, double maxHorizAngle, double minVertAngle, double maxVertAngle, bool imageSizeOptimization, bool reflectance, bool range, bool color)
-  {  
+  {
     projection_ = new projection(width, height, method, numberOfImages, param, minZ, maxZ, minHorizAngle, maxHorizAngle, minVertAngle, maxVertAngle, imageSizeOptimization);
-    
+
     //clear the containers
     clear();
 
@@ -104,7 +104,7 @@ namespace fbr
     range_ = range;
     color_ = color;
   }
-  
+
   void panorama::clear()
   {
     //clear the containers
@@ -115,7 +115,7 @@ namespace fbr
     extendedIMap_.clear();
   }
 
-  void panorama::createPanorama(cv::Mat scan) 
+  void panorama::createPanorama(cv::Mat scan)
   {
     cv::Mat color;
     createPanorama(scan, color);
@@ -123,9 +123,9 @@ namespace fbr
 
   void panorama::createPanorama(cv::Mat scan, cv::Mat color)
   {
-    initMap();      	
+    initMap();
 
-    cv::MatIterator_<cv::Vec4f> it, end; 
+    cv::MatIterator_<cv::Vec4f> it, end;
     cv::MatIterator_<cv::Vec3f> itColor;
     if(color.empty() == false)
       {
@@ -151,17 +151,17 @@ namespace fbr
 	}
       }
   }
-  
+
   void panorama::createPanoramaFromOctree(PointType pointtype, scanner_type sType, double minReflectance, double maxReflectance)
   {
     initMap();
-    
+
     pointtype_ = pointtype;
     sType_ = sType;
     minReflectance_ = minReflectance;
     maxReflectance_ = maxReflectance;
   }
-  
+
   template <class T>
   void panorama::accept(T *point)
   {
@@ -203,13 +203,13 @@ namespace fbr
       {
 	cv::Mat point(1,1,CV_32FC(4),cv::Scalar(x,y,z,reflectance));
 	cv::Mat pointColor(1,1,CV_32FC(3),cv::Scalar(r,g,b));
-	
+
 	cv::MatIterator_<cv::Vec4f> it;
 	it = point.begin<cv::Vec4f>();
-	
+
 	cv::MatIterator_<cv::Vec3f> itColor;
 	itColor = pointColor.begin<cv::Vec3f>();
-	
+
 	int x, y;
 	double range;
 	// this function returns -1 for x and y if they are out of image range
@@ -227,7 +227,7 @@ namespace fbr
   }
 
   void panorama::recoverPointCloud(const cv::Mat& rangeImage,
-				   cv::Mat& reflectanceImage, vector<cv::Vec4f> &reducedPoints) 
+				   cv::Mat& reflectanceImage, vector<cv::Vec4f> &reducedPoints)
   {
     projection_->recoverPointCloud(rangeImage, reflectanceImage, reducedPoints);
   }
@@ -246,7 +246,7 @@ namespace fbr
   {
     return maxRange_;
   }
-  
+
   projection_method panorama::getProjectionMethod()
   {
     return projection_->getProjectionMethod();
@@ -256,12 +256,12 @@ namespace fbr
   {
     return projection_->getProjectionNumberOfImages();
   }
-  
+
   double panorama::getProjectionParam()
   {
     return projection_->getProjectionParam();
   }
-  
+
   panorama_map_method panorama::getMapMethod()
   {
     return mapMethod_;
@@ -310,7 +310,7 @@ namespace fbr
 	  {
 	    //unsigned char bytes[3];
 	    unsigned int rangeValue = (int)(iRange_.at<float>(h,w) * 10000);
-	    
+
 	    //threeChannelRange.at<cv::Vec3b>(h,w)[0] = (rangeValue >> 16) & 0xFF;
 	    //threeChannelRange.at<cv::Vec3b>(h,w)[1] = (rangeValue >> 8) & 0xFF;
 	    //threeChannelRange.at<cv::Vec3b>(h,w)[2] = rangeValue & 0xFF;
@@ -325,7 +325,7 @@ namespace fbr
 	    threeChannelRange.at<cv::Vec3b>(h,w)[2] = B;
 	  }
       }
-    
+
     return threeChannelRange;
   }
 
@@ -333,7 +333,7 @@ namespace fbr
   {
     //vector<unsigned int> colorMap = getAllRGBSortedByHSL();
     vector<unsigned int> colorMap = getAllRGBSortedByRGB();
-    
+
     int width = projection_->getProjectionWidth();
     int height = projection_->getProjectionHeight();
 
@@ -349,7 +349,7 @@ namespace fbr
 	  {
 	    //unsigned char bytes[3];
 	    unsigned int rangeValue = (int)(iRange_.at<float>(h,w) * 10000);
-	    
+
 	    //range1.at<uchar>(h,w) = (rangeValue >> 16) & 0xFF;
 	    //range2.at<uchar>(h,w) = (rangeValue >> 8) & 0xFF;
 	    //range3.at<uchar>(h,w) = rangeValue & 0xFF;
@@ -365,12 +365,12 @@ namespace fbr
 	  }
       }
   }
-  
+
   cv::Mat panorama::getColorImage()
   {
     return iColor_;
   }
-  
+
   cv::Mat panorama::getMap()
   {
     return iMap_;
@@ -401,7 +401,7 @@ namespace fbr
       }
     //init the compresed map
     else if(mapMethod_ == FULL)
-    {	
+    {
 
     }
 
@@ -425,13 +425,13 @@ namespace fbr
 
   //TODO: this needs to handle the case that range_ is false and iRange is not initialized
   void panorama::map(int x, int y, cv::MatIterator_<cv::Vec4f> it, cv::MatIterator_<cv::Vec3f> itColor, double range)
-  {    
+  {
     if (maxRange_ < (float)range)
       maxRange_ = (float)range;
     if (minRange_ > (float)range)
       minRange_ = (float)range;
 
-    if (range_ == false || iRange_.at<float>(y,x) < range) 
+    if (range_ == false || iRange_.at<float>(y,x) < range)
       {
 	// reflectance
 	if(reflectance_ == true)
@@ -449,9 +449,9 @@ namespace fbr
       }
 
     // adding the point with max distance
-    if (mapMethod_ == FARTHEST) 
+    if (mapMethod_ == FARTHEST)
       {
-	if (range_ == false || iRange_.at<float>(y,x) < range) 
+	if (range_ == false || iRange_.at<float>(y,x) < range)
 	  {
 	    //adding farthest point
 	    iMap_.at<cv::Vec3f>(y,x)[0] = (*it)[0]; // x
@@ -472,9 +472,9 @@ namespace fbr
     //compressed map
     else if(mapMethod_ == FULL)
       {
-	
+
       }
   }
-    
+
 }
 

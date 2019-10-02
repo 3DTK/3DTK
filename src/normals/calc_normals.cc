@@ -228,8 +228,8 @@ void writeScanFilesXYZ(string dir,
     normptsout << points[i].x << " "
                << points[i].y << " "
                << points[i].z << " "
-               << normals[i].x << " " 
-               << normals[i].y << " " 
+               << normals[i].x << " "
+               << normals[i].y << " "
                << normals[i].z << " " << endl;
   }
   normptsout.clear();
@@ -350,7 +350,7 @@ int main(int argc, char** argv)
     if (inward) {
       flipNormals(normals);
     }
-    
+
     // pose file (repeated for the number of segments
     writePoseFiles(normdir, rPos, rPosTheta, scanNumber);
     // scan files for all segments
@@ -362,7 +362,7 @@ int main(int argc, char** argv)
 
   cout << "Normal program end" << endl;
 
-  return 0;  
+  return 0;
 
   // shutdown everything
   if (scanserver)

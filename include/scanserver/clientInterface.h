@@ -70,49 +70,49 @@ protected:
 
   //! Void allocator to use for ip-STL-containers
   ip::allocator<void, SegmentManager> allocator;
-  
+
   //! Mutex for concurrent access to the client interface, protecting the server communication and argument manipulation
   ip::interprocess_mutex m_mutex_client;
-  
+
   //! Mutex for client-server communication, handling the process switch and work on the server
   ip::interprocess_mutex m_mutex_server;
 
   //! Condition the server waits on and the client notifies to
   ip::interprocess_condition m_condition_server;
-  
+
   //! Condition the clients will wait on while the server processes
   ip::interprocess_condition m_condition_client;
-  
+
   //! TEST: Pod message type
   message_t m_message;
-  
+
   //! String arguments for message passing
   SharedString m_arg_string_1, m_arg_string_2;
-  
+
   //! Integer arguments for message passing
   unsigned int m_arg_uint_1, m_arg_uint_2;
-  
+
   //! size_t argument for >4GB sizes
   std::size_t m_arg_size_t;
-  
+
   //! Float arguments for message passing
   float m_arg_float_1, m_arg_float_2;
-  
+
   //! IO type argument for message passing
   IOType m_arg_io_type;
-  
+
   //! An error message containing detais
   SharedString m_error_message;
-  
+
   //! Pointer for a scanvector
   ip::offset_ptr<SharedScanVector> m_scanvector_ptr;
-  
+
   //! Pointer for a scan
   ip::offset_ptr<SharedScan> m_sharedscan_ptr;
-  
+
   //! Pointer for a cache object
   ip::offset_ptr<CacheObject> m_cacheobject_ptr;
-  
+
 // TODO: remove this later on, this is for close for the testclient
 public:
 // private:
@@ -125,7 +125,7 @@ public:
 
   //! "Close" a directory by releasing all contained scans, deleting the vector and resetting the pointer
   void closeDirectory(SharedScanVector*& scans);
-  
+
   //! Called from SharedScan on a cache miss, this requests the serverside cache handler to load, returns false if no cached file was found
   bool loadCacheObject(CacheObject* obj);
 
@@ -146,16 +146,16 @@ public:
 
   //! Called from SharedScan, requests saving frames into a file
   void saveFramesFile(SharedScan* scan, bool append = false);
- 
+
   //! Called from SharedScan, this removes all previous contained frames
   void clearFrames(SharedScan* scan);
-  
+
   //! Returns the CacheObject shared memory size for allocation and planning purposes
   std::size_t getCacheSize();
 
   //! Let the server print out its metric
   void printMetrics();
-  
+
 protected:
   //! Trivial constructor: initialize all shared memory containers, only allowed to be called by the ServerInterface
   ClientInterface(SegmentManager* sm) :
@@ -167,12 +167,12 @@ protected:
     m_error_message(allocator)
   {
   }
-  
+
   // only the instance in the server will deconstruct
   virtual ~ClientInterface()
   {
   }
-  
+
 protected:
   //! The one shared memory opened in the application, a single one in each of the clients and in the server
   static ip::managed_shared_memory* m_msm;

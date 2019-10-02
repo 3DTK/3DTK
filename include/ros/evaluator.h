@@ -49,7 +49,7 @@ public:
     double result = 0;
 
     if (icp) {
-      if (withICP) 
+      if (withICP)
         doICP(scans);
       for (unsigned int i = 0; i < scans.size(); i++) {
         for (unsigned int j = 0; j < scans.size(); j++) {
@@ -65,7 +65,7 @@ public:
         double err2 = icp->Point_Point_Error((scans)[i-1], (scans)[i], mdist, &nrp2, 0.01);
         result += err2;
       }*/
-     
+
     }
     return result;
   }
@@ -101,7 +101,7 @@ public:
     double result = 0;
 
     if (icp) {
-      if (withICP) 
+      if (withICP)
         doICP(scans);
 
       for (unsigned int i = 1; i < scans.size(); i++) {
@@ -109,7 +109,7 @@ public:
         icp->Point_Point_Error((scans)[i-1], (scans)[i], mdist, &nrp2);
         result += nrp2;
       }
-     
+
     }
     return result * -(0.000001);   // use for number of points as error
   }
@@ -144,7 +144,7 @@ public:
     double result = 0;
 
     if (icp) {
-      if (withICP) 
+      if (withICP)
         doICP(scans);
 
       unsigned int n = scans[0]->size<DataXYZ>("xyz reduced");
@@ -156,9 +156,9 @@ public:
 #ifdef _OPENMP
 #pragma omp parallel for schedule(dynamic)
 #endif
-      for (unsigned int i = 0; i < n; i++) { 
+      for (unsigned int i = 0; i < n; i++) {
         unsigned int tn = omp_get_thread_num();
-        for (unsigned int j = 0; j < m; j++) { 
+        for (unsigned int j = 0; j < m; j++) {
           DataXYZ ps = scans[0]->get("xyz reduced");
           DataXYZ qs = scans[1]->get("xyz reduced");
           const double*p = ps[i];
@@ -170,7 +170,7 @@ public:
       }
       for (unsigned int i=0; i < OPENMP_NUM_THREADS; i++)
         result -= sums[i];
-     
+
     }
     return result * 0.0001;        // use for n^2
   }
@@ -245,17 +245,17 @@ public:
 //        exit(0);
         if(!fitPlane(points, plane, center)) {
           cout << "couldnt fit plane nr " << j << endl;
-          continue; 
+          continue;
         }
         for (unsigned int k = 0; k < points.size(); k++) {
           planeerr += fabs(planeDist(points[k], plane[0], plane[1], plane[2], plane[3]));
         }
-      
+
 //        error += planeerr;
 	error += planeerr/scans[i]->size<DataXYZ>("xyz reduced");
       }
 
-    } 
+    }
 
     return error;
   }

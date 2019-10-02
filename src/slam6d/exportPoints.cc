@@ -160,7 +160,7 @@ int main(int argc, char **argv)
   int    start = 0,   end = -1;
   int    maxDist    = -1;
   int    minDist    = -1;
-  bool   uP         = false;  // should we use the pose information instead of the frames?? 
+  bool   uP         = false;  // should we use the pose information instead of the frames??
   bool   use_xyz = false;
   bool   use_color = false;
   bool   use_reflectance = false;
@@ -191,7 +191,7 @@ int main(int argc, char **argv)
 
   rangeFilterActive = minDist > 0 || maxDist > 0;
 
-  // custom filter set? quick check, needs to contain at least one ';' 
+  // custom filter set? quick check, needs to contain at least one ';'
   // (proper chsecking will be done case specific in pointfilter.cc)
   size_t pos = customFilter.find_first_of(";");
   if (pos != std::string::npos){
@@ -248,7 +248,7 @@ int main(int argc, char **argv)
      if(rangeFilterActive) Scan::allScans[i]->setRangeFilter(maxDist, minDist);
      if(customFilterActive) Scan::allScans[i]->setCustomFilter(customFilter);
   }
-  
+
 //
   int end_reduction = (int)Scan::allScans.size();
 #ifdef _OPENMP
@@ -267,27 +267,27 @@ int main(int argc, char **argv)
   }
 
   readFramesAndTransform(dir, start, end, frame, uP, red > -1);
-  
+
  std::cout << "Export all 3D Points to file \"points.pts\"" << std::endl;
  std::cout << "Export all 6DoF poses to file \"positions.txt\"" << std::endl;
  std::cout << "Export all 6DoF matrices to file \"poses.txt\"" << std::endl;
  FILE *redptsout = fopen("points.pts", "wb");
  std::ofstream posesout("positions.txt");
  std::ofstream matricesout("poses.txt");
-  
+
   for(unsigned int i = 0; i < Scan::allScans.size(); i++) {
     Scan *source = Scan::allScans[i];
     std::string red_string = red > 0 ? " reduced" : "";
-      
+
     DataXYZ xyz  = source->get("xyz" + red_string);
-    
+
     if(use_reflectance) {
-      DataReflectance xyz_reflectance = 
+      DataReflectance xyz_reflectance =
           (((DataReflectance)source->get("reflectance" + red_string)).size() == 0) ?
- 
-          source->create("reflectance" + red_string, sizeof(float)*xyz.size()) : 
-          source->get("reflectance" + red_string); 
- 
+
+          source->create("reflectance" + red_string, sizeof(float)*xyz.size()) :
+          source->get("reflectance" + red_string);
+
       if (!(types & PointType::USE_REFLECTANCE)) {
         for(unsigned int i = 0; i < xyz.size(); i++) xyz_reflectance[i] = 255;
       }
@@ -296,13 +296,13 @@ int main(int argc, char **argv)
       } else {
         write_uosr(xyz, xyz_reflectance, redptsout, scaleFac*100.0 , hexfloat, high_precision);
       }
-      
+
     } else if(use_color) {
       std::string data_string = red > 0 ? "color reduced" : "rgb";
-      DataRGB xyz_color = 
+      DataRGB xyz_color =
           (((DataRGB)source->get(data_string)).size() == 0) ?
-          source->create(data_string, sizeof(unsigned char)*3*xyz.size()) : 
-          source->get(data_string); 
+          source->create(data_string, sizeof(unsigned char)*3*xyz.size()) :
+          source->get(data_string);
       if (!(types & PointType::USE_COLOR)) {
           for(unsigned int i = 0; i < xyz.size(); i++) {
             xyz_color[i][0] = 0;
@@ -318,9 +318,9 @@ int main(int argc, char **argv)
 
     } else if(use_normals) {
       std::string data_string = red > 0 ? "normal reduced" : "normal";
-      DataNormal normals = 
+      DataNormal normals =
           (((DataNormal)source->get(data_string)).size() == 0) ?
-          source->create(data_string, sizeof(double)*3*xyz.size()) : 
+          source->create(data_string, sizeof(double)*3*xyz.size()) :
           source->get(data_string);
       if(use_xyz) {
         write_xyz_normal(xyz, normals, redptsout, scaleFac, hexfloat, high_precision);
@@ -334,7 +334,7 @@ int main(int argc, char **argv)
       } else {
         write_uos(xyz, redptsout, scaleFac*100.0, hexfloat, high_precision);
       }
-    
+
     }
     if(use_xyz) {
       writeTrajectoryXYZ(posesout, source->get_transMat(), false, scaleFac);
@@ -345,7 +345,7 @@ int main(int argc, char **argv)
     }
 
   }
-   
+
   fclose(redptsout);
   posesout.close();
   posesout.clear();

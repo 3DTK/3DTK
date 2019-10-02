@@ -48,7 +48,7 @@ struct information{
   bool normalizeRange;
   bool threeChannelRange;
   bool threeGrayscaleRange;
-  bool saveOct, loadOct;  
+  bool saveOct, loadOct;
 } info;
 
 void usage(int argc, char** argv){
@@ -106,7 +106,7 @@ void parssArgs(int argc, char** argv, information& info){
   info.maxHorizAngle = 360;
   info.minVertAngle = -40;
   info.maxVertAngle = 60;
-  info.mapMethod = fbr::FARTHEST;  
+  info.mapMethod = fbr::FARTHEST;
   info.projectionMethod = EQUIRECTANGULAR;
   info.panoramaFormat = PNG;
   info.panoramaFormatParam = 3;
@@ -123,7 +123,7 @@ void parssArgs(int argc, char** argv, information& info){
   info.threeGrayscaleRange = false;
   info.saveOct = false;
   info.loadOct = false;
-  
+
   int c;
   opterr = 0;
   //reade the command line and get the options
@@ -237,7 +237,7 @@ void parssArgs(int argc, char** argv, information& info){
       cout<<"Too few input arguments. At least inDir and two scan numbers are required."<<endl;
       usage(argc, argv);
     }
-    
+
   info.inDir = argv[optind];
   if(info.outDir.empty()) info.outDir = info.inDir;
   if(info.outDir.back() != '/') info.outDir += '/';
@@ -279,7 +279,7 @@ void printInfo(information info){
 int main(int argc, char** argv)
 {
   parssArgs(argc, argv, info);
-  
+
   printInfo(info);
 
   //opendirectory of the scans
@@ -293,14 +293,14 @@ int main(int argc, char** argv)
       //init the panorama
       fbr::panorama pImage;
       pImage.init(info.panoramaWidth, info.panoramaHeight, info.projectionMethod, info.numberOfImages, info.projectionParam, info.mapMethod, scan.getZMin(), scan.getZMax(), info.minHorizAngle, info.maxHorizAngle, info.minVertAngle, info.maxVertAngle, info.panoramaSizeOptimization, info.reflectance, info.range, info.color);
-      
+
       //create panorama
       pImage.createPanorama(scan.getMatScan(), scan.getMatScanColor());
-            
+
       //get the new panorama image size incase of optimized panorama size
       info.panoramaWidth = pImage.getImageWidth();
       info.panoramaHeight = pImage.getImageHeight();
-      
+
       //write panorama to file
       string out;
       vector<int> panoramaFormatParams;
@@ -322,19 +322,19 @@ int main(int argc, char** argv)
       case TIFF:
 	break;
       }
-      
+
       if(info.range == true)
 	{
 	  out = info.outDir+"scan"+to_string(s, 3)+"_"+projectionMethodToString(info.projectionMethod)+"_"+to_string(info.panoramaWidth)+"x"+to_string(info.panoramaHeight)+"_Range."+panoramaFormatToFileFormatString(info.panoramaFormat);
 	  imwrite(out, pImage.getRangeImage(), panoramaFormatParams);
 	}
-      
+
       if(info.normalizeRange == true)
 	{
 	  out = info.outDir+"scan"+to_string(s, 3)+"_"+projectionMethodToString(info.projectionMethod)+"_"+to_string(info.panoramaWidth)+"x"+to_string(info.panoramaHeight)+"_NormalizedRange."+panoramaFormatToFileFormatString(info.panoramaFormat);
 	  imwrite(out, pImage.getNormalizedRangeImage(), panoramaFormatParams);
 	}
-      
+
       if(info.threeChannelRange == true)
 	{
 
@@ -358,11 +358,11 @@ int main(int argc, char** argv)
 	  //cout<<endl;
 	  //}
 	  //cout<<"---------------------"<<endl;
-	  
+
 	  out = info.outDir+"scan"+to_string(s, 3)+"_"+projectionMethodToString(info.projectionMethod)+"_"+to_string(info.panoramaWidth)+"x"+to_string(info.panoramaHeight)+"_ThreeChannel24BitRange."+panoramaFormatToFileFormatString(info.panoramaFormat);
 	  imwrite(out, pImage.getThreeChannel24BitRangeImage(), panoramaFormatParams);
 	}
-      
+
       if(info.threeGrayscaleRange == true)
 	{
 	  cv::Mat range1, range2, range3;
@@ -387,7 +387,7 @@ int main(int argc, char** argv)
 	  //cout<<endl;
 	  //}
 	  //cout<<"---------------------"<<endl;
-	  
+
 	  out = info.outDir+"scan"+to_string(s, 3)+"_"+projectionMethodToString(info.projectionMethod)+"_"+to_string(info.panoramaWidth)+"x"+to_string(info.panoramaHeight)+"_ThreeGrayscaleRange_1."+panoramaFormatToFileFormatString(info.panoramaFormat);
 	  imwrite(out, range1, panoramaFormatParams);
 	  out = info.outDir+"scan"+to_string(s, 3)+"_"+projectionMethodToString(info.projectionMethod)+"_"+to_string(info.panoramaWidth)+"x"+to_string(info.panoramaHeight)+"_ThreeGrayscaleRange_2."+panoramaFormatToFileFormatString(info.panoramaFormat);
@@ -401,7 +401,7 @@ int main(int argc, char** argv)
 	  out = info.outDir+"scan"+to_string(s, 3)+"_"+projectionMethodToString(info.projectionMethod)+"_"+to_string(info.panoramaWidth)+"x"+to_string(info.panoramaHeight)+"_Reflectance."+panoramaFormatToFileFormatString(info.panoramaFormat);
 	  imwrite(out, pImage.getReflectanceImage(), panoramaFormatParams);
 	}
-      
+
       if(info.color == true)
 	{
 	  out = info.outDir+"scan"+to_string(s, 3)+"_"+projectionMethodToString(info.projectionMethod)+"_"+to_string(info.panoramaWidth)+"x"+to_string(info.panoramaHeight)+"_Color."+panoramaFormatToFileFormatString(info.panoramaFormat);

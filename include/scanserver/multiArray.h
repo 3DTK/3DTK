@@ -1,6 +1,6 @@
 /**
  * @file
- * @brief 
+ * @brief
  *
  * @author Thomas Escher
  */
@@ -31,7 +31,7 @@ public:
   {
     return reinterpret_cast<return_type*>(getData()) + (i*3);
   }
-  
+
   //! Count of T[3] objects in this CacheData
   inline unsigned int size() const { return CacheDataAccess::getSize() / (3*sizeof(return_type)); }
 };
@@ -53,7 +53,7 @@ public:
   {
     return *(reinterpret_cast<return_type*>(getData()) + i);
   }
-  
+
   //! Count of T objects in this CacheData
   inline unsigned int size() const { return CacheDataAccess::getSize() / sizeof(return_type); }
 };
@@ -79,12 +79,12 @@ public:
     for(unsigned int i = 0; i < size; ++i)
       m_array[i] = data[i];
   }
-  
+
   //! Removes the temporary array on destruction (RAII)
   ~Array() {
     delete[] m_array;
   }
-  
+
   //! Conversion operator to interface the MultiArray to a T** array
   inline T* const* get() const { return m_array; }
 private:

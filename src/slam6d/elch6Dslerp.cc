@@ -147,7 +147,7 @@ void elch6Dslerp::close_loop(const vector <Scan *> &allScans,
          << " " << axisangle[2] << " " << axisangle[3]
          << endl;
   }
-  
+
   //transform scans
   double idQ[4] = {1, 0, 0, 0}, rPos[3], rPosQuat[4], delta0[16];
 

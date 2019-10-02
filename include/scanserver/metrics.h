@@ -38,11 +38,11 @@ public:
     else
       return (T)0;
   }
-  
+
   std::size_t size() const {
     return m_values.size();
   }
-  
+
   void reset() {
     m_values.clear();
   }

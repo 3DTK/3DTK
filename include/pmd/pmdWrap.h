@@ -68,7 +68,7 @@ struct PMDCam {
     int minPts4Pose;
     double maxError;
     int minConsensusPts;
-    int savePoses;   
+    int savePoses;
     // Settings
     ImageHeaderInformation *header;
     int synchronous;

@@ -22,13 +22,13 @@ using Eigen::MatrixXd;
 //#define SEPERATE_ROSCORE
 //#define OPTIMAL_CORRESPODENCE
 #define GPS_HECTOR
-//#define READBAG 
+//#define READBAG
 //#define READFILE
 #ifdef  POINT3D
 #define DIMENSIONS   3
 #else
 #define DIMENSIONS   2
-#endif 
+#endif
 //#define DIMENSIONS   2
 
 class Curves;
@@ -60,26 +60,26 @@ public:
   void Trans_Mat(Curves* CurrentPoint,Curves* NextPoint);
   //void Trans_Mat2(Curves* CurrentPoint,Curves* NextPoint);
   MatrixXd Opt_rot(VectorXd A,VectorXd B);
- 
+
 public:
     std::vector<double> *m_point;
     int  m_type;
     string str;
-    
+
     std::vector<double> cached_poses;
     //std::vector<MatrixXd>&poses_final;
 
-   
+
     Vector3d points;
-    Vector3d points1; 
+    Vector3d points1;
     Vector3d points2;   //!< 3D position of trajectory1 and trajectory2
     Vector3d Fus_points;
     double   time_stamps;
 
     unsigned int  identifiers;
-#ifdef POINT3D 
+#ifdef POINT3D
     Matrix3d rot1;
-    Matrix3d rot2; 
+    Matrix3d rot2;
     Vector3d trans1;
     Vector3d trans2;
    // Matrix3cd R;
@@ -95,7 +95,7 @@ public:
 
 #else
     Matrix2d rot1;
-    Matrix2d rot2; 
+    Matrix2d rot2;
     Vector2d trans1;
     Vector2d trans2;
    // Matrix2cd R;

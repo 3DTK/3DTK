@@ -42,7 +42,7 @@ void ScanIO_riegl_txt::readPose(const char* dir_path,
                                 double* pose)
 {
   unsigned int i;
-  
+
   path pose_path(dir_path);
   pose_path /= path(std::string(posePrefix())
                     + identifier
@@ -55,7 +55,7 @@ void ScanIO_riegl_txt::readPose(const char* dir_path,
   ifstream pose_file(pose_path);
     double rPos[3], rPosTheta[16];
     double inMatrix[16], tMatrix[16];
-    
+
     if (pose_file.fail()) {
       throw std::runtime_error(std::string("Pose file could not be opened for [")
                                + identifier + "] in [" + dir_path + "]");
@@ -64,7 +64,7 @@ void ScanIO_riegl_txt::readPose(const char* dir_path,
     for (i = 0; i < 16; ++i)
       pose_file >> inMatrix[i];
     pose_file.close();
-    
+
     if (pose_file.fail()) {
       throw std::runtime_error(std::string("Pose file could not be read for [")
                                + identifier + "] in [" + dir_path + "]");
@@ -87,9 +87,9 @@ void ScanIO_riegl_txt::readPose(const char* dir_path,
     tMatrix[13] = inMatrix[11];
     tMatrix[14] = inMatrix[3];
     tMatrix[15] = inMatrix[15];
-    
+
     Matrix4ToEuler(tMatrix, rPosTheta, rPos);
-    
+
     pose[0] = 100*rPos[0];
     pose[1] = 100*rPos[1];
     pose[2] = 100*rPos[2];

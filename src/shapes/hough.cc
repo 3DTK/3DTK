@@ -23,7 +23,7 @@ using namespace NEWMAT;
 #include <direct.h>
 #else
 #include <dlfcn.h>
-#endif 
+#endif
 #include <sys/stat.h>
 
 /**
@@ -33,7 +33,7 @@ using namespace NEWMAT;
   *
   * Dorit Borrmann, Jan Elseberg, Kai Lingemann, and Andreas Nüchter. The 3D
   * Hough Transform for Plane Detection in Point Clouds - A Review and A new
-  * Accumulator Design, Journal 3D Research, Springer, Volume 2, Number 2, 
+  * Accumulator Design, Journal 3D Research, Springer, Volume 2, Number 2,
   * March 2011.
   */
 
@@ -53,7 +53,7 @@ Hough::Hough(bool q, std::string configFile)
 
 Hough::Hough(Scan * GlobalScan, bool q, std::string configFile)
 {
- 
+
   quiet = q;
   if(configFile.size() > 0) {
     myConfigFileHough.LoadCfg(configFile.c_str());
@@ -111,14 +111,14 @@ Hough::~Hough() {
     out.close();
   }
 
-  for(vector<ConvexPlane*>::iterator it = planes.begin(); 
+  for(vector<ConvexPlane*>::iterator it = planes.begin();
       it != planes.end(); it++) {
       ConvexPlane* tmp = (*it);
       delete tmp;
   }
   delete acc;
   delete allPoints;
-  
+
 }
 
 /**
@@ -134,11 +134,11 @@ int Hough::RHT() {
   unsigned int stop = (unsigned int)(allPoints->size()/100.0)*myConfigFileHough.Get_MinSizeAllPoints();
   int plane = 1;
   long start, end;
-  start = GetCurrentTimeInMilliSec(); 
+  start = GetCurrentTimeInMilliSec();
   int counter = 0;
-  while( allPoints->size() > stop && 
+  while( allPoints->size() > stop &&
           planes.size() < (unsigned int)myConfigFileHough.Get_MaxPlanes() &&
-          counter < (int)myConfigFileHough.Get_TrashMax()) { 
+          counter < (int)myConfigFileHough.Get_TrashMax()) {
     unsigned int pint = (int) (((*allPoints).size())*(rand()/(RAND_MAX+1.0)));
 
     p1 = (*allPoints)[pint];
@@ -156,7 +156,7 @@ int Hough::RHT() {
       if(acc->accumulate(theta, phi, rho)) {
         end = GetCurrentTimeInMilliSec() - start;
         start = GetCurrentTimeInMilliSec();
-        if (!quiet) cout << "Time for RHT " << plane << ": " << end << endl; 
+        if (!quiet) cout << "Time for RHT " << plane << ": " << end << endl;
         double * n = acc->getMax(rho, theta, phi);
 	   if (!quiet) cout << rho << " " << theta << " " << phi << endl;
         planeSize = deletePoints(n, rho);
@@ -165,7 +165,7 @@ int Hough::RHT() {
         if(planeSize < (int)myConfigFileHough.Get_MinPlaneSize()) counter++;
         end = GetCurrentTimeInMilliSec() - start;
         start = GetCurrentTimeInMilliSec();
-        if(!quiet) cout << "Time for Polygonization " << plane << ": " << end << endl; 
+        if(!quiet) cout << "Time for Polygonization " << plane << ": " << end << endl;
         acc->resetAccumulator();
         plane++;
         if(!quiet) cout << "Planes " << planes.size() << endl;
@@ -175,14 +175,14 @@ int Hough::RHT() {
   }
   /*
   vector<Point>::iterator itr = allPoints->begin();
- 
+
   Point p;
-  start = GetCurrentTimeInMilliSec(); 
+  start = GetCurrentTimeInMilliSec();
   while(itr != allPoints->end()) {
     p = *(itr);
     cout << p.x << " " << p.y << " " << p.z << endl;
     itr++;
-  } 
+  }
   */
   return (int)planes.size();
 }
@@ -192,19 +192,19 @@ int Hough::RHT() {
  */
 void Hough::SHT() {
   vector<Point>::iterator itr = allPoints->begin();
- 
+
   Point p;
   long start, end;
-  start = GetCurrentTimeInMilliSec(); 
+  start = GetCurrentTimeInMilliSec();
   while(itr != allPoints->end()) {
     p = *(itr);
     acc->accumulate(p);
     itr++;
-  } 
+  }
   end = GetCurrentTimeInMilliSec() - start;
   start = GetCurrentTimeInMilliSec();
-  if (!quiet) cout << "Time for SHT: " << end << endl; 
-  
+  if (!quiet) cout << "Time for SHT: " << end << endl;
+
   if(myConfigFileHough.Get_PeakWindow()) {
     acc->peakWindow(myConfigFileHough.Get_WindowSize());
   }
@@ -213,26 +213,26 @@ void Hough::SHT() {
   multiset<int*, maxcompare>::iterator it = maxlist->begin();
   int threshold = ((*it)[0] * myConfigFileHough.Get_PlaneRatio());
   unsigned int stop = (int)(allPoints->size()/100.0)*myConfigFileHough.Get_MinSizeAllPoints();
-  
-  while(it != maxlist->end() && 
-        stop < allPoints->size() && 
-        planes.size() < (unsigned int)myConfigFileHough.Get_MaxPlanes() && 
+
+  while(it != maxlist->end() &&
+        stop < allPoints->size() &&
+        planes.size() < (unsigned int)myConfigFileHough.Get_MaxPlanes() &&
         (*it)[0] > threshold) {
     int* tmp = (*it);
     double * polar = acc->getMax(tmp);
-    deletePoints(polar, polar[3]); 
+    deletePoints(polar, polar[3]);
     delete[] polar;
     it++;
-  } 
-  if (!quiet) cout << "Time for Polygonization: " << end << endl; 
-  
+  }
+  if (!quiet) cout << "Time for Polygonization: " << end << endl;
+
   it = maxlist->begin();
     for(;it != maxlist->end(); it++) {
       int* tmp = (*it);
       delete[] tmp;
-  } 
-  
-  delete maxlist; 
+  }
+
+  delete maxlist;
 }
 
 /**
@@ -253,14 +253,14 @@ double * const* Hough::getPoints(int &size) {
 }
 
 /**
-  * Deletes all points that lie on a list of planes. 
+  * Deletes all points that lie on a list of planes.
   * @param model the list of planes
   * @param size the number of remaining points after delete operation
   * @return the remaining points
   */
 double * const* Hough::deletePoints(vector<ConvexPlane*> &model, int &size) {
   for(unsigned int i = 0; i < model.size(); i++) {
-    deletePoints(model[i]->n, model[i]->rho); 
+    deletePoints(model[i]->n, model[i]->rho);
   }
   double ** returnPoints = new double*[allPoints->size()];
   for(unsigned int i = 0; i < allPoints->size(); i++) {
@@ -297,7 +297,7 @@ void Hough::PHT() {
       i++;
       voted[pint] = true;
     }
-    
+
   }
   // List of Maxima
   if(myConfigFileHough.Get_PeakWindow()) {
@@ -306,27 +306,27 @@ void Hough::PHT() {
   multiset<int*, maxcompare>* maxlist = acc->getMax();
 //  cout << "Mean "  << acc->mean() << endl;
 //  cout << "Variance "  << acc->variance() << endl;
-  
+
   multiset<int*, maxcompare>::iterator it = maxlist->begin();
   int threshold = ((*it)[0] * myConfigFileHough.Get_PlaneRatio());
-  while(it != maxlist->end() && 
-        stop < allPoints->size() && 
-        planes.size() < (unsigned int)myConfigFileHough.Get_MaxPlanes() && 
+  while(it != maxlist->end() &&
+        stop < allPoints->size() &&
+        planes.size() < (unsigned int)myConfigFileHough.Get_MaxPlanes() &&
         (*it)[0] > threshold) {
-     
+
     int* tmp = (*it);
     double * tmp2 = acc->getMax(tmp);
     deletePoints(tmp2, tmp2[3]);
     delete [] tmp2;
     it++;
-  } 
+  }
   it = maxlist->begin();
     for(;it != maxlist->end(); it++) {
       int* tmp = (*it);
       delete[] tmp;
-  } 
-  
-  delete maxlist; 
+  }
+
+  delete maxlist;
   delete[] voted;
 }
 
@@ -337,15 +337,15 @@ void Hough::PHT() {
 void Hough::PPHT() {
   unsigned int stop =
   (int)(allPoints->size()/100.0)*myConfigFileHough.Get_MinSizeAllPoints();
-  while(stop < allPoints->size() && 
+  while(stop < allPoints->size() &&
         planes.size() < (unsigned int)myConfigFileHough.Get_MaxPlanes()) {
     bool *voted = new bool[allPoints->size()];
     for(unsigned int i = 0; i < allPoints->size(); i++) {
       voted[i] = false;
     }
-   
+
     unsigned int pint;
-    do { 
+    do {
       pint = (int) (((*allPoints).size())*(rand()/(RAND_MAX+1.0)));
 
       Point p = (*allPoints)[pint];
@@ -363,7 +363,7 @@ void Hough::PPHT() {
       }
 
     } while(!voted[pint]);
-   
+
 	delete[] voted;
   }
 }
@@ -376,13 +376,13 @@ void Hough::APHT() {
 
   int max = 0;
   int maxpos = 0;
-  vector<int*> mergelist = vector<int*>(); 
-  int stability[20] = {0}; 
+  vector<int*> mergelist = vector<int*>();
+  int stability[20] = {0};
   do {
-  
+
     //randomly select points and perform HT for them
-    vector<int*> altlist = mergelist; 
-    mergelist = vector<int*>(); 
+    vector<int*> altlist = mergelist;
+    mergelist = vector<int*>();
     multiset<int*,valuecompare> maxlist = multiset<int*,valuecompare>();
     for(int i = 0; i < 10; i++) {
       unsigned int pint = (int) (((*allPoints).size())*(rand()/(RAND_MAX+1.0)));
@@ -391,10 +391,10 @@ void Hough::APHT() {
       // store the maximum cell touched by the HT
       maxlist.insert(max);
     }
- 
+
     // merge active with previous list
-    multiset<int*,valuecompare>::iterator mi = maxlist.begin(); 
-    vector<int*>::iterator ai = altlist.begin(); 
+    multiset<int*,valuecompare>::iterator mi = maxlist.begin();
+    vector<int*>::iterator ai = altlist.begin();
 
     int i = 0;
     while(i < 20) {
@@ -412,7 +412,7 @@ void Hough::APHT() {
       } else {
         mi_oder_ai = true;
       }
-    
+
       int *tmp;
       if(mi_oder_ai) {
         tmp = (*mi);
@@ -433,7 +433,7 @@ void Hough::APHT() {
             insert = false;
             break;
           }
-        } else { 
+        } else {
           if( sqrt((float)
             ((*it)[4] - (tmp[4])) * ((*it)[4] - (tmp[4])) +
             ((*it)[1] - (tmp[1])) * ((*it)[1] - (tmp[1])) +
@@ -465,7 +465,7 @@ void Hough::APHT() {
               treffer = true;
               break;
             }
-          } else { 
+          } else {
             if( sqrt((float)
               ((tmp2)[4] - (tmp1[4])) * ((tmp2)[4] - (tmp1[4])) +
               ((tmp2)[1] - (tmp1[1])) * ((tmp2)[1] - (tmp1[1])) +
@@ -486,7 +486,7 @@ void Hough::APHT() {
     for(int i = mergelist.size(); i < 20; i++) {
       stability[i] = 0;
     }
-    // determine stability count, 
+    // determine stability count,
     // a set of n entries is considered to be stable, if all planes in the set
     // are the maximal entries of the mergelist in this iteration and have also
     // been the maximal entries in the previous iteration (the order in the set
@@ -504,7 +504,7 @@ void Hough::APHT() {
     }
     // repeat until maximum stability count exceeds a threshold
   } while(max < (int)myConfigFileHough.Get_AccumulatorMax()
-  && stability[myConfigFileHough.Get_MaxPlanes()] < 
+  && stability[myConfigFileHough.Get_MaxPlanes()] <
   myConfigFileHough.Get_AccumulatorMax() * myConfigFileHough.Get_PlaneRatio()
   );
   if(stability[myConfigFileHough.Get_MaxPlanes()] >= myConfigFileHough.Get_AccumulatorMax() * myConfigFileHough.Get_PlaneRatio()) {
@@ -512,37 +512,37 @@ void Hough::APHT() {
   }
 
   for(int i = 0; i <= maxpos; i++) {
-    double * n = acc->getMax(mergelist[i]); 
+    double * n = acc->getMax(mergelist[i]);
     deletePoints(n, n[3]);
-   
+
     delete[] n;
   }
-      
+
 }
 
 /**
   * Verifies the distance criterion needed for the RHT. The distance between the
   * three selected points may not exceed a maximal or fall below a minimal
-  * distance. 
+  * distance.
   */
 bool Hough::distanceOK(Point p1, Point p2, Point p3) {
   // p1 - p2
-  double distance = (p1.x - p2.x) * (p1.x - p2.x) + (p1.y - p2.y) * (p1.y - p2.y) + (p1.z - p2.z) * (p1.z - p2.z); 
+  double distance = (p1.x - p2.x) * (p1.x - p2.x) + (p1.y - p2.y) * (p1.y - p2.y) + (p1.z - p2.z) * (p1.z - p2.z);
   if(sqrt(distance) < myConfigFileHough.Get_MinDist()) return false;
   if(sqrt(distance) > myConfigFileHough.Get_MaxDist()) return false;
 
   // p2 - p3
-  distance = (p3.x - p2.x) * (p3.x - p2.x) + (p3.y - p2.y) * (p3.y - p2.y) + (p3.z - p2.z) * (p3.z - p2.z); 
+  distance = (p3.x - p2.x) * (p3.x - p2.x) + (p3.y - p2.y) * (p3.y - p2.y) + (p3.z - p2.z) * (p3.z - p2.z);
   if(sqrt(distance) < myConfigFileHough.Get_MinDist()) return false;
   if(sqrt(distance) > myConfigFileHough.Get_MaxDist()) return false;
 
   // p3 - p1
-  distance = (p1.x - p3.x) * (p1.x - p3.x) + (p1.y - p3.y) * (p1.y - p3.y) + (p1.z - p3.z) * (p1.z - p3.z); 
+  distance = (p1.x - p3.x) * (p1.x - p3.x) + (p1.y - p3.y) * (p1.y - p3.y) + (p1.z - p3.z) * (p1.z - p3.z);
   if(sqrt(distance) < myConfigFileHough.Get_MinDist()) return false;
   if(sqrt(distance) > myConfigFileHough.Get_MaxDist()) return false;
 
   return true;
-  
+
 }
 
 /**
@@ -569,7 +569,7 @@ bool Hough::calculatePlane(Point p1, Point p2, Point p3, double &theta, double &
   Normalize3(n);
 
   rho = p1.x * n[0] + p1.y * n[1] + p1.z * n[2];
-  
+
   if(rho < 0) {
     rho = -rho;
     for(int i = 0; i < 3; i++) {
@@ -597,19 +597,19 @@ int Hough::deletePointsQuad(double * n, double rho) {
 
   vector<Point> planePoints;
   out << n[0] << " " << n[1] << " " << n[2] << " " << rho << " ";
-  
+
   Point p;
   vector<Point>::iterator itr = allPoints->begin();
-  
+
   while(itr != allPoints->end()) {
     p = *(itr);
     // if point close to plane, delete it
     double distance = p.x * n[0] + p.y * n[1] + p.z*n[2] - rho;
     if( fabs(distance) < myConfigFileHough.Get_MaxPointPlaneDist()) {
-   
+
       planePoints.push_back(p);
 
-    } 
+    }
    itr++;
   }
   double n2[4];
@@ -617,16 +617,16 @@ int Hough::deletePointsQuad(double * n, double rho) {
   // calculating the best fit plane
   calcPlane(planePoints, n2);
   out << n2[0] << " " << n2[1] << " " << n2[2] << " " << n2[3] << " " ;
-  
+
   itr = allPoints->begin();
-  planePoints.clear();  
- 
+  planePoints.clear();
+
   while(itr != allPoints->end()) {
     p = *(itr);
     // if point close to plane, delete it
     double distance = p.x * n2[0] + p.y * n2[1] + p.z*n2[2] - n2[3];
     if( fabs(distance) < myConfigFileHough.Get_MaxPointPlaneDist()) {
-   
+
       planePoints.push_back(p);
 
     } else {
@@ -636,7 +636,7 @@ int Hough::deletePointsQuad(double * n, double rho) {
   }
   delete allPoints;
   allPoints = nallPoints;
-  
+
   if (!quiet) cout << "Planepoints " << planePoints.size() << endl;
   int nr_points = planePoints.size();
   // TODO Clustering
@@ -678,7 +678,7 @@ int Hough::deletePointsQuad(double * n, double rho) {
   QuadTree tree(pppoints, nr_points , 0.3, min_angle);
 	vector<set<double *> > cps;
   cps = tree.getClusters();
-  
+
   unsigned int max_points = 0;
   int index = -1;
   for (unsigned int i = 0; i < cps.size(); i++) {
@@ -688,7 +688,7 @@ int Hough::deletePointsQuad(double * n, double rho) {
     }
   }
   for (unsigned int i = 0; i < cps.size(); i++) {
-    for (set<double *>::iterator it = cps[i].begin(); 
+    for (set<double *>::iterator it = cps[i].begin();
         it != cps[i].end(); it++) {
       Point p;
       p.x = (*it)[2] * cos( (*it)[1] ) * sin( (*it)[0] );
@@ -707,14 +707,14 @@ int Hough::deletePointsQuad(double * n, double rho) {
 
   ConvexPlane * plane1 = new ConvexPlane(n4, planePoints);
   planes.push_back(plane1);
-	
+
 
   for (int i = 0; i < nr_points; i++) {
     delete[] pppoints[i];
   }
   delete[] pppoints;
   return max_points;
-  
+
   // ENDE
 }
 
@@ -733,37 +733,37 @@ int Hough::deletePoints(double * n, double rho) {
   vector<Point> *nallPoints = new vector<Point>();
 
   vector<Point> planePoints;
-  
+
   Point p;
   vector<Point>::iterator itr = allPoints->begin();
- 
+
   while(itr != allPoints->end()) {
     p = *(itr);
     // if point close to plane, delete it
     double distance = p.x * n[0] + p.y * n[1] + p.z*n[2] - rho;
     if( fabs(distance) < myConfigFileHough.Get_MaxPointPlaneDist()) {
-   
+
       planePoints.push_back(p);
 
-    } 
+    }
    itr++;
   }
   double n2[4];
   // calculating the best fit plane
   double D = calcPlane(planePoints, n2);
-  
+
   bool nocluster = false;
-  
+
   if(D > myConfigFileHough.Get_MinPlanarity()) {
     nocluster = true;
-  } 
-  
+  }
+
   if(fabs(n2[0]) < fabs(n2[1])) {
     if(fabs(n2[1]) < fabs(n2[2])) {
       direction = 'z';
     } else {
       direction = 'y';
-    } 
+    }
   } else if (fabs(n2[2]) < fabs(n2[0])){
     direction = 'x';
   } else {
@@ -771,8 +771,8 @@ int Hough::deletePoints(double * n, double rho) {
   }
 
   itr = allPoints->begin();
-  planePoints.clear();  
- 
+  planePoints.clear();
+
   vPtPair planePairs;
   double minx, maxx, miny, maxy;
   minx = 1000000;
@@ -784,7 +784,7 @@ int Hough::deletePoints(double * n, double rho) {
     // if point close to plane, delete it
     double distance = p.x * n2[0] + p.y * n2[1] + p.z*n2[2] - n2[3];
     if( fabs(distance) < myConfigFileHough.Get_MaxPointPlaneDist()) {
-   
+
       Point tmp, p2;
       double distance = p.x * n2[0] + p.y * n2[1] + p.z*n2[2] - n2[3];
       tmp.x = p.x - distance * n2[0];
@@ -793,22 +793,22 @@ int Hough::deletePoints(double * n, double rho) {
       switch(direction) {
         case 'x': p2.x = tmp.y;
                   p2.y = tmp.z;
-                  break; 
+                  break;
         case 'y': p2.x = tmp.x;
                   p2.y = tmp.z;
                   break;
         case 'z': p2.x = tmp.x;
-                  p2.y = tmp.y; 
+                  p2.y = tmp.y;
                   break;
         default: cout << "OHOH" << endl;
       }
       p2.z = -1;
-      if(p2.x < minx) minx = p2.x; 
-      if(p2.y < miny) miny = p2.y; 
-      if(p2.x > maxx) maxx = p2.x; 
-      if(p2.y > maxy) maxy = p2.y; 
+      if(p2.x < minx) minx = p2.x;
+      if(p2.y < miny) miny = p2.y;
+      if(p2.x > maxx) maxx = p2.x;
+      if(p2.y > maxy) maxy = p2.y;
       PtPair myPair(p,p2);
-      
+
       planePairs.push_back(myPair);
 
     } else {
@@ -825,11 +825,11 @@ int Hough::deletePoints(double * n, double rho) {
   }
   // delete points from this list
   list< double*> point_list;
-  
-  vPtPair::iterator vitr;  
+
+  vPtPair::iterator vitr;
   vector<Point> tmp_points;
   for(vitr = planePairs.begin(); vitr != planePairs.end(); vitr++) {
-    
+
   // Case distinction x-z or x-y or y-z
     p = (*vitr).p1;
     Point p2 = (*vitr).p2;
@@ -844,14 +844,14 @@ int Hough::deletePoints(double * n, double rho) {
     }
   }
   D = calcPlane(tmp_points, n2);
-  
+
   nocluster = false;
-  
+
   if(D > myConfigFileHough.Get_MinPlanarity()) {
     nocluster = true;
   }
   unsigned int maxPlane = point_list.size();
-  
+
   // color points
   unsigned char rgb[3];
   for(int x = 0; x < 3; x++) {
@@ -863,7 +863,7 @@ int Hough::deletePoints(double * n, double rho) {
         p.rgb[0] = 0;
         p.rgb[1] = 0;
         p.rgb[2] = 0;
-      } else { 
+      } else {
         p.rgb[0] = rgb[0];
         p.rgb[1] = rgb[1];
         p.rgb[2] = rgb[2];
@@ -886,7 +886,7 @@ int Hough::deletePoints(double * n, double rho) {
   // If plane ok, calculate convex hull
   vector<double *> convex_hull;
   ConvexPlane::JarvisMarchConvexHull(point_list,convex_hull);
-  
+
   for(list<double* >::iterator it = point_list.begin();
       it != point_list.end(); ) {
       double* tmp = (*it);
@@ -894,14 +894,14 @@ int Hough::deletePoints(double * n, double rho) {
       delete[] tmp;
   }
   point_list.clear();
-  
+
   if(nocluster) {
     for(vector<double* >::iterator it = convex_hull.begin();
       it != convex_hull.end(); it++) {
       double* tmp = (*it);
       delete[] tmp;
-    } 
-    return maxPlane; 
+    }
+    return maxPlane;
   }
 
   ConvexPlane * plane1 = new ConvexPlane(n2, n2[3], direction, convex_hull);
@@ -922,7 +922,7 @@ int Hough::cluster(vPtPair &pairs, double minx, double maxx, double miny, double
   vector<set<int> > linked;
   double factor = myConfigFileHough.Get_PointDist();
   int xlength = 1 + (maxx - minx) / factor;
-  int ylength = 1 + (maxy - miny) / factor; 
+  int ylength = 1 + (maxy - miny) / factor;
 
   vector< vector<int> > colors;
 
@@ -934,7 +934,7 @@ int Hough::cluster(vPtPair &pairs, double minx, double maxx, double miny, double
     }
     delete tmp;
   }
- 
+
   //int colors[ylength][xlength];
   vector< vector<bool> > points;
   for(int i = 0; i < ylength; i++) {
@@ -947,11 +947,11 @@ int Hough::cluster(vPtPair &pairs, double minx, double maxx, double miny, double
   }
 
   int region = 0;
-  
+
   for(vitr = pairs.begin(); vitr != pairs.end(); vitr++) {
-    int x = (int)(((*vitr).p2.x - minx)  / (maxx - minx) * xlength - 0.5);   
-    int y = (int)(((*vitr).p2.y - miny)  / (maxy - miny) * ylength - 0.5);   
-    points[y][x] = true; 
+    int x = (int)(((*vitr).p2.x - minx)  / (maxx - minx) * xlength - 0.5);
+    int y = (int)(((*vitr).p2.y - miny)  / (maxy - miny) * ylength - 0.5);
+    points[y][x] = true;
   }
   int up, left;
   for(int y = 0; y < ylength; y++) {
@@ -994,7 +994,7 @@ int Hough::cluster(vPtPair &pairs, double minx, double maxx, double miny, double
                   set<int> newjoined;
                   insert_iterator<set<int> > res_ins(newjoined, newjoined.begin());
 
-                  set_union(joined.begin(), joined.end(), current.begin(), current.end(), res_ins); 
+                  set_union(joined.begin(), joined.end(), current.begin(), current.end(), res_ins);
                   joined.clear();
                  // delete joined;
                   joined = newjoined;
@@ -1005,9 +1005,9 @@ int Hough::cluster(vPtPair &pairs, double minx, double maxx, double miny, double
               }
               linked.push_back(joined);
             }
-          
+
         }
-        
+
       }
     }
   }
@@ -1024,7 +1024,7 @@ int Hough::cluster(vPtPair &pairs, double minx, double maxx, double miny, double
   int *linkedindex = new int[linked.size()];
   for(unsigned int i = 0; i < linked.size(); i++) {
     linkedindex[i] = 0;
-  }  
+  }
   set<int> current;
   for(unsigned int i = 0; i < linked.size(); i++) {
     current = linked[i];
@@ -1032,7 +1032,7 @@ int Hough::cluster(vPtPair &pairs, double minx, double maxx, double miny, double
       linkedindex[i] += counter[(*it)];
     }
   }
-  
+
   delete[] counter;
 
   int maxindex = 0;
@@ -1041,27 +1041,27 @@ int Hough::cluster(vPtPair &pairs, double minx, double maxx, double miny, double
       maxindex = i;
     }
   }
- 
+
   delete[] linkedindex;
   set<int> max = linked[maxindex];
   int zaehler = 0;
   for(vitr = pairs.begin(); vitr != pairs.end(); vitr++) {
-    int x = (int)(((*vitr).p2.x - minx) / (maxx - minx) * xlength - 0.5);   
-    int y = (int)(((*vitr).p2.y - miny) / (maxy - miny) * ylength - 0.5);   
+    int x = (int)(((*vitr).p2.x - minx) / (maxx - minx) * xlength - 0.5);
+    int y = (int)(((*vitr).p2.y - miny) / (maxy - miny) * ylength - 0.5);
     if(max.find(colors[y][x]) != max.end()) {
       (*vitr).p2.z = maxindex;
       zaehler++;
     } else {
       (*vitr).p2.z = -1;
-    } 
+    }
   }
-  
-   
-  /*            
+
+
+  /*
   for(vector<set<int> >::iterator itr = linked.begin(); itr != linked.end(); ) {
     set<>current = (*itr);
                 if(current.find(up) != current.end() || current.find(left) != current.end()) {
-  */  
+  */
   return maxindex;
 }
 
@@ -1080,13 +1080,13 @@ int Hough::writePlanes(int startCount) {
   int success = mkdir(blub.c_str(), S_IRWXU|S_IRWXG|S_IRWXO);
 #endif
 
-  if(success != 0 && errno != EEXIST) { 
+  if(success != 0 && errno != EEXIST) {
     cerr << "Creating directory " << blub << " failed" << endl;
     return -1;
   }
-  
+
   if(!quiet) cout << "Writing " << planes.size() << " Planes to " << blub << endl;
-  
+
   ofstream out;
   string blub3 = blub + "/planes.list";
   out.open(blub3.c_str());
@@ -1106,13 +1106,13 @@ int Hough::writePlanes(int startCount) {
 /**
   * Writes the convex hull of each detected plane to a file.
   */
-void Hough::writePlanes(std::string filePrefix) 
+void Hough::writePlanes(std::string filePrefix)
 {
   int counter = 0;
-  
+
   if (!quiet) std::cout << "There are " << planes.size() << " planes." << std::endl;
-    
-  for(vector<ConvexPlane*>::iterator it = planes.begin(); it != planes.end(); it++) 
+
+  for(vector<ConvexPlane*>::iterator it = planes.begin(); it != planes.end(); it++)
   {
     std::stringstream ss;
     ss << filePrefix << "_" << counter << ".txt";
@@ -1133,14 +1133,14 @@ void Hough::writePlanePoints(string filename) {
 
   Point p;
   vector<Point>::iterator itr = coloredPoints.begin();
- 
+
   while(itr != coloredPoints.end()) {
     p = *(itr);
     out << p.x << " " << p.y << " " << p.z << " " << (int)p.rgb[0] << " " << (int)(p.rgb[1]) << " " << (int)(p.rgb[2]) << endl;
     itr++;
   }
   itr = allPoints->begin();
-  
+
   while(itr != allPoints->end()) {
     p = *(itr);
     out << p.x << " " << p.y << " " << p.z << " " << 255 << " " << 255 << " " << 255 << endl;
@@ -1163,11 +1163,11 @@ void Hough::writeAllPoints(int index, vector<Point> points) {
   int success = mkdir(blub.c_str(), S_IRWXU|S_IRWXG|S_IRWXO);
 #endif
 
-  if(success != 0 && errno != EEXIST) { 
+  if(success != 0 && errno != EEXIST) {
     cerr << "Creating directory " << blub << " failed" << endl;
     return;
   }
-  
+
   blub = blub + "/scan" + to_string(index,3) + ".3d";
 
   ofstream out;
@@ -1175,7 +1175,7 @@ void Hough::writeAllPoints(int index, vector<Point> points) {
 
   Point p;
   vector<Point>::iterator itr = points.begin();
-  
+
   while(itr != points.end()) {
     p = *(itr);
     out << p.x << " " << p.y << " " << p.z << " " << (int)p.rgb[0] << " " << (int)(p.rgb[1]) << " " << (int)(p.rgb[2]) << endl;
@@ -1210,7 +1210,7 @@ double calcPlane(vector<Point> &ppoints, double plane[4]) {
   cx /= n;
   cy /= n;
   cz /= n;
-       
+
   for (int i = 0; i < n; i++) {
     Point p = ppoints[i];
     A(1, 1) += (p.x - cx)*(p.x - cx);
@@ -1236,12 +1236,12 @@ double calcPlane(vector<Point> &ppoints, double plane[4]) {
      */
   int index;
   D.MinimumAbsoluteValue1(index);
-     
+
   plane[0] = V(1,index);
   plane[1] = V(2,index);
   plane[2] = V(3,index);
   plane[3] = plane[0]*cx + plane[1]*cy + plane[2]*cz;
-  
+
   double sum = 0.0;
   for(int i = 1; i < 4; i++) {
     sum += D(i);

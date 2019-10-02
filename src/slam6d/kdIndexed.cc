@@ -7,7 +7,7 @@
  *
  */
 
-/** @file 
+/** @file
  *  @brief An optimized k-d tree implementation
  *  @author Remus Dumitru. Jacobs University Bremen, Germany
  *  @author Corneliu-Claudiu Prodescu. Jacobs University Bremen, Germany
@@ -98,7 +98,7 @@ std::vector<size_t> KDtreeIndexed::kNearestNeighbors(double *_p,
                                         int _k,
                                         int threadNum) const
 {
-  std::vector<size_t> result;    
+  std::vector<size_t> result;
   params[threadNum].closest = 0;
   params[threadNum].p = _p;
   params[threadNum].k = _k;
@@ -119,13 +119,13 @@ std::vector<size_t> KDtreeIndexed::kNearestNeighbors(double *_p,
       params[threadNum].distances[i] = -1.0;
   }
   _KNNSearch(m_data, threadNum);
-  
+
   for (int i = 0; i < _k; i++) {
     if (params[threadNum].distances[i] >= 0.0f) {
     result.push_back(params[threadNum].closest_neighbors[i]);
     }
   }
-  
+
   free (params[threadNum].closest_neighbors);
   free (params[threadNum].distances);
 
@@ -149,16 +149,16 @@ std::vector<size_t> KDtreeIndexed::fixedRangeSearchBetween2Points(double *_p,
   }
 
   Normalize3(_dir);
-  
+
   params[threadNum].dir = _dir;
   params[threadNum].range_neighbors.clear();
 
   _fixedRangeSearchBetween2Points(m_data, threadNum);
-  
+
   for (size_t i = 0; i < params[threadNum].range_neighbors.size(); i++) {
     result.push_back(params[threadNum].range_neighbors[i]);
   }
-  
+
   delete[] _dir;
   return result;
 }
@@ -176,11 +176,11 @@ std::vector<size_t> KDtreeIndexed::fixedRangeSearchAlongDir(double *_p,
   params[threadNum].range_neighbors.clear();
 
   _fixedRangeSearchAlongDir(m_data, threadNum);
-  
+
   for (size_t i = 0; i < params[threadNum].range_neighbors.size(); i++) {
     result.push_back(params[threadNum].range_neighbors[i]);
   }
-  
+
   return result;
 }
 
@@ -194,11 +194,11 @@ std::vector<size_t> KDtreeIndexed::fixedRangeSearch(double *_p,
   params[threadNum].p = _p;
   params[threadNum].range_neighbors.clear();
   _FixedRangeSearch(m_data, threadNum);
-  
+
   for (size_t i = 0; i < params[threadNum].range_neighbors.size(); i++) {
     result.push_back(params[threadNum].range_neighbors[i]);
   }
-  
+
   return result;
 }
 

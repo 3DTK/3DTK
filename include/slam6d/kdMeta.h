@@ -1,4 +1,4 @@
-/** @file 
+/** @file
  *  @brief Representation of the optimized k-d tree. MetaScan variant.
  *  @author Andreas Nuechter. Institute of Computer Science, University of Osnabrueck, Germany.
  *  @author Kai Lingemann. Institute of Computer Science, University of Osnabrueck, Germany.
@@ -17,7 +17,7 @@
 #include <boost/thread/locks.hpp>
 
 #ifdef _MSC_VER
-#if !defined _OPENMP && defined OPENMP 
+#if !defined _OPENMP && defined OPENMP
 #define _OPENMP
 #endif
 #endif
@@ -43,20 +43,20 @@ struct IndexAccessor {
 };
 
 /**
- * @brief The optimized k-d tree. 
- * 
+ * @brief The optimized k-d tree.
+ *
  * A kD tree for points, with limited
  * capabilities (find nearest point to
  * a given point, or to a ray).
  **/
-class KDtreeMetaManaged : 
+class KDtreeMetaManaged :
     public SearchTree,
     private KDTreeImpl<const DataXYZ* const*, Index, IndexAccessor, double*, IndexAccessor>
 {
 public:
   KDtreeMetaManaged(const std::vector<Scan*>& scans);
   virtual ~KDtreeMetaManaged();
-  
+
   virtual void lock();
   virtual void unlock();
 

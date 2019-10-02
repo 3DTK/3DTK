@@ -26,7 +26,7 @@ using std::ofstream;
 
 #if WIN32
 #define snprintf sprintf_s
-#endif 
+#endif
 
 #include <boost/program_options.hpp>
 namespace po = boost::program_options;
@@ -90,8 +90,8 @@ int main(int argc, char **argv)
   int start = 0, end = -1;
   string dir;
   parse_options(argc, argv, dir, start, end);
-  
-  int fileCounter = start; 
+
+  int fileCounter = start;
   char rieglFileName[255];
   char poseFileName[255];
   char frameFileName[255];
@@ -99,14 +99,14 @@ int main(int argc, char **argv)
   ifstream riegl_in;
   ofstream pose_out;
   ofstream frames_out;
-  
-  for(;;) { 
+
+  for(;;) {
     if (end > -1 && fileCounter > end) break; // 'nuf read
 
     snprintf(rieglFileName,255,"%sscan%.3d.dat",dir.c_str(),fileCounter);
     snprintf(frameFileName,255,"%sscan%.3d.frames",dir.c_str(),fileCounter);
     snprintf(poseFileName,255,"%sscan%.3d.pose",dir.c_str(),fileCounter++);
-    
+
     riegl_in.open(rieglFileName);
     // read pose
 
@@ -114,13 +114,13 @@ int main(int argc, char **argv)
 
     cout << "Processing Scan " << rieglFileName;
     cout.flush();
-  
+
     double rPos[3], rPosTheta[16];
     double inMatrix[16], tMatrix[16];
     for (unsigned int i = 0; i < 16; riegl_in >> inMatrix[i++]);
- 
+
     riegl_in.close();
- 
+
     // transform input pose
     tMatrix[0] = inMatrix[5];
     tMatrix[1] = -inMatrix[9];
@@ -138,11 +138,11 @@ int main(int argc, char **argv)
     tMatrix[13] = 100*inMatrix[11];
     tMatrix[14] = 100*inMatrix[3];
     tMatrix[15] = inMatrix[15];
- 
+
     Matrix4ToEuler(tMatrix, rPosTheta, rPos);
-    
+
     double euler[6];
-     
+
     euler[0] = rPos[0];
     euler[1] = rPos[1];
     euler[2] = rPos[2];
@@ -158,29 +158,29 @@ int main(int argc, char **argv)
     for(int i = 0; i < 3; i++) {
       pose_out << euler[i] << " ";
     }
-    pose_out << endl; 
+    pose_out << endl;
 
     for(int i = 3; i < 6; i++) {
       pose_out << deg(euler[i]) << " ";
     }
-    pose_out << endl; 
+    pose_out << endl;
 
     cout << "Writing frames... " << poseFileName << endl;
-  
+
     for(int j = 0; j < 2; j++) {
       for (int i=0; i < 16; i++) {
         frames_out << tMatrix[i] << " ";
       }
       frames_out << "2" << endl;
     }
-    
+
     pose_out.close();
     pose_out.clear();
 
     frames_out.close();
     frames_out.clear();
 
-    
+
     cout << " done." << endl;
   }
 

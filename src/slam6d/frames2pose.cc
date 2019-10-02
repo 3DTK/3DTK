@@ -79,7 +79,7 @@ int parse_options(int argc,char **argv, std::string &dir, int& start, int& end){
 #endif
   return 0;
 }
- 
+
 
 int main(int argc, char **argv)
 {
@@ -95,7 +95,7 @@ int main(int argc, char **argv)
   ofstream pose_out;
 
   double rPos[3],rPosTheta[3];
-  
+
   double tMatrix[17];
 
   for (;;) {
@@ -109,35 +109,35 @@ int main(int argc, char **argv)
     // read 3D scan
 
     cout << "Reading frame " << frameFileName << "..." << endl;
-    
+
     while(pose_in.good()) {
       for (unsigned int i = 0; i < 17; pose_in >> tMatrix[i++]);
     }
-    
+
     Matrix4ToEuler(tMatrix, rPosTheta, rPos);
-    
-    
+
+
     pose_in.close();
     pose_in.clear();
 
     pose_out.open(poseFileName);
 
     cout << "Writing pose file... " << poseFileName << endl;
-    
+
     for(int i = 0; i < 3; i++) {
       pose_out << rPos[i] << " ";
     }
-    pose_out << endl; 
+    pose_out << endl;
 
     for(int i = 0; i < 3; i++) {
       pose_out << deg(rPosTheta[i]) << " ";
     }
-    pose_out << endl; 
+    pose_out << endl;
 
     pose_out.close();
     pose_out.clear();
 
-    
+
     cout << " done." << endl;
   }
 

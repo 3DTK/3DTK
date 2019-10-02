@@ -1,5 +1,5 @@
 /**
- * @file 
+ * @file
  * @brief Representation of an octree for show
  * @author Jan Elseberg. Jacobs University Bremen gGmbH, Germany
  * @author Andreas Nuechter. Jacobs University Bremen gGmbH, Germany
@@ -19,7 +19,7 @@ using namespace show;
 
 /**
  * @brief Octree for show
- * 
+ *
  * A cubic bounding box is calculated
  * from the given 3D points. Then it
  * is recusivly subdivided into smaller
@@ -32,7 +32,7 @@ class Show_BOctTree : public colordisplay
 {
 protected:
   BOctTree<T>* m_tree;
-  
+
   unsigned long maxtargetpoints;
 
   unsigned int current_lod_mode;
@@ -58,7 +58,7 @@ protected:
     m_cache_access = 0;
     m_scan = 0;
   }
-  
+
 public:
   //return the scm
   ScanColorManager* getScanColorManager()
@@ -97,22 +97,22 @@ public:
   {
     init(scm);
   }
-  
+
   //! Create tree by points
   template <class P>
   Show_BOctTree(P * const* pts, int n, T voxelSize, PointType pointtype = PointType(), ScanColorManager *scm = 0)
-  { 
+  {
     m_tree = new BOctTree<T>(pts, n, voxelSize, pointtype, true);
     init(scm);
   }
-  
+
   //! Create tree by deserializing from file
   Show_BOctTree(std::string filename, ScanColorManager *scm = 0)
   {
     m_tree = new BOctTree<T>(filename);
     init(scm);
   }
-  
+
   virtual ~Show_BOctTree() {
     // only delete cache access if created via this method
     if(m_cache_access) {
@@ -122,7 +122,7 @@ public:
     if(!m_scan)
       delete m_tree;
   }
-  
+
   int pow(int base, int exponent) {
     if (exponent == 0)
         return 1;
@@ -133,21 +133,21 @@ public:
         return base * pow(base, exponent - 1);
   }
   BOctTree<T>* getTree() const { return m_tree; }
-  
+
   void serialize(const std::string& filename) const { m_tree->serialize(filename); }
-  
+
   unsigned int getMemorySize() const { return m_tree->getMemorySize(); }
-  
+
   // virtual functions from colordisplay
 
   void selectRayBrushSize(std::set<T *> &points, int brushsize) {
     selectRayBS(points, m_tree->getRoot(), m_tree->getCenter(), m_tree->getSize(), brushsize);
   }
-  
+
   void selectRay(std::set<T *> &points, int depth = INT_MAX) {
     selectRay(points, m_tree->getRoot(), m_tree->getCenter(), m_tree->getSize(), depth);
   }
-  
+
   void selectRay(T * &point) {
     selectRay(point, m_tree->getRoot(), m_tree->getCenter(), m_tree->getSize(), FLT_MAX);
   }
@@ -187,14 +187,14 @@ public:
         break;
     }
   }
-  
+
   void draw() {
     glBegin(GL_POINTS);
     displayOctTreeAllCulled(m_tree->getRoot(), m_tree->getCenter(), m_tree->getSize());
     glEnd();
   }
-  
-  // these are needed on windows so that show can be used as a library 
+
+  // these are needed on windows so that show can be used as a library
   // we need to call the ExtractFrustum in a same process as the draw function on windows
   void extractFrustumAndDrawLOD(float ratio, short detail)
   {
@@ -211,9 +211,9 @@ public:
   void getCenter(double _center[3]) const {
     m_tree->getCenter(_center);
   }
-  
+
 protected:
-  
+
   //! ?
   unsigned long maxTargetPoints(const bitoct &node) {
     bitunion<T> *children;
@@ -297,7 +297,7 @@ protected:
       }
     }
   }
-  
+
   void displayOctTreeLOD2(float ratio, const bitoct &node, const T* center, T size ) {
 
     T ccenter[3];
@@ -325,7 +325,7 @@ protected:
                 if(cm) cm->setColor(p);
                 glVertex3f( p[0], p[1], p[2]);
               }
-            } else if ((int)length <= l) { 
+            } else if ((int)length <= l) {
               for(unsigned int iterator = 0; iterator < length; iterator++ ) {
                 if(cm) cm->setColor(point);
                 glVertex3f( point[0], point[1], point[2]);
@@ -350,7 +350,7 @@ protected:
       }
     }
   }
-  
+
   void displayOctTreeCulledLOD2(float ratio, const bitoct &node, const T* center, T size ) {
 
     int res = CubeInFrustum2(center[0], center[1], center[2], size);
@@ -388,7 +388,7 @@ protected:
                   if(cm) cm->setColor(p);
                   glVertex3f( p[0], p[1], p[2]);
                 }
-              } else if ((int)length <= l) { 
+              } else if ((int)length <= l) {
                 for(unsigned int iterator = 0; iterator < length; iterator++ ) {
                   if(cm) cm->setColor(point);
                   glVertex3f( point[0], point[1], point[2]);
@@ -398,7 +398,7 @@ protected:
                 if(cm) cm->setColor(point);
                 glVertex3f( point[0], point[1], point[2]);
               }
-            } 
+            }
           }
         } else { // recurse
           //int l = LOD2(ccenter[0], ccenter[1], ccenter[2], size/2.0);  // only a single pixel on screen only paint one point
@@ -411,7 +411,7 @@ protected:
       }
     }
   }
-  
+
   void displayOctTreeLOD3(long targetpts, const bitoct &node, const T* center, T size ) {
     if (targetpts <= 0) return; // no need to display anything
 
@@ -427,11 +427,11 @@ protected:
           unsigned int length = points[0].length;
           T *point = &(points[1].v);  // first point
           int l = LOD2(ccenter[0], ccenter[1], ccenter[2], size/2.0);  // only a single pixel on screen only paint one point
-          
+
           if ( l <= targetpts) {  // only a single pixel on screen only paint one point
             if(cm) cm->setColor(point);
             glVertex3f( point[0], point[1], point[2]);
-          } else { 
+          } else {
             for(unsigned int iterator = 0; iterator < length; iterator++ ) {
               if(cm) cm->setColor(point);
               glVertex3f( point[0], point[1], point[2]);
@@ -445,7 +445,7 @@ protected:
       }
     }
   }
-  
+
   void displayOctTreeCulledLOD3(long targetpts, const bitoct &node, const T* center, T size ) {
     if (targetpts <= 0) return; // no need to display anything
 
@@ -461,12 +461,12 @@ protected:
     bitunion<T> *children;
     bitoct::getChildren(node, children);
 
-    
+
     for (short i = 0; i < 8; i++) {
       if (  ( 1 << i ) & node.valid ) {   // if ith node exists
         BOctTree<T>::childcenter(center, ccenter, size, i);  // childrens center
         //l = std::min( max((int)(l*l*ratio), 1), targetpts);
-        
+
         if (  ( 1 << i ) & node.leaf ) {   // if ith node is leaf get center
           // check if leaf is visible
           if ( CubeInFrustum(ccenter[0], ccenter[1], ccenter[2], size/2.0) ) {
@@ -479,7 +479,7 @@ protected:
             if ( l <= targetpts) {  // only a single pixel on screen only paint one point
               if(cm) cm->setColor(point);
               glVertex3f( point[0], point[1], point[2]);
-            } else { 
+            } else {
               for(unsigned int iterator = 0; iterator < length; iterator++ ) {
                 if(cm) cm->setColor(point);
                 glVertex3f( point[0], point[1], point[2]);
@@ -659,7 +659,7 @@ protected:
             unsigned int length = points[0].length;
             T *point = &(points[1].v);  // first point
             for(unsigned int iterator = 0; iterator < length; iterator++ ) {
-              if (ScreenDist(point) < brushsize && RayDist(point) > 100.0) 
+              if (ScreenDist(point) < brushsize && RayDist(point) > 100.0)
                 selpoints.insert(point);
               point+=POINTDIM;
             }
@@ -704,7 +704,7 @@ protected:
       }
     }
   }
-  
+
   void displayOctTreeCAllCulled(const bitoct &node, const T* center, T size, T minsize ) {
     int res = CubeInFrustum2(center[0], center[1], center[2], size);
     if (res==0) return;  // culled do not continue with this branch of the tree
@@ -733,7 +733,7 @@ protected:
       }
     }
   }
-  
+
   void displayOctTreeCAll(const bitoct &node, const T* center, T size, T minsize ) {
     T ccenter[3];
     bitunion<T> *children;
@@ -751,8 +751,8 @@ protected:
       }
     }
   }
-  
-  
+
+
   void displayOctTreeCPAllCulled(const bitoct &node, const T* center, T size, T minsize ) {
     int res = CubeInFrustum2(center[0], center[1], center[2], size);
     if (res==0) return;  // culled do not continue with this branch of the tree
@@ -772,15 +772,15 @@ protected:
         if ( minsize > size ) {
           if ( CubeInFrustum(ccenter[0], ccenter[1], ccenter[2], size/2.0) ) {
             if(cm) {
-              if (( 1 << i ) & node.leaf ) 
+              if (( 1 << i ) & node.leaf )
                 cm->setColor( &(children->getPoints()[1]) );
-              else 
+              else
                 cm->setColor( m_tree->pickPoint(children->node) );
             }
 
             glPointSize(size/2.0);
             glBegin(GL_POINTS);
-            glVertex3f( ccenter[0], ccenter[1], ccenter[2] ); 
+            glVertex3f( ccenter[0], ccenter[1], ccenter[2] );
             glEnd();
           }
         }else if ( ( 1 << i ) & node.leaf ) {
@@ -804,7 +804,7 @@ protected:
       }
     }
   }
-  
+
   void displayOctTreeCPAll(const bitoct &node, const T* center, T size, T minsize ) {
     T ccenter[3];
     bitunion<T> *children;
@@ -817,15 +817,15 @@ protected:
           // check if leaf is visible
           if ( CubeInFrustum(ccenter[0], ccenter[1], ccenter[2], size/2.0) ) {
             if(cm) {
-              if (( 1 << i ) & node.leaf ) 
+              if (( 1 << i ) & node.leaf )
                 cm->setColor( &(children->getPoints()[1]) );
-              else 
+              else
                 cm->setColor( m_tree->pickPoint(children->node) );
             }
 
             glPointSize(size/2.0);
             glBegin(GL_POINTS);
-            glVertex3f( ccenter[0], ccenter[1], ccenter[2] ); 
+            glVertex3f( ccenter[0], ccenter[1], ccenter[2] );
             glEnd();
           }
         }else if ( ( 1 << i ) & node.leaf ) {
@@ -858,39 +858,39 @@ protected:
     glVertex3f(center[0] + size, center[1] + size, center[2] + size);
     glColor3f(1.0f,0.5f,0.0f);      // Set The Color To Orange
 
-    glVertex3f(center[0] + size, center[1] - size, center[2] + size); 
+    glVertex3f(center[0] + size, center[1] - size, center[2] + size);
     glVertex3f(center[0] - size, center[1] - size, center[2] + size);
     glVertex3f(center[0] - size, center[1] - size, center[2] - size);
     glVertex3f(center[0] + size, center[1] - size, center[2] - size);
 
     glColor3f(1.0f,0.0f,0.0f);      // Set The Color To Red
-    glVertex3f(center[0] + size, center[1] + size, center[2] + size); 
+    glVertex3f(center[0] + size, center[1] + size, center[2] + size);
     glVertex3f(center[0] - size, center[1] + size, center[2] + size);
     glVertex3f(center[0] - size, center[1] - size, center[2] + size);
     glVertex3f(center[0] + size, center[1] - size, center[2] + size);
 
     glColor3f(1.0f,1.0f,0.0f);      // Set The Color To Yellow
-    glVertex3f(center[0] + size, center[1] - size, center[2] - size); 
+    glVertex3f(center[0] + size, center[1] - size, center[2] - size);
     glVertex3f(center[0] - size, center[1] - size, center[2] - size);
     glVertex3f(center[0] - size, center[1] + size, center[2] - size);
     glVertex3f(center[0] + size, center[1] + size, center[2] - size);
 
     glColor3f(0.0f,0.0f,1.0f);      // Set The Color To Blue
-    glVertex3f(center[0] - size, center[1] + size, center[2] + size); 
+    glVertex3f(center[0] - size, center[1] + size, center[2] + size);
     glVertex3f(center[0] - size, center[1] + size, center[2] - size);
     glVertex3f(center[0] - size, center[1] - size, center[2] - size);
     glVertex3f(center[0] - size, center[1] - size, center[2] + size);
 
     glColor3f(1.0f,0.0f,1.0f);      // Set The Color To Violet
-    glVertex3f(center[0] + size, center[1] + size, center[2] - size); 
+    glVertex3f(center[0] + size, center[1] + size, center[2] - size);
     glVertex3f(center[0] + size, center[1] + size, center[2] + size);
     glVertex3f(center[0] + size, center[1] - size, center[2] + size);
     glVertex3f(center[0] + size, center[1] - size, center[2] - size);
 
     glEnd();
   }
-  
-  
+
+
   void displayOctTreeAllCulled(const bitoct &node, const T* center, T size, float *frustum[6], unsigned char frustsize ) {
     float *new_frustum[6]; unsigned char counter = 0;
     for (unsigned char p = 0; p < frustsize; p++ ) {
@@ -905,7 +905,7 @@ protected:
       displayOctTreeAll(node);
       return;
     }
-    
+
     T ccenter[3];
     bitunion<T> *children;
     bitoct::getChildren(node, children);
@@ -951,10 +951,10 @@ protected:
           }
         } else { // recurse
           result += countVisiblePoints( children->node, ccenter, size/2.0);
-        }   
+        }
         ++children; // next child
       }
-    }         
+    }
     return result;
   }
 };

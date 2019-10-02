@@ -16,7 +16,7 @@ class elch6Dquat : public elch6D {
      : elch6D(_quiet, my_icp6Dminimizer, mdm, max_num_iterations, rnd, eP, anim, epsilonICP, nns_method) {}
 
     virtual void close_loop(const vector <Scan *> &allScans, int first, int last, graph_t &g);
-    
+
 };
 
 #endif

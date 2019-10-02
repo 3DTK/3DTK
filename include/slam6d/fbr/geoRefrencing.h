@@ -22,27 +22,27 @@ namespace fbr{
     double bestAlign[16];
     unsigned int maxInlier;
     float minError;
-  
+
   private:
-    
+
     /**
      * findAlign : find the best align
      * @param localPoints vetor that contains the selected points of the scan with local coordinate
      * @param geoPoints vector that contains the selected points of the scan with world coordinate
      */
     int findAlign(unsigned int i, unsigned int j, unsigned int k, std::vector< std::vector< float > > localPoints, std::vector< std::vector< float > > geoPoints);
-    
-    
+
+
   public:
     geoRefrencing(float _minError);
-    
+
     /**
      * findRegistration : find the transformation matrix between the scan and world coordinate
      * @param localPoints vetor that contains the selected points of the scan with local coordinate
      * @param geoPoints vector that contains the selected points of the scan with world coordinate
      */
     void findRegistration(std::vector< std::vector< float > > localPoints, std::vector< std::vector< float > > geoPoints);
-    
+
 
     double * getBestAlign();
     std::vector<double> getBestAlignVector();

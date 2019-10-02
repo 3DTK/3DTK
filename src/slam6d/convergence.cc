@@ -37,7 +37,7 @@ void usage(char* prog)
   const std::string bold("");
   const std::string normal("");
 #endif
-  
+
   std::cout << std::endl
 	  << "Usage: " << prog << " [-s NR] filepath, [-z NR] convergence type" << std::endl << std::endl;
 
@@ -59,7 +59,7 @@ void usage(char* prog)
  * @param dir parsing result - the directory
  * @param start parsing result - starting at scan number 'start'
  * @param type parsing result - the type of convergence that should be stored (lokal, global)
- * @return 0, if the parsing was successful, 1 otherwise 
+ * @return 0, if the parsing was successful, 1 otherwise
  */
 int parseArgs(int argc,char **argv, std::string &dir, int &frame, int &type)
 {
@@ -94,7 +94,7 @@ int parseArgs(int argc,char **argv, std::string &dir, int &frame, int &type)
     usage(argv[0]);
   }
   dir = argv[optind];
-  
+
 #ifndef _MSC_VER
   if (dir[dir.length()-1] != '/') dir = dir + "/";
 #else
@@ -120,7 +120,7 @@ void getLocalConvergence(std::ifstream *inputFile, std::ofstream *outputFile)
         (*outputFile)<<rPos[0]<<" "<<rPos[1]<<" "<<rPos[2]<<std::endl;
       }
     }
-    catch (const std::exception &e) {   
+    catch (const std::exception &e) {
       break;
     }
   }
@@ -159,7 +159,7 @@ void getAllConvergence(std::ifstream *inputFile, std::ofstream *outputFile, int 
       }
       //(*outputFile) << sqrt(Dist2(rPosOrg, rPos))/100.0 << " " << quat_dist(quatOrg, quat) << " " << type << endl;
     }
-    catch (const std::exception &e) {   
+    catch (const std::exception &e) {
       break;
     }
   }
@@ -181,7 +181,7 @@ void getGlobalConvergence(std::ifstream *inputFile, std::ofstream *outputFile)
         lumYetFound = true;
         Matrix4ToEuler(transMat, rPosTheta, rPos);
         (*outputFile)<<rPos[0]<<" "<<rPos[1]<<" "<<rPos[2]<<std::endl;
-      } else 
+      } else
       {
         if(lumYetFound)             //we only want to write the last lum-correction into the file
         {
@@ -191,7 +191,7 @@ void getGlobalConvergence(std::ifstream *inputFile, std::ofstream *outputFile)
         }
       }
     }
-    catch (const std::exception &e) {   
+    catch (const std::exception &e) {
       break;
     }
   }
@@ -228,7 +228,7 @@ void readFrames(std::string dir, int frameNr, int convType)
       {
         getAllConvergence(&frame_in, &xyz_out, frameNr);
       }
-    
+
     frame_in.close();
     frame_in.clear();
   }
@@ -237,7 +237,7 @@ void readFrames(std::string dir, int frameNr, int convType)
 
 //-----------------------------------------------------------------------------------
 
-			    
+
 
 /**
  * Main function.
@@ -246,7 +246,7 @@ void readFrames(std::string dir, int frameNr, int convType)
  */
 
 int main(int argc, char **argv){
-  
+
   std::cout << "(c) University of Osnabrueck, 2008" << std::endl << std::endl
 	  << "Restricted Usage" << std::endl
 	  << "Don't use without permission" << std::endl;

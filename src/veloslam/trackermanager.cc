@@ -232,7 +232,7 @@ int TrackerManager::MatchTrackers(VeloScan& scanRef,Tracker& tracker,float kg)
 					shapeDiff =fabs( fabs(tracker.statusList.back().size_x-glu.size_x) +
 									 fabs(tracker.statusList.back().size_y-glu.size_y) +
 									 fabs(tracker.statusList.back().size_z-glu.size_z) );
-					positionDiff = sqrt(   (tracker.statusList.back().avg_x -glu.avg_x)*(tracker.statusList.back().avg_x -glu.avg_x) + 
+					positionDiff = sqrt(   (tracker.statusList.back().avg_x -glu.avg_x)*(tracker.statusList.back().avg_x -glu.avg_x) +
 						                            (tracker.statusList.back().avg_z -glu.avg_z)*(tracker.statusList.back().avg_z -glu.avg_z)
 											  	) ;
 			}

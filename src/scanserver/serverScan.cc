@@ -33,12 +33,12 @@ ServerScan::ServerScan(const ip::allocator<void, SegmentManager> & allocator,
   m_type->setCacheHandler(new ScanHandler(m_type.get(), cm, this, DATA_TYPE));
   m_deviation = cm->createCacheObject();
   m_deviation->setCacheHandler(new ScanHandler(m_deviation.get(), cm, this, DATA_DEVIATION));
-  
+
   m_xyz_reduced = cm->createCacheObject();
   m_xyz_reduced->setCacheHandler(new TemporaryHandler(m_xyz_reduced.get(), cm, this));
   m_xyz_reduced_original = cm->createCacheObject();
   m_xyz_reduced_original->setCacheHandler(new TemporaryHandler(m_xyz_reduced_original.get(), cm, this, true));
-  
+
   m_show_reduced = cm->createCacheObject();
   m_show_reduced->setCacheHandler(new TemporaryHandler(m_show_reduced.get(), cm, this, true));
   m_octtree = cm->createCacheObject();

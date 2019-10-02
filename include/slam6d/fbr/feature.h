@@ -13,7 +13,7 @@
 namespace fbr{
   /**
    * @class feature
-   * @brief class to detect and describe features 
+   * @brief class to detect and describe features
    * @param fDetectorMethod feature_detector_method
    * @param fDescriptorMethod feature_descriptor_method
    * @param keypoints vector containing the detected features
@@ -41,7 +41,7 @@ namespace fbr{
      * featureDetection : creates the features
      * @param pImage cv::Mat refletance panorama image
      * @param method feature_detector_method
-     * @param rImage cv::Mat range image for filtration 
+     * @param rImage cv::Mat range image for filtration
      * @param fMethod feature_filtration_method
      **/
     void featureDetection(cv::Mat pImage, feature_detector_method method, cv::Mat rImage, feature_filtration_method fMethod);
@@ -68,4 +68,4 @@ namespace fbr{
     unsigned int getNumberOfFeatures();
   };
 }
-#endif /* FEATURE_H_ */ 
+#endif /* FEATURE_H_ */

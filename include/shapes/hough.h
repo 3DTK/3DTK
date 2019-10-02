@@ -24,13 +24,13 @@ struct valuecompare {
 class Hough {
 
 public:
-  ofstream out; 
+  ofstream out;
   ConfigFileHough myConfigFileHough;
   Accumulator *acc;
 
   int nrEntries;
   vector <Point>* allPoints;
-  bool maximum;  
+  bool maximum;
   bool quiet;
   Scan *PlaneScan;
   Scan *PlaneScan2;
@@ -52,9 +52,9 @@ public:
 
   //vector<ConvexPlane>& getPlanes();
   bool distanceOK(Point p1, Point p2, Point p3);
-  bool calculatePlane(Point p1, Point p2, Point p3, double &theta, double &phi, double &rho); 
+  bool calculatePlane(Point p1, Point p2, Point p3, double &theta, double &phi, double &rho);
 
-  double * const* deletePoints(vector<ConvexPlane*> &model, int &size); 
+  double * const* deletePoints(vector<ConvexPlane*> &model, int &size);
   double * const* getPoints(int &size);
   int deletePoints(double * n, double rho);
   int deletePointsQuad(double * n, double rho);

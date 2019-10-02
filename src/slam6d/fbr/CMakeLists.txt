@@ -75,7 +75,7 @@ if (WITH_OPENCV)
     target_link_libraries(click_tool fbr ${NEWMAT_LIBRARIES} ${FBR_LIBS} show ${SHOW_LIBS} ${OPENGL_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY})
 
     if (WIN32)
-	    target_link_libraries(click_tool XGetopt) 
+	    target_link_libraries(click_tool XGetopt)
     endif()
 
     ###panorama reader

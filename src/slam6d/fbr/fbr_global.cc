@@ -8,8 +8,8 @@
  */
 
 /**
- * @file 
- * @brief Implementation of global functions for feature based registration 
+ * @file
+ * @brief Implementation of global functions for feature based registration
  * @author Hamidreza Houshiar, Jacobs University Bremen, Germany
  */
 
@@ -17,14 +17,14 @@
 #include <stdexcept>
 
 namespace fbr{
-  
+
   std::string scanFormatToString(IOType format){
     return io_type_to_libname(format);
   }
-  
+
   IOType stringToScanFormat(std::string format){
     return formatname_to_io_type(format.c_str());
-  }  
+  }
   std::string scannerTypeToString(scanner_type type){
     std::string sType;
     switch(type){
@@ -90,7 +90,7 @@ namespace fbr{
     }
     return sMethod;
   }
-  
+
   projection_method stringToProjectionMethod(std::string method){
     if(strcasecmp(method.c_str(), "EQUIRECTANGULAR") == 0) return EQUIRECTANGULAR;
     else if(strcasecmp(method.c_str(), "CYLINDRICAL") == 0) return CYLINDRICAL;
@@ -104,7 +104,7 @@ namespace fbr{
     else if(strcasecmp(method.c_str(), "AZIMUTHAL") == 0) return AZIMUTHAL;
     else throw std::runtime_error(std::string("projection method ") + method + std::string(" is unknown"));
   }
-  
+
   std::string panoramaMapMethodToString(panorama_map_method method){
     std::string sMethod;
     switch(method){
@@ -125,7 +125,7 @@ namespace fbr{
     }
     return sMethod;
   }
-  
+
   panorama_map_method stringToPanoramaMapMethod(std::string method){
     if(strcasecmp(method.c_str(), "FARTHEST") == 0) return FARTHEST;
     else if(strcasecmp(method.c_str(), "EXTENDED") == 0) return EXTENDED;
@@ -175,7 +175,7 @@ namespace fbr{
     }
     return sFormat;
   }
- 
+
   panorama_format stringToPanoramaFormat(std::string format){
     if(strcasecmp(format.c_str(), "PNG") == 0) return PNG;
     else if(strcasecmp(format.c_str(), "JPEG") == 0) return JPEG;
@@ -183,7 +183,7 @@ namespace fbr{
     else if(strcasecmp(format.c_str(), "TIFF") == 0) return TIFF;
     else throw std::runtime_error(std::string("panorama format ") + format + std::string(" is unknown"));
   }
-  
+
   std::string panoramaTypeToString(panorama_type type){
     std::string sType;
     switch(type){
@@ -198,7 +198,7 @@ namespace fbr{
     }
     return sType;
   }
- 
+
   panorama_type stringToPanoramaType(std::string type){
     if(strcasecmp(type.c_str(), "ThreeChannel24BitRange") == 0) return ThreeChannel24BitRange;
     else if(strcasecmp(type.c_str(), "ThreeGrayscaleRange") == 0) return ThreeGrayscaleRange;
@@ -255,7 +255,7 @@ namespace fbr{
     }
     return sMethod;
   }
-  
+
   feature_detector_method stringToFeatureDetectorMethod(std::string method){
 #ifdef WITH_OPENCV_NONFREE
     if(strcasecmp(method.c_str(), "SIFT") == 0) return SIFT_DET;
@@ -269,7 +269,7 @@ namespace fbr{
 #endif
     else throw std::runtime_error(std::string("feature detector method ") + method + std::string(" is unknown"));
   }
-  
+
   std::string featureDescriptorMethodToString(feature_descriptor_method method){
     std::string sMethod;
     switch(method){
@@ -289,7 +289,7 @@ namespace fbr{
     }
     return sMethod;
   }
-  
+
   feature_descriptor_method stringToFeatureDescriptorMethod(std::string method){
 #ifdef WITH_OPENCV_NONFREE
     if(strcasecmp(method.c_str(), "SIFT") == 0) return SIFT_DES;
@@ -323,7 +323,7 @@ namespace fbr{
     }
     return sMethod;
   }
-  
+
   matcher_method stringToMatcherMethod(std::string method){
     if(strcasecmp(method.c_str(), "BRUTEFORCE") == 0) return BRUTEFORCE;
     else if(strcasecmp(method.c_str(), "FLANN") == 0) return FLANN;
@@ -332,7 +332,7 @@ namespace fbr{
     else if(strcasecmp(method.c_str(), "RATIO") == 0) return RATIO;
     else throw std::runtime_error(std::string("matcher method ") + method + std::string(" is unknown"));
   }
-  
+
   std::string registrationMethodToString(registration_method method){
     std::string sMethod;
     switch(method){
@@ -422,7 +422,7 @@ namespace fbr{
     }
     return recoveredRangeFilterationMethod;
   }
-  
+
   recovered_range_filteration_method stringToRecoveredRangeFilterationMethod(std::string method)
   {
     if(strcasecmp(method.c_str(), "INTERQUARTILE") == 0) return INTERQUARTILE;
@@ -434,7 +434,7 @@ namespace fbr{
   //reflectance normalization
   float normalizeTheReflectance(float reflectance, scanner_type sType, double minReflectance, double maxReflectance)
   {
-    
+
     //normalize the reflectance
     if(sType == fbr::RIEGL)
       {
@@ -449,7 +449,7 @@ namespace fbr{
 	reflectance /= 800;
       }
     if(sType == MANUAL)
-      {                                                                                                            
+      {
 	reflectance = (reflectance - (minReflectance))/(maxReflectance-minReflectance);
       }
     if(sType != fbr::NONE)
@@ -457,14 +457,14 @@ namespace fbr{
 	if (reflectance < 0) reflectance = 0;
 	if (reflectance > 1) reflectance = 1;
       }
-    
+
     return reflectance;
   }
 
   //color compare to sort color_value_Tuples in first three color order
   bool colorCompare (const Color_Value_Tuple &lTuple, const Color_Value_Tuple &rTuple)
   {
-    
+
     if(std::get<0>(lTuple) == std::get<0>(rTuple))
       {
 	if(std::get<1>(lTuple) == std::get<1>(rTuple))
@@ -477,7 +477,7 @@ namespace fbr{
     else
       return std::get<0>(lTuple) < std::get<0>(rTuple);
   }
-  
+
   //get all rgb colors sorted based on hsv
   std::vector<unsigned int> getAllRGBSortedByHSL(unsigned int size)
   {
@@ -494,12 +494,12 @@ namespace fbr{
 	double dR = R/255.0;
 	double dG = G/255.0;
 	double dB = B/255.0;
-	
+
 	double dMax = std::max(dR, std::max(dG, dB));
 	double dMin = std::min(dR, std::min(dG, dB));
-	
+
 	double H = 0.0, S, L = (dMax + dMin) / 2;
-	
+
 	if(dMax == dMin)
 	  {
 	    H = S = 0; // achromatic
@@ -508,19 +508,19 @@ namespace fbr{
 	  {
 	    double delta = dMax - dMin;
 	    S = L > 0.5 ? delta / (2 - dMax - dMin) : delta / (dMax + dMin);
-	    
+
 	    if(dMax == dR)
 	      H = (dG - dB) / delta + (dG < dB ? 6 : 0);
 	    else if(dMax == dG)
 	      H = (dB - dR) / delta + 2;
 	    else if(dMax == dB)
 	      H = (dR - dG) / delta + 4;
-	    
+
 	    H /= 6;
 	  }
 	colors.push_back(std::make_tuple(H, S, L, C));
       }
-    
+
     sort(colors.begin(), colors.end(), colorCompare);
 
     for(std::vector<Color_Value_Tuple>::iterator itr = colors.begin(); itr != colors.end(); itr++)
@@ -547,14 +547,14 @@ namespace fbr{
 	double dR = R/255.0;
 	double dG = G/255.0;
 	double dB = B/255.0;
-	
+
 	double dMax = std::max(dR, std::max(dG, dB));
 	double dMin = std::min(dR, std::min(dG, dB));
-	
+
 	double H = 0.0, S, V = dMax;
 	double delta = dMax - dMin;
 	S = dMax == 0 ? 0 : delta / dMax;
-	
+
 	if(dMax == dMin)
 	  {
 	    H = 0; // achromatic
@@ -567,12 +567,12 @@ namespace fbr{
 	      H = (dB - dR) / delta + 2;
 	    else if(dMax == dB)
 	      H = (dR - dG) / delta + 4;
-	    
+
 	    H /= 6;
 	  }
 	colors.push_back(std::make_tuple(H, S, V, C));
       }
-    
+
     sort(colors.begin(), colors.end(), colorCompare);
 
     for(std::vector<Color_Value_Tuple>::iterator itr = colors.begin(); itr != colors.end(); itr++)
@@ -582,7 +582,7 @@ namespace fbr{
     }
     return colorMap;
   }
-  
+
   //get all rgb colors sorted based on rgb
   std::vector<unsigned int> getAllRGBSortedByRGB(unsigned int size)
   {
@@ -598,7 +598,7 @@ namespace fbr{
 
 	colors.push_back(std::make_tuple(R, G, B, C));
       }
-    
+
     sort(colors.begin(), colors.end(), colorCompare);
 
     for(std::vector<Color_Value_Tuple>::iterator itr = colors.begin(); itr != colors.end(); itr++)
@@ -614,7 +614,7 @@ namespace fbr{
   std::vector<unsigned int> getAllRGBSortedByRBGB()
   {
     std::vector<unsigned int> colorMap;
-    
+
     for (int j = 0; j < 256; j++)//red //255=interesting quirk
       {
 	for (int k = 0; k < 16; k++)//blue_MSBs
@@ -630,7 +630,7 @@ namespace fbr{
 	      }
 	  }
       }
-    
+
     return colorMap;
   }
 
@@ -638,7 +638,7 @@ namespace fbr{
   void colorToRGB1BitBy1Bit(unsigned int color, unsigned int &R, unsigned int &G, unsigned int &B)
   {
     unsigned char temp;
-    
+
     //1 bit
     temp = (color >> 23) & 0x01;
     R = (temp << 7);
@@ -656,7 +656,7 @@ namespace fbr{
     R += (temp << 1);
     temp = (color >> 2) & 0x01;
     R += (temp << 0);
-    
+
     temp = (color >> 22) & 0x01;
     G = (temp << 7);
     temp = (color >> 19) & 0x01;
@@ -673,7 +673,7 @@ namespace fbr{
     G += (temp << 1);
     temp = (color >> 1) & 0x01;
     G += (temp << 0);
-    
+
     temp = (color >> 21) & 0x01;
     B = (temp << 7);
     temp = (color >> 18) & 0x01;
@@ -706,7 +706,7 @@ namespace fbr{
     R += (temp << 2);
     temp = (color >> 4) & 0x03;
     R += (temp << 0);
-    
+
     temp = (color >> 20) & 0x03;
     G = (temp << 6);
     temp = (color >> 14) & 0x03;
@@ -715,7 +715,7 @@ namespace fbr{
     G += (temp << 2);
     temp = (color >> 2) & 0x03;
     G += (temp << 0);
-    
+
     temp = (color >> 18) & 0x03;
     B = (temp << 6);
     temp = (color >> 12) & 0x03;
@@ -736,12 +736,12 @@ namespace fbr{
     R = (temp << 4);
     temp = (color >> 8) & 0x0F;
     R += (temp << 0);
-    
+
     temp = (color >> 16) & 0x0F;
     G = (temp << 4);
     temp = (color >> 4) & 0x0F;
     G += (temp << 0);
-    
+
     temp = (color >> 12) & 0x0F;
     B = (temp << 4);
     temp = (color >> 0) & 0x0F;
@@ -755,10 +755,10 @@ namespace fbr{
     unsigned int temp;
     temp = (color >> 16) & 0xFF;
     R = (temp << 0);
-    
+
     temp = (color >> 8) & 0xFF;
     G = (temp << 0);
-    
+
     temp = (color >> 0) & 0xFF;
     B = (temp << 0);
   }

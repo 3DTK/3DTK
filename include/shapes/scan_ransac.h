@@ -1,17 +1,17 @@
 // =====================================================================================
-// 
+//
 //       Filename:  scan_ransac.h
-// 
-//    Description:  
-// 
+//
+//    Description:
+//
 //        Version:  1.0
 //        Created:  09/27/2010 01:21:49 PM
 //       Revision:  none
 //       Compiler:  g++
-// 
+//
 //         Author:  Jan Elseberg (), jelseber@uos.de
 //        Company:  Universitaet Osnabrueck
-// 
+//
 // =====================================================================================
 
 #ifndef __SCAN_RANSAC_H__
@@ -61,8 +61,8 @@ class NumberDetector {
 
   void RANSAC(vector<const double *> &scan_points);
   private:
-  bool FindNumber(vector<double *> &points, double plane[4]); 
-  void printNumbers(); 
+  bool FindNumber(vector<double *> &points, double plane[4]);
+  void printNumbers();
 
   pthread_t *ransac_thread;
   numberConsensus detectedNumbers[10];
