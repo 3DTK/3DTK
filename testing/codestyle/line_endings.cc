@@ -32,7 +32,7 @@ int main(int argc, char* argv[])
 			bool is_whitelisted = false;
 			for (const auto &p : whitelist) {
 				boost::regex re(p, boost::regex_constants::basic);
-				if (boost::regex_match(path.c_str(), re)) {
+				if (boost::regex_match(boost::filesystem::canonical(path).string(), re)) {
 					is_whitelisted = true;
 					break;
 				}

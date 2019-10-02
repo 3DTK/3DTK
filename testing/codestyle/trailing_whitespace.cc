@@ -6,24 +6,24 @@
 #include <vector>
 
 std::vector<std::string> whitelist = {
-	"(?:^|.*/)include/riegl/.*\\.a",
-	"(?:^|.*/)include/riegl/.*\\.hpp",
-	"(?:^|.*/)include/riegl/.*\\.so",
-	"(?:^|.*/)include/show/url\\.png",
-	"(?:^|.*/)src/cuda/grid_kernel.cu",
-	"(?:^|.*/)src/grid/docu.tex",
-	"(?:^|.*/)src/mesh/README.md",
-	"(?:^|.*/)src/pmd/README",
-	"(?:^|.*/)src/pmd/o3d.L32\\.pcp",
-	"(?:^|.*/)src/pmd/offline/pmdc.conf",
-	"(?:^|.*/)src/pmd/offline/rename",
-	"(?:^|.*/)src/pmd/pmdc.conf",
-	"(?:^|.*/)src/pmd/pose/dat/commas2dots",
-	"(?:^|.*/)src/pmd/pose/djvm\\.ttf",
-	"(?:^|.*/)src/pmd/pose/pmdc.conf",
-	"(?:^|.*/)src/slam6d/testICPortho.m",
-	"(?:^|.*/)src/spherical_quadtree/.*\\.pyc",
-	"(?:^|.*/)src/veloslam/SegIter.model",
+	".*/include/riegl/.*\\.a",
+	".*/include/riegl/.*\\.hpp",
+	".*/include/riegl/.*\\.so",
+	".*/include/show/url\\.png",
+	".*/src/cuda/grid_kernel.cu",
+	".*/src/grid/docu.tex",
+	".*/src/mesh/README.md",
+	".*/src/pmd/README",
+	".*/src/pmd/o3d.L32\\.pcp",
+	".*/src/pmd/offline/pmdc.conf",
+	".*/src/pmd/offline/rename",
+	".*/src/pmd/pmdc.conf",
+	".*/src/pmd/pose/dat/commas2dots",
+	".*/src/pmd/pose/djvm\\.ttf",
+	".*/src/pmd/pose/pmdc.conf",
+	".*/src/slam6d/testICPortho.m",
+	".*/src/spherical_quadtree/.*\\.pyc",
+	".*/src/veloslam/SegIter.model",
 };
 
 int main(int argc, char* argv[])
@@ -46,7 +46,7 @@ int main(int argc, char* argv[])
 			bool is_whitelisted = false;
 			for (const auto &p : whitelist) {
 				boost::regex re(p);
-				if (boost::regex_match(path.c_str(), re)) {
+				if (boost::regex_match(boost::filesystem::canonical(path).string(), re)) {
 					is_whitelisted = true;
 					break;
 				}
