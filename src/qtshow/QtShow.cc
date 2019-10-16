@@ -15,11 +15,7 @@ QtShow::QtShow(int &argc, char **argv)
 
   bool has_initial_directory;
   try {
-    boost::program_options::variables_map vm;
-    ShowProgramOptions show_parser(dss, ws, ds, &has_initial_directory);
-    show_parser.parse(argc, argv, vm);
-    show_parser.process();
-    //parse_show_args(argc, argv, dss, ws, ds, &has_initial_directory);
+    parse_show_args(argc, argv, dss, ws, ds, &has_initial_directory);
   } catch (std::exception& e) {
     std::cerr << "Error while parsing settings: " << e.what() << std::endl;
     exit(1);
