@@ -35,6 +35,14 @@ CMAKEOPTS="-DCMAKE_VERBOSE_MAKEFILE=ON"
 case "$DIST" in
 	buster|sid)
 		CMAKEOPTS="$CMAKEOPTS -DWITH_ROS=ON"
+		# if buster or unstable are run inside Docker, then generating
+		# moc_GLWidget.cpp will fail with:
+		# standard input:0: Note: No relevant classes found. No output generated.
+		# this is because under docker, the statx system call is not
+		# supported
+		# a workaround is to install an updated libseccomp library
+		wget https://launchpad.net/ubuntu/+archive/primary/+files/libseccomp2_2.4.1-0ubuntu0.16.04.2_amd64.deb
+		sudo apt-get install ./libseccomp2_2.4.1-0ubuntu0.16.04.2_amd64.deb
 		;;
 esac
 
