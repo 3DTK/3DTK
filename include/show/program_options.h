@@ -24,6 +24,56 @@
 #include "slam6d/point_type.h"
 #include "slam6d/scan_settings.h"
 
+class GenericProgramOptions
+{
+public:
+  GenericProgramOptions();
+  virtual boost::program_options::parsed_options parse(int argc, char **argv, boost::program_options::variables_map &vm);
+  boost::program_options::parsed_options parse(int argc, char **argv) {
+    boost::program_options::variables_map vm;
+    return parse(argc, argv, vm);
+  }
+  virtual boost::program_options::parsed_options parseConfig(std::string filename, const boost::program_options::options_description &desc, boost::program_options::variables_map &vm);
+  inline boost::program_options::parsed_options parseConfig(std::string filename, boost::program_options::variables_map &vm) {
+    boost::program_options::options_description visopts = visibleOptions();
+    return parseConfig(filename, visopts, vm);
+  }
+  virtual boost::program_options::options_description visibleOptions();
+  virtual void help(std::string program, boost::program_options::options_description opt_desc) {
+    std::cout << "Usage: " << program << " [options] <input-dir>" << std::endl;
+    std::cout << opt_desc << std::endl;
+    exit(0);
+  }
+  virtual inline void help(std::string program) { 
+    boost::program_options::options_description visopts = visibleOptions();
+    help(program, visopts); 
+  }
+
+  boost::program_options::options_description other_options;
+protected:
+  bool m_no_config;
+  boost::program_options::variables_map *m_vm;
+};
+
+class ScanProgramOptions : public GenericProgramOptions
+{
+public:
+  ScanProgramOptions(dataset_settings& dss, bool* directory_present = nullptr);
+  virtual boost::program_options::parsed_options parse(int argc, char **argv, boost::program_options::variables_map &vm);
+  virtual boost::program_options::options_description visibleOptions();
+  virtual void process();
+
+  boost::program_options::options_description datasource_options;
+  boost::program_options::options_description color_options;
+  boost::program_options::options_description reduction_options;
+  boost::program_options::options_description transform_options;
+  boost::program_options::options_description octtree_caching_options;
+protected:
+  dataset_settings *m_dss;
+  bool* m_directory_present;
+  std::vector<std::string> m_data_sources;
+};
+
 struct WindowDimensions {
   int w, h;
   WindowDimensions() : w(0), h(0) {};
@@ -101,7 +151,23 @@ std::string getConfigHome();
  * @param directory_present if this pointer is not null, allow input-dir to not be present and write that presence in the target bool
  * @return the parsed options
  */
-boost::program_options::parsed_options parse_scan_args(int argc, char **argv, dataset_settings& dss, bool* directory_present);
+class ShowProgramOptions : public ScanProgramOptions
+{
+public:
+  ShowProgramOptions(dataset_settings& dss, window_settings& ws, display_settings& ds, bool* directory_present = nullptr);
+  virtual boost::program_options::parsed_options parse(int argc, char **argv, boost::program_options::variables_map &vm);
+  virtual boost::program_options::options_description visibleOptions();
+  virtual void process();
+
+  boost::program_options::options_description gui_options;
+  boost::program_options::options_description display_options;
+
+private:
+  bool m_no_points, m_no_cameras, m_no_path, m_no_poses, m_no_fog, m_no_anim_color, m_no_anim_convert_jpg;
+  window_settings *m_ws;
+  display_settings *m_ds;
+};
+
 void parse_show_args(int argc, char **argv, dataset_settings& dss, window_settings& ws, display_settings& ds, bool *directory_present = nullptr);
 void setGUIOptions(bool& nogui, float& fps,
 		   WindowDimensions& dimensions, bool& advanced,

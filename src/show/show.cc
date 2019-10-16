@@ -48,7 +48,12 @@ int main(int argc, char **argv)
   display_settings ds;
 
   try {
-    parse_show_args(argc, argv, dss, ws, ds);
+    boost::program_options::variables_map vm;
+    ShowProgramOptions show_parser(dss, ws, ds);
+    show_parser.parse(argc, argv, vm);
+    show_parser.process();
+    std::cout << "data source: " << dss.data_source << std::endl;
+    //parse_show_args(argc, argv, dss, ws, ds);
   } catch (std::exception& e) {
     std::cerr << "Error while parsing settings: " << e.what() << std::endl;
     exit(1);

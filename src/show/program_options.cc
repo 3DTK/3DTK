@@ -64,71 +64,115 @@ void setOtherDatasetOptions(std::string& objFileName,
     ;
 }
 
-parsed_options parse_scan_args(int argc, char **argv, dataset_settings& dss, bool* directory_present)
+GenericProgramOptions::GenericProgramOptions()
+ : other_options("Other options"), m_no_config(false)
 {
-  using namespace std;
+  other_options.add_options()
+    ("help,?", "Display this help text");
+}
 
-  bool no_config;
+options_description GenericProgramOptions::visibleOptions()
+{
+  options_description visible_options;
+  visible_options.add(other_options);
+  return visible_options;
+}
 
-  // Temporary parsing variables
-  std::vector<std::string> data_sources;
+parsed_options GenericProgramOptions::parse(int argc, char **argv, variables_map &vm)
+{
+  options_description visible_options = visibleOptions();
+  parsed_options parsed = command_line_parser(argc, argv)
+    .options(visible_options)
+    .allow_unregistered()
+    .run();
+  store(parsed, vm);
+  notify(vm);
 
-  // TODO make all defaults declared here the initial values for the settings structs, then use that initial value as the default here
-  options_description scan_options("Scan selection");
+  // Help text
+  if (vm.count("help"))
+    help(argv[0]);
+  return parsed;
+}
+
+boost::program_options::parsed_options GenericProgramOptions::parseConfig(std::string filename, const options_description &desc, variables_map &vm)
+{
+  parsed_options parsed = parsed_options(nullptr);
+  std::ifstream user_config_file(filename.c_str());
+  if (!m_no_config && user_config_file) {
+    std::cout << "Parsing configuration file " << filename << "..." << std::endl;
+    parsed = parse_config_file(user_config_file, desc, true);
+    store(parsed, vm);
+    notify(vm);
+  }
+
+  return parsed;
+}
+
+ScanProgramOptions::ScanProgramOptions(dataset_settings& dss, bool* directory_present)
+  : GenericProgramOptions(), reduction_options("Point reduction"), color_options("Point coloring"), transform_options("Point transformation"),
+  octtree_caching_options("OctTree caching"), m_dss(&dss), m_directory_present(directory_present)
+{
   setScanOptions(dss.use_scanserver, dss.scan_numbers.min,
-    dss.scan_numbers.max, dss.format, scan_options);
+    dss.scan_numbers.max, dss.format, datasource_options);
 
-  options_description reduction_options("Point reduction");
   setReductionOptions(dss.distance_filter.min, dss.distance_filter.max,
     dss.octree_reduction_voxel,
     dss.octree_reduction_randomized_bucket,
     dss.skip_files, reduction_options);
 
-  options_description color_options("Point coloring");
   setDatasetColorOptions(dss.coloring.explicit_coloring,
     dss.coloring.colormap, dss.coloring.colormap_values.min,
     dss.coloring.colormap_values.max,
     dss.coloring.scans_colored,
     color_options);
 
-  options_description point_options("Point transformation");
-  setPointOptions(dss.origin_type, dss.sphere_radius, point_options);
+  setPointOptions(dss.origin_type, dss.sphere_radius, transform_options);
 
-  options_description file_options("Octree caching");
   setFileOptions(dss.save_octree, dss.load_octree, dss.cache_octree,
-		 file_options);
+		 octtree_caching_options);
 
-  options_description other_options("Other options");
   setOtherDatasetOptions(dss.objects_file_name,
     dss.custom_filter,
-    dss.trajectory_file_name, dss.identity, no_config,
+    dss.trajectory_file_name, dss.identity, m_no_config,
 		  other_options);
+}
 
-  // These options will be displayed in the help text
-  options_description visible_options("");
+boost::program_options::options_description ScanProgramOptions::visibleOptions()
+{
+  options_description visible_options;
   visible_options
     .add(color_options)
-    .add(scan_options)
+    .add(datasource_options)
     .add(reduction_options)
-    .add(point_options)
-    .add(file_options)
+    .add(transform_options)
+    .add(octtree_caching_options)
     .add(other_options)
     ;
+  return visible_options;
+}
 
+parsed_options ScanProgramOptions::parse(int argc, char **argv, variables_map &vm)
+{
+  m_vm = &vm;
+
+  std::cout << "CHECK: Scan parse" << std::endl;
+
+  parsed_options parsed = GenericProgramOptions::parse(argc, argv, vm);
+  std::vector<std::string> unrecognized = collect_unrecognized(parsed.options, include_positional);
+
+  // TODO make all defaults declared here the initial values for the settings structs, then use that initial value as the default here
+  options_description visopts = visibleOptions();
   options_description cmdline_options("");
-  cmdline_options.add(visible_options);
+  cmdline_options.add(visopts);
   cmdline_options.add_options()
-    ("input-dir,data-sources", value<std::vector<std::string> >(&data_sources), "Scan directory or data-sources definition")
+    ("input-dir,data-sources", value<std::vector<std::string> >(&m_data_sources), "Scan directory or data-sources definition")
     ;
 
   positional_options_description pd;
   pd.add("input-dir", -1);
 
-  // Parse the options into this map
-  variables_map vm;
-
   // First parse, but we are only interested in the input directory
-  parsed_options& parsed = command_line_parser(argc, argv)
+  parsed = command_line_parser(unrecognized)
     .positional(pd)
     .options(cmdline_options)
     .allow_unregistered()
@@ -137,56 +181,38 @@ parsed_options parse_scan_args(int argc, char **argv, dataset_settings& dss, boo
   store(parsed, vm);
   notify(vm);
 
-  // Parse ./config.ini file in the input directory
-  if (!no_config && vm.count("input-dir") && data_sources.size() == 1) {
-    dss.data_type = dataset_settings::SINGLE_SRC;
-    parse_dataset(data_sources[0], dss);
-    std::string config_ini = dss.data_source + "/config.ini";
-    ifstream local_config_file(config_ini.c_str());
-    if (local_config_file) {
-      cout << "Parsing configuration file " << config_ini << "..." << endl;
-      store(parse_config_file(local_config_file, visible_options, true), vm);
+  return parsed;
+}
 
-      // Command line options now overwrite ./config.ini file
-      //store(parsed, vm);
-      notify(vm);
-    }
-  }
-
-  // Help text
-  if (vm.count("help")) {
-    cout << "Usage: " << argv[0] << " [options] <input-dir>" << endl;
-    cout << visible_options << endl;
-    exit(0);
-  }
-
-  if (directory_present == nullptr && vm.count("input-dir") == 0) {
-    cerr << "Error: Please specify a directory. See --help for options." << endl;
+void ScanProgramOptions::process()
+{
+  if (m_directory_present == nullptr && !m_vm->count("help") && m_vm->count("input-dir") == 0) {
+    std::cerr << "Error: Please specify a directory. See --help for options." << std::endl;
     exit(1);
   }
 
   // Scan number range
-  if (dss.scan_numbers.min < 0) {
-    throw logic_error("Cannot start at a negative scan number.");
+  if (m_dss->scan_numbers.min < 0) {
+    throw std::logic_error("Cannot start at a negative scan number.");
   }
-  if (dss.scan_numbers.max < -1) {
-    throw logic_error("Cannot end at a negative scan number.");
+  if (m_dss->scan_numbers.max < -1) {
+    throw std::logic_error("Cannot end at a negative scan number.");
   }
-  if (0 < dss.scan_numbers.max && dss.scan_numbers.max < dss.scan_numbers.min) {
-    throw logic_error("<end> (" + to_string(dss.scan_numbers.max) + ") cannot be smaller than <start> (" + to_string(dss.scan_numbers.min) + ").");
+  if (0 < m_dss->scan_numbers.max && m_dss->scan_numbers.max < m_dss->scan_numbers.min) {
+    throw std::logic_error("<end> (" + to_string(m_dss->scan_numbers.max) + ") cannot be smaller than <start> (" + to_string(m_dss->scan_numbers.min) + ").");
   }
 
   // cache_octree implies load_octree and save_octree
-  if (dss.cache_octree) {
-    dss.load_octree = true;
-    dss.save_octree = true;
+  if (m_dss->cache_octree) {
+    m_dss->load_octree = true;
+    m_dss->save_octree = true;
   }
 
   // Bitset for initializing PointTypes
   unsigned int types = PointType::USE_NONE;
 
   // RGB formats imply colored points
-  switch (dss.format) {
+  switch (m_dss->format) {
     case UOS_RGB:
     case UOS_RRGBT:
     case RIEGL_RGB:
@@ -200,7 +226,7 @@ parsed_options parse_scan_args(int argc, char **argv, dataset_settings& dss, boo
 
   // Coloring bool_switch names mapped to their PointType bit,
   // in the order in which they should be the default coloring
-  std::vector<std::pair<string, unsigned int>> point_type_flags {
+  std::vector<std::pair<std::string, unsigned int>> point_type_flags {
     {"time",        PointType::USE_TIME},
     {"amplitude",   PointType::USE_AMPLITUDE},
     {"deviation",   PointType::USE_DEVIATION},
@@ -212,25 +238,25 @@ parsed_options parse_scan_args(int argc, char **argv, dataset_settings& dss, boo
   };
 
   // These are the names for values of listboxColorVal
-  std::array<string, 6> colorval_names {"height", "reflectance", "temperature", "amplitude", "deviation", "type"};
+  std::array < std::string, 6 > colorval_names{ "height", "reflectance", "temperature", "amplitude", "deviation", "type" };
 
   for (auto const &kv_pair : point_type_flags) {
-    if (vm[kv_pair.first].as<bool>()) {
+    if ((*m_vm)[kv_pair.first].as<bool>()) {
       // Translate color bool_switches to a bitset
       types |= kv_pair.second;
 
       // remember the most important one as default for listboxColorVal
       auto colorval_it = std::find(colorval_names.begin(), colorval_names.end(), kv_pair.first);
       if (colorval_it != colorval_names.end()) {
-        dss.coloring.colorval = colorval_it - colorval_names.begin();
+        m_dss->coloring.colorval = colorval_it - colorval_names.begin();
       }
     }
   }
 
-  dss.coloring.ptype = PointType(types);
+  m_dss->coloring.ptype = PointType(types);
 
-  if (vm.count("origin")) {
-    dss.origin_type_set = true;
+  if (m_vm->count("origin")) {
+    m_dss->origin_type_set = true;
   }
 
   const char separator =
@@ -240,38 +266,126 @@ parsed_options parse_scan_args(int argc, char **argv, dataset_settings& dss, boo
   '/';
 #endif
 
-  if (vm.count("input-dir") == 1) {
-    if (data_sources.size() > 1) {
-      //dss.set(data_sources);
-      dss.data_type = dataset_settings::MULTI_SRCS;
-      for (auto dss_def : data_sources) {
-        dataset_settings *child_set = new dataset_settings(&dss);
+  if (m_vm->count("input-dir") == 1) {
+    if (m_data_sources.size() > 1) {
+      //m_dss.set(data_sources);
+      m_dss->data_type = dataset_settings::MULTI_SRCS;
+      for (auto dss_def : m_data_sources) {
+        dataset_settings *child_set = new dataset_settings(m_dss);
         parse_dataset(dss_def, *child_set);
-        child_set->scan_ranges.setLimits(dss.scan_numbers.min, dss.scan_numbers.max);
+        child_set->scan_ranges.setLimits(m_dss->scan_numbers.min, m_dss->scan_numbers.max);
         child_set->data_type = dataset_settings::SINGLE_SRC;
         if (child_set->data_source.back() != separator) child_set->data_source += separator;
       }
     }
     else {
       //parse again to overwrite global parameters
-      parse_dataset(data_sources[0], dss);
-      dss.scan_ranges.setLimits(dss.scan_numbers.min, dss.scan_numbers.max);
-      if (dss.data_source.back() != separator) dss.data_source += separator;
+      parse_dataset(m_data_sources[0], *m_dss);
+      m_dss->scan_ranges.setLimits(m_dss->scan_numbers.min, m_dss->scan_numbers.max);
+      if (m_dss->data_source.back() != separator) m_dss->data_source += separator;
     }
   }
 
-  if (directory_present != nullptr) {
-    *directory_present = vm.count("input-dir") != 0;
+  if (m_directory_present != nullptr) {
+    *m_directory_present = m_vm->count("input-dir") != 0;
   }
+}
+
+ShowProgramOptions::ShowProgramOptions(dataset_settings & dss, window_settings & ws, display_settings & ds, bool * directory_present)
+  : ScanProgramOptions(dss, directory_present), gui_options("GUI options"), display_options("Display options"), m_ds(&ds), m_ws(&ws)
+{
+  setGUIOptions(ws.nogui, ws.max_fps, ws.dimensions, ws.advanced_controls,
+    ws.invert_mouse_x, ws.invert_mouse_y,
+    ws.capture_mouse, ws.hide_widgets, gui_options);
+
+  setDisplayOptions(dss.scale, ds.camera.fov, ds.init_with_viewmode,
+    m_no_points, m_no_cameras, m_no_path, m_no_poses,
+    m_no_fog, ds.fog.type, ds.fog.density,
+    ds.camera.position, ds.camera.rotation, ds.pointsize,
+    display_options);
+
+  color_options.add_options()
+    ("bgcolor", value(&dss.coloring.bgcolor)->default_value(Color(0, 0, 0), "0,0,0"),
+      "Drawing area background color, given as \"%f,%f,%f\" for red, green and blue.")
+    ("noanimcolor,A", bool_switch(&m_no_anim_color),
+      "Do not switch to different color settings when displaying animation");
+
+  other_options.add_options()
+    ("screenshot", bool_switch(&ws.take_screenshot), "Take screenshot and exit")
+    ("screenshot-filename", value(&ws.screenshot_filename), "Output filename for --screenshot")
+    ("no-anim-convert-jpg,J", bool_switch(&m_no_anim_convert_jpg)); // TODO description
+}
+
+options_description ShowProgramOptions::visibleOptions()
+{
+  options_description visible_options("");
+  visible_options
+    .add(gui_options)
+    .add(display_options)
+    .add(datasource_options)
+    .add(color_options)
+    .add(reduction_options)
+    .add(transform_options)
+    .add(octtree_caching_options)
+    .add(other_options);
+  return visible_options;
+}
+
+parsed_options ShowProgramOptions::parse(int argc, char **argv, variables_map &vm)
+{
+  parsed_options parsed = ScanProgramOptions::parse(argc, argv, vm);
+  std::vector<std::string> unrecognized = collect_unrecognized(parsed.options, exclude_positional);
+
+  options_description visopts = visibleOptions();
+  options_description cmdline_options("");
+  cmdline_options.add(visopts);
+  cmdline_options.add_options()
+    ("hide-label", bool_switch(&m_ds->hide_label))
+    ;
+
+  store(
+    command_line_parser(unrecognized)
+      .options(cmdline_options)
+      .run()
+    , vm);
+  notify(vm);
 
   return parsed;
 }
 
+void ShowProgramOptions::process()
+{
+  // Parse user config file
+  std::string config_home = getConfigHome() + "/3dtk/show.ini";
+
+  options_description cmdline_options("");
+  cmdline_options.add(visibleOptions());
+  cmdline_options.add_options()
+    ("hide-label", bool_switch(&m_ds->hide_label))
+    ;
+
+  parseConfig(config_home, cmdline_options, *m_vm);
+  if (!m_no_config && m_dss->data_type == dataset_settings::SINGLE_SRC) {
+    //dss.set(data_sources[0]);
+    std::string config_ini = m_dss->data_source + "config.ini";
+    parseConfig(config_ini, cmdline_options, *m_vm);
+  }
+
+  // Set drawing options from flags
+  m_ds->draw_points      = !m_no_points;
+  m_ds->draw_cameras     = !m_no_cameras;
+  m_ds->draw_path        = !m_no_path;
+  m_ds->draw_poses       = !m_no_poses;
+  m_ds->color_animation  = !m_no_anim_color;
+  m_ds->anim_convert_jpg = !m_no_anim_convert_jpg;
+  if (m_no_fog) m_ds->fog.type = 0;
+
+  ScanProgramOptions::process();
+}
+
+
 void parse_show_args(int argc, char **argv, dataset_settings& dss, window_settings& ws, display_settings& ds, bool *directory_present) {
   using namespace std;
-
-  parsed_options parsed = parse_scan_args(argc, argv, dss, directory_present);
-  std::vector<std::string> unrecognized = collect_unrecognized(parsed.options, exclude_positional);
 
   // Temporary parsing variables
   bool no_points, no_cameras, no_path, no_poses, no_fog, no_animcolor, no_anim_convert_jpg, no_config;
@@ -345,6 +459,10 @@ void parse_show_args(int argc, char **argv, dataset_settings& dss, window_settin
 
   // Parse the options into this map
   variables_map vm;
+
+  ScanProgramOptions scan_po(dss, directory_present);
+  parsed_options parsed = scan_po.parse(argc, argv, vm);
+  std::vector<std::string> unrecognized = collect_unrecognized(parsed.options, exclude_positional);
 
   // First parse, but we are only interested in the input directory
   store(
@@ -590,9 +708,6 @@ void setOtherOptions(bool& screenshot, std::string& screenshot_filename, std::st
 		     std::string& trajectoryFileName, bool& identity, bool& no_config,
 		     options_description& other_options)
 {
-  other_options.add_options()
-    ("help,?", "Display this help text");
-
   setOtherDatasetOptions(objFileName,
     customFilter, trajectoryFileName, identity, no_config,
     other_options);
