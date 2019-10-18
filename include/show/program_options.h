@@ -44,9 +44,9 @@ public:
     std::cout << opt_desc << std::endl;
     exit(0);
   }
-  virtual inline void help(std::string program) { 
+  virtual inline void help(std::string program) {
     boost::program_options::options_description visopts = visibleOptions();
-    help(program, visopts); 
+    help(program, visopts);
   }
 
   boost::program_options::options_description other_options;
