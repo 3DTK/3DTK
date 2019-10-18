@@ -50,17 +50,22 @@ std::vector<std::string> whitelist = {
 int main(int argc, char* argv[])
 {
 	std::vector<std::string> failed_files;
+	bool only_list_files = false;
 
 	boost::regex trailing_whitespace(".*[ \t]+$");
 
 	for (int i = 1; i < argc; ++i) {
 		// c++17 added boost::filesystem as std::filesystem
+		if (i == 1 && std::string(argv[1]) == "--list") {
+			only_list_files = true;
+			continue;
+		}
 		for (const auto& dirEntry : boost::filesystem::recursive_directory_iterator(argv[i])) {
 			boost::filesystem::path path(dirEntry.path());
 			if (boost::filesystem::is_directory(path)) {
 				continue;
 			}
-			if (!boost::filesystem::is_regular_file(path)) {
+			if (!boost::filesystem::is_regular_file(path) && !only_list_files) {
 				std::cerr << "is not a directory or regular file: " << dirEntry.path() << std::endl;
 				return 1;
 			}
@@ -83,18 +88,24 @@ int main(int argc, char* argv[])
 			bool found_trailing = false;
 			while (std::getline(ifs, line)) {
 				if (boost::regex_match(line, trailing_whitespace)) {
-					std::cerr << path.string() << ":" << i << " trailing whitespace" << std::endl;
 					found_trailing = true;
+					if (!only_list_files)
+						std::cerr << path.string() << ":" << i << " trailing whitespace" << std::endl;
+					else {
+						std::cout << path.string() << std::endl;
+						break;
+					}
 				}
 				++i;
 			}
 			if (found_trailing) {
 				failed_files.push_back(path.string());
 			}
+			ifs.close();
 		}
 	}
 
-	if (failed_files.size() > 0) {
+	if (failed_files.size() > 0 && !only_list_files) {
 		std::cerr << "fix them with: sed --in-place 's/[[:space:]]\\+$//'";
 		for (const auto &f : failed_files) {
 			std::cerr << " " << f;
