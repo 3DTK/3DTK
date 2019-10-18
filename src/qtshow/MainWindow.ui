@@ -1387,7 +1387,11 @@
       </widget>
      </item>
      <item row="0" column="1" colspan="2">
-      <widget class="QSpinBox" name="spinBoxFrame"/>
+      <widget class="QSpinBox" name="spinBoxFrame">
+       <property name="maximum">
+        <number>999999999</number>
+       </property>
+      </widget>
      </item>
      <item row="9" column="0" colspan="2">
       <widget class="QLabel" name="labelScanRangeSelection">
@@ -1411,7 +1415,11 @@
       </widget>
      </item>
      <item row="11" column="1" colspan="2">
-      <widget class="QSpinBox" name="spinBoxEndIndex"/>
+      <widget class="QSpinBox" name="spinBoxEndIndex">
+       <property name="maximum">
+        <number>999999999</number>
+       </property>
+      </widget>
      </item>
      <item row="7" column="0">
       <widget class="QLabel" name="label3dShift">
@@ -1498,7 +1506,11 @@
       </widget>
      </item>
      <item row="10" column="1" colspan="2">
-      <widget class="QSpinBox" name="spinBoxStartIndex"/>
+      <widget class="QSpinBox" name="spinBoxStartIndex">
+       <property name="maximum">
+        <number>999999999</number>
+       </property>
+      </widget>
      </item>
      <item row="12" column="1">
       <widget class="QPushButton" name="buttonStepUp">
