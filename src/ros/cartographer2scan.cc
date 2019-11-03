@@ -165,7 +165,7 @@ void writePointClouds(const string& outdir, double scale, double minDistance, do
 
         for (pcl::PointXYZ p : *pointCloud.cloud) {
             double distance = Eigen::Vector3d(p.x, p.y, p.z).norm() / scale;
-            if (distance < minDistance || distance > maxDistance) continue;
+            if (std::isnan(distance) || distance < minDistance || distance > maxDistance) continue;
 
             Eigen::Vector4d tmp(p.x, p.y, p.z, 1);
             Eigen::Vector4d pcorr = mapToLaser * tmp;
