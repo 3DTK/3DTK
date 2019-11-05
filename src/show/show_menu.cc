@@ -259,8 +259,8 @@ void newMenu()
   color_panel->set_alignment(GLUI_ALIGN_LEFT);
 
   static int dummy6 = 0;
-  glui1->add_checkbox_to_panel(color_panel, "Invert", &dummy6, 0, &invertView);  
-  
+  glui1->add_checkbox_to_panel(color_panel, "Invert", &dummy6, 0, &invertView);
+
   GLUI_Panel *color_ro = glui1->add_rollout_to_panel(color_panel, "Color values:", false);
   color_ro->set_alignment(GLUI_ALIGN_LEFT);
 
