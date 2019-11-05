@@ -39,7 +39,7 @@ void DrawPoints(GLenum mode, bool interruptable)
 
   // In case of animation
   if(frameNr != 0) {
-    if (coloranim == 1) {
+    if (coloranim == 0) {
       cm->setMode(ScanColorManager::MODE_ANIMATION);
     }
 

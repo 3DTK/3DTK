@@ -311,7 +311,7 @@ void newMenu()
   glui1->add_separator();
 
   /****** Animate button *****/
-  glui1->add_checkbox("No animation color", &coloranim);
+  glui1->add_checkbox("Keep current color", &coloranim);
   anim_spinner = glui1->add_spinner("Anim delay:", GLUI_SPINNER_INT, &anim_delay);
   anim_spinner->set_int_limits(0, 100);
   anim_spinner->set_speed(1);
