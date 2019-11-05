@@ -210,7 +210,7 @@ extern bool keymap[256];
 /**
  * draw scans in different color during animation
  */
-extern bool coloranim;
+extern int coloranim;
 
 /**
  * hide the gui

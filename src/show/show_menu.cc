@@ -258,6 +258,9 @@ void newMenu()
   color_panel = glui1->add_rollout("Color :", false);
   color_panel->set_alignment(GLUI_ALIGN_LEFT);
 
+  static int dummy6 = 0;
+  glui1->add_checkbox_to_panel(color_panel, "Invert", &dummy6, 0, &invertView);  
+  
   GLUI_Panel *color_ro = glui1->add_rollout_to_panel(color_panel, "Color values:", false);
   color_ro->set_alignment(GLUI_ALIGN_LEFT);
 
@@ -307,9 +310,8 @@ void newMenu()
 
   glui1->add_separator();
 
-  /****** Invert button *****/
-  glui1->add_button("Invert", 0, invertView)->set_alignment(GLUI_ALIGN_CENTER);
   /****** Animate button *****/
+  glui1->add_checkbox("No animation color", &coloranim);
   anim_spinner = glui1->add_spinner("Anim delay:", GLUI_SPINNER_INT, &anim_delay);
   anim_spinner->set_int_limits(0, 100);
   anim_spinner->set_speed(1);
