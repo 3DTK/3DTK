@@ -52,11 +52,11 @@ foreach(format IN ITEMS uos uosr uos_rgb xyz xyzr xyz_rgb)
 		# xyz_rgb crashes on msvc
 		continue()
 	endif()
-	if (MSVC AND format format MATCHES ".*r$")
+	if (MSVC AND format MATCHES ".*r$")
 		# uosr and xyzr segfault on msvc
 		continue()
 	endif()
-	if (MINGW AND format format MATCHES ".*r$")
+	if (MINGW AND format MATCHES ".*r$")
 		# uosr and xyzr render as if they were uos or xyz
 		continue()
 	endif()
