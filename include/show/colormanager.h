@@ -251,6 +251,9 @@ class ColorManager {
     virtual void load() {
       glColor3f(color[0], color[1], color[2] );
       glEnable (GL_TEXTURE_1D);
+      if(!defaultTexture) {
+       glGenTextures(1, &defaultTexture);
+      }
       glBindTexture (GL_TEXTURE_1D, defaultTexture);
     }
 
