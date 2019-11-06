@@ -110,3 +110,7 @@ script:
                else ./travisdockerbuild.sh $DERIV $DIST $CC; fi;;
         *) exit 1;;
     esac
+# work around for output not persisting in Travis's console:
+# https://github.com/travis-ci/travis-ci/issues/6018
+after_script:
+  - sleep 10
