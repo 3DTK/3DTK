@@ -53,6 +53,14 @@ foreach(format IN ITEMS uos uos_rgb xyz xyz_rgb)
 		# xyz_rgb crashes on msvc
 		continue()
 	endif()
+	if (MSVC AND format MATCHES ".*r$")
+		# uosr and xyzr segfault on msvc
+		continue()
+	endif()
+	if (MINGW AND format MATCHES ".*r$")
+		# uosr and xyzr render as if they were uos or xyz
+		continue()
+	endif()
 	add_test(test_show_${format}_run
 		${MACOSTIMEOUT}
 		${XVFB}
