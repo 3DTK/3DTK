@@ -945,7 +945,7 @@ void initShow(dataset_settings& dss, const window_settings& ws, const display_se
   for (unsigned int i = 0; i < 256; i++) {
     keymap[i] = false;
   }
-  setScansColored(colorScanVal);
+  setScansColored(0);
 
   if (trajectoryFile.size() > 0) {
     std::ifstream file(trajectoryFile);
