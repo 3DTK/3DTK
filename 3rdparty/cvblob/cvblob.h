@@ -87,7 +87,7 @@ extern "C" {
   /// \see CV_CHAINCODE_DOWN_RIGHT
   /// \see CV_CHAINCODE_RIGHT
   /// \see CV_CHAINCODE_UP_RIGHT
-  const char cvChainCodeMoves[8][2] = { { 0, -1},
+  const signed char cvChainCodeMoves[8][2] = { { 0, -1},
                                         { 1, -1},
 					{ 1,  0},
 					{ 1,  1},
