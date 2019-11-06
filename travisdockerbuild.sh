@@ -45,8 +45,9 @@ case "$DIST" in
 		# this is because under docker, the statx system call is not
 		# supported
 		# a workaround is to install an updated libseccomp library
-		wget https://launchpad.net/ubuntu/+archive/primary/+files/libseccomp2_2.4.1-0ubuntu0.16.04.2_amd64.deb
-		sudo apt-get install ./libseccomp2_2.4.1-0ubuntu0.16.04.2_amd64.deb
+		arch=$(dpkg --print-architecture)
+		wget https://launchpad.net/ubuntu/+archive/primary/+files/libseccomp2_2.4.1-0ubuntu0.16.04.2_$arch.deb
+		sudo apt-get install ./libseccomp2_2.4.1-0ubuntu0.16.04.2_$arch.deb
 		;;
 esac
 
