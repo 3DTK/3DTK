@@ -15,12 +15,14 @@ env: # needed for allow_failures
 matrix:
   allow_failures:
     - os: linux
+      arch: amd64
       sudo: required
       services:
         - docker
       env:
         - DERIV=debian DIST=sid
     - os: linux
+      arch: amd64
       sudo: required
       services:
         - docker
@@ -35,6 +37,7 @@ matrix:
         - $HOME/Library/Caches/Homebrew
       if: branch NOT IN (ubuntu, debian, linux)
     - os: linux
+      arch: amd64
       sudo: required
       services:
         - docker
@@ -42,6 +45,7 @@ matrix:
         - DERIV=debian DIST=sid
       if: branch NOT IN (macos, osx, apple, ubuntu)
     - os: linux
+      arch: amd64
       sudo: required
       services:
         - docker
@@ -49,6 +53,7 @@ matrix:
         - DERIV=debian DIST=sid CC=clang
       if: branch NOT IN (macos, osx, apple, ubuntu)
     - os: linux
+      arch: amd64
       sudo: required
       services:
         - docker
@@ -56,6 +61,15 @@ matrix:
         - DERIV=debian DIST=buster
       if: branch NOT IN (macos, osx, apple, ubuntu)
     - os: linux
+      arch: arm64
+      sudo: required
+      services:
+        - docker
+      env:
+        - DERIV=debian DIST=buster
+      if: branch NOT IN (macos, osx, apple, ubuntu)
+    - os: linux
+      arch: amd64
       sudo: required
       services:
         - docker
@@ -63,6 +77,7 @@ matrix:
         - DERIV=debian DIST=stretch
       if: branch NOT IN (macos, osx, apple, ubuntu)
     - os: linux
+      arch: amd64
       sudo: required
       services:
         - docker
@@ -70,6 +85,15 @@ matrix:
         - DERIV=ubuntu DIST=xenial
       if: branch NOT IN (macos, osx, apple, debian)
     - os: linux
+      arch: amd64
+      sudo: required
+      services:
+        - docker
+      env:
+        - DERIV=ubuntu DIST=bionic
+      if: branch NOT IN (macos, osx, apple, debian)
+    - os: linux
+      arch: arm64
       sudo: required
       services:
         - docker
