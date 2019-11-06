@@ -920,9 +920,8 @@ void initShow(dataset_settings& dss, const window_settings& ws, const display_se
     generateFrames(start, real_end, identity /*use .pose or identity*/);
   else std::cout << "Using existing frames..." << std::endl;
 
-  cm->setCurrentType(PointType::USE_HEIGHT);
-  //ColorMap cmap;
-  //cm->setColorMap(cmap);
+  mapColorToValue(0); // uses listboxColorVal
+  changeColorMap(0);  // uses listboxColorMapVal
 
   if (std::isnan(mincolor_value)) {
     mincolor_value = cm->getMin();
