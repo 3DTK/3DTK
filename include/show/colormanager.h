@@ -251,9 +251,6 @@ class ColorManager {
     virtual void load() {
       glColor3f(color[0], color[1], color[2] );
       glEnable (GL_TEXTURE_1D);
-      if(!defaultTexture) {
-	glGenTextures(1, &defaultTexture);
-      }
       glBindTexture (GL_TEXTURE_1D, defaultTexture);
     }
 
@@ -311,6 +308,9 @@ class ColorManager {
       imageData[3*buckets+1] = colormap[buckets][1]*255;
       imageData[3*buckets+2] = colormap[buckets][2]*255;
 
+      if(!defaultTexture) {
+		  glGenTextures(1, &defaultTexture);
+      }
       glBindTexture (GL_TEXTURE_1D, defaultTexture);
       glPixelStorei (GL_UNPACK_ALIGNMENT, 1);
       glTexParameteri (GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP);
