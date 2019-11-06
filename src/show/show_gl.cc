@@ -156,8 +156,12 @@ void DrawPoints(GLenum mode, bool interruptable)
 
         // glMultMatrixd(MetaMatrix[iterator].back());
         if (current_frame != (int)MetaMatrix.back().size() - 1) {
-          cm->setMode(ScanColorManager::MODE_ANIMATION);
-          cm->selectColors(type);
+          if (coloranim == 0) {
+            cm->setMode(ScanColorManager::MODE_ANIMATION);
+            cm->selectColors(type);
+          } else {
+            setScansColored(0);
+          }
         }
         glMultMatrixd(frame);
 
