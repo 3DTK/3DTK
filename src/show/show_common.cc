@@ -929,7 +929,6 @@ void initShow(dataset_settings& dss, const window_settings& ws, const display_se
   if (std::isnan(maxcolor_value)) {
     maxcolor_value = cm->getMax();
   }
-  minmaxChanged(0);
 
   selected_points = new std::set<sfloat*>[octpts.size()];
 
