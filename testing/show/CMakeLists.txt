@@ -38,14 +38,13 @@ else()
 endif()
 
 # FIXME: windows aborts on xyz_rgb
-# FIXME: screenshots of xyzr don't work
 # FIXME: show on macos segfaults when closing
 
-foreach(format IN ITEMS uos uos_rgb xyz xyz_rgb)
+foreach(format IN ITEMS uos uosr uos_rgb xyz xyzr xyz_rgb)
 	if (format MATCHES ".*_rgb$")
 		set(formatarg --color)
 	elseif(format MATCHES ".*r$")
-		set(formatarg --reflectance)
+		set(formatarg --reflectance --colormap grey)
 	else()
 		unset(formatarg)
 	endif()
