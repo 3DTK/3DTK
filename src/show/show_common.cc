@@ -603,7 +603,6 @@ void copy_settings_to_globals(
   listboxColorMapVal = static_cast<int>(dss.coloring.colormap);
   mincolor_value = dss.coloring.colormap_values.min;
   maxcolor_value = dss.coloring.colormap_values.max;
-  std::cout << "Was" << dss.coloring.scans_colored << std::endl;
   colorScanVal = dss.coloring.scans_colored;
   coloranim = !ds.color_animation;
 
