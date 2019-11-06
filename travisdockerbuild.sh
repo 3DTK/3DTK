@@ -35,6 +35,10 @@ CMAKEOPTS="-DCMAKE_VERBOSE_MAKEFILE=ON"
 case "$DIST" in
 	buster|sid)
 		CMAKEOPTS="$CMAKEOPTS -DWITH_ROS=ON"
+		if [ "$DIST" = "sid" ]; then
+			# no support for OpenCV 4
+			CMAKEOPTS="$CMAKEOPTS -DWITH_OPENCV=OFF"
+		fi
 		# if buster or unstable are run inside Docker, then generating
 		# moc_GLWidget.cpp will fail with:
 		# standard input:0: Note: No relevant classes found. No output generated.
