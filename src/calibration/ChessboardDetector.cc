@@ -29,12 +29,20 @@ ChessboardDetector::ChessboardDetector(cv::Size patternSize, float squareSize, b
 
 bool ChessboardDetector::detect(const cv::Mat& image)
 {
+    cv::Mat gray;
+
+    if (image.channels() != 1) {
+        cvtColor(image, gray, cv::COLOR_BGR2GRAY);
+    } else {
+        gray = image;
+    }
+
     auto start = std::chrono::high_resolution_clock::now();
 
-    bool found = findChessboardCorners(image, _patternSize, _imagePoints, _flags);
+    bool found = findChessboardCorners(gray, _patternSize, _imagePoints, _flags);
 
     if (found) {
-        cornerSubPix(image, _imagePoints, cvSize(11, 11), cvSize(-1, -1),
+        cornerSubPix(gray, _imagePoints, cvSize(11, 11), cvSize(-1, -1),
                      cvTermCriteria(CV_TERMCRIT_EPS + CV_TERMCRIT_ITER, 30, 0.1));
     }
 
