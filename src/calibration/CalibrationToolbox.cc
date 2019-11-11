@@ -6,7 +6,6 @@
 #include "calibration/Chessboard.h"
 #include <boost/filesystem.hpp>
 
-
 using namespace cv;
 using namespace std;
 
@@ -206,7 +205,13 @@ int CalibrationToolbox::calibrate() {
     //clock_t prevTimestamp = 0;
     //const Scalar RED(0, 0, 255), GREEN(0, 255, 0);
     //const char ESC_KEY = 27;
-    Mat image = imread(imagePath[0], CV_LOAD_IMAGE_COLOR);
+    Mat image = imread(imagePath[0],
+#if CV_MAJOR_VERSION > 2
+			cv::ImreadModes::IMREAD_COLOR
+#else
+			CV_LOAD_IMAGE_COLOR
+#endif
+			);
     Size imageSize = image.size();
     this->settings.imageSize = imageSize;
 
@@ -230,7 +235,7 @@ double CalibrationToolbox::computeReprojectionErrors(const vector<vector<Point3f
     for (i = 0; i < (int) objectPoints.size(); ++i) {
         projectPoints(Mat(objectPoints[i]), rvecs[i], tvecs[i], cameraMatrix,
                       distCoeffs, imagePoints2);
-        err = norm(Mat(imagePoints[i]), Mat(imagePoints2), CV_L2);
+        err = norm(Mat(imagePoints[i]), Mat(imagePoints2), cv::NORM_L2);
 
         int n = (int) objectPoints[i].size();
         perViewErrors[i] = (float) std::sqrt(err * err / n);
@@ -270,7 +275,7 @@ bool CalibrationToolbox::runCalibration(Settings &s, Size &imageSize, Mat &camer
                                         vector<float> &reprojErrs, double &totalAvgErr) {
 
     cameraMatrix = Mat::eye(3, 3, CV_64F);
-    if (s.flag & CV_CALIB_FIX_ASPECT_RATIO)
+    if (s.flag & cv::CALIB_FIX_ASPECT_RATIO)
         cameraMatrix.at<double>(0, 0) = 1.0;
 
     distCoeffs = Mat::zeros(8, 1, CV_64F);
@@ -284,7 +289,7 @@ bool CalibrationToolbox::runCalibration(Settings &s, Size &imageSize, Mat &camer
         } else {
             estimateInitial3DCameraMatrix(s, imagePoints, objectPoints, cameraMatrix, imageSize);
         }
-        flags |= CV_CALIB_USE_INTRINSIC_GUESS;
+        flags |= cv::CALIB_USE_INTRINSIC_GUESS;
     }
 
     cout << "objectPoints size: " << objectPoints.size() << "; imagePoints size: " << imagePoints.size() << endl;
@@ -329,16 +334,21 @@ void CalibrationToolbox::saveCameraParams(Settings &s, Size &imageSize, Mat &cam
     fs << "board_Height" << s.boardSize.height;
     fs << "square_Size" << s.squareSize;
 
-    if (s.flag & CV_CALIB_FIX_ASPECT_RATIO)
+    if (s.flag & cv::CALIB_FIX_ASPECT_RATIO)
         fs << "FixAspectRatio" << s.aspectRatio;
 
     if (s.flag) {
         sprintf(buf, "flags: %s%s%s%s",
-                s.flag & CV_CALIB_USE_INTRINSIC_GUESS ? " +use_intrinsic_guess" : "",
-                s.flag & CV_CALIB_FIX_ASPECT_RATIO ? " +fix_aspectRatio" : "",
-                s.flag & CV_CALIB_FIX_PRINCIPAL_POINT ? " +fix_principal_point" : "",
-                s.flag & CV_CALIB_ZERO_TANGENT_DIST ? " +zero_tangent_dist" : "");
-        cvWriteComment(*fs, buf, 0);
+                s.flag & cv::CALIB_USE_INTRINSIC_GUESS ? " +use_intrinsic_guess" : "",
+                s.flag & cv::CALIB_FIX_ASPECT_RATIO ? " +fix_aspectRatio" : "",
+                s.flag & cv::CALIB_FIX_PRINCIPAL_POINT ? " +fix_principal_point" : "",
+                s.flag & cv::CALIB_ZERO_TANGENT_DIST ? " +zero_tangent_dist" : "");
+#if CV_MAJOR_VERSION > 2
+        fs.writeComment(
+#else
+        cvWriteComment(*fs,
+#endif
+				buf, 0);
 
     }
 
@@ -364,7 +374,12 @@ void CalibrationToolbox::saveCameraParams(Settings &s, Size &imageSize, Mat &cam
             r = rvecs[i].t();
             t = tvecs[i].t();
         }
-        cvWriteComment(*fs, "a set of 6-tuples (rotation vector + translation vector) for each view", 0);
+#if CV_MAJOR_VERSION > 2
+        fs.writeComment(
+#else
+        cvWriteComment(*fs,
+#endif
+				"a set of 6-tuples (rotation vector + translation vector) for each view", 0);
         fs << "Extrinsic_Parameters" << bigmat;
     }
 
@@ -414,7 +429,7 @@ void CalibrationToolbox::estimateInitial3DCameraMatrix(Settings &s, vector<vecto
 
 
     double estRMS = calibrateCamera(this->estimatePatternPoints, this->estimateImagePoints, imageSize, cameraMatrix,
-                                    distCoeffs, rvecs, tvecs, CV_CALIB_FIX_K1| CV_CALIB_FIX_K2| CV_CALIB_FIX_K3| CV_CALIB_FIX_K4 | CV_CALIB_FIX_K5);
+                                    distCoeffs, rvecs, tvecs, cv::CALIB_FIX_K1| cv::CALIB_FIX_K2| cv::CALIB_FIX_K3| cv::CALIB_FIX_K4 | cv::CALIB_FIX_K5);
     totalAvgErr = computeReprojectionErrors(this->estimatePatternPoints, this->estimateImagePoints, rvecs, tvecs,
                                             cameraMatrix, distCoeffs, reprojErrs);
     cout << "Re-projection error for estimate: " << estRMS << endl;
@@ -436,11 +451,23 @@ int CalibrationToolbox::computeExtrinsic() {
     //Mat cameraMatrix = settings.estCameraMatrix;
     //Mat distCoeff = settings.estDistCoeff;
     double totalAvgErr = 0;
-    Mat image = imread(imagePath[0], CV_LOAD_IMAGE_COLOR);
+    Mat image = imread(imagePath[0],
+#if CV_MAJOR_VERSION > 2
+			cv::ImreadModes::IMREAD_COLOR
+#else
+			CV_LOAD_IMAGE_COLOR
+#endif
+			);
     Size imageSize = image.size();
     for(int i = 0; i < vecImagePoints.size(); i++){
         Mat rvec, tvec;
-        solvePnP(vecPatternPoints[i], vecImagePoints[i], camMatrix, distorCoeff, rvec, tvec, false, CV_ITERATIVE);
+        solvePnP(vecPatternPoints[i], vecImagePoints[i], camMatrix, distorCoeff, rvec, tvec, false,
+#if CV_MAJOR_VERSION > 2
+				cv::SOLVEPNP_ITERATIVE
+#else
+				CV_ITERATIVE
+#endif
+				);
         rvector.push_back(rvec);
         tvector.push_back(tvec);
     }
@@ -463,8 +490,8 @@ void CalibrationToolbox::visualize(bool readCameraParamFromFile){
         //gefunden Punkte bgr
         Mat image = imread(this->vecCalibImagePaths[i]);
         vector<Point2f> imagePoints2;
-        cvtColor(image, image, CV_BGR2GRAY);
-        cvtColor(image, image, CV_GRAY2BGR);
+        cvtColor(image, image, cv::COLOR_BGR2GRAY);
+        cvtColor(image, image, cv::COLOR_GRAY2BGR);
 
         std::stringstream detss;
         detss << settings.visualizePath << "/" << filename.filename().string() << ".detections" << ".png";
@@ -478,7 +505,7 @@ void CalibrationToolbox::visualize(bool readCameraParamFromFile){
             circle(image, point2f, 1, colorMap[colorIndex],2);
             if(!readCameraParamFromFile) {
                 projectPoints(Mat(vecPatternPoints[i]), rvector[i], tvector[i], camMatrix, distorCoeff, imagePoints2);
-                double err = norm(Mat(vecImagePoints[i]), Mat(imagePoints2), CV_L2);
+                double err = norm(Mat(vecImagePoints[i]), Mat(imagePoints2), cv::NORM_L2);
             }
             circle(pointsImage, point2f, 1, Scalar(255, 255, 255), 2);
 

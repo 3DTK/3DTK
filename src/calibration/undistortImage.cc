@@ -3,6 +3,11 @@
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
+#if CV_MAJOR_VERSION > 2
+#include <opencv2/calib3d.hpp>
+#else
+#include <opencv2/calib3d/calib3d.hpp>
+#endif
 
 using namespace std;
 using namespace cv;

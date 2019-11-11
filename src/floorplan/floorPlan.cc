@@ -57,7 +57,13 @@ vector<cv::Vec4i> floorplan::FloorPlan::extractWallLines() {
 
     for (size_t it = 0; it < lines.size(); ++it) {
         cv::Vec4i ln = lines[it];
-        cv::line(wallImg, cv::Point(ln[0], ln[1]), cv::Point(ln[2], ln[3]), cv::Scalar(0, 0, 255), 1, CV_AA);
+        cv::line(wallImg, cv::Point(ln[0], ln[1]), cv::Point(ln[2], ln[3]), cv::Scalar(0, 0, 255), 1,
+#if CV_MAJOR_VERSION > 2
+			cv::LINE_AA
+#else
+			CV_AA
+#endif
+		);
     }
     cv::imshow("lineImg", wallImg);
     cv::waitKey();
@@ -176,7 +182,13 @@ void floorplan::FloorPlan::correctWallLines() {
 
     for (size_t it = 0; it < this->walls.size(); ++it) {
         cv::Vec4i ln = this->walls[it];
-        cv::line(wallImg, cv::Point(ln[0], ln[1]), cv::Point(ln[2], ln[3]), cv::Scalar(0, 0, 255), 1, CV_AA);
+        cv::line(wallImg, cv::Point(ln[0], ln[1]), cv::Point(ln[2], ln[3]), cv::Scalar(0, 0, 255), 1,
+#if CV_MAJOR_VERSION > 2
+			cv::LINE_AA
+#else
+			CV_AA
+#endif
+		);
     }
     cv::imshow("correctedLineImg", wallImg);
     cv::waitKey();
@@ -198,7 +210,7 @@ floorplan::FloorPlan::FloorPlan(const cv::Mat &grayPlan, const double &scale) {
     if (!quiet) cout << endl << "== Mean: " << mean[0] << ";\t StdDev: " << stdDev[0] <<"..." << endl;
 
     // Threshold the image using mean + coef * stdDev.
-    cv::threshold(this->grayImg, this->thresh, mean[0] + (STD_DEV_MUL * stdDev[0]), 255, CV_THRESH_BINARY);
+    cv::threshold(this->grayImg, this->thresh, mean[0] + (STD_DEV_MUL * stdDev[0]), 255, cv::THRESH_BINARY);
     cv::imshow("threshImg", this->thresh);
     cv::waitKey();
 
