@@ -109,7 +109,13 @@ using namespace cv;
 
 
     void PictureHandler::loadImage(string path) {
-        Mat imageCV = imread(path, cv::ImreadModes::IMREAD_GRAYSCALE);
+        Mat imageCV = imread(path,
+#if CV_MAJOR_VERSION > 2
+				cv::ImreadModes::IMREAD_GRAYSCALE
+#else
+				CV_LOAD_IMAGE_GRAYSCALE
+#endif
+				);
         this->matImage = imageCV;
         if (imageCV.rows > 0 && imageCV.cols > 0) {
             image = image_u8_create(imageCV.cols, imageCV.rows);

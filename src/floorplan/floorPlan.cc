@@ -57,7 +57,13 @@ vector<cv::Vec4i> floorplan::FloorPlan::extractWallLines() {
 
     for (size_t it = 0; it < lines.size(); ++it) {
         cv::Vec4i ln = lines[it];
-        cv::line(wallImg, cv::Point(ln[0], ln[1]), cv::Point(ln[2], ln[3]), cv::Scalar(0, 0, 255), 1, cv::LINE_AA);
+        cv::line(wallImg, cv::Point(ln[0], ln[1]), cv::Point(ln[2], ln[3]), cv::Scalar(0, 0, 255), 1,
+#if CV_MAJOR_VERSION > 2
+			cv::LINE_AA
+#else
+			CV_AA
+#endif
+		);
     }
     cv::imshow("lineImg", wallImg);
     cv::waitKey();
@@ -176,7 +182,13 @@ void floorplan::FloorPlan::correctWallLines() {
 
     for (size_t it = 0; it < this->walls.size(); ++it) {
         cv::Vec4i ln = this->walls[it];
-        cv::line(wallImg, cv::Point(ln[0], ln[1]), cv::Point(ln[2], ln[3]), cv::Scalar(0, 0, 255), 1, cv::LINE_AA);
+        cv::line(wallImg, cv::Point(ln[0], ln[1]), cv::Point(ln[2], ln[3]), cv::Scalar(0, 0, 255), 1,
+#if CV_MAJOR_VERSION > 2
+			cv::LINE_AA
+#else
+			CV_AA
+#endif
+		);
     }
     cv::imshow("correctedLineImg", wallImg);
     cv::waitKey();

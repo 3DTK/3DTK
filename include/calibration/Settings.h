@@ -148,7 +148,13 @@ public:
             view0.copyTo(result);
         }
         else if( atImageList < (int)imageList.size() )
-            result = cv::imread(imageList[atImageList++], cv::ImreadModes::IMREAD_COLOR);
+            result = cv::imread(imageList[atImageList++],
+#if CV_MAJOR_VERSION > 2
+					cv::ImreadModes::IMREAD_COLOR
+#else
+					CV_LOAD_IMAGE_COLOR
+#endif
+					);
 
         return result;
     }

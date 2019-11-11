@@ -1050,8 +1050,20 @@ void model::Scene::clusterOpenings(const LabeledPlane3d& surf, const vector<Cand
         if (clusterCount[i] > 0) {
             int x = static_cast<int>(centers.at<float>(i * dim + 0));
             int y = static_cast<int>(centers.at<float>(i * dim + 1));
-            cv::circle(clusterImg, cv::Point(x, y), 2, colors[i], cv::FILLED);
-            cv::circle(finalImg, cv::Point(x, y), 2, colors[i], cv::FILLED);
+            cv::circle(clusterImg, cv::Point(x, y), 2, colors[i],
+#if CV_MAJOR_VERSION > 2
+					cv::FILLED
+#else
+					CV_FILLED
+#endif
+					);
+            cv::circle(finalImg, cv::Point(x, y), 2, colors[i],
+#if CV_MAJOR_VERSION > 2
+					cv::FILLED
+#else
+					CV_FILLED
+#endif
+					);
         }
     }
 

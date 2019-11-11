@@ -14,7 +14,13 @@ using namespace std;
 namespace fbr{
 
   // Functions to draw keypoints and matches.
-  void feature_drawer::_DrawKeypoint( cv::Mat& img, const cv::KeyPoint& p, const cv::Scalar& color, cv::DrawMatchesFlags flags )
+  void feature_drawer::_DrawKeypoint( cv::Mat& img, const cv::KeyPoint& p, const cv::Scalar& color,
+#if CV_MAJOR_VERSION >= 4
+		  cv::DrawMatchesFlags
+#else
+		  int
+#endif
+		  flags)
   {
     CV_Assert( !img.empty() );
     cv::Point center( cvRound(p.pt.x * draw_multiplier), cvRound(p.pt.y * draw_multiplier) );
@@ -53,7 +59,13 @@ namespace fbr{
   }
 
   void feature_drawer::DrawKeypoints( const cv::Mat& image, const vector<cv::KeyPoint>& keypoints, cv::Mat& outImage,
-				      const cv::Scalar& _color, cv::DrawMatchesFlags flags )
+				      const cv::Scalar& _color,
+#if CV_MAJOR_VERSION >= 4
+		  cv::DrawMatchesFlags
+#else
+		  int
+#endif
+		flags)
   {
     if( !(flags & cv::DrawMatchesFlags::DRAW_OVER_OUTIMG) )
       {
@@ -87,7 +99,13 @@ namespace fbr{
   void feature_drawer::_PrepareImgAndDrawKeypoints( const cv::Mat& img1, const vector<cv::KeyPoint>& keypoints1,
 						    const cv::Mat& img2, const vector<cv::KeyPoint>& keypoints2,
 						    cv::Mat& outImg, cv::Mat& outImg1, cv::Mat& outImg2,
-						    const cv::Scalar& singlePointColor, cv::DrawMatchesFlags flags )
+						    const cv::Scalar& singlePointColor,
+#if CV_MAJOR_VERSION >= 4
+		  cv::DrawMatchesFlags
+#else
+		  int
+#endif
+		flags)
   {
     //Size size( img1.cols + img2.cols, MAX(img1.rows, img2.rows) );
     cv::Size size(MAX(img1.cols, img2.cols), img1.rows + img2.rows );
@@ -129,7 +147,13 @@ namespace fbr{
   }
 
   void feature_drawer::_DrawMatch( cv::Mat& outImg, cv::Mat& outImg1, cv::Mat& outImg2 ,
-				   const cv::KeyPoint& kp1, const cv::KeyPoint& kp2, const cv::Scalar& matchColor, cv::DrawMatchesFlags flags )
+				   const cv::KeyPoint& kp1, const cv::KeyPoint& kp2, const cv::Scalar& matchColor,
+#if CV_MAJOR_VERSION >= 4
+		  cv::DrawMatchesFlags
+#else
+		  int
+#endif
+		flags)
   {
     cv::RNG& rng = cv::theRNG();
     bool isRandMatchColor = matchColor == cv::Scalar::all(-1);
@@ -153,7 +177,13 @@ namespace fbr{
 				    const cv::Mat& img2, const vector<cv::KeyPoint>& keypoints2,
 				    const vector<cv::DMatch>& matches1to2, cv::Mat& outImg,
 				    const cv::Scalar& matchColor, const cv::Scalar& singlePointColor,
-				    const vector<char>& matchesMask, cv::DrawMatchesFlags flags )
+				    const vector<char>& matchesMask,
+#if CV_MAJOR_VERSION >= 4
+		  cv::DrawMatchesFlags
+#else
+		  int
+#endif
+		flags)
   {
     if( !matchesMask.empty() && matchesMask.size() != matches1to2.size() )
       CV_Error( CV_StsBadSize, "matchesMask must have the same size as matches1to2" );
@@ -179,7 +209,13 @@ namespace fbr{
 				    const cv::Mat& img2, const vector<cv::KeyPoint>& keypoints2,
 				    const vector<vector<cv::DMatch> >& matches1to2, cv::Mat& outImg,
 				    const cv::Scalar& matchColor, const cv::Scalar& singlePointColor,
-				    const vector<vector<char> >& matchesMask, cv::DrawMatchesFlags flags )
+				    const vector<vector<char> >& matchesMask,
+#if CV_MAJOR_VERSION >= 4
+		  cv::DrawMatchesFlags
+#else
+		  int
+#endif
+		flags)
   {
     if( !matchesMask.empty() && matchesMask.size() != matches1to2.size() )
       CV_Error( CV_StsBadSize, "matchesMask must have the same size as matches1to2" );

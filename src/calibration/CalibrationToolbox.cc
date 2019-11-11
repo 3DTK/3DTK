@@ -205,7 +205,13 @@ int CalibrationToolbox::calibrate() {
     //clock_t prevTimestamp = 0;
     //const Scalar RED(0, 0, 255), GREEN(0, 255, 0);
     //const char ESC_KEY = 27;
-    Mat image = imread(imagePath[0], cv::ImreadModes::IMREAD_COLOR);
+    Mat image = imread(imagePath[0],
+#if CV_MAJOR_VERSION > 2
+			cv::ImreadModes::IMREAD_COLOR
+#else
+			CV_LOAD_IMAGE_COLOR
+#endif
+			);
     Size imageSize = image.size();
     this->settings.imageSize = imageSize;
 
@@ -337,7 +343,12 @@ void CalibrationToolbox::saveCameraParams(Settings &s, Size &imageSize, Mat &cam
                 s.flag & cv::CALIB_FIX_ASPECT_RATIO ? " +fix_aspectRatio" : "",
                 s.flag & cv::CALIB_FIX_PRINCIPAL_POINT ? " +fix_principal_point" : "",
                 s.flag & cv::CALIB_ZERO_TANGENT_DIST ? " +zero_tangent_dist" : "");
-        fs.writeComment(buf, 0);
+#if CV_MAJOR_VERSION > 2
+        fs.writeComment(
+#else
+        cvWriteComment(*fs,
+#endif
+				buf, 0);
 
     }
 
@@ -363,7 +374,12 @@ void CalibrationToolbox::saveCameraParams(Settings &s, Size &imageSize, Mat &cam
             r = rvecs[i].t();
             t = tvecs[i].t();
         }
-        fs.writeComment("a set of 6-tuples (rotation vector + translation vector) for each view", 0);
+#if CV_MAJOR_VERSION > 2
+        fs.writeComment(
+#else
+        cvWriteComment(*fs,
+#endif
+				"a set of 6-tuples (rotation vector + translation vector) for each view", 0);
         fs << "Extrinsic_Parameters" << bigmat;
     }
 
@@ -435,11 +451,23 @@ int CalibrationToolbox::computeExtrinsic() {
     //Mat cameraMatrix = settings.estCameraMatrix;
     //Mat distCoeff = settings.estDistCoeff;
     double totalAvgErr = 0;
-    Mat image = imread(imagePath[0], cv::ImreadModes::IMREAD_COLOR);
+    Mat image = imread(imagePath[0],
+#if CV_MAJOR_VERSION > 2
+			cv::ImreadModes::IMREAD_COLOR
+#else
+			CV_LOAD_IMAGE_COLOR
+#endif
+			);
     Size imageSize = image.size();
     for(int i = 0; i < vecImagePoints.size(); i++){
         Mat rvec, tvec;
-        solvePnP(vecPatternPoints[i], vecImagePoints[i], camMatrix, distorCoeff, rvec, tvec, false, cv::SOLVEPNP_ITERATIVE);
+        solvePnP(vecPatternPoints[i], vecImagePoints[i], camMatrix, distorCoeff, rvec, tvec, false,
+#if CV_MAJOR_VERSION > 2
+				cv::SOLVEPNP_ITERATIVE
+#else
+				CV_ITERATIVE
+#endif
+				);
         rvector.push_back(rvec);
         tvector.push_back(tvec);
     }
