@@ -32,7 +32,13 @@ PinholeModel::~PinholeModel()
 Eigen::Affine3d PinholeModel::computeExtrinsicTransform(std::vector<cv::Point2f> _imagePoints, std::vector<cv::Point3f> _objectPoints)
 {
     cv::Mat_<double> rvec, tvec;
-    solvePnP(_objectPoints, _imagePoints, _cameraMatrix, _distCoeffs, rvec, tvec, false, CV_ITERATIVE);
+    solvePnP(_objectPoints, _imagePoints, _cameraMatrix, _distCoeffs, rvec, tvec, false,
+#if CV_MAJOR_VERSION > 2
+			cv::SOLVEPNP_ITERATIVE
+#else
+			CV_ITERATIVE
+#endif
+			);
 
     cv:: Mat_<double> rotMatrix;
     Rodrigues(rvec, rotMatrix);

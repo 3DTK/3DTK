@@ -77,7 +77,6 @@ cmake -H%APPVEYOR_BUILD_FOLDER% -B%APPVEYOR_BUILD_FOLDER%\build ^
 	-DWITH_PYTHON=OFF ^
 	-DWITH_LASLIB=OFF ^
 	-DWITH_WXWIDGETS=OFF ^
-	-DWITH_OPENCV=OFF ^
 	-G "MinGW Makefiles"
 if %ERRORLEVEL% GEQ 1 (
 	echo cmake configuration failed

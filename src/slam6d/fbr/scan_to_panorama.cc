@@ -306,11 +306,11 @@ int main(int argc, char** argv)
       vector<int> panoramaFormatParams;
       switch(info.panoramaFormat){
       case PNG:
-	panoramaFormatParams.push_back(CV_IMWRITE_PNG_COMPRESSION);
+	panoramaFormatParams.push_back(cv::IMWRITE_PNG_COMPRESSION);
 	panoramaFormatParams.push_back(info.panoramaFormatParam);
 	break;
       case JPEG:
-	panoramaFormatParams.push_back(CV_IMWRITE_JPEG_QUALITY);
+	panoramaFormatParams.push_back(cv::IMWRITE_JPEG_QUALITY);
 	panoramaFormatParams.push_back(info.panoramaFormatParam);
 	//panoramaFormatParams.push_back(CV_IMWRITE_JPEG_LUMA_QUALITY);
 	//panoramaFormatParams.push_back(100);

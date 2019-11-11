@@ -144,9 +144,12 @@ option(WITH_E57 "Build library for e57 file format support." OFF)
 # cvblob is needed for thermo
 if (WITH_OPENCV)
   find_package(OpenCV REQUIRED)
+  if (OpenCV_VERSION VERSION_LESS 4)
+  message(STATUS "building cvblob")
   include_directories(${OpenCV_INCLUDE_DIRS})
   add_subdirectory(3rdparty/cvblob)
   link_directories(${PROJECT_SOURCE_DIR}/3rdparty/cvblob)
+  endif()
 endif()
 
 ## CUDA accelerated collision detection
