@@ -121,9 +121,9 @@ public:
         }
 
         flag = 0;
-        if(calibFixPrincipalPoint) flag |= CV_CALIB_FIX_PRINCIPAL_POINT;
-        if(calibZeroTangentDist)   flag |= CV_CALIB_ZERO_TANGENT_DIST;
-        if(aspectRatio)            flag |= CV_CALIB_FIX_ASPECT_RATIO;
+        if(calibFixPrincipalPoint) flag |= cv::CALIB_FIX_PRINCIPAL_POINT;
+        if(calibZeroTangentDist)   flag |= cv::CALIB_ZERO_TANGENT_DIST;
+        if(aspectRatio)            flag |= cv::CALIB_FIX_ASPECT_RATIO;
 
 
         calibrationPattern = NOT_EXISTING;
@@ -148,7 +148,7 @@ public:
             view0.copyTo(result);
         }
         else if( atImageList < (int)imageList.size() )
-            result = cv::imread(imageList[atImageList++], CV_LOAD_IMAGE_COLOR);
+            result = cv::imread(imageList[atImageList++], cv::ImreadModes::IMREAD_COLOR);
 
         return result;
     }

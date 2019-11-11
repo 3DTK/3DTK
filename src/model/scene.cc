@@ -770,7 +770,7 @@ void model::Scene::detectPotentialOpenings(const LabeledPlane3d& surf,
     cv::SVMParams params;
     params.svm_type = cv::SVM::NU_SVC;
     params.kernel_type = cv::SVM::RBF;
-    params.term_crit = cv::TermCriteria(CV_TERMCRIT_ITER | CV_TERMCRIT_EPS, 1000, 1e-6);
+    params.term_crit = cv::TermCriteria(cv::TermCriteria::MAX_ITER | cv::TermCriteria::EPS, 1000, 1e-6);
 
     params.nu    = 0.8;
     params.C     = 8.0;
@@ -882,7 +882,7 @@ void model::Scene::detectPotentialOpenings(const LabeledPlane3d& surf,
 
     // draw the chosen rectangles, and also the occupancy map
     cv::Mat imgWithOpenings = surf.depthImg;
-    cv::cvtColor(imgWithOpenings, imgWithOpenings, CV_GRAY2BGR, 3);
+    cv::cvtColor(imgWithOpenings, imgWithOpenings, cv::COLOR_GRAY2BGR, 3);
 
     for (size_t i = 0; i < openings.size(); ++i) {
         int y1 = openings[i].edges[0];
@@ -919,8 +919,8 @@ void model::Scene::clusterOpenings(const LabeledPlane3d& surf, const vector<Cand
     unsigned int dim = 7;
 
     // a few matrix initializations
-    CvMat* points   = cvCreateMat(nrSamples, dim, CV_32FC1);
-    CvMat* clusters = cvCreateMat(nrSamples, 1, CV_32SC1);
+    cv::Mat points   = cv::Mat(nrSamples, dim, CV_32FC1);
+    cv::Mat clusters = cv::Mat(nrSamples, 1, CV_32SC1);
 
     // fill in the matrices with data
     for (size_t i = 0; i < nrSamples; ++i) {
@@ -932,31 +932,31 @@ void model::Scene::clusterOpenings(const LabeledPlane3d& surf, const vector<Cand
         float x = static_cast<float>(openings[i].edges[2] + openings[i].edges[3]) / 2.0;
         float y = static_cast<float>(openings[i].edges[0] + openings[i].edges[1]) / 2.0;
 
-        points->data.fl[i * dim + 0]  = x;                      // window center
-        points->data.fl[i * dim + 1]  = y;                      // window center
-        points->data.fl[i * dim + 2]  = openings[i].edges[0];   // upper edge
-        points->data.fl[i * dim + 3]  = openings[i].edges[1];   // lower edge
-        points->data.fl[i * dim + 4]  = openings[i].edges[2];   // left edge
-        points->data.fl[i * dim + 5]  = openings[i].edges[3];   // right edge
-        points->data.fl[i * dim + 6]  = openings[i].features[1];// edge ratio
+        points.at<float>(i * dim + 0)  = x;                      // window center
+        points.at<float>(i * dim + 1)  = y;                      // window center
+        points.at<float>(i * dim + 2)  = openings[i].edges[0];   // upper edge
+        points.at<float>(i * dim + 3)  = openings[i].edges[1];   // lower edge
+        points.at<float>(i * dim + 4)  = openings[i].edges[2];   // left edge
+        points.at<float>(i * dim + 5)  = openings[i].edges[3];   // right edge
+        points.at<float>(i * dim + 6)  = openings[i].features[1];// edge ratio
     }
 
     // termination criteria for the kMeans algorithm
-    CvTermCriteria term;
-    term.type     = CV_TERMCRIT_ITER | CV_TERMCRIT_EPS;
-    term.max_iter = 10;
+    cv::TermCriteria term;
+    term.type     = cv::TermCriteria::MAX_ITER | cv::TermCriteria::EPS;
+    term.maxCount = 10;
     term.epsilon  = 1.0;
     int maxNrClusters = 256;
 
     int nrClusters = 2;                                             // from how many clusters to start
     double prev, compactness;                                       // previous compactness, and current compactness
-    CvMat *centers = cvCreateMat(nrClusters - 1, dim, CV_32FC1);    // place where we compute the centers of each cluster
-    cvKMeans2(points, nrClusters - 1, clusters, term, 1, 0, 0, centers, &prev);
+    cv::Mat centers = cv::Mat(nrClusters - 1, dim, CV_32FC1);    // place where we compute the centers of each cluster
+    compactness = cv::kmeans(points, nrClusters - 1, clusters, term, 1, 0, centers);
+    prev = compactness;
 
     while (1) {
-        cvReleaseMat(&centers);
-        centers = cvCreateMat(nrClusters, dim, CV_32FC1);
-        cvKMeans2(points, nrClusters, clusters, term, 1, 0, 0, centers, &compactness);
+        centers = cv::Mat(nrClusters, dim, CV_32FC1);
+        compactness = cv::kmeans(points, nrClusters, clusters, term, 1, 0, centers);
 
         // TODO put somewhere everything in class
         double deltaCompactness = compactness - prev;
@@ -982,8 +982,8 @@ void model::Scene::clusterOpenings(const LabeledPlane3d& surf, const vector<Cand
     // create an image with the clusters in separate colors
     cv::Mat clusterImg = surf.depthImg;
     cv::Mat finalImg   = surf.depthImg;
-    cv::cvtColor(clusterImg, clusterImg, CV_GRAY2BGR, 3);
-    cv::cvtColor(finalImg, finalImg, CV_GRAY2BGR, 3);
+    cv::cvtColor(clusterImg, clusterImg, cv::COLOR_GRAY2BGR, 3);
+    cv::cvtColor(finalImg, finalImg, cv::COLOR_GRAY2BGR, 3);
 
     // count how many elements we have in each cluster
     vector<int> clusterCount;
@@ -1001,7 +1001,7 @@ void model::Scene::clusterOpenings(const LabeledPlane3d& surf, const vector<Cand
     // fill in the result separating each cluster
     for (size_t i = 0; i < nrSamples; ++i) {
         // the cluster of the current opening
-        int currCluster = clusters->data.i[i];
+        int currCluster = clusters.data[i];
 
         // draw each cluster
         int y1 = openings[i].edges[0];
@@ -1048,10 +1048,10 @@ void model::Scene::clusterOpenings(const LabeledPlane3d& surf, const vector<Cand
     // display the center of the cluster only for the clusters that have candidates
     for (int i = 0; i < nrClusters; ++i) {
         if (clusterCount[i] > 0) {
-            int x = static_cast<int>(centers->data.fl[i * dim + 0]);
-            int y = static_cast<int>(centers->data.fl[i * dim + 1]);
-            cv::circle(clusterImg, cv::Point(x, y), 2, colors[i], CV_FILLED);
-            cv::circle(finalImg, cv::Point(x, y), 2, colors[i], CV_FILLED);
+            int x = static_cast<int>(centers.at<float>(i * dim + 0));
+            int y = static_cast<int>(centers.at<float>(i * dim + 1));
+            cv::circle(clusterImg, cv::Point(x, y), 2, colors[i], cv::FILLED);
+            cv::circle(finalImg, cv::Point(x, y), 2, colors[i], cv::FILLED);
         }
     }
 
@@ -1059,10 +1059,6 @@ void model::Scene::clusterOpenings(const LabeledPlane3d& surf, const vector<Cand
 
     cv::imwrite("./img/depthClusters.png", clusterImg);
     cv::imwrite("./img/depthOpenings.png", finalImg);
-
-    cvReleaseMat(&points);
-    cvReleaseMat(&centers);
-    cvReleaseMat(&clusters);
 }
 
 void model::Scene::addFinalOpenings(const LabeledPlane3d& surf,
@@ -1114,7 +1110,7 @@ void model::Scene::addFinalOpenings(const LabeledPlane3d& surf,
     // display an image with the final openings
     int r, g, b;
     cv::Mat finalOpeningsImg = surf.depthImg.clone();
-    cv::cvtColor(finalOpeningsImg, finalOpeningsImg, CV_GRAY2BGR, 3);
+    cv::cvtColor(finalOpeningsImg, finalOpeningsImg, cv::COLOR_GRAY2BGR, 3);
 
     for (vector<CandidateOpening>::iterator it = candidates.begin(); it < candidates.end(); ++it) {
         int y1 = it->edges[0];

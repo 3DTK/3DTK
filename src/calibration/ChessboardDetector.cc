@@ -11,10 +11,10 @@ ChessboardDetector::ChessboardDetector(cv::Size patternSize, float squareSize, b
     _squareSize(squareSize)
 {
     _flags = 0;
-    if (adaptiveThreshold) { _flags |= CV_CALIB_CB_ADAPTIVE_THRESH; }
-    if (normalizeImage) { _flags |= CV_CALIB_CB_NORMALIZE_IMAGE; }
-    if (filterQuads) { _flags |= CV_CALIB_CB_FILTER_QUADS; }
-    if (fastCheck) { _flags |= CV_CALIB_CB_FAST_CHECK; }
+    if (adaptiveThreshold) { _flags |= cv::CALIB_CB_ADAPTIVE_THRESH; }
+    if (normalizeImage) { _flags |= cv::CALIB_CB_NORMALIZE_IMAGE; }
+    if (filterQuads) { _flags |= cv::CALIB_CB_FILTER_QUADS; }
+    if (fastCheck) { _flags |= cv::CALIB_CB_FAST_CHECK; }
 
     if (squareSize <= 0) {
         _patternPoints = std::vector<cv::Point3f>();
@@ -34,8 +34,8 @@ bool ChessboardDetector::detect(const cv::Mat& image)
     bool found = findChessboardCorners(image, _patternSize, _imagePoints, _flags);
 
     if (found) {
-        cornerSubPix(image, _imagePoints, cvSize(11, 11), cvSize(-1, -1),
-                     cvTermCriteria(CV_TERMCRIT_EPS + CV_TERMCRIT_ITER, 30, 0.1));
+        cornerSubPix(image, _imagePoints, cv::Size(11, 11), cv::Size(-1, -1),
+                     cv::TermCriteria(cv::TermCriteria::EPS + cv::TermCriteria::MAX_ITER, 30, 0.1));
     }
 
     auto end = std::chrono::high_resolution_clock::now();

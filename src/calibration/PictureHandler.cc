@@ -58,11 +58,11 @@ using namespace cv;
 
         }else if (pattern == Settings::CHESSBOARD){
             found = findChessboardCorners(matImage, s.boardSize, this->point2fVec,
-                CV_CALIB_CB_ADAPTIVE_THRESH | CV_CALIB_CB_NORMALIZE_IMAGE | CV_CALIB_CB_FILTER_QUADS);
+                cv::CALIB_CB_ADAPTIVE_THRESH | cv::CALIB_CB_NORMALIZE_IMAGE | cv::CALIB_CB_FILTER_QUADS);
 
             if (found) {
                 cout << "Performing subpixel refinement of chessboard corners." << endl;
-                cornerSubPix(matImage, this->point2fVec, cvSize(11, 11), cvSize(-1, -1), cvTermCriteria( CV_TERMCRIT_EPS + CV_TERMCRIT_ITER, 30, 0.1));
+                cornerSubPix(matImage, this->point2fVec, cv::Size(11, 11), cv::Size(-1, -1), cv::TermCriteria( cv::TermCriteria::EPS + cv::TermCriteria::MAX_ITER, 30, 0.1));
             }
 
             gettimeofday(&end, 0);
@@ -109,7 +109,7 @@ using namespace cv;
 
 
     void PictureHandler::loadImage(string path) {
-        Mat imageCV = imread(path, CV_LOAD_IMAGE_GRAYSCALE);
+        Mat imageCV = imread(path, cv::ImreadModes::IMREAD_GRAYSCALE);
         this->matImage = imageCV;
         if (imageCV.rows > 0 && imageCV.cols > 0) {
             image = image_u8_create(imageCV.cols, imageCV.rows);

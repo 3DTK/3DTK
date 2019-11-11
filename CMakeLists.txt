@@ -142,7 +142,7 @@ option(WITH_LASLIB "Whether to build LASlib based scanio library" ON)
 option(WITH_E57 "Build library for e57 file format support." OFF)
 
 # cvblob is needed for thermo
-if (WITH_OPENCV)
+if (WITH_OPENCV AND OpenCV_VERSION VERSION_LESS 4)
   find_package(OpenCV REQUIRED)
   include_directories(${OpenCV_INCLUDE_DIRS})
   add_subdirectory(3rdparty/cvblob)
