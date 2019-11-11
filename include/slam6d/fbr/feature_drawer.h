@@ -27,26 +27,62 @@ namespace fbr{
    */
   class feature_drawer{
 
-    void _DrawKeypoint( cv::Mat& img, const cv::KeyPoint& p, const cv::Scalar& color, int flags );
+    void _DrawKeypoint( cv::Mat& img, const cv::KeyPoint& p, const cv::Scalar& color,
+#if CV_MAJOR_VERSION >= 4
+		  cv::DrawMatchesFlags
+#else
+		  int
+#endif
+		  flags);
     void _PrepareImgAndDrawKeypoints( const cv::Mat& img1, const std::vector<cv::KeyPoint>& keypoints1,
 				      const cv::Mat& img2, const std::vector<cv::KeyPoint>& keypoints2,
 				      cv::Mat& outImg, cv::Mat& outImg1, cv::Mat& outImg2,
-				      const cv::Scalar& singlePointColor, int flags );
+				      const cv::Scalar& singlePointColor,
+#if CV_MAJOR_VERSION >= 4
+		  cv::DrawMatchesFlags
+#else
+		  int
+#endif
+		  flags);
     void _DrawMatch( cv::Mat& outImg, cv::Mat& outImg1, cv::Mat& outImg2 ,
-		     const cv::KeyPoint& kp1, const cv::KeyPoint& kp2, const cv::Scalar& matchColor, int flags );
+		     const cv::KeyPoint& kp1, const cv::KeyPoint& kp2, const cv::Scalar& matchColor,
+#if CV_MAJOR_VERSION >= 4
+		  cv::DrawMatchesFlags
+#else
+		  int
+#endif
+		  flags);
   public:
     void DrawKeypoints( const cv::Mat& image, const std::vector<cv::KeyPoint>& keypoints, cv::Mat& outImage,
-			const cv::Scalar& _color, int flags );
+			const cv::Scalar& _color,
+#if CV_MAJOR_VERSION >= 4
+		  cv::DrawMatchesFlags
+#else
+		  int
+#endif
+		  flags);
     void DrawMatches( const cv::Mat& img1, const std::vector<cv::KeyPoint>& keypoints1,
 		      const cv::Mat& img2, const std::vector<cv::KeyPoint>& keypoints2,
 		      const std::vector<cv::DMatch>& matches1to2, cv::Mat& outImg,
 		      const cv::Scalar& matchColor, const cv::Scalar& singlePointColor,
-		      const std::vector<char>& matchesMask, int flags );
+		      const std::vector<char>& matchesMask,
+#if CV_MAJOR_VERSION >= 4
+		  cv::DrawMatchesFlags
+#else
+		  int
+#endif
+		  flags);
     void DrawMatches( const cv::Mat& img1, const std::vector<cv::KeyPoint>& keypoints1,
 		      const cv::Mat& img2, const std::vector<cv::KeyPoint>& keypoints2,
 		      const std::vector<std::vector<cv::DMatch> >& matches1to2, cv::Mat& outImg,
 		      const cv::Scalar& matchColor, const cv::Scalar& singlePointColor,
-		      const std::vector<std::vector<char> >& matchesMask, int flags );
+		      const std::vector<std::vector<char> >& matchesMask,
+#if CV_MAJOR_VERSION >= 4
+		  cv::DrawMatchesFlags
+#else
+		  int
+#endif
+		  flags);
   };
 }
 #endif /*FEATURE_DRAWER_H*/
