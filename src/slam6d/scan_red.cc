@@ -52,26 +52,23 @@
 #include <omp.h>
 #endif
 
-#ifndef _MSC_VER
-#include <getopt.h>
-#endif
-
 #ifdef _WIN32
-#include "XGetopt.h"
+#include <windows.h>
 #include <direct.h>
 #define mkdir(path,mode) _mkdir (path)
+#else
+#include <dlfcn.h>
 #endif
 
 #ifdef _MSC_VER
 #define strcasecmp _stricmp
 #define strncasecmp _strnicmp
-#include <windows.h>
-#include <direct.h>
+#include "XGetopt.h"
 #else
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <strings.h>
-#include <dlfcn.h>
+#include <getopt.h>
 #endif
 
 using namespace fbr;
