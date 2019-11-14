@@ -45,6 +45,12 @@ case "$DIST" in
 		wget https://launchpad.net/ubuntu/+archive/primary/+files/libseccomp2_2.4.1-0ubuntu0.16.04.2_$arch.deb
 		sudo apt-get install ./libseccomp2_2.4.1-0ubuntu0.16.04.2_$arch.deb
 		;;
+	xenial|bionic|stretch)
+		# nothing to do
+		;;
+	*)
+		echo "unknown distribution: $DIST" >&2
+		exit 1
 esac
 
 cat > Dockerfile <<EOF
@@ -70,6 +76,12 @@ RUN echo "deb $MIRROR $DIST-updates $COMP" >> /etc/apt/sources.list
 RUN echo "deb $SECMIRROR $DIST-security $COMP" >> /etc/apt/sources.list
 EOF
 		;;
+	sid|bullseye)
+		# nothing to do
+		;;
+	*)
+		echo "unknown distribution: $DIST" >&2
+		exit 1
 esac
 
 TAG="3dtk.docker.$DERIV.$DIST"
