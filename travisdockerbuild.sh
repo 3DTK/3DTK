@@ -33,7 +33,7 @@ esac
 CMAKEOPTS="-DCMAKE_VERBOSE_MAKEFILE=ON"
 
 case "$DIST" in
-	buster|sid)
+	buster|bullseye|sid)
 		CMAKEOPTS="$CMAKEOPTS -DWITH_ROS=ON"
 		# if buster or unstable are run inside Docker, then generating
 		# moc_GLWidget.cpp will fail with:

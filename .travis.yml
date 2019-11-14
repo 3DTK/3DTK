@@ -81,6 +81,14 @@ matrix:
       services:
         - docker
       env:
+        - DERIV=debian DIST=bullseye
+      if: branch NOT IN (macos, osx, apple, ubuntu)
+    - os: linux
+      arch: amd64
+      sudo: required
+      services:
+        - docker
+      env:
         - DERIV=debian DIST=stretch
       if: branch NOT IN (macos, osx, apple, ubuntu)
     - os: linux
