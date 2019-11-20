@@ -302,12 +302,12 @@ int main(int argc, char **argv)
       }
 
     } else if(use_type) {
-      DataType xyz_type = 
+      DataType xyz_type =
           (((DataType)source->get("type" + red_string)).size() == 0) ?
- 
-          source->create("type" + red_string, sizeof(int)*xyz.size()) : 
-          source->get("type" + red_string); 
- 
+
+          source->create("type" + red_string, sizeof(int)*xyz.size()) :
+          source->get("type" + red_string);
+
       if (!(types & PointType::USE_TYPE)) {
         for(unsigned int i = 0; i < xyz.size(); i++) xyz_type[i] = 0;
       }
