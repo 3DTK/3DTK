@@ -53,7 +53,7 @@ void validate(boost::any& v, const std::vector<std::string>& values,
 
 int parse_options(int argc, char **argv, std::string &dir, double &red, int &rand,
             int &start, int &end, int &maxDist, int &minDist, bool &use_pose,
-            bool &use_xyz, bool &use_reflectance, bool &use_color, int &octree, IOType &type, std::string& customFilter, double &scaleFac,
+            bool &use_xyz, bool &use_reflectance, bool &use_type, bool &use_color, int &octree, IOType &type, std::string& customFilter, double &scaleFac,
 	    bool &hexfloat, bool &high_precision, int &frame, bool &use_normals)
 {
 po::options_description generic("Generic options");
@@ -91,6 +91,8 @@ po::options_description generic("Generic options");
      "export in color as RGB")
     ("reflectance,R", po::bool_switch(&use_reflectance)->default_value(false),
      "export reflectance values")
+    ("type,T", po::bool_switch(&use_type)->default_value(false),
+     "export type/class values")
     ("normals,N", po::bool_switch(&use_normals)->default_value(false),
      "export point normals")
     ("trustpose,p", po::bool_switch(&use_pose)->default_value(false),
@@ -164,6 +166,7 @@ int main(int argc, char **argv)
   bool   use_xyz = false;
   bool   use_color = false;
   bool   use_reflectance = false;
+  bool   use_type = false;
   bool   use_normals = false;
   int octree       = 0;  // employ randomized octree reduction?
   IOType iotype    = UOS;
@@ -177,7 +180,7 @@ int main(int argc, char **argv)
 
   try {
     parse_options(argc, argv, dir, red, rand, start, end,
-      maxDist, minDist, uP, use_xyz, use_reflectance, use_color, octree, iotype, customFilter, scaleFac,
+      maxDist, minDist, uP, use_xyz, use_reflectance, use_type, use_color, octree, iotype, customFilter, scaleFac,
       hexfloat, high_precision, frame, use_normals);
   } catch (std::exception& e) {
     std::cerr << "Error while parsing settings: " << e.what() << std::endl;
@@ -242,6 +245,7 @@ int main(int argc, char **argv)
   unsigned int types = PointType::USE_NONE;
   if(supportsReflectance(iotype)) types |= PointType::USE_REFLECTANCE;
   if(supportsColor(iotype)) types |= PointType::USE_COLOR;
+  if(supportsType(iotype)) types |= PointType::USE_TYPE;
 
   // if specified, filter scans
   for (size_t i = 0; i < Scan::allScans.size(); i++)  {
@@ -295,6 +299,22 @@ int main(int argc, char **argv)
         write_xyzr(xyz, xyz_reflectance, redptsout, scaleFac, hexfloat, high_precision);
       } else {
         write_uosr(xyz, xyz_reflectance, redptsout, scaleFac*100.0 , hexfloat, high_precision);
+      }
+
+    } else if(use_type) {
+      DataType xyz_type = 
+          (((DataType)source->get("type" + red_string)).size() == 0) ?
+ 
+          source->create("type" + red_string, sizeof(int)*xyz.size()) : 
+          source->get("type" + red_string); 
+ 
+      if (!(types & PointType::USE_TYPE)) {
+        for(unsigned int i = 0; i < xyz.size(); i++) xyz_type[i] = 0;
+      }
+      if(use_xyz) {
+        write_xyzc(xyz, xyz_type, redptsout, scaleFac, hexfloat, high_precision);
+      } else {
+        write_uosc(xyz, xyz_type, redptsout, scaleFac*100.0 , hexfloat, high_precision);
       }
 
     } else if(use_color) {

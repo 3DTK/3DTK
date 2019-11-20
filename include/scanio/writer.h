@@ -13,10 +13,12 @@ void write_uos_rgb(std::vector<cv::Vec4f> &points, std::vector<cv::Vec3b> &color
 
 void write_uos(DataXYZ &xyz, FILE *file, double scaleFac = 1.0, bool hexfloat = false, bool high_precision=false, volatile bool *abort_flag = nullptr);
 void write_uosr(DataXYZ &xyz, DataReflectance &xyz_reflectance, FILE *file, double scaleFac = 1.0, bool hexfloat = false,bool high_precision=false, volatile bool *abort_flag = nullptr);
+void write_uosc(DataXYZ &xyz, DataType &xyz_type, FILE *file, double scaleFac = 1.0, bool hexfloat = false,bool high_precision=false, volatile bool *abort_flag = nullptr);
 void write_uos_rgb(DataXYZ &xyz, DataRGB &rgb, FILE *file, double scaleFac = 1.0, bool hexfloat = false, bool high_precision=false, volatile bool *abort_flag = nullptr);
 void write_uos_normal(DataXYZ &xyz, DataNormal &normals, FILE *file, double scaleFac = 1.0, bool hexfloat = false, bool high_precision=false, volatile bool *abort_flag = nullptr);
 void write_xyz(DataXYZ &xyz, FILE *file, double scaleFac = 0.01, bool hexfloat = false, bool high_precision=false, volatile bool *abort_flag = nullptr);
 void write_xyzr(DataXYZ &xyz, DataReflectance &xyz_reflectance, FILE *file, double scaleFac = 0.01, bool hexfloat = false, bool high_precision=false, volatile bool *abort_flag = nullptr);
+void write_xyzc(DataXYZ &xyz, DataType &xyz_type, FILE *file, double scaleFac = 0.01, bool hexfloat = false, bool high_precision=false, volatile bool *abort_flag = nullptr);
 void write_xyz_rgb(DataXYZ &xyz, DataRGB &rgb, FILE *file, double scaleFac = 0.01, bool hexfloat = false, bool high_precision=false, volatile bool *abort_flag = nullptr);
 void write_xyz_normal(DataXYZ &xyz, DataNormal &normals, FILE *file, double scaleFac = 0.01, bool hexfloat = false, bool high_precision=false, volatile bool *abort_flag = nullptr);
 void write_ply_rgb(std::vector<cv::Vec4f> &points, std::vector<cv::Vec3b> &color, std::string &dir, std::string id);
