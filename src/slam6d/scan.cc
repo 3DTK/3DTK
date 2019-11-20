@@ -442,6 +442,11 @@ void Scan::calcReducedPoints()
     DataReflectance my_reflectance(get("reflectance"));
     reflectance = my_reflectance;
   }
+  DataType type(DataPointer(0, 0));
+  if (reduction_pointtype.hasType()) {
+    DataType my_type(get("type"));
+    type = my_type;
+  }
   DataRGB rgb(DataPointer(0, 0));
   if (reduction_pointtype.hasColor()) {
     DataRGB my_rgb(get("rgb"));
@@ -455,6 +460,9 @@ void Scan::calcReducedPoints()
     }
     if (reduction_pointtype.hasReflectance()) {
       DataReflectance reflectance_reduced(create("reflectance reduced", sizeof(float)*reflectance.size()));
+    }
+    if (reduction_pointtype.hasType()) {
+      DataType type_reduced(create("type reduced", sizeof(int)*type.size()));
     }
     if (reduction_pointtype.hasColor()) {
       DataRGB rgb_reduced(create("color reduced", sizeof(unsigned char)*3*xyz.size()));
@@ -492,6 +500,18 @@ void Scan::calcReducedPoints()
                                         sizeof(float)*reflectance.size()));
       for(size_t i = 0; i < xyz.size(); ++i) {
            reflectance_reduced[i] = reflectance[i];
+        }
+    }
+    if (reduction_pointtype.hasType()) {
+      // check if we can create a large enough array. The maximum size_t on 32 bit
+      // is around 4.2 billion
+      if (sizeof(size_t) == 4 && type.size() > ((size_t)(-1))/sizeof(int)) {
+              throw std::runtime_error("Insufficient size of size_t datatype");
+      }
+      DataType type_reduced(create("type reduced",
+                                        sizeof(int)*type.size()));
+      for(size_t i = 0; i < xyz.size(); ++i) {
+           type_reduced[i] = type[i];
         }
     }
     if (reduction_pointtype.hasColor()) {
@@ -534,6 +554,8 @@ void Scan::calcReducedPoints()
         xyz_in[i][j] = xyz[i][j];
       if (reduction_pointtype.hasReflectance())
         xyz_in[i][j++] = reflectance[i];
+      if (reduction_pointtype.hasType())
+        xyz_in[i][j++] = type[i];
       if (reduction_pointtype.hasColor())
         memcpy(&xyz_in[i][j++], &rgb[i][0], 3);
       if (reduction_pointtype.hasNormal())
@@ -576,6 +598,7 @@ void Scan::calcReducedPoints()
     size_t size = center.size();
     DataXYZ xyz_reduced(create("xyz reduced", sizeof(double)*3*size));
     DataReflectance reflectance_reduced(DataPointer(0, 0));
+    DataType type_reduced(DataPointer(0, 0));
     DataRGB rgb_reduced(DataPointer(0, 0));
     DataNormal normal_reduced(DataPointer(0, 0));
     if (reduction_pointtype.hasReflectance()) {
@@ -588,6 +611,16 @@ void Scan::calcReducedPoints()
       DataReflectance my_reflectance_reduced(create("reflectance reduced",
                                                     sizeof(float)*size));
       reflectance_reduced = my_reflectance_reduced;
+    }
+    if (reduction_pointtype.hasType()) {
+      // check if we can create a large enough array. The maximum size_t on 32 bit
+      // is around 4.2 billion
+      if (sizeof(size_t) == 4 && size > ((size_t)(-1))/sizeof(int)) {
+              throw std::runtime_error("Insufficient size of size_t datatype");
+      }
+      DataType my_type_reduced(create("type reduced",
+                                                    sizeof(int)*size));
+      type_reduced = my_type_reduced;
     }
     if (reduction_pointtype.hasColor()) {
       // check if we can create a large enough array. The maximum size_t on 32 bit
@@ -617,6 +650,8 @@ void Scan::calcReducedPoints()
         xyz_reduced[i][j] = center[i][j];
       if (reduction_pointtype.hasReflectance())
         reflectance_reduced[i] = center[i][j++];
+      if (reduction_pointtype.hasType())
+        type_reduced[i] = center[i][j++];
       if (reduction_pointtype.hasColor())
         memcpy(&rgb_reduced[i][0], &center[i][j++], 3);
       if (reduction_pointtype.hasNormal())
