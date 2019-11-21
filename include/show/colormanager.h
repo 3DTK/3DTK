@@ -293,6 +293,9 @@ class ColorManager {
       extent = max - min;
     }
 
+    float** getFloatColormap() {
+      return colormap;
+    }
   protected:
 
 

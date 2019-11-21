@@ -352,6 +352,108 @@ void DrawCameras(void)
   }
 }
 
+void DrawTypeLegend() {
+  // Only draw when Color value = type (for classification tasks)
+  if (listboxColorVal==5) {
+  //	glMatrixMode(GL_MODELVIEW);
+    glPushMatrix();
+    glLoadIdentity();
+    glMatrixMode(GL_PROJECTION);
+
+    // Save the current projection matrix
+    glPushMatrix();
+    // Make the current matrix the identity matrix
+    glLoadIdentity();
+
+    // Set the projection (to 2D orthographic)
+    glOrtho(0.0,current_width,0.0,current_height,-1,1);
+
+    int treshold = 20; // If number of different types is >treshold, dont show indivdual entry for each class/type.
+    int min = (int) mincolor_value;
+    int max = (int) maxcolor_value;
+    //unsigned int buckets = cm->staticManager.back()->buckets;
+    unsigned int buckets = cm->getBuckets();
+    float** colorMap = cm->getColorMap();
+
+    float color[3];
+
+    char text[25];
+
+    glDisable(GL_FOG);
+    // Show at maximum 20 classes/types individually
+    if (max - min < treshold) {
+      int spacing = 20; // Spaing between class labels in pixel
+      int nr_values = max-min;
+      float bucket_steps = buckets/nr_values;
+      int startY = (nr_values+2)*spacing;
+      for (int i=0;i<=nr_values;i++) {
+        //char test[100];
+        glColor3d(1,1,1);
+        color[0] = colorMap[(int)(i*bucket_steps)][0];
+        color[1] = colorMap[(int)(i*bucket_steps)][1];
+        color[2] = colorMap[(int)(i*bucket_steps)][2];
+
+        sprintf(text, "Class %i", min+i);
+        glRasterPos3f(current_width-100      , startY-i*spacing     , 1);
+        _glutBitmapString(GLUT_BITMAP_8_BY_13 , text);
+        glBegin(GL_QUADS);
+        glColor3d(color[0],color[1],color[2]);
+        glPolygonMode(GL_FRONT, GL_FILL);
+        //glColor3d(1,0,0);
+        glVertex3f(current_width-123, startY-i*spacing+13, 1);
+        glVertex3f(current_width-110, startY-i*spacing+13, 1);
+        glVertex3f(current_width-110, startY-i*spacing, 1);
+        glVertex3f(current_width-123, startY-i*spacing, 1);
+        glColor3d(0,0,0);
+        glPolygonMode(GL_FRONT, GL_LINE);
+        glVertex3f(current_width-124, startY-i*spacing+14, 1);
+        glVertex3f(current_width-109, startY-i*spacing+14, 1);
+        glVertex3f(current_width-109, startY-i*spacing-1, 1);
+        glVertex3f(current_width-124, startY-i*spacing-1, 1);
+        glEnd();
+      }
+    }
+    else { // Show color bar instead of individual entries
+      int legendHeight = 100; // Pixels
+      float bucket_steps = buckets/(legendHeight-1); // 100 pixel color bar
+      int startY = 140;
+      glLineWidth(1);
+      glBegin(GL_LINES);
+
+      for (int i=0; i<legendHeight; i++) {
+        color[0] = colorMap[(int)(i*bucket_steps)][0];
+        color[1] = colorMap[(int)(i*bucket_steps)][1];
+        color[2] = colorMap[(int)(i*bucket_steps)][2];
+        glColor3d(color[0],color[1],color[2]);
+        glVertex3f(current_width-73, startY-i, 1);
+        glVertex3f(current_width-60, startY-i, 1);
+      }
+      glEnd();
+      glBegin(GL_QUADS);
+      glColor3d(0,0,0);
+      glPolygonMode(GL_FRONT, GL_LINE);
+      glVertex3f(current_width-74, startY+1, 1);
+      glVertex3f(current_width-59, startY+1, 1);
+      glVertex3f(current_width-59, startY-legendHeight, 1);
+      glVertex3f(current_width-74, startY-legendHeight, 1);
+      glEnd();
+      glColor3d(1,1,1);
+      sprintf(text, "%i", min);
+      glRasterPos3f(current_width-50, startY, 1);
+      _glutBitmapString(GLUT_BITMAP_8_BY_13 , text);
+      sprintf(text, "%i", max);
+      glRasterPos3f(current_width-50, startY-legendHeight, 1);
+      _glutBitmapString(GLUT_BITMAP_8_BY_13 , text);
+    }
+    glEnable(GL_FOG);
+
+    // Restore the original projection matrix
+    glPopMatrix();
+    glMatrixMode(GL_MODELVIEW);
+    glPopMatrix();
+  }
+}
+
 void DrawScala() {
   if (factor != 1) return;
 
@@ -841,7 +943,7 @@ void DisplayItFunc(GLenum mode, bool interruptable)
   // if show points is true the draw points
   if (show_points == 1) DrawPoints(mode, interruptable);
 
-
+  if (!hide_classLabels) DrawTypeLegend();
   if (label) DrawUrl();
 
   glPopMatrix();

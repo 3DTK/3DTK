@@ -69,6 +69,7 @@ struct display_settings {
   bool anim_convert_jpg;
 
   bool hide_label;
+  bool hide_classLabels;
 };
 
 struct window_settings {
@@ -111,7 +112,7 @@ void setDisplayOptions(double& scale, GLfloat& fov, int& viewmode,
 		       bool& noPoints, bool& noCameras, bool& noPath, bool& noPoses,
 		       bool& noFog, int& fogType, GLfloat& fogDensity,
 		       Position& position, Quaternion& rotation,
-		       int& pointsize, boost::program_options::options_description& display_options);
+		       int& pointsize, bool& hide_classLabels, boost::program_options::options_description& display_options);
 void setColorOptions(Color& bgcolor, bool& color, ShowColormap& colormap,
 		     float& colormin, float& colormax,
 		     int& scansColored, bool& noAnimColor,

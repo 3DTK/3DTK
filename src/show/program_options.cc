@@ -25,7 +25,8 @@ void parse_args(int argc, char **argv, dataset_settings& dss, window_settings& w
 		    no_points, no_cameras, no_path, no_poses,
 		    no_fog, ds.fog.type, ds.fog.density,
 		    ds.camera.position, ds.camera.rotation, ds.pointsize,
-		    display_options);
+		    ds.hide_classLabels,
+        display_options);
 
   options_description color_options("Point coloring");
   setColorOptions(dss.coloring.bgcolor, dss.coloring.explicit_coloring,
@@ -300,6 +301,7 @@ void setDisplayOptions(double& scale, GLfloat& fov, int& viewmode,
 		       bool& noFog, int& fogType, GLfloat& fogDensity,
 		       Position& position, Quaternion& rotation,
 		       int& pointsize,
+           bool& hide_classLabels,
 		       options_description& display_options)
 {
   display_options.add_options()
@@ -339,6 +341,8 @@ void setDisplayOptions(double& scale, GLfloat& fov, int& viewmode,
      "Camera starting rotation, given as a quaternion \"%lf,%lf,%lf,%lf\" for x, y, z, and w.")
     ("pointsize", value(&pointsize)->default_value(1),
      "Size of each point in pixels.")
+    ("hideClassLabels", bool_switch(&hide_classLabels),
+     "Hide legend with class labels when using coloring by point type")
     ;
 }
 
@@ -391,9 +395,9 @@ void setScanOptions(bool& scanserver, int& start, int& end,
     ("end,e", value(&end)->default_value(-1), "Stop at this scan number (0-based, with -1 meaning don't stop)")
     ("format,f", value(&format)->default_value(UOS, "uos"),
      "The input files are read with this shared library.\n"
-     "Available values: uos, uos_map, uos_rgb, uos_frames, uos_map_frames, "
+     "Available values: uos, uosc, uos_map, uos_rgb, uos_frames, uos_map_frames, "
      "old, rts, rts_map, ifp, riegl_txt, riegl_rgb, riegl_bin, zahn, ply, "
-     "wrl, xyz, zuf, iais, front, x3d, rxp, ais.")
+     "wrl, xyz, xyzc, zuf, iais, front, x3d, rxp, ais.")
     ;
 }
 

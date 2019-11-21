@@ -158,6 +158,11 @@ bool nogui = false;
 bool hide_label = false;
 
 /**
+ * hide ClassLabels when using point coloring by type
+ */
+bool hide_classLabels = false;
+
+/**
  * take a screenshot and exit
  */
 bool takescreenshot = false;
@@ -635,6 +640,7 @@ void copy_settings_to_globals(
   identity = dss.identity;
 
   hide_label = ds.hide_label;
+  hide_classLabels = ds.hide_classLabels;
 
   // Start in RGB mode if the user requests it or they request no other coloring
   if (dss.coloring.explicit_coloring || (dss.coloring.colorval == -1 && dss.coloring.ptype.hasColor())) {
