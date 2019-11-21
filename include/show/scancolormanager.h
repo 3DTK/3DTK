@@ -54,6 +54,8 @@ class ScanColorManager {
     void setMode(const unsigned int &mode);
     void setInvert(bool invert);
 
+    float** getColorMap();
+    unsigned int getBuckets();
     float getMin();
     float getMax();
     float getMin(unsigned int dim);

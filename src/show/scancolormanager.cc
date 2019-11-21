@@ -98,6 +98,8 @@ ScanColorManager::ScanColorManager(unsigned int _buckets, PointType type, bool a
       }
     }
 
+    float** ScanColorManager::getColorMap() { return allManager.front()->getFloatColormap(); };
+    unsigned int ScanColorManager::getBuckets() { return buckets; };
     float ScanColorManager::getMin() { return mins[currentdim];};
     float ScanColorManager::getMax() { return maxs[currentdim];};
     float ScanColorManager::getMin(unsigned int dim) { return mins[dim];};
