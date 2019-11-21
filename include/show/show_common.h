@@ -220,6 +220,11 @@ extern bool nogui;
 extern bool hide_label;
 
 /**
+ * hide class label legend when using point coloring by type
+ */
+extern bool hide_classLabels;
+
+/**
  * take a screenshot and exit
  */
 extern bool takescreenshot;
