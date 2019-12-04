@@ -827,6 +827,13 @@ int main(int argc, char **argv)
             reddir,
             to_string(iter,3));
 
+      Scan::openDirectory(scanserver, dir, iotype, iter, iter);
+      Scan* scan = *Scan::allScans.begin();
+      writeposefile(reddir,
+          scan->get_rPos(),
+          scan->get_rPosTheta(),
+          scan->getIdentifier());
+
     }
     Scan::closeDirectory();
   }
