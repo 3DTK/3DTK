@@ -102,12 +102,12 @@ icp6D::icp6D(icp6Dminimizer *my_icp6Dminimizer, double max_dist_match,
 int icp6D::match(Scan* PreviousScan, Scan* CurrentScan,
                  PairingMode pairing_mode)
 {
+  double id[16];
+  M4identity(id);
+  CurrentScan->transform(id, Scan::ICP, 0);  // write end pose
   // If ICP shall not be applied, then just write
-  // the identity matrix
+  // the identity matrix and return
   if (max_num_iterations == 0) {
-    double id[16];
-    M4identity(id);
-    CurrentScan->transform(id, Scan::ICP, 0);  // write end pose
     return 0;
   }
 
