@@ -453,7 +453,7 @@ void reduce_range(cv::Mat mat, std::vector<cv::Vec4f> &reduced_points, int width
 		  bool imageOptimization)
 {
   //panorama image(width, height, ptype);
-  panorama image(width, height, ptype, nImages, pParam, mMethod, zMin, zMax, MIN_ANGLE, MAX_ANGLE, imageOptimization);
+  panorama image(width, height, ptype, nImages, pParam, mMethod, zMin, zMax, MIN_ANGLE, MAX_ANGLE, imageOptimization, use_reflectance, true, false);
   //cv::Mat mat;
   //scan2mat(scan, mat);
   image.createPanorama(mat);
@@ -494,7 +494,7 @@ void reduce_interpolation(cv::Mat mat,
 
 {
   //panorama image(width, height, ptype);
-  panorama image(width, height, ptype, nImages, pParam, mMethod, zMin, zMax, MIN_ANGLE, MAX_ANGLE, imageOptimization);
+  panorama image(width, height, ptype, nImages, pParam, mMethod, zMin, zMax, MIN_ANGLE, MAX_ANGLE, imageOptimization, use_reflectance, true, false);
   //cv::Mat mat;
   //scan2mat(scan, mat);
   image.createPanorama(mat);
