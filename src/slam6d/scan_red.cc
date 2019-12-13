@@ -252,7 +252,7 @@ void parse_options(int argc, char **argv, int &start, int &end,
   reduction.add_options()
     ("reduction,r", po::value<reduction_method>(&rtype)->required(),
      "choose reduction method (OCTREE, RANGE, INTERPOLATE, NONE)")
-    ("scale,y", po::value<double>(&scale),
+    ("scale,y", po::value<double>(&scale)->default_value(1.0),
      "scaling factor")
     ("voxel,v", po::value<double>(&voxel),
      "voxel size")
@@ -311,7 +311,8 @@ void parse_options(int argc, char **argv, int &start, int &end,
          << "Example usage:" << std::endl
          << "\t./bin/scan_red -s 0 -e 0 -f uos --reduction OCTREE --voxel 10 --octree 0 dat" << std::endl
          << "\t./bin/scan_red -s 0 -e 0 -f uos --reduction RANGE --scale 0.5 --projection EQUIRECTANGULAR --width 3600 --height 1000 dat" << std::endl
-         << "\t./bin/scan_red -s 0 -e 0 -f uos --reduction INTERPOLATE --scale 0.2 --projection EQUIRECTANGULAR --width 3600 --height 1000 dat" << std::endl;
+         << "\t./bin/scan_red -s 0 -e 0 -f uos --reduction INTERPOLATE --scale 0.2 --projection EQUIRECTANGULAR --width 3600 --height 1000 dat" << std::endl
+         << "\t./bin/scan_red -s 0 -e 0 -f uosr --reduction RANGE --projection EQUIRECTANGULAR --width 3600 --height 1000 --reflectance -t RIEGL wue_city" << std::endl;
     exit(0);
   }
 
@@ -453,31 +454,41 @@ void reduce_range(cv::Mat mat, std::vector<cv::Vec4f> &reduced_points, int width
 		  bool imageOptimization)
 {
   //panorama image(width, height, ptype);
-  panorama image(width, height, ptype, nImages, pParam, mMethod, zMin, zMax, MIN_ANGLE, MAX_ANGLE, imageOptimization, use_reflectance, true, false);
+  panorama image(width, height, ptype, nImages, pParam, mMethod, zMin, zMax, MIN_ANGLE, MAX_ANGLE, imageOptimization, use_reflectance,
+		  true, // getReflectanceImage() will always return something (empty if use_reflectance == false)
+		  false // no RGB color
+		  );
   //cv::Mat mat;
   //scan2mat(scan, mat);
   image.createPanorama(mat);
   image.getDescription();
 
-  cv::Mat range_image_resized;
-  cv::Mat reflectance_image_resized;
+  if (scale != 1.0) {
+	  cv::Mat range_image_resized;
+	  cv::Mat reflectance_image_resized;
 
-  resize(image.getRangeImage(), range_image_resized, cv::Size(),
-         scale, scale, cv::INTER_NEAREST);
-	 //scale, scale, cv::INTER_LINEAR);
+	  resize(image.getRangeImage(), range_image_resized, cv::Size(),
+			  scale, scale, cv::INTER_NEAREST);
+	  //scale, scale, cv::INTER_LINEAR);
 
-  if (use_reflectance) {
-    resize(image.getReflectanceImage(), reflectance_image_resized,
-           cv::Size(), scale, scale, cv::INTER_NEAREST);
-	   //cv::Size(), scale, scale, cv::INTER_LINEAR);
+	  if (use_reflectance) {
+		  resize(image.getReflectanceImage(), reflectance_image_resized,
+				  cv::Size(), scale, scale, cv::INTER_NEAREST);
+		  //cv::Size(), scale, scale, cv::INTER_LINEAR);
+	  } else {
+		  reflectance_image_resized.create(range_image_resized.size(), CV_8U);
+		  reflectance_image_resized = cv::Scalar::all(0);
+	  }
+
+	  image.recoverPointCloud(range_image_resized,
+			  reflectance_image_resized,
+			  reduced_points);
   } else {
-    reflectance_image_resized.create(range_image_resized.size(), CV_8U);
-    reflectance_image_resized = cv::Scalar::all(0);
+	  cv::Mat reflectance_image = image.getReflectanceImage();
+	  image.recoverPointCloud(image.getRangeImage(),
+			  reflectance_image,
+			  reduced_points);
   }
-
-  image.recoverPointCloud(range_image_resized,
-                          reflectance_image_resized,
-                          reduced_points);
 }
 
 //void reduce_interpolation(Scan *scan,
