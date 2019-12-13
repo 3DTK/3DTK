@@ -44,6 +44,7 @@ call:pacman -S --needed ^
 	%MINGW_PACKAGE_PREFIX%-libpng ^
 	%MINGW_PACKAGE_PREFIX%-libzip ^
 	%MINGW_PACKAGE_PREFIX%-opencv ^
+	%MINGW_PACKAGE_PREFIX%-python3 ^
 	%MINGW_PACKAGE_PREFIX%-qt5 ^
 	%MINGW_PACKAGE_PREFIX%-suitesparse ^
 	%MINGW_PACKAGE_PREFIX%-toolchain ^
