@@ -485,7 +485,17 @@ void reduce_range(cv::Mat mat, std::vector<cv::Vec4f> &reduced_points, int width
 			  reduced_points);
   } else {
 	  cv::Mat reflectance_image = image.getReflectanceImage();
-	  image.recoverPointCloud(image.getRangeImage(),
+	  cv::Mat range_image = image.getRangeImage();
+	  // FIXME: why are the images flipped??
+	  flip(range_image, range_image, 1);
+	  flip(reflectance_image, reflectance_image, 1);
+#if 0
+	  std::vector<int> compression_params;
+	  compression_params.push_back(cv::IMWRITE_PNG_COMPRESSION);
+	  compression_params.push_back(9);
+	  cv::imwrite("panorama.png", reflectance_image, compression_params);
+#endif
+	  image.recoverPointCloud(range_image,
 			  reflectance_image,
 			  reduced_points);
   }
