@@ -50,13 +50,14 @@ if %ERRORLEVEL% GEQ 1 (
 @echo.sourcedir="$(cygpath "${APPVEYOR_BUILD_FOLDER}")"
 @echo.mkdir "$sourcedir/build"
 @echo.cmake -H"$sourcedir" -B"$sourcedir/build" \
+@echo.	-DCMAKE_BUILD_TYPE=RelWithDebInfo \
 @echo.	-DCMAKE_VERBOSE_MAKEFILE=ON \
 @echo.	-DWITH_GLFW=OFF \
 @echo.	-DWITH_CGAL=OFF \
 @echo.	-DWITH_PYTHON=OFF \
 @echo.	-DWITH_WXWIDGETS=OFF
-@echo.cmake --build "$sourcedir/build"
-@echo.CTEST_OUTPUT_ON_FAILURE=true cmake --build "$sourcedir/build" --target test
+@echo.cmake --build "$sourcedir/build" --config RelWithDebInfo
+@echo.CTEST_OUTPUT_ON_FAILURE=true cmake --build "$sourcedir/build" --target test --config RelWithDebInfo
 ) ^
 	 | %CYGWIN_ROOT%\bin\sed "s/ \r$//" ^
 	 | %CYGWIN_ROOT%\bin\bash -l

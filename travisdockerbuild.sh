@@ -30,7 +30,7 @@ case "$DERIV" in
 		exit 1
 esac
 
-CMAKEOPTS="-DCMAKE_VERBOSE_MAKEFILE=ON"
+CMAKEOPTS="-DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_VERBOSE_MAKEFILE=ON"
 
 case "$DIST" in
 	buster|bullseye|sid)
@@ -114,6 +114,6 @@ APT="apt-get install --yes --no-install-recommends -o Debug::pkgProblemResolver=
 	echo "echo travis_fold:end:docker_setup";
 	echo "mkdir .build";
 	echo "cmake -H. -B.build $CMAKEOPTS -G \"$GENERATOR\"";
-	echo "cmake --build .build";
-	echo "CTEST_OUTPUT_ON_FAILURE=true cmake --build .build --target test";
+	echo "cmake --build .build --config RelWithDebInfo";
+	echo "CTEST_OUTPUT_ON_FAILURE=true cmake --build .build --config RelWithDebInfo --target test";
 } | docker run --interactive --rm "$TAG" sh -
