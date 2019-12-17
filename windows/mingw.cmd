@@ -72,6 +72,7 @@ echo PATH: %PATH%
 
 md %APPVEYOR_BUILD_FOLDER%\build
 cmake -H%APPVEYOR_BUILD_FOLDER% -B%APPVEYOR_BUILD_FOLDER%\build ^
+	-DCMAKE_BUILD_TYPE=RelWithDebInfo ^
 	-DCMAKE_VERBOSE_MAKEFILE=ON ^
 	-DWITH_LIBCONFIG=OFF ^
 	-DWITH_CGAL=OFF ^
@@ -84,14 +85,14 @@ if %ERRORLEVEL% GEQ 1 (
 	exit /B 1
 )
 
-cmake --build %APPVEYOR_BUILD_FOLDER%\build
+cmake --build %APPVEYOR_BUILD_FOLDER%\build --config RelWithDebInfo
 if %ERRORLEVEL% GEQ 1 (
 	echo cmake --build failed
 	exit /B 1
 )
 
 set CTEST_OUTPUT_ON_FAILURE=true
-cmake --build %APPVEYOR_BUILD_FOLDER%\build --target test
+cmake --build %APPVEYOR_BUILD_FOLDER%\build --target test --config RelWithDebInfo
 if %ERRORLEVEL% GEQ 1 (
 	echo cmake --build --target test failed
 	exit /B 1
