@@ -120,6 +120,10 @@ void calculateNormalsAdaptiveApxKNN(vector<Point> &normals,
                                     const double _rPos[3],
                                     const double eps)
 {
+  if (kmin > kmax) {
+    throw std::invalid_argument("kmin must not be larger than kmax");
+  }
+
   ColumnVector rPos(3);
   for (int i = 0; i < 3; ++i)
     rPos(i+1) = _rPos[i];
@@ -341,6 +345,9 @@ void calculateNormalsAdaptiveKNN(vector<Point> &normals,
                                  const int kmax,
                                  const double _rPos[3])
 {
+  if (kmin > kmax) {
+    throw std::invalid_argument("kmin must not be larger than kmax");
+  }
   ColumnVector rPos(3);
   for (int i = 0; i < 3; ++i)
     rPos(i+1) = _rPos[i];
