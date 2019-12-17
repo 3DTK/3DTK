@@ -258,6 +258,7 @@ echo "cmake: %cmakeexe%"
 "%cmakeexe%" ^
 	-H"%sourcedir%" ^
 	-B"%outdir%" ^
+	-DCMAKE_BUILD_TYPE=RelWithDebInfo ^
 	-DCMAKE_TOOLCHAIN_FILE=%vcpkgdir%\scripts\buildsystems\vcpkg.cmake ^
 	-DOUTPUT_DIRECTORY:PATH=%outdir% ^
 	-DWITH_PYTHON=OFF ^
