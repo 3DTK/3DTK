@@ -320,21 +320,18 @@ void parse_options(int argc, char **argv, int &start, int &end,
 
   reduction_option_dependency(vm, OCTREE, "voxel");
   reduction_option_dependency(vm, OCTREE, "octree");
-  reduction_option_conflict(vm, OCTREE, "scale");
   reduction_option_conflict(vm, OCTREE, "projection");
   reduction_option_conflict(vm, OCTREE, "width");
   reduction_option_conflict(vm, OCTREE, "height");
 
   reduction_option_conflict(vm, RANGE, "voxel");
   reduction_option_conflict(vm, RANGE, "octree");
-  reduction_option_dependency(vm, RANGE, "scale");
   reduction_option_dependency(vm, RANGE, "projection");
   reduction_option_dependency(vm, RANGE, "width");
   reduction_option_dependency(vm, RANGE, "height");
 
   reduction_option_conflict(vm, INTERPOLATE, "voxel");
   reduction_option_conflict(vm, INTERPOLATE, "octree");
-  reduction_option_dependency(vm, INTERPOLATE, "scale");
   reduction_option_dependency(vm, INTERPOLATE, "projection");
   reduction_option_dependency(vm, INTERPOLATE, "width");
   reduction_option_dependency(vm, INTERPOLATE, "height");
