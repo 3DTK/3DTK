@@ -139,7 +139,7 @@ void calculateNormalsAdaptiveApxKNN(vector<Point> &normals,
   for (size_t i = 0; i < points.size(); ++i) {
     Matrix U(3,3);
     ANNpoint p = pa[i];
-    for(int kidx = kmin; kidx < kmax; kidx++) {
+    for(int kidx = kmin; kidx <= kmax; kidx++) {
       nr_neighbors=kidx+1;
       ANNidxArray nidx = new ANNidx[nr_neighbors];
       ANNdistArray d = new ANNdist[nr_neighbors];
@@ -382,7 +382,7 @@ void calculateNormalsAdaptiveKNN(vector<Point> &normals,
 	 Point mean(0.0,0.0,0.0);
 	 int nr_neighbors;
 
-	 for(int kidx = kmin; kidx < kmax; kidx++) {
+	 for(int kidx = kmin; kidx <= kmax; kidx++) {
 	   nr_neighbors = kidx + 1;
 	   vector<Point> temp = t.kNearestNeighbors(p,
 									    nr_neighbors,
