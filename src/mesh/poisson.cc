@@ -291,6 +291,12 @@ int Poisson::apply() {
 
   // call surface trimmer
   int a = oVertices.size(), b = oPolygons.size();
+  if (a == 0) {
+	  throw std::runtime_error("oVertices contains nothing");
+  }
+  if (b == 0) {
+	  throw std::runtime_error("oPolygons contains nothing");
+  }
   Execute< PointStreamNormal< float , DIMENSION > , PointStreamColor< float > >(oVertices, oPolygons, tPolygons);
 
   // update trimmed vertices and polygons
