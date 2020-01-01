@@ -19,6 +19,7 @@ int    pointmode      = -1;
 
 bool   smallfont      = true;
 bool   label          = !hide_label;
+bool   classLabels    = !hide_classLabels;
 
 #include "show/url.h"
 
@@ -943,7 +944,7 @@ void DisplayItFunc(GLenum mode, bool interruptable)
   // if show points is true the draw points
   if (show_points == 1) DrawPoints(mode, interruptable);
 
-  if (!hide_classLabels) DrawTypeLegend();
+  if (classLabels) DrawTypeLegend();
   if (label) DrawUrl();
 
   glPopMatrix();
@@ -1742,6 +1743,7 @@ void glWriteImagePNG(const char *filename, int scale, GLenum mode)
         glMatrixMode(GL_PROJECTION);
         glLoadIdentity();
         label = false;
+        classLabels = false;
         if(showViewMode != 1) {
           glFrustum(neardistance*width, neardistance*(width + part_width),
                     neardistance*(height),
@@ -1751,6 +1753,9 @@ void glWriteImagePNG(const char *filename, int scale, GLenum mode)
           if(i==0 && j==0) {
             label = !hide_label;
           }
+          if(i==0 && j==scale-1) {
+            classLabels = !hide_classLabels;
+          }
           DisplayItFunc(mode);
         } else {
           glOrtho( width, width + part_width,
@@ -1759,6 +1764,9 @@ void glWriteImagePNG(const char *filename, int scale, GLenum mode)
           glMatrixMode(GL_MODELVIEW);
           if(i==0 && j==0) {
             label = !hide_label;
+          }
+          if(i==0 && j==scale-1) {
+            classLabels = !hide_classLabels;
           }
           DisplayItFunc(mode);
         }
