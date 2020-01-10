@@ -470,7 +470,7 @@ cv::Mat calculatePyrSegmentation(std::vector<std::vector<cv::Vec3f>> &segmented_
 {
     int i, j, idx;
     int block_size = 1000;
-    IplImage ipl_img = img;
+    IplImage ipl_img = cvIplImage(img);
     IplImage* ipl_original = &ipl_img;
     IplImage* ipl_segmented = 0;
 
