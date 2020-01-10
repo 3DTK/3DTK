@@ -61,9 +61,17 @@ if %ERRORLEVEL% GEQ 1 (
 	exit /B 1
 )
 
+:: Workaround for CMake not wanting sh.exe on PATH for MinGW
+set PATH=%PATH:C:\Program Files\Git\usr\bin;=%
+:: set PATH=C:\MinGW\bin;%PATH%
+:: set PATH=C:\msys64\mingw64\x86_64-w64-mingw32\bin;%PATH%
+:: set PATH=C:\msys64\mingw64\bin;%PATH%
+set PATH=C:\msys64\mingw32\bin;%PATH%
+
+echo PATH: %PATH%
+
 md %APPVEYOR_BUILD_FOLDER%\build
 cmake -H%APPVEYOR_BUILD_FOLDER% -B%APPVEYOR_BUILD_FOLDER%\build ^
-	-DCMAKE_SH="CMAKE_SH-NOTFOUND" ^
 	-DCMAKE_BUILD_TYPE=RelWithDebInfo ^
 	-DCMAKE_VERBOSE_MAKEFILE=ON ^
 	-DWITH_LIBCONFIG=OFF ^
