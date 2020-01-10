@@ -93,7 +93,7 @@ void MainWindow::openRecentDirectory() {
 
 std::string recent_directory_path() {
   std::string config_home;
-#ifndef _MSC_VER
+#if __unix__ || (__APPLE__ && __MACH__)
   // in $XDG_CONFIG_HOME/3dtk/qtshow-recent.txt
   char *home_c = getenv("HOME");
   char *config_home_c = getenv("XDG_CONFIG_HOME");
@@ -102,9 +102,11 @@ std::string recent_directory_path() {
   } else {
     config_home = std::string(home_c) + "/.config";
   }
-#else
+#elif _WIN32
   // in %APPDATA%/3dtk/qtshow-recent.txt
   config_home = std::string(getenv("APPDATA"));
+#else
+#error "OS may not be supported"
 #endif
 
   return (config_home + "/3dtk/qtshow-recent.txt").c_str();
