@@ -29,11 +29,19 @@ for:
  - matrix:
      only:
       - PLATFORM: cygwin
+   branches:
+     except:
+      - msvc
+      - mingw
    build_script:
     - cmd: "%APPVEYOR_BUILD_FOLDER%\\windows\\cygwin.cmd"
  - matrix:
      only:
       - PLATFORM: mingw
+   branches:
+     except:
+      - msvc
+      - cygwin
    build_script:
     - cmd: "%APPVEYOR_BUILD_FOLDER%\\windows\\mingw.cmd"
    # pacman cache would exceed 1,048,576,000 bytes
@@ -42,6 +50,10 @@ for:
  - matrix:
      only:
       - PLATFORM: msvc
+   branches:
+     except:
+      - cygwin
+      - mingw
    # init:
    # Cannot use this until qt supports it or otherwise the qt debug builds will
    # miss their dependencies: https://github.com/Microsoft/vcpkg/issues/4866
