@@ -252,13 +252,13 @@ void parse_args(int argc, char **argv, dataset_settings& dss, window_settings& w
 std::string getConfigHome()
 {
   std::string config_home;
-#ifdef _MSC_VER
+#ifdef _WIN32
   // in %APPDATA%/3dtk/show.ini
   char *appdata = getenv("APPDATA");
   if (appdata != NULL) {
     config_home = std::string(appdata);
   }
-#else
+#elif __unix__ || (__APPLE__ && __MACH__)
   // in $XDG_CONFIG_HOME/3dtk/show.ini
   char *home_c = getenv("HOME");
   char *config_home_c = getenv("XDG_CONFIG_HOME");
@@ -267,6 +267,8 @@ std::string getConfigHome()
   } else if (home_c != NULL) {
     config_home = std::string(home_c) + "/.config";
   }
+#else
+#error "OS may not be supported"
 #endif
 
   return config_home;
