@@ -30,8 +30,8 @@ void findAllFilesByExtension(const boost::filesystem::path& root, const std::str
         return;
     }
 
-    boost::filesystem::recursive_directory_iterator it(root);
-    boost::filesystem::recursive_directory_iterator endit;
+    boost::filesystem::directory_iterator it(root);
+    boost::filesystem::directory_iterator endit;
 
     while (it != endit) {
         if (boost::filesystem::is_regular_file(*it) && boost::iequals(it->path().extension().string(), ext)) {
