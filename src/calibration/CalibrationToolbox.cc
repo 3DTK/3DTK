@@ -471,6 +471,11 @@ int CalibrationToolbox::computeExtrinsic() {
         rvector.push_back(rvec);
         tvector.push_back(tvec);
     }
+
+    totalAvgErr = computeReprojectionErrors(vecPatternPoints, vecImagePoints,
+                                            rvector, tvector, camMatrix, distorCoeff, reprojErrs);
+
+    std::cout << totalAvgErr << std::endl;
     saveCameraParams(settings, imageSize, settings.estCameraMatrix, settings.estDistCoeff, rvector, tvector, reprojErrs,vecImagePoints, totalAvgErr, false);
 
     return 1;
