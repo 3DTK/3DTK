@@ -209,7 +209,7 @@ public:
     std::string tagFamily;
 
     //pattern.xml Path
-    std::string patternPath;
+    std::vector<std::string> patternPaths;
     //picture path
     std::vector<std::string> picturePath;
     PatternType pattern;

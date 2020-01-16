@@ -79,7 +79,7 @@ int main(int argc, const char * argv[]) {
     settings.pattern = Settings::APRIL_3D;
     settings.decimate =1;
     settings.debug = false;
-    settings.patternPath = "";
+    settings.patternPaths = std::vector<std::string>();
     std::string dirpath = "";
     std::string dateiendung = "";
     std::string xmlFileName = "";
@@ -126,7 +126,7 @@ int main(int argc, const char * argv[]) {
 
                 ("read-pictures-form-file,F", po::value<std::string>(&dirpath), "read pictures filename form .txt file")
 
-                ("path-pattern,S", po::value<std::string>(&settings.patternPath), "set path to file with pattern coordinates")
+                ("path-pattern,S", po::value<std::vector<std::string> >(&settings.patternPaths)->multitoken(), "set path to file with pattern coordinates")
 
                 ("picturetype,T", po::value<std::string>(&dateiendung), "default read all files with png, jpeg, jpg, jpe, tif, tiff, ppm, pgm, bpm")
 
@@ -201,7 +201,7 @@ int main(int argc, const char * argv[]) {
         std::cout << "not implemented" << std::endl;
         return 1;
     }
-    if(settings.calibrationPattern == Settings::APRILTAG && settings.patternPath.length() == 0 && (!onlydetect || extrinsic)){
+    if(settings.calibrationPattern == Settings::APRILTAG && settings.patternPaths.size() == 0 && (!onlydetect || extrinsic)){
         std::cout << "for calibration with APRILTAGS need pattern file, use --help for more information" <<std::endl;
         return 1;
     }
