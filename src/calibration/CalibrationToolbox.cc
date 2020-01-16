@@ -11,7 +11,6 @@ using namespace std;
 
 CalibrationToolbox::CalibrationToolbox(Settings &s) :
         settings(s),
-        pattern(),
         imagePath(s.picturePath),
         pictureHandler(s.decimate, s.blur, s.threads, s.debug, s.refine_edges, s.tagFamily) {
     if(s.calibrationPattern != Settings::FROM_FILES) {
@@ -63,65 +62,65 @@ CalibrationToolbox::CalibrationToolbox(Settings &s) :
 }
 
 bool CalibrationToolbox::matchTags() {
-    vector<AprilTag2f> imagePoints = this->pictureHandler.getPointList();
-    vector<AprilTag3f> patternPoints = this->pattern.getPoints();
+    bool sucess = false;
 
-    vector<Point2f> imgPoints;
-    vector<Point3f> patPoints;
+    for(CalibrationPattern& c : this->patterns) {
+        vector<AprilTag2f> imagePoints = this->pictureHandler.getPointList();
+        vector<AprilTag3f> patternPoints = c.getPoints();
 
-    vector<Point2f> imgEstPoints;
-    vector<Point3f> patEstPoints;
+        vector<Point2f> imgPoints;
+        vector<Point3f> patPoints;
 
-    for (AprilTag2f aprilTag2f : imagePoints) {
-        for (AprilTag3f aprilTag3f : patternPoints) {
-            if (aprilTag3f.compair(aprilTag2f) == 0) {
-                imgPoints.push_back(aprilTag2f.point1);
-                imgPoints.push_back(aprilTag2f.point2);
-                imgPoints.push_back(aprilTag2f.point3);
-                imgPoints.push_back(aprilTag2f.point4);
+        vector<Point2f> imgEstPoints;
+        vector<Point3f> patEstPoints;
 
-                patPoints.push_back(aprilTag3f.point1);
-                patPoints.push_back(aprilTag3f.point2);
-                patPoints.push_back(aprilTag3f.point3);
-                patPoints.push_back(aprilTag3f.point4);
+        for (AprilTag2f aprilTag2f : imagePoints) {
+            for (AprilTag3f aprilTag3f : patternPoints) {
+                if (aprilTag3f.compair(aprilTag2f) == 0) {
+                    imgPoints.push_back(aprilTag2f.point1);
+                    imgPoints.push_back(aprilTag2f.point2);
+                    imgPoints.push_back(aprilTag2f.point3);
+                    imgPoints.push_back(aprilTag2f.point4);
 
-                //Punkte mit ID zwischen minEstID und maxEstID
-                if (settings.pattern == Settings::APRIL_3D && find(settings.estIDs.begin(), settings.estIDs.end(), aprilTag2f.id) != settings.estIDs.end()) {
-                    imgEstPoints.push_back(aprilTag2f.point1);
-                    imgEstPoints.push_back(aprilTag2f.point2);
-                    imgEstPoints.push_back(aprilTag2f.point3);
-                    imgEstPoints.push_back(aprilTag2f.point4);
+                    patPoints.push_back(aprilTag3f.point1);
+                    patPoints.push_back(aprilTag3f.point2);
+                    patPoints.push_back(aprilTag3f.point3);
+                    patPoints.push_back(aprilTag3f.point4);
 
-                    patEstPoints.push_back(Point3f(aprilTag3f.point1.x, aprilTag3f.point1.y, 0));
-                    patEstPoints.push_back(Point3f(aprilTag3f.point2.x, aprilTag3f.point2.y, 0));
-                    patEstPoints.push_back(Point3f(aprilTag3f.point3.x, aprilTag3f.point3.y, 0));
-                    patEstPoints.push_back(Point3f(aprilTag3f.point4.x, aprilTag3f.point4.y, 0));
+                    //Punkte mit ID zwischen minEstID und maxEstID
+                    if (settings.pattern == Settings::APRIL_3D && find(settings.estIDs.begin(), settings.estIDs.end(), aprilTag2f.id) != settings.estIDs.end()) {
+                        imgEstPoints.push_back(aprilTag2f.point1);
+                        imgEstPoints.push_back(aprilTag2f.point2);
+                        imgEstPoints.push_back(aprilTag2f.point3);
+                        imgEstPoints.push_back(aprilTag2f.point4);
+
+                        patEstPoints.push_back(Point3f(aprilTag3f.point1.x, aprilTag3f.point1.y, 0));
+                        patEstPoints.push_back(Point3f(aprilTag3f.point2.x, aprilTag3f.point2.y, 0));
+                        patEstPoints.push_back(Point3f(aprilTag3f.point3.x, aprilTag3f.point3.y, 0));
+                        patEstPoints.push_back(Point3f(aprilTag3f.point4.x, aprilTag3f.point4.y, 0));
+                    }
+                    break;
                 }
-                break;
             }
         }
-    }
-    if (imgPoints.size() > 4 && patPoints.size() > 4) {
-        this->vecImagePoints.push_back(imgPoints);
-        this->vecPatternPoints.push_back(patPoints);
+        if (imgPoints.size() > 4 && patPoints.size() > 4) {
+            this->vecImagePoints.push_back(imgPoints);
+            this->vecPatternPoints.push_back(patPoints);
 
-        if (imgEstPoints.size() > 4) {
-            this->estimateImagePoints.push_back(imgEstPoints);
-            this->estimatePatternPoints.push_back(patEstPoints);
+            if (imgEstPoints.size() > 4) {
+                this->estimateImagePoints.push_back(imgEstPoints);
+                this->estimatePatternPoints.push_back(patEstPoints);
+            }
+
+            sucess = true;
         }
-
-        return true;
     }
 
-    return false;
+    return sucess;
 }
 
 CalibrationToolbox::~CalibrationToolbox() {
 
-}
-
-CalibrationPattern CalibrationToolbox::getPattern() {
-    return this->pattern;
 }
 
 PictureHandler CalibrationToolbox::getPictureHandler() {
@@ -250,7 +249,11 @@ void CalibrationToolbox::calcBoardCornerPositions(Settings::Pattern patternType)
     //corners.clear();
     switch (patternType) {
         case Settings::APRILTAG:
-            this->pattern.readPattern(this->settings.patternPath, settings);
+            for (std::string& patternPath: this->settings.patternPaths) {
+                CalibrationPattern c;
+                c.readPattern(patternPath, settings);
+                this->patterns.push_back(c);
+            }
             break;
         case Settings::CHESSBOARD:
         case Settings::CIRCLES_GRID:
@@ -487,6 +490,8 @@ void CalibrationToolbox::visualize(bool readCameraParamFromFile){
         this->distorCoeff = settings.estDistCoeff;
     }
 
+    int numPatterns = std::max(1, (int) this->patterns.size());
+
     boost::filesystem::create_directories(settings.visualizePath);
 
     Mat pointsImage = Mat_<cv::Vec3b>::zeros(settings.imageSize.height, settings.imageSize.width);
@@ -494,7 +499,7 @@ void CalibrationToolbox::visualize(bool readCameraParamFromFile){
         boost::filesystem::path filename(this->vecCalibImagePaths[i]);
         //gefunden Punkte bgr
         Mat image = imread(this->vecCalibImagePaths[i]);
-        vector<Point2f> imagePoints2;
+        vector<Point2f> imagePointsReprojected;
         cvtColor(image, image, cv::COLOR_BGR2GRAY);
         cvtColor(image, image, cv::COLOR_GRAY2BGR);
 
@@ -503,25 +508,29 @@ void CalibrationToolbox::visualize(bool readCameraParamFromFile){
         std::stringstream ss;
         ss << settings.visualizePath << "/" << filename.filename().string() << ".reprojection" << ".png";
 
-        uint colorIndex = 0;
-        Scalar colorMap[4] = {Scalar(0,0,255), Scalar(0,255,0), Scalar(255,0,0), Scalar(0,255,255)};
+        for (int patternIndex = 0; patternIndex < numPatterns; patternIndex++) {
+            uint colorIndex = 0;
+            Scalar colorMap[4] = {Scalar(0,0,255), Scalar(0,255,0), Scalar(255,0,0), Scalar(0,255,255)};
 
-        for(Point2f point2f : this->vecImagePoints[i]){
-            circle(image, point2f, 1, colorMap[colorIndex],2);
-            if(!readCameraParamFromFile) {
-                projectPoints(Mat(vecPatternPoints[i]), rvector[i], tvector[i], camMatrix, distorCoeff, imagePoints2);
-                double err = norm(Mat(vecImagePoints[i]), Mat(imagePoints2), cv::NORM_L2);
+            for(Point2f point2f : this->vecImagePoints[i * numPatterns + patternIndex]){
+                circle(image, point2f, 1, colorMap[colorIndex],2);
+                if(!readCameraParamFromFile) {
+                    vector<Point2f> imagePoints2;
+                    projectPoints(Mat(vecPatternPoints[i * numPatterns + patternIndex]), rvector[i * numPatterns + patternIndex], tvector[i * numPatterns + patternIndex], camMatrix, distorCoeff, imagePoints2);
+                    imagePointsReprojected.insert(imagePointsReprojected.end(), imagePoints2.begin(), imagePoints2.end());
+                }
+                circle(pointsImage, point2f, 1, Scalar(255, 255, 255), 2);
+
+                colorIndex++;
+                if (colorIndex > 3) colorIndex = 0;
             }
-            circle(pointsImage, point2f, 1, Scalar(255, 255, 255), 2);
-
-            colorIndex++;
-            if (colorIndex > 3) colorIndex = 0;
         }
+
         if(!readCameraParamFromFile) {
             cv::imwrite(detss.str(), image);
         }
 
-        for (Point2f p : imagePoints2) {
+        for (Point2f p : imagePointsReprojected) {
             circle(image, p, 1, Scalar(0, 255, 0), 2);
         }
         cv::imwrite(ss.str(), image);
