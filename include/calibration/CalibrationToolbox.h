@@ -50,7 +50,7 @@ private:
     /**
      * Pattern handler
      */
-    CalibrationPattern pattern;
+    std::vector<CalibrationPattern> patterns;
 
     /**
      * image handler
@@ -119,12 +119,6 @@ public:
      *  deconstructor
      */
     ~CalibrationToolbox();
-
-    /**
-     * Getter for pattern
-     * return CalibrationPattern pattern
-     */
-    CalibrationPattern getPattern();
 
     /**
      * getter for PictureHandler
