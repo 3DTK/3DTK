@@ -28,6 +28,11 @@ GLWidget::GLWidget(QWidget *parent)
   idleTimer->start();
 }
 
+GLWidget::~GLWidget()
+{
+    callbacks::glut::quit();
+}
+
 void GLWidget::initializeGL() {
   initializeOpenGLFunctions();
   load_url_texture();

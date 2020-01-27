@@ -85,6 +85,11 @@ QtShow::QtShow(int &argc, char **argv)
   });
 }
 
+QtShow::~QtShow()
+{
+  delete mainWindow;
+}
+
 void QtShow::loadDifferentScan(dataset_settings new_dss) {
   dss = new_dss;
 

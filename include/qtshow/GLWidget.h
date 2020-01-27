@@ -12,6 +12,7 @@ class GLWidget : public QOpenGLWidget, protected QOpenGLFunctions {
 
 public:
   GLWidget(QWidget *parent = 0);
+  ~GLWidget() override;
 
 public slots:
   void setFullscreen(bool fullscreenWanted);
