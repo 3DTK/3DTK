@@ -28,7 +28,7 @@ echo "travis_fold:end:configure_3dtk"
 
 # build 3dtk
 echo "travis_fold:start:build_3dtk"
-	cmake --build .build --config RelWithDebInfo
+	travis_wait 30 cmake --build .build --config RelWithDebInfo
 echo "travis_fold:end:build_3dtk"
 
 # test 3dtk
