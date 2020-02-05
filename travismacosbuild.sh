@@ -10,6 +10,7 @@ echo "travis_fold:start:brew_install"
 	/usr/bin/yes | pip2 uninstall numpy
 	# update brew
 	brew tap brewsci/science
+	 brew unlink python@2
 	brew update
 	#brew upgrade
 	# install packageds with brew
