@@ -17,8 +17,8 @@ public:
     virtual void readDetectionsFromFile(const std::string& path) = 0;
 
 public:
-    std::vector<cv::Point2f> getImagePoints() { return _imagePoints; };
-    std::vector<cv::Point3f> getObjectPoints() { return _objectPoints; };
+    const std::vector<cv::Point2f>& getImagePoints() { return _imagePoints; };
+    const std::vector<cv::Point3f>& getObjectPoints() { return _objectPoints; };
     long getDetectionTimeMilliSec() { return _detectionTime; };
 
 protected:
