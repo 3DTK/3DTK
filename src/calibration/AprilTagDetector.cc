@@ -86,6 +86,9 @@ bool AprilTagDetector::detect(const cv::Mat& image)
     auto end = std::chrono::high_resolution_clock::now();
     _detectionTime = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
 
+    _imagePoints.clear();
+    _objectPoints.clear();
+
     if (_patternPoints.size() == 0) {
         // if no pattern points provided copy all tags to image points
         for (AprilTag::AprilTag2f aprilTag2f : _tags) {
@@ -94,8 +97,6 @@ bool AprilTagDetector::detect(const cv::Mat& image)
             _imagePoints.push_back(aprilTag2f.point3);
             _imagePoints.push_back(aprilTag2f.point4);
         }
-
-        _objectPoints.clear();
     } else {
         // if pattern points provided copy only matching image points
         for (AprilTag::AprilTag2f aprilTag2f : _tags) {
