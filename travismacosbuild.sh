@@ -17,7 +17,7 @@ echo "travis_fold:start:brew_install"
 	brew bundle
 	#export qt path, installed by brew
 	export PATH="/usr/local/opt/qt/bin:$PATH"
-	export PATH="/usr/local/opt/opencv@3/bin"
+	export PATH="/usr/local/opt/opencv@3/bin:$PATH"
 echo "travis_fold:end:brew_install"
 
 #configure and make 3dtk
@@ -28,7 +28,7 @@ echo "travis_fold:end:configure_3dtk"
 
 # build 3dtk
 echo "travis_fold:start:build_3dtk"
-	travis_wait 30 cmake --build .build --config RelWithDebInfo
+	travis_wait 60 cmake --build .build --config RelWithDebInfo
 echo "travis_fold:end:build_3dtk"
 
 # test 3dtk
