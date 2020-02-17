@@ -110,7 +110,7 @@ matrix:
 script:
   - |
     case "$TRAVIS_OS_NAME" in
-        osx) ./travismacosbuild.sh;;
+        osx) travis_wait 60 ./travismacosbuild.sh;;
         linux) if [ "$CC" = "clang" ]; then
                    # clang 8 takes very long to compile apriltags (clang 7 works fine)
                    travis_wait 60 ./travisdockerbuild.sh $DERIV $DIST $CC
