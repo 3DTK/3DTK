@@ -10,7 +10,7 @@ echo "travis_fold:start:brew_install"
 	/usr/bin/yes | pip2 uninstall numpy
 	# update brew
 	brew tap brewsci/science
-	 brew unlink python@2
+	brew unlink python@2
 	brew update
 	#brew upgrade
 	# install packageds with brew
@@ -28,7 +28,7 @@ echo "travis_fold:end:configure_3dtk"
 
 # build 3dtk
 echo "travis_fold:start:build_3dtk"
-	travis_wait 60 cmake --build .build --config RelWithDebInfo
+	cmake --build .build --config RelWithDebInfo
 echo "travis_fold:end:build_3dtk"
 
 # test 3dtk
