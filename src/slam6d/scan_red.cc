@@ -48,6 +48,8 @@
 
 #include "slam6d/globals.icc"
 
+#include "spherical_quadtree/spherical_quadtree.h"
+
 #ifdef _OPENMP
 #include <omp.h>
 #endif
@@ -76,7 +78,7 @@ using namespace fbr;
 #include <boost/program_options.hpp>
 namespace po = boost::program_options;
 
-enum reduction_method {OCTREE, RANGE, INTERPOLATE, NO_REDUCTION};
+enum reduction_method {OCTREE, RANGE, INTERPOLATE, NO_REDUCTION, SQTREE};
 
 /* Function used to check that 'opt1' and 'opt2' are not specified
    at the same time. */
@@ -200,6 +202,7 @@ void validate(boost::any& v, const std::vector<std::string>& values,
   else if(strcasecmp(arg.c_str(), "RANGE") == 0) v = RANGE;
   else if(strcasecmp(arg.c_str(), "INTERPOLATE") == 0) v = INTERPOLATE;
   else if(strcasecmp(arg.c_str(), "NONE") == 0) v = NO_REDUCTION;
+  else if(strcasecmp(arg.c_str(), "SQTREE") == 0) v = SQTREE;
   else throw std::runtime_error(std::string("reduction method ")
                                 + arg
                                 + std::string(" is unknown"));
@@ -251,11 +254,11 @@ void parse_options(int argc, char **argv, int &start, int &end,
   po::options_description reduction("Reduction options");
   reduction.add_options()
     ("reduction,r", po::value<reduction_method>(&rtype)->required(),
-     "choose reduction method (OCTREE, RANGE, INTERPOLATE, NONE)")
+     "choose reduction method (OCTREE, RANGE, INTERPOLATE, SQTREE, NONE)")
     ("scale,y", po::value<double>(&scale)->default_value(1.0),
      "scaling factor")
     ("voxel,v", po::value<double>(&voxel),
-     "voxel size")
+     "voxel size if --reduction OCTREE or maximum circumcircle diameter if --reduction SQTREE")
     ("projection,P", po::value<fbr::projection_method>(&ptype),
      "projection method or panorama image. Following Methods can be used: EQUIRECTANGULAR|CONIC|CYLINDRICAL|MERCATOR|RECTILINEAR|PANNINI|STEREOGRAPHIC|EQUALAREACYLINDRICAL      *Not all Projections may work with RANGE-reduction")
 
@@ -312,7 +315,8 @@ void parse_options(int argc, char **argv, int &start, int &end,
          << "\t./bin/scan_red -s 0 -e 0 -f uos --reduction OCTREE --voxel 10 --octree 0 dat" << std::endl
          << "\t./bin/scan_red -s 0 -e 0 -f uos --reduction RANGE --scale 0.5 --projection EQUIRECTANGULAR --width 3600 --height 1000 dat" << std::endl
          << "\t./bin/scan_red -s 0 -e 0 -f uos --reduction INTERPOLATE --scale 0.2 --projection EQUIRECTANGULAR --width 3600 --height 1000 dat" << std::endl
-         << "\t./bin/scan_red -s 0 -e 0 -f uosr --reduction RANGE --projection EQUIRECTANGULAR --width 3600 --height 1000 --reflectance -t RIEGL wue_city" << std::endl;
+         << "\t./bin/scan_red -s 0 -e 0 -f uosr --reduction RANGE --projection EQUIRECTANGULAR --width 3600 --height 1000 --reflectance -t RIEGL wue_city" << std::endl
+         << "\t./bin/scan_red -s 0 -e 0 -f uos --reduction SQTREE --voxel 0.5 --octree 10 dat" << std::endl;
     exit(0);
   }
 
@@ -335,6 +339,18 @@ void parse_options(int argc, char **argv, int &start, int &end,
   reduction_option_dependency(vm, INTERPOLATE, "projection");
   reduction_option_dependency(vm, INTERPOLATE, "width");
   reduction_option_dependency(vm, INTERPOLATE, "height");
+
+  reduction_option_dependency(vm, SQTREE, "voxel");
+  reduction_option_dependency(vm, SQTREE, "octree");
+  reduction_option_conflict(vm, SQTREE, "projection");
+  reduction_option_conflict(vm, SQTREE, "width");
+  reduction_option_conflict(vm, SQTREE, "height");
+
+  reduction_option_conflict(vm, NO_REDUCTION, "voxel");
+  reduction_option_conflict(vm, NO_REDUCTION, "octree");
+  reduction_option_conflict(vm, NO_REDUCTION, "projection");
+  reduction_option_conflict(vm, NO_REDUCTION, "width");
+  reduction_option_conflict(vm, NO_REDUCTION, "height");
 
 #ifndef _MSC_VER
   if (dir[dir.length()-1] != '/') dir = dir + "/";
@@ -439,6 +455,51 @@ void reduce_octree(Scan *scan, std::vector<cv::Vec4f> &reduced_points, std::vect
                                          xyz_reduced[j][2],
                                          0.0));
     }
+  }
+}
+
+void reduce_sqtree(Scan *scan, std::vector<cv::Vec4f> &reduced_points, std::vector<cv::Vec3b> &color,
+                   int octree, double red, bool use_reflectance, bool use_color)
+{
+  if (use_reflectance) {
+    DataXYZ xyz(scan->get("xyz"));
+    DataReflectance reflectance(scan->get("reflectance"));
+	QuadTree qtree = QuadTree(xyz);
+	std::vector<size_t> reduced = qtree.reduce(red, octree);
+	for (unsigned int i = 0; i < reduced.size(); i++) {
+		reduced_points.push_back(cv::Vec4f(
+					xyz[reduced[i]][0],
+					xyz[reduced[i]][1],
+					xyz[reduced[i]][2],
+					reflectance[reduced[i]]));
+	}
+  } else if (use_color) {
+    DataXYZ xyz(scan->get("xyz"));
+    DataRGB col(scan->get("color"));
+	QuadTree qtree = QuadTree(xyz);
+	std::vector<size_t> reduced = qtree.reduce(red, octree);
+	for (unsigned int i = 0; i < reduced.size(); i++) {
+		reduced_points.push_back(cv::Vec4f(
+					xyz[reduced[i]][0],
+					xyz[reduced[i]][1],
+					xyz[reduced[i]][2],
+					0.0));
+		color.push_back(cv::Vec3b(
+					col[reduced[i]][0],
+					col[reduced[i]][1],
+					col[reduced[i]][2]));
+	}
+  } else {
+    DataXYZ xyz(scan->get("xyz"));
+	QuadTree qtree = QuadTree(xyz);
+	std::vector<size_t> reduced = qtree.reduce(red, octree);
+	for (unsigned int i = 0; i < reduced.size(); i++) {
+		reduced_points.push_back(cv::Vec4f(
+					xyz[reduced[i]][0],
+					xyz[reduced[i]][1],
+					xyz[reduced[i]][2],
+					0.0));
+	}
   }
 }
 
@@ -736,6 +797,67 @@ int main(int argc, char **argv)
           color,
           octree,
           voxel,
+          use_reflectance,
+          use_color);
+
+      if (use_reflectance)
+        write_uosr(reduced_points,
+            reddir,
+            scan->getIdentifier());
+      else if(use_color)
+		switch(out_format) {
+			case UOS:
+				write_uos_rgb(reduced_points,
+						color,
+						reddir,
+						scan->getIdentifier());
+				break;
+			case XYZ:
+				/*
+				write_xyz_rgb(reduced_points,
+						color,
+						reddir,
+						scan->getIdentifier());
+						*/
+				break;
+			case PLY:
+				write_ply_rgb(reduced_points,
+						color,
+						reddir,
+						scan->getIdentifier());
+				break;
+			default:
+				throw std::runtime_error("unknown output format");
+		}
+      else
+        write_uos(reduced_points,
+            reddir,
+            scan->getIdentifier());
+
+
+      writeposefile(reddir,
+          scan->get_rPos(),
+          scan->get_rPosTheta(),
+          scan->getIdentifier());
+
+    } else if(rtype == SQTREE)
+    {
+      Scan::openDirectory(scanserver, dir, iotype, iter, iter);
+      if(Scan::allScans.size() == 0) {
+        std::cerr << "No scans found. Did you use the correct format?" << std::endl;
+        exit(-1);
+      }
+
+      Scan* scan = *Scan::allScans.begin();
+
+      if(rangeFilterActive) scan->setRangeFilter(maxDist, minDist);
+      if(customFilterActive) scan->setCustomFilter(customFilter);
+
+      reduce_sqtree(scan,
+          reduced_points,
+          color,
+          octree,  // nr of pts
+          voxel,   // angle
           use_reflectance,
           use_color);
 

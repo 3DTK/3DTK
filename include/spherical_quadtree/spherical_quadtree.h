@@ -41,6 +41,7 @@ class QuadNode
 		QuadNode(size_t, size_t, size_t, std::vector<size_t> const&, std::vector<std::array<double, 3>> const&, std::vector<std::array<double, 3>> &, std::unordered_map<std::pair<size_t, size_t>, size_t> &);
 
 		std::vector<size_t> search(double p[3], const double r);
+		std::vector<size_t> reduce(double red, int octree);
 };
 
 class QuadTree
@@ -55,6 +56,7 @@ class QuadTree
 		QuadTree(DataXYZ const&);
 
 		std::vector<size_t> search(double p[3], const double r);
+		std::vector<size_t> reduce(double red, int octree);
 };
 
 #endif
