@@ -26,7 +26,7 @@ endif
 	mkdir -p .build
 
 clean: .build
-	cmake --build .build --target clean --config RelWithDebInfo -DCMAKE_BUILD_TYPE=RelWithDebInfo
+	cmake --build .build --target clean --config RelWithDebInfo
 	-rm -rf .build
 	rm -f .configured
 
