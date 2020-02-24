@@ -83,7 +83,12 @@ QuadNode::QuadNode(size_t v1, size_t v2, size_t v3, std::vector<size_t> const& _
 	double w2[3] = {vertices[v2][0], vertices[v2][1], vertices[v2][2]};
 	double w3[3] = {vertices[v3][0], vertices[v3][1], vertices[v3][2]};
 	circumcircle(w1, w2, w3, ccp, &ccr);
-	if (_indices.size() <= 100) {
+	// we stop producing child nodes if we have less than 100 points for this
+	// node
+	//
+	// in cases where the same point exists more than 100 times, we would
+	// recurse forever, so we also limit the size of the circumcircle
+	if (_indices.size() <= 100 || ccr < 1e-10) {
 		// leaf
 		indices.insert(indices.end(), _indices.begin(), _indices.end());
 		isleaf = true;
@@ -173,6 +178,41 @@ std::vector<size_t> QuadNode::search(double p[3], const double r)
 	return res;
 }
 
+std::vector<size_t> QuadNode::reduce(double red, int octree)
+{
+	if (octree == 0) {
+		throw std::runtime_error("nr of pts per quad cannot be zero");
+	}
+	if (octree < 0) {
+		throw std::runtime_error("nr of pts per quad cannot be less than zero");
+	}
+	std::vector<size_t> res;
+	if (isleaf || ccr*2 < red) {
+		std::vector<size_t> all = getall();
+		if (all.size() <= octree) {
+			return all;
+		}
+		std::set<size_t> indices;
+		while (indices.size() < octree) {
+			size_t tmp = rand(all.size()-1);
+			indices.insert(tmp);
+		}
+		for(std::set<size_t>::iterator it = indices.begin(); it != indices.end(); ++it) {
+			res.push_back(all[*it]);
+		}
+		return res;
+	}
+	std::vector<size_t> res1 = t1->reduce(red, octree);
+	std::vector<size_t> res2 = t2->reduce(red, octree);
+	std::vector<size_t> res3 = t3->reduce(red, octree);
+	std::vector<size_t> res4 = t4->reduce(red, octree);
+	res.insert(res.end(), res1.begin(), res1.end());
+	res.insert(res.end(), res2.begin(), res2.end());
+	res.insert(res.end(), res3.begin(), res3.end());
+	res.insert(res.end(), res4.begin(), res4.end());
+	return res;
+}
+
 std::vector<size_t> QuadNode::getall()
 {
 	if (isleaf) {
@@ -253,6 +293,22 @@ std::vector<size_t> QuadTree::search(double p[3], const double r)
 	std::vector<size_t> result;
 	for (std::unique_ptr<QuadNode> const& n : trees) {
 		std::vector<size_t> res = n->search(p, r);
+		result.insert(result.end(), res.begin(), res.end());
+	}
+	return result;
+}
+
+std::vector<size_t> QuadTree::reduce(double red, int octree)
+{
+	if (octree == 0) {
+		throw std::runtime_error("nr of pts per quad cannot be zero");
+	}
+	if (octree < 0) {
+		throw std::runtime_error("nr of pts per quad cannot be less than zero");
+	}
+	std::vector<size_t> result;
+	for (std::unique_ptr<QuadNode> const& n : trees) {
+		std::vector<size_t> res = n->reduce(red, octree);
 		result.insert(result.end(), res.begin(), res.end());
 	}
 	return result;
