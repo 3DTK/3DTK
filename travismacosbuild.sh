@@ -17,7 +17,6 @@ echo "travis_fold:start:brew_install"
 	brew bundle
 	#export qt path, installed by brew
 	export PATH="/usr/local/opt/qt/bin:$PATH"
-	export PATH="/usr/local/opt/opencv@3/bin:$PATH"
 echo "travis_fold:end:brew_install"
 
 #configure and make 3dtk
