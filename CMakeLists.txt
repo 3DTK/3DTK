@@ -95,7 +95,7 @@ if(NOT NEWMAT_FOUND)
 endif()
 
 if(APPLE)
-  find_package(OpenCV REQUIRED HINTS "/usr/local/opt/opencv3/share/OpenCV/")
+  find_package(OpenCV REQUIRED)
 else()
   if(WIN32)
     set(OpenCV_STATIC ON)
