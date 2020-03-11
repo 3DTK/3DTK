@@ -22,7 +22,7 @@ QtShow::QtShow(int &argc, char **argv)
   }
 
   mainWindow = new MainWindow(dss, ws, ds);
-
+  mainWindow->show();
   if (has_initial_directory) {
     initShow(dss, ws, ds);
     mainWindow->addRecentDirectory();
@@ -77,7 +77,7 @@ QtShow::QtShow(int &argc, char **argv)
 
   connect(mainWindow, &MainWindow::scanDirectoryOpened, this, &QtShow::loadDifferentScan);
 
-  mainWindow->show();
+  //mainWindow->show();
 
   // After 1 second (and next GLWidget::update()) we can have the watermark back on
   QTimer::singleShot(1000, []() {
