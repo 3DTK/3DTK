@@ -339,6 +339,7 @@ std::function<void(int)> exitFunc = exit;
 
 void setResetView(int origin) {
     if (origin == 0) {
+        size_t num_nonempty_scans = 0;
         // set origin to the center of mass of all scans
         for (size_t i = 0; i < octpts.size(); ++i) {
             std::vector <sfloat*> points;
@@ -346,6 +347,11 @@ void setResetView(int origin) {
             BOctTree<sfloat>* cur_tree = ((Show_BOctTree<sfloat>*)octpts[i])->getTree();
             cur_tree->AllPoints( points );
 #endif
+            if (points.size() == 0) {
+                // skip empty scan to avoid division by zero
+                continue;
+            }
+            num_nonempty_scans++;
 
             double centroid[3] = {0., 0., 0.};
             double centroid_transformed[3];;
@@ -362,7 +368,7 @@ void setResetView(int origin) {
             }
         }
         for (unsigned int k = 0; k < 3; ++k)
-            CoM[k] /= octpts.size() * 1.;
+            CoM[k] /= num_nonempty_scans * 1.;
 
         RVX = -CoM[0];
         RVY = -CoM[1];
