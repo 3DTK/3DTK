@@ -1,5 +1,9 @@
 #include "slam6d/globals.icc"
 #include "spherical_quadtree/spherical_quadtree.h"
+#include <random>
+
+std::random_device rd;
+std::mt19937 gen(rd());
 
 #ifndef _MSC_VER
 // needed until we compile with C++14
@@ -83,6 +87,24 @@ QuadNode::QuadNode(size_t v1, size_t v2, size_t v3, std::vector<size_t> const& _
 	double w2[3] = {vertices[v2][0], vertices[v2][1], vertices[v2][2]};
 	double w3[3] = {vertices[v3][0], vertices[v3][1], vertices[v3][2]};
 	circumcircle(w1, w2, w3, ccp, &ccr);
+	// also compute the area of the triangle on the sphere surface
+	//    A = R²(alpha+beta+gamma-π)
+	// The angles are the angles between the planes from sphere center to each
+	// side of the triangle
+	double a[3] = {w1[0] - w2[0], w1[1] - w2[1], w1[2] - w2[2]};
+	double b[3] = {w2[0] - w3[0], w2[1] - w3[1], w2[2] - w3[2]};
+	double c[3] = {w3[0] - w1[0], w3[1] - w1[1], w3[2] - w1[2]};
+	double A[3], B[3], C[3];
+	Cross(a, w1, A);
+	Cross(b, w2, B);
+	Cross(c, w3, C);
+	Normalize3(A);
+	Normalize3(B);
+	Normalize3(C);
+	double alpha = M_PI - acos(A[0]*B[0] + A[1]*B[1] + A[2]*B[2]);
+	double beta = M_PI - acos(B[0]*C[0] + B[1]*C[1] + B[2]*C[2]);
+	double gamma = M_PI - acos(C[0]*A[0] + C[1]*A[1] + C[2]*A[2]);
+	area = (alpha + beta + gamma - M_PI);
 	// we stop producing child nodes if we have less than 100 points for this
 	// node
 	//
@@ -178,34 +200,44 @@ std::vector<size_t> QuadNode::search(double p[3], const double r)
 	return res;
 }
 
-std::vector<size_t> QuadNode::reduce(double red, int octree)
+std::vector<size_t> QuadNode::reduce(double theta, double cap_area, int numpts)
 {
-	if (octree == 0) {
+	if (numpts == 0) {
 		throw std::runtime_error("nr of pts per quad cannot be zero");
 	}
-	if (octree < 0) {
+	if (numpts < 0) {
 		throw std::runtime_error("nr of pts per quad cannot be less than zero");
 	}
 	std::vector<size_t> res;
-	if (isleaf || ccr*2 < red) {
+	if (isleaf || ccr*2 < theta) {
 		std::vector<size_t> all = getall();
-		if (all.size() <= octree) {
+		// the user requested numpts on a sphere cap with area cap_area
+		// the current triangle covers less than the surface of that sphere
+		// cap
+		// compute the number of points we should retrieve from this triangle
+		// by computing the ratio between cap_area and triangle area
+		double new_numpts = numpts * area/cap_area;
+		if (all.size() <= new_numpts) {
 			return all;
 		}
-		std::set<size_t> indices;
-		while (indices.size() < octree) {
-			size_t tmp = rand(all.size()-1);
-			indices.insert(tmp);
-		}
-		for(std::set<size_t>::iterator it = indices.begin(); it != indices.end(); ++it) {
-			res.push_back(all[*it]);
+		// We decide for each point whether it should go into the final list
+		// instead of computing the number of points we need. Example why this
+		// is useful: suppose a lot of triangles have areas such that we need
+		// 0.3 points from them. Then we would get *zero* points for all of
+		// them. Since triangle sizes are very similar, this effect doesn't
+		// cancel out overall.
+		std::bernoulli_distribution d(new_numpts/all.size());
+		for(std::vector<size_t>::iterator it = all.begin(); it != all.end(); ++it) {
+			if (d(gen)) {
+				res.push_back(*it);
+			}
 		}
 		return res;
 	}
-	std::vector<size_t> res1 = t1->reduce(red, octree);
-	std::vector<size_t> res2 = t2->reduce(red, octree);
-	std::vector<size_t> res3 = t3->reduce(red, octree);
-	std::vector<size_t> res4 = t4->reduce(red, octree);
+	std::vector<size_t> res1 = t1->reduce(theta, cap_area, numpts);
+	std::vector<size_t> res2 = t2->reduce(theta, cap_area, numpts);
+	std::vector<size_t> res3 = t3->reduce(theta, cap_area, numpts);
+	std::vector<size_t> res4 = t4->reduce(theta, cap_area, numpts);
 	res.insert(res.end(), res1.begin(), res1.end());
 	res.insert(res.end(), res2.begin(), res2.end());
 	res.insert(res.end(), res3.begin(), res3.end());
@@ -298,17 +330,19 @@ std::vector<size_t> QuadTree::search(double p[3], const double r)
 	return result;
 }
 
-std::vector<size_t> QuadTree::reduce(double red, int octree)
+std::vector<size_t> QuadTree::reduce(double theta, int numpts)
 {
-	if (octree == 0) {
+	if (numpts == 0) {
 		throw std::runtime_error("nr of pts per quad cannot be zero");
 	}
-	if (octree < 0) {
+	if (numpts < 0) {
 		throw std::runtime_error("nr of pts per quad cannot be less than zero");
 	}
+	// compute area of sphere cap under angle theta
+	double cap_area = 2 * M_PI * (1 - cos(theta));
 	std::vector<size_t> result;
 	for (std::unique_ptr<QuadNode> const& n : trees) {
-		std::vector<size_t> res = n->reduce(red, octree);
+		std::vector<size_t> res = n->reduce(theta, cap_area, numpts);
 		result.insert(result.end(), res.begin(), res.end());
 	}
 	return result;

@@ -27,8 +27,9 @@ class QuadNode
 	private:
 		std::vector<std::array<double, 3>> const& pts;
 		std::vector<size_t> indices;
-		double ccp[3];
-		double ccr;
+		double ccp[3]; // circumcircle center
+		double ccr; // angle between circle center and edge
+		double area; // area of triangle on sphere surface
 		bool isleaf;
 		std::unique_ptr<QuadNode> t1;
 		std::unique_ptr<QuadNode> t2;
@@ -41,7 +42,7 @@ class QuadNode
 		QuadNode(size_t, size_t, size_t, std::vector<size_t> const&, std::vector<std::array<double, 3>> const&, std::vector<std::array<double, 3>> &, std::unordered_map<std::pair<size_t, size_t>, size_t> &);
 
 		std::vector<size_t> search(double p[3], const double r);
-		std::vector<size_t> reduce(double red, int octree);
+		std::vector<size_t> reduce(double theta, double cap_area, int numpts);
 };
 
 class QuadTree
