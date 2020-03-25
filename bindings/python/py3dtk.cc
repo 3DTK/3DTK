@@ -212,6 +212,39 @@ bp::tuple pyEulerToMatrix3(bp::tuple t)
 	return bp::tuple(l);
 }
 
+bp::tuple pyMatrix4ToEuler(bp::tuple m)
+{
+	const double alignxf[16] = {
+		bp::extract<double>(m[0])(),
+		bp::extract<double>(m[1])(),
+		bp::extract<double>(m[2])(),
+		bp::extract<double>(m[3])(),
+		bp::extract<double>(m[4])(),
+		bp::extract<double>(m[5])(),
+		bp::extract<double>(m[6])(),
+		bp::extract<double>(m[7])(),
+		bp::extract<double>(m[8])(),
+		bp::extract<double>(m[9])(),
+		bp::extract<double>(m[10])(),
+		bp::extract<double>(m[11])(),
+		bp::extract<double>(m[12])(),
+		bp::extract<double>(m[13])(),
+		bp::extract<double>(m[14])(),
+		bp::extract<double>(m[15])()
+	};
+    double rPosTheta[3];
+    double rPos[3];
+	Matrix4ToEuler(alignxf, rPosTheta, rPos);
+	bp::list l;
+	for (int i = 0; i < 3; ++i) {
+		l.append(rPosTheta[i]);
+	}
+	for (int i = 0; i < 3; ++i) {
+		l.append(rPos[i]);
+	}
+	return bp::tuple(l);
+}
+
 bp::tuple pyEulerToMatrix4(bp::tuple p, bp::tuple t)
 {
 	const double rPos[3] = {
@@ -691,6 +724,7 @@ BOOST_PYTHON_MODULE(py3dtk)
 	bp::def("transform3normal", pytransform3normal);
 	bp::def("EulerToMatrix3", pyEulerToMatrix3);
 	bp::def("EulerToMatrix4", pyEulerToMatrix4);
+	bp::def("Matrix4ToEuler", pyMatrix4ToEuler);
 	bp::def("M3inv", pyM3inv);
 	bp::def("M4inv", pyM4inv);
 
