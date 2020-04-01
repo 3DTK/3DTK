@@ -319,6 +319,8 @@ public:
     root = &uroot->node;
 
     countPointsAndQueue(pts, newcenter, sizeNew, *root, center);
+
+    init();
   }
 
   virtual ~BOctTree()
