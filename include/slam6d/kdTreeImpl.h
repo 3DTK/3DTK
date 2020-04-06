@@ -80,6 +80,10 @@ public:
                       unsigned int bucketSize = 20) {
     AccessorFunc point;
 
+    if (n == 0) {
+        throw std::runtime_error("cannot create kdtree with zero points");
+    }
+
     // Find bbox and centroid
     double mins[3], maxs[3];
     double centroid[3];
