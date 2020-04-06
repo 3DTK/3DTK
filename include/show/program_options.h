@@ -57,6 +57,7 @@ struct display_settings {
   Camera camera;
   int init_with_viewmode;
   int pointsize;
+  float pzoom;
 
   fog_settings fog;
 
@@ -111,7 +112,7 @@ void setGUIOptions(bool& nogui, float& fps,
 void setDisplayOptions(double& scale, GLfloat& fov, int& viewmode,
 		       bool& noPoints, bool& noCameras, bool& noPath, bool& noPoses,
 		       bool& noFog, int& fogType, GLfloat& fogDensity,
-		       Position& position, Quaternion& rotation,
+		       Position& position, Quaternion& rotation, float& pzoom,
 		       int& pointsize, bool& hide_classLabels, boost::program_options::options_description& display_options);
 void setColorOptions(Color& bgcolor, bool& color, ShowColormap& colormap,
 		     float& colormin, float& colormax,
