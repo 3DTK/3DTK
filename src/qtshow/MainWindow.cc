@@ -305,7 +305,7 @@ void MainWindow::loadStates()
   using namespace boost::program_options;
 
   bool advanced, noPoints, noCameras, noPath, noPoses, noFog, hide_classLabels;
-  float fov, fogDensity;
+  float fov, fogDensity, pzoom;
   int viewmode, fogType, pointsize;
   ShowColormap colormap;
   int scansColored;
@@ -328,7 +328,7 @@ void MainWindow::loadStates()
   options_description display_options("Display options");
   setDisplayOptions(scale, fov, viewmode, noPoints, noCameras, noPath, noPoses,
 		    noFog, fogType, fogDensity, position, rotation,
-		    pointsize, hide_classLabels, display_options);
+		    pzoom, pointsize, hide_classLabels, display_options);
 
   options_description color_options("Point coloring");
   setColorOptions(bgcolor, color, colormap, colormin, colormax,

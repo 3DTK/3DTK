@@ -595,6 +595,7 @@ void copy_settings_to_globals(
   show_fog = ds.fog.type;
   fogDensity = ds.fog.density;
   pointsize = ds.pointsize;
+  pzoom = ds.pzoom;
 
   bgcolor[0] = dss.coloring.bgcolor.r;
   bgcolor[1] = dss.coloring.bgcolor.g;

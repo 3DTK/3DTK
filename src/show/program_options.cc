@@ -24,7 +24,7 @@ void parse_args(int argc, char **argv, dataset_settings& dss, window_settings& w
   setDisplayOptions(dss.scale, ds.camera.fov, ds.init_with_viewmode,
 		    no_points, no_cameras, no_path, no_poses,
 		    no_fog, ds.fog.type, ds.fog.density,
-		    ds.camera.position, ds.camera.rotation, ds.pointsize,
+		    ds.camera.position, ds.camera.rotation, ds.pzoom, ds.pointsize,
 		    ds.hide_classLabels,
         display_options);
 
@@ -302,7 +302,7 @@ void setDisplayOptions(double& scale, GLfloat& fov, int& viewmode,
 		       bool& noPoints, bool& noCameras, bool& noPath, bool& noPoses,
 		       bool& noFog, int& fogType, GLfloat& fogDensity,
 		       Position& position, Quaternion& rotation,
-		       int& pointsize,
+		       float& pzoom, int& pointsize,
            bool& hide_classLabels,
 		       options_description& display_options)
 {
@@ -341,6 +341,9 @@ void setDisplayOptions(double& scale, GLfloat& fov, int& viewmode,
     ("rotation",
      value(&rotation)->default_value(Quaternion(1,0,0,0), "1,0,0,0"),
      "Camera starting rotation, given as a quaternion \"%lf,%lf,%lf,%lf\" for x, y, z, and w.")
+    ("parallel-zoom",
+     value<float>(&pzoom)->default_value(2000.0),
+     "Initial zoom level for parallel zoom")
     ("pointsize", value(&pointsize)->default_value(1),
      "Size of each point in pixels.")
     ("hideClassLabels", bool_switch(&hide_classLabels),
