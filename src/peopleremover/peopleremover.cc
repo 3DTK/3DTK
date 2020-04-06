@@ -384,6 +384,7 @@ int main(int argc, char* argv[])
 #endif
 	}
 
+#if 0
 	std::cerr << "computing connectivity graph..." << std::endl;
 	/*
 	 * Output a graph where the nodes are the scan ids and edges connect nodes
@@ -423,6 +424,7 @@ int main(int argc, char* argv[])
 		}
 		std::cerr << "}" << std::endl;
 	}
+#endif
 
 	std::cerr << "write partitioning" << std::endl;
 #ifndef _MSC_VER
