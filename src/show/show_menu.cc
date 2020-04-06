@@ -141,20 +141,27 @@ void newMenu()
   cangle_spinner->set_float_limits(1.0, 180.0);
   cangle_spinner->set_speed(20.0);
   cangle_spinner->set_alignment(GLUI_ALIGN_RIGHT);
+  if (showViewMode != 0) {
+    cangle_spinner->disable();
+  }
 
   pzoom_spinner = glui2->add_spinner_to_panel(settings_panel, "Parallel Zoom :", GLUI_SPINNER_FLOAT, &pzoom);
   pzoom_spinner->set_float_limits(0.001, 100000.0);
   pzoom_spinner->set_speed(5.0);
   pzoom_spinner->set_float_val(pzoom);
   pzoom_spinner->set_alignment(GLUI_ALIGN_RIGHT);
-  pzoom_spinner->disable();
+  if (showViewMode != 1) {
+    pzoom_spinner->disable();
+  }
 
   rzoom_spinner = glui2->add_spinner_to_panel(settings_panel, "Rotate Zoom :", GLUI_SPINNER_FLOAT, &rzoom);
   rzoom_spinner->set_float_limits(1.0, 100000.0);
   rzoom_spinner->set_speed(5.0);
   rzoom_spinner->set_float_val(rzoom);
   rzoom_spinner->set_alignment(GLUI_ALIGN_RIGHT);
-  rzoom_spinner->disable();
+  if (showViewMode != 2) {
+    rzoom_spinner->disable();
+  }
 
   glui2->add_column(true);
 
