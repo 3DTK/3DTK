@@ -436,8 +436,10 @@ int main(int argc, char* argv[])
 	 * it gives better performance (probably because it's buffered) and
 	 * because of the availability of fprintf
 	 */
-	FILE *out_static = fopen("scan000.3d", "wb");
-	FILE *out_dynamic = fopen("scan001.3d", "wb");
+	std::string outdir = dir + "/pplremover";
+	boost::filesystem::create_directory(outdir);
+	FILE *out_static = fopen((outdir+"/scan000.3d").c_str(), "wb");
+	FILE *out_dynamic = fopen((outdir+"/scan001.3d").c_str(), "wb");
 	done = 0;
 	std::cerr << "0 %\r";
 	std::cerr.flush();
@@ -471,6 +473,8 @@ int main(int argc, char* argv[])
 				fprintf(out, " %a", refl_it->second[j]);
 			}
 			if (rgb_it != rgb_by_slice.end()) {
+				// FIXME: rgb_it->second[j] is a RGB char array not a single
+				// value
 				fprintf(out, " %a", rgb_it->second[j]);
 			}
 			fprintf(out, "\n");
@@ -483,10 +487,10 @@ int main(int argc, char* argv[])
 	fclose(out_static);
 	fclose(out_dynamic);
 
-	FILE *pose_static = fopen("scan000.pose", "wb");
+	FILE *pose_static = fopen((outdir+"/scan000.pose").c_str(), "wb");
 	fprintf(pose_static, "0 0 0\n0 0 0\n");
 	fclose(pose_static);
-	FILE *pose_dynamic = fopen("scan001.pose", "wb");
+	FILE *pose_dynamic = fopen((outdir+"/scan001.pose").c_str(), "wb");
 	fprintf(pose_dynamic, "0 0 0\n0 0 0\n");
 	fclose(pose_dynamic);
 
@@ -495,7 +499,7 @@ int main(int argc, char* argv[])
 	std::cerr << "0 %\r";
 	std::cerr.flush();
 	if (staticdir == "") {
-		staticdir = dir + "/static";
+		staticdir = dir + "/pplremover/static";
 	}
 	boost::filesystem::create_directory(staticdir);
 	for (std::pair<size_t, DataXYZ> element : points_by_slice) {
@@ -560,7 +564,7 @@ int main(int argc, char* argv[])
 	std::cerr.flush();
 
 	if (maskdir == "") {
-		maskdir = dir + "/pplremover";
+		maskdir = dir + "/pplremover/masks";
 	}
 	boost::filesystem::create_directory(maskdir);
 	for (std::pair<size_t, DataXYZ> element : points_by_slice) {
