@@ -925,6 +925,8 @@ void initShow(dataset_settings& dss, const window_settings& ws, const display_se
   // necessary to save these to allow filtering of scans from view and reloading frames; could also make those global..
   startScanIdx = start;
   endScanIdx = real_end;
+  startRangeScanIdx = start;
+  endRangeScanIdx = real_end;
   readIni = readInitial;
   scanIOtype = type;
 
