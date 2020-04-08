@@ -452,7 +452,7 @@ GLUI_SPINNER_INT, &factor);
     endScanIdx_spinner->set_int_val(endScanIdx);
     glui1->add_button_to_panel(advanced_panel, "Step up", 0, (GLUI_Update_CB)stepScansUp)->set_alignment(GLUI_ALIGN_CENTER);
     glui1->add_button_to_panel(advanced_panel, "Step down", 0, (GLUI_Update_CB)stepScansDown)->set_alignment(GLUI_ALIGN_CENTER);
-    glui1->add_button_to_panel(advanced_panel, "Reload frames", 0, (GLUI_Update_CB)reloadFrames)->set_alignment(GLUI_ALIGN_CENTER);
+    glui1->add_button_to_panel(advanced_panel, "Reload frames", 0, (GLUI_Update_CB)reloadFramesAndUpdateGui)->set_alignment(GLUI_ALIGN_CENTER);
 
 
     glui1->add_separator();
@@ -489,6 +489,12 @@ void stepScansUp(int dummy) {
 void stepScansDown(int dummy) {
   startRangeScanIdx--;
   endRangeScanIdx--;
+  haveToUpdate=1;
+}
+
+void reloadFramesAndUpdateGui() {
+  reloadFrames();
+  frame_spinner->set_int_limits(0, MetaMatrix[0].size() - 1);
   haveToUpdate=1;
 }
 
