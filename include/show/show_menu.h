@@ -160,6 +160,8 @@ void stepScansUp(int dummy);
 
 void stepScansDown(int dummy);
 
+/** This function invokes reloadFrames() and updates the Gui */
+void reloadFramesAndUpdateGui();
 
 /**
  * This function is called when a user starts to animate the generated path
