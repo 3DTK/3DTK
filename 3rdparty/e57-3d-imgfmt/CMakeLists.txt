@@ -92,7 +92,11 @@ find_package(Threads REQUIRED)
 #)
 #endif(NOT Boost_FOUND)
 
-set(Xerces_USE_STATIC_LIBS OFF)
+if (APPLE)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -framework CoreServices -framework CoreFoundation -lcurl")
+endif ()
+
+set(Xerces_USE_STATIC_LIBS ON)
 find_package(Xerces )
 if (NOT Xerces_FOUND)
     set(XERCES_ROOT CACHE PATH "Location of the xerces library")
@@ -188,6 +192,7 @@ add_executable( e57fields
         )
 target_link_libraries( e57fields
         E57RefImpl
+        ${CURL_LIBRARIES}
         ${XML_LIBRARIES}
         ${CMAKE_THREAD_LIBS_INIT}
         )
@@ -197,6 +202,7 @@ add_executable( e57xmldump
         )
 target_link_libraries( e57xmldump
         E57RefImpl
+        ${CURL_LIBRARIES}
         ${XML_LIBRARIES}
         ${CMAKE_THREAD_LIBS_INIT}
         )
@@ -206,6 +212,7 @@ add_executable( e57validate
         )
 target_link_libraries( e57validate
         E57RefImpl
+        ${CURL_LIBRARIES}
         ${XML_LIBRARIES}
         ${CMAKE_THREAD_LIBS_INIT}
         )
@@ -215,6 +222,7 @@ add_executable( e57unpack
         )
 target_link_libraries( e57unpack
         E57RefImpl
+        ${CURL_LIBRARIES}
         ${XML_LIBRARIES}
         ${Boost_LIBRARIES}
         ${CMAKE_THREAD_LIBS_INIT}
