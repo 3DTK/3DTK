@@ -66,17 +66,28 @@ $ equivs-build doc/equivs/control.debian.jessie
 Before compiling ($make) disable (switch to OFF) the options:
 `WITH_GLFW`, `WITH_QT`, `WITH_CGAL`
 
-## macOS 10.13 High Sierra
+## macOS
 
 The easiest way to install all required dependencies is to use Homebrew. You can install Homebrew as follows:
 ```
 $/usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
 ```
 for more information about Homebrew have a look at [Homebrew](http://brew.sh/index_de.html).
+If your using macOS Version >= 15.4, the Command Line Tools no longer supports SVN. Therefore, SVN must first be installed via brew:
+```
+$brew install svn
+```
+Check out the slam6d-code:
+```
+$ svn checkout svn://svn.code.sf.net/p/slam6d/code/trunk slam6d-code
+$ cd slam6d-code
+```
+
 After this, the commands to install the dependencies and build are:
 ```
 $ brew update
 $ brew bundle
+$ brew install cgal
 $ export PATH="/usr/local/opt/qt/bin:$PATH"
 $ mkdir .build
 $ cmake -H. -B.build -DWITH_PYTHON=OFF -DWITH_OPENMP=OFF -DWITH_FTGL=OFF $CMAKEOPTS -G "Ninja"
