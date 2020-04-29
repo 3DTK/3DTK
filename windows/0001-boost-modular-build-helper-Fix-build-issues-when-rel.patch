@@ -1,0 +1,171 @@
+From 613b577cd1c504c8fbdb5d1000c2c2d5f0302f5c Mon Sep 17 00:00:00 2001
+From: PhoebeHui <v-phma@microsoft.com>
+Date: Wed, 4 Dec 2019 19:00:05 -0800
+Subject: [PATCH 1/2] [boost-modular-build-helper] Fix build issues when
+ release only
+
+---
+ ports/boost-modular-build-helper/CONTROL      |  2 +-
+ ports/boost-modular-build-helper/Jamroot.jam  | 33 +++++++------------
+ .../boost-modular-build.cmake                 |  9 ++++-
+ 3 files changed, 20 insertions(+), 24 deletions(-)
+
+diff --git a/ports/boost-modular-build-helper/CONTROL b/ports/boost-modular-build-helper/CONTROL
+index b3a955924..ae319fb0b 100644
+--- a/ports/boost-modular-build-helper/CONTROL
++++ b/ports/boost-modular-build-helper/CONTROL
+@@ -1,2 +1,2 @@
+ Source: boost-modular-build-helper
+-Version: 1.72.0-2
++Version: 1.72.0-3
+diff --git a/ports/boost-modular-build-helper/Jamroot.jam b/ports/boost-modular-build-helper/Jamroot.jam
+index 688303b19..bfccec65a 100644
+--- a/ports/boost-modular-build-helper/Jamroot.jam
++++ b/ports/boost-modular-build-helper/Jamroot.jam
+@@ -36,8 +36,7 @@ if "@PORT@" != "boost-system"
+ {
+     use-project /boost/system : . ;
+ 
+-    lib boost_system : : <file>"@CURRENT_INSTALLED_DIR@/lib/@BOOST_LIB_PREFIX@boost_system@BOOST_LIB_RELEASE_SUFFIX@" <variant>release ;
+-    lib boost_system : : <file>"@CURRENT_INSTALLED_DIR@/debug/lib/@BOOST_LIB_PREFIX@boost_system@BOOST_LIB_DEBUG_SUFFIX@" <variant>debug ;
++    lib boost_system : : <file>"@CURRENT_INSTALLED_DIR@/@BUILD_LIB_PATH@@BOOST_LIB_PREFIX@boost_system@BOOST_LIB_SUFFIX@" <variant>@VARIANT@ ;
+     explicit boost_system ;
+ 
+     use-project /boost : . ;
+@@ -48,8 +47,7 @@ if "@PORT@" != "boost-chrono"
+ {
+     use-project /boost/chrono : . ;
+ 
+-    lib boost_chrono : : <file>"@CURRENT_INSTALLED_DIR@/lib/@BOOST_LIB_PREFIX@boost_chrono@BOOST_LIB_RELEASE_SUFFIX@" <variant>release ;
+-    lib boost_chrono : : <file>"@CURRENT_INSTALLED_DIR@/debug/lib/@BOOST_LIB_PREFIX@boost_chrono@BOOST_LIB_DEBUG_SUFFIX@" <variant>debug ;
++    lib boost_chrono : : <file>"@CURRENT_INSTALLED_DIR@/@BUILD_LIB_PATH@@BOOST_LIB_PREFIX@boost_chrono@BOOST_LIB_SUFFIX@" <variant>@VARIANT@ ;
+     explicit boost_chrono ;
+ }
+ 
+@@ -57,8 +55,7 @@ if "@PORT@" != "boost-regex"
+ {
+     use-project /boost/regex : . ;
+ 
+-    lib boost_regex : : <file>"@CURRENT_INSTALLED_DIR@/lib/@BOOST_LIB_PREFIX@boost_regex@BOOST_LIB_RELEASE_SUFFIX@" <variant>release ;
+-    lib boost_regex : : <file>"@CURRENT_INSTALLED_DIR@/debug/lib/@BOOST_LIB_PREFIX@boost_regex@BOOST_LIB_DEBUG_SUFFIX@" <variant>debug ;
++    lib boost_regex : : <file>"@CURRENT_INSTALLED_DIR@/@BUILD_LIB_PATH@@BOOST_LIB_PREFIX@boost_regex@BOOST_LIB_SUFFIX@" <variant>@VARIANT@ ;
+     explicit boost_regex ;
+ }
+ 
+@@ -66,8 +63,7 @@ if "@PORT@" != "boost-date-time"
+ {
+     use-project /boost/date_time : . ;
+ 
+-    lib boost_date_time : : <file>"@CURRENT_INSTALLED_DIR@/lib/@BOOST_LIB_PREFIX@boost_date_time@BOOST_LIB_RELEASE_SUFFIX@" <variant>release -<library>/boost/date_time//boost_date_time ;
+-    lib boost_date_time : : <file>"@CURRENT_INSTALLED_DIR@/debug/lib/@BOOST_LIB_PREFIX@boost_date_time@BOOST_LIB_DEBUG_SUFFIX@" <variant>debug -<library>/boost/date_time//boost_date_time ;
++    lib boost_date_time : : <file>"@CURRENT_INSTALLED_DIR@/@BUILD_LIB_PATH@@BOOST_LIB_PREFIX@boost_date_time@BOOST_LIB_SUFFIX@" <variant>@VARIANT@ -<library>/boost/date_time//boost_date_time ;
+     explicit boost_date_time ;
+ }
+ 
+@@ -75,8 +71,7 @@ if "@PORT@" != "boost-thread"
+ {
+     use-project /boost/thread : . ;
+ 
+-    lib boost_thread : : <file>"@CURRENT_INSTALLED_DIR@/lib/@BOOST_LIB_PREFIX@boost_thread@BOOST_LIB_RELEASE_SUFFIX@" <variant>release : : <library>/boost/date_time//boost_date_time ;
+-    lib boost_thread : : <file>"@CURRENT_INSTALLED_DIR@/debug/lib/@BOOST_LIB_PREFIX@boost_thread@BOOST_LIB_DEBUG_SUFFIX@" <variant>debug : : <library>/boost/date_time//boost_date_time ;
++    lib boost_thread : : <file>"@CURRENT_INSTALLED_DIR@/@BUILD_LIB_PATH@@BOOST_LIB_PREFIX@boost_thread@BOOST_LIB_SUFFIX@" <variant>@VARIANT@ : : <library>/boost/date_time//boost_date_time ;
+     explicit boost_thread ;
+ }
+ 
+@@ -84,8 +79,7 @@ if "@PORT@" != "boost-timer"
+ {
+     use-project /boost/timer : . ;
+ 
+-    lib boost_timer : : <file>"@CURRENT_INSTALLED_DIR@/lib/@BOOST_LIB_PREFIX@boost_timer@BOOST_LIB_RELEASE_SUFFIX@" <variant>release ;
+-    lib boost_timer : : <file>"@CURRENT_INSTALLED_DIR@/debug/lib/@BOOST_LIB_PREFIX@boost_timer@BOOST_LIB_DEBUG_SUFFIX@" <variant>debug ;
++    lib boost_timer : : <file>"@CURRENT_INSTALLED_DIR@/@BUILD_LIB_PATH@@BOOST_LIB_PREFIX@boost_timer@BOOST_LIB_SUFFIX@" <variant>@VARIANT@ ;
+     explicit boost_timer ;
+ }
+ 
+@@ -93,8 +87,7 @@ if "@PORT@" != "boost-filesystem"
+ {
+     use-project /boost/filesystem : . ;
+ 
+-    lib boost_filesystem : : <file>"@CURRENT_INSTALLED_DIR@/lib/@BOOST_LIB_PREFIX@boost_filesystem@BOOST_LIB_RELEASE_SUFFIX@" <variant>release : : <library>/boost/system//boost_system ;
+-    lib boost_filesystem : : <file>"@CURRENT_INSTALLED_DIR@/debug/lib/@BOOST_LIB_PREFIX@boost_filesystem@BOOST_LIB_DEBUG_SUFFIX@" <variant>debug : : <library>/boost/system//boost_system ;
++    lib boost_filesystem : : <file>"@CURRENT_INSTALLED_DIR@/@BUILD_LIB_PATH@@BOOST_LIB_PREFIX@boost_filesystem@BOOST_LIB_SUFFIX@" <variant>@VARIANT@ : : <library>/boost/system//boost_system ;
+     explicit boost_filesystem ;
+ }
+ 
+@@ -102,8 +95,7 @@ if "@PORT@" != "boost-atomic"
+ {
+     use-project /boost/atomic : . ;
+ 
+-    lib boost_atomic : : <file>"@CURRENT_INSTALLED_DIR@/lib/@BOOST_LIB_PREFIX@boost_atomic@BOOST_LIB_RELEASE_SUFFIX@" <variant>release ;
+-    lib boost_atomic : : <file>"@CURRENT_INSTALLED_DIR@/debug/lib/@BOOST_LIB_PREFIX@boost_atomic@BOOST_LIB_DEBUG_SUFFIX@" <variant>debug ;
++    lib boost_atomic : : <file>"@CURRENT_INSTALLED_DIR@/@BUILD_LIB_PATH@@BOOST_LIB_PREFIX@boost_atomic@BOOST_LIB_SUFFIX@" <variant>@VARIANT@ ;
+     explicit boost_atomic ;
+ }
+ 
+@@ -114,8 +106,7 @@ if "@PORT@" != "boost-context"
+ 
+     use-project /boost/context : . ;
+ 
+-    lib boost_context : : <file>"@CURRENT_INSTALLED_DIR@/lib/@BOOST_LIB_PREFIX@boost_context@BOOST_LIB_RELEASE_SUFFIX@" <variant>release ;
+-    lib boost_context : : <file>"@CURRENT_INSTALLED_DIR@/debug/lib/@BOOST_LIB_PREFIX@boost_context@BOOST_LIB_DEBUG_SUFFIX@" <variant>debug ;
++    lib boost_context : : <file>"@CURRENT_INSTALLED_DIR@/@BUILD_LIB_PATH@@BOOST_LIB_PREFIX@boost_context@BOOST_LIB_SUFFIX@" <variant>@VARIANT@ ;
+     explicit boost_context ;
+ }
+ 
+@@ -123,8 +114,7 @@ if "@PORT@" != "boost-test"
+ {
+     use-project /boost/test : . ;
+ 
+-    lib boost_unit_test_framework : : <file>"@CURRENT_INSTALLED_DIR@/lib/@BOOST_LIB_PREFIX@boost_unit_test_framework@BOOST_LIB_RELEASE_SUFFIX@" <variant>release ;
+-    lib boost_unit_test_framework : : <file>"@CURRENT_INSTALLED_DIR@/debug/lib/@BOOST_LIB_PREFIX@boost_unit_test_framework@BOOST_LIB_DEBUG_SUFFIX@" <variant>debug ;
++    lib boost_unit_test_framework : : <file>"@CURRENT_INSTALLED_DIR@/@BUILD_LIB_PATH@@BOOST_LIB_PREFIX@boost_unit_test_framework@BOOST_LIB_SUFFIX@" <variant>@VARIANT@ ;
+     explicit boost_unit_test_framework ;
+ }
+ 
+@@ -132,8 +122,7 @@ if "@PORT@" != "boost-serialization"
+ {
+     use-project /boost/serialization : . ;
+ 
+-    lib boost_serialization : : <file>"@CURRENT_INSTALLED_DIR@/lib/@BOOST_LIB_PREFIX@boost_serialization@BOOST_LIB_RELEASE_SUFFIX@" <variant>release ;
+-    lib boost_serialization : : <file>"@CURRENT_INSTALLED_DIR@/debug/lib/@BOOST_LIB_PREFIX@boost_serialization@BOOST_LIB_DEBUG_SUFFIX@" <variant>debug ;
++    lib boost_serialization : : <file>"@CURRENT_INSTALLED_DIR@/@BUILD_LIB_PATH@@BOOST_LIB_PREFIX@boost_serialization@BOOST_LIB_SUFFIX@" <variant>@VARIANT@ ;
+     explicit boost_serialization ;
+ }
+ 
+diff --git a/ports/boost-modular-build-helper/boost-modular-build.cmake b/ports/boost-modular-build-helper/boost-modular-build.cmake
+index 765d882b8..42735be0a 100644
+--- a/ports/boost-modular-build-helper/boost-modular-build.cmake
++++ b/ports/boost-modular-build-helper/boost-modular-build.cmake
+@@ -72,7 +72,6 @@ function(boost_modular_build)
+         file(WRITE ${_bm_SOURCE_PATH}/build/Jamfile.v2 "${_contents}")
+     endif()
+ 
+-    configure_file(${_bm_DIR}/Jamroot.jam ${_bm_SOURCE_PATH}/Jamroot.jam @ONLY)
+     # if(EXISTS "${CURRENT_INSTALLED_DIR}/share/boost-config/checks")
+     #     file(COPY "${CURRENT_INSTALLED_DIR}/share/boost-config/checks" DESTINATION "${_bm_SOURCE_PATH}/build/config")
+     # endif()
+@@ -298,6 +297,10 @@ function(boost_modular_build)
+     ######################
+     if(NOT DEFINED VCPKG_BUILD_TYPE OR VCPKG_BUILD_TYPE STREQUAL "release")
+         message(STATUS "Building ${TARGET_TRIPLET}-rel")
++        set(BOOST_LIB_SUFFIX ${BOOST_LIB_RELEASE_SUFFIX})
++        set(VARIANT "release")
++        set(BUILD_LIB_PATH "lib/")
++        configure_file(${_bm_DIR}/Jamroot.jam ${_bm_SOURCE_PATH}/Jamroot.jam @ONLY)
+         set(ENV{BOOST_BUILD_PATH} "${BOOST_BUILD_PATH}")
+         vcpkg_execute_required_process(
+             COMMAND "${B2_EXE}"
+@@ -316,6 +319,10 @@ function(boost_modular_build)
+ 
+     if(NOT DEFINED VCPKG_BUILD_TYPE OR VCPKG_BUILD_TYPE STREQUAL "debug")
+         message(STATUS "Building ${TARGET_TRIPLET}-dbg")
++        set(BOOST_LIB_SUFFIX ${BOOST_LIB_DEBUG_SUFFIX})
++        set(VARIANT debug)
++        set(BUILD_LIB_PATH "debug/lib/")
++        configure_file(${_bm_DIR}/Jamroot.jam ${_bm_SOURCE_PATH}/Jamroot.jam @ONLY)
+         set(ENV{BOOST_BUILD_PATH} "${BOOST_BUILD_PATH}")
+         vcpkg_execute_required_process(
+             COMMAND "${B2_EXE}"
+-- 
+2.25.1
+
