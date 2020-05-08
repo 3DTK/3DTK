@@ -107,6 +107,12 @@ add_library(scan
 set_property(TARGET scan PROPERTY POSITION_INDEPENDENT_CODE 1)
 target_link_libraries(scan scanclient scanio ${ANN_LIBRARIES} ${NEWMAT_LIBRARIES} ${SUITESPARSE_LIBRARIES})
 
+### SCAN2FEATURES
+
+add_executable(scan2features scan2features.cc)
+
+target_link_libraries(scan2features scan ${NEWMAT_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY})
+
 ### SLAM6D
 
 add_executable(slam6D slam6D.cc)
