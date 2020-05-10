@@ -364,12 +364,44 @@ void validate(boost::any& v, const std::vector<std::string>& values,
 	}
 }
 
+namespace std {
+void validate(boost::any& v, const std::vector<std::string>& values,
+		std::pair<size_t, double>*, int)
+{
+	using namespace boost::program_options;
+
+	validators::check_first_occurrence(v);
+	const std::string& s = validators::get_single_string(values);
+
+	const size_t sep = s.find(':');
+	if (sep==std::string::npos) {
+		throw validation_error(validation_error::invalid_option_value, "Cannot find colon in reduction option: " + s);
+	}
+	std::pair<size_t, double> ret;
+	try {
+		ret.first = std::stol(s.substr(0,sep));
+	} catch (std::invalid_argument) {
+		throw validation_error(validation_error::invalid_option_value, "Invalid number of points in reduction option: " + s.substr(0,sep));
+	} catch (std::out_of_range) {
+		throw validation_error(validation_error::invalid_option_value, "Number of points too large in reduction option: " + s.substr(0,sep));
+	}
+	try {
+		ret.second = std::stod(s.substr(sep+1));
+	} catch (std::invalid_argument) {
+		throw validation_error(validation_error::invalid_option_value, "Invalid angle in reduction option: " + s.substr(0,sep));
+	} catch (std::out_of_range) {
+		throw validation_error(validation_error::invalid_option_value, "Angle too large in reduction option: " + s.substr(0,sep));
+	}
+	v = boost::any(ret);
+}
+}
+
 void parse_cmdline(int argc, char* argv[], ssize_t &start, ssize_t &end, IOType &format, double &fuzz,
 	double &voxel_size, size_t &diff, size_t &normal_knearest,
 	size_t &cluster_size, normal_method_t &normal_method,
 	maxrange_method_t &maxrange_method, std::string &maskdir,
 	std::string &staticdir, std::string &dir, bool &no_subvoxel_accuracy,
-	bool &write_maxranges, int &jobs
+	bool &write_maxranges, int &jobs, std::pair<size_t, double> &reduce
 #ifdef WITH_MMAP_SCAN
 	, std::string &cachedir
 #endif
@@ -403,6 +435,8 @@ void parse_cmdline(int argc, char* argv[], ssize_t &start, ssize_t &end, IOType 
 		("min-cluster-size", po::value(&cluster_size)->default_value(5), "Minimum number of connected voxels that make a dynamic object (default: 5). Set to any value greater than one to turn on clustering.")
 		("maxrange-method", po::value(&maxrange_method)->default_value(NONE),
 		 "How to compute search range. Possible values: none, normals, 1nearest")
+		("reduce", po::value(&reduce),
+		 "Perform voxel traversal on a reduced set of points with X random points seen under angle Y in radians, separated by a colon: X:Y")
 		("write-maxranges", po::bool_switch(&write_maxranges)->default_value(false), "Write computed maxranges to scan002.3d and onward for each input scan")
 		("normal-knearest", po::value(&normal_knearest)->default_value(40),
 		 "To compute the normal vector, use NUM closest points for --maxrange-method=normals (default: 40)")
@@ -500,6 +534,19 @@ void compute_maxranges(
 		const double voxel_diagonal,
 		const double fuzz)
 {
+	std::cerr << "building spherical quad tree" << std::endl;
+	QuadTree qtree = QuadTree(orig_points_by_slice);
+	compute_maxranges(maxranges, qtree, orig_points_by_slice, normal_method, voxel_diagonal, fuzz);
+}
+
+void compute_maxranges(
+		std::vector<double> &maxranges,
+		const QuadTree &qtree,
+		const DataXYZ &orig_points_by_slice,
+		const normal_method_t normal_method,
+		const double voxel_diagonal,
+		const double fuzz)
+{
 	/*
 	const double* pos = std::get<0>(pose.second);
 	const double* theta = std::get<1>(pose.second);
@@ -507,8 +554,6 @@ void compute_maxranges(
 	double transmat4inv[16];
 	M4inv(transmat, transmat4inv);
 	*/
-	std::cerr << "building spherical quad tree" << std::endl;
-	QuadTree qtree = QuadTree(orig_points_by_slice);
 	// no need to build a k-d tree for the "angle" method
 	if (normal_method == KNEAREST || normal_method == RANGE) {
 		exit(1);

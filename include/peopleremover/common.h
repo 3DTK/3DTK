@@ -118,11 +118,19 @@ void parse_cmdline(int argc, char* argv[], ssize_t &start, ssize_t &end, IOType 
 	size_t &cluster_size, normal_method_t &normal_method,
 	maxrange_method_t &maxrange_method, std::string &maskdir,
 	std::string &staticdir, std::string &dir, bool &no_subvoxel_accuracy,
-	bool &write_maxranges, int &jobs
+	bool &write_maxranges, int &jobs, std::pair<size_t, double> &reduce
 #ifdef WITH_MMAP_SCAN
 	, std::string &cachedir
 #endif
 	);
+
+void compute_maxranges(std::vector<double> &maxranges,
+		const QuadTree &qtree,
+		const DataXYZ &orig_points_by_slice,
+				const normal_method_t normal_method,
+		const double voxel_diagonal,
+		const double fuzz
+		);
 
 void compute_maxranges(std::vector<double> &maxranges, const DataXYZ &orig_points_by_slice,
 				const normal_method_t normal_method,
