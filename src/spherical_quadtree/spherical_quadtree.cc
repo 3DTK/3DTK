@@ -2,8 +2,7 @@
 #include "spherical_quadtree/spherical_quadtree.h"
 #include <random>
 
-std::random_device rd;
-std::mt19937 gen(rd());
+std::mt19937 gen(0);
 
 #ifndef _MSC_VER
 // needed until we compile with C++14
