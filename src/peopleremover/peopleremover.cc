@@ -27,6 +27,7 @@ int main(int argc, char* argv[])
 	bool no_subvoxel_accuracy;
 	bool write_maxranges;
 	int jobs;
+	std::pair<size_t, double> reduce;
 #ifdef WITH_MMAP_SCAN
 	std::string cachedir;
 #endif
@@ -34,7 +35,7 @@ int main(int argc, char* argv[])
 	parse_cmdline(argc, argv, start, end, format, fuzz, voxel_size, diff,
 			normal_knearest, cluster_size, normal_method, maxrange_method,
 			maskdir, staticdir, dir, no_subvoxel_accuracy, write_maxranges,
-			jobs
+			jobs, reduce
 #ifdef WITH_MMAP_SCAN
 			, cachedir
 #endif
@@ -214,12 +215,26 @@ int main(int argc, char* argv[])
 		size_t i = scanorder[idx];
 		// FIXME: this is just wasting memory
 		std::vector<double> maxranges(points_by_slice[i].size(), std::numeric_limits<double>::infinity());
+		std::vector<size_t> reduced;
 
 		if (maxrange_method == NORMALS) {
 			if (normal_method == KNEAREST_GLOBAL || normal_method == RANGE_GLOBAL) {
 				exit(1);
 			}
-			compute_maxranges(maxranges, orig_points_by_slice[i], normal_method, voxel_diagonal, fuzz);
+			std::cerr << "building spherical quad tree" << std::endl;
+			QuadTree qtree = QuadTree(orig_points_by_slice[i]);
+			compute_maxranges(maxranges, qtree, orig_points_by_slice[i], normal_method, voxel_diagonal, fuzz);
+			if (reduce.first != 0 && reduce.second != 0) {
+				std::cerr << "reducing points..." << std::endl;
+				reduced = qtree.reduce(
+						reduce.second, // angular diameter theta
+						reduce.first   // number of points
+				);
+			} else {
+				for (size_t j = 0; j < points_by_slice[i].size(); ++j) {
+					reduced.push_back(j);
+				}
+			}
 		} else if (maxrange_method == ONENEAREST) {
 			exit(1);
 		}
@@ -231,7 +246,8 @@ int main(int argc, char* argv[])
 		}
 
 		std::set<struct voxel> free;
-		for (size_t j = 0; j < points_by_slice[i].size(); ++j) {
+		std::cerr << "shooting rays to " << reduced.size() << " points" << std::endl;
+		for (size_t j : reduced) {
 			double p[3] = {points_by_slice[i][j][0], points_by_slice[i][j][1], points_by_slice[i][j][2]};
 			if (maxranges[j] != std::numeric_limits<double>::infinity()) {
 				double maxrange = maxranges[j];
