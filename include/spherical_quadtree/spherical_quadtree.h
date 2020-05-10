@@ -36,13 +36,13 @@ class QuadNode
 		std::unique_ptr<QuadNode> t3;
 		std::unique_ptr<QuadNode> t4;
 
-		std::vector<size_t> getall();
+		std::vector<size_t> getall() const;
 
 	public:
 		QuadNode(size_t, size_t, size_t, std::vector<size_t> const&, std::vector<std::array<double, 3>> const&, std::vector<std::array<double, 3>> &, std::unordered_map<std::pair<size_t, size_t>, size_t> &);
 
-		std::vector<size_t> search(double p[3], const double r);
-		std::vector<size_t> reduce(double theta, double cap_area, int numpts);
+		std::vector<size_t> search(double p[3], const double r) const;
+		std::vector<size_t> reduce(double theta, double cap_area, int numpts) const;
 };
 
 class QuadTree
@@ -56,8 +56,8 @@ class QuadTree
 	public:
 		QuadTree(DataXYZ const&);
 
-		std::vector<size_t> search(double p[3], const double r);
-		std::vector<size_t> reduce(double red, int octree);
+		std::vector<size_t> search(double p[3], const double r) const;
+		std::vector<size_t> reduce(double red, int octree) const;
 };
 
 #endif

@@ -162,7 +162,7 @@ QuadNode::QuadNode(size_t v1, size_t v2, size_t v3, std::vector<size_t> const& _
 	t4 = std::make_unique<QuadNode>(v4,v5,v6,indices4, _pts, vertices, middlemap);
 }
 
-std::vector<size_t> QuadNode::search(double p[3], const double r)
+std::vector<size_t> QuadNode::search(double p[3], const double r) const
 {
 	if (isleaf) {
 		std::vector<size_t> res;
@@ -199,7 +199,7 @@ std::vector<size_t> QuadNode::search(double p[3], const double r)
 	return res;
 }
 
-std::vector<size_t> QuadNode::reduce(double theta, double cap_area, int numpts)
+std::vector<size_t> QuadNode::reduce(double theta, double cap_area, int numpts) const
 {
 	if (numpts == 0) {
 		throw std::runtime_error("nr of pts per quad cannot be zero");
@@ -244,7 +244,7 @@ std::vector<size_t> QuadNode::reduce(double theta, double cap_area, int numpts)
 	return res;
 }
 
-std::vector<size_t> QuadNode::getall()
+std::vector<size_t> QuadNode::getall() const
 {
 	if (isleaf) {
 		return indices;
@@ -319,7 +319,7 @@ QuadTree::QuadTree(DataXYZ const& _pts)
 	}
 }
 
-std::vector<size_t> QuadTree::search(double p[3], const double r)
+std::vector<size_t> QuadTree::search(double p[3], const double r) const
 {
 	std::vector<size_t> result;
 	for (std::unique_ptr<QuadNode> const& n : trees) {
@@ -329,7 +329,7 @@ std::vector<size_t> QuadTree::search(double p[3], const double r)
 	return result;
 }
 
-std::vector<size_t> QuadTree::reduce(double theta, int numpts)
+std::vector<size_t> QuadTree::reduce(double theta, int numpts) const
 {
 	if (numpts == 0) {
 		throw std::runtime_error("nr of pts per quad cannot be zero");
