@@ -97,6 +97,13 @@ jobs:
       env:
         - DERIV=ubuntu DIST=bionic
       if: branch NOT IN (macos, osx, apple, debian)
+    - os: linux
+      arch: amd64
+      services:
+        - docker
+      env:
+        - DERIV=ubuntu DIST=focal
+      if: branch NOT IN (macos, osx, apple, debian)
 script:
   - |
     case "$TRAVIS_OS_NAME" in

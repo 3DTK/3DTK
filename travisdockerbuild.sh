@@ -45,6 +45,9 @@ case "$DIST" in
 		wget https://launchpad.net/ubuntu/+archive/primary/+files/libseccomp2_2.4.1-0ubuntu0.16.04.2_$arch.deb
 		sudo apt-get install ./libseccomp2_2.4.1-0ubuntu0.16.04.2_$arch.deb
 		;;
+	focal)
+		CMAKEOPTS="$CMAKEOPTS -DWITH_ROS=ON"
+		;;
 	xenial|bionic|stretch)
 		# nothing to do
 		;;
@@ -70,7 +73,7 @@ RUN echo "deb $MIRROR $DIST-updates $COMP" >> /etc/apt/sources.list
 RUN echo "deb $SECMIRROR $DIST/updates $COMP" >> /etc/apt/sources.list
 EOF
 		;;
-	xenial|bionic)
+	xenial|bionic|focal)
 		cat >> Dockerfile <<EOF
 RUN echo "deb $MIRROR $DIST-updates $COMP" >> /etc/apt/sources.list
 RUN echo "deb $SECMIRROR $DIST-security $COMP" >> /etc/apt/sources.list
