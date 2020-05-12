@@ -46,7 +46,7 @@ Depends:
  libtf-conversions-dev,
  libtf-dev,
  libtf2-sensor-msgs-dev,
- libwxgtk3.0-dev,
+ libwxgtk3.0-gtk3-dev,
  libxi-dev,
  libxml2-dev,
  libxmlrpc-c++8-dev,
