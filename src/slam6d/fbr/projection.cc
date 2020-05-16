@@ -268,8 +268,6 @@ namespace fbr
     //ZAXIS projection
     if(method_ == ZAXIS)
       {
-	double minZ_ = -100;
-	double maxZ_ = 100;
 	//adding the longitude to x axis and latitude to y axis
 	xSize_ = maxHorizAngle_ - minHorizAngle_;
 	ySize_ = (maxZ_ - minZ_);
@@ -280,7 +278,7 @@ namespace fbr
 	widthMax_ = width_ - 1;
 	cout << "ZMAX= " << maxZ_ << " ZMIN= "<< minZ_ << endl;
 	yFactor_ = (double) height_ / ySize_;
-	//shift all the valuse to positive points on image
+  //shift all the values to positive points on image
 	heightMax_ = height_ - 1;
       }
 
