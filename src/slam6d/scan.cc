@@ -227,6 +227,12 @@ void Scan::setReductionParameter(double voxelSize,
   reduction_pointtype = pointtype;
 }
 
+void Scan::setUpsamplingParameter(double voxelSize, double factor, PointType pointtype) {
+    upsampling_voxelSize = voxelSize;
+    upsampling_factor = factor;
+    upsampling_pointtype = pointtype;
+}
+
 void Scan::setSearchTreeParameter(int nns_method, int bucketSize)
 {
   searchtree_nnstype = nns_method;
@@ -668,6 +674,125 @@ void Scan::calcReducedPoints()
 #ifdef WITH_METRICS
     ClientMetric::calc_reduced_points_time.end(tl);
 #endif //WITH_METRICS
+}
+
+
+/**
+ * Computes the covariance matrix of points in leaf.
+ * Attention: leaf must contain the mean of all points at the first position.
+ * @param leaf A vector containing points of one leaf.
+ * @return The covariance matrix (symmetric).
+ */
+SymmetricMatrix Scan::calcCovarianceMatrix(std::vector<double*>& leaf) {
+
+    unsigned int dim = upsampling_pointtype.getPointDim();
+
+    SymmetricMatrix C(dim);
+    C = 0;
+
+    // For all points in the leaf except the mean (because of that we start at pointI=1)
+    for(size_t pointI = 1; pointI < leaf.size(); pointI++) {
+
+        // For all values in lower triangular covariance matrix C
+        for(size_t k = 1; k <= 0.5 * dim * (dim + 1); k++) {
+
+            // 2D indices for lower triangular matrix
+            size_t i = std::ceil(std::sqrt(2.0 * k + 0.25) - 0.5);
+            size_t j = k - (i - 1) * i / 2;
+
+            // Summing up the covariance terms for current point and element
+            C(i, j) += ((leaf.at(pointI)[i - 1] - leaf.front()[i - 1]) *
+                   (leaf.at(pointI)[j - 1] - leaf.front()[j - 1]));
+
+        }
+    }
+
+    // Multiply by 1 / (n - 1) for sample variance -> additional mean does not belongs to the original sampling -> 1 / (n - 2)
+    C *= 1.0 / (leaf.size() - 2);
+
+    return C;
+
+}
+
+
+/**
+ * Computes an octree of the current scan, then upsample the
+ * current scan such that the calculated points fit to the gaussian
+ * distribution of one leaf containing the points of a certain area
+ * of the scan.
+ */
+void Scan::calcUpsampledPoints() {
+
+    unsigned int dim = upsampling_pointtype.getPointDim();
+    size_t writeIndex = 0;
+
+    DataXYZ xyz(get("xyz"));
+    DataXYZ xyz_upsampled(create("xyz upsampled", sizeof(double)*upsampling_factor*dim*xyz.size()));
+
+    // Copy all points from xyz to xyz_in (for octree) and xyz_upsampled
+    double **xyz_in = new double*[xyz.size()];
+    for (size_t i = 0; i < xyz.size(); ++i) {
+        xyz_in[i] = new double[upsampling_pointtype.getPointDim()];
+        for (size_t j = 0; j < dim; ++j) {
+            xyz_in[i][j] = xyz[i][j];
+            xyz_upsampled[i][j] = xyz[i][j];
+        }
+        ++writeIndex;
+    }
+
+    // start upsampling
+    // build octree-tree from CurrentScan
+    // put full data into the octree
+    BOctTree<double> *oct = new BOctTree<double>(xyz_in,
+                                                 xyz.size(),
+                                                 upsampling_voxelSize,
+                                                 upsampling_pointtype);
+
+    // Determine all leafs and its related points
+    std::vector<std::vector<double*>> leafPoints;
+    oct->AllLeafPointsWithAvg(leafPoints);
+
+
+    // Calculate upsampled points for every leaf considering its gaussian distribution
+    for(std::vector<double*> leaf : leafPoints) {
+
+        // Check if real leaf size > 3 has to be check for 4 because leaf contains mean at position 0
+        SymmetricMatrix C = (leaf.size() > 4) ? calcCovarianceMatrix(leaf) : SymmetricMatrix(IdentityMatrix(dim));
+        LowerTriangularMatrix L = Cholesky(C);
+
+        // To create normal distributed point (for Box-Muller transform)
+        std::default_random_engine generator;
+        std::normal_distribution<double> distribution(0,1);
+
+        // Create column vector and copy mean values to it
+        ColumnVector currentMean(dim);
+        for(size_t i = 0; i < dim; i++)
+            currentMean(i+1) = leaf.front()[i];
+
+        // Create normal distributed point x by using Box-Muller transorm to calculate a point fitting to the gaussian distribution of the data set
+        for(size_t i = 0; i < (leaf.size() - 1) * (upsampling_factor - 1); i++) {
+
+            ColumnVector x(dim);
+            for(size_t j = 1; j <= dim; j++)
+                x(j) = distribution(generator);
+
+            ColumnVector y = L * x + currentMean;
+
+            for(size_t j = 0; j < dim; j++)
+                xyz_upsampled[writeIndex][j] = y(j+1);
+            ++writeIndex;
+
+        }
+
+    }
+
+    // Delete memory on heap
+    delete oct;
+    for(size_t i = 0; i < xyz.size(); i++) {
+        delete[] xyz_in[i];
+    }
+    delete[] xyz_in;
+
 }
 
 
