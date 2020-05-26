@@ -435,6 +435,7 @@ public:
   void GetOctTreeRandom(std::vector<T*>&c) { GetOctTreeRandom(c, *root); }
   void GetOctTreeRandom(std::vector<T*>&c, int ptspervoxel, bool mode) { GetOctTreeRandom(c, ptspervoxel, mode, *root); }
   void AllPoints(std::vector<T *> &vp) { AllPoints(*BOctTree<T>::root, vp); }
+  void AllLeafPointsWithAvg(std::vector<std::vector<T*>> &vp) { AllLeafPointsWithAvg(*BOctTree<T>::root, vp); }
   template <class Visitor>
   void visit(Visitor &vClass) { visit(*BOctTree<T>::root, vClass); }
 
@@ -734,6 +735,70 @@ protected:
         ++children; // next child
       }
     }
+  }
+
+  /**
+   * Returns a vector of vector of points. Each element of the outer vector corresponds to one leaf.
+   * Each vector representing a leaf contains the mean as first element.
+   * @param node Start node of the search
+   * @param vp Returned vector of vectors
+   */
+  void AllLeafPointsWithAvg(bitoct &node, std::vector<std::vector<T*>> &vp) {
+
+      bitunion<T> *children;
+      bitoct::getChildren(node, children);
+
+      for (short i = 0; i < 8; i++) {
+
+          // if ith node exists
+          if (  ( 1 << i ) & node.valid ) {
+
+              // if ith node is leaf get center
+              if (  ( 1 << i ) & node.leaf ) {
+
+                  // offset pointer
+                  pointrep* points = children->getPointreps();
+                  unsigned int length = points[0].length;
+                  T *point = &(points[1].v);  // first point
+                  std::vector<T*> currentLeaf;
+
+                  // Initialize mean of leaf as first element of vector
+                  T *mean = new T[BOctTree<T>::POINTDIM]{0};
+                  currentLeaf.push_back(mean);
+
+                  // Add remaining measured points and sum up in first position to calculate the mean later on
+                  for(unsigned int iterator = 0; iterator < length; iterator++ ) {
+
+                      // Configure xyz to point
+                      T *p = new T[BOctTree<T>::POINTDIM];
+                      for (unsigned int k = 0; k < BOctTree<T>::POINTDIM; k++) {
+                          p[k] = point[k];
+
+                          // Sum up points in first element of vector
+                          currentLeaf.front()[k] += point[k];
+                      }
+
+                      // Add remaining measured points
+                      currentLeaf.push_back(p);
+
+                      point+=BOctTree<T>::POINTDIM;
+                  }
+
+                  // Calculate mean of current leaf
+                  for (unsigned int k = 0; k < BOctTree<T>::POINTDIM; k++)
+                      currentLeaf.front()[k] /= (currentLeaf.size()-1);
+
+                  // Add current leaf to vector storing all leafs
+                  vp.push_back(currentLeaf);
+
+              } else {
+                  // recurse
+                  AllLeafPointsWithAvg( children->node, vp);
+              }
+              // next child
+              ++children;
+          }
+      }
   }
 
   template <class Visitor>
@@ -1041,7 +1106,7 @@ protected:
         if (  ( 1 << i ) & node.leaf ) {   // if ith node is leaf
           result ++;
         } else { // recurse
-          result += countTrueLeaves(children->node);
+          result += countOctLeaves(children->node);
         }
         ++children; // next child
       }
