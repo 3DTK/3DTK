@@ -23,6 +23,10 @@
 #include <boost/thread/mutex.hpp>
 #include <boost/thread/locks.hpp>
 
+#include <random>
+#include "newmat/newmatap.h"
+using namespace NEWMAT;
+
 #ifdef WITH_MMAP_SCAN
 #include <boost/filesystem.hpp>
 #endif
@@ -204,6 +208,9 @@ public:
   //! Set reduction parameters, but don't reduce yet
   virtual void setReductionParameter(double voxelSize, int nrpts = 0,
     PointType pointtype = PointType());
+
+  //! Set upsampling factor, but don't upsample yet
+  virtual void setUpsamplingParameter(double voxelSize, double factor = 1, PointType pointtype = PointType());
 
   //! Set SearchTree type, but don't create it yet
   void setSearchTreeParameter(int nns_method, int bucketSize = 20);
@@ -421,6 +428,15 @@ protected:
   //! Pointtype used for the reduction octtree
   PointType reduction_pointtype;
 
+  //! Voxelsize of the octree used for upsampling
+  double upsampling_voxelSize;
+
+  //! Factor by which the number of points is increased by upsampling the points
+  int upsampling_factor;
+
+  //! Pointtype used for the upsampling octree
+  PointType upsampling_pointtype;
+
   //! Type of the searchtree to be created
   int searchtree_nnstype;
 
@@ -485,6 +501,9 @@ public:
   //! Creating reduced points
   void calcReducedPoints();
 
+  //! Creating upsampled points
+  void calcUpsampledPoints();
+
   //! Creating normals
   void calcNormals();
 
@@ -502,6 +521,9 @@ protected:
 private:
   //! flag for openDirectory and closeDirectory to distinguish the scans
   static bool scanserver;
+
+  //! Calculate the covariance matrix of a leaf
+  SymmetricMatrix calcCovarianceMatrix(std::vector<double*>& leaf);
 
 public:
   //! Mutex for safely reducing points and creating the search tree

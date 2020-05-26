@@ -78,7 +78,7 @@ using namespace fbr;
 #include <boost/program_options.hpp>
 namespace po = boost::program_options;
 
-enum reduction_method {OCTREE, RANGE, INTERPOLATE, NO_REDUCTION, SQTREE};
+enum reduction_method {OCTREE, RANGE, INTERPOLATE, NO_REDUCTION, SQTREE, UPSAMPLING};
 
 /* Function used to check that 'opt1' and 'opt2' are not specified
    at the same time. */
@@ -203,6 +203,7 @@ void validate(boost::any& v, const std::vector<std::string>& values,
   else if(strcasecmp(arg.c_str(), "INTERPOLATE") == 0) v = INTERPOLATE;
   else if(strcasecmp(arg.c_str(), "NONE") == 0) v = NO_REDUCTION;
   else if(strcasecmp(arg.c_str(), "SQTREE") == 0) v = SQTREE;
+  else if(strcasecmp(arg.c_str(), "UPSAMPLING") == 0) v = UPSAMPLING;
   else throw std::runtime_error(std::string("reduction method ")
                                 + arg
                                 + std::string(" is unknown"));
@@ -254,7 +255,7 @@ void parse_options(int argc, char **argv, int &start, int &end,
   po::options_description reduction("Reduction options");
   reduction.add_options()
     ("reduction,r", po::value<reduction_method>(&rtype)->required(),
-     "choose reduction method (OCTREE, RANGE, INTERPOLATE, SQTREE, NONE)")
+     "choose reduction method (OCTREE, RANGE, INTERPOLATE, SQTREE, NONE, UPSAMPLING)")
     ("scale,y", po::value<double>(&scale)->default_value(1.0),
      "scaling factor")
     ("voxel,v", po::value<double>(&voxel),
@@ -316,7 +317,8 @@ void parse_options(int argc, char **argv, int &start, int &end,
          << "\t./bin/scan_red -s 0 -e 0 -f uos --reduction RANGE --scale 0.5 --projection EQUIRECTANGULAR --width 3600 --height 1000 dat" << std::endl
          << "\t./bin/scan_red -s 0 -e 0 -f uos --reduction INTERPOLATE --scale 0.2 --projection EQUIRECTANGULAR --width 3600 --height 1000 dat" << std::endl
          << "\t./bin/scan_red -s 0 -e 0 -f uosr --reduction RANGE --projection EQUIRECTANGULAR --width 3600 --height 1000 --reflectance -t RIEGL wue_city" << std::endl
-         << "\t./bin/scan_red -s 0 -e 0 -f uos --reduction SQTREE --voxel 0.5 --octree 10 dat" << std::endl;
+         << "\t./bin/scan_red -s 0 -e 0 -f uos --reduction SQTREE --voxel 0.5 --octree 10 dat" << std::endl
+         << "\t./bin/scan_red -s 0 -e 0 -f uos --reduction UPSAMPLING --voxel 50 --scale 2 dat" << std::endl;
     exit(0);
   }
 
@@ -351,6 +353,13 @@ void parse_options(int argc, char **argv, int &start, int &end,
   reduction_option_conflict(vm, NO_REDUCTION, "projection");
   reduction_option_conflict(vm, NO_REDUCTION, "width");
   reduction_option_conflict(vm, NO_REDUCTION, "height");
+
+  reduction_option_dependency(vm, UPSAMPLING, "voxel");
+  reduction_option_dependency(vm, UPSAMPLING, "scale");
+  reduction_option_conflict(vm, UPSAMPLING, "octree");
+  reduction_option_conflict(vm, UPSAMPLING, "projection");
+  reduction_option_conflict(vm, UPSAMPLING, "width");
+  reduction_option_conflict(vm, UPSAMPLING, "height");
 
 #ifndef _MSC_VER
   if (dir[dir.length()-1] != '/') dir = dir + "/";
@@ -501,6 +510,24 @@ void reduce_sqtree(Scan *scan, std::vector<cv::Vec4f> &reduced_points, std::vect
 					0.0));
 	}
   }
+}
+
+void reduce_upsampling(Scan *scan, std::vector<cv::Vec4f> &reduced_points, double voxel, double scale) {
+
+    // Configure the necessary parameters for upsampling mode
+    scan->setUpsamplingParameter(voxel, scale);
+
+    // Upsample the given scan
+    scan->calcUpsampledPoints();
+
+    // Store the upsampled points stored in xyz_upsampled in reduced_points data structure
+    DataXYZ xyz_upsampled(scan->get("xyz upsampled"));
+    for(unsigned int j = 0; j < xyz_upsampled.size(); j++) {
+        reduced_points.push_back(cv::Vec4f(xyz_upsampled[j][0],
+                                           xyz_upsampled[j][1],
+                                           xyz_upsampled[j][2],
+                                           0.0));
+    }
 }
 
 //void reduce_range(Scan *scan, vector<cv::Vec4f> &reduced_points, int width,
@@ -900,6 +927,37 @@ int main(int argc, char **argv)
           scan->get_rPos(),
           scan->get_rPosTheta(),
           scan->getIdentifier());
+
+    } else if(rtype == UPSAMPLING) {
+
+        // Checking whether scans exist
+        Scan::openDirectory(scanserver, dir, iotype, iter, iter);
+        if(Scan::allScans.size() == 0) {
+            std::cerr << "No scans found. Did you use the correct format?" << std::endl;
+            exit(-1);
+        }
+
+        // Making plausibility check for upsampling factor
+        if(scale < 1) {
+            std::cerr << "Upsampling factor needs to be >= 1!" << std::endl;
+            exit(-1);
+        }
+
+        // Choose with first scan
+        Scan* scan = *Scan::allScans.begin();
+
+        // Start upsampling option
+        reduce_upsampling(scan, reduced_points, voxel, scale);
+
+        // Write to file
+        write_uos(reduced_points,
+                  reddir,
+                  scan->getIdentifier());
+
+        writeposefile(reddir,
+                      scan->get_rPos(),
+                      scan->get_rPosTheta(),
+                      scan->getIdentifier());
 
     }
     else
