@@ -1,10 +1,10 @@
 #include "slam6d/globals.icc"
 #include "slam6d/io_utils.h"
-#include "slam6d/scan.h"
 #include "ros/tdtkroswrapper.h"
 
 #include <ros/ros.h>
 #include <rosbag/bag.h>
+#include "slam6d/scan.h"
 #include <rosbag/view.h>
 #include <tf/transform_listener.h>
 #include <tf/transform_broadcaster.h>
