@@ -1,5 +1,6 @@
 find_package(PNG REQUIRED)
 include_directories(${PNG_INCLUDE_DIRS})
+include_directories(${NEWMAT_INCLUDE_DIRS})
 add_definitions(${PNG_DEFINITIONS})
 add_definitions(-DGLUI_NO_LIB_PRAGMA)
 
