@@ -41,15 +41,14 @@ if "%outdir%" == "" (
 :: there is no elsif in windows batch
 set toolset=%~3
 if "%toolset%" == "" (
-	set "generator=Visual Studio 16 2019"
-	set "triplet=x64-windows-v141"
+	set "toolset=v142"
 )
 if "%toolset%" == "v141" (
 	set "generator=Visual Studio 16 2017"
 	set "triplet=x64-windows-v141"
 )
 if "%toolset%" == "v142" (
-	set "generator=Visual Studio 16 2017"
+	set "generator=Visual Studio 16 2019"
 	set "triplet=x64-windows-v142"
 )
 :: we would like to abort if the third argument is anything other than the
