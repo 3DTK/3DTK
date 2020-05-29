@@ -297,6 +297,7 @@ echo "cmake: %cmakeexe%"
 "%cmakeexe%" ^
 	-H"%sourcedir%" ^
 	-B"%outdir%" ^
+	-DVCPKG_TARGET_TRIPLET=%triplet% ^
 	-DCMAKE_BUILD_TYPE=%buildtype% ^
 	-DCMAKE_TOOLCHAIN_FILE=%vcpkgdir%\scripts\buildsystems\vcpkg.cmake ^
 	-DOUTPUT_DIRECTORY:PATH=%outdir% ^
