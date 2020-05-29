@@ -100,8 +100,8 @@ if not exist "%outdir%" mkdir "%outdir%"
 :: https://github.com/microsoft/vcpkg/issues/10642
 :: set vcpkgcommit=2020.04
 :: set vcpkghash=f8-05-14-11-81-05-67-01-15-89-62-a3-21-fb-a9-91
-set vcpkgcommit=218e87ca1c89a510a6a91ed72647219734918080
-set vcpkghash=6d-cd-ec-ad-eb-3e-54-d2-08-88-8d-90-70-46-8f-46
+set vcpkgcommit=091e190117613ffc4917f83c6e13ca1095e9cb2f
+set vcpkghash=d1-c8-f6-6b-d7-b9-40-22-ee-be-43-b9-3c-6c-a6-42
 set vcpkgurl=https://github.com/Microsoft/vcpkg/archive/!vcpkgcommit!.zip
 set vcpkgzip=%outdir%\vcpkg.zip
 set vcpkgdir=%outdir%\3rdparty\vcpkg
@@ -226,7 +226,7 @@ if %ERRORLEVEL% GEQ 1 (
 	exit /B 1
 ) else ( echo vcpkg upgrade succeeded )
 
-%vcpkgexe% --triplet %triplet% install ^
+%vcpkgexe% --triplet %triplet% --recurse install ^
 	qt5 ^
 	libpng ^
 	boost ^
