@@ -1,5 +1,4 @@
 if (WITH_CGAL AND WITH_EIGEN3 AND WITH_OPENCV AND WITH_GMP)
-  include_directories(${NEWMAT_INCLUDE_DIRS})
   find_package(CGAL REQUIRED)
   find_package(Eigen3 REQUIRED)
 

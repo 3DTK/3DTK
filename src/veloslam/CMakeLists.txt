@@ -1,6 +1,5 @@
 if (WITH_OPENGL)
   include_directories(${SUITESPARSE_INCLUDE_DIRS})
-  include_directories(${NEWMAT_INCLUDE_DIRS})
   include_directories(${GLUT_INCLUDE_DIR})
 
   if(WITH_COMPACT_OCTREE)
