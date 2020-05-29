@@ -1,14 +1,16 @@
 @echo off
-:: this script is to build 3dtk on 64bit windows with visual studio 2017
+:: this script is to build 3dtk on 64bit windows with visual studio 2019
 :: if you require support for 32bit windows, please send patches
-:: this was tested on Windos 7 64bit
+:: this was tested on Windos 10 64bit build 2004
 ::
 :: The following components are required:
-::    - VC++ 2017 version 15 v141 tools
+::    - VC++ 2019 version 16 v142 tools
 ::    - Windows 10 SDK
 ::    - Visual C++ ATL
 ::    - Visual C++ MFC
 ::    - Visual Studio English Language Pack
+::
+:: Don't run this script via PowerShell or the quoting will get messed up...
 
 :: windows batch induces many headaches... best reference: https://ss64.com/nt/
 
