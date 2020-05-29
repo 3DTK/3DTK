@@ -93,6 +93,7 @@ if(NOT NEWMAT_FOUND)
   set(NEWMAT_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/3rdparty/newmat/newmat-10")
   set(NEWMAT_LIBRARIES newmat)
 endif()
+include_directories(${NEWMAT_INCLUDE_DIRS})
 
 if(APPLE)
   find_package(OpenCV REQUIRED)

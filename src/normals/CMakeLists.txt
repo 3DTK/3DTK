@@ -1,6 +1,5 @@
 if (WITH_OPENCV)
   add_definitions(-DWITH_OPENCV)
-  include_directories(${NEWMAT_INCLUDE_DIRS})
 
   add_library(normals_panorama normals_panorama.cc)
 
