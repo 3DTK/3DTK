@@ -1,5 +1,6 @@
 if (WITH_OPENCV)
   find_package(OpenCV REQUIRED)
+  include_directories(${NEWMAT_INCLUDE_DIRS})
 
   set(FBR_LIBS scan show ${OpenCV_LIBS})
 
