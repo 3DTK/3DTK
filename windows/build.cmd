@@ -46,7 +46,7 @@ if "%toolset%" == "" (
 	set "toolset=v142"
 )
 if "%toolset%" == "v141" (
-	set "generator=Visual Studio 16 2017"
+	set "generator=Visual Studio 15 2017"
 	set "triplet=x64-windows-v141"
 )
 if "%toolset%" == "v142" (
