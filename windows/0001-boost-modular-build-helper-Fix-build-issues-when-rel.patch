@@ -1,25 +1,16 @@
-From 613b577cd1c504c8fbdb5d1000c2c2d5f0302f5c Mon Sep 17 00:00:00 2001
+From fe4dc01164915a44085a2f93908de71fc1883c5b Mon Sep 17 00:00:00 2001
 From: PhoebeHui <v-phma@microsoft.com>
 Date: Wed, 4 Dec 2019 19:00:05 -0800
 Subject: [PATCH 1/2] [boost-modular-build-helper] Fix build issues when
  release only
 
 ---
- ports/boost-modular-build-helper/CONTROL      |  2 +-
  ports/boost-modular-build-helper/Jamroot.jam  | 33 +++++++------------
  .../boost-modular-build.cmake                 |  9 ++++-
- 3 files changed, 20 insertions(+), 24 deletions(-)
+ 2 files changed, 19 insertions(+), 23 deletions(-)
 
-diff --git a/ports/boost-modular-build-helper/CONTROL b/ports/boost-modular-build-helper/CONTROL
-index b3a955924..ae319fb0b 100644
---- a/ports/boost-modular-build-helper/CONTROL
-+++ b/ports/boost-modular-build-helper/CONTROL
-@@ -1,2 +1,2 @@
- Source: boost-modular-build-helper
--Version: 1.72.0-2
-+Version: 1.72.0-3
 diff --git a/ports/boost-modular-build-helper/Jamroot.jam b/ports/boost-modular-build-helper/Jamroot.jam
-index 688303b19..bfccec65a 100644
+index 884284b49..8d7d1e350 100644
 --- a/ports/boost-modular-build-helper/Jamroot.jam
 +++ b/ports/boost-modular-build-helper/Jamroot.jam
 @@ -36,8 +36,7 @@ if "@PORT@" != "boost-system"
@@ -133,10 +124,10 @@ index 688303b19..bfccec65a 100644
  }
  
 diff --git a/ports/boost-modular-build-helper/boost-modular-build.cmake b/ports/boost-modular-build-helper/boost-modular-build.cmake
-index 765d882b8..42735be0a 100644
+index d166a35ca..efb582c81 100644
 --- a/ports/boost-modular-build-helper/boost-modular-build.cmake
 +++ b/ports/boost-modular-build-helper/boost-modular-build.cmake
-@@ -72,7 +72,6 @@ function(boost_modular_build)
+@@ -81,7 +81,6 @@ function(boost_modular_build)
          file(WRITE ${_bm_SOURCE_PATH}/build/Jamfile.v2 "${_contents}")
      endif()
  
@@ -144,7 +135,7 @@ index 765d882b8..42735be0a 100644
      # if(EXISTS "${CURRENT_INSTALLED_DIR}/share/boost-config/checks")
      #     file(COPY "${CURRENT_INSTALLED_DIR}/share/boost-config/checks" DESTINATION "${_bm_SOURCE_PATH}/build/config")
      # endif()
-@@ -298,6 +297,10 @@ function(boost_modular_build)
+@@ -293,6 +292,10 @@ function(boost_modular_build)
      ######################
      if(NOT DEFINED VCPKG_BUILD_TYPE OR VCPKG_BUILD_TYPE STREQUAL "release")
          message(STATUS "Building ${TARGET_TRIPLET}-rel")
@@ -155,7 +146,7 @@ index 765d882b8..42735be0a 100644
          set(ENV{BOOST_BUILD_PATH} "${BOOST_BUILD_PATH}")
          vcpkg_execute_required_process(
              COMMAND "${B2_EXE}"
-@@ -316,6 +319,10 @@ function(boost_modular_build)
+@@ -311,6 +314,10 @@ function(boost_modular_build)
  
      if(NOT DEFINED VCPKG_BUILD_TYPE OR VCPKG_BUILD_TYPE STREQUAL "debug")
          message(STATUS "Building ${TARGET_TRIPLET}-dbg")
