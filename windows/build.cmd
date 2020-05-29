@@ -175,9 +175,9 @@ if %ERRORLEVEL% GEQ 1 (
 
 set cmakedir=%outdir%\3rdparty\cmake
 
-set cmakezip=%outdir%\cmake-3.12.4-win64-x64.zip
-set cmakeurl=https://cmake.org/files/v3.12/cmake-3.12.4-win64-x64.zip
-set cmakehash=f4-e8-13-07-8f-51-80-aa-ee-a4-5a-5b-87-5b-16-97
+set cmakezip=%outdir%\cmake-3.17.3-win64-x64.zip
+set cmakeurl=https://cmake.org/files/v3.17/cmake-3.17.3-win64-x64.zip
+set cmakehash=46-eb-52-c9-94-6c-8e-1d-ab-36-0c-39-27-44-bd-9c
 
 where cmake
 :: there is no AND or OR logical operator in windows batch
@@ -202,7 +202,7 @@ if %ERRORLEVEL% NEQ 0 (
 			exit /B 1
 		)
 	)
-	set cmakeexe=!cmakedir!\cmake-3.12.4-win64-x64\bin\cmake.exe
+	set cmakeexe=!cmakedir!\cmake-3.17.3-win64-x64\bin\cmake.exe
 ) else (
 	set cmakeexe=cmake
 )
