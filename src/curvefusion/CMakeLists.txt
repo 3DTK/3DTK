@@ -30,8 +30,6 @@ if(WITH_ROS)
 
   include_directories(${EIGEN3_INCLUDE_DIR})
 
-  include_directories(${NEWMAT_INCLUDE_DIRS})
-
   if(WITH_RIVLIB)
     if(${RiVLib_FOUND})
       add_executable(fusion fusion.cc common.cc extractTrajectory.cc curves.cc timestamps.cc tf_broadcaster.cc)

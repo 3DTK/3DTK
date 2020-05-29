@@ -1,5 +1,4 @@
 if (WITH_OPENCV AND OpenCV_VERSION VERSION_LESS 4)
-  include_directories(${NEWMAT_INCLUDE_DIRS})
   include_directories(${PROJECT_SOURCE_DIR}/3rdparty/cvblob)
   include_directories(${PROJECT_SOURCE_DIR}/include/shapes/)
   include_directories(${PROJECT_SOURCE_DIR}/include/thermo/)

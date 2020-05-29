@@ -20,7 +20,6 @@ else()
 endif()
 
 include_directories(${SUITESPARSE_INCLUDE_DIRS})
-include_directories(${NEWMAT_INCLUDE_DIRS})
 include_directories(${ANN_INCLUDE_DIRS})
 
 ### TOOLS

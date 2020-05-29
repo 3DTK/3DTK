@@ -1,4 +1,3 @@
-include_directories(${NEWMAT_INCLUDE_DIRS})
 include_directories(${PROJECT_SOURCE_DIR}/3rdparty/gocr-0.48/src)
 include_directories(${PROJECT_SOURCE_DIR}/3rdparty/gocr-0.48/include)
 include_directories(${PROJECT_SOURCE_DIR}/include/shapes/)
