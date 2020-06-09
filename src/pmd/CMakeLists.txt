@@ -1,6 +1,7 @@
 if (WITH_GLFW AND WITH_OPENCV AND WITH_XMLRPC AND WITH_LIBCONFIG AND WITH_FTGL  AND OpenCV_VERSION VERSION_LESS 4)
   find_package(glfw3 REQUIRED)
-
+  find_package(OpenGL REQUIRED)
+  
   include_directories(${GLFW_INCLUDE_DIRS})
 
   include_directories(${PROJECT_SOURCE_DIR}/include/pmd/pmdaccess2)
@@ -56,7 +57,7 @@ if (WITH_GLFW AND WITH_OPENCV AND WITH_XMLRPC AND WITH_LIBCONFIG AND WITH_FTGL  
 
   add_library(pmdaccess2 ${PMDACCESS_DIR}pmdaccess.cc)
 
-  set(PMD_LIBS pmdaccess2 config GL GLU ftgl xmlrpc_util glfw xmlrpc_client xmlrpc xmlrpc++ xmlrpc_client++ xmlrpc_xmltok xmlrpc_xmlparse ${OpenCV_LIBS} )
+  set(PMD_LIBS pmdaccess2 config ftgl xmlrpc_util glfw xmlrpc_client xmlrpc xmlrpc++ xmlrpc_client++ xmlrpc_xmltok xmlrpc_xmlparse ${OPENGL_LIBRARIES} ${OpenCV_LIBS} )
 
 
   add_executable(grabVideoAnd3D  ${OFFLINE_DIR}grabVideoAnd3D.cc cvpmd.cc pmdWrap.cc )
