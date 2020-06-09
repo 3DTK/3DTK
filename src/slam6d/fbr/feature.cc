@@ -36,10 +36,10 @@ namespace fbr{
       //Detect the keypoints using SURF Detector
 #ifdef WITH_OPENCV_NONFREE
     case SURF_DET:{
-      double minHessian = 400;
+      double minHessian = 800;
 #if (CV_MAJOR_VERSION >= 3) && (CV_MINOR_VERSION >= 0)
       Ptr<xfeatures2d::SURF> detector = xfeatures2d::SURF::create(minHessian);
-      detector->compute(pImage, keypoints, descriptors);
+      detector->detectAndCompute(pImage, noArray(), keypoints, descriptors);
 #else
       cv::SurfFeatureDetector detector(minHessian);
       detector.detect(pImage, keypoints);
