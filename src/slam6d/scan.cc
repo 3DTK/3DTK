@@ -683,14 +683,15 @@ void Scan::calcReducedPoints()
  * @param leaf A vector containing points of one leaf.
  * @return The covariance matrix (symmetric).
  */
-SymmetricMatrix Scan::calcCovarianceMatrix(std::vector<double*>& leaf) {
+NEWMAT::SymmetricMatrix Scan::calcCovarianceMatrix(std::vector<double*>& leaf) {
 
     unsigned int dim = upsampling_pointtype.getPointDim();
 
-    SymmetricMatrix C(dim);
+    NEWMAT::SymmetricMatrix C(dim);
     C = 0;
 
-    // For all points in the leaf except the mean (because of that we start at pointI=1)
+    // For all points in the leaf except the mean
+    // (because of that we start at pointI=1)
     for(size_t pointI = 1; pointI < leaf.size(); pointI++) {
 
         // For all values in lower triangular covariance matrix C
@@ -707,7 +708,9 @@ SymmetricMatrix Scan::calcCovarianceMatrix(std::vector<double*>& leaf) {
         }
     }
 
-    // Multiply by 1 / (n - 1) for sample variance -> additional mean does not belongs to the original sampling -> 1 / (n - 2)
+    // Multiply by 1 / (n - 1) for sample variance
+    // --> additional mean does not belongs to the original sampling
+    // --> 1 / (n - 2)
     C *= 1.0 / (leaf.size() - 2);
 
     return C;
@@ -757,26 +760,26 @@ void Scan::calcUpsampledPoints() {
     for(std::vector<double*> leaf : leafPoints) {
 
         // Check if real leaf size > 3 has to be check for 4 because leaf contains mean at position 0
-        SymmetricMatrix C = (leaf.size() > 4) ? calcCovarianceMatrix(leaf) : SymmetricMatrix(IdentityMatrix(dim));
-        LowerTriangularMatrix L = Cholesky(C);
+        NEWMAT::SymmetricMatrix C = (leaf.size() > 4) ? calcCovarianceMatrix(leaf) : NEWMAT::SymmetricMatrix(NEWMAT::IdentityMatrix(dim));
+        NEWMAT::LowerTriangularMatrix L = Cholesky(C);
 
         // To create normal distributed point (for Box-Muller transform)
         std::default_random_engine generator;
         std::normal_distribution<double> distribution(0,1);
 
         // Create column vector and copy mean values to it
-        ColumnVector currentMean(dim);
+        NEWMAT::ColumnVector currentMean(dim);
         for(size_t i = 0; i < dim; i++)
             currentMean(i+1) = leaf.front()[i];
 
         // Create normal distributed point x by using Box-Muller transorm to calculate a point fitting to the gaussian distribution of the data set
         for(size_t i = 0; i < (leaf.size() - 1) * (upsampling_factor - 1); i++) {
 
-            ColumnVector x(dim);
+            NEWMAT::ColumnVector x(dim);
             for(size_t j = 1; j <= dim; j++)
                 x(j) = distribution(generator);
 
-            ColumnVector y = L * x + currentMean;
+            NEWMAT::ColumnVector y = L * x + currentMean;
 
             for(size_t j = 0; j < dim; j++)
                 xyz_upsampled[writeIndex][j] = y(j+1);
