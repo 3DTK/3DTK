@@ -1,7 +1,7 @@
 if (WITH_GLFW AND WITH_OPENCV AND WITH_XMLRPC AND WITH_LIBCONFIG AND WITH_FTGL  AND OpenCV_VERSION VERSION_LESS 4)
   find_package(glfw3 REQUIRED)
   find_package(OpenGL REQUIRED)
-  
+
   include_directories(${GLFW_INCLUDE_DIRS})
 
   include_directories(${PROJECT_SOURCE_DIR}/include/pmd/pmdaccess2)
