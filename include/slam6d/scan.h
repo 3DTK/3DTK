@@ -25,7 +25,6 @@
 
 #include <random>
 #include "newmat/newmatap.h"
-using namespace NEWMAT;
 
 #ifdef WITH_MMAP_SCAN
 #include <boost/filesystem.hpp>
@@ -523,7 +522,7 @@ private:
   static bool scanserver;
 
   //! Calculate the covariance matrix of a leaf
-  SymmetricMatrix calcCovarianceMatrix(std::vector<double*>& leaf);
+  NEWMAT::SymmetricMatrix calcCovarianceMatrix(std::vector<double*>& leaf);
 
 public:
   //! Mutex for safely reducing points and creating the search tree
