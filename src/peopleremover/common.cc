@@ -136,7 +136,7 @@ void walk_voxels(
 	double tDeltaX, tMaxX, maxMultX;
 	double tDeltaY, tMaxY, maxMultY;
 	double tDeltaZ, tMaxZ, maxMultZ;
-	char stepX, stepY, stepZ;
+	signed char stepX, stepY, stepZ;
 	/*
 	 * tMax*: value t at which the segment crosses the first voxel boundary in the given direction
 	 * stepX: in which direction to increase the voxel count (1 or -1)
