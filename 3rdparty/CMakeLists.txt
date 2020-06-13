@@ -108,7 +108,28 @@ ENDIF(APPLE)
 endif()
 
 # Compile AprilTags library if required
-add_subdirectory(apriltag-3.0)
+set(APRILTAG_DIR ${PROJECT_SOURCE_DIR}/3rdparty/apriltag-3.1.2/)
+file(GLOB TAG_FILES ${APRILTAG_DIR}/tag*.c)
+if (${CMAKE_CXX_COMPILER_ID} STREQUAL Clang)
+    # otherwise clang takes about an hour to compile
+    set_source_files_properties(SOURCE ${TAG_FILES} PROPERTIES COMPILE_FLAGS -O0)
+endif()
+set(APRILTAG_SRCS
+	${APRILTAG_DIR}/apriltag.c
+	${APRILTAG_DIR}/apriltag_pose.c
+	${APRILTAG_DIR}/apriltag_quad_thresh.c)
+aux_source_directory(${APRILTAG_DIR}/common COMMON_SRC)
+add_library(apriltag SHARED ${APRILTAG_SRCS} ${COMMON_SRC} ${TAG_FILES})
+target_include_directories(apriltag PRIVATE ${APRILTAG_DIR})
+if (MSVC)
+    find_package(pthreads REQUIRED)
+    target_include_directories(apriltag PUBLIC ${PThreads4W_INCLUDE_DIR})
+    target_link_libraries(apriltag PThreads4W::PThreads4W winmm)
+else()
+    find_package(Threads REQUIRED)
+    target_link_libraries(apriltag Threads::Threads m)
+endif()
+set(APRILTAG_INCLUDE_DIRS ${APRILTAG_DIR} CACHE INTERNAL "")
 
 add_subdirectory(rply-1.1.4)
 
