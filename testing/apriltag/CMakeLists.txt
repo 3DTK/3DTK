@@ -1,4 +1,5 @@
 if (WITH_OPENCV)
+	include_directories(${APRILTAG_INCLUDE_DIRS})
 	add_executable(test_apriltag main.cc)
 	target_link_libraries(test_apriltag apriltag ${OpenCV_LIBRARIES})
 	add_test(test_apriltag_build "${CMAKE_COMMAND}" --build ${CMAKE_BINARY_DIR} --target test_apriltag)
