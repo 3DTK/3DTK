@@ -162,6 +162,7 @@ echo vcpkgdir: %vcpkgdir%
 :: https://github.com/microsoft/vcpkg/pull/9224
 echo patching vcpkg...
 git apply --unsafe-paths --directory=%vcpkgdir% "%sourcedir%\windows\0001-boost-modular-build-helper-Fix-build-issues-when-rel.patch"
+git apply --unsafe-paths --directory=%vcpkgdir% "%sourcedir%\windows\0001-mpir-only-install-debug-files-if-VCPKG_BUILD_TYPE-is.patch"
 echo copy triplets...
 copy "%sourcedir%\windows\x64-windows-v141.cmake" "%vcpkgdir%\triplets\x64-windows-v141.cmake"
 copy "%sourcedir%\windows\x64-windows-v142.cmake" "%vcpkgdir%\triplets\x64-windows-v142.cmake"

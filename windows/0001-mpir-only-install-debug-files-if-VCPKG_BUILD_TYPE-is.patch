@@ -1,0 +1,32 @@
+From 5f08e8c5dde0336cc2e84c4dc17f2a9d7fcfc7a2 Mon Sep 17 00:00:00 2001
+From: NancyLi1013 <46708020+NancyLi1013@users.noreply.github.com>
+Date: Tue, 16 Jun 2020 09:17:19 +0200
+Subject: [PATCH] [mpir] only install debug files if VCPKG_BUILD_TYPE is empty
+ or 'debug'
+
+ closes #11962
+---
+ ports/mpir/portfile.cmake | 9 ++++++---
+ 1 file changed, 6 insertions(+), 3 deletions(-)
+
+diff --git a/ports/mpir/portfile.cmake b/ports/mpir/portfile.cmake
+index 118a19602..5727da5cc 100644
+--- a/ports/mpir/portfile.cmake
++++ b/ports/mpir/portfile.cmake
+@@ -136,8 +136,11 @@ elseif(VCPKG_TARGET_IS_WINDOWS)
+     
+     file(INSTALL ${REL_DLLS} DESTINATION ${CURRENT_PACKAGES_DIR}/bin)
+     file(INSTALL ${REL_LIBS} DESTINATION ${CURRENT_PACKAGES_DIR}/lib)
+-    file(INSTALL ${DBG_DLLS} DESTINATION ${CURRENT_PACKAGES_DIR}/debug/bin)
+-    file(INSTALL ${DBG_LIBS} DESTINATION ${CURRENT_PACKAGES_DIR}/debug/lib)
++
++    if(NOT DEFINED VCPKG_BUILD_TYPE OR VCPKG_BUILD_TYPE STREQUAL "debug")
++      file(INSTALL ${DBG_DLLS} DESTINATION ${CURRENT_PACKAGES_DIR}/debug/bin)
++      file(INSTALL ${DBG_LIBS} DESTINATION ${CURRENT_PACKAGES_DIR}/debug/lib)
++    endif()
+     
+     if(VCPKG_LIBRARY_LINKAGE STREQUAL static)
+         file(REMOVE_RECURSE ${CURRENT_PACKAGES_DIR}/bin ${CURRENT_PACKAGES_DIR}/debug/bin)
+-- 
+2.27.0
+
