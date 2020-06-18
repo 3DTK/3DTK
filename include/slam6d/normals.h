@@ -29,7 +29,12 @@ void calculateNormalsAdaptiveApxKNN(std::vector<Point> &normals,
 void calculateNormalsKNN(std::vector<Point> &normals,
                          const std::vector<Point> &points,
                          const int k,
-                         const double _rPos[3] );
+                         const double _rPos[3]);
+
+void calculateNormalsKNN(std::vector<Point> &normals,
+                         const std::vector<Point> &points,
+                         const int k,
+                         const double _rPos[3], int bucketsize);
 
 
 void calculateNormalsAdaptiveKNN(std::vector<Point> &normals,
