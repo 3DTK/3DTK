@@ -122,22 +122,7 @@ int main(int argc, char **argv)
     riegl_in.close();
 
     // transform input pose
-    tMatrix[0] = inMatrix[5];
-    tMatrix[1] = -inMatrix[9];
-    tMatrix[2] = -inMatrix[1];
-    tMatrix[3] = -inMatrix[13];
-    tMatrix[4] = -inMatrix[6];
-    tMatrix[5] = inMatrix[10];
-    tMatrix[6] = inMatrix[2];
-    tMatrix[7] = inMatrix[14];
-    tMatrix[8] = -inMatrix[4];
-    tMatrix[9] = inMatrix[8];
-    tMatrix[10] = inMatrix[0];
-    tMatrix[11] = inMatrix[12];
-    tMatrix[12] = -100*inMatrix[7];
-    tMatrix[13] = 100*inMatrix[11];
-    tMatrix[14] = 100*inMatrix[3];
-    tMatrix[15] = inMatrix[15];
+    to3DTKMat(inMatrix, tMatrix);
 
     Matrix4ToEuler(tMatrix, rPosTheta, rPos);
 
@@ -185,4 +170,3 @@ int main(int argc, char **argv)
   }
 
 }
-
