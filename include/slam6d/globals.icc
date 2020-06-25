@@ -405,9 +405,10 @@ inline void M3inv( const T *Min, T *Mout )
  * Converts a right-hand-side matrix into a 3DTK matrix
  * @param *inMatrix pointer to matrix (double[16])
  * @param *outMatrix pointer to matrix (double[16])
+ * @param scale used for unit conversion, default 100.0 for Riegl
  */
 inline void to3DTKMat(const double *inMatrix,
-				  double *outMatrix, bool convertFromM = true)
+				  double *outMatrix, float scale = 100.0)
 {
     outMatrix[0] = inMatrix[5];
     outMatrix[1] = -inMatrix[9];
@@ -421,16 +422,9 @@ inline void to3DTKMat(const double *inMatrix,
     outMatrix[9] = inMatrix[8];
     outMatrix[10] = inMatrix[0];
     outMatrix[11] = inMatrix[12];
-
-    if (convertFromM) {
-        outMatrix[12] = -100*inMatrix[7];
-        outMatrix[13] = 100*inMatrix[11];
-        outMatrix[14] = 100*inMatrix[3];
-    } else {
-        outMatrix[12] = -inMatrix[7];
-        outMatrix[13] = inMatrix[11];
-        outMatrix[14] = inMatrix[3];
-    }
+    outMatrix[12] = -scale*inMatrix[7];
+    outMatrix[13] = scale*inMatrix[11];
+    outMatrix[14] = scale*inMatrix[3];
     outMatrix[15] = inMatrix[15];
 }
 
@@ -438,9 +432,10 @@ inline void to3DTKMat(const double *inMatrix,
  * Converts a 3DTK matrix into a right-handed matrix
  * @param *inMatrix pointer to matrix (double[16])
  * @param *outMatrix pointer to matrix (double[16])
+ * @param scale used for unit conversion, default 100.0 for Riegl
  */
-inline void toRightHandedMat(const double *inMatrix,
-				  double *outMatrix, bool convertToM = true)
+inline void toRieglMat(const double *inMatrix,
+				  double *outMatrix, float scale = 100.0)
 {
     outMatrix[5] = inMatrix[0];
     outMatrix[9] = -inMatrix[1];
@@ -458,12 +453,9 @@ inline void toRightHandedMat(const double *inMatrix,
     outMatrix[11] = inMatrix[13];
     outMatrix[3] = inMatrix[14];
     outMatrix[15] = inMatrix[15];
-
-    if (convertToM) {
-        outMatrix[3] /= 100;
-        outMatrix[7] /= 100;
-        outMatrix[11] /= 100;
-    }
+    outMatrix[3] /= scale;
+    outMatrix[7] /= scale;
+    outMatrix[11] /= scale;
 }
 
 /**
