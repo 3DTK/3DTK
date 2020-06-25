@@ -116,7 +116,7 @@ int main(int argc, char **argv)
       for (unsigned int i = 0; i < 17; pose_in >> inMatrix[i++]);
     }
 
-    toRightHandedMat(inMatrix, tMatrix);
+    toRieglMat(inMatrix, tMatrix);
 
     pose_in.close();
     pose_in.clear();
