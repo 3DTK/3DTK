@@ -88,6 +88,7 @@ void calcPath()
   }
 
   nr_interpolations = calcNoOfPoints(path_listXY, path_listXZ);
+  std::cerr << "Number of interpolations: " << nr_interpolations << std::endl;
   calcInterpolatedCameras(path_listXY, path_listXZ);
   // now get the nurbs path for the individual xy and xz plane
   path_vectorX = cam_nurbs_path.getNurbsPath(path_listXY,
