@@ -97,7 +97,7 @@ int main(int argc, char **argv)
     for(unsigned int j = 0; j < 16; j++) avgMatrix[j] += tMatrices[i][j];
   }
 
-  for(unsigned int j = 0; j < 16; j++) avgMatrix[j] /= (tMatrices.size()-1);
+  for(unsigned int j = 0; j < 16; j++) avgMatrix[j] /= (tMatrices.size());
 
   cout << endl
 	  << "average matrix before finding nearest orthonormal matrix" << endl;
@@ -157,4 +157,3 @@ int main(int argc, char **argv)
 
   return 0;
 }
-
