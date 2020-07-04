@@ -115,6 +115,8 @@ namespace fbr{
 #endif
     ORB_DET,
     FAST_DET,
+    KAZE_DET,
+    AKAZE_DET,
 #if CV_MAJOR_VERSION <= 2
     STAR_DET,
 #endif
@@ -125,6 +127,8 @@ namespace fbr{
     SURF_DES,
 #endif
     ORB_DES,
+    KAZE_DES,
+    AKAZE_DES,
   };
   /**
    * @enum matching_method

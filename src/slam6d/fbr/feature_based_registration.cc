@@ -346,7 +346,7 @@ void parssArgs(int argc, char** argv, information& info){
   }
 #endif
   if(info.mMethod == FLANN && info.dMethod == ORB_DES){
-    cout<<"Error: ORB descriptoronly works with BRUTEFORCE matcher."<<endl;
+    cout<<"Error: ORB descriptor only works with BRUTEFORCE matcher."<<endl;
     usage(argc, argv);
   }
 
@@ -710,7 +710,7 @@ int main(int argc, char** argv){
     }
   }
 
-  //create secon feature set
+  //create second feature set
   feature sFeature(info.fMethod, info.dMethod, info.fFiltrationMethod);
 
   //verbose
@@ -790,7 +790,7 @@ int main(int argc, char** argv){
   if(info.verbose >= 4) info.mTime = ((double)cv::getTickCount() - info.mTime)/cv::getTickFrequency();
   if(info.verbose >= 2) matcher.getDescription();
 
-  //write matcheed features to image
+  //write matched features to image
   //verbose
   if(info.verbose >= 1){
     if(info.fImage == COLOR && fPanorama.getColorImage().empty() != 1 && sPanorama.getColorImage().empty() != 1)
