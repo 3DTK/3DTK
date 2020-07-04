@@ -138,6 +138,80 @@ namespace fbr{
 	qtInitialMatchesVector.push_back(qtInitialMatches);
       }
     }
+    else if(qFeature.getDescriptorMethod() == KAZE_DES) {
+
+          // COPIED FROM ORB CHANGED MATCHER TO CV::NORM_L2
+
+        if(mMethod == KNN){
+            cv::BFMatcher matcher (cv::NORM_L2);
+            matcher.knnMatch(qFeature.getDescriptors(), tFeature.getDescriptors(), qtInitialMatchesVector, knn);
+        }
+        if (mMethod == RADIUS){
+            cv::BFMatcher matcher (cv::NORM_L2);
+            matcher.radiusMatch(qFeature.getDescriptors(), tFeature.getDescriptors(), qtInitialMatchesVector, radius);
+        }
+        if (mMethod == RATIO){
+            cv::BFMatcher matcher (cv::NORM_L2);
+            matcher.knnMatch(qFeature.getDescriptors(), tFeature.getDescriptors(), qtInitialMatchesVector, 2);
+        }
+        if (mMethod == BRUTEFORCE){
+            //opencv 2.4
+#if CV_MAJOR_VERSION >= 3 || ((CV_MAJOR_VERSION == 2) && (CV_MINOR_VERSION >= 4))
+            cv::BFMatcher matcher (cv::NORM_L2);
+#else  //older version of opencv than 2.4
+            cv::BruteForceMatcher< cv::L2<float> > matcher;
+#endif
+            matcher.match(qFeature.getDescriptors(), tFeature.getDescriptors(), qtInitialMatches);
+            qtInitialMatchesVector.push_back(qtInitialMatches);
+        }
+    }
+    else if(qFeature.getDescriptorMethod() == AKAZE_DES) {
+
+            // COPIED FROM ORB
+
+          if(mMethod == KNN){
+              //opencv 2.4
+#if CV_MAJOR_VERSION >= 3 || ((CV_MAJOR_VERSION == 2) && (CV_MINOR_VERSION >= 4))
+              cv::BFMatcher matcher (cv::NORM_HAMMING);
+#else  //older version of opencv than 2.4
+              cv::BruteForceMatcher< cv::Hamming > matcher;
+#endif
+              matcher.knnMatch(qFeature.getDescriptors(), tFeature.getDescriptors(), qtInitialMatchesVector, knn);
+          }
+          if(mMethod == RADIUS){
+              //opencv 2.4
+#if CV_MAJOR_VERSION >= 3 || ((CV_MAJOR_VERSION == 2) && (CV_MINOR_VERSION >= 4))
+              cv::BFMatcher matcher (cv::NORM_HAMMING);
+#else  //older version of opencv than 2.4
+              cv::BruteForceMatcher< cv::Hamming > matcher;
+#endif
+              matcher.radiusMatch(qFeature.getDescriptors(), tFeature.getDescriptors(), qtInitialMatchesVector, radius);
+          }
+          if(mMethod == RATIO){
+              cout << "choose RATIO" << endl;
+              //opencv 2.4
+#if CV_MAJOR_VERSION >= 3 || ((CV_MAJOR_VERSION == 2) && (CV_MINOR_VERSION >= 4))
+              cv::BFMatcher matcher (cv::NORM_HAMMING);
+              cout << ">= 3" << endl;
+#else  //older version of opencv than 2.4
+              cv::BruteForceMatcher< cv::Hamming > matcher;
+              cout << "<3" << endl;
+#endif
+              matcher.knnMatch(qFeature.getDescriptors(), tFeature.getDescriptors(), qtInitialMatchesVector, 2);
+              cout << "no problem here" << endl;
+          }
+          if(mMethod == BRUTEFORCE){
+              //opencv 2.4
+#if CV_MAJOR_VERSION >= 3 || ((CV_MAJOR_VERSION == 2) && (CV_MINOR_VERSION >= 4))
+              cv::BFMatcher matcher (cv::NORM_HAMMING);
+#else  //older version of opencv than 2.4
+              cv::BruteForceMatcher< cv::Hamming > matcher;
+#endif
+              matcher.match(qFeature.getDescriptors(), tFeature.getDescriptors(), qtInitialMatches);
+              qtInitialMatchesVector.push_back(qtInitialMatches);
+          }
+
+      }
     if(mMethod == RATIO){
       for(unsigned int i = 0; i < qtInitialMatchesVector.size(); i++){
 	float ratio = qtInitialMatchesVector[i][0].distance/qtInitialMatchesVector[i][1].distance;

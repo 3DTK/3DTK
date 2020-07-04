@@ -245,6 +245,12 @@ namespace fbr{
     case FAST_DET:
       sMethod = "FAST_DET";
       break;
+    case KAZE_DET:
+      sMethod = "KAZE_DET";
+      break;
+    case AKAZE_DET:
+      sMethod = "AKAZE_DET";
+      break;
 #if CV_MAJOR_VERSION <= 2
     case STAR_DET:
       sMethod = "STAR_DET";
@@ -264,6 +270,8 @@ namespace fbr{
 #endif
     if(strcasecmp(method.c_str(), "ORB") == 0) return ORB_DET;
     else if(strcasecmp(method.c_str(), "FAST") == 0) return FAST_DET;
+    else if(strcasecmp(method.c_str(), "KAZE") == 0) return KAZE_DET;
+    else if(strcasecmp(method.c_str(), "AKAZE") == 0) return AKAZE_DET;
 #if CV_MAJOR_VERSION <= 2
     else if(strcasecmp(method.c_str(), "STAR") == 0) return STAR_DET;
 #endif
@@ -284,6 +292,12 @@ namespace fbr{
     case ORB_DES:
       sMethod = "ORB_DES";
       break;
+    case KAZE_DES:
+      sMethod = "KAZE_DES";
+      break;
+    case AKAZE_DES:
+      sMethod = "AKAZE_DES";
+      break;
     default:
       throw std::runtime_error(std::string("feature descriptor method ") + to_string(method) + std::string(" could not be matched to a feature descriptor method"));
     }
@@ -297,6 +311,8 @@ namespace fbr{
     else
 #endif
     if(strcasecmp(method.c_str(), "ORB") == 0) return ORB_DES;
+    else if(strcasecmp(method.c_str(), "KAZE") == 0) return KAZE_DES;
+    else if(strcasecmp(method.c_str(), "AKAZE") == 0) return AKAZE_DES;
     else throw std::runtime_error(std::string("feature descriptor method ") + method + std::string(" is unknown"));
   }
 
