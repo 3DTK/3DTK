@@ -45,168 +45,120 @@ using std::endl;
 #include "shapes/shape.h"
 #include "shapes/ransac.h"
 
+#include <boost/filesystem.hpp>
+#include <boost/program_options.hpp>
+namespace po = boost::program_options;
+
 enum plane_alg {
   RHT, SHT, PHT, PPHT, APHT, RANSAC
 };
 
-float cube_size;
-
-void usage(char* prog) {
-#ifndef _WIN32
-  const string bold("\033[1m");
-  const string normal("\033[m");
-#else
-  const string bold("");
-  const string normal("");
-#endif
-  cout << endl
-	  << bold << "USAGE " << normal << endl
-	  << "   " << prog << " [options] directory" << endl << endl;
-  cout << bold << "OPTIONS" << normal << endl
-
-	  << bold << "  -f" << normal << " F, " << bold << "--format=" << normal << "F" << endl
-	  << "         using shared library F for input" << endl
-	  << "         (chose F from {uos, uos_map, uos_rgb, uos_frames, uos_map_frames, old, rts, rts_map, ifp, riegl_txt, riegl_rgb, riegl_bin, zahn, ply})" << endl
-	  << endl
-	  << bold << "  -m" << normal << " NR, " << bold << "--max=" << normal << "NR" << endl
-	  << "         neglegt all data points with a distance larger than NR 'units'" << endl
-	  << endl
-	  << bold << "  -M" << normal << " NR, " << bold << "--min=" << normal << "NR" << endl
-	  << "         neglegt all data points with a distance smaller than NR 'units'" << endl
-	  << endl
-	  << bold << "  -p" << normal << " P, " << bold << "--plane=" << normal << "P" << endl
-	  << "         using algorithm P for plane detection" << endl
-	  << "         (chose P from {rht, sht, pht, ppht, apht, ran})" << endl
-	  << endl
-	  << bold << "  -r" << normal << " NR, " << bold << "--reduce=" << normal << "NR" << endl
-	  << "         turns on octree based point reduction (voxel size=<NR>)" << endl
-	  << endl
-	  << bold << "  -O" << normal << " NR (optional), " << bold << "--octree=" << normal << "NR (optional)" << endl
-	  << "         use randomized octree based point reduction (pts per voxel=<NR>)" << endl
-	  << "         requires " << bold << "-r" << normal <<" or " << bold << "--reduce" << endl
-	  << endl
-	  << bold << "  -s" << normal << " NR, " << bold << "--start=" << normal << "NR" << endl
-	  << "         start at scan NR (i.e., neglects the first NR scans)" << endl
-	  << "         [ATTENTION: counting naturally starts with 0]" << endl
-	  << endl
-	  << bold << "  -S, --scanserver" << normal << endl
-	  << "         Use the scanserver as an input method and handling of scan data" << endl
-	  << endl
-      << bold << "  -c, --cubesize" << normal << endl
-      << "         Use cubesize to change the size of the smallest cube in the octtree" << endl
-      << endl
-    	  << endl << endl;
-
-  cout << bold << "EXAMPLES " << normal << endl
-	  << "   " << prog << " -m 500 -r 5 dat" << endl
-	  << "   " << prog << " --max=5000 -r 10.2 dat" << endl
-	  << "   " << prog << " -s 2 -e 10 -r dat" << endl << endl;
-  exit(1);
-
-}
-
-/**
-  * Parses command line arguments needed for plane detection. For details about
-  * the argument see usage().
-  */
-
-int parseArgs(int argc, char **argv, string &dir, double &red, int &start, int
-		    &maxDist, int&minDist, int &octree, IOType &type, plane_alg &alg, bool
-		    &quiet, bool& scanserver, float &cube_size)
+int parse_options(int argc, char **argv, string &dir, double &red, int &start, int
+        &maxDist, int&minDist, int &octree, IOType &type, plane_alg &alg, bool
+        &quiet, bool& scanserver, float &cube_size)
 {
-  bool reduced = false;
-  int  c;
-  // from unistd.h:
-  extern char *optarg;
-  extern int optind;
 
-  /* options descriptor */
-  // 0: no arguments, 1: required argument, 2: optional argument
-  static struct option longopts[] = {
-    { "format",          required_argument,   0,  'f' },
-    { "max",             required_argument,   0,  'm' },
-    { "min",             required_argument,   0,  'M' },
-    { "start",           required_argument,   0,  's' },
-    { "reduce",          required_argument,   0,  'r' },
-    { "plane",           required_argument,   0,  'p' },
-    { "cubesize",        required_argument,   0,  'c' },
-    { "quiet",            no_argument,         0,  'q' },
-    { "octree",          optional_argument,   0,  'O' },
-    { "scanserver",      no_argument,         0,  'S' },
-    { 0,           0,   0,   0}                    // needed, cf. getopt.h
-  };
+  po::options_description generic("Generic options");
+    generic.add_options()
+      ("help,h", "output this help message");
+    po::options_description input("Input options");
+    input.add_options()
+      ("format,f", po::value<IOType>(&type)->default_value(UOS,"uos"),
+        "using shared library <arg> for input. (chose F from {uos, uos_map, "
+        "uos_rgb, uos_frames, uos_map_frames, old, rts, rts_map, ifp, "
+        "riegl_txt, riegl_rgb, riegl_bin, zahn, ply, las})")
+      ("start,s", po::value<int>(&start)->default_value(0),
+        "start at scan <arg> (i.e., neglects the first <arg> scans)"
+        "[ATTENTION: counting naturally starts with 0]")
+      ("max,m", po::value<int>(&maxDist)->default_value(-1),
+        "neglegt all data points with a distance larger than <arg> 'units'")
+      ("min,M", po::value<int>(&minDist)->default_value(-1),
+        "neglegt all data points with a distance smaller than <arg> 'units'")
+      ("reduce,r", po::value<double>(&red)->default_value(-1.0),
+        "turns on octree based point reduction (voxel size= <arg>)")
+      ("plane,p", po::value<plane_alg>(&alg)->default_value(RHT,"rht"), 
+        "Plane Detection Algorithm. Choose p from {rht, sht, pht, ppht, apht, ran}")
+      ("cubesize,c", po::value<float>(&cube_size)->default_value(50.0),
+        "Use cubesize to change the size of the smallest cube in the octtree <arg>")
+      ("quiet,q", po::value<bool>(&quiet)->default_value(false),
+        "Quiet: <arg>")
+      ("octree,O", po::value<int>(&octree)->default_value(0),
+        "Use randomized octree based point reduction (pts per voxel=<arg>)")          
+      ("scanserver,S", po::value<bool>(&scanserver)->default_value(false),
+        "Use the scanserver as an input method and handling of scan data");
 
-  cout << endl;
-  while ((c = getopt_long(argc, argv, "f:r:s:e:m:M:p:O:q", longopts, NULL)) != -1)
-    switch (c)
-	 {
-	 case 'r':
-	   red = atof(optarg);
-     reduced = true;
-	   break;
-	 case 's':
-	   start = atoi(optarg);
-	   if (start < 0) { cerr << "Error: Cannot start at a negative scan number.\n"; exit(1); }
-	   break;
-	 case 'f':
-     try {
-       type = formatname_to_io_type(optarg);
-     } catch (...) { // runtime_error
-       cerr << "Format " << optarg << " unknown." << endl;
-       abort();
-     }
-     break;
-   case 'p':
-      if(strcasecmp(optarg, "rht") == 0) alg = RHT;
-      else if(strcasecmp(optarg, "sht") == 0) alg = SHT;
-      else if(strcasecmp(optarg, "pht") == 0) alg = PHT;
-      else if(strcasecmp(optarg, "ppht") == 0) alg = PPHT;
-      else if(strcasecmp(optarg, "apht") == 0) alg = APHT;
-      else if(strcasecmp(optarg, "ran") == 0) alg = RANSAC;
-      else abort();
-      break;
-	 case 'q':
-	   quiet = true;
-       break;
-     case 'c':
-       cube_size = atoi(optarg);
-       break;
-	 case 'm':
-	   maxDist = atoi(optarg);
-	   break;
-	 case 'O':
-	   if (optarg) {
-		octree = atoi(optarg);
-	   } else {
-		octree = 1;
-	   }
-	   break;
-	 case 'M':
-	   minDist = atoi(optarg);
-	   break;
-	 case 'S':
-        scanserver = true;
-        break;
-	 case '?':
-	   usage(argv[0]);
-	   return 1;
-      default:
-	   abort ();
-      }
+    po::options_description hidden("Hidden options");
+    hidden.add_options()
+      ("input-dir", po::value<std::string>(&dir), "input dir");
 
-  if (optind != argc-1) {
-    cerr << "\n*** Directory missing ***" << endl;
-    usage(argv[0]);
-  }
-  dir = argv[optind];
+    // all options
+    po::options_description all;
+    all.add(generic).add(input).add(hidden);
 
-#ifndef _WIN32
-  if (dir[dir.length()-1] != '/') dir = dir + "/";
-#else
-  if (dir[dir.length()-1] != '\\') dir = dir + "\\";
-#endif
+    // options visible with --help
+    po::options_description cmdline_options;
+    cmdline_options.add(generic).add(input);
+
+    // positional argument
+    po::positional_options_description pd;
+    pd.add("input-dir", 1);
+
+    // process options
+    po::variables_map vm;
+    po::store(po::command_line_parser(argc, argv).
+              options(all).positional(pd).run(), vm);
+
+    // display help
+    if (vm.count("help")) {
+      std::cout << cmdline_options;
+      std::cout << std::endl
+           << "Example usage:" << std::endl
+           << "\t .bin/planes -f uosr -m 1500 -p rht -s 0 dat/wue_city/" << std::endl;
+      exit(0);
+    }
+    po::notify(vm);
+
+  #ifndef _MSC_VER
+    if (dir[dir.length()-1] != '/') dir = dir + "/";
+  #else
+    if (dir[dir.length()-1] != '\\') dir = dir + "\\";
+  #endif
 
   return 0;
+}
+
+void validate(boost::any& v, const std::vector<std::string>& values,
+              IOType*, int) {
+  if (values.size() == 0)
+    throw std::runtime_error("Invalid model specification");
+  std::string arg = values.at(0);
+  try {
+    v = formatname_to_io_type(arg.c_str());
+  } catch (...) { // runtime_error
+    throw std::runtime_error("Format " + arg + " unknown.");
+  }
+}
+
+plane_alg formatname_to_plane_alg(const char* string){
+  if (strcasecmp(string, "rht") == 0) return RHT;
+  else if (strcasecmp(string, "sht") == 0) return SHT;
+  else if (strcasecmp(string, "pht") == 0) return PHT;
+  else if (strcasecmp(string, "ppht") == 0) return PPHT;
+  else if (strcasecmp(string, "apht") == 0) return APHT;
+  else if (strcasecmp(string, "ran") == 0) return RANSAC;
+  else throw std::runtime_error(std::string("Plane Detection Algorithm ") + string + std::string(" is unknown"));
+}
+
+void validate(boost::any& v, const std::vector<std::string>& values,
+              plane_alg*, int) {
+  if (values.size() == 0)
+    throw std::runtime_error("Invalid model specification");
+  std::string arg = values.at(0);
+  try {
+    v = formatname_to_plane_alg(arg.c_str());
+  } catch (...) { // runtime_error
+    throw std::runtime_error("Format " + arg + " unknown.");
+  }
 }
 
 /**
@@ -219,9 +171,6 @@ int main(int argc, char **argv)
 
   cout << "(c) Jacobs University Bremen, gGmbH, 2010" << endl << endl;
 
-  if (argc <= 1) {
-    usage(argv[0]);
-  }
   // parsing the command line parameters
   // init, default values if not specified
   string dir;
@@ -237,7 +186,8 @@ int main(int argc, char **argv)
   float cube_size = 50.0;
 
   cout << "Parse args" << endl;
-  parseArgs(argc, argv, dir, red, start, maxDist, minDist, octree, type, alg, quiet, scanserver, cube_size);
+  //parseArgs(argc, argv, dir, red, start, maxDist, minDist, octree, type, alg, quiet, scanserver, cube_size);
+  parse_options(argc, argv, dir, red, start, maxDist, minDist, octree, type, alg, quiet, scanserver, cube_size);
   int fileNr = start;
   string planedir = dir + "planes";
 
@@ -338,8 +288,7 @@ int main(int argc, char **argv)
                   break;
       case APHT:  hough.APHT();
                   break;
-      default:  usage(argv[0]);
-                exit(1);
+      default:  exit(1);
                 break;
     }
 
