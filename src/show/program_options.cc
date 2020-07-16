@@ -384,7 +384,7 @@ void setColorOptions(Color& bgcolor, bool& color, ShowColormap& colormap,
     ("colormax", value(&colormax),
      "Maximum value for mapping the color spectrum.")
     ("scanscolored", value(&scansColored)->default_value(0),
-     "Scans colored")
+     "Scans colored: 0 -> None, 1 -> Id Scans by Color, 2 -> Color by Points")
     ("noanimcolor,A", bool_switch(&noAnimColor),
      "Do not switch to different color settings when displaying animation")
     ;
