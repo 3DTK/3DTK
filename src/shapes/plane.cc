@@ -76,14 +76,14 @@ int parse_options(int argc, char **argv, string &dir, double &red, int &start, i
         "neglegt all data points with a distance smaller than <arg> 'units'")
       ("reduce,r", po::value<double>(&red)->default_value(-1.0),
         "turns on octree based point reduction (voxel size= <arg>)")
-      ("plane,p", po::value<plane_alg>(&alg)->default_value(RHT,"rht"), 
+      ("plane,p", po::value<plane_alg>(&alg)->default_value(RHT,"rht"),
         "Plane Detection Algorithm. Choose p from {rht, sht, pht, ppht, apht, ran}")
       ("cubesize,c", po::value<float>(&cube_size)->default_value(50.0),
         "Use cubesize to change the size of the smallest cube in the octtree <arg>")
       ("quiet,q", po::value<bool>(&quiet)->default_value(false),
         "Quiet: <arg>")
       ("octree,O", po::value<int>(&octree)->default_value(0),
-        "Use randomized octree based point reduction (pts per voxel=<arg>)")          
+        "Use randomized octree based point reduction (pts per voxel=<arg>)")
       ("scanserver,S", po::value<bool>(&scanserver)->default_value(false),
         "Use the scanserver as an input method and handling of scan data");
 
