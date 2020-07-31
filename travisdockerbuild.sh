@@ -42,8 +42,8 @@ case "$DIST" in
 		# supported
 		# a workaround is to install an updated libseccomp library
 		arch=$(dpkg --print-architecture)
-		wget https://launchpad.net/ubuntu/+archive/primary/+files/libseccomp2_2.4.1-0ubuntu0.16.04.2_$arch.deb
-		sudo apt-get install ./libseccomp2_2.4.1-0ubuntu0.16.04.2_$arch.deb
+		wget https://launchpad.net/ubuntu/+archive/primary/+files/libseccomp2_2.4.1-0ubuntu0.16.04.2_$arch.deb -O /tmp/libseccomp.deb
+		sudo apt-get install /tmp/libseccomp.deb
 		;;
 	xenial|bionic|stretch)
 		# nothing to do
