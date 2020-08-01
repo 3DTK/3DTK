@@ -104,7 +104,7 @@ APT="apt-get install --yes --no-install-recommends -o Debug::pkgProblemResolver=
 	echo "cat /etc/apt/sources.list";
 	echo "apt-get update";
 	echo "apt-get dist-upgrade --yes";
-	echo "$APT equivs ninja-build";
+	echo "$APT equivs ninja-build build-essential";
 	if [ -z "$CC" ]; then
 		echo "equivs-build doc/equivs/control.$DERIV.$DIST";
 	else
