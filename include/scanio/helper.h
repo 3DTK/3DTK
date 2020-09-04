@@ -119,7 +119,7 @@ bool open_path(boost::filesystem::path data_path, std::function<bool (std::istre
 bool open_path_writing(boost::filesystem::path data_path, std::function<bool (std::ostream &)> handler);
 
 #ifdef WITH_LIBZIP
-bool write_multiple(std::map<std::string,std::string> contentmap);
+bool write_multiple(std::map<std::string,std::string> contentmap, std::ios_base::openmode writemode = std::ios_base::out);
 #endif
 
 #endif

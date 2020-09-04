@@ -976,7 +976,7 @@ bool open_path_writing(boost::filesystem::path data_path, std::function<bool (st
 }
 
 #ifdef WITH_LIBZIP
-bool write_multiple(std::map<std::string,std::string> contentmap)
+bool write_multiple(std::map<std::string,std::string> contentmap, std::ios_base::openmode writemode)
 {
     std::map<std::string, struct zip *> archivehandles;
     for (auto it=contentmap.begin(); it != contentmap.end(); ++it) {
@@ -987,10 +987,12 @@ bool write_multiple(std::map<std::string,std::string> contentmap)
         // directory
         boost::filesystem::path dirname = boost::filesystem::path(path).parent_path();
         if (boost::filesystem::is_directory(dirname)) {
-            boost::filesystem::ofstream data_file(path);
+            boost::filesystem::ofstream data_file(path, writemode);
             data_file << content;
             data_file.close();
             continue;
+        } else if(writemode != std::ios_base::out) {
+          throw std::runtime_error("appending to files in a zip archive is not supported");
         }
 
         bool ret = find_path_archive(path, [=,&archivehandles](boost::filesystem::path archivepath, boost::filesystem::path remainder) -> bool {
