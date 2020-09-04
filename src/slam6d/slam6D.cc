@@ -581,6 +581,12 @@ int main(int argc, char **argv)
             scanserver, pairing_mode, continue_processing, bucketSize,
             loopclose);
 
+  /* writing frames in zip archives is not supported by BasicScan */
+  if(!boost::filesystem::is_directory(dir)) {
+    std::cerr << argv[0] << " does not support scans in archives" << std::endl;
+    exit(-1);
+  }
+
   cout << "slam6D will proceed with the following parameters:" << endl;
   //@@@ to do :-)
   // TODO: writer a proper TODO ^
