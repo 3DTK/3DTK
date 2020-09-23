@@ -65,7 +65,7 @@ extern  VeloScan* g_pfirstScan;
 
 #ifdef __APPLE__
 #include <GL/glew.h>
-#include <Gl/glui.h>
+#include <GL/glui.h>
 #else
 #include <GL/gl.h>			/* OpenGL header file */
 #include <GL/glu.h>			/* OpenGL utilities header file */
