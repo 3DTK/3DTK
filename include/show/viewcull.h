@@ -9,7 +9,7 @@
 #include <GL/glut.h>
 #elif __APPLE__
 #include <GLUT/glut.h>
-#include <OpenGl/glu.h>
+#include <OpenGL/glu.h>
 #include <stdbool.h>
 #else
 #include <GL/glut.h>
