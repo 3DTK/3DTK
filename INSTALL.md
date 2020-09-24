@@ -1,6 +1,6 @@
 # Installation
 
-## Ubuntu 16.04 
+## Ubuntu 20.04 Focal Fossa
 
 The easiest way to make sure that you install the right dependencies for
 unpackaged software like _3DTK_ on Debian based distributions is to build a
@@ -12,11 +12,22 @@ installing all dependencies manually is that by removing the meta package
 `3dtk-build-deps` you created can also automatically remove all the
 dependencies that were installed with it and are not needed anymore.
 
+These instructions assume you are running Ubuntu 20.04 Focal Fossa but we also
+support other Ubuntu LTS releases. If you are not using 20.04, then just
+replace any mentioning of "focal" in these instructions, by the shorthand for
+your Ubuntu distribution. For example:
+
+| version | shortname |
+|---------|-----------|
+| 20.04   | focal     |
+| 18.04   | bionic    |
+| 16.04   | xenial    |
+
 Run `apt-cache policy` to find out whether you have the universe and multiverse
 repositories enabled. If not, run:
 
 ```
-$ echo deb http://archive.ubuntu.com/ubuntu xenial main universe multiverse | sudo tee -a /etc/apt/sources.list > /dev/null
+$ echo deb http://archive.ubuntu.com/ubuntu focal main universe multiverse | sudo tee -a /etc/apt/sources.list > /dev/null
 $ sudo apt-get update
 ```
 
@@ -26,9 +37,8 @@ To download 3DTK and install its dependencies, run:
 $ sudo apt-get install --no-install-recommends equivs subversion
 $ svn checkout svn://svn.code.sf.net/p/slam6d/code/trunk slam6d-code
 $ cd slam6d-code
-$ equivs-build doc/equivs/control.ubuntu.xenial
-$ sudo dpkg -i 3dtk-build-deps_1.0_all.deb
-$ sudo apt-get -f install --no-install-recommends
+$ equivs-build doc/equivs/control.ubuntu.focal
+$ sudo apt install ./3dtk-build-deps_1.0_all.deb
 $ make
 ```
 
