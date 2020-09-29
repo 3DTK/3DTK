@@ -18,6 +18,55 @@
 
 #include "show/show_common.h"
 #include "show/program_options.h"
+#ifdef SPACEMOUSE
+    #include "show/show_gl.h"
+    #ifndef __APPLE__
+        #include <linux/input.h>
+    #endif
+    #include <sys/types.h>
+    #include <sys/stat.h>
+    #include <fcntl.h>
+
+    #include <stdio.h>
+    #include <math.h>
+    #include <stdlib.h>
+    #include <stdint.h>
+    #include <thread>
+    #include <spnav.h>
+int spacenavHandler(){
+    int fixRoation = 0;
+    int fixTranslation = 0;
+    float translationMultiplier = 1;
+    float rotationMultipler = 0.5;
+    spnav_event sev;
+    if(spnav_open()==-1) {
+        fprintf(stderr, "failed to connect to the space navigator daemon\n");
+        return 1;
+    }
+    spnav_sensitivity(0.03);
+    while(true){
+        int event = spnav_poll_event(&sev);
+        if(event != 0){
+            if(sev.type == SPNAV_EVENT_MOTION) {
+                if(fixRoation){
+                    moveCamera(-sev.motion.x*translationMultiplier, -sev.motion.y*translationMultiplier, sev.motion.z*translationMultiplier, 0, 0, 0);
+                }
+                else if(fixTranslation){
+                    moveCamera(0, 0, 0, -0.5*sev.motion.rx*rotationMultipler, 0.5*sev.motion.ry*rotationMultipler, -0.5*sev.motion.rz*rotationMultipler);
+                }else
+                    moveCamera(-sev.motion.x*translationMultiplier, -sev.motion.y*translationMultiplier, sev.motion.z*translationMultiplier, -rotationMultipler*sev.motion.rx, rotationMultipler*sev.motion.ry, -rotationMultipler*sev.motion.rz);
+            } else {	/* SPNAV_EVENT_BUTTON */
+                if(sev.button.press && sev.button.bnum == 0){
+                    fixRoation = !fixRoation;
+                }
+                if(sev.button.press && sev.button.bnum == 1){
+                    fixTranslation = !fixTranslation;
+                }
+            }
+        }
+    }
+}
+#endif
 
 void saveImageAndExit(int dummy)
 {
@@ -62,6 +111,10 @@ int main(int argc, char **argv)
   else if (takescreenshot) {
     glutTimerFunc(0, &saveImageAndExit, 0);
   }
+#ifdef SPACEMOUSE
+    std::thread t1(spacenavHandler);
+#endif
+
   glutMainLoop();
 }
 
