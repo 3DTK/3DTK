@@ -142,6 +142,12 @@ void GLWidget::mouseMoveEvent(QMouseEvent *event) {
   cameraChanged();
 }
 
+void GLWidget::spaceNavEvent(double x, double y, double z, double rx, double ry, double rz) {
+    moveCamera(x,y,z,rx,ry,rz);
+    update();
+    cameraChanged();
+}
+
 void GLWidget::keyPressEvent(QKeyEvent *event) {
   bool ctrl  = (event->modifiers() & Qt::ControlModifier) != 0,
        alt   = (event->modifiers() & Qt::AltModifier)     != 0,

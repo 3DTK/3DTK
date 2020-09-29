@@ -141,6 +141,22 @@ option(WITH_COMPACT_OCTREE "Whether to use the compact octree display ON/OFF" OF
 option(WITH_GLEE "Whether to use OpenGL extensions, requires glee. ON/OFF" OFF)
 option(WITH_LASLIB "Whether to build LASlib based scanio library" ON)
 option(WITH_E57 "Build library for e57 file format support." OFF)
+option(WITH_3DMOUSE "Support for 3DConnexion Space Mouse" OFF)
+
+if(WITH_3DMOUSE)
+  if(APPLE)
+    add_library(spnav STATIC IMPORTED)
+    set_property(TARGET spnav PROPERTY IMPORTED_LOCATION /usr/local/Cellar/libspnav/0.2.3/lib/libspnav.dylib)
+    include_directories(/usr/local/Cellar/libspnav/0.2.3/include)
+  endif()
+  add_compile_definitions(SPACEMOUSE)
+  set(SPNAV_LIB "spnav")
+  set(SPNAV_CONTROLLER "spnav_controller.cc")
+  message(STATUS "With 3DMouse Support")
+else()
+  set(SPNAV_LIB "")
+  set(SPNAV_CONTROLLER "")
+endif()
 
 # cvblob is needed for thermo
 if (WITH_OPENCV)
