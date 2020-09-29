@@ -18,6 +18,7 @@
 
 #include "show/show_common.h"
 #include "show/program_options.h"
+#include <thread>
 #ifdef SPACEMOUSE
     #include "show/show_gl.h"
     #ifndef __APPLE__
@@ -31,13 +32,16 @@
     #include <math.h>
     #include <stdlib.h>
     #include <stdint.h>
-    #include <thread>
     #include <spnav.h>
+#else
+    #include <linux/input.h>
+#endif
 int spacenavHandler(){
     int fixRoation = 0;
     int fixTranslation = 0;
     float translationMultiplier = 1;
     float rotationMultipler = 0.5;
+#ifdef SPACEMOUSE
     spnav_event sev;
     if(spnav_open()==-1) {
         fprintf(stderr, "failed to connect to the space navigator daemon\n");
@@ -65,8 +69,66 @@ int spacenavHandler(){
             }
         }
     }
-}
+#else
+	struct input_id device_info;
+	int fd = open("/dev/input/by-id/usb-3Dconnexion_SpaceMouse_Compact-event-if00", O_RDONLY);
+	if (fd == -1) {
+		fprintf(stderr, "3D Mouse not connected\n");
+		return 1;
+	}
+	if(ioctl(fd, EVIOCGID, &device_info)) {
+		perror("3D Mouse EVIOCGID ioctl failed");
+		return 1;
+	}
+	if (device_info.vendor != 0x256f) {
+		fprintf(stderr, "unexpected vendor: %d\n", device_info.vendor);
+		return 1;
+	}
+	if (device_info.product != 0xc635) {
+		fprintf(stderr, "unexpected product: %d\n", device_info.product);
+		return 1;
+	}
+	if (device_info.bustype != BUS_USB) {
+		fprintf(stderr, "unexpected bus type: %d\n", device_info.bustype);
+		return 1;
+	}
+	int axes[6] = {0,0,0,0,0,0};
+	int buttons[2] = {0, 0};
+	struct input_event ev;
+	uint8_t evtype_bitmask[EV_MAX/8 + 1];
+	int ev_type;
+
+	memset(evtype_bitmask, 0, sizeof(evtype_bitmask));
+	if (ioctl(fd, EVIOCGBIT(0, sizeof(evtype_bitmask)), evtype_bitmask) < 0) {
+		perror("3D Mouse EVIOCGBIT ioctl failed");
+		return 1;
+	}
+	for (;;) {
+		int n = read(fd, &ev, sizeof(struct input_event));
+		if(n < sizeof(struct input_event)) {
+			fprintf(stderr, "unexpected event size\n");
+			return 1;
+		}
+		switch (ev.type) {
+			case EV_KEY:
+				if (ev.code != 0 and ev.code != 1) {
+					fprintf(stderr, "unexpected button code: %d\n", ev.code);
+				}
+				buttons[ev.code] = ev.value;
+				break;
+			case EV_REL:
+				switch(ev.code) {
+					case 0: moveCamera(-ev.value /4, 0, 0, 0, 0, 0); break;
+					case 1: moveCamera(0, 0, -ev.value /4, 0, 0, 0); break;
+					case 2: moveCamera(0, ev.value /4, 0, 0, 0, 0); break;
+					case 3: moveCamera(0, 0, 0, -ev.value/40, 0, 0); break;
+					case 4: moveCamera(0, 0, 0, 0, 0, ev.value/40); break;
+					case 5: moveCamera(0, 0, 0, 0, -ev.value/40, 0); break;
+				}
+		}
+	}
 #endif
+}
 
 void saveImageAndExit(int dummy)
 {
@@ -111,9 +173,7 @@ int main(int argc, char **argv)
   else if (takescreenshot) {
     glutTimerFunc(0, &saveImageAndExit, 0);
   }
-#ifdef SPACEMOUSE
-    std::thread t1(spacenavHandler);
-#endif
+  std::thread t1(spacenavHandler);
 
   glutMainLoop();
 }
