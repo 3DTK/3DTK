@@ -4,6 +4,9 @@
 #include <QApplication>
 
 #include "qtshow/MainWindow.h"
+#ifdef SPACEMOUSE
+    #include "qtshow/spnav_controller.h"
+#endif
 
 class QtShow : public QApplication {
   Q_OBJECT
@@ -20,6 +23,9 @@ protected:
   dataset_settings dss;
   window_settings ws;
   display_settings ds;
+#ifdef SPACEMOUSE
+  SpaceNavController *spnav_controller;
+#endif
 };
 
 #endif
