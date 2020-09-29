@@ -32,6 +32,7 @@ if (WITH_OPENGL AND WITH_QT)
     ScanPicker.cc
     SettingsDialog.cc
     ShortcutsDialog.cc
+    ${SPNAV_CONTROLLER}
     ${QTSHOW_HEADERS_MOC}
     ${QTSHOW_FORMS_HEADERS})
 
@@ -41,5 +42,5 @@ if (WITH_OPENGL AND WITH_QT)
   target_link_libraries(glwidget ${SHOW_LIBS} ${QT_LIBRARIES})
 
   target_link_libraries(qtshow Qt5::Widgets)
-  target_link_libraries(qtshow glwidget ${QT_LIBRARIES})
+  target_link_libraries(qtshow glwidget ${QT_LIBRARIES} ${SPNAV_LIB})
 endif()

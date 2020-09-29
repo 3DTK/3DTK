@@ -83,6 +83,9 @@ QtShow::QtShow(int &argc, char **argv)
   QTimer::singleShot(1000, []() {
     label = true;
   });
+#ifdef SPACEMOUSE
+  spnav_controller = new SpaceNavController(mainWindow->glWidget);
+#endif
 }
 
 QtShow::~QtShow()

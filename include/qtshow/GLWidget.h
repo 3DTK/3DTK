@@ -83,6 +83,8 @@ signals:
   void dockWidgetsHidden();
   void dockWidgetsShown();
 
+public:
+    void spaceNavEvent(double x, double y, double z, double rx, double ry, double rz);
 protected:
   void initializeGL();
   void resizeGL(int w, int h);
