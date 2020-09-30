@@ -19,11 +19,11 @@
 #include "show/show_common.h"
 #include "show/program_options.h"
 #include <thread>
+#ifdef __linux__
+	#include <linux/input.h>
+#endif
 #ifdef SPACEMOUSE
     #include "show/show_gl.h"
-    #ifndef __APPLE__
-        #include <linux/input.h>
-    #endif
     #include <sys/types.h>
     #include <sys/stat.h>
     #include <fcntl.h>
@@ -33,8 +33,6 @@
     #include <stdlib.h>
     #include <stdint.h>
     #include <spnav.h>
-#else
-    #include <linux/input.h>
 #endif
 int spacenavHandler(){
     int fixRoation = 0;
@@ -70,6 +68,7 @@ int spacenavHandler(){
         }
     }
 #else
+#ifdef __linux__
 	struct input_id device_info;
 	int fd = open("/dev/input/by-id/usb-3Dconnexion_SpaceMouse_Compact-event-if00", O_RDONLY);
 	if (fd == -1) {
@@ -128,6 +127,8 @@ int spacenavHandler(){
 		}
 	}
 #endif
+#endif
+	return 0;
 }
 
 void saveImageAndExit(int dummy)
