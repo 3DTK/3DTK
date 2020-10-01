@@ -10,3 +10,9 @@
 /cmake-build-debug/
 /.DS_Store
 .DS_Store
+*.cflags
+*.config
+*.creator*
+*.cxxflags
+*.files
+*.includes
