@@ -97,7 +97,7 @@ QtShow::QtShow(int &argc, char **argv)
   });
 #ifdef SPACEMOUSE
     #ifndef __APPLE__
-    spnav_controller = new SpaceNavController(mainWindow->glWidget);
+    spnav_controller = new SpaceNavController(mainWindow->glWidget, &translationMultiplier, &rotationMultiplier);
     #else
     int16_t result = SetConnexionHandlers(&Connexion3DMouseMessageHandler, nullptr, nullptr, true);
     clientID = RegisterConnexionClient(kConnexionClientWildcard, (uint8_t*)"qtshow",kConnexionClientModeTakeOver, kConnexionMaskAll);
