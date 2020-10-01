@@ -24,6 +24,7 @@ signals:
   void pathFilePicked(QString);
 
 public slots:
+  void slider3DMouseReleased(int value);
   void openScanDirectory();
   void openRecentDirectory();
   void clearRecentDirectories();

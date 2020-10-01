@@ -495,3 +495,7 @@ void MainWindow::callReloadFrames()
 {
   reloadFrames();
 }
+
+void MainWindow::slider3DMouseReleased(int value){
+    std::cout << "changed 3DMouse movement multiplier: " << value << std::endl;
+}
