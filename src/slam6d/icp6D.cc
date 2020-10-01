@@ -51,7 +51,7 @@ using std::cerr;
 icp6D::icp6D(icp6Dminimizer *my_icp6Dminimizer, double max_dist_match,
 	     int max_num_iterations, bool quiet, bool meta, int rnd, bool eP,
 	     int anim, double epsilonICP, int nns_method, bool cuda_enabled,
-	     bool cad_matching)
+	     bool cad_matching, int max_num_metascans)
 {
   this->my_icp6Dminimizer = my_icp6Dminimizer;
   this->anim              = anim;
@@ -88,6 +88,8 @@ icp6D::icp6D(icp6Dminimizer *my_icp6Dminimizer, double max_dist_match,
   // Set initial seed (for "real" random numbers)
   //  srand( (unsigned)time( NULL ) );
   this->cad_matching = cad_matching;
+
+  this->max_num_metascans = max_num_metascans;
 
   //set the number of point pairs to zero
   nr_pointPair = 0;
@@ -408,6 +410,15 @@ void icp6D::doICP(vector <Scan *> allScans, PairingMode pairing_mode)
     }
     if ( meta && i != allScans.size()-1 ) {
       meta_scans.push_back(CurrentScan);
+
+      // only keep last n scans as metascans
+      if(max_num_metascans > 0) {
+        while(meta_scans.size() > max_num_metascans) {
+          meta_scans.erase(meta_scans.begin());
+        }
+        std::cout << meta_scans.size() << " scans in metascan" << std::endl;
+      }
+
       my_MetaScan = new MetaScan(meta_scans, nns_method);
     }
   }
