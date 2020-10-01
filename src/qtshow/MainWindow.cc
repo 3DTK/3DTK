@@ -10,15 +10,12 @@
 
 #include "show/program_options.h"
 
-#if defined(SPACEMOUSE) && defined(__APPLE__)
-static float translationMultiplier = 0.1;
-static float rotationMultipler = 0.01;
-#endif
-
-MainWindow::MainWindow(const dataset_settings& dss, const window_settings& ws, const display_settings& ds, QWidget *parent, Qt::WindowFlags flags)
+MainWindow::MainWindow(const dataset_settings& dss, const window_settings& ws, const display_settings& ds, float *translationMultiplier, float *rotationMultiplier, QWidget *parent, Qt::WindowFlags flags)
   : QMainWindow(parent, flags)
   , dss(dss), ds(ds)
 {
+  this->translationMultiplier = translationMultiplier;
+  this->rotationMultiplier = rotationMultiplier;
   if (!ws.nogui) {
     setupUi(this);
 
@@ -507,6 +504,8 @@ void MainWindow::slider3DMouseReleased(int value){
 
 void MainWindow::on_horizontalSlider3DMouse_sliderReleased()
 {
-    //translationMultiplier = (horizontalSlider3DMouse->value()/100.0);
-    //rotationMultiplier = (horizontalSlider3DMouse->value()/1000.0);
+#ifdef SPACEMOUSE
+    *translationMultiplier = (horizontalSlider3DMouse->value()+1)/float(200.0);
+    *rotationMultiplier = (horizontalSlider3DMouse->value()+1)/float(2000.0);
+#endif
 }

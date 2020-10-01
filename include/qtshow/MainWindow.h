@@ -17,7 +17,7 @@ class MainWindow : public QMainWindow, protected Ui::MainWindow {
   Q_OBJECT
 
 public:
-  MainWindow(const dataset_settings& dss, const window_settings& ws, const display_settings& ds, QWidget *parent = Q_NULLPTR, Qt::WindowFlags flags = Qt::WindowFlags());
+  MainWindow(const dataset_settings& dss, const window_settings& ws, const display_settings& ds, float *translationMultiplier = nullptr, float *rotationMultiplier= nullptr, QWidget *parent = Q_NULLPTR, Qt::WindowFlags flags = Qt::WindowFlags());
 
 signals:
   void scanDirectoryOpened(dataset_settings);
@@ -84,6 +84,10 @@ protected slots:
 friend class QtShow;
 private slots:
 void on_horizontalSlider3DMouse_sliderReleased();
+
+private:
+    float *translationMultiplier;
+    float *rotationMultiplier;
 };
 
 #endif

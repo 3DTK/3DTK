@@ -20,7 +20,7 @@ public:
   QtShow(int &argc, char **argv);
   ~QtShow() override;
 #if defined(SPACEMOUSE) && defined(__APPLE__)
-    static void MyMessageHandler(unsigned int productID, unsigned int messageType, void *messageArgument);
+    static void Connexion3DMouseMessageHandler(unsigned int productID, unsigned int messageType, void *messageArgument);
 #endif
 //    void MyAddedMessageHandler(unsigned int connection);
 //    void MyRemovedMessageHandler(unsigned int connection);
@@ -37,6 +37,9 @@ protected:
   display_settings ds;
 #if defined(SPACEMOUSE) && !defined(__APPLE__)
   SpaceNavController *spnav_controller;
+private:
+  float translationMultiplier = 0.1;
+  float rotationMultiplier = 0.01;
 #endif
 };
 
