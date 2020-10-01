@@ -21,8 +21,6 @@ void SpaceNavController::run() {
   bool shift    = false;
   bool fixRotation = false;
   bool fixTranslation = false;
-  float translationMultiplier = 0.1;
-  float rotationMultipler = 0.01;
 
   std::cout << "waiting for space mouse input\n";
 
@@ -35,25 +33,25 @@ void SpaceNavController::run() {
 
             double rotsize = 0.2 *stepsize;*/
             if(!fixRotation && !fixTranslation) {
-                m_glwidget->spaceNavEvent(-ev.motion.x*translationMultiplier,
-                                          -ev.motion.y*translationMultiplier,
-                                          ev.motion.z*translationMultiplier,
-                                          -ev.motion.rx*rotationMultipler,
-                                          ev.motion.ry*rotationMultipler,
-                                          -ev.motion.rz*rotationMultipler
+                m_glwidget->spaceNavEvent(-ev.motion.x**translationMultiplier,
+                                          -ev.motion.y**translationMultiplier,
+                                          ev.motion.z**translationMultiplier,
+                                          -ev.motion.rx**rotationMultiplier,
+                                          ev.motion.ry**rotationMultiplier,
+                                          -ev.motion.rz**rotationMultiplier
                 );
-            } else if (fixRotation){
-                m_glwidget->spaceNavEvent(-ev.motion.x*translationMultiplier,
-                                          -ev.motion.y*translationMultiplier,
-                                          ev.motion.z*translationMultiplier,
+            } else if (fixRotation && !fixTranslation){
+                m_glwidget->spaceNavEvent(-ev.motion.x**translationMultiplier,
+                                          -ev.motion.y**translationMultiplier,
+                                          ev.motion.z**translationMultiplier,
                                           0,0,0
                 );
-            } else if (fixTranslation){
+            } else if (fixTranslation && !fixRotation){
                 m_glwidget->spaceNavEvent(
                         0,0,0,
-                        -ev.motion.rx*rotationMultipler,
-                        ev.motion.ry*rotationMultipler,
-                        -ev.motion.rz*rotationMultipler
+                        -ev.motion.rx**rotationMultiplier,
+                        ev.motion.ry**rotationMultiplier,
+                        -ev.motion.rz**rotationMultiplier
                 );
             }
         } else if(ev.type == SPNAV_EVENT_BUTTON) {
@@ -62,9 +60,11 @@ void SpaceNavController::run() {
                 switch(ev.button.bnum) {
                     case 0:
                         fixRotation = !fixRotation;
+                        fixTranslation = false;
                         break;
                     case 1:
                         fixTranslation = !fixTranslation;
+                        fixRotation = false;
                         break;
                     case 12:
                         // 12 -> 1, 13 -> 2, 14 -> 3, 15 -> 4

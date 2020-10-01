@@ -9,14 +9,14 @@ static uint16_t clientID;
 static bool fixRotation = false;
 static bool fixTranslation = false;
 static float translationMultiplier = 0.1;
-static float rotationMultipler = 0.01;
+static float rotationMultiplier = 0.01;
 #endif
 
 QtShow::QtShow(int &argc, char **argv)
   : QApplication(argc, argv)
 {
   // Qt wants to automatically set the locale for us (c.f. Qt bugs #15247 #10994).
-  // This is a problem for sscanf for comma-separated lists of numbers when e.g. LC_NUMERIC=de_DE
+  // This is a problem for scanf for comma-separated lists of numbers when e.g. LC_NUMERIC=de_DE
   // We reset this behaviour to POSIX before we execute any of our own code:
   setlocale(LC_NUMERIC, "POSIX");
 
@@ -29,8 +29,11 @@ QtShow::QtShow(int &argc, char **argv)
     std::cerr << "Error while parsing settings: " << e.what() << std::endl;
     exit(1);
   }
-
-  mainWindow = new MainWindow(dss, ws, ds);
+#ifdef SPACEMOUSE
+  mainWindow = new MainWindow(dss, ws, ds, &translationMultiplier, &rotationMultiplier);
+#else
+    mainWindow = new MainWindow(dss, ws, ds);
+#endif
   mainWindow->show();
   if (has_initial_directory) {
     initShow(dss, ws, ds);
@@ -96,7 +99,7 @@ QtShow::QtShow(int &argc, char **argv)
     #ifndef __APPLE__
     spnav_controller = new SpaceNavController(mainWindow->glWidget);
     #else
-    int16_t result = SetConnexionHandlers(&MyMessageHandler, nullptr, nullptr, true);
+    int16_t result = SetConnexionHandlers(&Connexion3DMouseMessageHandler, nullptr, nullptr, true);
     clientID = RegisterConnexionClient(kConnexionClientWildcard, (uint8_t*)"qtshow",kConnexionClientModeTakeOver, kConnexionMaskAll);
     SetConnexionClientButtonMask(clientID, kConnexionMaskAllButtons);
     if(result == 0){
@@ -116,7 +119,7 @@ QtShow::~QtShow()
 }
 
 #if defined(SPACEMOUSE) && defined(__APPLE__)
-void QtShow::MyMessageHandler(unsigned int connection, unsigned int messageType, void *messageArgument)
+void QtShow::Connexion3DMouseMessageHandler(unsigned int connection, unsigned int messageType, void *messageArgument)
 {
     //std::cout << "messageHandler" << std::endl;
     ConnexionDeviceState *state;
@@ -137,9 +140,9 @@ void QtShow::MyMessageHandler(unsigned int connection, unsigned int messageType,
                             mainWindow->glWidget->spaceNavEvent(-state->axis[0] * translationMultiplier,
                                                                 state->axis[2] * translationMultiplier,
                                                                 -state->axis[1] * translationMultiplier,
-                                                                -state->axis[3] * rotationMultipler,
-                                                                -state->axis[5] * rotationMultipler,
-                                                                state->axis[4] * rotationMultipler);
+                                                                -state->axis[3] * rotationMultiplier,
+                                                                -state->axis[5] * rotationMultiplier,
+                                                                state->axis[4] * rotationMultiplier);
                         } else if(fixRotation && !fixTranslation){
                             mainWindow->glWidget->spaceNavEvent(-state->axis[0] * translationMultiplier,
                                                                 state->axis[2] * translationMultiplier,
@@ -151,9 +154,9 @@ void QtShow::MyMessageHandler(unsigned int connection, unsigned int messageType,
                             mainWindow->glWidget->spaceNavEvent(0,
                                                                 0,
                                                                 0,
-                                                                -state->axis[3] * rotationMultipler,
-                                                                -state->axis[5] * rotationMultipler,
-                                                                state->axis[4] * rotationMultipler);
+                                                                -state->axis[3] * rotationMultiplier,
+                                                                -state->axis[5] * rotationMultiplier,
+                                                                state->axis[4] * rotationMultiplier);
                         }
                         break;
                     case kConnexionCmdHandleButtons:
