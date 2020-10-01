@@ -18,6 +18,20 @@ Alternatively on **Windows**, execute the batch script `build.cmd` either from t
 
 Some Boost libraries (_graph, regex, serialization, filesystem, interprocess_) are needed to compile the slam6D program. **_3DTK_ is not compatible with boost version 1.49.** Please make sure to use a different version.
 
+### 3DConnexion Space Mouse Support
+The Applications `show` and `qtshow` supports navigation with the _3DConnexion SpaceMouse_. The left key on the _SpaceMouse Wireless/Compact_ fixes the rotation and the right key fixes the translation.
+The keyset for other models can be different.
+
+#### Linux
+No further steps are required for the basic functions. For full support the `libspnav` and the `spacenavd` daemon ([show on GitHub](https://github.com/FreeSpacenav)) is required.
+Then build _3DTK_ with the `WITH_3DMOUSE` option.
+
+#### macOS
+It's required to install the official driver and build _3DTK_ with the `WITH_3DMOUSE` option.
+
+<!--#### Windows
+Should be the same as for macOS, but is not tested!-->
+
 ## Getting Started
 For a detailed explanation of the programm, its usage, etc., please refer to the [high level documentation](doc/documentation_HL.pdf) (esp. sections 4-6, for starters) and [here](doc/3d_video.md) for creating videos with _3DTK_. Further a reference manual can be found in `doc/html/index.html` after building the doxygen domcumentation (type in `make docu` to get the HTML files).
 
