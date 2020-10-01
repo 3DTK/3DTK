@@ -7,8 +7,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1331</width>
-    <height>840</height>
+    <width>1441</width>
+    <height>1445</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -30,8 +30,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1331</width>
-     <height>30</height>
+     <width>1441</width>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -594,7 +594,7 @@
        </rect>
       </property>
       <property name="text">
-       <string>Save Path…</string>
+       <string>Save Path</string>
       </property>
      </widget>
      <widget class="QPushButton" name="buttonLoadPath">
@@ -607,7 +607,7 @@
        </rect>
       </property>
       <property name="text">
-       <string>Load Path…</string>
+       <string>Load Path</string>
       </property>
      </widget>
      <widget class="QPushButton" name="buttonDrawRobotPath">
@@ -982,7 +982,7 @@
       </rect>
      </property>
      <property name="text">
-      <string>Save Image…</string>
+      <string>Save Image</string>
      </property>
     </widget>
    </widget>
@@ -1084,6 +1084,35 @@
      <property name="text">
       <string>Reset position</string>
      </property>
+    </widget>
+    <widget class="QWidget" name="layoutWidget">
+     <property name="geometry">
+      <rect>
+       <x>17</x>
+       <y>103</y>
+       <width>241</width>
+       <height>24</height>
+      </rect>
+     </property>
+     <layout class="QHBoxLayout" name="horizontalLayout_3DMouse">
+      <item>
+       <widget class="QLabel" name="label_3DMouse">
+        <property name="text">
+         <string>3D Mouse</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QSlider" name="horizontalSlider3DMouse">
+        <property name="value">
+         <number>50</number>
+        </property>
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+       </widget>
+      </item>
+     </layout>
     </widget>
    </widget>
   </widget>
