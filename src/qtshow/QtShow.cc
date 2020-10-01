@@ -3,6 +3,15 @@
 #include "show/program_options.h"
 #include "slam6d/io_types.h"
 
+#if defined(SPACEMOUSE) && defined(__APPLE__)
+static MainWindow *mainWindow;
+static uint16_t clientID;
+static bool fixRotation = false;
+static bool fixTranslation = false;
+static float translationMultiplier = 0.1;
+static float rotationMultipler = 0.01;
+#endif
+
 QtShow::QtShow(int &argc, char **argv)
   : QApplication(argc, argv)
 {
@@ -84,14 +93,95 @@ QtShow::QtShow(int &argc, char **argv)
     label = true;
   });
 #ifdef SPACEMOUSE
-  spnav_controller = new SpaceNavController(mainWindow->glWidget);
+    #ifndef __APPLE__
+    spnav_controller = new SpaceNavController(mainWindow->glWidget);
+    #else
+    int16_t result = SetConnexionHandlers(&MyMessageHandler, nullptr, nullptr, true);
+    clientID = RegisterConnexionClient(kConnexionClientWildcard, (uint8_t*)"qtshow",kConnexionClientModeTakeOver, kConnexionMaskAll);
+    SetConnexionClientButtonMask(clientID, kConnexionMaskAllButtons);
+    if(result == 0){
+        std::cout << "found and activate 3DConnexion mouse" << std::endl;
+    }
+    #endif
 #endif
 }
 
 QtShow::~QtShow()
 {
+#if defined(SPACEMOUSE) && defined(__APPLE__)
+    UnregisterConnexionClient(clientID);
+    CleanupConnexionHandlers();
+#endif
   delete mainWindow;
 }
+
+#if defined(SPACEMOUSE) && defined(__APPLE__)
+void QtShow::MyMessageHandler(unsigned int connection, unsigned int messageType, void *messageArgument)
+{
+    //std::cout << "messageHandler" << std::endl;
+    ConnexionDeviceState *state;
+    switch (messageType)
+    {
+        case kConnexionMsgDeviceState:
+            state = (ConnexionDeviceState*)messageArgument;
+            //std::cout << "sender client id: "<< state->client << std::endl;
+            if (state->client == clientID)
+            {
+                // decipher what command/event is being reported by the driver
+                switch (state->command)
+                {
+                    case kConnexionCmdHandleAxis:
+                        //std::cout << "move axis" << std::endl;
+                        // state->axis will contain values for the 6 axis
+                        if(!fixRotation && !fixTranslation) {
+                            mainWindow->glWidget->spaceNavEvent(-state->axis[0] * translationMultiplier,
+                                                                state->axis[2] * translationMultiplier,
+                                                                -state->axis[1] * translationMultiplier,
+                                                                -state->axis[3] * rotationMultipler,
+                                                                -state->axis[5] * rotationMultipler,
+                                                                state->axis[4] * rotationMultipler);
+                        } else if(fixRotation && !fixTranslation){
+                            mainWindow->glWidget->spaceNavEvent(-state->axis[0] * translationMultiplier,
+                                                                state->axis[2] * translationMultiplier,
+                                                                -state->axis[1] * translationMultiplier,
+                                                                0,
+                                                                0,
+                                                                0);
+                        } else if(!fixRotation && fixTranslation){
+                            mainWindow->glWidget->spaceNavEvent(0,
+                                                                0,
+                                                                0,
+                                                                -state->axis[3] * rotationMultipler,
+                                                                -state->axis[5] * rotationMultipler,
+                                                                state->axis[4] * rotationMultipler);
+                        }
+                        break;
+                    case kConnexionCmdHandleButtons:
+                        // state->buttons reports the buttons that are pressed
+                        //std::cout << "pressed buttons" << state->buttons << std::endl;
+                        switch (state->buttons) {
+                            case 1:
+                                fixRotation = !fixRotation;
+                                fixTranslation = false;
+                                break;
+                            case 2:
+                                fixTranslation = !fixTranslation;
+                                fixRotation = false;
+                                break;
+                            default:
+                                //std::cout << "unsupported button: " << state->buttons << std::endl;
+                                break;
+                        }
+                        break;
+                }
+            }
+            break;
+        default:
+            // other messageTypes can happen and should be ignored
+            break;
+    }
+}
+#endif
 
 void QtShow::loadDifferentScan(dataset_settings new_dss) {
   dss = new_dss;

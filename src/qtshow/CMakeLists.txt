@@ -42,5 +42,5 @@ if (WITH_OPENGL AND WITH_QT)
   target_link_libraries(glwidget ${SHOW_LIBS} ${QT_LIBRARIES})
 
   target_link_libraries(qtshow Qt5::Widgets)
-  target_link_libraries(qtshow glwidget ${QT_LIBRARIES} ${SPNAV_LIB})
+  target_link_libraries(qtshow glwidget ${QT_LIBRARIES} ${SPNAV_LIB} ${3DCONNEXION_LIB})
 endif()

@@ -5,7 +5,12 @@
 
 #include "qtshow/MainWindow.h"
 #ifdef SPACEMOUSE
-    #include "qtshow/spnav_controller.h"
+    #ifdef __APPLE__
+        #include "ConnexionClientAPI.h"
+        #include "ConnexionClient.h"
+    #else
+        #include "qtshow/spnav_controller.h"
+    #endif
 #endif
 
 class QtShow : public QApplication {
@@ -14,16 +19,23 @@ class QtShow : public QApplication {
 public:
   QtShow(int &argc, char **argv);
   ~QtShow() override;
+#if defined(SPACEMOUSE) && defined(__APPLE__)
+    static void MyMessageHandler(unsigned int productID, unsigned int messageType, void *messageArgument);
+#endif
+//    void MyAddedMessageHandler(unsigned int connection);
+//    void MyRemovedMessageHandler(unsigned int connection);
 
 public slots:
   void loadDifferentScan(dataset_settings dss);
 
 protected:
+#if !(defined(SPACEMOUSE) && defined(__APPLE__))
   MainWindow *mainWindow;
+#endif
   dataset_settings dss;
   window_settings ws;
   display_settings ds;
-#ifdef SPACEMOUSE
+#if defined(SPACEMOUSE) && !defined(__APPLE__)
   SpaceNavController *spnav_controller;
 #endif
 };
