@@ -163,7 +163,7 @@ int parse_options(int argc, char **argv, string &dir, double &red, int &rand,
               double &epsilonICP, double &epsilonSLAM,  int &nns_method, bool &exportPts, double &distLoop,
               int &iterLoop, double &graphDist, int &octree, IOType &type,
               bool& scanserver, PairingMode &pairing_mode, bool &continue_processing, int &bucketSize,
-              boost::filesystem::path &loopclosefile)
+              boost::filesystem::path &loopclosefile, int &max_num_metascans)
 {
 
 po::options_description generic("Generic options");
@@ -291,7 +291,9 @@ po::options_description generic("Generic options");
     "specifies the bucket size for leafs of the k-d tree. During construction of the"
     "tree, any subtree of at most this size will be replaced by an array.")
     ("loopclosefile", po::value<boost::filesystem::path>(&loopclosefile),
-    "filename to write scan poses");
+    "filename to write scan poses")
+    ("maxmeta", po::value<int>(&max_num_metascans)->default_value(-1),
+     "maximum nr of previous scans to combine to a metascan in scan matching");
 
   po::options_description hidden("Hidden options");
   hidden.add_options()
@@ -337,6 +339,8 @@ po::options_description generic("Generic options");
   if(point_to_plane) pairing_mode = CLOSEST_PLANE_SIMPLE;
   if(normal_shoot) pairing_mode = CLOSEST_POINT_ALONG_NORMAL_SIMPLE;
 
+  if(!meta) max_num_metascans = -1;
+
   return 0;
 }
 
@@ -372,7 +376,8 @@ void matchGraph6Dautomatic(double cldist,
                            double mdmll,
                            double graphDist,
                            bool &eP,
-                           IOType type)
+                           IOType type,
+                           int max_num_metascans = -1)
 {
   double cldist2 = sqr(cldist);
 
@@ -411,6 +416,11 @@ void matchGraph6Dautomatic(double cldist,
       // Matching strongly linked scans with ICPs
       if(meta_icp) {
         metas.push_back(allScans[i - 1]);
+        if(max_num_metascans > 0) {
+          while(metas.size() > max_num_metascans) {
+            metas.erase(metas.begin());
+          }
+        }
         MetaScan* meta_scan = new MetaScan(metas);
         my_icp6D->match(meta_scan, allScans[i]);
         delete meta_scan;
@@ -572,6 +582,7 @@ int main(int argc, char **argv)
   bool continue_processing = false;
   int bucketSize = 20;
   boost::filesystem::path loopclose("loopclose.pts");
+  int max_num_metascans = -1;
 
   parse_options(argc, argv, dir, red, rand, mdm, mdml, mdmll, mni, start, end,
             maxDist, minDist, customFilter, quiet, veryQuiet, eP, meta,
@@ -579,7 +590,7 @@ int main(int argc, char **argv)
             mni_lum, net, cldist, clpairs, loopsize, epsilonICP, epsilonSLAM,
             nns_method, exportPts, distLoop, iterLoop, graphDist, octree, type,
             scanserver, pairing_mode, continue_processing, bucketSize,
-            loopclose);
+            loopclose, max_num_metascans);
 
   /* writing frames in zip archives is not supported by BasicScan */
   if(!boost::filesystem::is_directory(dir)) {
@@ -701,7 +712,7 @@ int main(int argc, char **argv)
   if (mni_lum == -1 && loopSlam6DAlgo == 0) {
     icp6D *my_icp = 0;
     my_icp = new icp6D(my_icp6Dminimizer, mdm, mni, quiet, meta, rand, eP,
-                       anim, epsilonICP, nns_method);
+                       anim, epsilonICP, nns_method,false,false,max_num_metascans);
     // check if CAD matching was selected as type
     if (type == UOS_CAD)
     {
@@ -714,7 +725,7 @@ int main(int argc, char **argv)
     //!!!!!!!!!!!!!!!!!!!!!!!!
     icp6D *my_icp = 0;
     my_icp = new icp6D(my_icp6Dminimizer, mdm, mni, quiet, meta, rand, eP,
-                       anim, epsilonICP, nns_method);
+                       anim, epsilonICP, nns_method,false,false,max_num_metascans);
     my_icp->doICP(Scan::allScans, pairing_mode);
     graphSlam6D *my_graphSlam6D = new lum6DEuler(my_icp6Dminimizer,
                                                  mdm, mdml, mni, quiet, meta,
@@ -801,7 +812,7 @@ int main(int argc, char **argv)
         matchGraph6Dautomatic(cldist, loopsize, Scan::allScans, my_icp, meta,
                               nns_method, my_loopSlam6D, my_graphSlam6D,
                               mni_lum, epsilonSLAM, mdml, mdmll, graphDist, eP,
-                              type);
+                              type, max_num_metascans);
         delete my_icp;
         if(my_loopSlam6D) {
           delete my_loopSlam6D;
