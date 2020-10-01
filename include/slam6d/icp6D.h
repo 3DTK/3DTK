@@ -38,7 +38,8 @@ public:
 	   double epsilonICP = 0.0000001,
 	   int nns_method = simpleKD,
 	   bool cuda_enabled = false,
-	   bool cad_matching = false);
+	   bool cad_matching = false,
+     int max_num_metascans = -1);
 
   /**
    * Destructor (empty, but needed, because virtual)
@@ -142,6 +143,11 @@ protected:
    * number of matched points in ICP
    */
   int nr_pointPair;
+
+  /**
+   * Window size for ICP with metascans
+   */
+  int max_num_metascans;
 };
 
 #include "icp6D.icc"
