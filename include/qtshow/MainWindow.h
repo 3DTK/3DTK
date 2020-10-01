@@ -82,6 +82,8 @@ protected slots:
   void applySettings();
 
 friend class QtShow;
+private slots:
+void on_horizontalSlider3DMouse_sliderReleased();
 };
 
 #endif
