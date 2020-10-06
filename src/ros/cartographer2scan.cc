@@ -143,6 +143,7 @@ void writePointClouds(const string& outdir, double scale, double minDistance, do
     if (pointClouds.size() < 1) return;
 
     static long index = 0;
+    long numPoints = 0;
 
     string scanFilename = outdir + "/scan" + to_string(index,3) + ".3d";
     cout << "Writing " << scanFilename << endl;
@@ -178,6 +179,7 @@ void writePointClouds(const string& outdir, double scale, double minDistance, do
                 float zout = pcorr(0);
 
                 scanFile << xout / scale << " " << yout / scale << " " << zout / scale << endl;
+                numPoints++;
             }
         } else if (pointCloud.cloudRGB != 0) {
            for (pcl::PointXYZRGB p : *pointCloud.cloudRGB) {
@@ -192,6 +194,7 @@ void writePointClouds(const string& outdir, double scale, double minDistance, do
                 float zout = pcorr(0);
 
                 scanFile << xout / scale << " " << yout / scale << " " << zout / scale << " " << (int) p.r << " " << (int) p.g << " " << (int) p.b << " " << endl;
+                numPoints++;
             }
         } else if (pointCloud.cloudI != 0) {
            for (pcl::PointXYZI p : *pointCloud.cloudI) {
@@ -206,6 +209,7 @@ void writePointClouds(const string& outdir, double scale, double minDistance, do
                 float zout = pcorr(0);
 
                 scanFile << xout / scale << " " << yout / scale << " " << zout / scale << " " << p.intensity << endl;
+                numPoints++;
             }
         }
     }
@@ -247,7 +251,8 @@ void writePointClouds(const string& outdir, double scale, double minDistance, do
     o.flush();
     o.close();
 
-    index++;
+    // skip empty scans
+    if (numPoints > 0) index++;
 }
 
 int main(int argc, char* argv[])
