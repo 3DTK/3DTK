@@ -246,7 +246,7 @@ int main(int argc, char* argv[])
             ("topics-MultiEchoLaserScan", program_options::value<vector<string> >(&topicsMultiEchoLaserScan)->multitoken()->default_value(vector<string> {"horizontal_laser_2d", "vertical_laser_2d"}), "Topics with MultiEchoLaserScan messages for export")
             ("topics-LaserScan", program_options::value<vector<string> >(&topicsLaserScan)->multitoken()->default_value(vector<string>()), "Topics with LaserScan messages for export")
             ("topics-TF", program_options::value<vector<string> >(&topicsTF)->multitoken()->default_value(vector<string> {"/tf"}), "Topics with TF information")
-            ("urdf", program_options::value<string>(&urdffile)->required(), "input URDF file")
+            ("urdf", program_options::value<string>(&urdffile), "input URDF file")
             ("frame-map", program_options::value<string>(&mapFrame)->required()->default_value("/map"), "frame id of the map")
             ("frame-base", program_options::value<string>(&baseFrame)->required()->default_value("/base_link"), "frame id of the robot base link")
 
