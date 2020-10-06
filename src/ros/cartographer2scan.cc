@@ -135,6 +135,8 @@ struct PointCloudWithTransform {
     tf::Transform pose;
     tf::Transform calibration;
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud;
+    pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloudRGB;
+    pcl::PointCloud<pcl::PointXYZI>::Ptr cloudI;
 };
 
 void writePointClouds(const string& outdir, double scale, double minDistance, double maxDistance, const vector<PointCloudWithTransform>& pointClouds) {
@@ -163,18 +165,48 @@ void writePointClouds(const string& outdir, double scale, double minDistance, do
 
         Eigen::MatrixXd mapToLaser = (firstPoseInverse * currentPose * baseToLaser).matrix();
 
-        for (pcl::PointXYZ p : *pointCloud.cloud) {
-            double distance = Eigen::Vector3d(p.x, p.y, p.z).norm() / scale;
-            if (std::isnan(distance) || distance < minDistance || distance > maxDistance) continue;
+        if (pointCloud.cloud != 0) {
+            for (pcl::PointXYZ p : *pointCloud.cloud) {
+                double distance = Eigen::Vector3d(p.x, p.y, p.z).norm() / scale;
+                if (std::isnan(distance) || distance < minDistance || distance > maxDistance) continue;
 
-            Eigen::Vector4d tmp(p.x, p.y, p.z, 1);
-            Eigen::Vector4d pcorr = mapToLaser * tmp;
+                Eigen::Vector4d tmp(p.x, p.y, p.z, 1);
+                Eigen::Vector4d pcorr = mapToLaser * tmp;
 
-            float xout = -pcorr(1);
-            float yout = pcorr(2);
-            float zout = pcorr(0);
+                float xout = -pcorr(1);
+                float yout = pcorr(2);
+                float zout = pcorr(0);
 
-            scanFile << xout / scale << " " << yout / scale << " " << zout / scale << endl;
+                scanFile << xout / scale << " " << yout / scale << " " << zout / scale << endl;
+            }
+        } else if (pointCloud.cloudRGB != 0) {
+           for (pcl::PointXYZRGB p : *pointCloud.cloudRGB) {
+                double distance = Eigen::Vector3d(p.x, p.y, p.z).norm() / scale;
+                if (std::isnan(distance) || distance < minDistance || distance > maxDistance) continue;
+
+                Eigen::Vector4d tmp(p.x, p.y, p.z, 1);
+                Eigen::Vector4d pcorr = mapToLaser * tmp;
+
+                float xout = -pcorr(1);
+                float yout = pcorr(2);
+                float zout = pcorr(0);
+
+                scanFile << xout / scale << " " << yout / scale << " " << zout / scale << " " << (int) p.r << " " << (int) p.g << " " << (int) p.b << " " << endl;
+            }
+        } else if (pointCloud.cloudI != 0) {
+           for (pcl::PointXYZI p : *pointCloud.cloudI) {
+                double distance = Eigen::Vector3d(p.x, p.y, p.z).norm() / scale;
+                if (std::isnan(distance) || distance < minDistance || distance > maxDistance) continue;
+
+                Eigen::Vector4d tmp(p.x, p.y, p.z, 1);
+                Eigen::Vector4d pcorr = mapToLaser * tmp;
+
+                float xout = -pcorr(1);
+                float yout = pcorr(2);
+                float zout = pcorr(0);
+
+                scanFile << xout / scale << " " << yout / scale << " " << zout / scale << " " << p.intensity << endl;
+            }
         }
     }
 
@@ -236,6 +268,8 @@ int main(int argc, char* argv[])
     double maxDistance;
     size_t combine;
     string outdir;
+    bool exportColor;
+    bool exportIntensity;
 
     program_options::options_description desc("Allowed options");
     desc.add_options()
@@ -256,6 +290,8 @@ int main(int argc, char* argv[])
             ("min,M", program_options::value<double>(&minDistance)->default_value(0.0), "Neglect all points closer than this to the origin")
             ("max,m", program_options::value<double>(&maxDistance)->default_value(std::numeric_limits<double>::max()), "Neglect all points further than this from the origin")
             ("combine", program_options::value<size_t>(&combine)->default_value(1), "Combine n scans")
+            ("color,C", "Export with color")
+            ("intensity,I", "Export with intensity")
             ("output,o", program_options::value<string>(&outdir)->required(), "output folder")
             ;
 
@@ -266,6 +302,9 @@ int main(int argc, char* argv[])
         cout << desc << endl;
         return EXIT_SUCCESS;
     }
+
+    exportColor = vm.count("color");
+    exportIntensity = vm.count("intensity");
 
     program_options::notify(vm);
 
@@ -406,14 +445,34 @@ int main(int argc, char* argv[])
 
             pcl::PCLPointCloud2 pcl_pc2;
             pcl_conversions::toPCL(*message,pcl_pc2);
-            pcl::PointCloud<pcl::PointXYZ>::Ptr temp_cloud(new pcl::PointCloud<pcl::PointXYZ>);
-            pcl::fromPCLPointCloud2(pcl_pc2,*temp_cloud);
 
             PointCloudWithTransform pointCloud;
             pointCloud.timestamp = message->header.stamp;
             pointCloud.pose = baseTransform;
             pointCloud.calibration = laserTransform;
-            pointCloud.cloud = temp_cloud;
+
+            if (exportColor) {
+                pcl::PointCloud<pcl::PointXYZRGB>::Ptr temp_cloud_rgb(new pcl::PointCloud<pcl::PointXYZRGB>);
+                pcl::fromPCLPointCloud2(pcl_pc2,*temp_cloud_rgb);
+
+                pointCloud.cloud = 0;
+                pointCloud.cloudRGB = temp_cloud_rgb;
+                pointCloud.cloudI = 0;
+            } else if(exportIntensity) {
+                pcl::PointCloud<pcl::PointXYZI>::Ptr temp_cloud_i(new pcl::PointCloud<pcl::PointXYZI>);
+                pcl::fromPCLPointCloud2(pcl_pc2,*temp_cloud_i);
+
+                pointCloud.cloud = 0;
+                pointCloud.cloudRGB = 0;
+                pointCloud.cloudI = temp_cloud_i;
+            } else {
+                pcl::PointCloud<pcl::PointXYZ>::Ptr temp_cloud(new pcl::PointCloud<pcl::PointXYZ>);
+                pcl::fromPCLPointCloud2(pcl_pc2,*temp_cloud);
+
+                pointCloud.cloud = temp_cloud;
+                pointCloud.cloudRGB = 0;
+                pointCloud.cloudI = 0;
+            }
 
             pointClouds.push_back(pointCloud);
 
@@ -471,6 +530,8 @@ int main(int argc, char* argv[])
             pointCloud.pose = baseTransform;
             pointCloud.calibration = laserTransform;
             pointCloud.cloud = temp_cloud;
+            pointCloud.cloudRGB = 0;
+            pointCloud.cloudI = 0;
 
             pointClouds.push_back(pointCloud);
 
@@ -528,6 +589,8 @@ int main(int argc, char* argv[])
             pointCloud.pose = baseTransform;
             pointCloud.calibration = laserTransform;
             pointCloud.cloud = temp_cloud;
+            pointCloud.cloudRGB = 0;
+            pointCloud.cloudI = 0;
 
             pointClouds.push_back(pointCloud);
 
