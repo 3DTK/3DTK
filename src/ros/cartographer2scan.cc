@@ -335,7 +335,9 @@ int main(int argc, char* argv[])
     }
 
 
-    tf::Transformer *l = NULL;
+    rosbag::Bag bag(bagFile);
+    rosbag::View bagView(bag);
+    tf::Transformer* l = new tf::Transformer(true, bagView.getEndTime() - bagView.getBeginTime());
 
     if (trajectoryFiles.size() < 1) {
         trajectoryFiles.push_back(bagFile);
@@ -349,7 +351,7 @@ int main(int argc, char* argv[])
             rosbag::Bag bag(trajectoryFile);
             rosbag::View tfview(bag, rosbag::TopicQuery(topicsTF));
 
-            l = new tf::Transformer(true, tfview.getEndTime() - tfview.getBeginTime());
+            if (transformSetter) { transformSetter->setFixedTransforms(l, bagView.getBeginTime());}
 
             for (rosbag::MessageInstance const m : tfview) {
                 if (m.isType<tf::tfMessage>()) {
@@ -364,10 +366,9 @@ int main(int argc, char* argv[])
                     }
                 }
             }
+
+            if (transformSetter) { transformSetter->setFixedTransforms(l, bagView.getEndTime());}
         } else {
-
-            l = new tf::Transformer(true, ros::Duration(3600));
-
             ifstream data(trajectoryFile);
 
             string line;
@@ -608,6 +609,9 @@ int main(int argc, char* argv[])
         writePointClouds(outdir, scale, minDistance, maxDistance, pointClouds);
         pointClouds.clear();
     }
+
+    delete l;
+    delete transformSetter;
 
     return 0;
 }
