@@ -305,7 +305,7 @@ int main(int argc, char* argv[])
             rosbag::Bag bag(trajectoryFile);
             rosbag::View tfview(bag, rosbag::TopicQuery(topicsTF));
 
-            l = new tf::Transformer(true, ros::Duration(3600));//tfview.getEndTime() - tfview.getBeginTime());
+            l = new tf::Transformer(true, tfview.getEndTime() - tfview.getBeginTime());
 
             for (rosbag::MessageInstance const m : tfview) {
                 if (m.isType<tf::tfMessage>()) {
