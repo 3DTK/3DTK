@@ -46,6 +46,7 @@ if (WITH_OPENGL)
   add_executable(showbin show.cc $<TARGET_OBJECTS:show_objects>)
   set_target_properties(showbin PROPERTIES OUTPUT_NAME "show")
   target_link_libraries(showbin ${SHOW_LIBS})
+  target_compile_definitions(showbin PRIVATE SPACEMOUSE)
 
   if(WITH_WXWIDGETS)
     find_package(wxWidgets REQUIRED core base gl)
