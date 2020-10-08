@@ -43,4 +43,5 @@ if (WITH_OPENGL AND WITH_QT)
 
   target_link_libraries(qtshow Qt5::Widgets)
   target_link_libraries(qtshow glwidget ${QT_LIBRARIES} ${SPNAV_LIB} ${3DCONNEXION_LIB})
+  target_compile_definitions(qtshow PRIVATE SPACEMOUSE)
 endif()
