@@ -144,7 +144,7 @@ option(WITH_E57 "Build library for e57 file format support." OFF)
 option(WITH_3DMOUSE "Support for 3DConnexion Space Mouse" OFF)
 
 if(WITH_3DMOUSE)
-  add_compile_definitions(SPACEMOUSE)
+  #add_compile_definitions(SPACEMOUSE)
   if(APPLE)
     #find_library(3DCONNEXIONCLIENT_FRAMEWORK 3DconnexionClient)
     find_package(3DconnexionClient)
