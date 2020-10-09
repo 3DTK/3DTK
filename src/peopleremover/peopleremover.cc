@@ -3,15 +3,15 @@
 #include <boost/filesystem.hpp>
 
 #ifdef WITH_MMAP_SCAN
-#include <sys/mman.h>
-#include <fcntl.h>
 #include <cerrno>
 #include <cstring>
+#include <fcntl.h>
+#include <sys/mman.h>
 #endif
 
 namespace po = boost::program_options;
 
-int main(int argc, char* argv[])
+int main(int argc, char *argv[])
 {
 	ssize_t start, end;
 	IOType format;
@@ -33,15 +33,16 @@ int main(int argc, char* argv[])
 #endif
 
 	parse_cmdline(argc, argv, start, end, format, fuzz, voxel_size, diff,
-			normal_knearest, cluster_size, normal_method, maxrange_method,
-			maskdir, staticdir, dir, no_subvoxel_accuracy, write_maxranges,
-			jobs, reduce
+		      normal_knearest, cluster_size, normal_method,
+		      maxrange_method, maskdir, staticdir, dir,
+		      no_subvoxel_accuracy, write_maxranges, jobs, reduce
 #ifdef WITH_MMAP_SCAN
-			, cachedir
+		      ,
+		      cachedir
 #endif
-			);
+	);
 
-	double voxel_diagonal = sqrt(3*voxel_size*voxel_size);
+	double voxel_diagonal = sqrt(3 * voxel_size * voxel_size);
 
 	std::cerr << "dir: " << dir << std::endl;
 
@@ -56,8 +57,9 @@ int main(int argc, char* argv[])
 #else
 	Scan::openDirectory(false, dir, format, start, end);
 #endif
-	if(Scan::allScans.size() == 0) {
-		std::cerr << "No scans found. Did you use the correct format?" << std::endl;
+	if (Scan::allScans.size() == 0) {
+		std::cerr << "No scans found. Did you use the correct format?"
+			  << std::endl;
 		exit(-1);
 	}
 
@@ -65,47 +67,57 @@ int main(int argc, char* argv[])
 	std::unordered_map<size_t, DataReflectance> reflectances_by_slice;
 	std::unordered_map<size_t, DataRGB> rgb_by_slice;
 	std::unordered_map<size_t, DataXYZ> orig_points_by_slice;
-	std::unordered_map<size_t, std::tuple<const double *, const double *, const double *>> trajectory;
+	std::unordered_map<
+	    size_t, std::tuple<const double *, const double *, const double *>>
+	    trajectory;
 #ifdef WITH_MMAP_SCAN
 	std::unordered_map<size_t, int> mmap_fds;
 #endif
 	std::cerr << "size: " << Scan::allScans.size() << std::endl;
 	std::vector<size_t> scanorder;
 	for (size_t id = 0; id < Scan::allScans.size(); ++id) {
-		size_t i = id+start;
+		size_t i = id + start;
 		scanorder.push_back(i);
 		Scan *scan = Scan::allScans[id];
 		/* The range filter must be set *before* transformAll() because
-		 * otherwise, transformAll will move the point coordinates such that
-		 * the rangeFilter doesn't filter the right points anymore. This in
-		 * turn can lead to the situation that when retrieving the reflectance
-		 * values, some reflectance values are not returned because when
-		 * reading them in, those get filtered by the *original* point
-		 * coordinates. This in turn can lead to the situation that the vector
-		 * for xyz and reflectance are of different length.
+		 * otherwise, transformAll will move the point coordinates such
+		 * that the rangeFilter doesn't filter the right points anymore.
+		 * This in turn can lead to the situation that when retrieving
+		 * the reflectance values, some reflectance values are not
+		 * returned because when reading them in, those get filtered by
+		 * the *original* point coordinates. This in turn can lead to
+		 * the situation that the vector for xyz and reflectance are of
+		 * different length.
 		 */
 		scan->setRangeFilter(-1, voxel_diagonal);
 		DataXYZ xyz_orig(scan->get("xyz"));
 		// copy points
-		size_t raw_orig_data_size = xyz_orig.size() * sizeof(double) * 3;
-		unsigned char* xyz_orig_data;
+		size_t raw_orig_data_size =
+		    xyz_orig.size() * sizeof(double) * 3;
+		unsigned char *xyz_orig_data;
 #ifdef WITH_MMAP_SCAN
 		if (!cachedir.empty()) {
 			char filename[] = "ppl_XXXXXX";
 			int fd = mkstemp(filename);
 			if (fd == -1) {
-				throw std::runtime_error("cannot create temporary file");
+				throw std::runtime_error(
+				    "cannot create temporary file");
 			}
-			// by unlinking the file now, we make sure that there are no leftover
-			// files even if the process is killed
+			// by unlinking the file now, we make sure that there
+			// are no leftover files even if the process is killed
 			unlink(filename);
 			int ret = fallocate(fd, 0, 0, raw_orig_data_size);
 			if (ret == -1) {
 				throw std::runtime_error("cannot fallocate");
 			}
-			xyz_orig_data = (unsigned char *)mmap(NULL, raw_orig_data_size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+			xyz_orig_data = (unsigned char *)mmap(
+			    NULL, raw_orig_data_size, PROT_READ | PROT_WRITE,
+			    MAP_SHARED, fd, 0);
 			if (xyz_orig_data == MAP_FAILED) {
-				throw std::runtime_error(std::string("cannot mmap: ")+std::string(std::strerror(errno))+std::string(" ")+std::to_string(errno));
+				throw std::runtime_error(
+				    std::string("cannot mmap: ") +
+				    std::string(std::strerror(errno)) +
+				    std::string(" ") + std::to_string(errno));
 			}
 			mmap_fds[i] = fd;
 		} else {
@@ -114,30 +126,40 @@ int main(int argc, char* argv[])
 #ifdef WITH_MMAP_SCAN
 		}
 #endif
-		memcpy(xyz_orig_data, xyz_orig.get_raw_pointer(), raw_orig_data_size);
-		orig_points_by_slice[i] = DataPointer(xyz_orig_data, raw_orig_data_size);
+		memcpy(xyz_orig_data, xyz_orig.get_raw_pointer(),
+		       raw_orig_data_size);
+		orig_points_by_slice[i] =
+		    DataPointer(xyz_orig_data, raw_orig_data_size);
 		// now that the original coordinates are saved, transform
 		scan->transformAll(scan->get_transMatOrg());
-		trajectory[i] = std::make_tuple(scan->get_rPos(), scan->get_rPosTheta(), scan->get_transMatOrg());
+		trajectory[i] =
+		    std::make_tuple(scan->get_rPos(), scan->get_rPosTheta(),
+				    scan->get_transMatOrg());
 		DataXYZ xyz(scan->get("xyz"));
 		DataReflectance refl(scan->get("reflectance"));
 		if (refl.size() != 0) {
-			if (xyz.size() != refl.size() || xyz_orig.size() != refl.size()) {
-				std::cerr << "refl mismatch: " << xyz.size() << " vs. " << refl.size() << std::endl;
+			if (xyz.size() != refl.size() ||
+			    xyz_orig.size() != refl.size()) {
+				std::cerr << "refl mismatch: " << xyz.size()
+					  << " vs. " << refl.size()
+					  << std::endl;
 				exit(1);
 			}
 			reflectances_by_slice[i] = refl;
 		}
 		DataRGB rgb(scan->get("rgb"));
 		if (rgb.size() != 0) {
-			if (xyz.size() != rgb.size() || xyz_orig.size() != rgb.size()) {
-				std::cerr << "rgb mismatch: " << xyz.size() << " vs. " << rgb.size() << std::endl;
+			if (xyz.size() != rgb.size() ||
+			    xyz_orig.size() != rgb.size()) {
+				std::cerr << "rgb mismatch: " << xyz.size()
+					  << " vs. " << rgb.size() << std::endl;
 				exit(1);
 			}
 			rgb_by_slice[i] = rgb;
 		}
 		points_by_slice[i] = xyz;
-		std::cerr << "number of points in scan " << i << ": " << xyz.size() << std::endl;
+		std::cerr << "number of points in scan " << i << ": "
+			  << xyz.size() << std::endl;
 	}
 #ifndef _MSC_VER
 	clock_gettime(CLOCK_MONOTONIC, &after);
@@ -151,15 +173,19 @@ int main(int argc, char* argv[])
 #ifndef _MSC_VER
 	clock_gettime(CLOCK_MONOTONIC, &before);
 #endif
-	std::unordered_map<struct voxel, std::set<size_t>> voxel_occupied_by_slice;
+	std::unordered_map<struct voxel, std::set<size_t>>
+	    voxel_occupied_by_slice;
 	std::cerr << "0 %\r";
 	std::cerr.flush();
 	size_t done = 0;
 	for (std::pair<size_t, DataXYZ> element : points_by_slice) {
 		for (size_t i = 0; i < element.second.size(); ++i) {
-			voxel_occupied_by_slice[voxel_of_point(element.second[i],voxel_size)].insert(element.first);
+			voxel_occupied_by_slice
+			    [voxel_of_point(element.second[i], voxel_size)]
+				.insert(element.first);
 		}
-		std::cerr << ((done+1)*100.0f/points_by_slice.size()) << " %\r";
+		std::cerr << ((done + 1) * 100.0f / points_by_slice.size())
+			  << " %\r";
 		std::cerr.flush();
 		done += 1;
 	}
@@ -176,7 +202,8 @@ int main(int argc, char* argv[])
 		exit(1);
 	}
 
-	std::cerr << "occupied voxels: " << voxel_occupied_by_slice.size() << std::endl;
+	std::cerr << "occupied voxels: " << voxel_occupied_by_slice.size()
+		  << std::endl;
 
 	if (maxrange_method != NONE) {
 		std::cerr << "compute maxranges and walk voxels" << std::endl;
@@ -195,8 +222,9 @@ int main(int argc, char* argv[])
 	std::set<struct voxel> free_voxels;
 
 	/*
-	 *  we need a separate variable to keep track of how many scans were done
-	 *  because they are not done in order when execution happens in parallel
+	 *  we need a separate variable to keep track of how many scans were
+	 * done because they are not done in order when execution happens in
+	 * parallel
 	 */
 	done = 0;
 #ifdef _OPENMP
@@ -205,40 +233,50 @@ int main(int argc, char* argv[])
 #endif
 	for (
 #if defined(_MSC_VER) and defined(_OPENMP)
-		// MSVC only supports OpenMP 2.5 where the counter must be signed
-		// There is also no ssize_t on non-POSIX platforms but sizeof(long) == sizeof(void*)
-		long
+	    // MSVC only supports OpenMP 2.5 where the counter must be signed
+	    // There is also no ssize_t on non-POSIX platforms but sizeof(long)
+	    // == sizeof(void*)
+	    long
 #else
-		size_t
+	    size_t
 #endif
-		idx = 0; idx < scanorder.size(); ++idx) {
+		idx = 0;
+	    idx < scanorder.size(); ++idx) {
 		size_t i = scanorder[idx];
 		// FIXME: this is just wasting memory
-		std::vector<double> maxranges(points_by_slice[i].size(), std::numeric_limits<double>::infinity());
+		std::vector<double> maxranges(
+		    points_by_slice[i].size(),
+		    std::numeric_limits<double>::infinity());
 		std::vector<size_t> reduced;
 
 		if (maxrange_method == NORMALS) {
-			if (normal_method == KNEAREST_GLOBAL || normal_method == RANGE_GLOBAL) {
+			if (normal_method == KNEAREST_GLOBAL ||
+			    normal_method == RANGE_GLOBAL) {
 				exit(1);
 			}
-			std::cerr << "building spherical quad tree" << std::endl;
+			std::cerr << "building spherical quad tree"
+				  << std::endl;
 			QuadTree qtree = QuadTree(orig_points_by_slice[i]);
-			compute_maxranges(maxranges, qtree, orig_points_by_slice[i], normal_method, voxel_diagonal, fuzz);
+			compute_maxranges(maxranges, qtree,
+					  orig_points_by_slice[i],
+					  normal_method, voxel_diagonal, fuzz);
 			if (reduce.first != 0 && reduce.second != 0) {
 				std::cerr << "reducing points..." << std::endl;
 				reduced = qtree.reduce(
-						reduce.second, // angular diameter theta
-						reduce.first   // number of points
+				    reduce.second, // angular diameter theta
+				    reduce.first   // number of points
 				);
 			} else {
-				for (size_t j = 0; j < points_by_slice[i].size(); ++j) {
+				for (size_t j = 0;
+				     j < points_by_slice[i].size(); ++j) {
 					reduced.push_back(j);
 				}
 			}
 		} else if (maxrange_method == ONENEAREST) {
 			exit(1);
 		}
-		// FIXME: fuzz also needs to be applied with maxrange_method == NONE
+		// FIXME: fuzz also needs to be applied with maxrange_method ==
+		// NONE
 
 		if (write_maxranges) {
 			std::cerr << "write maxranges" << std::endl;
@@ -246,16 +284,20 @@ int main(int argc, char* argv[])
 		}
 
 		std::set<struct voxel> free;
-		std::cerr << "shooting rays to " << reduced.size() << " points" << std::endl;
+		std::cerr << "shooting rays to " << reduced.size() << " points"
+			  << std::endl;
 		for (size_t j : reduced) {
-			double p[3] = {points_by_slice[i][j][0], points_by_slice[i][j][1], points_by_slice[i][j][2]};
-			if (maxranges[j] != std::numeric_limits<double>::infinity()) {
+			double p[3] = {points_by_slice[i][j][0],
+				       points_by_slice[i][j][1],
+				       points_by_slice[i][j][2]};
+			if (maxranges[j] !=
+			    std::numeric_limits<double>::infinity()) {
 				double maxrange = maxranges[j];
 				double r = Len(orig_points_by_slice[i][j]);
-				double factor = maxrange/r;
-				p[0] = orig_points_by_slice[i][j][0]*factor;
-				p[1] = orig_points_by_slice[i][j][1]*factor;
-				p[2] = orig_points_by_slice[i][j][2]*factor;
+				double factor = maxrange / r;
+				p[0] = orig_points_by_slice[i][j][0] * factor;
+				p[1] = orig_points_by_slice[i][j][1] * factor;
+				p[2] = orig_points_by_slice[i][j][2] * factor;
 				transform3(std::get<2>(trajectory[i]), p);
 			}
 			struct visitor_args data = {};
@@ -263,13 +305,8 @@ int main(int argc, char* argv[])
 			data.voxel_occupied_by_slice = &voxel_occupied_by_slice;
 			data.current_slice = i;
 			data.diff = diff;
-			walk_voxels(
-					std::get<0>(trajectory[i]),
-					p,
-					voxel_size,
-					visitor,
-					&data
-					);
+			walk_voxels(std::get<0>(trajectory[i]), p, voxel_size,
+				    visitor, &data);
 		}
 #ifdef _OPENMP
 #pragma omp critical
@@ -278,7 +315,8 @@ int main(int argc, char* argv[])
 			for (struct voxel v : free) {
 				free_voxels.insert(v);
 			}
-			std::cerr << ((done+1)*100.0f/scanorder.size()) << " %\r";
+			std::cerr << ((done + 1) * 100.0f / scanorder.size())
+				  << " %\r";
 			std::cerr.flush();
 			done += 1;
 		}
@@ -291,7 +329,10 @@ int main(int argc, char* argv[])
 	std::cerr << "took: " << elapsed << " seconds" << std::endl;
 #endif
 
-	std::cerr << "number of freed voxels: " << free_voxels.size() << " (" << (free_voxels.size()*100.0f/voxel_occupied_by_slice.size()) << "% of occupied voxels)" << std::endl;
+	std::cerr << "number of freed voxels: " << free_voxels.size() << " ("
+		  << (free_voxels.size() * 100.0f /
+		      voxel_occupied_by_slice.size())
+		  << "% of occupied voxels)" << std::endl;
 
 	if (cluster_size > 1) {
 		std::cerr << "clustering voxels" << std::endl;
@@ -299,20 +340,31 @@ int main(int argc, char* argv[])
 		clock_gettime(CLOCK_MONOTONIC, &before);
 #endif
 		std::unordered_map<struct voxel, size_t> voxel_to_cluster;
-		std::unordered_map<size_t, std::set<struct voxel>> cluster_to_voxel;
+		std::unordered_map<size_t, std::set<struct voxel>>
+		    cluster_to_voxel;
 		size_t i = 0;
 		for (const struct voxel v : free_voxels) {
 			std::set<size_t> neighbor_clusters;
 			int vradius = 1;
-			for (int i = 0-vradius; i <= vradius; ++i) {
-				for (int j = 0-vradius; j <= vradius; ++j) {
-					for (int k = 0-vradius; k <= vradius; ++k) {
-						if (i == 0 && j == 0 && k == 0) {
+			for (int i = 0 - vradius; i <= vradius; ++i) {
+				for (int j = 0 - vradius; j <= vradius; ++j) {
+					for (int k = 0 - vradius; k <= vradius;
+					     ++k) {
+						if (i == 0 && j == 0 &&
+						    k == 0) {
 							continue;
 						}
-						std::unordered_map<struct voxel, size_t>::iterator it2 = voxel_to_cluster.find(voxel(v.x+i, v.y+j, v.z+k));
-						if (it2 != voxel_to_cluster.end()) {
-							neighbor_clusters.insert(it2->second);
+						std::unordered_map<
+						    struct voxel,
+						    size_t>::iterator it2 =
+						    voxel_to_cluster.find(
+							voxel(v.x + i, v.y + j,
+							      v.z + k));
+						if (it2 !=
+						    voxel_to_cluster.end()) {
+							neighbor_clusters
+							    .insert(
+								it2->second);
 						}
 					}
 				}
@@ -335,7 +387,8 @@ int main(int argc, char* argv[])
 				if (cluster == mincluster) {
 					continue;
 				}
-				for (struct voxel v2 : cluster_to_voxel[cluster]) {
+				for (struct voxel v2 :
+				     cluster_to_voxel[cluster]) {
 					voxel_to_cluster[v2] = mincluster;
 					cluster_to_voxel[mincluster].insert(v2);
 				}
@@ -345,7 +398,8 @@ int main(int argc, char* argv[])
 			cluster_to_voxel[mincluster].insert(v);
 			i += 1;
 		}
-		for (std::pair<size_t, std::set<struct voxel>> p : cluster_to_voxel) {
+		for (std::pair<size_t, std::set<struct voxel>> p :
+		     cluster_to_voxel) {
 			if (p.second.size() >= cluster_size) {
 				continue;
 			}
@@ -353,7 +407,8 @@ int main(int argc, char* argv[])
 				free_voxels.erase(voxel);
 			}
 		}
-		std::cerr << "number of free voxels after clustering: " << free_voxels.size() << std::endl;
+		std::cerr << "number of free voxels after clustering: "
+			  << free_voxels.size() << std::endl;
 #ifndef _MSC_VER
 		clock_gettime(CLOCK_MONOTONIC, &after);
 		elapsed = (after.tv_sec - before.tv_sec);
@@ -371,27 +426,39 @@ int main(int argc, char* argv[])
 		for (struct voxel v : free_voxels) {
 			std::set<struct voxel> neighbor_voxels;
 			int vradius = 2;
-			for (int i = 0-vradius; i <= vradius; ++i) {
-				for (int j = 0-vradius; j <= vradius; ++j) {
-					for (int k = 0-vradius; k <= vradius; ++k) {
-						if (i == 0 && j == 0 && k == 0) {
+			for (int i = 0 - vradius; i <= vradius; ++i) {
+				for (int j = 0 - vradius; j <= vradius; ++j) {
+					for (int k = 0 - vradius; k <= vradius;
+					     ++k) {
+						if (i == 0 && j == 0 &&
+						    k == 0) {
 							continue;
 						}
-						struct voxel neighbor = voxel(v.x+i, v.y+j, v.z+k);
-						if (free_voxels.find(neighbor) != free_voxels.end()) {
+						struct voxel neighbor = voxel(
+						    v.x + i, v.y + j, v.z + k);
+						if (free_voxels.find(
+							neighbor) !=
+						    free_voxels.end()) {
 							continue;
 						}
-						if (voxel_occupied_by_slice.find(neighbor) == voxel_occupied_by_slice.end()) {
+						if (voxel_occupied_by_slice
+							.find(neighbor) ==
+						    voxel_occupied_by_slice
+							.end()) {
 							continue;
 						}
-						for (size_t num : voxel_occupied_by_slice[v]) {
-							half_voxels[neighbor].insert(num);
+						for (size_t num :
+						     voxel_occupied_by_slice
+							 [v]) {
+							half_voxels[neighbor]
+							    .insert(num);
 						}
 					}
 				}
 			}
 		}
-		std::cerr << "number of half-free voxels: " << half_voxels.size() << std::endl;
+		std::cerr << "number of half-free voxels: "
+			  << half_voxels.size() << std::endl;
 #ifndef _MSC_VER
 		clock_gettime(CLOCK_MONOTONIC, &after);
 		elapsed = (after.tv_sec - before.tv_sec);
@@ -454,48 +521,51 @@ int main(int argc, char* argv[])
 	 */
 	std::string outdir = dir + "/pplremover";
 	boost::filesystem::create_directory(outdir);
-	FILE *out_static = fopen((outdir+"/scan000.3d").c_str(), "wb");
-	FILE *out_dynamic = fopen((outdir+"/scan001.3d").c_str(), "wb");
+	FILE *out_static = fopen((outdir + "/scan000.3d").c_str(), "wb");
+	FILE *out_dynamic = fopen((outdir + "/scan001.3d").c_str(), "wb");
 	done = 0;
 	std::cerr << "0 %\r";
 	std::cerr.flush();
 	for (size_t i : scanorder) {
-		std::unordered_map<size_t, DataReflectance>::const_iterator refl_it =
-			reflectances_by_slice.find(i);
+		std::unordered_map<size_t, DataReflectance>::const_iterator
+		    refl_it = reflectances_by_slice.find(i);
 		std::unordered_map<size_t, DataRGB>::const_iterator rgb_it =
-			rgb_by_slice.find(i);
+		    rgb_by_slice.find(i);
 		for (size_t j = 0; j < points_by_slice[i].size(); ++j) {
 			FILE *out;
-			struct voxel voxel = voxel_of_point(points_by_slice[i][j],voxel_size);
-			if (free_voxels.find(voxel) != free_voxels.end()
-					|| (half_voxels.find(voxel) != half_voxels.end() && half_voxels[voxel].find(i) != half_voxels[voxel].end())) {
+			struct voxel voxel =
+			    voxel_of_point(points_by_slice[i][j], voxel_size);
+			if (free_voxels.find(voxel) != free_voxels.end() ||
+			    (half_voxels.find(voxel) != half_voxels.end() &&
+			     half_voxels[voxel].find(i) !=
+				 half_voxels[voxel].end())) {
 				out = out_dynamic;
 			} else {
 				out = out_static;
 			}
-			// we print the mantissa with 13 hexadecimal digits because the
-			// mantissa for double precision is 52 bits long which is 6.5
-			// bytes and thus 13 hexadecimal digits
+			// we print the mantissa with 13 hexadecimal digits
+			// because the mantissa for double precision is 52 bits
+			// long which is 6.5 bytes and thus 13 hexadecimal
+			// digits
 			//
 			// According to
 			// http://pubs.opengroup.org/onlinepubs/000095399/functions/printf.html
-			// the %a conversion specifier automatically picks the right
-			// precision to represent the value exactly.
-			fprintf(out, "%a %a %a",
-					points_by_slice[i][j][0],
-					points_by_slice[i][j][1],
-					points_by_slice[i][j][2]);
+			// the %a conversion specifier automatically picks the
+			// right precision to represent the value exactly.
+			fprintf(out, "%a %a %a", points_by_slice[i][j][0],
+				points_by_slice[i][j][1],
+				points_by_slice[i][j][2]);
 			if (refl_it != reflectances_by_slice.end()) {
 				fprintf(out, " %a", refl_it->second[j]);
 			}
 			if (rgb_it != rgb_by_slice.end()) {
-				// FIXME: rgb_it->second[j] is a RGB char array not a single
-				// value
+				// FIXME: rgb_it->second[j] is a RGB char array
+				// not a single value
 				fprintf(out, " %a", rgb_it->second[j]);
 			}
 			fprintf(out, "\n");
 		}
-		std::cerr << ((done+1)*100.0f/scanorder.size()) << " %\r";
+		std::cerr << ((done + 1) * 100.0f / scanorder.size()) << " %\r";
 		std::cerr.flush();
 		done += 1;
 	}
@@ -503,10 +573,10 @@ int main(int argc, char* argv[])
 	fclose(out_static);
 	fclose(out_dynamic);
 
-	FILE *pose_static = fopen((outdir+"/scan000.pose").c_str(), "wb");
+	FILE *pose_static = fopen((outdir + "/scan000.pose").c_str(), "wb");
 	fprintf(pose_static, "0 0 0\n0 0 0\n");
 	fclose(pose_static);
-	FILE *pose_dynamic = fopen((outdir+"/scan001.pose").c_str(), "wb");
+	FILE *pose_dynamic = fopen((outdir + "/scan001.pose").c_str(), "wb");
 	fprintf(pose_dynamic, "0 0 0\n0 0 0\n");
 	fclose(pose_dynamic);
 
@@ -520,10 +590,11 @@ int main(int argc, char* argv[])
 	boost::filesystem::create_directory(staticdir);
 	for (std::pair<size_t, DataXYZ> element : points_by_slice) {
 		size_t i = element.first;
-		std::unordered_map<size_t, DataReflectance>::const_iterator refl_it =
-			reflectances_by_slice.find(i);
+		std::unordered_map<size_t, DataReflectance>::const_iterator
+		    refl_it = reflectances_by_slice.find(i);
 		std::ostringstream out;
-		out << staticdir << "/scan" << std::setw(3) << std::setfill('0') << i << ".3d";
+		out << staticdir << "/scan" << std::setw(3) << std::setfill('0')
+		    << i << ".3d";
 		FILE *out_static = fopen(out.str().c_str(), "wb");
 		if (out_static == NULL) {
 			std::cerr << "cannot open" << out.str() << std::endl;
@@ -535,40 +606,46 @@ int main(int argc, char* argv[])
 			if (refl_it != reflectances_by_slice.end()) {
 				refl = refl_it->second[j];
 			}
-			struct voxel voxel = voxel_of_point(element.second[j],voxel_size);
-			if (free_voxels.find(voxel) == free_voxels.end()
-					&& (half_voxels.find(voxel) == half_voxels.end() || half_voxels[voxel].find(i) == half_voxels[voxel].end())) {
+			struct voxel voxel =
+			    voxel_of_point(element.second[j], voxel_size);
+			if (free_voxels.find(voxel) == free_voxels.end() &&
+			    (half_voxels.find(voxel) == half_voxels.end() ||
+			     half_voxels[voxel].find(i) ==
+				 half_voxels[voxel].end())) {
 				ret = fprintf(out_static, "%a %a %a %a\n",
-						orig_points_by_slice[i][j][0],
-						orig_points_by_slice[i][j][1],
-						orig_points_by_slice[i][j][2],
-						//0.0f
-						refl
-						);
+					      orig_points_by_slice[i][j][0],
+					      orig_points_by_slice[i][j][1],
+					      orig_points_by_slice[i][j][2],
+					      // 0.0f
+					      refl);
 			}
 			if (ret < 0) {
-				std::cerr << "failed to write to " << out.str() << std::endl;
+				std::cerr << "failed to write to " << out.str()
+					  << std::endl;
 				exit(1);
 			}
 		}
 		fclose(out_static);
 		std::ostringstream out_pose;
-		out_pose << staticdir << "/scan" << std::setw(3) << std::setfill('0') << i << ".pose";
+		out_pose << staticdir << "/scan" << std::setw(3)
+			 << std::setfill('0') << i << ".pose";
 		FILE *pose = fopen(out_pose.str().c_str(), "wb");
-		int ret = fprintf(pose, "%.17f %.17f %.17f\n%.17f %.17f %.17f\n",
-				std::get<0>(trajectory[i])[0],
-				std::get<0>(trajectory[i])[1],
-				std::get<0>(trajectory[i])[2],
-				std::get<1>(trajectory[i])[0]*180/M_PI,
-				std::get<1>(trajectory[i])[1]*180/M_PI,
-				std::get<1>(trajectory[i])[2]*180/M_PI
-				);
+		int ret =
+		    fprintf(pose, "%.17f %.17f %.17f\n%.17f %.17f %.17f\n",
+			    std::get<0>(trajectory[i])[0],
+			    std::get<0>(trajectory[i])[1],
+			    std::get<0>(trajectory[i])[2],
+			    std::get<1>(trajectory[i])[0] * 180 / M_PI,
+			    std::get<1>(trajectory[i])[1] * 180 / M_PI,
+			    std::get<1>(trajectory[i])[2] * 180 / M_PI);
 		if (ret < 0) {
-			std::cerr << "failed to write to " << out_pose.str() << std::endl;
+			std::cerr << "failed to write to " << out_pose.str()
+				  << std::endl;
 			exit(1);
 		}
 		fclose(pose);
-		std::cerr << ((done+1)*100.0f/points_by_slice.size()) << " %\r";
+		std::cerr << ((done + 1) * 100.0f / points_by_slice.size())
+			  << " %\r";
 		std::cerr.flush();
 		done += 1;
 	}
@@ -585,7 +662,8 @@ int main(int argc, char* argv[])
 	boost::filesystem::create_directory(maskdir);
 	for (std::pair<size_t, DataXYZ> element : points_by_slice) {
 		std::ostringstream out;
-		out << maskdir << "/scan" << std::setw(3) << std::setfill('0') << element.first << ".mask";
+		out << maskdir << "/scan" << std::setw(3) << std::setfill('0')
+		    << element.first << ".mask";
 		FILE *out_mask = fopen(out.str().c_str(), "wb");
 		if (out_mask == NULL) {
 			std::cerr << "cannot open" << out.str() << std::endl;
@@ -593,20 +671,25 @@ int main(int argc, char* argv[])
 		}
 		for (size_t i = 0; i < element.second.size(); ++i) {
 			int ret;
-			struct voxel voxel = voxel_of_point(element.second[i],voxel_size);
-			if (free_voxels.find(voxel) != free_voxels.end()
-					|| (half_voxels.find(voxel) != half_voxels.end() && half_voxels[voxel].find(element.first) != half_voxels[voxel].end())) {
+			struct voxel voxel =
+			    voxel_of_point(element.second[i], voxel_size);
+			if (free_voxels.find(voxel) != free_voxels.end() ||
+			    (half_voxels.find(voxel) != half_voxels.end() &&
+			     half_voxels[voxel].find(element.first) !=
+				 half_voxels[voxel].end())) {
 				ret = fprintf(out_mask, "1\n");
 			} else {
 				ret = fprintf(out_mask, "0\n");
 			}
 			if (ret < 0) {
-				std::cerr << "failed to write to " << out.str() << std::endl;
+				std::cerr << "failed to write to " << out.str()
+					  << std::endl;
 				exit(1);
 			}
 		}
 		fclose(out_mask);
-		std::cerr << ((done+1)*100.0f/points_by_slice.size()) << " %\r";
+		std::cerr << ((done + 1) * 100.0f / points_by_slice.size())
+			  << " %\r";
 		std::cerr.flush();
 		done += 1;
 	}
@@ -626,11 +709,13 @@ int main(int argc, char* argv[])
 #ifdef WITH_MMAP_SCAN
 		if (!cachedir.empty()) {
 			int ret;
-			ret = munmap(orig_points_by_slice[i].get_raw_pointer(), orig_points_by_slice[i].size());
+			ret = munmap(orig_points_by_slice[i].get_raw_pointer(),
+				     orig_points_by_slice[i].size());
 			if (ret != 0) {
 				throw std::runtime_error("cannot munmap");
 			}
-			// since we called unlink() before, this also deletes the file for good
+			// since we called unlink() before, this also deletes
+			// the file for good
 			ret = close(mmap_fds[i]);
 			if (ret != 0) {
 				throw std::runtime_error("cannot close");
