@@ -1,21 +1,21 @@
 #ifndef PEOPLEREMOVER_COMMON_H
 #define PEOPLEREMOVER_COMMON_H
 
-#include <unordered_map>
-#include <set>
 #include <boost/functional/hash.hpp>
 #include <boost/program_options.hpp>
-#include <limits>
-#include <iostream>
 #include <fstream>
+#include <iostream>
+#include <limits>
+#include <set>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <unordered_map>
 
 namespace po = boost::program_options;
 
 #include "scanio/scan_io.h"
-#include "slam6d/scan.h"
 #include "slam6d/normals.h"
+#include "slam6d/scan.h"
 #include "spherical_quadtree/spherical_quadtree.h"
 
 #ifdef _OPENMP
@@ -36,18 +36,19 @@ namespace io = boost::iostreams;
  * equally fast and use the same amount of memory but I just don't like the
  * verbosity of the syntax and how to access members via std::get<>(v)
  */
-struct voxel{
+struct voxel {
 	mutable ssize_t x;
 	mutable ssize_t y;
 	mutable ssize_t z;
 
 	voxel(const ssize_t X, const ssize_t Y, const ssize_t Z)
-		: x(X), y(Y), z(Z) {}
+	    : x(X), y(Y), z(Z)
+	{
+	}
 
-	voxel(const struct voxel &other)
-		: x(other.x), y(other.y), z(other.z) {}
+	voxel(const struct voxel &other) : x(other.x), y(other.y), z(other.z) {}
 
-	bool operator<(const struct voxel& rhs) const
+	bool operator<(const struct voxel &rhs) const
 	{
 		if (x != rhs.x) {
 			return x < rhs.x;
@@ -58,12 +59,12 @@ struct voxel{
 		return z < rhs.z;
 	}
 
-	bool operator==(const struct voxel& rhs) const
+	bool operator==(const struct voxel &rhs) const
 	{
 		return x == rhs.x && y == rhs.y && z == rhs.z;
 	}
 
-	bool operator!=(const struct voxel& rhs) const
+	bool operator!=(const struct voxel &rhs) const
 	{
 		return x != rhs.x || y != rhs.y || z != rhs.z;
 	}
@@ -71,11 +72,10 @@ struct voxel{
 
 namespace std
 {
-	template<> struct hash<struct voxel>
-	{
-		std::size_t operator()(struct voxel const& t) const;
-	};
+template <> struct hash<struct voxel> {
+	std::size_t operator()(struct voxel const &t) const;
 };
+}; // namespace std
 
 ssize_t py_div(double a, double b);
 
@@ -85,57 +85,55 @@ struct voxel voxel_of_point(const double *p, double voxel_size);
 
 // FIXME: test the runtime if empty_voxels and voxel_occupied_by_slice are not
 // pointers
-struct visitor_args
-{
+struct visitor_args {
 	std::set<struct voxel> *empty_voxels;
-	std::unordered_map<struct voxel, std::set<size_t>> *voxel_occupied_by_slice;
+	std::unordered_map<struct voxel, std::set<size_t>>
+	    *voxel_occupied_by_slice;
 	size_t current_slice;
 	size_t diff;
 };
 
 bool visitor(struct voxel voxel, void *data);
 
-void walk_voxels(
-		const double * const start_pos,
-		const double * const end_pos,
-		const double voxel_size,
-		bool (*visitor)(struct voxel, void *),
-		void *data
-		);
+void walk_voxels(const double *const start_pos, const double *const end_pos,
+		 const double voxel_size, bool (*visitor)(struct voxel, void *),
+		 void *data);
 
-void validate(boost::any& v, const std::vector<std::string>& values, IOType* target_type, int);
+void validate(boost::any &v, const std::vector<std::string> &values,
+	      IOType *target_type, int);
 
-enum maxrange_method_t {NONE, NORMALS, ONENEAREST};
+enum maxrange_method_t { NONE, NORMALS, ONENEAREST };
 
-void validate(boost::any& v, const std::vector<std::string>& values, maxrange_method_t* target_type, int);
+void validate(boost::any &v, const std::vector<std::string> &values,
+	      maxrange_method_t *target_type, int);
 
-enum normal_method_t {KNEAREST, RANGE, ANGLE, KNEAREST_GLOBAL, RANGE_GLOBAL};
+enum normal_method_t { KNEAREST, RANGE, ANGLE, KNEAREST_GLOBAL, RANGE_GLOBAL };
 
-void validate(boost::any& v, const std::vector<std::string>& values, normal_method_t* target_type, int);
+void validate(boost::any &v, const std::vector<std::string> &values,
+	      normal_method_t *target_type, int);
 
-void parse_cmdline(int argc, char* argv[], ssize_t &start, ssize_t &end, IOType &format, double &fuzz,
-	double &voxel_size, size_t &diff, size_t &normal_knearest,
-	size_t &cluster_size, normal_method_t &normal_method,
-	maxrange_method_t &maxrange_method, std::string &maskdir,
-	std::string &staticdir, std::string &dir, bool &no_subvoxel_accuracy,
-	bool &write_maxranges, int &jobs, std::pair<size_t, double> &reduce
+void parse_cmdline(int argc, char *argv[], ssize_t &start, ssize_t &end,
+		   IOType &format, double &fuzz, double &voxel_size,
+		   size_t &diff, size_t &normal_knearest, size_t &cluster_size,
+		   normal_method_t &normal_method,
+		   maxrange_method_t &maxrange_method, std::string &maskdir,
+		   std::string &staticdir, std::string &dir,
+		   bool &no_subvoxel_accuracy, bool &write_maxranges, int &jobs,
+		   std::pair<size_t, double> &reduce
 #ifdef WITH_MMAP_SCAN
-	, std::string &cachedir
+		   ,
+		   std::string &cachedir
 #endif
-	);
+);
+
+void compute_maxranges(std::vector<double> &maxranges, const QuadTree &qtree,
+		       const DataXYZ &orig_points_by_slice,
+		       const normal_method_t normal_method,
+		       const double voxel_diagonal, const double fuzz);
 
 void compute_maxranges(std::vector<double> &maxranges,
-		const QuadTree &qtree,
-		const DataXYZ &orig_points_by_slice,
-				const normal_method_t normal_method,
-		const double voxel_diagonal,
-		const double fuzz
-		);
-
-void compute_maxranges(std::vector<double> &maxranges, const DataXYZ &orig_points_by_slice,
-				const normal_method_t normal_method,
-		const double voxel_diagonal,
-		const double fuzz
-		);
+		       const DataXYZ &orig_points_by_slice,
+		       const normal_method_t normal_method,
+		       const double voxel_diagonal, const double fuzz);
 
 #endif
