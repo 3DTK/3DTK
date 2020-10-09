@@ -22,6 +22,7 @@
 #ifdef __linux__
 	#include <linux/input.h>
 #endif
+#ifndef __APPLE__
 #ifdef SPACEMOUSE
     #include "show/show_gl.h"
     #include <sys/types.h>
@@ -32,9 +33,9 @@
     #include <stdlib.h>
     #include <stdint.h>
     #include <thread>
-#ifndef __APPLE__
     #include <linux/input.h>
     #include <spnav.h>
+#endif
 
 int spacenavHandler(){
     int fixRoation = 0;
@@ -132,7 +133,6 @@ int spacenavHandler(){
 #endif
 	return 0;
 }
-    #endif
 #endif
 
 void saveImageAndExit(int dummy)
@@ -178,7 +178,7 @@ int main(int argc, char **argv)
   else if (takescreenshot) {
     glutTimerFunc(0, &saveImageAndExit, 0);
   }
-#if  defined(SPACEMOUSE) && !defined(__APPLE__)
+#ifndef __APPLE__
     std::thread t1(spacenavHandler);
 #endif
 
