@@ -737,27 +737,23 @@ void setup_camera() {
                 ups_vectorZ.at(path_iterator).y-path_vectorZ.at(path_iterator).y);
     }
   } else {
+    double t[3] = {0,0,0};
+    double mat[16];
+    QuatToMatrix4((const double *)quat, t, mat);
+    glMultMatrixd(mat);
+
+    glGetFloatv(GL_MODELVIEW_MATRIX, view_rotate_button);
+    // rotate the camera
+    double rPT[3];
+    Matrix4ToEuler(mat, rPT);
+    mouseRotX = deg(rPT[0]);
+    mouseRotY = deg(rPT[1]);
+    mouseRotZ = deg(rPT[2]);
+
     if (cameraNavMouseMode == 1) {
-      glRotated( mouseRotZ, 0, 0, 1);
-      glRotated( mouseRotX, 1, 0, 0);
-      glRotated( mouseRotY, 0, 1, 0);
-      glGetFloatv(GL_MODELVIEW_MATRIX, view_rotate_button);
       update_view_rotate(0);
-    } else {
-      double t[3] = {0,0,0};
-      double mat[16];
-      QuatToMatrix4((const double *)quat, t, mat);
-      glMultMatrixd(mat);
-
-      glGetFloatv(GL_MODELVIEW_MATRIX, view_rotate_button);
-      // rotate the camera
-      double rPT[3];
-      Matrix4ToEuler(mat, rPT);
-      mouseRotX = deg(rPT[0]);
-      mouseRotY = deg(rPT[1]);
-      mouseRotZ = deg(rPT[2]);
-
     }
+
     if (!nogui && !takescreenshot)
       updateControls();
 
@@ -1361,11 +1357,6 @@ void selectPoints(int x, int y) {
     glLoadIdentity();
 
     // do the model-transformation
-  if (cameraNavMouseMode == 1) {
-    glRotated( mouseRotX, 1, 0, 0);
-    glRotated( mouseRotY, 0, 1, 0);
-    glRotated( mouseRotZ, 0, 0, 1);
-  } else {
     double t[3] = {0,0,0};
     double mat[16];
     QuatToMatrix4((const double *)quat, t, mat);
@@ -1377,8 +1368,11 @@ void selectPoints(int x, int y) {
     mouseRotX = deg(rPT[0]);
     mouseRotY = deg(rPT[1]);
     mouseRotZ = deg(rPT[2]);
-  }
-  updateControls();
+
+  //if (cameraNavMouseMode == 1) {
+  //}
+
+    updateControls();
     glTranslated(X, Y, Z);       // move camera
 
     static sfloat *sp2 = 0;
@@ -1488,8 +1482,22 @@ void moveCamera(double x, double y, double z,
   mouseRotY -= roty;
   mouseRotZ -= rotz;
 
-  if (mouseRotX < -90) mouseRotX=-90;
-  else if (mouseRotX > 90) mouseRotX=90;
+  double q_tmp[4];
+  double euler[3]{rad(mouseRotX),rad(mouseRotY),rad(mouseRotZ)};
+  RPYEulerQuat(euler,q_tmp);
+
+  double q_diff[4];
+  double euler_diff[3]{rad(rotx),rad(-roty),rad(-rotz)};
+  RPYEulerQuat(euler_diff,q_diff);
+  double q_tmp3[4];
+  QMult(q_diff,quat,q_tmp3);
+  quat[0] = q_tmp3[0];
+  quat[1] = q_tmp3[1];
+  quat[2] = q_tmp3[2];
+  quat[3] = q_tmp3[3];
+
+  if (mouseRotX < -360) mouseRotX += 360;
+  else if (mouseRotX > 360) mouseRotX -= 360;
   if (mouseRotY > 360) mouseRotY-=360;
   else if (mouseRotY < 0) mouseRotY+=360;
   if (mouseRotZ > 360) mouseRotZ-=360;
