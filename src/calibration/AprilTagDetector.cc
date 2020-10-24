@@ -9,9 +9,10 @@
 
 namespace calibration {
 
-AprilTagDetector::AprilTagDetector(std::vector<AprilTag::AprilTag3f> patternPoints, std::string tagFamily, float decimate, float blur, int hamming, bool refineEdges, int threads, bool debug) :
+AprilTagDetector::AprilTagDetector(std::vector<AprilTag::AprilTag3f> patternPoints, std::string tagFamily, float decimate, float blur, int hamming, bool refineEdges, bool cornerSubpixel, int threads, bool debug) :
     _patternPoints(patternPoints),
-    _tagFamilyName(tagFamily)
+    _tagFamilyName(tagFamily),
+    _cornerSubpixel(cornerSubpixel)
 {
     //set tag family
     if (_tagFamilyName.compare("tag36h11") == 0) {
@@ -75,10 +76,27 @@ bool AprilTagDetector::detect(const cv::Mat& image)
         apriltag_detection_t *det;
         zarray_get(detections, i, &det);
         AprilTag::AprilTag2f aprilTag2f = AprilTag::AprilTag2f(det->id);
-        aprilTag2f.point4 = cv::Point2f((float) ((det->p)[0][0]), (float) ((det->p)[0][1]));
-        aprilTag2f.point3 = cv::Point2f((float) ((det->p)[1][0]), (float) ((det->p)[1][1]));
-        aprilTag2f.point2 = cv::Point2f((float) ((det->p)[2][0]), (float) ((det->p)[2][1]));
-        aprilTag2f.point1 = cv::Point2f((float) ((det->p)[3][0]), (float) ((det->p)[3][1]));
+        if (_cornerSubpixel) {
+            std::vector<cv::Point2f> tagPoints;
+            tagPoints.push_back(cv::Point2f((float) ((det->p)[0][0]), (float) ((det->p)[0][1])));
+            tagPoints.push_back(cv::Point2f((float) ((det->p)[1][0]), (float) ((det->p)[1][1])));
+            tagPoints.push_back(cv::Point2f((float) ((det->p)[2][0]), (float) ((det->p)[2][1])));
+            tagPoints.push_back(cv::Point2f((float) ((det->p)[3][0]), (float) ((det->p)[3][1])));
+
+            cornerSubPix(gray, tagPoints, cv::Size(11, 11), cv::Size(-1, -1),
+                     cv::TermCriteria(cv::TermCriteria::EPS + cv::TermCriteria::MAX_ITER, 30, 0.1));
+
+            aprilTag2f.point4 = tagPoints.at(0);
+            aprilTag2f.point3 = tagPoints.at(1);
+            aprilTag2f.point2 = tagPoints.at(2);
+            aprilTag2f.point1 = tagPoints.at(3);
+        } else {
+            aprilTag2f.point4 = cv::Point2f((float) ((det->p)[0][0]), (float) ((det->p)[0][1]));
+            aprilTag2f.point3 = cv::Point2f((float) ((det->p)[1][0]), (float) ((det->p)[1][1]));
+            aprilTag2f.point2 = cv::Point2f((float) ((det->p)[2][0]), (float) ((det->p)[2][1]));
+            aprilTag2f.point1 = cv::Point2f((float) ((det->p)[3][0]), (float) ((det->p)[3][1]));
+        }
+
         _tags.push_back(aprilTag2f);
         apriltag_detection_destroy(det);
     }
