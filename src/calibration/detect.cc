@@ -52,6 +52,7 @@ int main(int argc, const char *argv[]) {
     float blur;
     int hamming;
     bool refineEdges;
+    bool cornerSubpixel;
     int threads;
     bool debug;
     int x;
@@ -91,6 +92,7 @@ int main(int argc, const char *argv[]) {
             ("blur,b", po::value<float>(&blur)->default_value(0.0), "apply low-pass blur to input; negative sharpens")
             ("hamming,h", po::value<int>(&hamming)->default_value(0), "detect tags with up to this many bit errors")
             ("refine-edges", po::value<bool>(&refineEdges)->default_value(true), "spend more time trying to align edges of tags")
+            ("corner-subpixel", po::value<bool>(&cornerSubpixel)->default_value(false), "enable corner subpixel refinement for tags with chessboard style corners")
             ("threads,t", po::value<int>(&threads)->default_value(4), "set thread count for AprilTag detection")
             ("debug", po::value<bool>(&debug)->default_value(false), "enable debug output for AprilTag detector");
     chessboard.add_options()
@@ -164,7 +166,7 @@ int main(int argc, const char *argv[]) {
             return 1;
         }
 
-        detector = new calibration::AprilTagDetector(std::vector<AprilTag::AprilTag3f>(), tagFamily, decimate, blur, hamming, refineEdges, threads, debug);
+        detector = new calibration::AprilTagDetector(std::vector<AprilTag::AprilTag3f>(), tagFamily, decimate, blur, hamming, refineEdges, cornerSubpixel, threads, debug);
     } else if (vm["patterntype"].as<std::string>().compare("chessboard") == 0) {
         if (x <= 2 || y <= 2) {
             std::cerr << "Board size is invalid! use -- help for more information" << std::endl;
