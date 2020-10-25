@@ -39,7 +39,7 @@ bool ChessboardDetector::detect(const cv::Mat& image)
     bool found = false;
 
     if (_sectorBasedApproach) {
-#if CV_MAJOR_VERSION > 4
+#if CV_MAJOR_VERSION > 3
         found = findChessboardCornersSB(gray, _patternSize, _imagePoints, _flags | cv::CALIB_CB_ACCURACY);
 #endif
     } else {

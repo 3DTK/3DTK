@@ -1,7 +1,9 @@
 #ifndef CALIBRATION_ARUCODETECTOR_H
 #define CALIBRATION_ARUCODETECTOR_H
 
-#if CV_MAJOR_VERSION > 4
+#include "opencv2/core/version.hpp"
+
+#if CV_MAJOR_VERSION > 3
 
 #include "calibration/Detector.h"
 #include "calibration/AprilTag.h"
