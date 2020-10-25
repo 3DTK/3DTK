@@ -8,6 +8,7 @@
 #include "calibration/Detector.h"
 #include "calibration/AprilTagDetector.h"
 #include "calibration/ChessboardDetector.h"
+#include "calibration/CirclesGridDetector.h"
 
 #include <dirent.h>
 
@@ -61,6 +62,7 @@ int main(int argc, const char *argv[]) {
     bool normalizeImage;
     bool filterQuads;
     bool fastCheck;
+    bool sectorBasedApproach;
 
     // Declare supported options
     po::variables_map vm;
@@ -68,7 +70,7 @@ int main(int argc, const char *argv[]) {
     po::options_description input("Input options");
     po::options_description output("Output options");
     po::options_description apriltag("AprilTag options");
-    po::options_description chessboard("Chessboard options");
+    po::options_description chessboard("Chessboard and circles grid options");
     po::options_description hidden("Hidden options");
 
     generic.add_options()
@@ -77,8 +79,9 @@ int main(int argc, const char *argv[]) {
             ("input,i", po::value<std::string>(&inputPath)->required(), "input path with pictures");
     input.add_options()
             ("patterntype,p", po::value<std::string>(&patternType)->default_value("apriltag"),
-             "set the type of used pattern, default 'apriltag', allowed 'apriltag' or 'chessboard'")
+             "set the type of used pattern, default 'apriltag', allowed 'apriltag' or 'chessboard' or 'circlesgrid'")
             ("force", "run pattern detection even if a '.detections' file was found.")
+            ("visualize", "save images with detections.")
             ("extensions,e", po::value<std::vector<std::string> >(&extensions)->multitoken()->default_value(
                  std::vector<std::string> {".jpg", ".jpeg", ".jpe", ".png", ".tiff", ".tif", ".ppm", ".pgm", ".bmp"}),
              "filename extensions of input image files");
@@ -105,7 +108,9 @@ int main(int argc, const char *argv[]) {
             ("filter-quads", po::value<bool>(&filterQuads)->default_value(true),
              "use additional criteria (like contour area, perimeter, square-like shape) to filter out false quads")
             ("fast-check", po::value<bool>(&fastCheck)->default_value(false),
-             "run a fast check on the image that looks for chessboard corners, and shortcut the call if none is found");
+             "run a fast check on the image that looks for chessboard corners, and shortcut the call if none is found")
+            ("sector-based-approach", po::value<bool>(&sectorBasedApproach)->default_value(false),
+             "use sector based approach");
 
     po::options_description all;
     all.add(generic).add(hidden).add(input).add(output).add(apriltag).add(chessboard);
@@ -175,7 +180,16 @@ int main(int argc, const char *argv[]) {
             return -1;
         }
 
-        detector = new calibration::ChessboardDetector(cv::Size(x, y), -1, adaptiveThreshold, normalizeImage, filterQuads, fastCheck);
+        detector = new calibration::ChessboardDetector(cv::Size(x, y), 1, adaptiveThreshold, normalizeImage, filterQuads, fastCheck, sectorBasedApproach);
+    } else if (vm["patterntype"].as<std::string>().compare("circlesgrid") == 0) {
+        if (x < 2 || y < 2) {
+            std::cerr << "Board size is invalid! use -- help for more information" << std::endl;
+            std::cerr << "Both board size x and board size y of the circles grid should be bigger than 2!" << std::endl;
+            std::cout << cmdline_options << std::endl;
+            return -1;
+        }
+
+        detector = new calibration::CirclesGridDetector(cv::Size(x, y), 1, true);
     } else {
         std::cerr << "Patterntype is invalid! use -- help for more information" << std::endl;
         std::cout << cmdline_options << std::endl;
@@ -216,6 +230,13 @@ int main(int argc, const char *argv[]) {
             detector->writeDetectionsToFile(imageFile + ".detections");
             std::cout << "Time to detect: " << detector->getDetectionTimeMilliSec() << " ms" << std::endl;
             std::cout << "Found " << detector->getImagePoints().size() << " image points." << std::endl;
+
+            if (vm.count("visualize")) {
+                for (Point2f p : detector->getImagePoints()) {
+                    circle(image, p, 1, Scalar(0, 0, 255), 2);
+                }
+                cv::imwrite(imageFile + ".detections.png", image);
+            }
         } else {
             std::cout << "No pattern detected!" << std::endl;
         }

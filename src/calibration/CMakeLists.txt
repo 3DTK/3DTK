@@ -9,6 +9,7 @@ if (WITH_OPENCV AND WITH_EIGEN3)
       Chessboard.cc
       AprilTagDetector.cc
       ChessboardDetector.cc
+      CirclesGridDetector.cc
       PinholeModel.cc
       )
   add_library(calibration ${CALIBRATION_LIBRARY_SOURCES})

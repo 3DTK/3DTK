@@ -83,7 +83,7 @@ bool AprilTagDetector::detect(const cv::Mat& image)
             tagPoints.push_back(cv::Point2f((float) ((det->p)[2][0]), (float) ((det->p)[2][1])));
             tagPoints.push_back(cv::Point2f((float) ((det->p)[3][0]), (float) ((det->p)[3][1])));
 
-            cornerSubPix(gray, tagPoints, cv::Size(11, 11), cv::Size(-1, -1),
+            cornerSubPix(gray, tagPoints, cv::Size(8, 8), cv::Size(-1, -1),
                      cv::TermCriteria(cv::TermCriteria::EPS + cv::TermCriteria::MAX_ITER, 30, 0.1));
 
             aprilTag2f.point4 = tagPoints.at(0);
