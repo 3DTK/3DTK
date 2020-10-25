@@ -1,9 +1,9 @@
-#if CV_MAJOR_VERSION > 4
-
 #include "calibration/ArucoDetector.h"
 #include <chrono>
 #include <opencv2/opencv.hpp>
 #include <boost/filesystem.hpp>
+
+#if CV_MAJOR_VERSION > 3
 
 namespace calibration {
 
