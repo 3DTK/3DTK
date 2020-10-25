@@ -79,8 +79,13 @@ int main(int argc, const char *argv[]) {
     hidden.add_options()
             ("input,i", po::value<std::string>(&inputPath)->required(), "input path with pictures");
     input.add_options()
+#if CV_MAJOR_VERSION > 4
             ("patterntype,p", po::value<std::string>(&patternType)->default_value("apriltag"),
              "set the type of used pattern, default 'apriltag', allowed 'apriltag' or 'aruco' or 'chessboard' or 'circlesgrid'")
+#else
+            ("patterntype,p", po::value<std::string>(&patternType)->default_value("apriltag"),
+             "set the type of used pattern, default 'apriltag', allowed 'apriltag' or 'chessboard' or 'circlesgrid'")
+#endif
             ("force", "run pattern detection even if a '.detections' file was found.")
             ("visualize", "save images with detections.")
             ("extensions,e", po::value<std::vector<std::string> >(&extensions)->multitoken()->default_value(
@@ -110,8 +115,13 @@ int main(int argc, const char *argv[]) {
              "use additional criteria (like contour area, perimeter, square-like shape) to filter out false quads")
             ("fast-check", po::value<bool>(&fastCheck)->default_value(false),
              "run a fast check on the image that looks for chessboard corners, and shortcut the call if none is found")
+#if CV_MAJOR_VERSION > 4
             ("sector-based-approach", po::value<bool>(&sectorBasedApproach)->default_value(false),
              "use sector based approach");
+#else
+            ;
+            sectorBasedApproach = false;
+#endif
 
     po::options_description all;
     all.add(generic).add(hidden).add(input).add(output).add(apriltag).add(chessboard);
@@ -173,8 +183,10 @@ int main(int argc, const char *argv[]) {
         }
 
         detector = new calibration::AprilTagDetector(std::vector<AprilTag::AprilTag3f>(), tagFamily, decimate, blur, hamming, refineEdges, cornerSubpixel, threads, debug);
+#if CV_MAJOR_VERSION > 4
     } else if (vm["patterntype"].as<std::string>().compare("aruco") == 0) {
         detector = new calibration::ArucoDetector(std::vector<AprilTag::AprilTag3f>(), "DICT_APRILTAG_36h11");
+#endif
     } else if (vm["patterntype"].as<std::string>().compare("chessboard") == 0) {
         if (x <= 2 || y <= 2) {
             std::cerr << "Board size is invalid! use -- help for more information" << std::endl;
