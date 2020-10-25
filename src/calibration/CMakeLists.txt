@@ -8,6 +8,7 @@ if (WITH_OPENCV AND WITH_EIGEN3)
       AprilTag.cc
       Chessboard.cc
       AprilTagDetector.cc
+      ArucoDetector.cc
       ChessboardDetector.cc
       CirclesGridDetector.cc
       PinholeModel.cc
