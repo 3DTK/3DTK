@@ -7,6 +7,7 @@
 #include <boost/algorithm/string/predicate.hpp>
 #include "calibration/Detector.h"
 #include "calibration/AprilTagDetector.h"
+#include "calibration/ArucoDetector.h"
 #include "calibration/ChessboardDetector.h"
 #include "calibration/CirclesGridDetector.h"
 
@@ -79,7 +80,7 @@ int main(int argc, const char *argv[]) {
             ("input,i", po::value<std::string>(&inputPath)->required(), "input path with pictures");
     input.add_options()
             ("patterntype,p", po::value<std::string>(&patternType)->default_value("apriltag"),
-             "set the type of used pattern, default 'apriltag', allowed 'apriltag' or 'chessboard' or 'circlesgrid'")
+             "set the type of used pattern, default 'apriltag', allowed 'apriltag' or 'aruco' or 'chessboard' or 'circlesgrid'")
             ("force", "run pattern detection even if a '.detections' file was found.")
             ("visualize", "save images with detections.")
             ("extensions,e", po::value<std::vector<std::string> >(&extensions)->multitoken()->default_value(
@@ -172,6 +173,8 @@ int main(int argc, const char *argv[]) {
         }
 
         detector = new calibration::AprilTagDetector(std::vector<AprilTag::AprilTag3f>(), tagFamily, decimate, blur, hamming, refineEdges, cornerSubpixel, threads, debug);
+    } else if (vm["patterntype"].as<std::string>().compare("aruco") == 0) {
+        detector = new calibration::ArucoDetector(std::vector<AprilTag::AprilTag3f>(), "DICT_APRILTAG_36h11");
     } else if (vm["patterntype"].as<std::string>().compare("chessboard") == 0) {
         if (x <= 2 || y <= 2) {
             std::cerr << "Board size is invalid! use -- help for more information" << std::endl;
