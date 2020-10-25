@@ -1,6 +1,8 @@
 #ifndef CALIBRATION_ARUCODETECTOR_H
 #define CALIBRATION_ARUCODETECTOR_H
 
+#if CV_MAJOR_VERSION > 4
+
 #include "calibration/Detector.h"
 #include "calibration/AprilTag.h"
 #include <opencv2/opencv.hpp>
@@ -29,5 +31,7 @@ private:
 };
 
 } // namespace calibration
+
+#endif
 
 #endif // CALIBRATION_ARUCODETECTOR_H
