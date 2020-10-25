@@ -32,7 +32,11 @@ bool CirclesGridDetector::detect(const cv::Mat& image)
 
     auto start = std::chrono::high_resolution_clock::now();
 
-    bool found = findCirclesGrid(gray, _patternSize, _imagePoints, _flags | cv::CALIB_CB_CLUSTERING);
+    cv::SimpleBlobDetector::Params params;
+    params.filterByArea = false;
+    cv::Ptr<cv::FeatureDetector> blobDetector = cv::SimpleBlobDetector::create(params);
+
+    bool found = findCirclesGrid(gray, _patternSize, _imagePoints, _flags | cv::CALIB_CB_CLUSTERING, blobDetector);
 
     auto end = std::chrono::high_resolution_clock::now();
     _detectionTime = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
