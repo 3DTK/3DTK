@@ -10,7 +10,7 @@ namespace calibration
 class ChessboardDetector : public Detector
 {
 public:
-    ChessboardDetector(cv::Size patternSize, float squareSize = -1, bool adaptiveThreshold = true, bool normalizeImage = true, bool filterQuads = true, bool fastCheck = false);
+    ChessboardDetector(cv::Size patternSize, float squareSize = 1, bool adaptiveThreshold = true, bool normalizeImage = true, bool filterQuads = true, bool fastCheck = false, bool sectorBasedApproach = false);
 
 public:
     bool detect(const cv::Mat& image);
@@ -22,6 +22,7 @@ private:
     cv::Size _patternSize;
     float _squareSize;
     int _flags;
+    bool _sectorBasedApproach;
 };
 
 } // namespace calibration
