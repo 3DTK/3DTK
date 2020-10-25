@@ -1,3 +1,5 @@
+#if CV_MAJOR_VERSION > 4
+
 #include "calibration/ArucoDetector.h"
 #include <chrono>
 #include <opencv2/opencv.hpp>
@@ -106,3 +108,5 @@ void ArucoDetector::readDetectionsFromFile(const std::string& path)
 }
 
 } // namespace calibration
+
+#endif
