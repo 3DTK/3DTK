@@ -151,10 +151,8 @@ void writePointClouds(const string& outdir, double scale, double minDistance, do
     long numPoints = 0;
 
     string scanFilename = outdir + "/scan" + to_string(index,3) + ".3d";
+    FILE* scanFile = fopen(scanFilename.c_str(), "wb");
     cout << "Writing " << scanFilename << endl;
-
-    ofstream scanFile(scanFilename);
-    scanFile << fixed << setprecision(2);
 
     Eigen::Affine3d firstPose = tf2::transformToEigen(pointClouds.at(0).pose);
     Eigen::Affine3d firstPoseInverse = firstPose.inverse();
@@ -174,11 +172,7 @@ void writePointClouds(const string& outdir, double scale, double minDistance, do
                 Eigen::Vector4d tmp(p.x, p.y, p.z, 1);
                 Eigen::Vector4d pcorr = mapToLaser * tmp;
 
-                float xout = -pcorr(1);
-                float yout = pcorr(2);
-                float zout = pcorr(0);
-
-                scanFile << xout / scale << " " << yout / scale << " " << zout / scale << endl;
+                fprintf(scanFile, "%lf %lf %lf\n", -pcorr(1) / scale, pcorr(2) / scale, pcorr(0) / scale);
                 numPoints++;
             }
         } else if (pointCloud.cloudRGB != 0) {
@@ -189,11 +183,7 @@ void writePointClouds(const string& outdir, double scale, double minDistance, do
                 Eigen::Vector4d tmp(p.x, p.y, p.z, 1);
                 Eigen::Vector4d pcorr = mapToLaser * tmp;
 
-                float xout = -pcorr(1);
-                float yout = pcorr(2);
-                float zout = pcorr(0);
-
-                scanFile << xout / scale << " " << yout / scale << " " << zout / scale << " " << (int) p.r << " " << (int) p.g << " " << (int) p.b << " " << endl;
+                fprintf(scanFile, "%lf %lf %lf %d %d %d\n", -pcorr(1) / scale, pcorr(2) / scale, pcorr(0) / scale, (int) p.r, (int) p.g, (int) p.b);
                 numPoints++;
             }
         } else if (pointCloud.cloudI != 0) {
@@ -204,17 +194,14 @@ void writePointClouds(const string& outdir, double scale, double minDistance, do
                 Eigen::Vector4d tmp(p.x, p.y, p.z, 1);
                 Eigen::Vector4d pcorr = mapToLaser * tmp;
 
-                float xout = -pcorr(1);
-                float yout = pcorr(2);
-                float zout = pcorr(0);
+                fprintf(scanFile, "%lf %lf %lf %lf\n", -pcorr(1) / scale, pcorr(2) / scale, pcorr(0) / scale, p.intensity);
 
-                scanFile << xout / scale << " " << yout / scale << " " << zout / scale << " " << p.intensity << endl;
                 numPoints++;
             }
         }
     }
 
-    scanFile.close();
+    fclose(scanFile);
 
     Eigen::Affine3d pose = tf2::transformToEigen(pointClouds.at(0).pose);
     double transmat[16];
