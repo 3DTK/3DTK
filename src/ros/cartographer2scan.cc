@@ -333,7 +333,7 @@ int main(int argc, char* argv[])
                     }
                 }
             }
-            
+
             rosbag::View tfview(bag, rosbag::TopicQuery(topicsTF));
             for (rosbag::MessageInstance const m : tfview) {
                 if (m.isType<tf2_msgs::TFMessage>()) {
