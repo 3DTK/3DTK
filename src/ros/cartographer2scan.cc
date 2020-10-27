@@ -3,14 +3,14 @@
 #include <ros/ros.h>
 #include <rosbag/bag.h>
 #include <rosbag/view.h>
-#include <tf/transform_listener.h>
-#include <tf/transform_datatypes.h>
-#include <tf_conversions/tf_eigen.h>
+#include <tf2/buffer_core.h>
+#include <tf2_eigen/tf2_eigen.h>
+#include <tf2_kdl/tf2_kdl.h>
+#include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 #include <urdf/model.h>
 #include <kdl/tree.hpp>
 #include <kdl_parser/kdl_parser.hpp>
 #include <robot_state_publisher/robot_state_publisher.h>
-#include <tf2_kdl/tf2_kdl.h>
 
 #include <iostream>
 #include <fstream>
@@ -44,7 +44,7 @@ ostream& operator<<(ostream &os, const vector<string> &vec) {
 }
 }
 
-void setTransform(double *transmat, double *mat, double x, double y, double z) {
+void setTransform(double *transmat, const double *mat, double x, double y, double z) {
     transmat[0] = mat[4];
     transmat[1] = -mat[7];
     transmat[2] = -mat[1];
@@ -85,7 +85,7 @@ public:
     }
 
 public:
-    void setFixedTransforms(tf::Transformer *l, ros::Time t) {
+    void setFixedTransforms(tf2::BufferCore* tfBuffer, ros::Time t) {
         std::vector<geometry_msgs::TransformStamped> tf_transforms;
         geometry_msgs::TransformStamped tf_transform;
 
@@ -95,9 +95,14 @@ public:
 
             double qx,qy,qz,qw;
             k.M.GetQuaternion(qx, qy, qz, qw);
-            tf::Quaternion q(qx, qy, qz, qw);
 
-            l->setTransform(tf::StampedTransform(tf::Transform(q, tf::Vector3(k.p.x(), k.p.y(), k.p.z())), t, seg->second.root, seg->second.tip));
+            geometry_msgs::TransformStamped trafo;
+            trafo.header.stamp = t;
+            trafo.header.frame_id = seg->second.root;
+            trafo.child_frame_id = seg->second.tip;
+            trafo.transform.translation = tf2::toMsg(tf2::Vector3(k.p.x(), k.p.y(), k.p.z()));
+            trafo.transform.rotation = tf2::toMsg(tf2::Quaternion(qx, qy, qz, qw));
+            tfBuffer->setTransform(trafo, "default_authority", true);
         }
     }
 
@@ -132,8 +137,8 @@ protected:
 
 struct PointCloudWithTransform {
     ros::Time timestamp;
-    tf::Transform pose;
-    tf::Transform calibration;
+    geometry_msgs::TransformStamped pose;
+    geometry_msgs::TransformStamped calibration;
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud;
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloudRGB;
     pcl::PointCloud<pcl::PointXYZI>::Ptr cloudI;
@@ -151,19 +156,14 @@ void writePointClouds(const string& outdir, double scale, double minDistance, do
     ofstream scanFile(scanFilename);
     scanFile << fixed << setprecision(2);
 
-    Eigen::Affine3d firstPose;
-    tf::transformTFToEigen(pointClouds.at(0).pose, firstPose);
+    Eigen::Affine3d firstPose = tf2::transformToEigen(pointClouds.at(0).pose);
     Eigen::Affine3d firstPoseInverse = firstPose.inverse();
 
     for (size_t i = 0; i < pointClouds.size(); i++) {
         const PointCloudWithTransform& pointCloud = pointClouds.at(i);
 
-        Eigen::Affine3d baseToLaser;
-        tf::transformTFToEigen(pointCloud.calibration, baseToLaser);
-
-        Eigen::Affine3d currentPose;
-        tf::transformTFToEigen(pointClouds.at(i).pose, currentPose);
-
+        Eigen::Affine3d baseToLaser = tf2::transformToEigen(pointCloud.calibration);
+        Eigen::Affine3d currentPose = tf2::transformToEigen(pointClouds.at(i).pose);
         Eigen::MatrixXd mapToLaser = (firstPoseInverse * currentPose * baseToLaser).matrix();
 
         if (pointCloud.cloud != 0) {
@@ -216,28 +216,9 @@ void writePointClouds(const string& outdir, double scale, double minDistance, do
 
     scanFile.close();
 
-    tf::Transform transform = pointClouds.at(0).pose;
-
-    double X = transform.getOrigin().getX()*100;
-    double Y = transform.getOrigin().getY()*100;
-    double Z = transform.getOrigin().getZ()*100;
-
-    double rotmat[9];
-
-    rotmat[0] = transform.getBasis().getRow(0).getX();
-    rotmat[1] = transform.getBasis().getRow(0).getY();
-    rotmat[2] = transform.getBasis().getRow(0).getZ();
-
-    rotmat[3] = transform.getBasis().getRow(1).getX();
-    rotmat[4] = transform.getBasis().getRow(1).getY();
-    rotmat[5] = transform.getBasis().getRow(1).getZ();
-
-    rotmat[6] = transform.getBasis().getRow(2).getX();
-    rotmat[7] = transform.getBasis().getRow(2).getY();
-    rotmat[8] = transform.getBasis().getRow(2).getZ();
-
+    Eigen::Affine3d pose = tf2::transformToEigen(pointClouds.at(0).pose);
     double transmat[16];
-    setTransform(transmat, rotmat, X, Y, Z);
+    setTransform(transmat, pose.rotation().data(), pose.translation().x() / scale, pose.translation().y() / scale, pose.translation().z() / scale);
 
     ofstream o;
     string poseFileName = outdir + "/scan" + to_string(index,3) + ".pose";
@@ -339,7 +320,11 @@ int main(int argc, char* argv[])
 
     rosbag::Bag bag(bagFile);
     rosbag::View bagView(bag);
-    tf::Transformer* l = new tf::Transformer(true, bagView.getEndTime() - bagView.getBeginTime());
+    tf2::BufferCore tfBuffer(bagView.getEndTime() - bagView.getBeginTime());
+
+    if (transformSetter) {
+        transformSetter->setFixedTransforms(&tfBuffer, bagView.getBeginTime());
+    }
 
     if (trajectoryFiles.size() < 1) {
         trajectoryFiles.push_back(bagFile);
@@ -352,43 +337,25 @@ int main(int argc, char* argv[])
         if (extension.compare(".bag") == 0) {
             rosbag::Bag bag(trajectoryFile);
 
-            std::vector<tf::StampedTransform> staticTransforms;
             rosbag::View tfviewStatic(bag, rosbag::TopicQuery(topicsTFStatic));
             for (rosbag::MessageInstance const m : tfviewStatic) {
-                if (m.isType<tf::tfMessage>()) {
-                    tf::tfMessageConstPtr tfm = m.instantiate<tf::tfMessage>();
-                    for (unsigned int i = 0; i < tfm->transforms.size(); i++) {
-                        tf::StampedTransform trans;
-                        transformStampedMsgToTF(tfm->transforms[i], trans);
-
-                        staticTransforms.push_back(trans);
+                if (m.isType<tf2_msgs::TFMessage>()) {
+                    tf2_msgs::TFMessageConstPtr tfm = m.instantiate<tf2_msgs::TFMessage>();
+                    for (const geometry_msgs::TransformStamped& t : tfm->transforms) {
+                        tfBuffer.setTransform(t, "default_authority", true);
                     }
                 }
             }
-
-            std::cout << staticTransforms.size() << std::endl;
             
             rosbag::View tfview(bag, rosbag::TopicQuery(topicsTF));
-            if (transformSetter) { transformSetter->setFixedTransforms(l, bagView.getBeginTime());}
             for (rosbag::MessageInstance const m : tfview) {
-                if (m.isType<tf::tfMessage>()) {
-                    tf::tfMessageConstPtr tfm = m.instantiate<tf::tfMessage>();
-                    for (unsigned int i = 0; i < tfm->transforms.size(); i++) {
-                        tf::StampedTransform trans;
-                        transformStampedMsgToTF(tfm->transforms[i], trans);
-
-                        l->setTransform(trans);
-
-                        for (tf::StampedTransform staticTransform : staticTransforms) {
-                            staticTransform.stamp_ = trans.stamp_;
-                            l->setTransform(staticTransform);
-                        }
-
-                        if (transformSetter) { transformSetter->setFixedTransforms(l, trans.stamp_);}
+                if (m.isType<tf2_msgs::TFMessage>()) {
+                    tf2_msgs::TFMessageConstPtr tfm = m.instantiate<tf2_msgs::TFMessage>();
+                    for (const geometry_msgs::TransformStamped& t : tfm->transforms) {
+                        tfBuffer.setTransform(t, "default_authority", false);
                     }
                 }
             }
-            if (transformSetter) { transformSetter->setFixedTransforms(l, bagView.getEndTime());}
         } else {
             ifstream data(trajectoryFile);
 
@@ -424,20 +391,15 @@ int main(int argc, char* argv[])
                     continue;
                 }
 
-                Eigen::Affine3d transform = Eigen::Affine3d::Identity();
-                transform.translate(Eigen::Vector3d(x, y, z));
-                transform.rotate(Eigen::Quaterniond(qw, qx, qy, qz));
+                Eigen::Affine3d pose = Eigen::Affine3d::Identity();
+                pose.translate(Eigen::Vector3d(x, y, z));
+                pose.rotate(Eigen::Quaterniond(qw, qx, qy, qz));
 
-                Eigen::Matrix4d pose = transform.matrix();
-
-                tf::Transform rosTF;
-                tf::transformEigenToTF(Eigen::Affine3d(pose), rosTF);
-
-                tf::StampedTransform trans;
-                trans = tf::StampedTransform(rosTF, ros::Time(time), mapFrame, baseFrame);
-
-                l->setTransform(trans);
-                if (transformSetter) { transformSetter->setFixedTransforms(l, trans.stamp_);}
+                geometry_msgs::TransformStamped trafo = tf2::eigenToTransform(pose);
+                trafo.header.stamp = ros::Time(time);
+                trafo.header.frame_id = mapFrame;
+                trafo.child_frame_id = baseFrame;
+                tfBuffer.setTransform(trafo, "default_authority", false);
 
                 cout << setprecision(20) << time << endl;
             }
@@ -460,12 +422,12 @@ int main(int argc, char* argv[])
                 continue;
             }
 
-            tf::StampedTransform baseTransform;
-            tf::StampedTransform laserTransform;
+            geometry_msgs::TransformStamped baseTransform;
+            geometry_msgs::TransformStamped laserTransform;
             try {
-                l->lookupTransform (mapFrame, baseFrame, message->header.stamp, baseTransform);
-                l->lookupTransform (baseFrame, message->header.frame_id, message->header.stamp, laserTransform);
-            } catch (tf::TransformException e) {
+                baseTransform = tfBuffer.lookupTransform (mapFrame, baseFrame, message->header.stamp);
+                laserTransform = tfBuffer.lookupTransform (baseFrame, message->header.frame_id, message->header.stamp);
+            } catch (tf2::TransformException e) {
                 cout << "Failed to look up transforms! " << e.what() << endl;
                 continue;
             }
@@ -527,13 +489,13 @@ int main(int argc, char* argv[])
                 continue;
             }
 
-            tf::StampedTransform baseTransform;
-            tf::StampedTransform laserTransform;
+            geometry_msgs::TransformStamped baseTransform;
+            geometry_msgs::TransformStamped laserTransform;
             try {
-                l->lookupTransform (mapFrame, baseFrame, message->header.stamp, baseTransform);
-                l->lookupTransform (baseFrame, message->header.frame_id, message->header.stamp, laserTransform);
-            } catch (...) {
-                cout << "Failed to look up transforms!" << endl;
+                baseTransform = tfBuffer.lookupTransform (mapFrame, baseFrame, message->header.stamp);
+                laserTransform = tfBuffer.lookupTransform (baseFrame, message->header.frame_id, message->header.stamp);
+            } catch (tf2::TransformException e) {
+                cout << "Failed to look up transforms! " << e.what() << endl;
                 continue;
             }
 
@@ -586,13 +548,13 @@ int main(int argc, char* argv[])
                 continue;
             }
 
-            tf::StampedTransform baseTransform;
-            tf::StampedTransform laserTransform;
+            geometry_msgs::TransformStamped baseTransform;
+            geometry_msgs::TransformStamped laserTransform;
             try {
-                l->lookupTransform (mapFrame, baseFrame, message->header.stamp, baseTransform);
-                l->lookupTransform (baseFrame, message->header.frame_id, message->header.stamp, laserTransform);
-            } catch (...) {
-                cout << "Failed to look up transforms!" << endl;
+                baseTransform = tfBuffer.lookupTransform (mapFrame, baseFrame, message->header.stamp);
+                laserTransform = tfBuffer.lookupTransform (baseFrame, message->header.frame_id, message->header.stamp);
+            } catch (tf2::TransformException e) {
+                cout << "Failed to look up transforms! " << e.what() << endl;
                 continue;
             }
 
@@ -631,7 +593,6 @@ int main(int argc, char* argv[])
         pointClouds.clear();
     }
 
-    delete l;
     delete transformSetter;
 
     return 0;
