@@ -263,6 +263,7 @@ int main(int argc, char* argv[])
     vector<string> topicsMultiEchoLaserScan;
     vector<string> topicsLaserScan;
     vector<string> topicsTF;
+    vector<string> topicsTFStatic;
     string urdffile;
     string mapFrame;
     string baseFrame;
@@ -285,6 +286,7 @@ int main(int argc, char* argv[])
             ("topics-MultiEchoLaserScan", program_options::value<vector<string> >(&topicsMultiEchoLaserScan)->multitoken()->default_value(vector<string> {"horizontal_laser_2d", "vertical_laser_2d"}), "Topics with MultiEchoLaserScan messages for export")
             ("topics-LaserScan", program_options::value<vector<string> >(&topicsLaserScan)->multitoken()->default_value(vector<string>()), "Topics with LaserScan messages for export")
             ("topics-TF", program_options::value<vector<string> >(&topicsTF)->multitoken()->default_value(vector<string> {"/tf"}), "Topics with TF information")
+            ("topics-TF-static", program_options::value<vector<string> >(&topicsTFStatic)->multitoken()->default_value(vector<string> {"/tf_static"}), "Topics with static TF information")
             ("urdf", program_options::value<string>(&urdffile), "input URDF file")
             ("frame-map", program_options::value<string>(&mapFrame)->required()->default_value("/map"), "frame id of the map")
             ("frame-base", program_options::value<string>(&baseFrame)->required()->default_value("/base_link"), "frame id of the robot base link")
@@ -349,10 +351,25 @@ int main(int argc, char* argv[])
 
         if (extension.compare(".bag") == 0) {
             rosbag::Bag bag(trajectoryFile);
+
+            std::vector<tf::StampedTransform> staticTransforms;
+            rosbag::View tfviewStatic(bag, rosbag::TopicQuery(topicsTFStatic));
+            for (rosbag::MessageInstance const m : tfviewStatic) {
+                if (m.isType<tf::tfMessage>()) {
+                    tf::tfMessageConstPtr tfm = m.instantiate<tf::tfMessage>();
+                    for (unsigned int i = 0; i < tfm->transforms.size(); i++) {
+                        tf::StampedTransform trans;
+                        transformStampedMsgToTF(tfm->transforms[i], trans);
+
+                        staticTransforms.push_back(trans);
+                    }
+                }
+            }
+
+            std::cout << staticTransforms.size() << std::endl;
+            
             rosbag::View tfview(bag, rosbag::TopicQuery(topicsTF));
-
             if (transformSetter) { transformSetter->setFixedTransforms(l, bagView.getBeginTime());}
-
             for (rosbag::MessageInstance const m : tfview) {
                 if (m.isType<tf::tfMessage>()) {
                     tf::tfMessageConstPtr tfm = m.instantiate<tf::tfMessage>();
@@ -362,11 +379,15 @@ int main(int argc, char* argv[])
 
                         l->setTransform(trans);
 
+                        for (tf::StampedTransform staticTransform : staticTransforms) {
+                            staticTransform.stamp_ = trans.stamp_;
+                            l->setTransform(staticTransform);
+                        }
+
                         if (transformSetter) { transformSetter->setFixedTransforms(l, trans.stamp_);}
                     }
                 }
             }
-
             if (transformSetter) { transformSetter->setFixedTransforms(l, bagView.getEndTime());}
         } else {
             ifstream data(trajectoryFile);
