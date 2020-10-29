@@ -204,8 +204,16 @@ void writePointClouds(const string& outdir, double scale, double minDistance, do
     fclose(scanFile);
 
     Eigen::Affine3d pose = tf2::transformToEigen(pointClouds.at(0).pose);
+
+    double rotmat[9];
+    for (int m = 0; m < 3; m++) {
+        for (int n = 0; n < 3; n++) {
+            rotmat[m*3 + n] = pose.rotation()(m, n);
+        }
+    }
+
     double transmat[16];
-    setTransform(transmat, pose.rotation().data(), pose.translation().x() / scale, pose.translation().y() / scale, pose.translation().z() / scale);
+    setTransform(transmat, rotmat, pose.translation().x() / scale, pose.translation().y() / scale, pose.translation().z() / scale);
 
     ofstream o;
     string poseFileName = outdir + "/scan" + to_string(index,3) + ".pose";
