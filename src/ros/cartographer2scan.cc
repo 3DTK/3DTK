@@ -252,6 +252,7 @@ int main(int argc, char* argv[])
     string outdir;
     bool exportColor;
     bool exportIntensity;
+    bool useReceiveTimestamps;
 
     program_options::options_description desc("Allowed options");
     desc.add_options()
@@ -275,6 +276,7 @@ int main(int argc, char* argv[])
             ("combine", program_options::value<size_t>(&combine)->default_value(1), "Combine n scans")
             ("color,C", "Export with color")
             ("intensity,I", "Export with intensity")
+            ("use-receive-timestamps", "Use the timestamps of the messages for bad bagfiles")
             ("output,o", program_options::value<string>(&outdir)->required(), "output folder")
             ;
 
@@ -288,6 +290,7 @@ int main(int argc, char* argv[])
 
     exportColor = vm.count("color");
     exportIntensity = vm.count("intensity");
+    useReceiveTimestamps = vm.count("use-receive-timestamps");
 
     program_options::notify(vm);
 
@@ -336,7 +339,11 @@ int main(int argc, char* argv[])
             for (rosbag::MessageInstance const m : tfviewStatic) {
                 if (m.isType<tf2_msgs::TFMessage>()) {
                     tf2_msgs::TFMessageConstPtr tfm = m.instantiate<tf2_msgs::TFMessage>();
-                    for (const geometry_msgs::TransformStamped& t : tfm->transforms) {
+                    for (geometry_msgs::TransformStamped t : tfm->transforms) {
+                        if (useReceiveTimestamps) {
+                            t.header.stamp = m.getTime();
+                        }
+
                         tfBuffer.setTransform(t, "default_authority", true);
                     }
                 }
@@ -346,7 +353,11 @@ int main(int argc, char* argv[])
             for (rosbag::MessageInstance const m : tfview) {
                 if (m.isType<tf2_msgs::TFMessage>()) {
                     tf2_msgs::TFMessageConstPtr tfm = m.instantiate<tf2_msgs::TFMessage>();
-                    for (const geometry_msgs::TransformStamped& t : tfm->transforms) {
+                    for (geometry_msgs::TransformStamped t : tfm->transforms) {
+                        if (useReceiveTimestamps) {
+                            t.header.stamp = m.getTime();
+                        }
+
                         tfBuffer.setTransform(t, "default_authority", false);
                     }
                 }
@@ -413,15 +424,20 @@ int main(int argc, char* argv[])
         for (rosbag::MessageInstance const m : viewScans) {
             sensor_msgs::PointCloud2ConstPtr message = m.instantiate<sensor_msgs::PointCloud2>();
 
-            if (message->header.stamp < ros::Time(startTime) || message->header.stamp > ros::Time(endTime)) {
+            ros::Time stamp = message->header.stamp;
+            if (useReceiveTimestamps) {
+                stamp = m.getTime();
+            }
+
+            if (stamp < ros::Time(startTime) || stamp > ros::Time(endTime)) {
                 continue;
             }
 
             geometry_msgs::TransformStamped baseTransform;
             geometry_msgs::TransformStamped laserTransform;
             try {
-                baseTransform = tfBuffer.lookupTransform (mapFrame, baseFrame, message->header.stamp);
-                laserTransform = tfBuffer.lookupTransform (baseFrame, message->header.frame_id, message->header.stamp);
+                baseTransform = tfBuffer.lookupTransform (mapFrame, baseFrame, stamp);
+                laserTransform = tfBuffer.lookupTransform (baseFrame, message->header.frame_id, stamp);
             } catch (tf2::TransformException e) {
                 cout << "Failed to look up transforms! " << e.what() << endl;
                 continue;
@@ -431,7 +447,7 @@ int main(int argc, char* argv[])
             pcl_conversions::toPCL(*message,pcl_pc2);
 
             PointCloudWithTransform pointCloud;
-            pointCloud.timestamp = message->header.stamp;
+            pointCloud.timestamp = stamp;
             pointCloud.pose = baseTransform;
             pointCloud.calibration = laserTransform;
 
@@ -480,15 +496,21 @@ int main(int argc, char* argv[])
         for (rosbag::MessageInstance const m : viewScans) {
             sensor_msgs::MultiEchoLaserScanConstPtr message = m.instantiate<sensor_msgs::MultiEchoLaserScan>();
 
-            if (message->header.stamp < ros::Time(startTime) || message->header.stamp > ros::Time(endTime)) {
+            ros::Time stamp = message->header.stamp;
+            if (useReceiveTimestamps) {
+                stamp = m.getTime();
+            }
+
+
+            if (stamp < ros::Time(startTime) || stamp > ros::Time(endTime)) {
                 continue;
             }
 
             geometry_msgs::TransformStamped baseTransform;
             geometry_msgs::TransformStamped laserTransform;
             try {
-                baseTransform = tfBuffer.lookupTransform (mapFrame, baseFrame, message->header.stamp);
-                laserTransform = tfBuffer.lookupTransform (baseFrame, message->header.frame_id, message->header.stamp);
+                baseTransform = tfBuffer.lookupTransform (mapFrame, baseFrame, stamp);
+                laserTransform = tfBuffer.lookupTransform (baseFrame, message->header.frame_id, stamp);
             } catch (tf2::TransformException e) {
                 cout << "Failed to look up transforms! " << e.what() << endl;
                 continue;
@@ -510,7 +532,7 @@ int main(int argc, char* argv[])
             }
 
             PointCloudWithTransform pointCloud;
-            pointCloud.timestamp = message->header.stamp;
+            pointCloud.timestamp = stamp;
             pointCloud.pose = baseTransform;
             pointCloud.calibration = laserTransform;
             pointCloud.cloud = temp_cloud;
@@ -539,15 +561,21 @@ int main(int argc, char* argv[])
         for (rosbag::MessageInstance const m : viewScans) {
             sensor_msgs::LaserScanConstPtr message = m.instantiate<sensor_msgs::LaserScan>();
 
-            if (message->header.stamp < ros::Time(startTime) || message->header.stamp > ros::Time(endTime)) {
+            ros::Time stamp = message->header.stamp;
+            if (useReceiveTimestamps) {
+                stamp = m.getTime();
+            }
+
+
+            if (stamp < ros::Time(startTime) || stamp > ros::Time(endTime)) {
                 continue;
             }
 
             geometry_msgs::TransformStamped baseTransform;
             geometry_msgs::TransformStamped laserTransform;
             try {
-                baseTransform = tfBuffer.lookupTransform (mapFrame, baseFrame, message->header.stamp);
-                laserTransform = tfBuffer.lookupTransform (baseFrame, message->header.frame_id, message->header.stamp);
+                baseTransform = tfBuffer.lookupTransform (mapFrame, baseFrame, stamp);
+                laserTransform = tfBuffer.lookupTransform (baseFrame, message->header.frame_id, stamp);
             } catch (tf2::TransformException e) {
                 cout << "Failed to look up transforms! " << e.what() << endl;
                 continue;
@@ -569,7 +597,7 @@ int main(int argc, char* argv[])
             }
 
             PointCloudWithTransform pointCloud;
-            pointCloud.timestamp = message->header.stamp;
+            pointCloud.timestamp = stamp;
             pointCloud.pose = baseTransform;
             pointCloud.calibration = laserTransform;
             pointCloud.cloud = temp_cloud;
