@@ -184,7 +184,7 @@ NurbsPath::getOutpoint(float t,float OutPoint[],float*opx,float*opy,const float*
 		// calculate the effect of this point on the curve
 		float Val = coxDeBoor(t,i,ivOrder,knots);
 
-		if(Val>0.0001f) {
+        if(Val>0.0f) {
 
 			// sum effect of CV on this part of the curve
 			OutPoint[0] += Val * opx[i];
