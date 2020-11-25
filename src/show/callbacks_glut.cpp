@@ -386,41 +386,35 @@ void keyHandler(int key, bool control, bool alt, bool shift) {
   double rotsize = 0.2 * stepsize;
 
   switch (key) {
-    case 'w':
-    case 'W':
-      moveCamera(0,0,stepsize,0,0,0);
-      break;
+    //x
     case 'a':
     case 'A':
       moveCamera(stepsize,0,0,0,0,0);
-      break;
-    case 's':
-    case 'S':
-      moveCamera(0,0,-stepsize,0,0,0);
       break;
     case 'd':
     case 'D':
       moveCamera(-stepsize,0,0,0,0,0);
       break;
-    case 'c':
-    case 'C':
+    //y
+    case 'y':
+    case 'Y':
       moveCamera(0,stepsize,0,0,0,0);
       break;
+    case 'c':  
+    case 'C':  
     case 32:  // WXK_SPACE
       moveCamera(0,-stepsize,0,0,0,0);
       break;
-    case 314: // WXK_LEFT
-      moveCamera(0,0,0,0,rotsize,0);
+    //z
+    case 'w':
+    case 'W':
+      moveCamera(0,0,stepsize,0,0,0);
       break;
-    case 315: // WXK_UP
-      moveCamera(0,0,0,rotsize,0,0);
+    case 's':
+    case 'S':
+      moveCamera(0,0,-stepsize,0,0,0);
       break;
-    case 316: // WXK_RIGHT
-      moveCamera(0,0,0,0,-rotsize,0);
-      break;
-    case 317: // WXK_DOWN
-      moveCamera(0,0,0,-rotsize,0,0);
-      break;
+    //roll
     case 'q':
     case 'Q':
     case 366: // WXK_PAGEUP
@@ -430,6 +424,28 @@ void keyHandler(int key, bool control, bool alt, bool shift) {
     case 'E':
     case 367: // WXK_PAGEDOWN
       moveCamera(0,0,0,0,0,-rotsize);
+      break;
+    //pitch
+    case 'i':
+    case 'I':
+    case 315: // WXK_UP
+      moveCamera(0,0,0,rotsize,0,0);
+      break;
+    case 'k':
+    case 'K':
+    case 317: // WXK_DOWN
+      moveCamera(0,0,0,-rotsize,0,0);
+      break;
+    //yaw
+    case 'j':
+    case 'J':
+    case 314: // WXK_LEFT
+      moveCamera(0,0,0,0,rotsize,0);
+      break;
+    case 'l':
+    case 'L':
+    case 316: // WXK_RIGHT
+      moveCamera(0,0,0,0,-rotsize,0);
       break;
     case 'f':
       if (!fullscreen) {
