@@ -215,7 +215,7 @@ void parse_options(int argc, char **argv, int &start, int &end,
                    int &maxDist, int &minDist, std::string &customFilter, reduction_method &rtype, IOType &out_format, double &scale,
                    double &voxel, int &octree, bool &use_reflectance,
 		   int &MIN_ANGLE, int &MAX_ANGLE, int &nImages, double &pParam,
-		   fbr::scanner_type &sType, bool &loadOct, bool &use_color)
+		   fbr::scanner_type &sType, bool &loadOct, bool &use_color, bool &rm_scatter)
 {
   po::options_description generic("Generic options");
   generic.add_options()
@@ -260,6 +260,8 @@ void parse_options(int argc, char **argv, int &start, int &end,
      "scaling factor")
     ("voxel,v", po::value<double>(&voxel),
      "voxel size if --reduction OCTREE or maximum circumcircle diameter if --reduction SQTREE")
+    ("delete,d", po::bool_switch(&rm_scatter),
+     "Deletes voxels if fewer points are contained than given with the OCTREE option")
     ("projection,P", po::value<fbr::projection_method>(&ptype),
      "projection method or panorama image. Following Methods can be used: EQUIRECTANGULAR|CONIC|CYLINDRICAL|MERCATOR|RECTILINEAR|PANNINI|STEREOGRAPHIC|EQUALAREACYLINDRICAL      *Not all Projections may work with RANGE-reduction")
 
@@ -403,13 +405,13 @@ void scan2mat(Scan *source, cv::Mat &mat)
 }
 
 void reduce_octree(Scan *scan, std::vector<cv::Vec4f> &reduced_points, std::vector<cv::Vec3b> &color,
-                   int octree, double red, bool use_reflectance, bool use_color)
+                   int octree, double red, bool use_reflectance, bool use_color, bool rm_scatter)
 {
   if (use_reflectance) {
     unsigned int types = PointType::USE_REFLECTANCE;
     PointType pointtype(types);
     scan->setReductionParameter(red, octree, pointtype);
-    scan->calcReducedPoints();
+    scan->calcReducedPoints(rm_scatter);
 
     DataXYZ xyz_reduced(scan->get("xyz reduced"));
     DataReflectance reflectance_reduced(scan->get("reflectance reduced"));
@@ -653,6 +655,7 @@ int main(int argc, char **argv)
   IOType out_format;
   double scale, voxel;
   int octree;
+  bool rm_scatter = false;
   bool use_reflectance;
   std::string customFilter;
   bool rangeFilterActive = false;
@@ -668,12 +671,12 @@ int main(int argc, char **argv)
   fbr::panorama_map_method mMethod = FARTHEST;
   float zMin = 0, zMax = 0;
   bool imageOptimization = false;
-
+  
 
   parse_options(argc, argv, start, end, scanserver, width, height, ptype,
                 dir, iotype, maxDist, minDist, customFilter, rtype, out_format, scale, voxel, octree,
                 use_reflectance, MIN_ANGLE, MAX_ANGLE, nImages, pParam,
-		sType, loadOct, use_color);
+		sType, loadOct, use_color, rm_scatter);
 
   rangeFilterActive = minDist > 0 || maxDist > 0;
   // custom filter set? quick check, needs to contain at least one ';'
@@ -825,7 +828,8 @@ int main(int argc, char **argv)
           octree,
           voxel,
           use_reflectance,
-          use_color);
+          use_color,
+          rm_scatter);
 
       if (use_reflectance)
         write_uosr(reduced_points,

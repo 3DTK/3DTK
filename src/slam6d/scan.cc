@@ -430,7 +430,7 @@ void Scan::calcNormals()
  * Computes an octtree of the current scan, then getting the
  * reduced points as the centers of the octree voxels.
  */
-void Scan::calcReducedPoints()
+void Scan::calcReducedPoints(bool rm_scatter)
 {
 #ifdef WITH_METRICS
   Timer t = ClientMetric::scan_load_time.start();
@@ -585,10 +585,9 @@ void Scan::calcReducedPoints()
       } else if (reduction_nrpts == 1) {
         oct->GetOctTreeRandom(center);
       } else {
-	   // FIXME: add option to pass true to GetOctTreeRandom()
-	   //        in the past this was done by letting reduction_nrpts be
-	   //        negative but ultimately this should be an extra variable
-        oct->GetOctTreeRandom(center, reduction_nrpts, false);
+     // if rm_scatter is true, all voxels with less than
+     // reduction_nrpts will be removed
+        oct->GetOctTreeRandom(center, reduction_nrpts, rm_scatter);
       }
     } else {
         oct->GetOctTreeCenter(center);
