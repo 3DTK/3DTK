@@ -1015,7 +1015,7 @@ protected:
     }
   }
 
-  void GetOctTreeRandom(std::vector<T*>&c, unsigned int ptspervoxel, bool mode, bitoct &node) {
+  void GetOctTreeRandom(std::vector<T*>&c, unsigned int ptspervoxel, bool rm_scatter, bitoct &node) {
     bitunion<T> *children;
     bitoct::getChildren(node, children);
     for (short i = 0; i < 8; i++) {
@@ -1026,8 +1026,8 @@ protected:
           // offset pointer
           pointrep* points = children->getPointreps();
           unsigned int length = points[0].length;
-          // ignore points from voxels with less than -ptspervoxel points
-          if(mode) {
+          // ignore points from voxels with less than ptspervoxel points
+          if(rm_scatter) {
             if(length > ptspervoxel) {
               for (unsigned int j = 0; j < length; j++)
                 c.push_back(&(points[POINTDIM*j+1].v));
@@ -1052,7 +1052,7 @@ protected:
             c.push_back(&(points[POINTDIM*(*it)+1].v));
 
         } else { // recurse
-          GetOctTreeRandom(c, ptspervoxel, mode, children->node);
+          GetOctTreeRandom(c, ptspervoxel, rm_scatter, children->node);
         }
         ++children; // next child
       }

@@ -495,10 +495,9 @@ protected:
   void transformReduced(const double alignxf[16]);
 
 
-  //@FIXME
 public:
   //! Creating reduced points
-  void calcReducedPoints();
+  void calcReducedPoints(bool rm_scatter=false);
 
   //! Creating upsampled points
   void calcUpsampledPoints();
