@@ -671,7 +671,7 @@ int main(int argc, char **argv)
   fbr::panorama_map_method mMethod = FARTHEST;
   float zMin = 0, zMax = 0;
   bool imageOptimization = false;
-  
+
 
   parse_options(argc, argv, start, end, scanserver, width, height, ptype,
                 dir, iotype, maxDist, minDist, customFilter, rtype, out_format, scale, voxel, octree,
