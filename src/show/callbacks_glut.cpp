@@ -400,8 +400,8 @@ void keyHandler(int key, bool control, bool alt, bool shift) {
     case 'Y':
       moveCamera(0,stepsize,0,0,0,0);
       break;
-    case 'c':  
-    case 'C':  
+    case 'c':
+    case 'C':
     case 32:  // WXK_SPACE
       moveCamera(0,-stepsize,0,0,0,0);
       break;
