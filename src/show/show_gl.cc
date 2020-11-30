@@ -738,9 +738,9 @@ void setup_camera() {
     }
   } else {
     if (cameraNavMouseMode == 1) {
-      glRotated( mouseRotZ, 0, 0, 1);
       glRotated( mouseRotX, 1, 0, 0);
       glRotated( mouseRotY, 0, 1, 0);
+      glRotated( mouseRotZ, 0, 0, 1);
       glGetFloatv(GL_MODELVIEW_MATRIX, view_rotate_button);
       update_view_rotate(0);
     } else {
