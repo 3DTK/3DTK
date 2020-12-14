@@ -21,8 +21,8 @@ namespace calibration{
                                          std::vector<cv::Point3f>&imageEstPoints,
                                          std::vector<cv::Point3f>&objectEstPoints);
 
-        static void writeDetectionsToFile(std::string &path, std::map<std::string, cv::Point3f>& points);
-        static void writeDetectionsToFile(std::string &path, std::map<std::string, cv::Point3f>& points,
+        static void writeDetectionsToFile(const std::string &path, std::map<std::string, cv::Point3f>& points);
+        static void writeDetectionsToFile(const std::string &path, std::map<std::string, cv::Point3f>& points,
                                       std::string *comment);
 
     private:

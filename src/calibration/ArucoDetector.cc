@@ -2,6 +2,7 @@
 #include <chrono>
 #include <opencv2/opencv.hpp>
 #include <boost/filesystem.hpp>
+#include <calibration/DetectionFileHandler.h>
 
 #if CV_MAJOR_VERSION > 3
 
@@ -89,17 +90,32 @@ bool ArucoDetector::detect(const cv::Mat& image)
 
 void ArucoDetector::writeDetectionsToFile(const std::string& path)
 {
-    std::fstream f;
-    f.open(path, std::ios::out);
-    f << "#APRIL_2D" << std::endl;
-    for (AprilTag::AprilTag2f tag : _tags) {
-        f << tag.toString();
+    std::map<std::string, cv::Point3f> detections;
+    for(AprilTag::AprilTag2f tag : _tags){
+        //corner 1
+        std::stringstream id;
+        id << "APR" << tag.id << "TL";
+        detections.insert({id.str(), cv::Point3f(tag.point1.x, tag.point1.y, 0.0)});
+        //corner 2
+        id.str("");
+        id << "APR" << tag.id << "BL";
+        detections.insert({id.str(), cv::Point3f(tag.point2.x, tag.point2.y, 0.0)});
+        //corner 3
+        id.str("");
+        id << "APR" << tag.id << "BR";
+        detections.insert({id.str(), cv::Point3f(tag.point3.x, tag.point3.y, 0.0)});
+        //corner 4
+        id.str("");
+        id << "APR" << tag.id << "TR";
+        detections.insert({id.str(), cv::Point3f(tag.point4.x, tag.point4.y, 0.0)});
     }
-    f.close();
+    DetectionFileHandler::writeDetectionsToFile(path, detections);
 }
 
 void ArucoDetector::readDetectionsFromFile(const std::string& path)
 {
+    //TODO not compatible with the new detection file format
+    std::cerr << "depricated function, don't use it! it's not compatible with the new detection file format!" << std::endl;
     _tags.clear();
 
     if (boost::filesystem::exists(boost::filesystem::path(path))) {
