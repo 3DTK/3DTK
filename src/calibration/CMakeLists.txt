@@ -16,7 +16,7 @@ if (WITH_OPENCV AND WITH_EIGEN3)
   add_library(calibration ${CALIBRATION_LIBRARY_SOURCES})
   target_link_libraries(calibration apriltag ${OpenCV_LIBRARIES} ${Boost_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY})
 
-  add_executable(detect detect.cc)
+  add_executable(detect detect.cc DetectionFileHandler.cpp)
   if (WIN32)
     target_link_libraries(detect winmm)
   endif()

@@ -10,6 +10,7 @@
 #include "calibration/ArucoDetector.h"
 #include "calibration/ChessboardDetector.h"
 #include "calibration/CirclesGridDetector.h"
+#include "calibration/DetectionFileHandler.h"
 
 #include <dirent.h>
 
