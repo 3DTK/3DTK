@@ -2,6 +2,7 @@
 #include <chrono>
 #include <fstream>
 #include <boost/filesystem.hpp>
+#include <calibration/DetectionFileHandler.h>
 #include "calibration/Chessboard.h"
 
 namespace calibration {
@@ -65,15 +66,22 @@ bool ChessboardDetector::detect(const cv::Mat& image)
 
 void ChessboardDetector::writeDetectionsToFile(const std::string& path)
 {
-    std::ofstream f;
-    f.open(path, std::ios::out);
-    f << "#CHESSBOARD" << std::endl;
-    f << Chessboard::toString(_imagePoints);
-    f.close();
+    std::map<std::string, cv::Point3f> detections;
+    int i = 0;
+    for(cv::Point2f point : _imagePoints){
+        //corner 1
+        std::stringstream id;
+        id << "CHE" << _patternSize.width << "X" << _patternSize.height << "ID" << i;
+        detections.insert({id.str(), cv::Point3f(point.x, point.y, 0.0)});
+        i++;
+    }
+    DetectionFileHandler::writeDetectionsToFile(path, detections);
 }
 
 void ChessboardDetector::readDetectionsFromFile(const std::string& path)
 {
+    //TODO not compatible with the new detection file format
+    std::cerr << "depricated function, don't use it! it's not compatible with the new detection file format!" << std::endl;
     _imagePoints.clear();
 
     if (boost::filesystem::exists(boost::filesystem::path(path))) {

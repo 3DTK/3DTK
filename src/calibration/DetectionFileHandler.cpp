@@ -92,7 +92,7 @@ namespace calibration{
         }
     }
 
-    void DetectionFileHandler::writeDetectionsToFile(string &path, map<string, Point3f>& points,
+    void DetectionFileHandler::writeDetectionsToFile(const string &path, map<string, Point3f>& points,
                                       string *comment){
         fstream f;
         f.open(path, ios::out);
@@ -105,12 +105,12 @@ namespace calibration{
         f << "#ID x y z" << endl;
         for(tuple<string, Point3f> t : points){
             Point3f p = get<1>(t);
-            f << get<0>(t) << " " << p.x << " " << p.y << " " << p.x << endl;
+            f << get<0>(t) << " " << p.x << " " << p.y << " " << p.z << endl;
         }
         f.close();
     }
 
-    void DetectionFileHandler::writeDetectionsToFile(string &path, map<string, Point3f>& points){
+    void DetectionFileHandler::writeDetectionsToFile(const string &path, map<string, Point3f>& points){
         writeDetectionsToFile(path, points, nullptr);
     }
 }
