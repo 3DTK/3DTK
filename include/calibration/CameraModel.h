@@ -20,33 +20,33 @@ public:
      * similar to OpenCV projectPoints
      * @return
      */
-    virtual std::vector<cv::Point3f>forwardprojection();
+    std::vector<cv::Point3f>forwardprojection();
 
-    virtual std::vector<cv::Point3f>backwardprojection();
+    std::vector<cv::Point3f>backwardprojection();
 
     /**
      * Camera parameters to double vector
      * @return
      */
-    virtual std::vector<double> parametersToVector();
+    std::vector<double> parametersToVector();
 
-    virtual void vectorToParameters();
+    void vectorToParameters();
 
     /**
      * calibrate Camera
      * @return
      */
-    virtual void calibrate();
+    void calibrate();
 
     /**
      *  OpenCV YAML file format
      * @param path
      */
-    virtual void saveParametersToFile(std::string &path);
-    virtual void loadParametersToFile(std::string &path);
+    void saveParametersToFile(std::string &path);
+    void loadParametersToFile(std::string &path);
 
-    virtual void wirteParametersTo(cv::FileStorage &fs);
-    virtual void fromParametersFrom(cv::FileStorage &fs);
+    void wirteParametersTo(cv::FileStorage &fs);
+    void fromParametersFrom(cv::FileStorage &fs);
 
 
 
