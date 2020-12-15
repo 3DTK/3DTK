@@ -11,7 +11,7 @@ echo "travis_fold:start:brew_install"
 	brew update
 	#brew upgrade
 	# install packageds with brew
-	brew bundle
+	travis_wait 30 brew bundle
 	#export qt path, installed by brew
 	export PATH="/usr/local/opt/qt/bin:$PATH"
 echo "travis_fold:end:brew_install"
