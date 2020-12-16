@@ -14,6 +14,14 @@ notifications:
 env: # needed for allow_failures
 jobs:
   allow_failures:
+    - os: osx
+      osx_image: xcode12u
+      before_cache:
+        - brew cleanup
+      cache:
+        directories:
+        - $HOME/Library/Caches/Homebrew
+      if: branch NOT IN (ubuntu, debian, linux)
     - os: linux
       arch: arm64
       services:
