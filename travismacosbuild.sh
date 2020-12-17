@@ -4,8 +4,8 @@
 set -eu
 
 echo "travis_fold:start:brew_install"
-    brew update || true
-    brew uninstall --cask --force java
+  brew uninstall --cask --force java
+  brew update || true
 	# update brew
 	brew tap brewsci/science
 	brew update
