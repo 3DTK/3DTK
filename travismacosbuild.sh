@@ -4,7 +4,7 @@
 set -eu
 
 echo "travis_fold:start:brew_install"
-  brew remove --force java
+  brew uninstall --ignore-dependencies java
   brew update || true
 	# update brew
 	brew tap brewsci/science
