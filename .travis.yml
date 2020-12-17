@@ -105,7 +105,7 @@ jobs:
         - DERIV=ubuntu DIST=focal
       if: branch NOT IN (macos, osx, apple, debian)
 script:
-  - if [[ $TRAVIS_OS_NAME == 'osx' ]]; then ./travismacosbuild.sh; fi
+  - if [[ $TRAVIS_OS_NAME == 'osx' ]]; then travis_wait 30  ./travismacosbuild.sh; fi
   - if [[ $TRAVIS_OS_NAME == 'linux' ]]; then ./travisdockerbuild.sh $DERIV $DIST $CC; fi
 # work around for output not persisting in Travis's console:
 # https://github.com/travis-ci/travis-ci/issues/6018
