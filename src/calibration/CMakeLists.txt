@@ -12,11 +12,12 @@ if (WITH_OPENCV AND WITH_EIGEN3)
       ChessboardDetector.cc
       CirclesGridDetector.cc
       PinholeModel.cc
+      DetectionFileHandler.cpp
       )
   add_library(calibration ${CALIBRATION_LIBRARY_SOURCES})
   target_link_libraries(calibration apriltag ${OpenCV_LIBRARIES} ${Boost_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY})
 
-  add_executable(detect detect.cc DetectionFileHandler.cpp)
+  add_executable(detect detect.cc )
   if (WIN32)
     target_link_libraries(detect winmm)
   endif()
@@ -47,7 +48,7 @@ if (WITH_OPENCV AND WITH_EIGEN3)
   set(CALIBRATE_SOURCES
           Calibrator.cc)
   add_executable(calibrate calibrate.cc ${CALIBRATE_SOURCES})
-  target_link_libraries(calibrate calibration apriltag ${OpenCV_LIBRARIES} ${Boost_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY})
+  target_link_libraries(calibrate calibration ${OpenCV_LIBRARIES} ${Boost_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY})
 
   configure_file(createAprilGrid.py ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/createAprilGrid COPYONLY)
 endif()
