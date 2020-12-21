@@ -41,23 +41,23 @@ if(WITH_ROS)
 
   if(WITH_RIVLIB)
   add_executable(bag2scan bag2scan.cc calibration.cc importer.cc ekf_filter.cc powell.cc nrutil.cc my_robot_pose_ekf/odom_estimation.cpp my_robot_pose_ekf/nonlinearanalyticconditionalgaussianodo.cpp odometry.cc)
-  target_link_libraries(bag2scan scan ${catkin_LIBRARIES} ${RiVLib_SCANLIB_LIBRARY} ${OROCOS_BFL_LIBRARIES})
+  target_link_libraries(bag2scan scan ${catkin_LIBRARIES} ${RiVLib_SCANLIB_LIBRARY} ${OROCOS_BFL_LIBRARIES} ${Boost_LIBRARIES})
   add_dependencies(bag2scan riegl_generate_messages_cpp)
   add_dependencies(bag2scan volksbotRT_generate_messages_cpp)
   endif()
 
   add_executable(cartographer2scan cartographer2scan.cc)
-  target_link_libraries(cartographer2scan ${catkin_LIBRARIES} ${PCL_LIBRARIES})
+  target_link_libraries(cartographer2scan ${catkin_LIBRARIES} ${PCL_LIBRARIES} ${Boost_LIBRARIES})
 
   add_library(tdtkroswrapper
     tdtkroswrapper.cc
     #slam6Dwrapper.cc
     icp6Dwrapper.cc
   )
-  target_link_libraries(tdtkroswrapper scan ${catkin_LIBRARIES} ${PCL_LIBRARIES})
+  target_link_libraries(tdtkroswrapper scan ${catkin_LIBRARIES} ${PCL_LIBRARIES} ${Boost_LIBRARIES})
 
   add_executable(scan2bag scan2bag.cc)
-  target_link_libraries(scan2bag ${catkin_LIBRARIES} ${PCL_LIBRARIES} scan tdtkroswrapper)
+  target_link_libraries(scan2bag ${catkin_LIBRARIES} ${PCL_LIBRARIES} scan tdtkroswrapper ${Boost_LIBRARIES})
 
   #add_executable(slam6D_node slam6D_node.cc)
   #target_link_libraries(slam6D_node ${catkin_LIBRARIES} tdtkroswrapper)
