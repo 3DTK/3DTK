@@ -50,6 +50,7 @@ Depends:
  libstd-srvs-dev,
  libsuitesparse-dev,
  libtf-conversions-dev,
+ libtf2-eigen-dev,
  libtf2-kdl-dev,
  libtf2-sensor-msgs-dev,
  liburdf-dev,
