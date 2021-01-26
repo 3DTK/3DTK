@@ -57,6 +57,7 @@ MainWindow::MainWindow(const dataset_settings& dss, const window_settings& ws, c
     QDir curDir(QDir::current());
     lineEditStateFile->setText(curDir.canonicalPath() + "/" + QString::fromStdString(dss.data_source) + "config.ini");
     lineEditSelectionFile->setText(curDir.canonicalPath() + "/selected.3d");
+    lineEditCylinderFile->setText(curDir.canonicalPath() + "/cylinder.cyl");
   } else {
     glWidget = new GLWidget(this);
     glWidget->setFocusPolicy(Qt::ClickFocus);
@@ -194,9 +195,15 @@ void MainWindow::applySettings() {
   advanced_controls = settingsDialog->cbEnableAdvancedMode->isChecked();
   if(advanced_controls) {
     dockAdvanced->setFloating(true);
+    dockCylinder->setFloating(true);
     dockAdvanced->show();
+    dockCylinder->show();
+    dockCylinderPara->show();
   } else {
     dockAdvanced->hide();
+    dockCylinder->setFloating(true);
+    dockCylinder->hide();
+    dockCylinderPara->hide();
   }
 
   std::string configHome = getConfigHome();
@@ -238,8 +245,11 @@ void MainWindow::hideDockWidgets()
     dockColor->hide();
     dockMode->hide();
     dockNavigation->hide();
-    if(advanced_controls)
+    if(advanced_controls){
       dockAdvanced->hide();
+      dockCylinder->hide();
+      dockCylinderPara->hide();
+    }
     statusbar->hide();
     menubar->hide();
     centralwidget->layout()->setContentsMargins(0, 0, 0, 0);
@@ -259,9 +269,12 @@ void MainWindow::showDockWidgets()
     dockColor->show();
     dockMode->show();
     dockNavigation->show();
-    if(advanced_controls)
+    if(advanced_controls){
       dockAdvanced->show();
-    statusbar->show();
+      dockCylinder->show();
+      dockCylinderPara->show();
+    }
+    if(advanced_controls)
     menubar->show();
     centralwidget->layout()->setContentsMargins(defaultMargins);
   }
@@ -508,4 +521,136 @@ void MainWindow::on_horizontalSlider3DMouse_sliderReleased()
     *translationMultiplier = (horizontalSlider3DMouse->value()+1)/float(200.0);
     *rotationMultiplier = (horizontalSlider3DMouse->value()+1)/float(2000.0);
 #endif
+}
+
+void MainWindow::setCylinderParasGUI(){
+  userSetCylParas = false;
+  spinBoxCylinderNumber->setValue(current_cylinder);
+  doubleSpinBoxCylAxis_x->setValue(current_cylAxis[0]);
+  doubleSpinBoxCylAxis_y->setValue(current_cylAxis[1]);
+  doubleSpinBoxCylAxis_z->setValue(current_cylAxis[2]);
+  doubleSpinBoxCylEP_x->setValue(current_cylEPoint[0] / cylFit.cylParasGUI.scaleGUI);
+  doubleSpinBoxCylEP_y->setValue(current_cylEPoint[1] / cylFit.cylParasGUI.scaleGUI);
+  doubleSpinBoxCylEP_z->setValue(current_cylEPoint[2] / cylFit.cylParasGUI.scaleGUI);
+  doubleSpinBoxCylRadius->setValue(current_cylRadius / cylFit.cylParasGUI.scaleGUI);
+  doubleSpinBoxCylLength->setValue(current_cylLength / cylFit.cylParasGUI.scaleGUI);
+  doubleSpinBoxCylSP_x->setValue(current_cylSPoint[0] / cylFit.cylParasGUI.scaleGUI);
+  doubleSpinBoxCylSP_y->setValue(current_cylSPoint[1] / cylFit.cylParasGUI.scaleGUI);
+  doubleSpinBoxCylSP_z->setValue(current_cylSPoint[2] / cylFit.cylParasGUI.scaleGUI);
+  userSetCylParas = true;
+}
+
+void MainWindow::testCylinderParasGUIScale(){
+  //check if end point in range
+  if(current_cylEPoint[0]/cylFit.cylParasGUI.scaleGUI >= doubleSpinBoxCylEP_x->maximum() || current_cylEPoint[0]/cylFit.cylParasGUI.scaleGUI < doubleSpinBoxCylEP_x->minimum()){
+    cylFit.cylParasGUI.scaleGUI = ceil((fabs(current_cylEPoint[0] / (doubleSpinBoxCylEP_x->maximum())))/10)*10;
+  }
+  if(current_cylEPoint[1]/cylFit.cylParasGUI.scaleGUI >= doubleSpinBoxCylEP_y->maximum() || current_cylEPoint[1]/cylFit.cylParasGUI.scaleGUI < doubleSpinBoxCylEP_y->minimum()){
+    cylFit.cylParasGUI.scaleGUI = ceil((fabs(current_cylEPoint[1] / (doubleSpinBoxCylEP_y->maximum())))/10)*10;
+  }
+  if(current_cylEPoint[2]/cylFit.cylParasGUI.scaleGUI >= doubleSpinBoxCylEP_z->maximum() || current_cylEPoint[2]/cylFit.cylParasGUI.scaleGUI < doubleSpinBoxCylEP_z->minimum()){
+    cylFit.cylParasGUI.scaleGUI = ceil((fabs(current_cylEPoint[2] / (doubleSpinBoxCylEP_z->maximum())))/10)*10;
+  }
+  //check if start point in range
+  if(current_cylSPoint[0]/cylFit.cylParasGUI.scaleGUI >= doubleSpinBoxCylSP_x->maximum() || current_cylSPoint[0]/cylFit.cylParasGUI.scaleGUI < doubleSpinBoxCylSP_x->minimum()){
+    cylFit.cylParasGUI.scaleGUI = ceil((fabs(current_cylSPoint[0] / (doubleSpinBoxCylSP_x->maximum())))/10)*10;
+  }
+  if(current_cylSPoint[1]/cylFit.cylParasGUI.scaleGUI >= doubleSpinBoxCylSP_y->maximum() || current_cylSPoint[1]/cylFit.cylParasGUI.scaleGUI < doubleSpinBoxCylSP_y->minimum()){
+    cylFit.cylParasGUI.scaleGUI = ceil((fabs(current_cylSPoint[1] / (doubleSpinBoxCylSP_y->maximum())))/10)*10;
+  }
+  if(current_cylSPoint[2]/cylFit.cylParasGUI.scaleGUI >= doubleSpinBoxCylSP_z->maximum() || current_cylSPoint[2]/cylFit.cylParasGUI.scaleGUI < doubleSpinBoxCylSP_z->minimum()){
+    cylFit.cylParasGUI.scaleGUI = ceil((fabs(current_cylSPoint[2] / (doubleSpinBoxCylSP_z->maximum())))/10)*10;
+  }
+  //check if radius in range
+  if(current_cylRadius/cylFit.cylParasGUI.scaleGUI >= doubleSpinBoxCylRadius->maximum() || current_cylRadius/cylFit.cylParasGUI.scaleGUI < doubleSpinBoxCylRadius->minimum()){
+    cylFit.cylParasGUI.scaleGUI = ceil((fabs(current_cylRadius / (doubleSpinBoxCylRadius->maximum())))/10)*10;
+  }
+  //check if length in range
+  if(current_cylLength/cylFit.cylParasGUI.scaleGUI >= doubleSpinBoxCylLength->maximum() || current_cylLength/cylFit.cylParasGUI.scaleGUI < doubleSpinBoxCylLength->minimum()){
+    cylFit.cylParasGUI.scaleGUI = ceil((fabs(current_cylLength / (doubleSpinBoxCylLength->maximum())))/10)*10;
+  }
+}
+
+void MainWindow::setCylinderFilePath(){
+  QString cylinderFilePath = QFileDialog::getOpenFileName();
+  if(!cylinderFilePath.isEmpty()) {
+    lineEditCylinderFile->setText(cylinderFilePath);
+  }
+}
+
+void MainWindow::createCylinderFromSelection(){
+  cylFit.cylParasGUI.scaleGUI = 1;
+  cylFit.fitCylinderFromUserSelection(current_cylinder);
+  testCylinderParasGUIScale();
+  setCylinderParasGUI();
+  update();
+}
+
+void MainWindow::setAutoCorrect(bool value){
+  current_cylAutoCorrect = value;
+  std::cout << "Set Auto Correct Value" << '\n';
+}
+
+void MainWindow::deleteCurrentCylinder(){
+  cylFit.deleteCylinder(current_cylinder);
+  cylFit.cylParasGUI.scaleGUI = 1;
+  setCylinderParasGUI();
+  update();
+}
+
+void MainWindow::setCurrentCylinder(int value){
+  current_cylinder = value;
+  if(cylFit.setCurrentCylinder(value)){
+    testCylinderParasGUIScale();
+  }
+  setCylinderParasGUI();
+  update();
+}
+
+void MainWindow::changeCylinderParas(){
+  if(!userSetCylParas)  return;
+
+  double r = doubleSpinBoxCylRadius->value() * cylFit.cylParasGUI.scaleGUI;
+  double l = doubleSpinBoxCylLength->value() * cylFit.cylParasGUI.scaleGUI;
+  double axis[] = {doubleSpinBoxCylAxis_x->value(), doubleSpinBoxCylAxis_y->value(), doubleSpinBoxCylAxis_z->value()};
+  double cylStartP[] = {doubleSpinBoxCylSP_x->value() * cylFit.cylParasGUI.scaleGUI, doubleSpinBoxCylSP_y->value() * cylFit.cylParasGUI.scaleGUI, doubleSpinBoxCylSP_z->value() * cylFit.cylParasGUI.scaleGUI};
+  double cylEndP[] = {doubleSpinBoxCylEP_x->value() * cylFit.cylParasGUI.scaleGUI, doubleSpinBoxCylEP_y->value() * cylFit.cylParasGUI.scaleGUI, doubleSpinBoxCylEP_z->value() * cylFit.cylParasGUI.scaleGUI};
+  cylFit.changeCylinderParas(r, l, axis, cylStartP, cylEndP);
+  setCylinderParasGUI();
+}
+
+void MainWindow::changeCylinderFittingParas(){
+  //LS
+  cylFit.cylParasGUI.axisResFirst = doubleSpinBoxCylLSFGRes->value();
+  cylFit.cylParasGUI.angleMaxCone = doubleSpinBoxCylLSCMaxAngle->value();
+  cylFit.cylParasGUI.randomized = checkBoxRandom->isChecked();
+  cylFit.cylParasGUI.nAxis = spinBoxCylNAxis->value();
+  cylFit.cylParasGUI.axisResCone = doubleSpinBoxCylLSCRes->value();
+
+  //Growing
+  cylFit.cylParasGUI.cylEps =  doubleSpinBoxCylGrowingDis->value();
+  cylFit.cylParasGUI.radiusThreshold = doubleSpinBoxCylGrowingRThres->value();
+}
+
+void MainWindow::loadCylinderFromFile(){
+  QString fileName = lineEditCylinderFile->text();
+  current_cylinderFile = fileName.toLatin1().data();
+  cylFit.loadCylindersFromFile();
+  setCylinderParasGUI();
+  update();
+}
+
+void MainWindow::saveCylinderToFile(){
+  std::cout << "Save Cylinder" << '\n';
+  QString fileName = lineEditCylinderFile->text();
+  current_cylinderFile = fileName.toLatin1().data();
+  cylFit.saveCylinderToFile();
+}
+
+void MainWindow::clearCylinder(){
+  current_cylinder = 0;
+  cylFit.deleteAllCylinder();
+  cylFit.setCurrentCylinder(0);
+  setCylinderParasGUI();
+  update();
 }

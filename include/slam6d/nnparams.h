@@ -20,6 +20,16 @@ struct NNParams {
   int y;
   int z;
 
+  //direction for search along dir
+  float dir[3];
+  int dir_v[3];
+  int maxDistDir_v;
+  double maxDistDir;
+
+  //Percent of noise for search along dir
+  double minDistR;
+  int minDistR_v;
+
   /**
    * pointer to the point, size = 4 bytes of 32 bit machines
    */
@@ -34,5 +44,7 @@ struct NNParams {
   int max_count;
 
 };
-
+struct NNPoints{
+  std::vector<float*> knnRangePoints;
+};
 #endif
