@@ -62,6 +62,19 @@ public slots:
   void callStepScansDown();
   void callReloadFrames();
 
+  void setCylinderParasGUI();
+  void setCylinderFilePath();
+  void setCurrentCylinder(int value);
+  void testCylinderParasGUIScale();
+  void changeCylinderFittingParas();
+  void changeCylinderParas();
+  void createCylinderFromSelection();
+  void setAutoCorrect(bool value);
+  void deleteCurrentCylinder();
+  void saveCylinderToFile();
+  void loadCylinderFromFile();
+  void clearCylinder();
+
 protected:
   std::vector<std::string> loadRecentDirectories();
   void updateRecentDirectoriesMenu(std::vector<std::string> directories);

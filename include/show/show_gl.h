@@ -246,4 +246,13 @@ void callCameraUpdate(int dummy);
 
 void calcPointSequence(std::vector<int> &sequence, int frameNr);
 
+/**
+ * Draw Cylinder functions
+ */
+ void DrawCylinder();
+ void drawCylinderBody(sfloat startPoint[3], sfloat endPoint[3], sfloat axis[3], sfloat radius, int resolution);
+ void drawCircle(sfloat radius, int resolution, sfloat middlePoint[3], sfloat circle_direction[2][3]);
+ void drawTube(sfloat radius, int resolution, sfloat startPoint[3], sfloat endPoint[3], sfloat circle_direction[2][3]);
+
+
 #endif
