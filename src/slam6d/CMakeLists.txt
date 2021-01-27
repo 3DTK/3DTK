@@ -104,7 +104,11 @@ add_library(scan
         icp6Dnapx.cc      normals.cc        kdIndexed.cc      ../parsers/range_set_parser.cc
         )
 set_property(TARGET scan PROPERTY POSITION_INDEPENDENT_CODE 1)
-target_link_libraries(scan scanclient scanio ${ANN_LIBRARIES} ${NEWMAT_LIBRARIES} ${SUITESPARSE_LIBRARIES})
+if (WITH_OPENMP)
+  target_link_libraries(scan scanclient scanio ${ANN_LIBRARIES} ${NEWMAT_LIBRARIES} ${SUITESPARSE_LIBRARIES} OpenMP::OpenMP_CXX)
+else()
+  target_link_libraries(scan scanclient scanio ${ANN_LIBRARIES} ${NEWMAT_LIBRARIES} ${SUITESPARSE_LIBRARIES})
+endif()
 
 ### SCAN2FEATURES
 

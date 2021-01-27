@@ -104,6 +104,14 @@ $ cmake -H. -B.build -DWITH_PYTHON=OFF -DWITH_OPENMP=OFF -DWITH_FTGL=OFF $CMAKEO
 $ cmake --build .build
 ```
 
+It is possible to build 3dtk with OpenMP on macOS too. For the instructions how to install the OpenMP libs on correct way 
+on macOS, follow [this instruction](https://mac.r-project.org/openmp/). After correct installation of OMP, configure and build
+3dtk with following command: 
+```
+$ cmake -H. -B.build -DWITH_PYTHON=OFF -DWITH_OPENMP=ON -DWITH_FTGL=OFF $CMAKEOPTS -G "Ninja"
+$ cmake --build .build
+```
+
 
 ## Fedora 25
 ```
