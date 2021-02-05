@@ -109,6 +109,7 @@ APT="apt-get install --yes --no-install-recommends -o Debug::pkgProblemResolver=
     case "$DIST" in
 	    buster|bullseye|sid|focal)
 		    echo "equivs-build doc/equivs/control.$DERIV.$DIST.ros";
+		    ;;
       *)
 		    echo "equivs-build doc/equivs/control.$DERIV.$DIST";
     esac
