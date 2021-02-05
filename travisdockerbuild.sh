@@ -106,7 +106,12 @@ APT="apt-get install --yes --no-install-recommends -o Debug::pkgProblemResolver=
 	echo "apt-get dist-upgrade --yes";
 	echo "$APT equivs ninja-build build-essential";
 	if [ -z "$CC" ]; then
-		echo "equivs-build doc/equivs/control.$DERIV.$DIST";
+    case "$DIST" in
+	    buster|bullseye|sid|focal)
+		    echo "equivs-build doc/equivs/control.$DERIV.$DIST.ros";
+      *)
+		    echo "equivs-build doc/equivs/control.$DERIV.$DIST";
+    esac
 	else
 		echo "equivs-build doc/equivs/control.$DERIV.$DIST.$CC";
 	fi
