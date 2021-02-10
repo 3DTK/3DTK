@@ -319,6 +319,40 @@ inline void MMult(const T *M1,
 }
 
 /**
+ *   Multiplies a 4x4 matrices in OpenGL
+ *   (column-major) order with a 3x1 point 
+ *   Note: transforms the point
+ *  @param M     input matrix
+ *  @param Pin   input point
+ *  @param Pout  output point
+ *
+ */
+template <class T, class S>
+inline void PMult(const T *M, const S *Pin, S *Pout)
+{
+  Pout[ 0] = M[ 0]*Pin[ 0]+M[ 4]*Pin[ 1]+M[ 8]*Pin[ 2]+M[12];
+  Pout[ 1] = M[ 1]*Pin[ 0]+M[ 5]*Pin[ 1]+M[ 9]*Pin[ 2]+M[13];
+  Pout[ 2] = M[ 2]*Pin[ 0]+M[ 6]*Pin[ 1]+M[10]*Pin[ 2]+M[14];
+}
+
+/**
+ *   Multiplies a 4x4 matrices in OpenGL
+ *   (column-major) order with a 3x1 point 
+ *   Note: transforms the point (i.e. overwrites it)
+ *  @param M   input matrix
+ *  @param P   input point
+ *
+ */
+
+template <class T, class S>
+inline void PMult(const T *M, S *P)
+{
+  S Pout[3];
+  PMult(M, Pin, Pout);
+  for(unsigned int i = 0; i < 3; i++) P[i] = Pout[i];  
+}
+
+/**
  * Converts an Euler angle to a 3x3 matrix
  *
  * @param rPosTheta  vector of Euler angles

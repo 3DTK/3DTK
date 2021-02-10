@@ -75,7 +75,7 @@ void SDisplay::readDisplays(std::string &filename, std::vector<SDisplay*> &displ
         std::cerr << "Unknown SDisplay Object" << std::endl;
       }
     } catch(...) {
-      std::cerr << "Wrong display type" << std::endl;
+      std::cerr << "Wrong display type " << type << " " << objectfile << std::endl;
     }
   }
   input.close();
@@ -231,7 +231,7 @@ SDisplay * LineDisplay::readFromFile(std::string &filename) {
 void LineDisplay::displayObject() {
 
   glColor3f(1.0, 0.3, 0.3);
-  glLineWidth(1.0);
+  glLineWidth(3.0);
   glBegin(GL_LINES);
 
   for (unsigned int i = 0; i < lines.size(); i++) {

@@ -1381,7 +1381,9 @@ void selectPoints(int x, int y) {
   updateControls();
     glTranslated(X, Y, Z);       // move camera
 
-    static sfloat *sp2 = 0;
+    //static sfloat *sp2 = 0;
+    static sfloat sp2[3];
+
     for(int iterator = (int)octpts.size()-1; iterator >= 0; iterator--) {
 
       // ignore scans outside the selected (currently visible) range - if in advanced mode
@@ -1390,6 +1392,8 @@ void selectPoints(int x, int y) {
         if (iterator < startRangeScanIdx - startScanIdx) continue;
         if (iterator > endRangeScanIdx - startScanIdx) continue;
       }
+      double* frame;
+      frame = MetaMatrix[iterator].back();
 
       glPushMatrix();
       glMultMatrixd(MetaMatrix[iterator].back());
@@ -1400,19 +1404,26 @@ void selectPoints(int x, int y) {
         sfloat *sp = 0;
         octpts[iterator]->selectRay(sp);
         if (sp != 0) {
+          //Store point in local coordinate system for display
           std::cout << "Selected point: "
                << sp[0] << " " << sp[1] << " " << sp[2] << std::endl;
+          selected_points[iterator].insert(sp);
+          
+          //Transform point into global coordinate system
+          sfloat tmp[3];
+          PMult(frame,sp,tmp);
 
           if (sp2 != 0) {
             std::cout << "Distance to last point: "
-                 << sqrt( sqr(sp2[0] - sp[0]) +
-                          sqr(sp2[1] - sp[1]) +
-                          sqr(sp2[2] - sp[2])  )
+                 << sqrt( sqr(sp2[0] - tmp[0]) +
+                          sqr(sp2[1] - tmp[1]) +
+                          sqr(sp2[2] - tmp[2])  )
                  << std::endl;
           }
-          sp2 = sp;
+          for(unsigned int i = 0; i < 3; i++) sp2[i] = tmp[i];
+          std::cout << "Global coordinates: "
+               << sp2[0] << " " << sp2[1] << " " << sp2[2] << std::endl;
 
-          selected_points[iterator].insert(sp);
         }
       } else { // select multiple points with a given brushsize
         octpts[iterator]->selectRayBrushSize(selected_points[iterator],
