@@ -348,7 +348,7 @@ template <class T, class S>
 inline void PMult(const T *M, S *P)
 {
   S Pout[3];
-  PMult(M, Pin, Pout);
+  PMult(M, P, Pout);
   for(unsigned int i = 0; i < 3; i++) P[i] = Pout[i];  
 }
 
