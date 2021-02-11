@@ -5,10 +5,8 @@ set -eu
 
 echo "travis_fold:start:brew_install"
   brew uninstall --ignore-dependencies java
-  brew update || true
 	# update brew
-	brew tap brewsci/science
-	brew update
+	brew update || true
 	#brew upgrade
 	# install packageds with brew
   brew bundle
