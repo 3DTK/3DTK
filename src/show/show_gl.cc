@@ -1408,7 +1408,7 @@ void selectPoints(int x, int y) {
           std::cout << "Selected point: "
                << sp[0] << " " << sp[1] << " " << sp[2] << std::endl;
           selected_points[iterator].insert(sp);
-          
+
           //Transform point into global coordinate system
           sfloat tmp[3];
           PMult(frame,sp,tmp);

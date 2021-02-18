@@ -320,7 +320,7 @@ inline void MMult(const T *M1,
 
 /**
  *   Multiplies a 4x4 matrices in OpenGL
- *   (column-major) order with a 3x1 point 
+ *   (column-major) order with a 3x1 point
  *   Note: transforms the point
  *  @param M     input matrix
  *  @param Pin   input point
@@ -337,7 +337,7 @@ inline void PMult(const T *M, const S *Pin, S *Pout)
 
 /**
  *   Multiplies a 4x4 matrices in OpenGL
- *   (column-major) order with a 3x1 point 
+ *   (column-major) order with a 3x1 point
  *   Note: transforms the point (i.e. overwrites it)
  *  @param M   input matrix
  *  @param P   input point
@@ -349,7 +349,7 @@ inline void PMult(const T *M, S *P)
 {
   S Pout[3];
   PMult(M, P, Pout);
-  for(unsigned int i = 0; i < 3; i++) P[i] = Pout[i];  
+  for(unsigned int i = 0; i < 3; i++) P[i] = Pout[i];
 }
 
 /**
