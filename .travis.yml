@@ -13,108 +13,112 @@ notifications:
     on_failure: always
 env: # needed for allow_failures
 jobs:
-  allow_failures:
-    - os: osx
-      osx_image: xcode12u
-      before_cache:
-        - brew cleanup
-      cache:
-        directories:
-        - $HOME/Library/Caches/Homebrew
-      if: branch NOT IN (ubuntu, debian, linux)
-    - os: linux
-      arch: arm64
-      services:
-        - docker
-      env:
-        - DERIV=debian DIST=sid
-    - os: linux
-      arch: amd64
-      services:
-        - docker
-      env:
-        - DERIV=debian DIST=sid
-    - os: linux
-      arch: amd64
-      services:
-        - docker
-      env:
-        - DERIV=debian DIST=sid CC=clang
+#  allow_failures:
+#    - os: osx
+#      osx_image: xcode12u
+#      before_cache:
+#        - brew cleanup
+#      cache:
+#        directories:
+#        - $HOME/Library/Caches/Homebrew
+#      if: branch NOT IN (ubuntu, debian, linux)
+#    - os: linux
+#      arch: arm64
+#      services:
+#        - docker
+#      env:
+#        - DERIV=debian DIST=sid
+#    - os: linux
+#      arch: amd64
+#      services:
+#        - docker
+#      env:
+#        - DERIV=debian DIST=sid
+#    - os: linux
+#      arch: amd64
+#      services:
+#        - docker
+#      env:
+#        - DERIV=debian DIST=sid CC=clang
+#  include:
+#    - os: osx
+#      osx_image: xcode12u
+#      before_cache:
+#        - brew cleanup
+#      cache:
+#        directories:
+#        - $HOME/Library/Caches/Homebrew
+#      if: branch NOT IN (ubuntu, debian, linux)
+#    - os: linux
+#      arch: arm64
+#      services:
+#        - docker
+#      env:
+#        - DERIV=debian DIST=sid
+#      if: branch NOT IN (macos, osx, apple, ubuntu)
+#    - os: linux
+#      arch: amd64
+#      services:
+#        - docker
+#      env:
+#        - DERIV=debian DIST=sid
+#      if: branch NOT IN (macos, osx, apple, ubuntu)
+#    - os: linux
+#      arch: amd64
+#      services:
+#        - docker
+#      env:
+#        - DERIV=debian DIST=sid CC=clang
+#      if: branch NOT IN (macos, osx, apple, ubuntu)
+#    - os: linux
+#      arch: amd64
+#      services:
+#        - docker
+#      env:
+#        - DERIV=debian DIST=buster
+#      if: branch NOT IN (macos, osx, apple, ubuntu)
+#    - os: linux
+#      arch: amd64
+#      services:
+#        - docker
+#      env:
+#        - DERIV=debian DIST=bullseye
+#      if: branch NOT IN (macos, osx, apple, ubuntu)
+#    - os: linux
+#      arch: amd64
+#      services:
+#        - docker
+#      env:
+#        - DERIV=debian DIST=stretch
+#      if: branch NOT IN (macos, osx, apple, ubuntu)
+#    - os: linux
+#      arch: amd64
+#      services:
+#        - docker
+#      env:
+#        - DERIV=ubuntu DIST=xenial
+#      if: branch NOT IN (macos, osx, apple, debian)
+#    - os: linux
+#      arch: amd64
+#      services:
+#        - docker
+#      env:
+#        - DERIV=ubuntu DIST=bionic
+#      if: branch NOT IN (macos, osx, apple, debian)
+#    - os: linux
+#      arch: amd64
+#      services:
+#        - docker
+#      env:
+#        - DERIV=ubuntu DIST=focal
+#      if: branch NOT IN (macos, osx, apple, debian)
   include:
-    - os: osx
-      osx_image: xcode12u
-      before_cache:
-        - brew cleanup
-      cache:
-        directories:
-        - $HOME/Library/Caches/Homebrew
-      if: branch NOT IN (ubuntu, debian, linux)
-    - os: linux
-      arch: arm64
-      services:
-        - docker
-      env:
-        - DERIV=debian DIST=sid
-      if: branch NOT IN (macos, osx, apple, ubuntu)
-    - os: linux
-      arch: amd64
-      services:
-        - docker
-      env:
-        - DERIV=debian DIST=sid
-      if: branch NOT IN (macos, osx, apple, ubuntu)
-    - os: linux
-      arch: amd64
-      services:
-        - docker
-      env:
-        - DERIV=debian DIST=sid CC=clang
-      if: branch NOT IN (macos, osx, apple, ubuntu)
-    - os: linux
-      arch: amd64
-      services:
-        - docker
-      env:
-        - DERIV=debian DIST=buster
-      if: branch NOT IN (macos, osx, apple, ubuntu)
-    - os: linux
-      arch: amd64
-      services:
-        - docker
-      env:
-        - DERIV=debian DIST=bullseye
-      if: branch NOT IN (macos, osx, apple, ubuntu)
-    - os: linux
-      arch: amd64
-      services:
-        - docker
-      env:
-        - DERIV=debian DIST=stretch
-      if: branch NOT IN (macos, osx, apple, ubuntu)
-    - os: linux
-      arch: amd64
-      services:
-        - docker
-      env:
-        - DERIV=ubuntu DIST=xenial
-      if: branch NOT IN (macos, osx, apple, debian)
-    - os: linux
-      arch: amd64
-      services:
-        - docker
-      env:
-        - DERIV=ubuntu DIST=bionic
-      if: branch NOT IN (macos, osx, apple, debian)
-    - os: linux
-      arch: amd64
-      services:
-        - docker
-      env:
-        - DERIV=ubuntu DIST=focal
-      if: branch NOT IN (macos, osx, apple, debian)
+    - os: windows
+      if: branch NOT IN (macos, osx, apple, debian, ubuntu)
 script:
   - if [[ $TRAVIS_OS_NAME == 'osx' ]]; then travis_wait 45  ./travismacosbuild.sh; fi
   - if [[ $TRAVIS_OS_NAME == 'linux' ]]; then ./travisdockerbuild.sh $DERIV $DIST $CC; fi
+  - if [[ $TRAVIS_OS_NAME == 'windows' ]]; then /C/ProgramData/chocolatey/bin/python.exe windows/timeout.py 4800 windows/build.cmd $TRAVIS_BUILD_DIR C:/slam6d v142; fi
 # work around for output not persisting in Travis's console:
 # https://github.com/travis-ci/travis-ci/issues/6018
 after_script:
