@@ -4,6 +4,8 @@
 #include <vector>
 #include <math.h>
 #include <iostream>
+#include <stdlib.h>
+#include <time.h>
 #include "newmat/newmatap.h"                // for matrix applications
 
 
