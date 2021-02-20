@@ -65,6 +65,7 @@
 #include "slam6d/point_type.h"
 #include "slam6d/io_utils.h"
 #include "show/display.h"
+#include "show/cylinderFitting.h"
 
 /**
  * Display objects from the loadObj parameter.
@@ -383,6 +384,21 @@ extern int selectOrunselect;
 extern int selection_depth;
 extern int brush_size;
 extern char *selection_file_name;
+
+/**
+ * Cylinder values
+ */
+extern bool userSetCylParas;
+extern int current_cylinder;
+extern double current_cylRadius;
+extern double current_cylLength;
+extern double current_cylAxis[3];
+extern double current_cylSPoint[3];
+extern double current_cylEPoint[3];
+extern char* current_cylinderFile;
+extern bool current_cylAutoCorrect;
+extern bool show_cylinderBody;
+extern bool show_cylinderPoints;
 
 // show_gl needs to know this function for correct handling of close event
 void deinitShow();

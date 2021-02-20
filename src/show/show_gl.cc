@@ -636,6 +636,187 @@ void DrawCoordinateSystems() {
   }
 }
 
+/**
+ * void DrawCylinder - Draws Cylinder
+ *
+ * Use Function: drawCylinderBody() (+ drawCircle() + drawTube())
+ */
+void DrawCylinder(){
+  //check if any cylinder were generated
+  if(cylFit.generated_Cylinders.empty())
+    return;
+
+  //Rotate + Translate--> calc Frame --> then draw cylinder Points for each scan
+  std::vector<int> sequence;
+  calcPointSequence(sequence, current_frame);
+  for(unsigned int i = 0; i < sequence.size(); i++) {
+
+    int iterator = sequence[i];
+    // ignore scans that don't have any frames associated with them
+    if((unsigned int)iterator >= MetaMatrix.size()) continue;
+
+    // also ignore scans outside the selected range - if in advanced mode
+    if (advanced_controls){
+      // pay attention to offset (startScanIdx)
+      if (iterator < startRangeScanIdx - startScanIdx) continue;
+      if (iterator > endRangeScanIdx - startScanIdx) continue;
+    }
+
+    // set usable frame
+    double* frame;
+    Scan::AlgoType type;
+    if((unsigned int)current_frame >= MetaMatrix[iterator].size()) {
+      // use last possible frame
+      frame = MetaMatrix[iterator].back();
+      type = MetaAlgoType[iterator].back();
+    } else {
+      frame = MetaMatrix[iterator][current_frame];
+      type = MetaAlgoType[iterator][current_frame];
+    }
+    if (type == Scan::INVALID) continue;
+
+
+    glPushMatrix();
+
+    glMultMatrixd(frame);
+
+    ExtractFrustum(pointsize);
+
+    //Colour selected cylinder red (blue for other cylinder Points)
+    for ( std::set<Cylinder*>::iterator it = cylFit.generated_Cylinders.begin(); it != cylFit.generated_Cylinders.end(); it++) {
+      //check if Cylinder was successfully calculated
+      if((*it)->radius <= 0){
+        continue;
+      }
+
+      //check if current cylinder is selected, if yes --> red (else blue) (-->different from selected Points for better visiblity)
+      if((*it)->cylIndex == current_cylinder)
+        glColor4f(1.0, 0.0, 0.0, 1.0); //red
+      else
+        glColor4f(0.0, 0.0, 1.0, 1.0); //blue
+
+      //Draw Cylinder Points
+      if(show_cylinderPoints){
+        glPointSize(pointsize+2);
+        glBegin(GL_POINTS);
+        for(std::vector<CylPoint*>::iterator it_point = (*it)->cylinderPoints.begin(); it_point !=  (*it)->cylinderPoints.end(); it_point++){
+          glVertex3d((*it_point)->x, (*it_point)->y, (*it_point)->z);
+        }
+        glEnd();
+        glPointSize(pointsize);
+      }
+
+      //Draw Cylinder
+      if(show_cylinderBody)
+        drawCylinderBody((*it)->cylStartP, (*it)->cylEndP, (*it)->axis, (*it)->radius, 100);
+    }
+    glPopMatrix();
+  }
+}
+/**
+ * void drawCylinderBody - Draws "Physical" Cylinder Body (Tube + 2 Circles)
+ *
+ * @param  {type} sfloat startPoint[3] Cylinder start point lying on cyl axis
+ * @param  {type} sfloat endPoint[3]   Cylinder end point lying on cyl axis
+ * @param  {type} sfloat axis[3]       Cylinder axis
+ * @param  {type} sfloat radius        Cylinder radius
+ * @param  {type} int resolution       Drawing resolution (Circle created from triangles)
+ */
+void drawCylinderBody(sfloat startPoint[3], sfloat endPoint[3], sfloat axis[3], sfloat radius, int resolution){
+  //normalize clyinder axis
+  sfloat normCylinderAxis = sqrt(axis[0] * axis[0] + axis[1] * axis[1] + axis[2] * axis[2]);
+  axis[0] /= normCylinderAxis;
+  axis[1] /= normCylinderAxis;
+  axis[2] /= normCylinderAxis;
+
+  //calc circle direction vector --> Crossproduct with vector (1, 1, 0),
+  //both circles of cylinder parallel --> directions are the same
+  sfloat ortho_vec[2][3] = {{axis[1]-axis[2], axis[2]-axis[0], axis[0]-axis[1]}, {0.0, 0.0, 0.0}};
+  ortho_vec[1][0] = ortho_vec[0][1]*axis[2]-ortho_vec[0][2]*axis[1];
+  ortho_vec[1][1] = ortho_vec[0][2]*axis[0]-ortho_vec[0][0]*axis[2];
+  ortho_vec[1][2] = ortho_vec[0][0]*axis[1]-ortho_vec[0][1]*axis[0];
+  sfloat length_ortho[2] = {sqrt(ortho_vec[0][0]*ortho_vec[0][0]+ortho_vec[0][1] * ortho_vec[0][1] + ortho_vec[0][2] * ortho_vec[0][2]),
+                            sqrt(ortho_vec[1][0]*ortho_vec[1][0]+ortho_vec[1][1] * ortho_vec[1][1] + ortho_vec[1][2] * ortho_vec[1][2])};
+  sfloat circle_direction[2][3] = {{radius*ortho_vec[0][0]/length_ortho[0], radius*ortho_vec[0][1]/length_ortho[0], radius*ortho_vec[0][2]/length_ortho[0]},
+                                    {radius*ortho_vec[1][0]/length_ortho[1], radius*ortho_vec[1][1]/length_ortho[1], radius*ortho_vec[1][2]/length_ortho[1]}};
+
+  //draw Cylinder
+  drawCircle(radius, resolution, startPoint, circle_direction);
+  drawCircle(radius, resolution, endPoint, circle_direction);
+  drawTube(radius, resolution, startPoint, endPoint, circle_direction);
+}
+
+/**
+ * void drawCircle - Draws a filled circle created with Triangles
+ *
+ * @param  {type} sfloat radius                 Radius circle
+ * @param  {type} int resolution                Resolution (how many Triangles)
+ * @param  {type} sfloat middlePoint[3]         Circle middle point
+ * @param  {type} sfloat circle_direction[2][3] Circle Direction (Orthogonale circle axis)
+ */
+void drawCircle(sfloat radius, int resolution, sfloat middlePoint[3], sfloat circle_direction[2][3]){
+  GLfloat vertex[4];
+
+  glBegin(GL_TRIANGLE_FAN);
+  vertex[0] = middlePoint[0];
+  vertex[1] = middlePoint[1];
+  vertex[2] = middlePoint[2];
+  vertex[3] = 1.0;
+  glVertex4fv(vertex);
+
+  for (float tmp_deltaTheta=0.0f; tmp_deltaTheta<2*M_PI; tmp_deltaTheta+=((2 * M_PI)/(resolution-1))){
+    vertex[0] = middlePoint[0] + cos(tmp_deltaTheta) * circle_direction[0][0] + sin(tmp_deltaTheta) * circle_direction[1][0];
+    vertex[1] = middlePoint[1] + cos(tmp_deltaTheta) * circle_direction[0][1] + sin(tmp_deltaTheta) * circle_direction[1][1];
+    vertex[2] = middlePoint[2] + cos(tmp_deltaTheta) * circle_direction[0][2] + sin(tmp_deltaTheta) * circle_direction[1][2];
+    vertex[3] = 1.0;
+    glVertex4fv(vertex);
+  }
+  float tmp_deltaTheta=0.0f;
+  vertex[0] = middlePoint[0] + cos(tmp_deltaTheta) * circle_direction[0][0] + sin(tmp_deltaTheta) * circle_direction[1][0];
+  vertex[1] = middlePoint[1] + cos(tmp_deltaTheta) * circle_direction[0][1] + sin(tmp_deltaTheta) * circle_direction[1][1];
+  vertex[2] = middlePoint[2] + cos(tmp_deltaTheta) * circle_direction[0][2] + sin(tmp_deltaTheta) * circle_direction[1][2];
+  vertex[3] = 1.0;
+  glVertex4fv(vertex);
+  glEnd();
+}
+
+/**
+ * void drawTube - Draws a tube (used for drawing cylinder)
+ *
+ * @param  {type} sfloat radius                 Tube radius
+ * @param  {type} int resolution                Tube resolution (How many "Triangles")
+ * @param  {type} sfloat startPoint[3]          Start point on tube axis
+ * @param  {type} sfloat endPoint[3]            End point on tube axis
+ * @param  {type} sfloat circle_direction[2][3] Circle ortho axis
+ */
+void drawTube(sfloat radius, int resolution, sfloat startPoint[3], sfloat endPoint[3], sfloat circle_direction[2][3]){
+  GLfloat vertex[4];
+  glBegin(GL_QUAD_STRIP);
+  for (float tmp_deltaTheta=0.0f; tmp_deltaTheta<2*M_PI; tmp_deltaTheta+=((2 * M_PI)/(resolution-1))){
+    vertex[0] = startPoint[0] + cos(tmp_deltaTheta) * circle_direction[0][0] + sin(tmp_deltaTheta) * circle_direction[1][0];
+    vertex[1] = startPoint[1] + cos(tmp_deltaTheta) * circle_direction[0][1] + sin(tmp_deltaTheta) * circle_direction[1][1];
+    vertex[2] = startPoint[2] + cos(tmp_deltaTheta) * circle_direction[0][2] + sin(tmp_deltaTheta) * circle_direction[1][2];
+    vertex[3] = 1.0;
+    glVertex4fv(vertex);
+    vertex[0] = endPoint[0] + cos(tmp_deltaTheta) * circle_direction[0][0] + sin(tmp_deltaTheta) * circle_direction[1][0];
+    vertex[1] = endPoint[1] + cos(tmp_deltaTheta) * circle_direction[0][1] + sin(tmp_deltaTheta) * circle_direction[1][1];
+    vertex[2] = endPoint[2] + cos(tmp_deltaTheta) * circle_direction[0][2] + sin(tmp_deltaTheta) * circle_direction[1][2];
+    vertex[3] = 1.0;
+    glVertex4fv(vertex);
+  }
+  float tmp_deltaTheta=0.0f;
+  vertex[0] = startPoint[0] + cos(tmp_deltaTheta) * circle_direction[0][0] + sin(tmp_deltaTheta) * circle_direction[1][0];
+  vertex[1] = startPoint[1] + cos(tmp_deltaTheta) * circle_direction[0][1] + sin(tmp_deltaTheta) * circle_direction[1][1];
+  vertex[2] = startPoint[2] + cos(tmp_deltaTheta) * circle_direction[0][2] + sin(tmp_deltaTheta) * circle_direction[1][2];
+  vertex[3] = 1.0;
+  glVertex4fv(vertex);
+  vertex[0] = endPoint[0] + cos(tmp_deltaTheta) * circle_direction[0][0] + sin(tmp_deltaTheta) * circle_direction[1][0];
+  vertex[1] = endPoint[1] + cos(tmp_deltaTheta) * circle_direction[0][1] + sin(tmp_deltaTheta) * circle_direction[1][1];
+  vertex[2] = endPoint[2] + cos(tmp_deltaTheta) * circle_direction[0][2] + sin(tmp_deltaTheta) * circle_direction[1][2];
+  vertex[3] = 1.0;
+  glVertex4fv(vertex);
+  glEnd();
+}
 void setup_camera() {
 
   // The camera projection is represented in OpenGL by the ModelView matrix
@@ -943,6 +1124,9 @@ void DisplayItFunc(GLenum mode, bool interruptable)
 
   // if show points is true the draw points
   if (show_points == 1) DrawPoints(mode, interruptable);
+
+  // if show_cylinderBody or show_cylinderPoints true draw cylinder
+if(show_cylinderBody || show_cylinderPoints) DrawCylinder();
 
   if (classLabels) DrawTypeLegend();
   if (label) DrawUrl();

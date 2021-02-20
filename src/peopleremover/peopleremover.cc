@@ -559,10 +559,9 @@ int main(int argc, char *argv[])
 				fprintf(out, " %a", refl_it->second[j]);
 			}
 			if (rgb_it != rgb_by_slice.end()) {
-				// DataRGB is a TripleArray<unsigned char>
-				fprintf(out, " %d %d %d", rgb_it->second[j][0],
-					rgb_it->second[j][1],
-					rgb_it->second[j][2]);
+				// FIXME: rgb_it->second[j] is a RGB char array
+				// not a single value
+				fprintf(out, " %a", rgb_it->second[j]);
 			}
 			fprintf(out, "\n");
 		}
@@ -593,8 +592,6 @@ int main(int argc, char *argv[])
 		size_t i = element.first;
 		std::unordered_map<size_t, DataReflectance>::const_iterator
 		    refl_it = reflectances_by_slice.find(i);
-		std::unordered_map<size_t, DataRGB>::const_iterator rgb_it =
-		    rgb_by_slice.find(i);
 		std::ostringstream out;
 		out << staticdir << "/scan" << std::setw(3) << std::setfill('0')
 		    << i << ".3d";
@@ -605,29 +602,22 @@ int main(int argc, char *argv[])
 		}
 		for (size_t j = 0; j < element.second.size(); ++j) {
 			int ret;
+			double refl = 0;
+			if (refl_it != reflectances_by_slice.end()) {
+				refl = refl_it->second[j];
+			}
 			struct voxel voxel =
 			    voxel_of_point(element.second[j], voxel_size);
 			if (free_voxels.find(voxel) == free_voxels.end() &&
 			    (half_voxels.find(voxel) == half_voxels.end() ||
 			     half_voxels[voxel].find(i) ==
 				 half_voxels[voxel].end())) {
-				ret = fprintf(out_static, "%a %a %a",
+				ret = fprintf(out_static, "%a %a %a %a\n",
 					      orig_points_by_slice[i][j][0],
 					      orig_points_by_slice[i][j][1],
-					      orig_points_by_slice[i][j][2]);
-				if (refl_it != reflectances_by_slice.end()) {
-					fprintf(out_static, " %a",
-						refl_it->second[j]);
-				}
-				if (rgb_it != rgb_by_slice.end()) {
-					// DataRGB is a TripleArray<unsigned
-					// char>
-					fprintf(out_static, " %d %d %d",
-						rgb_it->second[j][0],
-						rgb_it->second[j][1],
-						rgb_it->second[j][2]);
-				}
-				fprintf(out_static, "\n");
+					      orig_points_by_slice[i][j][2],
+					      // 0.0f
+					      refl);
 			}
 			if (ret < 0) {
 				std::cerr << "failed to write to " << out.str()

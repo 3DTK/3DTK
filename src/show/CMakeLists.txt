@@ -26,7 +26,7 @@ if (WITH_OPENGL)
   endif()
 endif()
 
-add_library(show_objects OBJECT NurbsPath.cc PathGraph.cc scancolormanager.cc colormanager.cc compacttree.cc show_gl.cc vertexarray.cc viewcull.cc display.cc show_animate.cc show_common.cc show_menu.cc program_options.cc callbacks_glut.cpp)
+add_library(show_objects OBJECT NurbsPath.cc PathGraph.cc scancolormanager.cc colormanager.cc compacttree.cc show_gl.cc vertexarray.cc viewcull.cc display.cc show_animate.cc show_common.cc show_menu.cc program_options.cc callbacks_glut.cpp cylinderFitting.cc)
 set_property(TARGET show_objects PROPERTY POSITION_INDEPENDENT_CODE ON)
 
 add_library(show show.cc $<TARGET_OBJECTS:show_objects>)
