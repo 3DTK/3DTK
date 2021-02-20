@@ -119,13 +119,12 @@ std::vector<Cylinder*> CylinderDetector::detectCylinder(){
   cad->calculateCylAxis();
 
 
-  int cylinderCounter = 0; int circleFileCounter = 0;
-  int noCylinderFoundRound = 0; unsigned int maxnoCylinderFoundRound = 5;
-  int vectorPointFileCounter = 0;
-  for(int i = 0; i < para.maxCylAxis; i++){
+  int cylinderCounter = 0;
+  int noCylinderFoundRound = 0;
+  for(unsigned int i = 0; i < para.maxCylAxis; i++){
     //Get new cylinder axis hypothese if not valid break
     CylinderAxis ca = cad->getCylAxisHypothese(i);
-    if(ca.nVotes == -1)
+    if(ca.nVotes == 0)
       break;
 
     //Calc orthnormal coor sys
@@ -155,7 +154,6 @@ std::vector<Cylinder*> CylinderDetector::detectCylinder(){
       }
 
       //Combine to get Cylinder
-      float cylinderCost = 0;
       unsigned int newCylinderFound = 0;
       for(unsigned int i = 0; i < circles.size(); i++){
         float c[] = {circles.at(i).middleP[0], circles.at(i).middleP[1], circles.at(i).middleP[2]};
@@ -202,7 +200,7 @@ std::vector<Cylinder*> CylinderDetector::detectCylinder(){
           continue;
         }
       }
-      for(int m = 0; m < v_PCP.size(); m++){
+      for(unsigned int m = 0; m < v_PCP.size(); m++){
         if(possibleCylPUsed[m]){
           v_PCP.erase(v_PCP.begin()+m);
         }
@@ -516,7 +514,6 @@ bool CylinderDetector::intersectCylinder(Cylinder &cyl1, Cylinder& cyl2){
     ColumnVector tmp(3); tmp = c2_p0 - c1_p0;
     Real d0 = DotProduct(c1, tmp);
     tmp = c2_p1 - c1_p0;
-    Real d1 = DotProduct(c1, tmp);
     minDis = (((d0*c1) + c1_p0) - c2_p0).NormFrobenius();
     if(minDis < cyl1.radius + cyl2.radius){
       return true;

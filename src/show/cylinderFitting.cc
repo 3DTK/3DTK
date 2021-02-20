@@ -510,7 +510,6 @@ bool CylinderFitting::fitCylinderAlongLateralSurfacePoints(Cylinder* c){
   bool growLeft = true, growRight = true;
 
   //Cylinder Variables
-  float cylLength = dist2Points3D(c->cylStartP, c->cylEndP);
   float radiusThreshold = cylParasGUI.radiusThreshold;
 
   float current_cylEps = cylParasGUI.cylEps; int currentTry = 0;
@@ -792,7 +791,7 @@ std::vector<CylPoint> CylinderFitting::prepareCylAxisForLS(Cylinder *c, float re
     if(cylParasGUI.randomized == true){
 
       RowVector axis_pole(3);
-      for(int i = 0; i < cylParasGUI.nAxis; i++){
+      for(unsigned int i = 0; i < cylParasGUI.nAxis; i++){
         if(i == 0){
           axis_pole(1) = 0;
           axis_pole(2) = 0;

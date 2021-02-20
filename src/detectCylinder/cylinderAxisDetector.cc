@@ -78,7 +78,7 @@ CylinderAxis CylinderAxisDetector::getCylAxisHypothese(int index){
     ca.axis[0] = 0;
     ca.axis[1] = 0;
     ca.axis[2] = 0;
-    ca.nVotes = -1;
+    ca.nVotes = 0;
     return ca;
   }else{
     return (*v_cylinderAxis.at(index));
