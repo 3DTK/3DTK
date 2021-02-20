@@ -402,6 +402,8 @@ protected:
 
   //! Threadlocal storage of parameters used in SearchTree operations
   static NNParams params[100];
+  // !Threadlocal storage of points used in KNNSearch
+  static NNPoints pointsSearch[100];
 
   /**
    * Serialization uncritical, runtime irrelevant variables (constructor-stuff)
@@ -1376,7 +1378,190 @@ protected:
     }
   }
 
+public:
+  /**
+   * RangeSearchAlongDir - Search along Direction/Vector/axis with min and max Distance from direction (cylinder search)
+   *
+   * @param  {type} double *point       Point on axis(maxDistDir will be start counted from this point)
+   * @param  {type} double* dir         Direction/Axis used for search
+   * @param  {type} double maxDistR     Max dist between point and line (axis)
+   * @param  {type} double minDistR     Min dist between point and line (axis)
+   * @param  {type} double maxDistDir   Max dist along dir (start from point in both directions)
+   * @param  {type} int threadNum       Threadnumber
+   * @return {type} std::vector<float*> Points found
+   */
+  inline std::vector<float*> RangeSearchAlongDir(double *point, double* dir, double maxDistR, double minDistR, double maxDistDir, int threadNum) const{
 
+    pointsSearch[threadNum].knnRangePoints.clear();
+    params[threadNum].closest_d2 = maxDistR;
+    params[threadNum].maxDistDir = sqrt(maxDistDir * maxDistDir + maxDistR * maxDistR);
+    params[threadNum].maxDistDir_v = fabs(params[threadNum].maxDistDir + add[0] + add[1] + add[2]) * mult + 1;
+    params[threadNum].minDistR = minDistR;
+    params[threadNum].minDistR_v = fabs(minDistR + add[0] + add[1] + add[2]) * mult + 1;
+    params[threadNum].closest_v = fabs(maxDistR + add[0] + add[1] + add[2]) * mult + 1;
+    params[threadNum].p = point;
+    params[threadNum].x = (point[0] + add[0]) * mult;
+    params[threadNum].y = (point[1] + add[1]) * mult;
+    params[threadNum].z = (point[2] + add[2]) * mult;
+    params[threadNum].dir_v[0] = (dir[0] + add[0]) * mult;
+    params[threadNum].dir_v[1] = (dir[1] + add[1]) * mult;
+    params[threadNum].dir_v[2] = (dir[2] + add[2]) * mult;
+    params[threadNum].dir[0] = dir[0];
+    params[threadNum].dir[1] = dir[1];
+    params[threadNum].dir[2] = dir[2];
+    params[threadNum].count = 0;
+    params[threadNum].max_count = 10000; // stop looking after this many buckets
+
+    unsigned char depth = 0;
+    unsigned int child_bit;
+    unsigned int child_index_min;
+    unsigned int child_index_max;
+
+    bitunion<T> *node = &(*uroot);
+
+    int cx, cy, cz;
+
+    child_bit = child_bit_depth[depth];
+    cx = child_bit_depth[depth];
+    cy = child_bit_depth[depth];
+    cz = child_bit_depth[depth];
+
+    int xmin, ymin, zmin, xmax, ymax, zmax;
+    double distR = maxDistR;// + params[threadNum].noise;
+    xmin = (std::min)((int)((point[0] - maxDistDir*dir[0] - distR + add[0]) * mult), 0);
+    ymin = (std::min)((int)((point[1] - maxDistDir*dir[1] - distR + add[1]) * mult), 0);
+    zmin = (std::min)((int)((point[2] - maxDistDir*dir[2] - distR + add[2]) * mult), 0);
+    xmax = (std::max)((int)((point[0] + maxDistDir*dir[0] + distR + add[0]) * mult), 0);
+    ymax = (std::max)((int)((point[1] + maxDistDir*dir[1] + distR + add[1]) * mult), 0);
+    zmax = (std::max)((int)((point[2] + maxDistDir*dir[2] + distR + add[2]) * mult), 0);
+
+    while (true) { // find the first node where branching is required
+      child_index_min = ((xmin & child_bit )!=0)  | (((ymin & child_bit )!=0 )<< 1) | (((zmin & child_bit )!=0) << 2);
+      child_index_max = ((xmax & child_bit )!=0)  | (((ymax & child_bit )!=0 )<< 1) | (((zmax & child_bit )!=0) << 2);
+
+      // if these are the same, go there
+      if (child_index_min == child_index_max) {
+        if (node->childIsLeaf(child_index_min) ) {  // luckily, no branching is required
+          _findPointsAlongDirInLeaf(node->getChild(child_index_min), threadNum);
+          return pointsSearch[threadNum].knnRangePoints;
+        } else {
+          if (node->isValid(child_index_min) ) { // only descend when there is a child
+            childcenter(cx,cy,cz, cx,cy,cz, child_index_min, child_bit/2 );
+            node = node->getChild(child_index_min);
+            child_bit /= 2;
+          } else {  // there is no child containing the bounding box => no point is close enough
+            return pointsSearch[threadNum].knnRangePoints;
+          }
+        }
+      } else {
+        // if min and max are not in the same child we must branch
+        break;
+      }
+    }
+
+
+    // node contains all box-within-bounds cells, now begin best bin first search
+    _FindPointsAlongDir(threadNum, node->node, child_bit/2, cx, cy, cz);
+    return pointsSearch[threadNum].knnRangePoints;
+  }
+protected:
+
+  /**
+   * _distanceToLine - Calc Distance between Point p_0 + Line
+   *
+   * @param  {type} float dir[3]  vector/direction of line
+   * @param  {type} float dirP[3] Point on line
+   * @param  {type} float p[3]    Point p_0
+   * @return {type}               distance between p_0 and line
+   */
+  inline float _distanceToLine(float dir[3], float dirP[3], float p[3]) const{
+    float p_tmp[] = {p[0] - dirP[0], p[1] - dirP[1], p[2] - dirP[2]};
+
+    float cross[3];
+    cross[0] = dir[1] * p_tmp[2] - p_tmp[1] * dir[2];
+    cross[1] = dir[2] * p_tmp[0] - p_tmp[2] * dir[0];
+    cross[2] = dir[0] * p_tmp[1] - p_tmp[0] * dir[1];
+
+    float norm = sqrt(cross[0] * cross[0] + cross[1] * cross[1] + cross[2] * cross[2]);
+    float norm2 = sqrt(dir[0] * dir[0] + dir[1] * dir[1] + dir[2] * dir[2]);
+
+    return norm/norm2;
+  }
+
+  /**
+   * This is the heavy duty search function doing most of the (theoretically unneccesary) work. The tree is recursively searched.
+   * Depending on which of the 8 child-voxels is closer to the query point, the children are examined in a special order.
+   * This order is defined in map, imap is its inverse and sequence2ci is a speedup structure for faster access to the child indices.
+   */
+  void _FindPointsAlongDir(int threadNum, bitoct &node, int size, int x, int y, int z) const
+  {
+    // Recursive case
+    // compute which child is closest to the query point
+    unsigned char child_index =  ((params[threadNum].x - x) >= 0) |
+                                (((params[threadNum].y - y) >= 0) << 1) |
+                                (((params[threadNum].z - z) >= 0) << 2);
+
+    char *seq2ci = sequence2ci[child_index][node.valid];  // maps preference to index in children array
+    char *mmap = amap[child_index];  // maps preference to area index
+
+    bitunion<T> *children;
+    bitoct::getChildren(node, children);
+    int cx, cy, cz;
+    cx = cy = cz = 0; // just to shut up the compiler warnings
+    for (unsigned char i = 0; i < 8; i++) { // in order of preference
+      child_index = mmap[i]; // the area index of the node
+      if (  ( 1 << child_index ) & node.valid ) {   // if ith node exists
+        //Note: Should look if node is within range
+        childcenter(x,y,z, cx,cy,cz, child_index, size);
+        float p[3] = {(float)cx, (float)cy, (float)cz};
+        float dir_p[3] = {(float)params[threadNum].x, (float)params[threadNum].y, (float)params[threadNum].z};
+        float dir_v[3] = {(float)params[threadNum].dir_v[0], (float)params[threadNum].dir_v[1], (float)params[threadNum].dir_v[2]};
+
+        double dist = _distanceToLine(dir_v, dir_p, p);
+        double tmpX = dir_p[0] - p[0];
+        double tmpY = dir_p[1] - p[1];
+        double tmpZ = dir_p[2] - p[2];
+        double distLength = sqrt(tmpX * tmpX + tmpY * tmpY + tmpZ * tmpZ);
+        if (params[threadNum].closest_v == 0 || dist > params[threadNum].closest_v || distLength > params[threadNum].maxDistDir_v){
+          continue;
+        }
+        // find the closest point in leaf seq2ci[i]
+        if (  ( 1 << child_index ) & node.leaf ) {   // if ith node is leaf
+          _findPointsAlongDirInLeaf( &children[seq2ci[i]], threadNum);
+        } else { // recurse
+          _FindPointsAlongDir(threadNum, children[seq2ci[i]].node, size/2, cx, cy, cz);
+        }
+      }
+    }
+  }
+
+  /**
+   * Given a leaf node, this function looks for the closest point to params[threadNum].closest
+   * in the list of points.
+   */
+  inline void _findPointsAlongDirInLeaf(bitunion<T> *node, int threadNum) const {
+    if (params[threadNum].count >= params[threadNum].max_count) return;
+    params[threadNum].count++;
+    T* points = node->getPoints();
+    unsigned int length = node->getLength();
+    for(unsigned int iterator = 0; iterator < length; iterator++ ) {
+      float p[] = {(float)params[threadNum].p[0], (float)params[threadNum].p[1], (float)params[threadNum].p[2]};
+      float dist2Line = (float) _distanceToLine(params[threadNum].dir, p, points);
+      double tmpX = p[0] - points[0];
+      double tmpY = p[1] - points[1];
+      double tmpZ = p[2] - points[2];
+      double distLength = sqrt(tmpX * tmpX + tmpY * tmpY + tmpZ * tmpZ);
+      float min = params[threadNum].minDistR;// * params[threadNum].minDistR;
+      float max = params[threadNum].closest_d2;// * params[threadNum].closest_d2;
+      //if same --> round to same float point size for equality test
+      if(min == max)
+        dist2Line = round(dist2Line * min) / min;
+      if((dist2Line >= min) && (dist2Line <= max) && (distLength < params[threadNum].maxDistDir)){
+        pointsSearch[threadNum].knnRangePoints.push_back(static_cast<float*>(points));
+      }
+      points+=BOctTree<T>::POINTDIM;
+    }
+  }
 
 /**
  * This function finds the closest point in the octree given a specified
@@ -1761,5 +1946,7 @@ typedef SingleObject<BOctTree<float> > DataOcttree;
 
 template <class T>
 NNParams BOctTree<T>::params[100];
+template <class T>
+NNPoints BOctTree<T>::pointsSearch[100];
 
 #endif

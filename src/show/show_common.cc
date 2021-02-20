@@ -323,6 +323,21 @@ int selection_depth = 1;
 int brush_size = 0;
 char *selection_file_name;
 
+/**
+* Cylinder Fitting values
+*/
+bool userSetCylParas = true;
+int current_cylinder = 0;
+double current_cylRadius = 0;
+double current_cylLength = 0;
+double current_cylAxis[3] = {0, 0, 0};
+double current_cylSPoint[3] = {0, 0, 0};
+double current_cylEPoint[3] = {0, 0, 0};
+char* current_cylinderFile;
+bool current_cylAutoCorrect = false;
+bool show_cylinderBody = true;
+bool show_cylinderPoints = true;
+
 // show_gl needs to know this function for correct handling of close event
 void deinitShow();
 

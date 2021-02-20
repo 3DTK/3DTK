@@ -75,6 +75,11 @@ public:
     m_scan = scan;
   }
 
+  //For Cylinder fitting
+  std::vector<float*> RangeSearchAlongDir(double *point, double* dir, double maxDistR, double minDistR, double maxDistDir, int threadNum){
+    return m_tree->RangeSearchAlongDir(point, dir, maxDistR, minDistR, maxDistDir, threadNum);
+  }
+
   //! Retrieve a cache access object and update the tree pointer
   void lockCachedTree() {
     if(m_scan != 0 && m_cache_access == 0) {

@@ -63,6 +63,10 @@ QtShow::QtShow(int &argc, char **argv)
   else
     mainWindow->dockAdvanced->hide();
 
+  mainWindow->dockCylinder->setFloating(true);
+  if(!advanced_controls)
+    mainWindow->dockCylinder->hide();
+
   update_callback = [&]() {
     mainWindow->glWidget->update();
   };
