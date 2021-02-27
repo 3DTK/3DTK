@@ -333,8 +333,8 @@ bool CylinderDetector::findCylinderEndsNew(Cylinder *c){
   double maxDistance = 0;
   double dis[projectedPointsOnAxes.size()-1];
   for(unsigned int i = 0; i < projectedPointsOnAxes.size()-1; i++){
-    float p1[3] = {projectedPointsOnAxes.at(i).x, projectedPointsOnAxes.at(i).y, projectedPointsOnAxes.at(i).z};
-    float p2[3] = {projectedPointsOnAxes.at(i+1).x, projectedPointsOnAxes.at(i+1).y, projectedPointsOnAxes.at(i+1).z};
+    double p1[3] = {projectedPointsOnAxes.at(i).x, projectedPointsOnAxes.at(i).y, projectedPointsOnAxes.at(i).z};
+    double p2[3] = {projectedPointsOnAxes.at(i+1).x, projectedPointsOnAxes.at(i+1).y, projectedPointsOnAxes.at(i+1).z};
     dis[i] = dist2Point(p1, p2);
     if(dis[i] > maxDistance)
       maxDistance = dis[i];
