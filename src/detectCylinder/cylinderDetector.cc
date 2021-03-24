@@ -582,3 +582,11 @@ void crossProduct(Real* a, Real* b, Real* c){
  c[1] = a[2] * b[0] - a[0] * b[2];
  c[2] = a[0] * b[1] - a[1] * b[0];
 }
+
+double dist2Point(double* p1, double* p2){
+  double tmpX = p1[0] - p2[0];
+  double tmpY = p1[1] - p2[1];
+  double tmpZ = p1[2] - p2[2];
+
+  return sqrt(tmpX * tmpX + tmpY * tmpY + tmpZ * tmpZ);
+}

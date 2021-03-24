@@ -83,5 +83,6 @@ private:
 };
 
 void crossProduct(NEWMAT::Real* a, NEWMAT::Real* b, NEWMAT::Real* c);
+double dist2Point(double* p1, double* p2);
 
 #endif
