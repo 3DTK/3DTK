@@ -574,7 +574,7 @@ DataPointer BasicScan::get(const std::string& identifier)
                       // show requests reduced points
                       // manipulate in showing the same entry
                       if (identifier == "xyz reduced show") {
-                        calcReducedOnDemand();
+                        calcReducedPoints();
                         m_data["xyz reduced show"] = m_data["xyz reduced"];
                       } else
                         if(identifier == "octtree") {
@@ -725,6 +725,7 @@ void BasicScan::calcReducedOnDemandPrivate()
   // create reduced points and transform to initial position,
   // save a copy of this for SearchTree
   calcReducedPoints();
+  cout << "Reduced points computed" << endl;
   transformReduced(transMatOrg);
   copyReducedToOriginal();
 }
