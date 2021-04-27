@@ -725,7 +725,6 @@ void BasicScan::calcReducedOnDemandPrivate()
   // create reduced points and transform to initial position,
   // save a copy of this for SearchTree
   calcReducedPoints();
-  cout << "Reduced points computed" << endl;
   transformReduced(transMatOrg);
   copyReducedToOriginal();
 }
