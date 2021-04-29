@@ -85,7 +85,7 @@ void CircleDetector::projectPointsAlongCylAxis(float orthoSysMat[3][3]){
   for(std::vector<origPoint3D>::const_iterator it = v_origPoints.begin(); it != v_origPoints.end(); ++it){
     ColumnVector p(3); p << (*it).point[0] << (*it).point[1] << (*it).point[2];
     ColumnVector p_proj = DotProduct(p, a) * a + DotProduct(p, b) * b;
-    ProjPoint projP = {DotProduct(p_proj,a), DotProduct(p_proj,b), 0 ,index3D}; index3D++;
+    ProjPoint projP = {static_cast<float>(DotProduct(p_proj,a)), static_cast<float>(DotProduct(p_proj,b)), 0 ,index3D}; index3D++;
     v_projectedPoints.push_back(projP);
   }
 }
