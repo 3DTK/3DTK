@@ -580,7 +580,7 @@ DataPointer BasicScan::get(const std::string& identifier)
                       } else
                         if(identifier == "octtree") {
                           createOcttree();
-                        } else 
+                        } else
 			  std::cerr << identifier << " could not be found!" << std::endl;
     it = m_data.find(identifier);
   }

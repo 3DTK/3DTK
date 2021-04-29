@@ -2,7 +2,7 @@
  * scan2scan_distance implementation
  *
  * Copyright (C) by the 3DTK contributors
- * Copyright (C) Dorit Borrmann, Helge Lauterbach 
+ * Copyright (C) Dorit Borrmann, Helge Lauterbach
  *
  * Released under the GPL version 3.
  *
@@ -12,8 +12,8 @@
 /**
  * @file
  * @brief Main program for computing scan2scan distance.
- * 
- * Program to compute the distance between scans using different distance criteria 
+ *
+ * Program to compute the distance between scans using different distance criteria
  * ATTENTION: Scans will be written to the dir/diff if no 'outdir' is given
  *
  * @author Dorit Borrmann. University of Wuerzburg, Germany.
@@ -111,7 +111,7 @@ void parseArgs(int argc, char** argv, std::string &dir, int &start, int &end, IO
 #else
     if (dir[dir.length()-1] != '\\') dir = dir + "\\";
 #endif
-  
+
     if(point_to_plane) pairing_mode = CLOSEST_PLANE_SIMPLE;
     if(normal_shoot) pairing_mode = CLOSEST_POINT_ALONG_NORMAL_SIMPLE;
 
@@ -133,11 +133,7 @@ int main(int argc, char* argv[])
 
   parseArgs(argc, argv, dir, start, end, type, max_dist, outdir, customFilter, pairing_mode);
 
-  if(outdir.length() < 1) {
-   outdir = dir + "diff";
-  }
-
-  // custom filter set? quick check, needs to contain at least one ';' 
+  // custom filter set? quick check, needs to contain at least one ';'
   // (proper checking will be done case specific in pointfilter.cc)
   size_t pos = customFilter.find_first_of(";");
   if (pos != std::string::npos) {
@@ -178,12 +174,12 @@ int main(int argc, char* argv[])
     if (customFilter.length() > 0){
       std::cerr << "Custom filter: specifying string has not been set properly, data will NOT be filtered." << std::endl;
     }
-  }  
+  }
 
   double max_dist2 = max_dist*max_dist;
 
   boost::filesystem::create_directory(outdir);
-
+  std::cout << "Writing files to " << outdir << std::endl;
   Scan::openDirectory(false, dir, type, start, end);
 
   Scan* reference = Scan::allScans[0];
@@ -198,18 +194,18 @@ int main(int argc, char* argv[])
   }
   reference->setReductionParameter(-1, 0); //, PointType(types));
   reference->setSearchTreeParameter(simpleKD,20);
-  
+
   scan->setRangeFilter(-1,-1);
   if (customFilterActive) scan->setCustomFilter(customFilter);
   scan->setReductionParameter(-1, 0, PointType(types));
   scan->setSearchTreeParameter(simpleKD,20);
-  
+
   std::cout << "loading scans finished " << types << std::endl;
 
   double max_dist_match2 = max_dist*max_dist;
   unsigned int nr_pointPair = 0;
 #ifdef _OPENMP
-    // Implementation according to the paper 
+    // Implementation according to the paper
     // "The Parallel Iterative Closest Point Algorithm"
     // by Langis / Greenspan / Godin, IEEE 3DIM 2001
     //
@@ -236,7 +232,7 @@ int main(int argc, char* argv[])
       centroid_d[i][0] = centroid_d[i][1] = centroid_d[i][2] = 0.0;
       n[i] = 0;
     }
-    #pragma omp parallel 
+    #pragma omp parallel
     {
       int thread_num = omp_get_thread_num();
       Scan::getPtPairsParallel(pairs, reference, scan,
@@ -247,7 +243,7 @@ int main(int argc, char* argv[])
       n[thread_num] = (unsigned int)pairs[thread_num].size();
 
     } // end parallel
-    
+
     // do we have enough point pairs?
     unsigned int pairssize = 0;
     for (int i = 0; i < OPENMP_NUM_THREADS; i++) {
@@ -255,22 +251,22 @@ int main(int argc, char* argv[])
     }
     //add the number of point pair
     nr_pointPair = pairssize;
-
+    std::cout << "Writing points to " << outdir << std::endl;
     std::ofstream scan_out(outdir + "/scan" + to_string(scan->getIdentifier(),3) + ".3d");
     for(int i=0; i < OPENMP_NUM_THREADS; i++) {
       for(size_t j = 0; j < pairs[i].size(); j++) {
         PtPair &pp = pairs[i][j];
         double p12[3] = {
-          pp.p1.x - pp.p2.x, 
+          pp.p1.x - pp.p2.x,
           pp.p1.y - pp.p2.y,
           pp.p1.z - pp.p2.z };
-        scan_out << pp.p2.x << " " << pp.p2.y << " " << pp.p2.z 
+        scan_out << pp.p2.x << " " << pp.p2.y << " " << pp.p2.z
             << " " << Len(p12) << std::endl;
       }
     }
     scan_out.flush();
     scan_out.close();
-    
+
 #else
     std::cout << "single core version" << std::endl;
 
@@ -281,13 +277,13 @@ int main(int argc, char* argv[])
     double centroid_m[3] = {0.0, 0.0, 0.0};
     double centroid_d[3] = {0.0, 0.0, 0.0};
     std::vector<PtPair> pairs;
-   
+
     Scan::getPtPairs(&pairs, PreviousScan, CurrentScan, 0, rnd,
 		     max_dist_match2, ret, centroid_m, centroid_d, CLOSEST_POINT);
 
     //set the number of point paira
     nr_pointPair = pairs.size();
-    
+
 #endif
     std::cout << nr_pointPair << " pairs" << std::endl;
 
