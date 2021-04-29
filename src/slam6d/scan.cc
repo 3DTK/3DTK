@@ -396,7 +396,7 @@ void Scan::copyOriginalToReduced()
  */
 void Scan::calcNormals()
 {
-  std::cout << "calcNormals" << std::endl;
+  std::cout << "calcNormals " << scanNr << std::endl;
   DataXYZ xyz(get("xyz"));
   // check if we can create a large enough array. The maximum size_t on 32 bit
   // is around 4.2 billion which is too little for scans with more than 179

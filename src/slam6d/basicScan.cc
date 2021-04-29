@@ -532,7 +532,6 @@ DataPointer BasicScan::get(const std::string& identifier)
   // try to get data
   std::map<std::string, std::pair<unsigned char*, size_t>>::iterator
     it = m_data.find(identifier);
-
   // create data fields
   if (it == m_data.end()) {
     // load from file
@@ -557,6 +556,9 @@ DataPointer BasicScan::get(const std::string& identifier)
                 get(DATA_DEVIATION);
               else
                 // normals on demand
+                if (identifier == "normal")
+                  calcNormalsOnDemand();
+              else
                 if (identifier == "normal") {
                   if(supportsNormals(m_type)) {
                     get(DATA_NORMAL);
@@ -564,6 +566,9 @@ DataPointer BasicScan::get(const std::string& identifier)
                     calcNormalsOnDemand();
                   }
                 } else
+                if (identifier == "normal")
+                  calcNormalsOnDemand();
+                else
                   // reduce on demand
                   if (identifier == "xyz reduced")
                     calcReducedOnDemand();
@@ -579,7 +584,8 @@ DataPointer BasicScan::get(const std::string& identifier)
                       } else
                         if(identifier == "octtree") {
                           createOcttree();
-                        }
+                        } else 
+			  std::cerr << identifier << " could not be found!" << std::endl;
     it = m_data.find(identifier);
   }
 
