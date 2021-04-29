@@ -443,10 +443,10 @@ protected:
   int searchtree_bucketsize;
 
   //! Flag whether "xyz reduced" has been initialized for this Scan yet
-  bool m_has_reduced;
+  bool m_has_reduced = false;
 
   //! Flag whether "normals" has been initialized for this Scan yet
-  bool m_has_normals;
+  bool m_has_normals = false;
 
   //! Reduction value used for octtree input
   double octtree_reduction_voxelSize;
