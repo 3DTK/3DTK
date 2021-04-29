@@ -555,10 +555,6 @@ DataPointer BasicScan::get(const std::string& identifier)
               if (identifier == "deviation")
                 get(DATA_DEVIATION);
               else
-                // normals on demand
-                if (identifier == "normal")
-                  calcNormalsOnDemand();
-              else
                 if (identifier == "normal") {
                   if(supportsNormals(m_type)) {
                     get(DATA_NORMAL);
@@ -566,7 +562,7 @@ DataPointer BasicScan::get(const std::string& identifier)
                     calcNormalsOnDemand();
                   }
                 } else
-                if (identifier == "normal")
+                if (identifier == "normal reduced")
                   calcNormalsOnDemand();
                 else
                   // reduce on demand
