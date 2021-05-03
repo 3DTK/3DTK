@@ -272,7 +272,7 @@ int main(int argc, char* argv[])
 
     std::cout << "has not been implemented yet, aborting..." << std::endl;
     return 1;
-
+/** unused code with erros during building without OpenMP
     double ret = 0.0;
     double centroid_m[3] = {0.0, 0.0, 0.0};
     double centroid_d[3] = {0.0, 0.0, 0.0};
@@ -283,7 +283,7 @@ int main(int argc, char* argv[])
 
     //set the number of point paira
     nr_pointPair = pairs.size();
-
+**/
 #endif
     std::cout << nr_pointPair << " pairs" << std::endl;
 
