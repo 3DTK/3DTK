@@ -850,9 +850,12 @@ void Scan::transformReduced(const double alignxf[16])
     transform3(alignxf, xyz_reduced[i]);
   }
 
-  DataNormal normal_reduced(get("normal reduced"));
-  for (size_t i = 0; i < normal_reduced.size(); ++i) {
-    transform3normal(alignxf, normal_reduced[i]);
+  if (reduction_pointtype.hasNormal()) {
+    cout << "get normals reduced" << endl;
+    DataNormal normal_reduced(get("normal reduced"));
+    for (size_t i = 0; i < normal_reduced.size(); ++i) {
+      transform3normal(alignxf, normal_reduced[i]);
+    }
   }
 
 
@@ -1290,7 +1293,12 @@ void Scan::getPtPairsParallel(std::vector <PtPair> *pairs,
     for(size_t i = 0; i < meta->size(); ++i) {
       // determine step for each scan individually
       DataXYZ xyz_reduced(meta->getScan(i)->get("xyz reduced"));
-      DataNormal normal_reduced(Target->get("normal reduced"));
+      DataXYZ normal_reduced(DataPointer(0, 0));
+      if ((pairing_mode == CLOSEST_POINT_ALONG_NORMAL_SIMPLE) || (pairing_mode == CLOSEST_PLANE_SIMPLE)) {
+        DataXYZ my_normals(meta->getScan(i)->get("normal reduced"));
+        normal_reduced =  my_normals;
+      }
+
       size_t max = xyz_reduced.size();
       size_t step = ceil(max / (double)OPENMP_NUM_THREADS);
       size_t endindex = thread_num == (OPENMP_NUM_THREADS - 1) ? max : step * thread_num + step;
@@ -1305,7 +1313,11 @@ void Scan::getPtPairsParallel(std::vector <PtPair> *pairs,
     }
   } else {
     DataXYZ xyz_reduced(Target->get("xyz reduced"));
-    DataNormal normal_reduced(Target->get("normal reduced"));
+    DataXYZ normal_reduced(DataPointer(0, 0));
+    if ((pairing_mode == CLOSEST_POINT_ALONG_NORMAL_SIMPLE) || (pairing_mode == CLOSEST_PLANE_SIMPLE)) {
+      DataXYZ my_normals(Target->get("normal reduced"));
+      normal_reduced =  my_normals;
+    }
     size_t endindex = thread_num == (OPENMP_NUM_THREADS - 1) ?  xyz_reduced.size() : step * thread_num + step;
     search->getPtPairs(&pairs[thread_num], Source->dalignxf,
                        xyz_reduced, normal_reduced,
