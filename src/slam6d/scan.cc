@@ -423,7 +423,6 @@ void Scan::calcNormals()
     xyz_normals[i][1] = normals[i].y;
     xyz_normals[i][2] = normals[i].z;
   }
-  std::cout << "calcNormals done" << std::endl;
 }
 
 /**
@@ -851,7 +850,6 @@ void Scan::transformReduced(const double alignxf[16])
   }
 
   if (reduction_pointtype.hasNormal()) {
-    cout << "get normals reduced" << endl;
     DataNormal normal_reduced(get("normal reduced"));
     for (size_t i = 0; i < normal_reduced.size(); ++i) {
       transform3normal(alignxf, normal_reduced[i]);
@@ -1222,7 +1220,11 @@ void Scan::getPtPairs(std::vector <PtPair> *pairs,
 
   // get point pairs
   DataXYZ xyz_reduced(Target->get("xyz reduced"));
-  DataNormal normal_reduced(Target->get("normal reduced"));
+  DataNormal normal_reduced(DataPointer(0, 0));
+  if ((pairing_mode == CLOSEST_POINT_ALONG_NORMAL_SIMPLE) || (pairing_mode == CLOSEST_PLANE_SIMPLE)) {
+    DataNormal my_normals(Target->get("normal reduced"));
+    normal_reduced =  my_normals;
+  }
   Source->getSearchTree()->getPtPairs(pairs, Source->dalignxf,
                                       xyz_reduced,
                                       normal_reduced,
@@ -1293,9 +1295,9 @@ void Scan::getPtPairsParallel(std::vector <PtPair> *pairs,
     for(size_t i = 0; i < meta->size(); ++i) {
       // determine step for each scan individually
       DataXYZ xyz_reduced(meta->getScan(i)->get("xyz reduced"));
-      DataXYZ normal_reduced(DataPointer(0, 0));
+      DataNormal normal_reduced(DataPointer(0, 0));
       if ((pairing_mode == CLOSEST_POINT_ALONG_NORMAL_SIMPLE) || (pairing_mode == CLOSEST_PLANE_SIMPLE)) {
-        DataXYZ my_normals(meta->getScan(i)->get("normal reduced"));
+        DataNormal my_normals(meta->getScan(i)->get("normal reduced"));
         normal_reduced =  my_normals;
       }
 
@@ -1313,9 +1315,9 @@ void Scan::getPtPairsParallel(std::vector <PtPair> *pairs,
     }
   } else {
     DataXYZ xyz_reduced(Target->get("xyz reduced"));
-    DataXYZ normal_reduced(DataPointer(0, 0));
+    DataNormal normal_reduced(DataPointer(0, 0));
     if ((pairing_mode == CLOSEST_POINT_ALONG_NORMAL_SIMPLE) || (pairing_mode == CLOSEST_PLANE_SIMPLE)) {
-      DataXYZ my_normals(Target->get("normal reduced"));
+      DataNormal my_normals(Target->get("normal reduced"));
       normal_reduced =  my_normals;
     }
     size_t endindex = thread_num == (OPENMP_NUM_THREADS - 1) ?  xyz_reduced.size() : step * thread_num + step;
