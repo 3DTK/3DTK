@@ -142,13 +142,13 @@ namespace fbr
 	if(x != -1 && y != -1) {
 	//create the iReflectance iRange iolor and map
 	map(x, y, it, itColor, range);
-
+	}
 	//increase the color
 	if(color.empty() == false)
 	  {
 	    ++itColor;
 	  }
-	}
+	
       }
   }
 
@@ -366,6 +366,29 @@ namespace fbr
       }
   }
 
+  void panorama::getOneGrayscaleRangeImage(cv::Mat& range1)
+  {
+    //vector<unsigned int> colorMap = getAllRGBSortedByHSL();
+    //vector<unsigned int> colorMap = getAllRGBSortedByRGB();
+    
+    int width = projection_->getProjectionWidth();
+    int height = projection_->getProjectionHeight();
+
+    range1.create(height, width, CV_16UC1);
+    unsigned int rangeValue;
+    range1 = cv::Scalar::all(0);
+   
+    for(int h = 0; h < height; h++)
+      {
+	for(int w = 0; w < width; w++)
+	  {
+	    rangeValue = (int)(iRange_.at<float>(h,w) * 10000 );
+	    
+	    range1.at<unsigned short>(h,w) = rangeValue;
+	    
+	  }
+      }
+  }
   cv::Mat panorama::getColorImage()
   {
     return iColor_;

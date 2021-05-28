@@ -48,6 +48,7 @@ struct information{
   bool normalizeRange;
   bool threeChannelRange;
   bool threeGrayscaleRange;
+  bool oneGrayscaleRange;
   bool saveOct, loadOct;
 } info;
 
@@ -70,7 +71,7 @@ void usage(int argc, char** argv){
   printf("\n");
   printf("\n");
   printf("\t\t-M mapMethod\t\t\t panorama map method [FARTHEST|EXTENDED|FULL]\n");
-  printf("\t\t-p projectionMethod\t\t projection method [AZIMUTHAL|CONIC|CYLINDRICAL|EQUALAREACYLINDRICAL|EQUIRECTANGULAR|MERCATOR|PANNINI|RECTILINEAR|STEREOGRAPHIC|ZAXIS]\n");
+  printf("\t\t-p projectionMethod\t\t projection method [AZIMUTHAL|CONIC|CYLINDRICAL|EQUALAREACYLINDRICAL|EQUIRECTANGULAR|MERCATOR|MILLER|PANNINI|RECTILINEAR|STEREOGRAPHIC|ZAXIS]\n");
   printf("\t\t-F panoramaFormat\t\t panorama format [PNG|JPEG|JPEG2000|TIFF]\n");
   printf("\t\t-S panoramaFormatParam\t\t panorama format param panorama format related param mostly compression param\n");
   printf("\t\t-N numberOfImage\t\t number of Horizontal images used for some projections\n");
@@ -84,6 +85,7 @@ void usage(int argc, char** argv){
   printf("\t\t-A range \t\t\t creates the Range image\n");
   printf("\t\t-a normalizeiRange \t\t normalize the Range image to have values between 0--255\n");
   printf("\t\t-c threeChannelRange \t\t puts the range(meter*10000) value in a 3*8 bit rgb image\n");
+  printf("\t\t-G oneGrayscaleRange \t\t puts the range value(meter*10000) in one CVU16 grayscale image\n");
   printf("\t\t-g threeGrayscaleRange \t\t puts the range(meter*10000) value in three CVU8 grayscale images\n");
   printf("\t\t-l loadOct \t\t\t load the Octtree\n");
   printf("\t\t-o saveOct \t\t\t save the Octtree\n");
@@ -121,13 +123,14 @@ void parssArgs(int argc, char** argv, information& info){
   info.normalizeRange = false;
   info.threeChannelRange = false;
   info.threeGrayscaleRange = false;
+  info.oneGrayscaleRange = false;
   info.saveOct = false;
   info.loadOct = false;
 
   int c;
   opterr = 0;
   //reade the command line and get the options
-  while ((c = getopt (argc, argv, "aAb:B:cCe:f:F:gH:ilm:M:n:N:oO:p:P:Rs:S:t:w:W:x:")) != -1)
+  while ((c = getopt (argc, argv, "aAb:B:cCe:f:F:gGH:ilm:M:n:N:oO:p:P:Rs:S:t:w:W:x:")) != -1)
     switch (c)
       {
       case 'a':
@@ -161,6 +164,10 @@ void parssArgs(int argc, char** argv, information& info){
 	break;
       case 'g':
 	info.threeGrayscaleRange = true;
+	info.range = true;
+	break;
+      case 'G':
+	info.oneGrayscaleRange = true;
 	info.range = true;
 	break;
       case 'H':
@@ -269,6 +276,7 @@ void printInfo(information info){
   cout<<"Color= "<<info.color<<endl;
   cout<<"Range= "<<info.range<<endl;
   cout<<"Normalize Range= "<<info.normalizeRange<<endl;
+  cout<<"One Grayscale Range= "<<info.oneGrayscaleRange<<endl;
   cout<<"Three Channel Range= "<<info.threeChannelRange<<endl;
   cout<<"Three Gray Range= "<<info.threeGrayscaleRange<<endl;
   cout<<"Save Oct= "<<info.saveOct<<endl;
@@ -363,6 +371,16 @@ int main(int argc, char** argv)
 	  imwrite(out, pImage.getThreeChannel24BitRangeImage(), panoramaFormatParams);
 	}
 
+     if(info.oneGrayscaleRange == true)
+	{
+	  cv::Mat range1;
+	  pImage.getOneGrayscaleRangeImage(range1);
+
+
+	  out = info.outDir+"scan"+to_string(s, 3)+"_"+projectionMethodToString(info.projectionMethod)+"_"+to_string(info.panoramaWidth)+"x"+to_string(info.panoramaHeight)+"_OneGrayscaleRange."+panoramaFormatToFileFormatString(info.panoramaFormat);
+	  imwrite(out, range1, panoramaFormatParams);
+	  
+	}
       if(info.threeGrayscaleRange == true)
 	{
 	  cv::Mat range1, range2, range3;

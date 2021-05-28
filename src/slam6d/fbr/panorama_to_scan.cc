@@ -29,6 +29,7 @@ struct information{
   string inputThreeGrayscaleRangeImage1;
   string inputThreeGrayscaleRangeImage2;
   string inputThreeGrayscaleRangeImage3;
+  string inputOneGrayscaleRangeImage;
   string inputRangeImage;
   string inputReflectanceImage;
   string inputColorImage;
@@ -37,6 +38,8 @@ struct information{
   int minVertAngle, maxVertAngle;
   int minHorizAngle, maxHorizAngle;
   recovered_range_filteration_method recoveredRangeFilterationMethod;
+  int numberOfImages;
+  double projectionParam;
   int numberOfNeighbours;
   float interquartileScaleFactor;
   float averageDiff;
@@ -49,7 +52,7 @@ void usage(int argc, char** argv)
   printf("USAGE: %s input images -t the input image type -O output dir\n", argv[0]);
   printf("\n");
   printf("\n");
-  printf("\t-t the input images type\t\t [ThreeChannel24BitRange|ThreeGrayscaleRange]\n");
+  printf("\t-t the input images type\t\t [ThreeChannel24BitRange|ThreeGrayscaleRange|OneGrayscaleRange]\n");
   printf("\t-O output dir\t\t\t\t output Dir\n");
   printf("\n");
   printf("\tOptions:\n");
@@ -57,7 +60,9 @@ void usage(int argc, char** argv)
   printf("\t-R reflectance input image\t\t load the reflectance image\n");
   printf("\t-C color input image\t\t\t load the color image\n");
   printf("\t-A range input image\t\t\t load the range image\n");
-  printf("\t-p projectionMethod\t\t\t projection method [EQUIRECTANGULAR|CONIC|CYLINDRICAL|MERCATOR|RECTILINEAR|PANNINI|STEREOGRAPHIC|ZAXIS]\n");
+  printf("\t-p projectionMethod\t\t\t projection method [AZIMUTHAL|CONIC|CYLINDRICAL|EQUALAREACYLINDRICAL|EQUIRECTANGULAR|MERCATOR|MILLER|PANNINI|RECTILINEAR|STEREOGRAPHIC|ZAXIS]\n");
+  printf("\t-i Number of images in panorama\t\t\t only for RECTILINEAR, PANNINI and STEREOGRAPHIC\n"); 
+  printf("\t-P projectionParam\t\t special projection parameter (d for Pannini and r for stereographic)\n");
   printf("\t-m minHorizAngle\t\t\t Scanner horizontal view minAngle \n");
   printf("\t-w maxHorizAngle\t\t\t Scanner horizontal view maxAngle \n");
   printf("\t-n minVertAngle\t\t\t\t Scanner vertical view minAngle \n");
@@ -85,8 +90,11 @@ void parssArgs(int argc, char** argv, information& info)
   info.averageDiff = 1;
   int c;
   opterr = 0;
+  info.numberOfImages = 1;
+  //depend on the projection method
+  info.projectionParam = 0;
   //reade the command line and get the options
-  while ((c = getopt (argc, argv, "A:C:D:F:I:m:n:N:O:p:R:t:w:x:")) != -1)
+  while ((c = getopt (argc, argv, "A:C:D:F:i:I:m:n:N:O:p:P:R:t:w:x:")) != -1)
     switch (c)
       {
       case 'A':
@@ -100,6 +108,9 @@ void parssArgs(int argc, char** argv, information& info)
 	break;
       case 'F':
 	info.recoveredRangeFilterationMethod = stringToRecoveredRangeFilterationMethod(optarg);
+	break;
+      case 'i':
+	info.numberOfImages = atof(optarg);
 	break;
       case 'I':
 	info.interquartileScaleFactor = atof(optarg);
@@ -120,6 +131,9 @@ void parssArgs(int argc, char** argv, information& info)
 	break;
       case 'p':
 	info.projectionMethod = stringToProjectionMethod(optarg);
+	break;
+      case 'P':
+	info.projectionParam = atoi(optarg);
 	break;
       case 'R':
 	info.inputReflectanceImage = optarg;
@@ -160,6 +174,20 @@ void parssArgs(int argc, char** argv, information& info)
 	  info.inputThreeChannel24BitRangeImage = argv[optind];
 	}
     }
+  if(info.inputImageType == OneGrayscaleRange)
+    {
+      cout<<"argc= "<<argc<<endl;
+      cout<<"optind= "<<optind<<endl;
+      if(argc - optind != 1)
+	{
+	  cout<<"Error with  input arguments.  One grayscale range image is requiered"<<endl;
+	  usage(argc, argv);
+	}
+      else
+	{
+	  info.inputOneGrayscaleRangeImage = argv[optind];
+	}
+    }
 
   if(info.inputImageType == ThreeGrayscaleRange)
     {
@@ -175,6 +203,12 @@ void parssArgs(int argc, char** argv, information& info)
 	  info.inputThreeGrayscaleRangeImage3 = argv[optind+2];
 	}
     }
+  if(info.projectionMethod == PANNINI && info.projectionParam == 0){
+    info.projectionParam = 1;
+  }
+  if(info.projectionMethod == STEREOGRAPHIC && info.projectionParam == 0){
+    info.projectionParam = 2;
+  }
 
 }
 
@@ -185,6 +219,7 @@ void printInfo(information info)
   cout<<"Input Three Grayscale Range Image 1= "<<info.inputThreeGrayscaleRangeImage1<<endl;
   cout<<"Input Three Grayscale Range Image 2= "<<info.inputThreeGrayscaleRangeImage2<<endl;
   cout<<"Input Three Grayscale Range Image 3= "<<info.inputThreeGrayscaleRangeImage3<<endl;
+  cout<<"Input One Grayscale 16 Bit Range Image= "<<info.inputOneGrayscaleRangeImage<<endl;
   cout<<"Input Range Image= "<<info.inputRangeImage<<endl;
   cout<<"Input Reflectance Image= "<<info.inputReflectanceImage<<endl;
   cout<<"Input Color Image= "<<info.inputColorImage<<endl;
@@ -194,6 +229,8 @@ void printInfo(information info)
   cout<<"maxHorizAngle= "<<info.maxHorizAngle<<endl;
   cout<<"minVertAngle= "<<info.minVertAngle<<endl;
   cout<<"maxVertAngle= "<<info.maxVertAngle<<endl;
+  cout<<"Number of images= "<<info.numberOfImages<<endl;
+  cout<<"Projection param= "<<info.projectionParam<<endl;
   cout<<"recoveredRangeFilterationMethod= "<<recoveredRangeFilterationMethodToString(info.recoveredRangeFilterationMethod)<<endl;
   cout<<"numberOfNeighbours= "<<info.numberOfNeighbours<<endl;
   cout<<"interquartileScaleFactor= "<<info.interquartileScaleFactor<<endl;
@@ -309,6 +346,7 @@ int main(int argc, char** argv)
   //panorama containers
   cv::Mat iRange;
   cv::Mat iThreeChannel24BitRange;
+  cv::Mat iOneGrayscaleRange;
   cv::Mat iThreeGrayscaleRange1;
   cv::Mat iThreeGrayscaleRange2;
   cv::Mat iThreeGrayscaleRange3;
@@ -332,6 +370,26 @@ int main(int argc, char** argv)
     else
       {
 	cout<<"The Three Channel 24 Bit Range is not available."<<endl;
+	return 0;
+      }
+    break;
+  case OneGrayscaleRange:
+    if(info.inputOneGrayscaleRangeImage.empty() == false)
+      {
+	iOneGrayscaleRange = cv::imread(info.inputOneGrayscaleRangeImage.c_str(), -1);
+	cout << iOneGrayscaleRange.type() << endl;
+	if(iOneGrayscaleRange.type() != CV_16UC1)
+	  {
+	    cout<<"Grayscale Range image has a wrong type."<<endl;
+	    return 0;
+	  }
+	
+	info.imageHeight = iOneGrayscaleRange.rows;
+	info.imageWidth = iOneGrayscaleRange.cols;
+      }
+    else
+      {
+	cout<<"Grayscale Range image is not available."<<endl;
 	return 0;
       }
     break;
@@ -428,7 +486,7 @@ int main(int argc, char** argv)
     }
 
   //get the projection object
-  projection proj(info.imageWidth, info.imageHeight, info.projectionMethod, -1, -1, -1, -1, info.minHorizAngle, info.maxHorizAngle, info.minVertAngle, info.maxVertAngle, false);
+  projection proj(info.imageWidth, info.imageHeight, info.projectionMethod, info.numberOfImages, info.projectionParam, -1, -1, info.minHorizAngle, info.maxHorizAngle, info.minVertAngle, info.maxVertAngle, false);
 
   //read the panorama and write it to a file
   //get the name of outputscan from the input ThreeChannel24BitRange image
@@ -437,6 +495,10 @@ int main(int argc, char** argv)
   if(info.inputImageType == ThreeChannel24BitRange)
     {
       inputFile = info.inputThreeChannel24BitRangeImage;
+    }
+  else if(info.inputImageType == OneGrayscaleRange)
+    {
+      inputFile = info.inputOneGrayscaleRangeImage;
     }
   else if(info.inputImageType == ThreeGrayscaleRange)
     {
@@ -473,7 +535,8 @@ int main(int argc, char** argv)
 	{
 	  float range = 0.0;
 	  unsigned int color = 0;
-	  unsigned int R = 0, G = 0, B = 0;;
+	  unsigned int R = 0, G = 0, B = 0;
+	  unsigned int numim=w*info.numberOfImages/info.imageWidth;
 	  if(info.inputImageType == ThreeChannel24BitRange)
 	    {
 	      R = iThreeChannel24BitRange.at<cv::Vec3b>(h,w)[0];
@@ -486,6 +549,13 @@ int main(int argc, char** argv)
 	      //range+= byte;
 	      //color+= byte;
 	      //range/= 10000;
+	    }
+	  else if(info.inputImageType == OneGrayscaleRange)
+	    {
+	      R = iOneGrayscaleRange.at<unsigned short>(h,w);
+	      G = 0;
+	      B = 0;
+	     
 	    }
 	  else if(info.inputImageType == ThreeGrayscaleRange)
 	    {
@@ -501,6 +571,7 @@ int main(int argc, char** argv)
 	      //range/= 10000;
 	    }
 
+	  if(info.inputImageType == ThreeChannel24BitRange || info.inputImageType == ThreeGrayscaleRange) {
 	  color = (R<<16) | (G<<8) | (B);
 	  std::unordered_map<unsigned int , unsigned int>::const_iterator mapPair = colorMap.find (color);
 	  if ( mapPair == colorMap.end() )
@@ -515,7 +586,13 @@ int main(int argc, char** argv)
 	      range/= 10000;
 	      //std::cout << myPair->first << " is " << myPair->second;
 	    }
+	  }
 
+	  if (info.inputImageType == OneGrayscaleRange)
+		{
+			range=R;
+			range/= 10000;		
+		}
 
 	  //get filteration status for pixel [h, w]
 	  //if no filteration it returns true
@@ -525,7 +602,7 @@ int main(int argc, char** argv)
 	    {
 	      // cout<<h<<" "<<w<<" "<<range<<endl;
 	      double x, y, z, reflectance, r, g, b;
-	      proj.calcPointFromPanoramaPosition(x, y, z, h, w, range);
+	      proj.calcPointFromPanoramaPosition(x, y, z, h, w, range, numim);
 	      if(iReflectance.empty() == false)
 		{
 		  reflectance = iReflectance.at<uchar>(h,w);

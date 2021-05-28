@@ -153,6 +153,23 @@ namespace fbr
 	heightMax_ = height_ - 1;
       }
 
+     //Miller Projection
+    if(method_ == MILLER)
+      {
+	//find the x and y range
+	xSize_ = maxHorizAngle_ - minHorizAngle_;
+
+	//y= (int) (yFactor_ * 5./4.*(log(tan(theta*2./5.+M_PI/4. )) - log(tan(minVertAngle_*2./5.+M_PI/4.))));
+	ySize_ = (5./4.*(log(tan(maxVertAngle_*2./5.+M_PI/4. )) - log(tan(minVertAngle_*2./5.+M_PI/4.))));
+      
+	setImageRatio();
+      
+	xFactor_ = (double) width_ / xSize_;
+	widthMax_ = width_ - 1;
+	yFactor_ = (double) height_ / ySize_;
+	heightMax_ = height_ - 1;
+      }
+
     //RECTILINEAR projection
     if(method_ == RECTILINEAR)
       {
@@ -343,7 +360,10 @@ namespace fbr
 	    range = rangeImage.at<float>(row, col);
 	    reflectance = reflectanceImage.at<uchar>(row,col)/255.0;
 
-	    calcPointFromPanoramaPosition(x, y, z, row, col, range);
+	    for (unsigned int numim = 0; numim < numberOfImages_; ++numim)
+		{
+	    		calcPointFromPanoramaPosition(x, y, z, row, col, range, numim);
+		}
 
 	    if( fabs(x) < 1e-5 && fabs(y) < 1e-5 && fabs(z) < 1e-5)
 	      {
@@ -354,7 +374,7 @@ namespace fbr
       }
   }
 
-  void projection::calcPointFromPanoramaPosition(double& x, double& y, double& z, int row, int col, double range)
+  void projection::calcPointFromPanoramaPosition(double& x, double& y, double& z, int row, int col, double range, unsigned int numim)
   {
     double theta, phi;
     //get the theta and phi based on the projection
@@ -368,7 +388,7 @@ namespace fbr
 			phi = (col + 0.5) / xFactor_ + minHorizAngle_;
 			break;
 		case MERCATOR:
-			theta = 2 * atan2(exp((heightMax_ - row + 0.5) / yFactor_ + minVertAngle_), 1.) - M_PI_2;
+			theta = 2 * atan2(exp((heightMax_ - row + 0.5) / yFactor_ + log(tan(minVertAngle_/2.+M_PI/4.))), 1.) - M_PI_2;
 			phi = (col + 0.5) / xFactor_ + minHorizAngle_;
 			break;
 		case CONIC:
@@ -387,6 +407,128 @@ namespace fbr
 				float Ce = 2.*asin(0.5*ro);
 				theta = -asin(cos(Ce)*sin(phi1_)+Y/ro*sin(Ce)*cos(phi1_));
 				phi = long0_ + atan2(X*sin(Ce),(ro*cos(phi1_)*cos(Ce)-Y*sin(phi1_)*sin(Ce)));
+				break;
+			}
+		case MILLER:
+			theta = 5./2. * atan2(exp(4./5.*(heightMax_ - row + 0.5) / yFactor_ + log(tan(minVertAngle_*2./5.+M_PI/4.))), 1.) - M_PI*5./8.;
+			phi = (col + 0.5) / xFactor_ + minHorizAngle_;
+			break;                
+		case EQUALAREACYLINDRICAL:
+			{
+				theta = asin((heightMax_ - row + 0.5) / yFactor_ * cos(param_) + sin(minVertAngle_));
+				phi = (col + 0.5 ) / (xFactor_*cos(param_)) + minHorizAngle_;
+				break;
+			}
+		case STEREOGRAPHIC:
+			{
+				iMinX_ = minHorizAngle_ + (numim * interval_);
+	    			iMaxX_ = minHorizAngle_ + ((numim + 1) * interval_);
+	    					
+
+				//longitude of projection center
+				l0_ = iMinX_ + interval_ / 2;
+				//use the R variable of stereographic projection mentioned in the thesis
+				//finding the min and max of x direction
+				k_ = (2 * param_) / (1 + sin(p1_) * sin(p1_) + cos(p1_) * cos(p1_) * cos(iMaxX_ - l0_));
+				max_ = k_ * cos(p1_) * sin (iMaxX_ - l0_);
+				k_ = (2 * param_) / (1 + sin (p1_) * sin(p1_) + cos(p1_) * cos(p1_) * cos(iMinX_ -l0_));
+				min_ = k_ * cos(p1_) * sin (iMinX_ -l0_);
+				xFactor_ = (double) (width_ / numberOfImages_) / (max_ - min_);
+				double xlow = min_;
+				widthMax_ = (width_ / numberOfImages_) - 1;
+				//finding the min and max of y direction
+				k_ = (2 * param_) / (1 + sin(p1_) * sin(iMaxY_) + cos(p1_) * cos(iMaxY_) * cos(iMaxX_ - l0_));
+				max_ = k_ * (cos(p1_) * sin(iMaxY_) - sin(p1_) * cos(iMaxY_) * cos(iMaxX_ - l0_));
+				k_ = (2 * param_) / (1 + sin(p1_) * sin(iMinY_) + cos(p1_) * cos(iMinY_) * cos(iMinX_ - l0_));
+				min_ = k_ * (cos(p1_) * sin(iMinY_) - sin(p1_) * cos(iMinY_) * cos(iMinX_ - l0_));
+				yFactor_ = (double) height_ / (max_ - min_);
+				heightLow_ = min_;
+				heightMax_ = height_ - 1;
+				
+				float X = (col - (numim * widthMax_) ) / xFactor_ + xlow;
+				float Y = (heightMax_-row) / yFactor_ + heightLow_;
+				float ro = pow(X*X+Y*Y,0.5);
+				float Ce = 2.*atan2(0.5*ro,param_);
+				theta = asin(cos(Ce)*sin(p1_)+Y/ro*sin(Ce)*cos(p1_));
+				phi = l0_ + atan2(X*sin(Ce),(ro*cos(p1_)*cos(Ce)-Y*sin(p1_)*sin(Ce)));
+					
+				break;
+			}
+		case RECTILINEAR:
+			{
+				iMinX_ = minHorizAngle_ + (numim * interval_);
+	    			iMaxX_ = minHorizAngle_ + ((numim + 1) * interval_);
+
+				//the longitude of projection center
+				l0_ = iMinX_ + interval_ / 2;
+				//finding the min and max of the x direction
+				coscRectilinear_ = sin(p1_) * sin(iMaxY_) + cos(p1_) * cos(iMaxY_) * cos(iMaxX_ - l0_);
+				max_ = (cos(iMaxY_) * sin(iMaxX_ - l0_) / coscRectilinear_);
+				coscRectilinear_ = sin(p1_) * sin(iMinY_) + cos(p1_) * cos(iMinY_) * cos(iMinX_ - l0_);
+				min_ = (cos(iMinY_) * sin(iMinX_ - l0_) / coscRectilinear_);
+				xFactor_ = (double) (width_ / numberOfImages_) / (max_ - min_);
+				double xlow = min_;
+				widthMax_ = (width_ / numberOfImages_) - 1;
+				//finding the min and max of y direction
+				coscRectilinear_ = sin(p1_) * sin(iMaxY_) + cos(p1_) * cos(iMaxY_) * cos(iMaxX_ - l0_);
+				max_ = ( (cos(p1_) * sin(iMaxY_) - sin(p1_) * cos(iMaxY_) * cos(iMaxX_ - l0_) )/ coscRectilinear_);
+				coscRectilinear_ = sin(p1_) * sin(iMinY_) + cos(p1_) * cos(iMinY_) * cos(iMinX_ - l0_);
+				min_ = ( (cos(p1_) * sin(iMinY_) - sin(p1_) * cos(iMinY_) * cos(iMinX_ - l0_) )/ coscRectilinear_);
+				yFactor_ = (double) height_ / (max_ - min_);
+				heightLow_ = min_;
+				heightMax_ = height_ - 1;
+				
+				float X = (col - (numim * widthMax_) ) / xFactor_ + xlow;
+				float Y = (heightMax_-row) / yFactor_ + heightLow_;
+				float ro = pow(X*X+Y*Y,0.5);
+				float Ce = atan2(ro,1);
+				theta = asin(cos(Ce)*sin(p1_)+Y/ro*sin(Ce)*cos(p1_));
+				phi = l0_ + atan2(X*sin(Ce),(ro*cos(p1_)*cos(Ce)-Y*sin(p1_)*sin(Ce)));
+
+				break;
+			}
+		case PANNINI:
+			{
+				iMinX_ = minHorizAngle_ + (numim * interval_);
+	    			iMaxX_ = minHorizAngle_ + ((numim + 1) * interval_);
+	    
+				//the longitude of projection center
+				l0_ = iMinX_ + interval_ / 2;
+				
+				//latitude of projection center
+				//p1_ = 0;
+		
+				//use the S variable of pannini projection mentioned in the thesis
+				//finding the min and max of the x direction
+				sPannini_ = (param_ + 1) / (param_ + sin(p1_) * tan(iMaxY_) + cos(p1_) * cos(iMaxX_ - l0_));
+				max_ = sPannini_ * (sin(iMaxX_ - l0_));
+				sPannini_ = (param_ + 1) / (param_ + sin(p1_) * tan(iMinY_) + cos(p1_) * cos(iMinX_ - l0_));
+				min_ = sPannini_ * (sin(iMinX_ - l0_));
+				xFactor_ = (double) (width_ / numberOfImages_) / (max_ - min_);
+				double xlow = min_;
+				widthMax_ = (width_ / numberOfImages_) - 1;
+				//finding the min and max of y direction
+				sPannini_ = (param_ + 1) / (param_ + sin(p1_) * tan(iMaxY_) + cos(p1_) * cos(iMaxX_ - l0_));
+				max_ = sPannini_ * (tan(iMaxY_) * (cos(p1_) - sin(p1_) * 1/tan(iMaxY_) * cos(iMaxX_ - l0_)));
+				sPannini_ = (param_ + 1) / (param_ + sin(p1_) * tan(iMinY_) + cos(p1_) * cos(iMinX_ - l0_));
+				min_ = sPannini_ * (tan(iMinY_) * (cos(p1_) - sin(p1_) * 1/tan(iMinY_) * cos(iMinX_ - l0_)));
+				yFactor_ = (double) height_ / (max_ - min_);
+				heightLow_ = min_;
+				heightMax_ = height_ - 1;
+				
+				float X = (col - (numim * widthMax_) ) / xFactor_ + xlow;
+				float Y = (heightMax_-row) / yFactor_ + heightLow_;
+				
+				//theta = atan2(A*sin(phi)+B*cos(phi),1);
+				float A = Y/(X*cos(p1_));
+				float B = tan(p1_);
+				float C = X*sin(p1_)*A-param_-1;
+				float D = X*sin(p1_)*B+X*cos(p1_);
+				float E = -X*param_; 
+				
+				//C*sin(phi)+D*cos(phi)=E
+				phi = l0_ + acos(E/pow(C*C+D*D,0.5)) + atan2(C,D); 
+				theta = atan2(A*sin(phi-l0_)+B*cos(phi-l0_),1);
 				break;
 			}
 		default:
@@ -512,6 +654,25 @@ namespace fbr
 	//if (x > widthMax_) x = widthMax_;
 	if (x > widthMax_) x = -1;
 	y = (int) ( yFactor_ * ( (log(tan(theta) + (1/cos(theta)))) - (log(tan(minVertAngle_) + (1/cos(minVertAngle_)))) ) );
+	y = heightMax_ - y;
+	//if (y < 0) y = 0;
+	if (y < 0) y = -1;
+	//if (y > heightMax_) y = heightMax_;
+	if (y > heightMax_) y = -1;
+      }
+
+    //Miller Projection
+    if( method_ == MILLER)
+      {
+	/// minHorizAngle_ and minVertAngle_ are used to shift the data to start from min angles
+	x = (int) ( xFactor_ * (phi - minHorizAngle_));
+	//if (x < 0) x = 0;
+	if (x < 0) x = -1;
+	//if (x > widthMax_) x = widthMax_;
+	if (x > widthMax_) x = -1;
+	//y = (int) ( yFactor_ * ( (log(tan(theta) + (1/cos(theta)))) - (log(tan(minVertAngle_) + (1/cos(minVertAngle_)))) ) );
+
+	y= (int) (yFactor_ * 5./4.*(log(tan(theta*2./5.+M_PI/4. )) - log(tan(minVertAngle_*2./5.+M_PI/4.))));
 	y = heightMax_ - y;
 	//if (y < 0) y = 0;
 	if (y < 0) y = -1;

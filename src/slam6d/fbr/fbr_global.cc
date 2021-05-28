@@ -64,6 +64,9 @@ namespace fbr{
     case MERCATOR:
       sMethod = "MERCATOR";
       break;
+    case MILLER:
+      sMethod = "MILLER";
+      break;
     case RECTILINEAR:
       sMethod = "RECTILINEAR";
       break;
@@ -95,6 +98,7 @@ namespace fbr{
     if(strcasecmp(method.c_str(), "EQUIRECTANGULAR") == 0) return EQUIRECTANGULAR;
     else if(strcasecmp(method.c_str(), "CYLINDRICAL") == 0) return CYLINDRICAL;
     else if(strcasecmp(method.c_str(), "MERCATOR") == 0) return MERCATOR;
+    else if(strcasecmp(method.c_str(), "MILLER") == 0) return MILLER;
     else if(strcasecmp(method.c_str(), "RECTILINEAR") == 0) return RECTILINEAR;
     else if(strcasecmp(method.c_str(), "PANNINI") == 0) return PANNINI;
     else if(strcasecmp(method.c_str(), "STEREOGRAPHIC") == 0) return STEREOGRAPHIC;
@@ -192,6 +196,8 @@ namespace fbr{
       break;
     case ThreeGrayscaleRange:
       sType = "ThreeGrayscaleRange";
+    case OneGrayscaleRange:
+      sType = "OneGrayscaleRange";
       break;
     default:
       throw std::runtime_error(std::string("panorama type ") + to_string(type) + std::string(" could not be matched to a panorama type"));
@@ -202,6 +208,7 @@ namespace fbr{
   panorama_type stringToPanoramaType(std::string type){
     if(strcasecmp(type.c_str(), "ThreeChannel24BitRange") == 0) return ThreeChannel24BitRange;
     else if(strcasecmp(type.c_str(), "ThreeGrayscaleRange") == 0) return ThreeGrayscaleRange;
+    else if(strcasecmp(type.c_str(), "OneGrayscaleRange") == 0) return OneGrayscaleRange;
     else throw std::runtime_error(std::string("panorama type ") + type + std::string(" is unknown"));
   }
 
