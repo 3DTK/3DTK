@@ -61,7 +61,7 @@ void usage(int argc, char** argv)
   printf("\t-C color input image\t\t\t load the color image\n");
   printf("\t-A range input image\t\t\t load the range image\n");
   printf("\t-p projectionMethod\t\t\t projection method [AZIMUTHAL|CONIC|CYLINDRICAL|EQUALAREACYLINDRICAL|EQUIRECTANGULAR|MERCATOR|MILLER|PANNINI|RECTILINEAR|STEREOGRAPHIC|ZAXIS]\n");
-  printf("\t-i Number of images in panorama\t\t\t only for RECTILINEAR, PANNINI and STEREOGRAPHIC\n"); 
+  printf("\t-i Number of images in panorama\t\t\t only for RECTILINEAR, PANNINI and STEREOGRAPHIC\n");
   printf("\t-P projectionParam\t\t special projection parameter (d for Pannini and r for stereographic)\n");
   printf("\t-m minHorizAngle\t\t\t Scanner horizontal view minAngle \n");
   printf("\t-w maxHorizAngle\t\t\t Scanner horizontal view maxAngle \n");
@@ -383,7 +383,7 @@ int main(int argc, char** argv)
 	    cout<<"Grayscale Range image has a wrong type."<<endl;
 	    return 0;
 	  }
-	
+
 	info.imageHeight = iOneGrayscaleRange.rows;
 	info.imageWidth = iOneGrayscaleRange.cols;
       }
@@ -555,7 +555,7 @@ int main(int argc, char** argv)
 	      R = iOneGrayscaleRange.at<unsigned short>(h,w);
 	      G = 0;
 	      B = 0;
-	     
+
 	    }
 	  else if(info.inputImageType == ThreeGrayscaleRange)
 	    {
@@ -591,7 +591,7 @@ int main(int argc, char** argv)
 	  if (info.inputImageType == OneGrayscaleRange)
 		{
 			range=R;
-			range/= 10000;		
+			range/= 10000;
 		}
 
 	  //get filteration status for pixel [h, w]

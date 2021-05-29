@@ -379,7 +379,7 @@ int main(int argc, char** argv)
 
 	  out = info.outDir+"scan"+to_string(s, 3)+"_"+projectionMethodToString(info.projectionMethod)+"_"+to_string(info.panoramaWidth)+"x"+to_string(info.panoramaHeight)+"_OneGrayscaleRange."+panoramaFormatToFileFormatString(info.panoramaFormat);
 	  imwrite(out, range1, panoramaFormatParams);
-	  
+
 	}
       if(info.threeGrayscaleRange == true)
 	{

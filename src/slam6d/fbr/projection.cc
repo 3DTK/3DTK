@@ -161,9 +161,9 @@ namespace fbr
 
 	//y= (int) (yFactor_ * 5./4.*(log(tan(theta*2./5.+M_PI/4. )) - log(tan(minVertAngle_*2./5.+M_PI/4.))));
 	ySize_ = (5./4.*(log(tan(maxVertAngle_*2./5.+M_PI/4. )) - log(tan(minVertAngle_*2./5.+M_PI/4.))));
-      
+
 	setImageRatio();
-      
+
 	xFactor_ = (double) width_ / xSize_;
 	widthMax_ = width_ - 1;
 	yFactor_ = (double) height_ / ySize_;
@@ -412,7 +412,7 @@ namespace fbr
 		case MILLER:
 			theta = 5./2. * atan2(exp(4./5.*(heightMax_ - row + 0.5) / yFactor_ + log(tan(minVertAngle_*2./5.+M_PI/4.))), 1.) - M_PI*5./8.;
 			phi = (col + 0.5) / xFactor_ + minHorizAngle_;
-			break;                
+			break;
 		case EQUALAREACYLINDRICAL:
 			{
 				theta = asin((heightMax_ - row + 0.5) / yFactor_ * cos(param_) + sin(minVertAngle_));
@@ -423,7 +423,7 @@ namespace fbr
 			{
 				iMinX_ = minHorizAngle_ + (numim * interval_);
 	    			iMaxX_ = minHorizAngle_ + ((numim + 1) * interval_);
-	    					
+
 
 				//longitude of projection center
 				l0_ = iMinX_ + interval_ / 2;
@@ -444,14 +444,14 @@ namespace fbr
 				yFactor_ = (double) height_ / (max_ - min_);
 				heightLow_ = min_;
 				heightMax_ = height_ - 1;
-				
+
 				float X = (col - (numim * widthMax_) ) / xFactor_ + xlow;
 				float Y = (heightMax_-row) / yFactor_ + heightLow_;
 				float ro = pow(X*X+Y*Y,0.5);
 				float Ce = 2.*atan2(0.5*ro,param_);
 				theta = asin(cos(Ce)*sin(p1_)+Y/ro*sin(Ce)*cos(p1_));
 				phi = l0_ + atan2(X*sin(Ce),(ro*cos(p1_)*cos(Ce)-Y*sin(p1_)*sin(Ce)));
-					
+
 				break;
 			}
 		case RECTILINEAR:
@@ -477,7 +477,7 @@ namespace fbr
 				yFactor_ = (double) height_ / (max_ - min_);
 				heightLow_ = min_;
 				heightMax_ = height_ - 1;
-				
+
 				float X = (col - (numim * widthMax_) ) / xFactor_ + xlow;
 				float Y = (heightMax_-row) / yFactor_ + heightLow_;
 				float ro = pow(X*X+Y*Y,0.5);
@@ -491,13 +491,13 @@ namespace fbr
 			{
 				iMinX_ = minHorizAngle_ + (numim * interval_);
 	    			iMaxX_ = minHorizAngle_ + ((numim + 1) * interval_);
-	    
+
 				//the longitude of projection center
 				l0_ = iMinX_ + interval_ / 2;
-				
+
 				//latitude of projection center
 				//p1_ = 0;
-		
+
 				//use the S variable of pannini projection mentioned in the thesis
 				//finding the min and max of the x direction
 				sPannini_ = (param_ + 1) / (param_ + sin(p1_) * tan(iMaxY_) + cos(p1_) * cos(iMaxX_ - l0_));
@@ -515,19 +515,19 @@ namespace fbr
 				yFactor_ = (double) height_ / (max_ - min_);
 				heightLow_ = min_;
 				heightMax_ = height_ - 1;
-				
+
 				float X = (col - (numim * widthMax_) ) / xFactor_ + xlow;
 				float Y = (heightMax_-row) / yFactor_ + heightLow_;
-				
+
 				//theta = atan2(A*sin(phi)+B*cos(phi),1);
 				float A = Y/(X*cos(p1_));
 				float B = tan(p1_);
 				float C = X*sin(p1_)*A-param_-1;
 				float D = X*sin(p1_)*B+X*cos(p1_);
-				float E = -X*param_; 
-				
+				float E = -X*param_;
+
 				//C*sin(phi)+D*cos(phi)=E
-				phi = l0_ + acos(E/pow(C*C+D*D,0.5)) + atan2(C,D); 
+				phi = l0_ + acos(E/pow(C*C+D*D,0.5)) + atan2(C,D);
 				theta = atan2(A*sin(phi-l0_)+B*cos(phi-l0_),1);
 				break;
 			}

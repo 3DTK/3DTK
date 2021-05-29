@@ -201,8 +201,8 @@ namespace fbr{
      /**
      * Brief this function will put the float range in one grayscale image
      */
-    void getOneGrayscaleRangeImage(cv::Mat& range1);    
-     
+    void getOneGrayscaleRangeImage(cv::Mat& range1);
+
     cv::Mat getColorImage();
 
     cv::Mat getMap();
