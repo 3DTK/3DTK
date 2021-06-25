@@ -720,7 +720,7 @@ int main(int argc, char **argv)
       }
   }
 
-  for (int iter = start; iter <= end; iter++) {
+  for (int iter = start; (end == -1) || (iter <= end); iter++) {
 
     std::vector<cv::Vec4f> reduced_points;
     std::vector<cv::Vec3b> color;
