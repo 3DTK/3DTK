@@ -45,6 +45,8 @@ using std::endl;
 #include "shapes/shape.h"
 #include "shapes/ransac.h"
 
+#include "scanio/framesreader.h"
+
 #include <boost/filesystem.hpp>
 #include <boost/program_options.hpp>
 namespace po = boost::program_options;
@@ -212,16 +214,28 @@ int main(int argc, char **argv)
   scan->setRangeFilter(maxDist, minDist);
   scan->setReductionParameter(red, octree);
   //    scan->setSearchTreeParameter(nns_method, use_cuda);
-  scan->toGlobal();
+   //   scan->toGlobal();
 
-  double id[16];
-  M4identity(id);
-  for(int i = 0; i < 10; i++) {
-    scan->transform(id, Scan::ICP, 0);  // write end pose
+  bool usePose = false;
+  // Check if .frames or .pose should be used
+  {
+    string framesfilepath = dir + "scan" + to_string(start,3) + ".frames";
+    ifstream f( framesfilepath.c_str() );
+    if ( !f.good() && !usePose ) usePose = true;
+    f.close();
   }
+  readFramesAndTransform(dir, start, start, -1, usePose, (red > -1) );
+
+  // why the hell should you do that? why 10 times? i will just leave it there for now...
+//   double id[16];
+//   M4identity(id);
+//   for(int i = 0; i < 10; i++) {
+//     scan->transform(id, Scan::ICP, 0);  // write end pose
+//   }
 
   if (!quiet) cout << "start plane detection" << endl;
   long starttime = GetCurrentTimeInMilliSec();
+  // why would you only consider the very first scan?
   if(alg >= RANSAC) {
       Hough hough(Scan::allScans[0], quiet);
 
@@ -268,9 +282,9 @@ int main(int argc, char **argv)
       delete oct;
       starttime = (GetCurrentTimeInMilliSec() - starttime);
 
-
+  // for hough transform, consider all scans, not just the first
   } else {
-    Hough hough(Scan::allScans[0], quiet);
+    Hough hough(Scan::allScans, quiet);
     starttime = (GetCurrentTimeInMilliSec() - starttime);
     cout << "Time for Constructor call: " << starttime << endl;
 

@@ -89,7 +89,7 @@ namespace fbr{
      * @param col - of the panorama
      * @param range - range of the point
      */
-    void calcPointFromPanoramaPosition(double& x, double& y, double& z, int row, int col, double range, unsigned int numim);
+    void calcPointFromPanoramaPosition(double& x, double& y, double& z, int row, int col, double range);
     /**
      * @breif caclculates the x and y of the 3D point on panorama projection
      * returns x or y as -1 if the point is out of image range
@@ -97,7 +97,6 @@ namespace fbr{
      * @param y - the y on panorama
      * @param it - the point
      * @param range - range of the point
-     * @param numim - image number, useful for some projections
      */
     void calcPanoramaPositionForAPoint(int &x, int &y, cv::MatIterator_<cv::Vec4f> it, double &range);
 

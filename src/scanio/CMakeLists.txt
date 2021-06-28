@@ -32,7 +32,7 @@ else()
   unset (LIBZIP_LIBRARY CACHE)
 endif()
 
-add_library(scanio scan_io.cc ../slam6d/io_types.cc helper.cc)
+add_library(scanio scan_io.cc ../slam6d/io_types.cc helper.cc framesreader.cc)
 set_property(TARGET scanio PROPERTY POSITION_INDEPENDENT_CODE 1)
 
 set(SCANIO_LINK_LIBRARIES ${LIBZIP_LIBRARY} ${Boost_LIBRARIES} ${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY} pointfilter range_set_parser)

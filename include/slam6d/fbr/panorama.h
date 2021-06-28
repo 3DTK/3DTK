@@ -198,11 +198,6 @@ namespace fbr{
      * Brief this function will put the float range in to three grayscale images
      */
     void getThreeGrayscaleRangeImages(cv::Mat& range1, cv::Mat& range2, cv::Mat& range3);
-     /**
-     * Brief this function will put the float range in one grayscale image
-     */
-    void getOneGrayscaleRangeImage(cv::Mat& range1);
-
     cv::Mat getColorImage();
 
     cv::Mat getMap();

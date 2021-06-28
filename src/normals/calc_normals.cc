@@ -87,7 +87,7 @@ void validate(boost::any& v, const std::vector<std::string>& values,
 void parse_options(int argc, char **argv, int &start, int &end, int &bucketsize,
                    bool &scanserver, int &max_dist, int &min_dist, string &dir,
                    IOType &iotype, int &k1, int &k2,
-                   normal_method &ntype, int &width, int &height, bool &inward)
+                   normal_method &ntype, int &width, int &height, bool &inward, bool &exportRGB)
 {
 	/// ----------------------------------
 	/// set up program commandline options
@@ -145,6 +145,9 @@ void parse_options(int argc, char **argv, int &start, int &end, int &bucketsize,
 	("inward,i",
 	 po::value<bool>(&inward)->default_value(false),
 	 "normal direction inward? default false")
+    ("exportRGB,c",
+	 po::value<bool>(&exportRGB)->default_value(true),
+	 "Export normal values as RGB. Visualize using \"bin/show -f uos_rgb -c your/dir/\"")
 #endif
 	;
 
@@ -198,7 +201,7 @@ void writePoseFiles(string dir,
 }
 
 /// write scan files for all segments
-void writeScanFiles(string dir,
+void writeScanFilesRGB(string dir,
                     vector<Point> &points, vector<Point> &normals,
                     int scanNumber)
 {
@@ -220,11 +223,11 @@ void writeScanFiles(string dir,
 }
 
 /// write scan files with XYZ format all segments
-void writeScanFilesXYZ(string dir,
+void writeScanFilesNormal(string dir,
                        vector<Point> &points, vector<Point> &normals,
                        int scanNumber)
 {
-	string ofilename = dir + "/scan" + to_string(scanNumber, 3) + ".xyz";
+	string ofilename = dir + "/scan" + to_string(scanNumber, 3) + ".3d";
 	ofstream normptsout(ofilename.c_str());
 
 	for (size_t i = 0; i < points.size(); ++i) {
@@ -253,9 +256,10 @@ int main(int argc, char** argv)
 	normal_method ntype;
 	int width, height;
 	bool inward;
+    bool exportRGB;
 
 	parse_options(argc, argv, start, end, bucketsize, scanserver, max_dist, min_dist,
-	              dir, iotype, k1, k2, ntype, width, height, inward);
+	              dir, iotype, k1, k2, ntype, width, height, inward, exportRGB);
 
 	/// ----------------------------------
 	/// Prepare and read scans
@@ -292,6 +296,11 @@ int main(int argc, char** argv)
 		exit(-1);
 	}
 
+    if (exportRGB)
+        cout << "WARN: Exporting scans with RGB vals (0 - 255). These are ment for visualization. Do not use --exportRGB if you want more accurate normals." << endl;
+    else
+        cout << "WARN: Exporting scans with normalized normals. Use --exportRGB for visualization." << endl;
+
 	/// -----------------------------------------
 	/// Initialize and perform normal calculation
 	/// -----------------------------------------
@@ -300,6 +309,7 @@ int main(int argc, char** argv)
 
 	for ( ; it != Scan::allScans.end(); ++it) {
 		Scan* scan = *it;
+        cout << "Calc normals for scan " << scan->getIdentifier() << endl;
 
 		// apply optional filtering
 		scan->setRangeFilter(max_dist, min_dist);
@@ -355,8 +365,8 @@ int main(int argc, char** argv)
 		// pose file (repeated for the number of segments
 		writePoseFiles(normdir, rPos, rPosTheta, scanNumber);
 		// scan files for all segments
-		writeScanFiles(normdir, points, normals, scanNumber);
-		//    writeScanFilesXYZ(normdir, points, normals, scanNumber);
+		if (exportRGB) writeScanFilesRGB(normdir, points, normals, scanNumber);
+		else writeScanFilesNormal(normdir, points, normals, scanNumber);
 
 		scanNumber++;
 	}

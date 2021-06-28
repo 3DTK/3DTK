@@ -126,6 +126,8 @@ inline Point operator*(const double &v, const Point &p) {
   return res;
 }
 
+
+
 #include "point.icc"
 
 #endif

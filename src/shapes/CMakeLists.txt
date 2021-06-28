@@ -21,11 +21,13 @@ include_directories(${PROJECT_SOURCE_DIR}/include/shapes/)
 #  endif()
 #
 
-add_executable(planes plane.cc)
+add_executable(planes plane.cc ../scanio/framesreader.cc)
+target_include_directories(planes PUBLIC ${PROJECT_SOURCE_DIR}/3rdparty/rply-1.1.4)
+target_link_libraries(planes scan shape scanio rply ${NEWMAT_LIBRARIES} ${ANN_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY})
+
 #  add_executable(image toImage.cc image.cc hough.cc convexplane.cc accumulator.cc hsm3d.cc ConfigFileHough.cc parascan.cc quadtree.cc geom_math.cc )
 #  add_executable(matchMarker matchMarker.cc)
 
-target_link_libraries(planes scan shape ${NEWMAT_LIBRARIES} ${ANN_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY})
 if (WIN32)
   target_link_libraries(planes XGetopt)
 endif()

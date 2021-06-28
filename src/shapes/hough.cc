@@ -52,18 +52,15 @@ Hough::Hough(bool q, std::string configFile)
 }
 
 Hough::Hough(Scan * GlobalScan, bool q, std::string configFile)
+: Hough(q, configFile)
 {
-
-  quiet = q;
-  if(configFile.size() > 0) {
-    myConfigFileHough.LoadCfg(configFile.c_str());
-    if(!quiet) {
-	 std::cout << "Loaded Configfile" << std::endl;
-      myConfigFileHough.ShowConfiguration();
-    }
-  }
-
   SetScan(GlobalScan);
+}
+
+Hough::Hough(ScanVector& GlobalScans, bool q, std::string configFile)
+: Hough(q, configFile)
+{
+  SetScan(GlobalScans);
 }
 
 void Hough::SetScan(Scan* scan)
@@ -100,6 +97,44 @@ void Hough::SetScan(Scan* scan)
   srand(time(0)); // make the results actually random
   //srand(0); // make the results repeatable
 }
+
+// Set scans from a vector of multiple scans
+void Hough::SetScan(ScanVector& scans)
+{
+  nrEntries = 0;
+  maximum = false;
+  planeCounter = 0;
+
+  allPoints = new vector<Point>();
+  DataXYZ points_red;
+  for (const auto& scan : scans)
+  {
+    points_red = scan->get("xyz reduced");
+    for (unsigned int i = 0; i < points_red.size(); ++i) {
+      Point p(points_red[i]);
+      allPoints->push_back(p);
+    }
+  }
+
+  switch(myConfigFileHough.Get_AccumulatorType()) {
+    case 0:
+      acc = new AccumulatorSimple(myConfigFileHough);
+      break;
+    case 1:
+      acc = new AccumulatorBall(myConfigFileHough);
+      break;
+    case 2:
+      acc = new AccumulatorCube(myConfigFileHough);
+      break;
+    case 3:
+      acc = new AccumulatorBallI(myConfigFileHough);
+      break;
+  }
+  srand(time(0)); // make the results actually random
+  //srand(0); // make the results repeatable
+}
+
+
 
 /**
   * Desctructor.
@@ -1087,15 +1122,21 @@ int Hough::writePlanes(int startCount) {
 
   if(!quiet) cout << "Writing " << planes.size() << " Planes to " << blub << endl;
 
-  ofstream out;
+  ofstream out, nout;
   string blub3 = blub + "/planes.list";
+  string blub5 = blub + "/normals.list";
   out.open(blub3.c_str());
+  nout.open(blub5.c_str());
   for(vector<ConvexPlane*>::iterator it = planes.begin(); it != planes.end(); it++) {
     string blub2 = blub + "/plane"+ to_string(counter,3) + ".3d";
+    string blub4 = blub + "/plane"+ to_string(counter,3) + ".n";
     out << "Plane " << blub2 << endl;
+    nout << "Normal " << blub4 << endl;
     (*it)->writePlane(blub2, counter);
+    (*it)->writeNormal(blub4, counter);
     counter++;
   }
+
 
   out.close();
   out.flush();

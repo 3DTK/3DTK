@@ -42,13 +42,17 @@ public:
 
   Hough(bool quiet = true, std::string configFile = ""); // this constructor allows the Scan to be set later
   Hough(Scan * GlobalScan, bool quiet = true, std::string configFile = "bin/hough.cfg" );
+  Hough(ScanVector& GlobalScans, bool quiet = true, std::string configFile = "bin/hough.cfg" );
   void SetScan(Scan*);
+  void SetScan(ScanVector&);
   ~Hough();
   int  RHT();
   void SHT();
   void PHT();
   void PPHT();
   void APHT();
+
+
 
   //vector<ConvexPlane>& getPlanes();
   bool distanceOK(Point p1, Point p2, Point p3);

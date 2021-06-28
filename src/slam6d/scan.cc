@@ -392,7 +392,7 @@ void Scan::copyOriginalToReduced()
 
 
 /**
- * Computes normals for all points
+ * Computes normals for all points<YY
  */
 void Scan::calcNormals()
 {
