@@ -65,6 +65,7 @@ namespace fbr{
     EQUIRECTANGULAR,
     CYLINDRICAL,
     MERCATOR,
+    MILLER,
     RECTILINEAR,
     PANNINI,
     STEREOGRAPHIC,
@@ -97,6 +98,7 @@ namespace fbr{
   enum panorama_type{
     ThreeChannel24BitRange,
     ThreeGrayscaleRange,
+    OneGrayscaleRange,
   };
   /**
    * @enum feature_image

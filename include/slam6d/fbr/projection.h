@@ -88,8 +88,9 @@ namespace fbr{
      * @param row - of the panorama
      * @param col - of the panorama
      * @param range - range of the point
+     * @param numim - image number, useful for some projections
      */
-    void calcPointFromPanoramaPosition(double& x, double& y, double& z, int row, int col, double range);
+    void calcPointFromPanoramaPosition(double& x, double& y, double& z, int row, int col, double range, unsigned int numim);
     /**
      * @breif caclculates the x and y of the 3D point on panorama projection
      * returns x or y as -1 if the point is out of image range
