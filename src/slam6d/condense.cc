@@ -15,174 +15,7 @@
  *
  */
 
-#include <sys/types.h>
-#include <sys/stat.h>
-
-#include <string>
-#include <iostream>
-#include <fstream>
-#include <stdexcept>
-using std::string;
-
-#include <vector>
-#include <map>
-
-#include "slam6d/point.h"
-#include "slam6d/scan.h"
-#include "scanio/writer.h"
-#include "scanio/framesreader.h"
-#include "slam6d/globals.icc"
-
-#ifdef _MSC_VER
-#define strcasecmp _stricmp
-#define strncasecmp _strnicmp
-#else
-#include <strings.h>
-#endif
-
-#include <boost/program_options.hpp>
-#include <boost/filesystem.hpp>
-namespace po = boost::program_options;
-
-// checks if the given path exists
-int existsDir(const char* path)
-{
-    struct stat info;
-    if (stat( path, &info ) != 0) return 0;
-    else if ( info.st_mode & S_IFDIR ) return 1;
-    else return 0;
-}
-
-// write pose file
-void writePose(std::ofstream &posefile, const double* rPos, const double* rPosTheta, double scale=1)
-{
-  posefile << scale*rPos[0] << " " << scale*rPos[1] << " " << scale*rPos[2] << " ";
-  posefile << deg(rPosTheta[0]) << " "
-           << deg(rPosTheta[1]) << " "
-           << deg(rPosTheta[2]) << std::endl;
-}
-
-void writePoints(std::ofstream &scanfile, DataXYZ &xyz, double scaleFac = 1.0)
-{
-    for (uint j = 0; j < xyz.size(); j++)
-        scanfile << scaleFac*xyz[j][0] << " " << scaleFac*xyz[j][1] << " " << scaleFac*xyz[j][2] << endl;
-}
-
-void writePointsReflectance(std::ofstream &scanfile, DataXYZ &xyz, DataReflectance &r, double scaleFac = 1.0)
-{
-    for (uint j = 0; j < xyz.size(); j++)
-        scanfile << scaleFac*xyz[j][0] << " " << scaleFac*xyz[j][1] << " " << scaleFac*xyz[j][2] << " " << r[j] << endl;
-}
-
-void validate(boost::any& v, const std::vector<std::string>& values,
-              IOType*, int) {
-  if (values.size() == 0)
-    throw std::runtime_error("Invalid model specification");
-  std::string arg = values.at(0);
-  try {
-    v = formatname_to_io_type(arg.c_str());
-  } catch (...) { // runtime_error
-    throw std::runtime_error("Format " + arg + " unknown.");
-  }
-}
-
-
-int parse_options(int argc, char **argv, std::string &dir, double &red, int &rand,
-            int &start, int &end, int &maxDist, int &minDist, bool &use_pose,
-            bool &use_xyz, bool &use_reflectance, bool &use_type, bool &use_color, int &octree, IOType &type, std::string& customFilter, double &scaleFac,
-	    bool &hexfloat, bool &high_precision, int &frame, bool &use_normals, int &split)
-{
-po::options_description generic("Generic options");
-  generic.add_options()
-    ("help,h", "output this help message");
-
-  po::options_description input("Input options");
-  input.add_options()
-    ("format,f", po::value<IOType>(&type)->default_value(UOS, "uos"),
-     "using shared library <arg> for input. (chose F from {uos, uos_map, "
-     "uos_rgb, uos_frames, uos_map_frames, old, rts, rts_map, ifp, "
-     "riegl_txt, riegl_rgb, riegl_bin, zahn, ply, las})")
-    ("start,s", po::value<int>(&start)->default_value(0),
-     "start at scan <arg> (i.e., neglects the first <arg> scans) "
-     "[ATTENTION: counting naturally starts with 0]")
-    ("end,e", po::value<int>(&end)->default_value(-1),
-     "end after scan <arg>")
-    ("split,S", po::value<int>(&split)->default_value(end),
-    "Iterativley put <arg> scans together. If not used, condense will put all scans in one file.")
-    ("customFilter,u", po::value<string>(&customFilter),
-    "Apply a custom filter. Filter mode and data are specified as a semicolon-seperated string:"
-    "{filterMode};{nrOfParams}[;param1][;param2][...]\n"
-    "Multiple filters can be specified in a file (syntax in file is same as direct specification\n"
-    "FILE;{fileName}\n"
-    "See filter implementation in src/slam6d/pointfilter.cc for more detail.")
-    ("reduce,r", po::value<double>(&red)->default_value(-1.0),
-    "turns on octree based point reduction (voxel size=<NR>)")
-    ("octree,O", po::value<int>(&octree)->default_value(1),
-    "use randomized octree based point reduction (pts per voxel=<NR>)")
-    ("scale,y", po::value<double>(&scaleFac)->default_value(0.01),
-    "scale factor for point cloud in m (be aware of the different units for uos (cm) and xyz (m), (default: 0.01 means that input and output remain the same)")
-    ("min,M", po::value<int>(&minDist)->default_value(-1),
-    "neglegt all data points with a distance smaller than NR 'units'")
-    ("max,m", po::value<int>(&maxDist)->default_value(-1),
-    "neglegt all data points with a distance larger than NR 'units'")
-    ("color,c", po::bool_switch(&use_color)->default_value(false),
-     "export in color as RGB")
-    ("reflectance,R", po::bool_switch(&use_reflectance)->default_value(false),
-     "export reflectance values")
-    ("type,T", po::bool_switch(&use_type)->default_value(false),
-     "export type/class values")
-    ("normals,N", po::bool_switch(&use_normals)->default_value(false),
-     "export point normals")
-    ("trustpose,p", po::bool_switch(&use_pose)->default_value(false),
-    "Trust the pose file, do not use the transformation from the .frames files.")
-    ("xyz,x", po::bool_switch(&use_xyz)->default_value(false),
-     "export in xyz format (right handed coordinate system in m)")
-    ("hexfloat,0", po::bool_switch(&hexfloat)->default_value(false),
-     "export points with hexadecimal digits")
-    ("highprecision,H", po::bool_switch(&high_precision)->default_value(false),
-     "export points with full double precision")
-    ("frame,n", po::value<int>(&frame)->default_value(-1),
-     "uses frame NR for export");
-
-  po::options_description hidden("Hidden options");
-  hidden.add_options()
-    ("input-dir", po::value<std::string>(&dir), "input dir");
-
-  // all options
-  po::options_description all;
-  all.add(generic).add(input).add(hidden);
-
-  // options visible with --help
-  po::options_description cmdline_options;
-  cmdline_options.add(generic).add(input);
-
-  // positional argument
-  po::positional_options_description pd;
-  pd.add("input-dir", 1);
-
-  // process options
-  po::variables_map vm;
-  po::store(po::command_line_parser(argc, argv).
-            options(all).positional(pd).run(), vm);
-
-  // display help
-  if (vm.count("help")) {
-    std::cout << cmdline_options;
-    std::cout << std::endl
-         << "Example usage:" << std::endl
-         << "\tbin/condense -S 10 /your/directory" << std::endl;
-    exit(0);
-  }
-  po::notify(vm);
-
-#ifndef _MSC_VER
-  if (dir[dir.length()-1] != '/') dir = dir + "/";
-#else
-  if (dir[dir.length()-1] != '\\') dir = dir + "\\";
-#endif
-
-  return 0;
-}
+#include "slam6d/condense.h"
 
 
 int main(int argc, char **argv)
@@ -195,7 +28,7 @@ int main(int argc, char **argv)
   int    start = 0,   end = -1;
   int    maxDist    = -1;
   int    minDist    = -1;
-  bool   uP         = false;  // should we use the pose information instead of the frames??
+  bool   use_frames   = false;
   bool   use_xyz = false;
   bool   use_color = false;
   bool   use_reflectance = false;
@@ -214,7 +47,7 @@ int main(int argc, char **argv)
 
   try {
     parse_options(argc, argv, dir, red, rand, start, end,
-      maxDist, minDist, uP, use_xyz, use_reflectance, use_type, use_color, octree, iotype, customFilter, scaleFac,
+      maxDist, minDist, use_frames, use_xyz, use_reflectance, use_type, use_color, octree, iotype, customFilter, scaleFac,
       hexfloat, high_precision, frame, use_normals, split);
   } catch (std::exception& e) {
     std::cerr << "Error while parsing settings: " << e.what() << std::endl;
@@ -226,6 +59,7 @@ int main(int argc, char **argv)
     use_normals = false;
   }
 
+ std::string red_string = red > 0 ? " reduced" : "";
   rangeFilterActive = minDist > 0 || maxDist > 0;
 
   // custom filter set? quick check, needs to contain at least one ';'
@@ -270,6 +104,7 @@ int main(int argc, char **argv)
   }
 
   // Get Scans
+  if (use_frames) Scan::continueProcessing();
   Scan::openDirectory(false, dir, iotype, start, end);
   if(Scan::allScans.size() == 0) {
     std::cerr << "No scans found. Did you use the correct format?" << std::endl;
@@ -302,20 +137,6 @@ int main(int argc, char **argv)
     // reduction filter for current scan!
   }
 
-    // Unnecessary part. Just use --trustpose if pose should be trusted
-  // Check if .frames or .pose should be used
-//   {
-//     char* fr;
-//     std::sprintf(fr, "%sscan%03d.frames", dir.c_str(), start);
-//     string framesfilepath(fr);
-//     ifstream f( framesfilepath.c_str() );
-//     if ( !f.good() && !uP ) uP = true;
-//     f.close();
-//   }
-
-  // Read transformation from either .frames or .pose
-  readFramesAndTransform(dir, start, end, frame, uP, red > -1);
-
   // creating subdirectory for condensed scans
   std::string save_dir = dir + "cond/";
   if ( !existsDir( save_dir.c_str() ) )
@@ -325,20 +146,20 @@ int main(int argc, char **argv)
   } else std::cout << save_dir << " exists allready." << std::endl;
 
   // declare files
-  FILE *redptsout; //@FIXME REMOVE AND REWRITE ALL WRITE FUNCTIONS TO USE OFSTREAM
   std::ofstream ptsout;
   std::ofstream poseout;
   char* scanfilepath;
   char* posefilepath;
 
-  double rPos[] = {0,0,0};
-  double rPosTheta[] = {0,0,0};
   int k = 0; // count subscans
   uint seq = 0; // count subfiles
+  vector<Scan*> splitscans;
+
   for(unsigned int i = 0; i < Scan::allScans.size(); i++)
   {
 
     Scan *source = Scan::allScans[i];
+
     // open new file after 'split' scans
     if (0 == k++)
     {
@@ -348,20 +169,6 @@ int main(int argc, char **argv)
         sprintf(scanfilepath, "%sscan%03d.3d", save_dir.c_str(), seq);
         sprintf(posefilepath, "%sscan%03d.pose", save_dir.c_str(), seq);
         cout << "Creating scanfile " << scanfilepath << endl;
-
-        rPos[0] = source->get_rPos()[0];
-        rPos[1] = source->get_rPos()[1];
-        rPos[2] = source->get_rPos()[2];
-        rPosTheta[0] = source->get_rPosTheta()[0];
-        rPosTheta[1] = source->get_rPosTheta()[1];
-        rPosTheta[2] = source->get_rPosTheta()[2];
-
-        // open files
-        //fclose(redptsout);
-        //redptsout = fopen(scanfilepath, "w"); // wba => write binary append
-        //if (!redptsout) cout << "File corrupted" << endl
-        // TODO: REMOVE/REWRITE ALL WRITE FUNCITONS TO USE OFSTREAM
-        // APPEARENTLY, struct _IO_FILE CAN ONLY OPEN 1020 FILES, THEN IS CORRUPTED.
         poseout.close();
         poseout.clear();
         poseout.open(posefilepath, std::ofstream::out);
@@ -373,139 +180,126 @@ int main(int argc, char **argv)
         delete[] scanfilepath;
         delete[] posefilepath;
     }
-    // After <split> iterations, start new file. If split was not specified, write all in one file
+    // Now flush everything. If split was not specified, write all in one file
     if (k == split && split != -1)
     {
-        // Writing zero for pose because all the points have been transformed with the .pose or .frames files.
-        // This way, we can have globaly consistent points only through the .3d files (e.g. for hough transform),
-        // while local transformation can stil be applied later (e.g. post-registration).
-        //cout << "Exporting points done." << endl;
-        const double zero[] = {0,0,0};
-        rPos[0] /= split;
-        rPos[1] /= split;
-        rPos[2] /= split;
-        rPosTheta[0] /= split;
-        rPosTheta[1] /= split;
-        rPosTheta[2] /= split;
-        // TODO: built --exportMeanTrajectory
-        if(use_xyz) {
-          //writeTrajectoryXYZ(poseout, source->get_transMat(), true, scaleFac);
-          writePose(poseout, zero, zero, 0.01);
-        } else {
-          //writeTrajectoryUOS(poseout, source->get_transMat(), true, scaleFac*100.0);
-          writePose(poseout, zero, zero);
+        // Reference index (middle) for all scans 
+        int ref = (int)(0.5 * split);
+
+        // Collect all fields of all sub-sequent scan objects
+        vector<double*> pts;
+        vector<float> refls; 
+        vector<int> typevec;
+        vector<unsigned char*> rgbs;
+        vector<double*> normals;
+
+        // transform points into coordinate system of ref 
+        double tinv[16];
+        double rPos[3], rPosTheta[3];
+        const double* tmp = splitscans[ref]->get_transMat();
+        Matrix4ToEuler(tmp, rPosTheta, rPos);
+        M4inv(tmp, tinv);
+
+        // Collecting the data...
+        for (uint iter = 0; iter < splitscans.size(); iter++) {
+            Scan *sscan = splitscans[iter];
+            const double* transMat = sscan->get_transMat();
+            int nrpts = sscan->size<DataXYZ>("xyz" + red_string);
+            DataXYZ xyz(sscan->get("xyz" + red_string)); // most important
+            
+            // Getting all fields
+            DataReflectance refl(sscan->get("reflectance" + red_string));
+            DataType type(sscan->get("type" + red_string));
+            DataRGB rgb(sscan->get("rgb" + red_string));
+       
+            // Leave out fields that have no data. i.e. less points than nrpts
+            for (int j = 0; j < nrpts; j++) {
+                if (refl.size() == nrpts) 
+                    refls.push_back(refl[j]);
+                if (typevec.size() == nrpts)
+                    typevec.push_back(type[j]);
+                if (rgb.size() == nrpts)
+                    rgbs.push_back(rgb[j]);
+                if (iotype == UOS_NORMAL)
+                {
+                    DataNormal normal(sscan->get("normal" + red_string));
+                    double *n = new double[3];
+                    n[0] = normal[j][0];
+                    n[1] = normal[j][1];
+                    n[2] = normal[j][2];
+                    normals.push_back(n);
+                }
+                double *p = new double[3];
+                p[0] = xyz[j][0];
+                p[1] = xyz[j][1];
+                p[2] = xyz[j][2];
+                transform(p, transMat);
+                transform(p, tinv);
+                pts.push_back(p);
+            }
         }
+        Scan *s = new BasicScan(rPos, rPosTheta, pts);
+        if (use_reflectance)
+        {
+            float* data = reinterpret_cast<float*>(s->create("reflectance" + red_string, 
+                            sizeof(float) * refls.size()).get_raw_pointer());
+            for(size_t i2 = 0; i2 < refls.size(); ++i2)
+                data[i2] = refls[i2];
+        }
+        if (use_type)
+        {
+            int* data = reinterpret_cast<int*>(s->create("type" + red_string, 
+                            sizeof(int) * typevec.size()).get_raw_pointer());
+            for(size_t i2 = 0; i2 < typevec.size(); ++i2)
+                data[i2] = typevec[i2];
+        }
+        if (use_color)
+        {
+            unsigned char** data = reinterpret_cast<unsigned char**>(s->create("rgb" + red_string, 
+                            sizeof(unsigned char*) * rgbs.size()).get_raw_pointer());
+            for(size_t i2 = 0; i2 < rgbs.size(); ++i2)
+                data[i2] = rgbs[i2];
+        } 
+        if (use_normals)
+        {
+            double** data = reinterpret_cast<double**>(s->create("normal" + red_string, 
+                            sizeof(double*) * normals.size()).get_raw_pointer());
+            for(size_t i2 = 0; i2 < normals.size(); ++i2)
+                data[i2] = normals[i2];
+        }
+        
+        writeMetaScan(s, ptsout, red, use_reflectance, use_xyz, use_type,
+            use_color, use_normals, high_precision, types, scaleFac);
+        // TODO: interpolate path.
+        if(use_xyz) {
+          writeXYZPose(poseout, rPos, rPosTheta, 0.01);
+        } else {
+          writeUOSPose(poseout, rPos, rPosTheta);
+        }
+
+        // prepare next iteration:
         k = 0;
         seq++;
+        for (int o = 0; o < pts.size(); o++)
+            delete[] pts[o];
+        pts.clear();
+        splitscans.clear();
     }
 
     // CONDENSE SCANS:
-    rPos[0] += source->get_rPos()[0];
-    rPos[1] += source->get_rPos()[1];
-    rPos[2] += source->get_rPos()[2];
-    rPosTheta[0] += source->get_rPosTheta()[0];
-    rPosTheta[1] += source->get_rPosTheta()[1];
-    rPosTheta[2] += source->get_rPosTheta()[2];
 
     // if a scan contains no points do not include it in condensed files
     if( source->size<DataXYZ>("xyz") == 0 )
     {
-        std::cout << source->getIdentifier() << " has no points. Skipping..." << std::endl;
+        std::cout << "scan" << source->getIdentifier() << " has no points. Skipping..." << std::endl;
         continue;
-    } else { std::cout << "Exporting scan" << source->getIdentifier() << ".3d" << std::endl; }
-
-    /*
-     * "xyz reduced show" -> transformed points, globaly
-     * "xyz reduced" -> local frame points
-     * Here, points are required in local reference, since
-     * the corresponding transformation is to be exported into the .pose file.
-     */
-    std::string red_string = red > 0 ? " reduced" : "";
-    DataXYZ xyz  = source->get("xyz" + red_string);
-    //cout << "Get " << (xyz.valid() ? "valid" : "invalid") << " xyz data of size " << xyz.size() << endl;
-
-    if(use_reflectance) {
-      DataReflectance xyz_reflectance =
-          (((DataReflectance)source->get("reflectance" + red_string)).size() == 0) ?
-
-          source->create("reflectance" + red_string, sizeof(float)*xyz.size()) :
-          source->get("reflectance" + red_string);
-
-      if (!(types & PointType::USE_REFLECTANCE)) {
-        for(unsigned int i = 0; i < xyz.size(); i++) xyz_reflectance[i] = 255;
-      }
-      if(use_xyz) {
-        //write_xyzr(xyz, xyz_reflectance, redptsout, scaleFac, hexfloat, high_precision);
-        writePointsReflectance(ptsout, xyz, xyz_reflectance, scaleFac);
-      } else {
-        //write_uosr(xyz, xyz_reflectance, redptsout, scaleFac*100.0 , hexfloat, high_precision);
-        writePointsReflectance(ptsout, xyz, xyz_reflectance, scaleFac*100.0);
-      }
-
-    } else if(use_type) {
-      DataType xyz_type =
-          (((DataType)source->get("type" + red_string)).size() == 0) ?
-
-          source->create("type" + red_string, sizeof(int)*xyz.size()) :
-          source->get("type" + red_string);
-
-      if (!(types & PointType::USE_TYPE)) {
-        for(unsigned int i = 0; i < xyz.size(); i++) xyz_type[i] = 0;
-      }
-      if(use_xyz) {
-        write_xyzc(xyz, xyz_type, redptsout, scaleFac, hexfloat, high_precision);
-      } else {
-        write_uosc(xyz, xyz_type, redptsout, scaleFac*100.0 , hexfloat, high_precision);
-      }
-
-    } else if(use_color) {
-      std::string data_string = red > 0 ? "color reduced" : "rgb";
-      DataRGB xyz_color =
-          (((DataRGB)source->get(data_string)).size() == 0) ?
-          source->create(data_string, sizeof(unsigned char)*3*xyz.size()) :
-          source->get(data_string);
-      if (!(types & PointType::USE_COLOR)) {
-          for(unsigned int i = 0; i < xyz.size(); i++) {
-            xyz_color[i][0] = 0;
-            xyz_color[i][1] = 0;
-            xyz_color[i][2] = 0;
-        }
-      }
-      if(use_xyz) {
-        write_xyz_rgb(xyz, xyz_color, redptsout, scaleFac, hexfloat, high_precision);
-      } else {
-        write_uos_rgb(xyz, xyz_color, redptsout, scaleFac*100.0, hexfloat, high_precision);
-      }
-
-    } else if(use_normals) {
-      std::string data_string = red > 0 ? "normal reduced" : "normal";
-      DataNormal normals =
-          (((DataNormal)source->get(data_string)).size() == 0) ?
-          source->create(data_string, sizeof(double)*3*xyz.size()) :
-          source->get(data_string);
-      if(use_xyz) {
-        write_xyz_normal(xyz, normals, redptsout, scaleFac, hexfloat, high_precision);
-      } else {
-        write_uos_normal(xyz, normals, redptsout, scaleFac*100.0, hexfloat, high_precision);
-      }
-
-    } else {
-      if(use_xyz) {
-        //write_xyz(xyz, redptsout, scaleFac, hexfloat, high_precision);
-        writePoints(ptsout, xyz, 0.01);
-      } else {
-         // cout << "Writing in UOS file format to file..." << endl;
-        //write_uos(xyz, redptsout, scaleFac*100.0, hexfloat, high_precision);
-        writePoints(ptsout, xyz);
-      }
-
+    } else { 
+        splitscans.push_back(source);
+        std::cout << "Exporting scan" << source->getIdentifier() << ".3d" << std::endl; 
     }
-
+    
   }
 
-
-
-  //fclose(redptsout);
   poseout.close();
   poseout.clear();
 
