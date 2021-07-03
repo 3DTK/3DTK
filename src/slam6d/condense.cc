@@ -159,6 +159,15 @@ int main(int argc, char **argv)
   {
 
     Scan *source = Scan::allScans[i];
+    // if a scan contains no points do not include it in condensed files
+    if( source->size<DataXYZ>("xyz") == 0 )
+    {
+        std::cout << "scan" << source->getIdentifier() << " has no points. Skipping..." << std::endl;
+        continue;
+    } else { 
+        splitscans.push_back(source);
+        std::cout << "Exporting scan" << source->getIdentifier() << ".3d" << std::endl; 
+    }
 
     // open new file after 'split' scans
     if (0 == k++)
@@ -186,91 +195,14 @@ int main(int argc, char **argv)
         // Reference index (middle) for all scans 
         int ref = (int)(0.5 * split);
 
-        // Collect all fields of all sub-sequent scan objects
-        vector<double*> pts;
-        vector<float> refls; 
-        vector<int> typevec;
-        vector<unsigned char*> rgbs;
-        vector<double*> normals;
-
-        // transform points into coordinate system of ref 
-        double tinv[16];
-        double rPos[3], rPosTheta[3];
-        const double* tmp = splitscans[ref]->get_transMat();
-        Matrix4ToEuler(tmp, rPosTheta, rPos);
-        M4inv(tmp, tinv);
-
-        // Collecting the data...
-        for (uint iter = 0; iter < splitscans.size(); iter++) {
-            Scan *sscan = splitscans[iter];
-            const double* transMat = sscan->get_transMat();
-            int nrpts = sscan->size<DataXYZ>("xyz" + red_string);
-            DataXYZ xyz(sscan->get("xyz" + red_string)); // most important
-            
-            // Getting all fields
-            DataReflectance refl(sscan->get("reflectance" + red_string));
-            DataType type(sscan->get("type" + red_string));
-            DataRGB rgb(sscan->get("rgb" + red_string));
-       
-            // Leave out fields that have no data. i.e. less points than nrpts
-            for (int j = 0; j < nrpts; j++) {
-                if (refl.size() == nrpts) 
-                    refls.push_back(refl[j]);
-                if (typevec.size() == nrpts)
-                    typevec.push_back(type[j]);
-                if (rgb.size() == nrpts)
-                    rgbs.push_back(rgb[j]);
-                if (iotype == UOS_NORMAL)
-                {
-                    DataNormal normal(sscan->get("normal" + red_string));
-                    double *n = new double[3];
-                    n[0] = normal[j][0];
-                    n[1] = normal[j][1];
-                    n[2] = normal[j][2];
-                    normals.push_back(n);
-                }
-                double *p = new double[3];
-                p[0] = xyz[j][0];
-                p[1] = xyz[j][1];
-                p[2] = xyz[j][2];
-                transform(p, transMat);
-                transform(p, tinv);
-                pts.push_back(p);
-            }
-        }
-        Scan *s = new BasicScan(rPos, rPosTheta, pts);
-        if (use_reflectance)
-        {
-            float* data = reinterpret_cast<float*>(s->create("reflectance" + red_string, 
-                            sizeof(float) * refls.size()).get_raw_pointer());
-            for(size_t i2 = 0; i2 < refls.size(); ++i2)
-                data[i2] = refls[i2];
-        }
-        if (use_type)
-        {
-            int* data = reinterpret_cast<int*>(s->create("type" + red_string, 
-                            sizeof(int) * typevec.size()).get_raw_pointer());
-            for(size_t i2 = 0; i2 < typevec.size(); ++i2)
-                data[i2] = typevec[i2];
-        }
-        if (use_color)
-        {
-            unsigned char** data = reinterpret_cast<unsigned char**>(s->create("rgb" + red_string, 
-                            sizeof(unsigned char*) * rgbs.size()).get_raw_pointer());
-            for(size_t i2 = 0; i2 < rgbs.size(); ++i2)
-                data[i2] = rgbs[i2];
-        } 
-        if (use_normals)
-        {
-            double** data = reinterpret_cast<double**>(s->create("normal" + red_string, 
-                            sizeof(double*) * normals.size()).get_raw_pointer());
-            for(size_t i2 = 0; i2 < normals.size(); ++i2)
-                data[i2] = normals[i2];
-        }
+        Scan *s = createMetaScan(splitscans, iotype, ref, red_string,
+            use_reflectance, use_type, use_color, use_normals);
+        const double* rPos = s->get_rPos();
+        const double* rPosTheta = s->get_rPosTheta();
         
         writeMetaScan(s, ptsout, red, use_reflectance, use_xyz, use_type,
             use_color, use_normals, high_precision, types, scaleFac);
-        // TODO: interpolate path.
+        // TODO: interpolate path over all metascans vector<Scan*> 
         if(use_xyz) {
           writeXYZPose(poseout, rPos, rPosTheta, 0.01);
         } else {
@@ -280,24 +212,29 @@ int main(int argc, char **argv)
         // prepare next iteration:
         k = 0;
         seq++;
-        for (int o = 0; o < pts.size(); o++)
-            delete[] pts[o];
-        pts.clear();
         splitscans.clear();
     }
-
-    // CONDENSE SCANS:
-
-    // if a scan contains no points do not include it in condensed files
-    if( source->size<DataXYZ>("xyz") == 0 )
-    {
-        std::cout << "scan" << source->getIdentifier() << " has no points. Skipping..." << std::endl;
-        continue;
-    } else { 
-        splitscans.push_back(source);
-        std::cout << "Exporting scan" << source->getIdentifier() << ".3d" << std::endl; 
-    }
     
+  }
+
+   // Flush the rest. 
+  if (!splitscans.empty()) 
+  {
+    int ref = (int)(0.5 * split);
+
+    Scan *s = createMetaScan(splitscans, iotype, ref, red_string,
+        use_reflectance, use_type, use_color, use_normals);
+    const double* rPos = s->get_rPos();
+    const double* rPosTheta = s->get_rPosTheta();
+        
+    writeMetaScan(s, ptsout, red, use_reflectance, use_xyz, use_type,
+        use_color, use_normals, high_precision, types, scaleFac);
+    // TODO: interpolate path over all metascans vector<Scan*> 
+    if(use_xyz) {
+      writeXYZPose(poseout, rPos, rPosTheta, 0.01);
+    } else {
+      writeUOSPose(poseout, rPos, rPosTheta);
+    }
   }
 
   poseout.close();
