@@ -294,7 +294,77 @@ void calculateNormalsKNN(vector<Point> &normals,
   delete[] pa;
 }
 
+void calculateNormalsRange(std::vector<Point> &normals,
+                            const std::vector<Point> &points,
+                            const double r2,
+                            const double _rPos[3])
+{
+    ColumnVector rPos(3);
+    for (int i = 0; i < 3; ++i)
+        rPos(i + 1) = _rPos[i];
+    double** pa = new double*[points.size()];
+    for (size_t i = 0; i < points.size(); ++i) {
+        pa[i] = new double[3];
+        pa[i][0] = points[i].x;
+        pa[i][1] = points[i].y;
+        pa[i][2] = points[i].z;
+    }
 
+    KDtree t(pa, points.size());
+
+    normals.reserve(points.size());
+
+#ifdef _OPENMP
+    omp_set_num_threads(OPENMP_NUM_THREADS);
+
+  #pragma omp parallel for schedule(dynamic)
+#endif
+    for (
+#if defined(_MSC_VER) and defined(_OPENMP)
+    // MSVC only supports OpenMP 2.5 where the counter must be signed
+    // There is also no ssize_t on non-POSIX platforms but sizeof(long) == sizeof(void*)
+    long
+#else
+    size_t
+#endif
+    i = 0; i < points.size(); ++i) {
+#ifdef _OPENMP
+    int thread_num = omp_get_thread_num();
+#else
+    int thread_num = 0;
+#endif
+
+    double p[3] = { points[i].x, points[i].y, points[i].z };
+
+    vector<Point> temp = t.fixedRangeSearch(p, r2, thread_num);
+
+    double norm[3];
+    double eigen[3];
+    calculateNormal(temp, norm, eigen);
+    ColumnVector n(3);
+    n(1) = norm[0];
+    n(2) = norm[1];
+    n(3) = norm[2];
+
+    ColumnVector point_vector(3);
+    point_vector(1) = p[0] - rPos(1);
+    point_vector(2) = p[1] - rPos(2);
+    point_vector(3) = p[2] - rPos(3);
+    point_vector = point_vector / point_vector.NormFrobenius();
+    Real angle = (n.t() * point_vector).AsScalar();
+    if (angle < 0) {
+      n *= -1.0;
+    }
+    n = n / n.NormFrobenius();
+    #pragma omp critical
+    normals.push_back(Point(n(1), n(2), n(3)));
+  }
+
+  for (size_t i = 0; i < points.size(); ++i) {
+    delete[] pa[i];
+  }
+  delete[] pa;
+}
 
 
 void calculateNormalsKNN(vector<Point> &normals,

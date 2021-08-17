@@ -107,6 +107,7 @@ add_library(scan
         scan.cc           basicScan.cc      managedScan.cc    metaScan.cc
         io_types.cc       io_utils.cc       pointfilter.cc    allocator.cc
         icp6Dnapx.cc      normals.cc        kdIndexed.cc      ../parsers/range_set_parser.cc
+        bkd.cc            bkdIndexed.cc
         )
 set_property(TARGET scan PROPERTY POSITION_INDEPENDENT_CODE 1)
 target_link_libraries(scan scanclient scanio ${ANN_LIBRARIES} ${NEWMAT_LIBRARIES} ${SUITESPARSE_LIBRARIES})

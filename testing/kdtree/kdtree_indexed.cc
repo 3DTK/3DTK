@@ -321,3 +321,23 @@ TEST(segment_search_all4)
     BOOST_CHECK_EQUAL_COLLECTIONS(result.begin(), result.end(), trueresult.begin(), trueresult.end());
 }
 
+// Test if the tree is able to remove points.
+TEST(remove_check)
+{
+    size_t npts = 100;
+    double **pa = new double*[npts];
+    for (int i = 1; i <= npts; ++i) {
+        pa[i-1] = new double[3]{(double)i, 0.0, 0.0};
+    }
+    KDtreeIndexed t(pa, npts);
+    cout << "Removing two first points." << endl;
+    for (int i = 0; i < 2; ++i) {
+        t.Remove(pa[i]);
+    }
+    cout << "Removed." << endl;
+    double point[3] = {0.0, 0.0, 0.0};
+    vector<size_t> result = t.kNearestNeighbors(point, 2);
+    vector<size_t> trueresult = { 2, 3 };
+    BOOST_CHECK_EQUAL_COLLECTIONS( result.begin(), result.end(), trueresult.begin(), trueresult.end() );
+}
+

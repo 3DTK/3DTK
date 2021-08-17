@@ -6,6 +6,7 @@
  *  @author Kai Lingemann. Inst. of CS, University of Osnabrueck, Germany
  *  @author Momchil Ivanov Ivanov. Jacobs University Bremen, Germany
  *  @author Igor Pener. Jacobs University Bremen, Germany
+ *  @author Fabian Arzberger. Julius-Maximilian University Wuerzburg, Germany
  */
 
 #ifndef __KD_TREE_IMPL_H__
@@ -13,6 +14,8 @@
 
 #include "slam6d/kdparams.h"
 #include "globals.icc"
+
+#include <stdio.h>
 
 #ifdef _MSC_VER
 #if !defined _OPENMP && defined OPENMP
@@ -110,6 +113,7 @@ public:
     // Leaf nodes
     if ((n > 0) && (n <= bucketSize)) {
       npts = n;
+      isleaf = true;
       leaf.p = new AccessorData[n];
       // fill leaf index array with indices
       for(size_t i = 0; i < n; ++i) {
@@ -120,7 +124,7 @@ public:
 
     // Else, interior nodes
     npts = 0;
-
+    isleaf = false;
     for (int i = 0; i < 3; i++) {
       node.center[i] = 0.5 * (mins[i]+maxs[i]);
     }
@@ -148,6 +152,7 @@ public:
     // Put points that were measured very closely together in the same bucket
     if ( fabs(std::max(std::max(node.dx,node.dy),node.dz)) < 0.01 ) {
       npts = n;
+      isleaf = true;
       leaf.p = new AccessorData[n];
       // fill leaf index array with indices
       for(size_t i = 0; i < n; ++i) {
@@ -217,6 +222,13 @@ protected:
    * number of points. If this is 0: intermediate node. If nonzero: leaf.
    */
   int npts;
+  
+  /**
+   * When removing points, leaf nodes could get npts == 0. To prevent  
+   * treating them as intermediate nodes, we use this flag since unions wont
+   * allow us to check whether a node is leaf or non-leaf
+   */
+  bool isleaf;
 
   /**
    * Cue the standard rant about anon unions but not structs in C++
@@ -247,6 +259,77 @@ protected:
       AccessorData* p;
     } leaf;
   };
+  
+  void _CollectPts(const PointData& pts, int threadNum) const {
+      AccessorFunc point;
+      ParamFunc pointparam;
+      
+      if (npts) {
+          for (int i = 0; i < npts; ++i) 
+              params[threadNum].range_neighbors.push_back(pointparam(pts, leaf.p[i]));
+          
+          return;
+      }
+
+      node.child1->_CollectPts(pts, threadNum);
+      node.child2->_CollectPts(pts, threadNum);
+  }
+
+  /**
+   * @brief Removes a point from the tree by swapping.
+   * @return How many points have been removed. Will be 0 or 1.
+   */
+  int _Remove(const PointData& pts, int threadNum) {
+        AccessorFunc point;
+        ParamFunc pointparam;
+        int index_remove = -1;
+        double closestd2 = __DBL_MAX__;
+
+        // If leaf node (if nonzero)
+        if (isleaf) {
+            // Search for the (closest) point to be deleted
+            for (int i = 0; i < npts; i++) {
+                double d2 = Dist2( params[threadNum].p , point(pts, leaf.p[i]) );
+                if (d2 < closestd2) {
+                    closestd2 = d2;
+                    params[threadNum].closest = pointparam(pts, leaf.p[i]);
+                    index_remove = i;
+                }
+            }
+
+            // Remove the (closest) point (if it is close enough)  
+            if (closestd2 < 0.000000001) {
+                if (npts > 1 && index_remove != -1) {
+                    // Swap elem to be removed with last elem
+                    AccessorData *ptr2rmv = leaf.p + index_remove;
+                    AccessorData *end = leaf.p + npts - 1;
+                    std::swap(*ptr2rmv, *end);
+                    // Exclude last elem in the future by decrementing nr of pts.
+                    npts = npts - 1;
+                    return 1; // we removed one point.
+                } 
+                // only one point left...
+                else if (npts == 1 && index_remove != -1) {
+                    npts = npts - 1; // no need to swap this time
+                    return 1; // we removed the last point.
+                }
+            }
+            return 0; // we removed zero points
+        }
+
+        int removed = 0;
+        // Else, If not leaf node (interior), traverse the tree recursivley
+        double myd = node.splitval - params[threadNum].p[node.splitaxis];
+        if (myd > 0.0) // go right
+            removed += node.child1->_Remove(pts, threadNum);
+        else if (myd < 0.0) // go left
+            removed += node.child2->_Remove(pts, threadNum);
+        else { // unsure, search both paths
+            removed += node.child1->_Remove(pts, threadNum); 
+            removed += node.child2->_Remove(pts, threadNum);
+        }
+        return removed;
+  }
 
   /*
    * TODO: benchmark what is faster:
@@ -258,7 +341,7 @@ protected:
     ParamFunc   pointparam;
 
     // Leaf nodes
-    if (npts) {
+    if (isleaf) {
       for (int i = 0; i < npts; i++) {
         double myd2 = Dist2(params[threadNum].p, point(pts, leaf.p[i]));
         if (myd2 < params[threadNum].closest_d2) {
@@ -303,7 +386,7 @@ protected:
     ParamFunc pointparam;
 
     // Leaf nodes
-    if (npts) {
+    if (isleaf) {
       for (int i=0; i < npts; i++) {
         double p2p[] =  { params[threadNum].p[0] - point(pts, leaf.p[i])[0],
                           params[threadNum].p[1] - point(pts, leaf.p[i])[1],
@@ -317,7 +400,6 @@ protected:
       return;
     }
 
-
     // Quick check of whether to abort
     double p2c[] = { params[threadNum].p[0] - node.center[0],
                      params[threadNum].p[1] - node.center[1],
@@ -325,7 +407,6 @@ protected:
     double myd2center = Len2(p2c) - sqr(Dot(p2c, params[threadNum].dir));
     if (myd2center > sqr(node.r + sqrt(params[threadNum].closest_d2)))
       return;
-
 
     // Recursive case
     if (params[threadNum].p[node.splitaxis] < node.splitval) {
@@ -347,14 +428,13 @@ protected:
     ParamFunc pointparam;
 
     // Leaf nodes
-    if (npts) {
+    if (isleaf) {
 	    for (int i = 0; i < npts; i++) {
         double p2p[] =  { params[threadNum].p[0] - point(pts, leaf.p[i])[0],
                           params[threadNum].p[1] - point(pts, leaf.p[i])[1],
                           params[threadNum].p[2] - point(pts, leaf.p[i])[2] };
         double myd2 = Len2(p2p) - sqr(Dot(p2p, params[threadNum].dir));
         if (myd2 < params[threadNum].closest_d2) {
-		    //  cout << point(pts, leaf.p[i])[0] << " " << point(pts, leaf.p[i])[1] << " " << point(pts, leaf.p[i])[2] << " " << myd2 << endl;
           params[threadNum].range_neighbors.push_back(pointparam(pts, leaf.p[i]));
 	      }
 	    }
@@ -407,7 +487,7 @@ protected:
     ParamFunc pointparam;
 
     // Leaf nodes
-    if (npts) {
+    if (isleaf) {
 	    for (int i = 0; i < npts; i++) {
         /*
         double p2pb[] =  { point(pts, leaf.p[i])[0] - params[threadNum].p[0],
@@ -423,7 +503,6 @@ protected:
                           params[threadNum].p[2] - point(pts, leaf.p[i])[2] };
         double myd2 = Len2(p2p) - sqr(Dot(p2p, params[threadNum].dir));
         if (myd2 < params[threadNum].closest_d2) {
-		    //  cout << point(pts, leaf.p[i])[0] << " " << point(pts, leaf.p[i])[1] << " " << point(pts, leaf.p[i])[2] << " " << myd2 << endl;
           params[threadNum].range_neighbors.push_back(pointparam(pts, leaf.p[i]));
 	      }
 	    }
@@ -459,7 +538,7 @@ protected:
     ParamFunc pointparam;
 
     // Leaf nodes
-    if (npts) {
+    if (isleaf) {
 	 for (int i = 0; i < npts; i++) {
          double* tp = point(pts, leaf.p[i]);
          if (tp[0] >= params[threadNum].p[0] && tp[0] <= params[threadNum].p0[0]
@@ -502,7 +581,7 @@ protected:
     ParamFunc pointparam;
 
     // Leaf nodes
-    if (npts) {
+    if (isleaf) {
 	 for (int i = 0; i < npts; i++) {
 	   double myd2 = Dist2(params[threadNum].p, point(pts, leaf.p[i]));
 	   if (myd2 < params[threadNum].closest_d2) {
@@ -544,7 +623,7 @@ protected:
     ParamFunc pointparam;
 
     // Leaf nodes
-    if (npts) {
+    if (isleaf) {
 	 for (int i = 0; i < npts; i++) {
 	   double myd2 = Dist2(params[threadNum].p, point(pts, leaf.p[i]));
 
@@ -570,7 +649,13 @@ protected:
     int kN = params[threadNum].k-1;
 	// FIXME comparing with zero doesn't work for indexed kdtree, we should
 	// check the closest vector for the special negative values instead
-    if (params[threadNum].closest_neighbors[kN] != 0) {
+     /**
+       * @author Fabian Arzberger
+       * Heres the fix to the FIXME above. Pls recheck somebody!
+       * Instead of checking if closest_neighbors[] are set, we look at their
+       * corresponding distances. 
+       */
+    if (params[threadNum].distances[kN] != -1) {
         // Quick check of whether to abort
         double approx_dist_bbox
 		= std::max(std::max(fabs(params[threadNum].p[0]-node.center[0])-node.dx,
@@ -595,7 +680,7 @@ protected:
     ParamFunc pointparam;
 
     // Leaf nodes
-    if (npts) {
+    if (isleaf) {
 	 for (int i = 0; i < npts; i++) {
 	   double myd2 = Dist2(params[threadNum].p, point(pts, leaf.p[i]));
 	   if (myd2 >= params[threadNum].closest_d2) {
@@ -660,7 +745,7 @@ protected:
     double p2p[3], proj[3];
     double t, *comp;
     // Leaf nodes
-    if (npts) {
+    if (isleaf) {
         for (int i = 0; i < npts; i++) {
             p2p[0] = point(pts, leaf.p[i])[0] - params[threadNum].p[0];
             p2p[1] = point(pts, leaf.p[i])[1] - params[threadNum].p[1];
@@ -741,7 +826,7 @@ protected:
     double p2p[3], proj[3];
     double t, newdist2;
     // Leaf nodes
-    if (npts) {
+    if (isleaf) {
         for (int i = 0; i < npts; i++) {
             p2p[0] = point(pts, leaf.p[i])[0] - params[threadNum].p[0];
             p2p[1] = point(pts, leaf.p[i])[1] - params[threadNum].p[1];

@@ -13,6 +13,11 @@
 #include <vector>
 #include <slam6d/scan.h>
 
+void calculateNormalsRange(std::vector<Point> &normals,
+                            const std::vector<Point> &points,
+                            const double r2,
+                            const double _rPos[3]);
+
 void calculateNormalsApxKNN(std::vector<Point> &normals,
                             const std::vector<Point> &points,
                             const int k,

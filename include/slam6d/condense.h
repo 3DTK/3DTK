@@ -269,7 +269,7 @@ void validate(boost::any& v, const std::vector<std::string>& values,
 int parse_options(int argc, char **argv, std::string &dir, double &red, int &rand,
             int &start, int &end, int &maxDist, int &minDist, bool &use_frames,
             bool &use_xyz, bool &use_reflectance, bool &use_type, bool &use_color, int &octree, IOType &type, std::string& customFilter, double &scaleFac,
-	    bool &hexfloat, bool &high_precision, int &frame, bool &use_normals, int &split)
+	    bool &hexfloat, bool &high_precision, int &frame, bool &use_normals, int &split, bool& global)
 {
 po::options_description generic("Generic options");
   generic.add_options()
@@ -321,7 +321,9 @@ po::options_description generic("Generic options");
     ("highprecision,H", po::bool_switch(&high_precision)->default_value(false),
      "export points with full double precision")
     ("frame,n", po::value<int>(&frame)->default_value(-1),
-     "uses frame NR for export");
+     "uses frame NR for export")
+    ("global,g", po::bool_switch(&global)->default_value(false),
+     "Use global reference frame for export");
 
   po::options_description hidden("Hidden options");
   hidden.add_options()
@@ -461,7 +463,8 @@ Scan* createMetaScan(vector<Scan*> splitscans,
                      bool use_reflectance = false,
                      bool use_type = false,
                      bool use_color = false,
-                     bool use_normals = false) 
+                     bool use_normals = false,
+                     bool global = false) 
 {
 
     // Collect all fields of all sub-sequent scan objects
@@ -477,6 +480,7 @@ Scan* createMetaScan(vector<Scan*> splitscans,
     const double* tmp = splitscans[ref]->get_transMat();
     Matrix4ToEuler(tmp, rPosTheta, rPos);
     M4inv(tmp, tinv);
+
 
     // Collecting the data...
     for (uint iter = 0; iter < splitscans.size(); iter++) {
@@ -512,9 +516,15 @@ Scan* createMetaScan(vector<Scan*> splitscans,
             p[1] = xyz[j][1];
             p[2] = xyz[j][2];
             transform(p, transMat);
-            transform(p, tinv);
+            if (!global) transform(p, tinv);
             pts.push_back(p);
         }
+    }
+    if (global)
+    {
+        for (int i=0;i<3;++i) {
+            rPos[i] = 0; rPosTheta[i] = 0;
+        }    
     }
     Scan *s = new BasicScan(rPos, rPosTheta, pts);
     if (use_reflectance)

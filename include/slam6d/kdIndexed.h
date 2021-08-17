@@ -56,6 +56,13 @@ public:
 
   virtual ~KDtreeIndexed();
 
+  virtual int Remove(double *_p,
+                     int threadNum = 0); // no const
+
+  virtual size_t getNrPts() const;
+
+  virtual std::vector<size_t> CollectPts(int threadNum = 0) const;
+
   virtual size_t FindClosest(double *_p,
 						double maxdist2,
 						int threadNum = 0) const;

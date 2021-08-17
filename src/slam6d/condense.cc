@@ -44,11 +44,12 @@ int main(int argc, char **argv)
   bool high_precision = false;
   int frame = -1;
   int split = -1;
+  bool global = false;
 
   try {
     parse_options(argc, argv, dir, red, rand, start, end,
       maxDist, minDist, use_frames, use_xyz, use_reflectance, use_type, use_color, octree, iotype, customFilter, scaleFac,
-      hexfloat, high_precision, frame, use_normals, split);
+      hexfloat, high_precision, frame, use_normals, split, global);
   } catch (std::exception& e) {
     std::cerr << "Error while parsing settings: " << e.what() << std::endl;
     exit(1);
@@ -196,7 +197,7 @@ int main(int argc, char **argv)
         int ref = (int)(0.5 * split);
 
         Scan *s = createMetaScan(splitscans, iotype, ref, red_string,
-            use_reflectance, use_type, use_color, use_normals);
+            use_reflectance, use_type, use_color, use_normals, global);
         const double* rPos = s->get_rPos();
         const double* rPosTheta = s->get_rPosTheta();
         
@@ -220,10 +221,10 @@ int main(int argc, char **argv)
    // Flush the rest. 
   if (!splitscans.empty()) 
   {
-    int ref = (int)(0.5 * split);
+    int ref = (int)(0.5 * splitscans.size());
 
     Scan *s = createMetaScan(splitscans, iotype, ref, red_string,
-        use_reflectance, use_type, use_color, use_normals);
+        use_reflectance, use_type, use_color, use_normals, global);
     const double* rPos = s->get_rPos();
     const double* rPosTheta = s->get_rPosTheta();
         

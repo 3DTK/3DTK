@@ -47,6 +47,11 @@ public:
 
   virtual ~KDtree();
 
+  virtual std::vector<double*> CollectPts(int threadNum = 0) const;
+
+  virtual int Remove(double *p,
+                     int threadNum = 0); // no const
+
   // FIXME this file has tab width of 5
   virtual double *FindClosest(double *_p,
 						double maxdist2,

@@ -51,7 +51,7 @@ public:
 			const char _r, const char _g, const char _b);
 
   /**
-   *	Constructor with three double values and three color values
+   *	Constructor with three double values and three normal values
    */
   inline Point(const double _x,  const double _y,  const double _z,
 			const double _nx, const double _ny, const double _nz);

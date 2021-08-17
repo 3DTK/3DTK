@@ -14,6 +14,7 @@
  *  @author Andreas Nuechter. Jacobs University Bremen, Germany.
  *  @author Kai Lingemann. Inst. of CS, University of Osnabrueck, Germany.
  *  @author Thomas Escher Inst. of CS, University of Osnabrueck, Germany.
+ *  @author Fabian Arzberger. Julius-Maximilian University Wuerzburg, Germany.
  */
 
 #ifdef _MSC_VER
@@ -49,6 +50,21 @@ KDtree::KDtree(double **pts, int n, int bucketSize)
 
 KDtree::~KDtree()
 {
+}
+
+std::vector<double*> KDtree::CollectPts(int threadNum) const 
+{
+    params[threadNum].range_neighbors = std::vector<double*>(0);
+    _CollectPts(Void(), threadNum);
+    return params[threadNum].range_neighbors;
+}
+
+int KDtree::Remove(double *_p, int threadNum)
+{
+    params[threadNum].closest = 0;
+    params[threadNum].closest_d2 = __DBL_MAX__;
+    params[threadNum].p = _p;
+    return _Remove(Void(), threadNum);
 }
 
 /**

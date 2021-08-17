@@ -45,6 +45,7 @@ using namespace std;
 
 enum normal_method {KNN, ADAPTIVE_KNN,
                     AKNN, ADAPTIVE_AKNN,
+                    RANGE,
 #ifdef WITH_OPENCV
                     PANORAMA, PANORAMA_FAST
 #endif
@@ -62,6 +63,7 @@ void validate(boost::any& v, const std::vector<std::string>& values,
 	else if (strcasecmp(arg.c_str(), "ADAPTIVE_KNN") == 0) v = ADAPTIVE_KNN;
 	else if (strcasecmp(arg.c_str(), "AKNN") == 0) v = AKNN;
 	else if (strcasecmp(arg.c_str(), "ADAPTIVE_AKNN") == 0) v = ADAPTIVE_AKNN;
+    else if (strcasecmp(arg.c_str(), "RANGE") == 0) v = RANGE;
 #ifdef WITH_OPENCV
 	else if (strcasecmp(arg.c_str(), "PANORAMA") == 0) v = PANORAMA;
 	else if (strcasecmp(arg.c_str(), "PANORAMA_FAST") == 0) v = PANORAMA_FAST;
@@ -87,7 +89,7 @@ void validate(boost::any& v, const std::vector<std::string>& values,
 void parse_options(int argc, char **argv, int &start, int &end, int &bucketsize,
                    bool &scanserver, int &max_dist, int &min_dist, string &dir,
                    IOType &iotype, int &k1, int &k2,
-                   normal_method &ntype, int &width, int &height, bool &inward, bool &exportRGB)
+                   normal_method &ntype, int &width, int &height, bool &inward, bool &exportRGB, double& range)
 {
 	/// ----------------------------------
 	/// set up program commandline options
@@ -123,7 +125,7 @@ void parse_options(int argc, char **argv, int &start, int &end, int &bucketsize,
 	("normal,g",
 	 po::value<normal_method>(&ntype)->default_value(AKNN),
 	 "normal calculation method "
-	 "(KNN, ADAPTIVE_KNN, AKNN, ADAPTIVE_AKNN"
+	 "(KNN, ADAPTIVE_KNN, AKNN, ADAPTIVE_AKNN, RANGE"
 #ifdef WITH_OPENCV
 	 ", PANORAMA, PANORAMA_FAST"
 #endif
@@ -135,6 +137,12 @@ void parse_options(int argc, char **argv, int &start, int &end, int &bucketsize,
 	("K2,K",
 	 po::value<int>(&k2)->default_value(20),
 	 "<arg> value of Kmax for k-adaptation")
+    ("range,r",
+	 po::value<double>(&range)->default_value(20),
+	 "<arg> value of range for fixed range search.")
+    ("exportRGB,c",
+	 po::value<bool>(&exportRGB)->default_value(true),
+	 "Export normal values as RGB. Visualize using \"bin/show -f uos_rgb -c your/dir/\"")
 #ifdef WITH_OPENCV
 	("width,w",
 	 po::value<int>(&width)->default_value(3600),
@@ -145,9 +153,6 @@ void parse_options(int argc, char **argv, int &start, int &end, int &bucketsize,
 	("inward,i",
 	 po::value<bool>(&inward)->default_value(false),
 	 "normal direction inward? default false")
-    ("exportRGB,c",
-	 po::value<bool>(&exportRGB)->default_value(true),
-	 "Export normal values as RGB. Visualize using \"bin/show -f uos_rgb -c your/dir/\"")
 #endif
 	;
 
@@ -257,9 +262,10 @@ int main(int argc, char** argv)
 	int width, height;
 	bool inward;
     bool exportRGB;
+    double range;
 
 	parse_options(argc, argv, start, end, bucketsize, scanserver, max_dist, min_dist,
-	              dir, iotype, k1, k2, ntype, width, height, inward, exportRGB);
+	              dir, iotype, k1, k2, ntype, width, height, inward, exportRGB, range);
 
 	/// ----------------------------------
 	/// Prepare and read scans
@@ -297,15 +303,16 @@ int main(int argc, char** argv)
 	}
 
     if (exportRGB)
-        cout << "WARN: Exporting scans with RGB vals (0 - 255). These are ment for visualization. Do not use --exportRGB if you want more accurate normals." << endl;
+        cout << "WARN: Exporting scans with RGB vals (0 - 255). These are ment for visualization. Use --exportRGB=false if you want more accurate normals." << endl;
     else
-        cout << "WARN: Exporting scans with normalized normals. Use --exportRGB for visualization." << endl;
+        cout << "WARN: Exporting scans with normalized normals. Use --exportRGB=true for visualization." << endl;
 
 	/// -----------------------------------------
 	/// Initialize and perform normal calculation
 	/// -----------------------------------------
 	std::vector<Scan*>::iterator it = Scan::allScans.begin();
 	int scanNumber = start;
+    double sqRad2 = sqr(range);
 
 	for ( ; it != Scan::allScans.end(); ++it) {
 		Scan* scan = *it;
@@ -334,6 +341,8 @@ int main(int argc, char** argv)
 			calculateNormalsApxKNN(normals, points, k1, rPos);
 		else if (ntype == ADAPTIVE_AKNN)
 			calculateNormalsAdaptiveApxKNN(normals, points, k1, k2, rPos);
+        else if (ntype == RANGE)
+            calculateNormalsRange(normals, points, sqRad2, rPos);
 		else
 		{
 #ifdef WITH_OPENCV

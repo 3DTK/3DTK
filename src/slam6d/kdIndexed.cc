@@ -62,6 +62,34 @@ KDtreeIndexed::~KDtreeIndexed()
 {
 }
 
+size_t KDtreeIndexed::getNrPts() const
+{
+    return m_size;
+}
+
+std::vector<size_t> KDtreeIndexed::CollectPts(int threadNum) const
+{
+    params[threadNum].range_neighbors.clear();
+    _CollectPts(m_data, threadNum);
+    return params[threadNum].range_neighbors;
+}
+
+int KDtreeIndexed::Remove(double *_p,
+                            int threadNum)
+{
+    // We might delete a point.
+    if (m_size > 0) {
+        params[threadNum].closest = 0;
+        params[threadNum].closest_d2 = __DBL_MAX__;
+        params[threadNum].p = _p;
+        int removed = _Remove(m_data, threadNum);
+        m_size -= removed;
+        return removed;
+    }
+    // We delete no point.
+    return 0;
+}
+
 /**
  * Finds the closest point within the tree,
  * wrt. the point given as first parameter.
