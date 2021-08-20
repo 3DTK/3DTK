@@ -181,10 +181,11 @@ int main(int argc, char **argv)
         cout << "Creating scanfile " << scanfilepath << endl;
         poseout.close();
         poseout.clear();
-        poseout.open(posefilepath, std::ofstream::out);
+        // Truncate the files (overwrite mode)
+        poseout.open(posefilepath, std::ofstream::out | std::ofstream::trunc);
         ptsout.close();
         ptsout.clear();
-        ptsout.open(scanfilepath, std::ofstream::out | std::ofstream::app);
+        ptsout.open(scanfilepath, std::ofstream::out | std::ofstream::trunc);
 
         // free filename mem
         delete[] scanfilepath;

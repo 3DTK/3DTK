@@ -498,7 +498,7 @@ Scan* createMetaScan(vector<Scan*> splitscans,
         for (int j = 0; j < nrpts; j++) {
             if (refl.size() == nrpts) 
                 refls.push_back(refl[j]);
-            if (typevec.size() == nrpts)
+            if (type.size() == nrpts)
                 typevec.push_back(type[j]);
             if (rgb.size() == nrpts)
                 rgbs.push_back(rgb[j]);
@@ -534,21 +534,21 @@ Scan* createMetaScan(vector<Scan*> splitscans,
         for(size_t i2 = 0; i2 < refls.size(); ++i2)
             data[i2] = refls[i2];
     }
-    if (use_type)
+    else if (use_type)
     {
         int* data = reinterpret_cast<int*>(s->create("type" + red_string, 
                         sizeof(int) * typevec.size()).get_raw_pointer());
         for(size_t i2 = 0; i2 < typevec.size(); ++i2)
             data[i2] = typevec[i2];
     }
-    if (use_color)
+    else if (use_color)
     {
         unsigned char** data = reinterpret_cast<unsigned char**>(s->create("rgb" + red_string, 
                         sizeof(unsigned char*) * rgbs.size()).get_raw_pointer());
         for(size_t i2 = 0; i2 < rgbs.size(); ++i2)
             data[i2] = rgbs[i2];
     } 
-    if (use_normals)
+    else if (use_normals)
     {
         double** data = reinterpret_cast<double**>(s->create("normal" + red_string, 
                         sizeof(double*) * normals.size()).get_raw_pointer());
