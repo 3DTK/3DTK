@@ -70,6 +70,7 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/3rdparty/e57-3d-
 #endif(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
 
 find_package(Threads REQUIRED)
+find_package(CURL REQUIRED)
 
 # Find the Boost and Xerces libraries
 
@@ -93,7 +94,7 @@ find_package(Threads REQUIRED)
 #endif(NOT Boost_FOUND)
 
 if (APPLE)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -framework CoreServices -framework CoreFoundation -lcurl")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -framework CoreServices -framework CoreFoundation")
 endif ()
 
 set(Xerces_USE_STATIC_LIBS ON)
@@ -180,8 +181,9 @@ add_library( time_conversion STATIC
 )
 
 target_link_libraries(E57RefImpl
+        ${XML_LIBRARIES}
         ${CURL_LIBRARIES}
-        ${XML_LIBRARIES})
+	)
 
 #
 # E57-4 Tools
@@ -192,9 +194,9 @@ add_executable( e57fields
         )
 target_link_libraries( e57fields
         E57RefImpl
-        ${CURL_LIBRARIES}
         ${XML_LIBRARIES}
         ${CMAKE_THREAD_LIBS_INIT}
+        ${CURL_LIBRARIES}
         )
 
 add_executable( e57xmldump
@@ -202,9 +204,9 @@ add_executable( e57xmldump
         )
 target_link_libraries( e57xmldump
         E57RefImpl
-        ${CURL_LIBRARIES}
         ${XML_LIBRARIES}
         ${CMAKE_THREAD_LIBS_INIT}
+        ${CURL_LIBRARIES}
         )
 
 add_executable( e57validate
@@ -212,9 +214,9 @@ add_executable( e57validate
         )
 target_link_libraries( e57validate
         E57RefImpl
-        ${CURL_LIBRARIES}
         ${XML_LIBRARIES}
         ${CMAKE_THREAD_LIBS_INIT}
+        ${CURL_LIBRARIES}
         )
 
 add_executable( e57unpack
@@ -222,8 +224,8 @@ add_executable( e57unpack
         )
 target_link_libraries( e57unpack
         E57RefImpl
-        ${CURL_LIBRARIES}
         ${XML_LIBRARIES}
         ${Boost_LIBRARIES}
         ${CMAKE_THREAD_LIBS_INIT}
+	${CURL_LIBRARIES}
         )
