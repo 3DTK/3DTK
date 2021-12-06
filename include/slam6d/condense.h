@@ -106,7 +106,7 @@ void writeUOSC(std::ofstream &scanfile, DataXYZ &xyz ,DataType &xyz_type, double
             }
 		}
 	}
-} 
+}
 
 void writeUOSNormal(std::ofstream &scanfile, DataXYZ &xyz ,DataNormal &normals, double scaleFac = 1.0 , bool hexfloat = false, bool high_precision = false)
 {
@@ -115,23 +115,23 @@ void writeUOSNormal(std::ofstream &scanfile, DataXYZ &xyz ,DataNormal &normals, 
 	}
 	if (hexfloat) {
 		for(unsigned int j = 0; j < xyz.size(); j++) {
-            scanfile << setprecision(13) 
+            scanfile << setprecision(13)
                 << scaleFac*xyz[j][0] << " " << scaleFac*xyz[j][1] << " " << scaleFac*xyz[j][2] << " "
 				<<	normals[j][0] << " " << normals[j][1] << " " << normals[j][2] << endl;
 		}
 	} else {
 		for(unsigned int j = 0; j < xyz.size(); j++) {
 			if(high_precision) {
-                scanfile << setprecision(17) 
+                scanfile << setprecision(17)
                         << scaleFac*xyz[j][0] << " " << scaleFac*xyz[j][1] << " " << scaleFac*xyz[j][2] << " "
                         <<	normals[j][0] << " " << normals[j][1] << " " << normals[j][2] << endl;
 		  } else {
-                scanfile << setprecision(0) 
+                scanfile << setprecision(0)
                         << scaleFac*xyz[j][0] << " " << scaleFac*xyz[j][1] << " " << scaleFac*xyz[j][2] << " "
                         <<	normals[j][0] << " " << normals[j][1] << " " << normals[j][2] << endl;
             }
         }
-	}  
+	}
 }
 
 void writeUOSRGB(std::ofstream &scanfile, DataXYZ &xyz ,DataRGB &rgb, double scaleFac = 1.0 , bool hexfloat = false, bool high_precision = false)
@@ -141,23 +141,23 @@ void writeUOSRGB(std::ofstream &scanfile, DataXYZ &xyz ,DataRGB &rgb, double sca
 	}
 	if (hexfloat) {
 		for(unsigned int j = 0; j < xyz.size(); j++) {
-            scanfile << setprecision(13) 
+            scanfile << setprecision(13)
                 << scaleFac*xyz[j][0] << " " << scaleFac*xyz[j][1] << " " << scaleFac*xyz[j][2] << " "
 				<<	(int)rgb[j][0] << " " << (int)rgb[j][1] << " " << (int)rgb[j][2] << endl;
 		}
 	} else {
 		for(unsigned int j = 0; j < xyz.size(); j++) {
 			if(high_precision) {
-                scanfile << setprecision(17) 
+                scanfile << setprecision(17)
                         << scaleFac*xyz[j][0] << " " << scaleFac*xyz[j][1] << " " << scaleFac*xyz[j][2] << " "
                         <<	(int)rgb[j][0] << " " << (int)rgb[j][1] << " " << (int)rgb[j][2] << endl;
 		    } else {
-                scanfile << setprecision(0) 
+                scanfile << setprecision(0)
                         << scaleFac*xyz[j][0] << " " << scaleFac*xyz[j][1] << " " << scaleFac*xyz[j][2] << " "
                         <<	(int)rgb[j][0] << " " << (int)rgb[j][1] << " " << (int)rgb[j][2] << endl;
             }
         }
-    }   
+    }
 }
 
 void writeXYZPoints(std::ofstream &scanfile, DataXYZ &xyz, double scaleFac = 1.0)
@@ -179,23 +179,23 @@ void writeXYZNormal(std::ofstream &scanfile, DataXYZ &xyz ,DataNormal &normals, 
 	}
 	if (hexfloat) {
 		for(unsigned int j = 0; j < xyz.size(); j++) {
-            scanfile << setprecision(13) 
+            scanfile << setprecision(13)
                 << scaleFac*xyz[j][2] << " " << -scaleFac*xyz[j][0] << " " << scaleFac*xyz[j][1] << " "
 				<<	normals[j][2] << " " << -normals[j][0] << " " << normals[j][1] << endl;
 		}
 	} else {
 		for(unsigned int j = 0; j < xyz.size(); j++) {
 			if(high_precision) {
-                scanfile << setprecision(17) 
+                scanfile << setprecision(17)
                         << scaleFac*xyz[j][2] << " " << -scaleFac*xyz[j][0] << " " << scaleFac*xyz[j][1] << " "
                         <<	normals[j][2] << " " << -normals[j][0] << " " << normals[j][1] << endl;
 		  } else {
-                scanfile << setprecision(0) 
+                scanfile << setprecision(0)
                         << scaleFac*xyz[j][2] << " " << -scaleFac*xyz[j][0] << " " << scaleFac*xyz[j][1] << " "
                         <<	normals[j][2] << " " << -normals[j][0] << " " << normals[j][1] << endl;
             }
         }
-	}  
+	}
 }
 
 void writeXYZC(std::ofstream &scanfile, DataXYZ &xyz ,DataType &xyz_type, double scaleFac = 1.0 , bool hexfloat = false, bool high_precision = false)
@@ -225,7 +225,7 @@ void writeXYZC(std::ofstream &scanfile, DataXYZ &xyz ,DataType &xyz_type, double
             }
 		}
 	}
-} 
+}
 
 void writeXYZRGB(std::ofstream &scanfile, DataXYZ &xyz ,DataRGB &rgb, double scaleFac = 1.0 , bool hexfloat = false, bool high_precision = false)
 {
@@ -234,23 +234,23 @@ void writeXYZRGB(std::ofstream &scanfile, DataXYZ &xyz ,DataRGB &rgb, double sca
 	}
 	if (hexfloat) {
 		for(unsigned int j = 0; j < xyz.size(); j++) {
-            scanfile << setprecision(13) 
+            scanfile << setprecision(13)
                 << scaleFac*xyz[j][2] << " " << -scaleFac*xyz[j][0] << " " << scaleFac*xyz[j][1] << " "
 				<<	(int)rgb[j][0] << " " << (int)rgb[j][1] << " " << (int)rgb[j][2] << endl;
 		}
 	} else {
 		for(unsigned int j = 0; j < xyz.size(); j++) {
 			if(high_precision) {
-                scanfile << setprecision(17) 
+                scanfile << setprecision(17)
                         << scaleFac*xyz[j][2] << " " << -scaleFac*xyz[j][0] << " " << scaleFac*xyz[j][1] << " "
                         <<	(int)rgb[j][0] << " " << (int)rgb[j][1] << " " << (int)rgb[j][2] << endl;
 		    } else {
-                scanfile << setprecision(0) 
+                scanfile << setprecision(0)
                         << scaleFac*xyz[j][2] << " " << -scaleFac*xyz[j][0] << " " << scaleFac*xyz[j][1] << " "
                         <<	(int)rgb[j][0] << " " << (int)rgb[j][1] << " " << (int)rgb[j][2] << endl;
             }
         }
-    }   
+    }
 }
 
 void validate(boost::any& v, const std::vector<std::string>& values,
@@ -365,8 +365,8 @@ po::options_description generic("Generic options");
   return 0;
 }
 
-void writeMetaScan( Scan* source, 
-                    std::ofstream &ptsout, 
+void writeMetaScan( Scan* source,
+                    std::ofstream &ptsout,
                     int red,
                     bool use_reflectance,
                     bool use_xyz,
@@ -385,7 +385,7 @@ void writeMetaScan( Scan* source,
     */
     std::string red_string = red > 0 ? " reduced" : "";
     DataXYZ xyz  = source->get("xyz" + red_string);
-       
+
     if(use_reflectance) {
         DataReflectance xyz_reflectance =
         (((DataReflectance)source->get("reflectance" + red_string)).size() == 0) ?
@@ -430,9 +430,9 @@ void writeMetaScan( Scan* source,
             }
         }
         if(use_xyz) {
-            writeXYZRGB(ptsout, xyz, xyz_color, scaleFac, hexfloat, high_precision); 
+            writeXYZRGB(ptsout, xyz, xyz_color, scaleFac, hexfloat, high_precision);
         } else {
-            writeUOSRGB(ptsout, xyz, xyz_color, scaleFac*100.0, hexfloat, high_precision); 
+            writeUOSRGB(ptsout, xyz, xyz_color, scaleFac*100.0, hexfloat, high_precision);
         }
 
     } else if(use_normals) {
@@ -456,25 +456,25 @@ void writeMetaScan( Scan* source,
     }
 }
 
-Scan* createMetaScan(vector<Scan*> splitscans, 
-                     IOType iotype, 
-                     int ref, 
-                     string red_string = "", 
+Scan* createMetaScan(vector<Scan*> splitscans,
+                     IOType iotype,
+                     int ref,
+                     string red_string = "",
                      bool use_reflectance = false,
                      bool use_type = false,
                      bool use_color = false,
                      bool use_normals = false,
-                     bool global = false) 
+                     bool global = false)
 {
 
     // Collect all fields of all sub-sequent scan objects
     vector<double*> pts;
-    vector<float> refls; 
+    vector<float> refls;
     vector<int> typevec;
     vector<unsigned char*> rgbs;
     vector<double*> normals;
 
-    // transform points into coordinate system of ref 
+    // transform points into coordinate system of ref
     double tinv[16];
     double rPos[3], rPosTheta[3];
     const double* tmp = splitscans[ref]->get_transMat();
@@ -488,15 +488,15 @@ Scan* createMetaScan(vector<Scan*> splitscans,
         const double* transMat = sscan->get_transMat();
         int nrpts = sscan->size<DataXYZ>("xyz" + red_string);
         DataXYZ xyz(sscan->get("xyz" + red_string)); // most important
-            
+
         // Getting all fields
         DataReflectance refl(sscan->get("reflectance" + red_string));
         DataType type(sscan->get("type" + red_string));
         DataRGB rgb(sscan->get("rgb" + red_string));
-       
+
         // Leave out fields that have no data. i.e. less points than nrpts
         for (int j = 0; j < nrpts; j++) {
-            if (refl.size() == nrpts) 
+            if (refl.size() == nrpts)
                 refls.push_back(refl[j]);
             if (type.size() == nrpts)
                 typevec.push_back(type[j]);
@@ -524,33 +524,33 @@ Scan* createMetaScan(vector<Scan*> splitscans,
     {
         for (int i=0;i<3;++i) {
             rPos[i] = 0; rPosTheta[i] = 0;
-        }    
+        }
     }
     Scan *s = new BasicScan(rPos, rPosTheta, pts);
     if (use_reflectance)
     {
-        float* data = reinterpret_cast<float*>(s->create("reflectance" + red_string, 
+        float* data = reinterpret_cast<float*>(s->create("reflectance" + red_string,
                         sizeof(float) * refls.size()).get_raw_pointer());
         for(size_t i2 = 0; i2 < refls.size(); ++i2)
             data[i2] = refls[i2];
     }
     else if (use_type)
     {
-        int* data = reinterpret_cast<int*>(s->create("type" + red_string, 
+        int* data = reinterpret_cast<int*>(s->create("type" + red_string,
                         sizeof(int) * typevec.size()).get_raw_pointer());
         for(size_t i2 = 0; i2 < typevec.size(); ++i2)
             data[i2] = typevec[i2];
     }
     else if (use_color)
     {
-        unsigned char** data = reinterpret_cast<unsigned char**>(s->create("rgb" + red_string, 
+        unsigned char** data = reinterpret_cast<unsigned char**>(s->create("rgb" + red_string,
                         sizeof(unsigned char*) * rgbs.size()).get_raw_pointer());
         for(size_t i2 = 0; i2 < rgbs.size(); ++i2)
             data[i2] = rgbs[i2];
-    } 
+    }
     else if (use_normals)
     {
-        double** data = reinterpret_cast<double**>(s->create("normal" + red_string, 
+        double** data = reinterpret_cast<double**>(s->create("normal" + red_string,
                         sizeof(double*) * normals.size()).get_raw_pointer());
         for(size_t i2 = 0; i2 < normals.size(); ++i2)
             data[i2] = normals[i2];

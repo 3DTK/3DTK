@@ -52,7 +52,7 @@ KDtree::~KDtree()
 {
 }
 
-std::vector<double*> KDtree::CollectPts(int threadNum) const 
+std::vector<double*> KDtree::CollectPts(int threadNum) const
 {
     params[threadNum].range_neighbors = std::vector<double*>(0);
     _CollectPts(Void(), threadNum);

@@ -165,9 +165,9 @@ int main(int argc, char **argv)
     {
         std::cout << "scan" << source->getIdentifier() << " has no points. Skipping..." << std::endl;
         continue;
-    } else { 
+    } else {
         splitscans.push_back(source);
-        std::cout << "Exporting scan" << source->getIdentifier() << ".3d" << std::endl; 
+        std::cout << "Exporting scan" << source->getIdentifier() << ".3d" << std::endl;
     }
 
     // open new file after 'split' scans
@@ -194,17 +194,17 @@ int main(int argc, char **argv)
     // Now flush everything. If split was not specified, write all in one file
     if (k == split && split != -1)
     {
-        // Reference index (middle) for all scans 
+        // Reference index (middle) for all scans
         int ref = (int)(0.5 * split);
 
         Scan *s = createMetaScan(splitscans, iotype, ref, red_string,
             use_reflectance, use_type, use_color, use_normals, global);
         const double* rPos = s->get_rPos();
         const double* rPosTheta = s->get_rPosTheta();
-        
+
         writeMetaScan(s, ptsout, red, use_reflectance, use_xyz, use_type,
             use_color, use_normals, high_precision, types, scaleFac);
-        // TODO: interpolate path over all metascans vector<Scan*> 
+        // TODO: interpolate path over all metascans vector<Scan*>
         if(use_xyz) {
           writeXYZPose(poseout, rPos, rPosTheta, 0.01);
         } else {
@@ -216,11 +216,11 @@ int main(int argc, char **argv)
         seq++;
         splitscans.clear();
     }
-    
+
   }
 
-   // Flush the rest. 
-  if (!splitscans.empty()) 
+   // Flush the rest.
+  if (!splitscans.empty())
   {
     int ref = (int)(0.5 * splitscans.size());
 
@@ -228,10 +228,10 @@ int main(int argc, char **argv)
         use_reflectance, use_type, use_color, use_normals, global);
     const double* rPos = s->get_rPos();
     const double* rPosTheta = s->get_rPosTheta();
-        
+
     writeMetaScan(s, ptsout, red, use_reflectance, use_xyz, use_type,
         use_color, use_normals, high_precision, types, scaleFac);
-    // TODO: interpolate path over all metascans vector<Scan*> 
+    // TODO: interpolate path over all metascans vector<Scan*>
     if(use_xyz) {
       writeXYZPose(poseout, rPos, rPosTheta, 0.01);
     } else {

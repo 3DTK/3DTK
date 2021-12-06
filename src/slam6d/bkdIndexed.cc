@@ -13,7 +13,7 @@ BkdTreeIndexed::BkdTreeIndexed(double **pts,
                  int bucketsize)
                  : BkdTreeIndexed(bucketsize)
 {
-    // nr of trees needed for n points with given bucketsize 
+    // nr of trees needed for n points with given bucketsize
     int nrtrees = ceil(log2(n/bucketsize));
     // Init forrest
     /*
@@ -25,20 +25,20 @@ BkdTreeIndexed::BkdTreeIndexed(double **pts,
     for(int i = 0; i < nrtrees; ++i) {
         ForestElemIndexed sprout;
         forest.push_back( sprout );
-    } 
+    }
     ForestElemIndexed tree( new KDtreeIndexed(pts, n, bucketsize), n);
     forest.push_back( tree );
 }
 
 BkdTreeIndexed::~BkdTreeIndexed()
 {
-    for (uint i = 0; i < forest.size(); ++i) 
+    for (uint i = 0; i < forest.size(); ++i)
         forest.at(i).tree->~KDtreeIndexed();
     forest.clear();
     buffer.clear();
 }
 
-std::vector<size_t> BkdTreeIndexed::collectPts() const 
+std::vector<size_t> BkdTreeIndexed::collectPts() const
 {
     std::vector<size_t> res;
     for (uint i = 0; i < forest.size(); ++i) {
@@ -64,8 +64,8 @@ std::string BkdTreeIndexed::info() const
     info_ss << "Buffer [" << std::to_string(buffer.size())
         << "/" << std::to_string(bucketSize) << "]" << std::endl;
     for (int i = 0; i < forest.size(); ++i) {
-        info_ss << "Tree " << std::to_string(i) << ": " 
-            << std::to_string(forest.at(i).nrpts) << " pts." << std::endl; 
+        info_ss << "Tree " << std::to_string(i) << ": "
+            << std::to_string(forest.at(i).nrpts) << " pts." << std::endl;
     }
     info_ss << "======================================" << std::endl;
     info_str = info_ss.str();
@@ -80,8 +80,8 @@ std::string BkdTreeIndexed::info() const
  */
 std::string BkdTreeIndexed::_debug_info() const
 {
-    std::string info_str; 
-    std::stringstream info_ss; 
+    std::string info_str;
+    std::stringstream info_ss;
     info_ss << "============== BKD DEBUG ==============" << std::endl;
     info_ss << "Buffer [" << std::to_string(buffer.size())
         << "/" << std::to_string(bucketSize) << "]" << std::endl;
@@ -90,7 +90,7 @@ std::string BkdTreeIndexed::_debug_info() const
     }
     info_ss << std::endl;
     for (uint i = 0; i < forest.size(); ++i) {
-        info_ss << "Tree " << std::to_string(i) << ": " 
+        info_ss << "Tree " << std::to_string(i) << ": "
             << std::to_string(forest.at(i).nrpts) << " pts." << std::endl;
         if (forest.at(i).empty) continue;
         KDtreeIndexed *t = forest.at(i).tree;
@@ -106,11 +106,13 @@ std::string BkdTreeIndexed::_debug_info() const
     return info_str;
 }
 
-size_t BkdTreeIndexed::size() const 
+size_t BkdTreeIndexed::size() const
 {
     size_t res = 0;
     res += buffer.size();
-    for (uint i = 0; i < forest.size(); ++i) if(!forest.at(i).empty) res += forest.at(i).nrpts;
+    for (uint i = 0; i < forest.size(); ++i)
+        if(!forest.at(i).empty)
+            res += forest.at(i).nrpts;
     return res;
 }
 
@@ -120,7 +122,7 @@ std::ostream& operator<<(std::ostream &out, const BkdTreeIndexed &t)
     return out;
 }
 
-/** 
+/**
  *  @brief Insert point <pt> into the Bkd tree.
  *  Keeps the tree balanced and fully space utilized.
  */
@@ -145,7 +147,7 @@ double *BkdTreeIndexed::FindClosest(double *_p,
     // double dist;
     // // Search all the trees, pick best closest
     // for (uint i = 0; i < forest.size(); ++i) {
-        
+
     //     // Skip the empty trees.
     //     if (forest.at(i).empty) continue;
     //     KDtreeIndexed *tree = forest.at(i).tree;
@@ -172,7 +174,7 @@ std::vector<size_t> BkdTreeIndexed::fixedRangeSearchAlongDir(double *_p,
                                 double maxdist2,
                                 int threadNum) const
 {
-    
+
 }
 
 std::vector<size_t> BkdTreeIndexed::fixedRangeSearchBetween2Points(double *_p,
@@ -187,7 +189,7 @@ std::vector<size_t> BkdTreeIndexed::kNearestNeighbors(double *_p,
 								int k,
 								int threadNum) const
 {
-   
+
 }
 
 std::vector<size_t> BkdTreeIndexed::kNearestRangeSearch(double *_p,
@@ -202,14 +204,14 @@ std::vector<size_t> BkdTreeIndexed::fixedRangeSearch(double *_p,
 								double sqRad2,
 								int threadNum) const
 {
-    
+
 }
 
 /**
  * @brief Axis-aligned bounding box search.
  * @param _p: Minimum x, y, z values for the bounding box.
  * @param _p0: Maximum x, y, z values for the bouding box.
- * @return List of points that are inside the boudning box. 
+ * @return List of points that are inside the boudning box.
  */
 std::vector<size_t> BkdTreeIndexed::AABBSearch(double *_p,
                                 double* _p0,
@@ -226,12 +228,12 @@ size_t BkdTreeIndexed::segmentSearch_1NearestPoint(double *_p,
     //TODO: implement this.
 }
 
-/** 
+/**
  *  @brief Merges the trees from index 0 up to index <index>.
  *  Take all the points that are in those trees, delete them, and setup
  *  a new tree with all the deleted points.
  */
 void BkdTreeIndexed::mergeTreesLogarithmic(int index, int nrpts)
 {
-  
+
 }

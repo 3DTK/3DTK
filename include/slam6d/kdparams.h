@@ -62,6 +62,14 @@ public:
   std::vector<T> range_neighbors;
 
   /**
+   * Note: BKD-tree specific.
+   * vector of all the collected points in the tree,
+   * i.e. all points that have not been deleted while
+   * using the bkd trees at the moment of kd-forest reorganization.
+   */
+  std::vector<T> collected_pts;
+
+  /**
    * pointer to k nearest neighbors
    */
   T *closest_neighbors;

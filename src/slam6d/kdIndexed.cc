@@ -69,9 +69,9 @@ size_t KDtreeIndexed::getNrPts() const
 
 std::vector<size_t> KDtreeIndexed::CollectPts(int threadNum) const
 {
-    params[threadNum].range_neighbors.clear();
+    params[threadNum].collected_pts.clear();
     _CollectPts(m_data, threadNum);
-    return params[threadNum].range_neighbors;
+    return params[threadNum].collected_pts;
 }
 
 int KDtreeIndexed::Remove(double *_p,

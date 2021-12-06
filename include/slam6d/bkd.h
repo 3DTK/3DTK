@@ -1,21 +1,21 @@
 /** @file
  *  @brief Representation of an optimized Bkd tree.
- *  
+ *
  *  A Bkd-tree is like a kd-tree, but preserves balance and space
  *  utilization when inserting new or removing old points.
  *  It is therefore dynamicaly updated by handling multiple,
- *  logarithmic ordered kd-trees. 
- *  
- *  See: 
+ *  logarithmic ordered kd-trees.
+ *
+ *  See:
  *  Procopiuc, O., Agarwal, P. K., Arge, L., & Vitter, J. S. (2003).
  *  Bkd-Tree: A Dynamic Scalable kd-Tree.
  *  Lecture Notes in Computer Science, 46–65.
- *  doi:10.1007/978-3-540-45072-6_4 
- * 
+ *  doi:10.1007/978-3-540-45072-6_4
+ *
  *  TODO: the Bkd class derives from the SearchTree class.
  *  However, it does neither implement lock() nor unlock(), so it can't
- *  be used with the scanserver! 
- * 
+ *  be used with the scanserver!
+ *
  *  @author Fabian Arzberger, Uni Wuerzburg
  */
 
@@ -32,37 +32,34 @@
 struct ForestElem
 {
     // Create an empty Forest element, i.e. an empty tree (called 'sprout')
-    ForestElem() : empty(true), nrpts(0) {} // empty constructor, we use c++ init list 
+    ForestElem() : empty(true), nrpts(0) {} // empty constructor, we use c++ init list
     // Create a non-empty Forest element, i.e. a KD-tree (called 'tree')
     ForestElem(KDtree* t, size_t n) : empty(false), tree(t), nrpts(n) {}
-    
+
     // Struct data
     bool empty;
     KDtree* tree;
     size_t nrpts;
 };
 
-class BkdTree : public SearchTree 
+class BkdTree : public SearchTree
 {
 public:
     BkdTree(double **pts,
             int n,
             int bucketSize = 20);
-    
+
     BkdTree(int bucketSize = 20);
 
     virtual ~BkdTree();
 
     // BKD specifics
 
-    /**
-     * Note that insert / remove do not have threadNum options.
-     * 
-     */
-    int insert(double*, int threadNum = 0);
+    
+    void insert(double*, int threadNum = 0);
     int remove(double*, int threadNum= 0);
 
-    std::vector<double*> collectPts(int threadNum = 0) const; 
+    std::vector<double*> collectPts(int threadNum = 0) const;
 
     size_t size() const;
 
@@ -82,7 +79,7 @@ public:
                                 double *_dir,
                                 double maxdist2,
                                 int threadNum = 0) const;
-    
+
     virtual std::vector<Point> fixedRangeSearchBetween2Points(double *_p,
                                 double *_dir,
                                 double maxdist2,

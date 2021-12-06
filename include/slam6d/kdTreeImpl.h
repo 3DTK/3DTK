@@ -222,9 +222,9 @@ protected:
    * number of points. If this is 0: intermediate node. If nonzero: leaf.
    */
   int npts;
-  
+
   /**
-   * When removing points, leaf nodes could get npts == 0. To prevent  
+   * When removing points, leaf nodes could get npts == 0. To prevent
    * treating them as intermediate nodes, we use this flag since unions wont
    * allow us to check whether a node is leaf or non-leaf
    */
@@ -259,15 +259,15 @@ protected:
       AccessorData* p;
     } leaf;
   };
-  
+
   void _CollectPts(const PointData& pts, int threadNum) const {
       AccessorFunc point;
       ParamFunc pointparam;
-      
+
       if (npts) {
-          for (int i = 0; i < npts; ++i) 
+          for (int i = 0; i < npts; ++i)
+              //params[threadNum].collected_pts.push_back(pointparam(pts, leaf.p[i]));
               params[threadNum].range_neighbors.push_back(pointparam(pts, leaf.p[i]));
-          
           return;
       }
 
@@ -297,7 +297,7 @@ protected:
                 }
             }
 
-            // Remove the (closest) point (if it is close enough)  
+            // Remove the (closest) point (if it is close enough)
             if (closestd2 < 0.000000001) {
                 if (npts > 1 && index_remove != -1) {
                     // Swap elem to be removed with last elem
@@ -307,7 +307,7 @@ protected:
                     // Exclude last elem in the future by decrementing nr of pts.
                     npts = npts - 1;
                     return 1; // we removed one point.
-                } 
+                }
                 // only one point left...
                 else if (npts == 1 && index_remove != -1) {
                     npts = npts - 1; // no need to swap this time
@@ -325,7 +325,7 @@ protected:
         else if (myd < 0.0) // go left
             removed += node.child2->_Remove(pts, threadNum);
         else { // unsure, search both paths
-            removed += node.child1->_Remove(pts, threadNum); 
+            removed += node.child1->_Remove(pts, threadNum);
             removed += node.child2->_Remove(pts, threadNum);
         }
         return removed;
@@ -653,7 +653,7 @@ protected:
        * @author Fabian Arzberger
        * Heres the fix to the FIXME above. Pls recheck somebody!
        * Instead of checking if closest_neighbors[] are set, we look at their
-       * corresponding distances. 
+       * corresponding distances.
        */
     if (params[threadNum].distances[kN] != -1) {
         // Quick check of whether to abort
