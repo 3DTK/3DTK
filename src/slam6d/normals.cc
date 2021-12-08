@@ -294,6 +294,78 @@ void calculateNormalsKNN(vector<Point> &normals,
   delete[] pa;
 }
 
+///////////////////////////////////////////////////////
+///// USING ONLY SINGLE THREAD TO PRESERVE INDICES ////
+///////////////////////////////////////////////////////
+void calculateNormalsIndexedKNN(vector<Point> &normals,
+                         const vector<Point> &points,
+                         const int k,
+                         const double _rPos[3])
+{
+  int nr_neighbors = k;
+
+  ColumnVector rPos(3);
+  for (int i = 0; i < 3; ++i)
+    rPos(i + 1) = _rPos[i];
+
+  double** pa = new double*[points.size()];
+  for (size_t i = 0; i < points.size(); ++i) {
+    pa[i] = new double[3];
+    pa[i][0] = points[i].x;
+    pa[i][1] = points[i].y;
+    pa[i][2] = points[i].z;
+  }
+
+  KDtree t(pa, points.size());
+
+  normals.reserve(points.size());
+
+  for (
+#if defined(_MSC_VER) and defined(_OPENMP)
+    // MSVC only supports OpenMP 2.5 where the counter must be signed
+    // There is also no ssize_t on non-POSIX platforms but sizeof(long) == sizeof(void*)
+    long
+#else
+    size_t
+#endif
+    i = 0; i < points.size(); ++i) {
+
+    // Single thread
+    int thread_num = 0;
+
+    double p[3] = { points[i].x, points[i].y, points[i].z };
+
+    vector<Point> temp = t.kNearestNeighbors(p,
+                         nr_neighbors,
+                         thread_num);
+
+    double norm[3];
+    double eigen[3];
+    calculateNormal(temp, norm, eigen);
+    ColumnVector n(3);
+    n(1) = norm[0];
+    n(2) = norm[1];
+    n(3) = norm[2];
+
+    ColumnVector point_vector(3);
+    point_vector(1) = p[0] - rPos(1);
+    point_vector(2) = p[1] - rPos(2);
+    point_vector(3) = p[2] - rPos(3);
+    point_vector = point_vector / point_vector.NormFrobenius();
+    Real angle = (n.t() * point_vector).AsScalar();
+    if (angle < 0) {
+      n *= -1.0;
+    }
+    n = n / n.NormFrobenius();
+    normals.push_back(Point(n(1), n(2), n(3)));
+  }
+
+  for (size_t i = 0; i < points.size(); ++i) {
+    delete[] pa[i];
+  }
+  delete[] pa;
+}
+
 void calculateNormalsRange(std::vector<Point> &normals,
                             const std::vector<Point> &points,
                             const double r2,

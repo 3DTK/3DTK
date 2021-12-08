@@ -41,6 +41,10 @@ void calculateNormalsKNN(std::vector<Point> &normals,
                          const int k,
                          const double _rPos[3], int bucketsize);
 
+void calculateNormalsIndexedKNN(std::vector<Point> &normals,
+                         const std::vector<Point> &points,
+                         const int k,
+                         const double _rPos[3]);
 
 void calculateNormalsAdaptiveKNN(std::vector<Point> &normals,
                                  const std::vector<Point> &points,
