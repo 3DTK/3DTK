@@ -5,9 +5,11 @@
  * condense implementation
  *
  * @brief
- * This programm is a slightly modified version of exportPoints.
+ * This programm is a modified version of exportPoints.
  * The mod supports splitting an archive into multiple scan files, instead of just exporting everything into one file.
  * Use param -S for that. If that param is not used, the behavior will mimic the one of exportPoints.
+ * Further, the program will not export "points.txt, poses.txt, and positions.txt", 
+ * but export directly into scanXXX.3d and scanXXX.pose files.
  *
  * Copyright (C) Jochen Sprickerhof
  * Modifications made by Fabian Arzberger, JMU
@@ -62,7 +64,9 @@ int main(int argc, char **argv)
 
  std::string red_string = red > 0 ? " reduced" : "";
   rangeFilterActive = minDist > 0 || maxDist > 0;
-
+  if (rangeFilterActive) {
+    cout << "MinDist: " << minDist << ", MaxDist: " << maxDist << endl;
+  }
   // custom filter set? quick check, needs to contain at least one ';'
   // (proper chsecking will be done case specific in pointfilter.cc)
   size_t pos = customFilter.find_first_of(";");

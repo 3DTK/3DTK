@@ -312,7 +312,7 @@ po::options_description generic("Generic options");
      "export type/class values")
     ("normals,N", po::bool_switch(&use_normals)->default_value(false),
      "export point normals")
-    ("use_frames,p", po::bool_switch(&use_frames)->default_value(false),
+    ("use_frames,F", po::bool_switch(&use_frames)->default_value(false),
     "Use .frames files instead of .pose files.")
     ("xyz,x", po::bool_switch(&use_xyz)->default_value(false),
      "export in xyz format (right handed coordinate system in m)")
@@ -482,17 +482,17 @@ Scan* createMetaScan(vector<Scan*> splitscans,
     M4inv(tmp, tinv);
 
 
+    std::string color_red_string = red_string == "" ? "rgb" : "color reduced";
     // Collecting the data...
     for (uint iter = 0; iter < splitscans.size(); iter++) {
         Scan *sscan = splitscans[iter];
         const double* transMat = sscan->get_transMat();
         int nrpts = sscan->size<DataXYZ>("xyz" + red_string);
         DataXYZ xyz(sscan->get("xyz" + red_string)); // most important
-
         // Getting all fields
         DataReflectance refl(sscan->get("reflectance" + red_string));
         DataType type(sscan->get("type" + red_string));
-        DataRGB rgb(sscan->get("rgb" + red_string));
+        DataRGB rgb(sscan->get(color_red_string));
 
         // Leave out fields that have no data. i.e. less points than nrpts
         for (int j = 0; j < nrpts; j++) {
@@ -543,7 +543,7 @@ Scan* createMetaScan(vector<Scan*> splitscans,
     }
     else if (use_color)
     {
-        unsigned char** data = reinterpret_cast<unsigned char**>(s->create("rgb" + red_string,
+        unsigned char** data = reinterpret_cast<unsigned char**>(s->create(color_red_string, 
                         sizeof(unsigned char*) * rgbs.size()).get_raw_pointer());
         for(size_t i2 = 0; i2 < rgbs.size(); ++i2)
             data[i2] = rgbs[i2];
