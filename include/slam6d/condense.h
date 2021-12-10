@@ -350,6 +350,11 @@ po::options_description generic("Generic options");
   if (vm.count("help")) {
     std::cout << cmdline_options;
     std::cout << std::endl
+         << "This programm is a modified version of exportPoints." << std::endl
+         << "The mod supports splitting an archive into multiple scan files, instead of just exporting everything into one file." << std::endl
+         << "Use param -S for that. If that param is not used, the behavior will mimic the one of exportPoints." << std::endl
+         << "Further, the program will not export \"points.txt, poses.txt, and positions.txt\"," << std::endl 
+         << "but export directly into scanXXX.3d and scanXXX.pose files." << std::endl
          << "Example usage:" << std::endl
          << "\tbin/condense -S 10 /your/directory" << std::endl;
     exit(0);

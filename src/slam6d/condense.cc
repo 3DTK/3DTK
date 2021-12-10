@@ -19,7 +19,6 @@
 
 #include "slam6d/condense.h"
 
-
 int main(int argc, char **argv)
 {
   // parsing the command line parameters
@@ -62,7 +61,7 @@ int main(int argc, char **argv)
     use_normals = false;
   }
 
- std::string red_string = red > 0 ? " reduced" : "";
+  std::string red_string = red > 0 ? " reduced" : "";
   rangeFilterActive = minDist > 0 || maxDist > 0;
   if (rangeFilterActive) {
     cout << "MinDist: " << minDist << ", MaxDist: " << maxDist << endl;
@@ -245,5 +244,5 @@ int main(int argc, char **argv)
 
   poseout.close();
   poseout.clear();
-
+  return 0;
 }
