@@ -353,7 +353,7 @@ po::options_description generic("Generic options");
          << "This programm is a modified version of exportPoints." << std::endl
          << "The mod supports splitting an archive into multiple scan files, instead of just exporting everything into one file." << std::endl
          << "Use param -S for that. If that param is not used, the behavior will mimic the one of exportPoints." << std::endl
-         << "Further, the program will not export \"points.txt, poses.txt, and positions.txt\"," << std::endl 
+         << "Further, the program will not export \"points.txt, poses.txt, and positions.txt\"," << std::endl
          << "but export directly into scanXXX.3d and scanXXX.pose files." << std::endl
          << "Example usage:" << std::endl
          << "\tbin/condense -S 10 /your/directory" << std::endl;
@@ -548,7 +548,7 @@ Scan* createMetaScan(vector<Scan*> splitscans,
     }
     else if (use_color)
     {
-        unsigned char** data = reinterpret_cast<unsigned char**>(s->create(color_red_string, 
+        unsigned char** data = reinterpret_cast<unsigned char**>(s->create(color_red_string,
                         sizeof(unsigned char*) * rgbs.size()).get_raw_pointer());
         for(size_t i2 = 0; i2 < rgbs.size(); ++i2)
             data[i2] = rgbs[i2];

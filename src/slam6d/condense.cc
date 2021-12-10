@@ -8,7 +8,7 @@
  * This programm is a modified version of exportPoints.
  * The mod supports splitting an archive into multiple scan files, instead of just exporting everything into one file.
  * Use param -S for that. If that param is not used, the behavior will mimic the one of exportPoints.
- * Further, the program will not export "points.txt, poses.txt, and positions.txt", 
+ * Further, the program will not export "points.txt, poses.txt, and positions.txt",
  * but export directly into scanXXX.3d and scanXXX.pose files.
  *
  * Copyright (C) Jochen Sprickerhof
@@ -207,7 +207,7 @@ int main(int argc, char **argv)
 
         writeMetaScan(s, ptsout, red, use_reflectance, use_xyz, use_type,
             use_color, use_normals, high_precision, types, scaleFac);
-        // TODO: interpolate path over all metascans vector<Scan*>
+
         if(use_xyz) {
           writeXYZPose(poseout, rPos, rPosTheta, 0.01);
         } else {

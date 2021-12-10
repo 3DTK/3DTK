@@ -1,15 +1,15 @@
 /**
  * @file
  * @author Fabian Arzberger, JMU, Germany
- * 
+ *
  * atomize implementation
- * 
+ *
  * @brief
  * This programm is the opposing program to condense.
  * Once you've condensed S subsequent scans into multiple MetaScans and matched them,
- * each MetaScan has a .frames file. The purpose of this program is to split the 
+ * each MetaScan has a .frames file. The purpose of this program is to split the
  * .frames files back and apply them onto the corresponding single scans.
- * 
+ *
  */
 
 #include "slam6d/atomize.h"
@@ -39,7 +39,7 @@ int main(int argc, char **argv)
         std::cerr << "Error while parsing settings: " << e.what() << std::endl;
         exit(1);
     }
-    
+
     // Read and set filter and reduction parameters
     std::string red_string = red > 0 ? " reduced" : "";
     rangeFilterActive = minDist > 0 || maxDist > 0;
@@ -94,7 +94,7 @@ int main(int argc, char **argv)
         exit(-1);
     }
 
-    // Check which PointTypes the IOType supports 
+    // Check which PointTypes the IOType supports
     unsigned int types = PointType::USE_NONE;
     if(supportsReflectance(iotype)) types |= PointType::USE_REFLECTANCE;
     if(supportsColor(iotype)) types |= PointType::USE_COLOR;
@@ -120,42 +120,40 @@ int main(int argc, char **argv)
         }
     }
 
-    // Iterate in the same fashion as in condense.cc to reconstruct file association 
-    
+    // Iterate in the same fashion as in condense.cc to reconstruct file association
+
     int k = 0; // count subscans
     uint seq = 0; // count condensed files
     vector<Scan*> splitscans;
-    double transMat[16];
+    double transMat[16], transMatPose[16]; // transform from condensed frames / pose
+    double tPoseInv[16], transMatRel[16]; // relative transformations between frames / pose
     for (uint i = 0; i < Scan::allScans.size(); ++i)
     {
         Scan * source = Scan::allScans[i];
         // In atomize, we need to push every scan, even if its empty
         splitscans.push_back( source );
-        // In condense, empty scans got skipped 
+        // In condense, empty scans got skipped
         if ( source->size<DataXYZ>("xyz") == 0 ) continue;
-        
+
         // In condense, new files get opened here
-        // So in atomize, we have to read the .frames file of those 
+        // So in atomize, we have to read the transforms of those
         if (0 == k++) {
             readTransformFromFrames(cond_dir, seq, transMat);
-            cout << "FRAMES " << seq << endl;
-            for (int idx_mat = 0; idx_mat < 16; ++idx_mat)
-                cout << transMat[ idx_mat ] << " ";
-            cout << endl; 
+            readTransformFromPose(cond_dir, seq, transMatPose);
+            M4inv(transMatPose, tPoseInv);
+            MMult(transMat, tPoseInv, transMatRel);
         }
 
         // In condense, buffered scans get written to disk here
         // So in atomize, we have to split the relative transformations on each original scan
-        if (k == split && split != -1) { 
+        if (k == split && split != -1) {
             for (int j = 0; j < splitscans.size(); ++j) {
+                // Get original transform from pose file
                 const double* transMatOrig = splitscans[j]->get_transMatOrg();
-                //readTransformFromPose(orig_dir, j, transMatOrig);
-                cout << "POSE " << splitscans[j]->getIdentifier() << endl;
-                for (int idx_mat = 0; idx_mat < 16; ++idx_mat)
-                    cout << transMatOrig[ idx_mat ] << " ";
-                cout << endl; 
+                double transMatOut[16];
+                MMult(transMatRel, transMatOrig, transMatOut);
+                writeFrame(orig_dir, splitscans[j]->getIdentifier(), transMatOut);
             }
-
 
             // prepare next iteration:
             k = 0;

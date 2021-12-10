@@ -33,7 +33,7 @@ void validate(boost::any& v, const std::vector<std::string>& values,
 }
 
 int parse_options(int argc, char **argv, std::string &cond_dir, std::string &orig_dir,
-            double &red, int &rand, int &start, int &end, int &maxDist, int &minDist, 
+            double &red, int &rand, int &start, int &end, int &maxDist, int &minDist,
             int &octree, IOType &type, std::string& customFilter, int &split)
 {
 po::options_description generic("Generic options");
@@ -96,7 +96,7 @@ po::options_description generic("Generic options");
          << "This programm is the opposing program to condense." << std::endl
          << "Once you've condensed S subsequent scans into multiple MetaScans and matched them," << std::endl
          << "each MetaScan has a .frames file. The purpose of this program is to split the" << std::endl
-         << ".frames files back and apply the relative transformation onto the corresponding single scans." << std::endl 
+         << ".frames files back and apply the relative transformation onto the corresponding single scans." << std::endl
          << bold_on << "Important: Use the same filters and reduction params as with condense!" << bold_off << std::endl
          << "Example usage:" << std::endl
          << "\tbin/atomize /condensed/dir /original/dir [params used for condense]" << std::endl
@@ -121,6 +121,7 @@ void readTransformFromPose(std::string dir, int fileCounter, double* outMat) {
   // Setup filename and filestream
   std::ifstream poseIn;
   std::string poseFileName = dir + "scan" + to_string(fileCounter, 3) + ".pose";
+  cout << "Reading transform from " << poseFileName << endl;
 
   // Read original transform from .pose file
   poseIn.open(poseFileName);
@@ -129,11 +130,13 @@ void readTransformFromPose(std::string dir, int fileCounter, double* outMat) {
   for (int i = 0; i < 6; ++i) poseIn >> pose[i];
   // convert angles from deg to rad
   for (int i = 3; i < 6; ++i) pose[i] = rad(pose[i]);
-  
+
   // Convert [x y z rotX rotY rotZ] to homogeneous transform matrix
   double rPos[3] = { pose[0], pose[1], pose[2] };
   double rPosTheta[3] = { pose[3], pose[4], pose[5] };
   EulerToMatrix4(rPos, rPosTheta, outMat);
+  poseIn.close();
+  poseIn.clear();
 }
 
 // Does what it says. outMat must be double[16]
@@ -141,14 +144,38 @@ void readTransformFromFrames(std::string dir, int fileCounter, double* outMat) {
   // Setup filename and filestream
   std::ifstream frameIn;
   std::string frameFileName = dir + "scan" + to_string(fileCounter, 3) + ".frames";
+  cout << "Reading transform from " << frameFileName << endl;
+  frameIn.open( frameFileName.c_str() );
 
   // Read transform from .frames file
   int algoTypeDummy; // used as trash bin for last frames entry
   while( frameIn.good() ) {
     try {
-      frameIn >> outMat >> algoTypeDummy; 
+      frameIn >> outMat >> algoTypeDummy;
     } catch (const std::exception &e) {
       break;
     }
   }
+  frameIn.close();
+  frameIn.clear();
+}
+
+void writeFrame(std::string dir, const char* identifier, double* trans)
+{
+  std::ofstream frameOut;
+  std::string frameFileName = dir + "scan" + identifier + ".frames";
+  frameOut.open( frameFileName, std::ofstream::out | std::ofstream::trunc );
+
+  if (frameOut.good()) {
+    cout << "Writing to " << frameFileName << endl;
+    for (int i = 0; i < 16; ++i)
+      frameOut << trans[i] << " ";
+    frameOut << Scan::ICPINACTIVE << endl;
+  } else {
+    cout << "ERR: could not open " << frameFileName << endl;
+  }
+
+  frameOut.flush();
+  frameOut.close();
+  frameOut.clear();
 }

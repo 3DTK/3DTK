@@ -470,8 +470,8 @@ void Scan::calcReducedPoints(bool rm_scatter)
       DataType type_reduced(create("type reduced", sizeof(int)*type.size()));
     }
     if (reduction_pointtype.hasColor()) {
-      /** @author: Fabian Arzberger 
-       * FIXME: this is inconsistent with the other field identifiers. 
+      /** @author: Fabian Arzberger
+       * FIXME: this is inconsistent with the other field identifiers.
        * Why is color always refered to with get("rgb"), but when reduced it becomes get("color reduced") ?
        */
       DataRGB rgb_reduced(create("color reduced", sizeof(unsigned char)*3*xyz.size()));
@@ -530,8 +530,8 @@ void Scan::calcReducedPoints(bool rm_scatter)
       if (sizeof(size_t) == 4 && xyz.size() > ((size_t)(-1))/sizeof(unsigned char)/3) {
               throw std::runtime_error("Insufficient size of size_t datatype");
       }
-      /** @author: Fabian Arzberger 
-       * FIXME: this is inconsistent with the other field identifiers. 
+      /** @author: Fabian Arzberger
+       * FIXME: this is inconsistent with the other field identifiers.
        * Why is color always refered to with get("rgb"), but when reduced it becomes get("color reduced") ?
        */
       DataRGB rgb_reduced(create("color reduced", sizeof(unsigned char)*3*xyz.size()));
@@ -641,8 +641,8 @@ void Scan::calcReducedPoints(bool rm_scatter)
       if (sizeof(size_t) == 4 && size > ((size_t)(-1))/sizeof(unsigned char)/3) {
               throw std::runtime_error("Insufficient size of size_t datatype");
       }
-      /** @author: Fabian Arzberger 
-       * FIXME: this is inconsistent with the other field identifiers. 
+      /** @author: Fabian Arzberger
+       * FIXME: this is inconsistent with the other field identifiers.
        * Why is color always refered to with get("rgb"), but when reduced it becomes get("color reduced") ?
        */
       DataRGB my_rgb_reduced(create("color reduced",

@@ -116,8 +116,8 @@ size_t BkdTree::size() const
 {
     size_t res = 0;
     res += buffer.size();
-    for (size_t i = 0; i < forest.size(); ++i) 
-        if(!forest.at(i).empty) 
+    for (size_t i = 0; i < forest.size(); ++i)
+        if(!forest.at(i).empty)
             res += forest.at(i).nrpts;
     return res;
 }
@@ -355,7 +355,7 @@ void BkdTree::mergeTreesLogarithmic(int index, int nrpts, int threadNum)
     int ptindex = 0;
     for (int k = 0; k < index; ++k) {
 
-        //std::cout << "Getting pts for tree " << k << std::endl; 
+        //std::cout << "Getting pts for tree " << k << std::endl;
         if (forest.at(k).empty) continue;
         // else collect and copy pts.
         std::vector<double*> datak = forest.at(k).tree->CollectPts(threadNum);

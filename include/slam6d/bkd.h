@@ -55,7 +55,7 @@ public:
 
     // BKD specifics
 
-    
+
     void insert(double*, int threadNum = 0);
     int remove(double*, int threadNum= 0);
 
