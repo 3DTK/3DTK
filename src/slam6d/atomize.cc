@@ -161,5 +161,18 @@ int main(int argc, char **argv)
             splitscans.clear();
         }
     }
+
+    // flush the rest
+    if (!splitscans.empty())
+    {
+        for (int j = 0; j < splitscans.size(); ++j) {
+            // Get original transform from pose file
+            const double* transMatOrig = splitscans[j]->get_transMatOrg();
+            double transMatOut[16];
+            MMult(transMatRel, transMatOrig, transMatOut);
+            writeFrame(orig_dir, splitscans[j]->getIdentifier(), transMatOut);
+        }
+    }
+
     return 0;
 }

@@ -1,3 +1,6 @@
+#ifndef _ATOMIZE_H
+#define _ATOMIZE_H
+
 #include <string>
 
 using std::string;
@@ -179,3 +182,5 @@ void writeFrame(std::string dir, const char* identifier, double* trans)
   frameOut.close();
   frameOut.clear();
 }
+
+#endif //_ATOMIZE_H
