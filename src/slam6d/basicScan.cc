@@ -13,6 +13,8 @@
 #include "slam6d/kd.h"
 #include "slam6d/Boctree.h"
 #include "slam6d/ann_kd.h"
+#include "slam6d/BruteForceNotATree.h"
+
 
 #ifdef WITH_METRICS
 #include "slam6d/metrics.h"
@@ -715,6 +717,9 @@ void BasicScan::createSearchTreePrivate()
                                 10.0,
                                 PointType(), true);
       break;
+    case BruteForce: 
+        kd = new BruteForceNotATree(ar.get(),xyz_orig.size());
+        break;
     case -1:
       throw std::runtime_error("Cannot create a SearchTree without setting a type.");
     default:

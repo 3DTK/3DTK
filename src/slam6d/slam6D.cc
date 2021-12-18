@@ -197,9 +197,9 @@ po::options_description generic("Generic options");
     ("nns_method,t", po::value<int>(&nns_method)->default_value(simpleKD),
     "selects the Nearest Neighbor Search Algorithm\n"
     "0 = simple k-d tree\n"
-    "1 = cached k-d tree\n"
-    "2 = ANNTree\n"
-    "3 = BOCTree")
+    "1 = ANNTree\n"
+    "2 = BOCTree\n"
+    "3 = BruteForce")
     ("loop6DAlgo,L", po::value<int>(&loopSlam6DAlgo)->default_value(0),
      "selects the method for closing the loop explicitly\n"
      "0 = no loop closing technique\n"

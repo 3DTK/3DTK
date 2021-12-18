@@ -32,7 +32,7 @@
 
 //! SearchTree types
 enum nns_type {
-  simpleKD, ANNTree, BOCTree
+  simpleKD, ANNTree, BOCTree, BruteForce
 };
 
 class Scan;
