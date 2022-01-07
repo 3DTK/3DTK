@@ -30,11 +30,12 @@ int main(int argc, char **argv)
     bool customFilterActive = false;
     std::string customFilter;
     int split = -1;
+    bool rm_scatter = false;
 
     // parsing the command line parameters with boost::po, see header file
     try {
         parse_options(argc, argv, cond_dir, orig_dir, red, rand, start, end,
-            maxDist, minDist, octree, iotype, customFilter, split);
+            maxDist, minDist, octree, iotype, customFilter, split, rm_scatter);
     } catch (std::exception& e) {
         std::cerr << "Error while parsing settings: " << e.what() << std::endl;
         exit(1);
@@ -108,6 +109,14 @@ int main(int argc, char **argv)
 
     // If specified, apply reduction
     int end_reduction = (int)Scan::allScans.size();
+    cout << "Applying reduction... " << endl;
+    if (rm_scatter && red == -1
+    || octree != 1 && red == -1 ) 
+    {
+        cout << "Conflicting reduction options found. " << endl;
+        cout << "Use -r <arg> to set voxelsize. Use -O <arg> to specify nr. of pts. in a voxel." << endl;
+        cout << "Use -d to delete the voxels with fewer pts. than specified with -O." << endl;
+    }
 #ifdef _OPENMP
     #pragma omp parallel for schedule(dynamic)
 #endif
@@ -116,7 +125,7 @@ int main(int argc, char **argv)
             PointType pointtype(types);
             std::cout << "Reducing Scan No. " << iterator << std::endl;
             Scan::allScans[iterator]->setReductionParameter(red, octree, pointtype);
-            Scan::allScans[iterator]->calcReducedPoints();
+            Scan::allScans[iterator]->calcReducedPoints(rm_scatter);
         }
     }
 

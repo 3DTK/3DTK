@@ -269,7 +269,7 @@ void validate(boost::any& v, const std::vector<std::string>& values,
 int parse_options(int argc, char **argv, std::string &dir, double &red, int &rand,
             int &start, int &end, int &maxDist, int &minDist, bool &use_frames,
             bool &use_xyz, bool &use_reflectance, bool &use_type, bool &use_color, int &octree, IOType &type, std::string& customFilter, double &scaleFac,
-	    bool &hexfloat, bool &high_precision, int &frame, bool &use_normals, int &split, bool& global)
+	    bool &hexfloat, bool &high_precision, int &frame, bool &use_normals, int &split, bool& global, bool& rm_scatter)
 {
 po::options_description generic("Generic options");
   generic.add_options()
@@ -298,6 +298,8 @@ po::options_description generic("Generic options");
     "turns on octree based point reduction (voxel size=<NR>)")
     ("octree,O", po::value<int>(&octree)->default_value(1),
     "use randomized octree based point reduction (pts per voxel=<NR>)")
+    ("rm_scatter,d", po::bool_switch(&rm_scatter)->default_value(false),
+     "Note: -r and -O are needed. Removes any voxel that has less than the specified number of points in it.")
     ("scale,y", po::value<double>(&scaleFac)->default_value(0.01),
     "scale factor for point cloud in m (be aware of the different units for uos (cm) and xyz (m), (default: 0.01 means that input and output remain the same)")
     ("min,M", po::value<int>(&minDist)->default_value(-1),
@@ -389,7 +391,8 @@ void writeMetaScan( Scan* source,
     * the corresponding transformation is to be exported into the .pose file.
     */
     std::string red_string = red > 0 ? " reduced" : "";
-    DataXYZ xyz  = source->get("xyz" + red_string);
+    // MetaScan got created with xyz-data field called "xyz"
+    DataXYZ xyz  = source->get("xyz");
 
     if(use_reflectance) {
         DataReflectance xyz_reflectance =
@@ -486,27 +489,33 @@ Scan* createMetaScan(vector<Scan*> splitscans,
     Matrix4ToEuler(tmp, rPosTheta, rPos);
     M4inv(tmp, tinv);
 
-
     std::string color_red_string = red_string == "" ? "rgb" : "color reduced";
+    std::string xyz_red_string = red_string == "" ? "xyz" : "xyz reduced show";
     // Collecting the data...
     for (uint iter = 0; iter < splitscans.size(); iter++) {
         Scan *sscan = splitscans[iter];
         const double* transMat = sscan->get_transMat();
-        int nrpts = sscan->size<DataXYZ>("xyz" + red_string);
-        DataXYZ xyz(sscan->get("xyz" + red_string)); // most important
+        int nrpts = sscan->size<DataXYZ>(xyz_red_string);
+        DataXYZ xyz(sscan->get(xyz_red_string)); // most important
         // Getting all fields
-        DataReflectance refl(sscan->get("reflectance" + red_string));
-        DataType type(sscan->get("type" + red_string));
-        DataRGB rgb(sscan->get(color_red_string));
+        DataReflectance *refl;
+        DataType *type;
+        DataRGB *rgb;
+        if (use_reflectance)
+            refl = new DataReflectance(sscan->get("reflectance" + red_string));
+        if (use_type)
+            type = new DataType(sscan->get("type" + red_string));
+        if (use_color)
+            rgb = new DataRGB(sscan->get(color_red_string));
 
         // Leave out fields that have no data. i.e. less points than nrpts
         for (int j = 0; j < nrpts; j++) {
-            if (refl.size() == nrpts)
-                refls.push_back(refl[j]);
-            if (type.size() == nrpts)
-                typevec.push_back(type[j]);
-            if (rgb.size() == nrpts)
-                rgbs.push_back(rgb[j]);
+            if (use_reflectance && refl->size() == nrpts)
+                refls.push_back(refl->operator[](j));
+            if (use_type && type->size() == nrpts)
+                typevec.push_back(type->operator[](j));
+            if (use_color && rgb->size() == nrpts)
+                rgbs.push_back(rgb->operator[](j));
             if (iotype == UOS_NORMAL)
             {
                 DataNormal normal(sscan->get("normal" + red_string));
@@ -531,6 +540,7 @@ Scan* createMetaScan(vector<Scan*> splitscans,
             rPos[i] = 0; rPosTheta[i] = 0;
         }
     }
+    // Creates a new BasicScan with xyz-data field called "xyz"
     Scan *s = new BasicScan(rPos, rPosTheta, pts);
     if (use_reflectance)
     {

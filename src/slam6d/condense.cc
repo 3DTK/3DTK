@@ -46,11 +46,12 @@ int main(int argc, char **argv)
   int frame = -1;
   int split = -1;
   bool global = false;
+  bool rm_scatter = false;
 
   try {
     parse_options(argc, argv, dir, red, rand, start, end,
       maxDist, minDist, use_frames, use_xyz, use_reflectance, use_type, use_color, octree, iotype, customFilter, scaleFac,
-      hexfloat, high_precision, frame, use_normals, split, global);
+      hexfloat, high_precision, frame, use_normals, split, global, rm_scatter);
   } catch (std::exception& e) {
     std::cerr << "Error while parsing settings: " << e.what() << std::endl;
     exit(1);
@@ -126,7 +127,15 @@ int main(int argc, char **argv)
      if(customFilterActive) Scan::allScans[i]->setCustomFilter(customFilter);
   }
 
-//
+  // Apply reduction
+  cout << "Applying reduction... " << endl;
+  if (rm_scatter && red == -1
+   || octree != 1 && red == -1 ) 
+   {
+    cout << "Conflicting reduction options found. " << endl;
+    cout << "Use -r <arg> to set voxelsize. Use -O <arg> to specify nr. of pts. in a voxel." << endl;
+    cout << "Use -d to delete the voxels with fewer pts. than specified with -O." << endl;
+   }
   int end_reduction = (int)Scan::allScans.size();
 #ifdef _OPENMP
 #pragma omp parallel for schedule(dynamic)
@@ -136,7 +145,7 @@ int main(int argc, char **argv)
       PointType pointtype(types);
       std::cout << "Reducing Scan No. " << iterator << std::endl;
       Scan::allScans[iterator]->setReductionParameter(red, octree, pointtype);
-      Scan::allScans[iterator]->calcReducedPoints();
+      Scan::allScans[iterator]->calcReducedPoints(rm_scatter);
     }
     // reduction filter for current scan!
   }
@@ -235,6 +244,7 @@ int main(int argc, char **argv)
     writeMetaScan(s, ptsout, red, use_reflectance, use_xyz, use_type,
         use_color, use_normals, high_precision, types, scaleFac);
     // TODO: interpolate path over all metascans vector<Scan*>
+    // edit: TODO finished. use "atomize" for that.
     if(use_xyz) {
       writeXYZPose(poseout, rPos, rPosTheta, 0.01);
     } else {

@@ -28,7 +28,7 @@
 
 // This data structure stores trees.
 // The trees themselfes do not have any pts stored.
-// Instead, they operate on the "DataElem" structure by reorganisation.
+// Instead, they operate on the "ForestElem" structure by reorganisation.
 struct ForestElem
 {
     // Create an empty Forest element, i.e. an empty tree (called 'sprout')

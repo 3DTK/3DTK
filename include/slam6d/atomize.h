@@ -37,7 +37,7 @@ void validate(boost::any& v, const std::vector<std::string>& values,
 
 int parse_options(int argc, char **argv, std::string &cond_dir, std::string &orig_dir,
             double &red, int &rand, int &start, int &end, int &maxDist, int &minDist,
-            int &octree, IOType &type, std::string& customFilter, int &split)
+            int &octree, IOType &type, std::string& customFilter, int &split, bool& rm_scatter)
 {
 po::options_description generic("Generic options");
   generic.add_options()
@@ -66,6 +66,8 @@ po::options_description generic("Generic options");
     "turns on octree based point reduction (voxel size=<NR>)")
     ("octree,O", po::value<int>(&octree)->default_value(1),
     "use randomized octree based point reduction (pts per voxel=<NR>)")
+    ("rm_scatter,d", po::bool_switch(&rm_scatter)->default_value(false),
+     "Note: -r and -O are needed. Removes any voxel that has less than the specified number of points in it.")
     ("min,M", po::value<int>(&minDist)->default_value(-1),
     "neglegt all data points with a distance smaller than NR 'units'")
     ("max,m", po::value<int>(&maxDist)->default_value(-1),
