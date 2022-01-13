@@ -266,8 +266,8 @@ protected:
 
       if (npts) {
           for (int i = 0; i < npts; ++i)
-              //params[threadNum].collected_pts.push_back(pointparam(pts, leaf.p[i]));
-              params[threadNum].range_neighbors.push_back(pointparam(pts, leaf.p[i]));
+              params[threadNum].collected_pts.push_back(pointparam(pts, leaf.p[i]));
+              //params[threadNum].range_neighbors.push_back(pointparam(pts, leaf.p[i]));
           return;
       }
 

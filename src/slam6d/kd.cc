@@ -54,9 +54,9 @@ KDtree::~KDtree()
 
 std::vector<double*> KDtree::CollectPts(int threadNum) const
 {
-    params[threadNum].range_neighbors = std::vector<double*>(0);
+    params[threadNum].collected_pts = std::vector<double*>(0);
     _CollectPts(Void(), threadNum);
-    return params[threadNum].range_neighbors;
+    return params[threadNum].collected_pts;
 }
 
 int KDtree::Remove(double *_p, int threadNum)

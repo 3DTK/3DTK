@@ -227,11 +227,11 @@ int main(int argc, char **argv)
   readFramesAndTransform(dir, start, start, -1, usePose, (red > -1) );
 
   // why the hell should you do that? why 10 times? i will just leave it there for now...
-//   double id[16];
-//   M4identity(id);
-//   for(int i = 0; i < 10; i++) {
-//     scan->transform(id, Scan::ICP, 0);  // write end pose
-//   }
+  double id[16];
+  M4identity(id);
+  for(int i = 0; i < 10; i++) {
+    scan->transform(id, Scan::ICP, 0);  // write end pose
+  }
 
   if (!quiet) cout << "start plane detection" << endl;
   long starttime = GetCurrentTimeInMilliSec();
