@@ -130,7 +130,7 @@ int main(int argc, char **argv)
   // Apply reduction
   cout << "Applying reduction... " << endl;
   if (rm_scatter && red == -1
-   || octree != 1 && red == -1 ) 
+   || octree != 1 && red == -1 )
    {
     cout << "Conflicting reduction options found. " << endl;
     cout << "Use -r <arg> to set voxelsize. Use -O <arg> to specify nr. of pts. in a voxel." << endl;

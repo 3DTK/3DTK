@@ -717,7 +717,7 @@ void BasicScan::createSearchTreePrivate()
                                 10.0,
                                 PointType(), true);
       break;
-    case BruteForce: 
+    case BruteForce:
         kd = new BruteForceNotATree(ar.get(),xyz_orig.size());
         break;
     case -1:
