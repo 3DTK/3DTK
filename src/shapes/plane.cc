@@ -213,8 +213,8 @@ int main(int argc, char **argv)
   Scan* scan = Scan::allScans.front();
   scan->setRangeFilter(maxDist, minDist);
   scan->setReductionParameter(red, octree);
-  //    scan->setSearchTreeParameter(nns_method, use_cuda);
-   //   scan->toGlobal();
+  //scan->setSearchTreeParameter(nns_method, use_cuda);
+  scan->toGlobal();
 
   bool usePose = false;
   // Check if .frames or .pose should be used
@@ -243,7 +243,7 @@ int main(int argc, char **argv)
           cout << "alternate cube size of octtree: " << cube_size << endl;
       }
 
-      DataXYZ xyz(Scan::allScans[0]->get("xyz reduced"));
+      DataXYZ xyz(Scan::allScans[0]->get("xyz"));
       RansacOctTree<double>* oct = new RansacOctTree<double>(PointerArray<double>(xyz).get(), xyz.size(), cube_size );
 
       unsigned int stop = (unsigned int)(hough.allPoints->size()/100.0)*hough.myConfigFileHough.Get_MinSizeAllPoints();
@@ -277,14 +277,14 @@ int main(int argc, char **argv)
           delete plane;
           delete normal;
       }
-
+      hough.writePlanePoints("dat/planes/scan000.3d");
       hough.writePlanes(0);
       delete oct;
       starttime = (GetCurrentTimeInMilliSec() - starttime);
 
   // for hough transform, consider all scans, not just the first
   } else {
-    Hough hough(Scan::allScans, quiet);
+    Hough hough(Scan::allScans[0], quiet);
     starttime = (GetCurrentTimeInMilliSec() - starttime);
     cout << "Time for Constructor call: " << starttime << endl;
 
@@ -306,6 +306,7 @@ int main(int argc, char **argv)
                 break;
     }
 
+    hough.writePlanePoints("dat/planes/scan000.3d");
     hough.writePlanes(0);
     cout << "Write Planes done" << endl;
     starttime = (GetCurrentTimeInMilliSec() - starttime);

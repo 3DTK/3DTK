@@ -42,7 +42,6 @@ public:
 
   Hough(bool quiet = true, std::string configFile = ""); // this constructor allows the Scan to be set later
   Hough(Scan * GlobalScan, bool quiet = true, std::string configFile = "bin/hough.cfg" );
-  Hough(ScanVector& GlobalScans, bool quiet = true, std::string configFile = "bin/hough.cfg" );
   void SetScan(Scan*);
   void SetScan(ScanVector&);
   ~Hough();
@@ -66,6 +65,7 @@ public:
   int writePlanes(int startCount);
   void writePlanes(std::string);
   int cluster(vPtPair &pairs, double minx, double max, double miny, double maxy);
+  void writeColoredPoints(std::string);
   void writePlanePoints(std::string);
   void writeAllPoints(int index, vector<Point> points);
 

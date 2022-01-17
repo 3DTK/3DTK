@@ -57,12 +57,6 @@ Hough::Hough(Scan * GlobalScan, bool q, std::string configFile)
   SetScan(GlobalScan);
 }
 
-Hough::Hough(ScanVector& GlobalScans, bool q, std::string configFile)
-: Hough(q, configFile)
-{
-  SetScan(GlobalScans);
-}
-
 void Hough::SetScan(Scan* scan)
 {
 
@@ -73,7 +67,7 @@ void Hough::SetScan(Scan* scan)
 
   allPoints = new vector<Point>();
 
-  DataXYZ points_red = scan->get("xyz reduced");
+  DataXYZ points_red = scan->get("xyz");
   for(unsigned int i = 0; i < points_red.size(); i++)
     {
     Point p(points_red[i]);
@@ -109,7 +103,7 @@ void Hough::SetScan(ScanVector& scans)
   DataXYZ points_red;
   for (const auto& scan : scans)
   {
-    points_red = scan->get("xyz reduced");
+    points_red = scan->get("xyz");
     for (unsigned int i = 0; i < points_red.size(); ++i) {
       Point p(points_red[i]);
       allPoints->push_back(p);
@@ -892,9 +886,10 @@ int Hough::deletePoints(double * n, double rho) {
   for(int x = 0; x < 3; x++) {
     rgb[x] = (unsigned char)((255)*(rand()/(RAND_MAX+1.0)));
   }
+  //cout << "Generating random color: " << (int)rgb[0] << " " << (int)rgb[1] << " " << (int)rgb[2] << endl; 
   for(itr = tmp_points.begin(); itr != tmp_points.end(); itr++) {
       p = (*itr);
-      if(nocluster || maxPlane >= myConfigFileHough.Get_MinPlaneSize()) {
+      if(nocluster || maxPlane < myConfigFileHough.Get_MinPlaneSize()) {
         p.rgb[0] = 0;
         p.rgb[1] = 0;
         p.rgb[2] = 0;
@@ -1180,6 +1175,7 @@ void Hough::writePlanePoints(string filename) {
     out << p.x << " " << p.y << " " << p.z << " " << (int)p.rgb[0] << " " << (int)(p.rgb[1]) << " " << (int)(p.rgb[2]) << endl;
     itr++;
   }
+  
   itr = allPoints->begin();
 
   while(itr != allPoints->end()) {
@@ -1189,6 +1185,28 @@ void Hough::writePlanePoints(string filename) {
   }
   out.close();
 }
+
+/**
+  * Writes only valid colored points to disk
+  */
+void Hough::writeColoredPoints(string filename) {
+
+  ofstream out;
+  out.open(filename.c_str());
+
+  Point p;
+  vector<Point>::iterator itr = coloredPoints.begin();
+
+  while(itr != coloredPoints.end()) {
+    p = *(itr);
+    if ((int)p.rgb[0] != 0 && (int)p.rgb[1] != 0 && (int)p.rgb[2] != 0) 
+      out << p.x << " " << p.y << " " << p.z << " " << (int)p.rgb[0] << " " << (int)(p.rgb[1]) << " " << (int)(p.rgb[2]) << endl;
+    itr++;
+  }
+
+  out.close();
+}
+
 
 /**
   * Writes the remaining points from allPoints to the plane directory given in
