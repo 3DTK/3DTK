@@ -467,11 +467,11 @@ protected:
 
     // Recursive case
     if (params[threadNum].p[node.splitaxis] < node.splitval) {
-      node.child1->_fixedRangeSearchAlongDir(pts, threadNum);
-      node.child2->_fixedRangeSearchAlongDir(pts, threadNum);
+      node.child1->_fixedRangeSearchBetween2Points(pts, threadNum);
+      node.child2->_fixedRangeSearchBetween2Points(pts, threadNum);
     } else {
-      node.child2->_fixedRangeSearchAlongDir(pts, threadNum);
-      node.child1->_fixedRangeSearchAlongDir(pts, threadNum);
+      node.child2->_fixedRangeSearchBetween2Points(pts, threadNum);
+      node.child1->_fixedRangeSearchBetween2Points(pts, threadNum);
     }
 
   }

@@ -25,6 +25,7 @@
 #include "slam6d/kd.h"
 #include "slam6d/searchTree.h"
 #include <vector>
+#include <memory>
 
 // This data structure stores trees.
 // The trees themselfes do not have any pts stored.
@@ -55,7 +56,7 @@ public:
 
     // BKD specifics
 
-
+    void insert(std::vector<double*>&, int threadNum = 0);
     void insert(double*, int threadNum = 0);
     int remove(double*, int threadNum= 0);
 

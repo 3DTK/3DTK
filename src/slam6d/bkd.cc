@@ -128,6 +128,17 @@ std::ostream& operator<<(std::ostream &out, const BkdTree &t)
     return out;
 }
 
+void BkdTree::insert(std::vector<double*> &pts, int threadNum)
+{
+    for (double *p : pts) {
+        if (!p) {
+            std::cout << "Invalid pointer: " << &p << std::endl;
+            break;
+        }
+        insert(p, threadNum);
+    }
+}
+
 /**
  *  @brief Insert point <pt> into the Bkd tree.
  *  Keeps the tree balanced and fully space utilized.
@@ -187,6 +198,8 @@ void BkdTree::insert(double *pt, int threadNum)
     }
 }
 
+
+
 int BkdTree::remove(double* pt, int threadNum)
 {
     // Search if the point is inside the buffer
@@ -226,10 +239,12 @@ double *BkdTree::FindClosest(double *_p,
         if (forest.at(i).empty) continue;
         KDtree *tree = forest.at(i).tree;
         tmp = tree->FindClosest(_p, maxdist2, threadNum);
-        dist2 = Dist2( tmp, _p );
-        if ( dist2 < minDist2 ) {
-            minDist2 = dist2;
-            res = tmp;
+        if (tmp) {
+            dist2 = Dist2( tmp, _p );
+            if ( dist2 < minDist2 ) {
+                minDist2 = dist2;
+                res = tmp;
+            }
         }
     }
     // Also search the buffer if there is any nearer point
