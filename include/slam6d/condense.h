@@ -269,7 +269,7 @@ void validate(boost::any& v, const std::vector<std::string>& values,
 int parse_options(int argc, char **argv, std::string &dir, double &red, int &rand,
             int &start, int &end, int &maxDist, int &minDist, bool &use_frames,
             bool &use_xyz, bool &use_reflectance, bool &use_type, bool &use_color, int &octree, IOType &type, std::string& customFilter, double &scaleFac,
-	    bool &hexfloat, bool &high_precision, int &frame, bool &use_normals, int &split, bool& global, bool& rm_scatter)
+	    bool &hexfloat, bool &high_precision, int &frame, bool &use_normals, int &split, bool& global, bool& rm_scatter, bool& skip_empty)
 {
 po::options_description generic("Generic options");
   generic.add_options()
@@ -325,6 +325,8 @@ po::options_description generic("Generic options");
     ("frame,n", po::value<int>(&frame)->default_value(-1),
      "uses frame NR for export")
     ("global,g", po::bool_switch(&global)->default_value(false),
+     "Use global reference frame for export")
+    ("skipEmpty", po::bool_switch(&skip_empty)->default_value(false),
      "Use global reference frame for export");
 
   po::options_description hidden("Hidden options");

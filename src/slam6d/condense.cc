@@ -47,11 +47,12 @@ int main(int argc, char **argv)
   int split = -1;
   bool global = false;
   bool rm_scatter = false;
+  bool skip_empty = false;
 
   try {
     parse_options(argc, argv, dir, red, rand, start, end,
       maxDist, minDist, use_frames, use_xyz, use_reflectance, use_type, use_color, octree, iotype, customFilter, scaleFac,
-      hexfloat, high_precision, frame, use_normals, split, global, rm_scatter);
+      hexfloat, high_precision, frame, use_normals, split, global, rm_scatter, skip_empty);
   } catch (std::exception& e) {
     std::cerr << "Error while parsing settings: " << e.what() << std::endl;
     exit(1);
@@ -173,7 +174,7 @@ int main(int argc, char **argv)
 
     Scan *source = Scan::allScans[i];
     // if a scan contains no points do not include it in condensed files
-    if( source->size<DataXYZ>("xyz") == 0 )
+    if( source->size<DataXYZ>("xyz") == 0 && skip_empty)
     {
         std::cout << "scan" << source->getIdentifier() << " has no points. Skipping..." << std::endl;
         continue;

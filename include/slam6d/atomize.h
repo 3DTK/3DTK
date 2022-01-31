@@ -37,7 +37,8 @@ void validate(boost::any& v, const std::vector<std::string>& values,
 
 int parse_options(int argc, char **argv, std::string &cond_dir, std::string &orig_dir,
             double &red, int &rand, int &start, int &end, int &maxDist, int &minDist,
-            int &octree, IOType &type, std::string& customFilter, int &split, bool& rm_scatter)
+            int &octree, IOType &type, std::string& customFilter, int &split, bool& rm_scatter,
+            bool& skip_empty)
 {
 po::options_description generic("Generic options");
   generic.add_options()
@@ -71,7 +72,9 @@ po::options_description generic("Generic options");
     ("min,M", po::value<int>(&minDist)->default_value(-1),
     "neglegt all data points with a distance smaller than NR 'units'")
     ("max,m", po::value<int>(&maxDist)->default_value(-1),
-    "neglegt all data points with a distance larger than NR 'units'");
+    "neglegt all data points with a distance larger than NR 'units'")
+    ("skipEmpty", po::bool_switch(&skip_empty)->default_value(false),
+     "Use global reference frame for export");
 
   po::options_description hidden("Hidden options");
   hidden.add_options()
