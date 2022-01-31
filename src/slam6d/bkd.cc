@@ -258,12 +258,49 @@ double *BkdTree::FindClosest(double *_p,
     return res;
 }
 
+double *BkdTree::FindClosestAlongDir(double *_p,
+                                     double *_dir,
+                                     double maxdist2,
+                                     int threadNum) const
+{
+    double *res = 0;
+    double *tmp;
+    double minDist2 = __DBL_MAX__;
+    double dist2;
+    // Search all the trees, pick best closest
+    for (size_t i = 0; i < forest.size(); ++i) {
+
+        // Skip the empty trees.
+        if (forest.at(i).empty) continue;
+        KDtree *tree = forest.at(i).tree;
+        tmp = tree->FindClosestAlongDir(_p, _dir, maxdist2, threadNum);
+        if (tmp) { // double and tripple checking because im not sure
+        // if statements and dist2 check can probably be removed 
+        // since its done in the tree already
+            dist2 = Dist2( tmp, _p );
+            if ( dist2 < minDist2 ) {
+                minDist2 = dist2;
+                res = tmp;
+            }
+        }
+    }
+    // Also search the buffer if there is any nearer point
+    for (size_t i = 0; i < buffer.size(); ++i) {
+        dist2 = Dist2( buffer[i] , _p);
+        if (dist2 < minDist2) {
+            minDist2 = dist2;
+            res = buffer[i];
+        }
+    }
+    return res;
+}
+
 std::vector<Point> BkdTree::fixedRangeSearchAlongDir(double *_p,
                                 double *_dir,
                                 double maxdist2,
                                 int threadNum) const
 {
-
+  
 }
 
 std::vector<Point> BkdTree::fixedRangeSearchBetween2Points(double *_p,

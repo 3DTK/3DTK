@@ -76,6 +76,11 @@ public:
                                 double maxdist2,
                                 int threadNum = 0) const;
 
+    virtual double *FindClosestAlongDir(double *_p,
+                                        double *_dir,
+                                        double maxdist2,
+                                        int threadNum = 0) const;
+
     virtual std::vector<Point> fixedRangeSearchAlongDir(double *_p,
                                 double *_dir,
                                 double maxdist2,
