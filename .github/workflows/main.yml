@@ -1,0 +1,71 @@
+name: CI
+
+on:
+  push:
+    branches: [ master, workflow ]
+
+jobs:
+  # FIXME: blas FTBFS
+  #windows:
+  #  strategy:
+  #    matrix:
+  #      toolset: ["v141", "v142"]
+  #  runs-on: windows-latest
+  #  steps:
+  #    - uses: actions/checkout@v2
+  #    - name: vcpkg cache
+  #      uses: actions/cache@v2
+  #      with:
+  #        path: |
+  #          ${{github.workspace}}/build/3rdparty/vcpkg/installed
+  #        key: ${{ matrix.toolset }}-${{ hashFiles('windows/build.cmd') }}
+  #    - run:
+  #        windows/build.cmd ${{github.workspace}} ${{github.workspace}}/build ${{ matrix.toolset }}
+  # FIXME: fails with
+  # Could not find a package configuration file provided by "Qt5Widgets"
+  #macos:
+  #  runs-on: macos-latest
+  #  steps:
+  #    - uses: actions/checkout@v2
+  #    - name: Install dependencies
+  #      run: |
+  #        brew uninstall --ignore-dependencies java
+  #        brew update || true
+  #        brew bundle
+  #        export PATH="/usr/local/opt/qt/bin:$PATH"
+  #    - name: Build
+  #      run: |
+  #        mkdir .build
+  #        cmake -H. -B.build -DCMAKE_BUILD_TYPE=RelWithDebInfo -DWITH_PYTHON=OFF -DWITH_OPENMP=OFF -DWITH_FTGL=OFF
+  #        cmake --build .build --config RelWithDebInfo
+  #        CTEST_OUTPUT_ON_FAILURE=true cmake --build .build --target test --config RelWithDebInfo
+  linux:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        os: ['debian:buster', 'debian:bullseye', 'debian:sid', 'ubuntu:focal']
+    container: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install basic dependencies
+        run: |
+          cat /etc/os-release
+          export DEBIAN_FRONTEND=noninteractive
+          export DEBCONF_NONINTERACTIVE_SEEN=true
+          apt-get update
+          apt-get install --yes --no-install-recommends equivs ninja-build build-essential
+      - if: matrix.os == 'ubuntu:focal'
+        run: equivs-build doc/equivs/control.ubuntu.focal.ros
+      - if: matrix.os == 'debian:sid'
+        run: equivs-build doc/equivs/control.debian.sid.ros
+      - if: matrix.os == 'debian:bullseye'
+        run: equivs-build doc/equivs/control.debian.bullseye.ros
+      - if: matrix.os == 'debian:buster'
+        run: equivs-build doc/equivs/control.debian.buster.ros
+      - name: Install build dependencies
+        run: apt-get install --yes --no-install-recommends ./3dtk-build-deps_1.0_all.deb
+      - name: Build
+        run: |
+          cmake -H. -B.build -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_VERBOSE_MAKEFILE=ON -DWITH_ROS=ON -G Ninja
+          cmake --build .build --config RelWithDebInfo
+          CTEST_OUTPUT_ON_FAILURE=true cmake --build .build --config RelWithDebInfo --target test
