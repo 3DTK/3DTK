@@ -32,7 +32,7 @@ BkdTreeIndexed::BkdTreeIndexed(double **pts,
 
 BkdTreeIndexed::~BkdTreeIndexed()
 {
-    for (uint i = 0; i < forest.size(); ++i)
+    for (size_t i = 0; i < forest.size(); ++i)
         forest.at(i).tree->~KDtreeIndexed();
     forest.clear();
     buffer.clear();
@@ -41,7 +41,7 @@ BkdTreeIndexed::~BkdTreeIndexed()
 std::vector<size_t> BkdTreeIndexed::collectPts() const
 {
     std::vector<size_t> res;
-    for (uint i = 0; i < forest.size(); ++i) {
+    for (size_t i = 0; i < forest.size(); ++i) {
         if (forest.at(i).empty) continue;
         std::vector<size_t> tree_res = forest.at(i).tree->CollectPts();
         res.insert( std::end(res), std::begin(tree_res), std::end(tree_res) );
@@ -85,18 +85,18 @@ std::string BkdTreeIndexed::_debug_info() const
     info_ss << "============== BKD DEBUG ==============" << std::endl;
     info_ss << "Buffer [" << std::to_string(buffer.size())
         << "/" << std::to_string(bucketSize) << "]" << std::endl;
-    for (uint i = 0; i < buffer.size(); ++i) {
+    for (size_t i = 0; i < buffer.size(); ++i) {
         info_ss << buffer[i] << " ";
     }
     info_ss << std::endl;
-    for (uint i = 0; i < forest.size(); ++i) {
+    for (size_t i = 0; i < forest.size(); ++i) {
         info_ss << "Tree " << std::to_string(i) << ": "
             << std::to_string(forest.at(i).nrpts) << " pts." << std::endl;
         if (forest.at(i).empty) continue;
         KDtreeIndexed *t = forest.at(i).tree;
         std::vector<size_t> data = t->CollectPts();
 
-        for (uint j = 0; j < data.size(); ++j) {
+        for (size_t j = 0; j < data.size(); ++j) {
             info_ss << data.at(j) << " ";
         }
         info_ss << std::endl;
@@ -110,7 +110,7 @@ size_t BkdTreeIndexed::size() const
 {
     size_t res = 0;
     res += buffer.size();
-    for (uint i = 0; i < forest.size(); ++i)
+    for (size_t i = 0; i < forest.size(); ++i)
         if(!forest.at(i).empty)
             res += forest.at(i).nrpts;
     return res;
@@ -146,7 +146,7 @@ double *BkdTreeIndexed::FindClosest(double *_p,
     // double minDist2 = __DBL_MAX__;
     // double dist;
     // // Search all the trees, pick best closest
-    // for (uint i = 0; i < forest.size(); ++i) {
+    // for (size_t i = 0; i < forest.size(); ++i) {
 
     //     // Skip the empty trees.
     //     if (forest.at(i).empty) continue;
@@ -159,7 +159,7 @@ double *BkdTreeIndexed::FindClosest(double *_p,
     //     }
     // }
     // // Also search the buffer if there is any nearer point
-    // for (uint i = 0; i < buffer.size(); ++i) {
+    // for (size_t i = 0; i < buffer.size(); ++i) {
     //     dist = Dist2( buffer[i] , _p);
     //     if (dist < minDist2) {
     //         minDist2 = dist;

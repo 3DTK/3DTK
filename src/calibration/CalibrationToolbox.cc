@@ -509,7 +509,7 @@ void CalibrationToolbox::visualize(bool readCameraParamFromFile){
         ss << settings.visualizePath << "/" << filename.filename().string() << ".reprojection" << ".png";
 
         for (int patternIndex = 0; patternIndex < numPatterns; patternIndex++) {
-            uint colorIndex = 0;
+            int colorIndex = 0;
             Scalar colorMap[4] = {Scalar(0,0,255), Scalar(0,255,0), Scalar(255,0,0), Scalar(0,255,255)};
 
             for(Point2f point2f : this->vecImagePoints[i * numPatterns + patternIndex]){

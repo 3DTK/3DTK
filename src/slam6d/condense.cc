@@ -166,7 +166,7 @@ int main(int argc, char **argv)
   char* posefilepath;
 
   int k = 0; // count subscans
-  uint seq = 0; // count subfiles
+  int seq = 0; // count subfiles
   vector<Scan*> splitscans;
 
   for(unsigned int i = 0; i < Scan::allScans.size(); i++)

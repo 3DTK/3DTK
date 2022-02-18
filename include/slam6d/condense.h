@@ -69,13 +69,13 @@ void writeXYZPose(std::ofstream &posefile, const double* rPos, const double* rPo
 
 void writeUOSPoints(std::ofstream &scanfile, DataXYZ &xyz, double scaleFac = 1.0)
 {
-    for (uint j = 0; j < xyz.size(); j++)
+    for (size_t j = 0; j < xyz.size(); j++)
         scanfile << scaleFac*xyz[j][0] << " " << scaleFac*xyz[j][1] << " " << scaleFac*xyz[j][2] << endl;
 }
 
 void writeUOSPointsReflectance(std::ofstream &scanfile, DataXYZ &xyz, DataReflectance &r, double scaleFac = 1.0)
 {
-    for (uint j = 0; j < xyz.size(); j++)
+    for (size_t j = 0; j < xyz.size(); j++)
         scanfile << scaleFac*xyz[j][0] << " " << scaleFac*xyz[j][1] << " " << scaleFac*xyz[j][2] << " " << r[j] << endl;
 }
 
@@ -162,13 +162,13 @@ void writeUOSRGB(std::ofstream &scanfile, DataXYZ &xyz ,DataRGB &rgb, double sca
 
 void writeXYZPoints(std::ofstream &scanfile, DataXYZ &xyz, double scaleFac = 1.0)
 {
-    for (uint j = 0; j < xyz.size(); j++)
+    for (size_t j = 0; j < xyz.size(); j++)
         scanfile << scaleFac*xyz[j][2] << " " << -scaleFac*xyz[j][0] << " " << scaleFac*xyz[j][1] << endl;
 }
 
 void writeXYZPointsReflectance(std::ofstream &scanfile, DataXYZ &xyz, DataReflectance &r, double scaleFac = 1.0)
 {
-    for (uint j = 0; j < xyz.size(); j++)
+    for (size_t j = 0; j < xyz.size(); j++)
         scanfile << scaleFac*xyz[j][2] << " " << -scaleFac*xyz[j][0] << " " << scaleFac*xyz[j][1] << " " << r[j] << endl;
 }
 
@@ -494,7 +494,7 @@ Scan* createMetaScan(vector<Scan*> splitscans,
     std::string color_red_string = red_string == "" ? "rgb" : "color reduced";
     std::string xyz_red_string = red_string == "" ? "xyz" : "xyz reduced show";
     // Collecting the data...
-    for (uint iter = 0; iter < splitscans.size(); iter++) {
+    for (size_t iter = 0; iter < splitscans.size(); iter++) {
         Scan *sscan = splitscans[iter];
         const double* transMat = sscan->get_transMat();
         int nrpts = sscan->size<DataXYZ>(xyz_red_string);

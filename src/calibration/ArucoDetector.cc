@@ -44,7 +44,7 @@ bool ArucoDetector::detect(const cv::Mat& image)
     std::vector<std::vector<cv::Point2f> > markerCorners;
     cv::aruco::detectMarkers(gray, _dictionary, markerCorners, markerIds, _detectorParams);
 
-    for (uint i = 0; i < markerIds.size(); i++) {
+    for (size_t i = 0; i < markerIds.size(); i++) {
         AprilTag::AprilTag2f aprilTag2f = AprilTag::AprilTag2f(markerIds.at(i));
 
         aprilTag2f.point1 = markerCorners.at(i).at(0);

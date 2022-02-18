@@ -134,11 +134,11 @@ int main(int argc, char **argv)
     // Iterate in the same fashion as in condense.cc to reconstruct file association
 
     int k = 0; // count subscans
-    uint seq = 0; // count condensed files
+    int seq = 0; // count condensed files
     vector<Scan*> splitscans;
     double transMat[16], transMatPose[16]; // transform from condensed frames / pose
     double tPoseInv[16], transMatRel[16]; // relative transformations between frames / pose
-    for (uint i = 0; i < Scan::allScans.size(); ++i)
+    for (size_t i = 0; i < Scan::allScans.size(); ++i)
     {
         Scan * source = Scan::allScans[i];
         // In atomize, we need to push every scan, even if its empty

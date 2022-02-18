@@ -32,7 +32,7 @@ BkdTree::BkdTree(double **pts,
 
 BkdTree::~BkdTree()
 {
-    for (uint i = 0; i < forest.size(); ++i)
+    for (size_t i = 0; i < forest.size(); ++i)
         forest.at(i).tree->~KDtree();
     forest.clear();
     buffer.clear();
