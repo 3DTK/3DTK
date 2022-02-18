@@ -294,7 +294,7 @@ int main(int argc, char* argv[])
 
     program_options::notify(vm);
 
-    filesystem::create_directory(outdir);
+    boost::filesystem::create_directory(outdir);
 
 
     StaticTransformSetter* transformSetter = NULL;
