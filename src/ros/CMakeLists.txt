@@ -47,6 +47,7 @@ if(WITH_ROS)
   endif()
 
   add_executable(cartographer2scan cartographer2scan.cc)
+  set_property(TARGET cartographer2scan PROPERTY CXX_STANDARD 17)
   target_link_libraries(cartographer2scan ${catkin_LIBRARIES} ${PCL_LIBRARIES} ${Boost_LIBRARIES})
 
   add_library(tdtkroswrapper
@@ -54,15 +55,18 @@ if(WITH_ROS)
     #slam6Dwrapper.cc
     icp6Dwrapper.cc
   )
+  set_property(TARGET tdtkroswrapper PROPERTY CXX_STANDARD 17)
   target_link_libraries(tdtkroswrapper scan ${catkin_LIBRARIES} ${PCL_LIBRARIES} ${Boost_LIBRARIES})
 
   add_executable(scan2bag scan2bag.cc)
+  set_property(TARGET scan2bag PROPERTY CXX_STANDARD 17)
   target_link_libraries(scan2bag ${catkin_LIBRARIES} ${PCL_LIBRARIES} scan tdtkroswrapper ${Boost_LIBRARIES})
 
   #add_executable(slam6D_node slam6D_node.cc)
   #target_link_libraries(slam6D_node ${catkin_LIBRARIES} tdtkroswrapper)
 
   add_executable(icp6D_node icp6D_node.cc)
+  set_property(TARGET icp6D_node PROPERTY CXX_STANDARD 17)
   target_link_libraries(icp6D_node ${catkin_LIBRARIES} tdtkroswrapper)
 
 endif()
