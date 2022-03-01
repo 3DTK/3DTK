@@ -116,11 +116,9 @@ void SearchTree::getPtPairs(std::vector <PtPair> *pairs,
   for (unsigned int i = startindex; i < endindex; i++) {
     // take about 1/rnd-th of the numbers only
     if (rnd > 1 && rand(rnd) != 0) continue;
-
     t[0] = xyz_r[i][0];
     t[1] = xyz_r[i][1];
     t[2] = xyz_r[i][2];
-
     transform3(local_alignxf_inv, t, s);
 
     double *closest;
@@ -178,6 +176,7 @@ void SearchTree::getPtPairs(std::vector <PtPair> *pairs,
         myPair.p1.z - myPair.p2.z };
       sum += Len2(p12);
 
+      #pragma omp critical
       pairs->push_back(myPair);
     }
   }

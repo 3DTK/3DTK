@@ -144,7 +144,7 @@ int main(int argc, char **argv)
         // In atomize, we need to push every scan, even if its empty
         splitscans.push_back( source );
         // In condense, empty scans got skipped
-        if ( source->size<DataXYZ>("xyz") == 0 ) continue;
+        if ( source->size<DataXYZ>("xyz") == 0 && skip_empty ) continue;
 
         // In condense, new files get opened here
         // So in atomize, we have to read the transforms of those

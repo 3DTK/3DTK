@@ -327,7 +327,7 @@ po::options_description generic("Generic options");
     ("global,g", po::bool_switch(&global)->default_value(false),
      "Use global reference frame for export")
     ("skipEmpty", po::bool_switch(&skip_empty)->default_value(false),
-     "Use global reference frame for export");
+     "Skip a scan if it is empty (or becomes empty while applying filters)");
 
   po::options_description hidden("Hidden options");
   hidden.add_options()

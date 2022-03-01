@@ -108,9 +108,9 @@ int main(int argc, char **argv)
     if (end > -1 && fileCounter > end) break; // 'nuf read
 
     if(readFromPose) {
-      snprintf(poseFileName,255,"%sscan%.3d.pose",dir.c_str(),fileCounter++);
+      snprintf(poseFileName,255,"%sscan%.3d.pose",dir.c_str(),fileCounter+=100);
     } else {
-      snprintf(poseFileName,255,"%sscan%.3d.frames",dir.c_str(),fileCounter++);
+      snprintf(poseFileName,255,"%sscan%.3d.frames",dir.c_str(),fileCounter+=100);
     }
     pose_in.open(poseFileName);
 
