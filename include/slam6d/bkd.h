@@ -34,6 +34,7 @@ struct ForestElem
 {
     // Create an empty Forest element, i.e. an empty tree (called 'sprout')
     ForestElem() : empty(true), nrpts(0) {} // empty constructor, we use c++ init list
+
     // Create a non-empty Forest element, i.e. a KD-tree (called 'tree')
     ForestElem(KDtree* t, size_t n) : empty(false), tree(t), nrpts(n) {}
 
@@ -56,8 +57,20 @@ public:
 
     // BKD specifics
 
+    // Insert multiple points
     void insert(std::vector<double*>&, int threadNum = 0);
+
+    // Insert a single point
     void insert(double*, int threadNum = 0);
+
+    /** @brief: Remove a point, but keeps the point in memory.
+     * Works by reorganization of points in the leaf array.
+     * Swaps the point to be removed with the last element in the leaf,
+     * then decrements the leaf size.
+     * @param pt: The coordinates of a point to be removed.
+     * @param threadNum: The identifier of the thread (use omp_set_num_threads(...) first)
+     * @result: The number of points that actually got removed.
+     */
     int remove(double*, int threadNum= 0);
 
     std::vector<double*> collectPts(int threadNum = 0) const;

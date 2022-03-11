@@ -1,5 +1,6 @@
 #define BOOST_TEST_DYN_LINK
 #define BOOST_TEST_MODULE bkdtree
+
 #include <boost/test/unit_test.hpp>
 #include <stdlib.h>
 #include <time.h>
@@ -22,9 +23,7 @@ using namespace std;
         double *p = new double[3]; \
         for (int i = 0; i < 3; ++i) p[i] = drand(10.0, 500.0); \
         tree.insert(p); \
-        cout << tree.info(); \
     } 
-
 
 // Generates double numbers
 double drand(double dmin, double dmax)
@@ -47,7 +46,7 @@ bool ptrequals(double *p1, double *p2) {
 TEST(simple_insertion_test)
 {
     setup_tree_with_pts(10000);
-    cout << "Tree size: " << tree.size() << endl;
+    //cout << "Tree size: " << tree.size() << endl;
     int treesize = tree.size();
     BOOST_CHECK(treesize == 10001);
 }
@@ -92,28 +91,22 @@ TEST(simple_consistency_check)
     BOOST_CHECK(!valequals(cls, p));
 }
 
-// TEST(simple_knearest_check)
-// {
-//     size_t npts = 100;
-//     double **pa = new double*[npts];
-//     for (int i = 1; i <= npts; ++i) {
-//         pa[i-1] = new double[3];
-//         pa[i-1][0] = (double) i;
-//         pa[i-1][1] = (double) 0;
-//         pa[i-1][2] = (double) 0;
-        
-//     }
-//     BkdTree t(pa, npts);
-//     double point[3] = {0.0, 0.0, 0.0};
-//     vector<Point> result = t.kNearestNeighbors(point, 2);
-//     for(int i=0;i<result.size();++i) cout << result[i] << " ";
-//     vector<Point> trueresult = { Point(1.0, 0.0, 0.0), Point(2.0, 0.0, 0.0) };
-//     for(int i=0;i<result.size();++i) cout << trueresult[i] << " ";
-//     // for (int i = 0; i < npts; ++i) delete pa[i];
-//     // delete[] pa;
-//     // TODO: this fails ?? why
-//     //BOOST_CHECK( result[0] == trueresult[0] && result[1] == trueresult[1]);
-//     BOOST_CHECK_EQUAL_COLLECTIONS(result.begin(), result.end(), trueresult.begin(), trueresult.end());
-// }
+TEST(simple_knearest_check)
+{
+    // Sets up tree, includes (0, 0, 0)
+    setup_tree_with_pts(100);
+    
+    // Include second reference point to compare
+    double second[3] = {0, 0, 0.001};
+    tree.insert( second );
+
+    // Search two nearest to that point
+    double point[3] = {0.00001, 0.0, 0.0};
+    vector<Point> result = tree.kNearestNeighbors(point, 2);
+    vector<Point> truth;
+    truth.push_back( Point(0, 0, 0) );
+    truth.push_back( Point(0, 0, 0.001) );
+    BOOST_CHECK_EQUAL_COLLECTIONS(result.begin(), result.end(), truth.begin(), truth.end());
+}
 
 // FIXME : add more complex tests!

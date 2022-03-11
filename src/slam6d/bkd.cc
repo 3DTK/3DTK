@@ -14,7 +14,8 @@ BkdTree::BkdTree(double **pts,
                  : BkdTree(bucketsize)
 {
     // nr of trees needed for n points with given bucketsize
-    int nrtrees = ceil(log2(n/bucketsize));
+    int nrtrees = std::max(1.0, ceil(log2(n/bucketsize)));
+    std::cout << "Nr Trees: " << nrtrees << std::endl;
     // Init forrest
     /*
      * this way, all points would fit into the forest.
@@ -22,12 +23,13 @@ BkdTree::BkdTree(double **pts,
      * that large tree, thus all trees before are empty.
      * This way, point insertion starts optimaly
      */
-    for(int i = 0; i < nrtrees; ++i) {
+    for(int i = 1; i < nrtrees; ++i) {
         ForestElem sprout;
         forest.push_back( sprout );
     }
     ForestElem tree(new KDtree(pts, n, bucketsize), n);
     forest.push_back( tree );
+    std::cout << "Size of the forest: " << forest.size() << std::endl;
 }
 
 BkdTree::~BkdTree()
@@ -132,8 +134,8 @@ void BkdTree::insert(std::vector<double*> &pts, int threadNum)
 {
     for (double *p : pts) {
         if (!p) {
-            std::cout << "Invalid pointer: " << &p << std::endl;
-            break;
+            std::cout << "WARN: Skipping invalid pointer: " << &p << std::endl;
+            continue;
         }
         insert(p, threadNum);
     }
@@ -197,8 +199,6 @@ void BkdTree::insert(double *pt, int threadNum)
         return;
     }
 }
-
-
 
 int BkdTree::remove(double* pt, int threadNum)
 {
@@ -319,6 +319,7 @@ std::vector<Point> BkdTree::kNearestNeighbors(double *_p,
     // Include k nearest from all the trees
     for(size_t i = 0; i < forest.size(); ++i) {
         if (forest.at(i).empty) continue;
+
         KDtree *t = forest.at(i).tree;
         std::vector<Point> kNNs = t->kNearestNeighbors(_p, k, threadNum);
         candidates.insert( end(candidates), begin(kNNs), end(kNNs) );
@@ -398,49 +399,41 @@ double *BkdTree::segmentSearch_1NearestPoint(double *_p,
  */
 void BkdTree::mergeTreesLogarithmic(int index, int nrpts, int threadNum)
 {
-    //std::cout << "Setting up new mem for pts" << std::endl;
-        // setup new points memory
-    double **newpts = new double*[nrpts];
-    //std::cout << "Done." << std::endl;
+    // setup new points memory
 
-        // copy the points
+    // FIXME: THIS IS MEMORY INEFFICIENT!!! USE SHARED_PTRs INSTEAD
+    double **newpts = new double*[nrpts];
+
+    // copy the points
     int ptindex = 0;
     for (int k = 0; k < index; ++k) {
 
-        //std::cout << "Getting pts for tree " << k << std::endl;
         if (forest.at(k).empty) continue;
-        // else collect and copy pts.
-        std::vector<double*> datak = forest.at(k).tree->CollectPts(threadNum);
-        //std::cout << "done." << std::endl;
 
-        //std::cout << "copying points" << std::endl;
-        for (size_t q = 0; q < forest.at(k).nrpts; ++q) {
+        std::vector<double*> datak =
+            forest.at(k).tree->CollectPts(threadNum);
+
+        for (size_t q = 0; q < datak.size(); ++q) {
             newpts[ptindex] = datak[q];
             ptindex++;
         }
-        //std::cout << "done" << std::endl;
 
         // Free previous data fields
         forest.at(k).nrpts = 0;
         forest.at(k).empty = true;
-        //datak.clear();
+        datak.clear();
     }
 
-        // add the points in the buffer
-        //std::cout << "Getting points from the buffer " << std::endl;
-    for (int i = 0; i < buffer.size(); ++i) {
+    // add the points in the buffer
+    for (size_t i = 0; i < buffer.size(); ++i) {
         newpts[ptindex] = buffer.at(i);
         ptindex++;
     }
-        //std::cout << "Done" << std::endl;
+    buffer.clear();
 
-        // Allocate new points
-        //std::cout << "Setting up new tree" << std::endl;
+    // Allocate new points
     forest.at(index).tree = new KDtree(newpts, nrpts, bucketSize);
-    //std::cout << "done" << std::endl;
-    //std::cout << "Updating tree fields" << std::endl;
     forest.at(index).nrpts = nrpts;
     forest.at(index).empty = nrpts == 0;
-    //std::cout << "end merge." << std::endl;
     return;
 }
