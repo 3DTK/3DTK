@@ -17,6 +17,9 @@ if(WITH_ROS)
       kdl_parser
       robot_state_publisher
       nav_msgs
+      std_msgs
+      geometry_msgs
+      sensor_msgs
   )
   find_package(Eigen3 REQUIRED)
   find_package(PCL REQUIRED)
@@ -57,6 +60,10 @@ if(WITH_ROS)
   )
   set_property(TARGET tdtkroswrapper PROPERTY CXX_STANDARD 17)
   target_link_libraries(tdtkroswrapper scan ${catkin_LIBRARIES} ${PCL_LIBRARIES} ${Boost_LIBRARIES})
+
+  add_executable(bag_listener bag_listener.cc)
+  set_property(TARGET bag_listener PROPERTY CXX_STANDARD 17)
+  target_link_libraries(bag_listener ${catkin_LIBRARIES} ${PCL_LIBRARIES} ${Boost_LIBRARIES})
 
   add_executable(scan2bag scan2bag.cc)
   set_property(TARGET scan2bag PROPERTY CXX_STANDARD 17)

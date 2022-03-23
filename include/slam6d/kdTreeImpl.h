@@ -264,6 +264,12 @@ protected:
       AccessorFunc point;
       ParamFunc pointparam;
 
+      // TODO: Here we need an implementation that stores shared_ptr<double>
+      // That way, we dont need to allocate new memory everytime we merge trees in a bkd-forest.
+
+      // TODO: Another idea: Write something like CollectPtsAndDelete(...) that would
+      // automatically address new memory and free the old points memory. Ideally, we would
+      // like to keep the original pointers untouched, while only moving references to them.
       if (npts) {
           for (int i = 0; i < npts; ++i)
               params[threadNum].collected_pts.push_back(pointparam(pts, leaf.p[i]));
