@@ -229,6 +229,7 @@ void newMenu()
   glui1->set_main_gfx_window(window_id);
 
   glui1->add_checkbox("Draw Points", &show_points);
+  glui1->add_checkbox("Draw Objects", &show_objects);
   glui1->add_checkbox("Draw Camera", &show_cameras);
   glui1->add_checkbox("Draw Path", &show_path);
   glui1->add_checkbox("Draw Poses", &show_poses);

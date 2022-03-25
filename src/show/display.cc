@@ -231,7 +231,7 @@ SDisplay * LineDisplay::readFromFile(std::string &filename) {
 void LineDisplay::displayObject() {
 
   glColor3f(1.0, 0.3, 0.3);
-  glLineWidth(3.0);
+  glLineWidth(5.0);
   glBegin(GL_LINES);
 
   for (unsigned int i = 0; i < lines.size(); i++) {

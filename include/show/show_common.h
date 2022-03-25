@@ -176,6 +176,12 @@ extern int show_fog;
 extern int show_points;             // Show data points in the viewer?
 
 /**
+ * Indicates if the objects should be shown
+ */
+extern int show_objects;            // Show display objects in the viewer?
+
+
+/**
  * Indicates if camera boxes should be shown
  */
 extern int show_cameras;             // Show the camera boxes in the viewer?

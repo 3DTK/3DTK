@@ -1120,9 +1120,12 @@ void DisplayItFunc(GLenum mode, bool interruptable)
   if (show_poses == 1) {
     DrawCoordinateSystems();
   }
-  DrawObjects(mode);
+  // if show objects is true then draw objects.
+  if (show_objects == 1) {
+    DrawObjects(mode);
+  }
 
-  // if show points is true the draw points
+  // if show points is true then draw points
   if (show_points == 1) DrawPoints(mode, interruptable);
 
   // if show_cylinderBody or show_cylinderPoints true draw cylinder

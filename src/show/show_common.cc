@@ -113,6 +113,11 @@ int show_fog             = 1;
 int show_points          = 1;             // Show data points in the viewer?
 
 /**
+ * Indicates if the objects should be shown
+ */
+int show_objects         = 1;             // Show display objects in the viewer?
+
+/**
  * Indicates if camera boxes should be shown
  */
 int show_cameras         = 1;             // Show the camera boxes in the viewer?
