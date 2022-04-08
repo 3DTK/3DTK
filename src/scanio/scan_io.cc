@@ -227,7 +227,7 @@ bool ScanIO::supports(IODataType type)
 
 time_t ScanIO::lastModified(const char* dir_path, const char* identifier)
 {
-  const char* suffixes[2] = { this->data_suffix, NULL };
+  const char* suffixes[2] = { this->dataSuffix(), NULL };
   return lastModifiedHelper(dir_path, identifier, suffixes, dataPrefix());
 }
 
