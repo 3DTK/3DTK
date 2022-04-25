@@ -18,8 +18,21 @@
 #include <pcl_conversions/pcl_conversions.h>
 #include <pcl/PCLPointCloud2.h>
 
+#include <sys/types.h>
+#include <sys/stat.h>
+
+// checks if the given path exists
+int existsDir(const char* path)
+{
+    struct stat info;
+    if (stat( path, &info ) != 0) return 0;
+    else if ( info.st_mode & S_IFDIR ) return 1;
+    else return 0;
+}
+
 using namespace std;
 namespace po = boost::program_options;
+
 
 const char* PATH; // Current directory
 const int POSE_WINDOW_SIZE = 1; // Size of pose sliding window average
@@ -354,6 +367,11 @@ int main(int argc, char **argv)
         outdir, lidar_topic, pose_topic, lookup_tf, lidar_frame, source_frame, pose_type);
 
     PATH = outdir.c_str();
+    if ( !existsDir( PATH ) )
+    {
+      boost::filesystem::create_directory( PATH );
+      std::cout << "Creating \"" << PATH << "\"." << std::endl;
+    } else std::cout << PATH << " exists allready." << std::endl;
 
     seq = 0;
 
