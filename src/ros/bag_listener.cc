@@ -36,6 +36,21 @@ namespace po = boost::program_options;
 
 const char* PATH; // Current directory
 const int POSE_WINDOW_SIZE = 1; // Size of pose sliding window average
+
+// Stuff related to "Write Pointcloud only when system is not moving"-mode.
+bool WRITE_ON_REST;
+pcl::PCLPointCloud2 pcl_tmp;
+pcl::PCLPointCloud2 pcl_export;
+double _x, _y, _z, _rW, _rX, _rY, _rZ; // current pose
+double x_, y_, z_, rW_, rX_, rY_, rZ_; // previous pose
+int not_changed = 0;
+bool append_mode = true;
+// If in the last N_PAST_POSES ...
+#define N_PAST_POSES 100
+// ... the difference is always smaller than EPS_POSE_DIFF ...
+#define EPS_POSE_DIFF 0.001
+// ... a scan should be exported to PATH.
+
 std::vector<geometry_msgs::PoseStamped> current_poses;
 
 uint seq;
@@ -51,7 +66,8 @@ int parse_options (int argc, char** argv,
   bool& lookup_tf,
   string& lidar_frame,
   string& source_frame,
-  int& pose_type
+  int& pose_type,
+  bool& on_rest
 )
 {
   po::options_description generic("Generic options");
@@ -75,7 +91,8 @@ int parse_options (int argc, char** argv,
     ("lidar_frame,l", po::value<string>(&lidar_frame)->default_value("/lidar_frame"),
      "Provide the name of frame that the LiDAR data uses.")
     ("pose_frame,p", po::value<string>(&source_frame)->default_value("/map"),
-     "Provide the name of frame that the pose data uses. Usually called \"/map\".");
+     "Provide the name of frame that the pose data uses. Usually called \"/map\".")
+    ("write_on_rest,r", po::bool_switch(&on_rest)->default_value(false));
   hidden.add_options()
     ("output-dir", po::value<string>(&outdir), "output-dir");
   // All options together
@@ -188,21 +205,144 @@ static inline void Matrix4ToEuler(const double *alignxf,
 
 void slidingWindow(geometry_msgs::PoseStamped& pose)
 {
-// If we have reached the current window size we remove the first
-  // element and pushback the new element
-  if(current_poses.size() == POSE_WINDOW_SIZE)
+  if (!WRITE_ON_REST)
   {
-    current_poses.erase(current_poses.begin());
-    current_poses.push_back(pose);
-  }
-  // Otherwise we simply pushback
-  else
-  {
-    current_poses.push_back(pose);
-  }
+    // If we have reached the current window size we remove the first
+    // element and pushback the new element
+    if(current_poses.size() == POSE_WINDOW_SIZE)
+    {
+      current_poses.erase(current_poses.begin());
+      current_poses.push_back(pose);
+    }
+    // Otherwise we simply pushback
+    else
+    {
+      current_poses.push_back(pose);
+    }
 
-  // Vector should be window size or less
-  assert(current_poses.size() <= POSE_WINDOW_SIZE);
+    // Vector should be window size or less
+    assert(current_poses.size() <= POSE_WINDOW_SIZE);
+  }
+  else // Write only on rest mode. 
+  {
+    // Get current pose
+    _x = pose.pose.position.x;
+    _y = pose.pose.position.y;
+    _z = pose.pose.position.z;
+    _rW = pose.pose.orientation.w;
+    _rX = pose.pose.orientation.x;
+    _rY = pose.pose.orientation.y;
+    _rZ = pose.pose.orientation.z;
+
+      // Check difference to last pose
+    if ( 
+      fabs(_x - x_) < EPS_POSE_DIFF &&
+      fabs(_y - y_) < EPS_POSE_DIFF &&
+      fabs(_z - z_) < EPS_POSE_DIFF &&
+      fabs(_rW - rW_) < EPS_POSE_DIFF &&
+      fabs(_rX - rX_) < EPS_POSE_DIFF &&
+      fabs(_rY - rY_) < EPS_POSE_DIFF &&
+      fabs(_rZ - rZ_) < EPS_POSE_DIFF
+    ) { 
+      append_mode = true;
+      not_changed++;
+      //ROS_INFO("Not changed!");
+    } else {
+      ROS_INFO("The robot moves to fast.");
+      not_changed = 0;
+      append_mode = false;
+    }
+
+    // If change is very small for N past poses, export Scan
+    if (not_changed >= N_PAST_POSES) 
+    {
+      ROS_INFO("The robot has been very still. Exporting now.");
+      not_changed = 0;
+      
+      // Transform PCL2 into appropriate, readable format.
+      // PCL2 has data field, PCL has points[x, y, z] fields.
+      pcl::PointCloud<pcl::PointXYZI>::Ptr temp_cloud( new pcl::PointCloud<pcl::PointXYZI> );
+      pcl::fromPCLPointCloud2( pcl_export, *temp_cloud);
+      // Reset exported point cloud
+      pcl_export = pcl_tmp;
+
+      // Opening 3d file to write into
+      std::ofstream file_3d;
+      char* file_name = new char[50]();
+      std::sprintf(file_name, "%sscan%03d.3d", PATH, seq);
+      file_3d.open(file_name);
+
+      // Writing the lidar data to the text file
+      // This is a left handed coordinate system and we convert the values to cm
+      for (int i = 0; i < temp_cloud->points.size(); ++i)
+      {
+          pcl::PointXYZI p = temp_cloud->points[i];
+          
+          // Convert to left handed
+          file_3d <<  100.0 * p.y << " "
+                  << -100.0 * p.z << " "
+                  <<  100.0 * p.x << " "
+                  << temp_cloud->points[i].intensity << std::endl;
+
+          // file_3d << -100.0 * p.y << " "
+          //         <<  100.0 * p.z << " "
+          //         <<  100.0 * p.x << " "
+          //         << temp_cloud->points[i].intensity << std::endl;
+      }
+      file_3d.close();
+
+      // Opening the pose file to write into
+      std::ofstream file_pose;
+      std::sprintf(file_name, "%sscan%03d.pose", PATH, seq);
+
+      // Getting the current pose as homgeneous transformation (4x4)
+      tf::Quaternion q(_rW, _rX, _rY, _rZ); 
+      q = q * transform_lidar2pose.getRotation();
+      tf::Matrix3x3 m(q);
+
+      const double in_matrix[16] ={m[0][0],m[0][1],m[0][2], _x + transform_lidar2pose.getOrigin().getX(),
+                                   m[1][0],m[1][1],m[1][2], _y + transform_lidar2pose.getOrigin().getY(),
+                                   m[2][0],m[2][1],m[2][2], _z + transform_lidar2pose.getOrigin().getZ(),
+                                  0      ,0      ,0      , 1};
+
+      // Converting to left handed matrix
+      double out_matrix[16], rPos[3], rPosTheta[16];
+      to3DTKMat(in_matrix, out_matrix, 1);
+      Matrix4ToEuler(out_matrix, rPosTheta, rPos);
+
+      // Extracting Position and Orientaion
+      double x = 100.0 * rPos[0];
+      double y = 100.0 * rPos[1];
+      double z = 100.0 * rPos[2];
+      double roll  = 1.0 * rPosTheta[0];
+      double pitch = 1.0 * rPosTheta[1];
+      double yaw   = 1.0 * rPosTheta[2];
+
+      // Writing to the pose file
+      // This is also a left hand coordinate system
+      // - Thumb (x) to the right
+      // - Pointy Finger (y) to  the top
+      // - Middle Finger (z) into the room
+      file_pose.open(file_name);
+      file_pose << x << " " << y << " " << z << " " <<
+                  roll * (180.0/M_PI) << " " <<
+                  pitch * (180.0/M_PI) << " " <<
+                  yaw * (180.0/M_PI) << " " << std::endl;
+      file_pose.close();
+
+      seq++;
+      delete file_name;
+    }
+   
+    // Save current pose for last pose in next iteration
+    x_ = _x;
+    y_ = _y;
+    z_ = _z;
+    rW_ = _rW;
+    rX_ = _rX;
+    rY_ = _rY;
+    rZ_ = _rZ;
+  }
 }
 
 void poseMsgCallback(const geometry_msgs::PoseStamped::ConstPtr& msg)
@@ -258,6 +398,8 @@ geometry_msgs::PoseStamped compute_pose_avg(void)
 
 void lidarMsgCallback(const sensor_msgs::PointCloud2::ConstPtr& msg)
 {
+  if (!WRITE_ON_REST)
+  {
     // First Callback
     if (!firstLidarCallback) {
       std::string info_string = std::string("Writing files to ")
@@ -345,6 +487,16 @@ void lidarMsgCallback(const sensor_msgs::PointCloud2::ConstPtr& msg)
 
     seq++;
     delete file_name;
+  }
+  else // "Write only on rest" mode. 
+  {
+    pcl_conversions::toPCL( *msg, pcl_tmp );
+    if (append_mode) {
+      pcl_export += pcl_tmp;
+    } else {
+      pcl_export = pcl_tmp;
+    }
+  }
 }
 
 int main(int argc, char **argv)
@@ -362,10 +514,13 @@ int main(int argc, char **argv)
     string lidar_frame;
     string source_frame;
     int pose_type;
+    bool wor; // write on rest
 
     parse_options(argc, argv,
-        outdir, lidar_topic, pose_topic, lookup_tf, lidar_frame, source_frame, pose_type);
+        outdir, lidar_topic, pose_topic, lookup_tf, 
+        lidar_frame, source_frame, pose_type, wor);
 
+    // Put options globally
     PATH = outdir.c_str();
     if ( !existsDir( PATH ) )
     {
@@ -373,6 +528,8 @@ int main(int argc, char **argv)
       std::cout << "Creating \"" << PATH << "\"." << std::endl;
     } else std::cout << PATH << " exists allready." << std::endl;
 
+    WRITE_ON_REST = wor;
+    if (WRITE_ON_REST) ROS_INFO("We write on rest only.");
     seq = 0;
 
     ros::init(argc, argv, "file_writer");
