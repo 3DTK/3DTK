@@ -51,6 +51,8 @@ bool append_mode = true;
 #define EPS_POSE_DIFF 0.001
 // ... a scan should be exported to PATH.
 
+#define PATH_CHAR_LEN 5000
+
 std::vector<geometry_msgs::PoseStamped> current_poses;
 
 uint seq;
@@ -268,7 +270,7 @@ void slidingWindow(geometry_msgs::PoseStamped& pose)
 
       // Opening 3d file to write into
       std::ofstream file_3d;
-      char* file_name = new char[5000]();
+      char* file_name = new char[PATH_CHAR_LEN]();
       std::sprintf(file_name, "%sscan%03d.3d", PATH, seq);
       file_3d.open(file_name);
 
@@ -416,7 +418,7 @@ void lidarMsgCallback(const sensor_msgs::PointCloud2::ConstPtr& msg)
 
     // Opening 3d file to write into
     std::ofstream file_3d;
-    char* file_name = new char[50]();
+    char* file_name = new char[PATH_CHAR_LEN]();
     std::sprintf(file_name, "%sscan%03d.3d", PATH, seq);
     ROS_INFO("Writing %s ...", file_name);
     file_3d.open(file_name);
