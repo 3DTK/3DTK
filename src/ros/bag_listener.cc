@@ -268,7 +268,7 @@ void slidingWindow(geometry_msgs::PoseStamped& pose)
 
       // Opening 3d file to write into
       std::ofstream file_3d;
-      char* file_name = new char[50]();
+      char* file_name = new char[5000]();
       std::sprintf(file_name, "%sscan%03d.3d", PATH, seq);
       file_3d.open(file_name);
 
