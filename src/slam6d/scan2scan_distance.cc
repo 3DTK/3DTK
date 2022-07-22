@@ -129,7 +129,7 @@ int main(int argc, char* argv[])
   std::string customFilter;
   bool customFilterActive = false;
 
-  PairingMode pairing_mode;
+  PairingMode pairing_mode = CLOSEST_POINT;
 
   parseArgs(argc, argv, dir, start, end, type, max_dist, outdir, customFilter, pairing_mode);
 
