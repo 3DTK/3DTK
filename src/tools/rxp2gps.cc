@@ -4,9 +4,6 @@
 #include <boost/program_options.hpp>
 #include <Eigen/Eigen>
 
-#define private public
-#define protected public
-
 #include "riegl/scanlib.hpp"
 
 using namespace std;
