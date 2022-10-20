@@ -1658,7 +1658,8 @@ void selectPoints(int x, int y) {
 
 
 void moveCamera(double x, double y, double z,
-                double rotx, double roty, double rotz) {
+                double rotx, double roty, double rotz,
+                bool withspnav) {
   interruptDrawing();
   double mat[9];
 
@@ -1681,25 +1682,63 @@ void moveCamera(double x, double y, double z,
 
   double transX, transY, transZ;
   transX = transY = transZ = 0.0;
-
-  mouseRotX += rotx;
-  mouseRotY -= roty;
-  mouseRotZ -= rotz;
-
-  if (mouseRotX < -90) mouseRotX=-90;
-  else if (mouseRotX > 90) mouseRotX=90;
-  if (mouseRotY > 360) mouseRotY-=360;
-  else if (mouseRotY < 0) mouseRotY+=360;
-  if (mouseRotZ > 360) mouseRotZ-=360;
-  else if (mouseRotZ < 0) mouseRotZ+=360;
-
   transX += x * mat[0] + y * mat[3] + z * mat[6];
   transY += x * mat[1] + y * mat[4] + z * mat[7];
   transZ += x * mat[2] + y * mat[5] + z * mat[8];
 
-  X += transX;
-  Y += transY;
-  Z += transZ;
+  // With 3Dconnexion spacemouse:
+  if (withspnav) {
+    double trans[3] = {transX, transY, transZ};
+
+    const double trans_cur[3] = { X,  Y,  Z};
+    const double rot_cur[3]   = {xr, yr, zr};
+    double T_cur[16];
+    EulerToMatrix4(trans_cur, rot_cur, T_cur);
+
+    double rxr, ryr, rzr;
+    rxr =  M_PI * rotx / 180.0;
+    ryr = -M_PI * roty / 180.0;
+    rzr = -M_PI * rotz / 180.0;
+    const double rot[3] = {rxr, ryr, rzr};
+    double T[16];
+    EulerToMatrix4(trans, rot, T);
+
+    double T_new[16];
+    MMult(T, T_cur, T_new);
+
+    double newMouseRot[3];
+    Matrix4ToEuler(T_new, newMouseRot);
+
+    X += transX;
+    Y += transY;
+    Z += transZ;
+
+    mouseRotX = deg(newMouseRot[0]);
+    mouseRotY = deg(newMouseRot[1]);
+    mouseRotZ = deg(newMouseRot[2]);
+
+    if (mouseRotX < -180) mouseRotX+=360;
+    else if (mouseRotX > 180) mouseRotX-=360;
+
+  // The original 3dtk
+  } else {
+    mouseRotX += rotx;
+    mouseRotY -= roty;
+    mouseRotZ -= rotz;
+
+    X += transX;
+    Y += transY;
+    Z += transZ;
+
+    if (mouseRotX < -90) mouseRotX=-90;
+    else if (mouseRotX > 90) mouseRotX=90;
+  }
+
+  // Rotation Constraints
+  if (mouseRotY > 360) mouseRotY-=360;
+  else if (mouseRotY < 0) mouseRotY+=360;
+  if (mouseRotZ > 360) mouseRotZ-=360;
+  else if (mouseRotZ < 0) mouseRotZ+=360;
   haveToUpdate = 1;
 
 }

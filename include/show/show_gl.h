@@ -161,7 +161,8 @@ void selectPoints(int x, int y);
 
 
 void moveCamera(double x, double y, double z,
-                double rotx, double roty, double rotz);
+                double rotx, double roty, double rotz,
+                bool withspnav = false);
 
 void initScreenWindow();
 

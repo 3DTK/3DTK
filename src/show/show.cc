@@ -40,26 +40,29 @@
 int spacenavHandler(){
     int fixRoation = 0;
     int fixTranslation = 0;
-    float translationMultiplier = 1;
-    float rotationMultipler = 0.5;
+    float translationMultiplier = 0.05; // adjust to your liking
+    float rotationMultipler = 0.005;
 #ifdef SPACEMOUSE
     spnav_event sev;
     if(spnav_open()==-1) {
         fprintf(stderr, "failed to connect to the space navigator daemon\n");
         return 1;
     }
-    spnav_sensitivity(0.03);
+    //spnav_sensitivity(0.03); // Saturates any input on my spacemouse... use multipliers above instead - Fabi
     while(true){
-        int event = spnav_poll_event(&sev);
+        //int event = spnav_poll_event(&sev);
+        int event = spnav_wait_event(&sev); // Copied that from libspnav examples, they use wait instead of poll
         if(event != 0){
+          // printf("got motion event: t(%d, %d, %d) ", sev.motion.x, sev.motion.y, sev.motion.z);
+          // printf("r(%d, %d, %d)\n", sev.motion.rx, sev.motion.ry, sev.motion.rz);
             if(sev.type == SPNAV_EVENT_MOTION) {
                 if(fixRoation){
-                    moveCamera(-sev.motion.x*translationMultiplier, -sev.motion.y*translationMultiplier, sev.motion.z*translationMultiplier, 0, 0, 0);
+                    moveCamera(-sev.motion.x*translationMultiplier, -sev.motion.y*translationMultiplier, sev.motion.z*translationMultiplier, 0, 0, 0, true);
                 }
                 else if(fixTranslation){
-                    moveCamera(0, 0, 0, -0.5*sev.motion.rx*rotationMultipler, 0.5*sev.motion.ry*rotationMultipler, -0.5*sev.motion.rz*rotationMultipler);
+                    moveCamera(0, 0, 0, -0.5*sev.motion.rx*rotationMultipler, 0.5*sev.motion.ry*rotationMultipler, -0.5*sev.motion.rz*rotationMultipler, true);
                 }else
-                    moveCamera(-sev.motion.x*translationMultiplier, -sev.motion.y*translationMultiplier, sev.motion.z*translationMultiplier, -rotationMultipler*sev.motion.rx, rotationMultipler*sev.motion.ry, -rotationMultipler*sev.motion.rz);
+                    moveCamera(-sev.motion.x*translationMultiplier, -sev.motion.y*translationMultiplier, sev.motion.z*translationMultiplier, -rotationMultipler*sev.motion.rx, rotationMultipler*sev.motion.ry, -rotationMultipler*sev.motion.rz, true);
             } else {	/* SPNAV_EVENT_BUTTON */
                 if(sev.button.press && sev.button.bnum == 0){
                     fixRoation = !fixRoation;

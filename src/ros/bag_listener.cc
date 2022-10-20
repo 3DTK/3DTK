@@ -51,7 +51,7 @@ bool append_mode = true;
 #define EPS_POSE_DIFF 0.001
 // ... a scan should be exported to PATH.
 
-#define PATH_CHAR_LEN 5000
+#define PATH_CHAR_LEN 5000 // what a shit define... maximum buffer size for output path
 
 std::vector<geometry_msgs::PoseStamped> current_poses;
 
@@ -225,7 +225,7 @@ void slidingWindow(geometry_msgs::PoseStamped& pose)
     // Vector should be window size or less
     assert(current_poses.size() <= POSE_WINDOW_SIZE);
   }
-  else // Write only on rest mode. 
+  else // Write only on rest mode.
   {
     // Get current pose
     _x = pose.pose.position.x;
@@ -237,7 +237,7 @@ void slidingWindow(geometry_msgs::PoseStamped& pose)
     _rZ = pose.pose.orientation.z;
 
       // Check difference to last pose
-    if ( 
+    if (
       fabs(_x - x_) < EPS_POSE_DIFF &&
       fabs(_y - y_) < EPS_POSE_DIFF &&
       fabs(_z - z_) < EPS_POSE_DIFF &&
@@ -245,7 +245,7 @@ void slidingWindow(geometry_msgs::PoseStamped& pose)
       fabs(_rX - rX_) < EPS_POSE_DIFF &&
       fabs(_rY - rY_) < EPS_POSE_DIFF &&
       fabs(_rZ - rZ_) < EPS_POSE_DIFF
-    ) { 
+    ) {
       append_mode = true;
       not_changed++;
       //ROS_INFO("Not changed!");
@@ -256,11 +256,11 @@ void slidingWindow(geometry_msgs::PoseStamped& pose)
     }
 
     // If change is very small for N past poses, export Scan
-    if (not_changed >= N_PAST_POSES) 
+    if (not_changed >= N_PAST_POSES)
     {
       ROS_INFO("The robot has been very still. Exporting now.");
       not_changed = 0;
-      
+
       // Transform PCL2 into appropriate, readable format.
       // PCL2 has data field, PCL has points[x, y, z] fields.
       pcl::PointCloud<pcl::PointXYZI>::Ptr temp_cloud( new pcl::PointCloud<pcl::PointXYZI> );
@@ -279,7 +279,7 @@ void slidingWindow(geometry_msgs::PoseStamped& pose)
       for (int i = 0; i < temp_cloud->points.size(); ++i)
       {
           pcl::PointXYZI p = temp_cloud->points[i];
-          
+
           // Convert to left handed
           file_3d <<  100.0 * p.y << " "
                   << -100.0 * p.z << " "
@@ -298,7 +298,7 @@ void slidingWindow(geometry_msgs::PoseStamped& pose)
       std::sprintf(file_name, "%sscan%03d.pose", PATH, seq);
 
       // Getting the current pose as homgeneous transformation (4x4)
-      tf::Quaternion q(_rW, _rX, _rY, _rZ); 
+      tf::Quaternion q(_rW, _rX, _rY, _rZ);
       q = q * transform_lidar2pose.getRotation();
       tf::Matrix3x3 m(q);
 
@@ -335,7 +335,7 @@ void slidingWindow(geometry_msgs::PoseStamped& pose)
       seq++;
       delete file_name;
     }
-   
+
     // Save current pose for last pose in next iteration
     x_ = _x;
     y_ = _y;
@@ -490,7 +490,7 @@ void lidarMsgCallback(const sensor_msgs::PointCloud2::ConstPtr& msg)
     seq++;
     delete file_name;
   }
-  else // "Write only on rest" mode. 
+  else // "Write only on rest" mode.
   {
     pcl_conversions::toPCL( *msg, pcl_tmp );
     if (append_mode) {
@@ -519,7 +519,7 @@ int main(int argc, char **argv)
     bool wor; // write on rest
 
     parse_options(argc, argv,
-        outdir, lidar_topic, pose_topic, lookup_tf, 
+        outdir, lidar_topic, pose_topic, lookup_tf,
         lidar_frame, source_frame, pose_type, wor);
 
     // Put options globally
