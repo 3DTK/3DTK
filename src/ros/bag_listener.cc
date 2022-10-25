@@ -36,6 +36,7 @@ namespace po = boost::program_options;
 
 const char* PATH; // Current directory
 const int POSE_WINDOW_SIZE = 1; // Size of pose sliding window average
+bool have_pose_topic = true;
 
 // Stuff related to "Write Pointcloud only when system is not moving"-mode.
 bool WRITE_ON_REST;
@@ -326,6 +327,14 @@ void slidingWindow(geometry_msgs::PoseStamped& pose)
       // - Pointy Finger (y) to  the top
       // - Middle Finger (z) into the room
       file_pose.open(file_name);
+      if (!have_pose_topic) {
+        x = 0;
+        y = 0;
+        z = 0;
+        roll = 0;
+        pitch = 0;
+        yaw = 0;
+      }
       file_pose << x << " " << y << " " << z << " " <<
                   roll * (180.0/M_PI) << " " <<
                   pitch * (180.0/M_PI) << " " <<
@@ -533,6 +542,8 @@ int main(int argc, char **argv)
     WRITE_ON_REST = wor;
     if (WRITE_ON_REST) ROS_INFO("We write on rest only.");
     seq = 0;
+
+    if (pose_topic.compare("")) have_pose_topic = false;
 
     ros::init(argc, argv, "file_writer");
     ros::NodeHandle n;
