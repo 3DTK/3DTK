@@ -82,7 +82,7 @@ int parse_options (int argc, char** argv,
     ("lidar_topic,L", po::value<string>(&lidar_topic)->default_value("/lidar"),
      "Provide the name of the topic where LiDAR data gets published.\n"
      "Currently, only sensor_msgs::PointCloud2 format is supported.")
-    ("pose_topic,P", po::value<string>(&pose_topic)->default_value("/pose"),
+    ("pose_topic,P", po::value<string>(&pose_topic)->default_value(""),
      "Provide the name of the topic where pose data gets published.")
     ("pose_type", po::value<int>(&pose_type)->default_value(1),
      "Chose the ROS data type of pose input:\n"
@@ -490,6 +490,14 @@ void lidarMsgCallback(const sensor_msgs::PointCloud2::ConstPtr& msg)
     // - Pointy Finger (y) to  the top
     // - Middle Finger (z) into the room
     file_pose.open(file_name);
+    if (!have_pose_topic) {
+        x = 0;
+        y = 0;
+        z = 0;
+        roll = 0;
+        pitch = 0;
+        yaw = 0;
+    }
     file_pose << x << " " << y << " " << z << " " <<
                  roll * (180.0/M_PI) << " " <<
                  pitch * (180.0/M_PI) << " " <<
@@ -543,8 +551,10 @@ int main(int argc, char **argv)
     if (WRITE_ON_REST) ROS_INFO("We write on rest only.");
     seq = 0;
 
-    if (pose_topic.compare("")) have_pose_topic = false;
-
+    if (pose_topic.compare("") == 0) {
+      have_pose_topic = false;
+    }
+    
     ros::init(argc, argv, "file_writer");
     ros::NodeHandle n;
     if (lookup_tf)
