@@ -35,6 +35,9 @@
     #include <thread>
     #include <linux/input.h>
     #include <spnav.h>
+
+    #define SPNAV_DEAD_THRESH_R 50 // Adjust to your liking
+    #define SPNAV_DEAD_THRESH_T 30 // Adjust to your liking
 #endif
 
 int spacenavHandler(){
@@ -50,12 +53,28 @@ int spacenavHandler(){
     }
     //spnav_sensitivity(0.03); // Saturates any input on my spacemouse... use multipliers above instead - Fabi
     while(true){
-        //int event = spnav_poll_event(&sev);
-        int event = spnav_wait_event(&sev); // Copied that from libspnav examples, they use wait instead of poll
+        int event = spnav_poll_event(&sev);
         if(event != 0){
+          // Use for Debug:
           // printf("got motion event: t(%d, %d, %d) ", sev.motion.x, sev.motion.y, sev.motion.z);
           // printf("r(%d, %d, %d)\n", sev.motion.rx, sev.motion.ry, sev.motion.rz);
             if(sev.type == SPNAV_EVENT_MOTION) {
+
+                // Set rotation deadzone
+                if (fabs(sev.motion.rx) < SPNAV_DEAD_THRESH_R)
+                  sev.motion.rx = 0;
+                if (fabs(sev.motion.ry) < SPNAV_DEAD_THRESH_R)
+                  sev.motion.ry = 0;
+                if (fabs(sev.motion.rz) < SPNAV_DEAD_THRESH_R)
+                  sev.motion.rz = 0;
+                if (fabs(sev.motion.x) < SPNAV_DEAD_THRESH_T)
+                  sev.motion.x = 0;
+                if (fabs(sev.motion.y) < SPNAV_DEAD_THRESH_T)
+                  sev.motion.y = 0;
+                if (fabs(sev.motion.z) < SPNAV_DEAD_THRESH_T)
+                  sev.motion.z = 0;
+
+                // Handle the event
                 if(fixRoation){
                     moveCamera(-sev.motion.x*translationMultiplier, -sev.motion.y*translationMultiplier, sev.motion.z*translationMultiplier, 0, 0, 0, true);
                 }

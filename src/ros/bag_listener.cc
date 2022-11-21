@@ -554,7 +554,7 @@ int main(int argc, char **argv)
     if (pose_topic.compare("") == 0) {
       have_pose_topic = false;
     }
-    
+
     ros::init(argc, argv, "file_writer");
     ros::NodeHandle n;
     if (lookup_tf)
