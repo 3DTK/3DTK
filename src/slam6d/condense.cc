@@ -1,6 +1,7 @@
 /**
  * @file
  * @author Fabian Arzberger, JMU, Germany.
+ * @author Jochen Sprickerhof, JMU, Germany.
  *
  * condense implementation
  *
@@ -8,10 +9,12 @@
  * This programm is a modified version of exportPoints.
  * The mod supports splitting an archive into multiple scan files, instead of just exporting everything into one file.
  * Use param -S for that. If that param is not used, the behavior will mimic the one of exportPoints.
+ * If the param is used, put S scans together, thus creating metascans of size S.
+ * Use the atomize (atomize.cc) program to re-apply any optimizations back onto the indivudial frames.
  * Further, the program will not export "points.txt, poses.txt, and positions.txt",
  * but export directly into scanXXX.3d and scanXXX.pose files.
  *
- * Copyright (C) Jochen Sprickerhof
+ * Copyright (C) Fabian Arzberger, Jochen Sprickerhof
  * Modifications made by Fabian Arzberger, JMU
  * Released under the GPL version 3.
  *

@@ -1,3 +1,10 @@
+/**
+ * THIS PROGRAM IS DEPRECATED.
+ * USE ros_listener.cc INSTEAD.
+ * IT WORKS THE SAME BUT HAS TIMESTAMP SUPPORT.
+ * @author Fabian Arzberger, fabian.arzberger@uni-wuerzburg.de
+*/
+
 #include <iostream>
 #include <fstream>
 #include <cassert>

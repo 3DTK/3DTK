@@ -61,9 +61,9 @@ if(WITH_ROS)
   set_property(TARGET tdtkroswrapper PROPERTY CXX_STANDARD 17)
   target_link_libraries(tdtkroswrapper scan ${catkin_LIBRARIES} ${PCL_LIBRARIES} ${Boost_LIBRARIES})
 
-  add_executable(bag_listener bag_listener.cc)
-  set_property(TARGET bag_listener PROPERTY CXX_STANDARD 17)
-  target_link_libraries(bag_listener ${catkin_LIBRARIES} ${PCL_LIBRARIES} ${Boost_LIBRARIES})
+  add_executable(ros_listener ros_listener.cc)
+  set_property(TARGET ros_listener PROPERTY CXX_STANDARD 17)
+  target_link_libraries(ros_listener ${catkin_LIBRARIES} ${PCL_LIBRARIES} ${Boost_LIBRARIES})
 
   add_executable(scan2bag scan2bag.cc)
   set_property(TARGET scan2bag PROPERTY CXX_STANDARD 17)

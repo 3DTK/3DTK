@@ -1086,7 +1086,7 @@ void DisplayItFunc(GLenum mode, bool interruptable)
           pose = MetaMatrix[i][current_frame];
       }
       if(showViewMode == 1) {
-        glVertex3f(pose[12], 50, pose[14]);
+        glVertex3f(pose[12], pose[13], pose[14]);
       } else {
         glVertex3f(pose[12], pose[13], pose[14]);
       }
