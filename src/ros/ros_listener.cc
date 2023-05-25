@@ -42,8 +42,7 @@ bool have_pose_topic = true;
 
 #define PATH_CHAR_LEN 5000 // what a shit define... maximum buffer size for output path
 
-// Pose stream is usually very fast wrt. LiDAR, so we assign an individual async spinner with its own callback queue
-// boost::shared_ptr<ros::AsyncSpinner> async_spinner;
+// Pose stream is usually very fast wrt. LiDAR, so we assign an individual callback queue
 ros::CallbackQueue callbacks_poses;
 std::queue<geometry_msgs::PoseStamped> current_poses;
 bool ignore_stamps = false;
@@ -212,15 +211,14 @@ inline void waitForSlidingWindow(double t)
   while(current_poses.size() < 1 && ros::ok()) callbacks_poses.callOne( ros::WallDuration() );
 
   // If timestamps are not used, we can return at this point.
-  if (ignore_stamps) return;
+  if (ignore_stamps) callbacks_poses.callAvailable( ros::WallDuration() );
 
   // If timestamps are used, wait for the LiDAR timestamp to be between the pose timestamps.
   else while( !(current_poses.front().header.stamp.toSec() < t
       && t < current_poses.back().header.stamp.toSec())
       && ros::ok() ) {
         if (verbose) ROS_INFO("Cycling...");
-        callbacks_poses.callOne( ros::WallDuration() );
-        //ros::Rate(100).sleep();
+        callbacks_poses.callOne( ros::WallDuration() ); // next pose Callback
         if (verbose && current_poses.size() > 0) ROS_INFO("%f < %f < %f", current_poses.front().header.stamp.toSec(), t, current_poses.back().header.stamp.toSec());
       }
   return;
@@ -451,7 +449,6 @@ int main(int argc, char **argv)
     // Setting up the pose stream node handle.
     // NOTE: This node handle gets its own callback queue, such that the poses
     // are always up to date and we dont interfere with the lidar thread.
-    //ros::CallbackQueue callbacks_poses;
     ros::NodeHandle nh_lidar;
     ros::NodeHandle nh_pose;
     nh_pose.setCallbackQueue(&callbacks_poses);
@@ -465,8 +462,6 @@ int main(int argc, char **argv)
           pose_sub = nh_pose.subscribe(pose_topic, 100000, imuMsgCallback);
           break;
       }
-      //async_spinner.reset(new ros::AsyncSpinner(0, &callbacks_poses));
-      ROS_INFO("Async pose subscriber thread started.");
     }
 
     // Lidar Node Handle, this one uses the default callback queue
@@ -489,13 +484,9 @@ int main(int argc, char **argv)
     }
 
     // Do the ROS spinning loop manually (we have two callback queues)
-    //async_spinner->start(); // spin callback queue of pose stream asynchronisly to the LiDAR stream
     while ( ros::ok() ) {
       ros::spinOnce(); // standard callback queue for LiDAR data
     }
 
-    // Dont forget resetting the async_spinner
-    //async_spinner->stop();
-    //async_spinner.reset();
     return 0; // normal program end
 }
