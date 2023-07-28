@@ -108,7 +108,7 @@ ENDIF(APPLE)
 endif()
 
 # Compile AprilTags library if required
-set(APRILTAG_DIR ${PROJECT_SOURCE_DIR}/3rdparty/apriltag-3.1.2/)
+set(APRILTAG_DIR ${PROJECT_SOURCE_DIR}/3rdparty/apriltag-3.3.0/)
 file(GLOB TAG_FILES ${APRILTAG_DIR}/tag*.c)
 if (${CMAKE_CXX_COMPILER_ID} STREQUAL Clang)
     # otherwise clang takes about an hour to compile
