@@ -43,6 +43,13 @@ if (WITH_OPENGL)
     message(STATUS "Not using compact octreees: Warning uses more memory")
   endif()
 
+  if(WITH_IMGUI)
+    include_directories(${IMGUI_INCLUDE_DIRS})
+    add_executable(imshowbin imshow.cc $<TARGET_OBJECTS:show_objects> ${IMGUI_SRCS})
+    set_target_properties(imshowbin PROPERTIES OUTPUT_NAME "imshow")
+    target_link_libraries(imshowbin ${SHOW_LIBS})
+  endif()
+
   add_executable(showbin show.cc $<TARGET_OBJECTS:show_objects>)
   set_target_properties(showbin PROPERTIES OUTPUT_NAME "show")
   target_link_libraries(showbin ${SHOW_LIBS})
