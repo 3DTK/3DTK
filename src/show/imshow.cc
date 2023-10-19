@@ -260,16 +260,19 @@ void displayIm() {
   // TODO: Replace with a functioning Controlls panel.
   // 1. Show a simple window that we create ourselves. We use a Begin/End pair to create a named window.
   {
-    static float f = 0.0f;
-    static int counter = 0;
-    ImGui::Begin("Hello, world!");
+    ImGui::Begin("3D Viewer - Selection");
     ImGui::SetNextWindowPos(ImVec2(START_WIDTH * 0.10, START_HEIGHT * 0.30), ImGuiCond_FirstUseEver);
-                        // Create a window called "Hello, world!" and append into it.
-    ImGui::Text("This is some useful text.");               // Display some text (you can use a format strings too)
-    ImGui::SliderFloat("float", &f, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
-    if (ImGui::Button("Button"))                            // Buttons return true when clicked (most widgets return true when edited/activated)
-        counter++;
-    ImGui::SameLine();
+
+    // Checkboxes
+    static bool show_points_bool = true, show_objects_bool = true, show_cameras_bool = true, show_path_bool = true, show_poses_bool = true;
+    ImGui::Checkbox("Draw Points", &show_points_bool); show_points = show_points_bool;
+    ImGui::Checkbox("Draw Objects", &show_objects_bool); show_objects = show_objects_bool;
+    ImGui::Checkbox("Draw Camera", &show_cameras_bool); show_cameras = show_cameras_bool;
+    ImGui::Checkbox("Draw Path", &show_path_bool); show_path = show_path_bool;
+    ImGui::Checkbox("Draw Poses", &show_poses_bool); show_poses = show_poses_bool;
+
+    // Point size
+    ImGui::SliderFloat("Point size", &pointsize, 0.0000001f, 10.0f);            
 
     ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
     ImGui::End();
@@ -279,7 +282,7 @@ void displayIm() {
   // TODO: Replace with a functioning Selections panel.
   // 2. Show another simple window.
   {
-    ImGui::Begin("Another Window");   // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
+    ImGui::Begin("3D Viewer - Controls");   // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
     ImGui::Text("Hello from another window!");
     ImGui::End();
   }
