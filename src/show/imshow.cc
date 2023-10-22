@@ -19,10 +19,12 @@
  * @author Dorit Borrmann. Jacobs University bremen gGmbH, Germany.
  */
 
+#define IMGUI_DEFINE_MATH_OPERATORS
 #include "imgui.h"
 #include "imgui_impl_glut.h"
 #include "imgui_impl_opengl2.h"
 #define GL_SILENCE_DEPRECATION
+#include "imGuIZMOquat.h"
 
 #include "show/show_common.h"
 #include "show/program_options.h"
@@ -50,6 +52,13 @@
     #define SPNAV_DEAD_THRESH_R 50 // Adjust to your liking
     #define SPNAV_DEAD_THRESH_T 30 // Adjust to your liking
 #endif
+
+static int SCREEN_WIDTH;
+static int SCREEN_HEIGHT;
+static int START_WIDTH_IMGUI;
+static int START_HEIGHT_IMGUI;
+static int START_X_IMGUI;
+static int START_Y_IMGUI;
 
 static bool interrupted = false;
 
@@ -255,38 +264,234 @@ void displayIm() {
   ImGui_ImplGLUT_NewFrame();
   ImGui::NewFrame();
   ImGuiIO& io = ImGui::GetIO();
+  io.ConfigWindowsMoveFromTitleBarOnly = true;
+  
+  // 1. Selection Window
+  {
+    ImGui::SetNextWindowPos(ImVec2(START_WIDTH_IMGUI * 0.80, START_HEIGHT_IMGUI * 0.05), ImGuiCond_FirstUseEver);
+    ImGui::SetNextWindowSize(ImVec2(START_WIDTH_IMGUI * 0.15, START_HEIGHT_IMGUI * 0.80), ImGuiCond_FirstUseEver);
+    ImGui::Begin("Selection");
+
+    if (ImGui::TreeNode("Draw")) {
+      // Drawing Controlls
+      static bool show_points_bool = true, show_objects_bool = true, show_cameras_bool = true, show_path_bool = true, show_poses_bool = true;
+      // Checkboxes
+      ImGui::Checkbox("Draw Points", &show_points_bool); show_points = show_points_bool;
+      ImGui::Checkbox("Draw Objects", &show_objects_bool); show_objects = show_objects_bool;
+      ImGui::Checkbox("Draw Camera", &show_cameras_bool); show_cameras = show_cameras_bool;
+      ImGui::Checkbox("Draw Path", &show_path_bool); show_path = show_path_bool;
+      ImGui::Checkbox("Draw Poses", &show_poses_bool); show_poses = show_poses_bool;
+      ImGui::Separator();
+      // Point size
+      ImGui::Text("Point size:");
+      ImGui::SliderFloat("##pixels", &pointsize, 0.1f, 10.0f, "%.1f", ImGuiSliderFlags_Logarithmic);
+      ImGui::Separator();
+
+      //Scan range selection
+      ImGui::Separator();
+      ImGui::Text("Scan range selection:");
+      ImGui::SliderInt("Id0", &startRangeScanIdx, startScanIdx, endRangeScanIdx);
+      ImGui::SliderInt("Idx", &endRangeScanIdx, startRangeScanIdx, endScanIdx);
+      if (ImGui::Button("Step Up")) stepScansUp(0);
+      ImGui::SameLine();
+      if (ImGui::Button("Step Down")) stepScansDown(0);
+      if (ImGui::Button("Reload Frames")) reloadFrames();
+      ImGui::TreePop();
+    }
+    ImGui::Separator();
+
+    // Fog Controlls
+    if (ImGui::TreeNode("Fog")) {
+      ImGui::RadioButton("Disable", &show_fog, 0);
+      ImGui::RadioButton("Exp", &show_fog, 1);
+      ImGui::RadioButton("Exp2", &show_fog, 2);
+      ImGui::RadioButton("Lin", &show_fog, 3);
+      ImGui::RadioButton("Inv Exp", &show_fog, 4);
+      ImGui::RadioButton("Inv Exp2 ", &show_fog, 5);
+      ImGui::RadioButton("Inv Lin", &show_fog, 6);
+      ImGui::Separator();
+      ImGui::TreePop();
+    }
+    ImGui::Separator();
+    ImGui::Text("Fog Density:");
+    ImGui::SliderFloat("##fog", &fogDensity, 0.0f, 1.0f, "%.5f", ImGuiSliderFlags_Logarithmic);
+    ImGui::Separator();
+
+    // Color Controlls
+    if (ImGui::TreeNode("Color")) {
+      ImGui::Checkbox("Invert", &invert);
+
+      // Color Values
+      ImGui::Separator();
+      if (ImGui::TreeNode("Values")) {
+        ImGui::RadioButton("Height", &listboxColorVal, 0);
+        if(!(pointtype.hasReflectance())) ImGui::RadioButton("Reflectance", false);
+        else ImGui::RadioButton("Reflectance", &listboxColorVal, 1);
+        if(!(pointtype.hasTemperature())) ImGui::RadioButton("Temperature", false);
+        else ImGui::RadioButton("Temperature", &listboxColorVal, 2);
+        if(!(pointtype.hasAmplitude())) ImGui::RadioButton("Amplitude", false);
+        else ImGui::RadioButton("Amplitude", &listboxColorVal, 3);
+        if(!(pointtype.hasDeviation())) ImGui::RadioButton("Deviation", false);
+        else ImGui::RadioButton("Deviation", &listboxColorVal, 4);
+        if(!(pointtype.hasType())) ImGui::RadioButton("Type", false);
+        else ImGui::RadioButton("Type", &listboxColorVal, 5);
+        mapColorToValue(0); // 0 is a dummy
+        ImGui::TreePop();
+      }
+      // Color Map
+      ImGui::Separator();
+      if (ImGui::TreeNode("Map")) {
+        ImGui::RadioButton("Solid", &listboxColorMapVal, 0);
+        ImGui::RadioButton("Grey", &listboxColorMapVal, 1);
+        ImGui::RadioButton("HSV", &listboxColorMapVal, 2);
+        ImGui::RadioButton("Jet", &listboxColorMapVal, 3);
+        ImGui::RadioButton("Hot", &listboxColorMapVal, 4);
+        ImGui::RadioButton("Rand", &listboxColorMapVal, 5);
+        ImGui::RadioButton("SHSV", &listboxColorMapVal, 6);
+        ImGui::RadioButton("TEMP", &listboxColorMapVal, 7);
+        changeColorMap(0); // dummy 0
+        ImGui::TreePop();
+      }
+      // Color Type
+      ImGui::Separator();
+      if (ImGui::TreeNode("Type")) {
+        ImGui::RadioButton("Use Color Map", &colorScanVal, 0);
+        ImGui::RadioButton("By Scan ID", &colorScanVal, 1);
+        if (!(pointtype.hasColor())) ImGui::RadioButton("Point Color", false);
+        else ImGui::RadioButton("Point Color", &colorScanVal, 2);
+        setScansColored(0); //dummy 0
+        ImGui::TreePop();
+      }
+      ImGui::Separator();
+      ImGui::Text("Color values:");
+      ImGui::InputFloat("Min", &mincolor_value, 1.0f, 10.0f);
+      ImGui::InputFloat("Max", &maxcolor_value, 1.0f, 10.0f);
+      if (ImGui::Button("Reset Min/Max")) resetMinMax(0);
+      minmaxChanged(0); // dummy0
+      ImGui::TreePop();
+
+    }
+
+    // Anim panel
+    static bool coloranimbool;
+    ImGui::Checkbox("Force keep color", &coloranimbool); coloranim = coloranimbool;
+    ImGui::Separator();
+    ImGui::Text("Anim delay:");
+    ImGui::InputInt("##Anim", &anim_delay, 1, 10); 
+    if (ImGui::Button("Animate")) startAnimation(0);
+    ImGui::Separator();
+
+    // Camera path 
+    if(ImGui::TreeNode("Camera Path")) {
+      ImGui::Text("Path file:");
+      ImGui::InputTextWithHint("##File1", "path.dat", path_file_name, 2048);
+      ImGui::Text("Interpolation factor");
+      ImGui::SliderFloat("##Interpolationfactor", &path_interp_factor, 0.001f, 10.0f, "%.3f", ImGuiSliderFlags_Logarithmic);
+      if (ImGui::Button("Save Path")) {savePath(0);}
+      ImGui::SameLine();
+      if (ImGui::Button("Load Path")) {loadPath(0);}
+      if (ImGui::Button("Load Robot Path")) {drawRobotPath(0);}
+      ImGui::Separator();
+      static bool save_anim_bool, interpolate_bool;
+      ImGui::Checkbox("Save Animation", &save_anim_bool); save_animation=save_anim_bool;
+      ImGui::Checkbox("Interpolate by Distance", &interpolate_bool); 
+      // Check if updated
+      if ((bool)inter_by_dist != interpolate_bool) callCameraUpdate(0);
+      inter_by_dist=interpolate_bool;
+      if (ImGui::Button("Animate Path")) pathAnimate(0);
+      if (ImGui::Button("Animate Path and Matching")) pathMatchingAnimate(0);
+      ImGui::TreePop();
+    }
+    ImGui::Separator();
+
+    // Screenshots and position config
+    if (ImGui::TreeNode("Position & Screenshots")) {
+      ImGui::Text("Pose file:");
+      ImGui::InputTextWithHint("##PoseFile", "pose.dat", pose_file_name, 2048);
+      if (ImGui::Button("Save")) savePose(0);
+      ImGui::SameLine();
+      if (ImGui::Button("Load")) loadPose(0);
+      ImGui::Text("Scaling Factor");
+      ImGui::SliderInt("##Factor", &factor, 1, 10);
+      if (ImGui::Button("Save Image")) saveImage(0); // screenshot before imgui frame render x)
+      ImGui::TreePop();
+    }
+    ImGui::Separator();
+    
+    // Selection Panel
+    if (ImGui::TreeNode("Selection")) {
+      ImGui::Text("Selection file:");
+      ImGui::InputTextWithHint("##File2", "selected.3d", selection_file_name, 2048);
+      if (ImGui::Button("Save")) saveSelection(0);
+      ImGui::SameLine();
+      if (ImGui::Button("Load")) loadSelection(0);
+      ImGui::SameLine();
+      if (ImGui::Button("Clear")) clearSelection(0);
+      static bool select_unselect_bool, select_voxels_bool;
+      ImGui::Checkbox("Select/Unselect", &select_unselect_bool); selectOrunselect=select_unselect_bool;
+      ImGui::Checkbox("Select Voxels", &select_voxels_bool); select_voxels=select_voxels_bool;
+      ImGui::SliderInt("Depth:", &selection_depth, 1, 100, "%d", ImGuiSliderFlags_Logarithmic);
+      ImGui::SliderInt("Brushsize:", &brush_size, 0, 100, "%d", ImGuiSliderFlags_Logarithmic);
+      ImGui::TreePop();
+    }
+    ImGui::Separator();
+
+    // Advanced panel
+    if (advanced_controls && ImGui::TreeNode("Advanced")) {
+      ImGui::SliderInt("Frame #:", &current_frame, 0, MetaMatrix[0].size()-1);
+      ImGui::SliderFloat("FPS. Lim:", &idealfps, 0.0f, 240.0f, "%.1f");
+      ImGui::SliderFloat("Farplane:", &maxfardistance, 1.0f, 1000000.0f, "%.1f", ImGuiSliderFlags_Logarithmic);
+      ImGui::SliderFloat("Nearplane:", &neardistance, 0.01f, 1000000.0f, "%.01f", ImGuiSliderFlags_Logarithmic);
+      if(ImGui::Button("Cylce LOD")) cycleLOD();
+      ImGui::SliderFloat("LOD speed:", &adaption_rate, 0.0f, 3.0f, "%.1f");
+      static bool pathshift_bool;
+      ImGui::Checkbox("Shift Path for 3D", &pathshift_bool); path3D=pathshift_bool;
+      ImGui::SliderFloat("3D Shift:", &shifted, 0.0f, 50.0f);
+      
+      ImGui::TreePop();
+    } else {
+      ImGui::Separator();
+      ImGui::Text("--advanced missing");
+      ImGui::Separator();
+    }
+
+    ImGui::End(); // End of "3D-Viewer Selection" Panel
+  }
 
   // TODO: This is a dummy window with arbitrary conent.
   // TODO: Replace with a functioning Controlls panel.
-  // 1. Show a simple window that we create ourselves. We use a Begin/End pair to create a named window.
-  {
-    ImGui::Begin("3D Viewer - Selection");
-    ImGui::SetNextWindowPos(ImVec2(START_WIDTH * 0.10, START_HEIGHT * 0.30), ImGuiCond_FirstUseEver);
-
-    // Checkboxes
-    static bool show_points_bool = true, show_objects_bool = true, show_cameras_bool = true, show_path_bool = true, show_poses_bool = true;
-    ImGui::Checkbox("Draw Points", &show_points_bool); show_points = show_points_bool;
-    ImGui::Checkbox("Draw Objects", &show_objects_bool); show_objects = show_objects_bool;
-    ImGui::Checkbox("Draw Camera", &show_cameras_bool); show_cameras = show_cameras_bool;
-    ImGui::Checkbox("Draw Path", &show_path_bool); show_path = show_path_bool;
-    ImGui::Checkbox("Draw Poses", &show_poses_bool); show_poses = show_poses_bool;
-
-    // Point size
-    ImGui::SliderFloat("Point size", &pointsize, 0.0000001f, 10.0f);            
-
-    ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
-    ImGui::End();
-  }
-
-  // TODO: This is a dummy window with arbitrary conent.
-  // TODO: Replace with a functioning Selections panel.
   // 2. Show another simple window.
   {
-    ImGui::Begin("3D Viewer - Controls");   // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
-    ImGui::Text("Hello from another window!");
+    ImGui::SetNextWindowPos(ImVec2(START_WIDTH_IMGUI * 0.25, START_HEIGHT_IMGUI * 0.78), ImGuiCond_FirstUseEver);
+    ImGui::SetNextWindowSize(ImVec2(START_WIDTH_IMGUI * 0.50, START_HEIGHT_IMGUI * 0.20), ImGuiCond_FirstUseEver);
+    ImGui::Begin("Controls"); 
+    ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
+    ImGui::Separator(); 
+    static vgm::Quat qRotVgm = vgm::Quat(1.f,0.f,0.f,0.f);
+    static double t[3] = {0,0,0}, mat[16], rPT[3];
+    if (ImGui::gizmo3D("##gizmo1", qRotVgm)) {
+      // Convert gizmos vgm crap to 3dtk
+      quat[0] = qRotVgm.w; quat[1] = qRotVgm.x; quat[2] = qRotVgm.y; quat[3] = qRotVgm.z;
+      QuatToMatrix4((const double *)quat, t, mat);
+      Matrix4ToEuler(mat, rPT);
+      // rotate the camera
+      mouseRotX = deg(rPT[0]);
+      mouseRotY = deg(rPT[1]);
+      mouseRotZ = deg(rPT[2]);
+    } else {
+      rPT[0] = rad(mouseRotX);
+      rPT[1] = rad(mouseRotY);
+      rPT[2] = rad(mouseRotZ);
+      EulerToMatrix4(t, rPT, mat);
+      Matrix4ToQuat(mat, quat);
+      // Convert back to vgm, which gets synched next rendering cycle
+      qRotVgm.w = quat[0]; qRotVgm.x = quat[1]; qRotVgm.y = quat[2]; qRotVgm.z = quat[3];
+    }
+
     ImGui::End();
   }
-  // Render into buffer
+  
+  // Render IMGUI stuff into buffer
   ImGui::Render();
 
   // GLUT / OpenGL2 camera and aspect handling:
@@ -310,6 +515,7 @@ void displayIm() {
   DisplayItFunc(GL_RENDER);
   // Draw the buffer
   glDrawBuffer(buffermode);
+
   // Finally Draw ImGui contents as well
   ImGui_ImplOpenGL2_RenderDrawData(ImGui::GetDrawData());
 
@@ -327,10 +533,23 @@ void initScreenWindowIm()
 {
   // init display
   glutInitDisplayMode(GLUT_DEPTH | GLUT_RGBA | GLUT_DOUBLE);
+  SCREEN_WIDTH = glutGet(GLUT_SCREEN_WIDTH);  // This works well, when there is only one monitor. 
+  SCREEN_HEIGHT = glutGet(GLUT_SCREEN_HEIGHT); // For multimonitor this needs more treatment...
+  START_WIDTH_IMGUI = 1700;//= (0.8*SCREEN_WIDTH);
+  START_HEIGHT_IMGUI = 850;//= (0.8*SCREEN_HEIGHT);
+  // Check if screen is large enough for HD...
+  if (START_WIDTH_IMGUI > SCREEN_WIDTH || START_HEIGHT_IMGUI > SCREEN_HEIGHT) {
+    // Use original 3dtk
+    START_WIDTH_IMGUI = START_WIDTH;
+    START_HEIGHT_IMGUI = START_HEIGHT;
+  }
+  BOOST_ASSERT_MSG(!(START_WIDTH_IMGUI > SCREEN_WIDTH || START_HEIGHT_IMGUI > SCREEN_HEIGHT), "Go get a wider screen.");
+  START_X_IMGUI = (SCREEN_WIDTH - START_WIDTH_IMGUI) / 2;
+  START_Y_IMGUI = (SCREEN_HEIGHT - START_HEIGHT_IMGUI) / 2;
 
   // define the window position and size
-  glutInitWindowPosition(START_X, START_Y);
-  glutInitWindowSize( START_WIDTH, START_HEIGHT );
+  glutInitWindowPosition(START_X_IMGUI, START_Y_IMGUI);
+  glutInitWindowSize( START_WIDTH_IMGUI, START_HEIGHT_IMGUI );
 
   // create window
   window_id = glutCreateWindow("3D_Viewer");
@@ -352,7 +571,9 @@ void initScreenWindowIm()
   glutReshapeFunc(reshapeIm);
   glutMouseFunc(mouseButtonIm);
   glutMotionFunc(mouseMoveIm);
-
+#ifdef __FREEGLUT_EXT_H__
+  glutMouseWheelFunc(ImGui_ImplGLUT_MouseWheelFunc);
+#endif
   // Keyboard and Idle are not handled by 3dtk.
   // Original 3dtk installed GLUT handler functions:
   glutKeyboardFunc(callbacks::glut::keyPressed);

@@ -482,14 +482,14 @@ GLUI_SPINNER_INT, &factor);
  * one.
  */
 void stepScansUp(int dummy) {
-  startRangeScanIdx++;
-  endRangeScanIdx++;
+  if (startRangeScanIdx < endScanIdx) startRangeScanIdx++;
+  if (endRangeScanIdx < endScanIdx) endRangeScanIdx++;
   haveToUpdate=1;
 }
 
 void stepScansDown(int dummy) {
-  startRangeScanIdx--;
-  endRangeScanIdx--;
+  if (startRangeScanIdx > 0) startRangeScanIdx--;
+  if (endRangeScanIdx > 0) endRangeScanIdx--;
   haveToUpdate=1;
 }
 

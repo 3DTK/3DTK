@@ -146,8 +146,8 @@ option(WITH_3DMOUSE "Support for 3DConnexion Space Mouse" OFF)
 
 # Adds imgui to show using opengl2 and glut
 if(WITH_IMGUI)
-  set(IMGUI_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/3rdparty/imgui/" "${PROJECT_SOURCE_DIR}/3rdparty/imgui/backends")
-  file(GLOB IMGUI_SRCS "${PROJECT_SOURCE_DIR}/3rdparty/imgui/*.cpp" "${PROJECT_SOURCE_DIR}/3rdparty/imgui/backends/imgui_impl_opengl2.cpp" "${PROJECT_SOURCE_DIR}/3rdparty/imgui/backends/imgui_impl_glut.cpp")
+  set(IMGUI_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/3rdparty/imgui/" "${PROJECT_SOURCE_DIR}/3rdparty/imgui/backends" "${PROJECT_SOURCE_DIR}/3rdparty/imgui/imGuIZMO.quat")
+  file(GLOB IMGUI_SRCS "${PROJECT_SOURCE_DIR}/3rdparty/imgui/*.cpp" "${PROJECT_SOURCE_DIR}/3rdparty/imgui/backends/imgui_impl_opengl2.cpp" "${PROJECT_SOURCE_DIR}/3rdparty/imgui/backends/imgui_impl_glut.cpp" "${PROJECT_SOURCE_DIR}/3rdparty/imgui/imGuIZMO.quat/imGuIZMOquat.cpp")
 endif()
 
 if(WITH_3DMOUSE)
