@@ -211,8 +211,6 @@ void saveImageAndExit(int dummy)
 	exit(0);
 }
 
-// TODO: Updating the controlls, which are to be implemented
-
 void updateCamControls() {
   // TODO: implement cam controls first
 }
@@ -234,6 +232,10 @@ void updatePointModeControls() {
 }
 
 // GLUT Function wrappers:
+
+void keyButtonIm() {
+  //TODO: addd keyboardd support for IMgUi
+}
 
 /* Wrapper for mouse button handling. Uses both the internal callback and imgui*/
 void mouseButtonIm(int button, int state, int x, int y) {
@@ -268,8 +270,8 @@ void displayIm() {
   
   // 1. Selection Window
   {
-    ImGui::SetNextWindowPos(ImVec2(START_WIDTH_IMGUI * 0.80, START_HEIGHT_IMGUI * 0.05), ImGuiCond_FirstUseEver);
-    ImGui::SetNextWindowSize(ImVec2(START_WIDTH_IMGUI * 0.15, START_HEIGHT_IMGUI * 0.80), ImGuiCond_FirstUseEver);
+    ImGui::SetNextWindowPos(ImVec2(START_WIDTH_IMGUI * 0.85, START_HEIGHT_IMGUI * 0.05), ImGuiCond_FirstUseEver);
+    ImGui::SetNextWindowSize(ImVec2(START_WIDTH_IMGUI * 0.12, START_HEIGHT_IMGUI * 0.80), ImGuiCond_FirstUseEver);
     ImGui::Begin("Selection");
 
     if (ImGui::TreeNode("Draw")) {
@@ -364,8 +366,14 @@ void displayIm() {
       }
       ImGui::Separator();
       ImGui::Text("Color values:");
-      ImGui::InputFloat("Min", &mincolor_value, 1.0f, 10.0f);
-      ImGui::InputFloat("Max", &maxcolor_value, 1.0f, 10.0f);
+      static float small_step = (cm->getMax()-cm->getMin())/100; // 1percent increase
+      static float big_step = small_step*10; // 100percent increase
+      ImGui::InputFloat("Min", &mincolor_value, small_step, big_step, "%.1f", ImGuiInputTextFlags_CharsDecimal);
+      ImGui::InputFloat("Max", &maxcolor_value, small_step, big_step);
+      // Unsure if this would be better: 
+      // ImGui::SliderFloat("Min", &mincolor_value, cm->getMin(), cm->getMax(), "%.1f"); //, ImGuiSliderFlags_Logarithmic);
+      // ImGui::SliderFloat("Max", &maxcolor_value, cm->getMin(), cm->getMax(), "%.1f"); //, ImGuiSliderFlags_Logarithmic);
+      
       if (ImGui::Button("Reset Min/Max")) resetMinMax(0);
       minmaxChanged(0); // dummy0
       ImGui::TreePop();
@@ -396,7 +404,7 @@ void displayIm() {
       ImGui::Checkbox("Save Animation", &save_anim_bool); save_animation=save_anim_bool;
       ImGui::Checkbox("Interpolate by Distance", &interpolate_bool); 
       // Check if updated
-      if ((bool)inter_by_dist != interpolate_bool) callCameraUpdate(0);
+      // if ((bool)inter_by_dist != interpolate_bool) callCameraUpdate(0);
       inter_by_dist=interpolate_bool;
       if (ImGui::Button("Animate Path")) pathAnimate(0);
       if (ImGui::Button("Animate Path and Matching")) pathMatchingAnimate(0);
@@ -427,7 +435,9 @@ void displayIm() {
       if (ImGui::Button("Load")) loadSelection(0);
       ImGui::SameLine();
       if (ImGui::Button("Clear")) clearSelection(0);
-      static bool select_unselect_bool, select_voxels_bool;
+      static bool select_unselect_bool = true, select_voxels_bool = false;
+      selection_depth = 50;
+      brush_size = 50;
       ImGui::Checkbox("Select/Unselect", &select_unselect_bool); selectOrunselect=select_unselect_bool;
       ImGui::Checkbox("Select Voxels", &select_voxels_bool); select_voxels=select_voxels_bool;
       ImGui::SliderInt("Depth:", &selection_depth, 1, 100, "%d", ImGuiSliderFlags_Logarithmic);
@@ -447,70 +457,145 @@ void displayIm() {
       static bool pathshift_bool;
       ImGui::Checkbox("Shift Path for 3D", &pathshift_bool); path3D=pathshift_bool;
       ImGui::SliderFloat("3D Shift:", &shifted, 0.0f, 50.0f);
-      
       ImGui::TreePop();
-    } else {
-      ImGui::Separator();
+    
+    // idk why this has not been there earlier
+    } else if (!advanced_controls) {
       ImGui::Text("--advanced missing");
+      ImGui::SameLine();
+      if(ImGui::Button("Enable")) advanced_controls = true;
       ImGui::Separator();
     }
 
     ImGui::End(); // End of "3D-Viewer Selection" Panel
   }
 
-  // TODO: This is a dummy window with arbitrary conent.
-  // TODO: Replace with a functioning Controlls panel.
-  // 2. Show another simple window.
+  // 2. Similar to legacy shows controlls panel
   {
-    ImGui::SetNextWindowPos(ImVec2(START_WIDTH_IMGUI * 0.25, START_HEIGHT_IMGUI * 0.78), ImGuiCond_FirstUseEver);
-    ImGui::SetNextWindowSize(ImVec2(START_WIDTH_IMGUI * 0.50, START_HEIGHT_IMGUI * 0.20), ImGuiCond_FirstUseEver);
-    ImGui::Begin("Controls"); 
-    ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
-    ImGui::Separator(); 
-    static vgm::Quat qRotVgm = vgm::Quat(1.f,0.f,0.f,0.f);
-    static double t[3] = {0,0,0}, mat[16], rPT[3];
-    if (ImGui::gizmo3D("##gizmo1", qRotVgm)) {
-      // Convert gizmos vgm crap to 3dtk
-      quat[0] = qRotVgm.w; quat[1] = qRotVgm.x; quat[2] = qRotVgm.y; quat[3] = qRotVgm.z;
-      QuatToMatrix4((const double *)quat, t, mat);
-      Matrix4ToEuler(mat, rPT);
-      // rotate the camera
-      mouseRotX = deg(rPT[0]);
-      mouseRotY = deg(rPT[1]);
-      mouseRotZ = deg(rPT[2]);
-    } else {
-      rPT[0] = rad(mouseRotX);
-      rPT[1] = rad(mouseRotY);
-      rPT[2] = rad(mouseRotZ);
-      EulerToMatrix4(t, rPT, mat);
-      Matrix4ToQuat(mat, quat);
-      // Convert back to vgm, which gets synched next rendering cycle
-      qRotVgm.w = quat[0]; qRotVgm.x = quat[1]; qRotVgm.y = quat[2]; qRotVgm.z = quat[3];
-    }
+    ImGui::SetNextWindowPos(ImVec2(START_WIDTH_IMGUI * 0.175, START_HEIGHT_IMGUI * 0.75), ImGuiCond_FirstUseEver);
+    ImGui::SetNextWindowSize(ImVec2(START_WIDTH_IMGUI * 0.65, START_HEIGHT_IMGUI * 0.20), ImGuiCond_FirstUseEver);
+    if (ImGui::Begin("Controls")) {
 
-    ImGui::End();
+      //ImGui::Text("Application average %.1f FPS", io.Framerate);
+      ImGui::BeginTable("controls_table", 5, ImGuiTableFlags_ScrollX | ImGuiTableFlags_SizingStretchProp);
+      
+      // Column 1
+      ImGui::TableNextColumn();
+      ImGui::Text("Mode");
+      if(ImGui::Button("Top view")) topView();
+      if(ImGui::Button("Rotate view")) rotateView();
+      if(ImGui::Button("Reset view")) resetView(0);
+      
+      // Column 2 
+      ImGui::TableNextColumn();
+      ImGui::Text("Zoom settings");
+      if (showViewMode == 0) {
+        ImGui::SliderFloat("Field of View", &cangle, 1.0, 180.0, "%.1f");
+        ImGui::Text("Currently in: Normal view.");
+      }
+      if (showViewMode == 1) {
+        ImGui::SliderFloat("Parallel Zoom", &pzoom, 0.1, 100000.0, "%.1f", ImGuiSliderFlags_Logarithmic);
+        ImGui::Text("Currently in: Ortographic view.");
+      }
+      if (showViewMode == 2) {
+        ImGui::SliderFloat("Rotate Zoom", &rzoom, 0.001, 100000.0, "%.3f", ImGuiSliderFlags_Logarithmic);
+        //ImGui::Text("The navball does not work in rotate mode! ---->");
+        ImGui::Text("Currently in: Rotate view.");
+      } 
+      if (ImGui::TreeNode("Keyboard bindings")) {
+        ImGui::Text("w/a/s/d: fwd/back left/right");
+        ImGui::Text("q/e: roll\t\tc/y: up/down");
+        //ImGui::Text("c/y: up/down");
+        ImGui::Text("Hold Shift/Ctrl: faster/slower");
+        ImGui::TreePop();
+      }
+      // Column 3
+      // Navball replacement
+      ImGui::TableNextColumn();
+      ImGui::Text("Navball");
+      static vgm::Quat qRotVgm = vgm::Quat(1.f,0.f,0.f,0.f);
+      static double t[3] = {0,0,0}, mat[16], rPT[3];
+      if (ImGui::gizmo3D("##gizmo1", qRotVgm)) {
+        if (showViewMode != 2) {
+          // Convert gizmos vgm crap to 3dtk
+          quat[0] = qRotVgm.w; quat[1] = qRotVgm.x; quat[2] = qRotVgm.y; quat[3] = qRotVgm.z;
+          QuatToMatrix4((const double *)quat, t, mat);
+          Matrix4ToEuler(mat, rPT);
+          // rotate the camera
+          mouseRotX = deg(rPT[0]);
+          mouseRotY = deg(rPT[1]);
+          mouseRotZ = deg(rPT[2]);
+        } 
+      } else {
+        rPT[0] = rad(mouseRotX);
+        rPT[1] = rad(mouseRotY);
+        rPT[2] = rad(mouseRotZ);
+        EulerToMatrix4(t, rPT, mat);
+        // Convert back to vgm, which gets synched next rendering cycle
+        if (showViewMode != 2) {
+          Matrix4ToQuat(mat, quat);
+          qRotVgm.w = quat[0]; 
+          qRotVgm.x = quat[1]; 
+          qRotVgm.y = quat[2]; 
+          qRotVgm.z = quat[3];
+        }
+      }
+      
+      // Column 4
+      ImGui::TableNextColumn();
+      ImGui::Text("Camera");
+      static int signed_int_cam_choice;
+      ImGui::SliderInt("Choose camera", &signed_int_cam_choice, 0, cams.size()); 
+      cam_choice = signed_int_cam_choice;
+      if(ImGui::Button("Add camera")) callAddCamera(0);
+      if(ImGui::Button("Delete camera")) callDeleteCamera(0);
+
+      // Column 5
+      ImGui::TableNextColumn();
+      ImGui::Text("General behaviour");
+      static bool cam_mouse_nav_bool = true;
+      ImGui::Checkbox("MouseNav", &cam_mouse_nav_bool); 
+      cameraNavMouseMode = cam_mouse_nav_bool;
+      static bool always_all_pts = false, always_reduce_pts = false;
+      bool always_tmp = always_all_pts, reduce_tmp = always_reduce_pts;
+      ImGui::Checkbox("Always all points", &always_all_pts);
+      ImGui::Checkbox("Always reduce points", &always_reduce_pts);
+      // Check if changed all pts
+      if (always_tmp != always_all_pts && always_all_pts) {
+        always_reduce_pts = false;
+        reduce_tmp = false;
+        changePointMode(0);
+      } // Check if changed reduced pts
+      else if (reduce_tmp != always_reduce_pts && always_reduce_pts) {
+        always_all_pts = false;
+        always_tmp = false;
+        changePointMode(1); 
+      }
+      ImGui::EndTable();
+    } 
+    ImGui::End(); // End of "3D Viewer - Controlls panel"
   }
-  
-  // Render IMGUI stuff into buffer
+
+  // Render IMGUI stuff into ImGuis internal buffer
   ImGui::Render();
 
   // GLUT / OpenGL2 camera and aspect handling:
-  if ((cangle_spinner != 0 && (fabs(cangle_old - cangle) > 0.5)) ||
-    (pzoom_spinner != 0 && (fabs(pzoom_old - pzoom) > 0.5))) {
+  if (((fabs(cangle_old - cangle) > 0.5)) ||
+    (fabs(pzoom_old - pzoom) > 0.5)) {
     cangle_old = cangle;
     pzoom_old = pzoom;
     int viewport[4];
     glGetIntegerv(GL_VIEWPORT, viewport);
     reshapeIm(viewport[2], viewport[3]);
 #ifdef _WIN32
-    Sleep(25);
+    Sleep(5); // legacy show: Sleep(25)
 #else
-    usleep(250000);
+    usleep(50000); // legacy show: usleep(250000)
 #endif
   }
 
   // After reshaping, clear everything on screen
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  // glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   // Filling the buffer with OpenGL point cloud renderings
   DisplayItFunc(GL_RENDER);
   // Draw the buffer
