@@ -109,7 +109,7 @@ int spacenavHandlerIm(){
 #else
 #ifdef __linux__
 	struct input_id device_info;
-	int fd = open("/dev/input/by-id/usb-3Dconnexion_SpaceMouse_Compact-event-if00", O_RDONLY, );
+	int fd = open("/dev/input/by-id/usb-3Dconnexion_SpaceMouse_Compact-event-if00", O_RDONLY);
 	if (fd == -1) {
     perror("open");
 	  fprintf(stderr, "3D Mouse not connected\n");
