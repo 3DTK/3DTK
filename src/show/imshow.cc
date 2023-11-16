@@ -53,51 +53,13 @@
     #define SPNAV_DEAD_THRESH_T 30 // Adjust to your liking
 #endif
 
-static int SCREEN_WIDTH;
-static int SCREEN_HEIGHT;
-static int START_WIDTH_IMGUI;
-static int START_HEIGHT_IMGUI;
-static int START_X_IMGUI;
-static int START_Y_IMGUI;
-
-// show needs these to be defined, altough being useless when using imgui instead of glui...
-void updateCamControls() {return;}
-void resetRotationButton() {return;}
-void updateViewModeControls() {return;}
-void updateControls() {return;}
-void updatePointModeControls() {return;}
-void DrawTypeLegend();
-void setup_camera();
-void setup_fog();
-
-extern bool   classLabels;
-
-// Show Interrupt handlers:
-static bool interrupted = false;
-
-void interruptDrawing() {
-  interrupted = true;
-}
-
-void checkForInterrupt() {
-  interrupted = false;
-}
-
-bool isInterrupted() {
-#ifndef __APPLE__
-  glutMainLoopEvent();
-#endif
-  glutSetWindow(window_id);
-  return interrupted;
-}
-
 // Spacemouse handler:
-int spacenavHandler(){
-#ifdef SPACEMOUSE
+int spacenavHandlerIm(){
     int fixRoation = 0;
     int fixTranslation = 0;
     float translationMultiplier = 0.05; // adjust to your liking
     float rotationMultipler = 0.005;
+#ifdef SPACEMOUSE
     spnav_event sev;
     if(spnav_open()==-1) {
         fprintf(stderr, "failed to connect to the space navigator daemon\n");
@@ -147,9 +109,10 @@ int spacenavHandler(){
 #else
 #ifdef __linux__
 	struct input_id device_info;
-	int fd = open("/dev/input/by-id/usb-3Dconnexion_SpaceMouse_Compact-event-if00", O_RDONLY);
+	int fd = open("/dev/input/by-id/usb-3Dconnexion_SpaceMouse_Compact-event-if00", O_RDONLY, );
 	if (fd == -1) {
-		fprintf(stderr, "3D Mouse not connected\n");
+    perror("open");
+	  fprintf(stderr, "3D Mouse not connected\n");
 		return 1;
 	}
 	if(ioctl(fd, EVIOCGID, &device_info)) {
@@ -168,7 +131,7 @@ int spacenavHandler(){
 		fprintf(stderr, "unexpected bus type: %d\n", device_info.bustype);
 		return 1;
 	}
-	int axes[6] = {0,0,0,0,0,0};
+  int axes[6] = {0,0,0,0,0,0};
 	int buttons[2] = {0, 0};
 	struct input_event ev;
 	uint8_t evtype_bitmask[EV_MAX/8 + 1];
@@ -179,21 +142,21 @@ int spacenavHandler(){
 		perror("3D Mouse EVIOCGBIT ioctl failed");
 		return 1;
 	}
-	for (;;) {
+  for (;;) {
 		int n = read(fd, &ev, sizeof(struct input_event));
-		if(n < sizeof(struct input_event)) {
+    if(n < sizeof(struct input_event)) {
 			fprintf(stderr, "unexpected event size\n");
 			return 1;
 		}
 		switch (ev.type) {
 			case EV_KEY:
-				if (ev.code != 0 and ev.code != 1) {
+   			if (ev.code != 0 and ev.code != 1) {
 					fprintf(stderr, "unexpected button code: %d\n", ev.code);
 				}
 				buttons[ev.code] = ev.value;
 				break;
 			case EV_REL:
-				switch(ev.code) {
+   			switch(ev.code) {
 					case 0: moveCamera(-ev.value /4, 0, 0, 0, 0, 0); break;
 					case 1: moveCamera(0, 0, -ev.value /4, 0, 0, 0); break;
 					case 2: moveCamera(0, ev.value /4, 0, 0, 0, 0); break;
@@ -201,6 +164,8 @@ int spacenavHandler(){
 					case 4: moveCamera(0, 0, 0, 0, 0, ev.value/40); break;
 					case 5: moveCamera(0, 0, 0, 0, -ev.value/40, 0); break;
 				}
+        default:
+        cout << "Neither key nor rel" << endl;
 		}
 	}
 #endif
@@ -208,6 +173,44 @@ int spacenavHandler(){
 	return 0;
 }
 #endif
+
+static int SCREEN_WIDTH;
+static int SCREEN_HEIGHT;
+static int START_WIDTH_IMGUI;
+static int START_HEIGHT_IMGUI;
+static int START_X_IMGUI;
+static int START_Y_IMGUI;
+
+// show needs these to be defined, altough being useless when using imgui instead of glui...
+void updateCamControls() {return;}
+void resetRotationButton() {return;}
+void updateViewModeControls() {return;}
+void updateControls() {return;}
+void updatePointModeControls() {return;}
+void DrawTypeLegend();
+void setup_camera();
+void setup_fog();
+
+extern bool   classLabels;
+
+// Show Interrupt handlers:
+static bool interrupted = false;
+
+void interruptDrawing() {
+  interrupted = true;
+}
+
+void checkForInterrupt() {
+  interrupted = false;
+}
+
+bool isInterrupted() {
+#ifndef __APPLE__
+  glutMainLoopEvent();
+#endif
+  glutSetWindow(window_id);
+  return interrupted;
+}
 
 // Screenshot handler
 void saveImageAndExit(int dummy)
@@ -276,8 +279,9 @@ void renderImGuiWindows() {
 
   // 1. Selection Window
   {
-    ImGui::SetNextWindowPos(ImVec2(START_WIDTH_IMGUI * 0.83, START_HEIGHT_IMGUI * 0.05), ImGuiCond_FirstUseEver);
+    ImGui::SetNextWindowPos(ImVec2(START_WIDTH_IMGUI * 0.83, START_HEIGHT_IMGUI * 0.01), ImGuiCond_FirstUseEver);
     ImGui::SetNextWindowSize(ImVec2(START_WIDTH_IMGUI * 0.165, START_HEIGHT_IMGUI * 0.80), ImGuiCond_FirstUseEver);
+    ImGui::SetNextWindowCollapsed(true, ImGuiCond_FirstUseEver);
     ImGui::Begin("Selection");
 
     if (ImGui::TreeNode("Draw")) {
@@ -479,8 +483,9 @@ void renderImGuiWindows() {
 
   // 2. Similar to legacy shows controlls panel
   {
-    ImGui::SetNextWindowPos(ImVec2(START_WIDTH_IMGUI * 0.17, START_HEIGHT_IMGUI * 0.77), ImGuiCond_FirstUseEver);
+    ImGui::SetNextWindowPos(ImVec2(START_WIDTH_IMGUI * 0.01, START_HEIGHT_IMGUI * 0.01), ImGuiCond_FirstUseEver);
     ImGui::SetNextWindowSize(ImVec2(START_WIDTH_IMGUI * 0.655, START_HEIGHT_IMGUI * 0.20), ImGuiCond_FirstUseEver);
+    ImGui::SetNextWindowCollapsed(true, ImGuiCond_FirstUseEver);
     if (ImGui::Begin("Controls")) {
 
       bool table_exists = ImGui::BeginTable("controls_table", 5, ImGuiTableFlags_ScrollX | ImGuiTableFlags_SizingStretchProp);
@@ -1069,7 +1074,6 @@ void idleIm(void) {
 #endif
 
   if (haveToUpdate == 4) { // stop animation
-    cout << "Anim stop!!" << endl;
     frameNr = 0;  // delete these lines if you want a 'continue' functionality.
     haveToUpdate = 1;
   }
@@ -1264,7 +1268,7 @@ int main(int argc, char **argv)
     glutTimerFunc(0, &saveImageAndExit, 0);
   }
 #ifndef __APPLE__
-    std::thread t1(spacenavHandler);
+    std::thread t1(spacenavHandlerIm);
 #endif
 
   // Starting the Glut Main Loop
