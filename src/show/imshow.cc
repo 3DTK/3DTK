@@ -60,9 +60,20 @@ static int START_HEIGHT_IMGUI;
 static int START_X_IMGUI;
 static int START_Y_IMGUI;
 
-static bool interrupted = false;
+// show needs these to be defined, altough being useless when using imgui instead of glui...
+void updateCamControls() {return;}
+void resetRotationButton() {return;}
+void updateViewModeControls() {return;}
+void updateControls() {return;}
+void updatePointModeControls() {return;}
+void DrawTypeLegend();
+void setup_camera();
+void setup_fog();
 
-// GLUT Interrupt handlers:
+extern bool   classLabels;
+
+// Show Interrupt handlers:
+static bool interrupted = false;
 
 void interruptDrawing() {
   interrupted = true;
@@ -211,34 +222,30 @@ void saveImageAndExit(int dummy)
 	exit(0);
 }
 
-void updateCamControls() {
-  // TODO: implement cam controls first
-}
-
-void resetRotationButton() {
-  // TODO: implement reset-rotation button first
-}
-
-void updateViewModeControls() {
-  // TODO: implement view mode controlls first
-}
-
-void updateControls() {
-  // TODO: implement controlls first
-}
-
-void updatePointModeControls() {
-  // TODO: implement point mode controlls first
-}
-
 // GLUT Function wrappers:
 
-void keyButtonIm() {
-  //TODO: addd keyboardd support for IMgUi
+void keyPressedIm(unsigned char key, int x, int y) {
+  // We need to update unless we are in an animation
+  if (haveToUpdate != 3) haveToUpdate=1;
+  interruptDrawing();
+  ImGuiIO& io = ImGui::GetIO();
+  ImGui_ImplGLUT_KeyboardFunc(key, x,  y);
+  if (!io.WantCaptureKeyboard) {
+    callbacks::glut::keyPressed(key, x, y);
+  }
+}
+
+void keyPressedUpIm(unsigned char key, int x, int y) {
+  if (haveToUpdate != 3) haveToUpdate=1;
+  interruptDrawing();
+  ImGui_ImplGLUT_KeyboardUpFunc(key, x, y);
+  callbacks::glut::keyReleased(key, x, y);
 }
 
 /* Wrapper for mouse button handling. Uses both the internal callback and imgui*/
 void mouseButtonIm(int button, int state, int x, int y) {
+  if (haveToUpdate != 3) haveToUpdate=1;
+  interruptDrawing();
   ImGui_ImplGLUT_MouseFunc(button, state, x, y);
   callbacks::glut::mouseButton(button, state, x, y);
 }
@@ -251,27 +258,26 @@ void reshapeIm(int width, int height) {
 
 /* Wrapper for mouse movement. Uses both the internal callback and imgui*/
 void mouseMoveIm(int x, int y) {
+  if (haveToUpdate != 3) haveToUpdate=1;
+  interruptDrawing();
   ImGui_ImplGLUT_MotionFunc(x, y);
   ImGuiIO& io = ImGui::GetIO();
   if (!io.WantCaptureMouse)
     callbacks::glut::mouseMove(x, y);
 }
 
-/* Modified display loop function for GLUT, uses common show funcs. and imgui
-displayIm alters the OpenGL rendering cycle from the original 3dtk to include ImGui.*/
-void displayIm() {
-
+void renderImGuiWindows() {
   // ImGUI Renderings First:
   ImGui_ImplOpenGL2_NewFrame();
   ImGui_ImplGLUT_NewFrame();
   ImGui::NewFrame();
   ImGuiIO& io = ImGui::GetIO();
   io.ConfigWindowsMoveFromTitleBarOnly = true;
-  
+
   // 1. Selection Window
   {
-    ImGui::SetNextWindowPos(ImVec2(START_WIDTH_IMGUI * 0.85, START_HEIGHT_IMGUI * 0.05), ImGuiCond_FirstUseEver);
-    ImGui::SetNextWindowSize(ImVec2(START_WIDTH_IMGUI * 0.12, START_HEIGHT_IMGUI * 0.80), ImGuiCond_FirstUseEver);
+    ImGui::SetNextWindowPos(ImVec2(START_WIDTH_IMGUI * 0.83, START_HEIGHT_IMGUI * 0.05), ImGuiCond_FirstUseEver);
+    ImGui::SetNextWindowSize(ImVec2(START_WIDTH_IMGUI * 0.165, START_HEIGHT_IMGUI * 0.80), ImGuiCond_FirstUseEver);
     ImGui::Begin("Selection");
 
     if (ImGui::TreeNode("Draw")) {
@@ -289,15 +295,6 @@ void displayIm() {
       ImGui::SliderFloat("##pixels", &pointsize, 0.1f, 10.0f, "%.1f", ImGuiSliderFlags_Logarithmic);
       ImGui::Separator();
 
-      //Scan range selection
-      ImGui::Separator();
-      ImGui::Text("Scan range selection:");
-      ImGui::SliderInt("Id0", &startRangeScanIdx, startScanIdx, endRangeScanIdx);
-      ImGui::SliderInt("Idx", &endRangeScanIdx, startRangeScanIdx, endScanIdx);
-      if (ImGui::Button("Step Up")) stepScansUp(0);
-      ImGui::SameLine();
-      if (ImGui::Button("Step Down")) stepScansDown(0);
-      if (ImGui::Button("Reload Frames")) reloadFrames();
       ImGui::TreePop();
     }
     ImGui::Separator();
@@ -370,14 +367,13 @@ void displayIm() {
       static float big_step = small_step*10; // 100percent increase
       ImGui::InputFloat("Min", &mincolor_value, small_step, big_step, "%.1f", ImGuiInputTextFlags_CharsDecimal);
       ImGui::InputFloat("Max", &maxcolor_value, small_step, big_step);
-      // Unsure if this would be better: 
-      // ImGui::SliderFloat("Min", &mincolor_value, cm->getMin(), cm->getMax(), "%.1f"); //, ImGuiSliderFlags_Logarithmic);
-      // ImGui::SliderFloat("Max", &maxcolor_value, cm->getMin(), cm->getMax(), "%.1f"); //, ImGuiSliderFlags_Logarithmic);
-      
+      // Unsure if this would be better:
+      //ImGui::SliderFloat("Min", &mincolor_value, cm->getMin(), cm->getMax(), "%.1f"); //, ImGuiSliderFlags_Logarithmic);
+      //ImGui::SliderFloat("Max", &maxcolor_value, cm->getMin(), cm->getMax(), "%.1f"); //, ImGuiSliderFlags_Logarithmic);
+
       if (ImGui::Button("Reset Min/Max")) resetMinMax(0);
       minmaxChanged(0); // dummy0
       ImGui::TreePop();
-
     }
 
     // Anim panel
@@ -385,11 +381,11 @@ void displayIm() {
     ImGui::Checkbox("Force keep color", &coloranimbool); coloranim = coloranimbool;
     ImGui::Separator();
     ImGui::Text("Anim delay:");
-    ImGui::InputInt("##Anim", &anim_delay, 1, 10); 
+    ImGui::InputInt("##Anim", &anim_delay, 1, 10);
     if (ImGui::Button("Animate")) startAnimation(0);
     ImGui::Separator();
 
-    // Camera path 
+    // Camera path
     if(ImGui::TreeNode("Camera Path")) {
       ImGui::Text("Path file:");
       ImGui::InputTextWithHint("##File1", "path.dat", path_file_name, 2048);
@@ -402,9 +398,8 @@ void displayIm() {
       ImGui::Separator();
       static bool save_anim_bool, interpolate_bool;
       ImGui::Checkbox("Save Animation", &save_anim_bool); save_animation=save_anim_bool;
-      ImGui::Checkbox("Interpolate by Distance", &interpolate_bool); 
+      ImGui::Checkbox("Interpolate by Distance", &interpolate_bool);
       // Check if updated
-      // if ((bool)inter_by_dist != interpolate_bool) callCameraUpdate(0);
       inter_by_dist=interpolate_bool;
       if (ImGui::Button("Animate Path")) pathAnimate(0);
       if (ImGui::Button("Animate Path and Matching")) pathMatchingAnimate(0);
@@ -421,11 +416,14 @@ void displayIm() {
       if (ImGui::Button("Load")) loadPose(0);
       ImGui::Text("Scaling Factor");
       ImGui::SliderInt("##Factor", &factor, 1, 10);
-      if (ImGui::Button("Save Image")) saveImage(0); // screenshot before imgui frame render x)
+      if (ImGui::Button("Save Image")) {
+        pointmode = 1;
+        saveImage(0); // screenshot before imgui frame render x)
+      }
       ImGui::TreePop();
     }
     ImGui::Separator();
-    
+
     // Selection Panel
     if (ImGui::TreeNode("Selection")) {
       ImGui::Text("Selection file:");
@@ -436,8 +434,6 @@ void displayIm() {
       ImGui::SameLine();
       if (ImGui::Button("Clear")) clearSelection(0);
       static bool select_unselect_bool = true, select_voxels_bool = false;
-      selection_depth = 50;
-      brush_size = 50;
       ImGui::Checkbox("Select/Unselect", &select_unselect_bool); selectOrunselect=select_unselect_bool;
       ImGui::Checkbox("Select Voxels", &select_voxels_bool); select_voxels=select_voxels_bool;
       ImGui::SliderInt("Depth:", &selection_depth, 1, 100, "%d", ImGuiSliderFlags_Logarithmic);
@@ -448,6 +444,17 @@ void displayIm() {
 
     // Advanced panel
     if (advanced_controls && ImGui::TreeNode("Advanced")) {
+
+      //Scan range selection
+      ImGui::Separator();
+      ImGui::Text("Scan range selection:");
+      ImGui::SliderInt("Id0", &startRangeScanIdx, startScanIdx, endRangeScanIdx);
+      ImGui::SliderInt("Idx", &endRangeScanIdx, startRangeScanIdx, endScanIdx);
+      if (ImGui::Button("Step Up")) stepScansUp(0);
+      ImGui::SameLine();
+      if (ImGui::Button("Step Down")) stepScansDown(0);
+      if (ImGui::Button("Reload Frames")) reloadFrames();
+
       ImGui::SliderInt("Frame #:", &current_frame, 0, MetaMatrix[0].size()-1);
       ImGui::SliderFloat("FPS. Lim:", &idealfps, 0.0f, 240.0f, "%.1f");
       ImGui::SliderFloat("Farplane:", &maxfardistance, 1.0f, 1000000.0f, "%.1f", ImGuiSliderFlags_Logarithmic);
@@ -458,7 +465,7 @@ void displayIm() {
       ImGui::Checkbox("Shift Path for 3D", &pathshift_bool); path3D=pathshift_bool;
       ImGui::SliderFloat("3D Shift:", &shifted, 0.0f, 50.0f);
       ImGui::TreePop();
-    
+
     // idk why this has not been there earlier
     } else if (!advanced_controls) {
       ImGui::Text("--advanced missing");
@@ -472,21 +479,20 @@ void displayIm() {
 
   // 2. Similar to legacy shows controlls panel
   {
-    ImGui::SetNextWindowPos(ImVec2(START_WIDTH_IMGUI * 0.175, START_HEIGHT_IMGUI * 0.75), ImGuiCond_FirstUseEver);
-    ImGui::SetNextWindowSize(ImVec2(START_WIDTH_IMGUI * 0.65, START_HEIGHT_IMGUI * 0.20), ImGuiCond_FirstUseEver);
+    ImGui::SetNextWindowPos(ImVec2(START_WIDTH_IMGUI * 0.17, START_HEIGHT_IMGUI * 0.77), ImGuiCond_FirstUseEver);
+    ImGui::SetNextWindowSize(ImVec2(START_WIDTH_IMGUI * 0.655, START_HEIGHT_IMGUI * 0.20), ImGuiCond_FirstUseEver);
     if (ImGui::Begin("Controls")) {
 
-      //ImGui::Text("Application average %.1f FPS", io.Framerate);
-      ImGui::BeginTable("controls_table", 5, ImGuiTableFlags_ScrollX | ImGuiTableFlags_SizingStretchProp);
-      
+      bool table_exists = ImGui::BeginTable("controls_table", 5, ImGuiTableFlags_ScrollX | ImGuiTableFlags_SizingStretchProp);
+
       // Column 1
       ImGui::TableNextColumn();
       ImGui::Text("Mode");
       if(ImGui::Button("Top view")) topView();
       if(ImGui::Button("Rotate view")) rotateView();
       if(ImGui::Button("Reset view")) resetView(0);
-      
-      // Column 2 
+
+      // Column 2
       ImGui::TableNextColumn();
       ImGui::Text("Zoom settings");
       if (showViewMode == 0) {
@@ -501,7 +507,7 @@ void displayIm() {
         ImGui::SliderFloat("Rotate Zoom", &rzoom, 0.001, 100000.0, "%.3f", ImGuiSliderFlags_Logarithmic);
         //ImGui::Text("The navball does not work in rotate mode! ---->");
         ImGui::Text("Currently in: Rotate view.");
-      } 
+      }
       if (ImGui::TreeNode("Keyboard bindings")) {
         ImGui::Text("w/a/s/d: fwd/back left/right");
         ImGui::Text("q/e: roll\t\tc/y: up/down");
@@ -525,7 +531,7 @@ void displayIm() {
           mouseRotX = deg(rPT[0]);
           mouseRotY = deg(rPT[1]);
           mouseRotZ = deg(rPT[2]);
-        } 
+        }
       } else {
         rPT[0] = rad(mouseRotX);
         rPT[1] = rad(mouseRotY);
@@ -534,18 +540,18 @@ void displayIm() {
         // Convert back to vgm, which gets synched next rendering cycle
         if (showViewMode != 2) {
           Matrix4ToQuat(mat, quat);
-          qRotVgm.w = quat[0]; 
-          qRotVgm.x = quat[1]; 
-          qRotVgm.y = quat[2]; 
+          qRotVgm.w = quat[0];
+          qRotVgm.x = quat[1];
+          qRotVgm.y = quat[2];
           qRotVgm.z = quat[3];
         }
       }
-      
+
       // Column 4
       ImGui::TableNextColumn();
       ImGui::Text("Camera");
       static int signed_int_cam_choice;
-      ImGui::SliderInt("Choose camera", &signed_int_cam_choice, 0, cams.size()); 
+      ImGui::SliderInt("Choose camera", &signed_int_cam_choice, 0, cams.size());
       cam_choice = signed_int_cam_choice;
       if(ImGui::Button("Add camera")) callAddCamera(0);
       if(ImGui::Button("Delete camera")) callDeleteCamera(0);
@@ -554,30 +560,419 @@ void displayIm() {
       ImGui::TableNextColumn();
       ImGui::Text("General behaviour");
       static bool cam_mouse_nav_bool = true;
-      ImGui::Checkbox("MouseNav", &cam_mouse_nav_bool); 
+      ImGui::Checkbox("MouseNav", &cam_mouse_nav_bool);
       cameraNavMouseMode = cam_mouse_nav_bool;
-      static bool always_all_pts = false, always_reduce_pts = false;
+      static bool always_all_pts = false, always_reduce_pts = true;
       bool always_tmp = always_all_pts, reduce_tmp = always_reduce_pts;
       ImGui::Checkbox("Always all points", &always_all_pts);
       ImGui::Checkbox("Always reduce points", &always_reduce_pts);
-      // Check if changed all pts
+
+      // There might only be one checkbox marked at a time:
+
+      // Check if changed always pts
       if (always_tmp != always_all_pts && always_all_pts) {
         always_reduce_pts = false;
         reduce_tmp = false;
-        changePointMode(0);
       } // Check if changed reduced pts
       else if (reduce_tmp != always_reduce_pts && always_reduce_pts) {
         always_all_pts = false;
         always_tmp = false;
-        changePointMode(1); 
       }
-      ImGui::EndTable();
-    } 
+
+      // Insanity of Show states:
+
+      // If Idle and no checkbox marked:
+      if  ( !fullydisplayed && !mousemoving && !keypressed && !always_reduce_pts && !always_all_pts ) {
+        // Change pointmode to display everything
+        if (pointmode != 0) {
+          pointmode = 0;
+          glutPostRedisplay();
+        }
+
+      // If non-idle and always reduce
+      } else if (always_reduce_pts) {
+        // Change pointmode to always reduce
+        if (pointmode != -1) {
+          pointmode = -1;
+          glutPostRedisplay();
+        }
+
+      // If non-idle and always all
+      } else if (always_all_pts) {
+        // Change pointmode to always all
+        if (pointmode != 1) {
+          pointmode = 1;
+          glutPostRedisplay();
+        }
+      // If no idle and no checkbox
+      } else if (!always_reduce_pts && !always_all_pts && (mousemoving || keypressed)) {
+        // Change to always reduce
+        if (pointmode != -1) {
+          pointmode = -1;
+          glutPostRedisplay(); // run one GlutMainLoop cycle to validate display
+        }
+      }
+
+      // Close table. But only if the screen is large enough such that is exists
+      if (table_exists) ImGui::EndTable();
+    }
     ImGui::End(); // End of "3D Viewer - Controlls panel"
   }
 
   // Render IMGUI stuff into ImGuis internal buffer
   ImGui::Render();
+}
+
+/**
+ * Displays all data (i.e., points) that are to be displayed
+ * @param mode spezification for drawing to screen or in selection mode
+ */
+void DrawPointsIm(GLenum mode, bool interruptable)
+{
+  long time = GetCurrentTimeInMilliSec();
+  double min = 0.000000001;
+  double max = 1.0;
+  LevelOfDetail *= 1.0 + adaption_rate*(lastfps - idealfps)/idealfps;
+  if (LevelOfDetail > max) LevelOfDetail = max;
+  else if (LevelOfDetail < min) LevelOfDetail = min;
+
+  // In case of animation
+  if(frameNr != 0) {
+    if (coloranim == 0) {
+      cm->setMode(ScanColorManager::MODE_ANIMATION);
+    }
+
+    for(int iterator = (int)octpts.size()-1; iterator >= 0; iterator--) {
+
+      // ignore scans that don't have any frames associated with them
+      if((unsigned int)iterator >= MetaMatrix.size()) continue;
+
+      // also ignore scans outside the selected range - if in advanced mode
+      if (advanced_controls){
+        // pay attention to offset (startScanIdx)
+        if (iterator < startRangeScanIdx - startScanIdx) continue;
+        if (iterator > endRangeScanIdx - startScanIdx) continue;
+      }
+
+      // set usable frame
+      double* frame;
+      Scan::AlgoType type;
+      if((unsigned int)frameNr >= MetaMatrix[iterator].size()) {
+        // use last possible frame
+        frame = MetaMatrix[iterator].back();
+        type = MetaAlgoType[iterator].back();
+      } else {
+        frame = MetaMatrix[iterator][frameNr];
+        type = MetaAlgoType[iterator][frameNr];
+      }
+      if(type == Scan::INVALID) continue;
+      cm->selectColors(type);
+      glPushMatrix();
+      glMultMatrixd(frame);
+
+
+      glPointSize(pointsize);
+        ExtractFrustum(pointsize);
+        cm->selectColors(type);
+        if (pointmode == 1 ) {
+          octpts[iterator]->display();
+        } else {
+          octpts[iterator]->displayLOD(LevelOfDetail);
+        }
+      glPopMatrix();
+    }
+
+    setScansColored(0);
+
+  } else {
+
+    if (mode == GL_SELECT){
+      // select points mode
+      // ------------------
+      GLuint name = 0;
+      for(int iterator = (int)octpts.size()-1; iterator >= 0; iterator--) {
+        glPushMatrix();
+        glMultMatrixd(MetaMatrix[iterator].back());
+
+        glColor4f(1.0, 0.0, 0.0,1.0);
+        glPointSize(pointsize + 2.0);
+        for ( std::set<sfloat*>::iterator it = selected_points[iterator].begin();
+            it != selected_points[iterator].end(); it++) {
+          glLoadName(name++);
+          glBegin(GL_POINTS);
+          glVertex3d((*it)[0], (*it)[1], (*it)[2]);
+          glEnd();
+        }
+        glPointSize(pointsize);
+
+        glFlush();
+        glPopMatrix();
+      }
+
+    } else {
+
+      // draw point is normal mode
+      // -------------------------
+
+      if (interruptable) {
+        glDrawBuffer (GL_FRONT);
+      }
+      glPointSize(pointsize);
+
+      std::vector<int> sequence;
+      calcPointSequence(sequence, current_frame);
+      for(unsigned int i = 0; i < sequence.size(); i++) {
+        int iterator = sequence[i];
+        // ignore scans that don't have any frames associated with them
+        if((unsigned int)iterator >= MetaMatrix.size()) continue;
+
+        // also ignore scans outside the selected range - if in advanced mode
+        if (advanced_controls){
+          // pay attention to offset (startScanIdx)
+          if (iterator < startRangeScanIdx - startScanIdx) continue;
+          if (iterator > endRangeScanIdx - startScanIdx) continue;
+        }
+
+        // set usable frame
+        double* frame;
+        Scan::AlgoType type;
+        if((unsigned int)current_frame >= MetaMatrix[iterator].size()) {
+          // use last possible frame
+          frame = MetaMatrix[iterator].back();
+          type = MetaAlgoType[iterator].back();
+        } else {
+          frame = MetaMatrix[iterator][current_frame];
+          type = MetaAlgoType[iterator][current_frame];
+        }
+        if (type == Scan::INVALID) continue;
+        glPushMatrix();
+        if (invert)
+          // default: white points on black background
+          glColor4d(1.0, 1.0, 1.0, 0.0);
+        else
+          // black points on white background
+          glColor4d(0.0, 0.0, 0.0, 0.0);
+
+        // glMultMatrixd(MetaMatrix[iterator].back());
+        if (current_frame != (int)MetaMatrix.back().size() - 1) {
+          if (coloranim == 0) {
+            cm->setMode(ScanColorManager::MODE_ANIMATION);
+            cm->selectColors(type);
+          } else {
+            setScansColored(0);
+          }
+        }
+        glMultMatrixd(frame);
+
+        ExtractFrustum(pointsize);
+        if (pointmode == 1 ) {
+          octpts[iterator]->display();
+        } else if (interruptable) {
+          checkForInterrupt();
+          // ATTENTION: We sneak ImGui here when force-drawing the points
+          // ImGui Windows should never be color-inverted:
+          if (!invert) {
+            glDisable(GL_COLOR_LOGIC_OP);
+          }
+          // Sneak imgui
+          renderImGuiWindows();
+          ImGui_ImplOpenGL2_RenderDrawData(ImGui::GetDrawData());
+          // Reset color to before state
+          if (invert) {
+            glClearColor(bgcolor[0], bgcolor[1], bgcolor[2], 1.0);
+          } else {
+            glEnable(GL_COLOR_LOGIC_OP);
+            glLogicOp(GL_COPY_INVERTED);
+            glClearColor(1-bgcolor[0], 1-bgcolor[1], 1-bgcolor[2], 1.0);
+          }
+          // Force draw everything
+          glFlush();
+          glFinish();
+          if (isInterrupted()) {
+            glPopMatrix();
+            return;
+          }
+          octpts[iterator]->display();
+        } else {
+          octpts[iterator]->displayLOD(LevelOfDetail);
+        }
+        if (!selected_points[iterator].empty()) {
+          glColor4f(1.0, 0.0, 0.0, 1.0);
+          glPointSize(pointsize + 2.0);
+          glBegin(GL_POINTS);
+          for ( std::set<sfloat*>::iterator it = selected_points[iterator].begin();
+              it != selected_points[iterator].end(); it++) {
+            glVertex3d((*it)[0], (*it)[1], (*it)[2]);
+          }
+          glEnd();
+          glPointSize(pointsize);
+        }
+
+        glPopMatrix();
+      }
+    }
+  }
+
+  if (pointmode == 1 ) {
+    fullydisplayed = true;
+  } else {
+    unsigned long td = (GetCurrentTimeInMilliSec() - time);
+    if (td > 0)
+      lastfps =  1000.0/td;
+    else
+      lastfps = 1000.0;
+    fullydisplayed = false;
+  }
+  if (interruptable)
+    fullydisplayed = true;
+}
+
+/* Works the same as the original DisplayItFunc but DOES NOT FORCE DRAW the opengl buffer */
+void DisplayItFuncIm(GLenum mode, bool interruptable)
+{
+  // set the clear color buffer in case of
+  // both invert and non invert mode
+  if (invert) {
+    glClearColor(bgcolor[0], bgcolor[1], bgcolor[2], 1.0);
+  } else {
+    glEnable(GL_COLOR_LOGIC_OP);
+    glLogicOp(GL_COPY_INVERTED);
+    glClearColor(1-bgcolor[0], 1-bgcolor[1], 1-bgcolor[2], 1.0);
+  }
+
+  // clear the color and depth buffer bit
+  if (!interruptable) { // single buffer mode, we need the depth buffer
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  }
+
+  // set the polygon mode
+  // XXX please clarify why we need this and what GL_FRONT_AND_BACK would do
+  glPolygonMode(GL_FRONT/*_AND_BACK*/, GL_LINE);
+
+  glPushMatrix();
+
+  setup_camera();
+
+  DrawScala();
+
+  // process fog
+  setup_fog();
+
+  if (fardistance > maxfardistance) fardistance = maxfardistance;
+  if ( fabs(oldfardistance - fardistance) > 0.00001 ||
+       fabs(oldneardistance - neardistance) > 0.00001 ) {
+    oldfardistance = fardistance;
+    oldneardistance = neardistance;
+    int viewport[4];
+    glGetIntegerv(GL_VIEWPORT, viewport);
+    reshapeIm(viewport[2], viewport[3]);
+  }
+
+  // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  //
+  // show the objects __after__ the model-transformation
+  // for all status variables we show the appropiated thing
+  // using the drawing functions
+  //
+  // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+  if (show_path == 1) {
+    double *pose;
+    glColor4d(1.0, 0.0, 0.0, 1.0);
+    glLineWidth(5);
+    glBegin(GL_LINE_STRIP);
+    for(int i = 0; (unsigned int)i < MetaMatrix.size(); i++){
+
+      // also ignore scans outside the selected range - if in advanced mode
+      if (advanced_controls){
+        // pay attention to offset (startScanIdx)
+        if (i < startRangeScanIdx - startScanIdx) continue;
+        if (i > endRangeScanIdx - startScanIdx) continue;
+      }
+      // set usable type
+      Scan::AlgoType type;
+      if((unsigned int)frameNr >= MetaMatrix[i].size()) {
+        type = MetaAlgoType[i].back();
+      } else {
+        type = MetaAlgoType[i][frameNr];
+      }
+      if(frameNr >= 1 && frameNr < (int)MetaMatrix[i].size()) {
+        if(type == Scan::INVALID) continue;
+        // avoid incomplete frames in a scan
+        if((unsigned int)frameNr >= MetaMatrix[i].size())
+          pose = MetaMatrix[i].back();
+        else
+          pose = MetaMatrix[i][frameNr];
+      } else {
+        //pose = MetaMatrix[i].back();
+        // avoid incomplete frames in a scan
+        if((unsigned int)current_frame >= MetaMatrix[i].size())
+          pose = MetaMatrix[i].back();
+        else
+          pose = MetaMatrix[i][current_frame];
+      }
+      if(showViewMode == 1) {
+        glVertex3f(pose[12], pose[13], pose[14]);
+      } else {
+        glVertex3f(pose[12], pose[13], pose[14]);
+      }
+    }
+    glEnd();
+  }
+
+  // Draw trajectory from file
+  if (trajectory.size() > 0) {
+    glColor4d(1.0, 0.0, 0.0, 1.0);
+    glLineWidth(5);
+    glBegin(GL_LINE_STRIP);
+
+    for (size_t i = 0; i < trajectory.size(); i++) {
+      glVertex3f(trajectory.at(i)[0], trajectory.at(i)[1], trajectory.at(i)[2]);
+    }
+
+    glEnd();
+  }
+
+  // if show camera is true then draw cameras.
+  if (show_cameras == 1) {
+    DrawCameras();
+  }
+
+  // if show path is true the draw path.
+  if (show_path == 1) {
+    DrawPath();
+  }
+  // if show poses is true then draw coordinate axes.
+  if (show_poses == 1) {
+    DrawCoordinateSystems();
+  }
+  // if show objects is true then draw objects.
+  if (show_objects == 1) {
+    DrawObjects(mode);
+  }
+
+  // if show points is true then draw points
+  if (show_points == 1) DrawPointsIm(mode, interruptable);
+
+  // if show_cylinderBody or show_cylinderPoints true draw cylinder
+  if(show_cylinderBody || show_cylinderPoints) DrawCylinder();
+
+  if (classLabels) DrawTypeLegend();
+  if (label) DrawUrl();
+
+  glPopMatrix();
+
+  if (!invert) {
+    glDisable(GL_COLOR_LOGIC_OP);
+  }
+}
+
+
+/* Modified display loop function for GLUT, uses common show funcs. and imgui
+displayIm alters the OpenGL rendering cycle from the original 3dtk to include ImGui.*/
+void displayIm() {
+
+  renderImGuiWindows();
 
   // GLUT / OpenGL2 camera and aspect handling:
   if (((fabs(cangle_old - cangle) > 0.5)) ||
@@ -594,21 +989,180 @@ void displayIm() {
 #endif
   }
 
-  // After reshaping, clear everything on screen
-  // glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-  // Filling the buffer with OpenGL point cloud renderings
-  DisplayItFunc(GL_RENDER);
   // Draw the buffer
   glDrawBuffer(buffermode);
-
+  DisplayItFuncIm(GL_RENDER, false);
   // Finally Draw ImGui contents as well
   ImGui_ImplOpenGL2_RenderDrawData(ImGui::GetDrawData());
-
   // show the rendered scene
   glutSwapBuffers();
-  glutPostRedisplay();
+  if (pointmode != 0) {
+    glutPostRedisplay();
+  }
 }
 
+/* Replacement for the GLUT idle function. Instead of wrapping, this needed to be """completly""" changed */
+void idleIm(void) {
+
+#ifdef _WIN32
+  Sleep(1);
+#else
+  usleep(1000);
+#endif
+
+  if (glutGetWindow() != window_id)
+    glutSetWindow(window_id);
+
+  // return as nothing has to be updated
+  if (haveToUpdate == 0) {
+    if (!fullydisplayed && !mousemoving && !keypressed && pointmode == 0) {
+      glDrawBuffer(buffermode);
+      // Call the display function
+      DisplayItFuncIm(GL_RENDER, true); // Attention: Modified for ImGui
+    }
+    return;
+  }
+
+  // case: display is invalid - update it
+  if (haveToUpdate == 1) {
+    update_callback();
+    haveToUpdate = 0;
+    return;
+  }
+
+  // case: camera angle is changed - instead of repeating code call Reshape,
+  // since these OpenGL commands are the same
+  if (haveToUpdate == 2) {
+    int viewport[4];
+    glGetIntegerv(GL_VIEWPORT, viewport);
+    reshapeIm(viewport[2], viewport[3]);
+    update_callback();
+    haveToUpdate = 0;
+    return;
+  }
+
+  // case: animation
+  if (haveToUpdate == 3) {
+    frameNr += 1;
+    if (!(MetaMatrix.size() > 1 && frameNr < (int) MetaMatrix[1].size())) {
+      frameNr = 0;
+      haveToUpdate = 4;
+      return;
+    }
+    update_callback();
+
+    if (save_animation) {
+      std::string filename = scan_dir + "animframe" + to_string(frameNr, 5) + ".png";
+      std::cout << "write " << filename << std::endl;
+      int tmpUpdate = haveToUpdate;
+      glWriteImagePNG(filename.c_str(), factor, 0);
+      haveToUpdate = tmpUpdate;
+    }
+  }
+
+#ifdef _WIN32
+  // Extra Sleep is NOT necessary!
+  //Sleep(300);
+  Sleep(anim_delay);
+#else
+  usleep(anim_delay * 10000);
+#endif
+
+  if (haveToUpdate == 4) { // stop animation
+    cout << "Anim stop!!" << endl;
+    frameNr = 0;  // delete these lines if you want a 'continue' functionality.
+    haveToUpdate = 1;
+  }
+
+  // case: scan matching and path animation in lock-step
+  if (haveToUpdate == 8) {
+    if (path_iterator == 0) {
+      oldcamNavMode = cameraNavMouseMode;  // remember state of old mousenav
+      cameraNavMouseMode = 0;
+    }
+    frameNr += 1;
+    if (!(MetaMatrix.size() > 1 && frameNr < (int) MetaMatrix[1].size())) {
+      frameNr = 0;
+      haveToUpdate = 4;
+      return;
+    }
+    std::cout << path_iterator << " " << ups.size() << std::endl;
+    if ((false && path_iterator < path_vectorX.size()) ||
+        (true && path_iterator < ups.size())) {   // standard animation case
+
+      // call the path animation function
+      // hide both the cameras and the path
+      show_cameras = 0;
+      show_path = 0;
+      show_poses = 0;
+      // increase the iteration count
+
+      path_iterator += 1;
+      // repaint the screen
+      update_callback();
+
+      // save the animation
+      if (save_animation) {
+        std::string filename = scan_dir + "animframe"
+                                        + to_string(path_iterator, 5) + ".png";
+        std::cout << "written " << filename << " of "
+                  << path_vectorX.size() << " files" << std::endl;
+        glWriteImagePNG(filename.c_str(), factor, 0);
+        haveToUpdate = 8;
+      }
+    } else {                             // animation has just ended
+      cameraNavMouseMode = oldcamNavMode;
+      show_cameras = 1;
+      show_path = 1;
+      show_poses = 1;
+      haveToUpdate = 0;
+    }
+  }
+
+  // case: path animation
+  if (haveToUpdate == 6) {
+
+    if (path_iterator == 0) {
+      oldcamNavMode = cameraNavMouseMode;  // remember state of old mousenav
+      cameraNavMouseMode = 0;
+    }
+
+    // check if the user wants to animate both
+    // scan matching and the path at the same
+    // time
+
+    // cout << "path_iterator: " << path_iterator << endl;
+    if (path_iterator < path_vectorX.size()) {   // standard animation case
+
+      // call the path animation function
+      // hide both the cameras and the path
+      show_cameras = 0;
+      show_path = 0;
+      // increase the iteration count
+
+      path_iterator += 1;
+      // repaint the screen
+      update_callback();
+
+      // save the animation
+      if (save_animation) {
+        std::string filename = scan_dir + "animframe"
+                                        + to_string(path_iterator, 5) + ".png";
+
+        std::cout << "written " << filename << " of "
+                  << path_vectorX.size() << " files" << std::endl;
+        glWriteImagePNG(filename.c_str(), factor, 0);
+        haveToUpdate = 6;
+      }
+    } else {                             // animation has just ended
+      cameraNavMouseMode = oldcamNavMode;
+      show_cameras = 1;
+      show_path = 1;
+      haveToUpdate = 0;
+    }
+  }
+
+}
 
 /* Modified initScreenWindow function.
 ** This function installs the backend functions for GLUT.
@@ -618,10 +1172,11 @@ void initScreenWindowIm()
 {
   // init display
   glutInitDisplayMode(GLUT_DEPTH | GLUT_RGBA | GLUT_DOUBLE);
-  SCREEN_WIDTH = glutGet(GLUT_SCREEN_WIDTH);  // This works well, when there is only one monitor. 
+  SCREEN_WIDTH = glutGet(GLUT_SCREEN_WIDTH);  // This works well, when there is only one monitor.
   SCREEN_HEIGHT = glutGet(GLUT_SCREEN_HEIGHT); // For multimonitor this needs more treatment...
-  START_WIDTH_IMGUI = 1700;//= (0.8*SCREEN_WIDTH);
-  START_HEIGHT_IMGUI = 850;//= (0.8*SCREEN_HEIGHT);
+  // Stick to original 3dtk
+  START_WIDTH_IMGUI = 1280; // Factor of 2 will give QHD, Andreas ;)
+  START_HEIGHT_IMGUI = 720;
   // Check if screen is large enough for HD...
   if (START_WIDTH_IMGUI > SCREEN_WIDTH || START_HEIGHT_IMGUI > SCREEN_HEIGHT) {
     // Use original 3dtk
@@ -629,8 +1184,8 @@ void initScreenWindowIm()
     START_HEIGHT_IMGUI = START_HEIGHT;
   }
   BOOST_ASSERT_MSG(!(START_WIDTH_IMGUI > SCREEN_WIDTH || START_HEIGHT_IMGUI > SCREEN_HEIGHT), "Go get a wider screen.");
-  START_X_IMGUI = (SCREEN_WIDTH - START_WIDTH_IMGUI) / 2;
-  START_Y_IMGUI = (SCREEN_HEIGHT - START_HEIGHT_IMGUI) / 2;
+  START_X_IMGUI = 0;//(SCREEN_WIDTH - START_WIDTH_IMGUI) / 2;
+  START_Y_IMGUI = 0;//(SCREEN_HEIGHT - START_HEIGHT_IMGUI) / 2;
 
   // define the window position and size
   glutInitWindowPosition(START_X_IMGUI, START_Y_IMGUI);
@@ -645,11 +1200,11 @@ void initScreenWindowIm()
   IMGUI_CHECKVERSION();
   ImGui::CreateContext();
   ImGui::StyleColorsDark();
-  ImGui_ImplGLUT_Init();
-  ImGui_ImplOpenGL2_Init();
 
   // Disable imgui.ini file which messes with initial positions sometimes
   ImGui::GetIO().IniFilename = nullptr;
+  ImGui_ImplGLUT_Init();
+  ImGui_ImplOpenGL2_Init();
 
   // Install GLUT functions
   // ImGui wraps the original 3dtk GLUT handlers:
@@ -661,9 +1216,10 @@ void initScreenWindowIm()
 #endif
   // Keyboard and Idle are not handled by 3dtk.
   // Original 3dtk installed GLUT handler functions:
-  glutKeyboardFunc(callbacks::glut::keyPressed);
-  glutKeyboardUpFunc(callbacks::glut::keyReleased);
-  glutIdleFunc(callbacks::glut::idle);
+  glutKeyboardFunc(keyPressedIm);
+  glutKeyboardUpFunc(keyPressedUpIm);
+  //glutSpecialFunc(ImGui_ImplGLUT_SpecialFunc);
+  glutIdleFunc(idleIm);
 #ifdef __APPLE__
   glutWMCloseFunc(quit); // apple works different
 #else
@@ -713,4 +1269,9 @@ int main(int argc, char **argv)
 
   // Starting the Glut Main Loop
   glutMainLoop();
+
+  // Cleanup
+  ImGui_ImplOpenGL2_Shutdown();
+  ImGui_ImplGLUT_Shutdown();
+  ImGui::DestroyContext();
 }
