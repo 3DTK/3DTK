@@ -367,10 +367,8 @@ void renderImGuiWindows() {
       }
       ImGui::Separator();
       ImGui::Text("Color values:");
-      static float small_step = (cm->getMax()-cm->getMin())/100; // 1percent increase
-      static float big_step = small_step*10; // 100percent increase
-      ImGui::InputFloat("Min", &mincolor_value, small_step, big_step, "%.1f", ImGuiInputTextFlags_CharsDecimal);
-      ImGui::InputFloat("Max", &maxcolor_value, small_step, big_step);
+      ImGui::InputFloat("Min", &mincolor_value, 10, 100, "%.1f", ImGuiInputTextFlags_CharsDecimal);
+      ImGui::InputFloat("Max", &maxcolor_value, 10, 100, "%.1f", ImGuiInputTextFlags_CharsDecimal);
       // Unsure if this would be better:
       //ImGui::SliderFloat("Min", &mincolor_value, cm->getMin(), cm->getMax(), "%.1f"); //, ImGuiSliderFlags_Logarithmic);
       //ImGui::SliderFloat("Max", &maxcolor_value, cm->getMin(), cm->getMax(), "%.1f"); //, ImGuiSliderFlags_Logarithmic);
