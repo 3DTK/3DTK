@@ -211,7 +211,7 @@ int main(int argc, char **argv)
     if (k == split && split != -1)
     {
         // Reference index (middle) for all scans
-        int ref = (int)(0.5 * split);
+        int ref = 0;//(int)(0.5 * split);
 
         Scan *s = createMetaScan(splitscans, iotype, ref, red_string,
             use_reflectance, use_type, use_color, use_normals, global);
@@ -238,7 +238,7 @@ int main(int argc, char **argv)
    // Flush the rest.
   if (!splitscans.empty())
   {
-    int ref = (int)(0.5 * splitscans.size());
+    int ref = 0;//(int)(0.5 * splitscans.size());
 
     Scan *s = createMetaScan(splitscans, iotype, ref, red_string,
         use_reflectance, use_type, use_color, use_normals, global);
