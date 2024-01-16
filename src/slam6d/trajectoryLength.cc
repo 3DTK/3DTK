@@ -28,7 +28,7 @@ using std::ofstream;
 #include <boost/program_options.hpp>
 namespace po = boost::program_options;
 
-int parse_options(int argc,char **argv, std::string &dir, int& start, int& end, bool& readFromPose){
+int parse_options(int argc,char **argv, std::string &dir, int& start, int& end, bool& readFromPose, int& increment){
 
   po::options_description generic("Generic options");
   generic.add_options()
@@ -42,7 +42,9 @@ int parse_options(int argc,char **argv, std::string &dir, int& start, int& end, 
      "start at scan <arg> (i.e., neglects the first <arg> scans) "
      "[ATTENTION: counting naturally starts with 0]")
     ("end,e", po::value<int>(&end)->default_value(-1),
-     "end after scan <arg>");
+     "end after scan <arg>")
+    ("increment,i",po::value<int>(&increment)->default_value(100),
+     "Calc length between <arg> .pose/.frames");
 
   po::options_description hidden("Hidden options");
   hidden.add_options()
@@ -89,7 +91,8 @@ int main(int argc, char **argv)
   int start = 0, end = -1;
   string dir;
   bool readFromPose=false;
-  parse_options(argc, argv, dir, start, end, readFromPose);
+  int incr;
+  parse_options(argc, argv, dir, start, end, readFromPose, incr);
 
   int  fileCounter = start;
   char poseFileName[255];
@@ -108,9 +111,9 @@ int main(int argc, char **argv)
     if (end > -1 && fileCounter > end) break; // 'nuf read
 
     if(readFromPose) {
-      snprintf(poseFileName,255,"%sscan%.3d.pose",dir.c_str(),fileCounter+=100);
+      snprintf(poseFileName,255,"%sscan%.3d.pose",dir.c_str(),fileCounter+=incr);
     } else {
-      snprintf(poseFileName,255,"%sscan%.3d.frames",dir.c_str(),fileCounter+=100);
+      snprintf(poseFileName,255,"%sscan%.3d.frames",dir.c_str(),fileCounter+=incr);
     }
     pose_in.open(poseFileName);
 

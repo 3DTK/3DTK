@@ -321,6 +321,7 @@ void lidarMsgCallback(const sensor_msgs::PointCloud2::ConstPtr& msg)
     while(source_frame == "") {
       callbacks_poses.callOne(ros::WallDuration());
     }
+    ROS_INFO("Lidar frame \"%s\", Pose frame \"%s\"", lidar_frame.c_str(), source_frame.c_str());
     tf::TransformListener listener;
     listener.waitForTransform(lidar_frame, source_frame, ros::Time(0), ros::Duration(30.0) );
     listener.lookupTransform(lidar_frame, source_frame, ros::Time(ros::Time(0)), transform_lidar2pose);
