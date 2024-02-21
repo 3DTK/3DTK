@@ -586,7 +586,7 @@ void renderImGuiWindows() {
       // Insanity of Show states:
 
       // If Idle and no checkbox marked:
-      if  ( !fullydisplayed && !mousemoving && !keypressed && !always_reduce_pts && !always_all_pts ) {
+      if  ( !mousemoving && !keypressed && !always_reduce_pts && !always_all_pts ) {
         // Change pointmode to display everything
         if (pointmode != 0) {
           pointmode = 0;
@@ -615,6 +615,9 @@ void renderImGuiWindows() {
           pointmode = -1;
           glutPostRedisplay(); // run one GlutMainLoop cycle to validate display
         }
+      } else {
+        pointmode = 1;
+        glutPostRedisplay();
       }
 
       // Close table. But only if the screen is large enough such that is exists
