@@ -190,6 +190,7 @@ void updatePointModeControls() {return;}
 void DrawTypeLegend();
 void setup_camera();
 void setup_fog();
+void DrawPointsIm(GLenum, bool);
 
 extern bool   classLabels;
 
@@ -1018,7 +1019,7 @@ void idleIm(void) {
 
   // return as nothing has to be updated
   if (haveToUpdate == 0) {
-    if (!fullydisplayed && !mousemoving && !keypressed && pointmode == 0) {
+    if (!mousemoving && !keypressed && pointmode == 0) {
       glDrawBuffer(buffermode);
       // Call the display function
       DisplayItFuncIm(GL_RENDER, true); // Attention: Modified for ImGui
