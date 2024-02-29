@@ -190,6 +190,37 @@ void updatePointModeControls() {return;}
 void DrawTypeLegend();
 void setup_camera();
 void setup_fog();
+
+void mapColorToValueIm()
+{
+  switch (listboxColorVal) {
+    case 0:
+      cm->setCurrentType(PointType::USE_HEIGHT);
+      break;
+    case 1:
+      cm->setCurrentType(PointType::USE_REFLECTANCE);
+      break;
+    case 2:
+      cm->setCurrentType(PointType::USE_TEMPERATURE);
+      break;
+    case 3:
+      cm->setCurrentType(PointType::USE_AMPLITUDE);
+      break;
+    case 4:
+      cm->setCurrentType(PointType::USE_DEVIATION);
+      break;
+    case 5:
+      cm->setCurrentType(PointType::USE_TYPE);
+      break;
+    case 6:
+      cm->setCurrentType(PointType::USE_COLOR);
+      break;
+    default:
+      break;
+  };
+}
+
+// Forward declaration
 void DrawPointsIm(GLenum, bool);
 
 extern bool   classLabels;
@@ -327,6 +358,7 @@ void renderImGuiWindows() {
 
       // Color Values
       ImGui::Separator();
+      static int colorTypeVal = listboxColorVal;
       if (ImGui::TreeNode("Values")) {
         ImGui::RadioButton("Height", &listboxColorVal, 0);
         if(!(pointtype.hasReflectance())) ImGui::RadioButton("Reflectance", false);
@@ -339,11 +371,15 @@ void renderImGuiWindows() {
         else ImGui::RadioButton("Deviation", &listboxColorVal, 4);
         if(!(pointtype.hasType())) ImGui::RadioButton("Type", false);
         else ImGui::RadioButton("Type", &listboxColorVal, 5);
-        mapColorToValue(0); // 0 is a dummy
+        if (colorTypeVal != listboxColorVal) {
+          colorTypeVal = listboxColorVal;
+          mapColorToValueIm(); 
+        }
         ImGui::TreePop();
       }
       // Color Map
       ImGui::Separator();
+      static int colorMapVal = listboxColorMapVal;
       if (ImGui::TreeNode("Map")) {
         ImGui::RadioButton("Solid", &listboxColorMapVal, 0);
         ImGui::RadioButton("Grey", &listboxColorMapVal, 1);
@@ -353,7 +389,10 @@ void renderImGuiWindows() {
         ImGui::RadioButton("Rand", &listboxColorMapVal, 5);
         ImGui::RadioButton("SHSV", &listboxColorMapVal, 6);
         ImGui::RadioButton("TEMP", &listboxColorMapVal, 7);
-        changeColorMap(0); // dummy 0
+        if (colorMapVal != listboxColorMapVal) {
+          colorMapVal = listboxColorMapVal;
+          changeColorMap(0); // dummy 0
+        }
         ImGui::TreePop();
       }
       // Color Type
@@ -368,13 +407,11 @@ void renderImGuiWindows() {
       }
       ImGui::Separator();
       ImGui::Text("Color values:");
+      if (ImGui::Button("Reset Min/Max")) {
+        resetMinMax(0);
+      }
       ImGui::InputFloat("Min", &mincolor_value, 10, 100, "%.1f", ImGuiInputTextFlags_CharsDecimal);
       ImGui::InputFloat("Max", &maxcolor_value, 10, 100, "%.1f", ImGuiInputTextFlags_CharsDecimal);
-      // Unsure if this would be better:
-      //ImGui::SliderFloat("Min", &mincolor_value, cm->getMin(), cm->getMax(), "%.1f"); //, ImGuiSliderFlags_Logarithmic);
-      //ImGui::SliderFloat("Max", &maxcolor_value, cm->getMin(), cm->getMax(), "%.1f"); //, ImGuiSliderFlags_Logarithmic);
-
-      if (ImGui::Button("Reset Min/Max")) resetMinMax(0);
       minmaxChanged(0); // dummy0
       ImGui::TreePop();
     }
@@ -385,6 +422,7 @@ void renderImGuiWindows() {
     ImGui::Separator();
     ImGui::Text("Anim delay:");
     ImGui::InputInt("##Anim", &anim_delay, 1, 10);
+    anim_delay = std::max(0, anim_delay);
     if (ImGui::Button("Animate")) startAnimation(0);
     ImGui::Separator();
 
@@ -585,6 +623,7 @@ void renderImGuiWindows() {
 
       // Insanity of Show states:
 
+      static int modal_renderings = 0;
       // If Idle and no checkbox marked:
       if  ( !mousemoving && !keypressed && !always_reduce_pts && !always_all_pts ) {
         // Change pointmode to display everything
@@ -603,9 +642,28 @@ void renderImGuiWindows() {
 
       // If non-idle and always all
       } else if (always_all_pts) {
-        // Change pointmode to always all
-        if (pointmode != 1) {
+        // interuptable always_all_pts mode
+        checkForInterrupt(); 
+        // Start loading the points, show a modal dialog 
+        if (!isInterrupted() && pointmode != 1 && !mousemoving && !keypressed && modal_renderings < 3) {
+          ImGui::OpenPopup("Please wait");
+          if (ImGui::BeginPopupModal("Please wait")){
+            ImGui::Text("Loading all the points at once...");
+            ImGui::Text("Interact to abort.");
+            ImGui::EndPopup();
+            // We need at least 2 modal renderings because of the rendering cycle...
+            modal_renderings++;
+          }
+          glutPostRedisplay();
+        // If we are interrupted, reset mode to always_reduce mode internally
+        } else if (mousemoving || keypressed || isInterrupted()) {
+          pointmode = -1;
+          glutPostRedisplay();
+        // If we did not get interrupted and have rendered the modal dialog, start rendering all points
+        } else if (modal_renderings >= 3 && pointmode != 1) {
+          // Change pointmode to always all
           pointmode = 1;
+          modal_renderings = 0;
           glutPostRedisplay();
         }
       // If no idle and no checkbox
@@ -615,9 +673,6 @@ void renderImGuiWindows() {
           pointmode = -1;
           glutPostRedisplay(); // run one GlutMainLoop cycle to validate display
         }
-      } else {
-        pointmode = 1;
-        glutPostRedisplay();
       }
 
       // Close table. But only if the screen is large enough such that is exists
@@ -676,12 +731,11 @@ void DrawPointsIm(GLenum mode, bool interruptable)
       cm->selectColors(type);
       glPushMatrix();
       glMultMatrixd(frame);
-
-
       glPointSize(pointsize);
         ExtractFrustum(pointsize);
         cm->selectColors(type);
-        if (pointmode == 1 ) {
+        checkForInterrupt();
+        if (pointmode == 1 && !mousemoving && !keypressed && !isInterrupted()) {
           octpts[iterator]->display();
         } else {
           octpts[iterator]->displayLOD(LevelOfDetail);
@@ -772,7 +826,8 @@ void DrawPointsIm(GLenum mode, bool interruptable)
         glMultMatrixd(frame);
 
         ExtractFrustum(pointsize);
-        if (pointmode == 1 ) {
+        checkForInterrupt();
+        if (pointmode == 1 && !mousemoving && !keypressed && !isInterrupted()) {
           octpts[iterator]->display();
         } else if (interruptable) {
           checkForInterrupt();
@@ -820,7 +875,8 @@ void DrawPointsIm(GLenum mode, bool interruptable)
     }
   }
 
-  if (pointmode == 1 ) {
+  checkForInterrupt();
+  if (pointmode == 1 && !mousemoving && !keypressed && !isInterrupted()) {
     fullydisplayed = true;
   } else {
     unsigned long td = (GetCurrentTimeInMilliSec() - time);
@@ -1265,7 +1321,6 @@ int main(int argc, char **argv)
   initScreenWindowIm();
   initShow(dss, ws, ds);
 
-  // TODO: screenshot handling should disable ImGui content
   if (takescreenshot) {
     glutTimerFunc(0, &saveImageAndExit, 0);
   }
