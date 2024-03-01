@@ -373,7 +373,7 @@ void renderImGuiWindows() {
         else ImGui::RadioButton("Type", &listboxColorVal, 5);
         if (colorTypeVal != listboxColorVal) {
           colorTypeVal = listboxColorVal;
-          mapColorToValueIm(); 
+          mapColorToValueIm();
         }
         ImGui::TreePop();
       }
@@ -643,8 +643,8 @@ void renderImGuiWindows() {
       // If non-idle and always all
       } else if (always_all_pts) {
         // interuptable always_all_pts mode
-        checkForInterrupt(); 
-        // Start loading the points, show a modal dialog 
+        checkForInterrupt();
+        // Start loading the points, show a modal dialog
         if (!isInterrupted() && pointmode != 1 && !mousemoving && !keypressed && modal_renderings < 3) {
           ImGui::OpenPopup("Please wait");
           if (ImGui::BeginPopupModal("Please wait")){

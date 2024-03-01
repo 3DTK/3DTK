@@ -44,12 +44,15 @@ const int POSE_WINDOW_SIZE = 2; // Size of pose sliding window average
 bool have_pose_topic = true;
 
 #define PATH_CHAR_LEN 5000 // what a shit define... maximum buffer size for output path
+#define conv_rad2deg 57.29577951308232
 
 // Pose stream is usually very fast wrt. LiDAR, so we assign an individual callback queue
 ros::CallbackQueue callbacks_poses;
 std::queue<geometry_msgs::PoseStamped> current_poses;
 bool ignore_stamps = false;
 bool skip_points = false;
+double min_dist2;
+double max_dist2;
 
 uint seq; // this counts the scanfiles, starting from 000, 001, 002, ... , 999, 1000, 1001,...
 bool firstLidarCallback = false;
@@ -68,7 +71,9 @@ int parse_options (int argc, char** argv,
   bool& skip_points,
   int& pose_type,
   bool& ignore_timestamps,
-  bool& verbose
+  bool& verbose,
+  double& minDist,
+  double& maxDist
 )
 {
   po::options_description generic("Generic options");
@@ -86,6 +91,10 @@ int parse_options (int argc, char** argv,
      "Chose the ROS data type of pose input:\n"
      " 1 - geometry_msgs::PoseStamped\n"
      " 2 - sensor_msgs::Imu (this will only use rotation)")
+    ("minDist,m", po::value<double>(&minDist)->default_value(0),
+      "Ignore points closer to <arg> cm")
+    ("maxDist,M", po::value<double>(&maxDist)->default_value(std::numeric_limits<double>::max()),
+      "Ignore points closer to <arg> cm")
     ("skip_points,s", po::bool_switch(&skip_points)->default_value(false),
     "Exports only pose data. Use if re-run on a bagfile where points have already been exported.")
     ("verbose,v", po::bool_switch(&verbose)->default_value(false),
@@ -256,7 +265,7 @@ void poseMsgCallback(const geometry_msgs::PoseStamped::ConstPtr& msg)
   geometry_msgs::PoseStamped pose = geometry_msgs::PoseStamped();
   pose.header = msg->header;
   pose.pose = msg->pose;
-  source_frame = msg->header.frame_id; 
+  source_frame = msg->header.frame_id;
   slidingWindow(pose);
 }
 
@@ -268,7 +277,7 @@ void imuMsgCallback(const sensor_msgs::Imu::ConstPtr& msg)
   // Fill the pose here but leave out the position part.
   pose.pose.orientation = msg->orientation;
   pose.pose.position = geometry_msgs::Point(); // initializes with 0
-  source_frame = msg->header.frame_id; 
+  source_frame = msg->header.frame_id;
   slidingWindow(pose);
 }
 
@@ -334,45 +343,37 @@ void lidarMsgCallback(const sensor_msgs::PointCloud2::ConstPtr& msg)
       transform_lidar2pose.getRotation().getZ(),
       transform_lidar2pose.getRotation().getW()
     );
-    
-    firstLidarCallback = true; 
+
+    firstLidarCallback = true;
   }
-  pcl::PCLPointCloud2 pcl_pc2;
-  pcl_conversions::toPCL(*msg,pcl_pc2);
-  pcl::PointCloud<pcl::PointXYZI>::Ptr temp_cloud(new pcl::PointCloud<pcl::PointXYZI>);
-  pcl::fromPCLPointCloud2(pcl_pc2,*temp_cloud);
 
   // Opening 3d file to write into
-  std::ofstream file_3d;
+  FILE* file_3d;
   char* file_name = new char[PATH_CHAR_LEN]();
   std::sprintf(file_name, "%sscan%03d.3d", PATH, seq);
-  
+
   auto start_clock_pts = high_resolution_clock::now();
   if (!skip_points) {
-    file_3d.open(file_name);
+    pcl::PCLPointCloud2 pcl_pc2;
+    pcl_conversions::toPCL(*msg,pcl_pc2);
+    pcl::PointCloud<pcl::PointXYZI>::Ptr temp_cloud(new pcl::PointCloud<pcl::PointXYZI>);
+    pcl::fromPCLPointCloud2(pcl_pc2,*temp_cloud);
     // Writing the lidar data to the text file
+    file_3d = fopen(file_name, "wb");;
     // This is a left handed coordinate system and we convert the values to cm
     for (size_t i = 0; i < temp_cloud->points.size(); ++i)
     {
         pcl::PointXYZI p = temp_cloud->points[i];
+        double dist2 = 100*100*(p.x*p.x+p.y*p.y+p.z*p.z);
+        if (std::isnan(dist2) || dist2 < min_dist2 || dist2 > max_dist2 )
+          continue;
         // Convert to left handed
-        // tf::Vector3 v;
-        // v.setX(-p.y);
-        // v.setY(p.z);
-        // v.setZ(p.x);
-
-        //#pragma omp critical
-        file_3d << 100.0 * -p.y << " "
-                << 100.0 * p.z << " "
-                << 100.0 * p.x << " "
-                << temp_cloud->points[i].intensity << std::endl;
+        fprintf(file_3d, "%lf %lf %lf %lf\n", 100*-p.y, 100*p.z, 100*p.x, temp_cloud->points[i].intensity);
     }
-    file_3d.close();
+    fclose(file_3d);
   }
   auto stop_clock_pts = high_resolution_clock::now();
 
-  // Opening the pose file to write into
-  std::ofstream file_pose;
   // Get current pose average
   geometry_msgs::PoseStamped current_pose_avg = interpolate_pose_at(msg->header.stamp.toSec());
 
@@ -419,13 +420,9 @@ void lidarMsgCallback(const sensor_msgs::PointCloud2::ConstPtr& msg)
   auto duration_pts = duration_cast<milliseconds>(stop_clock_pts - start_clock_pts);
   ROS_INFO("Writing %s ... [%d ms]", file_name, duration_pts);
   std::sprintf(file_name, "%sscan%03d.pose", PATH, seq);
-  file_pose.open(file_name);
-  file_pose << x << " " << y << " " << z << " " <<
-               roll * (180.0/M_PI) << " " <<
-               pitch * (180.0/M_PI) << " " <<
-               yaw * (180.0/M_PI) << " " << std::endl;
-  file_pose.close();
-
+  FILE* file_pose = fopen(file_name, "wb");
+  fprintf(file_pose, "%lf %lf %lf %lf %lf %lf", x, y, z, roll*conv_rad2deg, pitch*conv_rad2deg, yaw*conv_rad2deg);
+  fclose(file_pose);
   seq++;
   delete file_name;
 }
@@ -445,11 +442,16 @@ int main(int argc, char **argv)
     string lidar_topic;
     string pose_topic;
     int pose_type;
+    double min_dist;
+    double max_dist;
 
    // Definition and allocation of parameters
     parse_options(argc, argv,
         outdir, lidar_topic, pose_topic, skip_points,
-        pose_type, ignore_stamps, verbose);
+        pose_type, ignore_stamps, verbose, min_dist, max_dist);
+
+    min_dist2 = min_dist*min_dist;
+    max_dist2 = max_dist*max_dist;
 
     // Create path on disk (if it does not exist yet)
     PATH = outdir.c_str();
