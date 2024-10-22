@@ -85,6 +85,7 @@ namespace std
 #include <boost/filesystem.hpp>
 
 #include <boost/program_options.hpp>
+#include <cfloat>
 namespace po = boost::program_options;
 
 //  Handling Segmentation faults and CTRL-C
