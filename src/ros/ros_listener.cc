@@ -94,7 +94,7 @@ int parse_options (int argc, char** argv,
     ("minDist,m", po::value<double>(&minDist)->default_value(0),
       "Ignore points closer to <arg> cm")
     ("maxDist,M", po::value<double>(&maxDist)->default_value(std::numeric_limits<double>::max()),
-      "Ignore points closer to <arg> cm")
+      "Ignore points further than <arg> cm")
     ("skip_points,s", po::bool_switch(&skip_points)->default_value(false),
     "Exports only pose data. Use if re-run on a bagfile where points have already been exported.")
     ("verbose,v", po::bool_switch(&verbose)->default_value(false),
