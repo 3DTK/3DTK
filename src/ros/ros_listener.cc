@@ -43,8 +43,8 @@ const char* PATH; // Current directory
 const int POSE_WINDOW_SIZE = 2; // Size of pose sliding window average
 bool have_pose_topic = true;
 
-#define PATH_CHAR_LEN 5000 // what a shit define... maximum buffer size for output path
-#define conv_rad2deg 57.29577951308232
+const int PATH_CHAR_LEN 5000; // what a shit define... maximum buffer size for output path
+const double conv_rad2deg 57.29577951308232
 
 // Pose stream is usually very fast wrt. LiDAR, so we assign an individual callback queue
 ros::CallbackQueue callbacks_poses;
