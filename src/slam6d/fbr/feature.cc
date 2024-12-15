@@ -59,6 +59,10 @@ namespace fbr {
 
               //Detect the keypoints using SIFT Detector
             case SIFT_DET:{
+#if (CV_MAJOR_VERSION >= 4) && (CV_MINOR_VERSION >= 10)
+              Ptr<cv::SIFT> detector = cv::SIFT::create();
+              detector->detect(pImage, keypoints, descriptors);
+#else
 #if (CV_MAJOR_VERSION >= 3) && (CV_MINOR_VERSION >= 0)
               Ptr<xfeatures2d::SIFT> detector = xfeatures2d::SIFT::create();
               detector->detect(pImage, keypoints, descriptors);
@@ -66,6 +70,7 @@ namespace fbr {
               cv::SiftFeatureDetector detector;
               detector.detect(pImage, keypoints);
 #endif
+#endif	      
               break;
             }
 #endif
@@ -158,6 +163,10 @@ namespace fbr {
             }
             case SIFT_DES:{
               //Create descriptor using SIFT
+#if (CV_MAJOR_VERSION >= 4) && (CV_MINOR_VERSION >= 10)
+              Ptr<cv::SIFT> detector = cv::SIFT::create();
+              detector->detect(pImage, keypoints, descriptors);
+#else	      
 #if (CV_MAJOR_VERSION >= 3) && (CV_MINOR_VERSION >= 0)
               Ptr<xfeatures2d::SIFT> extractor = xfeatures2d::SIFT::create();
               extractor->compute(pImage, keypoints, descriptors);
@@ -165,6 +174,7 @@ namespace fbr {
               cv::SiftDescriptorExtractor extractor;
               extractor.compute(pImage, keypoints, descriptors);
 #endif
+#endif	      
               break;
             }
 #endif

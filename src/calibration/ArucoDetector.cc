@@ -4,7 +4,7 @@
 #include <boost/filesystem.hpp>
 #include <calibration/DetectionFileHandler.h>
 
-#if CV_MAJOR_VERSION > 3
+#if (CV_MAJOR_VERSION > 3) && (CV_MAJOR_VERSION < 4)
 
 namespace calibration {
 

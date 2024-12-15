@@ -184,8 +184,9 @@ int main(int argc, const char *argv[]) {
         }
 
         detector = new calibration::AprilTagDetector(std::vector<AprilTag::AprilTag3f>(), tagFamily, decimate, blur, hamming, refineEdges, cornerSubpixel, threads, debug);
-#if CV_MAJOR_VERSION > 3
+#if (CV_MAJOR_VERSION > 3) && (CV_MAJOR_VERSION < 4)
     } else if (vm["patterntype"].as<std::string>().compare("aruco") == 0) {
+      
         detector = new calibration::ArucoDetector(std::vector<AprilTag::AprilTag3f>(), "DICT_APRILTAG_36h11");
 #endif
     } else if (vm["patterntype"].as<std::string>().compare("chessboard") == 0) {
