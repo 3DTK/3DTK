@@ -32,12 +32,13 @@ int main(int argc, char **argv)
     int split = -1;
     bool rm_scatter = false;
     bool skip_empty = false;
+    bool trustpose = false;
 
     // parsing the command line parameters with boost::po, see header file
     try {
         parse_options(argc, argv, cond_dir, orig_dir, red, rand, start, end,
             maxDist, minDist, octree, iotype, customFilter, split, rm_scatter,
-            skip_empty);
+            skip_empty, trustpose);
     } catch (std::exception& e) {
         std::cerr << "Error while parsing settings: " << e.what() << std::endl;
         exit(1);
@@ -91,6 +92,7 @@ int main(int argc, char **argv)
     }
 
     // Open Scans from disk
+    if (!trustpose) Scan::continueProcessing();
     Scan::openDirectory(false, orig_dir, iotype, start, end);
     if(Scan::allScans.size() == 0) {
         std::cerr << "No scans found. Did you use the correct format?" << std::endl;

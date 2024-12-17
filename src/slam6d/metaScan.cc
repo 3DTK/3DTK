@@ -28,6 +28,7 @@ MetaScan::MetaScan(std::vector<Scan*> scans, int nns_method) : m_scans(scans)
 {
   // add this to the global vector for addFrame reasons
   Scan::allScans.push_back(this);
+  m_pairs = *(new std::map<std::string, std::pair<unsigned char*, size_t> >);
 }
 
 MetaScan::~MetaScan()

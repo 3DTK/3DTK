@@ -352,7 +352,7 @@ double lum6DEuler::doGraphSlam6D(Graph gr, vector <Scan *> allScans, int nrIt)
       iteration < nrIt && ret > epsilonLUM;
       iteration++) {
 
-    if (nrIt > 1) cout << "Iteration " << iteration << " of " << nrIt << endl;
+    if (nrIt > 1 && !quiet) cout << "Iteration " << iteration << " of " << nrIt << endl;
 
     // * Calculate X and CX from all Dij and Cij
     int n = (gr.getNrScans() - 1);

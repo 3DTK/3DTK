@@ -267,7 +267,7 @@ void validate(boost::any& v, const std::vector<std::string>& values,
 
 
 int parse_options(int argc, char **argv, std::string &dir, double &red, int &rand,
-            int &start, int &end, int &maxDist, int &minDist, bool &use_frames,
+            int &start, int &end, int &maxDist, int &minDist, bool &trustpose,
             bool &use_xyz, bool &use_reflectance, bool &use_type, bool &use_color, int &octree, IOType &type, std::string& customFilter, double &scaleFac,
 	    bool &hexfloat, bool &high_precision, int &frame, bool &use_normals, int &split, bool& global, bool& rm_scatter, bool& skip_empty)
 {
@@ -314,8 +314,8 @@ po::options_description generic("Generic options");
      "export type/class values")
     ("normals,N", po::bool_switch(&use_normals)->default_value(false),
      "export point normals")
-    ("use_frames,F", po::bool_switch(&use_frames)->default_value(false),
-    "Use .frames files instead of .pose files.")
+    ("trustpose", po::bool_switch(&trustpose)->default_value(false),
+    "Use .pose files instead of .frames files.")
     ("xyz,x", po::bool_switch(&use_xyz)->default_value(false),
      "export in xyz format (right handed coordinate system in m)")
     ("hexfloat,0", po::bool_switch(&hexfloat)->default_value(false),

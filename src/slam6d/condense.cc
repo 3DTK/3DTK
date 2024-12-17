@@ -32,7 +32,7 @@ int main(int argc, char **argv)
   int    start = 0,   end = -1;
   int    maxDist    = -1;
   int    minDist    = -1;
-  bool   use_frames   = false;
+  bool   trustpose   = false;
   bool   use_xyz = false;
   bool   use_color = false;
   bool   use_reflectance = false;
@@ -54,7 +54,7 @@ int main(int argc, char **argv)
 
   try {
     parse_options(argc, argv, dir, red, rand, start, end,
-      maxDist, minDist, use_frames, use_xyz, use_reflectance, use_type, use_color, octree, iotype, customFilter, scaleFac,
+      maxDist, minDist, trustpose, use_xyz, use_reflectance, use_type, use_color, octree, iotype, customFilter, scaleFac,
       hexfloat, high_precision, frame, use_normals, split, global, rm_scatter, skip_empty);
   } catch (std::exception& e) {
     std::cerr << "Error while parsing settings: " << e.what() << std::endl;
@@ -113,7 +113,12 @@ int main(int argc, char **argv)
   }
 
   // Get Scans
-  if (use_frames) Scan::continueProcessing();
+  if (!trustpose){
+    Scan::continueProcessing();
+    std::cout << "ATTENTION: using .frames files!!!" << std::endl;
+  } else {
+    std::cout << "ATTENTION: using .pose files!!!" << std::endl;
+  } 
   Scan::openDirectory(false, dir, iotype, start, end);
   if(Scan::allScans.size() == 0) {
     std::cerr << "No scans found. Did you use the correct format?" << std::endl;

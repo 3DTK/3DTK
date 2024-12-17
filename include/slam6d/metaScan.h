@@ -33,12 +33,71 @@ public:
   virtual const char* getIdentifier() const { return "metascan"; }
 
   virtual DataPointer get(const std::string& identifier)
-  { return DataPointer(0, 0); }
+  { 
+    std::map<std::string, std::pair<unsigned char*, size_t>>::iterator it = m_pairs.find(identifier);
+    // Create data 
+    if (it == m_pairs.end()) 
+    { 
+      size_t nrPts = 0;
+      for (Scan *s : m_scans) {
+        nrPts += s->size<DataXYZ>(identifier);
+      } 
+      if (identifier == "xyz") {
+        vector<double> xyz;
+        xyz.reserve(nrPts);
+        for (Scan *s : m_scans) {
+          DataXYZ data_ptr = s->get("xyz");
+          for(int i = 0; i < data_ptr.size(); ++i) {
+            // MetaScan uses the transformed points!
+            double p[3] = {data_ptr[i][0], data_ptr[i][1], data_ptr[i][2]};
+            transform3(s->get_transMat(), p);   
+            xyz.push_back(p[0]);
+            xyz.push_back(p[1]);
+            xyz.push_back(p[2]);
+          } 
+        }
+        double* data = reinterpret_cast<double*>(create("xyz",
+          sizeof(double)*3*nrPts).get_raw_pointer());
+        for(size_t i = 0; i < xyz.size(); ++i) data[i] = xyz[i];
+      } else if (identifier == "xyz reduced" 
+        || identifier == "xyz reduced original") {
+        calcReducedOnDemand();
+      } else if (identifier == "xyz reduced show") {
+        calcReducedPoints();
+        m_pairs["xyz reduced show"] = m_pairs["xyz reduced"];  
+      }   
+      it = m_pairs.find(identifier);
+    } 
+
+    // If the data still does not exist (failure) return Datapointer to 0
+    if (it == m_pairs.end()) 
+      return DataPointer(0, 0);
+    else {
+      return DataPointer(it->second.first, it->second.second);
+    } 
+  }
 
   virtual void get(IODataType types) {}
 
   virtual DataPointer create(const std::string& identifier, size_t size)
-  { return DataPointer(0, 0); }
+  {
+    std::map<std::string, std::pair<unsigned char*, size_t>>::iterator it = m_pairs.find(identifier);
+    if(it != m_pairs.end() && it->second.second != size) {
+      delete[] it->second.first;
+    } 
+    unsigned char *data;
+    if(it == m_pairs.end() || it->second.second != size) {
+      data = new unsigned char[size];
+    } 
+    if(it == m_pairs.end()) {
+      it = m_pairs.insert(std::make_pair(identifier,
+        std::make_pair(data, size))).first;
+    } else if (it->second.second != size) {
+      it->second.first = data;
+      it->second.second = size;
+    }
+    return DataPointer(it->second.first, it->second.second);
+  }
 
   virtual void clear(const std::string& identifier) {}
 
@@ -60,6 +119,7 @@ protected:
 
 private:
   std::vector<Scan*> m_scans;
+  std::map<std::string, std::pair<unsigned char*, size_t> > m_pairs;
 };
 
 #endif // __META_SCAN_H__
