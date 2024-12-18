@@ -13,6 +13,7 @@
 #include "scan.h"
 
 #include <vector>
+#include <map>
 
 class MetaScan : public Scan {
 public:
