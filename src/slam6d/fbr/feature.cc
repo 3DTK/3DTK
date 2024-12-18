@@ -165,7 +165,7 @@ namespace fbr {
               //Create descriptor using SIFT
 #if (CV_MAJOR_VERSION >= 4) && (CV_MINOR_VERSION >= 10)
               Ptr<cv::SIFT> detector = cv::SIFT::create();
-              detector->detect(pImage, keypoints, descriptors);
+              detector->compute(pImage, keypoints, descriptors);
 #else	      
 #if (CV_MAJOR_VERSION >= 3) && (CV_MINOR_VERSION >= 0)
               Ptr<xfeatures2d::SIFT> extractor = xfeatures2d::SIFT::create();
