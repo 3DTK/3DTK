@@ -4,7 +4,7 @@
 #include <boost/filesystem.hpp>
 #include <calibration/DetectionFileHandler.h>
 
-#if (CV_MAJOR_VERSION > 3) && (CV_MAJOR_VERSION < 4)
+#if (CV_MAJOR_VERSION > 3)
 
 namespace calibration {
 
@@ -12,16 +12,27 @@ ArucoDetector::ArucoDetector(std::vector<AprilTag::AprilTag3f> patternPoints, st
     _patternPoints(patternPoints),
     _dictionaryName(dictionaryName)
 {
+    int dictionary_type = 0;
     if (_dictionaryName.compare("DICT_6X6_250") == 0) {
-        _dictionary = cv::aruco::getPredefinedDictionary(cv::aruco::DICT_6X6_250);
+        dictionary_type = cv::aruco::DICT_6X6_250;
+    } else if (_dictionaryName.compare("DICT_6X6_1000") == 0) {
+        dictionary_type = cv::aruco::DICT_6X6_1000;
     } else if (_dictionaryName.compare("DICT_APRILTAG_36h11") == 0) {
-        _dictionary = cv::aruco::getPredefinedDictionary(cv::aruco::DICT_APRILTAG_36h11);
+        dictionary_type = cv::aruco::DICT_APRILTAG_36h11;
     } else {
-        throw(std::invalid_argument("unrecognized dictionary name, only DICT_6X6_250 and DICT_APRILTAG_36h11 are supported!"));
+        throw(std::invalid_argument("unrecognized dictionary name, only DICT_6X6_250, DICT_6X6_1000 and DICT_APRILTAG_36h11 are supported!"));
     }
 
+
+    _dictionary = cv::aruco::getPredefinedDictionary(dictionary_type);
+#if (CV_MAJOR_VERSION >= 4) && (CV_MINOR_VERSION >= 7)
+    _detectorParams.cornerRefinementMethod = cv::aruco::CORNER_REFINE_SUBPIX;
+    _detector = std::make_shared<cv::aruco::ArucoDetector>(_dictionary,_detectorParams);
+#else
     _detectorParams = cv::aruco::DetectorParameters::create();
     _detectorParams->cornerRefinementMethod = cv::aruco::CORNER_REFINE_SUBPIX;
+#endif
+
 }
 
 ArucoDetector::~ArucoDetector()
@@ -42,7 +53,12 @@ bool ArucoDetector::detect(const cv::Mat& image)
 
     std::vector<int> markerIds;
     std::vector<std::vector<cv::Point2f> > markerCorners;
+
+#if (CV_MAJOR_VERSION >= 4) && (CV_MINOR_VERSION >= 7)
+    _detector->detectMarkers(gray, markerCorners, markerIds);
+#else
     cv::aruco::detectMarkers(gray, _dictionary, markerCorners, markerIds, _detectorParams);
+#endif
 
     for (size_t i = 0; i < markerIds.size(); i++) {
         AprilTag::AprilTag2f aprilTag2f = AprilTag::AprilTag2f(markerIds.at(i));

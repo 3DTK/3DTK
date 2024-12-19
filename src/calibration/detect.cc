@@ -51,6 +51,7 @@ int main(int argc, const char *argv[]) {
     std::string patternType;
     std::vector<std::string> extensions;
     std::string tagFamily;
+    std::string arucoDictionary;
     float decimate;
     float blur;
     int hamming;
@@ -98,6 +99,7 @@ int main(int argc, const char *argv[]) {
     apriltag.add_options()
             ("tagfamily,f", po::value<std::string>(&tagFamily)->default_value("tag36h11"), "set AprilTag family, "
                                                                                            "default 'tag36h11'")
+            ("dictionary", po::value<std::string>(&arucoDictionary)->default_value("DICT_6X6_250"), "set Aruco dictionary. DICT_6X6_250, DICT_6X6_1000, DICT_APRILTAG_36h11 are supported")
             ("decimate,d", po::value<float>(&decimate)->default_value(0.0), "decimate input image by this factor")
             ("blur,b", po::value<float>(&blur)->default_value(0.0), "apply low-pass blur to input; negative sharpens")
             ("hamming,h", po::value<int>(&hamming)->default_value(0), "detect tags with up to this many bit errors")
@@ -184,10 +186,17 @@ int main(int argc, const char *argv[]) {
         }
 
         detector = new calibration::AprilTagDetector(std::vector<AprilTag::AprilTag3f>(), tagFamily, decimate, blur, hamming, refineEdges, cornerSubpixel, threads, debug);
-#if (CV_MAJOR_VERSION > 3) && (CV_MAJOR_VERSION < 4)
+#if (CV_MAJOR_VERSION > 3)
     } else if (vm["patterntype"].as<std::string>().compare("aruco") == 0) {
-      
-        detector = new calibration::ArucoDetector(std::vector<AprilTag::AprilTag3f>(), "DICT_APRILTAG_36h11");
+        if (!arucoDictionary.compare("DICT_6X6_250") && !arucoDictionary.compare("DICT_6X6_1000") && !arucoDictionary.compare("DICT_APRILTAG_36h11")) {
+            std::cerr
+                    << "Unknown aruco dictionary! Supported are DICT_6X6_250, DICT_6X6_1000, DICT_APRILTAG_36h11."
+                    << std::endl;
+            std::cout << cmdline_options << std::endl;
+            return 1;
+        }
+
+        detector = new calibration::ArucoDetector(std::vector<AprilTag::AprilTag3f>(), arucoDictionary);
 #endif
     } else if (vm["patterntype"].as<std::string>().compare("chessboard") == 0) {
         if (x <= 2 || y <= 2) {

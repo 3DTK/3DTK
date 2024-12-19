@@ -10,6 +10,10 @@
 #include <opencv2/opencv.hpp>
 #include <opencv2/aruco.hpp>
 
+#if (CV_MAJOR_VERSION >= 4) && (CV_MINOR_VERSION >= 7)
+#include <opencv2/objdetect/aruco_detector.hpp>
+#endif
+
 namespace calibration
 {
 
@@ -27,8 +31,15 @@ public:
 private:
     std::vector<AprilTag::AprilTag3f> _patternPoints;
     std::string _dictionaryName;
+
+#if (CV_MAJOR_VERSION >= 4) && (CV_MINOR_VERSION >= 7)
+    cv::aruco::Dictionary _dictionary;
+    cv::aruco::DetectorParameters _detectorParams;
+    std::shared_ptr<cv::aruco::ArucoDetector> _detector;
+#else
     cv::Ptr<cv::aruco::Dictionary> _dictionary;
     cv::Ptr<cv::aruco::DetectorParameters> _detectorParams;
+#endif
     std::vector<AprilTag::AprilTag2f> _tags;
 };
 
