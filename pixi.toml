@@ -1,0 +1,94 @@
+# TESTED WITH UBUNTU LINUX 24.04 LTS NOBLE AND ROS NOETIC
+# With this pixi configuration you should be able to compile 3dtk using the WITH_ROS flag.
+# Quote: "Pixi is a package management tool for developers. 
+# It allows the developer to install libraries and applications in a reproducible way. 
+# Use pixi cross-platform, on Windows, Mac and Linux."
+# Visit https://pixi.sh/latest/ for more informatoin
+#
+# Install pixi, run:
+#  curl -fsSL https://pixi.sh/install.sh | bash
+#
+# Init robostack, run:
+#  pixi init robostack
+#  cd robostack
+#
+# Then copy and paste the whole content of THIS FILE into the newly created pixi.toml
+# Save and exit the pixi.toml, then run:
+#  pixi install 
+#
+# You can now enter a ros noetic environment that contains all necessary dependencies:
+#  pixi shell -e noetic
+#
+# For more information and available ROS packages, visit:
+#  https://robostack.github.io/index.html
+#
+# Additionally, you can install the following available packages from conda-forge:
+#  https://conda-forge.org/packages/
+
+[project]
+name = "robostack"
+version = "0.1.0"
+description = "Development environment for RoboStack ROS packages"
+authors = ["Fabian Arzberger <fabian.arzberger@uni-wuerzburg.de>"]
+channels = ["https://fast.prefix.dev/conda-forge"]
+platforms = ["linux-64", "win-64", "osx-64", "osx-arm64", "linux-aarch64"]
+
+[target.win-64.dependencies]
+# vs2022_win-64 = "*"  # Uncomment if using Visual Studio 2022
+
+[dependencies]
+python = "3.11.*"
+compilers = "*"
+cmake = "*"
+pkg-config = "*"
+make = "*"
+ninja = "*"
+
+[target.linux.dependencies]
+libgl-devel = "*"
+suitesparse = "*"
+libzip = "*"
+cgal = "*"
+libboost = "1.86.*"
+libboost-python = "1.86.*"
+python = "3.11.*"
+libcxx = "*"
+libboost-python-devel = "*"
+
+[environments]
+noetic = { features = ["noetic"] }
+humble = { features = ["humble"] }
+jazzy = { features = ["jazzy"] }
+
+# noetic
+[feature.noetic]
+channels = ["https://prefix.dev/robostack-noetic"]
+
+[feature.noetic.dependencies]
+ros-noetic-desktop = "*"
+ros-noetic-pcl-conversions = "*"
+ros-noetic-pcl-msgs = "*"
+ros-noetic-tf-conversions = "*"
+ros-noetic-tf2-msgs = "*"
+ros-noetic-tf2-sensor-msgs = "*"
+ros-noetic-tf2-eigen = "*"
+catkin_tools = "*"
+rosdep = "*"
+
+# humble
+[feature.humble]
+channels = ["https://prefix.dev/robostack-humble"]
+
+[feature.humble.dependencies]
+ros-humble-desktop = "*"
+colcon-common-extensions = "*"
+rosdep = "*"
+
+# jazzy
+[feature.jazzy]
+channels = ["https://prefix.dev/robostack-jazzy"]
+
+[feature.jazzy.dependencies]
+ros-jazzy-desktop = "*"
+colcon-common-extensions = "*"
+rosdep = "*"
