@@ -35,14 +35,14 @@ if(WITH_ROS)
   # https://salsa.debian.org/science-team/ros-catkin/commit/68154962414a4c7dfcedce0cd183135cd71a33c8
   include_directories(${EIGEN3_INCLUDE_DIR} ${PCL_INCLUDE_DIRS})
 
-  pkg_check_modules(OROCOS_BFL REQUIRED orocos-bfl)
-  include_directories(${OROCOS_BFL_INCLUDE_DIRS})
-  link_directories(${OROCOS_BFL_LIBRARY_DIRS})
 
   add_subdirectory(riegl)
   add_subdirectory(volksbotRT)
 
   if(WITH_RIVLIB)
+  pkg_check_modules(OROCOS_BFL REQUIRED orocos-bfl)
+  include_directories(${OROCOS_BFL_INCLUDE_DIRS})
+  link_directories(${OROCOS_BFL_LIBRARY_DIRS})
   add_executable(bag2scan bag2scan.cc calibration.cc importer.cc ekf_filter.cc powell.cc nrutil.cc my_robot_pose_ekf/odom_estimation.cpp my_robot_pose_ekf/nonlinearanalyticconditionalgaussianodo.cpp odometry.cc)
   target_link_libraries(bag2scan scan ${catkin_LIBRARIES} ${RiVLib_SCANLIB_LIBRARY} ${OROCOS_BFL_LIBRARIES} ${Boost_LIBRARIES})
   add_dependencies(bag2scan riegl_generate_messages_cpp)

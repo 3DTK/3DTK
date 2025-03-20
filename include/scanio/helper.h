@@ -5,6 +5,7 @@
 #include <iostream>
 #include <string>
 #include <sstream>
+#include <list>
 #include "slam6d/pointfilter.h"
 #include "slam6d/io_types.h"
 #include "slam6d/scan_settings.h"

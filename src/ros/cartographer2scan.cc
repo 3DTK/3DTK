@@ -330,8 +330,11 @@ int main(int argc, char* argv[])
 
     for (string trajectoryFile : trajectoryFiles) {
         cout << "Reading trajectory from " << trajectoryFile << "." << endl;
-        string extension = boost::filesystem::extension(trajectoryFile);
-
+#ifdef BOOST_FILESYSTEM_CONVENIENCE_HPP
+	string extension = boost::filesystem::extension(trajectoryFile);
+#else
+	string extension = boost::filesystem::path(trajectoryFile).extension().string();
+#endif	
         if (extension.compare(".bag") == 0) {
             rosbag::Bag bag(trajectoryFile);
 
