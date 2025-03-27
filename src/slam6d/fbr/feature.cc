@@ -70,7 +70,7 @@ namespace fbr {
               cv::SiftFeatureDetector detector;
               detector.detect(pImage, keypoints);
 #endif
-#endif	      
+#endif
               break;
             }
 #endif
@@ -166,7 +166,7 @@ namespace fbr {
 #if (CV_MAJOR_VERSION >= 4) && (CV_MINOR_VERSION >= 10)
               Ptr<cv::SIFT> detector = cv::SIFT::create();
               detector->compute(pImage, keypoints, descriptors);
-#else	      
+#else
 #if (CV_MAJOR_VERSION >= 3) && (CV_MINOR_VERSION >= 0)
               Ptr<xfeatures2d::SIFT> extractor = xfeatures2d::SIFT::create();
               extractor->compute(pImage, keypoints, descriptors);
@@ -174,7 +174,7 @@ namespace fbr {
               cv::SiftDescriptorExtractor extractor;
               extractor.compute(pImage, keypoints, descriptors);
 #endif
-#endif	      
+#endif
               break;
             }
 #endif

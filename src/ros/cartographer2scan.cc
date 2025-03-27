@@ -334,7 +334,7 @@ int main(int argc, char* argv[])
 	string extension = boost::filesystem::extension(trajectoryFile);
 #else
 	string extension = boost::filesystem::path(trajectoryFile).extension().string();
-#endif	
+#endif
         if (extension.compare(".bag") == 0) {
             rosbag::Bag bag(trajectoryFile);
 

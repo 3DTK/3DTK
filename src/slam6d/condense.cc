@@ -118,7 +118,7 @@ int main(int argc, char **argv)
     std::cout << "ATTENTION: using .frames files!!!" << std::endl;
   } else {
     std::cout << "ATTENTION: using .pose files!!!" << std::endl;
-  } 
+  }
   Scan::openDirectory(false, dir, iotype, start, end);
   if(Scan::allScans.size() == 0) {
     std::cerr << "No scans found. Did you use the correct format?" << std::endl;

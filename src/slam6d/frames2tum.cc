@@ -99,7 +99,7 @@ int main(int argc, char **argv)
   bool zero = false;
   bool trustPose = false;
   parseArgs(argc, argv, dir, start,end,sequence,zero,trustPose);
-  
+
   if (trustPose) cout << "Ignoring .frames !" << endl;
 
   int  fileCounter = start;
@@ -124,7 +124,7 @@ int main(int argc, char **argv)
     snprintf(poseFileName,255,"%sscan%.3d.pose",dir,fileCounter++);
     pose_in.open(poseFileName);
     if (!pose_in.good() && !frame_in.good()) break; // no more files in the directory
-   
+
     cout << ".";
     cout.flush();
 
@@ -142,7 +142,7 @@ int main(int argc, char **argv)
     if (!trustPose) {
       frame_in.close();
       frame_in.clear();
-    } 
+    }
     pose_in.close();
     pose_in.clear();
 
@@ -158,7 +158,7 @@ int main(int argc, char **argv)
     }
     else
       Matrix4ToQuat(tMatrix, quat, t);
-    
+
     // Rotate the whole trajectory
     double tdummy[3] = {0,0,0};
     double rot90[3] = {rad(0.0), rad(0.0), rad(0.0)};
@@ -174,15 +174,15 @@ int main(int argc, char **argv)
         cout << "Offset set at" << endl;
         init = false;
         for (int i = 0; i < 3; ++i)
-          offset[i] = t[i];    
+          offset[i] = t[i];
         cout << offset[0] << " " << offset[1] << " " << offset[2] << endl;
       }
       for (int i = 0; i < 3; ++i)
         t[i] = t[i] - offset[i];
     }
-    
+
     // Convert left-handed to right-handed
-    fprintf(pose_out, "%lf %lf %lf %lf %lf %lf %lf %lf\n", pose[6], t[2]/100.0, -t[0]/100.0, t[1]/100.0, -quat[0], -quat[3], quat[1], -quat[2]); 
+    fprintf(pose_out, "%lf %lf %lf %lf %lf %lf %lf %lf\n", pose[6], t[2]/100.0, -t[0]/100.0, t[1]/100.0, -quat[0], -quat[3], quat[1], -quat[2]);
   }
   fclose(pose_out);
   cout << " done writing trajectory.txt" << endl;
