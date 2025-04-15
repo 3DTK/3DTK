@@ -4,9 +4,9 @@
 //
 
 #include <iostream>
-#include <boost/program_options.hpp>
-#include <boost/filesystem.hpp>
+#include <fstream>
 #include <string>
+#include <boost/program_options.hpp>
 #include "../../3rdparty/e57-3d-imgfmt/include/E57Foundation.h"
 #include <slam6d/globals.icc>
 
@@ -173,7 +173,7 @@ bool writePose(double *translation, double *rotation, int scanid, std::string pa
     std::stringstream ss;
     ss << std::setw(3) << std::setfill('0') << scanid;
     std::string filename = path + "/scan" + ss.str() + ".pose";
-    boost::filesystem::ofstream file (filename);
+    std::ofstream file (filename);
     file << t[0] << " " << t[1] << " " << t[2] << "\n" << deg(r[0]) << " " << deg(r[1]) << " " << deg(r[2]) << " ";
 //    file << translation[0] << " " << translation[1] << " " << translation[2] << "\n" << deg(r[0]) << " " << deg(r[1]) << " " << deg(r[2]) << " ";
     file.close();
@@ -234,7 +234,7 @@ void readPoints(const std::string inputPath, const std::string outputPath, doubl
             std::stringstream ss;
             ss << std::setw(3) << std::setfill('0') << scanIndex;
             std::string filename = outputPath + "/scan" + ss.str() + ".3d";
-            boost::filesystem::ofstream file (filename);
+            std::ofstream file (filename);
 
             double tr[3];
             double rq[4];

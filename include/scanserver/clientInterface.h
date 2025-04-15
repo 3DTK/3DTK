@@ -12,10 +12,10 @@
 #if defined(_WINDEF_) && defined(__CYGWIN__)
 #error boost-interprocess is incompatible with windef.h on cygwin
 #endif
-#include <boost/interprocess/managed_shared_memory.hpp>
 #include <boost/interprocess/sync/interprocess_mutex.hpp>
 #include <boost/interprocess/sync/interprocess_condition.hpp>
 #include <boost/interprocess/allocators/allocator.hpp>
+#include <boost/interprocess/managed_shared_memory.hpp>
 #include <boost/interprocess/offset_ptr.hpp>
 #include <boost/interprocess/containers/vector.hpp>
 #include <boost/interprocess/containers/string.hpp>
