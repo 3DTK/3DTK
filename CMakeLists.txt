@@ -122,7 +122,7 @@ set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${ADDITIONAL_OPENCV_FLAGS}")
 # Declare Options and modify build accordingly ##
 #################################################
 
-option(WITH_CGAL "Compile with CGAL support" ON)
+option(WITH_CGAL "Compile with CGAL support" OFF)
 option(WITH_GMP "Compile with GMP support" ON) # on Windows GMP is provided by MPIR
 option(WITH_LIBZIP "Compile with libzip support" ON)
 option(WITH_OPENGL "Compile with OpenGL support" ON)
@@ -356,27 +356,27 @@ endif()
 
 # Remove this conditional when CMake >= 3.1.0 is required.
 # Older CMake is used in Debian Jessie (3.0.2) and Ubuntu Trusty (2.8.12.2).
-if(${CMAKE_VERSION} VERSION_LESS "3.1.0")
-	if (${CMAKE_CXX_COMPILER_ID} STREQUAL Clang)
-		# using Clang
-		set(ADDITIONAL_CFLAGS "${ADDITIONAL_CFLAGS} -std=c++0x")
-	elseif (${CMAKE_CXX_COMPILER_ID} STREQUAL GNU)
-		# using GCC
-		set(ADDITIONAL_CFLAGS "${ADDITIONAL_CFLAGS} -std=c++0x")
-	endif()
-else()
+#if(${CMAKE_VERSION} VERSION_LESS "3.1.0")
+#	if (${CMAKE_CXX_COMPILER_ID} STREQUAL Clang)
+#		# using Clang
+#		set(ADDITIONAL_CFLAGS "${ADDITIONAL_CFLAGS} -std=c++0x")
+#	elseif (${CMAKE_CXX_COMPILER_ID} STREQUAL GNU)
+#		# using GCC
+#		set(ADDITIONAL_CFLAGS "${ADDITIONAL_CFLAGS} -std=c++0x")
+#	endif()
+#else()
 	# Specifying the C++ standard (-std=c++0x, -std=gnu++14, ...) by using
 	# the CMAKE_CXX_FLAGS is not good cmake style (see Daniel Pfeifer in
 	# https://youtu.be/bsXLMQ6WgIk).
 	# By using CMAKE_CXX_STANDARD we also avoid having to implement
 	# compiler specific command line arguments.
-	set(CMAKE_CXX_STANDARD 11)
+	set(CMAKE_CXX_STANDARD 14)
 	# do not fall back to a previous standard
 	set(CMAKE_CXX_STANDARD_REQUIRED ON)
 	# enable compiler extensions like -std=gnu++11 on gcc
 	# gnu extensions are needed for strdup, ftruncate, fseeko, ftello...
 	set(CMAKE_CXX_EXTENSIONS ON)
-endif()
+#endif()
 
 # Add OpenGL includes for MACOS if needed
 # The OSX OpenGL frameworks natively supports freeglut extensions
