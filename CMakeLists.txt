@@ -122,6 +122,7 @@ set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${ADDITIONAL_OPENCV_FLAGS}")
 # Declare Options and modify build accordingly ##
 #################################################
 
+option(WITH_SEMIRIGIDREGISTRATION "Compile with semi rigid registration / continous time SLAM. ON/OFF" ON)
 option(WITH_CGAL "Compile with CGAL support" OFF)
 option(WITH_GMP "Compile with GMP support" ON) # on Windows GMP is provided by MPIR
 option(WITH_LIBZIP "Compile with libzip support" ON)
@@ -438,6 +439,7 @@ link_directories(${PROJECT_SOURCE_DIR}/lib)
 add_subdirectory(src/show)
 add_subdirectory(src/slam6d)
 add_subdirectory(src/scanio)
+add_subdirectory(src/srr)
 add_subdirectory(src/scanserver)
 add_subdirectory(src/segmentation)
 add_subdirectory(src/normals)

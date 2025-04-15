@@ -1,0 +1,27 @@
+include_directories(${PROJECT_SOURCE_DIR}/addons/include/srr)
+
+include_directories(${SUITESPARSE_INCLUDE_DIRS})
+
+include_directories(${NEWMAT_INCLUDE_DIRS})
+
+add_definitions(-DWITH_LIBZIP)
+
+set(SRR_SRCS
+  correction.cc
+  linescan.cc
+  continuousreg.cc
+  lum6Deuler.cc
+  ghelix6DQ2.cc
+  simplereg.cc
+  gapx6D.cc
+  srr_program_options.cc
+  lsegment.cc
+  )
+
+add_executable(correction ${SRR_SRCS})
+
+if(WIN32)
+  target_link_libraries(correction scan scanio ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY})
+else()
+  target_link_libraries(correction scan scanio ${LIBZIP_LIBRARY} ${NEWMAT_LIBRARIES_SHARED} ${CXSPARSE_LIBRARIES} ${ANN_LIBRARIES_SHARED} dl ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY})
+endif()
