@@ -1,5 +1,6 @@
 cmake_minimum_required (VERSION 3.5)
 project (3DTK)
+
 set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/3rdparty/CMakeModules" ${CMAKE_MODULE_PATH})
 
 # cmake no longer defines WIN32 on cygwin
@@ -124,11 +125,10 @@ set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${ADDITIONAL_OPENCV_FLAGS}")
 
 option(WITH_SEMIRIGIDREGISTRATION "Compile with semi rigid registration / continous time SLAM. ON/OFF" ON)
 option(WITH_CGAL "Compile with CGAL support" OFF)
-option(WITH_GMP "Compile with GMP support" ON) # on Windows GMP is provided by MPIR
+option(WITH_GMP "Compile with GMP support" OFF) # on Windows GMP is provided by MPIR
 option(WITH_LIBZIP "Compile with libzip support" ON)
 option(WITH_OPENGL "Compile with OpenGL support" ON)
 option(WITH_OPENCV "Compile with OpenCV support" ON)
-option(WITH_QT "Compile tools relying on QT (qtshow)" ON)
 option(WITH_GLFW "Compile with GLFW support" ON)
 option(WITH_FTGL "Compile with FTGL support" ON)
 option(WITH_XMLRPC "Compile with XMLRPC support" ON)
@@ -136,6 +136,7 @@ option(WITH_EIGEN3 "Compile with eigen3 support" ON)
 option(WITH_LIBCONFIG "Compile with libconfig support" ON)
 option(WITH_ROS "Compile with ROS support" OFF)
 option(WITH_PYTHON "Compile Python bindings" OFF)
+option(WITH_QT "Compile tools relying on QT (qtshow)" ON)
 option(WITH_WXWIDGETS "Compile with wxwidgets support" OFF)
 option(WITH_IMGUI "Compile the imshow program" OFF)
 option(WITH_OPENCV_NONFREE "Whether to use non-free (patent encumbered) OpenCV functionalities" OFF)
@@ -144,6 +145,7 @@ option(WITH_GLEE "Whether to use OpenGL extensions, requires glee. ON/OFF" OFF)
 option(WITH_LASLIB "Whether to build LASlib based scanio library" ON)
 option(WITH_E57 "Build library for e57 file format support." OFF)
 option(WITH_3DMOUSE "Support for 3DConnexion Space Mouse" OFF)
+option(WITH_TSDF "Complie with TSDF (openVDB)" OFF)
 
 # Adds imgui to show using opengl2 and glut
 if(WITH_IMGUI)
@@ -371,7 +373,7 @@ endif()
 	# https://youtu.be/bsXLMQ6WgIk).
 	# By using CMAKE_CXX_STANDARD we also avoid having to implement
 	# compiler specific command line arguments.
-	set(CMAKE_CXX_STANDARD 14)
+	set(CMAKE_CXX_STANDARD 17)
 	# do not fall back to a previous standard
 	set(CMAKE_CXX_STANDARD_REQUIRED ON)
 	# enable compiler extensions like -std=gnu++11 on gcc
@@ -468,6 +470,12 @@ add_subdirectory(src/detectCylinder)
 add_subdirectory(3rdparty)
 add_subdirectory(src/calibration)
 add_subdirectory(bindings)
+
+if(WITH_TSDF)
+  message(STATUS "With TSDF based on OpenVDB")
+  add_subdirectory(src/tsdf)
+endif()
+
 if(WITH_ADDONS)
   message(STATUS "With 3dtk addons.")
   add_subdirectory(addons)
