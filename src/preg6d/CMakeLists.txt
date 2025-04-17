@@ -1,4 +1,4 @@
-include_directories(${PROJECT_SOURCE_DIR}/addons/include/preg6d)
+include_directories(${PROJECT_SOURCE_DIR}/include/preg6d)
 
 include_directories(${SUITESPARSE_INCLUDE_DIRS})
 
@@ -24,8 +24,8 @@ opt/gaussnewton.cc
 opt/svd.cc
 tree/kdplanes.cc
 tree/bkdplanes.cc
-../../../src/slam6d/searchTree.cc
-../../../src/scanio/framesreader.cc
+../slam6d/searchTree.cc
+../scanio/framesreader.cc
 )
 
 set(POLYREG6D_SRCS
@@ -46,8 +46,8 @@ opt/gaussnewton.cc
 opt/svd.cc
 tree/kdplanes.cc
 tree/bkdplanes.cc
-../../../src/slam6d/searchTree.cc
-../../../src/scanio/framesreader.cc
+../slam6d/searchTree.cc
+../scanio/framesreader.cc
 )
 
 set(CLUSTER_SRCS
@@ -62,7 +62,7 @@ match/clustermatcher.cc
 match/planematcher.cc
 tree/kdplanes.cc
 tree/bkdplanes.cc
-../../../src/slam6d/searchTree.cc
+../slam6d/searchTree.cc
 )
 
 add_executable(preg6D ${PREG6D_SRCS})
