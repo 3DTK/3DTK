@@ -1,0 +1,3 @@
+[submodule "3rdparty/cctag"]
+	path = 3rdparty/cctag
+	url = https://github.com/JMUWRobotics/CCTag.git

@@ -1,9 +1,12 @@
 /addons/
 /.build/
+/builddir/
+/build/
 /.configured
 /bin/*
 /lib/
 /obj/
+/.cache/
 /CMakeLists.txt.user
 /3rdparty/riegl
 /.idea/

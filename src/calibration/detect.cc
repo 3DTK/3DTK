@@ -5,6 +5,7 @@
 #include <boost/program_options.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/algorithm/string/predicate.hpp>
+#include "calibration/CCTagDetector.h"
 #include "calibration/Detector.h"
 #include "calibration/AprilTagDetector.h"
 #include "calibration/ArucoDetector.h"
@@ -66,6 +67,7 @@ int main(int argc, const char *argv[]) {
     bool filterQuads;
     bool fastCheck;
     bool sectorBasedApproach;
+    size_t nCrowns;
 
     // Declare supported options
     po::variables_map vm;
@@ -74,6 +76,7 @@ int main(int argc, const char *argv[]) {
     po::options_description output("Output options");
     po::options_description apriltag("AprilTag options");
     po::options_description chessboard("Chessboard and circles grid options");
+    po::options_description cctag("CCTag options");
     po::options_description hidden("Hidden options");
 
     generic.add_options()
@@ -83,7 +86,7 @@ int main(int argc, const char *argv[]) {
     input.add_options()
 #if CV_MAJOR_VERSION > 3
             ("patterntype,p", po::value<std::string>(&patternType)->default_value("apriltag"),
-             "set the type of used pattern, default 'apriltag', allowed 'apriltag' or 'aruco' or 'chessboard' or 'circlesgrid'")
+             "set the type of used pattern, default 'apriltag', allowed 'apriltag' or 'aruco' or 'chessboard' or 'circlesgrid' or 'cctag'")
 #else
             ("patterntype,p", po::value<std::string>(&patternType)->default_value("apriltag"),
              "set the type of used pattern, default 'apriltag', allowed 'apriltag' or 'chessboard' or 'circlesgrid'")
@@ -125,12 +128,14 @@ int main(int argc, const char *argv[]) {
             ;
             sectorBasedApproach = false;
 #endif
+    cctag.add_options()
+            ("n-crowns", po::value<size_t>(&nCrowns)->default_value(3), "number of rings");
 
     po::options_description all;
-    all.add(generic).add(hidden).add(input).add(output).add(apriltag).add(chessboard);
+    all.add(generic).add(hidden).add(input).add(output).add(apriltag).add(chessboard).add(cctag);
 
     po::options_description cmdline_options;
-    cmdline_options.add(generic).add(input).add(output).add(apriltag).add(chessboard);
+    cmdline_options.add(generic).add(input).add(output).add(apriltag).add(chessboard).add(cctag);
 
     po::positional_options_description pd;
     pd.add("input", 1);
@@ -216,6 +221,13 @@ int main(int argc, const char *argv[]) {
         }
 
         detector = new calibration::CirclesGridDetector(cv::Size(x, y), 1, true);
+    } else if (vm["patterntype"].as<std::string>() == "cctag") {
+        if (nCrowns < 3 || 4 < nCrowns) {
+            std::cerr << "Number of crowns must be either 3 or 4\n";
+            return -1;
+        }
+
+        detector = new calibration::CCTagDetector(nCrowns);
     } else {
         std::cerr << "Patterntype is invalid! use -- help for more information" << std::endl;
         std::cout << cmdline_options << std::endl;

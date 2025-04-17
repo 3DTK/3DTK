@@ -71,7 +71,7 @@ bool ArucoDetector::detect(const cv::Mat& image)
         _tags.push_back(aprilTag2f);
     }
 
-     _imagePoints.clear();
+    _imagePoints.clear();
     _objectPoints.clear();
 
     if (_patternPoints.size() == 0) {

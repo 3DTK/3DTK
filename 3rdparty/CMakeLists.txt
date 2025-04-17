@@ -132,6 +132,11 @@ endif()
 set(APRILTAG_INCLUDE_DIRS ${APRILTAG_DIR} CACHE INTERNAL "")
 
 add_subdirectory(rply-1.1.4)
+add_subdirectory(cctag EXCLUDE_FROM_ALL)
+
+if(NOT EXISTS ${PROJECT_SOURCE_DIR}/3rdparty/cctag/CMakeLists.txt)
+    message(FATAL_ERROR "The submodules were not downloaded! GIT_SUBMODULE was turned off or failed. Please update submodules and try again.")
+endif()
 
 IF(WITH_E57)
   add_subdirectory(e57-3d-imgfmt)
