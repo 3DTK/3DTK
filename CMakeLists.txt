@@ -146,6 +146,7 @@ option(WITH_LASLIB "Whether to build LASlib based scanio library" ON)
 option(WITH_E57 "Build library for e57 file format support." OFF)
 option(WITH_3DMOUSE "Support for 3DConnexion Space Mouse" OFF)
 option(WITH_TSDF "Complie with TSDF (openVDB)" OFF)
+option(WITH_CALIB "Complie with calibration" OFF)
 
 # Adds imgui to show using opengl2 and glut
 if(WITH_IMGUI)
@@ -469,12 +470,16 @@ add_subdirectory(src/detectCylinder)
 # 3rdparty must come before src/calibration because it sets
 # APRILTAG_INCLUDE_DIRS
 add_subdirectory(3rdparty)
-add_subdirectory(src/calibration)
 add_subdirectory(bindings)
 
 if(WITH_TSDF)
   message(STATUS "With TSDF based on OpenVDB")
   add_subdirectory(src/tsdf)
+endif()
+
+if(WITH_CALIB)
+  message(STATUS "With calibration.")
+  add_subdirectory(src/calibration)
 endif()
 
 if(WITH_ADDONS)
@@ -491,6 +496,7 @@ add_subdirectory(testing)
 file(GLOB_RECURSE 3DTK_HEADER_FILES "include/*.h")
 add_custom_target(headers SOURCES ${3DTK_HEADER_FILES})
 
+if(WITH_CALIB)
 # use git submodules for CCTag, and check it out automatically
 # https://cliutils.gitlab.io/modern-cmake/chapters/projects/submodule.html
 find_package(Git QUIET)
@@ -505,6 +511,7 @@ if(GIT_FOUND AND EXISTS "${PROJECT_SOURCE_DIR}/.git")
       message(FATAL_ERROR "git submodule update --init --recursive failed with ${GIT_SUBMOD_RESULT}, please checkout submodules")
     endif()
   endif()
+endif()
 endif()
 
 message (STATUS "Build environment is set up!")
